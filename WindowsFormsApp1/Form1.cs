@@ -165,6 +165,7 @@ namespace WindowsFormsApp1
 
         private void textBox2_Enter(object sender, EventArgs e)
         {
+            textBox2.Text = "";
             newTextBox1();
         }
 
