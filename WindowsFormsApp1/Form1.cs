@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Globalization;
+using System.Runtime.InteropServices;
 
 namespace WindowsFormsApp1
 {
@@ -22,8 +23,8 @@ namespace WindowsFormsApp1
         private void button1_Click(object sender, EventArgs e)
         {//據第一行長度來分行分段
             bool noteFlg = false;
-            string x = textBox1.Text; 
-            if(x=="")Clipboard.GetText();
+            string x = textBox1.Text;
+            if (x == "") Clipboard.GetText();
             const string omitStr = "{}<p>《》〈〉：，。「」『』　0123456789-‧·\r\n";
             int wordCntr = 0; int noteCtr = 0;
             StringInfo mystrInof = new StringInfo(x);
@@ -180,7 +181,7 @@ namespace WindowsFormsApp1
                 textBox1.Text = x;
             }
             if (textBox1.Text.Substring(0, 2) == Environment.NewLine) textBox1.Text = textBox1.Text.Substring(2);
-            textBox1.SelectionStart = 0;textBox1.SelectionLength = 0;
+            textBox1.SelectionStart = 0; textBox1.SelectionLength = 0;
             textBox1.ScrollToCaret();
         }
 
@@ -207,37 +208,83 @@ namespace WindowsFormsApp1
 
         private void Form1_KeyDown(object sender, KeyEventArgs e)
         {
-            if (e.KeyCode == Keys.PageDown || e.KeyCode == Keys.PageUp)
+            if (Control.ModifierKeys == Keys.Control)
             {
+                if (e.KeyCode == Keys.NumPad5||e.KeyCode==Keys.Oemplus||e.KeyCode==Keys.Add)
+                {
+                    pasteToCtext();
 
-                string url = textBox3.Text;
-                if (url == "") return;
-                int edit = url.IndexOf("&editwiki");
-                int page = 0; string urlSub = url;
-                if (edit > -1)
-                {
-                    urlSub = url.Substring(0, url.IndexOf("&page=") + "&page=".Length);
-                    page = Int32.Parse(
-                        url.Substring(url.IndexOf("&page=") + "&page=".Length,
-                        url.IndexOf("&editwiki=") - (url.IndexOf("&page=") + "&page=".Length)));
-                    if (e.KeyCode == Keys.PageDown)
-                        url = urlSub + (page + 1).ToString() + url.Substring(url.IndexOf("&editwiki="));
-                    if (e.KeyCode == Keys.PageUp)
-                        url = urlSub + (page - 1).ToString() + url.Substring(url.IndexOf("&editwiki="));
-                    newTextBox1();
                 }
-                else
+
+                if (e.KeyCode == Keys.PageDown || e.KeyCode == Keys.PageUp)
                 {
-                    urlSub = url.Substring(0, url.IndexOf("&page=") + "&page=".Length);
-                    page = Int32.Parse(url.Substring(url.IndexOf("&page=") + "&page=".Length));
-                    if (e.KeyCode == Keys.PageDown)
-                        url = urlSub + (page + 1).ToString();
-                    if (e.KeyCode == Keys.PageUp)
-                        url = urlSub + (page - 1).ToString();
+
+                    string url = textBox3.Text;
+                    if (url == "") return;
+                    int edit = url.IndexOf("&editwiki");
+                    int page = 0; string urlSub = url;
+                    if (edit > -1)
+                    {
+                        urlSub = url.Substring(0, url.IndexOf("&page=") + "&page=".Length);
+                        page = Int32.Parse(
+                            url.Substring(url.IndexOf("&page=") + "&page=".Length,
+                            url.IndexOf("&editwiki=") - (url.IndexOf("&page=") + "&page=".Length)));
+                        if (e.KeyCode == Keys.PageDown)
+                            url = urlSub + (page + 1).ToString() + url.Substring(url.IndexOf("&editwiki="));
+                        if (e.KeyCode == Keys.PageUp)
+                            url = urlSub + (page - 1).ToString() + url.Substring(url.IndexOf("&editwiki="));
+                        newTextBox1();
+                    }
+                    else
+                    {
+                        urlSub = url.Substring(0, url.IndexOf("&page=") + "&page=".Length);
+                        page = Int32.Parse(url.Substring(url.IndexOf("&page=") + "&page=".Length));
+                        if (e.KeyCode == Keys.PageDown)
+                            url = urlSub + (page + 1).ToString();
+                        if (e.KeyCode == Keys.PageUp)
+                            url = urlSub + (page - 1).ToString();
+                    }
+                    Process.Start(url);
+                    textBox3.Text = url;
                 }
-                Process.Start(url);
-                textBox3.Text = url;
             }
+        }
+
+        string processID;
+        //https://stackoverflow.com/questions/58302052/c-microsoft-visualbasic-interaction-appactivate-no-effect
+        [DllImport("user32.dll", SetLastError = true)]
+        static extern void SwitchToThisWindow(IntPtr hWnd, bool turnOn);
+        private void pasteToCtext()
+        {
+            //https://docs.microsoft.com/zh-tw/dotnet/csharp/programming-guide/strings/how-to-determine-whether-a-string-represents-a-numeric-value
+            int i = 0;
+            if (processID == null)
+            {
+                processID = textBox2.Text;
+                bool result = int.TryParse(processID, out i); //i now = 108  
+                if (!result)
+                {
+                    MessageBox.Show("plz input the id of process in the textbox2 ,then go on……");
+                    return;
+                }
+            }
+            var process = Process.GetProcessById(Int32.Parse(processID));
+            if (process == null) { MessageBox.Show("plz input the id of process in the textbox2 ,then go on……"); return; }
+            SwitchToThisWindow(process.MainWindowHandle, true);
+            //ShowWindow(process.MainWindowHandle, SW_RESTORE);
+            //SetForegroundWindow(process.MainWindowHandle);
+            SendKeys.Send("^v{tab}~");
+            //throw new NotImplementedException();
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            pasteToCtext();
+        }
+
+        private void Form1_Resize(object sender, EventArgs e)
+        {
+            textBox1.Height = this.Height-textBox2.Height-textBox2.Top;
         }
     }
 }
