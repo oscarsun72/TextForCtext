@@ -10,7 +10,6 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Globalization;
 using System.Runtime.InteropServices;
-
 namespace WindowsFormsApp1
 {
     public partial class Form1 : Form
@@ -210,7 +209,7 @@ namespace WindowsFormsApp1
         {
             if (Control.ModifierKeys == Keys.Control)
             {
-                if (e.KeyCode == Keys.NumPad5||e.KeyCode==Keys.Oemplus||e.KeyCode==Keys.Add)
+                if (e.KeyCode == Keys.NumPad5 || e.KeyCode == Keys.Oemplus || e.KeyCode == Keys.Add)
                 {
                     pasteToCtext();
 
@@ -245,20 +244,26 @@ namespace WindowsFormsApp1
                             url = urlSub + (page - 1).ToString();
                     }
                     Process.Start(url);
+                    appActivateByID();
+                    Task.Delay(1500).Wait();
+                    SendKeys.Send("{Tab}"); //("{Tab 24}");
+                    Task.Delay(500).Wait();
+                    SendKeys.Send("^a");
                     textBox3.Text = url;
                 }
             }
         }
 
+
+
         string processID;
         //https://stackoverflow.com/questions/58302052/c-microsoft-visualbasic-interaction-appactivate-no-effect
         [DllImport("user32.dll", SetLastError = true)]
         static extern void SwitchToThisWindow(IntPtr hWnd, bool turnOn);
-        private void pasteToCtext()
-        {
-            //https://docs.microsoft.com/zh-tw/dotnet/csharp/programming-guide/strings/how-to-determine-whether-a-string-represents-a-numeric-value
+        void appActivateByID()
+        { //https://docs.microsoft.com/zh-tw/dotnet/csharp/programming-guide/strings/how-to-determine-whether-a-string-represents-a-numeric-value
             int i = 0;
-            if (processID == null)
+            if (processID == null||processID=="")
             {
                 processID = textBox2.Text;
                 bool result = int.TryParse(processID, out i); //i now = 108  
@@ -273,10 +278,18 @@ namespace WindowsFormsApp1
             SwitchToThisWindow(process.MainWindowHandle, true);
             //ShowWindow(process.MainWindowHandle, SW_RESTORE);
             //SetForegroundWindow(process.MainWindowHandle);
+        }
+
+
+
+        private void pasteToCtext()
+        {
+            appActivateByID();
             SendKeys.Send("^v{tab}~");
             //throw new NotImplementedException();
         }
 
+        
         private void button2_Click(object sender, EventArgs e)
         {
             pasteToCtext();
@@ -284,7 +297,7 @@ namespace WindowsFormsApp1
 
         private void Form1_Resize(object sender, EventArgs e)
         {
-            textBox1.Height = this.Height-textBox2.Height-textBox2.Top;
+            textBox1.Height = this.Height - textBox2.Height*3 - textBox2.Top;
         }
     }
 }

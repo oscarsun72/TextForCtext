@@ -38,7 +38,9 @@ namespace WindowsFormsApp1
             // 
             // textBox1
             // 
+            this.textBox1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
             this.textBox1.Font = new System.Drawing.Font("新細明體-ExtB", 23.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
+            this.textBox1.ForeColor = System.Drawing.SystemColors.Menu;
             this.textBox1.Location = new System.Drawing.Point(-1, 41);
             this.textBox1.Multiline = true;
             this.textBox1.Name = "textBox1";
