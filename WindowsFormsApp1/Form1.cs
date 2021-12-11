@@ -164,7 +164,10 @@ namespace WindowsFormsApp1
 
         private void textBox1_Click(object sender, EventArgs e)
         {
-
+            if (textBox1.Text=="")
+            {
+                textBox1.Text = Clipboard.GetText();
+            }
         }
 
         private void textBox2_TextChanged(object sender, EventArgs e)
@@ -254,13 +257,13 @@ namespace WindowsFormsApp1
                 {
                     splitLineByFristLen();
                 }
-                if (e.KeyCode==Keys.OemBackslash)
+                if (e.KeyCode==Keys.OemBackslash||e.KeyCode==Keys.Packet||e.KeyCode==Keys.Oem5)
                 {
                     string x = textBox1.Text;
                     int s = textBox1.SelectionStart;
                     string xNext = x.Substring(s);
                     x = x.Substring(0,textBox1.SelectionStart);
-                    xNext.Replace(Environment.NewLine, "");
+                    xNext= xNext.Replace(Environment.NewLine, "");
                     x = x + xNext;
                     textBox1.Text = x;
                     textBox1.SelectionStart = s;textBox1.SelectionLength = 1;
@@ -272,6 +275,7 @@ namespace WindowsFormsApp1
                 }
                 if (e.KeyCode == Keys.NumPad5 || e.KeyCode == Keys.Oemplus || e.KeyCode == Keys.Add)
                 {
+                    newTextBox1();
                     pasteToCtext();
 
                 }
