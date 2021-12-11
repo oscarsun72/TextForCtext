@@ -164,7 +164,7 @@ namespace WindowsFormsApp1
 
         private void textBox1_Click(object sender, EventArgs e)
         {
-            if (textBox1.Text=="")
+            if (textBox1.Text == "")
             {
                 textBox1.Text = Clipboard.GetText();
             }
@@ -204,7 +204,7 @@ namespace WindowsFormsApp1
             {
                 textBox2.Text = "";
                 string x = textBox1.Text;
-                Clipboard.SetText(x.Substring(0,textBox1.SelectionStart+textBox1.SelectionLength));
+                Clipboard.SetText(x.Substring(0, textBox1.SelectionStart + textBox1.SelectionLength));
                 pasteToCtext();
                 x = x.Substring(textBox1.SelectionStart + textBox1.SelectionLength + 2);
                 textBox1.Text = x;
@@ -249,27 +249,27 @@ namespace WindowsFormsApp1
             }
             if (Control.ModifierKeys == Keys.Control)
             {
-                if (e.KeyCode==Keys.S)
+                if (e.KeyCode == Keys.S)
                 {
                     savetext();
                 }
-                if (e.KeyCode==Keys.Q)
+                if (e.KeyCode == Keys.Q)
                 {
                     splitLineByFristLen();
                 }
-                if (e.KeyCode==Keys.OemBackslash||e.KeyCode==Keys.Packet||e.KeyCode==Keys.Oem5)
+                if (e.KeyCode == Keys.OemBackslash || e.KeyCode == Keys.Packet || e.KeyCode == Keys.Oem5)
                 {
                     string x = textBox1.Text;
                     int s = textBox1.SelectionStart;
                     string xNext = x.Substring(s);
-                    x = x.Substring(0,textBox1.SelectionStart);
-                    xNext= xNext.Replace(Environment.NewLine, "");
+                    x = x.Substring(0, textBox1.SelectionStart);
+                    xNext = xNext.Replace(Environment.NewLine, "");
                     x = x + xNext;
                     textBox1.Text = x;
-                    textBox1.SelectionStart = s;textBox1.SelectionLength = 1;
+                    textBox1.SelectionStart = s; textBox1.SelectionLength = 1;
                     textBox1.ScrollToCaret();
                 }
-                if (e.KeyCode==Keys.Oem7)
+                if (e.KeyCode == Keys.Oem7)
                 {
                     replaceWord();
                 }
@@ -321,8 +321,8 @@ namespace WindowsFormsApp1
 
         private void savetext()
         {
-            string str1 = textBox1.Text;            
-            File.WriteAllText(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)+@"\Dropbox\cText.txt", str1, Encoding.UTF8); //https://codertw.com/%E7%A8%8B%E5%BC%8F%E8%AA%9E%E8%A8%80/542361/
+            string str1 = textBox1.Text;
+            File.WriteAllText(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + @"\Dropbox\cText.txt", str1, Encoding.UTF8); //https://codertw.com/%E7%A8%8B%E5%BC%8F%E8%AA%9E%E8%A8%80/542361/
             // 也可以指定編碼方式 File.WriteAllText(@”c:\temp\test\ascii-2.txt”, str1, Encoding.ASCII);
             //throw new NotImplementedException();
         }
@@ -334,7 +334,7 @@ namespace WindowsFormsApp1
         void appActivateByID()
         { //https://docs.microsoft.com/zh-tw/dotnet/csharp/programming-guide/strings/how-to-determine-whether-a-string-represents-a-numeric-value
             int i = 0;
-            if (processID == null||processID=="")
+            if (processID == null || processID == "")
             {
                 processID = textBox2.Text;
                 bool result = int.TryParse(processID, out i); //i now = 108  
@@ -357,10 +357,11 @@ namespace WindowsFormsApp1
         {
             appActivateByID();
             SendKeys.Send("^v{tab}~");
+            this.WindowState = FormWindowState.Minimized;
             //throw new NotImplementedException();
         }
 
-        
+
         private void button2_Click(object sender, EventArgs e)
         {
             pasteToCtext();
@@ -368,23 +369,39 @@ namespace WindowsFormsApp1
 
         private void Form1_Resize(object sender, EventArgs e)
         {
-            textBox1.Height = this.Height - textBox2.Height*3 - textBox2.Top;
+            textBox1.Height = this.Height - textBox2.Height * 3 - textBox2.Top;
         }
 
-        private void textBox4_TextChanged(object sender, EventArgs e)
-        {
-            replaceWord();
-        }
+
 
         private void replaceWord()
         {
             if (textBox4.Text == "") return;
-                if (!(textBox1.SelectionLength > 2 || textBox1.SelectionLength == 0))
+            StringInfo selWord = new StringInfo(textBox1.SelectedText);
+            if (!(selWord.LengthInTextElements > 1 || textBox1.SelectionLength == 0))
             {
-                int s = textBox1.SelectionStart; int l = textBox1.SelectionLength;
+                int s = textBox1.SelectionStart; int l = selWord.LengthInTextElements;
                 textBox1.Text = textBox1.Text.Replace(textBox1.SelectedText, textBox4.Text);
+                textBox1.SelectionStart = s; textBox1.SelectionLength = l;
             }
             //throw new NotImplementedException();
+        }
+
+        private void textBox4_Leave(object sender, EventArgs e)
+        {
+            replaceWord();
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            //C# 如何取得使用者的螢幕解析度:https://blog.xuite.net/q10814/blog/48070595 https://www.delftstack.com/zh-tw/howto/csharp/screen-size-in-csharp/
+            Size Size = SystemInformation.PrimaryMonitorSize;
+            int Width = SystemInformation.PrimaryMonitorSize.Width;
+            int Height = SystemInformation.PrimaryMonitorSize.Height;
+            //MessageBox.Show("你的螢幕解析度是" + Size + "\n Width = " + Width + "\n Height = " + Height);
+            //FormStartPosition 列舉:https://docs.microsoft.com/zh-tw/dotnet/api/system.windows.forms.formstartposition?view=netframework-4.7.2
+            this.Location = new Point(Width-this.Width, Height - textBox1.Height*2);
+            //this.PointToScreen();
         }
     }
 }
