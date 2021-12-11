@@ -42,6 +42,11 @@ namespace WindowsFormsApp1
             while (mystrEnum.MoveNext())
             {
                 string mystr = mystrEnum.Current.ToString();
+                //if(mystr=="《"||mystr=="〈")
+                //{
+                //    break;
+                //}
+
                 if (mystr == "{") noteFlg = true;
                 if (mystr == "}")
                 {
@@ -79,6 +84,10 @@ namespace WindowsFormsApp1
             while (mystrEnum.MoveNext())
             {
                 string mystr = mystrEnum.Current.ToString();
+                //if (mystr == "《" || mystr == "〈")
+                //{
+                //    break;
+                //}
                 if (mystr == "{")
                 {
                     noteFlg = true;
@@ -110,10 +119,10 @@ namespace WindowsFormsApp1
                     if (wordCntr == 0)
                     {//純注文
                         StringInfo resltxtinof = new StringInfo(resltTxt);
-                        for (int i = resltxtinof.LengthInTextElements; i > -1; i--)
+                        for (int i = resltxtinof.LengthInTextElements; i > 0; i--)//-1; i--)
                         {
 
-                            if (omitStr.IndexOf(resltxtinof.SubstringByTextElements(i - 1)) == -1)
+                            if (omitStr.IndexOf(resltxtinof.SubstringByTextElements(i - 1,1)) == -1)
                             { noteBrkCtr++; }
                             if (noteBrkCtr == lineLen)
                             {
