@@ -10,6 +10,8 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Globalization;
 using System.Runtime.InteropServices;
+using System.IO;
+
 namespace WindowsFormsApp1
 {
     public partial class Form1 : Form
@@ -20,9 +22,19 @@ namespace WindowsFormsApp1
         }
 
         private void button1_Click(object sender, EventArgs e)
-        {//據第一行長度來分行分段
+        {
+            splitLineByFristLen();
+        }
+
+        private void splitLineByFristLen()
+        {
+            //據第一行長度來分行分段
             bool noteFlg = false;
-            string x = textBox1.Text;
+            int selStart = textBox1.SelectionStart;
+            //string x = textBox1.Text;
+            if (selStart == textBox1.Text.Length) selStart = 0;
+            string xPre = textBox1.Text.Substring(0, selStart);
+            string x = textBox1.Text.Substring(selStart);
             if (x == "") Clipboard.GetText();
             const string omitStr = "{}<p>《》〈〉：，。「」『』　0123456789-‧·\r\n";
             int wordCntr = 0; int noteCtr = 0;
@@ -122,7 +134,7 @@ namespace WindowsFormsApp1
                         for (int i = resltxtinof.LengthInTextElements; i > 0; i--)//-1; i--)
                         {
 
-                            if (omitStr.IndexOf(resltxtinof.SubstringByTextElements(i - 1,1)) == -1)
+                            if (omitStr.IndexOf(resltxtinof.SubstringByTextElements(i - 1, 1)) == -1)
                             { noteBrkCtr++; }
                             if (noteBrkCtr == lineLen)
                             {
@@ -142,7 +154,11 @@ namespace WindowsFormsApp1
 
 
             }
-            textBox1.Text = resltTxt;
+            textBox1.Text = xPre + resltTxt;
+            textBox1.Focus();
+            textBox1.SelectionStart = selStart;
+            textBox1.SelectionLength = 0;
+            textBox1.ScrollToCaret();
             //Clipboard.SetText(resltTxt);
         }
 
@@ -185,6 +201,8 @@ namespace WindowsFormsApp1
             {
                 textBox2.Text = "";
                 string x = textBox1.Text;
+                Clipboard.SetText(x.Substring(0,textBox1.SelectionStart+textBox1.SelectionLength));
+                pasteToCtext();
                 x = x.Substring(textBox1.SelectionStart + textBox1.SelectionLength + 2);
                 textBox1.Text = x;
             }
@@ -216,8 +234,42 @@ namespace WindowsFormsApp1
 
         private void Form1_KeyDown(object sender, KeyEventArgs e)
         {
+            //if ((int)ModifierKeys == (int)Keys.Control+ (int)Keys.Shift&&e.KeyCode==Keys.C)
+            //https://bbs.csdn.net/topics/350010591
+            //https://zhidao.baidu.com/question/628222381668604284.html
+            var m = ModifierKeys;
+            if ((m & Keys.Control) == Keys.Control
+                && (m & Keys.Shift) == Keys.Shift
+                && e.KeyCode == Keys.C)
+            {
+                Clipboard.SetText(textBox1.Text);
+            }
             if (Control.ModifierKeys == Keys.Control)
             {
+                if (e.KeyCode==Keys.S)
+                {
+                    savetext();
+                }
+                if (e.KeyCode==Keys.Q)
+                {
+                    splitLineByFristLen();
+                }
+                if (e.KeyCode==Keys.OemBackslash)
+                {
+                    string x = textBox1.Text;
+                    int s = textBox1.SelectionStart;
+                    string xNext = x.Substring(s);
+                    x = x.Substring(0,textBox1.SelectionStart);
+                    xNext.Replace(Environment.NewLine, "");
+                    x = x + xNext;
+                    textBox1.Text = x;
+                    textBox1.SelectionStart = s;textBox1.SelectionLength = 1;
+                    textBox1.ScrollToCaret();
+                }
+                if (e.KeyCode==Keys.Oem7)
+                {
+                    replaceWord();
+                }
                 if (e.KeyCode == Keys.NumPad5 || e.KeyCode == Keys.Oemplus || e.KeyCode == Keys.Add)
                 {
                     pasteToCtext();
@@ -263,7 +315,13 @@ namespace WindowsFormsApp1
             }
         }
 
-
+        private void savetext()
+        {
+            string str1 = textBox1.Text;            
+            File.WriteAllText(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)+@"\Dropbox\cText.txt", str1, Encoding.UTF8); //https://codertw.com/%E7%A8%8B%E5%BC%8F%E8%AA%9E%E8%A8%80/542361/
+            // 也可以指定編碼方式 File.WriteAllText(@”c:\temp\test\ascii-2.txt”, str1, Encoding.ASCII);
+            //throw new NotImplementedException();
+        }
 
         string processID;
         //https://stackoverflow.com/questions/58302052/c-microsoft-visualbasic-interaction-appactivate-no-effect
@@ -307,6 +365,22 @@ namespace WindowsFormsApp1
         private void Form1_Resize(object sender, EventArgs e)
         {
             textBox1.Height = this.Height - textBox2.Height*3 - textBox2.Top;
+        }
+
+        private void textBox4_TextChanged(object sender, EventArgs e)
+        {
+            replaceWord();
+        }
+
+        private void replaceWord()
+        {
+            if (textBox4.Text == "") return;
+                if (!(textBox1.SelectionLength > 2 || textBox1.SelectionLength == 0))
+            {
+                int s = textBox1.SelectionStart; int l = textBox1.SelectionLength;
+                textBox1.Text = textBox1.Text.Replace(textBox1.SelectedText, textBox4.Text);
+            }
+            //throw new NotImplementedException();
         }
     }
 }
