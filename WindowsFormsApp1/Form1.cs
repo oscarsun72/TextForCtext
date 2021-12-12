@@ -16,7 +16,7 @@ namespace WindowsFormsApp1
 {
     public partial class Form1 : Form
     {
-        readonly Point textBox4Location;readonly Size textBox4Size;
+        readonly Point textBox4Location; readonly Size textBox4Size;
         public Form1()
         {
             InitializeComponent();
@@ -173,10 +173,6 @@ namespace WindowsFormsApp1
             }
         }
 
-        private void textBox2_TextChanged(object sender, EventArgs e)
-        {
-
-        }
 
         private void textBox2_Leave(object sender, EventArgs e)
         {
@@ -202,11 +198,6 @@ namespace WindowsFormsApp1
 
         }
 
-        private void textBox2_Enter(object sender, EventArgs e)
-        {
-            textBox2.Text = "";
-            newTextBox1();
-        }
 
         private void newTextBox1()
         {
@@ -228,6 +219,25 @@ namespace WindowsFormsApp1
         private void textBox1_KeyDown(object sender, KeyEventArgs e)
         {
 
+            var m = ModifierKeys;
+            if ((m & Keys.Control) == Keys.Control
+                && (m & Keys.Shift) == Keys.Shift
+                && e.KeyCode == Keys.Up)
+            {
+                {
+                    int s = textBox1.SelectionStart; int ed = s;
+                    string x = textBox1.Text;
+                    for (int i = s-1; i > 0; i--)
+                    {
+                        if (x.Substring(i, 2) == Environment.NewLine)
+                        {
+                            s = i + 1;
+                            break;
+                        }
+                    }
+                    textBox1.SelectionStart = s; textBox1.SelectionLength = ed - s;
+                }
+            }
         }
 
         private void textBox3_TextChanged(object sender, EventArgs e)
@@ -315,7 +325,7 @@ namespace WindowsFormsApp1
                             url = urlSub + (page + 1).ToString() + url.Substring(url.IndexOf("&editwiki="));
                         if (e.KeyCode == Keys.PageUp)
                             url = urlSub + (page - 1).ToString() + url.Substring(url.IndexOf("&editwiki="));
-                        newTextBox1();
+                        //newTextBox1();
                     }
                     else
                     {
@@ -362,7 +372,7 @@ namespace WindowsFormsApp1
         //https://stackoverflow.com/questions/58302052/c-microsoft-visualbasic-interaction-appactivate-no-effect
         [DllImport("user32.dll", SetLastError = true)]
         static extern void SwitchToThisWindow(IntPtr hWnd, bool turnOn);
-        
+
         void appActivateByName()
         {
             Process[] procsBrowser = Process.GetProcessesByName("chrome");
@@ -424,13 +434,14 @@ namespace WindowsFormsApp1
         private void replaceWord()
         {
             if (textBox4.Text == "") return;
-            StringInfo selWord = new StringInfo(textBox1.SelectedText);
+            StringInfo selWord = new StringInfo(textBox4.Text);
             if (textBox1.SelectionLength != 0)//(!(selWord.LengthInTextElements > 1 || textBox1.SelectionLength == 0))
             {
                 int s = textBox1.SelectionStart; int l = selWord.LengthInTextElements;
                 textBox1.Text = textBox1.Text.Replace(textBox1.SelectedText, textBox4.Text);
                 textBox1.SelectionStart = s; textBox1.SelectionLength = l;
                 textBox1.ScrollToCaret();
+                textBox1.Focus();
             }
             //throw new NotImplementedException();
         }
@@ -457,19 +468,19 @@ namespace WindowsFormsApp1
 
         private void textBox4_Enter(object sender, EventArgs e)
         {
-            textBox4.Location = new Point(button1.Location.X,textBox4Location.Y);
-            textBox4.Size = new Size(textBox2.Size.Width+textBox2.Size.Width+
-                                        textBox3.Width+textBox4Size.Width,textBox4Size.Height);
+            textBox4.Location = new Point(button1.Location.X, textBox4Location.Y);
+            textBox4.Size = new Size(textBox2.Size.Width + textBox2.Size.Width +
+                                        textBox3.Width + textBox4Size.Width, textBox4Size.Height);
             textBox4.ScrollBars = ScrollBars.Horizontal;
         }
 
         private void textBox4_KeyDown(object sender, KeyEventArgs e)
         {
-            if (e.KeyCode==Keys.F2)
+            if (e.KeyCode == Keys.F2)
             {
-                if (textBox4.Text!="")
+                if (textBox4.Text != "")
                 {
-                    textBox4.SelectionStart = 0;textBox4.SelectionLength = textBox4.Text.Length;
+                    textBox4.SelectionStart = 0; textBox4.SelectionLength = textBox4.Text.Length;
                 }
             }
         }
@@ -483,6 +494,11 @@ namespace WindowsFormsApp1
                     textBox2.SelectionStart = 0; textBox2.SelectionLength = textBox2.Text.Length;
                 }
             }
+        }
+
+        private void textBox2_Click(object sender, EventArgs e)
+        {
+            textBox2.Text = "";
         }
     }
 }

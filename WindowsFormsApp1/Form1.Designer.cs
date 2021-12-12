@@ -70,8 +70,8 @@ namespace WindowsFormsApp1
             this.textBox2.Name = "textBox2";
             this.textBox2.Size = new System.Drawing.Size(146, 22);
             this.textBox2.TabIndex = 2;
-            this.textBox2.TextChanged += new System.EventHandler(this.textBox2_TextChanged);
-            this.textBox2.Enter += new System.EventHandler(this.textBox2_Enter);
+            this.textBox2.TabStop = false;
+            this.textBox2.Click += new System.EventHandler(this.textBox2_Click);
             this.textBox2.KeyDown += new System.Windows.Forms.KeyEventHandler(this.textBox2_KeyDown);
             this.textBox2.Leave += new System.EventHandler(this.textBox2_Leave);
             // 
