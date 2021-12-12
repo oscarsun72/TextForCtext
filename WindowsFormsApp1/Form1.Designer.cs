@@ -53,6 +53,7 @@ namespace WindowsFormsApp1
             this.textBox1.TabIndex = 0;
             this.textBox1.Click += new System.EventHandler(this.textBox1_Click);
             this.textBox1.KeyDown += new System.Windows.Forms.KeyEventHandler(this.textBox1_KeyDown);
+            this.textBox1.MouseDown += new System.Windows.Forms.MouseEventHandler(this.textBox1_MouseDown);
             // 
             // button1
             // 
@@ -118,6 +119,7 @@ namespace WindowsFormsApp1
             this.richTextBox1.TabStop = false;
             this.richTextBox1.Text = "";
             this.richTextBox1.Visible = false;
+            this.richTextBox1.MouseDown += new System.Windows.Forms.MouseEventHandler(this.richTextBox1_MouseDown);
             // 
             // Form1
             // 

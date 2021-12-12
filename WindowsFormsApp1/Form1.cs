@@ -206,16 +206,27 @@ namespace WindowsFormsApp1
         private void newTextBox1()
         {
             if (textBox1.Text == "") return;
+            saveText();
             if (textBox1.SelectedText != "")
             {
                 textBox2.Text = "";
                 string x = textBox1.Text;
                 Clipboard.SetText(x.Substring(0, textBox1.SelectionStart + textBox1.SelectionLength));
                 pasteToCtext();
-                x = x.Substring(textBox1.SelectionStart + textBox1.SelectionLength + 2);
+                if (textBox1.SelectionStart + textBox1.SelectionLength + 2 < textBox1.Text.Length)
+                {
+                    x = x.Substring(textBox1.SelectionStart + textBox1.SelectionLength + 2);
+                }
+                if ( textBox1.SelectionStart +textBox1.SelectionLength>=textBox1.Text.Length)
+                {
+                    x = "";
+                }
                 textBox1.Text = x;
             }
-            if (textBox1.Text.Substring(0, 2) == Environment.NewLine) textBox1.Text = textBox1.Text.Substring(2);
+            if (textBox1.Text.Length > 1)
+            {
+                if (textBox1.Text.Substring(0, 2) == Environment.NewLine) textBox1.Text = textBox1.Text.Substring(2);
+            }
             textBox1.SelectionStart = 0; textBox1.SelectionLength = 0;
             textBox1.ScrollToCaret();
         }
@@ -319,7 +330,23 @@ namespace WindowsFormsApp1
                 }
             }
             if (Control.ModifierKeys == Keys.Control)
-            {
+            {//按下Ctrl鍵
+                if (e.KeyCode == Keys.D3)
+                {
+                    Microsoft.Office.Interop.Word.Application appWord = new Microsoft.Office
+                        .Interop.Word.Application();
+                    appWord.Run("漢籍電子文獻資料庫文本整理_十三經注疏");
+                    appWord.Quit(Microsoft.Office.Interop.Word.WdSaveOptions.wdDoNotSaveChanges);
+                    textBox1.Text = Clipboard.GetText();
+                }
+                if (e.KeyCode == Keys.D4)
+                {
+                    Microsoft.Office.Interop.Word.Application appWord = new Microsoft.Office
+                        .Interop.Word.Application();
+                    appWord.Run("維基文庫四部叢刊本轉來");
+                    appWord.Quit(Microsoft.Office.Interop.Word.WdSaveOptions.wdDoNotSaveChanges);
+                    textBox1.Text = Clipboard.GetText();
+                }
                 if (e.KeyCode == Keys.S)
                 {
                     saveText();
@@ -340,7 +367,7 @@ namespace WindowsFormsApp1
                     textBox1.SelectionStart = s; textBox1.SelectionLength = 1;
                     textBox1.ScrollToCaret();
                 }
-                if (e.KeyCode == Keys.Oem7)
+                if (e.KeyCode == Keys.D7)
                 {
                     replaceWord();
                 }
@@ -542,6 +569,24 @@ namespace WindowsFormsApp1
         private void textBox2_Click(object sender, EventArgs e)
         {
             textBox2.Text = "";
+        }
+
+        private void textBox1_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (ModifierKeys == Keys.Control && e.Button == MouseButtons.Left)
+            {
+                richTextBox1.Size = textBox1.Size;
+                richTextBox1.Location = textBox1.Location;
+                richTextBox1.Show();
+
+            }
+        }
+
+        private void richTextBox1_MouseDown(object sender, MouseEventArgs e)
+        {
+            richTextBox1.Size = textBox1.Size;
+            richTextBox1.Location = textBox1.Location;
+            richTextBox1.Visible = false;
         }
     }
 }
