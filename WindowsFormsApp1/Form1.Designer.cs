@@ -103,6 +103,7 @@ namespace WindowsFormsApp1
             this.textBox4.Size = new System.Drawing.Size(40, 40);
             this.textBox4.TabIndex = 5;
             this.textBox4.TabStop = false;
+            this.textBox4.Enter += new System.EventHandler(this.textBox4_Enter);
             this.textBox4.Leave += new System.EventHandler(this.textBox4_Leave);
             // 
             // richTextBox1

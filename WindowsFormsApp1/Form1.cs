@@ -16,9 +16,12 @@ namespace WindowsFormsApp1
 {
     public partial class Form1 : Form
     {
+        readonly Point textBox4Location;readonly Size textBox4Size;
         public Form1()
         {
             InitializeComponent();
+            textBox4Location = textBox4.Location;
+            textBox4Size = textBox4.Size;
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -422,7 +425,7 @@ namespace WindowsFormsApp1
         {
             if (textBox4.Text == "") return;
             StringInfo selWord = new StringInfo(textBox1.SelectedText);
-            if (!(selWord.LengthInTextElements > 1 || textBox1.SelectionLength == 0))
+            if (textBox1.SelectionLength != 0)//(!(selWord.LengthInTextElements > 1 || textBox1.SelectionLength == 0))
             {
                 int s = textBox1.SelectionStart; int l = selWord.LengthInTextElements;
                 textBox1.Text = textBox1.Text.Replace(textBox1.SelectedText, textBox4.Text);
@@ -435,6 +438,9 @@ namespace WindowsFormsApp1
         private void textBox4_Leave(object sender, EventArgs e)
         {
             replaceWord();
+            textBox4.Location = textBox4Location;
+            textBox4.Size = textBox4Size;
+            textBox4.ScrollBars = ScrollBars.None;
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -447,6 +453,14 @@ namespace WindowsFormsApp1
             //FormStartPosition 列舉:https://docs.microsoft.com/zh-tw/dotnet/api/system.windows.forms.formstartposition?view=netframework-4.7.2
             this.Location = new Point(Width - this.Width, Height - textBox1.Height * 2);
             //this.PointToScreen();
+        }
+
+        private void textBox4_Enter(object sender, EventArgs e)
+        {
+            textBox4.Location = new Point(button1.Location.X,textBox4Location.Y);
+            textBox4.Size = new Size(textBox2.Size.Width+textBox2.Size.Width+
+                                        textBox3.Width+textBox4Size.Width,textBox4Size.Height);
+            textBox4.ScrollBars = ScrollBars.Horizontal;
         }
     }
 }
