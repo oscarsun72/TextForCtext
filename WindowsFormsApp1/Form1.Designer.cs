@@ -72,6 +72,7 @@ namespace WindowsFormsApp1
             this.textBox2.TabIndex = 2;
             this.textBox2.TextChanged += new System.EventHandler(this.textBox2_TextChanged);
             this.textBox2.Enter += new System.EventHandler(this.textBox2_Enter);
+            this.textBox2.KeyDown += new System.Windows.Forms.KeyEventHandler(this.textBox2_KeyDown);
             this.textBox2.Leave += new System.EventHandler(this.textBox2_Leave);
             // 
             // textBox3
@@ -104,6 +105,7 @@ namespace WindowsFormsApp1
             this.textBox4.TabIndex = 5;
             this.textBox4.TabStop = false;
             this.textBox4.Enter += new System.EventHandler(this.textBox4_Enter);
+            this.textBox4.KeyDown += new System.Windows.Forms.KeyEventHandler(this.textBox4_KeyDown);
             this.textBox4.Leave += new System.EventHandler(this.textBox4_Leave);
             // 
             // richTextBox1

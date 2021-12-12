@@ -462,5 +462,27 @@ namespace WindowsFormsApp1
                                         textBox3.Width+textBox4Size.Width,textBox4Size.Height);
             textBox4.ScrollBars = ScrollBars.Horizontal;
         }
+
+        private void textBox4_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode==Keys.F2)
+            {
+                if (textBox4.Text!="")
+                {
+                    textBox4.SelectionStart = 0;textBox4.SelectionLength = textBox4.Text.Length;
+                }
+            }
+        }
+
+        private void textBox2_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.F2)
+            {
+                if (textBox2.Text != "")
+                {
+                    textBox2.SelectionStart = 0; textBox2.SelectionLength = textBox2.Text.Length;
+                }
+            }
+        }
     }
 }
