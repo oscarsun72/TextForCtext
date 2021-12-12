@@ -217,7 +217,7 @@ namespace WindowsFormsApp1
                 {
                     x = x.Substring(textBox1.SelectionStart + textBox1.SelectionLength + 2);
                 }
-                if ( textBox1.SelectionStart +textBox1.SelectionLength>=textBox1.Text.Length)
+                if (textBox1.SelectionStart + textBox1.SelectionLength >= textBox1.Text.Length)
                 {
                     x = "";
                 }
@@ -251,6 +251,38 @@ namespace WindowsFormsApp1
                 {
                     int s = textBox1.SelectionStart, ed = s;
                     selToNewline(ref s, ref ed, textBox1.Text, true, textBox1);
+                }
+            }
+            if ((m & Keys.Control) == Keys.Control)
+            {
+                if (e.KeyCode == Keys.D0 || e.KeyCode == Keys.D9 || e.KeyCode == Keys.D8 || e.KeyCode == Keys.D7)
+                {
+
+
+                    int s = textBox1.SelectionStart; string insX = "", x = textBox1.Text;
+                    if (e.KeyCode == Keys.D0)
+                    {
+                        insX = Environment.NewLine + "　" + Environment.NewLine +
+                            "　" + Environment.NewLine +
+                            "　" + Environment.NewLine +
+                            "　" + Environment.NewLine;
+                    }
+                    if (e.KeyCode == Keys.D9)
+                    {
+                        insX = Environment.NewLine + "　" + Environment.NewLine +
+                            "　" + Environment.NewLine;
+                    }
+                    if (e.KeyCode == Keys.D8)
+                    {
+                        insX = Environment.NewLine + "　" + Environment.NewLine;
+                    }
+                    if (e.KeyCode == Keys.D7)
+                    {
+                        insX = "。}}";
+                    }
+                    x = x.Substring(0, s) + insX + x.Substring(s);
+                    textBox1.Text = x;
+                    textBox1.SelectionStart = s + insX.Length;
                 }
             }
         }
