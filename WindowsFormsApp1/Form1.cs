@@ -261,9 +261,9 @@ namespace WindowsFormsApp1
             {
                 if (e.KeyCode == Keys.D0 || e.KeyCode == Keys.D9 || e.KeyCode == Keys.D8 || e.KeyCode == Keys.D7)
                 {
-                    if (textBox1.SelectedText!="")
-                        SendKeys.Send("~");
-                    int s = textBox1.SelectionStart; string insX = "", x = textBox1.Text;
+                    int s = textBox1.SelectionStart, l = textBox1.SelectionLength; string insX = "", x = textBox1.Text;
+                    if (textBox1.SelectedText != "")
+                        x = x.Substring(0, s) + x.Substring(s + l);
                     if (e.KeyCode == Keys.D0)
                     {
                         insX = Environment.NewLine + "　" + Environment.NewLine +
@@ -294,8 +294,6 @@ namespace WindowsFormsApp1
 
         private void selToNewline(ref int s, ref int ed, string x, bool forward, TextBox tBox)
         {
-
-
             if (forward)
             {
                 for (int i = s + 1; i + 1 < x.Length; i++)
@@ -306,7 +304,6 @@ namespace WindowsFormsApp1
                         break;
                     }
                 }
-
             }
             else
             {
@@ -326,6 +323,7 @@ namespace WindowsFormsApp1
             if (s > -1 && ed - s > 0)
             {
                 tBox.SelectionStart = s; tBox.SelectionLength = ed - s;
+                tBox.ScrollToCaret();
             }
 
 
