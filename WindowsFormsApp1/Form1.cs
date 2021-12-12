@@ -177,8 +177,16 @@ namespace WindowsFormsApp1
 
         private void textBox2_Leave(object sender, EventArgs e)
         {
-            if (textBox2.Text == "") return;
-            string x = textBox1.Text; int xStart = x.IndexOf(textBox2.Text);
+            string s = textBox2.Text;
+            if (s == "") return;
+            //如何判斷字串是否代表數值 (c # 程式設計手冊):https://docs.microsoft.com/zh-tw/dotnet/csharp/programming-guide/strings/how-to-determine-whether-a-string-represents-a-numeric-value
+            int i = 0;
+            bool result = int.TryParse(s, out i); //i now = textBox2.Text
+            if (result && (processID == null || processID == ""))
+            {
+                processID = s;
+            }
+            string x = textBox1.Text; int xStart = x.IndexOf(s);
             if (xStart > 0)
             {
                 textBox1.Focus();
@@ -247,11 +255,18 @@ namespace WindowsFormsApp1
             {
                 Clipboard.SetText(textBox1.Text);
             }
+            if (Control.ModifierKeys == Keys.Alt)
+            {
+                if (e.KeyCode == Keys.Q)
+                {
+                    splitLineByFristLen();
+                }
+            }
             if (Control.ModifierKeys == Keys.Control)
             {
                 if (e.KeyCode == Keys.S)
                 {
-                    savetext();
+                    saveText();
                 }
                 if (e.KeyCode == Keys.Q)
                 {
@@ -309,7 +324,7 @@ namespace WindowsFormsApp1
                             url = urlSub + (page - 1).ToString();
                     }
                     Process.Start(url);
-                    appActivateByID();
+                    appActivateByName();
                     Task.Delay(1500).Wait();
                     SendKeys.Send("{Tab}"); //("{Tab 24}");
                     Task.Delay(500).Wait();
@@ -317,20 +332,49 @@ namespace WindowsFormsApp1
                     textBox3.Text = url;
                 }
             }
+            if (e.KeyCode == Keys.F5)
+            {
+                loadText();
+            }
         }
 
-        private void savetext()
+        private void saveText()
         {
+            //C# 對文字檔案的幾種讀寫方法總結:https://codertw.com/%E7%A8%8B%E5%BC%8F%E8%AA%9E%E8%A8%80/542361/
             string str1 = textBox1.Text;
-            File.WriteAllText(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + @"\Dropbox\cText.txt", str1, Encoding.UTF8); //https://codertw.com/%E7%A8%8B%E5%BC%8F%E8%AA%9E%E8%A8%80/542361/
+            File.WriteAllText(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + @"\Dropbox\cText.txt", str1, Encoding.UTF8);
             // 也可以指定編碼方式 File.WriteAllText(@”c:\temp\test\ascii-2.txt”, str1, Encoding.ASCII);
-            //throw new NotImplementedException();
         }
+
+        private void loadText()
+        {
+            //C# 對文字檔案的幾種讀寫方法總結:https://codertw.com/%E7%A8%8B%E5%BC%8F%E8%AA%9E%E8%A8%80/542361/
+            textBox1.Text = File.ReadAllText(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + @"\Dropbox\cText.txt");
+        }
+
+
+
 
         string processID;
         //https://stackoverflow.com/questions/58302052/c-microsoft-visualbasic-interaction-appactivate-no-effect
         [DllImport("user32.dll", SetLastError = true)]
         static extern void SwitchToThisWindow(IntPtr hWnd, bool turnOn);
+        
+        void appActivateByName()
+        {
+            Process[] procsBrowser = Process.GetProcessesByName("chrome");
+            if (procsBrowser.Length <= 0)
+            {
+                MessageBox.Show("Chrome is not running");
+            }
+            foreach (Process proc in procsBrowser)
+            {
+                if (proc.MainWindowHandle != IntPtr.Zero)
+                    SwitchToThisWindow(proc.MainWindowHandle, true);
+            }
+
+        }
+
         void appActivateByID()
         { //https://docs.microsoft.com/zh-tw/dotnet/csharp/programming-guide/strings/how-to-determine-whether-a-string-represents-a-numeric-value
             int i = 0;
@@ -355,7 +399,7 @@ namespace WindowsFormsApp1
 
         private void pasteToCtext()
         {
-            appActivateByID();
+            appActivateByName();
             SendKeys.Send("^v{tab}~");
             this.WindowState = FormWindowState.Minimized;
             //throw new NotImplementedException();
@@ -383,6 +427,7 @@ namespace WindowsFormsApp1
                 int s = textBox1.SelectionStart; int l = selWord.LengthInTextElements;
                 textBox1.Text = textBox1.Text.Replace(textBox1.SelectedText, textBox4.Text);
                 textBox1.SelectionStart = s; textBox1.SelectionLength = l;
+                textBox1.ScrollToCaret();
             }
             //throw new NotImplementedException();
         }
@@ -400,7 +445,7 @@ namespace WindowsFormsApp1
             int Height = SystemInformation.PrimaryMonitorSize.Height;
             //MessageBox.Show("你的螢幕解析度是" + Size + "\n Width = " + Width + "\n Height = " + Height);
             //FormStartPosition 列舉:https://docs.microsoft.com/zh-tw/dotnet/api/system.windows.forms.formstartposition?view=netframework-4.7.2
-            this.Location = new Point(Width-this.Width, Height - textBox1.Height*2);
+            this.Location = new Point(Width - this.Width, Height - textBox1.Height * 2);
             //this.PointToScreen();
         }
     }
