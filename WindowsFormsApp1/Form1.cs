@@ -34,10 +34,22 @@ namespace WindowsFormsApp1
             //據第一行長度來分行分段
             bool noteFlg = false;
             int selStart = textBox1.SelectionStart;
-            //string x = textBox1.Text;
+            string x = "";
             if (selStart == textBox1.Text.Length) selStart = 0;
+            if (selStart != 0)
+            {
+                x = textBox1.Text;
+                for (int i = selStart - 1; i > -1; i--)
+                {
+                    if (x.Substring(i, 2) == Environment.NewLine)
+                    {
+                        selStart = i + 2;
+                        break;
+                    }
+                }
+            }
             string xPre = textBox1.Text.Substring(0, selStart);
-            string x = textBox1.Text.Substring(selStart);
+            x = textBox1.Text.Substring(selStart);
             if (x == "") Clipboard.GetText();
             const string omitStr = "{}<p>《》〈〉：，。「」『』　0123456789-‧·\r\n";
             int wordCntr = 0; int noteCtr = 0;
@@ -225,19 +237,54 @@ namespace WindowsFormsApp1
                 && e.KeyCode == Keys.Up)
             {
                 {
-                    int s = textBox1.SelectionStart; int ed = s;
-                    string x = textBox1.Text;
-                    for (int i = s-1; i > 0; i--)
-                    {
-                        if (x.Substring(i, 2) == Environment.NewLine)
-                        {
-                            s = i + 1;
-                            break;
-                        }
-                    }
-                    textBox1.SelectionStart = s; textBox1.SelectionLength = ed - s;
+                    int s = textBox1.SelectionStart, ed = s;
+                    selToNewline(ref s, ref ed, textBox1.Text, false, textBox1);
                 }
             }
+            if ((m & Keys.Control) == Keys.Control
+                && (m & Keys.Shift) == Keys.Shift
+                && e.KeyCode == Keys.Down)
+            {
+                {
+                    int s = textBox1.SelectionStart, ed = s;
+                    selToNewline(ref s, ref ed, textBox1.Text, true, textBox1);
+                }
+            }
+        }
+
+        private void selToNewline(ref int s, ref int ed, string x, bool forward, TextBox tBox)
+        {
+
+
+            if (forward)
+            {
+                for (int i = s + 1; i < x.Length; i++)
+                {
+                    if (x.Substring(i, 2) == Environment.NewLine)
+                    {
+                        ed = i + 2;
+                        break;
+                    }
+                }
+
+            }
+            else
+            {
+                for (int i = s - 1; i > -1; i--)
+                {
+                    if (x.Substring(i, 2) == Environment.NewLine)
+                    {
+                        s = i + 2;
+                        break;
+                    }
+                }
+            }
+            if (s > -1 && ed - s > 0)
+            {
+                tBox.SelectionStart = s; tBox.SelectionLength = ed - s;
+            }
+
+
         }
 
         private void textBox3_TextChanged(object sender, EventArgs e)
