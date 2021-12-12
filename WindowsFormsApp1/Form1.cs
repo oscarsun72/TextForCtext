@@ -353,7 +353,6 @@ namespace WindowsFormsApp1
             //https://bbs.csdn.net/topics/350010591
             //https://zhidao.baidu.com/question/628222381668604284.html
             var m = ModifierKeys;
-            e.Handled = true;//取得或設定值，指出是否處理事件。https://docs.microsoft.com/zh-tw/dotnet/api/system.windows.forms.keyeventargs.handled?view=netframework-4.7.2&f1url=%3FappId%3DDev16IDEF1%26l%3DZH-TW%26k%3Dk(System.Windows.Forms.KeyEventArgs.Handled);k(TargetFrameworkMoniker-.NETFramework,Version%253Dv4.7.2);k(DevLang-csharp)%26rd%3Dtrue
             if ((m & Keys.Control) == Keys.Control
                 && (m & Keys.Shift) == Keys.Shift
                 && e.KeyCode == Keys.C)
@@ -421,6 +420,7 @@ namespace WindowsFormsApp1
 
                     string url = textBox3.Text;
                     if (url == "") return;
+                    e.Handled = true;//取得或設定值，指出是否處理事件。https://docs.microsoft.com/zh-tw/dotnet/api/system.windows.forms.keyeventargs.handled?view=netframework-4.7.2&f1url=%3FappId%3DDev16IDEF1%26l%3DZH-TW%26k%3Dk(System.Windows.Forms.KeyEventArgs.Handled);k(TargetFrameworkMoniker-.NETFramework,Version%253Dv4.7.2);k(DevLang-csharp)%26rd%3Dtrue
                     int edit = url.IndexOf("&editwiki");
                     int page = 0; string urlSub = url;
                     if (edit > -1)
