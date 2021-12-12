@@ -211,13 +211,17 @@ namespace WindowsFormsApp1
             {
                 textBox2.Text = "";
                 string x = textBox1.Text;
-                Clipboard.SetText(x.Substring(0, textBox1.SelectionStart + textBox1.SelectionLength));
+                int s = textBox1.SelectionStart, l = textBox1.SelectionLength;
+                Clipboard.SetText(x.Substring(0, s + l));
                 pasteToCtext();
-                if (textBox1.SelectionStart + textBox1.SelectionLength + 2 < textBox1.Text.Length)
+                if (s + l + 2 < textBox1.Text.Length)
                 {
-                    x = x.Substring(textBox1.SelectionStart + textBox1.SelectionLength + 2);
+                    if (x.Substring(s + l, 1) == Environment.NewLine)
+                        x = x.Substring(s + l + 2);
+                    else
+                        x = x.Substring(s + l);
                 }
-                if (textBox1.SelectionStart + textBox1.SelectionLength >= textBox1.Text.Length)
+                if (s + l >= textBox1.Text.Length)
                 {
                     x = "";
                 }
@@ -257,8 +261,8 @@ namespace WindowsFormsApp1
             {
                 if (e.KeyCode == Keys.D0 || e.KeyCode == Keys.D9 || e.KeyCode == Keys.D8 || e.KeyCode == Keys.D7)
                 {
-
-
+                    if (textBox1.SelectedText!="")
+                        SendKeys.Send("~");
                     int s = textBox1.SelectionStart; string insX = "", x = textBox1.Text;
                     if (e.KeyCode == Keys.D0)
                     {
@@ -283,6 +287,7 @@ namespace WindowsFormsApp1
                     x = x.Substring(0, s) + insX + x.Substring(s);
                     textBox1.Text = x;
                     textBox1.SelectionStart = s + insX.Length;
+                    textBox1.ScrollToCaret();
                 }
             }
         }
@@ -348,6 +353,7 @@ namespace WindowsFormsApp1
             //https://bbs.csdn.net/topics/350010591
             //https://zhidao.baidu.com/question/628222381668604284.html
             var m = ModifierKeys;
+            e.Handled = true;//取得或設定值，指出是否處理事件。https://docs.microsoft.com/zh-tw/dotnet/api/system.windows.forms.keyeventargs.handled?view=netframework-4.7.2&f1url=%3FappId%3DDev16IDEF1%26l%3DZH-TW%26k%3Dk(System.Windows.Forms.KeyEventArgs.Handled);k(TargetFrameworkMoniker-.NETFramework,Version%253Dv4.7.2);k(DevLang-csharp)%26rd%3Dtrue
             if ((m & Keys.Control) == Keys.Control
                 && (m & Keys.Shift) == Keys.Shift
                 && e.KeyCode == Keys.C)
