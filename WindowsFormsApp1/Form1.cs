@@ -38,15 +38,16 @@ namespace WindowsFormsApp1
             if (selStart == textBox1.Text.Length) selStart = 0;
             if (selStart != 0)
             {
-                x = textBox1.Text;
-                for (int i = selStart - 1; i > -1; i--)
-                {
-                    if (x.Substring(i, 2) == Environment.NewLine)
-                    {
-                        selStart = i + 2;
-                        break;
-                    }
-                }
+                selToNewline(ref selStart, ref selStart, textBox1.Text, false, textBox1);
+                //x = textBox1.Text;
+                //for (int i = selStart - 1; i > -1; i--)
+                //{
+                //    if (x.Substring(i, 2) == Environment.NewLine)
+                //    {
+                //        selStart = i + 2;
+                //        break;
+                //    }
+                //}
             }
             string xPre = textBox1.Text.Substring(0, selStart);
             x = textBox1.Text.Substring(selStart);
@@ -258,7 +259,7 @@ namespace WindowsFormsApp1
 
             if (forward)
             {
-                for (int i = s + 1; i < x.Length; i++)
+                for (int i = s + 1; i+1 < x.Length; i++)
                 {
                     if (x.Substring(i, 2) == Environment.NewLine)
                     {
