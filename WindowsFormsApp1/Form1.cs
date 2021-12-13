@@ -368,19 +368,11 @@ namespace WindowsFormsApp1
             {//按下Ctrl鍵
                 if (e.KeyCode == Keys.D3)
                 {
-                    Microsoft.Office.Interop.Word.Application appWord = new Microsoft.Office
-                        .Interop.Word.Application();
-                    appWord.Run("漢籍電子文獻資料庫文本整理_十三經注疏");
-                    appWord.Quit(Microsoft.Office.Interop.Word.WdSaveOptions.wdDoNotSaveChanges);
-                    textBox1.Text = Clipboard.GetText();
+                    runWord("漢籍電子文獻資料庫文本整理_十三經注疏");
                 }
                 if (e.KeyCode == Keys.D4)
                 {
-                    Microsoft.Office.Interop.Word.Application appWord = new Microsoft.Office
-                        .Interop.Word.Application();
-                    appWord.Run("維基文庫四部叢刊本轉來");
-                    appWord.Quit(Microsoft.Office.Interop.Word.WdSaveOptions.wdDoNotSaveChanges);
-                    textBox1.Text = Clipboard.GetText();
+                    runWord("維基文庫四部叢刊本轉來");
                 }
                 if (e.KeyCode == Keys.S)
                 {
@@ -455,6 +447,17 @@ namespace WindowsFormsApp1
             {
                 loadText();
             }
+        }
+
+
+
+        private void runWord(string runName)
+        {
+            Microsoft.Office.Interop.Word.Application appWord = new Microsoft.Office
+                                    .Interop.Word.Application();
+            appWord.Run(runName);
+            textBox1.Text = Clipboard.GetText();
+            appWord.Quit(Microsoft.Office.Interop.Word.WdSaveOptions.wdDoNotSaveChanges);
         }
 
         private void saveText()
@@ -568,7 +571,7 @@ namespace WindowsFormsApp1
             int Height = SystemInformation.PrimaryMonitorSize.Height;
             //MessageBox.Show("你的螢幕解析度是" + Size + "\n Width = " + Width + "\n Height = " + Height);
             //FormStartPosition 列舉:https://docs.microsoft.com/zh-tw/dotnet/api/system.windows.forms.formstartposition?view=netframework-4.7.2
-            this.Location = new Point(Width - this.Width, Height - textBox1.Height * 2);
+            this.Location = new Point(Width - this.Width, Height - textBox1.Height * 2 + 150);
             //this.PointToScreen();
         }
 
@@ -609,6 +612,15 @@ namespace WindowsFormsApp1
 
         private void textBox1_MouseDown(object sender, MouseEventArgs e)
         {
+            var m = ModifierKeys;
+            if ((m & Keys.Control) == Keys.Control && (m & Keys.Shift) == Keys.Shift)
+            {
+                runWord("漢籍電子文獻資料庫文本整理_十三經注疏");
+            }
+            if ((m & Keys.Alt) == Keys.Alt )
+            {
+                runWord("維基文庫四部叢刊本轉來");
+            }
             if (ModifierKeys == Keys.Control && e.Button == MouseButtons.Left)
             {
                 richTextBox1.Size = textBox1.Size;
