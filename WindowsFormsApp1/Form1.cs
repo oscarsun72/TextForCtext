@@ -549,7 +549,7 @@ namespace WindowsFormsApp1
             if (replacedword == "")//(!(selWord.LengthInTextElements > 1 || textBox1.SelectionLength == 0))
             {//無選取文字則以插入點後一字為被取代字
                 StringInfo replacedWord = new StringInfo(x.Substring(textBox1.SelectionStart, CJK_Crtr_Len_Max));
-                replacedword = replacedWord.SubstringByTextElements(0);//取CJK一個單位字
+                replacedword = replacedWord.SubstringByTextElements(0,1);//取CJK一個單位字
             }
             if (textBox1.SelectedText == textBox4.Text) return;
             int s = textBox1.SelectionStart; int l = selWord.LengthInTextElements;
@@ -564,6 +564,7 @@ namespace WindowsFormsApp1
 
         private void textBox4_Leave(object sender, EventArgs e)
         {
+            saveText();
             replaceWord();
             textBox4.Location = textBox4Location;
             textBox4.Size = textBox4Size;
