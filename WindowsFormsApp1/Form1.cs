@@ -546,6 +546,7 @@ namespace WindowsFormsApp1
             StringInfo selWord = new StringInfo(textBox4.Text);
             if (textBox1.SelectionLength != 0)//(!(selWord.LengthInTextElements > 1 || textBox1.SelectionLength == 0))
             {
+                if (textBox1.SelectedText == textBox4.Text) return;
                 int s = textBox1.SelectionStart; int l = selWord.LengthInTextElements;
                 textBox1.Text = textBox1.Text.Replace(textBox1.SelectedText, textBox4.Text);
                 textBox1.SelectionStart = s; textBox1.SelectionLength = l;
