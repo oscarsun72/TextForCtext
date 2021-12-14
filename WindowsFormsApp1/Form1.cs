@@ -263,6 +263,7 @@ namespace WindowsFormsApp1
                 {
                     newTextBox1();
                     pasteToCtext();
+                    nextPages(e);
                 }
                 if (e.KeyCode == Keys.D0 || e.KeyCode == Keys.D9 || e.KeyCode == Keys.D8 || e.KeyCode == Keys.D7)
                 {
@@ -410,7 +411,7 @@ namespace WindowsFormsApp1
                     x = x + xNext;
                     textBox1.Text = x;
                     textBox1.SelectionStart = s; textBox1.SelectionLength = 1;
-                    textBox1.ScrollToCaret();
+                    textBox1.ScrollToCaret();                    
                 }
 
 
