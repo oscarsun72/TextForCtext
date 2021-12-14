@@ -102,8 +102,9 @@ namespace WindowsFormsApp1
             // 
             this.textBox4.Font = new System.Drawing.Font("新細明體-ExtB", 20.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
             this.textBox4.Location = new System.Drawing.Point(381, 2);
+            this.textBox4.Multiline = true;
             this.textBox4.Name = "textBox4";
-            this.textBox4.Size = new System.Drawing.Size(40, 40);
+            this.textBox4.Size = new System.Drawing.Size(40, 42);
             this.textBox4.TabIndex = 5;
             this.textBox4.TabStop = false;
             this.textBox4.Enter += new System.EventHandler(this.textBox4_Enter);
