@@ -473,18 +473,19 @@ namespace WindowsFormsApp1
             appWord.Quit(Microsoft.Office.Interop.Word.WdSaveOptions.wdDoNotSaveChanges);
         }
 
+        const string F_to_Save_Txt = @"\Dropbox\cText.txt";
         private void saveText()
         {
             //C# 對文字檔案的幾種讀寫方法總結:https://codertw.com/%E7%A8%8B%E5%BC%8F%E8%AA%9E%E8%A8%80/542361/
             string str1 = textBox1.Text;
-            File.WriteAllText(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + @"\Dropbox\cText.txt", str1, Encoding.UTF8);
+            File.WriteAllText(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + F_to_Save_Txt, str1, Encoding.UTF8);
             // 也可以指定編碼方式 File.WriteAllText(@”c:\temp\test\ascii-2.txt”, str1, Encoding.ASCII);
         }
 
         private void loadText()
         {
             //C# 對文字檔案的幾種讀寫方法總結:https://codertw.com/%E7%A8%8B%E5%BC%8F%E8%AA%9E%E8%A8%80/542361/
-            textBox1.Text = File.ReadAllText(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + @"\Dropbox\cText.txt");
+            textBox1.Text = File.ReadAllText(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + F_to_Save_Txt);
         }
 
 
