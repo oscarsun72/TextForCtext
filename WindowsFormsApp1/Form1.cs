@@ -566,6 +566,7 @@ namespace WindowsFormsApp1
 
         string getReplaceWordDefault(string replacedWord)
         {
+            if (replacedWordList.Count == 0) return "";
             for (int i = 0; i < replacedWordList.Count; i++)
             {
                 if (replacedWord == replacedWordList[i])
