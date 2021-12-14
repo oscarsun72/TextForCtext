@@ -615,7 +615,7 @@ namespace WindowsFormsApp1
             if (rplsdWord!="")
             {
                 string rplsWord = getReplaceWordDefault(rplsdWord);
-                if (rplsWord != "") textBox1.Text = rplsWord;
+                if (rplsWord != "") textBox4.Text = rplsWord;
             }
         }
 
