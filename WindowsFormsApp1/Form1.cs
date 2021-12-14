@@ -401,7 +401,7 @@ namespace WindowsFormsApp1
                     splitLineByFristLen();
                 }
                 if (e.KeyCode == Keys.OemBackslash || e.KeyCode == Keys.Packet || e.KeyCode == Keys.Oem5)
-                {
+                {//clear the newline after the caret
                     string x = textBox1.Text;
                     int s = textBox1.SelectionStart;
                     string xNext = x.Substring(s);
@@ -417,39 +417,8 @@ namespace WindowsFormsApp1
                 if (e.KeyCode == Keys.PageDown || e.KeyCode == Keys.PageUp)
                 {
 
-                    string url = textBox3.Text;
-                    if (url == "") return;
                     e.Handled = true;//取得或設定值，指出是否處理事件。https://docs.microsoft.com/zh-tw/dotnet/api/system.windows.forms.keyeventargs.handled?view=netframework-4.7.2&f1url=%3FappId%3DDev16IDEF1%26l%3DZH-TW%26k%3Dk(System.Windows.Forms.KeyEventArgs.Handled);k(TargetFrameworkMoniker-.NETFramework,Version%253Dv4.7.2);k(DevLang-csharp)%26rd%3Dtrue
-                    int edit = url.IndexOf("&editwiki");
-                    int page = 0; string urlSub = url;
-                    if (edit > -1)
-                    {
-                        urlSub = url.Substring(0, url.IndexOf("&page=") + "&page=".Length);
-                        page = Int32.Parse(
-                            url.Substring(url.IndexOf("&page=") + "&page=".Length,
-                            url.IndexOf("&editwiki=") - (url.IndexOf("&page=") + "&page=".Length)));
-                        if (e.KeyCode == Keys.PageDown)
-                            url = urlSub + (page + 1).ToString() + url.Substring(url.IndexOf("&editwiki="));
-                        if (e.KeyCode == Keys.PageUp)
-                            url = urlSub + (page - 1).ToString() + url.Substring(url.IndexOf("&editwiki="));
-                        //newTextBox1();
-                    }
-                    else
-                    {
-                        urlSub = url.Substring(0, url.IndexOf("&page=") + "&page=".Length);
-                        page = Int32.Parse(url.Substring(url.IndexOf("&page=") + "&page=".Length));
-                        if (e.KeyCode == Keys.PageDown)
-                            url = urlSub + (page + 1).ToString();
-                        if (e.KeyCode == Keys.PageUp)
-                            url = urlSub + (page - 1).ToString();
-                    }
-                    Process.Start(url);
-                    appActivateByName();
-                    Task.Delay(1500).Wait();
-                    SendKeys.Send("{Tab}"); //("{Tab 24}");
-                    Task.Delay(500).Wait();
-                    SendKeys.Send("^a");
-                    textBox3.Text = url;
+                    nextPages(e);
                 }
             }
             if (e.KeyCode == Keys.F5)
@@ -458,7 +427,41 @@ namespace WindowsFormsApp1
             }
         }
 
-
+        private void nextPages(KeyEventArgs e)
+        {
+            string url = textBox3.Text;
+            if (url == "") return;
+            int edit = url.IndexOf("&editwiki");
+            int page = 0; string urlSub = url;
+            if (edit > -1)
+            {
+                urlSub = url.Substring(0, url.IndexOf("&page=") + "&page=".Length);
+                page = Int32.Parse(
+                    url.Substring(url.IndexOf("&page=") + "&page=".Length,
+                    url.IndexOf("&editwiki=") - (url.IndexOf("&page=") + "&page=".Length)));
+                if (e.KeyCode == Keys.PageDown)
+                    url = urlSub + (page + 1).ToString() + url.Substring(url.IndexOf("&editwiki="));
+                if (e.KeyCode == Keys.PageUp)
+                    url = urlSub + (page - 1).ToString() + url.Substring(url.IndexOf("&editwiki="));
+                //newTextBox1();
+            }
+            else
+            {
+                urlSub = url.Substring(0, url.IndexOf("&page=") + "&page=".Length);
+                page = Int32.Parse(url.Substring(url.IndexOf("&page=") + "&page=".Length));
+                if (e.KeyCode == Keys.PageDown)
+                    url = urlSub + (page + 1).ToString();
+                if (e.KeyCode == Keys.PageUp)
+                    url = urlSub + (page - 1).ToString();
+            }
+            Process.Start(url);
+            appActivateByName();
+            Task.Delay(1500).Wait();
+            SendKeys.Send("{Tab}"); //("{Tab 24}");
+            Task.Delay(500).Wait();
+            SendKeys.Send("^a");
+            textBox3.Text = url;
+        }
 
         private void runWord(string runName)
         {
