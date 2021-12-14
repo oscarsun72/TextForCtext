@@ -375,6 +375,11 @@ namespace WindowsFormsApp1
             }
             if (Control.ModifierKeys == Keys.Control)
             {//按下Ctrl鍵
+                if (e.KeyCode == Keys.F)
+                {
+                    textBox2.Focus();
+                    textBox2.SelectedText = textBox2.Text;
+                }
                 if (e.KeyCode == Keys.D1)
                 {
                     runWord("漢籍電子文獻資料庫文本整理_以轉貼到中國哲學書電子化計劃");
