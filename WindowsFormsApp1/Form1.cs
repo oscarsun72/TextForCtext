@@ -295,7 +295,7 @@ namespace WindowsFormsApp1
                     textBox1.ScrollToCaret();
                 }
             }
-            if (e.KeyCode==Keys.F2)
+            if (e.KeyCode == Keys.F2)
             {
                 keyDownF2(textBox1);
             }
@@ -378,7 +378,7 @@ namespace WindowsFormsApp1
                 if (e.KeyCode == Keys.F)
                 {
                     textBox2.Focus();
-                    textBox2.SelectedText = textBox2.Text;
+                    textBox2.SelectionStart = 0;textBox2.SelectionLength = textBox2.Text.Length;
                 }
                 if (e.KeyCode == Keys.D1)
                 {
@@ -576,14 +576,14 @@ namespace WindowsFormsApp1
         string getReplaceWordDefault(string replacedWord)
         {
             if (replacedWordList.Count == 0) return "";
-            string replsWord="";
+            string replsWord = "";
             for (int i = 0; i < replacedWordList.Count; i++)
             {
                 if (replacedWord == replacedWordList[i])
                 {
-                    replsWord+=replaceWordList[i];                    
+                    replsWord += replaceWordList[i];
                 }
-            }            
+            }
             return replsWord;
 
         }
@@ -622,7 +622,7 @@ namespace WindowsFormsApp1
                                         textBox3.Width + textBox4Size.Width, textBox4Size.Height);
             textBox4.ScrollBars = ScrollBars.Horizontal;
             string rplsdWord = textBox1.SelectedText;
-            if (rplsdWord!="")
+            if (rplsdWord != "")
             {
                 string rplsWord = getReplaceWordDefault(rplsdWord);
                 if (rplsWord != "") textBox4.Text = rplsWord;
