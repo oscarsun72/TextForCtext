@@ -570,10 +570,9 @@ namespace WindowsFormsApp1
             {
                 if (replacedWord == replacedWordList[i])
                 {
-                    return replaceWordList[i];
-                    break;
+                    return replaceWordList[i];                    
                 }
-            }
+            }            
             return "";
 
         }
