@@ -207,8 +207,8 @@ namespace WindowsFormsApp1
         {
             if (textBox1.Text == "") return;
             saveText();
-            if (textBox1.SelectedText != "")
-            {
+            //if (textBox1.SelectedText != "")
+            //{
                 textBox2.Text = "";
                 string x = textBox1.Text;
                 int s = textBox1.SelectionStart, l = textBox1.SelectionLength;
@@ -226,7 +226,7 @@ namespace WindowsFormsApp1
                     x = "";
                 }
                 textBox1.Text = x;
-            }
+            //}
             if (textBox1.Text.Length > 1)
             {
                 if (textBox1.Text.Substring(0, 2) == Environment.NewLine) textBox1.Text = textBox1.Text.Substring(2);
@@ -259,6 +259,11 @@ namespace WindowsFormsApp1
             }
             if ((m & Keys.Control) == Keys.Control)
             {
+                if (e.KeyCode == Keys.NumPad5 || e.KeyCode == Keys.Oemplus || e.KeyCode == Keys.Add)
+                {
+                    newTextBox1();
+                    pasteToCtext();
+                }
                 if (e.KeyCode == Keys.D0 || e.KeyCode == Keys.D9 || e.KeyCode == Keys.D8 || e.KeyCode == Keys.D7)
                 {
                     int s = textBox1.SelectionStart, l = textBox1.SelectionLength; string insX = "", x = textBox1.Text;
@@ -366,6 +371,10 @@ namespace WindowsFormsApp1
             }
             if (Control.ModifierKeys == Keys.Control)
             {//按下Ctrl鍵
+                if (e.KeyCode == Keys.D1)
+                {
+                    runWord("漢籍電子文獻資料庫文本整理_以轉貼到中國哲學書電子化計劃");
+                }
                 if (e.KeyCode == Keys.D3)
                 {
                     runWord("漢籍電子文獻資料庫文本整理_十三經注疏");
@@ -393,17 +402,8 @@ namespace WindowsFormsApp1
                     textBox1.Text = x;
                     textBox1.SelectionStart = s; textBox1.SelectionLength = 1;
                     textBox1.ScrollToCaret();
-                }
-                if (e.KeyCode == Keys.D7)
-                {
-                    replaceWord();
-                }
-                if (e.KeyCode == Keys.NumPad5 || e.KeyCode == Keys.Oemplus || e.KeyCode == Keys.Add)
-                {
-                    newTextBox1();
-                    pasteToCtext();
-
-                }
+                }                
+                
 
                 if (e.KeyCode == Keys.PageDown || e.KeyCode == Keys.PageUp)
                 {
@@ -617,7 +617,7 @@ namespace WindowsFormsApp1
             {
                 runWord("漢籍電子文獻資料庫文本整理_十三經注疏");
             }
-            if ((m & Keys.Alt) == Keys.Alt )
+            if ((m & Keys.Alt) == Keys.Alt)
             {
                 runWord("維基文庫四部叢刊本轉來");
             }
