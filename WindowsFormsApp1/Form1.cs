@@ -263,7 +263,7 @@ namespace WindowsFormsApp1
                 {
                     newTextBox1();
                     pasteToCtext();
-                    nextPages(e);
+                    nextPages(Keys.PageDown);
                 }
                 if (e.KeyCode == Keys.D0 || e.KeyCode == Keys.D9 || e.KeyCode == Keys.D8 || e.KeyCode == Keys.D7)
                 {
@@ -419,7 +419,7 @@ namespace WindowsFormsApp1
                 {
 
                     e.Handled = true;//取得或設定值，指出是否處理事件。https://docs.microsoft.com/zh-tw/dotnet/api/system.windows.forms.keyeventargs.handled?view=netframework-4.7.2&f1url=%3FappId%3DDev16IDEF1%26l%3DZH-TW%26k%3Dk(System.Windows.Forms.KeyEventArgs.Handled);k(TargetFrameworkMoniker-.NETFramework,Version%253Dv4.7.2);k(DevLang-csharp)%26rd%3Dtrue
-                    nextPages(e);
+                    nextPages(e.KeyCode);
                 }
             }
             if (e.KeyCode == Keys.F5)
@@ -428,7 +428,7 @@ namespace WindowsFormsApp1
             }
         }
 
-        private void nextPages(KeyEventArgs e)
+        private void nextPages(Keys eKeyCode)
         {
             string url = textBox3.Text;
             if (url == "") return;
@@ -440,9 +440,9 @@ namespace WindowsFormsApp1
                 page = Int32.Parse(
                     url.Substring(url.IndexOf("&page=") + "&page=".Length,
                     url.IndexOf("&editwiki=") - (url.IndexOf("&page=") + "&page=".Length)));
-                if (e.KeyCode == Keys.PageDown)
+                if (eKeyCode == Keys.PageDown)
                     url = urlSub + (page + 1).ToString() + url.Substring(url.IndexOf("&editwiki="));
-                if (e.KeyCode == Keys.PageUp)
+                if (eKeyCode == Keys.PageUp)
                     url = urlSub + (page - 1).ToString() + url.Substring(url.IndexOf("&editwiki="));
                 //newTextBox1();
             }
@@ -450,9 +450,9 @@ namespace WindowsFormsApp1
             {
                 urlSub = url.Substring(0, url.IndexOf("&page=") + "&page=".Length);
                 page = Int32.Parse(url.Substring(url.IndexOf("&page=") + "&page=".Length));
-                if (e.KeyCode == Keys.PageDown)
+                if (eKeyCode == Keys.PageDown)
                     url = urlSub + (page + 1).ToString();
-                if (e.KeyCode == Keys.PageUp)
+                if (eKeyCode == Keys.PageUp)
                     url = urlSub + (page - 1).ToString();
             }
             Process.Start(url);
