@@ -538,7 +538,7 @@ namespace WindowsFormsApp1
             textBox1.Height = this.Height - textBox2.Height * 3 - textBox2.Top;
         }
 
-        const int CJK_Crtr_Len_Max=2;//因為目前CJK最長為2字元
+        const int CJK_Crtr_Len_Max = 2;//因為目前CJK最長為2字元
 
         private void replaceWord()
         {
@@ -548,18 +548,40 @@ namespace WindowsFormsApp1
             string replacedword = textBox1.SelectedText;
             if (replacedword == "")//(!(selWord.LengthInTextElements > 1 || textBox1.SelectionLength == 0))
             {//無選取文字則以插入點後一字為被取代字
-                StringInfo replacedWord = new StringInfo(x.Substring(textBox1.SelectionStart, CJK_Crtr_Len_Max));
-                replacedword = replacedWord.SubstringByTextElements(0,1);//取CJK一個單位字
+                StringInfo replacedWord = new StringInfo(
+                        x.Substring(textBox1.SelectionStart, CJK_Crtr_Len_Max));
+                replacedword = replacedWord.SubstringByTextElements(0, 1);//取CJK一個單位字
             }
-            if (textBox1.SelectedText == textBox4.Text) return;
+            if (replacedword == textBox4.Text) return;
             int s = textBox1.SelectionStart; int l = selWord.LengthInTextElements;
             textBox1.Text = x.Replace(replacedword, textBox4.Text);
+            addReplaceWordDefault(replacedword, textBox4.Text);
             textBox1.SelectionStart = s; textBox1.SelectionLength = l;
             textBox1.ScrollToCaret();
             textBox1.Focus();
+        }
 
+        List<string> replaceWordList = new List<string>();
+        List<string> replacedWordList = new List<string>();
 
-            //throw new NotImplementedException();
+        string getReplaceWordDefault(string replacedWord)
+        {
+            for (int i = 0; i < replacedWordList.Count; i++)
+            {
+                if (replacedWord == replacedWordList[i])
+                {
+                    return replaceWordList[i];
+                    break;
+                }
+            }
+            return "";
+
+        }
+        void addReplaceWordDefault(string replacedWord,
+                string replaceWord)
+        {
+            replacedWordList.Append(replacedWord);
+            replaceWordList.Append(replaceWord);
         }
 
         private void textBox4_Leave(object sender, EventArgs e)
@@ -589,16 +611,19 @@ namespace WindowsFormsApp1
             textBox4.Size = new Size(textBox2.Size.Width + textBox2.Size.Width +
                                         textBox3.Width + textBox4Size.Width, textBox4Size.Height);
             textBox4.ScrollBars = ScrollBars.Horizontal;
+            string rplsdWord = textBox1.SelectedText;
+            if (rplsdWord!="")
+            {
+                string rplsWord = getReplaceWordDefault(rplsdWord);
+                if (rplsWord != "") textBox1.Text = rplsWord;
+            }
         }
 
         private void textBox4_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.KeyCode == Keys.F2)
             {
-                if (textBox4.Text != "")
-                {
-                    textBox4.SelectionStart = 0; textBox4.SelectionLength = textBox4.Text.Length;
-                }
+                keyDownF2(textBox4);
             }
         }
 
@@ -606,16 +631,26 @@ namespace WindowsFormsApp1
         {
             if (e.KeyCode == Keys.F2)
             {
-                if (textBox2.Text != "")
+                keyDownF2(textBox2);
+            }
+        }
+
+        private void keyDownF2(TextBox textBox)
+        {
+            if (textBox.Text != "")
+            {
+                if (textBox.SelectedText != "")
+                    textBox.SelectionStart = textBox.Text.Length;
+                else
                 {
-                    textBox2.SelectionStart = 0; textBox2.SelectionLength = textBox2.Text.Length;
+                    textBox.SelectionStart = 0; textBox.SelectionLength = textBox.Text.Length;
                 }
             }
         }
 
         private void textBox2_Click(object sender, EventArgs e)
         {
-            textBox2.Text = "";
+            //textBox2.Text = "";
         }
 
         private void textBox1_MouseDown(object sender, MouseEventArgs e)
