@@ -30,6 +30,10 @@ Ctrl + f ：移至 textBox2 準備尋找文本
 
 Ctrl + s ：儲存文本至 DropBox 根目錄下的「cText.txt」檔案
 
+F5 ：重新載入所儲存的文本
+
+Ctrl + Shift + c ：將textBox1的文本複製到剪貼簿 以備用
+
 Ctrl + q 或 Alt + q：據第一行(段)長度來將textBox1中的文本分行分段
 
 Ctrl + \ （反斜線） ： 清除textBox1文本插入點後的分段
