@@ -209,23 +209,23 @@ namespace WindowsFormsApp1
             saveText();
             //if (textBox1.SelectedText != "")
             //{
-                textBox2.Text = "";
-                string x = textBox1.Text;
-                int s = textBox1.SelectionStart, l = textBox1.SelectionLength;
-                Clipboard.SetText(x.Substring(0, s + l));
-                pasteToCtext();
-                if (s + l + 2 < textBox1.Text.Length)
-                {
-                    if (x.Substring(s + l, 1) == Environment.NewLine)
-                        x = x.Substring(s + l + 2);
-                    else
-                        x = x.Substring(s + l);
-                }
-                if (s + l >= textBox1.Text.Length)
-                {
-                    x = "";
-                }
-                textBox1.Text = x;
+            textBox2.Text = "";
+            string x = textBox1.Text;
+            int s = textBox1.SelectionStart, l = textBox1.SelectionLength;
+            Clipboard.SetText(x.Substring(0, s + l));
+            pasteToCtext();
+            if (s + l + 2 < textBox1.Text.Length)
+            {
+                if (x.Substring(s + l, 1) == Environment.NewLine)
+                    x = x.Substring(s + l + 2);
+                else
+                    x = x.Substring(s + l);
+            }
+            if (s + l >= textBox1.Text.Length)
+            {
+                x = "";
+            }
+            textBox1.Text = x;
             //}
             if (textBox1.Text.Length > 1)
             {
@@ -402,8 +402,8 @@ namespace WindowsFormsApp1
                     textBox1.Text = x;
                     textBox1.SelectionStart = s; textBox1.SelectionLength = 1;
                     textBox1.ScrollToCaret();
-                }                
-                
+                }
+
 
                 if (e.KeyCode == Keys.PageDown || e.KeyCode == Keys.PageUp)
                 {
@@ -538,21 +538,27 @@ namespace WindowsFormsApp1
             textBox1.Height = this.Height - textBox2.Height * 3 - textBox2.Top;
         }
 
-
+        const int CJK_Crtr_Len_Max=2;//因為目前CJK最長為2字元
 
         private void replaceWord()
         {
             if (textBox4.Text == "") return;
             StringInfo selWord = new StringInfo(textBox4.Text);
-            if (textBox1.SelectionLength != 0)//(!(selWord.LengthInTextElements > 1 || textBox1.SelectionLength == 0))
-            {
-                if (textBox1.SelectedText == textBox4.Text) return;
-                int s = textBox1.SelectionStart; int l = selWord.LengthInTextElements;
-                textBox1.Text = textBox1.Text.Replace(textBox1.SelectedText, textBox4.Text);
-                textBox1.SelectionStart = s; textBox1.SelectionLength = l;
-                textBox1.ScrollToCaret();
-                textBox1.Focus();
+            string x = textBox1.Text;
+            string replacedword = textBox1.SelectedText;
+            if (replacedword == "")//(!(selWord.LengthInTextElements > 1 || textBox1.SelectionLength == 0))
+            {//無選取文字則以插入點後一字為被取代字
+                StringInfo replacedWord = new StringInfo(x.Substring(textBox1.SelectionStart, CJK_Crtr_Len_Max));
+                replacedword = replacedWord.SubstringByTextElements(0);//取CJK一個單位字
             }
+            if (textBox1.SelectedText == textBox4.Text) return;
+            int s = textBox1.SelectionStart; int l = selWord.LengthInTextElements;
+            textBox1.Text = x.Replace(replacedword, textBox4.Text);
+            textBox1.SelectionStart = s; textBox1.SelectionLength = l;
+            textBox1.ScrollToCaret();
+            textBox1.Focus();
+
+
             //throw new NotImplementedException();
         }
 
