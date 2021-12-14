@@ -295,6 +295,10 @@ namespace WindowsFormsApp1
                     textBox1.ScrollToCaret();
                 }
             }
+            if (e.KeyCode==Keys.F2)
+            {
+                keyDownF2(textBox1);
+            }
         }
 
         private void selToNewline(ref int s, ref int ed, string x, bool forward, TextBox tBox)
@@ -567,14 +571,15 @@ namespace WindowsFormsApp1
         string getReplaceWordDefault(string replacedWord)
         {
             if (replacedWordList.Count == 0) return "";
+            string replsWord="";
             for (int i = 0; i < replacedWordList.Count; i++)
             {
                 if (replacedWord == replacedWordList[i])
                 {
-                    return replaceWordList[i];                    
+                    replsWord+=replaceWordList[i];                    
                 }
             }            
-            return "";
+            return replsWord;
 
         }
         void addReplaceWordDefault(string replacedWord,
