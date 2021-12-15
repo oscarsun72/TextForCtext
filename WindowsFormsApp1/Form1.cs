@@ -611,6 +611,11 @@ namespace WindowsFormsApp1
         {
             saveText();
             replaceWord();
+            textBox4Resize();
+        }
+
+        private void textBox4Resize()
+        {
             textBox4.Location = textBox4Location;
             textBox4.Size = textBox4Size;
             textBox4.ScrollBars = ScrollBars.None;
@@ -630,16 +635,21 @@ namespace WindowsFormsApp1
 
         private void textBox4_Enter(object sender, EventArgs e)
         {
-            textBox4.Location = new Point(button1.Location.X, textBox4Location.Y);
-            textBox4.Size = new Size(textBox2.Size.Width + textBox2.Size.Width +
-                                        textBox3.Width + textBox4Size.Width, textBox4Size.Height);
-            textBox4.ScrollBars = ScrollBars.Horizontal;
+            textBox4SizeLarger();
             string rplsdWord = textBox1.SelectedText;
             if (rplsdWord != "")
             {
                 string rplsWord = getReplaceWordDefault(rplsdWord);
                 if (rplsWord != "") textBox4.Text = rplsWord;
             }
+        }
+
+        private void textBox4SizeLarger()
+        {
+            textBox4.Location = new Point(button1.Location.X, textBox4Location.Y);
+            textBox4.Size = new Size(textBox2.Size.Width + textBox2.Size.Width +
+                                        textBox3.Width + textBox4Size.Width, textBox4Size.Height);
+            textBox4.ScrollBars = ScrollBars.Horizontal;
         }
 
         private void textBox4_KeyDown(object sender, KeyEventArgs e)
@@ -701,6 +711,45 @@ namespace WindowsFormsApp1
             richTextBox1.Size = textBox1.Size;
             richTextBox1.Location = textBox1.Location;
             richTextBox1.Visible = false;
+        }
+
+        private void textBox2_MouseDown(object sender, MouseEventArgs e)
+        {
+            Keys m = ModifierKeys;
+            if ((m & Keys.Control) == Keys.Control)
+            {
+                if (e.Button == MouseButtons.Left)
+                {
+                    textBox2.Text = "";
+                }
+            }
+        }
+
+        private void textBox4_MouseDown(object sender, MouseEventArgs e)
+        {
+            Keys m = ModifierKeys;
+            if ((m & Keys.Control)==Keys.Control)
+            {
+                if (e.Button == MouseButtons.Left)
+                {
+                    textBox4.Text = "";
+                }
+            }
+            
+        }
+
+        private void textBox4_MouseHover(object sender, EventArgs e)
+        {
+            textBox4SizeLarger();
+            //textBox4.Focus();
+        }
+
+        private void textBox4_MouseLeave(object sender, EventArgs e)
+        {
+            if (!textBox4.Focused)
+            {
+                textBox4Resize();
+            }
         }
     }
 }
