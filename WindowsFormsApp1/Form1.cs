@@ -257,8 +257,9 @@ namespace WindowsFormsApp1
                     selToNewline(ref s, ref ed, textBox1.Text, true, textBox1);
                 }
             }
+
             if ((m & Keys.Control) == Keys.Control)
-            {
+            {//按下Ctrl鍵
                 if (e.KeyCode == Keys.NumPad5 || e.KeyCode == Keys.Oemplus || e.KeyCode == Keys.Add)
                 {
                     newTextBox1();
@@ -296,10 +297,55 @@ namespace WindowsFormsApp1
                     textBox1.ScrollToCaret();
                 }
             }
+            if ((m&Keys.Shift)==Keys.Shift)
+            {
+                if (e.KeyCode == Keys.F3)
+                {
+                    e.Handled = true;
+                    string findword = textBox2.Text; int foundwhere;
+                    if (findword != "")
+                    {
+                        int start = textBox1.SelectionStart - 1; string x = textBox1.Text;
+                        foundwhere = x.LastIndexOf(findword, start);
+                        if (foundwhere == -1)
+                        {
+                            MessageBox.Show("not found next!"); return;
+                        }
+                        textBox1.SelectionStart = foundwhere;
+                        textBox1.SelectionLength = findword.Length;
+                    }
+                    return;
+                }
+
+            }
             if (e.KeyCode == Keys.F2)
             {
                 keyDownF2(textBox1);
             }
+            if (e.KeyCode == Keys.F3)
+            {
+                e.Handled = true;
+                string findword = textBox2.Text;int foundwhere;
+                if (findword != "")
+                {
+                    int start = textBox1.SelectionStart+1;string x = textBox1.Text;
+                    foundwhere = x.IndexOf(findword, start);
+                    if (foundwhere==-1)
+                    {
+                        MessageBox.Show("not found next!");return;
+                    }
+                    textBox1.SelectionStart =foundwhere;
+                    textBox1.SelectionLength = findword.Length;
+                }
+                return;
+            }
+            if (e.KeyCode == Keys.F12)
+            {
+                e.Handled = true;
+                textBox4.Focus();
+                return;
+            }
+
         }
 
         private void selToNewline(ref int s, ref int ed, string x, bool forward, TextBox tBox)
@@ -565,13 +611,19 @@ namespace WindowsFormsApp1
         private void replaceWord()
         {
             if (textBox4.Text == "") return;
+            if (textBox1.SelectionStart == textBox1.Text.Length) return;
             StringInfo selWord = new StringInfo(textBox4.Text);
             string x = textBox1.Text;
             string replacedword = textBox1.SelectedText;
             if (replacedword == "")//(!(selWord.LengthInTextElements > 1 || textBox1.SelectionLength == 0))
             {//無選取文字則以插入點後一字為被取代字
-                StringInfo replacedWord = new StringInfo(
-                        x.Substring(textBox1.SelectionStart, CJK_Crtr_Len_Max));
+                StringInfo replacedWord;
+                if (textBox1.SelectionStart + CJK_Crtr_Len_Max > textBox1.Text.Length)
+                    replacedWord = new StringInfo(
+                            x.Substring(textBox1.SelectionStart, 1));
+                else
+                    replacedWord = new StringInfo(
+                            x.Substring(textBox1.SelectionStart, CJK_Crtr_Len_Max));
                 replacedword = replacedWord.SubstringByTextElements(0, 1);//取CJK一個單位字
             }
             if (replacedword == textBox4.Text) return;
@@ -609,6 +661,7 @@ namespace WindowsFormsApp1
 
         private void textBox4_Leave(object sender, EventArgs e)
         {
+            textBox1.Focus();
             saveText();
             replaceWord();
             textBox4Resize();
@@ -635,7 +688,8 @@ namespace WindowsFormsApp1
 
         private void textBox4_Enter(object sender, EventArgs e)
         {
-            textBox4SizeLarger();
+            if (textBox4.Size == textBox4Size)
+                textBox4SizeLarger();
             string rplsdWord = textBox1.SelectedText;
             if (rplsdWord != "")
             {
@@ -728,28 +782,16 @@ namespace WindowsFormsApp1
         private void textBox4_MouseDown(object sender, MouseEventArgs e)
         {
             Keys m = ModifierKeys;
-            if ((m & Keys.Control)==Keys.Control)
+            if ((m & Keys.Control) == Keys.Control)
             {
                 if (e.Button == MouseButtons.Left)
                 {
                     textBox4.Text = "";
                 }
             }
-            
+
         }
 
-        private void textBox4_MouseHover(object sender, EventArgs e)
-        {
-            textBox4SizeLarger();
-            //textBox4.Focus();
-        }
 
-        private void textBox4_MouseLeave(object sender, EventArgs e)
-        {
-            if (!textBox4.Focused)
-            {
-                textBox4Resize();
-            }
-        }
     }
 }

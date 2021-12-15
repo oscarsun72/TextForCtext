@@ -72,7 +72,6 @@ namespace WindowsFormsApp1
             this.textBox2.Name = "textBox2";
             this.textBox2.Size = new System.Drawing.Size(146, 22);
             this.textBox2.TabIndex = 2;
-            this.textBox2.TabStop = false;
             this.textBox2.Click += new System.EventHandler(this.textBox2_Click);
             this.textBox2.KeyDown += new System.Windows.Forms.KeyEventHandler(this.textBox2_KeyDown);
             this.textBox2.Leave += new System.EventHandler(this.textBox2_Leave);
@@ -112,8 +111,6 @@ namespace WindowsFormsApp1
             this.textBox4.KeyDown += new System.Windows.Forms.KeyEventHandler(this.textBox4_KeyDown);
             this.textBox4.Leave += new System.EventHandler(this.textBox4_Leave);
             this.textBox4.MouseDown += new System.Windows.Forms.MouseEventHandler(this.textBox4_MouseDown);
-            this.textBox4.MouseLeave += new System.EventHandler(this.textBox4_MouseLeave);
-            this.textBox4.MouseHover += new System.EventHandler(this.textBox4_MouseHover);
             // 
             // richTextBox1
             // 
