@@ -379,7 +379,7 @@ namespace WindowsFormsApp1
                 if (e.KeyCode == Keys.F)
                 {
                     textBox2.Focus();
-                    textBox2.SelectionStart = 0;textBox2.SelectionLength = textBox2.Text.Length;
+                    textBox2.SelectionStart = 0; textBox2.SelectionLength = textBox2.Text.Length;
                 }
                 if (e.KeyCode == Keys.D1)
                 {
@@ -411,7 +411,7 @@ namespace WindowsFormsApp1
                     x = x + xNext;
                     textBox1.Text = x;
                     textBox1.SelectionStart = s; textBox1.SelectionLength = 1;
-                    textBox1.ScrollToCaret();                    
+                    textBox1.ScrollToCaret();
                 }
 
 
@@ -457,10 +457,13 @@ namespace WindowsFormsApp1
             }
             Process.Start(url);
             appActivateByName();
-            Task.Delay(1500).Wait();
-            SendKeys.Send("{Tab}"); //("{Tab 24}");
-            Task.Delay(500).Wait();
-            SendKeys.Send("^a");
+            if (edit > -1)
+            {//編輯才執行，瀏覽則省略
+                Task.Delay(1500).Wait();
+                SendKeys.Send("{Tab}"); //("{Tab 24}");
+                Task.Delay(500).Wait();
+                SendKeys.Send("^a");
+            }
             textBox3.Text = url;
         }
 
