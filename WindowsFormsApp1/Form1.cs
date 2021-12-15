@@ -449,7 +449,12 @@ namespace WindowsFormsApp1
             else
             {
                 urlSub = url.Substring(0, url.IndexOf("&page=") + "&page=".Length);
-                page = Int32.Parse(url.Substring(url.IndexOf("&page=") + "&page=".Length));
+                int ed = url.IndexOf("#");
+                if (ed > -1)
+                    page = Int32.Parse(url.Substring(url.IndexOf("&page=") + "&page=".Length,
+                        url.IndexOf("#") - (url.IndexOf("&page=") + "&page=".Length)));
+                else
+                    page = Int32.Parse(url.Substring(url.IndexOf("&page=") + "&page=".Length));
                 if (eKeyCode == Keys.PageDown)
                     url = urlSub + (page + 1).ToString();
                 if (eKeyCode == Keys.PageUp)
