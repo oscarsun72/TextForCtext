@@ -61,11 +61,15 @@ Ctrl + 9 ：如同鍵入「　　」2個全形空格，且各個空格間有分�
 
 Ctrl + 0 ：如同鍵入「　　　　」4個全形空格，且各個空格間有分段符
 
-F3 ： 在textBox1 尋找下一個符合 textBox2 內容的字串
+F3 ： 在textBox1 尋找下一個符合所選取的字串；如果沒有選取，則以 textBox2 的字串為據
 
-Shift + F3 ： 在textBox1 尋找上一個符合 textBox2 內容的字串
+Shift + F3 ： 在textBox1 尋找上一個符合所選取的字串；如果沒有選取，則以 textBox2 的字串為據
 
 F12 ：移至 textBox4 準備取代文本文字
+
+Ctrl + F12 ：就 textBox1 所選之字串，執行「[查詢國語辭典.exe](https://github.com/oscarsun72/lookupChineseWords.git)」以查詢網路詞典
+
+Alt + G ：就 textBox1 所選之字串，執行「[網路搜尋_元搜尋-同時搜多個引擎.exe](https://github.com/oscarsun72/SearchEnginesConsole.git)」以查詢 Google 等網站
 
 Ctrl + + （加號，含函數字鍵盤） 或 Ctrl + 5 (數字鍵盤） ：將插入點或選取文字（含）之前的文本剪下貼到 ctext 的[簡單修改模式]框中，並按下「保存編輯」鈕，且在[簡單修改模式]下開啟下一頁準備編輯文本。
 
