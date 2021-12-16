@@ -12,6 +12,7 @@ using System.Globalization;
 using System.Runtime.InteropServices;
 using System.IO;
 using System.Drawing.Text;
+using System.Media;
 
 namespace WindowsFormsApp1
 {
@@ -20,6 +21,7 @@ namespace WindowsFormsApp1
         readonly Point textBox4Location; readonly Size textBox4Size;
         readonly string dropBoxPathIncldBackSlash;
         const string HanaMinB = "HanaMinB";
+        Color button2BackColor;
         //bool insertMode = true;
         public Form1()
         {
@@ -27,6 +29,7 @@ namespace WindowsFormsApp1
             textBox4Location = textBox4.Location;
             textBox4Size = textBox4.Size;
             dropBoxPathIncldBackSlash = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + @"\Dropbox\";
+            button2BackColor = button2.BackColor;
             var HanaminB = getHanaminBFontInstalled();
             if (HanaminB != null)
             {
@@ -239,7 +242,7 @@ namespace WindowsFormsApp1
             string x = textBox1.Text;
             int s = textBox1.SelectionStart, l = textBox1.SelectionLength;
             Clipboard.SetText(x.Substring(0, s + l));
-            pasteToCtext();
+            //pasteToCtext();
             if (s + l + 2 < textBox1.Text.Length)
             {
                 if (x.Substring(s + l, 1) == Environment.NewLine)
@@ -260,7 +263,11 @@ namespace WindowsFormsApp1
             textBox1.SelectionStart = 0; textBox1.SelectionLength = 0;
             textBox1.ScrollToCaret();
         }
+
+
         string textBox1OriginalText;
+
+
         private void textBox1_KeyDown(object sender, KeyEventArgs e)
         {
 
@@ -585,7 +592,7 @@ namespace WindowsFormsApp1
             if (edit > -1)
             {//編輯才執行，瀏覽則省略
                 Task.Delay(1500).Wait();
-                SendKeys.Send("{Tab 24}"); //("{Tab 24}");
+                SendKeys.Send("{Tab}"); //("{Tab 24}");
                 Task.Delay(500).Wait();
                 SendKeys.Send("^a");
             }
@@ -594,6 +601,7 @@ namespace WindowsFormsApp1
 
         private void runWord(string runName)
         {
+            SystemSounds.Hand.Play();
             Microsoft.Office.Interop.Word.Application appWord = new Microsoft.Office
                                     .Interop.Word.Application();
             appWord.Run(runName);
@@ -672,7 +680,16 @@ namespace WindowsFormsApp1
 
         private void button2_Click(object sender, EventArgs e)
         {
-            pasteToCtext();
+            if (button2.Text == "全部文")
+            {
+                button2.Text = "選取文";
+                button2.BackColor = Color.Red;
+            }
+            else
+            {
+                button2.Text = "全部文";
+                button2.BackColor = button2BackColor;
+            }
         }
 
         private void Form1_Resize(object sender, EventArgs e)
@@ -690,7 +707,7 @@ namespace WindowsFormsApp1
             string x = textBox1.Text;
             string replacedword = textBox1.SelectedText;
             if (replacedword == "")//(!(selWord.LengthInTextElements > 1 || textBox1.SelectionLength == 0))
-            {//無選取文字則以插入點後一字為被取代字
+            {//無選取文字則以插入點後一字為被取代字                
                 StringInfo replacedWord;
                 if (textBox1.SelectionStart + CJK_Crtr_Len_Max > textBox1.Text.Length)
                     replacedWord = new StringInfo(
@@ -701,8 +718,23 @@ namespace WindowsFormsApp1
                 replacedword = replacedWord.SubstringByTextElements(0, 1);//取CJK一個單位字
             }
             if (replacedword == textBox4.Text) return;
-            int s = textBox1.SelectionStart; int l = selWord.LengthInTextElements;
-            textBox1.Text = x.Replace(replacedword, textBox4.Text);
+            int s = textBox1.SelectionStart; int l=0;
+            if (button2.Text == "選取文")
+            {
+                replacedword = textBox2.Text;
+                if (replacedword != "")
+                {
+                    l = textBox1.SelectionLength;
+                    string xBefore = x.Substring(0, s), xAfter = x.Substring(s + l);
+                    x = textBox1.SelectedText;
+                    textBox1.Text = xBefore+ x.Replace(replacedword, textBox4.Text)+xAfter;
+                }
+            }
+            else
+            {
+                l = selWord.LengthInTextElements;
+                textBox1.Text = x.Replace(replacedword, textBox4.Text);
+            }
             addReplaceWordDefault(replacedword, textBox4.Text);
             textBox1.SelectionStart = s; textBox1.SelectionLength = l;
             textBox1.ScrollToCaret();
@@ -738,7 +770,7 @@ namespace WindowsFormsApp1
             textBox1.Focus();
             saveText();
             replaceWord();
-            textBox4Resize();            
+            textBox4Resize();
         }
 
         private void textBox4Resize()
@@ -876,7 +908,7 @@ namespace WindowsFormsApp1
             //    StringInfo xInfo = new StringInfo(xNext);
 
             //}
-            
+
         }
 
         private void undoTextValueChanged(int s, int l)
