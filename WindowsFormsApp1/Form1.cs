@@ -20,6 +20,7 @@ namespace WindowsFormsApp1
         readonly Point textBox4Location; readonly Size textBox4Size;
         readonly string dropBoxPathIncldBackSlash;
         const string HanaMinB = "HanaMinB";
+        //bool insertMode = true;
         public Form1()
         {
             InitializeComponent();
@@ -382,6 +383,13 @@ namespace WindowsFormsApp1
                 }
                 return;
             }
+
+            //按下單一鍵
+            //if (e.KeyCode == Keys.Insert)
+            //{
+            //    if (insertMode) insertMode = false;
+            //    else insertMode = true;
+            //}
             if (e.KeyCode == Keys.F2)
             {
                 keyDownF2(textBox1); return;
@@ -861,7 +869,14 @@ namespace WindowsFormsApp1
         private void textBox1_TextChanged(object sender, EventArgs e)
         {
             undoTextValueChanged(selStart, selLength);
+            //if (!insertMode && textBox1.Focused && textBox1.SelectedText=="")
+            //{
+            //    string x = textBox1.Text;int s = textBox1.SelectionStart;
+            //    string xNext = x.Substring(s);
+            //    StringInfo xInfo = new StringInfo(xNext);
 
+            //}
+            
         }
 
         private void undoTextValueChanged(int s, int l)
