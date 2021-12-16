@@ -781,6 +781,7 @@ namespace WindowsFormsApp1
             saveText();
             replaceWord();
             textBox4Resize();
+            textBox4.Text = "";
         }
 
         private void textBox4Resize()
