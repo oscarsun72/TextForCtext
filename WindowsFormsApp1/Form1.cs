@@ -248,9 +248,14 @@ namespace WindowsFormsApp1
             textBox2.Text = "";
             string x = textBox1.Text;
             int s = textBox1.SelectionStart, l = textBox1.SelectionLength;
-            Clipboard.SetText(x.Substring(0, s + l).Replace("}" + Environment.NewLine + "}", "}}" + Environment.NewLine)
+            string xCopy = x.Substring(0, s + l).Replace("}" + Environment.NewLine + "}", "}}" + Environment.NewLine)
                 .Replace(Environment.NewLine + "》", "》" + Environment.NewLine)
-                .Replace(Environment.NewLine + "〉", "〉" + Environment.NewLine));
+                .Replace(Environment.NewLine + "〉", "〉" + Environment.NewLine);
+            Clipboard.SetText(xCopy);
+            if (xCopy.IndexOf(" ")>-1||xCopy.IndexOf("�")>-1)
+            {
+                SystemSounds.Exclamation.Play();//文本有缺字警告
+            }
             //pasteToCtext();
             if (s + l + 2 < textBox1.Text.Length)
             {
