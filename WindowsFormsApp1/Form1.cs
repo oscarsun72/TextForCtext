@@ -248,7 +248,7 @@ namespace WindowsFormsApp1
             textBox2.Text = "";
             string x = textBox1.Text;
             int s = textBox1.SelectionStart, l = textBox1.SelectionLength;
-            Clipboard.SetText(x.Substring(0, s + l));
+            Clipboard.SetText(x.Substring(0, s + l).Replace("}" + Environment.NewLine+"}","}}"+Environment.NewLine));
             //pasteToCtext();
             if (s + l + 2 < textBox1.Text.Length)
             {
