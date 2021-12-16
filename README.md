@@ -54,6 +54,7 @@ Ctrl + PageDown ： 根據 textBox3所載的網址，瀏覽ctext書影的下一�
 
 ### 在 textBox1 中按下以下組合鍵：
 
+Insrt : 如 MS Word ，切換插入/取代文字模式（尚無能力寫，希望能做到）
 
 Ctrl + 8 ：如同鍵入「　」1個全形空格，且各個空格間有分段符
 
