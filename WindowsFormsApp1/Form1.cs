@@ -252,8 +252,9 @@ namespace WindowsFormsApp1
                 .Replace(Environment.NewLine + "》", "》" + Environment.NewLine)
                 .Replace(Environment.NewLine + "〉", "〉" + Environment.NewLine);
             Clipboard.SetText(xCopy);
-            if (xCopy.IndexOf(" ")>-1||xCopy.IndexOf("�")>-1)
-            {
+            if (xCopy.IndexOf(" ")>-1||xCopy.IndexOfAny("�".ToCharArray())>-1)
+            {//  「�」甚特別，indexof會失效，明明沒有，而傳回 0 //https://docs.microsoft.com/zh-tw/dotnet/csharp/how-to/compare-strings
+             //  //https://docs.microsoft.com/zh-tw/dotnet/api/system.string.compare?view=net-6.0
                 SystemSounds.Exclamation.Play();//文本有缺字警告
             }
             if (s + l + 2 < textBox1.Text.Length)
