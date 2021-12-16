@@ -17,11 +17,13 @@ namespace WindowsFormsApp1
     public partial class Form1 : Form
     {
         readonly Point textBox4Location; readonly Size textBox4Size;
+        readonly string dropBoxPathIncldBackSlash;
         public Form1()
         {
             InitializeComponent();
             textBox4Location = textBox4.Location;
             textBox4Size = textBox4.Size;
+            dropBoxPathIncldBackSlash = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + @"\Dropbox\";
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -234,37 +236,55 @@ namespace WindowsFormsApp1
             textBox1.SelectionStart = 0; textBox1.SelectionLength = 0;
             textBox1.ScrollToCaret();
         }
-
+        string textBox1OriginalText;
         private void textBox1_KeyDown(object sender, KeyEventArgs e)
         {
 
             var m = ModifierKeys;
-            if ((m & Keys.Control) == Keys.Control
-                && (m & Keys.Shift) == Keys.Shift
-                && e.KeyCode == Keys.Up)
+            if ((m & Keys.Control) == Keys.Control && e.KeyCode == Keys.H)
             {
-                {
-                    int s = textBox1.SelectionStart, ed = s;
-                    selToNewline(ref s, ref ed, textBox1.Text, false, textBox1);
-                }
+                //不知為何，就是會將插入點前一個字元給刪除,即使有以下此行也無效
+                e.Handled = true;
+                textBox1OriginalText = textBox1.Text; selLength = textBox1.SelectionLength; selStart = textBox1.SelectionStart;
+                textBox4.Focus();
+                return;
+            }
+
+            if ((m & Keys.Control) == Keys.Control
+            && (m & Keys.Shift) == Keys.Shift
+            && e.KeyCode == Keys.Up)
+            {
+                int s = textBox1.SelectionStart, ed = s;
+                selToNewline(ref s, ref ed, textBox1.Text, false, textBox1);
+                return;
             }
             if ((m & Keys.Control) == Keys.Control
                 && (m & Keys.Shift) == Keys.Shift
                 && e.KeyCode == Keys.Down)
             {
-                {
-                    int s = textBox1.SelectionStart, ed = s;
-                    selToNewline(ref s, ref ed, textBox1.Text, true, textBox1);
-                }
+                int s = textBox1.SelectionStart, ed = s;
+                selToNewline(ref s, ref ed, textBox1.Text, true, textBox1);
+                return;
             }
 
             if ((m & Keys.Control) == Keys.Control)
             {//按下Ctrl鍵
+                if (e.KeyCode == Keys.F12)
+                {
+                    string x = textBox1.SelectedText;
+                    if (x != "")
+                    {
+                        Clipboard.SetText(x);
+                        Process.Start(dropBoxPathIncldBackSlash + @"VS\VB\查詢國語辭典\查詢國語辭典\bin\Debug\查詢國語辭典.exe");
+                    }
+                    return;
+                }
                 if (e.KeyCode == Keys.NumPad5 || e.KeyCode == Keys.Oemplus || e.KeyCode == Keys.Add)
                 {
                     newTextBox1();
                     pasteToCtext();
                     nextPages(Keys.PageDown);
+                    return;
                 }
                 if (e.KeyCode == Keys.D0 || e.KeyCode == Keys.D9 || e.KeyCode == Keys.D8 || e.KeyCode == Keys.D7)
                 {
@@ -295,14 +315,19 @@ namespace WindowsFormsApp1
                     textBox1.Text = x;
                     textBox1.SelectionStart = s + insX.Length;
                     textBox1.ScrollToCaret();
+                    return;
                 }
             }
-            if ((m&Keys.Shift)==Keys.Shift)
+
+            //按下Shift鍵
+            if ((m & Keys.Shift) == Keys.Shift)
             {
                 if (e.KeyCode == Keys.F3)
                 {
                     e.Handled = true;
-                    string findword = textBox2.Text; int foundwhere;
+                    int foundwhere;
+                    string findword = textBox1.SelectedText;
+                    if (findword == "") findword = textBox2.Text;
                     if (findword != "")
                     {
                         int start = textBox1.SelectionStart - 1; string x = textBox1.Text;
@@ -318,23 +343,40 @@ namespace WindowsFormsApp1
                 }
 
             }
+
+            //按下Alt鍵
+            if ((m & Keys.Alt) == Keys.Alt)
+            {
+                if (e.KeyCode == Keys.G)
+                {
+                    string x = textBox1.SelectedText;
+                    if (x != "")
+                    {
+                        Clipboard.SetText(x);
+                        Process.Start(dropBoxPathIncldBackSlash + @"VS\VB\網路搜尋_元搜尋-同時搜多個引擎\網路搜尋_元搜尋-同時搜多個引擎\bin\Debug\網路搜尋_元搜尋-同時搜多個引擎.exe");
+                    }
+                }
+                return;
+            }
             if (e.KeyCode == Keys.F2)
             {
-                keyDownF2(textBox1);
+                keyDownF2(textBox1); return;
             }
             if (e.KeyCode == Keys.F3)
             {
                 e.Handled = true;
-                string findword = textBox2.Text;int foundwhere;
+                int foundwhere;
+                string findword = textBox1.SelectedText;
+                if (findword == "") findword = textBox2.Text;
                 if (findword != "")
                 {
-                    int start = textBox1.SelectionStart+1;string x = textBox1.Text;
+                    int start = textBox1.SelectionStart + 1; string x = textBox1.Text;
                     foundwhere = x.IndexOf(findword, start);
-                    if (foundwhere==-1)
+                    if (foundwhere == -1)
                     {
-                        MessageBox.Show("not found next!");return;
+                        MessageBox.Show("not found next!"); return;
                     }
-                    textBox1.SelectionStart =foundwhere;
+                    textBox1.SelectionStart = foundwhere;
                     textBox1.SelectionLength = findword.Length;
                 }
                 return;
@@ -511,9 +553,9 @@ namespace WindowsFormsApp1
             if (edit > -1)
             {//編輯才執行，瀏覽則省略
                 Task.Delay(1500).Wait();
-                SendKeys.Send("{Tab}"); //("{Tab 24}");
-                Task.Delay(500).Wait();
-                SendKeys.Send("^a");
+                //SendKeys.Send("{Tab}"); //("{Tab 24}");
+                //Task.Delay(500).Wait();
+                //SendKeys.Send("^a");
             }
             textBox3.Text = url;
         }
@@ -527,19 +569,19 @@ namespace WindowsFormsApp1
             appWord.Quit(Microsoft.Office.Interop.Word.WdSaveOptions.wdDoNotSaveChanges);
         }
 
-        const string F_to_Save_Txt = @"\Dropbox\cText.txt";
+        const string fName_to_Save_Txt = "cText.txt";
         private void saveText()
         {
             //C# 對文字檔案的幾種讀寫方法總結:https://codertw.com/%E7%A8%8B%E5%BC%8F%E8%AA%9E%E8%A8%80/542361/
             string str1 = textBox1.Text;
-            File.WriteAllText(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + F_to_Save_Txt, str1, Encoding.UTF8);
+            File.WriteAllText(dropBoxPathIncldBackSlash + fName_to_Save_Txt, str1, Encoding.UTF8);
             // 也可以指定編碼方式 File.WriteAllText(@”c:\temp\test\ascii-2.txt”, str1, Encoding.ASCII);
         }
 
         private void loadText()
         {
             //C# 對文字檔案的幾種讀寫方法總結:https://codertw.com/%E7%A8%8B%E5%BC%8F%E8%AA%9E%E8%A8%80/542361/
-            textBox1.Text = File.ReadAllText(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + F_to_Save_Txt);
+            textBox1.Text = File.ReadAllText(dropBoxPathIncldBackSlash + fName_to_Save_Txt);
         }
 
 
@@ -791,7 +833,22 @@ namespace WindowsFormsApp1
             }
 
         }
+        int selStart = 0; int selLength = 0;
+        private void textBox1_TextChanged(object sender, EventArgs e)
+        {
+            undoTextValueChanged(selStart, selLength);
 
+        }
 
+        private void undoTextValueChanged(int s, int l)
+        {
+            if (textBox1OriginalText != "" &&
+                                textBox1.Text != textBox1OriginalText)
+            {
+                textBox1.Text = textBox1OriginalText;
+                textBox1OriginalText = "";
+                textBox1.SelectionStart = s; textBox1.SelectionLength = l;
+            }
+        }
     }
 }
