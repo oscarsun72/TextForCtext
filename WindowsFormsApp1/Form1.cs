@@ -738,7 +738,7 @@ namespace WindowsFormsApp1
             textBox1.Focus();
             saveText();
             replaceWord();
-            textBox4Resize();
+            textBox4Resize();            
         }
 
         private void textBox4Resize()

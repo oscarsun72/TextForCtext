@@ -1,0 +1,329 @@
+Attribute VB_Name = "SystemSetup"
+Option Explicit
+Public fso As Object
+Public userProfilePath As String
+Public Declare PtrSafe Function sndPlaySound32 Lib "winmm.dll" Alias "sndPlaySoundA" (ByVal lpszSoundName As String, ByVal uFlags As Long) As Long
+
+'https://msdn.microsoft.com/zh-tw/library/office/ff192913.aspx
+Private Declare PtrSafe Function OpenClipboard Lib "user32.dll" (ByVal hWnd As Long) As Long
+Private Declare PtrSafe Function EmptyClipboard Lib "user32.dll" () As Long
+Private Declare PtrSafe Function CloseClipboard Lib "user32.dll" () As Long
+Private Declare PtrSafe Function IsClipboardFormatAvailable Lib "user32.dll" (ByVal wFormat As Long) As Long
+Private Declare PtrSafe Function GetClipboardData Lib "user32.dll" (ByVal wFormat As Long) As Long
+Private Declare PtrSafe Function SetClipboardData Lib "user32.dll" (ByVal wFormat As Long, ByVal hMem As Long) As Long
+Private Declare PtrSafe Function GlobalAlloc Lib "kernel32.dll" (ByVal wFlags As Long, ByVal dwBytes As Long) As Long
+Private Declare PtrSafe Function GlobalLock Lib "kernel32.dll" (ByVal hMem As Long) As Long
+Private Declare PtrSafe Function GlobalUnlock Lib "kernel32.dll" (ByVal hMem As Long) As Long
+Private Declare PtrSafe Function GlobalSize Lib "kernel32" (ByVal hMem As Long) As Long
+Private Declare PtrSafe Function lstrcpy Lib "kernel32.dll" Alias "lstrcpyW" (ByVal lpString1 As Long, ByVal lpString2 As Long) As Long
+'https://msdn.microsoft.com/zh-tw/library/office/ff194373.aspx
+'Declare Function OpenClipboard Lib "User32" (ByVal hWnd As Long) _
+'   As Long
+'Declare Function CloseClipboard Lib "User32" () As Long
+'Declare Function GetClipboardData Lib "User32" (ByVal wFormat As _
+'   Long) As Long
+'Declare Function GlobalAlloc Lib "kernel32" (ByVal wFlags&, ByVal _
+'   dwBytes As Long) As Long
+'Declare Function GlobalLock Lib "kernel32" (ByVal hMem As Long) _
+'   As Long
+'Declare Function GlobalUnlock Lib "kernel32" (ByVal hMem As Long) _
+'   As Long
+'Declare Function GlobalSize Lib "kernel32" (ByVal hMem As Long) _
+'   As Long
+'Declare Function lstrcpy Lib "kernel32" (ByVal lpString1 As Any, _
+'   ByVal lpString2 As Any) As Long
+ 
+Public Const GHND = &H42
+Public Const CF_TEXT = 1
+Public Const MAXSIZE = 4096
+Function ClipBoard_GetData()
+   Dim hClipMemory As Long
+   Dim lpClipMemory As Long
+   Dim MyString As String
+   Dim RetVal As Long
+ 
+   If OpenClipboard(0&) = 0 Then
+      MsgBox "Cannot open Clipboard. Another app. may have it open"
+      Exit Function
+   End If
+          
+   ' Obtain the handle to the global memory
+   ' block that is referencing the text.
+   hClipMemory = GetClipboardData(CF_TEXT)
+   If IsNull(hClipMemory) Then
+      MsgBox "Could not allocate memory"
+      GoTo OutOfHere
+   End If
+ 
+   ' Lock Clipboard memory so we can reference
+   ' the actual data string.
+   lpClipMemory = GlobalLock(hClipMemory)
+ 
+   If Not IsNull(lpClipMemory) Then
+      MyString = Space$(MAXSIZE)
+      RetVal = lstrcpy(MyString, lpClipMemory)
+      RetVal = GlobalUnlock(hClipMemory)
+       
+      ' Peel off the null terminating character.
+      MyString = Mid(MyString, 1, InStr(1, MyString, Chr$(0), 0) - 1)
+   Else
+      MsgBox "Could not lock memory to copy string from."
+   End If
+ 
+OutOfHere:
+ 
+   RetVal = CloseClipboard()
+   ClipBoard_GetData = MyString
+ 
+End Function
+Public Sub SetClipboard(sUniText As String)
+    Dim iStrPtr As Long
+    Dim iLen As Long
+    Dim iLock As Long
+    Const GMEM_MOVEABLE As Long = &H2
+    Const GMEM_ZEROINIT As Long = &H40
+    Const CF_UNICODETEXT As Long = &HD
+    OpenClipboard 0&
+    EmptyClipboard
+    iLen = LenB(sUniText) + 2&
+    iStrPtr = GlobalAlloc(GMEM_MOVEABLE Or GMEM_ZEROINIT, iLen)
+    iLock = GlobalLock(iStrPtr)
+    lstrcpy iLock, CLng(StrPtr(sUniText)) 'http://forum.slime.com.tw/thread152795.html
+    GlobalUnlock iStrPtr
+    SetClipboardData CF_UNICODETEXT, iStrPtr
+    CloseClipboard
+End Sub
+
+Public Function GetClipboard() As String
+    Dim iStrPtr As Long
+    Dim iLen As Long
+    Dim iLock As Long
+    Dim sUniText As String
+    Const CF_UNICODETEXT As Long = 13&
+    OpenClipboard 0&
+    If IsClipboardFormatAvailable(CF_UNICODETEXT) Then
+        iStrPtr = GetClipboardData(CF_UNICODETEXT)
+        If iStrPtr Then
+            iLock = GlobalLock(iStrPtr)
+            iLen = GlobalSize(iStrPtr)
+            sUniText = String$(iLen \ 2& - 1&, vbNullChar)
+            lstrcpy CLng(StrPtr(sUniText)), iLock 'http://forum.slime.com.tw/thread152795.html
+            GlobalUnlock iStrPtr
+        End If
+        GetClipboard = sUniText
+    End If
+    CloseClipboard
+End Function
+
+Sub CopyText(Text As String) 'https://stackoverflow.com/questions/14219455/excel-vba-code-to-copy-a-specific-string-to-clipboard
+    'VBA Macro using late binding to copy text to clipboard.
+    'By Justin Kay, 8/15/2014
+    Dim MSForms_DataObject As Object
+    Set MSForms_DataObject = CreateObject("new:{1C3B4210-F441-11CE-B9EA-00AA006B1A69}")
+    MSForms_DataObject.SetText Text
+    MSForms_DataObject.PutInClipboard
+    Set MSForms_DataObject = Nothing
+End Sub
+
+Function ClipboardPutIn(Optional StoreText As String) As String 'https://www.thespreadsheetguru.com/blog/2015/1/13/how-to-use-vba-code-to-copy-text-to-the-clipboard
+'PURPOSE: Read/Write to Clipboard
+'Source: ExcelHero.com (Daniel Ferry)
+
+Dim x As Variant
+
+'Store as variant for 64-bit VBA support
+  x = StoreText
+
+'Create HTMLFile Object
+  With CreateObject("htmlfile")
+    With .parentWindow.clipboardData
+      Select Case True
+        Case Len(StoreText)
+          'Write to the clipboard
+            .setData "text", x
+        Case Else
+          'Read from the clipboard (no variable passed through)
+            ClipboardPutIn = .GetData("text")
+      End Select
+    End With
+  End With
+
+End Function
+Sub 按下掃描鍵() 'ctrl+1 2008/7/23 F7'原為ToolsProofing
+On Error Resume Next
+    setOX
+    OX.ControlSend "ScanGear CS-U", "", "Button2", "!S"
+'    OX.WinActivate "圖書管理"
+'    OX.WinGetState "ScanGear CS-U"
+    OX.WinSetState "ScanGear CS-U", "", OX.SW_MINIMIZE
+    DoEvents
+    OX.WinSetState "ScanGear CS-U", "", OX.SW_MINIMIZE
+    'AppActivate "圖書管理"
+End Sub
+
+Sub 查詢奇摩() 'Ctrl+Shift+Y
+On Error GoTo ErrMsg '只查google
+'FollowHyperlink "http://tw.search.yahoo.com/search", , , , "fr=slv1-ptec&p=" & Screen.ActiveControl.seltext
+Selection.Copy
+'FollowHyperlink "http://tw.search.yahoo.com/search", , , , "p=" & Selection, msoMethodGet
+'If Tasks.Exists("skqs professional version") Then
+    Shell Replace(GetDefaultBrowserEXE, """%1", "http://tw.search.yahoo.com/search?p=" & Selection)
+'Else
+'    Shell "C:\Program Files\Opera\opera.exe" & " http://tw.search.yahoo.com/search?p=" & Selection, vbNormalFocus
+'End If
+'按下掃描鍵
+'ActiveDocument.Save
+Exit Sub
+ErrMsg:
+MsgBox Err & " : " & Err.Description
+End Sub
+
+Sub 查詢Google()
+'快速鍵'Ctrl+shift+g'2011/8/11'2021/4/15此指定鍵已為字數統計用，今改指定為Alt+Shift+g、Alt+g
+On Error GoTo ErrMsg
+Const f As String = "網路搜尋_元搜尋-同時搜多個引擎.EXE"
+Const st As String = "C:\Program Files\孫守真\網路搜尋_元搜尋-同時搜多個引擎\"
+Dim funame As String
+'FollowHyperlink "http://tw.search.yahoo.com/search", , , , "fr=slv1-ptec&p=" & Screen.ActiveControl.seltext
+'FollowHyperlink "http://www.google.com.tw/search", , , , "q=" & Screen.ActiveControl.seltext, msoMethodGet
+If Selection.Type = wdSelectionNormal Then
+    Selection.Copy
+    If ActiveDocument.Saved = False And ActiveDocument.path <> "" Then ActiveDocument.save: DoEvents
+    If Tasks.Exists("skqs professional version") Then
+        Shell Replace(GetDefaultBrowserEXE, """%1", "http://www.google.com.tw/search?q=" & Selection)
+    Else
+        'Shell "C:\Program Files\Opera\opera.exe" & " http://www.google.com.tw/search?q=" & Selection, vbNormalFocus
+        If Dir(st & f) <> "" Then
+            funame = st & f
+        ElseIf Dir("C:\Program Files (x86)\孫守真\網路搜尋_元搜尋-同時搜多個引擎\" & f) <> "" Then
+            funame = "C:\Program Files (x86)\孫守真\網路搜尋_元搜尋-同時搜多個引擎\" & f
+        ElseIf Dir("W:\!! for hpr\VB\網路搜尋_元搜尋-同時搜多個引擎\網路搜尋_元搜尋-同時搜多個引擎\bin\Debug\" & f) <> "" Then
+            funame = "W:\!! for hpr\VB\網路搜尋_元搜尋-同時搜多個引擎\網路搜尋_元搜尋-同時搜多個引擎\bin\Debug\" & f
+        ElseIf Dir("C:\網路搜尋_元搜尋-同時搜多個引擎\網路搜尋_元搜尋-同時搜多個引擎\bin\Debug\" & f) <> "" Then
+            funame = "C:\網路搜尋_元搜尋-同時搜多個引擎\網路搜尋_元搜尋-同時搜多個引擎\bin\Debug\" & f
+        ElseIf Dir("A:\", vbVolume) <> "" Then
+            If Dir("A:\Users\oscar\Dropbox\VS\VB\網路搜尋_元搜尋-同時搜多個引擎\網路搜尋_元搜尋-同時搜多個引擎\bin\Debug\" & f) <> "" Then _
+                funame = "A:\Users\oscar\Dropbox\VS\VB\網路搜尋_元搜尋-同時搜多個引擎\網路搜尋_元搜尋-同時搜多個引擎\bin\Debug\" & f
+        ElseIf Dir(userProfilePath & "Dropbox\VS\VB\網路搜尋_元搜尋-同時搜多個引擎\網路搜尋_元搜尋-同時搜多個引擎\bin\Debug\" & f) <> "" Then
+            funame = userProfilePath & "Dropbox\VS\VB\網路搜尋_元搜尋-同時搜多個引擎\網路搜尋_元搜尋-同時搜多個引擎\bin\Debug\" & f
+        ElseIf Dir(userProfilePath & "Dropbox\VS\VB\網路搜尋_元搜尋-同時搜多個引擎\網路搜尋_元搜尋-同時搜多個引擎\bin\Debug\" & f) <> "" Then
+            funame = userProfilePath & "Dropbox\VS\VB\網路搜尋_元搜尋-同時搜多個引擎\網路搜尋_元搜尋-同時搜多個引擎\bin\Debug\" & f
+        Else
+            Exit Sub
+        End If
+        Shell funame
+        'Shell "W:\!! for hpr\VB\網路搜尋_元搜尋-同時搜多個引擎\網路搜尋_元搜尋-同時搜多個引擎\bin\Debug\網路搜尋_元搜尋-同時搜多個引擎.exe"
+    End If
+End If
+'按下掃描鍵
+Exit Sub
+
+ErrMsg:
+MsgBox Err & " : " & Err.Description
+End Sub
+
+
+Function 取得桌面路徑() 'WshEnvironment.Item'2012/6/3
+
+'GetDeskDir() '取得桌面
+    'Dim wshshell As Object '宣告wshshell為一個Object
+    Dim strDesktop As String 'strDesktop變數儲存wshshell.regread的傳回值
+    'Set wshshell = CreateObject("wscript.shell") '將"wscript.shell"載入到wshshell內
+    'strDesktop = wshshell.RegRead("HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders\Desktop") '取得桌面路徑
+    strDesktop = CreateObject("WScript.Shell").SpecialFolders("Desktop")
+    
+'    Print "桌面路徑為："; strDesktop
+取得桌面路徑 = strDesktop
+'End Sub
+'http://it-easy.tw/vb-get-path/#4
+
+'Dim wshshell As Object
+'Dim strDesktop
+'Set wshshell = CreateObject("wscript.shell")
+'strDesktop = wshshell.RegRead("HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders\desktop")
+'http://www.accessoft.com/blog/article-show.asp?userid=32&Id=97
+End Function
+Function 取得使用者路徑_含反斜線() '2021/11/3
+'https://www.796t.com/post/M2ExcmU=.html
+'https://stackoverflow.com/questions/42091960/userprofile-environ-on-vba
+Dim a As String
+a = VBA.Environ("AppData")
+a = VBA.Replace(a, "AppData\Roaming", "")
+取得使用者路徑_含反斜線 = a
+End Function
+Function GetClipboardText()
+Dim Clipboard As New MSForms.DataObject
+Clipboard.GetFromClipboard
+GetClipboardText = Clipboard.GetText
+End Function
+
+Sub insertNowTime()
+With Selection.Range 'Alt+t
+    .InsertAfter Now
+    .Font.Subscript = True
+End With
+End Sub
+Sub 重啟小小輸入法() 'Alt+q
+Shell Replace(SystemSetup.取得桌面路徑, "Desktop", "Dropbox") & "\VS\bat\重啟小小輸入法.bat"
+End Sub
+
+Sub shortcutKeys() '指定快速鍵
+CustomizationContext = NormalTemplate
+'KeyBindings.Add _
+    KeyCategory:=wdKeyCategoryCommand, _
+    Command:="Docs.在本文件中尋找選取字串", _
+    KeyCode:=BuildKeyCode(wdKeyControl, wdKeyShift, wdKeyPageDown)
+KeyBindings.Add _
+    KeyCategory:=wdKeyCategoryCommand, _
+    Command:="Docs.貼上純文字", _
+    KeyCode:=BuildKeyCode(wdKeyShift, wdKeyInsert)
+End Sub
+
+
+'https://analystcave.com/vba-status-bar-progress-bar-sounds-emails-alerts-vba/#:~:text=The%20VBA%20Status%20Bar%20is%20a%20panel%20that,Bar%20we%20need%20to%20Enable%20it%20using%20Application.DisplayStatusBar%3A
+Sub playSound(longShort As Byte) 'Public Declare Function sndPlaySound32 Lib "winmm.dll" Alias "sndPlaySoundA" (ByVal lpszSoundName As String, ByVal uFlags As Long) As Long
+    '播放聲音、音效、音樂
+    Select Case longShort
+        Case 1
+            sndPlaySound32 "C:\Windows\Media\Chimes.wav", &H0
+        Case 2
+            sndPlaySound32 "C:\Windows\Media\Windows Notify Calendar.wav", &H0
+        Case 3
+            sndPlaySound32 "C:\Windows\Media\Alarm10.wav", &H0
+        Case 4
+            sndPlaySound32 "C:\Windows\Media\Alarm03.wav", &H0
+        Case 7
+            sndPlaySound32 "C:\Windows\Media\Ring10.wav", &H0
+        Case 12
+            sndPlaySound32 "C:\Windows\Media\Ring05.wav", &H0
+    End Select
+    
+End Sub
+
+
+Function getChrome()
+Dim chromePath As String
+If fso Is Nothing Then Set fso = CreateObject("scripting.filesystemobject")
+If fso.fileexists("W:\PortableApps\PortableApps\GoogleChromePortable\App\Chrome-bin\chrome.exe") Then
+    chromePath = "W:\PortableApps\PortableApps\GoogleChromePortable\App\Chrome-bin\chrome.exe"
+ElseIf Dir("C:\Program Files (x86)\Google\Chrome\Application\chrome.exe") <> "" Then
+    chromePath = "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe"
+ElseIf fso.fileexists("C:\Program Files\Google\Chrome\Application\chrome.exe") Then
+    chromePath = "C:\Program Files\Google\Chrome\Application\chrome.exe"
+End If
+getChrome = chromePath
+End Function
+
+Function stopUndo(Optional undoName As String) As UndoRecord
+'https://www.google.com/search?q=word+vba+stop+undo&rlz=1C1GCEU_zh-TWTW967TW967&oq=word+vba+stop+undo&aqs=chrome..69i57j69i64.10026j0j7&sourceid=chrome&ie=UTF-8
+'https://docs.microsoft.com/en-us/office/vba/word/concepts/working-with-word/working-with-the-undorecord-object
+'https://stackoverflow.com/questions/28051381/how-to-disable-the-changes-made-by-vba-in-undo-list-in-ms-word#_=_
+Dim ur As UndoRecord
+Set ur = word.Application.UndoRecord
+ur.StartCustomRecord undoName
+Set stopUndo = ur
+End Function
+
+Sub contiUndo(ByRef ur As UndoRecord)
+ur.EndCustomRecord
+End Sub
