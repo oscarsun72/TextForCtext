@@ -256,7 +256,6 @@ namespace WindowsFormsApp1
             {
                 SystemSounds.Exclamation.Play();//文本有缺字警告
             }
-            //pasteToCtext();
             if (s + l + 2 < textBox1.Text.Length)
             {
                 if (x.Substring(s + l, 1) == Environment.NewLine)
