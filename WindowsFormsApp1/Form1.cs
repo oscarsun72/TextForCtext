@@ -11,6 +11,7 @@ using System.Windows.Forms;
 using System.Globalization;
 using System.Runtime.InteropServices;
 using System.IO;
+using System.Drawing.Text;
 
 namespace WindowsFormsApp1
 {
@@ -18,12 +19,34 @@ namespace WindowsFormsApp1
     {
         readonly Point textBox4Location; readonly Size textBox4Size;
         readonly string dropBoxPathIncldBackSlash;
+        const string HanaMinB = "HanaMinB";
         public Form1()
         {
             InitializeComponent();
             textBox4Location = textBox4.Location;
             textBox4Size = textBox4.Size;
             dropBoxPathIncldBackSlash = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + @"\Dropbox\";
+            var HanaminB = getHanaminBFontInstalled();
+            if (HanaminB != null)
+            {
+                textBox1.Font = new Font(HanaminB, textBox1.Font.Size);
+                textBox2.Font = new Font(HanaminB, textBox2.Font.Size);
+                textBox4.Font = new Font(HanaminB, textBox4.Font.Size);
+            }
+        }
+        FontFamily getHanaminBFontInstalled()
+        { //https://www.cnblogs.com/arxive/p/7795232.html            
+            InstalledFontCollection MyFont = new InstalledFontCollection();
+            FontFamily[] fontFamilys = MyFont.Families;
+            if (fontFamilys == null || fontFamilys.Length < 1)
+            {
+                return null;
+            }
+            foreach (FontFamily item in fontFamilys)
+            {
+                if (item.Name == HanaMinB) return item;
+            }
+            return null;
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -338,6 +361,7 @@ namespace WindowsFormsApp1
                         }
                         textBox1.SelectionStart = foundwhere;
                         textBox1.SelectionLength = findword.Length;
+                        textBox1.ScrollToCaret();
                     }
                     return;
                 }
@@ -377,7 +401,7 @@ namespace WindowsFormsApp1
                         MessageBox.Show("not found next!"); return;
                     }
                     textBox1.SelectionStart = foundwhere;
-                    textBox1.SelectionLength = findword.Length;
+                    textBox1.SelectionLength = findword.Length; textBox1.ScrollToCaret();
                 }
                 return;
             }
@@ -553,9 +577,9 @@ namespace WindowsFormsApp1
             if (edit > -1)
             {//編輯才執行，瀏覽則省略
                 Task.Delay(1500).Wait();
-                //SendKeys.Send("{Tab}"); //("{Tab 24}");
-                //Task.Delay(500).Wait();
-                //SendKeys.Send("^a");
+                SendKeys.Send("{Tab 24}"); //("{Tab 24}");
+                Task.Delay(500).Wait();
+                SendKeys.Send("^a");
             }
             textBox3.Text = url;
         }
