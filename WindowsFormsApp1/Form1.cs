@@ -30,12 +30,19 @@ namespace WindowsFormsApp1
             textBox4Size = textBox4.Size;
             dropBoxPathIncldBackSlash = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + @"\Dropbox\";
             button2BackColor = button2.BackColor;
-            var HanaminB = getHanaminBFontInstalled();
-            if (HanaminB != null)
+            var cjk = getHanaminBFontInstalled();
+            if (cjk != null)
             {
-                textBox1.Font = new Font(HanaminB, textBox1.Font.Size);
-                textBox2.Font = new Font(HanaminB, textBox2.Font.Size);
-                textBox4.Font = new Font(HanaminB, textBox4.Font.Size);
+                if (cjk.Name == "KaiXinSongB")
+                {
+                    textBox1.Font = new Font(cjk, (float)17);
+                }
+                else
+                {
+                    textBox1.Font = new Font(cjk, textBox1.Font.Size);
+                }
+                textBox2.Font = new Font(cjk, textBox2.Font.Size);
+                textBox4.Font = new Font(cjk, textBox4.Font.Size);
             }
         }
         FontFamily getHanaminBFontInstalled()
@@ -595,6 +602,8 @@ namespace WindowsFormsApp1
                 SendKeys.Send("{Tab}"); //("{Tab 24}");
                 Task.Delay(100).Wait();
                 SendKeys.Send("^a");
+                Task.Delay(100).Wait();
+                SendKeys.Send("^{PGUP}");//回上一頁籤檢查文本是否如願貼好
             }
             textBox3.Text = url;
         }
@@ -719,7 +728,7 @@ namespace WindowsFormsApp1
                 replacedword = replacedWord.SubstringByTextElements(0, 1);//取CJK一個單位字
             }
             if (replacedword == textBox4.Text) return;
-            int s = textBox1.SelectionStart; int l=0;
+            int s = textBox1.SelectionStart; int l = 0;
             if (button2.Text == "選取文")
             {
                 replacedword = textBox2.Text;
@@ -728,7 +737,7 @@ namespace WindowsFormsApp1
                     l = textBox1.SelectionLength;
                     string xBefore = x.Substring(0, s), xAfter = x.Substring(s + l);
                     x = textBox1.SelectedText;
-                    textBox1.Text = xBefore+ x.Replace(replacedword, textBox4.Text)+xAfter;
+                    textBox1.Text = xBefore + x.Replace(replacedword, textBox4.Text) + xAfter;
                 }
             }
             else
