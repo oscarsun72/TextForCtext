@@ -317,7 +317,7 @@ namespace WindowsFormsApp1
                     }
                     return;
                 }
-                if (e.KeyCode == Keys.NumPad5 || e.KeyCode == Keys.Oemplus || e.KeyCode == Keys.Add)
+                if (e.KeyCode == Keys.NumPad5 || e.KeyCode == Keys.Oemplus || e.KeyCode == Keys.Add|| e.KeyCode==Keys.Subtract)
                 {
                     newTextBox1();
                     pasteToCtext();
@@ -355,6 +355,26 @@ namespace WindowsFormsApp1
                     textBox1.ScrollToCaret();
                     return;
                 }
+
+                if (e.KeyCode == Keys.Q)
+                {
+                    splitLineByFristLen(); return;
+                }
+
+                if (e.KeyCode == Keys.OemBackslash || e.KeyCode == Keys.Packet || e.KeyCode == Keys.Oem5)
+                {//clear the newline after the caret
+                    string x = textBox1.Text;
+                    int s = textBox1.SelectionStart;
+                    string xNext = x.Substring(s);
+                    x = x.Substring(0, textBox1.SelectionStart);
+                    xNext = xNext.Replace(Environment.NewLine, "");
+                    x = x + xNext;
+                    textBox1.Text = x;
+                    textBox1.SelectionStart = s; textBox1.SelectionLength = 1;
+                    textBox1.ScrollToCaret();
+                    return;
+                }
+
             }
 
             //按下Shift鍵
@@ -384,7 +404,7 @@ namespace WindowsFormsApp1
             }
 
             //按下Alt鍵
-            if ((m & Keys.Alt) == Keys.Alt)
+            if ((m & Keys.Alt) == Keys.Alt)//⇌ if (Control.ModifierKeys == Keys.Alt)
             {
                 if (e.KeyCode == Keys.G)
                 {
@@ -394,8 +414,14 @@ namespace WindowsFormsApp1
                         Clipboard.SetText(x);
                         Process.Start(dropBoxPathIncldBackSlash + @"VS\VB\網路搜尋_元搜尋-同時搜多個引擎\網路搜尋_元搜尋-同時搜多個引擎\bin\Debug\網路搜尋_元搜尋-同時搜多個引擎.exe");
                     }
+                    return;
                 }
-                return;
+                if (e.KeyCode == Keys.Q)
+                {
+                    splitLineByFristLen(); return;
+                }
+
+
             }
 
             //按下單一鍵
@@ -501,51 +527,29 @@ namespace WindowsFormsApp1
             {
                 Clipboard.SetText(textBox1.Text);
             }
-            if (Control.ModifierKeys == Keys.Alt)
-            {
-                if (e.KeyCode == Keys.Q)
-                {
-                    splitLineByFristLen();
-                }
-            }
+
             if (Control.ModifierKeys == Keys.Control)
             {//按下Ctrl鍵
                 if (e.KeyCode == Keys.F)
                 {
                     textBox2.Focus();
-                    textBox2.SelectionStart = 0; textBox2.SelectionLength = textBox2.Text.Length;
+                    textBox2.SelectionStart = 0; textBox2.SelectionLength = textBox2.Text.Length; return;
                 }
                 if (e.KeyCode == Keys.D1)
                 {
-                    runWord("漢籍電子文獻資料庫文本整理_以轉貼到中國哲學書電子化計劃");
+                    runWord("漢籍電子文獻資料庫文本整理_以轉貼到中國哲學書電子化計劃"); return;
                 }
                 if (e.KeyCode == Keys.D3)
                 {
-                    runWord("漢籍電子文獻資料庫文本整理_十三經注疏");
+                    runWord("漢籍電子文獻資料庫文本整理_十三經注疏"); return;
                 }
                 if (e.KeyCode == Keys.D4)
                 {
-                    runWord("維基文庫四部叢刊本轉來");
+                    runWord("維基文庫四部叢刊本轉來"); return;
                 }
                 if (e.KeyCode == Keys.S)
                 {
-                    saveText();
-                }
-                if (e.KeyCode == Keys.Q)
-                {
-                    splitLineByFristLen();
-                }
-                if (e.KeyCode == Keys.OemBackslash || e.KeyCode == Keys.Packet || e.KeyCode == Keys.Oem5)
-                {//clear the newline after the caret
-                    string x = textBox1.Text;
-                    int s = textBox1.SelectionStart;
-                    string xNext = x.Substring(s);
-                    x = x.Substring(0, textBox1.SelectionStart);
-                    xNext = xNext.Replace(Environment.NewLine, "");
-                    x = x + xNext;
-                    textBox1.Text = x;
-                    textBox1.SelectionStart = s; textBox1.SelectionLength = 1;
-                    textBox1.ScrollToCaret();
+                    saveText(); return;
                 }
 
 
@@ -554,11 +558,13 @@ namespace WindowsFormsApp1
 
                     e.Handled = true;//取得或設定值，指出是否處理事件。https://docs.microsoft.com/zh-tw/dotnet/api/system.windows.forms.keyeventargs.handled?view=netframework-4.7.2&f1url=%3FappId%3DDev16IDEF1%26l%3DZH-TW%26k%3Dk(System.Windows.Forms.KeyEventArgs.Handled);k(TargetFrameworkMoniker-.NETFramework,Version%253Dv4.7.2);k(DevLang-csharp)%26rd%3Dtrue
                     nextPages(e.KeyCode);
+                    return;
                 }
             }
             if (e.KeyCode == Keys.F5)
             {
                 loadText();
+                return;
             }
         }
 
