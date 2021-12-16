@@ -44,10 +44,6 @@ F5 ：重新載入所儲存的文本
 
 Ctrl + Shift + c ：將textBox1的文本複製到剪貼簿 以備用
 
-Ctrl + q 或 Alt + q：據第一行(段)長度來將textBox1中的文本分行分段
-
-Ctrl + \ （反斜線） ： 清除textBox1文本插入點後的分段
-
 Ctrl + PageUp ：根據 textBox3所載的網址，瀏覽ctext書影的上一頁
 
 Ctrl + PageDown ： 根據 textBox3所載的網址，瀏覽ctext書影的下一頁
@@ -55,6 +51,10 @@ Ctrl + PageDown ： 根據 textBox3所載的網址，瀏覽ctext書影的下一�
 ### 在 textBox1 中按下以下組合鍵：
 
 Insrt : 如 MS Word ，切換插入/取代文字模式（尚無能力寫，希望能做到）
+
+Ctrl + q 或 Alt + q：據第一行(段)長度來將textBox1中的文本分行分段
+
+Ctrl + \ （反斜線） ： 清除textBox1文本插入點後的分段
 
 Ctrl + 8 ：如同鍵入「　」1個全形空格，且各個空格間有分段符
 
@@ -72,7 +72,7 @@ Ctrl + F12 ：就 textBox1 所選之字串，執行「[查詢國語辭典.exe](h
 
 Alt + G ：就 textBox1 所選之字串，執行「[網路搜尋_元搜尋-同時搜多個引擎.exe](https://github.com/oscarsun72/SearchEnginesConsole.git)」以查詢 Google 等網站
 
-Ctrl + + （加號，含函數字鍵盤） 或 Ctrl + 5 (數字鍵盤） ：將插入點或選取文字（含）之前的文本剪下貼到 ctext 的[簡單修改模式]框中，並按下「保存編輯」鈕，且在[簡單修改模式]下開啟下一頁準備編輯文本。
+Ctrl + + （加號，含函數字鍵盤） 或 Ctrl + -（數字鍵盤）  或 Ctrl + 5 (數字鍵盤） ：將插入點或選取文字（含）之前的文本剪下貼到 ctext 的[簡單修改模式]框中，並按下「保存編輯」鈕，且在[簡單修改模式]下開啟下一頁準備編輯文本。
 
 Ctrl+Shift+↑：從插入點開啟向前選取整段
 
