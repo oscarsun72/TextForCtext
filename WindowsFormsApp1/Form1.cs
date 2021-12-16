@@ -20,7 +20,7 @@ namespace WindowsFormsApp1
     {
         readonly Point textBox4Location; readonly Size textBox4Size;
         readonly string dropBoxPathIncldBackSlash;
-        const string HanaMinB = "HanaMinB";
+        const string CJKBiggestSet = "KaiXinSongB";//"TH-Tshyn-P1";//"HanaMinB";
         Color button2BackColor;
         //bool insertMode = true;
         public Form1()
@@ -48,7 +48,7 @@ namespace WindowsFormsApp1
             }
             foreach (FontFamily item in fontFamilys)
             {
-                if (item.Name == HanaMinB) return item;
+                if (item.Name == CJKBiggestSet) return item;
             }
             return null;
         }
@@ -593,7 +593,7 @@ namespace WindowsFormsApp1
             {//編輯才執行，瀏覽則省略
                 Task.Delay(1500).Wait();
                 SendKeys.Send("{Tab}"); //("{Tab 24}");
-                Task.Delay(500).Wait();
+                Task.Delay(100).Wait();
                 SendKeys.Send("^a");
             }
             textBox3.Text = url;
@@ -672,8 +672,9 @@ namespace WindowsFormsApp1
         private void pasteToCtext()
         {
             appActivateByName();
+            Task.Delay(100).Wait();
             SendKeys.Send("^v{tab}~");
-            this.WindowState = FormWindowState.Minimized;
+            //this.WindowState = FormWindowState.Minimized;
             //throw new NotImplementedException();
         }
 
