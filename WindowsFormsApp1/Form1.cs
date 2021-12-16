@@ -248,7 +248,9 @@ namespace WindowsFormsApp1
             textBox2.Text = "";
             string x = textBox1.Text;
             int s = textBox1.SelectionStart, l = textBox1.SelectionLength;
-            Clipboard.SetText(x.Substring(0, s + l).Replace("}" + Environment.NewLine+"}","}}"+Environment.NewLine));
+            Clipboard.SetText(x.Substring(0, s + l).Replace("}" + Environment.NewLine + "}", "}}" + Environment.NewLine)
+                .Replace(Environment.NewLine + "》", "》" + Environment.NewLine)
+                .Replace(Environment.NewLine + "〉", "〉" + Environment.NewLine));
             //pasteToCtext();
             if (s + l + 2 < textBox1.Text.Length)
             {
@@ -317,7 +319,7 @@ namespace WindowsFormsApp1
                     }
                     return;
                 }
-                if (e.KeyCode == Keys.NumPad5 || e.KeyCode == Keys.Oemplus || e.KeyCode == Keys.Add|| e.KeyCode==Keys.Subtract)
+                if (e.KeyCode == Keys.NumPad5 || e.KeyCode == Keys.Oemplus || e.KeyCode == Keys.Add || e.KeyCode == Keys.Subtract)
                 {
                     newTextBox1();
                     pasteToCtext();
