@@ -84,3 +84,8 @@ Ctrl+Shift+↓：從插入點開啟向後選取整段
 Ctrl+ 滑鼠左鍵：清除框中所有文字
 
 
+## 參照資源
+- [查字.mdb](https://www.dropbox.com/s/6vn9hi7i95cbhy4/%E6%9F%A5%E5%AD%97.mdb?dl=0)
+- [《重編國語辭典修訂本》資料庫.mdb](https://www.dropbox.com/s/a6t3yhou4smpdv7/%E3%80%8A%E9%87%8D%E7%B7%A8%E5%9C%8B%E8%AA%9E%E8%BE%AD%E5%85%B8%E4%BF%AE%E8%A8%82%E6%9C%AC%E3%80%8B%E8%B3%87%E6%96%99%E5%BA%AB.mdb?dl=0)
+
+
