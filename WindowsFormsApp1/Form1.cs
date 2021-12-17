@@ -724,13 +724,13 @@ namespace WindowsFormsApp1
 
         const int CJK_Crtr_Len_Max = 2;//因為目前CJK最長為2字元
 
-        private void replaceWord()
+        private void replaceWord(string replacedword, string rplsword)
         {
-            if (textBox4.Text == "") return;
+            if (rplsword == "") return;
             if (textBox1.SelectionStart == textBox1.Text.Length) return;
-            StringInfo selWord = new StringInfo(textBox4.Text);
+            StringInfo selWord = new StringInfo(rplsword);
             string x = textBox1.Text;
-            string replacedword = textBox1.SelectedText;
+            //string replacedword = textBox1.SelectedText;
             if (replacedword == "")//(!(selWord.LengthInTextElements > 1 || textBox1.SelectionLength == 0))
             {//無選取文字則以插入點後一字為被取代字                
                 StringInfo replacedWord;
@@ -742,25 +742,23 @@ namespace WindowsFormsApp1
                             x.Substring(textBox1.SelectionStart, CJK_Crtr_Len_Max));
                 replacedword = replacedWord.SubstringByTextElements(0, 1);//取CJK一個單位字
             }
-            if (replacedword == textBox4.Text) return;
+            if (replacedword == rplsword) return;
             int s = textBox1.SelectionStart; int l = 0;
             if (button2.Text == "選取文")
             {
                 replacedword = textBox2.Text;
-                if (replacedword != "")
-                {
-                    l = textBox1.SelectionLength;
-                    string xBefore = x.Substring(0, s), xAfter = x.Substring(s + l);
-                    x = textBox1.SelectedText;
-                    textBox1.Text = xBefore + x.Replace(replacedword, textBox4.Text) + xAfter;
-                }
+                if (replacedword == "") return;
+                l = textBox1.SelectionLength;
+                string xBefore = x.Substring(0, s), xAfter = x.Substring(s + l);
+                x = textBox1.SelectedText;
+                textBox1.Text = xBefore + x.Replace(replacedword, rplsword) + xAfter;
             }
             else
             {
                 l = selWord.LengthInTextElements;
-                textBox1.Text = x.Replace(replacedword, textBox4.Text);
+                textBox1.Text = x.Replace(replacedword, rplsword);
             }
-            addReplaceWordDefault(replacedword, textBox4.Text);
+            addReplaceWordDefault(replacedword, rplsword);
             textBox1.SelectionStart = s; textBox1.SelectionLength = l;
             textBox1.ScrollToCaret();
             textBox1.Focus();
@@ -786,15 +784,18 @@ namespace WindowsFormsApp1
         void addReplaceWordDefault(string replacedWord,
                 string replaceWord)
         {
-            replacedWordList.Append(replacedWord);
-            replaceWordList.Append(replaceWord);
+            if (!replacedWord.Contains(replacedWord))
+            {
+                replacedWordList.Add(replacedWord);
+                replaceWordList.Add(replaceWord);
+            }
         }
 
         private void textBox4_Leave(object sender, EventArgs e)
         {
             textBox1.Focus();
             saveText();
-            replaceWord();
+            replaceWord(textBox1.SelectedText, textBox4.Text);
             textBox4Resize();
             textBox4.Text = "";
         }
@@ -822,7 +823,8 @@ namespace WindowsFormsApp1
         {
             if (textBox4.Size == textBox4Size)
                 textBox4SizeLarger();
-            string rplsdWord = textBox1.SelectedText;
+            string rplsdWord = "";
+            rplsdWord = textBox1.SelectedText;
             if (rplsdWord != "")
             {
                 string rplsWord = getReplaceWordDefault(rplsdWord);
