@@ -548,21 +548,22 @@ namespace WindowsFormsApp1
                 this.BackColor = Color.Green;
                 if (e.KeyCode == Keys.D1)
                 {
-                    runWord("漢籍電子文獻資料庫文本整理_以轉貼到中國哲學書電子化計劃"); return;
+                    runWord("漢籍電子文獻資料庫文本整理_以轉貼到中國哲學書電子化計劃"); 
                 }
                 if (e.KeyCode == Keys.D3)
                 {
-                    runWord("漢籍電子文獻資料庫文本整理_十三經注疏"); return;
+                    runWord("漢籍電子文獻資料庫文本整理_十三經注疏"); 
                 }
                 if (e.KeyCode == Keys.D4)
                 {
-                    runWord("維基文庫四部叢刊本轉來"); return;
+                    runWord("維基文庫四部叢刊本轉來");
                 }
                 if (e.KeyCode == Keys.S)
                 {
-                    saveText(); return;
+                    saveText(); 
                 }
                 this.BackColor = C;
+                return;
 
 
                 if (e.KeyCode == Keys.PageDown || e.KeyCode == Keys.PageUp)
