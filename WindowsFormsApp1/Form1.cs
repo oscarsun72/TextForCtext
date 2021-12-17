@@ -613,9 +613,9 @@ namespace WindowsFormsApp1
             appActivateByName();
             if (edit > -1)
             {//編輯才執行，瀏覽則省略
-                Task.Delay(1500).Wait();
+                Task.Delay(1800).Wait();
                 SendKeys.Send("{Tab}"); //("{Tab 24}");
-                Task.Delay(500).Wait();
+                Task.Delay(200).Wait();
                 SendKeys.Send("^a");
                 Task.Delay(500).Wait();
                 SendKeys.Send("^{PGUP}");//回上一頁籤檢查文本是否如願貼好
