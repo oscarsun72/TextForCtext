@@ -260,7 +260,7 @@ namespace WindowsFormsApp1
                 SystemSounds.Exclamation.Play();//文本有缺字警告
                 Color c = this.BackColor;
                 this.BackColor = Color.Yellow;
-                Task.Delay(600).Wait();
+                Task.Delay(900).Wait();
                 this.BackColor = c;
             }
             if (s + l + 2 < textBox1.Text.Length)
