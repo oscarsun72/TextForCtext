@@ -258,6 +258,10 @@ namespace WindowsFormsApp1
             {//  「�」甚特別，indexof會失效，明明沒有，而傳回 0 //https://docs.microsoft.com/zh-tw/dotnet/csharp/how-to/compare-strings
              //  //https://docs.microsoft.com/zh-tw/dotnet/api/system.string.compare?view=net-6.0
                 SystemSounds.Exclamation.Play();//文本有缺字警告
+                Color c = this.BackColor;
+                this.BackColor = Color.Yellow;
+                Task.Delay(600).Wait();
+                this.BackColor = c;
             }
             if (s + l + 2 < textBox1.Text.Length)
             {
