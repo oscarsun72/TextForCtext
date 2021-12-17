@@ -784,11 +784,21 @@ namespace WindowsFormsApp1
         void addReplaceWordDefault(string replacedWord,
                 string replaceWord)
         {
-            if (!replacedWord.Contains(replacedWord))
+            if (replacedWord.Contains(replacedWord))
             {
-                replacedWordList.Add(replacedWord);
-                replaceWordList.Add(replaceWord);
+                int i = 0, count = replacedWordList.Count;
+                while (i < count)
+                {
+                    if (replacedWordList.IndexOf(replacedWord, i) == replaceWordList.IndexOf(replaceWord, i))
+                    {
+                        return;
+                    }
+                    i++;
+                }
             }
+            replacedWordList.Add(replacedWord);
+            replaceWordList.Add(replaceWord);
+
         }
 
         private void textBox4_Leave(object sender, EventArgs e)
