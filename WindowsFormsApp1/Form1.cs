@@ -197,7 +197,11 @@ namespace WindowsFormsApp1
 
 
             }
-            textBox1.Text = xPre + resltTxt;
+            textBox1.Text = xPre + resltTxt.Replace("}" + Environment.NewLine + "}", "}}" + Environment.NewLine)
+                .Replace(Environment.NewLine + "》", "》" + Environment.NewLine)
+                .Replace(Environment.NewLine + "〉", "〉" + Environment.NewLine)
+                .Replace(Environment.NewLine + "}}", "}}" + Environment.NewLine)
+                .Replace("{{" + Environment.NewLine, Environment.NewLine + "{{");
             textBox1.Focus();
             textBox1.SelectionStart = selStart;
             textBox1.SelectionLength = 0;
@@ -248,11 +252,7 @@ namespace WindowsFormsApp1
             textBox2.Text = "";
             string x = textBox1.Text;
             int s = textBox1.SelectionStart, l = textBox1.SelectionLength;
-            string xCopy = x.Substring(0, s + l).Replace("}" + Environment.NewLine + "}", "}}" + Environment.NewLine)
-                .Replace(Environment.NewLine + "》", "》" + Environment.NewLine)
-                .Replace(Environment.NewLine + "〉", "〉" + Environment.NewLine)
-                .Replace(Environment.NewLine + "}}", "}}" + Environment.NewLine)
-                .Replace("{{" + Environment.NewLine, Environment.NewLine + "{{");
+            string xCopy = x.Substring(0, s + l);
             Clipboard.SetText(xCopy);
             if (xCopy.IndexOf(" ") > -1 || xCopy.IndexOfAny("�".ToCharArray()) > -1)
             {//  「�」甚特別，indexof會失效，明明沒有，而傳回 0 //https://docs.microsoft.com/zh-tw/dotnet/csharp/how-to/compare-strings
@@ -615,9 +615,9 @@ namespace WindowsFormsApp1
             {//編輯才執行，瀏覽則省略
                 Task.Delay(1500).Wait();
                 SendKeys.Send("{Tab}"); //("{Tab 24}");
-                Task.Delay(100).Wait();
+                Task.Delay(500).Wait();
                 SendKeys.Send("^a");
-                Task.Delay(100).Wait();
+                Task.Delay(500).Wait();
                 SendKeys.Send("^{PGUP}");//回上一頁籤檢查文本是否如願貼好
             }
             textBox3.Text = url;
