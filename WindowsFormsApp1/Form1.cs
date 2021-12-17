@@ -529,7 +529,7 @@ namespace WindowsFormsApp1
             //if ((int)ModifierKeys == (int)Keys.Control+ (int)Keys.Shift&&e.KeyCode==Keys.C)
             //https://bbs.csdn.net/topics/350010591
             //https://zhidao.baidu.com/question/628222381668604284.html
-            var m = ModifierKeys;
+            var m = ModifierKeys; Color C = this.BackColor;
             if ((m & Keys.Control) == Keys.Control
                 && (m & Keys.Shift) == Keys.Shift
                 && e.KeyCode == Keys.C)
@@ -544,6 +544,8 @@ namespace WindowsFormsApp1
                     textBox2.Focus();
                     textBox2.SelectionStart = 0; textBox2.SelectionLength = textBox2.Text.Length; return;
                 }
+                
+                this.BackColor = Color.Green;
                 if (e.KeyCode == Keys.D1)
                 {
                     runWord("漢籍電子文獻資料庫文本整理_以轉貼到中國哲學書電子化計劃"); return;
@@ -560,6 +562,7 @@ namespace WindowsFormsApp1
                 {
                     saveText(); return;
                 }
+                this.BackColor = C;
 
 
                 if (e.KeyCode == Keys.PageDown || e.KeyCode == Keys.PageUp)
