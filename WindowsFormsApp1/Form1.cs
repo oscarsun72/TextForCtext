@@ -577,6 +577,7 @@ namespace WindowsFormsApp1
                 this.BackColor = Color.Red;
                 e.Handled = true;
                 backupLastPageText(Clipboard.GetText(), true);
+                Task.Delay(800).Wait();
                 this.BackColor = c;
                 return;
             }
