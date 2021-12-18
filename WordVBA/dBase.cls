@@ -12,7 +12,7 @@ Const cntStr As String = "Provider=Microsoft.ACE.OLEDB.12.0;Data Source="
 
 Sub cnt查字(ByRef cnt As ADODB.Connection)
 Dim pat As New Paths, p As String
-p = pat.getdb_查字forinputFullName()
+p = pat.getdb_查字FullName()
 If p = "" Then
     MsgBox "找不到查字.mdb", vbCritical
     End

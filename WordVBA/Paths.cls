@@ -10,13 +10,13 @@ Attribute VB_Exposed = False
 Option Explicit
 'Dim fso As Object
 Function getdb_重編國語辭典修訂本_資料庫fullName()
-Dim cntStr As String, pth As String
+Dim cntStr As String
 'On Error GoTo eH
-pth = SystemSetup.取得使用者路徑_含反斜線()
-    If Dir(pth & "dropbox\《重編國語辭典修訂本》資料庫.mdb") <> "" Then
-        cntStr = pth & "dropbox\《重編國語辭典修訂本》資料庫.mdb"
-    ElseIf Dir("C:\Users\ssz3\Documents\《重編國語辭典修訂本》資料庫.mdb") <> "" Then
-        cntStr = "C:\Users\ssz3\Documents\《重編國語辭典修訂本》資料庫.mdb"
+userProfilePath = SystemSetup.取得使用者路徑_含反斜線()
+    If Dir(userProfilePath & "dropbox\《重編國語辭典修訂本》資料庫.mdb") <> "" Then
+        cntStr = userProfilePath & "dropbox\《重編國語辭典修訂本》資料庫.mdb"
+    ElseIf Dir(userProfilePath & "Documents\《重編國語辭典修訂本》資料庫.mdb") <> "" Then
+        cntStr = userProfilePath & "Documents\《重編國語辭典修訂本》資料庫.mdb"
     ElseIf fso.fileexists("D:\@@@華語文工具及資料@@@\Macros\《重編國語辭典修訂本》資料庫.mdb") Then
                 cntStr = "D:\@@@華語文工具及資料@@@\Macros\《重編國語辭典修訂本》資料庫.mdb"
     ElseIf Dir("c:\@@@華語文工具及資料@@@\Macros\《重編國語辭典修訂本》資料庫.mdb") <> "" Then
@@ -38,10 +38,8 @@ getdb_重編國語辭典修訂本_資料庫fullName = cntStr
 End Function
 
 Function getdb_查字FullName() As String
-Dim pth As String
-pth = SystemSetup.取得使用者路徑_含反斜線()
-If fso.fileexists(pth & "dropbox\查字.mdb") Then
-    getdb_查字FullName = pth & "dropbox\查字.mdb"
+If fso.fileexists(userProfilePath & "dropbox\查字.mdb") Then
+    getdb_查字FullName = userProfilePath & "dropbox\查字.mdb"
 ElseIf fso.fileexists("H:\我的雲端硬碟\私人\千慮一得齋(C槽版)\書籍資料\圖書管理附件\查字.mdb") Then
     getdb_查字FullName = "H:\我的雲端硬碟\私人\千慮一得齋(C槽版)\書籍資料\圖書管理附件\查字.mdb"
 ElseIf fso.fileexists("D:\千慮一得齋\書籍資料\圖書管理附件\查字.mdb") Then
@@ -53,10 +51,8 @@ ElseIf Dir("c:\@@@華語文工具及資料@@@\Macros\查字.mdb") <> "" Then
 End If
 End Function
 Function getdb_查字forinputFullName()
-Dim pth As String
-pth = SystemSetup.取得使用者路徑_含反斜線()
-If fso.fileexists(pth & "dropbox\查字forinput.mdb") Then
-    getdb_查字forinputFullName = pth & "dropbox\查字forinput.mdb"
+If fso.fileexists(userProfilePath & "dropbox\查字forinput.mdb") Then
+    getdb_查字forinputFullName = userProfilePath & "dropbox\查字forinput.mdb"
 ElseIf fso.fileexists("H:\我的雲端硬碟\私人\千慮一得齋(C槽版)\書籍資料\圖書管理附件\查字forinput.mdb") Then
     getdb_查字forinputFullName = "H:\我的雲端硬碟\私人\千慮一得齋(C槽版)\書籍資料\圖書管理附件\查字forinput.mdb"
 ElseIf fso.fileexists("D:\千慮一得齋\書籍資料\圖書管理附件\查字forinput.mdb") Then
@@ -68,6 +64,7 @@ End Function
 
 Private Sub Class_Initialize()
 Set fso = CreateObject("Scripting.FileSystemObject")
+userProfilePath = SystemSetup.取得使用者路徑_含反斜線()
 End Sub
 
 Private Sub Class_Terminate()
