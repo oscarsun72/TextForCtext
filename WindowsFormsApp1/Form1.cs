@@ -571,7 +571,7 @@ namespace WindowsFormsApp1
                 {
                     saveText();
                 }
-                this.BackColor = C;          
+                this.BackColor = C;
                 return;
 
             }
@@ -582,12 +582,8 @@ namespace WindowsFormsApp1
             }
             if (e.KeyCode == Keys.F12)
             {
-                Color c = this.BackColor;
-                this.BackColor = Color.Red;
                 e.Handled = true;
                 backupLastPageText(Clipboard.GetText(), true);
-                Task.Delay(800).Wait();
-                this.BackColor = c;
                 return;
             }
         }
@@ -595,6 +591,8 @@ namespace WindowsFormsApp1
         const string fName_to_Backup_Txt = "cTextBK.txt";
         void backupLastPageText(string x, bool updateLastBackup)
         {
+            Color C = this.BackColor;
+            this.BackColor = Color.Red;
             //C# 對文字檔案的幾種讀寫方法總結:https://codertw.com/%E7%A8%8B%E5%BC%8F%E8%AA%9E%E8%A8%80/542361/
             string lastPageText = x + "＠"; //"＠" 作為每頁的界號
             if (File.Exists(dropBoxPathIncldBackSlash + fName_to_Backup_Txt))
@@ -611,6 +609,8 @@ namespace WindowsFormsApp1
                 }
             }
             File.AppendAllText(dropBoxPathIncldBackSlash + fName_to_Backup_Txt, lastPageText, Encoding.UTF8);
+            Task.Delay(800).Wait();
+            this.BackColor = C;
 
         }
 
@@ -994,6 +994,15 @@ namespace WindowsFormsApp1
                 textBox1.Text = textBox1OriginalText;
                 textBox1OriginalText = "";
                 textBox1.SelectionStart = s; textBox1.SelectionLength = l;
+            }
+        }
+
+        private void Form1_MouseDown(object sender, MouseEventArgs e)
+        {
+            Keys m = ModifierKeys;
+            if (m == Keys.Alt && e.Button == MouseButtons.Left)
+            {
+                backupLastPageText(Clipboard.GetText(), true);
             }
         }
     }
