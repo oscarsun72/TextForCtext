@@ -30,6 +30,7 @@ namespace WindowsFormsApp1
             textBox4Size = textBox4.Size;
             dropBoxPathIncldBackSlash = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + @"\Dropbox\";
             button2BackColor = button2.BackColor;
+            textBox2BackColorDefault = textBox2.BackColor; ;
             var cjk = getHanaminBFontInstalled();
             if (cjk != null)
             {
@@ -221,7 +222,8 @@ namespace WindowsFormsApp1
         private void textBox2_Leave(object sender, EventArgs e)
         {
             string s = textBox2.Text;
-            if (s == "") return;
+            if (s == "")
+            { textBox2.BackColor = textBox2BackColorDefault; return; }
             //如何判斷字串是否代表數值 (c # 程式設計手冊):https://docs.microsoft.com/zh-tw/dotnet/csharp/programming-guide/strings/how-to-determine-whether-a-string-represents-a-numeric-value
             int i = 0;
             bool result = int.TryParse(s, out i); //i now = textBox2.Text
@@ -241,15 +243,14 @@ namespace WindowsFormsApp1
             }
             else
             {
-                Color C = textBox2.BackColor;
                 textBox2.BackColor = Color.Red;
                 Task.Delay(500).Wait();
                 //C# Leave envent cancel
-                textBox2.BackColor = C;//https://docs.microsoft.com/zh-tw/dotnet/api/system.windows.forms.control.leave?view=windowsdesktop-6.0
+                textBox2.BackColor = Color.GreenYellow;//https://docs.microsoft.com/zh-tw/dotnet/api/system.windows.forms.control.leave?view=windowsdesktop-6.0
                 textBox2.Focus();
 
                 //TextBox tb = (TextBox)sender;
-                                //此法成了移除了：
+                //此法成了移除了：
                 //tb.Leave -= textBox2_Leave;//https://stackoverflow.com/questions/2664639/cancel-leave-event-when-closing
                 /*
                 private void tabPage1_Validating(object sender,System.ComponentModel.CancelEventArgs e)
@@ -262,6 +263,7 @@ namespace WindowsFormsApp1
 
                 }*/
             }
+            textBox2.BackColor = textBox2BackColorDefault;
         }
 
 
@@ -576,7 +578,7 @@ namespace WindowsFormsApp1
                     return;
                 }
 
-                                
+
                 if (e.KeyCode == Keys.D1)
                 {
                     runWord("漢籍電子文獻資料庫文本整理_以轉貼到中國哲學書電子化計劃");
@@ -592,7 +594,7 @@ namespace WindowsFormsApp1
                 if (e.KeyCode == Keys.S)
                 {
                     saveText();
-                }                
+                }
                 return;
 
             }
@@ -681,7 +683,7 @@ namespace WindowsFormsApp1
 
         private void runWord(string runName)
         {
-            Color C = this.BackColor; this.BackColor = Color.Green;            
+            Color C = this.BackColor; this.BackColor = Color.Green;
             SystemSounds.Hand.Play();
             Microsoft.Office.Interop.Word.Application appWord = new Microsoft.Office
                                     .Interop.Word.Application();
@@ -1000,6 +1002,8 @@ namespace WindowsFormsApp1
 
         }
         int selStart = 0; int selLength = 0;
+        private Color textBox2BackColorDefault;
+
         private void textBox1_TextChanged(object sender, EventArgs e)
         {
             undoTextValueChanged(selStart, selLength);
@@ -1024,6 +1028,9 @@ namespace WindowsFormsApp1
             }
         }
 
-
+        private void textBox2_Enter(object sender, EventArgs e)
+        {
+            textBox2.BackColor = Color.GreenYellow;
+        }
     }
 }
