@@ -470,6 +470,14 @@ namespace WindowsFormsApp1
             //    if (insertMode) insertMode = false;
             //    else insertMode = true;
             //}
+            if (e.KeyCode == Keys.F1 || e.KeyCode == Keys.Pause)
+            {//- 按下 F1 鍵：以找到的字串位置**前**分行分段
+             // -按下 Pause Break 鍵：以找到的字串位置** 後**分行分段
+                e.Handled = true;
+                splitLineParabySeltext(e.KeyCode);
+                return;
+            }
+
             if (e.KeyCode == Keys.F2)
             {
                 keyDownF2(textBox1); return;
@@ -496,6 +504,23 @@ namespace WindowsFormsApp1
 
         }
 
+        void splitLineParabySeltext(Keys kys)
+        {
+            if (!(kys == Keys.F1 || kys == Keys.Pause)) return;
+            string x = textBox1.SelectedText;
+            if (x == "") return;
+            x = textBox1.Text;
+            int s = textBox1.SelectionStart, l = textBox1.SelectionLength;
+            if (kys == Keys.Pause)
+                // -按下 Pause Break 鍵：以找到的字串位置** 後**分行分段
+                x = x.Substring(0, s + l) + Environment.NewLine + x.Substring(s + l);
+            if (kys == Keys.F1)
+                //- 按下 F1 鍵：以找到的字串位置**前**分行分段
+                x = x.Substring(0, s ) + Environment.NewLine + x.Substring(s);            
+            textBox1.Text = x;
+            textBox1.SelectionStart = s; textBox1.SelectionLength = l;
+            textBox1.ScrollToCaret();
+        }
         private void selToNewline(ref int s, ref int ed, string x, bool forward, TextBox tBox)
         {
             if (forward)
@@ -911,18 +936,26 @@ namespace WindowsFormsApp1
         }
 
         private void textBox4_KeyDown(object sender, KeyEventArgs e)
-        {
+        {            
             if (e.KeyCode == Keys.F2)
             {
                 keyDownF2(textBox4);
+                return;
             }
         }
 
         private void textBox2_KeyDown(object sender, KeyEventArgs e)
         {
+            if (e.KeyCode == Keys.F1 || e.KeyCode == Keys.Pause)
+            {
+                e.Handled = true;
+                splitLineParabySeltext(e.KeyCode);
+                return;
+            }
             if (e.KeyCode == Keys.F2)
             {
                 keyDownF2(textBox2);
+                return;
             }
         }
 
@@ -1031,6 +1064,14 @@ namespace WindowsFormsApp1
         private void textBox2_Enter(object sender, EventArgs e)
         {
             textBox2.BackColor = Color.GreenYellow;
+        }
+
+        private void textBox2_TextChanged(object sender, EventArgs e)
+        {
+            string x = textBox2.Text;
+            if (x == "") return;
+            int s = textBox1.Text.IndexOf(x);
+            if (s > -1) textBox1.Select(s, x.Length);
         }
     }
 }
