@@ -1003,6 +1003,7 @@ namespace WindowsFormsApp1
             if (m == Keys.Alt && e.Button == MouseButtons.Left)
             {
                 backupLastPageText(Clipboard.GetText(), true);
+                return;
             }
         }
     }
