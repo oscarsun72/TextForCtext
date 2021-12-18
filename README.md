@@ -43,7 +43,7 @@ Ctrl + s ：儲存文本至 DropBox 根目錄下的「cText.txt」檔案
 
 F5 ：重新載入所儲存的文本
 
-F12 ： 更新最後的備份頁文本
+F12 或 Alt + 滑鼠左鍵 ： 更新最後的備份頁文本
 
 Ctrl + Shift + c ：將textBox1的文本複製到剪貼簿 以備用
 
