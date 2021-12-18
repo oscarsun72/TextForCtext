@@ -21,7 +21,7 @@ namespace WindowsFormsApp1
         readonly Point textBox4Location; readonly Size textBox4Size;
         readonly string dropBoxPathIncldBackSlash;
         const string CJKBiggestSet = "KaiXinSongB";//"TH-Tshyn-P1";//"HanaMinB";
-        Color button2BackColor;
+        Color button2BackColorDefault;
         //bool insertMode = true;
         public Form1()
         {
@@ -29,8 +29,8 @@ namespace WindowsFormsApp1
             textBox4Location = textBox4.Location;
             textBox4Size = textBox4.Size;
             dropBoxPathIncldBackSlash = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + @"\Dropbox\";
-            button2BackColor = button2.BackColor;
-            textBox2BackColorDefault = textBox2.BackColor; ;
+            button2BackColorDefault = button2.BackColor;
+            textBox2BackColorDefault = textBox2.BackColor;
             var cjk = getHanaminBFontInstalled();
             if (cjk != null)
             {
@@ -773,7 +773,7 @@ namespace WindowsFormsApp1
             else
             {
                 button2.Text = "全部文";
-                button2.BackColor = button2BackColor;
+                button2.BackColor = button2BackColorDefault;
             }
         }
 
