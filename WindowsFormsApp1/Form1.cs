@@ -516,7 +516,8 @@ namespace WindowsFormsApp1
                 x = x.Substring(0, s + l) + Environment.NewLine + x.Substring(s + l);
             if (kys == Keys.F1)
                 //- 按下 F1 鍵：以找到的字串位置**前**分行分段
-                x = x.Substring(0, s ) + Environment.NewLine + x.Substring(s);            
+                x = x.Substring(0, s) + Environment.NewLine + x.Substring(s);
+            if (!textBox1.Focused) textBox1.Focus();
             textBox1.Text = x;
             textBox1.SelectionStart = s; textBox1.SelectionLength = l;
             textBox1.ScrollToCaret();
