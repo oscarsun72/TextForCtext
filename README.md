@@ -4,7 +4,7 @@
 尤其由[中研院史語所《漢籍電子文獻資料庫》](http://hanchi.ihp.sinica.edu.tw/ihp/hanji.htm)輸入《十三經注疏》、[《維基文庫》](https://zh.wikisource.org/zh-hant/)輸入《四部叢刊》本諸書圖文對照時，輔助加速，避免人工之失誤。感恩感恩　南無阿彌陀佛
 
 昨天邊寫程式、測試，邊完成了[《四部叢刊》《南華真經》（《莊子》）](https://ctext.org/wiki.pl?if=gb&chapter=941297#lib77891.114)[第一份文件](https://ctext.org/wiki.pl?if=gb&chapter=941297&action=history)輸入的工作；真是感覺像飛了起來，和之前用手、眼合作判斷分行切割的速度，懸若天壤、判若兩人。感恩感恩　讚歎讚歎　南無阿彌陀佛
-20211217在不斷修改增潤的過程中，也將把[此部《莊子》](https://ctext.org/library.pl?if=gb&res=77451)書[維基文本](https://ctext.org/wiki.pl?if=gb&res=393223)建置完畢了。感恩感恩　讚歎讚歎　南無阿彌陀佛 20211218：1951 建置完畢 感恩感恩　南無阿彌陀佛
+20211217在不斷修改增潤的過程中，也將把[此部《莊子》](https://ctext.org/library.pl?if=gb&res=77451)書[維基文本](https://ctext.org/wiki.pl?if=gb&res=393223)建置完畢了。感恩感恩　讚歎讚歎　南無阿彌陀佛 20211218：1951 [建置完畢](https://ctext.org/wiki.pl?if=gb&res=393223) 感恩感恩　南無阿彌陀佛
 
 ## 介面簡介：
 ![操作介面](https://github.com/oscarsun72/TextForCtext/blob/master/TextforCtext%E4%BB%8B%E9%9D%A2%E7%B0%A1%E4%BB%8B.png)
@@ -54,6 +54,8 @@ Ctrl + PageUp ：根據 textBox3所載的網址，瀏覽ctext書影的上一頁
 
 Ctrl + PageDown ： 根據 textBox3所載的網址，瀏覽ctext書影的下一頁
 
+
+
 ### 在 textBox1 中按下以下組合鍵：
 
 Insrt : 如 MS Word ，切換插入/取代文字模式（尚無能力寫，希望能做到）
@@ -61,6 +63,10 @@ Insrt : 如 MS Word ，切換插入/取代文字模式（尚無能力寫，希�
 Ctrl + q 或 Alt + q：據第一行(段)長度來將textBox1中的文本分行分段
 
 Ctrl + \ （反斜線） ： 清除textBox1文本插入點後的分段
+
+按下 F1 鍵：以找到的字串位置**前**分行分段
+
+按下 Pause Break 鍵：以找到的字串位置**後**分行分段
 
 Ctrl + 8 ：如同鍵入「　」1個全形空格，且各個空格間有分段符
 
@@ -89,7 +95,12 @@ Ctrl+Shift+↓：從插入點開啟向後選取整段
 
 ### 在 textBox2、4 中按下以下鍵：
 
+F2 : 全選/取消全選框裡文字
 Ctrl+ 滑鼠左鍵：清除框中所有文字
+
+### 在 textBox2 ：
+- 按下 F1 鍵：以找到的字串位置**前**分行分段
+- 按下 Pause Break 鍵：以找到的字串位置**後**分行分段
 
 ### textBox4 取代文字用方塊框
 - 若有指定要取代的文字，進入後會自動填入之前用以取代過的文字以便輸入（即自動填入對應的預設值）
