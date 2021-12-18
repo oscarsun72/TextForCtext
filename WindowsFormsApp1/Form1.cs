@@ -230,7 +230,7 @@ namespace WindowsFormsApp1
                 processID = s;
             }
             string x = textBox1.Text; int xStart = x.IndexOf(s);
-            if (xStart > 0)
+            if (xStart > -1)
             {
                 textBox1.Focus();
                 textBox1.Select(xStart, textBox2.Text.Length);
@@ -239,8 +239,31 @@ namespace WindowsFormsApp1
                 Clipboard.SetText(x);
                 //textBox1.Text = textBox1.Text.Substring(xStart + 2);
             }
+            else
+            {
+                Color C = textBox2.BackColor;
+                textBox2.BackColor = Color.Red;
+                Task.Delay(500).Wait();
+                //C# Leave envent cancel
+                textBox2.BackColor = C;//https://docs.microsoft.com/zh-tw/dotnet/api/system.windows.forms.control.leave?view=windowsdesktop-6.0
+                textBox2.Focus();
 
+                //TextBox tb = (TextBox)sender;
+                                //此法成了移除了：
+                //tb.Leave -= textBox2_Leave;//https://stackoverflow.com/questions/2664639/cancel-leave-event-when-closing
+                /*
+                private void tabPage1_Validating(object sender,System.ComponentModel.CancelEventArgs e)
+
+                {//https://social.msdn.microsoft.com/Forums/en-US/0a6251c5-b4bd-42a7-bbd3-cdac893df04f/how-to-cancel-or-abort-occurs-leave-event-of-tabcontrol?forum=csharplanguage
+
+                    if (!checkValidated.Checked)
+
+                        e.Cancel = true;
+
+                }*/
+            }
         }
+
 
 
         private void newTextBox1()
@@ -529,7 +552,7 @@ namespace WindowsFormsApp1
             //if ((int)ModifierKeys == (int)Keys.Control+ (int)Keys.Shift&&e.KeyCode==Keys.C)
             //https://bbs.csdn.net/topics/350010591
             //https://zhidao.baidu.com/question/628222381668604284.html
-            var m = ModifierKeys; Color C = this.BackColor;
+            var m = ModifierKeys;
             if ((m & Keys.Control) == Keys.Control
                 && (m & Keys.Shift) == Keys.Shift
                 && e.KeyCode == Keys.C)
@@ -553,8 +576,7 @@ namespace WindowsFormsApp1
                     return;
                 }
 
-
-                this.BackColor = Color.Green;
+                                
                 if (e.KeyCode == Keys.D1)
                 {
                     runWord("漢籍電子文獻資料庫文本整理_以轉貼到中國哲學書電子化計劃");
@@ -570,8 +592,7 @@ namespace WindowsFormsApp1
                 if (e.KeyCode == Keys.S)
                 {
                     saveText();
-                }
-                this.BackColor = C;
+                }                
                 return;
 
             }
@@ -660,12 +681,14 @@ namespace WindowsFormsApp1
 
         private void runWord(string runName)
         {
+            Color C = this.BackColor; this.BackColor = Color.Green;            
             SystemSounds.Hand.Play();
             Microsoft.Office.Interop.Word.Application appWord = new Microsoft.Office
                                     .Interop.Word.Application();
             appWord.Run(runName);
             textBox1.Text = Clipboard.GetText();
             appWord.Quit(Microsoft.Office.Interop.Word.WdSaveOptions.wdDoNotSaveChanges);
+            this.BackColor = C;
         }
 
         const string fName_to_Save_Txt = "cText.txt";
