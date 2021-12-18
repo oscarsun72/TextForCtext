@@ -253,7 +253,7 @@ namespace WindowsFormsApp1
             string x = textBox1.Text;
             int s = textBox1.SelectionStart, l = textBox1.SelectionLength;
             string xCopy = x.Substring(0, s + l);
-            Clipboard.SetText(xCopy); backupLastPageText(xCopy, false);
+            Clipboard.SetText(xCopy); BackupLastPageText(xCopy, false, false);
             if (xCopy.IndexOf(" ") > -1 || xCopy.IndexOfAny("�".ToCharArray()) > -1)
             {//  「�」甚特別，indexof會失效，明明沒有，而傳回 0 //https://docs.microsoft.com/zh-tw/dotnet/csharp/how-to/compare-strings
              //  //https://docs.microsoft.com/zh-tw/dotnet/api/system.string.compare?view=net-6.0
@@ -583,37 +583,33 @@ namespace WindowsFormsApp1
             if (e.KeyCode == Keys.F12)
             {
                 e.Handled = true;
-                backupLastPageText(Clipboard.GetText(), true);
+                BackupLastPageText(Clipboard.GetText(), true, true);
                 return;
             }
         }
 
         const string fName_to_Backup_Txt = "cTextBK.txt";
-        void backupLastPageText(string x, bool updateLastBackup)
+        void BackupLastPageText(string x, bool updateLastBackup, bool showColorSignal)
         {
             Color C = this.BackColor;
-            this.BackColor = Color.Red;
+            if (showColorSignal) { this.BackColor = Color.Red; Task.Delay(800).Wait(); }
             //C# 對文字檔案的幾種讀寫方法總結:https://codertw.com/%E7%A8%8B%E5%BC%8F%E8%AA%9E%E8%A8%80/542361/
             string lastPageText = x + "＠"; //"＠" 作為每頁的界號
             if (File.Exists(dropBoxPathIncldBackSlash + fName_to_Backup_Txt))
             {
                 if (updateLastBackup)
                 {
-
                     string bk = File.ReadAllText(dropBoxPathIncldBackSlash + fName_to_Backup_Txt);
                     int bkLastEnd = bk.LastIndexOf("＠"), bkLastStart = bk.LastIndexOf("＠", bkLastEnd - 1) + 1;
                     //if (bkLastStart == -1) bkLastStart = 0;
                     bk = bk.Substring(0, bkLastStart) + lastPageText;
                     File.WriteAllText(dropBoxPathIncldBackSlash + fName_to_Backup_Txt, bk, Encoding.UTF8);
-                    Task.Delay(800).Wait();
-                    this.BackColor = C;
+                    if (showColorSignal) this.BackColor = C;
                     return;
                 }
             }
             File.AppendAllText(dropBoxPathIncldBackSlash + fName_to_Backup_Txt, lastPageText, Encoding.UTF8);
-            Task.Delay(800).Wait();
-            this.BackColor = C;
-
+            if (showColorSignal) this.BackColor = C;
         }
 
         private void nextPages(Keys eKeyCode)
@@ -943,7 +939,7 @@ namespace WindowsFormsApp1
             }
             if (m == Keys.Alt && e.Button == MouseButtons.Left)
             {
-                backupLastPageText(Clipboard.GetText(), true);
+                BackupLastPageText(Clipboard.GetText(), true, true);
                 return;
             }
 
