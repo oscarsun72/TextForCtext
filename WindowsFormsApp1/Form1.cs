@@ -605,6 +605,8 @@ namespace WindowsFormsApp1
                     //if (bkLastStart == -1) bkLastStart = 0;
                     bk = bk.Substring(0, bkLastStart) + lastPageText;
                     File.WriteAllText(dropBoxPathIncldBackSlash + fName_to_Backup_Txt, bk, Encoding.UTF8);
+                    Task.Delay(800).Wait();
+                    this.BackColor = C;
                     return;
                 }
             }
@@ -1003,6 +1005,6 @@ namespace WindowsFormsApp1
             }
         }
 
-        
+
     }
 }
