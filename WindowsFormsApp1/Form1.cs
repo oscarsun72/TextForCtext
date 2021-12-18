@@ -924,14 +924,14 @@ namespace WindowsFormsApp1
         private void textBox1_MouseDown(object sender, MouseEventArgs e)
         {
             var m = ModifierKeys;
-            if ((m & Keys.Control) == Keys.Control && (m & Keys.Shift) == Keys.Shift)
-            {
-                runWord("漢籍電子文獻資料庫文本整理_十三經注疏");
-            }
-            if ((m & Keys.Alt) == Keys.Alt)
-            {
-                runWord("維基文庫四部叢刊本轉來");
-            }
+            //if ((m & Keys.Control) == Keys.Control && (m & Keys.Shift) == Keys.Shift)
+            //{
+            //    runWord("漢籍電子文獻資料庫文本整理_十三經注疏");
+            //}
+            //if ((m & Keys.Alt) == Keys.Alt)
+            //{
+            //    runWord("維基文庫四部叢刊本轉來");
+            //}
             if (ModifierKeys == Keys.Control && e.Button == MouseButtons.Left)
             {
                 richTextBox1.Size = textBox1.Size;
@@ -939,6 +939,12 @@ namespace WindowsFormsApp1
                 richTextBox1.Show();
 
             }
+            if (m == Keys.Alt && e.Button == MouseButtons.Left)
+            {
+                backupLastPageText(Clipboard.GetText(), true);
+                return;
+            }
+
         }
 
         private void richTextBox1_MouseDown(object sender, MouseEventArgs e)
@@ -997,14 +1003,6 @@ namespace WindowsFormsApp1
             }
         }
 
-        private void Form1_MouseDown(object sender, MouseEventArgs e)
-        {
-            Keys m = ModifierKeys;
-            if (m == Keys.Alt && e.Button == MouseButtons.Left)
-            {
-                backupLastPageText(Clipboard.GetText(), true);
-                return;
-            }
-        }
+        
     }
 }
