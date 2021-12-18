@@ -937,7 +937,7 @@ namespace WindowsFormsApp1
         }
 
         private void textBox4_KeyDown(object sender, KeyEventArgs e)
-        {            
+        {
             if (e.KeyCode == Keys.F2)
             {
                 keyDownF2(textBox4);
@@ -1072,7 +1072,12 @@ namespace WindowsFormsApp1
             string x = textBox2.Text;
             if (x == "") return;
             int s = textBox1.Text.IndexOf(x);
-            if (s > -1) textBox1.Select(s, x.Length);
+            if (s > -1)
+            {
+                textBox1.Select(s, x.Length);
+                textBox1.ScrollToCaret();
+            }
+
         }
     }
 }
