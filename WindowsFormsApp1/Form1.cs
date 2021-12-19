@@ -50,8 +50,8 @@ namespace WindowsFormsApp1
                 textBox4.Font = new Font(cjk, textBox4.Font.Size);
             }
             this.nICo = new NotifyIcon();
-            this.nICo.Icon=this.Icon;
-            this.nICo.MouseClick+= new System.Windows.Forms.MouseEventHandler(nICo_Click);
+            this.nICo.Icon = this.Icon;
+            this.nICo.MouseClick += new System.Windows.Forms.MouseEventHandler(nICo_Click);
         }
 
         private void nICo_Click(object sender, MouseEventArgs e)
@@ -998,13 +998,14 @@ namespace WindowsFormsApp1
         private void keyDownF2(TextBox textBox)
         {
             if (textBox.Text != "")
-            {
+            {//F2 : 全選/取消全選框裡文字。若原有選取文字則取消選取至其尾端
                 if (textBox.SelectedText != "")
+                    textBox.Select(textBox.SelectionStart + textBox.SelectionLength, 0);
+                if (textBox.SelectedText == textBox.Text)
                     textBox.SelectionStart = textBox.Text.Length;
                 else
-                {
                     textBox.SelectionStart = 0; textBox.SelectionLength = textBox.Text.Length;
-                }
+                textBox.ScrollToCaret();
             }
         }
 
