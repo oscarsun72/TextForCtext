@@ -320,19 +320,26 @@ namespace WindowsFormsApp1
 
             if ((m & Keys.Control) == Keys.Control
             && (m & Keys.Shift) == Keys.Shift
+            && e.KeyCode == Keys.Delete)
+            {//Ctrl + Shift + Delete ： 將選取文字於文本中全部清除
+                int s = textBox1.SelectionStart;
+                textBox1.Text = textBox1.Text.Replace(textBox1.SelectedText, "");
+                textBox1.SelectionStart = s;textBox1.ScrollToCaret();
+                return;
+            }
+                if ((m & Keys.Control) == Keys.Control
+            && (m & Keys.Shift) == Keys.Shift
             && e.KeyCode == Keys.Up)
             {
                 int s = textBox1.SelectionStart, ed = s;
-                selToNewline(ref s, ref ed, textBox1.Text, false, textBox1);
-                return;
+                selToNewline(ref s, ref ed, textBox1.Text, false, textBox1);return;
             }
             if ((m & Keys.Control) == Keys.Control
                 && (m & Keys.Shift) == Keys.Shift
                 && e.KeyCode == Keys.Down)
             {
                 int s = textBox1.SelectionStart, ed = s;
-                selToNewline(ref s, ref ed, textBox1.Text, true, textBox1);
-                return;
+                selToNewline(ref s, ref ed, textBox1.Text, true, textBox1);return;
             }
 
             if ((m & Keys.Control) == Keys.Control)
