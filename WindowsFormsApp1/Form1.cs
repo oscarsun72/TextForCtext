@@ -237,7 +237,7 @@ namespace WindowsFormsApp1
         private void textBox2_Leave(object sender, EventArgs e)
         {
             string s = textBox2.Text;
-            if (s == "")
+            if (s == "" || s == textBox1.SelectedText)
             { textBox2.BackColor = textBox2BackColorDefault; return; }
             //如何判斷字串是否代表數值 (c # 程式設計手冊):https://docs.microsoft.com/zh-tw/dotnet/csharp/programming-guide/strings/how-to-determine-whether-a-string-represents-a-numeric-value
             int i = 0;
@@ -993,7 +993,7 @@ namespace WindowsFormsApp1
                 keyDownF2(textBox2);
                 return;
             }
-            if (e.KeyCode==Keys.F3)
+            if (e.KeyCode == Keys.F3)
             {
                 KeyEventArgs ekey = new KeyEventArgs(Keys.F3);
                 textBox1_KeyDown(textBox1, ekey);
@@ -1009,8 +1009,8 @@ namespace WindowsFormsApp1
                     textBox.Select(textBox.SelectionStart + textBox.SelectionLength, 0);
                 if (x == textBox.Text)
                     textBox.SelectionStart = textBox.Text.Length;
-                if(x=="")
-                    textBox.Select(0,textBox.Text.Length);
+                if (x == "")
+                    textBox.Select(0, textBox.Text.Length);
                 textBox.ScrollToCaret();
             }
         }
