@@ -1005,7 +1005,7 @@ namespace WindowsFormsApp1
                 if (x == textBox.Text)
                     textBox.SelectionStart = textBox.Text.Length;
                 if(x=="")
-                    textBox.SelectionStart = 0; textBox.SelectionLength = textBox.Text.Length;
+                    textBox.Select(0,textBox.Text.Length);
                 textBox.ScrollToCaret();
             }
         }
