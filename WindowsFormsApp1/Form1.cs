@@ -999,11 +999,12 @@ namespace WindowsFormsApp1
         {
             if (textBox.Text != "")
             {//F2 : 全選/取消全選框裡文字。若原有選取文字則取消選取至其尾端
-                if (textBox.SelectedText != "")
+                string x = textBox.SelectedText;
+                if (x != "")
                     textBox.Select(textBox.SelectionStart + textBox.SelectionLength, 0);
-                if (textBox.SelectedText == textBox.Text)
+                if (x == textBox.Text)
                     textBox.SelectionStart = textBox.Text.Length;
-                else
+                if(x=="")
                     textBox.SelectionStart = 0; textBox.SelectionLength = textBox.Text.Length;
                 textBox.ScrollToCaret();
             }
