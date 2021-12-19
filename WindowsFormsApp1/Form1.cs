@@ -23,6 +23,10 @@ namespace WindowsFormsApp1
         const string CJKBiggestSet = "KaiXinSongB";//"TH-Tshyn-P1";//"HanaMinB";
         Color button2BackColorDefault;
         //bool insertMode = true;
+
+        System.Windows.Forms.NotifyIcon nICo;
+
+
         public Form1()
         {
             InitializeComponent();
@@ -45,7 +49,18 @@ namespace WindowsFormsApp1
                 textBox2.Font = new Font(cjk, textBox2.Font.Size);
                 textBox4.Font = new Font(cjk, textBox4.Font.Size);
             }
+            this.nICo = new NotifyIcon();
+            this.nICo.Icon=this.Icon;
+            this.nICo.MouseClick+= new System.Windows.Forms.MouseEventHandler(nICo_Click);
         }
+
+        private void nICo_Click(object sender, MouseEventArgs e)
+        {
+            nICo.Visible = false;
+            this.Show();
+            this.WindowState = FormWindowState.Normal;
+        }
+
         FontFamily getHanaminBFontInstalled()
         { //https://www.cnblogs.com/arxive/p/7795232.html            
             InstalledFontCollection MyFont = new InstalledFontCollection();
@@ -324,22 +339,22 @@ namespace WindowsFormsApp1
             {//Ctrl + Shift + Delete ： 將選取文字於文本中全部清除
                 int s = textBox1.SelectionStart;
                 textBox1.Text = textBox1.Text.Replace(textBox1.SelectedText, "");
-                textBox1.SelectionStart = s;textBox1.ScrollToCaret();
+                textBox1.SelectionStart = s; textBox1.ScrollToCaret();
                 return;
             }
-                if ((m & Keys.Control) == Keys.Control
-            && (m & Keys.Shift) == Keys.Shift
-            && e.KeyCode == Keys.Up)
+            if ((m & Keys.Control) == Keys.Control
+        && (m & Keys.Shift) == Keys.Shift
+        && e.KeyCode == Keys.Up)
             {
                 int s = textBox1.SelectionStart, ed = s;
-                selToNewline(ref s, ref ed, textBox1.Text, false, textBox1);return;
+                selToNewline(ref s, ref ed, textBox1.Text, false, textBox1); return;
             }
             if ((m & Keys.Control) == Keys.Control
                 && (m & Keys.Shift) == Keys.Shift
                 && e.KeyCode == Keys.Down)
             {
                 int s = textBox1.SelectionStart, ed = s;
-                selToNewline(ref s, ref ed, textBox1.Text, true, textBox1);return;
+                selToNewline(ref s, ref ed, textBox1.Text, true, textBox1); return;
             }
 
             if ((m & Keys.Control) == Keys.Control)
@@ -642,7 +657,18 @@ namespace WindowsFormsApp1
                 BackupLastPageText(Clipboard.GetText(), true, true);
                 return;
             }
+            if (e.KeyCode == Keys.Escape)
+            {
+                if (textBox1.Text == "")
+                //預設為最上層顯示，若textBox1值為空，則按下Esc鍵會隱藏到任務列中；點一下即恢復
+                {//https://dotblogs.com.tw/jimmyyu/2009/09/21/10733
+                    //https://dotblogs.com.tw/chou/2009/02/25/7284 https://yl9111524.pixnet.net/blog/post/49024854
+                    this.Hide();
+                    this.nICo.Visible = true;
+                }
+            }
         }
+
 
         const string fName_to_Backup_Txt = "cTextBK.txt";
         void BackupLastPageText(string x, bool updateLastBackup, bool showColorSignal)
