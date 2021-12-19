@@ -51,14 +51,25 @@ namespace WindowsFormsApp1
             }
             this.nICo = new NotifyIcon();
             this.nICo.Icon = this.Icon;
-            this.nICo.MouseClick += new System.Windows.Forms.MouseEventHandler(nICo_Click);
+            this.nICo.MouseClick += new System.Windows.Forms.MouseEventHandler(nICo_MouseClick);
+            this.nICo.MouseMove += new System.Windows.Forms.MouseEventHandler(nICo_MouseMove);
         }
 
-        private void nICo_Click(object sender, MouseEventArgs e)
+        void show_nICo()
         {
             nICo.Visible = false;
             this.Show();
             this.WindowState = FormWindowState.Normal;
+
+        }
+
+        private void nICo_MouseClick(object sender, MouseEventArgs e)
+        {
+            show_nICo();
+        }
+        private void nICo_MouseMove(object sender, MouseEventArgs e)
+        {
+            show_nICo();
         }
 
         FontFamily getHanaminBFontInstalled()
