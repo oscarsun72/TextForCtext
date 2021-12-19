@@ -748,6 +748,8 @@ namespace WindowsFormsApp1
                                     .Interop.Word.Application();
             appWord.Run(runName);
             textBox1.Text = Clipboard.GetText();
+            textBox1.SelectionStart = 0;
+            textBox1.ScrollToCaret();
             appWord.Quit(Microsoft.Office.Interop.Word.WdSaveOptions.wdDoNotSaveChanges);
             this.BackColor = C;
         }
