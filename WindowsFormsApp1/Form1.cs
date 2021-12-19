@@ -672,15 +672,18 @@ namespace WindowsFormsApp1
             {
                 if (textBox1.Text == "")
                 //預設為最上層顯示，若textBox1值為空，則按下Esc鍵會隱藏到任務列中；點一下即恢復
-                {//https://dotblogs.com.tw/jimmyyu/2009/09/21/10733
-                    //https://dotblogs.com.tw/chou/2009/02/25/7284 https://yl9111524.pixnet.net/blog/post/49024854
-                    this.Hide();
-                    this.nICo.Visible = true;
+                {
+                    hideToNICo();
                 }
             }
         }
 
-
+        void hideToNICo() {
+            //https://dotblogs.com.tw/jimmyyu/2009/09/21/10733
+            //https://dotblogs.com.tw/chou/2009/02/25/7284 https://yl9111524.pixnet.net/blog/post/49024854
+            this.Hide();
+            this.nICo.Visible = true;
+        }
         const string fName_to_Backup_Txt = "cTextBK.txt";
         void BackupLastPageText(string x, bool updateLastBackup, bool showColorSignal)
         {
@@ -1094,6 +1097,10 @@ namespace WindowsFormsApp1
         private void textBox1_TextChanged(object sender, EventArgs e)
         {
             undoTextValueChanged(selStart, selLength);
+            if (textBox1.Text=="")
+            {
+                hideToNICo();
+            }
             //if (!insertMode && textBox1.Focused && textBox1.SelectedText=="")
             //{
             //    string x = textBox1.Text;int s = textBox1.SelectionStart;
