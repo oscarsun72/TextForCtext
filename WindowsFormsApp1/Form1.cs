@@ -993,6 +993,11 @@ namespace WindowsFormsApp1
                 keyDownF2(textBox2);
                 return;
             }
+            if (e.KeyCode==Keys.F3)
+            {
+                KeyEventArgs ekey = new KeyEventArgs(Keys.F3);
+                textBox1_KeyDown(textBox1, ekey);
+            }
         }
 
         private void keyDownF2(TextBox textBox)
