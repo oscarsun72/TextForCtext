@@ -101,7 +101,10 @@ Set acs = Nothing
 End Function
 
 Sub setWordControlValue(w As String)
-If Not word.Tasks.Exists("查字forinput - [dictsurl]") Then Exit Sub
+Const cz As String = "查字forinput - [dictsurl]"
+On Error GoTo eH
+If Not SystemSetup.appActivatedYet("msaccess") Then Exit Sub
+'If Not word.Tasks.Exists(cz) Then Exit Sub ' 用 word.Tasks 有時會當掉
 If w = "" Then Exit Sub
 On Error Resume Next
 'do until acs.screen.activeform.ActiveControl.Name <> "word" Then
@@ -116,6 +119,14 @@ With Me.ctl("word")
         .SelLength = Len(w) - 1
     End If
 End With
+Exit Sub
+eH:
+Select Case Err.Number
+    Case 5 '程序呼叫或引數不正確
+    Case Else
+        MsgBox Err.Number & Err.Description
+        'resume
+End Select
 End Sub
 
 Sub setURLControlValue(url As String)

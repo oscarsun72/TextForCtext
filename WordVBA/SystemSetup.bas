@@ -327,3 +327,35 @@ End Function
 Sub contiUndo(ByRef ur As UndoRecord)
 ur.EndCustomRecord
 End Sub
+
+
+Public Function appActivatedYet(exeName As String) As Boolean
+On Error GoTo eH:
+      exeName = exeName & ".exe": exeName = StrConv(exeName, vbUpperCase)
+'https://stackoverflow.com/questions/44075292/determine-process-id-with-vba
+'https://stackoverflow.com/questions/26277214/vba-getting-program-names-and-task-id-of-running-processes
+    Dim objServices As Object, objProcessSet As Object, Process As Object
+
+    Set objServices = GetObject("winmgmts:\\.\root\CIMV2")
+    Set objProcessSet = objServices.ExecQuery("SELECT ProcessID, name FROM Win32_Process WHERE name = """ & exeName & """", , 48)
+
+    'you may find more than one processid depending on your search/program
+    For Each Process In objProcessSet
+       'Debug.Print Process.ProcessID, Process.Name
+       If Process.Name = exeName Then 'processName Then
+        appActivatedYet = True
+        Exit Function
+       End If
+    Next
+'    If objProcessSet.pri.Count > 0 Then appActivatedYet = True
+    
+    Set objProcessSet = Nothing
+Exit Function
+eH:
+Select Case Err.Number
+    Case 5 '程序呼叫或引數不正確
+    Case Else
+        MsgBox Err.Number & Err.Description
+        'resume
+End Select
+End Function
