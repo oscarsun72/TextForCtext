@@ -236,7 +236,7 @@ namespace WindowsFormsApp1
             textBox1.Focus();
             textBox1.SelectionStart = selStart;
             textBox1.SelectionLength = 0;
-            textBox1.ScrollToCaret();
+            //textBox1.ScrollToCaret();
             //Clipboard.SetText(resltTxt);
         }
 
@@ -386,9 +386,7 @@ namespace WindowsFormsApp1
                 }
                 if (e.KeyCode == Keys.NumPad5 || e.KeyCode == Keys.Oemplus || e.KeyCode == Keys.Add || e.KeyCode == Keys.Subtract)
                 {
-                    newTextBox1();
-                    pasteToCtext();
-                    nextPages(Keys.PageDown);
+                    keyDownCtrlAdd();
                     return;
                 }
                 if (e.KeyCode == Keys.D0 || e.KeyCode == Keys.D9 || e.KeyCode == Keys.D8 || e.KeyCode == Keys.D7)
@@ -539,6 +537,13 @@ namespace WindowsFormsApp1
                 return;
             }
 
+        }
+
+        private void keyDownCtrlAdd()
+        {
+            newTextBox1();
+            pasteToCtext();
+            nextPages(Keys.PageDown);
         }
 
         void splitLineParabySeltext(Keys kys)
@@ -1005,6 +1010,12 @@ namespace WindowsFormsApp1
 
         private void textBox2_KeyDown(object sender, KeyEventArgs e)
         {
+            if (e.KeyCode == Keys.NumPad5 || e.KeyCode == Keys.Oemplus || e.KeyCode == Keys.Add || e.KeyCode == Keys.Subtract)
+            {
+                textBox1_KeyDown(sender, e);                
+                return;
+            }
+
             if (e.KeyCode == Keys.F1 || e.KeyCode == Keys.Pause)
             {
                 e.Handled = true;
@@ -1131,6 +1142,11 @@ namespace WindowsFormsApp1
             }
         }
 
+        private void Form1_Activated(object sender, EventArgs e)
+        {
+            if (!this.TopMost) this.TopMost = true;
+        }
+
         private void textBox2_Enter(object sender, EventArgs e)
         {
             textBox2.BackColor = Color.GreenYellow;
@@ -1151,7 +1167,7 @@ namespace WindowsFormsApp1
 
         private void Form1_Deactivate(object sender, EventArgs e)
         {//預設表單視窗為最上層顯示，當表單視窗不在作用中時，自動隱藏至系統右下方之系統列/任務列中，當滑鼠滑過任務列中的縮圖ico時，即還原/恢復視窗窗體
-            if (!textBox2.Focused) hideToNICo();
+            if (!textBox2.Focused) this.TopMost = false;//hideToNICo();
         }
     }
 }
