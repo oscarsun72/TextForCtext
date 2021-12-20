@@ -49,6 +49,7 @@ namespace WindowsFormsApp1
                 textBox2.Font = new Font(cjk, textBox2.Font.Size);
                 textBox4.Font = new Font(cjk, textBox4.Font.Size);
             }
+            thisHeight = this.Height; thisWidth = this.Width; thisLeft = this.Left; thisTop = this.Top;
             this.nICo = new NotifyIcon();
             this.nICo.Icon = this.Icon;
             this.nICo.MouseClick += new System.Windows.Forms.MouseEventHandler(nICo_MouseClick);
@@ -685,7 +686,10 @@ namespace WindowsFormsApp1
         {
             //https://dotblogs.com.tw/jimmyyu/2009/09/21/10733
             //https://dotblogs.com.tw/chou/2009/02/25/7284 https://yl9111524.pixnet.net/blog/post/49024854
-            thisHeight = this.Height; thisWidth = this.Width; thisLeft = this.Left; thisTop = this.Top;
+            if (this.WindowState != FormWindowState.Minimized)
+            {
+                thisHeight = this.Height; thisWidth = this.Width; thisLeft = this.Left; thisTop = this.Top;
+            }
             this.Hide();
             this.nICo.Visible = true;
         }
@@ -1147,7 +1151,7 @@ namespace WindowsFormsApp1
 
         private void Form1_Deactivate(object sender, EventArgs e)
         {//預設表單視窗為最上層顯示，當表單視窗不在作用中時，自動隱藏至系統右下方之系統列/任務列中，當滑鼠滑過任務列中的縮圖ico時，即還原/恢復視窗窗體
-            if(!textBox2.Focused)hideToNICo();
+            if (!textBox2.Focused) hideToNICo();
         }
     }
 }
