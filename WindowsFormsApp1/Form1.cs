@@ -25,7 +25,7 @@ namespace WindowsFormsApp1
         //bool insertMode = true;
 
         System.Windows.Forms.NotifyIcon nICo;
-
+        int thisHeight, thisWidth, thisLeft, thisTop;
 
         public Form1()
         {
@@ -60,7 +60,10 @@ namespace WindowsFormsApp1
             nICo.Visible = false;
             this.Show();
             this.WindowState = FormWindowState.Normal;
-
+            this.Height = thisHeight;
+            this.Width = thisWidth;
+            this.Left = thisLeft;
+            this.Top = thisTop;
         }
 
         private void nICo_MouseClick(object sender, MouseEventArgs e)
@@ -678,9 +681,11 @@ namespace WindowsFormsApp1
             }
         }
 
-        void hideToNICo() {
+        void hideToNICo()
+        {
             //https://dotblogs.com.tw/jimmyyu/2009/09/21/10733
             //https://dotblogs.com.tw/chou/2009/02/25/7284 https://yl9111524.pixnet.net/blog/post/49024854
+            thisHeight = this.Height; thisWidth = this.Width; thisLeft = this.Left; thisTop = this.Top;
             this.Hide();
             this.nICo.Visible = true;
         }
@@ -1097,7 +1102,7 @@ namespace WindowsFormsApp1
         private void textBox1_TextChanged(object sender, EventArgs e)
         {
             undoTextValueChanged(selStart, selLength);
-            if (textBox1.Text=="")
+            if (textBox1.Text == "")
             {
                 hideToNICo();
             }
