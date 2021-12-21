@@ -511,13 +511,15 @@ namespace WindowsFormsApp1
                             sTxtChk += "􏿽";
                         }
                         x = x.Substring(0, s) + sTxtChk+x.Substring(s+l);
+                        textBox1.Text = x;
+                        textBox1.SelectionStart = s + sTxtChk.Length;
                     }
                     else
                     {
-                        x = x.Substring(0, s) + "􏿽"+ x.Substring(s);                        
+                        x = x.Substring(0, s) + "􏿽"+ x.Substring(s);
+                        textBox1.Text = x;
+                        textBox1.SelectionStart = s + "􏿽".Length;
                     }
-                    textBox1.Text = x;
-                    textBox1.SelectionStart = s + sTxt.Length;
                     textBox1.ScrollToCaret();
                     return;
                 }
