@@ -716,6 +716,7 @@ namespace WindowsFormsApp1
                     int w = this.Width;
                     if (e.KeyCode==Keys.Left)this.Left -= w;
                     if (e.KeyCode == Keys.Right)this.Left += w;
+                    this.Activate();
                     return;
                 } 
             
