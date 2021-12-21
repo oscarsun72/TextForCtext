@@ -693,7 +693,26 @@ namespace WindowsFormsApp1
                 return;
 
             }
-            if (e.KeyCode == Keys.F5)
+
+            if (Control.ModifierKeys == Keys.Alt)
+            {//按下Alt鍵
+                if (e.KeyCode == Keys.Left||e.KeyCode==Keys.Right)
+                {
+                    int w = this.Width;
+                    if (e.KeyCode==Keys.Left)
+                    {
+                        this.Left -= w;
+                    }
+                    if (e.KeyCode == Keys.Right)
+                    {
+                        this.Left += w;
+                    }
+                    return;
+                } 
+            
+            }
+
+                if (e.KeyCode == Keys.F5)
             {
                 loadText();
                 return;
@@ -706,11 +725,12 @@ namespace WindowsFormsApp1
             }
             if (e.KeyCode == Keys.Escape)
             {
-                if (textBox1.Text == "")
-                //預設為最上層顯示，若textBox1值為空，則按下Esc鍵會隱藏到任務列中；點一下即恢復
-                {
-                    hideToNICo();
-                }
+                hideToNICo();
+                //if (textBox1.Text == "")
+                ////預設為最上層顯示，若textBox1值為空，則按下Esc鍵會隱藏到任務列中；點一下即恢復
+                //{
+                //    hideToNICo();
+                //}
             }
         }
 
