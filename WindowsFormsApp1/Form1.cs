@@ -101,6 +101,7 @@ namespace WindowsFormsApp1
             //據第一行長度來分行分段
             bool noteFlg = false;
             int selStart = textBox1.SelectionStart;
+            int s = selStart;
             string x = "";
             if (selStart == textBox1.Text.Length) selStart = 0;
             if (selStart != 0)
@@ -234,9 +235,9 @@ namespace WindowsFormsApp1
                 .Replace(Environment.NewLine + "}}", "}}" + Environment.NewLine)
                 .Replace("{{" + Environment.NewLine, Environment.NewLine + "{{");
             textBox1.Focus();
-            textBox1.SelectionStart = selStart;
-            textBox1.SelectionLength = 0;
-            //textBox1.ScrollToCaret();
+            textBox1.SelectionStart = s;//selStart;
+            textBox1.SelectionLength = 1;
+            textBox1.ScrollToCaret();
             //Clipboard.SetText(resltTxt);
         }
 
@@ -795,6 +796,7 @@ namespace WindowsFormsApp1
         {
             Color C = this.BackColor; this.BackColor = Color.Green;
             SystemSounds.Hand.Play();
+            hideToNICo();
             Microsoft.Office.Interop.Word.Application appWord = new Microsoft.Office
                                     .Interop.Word.Application();
             appWord.Run(runName);
@@ -803,6 +805,7 @@ namespace WindowsFormsApp1
             textBox1.ScrollToCaret();
             appWord.Quit(Microsoft.Office.Interop.Word.WdSaveOptions.wdDoNotSaveChanges);
             this.BackColor = C;
+            show_nICo();
         }
 
         const string fName_to_Save_Txt = "cText.txt";
