@@ -384,7 +384,7 @@ namespace WindowsFormsApp1
                     }
                     return;
                 }
-                if (e.KeyCode == Keys.NumPad5 || e.KeyCode == Keys.Oemplus || e.KeyCode == Keys.Add || e.KeyCode == Keys.Subtract)
+                if (e.KeyCode == Keys.Add || e.KeyCode == Keys.Oemplus || e.KeyCode == Keys.Subtract || e.KeyCode == Keys.NumPad5)
                 {
                     keyDownCtrlAdd();
                     return;
@@ -495,7 +495,26 @@ namespace WindowsFormsApp1
                 {
                     splitLineByFristLen(); return;
                 }
-
+                if (e.KeyCode==Keys.D1)
+                {//Alt + 1 : 鍵入本站制式留空空格標記「􏿽」：若有選取則取代全形空格「　」為「􏿽」
+                    string x = textBox1.Text;
+                    int s = textBox1.SelectionStart;
+                    string sTxt= textBox1.SelectedText;
+                    if (sTxt!="")
+                    {
+                        var asTxt = sTxt.Split("　".ToCharArray());
+                        foreach (string item in asTxt)
+                        {
+                            if (item != "　") return;
+                        }
+                        x = x.Substring(0, s) + sTxt.Replace("　", "􏿽")+x.Substring(s+sTxt.Length);
+                    }
+                    else
+                    {
+                        x = x.Substring(0, s) + "􏿽"+ x.Substring(s);                        
+                    }
+                    return;
+                }
 
             }
 
@@ -1012,7 +1031,7 @@ namespace WindowsFormsApp1
         {
             if (e.KeyCode == Keys.NumPad5 || e.KeyCode == Keys.Oemplus || e.KeyCode == Keys.Add || e.KeyCode == Keys.Subtract)
             {
-                textBox1_KeyDown(sender, e);                
+                textBox1_KeyDown(sender, e);
                 return;
             }
 
