@@ -496,7 +496,7 @@ namespace WindowsFormsApp1
                     splitLineByFristLen(); return;
                 }
 
-                if (e.KeyCode==Keys.Menu|| e.KeyCode==Keys.D1)//D1=Menu?
+                if ( e.KeyCode==Keys.D1)//D1=Menu?
                 {//Alt + 1 : 鍵入本站制式留空空格標記「􏿽」：若有選取則取代全形空格「　」為「􏿽」
                     string x = textBox1.Text;
                     int s = textBox1.SelectionStart, l = textBox1.SelectionLength;
@@ -505,7 +505,11 @@ namespace WindowsFormsApp1
                     {
                         string sTxtChk = sTxt.Replace("　", "");
                         if (sTxtChk!= "") return;
-                        x = x.Substring(0, s) + sTxt.Replace("　", "􏿽")+x.Substring(s+l);
+                        for (int i = 0; i < sTxt.Length; i++)
+                        {
+                            sTxtChk += "􏿽";
+                        }
+                        x = x.Substring(0, s) + sTxtChk+x.Substring(s+l);
                     }
                     else
                     {
