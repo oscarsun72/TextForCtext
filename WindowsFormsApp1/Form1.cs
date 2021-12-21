@@ -495,24 +495,24 @@ namespace WindowsFormsApp1
                 {
                     splitLineByFristLen(); return;
                 }
-                if (e.KeyCode==Keys.D1)
+
+                if (e.KeyCode==Keys.Menu|| e.KeyCode==Keys.D1)//D1=Menu?
                 {//Alt + 1 : 鍵入本站制式留空空格標記「􏿽」：若有選取則取代全形空格「　」為「􏿽」
                     string x = textBox1.Text;
                     int s = textBox1.SelectionStart;
                     string sTxt= textBox1.SelectedText;
                     if (sTxt!="")
                     {
-                        var asTxt = sTxt.Split("　".ToCharArray());
-                        foreach (string item in asTxt)
-                        {
-                            if (item != "　") return;
-                        }
+                        string sTxtChk = sTxt.Replace("　", "");
+                        if (sTxtChk!= "") return;
                         x = x.Substring(0, s) + sTxt.Replace("　", "􏿽")+x.Substring(s+sTxt.Length);
                     }
                     else
                     {
                         x = x.Substring(0, s) + "􏿽"+ x.Substring(s);                        
                     }
+                    textBox1.Text = x;
+                    textBox1.SelectionStart = s + sTxt.Length;
                     return;
                 }
 
