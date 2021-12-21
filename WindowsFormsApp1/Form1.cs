@@ -518,6 +518,7 @@ namespace WindowsFormsApp1
                     }
                     textBox1.Text = x;
                     textBox1.SelectionStart = s + sTxt.Length;
+                    textBox1.ScrollToCaret();
                     return;
                 }
 
