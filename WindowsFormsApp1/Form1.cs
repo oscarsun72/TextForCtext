@@ -312,7 +312,7 @@ namespace WindowsFormsApp1
             if (xCopy.IndexOf(" ") > -1 || xCopy.IndexOfAny("�".ToCharArray()) > -1)
             {//  「�」甚特別，indexof會失效，明明沒有，而傳回 0 //https://docs.microsoft.com/zh-tw/dotnet/csharp/how-to/compare-strings
              //  //https://docs.microsoft.com/zh-tw/dotnet/api/system.string.compare?view=net-6.0
-                SystemSounds.Asterisk.Play();//文本有缺字警告
+                SystemSounds.Hand.Play();//文本有缺字警告
                 Color c = this.BackColor;
                 this.BackColor = Color.Yellow;
                 Task.Delay(900).Wait();
@@ -499,13 +499,13 @@ namespace WindowsFormsApp1
                 if (e.KeyCode==Keys.Menu|| e.KeyCode==Keys.D1)//D1=Menu?
                 {//Alt + 1 : 鍵入本站制式留空空格標記「􏿽」：若有選取則取代全形空格「　」為「􏿽」
                     string x = textBox1.Text;
-                    int s = textBox1.SelectionStart;
+                    int s = textBox1.SelectionStart, l = textBox1.SelectionLength;
                     string sTxt= textBox1.SelectedText;
                     if (sTxt!="")
                     {
                         string sTxtChk = sTxt.Replace("　", "");
                         if (sTxtChk!= "") return;
-                        x = x.Substring(0, s) + sTxt.Replace("　", "􏿽")+x.Substring(s+sTxt.Length);
+                        x = x.Substring(0, s) + sTxt.Replace("　", "􏿽")+x.Substring(s+l);
                     }
                     else
                     {
