@@ -672,7 +672,13 @@ namespace WindowsFormsApp1
                     nextPages(e.KeyCode);
                     return;
                 }
-
+                if (e.KeyCode == Keys.Left || e.KeyCode == Keys.Right)
+                {
+                    const int w = 1;
+                    if (e.KeyCode == Keys.Left) this.Left -= w;
+                    if (e.KeyCode == Keys.Right) this.Left += w;
+                    return;
+                }
 
                 if (e.KeyCode == Keys.D1)
                 {
@@ -694,19 +700,22 @@ namespace WindowsFormsApp1
 
             }
 
+            //if (((m & Keys.Control) == Keys.Control && (m & Keys.Alt) == Keys.Alt) && 
+            //    (e.KeyCode == Keys.Left || e.KeyCode == Keys.Right||e.KeyCode==Keys.Menu))
+            //{
+            //    const int w= 10;
+            //    if (e.KeyCode == Keys.Left) this.Left -= w;
+            //    if (e.KeyCode == Keys.Right) this.Left += w;
+            //    return;
+            //}
+
             if (Control.ModifierKeys == Keys.Alt)
             {//按下Alt鍵
                 if (e.KeyCode == Keys.Left||e.KeyCode==Keys.Right)
                 {
                     int w = this.Width;
-                    if (e.KeyCode==Keys.Left)
-                    {
-                        this.Left -= w;
-                    }
-                    if (e.KeyCode == Keys.Right)
-                    {
-                        this.Left += w;
-                    }
+                    if (e.KeyCode==Keys.Left)this.Left -= w;
+                    if (e.KeyCode == Keys.Right)this.Left += w;
                     return;
                 } 
             
