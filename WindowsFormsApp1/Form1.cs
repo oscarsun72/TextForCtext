@@ -497,26 +497,26 @@ namespace WindowsFormsApp1
                     splitLineByFristLen(); return;
                 }
 
-                if ( e.KeyCode==Keys.D1)//D1=Menu?
+                if (e.KeyCode == Keys.D1)//D1=Menu?
                 {//Alt + 1 : 鍵入本站制式留空空格標記「􏿽」：若有選取則取代全形空格「　」為「􏿽」
                     string x = textBox1.Text;
                     int s = textBox1.SelectionStart, l = textBox1.SelectionLength;
-                    string sTxt= textBox1.SelectedText;
-                    if (sTxt!="")
+                    string sTxt = textBox1.SelectedText;
+                    if (sTxt != "")
                     {
                         string sTxtChk = sTxt.Replace("　", "");
-                        if (sTxtChk!= "") return;
+                        if (sTxtChk != "") return;
                         for (int i = 0; i < sTxt.Length; i++)
                         {
                             sTxtChk += "􏿽";
                         }
-                        x = x.Substring(0, s) + sTxtChk+x.Substring(s+l);
+                        x = x.Substring(0, s) + sTxtChk + x.Substring(s + l);
                         textBox1.Text = x;
                         textBox1.SelectionStart = s + sTxtChk.Length;
                     }
                     else
                     {
-                        x = x.Substring(0, s) + "􏿽"+ x.Substring(s);
+                        x = x.Substring(0, s) + "􏿽" + x.Substring(s);
                         textBox1.Text = x;
                         textBox1.SelectionStart = s + "􏿽".Length;
                     }
@@ -674,9 +674,12 @@ namespace WindowsFormsApp1
                 }
                 if (e.KeyCode == Keys.Left || e.KeyCode == Keys.Right)
                 {
-                    const int w = 1;
-                    if (e.KeyCode == Keys.Left) this.Left -= w;
-                    if (e.KeyCode == Keys.Right) this.Left += w;
+                    //const int w = 1;
+                    Point mouseIP = Cursor.Position;//https://jjnnykimo.pixnet.net/blog/post/27155696
+                    if (e.KeyCode == Keys.Left) { this.Left --; mouseIP.X--; }//-= w; }
+                    if (e.KeyCode == Keys.Right) { this.Left ++; mouseIP.X++; } //+= w; }
+                    Cursor.Position = mouseIP;
+                    //SetCursorPos(mouseIP.X,mouseIP.Y);
                     return;
                 }
 
@@ -711,18 +714,18 @@ namespace WindowsFormsApp1
 
             if (Control.ModifierKeys == Keys.Alt)
             {//按下Alt鍵
-                if (e.KeyCode == Keys.Left||e.KeyCode==Keys.Right)
+                if (e.KeyCode == Keys.Left || e.KeyCode == Keys.Right)
                 {
                     int w = this.Width;
-                    if (e.KeyCode==Keys.Left)this.Left -= w;
-                    if (e.KeyCode == Keys.Right)this.Left += w;
-                    this.Activate();
+                    if (e.KeyCode == Keys.Left) this.Left -= w;
+                    if (e.KeyCode == Keys.Right) this.Left += w;
+                    mouseMovein();
                     return;
-                } 
-            
+                }
+
             }
 
-                if (e.KeyCode == Keys.F5)
+            if (e.KeyCode == Keys.F5)
             {
                 loadText();
                 return;
@@ -742,6 +745,13 @@ namespace WindowsFormsApp1
                 //    hideToNICo();
                 //}
             }
+        }
+
+        [DllImport("user32")]
+        static extern bool SetCursorPos(int X, int Y);
+        private void mouseMovein()
+        {//https://lolikitty.pixnet.net/blog/post/164569578
+            SetCursorPos(this.Left + 30, this.Top + 100);
         }
 
         void hideToNICo()
