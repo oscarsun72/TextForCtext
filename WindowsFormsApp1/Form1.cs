@@ -1238,15 +1238,16 @@ namespace WindowsFormsApp1
 
         private void textBox2_TextChanged(object sender, EventArgs e)
         {
-            string x = textBox2.Text;
+            string x = textBox2.Text,x1=textBox1.Text;
             if (x == "") return;
-            int s = textBox1.Text.IndexOf(x);
+            int s = x1.IndexOf(x),nextS=x1.IndexOf(x,s+1);            
             if (s > -1)
             {
                 textBox1.Select(s, x.Length);
                 textBox1.ScrollToCaret();
+                if (nextS > -1) textBox2.BackColor = Color.Yellow;return;
             }
-
+            textBox2.BackColor = Color.GreenYellow;
         }
 
         private void Form1_Deactivate(object sender, EventArgs e)
