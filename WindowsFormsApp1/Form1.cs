@@ -312,7 +312,8 @@ namespace WindowsFormsApp1
             int s = textBox1.SelectionStart, l = textBox1.SelectionLength;
             string xCopy = x.Substring(0, s + l);
             Clipboard.SetText(xCopy); BackupLastPageText(xCopy, false, false);
-            if (xCopy.IndexOf(" ") > -1 || xCopy.IndexOfAny("�".ToCharArray()) > -1)
+            if (xCopy.IndexOf(" ") > -1 || xCopy.IndexOfAny("�".ToCharArray()) > -1 ||
+                xCopy.IndexOf("□") > -1)//□為《維基文庫》《四庫全書》的缺字符，" "則是《四部叢刊》的，"�"則是《四部叢刊》的造字符。
             {//  「�」甚特別，indexof會失效，明明沒有，而傳回 0 //https://docs.microsoft.com/zh-tw/dotnet/csharp/how-to/compare-strings
              //  //https://docs.microsoft.com/zh-tw/dotnet/api/system.string.compare?view=net-6.0
                 SystemSounds.Hand.Play();//文本有缺字警告
@@ -320,6 +321,11 @@ namespace WindowsFormsApp1
                 this.BackColor = Color.Yellow;
                 Task.Delay(900).Wait();
                 this.BackColor = c;
+                string[] rTxt = { " ", "�", "□" };
+                foreach (string rs in rTxt)
+                {
+                    xCopy = xCopy.Replace(rs,"●");//「●」為《中國哲學書電子化計劃》的缺字符，詳：https://ctext.org/instructions/wiki-formatting/zh
+                }
             }
             if (s + l + 2 < textBox1.Text.Length)
             {
@@ -343,7 +349,7 @@ namespace WindowsFormsApp1
         }
 
 
-        string textBox1OriginalText="";
+        string textBox1OriginalText = "";
 
 
         private void textBox1_KeyDown(object sender, KeyEventArgs e)
@@ -678,8 +684,8 @@ namespace WindowsFormsApp1
                 {
                     //const int w = 1;
                     Point mouseIP = Cursor.Position;//https://jjnnykimo.pixnet.net/blog/post/27155696
-                    if (e.KeyCode == Keys.Left) { this.Left --; mouseIP.X--; }//-= w; }
-                    if (e.KeyCode == Keys.Right) { this.Left ++; mouseIP.X++; } //+= w; }
+                    if (e.KeyCode == Keys.Left) { this.Left--; mouseIP.X--; }//-= w; }
+                    if (e.KeyCode == Keys.Right) { this.Left++; mouseIP.X++; } //+= w; }
                     Cursor.Position = mouseIP;
                     //SetCursorPos(mouseIP.X,mouseIP.Y);
                     return;
@@ -846,7 +852,7 @@ namespace WindowsFormsApp1
                                     .Interop.Word.Application();
             appWord.Run(runName);
             textBox1.Text = Clipboard.GetText();
-            textBox1.Select(0,0);
+            textBox1.Select(0, 0);
             textBox1.ScrollToCaret();
             appWord.Quit(Microsoft.Office.Interop.Word.WdSaveOptions.wdDoNotSaveChanges);
             this.BackColor = C;
@@ -946,7 +952,7 @@ namespace WindowsFormsApp1
 
         private void replaceWord(string replacedword, string rplsword)
         {
-            if (rplsword == "") return;
+            if (rplsword == "") return;            
             if (textBox1.SelectionStart == textBox1.Text.Length) return;
             StringInfo selWord = new StringInfo(rplsword);
             string x = textBox1.Text;
@@ -971,12 +977,15 @@ namespace WindowsFormsApp1
                 l = textBox1.SelectionLength;
                 string xBefore = x.Substring(0, s), xAfter = x.Substring(s + l);
                 x = textBox1.SelectedText;
+                if (rplsword == "\"\"") rplsword = "";//要清除所選文字，則選取其字，然後在 textBox4 輸入兩個英文半形雙引號 「""」（即表空字串），則不會取代成「""」，而是清除之。
                 textBox1.Text = xBefore + x.Replace(replacedword, rplsword) + xAfter;
             }
             else
             {
                 l = selWord.LengthInTextElements;
+                if (rplsword == "\"\"") rplsword = "";
                 textBox1.Text = x.Replace(replacedword, rplsword);
+
             }
             addReplaceWordDefault(replacedword, rplsword);
             textBox1.SelectionStart = s; textBox1.SelectionLength = l;
@@ -1238,7 +1247,7 @@ namespace WindowsFormsApp1
 
         private void Form1_Deactivate(object sender, EventArgs e)
         {//預設表單視窗為最上層顯示，當表單視窗不在作用中時，自動隱藏至系統右下方之系統列/任務列中，當滑鼠滑過任務列中的縮圖ico時，即還原/恢復視窗窗體
-            if (!textBox2.Focused&&textBox1.Text!="") this.TopMost = false;//hideToNICo();
+            if (!textBox2.Focused && textBox1.Text != "") this.TopMost = false;//hideToNICo();
         }
     }
 }
