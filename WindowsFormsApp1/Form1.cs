@@ -299,7 +299,7 @@ namespace WindowsFormsApp1
 
                 }*/
             }
-            textBox2.BackColor = textBox2BackColorDefault;
+            //textBox2.BackColor = textBox2BackColorDefault;
         }
 
 
