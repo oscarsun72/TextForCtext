@@ -246,6 +246,8 @@ namespace WindowsFormsApp1
             if (textBox1.Text == "")
             {
                 textBox1.Text = Clipboard.GetText();
+                textBox1.Select(0, 0);
+                textBox1.ScrollToCaret();
             }
         }
 
@@ -685,15 +687,15 @@ namespace WindowsFormsApp1
 
                 if (e.KeyCode == Keys.D1)
                 {
-                    runWord("漢籍電子文獻資料庫文本整理_以轉貼到中國哲學書電子化計劃");
+                    runWordMacro("漢籍電子文獻資料庫文本整理_以轉貼到中國哲學書電子化計劃");
                 }
                 if (e.KeyCode == Keys.D3)
                 {
-                    runWord("漢籍電子文獻資料庫文本整理_十三經注疏");
+                    runWordMacro("漢籍電子文獻資料庫文本整理_十三經注疏");
                 }
                 if (e.KeyCode == Keys.D4)
                 {
-                    runWord("維基文庫四部叢刊本轉來");
+                    runWordMacro("維基文庫四部叢刊本轉來");
                 }
                 if (e.KeyCode == Keys.S)
                 {
@@ -835,7 +837,7 @@ namespace WindowsFormsApp1
             textBox3.Text = url;
         }
 
-        private void runWord(string runName)
+        private void runWordMacro(string runName)
         {
             Color C = this.BackColor; this.BackColor = Color.Green;
             SystemSounds.Hand.Play();
@@ -844,7 +846,7 @@ namespace WindowsFormsApp1
                                     .Interop.Word.Application();
             appWord.Run(runName);
             textBox1.Text = Clipboard.GetText();
-            textBox1.SelectionStart = 0;
+            textBox1.Select(0,0);
             textBox1.ScrollToCaret();
             appWord.Quit(Microsoft.Office.Interop.Word.WdSaveOptions.wdDoNotSaveChanges);
             this.BackColor = C;
