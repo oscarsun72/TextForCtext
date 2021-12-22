@@ -264,7 +264,7 @@ namespace WindowsFormsApp1
             {
                 processID = s;
             }
-            string x = textBox1.Text; int xStart = x.IndexOf(s),nextStart=x.IndexOf(s,xStart+1);
+            string x = textBox1.Text; int xStart = x.IndexOf(s), nextStart = x.IndexOf(s, xStart + 1);
             Color C = textBox2.BackColor;
             if (xStart > -1)
             {//若有找到
@@ -274,8 +274,8 @@ namespace WindowsFormsApp1
                 x = x.Substring(0, xStart + textBox2.Text.Length);
                 Clipboard.SetText(x);
                 //textBox1.Text = textBox1.Text.Substring(xStart + 2);
-                if (nextStart > -1)textBox2.BackColor = Color.Yellow;//若符合尋找的字串並非獨一無二，則 textBox2 會顯示黃色
-                else textBox2.BackColor= textBox2BackColorDefault;
+                if (nextStart > -1) textBox2.BackColor = Color.Yellow;//若符合尋找的字串並非獨一無二，則 textBox2 會顯示黃色
+                else textBox2.BackColor = textBox2BackColorDefault;
             }
             else
             {//若沒找到
@@ -326,7 +326,7 @@ namespace WindowsFormsApp1
                 string[] rTxt = { " ", "�", "□" };
                 foreach (string rs in rTxt)
                 {
-                    xCopy = xCopy.Replace(rs,"●");//「●」為《中國哲學書電子化計劃》的缺字符，詳：https://ctext.org/instructions/wiki-formatting/zh
+                    xCopy = xCopy.Replace(rs, "●");//「●」為《中國哲學書電子化計劃》的缺字符，詳：https://ctext.org/instructions/wiki-formatting/zh
                 }
             }
             Clipboard.SetText(xCopy); BackupLastPageText(xCopy, false, false);
@@ -956,7 +956,7 @@ namespace WindowsFormsApp1
 
         private void replaceWord(string replacedword, string rplsword)
         {
-            if (rplsword == "") return;            
+            if (rplsword == "") return;
             if (textBox1.SelectionStart == textBox1.Text.Length) return;
             StringInfo selWord = new StringInfo(rplsword);
             string x = textBox1.Text;
@@ -1238,14 +1238,14 @@ namespace WindowsFormsApp1
 
         private void textBox2_TextChanged(object sender, EventArgs e)
         {
-            string x = textBox2.Text,x1=textBox1.Text;
+            string x = textBox2.Text, x1 = textBox1.Text;
             if (x == "") return;
-            int s = x1.IndexOf(x),nextS=x1.IndexOf(x,s+1);            
+            int s = x1.IndexOf(x), nextS = x1.IndexOf(x, s + 1);
             if (s > -1)
             {
                 textBox1.Select(s, x.Length);
                 textBox1.ScrollToCaret();
-                if (nextS > -1) textBox2.BackColor = Color.Yellow;return;
+                if (nextS > -1) { textBox2.BackColor = Color.Yellow; return; }
             }
             textBox2.BackColor = Color.GreenYellow;
         }
