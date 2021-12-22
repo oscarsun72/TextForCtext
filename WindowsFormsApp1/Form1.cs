@@ -264,18 +264,21 @@ namespace WindowsFormsApp1
             {
                 processID = s;
             }
-            string x = textBox1.Text; int xStart = x.IndexOf(s);
+            string x = textBox1.Text; int xStart = x.IndexOf(s),nextStart=x.IndexOf(s,xStart+1);
+            Color C = textBox2.BackColor;
             if (xStart > -1)
-            {
+            {//若有找到
                 textBox1.Focus();
                 textBox1.Select(xStart, textBox2.Text.Length);
                 textBox1.ScrollToCaret();
                 x = x.Substring(0, xStart + textBox2.Text.Length);
                 Clipboard.SetText(x);
                 //textBox1.Text = textBox1.Text.Substring(xStart + 2);
+                if (nextStart > -1)textBox2.BackColor = Color.Yellow;//若符合尋找的字串並非獨一無二，則 textBox2 會顯示黃色
+                else textBox2.BackColor= textBox2BackColorDefault;
             }
             else
-            {
+            {//若沒找到
                 textBox2.BackColor = Color.Red;
                 Task.Delay(500).Wait();
                 //C# Leave envent cancel
@@ -770,6 +773,7 @@ namespace WindowsFormsApp1
             {
                 thisHeight = this.Height; thisWidth = this.Width; thisLeft = this.Left; thisTop = this.Top;
             }
+            this.WindowState = FormWindowState.Minimized;
             this.Hide();
             this.nICo.Visible = true;
         }
