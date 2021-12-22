@@ -343,7 +343,7 @@ namespace WindowsFormsApp1
         }
 
 
-        string textBox1OriginalText;
+        string textBox1OriginalText="";
 
 
         private void textBox1_KeyDown(object sender, KeyEventArgs e)
