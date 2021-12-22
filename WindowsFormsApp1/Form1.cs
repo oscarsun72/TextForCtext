@@ -311,7 +311,6 @@ namespace WindowsFormsApp1
             string x = textBox1.Text;
             int s = textBox1.SelectionStart, l = textBox1.SelectionLength;
             string xCopy = x.Substring(0, s + l);
-            Clipboard.SetText(xCopy); BackupLastPageText(xCopy, false, false);
             if (xCopy.IndexOf(" ") > -1 || xCopy.IndexOfAny("�".ToCharArray()) > -1 ||
                 xCopy.IndexOf("□") > -1)//□為《維基文庫》《四庫全書》的缺字符，" "則是《四部叢刊》的，"�"則是《四部叢刊》的造字符。
             {//  「�」甚特別，indexof會失效，明明沒有，而傳回 0 //https://docs.microsoft.com/zh-tw/dotnet/csharp/how-to/compare-strings
@@ -327,6 +326,7 @@ namespace WindowsFormsApp1
                     xCopy = xCopy.Replace(rs,"●");//「●」為《中國哲學書電子化計劃》的缺字符，詳：https://ctext.org/instructions/wiki-formatting/zh
                 }
             }
+            Clipboard.SetText(xCopy); BackupLastPageText(xCopy, false, false);
             if (s + l + 2 < textBox1.Text.Length)
             {
                 if (x.Substring(s + l, 1) == Environment.NewLine)
