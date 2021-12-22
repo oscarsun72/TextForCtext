@@ -1247,6 +1247,7 @@ namespace WindowsFormsApp1
                 textBox1.ScrollToCaret();
                 if (nextS > -1) { textBox2.BackColor = Color.Yellow; return; }
             }
+            else { textBox2.BackColor = Color.Red; return; }
             textBox2.BackColor = Color.GreenYellow;
         }
 
