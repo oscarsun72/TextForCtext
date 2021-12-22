@@ -1238,7 +1238,7 @@ namespace WindowsFormsApp1
 
         private void Form1_Deactivate(object sender, EventArgs e)
         {//預設表單視窗為最上層顯示，當表單視窗不在作用中時，自動隱藏至系統右下方之系統列/任務列中，當滑鼠滑過任務列中的縮圖ico時，即還原/恢復視窗窗體
-            if (!textBox2.Focused) this.TopMost = false;//hideToNICo();
+            if (!textBox2.Focused&&textBox1.Text!="") this.TopMost = false;//hideToNICo();
         }
     }
 }
