@@ -852,6 +852,7 @@ namespace WindowsFormsApp1
             Color C = this.BackColor; this.BackColor = Color.Green;
             SystemSounds.Hand.Play();
             hideToNICo();
+            if (this.Visible) this.Hide();
             Microsoft.Office.Interop.Word.Application appWord = new Microsoft.Office
                                     .Interop.Word.Application();
             appWord.Run(runName);
