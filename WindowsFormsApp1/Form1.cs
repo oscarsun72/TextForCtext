@@ -1249,6 +1249,7 @@ namespace WindowsFormsApp1
             }
             else { textBox2.BackColor = Color.Red; return; }
             textBox2.BackColor = Color.GreenYellow;
+            SystemSounds.Hand.Play();//文本唯一提示
         }
 
         private void Form1_Deactivate(object sender, EventArgs e)
