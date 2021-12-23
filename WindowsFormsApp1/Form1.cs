@@ -60,11 +60,17 @@ namespace WindowsFormsApp1
             //this.Shown += Form1_Shown;//https://stackoverflow.com/questions/32720207/change-caret-cursor-in-textbox-in-c-sharp
         }
 
-        void Form1_Shown(object sender, EventArgs e)
-        {//插入點游標寬廣設定.文字框中更改插入符號(游標) https://www.796t.com/post/OXZ0cjQ=.html 如何改變鼠標的樣式: https://blog.xuite.net/akira32/home/109034425-Visual+C%23,%E5%A6%82%E4%BD%95%E6%94%B9%E8%AE%8A%E9%BC%A0%E6%A8%99%E7%9A%84%E6%A8%A3%E5%BC%8F+(change+cursor+to+system+type+or+customed+type) https://www.google.com/search?q=%E6%88%91%E7%94%A8%E4%BB%A5%E4%B8%8A%E7%9A%84%E4%BD%9C%E6%B3%95%E9%83%BD%E7%84%A1%E6%B3%95%E6%94%B9%E8%AE%8A%E9%BC%A0%E6%A8%99%E7%9A%84%E6%A8%A3%E5%BC%8F%2C%E8%AB%8B%E5%95%8F%E4%B8%80%E4%B8%8B%E8%A6%81%E5%A6%82%E4%BD%95%E9%81%94%E6%88%90%E5%91%A2%3F&rlz=1C1GCEU_zh-TWTW823TW823&sourceid=chrome&ie=UTF-8
-            CreateCaret(textBox1.Handle, IntPtr.Zero, 5, int.Parse(textBox1.Font.SizeInPoints.ToString()));
-            ShowCaret(textBox1.Handle);
+        void Caret_Shown(Control ctl)
+        {
+            CreateCaret(ctl.Handle, IntPtr.Zero, 4, (int)ctl.Font.Size);
+            ShowCaret(ctl.Handle);
         }
+        //void Form1_Shown(object sender, EventArgs e)
+        //{//插入點游標寬廣設定.文字框中更改插入符號(游標) https://www.796t.com/post/OXZ0cjQ=.html 如何改變鼠標的樣式: https://blog.xuite.net/akira32/home/109034425-Visual+C%23,%E5%A6%82%E4%BD%95%E6%94%B9%E8%AE%8A%E9%BC%A0%E6%A8%99%E7%9A%84%E6%A8%A3%E5%BC%8F+(change+cursor+to+system+type+or+customed+type) https://www.google.com/search?q=%E6%88%91%E7%94%A8%E4%BB%A5%E4%B8%8A%E7%9A%84%E4%BD%9C%E6%B3%95%E9%83%BD%E7%84%A1%E6%B3%95%E6%94%B9%E8%AE%8A%E9%BC%A0%E6%A8%99%E7%9A%84%E6%A8%A3%E5%BC%8F%2C%E8%AB%8B%E5%95%8F%E4%B8%80%E4%B8%8B%E8%A6%81%E5%A6%82%E4%BD%95%E9%81%94%E6%88%90%E5%91%A2%3F&rlz=1C1GCEU_zh-TWTW823TW823&sourceid=chrome&ie=UTF-8
+        //    Caret_Shown(textBox1);
+        //    //CreateCaret(textBox1.Handle, IntPtr.Zero, 5, int.Parse(textBox1.Font.SizeInPoints.ToString()));
+        //    //ShowCaret(textBox1.Handle);            
+        //}
         void show_nICo()
         {
             nICo.Visible = false;
@@ -80,9 +86,10 @@ namespace WindowsFormsApp1
         {
             show_nICo();
         }
+
         private void nICo_MouseMove(object sender, MouseEventArgs e)
         {
-            show_nICo();
+            if (Cursor.Position.Y > this.Top + this.Height) show_nICo();
         }
 
         FontFamily getHanaminBFontInstalled()
@@ -667,6 +674,7 @@ namespace WindowsFormsApp1
         private void textBox3_Click(object sender, EventArgs e)
         {
             string x = Clipboard.GetText();
+            if (x == "" || x.Length < 4) return;
             if (x.Substring(0, 4) == "http")
                 if (x.IndexOf("ctext.org") > -1)
                 {
@@ -793,7 +801,7 @@ namespace WindowsFormsApp1
             {
                 thisHeight = this.Height; thisWidth = this.Width; thisLeft = this.Left; thisTop = this.Top;
             }
-            this.WindowState = FormWindowState.Minimized;
+            //this.WindowState = FormWindowState.Minimized;
             this.Hide();
             this.nICo.Visible = true;
         }
@@ -872,7 +880,11 @@ namespace WindowsFormsApp1
             Color C = this.BackColor; this.BackColor = Color.Green;
             SystemSounds.Hand.Play();
             hideToNICo();
-            if (this.Visible) this.Hide();
+            if (this.Visible)
+            {
+                this.WindowState = FormWindowState.Minimized;
+                this.Hide();
+            }
             Microsoft.Office.Interop.Word.Application appWord = new Microsoft.Office
                                     .Interop.Word.Application();
             appWord.Run(runName);
@@ -1085,7 +1097,8 @@ namespace WindowsFormsApp1
             //MessageBox.Show("你的螢幕解析度是" + Size + "\n Width = " + Width + "\n Height = " + Height);
             //FormStartPosition 列舉:https://docs.microsoft.com/zh-tw/dotnet/api/system.windows.forms.formstartposition?view=netframework-4.7.2
             this.Location = new Point
-                (Width - this.Width, Height - textBox1.Height * 2 + 150);
+                (Width - this.Width, Height - textBox1.Height * 2);
+            textBox1Size();
             //this.PointToScreen();
         }
 
@@ -1257,7 +1270,12 @@ namespace WindowsFormsApp1
         private void Form1_Activated(object sender, EventArgs e)
         {
             if (!this.TopMost) this.TopMost = true;
-            this.Shown += Form1_Shown; textBox1Size();
+            if (textBox1.Focused) Caret_Shown(textBox1);
+        }
+
+        private void textBox1_Enter(object sender, EventArgs e)
+        {
+            Caret_Shown(textBox1);
         }
 
         private void textBox2_Enter(object sender, EventArgs e)
@@ -1285,7 +1303,7 @@ namespace WindowsFormsApp1
 
         private void Form1_Deactivate(object sender, EventArgs e)
         {//預設表單視窗為最上層顯示，當表單視窗不在作用中時，自動隱藏至系統右下方之系統列/任務列中，當滑鼠滑過任務列中的縮圖ico時，即還原/恢復視窗窗體
-            if (!textBox2.Focused && textBox1.Text != "") this.TopMost = false;//hideToNICo();
+            if (!textBox2.Focused && textBox1.Text != "") this.TopMost = false;//hideToNICo();            
         }
     }
 }
