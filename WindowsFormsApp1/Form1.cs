@@ -1286,21 +1286,51 @@ namespace WindowsFormsApp1
         private void textBox2_TextChanged(object sender, EventArgs e)
         {
             string x = textBox2.Text, x1 = textBox1.Text;
-            if (x == "") return;
-            int s = x1.IndexOf(x), nextS = x1.IndexOf(x, s + 1);
+            if (x == "" || x1 == "") return;
+            var sa = findword(x, x1);
+            if (sa == null) return;
+            int s = sa[0], nextS = sa[1];
             if (s > -1)
             {
                 textBox1.Select(s, x.Length);
                 textBox1.ScrollToCaret();
                 if (nextS > -1) { textBox2.BackColor = Color.Yellow; doNotLeaveTextBox2 = false; return; }
             }
-            else { textBox2.BackColor = Color.Red; doNotLeaveTextBox2 = false; return; }
+            else
+            {
+                textBox2.BackColor = Color.Red;
+                doNotLeaveTextBox2 = false; return;
+            }
             textBox2.BackColor = Color.GreenYellow;
             SystemSounds.Hand.Play();//文本唯一提示
             doNotLeaveTextBox2 = true;
             textBox2.SelectAll();
         }
 
+        int[] findword(string x, string x1)
+        {
+            //string x = textBox2.Text;
+            StringInfo xInfo = new StringInfo(x);
+            if (xInfo.LengthInTextElements < 1) return null;
+            //string x1 = textBox1.Text;
+            if (x == "") return null;
+            StringInfo x1Info = new StringInfo(x1);
+            int s, nextS;
+            //int s = x1.IndexOf(xInfo.String), nextS = x1.IndexOf(x, s + 1);
+            if (xInfo.LengthInTextElements == 1)
+            {
+                s = x1Info.String.IndexOfAny(xInfo.String.ToCharArray());
+                nextS = x1Info.String.IndexOfAny
+                (xInfo.String.ToCharArray(), s + xInfo.LengthInTextElements);
+            }
+            else
+            {
+                s = x1.IndexOf(x);
+                nextS = x1.IndexOf(x, s + x.Length);
+            }
+
+            return new int[] { s, nextS };
+        }
         private void Form1_Deactivate(object sender, EventArgs e)
         {//預設表單視窗為最上層顯示，當表單視窗不在作用中時，自動隱藏至系統右下方之系統列/任務列中，當滑鼠滑過任務列中的縮圖ico時，即還原/恢復視窗窗體
             if (!textBox2.Focused && textBox1.Text != "") this.TopMost = false;//hideToNICo();            
