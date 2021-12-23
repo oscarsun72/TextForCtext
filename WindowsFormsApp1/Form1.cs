@@ -470,6 +470,7 @@ namespace WindowsFormsApp1
                     else
                         s = x.LastIndexOf("{{", s - 1);
                     textBox1.SelectionStart = s;
+                    textBox1.ScrollToCaret();
                 }
 
             }
