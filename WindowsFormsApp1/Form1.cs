@@ -57,7 +57,7 @@ namespace WindowsFormsApp1
             this.nICo.Icon = this.Icon;
             this.nICo.MouseClick += new System.Windows.Forms.MouseEventHandler(nICo_MouseClick);
             this.nICo.MouseMove += new System.Windows.Forms.MouseEventHandler(nICo_MouseMove);
-            this.Shown += Form1_Shown;//https://stackoverflow.com/questions/32720207/change-caret-cursor-in-textbox-in-c-sharp
+            //this.Shown += Form1_Shown;//https://stackoverflow.com/questions/32720207/change-caret-cursor-in-textbox-in-c-sharp
         }
 
         void Form1_Shown(object sender, EventArgs e)
@@ -970,6 +970,11 @@ namespace WindowsFormsApp1
 
         private void Form1_Resize(object sender, EventArgs e)
         {
+            textBox1Size();
+        }
+
+        void textBox1Size()
+        {
             textBox1.Height = this.Height - textBox2.Height * 3 - textBox2.Top;
         }
 
@@ -1079,7 +1084,8 @@ namespace WindowsFormsApp1
             int Height = SystemInformation.PrimaryMonitorSize.Height;
             //MessageBox.Show("你的螢幕解析度是" + Size + "\n Width = " + Width + "\n Height = " + Height);
             //FormStartPosition 列舉:https://docs.microsoft.com/zh-tw/dotnet/api/system.windows.forms.formstartposition?view=netframework-4.7.2
-            this.Location = new Point(Width - this.Width, Height - textBox1.Height * 2 + 150);
+            this.Location = new Point
+                (Width - this.Width, Height - textBox1.Height * 2 + 150);
             //this.PointToScreen();
         }
 
@@ -1251,6 +1257,7 @@ namespace WindowsFormsApp1
         private void Form1_Activated(object sender, EventArgs e)
         {
             if (!this.TopMost) this.TopMost = true;
+            this.Shown += Form1_Shown; textBox1Size();
         }
 
         private void textBox2_Enter(object sender, EventArgs e)
