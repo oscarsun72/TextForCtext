@@ -1252,6 +1252,7 @@ namespace WindowsFormsApp1
             textBox2.BackColor = Color.GreenYellow;
             SystemSounds.Hand.Play();//文本唯一提示
             doNotLeaveTextBox2 = true;
+            textBox2.SelectAll();
         }
 
         private void Form1_Deactivate(object sender, EventArgs e)
