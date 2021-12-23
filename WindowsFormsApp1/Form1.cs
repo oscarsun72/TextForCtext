@@ -1104,6 +1104,7 @@ namespace WindowsFormsApp1
             {
                 e.Handled = true;
                 splitLineParabySeltext(e.KeyCode);
+                if (textBox2.BackColor == Color.GreenYellow) textBox2.Focus();//方便快速分行分段
                 return;
             }
             if (e.KeyCode == Keys.F2)
