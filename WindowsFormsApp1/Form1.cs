@@ -26,7 +26,10 @@ namespace WindowsFormsApp1
 
         System.Windows.Forms.NotifyIcon nICo;
         int thisHeight, thisWidth, thisLeft, thisTop;
-
+        [DllImport("user32.dll")]
+        static extern bool CreateCaret(IntPtr hWnd, IntPtr hBitmap, int nWidth, int nHeight);
+        [DllImport("user32.dll")]
+        static extern bool ShowCaret(IntPtr hWnd);
         public Form1()
         {
             InitializeComponent();
@@ -54,8 +57,14 @@ namespace WindowsFormsApp1
             this.nICo.Icon = this.Icon;
             this.nICo.MouseClick += new System.Windows.Forms.MouseEventHandler(nICo_MouseClick);
             this.nICo.MouseMove += new System.Windows.Forms.MouseEventHandler(nICo_MouseMove);
+            this.Shown += Form1_Shown;//https://stackoverflow.com/questions/32720207/change-caret-cursor-in-textbox-in-c-sharp
         }
 
+        void Form1_Shown(object sender, EventArgs e)
+        {//插入點游標寬廣設定.文字框中更改插入符號(游標) https://www.796t.com/post/OXZ0cjQ=.html 如何改變鼠標的樣式: https://blog.xuite.net/akira32/home/109034425-Visual+C%23,%E5%A6%82%E4%BD%95%E6%94%B9%E8%AE%8A%E9%BC%A0%E6%A8%99%E7%9A%84%E6%A8%A3%E5%BC%8F+(change+cursor+to+system+type+or+customed+type) https://www.google.com/search?q=%E6%88%91%E7%94%A8%E4%BB%A5%E4%B8%8A%E7%9A%84%E4%BD%9C%E6%B3%95%E9%83%BD%E7%84%A1%E6%B3%95%E6%94%B9%E8%AE%8A%E9%BC%A0%E6%A8%99%E7%9A%84%E6%A8%A3%E5%BC%8F%2C%E8%AB%8B%E5%95%8F%E4%B8%80%E4%B8%8B%E8%A6%81%E5%A6%82%E4%BD%95%E9%81%94%E6%88%90%E5%91%A2%3F&rlz=1C1GCEU_zh-TWTW823TW823&sourceid=chrome&ie=UTF-8
+            CreateCaret(textBox1.Handle, IntPtr.Zero, 5, int.Parse(textBox1.Font.SizeInPoints.ToString()));
+            ShowCaret(textBox1.Handle);
+        }
         void show_nICo()
         {
             nICo.Visible = false;
