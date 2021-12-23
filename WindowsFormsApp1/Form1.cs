@@ -1091,7 +1091,7 @@ namespace WindowsFormsApp1
                 return;
             }
         }
-
+        bool doNotLeaveTextBox2 = false;
         private void textBox2_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.KeyCode == Keys.NumPad5 || e.KeyCode == Keys.Oemplus || e.KeyCode == Keys.Add || e.KeyCode == Keys.Subtract)
@@ -1104,7 +1104,7 @@ namespace WindowsFormsApp1
             {
                 e.Handled = true;
                 splitLineParabySeltext(e.KeyCode);
-                if (textBox2.BackColor == Color.GreenYellow) textBox2.Focus();//方便快速分行分段
+                if (doNotLeaveTextBox2) textBox2.Focus();//方便快速分行分段
                 return;
             }
             if (e.KeyCode == Keys.F2)
@@ -1246,11 +1246,12 @@ namespace WindowsFormsApp1
             {
                 textBox1.Select(s, x.Length);
                 textBox1.ScrollToCaret();
-                if (nextS > -1) { textBox2.BackColor = Color.Yellow; return; }
+                if (nextS > -1) { textBox2.BackColor = Color.Yellow; doNotLeaveTextBox2 = false; return; }
             }
-            else { textBox2.BackColor = Color.Red; return; }
+            else { textBox2.BackColor = Color.Red; doNotLeaveTextBox2 = false; return; }
             textBox2.BackColor = Color.GreenYellow;
             SystemSounds.Hand.Play();//文本唯一提示
+            doNotLeaveTextBox2 = true;
         }
 
         private void Form1_Deactivate(object sender, EventArgs e)
