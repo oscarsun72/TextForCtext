@@ -1294,7 +1294,8 @@ namespace WindowsFormsApp1
             char[] xChar = x.ToArray();
             foreach (char item in xChar)
             {
-                if (CharUnicodeInfo.GetUnicodeCategory(item) == category)
+                //if (CharUnicodeInfo.GetUnicodeCategory(item) == category)
+                if (Char.IsSurrogate(item))
                 {
                     surrogate++;
                 }
@@ -1306,7 +1307,7 @@ namespace WindowsFormsApp1
         {
             string x = textBox2.Text, x1 = textBox1.Text;
             if (x == "" || x1 == "") return;
-            if (isKeyDownSurrogate(x)) return;//surrogate字在文字方塊輸入時會引發2次keyDown事件
+            if (isKeyDownSurrogate(x)) return;//surrogate字在文字方塊輸入時會引發2次keyDown事件            
             var sa = findWord(x, x1);
             if (sa == null) return;
             int s = sa[0], nextS = sa[1];
