@@ -20,7 +20,7 @@ namespace WindowsFormsApp1
     {
         readonly Point textBox4Location; readonly Size textBox4Size;
         readonly string dropBoxPathIncldBackSlash;
-        const string CJKBiggestSet = "KaiXinSongB";//"TH-Tshyn-P1";//"HanaMinB";
+        const string CJKBiggestSet = "HanaMinB";//"KaiXinSongB";//"TH-Tshyn-P1";
         Color button2BackColorDefault;
         //bool insertMode = true;
 
@@ -62,7 +62,7 @@ namespace WindowsFormsApp1
 
         void Caret_Shown(Control ctl)
         {
-            CreateCaret(ctl.Handle, IntPtr.Zero, 4, (int)ctl.Font.Size);
+            CreateCaret(ctl.Handle, IntPtr.Zero, 4, Convert.ToInt32(ctl.Font.Size*1.5));
             ShowCaret(ctl.Handle);
         }
         //void Form1_Shown(object sender, EventArgs e)
