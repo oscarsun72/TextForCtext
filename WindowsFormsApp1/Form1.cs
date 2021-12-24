@@ -1271,6 +1271,8 @@ namespace WindowsFormsApp1
         {
             if (!this.TopMost) this.TopMost = true;
             if (textBox1.Focused) Caret_Shown(textBox1);
+            if (textBox2.BackColor == Color.GreenYellow &&
+                doNotLeaveTextBox2 && textBox2.Focused) textBox2.SelectAll();
         }
 
         private void textBox1_Enter(object sender, EventArgs e)
@@ -1283,11 +1285,29 @@ namespace WindowsFormsApp1
             textBox2.BackColor = Color.GreenYellow;
         }
 
+        int surrogate = 0;
+        bool isKeyDownSurrogate(string x)
+        {/*解決輸入CJK字元長度為2的字串問題 https://docs.microsoft.com/en-us/previous-versions/windows/desktop/indexsrv/surrogate-pairs
+          * 
+        https://stackoverflow.com/questions/50180815/is-string-replacestring-string-unicode-safe-in-regards-to-surrogate-pairs */
+            UnicodeCategory category = UnicodeCategory.Surrogate;//https://docs.microsoft.com/zh-tw/dotnet/api/system.globalization.unicodecategory?view=net-6.0
+            char[] xChar = x.ToArray();
+            foreach (char item in xChar)
+            {
+                if (CharUnicodeInfo.GetUnicodeCategory(item) == category)
+                {
+                    surrogate++;
+                }
+            }
+            if (surrogate % 2 != 0) { surrogate = 0; return true; }
+            else { surrogate = 0; return false; }
+        }
         private void textBox2_TextChanged(object sender, EventArgs e)
         {
             string x = textBox2.Text, x1 = textBox1.Text;
             if (x == "" || x1 == "") return;
-            var sa = findword(x, x1);
+            if (isKeyDownSurrogate(x)) return;//surrogate字在文字方塊輸入時會引發2次keyDown事件
+            var sa = findWord(x, x1);
             if (sa == null) return;
             int s = sa[0], nextS = sa[1];
             if (s > -1)
@@ -1305,31 +1325,32 @@ namespace WindowsFormsApp1
             SystemSounds.Hand.Play();//文本唯一提示
             doNotLeaveTextBox2 = true;
             textBox2.SelectAll();
+
         }
 
-        int[] findword(string x, string x1)
+        int[] findWord(string x, string x1)
         {
-            //string x = textBox2.Text;
-            StringInfo xInfo = new StringInfo(x);
-            if (xInfo.LengthInTextElements < 1) return null;
-            //string x1 = textBox1.Text;
-            if (x == "") return null;
-            StringInfo x1Info = new StringInfo(x1);
+            if (x == "" || x1 == "") return null;
             int s, nextS;
-            //int s = x1.IndexOf(xInfo.String), nextS = x1.IndexOf(x, s + 1);
-            if (xInfo.LengthInTextElements == 1)
-            {
-                s = x1Info.String.IndexOfAny(xInfo.String.ToCharArray());
-                nextS = x1Info.String.IndexOfAny
-                (xInfo.String.ToCharArray(), s + xInfo.LengthInTextElements);
-            }
-            else
-            {
-                s = x1.IndexOf(x);
-                nextS = x1.IndexOf(x, s + x.Length);
-            }
-
+            s = x1.IndexOf(x);
+            nextS = x1.IndexOf(x, s + x.Length);
             return new int[] { s, nextS };
+        }
+        int indexOfStringInfo(string s, string x)
+        {
+            //StringInfo sInfo = new StringInfo(s);
+            //StringInfo xInfo = new StringInfo(x);
+            TextElementEnumerator xTE = StringInfo.GetTextElementEnumerator(x);
+            int i = 0;
+            while (xTE.MoveNext())
+            {
+                string sComp = xTE.Current.ToString();
+                if (s == sComp)
+                {
+                    return i++;
+                }
+            }
+            return -1;
         }
         private void Form1_Deactivate(object sender, EventArgs e)
         {//預設表單視窗為最上層顯示，當表單視窗不在作用中時，自動隱藏至系統右下方之系統列/任務列中，當滑鼠滑過任務列中的縮圖ico時，即還原/恢復視窗窗體
