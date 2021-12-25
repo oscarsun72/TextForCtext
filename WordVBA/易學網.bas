@@ -6,6 +6,7 @@ Dim d As Document, a, noteFlag As Boolean, x As String
 Set d = ActiveDocument
 If d.path <> "" Then Set d = Documents.Add()
 d.Range.Paste
+d.Range.Find.Execute "^p", , , , , , , wdFindContinue, , "", wdReplaceAll
 For Each a In d.Characters
     x = x & a
     If Not a.Previous Is Nothing And Not a.Next Is Nothing Then
