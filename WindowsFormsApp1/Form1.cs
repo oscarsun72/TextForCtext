@@ -120,12 +120,12 @@ namespace WindowsFormsApp1
             int selStart = textBox1.SelectionStart; int s;
             //if (x.Substring(selStart).IndexOf(Environment.NewLine) == -1)
             //{// 結果插入點所在處無分段符號，則取其前一段
-                s = x.Substring(0, selStart).LastIndexOf(Environment.NewLine);
-                if (s > -1)
-                {
-                    selStart = x.Substring(0, s).LastIndexOf(Environment.NewLine)+Environment.NewLine.Length;
-                    if (selStart == -1) selStart = 0;
-                }
+            s = x.Substring(0, selStart).LastIndexOf(Environment.NewLine);
+            if (s > -1)
+            {
+                selStart = x.Substring(0, s).LastIndexOf(Environment.NewLine) + Environment.NewLine.Length;
+                if (selStart == -1) selStart = 0;
+            }
             //}
             s = selStart;
             if (selStart == textBox1.Text.Length) selStart = 0;
@@ -260,7 +260,7 @@ namespace WindowsFormsApp1
                 .Replace(Environment.NewLine + "}}", "}}" + Environment.NewLine)
                 .Replace("{{" + Environment.NewLine, Environment.NewLine + "{{");
             textBox1.Focus();
-            textBox1.SelectionStart = s+resltTxt.IndexOf(Environment.NewLine)+Environment.NewLine.Length ;//selStart;
+            textBox1.SelectionStart = s + resltTxt.IndexOf(Environment.NewLine) + Environment.NewLine.Length;//selStart;
             textBox1.SelectionLength = 1;
             textBox1.ScrollToCaret();
             //Clipboard.SetText(resltTxt);
@@ -506,7 +506,7 @@ namespace WindowsFormsApp1
                         s = x.IndexOf("}}", s + 1) + 2;
                     else
                         s = x.LastIndexOf("{{", s - 1);
-                    textBox1.SelectionStart = s;
+                    if (s > -1) textBox1.SelectionStart = s;
                     textBox1.ScrollToCaret();
                 }
 
