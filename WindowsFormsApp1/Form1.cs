@@ -114,11 +114,20 @@ namespace WindowsFormsApp1
 
         private void splitLineByFristLen()
         {
-            //據第一行長度來分行分段
+            //據第一行長度來分行分段//只要插入點（游標）所在位置前有分段，則依其前一段長度來分行分段
             bool noteFlg = false;
-            int selStart = textBox1.SelectionStart;
-            int s = selStart;
-            string x = "";
+            string x = textBox1.Text;
+            int selStart = textBox1.SelectionStart; int s;
+            //if (x.Substring(selStart).IndexOf(Environment.NewLine) == -1)
+            //{// 結果插入點所在處無分段符號，則取其前一段
+                s = x.Substring(0, selStart).LastIndexOf(Environment.NewLine);
+                if (s > -1)
+                {
+                    selStart = x.Substring(0, s).LastIndexOf(Environment.NewLine)+Environment.NewLine.Length;
+                    if (selStart == -1) selStart = 0;
+                }
+            //}
+            s = selStart;
             if (selStart == textBox1.Text.Length) selStart = 0;
             if (selStart != 0)
             {
@@ -251,7 +260,7 @@ namespace WindowsFormsApp1
                 .Replace(Environment.NewLine + "}}", "}}" + Environment.NewLine)
                 .Replace("{{" + Environment.NewLine, Environment.NewLine + "{{");
             textBox1.Focus();
-            textBox1.SelectionStart = s;//selStart;
+            textBox1.SelectionStart = s+resltTxt.IndexOf(Environment.NewLine)+Environment.NewLine.Length ;//selStart;
             textBox1.SelectionLength = 1;
             textBox1.ScrollToCaret();
             //Clipboard.SetText(resltTxt);
@@ -1302,7 +1311,7 @@ namespace WindowsFormsApp1
         {/*解決輸入CJK字元長度為2的字串問題 https://docs.microsoft.com/en-us/previous-versions/windows/desktop/indexsrv/surrogate-pairs
           * 
         https://stackoverflow.com/questions/50180815/is-string-replacestring-string-unicode-safe-in-regards-to-surrogate-pairs */
-            UnicodeCategory category = UnicodeCategory.Surrogate;//https://docs.microsoft.com/zh-tw/dotnet/api/system.globalization.unicodecategory?view=net-6.0
+            //UnicodeCategory category = UnicodeCategory.Surrogate;//https://docs.microsoft.com/zh-tw/dotnet/api/system.globalization.unicodecategory?view=net-6.0
             char[] xChar = x.ToArray();
             foreach (char item in xChar)
             {
