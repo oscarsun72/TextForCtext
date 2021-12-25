@@ -506,7 +506,10 @@ namespace WindowsFormsApp1
                         s = x.IndexOf("}}", s + 1) + 2;
                     else
                         s = x.LastIndexOf("{{", s - 1);
-                    if (s > -1) textBox1.SelectionStart = s;
+                    if (s > -1)
+                        textBox1.SelectionStart = s;
+                    else
+                        MessageBox.Show("not found!");
                     textBox1.ScrollToCaret();
                 }
 
