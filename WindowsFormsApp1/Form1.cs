@@ -62,7 +62,7 @@ namespace WindowsFormsApp1
 
         void Caret_Shown(Control ctl)
         {
-            CreateCaret(ctl.Handle, IntPtr.Zero, 4, Convert.ToInt32(ctl.Font.Size*1.5));
+            CreateCaret(ctl.Handle, IntPtr.Zero, 4, Convert.ToInt32(ctl.Font.Size * 1.5));
             ShowCaret(ctl.Handle);
         }
         //void Form1_Shown(object sender, EventArgs e)
@@ -357,12 +357,24 @@ namespace WindowsFormsApp1
             {
                 x = "";
             }
-            textBox1.Text = x;
+            //textBox1.Text = x;
             //}
-            if (textBox1.Text.Length > 1)
+            if (x.Length > 1)
             {
-                if (textBox1.Text.Substring(0, 2) == Environment.NewLine) textBox1.Text = textBox1.Text.Substring(2);
+                //清除不需要的部分
+                if (x.Substring(0, 2) == Environment.NewLine) x = x.Substring(2);
+                string[] rTxt = { "。}}<p>" };
+                int lng = rTxt[0].Length;
+                string xClr = x.Substring(0, lng);
+                int clr = xClr.IndexOf(rTxt[0]);
+                while (clr > -1)
+                {
+                    x = x.Substring(clr + lng);
+                    xClr = x.Substring(0, lng);
+                    clr = xClr.IndexOf(rTxt[0]);
+                }
             }
+            textBox1.Text = x;
             textBox1.SelectionStart = 0; textBox1.SelectionLength = 0;
             textBox1.ScrollToCaret();
         }

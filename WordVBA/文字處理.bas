@@ -2834,8 +2834,10 @@ rp = Array("(", "{{", ")", "}}", ChrW(160), "", "【圖】", "", _
      "^p" & ChrW(12310) & "疏" & ChrW(12311), ChrW(12310) & "疏" & ChrW(12311) & "{{", _
      "}}" & Chr(13) & "^#" & Chr(13) & "{{", "", _
      "．．．．．．．．．．．．．．．．．．" & Chr(13), "", _
-     Chr(13) & "^#" & Chr(13), "", "}}" & Chr(13) & "^#" & Chr(13), "}}", _
-     "}}" & Chr(13) & "{{", "")
+     Chr(13) & "^#" & Chr(13), "", _
+     "}}" & Chr(13) & "^#" & Chr(13), "}}", _
+     "}}" & Chr(13) & "{{", "", _
+     "-", "", "^#", "") ', "。}}<p>。}}<p>", "。}}<p>")
      '原來「ChrW(13) & ChrW(45) & ChrW(13) & ChrW(13) & ChrW(11)」是其中有表格啊
 Set rng = d.Range
 rng.Paste
@@ -3323,6 +3325,7 @@ Do Until Selection.End = ActiveDocument.Range.End - 1
     Selection.move
     If Selection.Previous <> ChrW(20008) And Selection.Hyperlinks.Count = 0 Then
         生難字加上國語辭典注音
+        ActiveWindow.ScrollIntoView Selection, False
         i = i + 1
     End If
     If i = 40 Then Exit Sub
