@@ -713,7 +713,19 @@ namespace WindowsFormsApp1
             //https://zh.wikipedia.org/wiki/%E4%B8%AD%E6%97%A5%E9%9F%93%E7%B5%B1%E4%B8%80%E8%A1%A8%E6%84%8F%E6%96%87%E5%AD%97
             if (Regex.IsMatch(x, @"[\u4e00-\u9fbb]")) return true;
             if (Regex.IsMatch(x, @"[\u3400-\u4dbf]")) return true;//擴充A區包含有6,592個漢字，位置在U+3400—U+4DBF
-            //以下長度不同,恐怕失效,目前知C即不行,有空再測試
+                                                                  //以下長度不同,恐怕失效,目前知C即不行,有空再測試            
+                                                                  //c# 中文 轉 unicode:
+                                                                  //https://www.google.com/search?q=c%23+%E4%B8%AD%E6%96%87+%E8%BD%89+unicode&rlz=1C1GCEU_zh-TWTW823TW823&sxsrf=AOaemvJI_o6pHrTEJVPCsVy0iyVsclLtjQ%3A1640527095825&ei=93TIYbnqMYOmoATnx4rwBg&oq=c%23++%5Cu%E4%B8%AD%E6%96%87%E5%AD%97%E7%A2%BC&gs_lcp=Cgdnd3Mtd2l6EAMYATIFCAAQzQIyBQgAEM0COggIABCwAxDNAjoECCMQJ0oECEEYAUoECEYYAFCzWFjiY2DfcGgCcAB4AIABVYgB1gGSAQEzmAEAoAEByAECwAEB&sclient=gws-wiz
+                                                                  //https://www.itread01.com/p/1418585.html
+            string outStr = "";
+            if (!string.IsNullOrEmpty(x))
+            {
+                for (int i = 0; i < x.Length; i++)
+                {
+                    outStr += "/u" + ((int)x[i]).ToString("x");
+                }
+            }
+            x = outStr;
             if (Regex.IsMatch(x, @"[\u20000-\u2A6DD]")) return true;//擴充B區包含有42,717個漢字，位置在U+20000—U+2A6DD
             if (Regex.IsMatch(x, @"[\u2A700-\u2B734]")) return true;//C:位置在U+2A700—U+2B734
             if (Regex.IsMatch(x, @"[\u2B740-\u2B81F]")) return true;//D:範圍為U+2B740–U+2B81F（實際有字元為U+2B740–U+2B81D）
@@ -722,8 +734,46 @@ namespace WindowsFormsApp1
             if (Regex.IsMatch(x, @"[\u30000-\u3134A]")) return true;//G:U+30000–U+3134A
             //if (Regex.IsMatch(x, @"[\u-\u]")) return true;//
 
+            //https://www.itread01.com/p/1418585.html
+            //C#中文字轉換Unicode(\u ) : http://trufflepenne.blogspot.com/2013/03/cunicode.html
+
             return false;
         }
+
+        //C#中文字轉換Unicode(\u ):http://trufflepenne.blogspot.com/2013/03/cunicode.html
+        private string StringToUnicode(string srcText)
+        {
+            string dst = "";
+            char[] src = srcText.ToCharArray();
+            for (int i = 0; i < src.Length; i++)
+            {
+                byte[] bytes = Encoding.Unicode.GetBytes(src[i].ToString());
+                string str = @"\u" + bytes[1].ToString("X2") + bytes[0].ToString("X2");
+                dst += str;
+            }
+            return dst;
+        }
+
+        private string UnicodeToString(string srcText)
+        {
+            string dst = "";
+            string src = srcText;
+            int len = srcText.Length / 6;
+
+            for (int i = 0; i <= len - 1; i++)
+            {
+                string str = "";
+                str = src.Substring(0, 6).Substring(2);
+                src = src.Substring(6);
+                byte[] bytes = new byte[2];
+                bytes[1] = byte.Parse(int.Parse(str.Substring(0, 2), System.Globalization.NumberStyles.HexNumber).ToString());
+                bytes[0] = byte.Parse(int.Parse(str.Substring(2, 2), System.Globalization.NumberStyles.HexNumber).ToString());
+                dst += Encoding.Unicode.GetString(bytes);
+            }
+            return dst;
+        }
+
+
         private void keyDownCtrlAdd()
         {
             newTextBox1();
