@@ -376,7 +376,7 @@ namespace WindowsFormsApp1
                 int lng = rTxt[0].Length;
                 string xClr = x.Substring(0, lng);
                 int clr = xClr.IndexOf(rTxt[0]);
-                while (clr > -1)
+                while (clr > -1 && x != "")
                 {
                     x = x.Substring(clr + lng);
                     xClr = x.Substring(0, lng);
@@ -779,7 +779,7 @@ namespace WindowsFormsApp1
                 if (e.KeyCode == Keys.Left || e.KeyCode == Keys.Right)
                 {/*Alt + ←：視窗向左移動半個表單寬度（+ Ctrl：徵調）
                 Alt + →：視窗向右移動半個表單寬度（+ Ctrl：徵調）*/
-                    int w = this.Width/2;
+                    int w = this.Width / 2;
                     if (e.KeyCode == Keys.Left) this.Left -= w;
                     if (e.KeyCode == Keys.Right) this.Left += w;
                     mouseMovein();
