@@ -262,7 +262,7 @@ namespace WindowsFormsApp1
                 .Replace("{{" + Environment.NewLine, Environment.NewLine + "{{");
             textBox1.Focus();
             textBox1.SelectionStart = s + resltTxt.IndexOf(Environment.NewLine) + Environment.NewLine.Length;//selStart;
-            textBox1.SelectionLength = 1;
+            textBox1.SelectionLength = 0;
             textBox1.ScrollToCaret();
             //Clipboard.SetText(resltTxt);
         }
