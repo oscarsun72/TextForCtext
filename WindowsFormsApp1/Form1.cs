@@ -713,6 +713,7 @@ namespace WindowsFormsApp1
             //https://zh.wikipedia.org/wiki/%E4%B8%AD%E6%97%A5%E9%9F%93%E7%B5%B1%E4%B8%80%E8%A1%A8%E6%84%8F%E6%96%87%E5%AD%97
             if (Regex.IsMatch(x, @"[\u4e00-\u9fbb]")) return true;
             if (Regex.IsMatch(x, @"[\u3400-\u4dbf]")) return true;//擴充A區包含有6,592個漢字，位置在U+3400—U+4DBF
+            //以下長度不同,恐怕失效,目前知C即不行,有空再測試
             if (Regex.IsMatch(x, @"[\u20000-\u2A6DD]")) return true;//擴充B區包含有42,717個漢字，位置在U+20000—U+2A6DD
             if (Regex.IsMatch(x, @"[\u2A700-\u2B734]")) return true;//C:位置在U+2A700—U+2B734
             if (Regex.IsMatch(x, @"[\u2B740-\u2B81F]")) return true;//D:範圍為U+2B740–U+2B81F（實際有字元為U+2B740–U+2B81D）
