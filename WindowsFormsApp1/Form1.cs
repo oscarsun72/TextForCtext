@@ -736,8 +736,7 @@ namespace WindowsFormsApp1
                     return;
                 }
                 if (e.KeyCode == Keys.Left || e.KeyCode == Keys.Right)
-                {
-                    //const int w = 1;
+                {//Ctrl+左右鍵：徵調                    
                     Point mouseIP = Cursor.Position;//https://jjnnykimo.pixnet.net/blog/post/27155696
                     if (e.KeyCode == Keys.Left) { this.Left--; mouseIP.X--; }//-= w; }
                     if (e.KeyCode == Keys.Right) { this.Left++; mouseIP.X++; } //+= w; }
@@ -779,7 +778,7 @@ namespace WindowsFormsApp1
             {//按下Alt鍵
                 if (e.KeyCode == Keys.Left || e.KeyCode == Keys.Right)
                 {
-                    int w = this.Width;
+                    int w = this.Width/2;
                     if (e.KeyCode == Keys.Left) this.Left -= w;
                     if (e.KeyCode == Keys.Right) this.Left += w;
                     mouseMovein();
