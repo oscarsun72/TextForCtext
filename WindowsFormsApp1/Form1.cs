@@ -13,6 +13,7 @@ using System.Runtime.InteropServices;
 using System.IO;
 using System.Drawing.Text;
 using System.Media;
+using System.Text.RegularExpressions;
 
 namespace WindowsFormsApp1
 {
@@ -513,6 +514,38 @@ namespace WindowsFormsApp1
                     textBox1.ScrollToCaret();
                 }
 
+                if (e.KeyCode == Keys.Left || e.KeyCode == Keys.Right)
+                {/*Ctrl + →：插入點若在漢字中,從插入點開始向後移至任何非漢字前(即漢字後) 反之亦然
+                  * Ctrl + ←：：插入點若在漢字中,從插入點開始向後移至任何非漢字後(即漢字前) 反之亦然*/
+                    string x = textBox1.Text;
+                    int s = textBox1.SelectionStart;
+                    int l;
+                    bool isIPCharHanzi = isChineseChar(x.Substring(s, 1));
+                    if (e.KeyCode == Keys.Left)
+                    {
+                        if (isIPCharHanzi) l = findNotChineseCharFarLength(x.Substring(0, s), false);
+                        else l = findChineseCharFarLength(x.Substring(0, s), false);
+                        if (l != -1)
+                        {
+                            textBox1.SelectionStart = s - l + 1;
+                            e.Handled = true;
+                            return;
+                        }
+                    }
+                    else
+                    {
+                        if (isIPCharHanzi) l = findNotChineseCharFarLength(x.Substring(s), true);
+                        else l = findChineseCharFarLength(x.Substring(s), true);
+                        if (l != -1)
+                        {
+                            textBox1.SelectionStart = s + l - 1;
+                            e.Handled = true;
+                            return;
+                        }
+                    }
+
+                }
+
             }
 
             //按下Shift鍵
@@ -628,6 +661,68 @@ namespace WindowsFormsApp1
 
         }
 
+        int findNotChineseCharFarLength(string x, bool forward)
+        {
+            StringInfo xInfo = new StringInfo(x);
+            if (forward)
+            {
+                for (int i = 0; i < xInfo.LengthInTextElements; i++)
+                {
+
+                    if (!isChineseChar(xInfo.SubstringByTextElements(i, 1))) return i + 1;//https://www.jb51.net/article/45556.htm
+                }
+            }
+            else
+            {
+                for (int i = xInfo.LengthInTextElements - 1; i > -1; i--)
+                {
+
+                    if (!isChineseChar(xInfo.SubstringByTextElements(i, 1))) return xInfo.LengthInTextElements - i;
+                }
+
+            }
+            return -1;
+        }
+
+        int findChineseCharFarLength(string x, bool forward)
+        {
+            StringInfo xInfo = new StringInfo(x);
+            if (forward)
+            {
+                for (int i = 0; i < xInfo.LengthInTextElements; i++)
+                {
+
+                    if (isChineseChar(xInfo.SubstringByTextElements(i, 1))) return i + 1;//https://www.jb51.net/article/45556.htm
+                }
+            }
+            else
+            {
+                for (int i = xInfo.LengthInTextElements - 1; i > -1; i--)
+                {
+
+                    if (isChineseChar(xInfo.SubstringByTextElements(i, 1))) return xInfo.LengthInTextElements - i;
+                }
+
+            }
+            return -1;
+        }
+
+        bool isChineseChar(string x)
+        {
+            //https://www.jb51.net/article/45556.htm
+            //https://zh.wikipedia.org/wiki/%E4%B8%AD%E6%97%A5%E9%9F%93%E7%B5%B1%E4%B8%80%E8%A1%A8%E6%84%8F%E6%96%87%E5%AD%97
+            if (Regex.IsMatch(x, @"[\u4e00-\u9fbb]")) return true;
+            if (Regex.IsMatch(x, @"[\u3400-\u4dbf]")) return true;//擴充A區包含有6,592個漢字，位置在U+3400—U+4DBF
+            if (Regex.IsMatch(x, @"[\u20000-\u2A6DD]")) return true;//擴充B區包含有42,717個漢字，位置在U+20000—U+2A6DD
+            if (Regex.IsMatch(x, @"[\u2A700-\u2B734]")) return true;//C:位置在U+2A700—U+2B734
+            if (Regex.IsMatch(x, @"[\u2B740-\u2B81F]")) return true;//D:範圍為U+2B740–U+2B81F（實際有字元為U+2B740–U+2B81D）
+            if (Regex.IsMatch(x, @"[\u2B820-\u2CEAF]")) return true;//E:編碼範圍U+2B820–U+2CEAF
+            if (Regex.IsMatch(x, @"[\u2CEB0-\u2EBEF]")) return true;//F:U+2CEB0–U+2EBEF
+            if (Regex.IsMatch(x, @"[\u30000-\u3134A]")) return true;//G:U+30000–U+3134A
+            //if (Regex.IsMatch(x, @"[\u-\u]")) return true;//
+
+            return false;
+        }
         private void keyDownCtrlAdd()
         {
             newTextBox1();
