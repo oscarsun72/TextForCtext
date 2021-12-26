@@ -709,6 +709,8 @@ namespace WindowsFormsApp1
 
         bool isChineseChar(string x)
         {
+            if ("　􏿽\r\n{}。，；！？、－-《》〈〉「」『』0123456789".IndexOf(x) > -1) return false;
+
             //https://www.jb51.net/article/45556.htm
             //https://zh.wikipedia.org/wiki/%E4%B8%AD%E6%97%A5%E9%9F%93%E7%B5%B1%E4%B8%80%E8%A1%A8%E6%84%8F%E6%96%87%E5%AD%97
             if (Regex.IsMatch(x, @"[\u4e00-\u9fbb]")) return true;
