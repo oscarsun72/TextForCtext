@@ -717,6 +717,18 @@ namespace WindowsFormsApp1
                                                                   //c# 中文 轉 unicode:
                                                                   //https://www.google.com/search?q=c%23+%E4%B8%AD%E6%96%87+%E8%BD%89+unicode&rlz=1C1GCEU_zh-TWTW823TW823&sxsrf=AOaemvJI_o6pHrTEJVPCsVy0iyVsclLtjQ%3A1640527095825&ei=93TIYbnqMYOmoATnx4rwBg&oq=c%23++%5Cu%E4%B8%AD%E6%96%87%E5%AD%97%E7%A2%BC&gs_lcp=Cgdnd3Mtd2l6EAMYATIFCAAQzQIyBQgAEM0COggIABCwAxDNAjoECCMQJ0oECEEYAUoECEYYAFCzWFjiY2DfcGgCcAB4AIABVYgB1gGSAQEzmAEAoAEByAECwAEB&sclient=gws-wiz
                                                                   //https://www.itread01.com/p/1418585.html
+
+            if (Regex.IsMatch(x, @"[\u20000-\u2A6DD]")) return true;//擴充B區包含有42,717個漢字，位置在U+20000—U+2A6DD
+            if (Regex.IsMatch(x, @"[\u2A700-\u2B734]")) return true;//C:位置在U+2A700—U+2B734
+            if (Regex.IsMatch(x, @"[\u2B740-\u2B81F]")) return true;//D:範圍為U+2B740–U+2B81F（實際有字元為U+2B740–U+2B81D）
+            if (Regex.IsMatch(x, @"[\u2B820-\u2CEAF]")) return true;//E:編碼範圍U+2B820–U+2CEAF
+            if (Regex.IsMatch(x, @"[\u2CEB0-\u2EBEF]")) return true;//F:U+2CEB0–U+2EBEF
+            if (Regex.IsMatch(x, @"[\u30000-\u3134A]")) return true;//G:U+30000–U+3134A
+            //if (Regex.IsMatch(x, @"[\u-\u]")) return true;//
+
+            /*
+            //https://www.itread01.com/p/1418585.html
+            //C#中文字轉換Unicode(\u ) : http://trufflepenne.blogspot.com/2013/03/cunicode.html
             string outStr = "";
             if (!string.IsNullOrEmpty(x))
             {
@@ -726,17 +738,7 @@ namespace WindowsFormsApp1
                 }
             }
             x = outStr;
-            if (Regex.IsMatch(x, @"[\u20000-\u2A6DD]")) return true;//擴充B區包含有42,717個漢字，位置在U+20000—U+2A6DD
-            if (Regex.IsMatch(x, @"[\u2A700-\u2B734]")) return true;//C:位置在U+2A700—U+2B734
-            if (Regex.IsMatch(x, @"[\u2B740-\u2B81F]")) return true;//D:範圍為U+2B740–U+2B81F（實際有字元為U+2B740–U+2B81D）
-            if (Regex.IsMatch(x, @"[\u2B820-\u2CEAF]")) return true;//E:編碼範圍U+2B820–U+2CEAF
-            if (Regex.IsMatch(x, @"[\u2CEB0-\u2EBEF]")) return true;//F:U+2CEB0–U+2EBEF
-            if (Regex.IsMatch(x, @"[\u30000-\u3134A]")) return true;//G:U+30000–U+3134A
-            //if (Regex.IsMatch(x, @"[\u-\u]")) return true;//
-
-            //https://www.itread01.com/p/1418585.html
-            //C#中文字轉換Unicode(\u ) : http://trufflepenne.blogspot.com/2013/03/cunicode.html
-
+            */
             return false;
         }
 
