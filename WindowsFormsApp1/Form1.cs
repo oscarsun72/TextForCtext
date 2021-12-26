@@ -777,7 +777,8 @@ namespace WindowsFormsApp1
             if (Control.ModifierKeys == Keys.Alt)
             {//按下Alt鍵
                 if (e.KeyCode == Keys.Left || e.KeyCode == Keys.Right)
-                {
+                {/*Alt + ←：視窗向左移動半個表單寬度（+ Ctrl：徵調）
+                Alt + →：視窗向右移動半個表單寬度（+ Ctrl：徵調）*/
                     int w = this.Width/2;
                     if (e.KeyCode == Keys.Left) this.Left -= w;
                     if (e.KeyCode == Keys.Right) this.Left += w;
