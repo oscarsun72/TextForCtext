@@ -1471,7 +1471,7 @@ namespace WindowsFormsApp1
         private void Form1_Activated(object sender, EventArgs e)
         {
             if (!this.TopMost) this.TopMost = true;
-            if (textBox1.Focused) Caret_Shown(textBox1);
+            if (insertMode) Caret_Shown(textBox1); else Caret_Shown_OverwriteMode(textBox1);
             if (textBox2.BackColor == Color.GreenYellow &&
                 doNotLeaveTextBox2 && textBox2.Focused) textBox2.SelectAll();
         }
@@ -1555,7 +1555,8 @@ namespace WindowsFormsApp1
             if (!checkSurrogatePairsOK(e.KeyChar)) return;
             if (!insertMode)
             {
-                if (textBox1.Text.Length != textBox1.MaxLength && textBox1.SelectedText == "")
+                if (textBox1.Text.Length != textBox1.MaxLength && textBox1.SelectedText == ""
+                    && textBox1.Text != "" && textBox1.SelectionStart != textBox1.Text.Length)
                 {
                     //string x = textBox1.Text; int s = textBox1.SelectionStart;
                     //    string xNext = x.Substring(s);
