@@ -1505,11 +1505,20 @@ namespace WindowsFormsApp1
             //How can I place a TextBox in overwrite mode instead of insert mode:https://www.syncfusion.com/faq/windowsforms/textbox/how-can-i-place-a-textbox-in-overwrite-mode-instead-of-insert-mode
             if (insertMode)
             {
+                if (char.IsSurrogate(e.KeyChar))
+                {
+                    surrogate++;
+                    if (surrogate % 2 != 0)
+                    {
+                        return;
+                    }
+                    surrogate = 0;
+                }
                 if (textBox1.Text.Length != textBox1.MaxLength && textBox1.SelectedText == "")
                 {
                     //string x = textBox1.Text; int s = textBox1.SelectionStart;
                     //    string xNext = x.Substring(s);
-                    //    StringInfo xInfo = new StringInfo(xNext);
+                    //    StringInfo xInfo = new StringInfo(xNext);                    
                     textBox1.SelectionLength = 1;//對於已經輸入完成的 surrogate C#應該會正確判斷其字長度；實際測試非然也
                     if (char.IsSurrogate(textBox1.SelectedText.ToCharArray()[0]))
                     {
