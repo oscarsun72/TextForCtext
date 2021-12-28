@@ -143,7 +143,7 @@ namespace WindowsFormsApp1
             string xPre = textBox1.Text.Substring(0, selStart);
             x = textBox1.Text.Substring(selStart);
             if (x == "") Clipboard.GetText();
-            const string omitStr = "{}<p>《》〈〉：；，。「」『』？！　0123456789-‧·\r\n";
+            const string omitStr = "{}<p>《》〈〉：；、，。「」『』？！　0123456789-‧·\r\n";
             int wordCntr = 0; int noteCtr = 0;
             StringInfo mystrInof = new StringInfo(x);
             if (x.IndexOf(Environment.NewLine) == -1)
