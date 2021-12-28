@@ -641,51 +641,53 @@ namespace WindowsFormsApp1
 
             }
 
-            //按下單一鍵
-            if (e.KeyCode == Keys.Insert)
-            {
-                if (insertMode)
+            if (ModifierKeys == Keys.None)
+            {//按下單一鍵
+                if (e.KeyCode == Keys.Insert)
                 {
-                    insertMode = false;
-                    Caret_Shown_OverwriteMode(textBox1);
-                }
-                else
-                {
-                    insertMode = true;
-                    Caret_Shown(textBox1);
-                }
-                return;
-            }
-            if (e.KeyCode == Keys.F1 || e.KeyCode == Keys.Pause)
-            {//- 按下 F1 鍵：以找到的字串位置**前**分行分段
-             // -按下 Pause Break 鍵：以找到的字串位置** 後**分行分段
-                e.Handled = true;
-                splitLineParabySeltext(e.KeyCode);
-                return;
-            }
-
-            if (e.KeyCode == Keys.F2)
-            {
-                keyDownF2(textBox1); return;
-            }
-            if (e.KeyCode == Keys.F3)
-            {
-                e.Handled = true;
-                int foundwhere;
-                string findword = textBox1.SelectedText;
-                if (findword == "") findword = textBox2.Text;
-                if (findword != "")
-                {
-                    int start = textBox1.SelectionStart + 1; string x = textBox1.Text;
-                    foundwhere = x.IndexOf(findword, start);
-                    if (foundwhere == -1)
+                    if (insertMode)
                     {
-                        MessageBox.Show("not found next!"); return;
+                        insertMode = false;
+                        Caret_Shown_OverwriteMode(textBox1);
                     }
-                    textBox1.SelectionStart = foundwhere;
-                    textBox1.SelectionLength = findword.Length; textBox1.ScrollToCaret();
+                    else
+                    {
+                        insertMode = true;
+                        Caret_Shown(textBox1);
+                    }
+                    return;
                 }
-                return;
+                if (e.KeyCode == Keys.F1 || e.KeyCode == Keys.Pause)
+                {//- 按下 F1 鍵：以找到的字串位置**前**分行分段
+                 // -按下 Pause Break 鍵：以找到的字串位置** 後**分行分段
+                    e.Handled = true;
+                    splitLineParabySeltext(e.KeyCode);
+                    return;
+                }
+
+                if (e.KeyCode == Keys.F2)
+                {
+                    keyDownF2(textBox1); return;
+                }
+                if (e.KeyCode == Keys.F3)
+                {
+                    e.Handled = true;
+                    int foundwhere;
+                    string findword = textBox1.SelectedText;
+                    if (findword == "") findword = textBox2.Text;
+                    if (findword != "")
+                    {
+                        int start = textBox1.SelectionStart + 1; string x = textBox1.Text;
+                        foundwhere = x.IndexOf(findword, start);
+                        if (foundwhere == -1)
+                        {
+                            MessageBox.Show("not found next!"); return;
+                        }
+                        textBox1.SelectionStart = foundwhere;
+                        textBox1.SelectionLength = findword.Length; textBox1.ScrollToCaret();
+                    }
+                    return;
+                }
             }
 
         }
@@ -967,26 +969,28 @@ namespace WindowsFormsApp1
                 }
 
             }
-
-            if (e.KeyCode == Keys.F5)
-            {
-                loadText();
-                return;
-            }
-            if (e.KeyCode == Keys.F12)
-            {
-                e.Handled = true;
-                BackupLastPageText(Clipboard.GetText(), true, true);
-                return;
-            }
-            if (e.KeyCode == Keys.Escape)
-            {
-                hideToNICo();
-                //if (textBox1.Text == "")
-                ////預設為最上層顯示，若textBox1值為空，則按下Esc鍵會隱藏到任務列中；點一下即恢復
-                //{
-                //    hideToNICo();
-                //}
+            if (ModifierKeys == Keys.None)
+            {//按下單一鍵            
+                if (e.KeyCode == Keys.F5)
+                {
+                    loadText();
+                    return;
+                }
+                if (e.KeyCode == Keys.F12)
+                {
+                    e.Handled = true;
+                    BackupLastPageText(Clipboard.GetText(), true, true);
+                    return;
+                }
+                if (e.KeyCode == Keys.Escape)
+                {
+                    hideToNICo();
+                    //if (textBox1.Text == "")
+                    ////預設為最上層顯示，若textBox1值為空，則按下Esc鍵會隱藏到任務列中；點一下即恢復
+                    //{
+                    //    hideToNICo();
+                    //}
+                }
             }
         }
 
