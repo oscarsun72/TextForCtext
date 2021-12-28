@@ -1554,7 +1554,7 @@ namespace WindowsFormsApp1
             //How can I place a TextBox in overwrite mode instead of insert mode:https://www.syncfusion.com/faq/windowsforms/textbox/how-can-i-place-a-textbox-in-overwrite-mode-instead-of-insert-mode
             if (!checkSurrogatePairsOK(e.KeyChar)) return;
             if (!insertMode)
-            {
+            {//https://stackoverflow.com/questions/1428047/how-to-set-winforms-textbox-to-overwrite-mode/70502655#70502655
                 if (textBox1.Text.Length != textBox1.MaxLength && textBox1.SelectedText == ""
                     && textBox1.Text != "" && textBox1.SelectionStart != textBox1.Text.Length)
                 {
