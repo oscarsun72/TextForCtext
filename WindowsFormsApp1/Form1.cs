@@ -23,7 +23,7 @@ namespace WindowsFormsApp1
         readonly string dropBoxPathIncldBackSlash;
         const string CJKBiggestSet = "HanaMinB";//"KaiXinSongB";//"TH-Tshyn-P1";
         Color button2BackColorDefault;
-        //bool insertMode = true;
+        bool insertMode = true;
 
         System.Windows.Forms.NotifyIcon nICo;
         int thisHeight, thisWidth, thisLeft, thisTop;
@@ -622,11 +622,12 @@ namespace WindowsFormsApp1
             }
 
             //按下單一鍵
-            //if (e.KeyCode == Keys.Insert)
-            //{
-            //    if (insertMode) insertMode = false;
-            //    else insertMode = true;
-            //}
+            if (e.KeyCode == Keys.Insert)
+            {
+                if (insertMode) insertMode = false;
+                else insertMode = true;
+                return;
+            }
             if (e.KeyCode == Keys.F1 || e.KeyCode == Keys.Pause)
             {//- 按下 F1 鍵：以找到的字串位置**前**分行分段
              // -按下 Pause Break 鍵：以找到的字串位置** 後**分行分段
@@ -1421,13 +1422,6 @@ namespace WindowsFormsApp1
             {
                 hideToNICo();
             }
-            //if (!insertMode && textBox1.Focused && textBox1.SelectedText=="")
-            //{
-            //    string x = textBox1.Text;int s = textBox1.SelectionStart;
-            //    string xNext = x.Substring(s);
-            //    StringInfo xInfo = new StringInfo(xNext);
-
-            //}
 
         }
 
@@ -1501,6 +1495,36 @@ namespace WindowsFormsApp1
             SystemSounds.Hand.Play();//文本唯一提示
             doNotLeaveTextBox2 = true;
             textBox2.SelectAll();
+
+        }
+
+        private void textBox1_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            //https://social.msdn.microsoft.com/Forums/vstudio/en-US/5d021d76-36cd-43e6-b858-5a905c2e86d4/how-to-determine-if-in-insert-mode-or-overwrite-mode?forum=wpf
+            //https://stackoverflow.com/questions/1428047/how-to-set-winforms-textbox-to-overwrite-mode/17962132#17962132
+            //How can I place a TextBox in overwrite mode instead of insert mode:https://www.syncfusion.com/faq/windowsforms/textbox/how-can-i-place-a-textbox-in-overwrite-mode-instead-of-insert-mode
+            if (insertMode)
+            {
+                if (textBox1.Text.Length != textBox1.MaxLength && textBox1.SelectedText == "")
+                {
+                    //string x = textBox1.Text; int s = textBox1.SelectionStart;
+                    //    string xNext = x.Substring(s);
+                    //    StringInfo xInfo = new StringInfo(xNext);
+                    textBox1.SelectionLength = 1;//對於已經輸入完成的 surrogate C#應該會正確判斷其字長度；實際測試非然也
+                    if (char.IsSurrogate(textBox1.SelectedText.ToCharArray()[0]))
+                    {
+                        textBox1.SelectionLength = 2;
+                    }
+                }
+            }
+
+            //if (!insertMode && textBox1.Focused && textBox1.SelectedText=="")
+            //{
+            //    string x = textBox1.Text;int s = textBox1.SelectionStart;
+            //    string xNext = x.Substring(s);
+            //    StringInfo xInfo = new StringInfo(xNext);
+
+            //}
 
         }
 
