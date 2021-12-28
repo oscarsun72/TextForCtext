@@ -75,7 +75,7 @@ Alt + →：視窗向右移動30dpi（+ Ctrl：徵調）
 
 ### 在 textBox1 中按下以下組合鍵：
 
-Insert : 如 MS Word ，切換插入/取代文字模式（hit! 只差設置還原機制）
+Insert : 如 MS Word ，切換插入/取代文字模式（hit! 還原機制亦大致成功了。還原上限為50次。）
 
 Ctrl + q 或 Alt + q：據第一行(段)長度來將textBox1中的文本分行分段
 

@@ -66,6 +66,12 @@ namespace WindowsFormsApp1
             CreateCaret(ctl.Handle, IntPtr.Zero, 4, Convert.ToInt32(ctl.Font.Size * 1.5));
             ShowCaret(ctl.Handle);
         }
+        void Caret_Shown_OverwriteMode(Control ctl)
+        {
+            CreateCaret(ctl.Handle, IntPtr.Zero, Convert.ToInt32(ctl.Font.Size * 1.5), Convert.ToInt32(ctl.Font.Size * 1.5));
+            ShowCaret(ctl.Handle);
+        }
+
         //void Form1_Shown(object sender, EventArgs e)
         //{//插入點游標寬廣設定.文字框中更改插入符號(游標) https://www.796t.com/post/OXZ0cjQ=.html 如何改變鼠標的樣式: https://blog.xuite.net/akira32/home/109034425-Visual+C%23,%E5%A6%82%E4%BD%95%E6%94%B9%E8%AE%8A%E9%BC%A0%E6%A8%99%E7%9A%84%E6%A8%A3%E5%BC%8F+(change+cursor+to+system+type+or+customed+type) https://www.google.com/search?q=%E6%88%91%E7%94%A8%E4%BB%A5%E4%B8%8A%E7%9A%84%E4%BD%9C%E6%B3%95%E9%83%BD%E7%84%A1%E6%B3%95%E6%94%B9%E8%AE%8A%E9%BC%A0%E6%A8%99%E7%9A%84%E6%A8%A3%E5%BC%8F%2C%E8%AB%8B%E5%95%8F%E4%B8%80%E4%B8%8B%E8%A6%81%E5%A6%82%E4%BD%95%E9%81%94%E6%88%90%E5%91%A2%3F&rlz=1C1GCEU_zh-TWTW823TW823&sourceid=chrome&ie=UTF-8
         //    Caret_Shown(textBox1);
@@ -470,6 +476,20 @@ namespace WindowsFormsApp1
                     textBox1.ScrollToCaret();
                     return;
                 }
+                if (e.KeyCode == Keys.Z)
+                {//還原功能
+                    e.Handled = true;
+                    int s = textBox1.SelectionStart, l = textBox1.SelectionLength;
+                    if (undoTextBox1Text.Count - undoTimes > -1)
+                    {
+                        textBox1.Text = undoTextBox1Text[undoTextBox1Text.Count - ++undoTimes];
+                        textBox1.Select(s, l);
+                        textBox1.ScrollToCaret();
+                    }
+                    else
+                        MessageBox.Show("no more to undo!");
+                    return;
+                }
 
                 if (e.KeyCode == Keys.H)
                 //if ((m & Keys.Control) == Keys.Control && e.KeyCode == Keys.H)
@@ -624,8 +644,16 @@ namespace WindowsFormsApp1
             //按下單一鍵
             if (e.KeyCode == Keys.Insert)
             {
-                if (insertMode) insertMode = false;
-                else insertMode = true;
+                if (insertMode)
+                {
+                    insertMode = false;
+                    Caret_Shown_OverwriteMode(textBox1);
+                }
+                else
+                {
+                    insertMode = true;
+                    Caret_Shown(textBox1);
+                }
                 return;
             }
             if (e.KeyCode == Keys.F1 || e.KeyCode == Keys.Pause)
@@ -1422,9 +1450,9 @@ namespace WindowsFormsApp1
             {
                 hideToNICo();
             }
-
         }
 
+        List<string> undoTextBox1Text = new List<string>();
         private void undoTextValueChanged(int s, int l)
         {
             if (textBox1OriginalText != "" &&
@@ -1446,7 +1474,8 @@ namespace WindowsFormsApp1
 
         private void textBox1_Enter(object sender, EventArgs e)
         {
-            Caret_Shown(textBox1);
+            if (insertMode) Caret_Shown(textBox1);
+            else Caret_Shown_OverwriteMode(textBox1);
         }
 
         private void textBox2_Enter(object sender, EventArgs e)
@@ -1455,6 +1484,8 @@ namespace WindowsFormsApp1
         }
 
         int surrogate = 0;
+        private int undoTimes;
+
         bool isKeyDownSurrogate(string x)
         {/*解決輸入CJK字元長度為2的字串問題 https://docs.microsoft.com/en-us/previous-versions/windows/desktop/indexsrv/surrogate-pairs
           * 
@@ -1498,22 +1529,28 @@ namespace WindowsFormsApp1
 
         }
 
+        bool checkSurrogatePairsOK(char cr)
+        {
+            if (char.IsSurrogate(cr))
+            {
+                surrogate++;
+                if (surrogate % 2 != 0)
+                {
+                    return false;
+                }
+                surrogate = 0;
+                return true;
+            }
+            else return true;
+        }
         private void textBox1_KeyPress(object sender, KeyPressEventArgs e)
         {
             //https://social.msdn.microsoft.com/Forums/vstudio/en-US/5d021d76-36cd-43e6-b858-5a905c2e86d4/how-to-determine-if-in-insert-mode-or-overwrite-mode?forum=wpf
             //https://stackoverflow.com/questions/1428047/how-to-set-winforms-textbox-to-overwrite-mode/17962132#17962132
             //How can I place a TextBox in overwrite mode instead of insert mode:https://www.syncfusion.com/faq/windowsforms/textbox/how-can-i-place-a-textbox-in-overwrite-mode-instead-of-insert-mode
-            if (insertMode)
+            if (!checkSurrogatePairsOK(e.KeyChar)) return;
+            if (!insertMode)
             {
-                if (char.IsSurrogate(e.KeyChar))
-                {
-                    surrogate++;
-                    if (surrogate % 2 != 0)
-                    {
-                        return;
-                    }
-                    surrogate = 0;
-                }
                 if (textBox1.Text.Length != textBox1.MaxLength && textBox1.SelectedText == "")
                 {
                     //string x = textBox1.Text; int s = textBox1.SelectionStart;
@@ -1526,15 +1563,15 @@ namespace WindowsFormsApp1
                     }
                 }
             }
-
-            //if (!insertMode && textBox1.Focused && textBox1.SelectedText=="")
-            //{
-            //    string x = textBox1.Text;int s = textBox1.SelectionStart;
-            //    string xNext = x.Substring(s);
-            //    StringInfo xInfo = new StringInfo(xNext);
-
-            //}
-
+            if (ModifierKeys == Keys.None)
+            {
+                undoTextBox1Text.Add(textBox1.Text);
+                if (undoTimes != 0) undoTimes = 0;
+                if (undoTextBox1Text.Count > 50)//還原上限定為50個
+                {
+                    undoTextBox1Text.RemoveAt(0);
+                }
+            }
         }
 
         int[] findWord(string x, string x1)
