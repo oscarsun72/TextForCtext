@@ -481,7 +481,7 @@ namespace WindowsFormsApp1
                     }
                     if (e.KeyCode == Keys.D6)
                     {
-                        if ((int)m == (int)Keys.Shift+(int)Keys.Control)
+                        if ((int)m == (int)Keys.Shift + (int)Keys.Control)
                         {
                             insX = "}}";
                         }
@@ -490,10 +490,11 @@ namespace WindowsFormsApp1
                             insX = "{{";
                         }
                     }
-                    x = x.Substring(0, s) + insX + x.Substring(s);
-                    textBox1.Text = x;
-                    textBox1.SelectionStart = s + insX.Length;
-                    textBox1.ScrollToCaret();
+                    insertWords(insX);
+                    //x = x.Substring(0, s) + insX + x.Substring(s);
+                    //textBox1.Text = x;
+                    //textBox1.SelectionStart = s + insX.Length;
+                    //textBox1.ScrollToCaret();
                     return;
                 }
                 if (e.KeyCode == Keys.Z)
@@ -661,6 +662,67 @@ namespace WindowsFormsApp1
                 {
                     splitLineByFristLen(); return;
                 }
+                if (e.KeyCode == Keys.D9 || e.KeyCode == Keys.D0 || e.KeyCode == Keys.U || e.KeyCode == Keys.Y || e.KeyCode == Keys.I)
+                {/* Alt + 9 : 鍵入 「 
+                  * Alt + 0 : 鍵入 『 
+                  * Alt + u : 鍵入 《 
+                  * Alt + y : 鍵入 〈 
+                  * Alt + i : 鍵入 》（如 MS Word 自動校正，會依前面的符號作結尾號（close），如前是「〈」，則轉為「〉」……）*/
+                    string insX = "";
+                    if (e.KeyCode == Keys.D9) insX = "「";
+                    if (e.KeyCode == Keys.D0) insX = "『";
+                    if (e.KeyCode == Keys.U) insX = "《";
+                    if (e.KeyCode == Keys.Y) insX = "〈";
+                    if (e.KeyCode == Keys.I)
+                    {
+                        int s = textBox1.SelectionStart; string x = textBox1.Text;
+                        if (s > 0)
+                        {
+                            string xPrevious = x.Substring(0, s);
+                            const string symbol = "{（〈《「『"; string whatSymbolPrefix = "";
+                            StringInfo xPreviousInfo = new StringInfo(xPrevious);
+                            for (int i = xPreviousInfo.LengthInTextElements - 1; i > -1; i--)
+                            {
+                                whatSymbolPrefix = xPreviousInfo.SubstringByTextElements(i, 1);
+                                if (symbol.IndexOf(whatSymbolPrefix) > -1){
+                                    insX = whatSymbolPrefix;
+                                    break;
+                                    }
+                            }
+                            switch (insX)
+                            {
+                                case "{":
+                                    insX = "}}";
+                                    break;
+                                case "（":
+                                    insX = "）";
+                                    break;
+                                case "〈":
+                                    insX = "〉";
+                                    break;
+                                case "《":
+                                    insX = "》";
+                                    break;
+                                case "「":
+                                    insX = "」";
+                                    break;
+                                case "『":
+                                    insX = "』";
+                                    break;                                
+                                default:
+                                    insX = "》";
+                                    break;
+                            }
+
+                        }
+                        else
+                        {
+                            insX = "》";
+                        }
+                    }
+                    insertWords(insX);
+                    return;
+                }
 
                 if (e.KeyCode == Keys.D1)//D1=Menu?
                 {//Alt + 1 : 鍵入本站制式留空空格標記「􏿽」：若有選取則取代全形空格「　」為「􏿽」
@@ -752,6 +814,15 @@ namespace WindowsFormsApp1
                 }
             }
 
+        }
+
+        private void insertWords(string insX)
+        {
+            int s = textBox1.SelectionStart, l = textBox1.SelectionLength; string x = textBox1.Text;
+            x = x.Substring(0, s) + insX + x.Substring(s);
+            textBox1.Text = x;
+            textBox1.SelectionStart = s + insX.Length;
+            textBox1.ScrollToCaret();
         }
 
         List<string> lastKeyPress = new List<string>();
