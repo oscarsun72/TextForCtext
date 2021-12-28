@@ -454,7 +454,7 @@ namespace WindowsFormsApp1
                     keyDownCtrlAdd();
                     return;
                 }
-                if (e.KeyCode == Keys.D0 || e.KeyCode == Keys.D9 || e.KeyCode == Keys.D8 || e.KeyCode == Keys.D7)
+                if (e.KeyCode == Keys.D0 || e.KeyCode == Keys.D9 || e.KeyCode == Keys.D8 || e.KeyCode == Keys.D7 || e.KeyCode == Keys.D6)
                 {
                     int s = textBox1.SelectionStart, l = textBox1.SelectionLength; string insX = "", x = textBox1.Text;
                     if (textBox1.SelectedText != "")
@@ -478,6 +478,17 @@ namespace WindowsFormsApp1
                     if (e.KeyCode == Keys.D7)
                     {
                         insX = "。}}";
+                    }
+                    if (e.KeyCode == Keys.D6)
+                    {
+                        if ((int)m == (int)Keys.Shift+(int)Keys.Control)
+                        {
+                            insX = "}}";
+                        }
+                        if (m == Keys.Control)
+                        {
+                            insX = "{{";
+                        }
                     }
                     x = x.Substring(0, s) + insX + x.Substring(s);
                     textBox1.Text = x;
