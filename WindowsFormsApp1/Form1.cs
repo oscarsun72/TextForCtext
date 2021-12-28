@@ -404,6 +404,15 @@ namespace WindowsFormsApp1
 
             var m = ModifierKeys;
 
+            //if ((m & Keys.Control) == Keys.Control && (m & Keys.Alt) == Keys.Alt && e.KeyCode == Keys.G)
+            //if((int)Control.ModifierKeys ==
+            //    (int)Keys.Control + (int)Keys.Alt && e.KeyCode == Keys.G)
+            if ((m & Keys.Control) == Keys.Control
+                && (m & Keys.Alt) == Keys.Alt)//https://zhidao.baidu.com/question/628222381668604284.html
+            {//https://bbs.csdn.net/topics/350010591
+                if (e.KeyCode == Keys.G || e.KeyCode == Keys.Packet)
+                { e.Handled = true; return; }
+            }
             if ((m & Keys.Control) == Keys.Control
             && (m & Keys.Shift) == Keys.Shift
             && e.KeyCode == Keys.Delete)
@@ -506,7 +515,7 @@ namespace WindowsFormsApp1
                     splitLineByFristLen(); return;
                 }
 
-                if (e.KeyCode == Keys.OemBackslash || e.KeyCode == Keys.Packet || e.KeyCode == Keys.Oem5)
+                if (e.KeyCode == Keys.OemBackslash || e.KeyCode == Keys.Oem5)
                 {//clear the newline after the caret
                     string x = textBox1.Text;
                     int s = textBox1.SelectionStart;
@@ -520,10 +529,39 @@ namespace WindowsFormsApp1
                     return;
                 }
                 if (e.KeyCode == Keys.Up || e.KeyCode == Keys.Down)
-                {/*Ctrl + ↑：從插入點開始向前移至{{前
-                    Ctrl + ↓：從插入點開始向後移至}}後*/
+                {/*Ctrl + ↑：從插入點開始向前移至上一段尾
+                  * Ctrl + ↓：從插入點開始向後移至這一段末（無分段則不移動）*/
                     int s = textBox1.SelectionStart; string x = textBox1.Text;
                     if (e.KeyCode == Keys.Down)
+                    {
+                        if (s == x.Length) goto notFound;
+                        if (s + Environment.NewLine.Length > x.Length) goto notFound;
+                        s = x.IndexOf(Environment.NewLine, s + Environment.NewLine.Length);
+                        if (s > x.Length) goto notFound;
+                    }
+                    else
+                    {
+                        if (s == 0) goto notFound;
+                        if (s - Environment.NewLine.Length < 0) goto notFound;
+                        s = x.LastIndexOf(Environment.NewLine, s - Environment.NewLine.Length) + Environment.NewLine.Length;
+                        if (s < 0) goto notFound;
+                    }
+                    if (s > -1)
+                        textBox1.SelectionStart = s;
+                    else
+                        goto notFound;
+                    textBox1.ScrollToCaret();
+                    return;
+                notFound:
+                    MessageBox.Show("not found!");
+                    return;
+                }
+
+                if (e.KeyCode == Keys.OemCloseBrackets || e.KeyCode == Keys.OemOpenBrackets)
+                {/*Ctrl + [：從插入點開始向前移至{{前
+                    Ctrl + ]：從插入點開始向後移至}}後*/
+                    int s = textBox1.SelectionStart; string x = textBox1.Text;
+                    if (e.KeyCode == Keys.OemCloseBrackets)
                         s = x.IndexOf("}}", s + 1) + 2;
                     else
                         s = x.LastIndexOf("{{", s - 1);
@@ -532,6 +570,7 @@ namespace WindowsFormsApp1
                     else
                         MessageBox.Show("not found!");
                     textBox1.ScrollToCaret();
+                    return;
                 }
 
                 if (e.KeyCode == Keys.Left || e.KeyCode == Keys.Right)
@@ -688,10 +727,23 @@ namespace WindowsFormsApp1
                     }
                     return;
                 }
+
+                if (e.KeyCode == Keys.F4)
+                {//F4 ： 重複做最後一次的輸入1次
+                    int c = lastKeyPress.Count - 1;
+                    if (c < 0) return;
+                    string lk = lastKeyPress[c];
+                    if (lk != "")
+                    {
+                        SendKeys.Send(lk);
+                    }
+                    return;
+                }
             }
 
         }
 
+        List<string> lastKeyPress = new List<string>();
         int findNotChineseCharFarLength(string x, bool forward)
         {
             StringInfo xInfo = new StringInfo(x);
@@ -1474,6 +1526,8 @@ namespace WindowsFormsApp1
             if (textBox1.Focused)
             {
                 if (insertMode) Caret_Shown(textBox1); else Caret_Shown_OverwriteMode(textBox1);
+                if (textBox1.SelectionLength == textBox1.Text.Length)
+                    textBox1.Select(selStart, selLength);
             }
             if (textBox2.BackColor == Color.GreenYellow &&
                 doNotLeaveTextBox2 && textBox2.Focused) textBox2.SelectAll();
@@ -1550,12 +1604,41 @@ namespace WindowsFormsApp1
             }
             else return true;
         }
+        string lastKeyPressElement = "";
         private void textBox1_KeyPress(object sender, KeyPressEventArgs e)
         {
             //https://social.msdn.microsoft.com/Forums/vstudio/en-US/5d021d76-36cd-43e6-b858-5a905c2e86d4/how-to-determine-if-in-insert-mode-or-overwrite-mode?forum=wpf
             //https://stackoverflow.com/questions/1428047/how-to-set-winforms-textbox-to-overwrite-mode/17962132#17962132
             //How can I place a TextBox in overwrite mode instead of insert mode:https://www.syncfusion.com/faq/windowsforms/textbox/how-can-i-place-a-textbox-in-overwrite-mode-instead-of-insert-mode
-            if (!checkSurrogatePairsOK(e.KeyChar)) return;
+            if (!checkSurrogatePairsOK(e.KeyChar))
+            {
+                lastKeyPressElement += e.KeyChar;
+                return;
+            }
+            else
+            {
+                //https://zh.wikipedia.org/wiki/UTF-16
+                if (char.IsLowSurrogate(e.KeyChar))
+                {
+                    lastKeyPressElement += e.KeyChar;
+                    lastKeyPress.Add(lastKeyPressElement);
+                    lastKeyPressElement = "";
+                    if (lastKeyPress.Count > 2)
+                    {
+                        lastKeyPress.RemoveAt(0);
+                    }
+                }
+                else
+                {
+                    lastKeyPressElement += e.KeyChar;
+                    lastKeyPress.Add(lastKeyPressElement);
+                    lastKeyPressElement = "";
+                    if (lastKeyPress.Count > 2)
+                    {
+                        lastKeyPress.RemoveAt(0);
+                    }
+                }
+            }
             if (!insertMode)
             {//https://stackoverflow.com/questions/1428047/how-to-set-winforms-textbox-to-overwrite-mode/70502655#70502655
                 if (textBox1.Text.Length != textBox1.MaxLength && textBox1.SelectedText == ""
@@ -1608,7 +1691,8 @@ namespace WindowsFormsApp1
         }
         private void Form1_Deactivate(object sender, EventArgs e)
         {//預設表單視窗為最上層顯示，當表單視窗不在作用中時，自動隱藏至系統右下方之系統列/任務列中，當滑鼠滑過任務列中的縮圖ico時，即還原/恢復視窗窗體
-            if (!textBox2.Focused && textBox1.Text != "") this.TopMost = false;//hideToNICo();            
+            if (!textBox2.Focused && textBox1.Text != "") this.TopMost = false;//hideToNICo();
+            selStart = textBox1.SelectionStart; selLength = textBox1.SelectionLength;
         }
     }
 }
