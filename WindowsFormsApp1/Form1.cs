@@ -1305,7 +1305,7 @@ namespace WindowsFormsApp1
             //MessageBox.Show("你的螢幕解析度是" + Size + "\n Width = " + Width + "\n Height = " + Height);
             //FormStartPosition 列舉:https://docs.microsoft.com/zh-tw/dotnet/api/system.windows.forms.formstartposition?view=netframework-4.7.2
             this.Location = new Point
-                (Width - this.Width, Height - textBox1.Height * 2);
+                (Width - this.Width, Height - this.Height - (int)(textBox1.Height / 3));
             textBox1Size();
             //this.PointToScreen();
         }
@@ -1471,7 +1471,10 @@ namespace WindowsFormsApp1
         private void Form1_Activated(object sender, EventArgs e)
         {
             if (!this.TopMost) this.TopMost = true;
-            if (insertMode) Caret_Shown(textBox1); else Caret_Shown_OverwriteMode(textBox1);
+            if (textBox1.Focused)
+            {
+                if (insertMode) Caret_Shown(textBox1); else Caret_Shown_OverwriteMode(textBox1);
+            }
             if (textBox2.BackColor == Color.GreenYellow &&
                 doNotLeaveTextBox2 && textBox2.Focused) textBox2.SelectAll();
         }
