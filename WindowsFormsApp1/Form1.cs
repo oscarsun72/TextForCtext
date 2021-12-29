@@ -457,7 +457,8 @@ namespace WindowsFormsApp1
                 if (e.KeyCode == Keys.D0 || e.KeyCode == Keys.D9 || e.KeyCode == Keys.D8 || e.KeyCode == Keys.D7 || e.KeyCode == Keys.D6)
                 {
                     e.Handled = true;
-                    int s = textBox1.SelectionStart, l = textBox1.SelectionLength; string insX = "", x = textBox1.Text;
+                    int s = textBox1.SelectionStart, l = textBox1.SelectionLength;
+                    string insX = "", x = textBox1.Text;
                     if (textBox1.SelectedText != "")
                         x = x.Substring(0, s) + x.Substring(s + l);
                     if (e.KeyCode == Keys.D0)
@@ -491,7 +492,7 @@ namespace WindowsFormsApp1
                             insX = "{{";
                         }
                     }
-                    insertWords(insX);
+                    insertWords(insX,x);
                     //x = x.Substring(0, s) + insX + x.Substring(s);
                     //textBox1.Text = x;
                     //textBox1.SelectionStart = s + insX.Length;
@@ -670,14 +671,14 @@ namespace WindowsFormsApp1
                   * Alt + y : 鍵入 〈 
                   * Alt + i : 鍵入 》（如 MS Word 自動校正(如在「選項>印刷樣式」中的設定值)，會依前面的符號作結尾號（close），如前是「〈」，則轉為「〉」……）*/
                     e.Handled = true;
-                    string insX = "";
+                    string insX = "",x = textBox1.Text;
                     if (e.KeyCode == Keys.D9) { insX = "「"; goto insert; }
                     if (e.KeyCode == Keys.D0) { insX = "『"; goto insert; }
                     if (e.KeyCode == Keys.U) { insX = "《"; goto insert; }
                     if (e.KeyCode == Keys.Y) { insX = "〈"; goto insert; }
                     if (e.KeyCode == Keys.I)
                     {
-                        int s = textBox1.SelectionStart; string x = textBox1.Text;
+                        int s = textBox1.SelectionStart;
                         if (s > 0)
                         {
                             string xPrevious = x.Substring(0, s);
@@ -703,12 +704,12 @@ namespace WindowsFormsApp1
                                 {
                                     sFirst = symbolPairChk.IndexOf(xChk[i]);
                                     bool sPairOpenFirstContained = sPairOpenFirst.Contains(xChk[i].ToString());
-                                    if (sFirst > -1&&!sPairOpenFirstContained)
+                                    if (sFirst > -1 && !sPairOpenFirstContained)
                                     {
                                         insX = symbolPairChk[sFirst].ToString();
                                         if (symbolPairChkClose.IndexOf(xChk[i]) == -1)
                                         {//如果是open 
-                                            if (sPairOpenFirst.Count== 0 ||
+                                            if (sPairOpenFirst.Count == 0 ||
                                                 !sPairOpenFirst.Contains(xChk[i].ToString()))
                                             {
                                                 insX = symbolPairChkClose[sFirst].ToString();
@@ -815,7 +816,7 @@ namespace WindowsFormsApp1
                         insX = "》";
                     }
                 insert:
-                    insertWords(insX);
+                    insertWords(insX,x);
                     return;
                 }
 
@@ -911,9 +912,9 @@ namespace WindowsFormsApp1
 
         }
 
-        private void insertWords(string insX)
+        private void insertWords(string insX, string x)
         {
-            int s = textBox1.SelectionStart, l = textBox1.SelectionLength; string x = textBox1.Text;
+            int s = textBox1.SelectionStart, l = textBox1.SelectionLength;
             x = x.Substring(0, s) + insX + x.Substring(s);
             textBox1.Text = x;
             textBox1.SelectionStart = s + insX.Length;
