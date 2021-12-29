@@ -456,6 +456,7 @@ namespace WindowsFormsApp1
                 }
                 if (e.KeyCode == Keys.D0 || e.KeyCode == Keys.D9 || e.KeyCode == Keys.D8 || e.KeyCode == Keys.D7 || e.KeyCode == Keys.D6)
                 {
+                    e.Handled = true;
                     int s = textBox1.SelectionStart, l = textBox1.SelectionLength; string insX = "", x = textBox1.Text;
                     if (textBox1.SelectedText != "")
                         x = x.Substring(0, s) + x.Substring(s + l);
@@ -667,28 +668,120 @@ namespace WindowsFormsApp1
                   * Alt + 0 : 鍵入 『 
                   * Alt + u : 鍵入 《 
                   * Alt + y : 鍵入 〈 
-                  * Alt + i : 鍵入 》（如 MS Word 自動校正，會依前面的符號作結尾號（close），如前是「〈」，則轉為「〉」……）*/
+                  * Alt + i : 鍵入 》（如 MS Word 自動校正(如在「選項>印刷樣式」中的設定值)，會依前面的符號作結尾號（close），如前是「〈」，則轉為「〉」……）*/
+                    e.Handled = true;
                     string insX = "";
-                    if (e.KeyCode == Keys.D9) insX = "「";
-                    if (e.KeyCode == Keys.D0) insX = "『";
-                    if (e.KeyCode == Keys.U) insX = "《";
-                    if (e.KeyCode == Keys.Y) insX = "〈";
+                    if (e.KeyCode == Keys.D9) { insX = "「"; goto insert; }
+                    if (e.KeyCode == Keys.D0) { insX = "『"; goto insert; }
+                    if (e.KeyCode == Keys.U) { insX = "《"; goto insert; }
+                    if (e.KeyCode == Keys.Y) { insX = "〈"; goto insert; }
                     if (e.KeyCode == Keys.I)
                     {
                         int s = textBox1.SelectionStart; string x = textBox1.Text;
                         if (s > 0)
                         {
                             string xPrevious = x.Substring(0, s);
-                            const string symbol = "{（〈《「『"; string whatSymbolPrefix = "";
-                            StringInfo xPreviousInfo = new StringInfo(xPrevious);
-                            for (int i = xPreviousInfo.LengthInTextElements - 1; i > -1; i--)
+                            const string symbol = "{（〈《「『』」》〉）";
+                            string whatSymbolPrefix = "";
+                            string xChk = ""; bool chk = false; bool closeFlag = false;
+                            for (int i = xPrevious.Length - 1; i > -1; i--)
                             {
-                                whatSymbolPrefix = xPreviousInfo.SubstringByTextElements(i, 1);
-                                if (symbol.IndexOf(whatSymbolPrefix) > -1){
-                                    insX = whatSymbolPrefix;
+                                whatSymbolPrefix = xPrevious.Substring(i, 1);
+                                if (symbol.IndexOf(whatSymbolPrefix) > -1)
+                                {
+                                    xChk = xPrevious.Substring(0, i + 1); chk = true;
                                     break;
-                                    }
+                                }
                             }
+                            if (chk)//需要檢查誰沒配對
+                            {
+                                const string symbolPairChk = "（〈《「『）〉》」』";
+                                const string symbolPairChkClose = "）〉》」』";
+                                int sFirst = -1;
+                                List<string> sPairOpenFirst = new List<string>();
+                                for (int i = xChk.Length - 1; i > -1; i--)
+                                {
+                                    sFirst = symbolPairChk.IndexOf(xChk[i]);
+                                    bool sPairOpenFirstContained = sPairOpenFirst.Contains(xChk[i].ToString());
+                                    if (sFirst > -1&&!sPairOpenFirstContained)
+                                    {
+                                        insX = symbolPairChk[sFirst].ToString();
+                                        if (symbolPairChkClose.IndexOf(xChk[i]) == -1)
+                                        {//如果是open 
+                                            if (sPairOpenFirst.Count== 0 ||
+                                                !sPairOpenFirst.Contains(xChk[i].ToString()))
+                                            {
+                                                insX = symbolPairChkClose[sFirst].ToString();
+                                                closeFlag = true;
+                                                break;
+                                            }
+                                        }
+                                        else
+                                        {//如果是close,取得其配對的 open
+                                            string sPOF = symbolPairChk[
+                                                symbolPairChkClose.IndexOf(insX)].ToString();
+                                            if (sPairOpenFirst.Count == 0 || !sPairOpenFirst.Contains(sPOF))
+                                            {
+                                                sPairOpenFirst.Add(sPOF);
+                                            }
+                                            continue;
+                                        }
+
+                                    }
+                                    //string sPair
+
+
+                                    //if (sFirst > -1 &&
+                                    //    ((sFirst >
+                                    //    xChk.LastIndexOf(symbolPairChkClose[i])) ||
+                                    //    xChk.LastIndexOf
+                                    //    (symbolPairChkClose[i],
+                                    //    xChk.Length - 1,
+                                    //    xChk.Length - sFirst) == -1))
+                                    //{
+                                    //    insX = symbolPairChk[i].ToString();
+                                    //    closeFlag = true;
+                                    //    switch (insX)
+                                    //    {
+                                    //        case "{":
+                                    //            insX = "}}";
+                                    //            break;
+                                    //        case "（":
+                                    //            insX = "）";
+                                    //            break;
+                                    //        case "〈":
+                                    //            insX = "〉";
+                                    //            break;
+                                    //        case "《":
+                                    //            insX = "》";
+                                    //            break;
+                                    //        case "「":
+                                    //            insX = "」";
+                                    //            break;
+                                    //        case "『":
+                                    //            insX = "』";
+                                    //            break;
+                                    //        default:
+                                    //            insX = "》";
+                                    //            break;
+                                    //    }
+                                    //    break;
+                                    //}
+                                }//for
+                                if (!closeFlag)
+                                {
+                                    insX = "》";
+                                }
+                            }
+                            else
+                            {
+                                insX = "》";
+
+                            }
+
+                        }
+                        else
+                        {
                             switch (insX)
                             {
                                 case "{":
@@ -708,18 +801,20 @@ namespace WindowsFormsApp1
                                     break;
                                 case "『":
                                     insX = "』";
-                                    break;                                
+                                    break;
                                 default:
                                     insX = "》";
                                     break;
                             }
 
-                        }
-                        else
-                        {
-                            insX = "》";
+
                         }
                     }
+                    else
+                    {
+                        insX = "》";
+                    }
+                insert:
                     insertWords(insX);
                     return;
                 }
@@ -891,7 +986,7 @@ namespace WindowsFormsApp1
             if (Regex.IsMatch(x, @"[\u2B820-\u2CEAF]")) return true;//E:編碼範圍U+2B820–U+2CEAF
             if (Regex.IsMatch(x, @"[\u2CEB0-\u2EBEF]")) return true;//F:U+2CEB0–U+2EBEF
             if (Regex.IsMatch(x, @"[\u30000-\u3134A]")) return true;//G:U+30000–U+3134A
-            //if (Regex.IsMatch(x, @"[\u-\u]")) return true;//
+                                                                    //if (Regex.IsMatch(x, @"[\u-\u]")) return true;//
 
             /*
             //https://www.itread01.com/p/1418585.html
