@@ -143,7 +143,6 @@ namespace WindowsFormsApp1
             string xPre = textBox1.Text.Substring(0, selStart);
             x = textBox1.Text.Substring(selStart);
             if (x == "") Clipboard.GetText();
-            const string omitStr = "{}<p>《》〈〉：；、，。「」『』？！　0123456789-‧·\r\n";
             int wordCntr = 0; int noteCtr = 0;
             StringInfo mystrInof = new StringInfo(x);
             if (x.IndexOf(Environment.NewLine) == -1)
@@ -1019,16 +1018,100 @@ namespace WindowsFormsApp1
             nextPages(Keys.PageDown, false);
         }
 
+        const string omitStr = "{}<p>《》〈〉：；、，。「」『』？！　0123456789-‧·\r\n";
+        string clearOmitChar(string x)
+        {
+            foreach (var item in omitStr)
+            {
+                x = x.Replace(item.ToString(), "");
+            }
+            return x;
+        }
+
         int normalLineParaLength;
         private int[] checkAbnormalLinePara(string xChk)
         {
-            string[] xLineParas = xChk.Split(Environment.NewLine.ToArray(), StringSplitOptions.None);
-            int i = -1;
+            if (normalLineParaLength < 7) return new int[0];
+            string[] xLineParas = xChk.Split(
+                Environment.NewLine.ToArray(),
+                StringSplitOptions.RemoveEmptyEntries);
+            int i = -1, gap = 0;
             foreach (string lineParaText in xLineParas)
             {
                 i++;
-                if (Math.Abs(new StringInfo(lineParaText).LengthInTextElements
-                    - normalLineParaLength) > 3)
+                int noteTextBlendStart = lineParaText.IndexOf("{"),
+                    noteTextBlendEnd = lineParaText.IndexOf("}");
+                if (noteTextBlendStart != -1 || noteTextBlendEnd != -1)
+                {//blend text and note 
+                    int len = 0;
+                    string text = "", note = "";
+                    if (noteTextBlendStart != -1 && noteTextBlendEnd == -1)
+                    {// {{ only
+                        text = clearOmitChar(lineParaText.Substring(0, noteTextBlendStart));
+                        note = clearOmitChar(lineParaText.Substring(noteTextBlendStart + 2));
+                        len = new StringInfo(text).LengthInTextElements +
+                            (int)Math.Round((decimal)new StringInfo(note).LengthInTextElements / 2);
+                    }
+                    if (noteTextBlendStart == -1 && noteTextBlendEnd != -1)
+                    {// }} only
+                        note = clearOmitChar(lineParaText.Substring(0, noteTextBlendEnd));
+                        text = clearOmitChar(lineParaText.Substring(noteTextBlendEnd + 2));
+                        len = new StringInfo(text).LengthInTextElements +
+                            (int)Math.Round((decimal)new StringInfo(note).LengthInTextElements / 2);
+                    }
+                    else
+                    {// {{ and }} both
+                        if (noteTextBlendStart < noteTextBlendEnd)
+                        {
+                            int st = 0;
+                            while (noteTextBlendStart != -1)
+                            {
+                                text += lineParaText.Substring(st, noteTextBlendStart);
+                                note += lineParaText.Substring(noteTextBlendStart + 2,
+                                    noteTextBlendEnd == -1 ? lineParaText.Length : noteTextBlendEnd
+                                    -(noteTextBlendStart + 2));
+                                noteTextBlendStart = lineParaText.IndexOf("{", noteTextBlendStart + 2);
+                                noteTextBlendEnd = lineParaText.IndexOf("}",
+                                    noteTextBlendStart == -1 ? lineParaText.Length : noteTextBlendStart);
+                                st = noteTextBlendEnd == -1 ? noteTextBlendStart : noteTextBlendEnd + 2;
+                            }
+                            text = clearOmitChar(text); note = clearOmitChar(note);
+                            len = new StringInfo(text).LengthInTextElements + (int)Math.Round((decimal)new StringInfo(note).LengthInTextElements / 2);
+                        }
+                        else
+                        {// noteTextBlendEnd < noteTextBlendStart  
+                            int stNote = 0;
+                            while (noteTextBlendStart != -1)
+                            {
+                                note += lineParaText.Substring(stNote, noteTextBlendEnd);
+                                text += lineParaText.Substring(noteTextBlendEnd + 2,
+                                    noteTextBlendStart- (noteTextBlendEnd + 2));
+                                noteTextBlendEnd = lineParaText.IndexOf("}", noteTextBlendStart + 2);
+                                if (noteTextBlendEnd == -1)
+                                {
+                                    stNote = noteTextBlendStart + 2;
+                                    note += lineParaText.Substring(stNote); break;
+                                }
+                                else
+                                {
+                                    noteTextBlendStart = lineParaText.IndexOf("{",
+                                        noteTextBlendEnd + 2);
+                                    stNote = noteTextBlendStart;
+                                }
+                            }
+                            text = clearOmitChar(text); note = clearOmitChar(note);
+                            len = new StringInfo(text).LengthInTextElements +
+                                (int)Math.Round((decimal)new StringInfo(note).LengthInTextElements / 2);
+                        }
+                    }
+                    gap = Math.Abs(len - normalLineParaLength);
+                }
+                else//only text or note
+                    gap = Math.Abs(
+                        new StringInfo(clearOmitChar(lineParaText)).
+                        LengthInTextElements
+                         - normalLineParaLength);
+                if (gap > 3 )//&& gap < 8)
                 {//select the abnormal one
                     string x = textBox1.Text;
                     int j = -1, lineSeprtEnd = 0, lineSeprtStart = lineSeprtEnd;
@@ -1038,8 +1121,9 @@ namespace WindowsFormsApp1
 
                         if (++j == i) break;
                         lineSeprtStart = lineSeprtEnd;
+                        lineSeprtEnd = x.IndexOf(Environment.NewLine, ++lineSeprtEnd);
                     }
-                    return new int[]{ lineSeprtStart, lineSeprtEnd };
+                    return new int[] { lineSeprtStart, lineSeprtEnd-lineSeprtStart };
                 }
             }
             return new int[0];
