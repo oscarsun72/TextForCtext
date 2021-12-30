@@ -1079,19 +1079,35 @@ namespace WindowsFormsApp1
                                     noteTextBlendEnd == -1 ?
                                     lineParaText.Length - (noteTextBlendStart + 2)
                                     : noteTextBlendEnd - (noteTextBlendStart + 2));
-                                noteTextBlendStart = lineParaText.IndexOf("{", noteTextBlendStart + 2);
+                                noteTextBlendStart = lineParaText.IndexOf
+                                    ("{", noteTextBlendStart + 2);
                                 if (noteTextBlendStart == -1)
                                 {
                                     if (noteTextBlendEnd != -1)
-                                        text += lineParaText.Substring(noteTextBlendEnd + 2);
+                                        text += lineParaText.Substring
+                                            (noteTextBlendEnd + 2);
                                     break;
                                 }
                                 st = noteTextBlendEnd + 2;
-                                lText = noteTextBlendStart - (noteTextBlendEnd + 2);
+                                lText = noteTextBlendStart - st;//(noteTextBlendEnd + 2);
+                                text += lineParaText.Substring
+                                    (st,  lText);
                                 noteTextBlendEnd = lineParaText.IndexOf("}",
                                    noteTextBlendStart);
                                 st = noteTextBlendEnd == -1 ? st :
                                     noteTextBlendEnd + 2;
+                                lText = noteTextBlendStart;
+                                noteTextBlendStart = lineParaText.IndexOf("{",st);
+                                if (noteTextBlendStart == -1)
+                                {
+                                    note += lineParaText.Substring(lText+2,
+                                        noteTextBlendEnd-(lText+2));
+                                    lText = lineParaText.Length - st;
+                                    text += lineParaText.Substring(st,
+                                        lineParaText.Length-st);
+                                    break;
+                                }
+                                lText =noteTextBlendStart-st;
                             }
                             text = clearOmitChar(text); note = clearOmitChar(note);
                             len = new StringInfo(text).LengthInTextElements + (int)Math.Ceiling((decimal)new StringInfo(note).LengthInTextElements / 2);
