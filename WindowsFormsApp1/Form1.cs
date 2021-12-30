@@ -1098,10 +1098,10 @@ namespace WindowsFormsApp1
                         }
                         else
                         {// noteTextBlendEnd < noteTextBlendStart  
-                            int stNote = 0;
+                            int stNote = 0,lNote=noteTextBlendEnd;
                             while (noteTextBlendStart != -1)
                             {
-                                note += lineParaText.Substring(stNote, noteTextBlendEnd);
+                                note += lineParaText.Substring(stNote, lNote);
                                 text += lineParaText.Substring(noteTextBlendEnd + 2,
                                     noteTextBlendStart - (noteTextBlendEnd + 2));
                                 noteTextBlendEnd = lineParaText.IndexOf("}",
@@ -1123,6 +1123,17 @@ namespace WindowsFormsApp1
                                         break;
                                     }
                                     stNote = noteTextBlendStart + 2;
+                                    lNote = noteTextBlendEnd;
+                                    noteTextBlendEnd = lineParaText.IndexOf("}",stNote);
+                                    if (noteTextBlendEnd==-1)
+                                    {
+                                        text += lineParaText.Substring(lNote + 2,
+                                            noteTextBlendStart - (lNote + 2));
+                                        lNote = lineParaText.Length - stNote;
+                                        note += lineParaText.Substring(stNote, lNote);
+                                        break;
+                                    }
+                                    lNote = noteTextBlendEnd - stNote;
                                 }
                             }
                             text = clearOmitChar(text); note = clearOmitChar(note);
