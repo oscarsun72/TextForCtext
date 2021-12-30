@@ -1098,7 +1098,7 @@ namespace WindowsFormsApp1
                         }
                         else
                         {// noteTextBlendEnd < noteTextBlendStart  
-                            int stNote = 0,lNote=noteTextBlendEnd;
+                            int stNote = 0, lNote = noteTextBlendEnd;
                             while (noteTextBlendStart != -1)
                             {
                                 note += lineParaText.Substring(stNote, lNote);
@@ -1124,8 +1124,8 @@ namespace WindowsFormsApp1
                                     }
                                     stNote = noteTextBlendStart + 2;
                                     lNote = noteTextBlendEnd;
-                                    noteTextBlendEnd = lineParaText.IndexOf("}",stNote);
-                                    if (noteTextBlendEnd==-1)
+                                    noteTextBlendEnd = lineParaText.IndexOf("}", stNote);
+                                    if (noteTextBlendEnd == -1)
                                     {
                                         text += lineParaText.Substring(lNote + 2,
                                             noteTextBlendStart - (lNote + 2));
@@ -1150,7 +1150,7 @@ namespace WindowsFormsApp1
                         LengthInTextElements;
                     gap = Math.Abs(len - normalLineParaLength);
                 }
-                if (gap > 3 || (len - normalLineParaLength < 0
+                if (gap > 3 && !(len < normalLineParaLength
                     && lineParaText.IndexOf("<p>") > -1))//&& gap < 8)
                 {//select the abnormal one
                     string x = textBox1.Text;
