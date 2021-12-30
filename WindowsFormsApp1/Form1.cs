@@ -1092,10 +1092,17 @@ namespace WindowsFormsApp1
                                 lText = noteTextBlendStart - st;//(noteTextBlendEnd + 2);
                                 text += lineParaText.Substring
                                     (st,  lText);
+                                lText = noteTextBlendEnd;
                                 noteTextBlendEnd = lineParaText.IndexOf("}",
                                    noteTextBlendStart);
-                                st = noteTextBlendEnd == -1 ? st :
-                                    noteTextBlendEnd + 2;
+                                if (noteTextBlendEnd==-1)
+                                {
+                                    note += lineParaText.Substring(
+                                        noteTextBlendStart,
+                                        lineParaText.Length-noteTextBlendStart);
+                                    break;
+                                }
+                                st = noteTextBlendEnd + 2;
                                 lText = noteTextBlendStart;
                                 noteTextBlendStart = lineParaText.IndexOf("{",st);
                                 if (noteTextBlendStart == -1)
