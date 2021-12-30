@@ -161,11 +161,6 @@ namespace WindowsFormsApp1
             while (mystrEnum.MoveNext())
             {
                 string mystr = mystrEnum.Current.ToString();
-                //if(mystr=="《"||mystr=="〈")
-                //{
-                //    break;
-                //}
-
                 if (mystr == "{") noteFlg = true;
                 if (mystr == "}")
                 {
@@ -189,11 +184,12 @@ namespace WindowsFormsApp1
 
                 }
             }
-            int lineLen = 0;
+            int lineLen = 0;//taked the normal Line and or Para Length
             if (wordCntr == 0 && noteFlg)//純注文
                 lineLen = noteCtr;
             else
                 lineLen = wordCntr + noteCtr / 2;//wordCntr+((int)Math.Round(noteCtr/2.0));
+            normalLineParaLength = lineLen;
             resltTxt = ""; wordCntr = 0; noteCtr = 0; int noteBrk = 0; int noteBrkCtr = 0; noteFlg = false;
             if ((x.IndexOf("{") == -1 && x.IndexOf("}") > -1) || x.IndexOf("}") < x.IndexOf("{"))
             {
@@ -492,7 +488,7 @@ namespace WindowsFormsApp1
                             insX = "{{";
                         }
                     }
-                    insertWords(insX,x);
+                    insertWords(insX, x);
                     //x = x.Substring(0, s) + insX + x.Substring(s);
                     //textBox1.Text = x;
                     //textBox1.SelectionStart = s + insX.Length;
@@ -671,7 +667,7 @@ namespace WindowsFormsApp1
                   * Alt + y : 鍵入 〈 
                   * Alt + i : 鍵入 》（如 MS Word 自動校正(如在「選項>印刷樣式」中的設定值)，會依前面的符號作結尾號（close），如前是「〈」，則轉為「〉」……）*/
                     e.Handled = true;
-                    string insX = "",x = textBox1.Text;
+                    string insX = "", x = textBox1.Text;
                     if (e.KeyCode == Keys.D9) { insX = "「"; goto insert; }
                     if (e.KeyCode == Keys.D0) { insX = "『"; goto insert; }
                     if (e.KeyCode == Keys.U) { insX = "《"; goto insert; }
@@ -729,46 +725,8 @@ namespace WindowsFormsApp1
                                         }
 
                                     }
-                                    //string sPair
 
-
-                                    //if (sFirst > -1 &&
-                                    //    ((sFirst >
-                                    //    xChk.LastIndexOf(symbolPairChkClose[i])) ||
-                                    //    xChk.LastIndexOf
-                                    //    (symbolPairChkClose[i],
-                                    //    xChk.Length - 1,
-                                    //    xChk.Length - sFirst) == -1))
-                                    //{
-                                    //    insX = symbolPairChk[i].ToString();
-                                    //    closeFlag = true;
-                                    //    switch (insX)
-                                    //    {
-                                    //        case "{":
-                                    //            insX = "}}";
-                                    //            break;
-                                    //        case "（":
-                                    //            insX = "）";
-                                    //            break;
-                                    //        case "〈":
-                                    //            insX = "〉";
-                                    //            break;
-                                    //        case "《":
-                                    //            insX = "》";
-                                    //            break;
-                                    //        case "「":
-                                    //            insX = "」";
-                                    //            break;
-                                    //        case "『":
-                                    //            insX = "』";
-                                    //            break;
-                                    //        default:
-                                    //            insX = "》";
-                                    //            break;
-                                    //    }
-                                    //    break;
-                                    //}
-                                }//for
+                                }//end of for loop 
                                 if (!closeFlag)
                                 {
                                     insX = "》";
@@ -782,7 +740,7 @@ namespace WindowsFormsApp1
 
                         }
                         else
-                        {
+                        {//pick up the close symbol according to the open one
                             switch (insX)
                             {
                                 case "{":
@@ -816,7 +774,7 @@ namespace WindowsFormsApp1
                         insX = "》";
                     }
                 insert:
-                    insertWords(insX,x);
+                    insertWords(insX, x);
                     return;
                 }
 
@@ -1041,9 +999,51 @@ namespace WindowsFormsApp1
 
         private void keyDownCtrlAdd()
         {
+            string x = textBox1.Text;
+            int s = textBox1.SelectionStart, l = textBox1.SelectionLength;
+            string xCopy = x.Substring(0, s + l);
+            int[] chk = checkAbnormalLinePara(xCopy);
+            if (chk.Length > 0)
+            {
+                if (MessageBox.Show("there is abnormal LinePara Length , check it now?", "",
+                    MessageBoxButtons.OKCancel, MessageBoxIcon.Warning,
+                    MessageBoxDefaultButton.Button1) == DialogResult.OK)
+                {
+                    textBox1.Select(chk[0], chk[1]);
+                    textBox1.ScrollToCaret();
+                    return;
+                }
+            }
             newTextBox1();
             pasteToCtext();
-            nextPages(Keys.PageDown);
+            nextPages(Keys.PageDown, false);
+        }
+
+        int normalLineParaLength;
+        private int[] checkAbnormalLinePara(string xChk)
+        {
+            string[] xLineParas = xChk.Split(Environment.NewLine.ToArray(), StringSplitOptions.None);
+            int i = -1;
+            foreach (string lineParaText in xLineParas)
+            {
+                i++;
+                if (Math.Abs(new StringInfo(lineParaText).LengthInTextElements
+                    - normalLineParaLength) > 3)
+                {//select the abnormal one
+                    string x = textBox1.Text;
+                    int j = -1, lineSeprtEnd = 0, lineSeprtStart = lineSeprtEnd;
+                    lineSeprtEnd = x.IndexOf(Environment.NewLine, lineSeprtEnd);
+                    while (lineSeprtEnd > -1)
+                    {
+
+                        if (++j == i) break;
+                        lineSeprtStart = lineSeprtEnd;
+                    }
+                    return new int[]{ lineSeprtStart, lineSeprtEnd };
+                }
+            }
+            return new int[0];
+            //throw new NotImplementedException();
         }
 
         void splitLineParabySeltext(Keys kys)
@@ -1143,7 +1143,7 @@ namespace WindowsFormsApp1
                 {
 
                     e.Handled = true;//取得或設定值，指出是否處理事件。https://docs.microsoft.com/zh-tw/dotnet/api/system.windows.forms.keyeventargs.handled?view=netframework-4.7.2&f1url=%3FappId%3DDev16IDEF1%26l%3DZH-TW%26k%3Dk(System.Windows.Forms.KeyEventArgs.Handled);k(TargetFrameworkMoniker-.NETFramework,Version%253Dv4.7.2);k(DevLang-csharp)%26rd%3Dtrue
-                    nextPages(e.KeyCode);
+                    nextPages(e.KeyCode, true);
                     return;
                 }
                 if (e.KeyCode == Keys.Left || e.KeyCode == Keys.Right)
@@ -1267,7 +1267,7 @@ namespace WindowsFormsApp1
             if (showColorSignal) this.BackColor = C;
         }
 
-        private void nextPages(Keys eKeyCode)
+        private void nextPages(Keys eKeyCode, bool stayInHere)
         {
             string url = textBox3.Text;
             if (url == "") return;
@@ -1311,6 +1311,7 @@ namespace WindowsFormsApp1
                 SendKeys.Send("^{PGUP}");//回上一頁籤檢查文本是否如願貼好
             }
             textBox3.Text = url;
+            if (stayInHere) this.Activate();
         }
 
         private void runWordMacro(string runName)
