@@ -1049,15 +1049,21 @@ namespace WindowsFormsApp1
                     {// {{ only
                         text = clearOmitChar(lineParaText.Substring(0, noteTextBlendStart));
                         note = clearOmitChar(lineParaText.Substring(noteTextBlendStart + 2));
-                        len = new StringInfo(text).LengthInTextElements +
-                            (int)Math.Ceiling((decimal)new StringInfo(note).LengthInTextElements / 2);
+                        if (text == "")
+                            len = new StringInfo(note).LengthInTextElements;
+                        else
+                            len = new StringInfo(text).LengthInTextElements +
+                                (int)Math.Ceiling((decimal)new StringInfo(note).LengthInTextElements / 2);
                     }
                     if (noteTextBlendStart == -1 && noteTextBlendEnd != -1)
                     {// }} only
                         note = clearOmitChar(lineParaText.Substring(0, noteTextBlendEnd));
                         text = clearOmitChar(lineParaText.Substring(noteTextBlendEnd + 2));
-                        len = new StringInfo(text).LengthInTextElements +
-                            (int)Math.Ceiling((decimal)new StringInfo(note).LengthInTextElements / 2);
+                        if (text == "")
+                            len = new StringInfo(note).LengthInTextElements;
+                        else
+                            len = new StringInfo(text).LengthInTextElements +
+                                (int)Math.Ceiling((decimal)new StringInfo(note).LengthInTextElements / 2);
                     }
                     if (noteTextBlendStart != -1 && noteTextBlendEnd != -1)
                     {// {{ and }} both
@@ -1094,16 +1100,23 @@ namespace WindowsFormsApp1
                                     noteTextBlendStart - (noteTextBlendEnd + 2));
                                 noteTextBlendEnd = lineParaText.IndexOf("}",
                                     noteTextBlendStart + 2);
+                                stNote = noteTextBlendStart + 2;
                                 if (noteTextBlendEnd == -1)
                                 {
-                                    stNote = noteTextBlendStart + 2;
                                     note += lineParaText.Substring(stNote); break;
                                 }
                                 else
                                 {
+                                    note += lineParaText.Substring(stNote, noteTextBlendEnd -
+                                        (noteTextBlendStart + 2));
                                     noteTextBlendStart = lineParaText.IndexOf("{",
-                                        noteTextBlendEnd + 2);
-                                    stNote = noteTextBlendStart;
+                                        noteTextBlendStart + 2);
+                                    if (noteTextBlendStart == -1)
+                                    {
+                                        text += lineParaText.Substring(noteTextBlendEnd + 2);
+                                        break;
+                                    }
+                                    stNote = noteTextBlendStart + 2;
                                 }
                             }
                             text = clearOmitChar(text); note = clearOmitChar(note);
@@ -1120,8 +1133,8 @@ namespace WindowsFormsApp1
                         LengthInTextElements;
                     gap = Math.Abs(len - normalLineParaLength);
                 }
-                if (gap > 3 || (len-normalLineParaLength<0
-                    && lineParaText.IndexOf("<p>")>-1))//&& gap < 8)
+                if (gap > 3 || (len - normalLineParaLength < 0
+                    && lineParaText.IndexOf("<p>") > -1))//&& gap < 8)
                 {//select the abnormal one
                     string x = textBox1.Text;
                     int j = -1, lineSeprtEnd = 0, lineSeprtStart = lineSeprtEnd;
