@@ -1069,23 +1069,29 @@ namespace WindowsFormsApp1
                     {// {{ and }} both
                         if (noteTextBlendStart < noteTextBlendEnd)
                         {
-                            int st = 0;
+                            int st = 0, lText = noteTextBlendStart;
                             while (noteTextBlendStart != -1)
                             {
-                                text += lineParaText.Substring(st, noteTextBlendStart);
-                                note += lineParaText.Substring(noteTextBlendStart + 2,
-                                    noteTextBlendEnd == -1 ? lineParaText.Length : noteTextBlendEnd
-                                    - (noteTextBlendStart + 2));
+                                text += lineParaText.Substring(st,
+                                    lText);
+                                note += lineParaText.Substring
+                                    (noteTextBlendStart + 2,
+                                    noteTextBlendEnd == -1 ?
+                                    lineParaText.Length - (noteTextBlendStart + 2)
+                                    : noteTextBlendEnd - (noteTextBlendStart + 2));
                                 noteTextBlendStart = lineParaText.IndexOf("{", noteTextBlendStart + 2);
                                 if (noteTextBlendStart == -1)
                                 {
-                                    text += lineParaText.Substring(noteTextBlendEnd + 2);
+                                    if (noteTextBlendEnd != -1)
+                                        text += lineParaText.Substring(noteTextBlendEnd + 2);
                                     break;
                                 }
                                 st = noteTextBlendEnd + 2;
+                                lText = noteTextBlendStart - (noteTextBlendEnd + 2);
                                 noteTextBlendEnd = lineParaText.IndexOf("}",
-                                    noteTextBlendStart);
-                                st = noteTextBlendEnd == -1 ? st : noteTextBlendEnd + 2;
+                                   noteTextBlendStart);
+                                st = noteTextBlendEnd == -1 ? st :
+                                    noteTextBlendEnd + 2;
                             }
                             text = clearOmitChar(text); note = clearOmitChar(note);
                             len = new StringInfo(text).LengthInTextElements + (int)Math.Ceiling((decimal)new StringInfo(note).LengthInTextElements / 2);
