@@ -615,6 +615,24 @@ namespace WindowsFormsApp1
 
                 }
 
+                if (e.KeyCode==Keys.OemPeriod||e.KeyCode==Keys.Oemcomma)
+                {
+                    int s = textBox1.SelectionStart;string x = textBox1.Text;
+                    string findwhat;
+                    if (e.KeyCode == Keys.OemPeriod)
+                        findwhat = ">";
+                    else
+                        findwhat = "<";
+                    int p = x.IndexOf(findwhat, s + 1);
+                    if (p > -1)
+                    {
+                        textBox1.Select(p,0);
+                    }
+                    else
+                        MessageBox.Show("not found!");
+                    return;
+                }
+
             }
 
             //按下Shift鍵
