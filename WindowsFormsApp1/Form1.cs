@@ -1316,7 +1316,8 @@ namespace WindowsFormsApp1
                     return;
                 }
                 if (e.KeyCode == Keys.Left || e.KeyCode == Keys.Right)
-                {//Ctrl+左右鍵：徵調                    
+                {//Ctrl+左右鍵：徵調
+                    if (textBox1.Focused) return;
                     Point mouseIP = Cursor.Position;//https://jjnnykimo.pixnet.net/blog/post/27155696
                     if (e.KeyCode == Keys.Left) { this.Left--; mouseIP.X--; }//-= w; }
                     if (e.KeyCode == Keys.Right) { this.Left++; mouseIP.X++; } //+= w; }

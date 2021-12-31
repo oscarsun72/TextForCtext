@@ -65,9 +65,9 @@ Ctrl + PageDown ： 根據 textBox3所載的網址，瀏覽ctext書影的下一�
 
 Esc 則按下Esc鍵會隱藏到任務列（系統列）中；滑鼠在其 ico 圖示上滑過即恢復
 
-Alt + ←：視窗向左移動30dpi（+ Ctrl：徵調）
+Alt + ←：視窗向左移動30dpi（+ Ctrl：徵調；插入點在textBox1時例外）
 
-Alt + →：視窗向右移動30dpi（+ Ctrl：徵調）
+Alt + →：視窗向右移動30dpi（+ Ctrl：徵調；插入點在textBox1時例外）
 
 
 
