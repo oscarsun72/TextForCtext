@@ -1080,6 +1080,10 @@ namespace WindowsFormsApp1
             foreach (string lineParaText in xLineParas)
             {
                 i++;
+                if (lineParaText.IndexOf("{{{")>-1)//{{{孫守真按：}}}等略去，以人工校對
+                {
+                    continue;
+                }
                 int noteTextBlendStart = lineParaText.IndexOf("{"),
                     noteTextBlendEnd = lineParaText.IndexOf("}");
                 if (noteTextBlendStart != -1 || noteTextBlendEnd != -1)
