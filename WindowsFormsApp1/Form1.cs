@@ -341,6 +341,22 @@ namespace WindowsFormsApp1
             string x = textBox1.Text;
             int s = textBox1.SelectionStart, l = textBox1.SelectionLength;
             string xCopy = x.Substring(0, s + l);
+            string[] replacedChar = { ",", ";",":" };
+            string[] replaceChar = { "，", "；" ,"："};
+            foreach (var item in replacedChar)
+            {
+                if (xCopy.IndexOf(item) > -1)
+                {
+                    if (MessageBox.Show("含半形標點，是否取代為全形？", "", MessageBoxButtons.OKCancel) == DialogResult.OK)
+                    {
+                        for (int i = 0; i < replaceChar.Length; i++)
+                        {
+                            xCopy = xCopy.Replace(replacedChar[i], replaceChar[i]);
+                        }
+                    }
+                    break;
+                }
+            }
             if (xCopy.IndexOf(" ") > -1 || xCopy.IndexOfAny("�".ToCharArray()) > -1 ||
                 xCopy.IndexOf("□") > -1)//□為《維基文庫》《四庫全書》的缺字符，" "則是《四部叢刊》的，"�"則是《四部叢刊》的造字符。
             {//  「�」甚特別，indexof會失效，明明沒有，而傳回 0 //https://docs.microsoft.com/zh-tw/dotnet/csharp/how-to/compare-strings
@@ -585,7 +601,7 @@ namespace WindowsFormsApp1
 
                 if (e.KeyCode == Keys.Left || e.KeyCode == Keys.Right)
                 {/*Ctrl + →：插入點若在漢字中,從插入點開始向後移至任何非漢字前(即漢字後) 反之亦然
-                  * Ctrl + ←：：插入點若在漢字中,從插入點開始向後移至任何非漢字後(即漢字前) 反之亦然*/                    
+                  * Ctrl + ←：：插入點若在漢字中,從插入點開始向後移至任何非漢字後(即漢字前) 反之亦然*/
                     string x = textBox1.Text;
                     int s = textBox1.SelectionStart;
                     int l;
@@ -596,7 +612,7 @@ namespace WindowsFormsApp1
                         else l = findChineseCharFarLength(x.Substring(0, s), false);
                         if (l != -1)
                         {
-                            textBox1.Select( s - l + 1,0);
+                            textBox1.Select(s - l + 1, 0);
                             textBox1.ScrollToCaret();
                             e.Handled = true;
                             return;
@@ -608,7 +624,7 @@ namespace WindowsFormsApp1
                         else l = findChineseCharFarLength(x.Substring(s), true);
                         if (l != -1)
                         {
-                            textBox1.Select( s + l - 1,0);
+                            textBox1.Select(s + l - 1, 0);
                             textBox1.ScrollToCaret();
                             e.Handled = true;
                             return;
@@ -616,10 +632,10 @@ namespace WindowsFormsApp1
                     }
                 }
 
-                if (e.KeyCode==Keys.OemPeriod||e.KeyCode==Keys.Oemcomma)
+                if (e.KeyCode == Keys.OemPeriod || e.KeyCode == Keys.Oemcomma)
                 {
                     e.Handled = true;
-                    int s = textBox1.SelectionStart;string x = textBox1.Text;
+                    int s = textBox1.SelectionStart; string x = textBox1.Text;
                     string findwhat;
                     if (e.KeyCode == Keys.OemPeriod)
                         findwhat = ">";
@@ -628,10 +644,10 @@ namespace WindowsFormsApp1
                     int p = x.IndexOf(findwhat, s + 1);
                     if (p > -1)
                     {
-                        int l=0;
-                        if (findwhat==">")
+                        int l = 0;
+                        if (findwhat == ">")
                             l = 1;
-                        textBox1.Select(p+l,0);
+                        textBox1.Select(p + l, 0);
                         textBox1.ScrollToCaret();
                     }
                     else
@@ -1053,7 +1069,7 @@ namespace WindowsFormsApp1
             return x;
         }
 
-        int normalLineParaLength=0;
+        int normalLineParaLength = 0;
         private int[] checkAbnormalLinePara(string xChk)
         {
             if (normalLineParaLength < 7) return new int[0];
@@ -1115,30 +1131,30 @@ namespace WindowsFormsApp1
                                 st = noteTextBlendEnd + 2;
                                 lText = noteTextBlendStart - st;//(noteTextBlendEnd + 2);
                                 text += lineParaText.Substring
-                                    (st,  lText);
+                                    (st, lText);
                                 lText = noteTextBlendEnd;
                                 noteTextBlendEnd = lineParaText.IndexOf("}",
                                    noteTextBlendStart);
-                                if (noteTextBlendEnd==-1)
+                                if (noteTextBlendEnd == -1)
                                 {
                                     note += lineParaText.Substring(
                                         noteTextBlendStart,
-                                        lineParaText.Length-noteTextBlendStart);
+                                        lineParaText.Length - noteTextBlendStart);
                                     break;
                                 }
                                 st = noteTextBlendEnd + 2;
                                 lText = noteTextBlendStart;
-                                noteTextBlendStart = lineParaText.IndexOf("{",st);
+                                noteTextBlendStart = lineParaText.IndexOf("{", st);
                                 if (noteTextBlendStart == -1)
                                 {
-                                    note += lineParaText.Substring(lText+2,
-                                        noteTextBlendEnd-(lText+2));
+                                    note += lineParaText.Substring(lText + 2,
+                                        noteTextBlendEnd - (lText + 2));
                                     lText = lineParaText.Length - st;
                                     text += lineParaText.Substring(st,
-                                        lineParaText.Length-st);
+                                        lineParaText.Length - st);
                                     break;
                                 }
-                                lText =noteTextBlendStart-st;
+                                lText = noteTextBlendStart - st;
                             }
                             text = clearOmitChar(text); note = clearOmitChar(note);
                             len = new StringInfo(text).LengthInTextElements + (int)Math.Ceiling((decimal)new StringInfo(note).LengthInTextElements / 2);
