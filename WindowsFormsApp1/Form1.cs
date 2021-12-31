@@ -1045,7 +1045,9 @@ namespace WindowsFormsApp1
             int[] chk = checkAbnormalLinePara(xCopy);
             if (chk.Length > 0)
             {
-                if (MessageBox.Show("there is abnormal LinePara Length , check it now?", "",
+                if (MessageBox.Show("there is abnormal LinePara Length , check it now?"+
+                    Environment.NewLine+ Environment.NewLine+
+                    "normal= " + chk[2] + "\tabnormal= " + chk[3], "",
                     MessageBoxButtons.OKCancel, MessageBoxIcon.Warning,
                     MessageBoxDefaultButton.Button1) == DialogResult.OK)
                 {
@@ -1244,7 +1246,8 @@ namespace WindowsFormsApp1
                         lineSeprtStart = lineSeprtEnd;
                         lineSeprtEnd = x.IndexOf(Environment.NewLine, ++lineSeprtEnd);
                     }
-                    return new int[] { lineSeprtStart, lineSeprtEnd - lineSeprtStart };
+                    return new int[] { lineSeprtStart, lineSeprtEnd - lineSeprtStart ,
+                    normalLineParaLength,len};
                 }
             }
             return new int[0];
