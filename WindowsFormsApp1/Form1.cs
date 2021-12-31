@@ -341,8 +341,8 @@ namespace WindowsFormsApp1
             string x = textBox1.Text;
             int s = textBox1.SelectionStart, l = textBox1.SelectionLength;
             string xCopy = x.Substring(0, s + l);
-            string[] replacedChar = { ",", ";",":" };
-            string[] replaceChar = { "，", "；" ,"："};
+            string[] replacedChar = { ",", ";", ":" };
+            string[] replaceChar = { "，", "；", "：" };
             foreach (var item in replacedChar)
             {
                 if (xCopy.IndexOf(item) > -1)
@@ -1154,6 +1154,8 @@ namespace WindowsFormsApp1
                                         lineParaText.Length - st);
                                     break;
                                 }
+                                note += lineParaText.Substring(lText + 2, noteTextBlendEnd - (lText + 2));
+                                noteTextBlendEnd = lineParaText.IndexOf("}", noteTextBlendStart);
                                 lText = noteTextBlendStart - st;
                             }
                             text = clearOmitChar(text); note = clearOmitChar(note);
@@ -1214,7 +1216,8 @@ namespace WindowsFormsApp1
                     gap = Math.Abs(len - normalLineParaLength);
                 }
                 if (gap > 3 && !(len < normalLineParaLength
-                    && lineParaText.IndexOf("<p>") > -1))//&& gap < 8)
+                    && lineParaText.IndexOf("<p>") > -1)
+                    && lineParaText!="　")//&& gap < 8)
                 {//select the abnormal one
                     string x = textBox1.Text;
                     int j = -1, lineSeprtEnd = 0, lineSeprtStart = lineSeprtEnd;
