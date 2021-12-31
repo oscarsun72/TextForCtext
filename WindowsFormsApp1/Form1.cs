@@ -2038,6 +2038,7 @@ namespace WindowsFormsApp1
         int[] findWord(string x, string x1)
         {
             if (x == "" || x1 == "") return null;
+            if (x.Length > x1.Length) return null;
             int s, nextS;
             s = x1.IndexOf(x);
             nextS = x1.IndexOf(x, s + x.Length);
