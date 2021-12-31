@@ -626,7 +626,11 @@ namespace WindowsFormsApp1
                     int p = x.IndexOf(findwhat, s + 1);
                     if (p > -1)
                     {
-                        textBox1.Select(p,0);
+                        int l=0;
+                        if (findwhat==">")
+                            l = 1;
+                        textBox1.Select(p+l,0);
+                        textBox1.ScrollToCaret();
                     }
                     else
                         MessageBox.Show("not found!");
