@@ -429,6 +429,7 @@ namespace WindowsFormsApp1
             && e.KeyCode == Keys.Delete)
             {//Ctrl + Shift + Delete ： 將選取文字於文本中全部清除
                 int s = textBox1.SelectionStart;
+                undoRecord();                
                 textBox1.Text = textBox1.Text.Replace(textBox1.SelectedText, "");
                 textBox1.SelectionStart = s; textBox1.ScrollToCaret();
                 return;
@@ -514,6 +515,10 @@ namespace WindowsFormsApp1
                 {//還原功能
                     e.Handled = true;
                     int s = textBox1.SelectionStart, l = textBox1.SelectionLength;
+                    if (selStart!=s&&selStart!=0)
+                    {
+                        s = selStart;l = selLength;
+                    }
                     if (undoTextBox1Text.Count - undoTimes > -1)
                     {
                         textBox1.Text = undoTextBox1Text[undoTextBox1Text.Count - ++undoTimes];
@@ -1660,6 +1665,7 @@ namespace WindowsFormsApp1
             }
             if (replacedword == rplsword) return;
             int s = textBox1.SelectionStart; int l = 0;
+            undoRecord();
             if (button2.Text == "選取文")
             {
                 replacedword = textBox2.Text;
@@ -2044,12 +2050,18 @@ namespace WindowsFormsApp1
             }
             if (ModifierKeys == Keys.None)
             {
-                undoTextBox1Text.Add(textBox1.Text);
-                if (undoTimes != 0) undoTimes = 0;
-                if (undoTextBox1Text.Count > 50)//還原上限定為50個
-                {
-                    undoTextBox1Text.RemoveAt(0);
-                }
+                undoRecord();
+            }
+        }
+
+        private void undoRecord()
+        {
+            selStart = textBox1.SelectionStart;selLength = textBox1.SelectionLength;
+            undoTextBox1Text.Add(textBox1.Text);
+            if (undoTimes != 0) undoTimes = 0;
+            if (undoTextBox1Text.Count > 50)//還原上限定為50個
+            {
+                undoTextBox1Text.RemoveAt(0);
             }
         }
 
