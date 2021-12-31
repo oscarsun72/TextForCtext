@@ -1029,7 +1029,7 @@ namespace WindowsFormsApp1
             return x;
         }
 
-        int normalLineParaLength;
+        int normalLineParaLength=0;
         private int[] checkAbnormalLinePara(string xChk)
         {
             if (normalLineParaLength < 7) return new int[0];
