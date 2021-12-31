@@ -1072,6 +1072,7 @@ namespace WindowsFormsApp1
         int normalLineParaLength = 0;
         private int[] checkAbnormalLinePara(string xChk)
         {
+            saveText();
             if (normalLineParaLength < 7) return new int[0];
             string[] xLineParas = xChk.Split(
                 Environment.NewLine.ToArray(),
@@ -1184,6 +1185,7 @@ namespace WindowsFormsApp1
                                 {
                                     note += lineParaText.Substring(stNote, noteTextBlendEnd -
                                         (noteTextBlendStart + 2));
+                                    stNote = noteTextBlendStart;//暫記下備用
                                     noteTextBlendStart = lineParaText.IndexOf("{",
                                         noteTextBlendStart + 2);
                                     if (noteTextBlendStart == -1)
@@ -1191,6 +1193,8 @@ namespace WindowsFormsApp1
                                         text += lineParaText.Substring(noteTextBlendEnd + 2);
                                         break;
                                     }
+                                    text += lineParaText.Substring(noteTextBlendEnd+2,
+                                        noteTextBlendStart-( noteTextBlendEnd+2));
                                     stNote = noteTextBlendStart + 2;
                                     lNote = noteTextBlendEnd;
                                     noteTextBlendEnd = lineParaText.IndexOf("}", stNote);
@@ -1203,6 +1207,13 @@ namespace WindowsFormsApp1
                                         break;
                                     }
                                     lNote = noteTextBlendEnd - stNote;
+                                    noteTextBlendStart = lineParaText.IndexOf("{",
+                                        noteTextBlendEnd);
+                                    if (noteTextBlendStart==-1)
+                                    {
+                                        text += lineParaText.Substring(
+                                            noteTextBlendEnd+2);
+                                    }
                                 }
                             }
                             text = clearOmitChar(text); note = clearOmitChar(note);
