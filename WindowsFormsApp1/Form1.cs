@@ -585,7 +585,7 @@ namespace WindowsFormsApp1
 
                 if (e.KeyCode == Keys.Left || e.KeyCode == Keys.Right)
                 {/*Ctrl + →：插入點若在漢字中,從插入點開始向後移至任何非漢字前(即漢字後) 反之亦然
-                  * Ctrl + ←：：插入點若在漢字中,從插入點開始向後移至任何非漢字後(即漢字前) 反之亦然*/
+                  * Ctrl + ←：：插入點若在漢字中,從插入點開始向後移至任何非漢字後(即漢字前) 反之亦然*/                    
                     string x = textBox1.Text;
                     int s = textBox1.SelectionStart;
                     int l;
@@ -596,7 +596,8 @@ namespace WindowsFormsApp1
                         else l = findChineseCharFarLength(x.Substring(0, s), false);
                         if (l != -1)
                         {
-                            textBox1.SelectionStart = s - l + 1;
+                            textBox1.Select( s - l + 1,0);
+                            textBox1.ScrollToCaret();
                             e.Handled = true;
                             return;
                         }
@@ -607,16 +608,17 @@ namespace WindowsFormsApp1
                         else l = findChineseCharFarLength(x.Substring(s), true);
                         if (l != -1)
                         {
-                            textBox1.SelectionStart = s + l - 1;
+                            textBox1.Select( s + l - 1,0);
+                            textBox1.ScrollToCaret();
                             e.Handled = true;
                             return;
                         }
                     }
-
                 }
 
                 if (e.KeyCode==Keys.OemPeriod||e.KeyCode==Keys.Oemcomma)
                 {
+                    e.Handled = true;
                     int s = textBox1.SelectionStart;string x = textBox1.Text;
                     string findwhat;
                     if (e.KeyCode == Keys.OemPeriod)
