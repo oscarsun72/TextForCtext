@@ -45,24 +45,27 @@ namespace WindowsFormsApp1
             this.textBox1.Font = new System.Drawing.Font("新細明體-ExtB", 23.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
             this.textBox1.ForeColor = System.Drawing.SystemColors.Menu;
             this.textBox1.HideSelection = false;
-            this.textBox1.Location = new System.Drawing.Point(-1, 41);
+            this.textBox1.Location = new System.Drawing.Point(-1, 51);
+            this.textBox1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.textBox1.Multiline = true;
             this.textBox1.Name = "textBox1";
             this.textBox1.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.textBox1.Size = new System.Drawing.Size(422, 399);
+            this.textBox1.Size = new System.Drawing.Size(561, 498);
             this.textBox1.TabIndex = 0;
             this.textBox1.Click += new System.EventHandler(this.textBox1_Click);
             this.textBox1.TextChanged += new System.EventHandler(this.textBox1_TextChanged);
             this.textBox1.Enter += new System.EventHandler(this.textBox1_Enter);
             this.textBox1.KeyDown += new System.Windows.Forms.KeyEventHandler(this.textBox1_KeyDown);
             this.textBox1.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.textBox1_KeyPress);
+            this.textBox1.Leave += new System.EventHandler(this.textBox1_Leave);
             this.textBox1.MouseDown += new System.Windows.Forms.MouseEventHandler(this.textBox1_MouseDown);
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(-1, 12);
+            this.button1.Location = new System.Drawing.Point(-1, 15);
+            this.button1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(61, 23);
+            this.button1.Size = new System.Drawing.Size(81, 29);
             this.button1.TabIndex = 1;
             this.button1.TabStop = false;
             this.button1.Text = "分行分段";
@@ -71,10 +74,11 @@ namespace WindowsFormsApp1
             // 
             // textBox2
             // 
-            this.textBox2.Location = new System.Drawing.Point(121, 12);
+            this.textBox2.Location = new System.Drawing.Point(161, 15);
+            this.textBox2.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.textBox2.Multiline = true;
             this.textBox2.Name = "textBox2";
-            this.textBox2.Size = new System.Drawing.Size(146, 22);
+            this.textBox2.Size = new System.Drawing.Size(193, 26);
             this.textBox2.TabIndex = 2;
             this.textBox2.Click += new System.EventHandler(this.textBox2_Click);
             this.textBox2.TextChanged += new System.EventHandler(this.textBox2_TextChanged);
@@ -85,9 +89,10 @@ namespace WindowsFormsApp1
             // 
             // textBox3
             // 
-            this.textBox3.Location = new System.Drawing.Point(264, 12);
+            this.textBox3.Location = new System.Drawing.Point(352, 15);
+            this.textBox3.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.textBox3.Name = "textBox3";
-            this.textBox3.Size = new System.Drawing.Size(111, 22);
+            this.textBox3.Size = new System.Drawing.Size(147, 25);
             this.textBox3.TabIndex = 3;
             this.textBox3.TabStop = false;
             this.textBox3.Click += new System.EventHandler(this.textBox3_Click);
@@ -96,10 +101,11 @@ namespace WindowsFormsApp1
             // textBox4
             // 
             this.textBox4.Font = new System.Drawing.Font("新細明體-ExtB", 20.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
-            this.textBox4.Location = new System.Drawing.Point(381, 2);
+            this.textBox4.Location = new System.Drawing.Point(508, 2);
+            this.textBox4.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.textBox4.Multiline = true;
             this.textBox4.Name = "textBox4";
-            this.textBox4.Size = new System.Drawing.Size(40, 42);
+            this.textBox4.Size = new System.Drawing.Size(52, 52);
             this.textBox4.TabIndex = 5;
             this.textBox4.TabStop = false;
             this.textBox4.Enter += new System.EventHandler(this.textBox4_Enter);
@@ -109,9 +115,10 @@ namespace WindowsFormsApp1
             // 
             // richTextBox1
             // 
-            this.richTextBox1.Location = new System.Drawing.Point(94, 95);
+            this.richTextBox1.Location = new System.Drawing.Point(125, 119);
+            this.richTextBox1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.richTextBox1.Name = "richTextBox1";
-            this.richTextBox1.Size = new System.Drawing.Size(252, 212);
+            this.richTextBox1.Size = new System.Drawing.Size(335, 264);
             this.richTextBox1.TabIndex = 6;
             this.richTextBox1.TabStop = false;
             this.richTextBox1.Text = "";
@@ -120,9 +127,10 @@ namespace WindowsFormsApp1
             // 
             // button2
             // 
-            this.button2.Location = new System.Drawing.Point(60, 12);
+            this.button2.Location = new System.Drawing.Point(80, 15);
+            this.button2.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(60, 23);
+            this.button2.Size = new System.Drawing.Size(80, 29);
             this.button2.TabIndex = 4;
             this.button2.TabStop = false;
             this.button2.Text = "全部文";
@@ -131,9 +139,9 @@ namespace WindowsFormsApp1
             // 
             // Form1
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(424, 450);
+            this.ClientSize = new System.Drawing.Size(565, 562);
             this.Controls.Add(this.richTextBox1);
             this.Controls.Add(this.textBox4);
             this.Controls.Add(this.button2);
@@ -143,6 +151,7 @@ namespace WindowsFormsApp1
             this.Controls.Add(this.textBox1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.KeyPreview = true;
+            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.Name = "Form1";
             this.StartPosition = System.Windows.Forms.FormStartPosition.Manual;
             this.Text = "TextForCtext";
