@@ -421,7 +421,7 @@ namespace WindowsFormsApp1
             //if ((m & Keys.Control) == Keys.Control && (m & Keys.Alt) == Keys.Alt && e.KeyCode == Keys.G)
             //if((int)Control.ModifierKeys ==
             //    (int)Keys.Control + (int)Keys.Alt && e.KeyCode == Keys.G)
-            if((m & Keys.Shift) == Keys.Shift &&e.KeyCode== Keys.Insert )pasteAllOverWrite = true;
+            if ((m & Keys.Shift) == Keys.Shift && e.KeyCode == Keys.Insert) pasteAllOverWrite = true;
             else pasteAllOverWrite = false;
             if ((m & Keys.Control) == Keys.Control
                 && (m & Keys.Alt) == Keys.Alt)//https://zhidao.baidu.com/question/628222381668604284.html
@@ -437,7 +437,7 @@ namespace WindowsFormsApp1
                 //int s = textBox1.SelectionStart;
                 undoRecord();
                 textBox1.Text = textBox1.Text.Replace(textBox1.SelectedText, "");
-                textBox1.SelectionStart = selStart; 
+                textBox1.SelectionStart = selStart;
                 textBox1.ScrollToCaret();
                 return;
             }
@@ -524,19 +524,7 @@ namespace WindowsFormsApp1
                 if (e.KeyCode == Keys.Z)
                 {//還原功能
                     e.Handled = true;
-                    int s = textBox1.SelectionStart, l = textBox1.SelectionLength;
-                    if (selStart != s && selStart != 0)
-                    {
-                        s = selStart; l = selLength;
-                    }
-                    if (undoTextBox1Text.Count - undoTimes > -1)
-                    {
-                        textBox1.Text = undoTextBox1Text[undoTextBox1Text.Count - ++undoTimes];
-                        textBox1.Select(s, l);
-                        textBox1.ScrollToCaret();
-                    }
-                    else
-                        MessageBox.Show("no more to undo!");
+                    undoTextBox(textBox1);
                     return;
                 }
 
@@ -922,6 +910,29 @@ namespace WindowsFormsApp1
                     return;
                 }
             }
+
+        }
+
+        private void undoTextBox(TextBox textBox1)
+        {
+            int s = textBox1.SelectionStart, l = textBox1.SelectionLength;
+            if (selStart != s && selStart != 0)
+            {
+                s = selStart; l = selLength;
+            }
+            if (undoTextBox1Text.Count - undoTimes > -1)
+            {
+                textBox1.Text = undoTextBox1Text[undoTextBox1Text.Count - ++undoTimes];
+                textBox1.Select(s, l);
+                Point caretPosition = textBox1.GetPositionFromCharIndex(s);
+                if (caretPosition.Y >textBox1.Height-textBox1.Top || caretPosition.Y < textBox1.Top)
+                {
+                    textBox1.ScrollToCaret();
+                    textBox1.AutoScrollOffset = caretPosition;
+                }
+            }
+            else
+                MessageBox.Show("no more to undo!");
 
         }
 
