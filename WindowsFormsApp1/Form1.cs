@@ -1804,7 +1804,7 @@ namespace WindowsFormsApp1
                 string rplsWord = getReplaceWordDefault(rplsdWord);
                 if (rplsWord != "") textBox4.Text = rplsWord;
             }            
-            restoreCaretPosition(textBox1, selStart,selLength);
+            restoreCaretPosition(textBox1, selStart,selLength==0?1:selLength);            
         }
 
         private void textBox4SizeLarger()
