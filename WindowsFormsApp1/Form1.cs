@@ -272,7 +272,7 @@ namespace WindowsFormsApp1
 
         private void textBox1_Click(object sender, EventArgs e)
         {
-            if (textBox1.Text == "")
+            if (textBox1.Text == ""&&ModifierKeys==Keys.None)
             {
                 textBox1.Text = Clipboard.GetText();
                 textBox1.Select(0, 0);
