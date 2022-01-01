@@ -608,7 +608,7 @@ namespace WindowsFormsApp1
                         {
                             s = s - l + 1;
                             textBox1.Select(s, 0);
-                            restoreCaretPosition(textBox1,s,0);//textBox1.ScrollToCaret();
+                            restoreCaretPosition(textBox1, s, 0);//textBox1.ScrollToCaret();
                             e.Handled = true;
                             return;
                         }
@@ -684,6 +684,12 @@ namespace WindowsFormsApp1
             //按下Alt鍵
             if ((m & Keys.Alt) == Keys.Alt)//⇌ if (Control.ModifierKeys == Keys.Alt)
             {
+                if (e.KeyCode == Keys.OemPeriod)
+                {
+                    insertWords("·", textBox1.Text);
+                    e.Handled = true;
+                    return;
+                }
                 if (e.KeyCode == Keys.G)
                 {
                     string x = textBox1.SelectedText;
@@ -956,8 +962,10 @@ namespace WindowsFormsApp1
             int s = textBox1.SelectionStart, l = textBox1.SelectionLength;
             x = x.Substring(0, s) + insX + x.Substring(s);
             textBox1.Text = x;
-            textBox1.SelectionStart = s + insX.Length;
-            textBox1.ScrollToCaret();
+            s += insX.Length;
+            //textBox1.SelectionStart = s + insX.Length;
+            //textBox1.ScrollToCaret();
+            restoreCaretPosition(textBox1, s, l);
         }
 
         List<string> lastKeyPress = new List<string>();
@@ -1722,7 +1730,7 @@ namespace WindowsFormsApp1
             }
             addReplaceWordDefault(replacedword, rplsword);
             textBox1.SelectionStart = s; textBox1.SelectionLength = l;
-            restoreCaretPosition(textBox1, s, l==0?1:l);//textBox1.ScrollToCaret();
+            restoreCaretPosition(textBox1, s, l == 0 ? 1 : l);//textBox1.ScrollToCaret();
             textBox1.Focus();
         }
 
@@ -1803,8 +1811,8 @@ namespace WindowsFormsApp1
             {
                 string rplsWord = getReplaceWordDefault(rplsdWord);
                 if (rplsWord != "") textBox4.Text = rplsWord;
-            }            
-            restoreCaretPosition(textBox1, selStart,selLength==0?1:selLength);            
+            }
+            restoreCaretPosition(textBox1, selStart, selLength == 0 ? 1 : selLength);
         }
 
         private void textBox4SizeLarger()
