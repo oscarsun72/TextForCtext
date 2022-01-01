@@ -600,14 +600,13 @@ namespace WindowsFormsApp1
                     int s = textBox1.SelectionStart;
                     int l; bool isIPCharHanzi;
                     if (e.KeyCode == Keys.Left)
-                    {
+                    {//Ctrl  + ←
                         isIPCharHanzi = isChineseChar(x.Substring(s - 1, 1));
                         if (isIPCharHanzi) l = findNotChineseCharFarLength(x.Substring(0, s), false);
                         else l = findChineseCharFarLength(x.Substring(0, s), false);
                         if (l != -1)
                         {
                             s = s - l + 1;
-                            if ("。，、；：？！「」『』《》〈〉".IndexOf(textBox1.Text.Substring(s, 1)) > -1) s++;
                             textBox1.Select(s, 0);
                             restoreCaretPosition(textBox1,s,0);//textBox1.ScrollToCaret();
                             e.Handled = true;
@@ -615,14 +614,16 @@ namespace WindowsFormsApp1
                         }
                     }
                     else
-                    {
+                    {// Ctrl + →
                         isIPCharHanzi = isChineseChar(x.Substring(s, 1));
                         if (isIPCharHanzi) l = findNotChineseCharFarLength(x.Substring(s), true);
                         else l = findChineseCharFarLength(x.Substring(s), true);
                         if (l != -1)
                         {
-                            textBox1.Select(s + l - 1, 0);
-                            textBox1.ScrollToCaret();
+                            s = s + l - 1;
+                            if ("。，、；：？！「」『』《》〈〉".IndexOf(textBox1.Text.Substring(s, 1)) > -1) s++;
+                            textBox1.Select(s, 0);
+                            restoreCaretPosition(textBox1, s, 0);//textBox1.ScrollToCaret();
                             e.Handled = true;
                             return;
                         }
