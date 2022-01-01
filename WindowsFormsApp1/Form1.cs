@@ -1722,7 +1722,7 @@ namespace WindowsFormsApp1
             }
             addReplaceWordDefault(replacedword, rplsword);
             textBox1.SelectionStart = s; textBox1.SelectionLength = l;
-            textBox1.ScrollToCaret();
+            restoreCaretPosition(textBox1, s, l);//textBox1.ScrollToCaret();
             textBox1.Focus();
         }
 
