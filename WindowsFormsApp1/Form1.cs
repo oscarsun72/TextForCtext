@@ -1803,8 +1803,8 @@ namespace WindowsFormsApp1
             {
                 string rplsWord = getReplaceWordDefault(rplsdWord);
                 if (rplsWord != "") textBox4.Text = rplsWord;
-            }
-            restoreCaretPosition(textBox1, textBox1.SelectionStart,textBox1.SelectionLength);
+            }            
+            restoreCaretPosition(textBox1, selStart,selLength);
         }
 
         private void textBox4SizeLarger()
@@ -2108,7 +2108,7 @@ namespace WindowsFormsApp1
 
         private void textBox1_Leave(object sender, EventArgs e)
         {
-            selStart= textBox1.SelectionStart;selLength = textBox1.TextLength;
+            //selStart= textBox1.SelectionStart;selLength = textBox1.TextLength;
         }
 
         int[] findWord(string x, string x1)
