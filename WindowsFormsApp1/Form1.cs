@@ -418,8 +418,8 @@ namespace WindowsFormsApp1
             //if ((m & Keys.Control) == Keys.Control && (m & Keys.Alt) == Keys.Alt && e.KeyCode == Keys.G)
             //if((int)Control.ModifierKeys ==
             //    (int)Keys.Control + (int)Keys.Alt && e.KeyCode == Keys.G)
-            if((m & Keys.Shift) == Keys.Shift &&e.KeyCode== Keys.Insert )pasteAll = true;
-            else pasteAll = false;
+            if((m & Keys.Shift) == Keys.Shift &&e.KeyCode== Keys.Insert )pasteAllOverWrite = true;
+            else pasteAllOverWrite = false;
             if ((m & Keys.Control) == Keys.Control
                 && (m & Keys.Alt) == Keys.Alt)//https://zhidao.baidu.com/question/628222381668604284.html
             {//https://bbs.csdn.net/topics/350010591
@@ -453,8 +453,8 @@ namespace WindowsFormsApp1
 
             if ((m & Keys.Control) == Keys.Control)
             {//按下Ctrl鍵
-                if (e.KeyCode == Keys.V) pasteAll = false;
-                else pasteAll = false;
+                if (e.KeyCode == Keys.V) pasteAllOverWrite = false;
+                else pasteAllOverWrite = false;
 
                 if (e.KeyCode == Keys.F12)
                 {
@@ -1901,7 +1901,7 @@ namespace WindowsFormsApp1
         private void textBox1_TextChanged(object sender, EventArgs e)
         {
             undoTextValueChanged(selStart, selLength);
-            if (textBox1.Text == "" && !pasteAll)
+            if (textBox1.Text == "" && !pasteAllOverWrite)
             {
                 hideToNICo();
             }
@@ -2005,7 +2005,7 @@ namespace WindowsFormsApp1
         }
         string lastKeyPressElement = "";
 
-        bool pasteAll = false;
+        bool pasteAllOverWrite = false;
 
         private void textBox1_KeyPress(object sender, KeyPressEventArgs e)
         {
