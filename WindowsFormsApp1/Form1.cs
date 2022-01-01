@@ -418,6 +418,8 @@ namespace WindowsFormsApp1
             //if ((m & Keys.Control) == Keys.Control && (m & Keys.Alt) == Keys.Alt && e.KeyCode == Keys.G)
             //if((int)Control.ModifierKeys ==
             //    (int)Keys.Control + (int)Keys.Alt && e.KeyCode == Keys.G)
+            if((m & Keys.Shift) == Keys.Shift &&e.KeyCode== Keys.Insert )pasteAll = true;
+            else pasteAll = false;
             if ((m & Keys.Control) == Keys.Control
                 && (m & Keys.Alt) == Keys.Alt)//https://zhidao.baidu.com/question/628222381668604284.html
             {//https://bbs.csdn.net/topics/350010591
@@ -429,7 +431,7 @@ namespace WindowsFormsApp1
             && e.KeyCode == Keys.Delete)
             {//Ctrl + Shift + Delete ： 將選取文字於文本中全部清除
                 int s = textBox1.SelectionStart;
-                undoRecord();                
+                undoRecord();
                 textBox1.Text = textBox1.Text.Replace(textBox1.SelectedText, "");
                 textBox1.SelectionStart = s; textBox1.ScrollToCaret();
                 return;
@@ -451,6 +453,9 @@ namespace WindowsFormsApp1
 
             if ((m & Keys.Control) == Keys.Control)
             {//按下Ctrl鍵
+                if (e.KeyCode == Keys.V) pasteAll = false;
+                else pasteAll = false;
+
                 if (e.KeyCode == Keys.F12)
                 {
                     string x = textBox1.SelectedText;
@@ -515,9 +520,9 @@ namespace WindowsFormsApp1
                 {//還原功能
                     e.Handled = true;
                     int s = textBox1.SelectionStart, l = textBox1.SelectionLength;
-                    if (selStart!=s&&selStart!=0)
+                    if (selStart != s && selStart != 0)
                     {
-                        s = selStart;l = selLength;
+                        s = selStart; l = selLength;
                     }
                     if (undoTextBox1Text.Count - undoTimes > -1)
                     {
@@ -1050,8 +1055,8 @@ namespace WindowsFormsApp1
             int[] chk = checkAbnormalLinePara(xCopy);
             if (chk.Length > 0)
             {
-                if (MessageBox.Show("there is abnormal LinePara Length , check it now?"+
-                    Environment.NewLine+ Environment.NewLine+
+                if (MessageBox.Show("there is abnormal LinePara Length , check it now?" +
+                    Environment.NewLine + Environment.NewLine +
                     "normal= " + chk[2] + "\tabnormal= " + chk[3], "",
                     MessageBoxButtons.OKCancel, MessageBoxIcon.Warning,
                     MessageBoxDefaultButton.Button1) == DialogResult.OK)
@@ -1088,7 +1093,7 @@ namespace WindowsFormsApp1
             foreach (string lineParaText in xLineParas)
             {
                 i++;
-                if (lineParaText.IndexOf("{{{")>-1)//{{{孫守真按：}}}等略去，以人工校對
+                if (lineParaText.IndexOf("{{{") > -1)//{{{孫守真按：}}}等略去，以人工校對
                 {
                     continue;
                 }
@@ -1200,8 +1205,8 @@ namespace WindowsFormsApp1
                                         text += lineParaText.Substring(noteTextBlendEnd + 2);
                                         break;
                                     }
-                                    text += lineParaText.Substring(noteTextBlendEnd+2,
-                                        noteTextBlendStart-( noteTextBlendEnd+2));
+                                    text += lineParaText.Substring(noteTextBlendEnd + 2,
+                                        noteTextBlendStart - (noteTextBlendEnd + 2));
                                     stNote = noteTextBlendStart + 2;
                                     lNote = noteTextBlendEnd;
                                     noteTextBlendEnd = lineParaText.IndexOf("}", stNote);
@@ -1216,10 +1221,10 @@ namespace WindowsFormsApp1
                                     lNote = noteTextBlendEnd - stNote;
                                     noteTextBlendStart = lineParaText.IndexOf("{",
                                         noteTextBlendEnd);
-                                    if (noteTextBlendStart==-1)
+                                    if (noteTextBlendStart == -1)
                                     {
                                         text += lineParaText.Substring(
-                                            noteTextBlendEnd+2);
+                                            noteTextBlendEnd + 2);
                                     }
                                 }
                             }
@@ -1239,7 +1244,7 @@ namespace WindowsFormsApp1
                 }
                 if (gap > 3 && !(len < normalLineParaLength
                     && lineParaText.IndexOf("<p>") > -1)
-                    && lineParaText!="　")//&& gap < 8)
+                    && lineParaText != "　")//&& gap < 8)
                 {//select the abnormal one
                     string x = textBox1.Text;
                     int j = -1, lineSeprtEnd = 0, lineSeprtStart = lineSeprtEnd;
@@ -1896,7 +1901,7 @@ namespace WindowsFormsApp1
         private void textBox1_TextChanged(object sender, EventArgs e)
         {
             undoTextValueChanged(selStart, selLength);
-            if (textBox1.Text == "")
+            if (textBox1.Text == "" && !pasteAll)
             {
                 hideToNICo();
             }
@@ -1999,6 +2004,9 @@ namespace WindowsFormsApp1
             else return true;
         }
         string lastKeyPressElement = "";
+
+        bool pasteAll = false;
+
         private void textBox1_KeyPress(object sender, KeyPressEventArgs e)
         {
             //https://social.msdn.microsoft.com/Forums/vstudio/en-US/5d021d76-36cd-43e6-b858-5a905c2e86d4/how-to-determine-if-in-insert-mode-or-overwrite-mode?forum=wpf
@@ -2056,7 +2064,7 @@ namespace WindowsFormsApp1
 
         private void undoRecord()
         {
-            selStart = textBox1.SelectionStart;selLength = textBox1.SelectionLength;
+            selStart = textBox1.SelectionStart; selLength = textBox1.SelectionLength;
             undoTextBox1Text.Add(textBox1.Text);
             if (undoTimes != 0) undoTimes = 0;
             if (undoTextBox1Text.Count > 50)//還原上限定為50個
