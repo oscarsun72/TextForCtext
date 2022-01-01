@@ -923,17 +923,22 @@ namespace WindowsFormsApp1
             if (undoTextBox1Text.Count - undoTimes > -1)
             {
                 textBox1.Text = undoTextBox1Text[undoTextBox1Text.Count - ++undoTimes];
-                textBox1.Select(s, l);
-                Point caretPosition = textBox1.GetPositionFromCharIndex(s);//c# caret position: https://stackoverflow.com/questions/37782986/how-to-find-the-caret-position-in-a-textbox-using-c
-                if (caretPosition.Y >textBox1.Height-textBox1.Top || caretPosition.Y < textBox1.Top)
-                {
-                    textBox1.ScrollToCaret();
-                    textBox1.AutoScrollOffset = caretPosition;
-                }
+                restoreCaretPosition(textBox1, s, l);
             }
             else
                 MessageBox.Show("no more to undo!");
 
+        }
+
+        private static void restoreCaretPosition(TextBox textBox1, int s, int l)
+        {
+            textBox1.Select(s, l);
+            Point caretPosition = textBox1.GetPositionFromCharIndex(s);//c# caret position: https://stackoverflow.com/questions/37782986/how-to-find-the-caret-position-in-a-textbox-using-c
+            if (caretPosition.Y > textBox1.Height - textBox1.Top || caretPosition.Y < textBox1.Top)
+            {
+                textBox1.ScrollToCaret();
+                textBox1.AutoScrollOffset = caretPosition;
+            }
         }
 
         private void insertWords(string insX, string x)
@@ -1260,7 +1265,7 @@ namespace WindowsFormsApp1
                 }
                 if (gap > 3 && !(len < normalLineParaLength
                     && lineParaText.IndexOf("<p>") > -1)
-                    && lineParaText != "　")//&& gap < 8)
+                    && lineParaText != "　" && lineParaText.IndexOf("*")==-1)//&& gap < 8)
                 {//select the abnormal one
                     string x = textBox1.Text;
                     int j = -1, lineSeprtEnd = 0, lineSeprtStart = lineSeprtEnd;
