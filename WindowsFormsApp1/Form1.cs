@@ -430,10 +430,12 @@ namespace WindowsFormsApp1
             && (m & Keys.Shift) == Keys.Shift
             && e.KeyCode == Keys.Delete)
             {//Ctrl + Shift + Delete ： 將選取文字於文本中全部清除
-                int s = textBox1.SelectionStart;
+                e.Handled = true;
+                //int s = textBox1.SelectionStart;
                 undoRecord();
                 textBox1.Text = textBox1.Text.Replace(textBox1.SelectedText, "");
-                textBox1.SelectionStart = s; textBox1.ScrollToCaret();
+                textBox1.SelectionStart = selStart; 
+                textBox1.ScrollToCaret();
                 return;
             }
             if ((m & Keys.Control) == Keys.Control
@@ -1071,7 +1073,7 @@ namespace WindowsFormsApp1
             nextPages(Keys.PageDown, false);
         }
 
-        const string omitStr = "{}<p>《》〈〉：；、，。「」『』？！　0123456789-‧·\r\n";
+        const string omitStr = "【】〖〗＝{}<p>《》〈〉：；、，。「」『』？！　0123456789-‧·\r\n";
         string clearOmitChar(string x)
         {
             foreach (var item in omitStr)
