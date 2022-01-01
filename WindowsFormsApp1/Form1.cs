@@ -1073,7 +1073,7 @@ namespace WindowsFormsApp1
             nextPages(Keys.PageDown, false);
         }
 
-        const string omitStr = "【】〖〗＝{}<p>《》〈〉：；、，。「」『』？！　0123456789-‧·\r\n";
+        const string omitStr = "【】〖〗＝{}<p>（）《》〈〉：；、，。「」『』？！　0123456789-‧·\r\n";
         string clearOmitChar(string x)
         {
             foreach (var item in omitStr)
