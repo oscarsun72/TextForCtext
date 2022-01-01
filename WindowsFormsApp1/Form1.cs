@@ -924,7 +924,7 @@ namespace WindowsFormsApp1
             {
                 textBox1.Text = undoTextBox1Text[undoTextBox1Text.Count - ++undoTimes];
                 textBox1.Select(s, l);
-                Point caretPosition = textBox1.GetPositionFromCharIndex(s);
+                Point caretPosition = textBox1.GetPositionFromCharIndex(s);//https://stackoverflow.com/questions/37782986/how-to-find-the-caret-position-in-a-textbox-using-c
                 if (caretPosition.Y >textBox1.Height-textBox1.Top || caretPosition.Y < textBox1.Top)
                 {
                     textBox1.ScrollToCaret();
