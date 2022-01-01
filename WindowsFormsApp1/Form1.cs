@@ -1948,7 +1948,8 @@ namespace WindowsFormsApp1
             {
                 textBox1.Text = textBox1OriginalText;
                 textBox1OriginalText = "";
-                textBox1.SelectionStart = s; textBox1.SelectionLength = l;
+                //textBox1.SelectionStart = s; textBox1.SelectionLength = l;
+                restoreCaretPosition(textBox1, s, l == 0 ? 1 : l);
             }
         }
 
