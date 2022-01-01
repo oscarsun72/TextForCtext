@@ -544,17 +544,8 @@ namespace WindowsFormsApp1
                 }
 
                 if (e.KeyCode == Keys.OemBackslash || e.KeyCode == Keys.Oem5)
-                {//clear the newline after the caret
-                    string x = textBox1.Text;
-                    int s = textBox1.SelectionStart;
-                    string xNext = x.Substring(s);
-                    x = x.Substring(0, textBox1.SelectionStart);
-                    xNext = xNext.Replace(Environment.NewLine, "");
-                    normalLineParaLength = 0;
-                    x = x + xNext;
-                    textBox1.Text = x;
-                    textBox1.SelectionStart = s; textBox1.SelectionLength = 1;
-                    textBox1.ScrollToCaret();
+                {
+                    clearNewLinesAfterCaret();
                     return;
                 }
                 if (e.KeyCode == Keys.Up || e.KeyCode == Keys.Down)
@@ -912,6 +903,21 @@ namespace WindowsFormsApp1
                 }
             }
 
+        }
+
+        private void clearNewLinesAfterCaret()
+        {
+            //clear the newline after the caret
+            string x = textBox1.Text;
+            int s = textBox1.SelectionStart;
+            string xNext = x.Substring(s);
+            x = x.Substring(0, textBox1.SelectionStart);
+            xNext = xNext.Replace(Environment.NewLine, "");
+            normalLineParaLength = 0;
+            x = x + xNext;
+            textBox1.Text = x;
+            textBox1.SelectionStart = s;// textBox1.SelectionLength = 1;
+            restoreCaretPosition(textBox1, s, 0);//textBox1.ScrollToCaret();
         }
 
         private void undoTextBox(TextBox textBox1)
@@ -1544,9 +1550,9 @@ namespace WindowsFormsApp1
             appActivateByName();
             if (edit > -1)
             {//編輯才執行，瀏覽則省略
-                Task.Delay(1900).Wait();
+                Task.Delay(2200).Wait(); //1900
                 SendKeys.Send("{Tab}"); //("{Tab 24}");
-                Task.Delay(200).Wait();
+                Task.Delay(200).Wait();//200
                 SendKeys.Send("^a");
                 Task.Delay(500).Wait();
                 SendKeys.Send("^{PGUP}");//回上一頁籤檢查文本是否如願貼好
