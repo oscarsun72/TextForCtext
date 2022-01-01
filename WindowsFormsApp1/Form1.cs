@@ -1672,6 +1672,7 @@ namespace WindowsFormsApp1
         private void Form1_Resize(object sender, EventArgs e)
         {
             textBox1Size();
+            //if (this.WindowState == FormWindowState.Minimized) hideToNICo();
         }
 
         void textBox1Size()
