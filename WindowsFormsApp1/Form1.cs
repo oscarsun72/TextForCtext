@@ -14,6 +14,8 @@ using System.IO;
 using System.Drawing.Text;
 using System.Media;
 using System.Text.RegularExpressions;
+using System.Web;/*c# how to get the focused control on Chrome
+                  * *https://docs.microsoft.com/en-us/dotnet/api/system.web.ui.page.setfocus?view=netframework-4.8 */
 
 namespace WindowsFormsApp1
 {
@@ -415,6 +417,7 @@ namespace WindowsFormsApp1
 
             var m = ModifierKeys;
 
+            if ((m & Keys.None) == Keys.None && e.KeyCode == Keys.Delete) undoRecord();
             //if ((m & Keys.Control) == Keys.Control && (m & Keys.Alt) == Keys.Alt && e.KeyCode == Keys.G)
             //if((int)Control.ModifierKeys ==
             //    (int)Keys.Control + (int)Keys.Alt && e.KeyCode == Keys.G)
