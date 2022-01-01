@@ -964,7 +964,7 @@ namespace WindowsFormsApp1
             }
             else
             {
-                for (int i = xInfo.LengthInTextElements - 1; i > -1; i--)
+                for (int i = xInfo.LengthInTextElements - 2; i > -1; i--)
                 {
 
                     if (!isChineseChar(xInfo.SubstringByTextElements(i, 1))) return xInfo.LengthInTextElements - i;
