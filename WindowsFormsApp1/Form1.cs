@@ -607,10 +607,10 @@ namespace WindowsFormsApp1
                   * Ctrl + ←：：插入點若在漢字中,從插入點開始向後移至任何非漢字後(即漢字前) 反之亦然*/
                     string x = textBox1.Text;
                     int s = textBox1.SelectionStart;
-                    int l;
-                    bool isIPCharHanzi = isChineseChar(x.Substring(s, 1));
+                    int l; bool isIPCharHanzi;
                     if (e.KeyCode == Keys.Left)
                     {
+                        isIPCharHanzi = isChineseChar(x.Substring(s - 1, 1));
                         if (isIPCharHanzi) l = findNotChineseCharFarLength(x.Substring(0, s), false);
                         else l = findChineseCharFarLength(x.Substring(0, s), false);
                         if (l != -1)
@@ -623,6 +623,7 @@ namespace WindowsFormsApp1
                     }
                     else
                     {
+                        isIPCharHanzi = isChineseChar(x.Substring(s, 1));
                         if (isIPCharHanzi) l = findNotChineseCharFarLength(x.Substring(s), true);
                         else l = findChineseCharFarLength(x.Substring(s), true);
                         if (l != -1)
@@ -964,7 +965,7 @@ namespace WindowsFormsApp1
             }
             else
             {
-                for (int i = xInfo.LengthInTextElements - 2; i > -1; i--)
+                for (int i = xInfo.LengthInTextElements - 1; i > -1; i--)
                 {
 
                     if (!isChineseChar(xInfo.SubstringByTextElements(i, 1))) return xInfo.LengthInTextElements - i;
@@ -1265,7 +1266,7 @@ namespace WindowsFormsApp1
                 }
                 if (gap > 3 && !(len < normalLineParaLength
                     && lineParaText.IndexOf("<p>") > -1)
-                    && lineParaText != "　" && lineParaText.IndexOf("*")==-1)//&& gap < 8)
+                    && lineParaText != "　" && lineParaText.IndexOf("*") == -1)//&& gap < 8)
                 {//select the abnormal one
                     string x = textBox1.Text;
                     int j = -1, lineSeprtEnd = 0, lineSeprtStart = lineSeprtEnd;
