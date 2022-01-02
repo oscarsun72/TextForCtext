@@ -412,11 +412,33 @@ namespace WindowsFormsApp1
 
         string textBox1OriginalText = "";
 
+        List<Point> caretPositionList = new List<Point>();
+        const int caretPositionListSize = 3;
+
+        void caretPositionRecord()
+        {//C# caret position record
+            Point caretPositionToken = textBox1.GetPositionFromCharIndex(textBox1.SelectionStart);
+            caretPositionList.Add(caretPositionToken);
+            if (caretPositionList.Count > caretPositionListSize) caretPositionList.RemoveAt(0);
+        }
+
+        int caretPositionRecallTimes = 0;
+        void caretPositionRecall()
+        {
+            TextBox tb = textBox1;
+            Point p = caretPositionList[caretPositionRecallTimes++];
+            int s = tb.GetCharIndexFromPosition(p);
+            tb.Select(s, 0);
+            //restoreCaretPosition(tb,s,0);
+            tb.ScrollToCaret();
+            if (caretPositionRecallTimes > caretPositionListSize - 1) caretPositionRecallTimes = 0;
+        }
 
         private void textBox1_KeyDown(object sender, KeyEventArgs e)
         {
-
             var m = ModifierKeys;
+            if ((m & Keys.Shift) != Keys.Shift && e.KeyCode != Keys.F5) caretPositionRecord();
+
 
             if ((m & Keys.None) == Keys.None && e.KeyCode == Keys.Delete) undoRecord();
             //if ((m & Keys.Control) == Keys.Control && (m & Keys.Alt) == Keys.Alt && e.KeyCode == Keys.G)
@@ -654,7 +676,8 @@ namespace WindowsFormsApp1
                     return;
                 }
 
-            }
+            }//以上 Ctrl
+
 
             //按下Shift鍵
             if ((m & Keys.Shift) == Keys.Shift)
@@ -678,9 +701,15 @@ namespace WindowsFormsApp1
                         textBox1.ScrollToCaret();
                     }
                     return;
-                }
+                }//以上 Shift + F3
 
-            }
+                if (e.KeyCode == Keys.F5)
+                {//Shift + F5 ： 在textBox1 回到上1次插入點（游標）所在處（且與最近「caretPositionListSize」次瀏覽處作切換，如 MS Word）
+                    caretPositionRecall();
+                }//以上 Shift + F5
+
+            }//以上 Shift
+
 
             //按下Alt鍵
             if ((m & Keys.Alt) == Keys.Alt)//⇌ if (Control.ModifierKeys == Keys.Alt)
@@ -1469,11 +1498,15 @@ namespace WindowsFormsApp1
                 }
 
             }
+
+
             if (ModifierKeys == Keys.None)
-            {//按下單一鍵            
+            {//按下單一鍵
                 if (e.KeyCode == Keys.F5)
                 {
+                    selLength = textBox1.SelectionLength; selStart = textBox1.SelectionStart;
                     loadText();
+                    restoreCaretPosition(textBox1, selStart, selLength);
                     return;
                 }
                 if (e.KeyCode == Keys.F12)
@@ -1491,7 +1524,7 @@ namespace WindowsFormsApp1
                     //    hideToNICo();
                     //}
                 }
-            }
+            }//以上 按下單一鍵
         }
 
         [DllImport("user32")]
@@ -2130,7 +2163,12 @@ namespace WindowsFormsApp1
 
         private void textBox1_Leave(object sender, EventArgs e)
         {
-            //selStart= textBox1.SelectionStart;selLength = textBox1.TextLength;
+            selStart = textBox1.SelectionStart; selLength = textBox1.SelectionLength;
+        }
+
+        private void textBox1_MouseUp(object sender, MouseEventArgs e)
+        {
+            caretPositionRecord();
         }
 
         int[] findWord(string x, string x1)

@@ -115,9 +115,11 @@ F2 : 全選/取消全選框裡文字。若原有選取文字則取消選取至�
 
 F3 ： 在textBox1 從插入點（游標所在處）開始尋找下一個符合所選取的字串；如果沒有選取，則以 textBox2 的字串為據
 
+Shift + F3 ： 從插入點（游標所在處）開始在textBox1 尋找上一個符合所選取的字串；如果沒有選取，則以 textBox2 的字串為據
+
 F4 ： 重複輸入最後一個字
 
-Shift + F3 ： 從插入點（游標所在處）開始在textBox1 尋找上一個符合所選取的字串；如果沒有選取，則以 textBox2 的字串為據
+Shift + F5 ： 在textBox1 回到上1次插入點（游標）所在處（且與最近「caretPositionListSize」次瀏覽處作切換，如 MS Word）。caretPositionListSize目前=  3。
 
 Ctrl + h ：移至 textBox4 準備取代文本文字
 
