@@ -99,6 +99,7 @@ namespace WindowsFormsApp1
         private void nICo_MouseMove(object sender, MouseEventArgs e)
         {
             if (Cursor.Position.Y > this.Top + this.Height) show_nICo();
+            //if (this.Top <0 && this.Left<0) show_nICo();            
         }
 
         FontFamily getHanaminBFontInstalled()
@@ -272,7 +273,7 @@ namespace WindowsFormsApp1
 
         private void textBox1_Click(object sender, EventArgs e)
         {
-            if (textBox1.Text == ""&&ModifierKeys==Keys.None)
+            if (textBox1.Text == "" && ModifierKeys == Keys.None)
             {
                 textBox1.Text = Clipboard.GetText();
                 textBox1.Select(0, 0);
@@ -1432,7 +1433,7 @@ namespace WindowsFormsApp1
                 }
                 return;
 
-            }
+            }//按下 Ctrl鍵 終
 
             //if (((m & Keys.Control) == Keys.Control && (m & Keys.Alt) == Keys.Alt) && 
             //    (e.KeyCode == Keys.Left || e.KeyCode == Keys.Right||e.KeyCode==Keys.Menu))
@@ -1442,6 +1443,17 @@ namespace WindowsFormsApp1
             //    if (e.KeyCode == Keys.Right) this.Left += w;
             //    return;
             //}
+
+            if (Control.ModifierKeys == Keys.Shift)
+            {//按下Shift鍵
+                if (e.KeyCode == Keys.F12)
+                {
+                    e.Handled = true;
+                    saveText();
+                    return;
+                }
+            }//按下Shift鍵 終
+
 
             if (Control.ModifierKeys == Keys.Alt)
             {//按下Alt鍵
@@ -1488,6 +1500,7 @@ namespace WindowsFormsApp1
         {//https://lolikitty.pixnet.net/blog/post/164569578
             SetCursorPos(this.Left + 30, this.Top + 100);
         }
+
 
         void hideToNICo()
         {
@@ -2149,6 +2162,10 @@ namespace WindowsFormsApp1
         {//預設表單視窗為最上層顯示，當表單視窗不在作用中時，自動隱藏至系統右下方之系統列/任務列中，當滑鼠滑過任務列中的縮圖ico時，即還原/恢復視窗窗體
             if (!textBox2.Focused && textBox1.Text != "") this.TopMost = false;//hideToNICo();
             selStart = textBox1.SelectionStart; selLength = textBox1.SelectionLength;
+            //if (this.WindowState==FormWindowState.Minimized)
+            //{
+            //    hideToNICo();
+            //}
         }
     }
 }
