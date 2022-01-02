@@ -415,39 +415,40 @@ namespace WindowsFormsApp1
 
         string textBox1OriginalText = "";
 
-        List<Point> caretPositionList = new List<Point>();
-        const int caretPositionListSize = 3;
+        List<int> charIndexList = new List<int>();
+        const int charIndexListSize = 3;
 
         void caretPositionRecord()
         {//C# caret position record
-            Point caretPositionToken = textBox1.GetPositionFromCharIndex(textBox1.SelectionStart);
-            if (caretPositionList.Count == 0)
+            int charIndexToken = textBox1.SelectionStart;
+            if (charIndexList.Count == 0)
             {
-                caretPositionList.Add(caretPositionToken); return;
-            }
-            //Point pLast = caretPositionList[caretPositionList.Count - 1];
-            //if (Math.Abs(pLast.Y - caretPositionToken.Y) > 
-            //    textBox1.Height / 6)
-            //{
-            caretPositionList.Add(caretPositionToken);
-            if (caretPositionList.Count > caretPositionListSize) caretPositionList.RemoveAt(0);
-            //}
+                charIndexList.Add(charIndexToken); return;
+            }            
+            int sLast = charIndexList[charIndexList.Count - 1];
+            if (charIndexToken != sLast)
+                charIndexList.Add(charIndexToken);
+            if (charIndexList.Count > charIndexListSize) charIndexList.RemoveAt(0);
         }
 
-        int caretPositionRecallTimes = 0;
+        int charIndexRecallTimes = charIndexListSize - 1;
         void caretPositionRecall()
         {
-            if (caretPositionList.Count == 0) return;
+            if (charIndexList.Count == 0) return;
             TextBox tb = textBox1;
-            Point p = caretPositionList[
-                caretPositionRecallTimes + 1 == caretPositionList.Count ?
-                0 :
-                caretPositionRecallTimes++];
-            int s = tb.GetCharIndexFromPosition(p);
-            tb.Select(s, 0);
-            //restoreCaretPosition(tb,s,0);
-            tb.ScrollToCaret();
-            if (caretPositionRecallTimes > caretPositionListSize - 1) caretPositionRecallTimes = 0;
+            int s = tb.SelectionStart;
+            int sLast = charIndexList[charIndexRecallTimes - 1 > charIndexList.Count - 1 ?
+                charIndexList.Count - 1 :
+                charIndexRecallTimes--];
+            while (sLast == s)
+            {
+                sLast = charIndexList[charIndexRecallTimes - 1 > charIndexList.Count - 1 ?
+                charIndexList.Count - 1 :
+                charIndexRecallTimes--];
+            }
+            tb.Select(sLast, 0);
+            restoreCaretPosition(tb, sLast, 0);
+            if (charIndexRecallTimes < 0) charIndexRecallTimes = charIndexListSize - 1;
         }
 
         private void textBox1_KeyDown(object sender, KeyEventArgs e)

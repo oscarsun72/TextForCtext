@@ -120,7 +120,7 @@ Shift + F3 ： 從插入點（游標所在處）開始在textBox1 尋找上一�
 
 F4 ： 重複輸入最後一個字
 
-Shift + F5 ： 在textBox1 回到上1次插入點（游標）所在處（且與最近「caretPositionListSize」次瀏覽處作切換，如 MS Word）。caretPositionListSize目前=  3。
+Shift + F5 ： 在textBox1 回到上1次插入點（游標）所在處（且與最近「charIndexListSize」次瀏覽處作切換，如 MS Word）。charIndexListSize 目前=  3。
 
 Ctrl + h ：移至 textBox4 準備取代文本文字
 
