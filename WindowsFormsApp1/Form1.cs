@@ -1518,6 +1518,7 @@ namespace WindowsFormsApp1
                 if (e.KeyCode == Keys.F1)
                 {
                     var cjk = getCJKExtFontInstalled(CJKBiggestSet[++FontFamilyNowIndex]);
+                    if (FontFamilyNowIndex == CJKBiggestSet.Length - 1) FontFamilyNowIndex = 0;
                     if (cjk != null)
                     {
                         if (cjk.Name == "KaiXinSongB")
