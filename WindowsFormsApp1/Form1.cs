@@ -425,7 +425,7 @@ namespace WindowsFormsApp1
             {
                 caretPositionList.Add(caretPositionToken); return;
             }
-            Point pLast = caretPositionList[caretPositionList.Count - 1];
+            //Point pLast = caretPositionList[caretPositionList.Count - 1];
             //if (Math.Abs(pLast.Y - caretPositionToken.Y) > 
             //    textBox1.Height / 6)
             //{
