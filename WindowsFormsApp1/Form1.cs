@@ -23,7 +23,8 @@ namespace WindowsFormsApp1
     {
         readonly Point textBox4Location; readonly Size textBox4Size;
         readonly string dropBoxPathIncldBackSlash;
-        const string CJKBiggestSet = "HanaMinB";//"KaiXinSongB";//"TH-Tshyn-P1";
+        //string[] CJKBiggestSet = new string[]{ "HanaMinB", "KaiXinSongB", "TH-Tshyn-P1" };
+        string[] CJKBiggestSet = { "HanaMinB", "KaiXinSongB", "TH-Tshyn-P1" };
         Color button2BackColorDefault;
         bool insertMode = true;
 
@@ -41,7 +42,7 @@ namespace WindowsFormsApp1
             dropBoxPathIncldBackSlash = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + @"\Dropbox\";
             button2BackColorDefault = button2.BackColor;
             textBox2BackColorDefault = textBox2.BackColor;
-            var cjk = getHanaminBFontInstalled();
+            var cjk = getCJKExtFontInstalled(CJKBiggestSet[FontFamilyNowIndex]);
             if (cjk != null)
             {
                 if (cjk.Name == "KaiXinSongB")
@@ -102,7 +103,8 @@ namespace WindowsFormsApp1
             //if (this.Top <0 && this.Left<0) show_nICo();            
         }
 
-        FontFamily getHanaminBFontInstalled()
+        int FontFamilyNowIndex = 0;
+        FontFamily getCJKExtFontInstalled(string fontName)
         { //https://www.cnblogs.com/arxive/p/7795232.html            
             InstalledFontCollection MyFont = new InstalledFontCollection();
             FontFamily[] fontFamilys = MyFont.Families;
@@ -112,7 +114,7 @@ namespace WindowsFormsApp1
             }
             foreach (FontFamily item in fontFamilys)
             {
-                if (item.Name == CJKBiggestSet) return item;
+                if (item.Name == fontName) return item;
             }
             return null;
         }
@@ -418,11 +420,14 @@ namespace WindowsFormsApp1
         void caretPositionRecord()
         {//C# caret position record
             Point caretPositionToken = textBox1.GetPositionFromCharIndex(textBox1.SelectionStart);
-            Point pLast = caretPositionList[caretPositionListSize - 1];
-            if (Math.Abs(pLast.Y - caretPositionToken.Y) > textBox1.Height / 3)
+            if (caretPositionList.Count > 0)
             {
-                caretPositionList.Add(caretPositionToken);
-                if (caretPositionList.Count > caretPositionListSize) caretPositionList.RemoveAt(0);
+                Point pLast = caretPositionList[caretPositionListSize - 1];
+                if (Math.Abs(pLast.Y - caretPositionToken.Y) > textBox1.Height / 3)
+                {
+                    caretPositionList.Add(caretPositionToken);
+                    if (caretPositionList.Count > caretPositionListSize) caretPositionList.RemoveAt(0);
+                }
             }
         }
 
@@ -1339,7 +1344,7 @@ namespace WindowsFormsApp1
 
         void splitLineParabySeltext(Keys kys)
         {
-            if (!(kys == Keys.F1 || kys == Keys.Pause)) return;
+            if (!(kys == Keys.F1 || kys == Keys.Pause) || ModifierKeys != Keys.None) return;
             string x = textBox1.SelectedText;
             if (x == "") return;
             x = textBox1.Text;
@@ -1419,20 +1424,23 @@ namespace WindowsFormsApp1
                 && (m & Keys.Shift) == Keys.Shift
                 && e.KeyCode == Keys.C)
             {
+                e.Handled = true;
                 Clipboard.SetText(textBox1.Text);
+                return;
             }
 
             if (Control.ModifierKeys == Keys.Control)
             {//按下Ctrl鍵
                 if (e.KeyCode == Keys.F)
                 {
+                    e.Handled = true;
                     textBox2.Focus();
-                    textBox2.SelectionStart = 0; textBox2.SelectionLength = textBox2.Text.Length; return;
+                    textBox2.SelectionStart = 0; textBox2.SelectionLength = textBox2.Text.Length;
+                    return;
                 }
 
                 if (e.KeyCode == Keys.PageDown || e.KeyCode == Keys.PageUp)
                 {
-
                     e.Handled = true;//取得或設定值，指出是否處理事件。https://docs.microsoft.com/zh-tw/dotnet/api/system.windows.forms.keyeventargs.handled?view=netframework-4.7.2&f1url=%3FappId%3DDev16IDEF1%26l%3DZH-TW%26k%3Dk(System.Windows.Forms.KeyEventArgs.Handled);k(TargetFrameworkMoniker-.NETFramework,Version%253Dv4.7.2);k(DevLang-csharp)%26rd%3Dtrue
                     nextPages(e.KeyCode, true);
                     return;
@@ -1440,6 +1448,7 @@ namespace WindowsFormsApp1
                 if (e.KeyCode == Keys.Left || e.KeyCode == Keys.Right)
                 {//Ctrl+左右鍵：徵調
                     if (textBox1.Focused) return;
+                    e.Handled = true;
                     Point mouseIP = Cursor.Position;//https://jjnnykimo.pixnet.net/blog/post/27155696
                     if (e.KeyCode == Keys.Left) { this.Left--; mouseIP.X--; }//-= w; }
                     if (e.KeyCode == Keys.Right) { this.Left++; mouseIP.X++; } //+= w; }
@@ -1451,20 +1460,24 @@ namespace WindowsFormsApp1
                 if (e.KeyCode == Keys.D1)
                 {
                     runWordMacro("漢籍電子文獻資料庫文本整理_以轉貼到中國哲學書電子化計劃");
+                    e.Handled = true; return;
                 }
                 if (e.KeyCode == Keys.D3)
                 {
                     runWordMacro("漢籍電子文獻資料庫文本整理_十三經注疏");
+                    e.Handled = true; return;
                 }
                 if (e.KeyCode == Keys.D4)
                 {
                     runWordMacro("維基文庫四部叢刊本轉來");
+                    e.Handled = true; return;
                 }
                 if (e.KeyCode == Keys.S)
                 {
                     saveText();
+                    e.Handled = true; return;
                 }
-                return;
+
 
             }//按下 Ctrl鍵 終
 
@@ -1493,6 +1506,7 @@ namespace WindowsFormsApp1
                 if (e.KeyCode == Keys.Left || e.KeyCode == Keys.Right)
                 {/*Alt + ←：視窗向左移動30dpi（+ Ctrl：徵調）
                   * Alt + →：視窗向右移動30dpi（+ Ctrl：徵調）*/
+                    e.Handled = true;
                     const int w = 30;
                     //int w = this.Width / 2;
                     if (e.KeyCode == Keys.Left) this.Left -= w;
@@ -1501,13 +1515,30 @@ namespace WindowsFormsApp1
                     return;
                 }
 
-            }
+                if (e.KeyCode == Keys.F1)
+                {
+                    var cjk = getCJKExtFontInstalled(CJKBiggestSet[++FontFamilyNowIndex]);
+                    if (cjk != null)
+                    {
+                        if (cjk.Name == "KaiXinSongB")
+                        {
+                            textBox1.Font = new Font(cjk, (float)17);
+                        }
+                        else
+                        {
+                            textBox1.Font = new Font(cjk, textBox1.Font.Size);
+                        }
+                    }
+                    e.Handled = true; return;
+                }
+            }//以上 按下Alt鍵
 
 
             if (ModifierKeys == Keys.None)
             {//按下單一鍵
                 if (e.KeyCode == Keys.F5)
                 {
+                    e.Handled = true;
                     selLength = textBox1.SelectionLength; selStart = textBox1.SelectionStart;
                     loadText();
                     restoreCaretPosition(textBox1, selStart, selLength);
@@ -1521,7 +1552,9 @@ namespace WindowsFormsApp1
                 }
                 if (e.KeyCode == Keys.Escape)
                 {
+                    e.Handled = true;
                     hideToNICo();
+                    return;
                     //if (textBox1.Text == "")
                     ////預設為最上層顯示，若textBox1值為空，則按下Esc鍵會隱藏到任務列中；點一下即恢復
                     //{
@@ -1890,23 +1923,27 @@ namespace WindowsFormsApp1
                 return;
             }
 
-            if (e.KeyCode == Keys.F1 || e.KeyCode == Keys.Pause)
-            {
-                e.Handled = true;
-                splitLineParabySeltext(e.KeyCode);
-                if (doNotLeaveTextBox2) textBox2.Focus();//方便快速分行分段
-                return;
-            }
-            if (e.KeyCode == Keys.F2)
-            {
-                keyDownF2(textBox2);
-                return;
-            }
-            if (e.KeyCode == Keys.F3)
-            {
-                KeyEventArgs ekey = new KeyEventArgs(Keys.F3);
-                textBox1_KeyDown(textBox1, ekey);
-            }
+
+            if (ModifierKeys == Keys.None)
+            {//只按下單一鍵
+                if (e.KeyCode == Keys.F1 || e.KeyCode == Keys.Pause)
+                {
+                    e.Handled = true;
+                    splitLineParabySeltext(e.KeyCode);
+                    if (doNotLeaveTextBox2) textBox2.Focus();//方便快速分行分段
+                    return;
+                }
+                if (e.KeyCode == Keys.F2)
+                {
+                    keyDownF2(textBox2);
+                    return;
+                }
+                if (e.KeyCode == Keys.F3)
+                {
+                    KeyEventArgs ekey = new KeyEventArgs(Keys.F3);
+                    textBox1_KeyDown(textBox1, ekey);
+                }
+            }//以上 只按下單一鍵
         }
 
         private void keyDownF2(TextBox textBox)

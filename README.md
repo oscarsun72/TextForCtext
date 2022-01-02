@@ -69,6 +69,7 @@ Alt + ←：視窗向左移動30dpi（+ Ctrl：徵調；插入點在textBox1時�
 
 Alt + →：視窗向右移動30dpi（+ Ctrl：徵調；插入點在textBox1時例外）
 
+Alt + F1 ：切換支援 CJK - Ext 擴充字集的大字集字型
 
 
 
