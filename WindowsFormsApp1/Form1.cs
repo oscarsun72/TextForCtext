@@ -424,7 +424,7 @@ namespace WindowsFormsApp1
             if (charIndexList.Count == 0)
             {
                 charIndexList.Add(charIndexToken); return;
-            }            
+            }
             int sLast = charIndexList[charIndexList.Count - 1];
             if (charIndexToken != sLast)
                 charIndexList.Add(charIndexToken);
@@ -896,11 +896,11 @@ namespace WindowsFormsApp1
                     return;
                 }
 
-                if (e.KeyCode==Keys.Delete)
+                if (e.KeyCode == Keys.Delete)
                 {//Alt + Del : 刪除插入點後第一個分行分段
                     e.Handled = true;
                     string x = textBox1.Text;
-                    int s = textBox1.SelectionStart,p= x.IndexOf(Environment.NewLine),l=textBox1.SelectionLength;
+                    int s = textBox1.SelectionStart, p = x.IndexOf(Environment.NewLine, s + 1), l = textBox1.SelectionLength;
                     if (p == -1) return;
                     x = x.Substring(0, p) + x.Substring(p + Environment.NewLine.Length);
                     textBox1.Text = x;
