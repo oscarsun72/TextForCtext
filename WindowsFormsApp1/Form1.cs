@@ -421,8 +421,11 @@ namespace WindowsFormsApp1
         void caretPositionRecord()
         {//C# caret position record
             Point caretPositionToken = textBox1.GetPositionFromCharIndex(textBox1.SelectionStart);
-            if (caretPositionList.Count > 0)
             {
+                if (caretPositionList.Count == 0)
+                {
+                    caretPositionList.Add(caretPositionToken); return;
+                }
                 Point pLast = caretPositionList[caretPositionListSize - 1];
                 if (Math.Abs(pLast.Y - caretPositionToken.Y) > textBox1.Height / 3)
                 {
@@ -435,6 +438,7 @@ namespace WindowsFormsApp1
         int caretPositionRecallTimes = 0;
         void caretPositionRecall()
         {
+            if (caretPositionList.Count == 0) return;
             TextBox tb = textBox1;
             Point p = caretPositionList[caretPositionRecallTimes++];
             int s = tb.GetCharIndexFromPosition(p);
