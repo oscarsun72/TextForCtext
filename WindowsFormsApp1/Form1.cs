@@ -37,6 +37,7 @@ namespace WindowsFormsApp1
         public Form1()
         {
             InitializeComponent();
+            textBox1FontDefaultSize = textBox1.Font.Size;
             textBox4Location = textBox4.Location;
             textBox4Size = textBox4.Size;
             dropBoxPathIncldBackSlash = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + @"\Dropbox\";
@@ -51,7 +52,7 @@ namespace WindowsFormsApp1
                 }
                 else
                 {
-                    textBox1.Font = new Font(cjk, textBox1.Font.Size);
+                    textBox1.Font = new Font(cjk, textBox1FontDefaultSize);
                 }
                 textBox2.Font = new Font(cjk, textBox2.Font.Size);
                 textBox4.Font = new Font(cjk, textBox4.Font.Size);
@@ -1527,7 +1528,7 @@ namespace WindowsFormsApp1
                         }
                         else
                         {
-                            textBox1.Font = new Font(cjk, textBox1.Font.Size);
+                            textBox1.Font = new Font(cjk, textBox1FontDefaultSize);
                         }
                     }
                     e.Handled = true; return;
@@ -2136,6 +2137,7 @@ namespace WindowsFormsApp1
         string lastKeyPressElement = "";
 
         bool pasteAllOverWrite = false;
+        private readonly float textBox1FontDefaultSize;
 
         private void textBox1_KeyPress(object sender, KeyPressEventArgs e)
         {
