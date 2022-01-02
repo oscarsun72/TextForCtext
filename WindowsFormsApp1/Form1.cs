@@ -421,18 +421,17 @@ namespace WindowsFormsApp1
         void caretPositionRecord()
         {//C# caret position record
             Point caretPositionToken = textBox1.GetPositionFromCharIndex(textBox1.SelectionStart);
+            if (caretPositionList.Count == 0)
             {
-                if (caretPositionList.Count == 0)
-                {
-                    caretPositionList.Add(caretPositionToken); return;
-                }
-                Point pLast = caretPositionList[caretPositionListSize - 1];
-                if (Math.Abs(pLast.Y - caretPositionToken.Y) > textBox1.Height / 3)
-                {
-                    caretPositionList.Add(caretPositionToken);
-                    if (caretPositionList.Count > caretPositionListSize) caretPositionList.RemoveAt(0);
-                }
+                caretPositionList.Add(caretPositionToken); return;
             }
+            Point pLast = caretPositionList[caretPositionList.Count - 1];
+            //if (Math.Abs(pLast.Y - caretPositionToken.Y) > 
+            //    textBox1.Height / 6)
+            //{
+            caretPositionList.Add(caretPositionToken);
+            if (caretPositionList.Count > caretPositionListSize) caretPositionList.RemoveAt(0);
+            //}
         }
 
         int caretPositionRecallTimes = 0;
@@ -440,7 +439,10 @@ namespace WindowsFormsApp1
         {
             if (caretPositionList.Count == 0) return;
             TextBox tb = textBox1;
-            Point p = caretPositionList[caretPositionRecallTimes++];
+            Point p = caretPositionList[
+                caretPositionRecallTimes + 1 == caretPositionList.Count ?
+                0 :
+                caretPositionRecallTimes++];
             int s = tb.GetCharIndexFromPosition(p);
             tb.Select(s, 0);
             //restoreCaretPosition(tb,s,0);
