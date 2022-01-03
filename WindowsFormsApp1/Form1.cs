@@ -100,7 +100,8 @@ namespace WindowsFormsApp1
 
         private void nICo_MouseMove(object sender, MouseEventArgs e)
         {
-            if (Cursor.Position.Y > this.Top + this.Height) show_nICo();
+            if (Cursor.Position.Y > this.Top + this.Height||
+                Cursor.Position.X > this.Left+ this.Width ) show_nICo();
             //if (this.Top <0 && this.Left<0) show_nICo();            
         }
 
