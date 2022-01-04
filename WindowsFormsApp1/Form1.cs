@@ -100,8 +100,8 @@ namespace WindowsFormsApp1
 
         private void nICo_MouseMove(object sender, MouseEventArgs e)
         {
-            if (Cursor.Position.Y > this.Top + this.Height||
-                Cursor.Position.X > this.Left+ this.Width ) show_nICo();
+            if (Cursor.Position.Y > this.Top + this.Height ||
+                Cursor.Position.X > this.Left + this.Width) show_nICo();
             //if (this.Top <0 && this.Left<0) show_nICo();            
         }
 
@@ -497,6 +497,18 @@ namespace WindowsFormsApp1
                 selToNewline(ref s, ref ed, textBox1.Text, true, textBox1); return;
             }
 
+
+            //同時按下Ctrl+Shift
+            if ((m & Keys.Control) == Keys.Control && (m & Keys.Shift) == Keys.Shift)
+            {
+                if (e.KeyCode == Keys.Add || e.KeyCode == Keys.Oemplus || e.KeyCode == Keys.Subtract || e.KeyCode == Keys.NumPad5)
+                {
+                   keyDownCtrlAdd(true);
+                    return;
+                }
+            }
+            //以上 //同時按下Ctrl+Shift
+
             if ((m & Keys.Control) == Keys.Control)
             {//按下Ctrl鍵
                 if (e.KeyCode == Keys.V) pasteAllOverWrite = false;
@@ -514,7 +526,7 @@ namespace WindowsFormsApp1
                 }
                 if (e.KeyCode == Keys.Add || e.KeyCode == Keys.Oemplus || e.KeyCode == Keys.Subtract || e.KeyCode == Keys.NumPad5)
                 {
-                    keyDownCtrlAdd();
+                    keyDownCtrlAdd(false);
                     return;
                 }
                 if (e.KeyCode == Keys.D0 || e.KeyCode == Keys.D9 || e.KeyCode == Keys.D8 || e.KeyCode == Keys.D7 || e.KeyCode == Keys.D6)
@@ -1147,7 +1159,7 @@ namespace WindowsFormsApp1
         }
 
 
-        private void keyDownCtrlAdd()
+        private void keyDownCtrlAdd(bool shiftKeyDownYet)
         {
             string x = textBox1.Text;
             int s = textBox1.SelectionStart, l = textBox1.SelectionLength;
@@ -1168,7 +1180,7 @@ namespace WindowsFormsApp1
             }
             newTextBox1();
             pasteToCtext();
-            nextPages(Keys.PageDown, false);
+            if (!shiftKeyDownYet) nextPages(Keys.PageDown, false);
         }
 
         const string omitStr = "【】〖〗＝{}<p>（）《》〈〉：；、，。「」『』？！　0123456789-‧·\r\n";
