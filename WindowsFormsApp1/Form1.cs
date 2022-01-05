@@ -401,7 +401,7 @@ namespace WindowsFormsApp1
                 int lng = rTxt[0].Length;
                 string xClr = x.Substring(0, lng);
                 int clr = xClr.IndexOf(rTxt[0]);
-                while (clr > -1 && x != "")
+                while (clr > -1 && x != ""&& x.Length>=lng)
                 {
                     x = x.Substring(clr + lng);
                     xClr = x.Substring(0, lng);

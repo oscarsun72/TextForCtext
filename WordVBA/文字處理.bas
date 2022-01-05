@@ -2814,7 +2814,11 @@ Next a
 slRng.Find.Execute "（（", True, , , , , , , , "（", wdReplaceAll
 slRng.Find.Execute "））", True, , , , , , , , "）", wdReplaceAll
 Beep
-Selection.Collapse
+Selection.EndKey wdStory
+Do
+   Selection.MoveLeft
+   If Selection = Chr(13) Then Selection.Delete
+Loop While Selection = Chr(13)
 'MsgBox "done!", vbInformation
 End Sub
 Sub 漢籍電子文獻資料庫文本整理_以轉貼到中國哲學書電子化計劃(Optional doNotCloseDoc As Boolean)
@@ -3179,7 +3183,8 @@ eH:
         Case Else
             MsgBox Err.Number & Err.Description
 '            Resume
-            If cnt.State <> adStateClosed Then cnt.Close
+            GoTo endS
+            'If cnt.State <> adStateClosed Then cnt.Close
     End Select
 End Sub
 Sub 生難字加上國語辭典注音nextTable(ByRef rst As ADODB.Recordset, ByRef cnt As ADODB.Connection, x, tbName As String, precise As Boolean)
