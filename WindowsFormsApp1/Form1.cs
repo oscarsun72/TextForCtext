@@ -1036,12 +1036,19 @@ namespace WindowsFormsApp1
         private void insertWords(string insX, string x)
         {
             int s = textBox1.SelectionStart, l = textBox1.SelectionLength;
-            x = x.Substring(0, s) + insX + x.Substring(s);
+            if (l == 0)
+                x = x.Substring(0, s) + insX + x.Substring(s);
+            else
+                x = x.Substring(0, s) + insX + x.Substring(s + l);
             textBox1.Text = x;
             s += insX.Length;
             //textBox1.SelectionStart = s + insX.Length;
             //textBox1.ScrollToCaret();
-            restoreCaretPosition(textBox1, s, l);
+            if (l == 0)
+                restoreCaretPosition(textBox1, s, l);
+            else
+                restoreCaretPosition(textBox1, s + l - 1, 0);
+
         }
 
         List<string> lastKeyPress = new List<string>();
@@ -2008,6 +2015,7 @@ namespace WindowsFormsApp1
         private void textBox1_MouseDown(object sender, MouseEventArgs e)
         {
             var m = ModifierKeys;
+            mouseMiddleBtnDown(e);
             //if ((m & Keys.Control) == Keys.Control && (m & Keys.Shift) == Keys.Shift)
             //{
             //    runWord("漢籍電子文獻資料庫文本整理_十三經注疏");
@@ -2250,6 +2258,23 @@ namespace WindowsFormsApp1
         private void textBox1_MouseUp(object sender, MouseEventArgs e)
         {
             caretPositionRecord();
+        }
+
+        private void Form1_MouseDown(object sender, MouseEventArgs e)
+        {
+            mouseMiddleBtnDown(e);
+        }
+
+        void mouseMiddleBtnDown(MouseEventArgs e)
+        {
+            if (ModifierKeys == Keys.None)
+            {
+                if (e.Button == MouseButtons.Middle)
+                {//預設為最上層顯示，則按下Esc鍵或滑鼠中鍵會隱藏到任務列（系統列）中；滑鼠在其 ico 圖示上滑過即恢復
+                    hideToNICo();
+                }
+            }
+
         }
 
         int[] findWord(string x, string x1)
