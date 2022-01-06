@@ -1047,7 +1047,7 @@ namespace WindowsFormsApp1
             if (l == 0)
                 restoreCaretPosition(textBox1, s, l);
             else
-                restoreCaretPosition(textBox1, s + l - 1, 0);
+                restoreCaretPosition(textBox1, s + insX.Length - 1, 0);
 
         }
 
