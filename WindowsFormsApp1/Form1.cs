@@ -537,8 +537,8 @@ namespace WindowsFormsApp1
                     e.Handled = true;
                     int s = textBox1.SelectionStart, l = textBox1.SelectionLength;
                     string insX = "", x = textBox1.Text;
-                    if (textBox1.SelectedText != "")
-                        x = x.Substring(0, s) + x.Substring(s + l);
+                    //if (textBox1.SelectedText != "")
+                    //    x = x.Substring(0, s) + x.Substring(s + l);
                     if (e.KeyCode == Keys.D0)
                     {
                         insX = Environment.NewLine + "　" + Environment.NewLine +
