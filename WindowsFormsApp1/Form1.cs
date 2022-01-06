@@ -1044,10 +1044,7 @@ namespace WindowsFormsApp1
             s += insX.Length;
             //textBox1.SelectionStart = s + insX.Length;
             //textBox1.ScrollToCaret();
-            if (l == 0)
-                restoreCaretPosition(textBox1, s, l);
-            else
-                restoreCaretPosition(textBox1, s + insX.Length - 1, 0);
+                restoreCaretPosition(textBox1, s, 0);           
 
         }
 
