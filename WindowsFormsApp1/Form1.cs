@@ -348,8 +348,8 @@ namespace WindowsFormsApp1
             string x = textBox1.Text;
             int s = textBox1.SelectionStart, l = textBox1.SelectionLength;
             string xCopy = x.Substring(0, s + l);
-            string[] replacedChar = { ",", ";", ":" , "．" };
-            string[] replaceChar = { "，", "；", "：" ,"·"};
+            string[] replacedChar = { ",", ";", ":", "．" };
+            string[] replaceChar = { "，", "；", "：", "·" };
             foreach (var item in replacedChar)
             {
                 if (xCopy.IndexOf(item) > -1)
@@ -399,13 +399,16 @@ namespace WindowsFormsApp1
                 if (x.Substring(0, 2) == Environment.NewLine) x = x.Substring(2);
                 string[] rTxt = { "。}}<p>" };
                 int lng = rTxt[0].Length;
-                string xClr = x.Substring(0, lng);
-                int clr = xClr.IndexOf(rTxt[0]);
-                while (clr > -1 && x != ""&& x.Length>=lng)
+                if (x.Length >= lng)
                 {
-                    x = x.Substring(clr + lng);
-                    xClr = x.Substring(0, lng);
-                    clr = xClr.IndexOf(rTxt[0]);
+                    string xClr = x.Substring(0, lng);
+                    int clr = xClr.IndexOf(rTxt[0]);
+                    while (clr > -1 && x != "" && x.Length >= lng)
+                    {
+                        x = x.Substring(clr + lng);
+                        xClr = x.Substring(0, lng);
+                        clr = xClr.IndexOf(rTxt[0]);
+                    }
                 }
             }
             textBox1.Text = x;
@@ -503,7 +506,7 @@ namespace WindowsFormsApp1
             {
                 if (e.KeyCode == Keys.Add || e.KeyCode == Keys.Oemplus || e.KeyCode == Keys.Subtract || e.KeyCode == Keys.NumPad5)
                 {
-                   keyDownCtrlAdd(true);
+                    keyDownCtrlAdd(true);
                     return;
                 }
             }
@@ -1090,7 +1093,7 @@ namespace WindowsFormsApp1
 
         bool isChineseChar(string x)
         {
-            const string notChineseCharPriority= "　 􏿽\r\n<>{}.,;?@●'\"。，；！？、－-《》〈〉「」『』〖〗【】（）()[]〔〕［］0123456789";
+            const string notChineseCharPriority = "　 􏿽\r\n<>{}.,;?@●'\"。，；！？、－-《》〈〉「」『』〖〗【】（）()[]〔〕［］0123456789";
             if (notChineseCharPriority.IndexOf(x) > -1) return false;
 
             //https://www.jb51.net/article/45556.htm
