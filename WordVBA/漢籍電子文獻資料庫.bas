@@ -32,6 +32,7 @@ d.Close wdDoNotSaveChanges
 End Sub
 
 Sub get阮元挍勘記()
+'其實本有，在原書各頁下，不必做。
 Dim rng As Range, a, noteFlag As Boolean, x As String
 Set rng = Documents.Add().Range
 rng.Paste
@@ -46,7 +47,7 @@ For Each a In rng.Characters
             If a.Next.Font.Size = 10 Then
                 x = x & a
             Else
-                x = x & a & "{{"
+                x = x & a & "：{{"
             End If
         Else
             If a.Next.Font.Size > 7.5 Or a.Next.Font.Color <> 255 Then
