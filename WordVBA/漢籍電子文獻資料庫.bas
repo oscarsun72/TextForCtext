@@ -30,3 +30,37 @@ Next i
 d.Range.Cut
 d.Close wdDoNotSaveChanges
 End Sub
+
+Sub get阮元挍勘記()
+Dim rng As Range, a, noteFlag As Boolean, x As String
+Set rng = Documents.Add().Range
+rng.Paste
+For Each a In rng.Characters
+    If a.Font.Color = 255 Then
+        If a.Font.Size = 10 Then
+            noteFlag = False
+        Else
+            noteFlag = True
+        End If
+        If noteFlag = False Then
+            If a.Next.Font.Size = 10 Then
+                x = x & a
+            Else
+                x = x & a & "{{"
+            End If
+        Else
+            If a.Next.Font.Size > 7.5 Or a.Next.Font.Color <> 255 Then
+                x = x & a & "}}<p>" & Chr(13) & Chr(10)
+            Else
+                x = x & a
+            End If
+        End If
+    End If
+Next a
+rng.Text = x
+文字處理.書名號篇名號標注
+rng.Cut
+rng.Document.Close wdDoNotSaveChanges
+'SystemSetup.ClipboardPutIn x
+Beep
+End Sub
