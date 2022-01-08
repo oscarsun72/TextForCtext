@@ -2,13 +2,23 @@ Attribute VB_Name = "易學網"
 Option Explicit
 'https://www.eee-learning.com/book/
 Sub 周易本義()
-Dim d As Document, a, noteFlag As Boolean, x As String
+Dim d As Document, a, noteFlag As Boolean, x As String, omitPara As Paragraph
 Set d = ActiveDocument
 'If d.path <> "" Then
 Set d = Documents.Add()
 d.Range.Paste
-d.Range.Find.Execute "^p", , , , , , , wdFindContinue, , "", wdReplaceAll
+'d.Range.Find.Execute "^p", , , , , , , wdFindContinue, , "", wdReplaceAll
 For Each a In d.Characters
+    If InStr(a.Paragraphs(1).Range, "《彖》") > 0 Or _
+        InStr(a.Paragraphs(1).Range, "《象》") > 0 Then
+        Set omitPara = a.Paragraphs(1)
+        If Not omitPara.Next.Next Is Nothing Then _
+            Set a = omitPara.Next.Next.Range.Characters(1)
+    End If
+    Do While InStr(Chr(13) & Chr(160) & Chr(32) & Chr(30), a) > 0
+        If a.Next Is Nothing Then Exit Do
+        Set a = a.Next
+    Loop
     x = x & a
     If Not a.Previous Is Nothing And Not a.Next Is Nothing Then
         If a.Font.Bold = True Then
