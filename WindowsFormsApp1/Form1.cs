@@ -348,8 +348,8 @@ namespace WindowsFormsApp1
             string x = textBox1.Text;
             int s = textBox1.SelectionStart, l = textBox1.SelectionLength;
             string xCopy = x.Substring(0, s + l);
-            string[] replacedChar = { ",", ";", ":", "．" };
-            string[] replaceChar = { "，", "；", "：", "·" };
+            string[] replacedChar = { ",", ";", ":", "．" , "" };
+            string[] replaceChar = { "，", "；", "：", "·" ,""};
             foreach (var item in replacedChar)
             {
                 if (xCopy.IndexOf(item) > -1)
