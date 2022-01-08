@@ -2,38 +2,62 @@ Attribute VB_Name = "易學網"
 Option Explicit
 'https://www.eee-learning.com/book/
 Sub 周易本義()
-Dim d As Document, a, noteFlag As Boolean, x As String, omitPara As Paragraph
+Dim d As Document, a, ai As Long, noteFlag As Boolean, x As String, _
+    omitPara As Paragraph, acnt As Long, omitAcnt As Long, omitParaNext As Paragraph _
+    , omitParaNextRng As Range, omitParaRng As Range, omitParaNext1Rng As Range, omitParaNext1 As Paragraph _
+    , noteFlgPrevious As Boolean, openCnt As Long, closeCnt As Long
 Set d = ActiveDocument
 'If d.path <> "" Then
 Set d = Documents.Add()
 d.Range.Paste
+acnt = d.Characters.Count
 'd.Range.Find.Execute "^p", , , , , , , wdFindContinue, , "", wdReplaceAll
-For Each a In d.Characters
+For i = 1 To acnt
+    Set a = d.Characters(i)
+    Do While InStr(ChrW(13) & ChrW(160) & ChrW(32) & ChrW(30), a) > 0
+        If a.Next Is Nothing Then Exit Do
+        Set a = a.Next
+        i = i + 1
+    Loop
     If InStr(a.Paragraphs(1).Range, "《彖》") > 0 Or _
         InStr(a.Paragraphs(1).Range, "《象》") > 0 Then
         Set omitPara = a.Paragraphs(1)
-        If Not omitPara.Next.Next Is Nothing Then _
-            Set a = omitPara.Next.Next.Range.Characters(1)
+        Set omitParaRng = omitPara.Range
+        Set omitParaNext = omitPara.Next
+        Set omitParaNextRng = omitParaNext.Range
+        Set omitParaNext1 = omitPara.Next.Next
+        If Not omitParaNext1 Is Nothing Then
+            Set omitParaNext1Rng = omitParaNext1.Range
+            Set a = omitParaNext1Rng.Characters(1)
+            i = i + omitParaRng.Characters.Count + omitParaNextRng.Characters.Count
+        End If
     End If
-    Do While InStr(Chr(13) & Chr(160) & Chr(32) & Chr(30), a) > 0
-        If a.Next Is Nothing Then Exit Do
-        Set a = a.Next
-    Loop
-    x = x & a
+
     If Not a.Previous Is Nothing And Not a.Next Is Nothing Then
         If a.Font.Bold = True Then
             noteFlag = False
         Else '注文
             noteFlag = True
         End If
-        If Not noteFlag And a.Next.Font.Bold = False Then
-            x = x + "{{"
-        End If
-        If noteFlag And a.Next.Font.Bold = True Then
-            x = x + "}}"
+        If Not noteFlag And noteFlgPrevious Then
+            x = x + "}}" + a
+            noteFlgPrevious = noteFlag
+            closeCnt = closeCnt + 1
+        Else
+            x = x & a
+            If Not noteFlag And a.Next.Font.Bold = False Then
+                x = x + "{{"
+                noteFlgPrevious = True
+                openCnt = openCnt + 1
+            End If
+            If noteFlag And a.Next.Font.Bold = True Then
+                x = x + "}}"
+                closeCnt = closeCnt + 1
+            End If
         End If
     End If
-Next a
+Next i
+If openCnt > closeCnt Then x = x + "}}"
 SystemSetup.ClipboardPutIn Replace(Replace(x, " ", ""), ChrW(160), "")
 d.Close wdDoNotSaveChanges
 Beep
