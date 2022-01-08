@@ -348,8 +348,8 @@ namespace WindowsFormsApp1
             string x = textBox1.Text;
             int s = textBox1.SelectionStart, l = textBox1.SelectionLength;
             string xCopy = x.Substring(0, s + l);
-            string[] replacedChar = { ",", ";", ":", "．" , "" };
-            string[] replaceChar = { "，", "；", "：", "·" ,""};
+            string[] replacedChar = { ",", ";", ":", "．"  };
+            string[] replaceChar = { "，", "；", "：", "·" };
             foreach (var item in replacedChar)
             {
                 if (xCopy.IndexOf(item) > -1)
@@ -378,6 +378,11 @@ namespace WindowsFormsApp1
                 {
                     xCopy = xCopy.Replace(rs, "●");//「●」為《中國哲學書電子化計劃》的缺字符，詳：https://ctext.org/instructions/wiki-formatting/zh
                 }
+            }
+            string[] clearedStr = { "" };
+            foreach (var item in clearedStr)
+            {
+                xCopy = xCopy.Replace(item, "");
             }
             Clipboard.SetText(xCopy); BackupLastPageText(xCopy, false, false);
             if (s + l + 2 < textBox1.Text.Length)
