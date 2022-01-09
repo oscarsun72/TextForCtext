@@ -16,6 +16,20 @@ Private Declare PtrSafe Function GlobalLock Lib "kernel32.dll" (ByVal hMem As Lo
 Private Declare PtrSafe Function GlobalUnlock Lib "kernel32.dll" (ByVal hMem As Long) As Long
 Private Declare PtrSafe Function GlobalSize Lib "kernel32" (ByVal hMem As Long) As Long
 Private Declare PtrSafe Function lstrcpy Lib "kernel32.dll" Alias "lstrcpyW" (ByVal lpString1 As Long, ByVal lpString2 As Long) As Long
+
+Public Declare Function ShellExecute Lib "shell32.dll" Alias "ShellExecuteA" _
+    (ByVal hWnd As Long, ByVal lpOperation As String, ByVal lpFile As String, _
+  ByVal lpParameters As String, ByVal lpDirectory As String, _
+  ByVal nShowCmd As Long) As Long 'https://www.mrexcel.com/board/threads/vba-api-call-issues-with-show-window-activation.920147/
+Public Declare Function ShowWindow Lib "user32" _
+  (ByVal hWnd As Long, ByVal nCmdSHow As Long) As Long
+Public Declare Function FindWindow Lib "user32" Alias "FindWindowA" _
+  (ByVal lpClassName As String, ByVal lpWindowName As String) As Long
+  
+Public Declare Function SetForegroundWindow Lib "user32" (ByVal hWnd As Long) As Boolean
+  
+  
+  
 'https://msdn.microsoft.com/zh-tw/library/office/ff194373.aspx
 'Declare Function OpenClipboard Lib "User32" (ByVal hWnd As Long) _
 '   As Long
@@ -342,7 +356,8 @@ On Error GoTo eH:
     'you may find more than one processid depending on your search/program
     For Each Process In objProcessSet
        'Debug.Print Process.ProcessID, Process.Name
-       If Process.Name = exeName Then 'processName Then
+       'If Process.Name = exeName Then 'processName Then
+       If Not StrComp(Process.Name, exeName, vbTextCompare) Then 'processName Then
         appActivatedYet = True
         Exit Function
        End If
@@ -358,4 +373,16 @@ Select Case Err.Number
         MsgBox Err.Number & Err.Description
         'resume
 End Select
+End Function
+
+Function apicShowWindow(strClassName As String, strWindowName As String, lngState As Long)
+  'https://www.mrexcel.com/board/threads/vba-api-call-issues-with-show-window-activation.920147/
+  'Declare variables
+  Dim lngWnd As Long
+  Dim intRet As Integer
+  
+  lngWnd = FindWindow(strClassName, strWindowName)
+  apicShowWindow = ShowWindow(lngWnd, lngState)
+  'Spy + + :https://docs.microsoft.com/zh-tw/visualstudio/debugger/how-to-start-spy-increment?view=vs-2022
+  SetForegroundWindow lngWnd 'https://zechs.taipei/?p=146
 End Function

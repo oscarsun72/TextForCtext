@@ -3134,10 +3134,19 @@ typeTexts:
             'add new url
 rePt:
             If rst.RecordCount = 1 Then
-                If Not word.Tasks.Exists("google chrome") Then
+                If Not SystemSetup.appActivatedYet("chrome") Then
+                'If Not word.Tasks.Exists("google chrome") Then
                     Shell SystemSetup.getChrome & " https://dict.revised.moe.edu.tw/search.jsp?md=1"
                 Else
-                    AppActivate "google chrome" 'https://docs.microsoft.com/zh-tw/sql/ado/reference/ado-api/absoluteposition-property-ado?view=sql-server-ver15
+'                    AppActivate "google chrome" 'https://docs.microsoft.com/zh-tw/sql/ado/reference/ado-api/absoluteposition-property-ado?view=sql-server-ver15
+                    'SystemSetup.apicShowWindow vbNullString, "chrome", 5
+'                    SystemSetup.apicShowWindow vbNullString, "textforctext", 9 '8
+'                    SystemSetup.apicShowWindow vbNullString _
+                        , "·s¤À­¶ - Google Chrome", 8 '8
+                    SystemSetup.apicShowWindow "Chrome_WidgetWin_1" _
+                        , vbNullString, 3 'https://zechs.taipei/?p=146
+                        'https://docs.microsoft.com/zh-tw/visualstudio/debugger/how-to-start-spy-increment?view=vs-2022
+                    'https://stackoverflow.com/questions/19705797/find-the-window-handle-for-a-chrome-browser
                 End If
             Else
                 Beep
