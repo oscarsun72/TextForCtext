@@ -355,7 +355,7 @@ namespace WindowsFormsApp1
                 if (xCopy.IndexOf(item) > -1)
                 {
                     if (MessageBox.Show("含半形標點，是否取代為全形？", "", MessageBoxButtons.OKCancel,
-                        MessageBoxIcon.Hand) == DialogResult.OK)
+                        MessageBoxIcon.Error) == DialogResult.OK)
                     {
                         for (int i = 0; i < replaceChar.Length; i++)
                         {
