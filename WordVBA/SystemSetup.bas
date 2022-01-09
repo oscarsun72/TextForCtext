@@ -382,7 +382,7 @@ Function apicShowWindow(strClassName As String, strWindowName As String, lngStat
   Dim intRet As Integer
   
   lngWnd = FindWindow(strClassName, strWindowName)
-  apicShowWindow = ShowWindow(lngWnd, lngState)
   'Spy + + :https://docs.microsoft.com/zh-tw/visualstudio/debugger/how-to-start-spy-increment?view=vs-2022
   SetForegroundWindow lngWnd 'https://zechs.taipei/?p=146
+  apicShowWindow = ShowWindow(lngWnd, lngState)
 End Function
