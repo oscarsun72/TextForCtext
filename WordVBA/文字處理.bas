@@ -3139,10 +3139,7 @@ rePt:
                     Shell SystemSetup.getChrome & " https://dict.revised.moe.edu.tw/search.jsp?md=1"
                 Else
 '                    AppActivate "google chrome" 'https://docs.microsoft.com/zh-tw/sql/ado/reference/ado-api/absoluteposition-property-ado?view=sql-server-ver15
-                    'SystemSetup.apicShowWindow vbNullString, "chrome", 5
-'                    SystemSetup.apicShowWindow vbNullString, "textforctext", 9 '8
-'                    SystemSetup.apicShowWindow vbNullString _
-                        , "·s¤À­¶ - Google Chrome", 8 '8
+                        'try looking for both Chrome_WidgetWin_1 and Chrome_RenderWidgetHostHWND
                     SystemSetup.apicShowWindow "Chrome_WidgetWin_1" _
                         , vbNullString, 3 'https://zechs.taipei/?p=146
                         'https://docs.microsoft.com/zh-tw/visualstudio/debugger/how-to-start-spy-increment?view=vs-2022
