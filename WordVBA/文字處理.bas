@@ -3186,9 +3186,13 @@ eH:
         Case 5834 '指定名稱的項目不存在
             Docs.樣式add_沛榮按等樣式
             Resume
+        Case 5 '程序呼叫或引數不正確
+            SystemSetup.Wait 'http://vbcity.com/forums/t/81315.aspx
+            'Application.Wait (Now + TimeValue("0:00:10")) '<~~ Waits ten seconds.
+            Resume 'https://stackoverflow.com/questions/21937053/appactivate-to-return-to-excel
         Case Else
             MsgBox Err.Number & Err.Description
-'            Resume
+            Resume
             GoTo endS
             'If cnt.State <> adStateClosed Then cnt.Close
     End Select

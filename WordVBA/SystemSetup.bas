@@ -17,16 +17,16 @@ Private Declare PtrSafe Function GlobalUnlock Lib "kernel32.dll" (ByVal hMem As 
 Private Declare PtrSafe Function GlobalSize Lib "kernel32" (ByVal hMem As Long) As Long
 Private Declare PtrSafe Function lstrcpy Lib "kernel32.dll" Alias "lstrcpyW" (ByVal lpString1 As Long, ByVal lpString2 As Long) As Long
 
-Public Declare Function ShellExecute Lib "shell32.dll" Alias "ShellExecuteA" _
+Public Declare PtrSafe Function ShellExecute Lib "shell32.dll" Alias "ShellExecuteA" _
     (ByVal hWnd As Long, ByVal lpOperation As String, ByVal lpFile As String, _
   ByVal lpParameters As String, ByVal lpDirectory As String, _
   ByVal nShowCmd As Long) As Long 'https://www.mrexcel.com/board/threads/vba-api-call-issues-with-show-window-activation.920147/
-Public Declare Function ShowWindow Lib "user32" _
+Public Declare PtrSafe Function ShowWindow Lib "user32" _
   (ByVal hWnd As Long, ByVal nCmdSHow As Long) As Long
-Public Declare Function FindWindow Lib "user32" Alias "FindWindowA" _
+Public Declare PtrSafe Function FindWindow Lib "user32" Alias "FindWindowA" _
   (ByVal lpClassName As String, ByVal lpWindowName As String) As Long
   
-Public Declare Function SetForegroundWindow Lib "user32" (ByVal hWnd As Long) As Boolean
+Public Declare PtrSafe Function SetForegroundWindow Lib "user32" (ByVal hWnd As Long) As Boolean
   
   
   
@@ -386,3 +386,11 @@ Function apicShowWindow(strClassName As String, strWindowName As String, lngStat
   'Spy + + :https://docs.microsoft.com/zh-tw/visualstudio/debugger/how-to-start-spy-increment?view=vs-2022
   SetForegroundWindow lngWnd 'https://zechs.taipei/?p=146
 End Function
+
+Sub Wait()
+'http://vbcity.com/forums/t/81315.aspx
+Dim WaitDt As Date
+WaitDt = DateAdd("s", 3, Now())
+Do While Now < WaitDt
+Loop
+End Sub
