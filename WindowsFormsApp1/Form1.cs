@@ -1103,7 +1103,7 @@ namespace WindowsFormsApp1
 
         bool isChineseChar(string x)
         {
-            const string notChineseCharPriority = "　 􏿽\r\n<>{}.,;?@●'\"。，；！？、－-《》〈〉「」『』〖〗【】（）()[]〔〕［］0123456789";
+            const string notChineseCharPriority = "〇　 􏿽\r\n<>{}.,;?@●'\"。，；！？、－-《》〈〉「」『』〖〗【】（）()[]〔〕［］0123456789";
             if (notChineseCharPriority.IndexOf(x) > -1) return false;
 
             //https://www.jb51.net/article/45556.htm
