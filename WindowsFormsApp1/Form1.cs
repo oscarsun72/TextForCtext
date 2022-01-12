@@ -1379,6 +1379,8 @@ namespace WindowsFormsApp1
                         LengthInTextElements;
                     gap = Math.Abs(len - normalLineParaLength);
                 }
+
+                
                 //the normal rule
                 if (gap > 4 && !(len < normalLineParaLength
                     && lineParaText.IndexOf("<p>") > -1)
@@ -1394,6 +1396,10 @@ namespace WindowsFormsApp1
                         if (++j == i) break;
                         lineSeprtStart = lineSeprtEnd;
                         lineSeprtEnd = x.IndexOf(Environment.NewLine, ++lineSeprtEnd);
+                    }
+                    if (gap>10)
+                    {
+                        SystemSounds.Hand.Play();
                     }
                     return new int[] { lineSeprtStart, lineSeprtEnd - lineSeprtStart ,
                     normalLineParaLength,len};
