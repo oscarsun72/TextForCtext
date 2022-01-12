@@ -1368,7 +1368,8 @@ namespace WindowsFormsApp1
                         LengthInTextElements;
                     gap = Math.Abs(len - normalLineParaLength);
                 }
-                if (gap > 3 && !(len < normalLineParaLength
+                //the normal rule
+                if (gap > 4 && !(len < normalLineParaLength
                     && lineParaText.IndexOf("<p>") > -1)
                     && lineParaText != "　" && lineParaText.IndexOf("*") == -1)//&& gap < 8)
                 {//select the abnormal one
