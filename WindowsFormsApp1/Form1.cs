@@ -1115,6 +1115,8 @@ namespace WindowsFormsApp1
                                                                   //https://www.google.com/search?q=c%23+%E4%B8%AD%E6%96%87+%E8%BD%89+unicode&rlz=1C1GCEU_zh-TWTW823TW823&sxsrf=AOaemvJI_o6pHrTEJVPCsVy0iyVsclLtjQ%3A1640527095825&ei=93TIYbnqMYOmoATnx4rwBg&oq=c%23++%5Cu%E4%B8%AD%E6%96%87%E5%AD%97%E7%A2%BC&gs_lcp=Cgdnd3Mtd2l6EAMYATIFCAAQzQIyBQgAEM0COggIABCwAxDNAjoECCMQJ0oECEEYAUoECEYYAFCzWFjiY2DfcGgCcAB4AIABVYgB1gGSAQEzmAEAoAEByAECwAEB&sclient=gws-wiz
                                                                   //https://www.itread01.com/p/1418585.html
 
+            if (char.IsSurrogate(x.ToCharArray()[0]) || char.IsSurrogatePair(x, 0)) return true;
+
             if (Regex.IsMatch(x, @"[\u20000-\u2A6DD]")) return true;//擴充B區包含有42,717個漢字，位置在U+20000—U+2A6DD
             if (Regex.IsMatch(x, @"[\u2A700-\u2B734]")) return true;//C:位置在U+2A700—U+2B734
             if (Regex.IsMatch(x, @"[\u2B740-\u2B81F]")) return true;//D:範圍為U+2B740–U+2B81F（實際有字元為U+2B740–U+2B81D）
@@ -1372,7 +1374,7 @@ namespace WindowsFormsApp1
                 if (gap > 4 && !(len < normalLineParaLength
                     && lineParaText.IndexOf("<p>") > -1)
                     && lineParaText != "　" && lineParaText.IndexOf("*") == -1 &&
-                        lineParaText.IndexOf("|")==-1) //&& gap < 8)
+                        lineParaText.IndexOf("|") == -1) //&& gap < 8)
                 {//select the abnormal one
                     string x = textBox1.Text;
                     int j = -1, lineSeprtEnd = 0, lineSeprtStart = lineSeprtEnd;
