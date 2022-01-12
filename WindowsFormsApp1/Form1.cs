@@ -918,6 +918,14 @@ namespace WindowsFormsApp1
                     return;
                 }
 
+                if (e.KeyCode==Keys.P)
+                {
+                    e.Handled = true;
+                    insertWords("<p>", textBox1.Text);                    
+                    return;
+                }
+
+
                 if (e.KeyCode == Keys.Delete)
                 {//Alt + Del : 刪除插入點後第一個分行分段
                     e.Handled = true;
