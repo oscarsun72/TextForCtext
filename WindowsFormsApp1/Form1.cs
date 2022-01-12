@@ -1742,6 +1742,7 @@ namespace WindowsFormsApp1
             appWord.Quit(Microsoft.Office.Interop.Word.WdSaveOptions.wdDoNotSaveChanges);
             this.BackColor = C;
             show_nICo();
+            normalLineParaLength = 0;
         }
 
         const string fName_to_Save_Txt = "cText.txt";
