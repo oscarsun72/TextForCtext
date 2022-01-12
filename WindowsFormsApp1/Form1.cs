@@ -918,10 +918,10 @@ namespace WindowsFormsApp1
                     return;
                 }
 
-                if (e.KeyCode==Keys.P)
+                if (e.KeyCode == Keys.P)
                 {
                     e.Handled = true;
-                    insertWords("<p>", textBox1.Text);                    
+                    insertWords("<p>", textBox1.Text);
                     return;
                 }
 
@@ -1380,7 +1380,7 @@ namespace WindowsFormsApp1
                     gap = Math.Abs(len - normalLineParaLength);
                 }
 
-                
+
                 //the normal rule
                 if (gap > 4 && !(len < normalLineParaLength
                     && lineParaText.IndexOf("<p>") > -1)
@@ -1397,7 +1397,7 @@ namespace WindowsFormsApp1
                         lineSeprtStart = lineSeprtEnd;
                         lineSeprtEnd = x.IndexOf(Environment.NewLine, ++lineSeprtEnd);
                     }
-                    if (gap>10)
+                    if (gap > 10)
                     {
                         SystemSounds.Hand.Play();
                     }
