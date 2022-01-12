@@ -1371,7 +1371,8 @@ namespace WindowsFormsApp1
                 //the normal rule
                 if (gap > 4 && !(len < normalLineParaLength
                     && lineParaText.IndexOf("<p>") > -1)
-                    && lineParaText != "　" && lineParaText.IndexOf("*") == -1)//&& gap < 8)
+                    && lineParaText != "　" && lineParaText.IndexOf("*") == -1 &&
+                        lineParaText.IndexOf("|")==-1) //&& gap < 8)
                 {//select the abnormal one
                     string x = textBox1.Text;
                     int j = -1, lineSeprtEnd = 0, lineSeprtStart = lineSeprtEnd;
