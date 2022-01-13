@@ -737,7 +737,7 @@ namespace WindowsFormsApp1
                 {
                     e.Handled = true;
                     int foundwhere;
-                    string findword = textBox1.SelectedText;
+                    string findword = textBox1.SelectionLength == 0 ? lastFindStr : textBox1.SelectedText;
                     if (findword == "") findword = textBox2.Text;
                     if (findword != "")
                     {
@@ -985,8 +985,8 @@ namespace WindowsFormsApp1
                 if (e.KeyCode == Keys.F3)
                 {
                     e.Handled = true;
-                    int foundwhere;
-                    string findword = textBox1.SelectedText;
+                    int foundwhere;                    
+                    string findword = textBox1.SelectionLength == 0?lastFindStr:textBox1.SelectedText;
                     if (findword == "") findword = textBox2.Text;
                     if (findword != "")
                     {
