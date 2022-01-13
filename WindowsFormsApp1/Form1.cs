@@ -345,7 +345,7 @@ namespace WindowsFormsApp1
             saveText();
             //if (textBox1.SelectedText != "")
             //{
-            textBox2.Text = "";
+            if (textBox2.Text != "＠") textBox2.Text = "";
             string x = textBox1.Text;
             int s = textBox1.SelectionStart, l = textBox1.SelectionLength;
             string xCopy = x.Substring(0, s + l);
