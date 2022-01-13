@@ -300,7 +300,7 @@ namespace WindowsFormsApp1
             }
             string x = textBox1.Text; int xStart = x.IndexOf(s), nextStart = x.IndexOf(s, xStart + 1);
             Color C = textBox2.BackColor;
-            lastFindStr = s;
+            if (s != "") lastFindStr = s;
             if (xStart > -1)
             {//若有找到
                 textBox1.Focus();
