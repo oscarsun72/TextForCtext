@@ -93,7 +93,6 @@ namespace WindowsFormsApp1
             this.textBox3.TabIndex = 3;
             this.textBox3.TabStop = false;
             this.textBox3.Click += new System.EventHandler(this.textBox3_Click);
-            this.textBox3.TextChanged += new System.EventHandler(this.textBox3_TextChanged);
             // 
             // textBox4
             // 

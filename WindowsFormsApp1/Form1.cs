@@ -1484,11 +1484,7 @@ namespace WindowsFormsApp1
 
         }
 
-        private void textBox3_TextChanged(object sender, EventArgs e)
-        {
-
-        }
-
+        
         private void textBox3_Click(object sender, EventArgs e)
         {
             string x = Clipboard.GetText();
