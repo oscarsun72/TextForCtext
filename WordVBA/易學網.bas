@@ -1,13 +1,18 @@
 Attribute VB_Name = "易學網"
 Option Explicit
+Function isOmitChar(char) As Boolean
+Dim omitChar As String
+omitChar = ChrW(160) & ChrW(13)
+If InStr(omitChar, char) > 0 Then isOmitChar = True
+End Function
+
+
 'https://www.eee-learning.com/book/
 Sub 周易本義()
-Dim d As Document, a, ai As Long, noteFlag As Boolean, x As String, _
+Dim d As Document, a, i As Long, noteFlag As Boolean, x As String, _
     omitPara As Paragraph, acnt As Long, omitAcnt As Long, omitParaNext As Paragraph _
     , omitParaNextRng As Range, omitParaRng As Range, omitParaNext1Rng As Range, omitParaNext1 As Paragraph _
     , noteFlgPrevious As Boolean, openCnt As Long, closeCnt As Long
-Set d = ActiveDocument
-'If d.path <> "" Then
 Set d = Documents.Add()
 d.Range.Paste
 acnt = d.Characters.Count
@@ -90,3 +95,37 @@ rng.Document.Close wdDoNotSaveChanges
 Beep
 End Sub
  
+
+Sub 易程傳_伊川易傳()
+Dim rng As Range, a, x As String, noteFlg As Boolean, preNoteFlg As Boolean, rngEnd As Range
+Set rng = Documents.Add.Range
+rng.Paste
+Set rngEnd = rng
+If rngEnd.Find.Execute("本文取自易學網。") Then rng.SetRange 0, rngEnd.start
+For Each a In rng.Characters
+    If isOmitChar(a) Then
+'        If preNoteFlg Then
+'            x = x & "}}"
+'        End If
+    Else
+        If a.Font.Bold Then
+            noteFlg = False
+        Else
+            noteFlg = True
+        End If
+        If preNoteFlg And Not noteFlg Then
+            x = x & "}}" & a
+        ElseIf Not preNoteFlg And noteFlg Then
+            x = x & "{{" & a
+        Else
+            x = x & a
+        End If
+    End If
+    preNoteFlg = noteFlg
+Next a
+rng.SetRange rng.Document.Range.start, rng.Document.Range.End
+rng.Text = Replace(x, " ", "")
+rng.Cut
+rng.Document.Close wdDoNotSaveChanges
+Beep
+End Sub

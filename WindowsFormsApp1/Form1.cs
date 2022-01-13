@@ -285,7 +285,7 @@ namespace WindowsFormsApp1
             }
         }
 
-
+        string lastFindStr = "";
         private void textBox2_Leave(object sender, EventArgs e)
         {
             string s = textBox2.Text;
@@ -300,6 +300,7 @@ namespace WindowsFormsApp1
             }
             string x = textBox1.Text; int xStart = x.IndexOf(s), nextStart = x.IndexOf(s, xStart + 1);
             Color C = textBox2.BackColor;
+            lastFindStr = s;
             if (xStart > -1)
             {//若有找到
                 textBox1.Focus();
@@ -750,6 +751,7 @@ namespace WindowsFormsApp1
                         textBox1.SelectionLength = findword.Length;
                         textBox1.ScrollToCaret();
                     }
+                    lastFindStr=findword;
                     return;
                 }//以上 Shift + F3
 
@@ -997,6 +999,7 @@ namespace WindowsFormsApp1
                         textBox1.SelectionStart = foundwhere;
                         textBox1.SelectionLength = findword.Length; textBox1.ScrollToCaret();
                     }
+                    lastFindStr=findword;
                     return;
                 }
 
