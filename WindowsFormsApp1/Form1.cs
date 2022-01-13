@@ -642,11 +642,22 @@ namespace WindowsFormsApp1
                 if (e.KeyCode == Keys.OemCloseBrackets || e.KeyCode == Keys.OemOpenBrackets)
                 {/*Ctrl + [：從插入點開始向前移至{{前
                     Ctrl + ]：從插入點開始向後移至}}後*/
-                    int s = textBox1.SelectionStart; string x = textBox1.Text;
+                    string x = textBox1.Text;
+                    if (x.IndexOf("{{") == -1 && x.IndexOf("}}") == -1)
+                    {
+                        MessageBox.Show("not found {{ or  }} ");
+                        return;
+                    }
+                    int s = textBox1.SelectionStart;
                     if (e.KeyCode == Keys.OemCloseBrackets)
                         s = x.IndexOf("}}", s + 1) + 2;
                     else
-                        s = x.LastIndexOf("{{", s - 1);
+                    {
+                        if (s > 0)
+                        {
+                            s = x.LastIndexOf("{{", s - 1);
+                        }
+                    }
                     if (s > -1)
                         textBox1.SelectionStart = s;
                     else

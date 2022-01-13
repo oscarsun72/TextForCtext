@@ -23,6 +23,22 @@ Next i
 data.SetText Replace(x, "/>", "/>●", 1, 1)
 data.PutInClipboard
 End Sub
+Sub 清除所有符號_分段注文符號例外()
+Dim f, i As Integer
+f = Array("。", "」", Chr(-24152), "：", "，", "；", _
+    "、", "「", ".", Chr(34), ":", ",", ";", _
+    "……", "...", "．", "【", "】", " ", "《", "》", "〈", "〉", "？" _
+    , "！", "﹝", "﹞", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0" _
+    , "『", "』", ChrW(9312), ChrW(9313), ChrW(9314), ChrW(9315), ChrW(9316) _
+    , ChrW(9317), ChrW(9318), ChrW(9319), ChrW(9320), ChrW(9321), ChrW(9322), ChrW(9323) _
+    , ChrW(9324), ChrW(9325), ChrW(9326), ChrW(9327), ChrW(9328), ChrW(9329), ChrW(9330) _
+    , ChrW(9331), ChrW(8221), """") '先設定標點符號陣列以備用
+    '全形圓括弧暫不取代！
+    For i = 0 To UBound(f)
+        ActiveDocument.Range.Find.Execute f(i), True, , , , , , wdFindContinue, True, "", wdReplaceAll
+    Next
+End Sub
+
 
 Sub 維基文庫四部叢刊本轉來()
 Dim d As Document, a, i
@@ -452,3 +468,22 @@ d.Range.Cut
 d.Close wdDoNotSaveChanges
 If word.Application.Windows.Count > 0 Then word.Application.ActiveWindow.WindowState = wdWindowStateMinimize
 End Sub
+
+
+Sub tempReplaceTxtforCtext()
+Dim a, d As Document, i As Integer
+a = Array("（", "", "）", "", "○", ChrW(12295))
+Set d = Documents.Add
+d.Range.Paste
+For i = 0 To UBound(a)
+    d.Range.Find.Execute a(i), , , , , , , wdFindContinue, , a(i + 1), wdReplaceAll
+    i = i + 1
+Next i
+d.Range.Cut
+d.Close wdDoNotSaveChanges
+AppActivate "google chrome"
+SendKeys "^v"
+SendKeys "{tab}~"
+
+End Sub
+

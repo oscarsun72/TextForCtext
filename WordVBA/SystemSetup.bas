@@ -394,3 +394,13 @@ WaitDt = DateAdd("s", 3, Now())
 Do While Now < WaitDt
 Loop
 End Sub
+
+Sub appActivateChrome()
+    AppActivate "google chrome" 'https://docs.microsoft.com/zh-tw/sql/ado/reference/ado-api/absoluteposition-property-ado?view=sql-server-ver15
+        'try looking for both Chrome_WidgetWin_1 and Chrome_RenderWidgetHostHWND
+'    SystemSetup.apicShowWindow "Chrome_WidgetWin_1" _
+        , vbNullString, 3 'https://zechs.taipei/?p=146
+        'https://docs.microsoft.com/zh-tw/visualstudio/debugger/how-to-start-spy-increment?view=vs-2022
+    'https://stackoverflow.com/questions/19705797/find-the-window-handle-for-a-chrome-browser
+
+End Sub
