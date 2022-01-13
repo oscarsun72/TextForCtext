@@ -1200,8 +1200,14 @@ namespace WindowsFormsApp1
 
         private void keyDownCtrlAdd(bool shiftKeyDownYet)
         {
-            string x = textBox1.Text;
             int s = textBox1.SelectionStart, l = textBox1.SelectionLength;
+            string x = textBox1.Text;
+            if (textBox1.SelectedText == "＠")
+            {
+                textBox1.Text = x.Substring(0, s) + x.Substring(s + 1);
+                l = 0;
+                textBox1.Select(s, l);
+            }
             string xCopy = x.Substring(0, s + l);
             int[] chk = checkAbnormalLinePara(xCopy);
             if (chk.Length > 0)
@@ -1491,6 +1497,7 @@ namespace WindowsFormsApp1
                 if (x.IndexOf("ctext.org") > -1)
                 {
                     textBox3.Text = x;
+                    SystemSounds.Beep.Play();
                 }
 
         }
