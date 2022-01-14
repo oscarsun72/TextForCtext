@@ -1305,6 +1305,11 @@ namespace WindowsFormsApp1
                                 }
                                 st = noteTextBlendEnd + 2;
                                 lText = noteTextBlendStart - st;//(noteTextBlendEnd + 2);
+                                if (lText < 0)
+                                {
+                                    MessageBox.Show("somethins must be wrong,plx check it out !", "", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                    return new int[0];
+                                }
                                 text += lineParaText.Substring
                                     (st, lText);
                                 lText = noteTextBlendEnd;
