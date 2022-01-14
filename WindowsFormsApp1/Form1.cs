@@ -1201,6 +1201,7 @@ namespace WindowsFormsApp1
         private void keyDownCtrlAdd(bool shiftKeyDownYet)
         {
             int s = textBox1.SelectionStart, l = textBox1.SelectionLength;
+            if (s == 0) return;
             string x = textBox1.Text;
             if (textBox1.SelectedText == "＠")
             {
