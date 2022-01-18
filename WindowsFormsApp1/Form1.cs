@@ -1408,7 +1408,7 @@ namespace WindowsFormsApp1
 
 
                 //the normal rule
-                if (gap > 4 && !(len < normalLineParaLength
+                if (gap > 5 && !(len < normalLineParaLength
                     && lineParaText.IndexOf("<p>") > -1)
                     && lineParaText != "　" && lineParaText.IndexOf("*") == -1 &&
                         lineParaText.IndexOf("|") == -1) //&& gap < 8)
