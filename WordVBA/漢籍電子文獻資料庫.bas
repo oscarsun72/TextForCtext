@@ -14,7 +14,8 @@ Dim d As Document, a, i As Integer, ub As Integer
 a = Array("^p" & ChrW(12310) & "²¨" & ChrW(12311), ChrW(12310) & "²¨" & ChrW(12311) & "{{", _
     "¡D", "", "ÄÀ¤ê", "¡mÄÀ¡n¤ê¡G", "¥¿¸q¤ê", "¡m¥¿¸q¡n¤ê¡G", "¡³", ChrW(12295), "^pÎ½¤ê", "<p>¡qÎ½¡r¤ê¡G", "^p¶H¤ê", "<p>¡q¶H¡r¤ê¡G", _
     "^p", "}}<p>^p", "^p" & ChrW(12295), "}}<p>" & ChrW(12295), ChrW(12295) & "^p", ChrW(12295) & "}}<p>", _
-    "}}", "¡C}}", "¡C}}<p>^p¡C}}<p>", "¡C}}<p>", "¡C}}<p>¡C}}<p>", "¡C}}<p>", "{{ª`¡C}}", "¡³¡mª`¡n¡G")
+    "}}", "¡C}}", "¡C}}<p>^p¡C}}<p>", "¡C}}<p>", "¡C}}<p>¡C}}<p>", "¡C}}<p>", "{{ª`¡C}}", "¡³¡mª`¡n¡G", _
+    "ªþÄÀ­µ¡mÂ§°O¡nª`²¨", "ªþÄÀ­µÂ§°Oª`²¨")
 ub = UBound(a) - 1
 Set d = ActiveDocument
 If d.path <> "" Then

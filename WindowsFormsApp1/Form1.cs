@@ -410,7 +410,7 @@ namespace WindowsFormsApp1
                 {
                     string xClr = x.Substring(0, lng);
                     int clr = xClr.IndexOf(rTxt[0]);
-                    while (clr > -1 && x != "" && x.Length >= lng)
+                    while (clr > -1 && x != "" && x.Length >= lng && x.Substring(clr + lng) != "")
                     {
                         x = x.Substring(clr + lng);
                         xClr = x.Substring(0, lng);
