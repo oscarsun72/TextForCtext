@@ -370,7 +370,8 @@ namespace WindowsFormsApp1
                 xCopy.IndexOf("□") > -1)//□為《維基文庫》《四庫全書》的缺字符，" "則是《四部叢刊》的，"�"則是《四部叢刊》的造字符。
             {//  「�」甚特別，indexof會失效，明明沒有，而傳回 0 //https://docs.microsoft.com/zh-tw/dotnet/csharp/how-to/compare-strings
              //  //https://docs.microsoft.com/zh-tw/dotnet/api/system.string.compare?view=net-6.0
-                SystemSounds.Hand.Play();//文本有缺字警告
+             //SystemSounds.Hand.Play();//文本有缺字警告                
+                if (File.Exists(soundWarningLocation)) new SoundPlayer(soundWarningLocation).Play();
                 Color c = this.BackColor;
                 this.BackColor = Color.Yellow;
                 Task.Delay(900).Wait();
@@ -423,6 +424,8 @@ namespace WindowsFormsApp1
             textBox1.ScrollToCaret();
         }
 
+
+        const string soundWarningLocation = @"c:\windows\media\Windows Foreground.wav";
 
         string textBox1OriginalText = "";
 
