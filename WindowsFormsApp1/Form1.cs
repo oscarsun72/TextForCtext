@@ -1420,7 +1420,8 @@ namespace WindowsFormsApp1
                     bool alarm = true;
                     if (i + 1 < xLineParas.Length)
                     {
-                        if (gap > gapRef && xLineParas[i + 1].IndexOf("}}") > -1)
+                        if (gap > gapRef && len < normalLineParaLength 
+                            && xLineParas[i + 1].IndexOf("}}") > -1)
                         {
                             alarm = false;
                         }
