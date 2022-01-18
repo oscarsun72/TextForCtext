@@ -1409,29 +1409,42 @@ namespace WindowsFormsApp1
                     gap = Math.Abs(len - normalLineParaLength);
                 }
 
+                const int gapRef = 9;
 
                 //the normal rule
-                if (gap > 9 && !(len < normalLineParaLength
+                if (gap > gapRef && !(len < normalLineParaLength
                     && lineParaText.IndexOf("<p>") > -1)
                     && lineParaText != "　" && lineParaText.IndexOf("*") == -1 &&
                         lineParaText.IndexOf("|") == -1) //&& gap < 8)
                 {//select the abnormal one
-                    string x = textBox1.Text;
-                    int j = -1, lineSeprtEnd = 0, lineSeprtStart = lineSeprtEnd;
-                    lineSeprtEnd = x.IndexOf(Environment.NewLine, lineSeprtEnd);
-                    while (lineSeprtEnd > -1)
+                    bool alarm = true;
+                    if (i + 1 < xLineParas.Length)
                     {
+                        if (gap > gapRef && xLineParas[i + 1].IndexOf("}}") > -1)
+                        {
+                            alarm = false;
+                        }
+                    }
+                    if (alarm)
+                    {
+                        string x = textBox1.Text;
+                        int j = -1, lineSeprtEnd = 0, lineSeprtStart = lineSeprtEnd;
+                        lineSeprtEnd = x.IndexOf(Environment.NewLine, lineSeprtEnd);
+                        while (lineSeprtEnd > -1)
+                        {
 
-                        if (++j == i) break;
-                        lineSeprtStart = lineSeprtEnd;
-                        lineSeprtEnd = x.IndexOf(Environment.NewLine, ++lineSeprtEnd);
+                            if (++j == i) break;
+                            lineSeprtStart = lineSeprtEnd;
+                            lineSeprtEnd = x.IndexOf(Environment.NewLine, ++lineSeprtEnd);
+                        }
+                        if (gap > 10)
+                        {
+                            SystemSounds.Hand.Play();
+                        }
+                        return new int[] { lineSeprtStart, lineSeprtEnd - lineSeprtStart ,
+                        normalLineParaLength,len};
+
                     }
-                    if (gap > 10)
-                    {
-                        SystemSounds.Hand.Play();
-                    }
-                    return new int[] { lineSeprtStart, lineSeprtEnd - lineSeprtStart ,
-                    normalLineParaLength,len};
                 }
             }
             return new int[0];
