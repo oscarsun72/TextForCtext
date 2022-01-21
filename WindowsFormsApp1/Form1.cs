@@ -954,6 +954,12 @@ namespace WindowsFormsApp1
                     insertWords("<p>"+Environment.NewLine, textBox1.Text);
                     return;
                 }
+                if (e.KeyCode == Keys.J)
+                {//Alt + j : 鍵入換行分段符號（newline）（同 Ctrl + j 的系統預設）
+                    e.Handled = true;
+                    insertWords(Environment.NewLine, textBox1.Text);
+                    return;
+                }
 
 
                 if (e.KeyCode == Keys.Delete)
