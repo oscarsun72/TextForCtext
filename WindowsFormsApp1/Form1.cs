@@ -961,6 +961,11 @@ namespace WindowsFormsApp1
                     return;
                 }
 
+                if (e.KeyCode == Keys.Add || e.KeyCode == Keys.Oemplus )//|| e.KeyCode == Keys.Subtract || e.KeyCode == Keys.NumPad5)
+                {
+                    keyDownCtrlAdd(false);
+                    return;
+                }
 
                 if (e.KeyCode == Keys.Delete)
                 {//Alt + Del : 刪除插入點後第一個分行分段
