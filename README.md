@@ -106,19 +106,19 @@ Alt + 8 : 鍵入 「　　*」
 
 Alt + 9 : 鍵入 「 
 
+Alt + 0 : 鍵入 『
+
+Alt + i : 鍵入 》（如 MS Word 自動校正，會依前面的符號作結尾號（close），如前是「〈」，則轉為「〉」……）
+
 Alt + j : 鍵入換行分段符號（newline）（同 Ctrl + j 的系統預設）
 
-Alt + 0 : 鍵入 『
+Alt + p : 鍵入 "<p>" + newline（分行分段符號）
 
 Alt + u : 鍵入 《
 
 Alt + y : 鍵入 〈
 
-Alt + i : 鍵入 》（如 MS Word 自動校正，會依前面的符號作結尾號（close），如前是「〈」，則轉為「〉」……）
-
 Alt + . : 鍵入 ·
-
-Alt + p : 鍵入 "<p>" + newline（分行分段符號）
 
 Alt + Del : 刪除插入點後第一個分行分段
 
