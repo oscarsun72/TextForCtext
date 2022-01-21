@@ -978,7 +978,7 @@ namespace WindowsFormsApp1
                     return;
                 }
 
-                if (e.KeyCode == Keys.OemBackslash)//|| e.KeyCode == Keys.Oem5)
+                if (e.KeyCode == Keys.OemBackslash || e.KeyCode == Keys.Oem5)
                 {
                     e.Handled = true;
                     clearNewLinesAfterCaret();
