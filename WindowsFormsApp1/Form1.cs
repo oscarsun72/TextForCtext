@@ -479,13 +479,13 @@ namespace WindowsFormsApp1
             else pasteAllOverWrite = false;
             if ((m & Keys.Control) == Keys.Control
                 && (m & Keys.Alt) == Keys.Alt)//https://zhidao.baidu.com/question/628222381668604284.html
-            {//https://bbs.csdn.net/topics/350010591
+            {//https://bbs.csdn.net/topics/350010591                
                 if (e.KeyCode == Keys.G || e.KeyCode == Keys.Packet)
                 { e.Handled = true; return; }
             }
             if ((m & Keys.Control) == Keys.Control
-            && (m & Keys.Shift) == Keys.Shift
-            && e.KeyCode == Keys.Delete)
+                && (m & Keys.Shift) == Keys.Shift
+                && e.KeyCode == Keys.Delete)
             {//Ctrl + Shift + Delete ： 將選取文字於文本中全部清除
                 e.Handled = true;
                 //int s = textBox1.SelectionStart;
@@ -496,9 +496,10 @@ namespace WindowsFormsApp1
                 return;
             }
             if ((m & Keys.Control) == Keys.Control
-        && (m & Keys.Shift) == Keys.Shift
-        && e.KeyCode == Keys.Up)
+                    && (m & Keys.Shift) == Keys.Shift
+                    && e.KeyCode == Keys.Up)
             {
+                e.Handled = true;
                 int s = textBox1.SelectionStart, ed = s;
                 selToNewline(ref s, ref ed, textBox1.Text, false, textBox1); return;
             }
@@ -506,6 +507,7 @@ namespace WindowsFormsApp1
                 && (m & Keys.Shift) == Keys.Shift
                 && e.KeyCode == Keys.Down)
             {
+                e.Handled = true;
                 int s = textBox1.SelectionStart, ed = s;
                 selToNewline(ref s, ref ed, textBox1.Text, true, textBox1); return;
             }
@@ -516,6 +518,7 @@ namespace WindowsFormsApp1
             {
                 if (e.KeyCode == Keys.Add || e.KeyCode == Keys.Oemplus || e.KeyCode == Keys.Subtract || e.KeyCode == Keys.NumPad5)
                 {
+                    e.Handled = true;
                     keyDownCtrlAdd(true);
                     return;
                 }
@@ -530,6 +533,7 @@ namespace WindowsFormsApp1
                 if (e.KeyCode == Keys.F12)
                 {
                     string x = textBox1.SelectedText;
+                    e.Handled = true;
                     if (x != "")
                     {
                         Clipboard.SetText(x);
@@ -606,17 +610,20 @@ namespace WindowsFormsApp1
 
                 if (e.KeyCode == Keys.Q)
                 {
+                    e.Handled = true;
                     splitLineByFristLen(); return;
                 }
 
                 if (e.KeyCode == Keys.OemBackslash || e.KeyCode == Keys.Oem5)
                 {
+                    e.Handled = true;
                     clearNewLinesAfterCaret();
                     return;
                 }
                 if (e.KeyCode == Keys.Up || e.KeyCode == Keys.Down)
                 {/*Ctrl + ↑：從插入點開始向前移至上一段尾
                   * Ctrl + ↓：從插入點開始向後移至這一段末（無分段則不移動）*/
+                    e.Handled = true;
                     int s = textBox1.SelectionStart; string x = textBox1.Text;
                     if (e.KeyCode == Keys.Down)
                     {
@@ -646,6 +653,7 @@ namespace WindowsFormsApp1
                 if (e.KeyCode == Keys.OemCloseBrackets || e.KeyCode == Keys.OemOpenBrackets)
                 {/*Ctrl + [：從插入點開始向前移至{{前
                     Ctrl + ]：從插入點開始向後移至}}後*/
+                    e.Handled = true;
                     string x = textBox1.Text;
                     if (x.IndexOf("{{") == -1 && x.IndexOf("}}") == -1)
                     {
@@ -676,6 +684,7 @@ namespace WindowsFormsApp1
                     string x = textBox1.Text;
                     int s = textBox1.SelectionStart;
                     int l; bool isIPCharHanzi;
+                    e.Handled = true;
                     if (e.KeyCode == Keys.Left)
                     {//Ctrl  + ←
                         isIPCharHanzi = isChineseChar(x.Substring(s - 1, 1));
@@ -793,13 +802,13 @@ namespace WindowsFormsApp1
                 if (e.KeyCode == Keys.D2)
                 {//Alt + 2 : 鍵入全形空格「　」
                     e.Handled = true;
-                    insertWords("　", textBox1.Text); 
+                    insertWords("　", textBox1.Text);
                     return;
                 }
                 if (e.KeyCode == Keys.D8)
                 {//Alt + 8 : 鍵入 「　　*」
                     e.Handled = true;
-                    insertWords("　　*", textBox1.Text); 
+                    insertWords("　　*", textBox1.Text);
                     return;
                 }
 
@@ -926,6 +935,7 @@ namespace WindowsFormsApp1
                     string x = textBox1.Text;
                     int s = textBox1.SelectionStart, l = textBox1.SelectionLength;
                     string sTxt = textBox1.SelectedText;
+                    e.Handled = true;
                     if (sTxt != "")
                     {
                         string sTxtChk = sTxt.Replace("　", "");
@@ -951,7 +961,7 @@ namespace WindowsFormsApp1
                 if (e.KeyCode == Keys.P)
                 {//Alt + p : 鍵入 "<p>" + newline（分行分段符號）
                     e.Handled = true;
-                    insertWords("<p>"+Environment.NewLine, textBox1.Text);
+                    insertWords("<p>" + Environment.NewLine, textBox1.Text);
                     return;
                 }
                 if (e.KeyCode == Keys.J)
@@ -961,9 +971,17 @@ namespace WindowsFormsApp1
                     return;
                 }
 
-                if (e.KeyCode == Keys.Add || e.KeyCode == Keys.Oemplus )//|| e.KeyCode == Keys.Subtract || e.KeyCode == Keys.NumPad5)
+                if (e.KeyCode == Keys.Add || e.KeyCode == Keys.Oemplus)//|| e.KeyCode == Keys.Subtract || e.KeyCode == Keys.NumPad5)
                 {
+                    e.Handled = true;
                     keyDownCtrlAdd(false);
+                    return;
+                }
+
+                if (e.KeyCode == Keys.OemBackslash)//|| e.KeyCode == Keys.Oem5)
+                {
+                    e.Handled = true;
+                    clearNewLinesAfterCaret();
                     return;
                 }
 
@@ -1445,7 +1463,7 @@ namespace WindowsFormsApp1
                     bool alarm = true;
                     if (i + 1 < xLineParas.Length)
                     {
-                        if (gap > gapRef && len < normalLineParaLength 
+                        if (gap > gapRef && len < normalLineParaLength
                             && xLineParas[i + 1].IndexOf("}}") > -1)
                         {
                             alarm = false;

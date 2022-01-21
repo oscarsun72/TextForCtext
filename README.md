@@ -80,7 +80,7 @@ Insert : 如 MS Word ，切換插入/取代文字模式（hit! 還原機制亦�
 
 Ctrl + q 或 Alt + q：據第一行(段)長度來將textBox1中的文本分行分段
 
-Ctrl + \ （反斜線） ： 清除textBox1文本插入點後的分段
+Ctrl + \ （反斜線） 或 Alt + \ ： 清除textBox1文本插入點後的分段
 
 按下 F1 鍵：以找到的字串位置**前**分行分段
 
