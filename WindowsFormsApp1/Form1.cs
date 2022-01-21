@@ -972,16 +972,23 @@ namespace WindowsFormsApp1
                 }
 
                 if (e.KeyCode == Keys.Add || e.KeyCode == Keys.Oemplus)//|| e.KeyCode == Keys.Subtract || e.KeyCode == Keys.NumPad5)
-                {
+                {// Alt + +
                     e.Handled = true;
                     keyDownCtrlAdd(false);
                     return;
                 }
 
                 if (e.KeyCode == Keys.OemBackslash || e.KeyCode == Keys.Oem5)
-                {
+                {// Alt + \ 
                     e.Handled = true;
                     clearNewLinesAfterCaret();
+                    return;
+                }
+                if (e.KeyCode == Keys.Down)
+                //Ctrl + ↓ 或 Alr + ↓：從插入點開始向後移至這一段末（無分段則不移動）
+                {
+                    e.Handled = true;                    
+                    textBox1_KeyDown(sender, e);
                     return;
                 }
 
