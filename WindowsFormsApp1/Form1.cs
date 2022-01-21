@@ -623,30 +623,7 @@ namespace WindowsFormsApp1
                 if (e.KeyCode == Keys.Up || e.KeyCode == Keys.Down)
                 {/*Ctrl + ↑：從插入點開始向前移至上一段尾
                   * Ctrl + ↓：從插入點開始向後移至這一段末（無分段則不移動）*/
-                    e.Handled = true;
-                    int s = textBox1.SelectionStart; string x = textBox1.Text;
-                    if (e.KeyCode == Keys.Down)
-                    {
-                        if (s == x.Length) goto notFound;
-                        if (s + Environment.NewLine.Length > x.Length) goto notFound;
-                        s = x.IndexOf(Environment.NewLine, s + Environment.NewLine.Length);
-                        if (s > x.Length) goto notFound;
-                    }
-                    else
-                    {
-                        if (s == 0) goto notFound;
-                        if (s - Environment.NewLine.Length < 0) goto notFound;
-                        s = x.LastIndexOf(Environment.NewLine, s - Environment.NewLine.Length) + Environment.NewLine.Length;
-                        if (s < 0) goto notFound;
-                    }
-                    if (s > -1)
-                        textBox1.SelectionStart = s;
-                    else
-                        goto notFound;
-                    textBox1.ScrollToCaret();
-                    return;
-                notFound:
-                    MessageBox.Show("not found!");
+                    keyDownCtrlAltUpDown(e);
                     return;
                 }
 
@@ -987,8 +964,7 @@ namespace WindowsFormsApp1
                 if (e.KeyCode == Keys.Down)
                 //Ctrl + ↓ 或 Alr + ↓：從插入點開始向後移至這一段末（無分段則不移動）
                 {
-                    e.Handled = true;                    
-                    textBox1_KeyDown(sender, e);
+                    keyDownCtrlAltUpDown(e);
                     return;
                 }
 
@@ -1068,6 +1044,35 @@ namespace WindowsFormsApp1
                     return;
                 }
             }
+
+        }
+
+        private void keyDownCtrlAltUpDown(KeyEventArgs e)
+        {
+            e.Handled = true;
+            int s = textBox1.SelectionStart; string x = textBox1.Text;
+            if (e.KeyCode == Keys.Down)
+            {
+                if (s == x.Length) goto notFound;
+                if (s + Environment.NewLine.Length > x.Length) goto notFound;
+                s = x.IndexOf(Environment.NewLine, s + Environment.NewLine.Length);
+                if (s > x.Length) goto notFound;
+            }
+            else
+            {
+                if (s == 0) goto notFound;
+                if (s - Environment.NewLine.Length < 0) goto notFound;
+                s = x.LastIndexOf(Environment.NewLine, s - Environment.NewLine.Length) + Environment.NewLine.Length;
+                if (s < 0) goto notFound;
+            }
+            if (s > -1)
+                textBox1.SelectionStart = s;
+            else
+                goto notFound;
+            textBox1.ScrollToCaret();
+            return;
+        notFound:
+            MessageBox.Show("not found!");
 
         }
 
