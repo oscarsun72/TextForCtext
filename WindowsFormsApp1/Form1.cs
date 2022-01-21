@@ -789,6 +789,20 @@ namespace WindowsFormsApp1
                 {
                     splitLineByFristLen(); return;
                 }
+
+                if (e.KeyCode == Keys.D2)
+                {//Alt + 2 : 鍵入全形空格「　」
+                    e.Handled = true;
+                    insertWords("　", textBox1.Text); 
+                    return;
+                }
+                if (e.KeyCode == Keys.D8)
+                {//Alt + 8 : 鍵入 「　　*」
+                    e.Handled = true;
+                    insertWords("　　*", textBox1.Text); 
+                    return;
+                }
+
                 if (e.KeyCode == Keys.D9 || e.KeyCode == Keys.D0 || e.KeyCode == Keys.U || e.KeyCode == Keys.Y || e.KeyCode == Keys.I)
                 {/* Alt + 9 : 鍵入 「 
                   * Alt + 0 : 鍵入 『 
@@ -935,9 +949,9 @@ namespace WindowsFormsApp1
                 }
 
                 if (e.KeyCode == Keys.P)
-                {
+                {//Alt + p : 鍵入 "<p>" + newline（分行分段符號）
                     e.Handled = true;
-                    insertWords("<p>", textBox1.Text);
+                    insertWords("<p>"+Environment.NewLine, textBox1.Text);
                     return;
                 }
 
@@ -1752,7 +1766,7 @@ namespace WindowsFormsApp1
             appActivateByName();
             if (edit > -1)
             {//編輯才執行，瀏覽則省略
-                Task.Delay(2200).Wait(); //1900
+                Task.Delay(1900).Wait(); //2200
                 SendKeys.Send("{Tab}"); //("{Tab 24}");
                 Task.Delay(200).Wait();//200
                 SendKeys.Send("^a");
