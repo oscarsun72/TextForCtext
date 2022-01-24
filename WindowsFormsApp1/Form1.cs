@@ -376,7 +376,7 @@ namespace WindowsFormsApp1
                 this.BackColor = Color.Yellow;
                 Task.Delay(900).Wait();
                 this.BackColor = c;
-                string[] rTxt = { " ", "�", "□" };
+                string[] rTxt = { " ", "�" };//, "□" };
                 foreach (string rs in rTxt)
                 {
                     xCopy = xCopy.Replace(rs, "●");//「●」為《中國哲學書電子化計劃》的缺字符，詳：https://ctext.org/instructions/wiki-formatting/zh
