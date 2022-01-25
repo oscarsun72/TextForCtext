@@ -599,7 +599,6 @@ namespace WindowsFormsApp1
                 {//還原功能
                     e.Handled = true;
                     undoTextBox(textBox1);
-                    undoTextBoxing=false;
                     return;
                 }
 
@@ -1117,6 +1116,7 @@ namespace WindowsFormsApp1
                 undoTextBoxing = true;
                 textBox1.Text = undoTextBox1Text[undoTextBox1Text.Count - ++undoTimes];
                 restoreCaretPosition(textBox1, s, l);
+                undoTextBoxing = false;
             }
             else
                 MessageBox.Show("no more to undo!");
