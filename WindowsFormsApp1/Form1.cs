@@ -489,7 +489,7 @@ namespace WindowsFormsApp1
             {//Ctrl + Shift + Delete ： 將選取文字於文本中全部清除
                 e.Handled = true;
                 //int s = textBox1.SelectionStart;
-                //undoRecord();
+                undoRecord();
                 textBox1.Text = textBox1.Text.Replace(textBox1.SelectedText, "");
                 textBox1.SelectionStart = selStart;
                 textBox1.ScrollToCaret();
@@ -527,11 +527,12 @@ namespace WindowsFormsApp1
 
             if ((m & Keys.Control) == Keys.Control)
             {//按下Ctrl鍵
+                //Ctrl + v
                 if (e.KeyCode == Keys.V) pasteAllOverWrite = false;
                 else pasteAllOverWrite = false;
 
                 if (e.KeyCode == Keys.F12)
-                {
+                {//Ctrl + F12
                     string x = textBox1.SelectedText;
                     e.Handled = true;
                     if (x != "")
@@ -542,10 +543,11 @@ namespace WindowsFormsApp1
                     return;
                 }
                 if (e.KeyCode == Keys.Add || e.KeyCode == Keys.Oemplus || e.KeyCode == Keys.Subtract || e.KeyCode == Keys.NumPad5)
-                {
+                {//Ctrl + + Ctrl + -
                     keyDownCtrlAdd(false);
                     return;
                 }
+                //Ctrl + 0, Ctrl + 9, Ctrl + 8, Ctrl + 7
                 if (e.KeyCode == Keys.D0 || e.KeyCode == Keys.D9 || e.KeyCode == Keys.D8 || e.KeyCode == Keys.D7 || e.KeyCode == Keys.D6)
                 {
                     e.Handled = true;
@@ -591,6 +593,8 @@ namespace WindowsFormsApp1
                     //textBox1.ScrollToCaret();
                     return;
                 }
+
+                //Ctrl + z
                 if (e.KeyCode == Keys.Z)
                 {//還原功能
                     e.Handled = true;
@@ -598,6 +602,7 @@ namespace WindowsFormsApp1
                     return;
                 }
 
+                //Ctrl + h
                 if (e.KeyCode == Keys.H)
                 //if ((m & Keys.Control) == Keys.Control && e.KeyCode == Keys.H)
                 {
@@ -608,18 +613,22 @@ namespace WindowsFormsApp1
                     return;
                 }
 
+                //Ctrl + q
                 if (e.KeyCode == Keys.Q)
                 {
                     e.Handled = true;
                     splitLineByFristLen(); return;
                 }
 
+                //Ctrl +\
                 if (e.KeyCode == Keys.OemBackslash || e.KeyCode == Keys.Oem5)
                 {
                     e.Handled = true;
                     clearNewLinesAfterCaret();
                     return;
                 }
+
+                //Ctrl + ↑ Ctrl + ↓
                 if (e.KeyCode == Keys.Up || e.KeyCode == Keys.Down)
                 {/*Ctrl + ↑：從插入點開始向前移至上一段尾
                   * Ctrl + ↓：從插入點開始向後移至這一段末（無分段則不移動）*/
@@ -627,6 +636,7 @@ namespace WindowsFormsApp1
                     return;
                 }
 
+                //Ctrl + [,Ctrl + ]
                 if (e.KeyCode == Keys.OemCloseBrackets || e.KeyCode == Keys.OemOpenBrackets)
                 {/*Ctrl + [：從插入點開始向前移至{{前
                     Ctrl + ]：從插入點開始向後移至}}後*/
@@ -655,6 +665,7 @@ namespace WindowsFormsApp1
                     return;
                 }
 
+                //Ctrl + ← Ctrl + →
                 if (e.KeyCode == Keys.Left || e.KeyCode == Keys.Right)
                 {/*Ctrl + →：插入點若在漢字中,從插入點開始向後移至任何非漢字前(即漢字後) 反之亦然
                   * Ctrl + ←：：插入點若在漢字中,從插入點開始向後移至任何非漢字後(即漢字前) 反之亦然*/
@@ -693,6 +704,7 @@ namespace WindowsFormsApp1
                     }
                 }
 
+                //Ctrl + . // Ctrl + ,
                 if (e.KeyCode == Keys.OemPeriod || e.KeyCode == Keys.Oemcomma)
                 {
                     e.Handled = true;
@@ -1092,7 +1104,7 @@ namespace WindowsFormsApp1
         }
 
         private void undoTextBox(TextBox textBox1)
-        {
+        {//Ctrl + z 還原機制
             int s = textBox1.SelectionStart, l = textBox1.SelectionLength;
             if (selStart != s && selStart != 0)
             {
@@ -1957,7 +1969,7 @@ namespace WindowsFormsApp1
             }
             if (replacedword == rplsword) return;
             int s = textBox1.SelectionStart; int l = 0;
-            //undoRecord();
+            undoRecord();
             if (button2.Text == "選取文")
             {
                 replacedword = textBox2.Text;
