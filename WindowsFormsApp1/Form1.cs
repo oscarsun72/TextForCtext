@@ -467,7 +467,7 @@ namespace WindowsFormsApp1
 
         private void textBox1_KeyDown(object sender, KeyEventArgs e)
         {
-            var m = ModifierKeys;
+            var m = ModifierKeys;keycodeNow = e.KeyCode;
             if ((m & Keys.Shift) != Keys.Shift && e.KeyCode != Keys.F5) caretPositionRecord();
 
 
@@ -489,7 +489,7 @@ namespace WindowsFormsApp1
             {//Ctrl + Shift + Delete ： 將選取文字於文本中全部清除
                 e.Handled = true;
                 //int s = textBox1.SelectionStart;
-                undoRecord();
+                //undoRecord();
                 textBox1.Text = textBox1.Text.Replace(textBox1.SelectedText, "");
                 textBox1.SelectionStart = selStart;
                 textBox1.ScrollToCaret();
@@ -599,6 +599,7 @@ namespace WindowsFormsApp1
                 {//還原功能
                     e.Handled = true;
                     undoTextBox(textBox1);
+                    undoTextBoxing=false;
                     return;
                 }
 
@@ -1103,8 +1104,9 @@ namespace WindowsFormsApp1
             restoreCaretPosition(textBox1, s, 0);//textBox1.ScrollToCaret();
         }
 
+        bool undoTextBoxing=false;
         private void undoTextBox(TextBox textBox1)
-        {//Ctrl + z 還原機制
+        {//Ctrl + z 還原機制            
             int s = textBox1.SelectionStart, l = textBox1.SelectionLength;
             if (selStart != s && selStart != 0)
             {
@@ -1112,6 +1114,7 @@ namespace WindowsFormsApp1
             }
             if (undoTextBox1Text.Count - undoTimes > -1)
             {
+                undoTextBoxing = true;
                 textBox1.Text = undoTextBox1Text[undoTextBox1Text.Count - ++undoTimes];
                 restoreCaretPosition(textBox1, s, l);
             }
@@ -1969,7 +1972,7 @@ namespace WindowsFormsApp1
             }
             if (replacedword == rplsword) return;
             int s = textBox1.SelectionStart; int l = 0;
-            undoRecord();
+            //undoRecord();
             if (button2.Text == "選取文")
             {
                 replacedword = textBox2.Text;
@@ -2203,9 +2206,12 @@ namespace WindowsFormsApp1
         int selStart = 0; int selLength = 0;
         private Color textBox2BackColorDefault;
 
+        Keys keycodeNow=new Keys();
+
         private void textBox1_TextChanged(object sender, EventArgs e)
         {
-            undoRecord();
+            if(!undoTextBoxing)//if(ModifierKeys!=Keys.Control && keycodeNow!=Keys.Z)
+                undoRecord();
             undoTextValueChanged(selStart, selLength);
             if (textBox1.Text == "" && !pasteAllOverWrite)
             {
