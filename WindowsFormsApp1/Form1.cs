@@ -24,7 +24,7 @@ namespace WindowsFormsApp1
         readonly Point textBox4Location; readonly Size textBox4Size;
         readonly string dropBoxPathIncldBackSlash;
         //string[] CJKBiggestSet = new string[]{ "HanaMinB", "KaiXinSongB", "TH-Tshyn-P1" };
-        string[] CJKBiggestSet = { "HanaMinB", "KaiXinSongB", "TH-Tshyn-P1" };
+        string[] CJKBiggestSet = { "HanaMinB", "KaiXinSongB", "TH-Tshyn-P1", "HanaMinA" };
         Color button2BackColorDefault;
         bool insertMode = true;
 
