@@ -474,6 +474,10 @@ Sub 戰國策_四部叢刊_維基文庫本()
 Dim a, rng As Range, rngDoc As Range, p As Paragraph, i As Long, rngCnt As Integer
 Set rngDoc = Documents.Add.Range
 rngDoc.Paste
+For Each p In rngDoc.Paragraphs
+    Set a = p.Range.Characters(1)
+    If a <> "　" Then a.InsertBefore "　"
+Next p
 For Each a In rngDoc.Characters
     If Not a.Next Is Nothing And Not a.Previous Is Nothing Then
         If a = "　" And a.Next <> "　" And a.Previous <> "　" Then
@@ -486,16 +490,32 @@ Next a
 For Each p In rngDoc.Paragraphs
     Set rng = p.Range
     If StrComp(rng.Characters(1), "　") = 0 And InStr(rng, "}") > 0 Then
-        For Each a In rng.Characters
-           i = i + 1
-           If rng.Characters(i) = "}" Then Exit For
-           If rng.Characters(i) = Chr(13) Or rng.Characters(i) = "{" Then
-                i = 0
-                Exit For
-           End If
-        Next a
+        If rng.Characters(1) = "　" And rng.Characters(2) = "{" And rng.Characters(3) = "{" Then
+            rng.Characters(1) = "{": rng.Characters(2) = "{": rng.Characters(3) = "　"
+            For Each a In rng.Characters
+               i = i + 1
+               If rng.Characters(i) = "}" Then Exit For
+               If rng.Characters(i) = Chr(13) Then
+                    i = 0
+                    Exit For
+               End If
+            Next a
+        Else
+            For Each a In rng.Characters
+               i = i + 1
+               If rng.Characters(i) = "}" Then Exit For
+               If rng.Characters(i) = Chr(13) Or rng.Characters(i) = "{" Then
+                    i = 0
+                    Exit For
+               End If
+            Next a
+        End If
         If i <> 0 Then
-            rng.SetRange rng.Characters(1).End, rng.Characters(i).start
+            If rng.Characters(1) = "{" And rng.Characters(2) = "{" And rng.Characters(3) = "　" Then
+                rng.SetRange rng.Characters(3).End, rng.Characters(i).start
+            Else
+                rng.SetRange rng.Characters(1).End, rng.Characters(i).start
+            End If
 '            rng.Select
 '            Stop
             rngCnt = rng.Characters.Count
