@@ -467,7 +467,7 @@ namespace WindowsFormsApp1
 
         private void textBox1_KeyDown(object sender, KeyEventArgs e)
         {
-            var m = ModifierKeys;keycodeNow = e.KeyCode;
+            var m = ModifierKeys;//keycodeNow = e.KeyCode;
             if ((m & Keys.Shift) != Keys.Shift && e.KeyCode != Keys.F5) caretPositionRecord();
 
 
@@ -2206,7 +2206,7 @@ namespace WindowsFormsApp1
         int selStart = 0; int selLength = 0;
         private Color textBox2BackColorDefault;
 
-        Keys keycodeNow=new Keys();
+        //Keys keycodeNow=new Keys();
 
         private void textBox1_TextChanged(object sender, EventArgs e)
         {
