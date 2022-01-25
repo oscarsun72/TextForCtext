@@ -499,11 +499,23 @@ For Each p In rngDoc.Paragraphs
 '            rng.Select
 '            Stop
             rngCnt = rng.Characters.Count
-            If rngCnt > 1 Then If rng.Characters((rngCnt - rngCnt Mod 2) / 2).Next <> "¡@" Then rng.Characters((rngCnt - rngCnt Mod 2) / 2).InsertAfter "¡@"
+            If rngCnt > 1 Then
+                If rngCnt Mod 2 = 1 Then
+                    If rng.Characters((rngCnt - rngCnt Mod 2) / 2 + 1).Next <> "¡@" _
+                        Then rng.Characters((rngCnt - rngCnt Mod 2) / 2).InsertAfter "¡@"
+
+                Else
+                    If rng.Characters((rngCnt - rngCnt Mod 2) / 2).Next <> "¡@" _
+                        Then rng.Characters((rngCnt - rngCnt Mod 2) / 2).InsertAfter "¡@"
+                End If
+            End If
         End If
         i = 0
     End If
 Next
+rngDoc.Cut
+rngDoc.Document.Close wdDoNotSaveChanges
+AppActivate "TextForCtext"
 End Sub
 
 Sub tempReplaceTxtforCtext()
