@@ -502,7 +502,7 @@ For Each p In rngDoc.Paragraphs
             If rngCnt > 1 Then
                 If rngCnt Mod 2 = 1 Then
                     If rng.Characters((rngCnt - rngCnt Mod 2) / 2 + 1).Next <> "¡@" _
-                        Then rng.Characters((rngCnt - rngCnt Mod 2) / 2).InsertAfter "¡@"
+                        Then rng.Characters((rngCnt - rngCnt Mod 2) / 2 + 1).InsertAfter "¡@"
 
                 Else
                     If rng.Characters((rngCnt - rngCnt Mod 2) / 2).Next <> "¡@" _
