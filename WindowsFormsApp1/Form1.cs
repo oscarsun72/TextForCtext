@@ -2210,7 +2210,7 @@ namespace WindowsFormsApp1
 
         private void textBox1_TextChanged(object sender, EventArgs e)
         {
-            if(!undoTextBoxing||ModifierKeys!=Keys.Control && keycodeNow!=Keys.Z)
+            if(!undoTextBoxing&&(ModifierKeys!=Keys.Control && keycodeNow!=Keys.Z))
                 undoRecord();
             undoTextValueChanged(selStart, selLength);
             if (textBox1.Text == "" && !pasteAllOverWrite)
