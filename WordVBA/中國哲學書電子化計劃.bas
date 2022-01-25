@@ -472,6 +472,8 @@ End Sub
 Sub 戰國策_四部叢刊_維基文庫本()
 'https://ctext.org/library.pl?if=gb&res=77385
 Dim a, rng As Range, rngDoc As Range, p As Paragraph, i As Long, rngCnt As Integer
+Dim omits As String
+omits = "《》〈〉「」『』·" & Chr(13)
 Set rngDoc = Documents.Add.Range
 rngDoc.Paste
 For Each p In rngDoc.Paragraphs
@@ -520,14 +522,31 @@ For Each p In rngDoc.Paragraphs
 '            Stop
             rngCnt = rng.Characters.Count
             If rngCnt > 1 Then
+                i = 0
+                For Each a In rng.Characters
+                    If InStr(omits, a) = 0 Then i = i + 1
+                Next a
+                rngCnt = i: i = 0
                 If rngCnt Mod 2 = 1 Then
-                    If rng.Characters((rngCnt - rngCnt Mod 2) / 2 + 1).Next <> "　" _
-                        Then rng.Characters((rngCnt - rngCnt Mod 2) / 2 + 1).InsertAfter "　"
-
+                    rngCnt = (rngCnt + 1) / 2
                 Else
-                    If rng.Characters((rngCnt - rngCnt Mod 2) / 2).Next <> "　" _
-                        Then rng.Characters((rngCnt - rngCnt Mod 2) / 2).InsertAfter "　"
+                    rngCnt = rngCnt / 2
                 End If
+                For Each a In rng.Characters
+                    If InStr(omits, a) = 0 Then i = i + 1
+                    If i = rngCnt Then
+                        a.InsertAfter "　"
+                        Exit For
+                    End If
+                Next a
+'                If rngCnt Mod 2 = 1 Then
+'                    If rng.Characters((rngCnt - rngCnt Mod 2) / 2 + 1).Next <> "　" _
+'                        Then rng.Characters((rngCnt - rngCnt Mod 2) / 2 + 1).InsertAfter "　"
+'
+'                Else
+'                    If rng.Characters((rngCnt - rngCnt Mod 2) / 2).Next <> "　" _
+'                        Then rng.Characters((rngCnt - rngCnt Mod 2) / 2).InsertAfter "　"
+'                End If
             Else
                 rng.Characters(1).InsertAfter "　"
             End If
