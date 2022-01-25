@@ -489,7 +489,7 @@ namespace WindowsFormsApp1
             {//Ctrl + Shift + Delete ： 將選取文字於文本中全部清除
                 e.Handled = true;
                 //int s = textBox1.SelectionStart;
-                //undoRecord();
+                undoRecord();
                 textBox1.Text = textBox1.Text.Replace(textBox1.SelectedText, "");
                 textBox1.SelectionStart = selStart;
                 textBox1.ScrollToCaret();
@@ -1972,7 +1972,7 @@ namespace WindowsFormsApp1
             }
             if (replacedword == rplsword) return;
             int s = textBox1.SelectionStart; int l = 0;
-            //undoRecord();
+            undoRecord();
             if (button2.Text == "選取文")
             {
                 replacedword = textBox2.Text;
