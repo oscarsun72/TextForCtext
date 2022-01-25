@@ -469,6 +469,42 @@ d.Close wdDoNotSaveChanges
 If word.Application.Windows.Count > 0 Then word.Application.ActiveWindow.WindowState = wdWindowStateMinimize
 End Sub
 
+Sub 戰國策_四部叢刊_維基文庫本()
+'https://ctext.org/library.pl?if=gb&res=77385
+Dim a, rng As Range, rngDoc As Range, p As Paragraph, i As Long, rngCnt As Integer
+Set rngDoc = Documents.Add.Range
+rngDoc.Paste
+For Each a In rngDoc.Characters
+    If Not a.Next Is Nothing And Not a.Previous Is Nothing Then
+        If a = "　" And a.Next <> "　" And a.Previous <> "　" Then
+            If a.Previous <> Chr(13) Then a.InsertBefore Chr(13)
+            Set a = a.Next
+        End If
+    End If
+Next a
+
+For Each p In rngDoc.Paragraphs
+    Set rng = p.Range
+    If StrComp(rng.Characters(1), "　") = 0 And InStr(rng, "}") > 0 Then
+        For Each a In rng.Characters
+           i = i + 1
+           If rng.Characters(i) = "}" Then Exit For
+           If rng.Characters(i) = Chr(13) Or rng.Characters(i) = "{" Then
+                i = 0
+                Exit For
+           End If
+        Next a
+        If i <> 0 Then
+            rng.SetRange rng.Characters(1).End, rng.Characters(i).start
+'            rng.Select
+'            Stop
+            rngCnt = rng.Characters.Count
+            If rngCnt > 1 Then If rng.Characters((rngCnt - rngCnt Mod 2) / 2).Next <> "　" Then rng.Characters((rngCnt - rngCnt Mod 2) / 2).InsertAfter "　"
+        End If
+        i = 0
+    End If
+Next
+End Sub
 
 Sub tempReplaceTxtforCtext()
 Dim a, d As Document, i As Integer
