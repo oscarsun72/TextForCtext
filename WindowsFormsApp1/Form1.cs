@@ -696,6 +696,7 @@ namespace WindowsFormsApp1
                         {
                             s = s + l - 1;
                             if ("。，、；：？！「」『』《》〈〉".IndexOf(textBox1.Text.Substring(s, 1)) > -1) s++;
+                            if (x.Substring(s, 0) == "}") s = s + 2;
                             textBox1.Select(s, 0);
                             restoreCaretPosition(textBox1, s, 0);//textBox1.ScrollToCaret();
                             e.Handled = true;
