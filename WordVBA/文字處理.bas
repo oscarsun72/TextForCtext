@@ -1712,7 +1712,7 @@ End Select
 End Sub
 
 Sub 文件字頻_old()
-Dim DR As Range, d As Document, Char, charText As String, preChar As String _
+Dim DR As Range, d As Document, char, charText As String, preChar As String _
     , x() As String, xT() As Long, i As Long, j As Long, ExcelSheet  As Object, _
     ds As Date, de As Date '
 Static xlsp As String
@@ -1730,8 +1730,8 @@ If xlsp = "" Then Exit Sub
 ds = VBA.Timer
 
 With d
-    For Each Char In d.Characters
-        charText = Char
+    For Each char In d.Characters
+        charText = char
         If Not charText = Chr(13) And charText <> "-" And Not charText Like "[a-zA-Z0-9０-９]" Then
             'If Not charText Like "[a-z1-9]" & Chr(-24153) & Chr(-24152) & " 　、'""「」『』（）－？！]" Then
 '            If InStr(Chr(-24153) & Chr(-24152) & Chr(2) & "‧[]〔〕﹝﹞…；,，.。． 　、'""‘’`\{}｛｝「」『』（）《》〈〉－？！]", charText) = 0 Then
@@ -1754,10 +1754,10 @@ With d
                 Else
                     GoSub 字頻加一
                 End If
-                preChar = Char
+                preChar = char
             End If
         End If
-    Next Char
+    Next char
 End With
 
 Dim Doc As New Document, Xsort() As String, u As Long ', xTsort() As Integer, k As Long, so As Long, ww As String
@@ -2193,7 +2193,7 @@ End Sub
 
 
 Sub 文件字頻()
-Dim d As Document, Char, charText As String, preChar As String _
+Dim d As Document, char, charText As String, preChar As String _
     , x() As String, xT() As Long, i As Long, j As Long, ds As Date, de As Date     '
 'Dim ExcelSheet  As New Excel.Worksheet 'As Object,
 '這是之前以先期引用的方式，在設定引用項目中手動加入的寫法:https://hankvba.blogspot.com/2018/03/vba.html  、 http://markc0826.blogspot.com/2012/07/blog-post.html
@@ -2219,8 +2219,8 @@ If xlsp = "" Then Exit Sub
 ds = VBA.Timer
 
 With d
-    For Each Char In d.Characters
-        charText = Char
+    For Each char In d.Characters
+        charText = char
         If InStr("()：>" & Chr(13) & Chr(9) & Chr(10) & Chr(11) & ChrW(12), charText) = 0 And charText <> "-" And Not charText Like "[a-zA-Z0-9０-９]" Then
             'If Not charText Like "[a-z1-9]" & Chr(-24153) & Chr(-24152) & " 　、'""「」『』（）－？！]" Then
 '            If InStr(Chr(-24153) & Chr(-24152) & Chr(2) & "‧[]〔〕﹝﹞…；,，.。． 　、'""‘’`\{}｛｝「」『』（）《》〈〉－？！]", charText) = 0 Then
@@ -2243,10 +2243,10 @@ With d
                 Else
                     GoSub 字頻加一
                 End If
-                preChar = Char
+                preChar = char
             End If
         End If
-    Next Char
+    Next char
 End With
 
 Dim Doc As New Document, Xsort() As String, u As Long ', xTsort() As Integer, k As Long, so As Long, ww As String
@@ -2389,7 +2389,7 @@ End Select
 End Sub
 
 Sub 文件詞頻() '由文件字頻改來'2015/11/28
-Dim d As Document, Char, charText As String, preChar As String _
+Dim d As Document, char, charText As String, preChar As String _
     , x() As String, xT() As Long, i As Long, j As Long, ds As Date, de As Date     '
 'Dim ExcelSheet  As New Excel.Worksheet 'As Object,
 'Dim xlApp As Excel.Application, xlBook As Excel.Workbook, xlSheet As Excel.Worksheet
@@ -2419,28 +2419,28 @@ If Ln > 11 Or Ln < 2 Then Exit Sub
 ds = VBA.Timer
 
 With d
-    For Each Char In d.Characters
+    For Each char In d.Characters
         Select Case Ln
             Case 2
-                charText = Char & Char.Next
+                charText = char & char.Next
             Case 3
-                charText = Char & Char.Next & Char.Next.Next
+                charText = char & char.Next & char.Next.Next
             Case 4
-                charText = Char & Char.Next & Char.Next.Next & Char.Next.Next.Next
+                charText = char & char.Next & char.Next.Next & char.Next.Next.Next
             Case 5
-                charText = Char & Char.Next & Char.Next.Next & Char.Next.Next.Next & Char.Next.Next.Next.Next
+                charText = char & char.Next & char.Next.Next & char.Next.Next.Next & char.Next.Next.Next.Next
             Case 6
-                charText = Char & Char.Next & Char.Next.Next & Char.Next.Next.Next & Char.Next.Next.Next.Next & Char.Next.Next.Next.Next.Next
+                charText = char & char.Next & char.Next.Next & char.Next.Next.Next & char.Next.Next.Next.Next & char.Next.Next.Next.Next.Next
             Case 7
-                charText = Char & Char.Next & Char.Next.Next & Char.Next.Next.Next & Char.Next.Next.Next.Next & Char.Next.Next.Next.Next.Next & Char.Next.Next.Next.Next.Next.Next
+                charText = char & char.Next & char.Next.Next & char.Next.Next.Next & char.Next.Next.Next.Next & char.Next.Next.Next.Next.Next & char.Next.Next.Next.Next.Next.Next
             Case 8
-                charText = Char & Char.Next & Char.Next.Next & Char.Next.Next.Next & Char.Next.Next.Next.Next & Char.Next.Next.Next.Next.Next & Char.Next.Next.Next.Next.Next.Next & Char.Next.Next.Next.Next.Next.Next.Next
+                charText = char & char.Next & char.Next.Next & char.Next.Next.Next & char.Next.Next.Next.Next & char.Next.Next.Next.Next.Next & char.Next.Next.Next.Next.Next.Next & char.Next.Next.Next.Next.Next.Next.Next
             Case 9
-                charText = Char & Char.Next & Char.Next.Next & Char.Next.Next.Next & Char.Next.Next.Next.Next & Char.Next.Next.Next.Next.Next & Char.Next.Next.Next.Next.Next.Next & Char.Next.Next.Next.Next.Next.Next.Next & Char.Next.Next.Next.Next.Next.Next.Next.Next
+                charText = char & char.Next & char.Next.Next & char.Next.Next.Next & char.Next.Next.Next.Next & char.Next.Next.Next.Next.Next & char.Next.Next.Next.Next.Next.Next & char.Next.Next.Next.Next.Next.Next.Next & char.Next.Next.Next.Next.Next.Next.Next.Next
             Case 10
-                charText = Char & Char.Next & Char.Next.Next & Char.Next.Next.Next & Char.Next.Next.Next.Next & Char.Next.Next.Next.Next.Next & Char.Next.Next.Next.Next.Next.Next & Char.Next.Next.Next.Next.Next.Next.Next & Char.Next.Next.Next.Next.Next.Next.Next.Next & Char.Next.Next.Next.Next.Next.Next.Next.Next.Next
+                charText = char & char.Next & char.Next.Next & char.Next.Next.Next & char.Next.Next.Next.Next & char.Next.Next.Next.Next.Next & char.Next.Next.Next.Next.Next.Next & char.Next.Next.Next.Next.Next.Next.Next & char.Next.Next.Next.Next.Next.Next.Next.Next & char.Next.Next.Next.Next.Next.Next.Next.Next.Next
             Case 11
-                charText = Char & Char.Next & Char.Next.Next & Char.Next.Next.Next & Char.Next.Next.Next.Next & Char.Next.Next.Next.Next.Next & Char.Next.Next.Next.Next.Next.Next & Char.Next.Next.Next.Next.Next.Next.Next & Char.Next.Next.Next.Next.Next.Next.Next.Next & Char.Next.Next.Next.Next.Next.Next.Next.Next.Next & Char.Next.Next.Next.Next.Next.Next.Next.Next.Next.Next
+                charText = char & char.Next & char.Next.Next & char.Next.Next.Next & char.Next.Next.Next.Next & char.Next.Next.Next.Next.Next & char.Next.Next.Next.Next.Next.Next & char.Next.Next.Next.Next.Next.Next.Next & char.Next.Next.Next.Next.Next.Next.Next.Next & char.Next.Next.Next.Next.Next.Next.Next.Next.Next & char.Next.Next.Next.Next.Next.Next.Next.Next.Next.Next
         End Select
         If Not charText Like "*[-'　 。，、；：？:,;,〈〉《》 ''「」『』（）▽△？！（）【】—""()<>" _
             & ChrW(9312) & Chr(-24153) & Chr(-24152) & ChrW(8218) & Chr(13) & Chr(10) & Chr(11) & ChrW(12) & Chr(63) & Chr(9) & Chr(-24152) & Chr(-24153) & "▽□】【~/︵—]*" _
@@ -2959,13 +2959,13 @@ If st = wdSelectionIP Then
     If Selection.start = 0 Then Exit Sub
     x = Selection.Previous.Characters(Selection.Previous.Characters.Count).Text
     If InStr("。，；「」『』〈〉《》？.,;""?－-──--（）()【】〔〕<>[]…! 　！", x) Then Exit Sub
-    If 文字處理.isSymbol(CStr(x)) Or 文字處理.is注音符號(CStr(x)) Or 文字處理.isLetter(CStr(x)) Or 文字處理.isNum(CStr(x)) Then Exit Sub
 '    Selection.Previous.Copy
 Else
     x = trimStrForSearch(VBA.CStr(Selection.Text), Selection)
     'Selection.Copy
     SystemSetup.ClipboardPutIn "=" & Selection.Text
 End If
+    If 文字處理.isSymbol(CStr(x)) Or 文字處理.is注音符號(CStr(x)) Or 文字處理.isLetter(CStr(x)) Or 文字處理.isNum(CStr(x)) Then Exit Sub
 Set rng = Selection.Range
 words = x
 db.setWordControlValue (words)
