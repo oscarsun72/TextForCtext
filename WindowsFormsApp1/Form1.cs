@@ -542,11 +542,13 @@ namespace WindowsFormsApp1
                     }
                     return;
                 }
+
                 if (e.KeyCode == Keys.Add || e.KeyCode == Keys.Oemplus || e.KeyCode == Keys.Subtract || e.KeyCode == Keys.NumPad5)
                 {//Ctrl + + Ctrl + -
                     keyDownCtrlAdd(false);
                     return;
                 }
+
                 //Ctrl + 0, Ctrl + 9, Ctrl + 8, Ctrl + 7
                 if (e.KeyCode == Keys.D0 || e.KeyCode == Keys.D9 || e.KeyCode == Keys.D8 || e.KeyCode == Keys.D7 || e.KeyCode == Keys.D6)
                 {
@@ -697,7 +699,7 @@ namespace WindowsFormsApp1
                             s = s + l - 1;
                             if ("。，、；：？！「」『』《》〈〉".IndexOf(textBox1.Text.Substring(s, 1)) > -1) s++;
                             if (x.Substring(s, 1) == "}") s = s + 2;
-                            if(x.Substring(s, 3) == "<p>") s = s + 3;
+                            if (x.Substring(s, 3) == "<p>") s = s + 3;
                             textBox1.Select(s, 0);
                             restoreCaretPosition(textBox1, s, 0);//textBox1.ScrollToCaret();
                             e.Handled = true;
@@ -1608,6 +1610,8 @@ namespace WindowsFormsApp1
                 return;
             }
 
+
+
             if (Control.ModifierKeys == Keys.Control)
             {//按下Ctrl鍵
                 if (e.KeyCode == Keys.F)
@@ -1636,6 +1640,13 @@ namespace WindowsFormsApp1
                     return;
                 }
 
+                if (e.KeyCode == Keys.Add || e.KeyCode == Keys.Oemplus || e.KeyCode == Keys.Subtract || e.KeyCode == Keys.NumPad5)
+                {//Ctrl + + Ctrl + -
+                    keyDownCtrlAdd(false);
+                    return;
+                }
+
+
                 if (e.KeyCode == Keys.D1)
                 {
                     runWordMacro("漢籍電子文獻資料庫文本整理_以轉貼到中國哲學書電子化計劃");
@@ -1651,6 +1662,14 @@ namespace WindowsFormsApp1
                     runWordMacro("維基文庫四部叢刊本轉來");
                     e.Handled = true; return;
                 }
+                
+                if (e.KeyCode == Keys.N)
+                {// Ctrl + n
+                    Process.Start("https://www.google.com.tw/?hl=zh_TW");
+                    appActivateByName();
+                    e.Handled = true; return;
+                }
+
                 if (e.KeyCode == Keys.S)
                 {
                     saveText();
@@ -1659,6 +1678,8 @@ namespace WindowsFormsApp1
 
 
             }//按下 Ctrl鍵 終
+
+
 
             //if (((m & Keys.Control) == Keys.Control && (m & Keys.Alt) == Keys.Alt) && 
             //    (e.KeyCode == Keys.Left || e.KeyCode == Keys.Right||e.KeyCode==Keys.Menu))
@@ -2005,7 +2026,8 @@ namespace WindowsFormsApp1
         {
             if (replacedWordList.Count == 0) return "";
             string replsWord = "";
-            for (int i = 0; i < replacedWordList.Count; i++)
+            //for (int i = 0; i < replacedWordList.Count; i++)
+            for (int i = replacedWordList.Count - 1; i > -1; i--)
             {
                 if (replacedWord == replacedWordList[i])
                 {
@@ -2074,7 +2096,11 @@ namespace WindowsFormsApp1
             if (rplsdWord != "")
             {
                 string rplsWord = getReplaceWordDefault(rplsdWord);
-                if (rplsWord != "") textBox4.Text = rplsWord;
+                if (rplsWord != "")
+                {
+                    textBox4.Text = rplsWord;
+                    if (rplsWord.IndexOf(Environment.NewLine) > -1) textBox4.Height = textBox4Size.Height * 3;
+                }
             }
             restoreCaretPosition(textBox1, selStart, selLength == 0 ? 1 : selLength);
         }
@@ -2328,6 +2354,10 @@ namespace WindowsFormsApp1
             //https://social.msdn.microsoft.com/Forums/vstudio/en-US/5d021d76-36cd-43e6-b858-5a905c2e86d4/how-to-determine-if-in-insert-mode-or-overwrite-mode?forum=wpf
             //https://stackoverflow.com/questions/1428047/how-to-set-winforms-textbox-to-overwrite-mode/17962132#17962132
             //How can I place a TextBox in overwrite mode instead of insert mode:https://www.syncfusion.com/faq/windowsforms/textbox/how-can-i-place-a-textbox-in-overwrite-mode-instead-of-insert-mode
+            if (e.KeyChar==Environment.NewLine.ToCharArray()[0])
+            {
+                return;
+            }
             if (!checkSurrogatePairsOK(e.KeyChar))
             {
                 lastKeyPressElement += e.KeyChar;
