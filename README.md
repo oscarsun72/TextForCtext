@@ -43,6 +43,12 @@ textBox4:文本取代用
 
 ### 在表單（操作介面視窗）任何位置按下：
 
+F5 ：重新載入所儲存的文本
+
+F12  ： 更新最後的備份頁文本
+
+Esc 則按下Esc鍵會隱藏到任務列（系統列）中；滑鼠在其 ico 圖示上滑過即恢復
+
 Ctrl + 1 ：執行 Word VBA Sub 巨集指令「漢籍電子文獻資料庫文本整理_以轉貼到中國哲學書電子化計劃」【 附件即有 [Word VBA](https://github.com/oscarsun72/TextForCtext/tree/master/WordVBA) 相關模組 】
 
 Ctrl + 3 ：執行 Word VBA Sub 巨集指令「漢籍電子文獻資料庫文本整理_十三經注疏」
@@ -51,25 +57,23 @@ Ctrl + 4 ：執行 Word VBA Sub 巨集指令「維基文庫四部叢刊本轉來
 
 Ctrl + f ：移至 textBox2 準備尋找文本
 
+Ctrl + n ：在新頁籤開啟 google 網頁，以備用（在預設瀏覽器為 Chrome 時）
+
 Ctrl + s 或 Shift + F12：儲存文本至 DropBox 根目錄下的「cText.txt」檔案
-
-F5 ：重新載入所儲存的文本
-
-F12  ： 更新最後的備份頁文本
-
-Ctrl + Shift + c ：將textBox1的文本複製到剪貼簿 以備用
 
 Ctrl + PageUp ：根據 textBox3所載的網址，瀏覽ctext書影的上一頁
 
 Ctrl + PageDown ： 根據 textBox3所載的網址，瀏覽ctext書影的下一頁
 
-Esc 則按下Esc鍵會隱藏到任務列（系統列）中；滑鼠在其 ico 圖示上滑過即恢復
+Ctrl + + （加號，含函數字鍵盤） 或 Ctrl + -（數字鍵盤）  或 Ctrl + 5 (數字鍵盤） 或 Alt + + ：將插入點或選取文字（含）之前的文本剪下貼到 ctext 的[簡單修改模式]框中，並按下「保存編輯」鈕，且在[簡單修改模式]下于瀏覽器新頁籤開啟下一頁準備編輯文本，並回到前一頁籤以供檢視所貼上之文本是否無誤。
+
+Ctrl + Shift + c ：將textBox1的文本複製到剪貼簿 以備用
 
 Alt + ←：視窗向左移動30dpi（+ Ctrl：徵調；插入點在textBox1時例外）
 
 Alt + →：視窗向右移動30dpi（+ Ctrl：徵調；插入點在textBox1時例外）
 
-Alt + F1 ：切換支援 CJK - Ext 擴充字集的大字集字型
+Alt + F1 ：切換 textbox1 之字型： 切換支援 CJK - Ext 擴充字集的大字集字型
 
 
 
