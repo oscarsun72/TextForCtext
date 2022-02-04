@@ -2195,10 +2195,13 @@ namespace WindowsFormsApp1
 
                 if (textBox1.SelectionLength == 0)
                 {
-                    int s = textBox1.SelectionStart; string x = textBox1.Text;
+                    Point p = e.Location;
+                    int s = textBox1.GetCharIndexFromPosition(p);
+                    string x = textBox1.Text;
                     textBox1.Text = x.Substring(0, s) + Environment.NewLine + x.Substring(s, x.Length - s);
                     //caretPositionRecall();
                     restoreCaretPosition(textBox1, s, 0);
+                    textBox1.AutoScrollOffset = p;
                 }
                 //switchRichTextBox1();
 
