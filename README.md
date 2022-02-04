@@ -166,10 +166,14 @@ Ctrl + <：到下一個<頭頂(原擬作縮小字型1點然，此功能不常用
 
 Ctrl + >：到下一個>尾端
 
+Ctrl + Shift + Delete ： 將選取文字於文本中全部清除(Ctrl + z 還原功能支援)
+
 
 Alt + 滑鼠左鍵 ： 更新最後的備份頁文本
 
-Ctrl + Shift + Delete ： 將選取文字於文本中全部清除(Ctrl + z 還原功能支援)
+Ctrl+ 滑鼠左鍵：在插入點後分行分段（原為切換RichTextBox用）
+
+
 
 ### 在 textBox2、4 中按下以下鍵：
 

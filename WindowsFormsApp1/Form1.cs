@@ -487,13 +487,18 @@ namespace WindowsFormsApp1
                 && (m & Keys.Shift) == Keys.Shift
                 && e.KeyCode == Keys.Delete)
             {//Ctrl + Shift + Delete ： 將選取文字於文本中全部清除
-                e.Handled = true;
                 //int s = textBox1.SelectionStart;
-                undoRecord();
-                textBox1.Text = textBox1.Text.Replace(textBox1.SelectedText, "");
-                textBox1.SelectionStart = selStart;
-                textBox1.ScrollToCaret();
-                return;
+                if (textBox1.SelectionLength > 0)
+                {
+                    e.Handled = true;
+                    undoRecord();
+                    textBox1.Text = textBox1.Text.Replace(textBox1.SelectedText, "");
+                    caretPositionRecall();
+                    //restoreCaretPosition();
+                    //textBox1.SelectionStart = selStart;
+                    //textBox1.ScrollToCaret();
+                    return;
+                }
             }
             if ((m & Keys.Control) == Keys.Control
                     && (m & Keys.Shift) == Keys.Shift
@@ -1662,7 +1667,7 @@ namespace WindowsFormsApp1
                     runWordMacro("維基文庫四部叢刊本轉來");
                     e.Handled = true; return;
                 }
-                
+
                 if (e.KeyCode == Keys.N)
                 {// Ctrl + n
                     Process.Start("https://www.google.com.tw/?hl=zh_TW");
@@ -2187,9 +2192,15 @@ namespace WindowsFormsApp1
             //}
             if (ModifierKeys == Keys.Control && e.Button == MouseButtons.Left)
             {
-                richTextBox1.Size = textBox1.Size;
-                richTextBox1.Location = textBox1.Location;
-                richTextBox1.Show();
+
+                if (textBox1.SelectionLength == 0)
+                {
+                    int s = textBox1.SelectionStart; string x = textBox1.Text;
+                    textBox1.Text = x.Substring(0, s) + Environment.NewLine + x.Substring(s, x.Length - s);
+                    //caretPositionRecall();
+                    restoreCaretPosition(textBox1, s, 0);
+                }
+                //switchRichTextBox1();
 
             }
             if (m == Keys.Alt && e.Button == MouseButtons.Left)
@@ -2198,6 +2209,13 @@ namespace WindowsFormsApp1
                 return;
             }
 
+        }
+
+        private void switchRichTextBox1()
+        {
+            richTextBox1.Size = textBox1.Size;
+            richTextBox1.Location = textBox1.Location;
+            richTextBox1.Show();
         }
 
         private void richTextBox1_MouseDown(object sender, MouseEventArgs e)
@@ -2354,7 +2372,7 @@ namespace WindowsFormsApp1
             //https://social.msdn.microsoft.com/Forums/vstudio/en-US/5d021d76-36cd-43e6-b858-5a905c2e86d4/how-to-determine-if-in-insert-mode-or-overwrite-mode?forum=wpf
             //https://stackoverflow.com/questions/1428047/how-to-set-winforms-textbox-to-overwrite-mode/17962132#17962132
             //How can I place a TextBox in overwrite mode instead of insert mode:https://www.syncfusion.com/faq/windowsforms/textbox/how-can-i-place-a-textbox-in-overwrite-mode-instead-of-insert-mode
-            if (e.KeyChar==Environment.NewLine.ToCharArray()[0])
+            if (e.KeyChar == Environment.NewLine.ToCharArray()[0])
             {
                 return;
             }
