@@ -2196,24 +2196,10 @@ namespace WindowsFormsApp1
                 if (textBox1.SelectionLength == 0)
                 {
                     Point p = e.Location;
-                    int s = textBox1.GetCharIndexFromPosition(p);                    
+                    int s = textBox1.GetCharIndexFromPosition(p);
                     string x = textBox1.Text;
                     textBox1.Text = x.Substring(0, s) + Environment.NewLine + x.Substring(s, x.Length - s);
-                    //caretPositionRecall();
-                    //restoreCaretPosition(textBox1, s, 0);
-                    p.Y += textBox1.GetPositionFromCharIndex(s).Y;
-                    textBox1.Select(textBox1.GetCharIndexFromPosition(p), 0);
-                    textBox1.ScrollToCaret();
-                    //s = textBox1.GetCharIndexFromPosition(p);
-                    textBox1.Select(s, 0);
-                    textBox1.ScrollToCaret();
-                    //textBox1.AutoScrollOffset = p;                    
-                    //ScrollableControl scrollableControl = new ScrollableControl
-                    //{
-                    //    AutoScroll = true
-                    //};
-                    //scrollableControl.ScrollControlIntoView(textBox1 as TextBox);   
-                    //textBox1.AutoScrollOffset = textBox1.GetPositionFromCharIndex(textBox1.SelectionStart);
+                    resumeLocationView(p, s);
                 }
                 //switchRichTextBox1();
 
@@ -2224,6 +2210,25 @@ namespace WindowsFormsApp1
                 return;
             }
 
+        }
+
+        private void resumeLocationView(Point p, int s)
+        {//回到原來的插入點定位、視界 20220205年初五立春後1日
+            //caretPositionRecall();
+            //restoreCaretPosition(textBox1, s, 0);
+            p.Y += textBox1.GetPositionFromCharIndex(s).Y;
+            textBox1.Select(textBox1.GetCharIndexFromPosition(p), 0);
+            textBox1.ScrollToCaret();
+            //s = textBox1.GetCharIndexFromPosition(p);
+            textBox1.Select(s, 0);
+            textBox1.ScrollToCaret();
+            //textBox1.AutoScrollOffset = p;                    
+            //ScrollableControl scrollableControl = new ScrollableControl
+            //{
+            //    AutoScroll = true
+            //};
+            //scrollableControl.ScrollControlIntoView(textBox1 as TextBox);   
+            //textBox1.AutoScrollOffset = textBox1.GetPositionFromCharIndex(textBox1.SelectionStart);
         }
 
         private void switchRichTextBox1()
