@@ -2196,12 +2196,24 @@ namespace WindowsFormsApp1
                 if (textBox1.SelectionLength == 0)
                 {
                     Point p = e.Location;
-                    int s = textBox1.GetCharIndexFromPosition(p);
+                    int s = textBox1.GetCharIndexFromPosition(p);                    
                     string x = textBox1.Text;
                     textBox1.Text = x.Substring(0, s) + Environment.NewLine + x.Substring(s, x.Length - s);
                     //caretPositionRecall();
-                    restoreCaretPosition(textBox1, s, 0);
-                    textBox1.AutoScrollOffset = p;
+                    //restoreCaretPosition(textBox1, s, 0);
+                    p.Y += textBox1.GetPositionFromCharIndex(s).Y;
+                    textBox1.Select(textBox1.GetCharIndexFromPosition(p), 0);
+                    textBox1.ScrollToCaret();
+                    //s = textBox1.GetCharIndexFromPosition(p);
+                    textBox1.Select(s, 0);
+                    textBox1.ScrollToCaret();
+                    //textBox1.AutoScrollOffset = p;                    
+                    //ScrollableControl scrollableControl = new ScrollableControl
+                    //{
+                    //    AutoScroll = true
+                    //};
+                    //scrollableControl.ScrollControlIntoView(textBox1 as TextBox);   
+                    //textBox1.AutoScrollOffset = textBox1.GetPositionFromCharIndex(textBox1.SelectionStart);
                 }
                 //switchRichTextBox1();
 
