@@ -2213,7 +2213,7 @@ namespace WindowsFormsApp1
         }
 
         private void resumeLocationView(Point p, int s)
-        {//回到原來的插入點定位、視界 20220205年初五立春後1日
+        {//回到原來的插入點位置、定位、視界 20220205年初五立春後1日
             //caretPositionRecall();
             //restoreCaretPosition(textBox1, s, 0);
             p.Y += textBox1.GetPositionFromCharIndex(s).Y;
