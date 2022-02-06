@@ -2484,6 +2484,11 @@ namespace WindowsFormsApp1
 
         }
 
+        private void textBox1_MouseDoubleClick(object sender, MouseEventArgs e)
+        {
+            keyDownCtrlAdd(false);
+        }
+
         int[] findWord(string x, string x1)
         {
             if (x == "" || x1 == "") return null;
