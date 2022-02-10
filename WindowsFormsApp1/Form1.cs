@@ -1787,6 +1787,7 @@ namespace WindowsFormsApp1
                 thisHeight = this.Height; thisWidth = this.Width; thisLeft = this.Left; thisTop = this.Top;
             }
             //this.WindowState = FormWindowState.Minimized;
+            this.TopMost = false;
             this.Hide();
             this.nICo.Visible = true;
         }

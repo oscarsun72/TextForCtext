@@ -39,6 +39,20 @@ f = Array("。", "」", Chr(-24152), "：", "，", "；", _
     Next
 End Sub
 
+Sub 換掉與書圖的對應_脫鉤() '20220210
+Dim rng As Range, angleRng As Range
+Set rng = Documents.Add().Range
+Set angleRng = rng
+rng.Paste
+Do While rng.Find.Execute("<")
+    rng.MoveEndUntil ">"
+    rng.SetRange rng.start, rng.End + 1
+    angleRng.SetRange rng.start, rng.End
+    If InStr(angleRng.Text, "file") > 0 Then angleRng.Delete
+Loop
+rng.Document.Range.Cut
+rng.Document.Close wdDoNotSaveChanges
+End Sub
 
 Sub 維基文庫四部叢刊本轉來()
 Dim d As Document, a, i
@@ -558,6 +572,8 @@ rngDoc.Cut
 rngDoc.Document.Close wdDoNotSaveChanges
 AppActivate "TextForCtext"
 End Sub
+
+
 
 Sub tempReplaceTxtforCtext()
 Dim a, d As Document, i As Integer
