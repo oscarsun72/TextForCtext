@@ -52,6 +52,7 @@ Do While rng.Find.Execute("<")
 Loop
 rng.Document.Range.Cut
 rng.Document.Close wdDoNotSaveChanges
+AppActivate "Google Chrome"
 End Sub
 
 Sub 維基文庫四部叢刊本轉來()

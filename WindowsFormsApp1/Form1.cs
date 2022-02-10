@@ -263,16 +263,19 @@ namespace WindowsFormsApp1
 
 
             }
+            undoRecord();
             textBox1.Text = xPre + resltTxt.Replace("}" + Environment.NewLine + "}", "}}" + Environment.NewLine)
                 .Replace(Environment.NewLine + "》", "》" + Environment.NewLine)
                 .Replace(Environment.NewLine + "〉", "〉" + Environment.NewLine)
                 .Replace(Environment.NewLine + "}}", "}}" + Environment.NewLine)
                 .Replace("{{" + Environment.NewLine, Environment.NewLine + "{{");
-            textBox1.Focus();
-            textBox1.SelectionStart = s + resltTxt.IndexOf(Environment.NewLine) + Environment.NewLine.Length;//selStart;
-            textBox1.SelectionLength = 0;
-            textBox1.ScrollToCaret();
-            //Clipboard.SetText(resltTxt);
+            //textBox1.Focus();
+            //textBox1.SelectionStart = s + resltTxt.IndexOf(Environment.NewLine) + Environment.NewLine.Length;//selStart;
+            //textBox1.SelectionLength = 0;
+            //textBox1.ScrollToCaret();
+            s = s + resltTxt.IndexOf(Environment.NewLine) + Environment.NewLine.Length;
+            restoreCaretPosition(textBox1, s, 0);
+            ////Clipboard.SetText(resltTxt);
         }
 
         private void textBox1_Click(object sender, EventArgs e)
