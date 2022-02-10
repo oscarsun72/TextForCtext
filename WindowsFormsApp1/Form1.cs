@@ -344,9 +344,9 @@ namespace WindowsFormsApp1
 
 
 
-        private void newTextBox1()
+        private bool newTextBox1()
         {
-            if (textBox1.Text == "") return;
+            if (textBox1.Text == "") return false;
             saveText();
             //if (textBox1.SelectedText != "")
             //{
@@ -371,12 +371,22 @@ namespace WindowsFormsApp1
                     break;
                 }
             }
-            if (xCopy.IndexOf(" ") > -1 || xCopy.IndexOfAny("�".ToCharArray()) > -1 ||
-                xCopy.IndexOf("□") > -1)//□為《維基文庫》《四庫全書》的缺字符，" "則是《四部叢刊》的，"�"則是《四部叢刊》的造字符。
+            int missWordPositon=xCopy.IndexOf(" ");
+            if (missWordPositon == -1) missWordPositon = xCopy.IndexOfAny("�".ToCharArray());
+            if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("□");
+            if(missWordPositon>-1)
+            //if (xCopy.IndexOf(" ") > -1 || xCopy.IndexOfAny("�".ToCharArray()) > -1 ||
+                //xCopy.IndexOf("□") > -1)//□為《維基文庫》《四庫全書》的缺字符，" "則是《四部叢刊》的，"�"則是《四部叢刊》的造字符。
             {//  「�」甚特別，indexof會失效，明明沒有，而傳回 0 //https://docs.microsoft.com/zh-tw/dotnet/csharp/how-to/compare-strings
              //  //https://docs.microsoft.com/zh-tw/dotnet/api/system.string.compare?view=net-6.0
-             //SystemSounds.Hand.Play();//文本有缺字警告                
-                if (File.Exists(soundWarningLocation)) new SoundPlayer(soundWarningLocation).Play();
+             //SystemSounds.Hand.Play();//文本有缺字警告
+                if (MessageBox.Show("有造字，是否先予訂補上？", "", MessageBoxButtons.OKCancel, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1) == DialogResult.OK)
+                {
+                    textBox1.Select(missWordPositon,1);
+                    textBox1.ScrollToCaret();
+                    return false;
+                }
+                //if (File.Exists(soundWarningLocation)) new SoundPlayer(soundWarningLocation).Play();
                 Color c = this.BackColor;
                 this.BackColor = Color.Yellow;
                 Task.Delay(900).Wait();
@@ -427,6 +437,7 @@ namespace WindowsFormsApp1
             textBox1.Text = x;
             textBox1.SelectionStart = 0; textBox1.SelectionLength = 0;
             textBox1.ScrollToCaret();
+            return true;
         }
 
 
@@ -1311,7 +1322,7 @@ namespace WindowsFormsApp1
                     return;
                 }
             }
-            newTextBox1();
+            if(!newTextBox1()) return;
             pasteToCtext();
             if (!shiftKeyDownYet) nextPages(Keys.PageDown, false);
         }
