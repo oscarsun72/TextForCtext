@@ -39,7 +39,7 @@ f = Array("。", "」", Chr(-24152), "：", "，", "；", _
     Next
 End Sub
 
-Sub 換掉與書圖的對應_脫鉤() '20220210
+Sub 撤掉與書圖的對應_脫鉤() '20220210
 Dim rng As Range, angleRng As Range
 Set rng = Documents.Add().Range
 Set angleRng = rng
