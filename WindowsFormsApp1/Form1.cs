@@ -23,6 +23,7 @@ namespace WindowsFormsApp1
     {
         readonly Point textBox4Location; readonly Size textBox4Size;
         readonly string dropBoxPathIncldBackSlash;
+        readonly Size textBox1SizeToForm;
         //string[] CJKBiggestSet = new string[]{ "HanaMinB", "KaiXinSongB", "TH-Tshyn-P1" };
         string[] CJKBiggestSet = { "HanaMinB", "KaiXinSongB", "TH-Tshyn-P1", "HanaMinA" };
         Color button2BackColorDefault;
@@ -40,6 +41,7 @@ namespace WindowsFormsApp1
             textBox1FontDefaultSize = textBox1.Font.Size;
             textBox4Location = textBox4.Location;
             textBox4Size = textBox4.Size;
+            textBox1SizeToForm = new Size(this.Width - textBox1.Width, this.Height - textBox1.Height);
             dropBoxPathIncldBackSlash = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + @"\Dropbox\";
             button2BackColorDefault = button2.BackColor;
             textBox2BackColorDefault = textBox2.BackColor;
@@ -1973,13 +1975,14 @@ namespace WindowsFormsApp1
 
         private void Form1_Resize(object sender, EventArgs e)
         {
-            textBox1Size();
+            textBox1ReSize();
             //if (this.WindowState == FormWindowState.Minimized) hideToNICo();
         }
 
-        void textBox1Size()
+        void textBox1ReSize()
         {
-            textBox1.Height = this.Height - textBox2.Height * 3 - textBox2.Top;
+            textBox1.Height = this.Height - textBox1SizeToForm.Height;// this.Height - textBox2.Height * 3 - textBox2.Top;
+            textBox1.Width = this.Width - textBox1SizeToForm.Width;
         }
 
         const int CJK_Crtr_Len_Max = 2;//因為目前CJK最長為2字元
@@ -2092,7 +2095,7 @@ namespace WindowsFormsApp1
             //FormStartPosition 列舉:https://docs.microsoft.com/zh-tw/dotnet/api/system.windows.forms.formstartposition?view=netframework-4.7.2
             this.Location = new Point
                 (Width - this.Width, Height - this.Height - (int)(textBox1.Height / 3));
-            textBox1Size();
+            textBox1ReSize();
             //this.PointToScreen();
         }
 
