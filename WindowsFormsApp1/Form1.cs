@@ -2202,6 +2202,7 @@ namespace WindowsFormsApp1
                     Point p = e.Location;
                     int s = textBox1.GetCharIndexFromPosition(p);
                     string x = textBox1.Text;
+                    undoRecord();
                     textBox1.Text = x.Substring(0, s) + Environment.NewLine + x.Substring(s, x.Length - s);
                     resumeLocationView(p, s);
                 }
