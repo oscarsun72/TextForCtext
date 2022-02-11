@@ -380,22 +380,22 @@ namespace WindowsFormsApp1
             {//  「�」甚特別，indexof會失效，明明沒有，而傳回 0 //https://docs.microsoft.com/zh-tw/dotnet/csharp/how-to/compare-strings
              //  //https://docs.microsoft.com/zh-tw/dotnet/api/system.string.compare?view=net-6.0
              //SystemSounds.Hand.Play();//文本有缺字警告
-                if (MessageBox.Show("有造字，是否先予訂補上？", "", MessageBoxButtons.OKCancel, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1) == DialogResult.OK)
-                {
-                    textBox1.Select(missWordPositon,1);
-                    textBox1.ScrollToCaret();
-                    return false;
-                }
                 //if (File.Exists(soundWarningLocation)) new SoundPlayer(soundWarningLocation).Play();
                 Color c = this.BackColor;
                 this.BackColor = Color.Yellow;
                 Task.Delay(900).Wait();
                 this.BackColor = c;
-                string[] rTxt = { " ", "�" };//, "□" };
-                foreach (string rs in rTxt)
-                {
-                    xCopy = xCopy.Replace(rs, "●");//「●」為《中國哲學書電子化計劃》的缺字符，詳：https://ctext.org/instructions/wiki-formatting/zh
-                }
+                //if (MessageBox.Show("有造字，是否先予訂補上？", "", MessageBoxButtons.OKCancel, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1) == DialogResult.OK)
+                //{
+                    textBox1.Select(missWordPositon,1);
+                    textBox1.ScrollToCaret();
+                    return false;
+                //}
+                //string[] rTxt = { " ", "�" };//, "□" };
+                //foreach (string rs in rTxt)
+                //{
+                //    xCopy = xCopy.Replace(rs, "●");//「●」為《中國哲學書電子化計劃》的缺字符，詳：https://ctext.org/instructions/wiki-formatting/zh
+                //}
             }
             string[] clearedStr = { "" };
             foreach (var item in clearedStr)

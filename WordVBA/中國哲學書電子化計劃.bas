@@ -574,7 +574,30 @@ rngDoc.Document.Close wdDoNotSaveChanges
 AppActivate "TextForCtext"
 End Sub
 
-
+Sub 國學大師_四庫全書本轉來()
+Dim rng As Range, noteRng As Range
+Set rng = Documents.Add().Range
+rng.Paste
+With rng.Find
+    .ClearAllFuzzyOptions
+    .ClearFormatting
+    .Execute "[[]*[]] ", , , True, , , True, wdFindContinue, , "", wdReplaceAll
+    .ClearAllFuzzyOptions
+    .ClearFormatting
+End With
+rng.Find.Font.Color = 16711935
+Do While rng.Find.Execute("", , , False, , , True, wdFindStop)
+    Set noteRng = rng
+    Do While noteRng.Next.Font.Color = 16711935
+        noteRng.SetRange noteRng.start, noteRng.Next.End
+    Loop
+    noteRng.Text = "{{" & Replace(noteRng, "/", "") & "}}"
+Loop
+With rng.Document
+    .Range.Cut
+    .Close wdDoNotSaveChanges
+End With
+End Sub
 
 Sub tempReplaceTxtforCtext()
 Dim a, d As Document, i As Integer
