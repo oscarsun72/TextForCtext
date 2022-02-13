@@ -1057,6 +1057,7 @@ namespace WindowsFormsApp1
                     if (findword != "")
                     {
                         int start = textBox1.SelectionStart + 1; string x = textBox1.Text;
+                        if (start >= textBox1.Text.Length) return;
                         foundwhere = x.IndexOf(findword, start);
                         if (foundwhere == -1)
                         {
