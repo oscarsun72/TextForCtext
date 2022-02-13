@@ -371,26 +371,35 @@ namespace WindowsFormsApp1
                     break;
                 }
             }
-            int missWordPositon=xCopy.IndexOf(" ");
+            int missWordPositon = xCopy.IndexOf(" ");
             if (missWordPositon == -1) missWordPositon = xCopy.IndexOfAny("�".ToCharArray());
             if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("□");
-            if(missWordPositon>-1)
+            if (missWordPositon > -1)
             //if (xCopy.IndexOf(" ") > -1 || xCopy.IndexOfAny("�".ToCharArray()) > -1 ||
-                //xCopy.IndexOf("□") > -1)//□為《維基文庫》《四庫全書》的缺字符，" "則是《四部叢刊》的，"�"則是《四部叢刊》的造字符。
+            //xCopy.IndexOf("□") > -1)//□為《維基文庫》《四庫全書》的缺字符，" "則是《四部叢刊》的，"�"則是《四部叢刊》的造字符。
             {//  「�」甚特別，indexof會失效，明明沒有，而傳回 0 //https://docs.microsoft.com/zh-tw/dotnet/csharp/how-to/compare-strings
              //  //https://docs.microsoft.com/zh-tw/dotnet/api/system.string.compare?view=net-6.0
              //SystemSounds.Hand.Play();//文本有缺字警告
-                //if (File.Exists(soundWarningLocation)) new SoundPlayer(soundWarningLocation).Play();
+             //if (File.Exists(soundWarningLocation)) new SoundPlayer(soundWarningLocation).Play();
                 Color c = this.BackColor;
                 this.BackColor = Color.Yellow;
                 Task.Delay(900).Wait();
                 this.BackColor = c;
-                //if (MessageBox.Show("有造字，是否先予訂補上？", "", MessageBoxButtons.OKCancel, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1) == DialogResult.OK)
-                //{
-                    textBox1.Select(missWordPositon,1);
+                if (xCopy.IndexOf("□") > -1 && xCopy.IndexOf("�") == -1 && xCopy.IndexOf(" ") == -1)
+                {
+                    if (MessageBox.Show("有造字，是否先予訂補上？", "", MessageBoxButtons.OKCancel, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1) == DialogResult.OK)
+                    {
+                        textBox1.Select(missWordPositon, 1);
+                        textBox1.ScrollToCaret();
+                        return false;
+                    }
+                }
+                else
+                {
+                    textBox1.Select(missWordPositon, 1);
                     textBox1.ScrollToCaret();
                     return false;
-                //}
+                }
                 //string[] rTxt = { " ", "�" };//, "□" };
                 //foreach (string rs in rTxt)
                 //{
@@ -1323,7 +1332,7 @@ namespace WindowsFormsApp1
                     return;
                 }
             }
-            if(!newTextBox1()) return;
+            if (!newTextBox1()) return;
             pasteToCtext();
             if (!shiftKeyDownYet) nextPages(Keys.PageDown, false);
         }
