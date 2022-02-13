@@ -385,7 +385,7 @@ namespace WindowsFormsApp1
                 this.BackColor = Color.Yellow;
                 Task.Delay(900).Wait();
                 this.BackColor = c;
-                if (xCopy.IndexOf("□") > -1 && xCopy.IndexOf("�") == -1 && xCopy.IndexOf(" ") == -1)
+                if (xCopy.IndexOf("□") > -1 && xCopy.IndexOfAny("�".ToCharArray()) == -1 && xCopy.IndexOf(" ") == -1)
                 {
                     if (MessageBox.Show("有造字，是否先予訂補上？", "", MessageBoxButtons.OKCancel, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1) == DialogResult.OK)
                     {
