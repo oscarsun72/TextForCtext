@@ -387,12 +387,12 @@ namespace WindowsFormsApp1
                 this.BackColor = c;
                 if (xCopy.IndexOf("□") > -1 && xCopy.IndexOfAny("�".ToCharArray()) == -1 && xCopy.IndexOf(" ") == -1)
                 {
-                    if (MessageBox.Show("有造字，是否先予訂補上？", "", MessageBoxButtons.OKCancel, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1) == DialogResult.OK)
-                    {
-                        textBox1.Select(missWordPositon, 1);
-                        textBox1.ScrollToCaret();
-                        return false;
-                    }
+                    //if (MessageBox.Show("有造字，是否先予訂補上？", "", MessageBoxButtons.OKCancel, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1) == DialogResult.OK)
+                    //{
+                    //    textBox1.Select(missWordPositon, 1);
+                    //    textBox1.ScrollToCaret();
+                    //    return false;
+                    //}
                 }
                 else
                 {
@@ -729,7 +729,7 @@ namespace WindowsFormsApp1
                             s = s + l - 1;
                             if ("。，、；：？！「」『』《》〈〉".IndexOf(textBox1.Text.Substring(s, 1)) > -1) s++;
                             if (x.Substring(s, 1) == "}") s = s + 2;
-                            if (x.Substring(s, 3) == "<p>") s = s + 3;
+                            if(s+3<=x.Length)if (x.Substring(s, 3) == "<p>") s = s + 3;
                             textBox1.Select(s, 0);
                             restoreCaretPosition(textBox1, s, 0);//textBox1.ScrollToCaret();
                             e.Handled = true;
