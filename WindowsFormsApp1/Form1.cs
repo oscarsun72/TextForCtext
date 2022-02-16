@@ -721,7 +721,10 @@ namespace WindowsFormsApp1
                     }
                     else
                     {// Ctrl + →
-                        isIPCharHanzi = isChineseChar(x.Substring(s, 1));
+                        if (s + 1 <= x.Length)
+                            isIPCharHanzi = isChineseChar(x.Substring(s, 1));
+                        else
+                            isIPCharHanzi = false;
                         if (isIPCharHanzi) l = findNotChineseCharFarLength(x.Substring(s), true);
                         else l = findChineseCharFarLength(x.Substring(s), true);
                         if (l != -1)
