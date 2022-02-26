@@ -2312,7 +2312,7 @@ namespace WindowsFormsApp1
         private void textBox1_TextChanged(object sender, EventArgs e)
         {
             if (textBox1.Text.IndexOf("") >-1)
-            {
+            {//Ctrl+Shift+6會插入這個""符號
                 int s = textBox1.SelectionStart, l = textBox1.SelectionLength;
                 textBox1.Text = textBox1.Text.Replace("", "");
                 restoreCaretPosition(textBox1, s, l);
