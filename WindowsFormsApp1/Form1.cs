@@ -2311,6 +2311,12 @@ namespace WindowsFormsApp1
 
         private void textBox1_TextChanged(object sender, EventArgs e)
         {
+            if (textBox1.Text.IndexOf("") >-1)
+            {
+                int s = textBox1.SelectionStart, l = textBox1.SelectionLength;
+                textBox1.Text = textBox1.Text.Replace("", "");
+                restoreCaretPosition(textBox1, s, l);
+            }
             if (!undoTextBoxing && (ModifierKeys != Keys.Control && keycodeNow != Keys.Z))
                 undoRecord();
             undoTextValueChanged(selStart, selLength);
@@ -2424,6 +2430,14 @@ namespace WindowsFormsApp1
 
         private void textBox1_KeyPress(object sender, KeyPressEventArgs e)
         {
+            //if (e.KeyChar==30)
+            //{
+            //    return;
+            //}
+            //if (ModifierKeys!=Keys.None)
+            //{
+            //    return;
+            //}
             //https://social.msdn.microsoft.com/Forums/vstudio/en-US/5d021d76-36cd-43e6-b858-5a905c2e86d4/how-to-determine-if-in-insert-mode-or-overwrite-mode?forum=wpf
             //https://stackoverflow.com/questions/1428047/how-to-set-winforms-textbox-to-overwrite-mode/17962132#17962132
             //How can I place a TextBox in overwrite mode instead of insert mode:https://www.syncfusion.com/faq/windowsforms/textbox/how-can-i-place-a-textbox-in-overwrite-mode-instead-of-insert-mode
