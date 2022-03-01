@@ -360,14 +360,14 @@ namespace WindowsFormsApp1
             {
                 if (xCopy.IndexOf(item) > -1)
                 {
-                    if (MessageBox.Show("含半形標點，是否取代為全形？", "", MessageBoxButtons.OKCancel,
-                        MessageBoxIcon.Error) == DialogResult.OK)
-                    {
+                    //if (MessageBox.Show("含半形標點，是否取代為全形？", "", MessageBoxButtons.OKCancel,
+                    //    MessageBoxIcon.Error) == DialogResult.OK)
+                    //{//直接將半形標點符號轉成全形
                         for (int i = 0; i < replaceChar.Length; i++)
                         {
                             xCopy = xCopy.Replace(replacedChar[i], replaceChar[i]);
                         }
-                    }
+                    //}
                     break;
                 }
             }
@@ -2311,11 +2311,11 @@ namespace WindowsFormsApp1
 
         private void textBox1_TextChanged(object sender, EventArgs e)
         {
-            if (textBox1.Text.IndexOf("") >-1)
+            if (textBox1.Text.IndexOf("") > -1)
             {//Ctrl+Shift+6會插入這個""符號
                 int s = textBox1.SelectionStart, l = textBox1.SelectionLength;
                 textBox1.Text = textBox1.Text.Replace("", "");
-                restoreCaretPosition(textBox1, s, l);
+                restoreCaretPosition(textBox1, s - 1, l);
             }
             if (!undoTextBoxing && (ModifierKeys != Keys.Control && keycodeNow != Keys.Z))
                 undoRecord();
