@@ -363,10 +363,10 @@ namespace WindowsFormsApp1
                     //if (MessageBox.Show("含半形標點，是否取代為全形？", "", MessageBoxButtons.OKCancel,
                     //    MessageBoxIcon.Error) == DialogResult.OK)
                     //{//直接將半形標點符號轉成全形
-                        for (int i = 0; i < replaceChar.Length; i++)
-                        {
-                            xCopy = xCopy.Replace(replacedChar[i], replaceChar[i]);
-                        }
+                    for (int i = 0; i < replaceChar.Length; i++)
+                    {
+                        xCopy = xCopy.Replace(replacedChar[i], replaceChar[i]);
+                    }
                     //}
                     break;
                 }
@@ -474,6 +474,7 @@ namespace WindowsFormsApp1
         void caretPositionRecall()
         {
             if (charIndexList.Count == 0) return;
+            if (charIndexRecallTimes - 1 < 0) return;
             TextBox tb = textBox1;
             int s = tb.SelectionStart;
             int sLast = charIndexList[charIndexRecallTimes - 1 > charIndexList.Count - 1 ?
@@ -1829,7 +1830,7 @@ namespace WindowsFormsApp1
             Color C = this.BackColor;
             if (showColorSignal) { this.BackColor = Color.Red; Task.Delay(800).Wait(); }
             //C# 對文字檔案的幾種讀寫方法總結:https://codertw.com/%E7%A8%8B%E5%BC%8F%E8%AA%9E%E8%A8%80/542361/
-            string lastPageText = x + Environment.NewLine+　"＠"; //"＠" 作為每頁的界號
+            string lastPageText = x + Environment.NewLine + "＠"; //"＠" 作為每頁的界號
             if (File.Exists(dropBoxPathIncldBackSlash + fName_to_Backup_Txt))
             {
                 if (updateLastBackup)
