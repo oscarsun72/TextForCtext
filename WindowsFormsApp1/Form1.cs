@@ -1263,6 +1263,8 @@ namespace WindowsFormsApp1
 
             //if (char.IsSurrogate(x.ToCharArray()[0]) || char.IsSurrogatePair(x, 0)) return true;
             if (char.IsSurrogatePair(x, 0)) return true;
+            if (char.IsHighSurrogate(x, 0)) return true;
+            if (char.IsLowSurrogate(x, 0)) return true;
             /*
             //https://www.itread01.com/p/1418585.html
             //C#中文字轉換Unicode(\u ) : http://trufflepenne.blogspot.com/2013/03/cunicode.html
