@@ -708,7 +708,7 @@ namespace WindowsFormsApp1
                     e.Handled = true;
                     if (e.KeyCode == Keys.Left)
                     {//Ctrl  + ←
-                        isIPCharHanzi = isChineseChar(x.Substring(s - 1, 1));
+                        isIPCharHanzi = isChineseChar(x.Substring(s - 1, 1)) == 0 ? false : true;
                         if (isIPCharHanzi) l = findNotChineseCharFarLength(x.Substring(0, s), false);
                         else l = findChineseCharFarLength(x.Substring(0, s), false);
                         if (l != -1)
@@ -721,9 +721,13 @@ namespace WindowsFormsApp1
                         }
                     }
                     else
-                    {// Ctrl + →
+                    {// Ctrl + →                        
                         if (s + 1 <= x.Length)
-                            isIPCharHanzi = isChineseChar(x.Substring(s, 1));
+                        {
+                            s++;
+                            if (char.IsLowSurrogate(x.Substring(s, 1).ToCharArray()[0])) s++;
+                            isIPCharHanzi = isChineseChar(x.Substring(s, 1)) == 0 ? false : true;
+                        }
                         else
                             isIPCharHanzi = false;
                         if (isIPCharHanzi) l = findNotChineseCharFarLength(x.Substring(s), true);
@@ -1194,21 +1198,24 @@ namespace WindowsFormsApp1
         List<string> lastKeyPress = new List<string>();
         int findNotChineseCharFarLength(string x, bool forward)
         {
+            int isC = 0, l = 0;
             StringInfo xInfo = new StringInfo(x);
             if (forward)
             {
                 for (int i = 0; i < xInfo.LengthInTextElements; i++)
                 {
-
-                    if (!isChineseChar(xInfo.SubstringByTextElements(i, 1))) return i + 1;//https://www.jb51.net/article/45556.htm
+                    isC = isChineseChar(xInfo.SubstringByTextElements(i, 1));
+                    if (isC == 1) l++;
+                    if (isC == 0) return i + 1 + l;//https://www.jb51.net/article/45556.htm
                 }
             }
             else
             {
                 for (int i = xInfo.LengthInTextElements - 1; i > -1; i--)
                 {
-
-                    if (!isChineseChar(xInfo.SubstringByTextElements(i, 1))) return xInfo.LengthInTextElements - i;
+                    isC = isChineseChar(xInfo.SubstringByTextElements(i, 1));
+                    if (isC == 1) l++;
+                    if (isC == 0) return xInfo.LengthInTextElements - i + l;
                 }
 
             }
@@ -1218,53 +1225,57 @@ namespace WindowsFormsApp1
         int findChineseCharFarLength(string x, bool forward)
         {
             StringInfo xInfo = new StringInfo(x);
+            int isC = 0, l = 0;
             if (forward)
             {
                 for (int i = 0; i < xInfo.LengthInTextElements; i++)
                 {
-
-                    if (isChineseChar(xInfo.SubstringByTextElements(i, 1))) return i + 1;//https://www.jb51.net/article/45556.htm
+                    isC = isChineseChar(xInfo.SubstringByTextElements(i, 1));
+                    if (isC == 1) l++;
+                    if (isC != 0) return i + 1 + l;//https://www.jb51.net/article/45556.htm
                 }
             }
             else
             {
                 for (int i = xInfo.LengthInTextElements - 1; i > -1; i--)
                 {
-
-                    if (isChineseChar(xInfo.SubstringByTextElements(i, 1))) return xInfo.LengthInTextElements - i;
+                    isC = isChineseChar(xInfo.SubstringByTextElements(i, 1));
+                    if (isC == 1) l++;
+                    if (isC != 0) return xInfo.LengthInTextElements - i + l;
                 }
 
             }
             return -1;
         }
 
-        bool isChineseChar(string x)
+        int isChineseChar(string x)
         {
             const string notChineseCharPriority = "〇　 􏿽\r\n<>{}.,;?@●'\"。，；！？、－-《》〈〉「」『』〖〗【】（）()[]〔〕［］0123456789";
-            if (notChineseCharPriority.IndexOf(x) > -1) return false;
+            if (notChineseCharPriority.IndexOf(x) > -1) return 0;
+            //if (x == "\udffd") return 0;
 
             //https://www.jb51.net/article/45556.htm
             //https://zh.wikipedia.org/wiki/%E4%B8%AD%E6%97%A5%E9%9F%93%E7%B5%B1%E4%B8%80%E8%A1%A8%E6%84%8F%E6%96%87%E5%AD%97
-            if (Regex.IsMatch(x, @"[\u4e00-\u9fbb]")) return true;
-            if (Regex.IsMatch(x, @"[\u3400-\u4dbf]")) return true;//擴充A區包含有6,592個漢字，位置在U+3400—U+4DBF
-                                                                  //以下長度不同,恐怕失效,目前知C即不行,有空再測試            
-                                                                  //c# 中文 轉 unicode:
-                                                                  //https://www.google.com/search?q=c%23+%E4%B8%AD%E6%96%87+%E8%BD%89+unicode&rlz=1C1GCEU_zh-TWTW823TW823&sxsrf=AOaemvJI_o6pHrTEJVPCsVy0iyVsclLtjQ%3A1640527095825&ei=93TIYbnqMYOmoATnx4rwBg&oq=c%23++%5Cu%E4%B8%AD%E6%96%87%E5%AD%97%E7%A2%BC&gs_lcp=Cgdnd3Mtd2l6EAMYATIFCAAQzQIyBQgAEM0COggIABCwAxDNAjoECCMQJ0oECEEYAUoECEYYAFCzWFjiY2DfcGgCcAB4AIABVYgB1gGSAQEzmAEAoAEByAECwAEB&sclient=gws-wiz
-                                                                  //https://www.itread01.com/p/1418585.html
+            if (Regex.IsMatch(x, @"[\u4e00-\u9fbb]")) return -1;
+            if (Regex.IsMatch(x, @"[\u3400-\u4dbf]")) return -1;//擴充A區包含有6,592個漢字，位置在U+3400—U+4DBF
+                                                                //以下長度不同,恐怕失效,目前知C即不行,有空再測試            
+                                                                //c# 中文 轉 unicode:
+                                                                //https://www.google.com/search?q=c%23+%E4%B8%AD%E6%96%87+%E8%BD%89+unicode&rlz=1C1GCEU_zh-TWTW823TW823&sxsrf=AOaemvJI_o6pHrTEJVPCsVy0iyVsclLtjQ%3A1640527095825&ei=93TIYbnqMYOmoATnx4rwBg&oq=c%23++%5Cu%E4%B8%AD%E6%96%87%E5%AD%97%E7%A2%BC&gs_lcp=Cgdnd3Mtd2l6EAMYATIFCAAQzQIyBQgAEM0COggIABCwAxDNAjoECCMQJ0oECEEYAUoECEYYAFCzWFjiY2DfcGgCcAB4AIABVYgB1gGSAQEzmAEAoAEByAECwAEB&sclient=gws-wiz
+                                                                //https://www.itread01.com/p/1418585.html
 
 
-            if (Regex.IsMatch(x, @"[\u20000-\u2A6DD]")) return true;//擴充B區包含有42,717個漢字，位置在U+20000—U+2A6DD
-            if (Regex.IsMatch(x, @"[\u2A700-\u2B734]")) return true;//C:位置在U+2A700—U+2B734
-            if (Regex.IsMatch(x, @"[\u2B740-\u2B81F]")) return true;//D:範圍為U+2B740–U+2B81F（實際有字元為U+2B740–U+2B81D）
-            if (Regex.IsMatch(x, @"[\u2B820-\u2CEAF]")) return true;//E:編碼範圍U+2B820–U+2CEAF
-            if (Regex.IsMatch(x, @"[\u2CEB0-\u2EBEF]")) return true;//F:U+2CEB0–U+2EBEF
-            if (Regex.IsMatch(x, @"[\u30000-\u3134A]")) return true;//G:U+30000–U+3134A
-                                                                    //if (Regex.IsMatch(x, @"[\u-\u]")) return true;//
+            if (Regex.IsMatch(x, @"[\u20000-\u2A6DD]")) return -1;//擴充B區包含有42,717個漢字，位置在U+20000—U+2A6DD
+            if (Regex.IsMatch(x, @"[\u2A700-\u2B734]")) return -1;//C:位置在U+2A700—U+2B734
+            if (Regex.IsMatch(x, @"[\u2B740-\u2B81F]")) return -1;//D:範圍為U+2B740–U+2B81F（實際有字元為U+2B740–U+2B81D）
+            if (Regex.IsMatch(x, @"[\u2B820-\u2CEAF]")) return -1;//true;//E:編碼範圍U+2B820–U+2CEAF
+            if (Regex.IsMatch(x, @"[\u2CEB0-\u2EBEF]")) return -1;//true;//F:U+2CEB0–U+2EBEF
+            if (Regex.IsMatch(x, @"[\u30000-\u3134A]")) return -1;//true;//G:U+30000–U+3134A
+                                                                  //if (Regex.IsMatch(x, @"[\u-\u]")) return true;//
 
             //if (char.IsSurrogate(x.ToCharArray()[0]) || char.IsSurrogatePair(x, 0)) return true;
-            if (char.IsSurrogatePair(x, 0)) return true;
-            if (char.IsHighSurrogate(x, 0)) return true;
-            if (char.IsLowSurrogate(x, 0)) return true;
+            if (char.IsSurrogatePair(x, 0)) return 1;
+            if (char.IsLowSurrogate(x, 0)) return -1;
+            if (char.IsHighSurrogate(x, 0)) return -1;
             /*
             //https://www.itread01.com/p/1418585.html
             //C#中文字轉換Unicode(\u ) : http://trufflepenne.blogspot.com/2013/03/cunicode.html
@@ -1278,7 +1289,7 @@ namespace WindowsFormsApp1
             }
             x = outStr;
             */
-            return false;
+            return 0;
         }
 
         //C#中文字轉換Unicode(\u ):http://trufflepenne.blogspot.com/2013/03/cunicode.html
