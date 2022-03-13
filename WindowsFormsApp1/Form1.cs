@@ -1121,7 +1121,7 @@ namespace WindowsFormsApp1
                 textBox1.Text = textBox1.Text.Replace(xClear, "");
             if (index > -1) s = -(xLen - textBox1.TextLength);
             caretPositionRecall();
-            restoreCaretPosition(textBox1, s, 0);
+            //restoreCaretPosition(textBox1, s, 0);
             //textBox1.SelectionStart = selStart;
             //textBox1.ScrollToCaret();
         }
@@ -2357,7 +2357,7 @@ namespace WindowsFormsApp1
             undoTextValueChanged(selStart, selLength);
             if (textBox1.Text == "" && !pasteAllOverWrite)
             {
-                hideToNICo();
+                //hideToNICo();
             }
         }
 
