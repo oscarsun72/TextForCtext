@@ -517,12 +517,7 @@ namespace WindowsFormsApp1
                 if (textBox1.SelectionLength > 0)
                 {
                     e.Handled = true;
-                    undoRecord();
-                    textBox1.Text = textBox1.Text.Replace(textBox1.SelectedText, "");
-                    caretPositionRecall();
-                    //restoreCaretPosition();
-                    //textBox1.SelectionStart = selStart;
-                    //textBox1.ScrollToCaret();
+                    clearSeltxt();
                     return;
                 }
             }
@@ -1037,6 +1032,14 @@ namespace WindowsFormsApp1
                     return;
                 }
 
+                if (e.KeyCode == Keys.Insert)
+                {//Alt + Insert ：將剪貼簿的文字內容讀入textBox1中
+                    e.Handled = true;
+                    textBox1.Text = Clipboard.GetText();
+                    return;
+                }
+
+
             }//以上 Alt
 
 
@@ -1103,6 +1106,24 @@ namespace WindowsFormsApp1
                 }
             }
 
+        }
+
+        private void clearSeltxt()
+        {
+            if (textBox1.SelectedText == "") return;
+            string xClear = textBox1.SelectedText, x = textBox1.Text;
+            int s = textBox1.SelectionStart, xLen = x.Length, index = x.Substring(0, (s == 0 ? s : s - 1)).IndexOf(xClear);
+            undoRecord();
+            caretPositionRecord();
+            if (xClear == "{{" || xClear == "}}")
+                textBox1.Text = textBox1.Text.Replace("{{", "").Replace("}}", "");
+            else
+                textBox1.Text = textBox1.Text.Replace(xClear, "");
+            if (index > -1) s = -(xLen - textBox1.TextLength);
+            caretPositionRecall();
+            restoreCaretPosition(textBox1, s, 0);
+            //textBox1.SelectionStart = selStart;
+            //textBox1.ScrollToCaret();
         }
 
         private void keyDownCtrlAltUpDown(KeyEventArgs e)
@@ -2550,6 +2571,11 @@ namespace WindowsFormsApp1
         private void textBox1_MouseDoubleClick(object sender, MouseEventArgs e)
         {
             keyDownCtrlAdd(false);
+        }
+
+        private void Form1_MouseDoubleClick(object sender, MouseEventArgs e)
+        {
+            textBox1.Text = Clipboard.GetText();
         }
 
         int[] findWord(string x, string x1)
