@@ -1376,6 +1376,7 @@ namespace WindowsFormsApp1
             if (!newTextBox1()) return;
             pasteToCtext();
             if (!shiftKeyDownYet) nextPages(Keys.PageDown, false);
+            pageTextEndPosition = 0;
         }
 
         const string omitStr = "．【】〖〗＝{}<p>（）《》〈〉：；、，。「」『』？！0123456789-‧·\r\n";//"　"
@@ -2342,6 +2343,8 @@ namespace WindowsFormsApp1
         int selStart = 0; int selLength = 0;
         private Color textBox2BackColorDefault;
 
+        int pageTextEndPosition = 0;
+            
         Keys keycodeNow = new Keys();
 
         private void textBox1_TextChanged(object sender, EventArgs e)

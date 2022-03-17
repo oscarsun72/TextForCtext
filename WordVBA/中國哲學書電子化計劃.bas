@@ -486,10 +486,11 @@ End Sub
 
 Sub 戰國策_四部叢刊_維基文庫本()
 'https://ctext.org/library.pl?if=gb&res=77385
-Dim a, rng As Range, rngDoc As Range, p As Paragraph, i As Long, rngCnt As Integer
+Dim a, rng As Range, rngDoc As Range, p As Paragraph, i As Long, rngCnt As Integer, ok As Boolean
 Dim omits As String
 omits = "《》〈〉「」『』·" & Chr(13)
 Set rngDoc = Documents.Add.Range
+re:
 rngDoc.Paste
 For Each p In rngDoc.Paragraphs
     Set a = p.Range.Characters(1)
@@ -569,7 +570,37 @@ For Each p In rngDoc.Paragraphs
         i = 0
     End If
 Next
+If ok Then
+    For Each p In rngDoc.Paragraphs
+        If Left(p.Range.Text, 3) = "{{　" And p.Range.Characters(p.Range.Characters.Count - 1) = "}" Then
+            a = p.Range.Text
+            a = Mid(a, 4, Len(a) - 6)
+            If InStr(a, "　") > 0 And InStr(a, "{") = 0 And InStr(a, "}") = 0 Then
+                rngCnt = p.Range.Characters.Count
+                For i = 4 To rngCnt
+                    Set a = p.Range.Characters(i)
+                    If a = "　" Then
+                        a.InsertParagraphBefore
+                        Exit For
+                    End If
+                Next i
+            End If
+        End If
+    Next p
+    rngDoc.Find.Execute "正曰", , , , , , , wdFindContinue, , "【正曰】", wdReplaceAll
+    rngDoc.Find.Execute ChrW(-10155) & ChrW(-8585) & "曰", , , , , , , wdFindContinue, , "【" & ChrW(-10155) & ChrW(-8585) & "曰】", wdReplaceAll
+    rngDoc.Find.Execute "補曰", , , , , , , wdFindContinue, , "【" & ChrW(-10155) & ChrW(-8585) & "曰】", wdReplaceAll
+End If
 rngDoc.Cut
+If Not ok Then
+    DoEvents
+    rngDoc.PasteAndFormat wdFormatPlainText
+    rngDoc.Find.Execute "〈", , , , , , , wdFindContinue, , "{{", wdReplaceAll
+    rngDoc.Find.Execute "〉", , , , , , , wdFindContinue, , "}}", wdReplaceAll
+    rngDoc.Cut
+    ok = True
+    GoTo re
+End If
 rngDoc.Document.Close wdDoNotSaveChanges
 AppActivate "TextForCtext"
 End Sub
@@ -581,7 +612,8 @@ rng.Paste
 With rng.Find
     .ClearAllFuzzyOptions
     .ClearFormatting
-    .Execute "[[]*[]] ", , , True, , , True, wdFindContinue, , "", wdReplaceAll
+    .MatchWildcards = True
+    .Execute "[[]*[]]  ", , , True, , , True, wdFindContinue, , "", wdReplaceAll
     .ClearAllFuzzyOptions
     .ClearFormatting
 End With
@@ -597,6 +629,20 @@ With rng.Document
     .Range.Cut
     .Close wdDoNotSaveChanges
 End With
+End Sub
+
+Sub 清除所有符號_加上井號_作為網址後綴()
+Dim rng As Range, e, sybol 'Alt + l
+sybol = Array("(", ")", "（", "）")
+Set rng = Documents.Add().Range
+rng.Paste
+Docs.清除所有符號
+For Each e In sybol
+    rng.Text = Replace(rng, e, "")
+Next e
+rng.Text = "#" & rng.Text
+rng.Cut
+rng.Document.Close wdDoNotSaveChanges
 End Sub
 
 Sub tempReplaceTxtforCtext()
