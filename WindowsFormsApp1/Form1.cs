@@ -1,21 +1,17 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
+using System.Diagnostics;
 using System.Drawing;
+using System.Drawing.Text;
+using System.Globalization;
+using System.IO;
 using System.Linq;
+using System.Media;
+using System.Runtime.InteropServices;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Globalization;
-using System.Runtime.InteropServices;
-using System.IO;
-using System.Drawing.Text;
-using System.Media;
-using System.Text.RegularExpressions;
-using System.Web;/*c# how to get the focused control on Chrome
-                  * *https://docs.microsoft.com/en-us/dotnet/api/system.web.ui.page.setfocus?view=netframework-4.8 */
 
 namespace WindowsFormsApp1
 {
@@ -353,6 +349,37 @@ namespace WindowsFormsApp1
             if (textBox2.Text != "＠") textBox2.Text = "";
             string x = textBox1.Text;
             int s = textBox1.SelectionStart, l = textBox1.SelectionLength;
+            if (pageTextEndPosition != 0 && s < pageTextEndPosition)
+            {
+                if (pageEndText10 != x.Substring(pageTextEndPosition - 10, 10))
+                {
+                    int es = x.IndexOf(pageEndText10);
+                    if (es > -1)
+                    {
+                        es += 10;
+                        if (Math.Abs(es - pageTextEndPosition) < 20)
+                        {
+                            pageTextEndPosition = es;
+                        }
+                        else
+                        { MessageBox.Show("請指定頁尾處位置"); pageTextEndPosition = 0;pageEndText10="" ; return false; }
+
+                    }
+                    else
+                    { MessageBox.Show("請指定頁尾處位置"); pageTextEndPosition = 0; ; pageEndText10 = ""; return false; }
+                }
+                else
+                {
+                    int es = x.IndexOf(pageEndText10);
+                    es += 10;
+                    if (es > -1 && es > pageTextEndPosition)
+                    {
+                        pageTextEndPosition = es;
+                    }
+
+                }
+                s = pageTextEndPosition;
+            }
             string xCopy = x.Substring(0, s + l);
             string[] replacedChar = { ",", ";", ":", "．" };
             string[] replaceChar = { "，", "；", "：", "·" };
@@ -1346,12 +1373,14 @@ namespace WindowsFormsApp1
             return dst;
         }
 
+        string pageEndText10 = "";
 
         private void keyDownCtrlAdd(bool shiftKeyDownYet)
         {
             int s = textBox1.SelectionStart, l = textBox1.SelectionLength;
             if (s == 0 && l == 0) return;
             string x = textBox1.Text;
+            if (pageTextEndPosition == 0) pageTextEndPosition = s;
             if (textBox1.SelectedText == "＠")
             {
                 textBox1.Text = x.Substring(0, s) + x.Substring(s + 1);
@@ -1359,6 +1388,7 @@ namespace WindowsFormsApp1
                 textBox1.Select(s, l);
             }
             string xCopy = x.Substring(0, s + l);
+            if (pageEndText10 == "") pageEndText10 = xCopy.Substring(xCopy.Length - 10);
             int[] chk = checkAbnormalLinePara(xCopy);
             if (chk.Length > 0)
             {
@@ -1376,7 +1406,7 @@ namespace WindowsFormsApp1
             if (!newTextBox1()) return;
             pasteToCtext();
             if (!shiftKeyDownYet) nextPages(Keys.PageDown, false);
-            pageTextEndPosition = 0;
+            pageTextEndPosition = 0; pageEndText10 = "";
         }
 
         const string omitStr = "．【】〖〗＝{}<p>（）《》〈〉：；、，。「」『』？！0123456789-‧·\r\n";//"　"
@@ -2344,7 +2374,7 @@ namespace WindowsFormsApp1
         private Color textBox2BackColorDefault;
 
         int pageTextEndPosition = 0;
-            
+
         Keys keycodeNow = new Keys();
 
         private void textBox1_TextChanged(object sender, EventArgs e)
