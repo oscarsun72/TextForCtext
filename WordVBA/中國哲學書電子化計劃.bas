@@ -1,5 +1,5 @@
 Attribute VB_Name = "中國哲學書電子化計劃"
-
+Option Explicit
 Sub 新頁面()
 'the page begin
 Const start As Integer = 2375
@@ -54,14 +54,65 @@ rng.Document.Range.Cut
 rng.Document.Close wdDoNotSaveChanges
 AppActivate "Google Chrome"
 End Sub
-
 Sub 維基文庫四部叢刊本轉來()
+Dim d As Document, a, i, p As Paragraph, xP As String, acP As Integer, space As String, rng As Range
+
+a = Array(ChrW(12296), "{{", ChrW(12297), "}}", "〈", "{{", "〉", "}}", _
+    "○", ChrW(12295))
+Set d = Documents.Add()
+d.Range.Paste
+維基文庫造字圖取代為文字 d.Range
+For i = 0 To UBound(a) - 1
+    d.Range.Find.Execute a(i), , , , , , True, wdFindContinue, , a(i + 1), wdReplaceAll
+    i = i + 1
+Next i
+For Each p In d.Range.Paragraphs
+    xP = p.Range
+    If Left(xP, 2) = "{{" And Right(xP, 3) = "}}" & Chr(13) Then
+        xP = Mid(p.Range, 3, Len(xP) - 5)
+        If InStr(xP, "{{") = 0 And InStr(xP, "}}") = 0 Then
+            acP = p.Range.Characters.Count - 1
+            If acP Mod 2 = 0 Then
+                p.Range.Characters(CInt(acP / 2)).InsertParagraphAfter
+                'p.Range.Characters(CInt(acP / 2)).InsertParagraphAfter
+            Else
+                p.Range.Characters(CInt((acP + 1) / 2)).InsertParagraphAfter
+            End If
+        End If
+    ElseIf Left(xP, 1) = "　" Then '前有空格的
+        i = InStr(xP, "{{")
+        If i > 0 And Right(xP, 3) = "}}" & Chr(13) Then
+            space = Mid(xP, 1, i - 1)
+            If Replace(space, "　", "") = "" Then
+                xP = Mid(xP, i + 2, Len(xP) - 3 - (i + 2))
+                If InStr(xP, "{{") = 0 And InStr(xP, "}}") = 0 Then
+                    Set rng = p.Range
+                    rng.SetRange rng.Characters(1).start, rng.Characters(i + 1).End
+                    rng.Text = "{{" & space
+                    acP = p.Range.Characters.Count - 1 - Len(space)
+                    If acP Mod 2 = 0 Then
+                        p.Range.Characters(CInt(acP / 2) + Len(space) + 1).InsertBefore Chr(13) & space
+                    Else
+                        p.Range.Characters(CInt((acP + 1) / 2) + Len(space) + 1).InsertBefore Chr(13) & space
+                    End If
+                End If
+            End If
+        End If
+    End If
+Next p
+文字處理.書名號篇名號標注
+d.Range.Cut
+d.Close wdDoNotSaveChanges
+SystemSetup.playSound 3
+End Sub
+Sub 維基文庫四部叢刊本轉來_early()
 Dim d As Document, a, i
 
 a = Array("^p^p", "@", "〈", "{{", "〉", "}}", "^p", "", "}}{{", "^p", "@", "^p", _
     "○", ChrW(12295))
 Set d = Documents.Add()
 d.Range.Paste
+維基文庫造字圖取代為文字 d.Range
 For i = 0 To UBound(a) - 1
     d.Range.Find.Execute a(i), , , , , , True, wdFindContinue, , a(i + 1), wdReplaceAll
     i = i + 1
@@ -100,6 +151,9 @@ a = Array("　　", "", "^p", "^p^p", "^p^p^p", "^p^p", "「^p^p", "「", "『^p^p", 
     "冉", ChrW(20868), "腳", ChrW(-32486), _
     ChrW(25995), ChrW(-24956))
 Set d = Documents.Add()
+d.Range.Paste
+維基文庫造字圖取代為文字 d.Range
+d.Range.Cut
 d.Range.PasteAndFormat wdFormatPlainText
 d.Range.Text = VBA.Replace(d.Range.Text, " ", "")
 For i = 0 To UBound(a) - 1
@@ -492,6 +546,7 @@ omits = "《》〈〉「」『』·" & Chr(13)
 Set rngDoc = Documents.Add.Range
 re:
 rngDoc.Paste
+維基文庫造字圖取代為文字 rngDoc
 For Each p In rngDoc.Paragraphs
     Set a = p.Range.Characters(1)
     If a <> "　" Then a.InsertBefore "　"
@@ -602,9 +657,92 @@ If Not ok Then
     GoTo re
 End If
 rngDoc.Document.Close wdDoNotSaveChanges
-AppActivate "TextForCtext"
+'AppActivate "TextForCtext"
+SystemSetup.playSound 4
 End Sub
-
+Sub 維基文庫造字圖取代為文字(rng As Range)
+Dim inlnsp As InlineShape, aLtTxt As String
+For Each inlnsp In rng.InlineShapes
+    aLtTxt = inlnsp.AlternativeText
+    If Len(aLtTxt) < 3 Then
+        'inlnsp.Delete
+    Else
+        If aLtTxt Like "?酉?? -- 醢" Then
+            aLtTxt = "醢"
+        ElseIf aLtTxt Like "揚 --（『昜』上『旦』之『日』與『一』相連）" Then
+            aLtTxt = "揚"
+        ElseIf aLtTxt Like "（??石）" Then
+            aLtTxt = "若"
+        ElseIf aLtTxt Like "??皿" Then
+            aLtTxt = "盟"
+        ElseIf aLtTxt Like "場 --（『昜』上『旦』之『日』與『一』相連）" Then
+            aLtTxt = "場"
+        ElseIf aLtTxt Like "?????禾 -- 蘇" Then
+            aLtTxt = "蘇"
+        ElseIf aLtTxt Like "?馬? -- 驂" Then
+            aLtTxt = "驂"
+        ElseIf aLtTxt Like "? -- or ?? ?" Then
+            aLtTxt = ChrW(-32119)
+        ElseIf aLtTxt Like "輕" Then
+            aLtTxt = ChrW(18518)
+        ElseIf aLtTxt Like "能" Then
+            aLtTxt = ChrW(17403)
+        ElseIf aLtTxt Like ChrW(12272) & ChrW(-10145) & ChrW(-8265) & ChrW(25908) Then
+            aLtTxt = ChrW(-10109) & ChrW(-8699)
+        ElseIf aLtTxt Like "??八 -- ??" Then
+            aLtTxt = ChrW(-10124) & ChrW(-9097)
+        ElseIf aLtTxt Like ChrW(12282) & ChrW(-28746) & "商" Then
+            aLtTxt = "適"
+        ElseIf aLtTxt Like "??？ -- 狐" Then
+            aLtTxt = "狐"
+        ElseIf aLtTxt Like "??戔 -- 殘" Then
+            aLtTxt = "殘"
+        ElseIf aLtTxt Like "?????匹 -- 繼" Then
+            aLtTxt = "繼"
+        ElseIf aLtTxt Like "???么 -- " & ChrW(31762) Then
+            aLtTxt = "篡"
+        ElseIf aLtTxt Like "????凡 -- 彘" Then
+            aLtTxt = "彘"
+        ElseIf aLtTxt Like "?麻止 -- ?" Then
+            aLtTxt = "歷"
+        ElseIf aLtTxt Like ChrW(12282) & ChrW(-28746) & ChrW(17807) Then
+            aLtTxt = "遽"
+        ElseIf aLtTxt Like "?至支 -- ??" Then
+            aLtTxt = "致"
+        ElseIf aLtTxt Like "（???女）" Then
+            aLtTxt = "嫈"
+        ElseIf aLtTxt Like "（???力）" Then
+            aLtTxt = ChrW(-10174) & ChrW(-9072)
+        ElseIf aLtTxt Like "??? -- 懈" Then
+            aLtTxt = "懈"
+        ElseIf aLtTxt Like "（???）-- 釵" Then
+            aLtTxt = "釵"
+        ElseIf aLtTxt Like "?目兆 -- 晁" Then
+            aLtTxt = "晁"
+        ElseIf aLtTxt Like "???? -- " & ChrW(-10161) & ChrW(-8272) Then
+            aLtTxt = "漆"
+        ElseIf aLtTxt Like "?口? -- 噦" Then
+            aLtTxt = "噦"
+        ElseIf aLtTxt Like "?口? -- 呦" Then
+            aLtTxt = "呦"
+        ElseIf aLtTxt Like "???? -- 指" Then
+            aLtTxt = "指"
+        ElseIf aLtTxt Like "（?血?）" Then
+            aLtTxt = ChrW(-30654)
+'        ElseIf aLtTxt Like "SKchar" Then
+'            aLtTxt = "疾,優,虢,曷,姬,鮑,徑,梓,死（2DB7E）"
+'        ElseIf aLtTxt Like "SKchar2" Then
+'            aLtTxt = "纏（7E92）,"
+        Else
+            GoTo nxt
+        End If
+    End If
+    inlnsp.Select
+    Selection.TypeText aLtTxt
+    inlnsp.Delete
+nxt:
+Next inlnsp
+End Sub
 Sub 國學大師_四庫全書本轉來()
 Dim rng As Range, noteRng As Range
 Set rng = Documents.Add().Range

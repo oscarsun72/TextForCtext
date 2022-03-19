@@ -75,7 +75,9 @@ Alt + →：視窗向右移動30dpi（+ Ctrl：徵調；插入點在textBox1時�
 
 Alt + F1 ：切換 textbox1 之字型： 切換支援 CJK - Ext 擴充字集的大字集字型
 
+滑鼠上一頁鍵： 同Ctrl + PageUp
 
+滑鼠下一頁鍵： 同Ctrl + PageDown
 
 
 ### 在 textBox1 中按下以下組合鍵：
@@ -177,6 +179,10 @@ Ctrl+ 滑鼠左鍵：在插入點後分行分段（原為切換RichTextBox用）
 
 
 滑鼠點二下，執行 Ctrl + + , 將插入點所在之前的文本貼到 Ctext 網頁 [簡單修改模式] 文字方塊中
+
+滑鼠上一頁鍵： 同Ctrl + PageUp
+
+滑鼠下一頁鍵： 同Ctrl + PageDown
 
 
 ### 在 textBox2、4 中按下以下鍵：

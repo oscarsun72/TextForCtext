@@ -357,7 +357,9 @@ namespace WindowsFormsApp1
                     if (es > -1)
                     {
                         es += 10;
-                        if (Math.Abs(es - pageTextEndPosition) < 20)
+                        int 孫守真按 = 20;
+                        if (x.Substring(0, pageTextEndPosition).IndexOf("{{{孫守真按：") > -1) 孫守真按 = 40;
+                        if (Math.Abs(es - pageTextEndPosition) < 孫守真按)
                         {
                             pageTextEndPosition = es;
                         }
@@ -541,7 +543,7 @@ namespace WindowsFormsApp1
                 && (m & Keys.Shift) == Keys.Shift
                 && e.KeyCode == Keys.Delete)
             {//Ctrl + Shift + Delete ： 將選取文字於文本中全部清除
-                //int s = textBox1.SelectionStart;
+             //int s = textBox1.SelectionStart;
                 if (textBox1.SelectionLength > 0)
                 {
                     e.Handled = true;
@@ -581,7 +583,7 @@ namespace WindowsFormsApp1
 
             if ((m & Keys.Control) == Keys.Control)
             {//按下Ctrl鍵
-                //Ctrl + v
+             //Ctrl + v
                 if (e.KeyCode == Keys.V) pasteAllOverWrite = false;
                 else pasteAllOverWrite = false;
 
@@ -2316,8 +2318,8 @@ namespace WindowsFormsApp1
 
         private void resumeLocationView(Point p, int s)
         {//回到原來的插入點位置、定位、視界 20220205年初五立春後1日
-            //caretPositionRecall();
-            //restoreCaretPosition(textBox1, s, 0);
+         //caretPositionRecall();
+         //restoreCaretPosition(textBox1, s, 0);
             p.Y += textBox1.GetPositionFromCharIndex(s).Y;
             textBox1.Select(textBox1.GetCharIndexFromPosition(p), 0);
             textBox1.ScrollToCaret();
@@ -2594,10 +2596,36 @@ namespace WindowsFormsApp1
         {
             if (ModifierKeys == Keys.None)
             {
-                if (e.Button == MouseButtons.Middle)
-                {//預設為最上層顯示，則按下Esc鍵或滑鼠中鍵會隱藏到任務列（系統列）中；滑鼠在其 ico 圖示上滑過即恢復
-                    hideToNICo();
+                switch (e.Button)
+                {
+                    case MouseButtons.Left:
+                        break;
+                    case MouseButtons.None:
+                        break;
+                    case MouseButtons.Right:
+                        break;
+                    case MouseButtons.Middle:
+                        //預設為最上層顯示，則按下Esc鍵或滑鼠中鍵會隱藏到任務列（系統列）中；滑鼠在其 ico 圖示上滑過即恢復
+                        hideToNICo();
+                        break;
+                    case MouseButtons.XButton1:
+                        nextPages(Keys.PageUp,true);
+                        //上一頁
+                        //keyDownCtrlAdd(false);
+                        break;
+                    case MouseButtons.XButton2:
+                        //keyDownCtrlAdd(true);
+                        //下一頁
+                        nextPages(Keys.PageDown, true);
+                        break;
+                    default:
+                        break;
                 }
+                //if (e.Button == MouseButtons.Middle)
+                //{//預設為最上層顯示，則按下Esc鍵或滑鼠中鍵會隱藏到任務列（系統列）中；滑鼠在其 ico 圖示上滑過即恢復
+                //    hideToNICo();
+                //}
+
             }
 
         }
