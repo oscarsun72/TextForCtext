@@ -73,10 +73,17 @@ For Each p In d.Range.Paragraphs
         If InStr(xP, "{{") = 0 And InStr(xP, "}}") = 0 Then
             acP = p.Range.Characters.Count - 1
             If acP Mod 2 = 0 Then
-                p.Range.Characters(CInt(acP / 2)).InsertParagraphAfter
-                'p.Range.Characters(CInt(acP / 2)).InsertParagraphAfter
+                acP = CInt(acP / 2)
             Else
-                p.Range.Characters(CInt((acP + 1) / 2)).InsertParagraphAfter
+                acP = CInt((acP + 1) / 2)
+            End If
+            If p.Range.Characters(acP).InlineShapes.Count = 0 Then
+                p.Range.Characters(acP).InsertParagraphAfter
+            Else
+                p.Range.Characters(acP).Select
+                Selection.Delete
+                Selection.TypeText " "
+                p.Range.Characters(acP).InsertParagraphAfter
             End If
         End If
     ElseIf Left(xP, 1) = "　" Then '前有空格的
@@ -91,10 +98,19 @@ For Each p In d.Range.Paragraphs
                     rng.Text = "{{" & space
                     acP = p.Range.Characters.Count - 1 - Len(space)
                     If acP Mod 2 = 0 Then
-                        p.Range.Characters(CInt(acP / 2) + Len(space) + 1).InsertBefore Chr(13) & space
+                        acP = CInt(acP / 2) + Len(space) + 1
                     Else
-                        p.Range.Characters(CInt((acP + 1) / 2) + Len(space) + 1).InsertBefore Chr(13) & space
+                        acP = CInt((acP + 1) / 2) + Len(space) + 1
                     End If
+                    If p.Range.Characters(acP).InlineShapes.Count = 0 Then
+                        p.Range.Characters(acP).InsertBefore Chr(13) & space
+                    Else
+                        p.Range.Characters(acP).Select
+                        Selection.Delete
+                        Selection.TypeText " "
+                        p.Range.Characters(acP).InsertBefore Chr(13) & space
+                    End If
+                    
                 End If
             End If
         End If
@@ -105,6 +121,7 @@ d.Range.Cut
 d.Close wdDoNotSaveChanges
 SystemSetup.playSound 3
 End Sub
+
 Sub 維基文庫四部叢刊本轉來_early()
 Dim d As Document, a, i
 
@@ -675,12 +692,38 @@ For Each inlnsp In rng.InlineShapes
             aLtTxt = "若"
         ElseIf aLtTxt Like "??皿" Then
             aLtTxt = "盟"
+        ElseIf aLtTxt Like "??? -- 溥" Then
+            aLtTxt = "溥"
         ElseIf aLtTxt Like "場 --（『昜』上『旦』之『日』與『一』相連）" Then
             aLtTxt = "場"
         ElseIf aLtTxt Like "?????禾 -- 蘇" Then
             aLtTxt = "蘇"
+        ElseIf aLtTxt Like ChrW(12272) & ChrW(-10155) & ChrW(-8696) & ChrW(31860) Then
+            aLtTxt = "隸"
+        ElseIf aLtTxt Like "彎（?弓爪）-- 弧莫不投" Then
+            aLtTxt = "弧"
+        ElseIf aLtTxt Like "?土? -- 坳" Then
+            aLtTxt = "坳"
+        ElseIf aLtTxt Like "????口?欠 -- " & ChrW(-10111) & ChrW(-8620) Then
+            aLtTxt = ChrW(-10111) & ChrW(-8620)
+        ElseIf aLtTxt Like "?????? -- 掾" Then
+            aLtTxt = "掾"
+        ElseIf aLtTxt Like "???? -- 詣" Then
+            aLtTxt = "詣"
+        ElseIf aLtTxt Like "????? --狖" Then
+            aLtTxt = "狖"
         ElseIf aLtTxt Like "?馬? -- 驂" Then
             aLtTxt = "驂"
+        ElseIf aLtTxt Like "?日?? -- 暝" Then
+            aLtTxt = "暝"
+        ElseIf aLtTxt Like "???? -- 溟" Then
+            aLtTxt = "溟"
+        ElseIf aLtTxt Like "（?厂雝）" Then
+            aLtTxt = "廱"
+        ElseIf aLtTxt Like "叟 -- 臾 ?" Then
+            aLtTxt = ChrW(-10114) & ChrW(-9161)
+        ElseIf aLtTxt Like "錫 --（右上『日』字下一?長出，類似『旦』字的『日』與『一』相連）" Then
+            aLtTxt = "錫"
         ElseIf aLtTxt Like "? -- or ?? ?" Then
             aLtTxt = ChrW(-32119)
         ElseIf aLtTxt Like "輕" Then
@@ -732,7 +775,7 @@ For Each inlnsp In rng.InlineShapes
 '        ElseIf aLtTxt Like "SKchar" Then
 '            aLtTxt = "疾,優,虢,曷,姬,鮑,徑,梓,死（2DB7E）"
 '        ElseIf aLtTxt Like "SKchar2" Then
-'            aLtTxt = "纏（7E92）,"
+'            aLtTxt = "纏（7E92）,丑,"
         Else
             GoTo nxt
         End If

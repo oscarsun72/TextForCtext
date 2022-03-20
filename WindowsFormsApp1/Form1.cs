@@ -728,7 +728,7 @@ namespace WindowsFormsApp1
                 {/*Ctrl + →：插入點若在漢字中,從插入點開始向後移至任何非漢字前(即漢字後) 反之亦然
                   * Ctrl + ←：：插入點若在漢字中,從插入點開始向後移至任何非漢字後(即漢字前) 反之亦然*/
                     string x = textBox1.Text;
-                    int s = textBox1.SelectionStart;
+                    int s = textBox1.SelectionStart, ss = s;
                     int l; bool isIPCharHanzi;
                     e.Handled = true;
                     if (e.KeyCode == Keys.Left)
@@ -742,7 +742,7 @@ namespace WindowsFormsApp1
                             textBox1.Select(s, 0);
                             restoreCaretPosition(textBox1, s, 0);//textBox1.ScrollToCaret();
                             e.Handled = true;
-                            return;
+                            //return;
                         }
                     }
                     else
@@ -769,9 +769,23 @@ namespace WindowsFormsApp1
                             textBox1.Select(s, 0);
                             restoreCaretPosition(textBox1, s, 0);//textBox1.ScrollToCaret();
                             e.Handled = true;
-                            return;
+                            //return;
                         }
                     }
+                    if ((m & Keys.Control) == Keys.Control && (m & Keys.Shift) == Keys.Shift)
+                    {// Ctrl+ Shift + ←  Ctrl+ Shift + → 選取文字
+                        textBox1.Select(ss, s - ss);
+                        //if (textBox1.SelectedText.Replace("　", "") == "")
+                        {
+                            textBox1.SelectedText = textBox1.SelectedText.Replace("　", "􏿽");
+                            if (e.KeyCode == Keys.Left)
+                            {
+                                if (textBox1.Text.Substring(s, 2) == "}}") s += 2;
+                                textBox1.Select(s, 0);
+                            }
+                        }
+                    }
+                    return;
                 }
 
                 //Ctrl + . // Ctrl + ,
@@ -1017,16 +1031,28 @@ namespace WindowsFormsApp1
                     return;
                 }
 
-                if (e.KeyCode == Keys.P)
-                {//Alt + p : 鍵入 "<p>" + newline（分行分段符號）
+                if (e.KeyCode == Keys.P || e.KeyCode == Keys.Oem3)
+                {//Alt + p 或 Alt + ` : 鍵入 "<p>" + newline（分行分段符號）
                     e.Handled = true;
-                    insertWords("<p>" + Environment.NewLine, textBox1.Text);
+                    int s = textBox1.SelectionStart; string x = textBox1.Text;
+                    if (x.Substring(s, 2) == Environment.NewLine || x.Substring(s < 2 ? s : s - 2, 2) == Environment.NewLine)
+                    {
+                        keysParagraphSymbol();
+                        return;
+                    }
+                    keysTitleCode();
                     return;
                 }
                 if (e.KeyCode == Keys.J)
                 {//Alt + j : 鍵入換行分段符號（newline）（同 Ctrl + j 的系統預設）
                     e.Handled = true;
                     insertWords(Environment.NewLine, textBox1.Text);
+                    return;
+                }
+                if (e.KeyCode == Keys.A)
+                {//Alt + a : 
+                    e.Handled = true;
+                    keyDownCtrlAdd(false);
                     return;
                 }
 
@@ -1134,8 +1160,110 @@ namespace WindowsFormsApp1
                     }
                     return;
                 }
+                if (e.KeyCode == Keys.F7)
+                {//F7 ： 每行/段前空一格
+                    e.Handled = true;
+                    keysSpacePreParagraphs();
+                    return;
+                }
+                if (e.KeyCode == Keys.F8)
+                {
+                    //F8 ： 加上篇名格式代碼
+                    e.Handled = true;
+                    keysTitleCode();
+                    return;
+                }
             }
 
+        }
+
+        private void keysTitleCode()
+        {
+            int s = textBox1.SelectionStart, i = s;
+            string x = textBox1.Text;
+            if (textBox1.SelectedText == "")
+            {
+                if (x.Substring(s, 1) == "　")
+                {
+                    int l = x.Length;
+                    while (x.Substring(i++, 1) == "　")
+                    {
+                        if (i == l) break;
+                    }
+                    s = i;
+                }
+                //else
+                {
+                    while (x.Substring(i == 0 ? i : i--, 1) != "　")
+                    {
+                        if (i == 0) break;
+                    }
+                    s = i + 2;
+                }
+                x = x.Substring(s);
+                for (int j = 0; j < x.Length; j++)
+                {
+                    string nx = x.Substring(j, 2);
+                    if (nx == Environment.NewLine || nx == "{{")
+                    {
+                        textBox1.Select(s, j);
+                        break;
+                    }
+                }
+
+            }
+            x = textBox1.Text;
+            textBox1.SelectedText = "*" + textBox1.SelectedText + "<p>";
+            i = x.LastIndexOf(Environment.NewLine, s);
+            if (i > -1)
+            {
+                if (x.Substring(i > 3 ? i - 3 : i, 5).IndexOf("<p>") == -1)
+                {
+                    textBox1.Select(i, 2); textBox1.SelectedText = "<p>" + Environment.NewLine;
+                }
+            }
+        }
+
+        private void keysSpacePreParagraphs()
+        {
+            int s = textBox1.SelectionStart;
+            if (textBox1.SelectedText == "")
+            {
+                pasteAllOverWrite = true;
+                textBox1.SelectAll();
+            }
+            int l = textBox1.SelectionLength;
+            if (l == textBox1.TextLength)
+            {
+                l = 0;
+            }
+            String slTxt = textBox1.SelectedText; int i = slTxt.IndexOf(Environment.NewLine), cntr = 0;
+            while (i > -1)
+            {
+                cntr++;
+                i = slTxt.IndexOf(Environment.NewLine, i + 1);
+            }
+            undoRecord(); caretPositionRecord();
+            textBox1.SelectedText = "　" + textBox1.SelectedText.Replace(Environment.NewLine, Environment.NewLine + "　");
+            if (l != 0)
+            {
+                textBox1.Select(s, l + 1 + cntr);
+            }
+            pasteAllOverWrite = false;
+        }
+
+        private void keysParagraphSymbol()
+        {
+            int s = textBox1.SelectionStart;
+            string x = textBox1.Text, stxtPre = x.Substring(s < 2 ? s : s - 2, 2);
+            if (stxtPre == Environment.NewLine)
+                textBox1.SelectionStart = s - 2;
+            else if (stxtPre.IndexOf("|", 1) > -1)
+            {
+                textBox1.Select(s - 1, 1);
+                textBox1.SelectedText = "";
+            }
+            insertWords("<p>" + Environment.NewLine, textBox1.Text);
         }
 
         private void clearSeltxt()
@@ -1849,6 +1977,12 @@ namespace WindowsFormsApp1
                     selLength = textBox1.SelectionLength; selStart = textBox1.SelectionStart;
                     loadText();
                     restoreCaretPosition(textBox1, selStart, selLength);
+                    return;
+                }
+                if (e.KeyCode == Keys.F9)
+                {//F9 ：重啟小小輸入法
+                    e.Handled = true;
+                    Process.Start(dropBoxPathIncldBackSlash + @"VS\bat\重啟小小輸入法.bat");
                     return;
                 }
                 if (e.KeyCode == Keys.F12)
@@ -2609,7 +2743,7 @@ namespace WindowsFormsApp1
                         hideToNICo();
                         break;
                     case MouseButtons.XButton1:
-                        nextPages(Keys.PageUp,true);
+                        nextPages(Keys.PageUp, true);
                         //上一頁
                         //keyDownCtrlAdd(false);
                         break;
