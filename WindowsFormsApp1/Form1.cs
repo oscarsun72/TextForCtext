@@ -403,18 +403,26 @@ namespace WindowsFormsApp1
                     break;
                 }
             }
-            #endregion 
+            #endregion
+            #region 清空末尾空行段落
+            int blankParagraphPosition = xCopy.LastIndexOf(Environment.NewLine);
+            while (xCopy.Length==blankParagraphPosition+2)
+            {
+                xCopy = xCopy.Substring(0, xCopy.Length - 2);
+                blankParagraphPosition = xCopy.LastIndexOf(Environment.NewLine);
+            }
+            #endregion
             #region 將連空行段落前綴|字符
-            int blankParagraphPosition = xCopy.IndexOf(Environment.NewLine);
+            blankParagraphPosition = xCopy.IndexOf(Environment.NewLine);
             while (blankParagraphPosition > -1)
             {
-                if (blankParagraphPosition + 2 >= xCopy.Length) break;
+                //if (blankParagraphPosition + 4 >= xCopy.Length) break;
                 if (xCopy.Substring(blankParagraphPosition + 2, 2) == Environment.NewLine)
                 {
                     xCopy = xCopy.Substring(0, blankParagraphPosition + 2) + "|" + xCopy.Substring(blankParagraphPosition + 2);
                 }
-                if (blankParagraphPosition + 2 >= xCopy.Length) break;
                 blankParagraphPosition = xCopy.IndexOf(Environment.NewLine, blankParagraphPosition + 1);
+                if (blankParagraphPosition + 4 >= xCopy.Length) break;
             }
             #endregion
             int missWordPositon = xCopy.IndexOf(" ");

@@ -774,6 +774,18 @@ For Each inlnsp In rng.InlineShapes
             aLtTxt = "Ëç"
         ElseIf aLtTxt Like "???? -- «ü" Then
             aLtTxt = "«ü"
+        ElseIf aLtTxt Like "?¦j?? -- ²}" Then
+            aLtTxt = ChrW(-10158) & ChrW(-8444)
+        ElseIf aLtTxt Like "*page2700-20px-SKQSfont.pdf.jpg*" Then
+            aLtTxt = "¼@"
+        ElseIf aLtTxt Like ChrW(12273) & ChrW(11966) & ChrW(12272) & ChrW(27701) & ChrW(20158) Then
+            aLtTxt = ChrW(-10161) & ChrW(-8915)
+        ElseIf aLtTxt Like "???¤î¦Û¤P?¤I? -- ÄÜ" Then
+            aLtTxt = "ÄÜ"
+        ElseIf aLtTxt Like ChrW(12272) & "¥Ø" & ChrW(-10170) & ChrW(-8693) Then
+            aLtTxt = ChrW(-10121) & ChrW(-8228)
+            ElseIf aLtTxt Like "??? -- Äî" Then
+            aLtTxt = "Äî"
         ElseIf aLtTxt Like "¡]?¦å?¡^" Then
             aLtTxt = ChrW(-30654)
 '        ElseIf aLtTxt Like "SKchar" Then
