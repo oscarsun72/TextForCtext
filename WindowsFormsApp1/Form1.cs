@@ -39,7 +39,7 @@ namespace WindowsFormsApp1
             textBox4Size = textBox4.Size;
             textBox1SizeToForm = new Size(this.Width - textBox1.Width, this.Height - textBox1.Height);
             dropBoxPathIncldBackSlash = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + @"\Dropbox\";
-            dropBoxPathIncldBackSlash = Directory.Exists(dropBoxPathIncldBackSlash) ? dropBoxPathIncldBackSlash : dropBoxPathIncldBackSlash.Replace(@"C:\",@"A:\");                
+            dropBoxPathIncldBackSlash = Directory.Exists(dropBoxPathIncldBackSlash) ? dropBoxPathIncldBackSlash : dropBoxPathIncldBackSlash.Replace(@"C:\", @"A:\");
             button2BackColorDefault = button2.BackColor;
             textBox2BackColorDefault = textBox2.BackColor;
             var cjk = getCJKExtFontInstalled(CJKBiggestSet[FontFamilyNowIndex]);
@@ -406,7 +406,7 @@ namespace WindowsFormsApp1
             #endregion
             #region 清空末尾空行段落
             int blankParagraphPosition = xCopy.LastIndexOf(Environment.NewLine);
-            while (xCopy.Length==blankParagraphPosition+2)
+            while (xCopy.Length == blankParagraphPosition + 2)
             {
                 xCopy = xCopy.Substring(0, xCopy.Length - 2);
                 blankParagraphPosition = xCopy.LastIndexOf(Environment.NewLine);
@@ -1307,7 +1307,7 @@ namespace WindowsFormsApp1
                     textBox1.Select(i, 2); textBox1.SelectedText = endCode; endPostion += endCode.Length;
                 }
             }
-            textBox1.Select(endPostion,0);//將插入點置於標題尾端以便接著貼入Quit Edit中
+            textBox1.Select(endPostion, 0);//將插入點置於標題尾端以便接著貼入Quit Edit中
         }
 
         private void keysSpacePreParagraphs()
@@ -1349,7 +1349,7 @@ namespace WindowsFormsApp1
                 textBox1.Select(s - 1, 1);
                 textBox1.SelectedText = "";
             }
-            if (x.Substring(s, 2) == Environment.NewLine)
+            if (s + 2 >= x.Length || x.Substring(s, 2) == Environment.NewLine)
                 insertWords("<p>", textBox1.Text);
             else
                 insertWords("<p>" + Environment.NewLine, textBox1.Text);
