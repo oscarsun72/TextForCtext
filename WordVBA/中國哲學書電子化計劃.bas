@@ -720,8 +720,12 @@ For Each inlnsp In rng.InlineShapes
             aLtTxt = "溟"
         ElseIf aLtTxt Like "（?厂雝）" Then
             aLtTxt = "廱"
+        ElseIf aLtTxt Like "??乃??皿 -- 盈" Then
+            aLtTxt = "盈"
         ElseIf aLtTxt Like "叟 -- 臾 ?" Then
             aLtTxt = ChrW(-10114) & ChrW(-9161)
+        ElseIf aLtTxt Like "愓 --（『昜』上『旦』之『日』與『一』相連）" Then
+            aLtTxt = "愓"
         ElseIf aLtTxt Like "錫 --（右上『日』字下一?長出，類似『旦』字的『日』與『一』相連）" Then
             aLtTxt = "錫"
         ElseIf aLtTxt Like "? -- or ?? ?" Then
@@ -773,11 +777,17 @@ For Each inlnsp In rng.InlineShapes
         ElseIf aLtTxt Like "（?血?）" Then
             aLtTxt = ChrW(-30654)
 '        ElseIf aLtTxt Like "SKchar" Then
-'            aLtTxt = "疾,優,虢,曷,姬,鮑,徑,梓,死（2DB7E）"
+'            aLtTxt = "疾,優,虢,曷,姬,鮑,徑,梓,死（2DB7E）,鬼"
 '        ElseIf aLtTxt Like "SKchar2" Then
 '            aLtTxt = "纏（7E92）,丑,"
         Else
-            GoTo nxt
+            Select Case aLtTxt
+                Case ChrW(12280) & ChrW(30098) & ChrW(-28523)
+                    aLtTxt = "●＝" & aLtTxt & "＝"
+                    '缺字則直接插入字圖替代文字
+                Case Else
+                    GoTo nxt
+            End Select
         End If
     End If
     inlnsp.Select

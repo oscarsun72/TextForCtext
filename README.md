@@ -81,7 +81,6 @@ Alt + F1 ：切換 textbox1 之字型： 切換支援 CJK - Ext 擴充字集的�
 
 滑鼠下一頁鍵： 同Ctrl + PageDown
 
-
 ### 在 textBox1 中按下以下組合鍵：
 
 Insert : 如 MS Word ，切換插入/取代文字模式（hit! 還原機制亦大致成功了。還原上限為50次。Ctrl + z ： 支援打字輸入時及取代文字時的還原。）
@@ -141,6 +140,8 @@ Shift + F3 ： 從插入點（游標所在處）開始在textBox1 尋找上一�
 F4 ： 重複輸入最後一個字
 
 Shift + F5 ： 在textBox1 回到上1次插入點（游標）所在處（且與最近「charIndexListSize」次瀏覽處作切換，如 MS Word）。charIndexListSize 目前=  3。
+
+F6 : 標題降階（增加標題前之星號）
 
 F7 ： 每行/段前空一格
 

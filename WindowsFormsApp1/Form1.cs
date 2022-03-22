@@ -39,6 +39,7 @@ namespace WindowsFormsApp1
             textBox4Size = textBox4.Size;
             textBox1SizeToForm = new Size(this.Width - textBox1.Width, this.Height - textBox1.Height);
             dropBoxPathIncldBackSlash = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + @"\Dropbox\";
+            dropBoxPathIncldBackSlash = Directory.Exists(dropBoxPathIncldBackSlash) ? dropBoxPathIncldBackSlash : dropBoxPathIncldBackSlash.Replace(@"C:\",@"A:\");                
             button2BackColorDefault = button2.BackColor;
             textBox2BackColorDefault = textBox2.BackColor;
             var cjk = getCJKExtFontInstalled(CJKBiggestSet[FontFamilyNowIndex]);
@@ -384,6 +385,7 @@ namespace WindowsFormsApp1
             }
             if (s == x.Length) l = 0;
             string xCopy = x.Substring(0, s + l);
+            #region 置換為全形符號
             string[] replacedChar = { ",", ";", ":", "．" };
             string[] replaceChar = { "，", "；", "：", "·" };
             foreach (var item in replacedChar)
@@ -401,6 +403,20 @@ namespace WindowsFormsApp1
                     break;
                 }
             }
+            #endregion 
+            #region 將連空行段落前綴|字符
+            int blankParagraphPosition = xCopy.IndexOf(Environment.NewLine);
+            while (blankParagraphPosition > -1)
+            {
+                if (blankParagraphPosition + 2 >= xCopy.Length) break;
+                if (xCopy.Substring(blankParagraphPosition + 2, 2) == Environment.NewLine)
+                {
+                    xCopy = xCopy.Substring(0, blankParagraphPosition + 2) + "|" + xCopy.Substring(blankParagraphPosition + 2);
+                }
+                if (blankParagraphPosition + 2 >= xCopy.Length) break;
+                blankParagraphPosition = xCopy.IndexOf(Environment.NewLine, blankParagraphPosition + 1);
+            }
+            #endregion
             int missWordPositon = xCopy.IndexOf(" ");
             if (missWordPositon == -1) missWordPositon = xCopy.IndexOfAny("�".ToCharArray());
             if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("□");
@@ -531,7 +547,7 @@ namespace WindowsFormsApp1
             //if ((m & Keys.Control) == Keys.Control && (m & Keys.Alt) == Keys.Alt && e.KeyCode == Keys.G)
             //if((int)Control.ModifierKeys ==
             //    (int)Keys.Control + (int)Keys.Alt && e.KeyCode == Keys.G)
-            if ((m & Keys.Shift) == Keys.Shift && e.KeyCode == Keys.Insert) pasteAllOverWrite = true;
+            if ((m & Keys.Shift) == Keys.Shift && e.KeyCode == Keys.Insert) { pasteAllOverWrite = true; dragDrop = false; }
             else pasteAllOverWrite = false;
             if ((m & Keys.Control) == Keys.Control
                 && (m & Keys.Alt) == Keys.Alt)//https://zhidao.baidu.com/question/628222381668604284.html
@@ -581,6 +597,7 @@ namespace WindowsFormsApp1
             }
             //以上 //同時按下Ctrl+Shift
 
+            #region 按下Ctrl鍵
             if ((m & Keys.Control) == Keys.Control)
             {//按下Ctrl鍵
              //Ctrl + v
@@ -814,6 +831,9 @@ namespace WindowsFormsApp1
 
             }//以上 Ctrl
 
+            #endregion
+
+            #region 按下Shift鍵
 
             //按下Shift鍵
             if ((m & Keys.Shift) == Keys.Shift)
@@ -846,8 +866,9 @@ namespace WindowsFormsApp1
                 }//以上 Shift + F5
 
             }//以上 Shift
+            #endregion
 
-
+            #region 按下Alt鍵            
             //按下Alt鍵
             if ((m & Keys.Alt) == Keys.Alt)//⇌ if (Control.ModifierKeys == Keys.Alt)
             {
@@ -1035,7 +1056,8 @@ namespace WindowsFormsApp1
                 {//Alt + p 或 Alt + ` : 鍵入 "<p>" + newline（分行分段符號）
                     e.Handled = true;
                     int s = textBox1.SelectionStart; string x = textBox1.Text;
-                    if (x.Substring(s, 2) == Environment.NewLine || x.Substring(s < 2 ? s : s - 2, 2) == Environment.NewLine)
+                    if (x.Length == s || x.Substring(s, 2) == Environment.NewLine ||
+                        x.Substring(s < 2 ? s : s - 2, 2) == Environment.NewLine)
                     {
                         keysParagraphSymbol();
                         return;
@@ -1092,13 +1114,15 @@ namespace WindowsFormsApp1
                 {//Alt + Insert ：將剪貼簿的文字內容讀入textBox1中
                     e.Handled = true;
                     textBox1.Text = Clipboard.GetText();
+                    dragDrop = false;
                     return;
                 }
 
 
             }//以上 Alt
+            #endregion
 
-
+            #region 按下單一鍵            
             if (ModifierKeys == Keys.None)
             {//按下單一鍵
                 if (e.KeyCode == Keys.Insert)
@@ -1160,6 +1184,12 @@ namespace WindowsFormsApp1
                     }
                     return;
                 }
+                if (e.KeyCode == Keys.F6)
+                {//F6 : 標題降階（增加標題前之星號）
+                    e.Handled = true;
+                    keysAsteriskPreTitle();
+                    return;
+                }
                 if (e.KeyCode == Keys.F7)
                 {//F7 ： 每行/段前空一格
                     e.Handled = true;
@@ -1174,13 +1204,35 @@ namespace WindowsFormsApp1
                     return;
                 }
             }
+            #endregion
+        }
 
+        private void keysAsteriskPreTitle()
+        {
+            string x = textBox1.SelectedText; int s = textBox1.SelectionStart;
+            caretPositionRecord();
+            if (textBox1.SelectedText == "")
+            {
+                x = textBox1.Text;
+                s = 0;
+            }
+            int i = x.IndexOf("*"), j = 0;
+            while (i > -1)
+            {
+                textBox1.Select(i + s + j, 1);
+                textBox1.SelectedText += "*";
+                i = x.IndexOf("*", i + 1);
+                //if (i > -1) i += j;
+                j++;
+            }
+            caretPositionRecall();
         }
 
         private void keysTitleCode()
         {
             int s = textBox1.SelectionStart, i = s;
             string x = textBox1.Text;
+            undoRecord();
             if (textBox1.SelectedText == "")
             {
                 if (x.Substring(s, 1) == "　")
@@ -1192,36 +1244,62 @@ namespace WindowsFormsApp1
                     }
                     s = i;
                 }
-                //else
+                while (x.Substring(i == 0 ? i : i--, 1) != "　")
                 {
-                    while (x.Substring(i == 0 ? i : i--, 1) != "　")
-                    {
-                        if (i == 0) break;
-                    }
-                    s = i + 2;
+                    if (i == 0) break;
                 }
+                if (i != 0) s = i + 2;
+                else s = i;
                 x = x.Substring(s);
                 for (int j = 0; j < x.Length; j++)
                 {
                     string nx = x.Substring(j, 2);
                     if (nx == Environment.NewLine || nx == "{{")
                     {
+                        if (nx == Environment.NewLine)
+                        {
+                            //標題（篇名）過長時之處理：
+                            if (j + 2 + 1 <= x.Length) if (x.Substring(j + 2, 1) == "　") continue;
+                        }
+                        //如果篇名標題有小注，則在其結尾處加上分段符號<p>
+                        if (nx == "{{")
+                        {
+                            if (j + 2 + 1 <= x.Length)
+                            {
+                                int k = x.IndexOf(Environment.NewLine, j + 2 + 1);
+                                //if (k > -1 || k == x.Length - 2)
+                                while (k + 1 <= x.Length || k > -1 || k == x.Length - 2)
+                                {
+                                    if (x.Substring(k - 2, 2) == "}}" && x.Substring(k + 2, 2) != "{{")
+                                    {
+                                        textBox1.Select(s + k, 0); textBox1.SelectedText = "<p>"; break;
+                                    }
+                                    k = x.IndexOf(Environment.NewLine, k + 1);
+                                }
+                            }
+                        }
                         textBox1.Select(s, j);
                         break;
                     }
                 }
 
             }
-            x = textBox1.Text;
-            textBox1.SelectedText = "*" + textBox1.SelectedText + "<p>";
+            x = textBox1.Text; string endCode = "<p>";
+            if (x.Substring(s + textBox1.SelectionLength - 3, 3) == "<p>") endCode = "";
+            textBox1.SelectedText = "*" + textBox1.SelectedText + endCode; int endPostion = textBox1.SelectionStart;
+            //標題篇名前段補上分段符號
             i = x.LastIndexOf(Environment.NewLine, s);
             if (i > -1)
             {
                 if (x.Substring(i > 3 ? i - 3 : i, 5).IndexOf("<p>") == -1)
                 {
-                    textBox1.Select(i, 2); textBox1.SelectedText = "<p>" + Environment.NewLine;
+                    endCode = "<p>" + Environment.NewLine;
+                    if (x.Substring(i + 2, 2) == Environment.NewLine)
+                        endCode = "<p>";
+                    textBox1.Select(i, 2); textBox1.SelectedText = endCode; endPostion += endCode.Length;
                 }
             }
+            textBox1.Select(endPostion,0);//將插入點置於標題尾端以便接著貼入Quit Edit中
         }
 
         private void keysSpacePreParagraphs()
@@ -1263,7 +1341,10 @@ namespace WindowsFormsApp1
                 textBox1.Select(s - 1, 1);
                 textBox1.SelectedText = "";
             }
-            insertWords("<p>" + Environment.NewLine, textBox1.Text);
+            if (x.Substring(s, 2) == Environment.NewLine)
+                insertWords("<p>", textBox1.Text);
+            else
+                insertWords("<p>" + Environment.NewLine, textBox1.Text);
         }
 
         private void clearSeltxt()
@@ -1825,6 +1906,7 @@ namespace WindowsFormsApp1
                 {
                     textBox3.Text = x;
                     SystemSounds.Beep.Play();
+                    textBox1.Focus();
                 }
 
         }
@@ -2418,7 +2500,8 @@ namespace WindowsFormsApp1
         private void textBox1_MouseDown(object sender, MouseEventArgs e)
         {
             var m = ModifierKeys;
-            mouseMiddleBtnDown(e);
+            //mouseMiddleBtnDown(textBox1, e);            
+            mouseMiddleBtnDown(sender, e);
             //if ((m & Keys.Control) == Keys.Control && (m & Keys.Shift) == Keys.Shift)
             //{
             //    runWord("漢籍電子文獻資料庫文本整理_十三經注疏");
@@ -2723,16 +2806,25 @@ namespace WindowsFormsApp1
 
         private void Form1_MouseDown(object sender, MouseEventArgs e)
         {
-            mouseMiddleBtnDown(e);
+            mouseMiddleBtnDown(sender, e);
         }
 
-        void mouseMiddleBtnDown(MouseEventArgs e)
+        void mouseMiddleBtnDown(object sender, MouseEventArgs e)
         {
             if (ModifierKeys == Keys.None)
             {
                 switch (e.Button)
                 {
                     case MouseButtons.Left:
+                        //if (sender.GetType().Name == "TextBox")
+                        //{//拖曳拖放移動文字
+                        //    TextBox tb = sender as TextBox;
+                        //    if (tb.SelectedText != "")
+                        //    {//https://docs.microsoft.com/zh-tw/dotnet/desktop/winforms/advanced/walkthrough-performing-a-drag-and-drop-operation-in-windows-forms?view=netframeworkdesktop-4.8
+                        //        tb.DoDragDrop(tb.SelectedText, DragDropEffects.Copy |
+                        //        DragDropEffects.Move);
+                        //    }
+                        //}
                         break;
                     case MouseButtons.None:
                         break;
@@ -2774,6 +2866,38 @@ namespace WindowsFormsApp1
             textBox1.Text = Clipboard.GetText();
         }
 
+        private void textBox1_DragEnter(object sender, DragEventArgs e)
+        {//https://docs.microsoft.com/zh-tw/dotnet/desktop/winforms/advanced/walkthrough-performing-a-drag-and-drop-operation-in-windows-forms?view=netframeworkdesktop-4.8
+            //https://docs.microsoft.com/zh-tw/dotnet/desktop/winforms/controls/enable-drag-and-drop-operations-with-wf-richtextbox-control?view=netframeworkdesktop-4.8
+            if (e.Data.GetDataPresent(DataFormats.Text))
+                //e.Effect = DragDropEffects.Copy;
+                e.Effect = DragDropEffects.All;
+            else
+                e.Effect = DragDropEffects.None;
+        }
+
+        bool dragDrop = false;
+        private void textBox1_DragDrop(object sender, DragEventArgs e)
+        {
+            //https://docs.microsoft.com/zh-tw/dotnet/desktop/winforms/controls/enable-drag-and-drop-operations-with-wf-richtextbox-control?view=netframeworkdesktop-4.8
+            int i;
+            String s;
+
+            // Get start position to drop the text.  
+            i = textBox1.SelectionStart;
+            s = textBox1.Text.Substring(i);
+            textBox1.Text = textBox1.Text.Substring(0, i);
+
+            // Drop the text on to the RichTextBox.  
+            textBox1.Text = textBox1.Text +
+               e.Data.GetData(DataFormats.Text).ToString();
+            textBox1.Text = textBox1.Text + s;
+
+            ////textBox1.Text = e.Data.GetData(DataFormats.Text).ToString();
+            //textBox1.Text = e.Data.GetData(DataFormats.UnicodeText).ToString();
+            dragDrop = true;
+        }
+
         int[] findWord(string x, string x1)
         {
             if (x == "" || x1 == "") return null;
@@ -2801,7 +2925,7 @@ namespace WindowsFormsApp1
         }
         private void Form1_Deactivate(object sender, EventArgs e)
         {//預設表單視窗為最上層顯示，當表單視窗不在作用中時，自動隱藏至系統右下方之系統列/任務列中，當滑鼠滑過任務列中的縮圖ico時，即還原/恢復視窗窗體
-            if (!textBox2.Focused && textBox1.Text != "") this.TopMost = false;//hideToNICo();
+            if (!textBox2.Focused && textBox1.Text != "" && !dragDrop) this.TopMost = false;//hideToNICo();
             selStart = textBox1.SelectionStart; selLength = textBox1.SelectionLength;
             //if (this.WindowState==FormWindowState.Minimized)
             //{
