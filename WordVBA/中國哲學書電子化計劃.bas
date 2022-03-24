@@ -706,6 +706,8 @@ For Each inlnsp In rng.InlineShapes
             aLtTxt = "坳"
         ElseIf aLtTxt Like "????口?欠 -- " & ChrW(-10111) & ChrW(-8620) Then
             aLtTxt = ChrW(-10111) & ChrW(-8620)
+        ElseIf aLtTxt Like "???? -- 攙" Then
+            aLtTxt = "攙"
         ElseIf aLtTxt Like "?????? -- 掾" Then
             aLtTxt = "掾"
         ElseIf aLtTxt Like "???? -- 詣" Then
@@ -726,6 +728,8 @@ For Each inlnsp In rng.InlineShapes
             aLtTxt = ChrW(-10114) & ChrW(-9161)
         ElseIf aLtTxt Like "愓 --（『昜』上『旦』之『日』與『一』相連）" Then
             aLtTxt = "愓"
+        ElseIf aLtTxt Like "場 --（『昜』上『旦』之『日』與『一』相連）" Then
+            aLtTxt = "場"
         ElseIf aLtTxt Like "錫 --（右上『日』字下一?長出，類似『旦』字的『日』與『一』相連）" Then
             aLtTxt = "錫"
         ElseIf aLtTxt Like "? -- or ?? ?" Then
@@ -736,7 +740,7 @@ For Each inlnsp In rng.InlineShapes
             aLtTxt = ChrW(17403)
         ElseIf aLtTxt Like ChrW(12272) & ChrW(-10145) & ChrW(-8265) & ChrW(25908) Then
             aLtTxt = ChrW(-10109) & ChrW(-8699)
-        ElseIf aLtTxt Like "??八 -- ??" Then
+        ElseIf aLtTxt Like "??八 -- " & ChrW(-10170) & ChrW(-8693) Then
             aLtTxt = ChrW(-10124) & ChrW(-9097)
         ElseIf aLtTxt Like ChrW(12282) & ChrW(-28746) & "商" Then
             aLtTxt = "適"
@@ -782,14 +786,24 @@ For Each inlnsp In rng.InlineShapes
             aLtTxt = ChrW(-10161) & ChrW(-8915)
         ElseIf aLtTxt Like "???止自匕?儿? -- 夔" Then
             aLtTxt = "夔"
+        ElseIf aLtTxt Like "?穴之 -- 窆" Then
+            aLtTxt = "窆"
         ElseIf aLtTxt Like ChrW(12272) & "目" & ChrW(-10170) & ChrW(-8693) Then
             aLtTxt = ChrW(-10121) & ChrW(-8228)
-            ElseIf aLtTxt Like "??? -- 癩" Then
+        ElseIf aLtTxt Like "??? -- 潤" Then
+            aLtTxt = "潤"
+        ElseIf aLtTxt Like "??? -- 靦" Then
+            aLtTxt = "靦"
+        ElseIf aLtTxt Like "??向 -- " & ChrW(-28664) Then
+            aLtTxt = "迥"
+        ElseIf aLtTxt Like "???????友-- 擾" Then
+            aLtTxt = "擾"
+        ElseIf aLtTxt Like "??? -- 癩" Then
             aLtTxt = "癩"
         ElseIf aLtTxt Like "（?血?）" Then
             aLtTxt = ChrW(-30654)
 '        ElseIf aLtTxt Like "SKchar" Then
-'            aLtTxt = "疾,優,虢,曷,姬,鮑,徑,梓,死（2DB7E）,鬼"
+'            aLtTxt = "疾,優,虢,曷,姬,鮑,徑,梓,死（2DB7E）,鬼,灌"
 '        ElseIf aLtTxt Like "SKchar2" Then
 '            aLtTxt = "纏（7E92）,丑,"
         Else

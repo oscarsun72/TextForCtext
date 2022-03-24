@@ -592,7 +592,7 @@ namespace WindowsFormsApp1
                 selToNewline(ref s, ref ed, textBox1.Text, true, textBox1); return;
             }
 
-
+            #region 同時按下Ctrl+Shift
             //同時按下Ctrl+Shift
             if ((m & Keys.Control) == Keys.Control && (m & Keys.Shift) == Keys.Shift)
             {
@@ -604,6 +604,7 @@ namespace WindowsFormsApp1
                 }
             }
             //以上 //同時按下Ctrl+Shift
+            #endregion
 
             #region 按下Ctrl鍵
             if ((m & Keys.Control) == Keys.Control)
@@ -1034,29 +1035,8 @@ namespace WindowsFormsApp1
 
                 if (e.KeyCode == Keys.D1)//D1=Menu?
                 {//Alt + 1 : 鍵入本站制式留空空格標記「􏿽」：若有選取則取代全形空格「　」為「􏿽」
-                    string x = textBox1.Text;
-                    int s = textBox1.SelectionStart, l = textBox1.SelectionLength;
-                    string sTxt = textBox1.SelectedText;
                     e.Handled = true;
-                    if (sTxt != "")
-                    {
-                        string sTxtChk = sTxt.Replace("　", "");
-                        if (sTxtChk != "") return;
-                        for (int i = 0; i < sTxt.Length; i++)
-                        {
-                            sTxtChk += "􏿽";
-                        }
-                        x = x.Substring(0, s) + sTxtChk + x.Substring(s + l);
-                        textBox1.Text = x;
-                        textBox1.SelectionStart = s + sTxtChk.Length;
-                    }
-                    else
-                    {
-                        x = x.Substring(0, s) + "􏿽" + x.Substring(s);
-                        textBox1.Text = x;
-                        textBox1.SelectionStart = s + "􏿽".Length;
-                    }
-                    textBox1.ScrollToCaret();
+                    keysSpacesBlank();
                     return;
                 }
 
@@ -1215,6 +1195,34 @@ namespace WindowsFormsApp1
             #endregion
         }
 
+        private void keysSpacesBlank()
+        {
+            string x = textBox1.Text;
+            int s = textBox1.SelectionStart, l = textBox1.SelectionLength;
+            string sTxt = textBox1.SelectedText;
+            if (sTxt != "")
+            {
+                string sTxtChk = sTxt.Replace("　", "􏿽");
+                textBox1.Text = x.Substring(0, s) + sTxtChk + x.Substring(s + sTxt.Length);
+                //string sTxtChk = sTxt.Replace("　", "");
+                //if (sTxtChk != "") return;
+                //for (int i = 0; i < sTxt.Length; i++)
+                //{
+                //    sTxtChk += "􏿽";
+                //}
+                //x = x.Substring(0, s) + sTxtChk + x.Substring(s + l);
+                //textBox1.Text = x;
+                textBox1.SelectionStart = s + sTxtChk.Length;
+            }
+            else
+            {
+                x = x.Substring(0, s) + "􏿽" + x.Substring(s);
+                textBox1.Text = x;
+                textBox1.SelectionStart = s + "􏿽".Length;
+            }
+            textBox1.ScrollToCaret();
+        }
+
         private void keysAsteriskPreTitle()
         {
             string x = textBox1.SelectedText; int s = textBox1.SelectionStart;
@@ -1278,6 +1286,7 @@ namespace WindowsFormsApp1
                                 //if (k > -1 || k == x.Length - 2)
                                 while (k + 1 <= x.Length || k > -1 || k == x.Length - 2)
                                 {
+                                    if (k - 2 < 0) return;
                                     if (x.Substring(k - 2, 2) == "}}" && x.Substring(k + 2, 2) != "{{")
                                     {
                                         textBox1.Select(s + k, 0); textBox1.SelectedText = "<p>"; break;
@@ -1293,6 +1302,7 @@ namespace WindowsFormsApp1
 
             }
             x = textBox1.Text; string endCode = "<p>";
+            if (s + textBox1.SelectionLength - 3 < 0) return;
             if (x.Substring(s + textBox1.SelectionLength - 3, 3) == "<p>") endCode = "";
             textBox1.SelectedText = "*" + textBox1.SelectedText + endCode; int endPostion = textBox1.SelectionStart;
             //標題篇名前段補上分段符號
