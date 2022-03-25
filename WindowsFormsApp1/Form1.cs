@@ -1249,6 +1249,7 @@ namespace WindowsFormsApp1
             int s = textBox1.SelectionStart, i = s;
             string x = textBox1.Text;
             undoRecord();
+            stopUndoRec = true;
             if (textBox1.SelectedText == "")
             {
                 if (x.Substring(s, 1) == "　")
@@ -1286,7 +1287,10 @@ namespace WindowsFormsApp1
                                 //if (k > -1 || k == x.Length - 2)
                                 while (k + 1 <= x.Length || k > -1 || k == x.Length - 2)
                                 {
-                                    if (k - 2 < 0) return;
+                                    if (k - 2 < 0)
+                                    {
+                                        stopUndoRec = false; return;
+                                    }
                                     if (x.Substring(k - 2, 2) == "}}" && x.Substring(k + 2, 2) != "{{")
                                     {
                                         textBox1.Select(s + k, 0); textBox1.SelectedText = "<p>"; break;
@@ -1302,7 +1306,10 @@ namespace WindowsFormsApp1
 
             }
             x = textBox1.Text; string endCode = "<p>";
-            if (s + textBox1.SelectionLength - 3 < 0) return;
+            if (s + textBox1.SelectionLength - 3 < 0)
+            {
+                stopUndoRec = false; return;
+            }
             if (x.Substring(s + textBox1.SelectionLength - 3, 3) == "<p>") endCode = "";
             textBox1.SelectedText = "*" + textBox1.SelectedText + endCode; int endPostion = textBox1.SelectionStart;
             //標題篇名前段補上分段符號
@@ -1318,6 +1325,7 @@ namespace WindowsFormsApp1
                 }
             }
             textBox1.Select(endPostion, 0);//將插入點置於標題尾端以便接著貼入Quit Edit中
+            stopUndoRec = false;
         }
 
         private void keysSpacePreParagraphs()
@@ -1353,18 +1361,23 @@ namespace WindowsFormsApp1
             int s = textBox1.SelectionStart;
             string x = textBox1.Text, stxtPre = x.Substring(s < 2 ? s : s - 2, 2);
             if (stxtPre == Environment.NewLine)
-                textBox1.SelectionStart = s - 2;
+                textBox1.SelectionStart = s - 2 > 0 ? s - 2 : 0;
             else if (stxtPre.IndexOf("|", 1) > -1)
             {
                 textBox1.Select(s - 1, 1);
                 textBox1.SelectedText = "";
             }
-            if (s + 2 >= x.Length || x.Substring(s, 2) == Environment.NewLine)
+            if (s + 2 >= x.Length || x.Substring(s, 2) == Environment.NewLine || x.Substring(s - 2 < 0 ? 0 : s - 2, 2) == Environment.NewLine)
                 insertWords("<p>", textBox1.Text);
             else
                 insertWords("<p>" + Environment.NewLine, textBox1.Text);
+            if (x.Substring(s - 2 < 0 ? 0 : s - 2, 2) == Environment.NewLine)
+            {
+                textBox1.SelectionStart = s + "<p>".Length; textBox1.ScrollToCaret();
+            }
         }
 
+        bool stopUndoRec = false;
         private void clearSeltxt()
         {
             if (textBox1.SelectedText == "") return;
@@ -2803,6 +2816,7 @@ namespace WindowsFormsApp1
 
         private void undoRecord()
         {
+            if (stopUndoRec) return;
             selStart = textBox1.SelectionStart; selLength = textBox1.SelectionLength;
             undoTextBox1Text.Add(textBox1.Text);
             if (undoTimes != 0) undoTimes = 0;

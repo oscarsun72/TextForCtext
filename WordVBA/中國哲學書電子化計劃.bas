@@ -679,6 +679,8 @@ SystemSetup.playSound 4
 End Sub
 Sub 維基文庫造字圖取代為文字(rng As Range)
 Dim inlnsp As InlineShape, aLtTxt As String
+Dim dictMdb As New dBase, cnt As New ADODB.Connection, rst As New ADODB.Recordset
+dictMdb.cnt查字 cnt
 For Each inlnsp In rng.InlineShapes
     aLtTxt = inlnsp.AlternativeText
     If Len(aLtTxt) < 3 Then
@@ -730,8 +732,20 @@ For Each inlnsp In rng.InlineShapes
             aLtTxt = "愓"
         ElseIf aLtTxt Like "場 --（『昜』上『旦』之『日』與『一』相連）" Then
             aLtTxt = "場"
+        ElseIf aLtTxt Like "暘 --（『昜』上『旦』之『日』與『一』相連）" Then
+            aLtTxt = "暘"
+        ElseIf aLtTxt Like "煬(「旦」改為「??」)" Then
+            aLtTxt = "煬"
         ElseIf aLtTxt Like "錫 --（右上『日』字下一?長出，類似『旦』字的『日』與『一』相連）" Then
             aLtTxt = "錫"
+        ElseIf aLtTxt Like ChrW(24298) & "（" & ChrW(8220) & ChrW(13357) & ChrW(8221) & "換為" & ChrW(8220) & "面" & ChrW(8221) & "）" Then
+            aLtTxt = "廩"
+        ElseIf aLtTxt Like ChrW(12273) & ChrW(11966) & ChrW(30464) Then
+            aLtTxt = "萌"
+        ElseIf aLtTxt Like "?彳? -- 徊" Then
+            aLtTxt = "徊"
+        ElseIf aLtTxt Like ChrW(12272) & ChrW(-10145) & ChrW(-8265) & "變" Then
+            aLtTxt = "●＝" & aLtTxt & "＝"
         ElseIf aLtTxt Like "? -- or ?? ?" Then
             aLtTxt = ChrW(-32119)
         ElseIf aLtTxt Like "輕" Then
@@ -796,6 +810,8 @@ For Each inlnsp In rng.InlineShapes
             aLtTxt = "靦"
         ElseIf aLtTxt Like "??向 -- " & ChrW(-28664) Then
             aLtTxt = "迥"
+        ElseIf aLtTxt Like "?日黽 -- " & ChrW(-24830) Then
+            aLtTxt = ChrW(-24830)
         ElseIf aLtTxt Like "???????友-- 擾" Then
             aLtTxt = "擾"
         ElseIf aLtTxt Like "??? -- 癩" Then
@@ -803,7 +819,7 @@ For Each inlnsp In rng.InlineShapes
         ElseIf aLtTxt Like "（?血?）" Then
             aLtTxt = ChrW(-30654)
 '        ElseIf aLtTxt Like "SKchar" Then
-'            aLtTxt = "疾,優,虢,曷,姬,鮑,徑,梓,死（2DB7E）,鬼,灌"
+'            aLtTxt = "疾,優,虢,曷,姬,鮑,徑,梓,死（2DB7E）,鬼,灌,瓘,毓,褭"
 '        ElseIf aLtTxt Like "SKchar2" Then
 '            aLtTxt = "纏（7E92）,丑,"
         Else
@@ -811,16 +827,24 @@ For Each inlnsp In rng.InlineShapes
                 Case ChrW(12280) & ChrW(30098) & ChrW(-28523)
                     aLtTxt = "●＝" & aLtTxt & "＝"
                     '缺字則直接插入字圖替代文字
+                    GoTo replaceIt
                 Case Else
                     GoTo nxt
             End Select
+            rst.Open "select * from 維基文庫造字圖取代對照表 where strcomp(find & """ & aLtTxt & """)=0", cnt, adOpenKeyset, adLockReadOnly
+            If rst.RecordCount > 0 Then
+                aLtTxt = rst.Fields("replace").Value
+            End If
+            rst.Close
         End If
     End If
+replaceIt:
     inlnsp.Select
     Selection.TypeText aLtTxt
     inlnsp.Delete
 nxt:
 Next inlnsp
+cnt.Close
 End Sub
 Sub 國學大師_四庫全書本轉來()
 Dim rng As Range, noteRng As Range
