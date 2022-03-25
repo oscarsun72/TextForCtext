@@ -1216,7 +1216,10 @@ namespace WindowsFormsApp1
             }
             else
             {
-                x = x.Substring(0, s) + "􏿽" + x.Substring(s);
+                if (x.Substring(s, 1) == "　")
+                    x = x.Substring(0, s) + "􏿽" + x.Substring(s + 1);// 自動清除後面的「　」字元                
+                else
+                    x = x.Substring(0, s) + "􏿽" + x.Substring(s);
                 textBox1.Text = x;
                 textBox1.SelectionStart = s + "􏿽".Length;
             }
@@ -1630,6 +1633,43 @@ namespace WindowsFormsApp1
                 l = 0;
                 textBox1.Select(s, l);
             }
+            #region 小注跨頁處理
+            if (s > 2)
+            {
+                if (l >= 2)//有選取
+                {
+                    if (textBox1.SelectedText.Substring(l - 2, 2) == "}}")
+                    {
+                        if (x.Substring(s + l, 2) == "{{")
+                        {
+                            textBox1.Select(s + l - 2, 2 + 2); textBox1.SelectedText = Environment.NewLine;
+                        }
+                        else if (x.Substring(s + l, Environment.NewLine.Length + 2) == Environment.NewLine + "{{")
+                        {
+                            textBox1.Select(s + l - 2, 2 + Environment.NewLine.Length + 2); textBox1.SelectedText = Environment.NewLine ;
+                        }
+
+                    }
+
+                }
+                else if (l == 0)
+                {
+                    if (x.Substring(s - 2, 2) == "}}")
+                    {
+                        if (x.Substring(s, 2) == "{{")
+                        {
+                            textBox1.Select(s - 2, 2 + 2); textBox1.SelectedText = Environment.NewLine;
+                        }
+                        else if (x.Substring(s, Environment.NewLine.Length + 2) == Environment.NewLine + "{{")
+                        {
+                            textBox1.Select(s - 2, 2 + Environment.NewLine.Length + 2); textBox1.SelectedText = Environment.NewLine;
+                        }
+
+                    }
+                }
+                s = textBox1.SelectionStart; l = textBox1.SelectionLength;
+            }
+            #endregion
             string xCopy = x.Substring(0, s + l);
             if (pageEndText10 == "") pageEndText10 = xCopy.Substring(xCopy.Length - 10);
             int[] chk = checkAbnormalLinePara(xCopy);
