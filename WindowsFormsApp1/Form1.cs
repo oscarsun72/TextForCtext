@@ -1328,7 +1328,42 @@ namespace WindowsFormsApp1
                 }
             }
             textBox1.Select(endPostion, 0);//將插入點置於標題尾端以便接著貼入Quit Edit中
+            keysTitleCode＿WithPrefaceNote();//處理「并序」
             stopUndoRec = false;
+        }
+
+        void keysTitleCode＿WithPrefaceNote()
+        {//由 keysTitleCode 調用，keysTitleCode完成時是停在「并序」字前
+            int s = textBox1.SelectionStart; bool replaceIt = false;
+            string x = textBox1.Text; const string n = "<p>{{";
+            if (x.Length < 12 || s < n.Length) return;
+            if (x.Substring(s, 2) == "{{") textBox1.SelectionStart = s += 2;
+            if (x.Substring(s + 2, 2) != "}}") return;
+            string px = x.Substring(s, 2);
+            switch (px)
+            {
+                case "并叙":
+                    replaceIt = true;                    
+                    break;
+                case "并序":
+                    replaceIt = true;                    
+                    break;
+                case "并引":
+                    replaceIt = true;                    
+                    break;
+                //case "*":
+                //    break;
+
+                default:
+                    break;
+            }
+            if (replaceIt)
+            {
+                int ns = s - n.Length;
+                textBox1.Select(ns, n.Length + px.Length);
+                textBox1.SelectedText = "{{" + px + "　　";
+                textBox1.SelectionStart = n.Length;
+            }
         }
 
         private void keysSpacePreParagraphs()
@@ -1646,7 +1681,7 @@ namespace WindowsFormsApp1
                         }
                         else if (x.Substring(s + l, Environment.NewLine.Length + 2) == Environment.NewLine + "{{")
                         {
-                            textBox1.Select(s + l - 2, 2 + Environment.NewLine.Length + 2); textBox1.SelectedText = Environment.NewLine ;
+                            textBox1.Select(s + l - 2, 2 + Environment.NewLine.Length + 2); textBox1.SelectedText = Environment.NewLine;
                         }
 
                     }
