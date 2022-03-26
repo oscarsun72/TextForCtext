@@ -818,10 +818,10 @@ For Each inlnsp In rng.InlineShapes
             aLtTxt = "癩"
         ElseIf aLtTxt Like "（?血?）" Then
             aLtTxt = ChrW(-30654)
-'        ElseIf aLtTxt Like "SKchar" Then
-'            aLtTxt = "疾,優,虢,曷,姬,鮑,徑,梓,死（2DB7E）,鬼,灌,瓘,毓,褭"
-'        ElseIf aLtTxt Like "SKchar2" Then
-'            aLtTxt = "纏（7E92）,丑,"
+        ElseIf aLtTxt Like "SKchar" Then
+'            aLtTxt = "疾,優,虢,曷,姬,鮑,徑,梓,死（2DB7E）,鬼,灌,瓘,鸛,毓,褭,舁"'餘詳 查字.mdb
+        ElseIf aLtTxt Like "SKchar2" Then
+'            aLtTxt = "纏（7E92）,丑,"'餘詳 查字.mdb
         Else
             Select Case aLtTxt
                 Case ChrW(12280) & ChrW(30098) & ChrW(-28523)
@@ -829,13 +829,16 @@ For Each inlnsp In rng.InlineShapes
                     '缺字則直接插入字圖替代文字
                     GoTo replaceIt
                 Case Else
-                    GoTo nxt
+                    rst.Open "select * from 維基文庫造字圖取代對照表 where (strcomp(find, """ & aLtTxt & """)=0 " & _
+                        "and not find like ""SKchar*"") ", cnt, adOpenKeyset, adLockReadOnly
+                    If rst.RecordCount > 0 Then
+                        aLtTxt = rst.Fields("replace").Value
+                    Else
+                        rst.Close
+                        GoTo nxt
+                    End If
+                    rst.Close
             End Select
-            rst.Open "select * from 維基文庫造字圖取代對照表 where strcomp(find & """ & aLtTxt & """)=0", cnt, adOpenKeyset, adLockReadOnly
-            If rst.RecordCount > 0 Then
-                aLtTxt = rst.Fields("replace").Value
-            End If
-            rst.Close
         End If
     End If
 replaceIt:

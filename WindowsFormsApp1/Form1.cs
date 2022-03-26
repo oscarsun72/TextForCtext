@@ -1343,13 +1343,13 @@ namespace WindowsFormsApp1
             switch (px)
             {
                 case "并叙":
-                    replaceIt = true;                    
+                    replaceIt = true;
                     break;
                 case "并序":
-                    replaceIt = true;                    
+                    replaceIt = true;
                     break;
                 case "并引":
-                    replaceIt = true;                    
+                    replaceIt = true;
                     break;
                 //case "*":
                 //    break;
@@ -1362,7 +1362,7 @@ namespace WindowsFormsApp1
                 int ns = s - n.Length;
                 textBox1.Select(ns, n.Length + px.Length);
                 textBox1.SelectedText = "{{" + px + "　　";
-                textBox1.SelectionStart = n.Length;
+                textBox1.SelectionStart = textBox1.SelectionStart + n.Length;
             }
         }
 
@@ -1398,6 +1398,8 @@ namespace WindowsFormsApp1
         {
             int s = textBox1.SelectionStart;
             string x = textBox1.Text, stxtPre = x.Substring(s < 2 ? s : s - 2, 2);
+            undoRecord();
+            stopUndoRec = true;
             if (stxtPre == Environment.NewLine)
                 textBox1.SelectionStart = s - 2 > 0 ? s - 2 : 0;
             else if (stxtPre.IndexOf("|", 1) > -1)
@@ -1405,7 +1407,8 @@ namespace WindowsFormsApp1
                 textBox1.Select(s - 1, 1);
                 textBox1.SelectedText = "";
             }
-            if (s + 2 >= x.Length || x.Substring(s, 2) == Environment.NewLine || x.Substring(s - 2 < 0 ? 0 : s - 2, 2) == Environment.NewLine)
+            if (s + 2 >= x.Length || x.Substring(s, 2) == Environment.NewLine ||
+                        x.Substring(s - 2 < 0 ? 0 : s - 2, 2) == Environment.NewLine)
                 insertWords("<p>", textBox1.Text);
             else
                 insertWords("<p>" + Environment.NewLine, textBox1.Text);
@@ -1413,6 +1416,7 @@ namespace WindowsFormsApp1
             {
                 textBox1.SelectionStart = s + "<p>".Length; textBox1.ScrollToCaret();
             }
+            stopUndoRec = false;
         }
 
         bool stopUndoRec = false;
@@ -1661,7 +1665,7 @@ namespace WindowsFormsApp1
             int s = textBox1.SelectionStart, l = textBox1.SelectionLength;
             if (s == 0 && l == 0) return;
             string x = textBox1.Text;
-            if (pageTextEndPosition == 0) pageTextEndPosition = s;
+            //if (pageTextEndPosition == 0) pageTextEndPosition = s;
             if (textBox1.SelectedText == "＠")
             {
                 textBox1.Text = x.Substring(0, s) + x.Substring(s + 1);
@@ -1671,15 +1675,16 @@ namespace WindowsFormsApp1
             #region 小注跨頁處理
             if (s > 2)
             {
+                const string curlyBracketsOpen = "{{", curlyBracketsClose = "}}";
                 if (l >= 2)//有選取
                 {
-                    if (textBox1.SelectedText.Substring(l - 2, 2) == "}}")
+                    if (textBox1.SelectedText.Substring(l - 2, 2) == curlyBracketsClose)
                     {
-                        if (x.Substring(s + l, 2) == "{{")
+                        if (x.Substring(s + l, 2) == curlyBracketsOpen)
                         {
                             textBox1.Select(s + l - 2, 2 + 2); textBox1.SelectedText = Environment.NewLine;
                         }
-                        else if (x.Substring(s + l, Environment.NewLine.Length + 2) == Environment.NewLine + "{{")
+                        else if (x.Substring(s + l, Environment.NewLine.Length + 2) == Environment.NewLine + curlyBracketsOpen)
                         {
                             textBox1.Select(s + l - 2, 2 + Environment.NewLine.Length + 2); textBox1.SelectedText = Environment.NewLine;
                         }
@@ -1687,24 +1692,36 @@ namespace WindowsFormsApp1
                     }
 
                 }
-                else if (l == 0)
+                else if (l == 0)//無選取時
                 {
-                    if (x.Substring(s - 2, 2) == "}}")
+                    if (x.Substring(s - 2, 2) == curlyBracketsClose)
                     {
-                        if (x.Substring(s, 2) == "{{")
+                        if (x.Substring(s, 2) == curlyBracketsOpen)
                         {
                             textBox1.Select(s - 2, 2 + 2); textBox1.SelectedText = Environment.NewLine;
                         }
-                        else if (x.Substring(s, Environment.NewLine.Length + 2) == Environment.NewLine + "{{")
+                        else if (x.Substring(s, Environment.NewLine.Length + 2) == Environment.NewLine + curlyBracketsOpen)
                         {
                             textBox1.Select(s - 2, 2 + Environment.NewLine.Length + 2); textBox1.SelectedText = Environment.NewLine;
                         }
 
                     }
+                    else if (x.Substring(s - 2, 2) == Environment.NewLine)
+                    {
+                        if (s - Environment.NewLine.Length - curlyBracketsOpen.Length >= 0)
+                        {
+                            if (x.Substring(s, 2) == curlyBracketsOpen &&
+                                x.Substring(s - Environment.NewLine.Length - curlyBracketsOpen.Length, 2) == curlyBracketsClose)
+                            {
+                                textBox1.Select(s - Environment.NewLine.Length - curlyBracketsOpen.Length, 2 * 3); textBox1.SelectedText = Environment.NewLine;
+                            }
+                        }
+                    }
                 }
                 s = textBox1.SelectionStart; l = textBox1.SelectionLength;
             }
             #endregion
+            if (pageTextEndPosition == 0) pageTextEndPosition = s;
             string xCopy = x.Substring(0, s + l);
             if (pageEndText10 == "") pageEndText10 = xCopy.Substring(xCopy.Length - 10);
             int[] chk = checkAbnormalLinePara(xCopy);
@@ -2426,10 +2443,11 @@ namespace WindowsFormsApp1
             if (replacedword == rplsword) return;
             int s = textBox1.SelectionStart; int l = 0;
             undoRecord();
+            stopUndoRec = true;
             if (button2.Text == "選取文")
             {
                 replacedword = textBox2.Text;
-                if (replacedword == "") return;
+                if (replacedword == "") { stopUndoRec = false; return; }
                 l = textBox1.SelectionLength;
                 string xBefore = x.Substring(0, s), xAfter = x.Substring(s + l);
                 x = textBox1.SelectedText;
@@ -2447,6 +2465,7 @@ namespace WindowsFormsApp1
             textBox1.SelectionStart = s; textBox1.SelectionLength = l;
             restoreCaretPosition(textBox1, s, l == 0 ? 1 : l);//textBox1.ScrollToCaret();
             textBox1.Focus();
+            stopUndoRec = false;
         }
 
         List<string> replaceWordList = new List<string>();
