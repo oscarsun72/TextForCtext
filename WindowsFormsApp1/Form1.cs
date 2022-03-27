@@ -1264,9 +1264,11 @@ namespace WindowsFormsApp1
                     }
                     s = i;
                 }
-                while (x.Substring(i == 0 ? i : i--, 1) != "　")
+                string titieBeginChar = x.Substring(i == 0 ? i : i--, 1);
+                while (titieBeginChar != "　" && titieBeginChar != Environment.NewLine.Substring(Environment.NewLine.Length - 1, 1))
                 {
                     if (i == 0) break;
+                    titieBeginChar = x.Substring(i == 0 ? i : i--, 1);
                 }
                 if (i != 0) s = i + 2;
                 else s = i;
@@ -1708,7 +1710,7 @@ namespace WindowsFormsApp1
                     }
                     else if (x.Substring(s - 2, 2) == Environment.NewLine)
                     {
-                        if (s - Environment.NewLine.Length - curlyBracketsOpen.Length >= 0)
+                        if (s - Environment.NewLine.Length - curlyBracketsOpen.Length >= 0 && s + 2 <= x.Length)
                         {
                             if (x.Substring(s, 2) == curlyBracketsOpen &&
                                 x.Substring(s - Environment.NewLine.Length - curlyBracketsOpen.Length, 2) == curlyBracketsClose)
