@@ -1040,9 +1040,16 @@ namespace WindowsFormsApp1
                     return;
                 }
 
+                if (e.KeyCode == Keys.A)
+                {//Alt + a : 
+                    e.Handled = true;
+                    keyDownCtrlAdd(false);
+                    return;
+                }
                 if (e.KeyCode == Keys.P || e.KeyCode == Keys.Oem3)
                 {//Alt + p 或 Alt + ` : 鍵入 "<p>" + newline（分行分段符號）
                     e.Handled = true;
+                    if (e.KeyCode == Keys.P) { keysParagraphSymbol(); return; }
                     int s = textBox1.SelectionStart; string x = textBox1.Text;
                     if (x.Length == s || x.Substring(s, 2) == Environment.NewLine ||
                         x.Substring(s < 2 ? s : s - 2, 2) == Environment.NewLine)
@@ -1057,12 +1064,6 @@ namespace WindowsFormsApp1
                 {//Alt + j : 鍵入換行分段符號（newline）（同 Ctrl + j 的系統預設）
                     e.Handled = true;
                     insertWords(Environment.NewLine, textBox1.Text);
-                    return;
-                }
-                if (e.KeyCode == Keys.A)
-                {//Alt + a : 
-                    e.Handled = true;
-                    keyDownCtrlAdd(false);
                     return;
                 }
 
