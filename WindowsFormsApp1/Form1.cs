@@ -759,7 +759,7 @@ namespace WindowsFormsApp1
                     e.Handled = true;
                     if (e.KeyCode == Keys.Left)
                     {//Ctrl  + ←
-                        isIPCharHanzi = isChineseChar(x.Substring(s - 1, 1)) == 0 ? false : true;
+                        isIPCharHanzi = isChineseChar(x.Substring(s - 1, 1), true) == 0 ? false : true;
                         if (isIPCharHanzi) l = findNotChineseCharFarLength(x.Substring(0, s), false);
                         else l = findChineseCharFarLength(x.Substring(0, s), false);
                         if (l != -1)
@@ -777,7 +777,7 @@ namespace WindowsFormsApp1
                         {
                             s++;
                             if (char.IsLowSurrogate(x.Substring(s, 1).ToCharArray()[0])) s++;
-                            isIPCharHanzi = isChineseChar(x.Substring(s, 1)) == 0 ? false : true;
+                            isIPCharHanzi = isChineseChar(x.Substring(s, 1), true) == 0 ? false : true;
                         }
                         else
                             isIPCharHanzi = false;
@@ -1051,8 +1051,11 @@ namespace WindowsFormsApp1
                     e.Handled = true;
                     if (e.KeyCode == Keys.P) { keysParagraphSymbol(); return; }
                     int s = textBox1.SelectionStart; string x = textBox1.Text;
-                    if (x.Length == s || x.Substring(s, 2) == Environment.NewLine ||
-                        x.Substring(s < 2 ? s : s - 2, 2) == Environment.NewLine)
+                    if (x.Length == s ||
+                        (x.Substring(s, 2) == Environment.NewLine || x.Substring(s < 2 ? s : s - 2, 2)
+                            == Environment.NewLine) && textBox1.SelectionLength == 0)//||
+                                                                                     //(x.Substring(s < 2 ? s : s - 2, 2)== Environment.NewLine &&
+                                                                                     //  x.Substring(s+1>x.Length?x.Length:s,1)!="　") // 有時標題是頂行的                       
                     {
                         keysParagraphSymbol();
                         return;
@@ -1274,7 +1277,7 @@ namespace WindowsFormsApp1
                 if (i != 0) s = i + 2;
                 else s = i;
                 x = x.Substring(s);
-                for (int j = 0; j < x.Length; j++)
+                for (int j = 0; j + 2 <= x.Length; j++)
                 {
                     string nx = x.Substring(j, 2);
                     if (nx == Environment.NewLine || nx == "{{")
@@ -1540,7 +1543,7 @@ namespace WindowsFormsApp1
             {
                 for (int i = 0; i < xInfo.LengthInTextElements; i++)
                 {
-                    isC = isChineseChar(xInfo.SubstringByTextElements(i, 1));
+                    isC = isChineseChar(xInfo.SubstringByTextElements(i, 1), true);
                     if (isC == 1) l++;
                     if (isC == 0) return i + 1 + l;//https://www.jb51.net/article/45556.htm
                 }
@@ -1549,7 +1552,7 @@ namespace WindowsFormsApp1
             {
                 for (int i = xInfo.LengthInTextElements - 1; i > -1; i--)
                 {
-                    isC = isChineseChar(xInfo.SubstringByTextElements(i, 1));
+                    isC = isChineseChar(xInfo.SubstringByTextElements(i, 1), true);
                     if (isC == 1) l++;
                     if (isC == 0) return xInfo.LengthInTextElements - i + l;
                 }
@@ -1566,7 +1569,7 @@ namespace WindowsFormsApp1
             {
                 for (int i = 0; i < xInfo.LengthInTextElements; i++)
                 {
-                    isC = isChineseChar(xInfo.SubstringByTextElements(i, 1));
+                    isC = isChineseChar(xInfo.SubstringByTextElements(i, 1), true);
                     if (isC == 1) l++;
                     if (isC != 0) return i + 1 + l;//https://www.jb51.net/article/45556.htm
                 }
@@ -1575,7 +1578,7 @@ namespace WindowsFormsApp1
             {
                 for (int i = xInfo.LengthInTextElements - 1; i > -1; i--)
                 {
-                    isC = isChineseChar(xInfo.SubstringByTextElements(i, 1));
+                    isC = isChineseChar(xInfo.SubstringByTextElements(i, 1), true);
                     if (isC == 1) l++;
                     if (isC != 0) return xInfo.LengthInTextElements - i + l;
                 }
@@ -1584,8 +1587,10 @@ namespace WindowsFormsApp1
             return -1;
         }
 
-        int isChineseChar(string x)
+        int isChineseChar(string x, bool skipPunctuation)
         {
+            const string punctuations = "〇.,;?@●'\"。，；！？、－-…《》〈〉「」『』〖〗【】（）()[]〔〕［］0123456789";
+            if (skipPunctuation) if (punctuations.IndexOf(x) > -1) return -1;
             const string notChineseCharPriority = "〇　 􏿽\r\n<>{}.,;?@●'\"。，；！？、－-《》〈〉「」『』〖〗【】（）()[]〔〕［］0123456789";
             if (notChineseCharPriority.IndexOf(x) > -1) return 0;
             //if (x == "\udffd") return 0;
@@ -1667,6 +1672,7 @@ namespace WindowsFormsApp1
         {
             int s = textBox1.SelectionStart, l = textBox1.SelectionLength;
             if (s == 0 && l == 0) return;
+
             string x = textBox1.Text;
             //if (pageTextEndPosition == 0) pageTextEndPosition = s;
             if (textBox1.SelectedText == "＠")
@@ -1723,7 +1729,18 @@ namespace WindowsFormsApp1
                 }
                 s = textBox1.SelectionStart; l = textBox1.SelectionLength;
             }
-            #endregion
+            #endregion//跨頁小注處理
+            #region 清除空行//前面處理跨頁小注時須有newline 判斷，故不可寫在其前而執行清除
+            if (pageTextEndPosition != 0) s = pageTextEndPosition;
+            while (s != textBox1.TextLength && s + 2 < textBox1.TextLength && textBox1.Text.Substring(s, 2) == Environment.NewLine)
+            {
+                if (textBox1.Text.Substring(s, 2) == Environment.NewLine)
+                {
+                    textBox1.Select(s, 2); textBox1.SelectedText = "";
+                    s = textBox1.SelectionStart;
+                }
+            }
+            #endregion//清除空行
             if (pageTextEndPosition == 0) pageTextEndPosition = s;
             string xCopy = x.Substring(0, s + l);
             if (pageEndText10 == "") pageEndText10 = xCopy.Substring(xCopy.Length - 10);
@@ -1747,7 +1764,7 @@ namespace WindowsFormsApp1
             pageTextEndPosition = 0; pageEndText10 = "";
         }
 
-        const string omitStr = "．【】〖〗＝{}<p>（）《》〈〉：；、，。「」『』？！0123456789-‧·\r\n";//"　"
+        const string omitStr = "．‧.…【】〖〗＝{}<p>（）《》〈〉：；、，。「」『』？！0123456789-‧·\r\n";//"　"
         string clearOmitChar(string x)
         {
             foreach (var item in omitStr)
@@ -2643,12 +2660,13 @@ namespace WindowsFormsApp1
 
                 if (textBox1.SelectionLength == 0)
                 {
-                    Point p = e.Location;
-                    int s = textBox1.GetCharIndexFromPosition(p);
-                    string x = textBox1.Text;
+                    //Point p = e.Location;
+                    //int s = textBox1.GetCharIndexFromPosition(p);
+                    //string x = textBox1.Text;
                     undoRecord();
-                    textBox1.Text = x.Substring(0, s) + Environment.NewLine + x.Substring(s, x.Length - s);
-                    resumeLocationView(p, s);
+                    textBox1.SelectedText = Environment.NewLine;
+                    //textBox1.Text = x.Substring(0, s) + Environment.NewLine + x.Substring(s, x.Length - s);
+                    //resumeLocationView(p, s);
                 }
                 //switchRichTextBox1();
 
