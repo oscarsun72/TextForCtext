@@ -677,17 +677,27 @@ namespace WindowsFormsApp1
                             insX = "{{";
                         }
                     }
-                    if (x.Substring(s, 2) != Environment.NewLine && x.Substring(s - 2, 2) != Environment.NewLine)
+                    if (s + 2 <= x.Length)
                     {
-                        insX = Environment.NewLine + insX + Environment.NewLine;
+                        if (x.Substring(s, 2) == Environment.NewLine)
+                        {
+                            insX = Environment.NewLine + insX;
+                        }
                     }
-                    else if (x.Substring(s, 2) == Environment.NewLine)
+                    if (s - 2 >= 0)
                     {
-                        insX = Environment.NewLine + insX;
+                        if (x.Substring(s - 2, 2) == Environment.NewLine)
+                        {
+                            insX += Environment.NewLine;
+                        }
                     }
-                    else if (x.Substring(s - 2, 2) == Environment.NewLine)
+                    if (s + 2 <= x.Length && s - 2 >= 0)
                     {
-                        insX += Environment.NewLine;
+                        if (x.Substring(s, 2) != Environment.NewLine && x.Substring(s - 2, 2) != Environment.NewLine)
+                        {
+                            insX = Environment.NewLine + insX + Environment.NewLine;
+                        }
+
                     }
                     insertWords(insX, x);
                     //x = x.Substring(0, s) + insX + x.Substring(s);
