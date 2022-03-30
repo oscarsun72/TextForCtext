@@ -1772,10 +1772,11 @@ namespace WindowsFormsApp1
                     Environment.NewLine + Environment.NewLine +
                     "normal= " + chk[2] + "\tabnormal= " + chk[3], "",
                     MessageBoxButtons.OKCancel, MessageBoxIcon.Warning,
-                    MessageBoxDefaultButton.Button1) == DialogResult.OK)
+                    MessageBoxDefaultButton.Button1) == DialogResult.OK)//檢查行/段落長
                 {
                     textBox1.Select(chk[0], chk[1]);
                     textBox1.ScrollToCaret();
+                    pageTextEndPosition = 0;
                     return;
                 }
             }
