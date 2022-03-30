@@ -756,15 +756,25 @@ namespace WindowsFormsApp1
                     string x = textBox1.Text;
                     int s = textBox1.SelectionStart, ss = s;
                     int l; bool isIPCharHanzi;
+                    string endStr = "}>" + Environment.NewLine;
                     e.Handled = true;
                     if (e.KeyCode == Keys.Left)
                     {//Ctrl  + ←
+                        if (endStr.IndexOf(textBox1.Text.Substring(s - 1, 1)) > -1) s--;
                         isIPCharHanzi = isChineseChar(x.Substring(s - 1, 1), true) == 0 ? false : true;
                         if (isIPCharHanzi) l = findNotChineseCharFarLength(x.Substring(0, s), false);
                         else l = findChineseCharFarLength(x.Substring(0, s), false);
                         if (l != -1)
                         {
                             s = s - l + 1;
+
+                            if (endStr.IndexOf(textBox1.Text.Substring(s, 1)) > -1)
+                            {
+                                if (textBox1.Text.Substring(s, 2) == Environment.NewLine)
+                                    s += 2;
+                                else
+                                    s++;
+                            }
                             textBox1.Select(s, 0);
                             restoreCaretPosition(textBox1, s, 0);//textBox1.ScrollToCaret();
                             e.Handled = true;
@@ -1159,6 +1169,10 @@ namespace WindowsFormsApp1
                             MessageBox.Show("not found next!"); return;
                         }
                         textBox1.SelectionStart = foundwhere;
+                        //if ()//標題搜尋時不選取，以利keysTitleCode()執行
+                        //{
+
+                        //}
                         textBox1.SelectionLength = findword.Length; textBox1.ScrollToCaret();
                     }
                     if (findword != "") lastFindStr = findword;
@@ -1257,7 +1271,14 @@ namespace WindowsFormsApp1
             string x = textBox1.Text;
             undoRecord();
             stopUndoRec = true;
-            if (textBox1.SelectedText == "")
+            if (textBox1.SelectedText != "")
+            {//目前好像用不到選取指定標題，故暫去掉，以便配合 按 F3鍵找標題處加標題格式
+                if (textBox1.SelectedText.Replace("　", "") == "")
+                {
+                    textBox1.DeselectAll();
+                }
+            }
+            if (textBox1.SelectedText == "")//目前好像用不到選取指定標題，故暫去掉
             {
                 if (x.Substring(s, 1) == "　")
                 {
@@ -1589,7 +1610,7 @@ namespace WindowsFormsApp1
 
         int isChineseChar(string x, bool skipPunctuation)
         {
-            const string punctuations = "〇.,;?@●'\"。，；！？、－-…《》〈〉「」『』〖〗【】（）()[]〔〕［］0123456789";
+            const string punctuations = "〇.,;?@●'\"。，；！？、－-—…《》〈〉「」『』〖〗【】（）()[]〔〕［］0123456789";
             if (skipPunctuation) if (punctuations.IndexOf(x) > -1) return -1;
             const string notChineseCharPriority = "〇　 􏿽\r\n<>{}.,;?@●'\"。，；！？、－-《》〈〉「」『』〖〗【】（）()[]〔〕［］0123456789";
             if (notChineseCharPriority.IndexOf(x) > -1) return 0;
@@ -2599,7 +2620,7 @@ namespace WindowsFormsApp1
                 return;
             }
 
-
+            #region 只按下單一鍵            
             if (ModifierKeys == Keys.None)
             {//只按下單一鍵
                 if (e.KeyCode == Keys.F1 || e.KeyCode == Keys.Pause)
@@ -2620,6 +2641,7 @@ namespace WindowsFormsApp1
                     textBox1_KeyDown(textBox1, ekey);
                 }
             }//以上 只按下單一鍵
+            #endregion
         }
 
         private void keyDownF2(TextBox textBox)
