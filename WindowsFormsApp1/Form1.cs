@@ -99,8 +99,14 @@ namespace WindowsFormsApp1
 
         private void nICo_MouseMove(object sender, MouseEventArgs e)
         {
+            #region 縮至系統工具列在右方時
+            //if (Cursor.Position.Y > this.Top + this.Height ||
+            //    Cursor.Position.X > this.Left + this.Width) show_nICo();
+            #endregion
+            #region 縮至系統工具列在左方時
             if (Cursor.Position.Y > this.Top + this.Height ||
-                Cursor.Position.X > this.Left + this.Width) show_nICo();
+                Cursor.Position.X < 420) show_nICo();//this.Left + this.Width) show_nICo();
+            #endregion
             //if (this.Top <0 && this.Left<0) show_nICo();            
         }
 
