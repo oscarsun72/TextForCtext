@@ -9,7 +9,7 @@ Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
 Option Explicit
 'Dim fso As Object
-Function getdb_重編國語辭典修訂本_資料庫fullName()
+Function getdb_重編國語辭典修訂本_資料庫fullName() As String
 Dim cntStr As String
 'On Error GoTo eH
 userProfilePath = SystemSetup.取得使用者路徑_含反斜線()
@@ -54,7 +54,7 @@ ElseIf Dir("c:\@@@華語文工具及資料@@@\Macros\查字.mdb") <> "" Then
 '    getdb_查字FullName = ""
 End If
 End Function
-Function getdb_查字forinputFullName()
+Function getdb_查字forinputFullName() As String
 If fso.fileexists(userProfilePath & "dropbox\查字forinput.mdb") Then
     getdb_查字forinputFullName = userProfilePath & "dropbox\查字forinput.mdb"
 ElseIf fso.fileexists(Replace(userProfilePath, "C:", "A:") & "dropbox\查字forinput.mdb") Then '虛擬電腦用
@@ -68,6 +68,11 @@ ElseIf Dir("c:\@@@華語文工具及資料@@@\Macros\查字forinput.mdb") <> "" Then
 End If
 End Function
 
+Function getdb_開發_千慮一得齋FullName() As String
+If fso.fileexists("D:\千慮一得齋\書籍資料\開發_千慮一得齋.mdb") Then _
+    getdb_開發_千慮一得齋FullName = "D:\千慮一得齋\書籍資料\開發_千慮一得齋.mdb"
+
+End Function
 Private Sub Class_Initialize()
 Set fso = CreateObject("Scripting.FileSystemObject")
 userProfilePath = SystemSetup.取得使用者路徑_含反斜線()

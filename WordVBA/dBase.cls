@@ -28,6 +28,10 @@ End Sub
 Property Get 重編國語辭典修訂本_資料庫_總表Name() As String
 重編國語辭典修訂本_資料庫_總表Name = "[《重編國語辭典修訂本》 總表]"
 End Property
+Sub cnt_開發_千慮一得齋(ByRef cnt As ADODB.Connection)
+Dim pat As New Paths
+cnt.Open cntStr & pat.getdb_開發_千慮一得齋FullName
+End Sub
 
 Sub 漢語大詞典加注音(x As String)
 dict加注音 x, 4
@@ -131,6 +135,7 @@ End Sub
 
 Sub setURLControlValue(url As String)
 Dim lnk As New Links
+If Not SystemSetup.appActivatedYet("msaccess") Then Exit Sub
 If Not word.Tasks.Exists("查字forinput - [dictsurl]") Then Exit Sub
 If Not lnk.checkURL_single(url) Then Exit Sub
 
@@ -140,6 +145,7 @@ Me.ctl("url").Value = url
 
 End Sub
 Sub setDictControlValue(dictID As Byte)
+If Not SystemSetup.appActivatedYet("msaccess") Then Exit Sub
 If Not word.Tasks.Exists("查字forinput - [dictsurl]") Then Exit Sub
 
 On Error Resume Next

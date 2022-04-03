@@ -646,7 +646,7 @@ namespace WindowsFormsApp1
                     //if (textBox1.SelectedText != "")
                     //    x = x.Substring(0, s) + x.Substring(s + l);
                     undoRecord();
-                    stopUndoRec = true;
+                    #region 《十三經注疏》四合一版區塊識識別用                    
                     if (e.KeyCode == Keys.D0)
                     {
                         //insX = Environment.NewLine + "　" + Environment.NewLine +
@@ -668,21 +668,7 @@ namespace WindowsFormsApp1
                         //insX = Environment.NewLine + "　" + Environment.NewLine;
                         insX = "　";
                     }
-                    if (e.KeyCode == Keys.D7)
-                    {
-                        insX = "。}}";
-                    }
-                    if (e.KeyCode == Keys.D6)
-                    {
-                        if ((int)m == (int)Keys.Shift + (int)Keys.Control)
-                        {
-                            insX = "}}";
-                        }
-                        if (m == Keys.Control)
-                        {
-                            insX = "{{";
-                        }
-                    }
+
                     if (s + 2 <= x.Length)
                     {
                         if (x.Substring(s, 2) == Environment.NewLine)
@@ -705,6 +691,25 @@ namespace WindowsFormsApp1
                         }
 
                     }
+                    //以上需要間隔，蓋為《十三經注疏》四合一版間隔區別四區塊專用耳。
+                    #endregion
+                    // Ctrl + 6 Ctrl + Shift+ 6 Ctrl + 7 並不需要間隔
+                    if (e.KeyCode == Keys.D7)
+                    {
+                        insX = "。}}";
+                    }
+                    if (e.KeyCode == Keys.D6)
+                    {
+                        if ((int)m == (int)Keys.Shift + (int)Keys.Control)
+                        {
+                            insX = "}}";
+                        }
+                        if (m == Keys.Control)
+                        {
+                            insX = "{{";
+                        }
+                    }
+                    stopUndoRec = true;
                     insertWords(insX, x);
                     //x = x.Substring(0, s) + insX + x.Substring(s);
                     //textBox1.Text = x;
@@ -951,7 +956,11 @@ namespace WindowsFormsApp1
                 if (e.KeyCode == Keys.D2)
                 {//Alt + 2 : 鍵入全形空格「　」
                     e.Handled = true;
-                    insertWords("　", textBox1.Text);
+                    string selX = textBox1.SelectedText;
+                    if (selX != "")
+                        textBox1.SelectedText = selX.Replace("􏿽", "　");
+                    else
+                        insertWords("　", textBox1.Text);
                     return;
                 }
                 if (e.KeyCode == Keys.D8)
@@ -1270,7 +1279,7 @@ namespace WindowsFormsApp1
             }
             else
             {
-                if (x.Substring(s, 1) == "　")
+                if (s + 1 <= x.Length && x.Substring(s, 1) == "　")
                     x = x.Substring(0, s) + "􏿽" + x.Substring(s + 1);// 自動清除後面的「　」字元                
                 else
                     x = x.Substring(0, s) + "􏿽" + x.Substring(s);
@@ -1812,7 +1821,7 @@ namespace WindowsFormsApp1
                 {
                     textBox1.Select(chk[0], chk[1]);
                     textBox1.ScrollToCaret();
-                    pageTextEndPosition = 0;
+                    if (s > pageTextEndPosition) pageTextEndPosition = 0;
                     return;
                 }
             }
@@ -2520,6 +2529,7 @@ namespace WindowsFormsApp1
             }
             if (replacedword == rplsword) return;
             int s = textBox1.SelectionStart; int l = 0;
+
             undoRecord();
             stopUndoRec = true;
             if (button2.Text == "選取文")
@@ -2540,6 +2550,10 @@ namespace WindowsFormsApp1
 
             }
             addReplaceWordDefault(replacedword, rplsword);
+            #region 自動將圓括弧置換成{{}}
+            if (replacedword == "（" && rplsword == "{{") textBox1.Text = textBox1.Text.Replace("）", "}}");
+            if (replacedword == "）" && rplsword == "}}") textBox1.Text = textBox1.Text.Replace("（", "{{");
+            #endregion
             textBox1.SelectionStart = s; textBox1.SelectionLength = l;
             restoreCaretPosition(textBox1, s, l == 0 ? 1 : l);//textBox1.ScrollToCaret();
             textBox1.Focus();
@@ -3138,5 +3152,19 @@ namespace WindowsFormsApp1
             //    hideToNICo();
             //}
         }
+
+        #region 資料庫匯出
+        void mdbExport()
+        {//未完成
+            //string bookName = "原抄本日知錄";
+            //string rstStr = "SELECT 書.書名, 篇.卷, 篇.頁, 篇.末頁, 篇.篇名, 札.札記, 札.頁, 札.札ID, 札.類ID, 類別主題.類別主題" +
+            //        "FROM 類別主題 INNER JOIN((書 INNER JOIN 篇 ON 書.書ID = 篇.書ID) INNER JOIN 札 ON 篇.篇ID = 札.篇ID) ON 類別主題.類ID = 札.類ID " +
+            //        "WHERE(((書.書名) = \"" + bookName + "\") AND((類別主題.類別主題)Not Like \" * 真按 * \" Or(類別主題.類別主題) Is Null)) ORDER BY 篇.卷, 篇.頁, 篇.末頁, 札.頁, 札.札ID;";
+
+            //const string cntStr = @"Provider=Microsoft.ACE.OLEDB.12.0;Data Source=D:\千慮一得齋\書籍資料\開發_千慮一得齋.mdb";
+            runWordMacro("中國哲學書電子化計劃.mdb開發_千慮一得齋Export");
+        }
+        #endregion
+
     }
 }

@@ -56,7 +56,7 @@ AppActivate "Google Chrome"
 End Sub
 Sub 維基文庫四部叢刊本轉來()
 Dim d As Document, a, i, p As Paragraph, xP As String, acP As Integer, space As String, rng As Range
-
+On Error GoTo eH
 a = Array(ChrW(12296), "{{", ChrW(12297), "}}", "〈", "{{", "〉", "}}", _
     "○", ChrW(12295))
 Set d = Documents.Add()
@@ -120,6 +120,15 @@ Next p
 d.Range.Cut
 d.Close wdDoNotSaveChanges
 SystemSetup.playSound 3
+Exit Sub
+eH:
+Select Case Err.Number
+    Case 5904 '無法編輯 [範圍]。
+        If p.Range.Characters(acP).Hyperlinks.Count > 0 Then p.Range.Characters(acP).Hyperlinks(1).Delete
+        Resume
+    Case Else
+        MsgBox Err.Number & Err.Description
+End Select
 End Sub
 
 Sub 維基文庫四部叢刊本轉來_early()
@@ -886,6 +895,27 @@ With rng.Document
 End With
 End Sub
 
+Sub mdb開發_千慮一得齋Export()
+Dim cnt As New ADODB.Connection, db As New dBase, rst As New ADODB.Recordset, exportStr As String, preTitle As String, title As String
+Const bookName As String = "原抄本日知錄" '執行前請先指定書名
+db.cnt_開發_千慮一得齋 cnt
+rst.Open "SELECT 篇.篇名, 札.札記, 書.書名, 篇.卷, 篇.頁, 篇.末頁, 札.篇ID, 札.頁, 札.札ID, 札.類ID, 類別主題.類別主題" & _
+        " FROM 類別主題 INNER JOIN ((書 INNER JOIN 篇 ON 書.書ID = 篇.書ID) INNER JOIN 札 ON 篇.篇ID = 札.篇ID) ON 類別主題.類ID = 札.類ID" & _
+        " WHERE (((書.書名)=""" & bookName & """) AND ((類別主題.類別主題) Not Like "" * 真按 * "" Or (類別主題.類別主題) Is Null))" & _
+        " ORDER BY 篇.卷, 篇.頁, 篇.末頁, 札.篇ID, 札.頁, 札.札ID;", cnt, adOpenKeyset, adLockReadOnly
+Do Until rst.EOF
+    title = rst.Fields(0).Value
+    If preTitle <> title Then
+        exportStr = exportStr & Chr(13) & "*" & title & Chr(13)
+    End If
+    preTitle = title
+    exportStr = exportStr & rst.Fields(1).Value
+    rst.MoveNext
+Loop
+rst.Close
+cnt.Close
+Documents.Add.Range = exportStr
+End Sub
 Sub 清除所有符號_加上井號_作為網址後綴()
 Dim rng As Range, e, sybol 'Alt + l
 sybol = Array("(", ")", "（", "）")
@@ -899,10 +929,25 @@ rng.Text = "#" & rng.Text
 rng.Cut
 rng.Document.Close wdDoNotSaveChanges
 End Sub
-
-Sub tempReplaceTxtforCtext()
+Sub tempReplaceTxtforCtextEdit()
+Dim a, d As Document, i As Integer, x As String
+a = Array("{{（", "{{", "）}}", "}}", "（", "{{", "）", "}}", "○", ChrW(12295))
+Set d = Documents.Add
+d.Range.Paste
+x = d.Range
+For i = 0 To UBound(a)
+    x = Replace(x, a(i), a(i + 1))
+    i = i + 1
+Next i
+d.Range = x
+d.Range.Cut
+d.Close wdDoNotSaveChanges
+AppActivate "google chrome"
+SendKeys "^v"
+End Sub
+Sub tempReplaceTxtforCtext() 'for Quick edit only
 Dim a, d As Document, i As Integer
-a = Array("（", "", "）", "", "○", ChrW(12295))
+a = Array("{{（", "{{", "）}}", "}}", "（", "{{", "）", "}}", "○", ChrW(12295))
 Set d = Documents.Add
 d.Range.Paste
 For i = 0 To UBound(a)
