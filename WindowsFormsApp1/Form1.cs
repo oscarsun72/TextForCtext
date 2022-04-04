@@ -1265,8 +1265,8 @@ namespace WindowsFormsApp1
                 {//自動把插入點所在處前後「􏿽」置換成「　」
                     undoRecord();
                     stopUndoRec = true;s--;
-                    while (s - 1 >= 0 && (x.Substring(s, 1) == "\udbff" || x.Substring(s, 1) == "\udffd")) { s--; }
-                    l = 0;
+                    while (s >= 0 && (x.Substring(s, 1) == "\udbff" || x.Substring(s, 1) == "\udffd")) { s--; }
+                    l = 1;
                     while (s + l + 1 <= x.Length && (x.Substring(s + l, 1) == "\udffd" || x.Substring(s + l, 1) == "\udbff")) { l++; }
                     textBox1.Select(s, l);
                     textBox1.SelectedText = textBox1.SelectedText.Replace("􏿽", "　");
