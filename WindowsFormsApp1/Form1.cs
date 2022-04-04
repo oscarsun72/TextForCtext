@@ -390,6 +390,7 @@ namespace WindowsFormsApp1
                 s = pageTextEndPosition;
             }
             if (s == x.Length) l = 0;
+            if (x.Substring(0, s + l) == "") return false;
             string xCopy = x.Substring(0, s + l);
             #region 置換為全形符號
             string[] replacedChar = { ",", ";", ":", "．" };
@@ -956,11 +957,7 @@ namespace WindowsFormsApp1
                 if (e.KeyCode == Keys.D2)
                 {//Alt + 2 : 鍵入全形空格「　」
                     e.Handled = true;
-                    string selX = textBox1.SelectedText;
-                    if (selX != "")
-                        textBox1.SelectedText = selX.Replace("􏿽", "　");
-                    else
-                        insertWords("　", textBox1.Text);
+                    keysSpaces();
                     return;
                 }
                 if (e.KeyCode == Keys.D8)
@@ -1258,6 +1255,33 @@ namespace WindowsFormsApp1
             #endregion
         }
 
+        private void keysSpaces()
+        {
+            string selX = textBox1.SelectedText;
+            int s = textBox1.SelectionStart, l = textBox1.SelectionLength; string x = textBox1.Text;
+            if (s + l + 2 <= x.Length && s - 2 >= 0)
+            {
+                if (x.Substring(s + l, 2) == "􏿽" || x.Substring(s - 2, 2) == "􏿽")
+                {//自動把插入點所在處前後「􏿽」置換成「　」
+                    undoRecord();
+                    stopUndoRec = true;
+                    while (s >= 0 && (x.Substring(s--, 1) == "\udbff" || x.Substring(s--, 1) == "\udffd")) { }
+                    l = 0;
+                    while (s + l + 1 <= x.Length && (x.Substring(s + l++, 1) == "\udffd" || x.Substring(s + l++, 1) == "\udbff")) { }
+                    textBox1.Select(s, l);
+                    textBox1.SelectedText = textBox1.SelectedText.Replace("􏿽", "　");
+                    stopUndoRec = false;
+                    return;
+                }
+            }
+            undoRecord();
+            stopUndoRec = true;
+            if (selX != "")
+                textBox1.SelectedText = selX.Replace("􏿽", "　");
+            else
+                insertWords("　", textBox1.Text);
+            stopUndoRec = false;
+        }
         private void keysSpacesBlank()
         {
             string x = textBox1.Text;
@@ -1265,7 +1289,10 @@ namespace WindowsFormsApp1
             string sTxt = textBox1.SelectedText;
             if (sTxt != "")
             {
+                if (sTxt.IndexOf("　") == -1) return;
                 string sTxtChk = sTxt.Replace("　", "􏿽");
+                undoRecord();
+                stopUndoRec = true;
                 textBox1.Text = x.Substring(0, s) + sTxtChk + x.Substring(s + sTxt.Length);
                 //string sTxtChk = sTxt.Replace("　", "");
                 //if (sTxtChk != "") return;
@@ -1276,6 +1303,7 @@ namespace WindowsFormsApp1
                 //x = x.Substring(0, s) + sTxtChk + x.Substring(s + l);
                 //textBox1.Text = x;
                 textBox1.SelectionStart = s + sTxtChk.Length;
+                stopUndoRec = false;
             }
             else
             {
@@ -1283,8 +1311,14 @@ namespace WindowsFormsApp1
                     x = x.Substring(0, s) + "􏿽" + x.Substring(s + 1);// 自動清除後面的「　」字元                
                 else
                     x = x.Substring(0, s) + "􏿽" + x.Substring(s);
-                textBox1.Text = x;
-                textBox1.SelectionStart = s + "􏿽".Length;
+                if (textBox1.Text != x)
+                {
+                    undoRecord();
+                    stopUndoRec = true;
+                    textBox1.Text = x;
+                    textBox1.SelectionStart = s + "􏿽".Length;
+                    stopUndoRec = false;
+                }
             }
             textBox1.ScrollToCaret();
         }
@@ -3106,15 +3140,16 @@ namespace WindowsFormsApp1
             // Get start position to drop the text.  
             i = textBox1.SelectionStart;
             s = textBox1.Text.Substring(i);
-            textBox1.Text = textBox1.Text.Substring(0, i);
+            //textBox1.Text = textBox1.Text.Substring(0, i);
 
             // Drop the text on to the RichTextBox.  
-            textBox1.Text = textBox1.Text +
-               e.Data.GetData(DataFormats.Text).ToString();
-            textBox1.Text = textBox1.Text + s;
+            //textBox1.Text = textBox1.Text +
+            //e.Data.GetData(DataFormats.Text).ToString();
+            //e.Data.GetData(DataFormats.UnicodeText).ToString();
+            //textBox1.Text = textBox1.Text + s;
 
             ////textBox1.Text = e.Data.GetData(DataFormats.Text).ToString();
-            //textBox1.Text = e.Data.GetData(DataFormats.UnicodeText).ToString();
+            textBox1.Text = e.Data.GetData(DataFormats.UnicodeText).ToString();
             dragDrop = true;
         }
 
