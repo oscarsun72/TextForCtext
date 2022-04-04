@@ -1258,17 +1258,17 @@ namespace WindowsFormsApp1
         private void keysSpaces()
         {
             string selX = textBox1.SelectedText;
-            int s = textBox1.SelectionStart, sExp = s - 1, l = textBox1.SelectionLength, lExp = l + 1; string x = textBox1.Text;
+            int s = textBox1.SelectionStart, l = textBox1.SelectionLength; string x = textBox1.Text;
             if (s + l + 2 <= x.Length && s - 2 >= 0)
             {
                 if (x.Substring(s + l, 2) == "􏿽" || x.Substring(s - 2, 2) == "􏿽")
                 {//自動把插入點所在處前後「􏿽」置換成「　」
                     undoRecord();
                     stopUndoRec = true;
-                    while (sExp >= 0 && (x.Substring(sExp, 1) == "\udbff" || x.Substring(sExp, 1) == "\udffd")) { sExp = --s; }
+                    while (s - 1 >= 0 && (x.Substring(s, 1) == "\udbff" || x.Substring(s, 1) == "\udffd")) { s--; }
                     l = 0;
-                    while (s + lExp + 1 <= x.Length && (x.Substring(s + lExp, 1) == "\udffd" || x.Substring(s + lExp, 1) == "\udbff")) { lExp = ++l; }
-                    textBox1.Select(s, lExp);
+                    while (s + l + 1 <= x.Length && (x.Substring(s + l, 1) == "\udffd" || x.Substring(s + l, 1) == "\udbff")) { l++; }
+                    textBox1.Select(s, l);
                     textBox1.SelectedText = textBox1.SelectedText.Replace("􏿽", "　");
                     stopUndoRec = false;
                     return;
