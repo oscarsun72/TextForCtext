@@ -356,6 +356,7 @@ namespace WindowsFormsApp1
             if (textBox2.Text != "＠") textBox2.Text = "";
             string x = textBox1.Text;
             int s = textBox1.SelectionStart, l = textBox1.SelectionLength;
+            if (pageTextEndPosition - 10 < 0 || pageTextEndPosition > x.Length) pageTextEndPosition = s;
             if (pageTextEndPosition != 0 && s < pageTextEndPosition)
             {
                 if (pageEndText10 != x.Substring(pageTextEndPosition - 10, 10))
@@ -1264,9 +1265,12 @@ namespace WindowsFormsApp1
                 if (x.Substring(s + l, 2) == "􏿽" || x.Substring(s - 2, 2) == "􏿽")
                 {//自動把插入點所在處前後「􏿽」置換成「　」
                     undoRecord();
-                    stopUndoRec = true;s--;
-                    while (s >= 0 && (x.Substring(s, 1) == "\udbff" || x.Substring(s, 1) == "\udffd")) { s--; }
-                    l = 1;
+                    stopUndoRec = true; s--;
+                    while (s >= 0 && (x.Substring(s, 1) == "\udbff" || x.Substring(s, 1) == "\udffd"))
+                    {
+                        s--;
+                    }
+                    l = 0; s++;
                     while (s + l + 1 <= x.Length && (x.Substring(s + l, 1) == "\udffd" || x.Substring(s + l, 1) == "\udbff")) { l++; }
                     textBox1.Select(s, l);
                     textBox1.SelectedText = textBox1.SelectedText.Replace("􏿽", "　");
@@ -1842,6 +1846,7 @@ namespace WindowsFormsApp1
             }
             #endregion//清除空行
             if (pageTextEndPosition == 0) pageTextEndPosition = s;
+            if (s < 0 || s + l > x.Length) s = textBox1.SelectionStart;
             string xCopy = x.Substring(0, s + l);
             if (pageEndText10 == "") pageEndText10 = xCopy.Substring(xCopy.Length - 10);
             int[] chk = checkAbnormalLinePara(xCopy);
