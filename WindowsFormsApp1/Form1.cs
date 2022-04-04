@@ -1264,7 +1264,7 @@ namespace WindowsFormsApp1
                 if (x.Substring(s + l, 2) == "􏿽" || x.Substring(s - 2, 2) == "􏿽")
                 {//自動把插入點所在處前後「􏿽」置換成「　」
                     undoRecord();
-                    stopUndoRec = true;
+                    stopUndoRec = true;s--;
                     while (s - 1 >= 0 && (x.Substring(s, 1) == "\udbff" || x.Substring(s, 1) == "\udffd")) { s--; }
                     l = 0;
                     while (s + l + 1 <= x.Length && (x.Substring(s + l, 1) == "\udffd" || x.Substring(s + l, 1) == "\udbff")) { l++; }
