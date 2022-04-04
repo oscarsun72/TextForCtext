@@ -1268,7 +1268,7 @@ namespace WindowsFormsApp1
                     while (sExp >= 0 && (x.Substring(sExp, 1) == "\udbff" || x.Substring(sExp, 1) == "\udffd")) { sExp = --s; }
                     l = 0;
                     while (s + lExp + 1 <= x.Length && (x.Substring(s + lExp, 1) == "\udffd" || x.Substring(s + lExp, 1) == "\udbff")) { lExp = ++l; }
-                    textBox1.Select(s, l);
+                    textBox1.Select(s, lExp);
                     textBox1.SelectedText = textBox1.SelectedText.Replace("􏿽", "　");
                     stopUndoRec = false;
                     return;
