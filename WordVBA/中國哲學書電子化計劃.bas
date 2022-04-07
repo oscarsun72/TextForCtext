@@ -564,7 +564,7 @@ d.Close wdDoNotSaveChanges
 If word.Application.Windows.Count > 0 Then word.Application.ActiveWindow.WindowState = wdWindowStateMinimize
 End Sub
 
-Sub 戰國策_四部叢刊_維基文庫本()
+Sub 戰國策_四部叢刊_維基文庫本() '《戰國策》格式者皆適用（即主文首行頂格，而其餘內容降一格者）
 'https://ctext.org/library.pl?if=gb&res=77385
 Dim a, rng As Range, rngDoc As Range, p As Paragraph, i As Long, rngCnt As Integer, ok As Boolean
 Dim omits As String
@@ -668,10 +668,12 @@ If ok Then
             End If
         End If
     Next p
-    rngDoc.Find.Execute "正曰", , , , , , , wdFindContinue, , "【正曰】", wdReplaceAll
-    rngDoc.Find.Execute ChrW(-10155) & ChrW(-8585) & "曰", , , , , , , wdFindContinue, , "【" & ChrW(-10155) & ChrW(-8585) & "曰】", wdReplaceAll
-    rngDoc.Find.Execute "補曰", , , , , , , wdFindContinue, , "【" & ChrW(-10155) & ChrW(-8585) & "曰】", wdReplaceAll
+    '以下3行《戰國策》本身才需要
+'    rngDoc.Find.Execute "正曰", , , , , , , wdFindContinue, , "【正曰】", wdReplaceAll
+'    rngDoc.Find.Execute ChrW(-10155) & ChrW(-8585) & "曰", , , , , , , wdFindContinue, , "【" & ChrW(-10155) & ChrW(-8585) & "曰】", wdReplaceAll
+'    rngDoc.Find.Execute "補曰", , , , , , , wdFindContinue, , "【" & ChrW(-10155) & ChrW(-8585) & "曰】", wdReplaceAll
 End If
+If ok Then 文字處理.書名號篇名號標注
 rngDoc.Cut
 If Not ok Then
     DoEvents
@@ -683,7 +685,9 @@ If Not ok Then
     GoTo re
 End If
 rngDoc.Document.Close wdDoNotSaveChanges
-'AppActivate "TextForCtext"
+On Error Resume Next
+AppActivate "TextForCtext"
+SendKeys "%{insert}", True
 SystemSetup.playSound 4
 End Sub
 Sub 維基文庫造字圖取代為文字(rng As Range)

@@ -381,10 +381,14 @@ namespace WindowsFormsApp1
                 else
                 {
                     int es = x.IndexOf(pageEndText10);
-                    es += 10;
-                    if (es > -1 && es > pageTextEndPosition)
+                    if (es > 2000) pageTextEndPosition = textBox1.SelectionStart;
+                    else
                     {
-                        pageTextEndPosition = es;
+                        es += 10;
+                        if (es > -1 && es > pageTextEndPosition)
+                        {
+                            pageTextEndPosition = es;
+                        }
                     }
 
                 }
@@ -536,7 +540,7 @@ namespace WindowsFormsApp1
         void caretPositionRecall()
         {
             if (charIndexList.Count == 0) return;
-            if (charIndexRecallTimes - 1 < 0) return;
+            if (charIndexRecallTimes - 1 < 0) { charIndexRecallTimes = charIndexListSize - 1; return; }
             TextBox tb = textBox1;
             int s = tb.SelectionStart;
             int sLast = charIndexList[charIndexRecallTimes - 1 > charIndexList.Count - 1 ?
@@ -556,7 +560,10 @@ namespace WindowsFormsApp1
         private void textBox1_KeyDown(object sender, KeyEventArgs e)
         {
             var m = ModifierKeys; keycodeNow = e.KeyCode;
-            if ((m & Keys.Shift) != Keys.Shift && e.KeyCode != Keys.F5) caretPositionRecord();
+            //if (e.KeyCode != Keys.F5 && (m & Keys.Shift) != Keys.Shift) caretPositionRecord();
+            if (e.KeyCode == Keys.Insert && (m & Keys.Shift) == Keys.Shift) caretPositionRecord();
+            else
+            if (e.KeyCode != Keys.F5) caretPositionRecord();
 
 
             //if ((m & Keys.None) == Keys.None && e.KeyCode == Keys.Delete) undoRecord();
@@ -1848,7 +1855,7 @@ namespace WindowsFormsApp1
             if (pageTextEndPosition == 0) pageTextEndPosition = s;
             if (s < 0 || s + l > x.Length) s = textBox1.SelectionStart;
             string xCopy = x.Substring(0, s + l);
-            if (pageEndText10 == "") pageEndText10 = xCopy.Substring(xCopy.Length - 10);
+            if (pageEndText10 == "") pageEndText10 = xCopy.Substring(xCopy.Length - 10 >= 0 ? xCopy.Length - 10 : xCopy.Length);
             int[] chk = checkAbnormalLinePara(xCopy);
             if (chk.Length > 0)
             {
