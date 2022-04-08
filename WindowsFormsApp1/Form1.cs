@@ -1874,6 +1874,7 @@ namespace WindowsFormsApp1
             if (!newTextBox1()) return;
             pasteToCtext();
             if (!shiftKeyDownYet) nextPages(Keys.PageDown, false);
+            predictEndofPage();
             pageTextEndPosition = 0; pageEndText10 = "";
         }
 
@@ -1887,14 +1888,38 @@ namespace WindowsFormsApp1
             return x;
         }
 
+        void predictEndofPage()
+        {
+            int s = 0, i = 0, predictEndofPagePosition = 0; string x = textBox1.Text;
+            if (lines_perPage == 0) return;
+            while (s > -1)
+            {
+                s = x.IndexOf(Environment.NewLine, s + 1);
+                i++;
+                if (i == lines_perPage)
+                {
+                    predictEndofPagePosition = s;
+                    break;
+                }
+            }
+            if (predictEndofPagePosition != 0 && predictEndofPagePosition - 5 >= 0)
+            {
+                textBox1.Select(predictEndofPagePosition - 5, 5);
+                textBox1.ScrollToCaret();
+            }
+        }
+
+        int lines_perPage = 0;
         int normalLineParaLength = 0;
         private int[] checkAbnormalLinePara(string xChk)
         {
             saveText();
-            if (normalLineParaLength < 7) return new int[0];
             string[] xLineParas = xChk.Split(
                 Environment.NewLine.ToArray(),
                 StringSplitOptions.RemoveEmptyEntries);
+            lines_perPage = xLineParas.Length;
+            if (normalLineParaLength == 0) normalLineParaLength = new StringInfo(xLineParas[0]).LengthInTextElements;
+            if (normalLineParaLength < 7) return new int[0];
             int i = -1, gap = 0, len = 0;
             foreach (string lineParaText in xLineParas)
             {
@@ -3077,6 +3102,7 @@ namespace WindowsFormsApp1
 
         void mouseMiddleBtnDown(object sender, MouseEventArgs e)
         {
+            #region ModifierKeys == Keys.None
             if (ModifierKeys == Keys.None)
             {
                 switch (e.Button)
@@ -3118,6 +3144,29 @@ namespace WindowsFormsApp1
                 //    hideToNICo();
                 //}
 
+            }
+            #endregion
+            else
+            {
+                switch (e.Button)
+                {
+                    case MouseButtons.Left:
+                        break;
+                    case MouseButtons.None:
+                        break;
+                    case MouseButtons.Right:
+                        break;
+                    case MouseButtons.Middle:
+                        if (new StringInfo(textBox1.SelectedText).LengthInTextElements == 5)
+                            keyDownCtrlAdd(false);
+                        break;
+                    case MouseButtons.XButton1:
+                        break;
+                    case MouseButtons.XButton2:
+                        break;
+                    default:
+                        break;
+                }
             }
 
         }
