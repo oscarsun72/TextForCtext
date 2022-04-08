@@ -1918,10 +1918,10 @@ namespace WindowsFormsApp1
                 item = x.Substring(s, e - s); if (item == "") return;
                 if (i == 0 & x.IndexOf("}}") < x.IndexOf("{{") && x.IndexOf("}}") > e)
                     i++;
-                else if (item.Substring(0, 2) == "{{" && item.Substring(item.Length - 2, 2) == "}}"
+                else if (item.Length > 4 && item.Substring(0, 2) == "{{" && item.Substring(item.Length - 2, 2) == "}}"
                         && item.Substring(2, item.Length - 4).IndexOf("{{") == -1 && item.Substring(2, item.Length - 4).IndexOf("}}") == -1)
                     i++;
-                else if (item.Substring(0, 2) == "{{" && item.IndexOf("}}") == -1 || item.Substring(item.Length - 2, 2) == "}}" && item.IndexOf("{{") == -1)
+                else if (item.Length > 2 && (item.Substring(0, 2) == "{{" && item.IndexOf("}}") == -1 || item.Substring(item.Length - 2, 2) == "}}" && item.IndexOf("{{") == -1))
                     i++;
                 else
                     i += 2;
@@ -1954,10 +1954,10 @@ namespace WindowsFormsApp1
             {
                 if (lines_perPage == 0 & xChk.IndexOf("}}") < xChk.IndexOf("{{") && xChk.IndexOf("}}") > item.Length)
                     lines_perPage++;
-                else if (item.Substring(0, 2) == "{{" && item.Substring(item.Length - 2, 2) == "}}"
+                else if (item.Length > 4 && item.Substring(0, 2) == "{{" && item.Substring(item.Length - 2, 2) == "}}"
                         && item.Substring(2, item.Length - 4).IndexOf("{{") == -1 && item.Substring(2, item.Length - 4).IndexOf("}}") == -1)
                     lines_perPage++;
-                else if (item.Substring(0, 2) == "{{" && item.IndexOf("}}") == -1 || item.Substring(item.Length - 2, 2) == "}}" && item.IndexOf("{{") == -1)
+                else if (item.Length > 2 && (item.Substring(0, 2) == "{{" && item.IndexOf("}}") == -1 || item.Substring(item.Length - 2, 2) == "}}" && item.IndexOf("{{")== -1))
                     lines_perPage++;
                 else
                     lines_perPage += 2;
