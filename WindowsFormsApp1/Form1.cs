@@ -2169,7 +2169,9 @@ namespace WindowsFormsApp1
 
         void autoPastetoCtextQuitEditTextbox()
         {
-            if (new StringInfo(textBox1.SelectedText).LengthInTextElements == predictEndofPageSelectedTextLen &&
+            //if (new StringInfo(textBox1.SelectedText).LengthInTextElements == predictEndofPageSelectedTextLen &&
+            //        textBox1.Text.Substring(textBox1.SelectionStart + textBox1.SelectionLength, 2) == Environment.NewLine)
+            if (textBox1.SelectionLength == predictEndofPageSelectedTextLen &&
                     textBox1.Text.Substring(textBox1.SelectionStart + textBox1.SelectionLength, 2) == Environment.NewLine)
             {
                 if (autoPastetoQuickEdit)
@@ -3232,7 +3234,8 @@ namespace WindowsFormsApp1
                     case MouseButtons.Right:
                         break;
                     case MouseButtons.Middle:
-                        if (new StringInfo(textBox1.SelectedText).LengthInTextElements == predictEndofPageSelectedTextLen)
+                        //if (new StringInfo(textBox1.SelectedText).LengthInTextElements == predictEndofPageSelectedTextLen)
+                        if (textBox1.SelectionLength == predictEndofPageSelectedTextLen)
                             keyDownCtrlAdd(false);
                         break;
                     case MouseButtons.XButton1:
