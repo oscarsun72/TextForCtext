@@ -395,7 +395,12 @@ namespace WindowsFormsApp1
                 s = pageTextEndPosition;
             }
             if (s == x.Length) l = 0;
-            if (x.Substring(0, s + l) == "") return false;
+            if (s + l <= x.Length)
+            {
+                if (x.Substring(0, s + l) == "") return false;
+            }
+            else
+            { s = textBox1.SelectionStart; l = textBox1.SelectionLength; }
             string xCopy = x.Substring(0, s + l);
             #region 置換為全形符號
             string[] replacedChar = { ",", ";", ":", "．" };
@@ -1870,6 +1875,8 @@ namespace WindowsFormsApp1
                     if (s > pageTextEndPosition) pageTextEndPosition = 0;
                     return;
                 }
+                else
+                    normalLineParaLength = 0;
             }
             if (!newTextBox1()) return;
             pasteToCtext();
@@ -1902,9 +1909,9 @@ namespace WindowsFormsApp1
                     break;
                 }
             }
-            if (predictEndofPagePosition != 0 && predictEndofPagePosition - 5 >= 0)
+            if (predictEndofPagePosition != 0 && predictEndofPagePosition - predictEndofPageSelectedTextLen >= 0)
             {
-                textBox1.Select(predictEndofPagePosition - 5, 5);
+                textBox1.Select(predictEndofPagePosition - predictEndofPageSelectedTextLen, predictEndofPageSelectedTextLen);
                 textBox1.ScrollToCaret();
             }
         }
@@ -2122,9 +2129,16 @@ namespace WindowsFormsApp1
             //throw new NotImplementedException();
         }
 
+        const int predictEndofPageSelectedTextLen = 5;
         void splitLineParabySeltext(Keys kys)
         {
             if (!(kys == Keys.F1 || kys == Keys.Pause) || ModifierKeys != Keys.None) return;
+            if (kys == Keys.F1 && new StringInfo(textBox1.SelectedText).LengthInTextElements == predictEndofPageSelectedTextLen &&
+                    textBox1.Text.Substring(textBox1.SelectionStart + textBox1.SelectionLength, 2) == Environment.NewLine)
+            {
+                keyDownCtrlAdd(false);
+                return;
+            }
             string x = textBox1.SelectedText;
             if (x == "") return;
             x = textBox1.Text;
@@ -3157,7 +3171,7 @@ namespace WindowsFormsApp1
                     case MouseButtons.Right:
                         break;
                     case MouseButtons.Middle:
-                        if (new StringInfo(textBox1.SelectedText).LengthInTextElements == 5)
+                        if (new StringInfo(textBox1.SelectedText).LengthInTextElements == predictEndofPageSelectedTextLen)
                             keyDownCtrlAdd(false);
                         break;
                     case MouseButtons.XButton1:
