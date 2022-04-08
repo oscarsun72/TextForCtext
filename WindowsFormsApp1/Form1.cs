@@ -1460,7 +1460,10 @@ namespace WindowsFormsApp1
             string x = textBox1.Text; const string n = "<p>{{";
             if (x.Length < 12 || s < n.Length) return;
             if (x.Substring(s, 2) == "{{") textBox1.SelectionStart = s += 2;
-            if (x.Substring(s + 2, 2) != "}}") return;
+            if (s + 2 + 2 <= x.Length)
+            {
+                if (x.Substring(s + 2, 2) != "}}") return;
+            }
             string px = x.Substring(s, 2);
             switch (px)
             {
@@ -2129,14 +2132,28 @@ namespace WindowsFormsApp1
             //throw new NotImplementedException();
         }
 
+        void autoPastetoCtextQuitEditTextbox()
+        {
+            if (new StringInfo(textBox1.SelectedText).LengthInTextElements == predictEndofPageSelectedTextLen &&
+                    textBox1.Text.Substring(textBox1.SelectionStart + textBox1.SelectionLength, 2) == Environment.NewLine)
+            {
+                if (MessageBox.Show("auto paste to Ctext Quit Edit textBox?", "", MessageBoxButtons.OKCancel) == DialogResult.OK)
+                {
+                    keyDownCtrlAdd(false);
+                }
+                else
+                    textBox1.Select(textBox1.SelectionStart + predictEndofPageSelectedTextLen, 0);
+                //return;
+            }
+        }
+
         const int predictEndofPageSelectedTextLen = 5;
         void splitLineParabySeltext(Keys kys)
         {
             if (!(kys == Keys.F1 || kys == Keys.Pause) || ModifierKeys != Keys.None) return;
-            if (kys == Keys.F1 && new StringInfo(textBox1.SelectedText).LengthInTextElements == predictEndofPageSelectedTextLen &&
-                    textBox1.Text.Substring(textBox1.SelectionStart + textBox1.SelectionLength, 2) == Environment.NewLine)
+            if (kys == Keys.F1)
             {
-                keyDownCtrlAdd(false);
+                autoPastetoCtextQuitEditTextbox();
                 return;
             }
             string x = textBox1.SelectedText;
@@ -2150,7 +2167,10 @@ namespace WindowsFormsApp1
                 //- 按下 F1 鍵：以找到的字串位置**前**分行分段
                 x = x.Substring(0, s) + Environment.NewLine + x.Substring(s);
             if (!textBox1.Focused) textBox1.Focus();
+            undoRecord();
+            stopUndoRec = true;
             textBox1.Text = x;
+            stopUndoRec = false;
             textBox1.SelectionStart = s; textBox1.SelectionLength = l;
             textBox1.ScrollToCaret();
         }
@@ -2939,6 +2959,7 @@ namespace WindowsFormsApp1
                 if (insertMode) Caret_Shown(textBox1); else Caret_Shown_OverwriteMode(textBox1);
                 if (textBox1.SelectionLength == textBox1.Text.Length)
                     textBox1.Select(selStart, selLength);
+                autoPastetoCtextQuitEditTextbox();
             }
             if (textBox2.BackColor == Color.GreenYellow &&
                 doNotLeaveTextBox2 && textBox2.Focused) textBox2.SelectAll();

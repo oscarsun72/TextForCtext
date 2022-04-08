@@ -89,7 +89,7 @@ Ctrl + q 或 Alt + q：據第一行(段)長度來將textBox1中的文本分行�
 
 Ctrl + \ （反斜線） 或 Alt + \ ： 清除textBox1文本插入點後的分段
 
-按下 F1 鍵：以找到的字串位置**前**分行分段（在文字選取內容接的不是newline時）
+按下 F1 鍵：以找到的字串位置**前**分行分段（在文字選取內容接的不是newline時；若是，且選取長度等於常數「predictEndofPageSelectedTextLen」則進行自動貼入 Ctext 的 quit edit 方塊中）
 
 按下 Pause Break 鍵：以找到的字串位置**後**分行分段
 
