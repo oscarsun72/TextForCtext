@@ -1910,15 +1910,25 @@ namespace WindowsFormsApp1
             string[] xPredict = x.Split(Environment.NewLine.ToArray(), StringSplitOptions.RemoveEmptyEntries);
             if (xPredict.Length < predictEndofPageSelectedTextLen) return;
             if (x.Replace(Environment.NewLine, "").Replace("　", "") == "") return;
-            int s = 0, i = 0, predictEndofPagePosition = 0;
+            int s = 0, e = 0, i = 0, predictEndofPagePosition = 0; string item;
 
-            while (s > -1)
+            while (e > -1)
             {
-                s = x.IndexOf(Environment.NewLine, s + 1);
-                i++;
+                e = x.IndexOf(Environment.NewLine, s);
+                item = x.Substring(s, e - s); if (item == "") return;
+                if (i == 0 & x.IndexOf("}}") < x.IndexOf("{{") && x.IndexOf("}}") > e)
+                    i++;
+                else if (item.Substring(0, 2) == "{{" && item.Substring(item.Length - 2, 2) == "}}"
+                        && item.Substring(2, item.Length - 4).IndexOf("{{") == -1 && item.Substring(2, item.Length - 4).IndexOf("}}") == -1)
+                    i++;
+                else if (item.Substring(0, 2) == "{{" && item.IndexOf("}}") == -1 || item.Substring(item.Length - 2, 2) == "}}" && item.IndexOf("{{") == -1)
+                    i++;
+                else
+                    i += 2;
+                s = e + 2;
                 if (i == lines_perPage)
                 {
-                    predictEndofPagePosition = s;
+                    predictEndofPagePosition = s - 2;
                     break;
                 }
             }
@@ -1942,14 +1952,15 @@ namespace WindowsFormsApp1
             //lines_perPage = xLineParas.Length;
             foreach (string item in xLineParas)
             {
-                bool note = false;
-                if (item.Substring(0, 2) == "{{" && item.Substring(item.Length - 2, 2) == "}}") note = true;
-                if (!note)
-                {
+                if (lines_perPage == 0 & xChk.IndexOf("}}") < xChk.IndexOf("{{") && xChk.IndexOf("}}") > item.Length)
                     lines_perPage++;
-                }
+                else if (item.Substring(0, 2) == "{{" && item.Substring(item.Length - 2, 2) == "}}"
+                        && item.Substring(2, item.Length - 4).IndexOf("{{") == -1 && item.Substring(2, item.Length - 4).IndexOf("}}") == -1)
+                    lines_perPage++;
+                else if (item.Substring(0, 2) == "{{" && item.IndexOf("}}") == -1 || item.Substring(item.Length - 2, 2) == "}}" && item.IndexOf("{{") == -1)
+                    lines_perPage++;
                 else
-                    note = false;
+                    lines_perPage += 2;
             }
             #endregion 
             if (normalLineParaLength == 0) normalLineParaLength = new StringInfo(xLineParas[0]).LengthInTextElements;
@@ -2158,16 +2169,20 @@ namespace WindowsFormsApp1
 
         void autoPastetoCtextQuitEditTextbox()
         {
-            if (!autoPastetoQuickEdit) return;
             if (new StringInfo(textBox1.SelectedText).LengthInTextElements == predictEndofPageSelectedTextLen &&
                     textBox1.Text.Substring(textBox1.SelectionStart + textBox1.SelectionLength, 2) == Environment.NewLine)
             {
-                if (MessageBox.Show("auto paste to Ctext Quit Edit textBox?", "", MessageBoxButtons.OKCancel) == DialogResult.OK)
+                if (autoPastetoQuickEdit)
                 {
-                    keyDownCtrlAdd(false);
+                    if (MessageBox.Show("auto paste to Ctext Quit Edit textBox?", "", MessageBoxButtons.OKCancel) == DialogResult.OK)
+                    {
+                        keyDownCtrlAdd(false);
+                    }
+                    else
+                        textBox1.Select(textBox1.SelectionStart + predictEndofPageSelectedTextLen, 0);
                 }
                 else
-                    textBox1.Select(textBox1.SelectionStart + predictEndofPageSelectedTextLen, 0);
+                    keyDownCtrlAdd(false);
                 //return;
             }
         }
@@ -2984,7 +2999,7 @@ namespace WindowsFormsApp1
                 if (insertMode) Caret_Shown(textBox1); else Caret_Shown_OverwriteMode(textBox1);
                 if (textBox1.SelectionLength == textBox1.Text.Length)
                     textBox1.Select(selStart, selLength);
-                autoPastetoCtextQuitEditTextbox();
+                if (autoPastetoQuickEdit) autoPastetoCtextQuitEditTextbox();
             }
             if (textBox2.BackColor == Color.GreenYellow &&
                 doNotLeaveTextBox2 && textBox2.Focused) textBox2.SelectAll();
