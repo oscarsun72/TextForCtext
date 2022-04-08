@@ -1436,7 +1436,8 @@ namespace WindowsFormsApp1
                 stopUndoRec = false; return;
             }
             if (x.Substring(s + textBox1.SelectionLength - 3, 3) == "<p>") endCode = "";
-            textBox1.SelectedText = "*" + textBox1.SelectedText + endCode; int endPostion = textBox1.SelectionStart;
+            textBox1.SelectedText = ("*" + textBox1.SelectedText + endCode).Replace("《", "").Replace("》", "").Replace("〈", "").Replace("〉", "");
+            int endPostion = textBox1.SelectionStart;
             //標題篇名前段補上分段符號
             i = x.LastIndexOf(Environment.NewLine, s);
             if (i > -1)
@@ -1898,10 +1899,19 @@ namespace WindowsFormsApp1
             return x;
         }
 
+        bool autoPastetoQuickEdit = false;
+        int previousBookID = 0;
+
         void predictEndofPage()
         {
-            int s = 0, i = 0, predictEndofPagePosition = 0; string x = textBox1.Text;
             if (lines_perPage == 0) return;
+            string x = textBox1.Text;
+            if (x.Length < 30) return;
+            string[] xPredict = x.Split(Environment.NewLine.ToArray(), StringSplitOptions.RemoveEmptyEntries);
+            if (xPredict.Length < predictEndofPageSelectedTextLen) return;
+            if (x.Replace(Environment.NewLine, "").Replace("　", "") == "") return;
+            int s = 0, i = 0, predictEndofPagePosition = 0;
+
             while (s > -1)
             {
                 s = x.IndexOf(Environment.NewLine, s + 1);
@@ -1927,7 +1937,21 @@ namespace WindowsFormsApp1
             string[] xLineParas = xChk.Split(
                 Environment.NewLine.ToArray(),
                 StringSplitOptions.RemoveEmptyEntries);
-            lines_perPage = xLineParas.Length;
+            #region get lines_perPage
+            lines_perPage = 0;
+            //lines_perPage = xLineParas.Length;
+            foreach (string item in xLineParas)
+            {
+                bool note = false;
+                if (item.Substring(0, 2) == "{{" && item.Substring(item.Length - 2, 2) == "}}") note = true;
+                if (!note)
+                {
+                    lines_perPage++;
+                }
+                else
+                    note = false;
+            }
+            #endregion 
             if (normalLineParaLength == 0) normalLineParaLength = new StringInfo(xLineParas[0]).LengthInTextElements;
             if (normalLineParaLength < 7) return new int[0];
             int i = -1, gap = 0, len = 0;
@@ -2134,6 +2158,7 @@ namespace WindowsFormsApp1
 
         void autoPastetoCtextQuitEditTextbox()
         {
+            if (!autoPastetoQuickEdit) return;
             if (new StringInfo(textBox1.SelectedText).LengthInTextElements == predictEndofPageSelectedTextLen &&
                     textBox1.Text.Substring(textBox1.SelectionStart + textBox1.SelectionLength, 2) == Environment.NewLine)
             {
@@ -3258,6 +3283,31 @@ namespace WindowsFormsApp1
             nextS = x1.IndexOf(x, s + x.Length);
             return new int[] { s, nextS };
         }
+
+
+
+        private void textBox3_TextChanged(object sender, EventArgs e)
+        {
+            autoPastetoOrNot();
+        }
+
+        private void autoPastetoOrNot()
+        {
+            if (textBox3.Text == "") return;
+            if (textBox3.Text.IndexOf("https://ctext.org/") == -1) return;
+            string x = textBox3.Text; const string f = "file="; int s = x.IndexOf(f);
+            int bookID = int.Parse(x.Substring(s + f.Length, x.IndexOf("&", s + 1) - s - f.Length));
+
+            if (bookID != previousBookID)
+            {
+                if (MessageBox.Show("auto paste to Ctext Quick Edit textBox ?", "", MessageBoxButtons.OKCancel) == DialogResult.OK)
+                    autoPastetoQuickEdit = true;
+                else
+                    autoPastetoQuickEdit = false;
+            }
+            previousBookID = bookID;
+        }
+
         int indexOfStringInfo(string s, string x)
         {
             //StringInfo sInfo = new StringInfo(s);
