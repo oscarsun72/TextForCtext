@@ -1464,6 +1464,7 @@ namespace WindowsFormsApp1
             int s = textBox1.SelectionStart; bool replaceIt = false;
             string x = textBox1.Text; const string n = "<p>{{";
             if (x.Length < 12 || s < n.Length) return;
+            if (s + 2 > x.Length) return;
             if (x.Substring(s, 2) == "{{") textBox1.SelectionStart = s += 2;
             if (s + 2 + 2 <= x.Length)
             {
