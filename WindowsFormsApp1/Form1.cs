@@ -1639,18 +1639,19 @@ namespace WindowsFormsApp1
             }
         }
 
-        private void insertWords(string insX, string x)
+        private void insertWords(string insX, string x="")
         {
-            int s = textBox1.SelectionStart, l = textBox1.SelectionLength;
-            if (l == 0)
-                x = x.Substring(0, s) + insX + x.Substring(s);
-            else
-                x = x.Substring(0, s) + insX + x.Substring(s + l);
-            textBox1.Text = x;
-            s += insX.Length;
-            //textBox1.SelectionStart = s + insX.Length;
-            //textBox1.ScrollToCaret();
-            restoreCaretPosition(textBox1, s, 0);
+            textBox1.SelectedText = insX;
+            //int s = textBox1.SelectionStart, l = textBox1.SelectionLength;
+            //if (l == 0)                
+            //    //x = x.Substring(0, s) + insX + x.Substring(s);
+            //else
+            //x = x.Substring(0, s) + insX + x.Substring(s + l);
+            //textBox1.Text = x;
+            //s += insX.Length;
+            ////textBox1.SelectionStart = s + insX.Length;
+            ////textBox1.ScrollToCaret();
+            //restoreCaretPosition(textBox1, s, 0);
 
         }
 
