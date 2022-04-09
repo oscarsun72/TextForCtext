@@ -1182,6 +1182,10 @@ namespace WindowsFormsApp1
             #region 按下單一鍵            
             if (ModifierKeys == Keys.None)
             {//按下單一鍵
+                if (e.KeyCode == Keys.Scroll)
+                {//按下 Scroll Lock 將字數較少的行/段落尾末標上「<p>」符號
+                    e.Handled = true; paragraphMarkAccordingFirstOne(); return;
+                }
                 if (e.KeyCode == Keys.Insert)
                 {
                     if (insertMode)
@@ -1639,9 +1643,41 @@ namespace WindowsFormsApp1
             }
         }
 
-        private void insertWords(string insX, string x="")
+        void paragraphMarkAccordingFirstOne()
         {
+            int s = 0, e = textBox1.Text.IndexOf(Environment.NewLine), rs = textBox1.SelectionStart;
+            string se = textBox1.Text.Substring(s, e - s);
+            int l = new StringInfo(se).LengthInTextElements;
+            undoRecord(); stopUndoRec = true;
+            while (e > -1)
+            {
+                s = e + 2;
+                e = textBox1.Text.IndexOf(Environment.NewLine, s);
+                if (e == -1) break;
+                se = textBox1.Text.Substring(s, e - s);
+                foreach (var item in punctuations)
+                {
+                    se = se.Replace(item.ToString(), "");
+                }
+                if (se != "" && new StringInfo(se).LengthInTextElements < l)
+                {
+                    if (se.IndexOf("{{") == -1 && se.IndexOf("<p>") == -1)
+                    {
+                        textBox1.Select(e, 0);
+                        textBox1.SelectedText = "<p>";
+                        e += 3;
+                    }
+                }
+            }
+            stopUndoRec = false;
+            textBox1.Select(rs, 0); textBox1.ScrollToCaret();
+        }
+        private void insertWords(string insX, string x = "")
+        {
+            undoRecord();
+            stopUndoRec = true;
             textBox1.SelectedText = insX;
+            stopUndoRec = false;
             //int s = textBox1.SelectionStart, l = textBox1.SelectionLength;
             //if (l == 0)                
             //    //x = x.Substring(0, s) + insX + x.Substring(s);
@@ -1708,9 +1744,9 @@ namespace WindowsFormsApp1
             return -1;
         }
 
+        const string punctuations = "〇.,;?@●'\"。，；！？、－-—…《》〈〉「」『』〖〗【】（）()[]〔〕［］0123456789";
         int isChineseChar(string x, bool skipPunctuation)
         {
-            const string punctuations = "〇.,;?@●'\"。，；！？、－-—…《》〈〉「」『』〖〗【】（）()[]〔〕［］0123456789";
             if (skipPunctuation) if (punctuations.IndexOf(x) > -1) return -1;
             const string notChineseCharPriority = "〇　 􏿽\r\n<>{}.,;?@●'\"。，；！？、－-《》〈〉「」『』〖〗【】（）()[]〔〕［］0123456789";
             if (notChineseCharPriority.IndexOf(x) > -1) return 0;
@@ -1958,7 +1994,7 @@ namespace WindowsFormsApp1
                 else if (item.Length > 4 && item.Substring(0, 2) == "{{" && item.Substring(item.Length - 2, 2) == "}}"
                         && item.Substring(2, item.Length - 4).IndexOf("{{") == -1 && item.Substring(2, item.Length - 4).IndexOf("}}") == -1)
                     lines_perPage++;
-                else if (item.Length > 2 && (item.Substring(0, 2) == "{{" && item.IndexOf("}}") == -1 || item.Substring(item.Length - 2, 2) == "}}" && item.IndexOf("{{")== -1))
+                else if (item.Length > 2 && (item.Substring(0, 2) == "{{" && item.IndexOf("}}") == -1 || item.Substring(item.Length - 2, 2) == "}}" && item.IndexOf("{{") == -1))
                     lines_perPage++;
                 else
                     lines_perPage += 2;
@@ -2622,6 +2658,10 @@ namespace WindowsFormsApp1
         private void pasteToCtext()
         {
             appActivateByName();
+            if (ModifierKeys == Keys.Control)
+            {
+                SendKeys.Send("^w");//關閉前一頁                
+            }
             Task.Delay(100).Wait();
             SendKeys.Send("^v{tab}~");
             //this.WindowState = FormWindowState.Minimized;
@@ -3002,7 +3042,7 @@ namespace WindowsFormsApp1
                 if (insertMode) Caret_Shown(textBox1); else Caret_Shown_OverwriteMode(textBox1);
                 if (textBox1.SelectionLength == textBox1.Text.Length)
                     textBox1.Select(selStart, selLength);
-                if (autoPastetoQuickEdit) autoPastetoCtextQuitEditTextbox();
+                if (autoPastetoQuickEdit || ModifierKeys != Keys.None) autoPastetoCtextQuitEditTextbox();
             }
             if (textBox2.BackColor == Color.GreenYellow &&
                 doNotLeaveTextBox2 && textBox2.Focused) textBox2.SelectAll();

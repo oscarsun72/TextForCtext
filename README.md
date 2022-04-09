@@ -81,6 +81,8 @@ Alt + F1 ：切換 textbox1 之字型： 切換支援 CJK - Ext 擴充字集的�
 
 滑鼠下一頁鍵： 同Ctrl + PageDown
 
+按下 Ctrl 、Alt 或 Shift 任一鍵再啟用表單成為現用的（activate form1)則會啟動自動輸入( auto paste to Quick Edit textbox in Ctext).
+
 ### 在 textBox1 中按下以下組合鍵：
 
 Insert : 如 MS Word ，切換插入/取代文字模式（hit! 還原機制亦大致成功了。還原上限為50次。Ctrl + z ： 支援打字輸入時及取代文字時的還原。）
@@ -92,6 +94,8 @@ Ctrl + \ （反斜線） 或 Alt + \ ： 清除textBox1文本插入點後的分�
 按下 F1 鍵：以找到的字串位置**前**分行分段（在文字選取內容接的不是newline時；若是，且選取長度等於常數「predictEndofPageSelectedTextLen」則進行自動貼入 Ctext 的 quit edit 方塊中）
 
 按下 Pause Break 鍵：以找到的字串位置**後**分行分段
+
+按下 Scroll Lock 將字數較少的行/段落尾末標上「<p>」符號
 
 Ctrl + 6 ：鍵入「{{」
 
