@@ -1645,7 +1645,7 @@ namespace WindowsFormsApp1
 
         void paragraphMarkAccordingFirstOne()
         {
-            int s = 0, e = textBox1.Text.IndexOf(Environment.NewLine), rs = textBox1.SelectionStart;
+            int s = 0, e = textBox1.Text.IndexOf(Environment.NewLine), rs = textBox1.SelectionStart,rl=textBox1.SelectionLength;
             string se = textBox1.Text.Substring(s, e - s);
             int l = new StringInfo(se).LengthInTextElements;
             undoRecord(); stopUndoRec = true;
@@ -1670,7 +1670,7 @@ namespace WindowsFormsApp1
                 }
             }
             stopUndoRec = false;
-            textBox1.Select(rs, 0); textBox1.ScrollToCaret();
+            textBox1.Select(rs, rl); textBox1.ScrollToCaret();
         }
         private void insertWords(string insX, string x = "")
         {
@@ -2658,7 +2658,7 @@ namespace WindowsFormsApp1
         private void pasteToCtext()
         {
             appActivateByName();
-            if (ModifierKeys == Keys.Control)
+            if (ModifierKeys == Keys.Shift)//(ModifierKeys == Keys.Control)
             {
                 SendKeys.Send("^w");//關閉前一頁                
             }
