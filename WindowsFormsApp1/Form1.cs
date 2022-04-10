@@ -2040,6 +2040,12 @@ namespace WindowsFormsApp1
                     i++;//第一段/行是純注文
                 else if (item.IndexOf("{{") == -1 && item.IndexOf("}}") == -1)//《維基文庫》純正文
                     i += 2;
+                else if (item.IndexOf("{{") > 0 || //《維基文庫》正注文夾雜
+                    (item.IndexOf("}}")>-1 && 
+                    ((item.IndexOf("<p>")==-1 && item.IndexOf("}}") < item.Length-2)||
+                        (item.IndexOf("<p>") > -1 && item.IndexOf("}}") < item.Length - 5))
+                    ))
+                    i += 2;
                 else if ((item.IndexOf("{{") == 0 && item.IndexOf("}}") == -1)
                     || (item.IndexOf("{{") == -1 && (item.Substring(item.Length - 5) == "}}<p>" ||
                                                 item.Substring(item.Length - 2) == "}}")))
