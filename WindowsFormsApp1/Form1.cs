@@ -1675,17 +1675,23 @@ namespace WindowsFormsApp1
             {
                 xLinePara = xLinePara.Replace(item.ToString(), "");
             }
-            int openCurlybracketsPostion = xLinePara.IndexOf("{{"), closeCurlybracketsPostion = xLinePara.IndexOf("}}"), s = 0, e = 0, countResult = 0;
-            string se = "", txt = "", note = "";
+            int openCurlybracketsPostion = xLinePara.IndexOf("{{"), closeCurlybracketsPostion = xLinePara.IndexOf("}}"),
+                s = 0, countResult = 0;//, e = 0
+            string txt = "", note = "";//se = ""
 
-            if (openCurlybracketsPostion == -1 && closeCurlybracketsPostion == -1)
+            if (openCurlybracketsPostion == -1 && closeCurlybracketsPostion == -1)//純正文、純注文
                 return new StringInfo(xLinePara).LengthInTextElements;
             else if (openCurlybracketsPostion > -1 && closeCurlybracketsPostion > -1)
-            {//兼具 {{、}}者
+            {//兼具 {{、}} 正文、注文夾雜者
+                if (openCurlybracketsPostion > closeCurlybracketsPostion)
+                {//先出現 }} 的話
+                    s = closeCurlybracketsPostion + 2;
+                    countResult += new StringInfo(xLinePara.Substring(0, closeCurlybracketsPostion)).LengthInTextElements;
+                }
                 while (openCurlybracketsPostion > -1)
                 {
                     txt = xLinePara.Substring(s, openCurlybracketsPostion);
-                    countResult = new StringInfo(txt).LengthInTextElements;
+                    countResult += new StringInfo(txt).LengthInTextElements;
                     note = xLinePara.Substring(openCurlybracketsPostion + 2, closeCurlybracketsPostion - (openCurlybracketsPostion + 2));
                     //int l = new StringInfo(note).LengthInTextElements;
                     //l = (((l + 1) % 2) == 1) ? ++l / 2 : l / 2;
@@ -1704,6 +1710,7 @@ namespace WindowsFormsApp1
                         return countResult += countNoteLen(note);
                     }
                 }
+
                 return countResult;
 
             }
@@ -2112,7 +2119,11 @@ namespace WindowsFormsApp1
             }
             */
             #endregion 
-            if (normalLineParaLength == 0) normalLineParaLength = new StringInfo(xLineParas[0]).LengthInTextElements;
+            if (normalLineParaLength == 0)
+            {
+                if (xLineParas.Length > 0)//通常第一行會有卷首篇題，故不準；最末行又可能收尾，故取其次末行
+                    normalLineParaLength = countWordsLenPerLinePara(xLineParas[xLineParas.Length - 1]);// new StringInfo(xLineParas[0]).LengthInTextElements;
+            }
             if (normalLineParaLength < 7) return new int[0];
             int i = -1, gap = 0, len = 0;
             foreach (string lineParaText in xLineParas)
@@ -2770,10 +2781,11 @@ namespace WindowsFormsApp1
         private void pasteToCtext()
         {
             appActivateByName();
-            if (ModifierKeys == Keys.Shift || ModifierKeys == Keys.Control
-                && textBox1.SelectionLength == predictEndofPageSelectedTextLen
-                && textBox1.Text.Substring(textBox1.SelectionStart + textBox1.SelectionLength, 2) == Environment.NewLine)
-            {//當啟用預估頁尾後，按下 Ctrl 或 Shift Alt 可以自動貼入 Quick Edit ，唯此處僅用 Ctrl 及 Shift 控制關閉前一頁所瀏覽之 Ctext 網頁
+            if (ModifierKeys == Keys.Shift || (autoPastetoQuickEdit && ModifierKeys == Keys.Control)) //|| ModifierKeys == Keys.Control
+                                                                                                      //||autoPastetoQuickEdit)//
+                                                                                                      //&& (textBox1.SelectionLength == predictEndofPageSelectedTextLen
+                                                                                                      //&& textBox1.Text.Substring(textBox1.SelectionStart + textBox1.SelectionLength, 2) == Environment.NewLine))
+            {//當啟用預估頁尾後，按下 Ctrl 或 Shift Alt 可以自動貼入 Quick Edit ，唯此處僅用 Ctrl 及 Shift 控制關閉前一頁所瀏覽之 Ctext 網頁                
                 SendKeys.Send("^{F4}");//關閉前一頁                
             }
             Task.Delay(100).Wait();
@@ -3406,6 +3418,7 @@ namespace WindowsFormsApp1
 
         private void textBox1_MouseDoubleClick(object sender, MouseEventArgs e)
         {
+            pageTextEndPosition = textBox1.SelectionStart + textBox1.SelectionLength;//重設 pageTextEndPosition 值
             keyDownCtrlAdd(false);
         }
 
