@@ -1995,8 +1995,16 @@ namespace WindowsFormsApp1
                 {
                     textBox1.Select(chk[0], chk[1]);
                     textBox1.ScrollToCaret();
-                    //if (s > pageTextEndPosition) pageTextEndPosition = 0;
-                    pageTextEndPosition = 0;
+                    if (s > pageTextEndPosition)
+                    {
+                        pageTextEndPosition = 0;
+                    }
+                    else
+                    {
+                        if (MessageBox.Show("reset the page end ? ", "", MessageBoxButtons.OKCancel) == DialogResult.OK)
+                            pageTextEndPosition = s;
+                    }
+
                     return;
                 }
                 else
@@ -2042,8 +2050,8 @@ namespace WindowsFormsApp1
                 else if (item.IndexOf("{{") == -1 && item.IndexOf("}}") == -1)//《維基文庫》純正文
                     i += 2;
                 else if (item.IndexOf("{{") > 0 || //《維基文庫》正注文夾雜
-                    (item.IndexOf("}}")>-1 && 
-                    ((item.IndexOf("<p>")==-1 && item.IndexOf("}}") < item.Length-2)||
+                    (item.IndexOf("}}") > -1 &&
+                    ((item.IndexOf("<p>") == -1 && item.IndexOf("}}") < item.Length - 2) ||
                         (item.IndexOf("<p>") > -1 && item.IndexOf("}}") < item.Length - 5))
                     ))
                     i += 2;
