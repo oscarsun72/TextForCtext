@@ -1642,36 +1642,71 @@ namespace WindowsFormsApp1
                 textBox1.AutoScrollOffset = caretPosition;
             }
         }
+
+        int countNoteLen(string note)
+        {
+            int l = new StringInfo(note).LengthInTextElements;
+            return (((l + 1) % 2) == 1) ? ++l / 2 : l / 2;
+        }
         int countWordsLenPerLinePara(string xLinePara)
         {
-            int openCurlybracketsPostion = xLinePara.IndexOf("{{"), closeCurlybracketsPostion = xLinePara.IndexOf("}}"),s=0,e=0, countResult=0;
+            int openCurlybracketsPostion = xLinePara.IndexOf("{{"), closeCurlybracketsPostion = xLinePara.IndexOf("}}"), s = 0, e = 0, countResult = 0;
             string se = "", txt = "", note = "";
-            foreach (var item in punctuations)
+            //StringInfo seInfo = new StringInfo(se);
+            foreach (var item in punctuations)//標點符號不計
             {
                 xLinePara = xLinePara.Replace(item.ToString(), "");
             }
 
-            if (openCurlybracketsPostion==-1 &&  closeCurlybracketsPostion==-1)
+            if (openCurlybracketsPostion == -1 && closeCurlybracketsPostion == -1)
                 return new StringInfo(xLinePara).LengthInTextElements;
-            else if (openCurlybracketsPostion>-1 && closeCurlybracketsPostion>-1)
+            else if (openCurlybracketsPostion > -1 && closeCurlybracketsPostion > -1)
             {//兼具 {{、}}者
-                while (openCurlybracketsPostion>-1)
+                while (openCurlybracketsPostion > -1)
                 {
                     txt = xLinePara.Substring(s, openCurlybracketsPostion);
                     countResult = new StringInfo(txt).LengthInTextElements;
+                    note = xLinePara.Substring(openCurlybracketsPostion + 2, closeCurlybracketsPostion - (openCurlybracketsPostion + 2));
+                    //int l = new StringInfo(note).LengthInTextElements;
+                    //l = (((l + 1) % 2) == 1) ? ++l / 2 : l / 2;
+                    countResult += countNoteLen(note);
+                    openCurlybracketsPostion = xLinePara.IndexOf("{{", closeCurlybracketsPostion);
+                    if (openCurlybracketsPostion == -1)
+                    {
+                        if (closeCurlybracketsPostion + 2 > xLinePara.Length) txt = "";
+                        else txt = xLinePara.Substring(closeCurlybracketsPostion + 2);
+                        return countResult += new StringInfo(txt).LengthInTextElements;
+                    }
+                    closeCurlybracketsPostion = xLinePara.IndexOf("}}", closeCurlybracketsPostion + 2);
+                    if (closeCurlybracketsPostion == -1)
+                    {
+                        note = xLinePara.Substring(openCurlybracketsPostion);
+                        return countResult += countNoteLen(note);
+                    }
                 }
-                    return countResult;
+                return countResult;
 
             }
+            else if (openCurlybracketsPostion > 0 && closeCurlybracketsPostion == -1)
+            {//只有 {{ 雜正文                
+                return new StringInfo(xLinePara.Substring(0, openCurlybracketsPostion)).LengthInTextElements +
+                        countNoteLen(xLinePara.Substring(openCurlybracketsPostion + 2));
+            }
+            else if (closeCurlybracketsPostion < xLinePara.Length - 2 && openCurlybracketsPostion == -1)
+            {//只有 }} 雜正文
+                return countNoteLen(xLinePara.Substring(0, closeCurlybracketsPostion)) +
+                    new StringInfo(xLinePara.Substring(closeCurlybracketsPostion + 2)).LengthInTextElements;
+            }
             else
-                return new StringInfo(xLinePara).LengthInTextElements;
+                return new StringInfo(xLinePara.Replace("{{", "").Replace("}}", "")).LengthInTextElements;
 
         }
         void paragraphMarkAccordingFirstOne()
         {
             int s = 0, e = textBox1.Text.IndexOf(Environment.NewLine), rs = textBox1.SelectionStart, rl = textBox1.SelectionLength;
             string se = textBox1.Text.Substring(s, e - s);
-            int l = new StringInfo(se).LengthInTextElements;
+            //int l = new StringInfo(se).LengthInTextElements;
+            int l = countWordsLenPerLinePara(se);
             undoRecord(); stopUndoRec = true;
             while (e > -1)
             {
@@ -1685,8 +1720,9 @@ namespace WindowsFormsApp1
                 //}
                 if (se != "" && countWordsLenPerLinePara(se) < l)
                 {
-                    if ((se.IndexOf("{{") == -1 && se.IndexOf("}}") > -1)
-                        || (se.IndexOf("{{") > 0 && se.IndexOf("}}") > -1) //「{{」不能是開頭
+                    if (((se.IndexOf("{{")==-1 && se.IndexOf("}}")==-1)
+                        ||(se.IndexOf("{{") == -1 && se.IndexOf("}}") > -1)
+                        || (se.IndexOf("{{") > 0 && se.IndexOf("}}") > -1)) //「{{」不能是開頭
                         && se.IndexOf("<p>") == -1)
                     {
                         textBox1.Select(e, 0);
