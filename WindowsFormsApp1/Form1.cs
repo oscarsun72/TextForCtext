@@ -1995,7 +1995,8 @@ namespace WindowsFormsApp1
                 {
                     textBox1.Select(chk[0], chk[1]);
                     textBox1.ScrollToCaret();
-                    if (s > pageTextEndPosition) pageTextEndPosition = 0;
+                    //if (s > pageTextEndPosition) pageTextEndPosition = 0;
+                    pageTextEndPosition = 0;
                     return;
                 }
                 else
