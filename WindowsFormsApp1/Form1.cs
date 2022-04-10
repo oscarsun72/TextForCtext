@@ -1643,6 +1643,26 @@ namespace WindowsFormsApp1
             }
         }
 
+        int countLinesPerPage(string xPage)
+        {
+            int count = 0;
+            string[] linesParasPage = xPage.Split(Environment.NewLine.ToArray(), StringSplitOptions.RemoveEmptyEntries);
+            foreach (string item in linesParasPage)
+            {
+                if ((item.IndexOf("{{") == -1 && item.IndexOf("}}") == -1)//純正文
+                    || item.IndexOf("{{") > 0 || item.IndexOf("}}") + 2 < item.Length)////正注文夾雜
+                {
+                    count += 2;
+                }
+                else if ((item.IndexOf("{{") > -1 && item.IndexOf("}}") > -1)//純注文
+                    || (item.IndexOf("{{") > -1 && item.IndexOf("}}") == -1)
+                    || (item.IndexOf("{{") == -1 && item.IndexOf("}}") > -1))
+                {
+                    count++;
+                }
+            }
+            return count;
+        }
         int countNoteLen(string note)
         {
             int l = new StringInfo(note).LengthInTextElements;
@@ -1650,13 +1670,13 @@ namespace WindowsFormsApp1
         }
         int countWordsLenPerLinePara(string xLinePara)
         {
-            int openCurlybracketsPostion = xLinePara.IndexOf("{{"), closeCurlybracketsPostion = xLinePara.IndexOf("}}"), s = 0, e = 0, countResult = 0;
-            string se = "", txt = "", note = "";
             //StringInfo seInfo = new StringInfo(se);
             foreach (var item in punctuations)//標點符號不計
             {
                 xLinePara = xLinePara.Replace(item.ToString(), "");
             }
+            int openCurlybracketsPostion = xLinePara.IndexOf("{{"), closeCurlybracketsPostion = xLinePara.IndexOf("}}"), s = 0, e = 0, countResult = 0;
+            string se = "", txt = "", note = "";
 
             if (openCurlybracketsPostion == -1 && closeCurlybracketsPostion == -1)
                 return new StringInfo(xLinePara).LengthInTextElements;
@@ -1720,8 +1740,8 @@ namespace WindowsFormsApp1
                 //}
                 if (se != "" && countWordsLenPerLinePara(se) < l)
                 {
-                    if (((se.IndexOf("{{")==-1 && se.IndexOf("}}")==-1)
-                        ||(se.IndexOf("{{") == -1 && se.IndexOf("}}") > -1)
+                    if (((se.IndexOf("{{") == -1 && se.IndexOf("}}") == -1)
+                        || (se.IndexOf("{{") == -1 && se.IndexOf("}}") > -1)
                         || (se.IndexOf("{{") > 0 && se.IndexOf("}}") > -1)) //「{{」不能是開頭
                         && se.IndexOf("<p>") == -1)
                     {
@@ -2007,7 +2027,7 @@ namespace WindowsFormsApp1
             string x = textBox1.Text;
             if (x.Length < 30) return;
             string[] xPredict = x.Split(Environment.NewLine.ToArray(), StringSplitOptions.RemoveEmptyEntries);
-            if (xPredict.Length < predictEndofPageSelectedTextLen) return;
+            //if (xPredict.Length < predictEndofPageSelectedTextLen) return;
             if (x.Replace(Environment.NewLine, "").Replace("　", "") == "") return;
             int s = 0, e = 0, i = 0, predictEndofPagePosition = 0; string item;
 
@@ -2017,16 +2037,27 @@ namespace WindowsFormsApp1
                 if (e - s < 0 || s < 0) break;
                 item = x.Substring(s, e - s); if (item == "") return;
                 if (i == 0 & x.IndexOf("}}") < x.IndexOf("{{") && x.IndexOf("}}") > e)
+                    i++;//第一段/行是純注文
+                else if (item.IndexOf("{{") == -1 && item.IndexOf("}}") == -1)//《維基文庫》純正文
+                    i += 2;
+                else if ((item.IndexOf("{{") == 0 && item.IndexOf("}}") == -1)
+                    || (item.IndexOf("{{") == -1 && (item.Substring(item.Length - 5) == "}}<p>" ||
+                                                item.Substring(item.Length - 2) == "}}")))
+                    //純注文
                     i++;
+                /*
                 else if (item.Length > 4 && item.Substring(0, 2) == "{{" && item.Substring(item.Length - 2, 2) == "}}"
                         && item.Substring(2, item.Length - 4).IndexOf("{{") == -1 && item.Substring(2, item.Length - 4).IndexOf("}}") == -1)
                     i++;
-                else if (item.Length > 2 && (item.Substring(0, 2) == "{{" && item.IndexOf("}}") == -1 || item.Substring(item.Length - 2, 2) == "}}" && item.IndexOf("{{") == -1))
+                else if (item.Length > 2 
+                    && (item.Substring(0, 2) == "{{" && item.IndexOf("}}") == -1 
+                        || item.Substring(item.Length - 2, 2) == "}}" && item.IndexOf("{{") == -1))
                     i++;
-                else
+                */
+                else//純正文及注文夾雜者
                     i += 2;
                 s = e + 2;
-                if (i == lines_perPage)
+                if (i >= lines_perPage)
                 {
                     predictEndofPagePosition = s - 2;
                     break;
@@ -2049,7 +2080,9 @@ namespace WindowsFormsApp1
                 StringSplitOptions.RemoveEmptyEntries);
             #region get lines_perPage
             lines_perPage = 0;
+            lines_perPage = countLinesPerPage(xChk);
             //lines_perPage = xLineParas.Length;
+            /*
             foreach (string item in xLineParas)
             {
                 if (lines_perPage == 0 & xChk.IndexOf("}}") < xChk.IndexOf("{{") && xChk.IndexOf("}}") > item.Length)
@@ -2062,6 +2095,7 @@ namespace WindowsFormsApp1
                 else
                     lines_perPage += 2;
             }
+            */
             #endregion 
             if (normalLineParaLength == 0) normalLineParaLength = new StringInfo(xLineParas[0]).LengthInTextElements;
             if (normalLineParaLength < 7) return new int[0];
