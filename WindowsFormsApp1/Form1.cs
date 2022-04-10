@@ -1463,7 +1463,7 @@ namespace WindowsFormsApp1
         {//由 keysTitleCode 調用，keysTitleCode完成時是停在「并序」字前
             int s = textBox1.SelectionStart; bool replaceIt = false;
             string x = textBox1.Text; const string n = "<p>{{";
-            if (x.Length < 12 || s < n.Length|| s + 2 > x.Length) return;
+            if (x.Length < 12 || s < n.Length || s + 2 > x.Length) return;
             if (x.Substring(s, 2) == "{{") textBox1.SelectionStart = s += 2;
             if (s + 2 + 2 <= x.Length)
             {
@@ -1642,10 +1642,34 @@ namespace WindowsFormsApp1
                 textBox1.AutoScrollOffset = caretPosition;
             }
         }
+        int countWordsLenPerLinePara(string xLinePara)
+        {
+            int openCurlybracketsPostion = xLinePara.IndexOf("{{"), closeCurlybracketsPostion = xLinePara.IndexOf("}}"),s=0,e=0, countResult=0;
+            string se = "", txt = "", note = "";
+            foreach (var item in punctuations)
+            {
+                xLinePara = xLinePara.Replace(item.ToString(), "");
+            }
 
+            if (openCurlybracketsPostion==-1 &&  closeCurlybracketsPostion==-1)
+                return new StringInfo(xLinePara).LengthInTextElements;
+            else if (openCurlybracketsPostion>-1 && closeCurlybracketsPostion>-1)
+            {//兼具 {{、}}者
+                while (openCurlybracketsPostion>-1)
+                {
+                    txt = xLinePara.Substring(s, openCurlybracketsPostion);
+                    countResult = new StringInfo(txt).LengthInTextElements;
+                }
+                    return countResult;
+
+            }
+            else
+                return new StringInfo(xLinePara).LengthInTextElements;
+
+        }
         void paragraphMarkAccordingFirstOne()
         {
-            int s = 0, e = textBox1.Text.IndexOf(Environment.NewLine), rs = textBox1.SelectionStart,rl=textBox1.SelectionLength;
+            int s = 0, e = textBox1.Text.IndexOf(Environment.NewLine), rs = textBox1.SelectionStart, rl = textBox1.SelectionLength;
             string se = textBox1.Text.Substring(s, e - s);
             int l = new StringInfo(se).LengthInTextElements;
             undoRecord(); stopUndoRec = true;
@@ -1655,13 +1679,15 @@ namespace WindowsFormsApp1
                 e = textBox1.Text.IndexOf(Environment.NewLine, s);
                 if (e == -1) break;
                 se = textBox1.Text.Substring(s, e - s);
-                foreach (var item in punctuations)
+                //foreach (var item in punctuations)
+                //{
+                //    se = se.Replace(item.ToString(), "");
+                //}
+                if (se != "" && countWordsLenPerLinePara(se) < l)
                 {
-                    se = se.Replace(item.ToString(), "");
-                }
-                if (se != "" && new StringInfo(se).LengthInTextElements < l)
-                {
-                    if (se.IndexOf("{{") == -1 && se.IndexOf("<p>") == -1)
+                    if ((se.IndexOf("{{") == -1 && se.IndexOf("}}") > -1)
+                        || (se.IndexOf("{{") > 0 && se.IndexOf("}}") > -1) //「{{」不能是開頭
+                        && se.IndexOf("<p>") == -1)
                     {
                         textBox1.Select(e, 0);
                         textBox1.SelectedText = "<p>";
@@ -1952,6 +1978,7 @@ namespace WindowsFormsApp1
             while (e > -1)
             {
                 e = x.IndexOf(Environment.NewLine, s);
+                if (e - s < 0 || s < 0) break;
                 item = x.Substring(s, e - s); if (item == "") return;
                 if (i == 0 & x.IndexOf("}}") < x.IndexOf("{{") && x.IndexOf("}}") > e)
                     i++;
@@ -2658,9 +2685,11 @@ namespace WindowsFormsApp1
         private void pasteToCtext()
         {
             appActivateByName();
-            if (ModifierKeys == Keys.Shift)//(ModifierKeys == Keys.Control)
-            {
-                SendKeys.Send("^w");//關閉前一頁                
+            if (ModifierKeys == Keys.Shift || ModifierKeys == Keys.Control
+                && textBox1.SelectionLength == predictEndofPageSelectedTextLen
+                && textBox1.Text.Substring(textBox1.SelectionStart + textBox1.SelectionLength, 2) == Environment.NewLine)
+            {//當啟用預估頁尾後，按下 Ctrl 或 Shift Alt 可以自動貼入 Quick Edit ，唯此處僅用 Ctrl 及 Shift 控制關閉前一頁所瀏覽之 Ctext 網頁
+                SendKeys.Send("^{F4}");//關閉前一頁                
             }
             Task.Delay(100).Wait();
             SendKeys.Send("^v{tab}~");
