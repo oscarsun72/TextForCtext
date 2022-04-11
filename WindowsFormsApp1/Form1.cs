@@ -3480,16 +3480,13 @@ namespace WindowsFormsApp1
 
         private void textBox3_TextChanged(object sender, EventArgs e)
         {
-            if (textBox3.Text.IndexOf("#editor") == -1)
-            {
-                autoPastetoOrNot();
-            }
+            autoPastetoOrNot();
         }
 
         private void autoPastetoOrNot()
         {
             if (textBox3.Text == "") return;
-            if (textBox3.Text.IndexOf("https://ctext.org/") == -1) return;
+            if (textBox3.Text.IndexOf("https://ctext.org/") == -1 || textBox3.Text.IndexOf("#editor") == -1) return;
             string x = textBox3.Text; const string f = "file="; int s = x.IndexOf(f);
             int bookID = int.Parse(x.Substring(s + f.Length, x.IndexOf("&", s + 1) - s - f.Length));
 
