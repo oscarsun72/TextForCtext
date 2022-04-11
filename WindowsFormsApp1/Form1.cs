@@ -2338,6 +2338,12 @@ namespace WindowsFormsApp1
                 {
                     if (MessageBox.Show("auto paste to Ctext Quit Edit textBox?", "", MessageBoxButtons.OKCancel) == DialogResult.OK)
                     {
+                        if (autoPastetoQuickEdit && ModifierKeys == Keys.Control)
+                        {
+                            appActivateByName();
+                            //當啟用預估頁尾後，按下 Ctrl 或 Shift Alt 可以自動貼入 Quick Edit ，唯此處僅用 Ctrl 及 Shift 控制關閉前一頁所瀏覽之 Ctext 網頁                
+                            SendKeys.Send("^{F4}");//關閉前一頁                
+                        }
                         keyDownCtrlAdd(false);
                     }
                     else
@@ -2781,10 +2787,10 @@ namespace WindowsFormsApp1
         private void pasteToCtext()
         {
             appActivateByName();
-            if (ModifierKeys == Keys.Shift || (autoPastetoQuickEdit && ModifierKeys == Keys.Control)) //|| ModifierKeys == Keys.Control
-                                                                                                      //||autoPastetoQuickEdit)//
-                                                                                                      //&& (textBox1.SelectionLength == predictEndofPageSelectedTextLen
-                                                                                                      //&& textBox1.Text.Substring(textBox1.SelectionStart + textBox1.SelectionLength, 2) == Environment.NewLine))
+            if (ModifierKeys == Keys.Shift)//|| (autoPastetoQuickEdit && ModifierKeys == Keys.Control)) //|| ModifierKeys == Keys.Control
+                                           //||autoPastetoQuickEdit)//
+                                           //&& (textBox1.SelectionLength == predictEndofPageSelectedTextLen
+                                           //&& textBox1.Text.Substring(textBox1.SelectionStart + textBox1.SelectionLength, 2) == Environment.NewLine))
             {//當啟用預估頁尾後，按下 Ctrl 或 Shift Alt 可以自動貼入 Quick Edit ，唯此處僅用 Ctrl 及 Shift 控制關閉前一頁所瀏覽之 Ctext 網頁                
                 SendKeys.Send("^{F4}");//關閉前一頁                
             }
@@ -3474,7 +3480,10 @@ namespace WindowsFormsApp1
 
         private void textBox3_TextChanged(object sender, EventArgs e)
         {
-            autoPastetoOrNot();
+            if (textBox3.Text.IndexOf("#editor") == -1)
+            {
+                autoPastetoOrNot();
+            }
         }
 
         private void autoPastetoOrNot()
