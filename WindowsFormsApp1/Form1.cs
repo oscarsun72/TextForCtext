@@ -1646,11 +1646,13 @@ namespace WindowsFormsApp1
         int countLinesPerPage(string xPage)
         {
             //int count = 0;
-            int i = 0; bool openNote = false;
+            int i = 0, openBracketS, closeBracketS; bool openNote = false;
             string[] linesParasPage = xPage.Split(Environment.NewLine.ToArray(), StringSplitOptions.RemoveEmptyEntries);
+            if (linesParasPage.Length == 1) return 1;
             foreach (string item in linesParasPage)
             {
                 //if (item == "") return;
+                openBracketS = item.IndexOf("{{"); closeBracketS = item.IndexOf("}}");
                 if (i == 0 && item.IndexOf("{{") == -1 && item.IndexOf("}}") == -1)
                 {
                     string x = linesParasPage[i + 1];
@@ -1658,17 +1660,23 @@ namespace WindowsFormsApp1
                     { i++; openNote = true; }//第一段/行是純注文
                     else { i += 2; openNote = false; }//第一段/行是純正文
                 }
-                else if (item.IndexOf("{{") == 0 && item.IndexOf("}}") == -1)//注文（開始）
+                else if (openBracketS > 0)//正注夾雜
+                { i += 2; openNote = false; }
+                else if (openBracketS > -1 && item.IndexOf("{{", openBracketS + 2) > -1)//正注夾雜
+                { i += 2; }// openNote = false; }
+                else if (openBracketS > -1 && closeBracketS > -1 && closeBracketS < item.Length - 2)//正注夾雜
+                { i += 2; }//openNote = false; }
+                else if (openBracketS == 0 && closeBracketS == -1)//注文（開始）
                 { i++; openNote = true; }
-                else if (item.IndexOf("{{") == -1 && item.IndexOf("}}") == item.Length - 2)//純注文（末截）
+                else if (openBracketS == -1 && closeBracketS == item.Length - 2)//純注文（末截）
                 { i++; openNote = false; }
-                else if (item.IndexOf("{{") == -1 && item.IndexOf("}}") == -1 && openNote == false)//《維基文庫》純正文
+                else if (openBracketS == -1 && closeBracketS == -1 && openNote == false)//《維基文庫》純正文
                     i += 2;
-                else if (item.IndexOf("{{") == -1 && item.IndexOf("}}") == -1 && openNote)//《維基文庫》純注文
+                else if (openBracketS == -1 && closeBracketS == -1 && openNote)//《維基文庫》純注文
                     i++;
                 //《維基文庫》正注文夾雜
-                else if (item.IndexOf("{{") > 0 && item.IndexOf("}}") == -1) { i += 2; openNote = true; }
-                else if (item.IndexOf("{{") == -1 && item.IndexOf("}}") < item.Length - 2) { i += 2; openNote = false; }
+                else if (openBracketS > 0 && closeBracketS == -1) { i += 2; openNote = true; }
+                else if (openBracketS == -1 && closeBracketS > -1 && closeBracketS < item.Length - 2) { i += 2; openNote = false; }
                 /*
                 if ((item.IndexOf("{{") == -1 && item.IndexOf("}}") == -1)//純正文
                     || item.IndexOf("{{") > 0 || item.IndexOf("}}") + 2 < item.Length)////正注文夾雜
@@ -2071,27 +2079,35 @@ namespace WindowsFormsApp1
             string[] xPredict = x.Split(Environment.NewLine.ToArray(), StringSplitOptions.RemoveEmptyEntries);
             //if (xPredict.Length < predictEndofPageSelectedTextLen) return;
             if (x.Replace(Environment.NewLine, "").Replace("　", "") == "") return;
-            int s = 0, e = 0, i = 0, predictEndofPagePosition = 0; string item;
+            int s = 0, e = 0, i = 0, predictEndofPagePosition = 0, openBracketS = 0, closeBracketS = 0;
+            string item;
             bool openNote = false;//, closeNote=false;
             while (e > -1)
             {
                 e = x.IndexOf(Environment.NewLine, s);
                 if (e - s < 0 || s < 0) break;
                 item = x.Substring(s, e - s); if (item == "") return;
-
+                openBracketS = item.IndexOf("{{"); closeBracketS = item.IndexOf("}}");
                 if (i == 0 & x.IndexOf("}}") < x.IndexOf("{{") && x.IndexOf("}}") > e)
                 { i++; openNote = true; }//第一段/行是純注文
-                else if (item.IndexOf("{{") == 0 && item.IndexOf("}}") == -1)//注文（開始）
+                else if (openBracketS > 0)//正注夾雜
+                { i += 2; openNote = false; }
+                else if (openBracketS > -1 && item.IndexOf("{{", openBracketS + 2) > -1)//正注夾雜
+                { i += 2; }// openNote = false; }
+                else if (openBracketS > -1 && closeBracketS > -1 && closeBracketS < item.Length - 2)//正注夾雜
+                { i += 2; }//openNote = false; }
+                else if (openBracketS == 0 && closeBracketS == -1)//注文（開始）
                 { i++; openNote = true; }
-                else if (item.IndexOf("{{") == -1 && item.IndexOf("}}") == item.Length - 2)//純注文（末截）
+                else if (openBracketS == -1 && closeBracketS == item.Length - 2)//純注文（末截）
                 { i++; openNote = false; }
-                else if (item.IndexOf("{{") == -1 && item.IndexOf("}}") == -1 && openNote == false)//《維基文庫》純正文
+                else if (openBracketS == -1 && closeBracketS == -1 && openNote == false)//《維基文庫》純正文
                     i += 2;
-                else if (item.IndexOf("{{") == -1 && item.IndexOf("}}") == -1 && openNote)//《維基文庫》純注文
+                else if (openBracketS == -1 && closeBracketS == -1 && openNote)//《維基文庫》純注文
                     i++;
                 //《維基文庫》正注文夾雜
-                else if (item.IndexOf("{{") > 0 && item.IndexOf("}}") == -1) { i += 2; openNote = true; }
-                else if (item.IndexOf("{{") == -1 && item.IndexOf("}}") < item.Length - 2) { i += 2; openNote = false; }
+                else if (openBracketS > 0 && closeBracketS == -1) { i += 2; openNote = true; }
+                else if (openBracketS == -1 && closeBracketS > -1 && item.IndexOf("}}") < item.Length - 2)
+                { i += 2; openNote = false; }
                 //else if (item.IndexOf("{{") > 0 || 
                 //    (item.IndexOf("}}") > -1 &&
                 //    ((item.IndexOf("<p>") == -1 && item.IndexOf("}}") < item.Length - 2) ||
@@ -2372,7 +2388,8 @@ namespace WindowsFormsApp1
             {
                 if (autoPastetoQuickEdit)
                 {
-                    if (MessageBox.Show("auto paste to Ctext Quit Edit textBox?", "", MessageBoxButtons.OKCancel) == DialogResult.OK)
+                    if (MessageBox.Show("auto paste to Ctext Quit Edit textBox?"+Environment.NewLine +Environment.NewLine
+                        + "……" +textBox1.SelectedText, "", MessageBoxButtons.OKCancel) == DialogResult.OK)
                     {
                         if (autoPastetoQuickEdit && ModifierKeys == Keys.Control)
                         {
