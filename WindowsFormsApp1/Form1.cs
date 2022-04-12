@@ -1869,7 +1869,7 @@ namespace WindowsFormsApp1
             return -1;
         }
 
-        const string punctuations = "〇.,;?@●'\"。，；！？、－-—…《》〈〉「」『』〖〗【】（）()[]〔〕［］0123456789";
+        const string punctuations = "〇.,;?@●'\"。，；！？、－-—…:：《·》〈‧〉「」『』〖〗【】（）()[]〔〕［］0123456789";
         int isChineseChar(string x, bool skipPunctuation)
         {
             if (skipPunctuation) if (punctuations.IndexOf(x) > -1) return -1;
