@@ -1697,7 +1697,7 @@ namespace WindowsFormsApp1
         int countNoteLen(string notePure)
         {//同時取商數與餘數 https://dotblogs.com.tw/abbee/2010/09/28/17943
             int l = new StringInfo(notePure).LengthInTextElements;
-            int x = l/2; ; //商數
+            int x = l / 2; ; //商數
             int y = l - (x * 2);//餘數
             //return (((l + 1) % 2) == 1) ? ++l / 2 : l / 2;
             return y == 0 ? x : ++x;
@@ -2388,8 +2388,8 @@ namespace WindowsFormsApp1
             {
                 if (autoPastetoQuickEdit)
                 {
-                    if (MessageBox.Show("auto paste to Ctext Quit Edit textBox?"+Environment.NewLine +Environment.NewLine
-                        + "……" +textBox1.SelectedText, "", MessageBoxButtons.OKCancel) == DialogResult.OK)
+                    if (MessageBox.Show("auto paste to Ctext Quit Edit textBox?" + Environment.NewLine + Environment.NewLine
+                        + "……" + textBox1.SelectedText, "", MessageBoxButtons.OKCancel) == DialogResult.OK)
                     {
                         if (autoPastetoQuickEdit && ModifierKeys == Keys.Control)
                         {
