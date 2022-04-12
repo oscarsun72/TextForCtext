@@ -1440,7 +1440,8 @@ namespace WindowsFormsApp1
                 stopUndoRec = false; return;
             }
             if (x.Substring(s + textBox1.SelectionLength - 3, 3) == "<p>") endCode = "";
-            textBox1.SelectedText = ("*" + textBox1.SelectedText + endCode).Replace("《", "").Replace("》", "").Replace("〈", "").Replace("〉", "");
+            textBox1.SelectedText = ("*" + textBox1.SelectedText + endCode)
+                    .Replace("《", "").Replace("》", "").Replace("〈", "").Replace("〉", "").Replace("·", "");
             int endPostion = textBox1.SelectionStart;
             //標題篇名前段補上分段符號
             i = x.LastIndexOf(Environment.NewLine, s);
@@ -1764,7 +1765,8 @@ namespace WindowsFormsApp1
         }
         void paragraphMarkAccordingFirstOne()
         {
-            int s = 0, e = textBox1.Text.IndexOf(Environment.NewLine), rs = textBox1.SelectionStart, rl = textBox1.SelectionLength;
+            int s = 0, e = textBox1.Text.IndexOf(Environment.NewLine); if (e < 0) return;
+            int rs = textBox1.SelectionStart, rl = textBox1.SelectionLength;
             string se = textBox1.Text.Substring(s, e - s);
             //int l = new StringInfo(se).LengthInTextElements;
             int l = countWordsLenPerLinePara(se);
