@@ -1722,7 +1722,9 @@ namespace WindowsFormsApp1
                 {//先出現 }} 的話
                     s = closeCurlybracketsPostion + 2;
                     countResult += new StringInfo(xLinePara.Substring(0, closeCurlybracketsPostion)).LengthInTextElements;
+                    closeCurlybracketsPostion = xLinePara.IndexOf("}}",closeCurlybracketsPostion+2);
                 }
+
                 while (openCurlybracketsPostion > -1)
                 {
                     txt = xLinePara.Substring(s, openCurlybracketsPostion);
