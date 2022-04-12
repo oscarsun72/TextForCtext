@@ -1663,14 +1663,14 @@ namespace WindowsFormsApp1
                 }
                 else if (openBracketS > 0)//正注夾雜
                 { i += 2; openNote = false; }
-                else if (openBracketS > -1 && item.IndexOf("{{", openBracketS + 2) > -1)//正注夾雜
-                { i += 2; }// openNote = false; }
-                else if (openBracketS > -1 && closeBracketS > -1 && closeBracketS < item.Length - 2)//正注夾雜
-                { i += 2; }//openNote = false; }
                 else if (openBracketS == 0 && closeBracketS == -1)//注文（開始）
                 { i++; openNote = true; }
                 else if (openBracketS == -1 && closeBracketS == item.Length - 2)//純注文（末截）
                 { i++; openNote = false; }
+                else if (openBracketS > -1 && item.IndexOf("{{", openBracketS + 2) > -1)//正注夾雜
+                { i += 2; }// openNote = false; }
+                else if (openBracketS > -1 && closeBracketS > -1 && closeBracketS < item.Length - 2)//正注夾雜
+                { i += 2; }//openNote = false; }
                 else if (openBracketS == -1 && closeBracketS == -1 && openNote == false)//《維基文庫》純正文
                     i += 2;
                 else if (openBracketS == -1 && closeBracketS == -1 && openNote)//《維基文庫》純注文
@@ -2094,14 +2094,14 @@ namespace WindowsFormsApp1
                 { i++; openNote = true; }//第一段/行是純注文
                 else if (openBracketS > 0)//正注夾雜
                 { i += 2; openNote = false; }
-                else if (openBracketS > -1 && item.IndexOf("{{", openBracketS + 2) > -1)//正注夾雜
-                { i += 2; }// openNote = false; }
-                else if (openBracketS > -1 && closeBracketS > -1 && closeBracketS < item.Length - 2)//正注夾雜
-                { i += 2; }//openNote = false; }
                 else if (openBracketS == 0 && closeBracketS == -1)//注文（開始）
                 { i++; openNote = true; }
                 else if (openBracketS == -1 && closeBracketS == item.Length - 2)//純注文（末截）
                 { i++; openNote = false; }
+                else if (openBracketS > -1 && item.IndexOf("{{", openBracketS + 2) > -1)//正注夾雜
+                { i += 2; }// openNote = false; }
+                else if (openBracketS > -1 && closeBracketS > -1 && closeBracketS < item.Length - 2)//正注夾雜
+                { i += 2; }//openNote = false; }
                 else if (openBracketS == -1 && closeBracketS == -1 && openNote == false)//《維基文庫》純正文
                     i += 2;
                 else if (openBracketS == -1 && closeBracketS == -1 && openNote)//《維基文庫》純注文
