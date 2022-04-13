@@ -1727,21 +1727,32 @@ namespace WindowsFormsApp1
                 return new StringInfo(xLinePara).LengthInTextElements;
             else if (openCurlybracketsPostion > -1 && closeCurlybracketsPostion > -1)
             {//兼具 {{、}} 正文、注文夾雜者
-                if (openCurlybracketsPostion > closeCurlybracketsPostion)
-                {//先出現 }} 的話
-                    s = closeCurlybracketsPostion + 2;
-                    countResult += new StringInfo(xLinePara.Substring(0, closeCurlybracketsPostion)).LengthInTextElements;
-                    closeCurlybracketsPostion = xLinePara.IndexOf("}}", closeCurlybracketsPostion + 2);
-                }
-
                 while (openCurlybracketsPostion > -1)
                 {
-                    txt = xLinePara.Substring(s, openCurlybracketsPostion);
-                    countResult += new StringInfo(txt).LengthInTextElements;
-                    note = xLinePara.Substring(openCurlybracketsPostion + 2, closeCurlybracketsPostion - (openCurlybracketsPostion + 2));
-                    //int l = new StringInfo(note).LengthInTextElements;
-                    //l = (((l + 1) % 2) == 1) ? ++l / 2 : l / 2;
-                    countResult += countNoteLen(note);
+                    if (closeCurlybracketsPostion > -1 && openCurlybracketsPostion > closeCurlybracketsPostion)
+                    {//先出現 }} 的話
+                        //s = closeCurlybracketsPostion + 2;
+                        //   countResult += new StringInfo(xLinePara.Substring(0, closeCurlybracketsPostion)).LengthInTextElements;
+                        countResult += countNoteLen(xLinePara.Substring(0, closeCurlybracketsPostion));
+                        //closeCurlybracketsPostion = xLinePara.IndexOf("}}", closeCurlybracketsPostion + 2);
+                    }
+                    else if (closeCurlybracketsPostion > -1)//&& openCurlybracketsPostion>-1
+                    {
+                        txt = xLinePara.Substring(s, openCurlybracketsPostion);
+                        countResult += new StringInfo(txt).LengthInTextElements;
+                        note = xLinePara.Substring(openCurlybracketsPostion + 2, closeCurlybracketsPostion - (openCurlybracketsPostion + 2));
+                        countResult += countNoteLen(note);
+                    }
+                    else if (closeCurlybracketsPostion == -1 && openCurlybracketsPostion > -1)
+                    {
+                        txt = xLinePara.Substring(s, openCurlybracketsPostion);
+                        countResult += new StringInfo(txt).LengthInTextElements;
+                        note = xLinePara.Substring(openCurlybracketsPostion + 2);
+                        countResult += countNoteLen(note);
+                        break;
+                    }
+                    else {; }
+                    s = closeCurlybracketsPostion + 2;
                     openCurlybracketsPostion = xLinePara.IndexOf("{{", closeCurlybracketsPostion);
                     if (openCurlybracketsPostion == -1)
                     {
@@ -1752,7 +1763,9 @@ namespace WindowsFormsApp1
                     closeCurlybracketsPostion = xLinePara.IndexOf("}}", closeCurlybracketsPostion + 2);
                     if (closeCurlybracketsPostion == -1)
                     {
-                        note = xLinePara.Substring(openCurlybracketsPostion);
+                        txt = xLinePara.Substring(s, openCurlybracketsPostion - s);
+                        countResult += new StringInfo(txt).LengthInTextElements;
+                        note = xLinePara.Substring(openCurlybracketsPostion + 2);
                         return countResult += countNoteLen(note);
                     }
                 }
@@ -2104,7 +2117,7 @@ namespace WindowsFormsApp1
 
                 if (item == "}}<p>")//《維基文庫》純注文空行
                     i++;
-                else if (i == 0 && openBracketS>closeBracketS ) //第一行正、注夾雜
+                else if (i == 0 && openBracketS > closeBracketS) //第一行正、注夾雜
                     i += 2;
                 else if (i == 0 & x.IndexOf("}}") < x.IndexOf("{{") && x.IndexOf("}}") > e)
                 { i++; openNote = true; }//第一段/行是純注文

@@ -949,6 +949,23 @@ d.Close wdDoNotSaveChanges
 AppActivate "google chrome"
 SendKeys "^v"
 End Sub
+
+Sub EditMakeup()
+Const differPageNum  As Integer = 161 '­¶¼Æ®t
+Dim rng As Range, pageNum As Range, d As Document, ur As UndoRecord
+Set d = ActiveDocument
+Set rng = d.Range
+Set ur = SystemSetup.stopUndo("EditMakeupCtext")
+Do While rng.Find.Execute(" page=""", , , , , , True, wdFindStop)
+    Set pageNum = rng
+    pageNum.SetRange rng.End, rng.End + 1
+    pageNum.MoveEndUntil """"
+    pageNum.Text = CStr(CInt(pageNum.Text) - differPageNum)
+    rng.SetRange pageNum.End, d.Range.End
+Loop
+SystemSetup.contiUndo ur
+End Sub
+
 Sub tempReplaceTxtforCtext() 'for Quick edit only
 Dim a, d As Document, i As Integer
 a = Array("{{¡]", "{{", "¡^}}", "}}", "¡]", "{{", "¡^", "}}", "¡³", ChrW(12295))
