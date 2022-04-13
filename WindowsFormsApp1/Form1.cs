@@ -1657,7 +1657,7 @@ namespace WindowsFormsApp1
                 openBracketS = item.IndexOf("{{"); closeBracketS = item.IndexOf("}}");
 
                 if (item == "}}<p>")//《維基文庫》純注文空行
-                    i++;
+                        i++;
                 else if (i == 0 && item.IndexOf("{{") == -1 && item.IndexOf("}}") == -1)
                 {
                     string x = linesParasPage[i + 1];
