@@ -1655,8 +1655,9 @@ namespace WindowsFormsApp1
             {
                 //if (item == "") return;
                 openBracketS = item.IndexOf("{{"); closeBracketS = item.IndexOf("}}");
+
                 if (item == "}}<p>")//《維基文庫》純注文空行
-                    continue;
+                    i++;
                 else if (i == 0 && item.IndexOf("{{") == -1 && item.IndexOf("}}") == -1)
                 {
                     string x = linesParasPage[i + 1];
@@ -2098,8 +2099,9 @@ namespace WindowsFormsApp1
                 if (e - s < 0 || s < 0) break;
                 item = x.Substring(s, e - s); if (item == "") return;
                 openBracketS = item.IndexOf("{{"); closeBracketS = item.IndexOf("}}");
+
                 if (item == "}}<p>")//《維基文庫》純注文空行
-                    continue;
+                    i++;
                 else if (i == 0 & x.IndexOf("}}") < x.IndexOf("{{") && x.IndexOf("}}") > e)
                 { i++; openNote = true; }//第一段/行是純注文
                 else if (openBracketS > 0)//正注夾雜
