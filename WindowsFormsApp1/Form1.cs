@@ -1666,7 +1666,8 @@ namespace WindowsFormsApp1
                 { i += 2; openNote = false; }
                 else if (openBracketS == 0 && closeBracketS == -1)//注文（開始）
                 { i++; openNote = true; }
-                else if (openBracketS == -1 && closeBracketS == item.Length - 2)//純注文（末截）
+                else if (openBracketS == -1 && (closeBracketS == item.Length - 2
+                    || item.Substring(item.Length - 5) == "}}<p>"))//純注文（末截）
                 { i++; openNote = false; }
                 else if (openBracketS > -1 && item.IndexOf("{{", openBracketS + 2) > -1)//正注夾雜
                 { i += 2; }// openNote = false; }
@@ -1723,7 +1724,7 @@ namespace WindowsFormsApp1
                 {//先出現 }} 的話
                     s = closeCurlybracketsPostion + 2;
                     countResult += new StringInfo(xLinePara.Substring(0, closeCurlybracketsPostion)).LengthInTextElements;
-                    closeCurlybracketsPostion = xLinePara.IndexOf("}}",closeCurlybracketsPostion+2);
+                    closeCurlybracketsPostion = xLinePara.IndexOf("}}", closeCurlybracketsPostion + 2);
                 }
 
                 while (openCurlybracketsPostion > -1)
@@ -2099,7 +2100,8 @@ namespace WindowsFormsApp1
                 { i += 2; openNote = false; }
                 else if (openBracketS == 0 && closeBracketS == -1)//注文（開始）
                 { i++; openNote = true; }
-                else if (openBracketS == -1 && closeBracketS == item.Length - 2)//純注文（末截）
+                else if (openBracketS == -1 && (closeBracketS == item.Length - 2
+                    || item.Substring(item.Length - 5) == "}}<p>"))//純注文（末截）
                 { i++; openNote = false; }
                 else if (openBracketS > -1 && item.IndexOf("{{", openBracketS + 2) > -1)//正注夾雜
                 { i += 2; }// openNote = false; }
