@@ -1666,9 +1666,11 @@ namespace WindowsFormsApp1
                 { i += 2; openNote = false; }
                 else if (openBracketS == 0 && closeBracketS == -1)//注文（開始）
                 { i++; openNote = true; }
-                else if (openBracketS == -1 && (closeBracketS == item.Length - 2
-                    || item.Substring(item.Length - 5) == "}}<p>"))//純注文（末截）
-                { i++; openNote = false; }
+                else if (openBracketS == -1 && closeBracketS > -1)
+                {
+                    if (closeBracketS == item.Length - 2 || item.Substring(item.Length - 5) == "}}<p>")//純注文（末截）
+                    { i++; openNote = false; }
+                }
                 else if (openBracketS > -1 && item.IndexOf("{{", openBracketS + 2) > -1)//正注夾雜
                 { i += 2; }// openNote = false; }
                 else if (openBracketS > -1 && closeBracketS > -1 && closeBracketS < item.Length - 2)//正注夾雜
@@ -2100,9 +2102,11 @@ namespace WindowsFormsApp1
                 { i += 2; openNote = false; }
                 else if (openBracketS == 0 && closeBracketS == -1)//注文（開始）
                 { i++; openNote = true; }
-                else if (openBracketS == -1 && (closeBracketS == item.Length - 2
-                    || item.Substring(item.Length - 5) == "}}<p>"))//純注文（末截）
-                { i++; openNote = false; }
+                else if (openBracketS == -1 && closeBracketS > -1)
+                {
+                    if (closeBracketS == item.Length - 2 || item.Substring(item.Length - 5) == "}}<p>")//純注文（末截）
+                    { i++; openNote = false; }
+                }
                 else if (openBracketS > -1 && item.IndexOf("{{", openBracketS + 2) > -1)//正注夾雜
                 { i += 2; }// openNote = false; }
                 else if (openBracketS > -1 && closeBracketS > -1 && closeBracketS < item.Length - 2)//正注夾雜
