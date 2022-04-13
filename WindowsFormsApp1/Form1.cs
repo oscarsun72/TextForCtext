@@ -1658,6 +1658,8 @@ namespace WindowsFormsApp1
 
                 if (item == "}}<p>")//《維基文庫》純注文空行
                     i++;
+                else if (i == 0 && openBracketS > closeBracketS) //第一行正、注夾雜
+                    i += 2;
                 else if (i == 0 && item.IndexOf("{{") == -1 && item.IndexOf("}}") == -1)
                 {
                     string x = linesParasPage[i + 1];
@@ -2102,6 +2104,8 @@ namespace WindowsFormsApp1
 
                 if (item == "}}<p>")//《維基文庫》純注文空行
                     i++;
+                else if (i == 0 && openBracketS>closeBracketS ) //第一行正、注夾雜
+                    i += 2;
                 else if (i == 0 & x.IndexOf("}}") < x.IndexOf("{{") && x.IndexOf("}}") > e)
                 { i++; openNote = true; }//第一段/行是純注文
                 else if (openBracketS > 0)//正注夾雜
