@@ -453,8 +453,9 @@ namespace WindowsFormsApp1
              //SystemSounds.Hand.Play();//文本有缺字警告
              //if (File.Exists(soundWarningLocation)) new SoundPlayer(soundWarningLocation).Play();
                 Color c = this.BackColor;
+                new SoundPlayer(@"C:\Windows\Media\Windows Notify Email.wav").Play();
                 this.BackColor = Color.Yellow;
-                Task.Delay(900).Wait();
+                //Task.Delay(900).Wait();
                 this.BackColor = c;
                 if (xCopy.IndexOf("□") > -1 && xCopy.IndexOfAny("�".ToCharArray()) == -1 && xCopy.IndexOf(" ") == -1)
                 {
@@ -469,7 +470,6 @@ namespace WindowsFormsApp1
                 {
                     textBox1.Select(missWordPositon, 1);
                     textBox1.ScrollToCaret();
-                    new SoundPlayer(@"C:\Windows\Media\Windows Notify Email.wav").Play();
                     return false;
                 }
                 //string[] rTxt = { " ", "�" };//, "□" };
