@@ -1657,7 +1657,7 @@ namespace WindowsFormsApp1
                 openBracketS = item.IndexOf("{{"); closeBracketS = item.IndexOf("}}");
 
                 if (item == "}}<p>")//《維基文庫》純注文空行
-                        i++;
+                    i++;
                 else if (i == 0 && item.IndexOf("{{") == -1 && item.IndexOf("}}") == -1)
                 {
                     string x = linesParasPage[i + 1];
@@ -1673,7 +1673,7 @@ namespace WindowsFormsApp1
                 {
                     if (closeBracketS == item.Length - 2 || item.Substring(item.Length - 5) == "}}<p>")//純注文（末截）
                     { i++; openNote = false; }
-                }                
+                }
                 else if (openBracketS > -1 && item.IndexOf("{{", openBracketS + 2) > -1)//正注夾雜
                 { i += 2; }// openNote = false; }
                 else if (openBracketS > -1 && closeBracketS > -1 && closeBracketS < item.Length - 2)//正注夾雜
@@ -2121,7 +2121,7 @@ namespace WindowsFormsApp1
                     i += 2;
                 else if (openBracketS == -1 && closeBracketS == -1 && openNote)//《維基文庫》純注文
                     i++;
-                
+
                 //《維基文庫》正注文夾雜
                 else if (openBracketS > 0 && closeBracketS == -1) { i += 2; openNote = true; }
                 else if (openBracketS == -1 && closeBracketS > -1 && item.IndexOf("}}") < item.Length - 2)
