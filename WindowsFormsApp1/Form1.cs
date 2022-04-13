@@ -1655,7 +1655,9 @@ namespace WindowsFormsApp1
             {
                 //if (item == "") return;
                 openBracketS = item.IndexOf("{{"); closeBracketS = item.IndexOf("}}");
-                if (i == 0 && item.IndexOf("{{") == -1 && item.IndexOf("}}") == -1)
+                if (item == "}}<p>")//《維基文庫》純注文空行
+                    continue;
+                else if (i == 0 && item.IndexOf("{{") == -1 && item.IndexOf("}}") == -1)
                 {
                     string x = linesParasPage[i + 1];
                     if (x.IndexOf("}}") > -1 && x.IndexOf("{{") == -1)//&& x.IndexOf("}}") > e)
@@ -1670,7 +1672,7 @@ namespace WindowsFormsApp1
                 {
                     if (closeBracketS == item.Length - 2 || item.Substring(item.Length - 5) == "}}<p>")//純注文（末截）
                     { i++; openNote = false; }
-                }
+                }                
                 else if (openBracketS > -1 && item.IndexOf("{{", openBracketS + 2) > -1)//正注夾雜
                 { i += 2; }// openNote = false; }
                 else if (openBracketS > -1 && closeBracketS > -1 && closeBracketS < item.Length - 2)//正注夾雜
@@ -2096,7 +2098,9 @@ namespace WindowsFormsApp1
                 if (e - s < 0 || s < 0) break;
                 item = x.Substring(s, e - s); if (item == "") return;
                 openBracketS = item.IndexOf("{{"); closeBracketS = item.IndexOf("}}");
-                if (i == 0 & x.IndexOf("}}") < x.IndexOf("{{") && x.IndexOf("}}") > e)
+                if (item == "}}<p>")//《維基文庫》純注文空行
+                    continue;
+                else if (i == 0 & x.IndexOf("}}") < x.IndexOf("{{") && x.IndexOf("}}") > e)
                 { i++; openNote = true; }//第一段/行是純注文
                 else if (openBracketS > 0)//正注夾雜
                 { i += 2; openNote = false; }
@@ -2115,6 +2119,7 @@ namespace WindowsFormsApp1
                     i += 2;
                 else if (openBracketS == -1 && closeBracketS == -1 && openNote)//《維基文庫》純注文
                     i++;
+                
                 //《維基文庫》正注文夾雜
                 else if (openBracketS > 0 && closeBracketS == -1) { i += 2; openNote = true; }
                 else if (openBracketS == -1 && closeBracketS > -1 && item.IndexOf("}}") < item.Length - 2)
