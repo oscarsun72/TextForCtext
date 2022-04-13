@@ -469,6 +469,7 @@ namespace WindowsFormsApp1
                 {
                     textBox1.Select(missWordPositon, 1);
                     textBox1.ScrollToCaret();
+                    new SoundPlayer(@"C:\Windows\Media\Windows Notify Email.wav").Play();
                     return false;
                 }
                 //string[] rTxt = { " ", "�" };//, "□" };
