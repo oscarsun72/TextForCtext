@@ -91,6 +91,7 @@ namespace WindowsFormsApp1
             // 
             // textBox3
             // 
+            this.textBox3.AllowDrop = true;
             this.textBox3.Location = new System.Drawing.Point(264, 12);
             this.textBox3.Name = "textBox3";
             this.textBox3.Size = new System.Drawing.Size(111, 22);
@@ -98,6 +99,8 @@ namespace WindowsFormsApp1
             this.textBox3.TabStop = false;
             this.textBox3.Click += new System.EventHandler(this.textBox3_Click);
             this.textBox3.TextChanged += new System.EventHandler(this.textBox3_TextChanged);
+            this.textBox3.DragDrop += new System.Windows.Forms.DragEventHandler(this.textBox3_DragDrop);
+            this.textBox3.DragEnter += new System.Windows.Forms.DragEventHandler(this.textBox3_DragEnter);
             // 
             // textBox4
             // 

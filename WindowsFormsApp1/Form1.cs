@@ -3522,7 +3522,13 @@ namespace WindowsFormsApp1
         }
 
         private void textBox1_DragEnter(object sender, DragEventArgs e)
-        {//https://docs.microsoft.com/zh-tw/dotnet/desktop/winforms/advanced/walkthrough-performing-a-drag-and-drop-operation-in-windows-forms?view=netframeworkdesktop-4.8
+        {
+            dragEnterTxt(e);
+        }
+
+        private static void dragEnterTxt(DragEventArgs e)
+        {
+            //https://docs.microsoft.com/zh-tw/dotnet/desktop/winforms/advanced/walkthrough-performing-a-drag-and-drop-operation-in-windows-forms?view=netframeworkdesktop-4.8
             //https://docs.microsoft.com/zh-tw/dotnet/desktop/winforms/controls/enable-drag-and-drop-operations-with-wf-richtextbox-control?view=netframeworkdesktop-4.8
             if (e.Data.GetDataPresent(DataFormats.Text))
                 //e.Effect = DragDropEffects.Copy;
@@ -3586,6 +3592,17 @@ namespace WindowsFormsApp1
                     autoPastetoQuickEdit = false;
             }
             previousBookID = bookID;
+        }
+
+        private void textBox3_DragDrop(object sender, DragEventArgs e)
+        {
+            //textBox3.DoDragDrop(e.Data, DragDropEffects.Copy);            
+            textBox3.Text = e.Data.GetData(DataFormats.UnicodeText).ToString();
+        }
+
+        private void textBox3_DragEnter(object sender, DragEventArgs e)
+        {
+            dragEnterTxt(e);
         }
 
         int indexOfStringInfo(string s, string x)
