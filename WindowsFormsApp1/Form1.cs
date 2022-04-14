@@ -3574,6 +3574,7 @@ namespace WindowsFormsApp1
 
         private void textBox3_TextChanged(object sender, EventArgs e)
         {
+            if (textBox3.Text.IndexOf("ctext.org") > -1) if (textBox3.Text.IndexOf("https://") == -1) textBox3.Text = "https://" + textBox3.Text;
             autoPastetoOrNot();
         }
 
@@ -3586,6 +3587,7 @@ namespace WindowsFormsApp1
 
             if (bookID != previousBookID)
             {
+                new SoundPlayer(@"C:\Windows\Media\Windows Exclamation.wav").Play();
                 if (MessageBox.Show("auto paste to Ctext Quick Edit textBox ?", "", MessageBoxButtons.OKCancel) == DialogResult.OK)
                     autoPastetoQuickEdit = true;
                 else
