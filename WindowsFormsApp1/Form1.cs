@@ -1309,37 +1309,59 @@ namespace WindowsFormsApp1
             int s = textBox1.SelectionStart, l = textBox1.SelectionLength;
             string sTxt = textBox1.SelectedText;
             if (sTxt != "")
-            {
-                if (sTxt.IndexOf("　") == -1) return;
-                string sTxtChk = sTxt.Replace("　", "􏿽");
-                undoRecord();
-                stopUndoRec = true;
-                textBox1.Text = x.Substring(0, s) + sTxtChk + x.Substring(s + sTxt.Length);
-                //string sTxtChk = sTxt.Replace("　", "");
-                //if (sTxtChk != "") return;
-                //for (int i = 0; i < sTxt.Length; i++)
-                //{
-                //    sTxtChk += "􏿽";
-                //}
-                //x = x.Substring(0, s) + sTxtChk + x.Substring(s + l);
-                //textBox1.Text = x;
-                textBox1.SelectionStart = s + sTxtChk.Length;
-                stopUndoRec = false;
-            }
-            else
-            {
-                if (s + 1 <= x.Length && x.Substring(s, 1) == "　")
-                    x = x.Substring(0, s) + "􏿽" + x.Substring(s + 1);// 自動清除後面的「　」字元                
+            {//有選取範圍
+                if (sTxt == "<p>")
+                { undoRecord(); stopUndoRec = true; textBox1.SelectedText = "􏿽"; stopUndoRec = false; }
                 else
-                    x = x.Substring(0, s) + "􏿽" + x.Substring(s);
-                if (textBox1.Text != x)
                 {
+                    if (sTxt.IndexOf("　") == -1) return;
+                    string sTxtChk = sTxt.Replace("　", "􏿽");
                     undoRecord();
                     stopUndoRec = true;
-                    textBox1.Text = x;
-                    textBox1.SelectionStart = s + "􏿽".Length;
+                    textBox1.Text = x.Substring(0, s) + sTxtChk + x.Substring(s + sTxt.Length);
+                    //string sTxtChk = sTxt.Replace("　", "");
+                    //if (sTxtChk != "") return;
+                    //for (int i = 0; i < sTxt.Length; i++)
+                    //{
+                    //    sTxtChk += "􏿽";
+                    //}
+                    //x = x.Substring(0, s) + sTxtChk + x.Substring(s + l);
+                    //textBox1.Text = x;
+                    textBox1.SelectionStart = s + sTxtChk.Length;
                     stopUndoRec = false;
                 }
+            }
+            else
+            {//無選取範圍
+                if (s + 3 <= x.Length && x.Length > 3 && s >= 3)
+                {//將插入點後的<p>置換成「􏿽」
+                    int i = 0,sn=s-i; string p = x.Substring(sn, 3);
+                    while (p != "<p>" && i < 4)
+                    {
+                        sn=s-i++;
+                        p = x.Substring(sn, 3);
+                    }
+                    if (p == "<p>")
+                    {
+                        undoRecord(); stopUndoRec = true; textBox1.Select(sn, 3); textBox1.SelectedText = "􏿽"; stopUndoRec = false;
+                    }
+                }
+                else
+                {
+                    if (s + 1 <= x.Length && x.Substring(s, 1) == "　")
+                        x = x.Substring(0, s) + "􏿽" + x.Substring(s + 1);// 自動清除後面的「　」字元                
+                    else
+                        x = x.Substring(0, s) + "􏿽" + x.Substring(s);
+                    if (textBox1.Text != x)
+                    {
+                        undoRecord();
+                        stopUndoRec = true;
+                        textBox1.Text = x;
+                        textBox1.SelectionStart = s + "􏿽".Length;
+                        stopUndoRec = false;
+                    }
+                }
+
             }
             textBox1.ScrollToCaret();
         }
@@ -2058,7 +2080,7 @@ namespace WindowsFormsApp1
                     Environment.NewLine + Environment.NewLine +
                     "normal= " + chk[2] + "\tabnormal= " + chk[3], "",
                     MessageBoxButtons.OKCancel, MessageBoxIcon.Warning,
-                    MessageBoxDefaultButton.Button1) == DialogResult.OK)//檢查行/段落長
+                    MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly) == DialogResult.OK)//檢查行/段落長
                 {
                     textBox1.Select(chk[0], chk[1]);
                     textBox1.ScrollToCaret();
@@ -2423,8 +2445,11 @@ namespace WindowsFormsApp1
             {
                 if (autoPastetoQuickEdit)
                 {
+                    //if (MessageBox.Show("auto paste to Ctext Quit Edit textBox?" + Environment.NewLine + Environment.NewLine
+                    //    + "……" + textBox1.SelectedText, "", MessageBoxButtons.OKCancel,MessageBoxIcon.Question,
+                    //    MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly) == DialogResult.OK)
                     if (MessageBox.Show("auto paste to Ctext Quit Edit textBox?" + Environment.NewLine + Environment.NewLine
-                        + "……" + textBox1.SelectedText, "", MessageBoxButtons.OKCancel) == DialogResult.OK)
+                        + "……" + textBox1.SelectedText, "", MessageBoxButtons.OKCancel, MessageBoxIcon.Question) == DialogResult.OK)
                     {
                         if (autoPastetoQuickEdit && ModifierKeys == Keys.Control)
                         {
@@ -3588,7 +3613,10 @@ namespace WindowsFormsApp1
             if (bookID != previousBookID)
             {
                 new SoundPlayer(@"C:\Windows\Media\Windows Exclamation.wav").Play();
-                if (MessageBox.Show("auto paste to Ctext Quick Edit textBox ?", "", MessageBoxButtons.OKCancel) == DialogResult.OK)
+                //https://www.facebook.com/oscarsun72/posts/4780524142058682
+                //messagebox topmost
+                if (MessageBox.Show("auto paste to Ctext Quick Edit textBox ?", "", MessageBoxButtons.OKCancel
+                        , MessageBoxIcon.Question, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly) == DialogResult.OK)
                     autoPastetoQuickEdit = true;
                 else
                     autoPastetoQuickEdit = false;
