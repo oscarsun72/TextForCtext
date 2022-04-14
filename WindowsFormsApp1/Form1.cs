@@ -1334,7 +1334,7 @@ namespace WindowsFormsApp1
             else
             {//無選取範圍
                 if (s + 3 <= x.Length && x.Length > 3 && s >= 3)
-                {//將插入點後的<p>置換成「􏿽」
+                {//將插入點後的<p>置換成「􏿽」----配合 paragraphMarkAccordingFirstOne()使用
                     int i = 0,sn=s-i; string p = x.Substring(sn, 3);
                     while (p != "<p>" && i < 4)
                     {
