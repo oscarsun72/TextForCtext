@@ -1303,6 +1303,30 @@ namespace WindowsFormsApp1
                 insertWords("　", textBox1.Text);
             stopUndoRec = false;
         }
+
+        int expandSelRange(string what, string domain)
+        {
+            int i = 0, s = textBox1.SelectionStart, sn = s - i; string p = domain.Substring(sn, 3);
+            while (p != what && i < 4)
+            {
+                sn = s - i++;
+                p = domain.Substring(sn, 3);
+            }
+            if (p == what)
+            {
+                //textBox1.Select(sn, 3);
+                return sn;
+            }
+            else
+            {
+                //MessageBox.Show("not found", "", MessageBoxButtons.OK, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1
+                //      , MessageBoxOptions.ServiceNotification);
+                //textBox1.DeselectAll();
+                return 0;
+            }
+            //return textBox1.SelectedText;
+
+        }
         private void keysSpacesBlank()
         {
             string x = textBox1.Text;
@@ -1333,34 +1357,34 @@ namespace WindowsFormsApp1
             }
             else
             {//無選取範圍
+                #region 將行/段尾在插入點附近的<p>置換成「􏿽」----配合 paragraphMarkAccordingFirstOne()使用
                 if (s + 3 <= x.Length && x.Length > 3 && s >= 3)
-                {//將插入點後的<p>置換成「􏿽」----配合 paragraphMarkAccordingFirstOne()使用
-                    int i = 0,sn=s-i; string p = x.Substring(sn, 3);
-                    while (p != "<p>" && i < 4)
-                    {
-                        sn=s-i++;
-                        p = x.Substring(sn, 3);
-                    }
-                    if (p == "<p>")
-                    {
-                        undoRecord(); stopUndoRec = true; textBox1.Select(sn, 3); textBox1.SelectedText = "􏿽"; stopUndoRec = false;
-                    }
-                }
-                else
                 {
-                    if (s + 1 <= x.Length && x.Substring(s, 1) == "　")
-                        x = x.Substring(0, s) + "􏿽" + x.Substring(s + 1);// 自動清除後面的「　」字元                
-                    else
-                        x = x.Substring(0, s) + "􏿽" + x.Substring(s);
-                    if (textBox1.Text != x)
+                    int sn = expandSelRange("<p>", x);
+                    if (sn > 0 && x.Substring(sn + 3, 2) == Environment.NewLine)
                     {
-                        undoRecord();
-                        stopUndoRec = true;
-                        textBox1.Text = x;
-                        textBox1.SelectionStart = s + "􏿽".Length;
-                        stopUndoRec = false;
+                        textBox1.Select(sn, 3);
+                        undoRecord(); stopUndoRec = true; textBox1.SelectedText = "􏿽"; stopUndoRec = false;
+                        return;
                     }
+
                 }
+                #endregion
+                //else
+                //{
+                if (s + 1 <= x.Length && x.Substring(s, 1) == "　")
+                    x = x.Substring(0, s) + "􏿽" + x.Substring(s + 1);// 自動清除後面的「　」字元                
+                else
+                    x = x.Substring(0, s) + "􏿽" + x.Substring(s);
+                if (textBox1.Text != x)
+                {
+                    undoRecord();
+                    stopUndoRec = true;
+                    textBox1.Text = x;
+                    textBox1.SelectionStart = s + "􏿽".Length;
+                    stopUndoRec = false;
+                }
+                //}
 
             }
             textBox1.ScrollToCaret();
@@ -2090,7 +2114,8 @@ namespace WindowsFormsApp1
                     }
                     else
                     {
-                        if (MessageBox.Show("reset the page end ? ", "", MessageBoxButtons.OKCancel) == DialogResult.OK)
+                        if (MessageBox.Show("reset the page end ? ", "", MessageBoxButtons.OKCancel,MessageBoxIcon.Exclamation,MessageBoxDefaultButton.Button1,
+                            MessageBoxOptions.ServiceNotification) == DialogResult.OK)
                             pageTextEndPosition = s;
                     }
 
