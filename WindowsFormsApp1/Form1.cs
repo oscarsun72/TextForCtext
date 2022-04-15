@@ -2500,10 +2500,11 @@ namespace WindowsFormsApp1
         bool autoPasteFromSBCKwhether = false;
         void autoPasteFromSBCK()
         {
-            if (autoPasteFromSBCKwhether)
-            {
-                textBox1.Text += Clipboard.GetText();
-            }
+            if (!autoPasteFromSBCKwhether)return;
+            textBox1.Text += Clipboard.GetText();
+            textBox1.Select(textBox1.TextLength, 0);
+            textBox1.ScrollToCaret();
+
         }
 
         const int predictEndofPageSelectedTextLen = 5;
