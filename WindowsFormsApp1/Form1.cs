@@ -3680,8 +3680,7 @@ namespace WindowsFormsApp1
 
             if (bookID != previousBookID)
             {
-                linesParasPerPage = -1;//每頁行/段數
-                wordsPerLinePara = -1;//每行/段字數 reset
+                resetBooksPagesFeatures();
 
                 new SoundPlayer(@"C:\Windows\Media\Windows Exclamation.wav").Play();
                 //https://www.facebook.com/oscarsun72/posts/4780524142058682
@@ -3693,6 +3692,12 @@ namespace WindowsFormsApp1
                     autoPastetoQuickEdit = false;
             }
             previousBookID = bookID;
+        }
+
+        private void resetBooksPagesFeatures()
+        {
+            linesParasPerPage = -1;//每頁行/段數
+            wordsPerLinePara = -1;//每行/段字數 reset
         }
 
         private void textBox3_DragDrop(object sender, DragEventArgs e)
