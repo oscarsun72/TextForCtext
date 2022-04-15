@@ -3216,11 +3216,15 @@ namespace WindowsFormsApp1
                     //resumeLocationView(p, s);
                 }
                 //switchRichTextBox1();
-
+                return;
             }
             if (m == Keys.Alt && e.Button == MouseButtons.Left)
             {
-                BackupLastPageText(Clipboard.GetText(), true, true);
+                if (textBox1.SelectionLength == predictEndofPageSelectedTextLen
+                    && textBox1.Text.Substring(textBox1.SelectionStart + predictEndofPageSelectedTextLen, 2) == Environment.NewLine)
+                    keyDownCtrlAdd(false);
+                else
+                    BackupLastPageText(Clipboard.GetText(), true, true);
                 return;
             }
 
