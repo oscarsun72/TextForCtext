@@ -372,11 +372,13 @@ namespace WindowsFormsApp1
                             pageTextEndPosition = es;
                         }
                         else
-                        { MessageBox.Show("請指定頁尾處位置"); textBox1.Select(pageTextEndPosition, 0); pageTextEndPosition = 0; pageEndText10 = ""; return false; }
+                        { MessageBox.Show("請指定頁尾處位置"); textBox1.Select(pageTextEndPosition, 0); pageTextEndPosition = 0;
+                            pageEndText10 = ""; return false; }
 
                     }
                     else
-                    { MessageBox.Show("請指定頁尾處位置"); textBox1.Select(pageTextEndPosition, 0); pageTextEndPosition = 0; ; pageEndText10 = ""; return false; }
+                    { MessageBox.Show("請指定頁尾處位置"); textBox1.Select(pageTextEndPosition, 0); pageTextEndPosition = 0; 
+                        pageEndText10 = ""; return false; }
                 }
                 else
                 {
@@ -2491,6 +2493,7 @@ namespace WindowsFormsApp1
                     else
                     {
                         pageTextEndPosition = textBox1.SelectionStart + predictEndofPageSelectedTextLen;
+                        pageEndText10 = textBox1.Text.Substring(pageTextEndPosition - 10);
                         textBox1.Select(pageTextEndPosition, 0);
                     }
                 }
