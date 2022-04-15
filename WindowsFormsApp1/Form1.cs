@@ -372,13 +372,17 @@ namespace WindowsFormsApp1
                             pageTextEndPosition = es;
                         }
                         else
-                        { MessageBox.Show("請指定頁尾處位置"); textBox1.Select(pageTextEndPosition, 0); pageTextEndPosition = 0;
-                            pageEndText10 = ""; return false; }
+                        {
+                            MessageBox.Show("請指定頁尾處位置"); textBox1.Select(pageTextEndPosition, 0); pageTextEndPosition = 0;
+                            pageEndText10 = ""; return false;
+                        }
 
                     }
                     else
-                    { MessageBox.Show("請指定頁尾處位置"); textBox1.Select(pageTextEndPosition, 0); pageTextEndPosition = 0; 
-                        pageEndText10 = ""; return false; }
+                    {
+                        MessageBox.Show("請指定頁尾處位置"); textBox1.Select(pageTextEndPosition, 0); pageTextEndPosition = 0;
+                        pageEndText10 = ""; return false;
+                    }
                 }
                 else
                 {
@@ -1755,6 +1759,9 @@ namespace WindowsFormsApp1
             }
             return i;//count;
         }
+
+        int linesParasPerPage = -1;//每頁行/段數
+        int wordsPerLinePara = -1;//每行/段字數
         int countNoteLen(string notePure)
         {//同時取商數與餘數 https://dotblogs.com.tw/abbee/2010/09/28/17943
             int l = new StringInfo(notePure).LengthInTextElements;
@@ -1789,7 +1796,7 @@ namespace WindowsFormsApp1
                     }
                     else if (closeCurlybracketsPostion > -1)//&& openCurlybracketsPostion>-1
                     {
-                        txt = xLinePara.Substring(s, openCurlybracketsPostion);
+                        txt = xLinePara.Substring(s, openCurlybracketsPostion - s);
                         countResult += new StringInfo(txt).LengthInTextElements;
                         note = xLinePara.Substring(openCurlybracketsPostion + 2, closeCurlybracketsPostion - (openCurlybracketsPostion + 2));
                         countResult += countNoteLen(note);
@@ -1844,7 +1851,8 @@ namespace WindowsFormsApp1
             int rs = textBox1.SelectionStart, rl = textBox1.SelectionLength;
             string se = textBox1.Text.Substring(s, e - s);
             //int l = new StringInfo(se).LengthInTextElements;
-            int l = countWordsLenPerLinePara(se);
+            int l = wordsPerLinePara != -1 ? wordsPerLinePara : countWordsLenPerLinePara(se);
+            if (wordsPerLinePara == -1) wordsPerLinePara = l;
             undoRecord(); stopUndoRec = true;
             while (e > -1)
             {
@@ -2240,8 +2248,9 @@ namespace WindowsFormsApp1
                 Environment.NewLine.ToArray(),
                 StringSplitOptions.RemoveEmptyEntries);
             #region get lines_perPage
-            lines_perPage = 0;
-            lines_perPage = countLinesPerPage(xChk);
+            //lines_perPage = 0;
+            lines_perPage = linesParasPerPage != -1 ? linesParasPerPage : countLinesPerPage(xChk);
+            if (linesParasPerPage == -1) linesParasPerPage = lines_perPage;
             //lines_perPage = xLineParas.Length;
             /*
             foreach (string item in xLineParas)
@@ -2257,7 +2266,7 @@ namespace WindowsFormsApp1
                     lines_perPage += 2;
             }
             */
-            #endregion 
+            #endregion
             if (normalLineParaLength == 0)
             {
                 if (xLineParas.Length > 0)//通常第一行會有卷首篇題，故不準；最末行又可能收尾，故取其次末行
@@ -3671,6 +3680,9 @@ namespace WindowsFormsApp1
 
             if (bookID != previousBookID)
             {
+                linesParasPerPage = -1;//每頁行/段數
+                wordsPerLinePara = -1;//每行/段字數 reset
+
                 new SoundPlayer(@"C:\Windows\Media\Windows Exclamation.wav").Play();
                 //https://www.facebook.com/oscarsun72/posts/4780524142058682
                 //messagebox topmost
