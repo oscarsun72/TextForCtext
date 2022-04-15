@@ -2498,11 +2498,11 @@ namespace WindowsFormsApp1
         }
 
         bool autoPasteFromSBCKwhether = false;
-        void autoPasteFromSBCK()
+        void autoPasteFromSBCK(bool autoPasteFromSBCKwhether)
         {
-            string x=textBox1.Text, xClipboard = Clipboard.GetText();
-            if (!autoPasteFromSBCKwhether)return;
-            if (x.IndexOf(xClipboard) > -1) return;            
+            string x = textBox1.Text, xClipboard = Clipboard.GetText();
+            if (!autoPasteFromSBCKwhether) return;
+            if (x.IndexOf(xClipboard) > -1) return;
             textBox1.Text += xClipboard;
             textBox1.Select(textBox1.TextLength, 0);
             textBox1.ScrollToCaret();
@@ -3332,7 +3332,8 @@ namespace WindowsFormsApp1
             }
             if (textBox2.BackColor == Color.GreenYellow &&
                 doNotLeaveTextBox2 && textBox2.Focused) textBox2.SelectAll();
-            if (autoPasteFromSBCKwhether) autoPasteFromSBCK();
+            bool autoPasteFromSBCKwhether = false; this.autoPasteFromSBCKwhether = autoPasteFromSBCKwhether;
+            if (autoPasteFromSBCKwhether) autoPasteFromSBCK(autoPasteFromSBCKwhether);
         }
 
         private void textBox1_Enter(object sender, EventArgs e)
@@ -3528,8 +3529,12 @@ namespace WindowsFormsApp1
                     case MouseButtons.Right:
                         break;
                     case MouseButtons.Middle:
-                        //預設為最上層顯示，則按下Esc鍵或滑鼠中鍵會隱藏到任務列（系統列）中；滑鼠在其 ico 圖示上滑過即恢復
-                        hideToNICo();
+                        if (textBox1.SelectionLength == predictEndofPageSelectedTextLen
+                                && textBox1.Text.Substring(textBox1.SelectionStart + predictEndofPageSelectedTextLen, 2) == Environment.NewLine)
+                            keyDownCtrlAdd(false);
+                        else
+                            //預設為最上層顯示，則按下Esc鍵或滑鼠中鍵會隱藏到任務列（系統列）中；滑鼠在其 ico 圖示上滑過即恢復
+                            hideToNICo();
                         break;
                     case MouseButtons.XButton1:
                         nextPages(Keys.PageUp, true);
@@ -3563,7 +3568,8 @@ namespace WindowsFormsApp1
                         break;
                     case MouseButtons.Middle:
                         //if (new StringInfo(textBox1.SelectedText).LengthInTextElements == predictEndofPageSelectedTextLen)
-                        if (textBox1.SelectionLength == predictEndofPageSelectedTextLen)
+                        if (textBox1.SelectionLength == predictEndofPageSelectedTextLen
+                                && textBox1.Text.Substring(textBox1.SelectionStart + predictEndofPageSelectedTextLen, 2) == Environment.NewLine)
                             keyDownCtrlAdd(false);
                         break;
                     case MouseButtons.XButton1:
@@ -3696,7 +3702,7 @@ namespace WindowsFormsApp1
         }
         private void Form1_Deactivate(object sender, EventArgs e)
         {//預設表單視窗為最上層顯示，當表單視窗不在作用中時，自動隱藏至系統右下方之系統列/任務列中，當滑鼠滑過任務列中的縮圖ico時，即還原/恢復視窗窗體
-            if (!textBox2.Focused && textBox1.Text != "" && !dragDrop&&
+            if (!textBox2.Focused && textBox1.Text != "" && !dragDrop &&
                 !autoPasteFromSBCKwhether) this.TopMost = false;//hideToNICo();
             selStart = textBox1.SelectionStart; selLength = textBox1.SelectionLength;
             //if (this.WindowState==FormWindowState.Minimized)
