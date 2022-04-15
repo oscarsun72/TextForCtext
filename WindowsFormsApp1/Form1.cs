@@ -2114,7 +2114,7 @@ namespace WindowsFormsApp1
                     }
                     else
                     {
-                        if (MessageBox.Show("reset the page end ? ", "", MessageBoxButtons.OKCancel,MessageBoxIcon.Exclamation,MessageBoxDefaultButton.Button1,
+                        if (MessageBox.Show("reset the page end ? ", "", MessageBoxButtons.OKCancel, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1,
                             MessageBoxOptions.ServiceNotification) == DialogResult.OK)
                             pageTextEndPosition = s;
                     }
@@ -2474,7 +2474,8 @@ namespace WindowsFormsApp1
                     //    + "……" + textBox1.SelectedText, "", MessageBoxButtons.OKCancel,MessageBoxIcon.Question,
                     //    MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly) == DialogResult.OK)
                     if (MessageBox.Show("auto paste to Ctext Quit Edit textBox?" + Environment.NewLine + Environment.NewLine
-                        + "……" + textBox1.SelectedText, "", MessageBoxButtons.OKCancel, MessageBoxIcon.Question) == DialogResult.OK)
+                        + "……" + textBox1.SelectedText, "", MessageBoxButtons.OKCancel, MessageBoxIcon.Question)
+                            == DialogResult.OK)
                     {
                         if (autoPastetoQuickEdit && ModifierKeys == Keys.Control)
                         {
@@ -2485,11 +2486,23 @@ namespace WindowsFormsApp1
                         keyDownCtrlAdd(false);
                     }
                     else
-                        textBox1.Select(textBox1.SelectionStart + predictEndofPageSelectedTextLen, 0);
+                    {
+                        pageTextEndPosition = textBox1.SelectionStart + predictEndofPageSelectedTextLen;
+                        textBox1.Select(pageTextEndPosition, 0);
+                    }
                 }
                 else
                     keyDownCtrlAdd(false);
                 //return;
+            }
+        }
+
+        bool autoPasteFromSBCKwhether = false;
+        void autoPasteFromSBCK()
+        {
+            if (autoPasteFromSBCKwhether)
+            {
+                textBox1.Text += Clipboard.GetText();
             }
         }
 
@@ -3316,6 +3329,7 @@ namespace WindowsFormsApp1
             }
             if (textBox2.BackColor == Color.GreenYellow &&
                 doNotLeaveTextBox2 && textBox2.Focused) textBox2.SelectAll();
+            if (autoPasteFromSBCKwhether) autoPasteFromSBCK();
         }
 
         private void textBox1_Enter(object sender, EventArgs e)
@@ -3624,6 +3638,7 @@ namespace WindowsFormsApp1
 
         private void textBox3_TextChanged(object sender, EventArgs e)
         {
+            if (textBox3.Text == "") return;
             if (textBox3.Text.IndexOf("ctext.org") > -1) if (textBox3.Text.IndexOf("https://") == -1) textBox3.Text = "https://" + textBox3.Text;
             autoPastetoOrNot();
         }
