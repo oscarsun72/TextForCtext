@@ -1361,11 +1361,14 @@ namespace WindowsFormsApp1
                 if (s + 3 <= x.Length && x.Length > 3 && s >= 3)
                 {
                     int sn = expandSelRange("<p>", x);
-                    if (sn > 0 && x.Substring(sn + 3, 2) == Environment.NewLine)
+                    if (sn + 3 + 2 <= x.Length && x.Substring(sn + 3 + 2).Replace(Environment.NewLine, "") != "")
                     {
-                        textBox1.Select(sn, 3);
-                        undoRecord(); stopUndoRec = true; textBox1.SelectedText = "􏿽"; stopUndoRec = false;
-                        return;
+                        if (sn > 0 && x.Substring(sn + 3, 2) == Environment.NewLine)
+                        {
+                            textBox1.Select(sn, 3);
+                            undoRecord(); stopUndoRec = true; textBox1.SelectedText = "􏿽"; stopUndoRec = false;
+                            return;
+                        }
                     }
 
                 }
