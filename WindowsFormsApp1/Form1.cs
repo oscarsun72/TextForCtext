@@ -1860,7 +1860,11 @@ namespace WindowsFormsApp1
             string se = textBox1.Text.Substring(s, e - s);
             //int l = new StringInfo(se).LengthInTextElements;
             int l = wordsPerLinePara != -1 ? wordsPerLinePara : countWordsLenPerLinePara(se);
-            if (wordsPerLinePara == -1) wordsPerLinePara = l;
+            if (wordsPerLinePara == -1)
+            {
+                wordsPerLinePara = l;
+                normalLineParaLength = wordsPerLinePara;
+            }
             undoRecord(); stopUndoRec = true;
             while (e > -1)
             {
@@ -1878,12 +1882,14 @@ namespace WindowsFormsApp1
                     //    || (se.IndexOf("{{") == -1 && se.IndexOf("}}") > -1)
                     //    || (se.IndexOf("{{") > 0 && se.IndexOf("}}") > -1)) //「{{」不能是開頭
                     //    && se.IndexOf("<p>") == -1)
-                    if (se.IndexOf("<p>") == -1)
+                    if (se.IndexOf("<p>") == -1 && !(se.IndexOf("{{")==0 && se.IndexOf("}}")==-1))
+                    //if (se.Substring(se.Length - 3, 3)!="<p>")
                     {
                         textBox1.Select(e, 0);
                         textBox1.SelectedText = "<p>";
                         e += 3;
                     }
+
                 }
             }
             stopUndoRec = false;
@@ -2278,8 +2284,12 @@ namespace WindowsFormsApp1
             #endregion
             if (normalLineParaLength == 0)
             {
-                if (xLineParas.Length > 0)//通常第一行會有卷首篇題，故不準；最末行又可能收尾，故取其次末行
-                    normalLineParaLength = countWordsLenPerLinePara(xLineParas[xLineParas.Length - 1]);// new StringInfo(xLineParas[0]).LengthInTextElements;
+                if (wordsPerLinePara != -1) normalLineParaLength = wordsPerLinePara;
+                else
+                {
+                    if (xLineParas.Length > 0)//通常第一行會有卷首篇題，故不準；最末行又可能收尾，故取其次末行
+                        normalLineParaLength = countWordsLenPerLinePara(xLineParas[xLineParas.Length - 1]);// new StringInfo(xLineParas[0]).LengthInTextElements;
+                }
             }
             if (normalLineParaLength < 7) return new int[0];
             int i = -1, gap = 0, len = 0;
