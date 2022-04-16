@@ -2619,7 +2619,7 @@ namespace WindowsFormsApp1
             }
 
 
-
+            #region 按下Ctrl鍵
             if (Control.ModifierKeys == Keys.Control)
             {//按下Ctrl鍵
                 if (e.KeyCode == Keys.F)
@@ -2684,9 +2684,14 @@ namespace WindowsFormsApp1
                     e.Handled = true; return;
                 }
 
+                if (e.KeyCode == Keys.Scroll)
+                {//按下 Ctrl +Scroll Lock 設定為將《四部叢刊》資料庫所複製的文本在表單得到焦點時直接貼到 textBox1 的末尾,或反設定
+                    e.Handled = true; if (autoPasteFromSBCKwhether) autoPasteFromSBCKwhether = true; else autoPasteFromSBCKwhether = false; return;
+                }
+
 
             }//按下 Ctrl鍵 終
-
+            #endregion
 
 
             //if (((m & Keys.Control) == Keys.Control && (m & Keys.Alt) == Keys.Alt) && 
@@ -3351,7 +3356,7 @@ namespace WindowsFormsApp1
             }
             if (textBox2.BackColor == Color.GreenYellow &&
                 doNotLeaveTextBox2 && textBox2.Focused) textBox2.SelectAll();
-            bool autoPasteFromSBCKwhether = false; this.autoPasteFromSBCKwhether = autoPasteFromSBCKwhether;
+            //bool autoPasteFromSBCKwhether = false; this.autoPasteFromSBCKwhether = autoPasteFromSBCKwhether;
             if (autoPasteFromSBCKwhether) autoPasteFromSBCK(autoPasteFromSBCKwhether);
         }
 
