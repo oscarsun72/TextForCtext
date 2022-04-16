@@ -3377,7 +3377,7 @@ namespace WindowsFormsApp1
                 doNotLeaveTextBox2 && textBox2.Focused) textBox2.SelectAll();
 
             string xClip = Clipboard.GetText();
-            if (xClip.Length>500&& textBox1.TextLength<100)
+            if (xClip.Length > 500 && textBox1.TextLength < 100)
             {
                 runWordMacro("維基文庫四部叢刊本轉來");
             }
@@ -3709,6 +3709,7 @@ namespace WindowsFormsApp1
         {
             if (textBox3.Text == "") return;
             if (textBox3.Text.IndexOf("ctext.org") > -1) if (textBox3.Text.IndexOf("https://") == -1) textBox3.Text = "https://" + textBox3.Text;
+            new SoundPlayer(@"C:\Windows\Media\recycle.wav").Play();
             autoPastetoOrNot();
         }
 
