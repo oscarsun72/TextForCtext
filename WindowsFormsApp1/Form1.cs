@@ -3383,7 +3383,7 @@ namespace WindowsFormsApp1
         private void autoRunWordVBAMacro()
         {
             string xClip = Clipboard.GetText();
-            if (xClip.IndexOf("MidleadingBot") > 0)//xClip.Length > 500 && textBox1.TextLength < 100&& xClip.IndexOf()>0)
+            if (xClip.IndexOf("MidleadingBot") > 0 && textBox1.TextLength < 100)//xClip.Length > 500 )
                 runWordMacro("維基文庫四部叢刊本轉來");
         }
 
@@ -3710,7 +3710,7 @@ namespace WindowsFormsApp1
         private void textBox3_TextChanged(object sender, EventArgs e)
         {
             if (textBox3.Text == "") return;
-            if (textBox3.Text.IndexOf("ctext.org") > -1) if (textBox3.Text.IndexOf("https://") == -1) textBox3.Text = "https://" + textBox3.Text;            
+            if (textBox3.Text.IndexOf("ctext.org") > -1) if (textBox3.Text.IndexOf("https://") == -1) textBox3.Text = "https://" + textBox3.Text;
             autoPastetoOrNot();
         }
 
