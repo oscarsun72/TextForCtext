@@ -1357,7 +1357,7 @@ namespace WindowsFormsApp1
                     //}
                     //x = x.Substring(0, s) + sTxtChk + x.Substring(s + l);
                     //textBox1.Text = x;
-                    textBox1.SelectionStart = s + sTxtChk.Length;
+                    textBox1.SelectionStart = s; //+ sTxtChk.Length;
                     stopUndoRec = false;
                 }
             }
