@@ -3710,8 +3710,7 @@ namespace WindowsFormsApp1
         private void textBox3_TextChanged(object sender, EventArgs e)
         {
             if (textBox3.Text == "") return;
-            if (textBox3.Text.IndexOf("ctext.org") > -1) if (textBox3.Text.IndexOf("https://") == -1) textBox3.Text = "https://" + textBox3.Text;
-            if (textBox3.Focused) new SoundPlayer(@"C:\Windows\Media\recycle.wav").Play();
+            if (textBox3.Text.IndexOf("ctext.org") > -1) if (textBox3.Text.IndexOf("https://") == -1) textBox3.Text = "https://" + textBox3.Text;            
             autoPastetoOrNot();
         }
 
@@ -3748,6 +3747,7 @@ namespace WindowsFormsApp1
         {
             //textBox3.DoDragDrop(e.Data, DragDropEffects.Copy);            
             textBox3.Text = e.Data.GetData(DataFormats.UnicodeText).ToString();
+            new SoundPlayer(@"C:\Windows\Media\recycle.wav").Play();
         }
 
         private void textBox3_DragEnter(object sender, DragEventArgs e)
