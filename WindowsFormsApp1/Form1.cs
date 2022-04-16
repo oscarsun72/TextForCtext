@@ -1882,7 +1882,7 @@ namespace WindowsFormsApp1
                     //    || (se.IndexOf("{{") == -1 && se.IndexOf("}}") > -1)
                     //    || (se.IndexOf("{{") > 0 && se.IndexOf("}}") > -1)) //「{{」不能是開頭
                     //    && se.IndexOf("<p>") == -1)
-                    if (se.IndexOf("<p>") == -1 && !(se.IndexOf("{{")==0 && se.IndexOf("}}")==-1))
+                    if (se.IndexOf("<p>") == -1 && !(se.IndexOf("{{") == 0 && se.IndexOf("}}") == -1))
                     //if (se.Substring(se.Length - 3, 3)!="<p>")
                     {
                         textBox1.Select(e, 0);
@@ -3656,24 +3656,34 @@ namespace WindowsFormsApp1
         bool dragDrop = false;
         private void textBox1_DragDrop(object sender, DragEventArgs e)
         {
-            //https://docs.microsoft.com/zh-tw/dotnet/desktop/winforms/controls/enable-drag-and-drop-operations-with-wf-richtextbox-control?view=netframeworkdesktop-4.8
-            int i;
-            String s;
+            if (ModifierKeys == Keys.None)
+            {
+                //https://docs.microsoft.com/zh-tw/dotnet/desktop/winforms/controls/enable-drag-and-drop-operations-with-wf-richtextbox-control?view=netframeworkdesktop-4.8
+                int i;
+                String s;
 
-            // Get start position to drop the text.  
-            i = textBox1.SelectionStart;
-            s = textBox1.Text.Substring(i);
-            //textBox1.Text = textBox1.Text.Substring(0, i);
+                // Get start position to drop the text.  
+                i = textBox1.SelectionStart;
+                s = textBox1.Text.Substring(i);
+                //textBox1.Text = textBox1.Text.Substring(0, i);
 
-            // Drop the text on to the RichTextBox.  
-            //textBox1.Text = textBox1.Text +
-            //e.Data.GetData(DataFormats.Text).ToString();
-            //e.Data.GetData(DataFormats.UnicodeText).ToString();
-            //textBox1.Text = textBox1.Text + s;
+                // Drop the text on to the RichTextBox.  
+                //textBox1.Text = textBox1.Text +
+                //e.Data.GetData(DataFormats.Text).ToString();
+                //e.Data.GetData(DataFormats.UnicodeText).ToString();
+                //textBox1.Text = textBox1.Text + s;
 
-            ////textBox1.Text = e.Data.GetData(DataFormats.Text).ToString();
-            textBox1.Text = e.Data.GetData(DataFormats.UnicodeText).ToString();
-            dragDrop = true;
+                ////textBox1.Text = e.Data.GetData(DataFormats.Text).ToString();            
+                textBox1.Text = e.Data.GetData(DataFormats.UnicodeText).ToString();
+                dragDrop = true;
+            }
+            else if (ModifierKeys == Keys.Control)
+            {
+                //Clipboard.SetData(DataFormats.UnicodeText, e.Data.GetData(DataFormats.UnicodeText));//由 vs studio 的 intel 幫我填入的（按兩下tab鍵後）
+                Clipboard.SetDataObject(e.Data);//由以上一行自己摸索、測試的
+                runWordMacro("維基文庫四部叢刊本轉來");
+                return;
+            }
         }
 
         int[] findWord(string x, string x1)
