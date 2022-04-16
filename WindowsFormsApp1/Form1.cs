@@ -3711,7 +3711,7 @@ namespace WindowsFormsApp1
         {
             if (textBox3.Text == "") return;
             if (textBox3.Text.IndexOf("ctext.org") > -1) if (textBox3.Text.IndexOf("https://") == -1) textBox3.Text = "https://" + textBox3.Text;
-            new SoundPlayer(@"C:\Windows\Media\recycle.wav").Play();
+            if (textBox3.Focused) new SoundPlayer(@"C:\Windows\Media\recycle.wav").Play();
             autoPastetoOrNot();
         }
 
