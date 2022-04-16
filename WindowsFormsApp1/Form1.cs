@@ -3681,7 +3681,8 @@ namespace WindowsFormsApp1
             {
                 //Clipboard.SetData(DataFormats.UnicodeText, e.Data.GetData(DataFormats.UnicodeText));//由 vs studio 的 intel 幫我填入的（按兩下tab鍵後）
                 Clipboard.SetDataObject(e.Data);//由以上一行自己摸索、測試的
-                runWordMacro("維基文庫四部叢刊本轉來");
+                textBox1.Text = "autoRunWordMacro=true……";
+                runWordMacro("維基文庫四部叢刊本轉來");//不想被鎖死的話得考慮用多工、多執行緒了
                 return;
             }
         }
