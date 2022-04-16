@@ -3375,7 +3375,13 @@ namespace WindowsFormsApp1
             }
             if (textBox2.BackColor == Color.GreenYellow &&
                 doNotLeaveTextBox2 && textBox2.Focused) textBox2.SelectAll();
-            //bool autoPasteFromSBCKwhether = false; this.autoPasteFromSBCKwhether = autoPasteFromSBCKwhether;
+
+            string xClip = Clipboard.GetText();
+            if (xClip.Length>500&& textBox1.TextLength<100)
+            {
+                runWordMacro("維基文庫四部叢刊本轉來");
+            }
+            //bool autoPasteFromSBCKwhether = false; this.autoPasteFromSBCKwhether = autoPasteFromSBCKwhether;            
             if (autoPasteFromSBCKwhether) autoPasteFromSBCK(autoPasteFromSBCKwhether);
         }
 
