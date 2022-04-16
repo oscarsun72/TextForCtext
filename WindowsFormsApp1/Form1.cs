@@ -3375,14 +3375,16 @@ namespace WindowsFormsApp1
             }
             if (textBox2.BackColor == Color.GreenYellow &&
                 doNotLeaveTextBox2 && textBox2.Focused) textBox2.SelectAll();
-
-            string xClip = Clipboard.GetText();
-            if (xClip.Length > 500 && textBox1.TextLength < 100)
-            {
-                runWordMacro("維基文庫四部叢刊本轉來");
-            }
+            autoRunWordVBAMacro();
             //bool autoPasteFromSBCKwhether = false; this.autoPasteFromSBCKwhether = autoPasteFromSBCKwhether;            
             if (autoPasteFromSBCKwhether) autoPasteFromSBCK(autoPasteFromSBCKwhether);
+        }
+
+        private void autoRunWordVBAMacro()
+        {
+            string xClip = Clipboard.GetText();
+            if (xClip.IndexOf("MidleadingBot") > 0)//xClip.Length > 500 && textBox1.TextLength < 100&& xClip.IndexOf()>0)
+                runWordMacro("維基文庫四部叢刊本轉來");
         }
 
         private void textBox1_Enter(object sender, EventArgs e)
