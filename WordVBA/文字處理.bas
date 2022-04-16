@@ -83,7 +83,7 @@ With ActiveDocument
 '                    Selection.SetRange wrong + ActiveDocument.Paragraphs.Count / 2, wrong + 1 '盢赣睹絏匡
 '                    x = x + 1
 '                End If
-                .Edit
+                .edit
                 rst("Ω计") = rst("Ω计") + 1
                 .Update
             End If
@@ -192,7 +192,7 @@ With ActiveDocument
 '            On Error GoTo Ω计
             rst.Update
         Else
-            rst.Edit
+            rst.edit
             rst("Ω计") = rst("Ω计") + 1
             rst.Update
         End If
@@ -347,7 +347,7 @@ End With
                     On Error GoTo 岿粇矪瞶
                     .Update 'dbUpdateBatch, True
                 Else
-1                   .Edit
+1                   .edit
                     rst("Ω计") = rst("Ω计") + 1
                     .Update
                 End If
@@ -447,7 +447,7 @@ With ActiveDocument
                     On Error GoTo 岿粇矪瞶
                     .Update 'dbUpdateBatch, True
                 Else
-1                   .Edit
+1                   .edit
                     rst("Ω计") = rst("Ω计") + 1
                     .Update
                 End If
@@ -591,7 +591,7 @@ With ActiveDocument
 '                rst("Ω计") = 1'箇砞﹚1
                 .Update 'dbUpdateBatch, True
             Else
-                .Edit
+                .edit
                 rst("Ω计") = rst("Ω计") + 1
                 .Update
             End If
@@ -677,7 +677,7 @@ With ActiveDocument
 '                rst("Ω计") = 1'箇砞﹚1
                 .Update 'dbUpdateBatch, True
             Else
-                .Edit
+                .edit
                 rst("Ω计") = rst("Ω计") + 1
                 .Update
             End If
@@ -759,7 +759,7 @@ With ActiveDocument
 '                rst("Ω计") = 1'箇砞﹚1
                 .Update 'dbUpdateBatch, True
             Else
-                .Edit
+                .edit
                 rst("Ω计") = rst("Ω计") + 1
                 .Update
             End If
@@ -842,7 +842,7 @@ With ActiveDocument
 '                rst("Ω计") = 1'箇砞﹚1
                 .Update 'dbUpdateBatch, True
             Else
-                .Edit
+                .edit
                 rst("Ω计") = rst("Ω计") + 1
                 .Update
             End If
@@ -925,7 +925,7 @@ With ActiveDocument
 '                rst("Ω计") = 1'箇砞﹚1
                 .Update 'dbUpdateBatch, True
             Else
-                .Edit
+                .edit
                 rst("Ω计") = rst("Ω计") + 1
                 .Update
             End If
@@ -1006,7 +1006,7 @@ With ActiveDocument
 '                rst("Ω计") = 1'箇砞﹚1
                 .Update 'dbUpdateBatch, True
             Else
-                .Edit
+                .edit
                 rst("Ω计") = rst("Ω计") + 1
                 .Update
             End If
@@ -1087,7 +1087,7 @@ With ActiveDocument
 '                rst("Ω计") = 1'箇砞﹚1
                 .Update 'dbUpdateBatch, True
             Else
-                .Edit
+                .edit
                 rst("Ω计") = rst("Ω计") + 1
                 .Update
             End If
@@ -1166,7 +1166,7 @@ With ActiveDocument
 '                rst("Ω计") = 1'箇砞﹚1
                 .Update 'dbUpdateBatch, True
             Else
-                .Edit
+                .edit
                 rst("Ω计") = rst("Ω计") + 1
                 .Update
             End If
@@ -1246,7 +1246,7 @@ With ActiveDocument
 '                rst("Ω计") = 1'箇砞﹚1
                 .Update 'dbUpdateBatch, True
             Else
-                .Edit
+                .edit
                 rst("Ω计") = rst("Ω计") + 1
                 .Update
             End If
@@ -1325,7 +1325,7 @@ With ActiveDocument
 '                rst("Ω计") = 1'箇砞﹚1
                 .Update 'dbUpdateBatch, True
             Else
-                .Edit
+                .edit
                 rst("Ω计") = rst("Ω计") + 1
                 .Update
             End If
@@ -1403,7 +1403,7 @@ With ActiveDocument
 '                rst("Ω计") = 1'箇砞﹚1
                 .Update 'dbUpdateBatch, True
             Else
-                .Edit
+                .edit
                 rst("Ω计") = rst("Ω计") + 1
                 .Update
             End If
@@ -1488,7 +1488,7 @@ With ActiveDocument
 '                rst("Ω计") = 1'箇砞﹚1
                 .Update 'dbUpdateBatch, True
             Else
-                .Edit
+                .edit
                 rst("Ω计") = rst("Ω计") + 1
                 .Update
             End If
@@ -1583,7 +1583,7 @@ With ActiveDocument
 '                rst("Ω计") = 1'箇砞﹚1
                 .Update 'dbUpdateBatch, True
             Else
-                .Edit
+                .edit
                 rst("Ω计") = rst("Ω计") + 1
                 .Update
             End If
@@ -1674,7 +1674,7 @@ With ActiveDocument
 '                rst("Ω计") = 1'箇砞﹚1
                 .Update 'dbUpdateBatch, True
             Else
-                .Edit
+                .edit
                 rst("Ω计") = rst("Ω计") + 1
                 .Update
             End If
@@ -3222,7 +3222,7 @@ Set d = ActiveDocument: dx = d.Range.Text: Set rngF = d.Range
 'cnt.Open cntStr
 
 GoSub bookmarks '夹翴才腹_腹_笆ノ
-rst.Open "select * from 夹翴才腹_絞腹_笆ノ order by 逼", cnt
+rst.Open "select * from 夹翴才腹_絞腹_笆ノ order by 逼", cnt, adOpenForwardOnly, adLockReadOnly
 Set rngF = d.Range: dx = d.Range.Text
 Do Until rst.EOF
     If VBA.InStr(dx, rst("絞").Value) Then 'if found
@@ -3252,7 +3252,7 @@ rst.Close: cnt.Close
 Exit Sub
 bookmarks:
 If rst.State = adStateOpen Then rst.Close
-rst.Open "select * from 夹翴才腹_腹_笆ノ order by 逼", cnt
+rst.Open "select * from 夹翴才腹_腹_笆ノ order by 逼", cnt, adOpenForwardOnly, adLockReadOnly
 Do Until rst.EOF
     If VBA.InStr(dx, rst("").Value) Then 'if found
         Do While rngF.Find.Execute(rst("").Value, , , , , , True, wdFindStop)

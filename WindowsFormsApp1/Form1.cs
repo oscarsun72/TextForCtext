@@ -1787,7 +1787,14 @@ namespace WindowsFormsApp1
             {//兼具 {{、}} 正文、注文夾雜者
                 while (openCurlybracketsPostion > -1)
                 {
-                    if (closeCurlybracketsPostion > -1 && openCurlybracketsPostion > closeCurlybracketsPostion)
+                    if (openCurlybracketsPostion == 0 && closeCurlybracketsPostion > openCurlybracketsPostion &&
+                            xLinePara.IndexOf("{{", closeCurlybracketsPostion) == -1 &&
+                            xLinePara.IndexOf("}}", closeCurlybracketsPostion + 2) == -1)
+                    {// like this :     {{……}}……
+                        return new StringInfo(xLinePara.Substring(closeCurlybracketsPostion + 2)).LengthInTextElements +
+                                countNoteLen(xLinePara.Substring(openCurlybracketsPostion + 2, closeCurlybracketsPostion - 2));
+                    }
+                    else if (closeCurlybracketsPostion > -1 && openCurlybracketsPostion > closeCurlybracketsPostion)
                     {//先出現 }} 的話
                         //s = closeCurlybracketsPostion + 2;
                         //   countResult += new StringInfo(xLinePara.Substring(0, closeCurlybracketsPostion)).LengthInTextElements;
