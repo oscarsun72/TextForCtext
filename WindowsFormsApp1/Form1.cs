@@ -1334,14 +1334,14 @@ namespace WindowsFormsApp1
 
         }
 
-        int countWordsinDomain(string whatWord,string domain)
+        int countWordsinDomain(string whatWord, string domain)
         {
-            StringInfo dw = new StringInfo(domain);int cntr=0;
+            StringInfo dw = new StringInfo(domain); int cntr = 0;
             for (int i = 0; i < dw.LengthInTextElements; i++)
             {
-                if (dw.SubstringByTextElements(i,1)==whatWord)
+                if (dw.SubstringByTextElements(i, 1) == whatWord)
                 {
-                    cntr++; 
+                    cntr++;
                 }
             }
             return cntr;
@@ -1370,7 +1370,7 @@ namespace WindowsFormsApp1
                     //}
                     //x = x.Substring(0, s) + sTxtChk + x.Substring(s + l);
                     //textBox1.Text = x;
-                    if (s + l + countWordsinDomain("　",x.Substring(s)) == textBox1.TextLength )
+                    if (s + l + countWordsinDomain("　", x.Substring(s)) == textBox1.TextLength)
                         textBox1.SelectionStart = s;
                     else
                         textBox1.SelectionStart = s + sTxtChk.Length;
@@ -2724,12 +2724,30 @@ namespace WindowsFormsApp1
 
                 if (e.KeyCode == Keys.Multiply)
                 {//按下 Ctrl + * 設定為將《四部叢刊》資料庫所複製的文本在表單得到焦點時直接貼到 textBox1 的末尾,或反設定
-                    e.Handled = true; if (!autoPasteFromSBCKwhether) autoPasteFromSBCKwhether = true; else autoPasteFromSBCKwhether = false; return;
+                    e.Handled = true;
+                    if (!autoPasteFromSBCKwhether)
+                    {
+                        new SoundPlayer(@"C:\Windows\Media\Speech On.wav");autoPasteFromSBCKwhether = true;
+                    }
+                    else
+                    {
+                        autoPasteFromSBCKwhether = false;new SoundPlayer(@"C:\Windows\Media\Speech Off.wav");
+                    }
+                    return;
                 }
 
                 if (e.KeyCode == Keys.Divide)
                 {//按下 Ctrl + / (Divide) 切換 check_the_adjacent_pages 值
-                    e.Handled = true; if (!check_the_adjacent_pages) check_the_adjacent_pages = true; else check_the_adjacent_pages = false; return;
+                    e.Handled = true;
+                    if (!check_the_adjacent_pages)
+                    {
+                        check_the_adjacent_pages = true; new SoundPlayer(@"C:\Windows\Media\Speech On.wav");
+                    }
+                    else
+                    {
+                        check_the_adjacent_pages = false; new SoundPlayer(@"C:\Windows\Media\Speech Off.wav");
+                    }
+                    return;
                 }
 
 
