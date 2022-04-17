@@ -23,7 +23,7 @@ namespace WindowsFormsApp1
         //string[] CJKBiggestSet = new string[]{ "HanaMinB", "KaiXinSongB", "TH-Tshyn-P1" };
         string[] CJKBiggestSet = { "HanaMinB", "KaiXinSongB", "TH-Tshyn-P1", "HanaMinA" };
         Color button2BackColorDefault;
-        bool insertMode = true;
+        bool insertMode = true, check_the_adjacent_pages = false;
 
         System.Windows.Forms.NotifyIcon nICo;
         int thisHeight, thisWidth, thisLeft, thisTop;
@@ -1357,7 +1357,10 @@ namespace WindowsFormsApp1
                     //}
                     //x = x.Substring(0, s) + sTxtChk + x.Substring(s + l);
                     //textBox1.Text = x;
-                    textBox1.SelectionStart = s; //+ sTxtChk.Length;
+                    if (textBox1.SelectionStart + textBox1.SelectionLength == textBox1.TextLength)
+                        textBox1.SelectionStart = s;
+                    else
+                        textBox1.SelectionStart = s + sTxtChk.Length;
                     stopUndoRec = false;
                 }
             }
@@ -2154,7 +2157,8 @@ namespace WindowsFormsApp1
             }
             if (!newTextBox1()) return;
             pasteToCtext();
-            if (!shiftKeyDownYet) nextPages(Keys.PageDown, false);
+            //if (!shiftKeyDownYet ) nextPages(Keys.PageDown, false);
+            if (!shiftKeyDownYet && !check_the_adjacent_pages) nextPages(Keys.PageDown, false);
             predictEndofPage();
             pageTextEndPosition = 0; pageEndText10 = "";
         }
@@ -2510,11 +2514,15 @@ namespace WindowsFormsApp1
                         + "……" + textBox1.SelectedText, "", MessageBoxButtons.OKCancel, MessageBoxIcon.Question)
                             == DialogResult.OK)
                     {
-                        if (autoPastetoQuickEdit && ModifierKeys == Keys.Control)
+                        if (autoPastetoQuickEdit && (ModifierKeys == Keys.Control || check_the_adjacent_pages))
                         {
                             appActivateByName();
                             //當啟用預估頁尾後，按下 Ctrl 或 Shift Alt 可以自動貼入 Quick Edit ，唯此處僅用 Ctrl 及 Shift 控制關閉前一頁所瀏覽之 Ctext 網頁                
-                            SendKeys.Send("^{F4}");//關閉前一頁                
+                            SendKeys.Send("^{F4}");//關閉前一頁
+                            if (check_the_adjacent_pages)
+                            {
+                                nextPages(Keys.PageDown, false);
+                            }
                         }
                         keyDownCtrlAdd(false);
                     }
@@ -2703,9 +2711,14 @@ namespace WindowsFormsApp1
                     e.Handled = true; return;
                 }
 
-                if (e.KeyCode == Keys.Scroll)
-                {//按下 Ctrl +Scroll Lock 設定為將《四部叢刊》資料庫所複製的文本在表單得到焦點時直接貼到 textBox1 的末尾,或反設定
-                    e.Handled = true; if (autoPasteFromSBCKwhether) autoPasteFromSBCKwhether = true; else autoPasteFromSBCKwhether = false; return;
+                if (e.KeyCode == Keys.Multiply)
+                {//按下 Ctrl + * 設定為將《四部叢刊》資料庫所複製的文本在表單得到焦點時直接貼到 textBox1 的末尾,或反設定
+                    e.Handled = true; if (!autoPasteFromSBCKwhether) autoPasteFromSBCKwhether = true; else autoPasteFromSBCKwhether = false; return;
+                }
+
+                if (e.KeyCode == Keys.Divide)
+                {//按下 Ctrl + / (Divide) 切換 check_the_adjacent_pages 值
+                    e.Handled = true; if (!check_the_adjacent_pages) check_the_adjacent_pages = true; else check_the_adjacent_pages = false; return;
                 }
 
 
@@ -2722,6 +2735,7 @@ namespace WindowsFormsApp1
             //    return;
             //}
 
+            #region 按下Shift鍵
             if (Control.ModifierKeys == Keys.Shift)
             {//按下Shift鍵
                 if (e.KeyCode == Keys.F12)
@@ -2731,8 +2745,9 @@ namespace WindowsFormsApp1
                     return;
                 }
             }//按下Shift鍵 終
+            #endregion
 
-
+            #region 按下Alt鍵
             if (Control.ModifierKeys == Keys.Alt)
             {//按下Alt鍵
                 if (e.KeyCode == Keys.Left || e.KeyCode == Keys.Right)
@@ -2765,6 +2780,7 @@ namespace WindowsFormsApp1
                     e.Handled = true; return;
                 }
             }//以上 按下Alt鍵
+            #endregion
 
 
             if (ModifierKeys == Keys.None)
@@ -2888,8 +2904,11 @@ namespace WindowsFormsApp1
                 SendKeys.Send("{Tab}"); //("{Tab 24}");
                 Task.Delay(200).Wait();//200
                 SendKeys.Send("^a");
-                Task.Delay(500).Wait();
-                SendKeys.Send("^{PGUP}");//回上一頁籤檢查文本是否如願貼好
+                if (!check_the_adjacent_pages)
+                {
+                    Task.Delay(500).Wait();
+                    SendKeys.Send("^{PGUP}");//回上一頁籤檢查文本是否如願貼好
+                }
             }
             textBox3.Text = url;
             if (stayInHere) this.Activate();

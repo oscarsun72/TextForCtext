@@ -83,7 +83,9 @@ Alt + F1 ：切換 textbox1 之字型： 切換支援 CJK - Ext 擴充字集的�
 
 按下 Ctrl 、Alt 或 Shift 任一鍵再啟用表單成為現用的（activate form1)則會啟動自動輸入( auto paste to Quick Edit textbox in Ctext).
 
-按下 Ctrl + Scroll Lock 設定為將《四部叢刊》資料庫所複製的文本在表單得到焦點時直接貼到 textBox1 的末尾,或反設定
+按下 Ctrl + * （Multiply）設定為將《四部叢刊》資料庫所複製的文本在表單得到焦點時直接貼到 textBox1 的末尾,或反設定
+
+按下 Ctrl + / （Divide） 切換 check_the_adjacent_pages 值
 
 
 ### 在 textBox1 中按下以下組合鍵：
