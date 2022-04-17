@@ -1333,6 +1333,19 @@ namespace WindowsFormsApp1
             //return textBox1.SelectedText;
 
         }
+
+        int countWordsinDomain(string whatWord,string domain)
+        {
+            StringInfo dw = new StringInfo(domain);int cntr=0;
+            for (int i = 0; i < dw.LengthInTextElements; i++)
+            {
+                if (dw.SubstringByTextElements(i,1)==whatWord)
+                {
+                    cntr++; 
+                }
+            }
+            return cntr;
+        }
         private void keysSpacesBlank()
         {
             string x = textBox1.Text;
@@ -1357,7 +1370,7 @@ namespace WindowsFormsApp1
                     //}
                     //x = x.Substring(0, s) + sTxtChk + x.Substring(s + l);
                     //textBox1.Text = x;
-                    if (s + l == textBox1.TextLength - 1)
+                    if (s + l + countWordsinDomain("　",x.Substring(s)) == textBox1.TextLength )
                         textBox1.SelectionStart = s;
                     else
                         textBox1.SelectionStart = s + sTxtChk.Length;
@@ -2519,10 +2532,7 @@ namespace WindowsFormsApp1
                             appActivateByName();
                             //當啟用預估頁尾後，按下 Ctrl 或 Shift Alt 可以自動貼入 Quick Edit ，唯此處僅用 Ctrl 及 Shift 控制關閉前一頁所瀏覽之 Ctext 網頁                
                             SendKeys.Send("^{F4}");//關閉前一頁
-                            if (check_the_adjacent_pages)
-                            {
-                                nextPages(Keys.PageDown, false);
-                            }
+                            if (check_the_adjacent_pages) nextPages(Keys.PageDown, false);
                         }
                         keyDownCtrlAdd(false);
                     }
@@ -2531,6 +2541,7 @@ namespace WindowsFormsApp1
                         pageTextEndPosition = textBox1.SelectionStart + predictEndofPageSelectedTextLen;
                         pageEndText10 = textBox1.Text.Substring(pageTextEndPosition - 10);
                         textBox1.Select(pageTextEndPosition, 0);
+                        if (check_the_adjacent_pages) nextPages(Keys.PageDown, false);
                     }
                 }
                 else
