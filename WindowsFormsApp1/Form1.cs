@@ -3430,7 +3430,7 @@ namespace WindowsFormsApp1
 
         private void autoRunWordVBAMacro()
         {
-            string xClip = Clipboard.GetText();
+            string xClip = Clipboard.GetText()?? "";
             if (xClip.IndexOf("MidleadingBot") > 0 && textBox1.TextLength < 100)//xClip.Length > 500 )
                 runWordMacro("維基文庫四部叢刊本轉來");
         }
