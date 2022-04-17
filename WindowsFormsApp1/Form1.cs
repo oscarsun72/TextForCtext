@@ -2727,11 +2727,11 @@ namespace WindowsFormsApp1
                     e.Handled = true;
                     if (!autoPasteFromSBCKwhether)
                     {
-                        new SoundPlayer(@"C:\Windows\Media\Speech On.wav");autoPasteFromSBCKwhether = true;
+                        new SoundPlayer(@"C:\Windows\Media\Speech On.wav").Play();autoPasteFromSBCKwhether = true;
                     }
                     else
                     {
-                        autoPasteFromSBCKwhether = false;new SoundPlayer(@"C:\Windows\Media\Speech Off.wav");
+                        autoPasteFromSBCKwhether = false;new SoundPlayer(@"C:\Windows\Media\Speech Off.wav").Play();
                     }
                     return;
                 }
@@ -2741,11 +2741,11 @@ namespace WindowsFormsApp1
                     e.Handled = true;
                     if (!check_the_adjacent_pages)
                     {
-                        check_the_adjacent_pages = true; new SoundPlayer(@"C:\Windows\Media\Speech On.wav");
+                        check_the_adjacent_pages = true; new SoundPlayer(@"C:\Windows\Media\Speech On.wav").Play();
                     }
                     else
                     {
-                        check_the_adjacent_pages = false; new SoundPlayer(@"C:\Windows\Media\Speech Off.wav");
+                        check_the_adjacent_pages = false; new SoundPlayer(@"C:\Windows\Media\Speech Off.wav").Play();
                     }
                     return;
                 }
