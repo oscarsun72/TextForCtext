@@ -408,10 +408,10 @@ namespace WindowsFormsApp1
             else
             { s = textBox1.SelectionStart; l = textBox1.SelectionLength; }
             string xCopy = x.Substring(0, s + l);
-            #region 置換為全形符號
-            string[] replacedChar = { ",", ";", ":", "．" };
-            string[] replaceChar = { "，", "；", "：", "·" };
-            foreach (var item in replacedChar)
+            #region 置換為全形符號、及清除冗餘
+            string[] replaceDChar = { ",", ";", ":", "．" ,"?","：：","《《","》》", "〈〈", "〉〉", "。}}。}}" };
+            string[] replaceChar = { "，", "；", "：", "·" ,"？","：","《《","》", "〈", "〉", "。}}" };
+            foreach (var item in replaceDChar)
             {
                 if (xCopy.IndexOf(item) > -1)
                 {
@@ -420,7 +420,7 @@ namespace WindowsFormsApp1
                     //{//直接將半形標點符號轉成全形
                     for (int i = 0; i < replaceChar.Length; i++)
                     {
-                        xCopy = xCopy.Replace(replacedChar[i], replaceChar[i]);
+                        xCopy = xCopy.Replace(replaceDChar[i], replaceChar[i]);
                     }
                     //}
                     break;
