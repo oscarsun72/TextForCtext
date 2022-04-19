@@ -1419,21 +1419,27 @@ namespace WindowsFormsApp1
         {
             string x = textBox1.SelectedText; int s = textBox1.SelectionStart;
             caretPositionRecord();
+            undoRecord();
+            stopUndoRec = true;
             if (textBox1.SelectedText == "")
             {
                 x = textBox1.Text;
                 s = 0;
             }
             int i = x.IndexOf("*"), j = 0;
-            while (i > -1)
+            while (i > -1 && i <= x.Length)
             {
                 textBox1.Select(i + s + j, 1);
                 textBox1.SelectedText += "*";
-                i = x.IndexOf("*", i + 1);
+                //x = textBox1.Text;
+                //i = x.IndexOf("*", i + 1);
+                if (x.IndexOf(Environment.NewLine, i) == -1) break;
+                i = x.IndexOf("*", x.IndexOf(Environment.NewLine, i));
                 //if (i > -1) i += j;
                 j++;
             }
             caretPositionRecall();
+            stopUndoRec = false;
         }
 
         private void keysTitleCode()
@@ -3437,8 +3443,8 @@ namespace WindowsFormsApp1
             }
             catch (Exception)
             {
-                Task.WaitAll();        
-                xClip = Clipboard.GetText() ?? "";                
+                Task.WaitAll();
+                xClip = Clipboard.GetText() ?? "";
                 //throw;
             }
             if (xClip.IndexOf("MidleadingBot") > 0 && textBox1.TextLength < 100)//xClip.Length > 500 )
