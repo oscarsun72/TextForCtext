@@ -1265,7 +1265,7 @@ namespace WindowsFormsApp1
                 if (e.KeyCode == Keys.F7)
                 {//F7 ： 每行/段前空一格
                     e.Handled = true;
-                    keysSpacePreParagraphs();
+                    keysSpacePreParagraphs_indent();
                     return;
                 }
                 if (e.KeyCode == Keys.F8)
@@ -1575,7 +1575,7 @@ namespace WindowsFormsApp1
             }
         }
 
-        private void keysSpacePreParagraphs()
+        private void keysSpacePreParagraphs_indent()
         {
             int s = textBox1.SelectionStart;
             if (textBox1.SelectedText == "")
@@ -1594,13 +1594,25 @@ namespace WindowsFormsApp1
                 cntr++;
                 i = slTxt.IndexOf(Environment.NewLine, i + 1);
             }
-            undoRecord(); caretPositionRecord();
-            textBox1.SelectedText = "　" + textBox1.SelectedText.Replace(Environment.NewLine, Environment.NewLine + "　");
+            undoRecord(); caretPositionRecord(); stopUndoRec = true;
+            if (s == 0 || textBox1.Text.Substring(s - 2, 2) == Environment.NewLine)
+            {
+
+                textBox1.SelectedText = "　" + textBox1.SelectedText.Replace(Environment.NewLine, Environment.NewLine + "　");
+            }
+            else
+            {
+                int f = textBox1.Text.LastIndexOf(Environment.NewLine, s);
+                textBox1.SelectedText = textBox1.SelectedText.Replace(Environment.NewLine, Environment.NewLine + "　");
+                textBox1.Select(f == -1 ? 0 : f + 2, s - f);
+                textBox1.SelectedText = "　" + textBox1.SelectedText;
+            }
             if (l != 0)
             {
                 textBox1.Select(s, l + 1 + cntr);
             }
             pasteAllOverWrite = false;
+            stopUndoRec = false;
         }
 
         private void keysParagraphSymbol()
