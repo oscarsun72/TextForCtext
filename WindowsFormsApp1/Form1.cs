@@ -2727,11 +2727,11 @@ namespace WindowsFormsApp1
                     e.Handled = true;
                     if (!autoPasteFromSBCKwhether)
                     {
-                        new SoundPlayer(@"C:\Windows\Media\Speech On.wav").Play();autoPasteFromSBCKwhether = true;
+                        new SoundPlayer(@"C:\Windows\Media\Speech On.wav").Play(); autoPasteFromSBCKwhether = true;
                     }
                     else
                     {
-                        autoPasteFromSBCKwhether = false;new SoundPlayer(@"C:\Windows\Media\Speech Off.wav").Play();
+                        autoPasteFromSBCKwhether = false; new SoundPlayer(@"C:\Windows\Media\Speech Off.wav").Play();
                     }
                     return;
                 }
@@ -3430,7 +3430,17 @@ namespace WindowsFormsApp1
 
         private void autoRunWordVBAMacro()
         {
-            string xClip = Clipboard.GetText()?? "";
+            string xClip = "";
+            try
+            {
+                xClip = Clipboard.GetText() ?? "";
+            }
+            catch (Exception)
+            {
+                Task.WaitAll();        
+                xClip = Clipboard.GetText() ?? "";                
+                //throw;
+            }
             if (xClip.IndexOf("MidleadingBot") > 0 && textBox1.TextLength < 100)//xClip.Length > 500 )
                 runWordMacro("維基文庫四部叢刊本轉來");
         }
