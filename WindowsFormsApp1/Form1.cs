@@ -3179,11 +3179,21 @@ namespace WindowsFormsApp1
 
         private void textBox4_Leave(object sender, EventArgs e)
         {
-            textBox1.Focus();
+            if (textBox4.Text == "") return;
+            if (textBox1.SelectionLength == 0 && insertMode == true) return;
+            //else if (textBox1.SelectionLength == 0 && insertMode == false)
+            //{
+                int s = textBox1.SelectionStart;
+            //    textBox1.Select(s
+            //        , char.IsHighSurrogate(textBox1.Text.Substring(s, 1), 0) ? 2 : 1);
+            //}
+            if (char.IsHighSurrogate(textBox1.SelectedText, 0))
+                textBox1.Select(s, 2);
             saveText();
             replaceWord(textBox1.SelectedText, textBox4.Text);
             textBox4Resize();
             textBox4.Text = "";
+            textBox1.Focus();
         }
 
         private void textBox4Resize()
@@ -3211,11 +3221,11 @@ namespace WindowsFormsApp1
         {
             if (textBox4.Size == textBox4Size)
                 textBox4SizeLarger();
-            string rplsdWord = textBox1.SelectedText;
+            string rplsdWord = textBox1.SelectedText, x = textBox1.Text; 
+            int s = textBox1.SelectionStart, l = char.IsHighSurrogate(x.Substring(s, 1), 0) ? 2 : 1;
             if (rplsdWord == "" && insertMode == false)
             {
-                string x = textBox1.Text; int s = textBox1.SelectionStart;
-                rplsdWord = x.Substring(s, char.IsHighSurrogate(x.Substring(s, 1),0) ? 2 : 1);
+                rplsdWord = x.Substring(s, l);
             }
             if (rplsdWord != "")
             {
@@ -3225,8 +3235,8 @@ namespace WindowsFormsApp1
                     textBox4.Text = rplsWord;
                     if (rplsWord.IndexOf(Environment.NewLine) > -1) textBox4.Height = textBox4Size.Height * 3;
                 }
-            }
-            restoreCaretPosition(textBox1, selStart, selLength == 0 ? 1 : selLength);
+            }            
+            restoreCaretPosition(textBox1, selStart, selLength == 0 ? l : selLength);
         }
 
         private void textBox4SizeLarger()
