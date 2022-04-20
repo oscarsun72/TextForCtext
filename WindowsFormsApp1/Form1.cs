@@ -409,8 +409,8 @@ namespace WindowsFormsApp1
             { s = textBox1.SelectionStart; l = textBox1.SelectionLength; }
             string xCopy = x.Substring(0, s + l);
             #region 置換為全形符號、及清除冗餘
-            string[] replaceDChar = { ",", ";", ":", "．" ,"?","：：","《《","》》", "〈〈", "〉〉", "。}}。}}" };
-            string[] replaceChar = { "，", "；", "：", "·" ,"？","：","《《","》", "〈", "〉", "。}}" };
+            string[] replaceDChar = { ",", ";", ":", "．", "?", "：：", "《《", "》》", "〈〈", "〉〉", "。}}。}}" };
+            string[] replaceChar = { "，", "；", "：", "·", "？", "：", "《《", "》", "〈", "〉", "。}}" };
             foreach (var item in replaceDChar)
             {
                 if (xCopy.IndexOf(item) > -1)
@@ -2096,7 +2096,7 @@ namespace WindowsFormsApp1
                 textBox1.Select(s, l);
             }
             #region 小注跨頁處理
-            if (s > 2)
+            if (s > 2 && s + 2 <= x.Length)
             {
                 const string curlyBracketsOpen = "{{", curlyBracketsClose = "}}";
                 if (l >= 2)//有選取
@@ -3211,8 +3211,12 @@ namespace WindowsFormsApp1
         {
             if (textBox4.Size == textBox4Size)
                 textBox4SizeLarger();
-            string rplsdWord = "";
-            rplsdWord = textBox1.SelectedText;
+            string rplsdWord = textBox1.SelectedText;
+            if (rplsdWord == "" && insertMode == false)
+            {
+                string x = textBox1.Text; int s = textBox1.SelectionStart;
+                rplsdWord = x.Substring(s, char.IsHighSurrogate(x.Substring(s, 1),0) ? 2 : 1);
+            }
             if (rplsdWord != "")
             {
                 string rplsWord = getReplaceWordDefault(rplsdWord);
