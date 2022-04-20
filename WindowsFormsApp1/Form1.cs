@@ -3792,9 +3792,10 @@ namespace WindowsFormsApp1
 
         private void autoPastetoOrNot()
         {
-            if (textBox3.Text == "") return;
-            if (textBox3.Text.IndexOf("https://ctext.org/") == -1 || textBox3.Text.IndexOf("#editor") == -1) return;
-            string x = textBox3.Text; const string f = "file="; int s = x.IndexOf(f);
+            string x = textBox3.Text;
+            if (x == "") return;
+            if (x.IndexOf("https://ctext.org/") == -1 || x.IndexOf("edit") == -1) return;
+            const string f = "file="; int s = x.IndexOf(f);
             int bookID = int.Parse(x.Substring(s + f.Length, x.IndexOf("&", s + 1) - s - f.Length));
 
             if (bookID != previousBookID)
