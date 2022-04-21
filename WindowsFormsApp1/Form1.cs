@@ -296,6 +296,7 @@ namespace WindowsFormsApp1
         string lastFindStr = "";
         private void textBox2_Leave(object sender, EventArgs e)
         {
+            if (button2.Text == "選取文") return;
             string s = textBox2.Text;
             if (s == "" || s == textBox1.SelectedText)
             { textBox2.BackColor = textBox2BackColorDefault; return; }
@@ -3183,7 +3184,7 @@ namespace WindowsFormsApp1
             if (textBox1.SelectionLength == 0 && insertMode == true) return;
             //else if (textBox1.SelectionLength == 0 && insertMode == false)
             //{
-                int s = textBox1.SelectionStart;
+            int s = textBox1.SelectionStart;
             //    textBox1.Select(s
             //        , char.IsHighSurrogate(textBox1.Text.Substring(s, 1), 0) ? 2 : 1);
             //}
@@ -3221,7 +3222,7 @@ namespace WindowsFormsApp1
         {
             if (textBox4.Size == textBox4Size)
                 textBox4SizeLarger();
-            string rplsdWord = textBox1.SelectedText, x = textBox1.Text; 
+            string rplsdWord = textBox1.SelectedText, x = textBox1.Text;
             int s = textBox1.SelectionStart, l = char.IsHighSurrogate(x.Substring(s, 1), 0) ? 2 : 1;
             if (rplsdWord == "" && insertMode == false)
             {
@@ -3235,7 +3236,7 @@ namespace WindowsFormsApp1
                     textBox4.Text = rplsWord;
                     if (rplsWord.IndexOf(Environment.NewLine) > -1) textBox4.Height = textBox4Size.Height * 3;
                 }
-            }            
+            }
             restoreCaretPosition(textBox1, selStart, selLength == 0 ? l : selLength);
         }
 
@@ -3510,6 +3511,7 @@ namespace WindowsFormsApp1
         }
         private void textBox2_TextChanged(object sender, EventArgs e)
         {
+            if (button2.Text == "選取文") return;
             string x = textBox2.Text, x1 = textBox1.Text;
             if (x == "" || x1 == "") return;
             if (isKeyDownSurrogate(x)) return;//surrogate字在文字方塊輸入時會引發2次keyDown事件            
