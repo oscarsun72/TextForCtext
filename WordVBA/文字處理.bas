@@ -3236,6 +3236,7 @@ Do Until rst.EOF
                     rngF.Text = rst("取代為").Value
                     'd.Range.Find.Execute rst("篇名").Value, , , , , , True, wdFindContinue, , rst("取代為").Value, wdReplaceAll
                 End If
+                rngF.SetRange rngF.End, d.Range.End
             End If
         Loop
     End If
@@ -3265,6 +3266,7 @@ Do Until rst.EOF
                     rngF.Text = rst("取代為").Value
         '            d.Range.Find.Execute rst("書名").Value, , , , , , True, wdFindContinue, , rst("取代為").Value, wdReplaceAll
                 End If
+                rngF.SetRange rngF.End, d.Range.End
             End If
         Loop
     End If

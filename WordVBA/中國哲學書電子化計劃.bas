@@ -62,6 +62,7 @@ a = Array(ChrW(12296), "{{", ChrW(12297), "}}", "〈", "{{", "〉", "}}", _
 Set d = Documents.Add()
 d.Range.Paste
 維基文庫造字圖取代為文字 d.Range
+維基文庫等欲直接抽換之字 d
 For i = 0 To UBound(a) - 1
     d.Range.Find.Execute a(i), , , , , , True, wdFindContinue, , a(i + 1), wdReplaceAll
     i = i + 1
@@ -933,6 +934,84 @@ rng.Text = "#" & rng.Text
 rng.Cut
 rng.Document.Close wdDoNotSaveChanges
 End Sub
+
+Sub 維基文庫等欲直接抽換之字(d As Document)
+Dim rst As New ADODB.Recordset, cnt As New ADODB.Connection, db As New dBase
+db.cnt查字 cnt
+rst.Open "select * from 維基文庫等欲直接抽換之字 where doIt = true", cnt, adOpenForwardOnly, adLockReadOnly
+Do Until rst.EOF
+    d.Range.Find.Execute rst.Fields("replaced").Value, , , , , , True, wdFindContinue, , rst.Fields("replacewith").Value, wdReplaceAll
+    rst.MoveNext
+Loop
+rst.Close: cnt.Close: Set db = Nothing
+End Sub
+
+Sub entity_Markup_edit_via_API_Annotate_Reverting()
+Dim rng As Range, rngMark As Range, d As Document, ay(), e, i As Long, DoctoMarked As Document
+Set d = ActiveDocument
+Const markStrOpen As String = "<entity ", markStrClose As String = "</entity>"
+If InStr(d.Range, markStrOpen) = 0 Then
+    MsgBox "plz paste the marked text in active doc First thx"
+    Exit Sub
+End If
+Set rng = d.Range
+'get the terms which were marked
+Do While rng.Find.Execute(markStrOpen)
+    'rng.SetRange rng.start, rng.End + rng.MoveEndUntil(markStrClose)
+    rng.SetRange rng.start, rng.End + rng.MoveEndUntil("/")
+    If d.Range(rng.End, rng.End + 7) = "entity>" Then
+        rng.SetRange rng.start, rng.End - 2
+        ReDim Preserve ay(i)
+        ay(i) = VBA.Split(rng.Text, ">")
+        i = i + 1
+    End If
+    
+    rng.SetRange rng.End, d.Range.End
+Loop
+'got the terms which were marked already
+'mark the text
+'Stop
+If MsgBox("if NOT text to be marked already copied then push CANCEL button", vbOKCancel + vbExclamation) = vbCancel Then Exit Sub
+Set DoctoMarked = Documents.Add
+Set rng = DoctoMarked.Range: Set rngMark = DoctoMarked.Range
+rng.Paste
+For Each e In ay
+reFind:
+    If rng.Find.Execute(e(1)) Then
+        If rng.Characters(1).Previous = ">" Then
+            rngMark.SetRange rng.start - 1, rng.start
+            'rngMark.MoveStartUntil "<"
+            Do Until DoctoMarked.Range(rngMark.start, rngMark.start + 1) = "<"
+                rngMark.move wdCharacter, -1
+            Loop
+            rngMark.SetRange rngMark.start, rng.start
+            If Left(rngMark.Text, 8) <> "<entity " Then
+                GoSub mark
+            Else
+                rng.SetRange rng.End, DoctoMarked.Range.End
+                GoTo reFind
+            End If
+        Else
+            GoSub mark
+        End If
+    Else
+        SystemSetup.ClipboardPutIn CStr(e(1))
+        MsgBox "plz check out why the " + e(1) + "dosen't exist !!", vbExclamation
+        Stop
+        Set rng = DoctoMarked.Range
+        GoTo reFind
+        'Exit Sub
+    End If
+    rng.SetRange rng.End, d.Range.End
+Next e
+Beep
+Exit Sub
+mark:
+    rng.InsertAfter "</entity>"
+    rng.InsertBefore e(0) + ">"
+Return
+End Sub
+
 Sub tempReplaceTxtforCtextEdit()
 Dim a, d As Document, i As Integer, x As String
 a = Array("{{（", "{{", "）}}", "}}", "（", "{{", "）", "}}", "○", ChrW(12295))
