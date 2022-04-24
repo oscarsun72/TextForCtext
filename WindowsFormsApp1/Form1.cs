@@ -1443,12 +1443,42 @@ namespace WindowsFormsApp1
             stopUndoRec = false;
         }
 
+        void autoMarkTitles()
+        {
+            undoRecord();
+            stopUndoRec = true;
+            //select the spaces front of the title
+            string sps = textBox1.SelectedText;
+            if (sps == "") return;
+            if (sps.Replace("　", "") != "") return;
+            int s = textBox1.Text.IndexOf(Environment.NewLine), ss = textBox1.SelectionStart;
+            while (s > -1)
+            {
+                s += 2;
+                if (s + sps.Length >= textBox1.TextLength) break;
+                if (textBox1.Text.Substring(s, sps.Length) == sps)
+                {
+                    textBox1.Select(s + sps.Length, 0);
+                    stopUndoRec = true;
+                    keysTitleCode();
+                    s = textBox1.SelectionStart;
+                }
+                if (s + 1 >= textBox1.TextLength || textBox1.SelectionStart + 1 >= textBox1.TextLength) break;
+                s = textBox1.Text.IndexOf(Environment.NewLine, s++);
+            }
+            //textBox1.Text = textBox1.Text.Replace("<p>" + Environment.NewLine + sps + "*", Environment.NewLine + sps);
+            stopUndoRec = false;
+            textBox1.Select(ss, 0); textBox1.ScrollToCaret();
+        }
         private void keysTitleCode()
         {
             int s = textBox1.SelectionStart, i = s;
             string x = textBox1.Text;
-            undoRecord();
-            stopUndoRec = true;
+            if (!stopUndoRec)
+            {
+                undoRecord();
+                stopUndoRec = true;
+            }
             if (textBox1.SelectedText != "")
             {//目前好像用不到選取指定標題，故暫去掉，以便配合 按 F3鍵找標題處加標題格式
                 if (textBox1.SelectedText.Replace("　", "") == "")
@@ -2827,6 +2857,13 @@ namespace WindowsFormsApp1
                     }
                     e.Handled = true; return;
                 }
+
+                if (e.KeyCode == Keys.F6)
+                {//Alt + F6 : run autoMarkTitles 自動標識標題（篇名）
+                    e.Handled = true;
+                    autoMarkTitles(); return;
+                }
+
             }//以上 按下Alt鍵
             #endregion
 
@@ -3180,8 +3217,14 @@ namespace WindowsFormsApp1
 
         private void textBox4_Leave(object sender, EventArgs e)
         {
-            if (textBox4.Text == "") return;
-            if (textBox1.SelectionLength == 0 && insertMode == true) return;
+            if (textBox4.Text == "")
+            {
+                textBox4Resize(); textBox1.Focus(); return;
+            }
+            if (textBox1.SelectionLength == 0 && insertMode == true)
+            {
+                textBox4Resize(); textBox1.Focus(); return;
+            }
             //else if (textBox1.SelectionLength == 0 && insertMode == false)
             //{
             int s = textBox1.SelectionStart;
