@@ -1452,6 +1452,7 @@ namespace WindowsFormsApp1
             if (sps == "") return;
             if (sps.Replace("　", "") != "") return;
             int s = textBox1.Text.IndexOf(Environment.NewLine), ss = textBox1.SelectionStart;
+            string x = "", xp = "";
             while (s > -1)
             {
                 s += 2;
@@ -1459,9 +1460,14 @@ namespace WindowsFormsApp1
                 if (textBox1.Text.Substring(s, sps.Length) == sps)
                 {
                     textBox1.Select(s + sps.Length, 0);
-                    stopUndoRec = true;
-                    keysTitleCode();
-                    s = textBox1.SelectionStart;
+                    x = textBox1.Text;
+                    xp = x.Substring(s + 2, x.IndexOf(Environment.NewLine, s + 2) - (s + 2));
+                    if (!(xp.IndexOf("}}") > -1 && xp.IndexOf("{{") == -1))
+                    {
+                        stopUndoRec = true;
+                        keysTitleCode();
+                        s = textBox1.SelectionStart;
+                    }
                 }
                 if (s + 1 >= textBox1.TextLength || textBox1.SelectionStart + 1 >= textBox1.TextLength) break;
                 s = textBox1.Text.IndexOf(Environment.NewLine, s++);
@@ -1778,7 +1784,8 @@ namespace WindowsFormsApp1
 
                 if (item == "}}<p>")//《維基文庫》純注文空行
                     i++;
-                else if (i == 0 && openBracketS > closeBracketS) //第一行正、注夾雜
+                else if (i == 0 && (openBracketS > closeBracketS || 
+                    openBracketS == -1 && closeBracketS > -1 && closeBracketS < item.Length - 2)) //第一行正、注夾雜
                     i += 2;
                 else if (i == 0 && item.IndexOf("{{") == -1 && item.IndexOf("}}") == -1)
                 {
