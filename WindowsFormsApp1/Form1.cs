@@ -1123,7 +1123,7 @@ namespace WindowsFormsApp1
                 {//Alt + p 或 Alt + ` : 鍵入 "<p>" + newline（分行分段符號）
                     e.Handled = true;
                     if (e.KeyCode == Keys.P) { keysParagraphSymbol(); return; }
-                    if (textBox1.Text.Replace("　", "") == "") { autoMarkTitles(); return; }
+                    if (textBox1.SelectedText.Replace("　", "") == "") { autoMarkTitles(); return; }
                     int s = textBox1.SelectionStart; string x = textBox1.Text;
                     if (x.Length == s ||
                         (x.Substring(s, 2) == Environment.NewLine || x.Substring(s < 2 ? s : s - 2, 2)
