@@ -1123,6 +1123,7 @@ namespace WindowsFormsApp1
                 {//Alt + p 或 Alt + ` : 鍵入 "<p>" + newline（分行分段符號）
                     e.Handled = true;
                     if (e.KeyCode == Keys.P) { keysParagraphSymbol(); return; }
+                    if (textBox1.Text.Replace("　", "") == "") { autoMarkTitles(); return; }
                     int s = textBox1.SelectionStart; string x = textBox1.Text;
                     if (x.Length == s ||
                         (x.Substring(s, 2) == Environment.NewLine || x.Substring(s < 2 ? s : s - 2, 2)
@@ -1276,7 +1277,7 @@ namespace WindowsFormsApp1
                     keysTitleCode();
                     return;
                 }
-            }
+            }//以上按下單一鍵
             #endregion
         }
 
@@ -1452,7 +1453,6 @@ namespace WindowsFormsApp1
             if (sps == "") return;
             if (sps.Replace("　", "") != "") return;
             int s = textBox1.Text.IndexOf(Environment.NewLine), ss = textBox1.SelectionStart;
-            string x = "", xp = "";
             while (s > -1)
             {
                 s += 2;
@@ -1460,8 +1460,8 @@ namespace WindowsFormsApp1
                 if (textBox1.Text.Substring(s, sps.Length) == sps)
                 {
                     textBox1.Select(s + sps.Length, 0);
-                    x = textBox1.Text;
-                    xp = x.Substring(s + 2, x.IndexOf(Environment.NewLine, s + 2) - (s + 2));
+                    string x = textBox1.Text;
+                    string xp = x.Substring(s + 2, x.IndexOf(Environment.NewLine, s + 2) - (s + 2));
                     if (!(xp.IndexOf("}}") > -1 && xp.IndexOf("{{") == -1))
                     {
                         stopUndoRec = true;
@@ -1784,7 +1784,7 @@ namespace WindowsFormsApp1
 
                 if (item == "}}<p>")//《維基文庫》純注文空行
                     i++;
-                else if (i == 0 && (openBracketS > closeBracketS || 
+                else if (i == 0 && (openBracketS > closeBracketS ||
                     openBracketS == -1 && closeBracketS > -1 && closeBracketS < item.Length - 2)) //第一行正、注夾雜
                     i += 2;
                 else if (i == 0 && item.IndexOf("{{") == -1 && item.IndexOf("}}") == -1)
@@ -2865,8 +2865,8 @@ namespace WindowsFormsApp1
                     e.Handled = true; return;
                 }
 
-                if (e.KeyCode == Keys.F6)
-                {//Alt + F6 : run autoMarkTitles 自動標識標題（篇名）
+                if (e.KeyCode == Keys.F6 || e.KeyCode == Keys.F8)
+                {//Alt + F6、Alt + F8 : run autoMarkTitles 自動標識標題（篇名）
                     e.Handled = true;
                     autoMarkTitles(); return;
                 }

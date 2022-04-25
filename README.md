@@ -152,7 +152,7 @@ Shift + F5 ： 在textBox1 回到上1次插入點（游標）所在處（且與�
 
 F6 : 標題降階（增加標題前之星號）
 
-Alt + F6 : run autoMarkTitles 自動標識標題（篇名）
+Alt + F6 或 Alt + F8 : run autoMarkTitles 自動標識標題（篇名）
 
 F7 ： 每行/段前空一格
 
