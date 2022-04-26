@@ -1452,7 +1452,7 @@ namespace WindowsFormsApp1
             string sps = textBox1.SelectedText;
             if (sps == "") return;
             if (sps.Replace("　", "") != "") return;
-            int s = textBox1.Text.IndexOf(Environment.NewLine), ss = textBox1.SelectionStart;
+            int s = textBox1.Text.IndexOf(Environment.NewLine), ss = textBox1.SelectionStart, sPre = 0;
             while (s > -1)
             {
                 s += 2;
@@ -1462,7 +1462,8 @@ namespace WindowsFormsApp1
                     textBox1.Select(s + sps.Length, 0);
                     string x = textBox1.Text;
                     string xp = x.Substring(s + 2, x.IndexOf(Environment.NewLine, s + 2) - (s + 2));
-                    if (!(xp.IndexOf("}}") > -1 && xp.IndexOf("{{") == -1))
+                    if (!(xp.IndexOf("}}") > -1 && xp.IndexOf("{{") == -1) &&
+                        textBox1.Text.Substring(sPre, sps.Length) != sps)
                     {
                         stopUndoRec = true;
                         keysTitleCode();
@@ -1470,6 +1471,7 @@ namespace WindowsFormsApp1
                     }
                 }
                 if (s + 1 >= textBox1.TextLength || textBox1.SelectionStart + 1 >= textBox1.TextLength) break;
+                sPre = s;
                 s = textBox1.Text.IndexOf(Environment.NewLine, s++);
             }
             //textBox1.Text = textBox1.Text.Replace("<p>" + Environment.NewLine + sps + "*", Environment.NewLine + sps);
@@ -1517,6 +1519,7 @@ namespace WindowsFormsApp1
                     string nx = x.Substring(j, 2);
                     if (nx == Environment.NewLine || nx == "{{")
                     {
+                    longTitle:
                         if (nx == Environment.NewLine)
                         {
                             //標題（篇名）過長時之處理：
@@ -1525,6 +1528,19 @@ namespace WindowsFormsApp1
                         //如果篇名標題有小注，則在其結尾處加上分段符號<p>
                         if (nx == "{{")
                         {
+                            #region 標題中有小注 bugs still
+                            int sCloseCurlyBrackets = x.IndexOf("}}", j), sNewLine = x.IndexOf(Environment.NewLine, j);
+                            if (sCloseCurlyBrackets > -1)
+                            {
+                                if (sCloseCurlyBrackets < sNewLine - "}}".Length &&
+                                    x.Substring(sCloseCurlyBrackets + 2, 3) != "<p>")
+                                {
+                                    //nx = Environment.NewLine;
+                                    j = sNewLine; nx = x.Substring(j, 2);
+                                    goto longTitle;
+                                }
+                            }
+                            #endregion
                             if (j + 2 + 1 <= x.Length)
                             {
                                 int k = x.IndexOf(Environment.NewLine, j + 2 + 1);
@@ -1543,7 +1559,7 @@ namespace WindowsFormsApp1
                                 }
                             }
                         }
-                        textBox1.Select(s, j);
+                        textBox1.Select(s, j);//選取標題文字內容,準備將標題格式，置換成標題語法格式
                         break;
                     }
                 }
@@ -1555,8 +1571,11 @@ namespace WindowsFormsApp1
                 stopUndoRec = false; return;
             }
             if (x.Substring(s + textBox1.SelectionLength - 3, 3) == "<p>") endCode = "";
+            //設定標題格式（完成標題語法設置）
             textBox1.SelectedText = ("*" + textBox1.SelectedText + endCode)
                     .Replace("《", "").Replace("》", "").Replace("〈", "").Replace("〉", "").Replace("·", "");
+
+            #region 標題篇名前段補上分段符號
             int endPostion = textBox1.SelectionStart;
             //標題篇名前段補上分段符號
             i = x.LastIndexOf(Environment.NewLine, s);
@@ -1570,6 +1589,8 @@ namespace WindowsFormsApp1
                     textBox1.Select(i, 2); textBox1.SelectedText = endCode; endPostion += endCode.Length;
                 }
             }
+            #endregion //標題篇名前段補上分段符號
+
             textBox1.Select(endPostion, 0);//將插入點置於標題尾端以便接著貼入Quit Edit中
             keysTitleCode＿WithPrefaceNote();//處理「并序」
             stopUndoRec = false;
@@ -1785,7 +1806,7 @@ namespace WindowsFormsApp1
                 if (item == "}}<p>")//《維基文庫》純注文空行
                     i++;
                 else if (i == 0 && (openBracketS > closeBracketS ||
-                    openBracketS == -1 && closeBracketS > -1 && closeBracketS < item.Length - 2)) //第一行正、注夾雜
+                    (openBracketS == -1 && closeBracketS > -1 && closeBracketS < item.Length - 2))) //第一行正、注夾雜
                     i += 2;
                 else if (i == 0 && item.IndexOf("{{") == -1 && item.IndexOf("}}") == -1)
                 {
@@ -2197,33 +2218,45 @@ namespace WindowsFormsApp1
             if (s < 0 || s + l > x.Length) s = textBox1.SelectionStart;
             string xCopy = x.Substring(0, s + l);
             if (pageEndText10 == "") pageEndText10 = xCopy.Substring(xCopy.Length - 10 >= 0 ? xCopy.Length - 10 : xCopy.Length);
-            int[] chk = checkAbnormalLinePara(xCopy);
-            if (chk.Length > 0)
+            #region checkAbnormalLinePara method test unit
+            try
             {
-                if (MessageBox.Show("there is abnormal LinePara Length , check it now?" +
-                    Environment.NewLine + Environment.NewLine +
-                    "normal= " + chk[2] + "\tabnormal= " + chk[3], "",
-                    MessageBoxButtons.OKCancel, MessageBoxIcon.Warning,
-                    MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly) == DialogResult.OK)//檢查行/段落長
+
+
+                int[] chk = checkAbnormalLinePara(xCopy);
+                if (chk.Length > 0)
                 {
-                    textBox1.Select(chk[0], chk[1]);
-                    textBox1.ScrollToCaret();
-                    if (s > pageTextEndPosition)
+                    if (MessageBox.Show("there is abnormal LinePara Length , check it now?" +
+                        Environment.NewLine + Environment.NewLine +
+                        "normal= " + chk[2] + "\tabnormal= " + chk[3], "",
+                        MessageBoxButtons.OKCancel, MessageBoxIcon.Warning,
+                        MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly) == DialogResult.OK)//檢查行/段落長
                     {
-                        pageTextEndPosition = 0;
+                        textBox1.Select(chk[0], chk[1]);
+                        textBox1.ScrollToCaret();
+                        if (s > pageTextEndPosition)
+                        {
+                            pageTextEndPosition = 0;
+                        }
+                        else
+                        {
+                            if (MessageBox.Show("reset the page end ? ", "", MessageBoxButtons.OKCancel, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1,
+                                MessageBoxOptions.ServiceNotification) == DialogResult.OK)
+                                pageTextEndPosition = s;
+                        }
+
+                        return;
                     }
                     else
-                    {
-                        if (MessageBox.Show("reset the page end ? ", "", MessageBoxButtons.OKCancel, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1,
-                            MessageBoxOptions.ServiceNotification) == DialogResult.OK)
-                            pageTextEndPosition = s;
-                    }
-
-                    return;
+                        normalLineParaLength = 0;
                 }
-                else
-                    normalLineParaLength = 0;
             }
+            catch (Exception)
+            {
+                MessageBox.Show("  checkAbnormalLinePara函式有誤，請留意！！");
+                //throw;
+            }
+            #endregion
             if (!newTextBox1()) return;
             pasteToCtext();
             //if (!shiftKeyDownYet ) nextPages(Keys.PageDown, false);
