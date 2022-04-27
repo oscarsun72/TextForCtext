@@ -634,6 +634,20 @@ namespace WindowsFormsApp1
             //以上 //同時按下Ctrl+Shift
             #endregion
 
+            #region 同時按下Alt+Shift
+            //同時按下Alt+Shift
+            if ((m & Keys.Alt) == Keys.Alt && (m & Keys.Shift) == Keys.Shift)
+            {
+                if (e.KeyCode == Keys.D1)
+                {//Alt + Shift + 1 如宋詞中的換片空格，只將文中的空格轉成空白，其他如首綴前罝以明段落或標題者不轉換
+                    e.Handled = true; SpacesBlanksInContext(); return;
+                }
+                if (e.KeyCode == Keys.D6)
+                {//Alt + Shift + 6 小注文不換行
+                    e.Handled = true; notes_a_line(); return;
+                }
+            }
+            #endregion
             #region 按下Ctrl鍵
             if ((m & Keys.Control) == Keys.Control)
             {//按下Ctrl鍵
@@ -960,20 +974,6 @@ namespace WindowsFormsApp1
                     e.Handled = true;
                     return;
                 }
-                if (e.KeyCode == Keys.G)
-                {
-                    string x = textBox1.SelectedText;
-                    if (x != "")
-                    {
-                        Clipboard.SetText(x);
-                        Process.Start(dropBoxPathIncldBackSlash + @"VS\VB\網路搜尋_元搜尋-同時搜多個引擎\網路搜尋_元搜尋-同時搜多個引擎\bin\Debug\網路搜尋_元搜尋-同時搜多個引擎.exe");
-                    }
-                    return;
-                }
-                if (e.KeyCode == Keys.Q)
-                {
-                    splitLineByFristLen(); return;
-                }
 
                 if (e.KeyCode == Keys.D2)
                 {//Alt + 2 : 鍵入全形空格「　」
@@ -1119,6 +1119,23 @@ namespace WindowsFormsApp1
                     keyDownCtrlAdd(false);
                     return;
                 }
+                if (e.KeyCode == Keys.G)
+                {
+                    string x = textBox1.SelectedText;
+                    if (x != "")
+                    {
+                        Clipboard.SetText(x);
+                        Process.Start(dropBoxPathIncldBackSlash + @"VS\VB\網路搜尋_元搜尋-同時搜多個引擎\網路搜尋_元搜尋-同時搜多個引擎\bin\Debug\網路搜尋_元搜尋-同時搜多個引擎.exe");
+                    }
+                    return;
+                }
+                if (e.KeyCode == Keys.J)
+                {//Alt + j : 鍵入換行分段符號（newline）（同 Ctrl + j 的系統預設）
+                    e.Handled = true;
+                    insertWords(Environment.NewLine, textBox1.Text);
+                    return;
+                }
+
                 if (e.KeyCode == Keys.P || e.KeyCode == Keys.Oem3)
                 {//Alt + p 或 Alt + ` : 鍵入 "<p>" + newline（分行分段符號）
                     e.Handled = true;
@@ -1137,31 +1154,28 @@ namespace WindowsFormsApp1
                     keysTitleCode();
                     return;
                 }
-                if (e.KeyCode == Keys.J)
-                {//Alt + j : 鍵入換行分段符號（newline）（同 Ctrl + j 的系統預設）
-                    e.Handled = true;
-                    insertWords(Environment.NewLine, textBox1.Text);
-                    return;
+                if (e.KeyCode == Keys.Q)
+                {
+                    e.Handled = true;splitLineByFristLen(); return;
+                }
+                if (e.KeyCode == Keys.S)
+                {//Alt + s 小注文不換行
+                    e.Handled = true; notes_a_line(); return;
                 }
 
                 if (e.KeyCode == Keys.Add || e.KeyCode == Keys.Oemplus)//|| e.KeyCode == Keys.Subtract || e.KeyCode == Keys.NumPad5)
                 {// Alt + +
-                    e.Handled = true;
-                    keyDownCtrlAdd(false);
-                    return;
+                    e.Handled = true;keyDownCtrlAdd(false);return;
                 }
 
                 if (e.KeyCode == Keys.OemBackslash || e.KeyCode == Keys.Oem5)
                 {// Alt + \ 
-                    e.Handled = true;
-                    clearNewLinesAfterCaret();
-                    return;
+                    e.Handled = true;clearNewLinesAfterCaret();return;
                 }
                 if (e.KeyCode == Keys.Down)
                 //Ctrl + ↓ 或 Alr + ↓：從插入點開始向後移至這一段末（無分段則不移動）
                 {
-                    keyDownCtrlAltUpDown(e);
-                    return;
+                    e.Handled = true;keyDownCtrlAltUpDown(e);return;
                 }
 
                 if (e.KeyCode == Keys.Delete)
@@ -1281,6 +1295,40 @@ namespace WindowsFormsApp1
             #endregion
         }
 
+        private void notes_a_line()
+        {//Alt + Shift + 6 小注文不換行
+            string xSel = textBox1.SelectedText, x = textBox1.Text; int s = textBox1.SelectionStart;
+            undoRecord();
+            stopUndoRec = true;
+            #region expand the notes text to get it
+            if (xSel == "")
+            {
+
+                while (s - 1 > 0)
+                {
+                    if (x.Substring(s, 1) == "{")
+                    {
+                        break;
+                    }
+                    s--;
+                }
+
+            }
+            #endregion
+            s++;
+            int e = x.IndexOf("}", s);
+            xSel = x.Substring(s, e - s);
+            StringInfo xSelInfo = new StringInfo(xSel);
+            for (int i = 0; i < xSelInfo.LengthInTextElements; i++)
+            {
+                xSel += "　";
+            }
+            textBox1.Select(s, e - s);
+            textBox1.SelectedText = xSel;
+            stopUndoRec = false;
+            //throw new NotImplementedException();
+        }
+
         private void keysSpaces()
         {
             string selX = textBox1.SelectedText;
@@ -1347,6 +1395,42 @@ namespace WindowsFormsApp1
                 }
             }
             return cntr;
+        }
+        private void SpacesBlanksInContext()
+        {//Alt + Shift + 1 如宋詞中的換片空格，只將文中的空格轉成空白，其他如首綴前罝以明段落或標題者不轉換
+            string x = textBox1.SelectedText; bool notTitleIndent = true; int s = textBox1.SelectionStart, offset = 0;
+            if (x == "") x = textBox1.Text;
+            undoRecord(); stopUndoRec = true;
+            for (int i = 0; i < x.Length; i++)
+            {
+                if (x.Substring(i, 1) == "　")
+                {
+                    if (x.Substring(i - 2, 2) != Environment.NewLine && notTitleIndent)
+                    {
+                        textBox1.Select(i + offset, 1);
+                        if (textBox1.SelectedText == "　")
+                        {
+                            textBox1.SelectedText = "􏿽";
+                            offset++;
+                        }
+                    }
+                    else
+                    {
+                        //if (x.Substring(i - 5, 3) == "<p>")
+                        int p = x.IndexOf(Environment.NewLine, i);
+                        if (x.Substring(i, p > -1 ? p : x.Length - i).IndexOf("*") > -1)
+                        {
+                            notTitleIndent = false;
+                        }
+                        //else
+                        //    notTitleIndent = false;
+                    }
+
+                }
+                else notTitleIndent = true;
+            }
+            restoreCaretPosition(textBox1, s, 0);
+            stopUndoRec = false;
         }
         private void keysSpacesBlank()
         {
