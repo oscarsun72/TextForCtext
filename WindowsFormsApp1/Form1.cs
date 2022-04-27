@@ -358,7 +358,7 @@ namespace WindowsFormsApp1
             string x = textBox1.Text;
             int s = textBox1.SelectionStart, l = textBox1.SelectionLength;
             if (pageTextEndPosition - 10 < 0 || pageTextEndPosition > x.Length) pageTextEndPosition = s;
-            if (pageTextEndPosition != 0 && s < pageTextEndPosition)
+            if (pageTextEndPosition != 0 && s + l < pageTextEndPosition)
             {
                 if (pageEndText10 != x.Substring(pageTextEndPosition - 10, 10))
                 {
@@ -441,7 +441,11 @@ namespace WindowsFormsApp1
             while (blankParagraphPosition > -1)
             {
                 //if (blankParagraphPosition + 4 >= xCopy.Length) break;
-                if (xCopy.Substring(blankParagraphPosition + 2, 2) == Environment.NewLine)
+                if (xCopy.Substring(0, 2) == Environment.NewLine)
+                {
+                    xCopy = "|" + xCopy;
+                }
+                else if (xCopy.Substring(blankParagraphPosition + 2, 2) == Environment.NewLine)
                 {
                     xCopy = xCopy.Substring(0, blankParagraphPosition + 2) + "|" + xCopy.Substring(blankParagraphPosition + 2);
                 }
@@ -490,6 +494,7 @@ namespace WindowsFormsApp1
             {
                 xCopy = xCopy.Replace(item, "");
             }
+
             Clipboard.SetText(xCopy); BackupLastPageText(xCopy, false, false);
             if (s + l + 2 < textBox1.Text.Length)
             {
@@ -522,6 +527,14 @@ namespace WindowsFormsApp1
                     }
                 }
             }
+
+            #region 清除空行//前面處理跨頁小注時須有newline 判斷，故不可寫在其前而執行清除
+            while (x.Substring(0, 2) == Environment.NewLine)
+            {
+                x = x.Substring(2);
+            }
+            #endregion//清除空行
+
             textBox1.Text = x;
             textBox1.SelectionStart = 0; textBox1.SelectionLength = 0;
             textBox1.ScrollToCaret();
@@ -968,6 +981,11 @@ namespace WindowsFormsApp1
             //按下Alt鍵
             if ((m & Keys.Alt) == Keys.Alt)//⇌ if (Control.ModifierKeys == Keys.Alt)
             {
+                if (e.KeyCode == Keys.Multiply)
+                {
+                    e.Handled = true; 歐陽文忠公集_集古錄跋尾校語專用(); return;
+                }
+
                 if (e.KeyCode == Keys.OemPeriod)
                 {
                     insertWords("·", textBox1.Text);
@@ -1156,7 +1174,7 @@ namespace WindowsFormsApp1
                 }
                 if (e.KeyCode == Keys.Q)
                 {
-                    e.Handled = true;splitLineByFristLen(); return;
+                    e.Handled = true; splitLineByFristLen(); return;
                 }
                 if (e.KeyCode == Keys.S)
                 {//Alt + s 小注文不換行
@@ -1165,17 +1183,17 @@ namespace WindowsFormsApp1
 
                 if (e.KeyCode == Keys.Add || e.KeyCode == Keys.Oemplus)//|| e.KeyCode == Keys.Subtract || e.KeyCode == Keys.NumPad5)
                 {// Alt + +
-                    e.Handled = true;keyDownCtrlAdd(false);return;
+                    e.Handled = true; keyDownCtrlAdd(false); return;
                 }
 
                 if (e.KeyCode == Keys.OemBackslash || e.KeyCode == Keys.Oem5)
                 {// Alt + \ 
-                    e.Handled = true;clearNewLinesAfterCaret();return;
+                    e.Handled = true; clearNewLinesAfterCaret(); return;
                 }
                 if (e.KeyCode == Keys.Down)
                 //Ctrl + ↓ 或 Alr + ↓：從插入點開始向後移至這一段末（無分段則不移動）
                 {
-                    e.Handled = true;keyDownCtrlAltUpDown(e);return;
+                    e.Handled = true; keyDownCtrlAltUpDown(e); return;
                 }
 
                 if (e.KeyCode == Keys.Delete)
@@ -1316,10 +1334,14 @@ namespace WindowsFormsApp1
             }
             #endregion
             s++;
-            int e = x.IndexOf("}", s);
+            int e = x.IndexOf("}", s), spaceCntr = 0;
             xSel = x.Substring(s, e - s);
-            StringInfo xSelInfo = new StringInfo(xSel);
-            for (int i = 0; i < xSelInfo.LengthInTextElements; i++)
+            #region 如果末已綴有空格
+            while (xSel.Substring(xSel.Length - ++spaceCntr, 1) == "　"){}
+            spaceCntr--;
+            #endregion //如果末已綴有空格
+            StringInfo xSelInfo = new StringInfo(xSel.Substring(0,xSel.Length-spaceCntr));
+            for (int i = 0; i+ spaceCntr < xSelInfo.LengthInTextElements; i++)
             {
                 xSel += "　";
             }
@@ -2287,6 +2309,8 @@ namespace WindowsFormsApp1
                 s = textBox1.SelectionStart; l = textBox1.SelectionLength;
             }
             #endregion//跨頁小注處理
+
+            /*
             #region 清除空行//前面處理跨頁小注時須有newline 判斷，故不可寫在其前而執行清除
             if (pageTextEndPosition != 0) s = pageTextEndPosition;
             while (s != textBox1.TextLength && s + 2 < textBox1.TextLength && textBox1.Text.Substring(s, 2) == Environment.NewLine)
@@ -2298,6 +2322,8 @@ namespace WindowsFormsApp1
                 }
             }
             #endregion//清除空行
+            */
+
             if (pageTextEndPosition == 0) pageTextEndPosition = s;
             if (s < 0 || s + l > x.Length) s = textBox1.SelectionStart;
             string xCopy = x.Substring(0, s + l);
@@ -4043,6 +4069,49 @@ namespace WindowsFormsApp1
             //}
         }
 
+        void 歐陽文忠公集_集古錄跋尾校語專用()
+        {//Alt + * //清除多餘的【】
+            if (textBox1.SelectedText == "") return;
+            int s = textBox1.SelectionStart;
+            string x = textBox1.SelectedText;
+            x = x.Replace("【", "").Replace("】", "");
+            undoRecord();
+            stopUndoRec = true;
+            textBox1.SelectedText = x;
+            stopUndoRec = false;
+        }
+
+        void 歐陽文忠公集_集古錄跋尾校語專用_()
+        {//Alt + * //未完成
+            int s = textBox1.SelectionStart;
+            if (textBox1.SelectedText == "") textBox1.SelectAll();
+            string x = textBox1.Text, xSel = textBox1.SelectedText;
+            string[] rp = { "<p>" + Environment.NewLine, "{{", "}}" };
+            string[] rpw = { "<p>" + Environment.NewLine + "【", "】{{【", "】}}" };
+            undoRecord();
+            stopUndoRec = true;
+
+            #region get the range to handle
+            int sp = xSel.IndexOf("<p>"), sn = 0;
+            while (sp > -1)
+            {
+                String xSelP = xSel.Substring(sn, sp);
+                string xSelN = xSelP.Substring(sn, xSelP.IndexOf("}}") + 2);
+                for (int i = 0; i < rp.Length; i++)
+
+                {
+                    xSelN = xSelN.Replace(rp[i], rpw[i]);
+                }
+
+                sn = sp + 5;
+                sp = xSel.IndexOf("<p>", sp + 1);
+
+            }
+            #endregion
+            textBox1.SelectedText = "【" + xSel;
+            stopUndoRec = false;
+
+        }
         #region 資料庫匯出
         void mdbExport()
         {//未完成
