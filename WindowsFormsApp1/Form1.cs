@@ -1337,13 +1337,14 @@ namespace WindowsFormsApp1
             int e = x.IndexOf("}", s), spaceCntr = 0;
             xSel = x.Substring(s, e - s);
             #region 如果末已綴有空格
-            while (xSel.Substring(xSel.Length - ++spaceCntr, 1) == "　"){}
+            while (xSel.Substring(xSel.Length - ++spaceCntr, 1) == "　") { }
             spaceCntr--;
             #endregion //如果末已綴有空格
-            StringInfo xSelInfo = new StringInfo(xSel.Substring(0,xSel.Length-spaceCntr));
-            for (int i = 0; i+ spaceCntr < xSelInfo.LengthInTextElements; i++)
+            StringInfo xSelInfo = new StringInfo(xSel.Substring(0, xSel.Length - spaceCntr));
+            for (int i = 0; i + spaceCntr < xSelInfo.LengthInTextElements; i++)
             {
-                xSel += "　";
+                if (punctuations.IndexOf(xSelInfo.SubstringByTextElements(i, 1)) == -1)
+                    xSel += "　";
             }
             textBox1.Select(s, e - s);
             textBox1.SelectedText = xSel;
