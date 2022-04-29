@@ -527,11 +527,13 @@ namespace WindowsFormsApp1
                     }
                 }
             }
-
-            #region 清除空行//前面處理跨頁小注時須有newline 判斷，故不可寫在其前而執行清除
-            while (x.Substring(0, 2) == Environment.NewLine)
+            if (x.Length > 2)
             {
-                x = x.Substring(2);
+                #region 清除空行//前面處理跨頁小注時須有newline 判斷，故不可寫在其前而執行清除
+                while (x.Substring(0, 2) == Environment.NewLine)
+                {
+                    x = x.Substring(2);
+                }
             }
             #endregion//清除空行
 
@@ -3175,7 +3177,8 @@ namespace WindowsFormsApp1
             textBox1.ScrollToCaret();
             try
             {
-                appWord.Quit(Microsoft.Office.Interop.Word.WdSaveOptions.wdDoNotSaveChanges);
+                if (runName != "checkEditingOfPreviousVersion")
+                    appWord.Quit(Microsoft.Office.Interop.Word.WdSaveOptions.wdDoNotSaveChanges);
             }
             catch (Exception)
             {

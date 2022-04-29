@@ -1064,6 +1064,7 @@ Return
 CheckOut:
     rng.Select
     d.ActiveWindow.Visible = True
+    d.ActiveWindow.ScrollIntoView rng
     MsgBox "plz check it out !", vbExclamation
 End Sub
 
