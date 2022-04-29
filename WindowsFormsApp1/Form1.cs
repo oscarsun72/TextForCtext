@@ -3173,7 +3173,15 @@ namespace WindowsFormsApp1
             textBox1.Text = Clipboard.GetText();
             textBox1.Select(0, 0);
             textBox1.ScrollToCaret();
-            appWord.Quit(Microsoft.Office.Interop.Word.WdSaveOptions.wdDoNotSaveChanges);
+            try
+            {
+                appWord.Quit(Microsoft.Office.Interop.Word.WdSaveOptions.wdDoNotSaveChanges);
+            }
+            catch (Exception)
+            {
+                //word 已被關閉
+                //throw;
+            }
             this.BackColor = C;
             show_nICo();
             normalLineParaLength = 0;
