@@ -63,6 +63,8 @@ Ctrl + n ：在新頁籤開啟 google 網頁，以備用（在預設瀏覽器為
 
 Ctrl + s 或 Shift + F12：儲存文本至 DropBox 根目錄下的「cText.txt」檔案
 
+Ctrl + w 關閉 Chrome 網頁頁籤
+
 Ctrl + PageUp ：根據 textBox3所載的網址，瀏覽ctext書影的上一頁
 
 Ctrl + PageDown ： 根據 textBox3所載的網址，瀏覽ctext書影的下一頁

@@ -62,7 +62,6 @@ a = Array(ChrW(12296), "{{", ChrW(12297), "}}", "〈", "{{", "〉", "}}", _
 Set d = Documents.Add()
 d.Range.Paste
 維基文庫造字圖取代為文字 d.Range
-維基文庫等欲直接抽換之字 d
 For i = 0 To UBound(a) - 1
     d.Range.Find.Execute a(i), , , , , , True, wdFindContinue, , a(i + 1), wdReplaceAll
     i = i + 1
@@ -117,6 +116,7 @@ For Each p In d.Range.Paragraphs
         End If
     End If
 Next p
+維基文庫等欲直接抽換之字 d
 文字處理.書名號篇名號標注
 d.Range.Cut
 d.Close wdDoNotSaveChanges
@@ -1012,6 +1012,79 @@ mark:
 Return
 End Sub
 
+Function checkEditingOfPreviousVersion() As Boolean
+Dim d As Document, rng As Range
+Set d = Documents.Add()
+Set rng = d.Range
+rng.Paste
+GoSub fontColor
+GoSub punctuations
+If d.Application.Documents.Count = 1 Then
+    d.Application.Quit wdDoNotSaveChanges
+Else
+    d.Close wdDoNotSaveChanges
+End If
+Exit Function
+ 
+ 
+fontColor:
+
+    rng.Find.ClearFormatting
+    rng.Find.Font.Color = 8912896 '{{{}}}語法下的文字
+    rng.Find.Replacement.ClearFormatting
+    With rng.Find
+        .Text = ""
+        .Replacement.Text = ""
+        .Forward = True
+        .Wrap = wdFindContinue
+        .Format = True
+        .MatchCase = False
+        .MatchWholeWord = False
+        .MatchByte = True
+        .MatchWildcards = False
+        .MatchSoundsLike = False
+        .MatchAllWordForms = False
+    End With
+    If (rng.Find.Execute) Then GoSub CheckOut
+Return
+
+punctuations:
+    rng.Find.ClearFormatting
+    rng.Find.Replacement.ClearFormatting
+    Dim punctus, e
+    punctus = Array("，", "。", "「", "·", "：", "（")  '檢查幾個具代表者即可
+    For Each e In punctus
+        If InStr(rng.Text, e) > 0 Then
+            rng.Find.Execute e
+            GoTo CheckOut
+        End If
+    Next e
+Return
+
+CheckOut:
+    rng.Select
+    d.ActiveWindow.Visible = True
+    MsgBox "plz check it out !", vbExclamation
+    checkEditingOfPreviousVersion = True
+End Function
+
+Sub EditMakeup()
+Const differPageNum  As Integer = 161 '頁數差
+Dim rng As Range, pageNum As Range, d As Document, ur As UndoRecord
+Set d = ActiveDocument
+Set rng = d.Range
+Set ur = SystemSetup.stopUndo("EditMakeupCtext")
+Do While rng.Find.Execute(" page=""", , , , , , True, wdFindStop)
+    Set pageNum = rng
+    pageNum.SetRange rng.End, rng.End + 1
+    pageNum.MoveEndUntil """"
+    pageNum.Text = CStr(CInt(pageNum.Text) - differPageNum)
+    rng.SetRange pageNum.End, d.Range.End
+Loop
+SystemSetup.contiUndo ur
+End Sub
+
+
 Sub tempReplaceTxtforCtextEdit()
 Dim a, d As Document, i As Integer, x As String
 a = Array("{{（", "{{", "）}}", "}}", "（", "{{", "）", "}}", "○", ChrW(12295))
@@ -1029,21 +1102,6 @@ AppActivate "google chrome"
 SendKeys "^v"
 End Sub
 
-Sub EditMakeup()
-Const differPageNum  As Integer = 161 '頁數差
-Dim rng As Range, pageNum As Range, d As Document, ur As UndoRecord
-Set d = ActiveDocument
-Set rng = d.Range
-Set ur = SystemSetup.stopUndo("EditMakeupCtext")
-Do While rng.Find.Execute(" page=""", , , , , , True, wdFindStop)
-    Set pageNum = rng
-    pageNum.SetRange rng.End, rng.End + 1
-    pageNum.MoveEndUntil """"
-    pageNum.Text = CStr(CInt(pageNum.Text) - differPageNum)
-    rng.SetRange pageNum.End, d.Range.End
-Loop
-SystemSetup.contiUndo ur
-End Sub
 
 Sub tempReplaceTxtforCtext() 'for Quick edit only
 Dim a, d As Document, i As Integer

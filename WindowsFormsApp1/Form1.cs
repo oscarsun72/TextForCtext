@@ -1441,7 +1441,7 @@ namespace WindowsFormsApp1
                     {
                         //if (x.Substring(i - 5, 3) == "<p>")
                         int p = x.IndexOf(Environment.NewLine, i);
-                        if (x.Substring(i, p > -1 ? p : x.Length - i).IndexOf("*") > -1)
+                        if (x.Substring(i, (p > -1 ? p : x.Length) - i).IndexOf("*") > -1)
                         {
                             notTitleIndent = false;
                         }
@@ -2082,7 +2082,8 @@ namespace WindowsFormsApp1
                     //    || (se.IndexOf("{{") == -1 && se.IndexOf("}}") > -1)
                     //    || (se.IndexOf("{{") > 0 && se.IndexOf("}}") > -1)) //「{{」不能是開頭
                     //    && se.IndexOf("<p>") == -1)
-                    if (se.IndexOf("<p>") == -1 && !(se.IndexOf("{{") == 0 && se.IndexOf("}}") == -1))
+                    if (se.IndexOf("<p>") == -1 && se.IndexOf("|") == -1
+                        && !(se.IndexOf("{{") == 0 && se.IndexOf("}}") == -1))
                     //if (se.Substring(se.Length - 3, 3)!="<p>")
                     {
                         textBox1.Select(e, 0);
@@ -2917,11 +2918,9 @@ namespace WindowsFormsApp1
                     e.Handled = true; return;
                 }
 
-                if (e.KeyCode == Keys.S)
-                {
-                    saveText();
-                    e.Handled = true; return;
-                }
+                if (e.KeyCode == Keys.S) { e.Handled = true; saveText(); return; }
+
+                if (e.KeyCode == Keys.W) { e.Handled = true; closeChromeTab(); return; }//Ctrl + w 關閉 Chrome 網頁頁籤
 
                 if (e.KeyCode == Keys.Multiply)
                 {//按下 Ctrl + * 設定為將《四部叢刊》資料庫所複製的文本在表單得到焦點時直接貼到 textBox1 的末尾,或反設定
@@ -2943,6 +2942,12 @@ namespace WindowsFormsApp1
                     if (!check_the_adjacent_pages)
                     {
                         check_the_adjacent_pages = true; new SoundPlayer(@"C:\Windows\Media\Speech On.wav").Play();
+                        if (MessageBox.Show("是否先檢查文本先前是否曾編輯過？" + Environment.NewLine +
+                            "要檢查的話，請先複製其文本，再按確定（ok）按鈕", "", MessageBoxButtons.OKCancel) == DialogResult.OK)
+                        {
+                            runWordMacro("checkEditingOfPreviousVersion");
+                        }
+
                     }
                     else
                     {
@@ -3647,7 +3652,7 @@ namespace WindowsFormsApp1
                 if (insertMode) Caret_Shown(textBox1); else Caret_Shown_OverwriteMode(textBox1);
                 if (textBox1.SelectionLength == textBox1.Text.Length)
                     textBox1.Select(selStart, selLength);
-                if (autoPastetoQuickEdit || ModifierKeys != Keys.None) autoPastetoCtextQuitEditTextbox();
+                if (autoPastetoQuickEdit || (autoPastetoQuickEdit && ModifierKeys != Keys.None)) autoPastetoCtextQuitEditTextbox();
             }
             if (textBox2.BackColor == Color.GreenYellow &&
                 doNotLeaveTextBox2 && textBox2.Focused) textBox2.SelectAll();
@@ -4018,9 +4023,17 @@ namespace WindowsFormsApp1
                 //messagebox topmost
                 if (MessageBox.Show("auto paste to Ctext Quick Edit textBox ?", "", MessageBoxButtons.OKCancel
                         , MessageBoxIcon.Question, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly) == DialogResult.OK)
+                {
                     autoPastetoQuickEdit = true;
+                    if (MessageBox.Show("是否先檢查文本先前是否曾編輯過？" + Environment.NewLine +
+                        "要檢查的話，請先複製其文本，再按確定（ok）按鈕", "", MessageBoxButtons.OKCancel) == DialogResult.OK)
+                    {
+                        runWordMacro("checkEditingOfPreviousVersion");
+                    }
+                }
                 else
                     autoPastetoQuickEdit = false;
+
             }
             previousBookID = bookID;
         }
@@ -4070,6 +4083,15 @@ namespace WindowsFormsApp1
             //}
         }
 
+        void closeChromeTab()
+        {//Ctrl + w 關閉 Chrome 網頁頁籤
+            appActivateByName();
+            SendKeys.Send("^{F4}");//關閉頁籤
+            bool autoPastetoQuickEditMemo = autoPastetoQuickEdit;
+            autoPastetoQuickEdit = false;
+            this.Activate();
+            autoPastetoQuickEdit = autoPastetoQuickEditMemo;
+        }
         void 歐陽文忠公集_集古錄跋尾校語專用()
         {//Alt + * //清除多餘的【】
             if (textBox1.SelectedText == "") return;
