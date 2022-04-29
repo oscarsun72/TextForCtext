@@ -1012,7 +1012,7 @@ mark:
 Return
 End Sub
 
-Function checkEditingOfPreviousVersion() As Boolean
+Sub checkEditingOfPreviousVersion()
 Dim d As Document, rng As Range
 Set d = Documents.Add()
 Set rng = d.Range
@@ -1024,7 +1024,7 @@ If d.Application.Documents.Count = 1 Then
 Else
     d.Close wdDoNotSaveChanges
 End If
-Exit Function
+Exit Sub
  
  
 fontColor:
@@ -1065,8 +1065,7 @@ CheckOut:
     rng.Select
     d.ActiveWindow.Visible = True
     MsgBox "plz check it out !", vbExclamation
-    checkEditingOfPreviousVersion = True
-End Function
+End Sub
 
 Sub EditMakeup()
 Const differPageNum  As Integer = 161 '­¶¼Æ®t

@@ -2943,7 +2943,8 @@ namespace WindowsFormsApp1
                     {
                         check_the_adjacent_pages = true; new SoundPlayer(@"C:\Windows\Media\Speech On.wav").Play();
                         if (MessageBox.Show("是否先檢查文本先前是否曾編輯過？" + Environment.NewLine +
-                            "要檢查的話，請先複製其文本，再按確定（ok）按鈕", "", MessageBoxButtons.OKCancel) == DialogResult.OK)
+                            "要檢查的話，請先複製其文本，再按確定（ok）按鈕", "", MessageBoxButtons.OKCancel
+                            , MessageBoxIcon.Question, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly) == DialogResult.OK)
                         {
                             runWordMacro("checkEditingOfPreviousVersion");
                         }
@@ -4026,7 +4027,8 @@ namespace WindowsFormsApp1
                 {
                     autoPastetoQuickEdit = true;
                     if (MessageBox.Show("是否先檢查文本先前是否曾編輯過？" + Environment.NewLine +
-                        "要檢查的話，請先複製其文本，再按確定（ok）按鈕", "", MessageBoxButtons.OKCancel) == DialogResult.OK)
+                        "要檢查的話，請先複製其文本，再按確定（ok）按鈕", "", MessageBoxButtons.OKCancel
+                        , MessageBoxIcon.Question, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly) == DialogResult.OK)
                     {
                         runWordMacro("checkEditingOfPreviousVersion");
                     }
