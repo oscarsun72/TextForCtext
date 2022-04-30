@@ -1912,7 +1912,7 @@ namespace WindowsFormsApp1
                 //if (item == "") return;
                 openBracketS = item.IndexOf("{{"); closeBracketS = item.IndexOf("}}");
 
-                if (item == "}}<p>")//《維基文庫》純注文空行
+                if (item == "}}<p>" || (closeBracketS == -1 && openBracketS == 0 && item.Length < 5))//《維基文庫》純注文空及其前一行
                     i++;
                 else if (i == 0 && (openBracketS > closeBracketS ||
                     (openBracketS == -1 && closeBracketS > -1 && closeBracketS < item.Length - 2))) //第一行正、注夾雜
@@ -2410,7 +2410,7 @@ namespace WindowsFormsApp1
                 item = x.Substring(s, e - s); if (item == "") return;
                 openBracketS = item.IndexOf("{{"); closeBracketS = item.IndexOf("}}");
 
-                if (item == "}}<p>")//《維基文庫》純注文空行
+                if (item == "}}<p>" || (closeBracketS == -1 && openBracketS == 0 && item.Length < 5))//《維基文庫》純注文空及其前一行
                     i++;
                 else if (i == 0 && ((openBracketS > closeBracketS) ||
                                 (openBracketS == -1 && closeBracketS > -1 && closeBracketS < e - 2))) //第一行正、注夾雜
