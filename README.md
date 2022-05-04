@@ -89,6 +89,7 @@ Alt + F1 ：切換 textbox1 之字型： 切換支援 CJK - Ext 擴充字集的�
 
 按下 Ctrl + / （Divide） 切換 check_the_adjacent_pages 值
 
+Ctrl + Shift + t 同Chrome瀏覽器 --還原最近關閉的頁籤
 
 ### 在 textBox1 中按下以下組合鍵：
 

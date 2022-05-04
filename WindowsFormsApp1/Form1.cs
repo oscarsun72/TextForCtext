@@ -901,11 +901,15 @@ namespace WindowsFormsApp1
                         }
                     }
                     if ((m & Keys.Control) == Keys.Control && (m & Keys.Shift) == Keys.Shift)
-                    {// Ctrl+ Shift + ←  Ctrl+ Shift + → 選取文字
+                    {// Ctrl+ Shift + ←  Ctrl+ Shift + → 選取文字 
                         textBox1.Select(ss, s - ss);
                         //if (textBox1.SelectedText.Replace("　", "") == "")
                         {
+                            //將空格改成空白
+                            undoRecord();
+                            stopUndoRec = true;
                             textBox1.SelectedText = textBox1.SelectedText.Replace("　", "􏿽");
+                            stopUndoRec = false;
                             if (e.KeyCode == Keys.Left)
                             {
                                 if (textBox1.Text.Substring(s, 2) == "}}") s += 2;
@@ -2860,6 +2864,14 @@ namespace WindowsFormsApp1
                 return;
             }
 
+            if ((m &Keys.Control)==Keys.Control && (m & Keys.Shift)==Keys.Shift && e.KeyCode==Keys.T)
+            {//Ctrl + Shift + t 同Chrome瀏覽器 --還原最近關閉的頁籤
+                e.Handled = true;
+                appActivateByName();
+                SendKeys.Send("^+t");
+                return;
+
+            }
 
             #region 按下Ctrl鍵
             if (Control.ModifierKeys == Keys.Control)
