@@ -2314,6 +2314,7 @@ namespace WindowsFormsApp1
                         }
                     }
                 }
+                x = textBox1.Text;
                 s = textBox1.SelectionStart; l = textBox1.SelectionLength;
             }
             #endregion//跨頁小注處理
@@ -2333,9 +2334,21 @@ namespace WindowsFormsApp1
             */
 
             if (pageTextEndPosition == 0) pageTextEndPosition = s;
+            else { s = pageTextEndPosition;l = 0; } 
             if (s < 0 || s + l > x.Length) s = textBox1.SelectionStart;
             string xCopy = x.Substring(0, s + l);
             if (pageEndText10 == "") pageEndText10 = xCopy.Substring(xCopy.Length - 10 >= 0 ? xCopy.Length - 10 : xCopy.Length);
+            else
+            {
+                if (pageEndText10 != xCopy.Substring(xCopy.Length - 10))
+                {
+                    MessageBox.Show("請重新指定頁面結束位置","",MessageBoxButtons.OK,MessageBoxIcon.Stop);
+                    pageTextEndPosition = 0;
+                    int sNew = x.IndexOf(pageEndText10);
+                    if (sNew > -1) textBox1.Select(sNew, pageEndText10.Length);
+                    return;
+                }
+            }
             #region checkAbnormalLinePara method test unit
             try
             {
@@ -2864,7 +2877,7 @@ namespace WindowsFormsApp1
                 return;
             }
 
-            if ((m &Keys.Control)==Keys.Control && (m & Keys.Shift)==Keys.Shift && e.KeyCode==Keys.T)
+            if ((m & Keys.Control) == Keys.Control && (m & Keys.Shift) == Keys.Shift && e.KeyCode == Keys.T)
             {//Ctrl + Shift + t 同Chrome瀏覽器 --還原最近關閉的頁籤
                 e.Handled = true;
                 appActivateByName();
@@ -3412,7 +3425,7 @@ namespace WindowsFormsApp1
             //    textBox1.Select(s
             //        , char.IsHighSurrogate(textBox1.Text.Substring(s, 1), 0) ? 2 : 1);
             //}
-            if (char.IsHighSurrogate(textBox1.SelectedText, 0))
+            if (char.IsHighSurrogate(textBox1.SelectedText, 0) && textBox1.SelectedText.Length < 3)
                 textBox1.Select(s, 2);
             saveText();
             replaceWord(textBox1.SelectedText, textBox4.Text);
