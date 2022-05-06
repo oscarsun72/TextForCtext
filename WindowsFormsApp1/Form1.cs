@@ -2346,16 +2346,18 @@ namespace WindowsFormsApp1
                     if (sNew > -1)
                     {
                         textBox1.Select(sNew, pageEndText10.Length);
-                        s = textBox1.SelectionStart; l = textBox1.SelectionLength;
-                        pageTextEndPosition = s + l;
-                        goto tryAgain;
+                        //s = textBox1.SelectionStart; l = textBox1.SelectionLength;
+                        //pageTextEndPosition = s + l;
+                        //pageEndText10 ="";
+                        ////keyDownCtrlAdd(shiftKeyDownYet);
+                        //goto tryAgain;
                     }
-                    else
-                    {
-                        MessageBox.Show("請重新指定頁面結束位置", "", MessageBoxButtons.OK, MessageBoxIcon.Stop);
-                        pageTextEndPosition = 0;
-                        return;
-                    }
+                    //else
+                    //{
+                    MessageBox.Show("請重新指定頁面結束位置", "", MessageBoxButtons.OK, MessageBoxIcon.Stop);
+                    pageTextEndPosition = 0; pageEndText10 = "";
+                    return;
+                    //}
                 }
             }
             #region checkAbnormalLinePara method test unit
