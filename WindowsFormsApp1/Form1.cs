@@ -1932,6 +1932,8 @@ namespace WindowsFormsApp1
                 { i += 2; openNote = false; }
                 else if (openBracketS == 0 && closeBracketS == -1)//注文（開始）
                 { i++; openNote = true; }
+                else if (openBracketS == -1 && closeBracketS == item.Length - 2)
+                { i++; openNote = false; }
                 else if (openBracketS == -1 && closeBracketS > -1)
                 {
                     if (closeBracketS == item.Length - 2 || item.Substring(item.Length - 5) == "}}<p>")//純注文（末截）
@@ -2345,19 +2347,18 @@ namespace WindowsFormsApp1
                     int sNew = x.IndexOf(pageEndText10);
                     if (sNew > -1)
                     {
-                        textBox1.Select(sNew, pageEndText10.Length);
+                        //textBox1.Select(sNew + pageEndText10.Length - predictEndofPageSelectedTextLen, predictEndofPageSelectedTextLen);
+                        //textBox1.Select(sNew, pageEndText10.Length);
                         //s = textBox1.SelectionStart; l = textBox1.SelectionLength;
-                        //pageTextEndPosition = s + l;
-                        //pageEndText10 ="";
-                        ////keyDownCtrlAdd(shiftKeyDownYet);
-                        //goto tryAgain;
+                        s = sNew; l = pageEndText10.Length;
+                        xCopy = x.Substring(0, s + l);
                     }
-                    //else
-                    //{
-                    MessageBox.Show("請重新指定頁面結束位置", "", MessageBoxButtons.OK, MessageBoxIcon.Stop);
-                    pageTextEndPosition = 0; pageEndText10 = "";
-                    return;
-                    //}
+                    else
+                    {
+                        MessageBox.Show("請重新指定頁面結束位置", "", MessageBoxButtons.OK, MessageBoxIcon.Stop);
+                        pageTextEndPosition = 0; pageEndText10 = "";
+                        return;
+                    }
                 }
             }
             #region checkAbnormalLinePara method test unit
@@ -2449,6 +2450,8 @@ namespace WindowsFormsApp1
                 { i += 2; openNote = false; }
                 else if (openBracketS == 0 && closeBracketS == -1)//注文（開始）
                 { i++; openNote = true; }
+                else if (openBracketS == -1 && closeBracketS == item.Length - 2)
+                { i++; openNote = false; }
                 else if (openBracketS == -1 && closeBracketS > -1)
                 {
                     if (closeBracketS == item.Length - 2 || item.Substring(item.Length - 5) == "}}<p>")//純注文（末截）
