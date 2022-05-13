@@ -1941,10 +1941,15 @@ namespace WindowsFormsApp1
                 { i += 2; }// openNote = false; }
                 else if (openBracketS > -1 && closeBracketS > -1 && closeBracketS < item.Length - 2)//正注夾雜
                 { i += 2; }//openNote = false; }
-                else if (openBracketS == -1 && closeBracketS == -1 && openNote == false)//《維基文庫》純正文
-                    i += 2;
-                else if (openBracketS == -1 && closeBracketS == -1 && openNote == true)//《維基文庫》純注文
-                    i++;
+
+                //無{{}}標記：
+                else if (openBracketS == -1 && closeBracketS == -1)
+                {
+                    if (openNote == false)//《維基文庫》純正文
+                        i += 2;
+                    else //《維基文庫》純注文
+                        i++;
+                }
 
                 //《維基文庫》正注文夾雜
                 else if (openBracketS > 0)//正注夾雜
@@ -2470,11 +2475,16 @@ namespace WindowsFormsApp1
                 { i += 2; }// openNote = false; }
                 else if (openBracketS > -1 && closeBracketS > -1 && closeBracketS < item.Length - 2)//正注夾雜
                 { i += 2; }//openNote = false; }
-                else if (openBracketS == -1 && closeBracketS == -1 && openNote == false)//《維基文庫》純正文
-                    i += 2;
-                else if (openBracketS == -1 && closeBracketS == -1 && openNote == true)//《維基文庫》純注文
-                    i++;
-
+                
+                //無{{}}標記：
+                else if (openBracketS == -1 && closeBracketS == -1)
+                {
+                    if (openNote == false)//《維基文庫》純正文
+                        i += 2;
+                    else //《維基文庫》純注文
+                        i++;
+                }
+                
                 //《維基文庫》正注文夾雜
                 else if (openBracketS > 0)//正注夾雜
                 {
@@ -3204,7 +3214,10 @@ namespace WindowsFormsApp1
             appActivateByName();
             if (edit > -1)
             {//編輯才執行，瀏覽則省略
-                Task.Delay(1900).Wait(); //2200
+                //Task.Delay(500).Wait(); //2200
+                //Task.Delay(1900).Wait(); //2200
+                Task.Delay(650).Wait(); //目前疾速是650，而穩定是700，乃至1100、1900、2200，看網速
+                //SendKeys.Send("{Tab 24}");
                 SendKeys.Send("{Tab}"); //("{Tab 24}");
                 Task.Delay(200).Wait();//200
                 SendKeys.Send("^a");
