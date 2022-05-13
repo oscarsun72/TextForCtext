@@ -1928,8 +1928,6 @@ namespace WindowsFormsApp1
                     { i++; openNote = true; }//第一段/行是純注文
                     else { i += 2; openNote = false; }//第一段/行是純正文
                 }
-                else if (openBracketS > 0)//正注夾雜
-                { i += 2; openNote = false; }
                 else if (openBracketS == 0 && closeBracketS == -1)//注文（開始）
                 { i++; openNote = true; }
                 else if (openBracketS == -1 && closeBracketS == item.Length - 2)
@@ -1945,10 +1943,23 @@ namespace WindowsFormsApp1
                 { i += 2; }//openNote = false; }
                 else if (openBracketS == -1 && closeBracketS == -1 && openNote == false)//《維基文庫》純正文
                     i += 2;
-                else if (openBracketS == -1 && closeBracketS == -1 && openNote)//《維基文庫》純注文
+                else if (openBracketS == -1 && closeBracketS == -1 && openNote == true)//《維基文庫》純注文
                     i++;
+
                 //《維基文庫》正注文夾雜
-                else if (openBracketS > 0 && closeBracketS == -1) { i += 2; openNote = true; }
+                else if (openBracketS > 0)//正注夾雜
+                {
+                    i += 2;
+                    if (closeBracketS == -1) openNote = true;
+                    else
+                    {
+                        if (item.LastIndexOf("}}") > item.LastIndexOf("{{"))
+                            openNote = false;
+                        else
+                            openNote = true;
+                    }
+                }
+                //else if (openBracketS > 0 && closeBracketS == -1) { i += 2; openNote = true; }
                 else if (openBracketS == -1 && closeBracketS > -1 && closeBracketS < item.Length - 2) { i += 2; openNote = false; }
                 /*
                 if ((item.IndexOf("{{") == -1 && item.IndexOf("}}") == -1)//純正文
@@ -2445,9 +2456,7 @@ namespace WindowsFormsApp1
                                 (openBracketS == -1 && closeBracketS > -1 && closeBracketS < e - 2))) //第一行正、注夾雜
                     i += 2;
                 else if (i == 0 & x.IndexOf("}}") < x.IndexOf("{{") && x.IndexOf("}}") > e)
-                { i++; openNote = true; }//第一段/行是純注文
-                else if (openBracketS > 0)//正注夾雜
-                { i += 2; openNote = false; }
+                { i++; openNote = true; }//第一段/行是純注文                
                 else if (openBracketS == 0 && closeBracketS == -1)//注文（開始）
                 { i++; openNote = true; }
                 else if (openBracketS == -1 && closeBracketS == item.Length - 2)
@@ -2463,13 +2472,24 @@ namespace WindowsFormsApp1
                 { i += 2; }//openNote = false; }
                 else if (openBracketS == -1 && closeBracketS == -1 && openNote == false)//《維基文庫》純正文
                     i += 2;
-                else if (openBracketS == -1 && closeBracketS == -1 && openNote)//《維基文庫》純注文
+                else if (openBracketS == -1 && closeBracketS == -1 && openNote == true)//《維基文庫》純注文
                     i++;
 
                 //《維基文庫》正注文夾雜
-                else if (openBracketS > 0 && closeBracketS == -1) { i += 2; openNote = true; }
-                else if (openBracketS == -1 && closeBracketS > -1 && item.IndexOf("}}") < item.Length - 2)
-                { i += 2; openNote = false; }
+                else if (openBracketS > 0)//正注夾雜
+                {
+                    i += 2;
+                    if (closeBracketS == -1) openNote = true;
+                    else
+                    {
+                        if (item.LastIndexOf("}}") > item.LastIndexOf("{{"))
+                            openNote = false;
+                        else
+                            openNote = true;
+                    }
+                }
+                //else if (openBracketS > 0 && closeBracketS == -1) { i += 2; openNote = true; }
+                else if (openBracketS == -1 && closeBracketS > -1 && closeBracketS < item.Length - 2) { i += 2; openNote = false; }
                 //else if (item.IndexOf("{{") > 0 || 
                 //    (item.IndexOf("}}") > -1 &&
                 //    ((item.IndexOf("<p>") == -1 && item.IndexOf("}}") < item.Length - 2) ||
