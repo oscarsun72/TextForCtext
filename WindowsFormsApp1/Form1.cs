@@ -3216,7 +3216,8 @@ namespace WindowsFormsApp1
             {//編輯才執行，瀏覽則省略
                 //Task.Delay(500).Wait(); //2200
                 //Task.Delay(1900).Wait(); //2200
-                Task.Delay(650).Wait(); //目前疾速是650，而穩定是700，乃至1100、1900、2200，看網速
+                //Task.Delay(650).Wait(); //目前疾速是650，而穩定是700，乃至1100、1900、2200，看網速
+                Task.Delay(700).Wait();
                 //SendKeys.Send("{Tab 24}");
                 SendKeys.Send("{Tab}"); //("{Tab 24}");
                 Task.Delay(200).Wait();//200
@@ -4167,7 +4168,7 @@ namespace WindowsFormsApp1
             //    hideToNICo();
             //}
         }
-
+                
         void closeChromeTab()
         {//Ctrl + w 關閉 Chrome 網頁頁籤
             appActivateByName();

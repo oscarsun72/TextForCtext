@@ -946,6 +946,58 @@ Loop
 rst.Close: cnt.Close: Set db = Nothing
 End Sub
 
+Sub dbSBCKWordtoReplace() '四部叢刊造字對照表 Alt+5
+Dim rng As Range
+Set rng = Documents.Add.Range
+rng.Paste
+dbSBCKWordtoReplaceSub rng
+rng.Cut
+If rng.Application.Documents.Count = 1 Then
+    rng.Application.Quit wdDoNotSaveChanges
+Else
+    rng.Document.Close wdDoNotSaveChanges
+End If
+End Sub
+Sub dbSBCKWordtoReplaceSub(ByRef rng As Range)
+Const tbName As String = "四部叢刊造字對照表"
+Dim rst As New ADODB.Recordset, cnt As New ADODB.Connection, db As New dBase
+rng.Find.ClearFormatting
+db.cnt查字 cnt
+rst.Open tbName, cnt, adOpenForwardOnly, adLockReadOnly
+Do Until rst.EOF
+    If InStr(rng.Text, rst.Fields(0).Value) Then _
+        rng.Find.Execute rst.Fields(0).Value, , , , , , True, wdFindContinue, , rst.Fields(1).Value, wdReplaceAll
+    rst.MoveNext
+Loop
+rst.Close: cnt.Close: Set db = Nothing
+End Sub
+
+Sub dbSBCKWordtoReplace_AddNewOne() '四部叢刊造字對照表 Alt+4
+Const tbName As String = "四部叢刊造字對照表"
+Dim rst As New ADODB.Recordset, cnt As New ADODB.Connection, db As New dBase
+Dim rng As Range
+Set rng = Selection.Range
+db.cnt查字 cnt
+rst.Open "select * from " + tbName + " where strcomp(造字, """ + rng.Characters(1) + """)=0", cnt, adOpenKeyset, adLockOptimistic
+If rst.RecordCount = 0 Then
+    If rng.Characters.Count = 2 Then
+        'rst.Open tbName, cnt, adOpenKeyset, adLockOptimistic
+        rst.AddNew
+        rst.Fields(0) = rng.Characters(1)
+        rst.Fields(1) = rng.Characters(2)
+        rst.Update
+        rng.Characters(1).Delete
+    Else
+        MsgBox "plz input the replace word next the one"
+    End If
+Else
+    If rng.Characters.Count = 2 Then If rng.Characters(2) = rst.Fields(1).Value Then rng.Characters(2).Delete
+    rng.Characters(1) = rst.Fields(1).Value
+End If
+rst.Close: cnt.Close: Set db = Nothing
+dbSBCKWordtoReplaceSub rng.Document.Range
+End Sub
+
 Sub entity_Markup_edit_via_API_Annotate_Reverting()
 Dim rng As Range, rngMark As Range, d As Document, ay(), e, i As Long, DoctoMarked As Document
 Set d = ActiveDocument
