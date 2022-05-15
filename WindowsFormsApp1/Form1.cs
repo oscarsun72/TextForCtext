@@ -2475,7 +2475,7 @@ namespace WindowsFormsApp1
                 { i += 2; }// openNote = false; }
                 else if (openBracketS > -1 && closeBracketS > -1 && closeBracketS < item.Length - 2)//正注夾雜
                 { i += 2; }//openNote = false; }
-                
+
                 //無{{}}標記：
                 else if (openBracketS == -1 && closeBracketS == -1)
                 {
@@ -2484,7 +2484,7 @@ namespace WindowsFormsApp1
                     else //《維基文庫》純注文
                         i++;
                 }
-                
+
                 //《維基文庫》正注文夾雜
                 else if (openBracketS > 0)//正注夾雜
                 {
@@ -3025,6 +3025,7 @@ namespace WindowsFormsApp1
                     {
                         check_the_adjacent_pages = false; new SoundPlayer(@"C:\Windows\Media\Speech Off.wav").Play();
                     }
+                    autoPasteFromSBCKwhether = false;
                     return;
                 }
 
@@ -3178,6 +3179,7 @@ namespace WindowsFormsApp1
             if (showColorSignal) this.BackColor = C;
         }
 
+        int waitTimeforappActivateByName = 1100;
         private void nextPages(Keys eKeyCode, bool stayInHere)
         {
             string url = textBox3.Text;
@@ -3217,9 +3219,10 @@ namespace WindowsFormsApp1
                 //Task.Delay(500).Wait(); //2200
                 //Task.Delay(1900).Wait(); //2200
                 //Task.Delay(650).Wait(); //目前疾速是650，而穩定是700，乃至1100、1900、2200，看網速
-                Task.Delay(700).Wait();
+                Task.Delay(waitTimeforappActivateByName).Wait();
                 //SendKeys.Send("{Tab 24}");
                 SendKeys.Send("{Tab}"); //("{Tab 24}");
+                //要尾綴「#editor」如是格式的才能只按一個tab就入文字框中 ： https://ctext.org/library.pl?if=gb&file=77367&page=59&editwiki=415472#editor
                 Task.Delay(200).Wait();//200
                 SendKeys.Send("^a");
                 if (!check_the_adjacent_pages)
@@ -3796,8 +3799,25 @@ namespace WindowsFormsApp1
         }
         private void textBox2_TextChanged(object sender, EventArgs e)
         {
+            string x = textBox2.Text;
+            #region 輸入末綴為「00」的數字可以設定開啟Chrome頁面的等待毫秒時間
+            if (x != "" && x.Length > 2)
+            {
+                if (x.Substring(x.Length - 2) == "00")
+                {
+                    int w;
+                    if (Int32.TryParse(x, out w))
+                    {
+                        waitTimeforappActivateByName = w;
+                        textBox2.Text = "";
+                        return;
+                    }
+                }
+            }
+            #endregion
+
             if (button2.Text == "選取文") return;
-            string x = textBox2.Text, x1 = textBox1.Text;
+            string x1 = textBox1.Text;
             if (x == "" || x1 == "") return;
             if (isKeyDownSurrogate(x)) return;//surrogate字在文字方塊輸入時會引發2次keyDown事件            
             var sa = findWord(x, x1);
@@ -4109,7 +4129,7 @@ namespace WindowsFormsApp1
                 if (MessageBox.Show("auto paste to Ctext Quick Edit textBox ?", "", MessageBoxButtons.OKCancel
                         , MessageBoxIcon.Question, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly) == DialogResult.OK)
                 {
-                    autoPastetoQuickEdit = true;
+                    autoPastetoQuickEdit = true; autoPasteFromSBCKwhether = false;
                     if (MessageBox.Show("是否先檢查文本先前是否曾編輯過？" + Environment.NewLine +
                         "要檢查的話，請先複製其文本，再按確定（ok）按鈕", "", MessageBoxButtons.OKCancel
                         , MessageBoxIcon.Question, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly) == DialogResult.OK)
@@ -4168,7 +4188,7 @@ namespace WindowsFormsApp1
             //    hideToNICo();
             //}
         }
-                
+
         void closeChromeTab()
         {//Ctrl + w 關閉 Chrome 網頁頁籤
             appActivateByName();

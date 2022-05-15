@@ -54,6 +54,79 @@ rng.Document.Range.Cut
 rng.Document.Close wdDoNotSaveChanges
 AppActivate "Google Chrome"
 End Sub
+
+Sub formatter() '為《經典釋文》春秋三傳等格式用，日後可改成其他需要格式化的文本
+Dim d As Document, rng As Range, a As Range, s As Long, e As Long
+Const spcs As String = "　"
+
+Set d = Documents.Add: Set rng = d.Range
+rng.Paste
+For Each a In d.Characters
+    If a = spcs Then
+        If a.Next = spcs Then
+            If InStr(a.Paragraphs(1).Range.Text, "*") = 0 Then
+                a.Select
+                s = a.start
+                Do Until Selection.Next <> spcs
+                    Selection.MoveRight , , wdExtend
+                Loop
+                e = Selection.End
+                Set a = Selection.Next
+                If a.Next = spcs Then
+                    a.Select
+                    Do Until Selection.Next <> spcs
+                        Selection.Next.Delete
+                    Loop
+                
+                    rng.SetRange s, e
+                    'rng.Select
+                    rng.Text = Replace(rng.Text, "　", ChrW(-9217) & ChrW(-8195))
+                    Set a = rng.Characters(rng.Characters.Count)
+                End If
+            End If
+        End If
+    End If
+Next a
+d.Range.Cut
+d.Close wdDoNotSaveChanges
+SystemSetup.playSound 2
+End Sub
+
+Sub formatter年前加分段符號() '為《經典釋文》春秋三傳等格式用，日後可改成其他需要格式化的文本
+Dim d As Document, rng As Range, a As Range, s As Long, e As Long, i As Integer, yi As Byte, ok As Boolean, yStr As String
+Const y As String = "年"
+Set d = Documents.Add: Set rng = d.Range
+'d.ActiveWindow.Visible = True
+rng.Paste
+rng.Find.ClearFormatting
+Do While rng.Find.Execute("^p")
+    If rng.End = d.Range.End - 1 Then Exit Do
+    Set a = d.Range
+    For i = 4 To 2 Step -1
+        a.SetRange rng.End, rng.End + i
+'        a.Select
+        If Right(a, 1) = y Then
+            If a.Previous.Previous <> ">" Then
+                For yi = 1 To 99
+                    yStr = 文字轉換.數字轉漢字2位數(yi) + y
+                    If a.Text = yStr Then
+                        rng.InsertBefore "<p>"
+                        ok = True: Exit For
+                    End If
+                Next yi
+                If ok Then
+                    ok = False
+                    Exit For
+                End If
+            End If
+        End If
+    Next i
+    rng.SetRange rng.End, d.Range.End
+Loop
+SystemSetup.playSound 2
+d.Range.Cut
+d.Close wdDoNotSaveChanges
+End Sub
 Sub 維基文庫四部叢刊本轉來()
 Dim d As Document, a, i, p As Paragraph, xP As String, acP As Integer, space As String, rng As Range
 On Error GoTo eH
@@ -989,6 +1062,7 @@ If rst.RecordCount = 0 Then
         rng.Characters(1).Delete
     Else
         MsgBox "plz input the replace word next the one"
+        Selection.move
     End If
 Else
     If rng.Characters.Count = 2 Then If rng.Characters(2) = rst.Fields(1).Value Then rng.Characters(2).Delete

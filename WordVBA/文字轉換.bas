@@ -13,7 +13,7 @@ fpath = "Provider=Microsoft.ACE.OLEDB.12.0;Data Source=" & pt & "\VS\迭ㄥ.mdb" '
 Dim rst As New ADODB.Recordset, rstPinyin As New ADODB.Recordset
 Dim cnt As New ADODB.Connection
 'Dim p As New ADODB.Parameter
-Dim x As String, Y As String, z As String
+Dim x As String, y As String, z As String
 Dim cmd As New ADODB.Command
 If Selection.Type = wdSelectionNormal Then
     x = Selection
@@ -33,16 +33,16 @@ If rstPinyin.EOF Then
 Else
     Do Until rstPinyin.EOF
         'y = "" & rst.Fields("").Value & ""
-        Y = rstPinyin.Fields("").Value
+        y = rstPinyin.Fields("").Value
         cmd.CommandText = "SELECT . FROM  INNER JOIN (猔 INNER JOIN ( INNER JOIN _猔 ON .ID = _猔.ID) ON 猔.猔ID = _猔.猔ID) ON .ID = _猔.ID " & _
-                        "WHERE (((.) = """ & Y & """) And ((.╱ノ) = False) And ((_猔.)= 0)) ORDER BY ., .;"
+                        "WHERE (((.) = """ & y & """) And ((.╱ノ) = False) And ((_猔.)= 0)) ORDER BY ., .;"
     '    rst.Close
         rst.Open cmd
         z = Replace(rst.GetString(, , , " "), x & " ", "")
         With Selection
             .Collapse wdCollapseEnd
-            .TypeText Y
-            .MoveLeft wdCharacter, Len(Y), wdExtend
+            .TypeText y
+            .MoveLeft wdCharacter, Len(y), wdExtend
             .Font.Name = "simsun" '"NSimSun" simhei'"Verdana"
             .Font.ColorIndex = wdRed
             .Font.Size = 14 '18
@@ -52,7 +52,7 @@ Else
             .Font.Name = "夹发砰"
             .Font.ColorIndex = wdRed
             .Font.Size = 14
-            .MoveLeft wdCharacter, Len(Y), wdExtend
+            .MoveLeft wdCharacter, Len(y), wdExtend
             .Range.HighlightColorIndex = wdYellow
             .Font.Bold = False
             .Collapse wdCollapseEnd
@@ -274,3 +274,31 @@ SystemSetup.contiUndo ur
 If rst.State <> adStateClosed Then rst.Close
 cnt.Close: Set rng = Nothing: Set ur = Nothing
 End Sub
+
+Function 计锣簙2计(yi As Byte)
+Const digit As Byte = 10
+Dim q As Byte, r As Byte, ay
+ay = Array("じ", "", "", "", "", "き", "せ", "", "", "", "")
+    r = yi Mod digit: q = (yi - r) / digit
+    If q = 0 Then
+        If yi = 1 Then
+            计锣簙2计 = ay(q)
+        Else
+            计锣簙2计 = ay(r)
+        End If
+    Else
+        If r = 0 Then
+            If q = 1 Then
+                计锣簙2计 = ay(10)
+            Else
+                计锣簙2计 = ay(q) + ay(10)
+            End If
+        Else
+            If q = 1 Then
+                计锣簙2计 = ay(10) + ay(r)
+            Else
+                计锣簙2计 = ay(q) + ay(10) + ay(r)
+            End If
+        End If
+    End If
+End Function
