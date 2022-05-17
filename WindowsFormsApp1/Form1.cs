@@ -2287,7 +2287,7 @@ namespace WindowsFormsApp1
                 textBox1.Select(s, l);
             }
             #region 小注跨頁處理
-            if (s > 2 && s + 2 <= x.Length)
+            if (s > 2 && s + 2 <= x.Length && s + l + Environment.NewLine.Length + 2 <= x.Length)
             {
                 const string curlyBracketsOpen = "{{", curlyBracketsClose = "}}";
                 if (l >= 2)//有選取
@@ -2351,7 +2351,7 @@ namespace WindowsFormsApp1
         #endregion//清除空行
         */
         tryAgain:
-            if (pageTextEndPosition == 0) pageTextEndPosition = s;
+            if (pageTextEndPosition == 0) pageTextEndPosition = s + l;
             else { s = pageTextEndPosition; l = 0; }
             if (s < 0 || s + l > x.Length) s = textBox1.SelectionStart;
             string xCopy = x.Substring(0, s + l);
