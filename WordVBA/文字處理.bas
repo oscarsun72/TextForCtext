@@ -3324,6 +3324,33 @@ Else
 End If
 Beep
 End Sub
+Sub replaceWithNextChararcter() 'Alt+Shift+h
+Dim s As Integer, chars 'As Characters
+Dim f As String, r As String
+Set chars = Selection.Characters
+If chars.Count < 2 And InStr(Selection, Chr(9)) = 0 Then Exit Sub
+If chars.Count > 2 Then
+    s = InStr(Selection, Chr(9))
+    If s > 0 Then
+        If InStr(Mid(Selection.Text, s + 1), Chr(9)) = 0 Then
+            chars = VBA.Split(Selection.Text, Chr(9))
+            Selection.Text = Left(Selection.Text, s - 1)
+            s = 0
+            f = chars(s): r = chars(s + 1) 'VBA.IIf(chars(s + 1) = Chr(9), "", chars(s + 1))
+        Else
+            Exit Sub
+        End If
+    Else
+        Exit Sub
+    End If
+Else
+    s = 1
+    f = chars(s)
+    r = VBA.IIf(chars(s + 1) = Chr(9), "", chars(s + 1))
+    Selection.Characters(s + 1) = ""
+End If
+Selection.Find.Execute f, , , , , , True, wdFindContinue, , r, wdReplaceAll
+End Sub
 
 Sub 國語辭典網址及ID尚缺者列出()
 Dim db As New dBase

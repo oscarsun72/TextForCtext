@@ -4106,7 +4106,10 @@ namespace WindowsFormsApp1
 
         private void textBox3_TextChanged(object sender, EventArgs e)
         {
-            if (textBox3.Text == "") return;
+            if (textBox3.Text == "") {
+                resetBooksPagesFeatures();
+                return;
+            }            
             if (textBox3.Text.IndexOf("ctext.org") > -1) if (textBox3.Text.IndexOf("https://") == -1) textBox3.Text = "https://" + textBox3.Text;
             autoPastetoOrNot();
         }
@@ -4148,6 +4151,9 @@ namespace WindowsFormsApp1
         {
             linesParasPerPage = -1;//每頁行/段數
             wordsPerLinePara = -1;//每行/段字數 reset
+            pageTextEndPosition = 0; pageEndText10 = "";
+            lines_perPage = 0;
+            normalLineParaLength = 0;
         }
 
         private void textBox3_DragDrop(object sender, DragEventArgs e)
