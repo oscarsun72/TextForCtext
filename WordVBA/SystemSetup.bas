@@ -74,7 +74,7 @@ Function ClipBoard_GetData()
    lpClipMemory = GlobalLock(hClipMemory)
  
    If Not IsNull(lpClipMemory) Then
-      MyString = Space$(MAXSIZE)
+      MyString = space$(MAXSIZE)
       RetVal = lstrcpy(MyString, lpClipMemory)
       RetVal = GlobalUnlock(hClipMemory)
        
@@ -150,6 +150,7 @@ Dim x As Variant
 
 'Create HTMLFile Object
   With CreateObject("htmlfile")
+    DoEvents
     With .parentWindow.clipboardData
       Select Case True
         Case Len(StoreText)

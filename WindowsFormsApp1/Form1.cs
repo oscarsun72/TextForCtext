@@ -3747,6 +3747,11 @@ namespace WindowsFormsApp1
             autoRunWordVBAMacro();
             //bool autoPasteFromSBCKwhether = false; this.autoPasteFromSBCKwhether = autoPasteFromSBCKwhether;            
             if (autoPasteFromSBCKwhether) autoPasteFromSBCK(autoPasteFromSBCKwhether);
+            if (textBox1.TextLength < 100)
+            {
+                string clpTxt = Clipboard.GetText();
+                if (clpTxt.IndexOf("<scanbegin file=") > -1 && clpTxt.IndexOf(" page=") > -1) runWordMacro("中國哲學書電子化計劃.清除頁前的分段符號");
+            }
         }
 
         private void autoRunWordVBAMacro()
@@ -3762,7 +3767,7 @@ namespace WindowsFormsApp1
                 xClip = Clipboard.GetText() ?? "";
                 //throw;
             }
-            if (xClip.IndexOf("MidleadingBot") > 0 && textBox1.TextLength < 100)//xClip.Length > 500 )
+            if ((xClip.IndexOf("MidleadingBot") > 0 || xClip.IndexOf("此頁面可能存在如下一些問題：") > -1) && textBox1.TextLength < 100)//xClip.Length > 500 )
                 runWordMacro("維基文庫四部叢刊本轉來");
         }
 
@@ -4106,10 +4111,11 @@ namespace WindowsFormsApp1
 
         private void textBox3_TextChanged(object sender, EventArgs e)
         {
-            if (textBox3.Text == "") {
-                resetBooksPagesFeatures();
+            if (textBox3.Text == "")
+            {
+                resetBooksPagesFeatures(); previousBookID = 0;
                 return;
-            }            
+            }
             if (textBox3.Text.IndexOf("ctext.org") > -1) if (textBox3.Text.IndexOf("https://") == -1) textBox3.Text = "https://" + textBox3.Text;
             autoPastetoOrNot();
         }
@@ -4122,7 +4128,7 @@ namespace WindowsFormsApp1
             const string f = "file="; int s = x.IndexOf(f);
             int bookID = int.Parse(x.Substring(s + f.Length, x.IndexOf("&", s + 1) - s - f.Length));
 
-            if (bookID != previousBookID)
+            if (bookID != previousBookID || previousBookID == 0)
             {
                 resetBooksPagesFeatures();
 

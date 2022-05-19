@@ -23,6 +23,43 @@ Next i
 data.SetText Replace(x, "/>", "/>●", 1, 1)
 data.PutInClipboard
 End Sub
+Sub 清除頁前的分段符號()
+Dim d As Document, rng As Range, e As Long
+Set d = Documents.Add
+Set rng = d.Range
+'d.ActiveWindow.Visible = True
+rng.Paste
+Do While rng.Find.Execute("<scanbegin ") '<scanbegin file="80564" page="13" y="4" />
+    rng.MoveEndUntil ">"
+    rng.MoveEnd
+'    rng.Select
+    rng.SetRange rng.End, rng.End + 2
+    If rng.Text = Chr(13) & Chr(13) Then
+'        rng.Select
+        e = rng.End
+        rng.Delete
+        Set rng = d.Range(e, d.Range.End)
+    Else
+    rng.SetRange rng.End, d.Range.End
+    End If
+Loop
+d.Range.Cut
+d.Application.WindowState = wdWindowStateMinimize
+d.Close wdDoNotSaveChanges
+'playSound 1
+pastetoEditBox
+
+End Sub
+
+Sub pastetoEditBox(Optional Description As String)
+AppActivate "google chrome"
+SendKeys "^v"
+SendKeys "{tab}"
+SystemSetup.ClipboardPutIn Description
+DoEvents
+SendKeys "^v"
+SendKeys "{tab 2}~"
+End Sub
 Sub 清除所有符號_分段注文符號例外()
 Dim f, i As Integer
 f = Array("。", "」", Chr(-24152), "：", "，", "；", _
@@ -41,6 +78,7 @@ End Sub
 
 Sub 撤掉與書圖的對應_脫鉤() '20220210
 Dim rng As Range, angleRng As Range
+word.Application.ScreenUpdating = False
 Set rng = Documents.Add().Range
 Set angleRng = rng
 rng.Paste
@@ -52,7 +90,8 @@ Do While rng.Find.Execute("<")
 Loop
 rng.Document.Range.Cut
 rng.Document.Close wdDoNotSaveChanges
-AppActivate "Google Chrome"
+pastetoEditBox "與《四部叢刊》文本不同，圖文脫鉤。另依《維基文庫》本輔以末學自製軟件TextForCtext對應錄入。感恩感恩　南無阿彌陀佛"
+word.Application.ScreenUpdating = True
 End Sub
 
 Sub formatter() '為《經典釋文》春秋三傳等格式用，日後可改成其他需要格式化的文本
@@ -1239,6 +1278,7 @@ For i = 0 To UBound(a)
     i = i + 1
 Next i
 d.Range.Cut
+d.Application.WindowState = wdWindowStateMinimize
 d.Close wdDoNotSaveChanges
 AppActivate "google chrome"
 SendKeys "^v"
