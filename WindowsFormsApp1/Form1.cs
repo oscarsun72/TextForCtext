@@ -3248,9 +3248,16 @@ namespace WindowsFormsApp1
             Microsoft.Office.Interop.Word.Application appWord = new Microsoft.Office
                                     .Interop.Word.Application();
             appWord.Run(runName);
-            textBox1.Text = Clipboard.GetText();
-            textBox1.Select(0, 0);
-            textBox1.ScrollToCaret();
+            switch (runName)
+            {
+                case "中國哲學書電子化計劃.清除頁前的分段符號":
+                    break;
+                default:
+                    textBox1.Text = Clipboard.GetText();
+                    textBox1.Select(0, 0);
+                    textBox1.ScrollToCaret();
+                    break;
+            }
             try
             {
                 if (runName != "checkEditingOfPreviousVersion")
@@ -3610,9 +3617,19 @@ namespace WindowsFormsApp1
             //{
             //    runWord("維基文庫四部叢刊本轉來");
             //}
+
+            if (e.Button == MouseButtons.Left && (m & Keys.Alt) == Keys.Alt && (m & Keys.Control) == Keys.Control)
+            {//Ctrl+ Alt + 滑鼠左鍵：將插入點後的分行分段清除
+                int s = textBox1.SelectionStart; string xSl = textBox1.Text.Substring(s, 2);
+                if (xSl != Environment.NewLine) s = textBox1.Text.IndexOf(Environment.NewLine, s);
+                textBox1.Select(s, 2);
+                textBox1.SelectedText = "";
+                return;
+
+            }
+
             if (ModifierKeys == Keys.Control && e.Button == MouseButtons.Left)
             {
-
                 if (textBox1.SelectionLength == 0)
                 {
                     //Point p = e.Location;

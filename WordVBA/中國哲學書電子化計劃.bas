@@ -2,17 +2,25 @@ Attribute VB_Name = "中國哲學書電子化計劃"
 Option Explicit
 Sub 新頁面()
 'the page begin
-Const start As Integer = 2375
+Dim start As Integer
 ' the page end
-Const e As Integer = 2380
+Dim e As Integer
 ' the book
-Const fileID As Long = 1000081
+Dim fileID As Long
 'https://ctext.org/library.pl?if=gb&file=1000081&page=2621
 
-Dim x As String, data As New MSForms.DataObject
-Dim i As Integer
+Dim x As String ', data As New MSForms.DataObject
+Dim i As Integer, rng As Range
+Set rng = ActiveDocument.Range
+start = CInt(Replace(rng.Paragraphs(1).Range, Chr(13), ""))
+e = CInt(Replace(rng.Paragraphs(2).Range, Chr(13), ""))
+fileID = CLng(Replace(rng.Paragraphs(3).Range, Chr(13), ""))
 For i = start To e
-    x = x & "<scanbegin file=""" & fileID & """ page=""" & i & """ />" & Chr(9) & "<scanend file=""" & fileID & """ page=""" & i & """ />" '若中間沒有任何內容，頁面最後便不能成一段落。若剛好一個段落，會與下一頁黏合在一起
+    If i = 1 Then
+        x = x & "<scanbegin file=""" & fileID & """ page=""" & i & """ />●" & Chr(9) & "<scanend file=""" & fileID & """ page=""" & i & """ />"
+    Else
+        x = x & "<scanbegin file=""" & fileID & """ page=""" & i & """ />" & Chr(9) & "<scanend file=""" & fileID & """ page=""" & i & """ />" '若中間沒有任何內容，頁面最後便不能成一段落。若剛好一個段落，會與下一頁黏合在一起
+    End If
 Next i
 
 
@@ -20,8 +28,13 @@ Next i
 '    x = x & e
 'Next e
 ''x = Replace(x, Chr(13), "")
-data.SetText Replace(x, "/>", "/>●", 1, 1)
-data.PutInClipboard
+'data.SetText Replace(x, "/>", "/>●", 1, 1)
+'data.PutInClipboard
+SystemSetup.SetClipboard x
+DoEvents
+AppActivate "google chrome"
+SendKeys "^v"
+
 End Sub
 Sub 清除頁前的分段符號()
 Dim d As Document, rng As Range, e As Long
@@ -47,15 +60,15 @@ d.Range.Cut
 d.Application.WindowState = wdWindowStateMinimize
 d.Close wdDoNotSaveChanges
 'playSound 1
-pastetoEditBox
+pastetoEditBox "清除頁前的分段符號"
 
 End Sub
 
-Sub pastetoEditBox(Optional Description As String)
+Sub pastetoEditBox(Description_from_ClipBoard As String)
 AppActivate "google chrome"
 SendKeys "^v"
 SendKeys "{tab}"
-SystemSetup.ClipboardPutIn Description
+SystemSetup.ClipboardPutIn Description_from_ClipBoard
 DoEvents
 SendKeys "^v"
 SendKeys "{tab 2}~"
@@ -171,6 +184,11 @@ Dim d As Document, a, i, p As Paragraph, xP As String, acP As Integer, space As 
 On Error GoTo eH
 a = Array(ChrW(12296), "{{", ChrW(12297), "}}", "〈", "{{", "〉", "}}", _
     "○", ChrW(12295))
+'《容齋三筆》等小注作正文省版面者 https://ctext.org/library.pl?if=gb&file=89545&page=24
+'a = Array("〈", "", "〉", "", _
+    "○", ChrW(12295))
+
+
 Set d = Documents.Add()
 d.Range.Paste
 維基文庫造字圖取代為文字 d.Range
