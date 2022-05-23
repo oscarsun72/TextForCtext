@@ -23,7 +23,7 @@ For i = start To e
     End If
 Next i
 
-
+rng.Paragraphs(3).Range = CLng(Replace(rng.Paragraphs(3).Range, Chr(13), "")) + 1
 'For Each e In Selection.Value
 '    x = x & e
 'Next e
@@ -57,14 +57,47 @@ Do While rng.Find.Execute("<scanbegin ") '<scanbegin file="80564" page="13" y="4
     End If
 Loop
 d.Range.Cut
-d.Application.WindowState = wdWindowStateMinimize
 d.Close wdDoNotSaveChanges
 'playSound 1
 pastetoEditBox "清除頁前的分段符號"
 
 End Sub
 
+Sub 將星號前的分段符號移置前段之末() '20220522
+Dim d As Document, rng As Range, e As Long, s As Long, rngP As Range
+Set d = Documents.Add
+Set rng = d.Range
+rng.Paste
+Do While rng.Find.Execute("*")
+    e = rng.End
+    If rng.Previous = Chr(13) Then
+        Set rng = rng.Previous
+        If rng.Previous = Chr(13) Then
+            Set rng = rng.Previous
+            If rng.Previous = ">" Then
+                rng.SetRange rng.start, e - 1
+                s = rng.start
+                Set rngP = d.Range(s, s)
+                rng.Delete
+                Do Until rngP.Next = "<"
+                    rngP.move wdCharacter, -1
+                Loop
+                rngP.move
+                rngP.InsertAfter Chr(13) & Chr(13)
+            End If
+        End If
+    End If
+    Set rng = d.Range(e, d.Range.End)
+Loop
+d.Range.Cut
+d.Close wdDoNotSaveChanges
+'playSound 1
+pastetoEditBox "將星號前的分段符號移置前段之末"
+
+End Sub
+
 Sub pastetoEditBox(Description_from_ClipBoard As String)
+word.Application.WindowState = wdWindowStateMinimize
 AppActivate "google chrome"
 SendKeys "^v"
 SendKeys "{tab}"
@@ -250,7 +283,7 @@ Next p
 文字處理.書名號篇名號標注
 d.Range.Cut
 d.Close wdDoNotSaveChanges
-SystemSetup.playSound 3
+SystemSetup.playSound 2
 Exit Sub
 eH:
 Select Case Err.Number
@@ -1063,6 +1096,11 @@ Next e
 rng.Text = "#" & rng.Text
 rng.Cut
 rng.Document.Close wdDoNotSaveChanges
+DoEvents
+AppActivate "google chrome"
+SendKeys "^v~"
+DoEvents
+SendKeys "{F5}"
 End Sub
 
 Sub 維基文庫等欲直接抽換之字(d As Document)

@@ -1005,6 +1005,12 @@ namespace WindowsFormsApp1
                     keysSpaces();
                     return;
                 }
+                if (e.KeyCode == Keys.D3)
+                {//Alt + 3 : 鍵入全形空格「〇」
+                    e.Handled = true;
+                    textBox1.SelectedText = "〇";
+                    return;
+                }
                 if (e.KeyCode == Keys.D8)
                 {//Alt + 8 : 鍵入 「　　*」
                     e.Handled = true;
@@ -2084,6 +2090,7 @@ namespace WindowsFormsApp1
             string se = textBox1.Text.Substring(s, e - s);
             //int l = new StringInfo(se).LengthInTextElements;
             int l = wordsPerLinePara != -1 ? wordsPerLinePara : countWordsLenPerLinePara(se);
+            if (countWordsLenPerLinePara(se) == wordsPerLinePara && se.Replace("●", "") == "") textBox1.Text = textBox1.Text.Substring(e + 2);
             if (wordsPerLinePara == -1)
             {
                 wordsPerLinePara = l;
