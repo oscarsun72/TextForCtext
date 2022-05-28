@@ -1011,6 +1011,12 @@ namespace WindowsFormsApp1
                     textBox1.SelectedText = "〇";
                     return;
                 }
+                if (e.KeyCode == Keys.D6 || e.KeyCode == Keys.D7)
+                {//Alt + 6 、 Alt + 7 : 鍵入 「"}}"+ newline +"{{"」
+                    e.Handled = true;
+                    insertWords("}}" + Environment.NewLine + "{{", textBox1.Text);
+                    return;
+                }
                 if (e.KeyCode == Keys.D8)
                 {//Alt + 8 : 鍵入 「　　*」
                     e.Handled = true;
@@ -1292,13 +1298,17 @@ namespace WindowsFormsApp1
                 }
 
                 if (e.KeyCode == Keys.F4)
-                {//F4 ： 重複做最後一次的輸入1次
+                {//按下 F4 鍵： 重複做最後一次的輸入1次
                     int c = lastKeyPress.Count - 1;
                     if (c < 0) return;
                     string lk = lastKeyPress[c];
                     if (lk != "")
                     {
+                        //undoRecord();
+                        //stopUndoRec = true;
+                        //textBox1.SelectedText = lk;
                         SendKeys.Send(lk);
+                        //stopUndoRec = false;
                     }
                     return;
                 }
@@ -2090,7 +2100,8 @@ namespace WindowsFormsApp1
             string se = textBox1.Text.Substring(s, e - s);
             //int l = new StringInfo(se).LengthInTextElements;
             int l = wordsPerLinePara != -1 ? wordsPerLinePara : countWordsLenPerLinePara(se);
-            if (countWordsLenPerLinePara(se) == wordsPerLinePara && se.Replace("●", "") == "") textBox1.Text = textBox1.Text.Substring(e + 2);
+            if (se.Replace("●", "") == "") textBox1.Text = textBox1.Text.Substring(e + 2);//●●●●●●●●乃作為權訂每行字數之參考，故可刪去
+            //if (countWordsLenPerLinePara(se) == wordsPerLinePara && se.Replace("●", "") == "") textBox1.Text = textBox1.Text.Substring(e + 2);
             if (wordsPerLinePara == -1)
             {
                 wordsPerLinePara = l;

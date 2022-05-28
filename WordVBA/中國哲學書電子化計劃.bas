@@ -80,6 +80,7 @@ Do While rng.Find.Execute("*")
                 Set rngP = d.Range(s, s)
                 rng.Delete
                 Do Until rngP.Next = "<"
+                    If rngP.start = 0 Then GoTo NextOne
                     rngP.move wdCharacter, -1
                 Loop
                 rngP.move
@@ -87,6 +88,7 @@ Do While rng.Find.Execute("*")
             End If
         End If
     End If
+NextOne:
     Set rng = d.Range(e, d.Range.End)
 Loop
 d.Range.Cut
@@ -106,6 +108,18 @@ DoEvents
 SendKeys "^v"
 SendKeys "{tab 2}~"
 End Sub
+
+Sub 轉成黑豆以作行字數長度判斷用()
+Dim p As Paragraph, a, i As Byte, cntr As Byte
+Set p = Selection.Paragraphs(1)
+cntr = p.Range.Characters.Count - 1
+For i = 1 To cntr
+    Set a = p.Range.Characters(i)
+    If a.Text <> Chr(13) Then a.Text = "●"
+Next i
+p.Range.Cut
+End Sub
+
 Sub 清除所有符號_分段注文符號例外()
 Dim f, i As Integer
 f = Array("。", "」", Chr(-24152), "：", "，", "；", _
