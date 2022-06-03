@@ -1337,6 +1337,7 @@ namespace WindowsFormsApp1
 
         private void notes_a_line()
         {//Alt + Shift + 6 小注文不換行
+            textBox1.DeselectAll();
             string xSel = textBox1.SelectedText, x = textBox1.Text; int s = textBox1.SelectionStart;
             undoRecord();
             stopUndoRec = true;
@@ -2930,12 +2931,20 @@ namespace WindowsFormsApp1
             //https://bbs.csdn.net/topics/350010591
             //https://zhidao.baidu.com/question/628222381668604284.html
             var m = ModifierKeys;
+            #region 同時按下 Ctrl Shift
             if ((m & Keys.Control) == Keys.Control
                 && (m & Keys.Shift) == Keys.Shift
                 && e.KeyCode == Keys.C)
             {
                 e.Handled = true;
                 Clipboard.SetText(textBox1.Text);
+                return;
+            }
+            if ((m & Keys.Control) == Keys.Control
+                && (m & Keys.Shift) == Keys.Shift && e.KeyCode == Keys.Divide)
+            {//按下 Ctrl + Shift + / （Divide）  切換 check_the_adjacent_pages 值
+                e.Handled = true;
+                toggleCheck_the_adjacent_pages();
                 return;
             }
 
@@ -2947,6 +2956,7 @@ namespace WindowsFormsApp1
                 return;
 
             }
+            #endregion 
 
             #region 按下Ctrl鍵
             if (Control.ModifierKeys == Keys.Control)
@@ -3014,36 +3024,14 @@ namespace WindowsFormsApp1
                 if (e.KeyCode == Keys.Multiply)
                 {//按下 Ctrl + * 設定為將《四部叢刊》資料庫所複製的文本在表單得到焦點時直接貼到 textBox1 的末尾,或反設定
                     e.Handled = true;
-                    if (!autoPasteFromSBCKwhether)
-                    {
-                        new SoundPlayer(@"C:\Windows\Media\Speech On.wav").Play(); autoPasteFromSBCKwhether = true;
-                    }
-                    else
-                    {
-                        autoPasteFromSBCKwhether = false; new SoundPlayer(@"C:\Windows\Media\Speech Off.wav").Play();
-                    }
+                    toggleAutoPasteFromSBCKwhether();
                     return;
                 }
 
                 if (e.KeyCode == Keys.Divide)
-                {//按下 Ctrl + / (Divide) 切換 check_the_adjacent_pages 值
+                {//按下 Ctrl + / （Divide） 切換自動連續輸入功能
                     e.Handled = true;
-                    if (!check_the_adjacent_pages)
-                    {
-                        check_the_adjacent_pages = true; new SoundPlayer(@"C:\Windows\Media\Speech On.wav").Play();
-                        if (MessageBox.Show("是否先檢查文本先前是否曾編輯過？" + Environment.NewLine +
-                            "要檢查的話，請先複製其文本，再按確定（ok）按鈕", "", MessageBoxButtons.OKCancel
-                            , MessageBoxIcon.Question, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly) == DialogResult.OK)
-                        {
-                            runWordMacro("checkEditingOfPreviousVersion");
-                        }
-
-                    }
-                    else
-                    {
-                        check_the_adjacent_pages = false; new SoundPlayer(@"C:\Windows\Media\Speech Off.wav").Play();
-                    }
-                    autoPasteFromSBCKwhether = false;
+                    toggleAutoPastetoQuickEdit();
                     return;
                 }
 
@@ -3115,7 +3103,7 @@ namespace WindowsFormsApp1
             }//以上 按下Alt鍵
             #endregion
 
-
+            #region 單一鍵
             if (ModifierKeys == Keys.None)
             {//按下單一鍵
                 if (e.KeyCode == Keys.F5)
@@ -3150,6 +3138,54 @@ namespace WindowsFormsApp1
                     //}
                 }
             }//以上 按下單一鍵
+            #endregion
+        }
+
+        private void toggleCheck_the_adjacent_pages()
+        {
+            if (!check_the_adjacent_pages)
+            {
+                check_the_adjacent_pages = true; new SoundPlayer(@"C:\Windows\Media\Speech On.wav").Play();
+                if (MessageBox.Show("是否先檢查文本先前是否曾編輯過？" + Environment.NewLine +
+                    "要檢查的話，請先複製其文本，再按確定（ok）按鈕", "", MessageBoxButtons.OKCancel
+                    , MessageBoxIcon.Question, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly) == DialogResult.OK)
+                {
+                    runWordMacro("checkEditingOfPreviousVersion");
+                }
+
+            }
+            else
+            {
+                check_the_adjacent_pages = false; new SoundPlayer(@"C:\Windows\Media\Speech Off.wav").Play();
+            }
+            autoPasteFromSBCKwhether = false;
+        }
+
+        private void toggleAutoPasteFromSBCKwhether()
+        {
+            if (!autoPasteFromSBCKwhether)
+            {
+                new SoundPlayer(@"C:\Windows\Media\Speech On.wav").Play(); autoPasteFromSBCKwhether = true;
+            }
+            else
+            {
+                autoPasteFromSBCKwhether = false; new SoundPlayer(@"C:\Windows\Media\Speech Off.wav").Play();
+            }
+            return;
+        }
+
+        private void toggleAutoPastetoQuickEdit()
+        {
+            if (!autoPastetoQuickEdit)
+            {
+                autoPastetoQuickEdit = true; autoPasteFromSBCKwhether = false;
+                new SoundPlayer(@"C:\Windows\Media\Speech On.wav").Play();
+            }
+            else
+            {
+                new SoundPlayer(@"C:\Windows\Media\Speech Off.wav").Play();
+                autoPastetoQuickEdit = false;
+            }
         }
 
         [DllImport("user32")]
@@ -3785,7 +3821,10 @@ namespace WindowsFormsApp1
             if (textBox1.TextLength < 100)
             {
                 string clpTxt = Clipboard.GetText();
-                if (clpTxt.IndexOf("<scanbegin file=") > -1 && clpTxt.IndexOf(" page=") > -1) runWordMacro("中國哲學書電子化計劃.清除頁前的分段符號");
+                if (clpTxt.Length > 500)
+                {
+                    if (clpTxt.IndexOf("<scanbegin file=") > -1 && clpTxt.IndexOf(" page=") > -1) runWordMacro("中國哲學書電子化計劃.清除頁前的分段符號");
+                }
             }
         }
 

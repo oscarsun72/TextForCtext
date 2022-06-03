@@ -87,7 +87,9 @@ Alt + F1 ：切換 textbox1 之字型： 切換支援 CJK - Ext 擴充字集的�
 
 按下 Ctrl + * （Multiply）設定為將《四部叢刊》資料庫所複製的文本在表單得到焦點時直接貼到 textBox1 的末尾,或反設定
 
-按下 Ctrl + / （Divide） 切換 check_the_adjacent_pages 值
+按下 Ctrl + / （Divide） 切換自動連續輸入功能
+
+按下 Ctrl + Shift + / （Divide）  切換 check_the_adjacent_pages 值
 
 Ctrl + Shift + t 同Chrome瀏覽器 --還原最近關閉的頁籤
 
