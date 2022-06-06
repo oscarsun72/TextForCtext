@@ -21,7 +21,7 @@ namespace WindowsFormsApp1
         readonly string dropBoxPathIncldBackSlash;
         readonly Size textBox1SizeToForm;
         //string[] CJKBiggestSet = new string[]{ "HanaMinB", "KaiXinSongB", "TH-Tshyn-P1" };
-        string[] CJKBiggestSet = { "HanaMinB", "KaiXinSongB", "TH-Tshyn-P1", "HanaMinA" };
+        string[] CJKBiggestSet = { "HanaMinB", "KaiXinSongB", "TH-Tshyn-P1", "HanaMinA", "Plangothic P1", "Plangothic P2" };
         Color button2BackColorDefault;
         bool insertMode = true, check_the_adjacent_pages = false;
 
@@ -1019,6 +1019,7 @@ namespace WindowsFormsApp1
                 }
                 if (e.KeyCode == Keys.D8)
                 {//Alt + 8 : 鍵入 「　　*」
+
                     e.Handled = true;
                     insertWords("　　*", textBox1.Text);
                     return;
@@ -4204,25 +4205,30 @@ namespace WindowsFormsApp1
 
             if (bookID != previousBookID || previousBookID == 0)
             {
-                resetBooksPagesFeatures();
-
-                new SoundPlayer(@"C:\Windows\Media\Windows Exclamation.wav").Play();
-                //https://www.facebook.com/oscarsun72/posts/4780524142058682
-                //messagebox topmost
-                if (MessageBox.Show("auto paste to Ctext Quick Edit textBox ?", "", MessageBoxButtons.OKCancel
+                new SoundPlayer(@"C:\Windows\Media\Windows Notify Messaging.wav").Play();
+                if (bookID - previousBookID > 1) if (MessageBox.Show("是否更新頁面每行字數及每頁行數等資訊？", "", MessageBoxButtons.OKCancel
                         , MessageBoxIcon.Question, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly) == DialogResult.OK)
+                        resetBooksPagesFeatures();
+
+                if (autoPastetoQuickEdit == false)
                 {
-                    autoPastetoQuickEdit = true; autoPasteFromSBCKwhether = false;
-                    if (MessageBox.Show("是否先檢查文本先前是否曾編輯過？" + Environment.NewLine +
-                        "要檢查的話，請先複製其文本，再按確定（ok）按鈕", "", MessageBoxButtons.OKCancel
-                        , MessageBoxIcon.Question, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly) == DialogResult.OK)
+                    new SoundPlayer(@"C:\Windows\Media\Windows Exclamation.wav").Play();
+                    //https://www.facebook.com/oscarsun72/posts/4780524142058682
+                    //messagebox topmost
+                    if (MessageBox.Show("AUTO paste to Ctext Quick Edit textBox ?", "", MessageBoxButtons.OKCancel
+                            , MessageBoxIcon.Question, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly) == DialogResult.OK)
                     {
-                        runWordMacro("checkEditingOfPreviousVersion");
+                        autoPastetoQuickEdit = true; autoPasteFromSBCKwhether = false;
+                        //if (MessageBox.Show("是否先檢查文本先前是否曾編輯過？" + Environment.NewLine +
+                        //    "要檢查的話，請先複製其文本，再按確定（ok）按鈕", "", MessageBoxButtons.OKCancel
+                        //    , MessageBoxIcon.Question, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly) == DialogResult.OK)
+                        //{
+                        //    runWordMacro("checkEditingOfPreviousVersion");
+                        //}
                     }
+                    else
+                        autoPastetoQuickEdit = false;
                 }
-                else
-                    autoPastetoQuickEdit = false;
-
             }
             previousBookID = bookID;
         }

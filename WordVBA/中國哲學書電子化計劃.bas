@@ -39,9 +39,12 @@ End Sub
 Sub 清除頁前的分段符號()
 Dim d As Document, rng As Range, e As Long
 Set d = Documents.Add
+DoEvents
+將星號前的分段符號移置前段之末 d
 Set rng = d.Range
 'd.ActiveWindow.Visible = True
-rng.Paste
+'rng.Paste
+rng.Find.ClearFormatting
 Do While rng.Find.Execute("<scanbegin ") '<scanbegin file="80564" page="13" y="4" />
     rng.MoveEndUntil ">"
     rng.MoveEnd
@@ -58,16 +61,18 @@ Do While rng.Find.Execute("<scanbegin ") '<scanbegin file="80564" page="13" y="4
 Loop
 d.Range.Cut
 d.Close wdDoNotSaveChanges
-'playSound 1
-pastetoEditBox "清除頁前的分段符號"
+playSound 1
+DoEvents
+pastetoEditBox "將星號前的分段符號移置前段之末 & 清除頁前的分段符號"
 
 End Sub
 
-Sub 將星號前的分段符號移置前段之末() '20220522
-Dim d As Document, rng As Range, e As Long, s As Long, rngP As Range
-Set d = Documents.Add
+Sub 將星號前的分段符號移置前段之末(d As Document) '20220522
+Dim rng As Range, e As Long, s As Long, rngP As Range
+'d As Document,Set d = Documents.Add
 Set rng = d.Range
 rng.Paste
+rng.Find.ClearFormatting
 Do While rng.Find.Execute("*")
     e = rng.End
     If rng.Previous = Chr(13) Then
@@ -91,17 +96,34 @@ Do While rng.Find.Execute("*")
 NextOne:
     Set rng = d.Range(e, d.Range.End)
 Loop
-d.Range.Cut
-d.Close wdDoNotSaveChanges
-'playSound 1
-pastetoEditBox "將星號前的分段符號移置前段之末"
+'d.Range.Cut
+'d.Close wdDoNotSaveChanges
+playSound 1
+'pastetoEditBox "將星號前的分段符號移置前段之末"
 
+End Sub
+
+Sub 將每頁間的分段符號清除()
+Dim d As Document, rng As Range, s As Long, e As Long, rngCheck As Range
+Const pageStart As String = "<scanbegin file="
+Const pageEnd As String = "<scanend file="
+Set d = ActiveDocument
+Set rng = d.Range(Len(pageStart), d.Range.End)
+Do While rng.Find.Execute(pageStart)
+    e = rng.start: s = e - 2
+    Set rngCheck = d.Range(s, e)
+    rngCheck.Select
+    If rngCheck.Previous = ">" Then rngCheck.Delete
+    rng.SetRange rng.End + 1, d.Range.End
+Loop
 End Sub
 
 Sub pastetoEditBox(Description_from_ClipBoard As String)
 word.Application.WindowState = wdWindowStateMinimize
 AppActivate "google chrome"
+DoEvents
 SendKeys "^v"
+DoEvents: DoEvents: DoEvents
 SendKeys "{tab}"
 SystemSetup.ClipboardPutIn Description_from_ClipBoard
 DoEvents
