@@ -212,6 +212,8 @@ Alt + 滑鼠左鍵 ： 更新最後的備份頁文本
 
 Ctrl+ 滑鼠左鍵：在插入點後分行分段（原為切換RichTextBox用）
 
+Ctrl+ 滑鼠右鍵：切換RichTextBox用
+
 Ctrl+ Alt + 滑鼠左鍵：將插入點後的分行分段清除
 
 

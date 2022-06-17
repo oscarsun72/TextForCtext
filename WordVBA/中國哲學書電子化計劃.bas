@@ -41,6 +41,7 @@ Dim d As Document, rng As Range, e As Long
 Set d = Documents.Add
 DoEvents
 將星號前的分段符號移置前段之末 d
+DoEvents
 Set rng = d.Range
 'd.ActiveWindow.Visible = True
 'rng.Paste
@@ -59,7 +60,9 @@ Do While rng.Find.Execute("<scanbegin ") '<scanbegin file="80564" page="13" y="4
     rng.SetRange rng.End, d.Range.End
     End If
 Loop
+DoEvents
 d.Range.Cut
+DoEvents
 d.Close wdDoNotSaveChanges
 playSound 1
 DoEvents
@@ -67,7 +70,7 @@ pastetoEditBox "將星號前的分段符號移置前段之末 & 清除頁前的分段符號"
 
 End Sub
 
-Sub 將星號前的分段符號移置前段之末(d As Document) '20220522
+Sub 將星號前的分段符號移置前段之末(ByRef d As Document) '20220522
 Dim rng As Range, e As Long, s As Long, rngP As Range
 'd As Document,Set d = Documents.Add
 Set rng = d.Range
@@ -75,21 +78,23 @@ rng.Paste
 rng.Find.ClearFormatting
 Do While rng.Find.Execute("*")
     e = rng.End
-    If rng.Previous = Chr(13) Then
-        Set rng = rng.Previous
+    If rng.start > 0 Then
         If rng.Previous = Chr(13) Then
             Set rng = rng.Previous
-            If rng.Previous = ">" Then
-                rng.SetRange rng.start, e - 1
-                s = rng.start
-                Set rngP = d.Range(s, s)
-                rng.Delete
-                Do Until rngP.Next = "<"
-                    If rngP.start = 0 Then GoTo NextOne
-                    rngP.move wdCharacter, -1
-                Loop
-                rngP.move
-                rngP.InsertAfter Chr(13) & Chr(13)
+            If rng.Previous = Chr(13) Then
+                Set rng = rng.Previous
+                If rng.Previous = ">" Then
+                    rng.SetRange rng.start, e - 1
+                    s = rng.start
+                    Set rngP = d.Range(s, s)
+                    rng.Delete
+                    Do Until rngP.Next = "<"
+                        If rngP.start = 0 Then GoTo NextOne
+                        rngP.move wdCharacter, -1
+                    Loop
+                    rngP.move
+                    rngP.InsertAfter Chr(13) & Chr(13)
+                End If
             End If
         End If
     End If
@@ -125,9 +130,10 @@ DoEvents
 SendKeys "^v"
 DoEvents: DoEvents: DoEvents
 SendKeys "{tab}"
-SystemSetup.ClipboardPutIn Description_from_ClipBoard
+'SystemSetup.ClipboardPutIn Description_from_ClipBoard
 DoEvents
-SendKeys "^v"
+'SendKeys "^v"
+SendKeys Description_from_ClipBoard
 SendKeys "{tab 2}~"
 End Sub
 

@@ -3678,6 +3678,7 @@ namespace WindowsFormsApp1
                 int s = textBox1.SelectionStart; string xSl = textBox1.Text.Substring(s, 2);
                 if (xSl != Environment.NewLine) s = textBox1.Text.IndexOf(Environment.NewLine, s);
                 textBox1.Select(s, 2);
+                undoRecord();
                 textBox1.SelectedText = "";
                 return;
 
@@ -3698,6 +3699,8 @@ namespace WindowsFormsApp1
                 //switchRichTextBox1();
                 return;
             }
+            if (ModifierKeys == Keys.Control && e.Button == MouseButtons.Right)
+            { switchRichTextBox1(); return; }
             if (m == Keys.Alt && e.Button == MouseButtons.Left)
             {
                 if (textBox1.SelectionLength == predictEndofPageSelectedTextLen
@@ -3738,9 +3741,12 @@ namespace WindowsFormsApp1
 
         private void richTextBox1_MouseDown(object sender, MouseEventArgs e)
         {
-            richTextBox1.Size = textBox1.Size;
-            richTextBox1.Location = textBox1.Location;
-            richTextBox1.Visible = false;
+            if (ModifierKeys == Keys.Control && e.Button == MouseButtons.Right)
+            {
+                richTextBox1.Size = textBox1.Size;
+                richTextBox1.Location = textBox1.Location;
+                richTextBox1.Visible = false;
+            }
         }
 
         private void textBox2_MouseDown(object sender, MouseEventArgs e)
@@ -4113,8 +4119,11 @@ namespace WindowsFormsApp1
 
         private void textBox1_MouseDoubleClick(object sender, MouseEventArgs e)
         {
-            pageTextEndPosition = textBox1.SelectionStart + textBox1.SelectionLength;//重設 pageTextEndPosition 值
-            keyDownCtrlAdd(false);
+            if (ModifierKeys == Keys.None)
+            {
+                pageTextEndPosition = textBox1.SelectionStart + textBox1.SelectionLength;//重設 pageTextEndPosition 值
+                keyDownCtrlAdd(false);
+            }
         }
 
         private void Form1_MouseDoubleClick(object sender, MouseEventArgs e)
@@ -4206,8 +4215,8 @@ namespace WindowsFormsApp1
             if (bookID != previousBookID || previousBookID == 0)
             {
                 new SoundPlayer(@"C:\Windows\Media\Windows Notify Messaging.wav").Play();
-                if (bookID - previousBookID > 1) if (MessageBox.Show("是否更新頁面每行字數及每頁行數等資訊？", "", MessageBoxButtons.OKCancel
-                        , MessageBoxIcon.Question, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly) == DialogResult.OK)
+                if (Math.Abs(bookID - previousBookID) > 1) if (MessageBox.Show("是否更新頁面每行字數及每頁行數等資訊？", "", MessageBoxButtons.OKCancel
+                       , MessageBoxIcon.Question, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly) == DialogResult.OK)
                         resetBooksPagesFeatures();
 
                 if (autoPastetoQuickEdit == false)
