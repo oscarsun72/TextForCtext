@@ -3306,6 +3306,7 @@ namespace WindowsFormsApp1
             switch (runName)
             {
                 case "中國哲學書電子化計劃.清除頁前的分段符號":
+                    Application.DoEvents();
                     Clipboard.Clear();
                     break;
                 default:

@@ -37,7 +37,7 @@ SendKeys "^v"
 
 End Sub
 Sub 清除頁前的分段符號()
-Dim d As Document, rng As Range, e As Long
+Dim d As Document, rng As Range, e As Long, s As Long
 Set d = Documents.Add
 DoEvents
 將星號前的分段符號移置前段之末 d
@@ -60,6 +60,28 @@ Do While rng.Find.Execute("<scanbegin ") '<scanbegin file="80564" page="13" y="4
     rng.SetRange rng.End, d.Range.End
     End If
 Loop
+
+Set rng = d.Range
+rng.Find.ClearFormatting
+Do While rng.Find.Execute("<scanend file=") ', , , , , , True, wdFindStop)
+    s = rng.start
+    rng.MoveEndUntil ">"
+    rng.MoveEnd
+'    rng.Select
+    rng.SetRange rng.End, rng.End + 2
+    If rng.Text = Chr(13) & Chr(13) Then
+'        e = rng.End
+'        rng.Select
+        rng.Cut
+        rng.SetRange s, s
+        rng.Paste
+        Set rng = d.Range(e, d.Range.End)
+    Else
+        rng.SetRange rng.End, d.Range.End
+    End If
+Loop
+
+
 DoEvents
 d.Range.Cut
 DoEvents
