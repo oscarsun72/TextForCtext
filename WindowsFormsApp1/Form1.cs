@@ -2370,7 +2370,7 @@ namespace WindowsFormsApp1
         }
         #endregion//清除空行
         */
-        tryAgain:
+        //tryAgain:
             if (pageTextEndPosition == 0) pageTextEndPosition = s + l;
             else { s = pageTextEndPosition; l = 0; }
             if (s < 0 || s + l > x.Length) s = textBox1.SelectionStart;
@@ -3306,6 +3306,7 @@ namespace WindowsFormsApp1
             switch (runName)
             {
                 case "中國哲學書電子化計劃.清除頁前的分段符號":
+                    Clipboard.Clear();
                     break;
                 default:
                     textBox1.Text = Clipboard.GetText();

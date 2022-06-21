@@ -1142,6 +1142,8 @@ DoEvents
 AppActivate "google chrome"
 SendKeys "^v~"
 DoEvents
+SendKeys "^l^c"
+DoEvents
 SendKeys "{F5}"
 End Sub
 

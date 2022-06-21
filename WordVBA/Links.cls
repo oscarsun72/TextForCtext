@@ -155,7 +155,10 @@ trimLinks = lnk
 End Function
 
 Function trimLinks_http_Dicts_toAddZhuYin_RevisedMoeEdu(url As String, ZhuYin As Variant) As String
-Dim i As Byte, ay, e '國語辭典
+Dim i As Byte, ay, e, s As Integer, urlO As String '國語辭典
+Const ordr As String = "#order"
+urlO = url
+s = InStr(urlO, ordr)
 ay = Array("&", "#")
     For Each e In ay
         If InStr(url, e) Then url = Left(url, InStr(url, e) - 1)
@@ -169,10 +172,14 @@ If Not IsNull(ZhuYin) Then
             i = i + 1
             If InStr(ZhuYin, e) Then Exit For
         Next
-        If i <= UBound(ay) + 1 Then trimLinks_http_Dicts_toAddZhuYin_RevisedMoeEdu = url & "#order" & i
+        If i <= UBound(ay) + 1 Then trimLinks_http_Dicts_toAddZhuYin_RevisedMoeEdu = url & ordr & i
         Beep
     Else
-        trimLinks_http_Dicts_toAddZhuYin_RevisedMoeEdu = url
+        If s > 0 Then
+            trimLinks_http_Dicts_toAddZhuYin_RevisedMoeEdu = url & Mid(urlO, s)
+        Else
+            trimLinks_http_Dicts_toAddZhuYin_RevisedMoeEdu = url
+        End If
     End If
 End If
 End Function
@@ -247,35 +254,35 @@ If VBA.InStr(u, "http") Then Exit Function
 checkURL_single = True
 End Function
 Function updateURL國學大師(d As word.Document)
-Dim lnk As String, hpLnk As word.Hyperlink
+Dim lnk As String, hplnk As word.Hyperlink
 If d.Hyperlinks.Count = 0 Then Exit Function
-For Each hpLnk In d.Hyperlinks
-    lnk = hpLnk.Address
+For Each hplnk In d.Hyperlinks
+    lnk = hplnk.Address
     If VBA.InStr(lnk, "guoxuedashi.com") = 0 Then
-        hpLnk.Address = VBA.Replace(lnk, ".com", ".net", 1, 1)
+        hplnk.Address = VBA.Replace(lnk, ".com", ".net", 1, 1)
     End If
-Next hpLnk
+Next hplnk
 End Function
 
 Function updateURL國語辭典(d As word.Document)
 On Error GoTo eH
-Dim db As New dBase, cnt As New ADODB.Connection, lnk As String, hpLnk As word.Hyperlink, rst As New ADODB.Recordset
+Dim db As New dBase, cnt As New ADODB.Connection, lnk As String, hplnk As word.Hyperlink, rst As New ADODB.Recordset
 Dim id As Long, chm As String, w As String
 'Set d = ActiveDocument
 If d.Hyperlinks.Count = 0 Then Exit Function
 db.cnt_重編國語辭典修訂本_資料庫 cnt
-For Each hpLnk In d.Hyperlinks
-    lnk = hpLnk.Address
+For Each hplnk In d.Hyperlinks
+    lnk = hplnk.Address
     If VBA.InStr(lnk, "/dictView.jsp?ID=") = 0 Then
         If VBA.InStr(lnk, "dict.revised.moe.edu.tw") Then
 1
             rst.Open "select url,urlv5 from " & db.重編國語辭典修訂本_資料庫_總表Name & " where instr(urlv5 ,""" & lnk & """)>0", cnt, adOpenKeyset
             If rst.RecordCount = 1 Then
-                hpLnk.Address = Me.trimLinks(rst.Fields(0).Value)
+                hplnk.Address = Me.trimLinks(rst.Fields(0).Value)
             ElseIf rst.RecordCount > 1 Then
-                hpLnk.Range.Select
+                hplnk.Range.Select
                 If InStr(Selection, "ㄩㄝˋ") > 0 And InStr(lnk, "9168") > 0 Then
-                    hpLnk.Address = "https://dict.revised.moe.edu.tw/dictView.jsp?ID=11765#order3"
+                    hplnk.Address = "https://dict.revised.moe.edu.tw/dictView.jsp?ID=11765#order3"
                 Else
                     SystemSetup.playSound 2
 '                    Stop
@@ -283,10 +290,10 @@ For Each hpLnk In d.Hyperlinks
                         MsgBox "url is duplicated ! plz check out", vbExclamation
                         GoTo endS
                     End If
-                    hpLnk.Address = "https://dict.revised.moe.edu.tw/dictView.jsp?ID=9168#order2"
+                    hplnk.Address = "https://dict.revised.moe.edu.tw/dictView.jsp?ID=9168#order2"
                 End If
             ElseIf rst.RecordCount = 0 Then
-                hpLnk.Range.Select
+                hplnk.Range.Select
                 'SystemSetup.playSound 12
                 'MsgBox "not found!", vbExclamation
                 Beep
@@ -316,7 +323,7 @@ For Each hpLnk In d.Hyperlinks
                             If VBA.IsNull(rst.Fields(1).Value) Then rst.Fields(1).Value = lnk
                             If VBA.IsNull(rst.Fields(2).Value) Then rst.Fields(2).Value = id
                             rst.Update
-                            hpLnk.Address = chm
+                            hplnk.Address = chm
                         Else
                             SystemSetup.playSound 3
                             'Stop
@@ -335,7 +342,7 @@ For Each hpLnk In d.Hyperlinks
 '            Beep
         End If
     End If
-Next hpLnk
+Next hplnk
 endS:
 If rst.State <> adStateClosed Then rst.Close
 If cnt.State <> adStateClosed Then cnt.Close

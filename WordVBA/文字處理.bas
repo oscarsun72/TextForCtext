@@ -2094,7 +2094,7 @@ If Selection.Type = wdSelectionIP Then Exit Sub
         End If
     End With
     If InStr(ActiveDocument.Name, "排印") Then
-        ActiveDocument.save
+        ActiveDocument.Save
 '        setOX
 '        OX.WinActivate "Microsoft Excel"
         'Dim e As New Excel.Application
@@ -2125,7 +2125,7 @@ If Selection.Type = wdSelectionIP Then Exit Sub
                 Else
                     .Cells(r, 5) = 1
                 End If
-                .ActiveWorkbook.save
+                .ActiveWorkbook.Save
                 .Cells(.ActiveCell.Row + 1, .ActiveCell.Column).Activate
             End With
         End With
@@ -2990,7 +2990,7 @@ End If
     cnt.Open "Provider=Microsoft.ACE.OLEDB.12.0;Data Source=" & cntStr
 'Exit Sub
 'cntt:
-    rst.Open "select 注音一式,釋義,url,ID from [《重編國語辭典修訂本》 總表] where strcomp(字詞名,""" & x & """)=0 order by 注音一式", cnt, adOpenKeyset, adLockOptimistic
+    rst.Open "select 注音一式,釋義,url,ID,多音排序 from [《重編國語辭典修訂本》 總表] where strcomp(字詞名,""" & x & """)=0 order by 多音排序", cnt, adOpenKeyset, adLockOptimistic
     If rst.RecordCount > 0 Then
         GoSub list
     Else
@@ -3048,7 +3048,7 @@ notFound:
                     GoTo 2
                 Else
                     rst.Close
-                    rst.Open "select 注音一式,釋義,url,ID from [《重編國語辭典修訂本》 總表] where instr(字詞名,""" & x & """)>0 order by 注音一式", cnt, adOpenKeyset, adLockOptimistic
+                    rst.Open "select 注音一式,釋義,url,ID,多音排序 from [《重編國語辭典修訂本》 總表] where instr(字詞名,""" & x & """)>0 order by 多音排序", cnt, adOpenKeyset, adLockOptimistic
                     Selection.Copy
                     If rst.RecordCount > 0 Then
                         Beep

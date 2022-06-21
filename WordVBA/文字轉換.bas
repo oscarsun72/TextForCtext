@@ -241,7 +241,7 @@ rngZhuYin.SetRange rng.End, rng.End
 db.cnt_重編國語辭典修訂本_資料庫 cnt
 
 For Each a In rng.Characters
-    rst.Open "select 注音一式  from [《重編國語辭典修訂本》 總表] where strcomp(字詞名,""" & a & """)=0 order by 注音一式", cnt, adOpenKeyset
+    rst.Open "select 注音一式,多音排序  from [《重編國語辭典修訂本》 總表] where strcomp(字詞名,""" & a & """)=0 order by 多音排序", cnt, adOpenKeyset
     Do Until rst.EOF
         zy = zy & rst.Fields(0).Value & "，"
         rst.MoveNext
