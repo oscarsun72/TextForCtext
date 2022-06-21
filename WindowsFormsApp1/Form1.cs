@@ -3305,9 +3305,7 @@ namespace WindowsFormsApp1
             appWord.Run(runName);
             switch (runName)
             {
-                case "中國哲學書電子化計劃.清除頁前的分段符號":
-                    Application.DoEvents();
-                    Clipboard.Clear();
+                case "中國哲學書電子化計劃.清除頁前的分段符號":                    
                     break;
                 default:
                     textBox1.Text = Clipboard.GetText();
@@ -3832,7 +3830,15 @@ namespace WindowsFormsApp1
                 string clpTxt = Clipboard.GetText();
                 if (clpTxt.Length > 500)
                 {
-                    if (clpTxt.IndexOf("<scanbegin file=") > -1 && clpTxt.IndexOf(" page=") > -1) runWordMacro("中國哲學書電子化計劃.清除頁前的分段符號");
+                    if (clpTxt.IndexOf("<scanbegin file=") > -1 && clpTxt.IndexOf(" page=") > -1)
+                    {
+                        runWordMacro("中國哲學書電子化計劃.清除頁前的分段符號");
+                        Application.DoEvents();
+                        ////Task.Delay(waitTimeforappActivateByName).Wait();
+                        //Task.Delay(550).Wait();
+                        Clipboard.Clear();
+
+                    }
                 }
             }
         }
