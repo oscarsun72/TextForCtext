@@ -1939,7 +1939,41 @@ namespace WindowsFormsApp1
                     i++;
                 else if (i == 0 && (openBracketS > closeBracketS ||
                     (openBracketS == -1 && closeBracketS > -1 && closeBracketS < item.Length - 2))) //第一行正、注夾雜
-                    i += 2;
+                {
+                    if (openBracketS > 2)
+                    {
+                        i += 2;
+                    }
+                    else
+                    {
+                        if (openBracketS == -1) i += 2;
+                        else if (openBracketS == 1)
+                        {//目前分行分段於有標點者切割有誤差，權以此暫補丁
+                            if (omitStr.IndexOf(item.Substring(0, 1)) == -1)
+                            {
+                                i += 2;
+                            }
+                            else i++;
+                        }
+                        else if (openBracketS == 2)
+                        {
+                            if (omitStr.IndexOf(item.Substring(0, 1)) == -1) i += 2;
+                            else if (omitStr.IndexOf(item.Substring(1, 1)) == -1)
+                            {//目前分行分段於有標點者切割有誤差，權以此暫補丁
+                                i += 2;
+                            }
+                            else
+                            {
+                                i++;
+                            }
+                        }
+                    }
+
+                    if (item.LastIndexOf("}}") > item.LastIndexOf("{{"))
+                        openNote = false;
+                    else
+                        openNote = true;
+                }
                 else if (i == 0 && item.IndexOf("{{") == -1 && item.IndexOf("}}") == -1)
                 {
                     string x = linesParasPage[i + 1];
@@ -1986,9 +2020,13 @@ namespace WindowsFormsApp1
                     }
                     else
                     {
-                        if (openBracketS == 1 && omitStr.IndexOf(item.Substring(0, 1)) == -1)
+                        if (openBracketS == 1)
                         {//目前分行分段於有標點者切割有誤差，權以此暫補丁
-                            i += 2;
+                            if (omitStr.IndexOf(item.Substring(0, 1)) == -1)
+                            {
+                                i += 2;
+                            }
+                            else i++;
                         }
                         if (openBracketS == 2)
                         {
@@ -2510,11 +2548,40 @@ namespace WindowsFormsApp1
                 else if (i == 0 && ((openBracketS > closeBracketS) ||
                                 (openBracketS == -1 && closeBracketS > -1 && closeBracketS < e - 2))) //第一行正、注夾雜
                 {
-                    i += 2;
-                    if (openBracketS > closeBracketS)
+                    if (openBracketS > 2)
                     {
-                        openNote = true;
+                        i += 2;
                     }
+                    else
+                    {
+                        if (openBracketS == -1) i += 2;
+                        else if (openBracketS == 1)
+                        {//目前分行分段於有標點者切割有誤差，權以此暫補丁
+                            if (omitStr.IndexOf(item.Substring(0, 1)) == -1)
+                            {
+                                i += 2;
+                            }
+                            else i++;
+                        }
+                        else if (openBracketS == 2)
+                        {
+                            if (omitStr.IndexOf(item.Substring(0, 1)) == -1) i += 2;
+                            else if (omitStr.IndexOf(item.Substring(1, 1)) == -1)
+                            {//目前分行分段於有標點者切割有誤差，權以此暫補丁
+                                i += 2;
+                            }
+                            else
+                            {
+                                i++;
+                            }
+                        }
+                    }
+
+                    if (item.LastIndexOf("}}") > item.LastIndexOf("{{"))
+                        openNote = false;
+                    else
+                        openNote = true;
+
                 }
                 else if (i == 0 & x.IndexOf("}}") < x.IndexOf("{{") && x.IndexOf("}}") > e)
                 { i++; openNote = true; }//第一段/行是純注文                
@@ -2557,9 +2624,13 @@ namespace WindowsFormsApp1
                     }
                     else
                     {
-                        if (openBracketS == 1 && omitStr.IndexOf(item.Substring(0, 1)) == -1)
+                        if (openBracketS == 1)
                         {//目前分行分段於有標點者切割有誤差，權以此暫補丁
-                            i += 2;
+                            if (omitStr.IndexOf(item.Substring(0, 1)) == -1)
+                            {
+                                i += 2;
+                            }
+                            else i++;
                         }
                         if (openBracketS == 2)
                         {
