@@ -200,7 +200,7 @@ Do While rng.Find.Execute("<")
 Loop
 rng.Document.Range.Cut
 rng.Document.Close wdDoNotSaveChanges
-pastetoEditBox "與《四部叢刊》文本不同，圖文脫鉤。另依《維基文庫》本輔以末學自製軟件TextForCtext對應錄入。感恩感恩　南無阿彌陀佛"
+pastetoEditBox "與原本書圖不合，圖文脫鉤。另依《維基文庫》本輔以末學自製軟件TextForCtext對應錄入。感恩感恩　南無阿彌陀佛"
 word.Application.ScreenUpdating = True
 End Sub
 

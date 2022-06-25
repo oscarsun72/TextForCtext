@@ -129,6 +129,7 @@ namespace WindowsFormsApp1
         private void button1_Click(object sender, EventArgs e)
         {
             splitLineByFristLen();
+            textBox1.Focus();
         }
 
         private void splitLineByFristLen()
@@ -1784,7 +1785,7 @@ namespace WindowsFormsApp1
                 i = slTxt.IndexOf(Environment.NewLine, i + 1);
             }
             undoRecord(); caretPositionRecord(); stopUndoRec = true;
-            if (s == 0 || textBox1.Text.Substring(s - 2, 2) == Environment.NewLine)
+            if (s == 0 || s > 2 && textBox1.Text.Substring(s - 2, 2) == Environment.NewLine)
             {
 
                 textBox1.SelectedText = "　" + textBox1.SelectedText.Replace(Environment.NewLine, Environment.NewLine + "　");
@@ -1948,17 +1949,24 @@ namespace WindowsFormsApp1
                 }
                 else if (openBracketS == 0 && closeBracketS == -1)//注文（開始）
                 { i++; openNote = true; }
-                else if (openBracketS == -1 && closeBracketS == item.Length - 2)
-                { i++; openNote = false; }
-                else if (openBracketS == -1 && closeBracketS > -1)
-                {
-                    if (closeBracketS == item.Length - 2 || item.Substring(item.Length - 5) == "}}<p>")//純注文（末截）
-                    { i++; openNote = false; }
+                else if (openBracketS == -1 && (closeBracketS == item.Length - 2 || item.Substring(item.Length - 5) == "}}<p>"))
+                { i++; openNote = false; }//純注文（末截）
+                else if (openBracketS == -1 && closeBracketS > -1 && closeBracketS < item.Length - 2)
+                {//正注夾雜注文結束
+                    { i += 2; openNote = false; }
                 }
                 else if (openBracketS > -1 && item.IndexOf("{{", openBracketS + 2) > -1)//正注夾雜
-                { i += 2; }// openNote = false; }
+                {
+                    i += 2;
+                    if (item.LastIndexOf("}}") < item.LastIndexOf("{{")) openNote = true;
+                    else openNote = false;
+                }
                 else if (openBracketS > -1 && closeBracketS > -1 && closeBracketS < item.Length - 2)//正注夾雜
-                { i += 2; }//openNote = false; }
+                {
+                    i += 2;
+                    if (item.LastIndexOf("}}") < item.LastIndexOf("{{")) openNote = true;
+                    else openNote = false;
+                }
 
                 //無{{}}標記：
                 else if (openBracketS == -1 && closeBracketS == -1)
@@ -1972,7 +1980,29 @@ namespace WindowsFormsApp1
                 //《維基文庫》正注文夾雜
                 else if (openBracketS > 0)//正注夾雜
                 {
-                    i += 2;
+                    if (openBracketS > 2)
+                    {
+                        i += 2;
+                    }
+                    else
+                    {
+                        if (openBracketS == 1 && omitStr.IndexOf(item.Substring(0, 1)) == -1)
+                        {//目前分行分段於有標點者切割有誤差，權以此暫補丁
+                            i += 2;
+                        }
+                        if (openBracketS == 2)
+                        {
+                            if (omitStr.IndexOf(item.Substring(0, 1)) == -1) i += 2;
+                            else if (omitStr.IndexOf(item.Substring(1, 1)) == -1)
+                            {//目前分行分段於有標點者切割有誤差，權以此暫補丁
+                                i += 2;
+                            }
+                            else
+                            {
+                                i++;
+                            }
+                        }
+                    }
                     if (closeBracketS == -1) openNote = true;
                     else
                     {
@@ -2355,22 +2385,22 @@ namespace WindowsFormsApp1
                 x = textBox1.Text;
                 s = textBox1.SelectionStart; l = textBox1.SelectionLength;
             }
-        #endregion//跨頁小注處理
+            #endregion//跨頁小注處理
 
-        /*
-        #region 清除空行//前面處理跨頁小注時須有newline 判斷，故不可寫在其前而執行清除
-        if (pageTextEndPosition != 0) s = pageTextEndPosition;
-        while (s != textBox1.TextLength && s + 2 < textBox1.TextLength && textBox1.Text.Substring(s, 2) == Environment.NewLine)
-        {
-            if (textBox1.Text.Substring(s, 2) == Environment.NewLine)
+            /*
+            #region 清除空行//前面處理跨頁小注時須有newline 判斷，故不可寫在其前而執行清除
+            if (pageTextEndPosition != 0) s = pageTextEndPosition;
+            while (s != textBox1.TextLength && s + 2 < textBox1.TextLength && textBox1.Text.Substring(s, 2) == Environment.NewLine)
             {
-                textBox1.Select(s, 2); textBox1.SelectedText = "";
-                s = textBox1.SelectionStart;
+                if (textBox1.Text.Substring(s, 2) == Environment.NewLine)
+                {
+                    textBox1.Select(s, 2); textBox1.SelectedText = "";
+                    s = textBox1.SelectionStart;
+                }
             }
-        }
-        #endregion//清除空行
-        */
-        //tryAgain:
+            #endregion//清除空行
+            */
+            //tryAgain:
             if (pageTextEndPosition == 0) pageTextEndPosition = s + l;
             else { s = pageTextEndPosition; l = 0; }
             if (s < 0 || s + l > x.Length) s = textBox1.SelectionStart;
@@ -2479,22 +2509,35 @@ namespace WindowsFormsApp1
                     i++;
                 else if (i == 0 && ((openBracketS > closeBracketS) ||
                                 (openBracketS == -1 && closeBracketS > -1 && closeBracketS < e - 2))) //第一行正、注夾雜
+                {
                     i += 2;
+                    if (openBracketS > closeBracketS)
+                    {
+                        openNote = true;
+                    }
+                }
                 else if (i == 0 & x.IndexOf("}}") < x.IndexOf("{{") && x.IndexOf("}}") > e)
                 { i++; openNote = true; }//第一段/行是純注文                
                 else if (openBracketS == 0 && closeBracketS == -1)//注文（開始）
                 { i++; openNote = true; }
-                else if (openBracketS == -1 && closeBracketS == item.Length - 2)
-                { i++; openNote = false; }
-                else if (openBracketS == -1 && closeBracketS > -1)
-                {
-                    if (closeBracketS == item.Length - 2 || item.Substring(item.Length - 5) == "}}<p>")//純注文（末截）
-                    { i++; openNote = false; }
+                else if (openBracketS == -1 && (closeBracketS == item.Length - 2 || item.Substring(item.Length - 5) == "}}<p>"))
+                { i++; openNote = false; }//純注文（末截）
+                else if (openBracketS == -1 && closeBracketS > -1 && closeBracketS < item.Length - 2)
+                {//正注夾雜注文結束
+                    { i += 2; openNote = false; }
                 }
                 else if (openBracketS > -1 && item.IndexOf("{{", openBracketS + 2) > -1)//正注夾雜
-                { i += 2; }// openNote = false; }
+                {
+                    i += 2;
+                    if (item.LastIndexOf("}}") < item.LastIndexOf("{{")) openNote = true;
+                    else openNote = false;
+                }
                 else if (openBracketS > -1 && closeBracketS > -1 && closeBracketS < item.Length - 2)//正注夾雜
-                { i += 2; }//openNote = false; }
+                {
+                    i += 2;
+                    if (item.LastIndexOf("}}") < item.LastIndexOf("{{")) openNote = true;
+                    else openNote = false;
+                }
 
                 //無{{}}標記：
                 else if (openBracketS == -1 && closeBracketS == -1)
@@ -2508,7 +2551,29 @@ namespace WindowsFormsApp1
                 //《維基文庫》正注文夾雜
                 else if (openBracketS > 0)//正注夾雜
                 {
-                    i += 2;
+                    if (openBracketS > 2)
+                    {
+                        i += 2;
+                    }
+                    else
+                    {
+                        if (openBracketS == 1 && omitStr.IndexOf(item.Substring(0, 1)) == -1)
+                        {//目前分行分段於有標點者切割有誤差，權以此暫補丁
+                            i += 2;
+                        }
+                        if (openBracketS == 2)
+                        {
+                            if (omitStr.IndexOf(item.Substring(0, 1)) == -1) i += 2;
+                            else if (omitStr.IndexOf(item.Substring(1, 1)) == -1)
+                            {//目前分行分段於有標點者切割有誤差，權以此暫補丁
+                                i += 2;
+                            }
+                            else
+                            {
+                                i++;
+                            }
+                        }
+                    }
                     if (closeBracketS == -1) openNote = true;
                     else
                     {
@@ -2517,6 +2582,7 @@ namespace WindowsFormsApp1
                         else
                             openNote = true;
                     }
+
                 }
                 //else if (openBracketS > 0 && closeBracketS == -1) { i += 2; openNote = true; }
                 else if (openBracketS == -1 && closeBracketS > -1 && closeBracketS < item.Length - 2) { i += 2; openNote = false; }
@@ -2957,7 +3023,7 @@ namespace WindowsFormsApp1
                 return;
 
             }
-            #endregion 
+            #endregion
 
             #region 按下Ctrl鍵
             if (Control.ModifierKeys == Keys.Control)
@@ -3271,13 +3337,13 @@ namespace WindowsFormsApp1
             appActivateByName();
             if (edit > -1)
             {//編輯才執行，瀏覽則省略
-                //Task.Delay(500).Wait(); //2200
-                //Task.Delay(1900).Wait(); //2200
-                //Task.Delay(650).Wait(); //目前疾速是650，而穩定是700，乃至1100、1900、2200，看網速
+             //Task.Delay(500).Wait(); //2200
+             //Task.Delay(1900).Wait(); //2200
+             //Task.Delay(650).Wait(); //目前疾速是650，而穩定是700，乃至1100、1900、2200，看網速
                 Task.Delay(waitTimeforappActivateByName).Wait();
                 //SendKeys.Send("{Tab 24}");
                 SendKeys.Send("{Tab}"); //("{Tab 24}");
-                //要尾綴「#editor」如是格式的才能只按一個tab就入文字框中 ： https://ctext.org/library.pl?if=gb&file=77367&page=59&editwiki=415472#editor
+                                        //要尾綴「#editor」如是格式的才能只按一個tab就入文字框中 ： https://ctext.org/library.pl?if=gb&file=77367&page=59&editwiki=415472#editor
                 Task.Delay(200).Wait();//200
                 SendKeys.Send("^a");
                 if (!check_the_adjacent_pages)
@@ -3305,9 +3371,13 @@ namespace WindowsFormsApp1
             appWord.Run(runName);
             switch (runName)
             {
-                case "中國哲學書電子化計劃.清除頁前的分段符號":                    
+                case "中國哲學書電子化計劃.清除頁前的分段符號":
                     break;
                 default:
+                    if (runName == "漢籍電子文獻資料庫文本整理_以轉貼到中國哲學書電子化計劃")
+                    {
+                        saveText();
+                    }
                     textBox1.Text = Clipboard.GetText();
                     textBox1.Select(0, 0);
                     textBox1.ScrollToCaret();
