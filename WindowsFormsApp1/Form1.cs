@@ -3374,11 +3374,11 @@ namespace WindowsFormsApp1
                 case "中國哲學書電子化計劃.清除頁前的分段符號":
                     break;
                 default:
+                    textBox1.Text = Clipboard.GetText();
                     if (runName == "漢籍電子文獻資料庫文本整理_以轉貼到中國哲學書電子化計劃")
                     {
                         saveText();
                     }
-                    textBox1.Text = Clipboard.GetText();
                     textBox1.Select(0, 0);
                     textBox1.ScrollToCaret();
                     break;
