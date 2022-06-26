@@ -1309,6 +1309,7 @@ namespace WindowsFormsApp1
                         //undoRecord();
                         //stopUndoRec = true;
                         //textBox1.SelectedText = lk;
+                        if ("{}".IndexOf(lk) > -1) lk = "{" + lk + "}";
                         SendKeys.Send(lk);
                         //stopUndoRec = false;
                     }
