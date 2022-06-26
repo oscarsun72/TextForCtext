@@ -97,7 +97,7 @@ Ctrl + Shift + t 同Chrome瀏覽器 --還原最近關閉的頁籤
 
 Insert : 如 MS Word ，切換插入/取代文字模式（hit! 還原機制亦大致成功了。還原上限為50次。Ctrl + z ： 支援打字輸入時及取代文字時的還原。）
 
-Ctrl + q 或 Alt + q：據第一行(段)長度來將textBox1中的文本分行分段
+Ctrl + q 或 Alt + q：據游標（插入點）所在第1段的長度來將textBox1中的文本分行分段
 
 Ctrl + \ （反斜線） 或 Alt + \ ： 清除textBox1文本插入點後的分段
 
