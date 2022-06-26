@@ -2,6 +2,7 @@ Attribute VB_Name = "漢籍電子文獻資料庫"
 Option Explicit
 Sub 漢籍電子文獻資料庫文本整理_以轉貼到中國哲學書電子化計劃()
 文字處理.漢籍電子文獻資料庫文本整理_以轉貼到中國哲學書電子化計劃
+SystemSetup.playSound 2
 End Sub
 Sub 漢籍電子文獻資料庫文本整理_十三經注疏()
 文字處理.漢籍電子文獻資料庫文本整理_以轉貼到中國哲學書電子化計劃 True

@@ -161,7 +161,7 @@ End Select
 End Sub
 Sub 詞頻() '2002/11/10
 On Error GoTo 錯誤處理
-Dim Wd, wrong As Long
+Dim wd, wrong As Long
 Dim wrongmark As Integer ', wdct As Long
 Dim StTime As Date, EndTime As Date
 Dim hfspace As Long
@@ -177,18 +177,18 @@ Set rst = db.OpenRecordset("詞頻表", dbOpenDynaset)
 If rst.RecordCount > 0 Then db.Execute "DELETE * FROM 詞頻表"
 StTime = Time
 With ActiveDocument
-    For Each Wd In .words
+    For Each wd In .words
         wrong = wrong + 1 '檢視用!
 '        If wrong Mod 1000 = 0 Then Debug.Print wrong
 '        Debug.Print wd & vbCr & "--------"
-        If Len(Wd) > 1 And Right(Wd, 1) = " " Then
+        If Len(wd) > 1 And Right(wd, 1) = " " Then
             hfspace = hfspace + 1 '計次
             GoTo retry '字串右邊是半形空格時,AccessUpdate時會銷去,且於詞彙亦無意意,故不計!
         End If
-        rst.FindFirst "詞彙 like '" & Wd & "'"
+        rst.FindFirst "詞彙 like '" & wd & "'"
         If rst.NoMatch Then
             rst.AddNew
-            rst("詞彙") = Wd
+            rst("詞彙") = wd
 '            On Error GoTo 次數
             rst.Update
         Else
@@ -201,7 +201,7 @@ With ActiveDocument
 '        wdct = Selection.StoryLength
 '        instr(1+
 '        .Select
-retry:  Next Wd
+retry:  Next wd
 End With
 EndTime = Time
 AppActivate "Microsoft word"
@@ -1880,7 +1880,7 @@ End Select
 End Sub
 
 Function lEnglish() '英文大寫字母
-Dim Wd, wdct As Long, i As Byte
+Dim wd, wdct As Long, i As Byte
 For i = 65 To 90
     Debug.Print Chr(i) & vbCr
 Next
@@ -1997,30 +1997,30 @@ Next ch
 End Sub
 
 Sub 注腳符號置換() '2004/10/17
-Dim Wd As Range 'As Range 'Words物件即表一個Range物件,見線上說明!
+Dim wd As Range 'As Range 'Words物件即表一個Range物件,見線上說明!
 'Dim i As Long ' Integer
 '要先執行全形轉半形,這樣words才能正確判斷為數字
 全形數字轉換成半形數字
 With Selection '原以整份文件(ActiveDocument),今但以選取範圍整理,但因更改值而影響,作廢!
     If .Type = wdSelectionIP Then .Document.Select '如果沒有選取範圍(為插入點)則處理整份文件
     If .Document.path = "" Then
-        For Each Wd In .words
+        For Each wd In .words
             '要是數字且前後不能加﹝﹞或〔〕才執行！
-            If Not Wd.Text Like "﹝" And Not Wd.Text Like "〔" And Not Wd Like "[[]" And Not Wd Like "[]]" Then
-                If IsNumeric(Wd) Then
-                    If Wd.End = .Document.Content.StoryLength Or Wd.start = 0 Then GoTo w '文件之首尾另外處理
-                    If Not Wd.Previous Like "﹝" And Not Wd.Previous Like "〔" And Not Wd.Previous Like "[[]" _
-                        And Not Wd.Next Like "﹞" And Not Wd.Next Like "〕" And Not Wd.Next Like "]" Then
-w:                      If Wd <= 20 Then 'Arial Unicode MS[種類]裡"括號文數字"只有二十個!
-                            With Wd
+            If Not wd.Text Like "﹝" And Not wd.Text Like "〔" And Not wd Like "[[]" And Not wd Like "[]]" Then
+                If IsNumeric(wd) Then
+                    If wd.End = .Document.Content.StoryLength Or wd.start = 0 Then GoTo w '文件之首尾另外處理
+                    If Not wd.Previous Like "﹝" And Not wd.Previous Like "〔" And Not wd.Previous Like "[[]" _
+                        And Not wd.Next Like "﹞" And Not wd.Next Like "〕" And Not wd.Next Like "]" Then
+w:                      If wd <= 20 Then 'Arial Unicode MS[種類]裡"括號文數字"只有二十個!
+                            With wd
                                 '選取會改變Selection的範圍,故今取消!
 '                                .Select 'Words物件即表一個Range物件,見線上說明!
                                 .Font.Name = "Arial Unicode MS"
-                                Wd.Text = ChrW((9312 - 1) + Wd)
+                                wd.Text = ChrW((9312 - 1) + wd)
                             End With
                         Else '超過20號的註腳時
-                            With Wd
-                                .Text = "﹝" & Wd.Text & "﹞" '加括號
+                            With wd
+                                .Text = "﹝" & wd.Text & "﹞" '加括號
                             End With
         '                    MsgBox "有超過20號的註腳,不能執行！", vbCritical
         '                    Do Until .Undo(i) = False '還原直至不能還原（還原所有動作）
@@ -2861,6 +2861,7 @@ For i = 0 To UBound(rp)
     rng.Find.Execute rp(i), , , , , , , wdFindContinue, , rp(i + 1), wdReplaceAll
     i = i + 1
 Next i
+中國哲學書電子化計劃.維基文庫等欲直接抽換之字 d
 文字處理.書名號篇名號標注
 Beep
 If Not doNotCloseDoc Then
