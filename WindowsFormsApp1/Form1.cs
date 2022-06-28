@@ -762,7 +762,7 @@ namespace WindowsFormsApp1
                         }
                     }
                     stopUndoRec = true;
-                    insertWords(insX, x);
+                    insertWords(insX, textBox1, x);
                     //x = x.Substring(0, s) + insX + x.Substring(s);
                     //textBox1.Text = x;
                     //textBox1.SelectionStart = s + insX.Length;
@@ -995,7 +995,7 @@ namespace WindowsFormsApp1
 
                 if (e.KeyCode == Keys.OemPeriod)
                 {
-                    insertWords("·", textBox1.Text);
+                    insertWords("·", textBox1, textBox1.Text);
                     e.Handled = true;
                     return;
                 }
@@ -1015,14 +1015,14 @@ namespace WindowsFormsApp1
                 if (e.KeyCode == Keys.D6 || e.KeyCode == Keys.D7)
                 {//Alt + 6 、 Alt + 7 : 鍵入 「"}}"+ newline +"{{"」
                     e.Handled = true;
-                    insertWords("}}" + Environment.NewLine + "{{", textBox1.Text);
+                    insertWords("}}" + Environment.NewLine + "{{", textBox1, textBox1.Text);
                     return;
                 }
                 if (e.KeyCode == Keys.D8)
                 {//Alt + 8 : 鍵入 「　　*」
 
                     e.Handled = true;
-                    insertWords("　　*", textBox1.Text);
+                    insertWords("　　*", textBox1, textBox1.Text);
                     return;
                 }
 
@@ -1140,7 +1140,7 @@ namespace WindowsFormsApp1
                         insX = "》";
                     }
                 insert:
-                    insertWords(insX, x);
+                    insertWords(insX, textBox1, x);
                     return;
                 }
 
@@ -1170,7 +1170,7 @@ namespace WindowsFormsApp1
                 if (e.KeyCode == Keys.J)
                 {//Alt + j : 鍵入換行分段符號（newline）（同 Ctrl + j 的系統預設）
                     e.Handled = true;
-                    insertWords(Environment.NewLine, textBox1.Text);
+                    insertWords(Environment.NewLine, textBox1, textBox1.Text);
                     return;
                 }
 
@@ -1405,7 +1405,7 @@ namespace WindowsFormsApp1
             if (selX != "")
                 textBox1.SelectedText = selX.Replace("􏿽", "　");
             else
-                insertWords("　", textBox1.Text);
+                insertWords("　", textBox1, textBox1.Text);
             stopUndoRec = false;
         }
 
@@ -1821,9 +1821,9 @@ namespace WindowsFormsApp1
             }
             if (s + 2 >= x.Length || x.Substring(s, 2) == Environment.NewLine ||
                         x.Substring(s - 2 < 0 ? 0 : s - 2, 2) == Environment.NewLine)
-                insertWords("<p>", textBox1.Text);
+                insertWords("<p>", textBox1, textBox1.Text);
             else
-                insertWords("<p>" + Environment.NewLine, textBox1.Text);
+                insertWords("<p>" + Environment.NewLine, textBox1, textBox1.Text);
             if (x.Substring(s - 2 < 0 ? 0 : s - 2, 2) == Environment.NewLine)
             {
                 textBox1.SelectionStart = s + "<p>".Length; textBox1.ScrollToCaret();
@@ -2232,11 +2232,12 @@ namespace WindowsFormsApp1
             stopUndoRec = false;
             textBox1.Select(rs, rl); textBox1.ScrollToCaret();
         }
-        private void insertWords(string insX, string x = "")
+        private void insertWords(string insX, TextBox tBox, string x = "")
         {
             undoRecord();
             stopUndoRec = true;
-            textBox1.SelectedText = insX;
+            //textBox1.SelectedText = insX;
+            tBox.SelectedText = insX;
             stopUndoRec = false;
             //int s = textBox1.SelectionStart, l = textBox1.SelectionLength;
             //if (l == 0)                
@@ -3730,6 +3731,7 @@ namespace WindowsFormsApp1
                 textBox1.Select(s, 2);
             saveText();
             replaceWord(textBox1.SelectedText, textBox4.Text);
+            Clipboard.SetText(textBox4.Text);
             textBox4Resize();
             textBox4.Text = "";
             textBox1.Focus();
@@ -3760,6 +3762,7 @@ namespace WindowsFormsApp1
         {
             if (textBox4.Size == textBox4Size)
                 textBox4SizeLarger();
+            if (textBox1.SelectedText != "") Clipboard.SetText(textBox1.SelectedText);// textBox4.Text = textBox1.SelectedText;
             string rplsdWord = textBox1.SelectedText, x = textBox1.Text;
             int s = textBox1.SelectionStart, l = char.IsHighSurrogate(x.Substring(s, 1), 0) ? 2 : 1;
             if (rplsdWord == "" && insertMode == false)
@@ -3788,11 +3791,18 @@ namespace WindowsFormsApp1
 
         private void textBox4_KeyDown(object sender, KeyEventArgs e)
         {
+            Keys m = ModifierKeys;
             if (e.KeyCode == Keys.F2)
             {
+                e.Handled = true;
                 keyDownF2(textBox4);
                 return;
             }
+            if (m == Keys.Alt && e.KeyCode == Keys.D1)
+            {
+                insertWords("·", textBox4);
+            }
+
         }
         bool doNotLeaveTextBox2 = false;
         private void textBox2_KeyDown(object sender, KeyEventArgs e)

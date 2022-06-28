@@ -61,6 +61,8 @@ Do While rng.Find.Execute("<scanbegin ") '<scanbegin file="80564" page="13" y="4
     End If
 Loop
 
+playSound 1
+
 Set rng = d.Range
 rng.Find.ClearFormatting
 Do While rng.Find.Execute("<scanend file=") ', , , , , , True, wdFindStop)
