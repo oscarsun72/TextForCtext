@@ -3762,7 +3762,7 @@ namespace WindowsFormsApp1
         {
             if (textBox4.Size == textBox4Size)
                 textBox4SizeLarger();
-            if (textBox1.SelectedText != "") Clipboard.SetText(textBox1.SelectedText);// textBox4.Text = textBox1.SelectedText;
+            if (new StringInfo(textBox1.SelectedText).LengthInTextElements > 1) { Clipboard.SetText(textBox1.SelectedText); textBox4.Text = textBox1.SelectedText; textBox4.DeselectAll(); }
             string rplsdWord = textBox1.SelectedText, x = textBox1.Text;
             int s = textBox1.SelectionStart, l = char.IsHighSurrogate(x.Substring(s, 1), 0) ? 2 : 1;
             if (rplsdWord == "" && insertMode == false)
