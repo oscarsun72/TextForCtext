@@ -523,6 +523,7 @@ namespace WindowsFormsApp1
                     while (clr > -1 && x != "" && x.Length >= lng && x.Substring(clr + lng) != "")
                     {
                         x = x.Substring(clr + lng);
+                        if (x.Length < lng) break;
                         xClr = x.Substring(0, lng);
                         clr = xClr.IndexOf(rTxt[0]);
                     }
@@ -534,6 +535,7 @@ namespace WindowsFormsApp1
                 while (x.Substring(0, 2) == Environment.NewLine)
                 {
                     x = x.Substring(2);
+                    if (x.Length < 2) break;
                 }
             }
             #endregion//清除空行
@@ -1341,9 +1343,15 @@ namespace WindowsFormsApp1
         private void notes_a_line()
         {//Alt + Shift + 6 小注文不換行
             textBox1.DeselectAll();
-            string xSel = textBox1.SelectedText, x = textBox1.Text; int s = textBox1.SelectionStart;
+            string xSel = textBox1.SelectedText, x = textBox1.Text; int s = textBox1.SelectionStart; bool flg = false;
             undoRecord();
             stopUndoRec = true;
+            if (x.Substring(0, s).IndexOf("{{") == -1)
+            {
+                textBox1.Text = "{{" + x;//暫時補的「{{」
+                x = textBox1.Text;
+                s += 2; flg = true;
+            }
             #region expand the notes text to get it
             if (xSel == "")
             {
@@ -1363,7 +1371,10 @@ namespace WindowsFormsApp1
             int e = x.IndexOf("}", s), spaceCntr = 0;
             xSel = x.Substring(s, e - s);
             #region 如果末已綴有空格
-            while (xSel.Substring(xSel.Length - ++spaceCntr, 1) == "　") { }
+            if (xSel.Length > 0)
+            {
+                while (xSel.Substring(xSel.Length - ++spaceCntr, 1) == "　") { }
+            }
             spaceCntr--;
             #endregion //如果末已綴有空格
             StringInfo xSelInfo = new StringInfo(xSel.Substring(0, xSel.Length - spaceCntr));
@@ -1374,6 +1385,10 @@ namespace WindowsFormsApp1
             }
             textBox1.Select(s, e - s);
             textBox1.SelectedText = xSel;
+            if (flg)
+            {
+                textBox1.Text = textBox1.Text.Substring(2);//還原暫時補的「{{」
+            }
             stopUndoRec = false;
             //throw new NotImplementedException();
         }

@@ -203,7 +203,7 @@ Dim funame As String
 'FollowHyperlink "http://www.google.com.tw/search", , , , "q=" & Screen.ActiveControl.seltext, msoMethodGet
 If Selection.Type = wdSelectionNormal Then
     Selection.Copy
-    If ActiveDocument.Saved = False And ActiveDocument.path <> "" Then ActiveDocument.save: DoEvents
+    If ActiveDocument.Saved = False And ActiveDocument.path <> "" Then ActiveDocument.Save: DoEvents
     If Tasks.Exists("skqs professional version") Then
         Shell Replace(GetDefaultBrowserEXE, """%1", "http://www.google.com.tw/search?q=" & Selection)
     Else
@@ -267,9 +267,9 @@ a = VBA.Replace(a, "AppData\Roaming", "")
 取得使用者路徑_含反斜線 = a
 End Function
 Function GetClipboardText()
-Dim Clipboard As New MSForms.DataObject
-Clipboard.GetFromClipboard
-GetClipboardText = Clipboard.GetText
+Dim clipboard As New MSForms.DataObject
+clipboard.GetFromClipboard
+GetClipboardText = clipboard.GetText
 End Function
 
 Sub insertNowTime()
@@ -388,10 +388,10 @@ Function apicShowWindow(strClassName As String, strWindowName As String, lngStat
   SetForegroundWindow lngWnd 'https://zechs.taipei/?p=146
 End Function
 
-Sub Wait()
+Sub Wait(sec As Single)
 'http://vbcity.com/forums/t/81315.aspx
 Dim WaitDt As Date
-WaitDt = DateAdd("s", 3, Now())
+WaitDt = DateAdd("s", sec, Now())
 Do While Now < WaitDt
 Loop
 End Sub

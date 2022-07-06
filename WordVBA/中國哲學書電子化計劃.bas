@@ -152,7 +152,10 @@ word.Application.WindowState = wdWindowStateMinimize
 AppActivate "google chrome"
 DoEvents
 SendKeys "^v"
-DoEvents: DoEvents: DoEvents
+DoEvents ' DoEvents: DoEvents
+Beep
+SystemSetup.Wait 0.5
+DoEvents:
 SendKeys "{tab}"
 'SystemSetup.ClipboardPutIn Description_from_ClipBoard
 DoEvents

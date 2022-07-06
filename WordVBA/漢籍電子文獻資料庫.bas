@@ -1,10 +1,47 @@
 Attribute VB_Name = "漢籍電子文獻資料庫"
 Option Explicit
+Sub clearResultMarked()
+Dim a As Range, d As Document, rng As Range
+Set d = Documents.Add
+Set rng = d.Range
+With rng
+    .Paste
+    .Find.Font.Shading.BackgroundPatternColor = 65535
+    Do While .Find.Execute()
+        If Asc(.Text) > 13 Or Asc(.Text) < 0 Then
+            .Shading.BackgroundPatternColor = wdColorAutomatic
+            With .Font
+                .Color = 0
+                .Bold = 0
+            End With
+        End If
+        rng.SetRange rng.End, d.Range.End - 1
+    Loop
+    .Find.ClearFormatting
+End With
+
+'For Each a In d.Characters
+'    If a.Shading.BackgroundPatternColor = 65535 Then '<> wdColorAutomatic
+'        With a
+'            .Shading.BackgroundPatternColor = wdColorAutomatic
+'            With .Font
+'                .Color = 0
+'                .Bold = 0
+'            End With
+'        End With
+'    End If
+'Next a
+d.Range.Cut
+DoEvents
+End Sub
+
 Sub 漢籍電子文獻資料庫文本整理_以轉貼到中國哲學書電子化計劃()
+clearResultMarked
 文字處理.漢籍電子文獻資料庫文本整理_以轉貼到中國哲學書電子化計劃
 SystemSetup.playSound 2
 End Sub
 Sub 漢籍電子文獻資料庫文本整理_十三經注疏()
+clearResultMarked
 文字處理.漢籍電子文獻資料庫文本整理_以轉貼到中國哲學書電子化計劃 True
 漢籍電子文獻資料庫文本整理_十三經注疏_sub
 On Error Resume Next
