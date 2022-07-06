@@ -1999,8 +1999,8 @@ namespace WindowsFormsApp1
                 }
                 else if (openBracketS == 0 && closeBracketS == -1)//注文（開始）
                 { i++; openNote = true; }
-                else if (openBracketS == -1)
-                {
+                else if (openBracketS == -1 && openNote)
+                {//純注文（末截）
                     if (closeBracketS == item.Length - 2)
                     { i++; openNote = false; }
                     else if (item.Length > 4)
@@ -2023,7 +2023,7 @@ namespace WindowsFormsApp1
 
                         }
                     }
-                }//純注文（末截）
+                }
                 else if (openBracketS == -1 && closeBracketS > -1 && closeBracketS < item.Length - 2)
                 {//正注夾雜注文結束
                     { i += 2; openNote = false; }
@@ -2627,8 +2627,8 @@ namespace WindowsFormsApp1
                 { i++; openNote = true; }//第一段/行是純注文                
                 else if (openBracketS == 0 && closeBracketS == -1)//注文（開始）
                 { i++; openNote = true; }
-                else if (openBracketS == -1)
-                {
+                else if (openBracketS == -1 && openNote)
+                {//純注文（末截）
                     if (closeBracketS == item.Length - 2)
                     { i++; openNote = false; }
                     else if (item.Length > 4)
@@ -2651,7 +2651,7 @@ namespace WindowsFormsApp1
 
                         }
                     }
-                }//純注文（末截）
+                }
                 else if (openBracketS == -1 && closeBracketS > -1 && closeBracketS < item.Length - 2)
                 {//正注夾雜注文結束
                     { i += 2; openNote = false; }
@@ -4049,7 +4049,16 @@ namespace WindowsFormsApp1
                         Application.DoEvents();
                         ////Task.Delay(waitTimeforappActivateByName).Wait();
                         //Task.Delay(550).Wait();
-                        Clipboard.Clear();
+                        try
+                        {
+                            Clipboard.Clear();
+                        }
+                        catch (Exception)
+                        {
+                            Application.DoEvents();
+                            Clipboard.Clear();
+                            //throw;
+                        }
 
                     }
                 }
