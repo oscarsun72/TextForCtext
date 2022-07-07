@@ -660,6 +660,23 @@ namespace WindowsFormsApp1
                 {//Alt + Shift + 1 如宋詞中的換片空格，只將文中的空格轉成空白，其他如首綴前罝以明段落或標題者不轉換
                     e.Handled = true; SpacesBlanksInContext(); return;
                 }
+                if (e.KeyCode == Keys.D2)
+                {//Alt + Shift + 2 : 將選取區內的「<p>」取代為「|」 ，而「　」取代為「􏿽」並清除「*」且將無「|」前綴的分行符號加上「|」
+                    if (textBox1.SelectionLength == 0) return;
+                    undoRecord();stopUndoRec = true;
+                    e.Handled = true;
+                    int s = textBox1.SelectionStart;
+                    string xSel = textBox1.SelectedText;
+                    xSel = xSel.Replace("<p>", "|").Replace("　", "􏿽");
+                    if (xSel.IndexOf("*") > -1)
+                    {
+                        xSel = xSel.Replace("*", "");
+                        xSel = xSel.Replace(Environment.NewLine, "|" + Environment.NewLine).Replace("||", "|");
+                    }
+                    textBox1.SelectedText = xSel; textBox1.Select(s, xSel.Length);
+                    stopUndoRec = false;
+                    return;
+                }
                 if (e.KeyCode == Keys.D6)
                 {//Alt + Shift + 6 小注文不換行
                     e.Handled = true; notes_a_line(); return;
