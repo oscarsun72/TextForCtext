@@ -154,16 +154,16 @@ Next e
 trimLinks = lnk
 End Function
 
-Function trimLinks_http_Dicts_toAddZhuYin_RevisedMoeEdu(url As String, ZhuYin As Variant) As String
+Function trimLinks_http_Dicts_toAddZhuYin_RevisedMoeEdu(URL As String, ZhuYin As Variant) As String
 Dim i As Byte, ay, e, s As Integer, urlO As String '國語辭典
 Const ordr As String = "#order"
-urlO = url
+urlO = URL
 s = InStr(urlO, ordr)
 ay = Array("&", "#")
     For Each e In ay
-        If InStr(url, e) Then url = Left(url, InStr(url, e) - 1)
+        If InStr(URL, e) Then URL = Left(URL, InStr(URL, e) - 1)
     Next
-trimLinks_http_Dicts_toAddZhuYin_RevisedMoeEdu = url
+trimLinks_http_Dicts_toAddZhuYin_RevisedMoeEdu = URL
 
 ay = Array("一", "二", "三", "四", "五", "六", "七", "八", "九", "十", "十一", "十二")
 If Not IsNull(ZhuYin) Then
@@ -172,25 +172,25 @@ If Not IsNull(ZhuYin) Then
             i = i + 1
             If InStr(ZhuYin, e) Then Exit For
         Next
-        If i <= UBound(ay) + 1 Then trimLinks_http_Dicts_toAddZhuYin_RevisedMoeEdu = url & ordr & i
+        If i <= UBound(ay) + 1 Then trimLinks_http_Dicts_toAddZhuYin_RevisedMoeEdu = URL & ordr & i
         Beep
     Else
         If s > 0 Then
-            trimLinks_http_Dicts_toAddZhuYin_RevisedMoeEdu = url & Mid(urlO, s)
+            trimLinks_http_Dicts_toAddZhuYin_RevisedMoeEdu = URL & Mid(urlO, s)
         Else
-            trimLinks_http_Dicts_toAddZhuYin_RevisedMoeEdu = url
+            trimLinks_http_Dicts_toAddZhuYin_RevisedMoeEdu = URL
         End If
     End If
 End If
 End Function
 
-Function chkLinks_http_Dicts_toAddZhuYin(ByRef url As String, Optional w As String, Optional dictID, Optional ByRef id As Long, Optional ZhuYin As Variant) As Boolean
-If Not checkURL_single(url) Then Exit Function
+Function chkLinks_http_Dicts_toAddZhuYin(ByRef URL As String, Optional w As String, Optional dictID, Optional ByRef id As Long, Optional ZhuYin As Variant) As Boolean
+If Not checkURL_single(URL) Then Exit Function
 
 Dim rstUrl As New ADODB.Recordset, dictIDcrct As String, strAyUrlChk, i As Byte, cnt As New ADODB.Connection, db As New dBase, ur As UndoRecord
 db.cnt查字 cnt
 chkUrl:
-    rstUrl.Open "select url from dicturl where url=""" & url & """ and strcomp(word,""" & w & """)=0", cnt, adOpenKeyset
+    rstUrl.Open "select url from dicturl where url=""" & URL & """ and strcomp(word,""" & w & """)=0", cnt, adOpenKeyset
 '    Select Case dictID
 '        Case 1, 2 'one URL only one character
             If rstUrl.RecordCount > 0 Then Exit Function  'avoid repeated rec
@@ -201,15 +201,15 @@ chkUrl:
     strAyUrlChk = VBA.Split(rstUrl.Fields(0).Value, " ")
     For i = 0 To UBound(strAyUrlChk)
     'https://docs.microsoft.com/zh-tw/office/vba/Language/Reference/User-Interface-Help/this-array-is-fixed-or-temporarily-locked-error-10
-        If VBA.InStr(url, strAyUrlChk(i)) = 0 Then
+        If VBA.InStr(URL, strAyUrlChk(i)) = 0 Then
             dictIDcrct = InputBox("指定的字詞典有誤，請輸入正確的ID：國=1，異=2，字=3，詞=4" & vbCr & vbCr _
                     & "或檢查《國語辭典》的網址是否有誤。是否是以" & vbCr & vbCr & _
                     "「http://dict.revised.moe.edu.tw/cgi-bin/cbdic/gsweb.cgi?o=dcbdic&searchid=」開頭的網址", , dictID)
             If dictIDcrct = "" Then Exit Function
             If Left(dictIDcrct, 4) = "http" Then
-                url = dictIDcrct
+                URL = dictIDcrct
                 rstUrl.Close
-                trimLinks_http_Dicts_toAddZhuYin_RevisedMoeEdu url, ZhuYin
+                trimLinks_http_Dicts_toAddZhuYin_RevisedMoeEdu URL, ZhuYin
                 GoTo chkUrl
             End If
             dictID = CLng(dictIDcrct)
@@ -220,7 +220,7 @@ chkUrl:
 '            Combo4 = dictID
             chkLinks_http_Dicts_toAddZhuYin = True
             If dictID = 1 Then
-                dictIDcrct = url
+                dictIDcrct = URL
                 If InStr(dictIDcrct, "&") Then dictIDcrct = Left(dictIDcrct, InStr(dictIDcrct, "&") - 1)
                 If InStr(dictIDcrct, "#") Then dictIDcrct = Left(dictIDcrct, InStr(dictIDcrct, "#") - 1)
                 If rstUrl.State <> adStateClosed Then rstUrl.Close
@@ -244,12 +244,12 @@ chkUrl:
     Next i
 End Function
 
-Function checkURL_single(url As String) As Boolean
+Function checkURL_single(URL As String) As Boolean
 Dim u As String
-If Left(url, 4) <> "http" Then Exit Function
-If VBA.InStr(url, " ") Then Exit Function
-If url = "" Then Exit Function
-u = VBA.Replace(url, "http", "", 1, 1)
+If Left(URL, 4) <> "http" Then Exit Function
+If VBA.InStr(URL, " ") Then Exit Function
+If URL = "" Then Exit Function
+u = VBA.Replace(URL, "http", "", 1, 1)
 If VBA.InStr(u, "http") Then Exit Function
 checkURL_single = True
 End Function
@@ -262,6 +262,7 @@ For Each hplnk In d.Hyperlinks
         hplnk.Address = VBA.Replace(lnk, ".com", ".net", 1, 1)
     End If
 Next hplnk
+SystemSetup.playSound 2
 End Function
 
 Function updateURL國語辭典(d As word.Document)
@@ -347,6 +348,7 @@ endS:
 If rst.State <> adStateClosed Then rst.Close
 If cnt.State <> adStateClosed Then cnt.Close
 Set rst = Nothing: Set cnt = Nothing
+SystemSetup.playSound 2
 Exit Function
 eH:
 Select Case Err.Number
@@ -355,4 +357,21 @@ Select Case Err.Number
         'resume
 End Select
 End Function
+
+Sub updateURL漢語大詞典(d As word.Document)
+Const urlNew As String = "https://ivantsoi.myds.me/web/hydcd"
+Const URL As String = "https://ivantsoi.ddns.net/hydcd"
+Dim ul As String
+Dim lnk As Hyperlink
+Set d = ActiveDocument
+For Each lnk In d.Hyperlinks
+    ul = lnk.Address
+    If InStr(ul, URL) > 0 Then
+        ul = VBA.Replace(lnk, URL, urlNew)
+        lnk.Address = ul
+    End If
+Next lnk
+Set d = Nothing: Set lnk = Nothing
+SystemSetup.playSound 2
+End Sub
 
