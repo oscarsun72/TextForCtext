@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Win32;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
@@ -11,6 +12,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Web;
 using System.Windows.Forms;
 
 namespace WindowsFormsApp1
@@ -42,6 +44,7 @@ namespace WindowsFormsApp1
             dropBoxPathIncldBackSlash = Directory.Exists(dropBoxPathIncldBackSlash) ? dropBoxPathIncldBackSlash : dropBoxPathIncldBackSlash.Replace(@"C:\", @"A:\");
             button2BackColorDefault = button2.BackColor;
             textBox2BackColorDefault = textBox2.BackColor;
+            defaultBrowserName = GetWebBrowserName();
             var cjk = getCJKExtFontInstalled(CJKBiggestSet[FontFamilyNowIndex]);
             if (cjk != null)
             {
@@ -3575,20 +3578,97 @@ namespace WindowsFormsApp1
             textBox1.Text = File.ReadAllText(dropBoxPathIncldBackSlash + fName_to_Save_Txt);
         }
 
+        #region browsers 
+
+        public string GetWebBrowserName()//預設瀏覽器
+        {
+            //https://cybarlab.com/web-browser-name-in-c-sharp            
+            string WebBrowserName = string.Empty;
+            WebBrowserName = GetDefaultWebBrowserFilePath();
+            return WebBrowserName.Substring(WebBrowserName.LastIndexOf("\\") + 1, WebBrowserName.LastIndexOf(".exe") - WebBrowserName.LastIndexOf("\\") - 1);
+            /*
+            try
+            {
+                HttpContext context = HttpContext.Current;//https://docs.microsoft.com/zh-tw/dotnet/api/system.web.httpcontext.current?view=netframework-4.8&f1url=%3FappId%3DDev16IDEF1%26l%3DZH-TW%26k%3Dk(System.Web.HttpContext.Current)%3Bk(TargetFrameworkMoniker-.NETFramework%2CVersion%253Dv4.8)%3Bk(DevLang-csharp)%26rd%3Dtrue
+                WebBrowserName = HttpContext.Current.Request.Browser.Browser + " " + HttpContext.Current.Request.Browser.Version;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+            */
+            return WebBrowserName;
+        }
 
 
+        private string GetDefaultWebBrowserFilePath()//chrome-extension://lcghoajegeldpfkfaejegfobkapnemjl/sandbox.html?src=https%3A%2F%2Fwww.796t.com%2Fcontent%2F1546728863.html
+        {
+            //從登錄檔中讀取預設瀏覽器可執行檔案路徑
+            RegistryKey key = Registry.ClassesRoot.OpenSubKey(@"http\shell\open\command\");
+            string s = key.GetValue("").ToString();
+
+            //s就是你的預設瀏覽器，不過後面帶了引數，把它截去，不過需要注意的是：不同的瀏覽器後面的引數不一樣！
+            //"D:\Program Files (x86)\Google\Chrome\Application\chrome.exe" -- "%1"
+            return s.Substring(s.IndexOf(@":\") - 1, s.LastIndexOf(".exe") + 4 - 1);
+        }
+
+        /*
+        //https://www.programmerall.com/article/8861915667/
+        /// <summary>
+        /// Get the path of the default browser
+        /// </summary>
+        /// <returns></returns>
+        public String GetDefaultWebBrowserFilePath()
+        {
+            string _BrowserKey1 = @"Software\Clients\StartmenuInternet\";
+            string _BrowserKey2 = @"\shell\open\command";
+
+            RegistryKey _RegistryKey = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(_BrowserKey1, false);
+            if (_RegistryKey == null)
+                _RegistryKey = Registry.LocalMachine.OpenSubKey(_BrowserKey1, false);
+            String _Result = _RegistryKey.GetValue("").ToString();
+            _RegistryKey.Close();
+
+            _RegistryKey = Registry.LocalMachine.OpenSubKey(_BrowserKey1 + _Result + _BrowserKey2);
+            _Result = _RegistryKey.GetValue("").ToString();
+            _RegistryKey.Close();
+
+            if (_Result.Contains("\""))
+            {
+                _Result = _Result.TrimStart('"');
+                _Result = _Result.Substring(0, _Result.IndexOf('"'));
+            }
+            return _Result;
+        }
+        */
+
+        #endregion
 
         string processID;
         //https://stackoverflow.com/questions/58302052/c-microsoft-visualbasic-interaction-appactivate-no-effect
         [DllImport("user32.dll", SetLastError = true)]
         static extern void SwitchToThisWindow(IntPtr hWnd, bool turnOn);
 
+        string defaultBrowserName = string.Empty;//https://cybarlab.com/web-browser-name-in-c-sharp
         void appActivateByName()
         {
-            Process[] procsBrowser = Process.GetProcessesByName("chrome");
+        //Process[] procsBrowser = Process.GetProcessesByName("chrome");
+        tryagain:
+            Process[] procsBrowser = Process.GetProcessesByName(defaultBrowserName);
             if (procsBrowser.Length <= 0)
             {
-                MessageBox.Show("Chrome is not running");
+                //MessageBox.Show("Chrome is not running");
+                if (defaultBrowserName != "chrome")
+                {
+                    defaultBrowserName = "chrome";
+                    goto tryagain;
+                }
+                else if (defaultBrowserName != "brave")
+                {
+                    defaultBrowserName = "brave";
+                    goto tryagain;
+                }
+                MessageBox.Show(defaultBrowserName + " is not running");
             }
             foreach (Process proc in procsBrowser)
             {
