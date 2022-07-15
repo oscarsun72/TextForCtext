@@ -2617,7 +2617,7 @@ namespace WindowsFormsApp1
                 {
                     i++;
                     if (item == "}}<p>") openNote = false; else openNote = true;
-                }                
+                }
                 else if (i == 0 && ((openBracketS > closeBracketS) ||
                                 (openBracketS == -1 && closeBracketS > -1 && closeBracketS < e - 2))) //第一行正、注夾雜
                 {
@@ -2660,7 +2660,7 @@ namespace WindowsFormsApp1
                 //{ i++; openNote = true; }//第一段/行是純注文
                 else if (i == 0 && item.IndexOf("{{") == -1 && item.IndexOf("}}") == -1)
                 {
-                    string[] linesParasPage = x.Substring(0,e*3).Split(Environment.NewLine.ToArray(), StringSplitOptions.RemoveEmptyEntries);
+                    string[] linesParasPage = x.Substring(0, e * 3 <= x.Length ? e * 3 : x.Length).Split(Environment.NewLine.ToArray(), StringSplitOptions.RemoveEmptyEntries);
                     string xx = linesParasPage[i + 1];
                     if (xx.IndexOf("}}") > -1 && xx.IndexOf("{{") == -1)//&& x.IndexOf("}}") > e)
                     { i++; openNote = true; }//第一段/行是純注文
@@ -3606,7 +3606,7 @@ namespace WindowsFormsApp1
             {
                 throw new Exception(ex.Message);
             }
-            */            
+            */
         }
 
 
