@@ -165,7 +165,8 @@ SendKeys "{tab 2}~"
 End Sub
 
 Sub 轉成黑豆以作行字數長度判斷用()
-Dim p As Paragraph, a, i As Byte, cntr As Byte
+Dim p As Paragraph, a, i As Byte, cntr As Byte, ur As UndoRecord
+Set ur = SystemSetup.stopUndo("轉成黑豆以作行字數長度判斷用")
 Set p = Selection.Paragraphs(1)
 cntr = p.Range.Characters.Count - 1
 For i = 1 To cntr
@@ -173,6 +174,8 @@ For i = 1 To cntr
     If a.Text <> Chr(13) Then a.Text = "●"
 Next i
 p.Range.Cut
+SystemSetup.contiUndo ur
+Set ur = Nothing
 End Sub
 
 Sub 清除所有符號_分段注文符號例外()

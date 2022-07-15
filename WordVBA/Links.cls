@@ -109,7 +109,7 @@ typeTexts:
 '        If VBA.IsNull(x) Then
 '            If sT = wdSelectionIP Then Selection.Characters(1).Previous.Copy
 'rePt:
-'            If rst.RecordCount = 1 Then AppActivate "google chrome" 'https://docs.microsoft.com/zh-tw/sql/ado/reference/ado-api/absoluteposition-property-ado?view=sql-server-ver15
+'            If rst.RecordCount = 1 Then AppActivateDefaultBrowser 'https://docs.microsoft.com/zh-tw/sql/ado/reference/ado-api/absoluteposition-property-ado?view=sql-server-ver15
 '            x = InputBox("plz putin the url", , IIf(VBA.IsNull(rst.Fields(0).Value), "", rst.Fields(0).Value)) 'frmDict.add1URLTo1∞Íªy√„®Â(words)
 '            If x = "" Then GoTo endS
 '            If Left(x, 4) <> "http" Then GoTo rePt
@@ -266,7 +266,7 @@ SystemSetup.playSound 2
 End Function
 
 Function updateURL∞Íªy√„®Â(d As word.Document)
-On Error GoTo eH
+On Error GoTo eh
 Dim db As New dBase, cnt As New ADODB.Connection, lnk As String, hplnk As word.Hyperlink, rst As New ADODB.Recordset
 Dim id As Long, chm As String, w As String
 'Set d = ActiveDocument
@@ -350,7 +350,7 @@ If cnt.State <> adStateClosed Then cnt.Close
 Set rst = Nothing: Set cnt = Nothing
 SystemSetup.playSound 2
 Exit Function
-eH:
+eh:
 Select Case Err.Number
     Case Else
         MsgBox Err.Number & Err.Description

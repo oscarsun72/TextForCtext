@@ -345,7 +345,7 @@ End Sub
 
 
 Public Function appActivatedYet(exeName As String) As Boolean
-On Error GoTo eH:
+On Error GoTo eh:
       exeName = exeName & ".exe": exeName = StrConv(exeName, vbUpperCase)
 'https://stackoverflow.com/questions/44075292/determine-process-id-with-vba
 'https://stackoverflow.com/questions/26277214/vba-getting-program-names-and-task-id-of-running-processes
@@ -367,7 +367,7 @@ On Error GoTo eH:
     
     Set objProcessSet = Nothing
 Exit Function
-eH:
+eh:
 Select Case Err.Number
     Case 5 '程序呼叫或引數不正確
     Case Else
@@ -397,7 +397,7 @@ Loop
 End Sub
 
 Sub appActivateChrome()
-    AppActivate "google chrome" 'https://docs.microsoft.com/zh-tw/sql/ado/reference/ado-api/absoluteposition-property-ado?view=sql-server-ver15
+    AppActivateDefaultBrowser 'https://docs.microsoft.com/zh-tw/sql/ado/reference/ado-api/absoluteposition-property-ado?view=sql-server-ver15
         'try looking for both Chrome_WidgetWin_1 and Chrome_RenderWidgetHostHWND
 '    SystemSetup.apicShowWindow "Chrome_WidgetWin_1" _
         , vbNullString, 3 'https://zechs.taipei/?p=146
