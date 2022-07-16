@@ -2612,6 +2612,7 @@ namespace WindowsFormsApp1
                 if (e - s < 0 || s < 0) break;
                 item = x.Substring(s, e - s); if (item == "") return;
                 openBracketS = item.IndexOf("{{"); closeBracketS = item.IndexOf("}}");
+                string[] linesParasPage = x.Substring(0, e * 3 <= x.Length ? e * 3 : x.Length).Split(Environment.NewLine.ToArray(), StringSplitOptions.RemoveEmptyEntries);
 
                 if (item == "}}<p>" || (closeBracketS == -1 && openBracketS == 0 && item.Length < 5))//《維基文庫》純注文空及其前一行
                 {
@@ -2658,9 +2659,8 @@ namespace WindowsFormsApp1
                 }
                 //else if (i == 0 & x.IndexOf("}}") < (x.IndexOf("{{") == -1 ? x.Length : x.IndexOf("{{")) && x.IndexOf("}}") > e)
                 //{ i++; openNote = true; }//第一段/行是純注文
-                else if (i == 0 && item.IndexOf("{{") == -1 && item.IndexOf("}}") == -1)
+                else if (i == 0 && item.IndexOf("{{") == -1 && item.IndexOf("}}") == -1 && linesParasPage.Length > 1)
                 {
-                    string[] linesParasPage = x.Substring(0, e * 3 <= x.Length ? e * 3 : x.Length).Split(Environment.NewLine.ToArray(), StringSplitOptions.RemoveEmptyEntries);
                     string xx = linesParasPage[i + 1];
                     if (xx.IndexOf("}}") > -1 && xx.IndexOf("{{") == -1)//&& x.IndexOf("}}") > e)
                     { i++; openNote = true; }//第一段/行是純注文

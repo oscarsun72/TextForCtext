@@ -124,7 +124,9 @@ Sub AppActivateDefaultBrowser()
 Dim DefaultBrowserName As String
 On Error GoTo eh
 DefaultBrowserName = "google chrome"
+DoEvents
 AppActivate DefaultBrowserName
+DoEvents
 Exit Sub
 eh:
 DefaultBrowserName = "brave"
