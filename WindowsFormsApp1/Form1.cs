@@ -14,6 +14,9 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Web;
 using System.Windows.Forms;
+using ado = ADODB;//https://docs.microsoft.com/zh-tw/dotnet/csharp/language-reference/keywords/using-directive
+                  //引用adodb 要將其「內嵌 Interop 類型」（Embed Interop Type）屬性設為false（預設是true）才不會出現以下錯誤：  HResult=0x80131522  Message=無法從組件 載入類型 'ADODB.FieldsToInternalFieldsMarshaler'。
+                  //https://stackoverflow.com/questions/5666265/adodbcould-not-load-type-adodb-fieldstointernalfieldsmarshaler-from-assembly  https://blog.csdn.net/m15188153014/article/details/119895082
 
 namespace WindowsFormsApp1
 {
@@ -1358,6 +1361,13 @@ namespace WindowsFormsApp1
                     //F8 ： 加上篇名格式代碼
                     e.Handled = true;
                     keysTitleCode();
+                    return;
+                }
+                if (e.KeyCode == Keys.F11)
+                {
+                    //F11 : run replaceXdirrectly() 維基文庫等欲直接抽換之字
+                    e.Handled = true;
+                    replaceXdirrectly();
                     return;
                 }
             }//以上按下單一鍵
@@ -3592,10 +3602,49 @@ namespace WindowsFormsApp1
 
         public string GetWebBrowserName()//預設瀏覽器
         {
+
+            //https://stackoverflow.com/questions/13621467/how-to-find-default-web-browser-using-c
+            //Software\Microsoft\Windows\Shell\Associations\UrlAssociations\http\UserChoic
+            //電腦\HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\Shell\Associations\UrlAssociations\http\UserChoice            
+            RegistryKey userChoiceKey = Registry.CurrentUser.OpenSubKey(@"SOFTWARE\Microsoft\Windows\Shell\Associations\UrlAssociations\http\UserChoice");
+            object progIdValue = userChoiceKey.GetValue("Progid");
+            if (progIdValue == null)
+            {
+                MessageBox.Show("BrowserApplication.Unknown;");
+                return "chrome";
+                //browser = BrowserApplication.Unknown;
+                //break;
+            }
+            string progId = progIdValue.ToString();
+            progId = progId.Substring(0, progId.IndexOf(".") == -1 ? progId.Length : progId.IndexOf("."));
+            switch (progId)
+            {
+                case "IE.HTTP":
+                    return "iexplore";
+                case "FirefoxURL":
+                    return "firefox";
+                case "ChromeHTML":
+                    return "chrome";
+                case "BraveHTML":
+                    return "brave";
+                case "OperaStable":
+                    return "Opera";
+                case "SafariHTML":
+                    return "Safari";
+                case "AppXq0fevzme2pys62n3e0fbqa7peapykr8v":
+                    //browser = BrowserApplication.Edge;
+                    return "msedge";
+                default:
+                    return "chrome";
+            }
+
+            /*
             //https://cybarlab.com/web-browser-name-in-c-sharp            
             string WebBrowserName = string.Empty;
             WebBrowserName = GetDefaultWebBrowserFilePath();
             return WebBrowserName.Substring(WebBrowserName.LastIndexOf("\\") + 1, WebBrowserName.LastIndexOf(".exe") - WebBrowserName.LastIndexOf("\\") - 1);
+            */
+
             /*
             try
             {
@@ -3607,18 +3656,22 @@ namespace WindowsFormsApp1
                 throw new Exception(ex.Message);
             }
             */
+
+            //https://stackoverflow.com/questions/13621467/how-to-find-default-web-browser-using-c
         }
 
 
         private string GetDefaultWebBrowserFilePath()//chrome-extension://lcghoajegeldpfkfaejegfobkapnemjl/sandbox.html?src=https%3A%2F%2Fwww.796t.com%2Fcontent%2F1546728863.html
         {
+            //舊的如此，抓不準！廢罝不用！
             //從登錄檔中讀取預設瀏覽器可執行檔案路徑
             RegistryKey key = Registry.ClassesRoot.OpenSubKey(@"http\shell\open\command\");
             string s = key.GetValue("").ToString();
+            return s.Substring(s.IndexOf(@":\") - 1, s.LastIndexOf(".exe") + 4 - 1);
+
 
             //s就是你的預設瀏覽器，不過後面帶了引數，把它截去，不過需要注意的是：不同的瀏覽器後面的引數不一樣！
             //"D:\Program Files (x86)\Google\Chrome\Application\chrome.exe" -- "%1"
-            return s.Substring(s.IndexOf(@":\") - 1, s.LastIndexOf(".exe") + 4 - 1);
         }
 
         /*
@@ -4518,12 +4571,15 @@ namespace WindowsFormsApp1
                 string dropStr = e.Data.GetData(DataFormats.UnicodeText).ToString();
                 if (dropStr.IndexOf("ctext.org/library.pl?") > -1 && dropStr.Length < 80)
                 {
-                    if (dropStr.IndexOf("https://") == -1) dropStr = "https://" + dropStr;
-                    textBox3.Text = dropStr;
+                    //if (dropStr.IndexOf("https://") == -1) dropStr = "https://" + dropStr;
+                    //textBox3.Text = dropStr;
+                    //new SoundPlayer(@"C:\Windows\Media\recycle.wav").Play();
+                    textBox3_DragDrop(sender, e);
                 }
                 else
                 {
                     textBox1.Text = dropStr;//e.Data.GetData(DataFormats.UnicodeText).ToString();
+                    //textBox1.Text = e.Data.GetData(DataFormats.UnicodeText).ToString();
                     dragDrop = true;
                 }
             }
@@ -4655,6 +4711,32 @@ namespace WindowsFormsApp1
             this.Activate();
             autoPastetoQuickEdit = autoPastetoQuickEditMemo;
         }
+
+
+        void openDatabase(string dbNameIncludeExt, ref ado.Connection cnt)
+        {
+            string conStr = "Provider=Microsoft.ACE.OLEDB.12.0;Data Source = " + dropBoxPathIncldBackSlash + dbNameIncludeExt;
+            cnt.Open(conStr);
+        }
+
+        void replaceXdirrectly()
+        {// F11
+            string tx = textBox1.Text;
+            ado.Connection cnt = new ado.Connection();
+            openDatabase("查字.mdb", ref cnt);
+            ado.Recordset rst = new ado.Recordset();
+            rst.Open("select * from 維基文庫等欲直接抽換之字 where doit=true", cnt, ado.CursorTypeEnum.adOpenForwardOnly, ado.LockTypeEnum.adLockReadOnly);
+            while (!rst.EOF)
+            {
+                tx = tx.Replace(rst.Fields[0].Value.ToString(), rst.Fields[1].Value.ToString());
+                rst.MoveNext();
+            }
+            rst.Close(); cnt.Close();            
+            textBox1.Text = tx;
+            caretPositionRecall();
+        }
+
+
         void 歐陽文忠公集_集古錄跋尾校語專用()
         {//Alt + * //清除多餘的【】
             if (textBox1.SelectedText == "") return;

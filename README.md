@@ -175,6 +175,8 @@ F7 ： 每行/段前空一格
 
 F8 或 Alt + ` ： 加上篇名格式代碼
 
+F11 : run replaceXdirrectly() 維基文庫等欲直接抽換之字
+
 Ctrl + h ：移至 textBox4 準備取代文本文字
 
 Ctrl + F12 ：就 textBox1 所選之字串，執行「[查詢國語辭典.exe](https://github.com/oscarsun72/lookupChineseWords.git)」以查詢網路詞典
