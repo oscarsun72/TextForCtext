@@ -4514,9 +4514,18 @@ namespace WindowsFormsApp1
                 //e.Data.GetData(DataFormats.UnicodeText).ToString();
                 //textBox1.Text = textBox1.Text + s;
 
-                ////textBox1.Text = e.Data.GetData(DataFormats.Text).ToString();            
-                textBox1.Text = e.Data.GetData(DataFormats.UnicodeText).ToString();
-                dragDrop = true;
+                ////textBox1.Text = e.Data.GetData(DataFormats.Text).ToString();
+                string dropStr = e.Data.GetData(DataFormats.UnicodeText).ToString();
+                if (dropStr.IndexOf("ctext.org/library.pl?") > -1 && dropStr.Length < 80)
+                {
+                    if (dropStr.IndexOf("https://") == -1) dropStr = "https://" + dropStr;
+                    textBox3.Text = dropStr;
+                }
+                else
+                {
+                    textBox1.Text = dropStr;//e.Data.GetData(DataFormats.UnicodeText).ToString();
+                    dragDrop = true;
+                }
             }
             else if (ModifierKeys == Keys.Control)
             {
