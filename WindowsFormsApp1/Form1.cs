@@ -2277,9 +2277,13 @@ namespace WindowsFormsApp1
                         && !(se.IndexOf("{{") == 0 && se.IndexOf("}}") == -1))
                     //if (se.Substring(se.Length - 3, 3)!="<p>")
                     {
-                        textBox1.Select(e, 0);
-                        textBox1.SelectedText = "<p>";
-                        e += 3;
+                        string tx = textBox1.Text;
+                        if (isShortLine(tx.Substring(e + 2, tx.IndexOf(Environment.NewLine, e + 2) - e - 2)))
+                        {
+                            textBox1.Select(e, 0);
+                            textBox1.SelectedText = "<p>";
+                            e += 3;
+                        }
                     }
 
                 }
@@ -4712,6 +4716,25 @@ namespace WindowsFormsApp1
             autoPastetoQuickEdit = autoPastetoQuickEditMemo;
         }
 
+        bool isShortLine(string nextLine, string currentLine = "")
+        {
+            ado.Connection cnt = new ado.Connection();
+            ado.Recordset rst = new ado.Recordset();
+            openDatabase("查字.mdb", ref cnt);
+            rst.Open("select * from 每行字數判斷用 where condition=0", cnt, ado.CursorTypeEnum.adOpenKeyset, ado.LockTypeEnum.adLockReadOnly);
+            while (!rst.EOF)
+            {
+                if (nextLine.IndexOf(rst.Fields["term"].Value.ToString()) == 0)
+                {
+                    rst.Close(); cnt.Close();
+                    return false;
+                }
+                rst.MoveNext();
+            }
+            rst.Close(); cnt.Close();
+            return true;
+
+        }
 
         void openDatabase(string dbNameIncludeExt, ref ado.Connection cnt)
         {
@@ -4731,7 +4754,7 @@ namespace WindowsFormsApp1
                 tx = tx.Replace(rst.Fields[0].Value.ToString(), rst.Fields[1].Value.ToString());
                 rst.MoveNext();
             }
-            rst.Close(); cnt.Close();            
+            rst.Close(); cnt.Close();
             textBox1.Text = tx;
             caretPositionRecall();
         }
