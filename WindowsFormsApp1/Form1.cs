@@ -1991,6 +1991,16 @@ namespace WindowsFormsApp1
                     if (item == "}}<p>") openNote = false; else openNote = true;
                 }
 
+                //else if (i == 0 & x.IndexOf("}}") < (x.IndexOf("{{") == -1 ? x.Length : x.IndexOf("{{")) && x.IndexOf("}}") > e)
+                //{ i++; openNote = true; }//第一段/行是純注文                
+                else if (i == 0 && item.IndexOf("{{") == -1 && item.IndexOf("}}") == -1)
+                {
+                    string xx = linesParasPage[i + 1];
+                    if (xx.IndexOf("}}") > -1 && xx.IndexOf("{{") == -1)//&& x.IndexOf("}}") > e)
+                    { i++; openNote = true; }//第一段/行是純注文
+                    else { i += 2; openNote = false; }//第一段/行是純正文
+                }
+
                 else if (i == 0 && (openBracketS > closeBracketS ||
                     (openBracketS == -1 && closeBracketS > -1 && closeBracketS < item.Length - 2))) //第一行正、注夾雜
                 {
@@ -2028,15 +2038,7 @@ namespace WindowsFormsApp1
                     else
                         openNote = true;
                 }
-                //else if (i == 0 & x.IndexOf("}}") < (x.IndexOf("{{") == -1 ? x.Length : x.IndexOf("{{")) && x.IndexOf("}}") > e)
-                //{ i++; openNote = true; }//第一段/行是純注文                
-                else if (i == 0 && item.IndexOf("{{") == -1 && item.IndexOf("}}") == -1)
-                {
-                    string xx = linesParasPage[i + 1];
-                    if (xx.IndexOf("}}") > -1 && xx.IndexOf("{{") == -1)//&& x.IndexOf("}}") > e)
-                    { i++; openNote = true; }//第一段/行是純注文
-                    else { i += 2; openNote = false; }//第一段/行是純正文
-                }
+
                 else if (openBracketS == 0 && closeBracketS == -1)//注文（開始）
                 { i++; openNote = true; }
                 else if (openBracketS == -1 && openNote)
@@ -2244,6 +2246,7 @@ namespace WindowsFormsApp1
         }
         void paragraphMarkAccordingFirstOne()
         {
+            replaceXdirrectly();
             int s = 0, e = textBox1.Text.IndexOf(Environment.NewLine); if (e < 0) return;
             int rs = textBox1.SelectionStart, rl = textBox1.SelectionLength;
             string se = textBox1.Text.Substring(s, e - s);
@@ -2256,10 +2259,10 @@ namespace WindowsFormsApp1
                 wordsPerLinePara = l;
                 normalLineParaLength = wordsPerLinePara;
             }
-            undoRecord(); stopUndoRec = true;
             ado.Connection cnt = new ado.Connection();
             openDatabase("查字.mdb", ref cnt);
             ado.Recordset rst = new ado.Recordset(); rst.Open("select * from 每行字數判斷用 where condition=0", cnt, ado.CursorTypeEnum.adOpenKeyset, ado.LockTypeEnum.adLockReadOnly);
+            undoRecord(); stopUndoRec = true;
             while (e > -1)
             {
                 s = e + 2;
@@ -2286,13 +2289,14 @@ namespace WindowsFormsApp1
                             textBox1.Select(e, 0);
                             textBox1.SelectedText = "<p>";
                             e += 3;
-                            if ((int)rst.AbsolutePosition > 1 ) rst.MoveFirst();
+                            if ((int)rst.AbsolutePosition > 1) rst.MoveFirst();
                         }
                     }
 
                 }
             }
             stopUndoRec = false;
+            new SoundPlayer(@"C:\Windows\Media\windows logoff sound.wav").Play();            
             rst.Close(); cnt.Close();
             textBox1.Select(rs, rl); textBox1.ScrollToCaret();
         }
@@ -2638,6 +2642,17 @@ namespace WindowsFormsApp1
                     i++;
                     if (item == "}}<p>") openNote = false; else openNote = true;
                 }
+
+                //else if (i == 0 & x.IndexOf("}}") < (x.IndexOf("{{") == -1 ? x.Length : x.IndexOf("{{")) && x.IndexOf("}}") > e)
+                //{ i++; openNote = true; }//第一段/行是純注文
+                else if (i == 0 && item.IndexOf("{{") == -1 && item.IndexOf("}}") == -1 && linesParasPage.Length > 1)
+                {
+                    string xx = linesParasPage[i + 1];
+                    if (xx.IndexOf("}}") > -1 && xx.IndexOf("{{") == -1)//&& x.IndexOf("}}") > e)
+                    { i++; openNote = true; }//第一段/行是純注文
+                    else { i += 2; openNote = false; }//第一段/行是純正文
+                }
+
                 else if (i == 0 && ((openBracketS > closeBracketS) ||
                                 (openBracketS == -1 && closeBracketS > -1 && closeBracketS < e - 2))) //第一行正、注夾雜
                 {
@@ -2676,15 +2691,7 @@ namespace WindowsFormsApp1
                         openNote = true;
 
                 }
-                //else if (i == 0 & x.IndexOf("}}") < (x.IndexOf("{{") == -1 ? x.Length : x.IndexOf("{{")) && x.IndexOf("}}") > e)
-                //{ i++; openNote = true; }//第一段/行是純注文
-                else if (i == 0 && item.IndexOf("{{") == -1 && item.IndexOf("}}") == -1 && linesParasPage.Length > 1)
-                {
-                    string xx = linesParasPage[i + 1];
-                    if (xx.IndexOf("}}") > -1 && xx.IndexOf("{{") == -1)//&& x.IndexOf("}}") > e)
-                    { i++; openNote = true; }//第一段/行是純注文
-                    else { i += 2; openNote = false; }//第一段/行是純正文
-                }
+
                 else if (openBracketS == 0 && closeBracketS == -1)//注文（開始）
                 { i++; openNote = true; }
                 else if (openBracketS == -1 && openNote)
@@ -4765,6 +4772,7 @@ namespace WindowsFormsApp1
                 rst.MoveNext();
             }
             rst.Close(); cnt.Close();
+            undoRecord();
             textBox1.Text = tx;
             caretPositionRecall();
         }
