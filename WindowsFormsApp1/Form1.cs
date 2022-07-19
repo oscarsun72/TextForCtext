@@ -2257,6 +2257,9 @@ namespace WindowsFormsApp1
                 normalLineParaLength = wordsPerLinePara;
             }
             undoRecord(); stopUndoRec = true;
+            ado.Connection cnt = new ado.Connection();
+            openDatabase("查字.mdb", ref cnt);
+            ado.Recordset rst = new ado.Recordset(); rst.Open("select * from 每行字數判斷用 where condition=0", cnt, ado.CursorTypeEnum.adOpenKeyset, ado.LockTypeEnum.adLockReadOnly);
             while (e > -1)
             {
                 s = e + 2;
@@ -2278,17 +2281,19 @@ namespace WindowsFormsApp1
                     //if (se.Substring(se.Length - 3, 3)!="<p>")
                     {
                         string tx = textBox1.Text;
-                        if (isShortLine(tx.Substring(e + 2, tx.IndexOf(Environment.NewLine, e + 2) - e - 2)))
+                        if (isShortLine(tx.Substring(e + 2, tx.IndexOf(Environment.NewLine, e + 2) - e - 2), "", cnt, rst))
                         {
                             textBox1.Select(e, 0);
                             textBox1.SelectedText = "<p>";
                             e += 3;
+                            if ((int)rst.AbsolutePosition > 1 ) rst.MoveFirst();
                         }
                     }
 
                 }
             }
             stopUndoRec = false;
+            rst.Close(); cnt.Close();
             textBox1.Select(rs, rl); textBox1.ScrollToCaret();
         }
         private void insertWords(string insX, TextBox tBox, string x = "")
@@ -4716,22 +4721,27 @@ namespace WindowsFormsApp1
             autoPastetoQuickEdit = autoPastetoQuickEditMemo;
         }
 
-        bool isShortLine(string nextLine, string currentLine = "")
+        bool isShortLine(string nextLine, string currentLine = "", ado.Connection cnt = null, ado.Recordset rst = null)
         {
-            ado.Connection cnt = new ado.Connection();
-            ado.Recordset rst = new ado.Recordset();
-            openDatabase("查字.mdb", ref cnt);
-            rst.Open("select * from 每行字數判斷用 where condition=0", cnt, ado.CursorTypeEnum.adOpenKeyset, ado.LockTypeEnum.adLockReadOnly);
+            //ado.Connection cnt = new ado.Connection();
+            //ado.Recordset rst = new ado.Recordset();
+            bool cntClose = false, rstClose = false;
+            if (cnt == null)
+            {
+                openDatabase("查字.mdb", ref cnt);
+                cntClose = true;
+            }
+            if (rst == null) { rst.Open("select * from 每行字數判斷用 where condition=0", cnt, ado.CursorTypeEnum.adOpenKeyset, ado.LockTypeEnum.adLockReadOnly); rstClose = true; }
             while (!rst.EOF)
             {
                 if (nextLine.IndexOf(rst.Fields["term"].Value.ToString()) == 0)
                 {
-                    rst.Close(); cnt.Close();
+                    if (rstClose) rst.Close(); else rst.MoveFirst(); if (cntClose) cnt.Close();
                     return false;
                 }
                 rst.MoveNext();
             }
-            rst.Close(); cnt.Close();
+            if (rstClose) rst.Close(); else rst.MoveFirst(); if (cntClose) cnt.Close();
             return true;
 
         }
