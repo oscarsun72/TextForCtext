@@ -1837,6 +1837,9 @@ namespace WindowsFormsApp1
                 case "并序":
                     replaceIt = true;
                     break;
+                case "幷序":
+                    replaceIt = true;
+                    break;
                 case "并引":
                     replaceIt = true;
                     break;
