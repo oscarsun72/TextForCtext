@@ -130,7 +130,7 @@ Alt + Shift + 1 如宋詞中的換片空格，只將文中的空格轉成空白�
 
 Alt + 2 : 鍵入全形空格「　」
 
-Alt + Shift + 2 : 將選取區內的「<p>」取代為「|」 ，而「　」取代為「􏿽」並清除「*」且將無「|」前綴的分行符號加上「|」
+Alt + Shift + 2 : 將選取區內的「<p>」取代為「|」 ，而「　」取代為「􏿽」並清除「*」且將無「|」前綴的分行符號加上「|」（詩偈排版格式用）
 
 Alt + 3 : 鍵入全形空格「〇」
 
@@ -174,7 +174,11 @@ F6 : 標題降階（增加標題前之星號）
 
 Alt + F6 或 Alt + F8 或 選取標題文字前之空格再按下 Alt + ` : run autoMarkTitles 自動標識標題（篇名）
 
-F7 ： 每行/段前空一格
+F7 ： 每行縮排，即每行/段前空一格
+
+Shfit + F7 : 每行凸排（尚未實作）: deleteSpacePreParagraphs_ConvexRow()
+
+Alt + F7 : 每行縮排一格後將其末誤標之<p>清除:keysSpacePreParagraphs_indent_ClearEnd＿P_Mark
 
 F8 或 Alt + ` ： 加上篇名格式代碼
 

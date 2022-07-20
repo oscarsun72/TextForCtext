@@ -1015,7 +1015,7 @@ namespace WindowsFormsApp1
             //按下Alt鍵
             if ((m & Keys.Alt) == Keys.Alt)//⇌ if (Control.ModifierKeys == Keys.Alt)
             {
-                if (e.KeyCode == Keys.Multiply)
+                if (e.KeyCode == Keys.Multiply)// Alt + *
                 {
                     e.Handled = true; 歐陽文忠公集_集古錄跋尾校語專用(); return;
                 }
@@ -1228,6 +1228,11 @@ namespace WindowsFormsApp1
                 if (e.KeyCode == Keys.S)
                 {//Alt + s 小注文不換行
                     e.Handled = true; notes_a_line(); return;
+                }
+
+                if (e.KeyCode == Keys.F7)
+                {// Alt + F7 : 每行縮排一格後將其末誤標之<p>
+                    e.Handled = true; keysSpacePreParagraphs_indent_ClearEnd＿P_Mark(); return;
                 }
 
                 if (e.KeyCode == Keys.Add || e.KeyCode == Keys.Oemplus)//|| e.KeyCode == Keys.Subtract || e.KeyCode == Keys.NumPad5)
@@ -1503,7 +1508,7 @@ namespace WindowsFormsApp1
             {
                 if (x.Substring(i, 1) == "　")
                 {
-                    if (x.Substring(i - 2, 2) != Environment.NewLine && notTitleIndent)
+                    if (i > 1 && x.Substring(i - 2, 2) != Environment.NewLine && notTitleIndent)
                     {
                         textBox1.Select(i + offset, 1);
                         if (textBox1.SelectedText == "　")
@@ -1815,8 +1820,64 @@ namespace WindowsFormsApp1
             }
         }
 
+
+
+        private void deleteSpacePreParagraphs_ConvexRow()
+        { //Shfit + F7 每行凸排
+        }
+
+        int indentRow()
+        {//每行縮排 //此函式執行完時會將執行結果的範圍選取，以便後續處理。傳回值為處理了幾行/段
+            int s = textBox1.SelectionStart; int l = textBox1.SelectionLength; String xn = "";
+            if (textBox1.SelectedText == "")
+            {
+                pasteAllOverWrite = true;
+                textBox1.SelectAll();
+                l = textBox1.TextLength;
+            }
+            String slTxt = textBox1.SelectedText; int i = slTxt.IndexOf(Environment.NewLine), cntr = 0;
+            while (i > -1)
+            {
+                cntr++;//計下處理了幾行/段
+                i = slTxt.IndexOf(Environment.NewLine, i + 1);
+            }
+            undoRecord(); caretPositionRecord(); stopUndoRec = true;
+            if (s == 0 || s > 2 && textBox1.Text.Substring(s - 2, 2) == Environment.NewLine)
+            {
+                xn = textBox1.SelectedText.Replace(Environment.NewLine, Environment.NewLine + "　");
+                if (s > 0) s = s - "　".Length; l = ("　" + xn).Length;
+                textBox1.SelectedText = "　" + xn;
+            }
+            else
+            {
+                int f = textBox1.Text.LastIndexOf(Environment.NewLine, s);
+                xn = textBox1.SelectedText.Replace(Environment.NewLine, Environment.NewLine + "　");
+                textBox1.SelectedText = xn;
+                textBox1.Select(f == -1 ? 0 : f + 2, s - f);//只讀取了第一行前端
+                if (s > 0) s = textBox1.SelectionStart - "　".Length;
+                l = ("　" + xn + textBox1.SelectionLength).Length;
+                textBox1.SelectedText = "　" + textBox1.SelectedText;
+            }
+            textBox1.Select(s, l);//將執行結果的範圍選取，以便後續處理。
+            pasteAllOverWrite = false;
+            stopUndoRec = false;
+            return cntr;
+        }
         private void keysSpacePreParagraphs_indent()
-        {
+        {// F7 每行縮排
+            int l = textBox1.SelectionLength; int s = textBox1.SelectionStart;
+            if (l == textBox1.TextLength)
+            {
+                l = 0;
+            }
+            int cntr = indentRow();//此函式執行完時會將執行結果的範圍選取，以便後續處理。傳回值為處理了幾行/段
+            if (l != 0)
+            {
+                textBox1.Select(s, l + 1 + cntr);
+            }
+
+            #region 原式
+            /*
             int s = textBox1.SelectionStart;
             if (textBox1.SelectedText == "")
             {
@@ -1853,7 +1914,28 @@ namespace WindowsFormsApp1
             }
             pasteAllOverWrite = false;
             stopUndoRec = false;
+            */
+            #endregion
         }
+
+        private void keysSpacePreParagraphs_indent_ClearEnd＿P_Mark()
+        {//Alt + F7 : 每行縮排一格後將其末誤標之<p>
+            int l = textBox1.SelectionLength; int s = textBox1.SelectionStart;
+            if (l == textBox1.TextLength)
+            {
+                l = 0;
+            }
+            int cntr = indentRow();//此函式執行完時會將執行結果的範圍選取，以便後續處理。傳回值為處理了幾行/段
+            undoRecord();
+            textBox1.SelectedText = textBox1.SelectedText.Replace("<p>" + Environment.NewLine, Environment.NewLine);
+            if (l != 0)
+            {
+                textBox1.Select(s, l + 1 + cntr - cntr * "<p>".Length);
+            }
+
+        }
+
+
 
         private void keysParagraphSymbol()
         {
@@ -2296,7 +2378,7 @@ namespace WindowsFormsApp1
                 }
             }
             stopUndoRec = false;
-            new SoundPlayer(@"C:\Windows\Media\windows logoff sound.wav").Play();            
+            new SoundPlayer(@"C:\Windows\Media\windows logoff sound.wav").Play();
             rst.Close(); cnt.Close();
             textBox1.Select(rs, rl); textBox1.ScrollToCaret();
         }
