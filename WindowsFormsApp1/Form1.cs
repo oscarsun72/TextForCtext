@@ -1927,7 +1927,8 @@ namespace WindowsFormsApp1
             }
             int cntr = indentRow();//此函式執行完時會將執行結果的範圍選取，以便後續處理。傳回值為處理了幾行/段
             undoRecord();
-            textBox1.SelectedText = textBox1.SelectedText.Replace("<p>" + Environment.NewLine, Environment.NewLine);
+            //textBox1.SelectedText = textBox1.SelectedText.Replace("<p>" + Environment.NewLine, Environment.NewLine);
+            textBox1.SelectedText = textBox1.SelectedText.Replace("<p>", "");
             if (l != 0)
             {
                 textBox1.Select(s, l + 1 + cntr - cntr * "<p>".Length);
