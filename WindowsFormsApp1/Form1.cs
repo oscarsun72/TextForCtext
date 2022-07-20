@@ -1863,15 +1863,19 @@ namespace WindowsFormsApp1
 
             while (s - 1 > -1 && textBox1.Text.Substring(s--, 2) != Environment.NewLine)
             {
-
+                l++;
             }
             //while (e < textBox1.TextLength && textBox1.Text.Substring(e++, 2) != Environment.NewLine)
             //{
 
             //}
             undoRecord(); stopUndoRec = true;
-            textBox1.Select(s, e);
-            textBox1.SelectedText = textBox1.SelectedText.Replace(Environment.NewLine + "　", Environment.NewLine);
+            textBox1.Select(s, l);
+            if (textBox1.SelectedText.IndexOf("􏿽") > -1)
+                textBox1.SelectedText = textBox1.SelectedText.Replace(Environment.NewLine + "􏿽", Environment.NewLine);
+            else
+                textBox1.SelectedText = textBox1.SelectedText.Replace(Environment.NewLine + "　", Environment.NewLine);
+            textBox1.Select(s, l);
             stopUndoRec = false;
         }
 
