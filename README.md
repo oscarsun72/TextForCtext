@@ -114,7 +114,7 @@ Ctrl + 6 ：鍵入「{{」
 
 Ctrl + Shift + 6 ：鍵入「}}」(在前面有「{」時，按下 Alt + i 也可以鍵入此值)
 
-Alt + Shift + 6 或 Alt + s：小注文不換行
+Alt + Shift + 6 或 Alt + s：小注文不換行：notes_a_line()
 
 Ctrl + 7 ：如同鍵入「。}}」，於《周易正義》〈彖、象〉辭時適用
 
@@ -149,6 +149,10 @@ Alt + i : 鍵入 》（如 MS Word 自動校正，會依前面的符號作結尾
 Alt + j : 鍵入換行分段符號（newline）（同 Ctrl + j 的系統預設）
 
 Alt + p 或 Alt + ` : 鍵入 "<p>" + newline（分行分段符號）；若置於行/段之首，則會自動移至前一段末再執行
+
+Alt + s 或 Alt + Shift + 6 ：小注文不換行 ： notes_a_line()
+
+Alt + Shift + s :  所有小注文都不換行
 
 Alt + u : 鍵入 《
 

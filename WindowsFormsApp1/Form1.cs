@@ -644,6 +644,12 @@ namespace WindowsFormsApp1
                 selToNewline(ref s, ref ed, textBox1.Text, true, textBox1); return;
             }
 
+            if ((m & Keys.Alt) == Keys.Alt
+                && (m & Keys.Shift) == Keys.Shift
+                && e.KeyCode == Keys.S)
+            {//Alt + Shift + s :  所有小注文都不換行
+                e.Handled = true; notes_a_line_all(); return;
+            }
             #region 同時按下Ctrl+Shift
             //同時按下Ctrl+Shift
             if ((m & Keys.Control) == Keys.Control && (m & Keys.Shift) == Keys.Shift)
@@ -1379,8 +1385,23 @@ namespace WindowsFormsApp1
             #endregion
         }
 
-        private void notes_a_line()
-        {//Alt + Shift + 6 小注文不換行
+        void notes_a_line_all()
+        {//Alt + Shift + s :  所有小注文都不換行
+            int s = textBox1.SelectionStart, i = textBox1.Text.IndexOf("}}"), space;
+            //'if (textBox1.SelectedText == "") textBox1.SelectAll();
+            undoRecord();
+            stopUndoRec = true;
+            while (i > -1)
+            {
+                textBox1.Select(i, 0);
+                space = notes_a_line();
+                i = textBox1.Text.IndexOf("}}", i + space + 1);
+            }
+            stopUndoRec = false;
+            textBox1.Select(s, 0); textBox1.ScrollToCaret();
+        }
+        private int notes_a_line()
+        {//Alt + Shift + 6 或 Alt + s 小注文不換行
             textBox1.DeselectAll();
             string xSel = textBox1.SelectedText, x = textBox1.Text; int s = textBox1.SelectionStart; bool flg = false;
             undoRecord();
@@ -1416,8 +1437,8 @@ namespace WindowsFormsApp1
             }
             spaceCntr--;
             #endregion //如果末已綴有空格
-            StringInfo xSelInfo = new StringInfo(xSel.Substring(0, xSel.Length - spaceCntr));
-            for (int i = 0; i + spaceCntr < xSelInfo.LengthInTextElements; i++)
+            StringInfo xSelInfo = new StringInfo(xSel.Substring(0, xSel.Length - spaceCntr)); int i = 0;
+            for (i = 0; i + spaceCntr < xSelInfo.LengthInTextElements; i++)
             {
                 if (punctuations.IndexOf(xSelInfo.SubstringByTextElements(i, 1)) == -1)
                     xSel += "　";
@@ -1429,6 +1450,7 @@ namespace WindowsFormsApp1
                 textBox1.Text = textBox1.Text.Substring(2);//還原暫時補的「{{」
             }
             stopUndoRec = false;
+            return i;
             //throw new NotImplementedException();
         }
 
@@ -1854,7 +1876,7 @@ namespace WindowsFormsApp1
                 xn = textBox1.SelectedText.Replace(Environment.NewLine, Environment.NewLine + "　");
                 textBox1.SelectedText = xn;
                 textBox1.Select(f == -1 ? 0 : f + 2, s - f);//只讀取了第一行前端
-                s=textBox1.SelectionStart - "　".Length;if (s < 0) s = 0;
+                s = textBox1.SelectionStart - "　".Length; if (s < 0) s = 0;
                 l = ("　" + xn + textBox1.SelectionLength).Length;
                 textBox1.SelectedText = "　" + textBox1.SelectedText;
             }
@@ -1932,10 +1954,15 @@ namespace WindowsFormsApp1
                 textBox1.Select(s, l + 1 + cntr - cntr * "<p>".Length);
             }
             while (textBox1.SelectionStart + textBox1.SelectionLength++ <= textBox1.TextLength
+                    && textBox1.SelectedText.Substring(textBox1.SelectedText.Length - 2) != Environment.NewLine
                     && textBox1.SelectedText.Substring(textBox1.SelectedText.Length - 3) != "<p>")
-            {
+            {//找到處理範圍裡最後一個<p>，若碰到換行而無<p>者，即停止
                 textBox1.Select(textBox1.SelectionStart, textBox1.SelectionLength++);
 
+            }
+            if (textBox1.Text.Substring(textBox1.SelectionStart + textBox1.SelectionLength + Environment.NewLine.Length, "　".Length) != "　")
+            {//如果按下來是頂行，則不取代最後的<p>
+                textBox1.Select(textBox1.SelectionStart, textBox1.SelectionLength - "<p>".Length);
             }
             //textBox1.SelectedText = textBox1.SelectedText.Replace("<p>" + Environment.NewLine, Environment.NewLine);            
             textBox1.SelectedText = textBox1.SelectedText.Replace("<p>", "");
