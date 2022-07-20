@@ -1854,7 +1854,7 @@ namespace WindowsFormsApp1
                 xn = textBox1.SelectedText.Replace(Environment.NewLine, Environment.NewLine + "　");
                 textBox1.SelectedText = xn;
                 textBox1.Select(f == -1 ? 0 : f + 2, s - f);//只讀取了第一行前端
-                if (s > 0) s = textBox1.SelectionStart - "　".Length;
+                s=textBox1.SelectionStart - "　".Length;if (s < 0) s = 0;
                 l = ("　" + xn + textBox1.SelectionLength).Length;
                 textBox1.SelectedText = "　" + textBox1.SelectedText;
             }
@@ -1927,12 +1927,18 @@ namespace WindowsFormsApp1
             }
             int cntr = indentRow();//此函式執行完時會將執行結果的範圍選取，以便後續處理。傳回值為處理了幾行/段
             undoRecord();
-            //textBox1.SelectedText = textBox1.SelectedText.Replace("<p>" + Environment.NewLine, Environment.NewLine);
-            textBox1.SelectedText = textBox1.SelectedText.Replace("<p>", "");
             if (l != 0)
             {
                 textBox1.Select(s, l + 1 + cntr - cntr * "<p>".Length);
             }
+            while (textBox1.SelectionStart + textBox1.SelectionLength++ <= textBox1.TextLength
+                    && textBox1.SelectedText.Substring(textBox1.SelectedText.Length - 3) != "<p>")
+            {
+                textBox1.Select(textBox1.SelectionStart, textBox1.SelectionLength++);
+
+            }
+            //textBox1.SelectedText = textBox1.SelectedText.Replace("<p>" + Environment.NewLine, Environment.NewLine);            
+            textBox1.SelectedText = textBox1.SelectedText.Replace("<p>", "");
 
         }
 
