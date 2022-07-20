@@ -1393,9 +1393,15 @@ namespace WindowsFormsApp1
             stopUndoRec = true;
             while (i > -1)
             {
-                textBox1.Select(i, 0);
-                space = notes_a_line(false);
-                i = textBox1.Text.IndexOf("}}", i + space + 1);
+                if ((textBox1.Text.LastIndexOf(Environment.NewLine, i) == -1 && textBox1.Text.LastIndexOf("{{", i) > -1)
+                    || (textBox1.Text.LastIndexOf(Environment.NewLine, i) < textBox1.Text.LastIndexOf("{{", i)))
+                {
+                    textBox1.Select(i, 0);
+                    space = notes_a_line(false);
+                    i = textBox1.Text.IndexOf("}}", i + space + 1);
+                }
+                else
+                    i = textBox1.Text.IndexOf("}}", i + 1);
             }
             stopUndoRec = false;
             textBox1.Select(s, 0); textBox1.ScrollToCaret();
