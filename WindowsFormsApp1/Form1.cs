@@ -1394,18 +1394,20 @@ namespace WindowsFormsApp1
             while (i > -1)
             {
                 textBox1.Select(i, 0);
-                space = notes_a_line();
+                space = notes_a_line(false);
                 i = textBox1.Text.IndexOf("}}", i + space + 1);
             }
             stopUndoRec = false;
             textBox1.Select(s, 0); textBox1.ScrollToCaret();
         }
-        private int notes_a_line()
+        private int notes_a_line(bool undoRe = true)
         {//Alt + Shift + 6 或 Alt + s 小注文不換行
             textBox1.DeselectAll();
             string xSel = textBox1.SelectedText, x = textBox1.Text; int s = textBox1.SelectionStart; bool flg = false;
-            undoRecord();
-            stopUndoRec = true;
+            if (undoRe)
+            {
+                undoRecord(); stopUndoRec = true;
+            }
             if (x.Substring(0, s).IndexOf("{{") == -1)
             {
                 textBox1.Text = "{{" + x;//暫時補的「{{」
@@ -1449,7 +1451,7 @@ namespace WindowsFormsApp1
             {
                 textBox1.Text = textBox1.Text.Substring(2);//還原暫時補的「{{」
             }
-            stopUndoRec = false;
+            if (undoRe) stopUndoRec = false;
             return i;
             //throw new NotImplementedException();
         }
