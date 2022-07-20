@@ -180,7 +180,7 @@ Alt + F6 或 Alt + F8 或 選取標題文字前之空格再按下 Alt + ` : run 
 
 F7 ： 每行縮排，即每行/段前空一格
 
-Shfit + F7 : 每行凸排（尚未實作）: deleteSpacePreParagraphs_ConvexRow()
+Shfit + F7 : 每行凸排: deleteSpacePreParagraphs_ConvexRow()
 
 Alt + F7 : 每行縮排一格後將其末誤標之<p>清除:keysSpacePreParagraphs_indent_ClearEnd＿P_Mark
 

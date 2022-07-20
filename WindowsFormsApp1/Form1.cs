@@ -1011,8 +1011,13 @@ namespace WindowsFormsApp1
 
                 if (e.KeyCode == Keys.F5)
                 {//Shift + F5 ： 在textBox1 回到上1次插入點（游標）所在處（且與最近「caretPositionListSize」次瀏覽處作切換，如 MS Word）
-                    caretPositionRecall();
+                    e.Handled = true; caretPositionRecall(); return;
                 }//以上 Shift + F5
+
+                if (e.KeyCode == Keys.F7)
+                {//Shfit + F7 每行凸排
+                    e.Handled = true; deleteSpacePreParagraphs_ConvexRow(); return;
+                }//以上 Shift + F7
 
             }//以上 Shift
             #endregion
@@ -1854,6 +1859,20 @@ namespace WindowsFormsApp1
 
         private void deleteSpacePreParagraphs_ConvexRow()
         { //Shfit + F7 每行凸排
+            int s = textBox1.SelectionStart, so = s, l = textBox1.SelectionLength, e = s + l; ;
+
+            while (s - 1 > -1 && textBox1.Text.Substring(s--, 2) != Environment.NewLine)
+            {
+
+            }
+            //while (e < textBox1.TextLength && textBox1.Text.Substring(e++, 2) != Environment.NewLine)
+            //{
+
+            //}
+            undoRecord(); stopUndoRec = true;
+            textBox1.Select(s, e);
+            textBox1.SelectedText = textBox1.SelectedText.Replace(Environment.NewLine + "　", Environment.NewLine);
+            stopUndoRec = false;
         }
 
         int indentRow()
