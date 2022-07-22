@@ -1038,6 +1038,13 @@ namespace WindowsFormsApp1
                     return;
                 }
 
+                if (e.KeyCode == Keys.D1)//D1=Menu?
+                {//Alt + 1 : 鍵入本站制式留空空格標記「􏿽」：若有選取則取代全形空格「　」為「􏿽」
+                    e.Handled = true;
+                    keysSpacesBlank();
+                    return;
+                }
+
                 if (e.KeyCode == Keys.D2)
                 {//Alt + 2 : 鍵入全形空格「　」
                     e.Handled = true;
@@ -1066,6 +1073,7 @@ namespace WindowsFormsApp1
                     return;
                 }
 
+                #region alt + 9 、alt + 0、alt + u、alt + y、alt + i                
                 if (e.KeyCode == Keys.D9 || e.KeyCode == Keys.D0 || e.KeyCode == Keys.U || e.KeyCode == Keys.Y || e.KeyCode == Keys.I)
                 {/* Alt + 9 : 鍵入 「 
                   * Alt + 0 : 鍵入 『 
@@ -1183,13 +1191,7 @@ namespace WindowsFormsApp1
                     insertWords(insX, textBox1, x);
                     return;
                 }
-
-                if (e.KeyCode == Keys.D1)//D1=Menu?
-                {//Alt + 1 : 鍵入本站制式留空空格標記「􏿽」：若有選取則取代全形空格「　」為「􏿽」
-                    e.Handled = true;
-                    keysSpacesBlank();
-                    return;
-                }
+                #endregion
 
                 if (e.KeyCode == Keys.A)
                 {//Alt + a : 
@@ -1622,21 +1624,24 @@ namespace WindowsFormsApp1
                 //else
                 //{
                 if (s + 1 <= x.Length && x.Substring(s, 1) == "　")
-                    x = x.Substring(0, s) + "􏿽" + x.Substring(s + 1);// 自動清除後面的「　」字元                
+                    //x = x.Substring(0, s) + "􏿽" + x.Substring(s + 1);// 自動清除後面的「　」字元                
+                    textBox1.Select(s, 1);
                 else
-                    x = x.Substring(0, s) + "􏿽" + x.Substring(s);
-                if (textBox1.Text != x)
-                {
-                    undoRecord();
-                    stopUndoRec = true;
-                    textBox1.Text = x;
-                    textBox1.SelectionStart = s + "􏿽".Length;
-                    stopUndoRec = false;
-                }
+                    //x = x.Substring(0, s) + "􏿽" + x.Substring(s);
+                    textBox1.Select(s, 0);
+                //if (textBox1.Text != x)
+                //{
+                undoRecord();
+                stopUndoRec = true;
+                textBox1.SelectedText = "􏿽";
+                //textBox1.Text = x;
+                //textBox1.SelectionStart = s + "􏿽".Length;
+                stopUndoRec = false;
+                //}
                 //}
 
             }
-            textBox1.ScrollToCaret();
+            //textBox1.ScrollToCaret();
         }
 
         private void keysAsteriskPreTitle()
@@ -2312,7 +2317,7 @@ namespace WindowsFormsApp1
             int l = new StringInfo(notePure).LengthInTextElements;
             int x = l / 2; ; //商數
             int y = l - (x * 2);//餘數
-            //return (((l + 1) % 2) == 1) ? ++l / 2 : l / 2;
+                                //return (((l + 1) % 2) == 1) ? ++l / 2 : l / 2;
             return y == 0 ? x : ++x;
         }
         int countWordsLenPerLinePara(string xLinePara)
@@ -2342,8 +2347,8 @@ namespace WindowsFormsApp1
                     //else 
                     if (closeCurlybracketsPostion > -1 && openCurlybracketsPostion > closeCurlybracketsPostion)
                     {//先出現 }} 的話
-                        //s = closeCurlybracketsPostion + 2;
-                        //   countResult += new StringInfo(xLinePara.Substring(0, closeCurlybracketsPostion)).LengthInTextElements;
+                     //s = closeCurlybracketsPostion + 2;
+                     //   countResult += new StringInfo(xLinePara.Substring(0, closeCurlybracketsPostion)).LengthInTextElements;
                         countResult += countNoteLen(xLinePara.Substring(0, closeCurlybracketsPostion));
                         //closeCurlybracketsPostion = xLinePara.IndexOf("}}", closeCurlybracketsPostion + 2);
                     }
@@ -2407,7 +2412,7 @@ namespace WindowsFormsApp1
             //int l = new StringInfo(se).LengthInTextElements;
             int l = wordsPerLinePara != -1 ? wordsPerLinePara : countWordsLenPerLinePara(se);
             if (se.Replace("●", "") == "") textBox1.Text = textBox1.Text.Substring(e + 2);//●●●●●●●●乃作為權訂每行字數之參考，故可刪去
-            //if (countWordsLenPerLinePara(se) == wordsPerLinePara && se.Replace("●", "") == "") textBox1.Text = textBox1.Text.Substring(e + 2);
+                                                                                          //if (countWordsLenPerLinePara(se) == wordsPerLinePara && se.Replace("●", "") == "") textBox1.Text = textBox1.Text.Substring(e + 2);
             if (wordsPerLinePara == -1)
             {
                 wordsPerLinePara = l;
@@ -4760,7 +4765,7 @@ namespace WindowsFormsApp1
                 else
                 {
                     textBox1.Text = dropStr;//e.Data.GetData(DataFormats.UnicodeText).ToString();
-                    //textBox1.Text = e.Data.GetData(DataFormats.UnicodeText).ToString();
+                                            //textBox1.Text = e.Data.GetData(DataFormats.UnicodeText).ToString();
                     dragDrop = true;
                 }
             }
@@ -4989,10 +4994,10 @@ namespace WindowsFormsApp1
         #region 資料庫匯出
         void mdbExport()
         {//未完成
-            //string bookName = "原抄本日知錄";
-            //string rstStr = "SELECT 書.書名, 篇.卷, 篇.頁, 篇.末頁, 篇.篇名, 札.札記, 札.頁, 札.札ID, 札.類ID, 類別主題.類別主題" +
-            //        "FROM 類別主題 INNER JOIN((書 INNER JOIN 篇 ON 書.書ID = 篇.書ID) INNER JOIN 札 ON 篇.篇ID = 札.篇ID) ON 類別主題.類ID = 札.類ID " +
-            //        "WHERE(((書.書名) = \"" + bookName + "\") AND((類別主題.類別主題)Not Like \" * 真按 * \" Or(類別主題.類別主題) Is Null)) ORDER BY 篇.卷, 篇.頁, 篇.末頁, 札.頁, 札.札ID;";
+         //string bookName = "原抄本日知錄";
+         //string rstStr = "SELECT 書.書名, 篇.卷, 篇.頁, 篇.末頁, 篇.篇名, 札.札記, 札.頁, 札.札ID, 札.類ID, 類別主題.類別主題" +
+         //        "FROM 類別主題 INNER JOIN((書 INNER JOIN 篇 ON 書.書ID = 篇.書ID) INNER JOIN 札 ON 篇.篇ID = 札.篇ID) ON 類別主題.類ID = 札.類ID " +
+         //        "WHERE(((書.書名) = \"" + bookName + "\") AND((類別主題.類別主題)Not Like \" * 真按 * \" Or(類別主題.類別主題) Is Null)) ORDER BY 篇.卷, 篇.頁, 篇.末頁, 札.頁, 札.札ID;";
 
             //const string cntStr = @"Provider=Microsoft.ACE.OLEDB.12.0;Data Source=D:\千慮一得齋\書籍資料\開發_千慮一得齋.mdb";
             runWordMacro("中國哲學書電子化計劃.mdb開發_千慮一得齋Export");
