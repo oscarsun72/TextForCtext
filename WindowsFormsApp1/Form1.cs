@@ -1790,6 +1790,10 @@ namespace WindowsFormsApp1
             x = textBox1.Text; string endCode = "<p>";
             if (s + textBox1.SelectionLength - 3 < 0)
             {
+                if (textBox1.SelectedText != "")
+                {
+                    textBox1.SelectedText = "*" + textBox1.SelectedText + "<p>";
+                }
                 stopUndoRec = false; return;
             }
             if (x.Substring(s + textBox1.SelectionLength - 3, 3) == "<p>") endCode = "";
@@ -2434,13 +2438,24 @@ namespace WindowsFormsApp1
                     //if (se.Substring(se.Length - 3, 3)!="<p>")
                     {
                         string tx = textBox1.Text;
-                        if (isShortLine(tx.Substring(e + 2, tx.IndexOf(Environment.NewLine, e + 2) - e - 2), "", cnt, rst))
+                        if (tx.IndexOf(Environment.NewLine, e + 2) > -1)
+                        {
+                            if (isShortLine(tx.Substring(e + 2, tx.IndexOf(Environment.NewLine, e + 2) - e - 2), "", cnt, rst))
+                            {
+                                textBox1.Select(e, 0);
+                                textBox1.SelectedText = "<p>";
+                                e += 3;
+                                if ((int)rst.AbsolutePosition > 1) rst.MoveFirst();
+                            }
+                        }
+                        else
                         {
                             textBox1.Select(e, 0);
                             textBox1.SelectedText = "<p>";
                             e += 3;
                             if ((int)rst.AbsolutePosition > 1) rst.MoveFirst();
                         }
+
                     }
 
                 }

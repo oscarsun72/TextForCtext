@@ -32,7 +32,7 @@ rng.Paragraphs(3).Range = CLng(Replace(rng.Paragraphs(3).Range, Chr(13), "")) + 
 'data.PutInClipboard
 SystemSetup.SetClipboard x
 DoEvents
-AppActivate "google chrome"
+Network.AppActivateDefaultBrowser
 SendKeys "^v"
 
 End Sub
@@ -87,10 +87,10 @@ Loop
 DoEvents
 d.Range.Cut
 DoEvents
-d.Close wdDoNotSaveChanges
 playSound 1
 DoEvents
 pastetoEditBox "將星號前的分段符號移置前段之末 & 清除頁前的分段符號"
+d.Close wdDoNotSaveChanges
 
 End Sub
 
@@ -149,9 +149,9 @@ End Sub
 
 Sub pastetoEditBox(Description_from_ClipBoard As String)
 word.Application.WindowState = wdWindowStateMinimize
-AppActivate "google chrome"
+AppActivateDefaultBrowser
 DoEvents
-SendKeys "^v"
+SendKeys "^v", True
 DoEvents ' DoEvents: DoEvents
 Beep
 SystemSetup.Wait 0.5
@@ -177,7 +177,6 @@ p.Range.Cut
 SystemSetup.contiUndo ur
 Set ur = Nothing
 End Sub
-
 Sub 清除所有符號_分段注文符號例外()
 Dim f, i As Integer
 f = Array("。", "」", Chr(-24152), "：", "，", "；", _
@@ -286,7 +285,7 @@ d.Close wdDoNotSaveChanges
 End Sub
 Sub 維基文庫四部叢刊本轉來()
 Dim d As Document, a, i, p As Paragraph, xP As String, acP As Integer, space As String, rng As Range
-On Error GoTo eH
+On Error GoTo eh
 a = Array(ChrW(12296), "{{", ChrW(12297), "}}", "〈", "{{", "〉", "}}", _
     "○", ChrW(12295))
 '《容齋三筆》等小注作正文省版面者 https://ctext.org/library.pl?if=gb&file=89545&page=24
@@ -357,7 +356,7 @@ d.Range.Cut
 d.Close wdDoNotSaveChanges
 SystemSetup.playSound 2
 Exit Sub
-eH:
+eh:
 Select Case Err.Number
     Case 5904 '無法編輯 [範圍]。
         If p.Range.Characters(acP).Hyperlinks.Count > 0 Then p.Range.Characters(acP).Hyperlinks(1).Delete
@@ -1169,7 +1168,7 @@ rng.Text = "#" & rng.Text
 rng.Cut
 rng.Document.Close wdDoNotSaveChanges
 DoEvents
-AppActivate "google chrome"
+AppActivateDefaultBrowser
 SendKeys "^v~"
 DoEvents
 SendKeys "^l^c"
@@ -1189,16 +1188,26 @@ rst.Close: cnt.Close: Set db = Nothing
 End Sub
 
 Sub dbSBCKWordtoReplace() '四部叢刊造字對照表 Alt+5
-Dim rng As Range
-Set rng = Documents.Add.Range
-rng.Paste
-dbSBCKWordtoReplaceSub rng
-rng.Cut
-If rng.Application.Documents.Count = 1 Then
-    rng.Application.Quit wdDoNotSaveChanges
+Dim rng As Range, ur As UndoRecord
+Set ur = stopUndo("《四部叢刊》資料庫造字取代為系統字")
+If ActiveDocument.Name = "《四部叢刊資料庫》補入《中國哲學書電子化計劃》.docm" Then
+    Set rng = ActiveDocument.Range
 Else
-    rng.Document.Close wdDoNotSaveChanges
+    Set rng = Documents.Add.Range
+    rng.Paste
 End If
+dbSBCKWordtoReplaceSub rng
+If Not ActiveDocument.Name = "《四部叢刊資料庫》補入《中國哲學書電子化計劃》.docm" Then
+    rng.Cut
+    If rng.Application.Documents.Count = 1 Then
+        rng.Application.Quit wdDoNotSaveChanges
+    Else
+        rng.Document.Close wdDoNotSaveChanges
+    End If
+Else
+    ActiveDocument.Save
+End If
+contiUndo ur
 End Sub
 Sub dbSBCKWordtoReplaceSub(ByRef rng As Range)
 Const tbName As String = "四部叢刊造字對照表"
@@ -1393,7 +1402,7 @@ Next i
 d.Range = x
 d.Range.Cut
 d.Close wdDoNotSaveChanges
-AppActivate "google chrome"
+AppActivateDefaultBrowser
 SendKeys "^v"
 End Sub
 
@@ -1410,7 +1419,7 @@ Next i
 d.Range.Cut
 d.Application.WindowState = wdWindowStateMinimize
 d.Close wdDoNotSaveChanges
-AppActivate "google chrome"
+AppActivateDefaultBrowser
 SendKeys "^v"
 SendKeys "{tab}~"
 
