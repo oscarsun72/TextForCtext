@@ -1790,7 +1790,7 @@ namespace WindowsFormsApp1
             x = textBox1.Text; string endCode = "<p>";
             if (s + textBox1.SelectionLength - 3 < 0)
             {
-                if (textBox1.SelectedText != "")
+                if (textBox1.SelectedText != "" && textBox1.SelectionStart == 0)
                 {
                     textBox1.SelectedText = "*" + textBox1.SelectedText + "<p>";
                 }
