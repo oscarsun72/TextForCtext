@@ -1041,7 +1041,7 @@ namespace WindowsFormsApp1
                 if (e.KeyCode == Keys.D1)//D1=Menu?
                 {//Alt + 1 : 鍵入本站制式留空空格標記「􏿽」：若有選取則取代全形空格「　」為「􏿽」
                     e.Handled = true;
-                    keysSpacesBlank();
+                    keysSpacesBlank();                    
                     return;
                 }
 
@@ -1587,6 +1587,8 @@ namespace WindowsFormsApp1
                     string sTxtChk = sTxt.Replace("　", "􏿽");
                     undoRecord();
                     stopUndoRec = true;
+                    textBox1.SelectedText = sTxtChk;
+                    /*
                     textBox1.Text = x.Substring(0, s) + sTxtChk + x.Substring(s + sTxt.Length);
                     //string sTxtChk = sTxt.Replace("　", "");
                     //if (sTxtChk != "") return;
@@ -1600,8 +1602,11 @@ namespace WindowsFormsApp1
                         textBox1.SelectionStart = s;
                     else
                         textBox1.SelectionStart = s + sTxtChk.Length;
+                    */
                     stopUndoRec = false;
                 }
+                //caretPositionRecall();
+                //textBox1.ScrollToCaret();
             }
             else
             {//無選取範圍
@@ -1640,8 +1645,7 @@ namespace WindowsFormsApp1
                 //}
                 //}
 
-            }
-            //textBox1.ScrollToCaret();
+            }            
         }
 
         private void keysAsteriskPreTitle()
@@ -2129,7 +2133,9 @@ namespace WindowsFormsApp1
             if (caretPosition.Y > textBox1.Height - textBox1.Top || caretPosition.Y < textBox1.Top)
             {
                 textBox1.ScrollToCaret();
-                textBox1.AutoScrollOffset = caretPosition;
+                textBox1.AutoScrollOffset = caretPosition;//還不行！再研究 20220723
+                //ScrollableControl scrl = new ScrollableControl();
+                //scrl.ScrollControlIntoView(textBox1);
             }
         }
 
