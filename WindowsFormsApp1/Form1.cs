@@ -1737,7 +1737,8 @@ namespace WindowsFormsApp1
                     s = i;
                 }
                 string titieBeginChar = x.Substring(i == 0 ? i : i--, 1);
-                while (titieBeginChar != "　" && titieBeginChar != Environment.NewLine.Substring(Environment.NewLine.Length - 1, 1))
+                while (titieBeginChar != "　" &&
+                    titieBeginChar != Environment.NewLine.Substring(Environment.NewLine.Length - 1, 1))
                 {
                     if (i == 0) break;
                     titieBeginChar = x.Substring(i == 0 ? i : i--, 1);
@@ -1748,7 +1749,7 @@ namespace WindowsFormsApp1
                 for (int j = 0; j + 2 <= x.Length; j++)
                 {
                     string nx = x.Substring(j, 2);
-                    if (nx == Environment.NewLine || nx == "{{")
+                    if (nx == Environment.NewLine || nx == "{{" || nx == "<p")
                     {
                     longTitle:
                         if (nx == Environment.NewLine)
@@ -1801,11 +1802,18 @@ namespace WindowsFormsApp1
             {
                 if (textBox1.SelectedText != "" && textBox1.SelectionStart == 0)
                 {
-                    textBox1.SelectedText = "*" + textBox1.SelectedText + "<p>";
+                    if (textBox1.SelectionStart + textBox1.SelectionLength + "<p>".Length <= textBox1.TextLength
+                        && textBox1.Text.Substring(textBox1.SelectionStart + textBox1.SelectionLength, "<p>".Length) == "<p>")
+                    {
+                        textBox1.SelectedText = "*" + textBox1.SelectedText;
+                    }
+                    else
+                        textBox1.SelectedText = "*" + textBox1.SelectedText + "<p>";
                 }
                 stopUndoRec = false; return;
             }
-            if (x.Substring(s + textBox1.SelectionLength - 3, 3) == "<p>") endCode = "";
+            if (x.Substring(s + textBox1.SelectionLength - 3, 3) == "<p>" ||
+                x.Substring(s + textBox1.SelectionLength, 3) == "<p>") endCode = "";
             //設定標題格式（完成標題語法設置）
             textBox1.SelectedText = ("*" + textBox1.SelectedText + endCode)
                     .Replace("《", "").Replace("》", "").Replace("〈", "").Replace("〉", "").Replace("·", "");
@@ -2004,6 +2012,10 @@ namespace WindowsFormsApp1
             #endregion
         }
 
+        [DllImport("user32.dll")]
+        public static extern int SendMessage(IntPtr hWnd, Int32 wMsg, bool wParam, Int32 lParam);
+        private const int WM_SETREDRAW = 11;
+
         private void keysSpacePreParagraphs_indent_ClearEnd＿P_Mark()
         {//Alt + F7 : 每行縮排一格後將其末誤標之<p>
             int l = textBox1.SelectionLength; int s = textBox1.SelectionStart;
@@ -2016,7 +2028,7 @@ namespace WindowsFormsApp1
                 }
                 else { textBox1.Select(s, 1); l = 1; }
             }
-            
+
             if (l == textBox1.TextLength)
             {
                 l = 0;
@@ -2027,6 +2039,11 @@ namespace WindowsFormsApp1
             {
                 textBox1.Select(s, l + 1 + cntr - cntr * "<p>".Length);
             }
+
+            //http://stackoverflow.com/questions/487661/how-do-i-suspend-painting-for-a-control-and-its-children
+            //https://stackoverflow.com/questions/126876/how-do-i-disable-updating-a-form-in-windows-forms
+            SendMessage(this.Handle, WM_SETREDRAW, false, 0);
+
             while (textBox1.SelectionStart + textBox1.SelectionLength++ <= textBox1.TextLength
                     && textBox1.SelectedText.Substring(textBox1.SelectedText.Length - 2) != Environment.NewLine
                     && textBox1.SelectedText.Substring(textBox1.SelectedText.Length - 3) != "<p>")
@@ -2034,15 +2051,29 @@ namespace WindowsFormsApp1
                 textBox1.Select(textBox1.SelectionStart, textBox1.SelectionLength++);
 
             }
-            if (textBox1.SelectionStart + textBox1.SelectionLength <= textBox1.TextLength)
+            if ("<p>".IndexOf(textBox1.SelectedText.Substring(0, 1)) > -1)
             {
-                if (textBox1.Text.Substring(textBox1.SelectionStart + textBox1.SelectionLength + Environment.NewLine.Length, "　".Length) != "　")
+                while (textBox1.SelectionStart >= 1 && textBox1.SelectedText.Substring(0, 3) != "<p>")
+                {
+                    textBox1.SelectionStart--; textBox1.SelectionLength++;
+                    if (textBox1.SelectionStart == 0) break;
+                }
+            }
+            if (textBox1.SelectionStart + textBox1.SelectionLength +
+                +Environment.NewLine.Length + "　".Length <= textBox1.TextLength)
+            {
+                if (textBox1.Text.Substring(textBox1.SelectionStart + textBox1.SelectionLength
+                    + Environment.NewLine.Length, "　".Length) != "　")
                 {//如果按下來是頂行，則不取代最後的<p>
                     textBox1.Select(textBox1.SelectionStart, textBox1.SelectionLength - "<p>".Length);
                 }
             }
             //textBox1.SelectedText = textBox1.SelectedText.Replace("<p>" + Environment.NewLine, Environment.NewLine);            
             textBox1.SelectedText = textBox1.SelectedText.Replace("<p>", "");
+            // Do your thingies here
+
+            SendMessage(this.Handle, WM_SETREDRAW, true, 0);
+            this.Refresh();
 
         }
 
