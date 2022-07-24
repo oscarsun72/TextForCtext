@@ -180,11 +180,11 @@ F6 : 標題降階（增加標題前之星號）
 
 Alt + F6 或 Alt + F8 或 選取標題文字前之空格再按下 Alt + ` : run autoMarkTitles 自動標識標題（篇名）
 
-F7 ： 每行縮排，即每行/段前空一格
+F7 ： 每行縮排，即每行/段前空一格；全部縮排的機會少，若要全部，則請將插入點放在全文前端或末尾
 
-Shfit + F7 : 每行凸排: deleteSpacePreParagraphs_ConvexRow()
+Shfit + F7 : 每行凸排: deleteSpacePreParagraphs_ConvexRow()；全部凸排的機會少，若要全部，則請將插入點放在全文前端或末尾
 
-Alt + F7 : 每行縮排一格後將其末誤標之<p>清除:keysSpacePreParagraphs_indent_ClearEnd＿P_Mark
+Alt + F7 : 每行縮排一格後將其末誤標之<p>清除:keysSpacePreParagraphs_indent_ClearEnd＿P_Mark；全部縮排的機會少，若要全部，則請將插入點放在全文前端或末尾
 
 F8 或 Alt + ` ： 加上篇名格式代碼
 

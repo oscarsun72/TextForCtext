@@ -1041,7 +1041,7 @@ namespace WindowsFormsApp1
                 if (e.KeyCode == Keys.D1)//D1=Menu?
                 {//Alt + 1 : 鍵入本站制式留空空格標記「􏿽」：若有選取則取代全形空格「　」為「􏿽」
                     e.Handled = true;
-                    keysSpacesBlank();                    
+                    keysSpacesBlank();
                     return;
                 }
 
@@ -1645,7 +1645,7 @@ namespace WindowsFormsApp1
                 //}
                 //}
 
-            }            
+            }
         }
 
         private void keysAsteriskPreTitle()
@@ -1876,7 +1876,15 @@ namespace WindowsFormsApp1
         private void deleteSpacePreParagraphs_ConvexRow()
         { //Shfit + F7 每行凸排
             int s = textBox1.SelectionStart, so = s, l = textBox1.SelectionLength, e = s + l; ;
-
+            if (l == 0)
+            {
+                if (s == 0 || s == textBox1.TextLength)
+                {//全部凸排的機會少，若要全部，則請將插入點放在全文前端或末尾
+                    textBox1.SelectAll();
+                    l = textBox1.TextLength;
+                }
+                else { textBox1.Select(s, 1); l = 1; }
+            }
             while (s - 1 > -1 && textBox1.Text.Substring(s--, 2) != Environment.NewLine)
             {
                 l++;
@@ -1891,6 +1899,10 @@ namespace WindowsFormsApp1
                 textBox1.SelectedText = textBox1.SelectedText.Replace(Environment.NewLine + "􏿽", Environment.NewLine);
             else
                 textBox1.SelectedText = textBox1.SelectedText.Replace(Environment.NewLine + "　", Environment.NewLine);
+            if (s == 0 && "　􏿽".IndexOf(textBox1.Text.Substring(0, 1)) > -1)
+            {
+                textBox1.Text = textBox1.Text.Substring(1, 0);
+            }
             textBox1.Select(s, l);
             stopUndoRec = false;
         }
@@ -1898,11 +1910,16 @@ namespace WindowsFormsApp1
         int indentRow()
         {//每行縮排 //此函式執行完時會將執行結果的範圍選取，以便後續處理。傳回值為處理了幾行/段
             int s = textBox1.SelectionStart; int l = textBox1.SelectionLength; String xn = "";
-            if (textBox1.SelectedText == "")
+            if (textBox1.SelectedText == "")//全部縮排的機會少，若要全部，則請將插入點放在全文前端或末尾
             {
-                pasteAllOverWrite = true;
-                textBox1.SelectAll();
-                l = textBox1.TextLength;
+                if (s == 0 || s == textBox1.TextLength)
+                {
+                    pasteAllOverWrite = true;
+                    textBox1.SelectAll();
+                    l = textBox1.TextLength;
+                }
+                else { textBox1.Select(s, 1); l = 1; }
+
             }
             String slTxt = textBox1.SelectedText; int i = slTxt.IndexOf(Environment.NewLine), cntr = 0;
             while (i > -1)
@@ -1990,6 +2007,16 @@ namespace WindowsFormsApp1
         private void keysSpacePreParagraphs_indent_ClearEnd＿P_Mark()
         {//Alt + F7 : 每行縮排一格後將其末誤標之<p>
             int l = textBox1.SelectionLength; int s = textBox1.SelectionStart;
+            if (l == 0)
+            {
+                if (s == 0 || s == textBox1.TextLength)
+                {//全部縮排的機會少，若要全部，則請將插入點放在全文前端或末尾
+                    textBox1.SelectAll();
+                    l = textBox1.TextLength;
+                }
+                else { textBox1.Select(s, 1); l = 1; }
+            }
+            
             if (l == textBox1.TextLength)
             {
                 l = 0;
@@ -2007,9 +2034,12 @@ namespace WindowsFormsApp1
                 textBox1.Select(textBox1.SelectionStart, textBox1.SelectionLength++);
 
             }
-            if (textBox1.Text.Substring(textBox1.SelectionStart + textBox1.SelectionLength + Environment.NewLine.Length, "　".Length) != "　")
-            {//如果按下來是頂行，則不取代最後的<p>
-                textBox1.Select(textBox1.SelectionStart, textBox1.SelectionLength - "<p>".Length);
+            if (textBox1.SelectionStart + textBox1.SelectionLength <= textBox1.TextLength)
+            {
+                if (textBox1.Text.Substring(textBox1.SelectionStart + textBox1.SelectionLength + Environment.NewLine.Length, "　".Length) != "　")
+                {//如果按下來是頂行，則不取代最後的<p>
+                    textBox1.Select(textBox1.SelectionStart, textBox1.SelectionLength - "<p>".Length);
+                }
             }
             //textBox1.SelectedText = textBox1.SelectedText.Replace("<p>" + Environment.NewLine, Environment.NewLine);            
             textBox1.SelectedText = textBox1.SelectedText.Replace("<p>", "");
@@ -2142,8 +2172,9 @@ namespace WindowsFormsApp1
         int countLinesPerPage(string xPage)
         {
             //int count = 0;
-            int i = 0, openBracketS, closeBracketS; bool openNote = false;
+            int i = 0, openBracketS, closeBracketS, e = xPage.IndexOf(Environment.NewLine); bool openNote = false;
             string[] linesParasPage = xPage.Split(Environment.NewLine.ToArray(), StringSplitOptions.RemoveEmptyEntries);
+
             if (linesParasPage.Length == 1) return 1;
             foreach (string item in linesParasPage)
             {
@@ -2156,8 +2187,8 @@ namespace WindowsFormsApp1
                     if (item == "}}<p>") openNote = false; else openNote = true;
                 }
 
-                //else if (i == 0 & x.IndexOf("}}") < (x.IndexOf("{{") == -1 ? x.Length : x.IndexOf("{{")) && x.IndexOf("}}") > e)
-                //{ i++; openNote = true; }//第一段/行是純注文                
+                else if (i == 0 && xPage.IndexOf("}}") > -1 && xPage.IndexOf("}}") < (xPage.IndexOf("{{") == -1 ? xPage.Length : xPage.IndexOf("{{")) && xPage.IndexOf("}}") > e)
+                { i++; openNote = true; }//第一段/行是純注文        
                 else if (i == 0 && item.IndexOf("{{") == -1 && item.IndexOf("}}") == -1)
                 {
                     string xx = linesParasPage[i + 1];
@@ -2819,8 +2850,8 @@ namespace WindowsFormsApp1
                     if (item == "}}<p>") openNote = false; else openNote = true;
                 }
 
-                //else if (i == 0 & x.IndexOf("}}") < (x.IndexOf("{{") == -1 ? x.Length : x.IndexOf("{{")) && x.IndexOf("}}") > e)
-                //{ i++; openNote = true; }//第一段/行是純注文
+                else if (i == 0 && x.IndexOf("}}") > -1 && x.IndexOf("}}") < (x.IndexOf("{{") == -1 ? x.Length : x.IndexOf("{{")) && x.IndexOf("}}") > e)
+                { i++; openNote = true; }//第一段/行是純注文
                 else if (i == 0 && item.IndexOf("{{") == -1 && item.IndexOf("}}") == -1 && linesParasPage.Length > 1)
                 {
                     string xx = linesParasPage[i + 1];

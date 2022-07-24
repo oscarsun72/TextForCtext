@@ -1895,7 +1895,7 @@ End Function
 Function trimStrForSearch(x As String, sl As word.Selection) As String
 'https://docs.microsoft.com/zh-tw/dotnet/visual-basic/programming-guide/language-features/procedures/passing-arguments-by-value-and-by-reference
 Dim ayToTrim As Variant, a As Variant, rng As Range, slTxtR As String
-On Error GoTo eH
+On Error GoTo eh
 slTxtR = sl.Characters(sl.Characters.Count)
 ayToTrim = Array(Chr(13), Chr(9), Chr(10), Chr(11), Chr(13) & Chr(7), Chr(13) & Chr(10))
 x = VBA.Trim(x)
@@ -1912,7 +1912,7 @@ If sl.Type <> wdSelectionIP Then
     End If
 End If
 Exit Function
-eH:
+eh:
 Select Case Err.Number
     Case Else
         MsgBox Err.Number & Err.Description
@@ -1939,7 +1939,7 @@ End If
 End Function
 Function is注音符號(ByVal a As String, Optional rng As Variant) As Boolean
 Dim f As String
-On Error GoTo eH
+On Error GoTo eh
 If Len(a) > 1 Then Exit Function
 f = "ㄅㄆㄇㄈㄉㄊㄋㄌㄍㄎㄏㄐㄑㄒㄓㄔㄕㄖㄗㄘㄙㄧㄨㄩㄚㄛㄜㄝㄞㄟㄠㄡㄢㄣㄤㄥㄦˊ  ˇ  ˋ  ˙"
 If a = ChrW(20008) Then
@@ -1960,7 +1960,7 @@ Else
     If InStr(f, a) Then is注音符號 = True
 End If
 Exit Function
-eH:
+eh:
 Select Case Err.Number
     Case 424 '此處需要物件
         Set rng = Nothing
@@ -2398,7 +2398,7 @@ Set xlApp = Excel.Application
 Set xlBook = Excel.Workbook
 Set xlSheet = Excel.Worksheet
 Dim ReadingLayoutB As Boolean
-Static Ln
+Static ln
 Dim xlsp As String
 On Error GoTo ErrH:
 Set d = ActiveDocument
@@ -2408,19 +2408,19 @@ Set d = ActiveDocument
         "預設將以此word文件檔名 + ""詞頻.XLSX""字綴,存於桌面上", "詞頻調查", xlsp & Replace(d.Name, ".doc", "") & "詞頻" & StrConv(Time, vbWide) & ".XLSX")
 'If xlsp = "" Then Exit Sub
 xlsp = 取得桌面路徑 & "\" & Replace(d.Name, ".doc", "") & "_詞頻" & StrConv(Time, vbWide) & ".XLSX"
-If Ln = "" Then Ln = 1
-Ln = InputBox("請指定詞彙長度" & vbCr & vbCr & "檔案會存在桌面上名為:" & vbCr & vbCr & Replace(d.Name, ".doc", "") & "_詞頻" & StrConv(Time, vbWide) & ".XLSX" & _
-                vbCr & vbCr & "的檔案", , Ln + 1)
-If Ln = "" Then Exit Sub
-If Not IsNumeric(Ln) Then Exit Sub
-If Ln > 11 Or Ln < 2 Then Exit Sub
+If ln = "" Then ln = 1
+ln = InputBox("請指定詞彙長度" & vbCr & vbCr & "檔案會存在桌面上名為:" & vbCr & vbCr & Replace(d.Name, ".doc", "") & "_詞頻" & StrConv(Time, vbWide) & ".XLSX" & _
+                vbCr & vbCr & "的檔案", , ln + 1)
+If ln = "" Then Exit Sub
+If Not IsNumeric(ln) Then Exit Sub
+If ln > 11 Or ln < 2 Then Exit Sub
 
 
 ds = VBA.Timer
 
 With d
     For Each char In d.Characters
-        Select Case Ln
+        Select Case ln
             Case 2
                 charText = char & char.Next
             Case 3
@@ -2494,7 +2494,7 @@ For j = u To 0 Step -1 '陣列排序'2010/10/29
     If Xsort(j) <> "" Then
         With Doc
             If Len(.Range) = 1 Then '尚未輸入內容
-                .Range.InsertAfter "詞頻 = " & j & "次：（" & Len(Replace(Xsort(j), "、", "")) / Ln & "個）"
+                .Range.InsertAfter "詞頻 = " & j & "次：（" & Len(Replace(Xsort(j), "、", "")) / ln & "個）"
                 .Range.Paragraphs(1).Range.Font.Size = 12
                 .Range.Paragraphs(.Paragraphs.Count).Range.Font.Name = "新細明體"
                 .Range.Paragraphs(.Paragraphs.Count).Range.Font.NameAscii = "Times New Roman"
@@ -2502,7 +2502,7 @@ For j = u To 0 Step -1 '陣列排序'2010/10/29
             Else
                 .Range.InsertParagraphAfter
                 .ActiveWindow.Selection.Range.Collapse Direction:=wdCollapseEnd
-                .Range.InsertAfter "詞頻 = " & j & "次：（" & Len(Replace(Xsort(j), "、", "")) / Ln & "個）"
+                .Range.InsertAfter "詞頻 = " & j & "次：（" & Len(Replace(Xsort(j), "、", "")) / ln & "個）"
                 .Range.Paragraphs(.Paragraphs.Count).Range.Font.Size = 12
                 '.Range.Paragraphs(.Paragraphs.Count).Range.Bold = True
                 .Range.Paragraphs(.Paragraphs.Count).Range.Font.Name = "新細明體"
@@ -2591,7 +2591,7 @@ End Sub
 Sub 書名號篇名號檢查()
 Dim s As Long, rng As Range, e, trm As String, ans
 Static x() As String, i As Integer
-On Error GoTo eH
+On Error GoTo eh
 Do
     Selection.Find.Execute "〈", , , , , , True, wdFindAsk
     Set rng = Selection.Range
@@ -2613,7 +2613,7 @@ Do
 1
 Loop
 Exit Sub
-eH:
+eh:
 Select Case Err.Number
     Case 92 '沒有設定 For 迴圈的初始值 陣列尚未有值
         GoTo 2
@@ -2673,7 +2673,7 @@ chng:
 Return
 End Sub
 Sub 中國哲學書電子化計劃_表格轉文字(ByRef r As Range)
-On Error GoTo eH
+On Error GoTo eh
 Dim lngTemp As Long '因為誤按到追蹤修訂，才會引發訊息提示刪除儲存格不會有標識
 'Dim d As Document
 Dim tb As Table, c As Cell ', ci As Long
@@ -2688,7 +2688,7 @@ If r.Tables.Count > 0 Then
 End If
 'word.Application.DisplayAlerts = lngTemp
 Exit Sub
-eH:
+eh:
 Select Case Err.Number
     Case 5992 '無法個別存取此集合中的各欄，因為表格中有混合的儲存格寬度。
         For Each c In tb.Range.Cells
@@ -2722,7 +2722,8 @@ For Each a In slRng.Characters
 Next a
 End Sub
 Sub 中國哲學書電子化計劃_去掉註文保留正文()
-Dim slRng As Range, a
+Dim slRng As Range, a, ur As UndoRecord
+Set ur = SystemSetup.stopUndo("中國哲學書電子化計劃_去掉註文保留正文")
 Docs.空白的新文件
 If ActiveDocument.Characters.Count = 1 Then Selection.Paste
 If Selection.Type = wdSelectionIP Then ActiveDocument.Select
@@ -2739,9 +2740,11 @@ For Each a In slRng.Characters
 Next a
 If MsgBox("是否取代異體字？", vbOKCancel) = vbOK Then 文字轉換.異體字轉正
 Beep 'MsgBox "done!", vbInformation
+SystemSetup.contiUndo ur
 End Sub
 Sub 中國哲學書電子化計劃_註文前後加括弧()
-Dim slRng As Range, a, flg As Boolean 'Alt+1
+Dim slRng As Range, a, flg As Boolean, ur As UndoRecord 'Alt+1
+Set ur = SystemSetup.stopUndo("中國哲學書電子化計劃_註文前後加括弧")
 Docs.空白的新文件
 If Selection.Type = wdSelectionIP Then ActiveDocument.Select
 Set slRng = Selection.Range
@@ -2820,10 +2823,12 @@ Do
    If Selection = Chr(13) Then Selection.Delete
 Loop While Selection = Chr(13)
 'MsgBox "done!", vbInformation
+SystemSetup.contiUndo ur
 End Sub
 Sub 漢籍電子文獻資料庫文本整理_以轉貼到中國哲學書電子化計劃(Optional doNotCloseDoc As Boolean)
-Dim rng As Range, d As Document, a
+Dim rng As Range, d As Document, a, ur As UndoRecord
 Dim rp As Variant, i As Byte
+Set ur = SystemSetup.stopUndo("漢籍電子文獻資料庫文本整理_以轉貼到中國哲學書電子化計劃")
 If Documents.Count = 0 Then Documents.Add
 Set d = ActiveDocument
 If d.path <> "" Or d.Content.Text <> Chr(13) Then
@@ -2868,6 +2873,7 @@ If Not doNotCloseDoc Then
     d.Range.Cut
     d.Close wdDoNotSaveChanges
 End If
+SystemSetup.contiUndo ur
 End Sub
 Sub 漢籍電子文獻資料庫文本整理_注文前後加括號()
 Dim rng As Range, fColor As Long, flg As Boolean
@@ -2952,7 +2958,7 @@ Next i
 End Function
 Sub 生難字加上國語辭典注音()
 Dim rng As Range, x, rst As New ADODB.Recordset, st As WdSelectionType, words As String
-Dim cnt As New ADODB.Connection, id As Long, sty As word.Style, url As String
+Dim cnt As New ADODB.Connection, id As Long, sty As word.Style, URL As String
 Dim frmDict As New Form_DictsURL, lnks As New Links, db As New dBase ', frm As New MSForms.DataObject
 Static cntStr As String, chromePath As String
 st = Selection.Type
@@ -2970,7 +2976,7 @@ End If
 Set rng = Selection.Range
 words = x
 db.setWordControlValue (words)
-On Error GoTo eH
+On Error GoTo eh
 Dim ur As UndoRecord
 Set ur = SystemSetup.stopUndo("生難字加上國語辭典注音")
 
@@ -3148,9 +3154,9 @@ rePt:
             If x = "" Then GoTo endS
             If Left(x, 4) <> "http" Then GoTo rePt
             x = lnks.trimLinks_http_Dicts_toAddZhuYin_RevisedMoeEdu(CStr(x), rst.Fields(0))
-            url = VBA.CStr(x)
-            If lnks.chkLinks_http_Dicts_toAddZhuYin(url, words, 1, id, rst.Fields(0)) Then
-                x = url
+            URL = VBA.CStr(x)
+            If lnks.chkLinks_http_Dicts_toAddZhuYin(URL, words, 1, id, rst.Fields(0)) Then
+                x = URL
                 rst.Fields(2).Value = x
                 If id <> 0 Then
                     rst.Fields("ID") = id
@@ -3175,7 +3181,7 @@ rePt:
 Return
 
 
-eH:
+eh:
     Select Case Err.Number
         Case 4198 '指令失敗 'Google Drive的問題
             Resume Next
@@ -3183,7 +3189,7 @@ eH:
             Docs.樣式add_沛榮按等樣式
             Resume
         Case 5 '程序呼叫或引數不正確
-            SystemSetup.Wait 'http://vbcity.com/forums/t/81315.aspx
+            SystemSetup.Wait 3 'http://vbcity.com/forums/t/81315.aspx
             'Application.Wait (Now + TimeValue("0:00:10")) '<~~ Waits ten seconds.
             Resume 'https://stackoverflow.com/questions/21937053/appactivate-to-return-to-excel
         Case Else
