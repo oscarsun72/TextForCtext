@@ -2033,8 +2033,8 @@ namespace WindowsFormsApp1
             {
                 l = 0;
             }
+            undoRecord(); stopUndoRec = true;
             int cntr = indentRow();//此函式執行完時會將執行結果的範圍選取，以便後續處理。傳回值為處理了幾行/段
-            undoRecord();
             if (l != 0)
             {
                 textBox1.Select(s, l + 1 + cntr - cntr * "<p>".Length);
@@ -2074,6 +2074,7 @@ namespace WindowsFormsApp1
 
             SendMessage(this.Handle, WM_SETREDRAW, true, 0);
             this.Refresh();
+            stopUndoRec = false;
 
         }
 

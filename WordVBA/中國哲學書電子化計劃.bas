@@ -157,6 +157,7 @@ Beep
 SystemSetup.Wait 0.5
 DoEvents:
 SendKeys "{tab}"
+AppActivateDefaultBrowser
 'SystemSetup.ClipboardPutIn Description_from_ClipBoard
 DoEvents
 'SendKeys "^v"
