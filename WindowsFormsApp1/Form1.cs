@@ -1918,6 +1918,7 @@ namespace WindowsFormsApp1
         int indentRow()
         {//每行縮排 //此函式執行完時會將執行結果的範圍選取，以便後續處理。傳回值為處理了幾行/段
             int s = textBox1.SelectionStart; int l = textBox1.SelectionLength; String xn = "";
+            bool stopUndoRecFlag = false;
             if (textBox1.SelectedText == "")//全部縮排的機會少，若要全部，則請將插入點放在全文前端或末尾
             {
                 if (s == 0 || s == textBox1.TextLength)
@@ -1935,7 +1936,7 @@ namespace WindowsFormsApp1
                 cntr++;//計下處理了幾行/段
                 i = slTxt.IndexOf(Environment.NewLine, i + 1);
             }
-            undoRecord(); caretPositionRecord(); stopUndoRec = true;
+            if (!stopUndoRec) { undoRecord(); caretPositionRecord(); stopUndoRec = true; stopUndoRecFlag = true; }
             if (s == 0 || s > 2 && textBox1.Text.Substring(s - 2, 2) == Environment.NewLine)
             {
                 xn = textBox1.SelectedText.Replace(Environment.NewLine, Environment.NewLine + "　");
@@ -1954,7 +1955,7 @@ namespace WindowsFormsApp1
             }
             textBox1.Select(s, l);//將執行結果的範圍選取，以便後續處理。
             pasteAllOverWrite = false;
-            stopUndoRec = false;
+            if (stopUndoRecFlag) stopUndoRec = false;
             return cntr;
         }
         private void keysSpacePreParagraphs_indent()
@@ -2535,9 +2536,36 @@ namespace WindowsFormsApp1
                 }
             }
             stopUndoRec = false;
+            replaceBlank_ifNOTTitleAndAfterparagraphMark();
             new SoundPlayer(@"C:\Windows\Media\windows logoff sound.wav").Play();
             rst.Close(); cnt.Close();
             textBox1.Select(rs, rl); textBox1.ScrollToCaret();
+        }
+
+        //將<p>後的空格「　」取代為「􏿽」，只要該行不是篇名
+        void replaceBlank_ifNOTTitleAndAfterparagraphMark()
+        {
+            int e = textBox1.Text.IndexOf(Environment.NewLine), s = 0; string px = textBox1.Text.Substring(s, e - s), x = textBox1.Text;
+            while (e > -1 && s < x.Length )
+            {
+                int j = 0;
+                px = x.Substring(s, e - s);
+                if (s > 5 && x.Substring(s - 5, 5) == "<p>" + Environment.NewLine
+                    && px.IndexOf("*") == -1)
+                {
+                    int i = 0;
+                    while (px!="" && px.Substring(i, 1) == "　")
+                    {
+                        x = x.Substring(0, s + i + j) + "􏿽" + x.Substring(s + i + 1 + j); i++; j++;
+                    }
+                }
+                s = e + Environment.NewLine.Length + j;
+                e = x.IndexOf(Environment.NewLine, s);
+
+            }
+            stopUndoRec = true; undoRecord();
+            textBox1.Text = x;
+            stopUndoRec = false;
         }
         private void insertWords(string insX, TextBox tBox, string x = "")
         {
@@ -5013,6 +5041,7 @@ namespace WindowsFormsApp1
             rst.Close(); cnt.Close();
             undoRecord();
             textBox1.Text = tx;
+            //replaceBlank_ifNOTTitleAndAfterparagraphMark();
             caretPositionRecall();
         }
 
