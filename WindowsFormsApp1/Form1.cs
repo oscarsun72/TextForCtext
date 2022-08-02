@@ -1577,17 +1577,19 @@ namespace WindowsFormsApp1
             string x = textBox1.Text;
             int s = textBox1.SelectionStart, l = textBox1.SelectionLength;
             string sTxt = textBox1.SelectedText;
+            dontHide = true;
             if (sTxt != "")
             {//有選取範圍
                 if (sTxt == "<p>")
                 { undoRecord(); stopUndoRec = true; textBox1.SelectedText = "􏿽"; stopUndoRec = false; }
                 else
                 {
-                    if (sTxt.IndexOf("　") == -1) return;
+                    if (sTxt.IndexOf("　") == -1) { stopUndoRec = false; return; }
                     string sTxtChk = sTxt.Replace("　", "􏿽");
                     undoRecord();
                     stopUndoRec = true;
                     textBox1.SelectedText = sTxtChk;
+                    dontHide = false;
                     /*
                     textBox1.Text = x.Substring(0, s) + sTxtChk + x.Substring(s + sTxt.Length);
                     //string sTxtChk = sTxt.Replace("　", "");
@@ -1603,7 +1605,7 @@ namespace WindowsFormsApp1
                     else
                         textBox1.SelectionStart = s + sTxtChk.Length;
                     */
-                    stopUndoRec = false;
+
                 }
                 //caretPositionRecall();
                 //textBox1.ScrollToCaret();
@@ -1620,6 +1622,7 @@ namespace WindowsFormsApp1
                         {
                             textBox1.Select(sn, 3);
                             undoRecord(); stopUndoRec = true; textBox1.SelectedText = "􏿽"; stopUndoRec = false;
+                            stopUndoRec = false;
                             return;
                         }
                     }
@@ -1641,6 +1644,7 @@ namespace WindowsFormsApp1
                 textBox1.SelectedText = "􏿽";
                 //textBox1.Text = x;
                 //textBox1.SelectionStart = s + "􏿽".Length;
+                stopUndoRec = false;
                 stopUndoRec = false;
                 //}
                 //}
@@ -1888,7 +1892,7 @@ namespace WindowsFormsApp1
                 {
                     if (x.Substring(s--, 1) == Environment.NewLine.Substring(1, 1))
                     {
-                        s+=2;
+                        s += 2;
                         break;
                     }
 
@@ -1959,7 +1963,7 @@ namespace WindowsFormsApp1
                 {
                     cntr++;
                     i = selTxt.IndexOf(Environment.NewLine + "　", i + 1);
-                }                
+                }
                 if (textBox1.SelectedText.Substring(0, 1) == "　") textBox1.SelectedText = textBox1.SelectedText.Substring(1);
                 l -= "　".Length;
                 textBox1.Select(s, l);

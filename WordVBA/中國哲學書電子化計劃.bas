@@ -30,7 +30,8 @@ rng.Paragraphs(3).Range = CLng(Replace(rng.Paragraphs(3).Range, Chr(13), "")) + 
 ''x = Replace(x, Chr(13), "")
 'data.SetText Replace(x, "/>", "/>¡´", 1, 1)
 'data.PutInClipboard
-SystemSetup.SetClipboard x
+'SystemSetup.SetClipboard x
+SystemSetup.CopyText x
 DoEvents
 Network.AppActivateDefaultBrowser
 SendKeys "^v"

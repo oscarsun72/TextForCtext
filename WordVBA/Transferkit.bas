@@ -23,6 +23,7 @@ If d.Characters.Count > 10000 Then
     d.ActiveWindow.Visible = True
 Else
     rng.Cut
+    d.Application.WindowState = wdWindowStateMinimize
     d.Close wdDoNotSaveChanges
 End If
 SystemSetup.contiUndo ur
