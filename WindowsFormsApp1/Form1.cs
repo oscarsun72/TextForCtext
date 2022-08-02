@@ -1890,12 +1890,12 @@ namespace WindowsFormsApp1
             {
                 if (s > 0)
                 {
-                    if (x.Substring(s--, 1) == Environment.NewLine.Substring(1, 1))
+                    if (x.Substring(s-1, 1) == Environment.NewLine.Substring(1, 1))
                     {
-                        s += 2;
+                        //s += 2;
                         break;
                     }
-
+                    s--;
                 }
                 else break;
             }
@@ -1904,7 +1904,7 @@ namespace WindowsFormsApp1
             {
                 if (s + l < x.Length)
                 {
-                    if (x.Substring(s + (++l), 1) == Environment.NewLine.Substring(0, 1))
+                    if (x.Substring(s + (++l), 1) == Environment.NewLine.Substring(1, 1))
                     {
                         l--;
                         break;
@@ -2135,7 +2135,20 @@ namespace WindowsFormsApp1
                     textBox1.Select(textBox1.SelectionStart, textBox1.SelectionLength - "<p>".Length);
                 }
             }
+            s = textBox1.SelectionStart; l = textBox1.SelectionLength;
+            int i = textBox1.SelectedText.IndexOf("􏿽");
+            while (i != -1)
+            {
+                if (textBox1.SelectedText.Substring(i - 1, 1) == "　")
+                {
+                    textBox1.Select(s + i, "􏿽".Length);
+                    textBox1.SelectedText = "　"; l -= ("􏿽".Length - "　".Length);
+                    textBox1.Select(s, l);
+                }                
+                i = textBox1.SelectedText.IndexOf("􏿽", i + 1);
+            }
             //textBox1.SelectedText = textBox1.SelectedText.Replace("<p>" + Environment.NewLine, Environment.NewLine);            
+            //textBox1.Select(s, l);
             textBox1.SelectedText = textBox1.SelectedText.Replace("<p>", "");
             // Do your thingies here
 
