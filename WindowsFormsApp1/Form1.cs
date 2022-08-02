@@ -1890,7 +1890,7 @@ namespace WindowsFormsApp1
             {
                 if (s > 0)
                 {
-                    if (x.Substring(s-1, 1) == Environment.NewLine.Substring(1, 1))
+                    if (x.Substring(s - 1, 1) == Environment.NewLine.Substring(1, 1))
                     {
                         //s += 2;
                         break;
@@ -2012,7 +2012,10 @@ namespace WindowsFormsApp1
             {
                 //int f = textBox1.Text.LastIndexOf(Environment.NewLine, s);
                 xn = textBox1.SelectedText.Replace(Environment.NewLine, Environment.NewLine + "　");
-                textBox1.SelectedText = xn;
+                if (textBox1.SelectedText == xn)
+                    textBox1.SelectedText = "　" + textBox1.SelectedText;
+                else
+                    textBox1.SelectedText = xn;
 
                 //textBox1.Select(f == -1 ? 0 : f + 2, s - f);//只讀取了第一行前端
                 //s = textBox1.SelectionStart - "　".Length; if (s < 0) s = 0;
@@ -2101,6 +2104,7 @@ namespace WindowsFormsApp1
                 l = 0;
             }
             undoRecord(); stopUndoRec = true;
+            expandSelectedTextRangeToWholeLinePara(s, l, textBox1.Text);
             int cntr = indentRow();//此函式執行完時會將執行結果的範圍選取，以便後續處理。傳回值為處理了幾行/段
             if (l != 0)
             {
@@ -2144,7 +2148,7 @@ namespace WindowsFormsApp1
                     textBox1.Select(s + i, "􏿽".Length);
                     textBox1.SelectedText = "　"; l -= ("􏿽".Length - "　".Length);
                     textBox1.Select(s, l);
-                }                
+                }
                 i = textBox1.SelectedText.IndexOf("􏿽", i + 1);
             }
             //textBox1.SelectedText = textBox1.SelectedText.Replace("<p>" + Environment.NewLine, Environment.NewLine);            
