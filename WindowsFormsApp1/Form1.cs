@@ -1879,11 +1879,42 @@ namespace WindowsFormsApp1
             }
         }
 
+        void expandSelectedTextRangeToWholeLinePara(int s, int l, string x)
+        {//延展選取範圍至整個行/段
+            int so = s;
+            while (s >= 0)
+            {
+                if (s > 0)
+                {
+                    if (x.Substring(s--, 1) == Environment.NewLine.Substring(1, 1))
+                    {
+                        s+=2;
+                        break;
+                    }
 
+                }
+                else break;
+            }
+            l += (so - s);
+            while (s + l <= x.Length)
+            {
+                if (s + l < x.Length)
+                {
+                    if (x.Substring(s + (++l), 1) == Environment.NewLine.Substring(0, 1))
+                    {
+                        l--;
+                        break;
+                    }
+
+                }
+                else break;
+            }
+            textBox1.Select(s, l);
+        }
 
         private void deleteSpacePreParagraphs_ConvexRow()
         { //Shfit + F7 每行凸排
-            int s = textBox1.SelectionStart, so = s, l = textBox1.SelectionLength, e = s + l; ;
+            int s = textBox1.SelectionStart, so = s, l = textBox1.SelectionLength, cntr = 0, i; dontHide = true; string x = textBox1.Text, selTxt;
             if (l == 0)
             {
                 if (s == 0 || s == textBox1.TextLength)
@@ -1893,31 +1924,59 @@ namespace WindowsFormsApp1
                 }
                 else { textBox1.Select(s, 1); l = 1; }
             }
-            while (s - 1 > -1 && textBox1.Text.Substring(s--, 2) != Environment.NewLine)
-            {
-                l++;
-            }
-            //while (e < textBox1.TextLength && textBox1.Text.Substring(e++, 2) != Environment.NewLine)
-            //{
-
-            //}
             undoRecord(); stopUndoRec = true;
-            textBox1.Select(s, l);
-            if (textBox1.SelectedText.IndexOf("􏿽") > -1)
+            //while (s - 1 > -1 && textBox1.Text.Substring(s--, 2) != Environment.NewLine)
+            //{
+            //    l++;
+            //}
+            ////while (e < textBox1.TextLength && textBox1.Text.Substring(e++, 2) != Environment.NewLine)
+            ////{
+
+            ////}
+            //textBox1.Select(s, l + (so - s));
+            //s = textBox1.SelectionStart; l = textBox1.SelectionLength;
+            expandSelectedTextRangeToWholeLinePara(s, l, x);
+            s = textBox1.SelectionStart; l = textBox1.SelectionLength;
+            selTxt = textBox1.SelectedText;
+            if (textBox1.SelectedText.Substring(0, 2) == "􏿽")//(textBox1.SelectedText.IndexOf("􏿽") > -1)
+            {
+                i = selTxt.IndexOf(Environment.NewLine + "􏿽");
+                while (i > -1)
+                {
+                    cntr++;
+                    i = selTxt.IndexOf(Environment.NewLine + "􏿽", i + 1);
+                }
+                if (textBox1.SelectedText.Substring(0, 1) == "􏿽") textBox1.SelectedText = textBox1.SelectedText.Substring(1);
+                l -= "􏿽".Length;
+                textBox1.Select(s, l);
                 textBox1.SelectedText = textBox1.SelectedText.Replace(Environment.NewLine + "􏿽", Environment.NewLine);
+                cntr *= 2;
+            }
             else
+            {
+                i = selTxt.IndexOf(Environment.NewLine + "　");
+                while (i > -1)
+                {
+                    cntr++;
+                    i = selTxt.IndexOf(Environment.NewLine + "　", i + 1);
+                }                
+                if (textBox1.SelectedText.Substring(0, 1) == "　") textBox1.SelectedText = textBox1.SelectedText.Substring(1);
+                l -= "　".Length;
+                textBox1.Select(s, l);
                 textBox1.SelectedText = textBox1.SelectedText.Replace(Environment.NewLine + "　", Environment.NewLine);
+            }
             if (s == 0 && "　􏿽".IndexOf(textBox1.Text.Substring(0, 1)) > -1)
             {
-                textBox1.Text = textBox1.Text.Substring(1, 0);
+                textBox1.Text = textBox1.Text.Substring(1);
             }
-            textBox1.Select(s, l);
+            textBox1.Select(s, l - cntr);
             stopUndoRec = false;
+            dontHide = false;
         }
 
         int indentRow()
         {//每行縮排 //此函式執行完時會將執行結果的範圍選取，以便後續處理。傳回值為處理了幾行/段
-            int s = textBox1.SelectionStart; int l = textBox1.SelectionLength; String xn = "";
+            int s = textBox1.SelectionStart; int l = textBox1.SelectionLength; String xn = "", x = textBox1.Text;
             bool stopUndoRecFlag = false;
             if (textBox1.SelectedText == "")//全部縮排的機會少，若要全部，則請將插入點放在全文前端或末尾
             {
@@ -1930,6 +1989,8 @@ namespace WindowsFormsApp1
                 else { textBox1.Select(s, 1); l = 1; }
 
             }
+            //先延展選取範圍至整個行/段
+            expandSelectedTextRangeToWholeLinePara(s, l, x);
             String slTxt = textBox1.SelectedText; int i = slTxt.IndexOf(Environment.NewLine), cntr = 0;
             while (i > -1)
             {
@@ -1945,13 +2006,14 @@ namespace WindowsFormsApp1
             }
             else
             {
-                int f = textBox1.Text.LastIndexOf(Environment.NewLine, s);
+                //int f = textBox1.Text.LastIndexOf(Environment.NewLine, s);
                 xn = textBox1.SelectedText.Replace(Environment.NewLine, Environment.NewLine + "　");
                 textBox1.SelectedText = xn;
-                textBox1.Select(f == -1 ? 0 : f + 2, s - f);//只讀取了第一行前端
-                s = textBox1.SelectionStart - "　".Length; if (s < 0) s = 0;
+
+                //textBox1.Select(f == -1 ? 0 : f + 2, s - f);//只讀取了第一行前端
+                //s = textBox1.SelectionStart - "　".Length; if (s < 0) s = 0;
                 l = ("　" + xn + textBox1.SelectionLength).Length;
-                textBox1.SelectedText = "　" + textBox1.SelectedText;
+                //textBox1.SelectedText = "　" + textBox1.SelectedText;
             }
             textBox1.Select(s, l);//將執行結果的範圍選取，以便後續處理。
             pasteAllOverWrite = false;
@@ -1960,7 +2022,7 @@ namespace WindowsFormsApp1
         }
         private void keysSpacePreParagraphs_indent()
         {// F7 每行縮排
-            int l = textBox1.SelectionLength; int s = textBox1.SelectionStart;
+            int l = textBox1.SelectionLength; int s = textBox1.SelectionStart; dontHide = true;
             if (l == textBox1.TextLength)
             {
                 l = 0;
@@ -1970,7 +2032,7 @@ namespace WindowsFormsApp1
             {
                 textBox1.Select(s, l + 1 + cntr);
             }
-
+            dontHide = false;
             #region 原式
             /*
             int s = textBox1.SelectionStart;
@@ -2019,7 +2081,7 @@ namespace WindowsFormsApp1
 
         private void keysSpacePreParagraphs_indent_ClearEnd＿P_Mark()
         {//Alt + F7 : 每行縮排一格後將其末誤標之<p>
-            int l = textBox1.SelectionLength; int s = textBox1.SelectionStart;
+            int l = textBox1.SelectionLength; int s = textBox1.SelectionStart; dontHide = true;
             if (l == 0)
             {
                 if (s == 0 || s == textBox1.TextLength)
@@ -2076,7 +2138,7 @@ namespace WindowsFormsApp1
             SendMessage(this.Handle, WM_SETREDRAW, true, 0);
             this.Refresh();
             stopUndoRec = false;
-
+            dontHide = false;
         }
 
 
@@ -2538,7 +2600,7 @@ namespace WindowsFormsApp1
             stopUndoRec = false;
             replaceBlank_ifNOTTitleAndAfterparagraphMark();
             new SoundPlayer(@"C:\Windows\Media\windows logoff sound.wav").Play();
-            rst.Close(); cnt.Close();
+            rst.Close(); cnt.Close(); rst = null; cnt = null;
             textBox1.Select(rs, rl); textBox1.ScrollToCaret();
         }
 
@@ -2546,7 +2608,7 @@ namespace WindowsFormsApp1
         void replaceBlank_ifNOTTitleAndAfterparagraphMark()
         {
             int e = textBox1.Text.IndexOf(Environment.NewLine), s = 0; string px = textBox1.Text.Substring(s, e - s), x = textBox1.Text;
-            while (e > -1 && s < x.Length )
+            while (e > -1 && s < x.Length)
             {
                 int j = 0;
                 px = x.Substring(s, e - s);
@@ -2554,7 +2616,7 @@ namespace WindowsFormsApp1
                     && px.IndexOf("*") == -1)
                 {
                     int i = 0;
-                    while (px!="" && px.Substring(i, 1) == "　")
+                    while (px != "" && px.Substring(i, 1) == "　")
                     {
                         x = x.Substring(0, s + i + j) + "􏿽" + x.Substring(s + i + 1 + j); i++; j++;
                     }
@@ -3730,9 +3792,10 @@ namespace WindowsFormsApp1
             SetCursorPos(this.Left + 30, this.Top + 100);
         }
 
-
+        bool dontHide = false;
         void hideToNICo()
         {
+            if (dontHide) return;
             //https://dotblogs.com.tw/jimmyyu/2009/09/21/10733
             //https://dotblogs.com.tw/chou/2009/02/25/7284 https://yl9111524.pixnet.net/blog/post/49024854
             if (this.WindowState != FormWindowState.Minimized)
@@ -5010,12 +5073,12 @@ namespace WindowsFormsApp1
             {
                 if (nextLine.IndexOf(rst.Fields["term"].Value.ToString()) == 0)
                 {
-                    if (rstClose) rst.Close(); else rst.MoveFirst(); if (cntClose) cnt.Close();
+                    if (rstClose) { rst.Close(); rst = null; } else rst.MoveFirst(); if (cntClose) { cnt.Close(); cnt = null; }
                     return false;
                 }
                 rst.MoveNext();
             }
-            if (rstClose) rst.Close(); else rst.MoveFirst(); if (cntClose) cnt.Close();
+            if (rstClose) { rst.Close(); rst = null; } else rst.MoveFirst(); if (cntClose) { cnt.Close(); cnt = null; }
             return true;
 
         }
@@ -5028,17 +5091,19 @@ namespace WindowsFormsApp1
 
         void replaceXdirrectly()
         {// F11
-            string tx = textBox1.Text;
+            string tx = textBox1.Text, rx;
             ado.Connection cnt = new ado.Connection();
             openDatabase("查字.mdb", ref cnt);
             ado.Recordset rst = new ado.Recordset();
             rst.Open("select * from 維基文庫等欲直接抽換之字 where doit=true", cnt, ado.CursorTypeEnum.adOpenForwardOnly, ado.LockTypeEnum.adLockReadOnly);
             while (!rst.EOF)
             {
-                tx = tx.Replace(rst.Fields[0].Value.ToString(), rst.Fields[1].Value.ToString());
+                rx = rst.Fields[0].Value.ToString();
+                if (tx.IndexOf(rx) > -1)
+                    tx = tx.Replace(rx, rst.Fields[1].Value.ToString());
                 rst.MoveNext();
             }
-            rst.Close(); cnt.Close();
+            rst.Close(); cnt.Close(); rst = null; cnt = null;//當您透過開啟 的 Recordset 物件結束作業時，請使用 Close 方法來釋放任何相關聯的系統資源。 關閉物件並不會從記憶體中移除它;您可以變更其屬性設定，並使用 Open 方法來稍後再次開啟它。 若要完全排除記憶體中的物件，請將物件變數設定為 Nothing。 https://docs.microsoft.com/zh-tw/sql/ado/reference/ado-api/open-method-ado-recordset?view=sql-server-ver16
             undoRecord();
             textBox1.Text = tx;
             //replaceBlank_ifNOTTitleAndAfterparagraphMark();
