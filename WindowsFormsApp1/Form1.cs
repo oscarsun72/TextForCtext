@@ -901,6 +901,7 @@ namespace WindowsFormsApp1
                                 else
                                     s++;
                             }
+                            s--;////////////////////新增以除錯的。還原「s = s - l + 1;」多加之1
                             textBox1.Select(s, 0);
                             restoreCaretPosition(textBox1, s, 0);//textBox1.ScrollToCaret();
                             e.Handled = true;
@@ -928,6 +929,7 @@ namespace WindowsFormsApp1
                             { if (x.Substring(s, 3) == "<p>") s = s + 3; }
                             else
                                 s = x.Length;
+                            s++;////////////////////新增以除錯的。還原「s = s + l - 1;」多減之1
                             textBox1.Select(s, 0);
                             restoreCaretPosition(textBox1, s, 0);//textBox1.ScrollToCaret();
                             e.Handled = true;
@@ -967,7 +969,7 @@ namespace WindowsFormsApp1
                             }
                             textBox1.Select(s, l);
                             if (textBox1.SelectedText.IndexOf("　") > -1)
-                                textBox1.SelectedText = textBox1.SelectedText.Replace("　", "􏿽");
+                                textBox1.SelectedText = textBox1.SelectedText.Replace("　　", "􏿽");
                             else if (textBox1.SelectedText.IndexOf("􏿽") > -1)
                                 textBox1.SelectedText = textBox1.SelectedText.Replace("􏿽", "　");
                             stopUndoRec = false;
