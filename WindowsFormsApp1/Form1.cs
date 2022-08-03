@@ -935,14 +935,41 @@ namespace WindowsFormsApp1
                         }
                     }
                     if ((m & Keys.Control) == Keys.Control && (m & Keys.Shift) == Keys.Shift)
-                    {// Ctrl+ Shift + ←  Ctrl+ Shift + → 選取文字 
+                    {// Ctrl+ Shift + ←  Ctrl+ Shift + → 選取文字 ，並將空格「　」與空白「􏿽」對轉
                         textBox1.Select(ss, s - ss);
                         //if (textBox1.SelectedText.Replace("　", "") == "")
                         {
                             //將空格改成空白
                             undoRecord();
                             stopUndoRec = true;
-                            textBox1.SelectedText = textBox1.SelectedText.Replace("　", "􏿽");
+                            s = textBox1.SelectionStart; l = textBox1.SelectionLength;  x = textBox1.Text;
+                            switch (e.KeyCode)
+                            {
+                                case Keys.Left:
+                                    while (s > 1)
+                                    {
+                                        if (x.Substring(s - 2, 2) == "􏿽")
+                                        { s -= 2; l += 2; }
+                                        else
+                                            break;
+                                    }
+                                    break;
+                                case Keys.Right:
+                                    while (s + l <= x.Length)
+                                    {
+                                        if (x.Substring(s + l, 2) == "􏿽")
+                                            l += 2;
+                                        else
+                                            break;
+                                    }
+                                    break;
+                                    //default:
+                            }
+                            textBox1.Select(s, l);
+                            if (textBox1.SelectedText.IndexOf("　") > -1)
+                                textBox1.SelectedText = textBox1.SelectedText.Replace("　", "􏿽");
+                            else if (textBox1.SelectedText.IndexOf("􏿽") > -1)
+                                textBox1.SelectedText = textBox1.SelectedText.Replace("􏿽", "　");
                             stopUndoRec = false;
                             if (e.KeyCode == Keys.Left)
                             {
@@ -1655,15 +1682,20 @@ namespace WindowsFormsApp1
         private void keysAsteriskPreTitle()
         {
             string x = textBox1.SelectedText; int s = textBox1.SelectionStart;
-            caretPositionRecord();
-            undoRecord();
-            stopUndoRec = true;
-            if (textBox1.SelectedText == "")
+            if (textBox1.SelectedText != "")
+                expandSelectedTextRangeToWholeLinePara(s,textBox1.SelectionLength,textBox1.Text);
+            else 
             {
                 x = textBox1.Text;
                 s = 0;
             }
+
+            caretPositionRecord();
+            undoRecord();
+            stopUndoRec = true;
+
             int i = x.IndexOf("*"), j = 0;
+
             while (i > -1 && i <= x.Length)
             {
                 textBox1.Select(i + s + j, 1);
@@ -2106,10 +2138,11 @@ namespace WindowsFormsApp1
             undoRecord(); stopUndoRec = true;
             expandSelectedTextRangeToWholeLinePara(s, l, textBox1.Text);
             int cntr = indentRow();//此函式執行完時會將執行結果的範圍選取，以便後續處理。傳回值為處理了幾行/段
-            if (l != 0)
-            {
-                textBox1.Select(s, l + 1 + cntr - cntr * "<p>".Length);
-            }
+            expandSelectedTextRangeToWholeLinePara(s, l, textBox1.Text);
+            //if (l != 0)
+            //{
+            //    textBox1.Select(s, l + 1 + cntr - cntr * "<p>".Length);
+            //}
 
             //http://stackoverflow.com/questions/487661/how-do-i-suspend-painting-for-a-control-and-its-children
             //https://stackoverflow.com/questions/126876/how-do-i-disable-updating-a-form-in-windows-forms
