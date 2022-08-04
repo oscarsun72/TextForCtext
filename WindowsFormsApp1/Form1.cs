@@ -5240,11 +5240,13 @@ namespace WindowsFormsApp1
         //如首行凸排而其他縮進一字者，參差不齊，加以修齊；如《王文成公全書》中之《傳習錄》格式 https://ctext.org/library.pl?if=en&file=112524&page=32
         void fixFormatErrorlike王文成公全書()
         {
-            string x = textBox1.Text; int s = 0, e = x.IndexOf(Environment.NewLine);
+            string x = textBox1.Text; int s = x.IndexOf(Environment.NewLine), e = x.IndexOf(Environment.NewLine, s + 1);
             while (e > -1 && s + e <= x.Length)
             {
                 string xp = x.Substring(s, e - s);
-                if (xp.Substring(xp.Length - "<p>".Length) == "<p>")
+                if (0 <= xp.Length - "<p>".Length
+                    && xp.Substring(xp.Length - "<p>".Length) == "<p>"
+                    && xp.IndexOf("*") == -1)
                 {
 
                     if (e + Environment.NewLine.Length + "􏿽".Length > x.Length) break;
