@@ -2647,7 +2647,9 @@ namespace WindowsFormsApp1
                         string tx = textBox1.Text;
                         if (tx.IndexOf(Environment.NewLine, e + 2) > -1)
                         {
-                            if (isShortLine(tx.Substring(e + 2, tx.IndexOf(Environment.NewLine, e + 2) - e - 2), "", cnt, rst))
+                            if (isShortLine(tx.Substring(e + 2, tx.IndexOf(Environment.NewLine, e + 2) - e - 2),
+                                tx.Substring(tx.LastIndexOf(Environment.NewLine, e) + 2, e - tx.LastIndexOf(Environment.NewLine, e) - 2)
+                                , cnt, rst))
                             {
                                 textBox1.Select(e, 0);
                                 textBox1.SelectedText = "<p>";
@@ -5129,10 +5131,10 @@ namespace WindowsFormsApp1
         }
 
         bool isShortLine(string nextLine, string currentLine = "", ado.Connection cnt = null, ado.Recordset rst = null)
-        {
+        {//傳回 fasle 則此行末不加<p>，因其非短行，乃抬頭等故耳；傳回true才加<p>
             //ado.Connection cnt = new ado.Connection();
             //ado.Recordset rst = new ado.Recordset();
-            bool cntClose = false, rstClose = false;
+            bool cntClose = false, rstClose = false;//, flg = false;//const string tableName = "每行字數判斷用";
             if (cnt == null)
             {
                 openDatabase("查字.mdb", ref cnt);
@@ -5141,8 +5143,47 @@ namespace WindowsFormsApp1
             if (rst == null) { rst.Open("select * from 每行字數判斷用 where condition=0", cnt, ado.CursorTypeEnum.adOpenKeyset, ado.LockTypeEnum.adLockReadOnly); rstClose = true; }
             while (!rst.EOF)
             {
-                if (nextLine.IndexOf(rst.Fields["term"].Value.ToString()) == 0)
+                string trm = rst.Fields["term"].Value.ToString();
+                if (nextLine.IndexOf(trm) == 0)
                 {
+                    ado.Recordset rstDoubleCheck = new ado.Recordset();
+                    string trmDoubleCheck;
+                    //檢查後綴不能是什麼詞彙；condition欄位=6
+                    rstDoubleCheck.Open("select * from 每行字數判斷用 where condition=6 and instr(term,\"" + trm + "\")>0", cnt, ado.CursorTypeEnum.adOpenForwardOnly, ado.LockTypeEnum.adLockReadOnly);
+
+                    while (!rstDoubleCheck.EOF)
+                    {
+                        trmDoubleCheck = rstDoubleCheck.Fields["term"].Value.ToString();
+                        if (nextLine.IndexOf(trmDoubleCheck) == 0)
+                        {
+                            rstDoubleCheck.Close(); rstDoubleCheck = null;
+                            if (rstClose) { rst.Close(); rst = null; } else rst.MoveFirst(); if (cntClose) { cnt.Close(); cnt = null; }
+                            return true;
+                        }
+                        rstDoubleCheck.MoveNext();
+                    }
+
+                    //檢前後若是什麼詞彙；condition欄位=4
+                    if (rstDoubleCheck.State != 0)//ado.ObjectStateEnum.adStateClosed==0
+                    {
+                        rstDoubleCheck.Close();
+                    }
+                    rstDoubleCheck.Open("select * from 每行字數判斷用 where condition=4 and instr(term,\"" + trm + "\")>0", cnt, ado.CursorTypeEnum.adOpenForwardOnly, ado.LockTypeEnum.adLockReadOnly);
+
+                    while (!rstDoubleCheck.EOF)
+                    {
+                        trmDoubleCheck = rstDoubleCheck.Fields["term"].Value.ToString();
+                        string trmPrprefix = trmDoubleCheck.Substring(0, trmDoubleCheck.IndexOf(trm));
+                        if (currentLine.LastIndexOf(trmPrprefix) + trmPrprefix.Length == currentLine.Length)
+                        {
+                            rstDoubleCheck.Close(); rstDoubleCheck = null;
+                            if (rstClose) { rst.Close(); rst = null; } else rst.MoveFirst(); if (cntClose) { cnt.Close(); cnt = null; }
+                            return false;
+                        }
+                        rstDoubleCheck.MoveNext();
+                    }
+
+                    rstDoubleCheck.Close(); rstDoubleCheck = null;
                     if (rstClose) { rst.Close(); rst = null; } else rst.MoveFirst(); if (cntClose) { cnt.Close(); cnt = null; }
                     return false;
                 }
