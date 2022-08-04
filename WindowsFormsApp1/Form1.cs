@@ -2014,9 +2014,12 @@ namespace WindowsFormsApp1
                 textBox1.Select(s, l);
                 textBox1.SelectedText = textBox1.SelectedText.Replace(Environment.NewLine + "　", Environment.NewLine);
             }
-            if (s == 0 && "　􏿽".IndexOf(textBox1.Text.Substring(0, 1)) > -1)
+            if (s == 0)
             {
-                textBox1.Text = textBox1.Text.Substring(1);
+                if ("　".IndexOf(textBox1.Text.Substring(0, 1)) > -1)
+                    textBox1.Text = textBox1.Text.Substring(1);
+                else if ("􏿽".IndexOf(textBox1.Text.Substring(0, "􏿽".Length)) > -1)
+                    textBox1.Text = textBox1.Text.Substring("􏿽".Length);
             }
             textBox1.Select(s, l - cntr);
             stopUndoRec = false;
@@ -5174,6 +5177,7 @@ namespace WindowsFormsApp1
             undoRecord();
             textBox1.Text = tx;
             //replaceBlank_ifNOTTitleAndAfterparagraphMark();
+            fixFormatErrorlike王文成公全書();
             caretPositionRecall();
         }
 
@@ -5221,6 +5225,49 @@ namespace WindowsFormsApp1
             stopUndoRec = false;
 
         }
+
+        //重複字串、串接字串用，如「　」→「　　　　」……
+        string concatenationStr(int count, string concatenationWhatStr)
+        {
+            string sp = "";
+            while (count > 0)
+            {
+                count--;
+                sp += concatenationWhatStr;
+            }
+            return sp;
+        }
+        //如首行凸排而其他縮進一字者，參差不齊，加以修齊；如《王文成公全書》中之《傳習錄》格式 https://ctext.org/library.pl?if=en&file=112524&page=32
+        void fixFormatErrorlike王文成公全書()
+        {
+            string x = textBox1.Text; int s = 0, e = x.IndexOf(Environment.NewLine);
+            while (e > -1 && s + e <= x.Length)
+            {
+                string xp = x.Substring(s, e - s);
+                if (xp.Substring(xp.Length - "<p>".Length) == "<p>")
+                {
+
+                    if (e + Environment.NewLine.Length + "􏿽".Length > x.Length) break;
+                    if (x.Substring(e + Environment.NewLine.Length, "􏿽".Length) == "􏿽")
+                    {
+                        int eo = e;
+                        while (e + 2 <= x.Length && x.Substring(e + 2, 2) == "􏿽")
+                        {
+                            e += 2;
+                        }
+                        string space_or_blanks = concatenationStr((int)(e - eo) / 2, "　");
+                        x = x.Substring(0, s) + space_or_blanks +
+                            x.Substring(s, eo - s - 3) + Environment.NewLine
+                            + space_or_blanks + x.Substring(e + 2);
+                    }
+
+                }
+                s = e + Environment.NewLine.Length;
+                e = x.IndexOf(Environment.NewLine, e + 1);
+            }
+            textBox1.Text = x;
+        }
+
         #region 資料庫匯出
         void mdbExport()
         {//未完成

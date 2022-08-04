@@ -196,7 +196,7 @@ f = Array("。", "」", Chr(-24152), "：", "，", "；", _
 End Sub
 
 Sub 撤掉與書圖的對應_脫鉤() '20220210
-Dim rng As Range, angleRng As Range
+Dim rng As Range, angleRng As Range, cntr As Long
 word.Application.ScreenUpdating = False
 Set rng = Documents.Add().Range
 Set angleRng = rng
@@ -205,7 +205,14 @@ Do While rng.Find.Execute("<")
     rng.MoveEndUntil ">"
     rng.SetRange rng.start, rng.End + 1
     angleRng.SetRange rng.start, rng.End
-    If InStr(angleRng.Text, "file") > 0 Then angleRng.Delete
+    If InStr(angleRng.Text, "file") > 0 Then
+        angleRng.Delete
+    Else
+        rng.SetRange rng.End, rng.Document.Range.End - 1
+    End If
+    If InStr(rng.Document.Range, " file=") = 0 Then Exit Do '若有上標籤「<entity entityid=」，則判斷會失誤
+    cntr = cntr + 1
+    If cntr > 2100 Then Stop
 Loop
 rng.Document.Range.Cut
 rng.Document.Close wdDoNotSaveChanges
