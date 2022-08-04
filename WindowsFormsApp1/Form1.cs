@@ -901,7 +901,10 @@ namespace WindowsFormsApp1
                                 else
                                     s++;
                             }
+                            //if (textBox1.Text.Substring(s - 1, 2)!= "􏿽")
+                            //{
                             s--;////////////////////新增以除錯的。還原「s = s - l + 1;」多加之1
+                            //}
                             textBox1.Select(s, 0);
                             restoreCaretPosition(textBox1, s, 0);//textBox1.ScrollToCaret();
                             e.Handled = true;
@@ -929,7 +932,11 @@ namespace WindowsFormsApp1
                             { if (x.Substring(s, 3) == "<p>") s = s + 3; }
                             else
                                 s = x.Length;
+
+                            //if (textBox1.Text.Substring(s + 1, 2) == "􏿽")
+                            //{
                             s++;////////////////////新增以除錯的。還原「s = s + l - 1;」多減之1
+                            //}
                             textBox1.Select(s, 0);
                             restoreCaretPosition(textBox1, s, 0);//textBox1.ScrollToCaret();
                             e.Handled = true;
@@ -944,7 +951,7 @@ namespace WindowsFormsApp1
                             //將空格改成空白
                             undoRecord();
                             stopUndoRec = true;
-                            s = textBox1.SelectionStart; l = textBox1.SelectionLength;  x = textBox1.Text;
+                            s = textBox1.SelectionStart; l = textBox1.SelectionLength; x = textBox1.Text;
                             switch (e.KeyCode)
                             {
                                 case Keys.Left:
@@ -952,6 +959,8 @@ namespace WindowsFormsApp1
                                     {
                                         if (x.Substring(s - 2, 2) == "􏿽")
                                         { s -= 2; l += 2; }
+                                        else if (x.Substring(s - 1, 1) == "　")
+                                        { s--; l++; }
                                         else
                                             break;
                                     }
@@ -961,6 +970,8 @@ namespace WindowsFormsApp1
                                     {
                                         if (x.Substring(s + l, 2) == "􏿽")
                                             l += 2;
+                                        else if (x.Substring(s + l, 1) == "　")
+                                            l++;
                                         else
                                             break;
                                     }
@@ -969,7 +980,7 @@ namespace WindowsFormsApp1
                             }
                             textBox1.Select(s, l);
                             if (textBox1.SelectedText.IndexOf("　") > -1)
-                                textBox1.SelectedText = textBox1.SelectedText.Replace("　　", "􏿽");
+                                textBox1.SelectedText = textBox1.SelectedText.Replace("　", "􏿽");
                             else if (textBox1.SelectedText.IndexOf("􏿽") > -1)
                                 textBox1.SelectedText = textBox1.SelectedText.Replace("􏿽", "　");
                             stopUndoRec = false;
@@ -1685,8 +1696,8 @@ namespace WindowsFormsApp1
         {
             string x = textBox1.SelectedText; int s = textBox1.SelectionStart;
             if (textBox1.SelectedText != "")
-                expandSelectedTextRangeToWholeLinePara(s,textBox1.SelectionLength,textBox1.Text);
-            else 
+                expandSelectedTextRangeToWholeLinePara(s, textBox1.SelectionLength, textBox1.Text);
+            else
             {
                 x = textBox1.Text;
                 s = 0;
@@ -2924,7 +2935,7 @@ namespace WindowsFormsApp1
             if (pageEndText10 == "") pageEndText10 = xCopy.Substring(xCopy.Length - 10 >= 0 ? xCopy.Length - 10 : xCopy.Length);
             else
             {
-                if (pageEndText10 != xCopy.Substring(xCopy.Length - 10))
+                if (xCopy.Length - 10 >= 0 && pageEndText10 != xCopy.Substring(xCopy.Length - 10))
                 {
                     int sNew = x.IndexOf(pageEndText10);
                     if (sNew > -1)
