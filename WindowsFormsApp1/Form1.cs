@@ -5303,9 +5303,11 @@ namespace WindowsFormsApp1
                         {
                             e += 2;
                         }
-                        int space_blank_Count = (int)(e - eo) / 2;
+                        int space_blank_Count = (int)(e - eo) / 2, en = x.IndexOf(Environment.NewLine, e + 2);
                         if (countWordsLenPerLinePara(x.Substring(s, e - s - "<p>".Length - Environment.NewLine.Length))
-                            + space_blank_Count == wordsPerLinePara)
+                            + space_blank_Count == wordsPerLinePara
+                            && e + 2 < x.Length &&
+                            x.Substring(e + 2, en - (e + 2)).IndexOf("*") == -1)
                         {
                             string space_or_blanks = concatenationStr(space_blank_Count, "　");
                             x = x.Substring(0, s) + space_or_blanks +
