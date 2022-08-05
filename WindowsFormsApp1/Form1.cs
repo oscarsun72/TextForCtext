@@ -5303,10 +5303,15 @@ namespace WindowsFormsApp1
                         {
                             e += 2;
                         }
-                        string space_or_blanks = concatenationStr((int)(e - eo) / 2, "　");
-                        x = x.Substring(0, s) + space_or_blanks +
-                            x.Substring(s, eo - s - 3) + Environment.NewLine
-                            + space_or_blanks + x.Substring(e + 2);
+                        int space_blank_Count = (int)(e - eo) / 2;
+                        if (countWordsLenPerLinePara(x.Substring(s, e - s - "<p>".Length - Environment.NewLine.Length))
+                            + space_blank_Count == wordsPerLinePara)
+                        {
+                            string space_or_blanks = concatenationStr(space_blank_Count, "　");
+                            x = x.Substring(0, s) + space_or_blanks +
+                                x.Substring(s, eo - s - 3) + Environment.NewLine
+                                + space_or_blanks + x.Substring(e + 2);
+                        }
                     }
 
                 }
@@ -5317,7 +5322,7 @@ namespace WindowsFormsApp1
             {
                 undoRecord();
             }
-            textBox1.Text = x;
+            if (textBox1.Text != x) textBox1.Text = x;
         }
 
         #region 資料庫匯出
