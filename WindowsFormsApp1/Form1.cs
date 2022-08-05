@@ -5134,7 +5134,7 @@ namespace WindowsFormsApp1
         {//傳回 fasle 則此行末不加<p>，因其非短行，乃抬頭等故耳；傳回true才加<p>
             //ado.Connection cnt = new ado.Connection();
             //ado.Recordset rst = new ado.Recordset();
-            bool cntClose = false, rstClose = false;//, flg = false;//const string tableName = "每行字數判斷用";
+            bool cntClose = false, rstClose = false, flg = true;//const string tableName = "每行字數判斷用";
             if (cnt == null)
             {
                 openDatabase("查字.mdb", ref cnt);
@@ -5146,6 +5146,7 @@ namespace WindowsFormsApp1
                 string trm = rst.Fields["term"].Value.ToString();
                 if (nextLine.IndexOf(trm) == 0)
                 {
+                    flg = false;
                     ado.Recordset rstDoubleCheck = new ado.Recordset();
                     string trmDoubleCheck;
                     //檢查後綴不能是什麼詞彙；condition欄位=6
@@ -5180,17 +5181,20 @@ namespace WindowsFormsApp1
                             if (rstClose) { rst.Close(); rst = null; } else rst.MoveFirst(); if (cntClose) { cnt.Close(); cnt = null; }
                             return false;
                         }
+                        if (!flg) flg = true;
                         rstDoubleCheck.MoveNext();
                     }
-
                     rstDoubleCheck.Close(); rstDoubleCheck = null;
-                    if (rstClose) { rst.Close(); rst = null; } else rst.MoveFirst(); if (cntClose) { cnt.Close(); cnt = null; }
-                    return false;
+                    if (!flg)
+                    {
+                        if (rstClose) { rst.Close(); rst = null; } else rst.MoveFirst(); if (cntClose) { cnt.Close(); cnt = null; }
+                        return flg;
+                    }
                 }
-                rst.MoveNext();
+                rst.MoveNext(); if (!flg) flg = true;
             }
             if (rstClose) { rst.Close(); rst = null; } else rst.MoveFirst(); if (cntClose) { cnt.Close(); cnt = null; }
-            return true;
+            return flg;
 
         }
 
@@ -5307,6 +5311,10 @@ namespace WindowsFormsApp1
                 }
                 s = e + Environment.NewLine.Length;
                 e = x.IndexOf(Environment.NewLine, e + 1);
+            }
+            if (!stopUndoRec)
+            {
+                undoRecord();
             }
             textBox1.Text = x;
         }
