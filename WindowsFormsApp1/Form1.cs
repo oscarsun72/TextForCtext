@@ -5308,7 +5308,7 @@ namespace WindowsFormsApp1
                             + space_blank_Count == wordsPerLinePara
                             && e + 2 < x.Length &&
                             x.Substring(e + 2, en - (e + 2)).IndexOf("*") == -1)
-                        {
+                        {//後面行/段不能是標題（篇名），前面行/段不能太短-要剛好正常行/段長才行
                             string space_or_blanks = concatenationStr(space_blank_Count, "　");
                             x = x.Substring(0, s) + space_or_blanks +
                                 x.Substring(s, eo - s - 3) + Environment.NewLine
