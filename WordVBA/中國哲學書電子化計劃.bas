@@ -212,7 +212,7 @@ Do While rng.Find.Execute("<")
     End If
     If InStr(rng.Document.Range, " file=") = 0 Then Exit Do '若有上標籤「<entity entityid=」，則判斷會失誤
     cntr = cntr + 1
-    If cntr > 2100 Then Stop
+    If cntr > 2300 Then Stop
 Loop
 SystemSetup.playSound 1
 rng.Document.Range.Cut

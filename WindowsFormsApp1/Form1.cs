@@ -5142,6 +5142,7 @@ namespace WindowsFormsApp1
             }
             //SELECT 每行字數判斷用.term, 每行字數判斷用.condition FROM 每行字數判斷用 WHERE(((每行字數判斷用.condition) = 0)) ORDER BY 每行字數判斷用.term DESC;
             if (rst == null) { rst.Open("select * from 每行字數判斷用 where condition=0 ORDER BY term DESC;", cnt, ado.CursorTypeEnum.adOpenKeyset, ado.LockTypeEnum.adLockReadOnly); rstClose = true; }
+            nextLine = nextLine.TrimStart("　".ToCharArray());//頂端的空格縮排不計
             while (!rst.EOF)
             {
                 string trm = rst.Fields["term"].Value.ToString();
