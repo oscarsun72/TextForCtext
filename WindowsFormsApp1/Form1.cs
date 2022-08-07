@@ -2647,13 +2647,19 @@ namespace WindowsFormsApp1
                         string tx = textBox1.Text;
                         if (tx.IndexOf(Environment.NewLine, e + 2) > -1)
                         {
+                            textBox1.Select(e, 0);
                             if (isShortLine(tx.Substring(e + 2, tx.IndexOf(Environment.NewLine, e + 2) - e - 2),
                                 tx.Substring(tx.LastIndexOf(Environment.NewLine, e) + 2, e - tx.LastIndexOf(Environment.NewLine, e) - 2)
                                 , cnt, rst))
                             {
-                                textBox1.Select(e, 0);
                                 textBox1.SelectedText = "<p>";
                                 e += 3;
+                                if ((int)rst.AbsolutePosition > 1) rst.MoveFirst();
+                            }
+                            else
+                            {
+                                textBox1.SelectedText = "|";
+                                e++;
                                 if ((int)rst.AbsolutePosition > 1) rst.MoveFirst();
                             }
                         }
@@ -4707,7 +4713,8 @@ namespace WindowsFormsApp1
             #region 輸入末綴為「00」的數字可以設定開啟Chrome頁面的等待毫秒時間
             if (x != "" && x.Length > 2)
             {
-                if (x.Substring(x.Length - 2) == "00")
+                //if (x.Substring(x.Length - 2) == "00")
+                if (Int32.Parse(x) % 10 == 0)
                 {
                     int w;
                     if (Int32.TryParse(x, out w))
