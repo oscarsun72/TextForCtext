@@ -3983,7 +3983,7 @@ namespace WindowsFormsApp1
                 case "中國哲學書電子化計劃.清除頁前的分段符號":
                     break;
                 default:
-                    textBox1.Text = Clipboard.GetText();
+                    textBox1.Text = Clipboard.GetText().Replace(Environment.NewLine + Environment.NewLine, Environment.NewLine);
                     if (runName == "漢籍電子文獻資料庫文本整理_以轉貼到中國哲學書電子化計劃")
                     {
                         saveText();
@@ -4714,7 +4714,7 @@ namespace WindowsFormsApp1
             if (x != "" && x.Length > 2)
             {
                 //if (x.Substring(x.Length - 2) == "00")
-                if (Int32.Parse(x) % 10 == 0)
+                if (Int32.Parse(x) % 10 == 0 && x.Length > 2)
                 {
                     int w;
                     if (Int32.TryParse(x, out w))
