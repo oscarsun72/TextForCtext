@@ -1910,7 +1910,13 @@ namespace WindowsFormsApp1
                 case "幷序":
                     replaceIt = true;
                     break;
+                case "有序":
+                    replaceIt = true;
+                    break;
                 case "并引":
+                    replaceIt = true;
+                    break;
+                case "幷引":
                     replaceIt = true;
                     break;
                 //case "*":
@@ -4713,15 +4719,17 @@ namespace WindowsFormsApp1
             #region 輸入末綴為「00」的數字可以設定開啟Chrome頁面的等待毫秒時間
             if (x != "" && x.Length > 2)
             {
-                //if (x.Substring(x.Length - 2) == "00")
-                if (Int32.Parse(x) % 10 == 0 && x.Length > 2)
+                if (x.Substring(x.Length - 1) == "0")
                 {
-                    int w;
-                    if (Int32.TryParse(x, out w))
+                    if (Int32.Parse(x) % 10 == 0 && x.Length > 2)
                     {
-                        waitTimeforappActivateByName = w;
-                        textBox2.Text = "";
-                        return;
+                        int w;
+                        if (Int32.TryParse(x, out w))
+                        {
+                            waitTimeforappActivateByName = w;
+                            textBox2.Text = "";
+                            return;
+                        }
                     }
                 }
             }

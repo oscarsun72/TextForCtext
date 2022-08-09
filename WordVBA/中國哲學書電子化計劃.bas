@@ -394,6 +394,45 @@ d.Close wdDoNotSaveChanges
 Beep
 End Sub
 
+Sub searchuCtext()
+' Alt+,
+Select Case Selection.Text
+    Case "", Chr(13), Chr(9), Chr(7), Chr(10), " ", "　"
+        MsgBox "no selected text for search !", vbCritical: Exit Sub
+End Select
+Static bookID
+Dim searchedTerm, e, addressHyper As String, bid As String
+Const site As String = "https://ctext.org/wiki.pl?if=gb&res="
+bid = Left(ActiveDocument.Paragraphs(1).Range, Len(ActiveDocument.Paragraphs(1).Range) - 1)
+If Not VBA.IsNumeric(bid) Then
+    If InStr(bid, "https://ctext.org/wiki.pl?if=gb&res=") = 0 Then
+        bookID = InputBox("plz input the book id ", , bookID)
+    Else
+        bookID = bid
+    End If
+Else
+    bookID = bid
+End If
+If InStr(bookID, "https") > 0 Then
+    bookID = Mid(bookID, InStr(bookID, "&res=") + Len("&res="))
+    If Not VBA.IsNumeric(bookID) Then
+        bookID = Mid(bookID, 0, InStr(bookID, "&searchu"))
+    End If
+End If
+If Not VBA.IsNumeric(bookID) Then
+    MsgBox "error . not the proper bookID ref ", vbCritical: Exit Sub
+End If
+e = Selection.Text
+'searchedTerm = 'Array("卦", "爻", "周易", "易經", "系辭", "繫辭", "擊辭", "說卦", "序卦", "卦序", "敘卦", "雜卦", "文言", "乾坤", "無咎", ChrW(26080) & "咎", "天咎", "元亨", "利貞", "易") ', "", "", "", "")
+''https://ctext.org/wiki.pl?if=gb&res=757381&searchu=%E5%8D%A6
+'For Each e In searchedTerm
+    addressHyper = addressHyper + " " + site + bookID + "&searchu=" + e
+'Next e
+Shell Network.getDefaultBrowserFullname + addressHyper
+
+Selection.Hyperlinks.Add Selection.Range, addressHyper
+End Sub
+
 Sub 史記三家注()
 '從2858頁起，20210920:0817之後，改用臺師大附中同學吳恆昇先生《中華文化網》所錄中研院《瀚典》初本，雖或仍未精，然至少免有簡化字轉換訛窘或造字亂碼之困擾，原文字檔棄置。根據初作比對，格式完全一樣！根本就是從這裡出來的，再轉簡化字，再又反正，造成之紊亂。悔當初沒想到用此本也。阿彌陀佛。佛弟子孫守真任真甫謹識於2021年9月20日
 Dim d As Document, a, i, p As Paragraph, px As String, rng As Range, e As Long, pRng As Range, pa
@@ -1434,4 +1473,5 @@ SendKeys "^v"
 SendKeys "{tab}~"
 
 End Sub
+
 

@@ -120,6 +120,13 @@ Function GetDefaultBrowserEXE() '2010/10/18¥Ñhttp://chijanzen.net/wp/?p=156#comm
     
 End Function
 
+Function getDefaultBrowserFullname()
+Dim appFullname As String
+appFullname = GetDefaultBrowserEXE
+getDefaultBrowserFullname = Mid(appFullname, 1, InStr(appFullname, ".exe") + Len(".exe"))
+End Function
+
+
 Sub AppActivateDefaultBrowser()
 Dim DefaultBrowserName As String
 On Error GoTo eh
