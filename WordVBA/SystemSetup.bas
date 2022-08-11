@@ -134,6 +134,8 @@ Sub CopyText(Text As String) 'https://stackoverflow.com/questions/14219455/excel
     'By Justin Kay, 8/15/2014
     Dim MSForms_DataObject As Object
     Set MSForms_DataObject = CreateObject("new:{1C3B4210-F441-11CE-B9EA-00AA006B1A69}")
+'    Set MSForms_DataObject = New MSForms.DataObject 與上式相同
+'    MSForms_DataObject.Clear
     MSForms_DataObject.SetText Text
     MSForms_DataObject.PutInClipboard
     Set MSForms_DataObject = Nothing
@@ -268,6 +270,7 @@ a = VBA.Replace(a, "AppData\Roaming", "")
 End Function
 Function GetClipboardText()
 Dim clipboard As New MSForms.DataObject
+DoEvents
 clipboard.GetFromClipboard
 GetClipboardText = clipboard.GetText
 End Function

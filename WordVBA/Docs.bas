@@ -743,6 +743,31 @@ With Selection.ParagraphFormat
 End With
 End Sub
 
+Sub mark易學關鍵字()
+Dim searchedTerm, e, ur As UndoRecord
+Set ur = SystemSetup.stopUndo("mark易學關鍵字")
+searchedTerm = Array("卦", "爻", "周易", "易經", "系辭", "繫辭", "擊辭", "說卦", "序卦", "卦序", "敘卦", "雜卦", "文言", "乾坤", "無咎", ChrW(26080) & "咎", "天咎", "元亨", "利貞", "易") ', "", "", "", "")
+word.Application.ScreenUpdating = False
+If ActiveDocument.path <> "" And Not ActiveDocument.Saved Then ActiveDocument.Save
+For Each e In searchedTerm
+    With ActiveDocument.Range.Find
+        .ClearFormatting
+        .Text = e
+        With .Replacement
+            .Text = e
+            .Font.ColorIndex = wdRed
+            .Highlight = True
+        End With
+        .Execute , , , , , , , wdFindContinue, , , wdReplaceAll
+    End With
+Next e
+ActiveDocument.Range.Find.ClearFormatting
+SystemSetup.playSound 1
+SystemSetup.contiUndo ur
+Set ur = Nothing
+word.Application.ScreenUpdating = True
+End Sub
+
 Sub 抽取超連結位址()
 Dim hplnk As Hyperlink, x As String, d As Document
 For Each hplnk In ActiveDocument.Hyperlinks

@@ -10,8 +10,9 @@ Dim fileID As Long
 'https://ctext.org/library.pl?if=gb&file=1000081&page=2621
 
 Dim x As String ', data As New MSForms.DataObject
-Dim i As Integer, rng As Range
-Set rng = ActiveDocument.Range
+Dim i As Integer, rng As Range, d As Document
+Set d = ActiveDocument
+Set rng = d.Range
 start = CInt(Replace(rng.Paragraphs(1).Range, Chr(13), ""))
 e = CInt(Replace(rng.Paragraphs(2).Range, Chr(13), ""))
 fileID = CLng(Replace(rng.Paragraphs(3).Range, Chr(13), ""))
@@ -32,6 +33,11 @@ rng.Paragraphs(3).Range = CLng(Replace(rng.Paragraphs(3).Range, Chr(13), "")) + 
 'data.PutInClipboard
 'SystemSetup.SetClipboard x
 SystemSetup.CopyText x
+If SystemSetup.GetClipboardText <> x Then
+    rng.SetRange d.Range.End - 1, d.Range.End - 1
+    rng.InsertAfter x
+    rng.Cut
+End If
 DoEvents
 Network.AppActivateDefaultBrowser
 SendKeys "^v"
@@ -86,7 +92,12 @@ Loop
 
 
 DoEvents
-d.Range.Cut
+'If d.Characters.Count < 50000 Then ' 147686
+'    d.Range.Cut '原來是Word的 cut 到剪貼簿裡有問題
+'Else
+    'SystemSetup.SetClipboard d.Range.Text
+    SystemSetup.ClipboardPutIn d.Range.Text
+'End If
 DoEvents
 playSound 1
 DoEvents
@@ -150,9 +161,11 @@ End Sub
 
 Sub pastetoEditBox(Description_from_ClipBoard As String)
 word.Application.WindowState = wdWindowStateMinimize
+'MsgBox "ready to paste", vbInformation
 AppActivateDefaultBrowser
 DoEvents
-SendKeys "^v", True
+'SystemSetup.Wait 0.5 '關鍵在這行！否則大容量貼上會失效。20220809'根本還是沒用！
+SendKeys "^v" ', True'恐怕要去掉這個才是
 DoEvents ' DoEvents: DoEvents
 Beep
 SystemSetup.Wait 0.5

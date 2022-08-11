@@ -1,5 +1,6 @@
 Attribute VB_Name = "Network"
 Option Explicit
+Dim DefaultBrowserNameAppActivate As String
 
 Sub 查詢國語辭典() '指定鍵:Ctrl+F12'2010/10/18修訂
 ''    If ActiveDocument.Path <> "" Then ActiveDocument.Save '怕word當掉忘了儲存
@@ -123,21 +124,38 @@ End Function
 Function getDefaultBrowserFullname()
 Dim appFullname As String
 appFullname = GetDefaultBrowserEXE
-getDefaultBrowserFullname = Mid(appFullname, 1, InStr(appFullname, ".exe") + Len(".exe"))
+appFullname = Mid(appFullname, 2, InStr(appFullname, ".exe") + Len(".exe") - 2)
+getDefaultBrowserFullname = appFullname
+DefaultBrowserNameAppActivate = VBA.Replace(VBA.Mid(appFullname, InStrRev(appFullname, "\") + 1), ".exe", "")
+Select Case DefaultBrowserNameAppActivate
+    Case "msedge"
+        DefaultBrowserNameAppActivate = "edge"
+End Select
 End Function
 
 
 Sub AppActivateDefaultBrowser()
-Dim DefaultBrowserName As String
 On Error GoTo eh
-DefaultBrowserName = "google chrome"
+Dim i As Byte, a
+a = Array("google chrome", "brave", "edge")
 DoEvents
-AppActivate DefaultBrowserName
+If DefaultBrowserNameAppActivate = "" Then getDefaultBrowserFullname
+AppActivate DefaultBrowserNameAppActivate
 DoEvents
 Exit Sub
 eh:
-DefaultBrowserName = "brave"
-Resume
+    Select Case Err.Number
+        Case 5
+            DefaultBrowserNameAppActivate = a(i)
+            i = i + 1
+            If i > UBound(a) Then
+                MsgBox Err.Number & Err.Description
+                Exit Sub
+            End If
+            Resume
+        Case Else
+            MsgBox Err.Number + Err.Description
+    End Select
 'AppActivate ""
 End Sub
 
