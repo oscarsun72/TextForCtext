@@ -1182,6 +1182,13 @@ With rng.Find
     .ClearAllFuzzyOptions
     .ClearFormatting
 End With
+Do While rng.Find.Execute("[[]", , , , , , True, wdFindContinue)
+   rng.MoveEndUntil "]"
+   rng.SetRange rng.start, rng.End + 1
+   rng.Delete
+Loop
+Set rng = rng.Document.Range
+rng.Find.Execute "^p^p", , , , , , , wdFindContinue, , "^p", wdReplaceAll
 rng.Find.Font.Color = 16711935
 Do While rng.Find.Execute("", , , False, , , True, wdFindStop)
     Set noteRng = rng
@@ -1191,7 +1198,9 @@ Do While rng.Find.Execute("", , , False, , , True, wdFindStop)
     noteRng.Text = "{{" & Replace(noteRng, "/", "") & "}}"
 Loop
 With rng.Document
-    .Range.Cut
+    '.Range.Cut
+    SystemSetup.ClipboardPutIn .Range.Text
+    DoEvents
     .Close wdDoNotSaveChanges
 End With
 End Sub

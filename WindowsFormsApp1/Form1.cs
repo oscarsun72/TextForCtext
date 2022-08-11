@@ -1624,7 +1624,7 @@ namespace WindowsFormsApp1
                 { undoRecord(); stopUndoRec = true; textBox1.SelectedText = "􏿽"; stopUndoRec = false; }
                 else
                 {
-                    if (sTxt.IndexOf("　") == -1) { stopUndoRec = false; return; }
+                    if (sTxt.IndexOf("　") == -1) { stopUndoRec = false; dontHide = false; return; }
                     string sTxtChk = sTxt.Replace("　", "􏿽");
                     undoRecord();
                     stopUndoRec = true;
@@ -1685,11 +1685,11 @@ namespace WindowsFormsApp1
                 //textBox1.Text = x;
                 //textBox1.SelectionStart = s + "􏿽".Length;
                 stopUndoRec = false;
-                stopUndoRec = false;
                 //}
                 //}
 
             }
+            dontHide = false;
         }
 
         private void keysAsteriskPreTitle()
@@ -4659,7 +4659,13 @@ namespace WindowsFormsApp1
                             Clipboard.Clear();
                             //throw;
                         }
+                        return;
 
+                    }
+                    else if (clpTxt.IndexOf("1a]") > -1 || clpTxt.IndexOf("1a] ") > -1)
+                    {
+                        runWordMacro("中國哲學書電子化計劃.國學大師_四庫全書本轉來");
+                        return;
                     }
                 }
             }
