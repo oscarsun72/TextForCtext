@@ -3915,7 +3915,7 @@ namespace WindowsFormsApp1
             if (showColorSignal) this.BackColor = C;
         }
 
-        int waitTimeforappActivateByName = 1100;
+        int waitTimeforappActivateByName = 680;//1100;
         private void nextPages(Keys eKeyCode, bool stayInHere)
         {
             string url = textBox3.Text;

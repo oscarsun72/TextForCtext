@@ -744,13 +744,31 @@ End With
 End Sub
 
 Sub mark©ö¾ÇÃöÁä¦r()
-Dim searchedTerm, e, ur As UndoRecord
+Dim searchedTerm, e, ur As UndoRecord, d As Document, clipBTxt As String, flgPaste As Boolean
 Set ur = SystemSetup.stopUndo("mark©ö¾ÇÃöÁä¦r")
-searchedTerm = Array("¨ö", "¤ø", "©P©ö", "©ö¸g", "¨tÃã", "Ã´Ãã", "À»Ãã", "»¡¨ö", "§Ç¨ö", "¨ö§Ç", "±Ô¨ö", "Âø¨ö", "¤å¨¥", "°®©[", "µL©S", ChrW(26080) & "©S", "¤Ñ©S", "¤¸¦ë", "§Q­s", "©ö") ', "", "", "", "")
+Set d = ActiveDocument
+clipBTxt = SystemSetup.GetClipboardText
+searchedTerm = Array("¨ö", "¤ø", "©P©ö", "©ö¸g", "¨tÃã", "Ã´Ãã", "À»Ãã", "À»µü", "Ã´µü", "»¡¨ö", "§Ç¨ö", "¨ö§Ç", "±Ô¨ö", "Âø¨ö", "¤å¨¥", "°®©[", "µL©S", ChrW(26080) & "©S", "¤Ñ©S", "¤¸¦ë", "§Q­s", "©ö") ', "", "", "", "")
+If Selection.Type = wdSelectionIP Then
+    If InStr(d.Range, clipBTxt) = 0 Then
+        For Each e In searchedTerm
+            If InStr(clipBTxt, e) > 0 Then
+                flgPaste = True
+                Exit For
+            End If
+        Next e
+        If flgPaste Then
+            ¶K¤W¯Â¤å¦r
+            Selection.InsertParagraphAfter: Selection.InsertParagraphAfter: Selection.InsertParagraphAfter
+            Selection.Collapse wdCollapseEnd
+        End If
+    End If
+End If
+
 word.Application.ScreenUpdating = False
-If ActiveDocument.path <> "" And Not ActiveDocument.Saved Then ActiveDocument.Save
+If d.path <> "" And Not d.Saved Then d.Save
 For Each e In searchedTerm
-    With ActiveDocument.Range.Find
+    With d.Range.Find
         .ClearFormatting
         .Text = e
         With .Replacement
@@ -761,8 +779,8 @@ For Each e In searchedTerm
         .Execute , , , , , , , wdFindContinue, , , wdReplaceAll
     End With
 Next e
-ActiveDocument.Range.Find.ClearFormatting
-SystemSetup.playSound 1
+d.Range.Find.ClearFormatting
+SystemSetup.playSound 1.921
 SystemSetup.contiUndo ur
 Set ur = Nothing
 word.Application.ScreenUpdating = True

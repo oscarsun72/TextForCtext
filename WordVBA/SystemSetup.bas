@@ -299,11 +299,13 @@ End Sub
 
 
 'https://analystcave.com/vba-status-bar-progress-bar-sounds-emails-alerts-vba/#:~:text=The%20VBA%20Status%20Bar%20is%20a%20panel%20that,Bar%20we%20need%20to%20Enable%20it%20using%20Application.DisplayStatusBar%3A
-Sub playSound(longShort As Byte) 'Public Declare Function sndPlaySound32 Lib "winmm.dll" Alias "sndPlaySoundA" (ByVal lpszSoundName As String, ByVal uFlags As Long) As Long
+Sub playSound(longShort As Single) 'Public Declare Function sndPlaySound32 Lib "winmm.dll" Alias "sndPlaySoundA" (ByVal lpszSoundName As String, ByVal uFlags As Long) As Long
     '播放聲音、音效、音樂
     Select Case longShort
         Case 1
             sndPlaySound32 "C:\Windows\Media\Chimes.wav", &H0
+        Case 1.921
+            sndPlaySound32 "C:\Windows\Media\Windows Notify System Generic.wav", &H0 '以 PotPlayer 播放即可於清單中檢視英文檔名
         Case 2
             sndPlaySound32 "C:\Windows\Media\Windows Notify Calendar.wav", &H0
         Case 3
