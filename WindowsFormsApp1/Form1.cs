@@ -463,6 +463,9 @@ namespace WindowsFormsApp1
             int missWordPositon = xCopy.IndexOf(" ");
             if (missWordPositon == -1) missWordPositon = xCopy.IndexOfAny("�".ToCharArray());
             if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("□");
+            if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("▫");
+            if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("ခ");
+            if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("င");
             if (missWordPositon > -1)
             //if (xCopy.IndexOf(" ") > -1 || xCopy.IndexOfAny("�".ToCharArray()) > -1 ||
             //xCopy.IndexOf("□") > -1)//□為《維基文庫》《四庫全書》的缺字符，" "則是《四部叢刊》的，"�"則是《四部叢刊》的造字符。
