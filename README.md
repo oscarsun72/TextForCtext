@@ -30,6 +30,7 @@ textBox4:文本取代用
   若符合尋找的字串並非獨一無二，則 textBox2 會顯示黃色。
   
   若只有一個符合尋找字串，則 textBox2 會顯示黃綠色，並發出提示音；若再配合按下 F1 鍵（以找到的字串位置前分行分段）、按下 Pause Break 鍵（以找到的字串位置後分行分段）該可加速分行分段
+  //暫時取消，釋放 F1、 Pause 鍵給 Alt + Shift + 2 用
   
 - 自動依據第一分段字數將 textBox1 插入點其後的文本分段。按下左上方的按鈕或按下 Ctrl + q （參見下文）
 - 清除 textBox1 插入點後的分段。按下 Ctrl + \ 
@@ -107,8 +108,9 @@ Ctrl + q 或 Alt + q：據游標（插入點）所在前1段的長度來將textB
 Ctrl + \ （反斜線） 或 Alt + \ ： 清除textBox1文本插入點後的分段
 
 按下 F1 鍵：以找到的字串位置**前**分行分段（在文字選取內容接的不是newline時；若是，且選取長度等於常數「predictEndofPageSelectedTextLen」則進行自動貼入 Ctext 的 quit edit 方塊中）
+//暫時取消，釋放 F1、 Pause 鍵給 Alt + Shift + 2 用
 
-按下 Pause Break 鍵：以找到的字串位置**後**分行分段
+按下 Pause Break 鍵：以找到的字串位置**後**分行分段//暫時取消，釋放  Pause 鍵給 Alt + Shift + 2
 
 按下 Scroll Lock 將字數較少的行/段落尾末標上「<p>」符號
 

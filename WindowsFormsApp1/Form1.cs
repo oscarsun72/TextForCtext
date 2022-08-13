@@ -674,21 +674,8 @@ namespace WindowsFormsApp1
                 }
                 if (e.KeyCode == Keys.D2)
                 {//Alt + Shift + 2 : 將選取區內的「<p>」取代為「|」 ，而「　」取代為「􏿽」並清除「*」且將無「|」前綴的分行符號加上「|」
-                    if (textBox1.SelectionLength == 0) return;
-                    undoRecord(); stopUndoRec = true;
                     e.Handled = true;
-                    int s = textBox1.SelectionStart;
-                    string xSel = textBox1.SelectedText;
-                    if (xSel.Substring(xSel.Length - 3) == "<p>") { textBox1.Select(s, xSel.Length - 3); xSel = textBox1.SelectedText; }//最後一個<p>不處理
-                    if (xSel.Substring(xSel.Length - 5) == "<p>" + Environment.NewLine) { textBox1.Select(s, xSel.Length - 5); xSel = textBox1.SelectedText; }//最後一個<p>不處理
-                    xSel = xSel.Replace("<p>", "|").Replace("　", "􏿽");
-                    if (xSel.IndexOf("*") > -1)
-                    {
-                        xSel = xSel.Replace("*", "");
-                        xSel = xSel.Replace(Environment.NewLine, "|" + Environment.NewLine).Replace("||", "|");
-                    }
-                    textBox1.SelectedText = xSel; textBox1.Select(s, xSel.Length);
-                    stopUndoRec = false;
+                    poetryFormat();
                     return;
                 }
                 if (e.KeyCode == Keys.D6)
@@ -1348,13 +1335,17 @@ namespace WindowsFormsApp1
                     }
                     return;
                 }
-                if (e.KeyCode == Keys.F1 || e.KeyCode == Keys.Pause)
+                if (e.KeyCode == Keys.F1 || e.KeyCode == Keys.Pause)//暫時取消，釋放 F1、 Pause 鍵給 Alt + Shift + 2 用
                 {//- 按下 F1 鍵：以找到的字串位置**前**分行分段
                  // -按下 Pause Break 鍵：以找到的字串位置** 後**分行分段
                     e.Handled = true;
-                    splitLineParabySeltext(e.KeyCode);
+                    //if (e.KeyCode == Keys.Pause)
+                        poetryFormat();
+                    //else
+                        //splitLineParabySeltext(e.KeyCode);
                     return;
                 }
+
 
                 if (e.KeyCode == Keys.F2)
                 {
@@ -1430,6 +1421,24 @@ namespace WindowsFormsApp1
                 }
             }//以上按下單一鍵
             #endregion
+        }
+
+        private void poetryFormat()
+        {
+            if (textBox1.SelectionLength == 0) return;
+            undoRecord(); stopUndoRec = true;
+            int s = textBox1.SelectionStart;
+            string xSel = textBox1.SelectedText;
+            if (xSel.Substring(xSel.Length - 3) == "<p>") { textBox1.Select(s, xSel.Length - 3); xSel = textBox1.SelectedText; }//最後一個<p>不處理
+            if (xSel.Substring(xSel.Length - 5) == "<p>" + Environment.NewLine) { textBox1.Select(s, xSel.Length - 5); xSel = textBox1.SelectedText; }//最後一個<p>不處理
+            xSel = xSel.Replace("<p>", "|").Replace("　", "􏿽");
+            if (xSel.IndexOf("*") > -1)
+            {
+                xSel = xSel.Replace("*", "");
+                xSel = xSel.Replace(Environment.NewLine, "|" + Environment.NewLine).Replace("||", "|");
+            }
+            textBox1.SelectedText = xSel; textBox1.Select(s, xSel.Length);
+            stopUndoRec = false;
         }
 
         void notes_a_line_all()
