@@ -106,7 +106,7 @@ End Function
 
 Sub setWordControlValue(w As String)
 Const cz As String = "查字forinput - [dictsurl]"
-On Error GoTo eH
+On Error GoTo eh
 If Not SystemSetup.appActivatedYet("msaccess") Then Exit Sub
 'If Not word.Tasks.Exists(cz) Then Exit Sub ' 用 word.Tasks 有時會當掉
 If w = "" Then Exit Sub
@@ -124,7 +124,7 @@ With Me.ctl("word")
     End If
 End With
 Exit Sub
-eH:
+eh:
 Select Case Err.Number
     Case 5 '程序呼叫或引數不正確
     Case Else
@@ -133,15 +133,15 @@ Select Case Err.Number
 End Select
 End Sub
 
-Sub setURLControlValue(url As String)
+Sub setURLControlValue(URL As String)
 Dim lnk As New Links
 If Not SystemSetup.appActivatedYet("msaccess") Then Exit Sub
 If Not word.Tasks.Exists("查字forinput - [dictsurl]") Then Exit Sub
-If Not lnk.checkURL_single(url) Then Exit Sub
+If Not lnk.checkURL_single(URL) Then Exit Sub
 
 On Error Resume Next
-Me.ctl("Text8").Value = url
-Me.ctl("url").Value = url
+Me.ctl("Text8").Value = URL
+Me.ctl("url").Value = URL
 
 End Sub
 Sub setDictControlValue(dictID As Byte)
@@ -152,3 +152,28 @@ On Error Resume Next
 Me.ctl("Combo4").Value = dictID
 End Sub
 
+Public Function FieldExists(rs As ADODB.Recordset, fieldName As String) As Boolean
+''https://stackoverflow.com/questions/16474210/detect-if-a-names-field-exists-in-a-record-set
+'    On Error GoTo merr
+'
+'    FieldExists = rs.Fields(fieldName).Name <> ""
+'    Exit Function
+'
+'merr:
+'    FieldExists = False
+
+'https://www.tek-tips.com/viewthread.cfm?qid=1283403
+    Dim fd                          As ADODB.Field
+    On Error Resume Next
+    Err.Clear
+    ' This field DOES NOT EXIST
+    Set fd = rs.Fields("fieldName")
+    If Err.Number <> 0 Then
+        'FieldExists = False
+        'MsgBox "'NONEXIST' Does NOT exist"
+    Else
+        FieldExists = True
+        'MsgBox "'NONEXIST' DOES exist"
+    End If
+    Set fd = Nothing
+End Function

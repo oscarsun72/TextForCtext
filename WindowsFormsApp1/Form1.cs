@@ -466,6 +466,7 @@ namespace WindowsFormsApp1
             if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("▫");
             if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("ခ");
             if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("င");
+            if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("ဌ");
             if (missWordPositon > -1)
             //if (xCopy.IndexOf(" ") > -1 || xCopy.IndexOfAny("�".ToCharArray()) > -1 ||
             //xCopy.IndexOf("□") > -1)//□為《維基文庫》《四庫全書》的缺字符，" "則是《四部叢刊》的，"�"則是《四部叢刊》的造字符。
@@ -1343,9 +1344,9 @@ namespace WindowsFormsApp1
                  // -按下 Pause Break 鍵：以找到的字串位置** 後**分行分段
                     e.Handled = true;
                     //if (e.KeyCode == Keys.Pause)
-                        poetryFormat();
+                    poetryFormat();
                     //else
-                        //splitLineParabySeltext(e.KeyCode);
+                    //splitLineParabySeltext(e.KeyCode);
                     return;
                 }
 
@@ -1965,7 +1966,7 @@ namespace WindowsFormsApp1
             l += (so - s);
             while (s + l <= x.Length)
             {
-                if (s + l < x.Length)
+                if (s + l + 1 < x.Length)
                 {
                     if (x.Substring(s + (++l), 1) == Environment.NewLine.Substring(1, 1))
                     {
@@ -3770,11 +3771,12 @@ namespace WindowsFormsApp1
                 }
 
                 if (e.KeyCode == Keys.F1)
-                {
+                {//Alt + F1
                     var cjk = getCJKExtFontInstalled(CJKBiggestSet[++FontFamilyNowIndex]);
                     if (FontFamilyNowIndex == CJKBiggestSet.Length - 1) FontFamilyNowIndex = -1;
                     if (cjk != null)
                     {
+                        MessageBox.Show(cjk.Name);
                         if (cjk.Name == "KaiXinSongB")
                         {
                             textBox1.Font = new Font(cjk, (float)17);

@@ -724,6 +724,10 @@ For Each d In Documents
     If d.path = "" Then d.Close wdDoNotSaveChanges
 Next d
 word.Application.ScreenUpdating = True
+If word.Windows.Count = 0 Then
+    word.Documents.Add
+    ActiveWindow.Visible = True
+End If
 End Sub
 Sub DocBackgroundFillColor() '頁面色彩
     ActiveDocument.ActiveWindow.View.Type = wdPrintView 'https://docs.microsoft.com/en-us/office/vba/api/word.document.background
@@ -745,11 +749,13 @@ End Sub
 
 Sub mark易學關鍵字()
 Dim searchedTerm, e, ur As UndoRecord, d As Document, clipBTxt As String, flgPaste As Boolean
-Set ur = SystemSetup.stopUndo("mark易學關鍵字")
+'Set ur = SystemSetup.stopUndo("mark易學關鍵字")
+SystemSetup.stopUndo ur, "mark易學關鍵字"
 Set d = ActiveDocument
-clipBTxt = SystemSetup.GetClipboardText
-searchedTerm = Array("卦", "爻", "周易", "易經", "系辭", "繫辭", "擊辭", "擊詞", "繫詞", "說卦", "序卦", "卦序", "敘卦", "雜卦", "文言", "乾坤", "無咎", ChrW(26080) & "咎", "天咎", "元亨", "利貞", "易") ', "", "", "", "")
-If Selection.Type = wdSelectionIP Then
+clipBTxt = VBA.Trim(SystemSetup.GetClipboardText)
+searchedTerm = Array("卦", "爻", "易", "周易", "易經", "系辭", "繫辭", "擊辭", "擊詞", "繫詞", "說卦", "序卦", "卦序", "敘卦", "雜卦", "文言", "乾坤", "無咎", ChrW(26080) & "咎", "天咎", "元亨", "利貞" _
+    , "史記", "九五", "六二", "上九", "上六", "九二", "筮") ', "", "", "", "")
+'If Selection.Type = wdSelectionIP Then
     If InStr(d.Range, clipBTxt) = 0 Then
         For Each e In searchedTerm
             If InStr(clipBTxt, e) > 0 Then
@@ -758,12 +764,21 @@ If Selection.Type = wdSelectionIP Then
             End If
         Next e
         If flgPaste Then
+            Selection.EndKey wdStory
+            Selection.InsertParagraphAfter
+            Selection.InsertParagraphAfter
+            Selection.Collapse wdCollapseEnd
             貼上純文字
             Selection.InsertParagraphAfter: Selection.InsertParagraphAfter: Selection.InsertParagraphAfter
             Selection.Collapse wdCollapseEnd
+            ActiveWindow.ScrollIntoView Selection
         End If
+    Else
+        Dim rng As Range
+        Set rng = d.Range
+        rng.Find.Execute VBA.Left(clipBTxt, 255), , , , , , , wdFindContinue
     End If
-End If
+'End If
 
 word.Application.ScreenUpdating = False
 If d.path <> "" And Not d.Saved Then d.Save
@@ -776,15 +791,23 @@ For Each e In searchedTerm
             .Font.ColorIndex = wdRed
             .Highlight = True
         End With
-        .Execute , , , , , , , wdFindContinue, , , wdReplaceAll
+        .Execute , , , , , , True, wdFindContinue, , , wdReplaceAll
     End With
 Next e
 d.Range.Find.ClearFormatting
-SystemSetup.playSound 1.921
+If flgPaste Then
+    SystemSetup.playSound 1.921
+Else
+    SystemSetup.playSound 1.469
+End If
 SystemSetup.contiUndo ur
 Set ur = Nothing
 word.Application.ScreenUpdating = True
+If Not rng Is Nothing Then rng.Select
+word.Application.ScreenRefresh
+ActiveWindow.ScrollIntoView Selection, True
 End Sub
+
 
 Sub 抽取超連結位址()
 Dim hplnk As Hyperlink, x As String, d As Document

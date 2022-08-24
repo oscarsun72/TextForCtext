@@ -304,6 +304,8 @@ Sub playSound(longShort As Single) 'Public Declare Function sndPlaySound32 Lib "
     Select Case longShort
         Case 1
             sndPlaySound32 "C:\Windows\Media\Chimes.wav", &H0
+        Case 1.469
+            sndPlaySound32 "C:\Windows\Media\Windows Message Nudge.wav", &H0
         Case 1.921
             sndPlaySound32 "C:\Windows\Media\Windows Notify System Generic.wav", &H0 '以 PotPlayer 播放即可於清單中檢視英文檔名
         Case 2
@@ -334,15 +336,15 @@ End If
 getChrome = chromePath
 End Function
 
-Function stopUndo(Optional undoName As String) As UndoRecord
+Sub stopUndo(ByRef ur As UndoRecord, Optional undoName As String)
 'https://www.google.com/search?q=word+vba+stop+undo&rlz=1C1GCEU_zh-TWTW967TW967&oq=word+vba+stop+undo&aqs=chrome..69i57j69i64.10026j0j7&sourceid=chrome&ie=UTF-8
 'https://docs.microsoft.com/en-us/office/vba/word/concepts/working-with-word/working-with-the-undorecord-object
 'https://stackoverflow.com/questions/28051381/how-to-disable-the-changes-made-by-vba-in-undo-list-in-ms-word#_=_
-Dim ur As UndoRecord
+'Dim ur As UndoRecord
 Set ur = word.Application.UndoRecord
 ur.StartCustomRecord undoName
-Set stopUndo = ur
-End Function
+'Set stopUndo = ur
+End Sub
 
 Sub contiUndo(ByRef ur As UndoRecord)
 ur.EndCustomRecord

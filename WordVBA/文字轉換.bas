@@ -75,7 +75,8 @@ Else
     Set rng = Selection.Range
     flgsel = wdFindStop
 End If
-Set ur = SystemSetup.stopUndo("異體字轉正")
+'Set ur = SystemSetup.stopUndo("異體字轉正")
+SystemSetup.stopUndo ur, "異體字轉正"
 'For Each a In rng.Characters
 '    If InStr(docAs, a) = 0 Then docAs = docAs & a '記下不重複的用字集
 'Next
@@ -255,7 +256,8 @@ For Each a In rng.Characters
     rst.Close
 Next a
 zys = Mid(zys, 2)
-Set ur = SystemSetup.stopUndo()
+'Set ur = SystemSetup.stopUndo()
+SystemSetup.stopUndo ur
 If ActiveDocument.path = "" Then
     rng.Text = zys
 Else

@@ -5,7 +5,8 @@ Sub hperLinkTextToDisplayShorten()
 Dim rng As Range, h As Hyperlink, ur As UndoRecord, d As Document
 Set d = Documents.Add()
 Set rng = d.Range
-Set ur = SystemSetup.stopUndo("hperLinkTextToDisplayShorten")
+'Set ur = SystemSetup.stopUndo("hperLinkTextToDisplayShorten")
+SystemSetup.stopUndo ur, "hperLinkTextToDisplayShorten"
 rng.Paste
 'd.ActiveWindow.Visible = True
 For Each h In rng.Hyperlinks

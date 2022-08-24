@@ -164,8 +164,8 @@ word.Application.WindowState = wdWindowStateMinimize
 'MsgBox "ready to paste", vbInformation
 AppActivateDefaultBrowser
 DoEvents
-'SystemSetup.Wait 0.5 '關鍵在這行！否則大容量貼上會失效。20220809'根本還是沒用！
-SendKeys "^v" ', True'恐怕要去掉這個才是
+'SystemSetup.Wait 0.5 '關鍵在這行！否則大容量貼上會失效。20220809'根本還是沒用！實際上是在Word的剪下傳送到剪貼簿的資料是空的
+SendKeys "^v" ', True'恐怕要去掉這個才是；都不是！實際上問題是出在Word的剪下傳送到剪貼簿的資料是空的
 DoEvents ' DoEvents: DoEvents
 Beep
 SystemSetup.Wait 0.5
@@ -181,7 +181,8 @@ End Sub
 
 Sub 轉成黑豆以作行字數長度判斷用()
 Dim p As Paragraph, a, i As Byte, cntr As Byte, ur As UndoRecord
-Set ur = SystemSetup.stopUndo("轉成黑豆以作行字數長度判斷用")
+'Set ur = SystemSetup.stopUndo("轉成黑豆以作行字數長度判斷用")
+SystemSetup.stopUndo ur, "轉成黑豆以作行字數長度判斷用"
 Set p = Selection.Paragraphs(1)
 cntr = p.Range.Characters.Count - 1
 For i = 1 To cntr
@@ -414,11 +415,12 @@ Select Case Selection.Text
         MsgBox "no selected text for search !", vbCritical: Exit Sub
 End Select
 Static bookID
-Dim searchedTerm, e, addressHyper As String, bid As String
-Const site As String = "https://ctext.org/wiki.pl?if=gb&res="
+Dim searchedTerm, e, addressHyper As String, bid As String, cndn As String
+'Const site As String = "https://ctext.org/wiki.pl?if=gb&res="
+Const site As String = "https://ctext.org/wiki.pl?if=gb"
 bid = Left(ActiveDocument.Paragraphs(1).Range, Len(ActiveDocument.Paragraphs(1).Range) - 1)
 If Not VBA.IsNumeric(bid) Then
-    If InStr(bid, "https://ctext.org/wiki.pl?if=gb&res=") = 0 Then
+    If InStr(bid, site) = 0 Then
         bookID = InputBox("plz input the book id ", , bookID)
     Else
         bookID = bid
@@ -427,7 +429,15 @@ Else
     bookID = bid
 End If
 If InStr(bookID, "https") > 0 Then
-    bookID = Mid(bookID, InStr(bookID, "&res=") + Len("&res="))
+    If InStr(bookID, "&res=") = 0 And InStr(bookID, "&chapter=") = 0 Then MsgBox "error . not the proper bookID ref ", vbCritical: Exit Sub
+    If InStr(bookID, "&res=") > 0 Then
+        cndn = "&res="
+    ElseIf InStr(bookID, "&chapter=") > 0 Then
+        cndn = "&chapter="
+    Else
+        MsgBox "error . not the proper bookID ref ", vbCritical: Exit Sub
+    End If
+    bookID = Mid(bookID, InStr(bookID, cndn) + Len(cndn))
     If Not VBA.IsNumeric(bookID) Then
         bookID = Mid(bookID, 0, InStr(bookID, "&searchu"))
     End If
@@ -439,7 +449,7 @@ e = Selection.Text
 'searchedTerm = 'Array("卦", "爻", "周易", "易經", "系辭", "繫辭", "擊辭", "說卦", "序卦", "卦序", "敘卦", "雜卦", "文言", "乾坤", "無咎", ChrW(26080) & "咎", "天咎", "元亨", "利貞", "易") ', "", "", "", "")
 ''https://ctext.org/wiki.pl?if=gb&res=757381&searchu=%E5%8D%A6
 'For Each e In searchedTerm
-    addressHyper = addressHyper + " " + site + bookID + "&searchu=" + e
+    addressHyper = addressHyper + " " + site + cndn + bookID + "&searchu=" + e
 'Next e
 Shell Network.getDefaultBrowserFullname + addressHyper
 
@@ -1260,7 +1270,8 @@ End Sub
 
 Sub dbSBCKWordtoReplace() '四部叢刊造字對照表 Alt+5
 Dim rng As Range, ur As UndoRecord
-Set ur = stopUndo("《四部叢刊》資料庫造字取代為系統字")
+'Set ur = stopUndo("《四部叢刊》資料庫造字取代為系統字")
+SystemSetup.stopUndo ur, "《四部叢刊》資料庫造字取代為系統字"
 If ActiveDocument.Name = "《四部叢刊資料庫》補入《中國哲學書電子化計劃》.docm" Then
     Set rng = ActiveDocument.Range
 Else
@@ -1448,7 +1459,8 @@ Const differPageNum  As Integer = 161 '頁數差
 Dim rng As Range, pageNum As Range, d As Document, ur As UndoRecord
 Set d = ActiveDocument
 Set rng = d.Range
-Set ur = SystemSetup.stopUndo("EditMakeupCtext")
+'Set ur = SystemSetup.stopUndo("EditMakeupCtext")
+SystemSetup.stopUndo ur, "EditMakeupCtext"
 Do While rng.Find.Execute(" page=""", , , , , , True, wdFindStop)
     Set pageNum = rng
     pageNum.SetRange rng.End, rng.End + 1

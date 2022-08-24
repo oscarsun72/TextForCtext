@@ -22,8 +22,8 @@ frmDict.getDictRecS CStr(x), rst, dictID
 'frmDict.getDictHydzdRecS CStr(x), rst
 If rst.RecordCount > 0 Then
     Dim ur As UndoRecord
-    Set ur = SystemSetup.stopUndo("¨Kºa«ö")
-        
+'    Set ur = SystemSetup.stopUndo("¨Kºa«ö")
+     SystemSetup.stopUndo ur, "¨Kºa«ö"
         lnk = rst.Fields(2).Value
         trimLinks lnk
         If rst.RecordCount = 1 Then
