@@ -165,7 +165,7 @@ word.Application.WindowState = wdWindowStateMinimize
 AppActivateDefaultBrowser
 DoEvents
 'SystemSetup.Wait 0.5 '關鍵在這行！否則大容量貼上會失效。20220809'根本還是沒用！實際上是在Word的剪下傳送到剪貼簿的資料是空的
-SendKeys "^v" ', True'恐怕要去掉這個才是；都不是！實際上問題是出在Word的剪下傳送到剪貼簿的資料是空的
+SendKeys "(^v)" ', True'恐怕要去掉這個才是；都不是！實際上問題是出在Word的剪下傳送到剪貼簿的資料是空的
 DoEvents ' DoEvents: DoEvents
 Beep
 SystemSetup.Wait 0.5
