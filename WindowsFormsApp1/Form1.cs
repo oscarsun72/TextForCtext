@@ -2016,7 +2016,7 @@ namespace WindowsFormsApp1
                     cntr++;
                     i = selTxt.IndexOf(Environment.NewLine + "􏿽", i + 1);
                 }
-                if (textBox1.SelectedText.Substring(0, 1) == "􏿽") textBox1.SelectedText = textBox1.SelectedText.Substring(1);
+                if (textBox1.SelectedText.Substring(0, 2) == "􏿽") textBox1.SelectedText = textBox1.SelectedText.Substring(2);
                 l -= "􏿽".Length;
                 textBox1.Select(s, l);
                 textBox1.SelectedText = textBox1.SelectedText.Replace(Environment.NewLine + "􏿽", Environment.NewLine);
