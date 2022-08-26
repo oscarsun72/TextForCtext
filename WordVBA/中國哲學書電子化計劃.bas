@@ -43,10 +43,28 @@ Network.AppActivateDefaultBrowser
 SendKeys "^v"
 
 End Sub
+Sub setPage1Code() '(ByRef d As Document)
+Dim xd As String
+xd = SystemSetup.GetClipboardText
+If InStr(xd, "page=""1""") = 0 Then
+    Dim bID As String, s As Byte, pge As String
+    s = InStr(xd, "page=""")
+    pge = Mid(xd, s + Len("page="""), InStr(s + Len("page="""), xd, """") - s - Len("page="""))
+    If CInt(pge) < 10 Then
+        s = InStr(xd, """")
+        bID = Mid(xd, s + 1, InStr(s + 1, xd, """") - s - 1)
+        xd = "<scanbegin file=""" & bID & """ page=""1"" />●<scanend file=""" & bID & """ page=""1"" />" + xd
+        SystemSetup.ClipboardPutIn xd
+    End If
+End If
+End Sub
+
 Sub 清除頁前的分段符號()
 Dim d As Document, rng As Range, e As Long, s As Long
 Set d = Documents.Add
 DoEvents
+'If (MsgBox("add page 1 code?", vbExclamation + vbOKCancel) = vbOK) Then setPage1Code
+setPage1Code
 將星號前的分段符號移置前段之末 d
 DoEvents
 Set rng = d.Range
@@ -415,18 +433,18 @@ Select Case Selection.Text
         MsgBox "no selected text for search !", vbCritical: Exit Sub
 End Select
 Static bookID
-Dim searchedTerm, e, addressHyper As String, bid As String, cndn As String
+Dim searchedTerm, e, addressHyper As String, bID As String, cndn As String
 'Const site As String = "https://ctext.org/wiki.pl?if=gb&res="
 Const site As String = "https://ctext.org/wiki.pl?if=gb"
-bid = Left(ActiveDocument.Paragraphs(1).Range, Len(ActiveDocument.Paragraphs(1).Range) - 1)
-If Not VBA.IsNumeric(bid) Then
-    If InStr(bid, site) = 0 Then
+bID = Left(ActiveDocument.Paragraphs(1).Range, Len(ActiveDocument.Paragraphs(1).Range) - 1)
+If Not VBA.IsNumeric(bID) Then
+    If InStr(bID, site) = 0 Then
         bookID = InputBox("plz input the book id ", , bookID)
     Else
-        bookID = bid
+        bookID = bID
     End If
 Else
-    bookID = bid
+    bookID = bID
 End If
 If InStr(bookID, "https") > 0 Then
     If InStr(bookID, "&res=") = 0 And InStr(bookID, "&chapter=") = 0 Then MsgBox "error . not the proper bookID ref ", vbCritical: Exit Sub
