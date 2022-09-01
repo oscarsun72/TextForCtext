@@ -126,10 +126,31 @@ Dim appFullname As String
 appFullname = GetDefaultBrowserEXE
 appFullname = Mid(appFullname, 2, InStr(appFullname, ".exe") + Len(".exe") - 2)
 getDefaultBrowserFullname = appFullname
-DefaultBrowserNameAppActivate = VBA.Replace(VBA.Mid(appFullname, InStrRev(appFullname, "\") + 1), ".exe", "")
-Select Case DefaultBrowserNameAppActivate
-    Case "msedge"
-        DefaultBrowserNameAppActivate = "edge"
+'DefaultBrowserNameAppActivate = VBA.Replace(VBA.Mid(appFullname, InStrRev(appFullname, "\") + 1), ".exe", "")
+End Function
+Function getDefaultBrowserNameAppActivate()
+Dim objShell, ProgID As String: Set objShell = CreateObject("WScript.Shell")
+ProgID = objShell.RegRead _
+            ("HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\Shell\Associations\UrlAssociations\http\UserChoice\ProgID")
+ProgID = Mid(ProgID, 1, IIf(InStr(ProgID, ".") = 0, Len(ProgID), InStr(ProgID, ".") - 1))
+Select Case ProgID
+    Case "IE.HTTP":
+        DefaultBrowserNameAppActivate = "iexplore"
+    Case "FirefoxURL":
+        DefaultBrowserNameAppActivate = "firefox"
+    Case "ChromeHTML":
+        DefaultBrowserNameAppActivate = "google chrome"
+    Case "BraveHTML":
+        DefaultBrowserNameAppActivate = "brave"
+    Case "OperaStable":
+        DefaultBrowserNameAppActivate = "Opera"
+    Case "SafariHTML":
+        DefaultBrowserNameAppActivate = "Safari"
+    Case "AppXq0fevzme2pys62n3e0fbqa7peapykr8v":
+        'browser = BrowserApplication.Edge;
+        DefaultBrowserNameAppActivate = "edge" '"msedge"
+    Case Else:
+        DefaultBrowserNameAppActivate = "google chrome" '"chrome"
 End Select
 End Function
 
@@ -139,7 +160,7 @@ On Error GoTo eh
 Dim i As Byte, a
 a = Array("google chrome", "brave", "edge")
 DoEvents
-If DefaultBrowserNameAppActivate = "" Then getDefaultBrowserFullname
+If DefaultBrowserNameAppActivate = "" Then getDefaultBrowserNameAppActivate
 AppActivate DefaultBrowserNameAppActivate
 DoEvents
 Exit Sub

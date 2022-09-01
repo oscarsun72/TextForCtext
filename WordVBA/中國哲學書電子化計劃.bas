@@ -38,6 +38,7 @@ If SystemSetup.GetClipboardText <> x Then
     rng.InsertAfter x
     rng.Cut
 End If
+rng.Document.ActiveWindow.WindowState = wdWindowStateMinimize
 DoEvents
 Network.AppActivateDefaultBrowser
 SendKeys "^v"
@@ -59,12 +60,27 @@ If InStr(xd, "page=""1""") = 0 Then
 End If
 End Sub
 
+Sub clearRedundantCode()
+Dim xd As String, s As Long, e As Long
+xd = SystemSetup.GetClipboardText
+s = InStr(xd, "<scanend ") 'end 和 begin間不當有任何文字
+Do Until s = 0
+    e = InStr(s, xd, ">")
+    s = InStr(e, xd, "<scanbegin ")
+    If s - e > 1 Then
+        xd = Mid(xd, 1, e) + Mid(xd, s)
+    End If
+    s = InStr(e, xd, "<scanend ")
+Loop
+SystemSetup.ClipboardPutIn xd
+End Sub
+
 Sub 清除頁前的分段符號()
-Dim d As Document, rng As Range, e As Long, s As Long
+Dim d As Document, rng As Range, e As Long, s As Long, xd As String
 Set d = Documents.Add
 DoEvents
 'If (MsgBox("add page 1 code?", vbExclamation + vbOKCancel) = vbOK) Then setPage1Code
-setPage1Code
+setPage1Code: clearRedundantCode
 將星號前的分段符號移置前段之末 d
 DoEvents
 Set rng = d.Range
@@ -110,11 +126,12 @@ Loop
 
 
 DoEvents
+xd = d.Range.Text
 'If d.Characters.Count < 50000 Then ' 147686
 '    d.Range.Cut '原來是Word的 cut 到剪貼簿裡有問題
 'Else
     'SystemSetup.SetClipboard d.Range.Text
-    SystemSetup.ClipboardPutIn d.Range.Text
+    SystemSetup.ClipboardPutIn xd
 'End If
 DoEvents
 playSound 1
@@ -186,7 +203,7 @@ DoEvents
 SendKeys "(^v)" ', True'恐怕要去掉這個才是；都不是！實際上問題是出在Word的剪下傳送到剪貼簿的資料是空的
 DoEvents ' DoEvents: DoEvents
 Beep
-SystemSetup.Wait 0.5
+SystemSetup.Wait 0.3
 DoEvents:
 SendKeys "{tab}"
 AppActivateDefaultBrowser

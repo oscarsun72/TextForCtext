@@ -4700,7 +4700,8 @@ namespace WindowsFormsApp1
                 xClip = Clipboard.GetText() ?? "";
                 //throw;
             }
-            if ((xClip.IndexOf("MidleadingBot") > 0 || xClip.IndexOf("此頁面可能存在如下一些問題：") > -1) && textBox1.TextLength < 100)//xClip.Length > 500 )
+            if ((xClip.IndexOf("MidleadingBot") > 0 || xClip.IndexOf("此頁面可能存在如下一些問題：") > -1||xClip.IndexOf("Wmr-bot")>-1) 
+                    && textBox1.TextLength < 100)//xClip.Length > 500 )
                 runWordMacro("維基文庫四部叢刊本轉來");
         }
 
