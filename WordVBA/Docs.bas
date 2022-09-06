@@ -748,7 +748,7 @@ End With
 End Sub
 
 Sub mark易學關鍵字()
-Dim searchedTerm, e, ur As UndoRecord, d As Document, clipBTxt As String, flgPaste As Boolean
+Dim searchedTerm, e, ur As UndoRecord, d As Document, clipBTxt As String, flgPaste As Boolean, xd As String
 'Set ur = SystemSetup.stopUndo("mark易學關鍵字")
 SystemSetup.stopUndo ur, "mark易學關鍵字"
 Set d = ActiveDocument
@@ -779,23 +779,26 @@ searchedTerm = Array("卦", "爻", "易", "周易", "易經", "系辭", "繫辭", "擊辭", "
         rng.Find.Execute VBA.Left(clipBTxt, 255), , , , , , , wdFindContinue
     End If
 'End If
-
-word.Application.ScreenUpdating = False
-If d.path <> "" And Not d.Saved Then d.Save
-For Each e In searchedTerm
-    With d.Range.Find
-        .ClearFormatting
-        .Text = e
-        With .Replacement
-            .Text = e
-            .Font.ColorIndex = wdRed
-            .Highlight = True
-        End With
-        .Execute , , , , , , True, wdFindContinue, , , wdReplaceAll
-    End With
-Next e
-d.Range.Find.ClearFormatting
 If flgPaste Then
+    word.Application.ScreenUpdating = False
+    If d.path <> "" And Not d.Saved Then d.Save
+    xd = d.Range.Text
+    For Each e In searchedTerm
+        If InStr(xd, e) > 0 Then
+            With d.Range.Find
+                .ClearFormatting
+                .Text = e
+                With .Replacement
+                    .Text = e
+                    .Font.ColorIndex = wdRed
+                    .Highlight = True
+                End With
+                .Execute , , , , , , True, wdFindContinue, , , wdReplaceAll
+            End With
+        End If
+    Next e
+    d.Range.Find.ClearFormatting
+
     SystemSetup.playSound 1.921
 Else
     SystemSetup.playSound 1.469
