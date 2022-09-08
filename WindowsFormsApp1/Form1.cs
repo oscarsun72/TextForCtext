@@ -2192,8 +2192,8 @@ namespace WindowsFormsApp1
             //https://stackoverflow.com/questions/126876/how-do-i-disable-updating-a-form-in-windows-forms
             SendMessage(this.Handle, WM_SETREDRAW, false, 0);
 
-            while (textBox1.SelectionStart + textBox1.SelectionLength++ <= textBox1.TextLength
-                    && textBox1.SelectedText.Substring(textBox1.SelectedText.Length - 1, 1) != Environment.NewLine.Substring(0, 1)
+            while (textBox1.SelectionStart + textBox1.SelectionLength + 1 <= textBox1.TextLength
+                    && textBox1.Text.Substring(textBox1.SelectionStart+ textBox1.SelectionLength, 2) != Environment.NewLine
                     && textBox1.SelectedText.Substring(textBox1.SelectedText.Length - 3) != "<p>")
             {//找到處理範圍裡最後一個<p>，若碰到換行而無<p>者，即停止
                 textBox1.Select(textBox1.SelectionStart, textBox1.SelectionLength++);
