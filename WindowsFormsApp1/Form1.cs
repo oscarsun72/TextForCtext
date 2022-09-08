@@ -3638,6 +3638,14 @@ namespace WindowsFormsApp1
             #region 同時按下 Ctrl Shift
             if ((m & Keys.Control) == Keys.Control
                 && (m & Keys.Shift) == Keys.Shift
+                && e.KeyCode == Keys.W)
+            {
+                e.Handled = true;
+                closeChromeWindow();//Ctrl + Shift + w 關閉 Chrome 網頁視窗
+                return;
+            }
+            if ((m & Keys.Control) == Keys.Control
+                && (m & Keys.Shift) == Keys.Shift
                 && e.KeyCode == Keys.C)
             {
                 e.Handled = true;
@@ -3715,9 +3723,11 @@ namespace WindowsFormsApp1
                 }
 
                 if (e.KeyCode == Keys.N)
-                {// Ctrl + n
-                    Process.Start("https://www.google.com.tw/?hl=zh_TW");
-                    appActivateByName();
+                {// Ctrl + n ：開新預設瀏覽器視窗 //原：在新頁籤開啟 google 網頁，以備用（在預設瀏覽器為 Chrome 時）
+                    e.Handled = true;
+                    //Process.Start("https://www.google.com.tw/?hl=zh_TW");
+                    appActivateByName();                    
+                    SendKeys.Send("^n");
                     e.Handled = true; return;
                 }
 
@@ -5170,6 +5180,16 @@ namespace WindowsFormsApp1
         {//Ctrl + w 關閉 Chrome 網頁頁籤
             appActivateByName();
             SendKeys.Send("^{F4}");//關閉頁籤
+            bool autoPastetoQuickEditMemo = autoPastetoQuickEdit;
+            autoPastetoQuickEdit = false;
+            this.Activate();
+            autoPastetoQuickEdit = autoPastetoQuickEditMemo;
+        }
+        
+        void closeChromeWindow()
+        {//Ctrl + Shift + w 關閉 Chrome 網頁視窗
+            appActivateByName();
+            SendKeys.Send("%{F4}");//關閉頁籤
             bool autoPastetoQuickEditMemo = autoPastetoQuickEdit;
             autoPastetoQuickEdit = false;
             this.Activate();

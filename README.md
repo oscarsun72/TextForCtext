@@ -65,11 +65,13 @@ Ctrl + 4 ：執行 Word VBA Sub 巨集指令「維基文庫四部叢刊本轉來
 
 Ctrl + f ：移至 textBox2 準備尋找文本
 
-Ctrl + n ：在新頁籤開啟 google 網頁，以備用（在預設瀏覽器為 Chrome 時）
+Ctrl + n ：開新預設瀏覽器視窗 //原：在新頁籤開啟 google 網頁，以備用（在預設瀏覽器為 Chrome 時）
 
 Ctrl + s 或 Shift + F12：儲存文本至 DropBox 根目錄下的「cText.txt」檔案
 
 Ctrl + w 關閉 Chrome 網頁頁籤
+
+Ctrl + Shift + w 關閉 Chrome 網頁視窗
 
 Ctrl + PageUp ：根據 textBox3所載的網址，瀏覽ctext書影的上一頁
 
