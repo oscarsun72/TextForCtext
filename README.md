@@ -110,7 +110,7 @@ Ctrl + \ （反斜線） 或 Alt + \ ： 清除textBox1文本插入點後的分�
 按下 F1 鍵：以找到的字串位置**前**分行分段（在文字選取內容接的不是newline時；若是，且選取長度等於常數「predictEndofPageSelectedTextLen」則進行自動貼入 Ctext 的 quit edit 方塊中）
 //暫時取消，釋放 F1、 Pause 鍵給 Alt + Shift + 2 用
 
-按下 Pause Break 鍵：以找到的字串位置**後**分行分段//暫時取消，釋放  Pause 鍵給 Alt + Shift + 2
+按下 Pause Break 鍵：以找到的字串位置**後**分行分段//暫時取消，釋放  Pause 鍵給 Alt + F7 （原Alt + Shift + 2）
 
 按下 Scroll Lock 將字數較少的行/段落尾末標上「<p>」符號
 

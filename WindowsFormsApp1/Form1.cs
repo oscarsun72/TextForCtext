@@ -1343,11 +1343,14 @@ namespace WindowsFormsApp1
                     }
                     return;
                 }
-                if (e.KeyCode == Keys.F1 || e.KeyCode == Keys.Pause)//暫時取消，釋放 F1、 Pause 鍵給 Alt + Shift + 2 用
+                if (e.KeyCode == Keys.F1 || e.KeyCode == Keys.Pause)//暫時取消，釋放 F1、 Pause 鍵給 Alt + Shift + 2 、Alt + F7用
                 {//- 按下 F1 鍵：以找到的字串位置**前**分行分段
                  // -按下 Pause Break 鍵：以找到的字串位置** 後**分行分段
                     e.Handled = true;
-                    //if (e.KeyCode == Keys.Pause)
+                    if (e.KeyCode == Keys.Pause)
+                    {
+                        keysSpacePreParagraphs_indent_ClearEnd＿P_Mark(); return;
+                    }
                     poetryFormat();
                     //else
                     //splitLineParabySeltext(e.KeyCode);
@@ -2073,10 +2076,12 @@ namespace WindowsFormsApp1
                 i = slTxt.IndexOf(Environment.NewLine, i + 1);
             }
             if (!stopUndoRec) { undoRecord(); caretPositionRecord(); stopUndoRec = true; stopUndoRecFlag = true; }
+            //s = textBox1.SelectionStart;
             if (s == 0 || s > 2 && textBox1.Text.Substring(s - 2, 2) == Environment.NewLine)
             {
                 xn = textBox1.SelectedText.Replace(Environment.NewLine, Environment.NewLine + "　");
-                if (s > 0) s = s - "　".Length; l = ("　" + xn).Length;
+                //if (s > 0) s = s - "　".Length;
+                l = ("　" + xn).Length;
                 textBox1.SelectedText = "　" + xn;
             }
             else
@@ -2188,7 +2193,7 @@ namespace WindowsFormsApp1
             SendMessage(this.Handle, WM_SETREDRAW, false, 0);
 
             while (textBox1.SelectionStart + textBox1.SelectionLength++ <= textBox1.TextLength
-                    && textBox1.SelectedText.Substring(textBox1.SelectedText.Length - 2) != Environment.NewLine
+                    && textBox1.SelectedText.Substring(textBox1.SelectedText.Length - 1, 1) != Environment.NewLine.Substring(0, 1)
                     && textBox1.SelectedText.Substring(textBox1.SelectedText.Length - 3) != "<p>")
             {//找到處理範圍裡最後一個<p>，若碰到換行而無<p>者，即停止
                 textBox1.Select(textBox1.SelectionStart, textBox1.SelectionLength++);
@@ -2218,7 +2223,8 @@ namespace WindowsFormsApp1
                 if (textBox1.SelectedText.Substring(i - 1, 1) == "　")
                 {
                     textBox1.Select(s + i, "􏿽".Length);
-                    textBox1.SelectedText = "　"; l -= ("􏿽".Length - "　".Length);
+                    if (textBox1.SelectedText == "􏿽") textBox1.SelectedText = "";//textBox1.SelectedText = "　";
+                    l -= ("􏿽".Length - "　".Length);
                     textBox1.Select(s, l);
                 }
                 i = textBox1.SelectedText.IndexOf("􏿽", i + 1);
@@ -4702,7 +4708,7 @@ namespace WindowsFormsApp1
                 xClip = Clipboard.GetText() ?? "";
                 //throw;
             }
-            if ((xClip.IndexOf("MidleadingBot") > 0 || xClip.IndexOf("此頁面可能存在如下一些問題：") > -1||xClip.IndexOf("Wmr-bot")>-1) 
+            if ((xClip.IndexOf("MidleadingBot") > 0 || xClip.IndexOf("此頁面可能存在如下一些問題：") > -1 || xClip.IndexOf("Wmr-bot") > -1)
                     && textBox1.TextLength < 100)//xClip.Length > 500 )
                 runWordMacro("維基文庫四部叢刊本轉來");
         }
