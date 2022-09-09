@@ -26,7 +26,7 @@ namespace WindowsFormsApp1
         readonly string dropBoxPathIncldBackSlash;
         readonly Size textBox1SizeToForm;
         //string[] CJKBiggestSet = new string[]{ "HanaMinB", "KaiXinSongB", "TH-Tshyn-P1" };
-        string[] CJKBiggestSet = { "HanaMinB", "KaiXinSongB", "TH-Tshyn-P1", "HanaMinA", "Plangothic P1", "Plangothic P2" };
+        string[] CJKBiggestSet = { "新細明體-ExtB", "HanaMinB", "KaiXinSongB", "TH-Tshyn-P1", "HanaMinA", "Plangothic P1", "Plangothic P2" };
         Color button2BackColorDefault;
         bool insertMode = true, check_the_adjacent_pages = false;
 
@@ -1512,7 +1512,7 @@ namespace WindowsFormsApp1
             }
             spaceCntr--;
             #endregion //如果末已綴有空格
-            StringInfo xSelInfo = new StringInfo(xSel.Substring(0, xSel.Length - spaceCntr)); int i = 0;
+            StringInfo xSelInfo = new StringInfo(xSel.Substring(0, xSel.Length - spaceCntr).Replace(Environment.NewLine, "")); int i = 0;
             for (i = 0; i + spaceCntr < xSelInfo.LengthInTextElements; i++)
             {
                 if (punctuations.IndexOf(xSelInfo.SubstringByTextElements(i, 1)) == -1)
