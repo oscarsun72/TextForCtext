@@ -2118,7 +2118,7 @@ namespace WindowsFormsApp1
                                    //textBox1.Select(s, l + 1 + cntr);                
                                    //}
                                    //textBox1.Select(s + 1 + cntr, l);
-            textBox1.Select(s + cntr, l + cntr);
+            textBox1.Select(s + 1, l + cntr);
             dontHide = false;
             #region 原式
             /*
