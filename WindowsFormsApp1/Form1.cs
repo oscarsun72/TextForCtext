@@ -2089,10 +2089,11 @@ namespace WindowsFormsApp1
             {
                 //int f = textBox1.Text.LastIndexOf(Environment.NewLine, s);
                 xn = textBox1.SelectedText.Replace(Environment.NewLine, Environment.NewLine + "　");
-                if (textBox1.SelectedText == xn)
-                    textBox1.SelectedText = "　" + textBox1.SelectedText;
-                else
-                    textBox1.SelectedText = xn;
+                textBox1.SelectedText = "　" + xn; s += "　".Length;
+                //if (textBox1.SelectedText == xn)
+                //textBox1.SelectedText = "　" + textBox1.SelectedText;
+                //else
+                //textBox1.SelectedText = xn;
 
                 //textBox1.Select(f == -1 ? 0 : f + 2, s - f);//只讀取了第一行前端
                 //s = textBox1.SelectionStart - "　".Length; if (s < 0) s = 0;
