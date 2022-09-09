@@ -2116,7 +2116,7 @@ namespace WindowsFormsApp1
                                    //{
                                    //textBox1.Select(s, l + 1 + cntr);                
                                    //}
-            textBox1.Select(s + 1 + cntr, l );
+            textBox1.Select(s + 1 + cntr, l);
             dontHide = false;
             #region 原式
             /*
@@ -2195,7 +2195,7 @@ namespace WindowsFormsApp1
             SendMessage(this.Handle, WM_SETREDRAW, false, 0);
 
             while (textBox1.SelectionStart + textBox1.SelectionLength + 1 <= textBox1.TextLength
-                    && textBox1.Text.Substring(textBox1.SelectionStart+ textBox1.SelectionLength, 2) != Environment.NewLine
+                    && textBox1.Text.Substring(textBox1.SelectionStart + textBox1.SelectionLength, 2) != Environment.NewLine
                     && textBox1.SelectedText.Substring(textBox1.SelectedText.Length - 3) != "<p>")
             {//找到處理範圍裡最後一個<p>，若碰到換行而無<p>者，即停止
                 textBox1.Select(textBox1.SelectionStart, textBox1.SelectionLength++);
@@ -3728,8 +3728,10 @@ namespace WindowsFormsApp1
                 {// Ctrl + n ：開新預設瀏覽器視窗 //原：在新頁籤開啟 google 網頁，以備用（在預設瀏覽器為 Chrome 時）
                     e.Handled = true;
                     //Process.Start("https://www.google.com.tw/?hl=zh_TW");
-                    appActivateByName();                    
+                    appActivateByName();
                     SendKeys.Send("^n");
+                    this.Activate();
+                    appActivateByName();
                     e.Handled = true; return;
                 }
 
@@ -4319,7 +4321,16 @@ namespace WindowsFormsApp1
             if (replacedword == "）" && rplsword == "}}") textBox1.Text = textBox1.Text.Replace("（", "{{");
             #endregion
             textBox1.SelectionStart = s; textBox1.SelectionLength = l;
-            restoreCaretPosition(textBox1, s, l == 0 ? 1 : l);//textBox1.ScrollToCaret();
+            //restoreCaretPosition(textBox1, s, l == 0 ? 1 : l);//textBox1.ScrollToCaret();
+            restoreCaretPosition(textBox1, s, l == 0 ? rplsword.Length : l);//textBox1.ScrollToCaret();
+            //if (l != 0)
+            //{
+            //    if (new StringInfo(replacedword).LengthInTextElements == 1)
+            //    {
+            //        l = rplsword.Length;
+            //    }
+            //}
+            restoreCaretPosition(textBox1, s,  l);
             textBox1.Focus();
             stopUndoRec = false;
         }
@@ -5187,7 +5198,7 @@ namespace WindowsFormsApp1
             this.Activate();
             autoPastetoQuickEdit = autoPastetoQuickEditMemo;
         }
-        
+
         void closeChromeWindow()
         {//Ctrl + Shift + w 關閉 Chrome 網頁視窗
             appActivateByName();
