@@ -2064,7 +2064,8 @@ namespace WindowsFormsApp1
                     textBox1.SelectAll();
                     l = textBox1.TextLength;
                 }
-                else { textBox1.Select(s, 1); l = 1; }
+                //已有「expandSelectedTextRangeToWholeLinePara」此行當不必下行
+                //else { textBox1.Select(s, 1); l = 1; }
 
             }
             //先延展選取範圍至整個行/段
@@ -2111,10 +2112,11 @@ namespace WindowsFormsApp1
                 l = 0;
             }
             int cntr = indentRow();//此函式執行完時會將執行結果的範圍選取，以便後續處理。傳回值為處理了幾行/段
-            if (l != 0)
-            {
-                textBox1.Select(s, l + 1 + cntr);
-            }
+                                   //if (l != 0)
+                                   //{
+                                   //textBox1.Select(s, l + 1 + cntr);                
+                                   //}
+            textBox1.Select(s + 1 + cntr, l );
             dontHide = false;
             #region 原式
             /*
