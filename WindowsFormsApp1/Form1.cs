@@ -4322,7 +4322,7 @@ namespace WindowsFormsApp1
             #endregion
             textBox1.SelectionStart = s; textBox1.SelectionLength = l;
             //restoreCaretPosition(textBox1, s, l == 0 ? 1 : l);//textBox1.ScrollToCaret();
-            restoreCaretPosition(textBox1, s, l == 0 ? rplsword.Length : l);//textBox1.ScrollToCaret();
+            restoreCaretPosition(textBox1, s, rplsword.Length );//textBox1.ScrollToCaret();
             //if (l != 0)
             //{
             //    if (new StringInfo(replacedword).LengthInTextElements == 1)
@@ -4330,7 +4330,7 @@ namespace WindowsFormsApp1
             //        l = rplsword.Length;
             //    }
             //}
-            restoreCaretPosition(textBox1, s,  l);
+            ////restoreCaretPosition(textBox1, s,  l);
             textBox1.Focus();
             stopUndoRec = false;
         }
