@@ -4395,7 +4395,7 @@ namespace WindowsFormsApp1
                     beforeScntr++;
                     s += rplsword.Length - replacedword.Length;
                 }
-                i = xDomain.IndexOf(replacedword, i + 1);
+                i = xDomain.IndexOf(replacedword, i + rplsword.Length);
             }
             return cntr;
         }
