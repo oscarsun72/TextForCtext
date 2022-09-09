@@ -4297,7 +4297,7 @@ namespace WindowsFormsApp1
             int s = textBox1.SelectionStart; int l = 0;
 
             undoRecord();
-            stopUndoRec = true;
+            stopUndoRec = true; int cntr = 0, beforeScntr = 0;
             if (button2.Text == "選取文")
             {
                 replacedword = textBox2.Text;
@@ -4306,14 +4306,22 @@ namespace WindowsFormsApp1
                 string xBefore = x.Substring(0, s), xAfter = x.Substring(s + l);
                 x = textBox1.SelectedText;
                 if (rplsword == "\"\"") rplsword = "";//要清除所選文字，則選取其字，然後在 textBox4 輸入兩個英文半形雙引號 「""」（即表空字串），則不會取代成「""」，而是清除之。
-                textBox1.Text = xBefore + x.Replace(replacedword, rplsword) + xAfter;
+                //textBox1.Text = xBefore + x.Replace(replacedword, rplsword) + xAfter;
+                cntr = ReplaceCntr(ref x, replacedword, rplsword, s, ref beforeScntr);
+                textBox1.Text = xBefore + x + xAfter;
             }
             else
             {
                 l = selWord.LengthInTextElements;
                 if (rplsword == "\"\"") rplsword = "";
-                textBox1.Text = x.Replace(replacedword, rplsword);
+                //textBox1.Text = x.Replace(replacedword, rplsword);
+                cntr = ReplaceCntr(ref x, replacedword, rplsword, s, ref beforeScntr);
+                textBox1.Text = x;
 
+            }
+            if (replacedword.Length != rplsword.Length)
+            {
+                s += beforeScntr * (rplsword.Length - replacedword.Length);
             }
             addReplaceWordDefault(replacedword, rplsword);
             #region 自動將圓括弧置換成{{}}
@@ -4322,7 +4330,7 @@ namespace WindowsFormsApp1
             #endregion
             textBox1.SelectionStart = s; textBox1.SelectionLength = l;
             //restoreCaretPosition(textBox1, s, l == 0 ? 1 : l);//textBox1.ScrollToCaret();
-            restoreCaretPosition(textBox1, s, rplsword.Length );//textBox1.ScrollToCaret();
+            restoreCaretPosition(textBox1, s, rplsword.Length);//textBox1.ScrollToCaret();
             //if (l != 0)
             //{
             //    if (new StringInfo(replacedword).LengthInTextElements == 1)
@@ -4373,6 +4381,22 @@ namespace WindowsFormsApp1
 
         }
 
+        int ReplaceCntr(ref string xDomain, string replacedword, string rplsword, int s, ref int beforeScntr)
+        {
+            int i = xDomain.IndexOf(replacedword), cntr = 0;
+            while (i > -1)
+            {
+                xDomain = xDomain.Substring(0, i) + rplsword + xDomain.Substring(i + replacedword.Length);
+                cntr++;
+                if (i < s)
+                {
+                    beforeScntr++;
+                    s += rplsword.Length - replacedword.Length;
+                }
+                i = xDomain.IndexOf(replacedword, i + 1);
+            }
+            return cntr;
+        }
         private void textBox4_Leave(object sender, EventArgs e)
         {
             if (textBox4.Text == "")
