@@ -5180,6 +5180,7 @@ namespace WindowsFormsApp1
         {
             //textBox3.DoDragDrop(e.Data, DragDropEffects.Copy);            
             textBox3.Text = e.Data.GetData(DataFormats.UnicodeText).ToString();
+            textBox1.Select(0, 0); textBox1.ScrollToCaret();
             new SoundPlayer(@"C:\Windows\Media\recycle.wav").Play();
         }
 
