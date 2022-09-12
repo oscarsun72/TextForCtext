@@ -2083,13 +2083,13 @@ namespace WindowsFormsApp1
                 xn = textBox1.SelectedText.Replace(Environment.NewLine, Environment.NewLine + "　");
                 //if (s > 0) s = s - "　".Length;
                 l = ("　" + xn).Length;
-                textBox1.SelectedText = "　" + xn;
+                textBox1.SelectedText = ("　" + xn).Replace(Environment.NewLine + "　{{", Environment.NewLine + "{{　");
             }
             else
             {
                 //int f = textBox1.Text.LastIndexOf(Environment.NewLine, s);
                 xn = textBox1.SelectedText.Replace(Environment.NewLine, Environment.NewLine + "　");
-                textBox1.SelectedText = "　" + xn; s -= "　".Length;
+                textBox1.SelectedText = ("　" + xn).Replace(Environment.NewLine + "　{{", Environment.NewLine + "{{　"); s -= "　".Length;
                 //if (textBox1.SelectedText == xn)
                 //textBox1.SelectedText = "　" + textBox1.SelectedText;
                 //else
