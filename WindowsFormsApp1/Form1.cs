@@ -2167,7 +2167,7 @@ namespace WindowsFormsApp1
         private const int WM_SETREDRAW = 11;
 
         private void keysSpacePreParagraphs_indent_ClearEnd＿P_Mark()
-        {//Alt + F7 : 每行縮排一格後將其末誤標之<p>
+        {//Alt + F7 (先改 Pause/Break）: 每行縮排一格後將其末誤標之<p>
             int l = textBox1.SelectionLength; int s = textBox1.SelectionStart; dontHide = true;
             if (l == 0)
             {
@@ -2176,7 +2176,7 @@ namespace WindowsFormsApp1
                     textBox1.SelectAll();
                     l = textBox1.TextLength;
                 }
-                else { textBox1.Select(s, 1); l = 1; }
+                //else { textBox1.Select(s, 1); l = 1; }                
             }
 
             if (l == textBox1.TextLength)
@@ -2215,8 +2215,9 @@ namespace WindowsFormsApp1
                 +Environment.NewLine.Length + "　".Length <= textBox1.TextLength)
             {
                 if (textBox1.Text.Substring(textBox1.SelectionStart + textBox1.SelectionLength
-                    + Environment.NewLine.Length, "　".Length) != "　")
-                {//如果按下來是頂行，則不取代最後的<p>
+                    + Environment.NewLine.Length, "　".Length) != "　" &&
+                    textBox1.SelectedText.Substring(textBox1.SelectionLength - 3) == "<p>")
+                {//如果接下來是頂行，則不取代最後的<p>
                     textBox1.Select(textBox1.SelectionStart, textBox1.SelectionLength - "<p>".Length);
                 }
             }
