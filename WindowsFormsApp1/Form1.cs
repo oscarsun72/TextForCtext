@@ -710,6 +710,10 @@ namespace WindowsFormsApp1
                     }
                     return;
                 }
+                if (e.KeyCode == Keys.Oem3)
+                {//` 或 Ctrl + ` ： 於插入點處起至「　」或「􏿽」或「|」或「<」或分段符號前止之文字加上黑括號【】//Print/SysRq 為OS鎖定不能用
+                    e.Handled = true; 加上黑括號(); return;
+                }
 
                 if (e.KeyCode == Keys.Add || e.KeyCode == Keys.Oemplus || e.KeyCode == Keys.Subtract || e.KeyCode == Keys.NumPad5)
                 {//Ctrl + + Ctrl + -
@@ -1329,7 +1333,7 @@ namespace WindowsFormsApp1
                 {//按下 Scroll Lock 將字數較少的行/段落尾末標上「<p>」符號
                     e.Handled = true; paragraphMarkAccordingFirstOne(); return;
                 }
-                
+
                 if (e.KeyCode == Keys.Insert)
                 {
                     if (insertMode)
@@ -1438,14 +1442,20 @@ namespace WindowsFormsApp1
         private void 加上黑括號()
         {//`： 於插入點處起至「　」或「􏿽」前止之文字加上黑括號【】//Print/SysRq 為OS鎖定不能用
             //throw new NotImplementedException();
-            int s = textBox1.SelectionStart,so=s;string x=textBox1.Text;
-            while ((Environment.NewLine + "　􏿽|<").IndexOf( x.Substring(++s , 1))==-1)
+            int s = textBox1.SelectionStart; string x = textBox1.Text;
+            //；若插入點位置前不是「　􏿽」等，則移至該處
+            while ((Environment.NewLine + "　􏿽|>}").IndexOf( x.Substring(--s-1, 1) )== -1)
             {
 
             }
-            undoRecord();
-            stopUndoRec = true;
-            textBox1.Select(so, s - so);textBox1.SelectedText = "【" + textBox1.SelectedText +"】";
+            int  so = s;//記下起始處
+            while ((Environment.NewLine + "　􏿽|<{").IndexOf(x.Substring(++s, 1)) == -1)
+            {
+
+            }
+            textBox1.Select(so, s - so);
+            undoRecord(); stopUndoRec = true;
+            textBox1.SelectedText = "【" + textBox1.SelectedText + "】";
             stopUndoRec = false;
         }
 
@@ -4897,7 +4907,7 @@ namespace WindowsFormsApp1
                 lastKeyPressElement += e.KeyChar;
                 return;
             }
-            if (e.KeyChar== 96)
+            if (e.KeyChar == 96)
             {//`： 於插入點處起至「　」或「􏿽」前止之文字加上黑括號【】//Print/SysRq 為OS鎖定不能用
                 e.Handled = true; 加上黑括號(); return;
             }
