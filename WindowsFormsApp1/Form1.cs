@@ -710,6 +710,10 @@ namespace WindowsFormsApp1
                     }
                     return;
                 }
+                if (e.KeyCode == Keys.Back)
+                {//Ctrl + Backspace : 清除插入點之前的所有「　」或「􏿽」
+                    e.Handled = true; 清除插入點之前的所有空格(); return;
+                }
                 if (e.KeyCode == Keys.Oem3)
                 {//` 或 Ctrl + ` ： 於插入點處起至「　」或「􏿽」或「|」或「<」或分段符號前止之文字加上黑括號【】//Print/SysRq 為OS鎖定不能用
                     e.Handled = true; 加上黑括號(); return;
@@ -1439,16 +1443,31 @@ namespace WindowsFormsApp1
             #endregion
         }
 
+        private void 清除插入點之前的所有空格()
+        {
+            //throw new NotImplementedException();
+            int s = textBox1.SelectionStart, e = s; string x = textBox1.Text;
+            while ("　􏿽".IndexOf(x.Substring(--s, 1)) > -1)
+            {
+
+            }
+            textBox1.Select(s + 1, e - s - 1);
+            undoRecord();
+            stopUndoRec = true;
+            textBox1.SelectedText = "";
+            stopUndoRec = false;
+        }
+
         private void 加上黑括號()
         {//`： 於插入點處起至「　」或「􏿽」前止之文字加上黑括號【】//Print/SysRq 為OS鎖定不能用
             //throw new NotImplementedException();
             int s = textBox1.SelectionStart; string x = textBox1.Text;
             //；若插入點位置前不是「　􏿽」等，則移至該處
-            while ((Environment.NewLine + "　􏿽|>}").IndexOf( x.Substring(--s-1, 1) )== -1)
+            while ((Environment.NewLine + "　􏿽|>}").IndexOf(x.Substring(--s - 1, 1)) == -1)
             {
 
             }
-            int  so = s;//記下起始處
+            int so = s;//記下起始處
             while ((Environment.NewLine + "　􏿽|<{").IndexOf(x.Substring(++s, 1)) == -1)
             {
 
@@ -4910,6 +4929,10 @@ namespace WindowsFormsApp1
             if (e.KeyChar == 96)
             {//`： 於插入點處起至「　」或「􏿽」前止之文字加上黑括號【】//Print/SysRq 為OS鎖定不能用
                 e.Handled = true; 加上黑括號(); return;
+            }
+            if (e.KeyChar == 127)
+            {//`： 於插入點處起至「　」或「􏿽」前止之文字加上黑括號【】//Print/SysRq 為OS鎖定不能用
+                e.Handled = true; ; return;//清除插入點之前的所有空格()
             }
             else
             {
