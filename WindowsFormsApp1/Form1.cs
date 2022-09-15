@@ -2862,7 +2862,8 @@ namespace WindowsFormsApp1
         int isChineseChar(string x, bool skipPunctuation)
         {
             if (skipPunctuation) if (punctuations.IndexOf(x) > -1) return -1;
-            const string notChineseCharPriority = "〇　 􏿽\r\n<>{}.,;?@●'\"。，；！？、－-《》〈〉「」『』〖〗【】（）()[]〔〕［］0123456789";
+            string notChineseCharPriority = "〇　 􏿽\r\n<>{}.,;?@●'\"。，；！？、－-《》〈〉「」『』〖〗【】（）()[]〔〕［］0123456789"
+                    + "􏿽".Substring(0, 1) + "􏿽".Substring(1, 1);
             if (notChineseCharPriority.IndexOf(x) > -1) return 0;
             //if (x == "\udffd") return 0;
 
