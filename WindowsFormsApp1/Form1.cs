@@ -904,10 +904,10 @@ namespace WindowsFormsApp1
                                 else
                                     s++;
                             }
-                            //if (textBox1.Text.Substring(s - 1, 2)!= "􏿽")
-                            //{
-                            s--;////////////////////新增以除錯的。還原「s = s - l + 1;」多加之1
-                            //}
+                            ////if (textBox1.Text.Substring(s - 1, 2)!= "􏿽")
+                            ////{
+                            //s--;////////////////////新增以除錯的。還原「s = s - l + 1;」多加之1
+                            ////}
                             textBox1.Select(s, 0);
                             restoreCaretPosition(textBox1, s, 0);//textBox1.ScrollToCaret();
                             e.Handled = true;
