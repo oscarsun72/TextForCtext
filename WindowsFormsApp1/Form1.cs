@@ -930,16 +930,16 @@ namespace WindowsFormsApp1
                         {
                             s = s + l - 1;
                             if ("。，、；：？！「」『』《》〈〉".IndexOf(textBox1.Text.Substring(s, 1)) > -1) s++;
-                            if (x.Substring(s, 1) == "}") s = s + 2;
+                            if (x.Substring(s, 1) == "}") s += 2;
                             if (s + 3 <= x.Length)
-                            { if (x.Substring(s, 3) == "<p>") s = s + 3; }
+                            { if (x.Substring(s, 3) == "<p>") s += 3; }
                             else
                                 s = x.Length;
 
-                            //if (textBox1.Text.Substring(s + 1, 2) == "􏿽")
-                            //{
-                            s++;////////////////////新增以除錯的。還原「s = s + l - 1;」多減之1
-                            //}
+                            ////if (textBox1.Text.Substring(s + 1, 2) == "􏿽")
+                            ////{
+                            //s++;////////////////////新增以除錯的。還原「s = s + l - 1;」多減之1
+                            ////}
                             textBox1.Select(s, 0);
                             restoreCaretPosition(textBox1, s, 0);//textBox1.ScrollToCaret();
                             e.Handled = true;
@@ -1462,17 +1462,22 @@ namespace WindowsFormsApp1
         {//`： 於插入點處起至「　」或「􏿽」前止之文字加上黑括號【】//Print/SysRq 為OS鎖定不能用
             //throw new NotImplementedException();
             int s = textBox1.SelectionStart; string x = textBox1.Text;
-            //；若插入點位置前不是「　􏿽」等，則移至該處
-            while ((Environment.NewLine + "　|>}" + "􏿽".Substring(1, 1)).IndexOf(x.Substring(--s, 1)) == -1)
+            if (textBox1.SelectionLength == 0)
             {
+                //；若插入點位置前不是「　􏿽」等，則移至該處
+                while ((Environment.NewLine + "　|>}" + "􏿽".Substring(1, 1)).IndexOf(x.Substring(--s, 1)) == -1)
+                {
 
-            }
-            int so = s;//記下起始處
-            while ((Environment.NewLine + "　|<{" + "􏿽".Substring(0, 1)).IndexOf(x.Substring(++s, 1)) == -1)
-            {
+                }
+                int so = s;//記下起始處
+                while ((Environment.NewLine + "　|<{" + "􏿽".Substring(0, 1)).IndexOf(x.Substring(++s, 1)) == -1)
+                {
 
+                }
+                textBox1.Select(++so, s - so);
             }
-            textBox1.Select(++so, s - so);
+            else//如果非插入點，則將選取區前後加上黑括號
+            { }
             undoRecord(); stopUndoRec = true;
             textBox1.SelectedText = "【" + textBox1.SelectedText + "】";
             stopUndoRec = false;
@@ -2842,6 +2847,7 @@ namespace WindowsFormsApp1
                 {
                     isC = isChineseChar(xInfo.SubstringByTextElements(i, 1), true);
                     if (isC == 1) l++;
+                    if (isC == 0 && xInfo.SubstringByTextElements(i, 1)=="􏿽") l++;
                     if (isC != 0) return i + 1 + l;//https://www.jb51.net/article/45556.htm
                 }
             }
@@ -2851,6 +2857,7 @@ namespace WindowsFormsApp1
                 {
                     isC = isChineseChar(xInfo.SubstringByTextElements(i, 1), true);
                     if (isC == 1) l++;
+                    if (isC == 0 && xInfo.SubstringByTextElements(i, 1) == "􏿽") l++;
                     if (isC != 0) return xInfo.LengthInTextElements - i + l;
                 }
 
@@ -2862,8 +2869,8 @@ namespace WindowsFormsApp1
         int isChineseChar(string x, bool skipPunctuation)
         {
             if (skipPunctuation) if (punctuations.IndexOf(x) > -1) return -1;
-            string notChineseCharPriority = "〇　 􏿽\r\n<>{}.,;?@●'\"。，；！？、－-《》〈〉「」『』〖〗【】（）()[]〔〕［］0123456789"
-                    + "􏿽".Substring(0, 1) + "􏿽".Substring(1, 1);
+            string notChineseCharPriority = "〇　 􏿽\r\n<>{}.,;?@●'\"。，；！？、－-《》〈〉「」『』〖〗【】（）()[]〔〕［］0123456789";
+
             if (notChineseCharPriority.IndexOf(x) > -1) return 0;
             //if (x == "\udffd") return 0;
 
@@ -2886,9 +2893,23 @@ namespace WindowsFormsApp1
                                                                   //if (Regex.IsMatch(x, @"[\u-\u]")) return true;//
 
             //if (char.IsSurrogate(x.ToCharArray()[0]) || char.IsSurrogatePair(x, 0)) return true;
-            if (char.IsSurrogatePair(x, 0)) return 1;
+            if (char.IsSurrogatePair(x, 0))
+            {
+                if (x == "􏿽")
+                {
+                    return 0;
+                }
+                return 1;
+            }
             if (char.IsLowSurrogate(x, 0)) return -1;
-            if (char.IsHighSurrogate(x, 0)) return -1;
+            if (char.IsHighSurrogate(x, 0))
+            {
+                if (x == "􏿽".Substring(0, 1))
+                {
+                    return 0;
+                }
+                return -1;
+            }
             /*
             //https://www.itread01.com/p/1418585.html
             //C#中文字轉換Unicode(\u ) : http://trufflepenne.blogspot.com/2013/03/cunicode.html
