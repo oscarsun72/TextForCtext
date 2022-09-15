@@ -1463,16 +1463,16 @@ namespace WindowsFormsApp1
             //throw new NotImplementedException();
             int s = textBox1.SelectionStart; string x = textBox1.Text;
             //；若插入點位置前不是「　􏿽」等，則移至該處
-            while ((Environment.NewLine + "　􏿽|>}").IndexOf(x.Substring(--s - 1, 1)) == -1)
+            while ((Environment.NewLine + "　|>}" + "􏿽".Substring(1, 1)).IndexOf(x.Substring(--s, 1)) == -1)
             {
 
             }
             int so = s;//記下起始處
-            while ((Environment.NewLine + "　􏿽|<{").IndexOf(x.Substring(++s, 1)) == -1)
+            while ((Environment.NewLine + "　|<{" + "􏿽".Substring(0, 1)).IndexOf(x.Substring(++s, 1)) == -1)
             {
 
             }
-            textBox1.Select(so, s - so);
+            textBox1.Select(++so, s - so);
             undoRecord(); stopUndoRec = true;
             textBox1.SelectedText = "【" + textBox1.SelectedText + "】";
             stopUndoRec = false;
