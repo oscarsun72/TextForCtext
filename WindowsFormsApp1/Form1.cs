@@ -1329,6 +1329,7 @@ namespace WindowsFormsApp1
                 {//按下 Scroll Lock 將字數較少的行/段落尾末標上「<p>」符號
                     e.Handled = true; paragraphMarkAccordingFirstOne(); return;
                 }
+                
                 if (e.KeyCode == Keys.Insert)
                 {
                     if (insertMode)
@@ -1432,6 +1433,20 @@ namespace WindowsFormsApp1
                 }
             }//以上按下單一鍵
             #endregion
+        }
+
+        private void 加上黑括號()
+        {//`： 於插入點處起至「　」或「􏿽」前止之文字加上黑括號【】//Print/SysRq 為OS鎖定不能用
+            //throw new NotImplementedException();
+            int s = textBox1.SelectionStart,so=s;string x=textBox1.Text;
+            while ((Environment.NewLine + "　􏿽|<").IndexOf( x.Substring(++s , 1))==-1)
+            {
+
+            }
+            undoRecord();
+            stopUndoRec = true;
+            textBox1.Select(so, s - so);textBox1.SelectedText = "【" + textBox1.SelectedText +"】";
+            stopUndoRec = false;
         }
 
         private void poetryFormat()
@@ -4881,6 +4896,10 @@ namespace WindowsFormsApp1
             {
                 lastKeyPressElement += e.KeyChar;
                 return;
+            }
+            if (e.KeyChar== 96)
+            {//`： 於插入點處起至「　」或「􏿽」前止之文字加上黑括號【】//Print/SysRq 為OS鎖定不能用
+                e.Handled = true; 加上黑括號(); return;
             }
             else
             {

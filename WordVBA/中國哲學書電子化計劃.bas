@@ -80,7 +80,7 @@ Dim d As Document, rng As Range, e As Long, s As Long, xd As String
 Set d = Documents.Add
 DoEvents
 'If (MsgBox("add page 1 code?", vbExclamation + vbOKCancel) = vbOK) Then setPage1Code
-setPage1Code: clearRedundantCode
+中國哲學書電子化計劃.setPage1Code:  clearRedundantCode
 將星號前的分段符號移置前段之末 d
 DoEvents
 Set rng = d.Range
@@ -1291,6 +1291,59 @@ SendKeys "^l^c"
 DoEvents
 SendKeys "{F5}"
 End Sub
+Sub 插入超連結_將顯示之編碼改為中文()
+Const keys As String = "&searchu=" 'Alt + j
+Dim rng As Range, lnk As String, cde As String, s As Long, d As Document
+Set rng = Selection.Range: Set d = ActiveDocument
+lnk = SystemSetup.GetClipboardText
+cde = Mid(lnk, InStr(lnk, keys) + Len(keys))
+cde = code.URLDecode(cde)
+s = Selection.start
+With Selection
+    .Hyperlinks.Add Selection.Range, lnk, , , Left(lnk, InStr(lnk, keys) + Len(keys) - 1) + cde
+    'd.Range(Selection.End, Selection.End + Len(cde)).Select
+    'Selection.Collapse
+    .MoveLeft wdCharacter, Len(cde)
+    .MoveRight wdCharacter, Len(cde) - 1, wdExtend
+    .Range.HighlightColorIndex = wdYellow
+    .move , 2
+    .InsertParagraphAfter
+    .InsertParagraphAfter
+    .Collapse
+End With
+End Sub
+Sub 只保留正文注文_且注文前後加括弧()
+Dim d As Document, ur As UndoRecord, slRng As Range
+Set d = ActiveDocument
+SystemSetup.stopUndo ur, "中國哲學書電子化計劃_註文前後加括弧"
+Docs.空白的新文件
+If Selection.Type = wdSelectionIP Then ActiveDocument.Select
+Set slRng = Selection.Range
+中國哲學書電子化計劃_表格轉文字 slRng
+Dim ay, e
+ay = Array(254, 8912896)
+With d.Range.Find
+    .ClearFormatting
+End With
+For Each e In ay
+    With d.Range.Find
+        .Font.Color = e
+        .Execute "", , , , , , True, wdFindContinue, , "", wdReplaceAll
+    End With
+Next e
+Set slRng = d.Range
+With slRng.Find
+    .ClearFormatting
+    .Font.Color = 34816
+End With
+Do While slRng.Find.Execute(, , , , , , True, wdFindStop)
+    If InStr(Chr(13) & Chr(11) & Chr(7) & Chr(8) & Chr(9) & Chr(10), slRng) = 0 Then
+    slRng.Text = "（" + slRng.Text + "）"
+    slRng.SetRange slRng.End, d.Range.End
+    End If
+Loop
+SystemSetup.contiUndo ur
+End Sub
 
 Sub 維基文庫等欲直接抽換之字(d As Document)
 Dim rst As New ADODB.Recordset, cnt As New ADODB.Connection, db As New dBase
@@ -1542,5 +1595,6 @@ SendKeys "^v"
 SendKeys "{tab}~"
 
 End Sub
+
 
 
