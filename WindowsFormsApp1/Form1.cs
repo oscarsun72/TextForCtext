@@ -4468,8 +4468,13 @@ namespace WindowsFormsApp1
 
         }
 
-        int ReplaceCntr(ref string xDomain, string replacedword, string rplsword, int s, ref int beforeScntr)
+        int ReplaceCntr(ref string xDomain, string replacedword, 
+            string rplsword, int s, ref int beforeScntr)
         {
+            if (xDomain.IndexOf("�") > -1)
+                xDomain = xDomain.Replace("�", "●");
+            if (replacedword.IndexOf("�") > -1)
+                replacedword = replacedword.Replace("�", "●");            
             int i = xDomain.IndexOf(replacedword), cntr = 0;
             while (i > -1)
             {
@@ -5128,6 +5133,7 @@ namespace WindowsFormsApp1
             if (ModifierKeys == Keys.None)
             {
                 pageTextEndPosition = textBox1.SelectionStart + textBox1.SelectionLength;//重設 pageTextEndPosition 值
+                pageEndText10 = ""; 
                 keyDownCtrlAdd(false);
             }
         }
