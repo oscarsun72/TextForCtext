@@ -901,8 +901,8 @@ namespace WindowsFormsApp1
                             {
                                 if (textBox1.Text.Substring(s, 2) == Environment.NewLine)
                                     s += 2;
-                                else
-                                    s++;
+                                //else
+                                //s++;
                             }
                             ////if (textBox1.Text.Substring(s - 1, 2)!= "􏿽")
                             ////{
@@ -2691,11 +2691,18 @@ namespace WindowsFormsApp1
         void paragraphMarkAccordingFirstOne()
         {
             replaceXdirrectly();
-            int s = 0, e = textBox1.Text.IndexOf(Environment.NewLine); if (e < 0) return;
+            int s = 0, l, e = textBox1.Text.IndexOf(Environment.NewLine); if (e < 0) return;
             int rs = textBox1.SelectionStart, rl = textBox1.SelectionLength;
             string se = textBox1.Text.Substring(s, e - s);
             //int l = new StringInfo(se).LengthInTextElements;
-            int l = wordsPerLinePara != -1 ? wordsPerLinePara : countWordsLenPerLinePara(se);
+            if (se.Replace("●", "") == "")
+            {
+                l = se.Length;
+                wordsPerLinePara = l;
+                normalLineParaLength = wordsPerLinePara;
+            }
+            else
+                l = wordsPerLinePara != -1 ? wordsPerLinePara : countWordsLenPerLinePara(se);
             if (se.Replace("●", "") == "") textBox1.Text = textBox1.Text.Substring(e + 2);//●●●●●●●●乃作為權訂每行字數之參考，故可刪去
                                                                                           //if (countWordsLenPerLinePara(se) == wordsPerLinePara && se.Replace("●", "") == "") textBox1.Text = textBox1.Text.Substring(e + 2);
             if (wordsPerLinePara == -1)
@@ -2821,6 +2828,7 @@ namespace WindowsFormsApp1
                 {
                     isC = isChineseChar(xInfo.SubstringByTextElements(i, 1), true);
                     if (isC == 1) l++;
+                    if (isC == 0 && xInfo.SubstringByTextElements(i, 1) == "􏿽") l++;
                     if (isC == 0) return i + 1 + l;//https://www.jb51.net/article/45556.htm
                 }
             }
@@ -2830,6 +2838,7 @@ namespace WindowsFormsApp1
                 {
                     isC = isChineseChar(xInfo.SubstringByTextElements(i, 1), true);
                     if (isC == 1) l++;
+                    if (isC == 0 && xInfo.SubstringByTextElements(i, 1) == "􏿽") l++;
                     if (isC == 0) return xInfo.LengthInTextElements - i + l;
                 }
 
@@ -2847,7 +2856,7 @@ namespace WindowsFormsApp1
                 {
                     isC = isChineseChar(xInfo.SubstringByTextElements(i, 1), true);
                     if (isC == 1) l++;
-                    if (isC == 0 && xInfo.SubstringByTextElements(i, 1)=="􏿽") l++;
+                    if (isC == 0 && xInfo.SubstringByTextElements(i, 1) == "􏿽") l++;
                     if (isC != 0) return i + 1 + l;//https://www.jb51.net/article/45556.htm
                 }
             }
@@ -2869,9 +2878,11 @@ namespace WindowsFormsApp1
         int isChineseChar(string x, bool skipPunctuation)
         {
             if (skipPunctuation) if (punctuations.IndexOf(x) > -1) return -1;
-            string notChineseCharPriority = "〇　 􏿽\r\n<>{}.,;?@●'\"。，；！？、－-《》〈〉「」『』〖〗【】（）()[]〔〕［］0123456789";
+            string notChineseCharPriority = "〇　 \r\n<>{}.,;?@●'\"。，；！？、－-《》〈〉「」『』〖〗【】（）()[]〔〕［］0123456789";
 
             if (notChineseCharPriority.IndexOf(x) > -1) return 0;
+
+            if (Regex.IsMatch(x, @"[a-zA-z]")) return 0;
             //if (x == "\udffd") return 0;
 
             //https://www.jb51.net/article/45556.htm
@@ -2901,7 +2912,14 @@ namespace WindowsFormsApp1
                 }
                 return 1;
             }
-            if (char.IsLowSurrogate(x, 0)) return -1;
+            if (char.IsLowSurrogate(x, 0))
+            {
+                if (x == "􏿽".Substring(1, 1))
+                {
+                    return 0;
+                }
+                return -1;
+            }
             if (char.IsHighSurrogate(x, 0))
             {
                 if (x == "􏿽".Substring(0, 1))
