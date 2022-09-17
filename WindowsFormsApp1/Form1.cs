@@ -664,7 +664,7 @@ namespace WindowsFormsApp1
             {
                 if (e.KeyCode == Keys.Add || e.KeyCode == Keys.Oemplus || e.KeyCode == Keys.Subtract || e.KeyCode == Keys.NumPad5)
                 {
-                    e.Handled = true;                    
+                    e.Handled = true;
                     keyDownCtrlAdd(true);
                     return;
                 }
@@ -722,7 +722,7 @@ namespace WindowsFormsApp1
                 if (e.KeyCode == Keys.Add || e.KeyCode == Keys.Oemplus || e.KeyCode == Keys.Subtract || e.KeyCode == Keys.NumPad5)
                 {//Ctrl + + Ctrl + -
                     e.Handled = true;
-                    if (e.KeyCode==Keys.Subtract)
+                    if (e.KeyCode == Keys.Subtract)
                     {// Ctrl + -（數字鍵盤） 會重設以插入點位置為頁面結束位國
                         resetPageTextEndPositionPasteToCText();
                         return;
@@ -1492,7 +1492,7 @@ namespace WindowsFormsApp1
                 {
 
                 }
-                textBox1.Select(++so, s - so);
+                textBox1.Select(s == 0 ? 0 : ++so, s - so);
             }
             else//如果非插入點，則將選取區前後加上黑括號
             { }
