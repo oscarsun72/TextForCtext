@@ -888,7 +888,7 @@ namespace WindowsFormsApp1
                     string endStr = "}>" + Environment.NewLine;
                     e.Handled = true;
                     if (e.KeyCode == Keys.Left)
-                    {//Ctrl  + ←
+                    {//Ctrl  + ← Ctrl + 向左鍵
                         if (endStr.IndexOf(textBox1.Text.Substring(s - 1, 1)) > -1) s--;
                         isIPCharHanzi = isChineseChar(x.Substring(s - 1, 1), true) == 0 ? false : true;
                         if (isIPCharHanzi) l = findNotChineseCharFarLength(x.Substring(0, s), false);
@@ -915,12 +915,17 @@ namespace WindowsFormsApp1
                         }
                     }
                     else
-                    {// Ctrl + →                        
+                    {// Ctrl + →  Ctrl + 向右鍵
                         if (s + 1 <= x.Length)
                         {
-                            s++;
-                            if (char.IsLowSurrogate(x.Substring(s, 1).ToCharArray()[0])) s++;
-                            isIPCharHanzi = isChineseChar(x.Substring(s, 1), true) == 0 ? false : true;
+                            int si = 0;
+                            if (char.IsLowSurrogate(x.Substring(s, 1).ToCharArray()[0])) si++;
+                            isIPCharHanzi = isChineseChar(x.Substring(s, ++si), true) == 0 ? false : true;
+                            //s += si;
+
+                            ////s++;
+                            //if (char.IsLowSurrogate(x.Substring(s, 1).ToCharArray()[0])) s++;
+                            //isIPCharHanzi = isChineseChar(x.Substring(s, 1), true) == 0 ? false : true;
                         }
                         else
                             isIPCharHanzi = false;
@@ -1444,14 +1449,21 @@ namespace WindowsFormsApp1
         }
 
         private void 清除插入點之前的所有空格()
-        {
+        {//Ctrl + Backspace,若插入點前為「<p>」則一併清除
             //throw new NotImplementedException();
             int s = textBox1.SelectionStart, e = s; string x = textBox1.Text;
-            while ("　􏿽".IndexOf(x.Substring(--s, 1)) > -1)
+            if (s > 3 && x.Substring(s - 3, 3) == "<p>")
             {
-
+                textBox1.Select(s - 3, 3);
             }
-            textBox1.Select(s + 1, e - s - 1);
+            else
+            {
+                while (s > 1 && "　􏿽".IndexOf(x.Substring(--s, 1)) > -1)
+                {
+
+                }
+                textBox1.Select(s + 1, e - s - 1);
+            }
             undoRecord();
             stopUndoRec = true;
             textBox1.SelectedText = "";
@@ -1465,7 +1477,7 @@ namespace WindowsFormsApp1
             if (textBox1.SelectionLength == 0)
             {
                 //；若插入點位置前不是「　􏿽」等，則移至該處
-                while ((Environment.NewLine + "　|>}" + "􏿽".Substring(1, 1)).IndexOf(x.Substring(--s, 1)) == -1)
+                while (s > 0 && (Environment.NewLine + "　|>}" + "􏿽".Substring(1, 1)).IndexOf(x.Substring(--s, 1)) == -1)
                 {
 
                 }
@@ -2828,7 +2840,7 @@ namespace WindowsFormsApp1
                 {
                     isC = isChineseChar(xInfo.SubstringByTextElements(i, 1), true);
                     if (isC == 1) l++;
-                    if (isC == 0 && xInfo.SubstringByTextElements(i, 1) == "􏿽") l++;
+                    //if (isC == 0 && xInfo.SubstringByTextElements(i, 1) == "􏿽") l++;
                     if (isC == 0) return i + 1 + l;//https://www.jb51.net/article/45556.htm
                 }
             }
@@ -2838,7 +2850,7 @@ namespace WindowsFormsApp1
                 {
                     isC = isChineseChar(xInfo.SubstringByTextElements(i, 1), true);
                     if (isC == 1) l++;
-                    if (isC == 0 && xInfo.SubstringByTextElements(i, 1) == "􏿽") l++;
+                    //if (isC == 0 && xInfo.SubstringByTextElements(i, 1) == "􏿽") l++;
                     if (isC == 0) return xInfo.LengthInTextElements - i + l;
                 }
 
@@ -4468,13 +4480,13 @@ namespace WindowsFormsApp1
 
         }
 
-        int ReplaceCntr(ref string xDomain, string replacedword, 
+        int ReplaceCntr(ref string xDomain, string replacedword,
             string rplsword, int s, ref int beforeScntr)
         {
-            if (xDomain.IndexOf("�") > -1)
-                xDomain = xDomain.Replace("�", "●");
-            if (replacedword.IndexOf("�") > -1)
-                replacedword = replacedword.Replace("�", "●");            
+            if (xDomain.IndexOf("�������") > -1)
+                xDomain = xDomain.Replace("�������", "●●●●●●●");
+            if (replacedword.IndexOf("�������") > -1)
+                replacedword = replacedword.Replace("�������", "●●●●●●●");
             int i = xDomain.IndexOf(replacedword), cntr = 0;
             while (i > -1)
             {
@@ -5133,7 +5145,7 @@ namespace WindowsFormsApp1
             if (ModifierKeys == Keys.None)
             {
                 pageTextEndPosition = textBox1.SelectionStart + textBox1.SelectionLength;//重設 pageTextEndPosition 值
-                pageEndText10 = ""; 
+                pageEndText10 = "";
                 keyDownCtrlAdd(false);
             }
         }
