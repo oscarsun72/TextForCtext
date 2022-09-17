@@ -1492,7 +1492,7 @@ namespace WindowsFormsApp1
                 {
 
                 }
-                textBox1.Select(s == 0 ? 0 : ++so, s - so);
+                textBox1.Select(so == 0 ? so : ++so, s - so);
             }
             else//如果非插入點，則將選取區前後加上黑括號
             { }
