@@ -3808,6 +3808,12 @@ namespace WindowsFormsApp1
 
                 if (e.KeyCode == Keys.Add || e.KeyCode == Keys.Oemplus || e.KeyCode == Keys.Subtract || e.KeyCode == Keys.NumPad5)
                 {//Ctrl + + Ctrl + -
+                    e.Handled = true;
+                    if (e.KeyCode == Keys.Subtract)
+                    {// Ctrl + -（數字鍵盤） 會重設以插入點位置為頁面結束位國
+                        resetPageTextEndPositionPasteToCText();
+                        return;
+                    }
                     keyDownCtrlAdd(false);
                     return;
                 }
