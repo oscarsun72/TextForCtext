@@ -1348,7 +1348,7 @@ End Sub
 Sub 維基文庫等欲直接抽換之字(d As Document)
 Dim rst As New ADODB.Recordset, cnt As New ADODB.Connection, db As New dBase
 db.cnt查字 cnt
-rst.Open "select * from 維基文庫等欲直接抽換之字 where doIt = true", cnt, adOpenForwardOnly, adLockReadOnly
+rst.Open "select * from 維基文庫等欲直接抽換之字 where doIt = true order by len(replaced) desc", cnt, adOpenForwardOnly, adLockReadOnly
 Do Until rst.EOF
     d.Range.Find.Execute rst.Fields("replaced").Value, , , , , , True, wdFindContinue, , rst.Fields("replacewith").Value, wdReplaceAll
     rst.MoveNext

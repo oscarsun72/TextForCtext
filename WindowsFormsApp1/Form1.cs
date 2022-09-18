@@ -4122,6 +4122,7 @@ namespace WindowsFormsApp1
 
         private void runWordMacro(string runName)
         {
+            if (Clipboard.GetText().Length < 250) return;
             Color C = this.BackColor; this.BackColor = Color.Green;
             SystemSounds.Hand.Play();
             hideToNICo();
@@ -5162,7 +5163,9 @@ namespace WindowsFormsApp1
 
         private void resetPageTextEndPositionPasteToCText()
         {
-            pageTextEndPosition = textBox1.SelectionStart + textBox1.SelectionLength;//重設 pageTextEndPosition 值
+            int s = textBox1.SelectionStart;
+            if (s > 2 && textBox1.Text.Substring(s - 2, 2) == Environment.NewLine) s -= 2;
+            pageTextEndPosition = s + textBox1.SelectionLength;//重設 pageTextEndPosition 值
             pageEndText10 = "";
             keyDownCtrlAdd(false);
         }
@@ -5446,7 +5449,7 @@ namespace WindowsFormsApp1
             ado.Connection cnt = new ado.Connection();
             openDatabase("查字.mdb", ref cnt);
             ado.Recordset rst = new ado.Recordset();
-            rst.Open("select * from 維基文庫等欲直接抽換之字 where doit=true", cnt, ado.CursorTypeEnum.adOpenForwardOnly, ado.LockTypeEnum.adLockReadOnly);
+            rst.Open("select * from 維基文庫等欲直接抽換之字 where doit=true order by len(replaced) desc", cnt, ado.CursorTypeEnum.adOpenForwardOnly, ado.LockTypeEnum.adLockReadOnly);
             while (!rst.EOF)
             {
                 rx = rst.Fields[0].Value.ToString();
