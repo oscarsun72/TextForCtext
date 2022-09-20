@@ -609,7 +609,7 @@ namespace WindowsFormsApp1
             if (e.KeyCode == Keys.Insert && (m & Keys.Shift) == Keys.Shift) caretPositionRecord();
             else
             if (e.KeyCode != Keys.F5) caretPositionRecord();
-
+            if (keycodeNow == Keys.Delete) undoRecord();
 
             //if ((m & Keys.None) == Keys.None && e.KeyCode == Keys.Delete) undoRecord();
             //if ((m & Keys.Control) == Keys.Control && (m & Keys.Alt) == Keys.Alt && e.KeyCode == Keys.G)
