@@ -2708,6 +2708,8 @@ namespace WindowsFormsApp1
         }
         void paragraphMarkAccordingFirstOne()
         {
+            bool topmost=TopMost ;
+            TopMost = false;
             replaceXdirrectly();
             int s = 0, l, e = textBox1.Text.IndexOf(Environment.NewLine); if (e < 0) return;
             int rs = textBox1.SelectionStart, rl = textBox1.SelectionLength;
@@ -2860,6 +2862,7 @@ namespace WindowsFormsApp1
             new SoundPlayer(@"C:\Windows\Media\windows logoff sound.wav").Play();
             if (topLine) { rst.Close(); cnt.Close(); rst = null; cnt = null; }
             textBox1.Select(rs, rl); textBox1.ScrollToCaret();
+            TopMost = topmost;
         }
 
         //將<p>後的空格「　」取代為「􏿽」，只要該行不是篇名
