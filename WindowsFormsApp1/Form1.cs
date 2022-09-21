@@ -2818,7 +2818,7 @@ namespace WindowsFormsApp1
                                     {
 
                                     }
-                                    isp--;
+                                    //isp--;
                                     spaceCnt = new StringInfo(se.Substring(0, isp)).LengthInTextElements;
                                     if (en > -1)
                                     {
@@ -2838,7 +2838,8 @@ namespace WindowsFormsApp1
                                                 {
                                                     //取得縮排數
                                                 }
-                                                if (new StringInfo(tx.Substring(e + 2, --isp)).LengthInTextElements > spaceCnt)
+                                                //if (new StringInfo(tx.Substring(e + 2, --isp)).LengthInTextElements > spaceCnt)
+                                                if (new StringInfo(tx.Substring(e + 2,isp)).LengthInTextElements > spaceCnt)
                                                 {
                                                     textBox1.Select(e, 0);
                                                     textBox1.SelectedText = "<p>";
