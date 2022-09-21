@@ -2803,23 +2803,49 @@ namespace WindowsFormsApp1
                     }
                     else//長度不小於常規 l
                     {
-                        //如果本行沒有段末標記
-                        if (se.IndexOf("<p>") == -1 && se.IndexOf("|") == -1)
-                        //&& !(se.IndexOf("{{") == 0 && se.IndexOf("}}") == -1))
+                        if (true)//Indents
                         {
-                            //如果本行有縮排
-                            if ("　􏿽".IndexOf(se.Substring(0, 1)) > -1 ||
-                                (se.Substring(0, 2) == "{{" && "　􏿽".IndexOf(se.Substring(2, 1)) > -1))
+                            //如果本行沒有段末標記
+                            if (se.IndexOf("<p>") == -1 && se.IndexOf("|") == -1)
+                            //&& !(se.IndexOf("{{") == 0 && se.IndexOf("}}") == -1))
                             {
-                                int en = tx.IndexOf(Environment.NewLine, e + 2);
-                                if (en > -1)
+                                //如果本行有縮排
+                                if ("　􏿽".IndexOf(se.Substring(0, 1)) > -1 ||
+                                    (se.Substring(0, 2) == "{{" && "　􏿽".IndexOf(se.Substring(2, 1)) > -1))
                                 {
-                                    if ("　􏿽".IndexOf(tx.Substring(e + 2, 1)) == -1 ||
-                                        (tx.Substring(e + 2, 2) == "{{" && "　􏿽".IndexOf(se.Substring(2, 1)) == -1))//如果下一行/段不是縮排而是頂格、頂行
+                                    int en = tx.IndexOf(Environment.NewLine, e + 2); int spaceCnt, isp = 0;
+                                    while ("　􏿽".IndexOf(se.Substring(++isp, 1),StringComparison.Ordinal) > -1)
                                     {
-                                        textBox1.Select(e, 0);
-                                        textBox1.SelectedText = "<p>";
-                                        e += 3;
+
+                                    }
+                                    isp--;
+                                    spaceCnt = new StringInfo(se.Substring(0, isp)).LengthInTextElements;
+                                    if (en > -1)
+                                    {
+                                        if ("　􏿽".IndexOf(tx.Substring(e + 2, 1)) == -1 ||//如果下一行/段不是縮排而是頂格、頂行
+                                            (tx.Substring(e + 2, 2) == "{{" && "　􏿽".IndexOf(se.Substring(2, 1)) == -1))
+                                        {
+                                            textBox1.Select(e, 0);
+                                            textBox1.SelectedText = "<p>";
+                                            e += 3;
+                                        }
+                                        else
+                                        {//如果下一行/段再縮排（且不是注文）
+                                            if ("　􏿽".IndexOf(tx.Substring(e + 2, 1)) > -1)
+                                            {
+                                                isp = 0;
+                                                while ("　􏿽".IndexOf(tx.Substring(e + 2 + (++isp), 1),StringComparison.Ordinal) > -1)//有「�」時會影響判斷
+                                                {
+                                                    //取得縮排數
+                                                }
+                                                if (new StringInfo(tx.Substring(e + 2, --isp)).LengthInTextElements > spaceCnt)
+                                                {
+                                                    textBox1.Select(e, 0);
+                                                    textBox1.SelectedText = "<p>";
+                                                    e += 3;
+                                                }
+                                            }
+                                        }
                                     }
                                 }
                             }
@@ -4510,7 +4536,7 @@ namespace WindowsFormsApp1
                 string xBefore = x.Substring(0, s), xAfter = x.Substring(s + l);
                 x = textBox1.SelectedText;
                 if (rplsword == "\"\"") rplsword = "";//要清除所選文字，則選取其字，然後在 textBox4 輸入兩個英文半形雙引號 「""」（即表空字串），則不會取代成「""」，而是清除之。
-                //textBox1.Text = xBefore + x.Replace(replacedword, rplsword) + xAfter;
+                                                      //textBox1.Text = xBefore + x.Replace(replacedword, rplsword) + xAfter;
                 cntr = ReplaceCntr(ref x, replacedword, rplsword, s, ref beforeScntr);
                 textBox1.Text = xBefore + x + xAfter;
             }
@@ -4535,14 +4561,14 @@ namespace WindowsFormsApp1
             textBox1.SelectionStart = s; textBox1.SelectionLength = l;
             //restoreCaretPosition(textBox1, s, l == 0 ? 1 : l);//textBox1.ScrollToCaret();
             restoreCaretPosition(textBox1, s, rplsword.Length);//textBox1.ScrollToCaret();
-            //if (l != 0)
-            //{
-            //    if (new StringInfo(replacedword).LengthInTextElements == 1)
-            //    {
-            //        l = rplsword.Length;
-            //    }
-            //}
-            ////restoreCaretPosition(textBox1, s,  l);
+                                                               //if (l != 0)
+                                                               //{
+                                                               //    if (new StringInfo(replacedword).LengthInTextElements == 1)
+                                                               //    {
+                                                               //        l = rplsword.Length;
+                                                               //    }
+                                                               //}
+                                                               ////restoreCaretPosition(textBox1, s,  l);
             textBox1.Focus();
             stopUndoRec = false;
         }
@@ -5463,8 +5489,8 @@ namespace WindowsFormsApp1
 
         bool isShortLine(string nextLine, string currentLine = "", ado.Connection cnt = null, ado.Recordset rst = null)
         {//傳回 fasle 則此行末不加<p>，因其非短行，乃抬頭等故耳；傳回true才加<p>
-            //ado.Connection cnt = new ado.Connection();
-            //ado.Recordset rst = new ado.Recordset();
+         //ado.Connection cnt = new ado.Connection();
+         //ado.Recordset rst = new ado.Recordset();
             bool cntClose = false, rstClose = false, flg = true;//const string tableName = "每行字數判斷用";
             if (cnt == null)
             {
