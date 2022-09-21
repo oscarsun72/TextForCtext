@@ -2728,66 +2728,110 @@ namespace WindowsFormsApp1
                 wordsPerLinePara = l;
                 normalLineParaLength = wordsPerLinePara;
             }
-            ado.Connection cnt = new ado.Connection();
-            openDatabase("查字.mdb", ref cnt);
-            ado.Recordset rst = new ado.Recordset(); rst.Open("select * from 每行字數判斷用 where condition=0", cnt, ado.CursorTypeEnum.adOpenKeyset, ado.LockTypeEnum.adLockReadOnly);
+            bool topLine = false;//抬頭？
+            ado.Connection cnt = new ado.Connection(); ado.Recordset rst = new ado.Recordset();
+            if (topLine)
+            {
+                openDatabase("查字.mdb", ref cnt);
+                rst.Open("select * from 每行字數判斷用 where condition=0", cnt, ado.CursorTypeEnum.adOpenKeyset, ado.LockTypeEnum.adLockReadOnly);
+            }
             undoRecord(); stopUndoRec = true;
             while (e > -1)
             {
                 s = e + 2;
                 e = textBox1.Text.IndexOf(Environment.NewLine, s);
                 if (e == -1) break;
-                se = textBox1.Text.Substring(s, e - s);
+                se = textBox1.Text.Substring(s, e - s);//本行/段文字
                 //foreach (var item in punctuations)
                 //{
                 //    se = se.Replace(item.ToString(), "");
                 //}
-                if (se != "" && countWordsLenPerLinePara(se) < l)
+                if (se != "")
                 {
-                    //if (((se.IndexOf("{{") == -1 && se.IndexOf("}}") == -1)
-                    //    || (se.IndexOf("{{") == -1 && se.IndexOf("}}") > -1)
-                    //    || (se.IndexOf("{{") > 0 && se.IndexOf("}}") > -1)) //「{{」不能是開頭
-                    //    && se.IndexOf("<p>") == -1)
-                    if (se.IndexOf("<p>") == -1 && se.IndexOf("|") == -1
-                        && !(se.IndexOf("{{") == 0 && se.IndexOf("}}") == -1))
-                    //if (se.Substring(se.Length - 3, 3)!="<p>")
+                    string tx = textBox1.Text;
+                    if (countWordsLenPerLinePara(se) < l)//長度小於常規
                     {
-                        string tx = textBox1.Text;
-                        if (tx.IndexOf(Environment.NewLine, e + 2) > -1)
+                        //if (((se.IndexOf("{{") == -1 && se.IndexOf("}}") == -1)
+                        //    || (se.IndexOf("{{") == -1 && se.IndexOf("}}") > -1)
+                        //    || (se.IndexOf("{{") > 0 && se.IndexOf("}}") > -1)) //「{{」不能是開頭
+                        //    && se.IndexOf("<p>") == -1)
+                        if (se.IndexOf("<p>") == -1 && se.IndexOf("|") == -1
+                            && !(se.IndexOf("{{") == 0 && se.IndexOf("}}") == -1))
+                        //if (se.Substring(se.Length - 3, 3)!="<p>")
                         {
-                            textBox1.Select(e, 0);
-                            if (isShortLine(tx.Substring(e + 2, tx.IndexOf(Environment.NewLine, e + 2) - e - 2),
-                                tx.Substring(tx.LastIndexOf(Environment.NewLine, e) + 2, e - tx.LastIndexOf(Environment.NewLine, e) - 2)
-                                , cnt, rst))
+                            //string tx = textBox1.Text;
+                            if (tx.IndexOf(Environment.NewLine, e + 2) > -1)
                             {
-                                textBox1.SelectedText = "<p>";
-                                e += 3;
-                                if ((int)rst.AbsolutePosition > 1) rst.MoveFirst();
+                                textBox1.Select(e, 0);
+                                //是否有抬頭格式？
+                                if (topLine)
+                                {
+                                    if (isShortLine(tx.Substring(e + 2, tx.IndexOf(Environment.NewLine, e + 2) - e - 2),
+                                        tx.Substring(tx.LastIndexOf(Environment.NewLine, e) + 2, e - tx.LastIndexOf(Environment.NewLine, e) - 2)
+                                        , cnt, rst))
+                                    {
+                                        textBox1.SelectedText = "<p>";
+                                        e += 3;
+                                        if ((int)rst.AbsolutePosition > 1) rst.MoveFirst();
+                                    }
+                                    else
+                                    {
+                                        textBox1.SelectedText = "|";
+                                        e++;
+                                        if ((int)rst.AbsolutePosition > 1) rst.MoveFirst();
+                                    }
+                                }
+                                else
+                                {
+                                    textBox1.SelectedText = "<p>";
+                                    e += 3;
+                                }
                             }
                             else
                             {
-                                textBox1.SelectedText = "|";
-                                e++;
-                                if ((int)rst.AbsolutePosition > 1) rst.MoveFirst();
+                                textBox1.Select(e, 0);
+                                textBox1.SelectedText = "<p>";
+                                e += 3;
+                                if (topLine)
+                                {
+                                    if ((int)rst.AbsolutePosition > 1) rst.MoveFirst();
+                                }
                             }
-                        }
-                        else
-                        {
-                            textBox1.Select(e, 0);
-                            textBox1.SelectedText = "<p>";
-                            e += 3;
-                            if ((int)rst.AbsolutePosition > 1) rst.MoveFirst();
+
                         }
 
                     }
-
+                    else//長度不小於常規 l
+                    {
+                        //如果本行沒有段末標記
+                        if (se.IndexOf("<p>") == -1 && se.IndexOf("|") == -1)
+                        //&& !(se.IndexOf("{{") == 0 && se.IndexOf("}}") == -1))
+                        {
+                            //如果本行有縮排
+                            if ("　􏿽".IndexOf(se.Substring(0, 1)) > -1 ||
+                                (se.Substring(0, 2) == "{{" && "　􏿽".IndexOf(se.Substring(2, 1)) > -1))
+                            {
+                                int en = tx.IndexOf(Environment.NewLine, e + 2);
+                                if (en > -1)
+                                {
+                                    if ("　􏿽".IndexOf(tx.Substring(e + 2, 1)) == -1 ||
+                                        (tx.Substring(e + 2, 2) == "{{" && "　􏿽".IndexOf(se.Substring(2, 1)) == -1))//如果下一行/段不是縮排而是頂格、頂行
+                                    {
+                                        textBox1.Select(e, 0);
+                                        textBox1.SelectedText = "<p>";
+                                        e += 3;
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
             stopUndoRec = false;
             replaceBlank_ifNOTTitleAndAfterparagraphMark();
             fillSpace_to_PinchNote_in_LineStart();
             new SoundPlayer(@"C:\Windows\Media\windows logoff sound.wav").Play();
-            rst.Close(); cnt.Close(); rst = null; cnt = null;
+            if (topLine) { rst.Close(); cnt.Close(); rst = null; cnt = null; }
             textBox1.Select(rs, rl); textBox1.ScrollToCaret();
         }
 
@@ -2825,7 +2869,7 @@ namespace WindowsFormsApp1
             {
                 px = x.Substring(s, e - s);//取得這一行的文字
                 int ne = px.IndexOf("}}"), ns = px.IndexOf("{{"), i = 0;//記下注文起訖位置
-                if (ns>-1 && px.Substring(0, 1) == "　" && ne < px.Length - 2)
+                if (ns > -1 && px.Substring(0, 1) == "　" && ne < px.Length - 2)
                 {
                     string nx = px.Substring(0, ns);
                     if (nx.Replace("　", "") == "")
@@ -2844,7 +2888,10 @@ namespace WindowsFormsApp1
                             while (px.Substring(++i, 1) == "　")
                             {
                                 space += "　";
-                            }                            
+                            }
+                            //把{{移到行首
+                            x = x.Substring(0, s) + "{{" + space + x.Substring(s + 2 + space.Length);
+                            //插入空格
                             x = x.Substring(0, s + ns + 2 +
                                 (int)(nxCnt / 2)) + space +
                                 x.Substring(s + ns + 2 + (int)(nxCnt / 2));
