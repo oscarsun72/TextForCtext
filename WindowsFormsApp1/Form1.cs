@@ -26,7 +26,7 @@ namespace WindowsFormsApp1
         readonly string dropBoxPathIncldBackSlash;
         readonly Size textBox1SizeToForm;
         //string[] CJKBiggestSet = new string[]{ "HanaMinB", "KaiXinSongB", "TH-Tshyn-P1" };
-        string[] CJKBiggestSet = { "新細明體-ExtB", "HanaMinB", "KaiXinSongB", "TH-Tshyn-P1", "HanaMinA", "Plangothic P1", "Plangothic P2" };
+        string[] CJKBiggestSet = { "全宋體(等寬)", "新細明體-ExtB", "HanaMinB", "KaiXinSongB", "TH-Tshyn-P1", "HanaMinA", "Plangothic P1", "Plangothic P2" };
         Color button2BackColorDefault;
         bool insertMode = true, check_the_adjacent_pages = false;
 
@@ -1050,7 +1050,7 @@ namespace WindowsFormsApp1
                     if (findword != "")
                     {
                         int start = textBox1.SelectionStart - 1; string x = textBox1.Text;
-                        foundwhere = x.LastIndexOf(findword, start);
+                        foundwhere = x.LastIndexOf(findword, start, StringComparison.Ordinal);
                         if (foundwhere == -1)
                         {
                             MessageBox.Show("not found next!"); return;
@@ -1392,7 +1392,7 @@ namespace WindowsFormsApp1
                     {
                         int start = textBox1.SelectionStart + 1; string x = textBox1.Text;
                         if (start >= textBox1.Text.Length) return;
-                        foundwhere = x.IndexOf(findword, start);
+                        foundwhere = x.IndexOf(findword, start, StringComparison.Ordinal);
                         if (foundwhere == -1)
                         {
                             MessageBox.Show("not found next!"); return;
@@ -2785,6 +2785,7 @@ namespace WindowsFormsApp1
             }
             stopUndoRec = false;
             replaceBlank_ifNOTTitleAndAfterparagraphMark();
+            fillSpace_to_PinchNote_in_LineStart();
             new SoundPlayer(@"C:\Windows\Media\windows logoff sound.wav").Play();
             rst.Close(); cnt.Close(); rst = null; cnt = null;
             textBox1.Select(rs, rl); textBox1.ScrollToCaret();
@@ -2793,11 +2794,11 @@ namespace WindowsFormsApp1
         //將<p>後的空格「　」取代為「􏿽」，只要該行不是篇名
         void replaceBlank_ifNOTTitleAndAfterparagraphMark()
         {
-            int e = textBox1.Text.IndexOf(Environment.NewLine), s = 0; string px = textBox1.Text.Substring(s, e - s), x = textBox1.Text;
+            int e = textBox1.Text.IndexOf(Environment.NewLine), s = 0; string px, x = textBox1.Text;
             while (e > -1 && s < x.Length)
             {
                 int j = 0;
-                px = x.Substring(s, e - s);
+                px = x.Substring(s, e - s);//取得這一行的文字
                 if (s > 5 && x.Substring(s - 5, 5) == "<p>" + Environment.NewLine
                     && px.IndexOf("*") == -1)
                 {
@@ -2815,6 +2816,50 @@ namespace WindowsFormsApp1
             textBox1.Text = x;
             stopUndoRec = false;
         }
+
+        void fillSpace_to_PinchNote_in_LineStart()
+        {
+            //若行首為有縮排的夾注文，則補上空格
+            int e = textBox1.Text.IndexOf(Environment.NewLine), s = 0; string px, x = textBox1.Text;
+            while (e > -1 && s < x.Length)
+            {
+                px = x.Substring(s, e - s);//取得這一行的文字
+                int ne = px.IndexOf("}}"), ns = px.IndexOf("{{"), i = 0;//記下注文起訖位置
+                if (ns>-1 && px.Substring(0, 1) == "　" && ne < px.Length - 2)
+                {
+                    string nx = px.Substring(0, ns);
+                    if (nx.Replace("　", "") == "")
+                    {
+                        if (ns > -1 && ns < ne)
+                        {
+                            nx = px.Substring(ns + 2, ne - ns - 2);//取得要處理的夾注文
+                            StringInfo nxInfo = new StringInfo(nx);
+                            int nxCnt = nxInfo.LengthInTextElements;
+                            if (nxCnt % 2 == 1)
+                            {
+                                nxCnt++;
+                            }
+
+                            string space = "　";
+                            while (px.Substring(++i, 1) == "　")
+                            {
+                                space += "　";
+                            }                            
+                            x = x.Substring(0, s + ns + 2 +
+                                (int)(nxCnt / 2)) + space +
+                                x.Substring(s + ns + 2 + (int)(nxCnt / 2));
+                        }
+                    }
+                }
+                s = e + Environment.NewLine.Length + i;
+                e = x.IndexOf(Environment.NewLine, s);
+            }
+            stopUndoRec = true; undoRecord();
+            textBox1.Text = x;
+            stopUndoRec = false;
+
+        }
+
         private void insertWords(string insX, TextBox tBox, string x = "")
         {
             undoRecord();
@@ -4496,21 +4541,23 @@ namespace WindowsFormsApp1
         int ReplaceCntr(ref string xDomain, string replacedword,
             string rplsword, int s, ref int beforeScntr)
         {
-            if (xDomain.IndexOf("�������") > -1)
-                xDomain = xDomain.Replace("�������", "●●●●●●●");
-            if (replacedword.IndexOf("�������") > -1)
-                replacedword = replacedword.Replace("�������", "●●●●●●●");
-            int i = xDomain.IndexOf(replacedword), cntr = 0;
-            while (i > -1)
+            //if (xDomain.IndexOf("�������") > -1)
+            //    xDomain = xDomain.Replace("�������", "●●●●●●●");
+            //if (replacedword.IndexOf("�������") > -1)
+            //    replacedword = replacedword.Replace("�������", "●●●●●●●");
+            int i = xDomain.IndexOf(replacedword, StringComparison.Ordinal), cntr = 0;
+            while (i < xDomain.Length && i > -1)
             {
-                xDomain = xDomain.Substring(0, i) + rplsword + xDomain.Substring(i + replacedword.Length);
+                xDomain = xDomain.Substring(0, i) + rplsword +
+                    //xDomain.Substring(i + xDomain.Length);
+                    xDomain.Substring(i + replacedword.Length);
                 cntr++;
                 if (i < s)
                 {
                     beforeScntr++;
                     s += rplsword.Length - replacedword.Length;
                 }
-                i = xDomain.IndexOf(replacedword, i + rplsword.Length);
+                i = xDomain.IndexOf(replacedword, i + rplsword.Length, StringComparison.Ordinal);
             }
             return cntr;
         }
