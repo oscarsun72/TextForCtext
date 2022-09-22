@@ -28,7 +28,10 @@ namespace WindowsFormsApp1
         //string[] CJKBiggestSet = new string[]{ "HanaMinB", "KaiXinSongB", "TH-Tshyn-P1" };
         string[] CJKBiggestSet = { "全宋體(等寬)", "新細明體-ExtB", "HanaMinB", "KaiXinSongB", "TH-Tshyn-P1", "HanaMinA", "Plangothic P1", "Plangothic P2" };
         Color button2BackColorDefault;
-        bool insertMode = true, check_the_adjacent_pages = false;
+        bool insertMode = true, check_the_adjacent_pages = false
+            , TopLine = false//抬頭
+            , Indents = true;//縮排
+
 
         System.Windows.Forms.NotifyIcon nICo;
         int thisHeight, thisWidth, thisLeft, thisTop;
@@ -2708,7 +2711,7 @@ namespace WindowsFormsApp1
         }
         void paragraphMarkAccordingFirstOne()
         {
-            bool topmost=TopMost ;
+            bool topmost = TopMost;
             TopMost = false;
             replaceXdirrectly();
             int s = 0, l, e = textBox1.Text.IndexOf(Environment.NewLine); if (e < 0) return;
@@ -2730,7 +2733,7 @@ namespace WindowsFormsApp1
                 wordsPerLinePara = l;
                 normalLineParaLength = wordsPerLinePara;
             }
-            bool topLine = false;//抬頭？
+            bool topLine = TopLine;//抬頭？
             ado.Connection cnt = new ado.Connection(); ado.Recordset rst = new ado.Recordset();
             if (topLine)
             {
@@ -2805,7 +2808,7 @@ namespace WindowsFormsApp1
                     }
                     else//長度不小於常規 l
                     {
-                        if (true)//Indents
+                        if (Indents)//書內含縮排格式
                         {
                             //如果本行沒有段末標記
                             if (se.IndexOf("<p>") == -1 && se.IndexOf("|") == -1)
@@ -2816,7 +2819,7 @@ namespace WindowsFormsApp1
                                     (se.Substring(0, 2) == "{{" && "　􏿽".IndexOf(se.Substring(2, 1)) > -1))
                                 {
                                     int en = tx.IndexOf(Environment.NewLine, e + 2); int spaceCnt, isp = 0;
-                                    while ("　􏿽".IndexOf(se.Substring(++isp, 1),StringComparison.Ordinal) > -1)
+                                    while ("　􏿽".IndexOf(se.Substring(++isp, 1), StringComparison.Ordinal) > -1)
                                     {
 
                                     }
@@ -2836,12 +2839,12 @@ namespace WindowsFormsApp1
                                             if ("　􏿽".IndexOf(tx.Substring(e + 2, 1)) > -1)
                                             {
                                                 isp = 0;
-                                                while ("　􏿽".IndexOf(tx.Substring(e + 2 + (++isp), 1),StringComparison.Ordinal) > -1)//有「�」時會影響判斷
+                                                while ("　􏿽".IndexOf(tx.Substring(e + 2 + (++isp), 1), StringComparison.Ordinal) > -1)//有「�」時會影響判斷
                                                 {
                                                     //取得縮排數
                                                 }
                                                 //if (new StringInfo(tx.Substring(e + 2, --isp)).LengthInTextElements > spaceCnt)
-                                                if (new StringInfo(tx.Substring(e + 2,isp)).LengthInTextElements > spaceCnt)
+                                                if (new StringInfo(tx.Substring(e + 2, isp)).LengthInTextElements > spaceCnt)
                                                 {
                                                     textBox1.Select(e, 0);
                                                     textBox1.SelectedText = "<p>";
@@ -5429,6 +5432,7 @@ namespace WindowsFormsApp1
             pageTextEndPosition = 0; pageEndText10 = "";
             lines_perPage = 0;
             normalLineParaLength = 0;
+            TopLine = false; Indents = true;
         }
 
         private void textBox3_DragDrop(object sender, DragEventArgs e)
