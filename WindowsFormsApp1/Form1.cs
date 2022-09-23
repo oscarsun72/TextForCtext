@@ -1956,7 +1956,7 @@ namespace WindowsFormsApp1
             //設定標題格式（完成標題語法設置）
             textBox1.SelectedText = ("*" + textBox1.SelectedText + endCode)
                     .Replace("《", "").Replace("》", "").Replace("〈", "").Replace("〉", "").Replace("·", "")
-                    .Replace("　","􏿽");//標題格式化、標準化
+                    .Replace("　", "􏿽");//標題格式化、標準化
 
             #region 標題篇名前段補上分段符號
             int endPostion = textBox1.SelectionStart;
@@ -2139,8 +2139,8 @@ namespace WindowsFormsApp1
                 //else { textBox1.Select(s, 1); l = 1; }
 
             }
-            //先延展選取範圍至整個行/段
-            expandSelectedTextRangeToWholeLinePara(s, l, x);
+            else //先延展選取範圍至整個行/段
+                expandSelectedTextRangeToWholeLinePara(s, l, x);
             String slTxt = textBox1.SelectedText; int i = slTxt.IndexOf(Environment.NewLine), cntr = 0;
             while (i > -1)
             {
