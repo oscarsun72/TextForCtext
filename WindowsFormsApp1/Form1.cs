@@ -1955,7 +1955,8 @@ namespace WindowsFormsApp1
                 x.Substring(s + textBox1.SelectionLength, 3) == "<p>") endCode = "";
             //設定標題格式（完成標題語法設置）
             textBox1.SelectedText = ("*" + textBox1.SelectedText + endCode)
-                    .Replace("《", "").Replace("》", "").Replace("〈", "").Replace("〉", "").Replace("·", "");
+                    .Replace("《", "").Replace("》", "").Replace("〈", "").Replace("〉", "").Replace("·", "")
+                    .Replace("　","􏿽");//標題格式化、標準化
 
             #region 標題篇名前段補上分段符號
             int endPostion = textBox1.SelectionStart;
