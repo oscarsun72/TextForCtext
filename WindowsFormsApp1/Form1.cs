@@ -467,13 +467,20 @@ namespace WindowsFormsApp1
             if (missWordPositon == -1) missWordPositon = xCopy.IndexOfAny("�".ToCharArray());
             if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("□");
             if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("▫");
+            if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("စ");
             if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("ခ");
             if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("င");
+            if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("ဇ");
             if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("ဌ");
             if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("◍");
             if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("ᗍ");
             if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("Ⲳ");
             if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("⛋");
+            if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("ဂ");
+            if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("ဃ");
+            if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("ဆ");
+            if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("ဈ");
+            if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("ဉ");
             if (missWordPositon > -1)
             //if (xCopy.IndexOf(" ") > -1 || xCopy.IndexOfAny("�".ToCharArray()) > -1 ||
             //xCopy.IndexOf("□") > -1)//□為《維基文庫》《四庫全書》的缺字符，" "則是《四部叢刊》的，"�"則是《四部叢刊》的造字符。
@@ -1954,9 +1961,11 @@ namespace WindowsFormsApp1
             if (x.Substring(s + textBox1.SelectionLength - 3, 3) == "<p>" ||
                 x.Substring(s + textBox1.SelectionLength, 3) == "<p>") endCode = "";
             //設定標題格式（完成標題語法設置）
-            textBox1.SelectedText = ("*" + textBox1.SelectedText + endCode)
-                    .Replace("《", "").Replace("》", "").Replace("〈", "").Replace("〉", "").Replace("·", "")
-                    .Replace("　", "􏿽");//標題格式化、標準化
+            string title = ("*" + textBox1.SelectedText + endCode)
+                    .Replace("《", "").Replace("》", "").Replace("〈", "").Replace("〉", "").Replace("·", "");
+            if (linesCounter(title) == 1)
+                title = title.Replace("　", "􏿽");//標題格式化、標準化
+            textBox1.SelectedText = title;
 
             #region 標題篇名前段補上分段符號
             int endPostion = textBox1.SelectionStart;
@@ -1979,6 +1988,16 @@ namespace WindowsFormsApp1
             stopUndoRec = false;
         }
 
+        int linesCounter(string x)
+        {
+            int lineCnt = 1, i = x.IndexOf(Environment.NewLine);
+            while (i > -1)
+            {
+                lineCnt++;
+                i = x.IndexOf(Environment.NewLine, i + 1);
+            }
+            return lineCnt;
+        }
         void keysTitleCode＿WithPrefaceNote()
         {//由 keysTitleCode 調用，keysTitleCode完成時是停在「并序」字前
             int s = textBox1.SelectionStart; bool replaceIt = false;
@@ -2179,6 +2198,7 @@ namespace WindowsFormsApp1
         private void keysSpacePreParagraphs_indent()
         {// F7 每行縮排
             int l = textBox1.SelectionLength; int s = textBox1.SelectionStart; dontHide = true;
+            bool allIndent = s == textBox1.TextLength || s == 0 ? true : false;
             if (l == textBox1.TextLength)
             {
                 l = 0;
@@ -2189,7 +2209,10 @@ namespace WindowsFormsApp1
                                    //textBox1.Select(s, l + 1 + cntr);                
                                    //}
                                    //textBox1.Select(s + 1 + cntr, l);
-            textBox1.Select(s + 1, l + cntr);
+            if (!allIndent)
+                textBox1.Select(s + 1, l + cntr);
+            else
+                textBox1.Select(0, 0);
             dontHide = false;
             #region 原式
             /*
@@ -3021,10 +3044,11 @@ namespace WindowsFormsApp1
         const string punctuations = ".,;?@'\"。，；！？、－-—…:：《·》〈‧〉「」『』〖〗【】（）()[]〔〕［］0123456789";
         int isChineseChar(string x, bool skipPunctuation)
         {
-            if (skipPunctuation) if (punctuations.IndexOf(x) > -1) return -1;
-            string notChineseCharPriority = "〇　 \r\n<>{}.,;?@●'\"。，；！？、－-《》〈〉「」『』〖〗【】（）()[]〔〕［］0123456789";
+            if (skipPunctuation) if (punctuations.IndexOf(x, StringComparison.Ordinal) > -1) return -1;
+            const string cha = "�□▫စခငဇဌ◍ᗍⲲ⛋ဂဃဆဈဉ";
+            string notChineseCharPriority = cha + "〇　 \r\n<>{}.,;?@●'\"。，；！？、－-《》〈〉「」『』〖〗【】（）()[]〔〕［］0123456789";
 
-            if (notChineseCharPriority.IndexOf(x) > -1) return 0;
+            if (notChineseCharPriority.IndexOf(x, StringComparison.Ordinal) > -1) return 0;
 
             if (Regex.IsMatch(x, @"[a-zA-z]")) return 0;
             //if (x == "\udffd") return 0;
@@ -4248,7 +4272,8 @@ namespace WindowsFormsApp1
 
         private void runWordMacro(string runName)
         {
-            if (Clipboard.GetText().Length < 250) return;
+            string xClpBd = Clipboard.GetText();
+            if (xClpBd.Length < 250 && xClpBd.IndexOf("Bot", StringComparison.Ordinal) == -1) return;
             Color C = this.BackColor; this.BackColor = Color.Green;
             SystemSounds.Hand.Play();
             hideToNICo();
