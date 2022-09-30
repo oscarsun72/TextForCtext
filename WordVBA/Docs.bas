@@ -755,6 +755,7 @@ Set d = ActiveDocument
 clipBTxt = VBA.Trim(SystemSetup.GetClipboardText)
 searchedTerm = Array("卦", "爻", "易", "周易", "易經", "系辭", "繫辭", "擊辭", "擊詞", "繫詞", "說卦", "序卦", "卦序", "敘卦", "雜卦", "文言", "乾坤", "無咎", ChrW(26080) & "咎", "天咎", "元亨", "利貞" _
     , "史記", "九五", "六二", "上九", "上六", "九二", "筮") ', "", "", "", "")
+
 'If Selection.Type = wdSelectionIP Then
     If InStr(d.Range, clipBTxt) = 0 Then
         For Each e In searchedTerm
@@ -763,6 +764,19 @@ searchedTerm = Array("卦", "爻", "易", "周易", "易經", "系辭", "繫辭", "擊辭", "
                 Exit For
             End If
         Next e
+        If Not flgPaste Then
+            'ChrW() & ChrW() &'ChrW() & ChrW() &
+            Dim gua
+            gua = Array(ChrW(-10119), ChrW(-8742), ChrW(-30233), ChrW(-10164), ChrW(-8698), ChrW(-31827), ChrW(-10132), ChrW(-8313), ChrW(20810), ChrW(-10167), ChrW(-8698), ChrW(-26587), ChrW(21093), ChrW(14615), ChrW(20089), ChrW(26080), "妄", ChrW(26083), "濟" _
+                        , "遘", "遁", ChrW(20089), "离", "乾", "小畜", "履", "臨", "觀", "大過", "坤", "泰", "否", "噬嗑", "賁", "坎", "屯", "蒙", "同人", "大有", "剝", "復", "離", "需", "訟", "謙", "豫", "無妄", "大畜", "師", "比", "隨", "蠱", "頤", "咸", "恒", "損", "益", "震", "艮", "中孚", "遯", "大壯", "夬", "姤", "漸", "歸妹", "小過", "晉", "明夷", "萃", "升", "豐", "旅", "既濟", "未濟", "家人", "睽", "困", "井", "巽", "兌", "蹇", "解", "革", "鼎", "渙", "節")
+            For Each e In gua
+                If InStr(clipBTxt, e) > 0 Then
+                    flgPaste = True
+                    Exit For
+                End If
+            Next e
+        End If
+        
         If flgPaste Then
             Selection.EndKey wdStory
             Selection.InsertParagraphAfter
@@ -857,6 +871,41 @@ Else
 End If
 End Sub
 
+Sub 中國哲學書電子化計劃_只保留正文注文_且注文前後加括弧_貼到古籍酷自動標點()
+Dim ur As UndoRecord
+SystemSetup.stopUndo ur, "中國哲學書電子化計劃_註文前後加括弧_貼到古籍酷自動標點"
+中國哲學書電子化計劃.只保留正文注文_且注文前後加括弧
+貼到古籍酷自動標點
+SystemSetup.contiUndo ur
+End Sub
+
+Sub 貼到古籍酷自動標點()
+Dim d As Document
+Set d = ActiveDocument
+d.Range.Cut
+On Error GoTo app
+AppActivate "古籍酷"
+DoEvents
+SendKeys "{TAB 16}", True
+SendKeys "^v"
+DoEvents
+SendKeys "+{TAB 2}~", True
+If d.path = "" Then d.Close wdDoNotSaveChanges
+Exit Sub
+app:
+Select Case Err.Number
+    Case 5
+        Shell (Network.getDefaultBrowserFullname + " https://old.gj.cool/gjcool/index")
+        AppActivate Network.getDefaultBrowserNameAppActivate '"古籍酷"
+        DoEvents
+        SystemSetup.Wait 2.5
+        'SendKeys "{TAB 16}", True
+        Resume Next
+    Case Else
+        MsgBox Err.Number & Err.Description
+End Select
+End Sub
+
 Sub updateURL() '更新超連結網址
 Dim site As String
 Dim lnk As New Links
@@ -872,3 +921,6 @@ Select Case site
         
 End Select
 End Sub
+
+
+

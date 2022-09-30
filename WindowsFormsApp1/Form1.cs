@@ -28,7 +28,7 @@ namespace WindowsFormsApp1
         //string[] CJKBiggestSet = new string[]{ "HanaMinB", "KaiXinSongB", "TH-Tshyn-P1" };
         string[] CJKBiggestSet = { "全宋體(等寬)", "新細明體-ExtB", "HanaMinB", "KaiXinSongB", "TH-Tshyn-P1", "HanaMinA", "Plangothic P1", "Plangothic P2" };
         Color button2BackColorDefault;
-        bool insertMode = true, check_the_adjacent_pages = false
+        bool insertMode = true, check_the_adjacent_pages = false, keyinText = false
             , TopLine = false//抬頭
             , Indents = true;//縮排
 
@@ -627,12 +627,10 @@ namespace WindowsFormsApp1
             //    (int)Keys.Control + (int)Keys.Alt && e.KeyCode == Keys.G)
             if ((m & Keys.Shift) == Keys.Shift && e.KeyCode == Keys.Insert) { pasteAllOverWrite = true; dragDrop = false; }
             else pasteAllOverWrite = false;
-            if ((m & Keys.Control) == Keys.Control
-                && (m & Keys.Alt) == Keys.Alt)//https://zhidao.baidu.com/question/628222381668604284.html
-            {//https://bbs.csdn.net/topics/350010591                
-                if (e.KeyCode == Keys.G || e.KeyCode == Keys.Packet)
-                { e.Handled = true; return; }
-            }
+
+
+            #region 同時按下Ctrl+Shift
+
             if ((m & Keys.Control) == Keys.Control
                 && (m & Keys.Shift) == Keys.Shift
                 && e.KeyCode == Keys.Delete)
@@ -648,7 +646,7 @@ namespace WindowsFormsApp1
             if ((m & Keys.Control) == Keys.Control
                     && (m & Keys.Shift) == Keys.Shift
                     && e.KeyCode == Keys.Up)
-            {
+            {//Ctrl + Shift + ↑
                 e.Handled = true;
                 int s = textBox1.SelectionStart, ed = s;
                 selToNewline(ref s, ref ed, textBox1.Text, false, textBox1); return;
@@ -656,19 +654,12 @@ namespace WindowsFormsApp1
             if ((m & Keys.Control) == Keys.Control
                 && (m & Keys.Shift) == Keys.Shift
                 && e.KeyCode == Keys.Down)
-            {
+            {//Ctrl + Shift + ↓
                 e.Handled = true;
                 int s = textBox1.SelectionStart, ed = s;
                 selToNewline(ref s, ref ed, textBox1.Text, true, textBox1); return;
             }
 
-            if ((m & Keys.Alt) == Keys.Alt
-                && (m & Keys.Shift) == Keys.Shift
-                && e.KeyCode == Keys.S)
-            {//Alt + Shift + s :  所有小注文都不換行
-                e.Handled = true; notes_a_line_all(); return;
-            }
-            #region 同時按下Ctrl+Shift
             //同時按下Ctrl+Shift
             if ((m & Keys.Control) == Keys.Control && (m & Keys.Shift) == Keys.Shift)
             {
@@ -681,6 +672,24 @@ namespace WindowsFormsApp1
             }
             //以上 //同時按下Ctrl+Shift
             #endregion
+
+
+            #region 同時按下 Ctrl + Alt
+            if ((m & Keys.Control) == Keys.Control
+                && (m & Keys.Alt) == Keys.Alt)//https://zhidao.baidu.com/question/628222381668604284.html
+            {//https://bbs.csdn.net/topics/350010591                
+                if (e.KeyCode == Keys.G || e.KeyCode == Keys.Packet)
+                { e.Handled = true; return; }
+            }
+
+            if ((m & Keys.Alt) == Keys.Alt
+                && (m & Keys.Shift) == Keys.Shift
+                && e.KeyCode == Keys.S)
+            {//Alt + Shift + s :  所有小注文都不換行
+                e.Handled = true; notes_a_line_all(); return;
+            }
+            #endregion
+
 
             #region 同時按下Alt+Shift
             //同時按下Alt+Shift
@@ -700,8 +709,14 @@ namespace WindowsFormsApp1
                 {//Alt + Shift + 6 小注文不換行
                     e.Handled = true; notes_a_line(); return;
                 }
+                if (e.KeyCode == Keys.Q)
+                {//Alt + Shift + q : 據選取區的CJK字長以作分段（末後植入 < p >，分行則以版式常態值劃分），為非《維基文庫》版式之電子文本，如《寒山子詩集》組詩
+                    e.Handled = true; markParagraphwithSelectionLen(); return;
+                }
             }
             #endregion
+
+
             #region 按下Ctrl鍵
             if ((m & Keys.Control) == Keys.Control)
             {//按下Ctrl鍵
@@ -723,6 +738,21 @@ namespace WindowsFormsApp1
                 if (e.KeyCode == Keys.Back)
                 {//Ctrl + Backspace : 清除插入點之前的所有「　」或「􏿽」
                     e.Handled = true; 清除插入點之前的所有空格(); return;
+                }
+                if (e.KeyCode == Keys.Insert)
+                {//Ctrl + Insert ：無選取時則複製插入點後一CJK字長
+                    int s = textBox1.SelectionStart, l = textBox1.SelectionLength;
+                    if (l > 0 || !insertMode)
+                    {
+                        e.Handled = true;
+                        if (!insertMode)
+                        {
+                            l += char.IsHighSurrogate(textBox1.Text.Substring(s + l, 1).ToCharArray()[0]) ? 2 : 1;
+                        }
+                        l = s + l > textBox1.TextLength ? l - 1 : l;
+                        Clipboard.SetText(new StringInfo(textBox1.Text.Substring(s, l)).String);
+                        return;
+                    }
                 }
                 if (e.KeyCode == Keys.Oem3)
                 {//` 或 Ctrl + ` ： 於插入點處起至「　」或「􏿽」或「|」或「<」或分段符號前止之文字加上黑括號【】//Print/SysRq 為OS鎖定不能用
@@ -1464,6 +1494,47 @@ namespace WindowsFormsApp1
             #endregion
         }
 
+        private void markParagraphwithSelectionLen()
+        {//Alt + Shift + q : 據選取區的CJK字長以作分段（末後植入 < p >，分行則以版式常態值劃分），為非《維基文庫》版式之電子文本，如《寒山子詩集》組詩
+         //throw new NotImplementedException();
+            string x = textBox1.Text; int p = x.IndexOf("<p>");
+            if (p == -1) return;
+            if (textBox1.SelectionLength == 0)
+            {
+                textBox1.Select(0, p);//第一次須是指定段落長度者，且其後文字須無分段/行
+            }
+            if (normalLineParaLength == 0) normalLineParaLength = x.IndexOf(Environment.NewLine);
+            string xSl = textBox1.SelectedText; x = x.Substring(textBox1.SelectionStart + textBox1.SelectionLength + Environment.NewLine.Length + "<p>".Length);
+            StringInfo xSlInfo = new StringInfo(xSl);//, xInfo = new StringInfo(x);
+            int l = xSlInfo.LengthInTextElements, s = 0;//取得段落長
+            // lInfo = xInfo.LengthInTextElements
+            //TextElementEnumerator xEl = StringInfo.GetTextElementEnumerator(x);
+            while (s + l < x.Length)
+            {
+                int iPara = 0, iLine = 0, sLine = s;
+                while (s + l < x.Length && new StringInfo(x.Substring(s, ++iPara)).LengthInTextElements < l)
+                {//取得段長位置
+                    if (new StringInfo(x.Substring(sLine, ++iLine)).LengthInTextElements == normalLineParaLength)
+                    {
+
+                        if (char.IsLowSurrogate(x.Substring(sLine + iLine, 1).ToCharArray()[0])) iLine++;
+                        x = x.Substring(0, sLine + iLine) + Environment.NewLine + x.Substring(sLine + iLine);
+                        sLine += iLine; iLine = 0;
+                        sLine += 2;  //Environment.NewLine.Length;
+                    }
+                }
+                s += iPara; iPara = 0;
+                if (char.IsLowSurrogate(x.Substring(s, 1).ToCharArray()[0])) s++;
+                x = x.Substring(0, s) + "<p>" + Environment.NewLine + x.Substring(s);
+                s += 5;//"<p>" + Environment.NewLine
+                //if (s > 5000) break;
+            }
+            undoRecord();
+            stopUndoRec = true;
+            textBox1.Text = xSl + "<p>" + Environment.NewLine + x;
+            stopUndoRec = false;
+        }
+
         private void 清除插入點之前的所有空格()
         {//Ctrl + Backspace,若插入點前為「<p>」則一併清除
             //throw new NotImplementedException();
@@ -1964,7 +2035,7 @@ namespace WindowsFormsApp1
             string title = ("*" + textBox1.SelectedText + endCode)
                     .Replace("《", "").Replace("》", "").Replace("〈", "").Replace("〉", "").Replace("·", "");
             if (linesCounter(title) == 1)
-                title = title.Replace("　", "􏿽");//標題格式化、標準化
+                title = title.Replace("　", "􏿽");//標題格式化、標準化//單行才置換
             textBox1.SelectedText = title;
 
             #region 標題篇名前段補上分段符號
@@ -2374,7 +2445,7 @@ namespace WindowsFormsApp1
             int s = textBox1.SelectionStart, xLen = x.Length, index = x.Substring(0, (s == 0 ? s : s - 1)).IndexOf(xClear);
             undoRecord();
             caretPositionRecord();
-            if (xClear == "{{" || xClear == "}}")
+            if ("{{}}".IndexOf(xClear) > -1)
                 textBox1.Text = textBox1.Text.Replace("{{", "").Replace("}}", "");
             else
                 textBox1.Text = textBox1.Text.Replace(xClear, "");
@@ -2750,12 +2821,22 @@ namespace WindowsFormsApp1
             }
             else
                 l = wordsPerLinePara != -1 ? wordsPerLinePara : countWordsLenPerLinePara(se);
+
             if (se.Replace("●", "") == "") textBox1.Text = textBox1.Text.Substring(e + 2);//●●●●●●●●乃作為權訂每行字數之參考，故可刪去
                                                                                           //if (countWordsLenPerLinePara(se) == wordsPerLinePara && se.Replace("●", "") == "") textBox1.Text = textBox1.Text.Substring(e + 2);
             if (wordsPerLinePara == -1)
             {
                 wordsPerLinePara = l;
                 normalLineParaLength = wordsPerLinePara;
+            }
+            else
+            {
+                if (se.IndexOf("<p>") ==-1 && se.IndexOf("*") == -1 && countWordsLenPerLinePara(se) < wordsPerLinePara)
+                {
+                    textBox1.Text = textBox1.Text.Substring(0, e) + "<p>"
+                        + textBox1.Text.Substring(e);
+                    e += 3;//"<p>".length
+                }
             }
             bool topLine = TopLine;//抬頭？
             ado.Connection cnt = new ado.Connection(); ado.Recordset rst = new ado.Recordset();
@@ -2835,7 +2916,7 @@ namespace WindowsFormsApp1
                         if (Indents)//書內含縮排格式
                         {
                             //如果本行沒有段末標記
-                            if (se.IndexOf("<p>") == -1 && se.IndexOf("|") == -1)
+                            if (se.IndexOf("<p>") == -1 && se.IndexOf("|") == -1&&se.IndexOf("*")==-1)
                             //&& !(se.IndexOf("{{") == 0 && se.IndexOf("}}") == -1))
                             {
                                 //如果本行有縮排
@@ -2860,7 +2941,7 @@ namespace WindowsFormsApp1
                                         }
                                         else
                                         {//如果下一行/段再縮排（且不是注文）
-                                            if ("　􏿽".IndexOf(tx.Substring(e + 2, 1)) > -1)
+                                            if ("　􏿽".IndexOf(tx.Substring(e + 2, 1)) > -1)//&& se.IndexOf("*") == -1)//&& tx.Substring(s, e).IndexOf("*") == -1)
                                             {
                                                 isp = 0;
                                                 while ("　􏿽".IndexOf(tx.Substring(e + 2 + (++isp), 1), StringComparison.Ordinal) > -1)//有「�」時會影響判斷
@@ -3916,6 +3997,22 @@ namespace WindowsFormsApp1
                 toggleCheck_the_adjacent_pages();
                 return;
             }
+            if ((m & Keys.Control) == Keys.Control
+                && (m & Keys.Shift) == Keys.Shift)
+            {   //按下 ctrl + shift + *  切換手動鍵入模式
+                if (e.KeyCode == Keys.Multiply)
+                {
+                    e.Handled = true;
+                    if (keyinText)
+                    {
+                        new SoundPlayer(@"C:\Windows\Media\Speech Off.wav").Play();
+                        keyinText = false; return;
+                    }
+                    new SoundPlayer(@"C:\Windows\Media\Speech On.wav").Play();
+                    keyinText = true;
+                    return;
+                }
+            }
 
             if ((m & Keys.Control) == Keys.Control && (m & Keys.Shift) == Keys.Shift && e.KeyCode == Keys.T)
             {//Ctrl + Shift + t 同Chrome瀏覽器 --還原最近關閉的頁籤
@@ -4260,6 +4357,12 @@ namespace WindowsFormsApp1
                                         //要尾綴「#editor」如是格式的才能只按一個tab就入文字框中 ： https://ctext.org/library.pl?if=gb&file=77367&page=59&editwiki=415472#editor
                 Task.Delay(200).Wait();//200
                 SendKeys.Send("^a");
+                Task.Delay(300).Wait();
+                if (keyinText)
+                {
+                    SendKeys.Send("^x");
+                    textBox1.Text = Clipboard.GetText() + Environment.NewLine + textBox1.Text;
+                }
                 if (!check_the_adjacent_pages)
                 {
                     Task.Delay(500).Wait();
@@ -4982,8 +5085,15 @@ namespace WindowsFormsApp1
             if (textBox1.TextLength < 100)
             {
                 string clpTxt = Clipboard.GetText();
+                if (keyinText && textBox1.Text == "")
+                {
+                    textBox1.Text = clpTxt;
+                    return;
+                }
+
                 if (clpTxt.Length > 500)
                 {
+
                     if (clpTxt.IndexOf("<scanbegin file=") > -1 && clpTxt.IndexOf(" page=") > -1)
                     {
                         runWordMacro("中國哲學書電子化計劃.清除頁前的分段符號");

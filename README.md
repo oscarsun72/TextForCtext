@@ -95,6 +95,8 @@ Alt + F1 ：切換 textbox1 之字型： 切換支援 CJK - Ext 擴充字集的�
 
 按下 Ctrl + * （Multiply）設定為將《四部叢刊》資料庫所複製的文本在表單得到焦點時直接貼到 textBox1 的末尾,或反設定
 
+按下 ctrl + shift + *  切換手動鍵入模式
+
 按下 Ctrl + / （Divide） 切換自動連續輸入功能
 
 按下 Ctrl + Shift + / （Divide）  切換 check_the_adjacent_pages 值
@@ -109,7 +111,11 @@ Insert : 如 MS Word ，切換插入/取代文字模式（hit! 還原機制亦�
 
 Ctrl + Backspace : 清除插入點之前的所有「　」或「􏿽」，若插入點前為「<p>」則一併清除
 
+Ctrl + insert ：無選取時則複製插入點後一CJK字長
+
 Ctrl + q 或 Alt + q：據游標（插入點）所在前1段的長度來將textBox1中的文本分行分段
+
+Alt + Shift + q : 據選取區的CJK字長以作分段（末後植入<p>，分行則以版式常態值劃分），為非《維基文庫》版式之電子文本，如《寒山子詩集》組詩
 
 Ctrl + \ （反斜線） 或 Alt + \ ： 清除textBox1文本插入點後的分段
 

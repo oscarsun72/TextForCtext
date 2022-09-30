@@ -1314,9 +1314,9 @@ End With
 End Sub
 Sub 只保留正文注文_且注文前後加括弧()
 Dim d As Document, ur As UndoRecord, slRng As Range
-Set d = ActiveDocument
-SystemSetup.stopUndo ur, "中國哲學書電子化計劃_註文前後加括弧"
+SystemSetup.stopUndo ur, "中國哲學書電子化計劃_只保留正文注文_且注文前後加括弧"
 Docs.空白的新文件
+Set d = ActiveDocument
 If Selection.Type = wdSelectionIP Then ActiveDocument.Select
 Set slRng = Selection.Range
 中國哲學書電子化計劃_表格轉文字 slRng

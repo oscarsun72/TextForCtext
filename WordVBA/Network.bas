@@ -128,7 +128,7 @@ appFullname = Mid(appFullname, 2, InStr(appFullname, ".exe") + Len(".exe") - 2)
 getDefaultBrowserFullname = appFullname
 'DefaultBrowserNameAppActivate = VBA.Replace(VBA.Mid(appFullname, InStrRev(appFullname, "\") + 1), ".exe", "")
 End Function
-Function getDefaultBrowserNameAppActivate()
+Function getDefaultBrowserNameAppActivate() As String
 Dim objShell, ProgID As String: Set objShell = CreateObject("WScript.Shell")
 ProgID = objShell.RegRead _
             ("HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\Shell\Associations\UrlAssociations\http\UserChoice\ProgID")
@@ -152,6 +152,7 @@ Select Case ProgID
     Case Else:
         DefaultBrowserNameAppActivate = "google chrome" '"chrome"
 End Select
+getDefaultBrowserNameAppActivate = DefaultBrowserNameAppActivate
 End Function
 
 
