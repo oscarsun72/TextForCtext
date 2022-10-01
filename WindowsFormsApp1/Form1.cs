@@ -1952,7 +1952,7 @@ namespace WindowsFormsApp1
             if (sps.Replace("　", "") != "") return;
             int s = textBox1.Text.IndexOf(Environment.NewLine), ss = textBox1.SelectionStart, sPre = 0;
             string x = textBox1.Text;
-            if (x.Substring(0,sps.Length).Replace("　","")=="")
+            if (x.Substring(0, sps.Length).Replace("　", "") == "")
             {
                 textBox1.Select(0, 0);
                 stopUndoRec = true;
@@ -1968,7 +1968,13 @@ namespace WindowsFormsApp1
                     textBox1.Select(s + sps.Length, 0);
 
                     x = textBox1.Text;
-                    if (s + 2 <= x.Length && x.IndexOf(Environment.NewLine, s + 2) == -1) break;
+                    if (s + 2 <= x.Length && x.IndexOf(Environment.NewLine, s + 2) == -1)
+                    {
+                        stopUndoRec = true;
+                        keysTitleCode();
+                        //s = textBox1.SelectionStart; 
+                        break;
+                    }
 
                     string xp = x.Substring(s + 2, x.IndexOf(Environment.NewLine, s + 2) - (s + 2));
                     if (!(xp.IndexOf("}}") > -1 && xp.IndexOf("{{") == -1) &&
