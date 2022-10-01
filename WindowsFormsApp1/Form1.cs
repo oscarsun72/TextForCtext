@@ -1524,7 +1524,7 @@ namespace WindowsFormsApp1
                     rst.Update(); rst.Close();
                 }
                 textBox1.SelectedText = xInfo.SubstringByTextElements(0, 1);
-            }            
+            }
             rst.Open("select 造字,字 from 四部叢刊造字對照表", cnt, ado.CursorTypeEnum.adOpenForwardOnly
                 , ado.LockTypeEnum.adLockReadOnly);
             x = textBox1.Text;
@@ -1951,6 +1951,14 @@ namespace WindowsFormsApp1
             if (sps == "") return;
             if (sps.Replace("　", "") != "") return;
             int s = textBox1.Text.IndexOf(Environment.NewLine), ss = textBox1.SelectionStart, sPre = 0;
+            string x = textBox1.Text;
+            if (x.Substring(0,sps.Length).Replace("　","")=="")
+            {
+                textBox1.Select(0, 0);
+                stopUndoRec = true;
+                keysTitleCode();
+                s = textBox1.SelectionStart;
+            }
             while (s > -1)
             {
                 s += 2;
@@ -1958,7 +1966,10 @@ namespace WindowsFormsApp1
                 if (textBox1.Text.Substring(s, sps.Length) == sps)
                 {
                     textBox1.Select(s + sps.Length, 0);
-                    string x = textBox1.Text;
+
+                    x = textBox1.Text;
+                    if (s + 2 <= x.Length && x.IndexOf(Environment.NewLine, s + 2) == -1) break;
+
                     string xp = x.Substring(s + 2, x.IndexOf(Environment.NewLine, s + 2) - (s + 2));
                     if (!(xp.IndexOf("}}") > -1 && xp.IndexOf("{{") == -1) &&
                         textBox1.Text.Substring(sPre, sps.Length) != sps)
@@ -3932,10 +3943,11 @@ namespace WindowsFormsApp1
             string x = textBox1.Text, xClipboard = Clipboard.GetText();
             if (!autoPasteFromSBCKwhether) return;
             if (x.IndexOf(xClipboard) > -1) return;
+            if (!TopMost) TopMost = true;
             textBox1.Text += xClipboard;
             textBox1.Select(textBox1.TextLength, 0);
             textBox1.ScrollToCaret();
-
+            new SoundPlayer(@"C:\Windows\Media\windows default.wav").Play();
         }
 
         const int predictEndofPageSelectedTextLen = 5;
