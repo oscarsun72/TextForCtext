@@ -1524,7 +1524,7 @@ namespace WindowsFormsApp1
                     rst.Update(); rst.Close();
                 }
                 textBox1.SelectedText = xInfo.SubstringByTextElements(0, 1);
-            }
+            }            
             rst.Open("select 造字,字 from 四部叢刊造字對照表", cnt, ado.CursorTypeEnum.adOpenForwardOnly
                 , ado.LockTypeEnum.adLockReadOnly);
             x = textBox1.Text;
@@ -1539,7 +1539,7 @@ namespace WindowsFormsApp1
             caretPositionRecord();
             textBox1.Text = x;
             stopUndoRec = false;
-            //restoreCaretPosition(textBox1, textBox1.SelectionStart, textBox1.SelectionLength);
+            restoreCaretPosition(textBox1, selStart, selLength);//textBox1.SelectionStart, textBox1.SelectionLength);
             caretPositionRecall();
             rst.Close(); cnt.Close();
         }
