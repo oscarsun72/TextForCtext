@@ -1116,6 +1116,9 @@ namespace WindowsFormsApp1
             }//以上 Shift
             #endregion
 
+
+
+
             #region 按下Alt鍵            
             //按下Alt鍵
             if ((m & Keys.Alt) == Keys.Alt)//⇌ if (Control.ModifierKeys == Keys.Alt)
@@ -1148,9 +1151,13 @@ namespace WindowsFormsApp1
                 if (e.KeyCode == Keys.D3)
                 {//Alt + 3 : 鍵入全形空格「〇」
                     e.Handled = true;
-                    //undoRecord();
-                    //textBox1.SelectedText = "〇";
                     insertWords("〇", textBox1);
+                    return;
+                }
+                if (e.KeyCode == Keys.D4)
+                {//Alt + 4 : 新增【四部叢刊造字對照表】資料並取代其造字
+                    e.Handled = true;
+                    addData四部叢刊造字對照表andReplace();
                     return;
                 }
                 if (e.KeyCode == Keys.D6 || e.KeyCode == Keys.D7)
@@ -1492,6 +1499,49 @@ namespace WindowsFormsApp1
                 }
             }//以上按下單一鍵
             #endregion
+        }
+
+        private void addData四部叢刊造字對照表andReplace()
+        {
+            //Alt + 4 : 新增【四部叢刊造字對照表】資料並取代其造字,若無選取文字以指定文字，則加以取代
+            //throw new NotImplementedException();
+            //選取文字第一個是造字，第2個是系統字（CJK）
+            ado.Connection cnt = new ado.Connection();
+            ado.Recordset rst = new ado.Recordset();
+            openDatabase("查字.mdb", ref cnt);
+            string x = textBox1.SelectedText;
+            if (x != "")
+            {
+                StringInfo xInfo = new StringInfo(x);
+                string w = xInfo.SubstringByTextElements(0, 1);
+                rst.Open("select 造字,字 from 四部叢刊造字對照表 where strcomp(造字,\"" + w + "\")=0",
+                    cnt, ado.CursorTypeEnum.adOpenKeyset, ado.LockTypeEnum.adLockOptimistic);
+                if (rst.RecordCount == 0)
+                {
+                    rst.AddNew();
+                    rst.Fields[0].Value = w;
+                    rst.Fields[1].Value = xInfo.SubstringByTextElements(1, 1);
+                    rst.Update(); rst.Close();
+                }
+                textBox1.SelectedText = xInfo.SubstringByTextElements(0, 1);
+            }
+            rst.Open("select 造字,字 from 四部叢刊造字對照表", cnt, ado.CursorTypeEnum.adOpenForwardOnly
+                , ado.LockTypeEnum.adLockReadOnly);
+            x = textBox1.Text;
+            while (!rst.EOF)
+            {
+                if (x.IndexOf(rst.Fields[0].Value.ToString(), StringComparison.Ordinal) > -1)
+                    x = x.Replace(rst.Fields[0].Value.ToString(), rst.Fields[1].Value.ToString());
+                rst.MoveNext();
+            }
+            undoRecord();
+            stopUndoRec = true;
+            caretPositionRecord();
+            textBox1.Text = x;
+            stopUndoRec = false;
+            //restoreCaretPosition(textBox1, textBox1.SelectionStart, textBox1.SelectionLength);
+            caretPositionRecall();
+            rst.Close(); cnt.Close();
         }
 
         private void markParagraphwithSelectionLen()
@@ -2831,7 +2881,7 @@ namespace WindowsFormsApp1
             }
             else
             {
-                if (se.IndexOf("<p>") ==-1 && se.IndexOf("*") == -1 && countWordsLenPerLinePara(se) < wordsPerLinePara)
+                if (se.IndexOf("<p>") == -1 && se.IndexOf("*") == -1 && countWordsLenPerLinePara(se) < wordsPerLinePara)
                 {
                     textBox1.Text = textBox1.Text.Substring(0, e) + "<p>"
                         + textBox1.Text.Substring(e);
@@ -2916,7 +2966,7 @@ namespace WindowsFormsApp1
                         if (Indents)//書內含縮排格式
                         {
                             //如果本行沒有段末標記
-                            if (se.IndexOf("<p>") == -1 && se.IndexOf("|") == -1&&se.IndexOf("*")==-1)
+                            if (se.IndexOf("<p>") == -1 && se.IndexOf("|") == -1 && se.IndexOf("*") == -1)
                             //&& !(se.IndexOf("{{") == 0 && se.IndexOf("}}") == -1))
                             {
                                 //如果本行有縮排
@@ -4357,9 +4407,9 @@ namespace WindowsFormsApp1
                                         //要尾綴「#editor」如是格式的才能只按一個tab就入文字框中 ： https://ctext.org/library.pl?if=gb&file=77367&page=59&editwiki=415472#editor
                 Task.Delay(200).Wait();//200
                 SendKeys.Send("^a");
-                Task.Delay(300).Wait();
                 if (keyinText)
                 {
+                    Task.Delay(800).Wait();
                     SendKeys.Send("^x");
                     textBox1.Text = Clipboard.GetText() + Environment.NewLine + textBox1.Text;
                 }
@@ -5070,6 +5120,7 @@ namespace WindowsFormsApp1
         private void Form1_Activated(object sender, EventArgs e)
         {
             if (!this.TopMost) this.TopMost = true;
+            if (autoPasteFromSBCKwhether) { autoPasteFromSBCK(autoPasteFromSBCKwhether); return; }
             if (textBox1.Focused)
             {
                 if (insertMode) Caret_Shown(textBox1); else Caret_Shown_OverwriteMode(textBox1);
@@ -5079,9 +5130,11 @@ namespace WindowsFormsApp1
             }
             if (textBox2.BackColor == Color.GreenYellow &&
                 doNotLeaveTextBox2 && textBox2.Focused) textBox2.SelectAll();
+
             autoRunWordVBAMacro();
+
             //bool autoPasteFromSBCKwhether = false; this.autoPasteFromSBCKwhether = autoPasteFromSBCKwhether;            
-            if (autoPasteFromSBCKwhether) autoPasteFromSBCK(autoPasteFromSBCKwhether);
+
             if (textBox1.TextLength < 100)
             {
                 string clpTxt = Clipboard.GetText();
