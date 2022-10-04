@@ -745,7 +745,7 @@ namespace WindowsFormsApp1
                     if (l > 0 || !insertMode)
                     {
                         e.Handled = true;
-                        if (!insertMode)
+                        if (s+l<textBox1.TextLength&& !insertMode)
                         {
                             l += char.IsHighSurrogate(textBox1.Text.Substring(s + l, 1).ToCharArray()[0]) ? 2 : 1;
                         }
@@ -1521,9 +1521,10 @@ namespace WindowsFormsApp1
                     rst.AddNew();
                     rst.Fields[0].Value = w;
                     rst.Fields[1].Value = xInfo.SubstringByTextElements(1, 1);
-                    rst.Update(); rst.Close();
+                    rst.Update();
                 }
                 textBox1.SelectedText = xInfo.SubstringByTextElements(0, 1);
+                rst.Close();
             }
             rst.Open("select 造字,字 from 四部叢刊造字對照表", cnt, ado.CursorTypeEnum.adOpenForwardOnly
                 , ado.LockTypeEnum.adLockReadOnly);

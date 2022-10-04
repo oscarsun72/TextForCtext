@@ -380,7 +380,16 @@ End Sub
 
 Sub 開啟超連結()
 'Ctrl +i   系統預設是 italic（即斜體字），此配合 ExcelVBA設定
-If Selection.Hyperlinks.Count > 0 Then Shell getDefaultBrowserFullname + " " + Selection.Hyperlinks(1).Address
+If Selection.Hyperlinks.Count > 0 Then
+    Dim strLnk As String, lnk As Hyperlink
+    Set lnk = Selection.Hyperlinks(1)
+    If Selection.Hyperlinks(1).SubAddress <> "" Then
+        strLnk = Selection.Hyperlinks(1).Address + "#" + Selection.Hyperlinks(1).SubAddress
+    Else
+        strLnk = Selection.Hyperlinks(1).Address
+    End If
+    Shell getDefaultBrowserFullname + " " + strLnk
+End If
 End Sub
 Sub 插入超連結() '2008/9/1 指定鍵(快捷鍵) Ctrl+shift+K(原系統指定在smallcaps為)
 'Alt+k
