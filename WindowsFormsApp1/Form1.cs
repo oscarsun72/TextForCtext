@@ -745,7 +745,7 @@ namespace WindowsFormsApp1
                     if (l > 0 || !insertMode)
                     {
                         e.Handled = true;
-                        if (s+l<textBox1.TextLength&& !insertMode)
+                        if (s + l < textBox1.TextLength && !insertMode)
                         {
                             l += char.IsHighSurrogate(textBox1.Text.Substring(s + l, 1).ToCharArray()[0]) ? 2 : 1;
                         }
@@ -1506,25 +1506,29 @@ namespace WindowsFormsApp1
             //Alt + 4 : 新增【四部叢刊造字對照表】資料並取代其造字,若無選取文字以指定文字，則加以取代
             //throw new NotImplementedException();
             //選取文字第一個是造字，第2個是系統字（CJK）
+            string x = textBox1.SelectedText;
             ado.Connection cnt = new ado.Connection();
             ado.Recordset rst = new ado.Recordset();
             openDatabase("查字.mdb", ref cnt);
-            string x = textBox1.SelectedText;
             if (x != "")
             {
                 StringInfo xInfo = new StringInfo(x);
-                string w = xInfo.SubstringByTextElements(0, 1);
-                rst.Open("select 造字,字 from 四部叢刊造字對照表 where strcomp(造字,\"" + w + "\")=0",
-                    cnt, ado.CursorTypeEnum.adOpenKeyset, ado.LockTypeEnum.adLockOptimistic);
-                if (rst.RecordCount == 0)
+                if (xInfo.LengthInTextElements == 2)
                 {
-                    rst.AddNew();
-                    rst.Fields[0].Value = w;
-                    rst.Fields[1].Value = xInfo.SubstringByTextElements(1, 1);
-                    rst.Update();
+
+                    string w = xInfo.SubstringByTextElements(0, 1);
+                    rst.Open("select 造字,字 from 四部叢刊造字對照表 where strcomp(造字,\"" + w + "\")=0",
+                        cnt, ado.CursorTypeEnum.adOpenKeyset, ado.LockTypeEnum.adLockOptimistic);
+                    if (rst.RecordCount == 0)
+                    {
+                        rst.AddNew();
+                        rst.Fields[0].Value = w;
+                        rst.Fields[1].Value = xInfo.SubstringByTextElements(1, 1);
+                        rst.Update();
+                    }
+                    textBox1.SelectedText = xInfo.SubstringByTextElements(0, 1);
+                    rst.Close();
                 }
-                textBox1.SelectedText = xInfo.SubstringByTextElements(0, 1);
-                rst.Close();
             }
             rst.Open("select 造字,字 from 四部叢刊造字對照表", cnt, ado.CursorTypeEnum.adOpenForwardOnly
                 , ado.LockTypeEnum.adLockReadOnly);
@@ -1542,6 +1546,21 @@ namespace WindowsFormsApp1
             stopUndoRec = false;
             restoreCaretPosition(textBox1, selStart, selLength);//textBox1.SelectionStart, textBox1.SelectionLength);
             caretPositionRecall();
+            if (textBox1.SelectionLength > 0)
+            {
+                if (char.IsLowSurrogate(textBox1.Text.Substring(textBox1.SelectionStart + textBox1.SelectionLength, 1).ToCharArray()[0]))
+                {
+                    textBox1.Select(textBox1.SelectionStart, ++textBox1.SelectionLength);
+                }
+            }
+            else
+            {
+                if (char.IsLowSurrogate(textBox1.Text.Substring(textBox1.SelectionStart, 1).ToCharArray()[0]))
+                {
+                    textBox1.Select(++textBox1.SelectionStart, 0);
+                }
+            }
+
             rst.Close(); cnt.Close();
         }
 
@@ -2157,6 +2176,9 @@ namespace WindowsFormsApp1
                     replaceIt = true;
                     break;
                 case "幷序":
+                    replaceIt = true;
+                    break;
+                case "並序":
                     replaceIt = true;
                     break;
                 case "有序":
