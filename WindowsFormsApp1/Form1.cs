@@ -1380,7 +1380,9 @@ namespace WindowsFormsApp1
                 if (e.KeyCode == Keys.Insert)
                 {//Alt + Insert ：將剪貼簿的文字內容讀入textBox1中
                     e.Handled = true;
-                    textBox1.Text = Clipboard.GetText();
+                    //textBox1.Text = Clipboard.GetText();
+                    string clpTxt = Clipboard.GetText();
+                    if (clpTxt != ClpTxtBefore) textBox1.Text = booksPunctuation(clpTxt);
                     dragDrop = false;
                     return;
                 }
@@ -4454,7 +4456,7 @@ namespace WindowsFormsApp1
                 SendKeys.Send("^a");
                 if (keyinText)
                 {
-                    Task.Delay(800).Wait();
+                    Task.Delay(990).Wait();
                     SendKeys.Send("^x");
                     textBox1.Text = Clipboard.GetText() + Environment.NewLine + textBox1.Text;
                 }
@@ -5171,6 +5173,7 @@ namespace WindowsFormsApp1
             }
         }
 
+        string ClpTxtBefore = "";
         private void Form1_Activated(object sender, EventArgs e)
         {
             if (!this.TopMost) this.TopMost = true;
@@ -5179,11 +5182,12 @@ namespace WindowsFormsApp1
             string clpTxt = Clipboard.GetText();
             if (keyinText)//如果是輸入模式
             {
-                if (clpTxt.IndexOf("http") > -1 && clpTxt.IndexOf("#editor") > -1)
+                if (ClpTxtBefore != clpTxt && clpTxt.IndexOf("http") > -1 && clpTxt.IndexOf("#editor") > -1)
                 {
                     //new SoundPlayer(@"C:\Windows\Media\Windows Balloon.wav").Play();
                     System.Media.SystemSounds.Asterisk.Play();
                     textBox3.Text = clpTxt;
+                    ClpTxtBefore = clpTxt;
                     return;
                 }
             }
@@ -5203,38 +5207,9 @@ namespace WindowsFormsApp1
 
             if (textBox1.TextLength < 100)
             {
-                if (keyinText && textBox1.Text == "" && clpTxt.IndexOf("http") == -1)
+                if (keyinText && ClpTxtBefore != clpTxt && textBox1.Text == "" && clpTxt.IndexOf("http") == -1)
                 {
-                    //new SoundPlayer(@"C:\Windows\Media\Windows Balloon.wav").Play();
-                    System.Media.SystemSounds.Asterisk.Play();
-                    ado.Connection cnt = new ado.Connection();
-                    ado.Recordset rst = new ado.Recordset();
-                    openDatabase("查字.mdb", ref cnt);
-                    rst.Open("select * from 標點符號_書名號_自動加上用 order by 排序", cnt, ado.CursorTypeEnum.adOpenForwardOnly);
-                    string w;
-                    while (!rst.EOF)
-                    {
-                        w = rst.Fields["書名"].Value.ToString();
-                        if (clpTxt.IndexOf(w) > -1)
-                        {
-                            clpTxt = clpTxt.Replace(w, rst.Fields["取代為"].Value.ToString());
-                        }
-                        rst.MoveNext();
-                    }
-                    rst.Close();
-                    rst.Open("select * from 標點符號_篇名號_自動加上用 order by 排序", cnt, ado.CursorTypeEnum.adOpenForwardOnly);
-                    while (!rst.EOF)
-                    {
-                        w = rst.Fields["篇名"].Value.ToString();
-                        if (clpTxt.IndexOf(w) > -1)
-                        {
-                            clpTxt = clpTxt.Replace(w, rst.Fields["取代為"].Value.ToString());
-                        }
-                        rst.MoveNext();
-                    }
-
-                    textBox1.Text = clpTxt;
-                    rst.Close(); cnt.Close();                    
+                    textBox1.Text = booksPunctuation(clpTxt);
                     return;
                 }
 
@@ -5267,6 +5242,41 @@ namespace WindowsFormsApp1
                     }
                 }
             }
+        }
+
+        private string booksPunctuation(string clpTxt)
+        {
+            //new SoundPlayer(@"C:\Windows\Media\Windows Balloon.wav").Play();
+            System.Media.SystemSounds.Asterisk.Play();
+            ado.Connection cnt = new ado.Connection();
+            ado.Recordset rst = new ado.Recordset();
+            openDatabase("查字.mdb", ref cnt);
+            rst.Open("select * from 標點符號_書名號_自動加上用 order by 排序", cnt, ado.CursorTypeEnum.adOpenForwardOnly);
+            string w;
+            while (!rst.EOF)
+            {
+                w = rst.Fields["書名"].Value.ToString();
+                if (clpTxt.IndexOf(w) > -1)
+                {
+                    clpTxt = clpTxt.Replace(w, rst.Fields["取代為"].Value.ToString());
+                }
+                rst.MoveNext();
+            }
+            rst.Close();
+            rst.Open("select * from 標點符號_篇名號_自動加上用 order by 排序", cnt, ado.CursorTypeEnum.adOpenForwardOnly);
+            while (!rst.EOF)
+            {
+                w = rst.Fields["篇名"].Value.ToString();
+                if (clpTxt.IndexOf(w) > -1)
+                {
+                    clpTxt = clpTxt.Replace(w, rst.Fields["取代為"].Value.ToString());
+                }
+                rst.MoveNext();
+            }
+
+            //textBox1.Text = clpTxt;
+            rst.Close(); cnt.Close();
+            return clpTxt;
         }
 
         private void autoRunWordVBAMacro()
