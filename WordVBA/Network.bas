@@ -112,22 +112,58 @@ End Function
 
 
 Function GetDefaultBrowserEXE() '2010/10/18由http://chijanzen.net/wp/?p=156#comment-1303(取得預設瀏覽器(default web browser)的名稱? chijanzen 雜貨舖)而來.
-    Dim objShell
-    Set objShell = CreateObject("WScript.Shell")
-    'HKEY_CLASSES_ROOT\HTTP\shell\open\ddeexec\Application
-    '取得註冊表中的值
-    GetDefaultBrowserEXE = objShell.RegRead _
-            ("HKCR\http\shell\open\command\")
+Dim deflBrowser As String
+deflBrowser = getDefaultBrowserNameAppActivate
+Select Case deflBrowser
+    Case "iexplore":
+        GetDefaultBrowserEXE = "C:\Program Files\Internet Explorer\iexplore.exe"
+    Case "firefox":
+        If Dir("W:\PortableApps\PortableApps\FirefoxPortable\App\Firefox64\firefox.exe") = "" Then
+            GetDefaultBrowserEXE = "C:\Program Files\Mozilla Firefox\firefox.exe"
+        Else
+            GetDefaultBrowserEXE = "W:\PortableApps\PortableApps\FirefoxPortable\App\Firefox64\firefox.exe"
+        End If
+    Case "brave":
+        If Dir(userProfilePath & "\AppData\Local\BraveSoftware\Brave-Browser\Application\brave.exe") = "" Then
+            GetDefaultBrowserEXE = "C:\Program Files (x86)\BraveSoftware\Brave-Browser\Application\brave.exe"
+        Else
+            GetDefaultBrowserEXE = userProfilePath & "\AppData\Local\BraveSoftware\Brave-Browser\Application\brave.exe"
+        End If
+    Case "Opera":
+        GetDefaultBrowserEXE = ""
+    Case "Safari":
+        GetDefaultBrowserEXE = ""
+    Case "edge":
+        GetDefaultBrowserEXE = "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe" '"msedge"
+    Case "ChromeHTML", "google chrome": '"chrome"
+        If Dir("C:\Program Files (x86)\Google\Chrome\Application\chrome.exe") = "" Then
+            GetDefaultBrowserEXE = "W:\PortableApps\PortableApps\GoogleChromePortable\GoogleChromePortable.exe"
+        Else
+            GetDefaultBrowserEXE = "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe"
+        End If
+    Case Else:
+        Dim objShell
+        Set objShell = CreateObject("WScript.Shell")
+        'HKEY_CLASSES_ROOT\HTTP\shell\open\ddeexec\Application
+        '取得註冊表中的值
+        deflBrowser = objShell.RegRead _
+                ("HKCR\http\shell\open\command\")
+        GetDefaultBrowserEXE = Mid(deflBrowser, 2, InStr(deflBrowser, ".exe") + Len(".exe") - 2)
+
+End Select
+    
     
 End Function
 
 Function getDefaultBrowserFullname()
 Dim appFullname As String
 appFullname = GetDefaultBrowserEXE
-appFullname = Mid(appFullname, 2, InStr(appFullname, ".exe") + Len(".exe") - 2)
+'appFullname = Mid(appFullname, 2, InStr(appFullname, ".exe") + Len(".exe") - 2)
 getDefaultBrowserFullname = appFullname
 'DefaultBrowserNameAppActivate = VBA.Replace(VBA.Mid(appFullname, InStrRev(appFullname, "\") + 1), ".exe", "")
 End Function
+
+
 Function getDefaultBrowserNameAppActivate() As String
 Dim objShell, ProgID As String: Set objShell = CreateObject("WScript.Shell")
 ProgID = objShell.RegRead _

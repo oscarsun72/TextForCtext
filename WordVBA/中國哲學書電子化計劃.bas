@@ -892,6 +892,27 @@ End With
 Beep
 End Sub
 
+Sub Search(searchWhatsUrl As String)
+Dim d As Document
+Set d = ActiveDocument
+If d.path <> "" Then If d.Saved = False Then d.Save
+If Selection.Type = wdSelectionNormal Then
+    Selection.Copy
+End If
+'Shell "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe https://ctext.org/wiki.pl?if=gb&res=384378&searchu=" & Selection.text
+Shell Normal.SystemSetup.getChrome & searchWhatsUrl & Selection.Text
+End Sub
+
+Sub search史記三家注()
+Search " https://ctext.org/wiki.pl?if=gb&res=384378&searchu="
+End Sub
+
+Sub search周易正義_阮元十三經注疏()
+Search " https://ctext.org/wiki.pl?if=gb&res=315747&searchu="
+End Sub
+
+
+
 Sub 讀史記三家注()
 Dim d As Document, t As Table
 Set d = Documents.Add
@@ -1293,12 +1314,13 @@ SendKeys "{F5}"
 End Sub
 Sub 插入超連結_將顯示之編碼改為中文()
 Const keys As String = "&searchu=" 'Alt + j
-Dim rng As Range, lnk As String, cde As String, s As Long, d As Document
+Dim rng As Range, lnk As String, cde As String, s As Long, d As Document, ur As UndoRecord
 Set rng = Selection.Range: Set d = ActiveDocument
 lnk = SystemSetup.GetClipboardText
 cde = Mid(lnk, InStr(lnk, keys) + Len(keys))
 cde = code.URLDecode(cde)
 s = Selection.start
+SystemSetup.stopUndo ur, "插入超連結_將顯示之編碼改為中文"
 With Selection
     .Hyperlinks.Add Selection.Range, lnk, , , Left(lnk, InStr(lnk, keys) + Len(keys) - 1) + cde
     'd.Range(Selection.End, Selection.End + Len(cde)).Select
@@ -1311,6 +1333,7 @@ With Selection
     .InsertParagraphAfter
     .Collapse
 End With
+SystemSetup.contiUndo ur
 End Sub
 Sub 只保留正文注文_且注文前後加括弧()
 Dim d As Document, ur As UndoRecord, slRng As Range

@@ -260,6 +260,7 @@ Function 取得桌面路徑() 'WshEnvironment.Item'2012/6/3
 'strDesktop = wshshell.RegRead("HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders\desktop")
 'http://www.accessoft.com/blog/article-show.asp?userid=32&Id=97
 End Function
+
 Function 取得使用者路徑_含反斜線() '2021/11/3
 'https://www.796t.com/post/M2ExcmU=.html
 'https://stackoverflow.com/questions/42091960/userprofile-environ-on-vba
@@ -268,6 +269,7 @@ a = VBA.Environ("AppData")
 a = VBA.Replace(a, "AppData\Roaming", "")
 取得使用者路徑_含反斜線 = a
 End Function
+
 Function GetClipboardText()
 Dim clipboard As New MSForms.DataObject
 DoEvents

@@ -28,7 +28,7 @@ namespace WindowsFormsApp1
         //string[] CJKBiggestSet = new string[]{ "HanaMinB", "KaiXinSongB", "TH-Tshyn-P1" };
         string[] CJKBiggestSet = { "全宋體(等寬)", "新細明體-ExtB", "HanaMinB", "KaiXinSongB", "TH-Tshyn-P1", "HanaMinA", "Plangothic P1", "Plangothic P2" };
         Color button2BackColorDefault;
-        bool insertMode = true, check_the_adjacent_pages = false, keyinText = false
+        bool insertMode = true, check_the_adjacent_pages = false, keyinText = false//手動輸入
             , TopLine = false//抬頭
             , Indents = true;//縮排
 
@@ -466,6 +466,7 @@ namespace WindowsFormsApp1
             int missWordPositon = xCopy.IndexOf(" ");
             if (missWordPositon == -1) missWordPositon = xCopy.IndexOfAny("�".ToCharArray());
             if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("□");
+            if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("◊");
             if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("▫");
             if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("စ");
             if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("ခ");
@@ -2179,6 +2180,9 @@ namespace WindowsFormsApp1
                     replaceIt = true;
                     break;
                 case "並序":
+                    replaceIt = true;
+                    break;
+                case "并敘":
                     replaceIt = true;
                     break;
                 case "有序":
@@ -4484,7 +4488,16 @@ namespace WindowsFormsApp1
                 case "中國哲學書電子化計劃.清除頁前的分段符號":
                     break;
                 default:
-                    textBox1.Text = Clipboard.GetText().Replace(Environment.NewLine + Environment.NewLine, Environment.NewLine);
+                    //清除多餘的空行,排除卷末的空行
+                    xClpBd = Clipboard.GetText();
+                    if (xClpBd.Length > 100)
+                    {
+                        textBox1.Text = xClpBd.Substring(0, xClpBd.Length - 100).Replace(Environment.NewLine + Environment.NewLine, Environment.NewLine)
+                            + xClpBd.Substring(xClpBd.Length - 100);
+                    }
+                    else
+                        textBox1.Text = xClpBd;
+
                     if (runName == "漢籍電子文獻資料庫文本整理_以轉貼到中國哲學書電子化計劃")
                     {
                         saveText();
@@ -5162,6 +5175,15 @@ namespace WindowsFormsApp1
         {
             if (!this.TopMost) this.TopMost = true;
             if (autoPasteFromSBCKwhether) { autoPasteFromSBCK(autoPasteFromSBCKwhether); return; }
+            Application.DoEvents();
+            string clpTxt = Clipboard.GetText();
+            if (keyinText)//如果是輸入模式
+            {
+                if (clpTxt.IndexOf("http") > -1 && clpTxt.IndexOf("#editor") > -1)
+                {
+                    textBox3.Text = clpTxt;
+                }
+            }
             if (textBox1.Focused)
             {
                 if (insertMode) Caret_Shown(textBox1); else Caret_Shown_OverwriteMode(textBox1);
@@ -5178,8 +5200,7 @@ namespace WindowsFormsApp1
 
             if (textBox1.TextLength < 100)
             {
-                string clpTxt = Clipboard.GetText();
-                if (keyinText && textBox1.Text == "")
+                if (keyinText && textBox1.Text == ""&& clpTxt.IndexOf("http")==-1)
                 {
                     textBox1.Text = clpTxt;
                     return;
@@ -5608,6 +5629,7 @@ namespace WindowsFormsApp1
 
         private void textBox3_TextChanged(object sender, EventArgs e)
         {
+            if (keyinText) return;
             if (textBox3.Text == "")
             {
                 resetBooksPagesFeatures(); previousBookID = 0;
