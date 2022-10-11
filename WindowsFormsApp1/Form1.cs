@@ -5181,7 +5181,10 @@ namespace WindowsFormsApp1
             {
                 if (clpTxt.IndexOf("http") > -1 && clpTxt.IndexOf("#editor") > -1)
                 {
+                    //new SoundPlayer(@"C:\Windows\Media\Windows Balloon.wav").Play();
+                    System.Media.SystemSounds.Asterisk.Play();
                     textBox3.Text = clpTxt;
+                    return;
                 }
             }
             if (textBox1.Focused)
@@ -5200,9 +5203,38 @@ namespace WindowsFormsApp1
 
             if (textBox1.TextLength < 100)
             {
-                if (keyinText && textBox1.Text == ""&& clpTxt.IndexOf("http")==-1)
+                if (keyinText && textBox1.Text == "" && clpTxt.IndexOf("http") == -1)
                 {
+                    //new SoundPlayer(@"C:\Windows\Media\Windows Balloon.wav").Play();
+                    System.Media.SystemSounds.Asterisk.Play();
+                    ado.Connection cnt = new ado.Connection();
+                    ado.Recordset rst = new ado.Recordset();
+                    openDatabase("查字.mdb", ref cnt);
+                    rst.Open("select * from 標點符號_書名號_自動加上用 order by 排序", cnt, ado.CursorTypeEnum.adOpenForwardOnly);
+                    string w;
+                    while (!rst.EOF)
+                    {
+                        w = rst.Fields["書名"].Value.ToString();
+                        if (clpTxt.IndexOf(w) > -1)
+                        {
+                            clpTxt = clpTxt.Replace(w, rst.Fields["取代為"].Value.ToString());
+                        }
+                        rst.MoveNext();
+                    }
+                    rst.Close();
+                    rst.Open("select * from 標點符號_篇名號_自動加上用 order by 排序", cnt, ado.CursorTypeEnum.adOpenForwardOnly);
+                    while (!rst.EOF)
+                    {
+                        w = rst.Fields["篇名"].Value.ToString();
+                        if (clpTxt.IndexOf(w) > -1)
+                        {
+                            clpTxt = clpTxt.Replace(w, rst.Fields["取代為"].Value.ToString());
+                        }
+                        rst.MoveNext();
+                    }
+
                     textBox1.Text = clpTxt;
+                    rst.Close(); cnt.Close();                    
                     return;
                 }
 
@@ -5819,7 +5851,12 @@ namespace WindowsFormsApp1
 
         void openDatabase(string dbNameIncludeExt, ref ado.Connection cnt)
         {
-            string conStr = "Provider=Microsoft.ACE.OLEDB.12.0;Data Source = " + dropBoxPathIncldBackSlash + dbNameIncludeExt;
+            string root = dropBoxPathIncldBackSlash;
+            if (!File.Exists(root + dbNameIncludeExt))
+            {
+                root = root.Replace("C:", "A:");
+            }
+            string conStr = "Provider=Microsoft.ACE.OLEDB.12.0;Data Source = " + root + dbNameIncludeExt;
             cnt.Open(conStr);
         }
 

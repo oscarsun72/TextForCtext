@@ -900,7 +900,8 @@ If Selection.Type = wdSelectionNormal Then
     Selection.Copy
 End If
 'Shell "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe https://ctext.org/wiki.pl?if=gb&res=384378&searchu=" & Selection.text
-Shell Normal.SystemSetup.getChrome & searchWhatsUrl & Selection.Text
+'Shell Normal.SystemSetup.getChrome & searchWhatsUrl & Selection.Text
+Shell Normal.Network.GetDefaultBrowserEXE & searchWhatsUrl & Selection.Text
 End Sub
 
 Sub search¥v°O¤T®aª`()
