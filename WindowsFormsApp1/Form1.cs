@@ -5257,7 +5257,7 @@ namespace WindowsFormsApp1
             {
                 w = rst.Fields["書名"].Value.ToString();
                 rw = rst.Fields["取代為"].Value.ToString();
-                rw=rw == "" ? "《" + rw + "》" : rw;
+                rw=rw == "" ? "《" + w + "》" : rw;
                 if (clpTxt.IndexOf(w) > -1)
                 {
                     clpTxt = clpTxt.Replace(w, rw);
@@ -5270,7 +5270,7 @@ namespace WindowsFormsApp1
             {
                 w = rst.Fields["篇名"].Value.ToString();
                 rw = rst.Fields["取代為"].Value.ToString();
-                rw = rw == "" ? "《" + rw + "》" : rw; 
+                rw = rw == "" ? "〈" + w + "〉" : rw; 
                 if (clpTxt.IndexOf(w) > -1)
                 {
                     clpTxt = clpTxt.Replace(w, rw);
