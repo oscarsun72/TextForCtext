@@ -1380,9 +1380,9 @@ namespace WindowsFormsApp1
                 if (e.KeyCode == Keys.Insert)
                 {//Alt + Insert ：將剪貼簿的文字內容讀入textBox1中
                     e.Handled = true;
-                    //textBox1.Text = Clipboard.GetText();
                     string clpTxt = Clipboard.GetText();
-                    if (clpTxt != ClpTxtBefore) textBox1.Text = booksPunctuation(clpTxt);
+                    if (keyinText && clpTxt != ClpTxtBefore) textBox1.Text = booksPunctuation(clpTxt);
+                    else textBox1.Text = clpTxt;
                     dragDrop = false;
                     return;
                 }
@@ -4456,7 +4456,7 @@ namespace WindowsFormsApp1
                 SendKeys.Send("^a");
                 if (keyinText)
                 {
-                    Task.Delay(990).Wait();
+                    Task.Delay(290).Wait();
                     SendKeys.Send("^x");
                     textBox1.Text = Clipboard.GetText() + Environment.NewLine + textBox1.Text;
                 }
@@ -5252,13 +5252,15 @@ namespace WindowsFormsApp1
             ado.Recordset rst = new ado.Recordset();
             openDatabase("查字.mdb", ref cnt);
             rst.Open("select * from 標點符號_書名號_自動加上用 order by 排序", cnt, ado.CursorTypeEnum.adOpenForwardOnly);
-            string w;
+            string w,rw;
             while (!rst.EOF)
             {
                 w = rst.Fields["書名"].Value.ToString();
+                rw = rst.Fields["取代為"].Value.ToString();
+                rw=rw == "" ? "《" + rw + "》" : rw;
                 if (clpTxt.IndexOf(w) > -1)
                 {
-                    clpTxt = clpTxt.Replace(w, rst.Fields["取代為"].Value.ToString());
+                    clpTxt = clpTxt.Replace(w, rw);
                 }
                 rst.MoveNext();
             }
@@ -5267,9 +5269,11 @@ namespace WindowsFormsApp1
             while (!rst.EOF)
             {
                 w = rst.Fields["篇名"].Value.ToString();
+                rw = rst.Fields["取代為"].Value.ToString();
+                rw = rw == "" ? "《" + rw + "》" : rw; 
                 if (clpTxt.IndexOf(w) > -1)
                 {
-                    clpTxt = clpTxt.Replace(w, rst.Fields["取代為"].Value.ToString());
+                    clpTxt = clpTxt.Replace(w, rw);
                 }
                 rst.MoveNext();
             }
