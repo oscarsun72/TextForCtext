@@ -12,7 +12,6 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using System.Web;
 using System.Windows.Forms;
 using ado = ADODB;//https://docs.microsoft.com/zh-tw/dotnet/csharp/language-reference/keywords/using-directive
                   //引用adodb 要將其「內嵌 Interop 類型」（Embed Interop Type）屬性設為false（預設是true）才不會出現以下錯誤：  HResult=0x80131522  Message=無法從組件 載入類型 'ADODB.FieldsToInternalFieldsMarshaler'。
@@ -5207,7 +5206,7 @@ namespace WindowsFormsApp1
 
             if (textBox1.TextLength < 100)
             {
-                if (keyinText && ClpTxtBefore != clpTxt && textBox1.Text == "" && clpTxt.IndexOf("http") == -1)
+                if (keyinText && ClpTxtBefore != clpTxt && textBox1.Text == "" && clpTxt.IndexOf("http") == -1 && clpTxt.IndexOf("<scanb") == -1)
                 {
                     textBox1.Text = booksPunctuation(clpTxt);
                     return;
@@ -5252,12 +5251,12 @@ namespace WindowsFormsApp1
             ado.Recordset rst = new ado.Recordset();
             openDatabase("查字.mdb", ref cnt);
             rst.Open("select * from 標點符號_書名號_自動加上用 order by 排序", cnt, ado.CursorTypeEnum.adOpenForwardOnly);
-            string w,rw;
+            string w, rw;
             while (!rst.EOF)
             {
                 w = rst.Fields["書名"].Value.ToString();
                 rw = rst.Fields["取代為"].Value.ToString();
-                rw=rw == "" ? "《" + w + "》" : rw;
+                rw = rw == "" ? "《" + w + "》" : rw;
                 if (clpTxt.IndexOf(w) > -1)
                 {
                     clpTxt = clpTxt.Replace(w, rw);
@@ -5270,7 +5269,7 @@ namespace WindowsFormsApp1
             {
                 w = rst.Fields["篇名"].Value.ToString();
                 rw = rst.Fields["取代為"].Value.ToString();
-                rw = rw == "" ? "〈" + w + "〉" : rw; 
+                rw = rw == "" ? "〈" + w + "〉" : rw;
                 if (clpTxt.IndexOf(w) > -1)
                 {
                     clpTxt = clpTxt.Replace(w, rw);

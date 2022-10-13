@@ -813,16 +813,22 @@ If flgPaste Then
     Next e
     d.Range.Find.ClearFormatting
 
+    GoSub refres
     SystemSetup.playSound 1.921
 Else
+    GoSub refres
     SystemSetup.playSound 1.469
 End If
 SystemSetup.contiUndo ur
 Set ur = Nothing
-word.Application.ScreenUpdating = True
-If Not rng Is Nothing Then rng.Select
-word.Application.ScreenRefresh
-ActiveWindow.ScrollIntoView Selection, True
+Exit Sub
+refres:
+    word.Application.ScreenUpdating = True
+    If Not rng Is Nothing Then rng.Select
+    word.Application.ScreenRefresh
+    ActiveWindow.ScrollIntoView Selection, True
+
+Return
 End Sub
 
 
@@ -882,6 +888,7 @@ End Sub
 Sub 貼到古籍酷自動標點()
 Dim d As Document
 Set d = ActiveDocument
+If d.path <> "" Then Exit Sub
 d.Range.Cut
 On Error GoTo app
 AppActivate "古籍酷"
