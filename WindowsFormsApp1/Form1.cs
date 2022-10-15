@@ -2118,8 +2118,9 @@ namespace WindowsFormsApp1
                 }
                 stopUndoRec = false; return;
             }
-            if (x.Substring(s + textBox1.SelectionLength - 3, 3) == "<p>" ||
-                x.Substring(s + textBox1.SelectionLength, 3) == "<p>") endCode = "";
+            if (s + textBox1.SelectionLength + 3 <= x.Length
+                && (x.Substring(s + textBox1.SelectionLength - 3, 3) == "<p>" ||
+                x.Substring(s + textBox1.SelectionLength, 3) == "<p>")) endCode = "";
             //設定標題格式（完成標題語法設置）
             string title = ("*" + textBox1.SelectedText + endCode)
                     .Replace("《", "").Replace("》", "").Replace("〈", "").Replace("〉", "").Replace("·", "");
@@ -5869,8 +5870,22 @@ namespace WindowsFormsApp1
             {
                 root = root.Replace("C:", "A:");
             }
-            string conStr = "Provider=Microsoft.ACE.OLEDB.12.0;Data Source = " + root + dbNameIncludeExt;
-            cnt.Open(conStr);
+            if (!File.Exists(root + dbNameIncludeExt)) { MessageBox.Show(root + dbNameIncludeExt + "not found"); return; }
+            //string conStr = "Provider=Microsoft.ACE.OLEDB.12.0;Data Source = " + root + dbNameIncludeExt;
+            string conStr = "Provider=Microsoft.Jet.OLEDB.4.0;Data Source = " + root + dbNameIncludeExt;
+            try
+            {
+
+                cnt.Open(conStr);
+            }
+            catch (Exception)
+            {
+                //MessageBox.Show(conStr);
+                //conStr = conStr.Replace("Microsoft.ACE.OLEDB.12.0","Microsoft.Jet.OLEDB.4.0");
+                //MessageBox.Show(conStr);
+                //cnt.Open(conStr);
+                throw;
+            }
         }
 
         void replaceXdirrectly()
