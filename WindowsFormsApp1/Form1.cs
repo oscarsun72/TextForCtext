@@ -5280,7 +5280,7 @@ namespace WindowsFormsApp1
 
             //textBox1.Text = clpTxt;
             rst.Close(); cnt.Close();
-            return clpTxt;
+            return clpTxt.Replace("《《", "《").Replace("》》", "》");
         }
 
         private void autoRunWordVBAMacro()
@@ -5880,11 +5880,21 @@ namespace WindowsFormsApp1
             }
             catch (Exception)
             {
-                //MessageBox.Show(conStr);
-                //conStr = conStr.Replace("Microsoft.ACE.OLEDB.12.0","Microsoft.Jet.OLEDB.4.0");
-                //MessageBox.Show(conStr);
-                //cnt.Open(conStr);
-                throw;
+
+                try
+                {
+                    //conStr = conStr.Replace("Microsoft.ACE.OLEDB.12.0", "Microsoft.Jet.OLEDB.4.0");
+                    conStr = conStr.Replace("Microsoft.Jet.OLEDB.4.0", "Microsoft.ACE.OLEDB.12.0");
+                    cnt.Open(conStr);
+
+                }
+                catch (Exception)
+                {
+
+                    throw;
+                }
+
+
             }
         }
 
