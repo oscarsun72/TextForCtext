@@ -5280,7 +5280,7 @@ namespace WindowsFormsApp1
 
             //textBox1.Text = clpTxt;
             rst.Close(); cnt.Close();
-            return clpTxt.Replace("《《", "《").Replace("》》", "》");
+            return clpTxt.Replace("《《", "《").Replace("》》", "》").Replace("〈〈", "〈").Replace("〉〉", "〉");
         }
 
         private void autoRunWordVBAMacro()
