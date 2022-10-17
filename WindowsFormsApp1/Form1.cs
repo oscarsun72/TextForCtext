@@ -3418,7 +3418,10 @@ namespace WindowsFormsApp1
                         //textBox1.Select(sNew, pageEndText10.Length);
                         //s = textBox1.SelectionStart; l = textBox1.SelectionLength;
                         s = sNew; l = pageEndText10.Length;
-                        xCopy = x.Substring(0, s + l);
+                        if (s + l > x.Length)
+                            xCopy = x.Substring(0, x.Length);
+                        else
+                            xCopy = x.Substring(0, s + l);
                     }
                     else
                     {
