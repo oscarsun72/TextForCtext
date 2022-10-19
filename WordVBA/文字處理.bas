@@ -3145,12 +3145,13 @@ typeTexts:
             'add new url
 rePt:
             If rst.RecordCount = 1 Then
-                If Not SystemSetup.appActivatedYet("chrome") Then
-                'If Not word.Tasks.Exists("google chrome") Then
-                    Shell SystemSetup.getChrome & " https://dict.revised.moe.edu.tw/search.jsp?md=1"
-                Else
-                    SystemSetup.appActivateChrome
-                End If
+                Shell Network.getDefaultBrowserFullname & " https://dict.revised.moe.edu.tw/search.jsp?md=1"
+'                If Not SystemSetup.appActivatedYet("chrome") Then
+'                'If Not word.Tasks.Exists("google chrome") Then
+'                    Shell SystemSetup.getChrome & " https://dict.revised.moe.edu.tw/search.jsp?md=1"
+'                Else
+'                    SystemSetup.appActivateChrome
+'                End If
             Else
                 Beep
             End If

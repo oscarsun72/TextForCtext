@@ -2103,6 +2103,18 @@ namespace WindowsFormsApp1
                 }
 
             }
+
+            #region 20221019補訂，為第一行為標題者
+            if (s == 0)
+            {
+                int sl = textBox1.SelectionLength;
+                while (textBox1.SelectedText.Substring(0, 1) == "　")
+                {
+                    textBox1.Select(++s, --sl);
+                }
+            }
+            #endregion
+
             x = textBox1.Text; string endCode = "<p>";
             if (s + textBox1.SelectionLength - 3 < 0)
             {
@@ -4632,6 +4644,40 @@ namespace WindowsFormsApp1
             //https://stackoverflow.com/questions/13621467/how-to-find-default-web-browser-using-c
         }
 
+        string getDefaultBrowserEXE()
+        {            
+            string userProfilePath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);//https://stackoverflow.com/questions/38252474/c-sharp-service-how-to-get-user-profile-folder-path
+            switch (defaultBrowserName)
+            {
+
+                case "iexplore":
+                    return @"C:\Program Files\Internet Explorer\iexplore.exe";
+                case "firefox":
+                    if (!File.Exists(@"W:\PortableApps\PortableApps\FirefoxPortable\App\Firefox64\firefox.exe"))
+                        return @"C:\Program Files\Mozilla Firefox\firefox.exe";
+                    else
+                        return @"W:\PortableApps\PortableApps\FirefoxPortable\App\Firefox64\firefox.exe";
+                case "brave":
+                    if (!File.Exists(userProfilePath + @"\AppData\Local\BraveSoftware\Brave-Browser\Application\brave.exe"))
+                        return @"C:\Program Files (x86)\BraveSoftware\Brave-Browser\Application\brave.exe";
+                    else
+                        return userProfilePath + @"\AppData\Local\BraveSoftware\Brave-Browser\Application\brave.exe";
+                case "Opera":
+                    return "";
+                case "Safari":
+                    return "";
+                case "edge":
+                    return @"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe";//"msedge"
+
+                case "ChromeHTML"://, "google chrome": '"chrome"
+                    if (!File.Exists(@"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe"))
+                        return @"W:\PortableApps\PortableApps\GoogleChromePortable\GoogleChromePortable.exe";
+                    else
+                        return @"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe";
+                default:
+                    return GetDefaultWebBrowserFilePath();                    
+            }
+        }
 
         private string GetDefaultWebBrowserFilePath()//chrome-extension://lcghoajegeldpfkfaejegfobkapnemjl/sandbox.html?src=https%3A%2F%2Fwww.796t.com%2Fcontent%2F1546728863.html
         {
@@ -5188,7 +5234,16 @@ namespace WindowsFormsApp1
             undoTextValueChanged(selStart, selLength);
             if (textBox1.Text == "" && !pasteAllOverWrite)
             {
-                hideToNICo();
+                if (!keyinText)
+                    hideToNICo();
+                else
+                {
+                    if (ModifierKeys != Keys.None)
+                    {
+                        hideToNICo();
+                    }
+                }
+
             }
         }
 
