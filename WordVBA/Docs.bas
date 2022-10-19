@@ -751,6 +751,7 @@ Sub mark易學關鍵字()
 Dim searchedTerm, e, ur As UndoRecord, d As Document, clipBTxt As String, flgPaste As Boolean, xd As String
 'Set ur = SystemSetup.stopUndo("mark易學關鍵字")
 SystemSetup.stopUndo ur, "mark易學關鍵字"
+If Documents.Count = 0 Then Documents.Add
 Set d = ActiveDocument
 clipBTxt = VBA.Trim(SystemSetup.GetClipboardText)
 searchedTerm = Array("卦", "爻", "易", "周易", "易經", "系辭", "繫辭", "擊辭", "擊詞", "繫詞", "說卦", "序卦", "卦序", "敘卦", "雜卦", "文言", "乾坤", "無咎", ChrW(26080) & "咎", "天咎", "元亨", "利貞" _

@@ -145,6 +145,7 @@ Sub 將星號前的分段符號移置前段之末(ByRef d As Document) '20220522
 Dim rng As Range, e As Long, s As Long, rngP As Range
 'd As Document,Set d = Documents.Add
 Set rng = d.Range
+DoEvents
 rng.Paste
 rng.Find.ClearFormatting
 Do While rng.Find.Execute("*")

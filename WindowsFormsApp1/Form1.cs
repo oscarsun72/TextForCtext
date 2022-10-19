@@ -625,7 +625,7 @@ namespace WindowsFormsApp1
             //if ((m & Keys.Control) == Keys.Control && (m & Keys.Alt) == Keys.Alt && e.KeyCode == Keys.G)
             //if((int)Control.ModifierKeys ==
             //    (int)Keys.Control + (int)Keys.Alt && e.KeyCode == Keys.G)
-            if ((m & Keys.Shift) == Keys.Shift && e.KeyCode == Keys.Insert) { pasteAllOverWrite = true; dragDrop = false; }
+            if ((m & Keys.Shift) == Keys.Shift && e.KeyCode == Keys.Insert && !keyinText) { pasteAllOverWrite = true; dragDrop = false; }
             else pasteAllOverWrite = false;
 
 
@@ -2317,7 +2317,7 @@ namespace WindowsFormsApp1
             {
                 if (s == 0 || s == textBox1.TextLength)
                 {
-                    pasteAllOverWrite = true;
+                    if (!keyinText) pasteAllOverWrite = true;
                     textBox1.SelectAll();
                     l = textBox1.TextLength;
                 }
@@ -4109,7 +4109,7 @@ namespace WindowsFormsApp1
                         keyinText = false; return;
                     }
                     new SoundPlayer(@"C:\Windows\Media\Speech On.wav").Play();
-                    keyinText = true;
+                    keyinText = true; pasteAllOverWrite = false;
                     return;
                 }
             }
@@ -4297,6 +4297,19 @@ namespace WindowsFormsApp1
                     Process.Start(dropBoxPathIncldBackSlash + @"VS\bat\重啟小小輸入法.bat");
                     return;
                 }
+                if (e.KeyCode == Keys.F10)
+                {//F10 ： 執行 Word VBA Sub 巨集指令「中國哲學書電子化計劃_只保留正文注文_且注文前後加括弧_貼到古籍酷自動標點」
+                    e.Handled = true;
+                    //SystemSounds.Question.Play();
+                    string x = Clipboard.GetText();
+                    if (MessageBox.Show("clear the Environment.NewLine?", "", MessageBoxButtons.OKCancel) == DialogResult.OK)
+                    {
+                        x = x.Replace(Environment.NewLine, "");
+                        Clipboard.SetText(x);
+                    }
+                    runWordMacro("Docs.中國哲學書電子化計劃_只保留正文注文_且注文前後加括弧_貼到古籍酷自動標點");
+                    return;
+                }
                 if (e.KeyCode == Keys.F12)
                 {
                     e.Handled = true;
@@ -4476,7 +4489,7 @@ namespace WindowsFormsApp1
         private void runWordMacro(string runName)
         {
             string xClpBd = Clipboard.GetText();
-            if (xClpBd.Length < 250 && xClpBd.IndexOf("Bot", StringComparison.Ordinal) == -1) return;
+            if (autoPastetoQuickEdit && xClpBd.Length < 250 && xClpBd.IndexOf("Bot", StringComparison.Ordinal) == -1) return;
             Color C = this.BackColor; this.BackColor = Color.Green;
             SystemSounds.Hand.Play();
             hideToNICo();
@@ -4487,7 +4500,23 @@ namespace WindowsFormsApp1
             }
             Microsoft.Office.Interop.Word.Application appWord = new Microsoft.Office
                                     .Interop.Word.Application();
-            appWord.Run(runName);
+            try
+            {
+                appWord.Run(runName);
+
+            }
+            catch (Exception e)
+            {
+                if (e.HResult.ToString() != "0x80010105")
+                {/* 
+                  System.Runtime.InteropServices.COMException
+                HResult=0x80010105
+                Message=伺服器丟出一個例外。 (發生例外狀況於 HRESULT: 0x80010105 (RPC_E_SERVERFAULT))
+                Source=Microsoft.Office.Interop.Word
+                    */
+                    throw;
+                }
+            }
             switch (runName)
             {
                 case "中國哲學書電子化計劃.清除頁前的分段符號":
@@ -5180,6 +5209,7 @@ namespace WindowsFormsApp1
         private void Form1_Activated(object sender, EventArgs e)
         {
             if (!this.TopMost) this.TopMost = true;
+            if (keyinText && !pasteAllOverWrite) pasteAllOverWrite = false;
             if (autoPasteFromSBCKwhether) { autoPasteFromSBCK(autoPasteFromSBCKwhether); return; }
             Application.DoEvents();
             string clpTxt = Clipboard.GetText();
