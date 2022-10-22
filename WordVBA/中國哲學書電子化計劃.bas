@@ -146,6 +146,7 @@ Dim rng As Range, e As Long, s As Long, rngP As Range
 'd As Document,Set d = Documents.Add
 Set rng = d.Range
 DoEvents
+On Error GoTo eH
 rng.Paste
 rng.Find.ClearFormatting
 Do While rng.Find.Execute("*")
@@ -177,7 +178,15 @@ Loop
 'd.Close wdDoNotSaveChanges
 playSound 1
 'pastetoEditBox "將星號前的分段符號移置前段之末"
-
+Exit Sub
+eH:
+Select Case Err.Number
+    Case 4605  '此方法或屬性無法使用，因為[剪貼簿] 是空的或無效的。
+        SystemSetup.Wait 0.8
+        Resume
+    Case Else
+        MsgBox Err.Number + Err.Description
+ End Select
 End Sub
 
 Sub 將每頁間的分段符號清除()
@@ -345,7 +354,7 @@ d.Close wdDoNotSaveChanges
 End Sub
 Sub 維基文庫四部叢刊本轉來()
 Dim d As Document, a, i, p As Paragraph, xP As String, acP As Integer, space As String, rng As Range
-On Error GoTo eh
+On Error GoTo eH
 a = Array(ChrW(12296), "{{", ChrW(12297), "}}", "〈", "{{", "〉", "}}", _
     "○", ChrW(12295))
 '《容齋三筆》等小注作正文省版面者 https://ctext.org/library.pl?if=gb&file=89545&page=24
@@ -416,7 +425,7 @@ d.Range.Cut
 d.Close wdDoNotSaveChanges
 SystemSetup.playSound 2
 Exit Sub
-eh:
+eH:
 Select Case Err.Number
     Case 5904 '無法編輯 [範圍]。
         If p.Range.Characters(acP).Hyperlinks.Count > 0 Then p.Range.Characters(acP).Hyperlinks(1).Delete

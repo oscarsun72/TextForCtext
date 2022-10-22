@@ -4645,7 +4645,7 @@ namespace WindowsFormsApp1
         }
 
         string getDefaultBrowserEXE()
-        {            
+        {
             string userProfilePath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);//https://stackoverflow.com/questions/38252474/c-sharp-service-how-to-get-user-profile-folder-path
             switch (defaultBrowserName)
             {
@@ -4675,7 +4675,7 @@ namespace WindowsFormsApp1
                     else
                         return @"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe";
                 default:
-                    return GetDefaultWebBrowserFilePath();                    
+                    return GetDefaultWebBrowserFilePath();
             }
         }
 
@@ -5266,8 +5266,18 @@ namespace WindowsFormsApp1
             if (!this.TopMost) this.TopMost = true;
             if (keyinText && !pasteAllOverWrite) pasteAllOverWrite = false;
             if (autoPasteFromSBCKwhether) { autoPasteFromSBCK(autoPasteFromSBCKwhether); return; }
-            Application.DoEvents();
-            string clpTxt = Clipboard.GetText();
+            Application.DoEvents(); string clpTxt = "";
+            try
+            {
+                clpTxt = Clipboard.GetText();
+            }
+            catch (Exception)
+            {
+
+                Task.Delay(900).Wait();
+                clpTxt = Clipboard.GetText();
+                //throw;
+            }
             if (keyinText)//如果是輸入模式
             {
                 if (ClpTxtBefore != clpTxt && clpTxt.IndexOf("http") > -1 && clpTxt.IndexOf("#editor") > -1)
@@ -5380,7 +5390,7 @@ namespace WindowsFormsApp1
             }
             catch (Exception)
             {
-                Task.WaitAll();
+                Task.WaitAll(); 
                 xClip = Clipboard.GetText() ?? "";
                 //throw;
             }

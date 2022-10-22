@@ -271,10 +271,20 @@ a = VBA.Replace(a, "AppData\Roaming", "")
 End Function
 
 Function GetClipboardText()
+On Error GoTo eh
 Dim clipboard As New MSForms.DataObject
 DoEvents
 clipboard.GetFromClipboard
 GetClipboardText = clipboard.GetText
+Exit Function
+eh:
+    Select Case Err.Number
+        Case -2147221040 'DataObject:GetFromClipboard OpenClipboard ¥¢±Ñ
+            SystemSetup.Wait 0.8
+            Resume
+        Case Else
+            MsgBox Err.Number + Err.Description
+    End Select
 End Function
 
 Sub insertNowTime()
