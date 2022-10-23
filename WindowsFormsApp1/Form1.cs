@@ -1703,7 +1703,7 @@ namespace WindowsFormsApp1
             textBox1.Select(s, 0); textBox1.ScrollToCaret();
         }
 
-        byte noteinLineLenLimit = 4;
+        byte noteinLineLenLimit = 3;
         private int notes_a_line(bool undoRe = true, bool ctrl = false)
         {//Alt + Shift + 6 或 Alt + s 小注文不換行
             textBox1.DeselectAll();
@@ -1752,12 +1752,13 @@ namespace WindowsFormsApp1
                 }
                 else
                 {
-                    if ((s - 6 >= 0 && x.Substring(s - 6, 2) == "}}") || (e + 4 + 2 <= x.Length && x.Substring(e + 4, 2) == "{{"))
+                    if ((s - 6 >= 0 && x.Substring(s - 6, 2) == "}}" && x.Substring(s - 4, 2) == Environment.NewLine)
+                        || (e + 4 + 2 <= x.Length && x.Substring(e + 4, 2) == "{{" && x.Substring(e + 2, 2) == Environment.NewLine))
                     {//如果注文換行
                         return 0;
                     }
-                    else if ((s - 7 >= 0 && x.Substring(s - 7, 2) == "}}" && x.Substring(s - 3, 1) == "　")
-                        || (e + 5 + 2 <= x.Length && x.Substring(e + 5, 2) == "{{") && x.Substring(e + 4, 1) == "　")
+                    else if ((s - 7 >= 0 && x.Substring(s - 7, 2) == "}}" && x.Substring(s - 5, 2) == Environment.NewLine && x.Substring(s - 3, 1) == "　")
+                        || (e + 5 + 2 <= x.Length && x.Substring(e + 5, 2) == "{{") && x.Substring(e + 2, 2) == Environment.NewLine && x.Substring(e + 4, 1) == "　")
                     {//縮排一格（字）；先只作縮排一格的，若縮排2字以上可另寫類推。
                         return 0;
                     }
@@ -5348,9 +5349,9 @@ namespace WindowsFormsApp1
 
                     if (clpTxt.IndexOf("<scanbegin file=") > -1 && clpTxt.IndexOf(" page=") > -1)
                     {
-                        if (ModifierKeys == Keys.Control)
+                        if (ModifierKeys == Keys.Control || ModifierKeys == Keys.Shift)
                         {
-                            //分行分段按鈕：若有按下Ctrl才按此鈕則執行圖文脫鉤 Word VBA
+                            //若有按下Ctrl 或 Shift 則執行圖文脫鉤 Word VBA
                             runWordMacro("中國哲學書電子化計劃.撤掉與書圖的對應_脫鉤");
                             return;
                         }
