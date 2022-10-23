@@ -681,18 +681,27 @@ namespace WindowsFormsApp1
                 if (e.KeyCode == Keys.G || e.KeyCode == Keys.Packet)
                 { e.Handled = true; return; }
             }
+            #endregion
 
+
+            #region 同時按下 Ctrl + Shift + Alt 
+            if ((m & Keys.Alt) == Keys.Alt
+                && (m & Keys.Shift) == Keys.Shift && (m & Keys.Control) == Keys.Control
+                && e.KeyCode == Keys.S)
+            {//Alt + Shift + Ctrl + s : 小注文不換行(短於8字元長者）：notes_a_line_all 
+                e.Handled = true; notes_a_line_all(true); return;
+            }
+            #endregion
+
+            #region 同時按下Alt+Shift
+            //同時按下Alt+Shift
             if ((m & Keys.Alt) == Keys.Alt
                 && (m & Keys.Shift) == Keys.Shift
                 && e.KeyCode == Keys.S)
             {//Alt + Shift + s :  所有小注文都不換行
-                e.Handled = true; notes_a_line_all(); return;
+                e.Handled = true; notes_a_line_all(false); return;
             }
-            #endregion
 
-
-            #region 同時按下Alt+Shift
-            //同時按下Alt+Shift
             if ((m & Keys.Alt) == Keys.Alt && (m & Keys.Shift) == Keys.Shift)
             {
                 if (e.KeyCode == Keys.D1)
@@ -1672,8 +1681,8 @@ namespace WindowsFormsApp1
             stopUndoRec = false;
         }
 
-        void notes_a_line_all()
-        {//Alt + Shift + s :  所有小注文都不換行
+        void notes_a_line_all(bool ctrl)
+        {//Alt + Shift + s :  所有小注文都不換行//Alt + Shift + Ctrl + s : 小注文不換行(短於8字元長者）
             int s = textBox1.SelectionStart, i = textBox1.Text.IndexOf("}}"), space;
             //'if (textBox1.SelectedText == "") textBox1.SelectAll();
             undoRecord();
@@ -1684,7 +1693,7 @@ namespace WindowsFormsApp1
                     || (textBox1.Text.LastIndexOf(Environment.NewLine, i) < textBox1.Text.LastIndexOf("{{", i)))
                 {
                     textBox1.Select(i, 0);
-                    space = notes_a_line(false);
+                    space = notes_a_line(false, ctrl);
                     i = textBox1.Text.IndexOf("}}", i + space + 1);
                 }
                 else
@@ -1693,7 +1702,7 @@ namespace WindowsFormsApp1
             stopUndoRec = false;
             textBox1.Select(s, 0); textBox1.ScrollToCaret();
         }
-        private int notes_a_line(bool undoRe = true)
+        private int notes_a_line(bool undoRe = true, bool ctrl = false)
         {//Alt + Shift + 6 或 Alt + s 小注文不換行
             textBox1.DeselectAll();
             string xSel = textBox1.SelectedText, x = textBox1.Text; int s = textBox1.SelectionStart; bool flg = false;
@@ -1733,6 +1742,13 @@ namespace WindowsFormsApp1
             spaceCntr--;
             #endregion //如果末已綴有空格
             StringInfo xSelInfo = new StringInfo(xSel.Substring(0, xSel.Length - spaceCntr).Replace(Environment.NewLine, "")); int i = 0;
+            if (ctrl)
+            {
+                if (xSelInfo.LengthInTextElements >= 8|| xSelInfo.LengthInTextElements == 1)//Alt + Shift + Ctrl + s : 小注文不換行(短於8字元長者）
+                {
+                    return 0;
+                }
+            }
             for (i = 0; i + spaceCntr < xSelInfo.LengthInTextElements; i++)
             {
                 if (punctuations.IndexOf(xSelInfo.SubstringByTextElements(i, 1)) == -1)
@@ -5390,7 +5406,7 @@ namespace WindowsFormsApp1
             }
             catch (Exception)
             {
-                Task.WaitAll(); 
+                Task.WaitAll();
                 xClip = Clipboard.GetText() ?? "";
                 //throw;
             }

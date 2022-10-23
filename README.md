@@ -134,6 +134,10 @@ Ctrl + Shift + 6 ：鍵入「}}」(在前面有「{」時，按下 Alt + i 也�
 
 Alt + Shift + 6 或 Alt + s：小注文不換行：notes_a_line()
 
+Alt + Shift + s : 小注文不換行：notes_a_line_all 
+
+Alt + Shift + Ctrl + s : 小注文不換行(短於8字元長者）：notes_a_line_all 
+
 Ctrl + 7 ：如同鍵入「。}}」，於《周易正義》〈彖、象〉辭時適用
 
 Ctrl + 8 ：如同鍵入「　」1個全形空格，且各個空格間有分段符
