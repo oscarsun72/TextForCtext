@@ -4551,6 +4551,8 @@ namespace WindowsFormsApp1
             {
                 case "中國哲學書電子化計劃.清除頁前的分段符號":
                     break;
+                case "中國哲學書電子化計劃.撤掉與書圖的對應_脫鉤":
+                    break;
                 default:
                     //清除多餘的空行,排除卷末的空行
                     xClpBd = Clipboard.GetText();
