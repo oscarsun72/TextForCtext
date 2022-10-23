@@ -688,7 +688,7 @@ namespace WindowsFormsApp1
             if ((m & Keys.Alt) == Keys.Alt
                 && (m & Keys.Shift) == Keys.Shift && (m & Keys.Control) == Keys.Control
                 && e.KeyCode == Keys.S)
-            {//Alt + Shift + Ctrl + s : 小注文不換行(短於8字元長者）：notes_a_line_all 
+            {//Alt + Shift + Ctrl + s : 小注文不換行(短於指定漢字長者)：notes_a_line_all 
                 e.Handled = true; notes_a_line_all(true); return;
             }
             #endregion
@@ -1682,7 +1682,7 @@ namespace WindowsFormsApp1
         }
 
         void notes_a_line_all(bool ctrl)
-        {//Alt + Shift + s :  所有小注文都不換行//Alt + Shift + Ctrl + s : 小注文不換行(短於8字元長者）
+        {//Alt + Shift + s :  所有小注文都不換行//Alt + Shift + Ctrl + s : 小注文不換行(短於指定漢字長者)
             int s = textBox1.SelectionStart, i = textBox1.Text.IndexOf("}}"), space;
             //'if (textBox1.SelectedText == "") textBox1.SelectAll();
             undoRecord();
@@ -1702,6 +1702,8 @@ namespace WindowsFormsApp1
             stopUndoRec = false;
             textBox1.Select(s, 0); textBox1.ScrollToCaret();
         }
+
+        byte noteinLineLenLimit=4;
         private int notes_a_line(bool undoRe = true, bool ctrl = false)
         {//Alt + Shift + 6 或 Alt + s 小注文不換行
             textBox1.DeselectAll();
@@ -1744,7 +1746,7 @@ namespace WindowsFormsApp1
             StringInfo xSelInfo = new StringInfo(xSel.Substring(0, xSel.Length - spaceCntr).Replace(Environment.NewLine, "")); int i = 0;
             if (ctrl)
             {
-                if (xSelInfo.LengthInTextElements >= 8|| xSelInfo.LengthInTextElements == 1)//Alt + Shift + Ctrl + s : 小注文不換行(短於8字元長者）
+                if (xSelInfo.LengthInTextElements >= noteinLineLenLimit || xSelInfo.LengthInTextElements == 1)//Alt + Shift + Ctrl + s : 小注文不換行(短於指定漢字長者)
                 {
                     return 0;
                 }

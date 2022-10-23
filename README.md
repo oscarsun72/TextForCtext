@@ -136,7 +136,7 @@ Alt + Shift + 6 或 Alt + s：小注文不換行：notes_a_line()
 
 Alt + Shift + s : 小注文不換行：notes_a_line_all 
 
-Alt + Shift + Ctrl + s : 小注文不換行(短於8字元長者）：notes_a_line_all 
+Alt + Shift + Ctrl + s : 小注文不換行(短於指定漢字長者 由變數 noteinLineLenLimit 限定）：notes_a_line_all 
 
 Ctrl + 7 ：如同鍵入「。}}」，於《周易正義》〈彖、象〉辭時適用
 
