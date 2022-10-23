@@ -134,11 +134,11 @@ namespace WindowsFormsApp1
             return null;
         }
 
-        private void button1_Click(object sender, EventArgs e)
-        {
-            splitLineByFristLen();
-            textBox1.Focus();
-        }
+        //private void button1_Click(object sender, EventArgs e)
+        //{
+        //    splitLineByFristLen();
+        //    textBox1.Focus();
+        //}
 
         private void splitLineByFristLen()
         {
@@ -1703,7 +1703,7 @@ namespace WindowsFormsApp1
             textBox1.Select(s, 0); textBox1.ScrollToCaret();
         }
 
-        byte noteinLineLenLimit=4;
+        byte noteinLineLenLimit = 4;
         private int notes_a_line(bool undoRe = true, bool ctrl = false)
         {//Alt + Shift + 6 或 Alt + s 小注文不換行
             textBox1.DeselectAll();
@@ -5334,6 +5334,12 @@ namespace WindowsFormsApp1
 
                     if (clpTxt.IndexOf("<scanbegin file=") > -1 && clpTxt.IndexOf(" page=") > -1)
                     {
+                        if (ModifierKeys == Keys.Control)
+                        {
+                            //分行分段按鈕：若有按下Ctrl才按此鈕則執行圖文脫鉤 Word VBA
+                            runWordMacro("中國哲學書電子化計劃.撤掉與書圖的對應_脫鉤");
+                            return;
+                        }
                         runWordMacro("中國哲學書電子化計劃.清除頁前的分段符號");
                         Application.DoEvents();
                         ////Task.Delay(waitTimeforappActivateByName).Wait();
@@ -5976,6 +5982,23 @@ namespace WindowsFormsApp1
             }
             if (rstClose) { rst.Close(); rst = null; } else rst.MoveFirst(); if (cntClose) { cnt.Close(); cnt = null; }
             return flg;
+
+        }
+
+        private void button1_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
+            {
+                if (ModifierKeys == Keys.Control)
+                {
+                    //分行分段按鈕：若有按下Ctrl才按此鈕則執行圖文脫鉤 Word VBA
+                    runWordMacro("中國哲學書電子化計劃.撤掉與書圖的對應_脫鉤");
+                    return;
+                }
+
+                splitLineByFristLen();
+                textBox1.Focus();
+            }
 
         }
 

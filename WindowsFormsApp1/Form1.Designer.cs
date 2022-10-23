@@ -73,7 +73,7 @@ namespace WindowsFormsApp1
             this.button1.TabStop = false;
             this.button1.Text = "分行分段";
             this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.button1_Click);
+            this.button1.MouseDown += new System.Windows.Forms.MouseEventHandler(this.button1_MouseDown);
             // 
             // textBox2
             // 
