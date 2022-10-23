@@ -1750,6 +1750,18 @@ namespace WindowsFormsApp1
                 {
                     return 0;
                 }
+                else
+                {
+                    if ((s - 6 >= 0 && x.Substring(s - 6, 2) == "}}") || (e + 4 + 2 <= x.Length && x.Substring(e + 4, 2) == "{{"))
+                    {//如果注文換行
+                        return 0;
+                    }
+                    else if ((s - 7 >= 0 && x.Substring(s - 7, 2) == "}}" && x.Substring(s - 3, 1) == "　")
+                        || (e + 5 + 2 <= x.Length && x.Substring(e + 5, 2) == "{{") && x.Substring(e + 4, 1) == "　")
+                    {//縮排一格（字）；先只作縮排一格的，若縮排2字以上可另寫類推。
+                        return 0;
+                    }
+                }
             }
             for (i = 0; i + spaceCntr < xSelInfo.LengthInTextElements; i++)
             {
@@ -4533,7 +4545,7 @@ namespace WindowsFormsApp1
             try
             {
                 appWord.Run(runName);
-
+                Application.DoEvents();
             }
             catch (Exception e)
             {
