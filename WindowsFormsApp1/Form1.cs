@@ -5995,6 +5995,7 @@ namespace WindowsFormsApp1
                 {
                     //分行分段按鈕：若有按下Ctrl才按此鈕則執行圖文脫鉤 Word VBA
                     runWordMacro("中國哲學書電子化計劃.撤掉與書圖的對應_脫鉤");
+                    textBox1.Focus();
                     return;
                 }
 
