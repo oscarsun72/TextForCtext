@@ -753,7 +753,7 @@ Dim searchedTerm, e, ur As UndoRecord, d As Document, clipBTxt As String, flgPas
 SystemSetup.stopUndo ur, "mark易學關鍵字"
 If Documents.Count = 0 Then Documents.Add
 Set d = ActiveDocument
-clipBTxt = VBA.Trim(SystemSetup.GetClipboardText)
+clipBTxt = Replace(VBA.Trim(SystemSetup.GetClipboardText), Chr(13) + Chr(10) + "空句子" + Chr(13) + Chr(10), Chr(13) + Chr(10) + Chr(13) + Chr(10))
 searchedTerm = Array("卦", "爻", "易", "周易", "易經", "系辭", "繫辭", "擊辭", "擊詞", "繫詞", "說卦", "序卦", "卦序", "敘卦", "雜卦", "文言", "乾坤", "無咎", ChrW(26080) & "咎", "天咎", "元亨", "利貞" _
     , "史記", "九五", "六二", "上九", "上六", "九二", "筮") ', "", "", "", "")
 
@@ -783,6 +783,7 @@ searchedTerm = Array("卦", "爻", "易", "周易", "易經", "系辭", "繫辭", "擊辭", "
             Selection.InsertParagraphAfter
             Selection.InsertParagraphAfter
             Selection.Collapse wdCollapseEnd
+            SystemSetup.SetClipboard clipBTxt
             貼上純文字
             Selection.InsertParagraphAfter: Selection.InsertParagraphAfter: Selection.InsertParagraphAfter
             Selection.Collapse wdCollapseEnd

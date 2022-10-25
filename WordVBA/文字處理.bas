@@ -2863,10 +2863,13 @@ For Each a In rng.Characters
     End If
 Next a
 rng.Cut
+On Error GoTo eh:
 rng.PasteAndFormat wdFormatPlainText
 rng.Find.ClearFormatting
 For i = 0 To UBound(rp)
-    rng.Find.Execute rp(i), , , , , , , wdFindContinue, , rp(i + 1), wdReplaceAll
+    If InStr(rng.Text, rp(i)) > 0 Then
+        rng.Find.Execute rp(i), , , , , , , wdFindContinue, , rp(i + 1), wdReplaceAll
+    End If
     i = i + 1
 Next i
 中國哲學書電子化計劃.維基文庫等欲直接抽換之字 d
@@ -2877,6 +2880,15 @@ If Not doNotCloseDoc Then
     d.Close wdDoNotSaveChanges
 End If
 SystemSetup.contiUndo ur
+Exit Sub
+eh:
+Select Case Err.Number
+    Case 4198 '指令失敗
+        SystemSetup.Wait 900
+        Resume
+    Case Else
+        MsgBox Err.Number + Err.Description
+End Select
 End Sub
 Sub 漢籍電子文獻資料庫文本整理_注文前後加括號()
 Dim rng As Range, fColor As Long, flg As Boolean
