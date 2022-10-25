@@ -4517,6 +4517,7 @@ namespace WindowsFormsApp1
                 {
                     Task.Delay(290).Wait();
                     SendKeys.Send("^x");
+                    undoRecord();
                     textBox1.Text = Clipboard.GetText() + Environment.NewLine + textBox1.Text;
                 }
                 if (!check_the_adjacent_pages)
@@ -5325,7 +5326,7 @@ namespace WindowsFormsApp1
             if (textBox1.Focused)
             {
                 if (insertMode) Caret_Shown(textBox1); else Caret_Shown_OverwriteMode(textBox1);
-                if (textBox1.SelectionLength == textBox1.Text.Length)
+                if (textBox1.TextLength > 0 && textBox1.SelectionLength == textBox1.TextLength && selLength < textBox1.SelectionLength && selLength < 30)
                     textBox1.Select(selStart, selLength);
                 if (autoPastetoQuickEdit || (autoPastetoQuickEdit && ModifierKeys != Keys.None)) autoPastetoCtextQuitEditTextbox();
             }
