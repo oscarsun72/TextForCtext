@@ -181,7 +181,7 @@ playSound 1
 Exit Sub
 eh:
 Select Case Err.Number
-    Case 4605  '此方法或屬性無法使用，因為[剪貼簿] 是空的或無效的。
+    Case 4605, 13 '此方法或屬性無法使用，因為[剪貼簿] 是空的或無效的。
         SystemSetup.Wait 0.8
         Resume
     Case Else

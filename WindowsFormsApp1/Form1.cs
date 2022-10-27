@@ -2584,8 +2584,8 @@ namespace WindowsFormsApp1
             int s = textBox1.SelectionStart, xLen = x.Length, index = x.Substring(0, (s == 0 ? s : s - 1)).IndexOf(xClear);
             undoRecord();
             caretPositionRecord();
-            if ("{{}}".IndexOf(xClear) > -1)
-                textBox1.Text = textBox1.Text.Replace("{{", "").Replace("}}", "");
+            if ("{{}}".IndexOf(xClear) > -1)//自行將所有大括弧清除
+                textBox1.Text = textBox1.Text.Replace("{", "").Replace("}", "");
             else
                 textBox1.Text = textBox1.Text.Replace(xClear, "");
             if (index > -1) s = -(xLen - textBox1.TextLength);
@@ -5327,7 +5327,10 @@ namespace WindowsFormsApp1
             {
                 if (insertMode) Caret_Shown(textBox1); else Caret_Shown_OverwriteMode(textBox1);
                 if (textBox1.TextLength > 0 && textBox1.SelectionLength == textBox1.TextLength && selLength < textBox1.SelectionLength && selLength < 30)
+                {
+                    if (textBox1.SelectionLength == textBox1.TextLength) textBox1.DeselectAll();
                     textBox1.Select(selStart, selLength);
+                }
                 if (autoPastetoQuickEdit || (autoPastetoQuickEdit && ModifierKeys != Keys.None)) autoPastetoCtextQuitEditTextbox();
             }
             if (textBox2.BackColor == Color.GreenYellow &&
