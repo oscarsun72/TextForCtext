@@ -182,7 +182,7 @@ Select Case ProgID
         DefaultBrowserNameAppActivate = "Opera"
     Case "SafariHTML":
         DefaultBrowserNameAppActivate = "Safari"
-    Case "AppXq0fevzme2pys62n3e0fbqa7peapykr8v":
+    Case "AppXq0fevzme2pys62n3e0fbqa7peapykr8v", "MSEdgeHTM":
         'browser = BrowserApplication.Edge;
         DefaultBrowserNameAppActivate = "edge" '"msedge"
     Case Else:

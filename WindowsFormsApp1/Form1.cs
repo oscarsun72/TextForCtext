@@ -5326,9 +5326,9 @@ namespace WindowsFormsApp1
             if (textBox1.Focused)
             {
                 if (insertMode) Caret_Shown(textBox1); else Caret_Shown_OverwriteMode(textBox1);
+
                 if (textBox1.TextLength > 0 && textBox1.SelectionLength == textBox1.TextLength && selLength < textBox1.SelectionLength && selLength < 30)
                 {
-                    if (textBox1.SelectionLength == textBox1.TextLength) textBox1.DeselectAll();
                     textBox1.Select(selStart, selLength);
                 }
                 if (autoPastetoQuickEdit || (autoPastetoQuickEdit && ModifierKeys != Keys.None)) autoPastetoCtextQuitEditTextbox();
@@ -5495,6 +5495,9 @@ namespace WindowsFormsApp1
             }
             #endregion
 
+            #region 預設瀏覽器名稱設定
+            if (x == "msedge" || x == "chrome" || x == "brave") defaultBrowserName = x;
+            #endregion
             if (button2.Text == "選取文") return;
             string x1 = textBox1.Text;
             if (x == "" || x1 == "") return;
@@ -5612,6 +5615,16 @@ namespace WindowsFormsApp1
             //{
             //    undoRecord();
             //}
+            if (keyinText && textBox1.TextLength > 0 && textBox1.SelectionLength == textBox1.TextLength)
+            {
+                if (!insertMode)
+                {
+                    textBox1.Select(selStart, char.IsHighSurrogate(textBox1.Text.Substring(selStart, 1).ToCharArray()[0]) ? 2 : 1);
+                }
+                else
+                    textBox1.Select(selStart, selLength);
+                //textBox1.DeselectAll();
+            }
         }
 
         private void undoRecord()
