@@ -5476,7 +5476,7 @@ namespace WindowsFormsApp1
         private void textBox2_TextChanged(object sender, EventArgs e)
         {
             string x = textBox2.Text;
-            #region 輸入末綴為「00」的數字可以設定開啟Chrome頁面的等待毫秒時間
+            #region 輸入末綴為「0」的數字可以設定開啟Chrome頁面的等待毫秒時間
             if (x != "" && x.Length > 2)
             {
                 if (x.Substring(x.Length - 1) == "0")
@@ -5496,7 +5496,18 @@ namespace WindowsFormsApp1
             #endregion
 
             #region 預設瀏覽器名稱設定
-            if (x == "msedge" || x == "chrome" || x == "brave") defaultBrowserName = x;
+                if (x == "msedge" || x == "chrome" || x == "brave") defaultBrowserName = x;
+            #endregion
+
+            #region 設定小注不換行的長度限制
+            
+            if (x.Substring(5) == "note:")
+            {
+                if (Int32.TryParse(x.Substring(5),out int n))
+                {
+                    noteinLineLenLimit = (byte)n;
+                }
+            }
             #endregion
             if (button2.Text == "選取文") return;
             string x1 = textBox1.Text;
@@ -5504,7 +5515,7 @@ namespace WindowsFormsApp1
             if (isKeyDownSurrogate(x)) return;//surrogate字在文字方塊輸入時會引發2次keyDown事件            
             var sa = findWord(x, x1);
             if (sa == null) return;
-            int s = sa[0], nextS = sa[1];
+            int s = sa[0];int nextS = sa[1];
             if (s > -1)
             {
                 textBox1.Select(s, x.Length);
