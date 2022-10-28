@@ -5496,14 +5496,14 @@ namespace WindowsFormsApp1
             #endregion
 
             #region 預設瀏覽器名稱設定
-                if (x == "msedge" || x == "chrome" || x == "brave") defaultBrowserName = x;
+            if (x == "msedge" || x == "chrome" || x == "brave") defaultBrowserName = x;
             #endregion
 
             #region 設定小注不換行的長度限制
-            
-            if (x.Substring(5) == "note:")
+
+            if (x.Length > 5 && x.Substring(5) == "note:")
             {
-                if (Int32.TryParse(x.Substring(5),out int n))
+                if (Int32.TryParse(x.Substring(5), out int n))
                 {
                     noteinLineLenLimit = (byte)n;
                 }
@@ -5515,7 +5515,7 @@ namespace WindowsFormsApp1
             if (isKeyDownSurrogate(x)) return;//surrogate字在文字方塊輸入時會引發2次keyDown事件            
             var sa = findWord(x, x1);
             if (sa == null) return;
-            int s = sa[0];int nextS = sa[1];
+            int s = sa[0]; int nextS = sa[1];
             if (s > -1)
             {
                 textBox1.Select(s, x.Length);
