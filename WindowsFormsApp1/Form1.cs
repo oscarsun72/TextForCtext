@@ -4696,6 +4696,8 @@ namespace WindowsFormsApp1
                         return @"C:\Program Files (x86)\BraveSoftware\Brave-Browser\Application\brave.exe";
                     else
                         return userProfilePath + @"\AppData\Local\BraveSoftware\Brave-Browser\Application\brave.exe";
+                case "vivaldi":
+                    return userProfilePath + @"\AppData\Local\Vivaldi\Application\vivaldi.exe";
                 case "Opera":
                     return "";
                 case "Safari":
