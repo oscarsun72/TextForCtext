@@ -481,7 +481,10 @@ namespace WindowsFormsApp1
             if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("ဆ");
             if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("ဈ");
             if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("ဉ");
-            if (missWordPositon > -1)
+            int chkP = xCopy.IndexOf("<p>") + "<p>".Length + Environment.NewLine.Length;//檢查不當分段
+            if (xCopy.IndexOf("<p>") > -1 && chkP + 1 <= xCopy.Length && ("　􏿽|" + Environment.NewLine).IndexOf(xCopy.Substring(chkP, 1)) == -1) ;
+            else chkP = -1;
+            if (missWordPositon > -1 || chkP > -1)
             //if (xCopy.IndexOf(" ") > -1 || xCopy.IndexOfAny("�".ToCharArray()) > -1 ||
             //xCopy.IndexOf("□") > -1)//□為《維基文庫》《四庫全書》的缺字符，" "則是《四部叢刊》的，"�"則是《四部叢刊》的造字符。
             {//  「�」甚特別，indexof會失效，明明沒有，而傳回 0 //https://docs.microsoft.com/zh-tw/dotnet/csharp/how-to/compare-strings
@@ -493,6 +496,12 @@ namespace WindowsFormsApp1
                 this.BackColor = Color.Yellow;
                 Task.Delay(400).Wait();
                 this.BackColor = c;
+                if (chkP > -1)
+                {
+                    textBox1.Select(chkP - (+"<p>".Length + Environment.NewLine.Length), 3);
+                    textBox1.ScrollToCaret();
+                    return false;
+                }
                 if (xCopy.IndexOf("□") > -1 && xCopy.IndexOfAny("�".ToCharArray()) == -1 && xCopy.IndexOf(" ") == -1)
                 {
                     //if (MessageBox.Show("有造字，是否先予訂補上？", "", MessageBoxButtons.OKCancel, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1) == DialogResult.OK)
@@ -2369,7 +2378,7 @@ namespace WindowsFormsApp1
 
             }
             //else //先延展選取範圍至整個行/段
-                expandSelectedTextRangeToWholeLinePara(s, l, x);
+            expandSelectedTextRangeToWholeLinePara(s, l, x);
             String slTxt = textBox1.SelectedText; int i = slTxt.IndexOf(Environment.NewLine), cntr = 0;
             while (i > -1)
             {
