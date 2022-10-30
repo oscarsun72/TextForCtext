@@ -482,7 +482,8 @@ namespace WindowsFormsApp1
             if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("ဈ");
             if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("ဉ");
             int chkP = xCopy.IndexOf("<p>") + "<p>".Length + Environment.NewLine.Length;//檢查不當分段
-            if (xCopy.IndexOf("<p>") > -1 && chkP + 1 <= xCopy.Length && ("　􏿽|" + Environment.NewLine).IndexOf(xCopy.Substring(chkP, 1)) == -1) ;
+            if (xCopy.IndexOf("<p>") > -1 && chkP + 1 <= xCopy.Length && ("　􏿽|" + Environment.NewLine).IndexOf(xCopy.Substring(chkP, 1)) == -1 &&
+                xCopy.IndexOf("*") > -1 && xCopy.IndexOf("*") > chkP) ;
             else chkP = -1;
             if (missWordPositon > -1 || chkP > -1)
             //if (xCopy.IndexOf(" ") > -1 || xCopy.IndexOfAny("�".ToCharArray()) > -1 ||
