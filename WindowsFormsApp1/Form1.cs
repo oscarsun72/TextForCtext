@@ -484,12 +484,23 @@ namespace WindowsFormsApp1
             int chkP = xCopy.IndexOf("<p>") + "<p>".Length + Environment.NewLine.Length;//檢查不當分段
             if (xCopy.IndexOf("<p>") > -1 && chkP + 1 <= x.Length && ("　􏿽|" + Environment.NewLine).IndexOf(x.Substring(chkP, 1)) == -1)
             {
-                if ("{}".IndexOf(x.Substring(chkP, 1)) > -1) {
-                    if (xCopy.IndexOf("*") > -1 && xCopy.IndexOf("*") < chkP) chkP = -1;
+                int asteriskPos = xCopy.IndexOf("*");
+                if ("{}".IndexOf(x.Substring(chkP, 1)) > -1)
+                {
+                    if (asteriskPos > -1 && asteriskPos < chkP) chkP = -1;
                 }
                 else
                 {
-                    if (xCopy.IndexOf("*") > -1 && xCopy.IndexOf("*") > chkP) chkP = -1;
+                    if (asteriskPos > -1 && asteriskPos > chkP)
+                    {
+                        //須檢查的<p>和* 之間不能再有<p>，因為標題*號前必有<p>
+                        if (xCopy.Substring(chkP, asteriskPos - chkP).IndexOf("<p>") == -1) chkP = -1;
+                    }
+                }
+                //如果是標題
+                if (Math.Abs(chkP - xCopy.LastIndexOf(Environment.NewLine, chkP) - normalLineParaLength) > 3)
+                {
+                    chkP = -1;
                 }
             }
             else chkP = -1;
