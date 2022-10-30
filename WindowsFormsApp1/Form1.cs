@@ -484,7 +484,13 @@ namespace WindowsFormsApp1
             int chkP = xCopy.IndexOf("<p>") + "<p>".Length + Environment.NewLine.Length;//檢查不當分段
             if (xCopy.IndexOf("<p>") > -1 && chkP + 1 <= x.Length && ("　􏿽|" + Environment.NewLine).IndexOf(x.Substring(chkP, 1)) == -1)
             {
-                if (xCopy.IndexOf("*") > -1 && xCopy.IndexOf("*") > chkP) chkP = -1;
+                if ("{}".IndexOf(x.Substring(chkP, 1)) > -1) {
+                    if (xCopy.IndexOf("*") > -1 && xCopy.IndexOf("*") < chkP) chkP = -1;
+                }
+                else
+                {
+                    if (xCopy.IndexOf("*") > -1 && xCopy.IndexOf("*") > chkP) chkP = -1;
+                }
             }
             else chkP = -1;
             if (missWordPositon > -1 || chkP > -1)
@@ -1601,8 +1607,8 @@ namespace WindowsFormsApp1
             string xSl = textBox1.SelectedText; x = x.Substring(textBox1.SelectionStart + textBox1.SelectionLength + Environment.NewLine.Length + "<p>".Length);
             StringInfo xSlInfo = new StringInfo(xSl);//, xInfo = new StringInfo(x);
             int l = xSlInfo.LengthInTextElements, s = 0;//取得段落長
-            // lInfo = xInfo.LengthInTextElements
-            //TextElementEnumerator xEl = StringInfo.GetTextElementEnumerator(x);
+                                                        // lInfo = xInfo.LengthInTextElements
+                                                        //TextElementEnumerator xEl = StringInfo.GetTextElementEnumerator(x);
             while (s + l < x.Length)
             {
                 int iPara = 0, iLine = 0, sLine = s;
@@ -1621,7 +1627,7 @@ namespace WindowsFormsApp1
                 if (char.IsLowSurrogate(x.Substring(s, 1).ToCharArray()[0])) s++;
                 x = x.Substring(0, s) + "<p>" + Environment.NewLine + x.Substring(s);
                 s += 5;//"<p>" + Environment.NewLine
-                //if (s > 5000) break;
+                       //if (s > 5000) break;
             }
             undoRecord();
             stopUndoRec = true;
@@ -1631,7 +1637,7 @@ namespace WindowsFormsApp1
 
         private void 清除插入點之前的所有空格()
         {//Ctrl + Backspace,若插入點前為「<p>」則一併清除
-            //throw new NotImplementedException();
+         //throw new NotImplementedException();
             int s = textBox1.SelectionStart, e = s; string x = textBox1.Text;
             if (s > 3 && x.Substring(s - 3, 3) == "<p>")
             {
@@ -1653,7 +1659,7 @@ namespace WindowsFormsApp1
 
         private void 加上黑括號()
         {//`： 於插入點處起至「　」或「􏿽」前止之文字加上黑括號【】//Print/SysRq 為OS鎖定不能用
-            //throw new NotImplementedException();
+         //throw new NotImplementedException();
             int s = textBox1.SelectionStart; string x = textBox1.Text;
             if (textBox1.SelectionLength == 0)
             {
