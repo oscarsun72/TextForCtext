@@ -356,6 +356,13 @@ namespace WindowsFormsApp1
         }
 
 
+        string getLineTxt(string x, int s)
+        {
+            int preP = x.LastIndexOf(Environment.NewLine, s), p = x.IndexOf(Environment.NewLine, s);
+            int lineS = preP == -1 ? 0 : preP + Environment.NewLine.Length;
+            int lineL = p == -1 ? x.Length : p - Environment.NewLine.Length - preP;
+            return x.Substring(lineS, lineL);
+        }
 
         private bool newTextBox1()
         {
@@ -481,10 +488,11 @@ namespace WindowsFormsApp1
             if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("ဆ");
             if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("ဈ");
             if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("ဉ");
-            int chkP = xCopy.IndexOf("<p>") + "<p>".Length + Environment.NewLine.Length;//檢查不當分段
+            int chkP = xCopy.IndexOf("<p>") + ("<p>".Length + Environment.NewLine.Length);//檢查不當分段（目前僅找最前面的一個，餘於停下手動檢索時人工目測
             if (xCopy.IndexOf("<p>") > -1 && chkP + 1 <= x.Length)//&& ("　􏿽|" + Environment.NewLine).IndexOf(x.Substring(chkP, 1)) == -1)
             {
                 int asteriskPos = xCopy.IndexOf("*");
+
                 if ("{}".IndexOf(x.Substring(chkP, 1)) > -1)
                 {
                     if (asteriskPos > -1 && asteriskPos < chkP) chkP = -1;
@@ -499,8 +507,17 @@ namespace WindowsFormsApp1
                 }
                 //如果是標題
                 int prePPos = chkP - ("<p>".Length + Environment.NewLine.Length) > -1 ?
-                    xCopy.LastIndexOf(Environment.NewLine, chkP - ("<p>".Length + Environment.NewLine.Length)) : 0;
-                if (prePPos > 0)
+                    xCopy.LastIndexOf(Environment.NewLine, chkP - ("<p>".Length + Environment.NewLine.Length)) : -1;
+                if (asteriskPos > -1)
+                {//標題*與<p>在同一行，長度沒跨行
+                    int pre = prePPos > -1 ? prePPos + 2 : 0;
+                    if (pre < asteriskPos && chkP - "<p>".Length + Environment.NewLine.Length > asteriskPos &&
+                        getLineTxt(xCopy, chkP - ("<p>".Length + Environment.NewLine.Length)).IndexOf(Environment.NewLine) == -1)
+                        //xCopy.Substring(pre, chkP - ("<p>".Length + Environment.NewLine.Length) - pre).IndexOf(Environment.NewLine) == -1)
+
+                        chkP = -1;
+                }
+                if (prePPos > -1 && chkP > -1)
                 {
                     if (Math.Abs(
                         new StringInfo(xCopy.Substring(prePPos + 2,
@@ -519,6 +536,10 @@ namespace WindowsFormsApp1
                             chkP = -1;
                         }
                     }
+                }
+                if (chkP > -1)
+                {//後面是縮排
+                    if (("　􏿽|" + Environment.NewLine).IndexOf(x.Substring(chkP, 1)) > -1) chkP = -1;
                 }
             }
             else chkP = -1;
