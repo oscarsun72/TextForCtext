@@ -503,6 +503,7 @@ namespace WindowsFormsApp1
                 {
                     textBox1.Select(chkP - (+"<p>".Length + Environment.NewLine.Length), 3);
                     textBox1.ScrollToCaret();
+                    Clipboard.SetText("　");//準備空格以填補缺額
                     return false;
                 }
                 if (xCopy.IndexOf("□") > -1 && xCopy.IndexOfAny("�".ToCharArray()) == -1 && xCopy.IndexOf(" ") == -1)
