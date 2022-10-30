@@ -77,6 +77,8 @@ Ctrl + w 關閉 Chrome 網頁頁籤
 
 Ctrl + Shift + w 關閉 Chrome 網頁視窗
 
+Ctrl + Shift + \ 切換抬頭平抬格式設定（bool TopLine）
+
 Ctrl + PageUp ：根據 textBox3所載的網址，瀏覽ctext書影的上一頁
 
 Ctrl + PageDown ： 根據 textBox3所載的網址，瀏覽ctext書影的下一頁

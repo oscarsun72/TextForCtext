@@ -2368,7 +2368,7 @@ namespace WindowsFormsApp1
                 //else { textBox1.Select(s, 1); l = 1; }
 
             }
-            else //先延展選取範圍至整個行/段
+            //else //先延展選取範圍至整個行/段
                 expandSelectedTextRangeToWholeLinePara(s, l, x);
             String slTxt = textBox1.SelectedText; int i = slTxt.IndexOf(Environment.NewLine), cntr = 0;
             while (i > -1)
@@ -4153,6 +4153,14 @@ namespace WindowsFormsApp1
                     }
                     new SoundPlayer(@"C:\Windows\Media\Speech On.wav").Play();
                     keyinText = true; pasteAllOverWrite = false;
+                    return;
+                }
+                if (e.KeyCode == Keys.Oem5)
+                {//Ctrl + Shift + \ 切換抬頭平抬格式設定（bool TopLine）
+                    e.Handled = true;
+                    if (!TopLine) SystemSounds.Hand.Play();
+                    else SystemSounds.Exclamation.Play();
+                    TopLine = TopLine ? false : true;
                     return;
                 }
             }
