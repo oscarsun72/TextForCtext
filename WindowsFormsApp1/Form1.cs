@@ -482,7 +482,7 @@ namespace WindowsFormsApp1
             if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("ဈ");
             if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("ဉ");
             int chkP = xCopy.IndexOf("<p>") + "<p>".Length + Environment.NewLine.Length;//檢查不當分段
-            if (xCopy.IndexOf("<p>") > -1 && chkP + 1 <= x.Length && ("　􏿽|" + Environment.NewLine).IndexOf(x.Substring(chkP, 1)) == -1)
+            if (xCopy.IndexOf("<p>") > -1 && chkP + 1 <= x.Length)//&& ("　􏿽|" + Environment.NewLine).IndexOf(x.Substring(chkP, 1)) == -1)
             {
                 int asteriskPos = xCopy.IndexOf("*");
                 if ("{}".IndexOf(x.Substring(chkP, 1)) > -1)
@@ -498,9 +498,27 @@ namespace WindowsFormsApp1
                     }
                 }
                 //如果是標題
-                if (Math.Abs(chkP - xCopy.LastIndexOf(Environment.NewLine, chkP) - normalLineParaLength) > 3)
+                int prePPos = chkP - ("<p>".Length + Environment.NewLine.Length) > -1 ?
+                    xCopy.LastIndexOf(Environment.NewLine, chkP - ("<p>".Length + Environment.NewLine.Length)) : 0;
+                if (prePPos > 0)
                 {
-                    chkP = -1;
+                    if (Math.Abs(
+                        new StringInfo(xCopy.Substring(prePPos + 2,
+                        chkP - ("<p>".Length + Environment.NewLine.Length) - (prePPos + 2))).LengthInTextElements
+                         - normalLineParaLength) > 3)
+                    {
+                        chkP = -1;
+                    }
+                    if (chkP > -1)
+                    {
+                        //如果前文不是縮排,後面不再縮排
+                        if ("　􏿽".IndexOf(xCopy.Substring(prePPos + 2, 1)) > -1 &&
+                            "　􏿽".IndexOf(xCopy.Substring(x.LastIndexOf(Environment.NewLine, prePPos) + 2, 1)) > -1 &&
+                            "　􏿽".IndexOf(x.Substring(x.IndexOf(Environment.NewLine, chkP) + 2, 1)) == -1)
+                        {
+                            chkP = -1;
+                        }
+                    }
                 }
             }
             else chkP = -1;
