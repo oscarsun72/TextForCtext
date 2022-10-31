@@ -1275,6 +1275,12 @@ Do While rng.Find.Execute("", , , False, , , True, wdFindStop)
     noteRng.Text = "{{" & Replace(noteRng, "/", "") & "}}"
 Loop
 With rng.Document
+    With .Range.Find
+        .ClearFormatting
+        .Text = ChrW(9675)
+        .Replacement.Text = ChrW(12295)
+        .Execute , , , , , , True, wdFindContinue, , , wdReplaceAll
+    End With
     '.Range.Cut
     SystemSetup.ClipboardPutIn .Range.Text
     DoEvents

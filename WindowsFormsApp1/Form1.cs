@@ -536,11 +536,31 @@ namespace WindowsFormsApp1
                             chkP = -1;
                         }
                     }
+                    if (chkP > -1)
+                    {//後面有縮排一行如標題者：
+                        if ("　􏿽".IndexOf(x.Substring(x.IndexOf(Environment.NewLine, chkP) + 2, 1)) > -1 &&
+                            "　􏿽".IndexOf(xCopy.Substring(x.LastIndexOf(Environment.NewLine, prePPos) + 2, 1)) == -1)
+                            chkP = -1;
+                    }
                 }
                 if (chkP > -1)
                 {//後面是縮排
-                    if (("　􏿽|" + Environment.NewLine).IndexOf(x.Substring(chkP, 1)) > -1) chkP = -1;
+                    if (("　􏿽" + Environment.NewLine).IndexOf(x.Substring(chkP, 1)) > -1) chkP = -1;
+                    //後面是凸排
+                    else
+                    {
+                        int nextPPos = x.IndexOf(Environment.NewLine, chkP);
+                        if (nextPPos > -1)
+                        {
+                            if (nextPPos + 2 + 1 <= x.Length &&
+                                    ("　􏿽" + Environment.NewLine).IndexOf(x.Substring(
+                                nextPPos + 2, 1)) > -1)
+                                chkP = -1;
+                        }
+                    }
                 }
+                //如真文中有分段，則設定chkP=0作為提示音就好,一如含有「□」之文本處理方式
+                //if (chkP > -1) chkP = 0;
             }
             else chkP = -1;
             if (missWordPositon > -1 || chkP > -1)
@@ -555,14 +575,14 @@ namespace WindowsFormsApp1
                 this.BackColor = Color.Yellow;
                 Task.Delay(400).Wait();
                 this.BackColor = c;
-                if (chkP > -1)
+                if (chkP > 0)
                 {
                     textBox1.Select(chkP - (+"<p>".Length + Environment.NewLine.Length), 3);
                     textBox1.ScrollToCaret();
                     Clipboard.SetText("　");//準備空格以填補缺額
                     return false;
                 }
-                if (xCopy.IndexOf("□") > -1 && xCopy.IndexOfAny("�".ToCharArray()) == -1 && xCopy.IndexOf(" ") == -1)
+                if (xCopy.IndexOf("□") > -1 && xCopy.IndexOfAny("�".ToCharArray()) == -1 && xCopy.IndexOf(" ") == -1 || chkP == 0)
                 {
                     //if (MessageBox.Show("有造字，是否先予訂補上？", "", MessageBoxButtons.OKCancel, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1) == DialogResult.OK)
                     //{
