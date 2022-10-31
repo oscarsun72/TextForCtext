@@ -530,7 +530,7 @@ namespace WindowsFormsApp1
                     {
                         //如果前文不是縮排,後面不再縮排
                         if ("　􏿽".IndexOf(xCopy.Substring(prePPos + 2, 1)) > -1 &&
-                            xCopy.Substring(prePPos+2,chkP-(prePPos+2)).IndexOf("*")==-1&&//前一行不是標題
+                            xCopy.Substring(prePPos + 2, chkP - (prePPos + 2)).IndexOf("*") == -1 &&//前一行不是標題
                             "　􏿽".IndexOf(xCopy.Substring(x.LastIndexOf(Environment.NewLine, prePPos) + 2, 1)) > -1 &&
                             "　􏿽".IndexOf(x.Substring(x.IndexOf(Environment.NewLine, chkP) + 2, 1)) == -1)
                         {
@@ -560,8 +560,18 @@ namespace WindowsFormsApp1
                         }
                     }
                 }
-                //如真文中有分段，則設定chkP=0作為提示音就好,一如含有「□」之文本處理方式
-                //if (chkP > -1) chkP = 0;
+                //如果正文中真有分段，則設定chkP=0作為提示音就好,一如含有「□」之文本處理方式
+                //(檢查過沒問題者於<p>前加「+」以識別(用「+」乃不可能存在的字符故）
+                if (chkP > -1)
+                {
+                    if (chkP - ("<p>".Length + Environment.NewLine.Length) - 1 > -1 &&
+                        xCopy.Substring(chkP - ("<p>".Length + Environment.NewLine.Length) - 1, 1) == "+")
+                    {
+                        chkP = 0;
+                        xCopy = xCopy.Replace("+<p>", "<p>");
+                    }
+
+                }
             }
             else chkP = -1;
             if (missWordPositon > -1 || chkP > -1)
