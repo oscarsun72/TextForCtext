@@ -530,6 +530,7 @@ namespace WindowsFormsApp1
                     {
                         //如果前文不是縮排,後面不再縮排
                         if ("　􏿽".IndexOf(xCopy.Substring(prePPos + 2, 1)) > -1 &&
+                            xCopy.Substring(prePPos+2,chkP-(prePPos+2)).IndexOf("*")==-1&&//前一行不是標題
                             "　􏿽".IndexOf(xCopy.Substring(x.LastIndexOf(Environment.NewLine, prePPos) + 2, 1)) > -1 &&
                             "　􏿽".IndexOf(x.Substring(x.IndexOf(Environment.NewLine, chkP) + 2, 1)) == -1)
                         {
