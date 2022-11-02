@@ -364,6 +364,7 @@ namespace WindowsFormsApp1
             return x.Substring(lineS, lineL);
         }
 
+        bool chkPTitleNotEnd = false;//為檢查不當分段設置的，以判斷前一頁末是否不含標明尾，其尾卻在此頁前，以便略過檢查
         private bool newTextBox1()
         {
             if (textBox1.Text == "") return false;
@@ -488,7 +489,12 @@ namespace WindowsFormsApp1
             if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("ဆ");
             if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("ဈ");
             if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("ဉ");
+
             #region 檢查不當分段
+            if (xCopy.LastIndexOf("*") > -1 && xCopy.LastIndexOf("*") > xCopy.LastIndexOf("<p>"))
+                chkPTitleNotEnd = true;
+            else
+                if (chkPTitleNotEnd) chkPTitleNotEnd = false;
             int chkP = xCopy.IndexOf("<p>") + ("<p>".Length + Environment.NewLine.Length);//檢查不當分段（目前僅找最前面的一個，餘於停下手動檢索時人工目測
             if (keyinText) { chkP = -1; goto chksum; }//手動輸入、非半自動連續輸入時，略過不處理
             if (xCopy.IndexOf("<p>") > -1 && chkP + 1 <= x.Length)//&& ("　􏿽|" + Environment.NewLine).IndexOf(x.Substring(chkP, 1)) == -1)
@@ -565,7 +571,7 @@ namespace WindowsFormsApp1
                 }
                 //如果正文中真有分段，則設定chkP=0作為提示音就好,一如含有「□」之文本處理方式
                 //(檢查過沒問題者於<p>前加「+」以識別(用「+」乃不可能存在的字符故）
-                if (chkP > -1)
+                if (chkP > -1 && chkPTitleNotEnd == false)
                 {
                     if (chkP - ("<p>".Length + Environment.NewLine.Length) - 1 > -1 &&
                         xCopy.Substring(chkP - ("<p>".Length + Environment.NewLine.Length) - 1, 1) == "+")
@@ -573,7 +579,6 @@ namespace WindowsFormsApp1
                         chkP = 0;
                         xCopy = xCopy.Replace("+<p>", "<p>");
                     }
-
                 }
             }
             else chkP = -1;
@@ -4629,6 +4634,7 @@ namespace WindowsFormsApp1
                 if (keyinText)
                 {
                     Task.Delay(290).Wait();
+                    Task.WaitAll();
                     SendKeys.Send("^x");
                     undoRecord();
                     textBox1.Text = Clipboard.GetText() + Environment.NewLine + textBox1.Text;
@@ -5435,13 +5441,13 @@ namespace WindowsFormsApp1
                     System.Media.SystemSounds.Asterisk.Play();
                     textBox3.Text = clpTxt;
                     ClpTxtBefore = clpTxt;
-                    appActivateByName();
+                    appActivateByName();//取得網址時順便貼上簡單修改模式下的文字
                     Task.WaitAll();
-                    SendKeys.Send("{F6 3}" );
+                    SendKeys.Send("{F6 3}");
                     SendKeys.Send("^a");
                     SendKeys.Send("^x");
                     string nowClpTxt = Clipboard.GetText();
-                    if (nowClpTxt!="" && nowClpTxt != ClpTxtBefore)
+                    if (nowClpTxt != "" && nowClpTxt != ClpTxtBefore)
                     {
                         textBox1.Text = nowClpTxt;
                         ClpTxtBefore = clpTxt;
