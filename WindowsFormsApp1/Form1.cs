@@ -488,7 +488,9 @@ namespace WindowsFormsApp1
             if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("ဆ");
             if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("ဈ");
             if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("ဉ");
+            #region 檢查不當分段
             int chkP = xCopy.IndexOf("<p>") + ("<p>".Length + Environment.NewLine.Length);//檢查不當分段（目前僅找最前面的一個，餘於停下手動檢索時人工目測
+            if (keyinText) { chkP = -1; goto chksum; }//手動輸入、非半自動連續輸入時，略過不處理
             if (xCopy.IndexOf("<p>") > -1 && chkP + 1 <= x.Length)//&& ("　􏿽|" + Environment.NewLine).IndexOf(x.Substring(chkP, 1)) == -1)
             {
                 int asteriskPos = xCopy.IndexOf("*");
@@ -530,8 +532,9 @@ namespace WindowsFormsApp1
                     {
                         //如果前文不是縮排,後面不再縮排
                         if ("　􏿽".IndexOf(xCopy.Substring(prePPos + 2, 1)) > -1 &&
-                            xCopy.Substring(prePPos + 2, chkP - (prePPos + 2)).IndexOf("*") == -1 &&//前一行不是標題
+                            x.Substring(prePPos + 2, chkP - (prePPos + 2)).IndexOf("*") == -1 &&//前一行不是標題
                             "　􏿽".IndexOf(xCopy.Substring(x.LastIndexOf(Environment.NewLine, prePPos) + 2, 1)) > -1 &&
+                            getLineTxt(xCopy, prePPos).IndexOf("*") == -1 &&//前二行不是標題
                             "　􏿽".IndexOf(x.Substring(x.IndexOf(Environment.NewLine, chkP) + 2, 1)) == -1)
                         {
                             chkP = -1;
@@ -574,6 +577,8 @@ namespace WindowsFormsApp1
                 }
             }
             else chkP = -1;
+            #endregion
+            chksum:
             if (missWordPositon > -1 || chkP > -1)
             //if (xCopy.IndexOf(" ") > -1 || xCopy.IndexOfAny("�".ToCharArray()) > -1 ||
             //xCopy.IndexOf("□") > -1)//□為《維基文庫》《四庫全書》的缺字符，" "則是《四部叢刊》的，"�"則是《四部叢刊》的造字符。
@@ -5430,6 +5435,17 @@ namespace WindowsFormsApp1
                     System.Media.SystemSounds.Asterisk.Play();
                     textBox3.Text = clpTxt;
                     ClpTxtBefore = clpTxt;
+                    appActivateByName();
+                    Task.WaitAll();
+                    SendKeys.Send("{F6 3}" );
+                    SendKeys.Send("^a");
+                    SendKeys.Send("^x");
+                    string nowClpTxt = Clipboard.GetText();
+                    if (nowClpTxt!="" && nowClpTxt != ClpTxtBefore)
+                    {
+                        textBox1.Text = nowClpTxt;
+                        ClpTxtBefore = clpTxt;
+                    }
                     return;
                 }
             }

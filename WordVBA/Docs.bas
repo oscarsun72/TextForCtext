@@ -813,8 +813,13 @@ If flgPaste Then
             End With
         End If
     Next e
-    d.Range.Find.ClearFormatting
-
+    With d.Range.Find
+        If InStr(.Parent.Text, Chr(13) & Chr(13) & Chr(13) & Chr(13)) > 1 Then
+            .ClearFormatting
+            .Execute Chr(13) & Chr(13) & Chr(13) & Chr(13), , , , , , True, wdFindContinue, , Chr(13) & Chr(13) & Chr(13), wdReplaceAll
+        End If
+        .ClearFormatting
+    End With
     GoSub refres
     SystemSetup.playSound 1.921
 Else
