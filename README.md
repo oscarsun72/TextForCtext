@@ -134,7 +134,9 @@ Ctrl + \ （反斜線） 或 Alt + \ ： 清除textBox1文本插入點後的分�
 
 Ctrl + 6 ：鍵入「{{」
 
-Ctrl + Shift + 6 ：鍵入「}}」(在前面有「{」時，按下 Alt + i 也可以鍵入此值)
+Ctrl + Shift + 6 ：鍵入「}}」(在前面有「{」時，按下 Alt + i 也可以鍵入此值---此似未實作)
+
+Ctrl + F1 ：選取範圍前後加上{{}}
 
 Alt + Shift + 6 或 Alt + s：小注文不換行：notes_a_line()
 

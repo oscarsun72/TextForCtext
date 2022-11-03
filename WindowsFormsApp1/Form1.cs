@@ -355,6 +355,14 @@ namespace WindowsFormsApp1
             //textBox2.BackColor = textBox2BackColorDefault;
         }
 
+        void noteMark()//Ctrl + F1 ：選取範圍前後加上{{}}
+        {
+            if (textBox1.SelectionLength > 0)
+            {
+                undoRecord();
+                textBox1.SelectedText = "{{" + textBox1.SelectedText + "}}";
+            }
+        }
 
         string getLineTxt(string x, int s)
         {
@@ -491,7 +499,7 @@ namespace WindowsFormsApp1
             if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("ဉ");
 
             #region 檢查不當分段
-
+            xCopy = xCopy.Replace("<p>|","<p>");x= x.Replace("<p>|","<p>");
             int chkP = xCopy.IndexOf("<p>") + ("<p>".Length + Environment.NewLine.Length);//檢查不當分段（目前僅找最前面的一個，餘於停下手動檢索時人工目測
             if (keyinText) { chkP = -1; goto chksum; }//手動輸入、非半自動連續輸入時，略過不處理
             if (xCopy.IndexOf("<p>") > -1 && chkP + 1 <= x.Length)//&& ("　􏿽|" + Environment.NewLine).IndexOf(x.Substring(chkP, 1)) == -1)
@@ -860,6 +868,11 @@ namespace WindowsFormsApp1
                 if (e.KeyCode == Keys.V) pasteAllOverWrite = false;
                 else pasteAllOverWrite = false;
 
+                if (e.KeyCode == Keys.F1)
+                {
+                    e.Handled = true;
+                    noteMark(); return;
+                }
                 if (e.KeyCode == Keys.F12)
                 {//Ctrl + F12
                     string x = textBox1.SelectedText;
