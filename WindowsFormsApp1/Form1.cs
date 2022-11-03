@@ -360,7 +360,7 @@ namespace WindowsFormsApp1
         {
             int preP = x.LastIndexOf(Environment.NewLine, s), p = x.IndexOf(Environment.NewLine, s);
             int lineS = preP == -1 ? 0 : preP + Environment.NewLine.Length;
-            int lineL = p == -1 ? x.Length : p - Environment.NewLine.Length - preP;
+            int lineL = p == -1 ? x.Length - lineS : p - Environment.NewLine.Length - preP;
             return x.Substring(lineS, lineL);
         }
 
