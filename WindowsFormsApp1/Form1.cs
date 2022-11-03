@@ -491,10 +491,7 @@ namespace WindowsFormsApp1
             if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("ဉ");
 
             #region 檢查不當分段
-            if (xCopy.LastIndexOf("*") > -1 && xCopy.LastIndexOf("*") > xCopy.LastIndexOf("<p>"))
-                chkPTitleNotEnd = true;
-            else
-                if (chkPTitleNotEnd) chkPTitleNotEnd = false;
+
             int chkP = xCopy.IndexOf("<p>") + ("<p>".Length + Environment.NewLine.Length);//檢查不當分段（目前僅找最前面的一個，餘於停下手動檢索時人工目測
             if (keyinText) { chkP = -1; goto chksum; }//手動輸入、非半自動連續輸入時，略過不處理
             if (xCopy.IndexOf("<p>") > -1 && chkP + 1 <= x.Length)//&& ("　􏿽|" + Environment.NewLine).IndexOf(x.Substring(chkP, 1)) == -1)
@@ -580,6 +577,14 @@ namespace WindowsFormsApp1
                         xCopy = xCopy.Replace("+<p>", "<p>");
                     }
                 }
+                if (chkPTitleNotEnd && chkP > -1)
+                {
+                    chkP = -1; chkPTitleNotEnd = false;
+                }
+                if (xCopy.LastIndexOf("*") > -1 && xCopy.LastIndexOf("*") > xCopy.LastIndexOf("<p>"))
+                    chkPTitleNotEnd = true;
+                else
+                if (chkPTitleNotEnd) chkPTitleNotEnd = false;
             }
             else chkP = -1;
             #endregion
