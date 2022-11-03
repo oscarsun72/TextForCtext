@@ -380,8 +380,18 @@ namespace WindowsFormsApp1
             //if (textBox1.SelectedText != "")
             //{
             if (textBox2.Text != "＠") textBox2.Text = "";
-            string x = textBox1.Text;
-            int s = textBox1.SelectionStart, l = textBox1.SelectionLength;
+            string x = textBox1.Text; int s = textBox1.SelectionStart, l = textBox1.SelectionLength;
+            if (x.IndexOf("<p>|") > -1)
+            {
+                x = x.Replace("<p>|", "<p>");
+                if (textBox1.SelectedText.IndexOf("<p>|") > -1)
+                {
+                    textBox1.SelectedText = textBox1.SelectedText.Replace("<p>|", "<p>");
+                    s = textBox1.SelectionStart; l = textBox1.SelectionLength;
+                }
+            }
+            
+
             if (pageTextEndPosition - 10 < 0 || pageTextEndPosition > x.Length) pageTextEndPosition = s;
             if (pageTextEndPosition != 0 && s + l < pageTextEndPosition)
             {
@@ -499,7 +509,7 @@ namespace WindowsFormsApp1
             if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("ဉ");
 
             #region 檢查不當分段
-            xCopy = xCopy.Replace("<p>|","<p>");x= x.Replace("<p>|","<p>");
+
             int chkP = xCopy.IndexOf("<p>") + ("<p>".Length + Environment.NewLine.Length);//檢查不當分段（目前僅找最前面的一個，餘於停下手動檢索時人工目測
             if (keyinText) { chkP = -1; goto chksum; }//手動輸入、非半自動連續輸入時，略過不處理
             if (xCopy.IndexOf("<p>") > -1 && chkP + 1 <= x.Length)//&& ("　􏿽|" + Environment.NewLine).IndexOf(x.Substring(chkP, 1)) == -1)
