@@ -551,8 +551,16 @@ namespace WindowsFormsApp1
                     }
                 }
                 if (chkP > -1)
-                {
-                    if (getLineTxt(xCopy,chkP - ("<p>".Length + Environment.NewLine.Length)).IndexOf("*") > -1) chkP = -1;
+                {//如果是單行標題
+                    if (getLineTxt(xCopy, chkP - ("<p>".Length + Environment.NewLine.Length)).IndexOf("*") > -1) chkP = -1;
+                }
+                if (chkP > -1)
+                {//過短的行略過不檢查
+                    if (Math.Abs(countWordsLenPerLinePara(getLineTxt(xCopy, chkP - ("<p>".Length + Environment.NewLine.Length)).Replace("<p", ""))
+                        - normalLineParaLength) > 3)
+                    {
+                        chkP = -1;
+                    }
                 }
                 if (chkP > -1)
                 {//後面是縮排
