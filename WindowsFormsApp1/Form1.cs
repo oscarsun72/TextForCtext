@@ -551,6 +551,10 @@ namespace WindowsFormsApp1
                     }
                 }
                 if (chkP > -1)
+                {
+                    if (getLineTxt(xCopy,chkP - ("<p>".Length + Environment.NewLine.Length)).IndexOf("*") > -1) chkP = -1;
+                }
+                if (chkP > -1)
                 {//後面是縮排
                     if (("　􏿽" + Environment.NewLine).IndexOf(x.Substring(chkP, 1)) > -1) chkP = -1;
                     //後面是凸排
@@ -5449,6 +5453,7 @@ namespace WindowsFormsApp1
                     appActivateByName();//取得網址時順便貼上簡單修改模式下的文字
                     Task.WaitAll();
                     SendKeys.Send("{F6 3}");
+                    Task.WaitAll();
                     SendKeys.Send("^a");
                     SendKeys.Send("^x");
                     string nowClpTxt = Clipboard.GetText();
