@@ -390,7 +390,7 @@ namespace WindowsFormsApp1
                     s = textBox1.SelectionStart; l = textBox1.SelectionLength;
                 }
             }
-            
+
 
             if (pageTextEndPosition - 10 < 0 || pageTextEndPosition > x.Length) pageTextEndPosition = s;
             if (pageTextEndPosition != 0 && s + l < pageTextEndPosition)
@@ -5674,11 +5674,11 @@ namespace WindowsFormsApp1
 
             #region 設定小注不換行的長度限制
 
-            if (x.Length > 5 && x.Substring(5) == "note:")
+            if (x.Length > 5 && x.Substring(0, 5) == "note:")
             {
                 if (Int32.TryParse(x.Substring(5), out int n))
                 {
-                    noteinLineLenLimit = (byte)n;
+                    noteinLineLenLimit = (byte)(n > 255 ? 255 : n);
                 }
             }
             #endregion
