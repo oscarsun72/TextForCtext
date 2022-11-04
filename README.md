@@ -298,9 +298,16 @@ Ctrl+ 滑鼠左鍵：清除框中所有文字
 ### 在表單：
 - 點二下滑鼠左鍵，則將剪貼簿的文字內容讀入textBox1中
 
-## 參照資源
+## 參照資源：
 （大於 25MB 無法在此上傳的檔案則表列於此。若有疏漏，尚祈提醒末學。感恩感恩　南無阿彌陀佛）
 - [查字.mdb](https://www.dropbox.com/s/889aqu6anxym6gp/%E6%9F%A5%E5%AD%97.mdb?dl=0)
 - [《重編國語辭典修訂本》資料庫.mdb](https://www.dropbox.com/s/dxumn4awnx4e0o9/%E3%80%8A%E9%87%8D%E7%B7%A8%E5%9C%8B%E8%AA%9E%E8%BE%AD%E5%85%B8%E4%BF%AE%E8%A8%82%E6%9C%AC%E3%80%8B%E8%B3%87%E6%96%99%E5%BA%AB.mdb?dl=0)
 
+## 操作演示：
+- [我讀《墨子閒詁》文本整理圖文對照程式設計實境秀-自製 TextForCtext 小工具輔助由《漢籍電子文獻資料庫》輸入至《中國哲學書電子化計劃》](https://youtu.be/hnMFTpNfAWg)
+- [《法苑珠林》圖文對照錄入實境秀-在《中國哲學書電子化計劃》網站](https://youtu.be/9D9pJKhKx7E)
+- [《臨川先生文集》圖文對照錄入實境秀-在《中國哲學書電子化計劃》網站](https://youtu.be/E7iNSZplEC8)
+- [《臨川先生文集》圖文對照錄入實境秀續-把她完成-在《中國哲學書電子化計劃》網站](https://youtu.be/Fdb2NUuHCuA)
+- [《臨川先生文集》圖文對照錄入實境秀再續-把她完成-在《中國哲學書電子化計劃》網站](https://youtu.be/mO5TUsovwec)
+- [《臨川先生文集》圖文對照錄入實境秀-程式設計增益功能-在《中國哲學書電子化計劃》網站](https://youtu.be/THOe_56bknQ)
 
