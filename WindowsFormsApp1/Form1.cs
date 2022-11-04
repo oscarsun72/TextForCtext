@@ -467,7 +467,7 @@ namespace WindowsFormsApp1
             int blankParagraphPosition = xCopy.LastIndexOf(Environment.NewLine);
             while (xCopy.Length == blankParagraphPosition + 2)
             {
-                xCopy = xCopy.Substring(0, xCopy.Length - 2);
+                xCopy = xCopy.Substring(0, (xCopy.Length - 2) > -1 ? xCopy.Length - 2 : xCopy.Length);
                 blankParagraphPosition = xCopy.LastIndexOf(Environment.NewLine);
             }
             #endregion
