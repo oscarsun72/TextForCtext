@@ -1275,12 +1275,12 @@ Do While rng.Find.Execute("", , , False, , , True, wdFindStop)
     noteRng.Text = "{{" & Replace(noteRng, "/", "") & "}}"
 Loop
 With rng.Document
-    With .Range.Find
-        .ClearFormatting
-        .Text = ChrW(9675)
-        .Replacement.Text = ChrW(12295)
-        .Execute , , , , , , True, wdFindContinue, , , wdReplaceAll
-    End With
+'    With .Range.Find
+'        .ClearFormatting
+'        .Text = ChrW(9675)
+'        .Replacement.Text = ChrW(12295)
+'        .Execute , , , , , , True, wdFindContinue, , , wdReplaceAll
+'    End With
     '.Range.Cut
     SystemSetup.ClipboardPutIn .Range.Text
     DoEvents
@@ -1582,13 +1582,23 @@ CheckOut:
     MsgBox "plz check it out !", vbExclamation
 End Sub
 
-Sub EditMakeup()
-Const differPageNum  As Integer = 161 '计畉
+Sub EditMakeup_changeFile_Page() 'セゅセ盿竚传file id ㎝ 计
+
+
+Const differPageNum  As Integer = 4 '计畉
+Const file As Long = 0 '7280
+
+
 Dim rng As Range, pageNum As Range, d As Document, ur As UndoRecord
 Set d = ActiveDocument
 Set rng = d.Range
 'Set ur = SystemSetup.stopUndo("EditMakeupCtext")
 SystemSetup.stopUndo ur, "EditMakeupCtext"
+If file > 0 Then
+    'rng.Find.Execute " file=""77991""", True, True, , , , True, wdFindContinue, , " file=""" & file & """", wdReplaceAll
+    rng.Text = Replace(rng.Text, " file=""78000""", " file=""" & file & """")
+End If
+
 Do While rng.Find.Execute(" page=""", , , , , , True, wdFindStop)
     Set pageNum = rng
     pageNum.SetRange rng.End, rng.End + 1
@@ -1596,7 +1606,10 @@ Do While rng.Find.Execute(" page=""", , , , , , True, wdFindStop)
     pageNum.Text = CStr(CInt(pageNum.Text) - differPageNum)
     rng.SetRange pageNum.End, d.Range.End
 Loop
+SystemSetup.SetClipboard d.Range.Text
 SystemSetup.contiUndo ur
+SystemSetup.playSound 1
+
 End Sub
 
 
