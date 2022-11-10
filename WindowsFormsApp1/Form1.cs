@@ -1833,13 +1833,13 @@ namespace WindowsFormsApp1
 
         void notes_a_line_all(bool ctrl)
         {//Alt + Shift + s :  所有小注文都不換行//Alt + Shift + Ctrl + s : 小注文不換行(短於指定漢字長者)
-            int s = textBox1.SelectionStart, i = textBox1.Text.IndexOf("}}"), space;
+            int s = textBox1.SelectionStart, i = textBox1.Text.IndexOf("}}"), space = 0;
             //'if (textBox1.SelectedText == "") textBox1.SelectAll();
             undoRecord();
             stopUndoRec = true;
             while (i > -1)
             {
-                if ((textBox1.Text.LastIndexOf(Environment.NewLine, i) == -1 && textBox1.Text.LastIndexOf("{{", i) > -1)
+                if ((textBox1.TextLength >= i + space + 1 && textBox1.Text.LastIndexOf(Environment.NewLine, i) == -1 && textBox1.Text.LastIndexOf("{{", i) > -1)
                     || (textBox1.Text.LastIndexOf(Environment.NewLine, i) < textBox1.Text.LastIndexOf("{{", i)))
                 {
                     textBox1.Select(i, 0);
