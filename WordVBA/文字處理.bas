@@ -3263,8 +3263,9 @@ Do Until rst.EOF
                 rngF.SetRange rngF.End, d.Range.End
             End If
         Loop
+        Set rngF = d.Range: dx = d.Range.Text
     End If
-    Set rngF = d.Range: dx = d.Range.Text
+    
     rst.MoveNext
 Loop
 d.Range.Find.Execute "《《", , , , , , True, wdFindContinue, , "《", wdReplaceAll
@@ -3293,14 +3294,16 @@ Do Until rst.EOF
                 rngF.SetRange rngF.End, d.Range.End
             End If
         Loop
+        Set rngF = d.Range: dx = d.Range.Text
     End If
-    Set rngF = d.Range: dx = d.Range.Text
+    
     rst.MoveNext
 Loop
 rst.Close
 Return
 
 End Sub
+
 
 Sub 分行分段_根據第1行的字數長度來作切割()
 Dim wordCount As Byte, d As Document, rng As Range, i As Integer, dx As String, a, p As Paragraph, j As Byte, wl
