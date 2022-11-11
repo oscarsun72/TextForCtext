@@ -4731,6 +4731,7 @@ namespace WindowsFormsApp1
                     break;
                 default:
                     //清除多餘的空行,排除卷末的空行
+                    Task.WaitAll();
                     xClpBd = Clipboard.GetText();
                     if (xClpBd.Length > 100)
                     {
