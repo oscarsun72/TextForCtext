@@ -224,6 +224,28 @@ SendKeys Description_from_ClipBoard
 SendKeys "{tab 2}~"
 End Sub
 
+Sub 金石錄_四部叢刊_維基文庫本() '《金石錄》格式者皆適用（即注文單行，而換行前的不單行） 20221110
+Dim rng As Range, d As Document, s As Long, e As Long, rngDel As Range, ur As UndoRecord
+Set d = ActiveDocument
+Set rng = d.Range: Set rngDel = rng
+rng.Find.ClearFormatting
+SystemSetup.stopUndo ur, "金石錄_四部叢刊_維基文庫本"
+Do While rng.Find.Execute("}}|" & Chr(13) & "{{", , , , , , True, wdFindStop)
+    s = rng.start - 1: e = rng.start
+    Do Until d.Range(s, e) <> "　" '清除其前空格
+        s = s - 1: e = e - 1
+    Loop
+    rngDel.SetRange s + 1, rng.start
+    'rngDel.Select
+    If rngDel.Text <> "" Then If Replace(rngDel, "　", "") = "" Then rngDel.Delete
+    rng.SetRange s + Len("}}|" & Chr(13) & "{{"), d.Range.End
+    
+    'Set rng = d.Range
+Loop
+d.Range.Text = Replace(Replace(d.Range.Text, "|" & Chr(13) & "　", ""), "}}|" & Chr(13) & "{{", Chr(13))
+SystemSetup.contiUndo ur
+End Sub
+
 Sub 轉成黑豆以作行字數長度判斷用()
 Dim p As Paragraph, a, i As Byte, cntr As Byte, ur As UndoRecord
 'Set ur = SystemSetup.stopUndo("轉成黑豆以作行字數長度判斷用")
@@ -1582,10 +1604,10 @@ CheckOut:
     MsgBox "plz check it out !", vbExclamation
 End Sub
 
-Sub EditMakeup_changeFile_Page() '同版本文本帶入置換file id 和 頁數
+Sub EditModeMakeup_changeFile_Page() '同版本文本帶入置換file id 和 頁數
 
 
-Const differPageNum  As Integer = 4 '頁數差
+Const differPageNum  As Integer = -4 '頁數差
 Const file As Long = 0 '7280
 
 
