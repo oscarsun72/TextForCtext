@@ -1,5 +1,32 @@
 Attribute VB_Name = "中國哲學書電子化計劃"
 Option Explicit
+Sub 集杜詩_文山先生全集_四部叢刊_維基文庫本_去掉中間誤空的格() '《集杜詩》格式者皆適用（中間誤空的格） 20221112
+Dim rng As Range, d As Document, p As Paragraph, a As Range, i As Integer, ur As UndoRecord
+Set d = ActiveDocument
+If d.path <> "" Then Set d = Documents.Add
+SystemSetup.stopUndo ur, "集杜詩_文山先生全集_四部叢刊_維基文庫本_去掉中間誤空的格"
+For Each p In d.Paragraphs
+    For Each a In p.Range.Characters
+        i = i + 1
+        If i > 3 Then '此與標題、縮排等前空幾格之條件有關
+            If a <> "　" And a.Next = "　" And a.Previous = "　" Then '單字前後皆空格者才處理
+                Set rng = d.Range(a.End, a.End)
+                rng.MoveEndWhile "　"
+'                rng.Select
+'                Stop
+                rng.Delete
+            End If
+        End If
+    Next
+    i = 0
+Next p
+DoEvents
+d.Range.Copy
+DoEvents
+SystemSetup.contiUndo ur
+SystemSetup.playSound 2
+End Sub
+
 Sub 新頁面()
 'the page begin
 Dim start As Integer
@@ -227,6 +254,10 @@ End Sub
 Sub 金石錄_四部叢刊_維基文庫本() '《金石錄》格式者皆適用（即注文單行，而換行前的不單行） 20221110
 Dim rng As Range, d As Document, s As Long, e As Long, rngDel As Range, ur As UndoRecord
 Set d = ActiveDocument
+If d.path <> "" Then Set d = Documents.Add
+DoEvents
+d.Range.Paste
+DoEvents
 Set rng = d.Range: Set rngDel = rng
 rng.Find.ClearFormatting
 SystemSetup.stopUndo ur, "金石錄_四部叢刊_維基文庫本"
@@ -243,7 +274,12 @@ Do While rng.Find.Execute("}}|" & Chr(13) & "{{", , , , , , True, wdFindStop)
     'Set rng = d.Range
 Loop
 d.Range.Text = Replace(Replace(d.Range.Text, "|" & Chr(13) & "　", ""), "}}|" & Chr(13) & "{{", Chr(13))
+d.Range.Copy
 SystemSetup.contiUndo ur
+SystemSetup.playSound 2
+word.Application.WindowState = wdWindowStateMinimize
+On Error Resume Next
+AppActivate "TextForCtext", True
 End Sub
 
 Sub 轉成黑豆以作行字數長度判斷用()

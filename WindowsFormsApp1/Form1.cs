@@ -2673,6 +2673,7 @@ namespace WindowsFormsApp1
             {
                 if (textBox1.Text.Substring(textBox1.SelectionStart + textBox1.SelectionLength
                     + Environment.NewLine.Length, "　".Length) != "　" &&
+                    textBox1.SelectionLength - 3 > -1 &&
                     textBox1.SelectedText.Substring(textBox1.SelectionLength - 3) == "<p>")
                 {//如果接下來是頂行，則不取代最後的<p>
                     textBox1.Select(textBox1.SelectionStart, textBox1.SelectionLength - "<p>".Length);
