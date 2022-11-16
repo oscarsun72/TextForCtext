@@ -5509,7 +5509,7 @@ namespace WindowsFormsApp1
                 {
                     textBox1.Select(selStart, selLength);
                 }
-                if (autoPastetoQuickEdit || (autoPastetoQuickEdit && ModifierKeys != Keys.None)) autoPastetoCtextQuitEditTextbox();
+                if (!keyinText && (autoPastetoQuickEdit || (autoPastetoQuickEdit && ModifierKeys != Keys.None))) autoPastetoCtextQuitEditTextbox();
             }
             if (textBox2.BackColor == Color.GreenYellow &&
                 doNotLeaveTextBox2 && textBox2.Focused) textBox2.SelectAll();
