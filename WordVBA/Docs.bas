@@ -753,8 +753,19 @@ Dim searchedTerm, e, ur As UndoRecord, d As Document, clipBTxt As String, flgPas
 SystemSetup.stopUndo ur, "mark易學關鍵字"
 If Documents.Count = 0 Then Documents.Add
 Set d = ActiveDocument
+    If InStr(d.Range.Text, Chr(13) & Chr(13) & Chr(13) & Chr(13)) > 0 Then
+        d.Range.Text = Replace(d.Range.Text, Chr(13) & Chr(13) & Chr(13) & Chr(13), Chr(13) & Chr(13) & Chr(13))
+    End If
+'    With d.Range.Find
+'        If InStr(.Parent.Text, Chr(13) & Chr(13) & Chr(13) & Chr(13)) > 1 Then
+'            .ClearFormatting
+'            .Execute Chr(13) & Chr(13) & Chr(13) & Chr(13), , , , , , True, wdFindContinue, , Chr(13) & Chr(13) & Chr(13), wdReplaceAll
+'        End If
+'        .ClearFormatting
+'    End With
+
 clipBTxt = Replace(VBA.Trim(SystemSetup.GetClipboardText), Chr(13) + Chr(10) + "空句子" + Chr(13) + Chr(10), Chr(13) + Chr(10) + Chr(13) + Chr(10))
-searchedTerm = Array("卦", "爻", "易", "周易", "易經", "系辭", "繫辭", "擊辭", "擊詞", "繫詞", "說卦", "序卦", "卦序", "敘卦", "雜卦", "文言", "乾坤", "無咎", ChrW(26080) & "咎", "天咎", "元亨", "利貞" _
+searchedTerm = Array("易", "卦", "爻", "周易", "易經", "系辭", "繫辭", "擊辭", "擊詞", "繫詞", "說卦", "序卦", "卦序", "敘卦", "雜卦", "文言", "乾坤", "無咎", ChrW(26080) & "咎", "天咎", "元亨", "利貞" _
     , "史記", "九五", "六二", "上九", "上六", "九二", "筮") ', "", "", "", "")
 
 'If Selection.Type = wdSelectionIP Then
@@ -813,13 +824,6 @@ If flgPaste Then
             End With
         End If
     Next e
-    With d.Range.Find
-        If InStr(.Parent.Text, Chr(13) & Chr(13) & Chr(13) & Chr(13)) > 1 Then
-            .ClearFormatting
-            .Execute Chr(13) & Chr(13) & Chr(13) & Chr(13), , , , , , True, wdFindContinue, , Chr(13) & Chr(13) & Chr(13), wdReplaceAll
-        End If
-        .ClearFormatting
-    End With
     GoSub refres
     SystemSetup.playSound 1.921
 Else

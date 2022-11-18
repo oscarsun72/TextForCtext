@@ -1282,6 +1282,40 @@ namespace WindowsFormsApp1
             //按下Alt鍵
             if ((m & Keys.Alt) == Keys.Alt)//⇌ if (Control.ModifierKeys == Keys.Alt)
             {
+                if (e.KeyCode == Keys.F1)// Alt + F1
+                {
+                    e.Handled = true; undoRecord();
+                    if (textBox1.SelectionLength > 0)
+                    {
+                        textBox1.SelectedText = textBox1.SelectedText.Replace("　", "■").Replace("􏿽", "■");
+                    }
+                    else
+                    {
+                        textBox1.SelectedText = "■"; int s = textBox1.SelectionStart;
+                        if ((s + 2) <= textBox1.TextLength && "　􏿽".IndexOf(textBox1.Text.Substring(s, 1)) > -1)
+                        {
+                            textBox1.Select(s, char.IsHighSurrogate(textBox1.Text.Substring(s, 1).ToCharArray()[0]) ? 2 : 1); textBox1.SelectedText = "";
+                        }
+                    }
+                    return;
+                }
+                if (e.KeyCode == Keys.F2)// Alt + F2
+                {
+                    e.Handled = true; undoRecord();
+                    if (textBox1.SelectionLength > 0)
+                    {
+                        textBox1.SelectedText = textBox1.SelectedText.Replace("　", "□").Replace("􏿽", "□");
+                    }
+                    else
+                    {
+                        textBox1.SelectedText = "□"; int s = textBox1.SelectionStart;
+                        if ((s + 2) <= textBox1.TextLength && "　􏿽".IndexOf(textBox1.Text.Substring(s, 1)) > -1)
+                        {
+                            textBox1.Select(s, char.IsHighSurrogate(textBox1.Text.Substring(s, 1).ToCharArray()[0]) ? 2 : 1); textBox1.SelectedText = "";
+                        }
+                    }
+                    return;
+                }
                 if (e.KeyCode == Keys.Multiply)// Alt + *
                 {
                     e.Handled = true; 歐陽文忠公集_集古錄跋尾校語專用(); return;
@@ -4314,7 +4348,7 @@ namespace WindowsFormsApp1
                     e.Handled = true;
                     if (!TopLine) SystemSounds.Hand.Play();
                     else SystemSounds.Exclamation.Play();
-                    TopLine = TopLine ? false : true;
+                    TopLine = !TopLine;
                     return;
                 }
             }
@@ -4326,6 +4360,30 @@ namespace WindowsFormsApp1
                 SendKeys.Send("^+t");
                 return;
 
+            }
+            #endregion
+
+            #region 按下 Alt+ Shift
+            if ((m & Keys.Alt) == Keys.Alt && (m & Keys.Shift) == Keys.Shift)
+            {
+                if (e.KeyCode == Keys.F1)
+                {//Alt + F1
+                    var cjk = getCJKExtFontInstalled(CJKBiggestSet[++FontFamilyNowIndex]);
+                    if (FontFamilyNowIndex == CJKBiggestSet.Length - 1) FontFamilyNowIndex = -1;
+                    if (cjk != null)
+                    {
+                        MessageBox.Show(cjk.Name);
+                        if (cjk.Name == "KaiXinSongB")
+                        {
+                            textBox1.Font = new Font(cjk, (float)17);
+                        }
+                        else
+                        {
+                            textBox1.Font = new Font(cjk, textBox1FontDefaultSize);
+                        }
+                    }
+                    e.Handled = true; return;
+                }
             }
             #endregion
 
@@ -4457,24 +4515,6 @@ namespace WindowsFormsApp1
                     return;
                 }
 
-                if (e.KeyCode == Keys.F1)
-                {//Alt + F1
-                    var cjk = getCJKExtFontInstalled(CJKBiggestSet[++FontFamilyNowIndex]);
-                    if (FontFamilyNowIndex == CJKBiggestSet.Length - 1) FontFamilyNowIndex = -1;
-                    if (cjk != null)
-                    {
-                        MessageBox.Show(cjk.Name);
-                        if (cjk.Name == "KaiXinSongB")
-                        {
-                            textBox1.Font = new Font(cjk, (float)17);
-                        }
-                        else
-                        {
-                            textBox1.Font = new Font(cjk, textBox1FontDefaultSize);
-                        }
-                    }
-                    e.Handled = true; return;
-                }
 
                 if (e.KeyCode == Keys.F6 || e.KeyCode == Keys.F8)
                 {//Alt + F6、Alt + F8 : run autoMarkTitles 自動標識標題（篇名）
