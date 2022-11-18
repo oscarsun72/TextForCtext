@@ -1284,36 +1284,14 @@ namespace WindowsFormsApp1
             {
                 if (e.KeyCode == Keys.F1)// Alt + F1
                 {
-                    e.Handled = true; undoRecord();
-                    if (textBox1.SelectionLength > 0)
-                    {
-                        textBox1.SelectedText = textBox1.SelectedText.Replace("　", "■").Replace("􏿽", "■");
-                    }
-                    else
-                    {
-                        textBox1.SelectedText = "■"; int s = textBox1.SelectionStart;
-                        if ((s + 2) <= textBox1.TextLength && "　􏿽".IndexOf(textBox1.Text.Substring(s, 1)) > -1)
-                        {
-                            textBox1.Select(s, char.IsHighSurrogate(textBox1.Text.Substring(s, 1).ToCharArray()[0]) ? 2 : 1); textBox1.SelectedText = "";
-                        }
-                    }
+                    e.Handled = true;
+                    keySymbols("■");
                     return;
                 }
                 if (e.KeyCode == Keys.F2)// Alt + F2
                 {
-                    e.Handled = true; undoRecord();
-                    if (textBox1.SelectionLength > 0)
-                    {
-                        textBox1.SelectedText = textBox1.SelectedText.Replace("　", "□").Replace("􏿽", "□");
-                    }
-                    else
-                    {
-                        textBox1.SelectedText = "□"; int s = textBox1.SelectionStart;
-                        if ((s + 2) <= textBox1.TextLength && "　􏿽".IndexOf(textBox1.Text.Substring(s, 1)) > -1)
-                        {
-                            textBox1.Select(s, char.IsHighSurrogate(textBox1.Text.Substring(s, 1).ToCharArray()[0]) ? 2 : 1); textBox1.SelectedText = "";
-                        }
-                    }
+                    e.Handled = true;
+                    keySymbols("□");
                     return;
                 }
                 if (e.KeyCode == Keys.Multiply)// Alt + *
@@ -1694,6 +1672,27 @@ namespace WindowsFormsApp1
                 }
             }//以上按下單一鍵
             #endregion
+        }
+
+        private void keySymbols(string symbol)
+        {
+            undoRecord();
+            if (textBox1.SelectionLength > 0)
+            {
+                textBox1.SelectedText = textBox1.SelectedText.Replace("　", symbol).Replace("􏿽", symbol);
+            }
+            else
+            {
+                textBox1.SelectedText = symbol; int s = textBox1.SelectionStart;
+                if ((s + 2) <= textBox1.TextLength && "　􏿽".IndexOf(textBox1.Text.Substring(s, 1)) > -1)
+                {
+                    textBox1.Select(s, char.IsHighSurrogate(textBox1.Text.Substring(s, 1).ToCharArray()[0]) ? 2 : 1); textBox1.SelectedText = "";
+                }
+                else if((s + 3) <= textBox1.TextLength && "<p>"==textBox1.Text.Substring(s, 3))
+                {
+                    textBox1.Select(s, 3);textBox1.SelectedText = "";
+                }
+            }
         }
 
         private void addData四部叢刊造字對照表andReplace()
@@ -5514,7 +5513,8 @@ namespace WindowsFormsApp1
             catch (Exception)
             {
 
-                Task.Delay(900).Wait();
+                //Task.Delay(900).Wait();
+                Task.WaitAll();
                 clpTxt = Clipboard.GetText();
                 //throw;
             }
