@@ -1679,7 +1679,7 @@ namespace WindowsFormsApp1
             undoRecord();
             if (textBox1.SelectionLength > 0)
             {
-                textBox1.SelectedText = textBox1.SelectedText.Replace("　", symbol).Replace("􏿽", symbol).Replace("<p>", symbol);
+                textBox1.SelectedText = textBox1.SelectedText.Replace("　", symbol).Replace("􏿽", symbol).Replace("<p>", symbol).Replace("*", "");
             }
             else
             {
