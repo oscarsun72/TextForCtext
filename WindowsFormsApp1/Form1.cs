@@ -1679,18 +1679,18 @@ namespace WindowsFormsApp1
             undoRecord();
             if (textBox1.SelectionLength > 0)
             {
-                textBox1.SelectedText = textBox1.SelectedText.Replace("　", symbol).Replace("􏿽", symbol).Replace("<p>",symbol);
+                textBox1.SelectedText = textBox1.SelectedText.Replace("　", symbol).Replace("􏿽", symbol).Replace("<p>", symbol);
             }
             else
             {
                 textBox1.SelectedText = symbol; int s = textBox1.SelectionStart;
-                if ((s + 2) <= textBox1.TextLength && "　􏿽".IndexOf(textBox1.Text.Substring(s, 1)) > -1)
+                if ((s + 2) <= textBox1.TextLength && "　􏿽*".IndexOf(textBox1.Text.Substring(s, 1), 0, StringComparison.Ordinal) > -1)
                 {
                     textBox1.Select(s, char.IsHighSurrogate(textBox1.Text.Substring(s, 1).ToCharArray()[0]) ? 2 : 1); textBox1.SelectedText = "";
                 }
-                else if((s + 3) <= textBox1.TextLength && "<p>"==textBox1.Text.Substring(s, 3))
+                else if ((s + 3) <= textBox1.TextLength && "<p>" == textBox1.Text.Substring(s, 3))
                 {
-                    textBox1.Select(s, 3);textBox1.SelectedText = "";
+                    textBox1.Select(s, 3); textBox1.SelectedText = "";
                 }
             }
         }
