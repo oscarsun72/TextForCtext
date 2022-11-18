@@ -4367,7 +4367,7 @@ namespace WindowsFormsApp1
             if ((m & Keys.Alt) == Keys.Alt && (m & Keys.Shift) == Keys.Shift)
             {
                 if (e.KeyCode == Keys.F1)
-                {//Alt + F1
+                {//Alt + Shift + F1 ：切換 textbox1 之字型： 切換支援 CJK - Ext 擴充字集的大字集字型
                     var cjk = getCJKExtFontInstalled(CJKBiggestSet[++FontFamilyNowIndex]);
                     if (FontFamilyNowIndex == CJKBiggestSet.Length - 1) FontFamilyNowIndex = -1;
                     if (cjk != null)
