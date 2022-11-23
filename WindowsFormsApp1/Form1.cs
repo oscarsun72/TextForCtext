@@ -4713,6 +4713,7 @@ namespace WindowsFormsApp1
                 SendKeys.Send("{Tab}"); //("{Tab 24}");
                                         //要尾綴「#editor」如是格式的才能只按一個tab就入文字框中 ： https://ctext.org/library.pl?if=gb&file=77367&page=59&editwiki=415472#editor
                 Task.Delay(200).Wait();//200
+                Task.WaitAll();
                 SendKeys.Send("^a");
                 if (keyinText)
                 {
@@ -5030,6 +5031,7 @@ namespace WindowsFormsApp1
                 SendKeys.Send("^{F4}");//關閉前一頁                
             }
             Task.Delay(100).Wait();
+            Task.WaitAll();
             SendKeys.Send("^v{tab}~");
             //this.WindowState = FormWindowState.Minimized;
             //throw new NotImplementedException();
@@ -5714,7 +5716,8 @@ namespace WindowsFormsApp1
             #endregion
 
             #region 預設瀏覽器名稱設定
-            if (x == "msedge" || x == "chrome" || x == "brave") defaultBrowserName = x;
+            //輸入「msedge」「chrome」「brave」「vivaldi」，可以設定預設瀏覽器名稱
+            if (x == "msedge" || x == "chrome" || x == "brave" || x == "vivaldi") defaultBrowserName = x;
             #endregion
 
             #region 設定小注不換行的長度限制

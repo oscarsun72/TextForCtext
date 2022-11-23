@@ -754,16 +754,16 @@ SystemSetup.stopUndo ur, "mark易學關鍵字"
 If Documents.Count = 0 Then Documents.Add
 Set d = ActiveDocument
     If InStr(d.Range.Text, Chr(13) & Chr(13) & Chr(13) & Chr(13)) > 0 Then
-        d.Range.Text = Replace(d.Range.Text, Chr(13) & Chr(13) & Chr(13) & Chr(13), Chr(13) & Chr(13) & Chr(13))
+'        d.Range.Text = Replace(d.Range.Text, Chr(13) & Chr(13) & Chr(13) & Chr(13), Chr(13) & Chr(13) & Chr(13))
+    '保留格式，故用以下，不用以上
+    With d.Range.Find
+        If InStr(.Parent.Text, Chr(13) & Chr(13) & Chr(13) & Chr(13)) > 1 Then
+            .ClearFormatting
+            .Execute Chr(13) & Chr(13) & Chr(13) & Chr(13), , , , , , True, wdFindContinue, , Chr(13) & Chr(13) & Chr(13), wdReplaceAll
+        End If
+        .ClearFormatting
+    End With
     End If
-'    With d.Range.Find
-'        If InStr(.Parent.Text, Chr(13) & Chr(13) & Chr(13) & Chr(13)) > 1 Then
-'            .ClearFormatting
-'            .Execute Chr(13) & Chr(13) & Chr(13) & Chr(13), , , , , , True, wdFindContinue, , Chr(13) & Chr(13) & Chr(13), wdReplaceAll
-'        End If
-'        .ClearFormatting
-'    End With
-
 clipBTxt = Replace(VBA.Trim(SystemSetup.GetClipboardText), Chr(13) + Chr(10) + "空句子" + Chr(13) + Chr(10), Chr(13) + Chr(10) + Chr(13) + Chr(10))
 searchedTerm = Array("易", "卦", "爻", "周易", "易經", "系辭", "繫辭", "擊辭", "擊詞", "繫詞", "說卦", "序卦", "卦序", "敘卦", "雜卦", "文言", "乾坤", "無咎", ChrW(26080) & "咎", "天咎", "元亨", "利貞" _
     , "史記", "九五", "六二", "上九", "上六", "九二", "筮") ', "", "", "", "")
@@ -792,7 +792,7 @@ searchedTerm = Array("易", "卦", "爻", "周易", "易經", "系辭", "繫辭", "擊辭", "
         If flgPaste Then
             Selection.EndKey wdStory
             Selection.InsertParagraphAfter
-            Selection.InsertParagraphAfter
+'            Selection.InsertParagraphAfter
             Selection.Collapse wdCollapseEnd
             SystemSetup.SetClipboard clipBTxt
             貼上純文字
@@ -834,11 +834,11 @@ SystemSetup.contiUndo ur
 Set ur = Nothing
 Exit Sub
 refres:
+    文字處理.書名號篇名號標注
     word.Application.ScreenUpdating = True
     If Not rng Is Nothing Then rng.Select
     word.Application.ScreenRefresh
     ActiveWindow.ScrollIntoView Selection, True
-
 Return
 End Sub
 
