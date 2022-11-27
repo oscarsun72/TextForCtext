@@ -1641,20 +1641,34 @@ CheckOut:
 End Sub
 
 Sub EditModeMakeup_changeFile_Page() 'セゅセ盿竚传file id ㎝ 计
-
-
-Const differPageNum  As Integer = -4 '计畉
-Const file As Long = 0 '7280
-
-
 Dim rng As Range, pageNum As Range, d As Document, ur As UndoRecord
 Set d = ActiveDocument
+
+'ゅン玡3琿だ琌戈癟,磅︽Ч穦睲埃
+If Not VBA.IsNumeric(VBA.Replace(d.Range.Paragraphs(1).Range.Text, Chr(13), "")) Then
+    MsgBox "叫ゅン玡3琿だ琌戈癟琌计,磅︽Ч穦睲埃" & vbCr & vbCr & _
+        "1. 计畉(ㄓ方-(搭)ヘ" & vbCr & _
+        "2. ヘ file number璶竚传Θぃ玥0菠玥箇砞0" & vbCr & _
+        "3. ㄓ方 file number璶砆,菠ご璶ㄤ琿辅=︽玥ゅンいfile="
+    Exit Sub
+End If
+Dim differPageNum  As Integer '计畉(ㄓ方-(搭)ヘ
+differPageNum = VBA.Replace(d.Paragraphs(1).Range.Text, Chr(13), "") '计畉(ㄓ方-(搭)ヘ
+Dim file
+file = VBA.Replace(d.Paragraphs(2).Range.Text, Chr(13), "") ' ヘぃ玥0
+If file = "" Then file = 0
+Dim fileFrom As String
+fileFrom = VBA.Replace(d.Paragraphs(3).Range.Text, Chr(13), "") ' 'ㄓ方
+If fileFrom = "" Then
+    Dim s As String: s = VBA.InStr(d.Range.Text, "<scanbegin file="): s = s + VBA.Len("<scanbegin file=")
+    fileFrom = Mid(d.Range.Text, s + 1, InStr(s + 1, d.Range.Text, """") - s - 1)
+End If
 Set rng = d.Range
 'Set ur = SystemSetup.stopUndo("EditMakeupCtext")
 SystemSetup.stopUndo ur, "EditMakeupCtext"
 If file > 0 Then
     'rng.Find.Execute " file=""77991""", True, True, , , , True, wdFindContinue, , " file=""" & file & """", wdReplaceAll
-    rng.Text = Replace(rng.Text, " file=""78000""", " file=""" & file & """")
+    rng.Text = Replace(rng.Text, " file=""" & fileFrom & """", " file=""" & file & """")
 End If
 
 Do While rng.Find.Execute(" page=""", , , , , , True, wdFindStop)
@@ -1664,6 +1678,8 @@ Do While rng.Find.Execute(" page=""", , , , , , True, wdFindStop)
     pageNum.Text = CStr(CInt(pageNum.Text) - differPageNum)
     rng.SetRange pageNum.End, d.Range.End
 Loop
+rng.SetRange d.Range.Paragraphs(1).Range.start, d.Range.Paragraphs(3).Range.End
+rng.Delete
 SystemSetup.SetClipboard d.Range.Text
 SystemSetup.contiUndo ur
 SystemSetup.playSound 1

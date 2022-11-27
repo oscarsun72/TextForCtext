@@ -1749,9 +1749,14 @@ namespace WindowsFormsApp1
             }
             else
             {
-                if (char.IsLowSurrogate(textBox1.Text.Substring(textBox1.SelectionStart, 1).ToCharArray()[0]))
+                if (textBox1.TextLength < textBox1.SelectionStart + 1)
+                    textBox1.Select(textBox1.SelectionStart, 1);
+                else
                 {
-                    textBox1.Select(++textBox1.SelectionStart, 0);
+                    if (char.IsLowSurrogate(textBox1.Text.Substring(textBox1.SelectionStart, 1).ToCharArray()[0]))
+                    {
+                        textBox1.Select(++textBox1.SelectionStart, 0);
+                    }
                 }
             }
 
@@ -5658,8 +5663,19 @@ namespace WindowsFormsApp1
                 //throw;
             }
             if ((xClip.IndexOf("MidleadingBot") > 0 || xClip.IndexOf("此頁面可能存在如下一些問題：") > -1 || xClip.IndexOf("Wmr-bot") > -1)
-                    && textBox1.TextLength < 100)//xClip.Length > 500 )
+                    && textBox1.TextLength < 100)//xClip.Length > 500 )                
+            {
+                bool nextPageAuto=false;
+                if (ModifierKeys == Keys.Control)//如果按下Ctrl則自動翻到下一頁
+                    nextPageAuto = true;
                 runWordMacro("維基文庫四部叢刊本轉來");
+                if (nextPageAuto)
+                {
+                    nextPages(Keys.PageDown, false);
+                    Task.WaitAll();
+                }
+            }
+
         }
 
         private void textBox1_Enter(object sender, EventArgs e)
