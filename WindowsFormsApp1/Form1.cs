@@ -5665,12 +5665,13 @@ namespace WindowsFormsApp1
             if ((xClip.IndexOf("MidleadingBot") > 0 || xClip.IndexOf("此頁面可能存在如下一些問題：") > -1 || xClip.IndexOf("Wmr-bot") > -1)
                     && textBox1.TextLength < 100)//xClip.Length > 500 )                
             {
-                bool nextPageAuto=false;
+                bool nextPageAuto = false;
                 if (ModifierKeys == Keys.Control)//如果按下Ctrl則自動翻到下一頁
                     nextPageAuto = true;
                 runWordMacro("維基文庫四部叢刊本轉來");
                 if (nextPageAuto)
                 {
+                    Task.WaitAll();
                     nextPages(Keys.PageDown, false);
                     Task.WaitAll();
                 }
