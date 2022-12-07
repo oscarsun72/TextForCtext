@@ -102,6 +102,35 @@ Loop
 SystemSetup.ClipboardPutIn xd
 End Sub
 
+Sub formatTitleCode() '標題格式設定
+Dim rng As Range, d As Document, y As Byte, s As Long, ur As UndoRecord
+Set d = ActiveDocument: SystemSetup.stopUndo ur, "formatTitleCode標題格式設定"
+Set rng = d.Range
+rng.Find.ClearFormatting
+For y = 2 To 4
+    Do While rng.Find.Execute("y=""" & y & """ />", , , , , , True, wdFindStop)
+        GoSub code
+    Loop
+    Set rng = d.Range
+Next y
+SystemSetup.contiUndo ur
+SystemSetup.playSound 1.469
+Exit Sub
+code:
+    rng.Text = rng.Text + "*"
+    s = rng.End + 1
+    rng.Collapse wdCollapseStart
+    rng.SetRange rng.start, rng.start
+    'rng.MoveStartUntil ">"
+    Do Until rng.Next.Text = "<"
+        rng.move wdCharacter, -1
+    Loop
+    rng.move
+    rng.Text = rng.Text + Chr(13) + Chr(13)
+    rng.SetRange s, d.Range.End
+    Return
+End Sub
+
 Sub 清除頁前的分段符號()
 Dim d As Document, rng As Range, e As Long, s As Long, xd As String
 Set d = Documents.Add

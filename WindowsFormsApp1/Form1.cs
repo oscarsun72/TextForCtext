@@ -507,6 +507,7 @@ namespace WindowsFormsApp1
             if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("ဆ");
             if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("ဈ");
             if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("ဉ");
+            if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("▱");
 
             #region 檢查不當分段
 
