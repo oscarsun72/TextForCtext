@@ -564,7 +564,8 @@ namespace WindowsFormsApp1
                     }
                     if (chkP > -1)
                     {//後面有縮排一行如標題者：
-                        if ("　􏿽".IndexOf(x.Substring(x.IndexOf(Environment.NewLine, chkP) + 2, 1)) > -1 &&
+                        if ((x.IndexOf(Environment.NewLine, chkP) + 2 + 1) <= x.Length &&
+                            "　􏿽".IndexOf(x.Substring(x.IndexOf(Environment.NewLine, chkP) + 2, 1)) > -1 &&
                             "　􏿽".IndexOf(xCopy.Substring(x.LastIndexOf(Environment.NewLine, prePPos) + 2, 1)) == -1)
                             chkP = -1;
                     }
@@ -827,6 +828,10 @@ namespace WindowsFormsApp1
                 if (e.KeyCode == Keys.G || e.KeyCode == Keys.Packet)
                 { e.Handled = true; return; }
             }
+
+            if ((m & Keys.Alt) == Keys.Alt && (m & Keys.Control) == Keys.Control && (m & Keys.Shift) != Keys.Shift
+                && e.KeyCode == Keys.S)
+            { e.Handled = true; notes_a_line_all(false, true); return; }
             #endregion
 
 
@@ -1870,7 +1875,7 @@ namespace WindowsFormsApp1
             stopUndoRec = false;
         }
 
-        void notes_a_line_all(bool ctrl)
+        void notes_a_line_all(bool ctrl, bool onlyUnderTitle = false)
         {//Alt + Shift + s :  所有小注文都不換行//Alt + Shift + Ctrl + s : 小注文不換行(短於指定漢字長者)
             int s = textBox1.SelectionStart, i = textBox1.Text.IndexOf("}}"), space = 0;
             //'if (textBox1.SelectedText == "") textBox1.SelectAll();
@@ -1881,8 +1886,12 @@ namespace WindowsFormsApp1
                 if ((textBox1.Text.LastIndexOf(Environment.NewLine, i) == -1 && textBox1.Text.LastIndexOf("{{", i) > -1)
                     || (textBox1.Text.LastIndexOf(Environment.NewLine, i) < textBox1.Text.LastIndexOf("{{", i)))
                 {
+                    if (onlyUnderTitle)
+                    { if (getLineTxt(textBox1.Text, i).IndexOf("*") == -1) goto omit; }
+
                     textBox1.Select(i, 0);
                     space = notes_a_line(false, ctrl);
+                omit:
                     if (textBox1.TextLength >= i + space + 1)
                         i = textBox1.Text.IndexOf("}}", i + space + 1);
                     else
@@ -4200,7 +4209,7 @@ namespace WindowsFormsApp1
                     else
                     {
                         pageTextEndPosition = textBox1.SelectionStart + predictEndofPageSelectedTextLen;
-                        pageEndText10 = textBox1.Text.Substring(pageTextEndPosition - 10);
+                        pageEndText10 = textBox1.Text.Substring(pageTextEndPosition > 9 ? pageTextEndPosition - 10 : pageTextEndPosition);
                         textBox1.Select(pageTextEndPosition, 0);
                         if (check_the_adjacent_pages) nextPages(Keys.PageDown, false);
                     }
@@ -5029,6 +5038,10 @@ namespace WindowsFormsApp1
         private void pasteToCtext()
         {
             appActivateByName();
+            //if (keyinText)
+            //{
+            //    hideToNICo();
+            //}
             if (ModifierKeys == Keys.Shift)//|| (autoPastetoQuickEdit && ModifierKeys == Keys.Control)) //|| ModifierKeys == Keys.Control
                                            //||autoPastetoQuickEdit)//
                                            //&& (textBox1.SelectionLength == predictEndofPageSelectedTextLen

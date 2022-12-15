@@ -145,6 +145,8 @@ Alt + Shift + s : 小注文不換行：notes_a_line_all
 
 Alt + Shift + Ctrl + s : 小注文不換行(短於指定漢字長者 由變數 noteinLineLenLimit 限定）：notes_a_line_all 
 
+Ctrl + Alt + s : 標題下之小注文才不換行
+
 Ctrl + 7 ：如同鍵入「。}}」，於《周易正義》〈彖、象〉辭時適用
 
 Ctrl + 8 ：如同鍵入「　」1個全形空格，且各個空格間有分段符
