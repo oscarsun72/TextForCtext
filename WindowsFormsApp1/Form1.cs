@@ -4737,6 +4737,7 @@ namespace WindowsFormsApp1
                     SendKeys.Send("^x");
                     undoRecord();
                     Task.WaitAll();
+                    Application.DoEvents();
                     textBox1.Text = Clipboard.GetText() + Environment.NewLine + textBox1.Text;
                 }
                 if (!check_the_adjacent_pages)
@@ -5883,7 +5884,10 @@ namespace WindowsFormsApp1
             {
                 if (!insertMode)
                 {
-                    textBox1.Select(selStart, char.IsHighSurrogate(textBox1.Text.Substring(selStart, 1).ToCharArray()[0]) ? 2 : 1);
+                    if (selStart + 1 > textBox1.TextLength)
+                        textBox1.Select(selStart, 0);
+                    else
+                        textBox1.Select(selStart, char.IsHighSurrogate(textBox1.Text.Substring(selStart, 1).ToCharArray()[0]) ? 2 : 1);
                 }
                 else
                     textBox1.Select(selStart, selLength);
