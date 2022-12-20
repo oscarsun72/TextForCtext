@@ -380,13 +380,22 @@ End Sub
 
 Sub 開啟超連結()
 'Ctrl +i   系統預設是 italic（即斜體字），此配合 ExcelVBA設定
-If Selection.Hyperlinks.Count > 0 Then
+Dim rng As Range
+Set rng = Selection.Range
+If rng.Hyperlinks.Count = 0 Then '如果所在位置沒有超連結，則看其前有否；若又無，則再看其後有否；若都無則不執行 2022/12/20
+    If rng.Previous.Hyperlinks.Count > 0 Then
+        Set rng = rng.Previous
+    ElseIf rng.Next.Hyperlinks.Count > 0 Then
+        Set rng = rng.Next
+    End If
+End If
+If rng.Hyperlinks.Count > 0 Then
     Dim strLnk As String, lnk As Hyperlink
-    Set lnk = Selection.Hyperlinks(1)
-    If Selection.Hyperlinks(1).SubAddress <> "" Then
-        strLnk = Selection.Hyperlinks(1).Address + "#" + Selection.Hyperlinks(1).SubAddress
+    Set lnk = rng.Hyperlinks(1)
+    If rng.Hyperlinks(1).SubAddress <> "" Then
+        strLnk = rng.Hyperlinks(1).Address + "#" + rng.Hyperlinks(1).SubAddress
     Else
-        strLnk = Selection.Hyperlinks(1).Address
+        strLnk = rng.Hyperlinks(1).Address
     End If
     Shell getDefaultBrowserFullname + " " + strLnk
 End If

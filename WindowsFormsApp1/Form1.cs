@@ -4736,6 +4736,7 @@ namespace WindowsFormsApp1
                     Task.WaitAll();
                     SendKeys.Send("^x");
                     undoRecord();
+                    Task.WaitAll();
                     textBox1.Text = Clipboard.GetText() + Environment.NewLine + textBox1.Text;
                 }
                 if (!check_the_adjacent_pages)

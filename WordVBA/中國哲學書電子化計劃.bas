@@ -9,12 +9,14 @@ For Each p In d.Paragraphs
     For Each a In p.Range.Characters
         i = i + 1
         If i > 3 Then '此與標題、縮排等前空幾格之條件有關
-            If a <> "　" And a.Next = "　" And a.Previous = "　" Then '單字前後皆空格者才處理
-                Set rng = d.Range(a.End, a.End)
-                rng.MoveEndWhile "　"
-'                rng.Select
-'                Stop
-                rng.Delete
+            If Not a.Next Is Nothing And Not a.Previous Is Nothing Then
+                If a <> "　" And a.Next = "　" And a.Previous = "　" Then '單字前後皆空格者才處理
+                    Set rng = d.Range(a.End, a.End)
+                    rng.MoveEndWhile "　"
+    '                rng.Select
+    '                Stop
+                    rng.Delete
+                End If
             End If
         End If
     Next
