@@ -305,6 +305,48 @@ Select Case Err.Number
         MsgBox Err.Number & Err.Description
 End Select
 End Sub
+Sub 貼上簡化字文本轉正()
+Dim rng As Range, ur As UndoRecord
+SystemSetup.stopUndo ur, "貼上簡化字文本轉正"
+Set rng = Selection.Range
+rng.PasteAndFormat (wdFormatPlainText)
+標點符號置換 rng: 清除半形空格 rng: 半形括號轉全形 rng
+If MsgBox("是否簡轉正？", vbOKCancel) = vbOK Then
+    'rng.Select
+    rng.TCSCConverter wdTCSCConverterDirectionAuto
+    'Selection.Range.TCSCConverter wdTCSCConverterDirectionAuto
+End If
+SystemSetup.contiUndo ur
+End Sub
+Sub 簡化字文本轉正()
+Dim rng As Range, ur As UndoRecord
+SystemSetup.stopUndo ur, "簡化字文本轉正"
+Set rng = Selection.Range
+標點符號置換 rng: 清除半形空格 rng: 半形括號轉全形 rng
+rng.TCSCConverter wdTCSCConverterDirectionAuto
+SystemSetup.contiUndo ur
+SystemSetup.playSound 1
+End Sub
+Function 標點符號置換(Optional rng As Range)
+Dim ay, i As Integer
+ay = Array(ChrW(8220), "「", ChrW(8221), "」", ChrW(-431), "、", ChrW(-432), "，" _
+    , ChrW(58), "：", ChrW(8216), "『", ChrW(8217), "』", _
+    ChrW(-428), "；", "·", "‧", ",", "，", ";", "；" _
+    , "?", "？", ":", "：", "﹕", "：")
+For i = 0 To UBound(ay)
+    rng.Find.Execute ay(i), , , , , , , wdFindContinue, , ay(i + 1), wdReplaceAll
+    i = i + 1
+Next i
+End Function
+Function 清除半形空格(Optional rng As Range)
+rng.Find.Execute " ", , , , , , , wdFindContinue, , "", wdReplaceAll
+End Function
+Function 半形括號轉全形(Optional rng As Range)
+rng.Find.Execute "(", , , , , , , wdFindContinue, , "（", wdReplaceAll
+rng.Find.Execute ")", , , , , , , wdFindContinue, , "）", wdReplaceAll
+End Function
+
+
 Sub 一字一段()
 With Selection
     .HomeKey wdStory
@@ -376,6 +418,24 @@ With ActiveDocument
         e.Delete
     Next e
 End With
+End Sub
+
+Sub 清除多餘不必要的分段()
+Dim p As Paragraph, rng As Range, ur As UndoRecord
+SystemSetup.stopUndo ur, "清除多餘不必要的分段"
+Set rng = ActiveDocument.Range
+For Each p In ActiveDocument.Paragraphs
+    If p.Range.Characters.Count > 2 Then
+        If Not p.Range.Characters(p.Range.Characters.Count - 1) Like "[》」』。（" & ChrW(-197) & "0-9a-zA-Z]" Then
+            If p.Range.End < ActiveDocument.Range.End - 1 Then
+'                p.Range.Characters(p.Range.Characters.Count).Select
+                p.Range.Characters(p.Range.Characters.Count).Delete
+            End If
+        End If
+    End If
+Next
+SystemSetup.contiUndo ur
+SystemSetup.playSound 2
 End Sub
 
 Sub 開新視窗() '快速鍵:alt+shift+w-原為OLE至備忘欄()指定鍵  '2011/6/23''2012/5/20 2003不能設定Alt+w 原設於"字形轉換_華康儷粗黑"
@@ -764,7 +824,8 @@ Set d = ActiveDocument
         .ClearFormatting
     End With
     End If
-clipBTxt = Replace(VBA.Trim(SystemSetup.GetClipboardText), Chr(13) + Chr(10) + "空句子" + Chr(13) + Chr(10), Chr(13) + Chr(10) + Chr(13) + Chr(10))
+clipBTxt = Replace(Replace(VBA.Trim(SystemSetup.GetClipboardText), Chr(13) + Chr(10) + "空句子" + Chr(13) + Chr(10), Chr(13) + Chr(10) + Chr(13) + Chr(10)), Chr(9), "")
+
 searchedTerm = Array("易", "卦", "爻", "周易", "易經", "系辭", "繫辭", "擊辭", "擊詞", "繫詞", "說卦", "序卦", "卦序", "敘卦", "雜卦", "文言", "乾坤", "無咎", ChrW(26080) & "咎", "天咎", "元亨", "利貞" _
     , "史記", "九五", "六二", "上九", "上六", "九二", "筮") ', "", "", "", "")
 
@@ -842,6 +903,46 @@ refres:
 Return
 End Sub
 
+Sub 文件比對_抓抄襲()
+Dim d1 As Document, d2 As Document, p As Paragraph, x As String, i As Byte, rng As Range, pc As Long, d1RngTxt, px As String, rng2 As Range
+Static pi As Long
+Set d1 = Documents(1) '來源
+d1RngTxt = d1.Range.Text
+Set d2 = Documents(2) '抄襲或引用(須先將。，的句子單位拆成各段文字）
+pc = d2.Paragraphs.Count
+If pi = 0 Then pi = 1
+For pi = pi To pc
+    Set p = d2.Paragraphs(pi)
+    If p.Range.Font.NameFarEast <> "標楷體" And p.Range.HighlightColorIndex = 0 Then
+        px = p.Range
+        x = VBA.Trim(Left(px, Len(px) - 1)) '去掉分段符號
+        If Len(x) > 2 Then
+            x = VBA.Left(x, Len(x) - 1) '去掉端後標點。，等
+            If VBA.InStr(d1RngTxt, x) Then
+                i = i + 1
+            Else
+                i = 0
+            End If
+        End If
+        If i > 1 And Len(x) > 2 Then
+            Set rng = d1.Range
+            rng.Find.Execute x
+            rng.Select
+            rng.Copy
+            d1.Activate
+            Set rng2 = d2.Range
+            rng2.Find.Execute x
+            rng2.Select
+            If d2.ActiveWindow.Selection.Range.HighlightColorIndex = 0 Then
+                SystemSetup.playSound 2
+                Exit Sub
+            End If
+        End If
+    End If
+Next
+pi = 0
+SystemSetup.playSound 3
+End Sub
 
 Sub 抽取超連結位址()
 Dim hplnk As Hyperlink, x As String, d As Document

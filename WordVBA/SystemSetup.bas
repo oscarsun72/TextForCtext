@@ -206,9 +206,9 @@ Dim funame As String
 If Selection.Type = wdSelectionNormal Then
     Selection.Copy
     If ActiveDocument.Saved = False And ActiveDocument.path <> "" Then ActiveDocument.Save: DoEvents
-    If Tasks.Exists("skqs professional version") Then
-        Shell Replace(GetDefaultBrowserEXE, """%1", "http://www.google.com.tw/search?q=" & Selection)
-    Else
+'    If Tasks.Exists("skqs professional version") Then
+'        Shell Replace(GetDefaultBrowserEXE, """%1", "http://www.google.com.tw/search?q=" & Selection)
+'    Else
         'Shell "C:\Program Files\Opera\opera.exe" & " http://www.google.com.tw/search?q=" & Selection, vbNormalFocus
         If Dir(st & f) <> "" Then
             funame = st & f
@@ -230,7 +230,7 @@ If Selection.Type = wdSelectionNormal Then
         End If
         Shell funame
         'Shell "W:\!! for hpr\VB\網路搜尋_元搜尋-同時搜多個引擎\網路搜尋_元搜尋-同時搜多個引擎\bin\Debug\網路搜尋_元搜尋-同時搜多個引擎.exe"
-    End If
+'    End If
 End If
 '按下掃描鍵
 Exit Sub

@@ -508,6 +508,7 @@ namespace WindowsFormsApp1
             if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("ဈ");
             if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("ဉ");
             if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("▱");
+            if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("ꗍ");
 
             #region 檢查不當分段
 
@@ -1177,7 +1178,7 @@ namespace WindowsFormsApp1
                                     while (s > 1)
                                     {
                                         if (x.Substring(s - 2, 2) == "􏿽")
-                                        { s -= 2; l += 2; }
+                                       { s -= 2; l += 2; }
                                         else if (x.Substring(s - 1, 1) == "　")
                                         { s--; l++; }
                                         else
@@ -1185,7 +1186,7 @@ namespace WindowsFormsApp1
                                     }
                                     break;
                                 case Keys.Right:
-                                    while (s + l <= x.Length)
+                                    while (s + l + 2 <= x.Length)
                                     {
                                         if (x.Substring(s + l, 2) == "􏿽")
                                             l += 2;
@@ -1501,10 +1502,10 @@ namespace WindowsFormsApp1
                     if (textBox1.SelectedText != "" && textBox1.SelectedText.Replace("　", "") == "") { autoMarkTitles(); return; }
                     int s = textBox1.SelectionStart; string x = textBox1.Text;
                     if (x.Length == s ||
-                        (x.Substring(s, 2) == Environment.NewLine || x.Substring(s < 2 ? s : s - 2, 2)
-                            == Environment.NewLine) && textBox1.SelectionLength == 0)//||
-                                                                                     //(x.Substring(s < 2 ? s : s - 2, 2)== Environment.NewLine &&
-                                                                                     //  x.Substring(s+1>x.Length?x.Length:s,1)!="　") // 有時標題是頂行的                       
+                        (s + 2 <= x.Length && (x.Substring(s, 2) == Environment.NewLine || x.Substring(s < 2 ? s : s - 2, 2)
+                            == Environment.NewLine) && textBox1.SelectionLength == 0))//||
+                                                                                      //(x.Substring(s < 2 ? s : s - 2, 2)== Environment.NewLine &&
+                                                                                      //  x.Substring(s+1>x.Length?x.Length:s,1)!="　") // 有時標題是頂行的                       
                     {
                         keysParagraphSymbol();
                         return;
@@ -1557,7 +1558,9 @@ namespace WindowsFormsApp1
                 {//Alt + Insert ：將剪貼簿的文字內容讀入textBox1中
                     e.Handled = true;
                     string clpTxt = Clipboard.GetText();
-                    if (keyinText && clpTxt != ClpTxtBefore) textBox1.Text = booksPunctuation(clpTxt);
+                    if (keyinText && clpTxt != ClpTxtBefore &&
+                        clpTxt.IndexOf("《") == -1 && clpTxt.IndexOf("〈") == -1 && clpTxt.IndexOf("·") == -1
+                        ) textBox1.Text = booksPunctuation(clpTxt);
                     else textBox1.Text = clpTxt;
                     dragDrop = false;
                     return;
