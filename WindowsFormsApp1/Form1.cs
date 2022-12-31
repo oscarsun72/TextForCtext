@@ -16,13 +16,15 @@ using System.Windows.Forms;
 using ado = ADODB;//https://docs.microsoft.com/zh-tw/dotnet/csharp/language-reference/keywords/using-directive
                   //引用adodb 要將其「內嵌 Interop 類型」（Embed Interop Type）屬性設為false（預設是true）才不會出現以下錯誤：  HResult=0x80131522  Message=無法從組件 載入類型 'ADODB.FieldsToInternalFieldsMarshaler'。
                   //https://stackoverflow.com/questions/5666265/adodbcould-not-load-type-adodb-fieldstointernalfieldsmarshaler-from-assembly  https://blog.csdn.net/m15188153014/article/details/119895082
+using TextForCtext;
 
 namespace WindowsFormsApp1
 {
+
     public partial class Form1 : Form
     {
         readonly Point textBox4Location; readonly Size textBox4Size;
-        readonly string dropBoxPathIncldBackSlash;
+        internal readonly string dropBoxPathIncldBackSlash;
         readonly Size textBox1SizeToForm;
         //string[] CJKBiggestSet = new string[]{ "HanaMinB", "KaiXinSongB", "TH-Tshyn-P1" };
         string[] CJKBiggestSet = { "全宋體(等寬)", "新細明體-ExtB", "HanaMinB", "KaiXinSongB", "TH-Tshyn-P1", "HanaMinA", "Plangothic P1", "Plangothic P2" };
@@ -1178,7 +1180,7 @@ namespace WindowsFormsApp1
                                     while (s > 1)
                                     {
                                         if (x.Substring(s - 2, 2) == "􏿽")
-                                       { s -= 2; l += 2; }
+                                        { s -= 2; l += 2; }
                                         else if (x.Substring(s - 1, 1) == "　")
                                         { s--; l++; }
                                         else
@@ -1520,6 +1522,22 @@ namespace WindowsFormsApp1
                 if (e.KeyCode == Keys.S)
                 {//Alt + s 小注文不換行
                     e.Handled = true; notes_a_line(); return;
+                }
+
+                if (e.KeyCode == Keys.V)// Alt + v
+                {
+                    e.Handled = true;
+                    int s = textBox1.SelectionStart;
+                    string x = textBox1.Text, wordtoChk;
+                    if (textBox1.SelectedText != "") wordtoChk = textBox1.SelectedText;
+                    else if (s + 2 <= textBox1.TextLength)
+                        wordtoChk = x.Substring(s, char.IsHighSurrogate(x.Substring(s, 1).ToCharArray()[0]) ? 2 : 1);
+                    else
+                        wordtoChk = x.Substring(s, 1);
+
+                    if (Mdb.VariantsExist(wordtoChk)) //SystemSounds.Hand.Play();
+                        MessageBox.Show("existed!!");
+                    return;
                 }
 
                 if (e.KeyCode == Keys.F7)
