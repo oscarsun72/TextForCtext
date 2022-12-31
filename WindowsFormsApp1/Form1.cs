@@ -1533,10 +1533,14 @@ namespace WindowsFormsApp1
                     else if (s + 2 <= textBox1.TextLength)
                         wordtoChk = x.Substring(s, char.IsHighSurrogate(x.Substring(s, 1).ToCharArray()[0]) ? 2 : 1);
                     else
+                    {
+                        if (s + 1 > x.Length) return;
                         wordtoChk = x.Substring(s, 1);
+                    }
 
-                    if (Mdb.VariantsExist(wordtoChk)) //SystemSounds.Hand.Play();
-                        MessageBox.Show("existed!!");
+                    if (isChineseChar(wordtoChk, false) != 0)
+                        if (Mdb.VariantsExist(wordtoChk)) //SystemSounds.Hand.Play();
+                            MessageBox.Show("existed!!");
                     return;
                 }
 

@@ -20,6 +20,7 @@ namespace TextForCtext
             {
                 root = root.Replace("C:", "A:");
             }
+            f = null;
             if (!File.Exists(root + dbNameIncludeExt)) { MessageBox.Show(root + dbNameIncludeExt + "not found"); return  ""; }
             else
                 return root+dbNameIncludeExt;
