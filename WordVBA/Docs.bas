@@ -234,7 +234,8 @@ End Sub
 
 Sub 清除所有符號() '由圖書管理symbles模組清除標點符號改編'包括註腳、數字
 'Dim F, a As String, i As Integer
-Dim f, i As Integer
+Dim f, i As Integer, ur As UndoRecord
+SystemSetup.stopUndo ur, "清除所有符號"
 f = Array("·", "‧", "。", "」", Chr(-24152), "：", "，", "；", _
     "、", "「", ".", Chr(34), ":", ",", ";", _
     "……", "...", "．", "【", "】", " ", "《", "》", "〈", "〉", "？" _
@@ -251,6 +252,7 @@ f = Array("·", "‧", "。", "」", Chr(-24152), "：", "，", "；", _
         ActiveDocument.Range.Find.Execute f(i), True, , , , , , wdFindContinue, True, "", wdReplaceAll
     Next
     'ActiveDocument.Content = a
+SystemSetup.contiUndo ur
 End Sub
 Sub 注腳符號() '注釋符號、註釋符號、註腳符號
 Dim i As Integer
