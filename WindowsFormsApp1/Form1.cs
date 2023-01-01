@@ -13,17 +13,24 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using Microsoft.Office.Interop.Word;
 using ado = ADODB;//https://docs.microsoft.com/zh-tw/dotnet/csharp/language-reference/keywords/using-directive
                   //引用adodb 要將其「內嵌 Interop 類型」（Embed Interop Type）屬性設為false（預設是true）才不會出現以下錯誤：  HResult=0x80131522  Message=無法從組件 載入類型 'ADODB.FieldsToInternalFieldsMarshaler'。
                   //https://stackoverflow.com/questions/5666265/adodbcould-not-load-type-adodb-fieldstointernalfieldsmarshaler-from-assembly  https://blog.csdn.net/m15188153014/article/details/119895082
 using TextForCtext;
+using br = TextForCtext.Browser;
+using Point = System.Drawing.Point;
+using Font = System.Drawing.Font;
+using Task = System.Threading.Tasks.Task;
+using Application = System.Windows.Forms.Application;
+
 
 namespace WindowsFormsApp1
 {
 
     public partial class Form1 : Form
     {
-        readonly Point textBox4Location; readonly Size textBox4Size;
+        readonly System.Drawing.Point textBox4Location; readonly Size textBox4Size;
         internal readonly string dropBoxPathIncldBackSlash;
         readonly Size textBox1SizeToForm;
         //string[] CJKBiggestSet = new string[]{ "HanaMinB", "KaiXinSongB", "TH-Tshyn-P1" };
@@ -32,7 +39,23 @@ namespace WindowsFormsApp1
         bool insertMode = true, check_the_adjacent_pages = false, keyinText = false//手動輸入
             , TopLine = false//抬頭
             , Indents = true;//縮排
+        internal string textBox3Text
+        {
+            get { return textBox3.Text; }
+            set { textBox3.Text = value; }
+        }
 
+        static internal string mainFromTextBox3Text;
+
+
+        /*browser operation mode:
+             appActivateByName:本來原始的；網路學來的
+                selenium 純selenium模式，啟動新的 chrome 執行個體，且須登入；chatGPT 教的
+                seleniumGet 混合模式，且夫不啟動 chrome，而是取得已經運動的chrome的執行個體的； chatGPT 教的+之前網路學的
+        */
+        public enum BrowserOPMode { appActivateByName, selenium, seleniumGet };
+
+        internal static BrowserOPMode browsrOPMode = BrowserOPMode.appActivateByName;
 
         System.Windows.Forms.NotifyIcon nICo;
         int thisHeight, thisWidth, thisLeft, thisTop;
@@ -42,6 +65,7 @@ namespace WindowsFormsApp1
         static extern bool ShowCaret(IntPtr hWnd);
         public Form1()
         {
+
             InitializeComponent();
             textBox1FontDefaultSize = textBox1.Font.Size;
             textBox4Location = textBox4.Location;
@@ -72,6 +96,7 @@ namespace WindowsFormsApp1
             this.nICo.MouseClick += new System.Windows.Forms.MouseEventHandler(nICo_MouseClick);
             this.nICo.MouseMove += new System.Windows.Forms.MouseEventHandler(nICo_MouseMove);
             //this.Shown += Form1_Shown;//https://stackoverflow.com/questions/32720207/change-caret-cursor-in-textbox-in-c-sharp
+
         }
 
         void Caret_Shown(Control ctl)
@@ -3741,7 +3766,8 @@ namespace WindowsFormsApp1
             }
             #endregion
             if (!newTextBox1()) return;
-            pasteToCtext();
+            //////pasteToCtext();
+            pasteToCtext(textBox3.Text);
             //if (!shiftKeyDownYet ) nextPages(Keys.PageDown, false);
             if (!shiftKeyDownYet && !check_the_adjacent_pages) nextPages(Keys.PageDown, false);
             predictEndofPage();
@@ -4225,8 +4251,10 @@ namespace WindowsFormsApp1
                         if (autoPastetoQuickEdit && (ModifierKeys == Keys.Control || check_the_adjacent_pages))
                         {
                             appActivateByName();
-                            //當啟用預估頁尾後，按下 Ctrl 或 Shift Alt 可以自動貼入 Quick Edit ，唯此處僅用 Ctrl 及 Shift 控制關閉前一頁所瀏覽之 Ctext 網頁                
-                            SendKeys.Send("^{F4}");//關閉前一頁
+                            //Browser.driver == null)
+                            if (browsrOPMode == BrowserOPMode.appActivateByName)
+                                //當啟用預估頁尾後，按下 Ctrl 或 Shift Alt 可以自動貼入 Quick Edit ，唯此處僅用 Ctrl 及 Shift 控制關閉前一頁所瀏覽之 Ctext 網頁                
+                                SendKeys.Send("^{F4}");//關閉前一頁
                             if (check_the_adjacent_pages) nextPages(Keys.PageDown, false);
                         }
                         keyDownCtrlAdd(false);
@@ -4741,25 +4769,64 @@ namespace WindowsFormsApp1
                 if (eKeyCode == Keys.PageUp)
                     url = urlSub + (page - 1).ToString();
             }
-            Process.Start(url);
-            appActivateByName();
+            switch (browsrOPMode)
+            {
+                case BrowserOPMode.appActivateByName:
+                    Process.Start(url);
+                    appActivateByName();
+                    break;
+                case BrowserOPMode.selenium:
+                    br.GoToUrlandActivate(url);
+                    break;
+                case BrowserOPMode.seleniumGet:
+                    break;
+                default:
+                    return;
+                    //break;
+            }
+
+
             if (edit > -1)
             {//編輯才執行，瀏覽則省略
-             //Task.Delay(500).Wait(); //2200
-             //Task.Delay(1900).Wait(); //2200
-             //Task.Delay(650).Wait(); //目前疾速是650，而穩定是700，乃至1100、1900、2200，看網速
-                Task.Delay(waitTimeforappActivateByName).Wait();
-                //SendKeys.Send("{Tab 24}");
-                SendKeys.Send("{Tab}"); //("{Tab 24}");
-                                        //要尾綴「#editor」如是格式的才能只按一個tab就入文字框中 ： https://ctext.org/library.pl?if=gb&file=77367&page=59&editwiki=415472#editor
-                Task.Delay(200).Wait();//200
-                Task.WaitAll();
-                SendKeys.Send("^a");
+
+                switch (browsrOPMode)
+                {
+                    case BrowserOPMode.appActivateByName:
+                        //Task.Delay(500).Wait(); //2200
+                        //Task.Delay(1900).Wait(); //2200
+                        //Task.Delay(650).Wait(); //目前疾速是650，而穩定是700，乃至1100、1900、2200，看網速
+                        Task.Delay(waitTimeforappActivateByName).Wait();
+                        //SendKeys.Send("{Tab 24}");
+                        SendKeys.Send("{Tab}"); //("{Tab 24}");
+                                                //要尾綴「#editor」如是格式的才能只按一個tab就入文字框中 ： https://ctext.org/library.pl?if=gb&file=77367&page=59&editwiki=415472#editor
+                        Task.Delay(200).Wait();//200
+                        Task.WaitAll();
+                        SendKeys.Send("^a");
+                        break;
+                    case BrowserOPMode.selenium:
+                        break;
+                    case BrowserOPMode.seleniumGet:
+                        break;
+                    default:
+                        break;
+                }
                 if (keyinText)
                 {
-                    Task.Delay(290).Wait();
-                    Task.WaitAll();
-                    SendKeys.Send("^x");
+                    switch (browsrOPMode)
+                    {
+                        case BrowserOPMode.appActivateByName:
+                            Task.Delay(290).Wait();
+                            Task.WaitAll();
+                            SendKeys.Send("^x");
+                            break;
+                        case BrowserOPMode.selenium:
+                            break;
+                        case BrowserOPMode.seleniumGet:
+                            break;
+                        default:
+                            break;
+                    }
+
                     undoRecord();
                     Task.WaitAll();
                     Application.DoEvents();
@@ -4767,8 +4834,19 @@ namespace WindowsFormsApp1
                 }
                 if (!check_the_adjacent_pages)
                 {
-                    Task.Delay(500).Wait();
-                    SendKeys.Send("^{PGUP}");//回上一頁籤檢查文本是否如願貼好
+                    switch (browsrOPMode)
+                    {
+                        case BrowserOPMode.appActivateByName:
+                            Task.Delay(500).Wait();
+                            SendKeys.Send("^{PGUP}");//回上一頁籤檢查文本是否如願貼好
+                            break;
+                        case BrowserOPMode.selenium:
+                            break;
+                        case BrowserOPMode.seleniumGet:
+                            break;
+                        default:
+                            break;
+                    }
                 }
             }
             textBox3.Text = url;
@@ -4924,7 +5002,7 @@ namespace WindowsFormsApp1
             //https://stackoverflow.com/questions/13621467/how-to-find-default-web-browser-using-c
         }
 
-        string getDefaultBrowserEXE()
+        internal static string getDefaultBrowserEXE()
         {
             string userProfilePath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);//https://stackoverflow.com/questions/38252474/c-sharp-service-how-to-get-user-profile-folder-path
             switch (defaultBrowserName)
@@ -4961,7 +5039,7 @@ namespace WindowsFormsApp1
             }
         }
 
-        private string GetDefaultWebBrowserFilePath()//chrome-extension://lcghoajegeldpfkfaejegfobkapnemjl/sandbox.html?src=https%3A%2F%2Fwww.796t.com%2Fcontent%2F1546728863.html
+        static private string GetDefaultWebBrowserFilePath()//chrome-extension://lcghoajegeldpfkfaejegfobkapnemjl/sandbox.html?src=https%3A%2F%2Fwww.796t.com%2Fcontent%2F1546728863.html
         {
             //舊的如此，抓不準！廢罝不用！
             //從登錄檔中讀取預設瀏覽器可執行檔案路徑
@@ -5011,8 +5089,8 @@ namespace WindowsFormsApp1
         [DllImport("user32.dll", SetLastError = true)]
         static extern void SwitchToThisWindow(IntPtr hWnd, bool turnOn);
 
-        string defaultBrowserName = string.Empty;//https://cybarlab.com/web-browser-name-in-c-sharp
-        void appActivateByName()
+        internal static string defaultBrowserName = string.Empty;//https://cybarlab.com/web-browser-name-in-c-sharp
+        internal void appActivateByName()
         {
         //Process[] procsBrowser = Process.GetProcessesByName("chrome");
         tryagain:
@@ -5061,9 +5139,12 @@ namespace WindowsFormsApp1
         }
 
 
-
+        private void pasteToCtext(string url)
+        {//for .BrowserOPMode.selenium
+            br.在Chrome瀏覽器的Quick_edit文字框中輸入文字(br.driver, Clipboard.GetText(), url);
+        }
         private void pasteToCtext()
-        {
+        {//for .BrowserOPMode.appActivateByName
             appActivateByName();
             //if (keyinText)
             //{
@@ -5778,6 +5859,24 @@ namespace WindowsFormsApp1
             if (x == "msedge" || x == "chrome" || x == "brave" || x == "vivaldi") defaultBrowserName = x;
             #endregion
 
+            #region 瀏覽操作模式設定
+            switch (textBox2.Text)
+            {
+                case "ap,":
+                    browsrOPMode = BrowserOPMode.appActivateByName;
+                    break;
+                case "sl,":
+                    browsrOPMode = BrowserOPMode.selenium;
+                    break;
+                case "sg,":
+                    browsrOPMode = BrowserOPMode.seleniumGet;
+                    break;
+
+                default:
+                    break;
+            }
+            #endregion
+
             #region 設定小注不換行的長度限制
 
             if (x.Length > 5 && x.Substring(0, 5) == "note:")
@@ -6122,6 +6221,7 @@ namespace WindowsFormsApp1
 
         private void textBox3_TextChanged(object sender, EventArgs e)
         {
+            mainFromTextBox3Text = textBox3.Text;
             if (keyinText) return;
             if (textBox3.Text == "")
             {
