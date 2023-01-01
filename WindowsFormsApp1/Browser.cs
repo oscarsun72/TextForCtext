@@ -41,21 +41,32 @@ namespace TextForCtext
         {
             if (driver == null)
             {
-                ChromeDriver cDrv;
-                try
-                {//selenium 如何操作免安裝版的 chrome 瀏覽器 或自訂安裝路徑的 chrome 瀏覽器呢
-                    cDrv = new ChromeDriver();
-                }
-                catch (Exception)
-                { //creedit 20230101 : 
-                  // 指定 Chrome 瀏覽器的路徑
-                     string chrome_path = Form1.getDefaultBrowserEXE();
-                    if(chrome_path.IndexOf("chrome") >-1)
-                    //# 建立 ChromeDriver 物件
-                    cDrv = new ChromeDriver(chrome_path);
-                    else
-                    throw;
-                }
+                ChromeDriver cDrv;//綠色免安裝版仍搞不定，安裝 chrome 了就OK 20220101 chatGPT建議者未通
+                cDrv= new ChromeDriver();
+                //string chrome_path = Form1.getDefaultBrowserEXE();
+                //if (chrome_path.IndexOf(@"C:\") == -1)
+                //{
+                    //try
+                    //{//selenium 如何操作免安裝版的 chrome 瀏覽器 或自訂安裝路徑的 chrome 瀏覽器呢
+                    //    ////chatGPT:如果您看到 WebDriverException: unknown error: cannot find Chrome binary 的例外，可能是因為 ChromeDriver 找不到 Chrome 的可執行檔。您可以使用以下程式碼來解決這個問題：
+                    //ChromeOptions options = new ChromeOptions();
+                    //options.BinaryLocation = @"W:\PortableApps\PortableApps\GoogleChromePortable\App\Chrome-bin";
+                    //options.BinaryLocation = @"W:\PortableApps\PortableApps\GoogleChromePortable";
+                    //cDrv = new ChromeDriver(options);
+                //}
+                //cDrv = new ChromeDriver(chrome_path);
+                //}
+                //catch (Exception)
+                //{ //creedit 20230101 : 
+                //  // 指定 Chrome 瀏覽器的路徑
+                //    if (chrome_path.IndexOf("chrome") > -1)
+                //    //# 建立 ChromeDriver 物件
+                //    {
+                //        cDrv = new ChromeDriver(chrome_path);
+                //    }
+                //    else
+                //        throw;
+                //}
                 cDrv.Navigate().GoToUrl(Form1.mainFromTextBox3Text);
                 MessageBox.Show("請先登入 Ctext.org 再繼續。按下「確定(OK)」以繼續……");
                 return cDrv;

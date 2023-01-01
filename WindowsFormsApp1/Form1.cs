@@ -24,7 +24,6 @@ using Font = System.Drawing.Font;
 using Task = System.Threading.Tasks.Task;
 using Application = System.Windows.Forms.Application;
 
-
 namespace WindowsFormsApp1
 {
 
@@ -3766,8 +3765,21 @@ namespace WindowsFormsApp1
             }
             #endregion
             if (!newTextBox1()) return;
-            //////pasteToCtext();
-            pasteToCtext(textBox3.Text);
+            switch (browsrOPMode)
+            {
+                case BrowserOPMode.appActivateByName:
+                    pasteToCtext();
+                    break;
+                case BrowserOPMode.selenium:
+                    pasteToCtext(textBox3.Text);
+                    break;
+                case BrowserOPMode.seleniumGet:
+                    //還未實作
+                    break;
+                default:
+                    break;
+            }
+
             //if (!shiftKeyDownYet ) nextPages(Keys.PageDown, false);
             if (!shiftKeyDownYet && !check_the_adjacent_pages) nextPages(Keys.PageDown, false);
             predictEndofPage();
@@ -4942,7 +4954,7 @@ namespace WindowsFormsApp1
 
         #region browsers 
 
-        public string GetWebBrowserName()//預設瀏覽器
+        static public string GetWebBrowserName()//預設瀏覽器
         {
 
             //https://stackoverflow.com/questions/13621467/how-to-find-default-web-browser-using-c
@@ -5029,11 +5041,14 @@ namespace WindowsFormsApp1
                 case "edge":
                     return @"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe";//"msedge"
 
-                case "ChromeHTML"://, "google chrome": '"chrome"
-                    if (!File.Exists(@"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe"))
-                        return @"W:\PortableApps\PortableApps\GoogleChromePortable\GoogleChromePortable.exe";
-                    else
+                case "chrome":// "ChromeHTML"://, "google chrome": '"chrome"
+                    if (File.Exists(@"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe"))
+                        return @"C:\Program Files\Google\Chrome\Application\chrome.exe";
+                    else if (File.Exists(@"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe"))
                         return @"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe";
+                        //return @"W:\PortableApps\PortableApps\GoogleChromePortable\GoogleChromePortable.exe";
+                    else
+                        return @"W:\PortableApps\PortableApps\GoogleChromePortable\App\Chrome-bin\chrome.exe";                    
                 default:
                     return GetDefaultWebBrowserFilePath();
             }
@@ -5140,7 +5155,7 @@ namespace WindowsFormsApp1
 
 
         private void pasteToCtext(string url)
-        {//for .BrowserOPMode.selenium
+        {//for .BrowserOPMode.selenium            
             br.在Chrome瀏覽器的Quick_edit文字框中輸入文字(br.driver, Clipboard.GetText(), url);
         }
         private void pasteToCtext()
