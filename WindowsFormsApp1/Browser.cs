@@ -131,7 +131,13 @@ namespace TextForCtext
             //System.Windows.Forms.Application.DoEvents();
             //送出
             selm.IWebElement submit = driver.FindElement(selm.By.Id("savechangesbutton"));//("textbox"));
-            submit.Click();
+            /* creedit 我問：在C#  用selenium 控制 chrome 瀏覽器時，怎麼樣才能不必等待網頁作出回應即續編處理按下來的程式碼 。如，以下程式碼，請問，如何在按下 submit.Click(); 後不必等這個動作完成或作出回應，即能繼續執行之後的程式碼呢 感恩感恩　南無阿彌陀佛
+                        chatGPT他答：你可以將 submit.Click(); 放在一個 Task 中去執行，並立即返回。
+             */
+            Task.Run(() =>
+            {
+                submit.Click();
+            });
             //f = null;
 
 
