@@ -155,6 +155,18 @@ namespace TextForCtext
 
         internal static void GoToUrlandActivate(string url)
         {
+            try
+            {
+            driver.SwitchTo().Window(driver.CurrentWindowHandle);
+
+            }
+            catch (Exception)
+            {
+                //driver.Close();//creedit
+                var hs=driver.WindowHandles;
+                driver.SwitchTo().Window(hs[0]);
+                //throw;
+            }
             driver.Navigate().GoToUrl(url);
             //activate and move to most front of desktop
             driver.SwitchTo().Window(driver.CurrentWindowHandle);

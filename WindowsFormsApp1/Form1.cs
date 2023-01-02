@@ -5659,6 +5659,7 @@ namespace WindowsFormsApp1
 
                 //Task.Delay(900).Wait();
                 Task.WaitAll();
+                Application.DoEvents();
                 clpTxt = Clipboard.GetText();
                 //throw;
             }
