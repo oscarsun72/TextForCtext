@@ -84,7 +84,20 @@ namespace TextForCtext
             //("https://ctext.org/library.pl?if=en&file=79166&page=85&editwiki=297821#editor");//("http://www.example.com");
 
             // 查找名稱為"textbox"的文字框元素
-            selm.IWebElement textbox = driver.FindElement(selm.By.Name("data"));//("textbox"));
+            selm.IWebElement textbox;
+            try
+            {
+                textbox = driver.FindElement(selm.By.Name("data"));//("textbox"));
+
+            }
+            catch (Exception)
+            {
+                //如果沒有按下「Quick edit」就按下它以開啟
+                selm.IWebElement quickedit = driver.FindElement(selm.By.Id("quickedit"));
+                quickedit.Click();//預設當如下面「submit.Click();」會等網頁作出回應才執行下一步。感恩感恩　讚歎讚歎　南無阿彌陀佛
+                textbox = driver.FindElement(selm.By.Name("data"));
+                //throw;
+            }
 
             textbox.Clear();
             // 在文字框中輸入文字

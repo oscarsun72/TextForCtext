@@ -7,6 +7,7 @@ using System.Data.OleDb;//以chatGPT建立的
 using System.IO;
 using WindowsFormsApp1;
 using System.Windows.Forms;
+using System.Web.UI;
 
 namespace TextForCtext
 {
@@ -14,16 +15,16 @@ namespace TextForCtext
     {
         internal static string fileFullName(string dbNameIncludeExt)
         {
-            Form1 f =new  Form1();
-            string root =f.dropBoxPathIncldBackSlash;
+            Form1 f = new Form1();
+            string root = f.dropBoxPathIncldBackSlash;
             if (!File.Exists(root + dbNameIncludeExt))
             {
                 root = root.Replace("C:", "A:");
             }
             f = null;
-            if (!File.Exists(root + dbNameIncludeExt)) { MessageBox.Show(root + dbNameIncludeExt + "not found"); return  ""; }
+            if (!File.Exists(root + dbNameIncludeExt)) { MessageBox.Show(root + dbNameIncludeExt + "not found"); return ""; }
             else
-                return root+dbNameIncludeExt;
+                return root + dbNameIncludeExt;
         }
 
         internal static bool VariantsExist(string wordtoChk)//以chatGPT建立再自己略加修潤的 Alt + v:即以以下與chatGPT對話所得者：C# 檢查[查字.mdb].[異體字反正]資料表中是否已有該字記錄,擬自創 creedit 一動詞以作紀念，日後若有標識 creedit（creeditted 、 creeditting) 者，即為取自 chatGPT AI 而改寫者，意為：「create from chatGPT AI and edit」,以取 create 諧音且兼其義以識別非純自創也 感恩感恩　讚歎讚歎　南無阿彌陀佛 
@@ -39,9 +40,8 @@ namespace TextForCtext
             // 建立連接字串
             string f = fileFullName("查字.mdb");
             if (f == "") return false;
-            string connectionString = "Provider=Microsoft.Jet.OLEDB.4.0;Data Source=" +  f;
+            string connectionString = "Provider=Microsoft.Jet.OLEDB.4.0;Data Source=" + f;
             
-
             // 建立連接物件
             OleDbConnection conn = new OleDbConnection(connectionString);
 
@@ -49,7 +49,9 @@ namespace TextForCtext
             OleDbCommand cmd = conn.CreateCommand();
 
             // 設定命令的文字
-            cmd.CommandText = "SELECT COUNT(*) FROM 異體字轉正 WHERE 異體字 = @word";//@word 為參數名
+            //cmd.CommandText = "SELECT COUNT(*) FROM 異體字轉正 WHERE 異體字 = @word";//@word 為參數名，用「=」比對中文會不正確，在cjk-擴充字集時
+            cmd.CommandText = "SELECT COUNT(*) FROM 異體字轉正 WHERE strcomp(異體字 , @word)=0";//@word 為參數名
+
 
             // 設定命令的參數
             cmd.Parameters.AddWithValue("@word", wordtoChk);
@@ -59,6 +61,7 @@ namespace TextForCtext
 
             // 執行命令並取得結果
             int count = (int)cmd.ExecuteScalar();
+            //*/
 
             // 關閉資料庫連接
             conn.Close();
