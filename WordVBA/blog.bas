@@ -383,10 +383,12 @@ Sub 開啟超連結()
 Dim rng As Range
 Set rng = Selection.Range
 If rng.Hyperlinks.Count = 0 Then '如果所在位置沒有超連結，則看其前有否；若又無，則再看其後有否；若都無則不執行 2022/12/20
-    If rng.Previous.Hyperlinks.Count > 0 Then
-        Set rng = rng.Previous
-    ElseIf rng.Next.Hyperlinks.Count > 0 Then
-        Set rng = rng.Next
+    If rng.start = 0 Then
+        GoSub nxt
+    ElseIf rng.End = rng.Document.Range.End - 1 Then
+        GoSub pre
+    Else
+        GoSub position
     End If
 End If
 If rng.Hyperlinks.Count > 0 Then
@@ -399,6 +401,14 @@ If rng.Hyperlinks.Count > 0 Then
     End If
     Shell getDefaultBrowserFullname + " " + strLnk
 End If
+Exit Sub
+position:
+    If rng.Previous.Hyperlinks.Count > 0 Then
+pre:        Set rng = rng.Previous
+    ElseIf rng.Next.Hyperlinks.Count > 0 Then
+nxt:        Set rng = rng.Next
+    End If
+Return
 End Sub
 Sub 插入超連結() '2008/9/1 指定鍵(快捷鍵) Ctrl+shift+K(原系統指定在smallcaps為)
 'Alt+k

@@ -73,6 +73,7 @@ namespace TextForCtext
             }
             else
             {
+                Clipboard.SetText(wordtoChk);//複製到剪貼簿以便到MS Access 輸入新記錄時直接貼上
                 return false;// 資料表中沒有該字記錄
             }
 

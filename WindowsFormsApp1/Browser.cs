@@ -12,10 +12,15 @@ using System.Drawing.Imaging;
 using static System.Net.Mime.MediaTypeNames;
 using System.Security.Policy;
 using System.Drawing;
+using OpenQA.Selenium;
 using OpenQA.Selenium.Interactions;
 using OpenQA.Selenium.DevTools.V85.ApplicationCache;
-using OpenQA.Selenium;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 //https://dotblogs.com.tw/supergary/2020/10/29/selenium#images-3
+using System.IO;
+using System.Net;
+using static System.Net.WebRequestMethods;
 
 namespace TextForCtext
 {
@@ -26,8 +31,16 @@ namespace TextForCtext
         //internal static selm.IWebDriver driver=driverNew();
         internal static ChromeDriver driver = driverNew();
         //static selm.IWebDriver driverNew()
+        //實測後發現：CurrentWindowHandle並不能取得瀏覽器現正作用中的分頁視窗，只能取得創建 ChromeDriver 物件時的最初及switch 方法執行後切換的分頁視窗 20230103 阿彌陀佛
+        static string originalWindow = driver.CurrentWindowHandle;
 
-
+        internal static string getOriginalWindow
+        {
+            get
+            {
+                return originalWindow;
+            }
+        }
 
         static Form1 frm;//creedit 
         public Browser(Form1 form)
@@ -42,17 +55,17 @@ namespace TextForCtext
             if (driver == null)
             {
                 ChromeDriver cDrv;//綠色免安裝版仍搞不定，安裝 chrome 了就OK 20220101 chatGPT建議者未通
-                cDrv= new ChromeDriver();
+                cDrv = new ChromeDriver();
                 //string chrome_path = Form1.getDefaultBrowserEXE();
                 //if (chrome_path.IndexOf(@"C:\") == -1)
                 //{
-                    //try
-                    //{//selenium 如何操作免安裝版的 chrome 瀏覽器 或自訂安裝路徑的 chrome 瀏覽器呢
-                    //    ////chatGPT:如果您看到 WebDriverException: unknown error: cannot find Chrome binary 的例外，可能是因為 ChromeDriver 找不到 Chrome 的可執行檔。您可以使用以下程式碼來解決這個問題：
-                    //ChromeOptions options = new ChromeOptions();
-                    //options.BinaryLocation = @"W:\PortableApps\PortableApps\GoogleChromePortable\App\Chrome-bin";
-                    //options.BinaryLocation = @"W:\PortableApps\PortableApps\GoogleChromePortable";
-                    //cDrv = new ChromeDriver(options);
+                //try
+                //{//selenium 如何操作免安裝版的 chrome 瀏覽器 或自訂安裝路徑的 chrome 瀏覽器呢
+                //    ////chatGPT:如果您看到 WebDriverException: unknown error: cannot find Chrome binary 的例外，可能是因為 ChromeDriver 找不到 Chrome 的可執行檔。您可以使用以下程式碼來解決這個問題：
+                //ChromeOptions options = new ChromeOptions();
+                //options.BinaryLocation = @"W:\PortableApps\PortableApps\GoogleChromePortable\App\Chrome-bin";
+                //options.BinaryLocation = @"W:\PortableApps\PortableApps\GoogleChromePortable";
+                //cDrv = new ChromeDriver(options);
                 //}
                 //cDrv = new ChromeDriver(chrome_path);
                 //}
@@ -67,7 +80,9 @@ namespace TextForCtext
                 //    else
                 //        throw;
                 //}
-                cDrv.Navigate().GoToUrl(Form1.mainFromTextBox3Text);
+                cDrv.Navigate().GoToUrl(Form1.mainFromTextBox3Text ?? "https://ctext.org/account.pl?if=en");
+                //IWebElement clk = cDrv.FindElement(selm.By.Id("logininfo")); clk.Click();
+                //cDrv.FindElement(selm.By.Id("logininfo")).Click();
                 MessageBox.Show("請先登入 Ctext.org 再繼續。按下「確定(OK)」以繼續……");
                 return cDrv;
             }
@@ -77,17 +92,19 @@ namespace TextForCtext
         internal static void 在Chrome瀏覽器的Quick_edit文字框中輸入文字(ChromeDriver driver, string xIuput, string url)//在Chrome瀏覽器的文字框中輸入文字,creedit
         {
 
+            if (url.IndexOf("edit") == -1) return;
             //selm.IWebDriver driver = new ChromeDriver();
 
-            // 使用driver導航到給定的URL
-            driver.Navigate().GoToUrl(url);
+            if (url != driver.Url && driver.Url.IndexOf(url.Replace("editor", "box")) == -1)
+                // 使用driver導航到給定的URL
+                driver.Navigate().GoToUrl(url);
             //("https://ctext.org/library.pl?if=en&file=79166&page=85&editwiki=297821#editor");//("http://www.example.com");
 
             // 查找名稱為"textbox"的文字框元素
             selm.IWebElement textbox;
             try
             {
-                textbox = driver.FindElement(selm.By.Name("data"));//("textbox"));
+                textbox = driver.FindElement(selm.By.Name("data"));//("textbox"));                
 
             }
             catch (Exception)
@@ -111,35 +128,35 @@ namespace TextForCtext
                 ChromeDriver 是一個 Web 自動化工具，它可以自動控制 Google Chrome 瀏覽器，執行各種測試和任務。這個訊息表示，當你在使用 ChromeDriver 時，只能輸入 BMP 中的字元。如果你想要輸入其他的字元 (比如許多亞洲語言中使用的字元)，可能會遇到問題。
              */
             //檢查是否都在BMP內
-            if (isAllinBmp(xIuput))
-            {
-                //textbox.SendKeys(stringtoEscape_sequences_for_Unicode_character_sets(xIuput));//(Keys.Control + "v");            
-                textbox.SendKeys(xIuput);
-            }
+            //if (isAllinBmp(xIuput))
+            //{
+            //textbox.SendKeys(stringtoEscape_sequences_for_Unicode_character_sets(xIuput));//(Keys.Control + "v");            
+            //textbox.SendKeys(xIuput);
+            //}
             //若含BMP外的字則用系統貼上的方法
-            else
-            {
-                #region paste to textbox
-                //文字框取得焦點
-                textbox.Click();
-                //chrome取得焦點
-                //Form1 f = new Form1();
-                //f.appActivateByName();
-                driver.SwitchTo().Window(driver.CurrentWindowHandle); //https://stackoverflow.com/questions/23200168/how-to-bring-selenium-browser-to-the-front#_=_
-                                                                      // 讓 Chrome 瀏覽器成為作用中的程式
-                                                                      //driver.Manage().Window.Maximize();//creedit chatGPT
-                                                                      //driver.Manage().Window.Position = new Point(0, 0);
+            //else//今一律用貼上省事便捷 20230102
+            //{
+            #region paste to textbox
+            //文字框取得焦點
+            textbox.Click();
+            //chrome取得焦點
+            //Form1 f = new Form1();
+            //f.appActivateByName();
+            driver.SwitchTo().Window(driver.CurrentWindowHandle); //https://stackoverflow.com/questions/23200168/how-to-bring-selenium-browser-to-the-front#_=_
+                                                                  // 讓 Chrome 瀏覽器成為作用中的程式
+                                                                  //driver.Manage().Window.Maximize();//creedit chatGPT
+                                                                  //driver.Manage().Window.Position = new Point(0, 0);
 
-                // 建立 Actions 物件
-                //Actions actions = new Actions(driver);//creedit
-                // 貼上剪貼簿中的文字
-                //actions.MoveToElement(textbox).Click().Perform();
-                //actions.SendKeys(OpenQA.Selenium.Keys.Control + "v").Build().Perform();
-                //actions.SendKeys(OpenQA.Selenium.Keys.LeftShift + OpenQA.Selenium.Keys.Insert).Build().Perform();
-                textbox.SendKeys(OpenQA.Selenium.Keys.LeftShift + OpenQA.Selenium.Keys.Insert);
-                //SendKeys.Send("^v{tab}~");
-                #endregion
-            }
+            // 建立 Actions 物件
+            //Actions actions = new Actions(driver);//creedit
+            // 貼上剪貼簿中的文字
+            //actions.MoveToElement(textbox).Click().Perform();
+            //actions.SendKeys(OpenQA.Selenium.Keys.Control + "v").Build().Perform();
+            //actions.SendKeys(OpenQA.Selenium.Keys.LeftShift + OpenQA.Selenium.Keys.Insert).Build().Perform();
+            textbox.SendKeys(OpenQA.Selenium.Keys.LeftShift + OpenQA.Selenium.Keys.Insert);
+            //SendKeys.Send("^v{tab}~");
+            #endregion
+            //}
             //Task.WaitAll();
             //System.Windows.Forms.Application.DoEvents();
             //送出
@@ -176,14 +193,29 @@ namespace TextForCtext
         {
             try
             {
-            driver.SwitchTo().Window(driver.CurrentWindowHandle);
+                driver.SwitchTo().Window(driver.CurrentWindowHandle);
 
             }
             catch (Exception)
             {
                 //driver.Close();//creedit
-                var hs=driver.WindowHandles;
-                driver.SwitchTo().Window(hs[0]);
+                //creedit20230103 這樣處理誤關分頁頁籤的錯誤（例外情形）就成功了，但整個瀏覽器誤關則尚未
+                //chatGPT：在 C# 中使用 Selenium 取得 Chrome 瀏覽器開啟的頁籤（分頁）數量可以使用以下方法：
+                int tabCount = driver.WindowHandles.Count;
+                /*另外，您也可以使用以下方法在 C# 中取得 Chrome 瀏覽器的標籤（分頁）數量:
+                 // 取得 Chrome 瀏覽器的標籤數量
+                    int tabCount = driver.Manage().Window.Bounds.Width / 100;
+                 */
+                if (tabCount > 0)
+                {
+                    var hs = driver.WindowHandles;
+                    //driver.SwitchTo().Window(hs[0]);
+                    driver.SwitchTo().Window(driver.CurrentWindowHandle);
+                }
+                else
+                {
+                    Browser.openNewTab();
+                }
                 //throw;
             }
             driver.Navigate().GoToUrl(url);
@@ -191,6 +223,24 @@ namespace TextForCtext
             driver.SwitchTo().Window(driver.CurrentWindowHandle);
             driver.ExecuteScript("window.scrollTo(0, 0)");//chatGPT:您好！如果您使用 C# 和 Selenium 來控制 Chrome 瀏覽器，您可以使用以下的程式碼將網頁捲到最上面：
         }
+
+
+        internal static ChromeDriver openNewTab()//creedit 20230103
+        {/*chatGPT
+            在 C# 中使用 Selenium 開啟新 Chrome 瀏覽器分頁可以使用以下方法：*/
+            // 創建 ChromeDriver 實例
+            //IWebDriver driver = new ChromeDriver();
+            ChromeDriver driver = new ChromeDriver();
+
+            // 開啟新分頁
+            driver.ExecuteScript("window.open();");
+            // 切換到新分頁
+            driver.SwitchTo().Window(driver.WindowHandles.Last());
+            //也可以以用：（自己找switch可用的方法時發現的）
+            //driver.SwitchTo().NewWindow(WindowType.Tab);   
+            return driver;
+        }
+
         static string stringtoEscape_sequences_for_Unicode_character_sets(string input)
         {
 
@@ -217,6 +267,27 @@ namespace TextForCtext
 
             return output;
 
+        }
+
+        internal static void downloadImage(string imageUrl)
+        {/*20230103 creedit,chatGPT：
+          你可以使用 Selenium 來下載網絡圖片。
+            首先，你需要獲取圖片的 URL。然後，使用 WebClient 的 DownloadData 方法下載圖片的二進制數據。
+            最後，使用 FileStream 將二進制數據寫入文件即可。  
+          */
+            // 獲取圖片的 URL。
+            //imageUrl = "https://example.com/image.png";
+
+            // 使用 WebClient 下載圖片的二進制數據。
+            WebClient webClient = new WebClient();
+            byte[] imageBytes = webClient.DownloadData(imageUrl);
+
+            // 將二進制數據寫入文件。
+            using (FileStream fileStream = new FileStream(@"x:\Ctext_Page_Image.png", FileMode.Create))
+            {
+                fileStream.Write(imageBytes, 0, imageBytes.Length);
+                Console.WriteLine("圖片已成功下載。");//在「即時運算視窗」寫出訊息
+            }
         }
 
         string getUrl(forms.Keys eKeyCode)
@@ -254,6 +325,8 @@ namespace TextForCtext
             }
             return url;
         }
+
+
     }
 }
 

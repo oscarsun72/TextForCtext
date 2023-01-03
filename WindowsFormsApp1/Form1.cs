@@ -23,6 +23,7 @@ using Point = System.Drawing.Point;
 using Font = System.Drawing.Font;
 using Task = System.Threading.Tasks.Task;
 using Application = System.Windows.Forms.Application;
+using System.Security.Cryptography;
 
 namespace WindowsFormsApp1
 {
@@ -407,12 +408,12 @@ namespace WindowsFormsApp1
             //{
             if (textBox2.Text != "＠") textBox2.Text = "";
             string x = textBox1.Text; int s = textBox1.SelectionStart, l = textBox1.SelectionLength;
-            if (x.IndexOf("<p>|") > -1)
+            if (x.IndexOf("<p>|") > -1 || x.IndexOf("|<p>") > -1)
             {
-                x = x.Replace("<p>|", "<p>");
-                if (textBox1.SelectedText.IndexOf("<p>|") > -1)
+                x = x.Replace("<p>|", "<p>").Replace("|<p>", "<p>");
+                if (textBox1.SelectedText.IndexOf("<p>|") > -1 || textBox1.SelectedText.IndexOf("|<p>") > -1)
                 {
-                    textBox1.SelectedText = textBox1.SelectedText.Replace("<p>|", "<p>");
+                    textBox1.SelectedText = textBox1.SelectedText.Replace("<p>|", "<p>").Replace("|<p>", "<p>");
                     s = textBox1.SelectionStart; l = textBox1.SelectionLength;
                 }
             }
@@ -644,6 +645,9 @@ namespace WindowsFormsApp1
                     chkPTitleNotEnd = true;
                 else
                 if (chkPTitleNotEnd) chkPTitleNotEnd = false;
+                if (chkP > -1 && x.Substring(chkP, 1) == "*")
+                    chkP = -1;
+
             }
             else chkP = -1;
             #endregion
@@ -3700,6 +3704,9 @@ namespace WindowsFormsApp1
             else { s = pageTextEndPosition; l = 0; }
             if (s < 0 || s + l > x.Length) s = textBox1.SelectionStart;
             string xCopy = x.Substring(0, s + l);
+            ////////////string xCopy = x.Substring(0, s + textBox1.SelectionLength);//前有處理過文本∴不能用textBox1.SelectionLength！！！20230102
+            //if (pageEndText10.Length > 20)
+            //    pageEndText10 = "";////////////20230102
             if (pageEndText10 == "") pageEndText10 = xCopy.Substring(xCopy.Length - 10 >= 0 ? xCopy.Length - 10 : xCopy.Length);
             else
             {
@@ -3764,22 +3771,27 @@ namespace WindowsFormsApp1
                 //throw;
             }
             #endregion
+
+            //貼到 Ctext Quick edit 前的文本檢查
             if (!newTextBox1()) return;
+
+            //根據不同輸入模式需求操作
             switch (browsrOPMode)
             {
-                case BrowserOPMode.appActivateByName:
+                case BrowserOPMode.appActivateByName://預設模式（1）
                     pasteToCtext();
                     break;
-                case BrowserOPMode.selenium:
+                case BrowserOPMode.selenium://純Selenium模式（2）
                     pasteToCtext(textBox3.Text);
                     break;
-                case BrowserOPMode.seleniumGet:
+                case BrowserOPMode.seleniumGet://Selenium配合Windows API模式（1+2）或純不用Selenium模式
                     //還未實作
                     break;
                 default:
                     break;
             }
 
+            //決定是否要到下一頁
             //if (!shiftKeyDownYet ) nextPages(Keys.PageDown, false);
             if (!shiftKeyDownYet && !check_the_adjacent_pages) nextPages(Keys.PageDown, false);
             predictEndofPage();
@@ -4582,6 +4594,12 @@ namespace WindowsFormsApp1
             #region 按下Alt鍵
             if (Control.ModifierKeys == Keys.Alt)
             {//按下Alt鍵
+                if (e.KeyCode == Keys.O)
+                {//Alt + o :下載圖片，準備交給《古籍酷》OCR（待實作）
+                    e.Handled = true;
+                    br.downloadImage(Clipboard.GetText());
+                    return;
+                }
                 if (e.KeyCode == Keys.Left || e.KeyCode == Keys.Right)
                 {/*Alt + ←：視窗向左移動30dpi（+ Ctrl：徵調）
                   * Alt + →：視窗向右移動30dpi（+ Ctrl：徵調）*/
@@ -4781,6 +4799,7 @@ namespace WindowsFormsApp1
                 if (eKeyCode == Keys.PageUp)
                     url = urlSub + (page - 1).ToString();
             }
+            #region 僅瀏覽而不編輯
             switch (browsrOPMode)
             {
                 case BrowserOPMode.appActivateByName:
@@ -4796,8 +4815,8 @@ namespace WindowsFormsApp1
                     return;
                     //break;
             }
-
-
+            #endregion
+            #region 要編輯時
             if (edit > -1)
             {//編輯才執行，瀏覽則省略
 
@@ -4829,9 +4848,12 @@ namespace WindowsFormsApp1
                         case BrowserOPMode.appActivateByName:
                             Task.Delay(290).Wait();
                             Task.WaitAll();
-                            SendKeys.Send("^x");
+                            SendKeys.Send("^x");//剪下一頁以便輸入備用
                             break;
                         case BrowserOPMode.selenium:
+                            OpenQA.Selenium.IWebElement quick_edit_box = br.driver.FindElement(OpenQA.Selenium.By.Name("data"));
+                            Task.WaitAll();
+                            Clipboard.SetText(quick_edit_box.Text);
                             break;
                         case BrowserOPMode.seleniumGet:
                             break;
@@ -4842,6 +4864,7 @@ namespace WindowsFormsApp1
                     undoRecord();
                     Task.WaitAll();
                     Application.DoEvents();
+                    //設定textbox1的內容以備編輯
                     textBox1.Text = Clipboard.GetText() + Environment.NewLine + textBox1.Text;
                 }
                 if (!check_the_adjacent_pages)
@@ -4861,6 +4884,8 @@ namespace WindowsFormsApp1
                     }
                 }
             }
+            #endregion
+
             textBox3.Text = url;
             if (stayInHere) this.Activate();
         }
@@ -5046,9 +5071,9 @@ namespace WindowsFormsApp1
                         return @"C:\Program Files\Google\Chrome\Application\chrome.exe";
                     else if (File.Exists(@"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe"))
                         return @"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe";
-                        //return @"W:\PortableApps\PortableApps\GoogleChromePortable\GoogleChromePortable.exe";
+                    //return @"W:\PortableApps\PortableApps\GoogleChromePortable\GoogleChromePortable.exe";
                     else
-                        return @"W:\PortableApps\PortableApps\GoogleChromePortable\App\Chrome-bin\chrome.exe";                    
+                        return @"W:\PortableApps\PortableApps\GoogleChromePortable\App\Chrome-bin\chrome.exe";
                 default:
                     return GetDefaultWebBrowserFilePath();
             }
@@ -5156,6 +5181,37 @@ namespace WindowsFormsApp1
 
         private void pasteToCtext(string url)
         {//for .BrowserOPMode.selenium            
+            if (keyinText)
+            {
+                //url = br.driver.Url;
+                //string activeTabTitlel = br.driver.Title;
+                //br.driver.SwitchTo();//br.driver.SwitchTo().Window(br.driver.CurrentWindowHandle).Url;
+                //br.driver.SwitchTo().Window(br.getOriginalWindow); 
+                //br.driver.SwitchTo();
+                //url = br.driver.Url;
+                //br.driver.SwitchTo().Window(br.driver.WindowHandles[0]);
+                //br.driver.SwitchTo().Window(br.driver.WindowHandles.First());
+                ////url = br.driver.Url;
+                //20230103 目前無法抓到正在作用中的視窗，只能以使用者習慣，通常在用的都是最後一個視窗，先試試 感恩感恩　南無阿彌陀佛
+                //br.driver.SwitchTo().Window(br.driver.WindowHandles.Last());//br.driver.SwitchTo().Window(br.driver.CurrentWindowHandle).Url;
+                //20230103 目前所知也只能用以下的笨方法了，雖然土，但管用。∴就不必上一行多此一舉了。感恩感恩　南無阿彌陀佛
+                if (br.driver.Url != textBox3.Text)
+                {
+                    bool found = false;
+                    //string[] tabUrls = br.driver.WindowHandles;
+                    System.Collections.ObjectModel.ReadOnlyCollection<string> tabUrls = br.driver.WindowHandles;
+                    foreach (string tabUrl in tabUrls)
+                    {
+                        string taburl = br.driver.SwitchTo().Window(tabUrl).Url;
+                        if (taburl == textBox3.Text || taburl.IndexOf(textBox3.Text.Replace("editor", "box")) > -1) { found = true; break; }
+                    }
+                    if (!found)
+                        br.driver = br.openNewTab();
+                }
+                url = textBox3.Text;
+                //textBox3.Text = url;
+                //string urlLast= url = br.driver.Url;
+            }
             br.在Chrome瀏覽器的Quick_edit文字框中輸入文字(br.driver, Clipboard.GetText(), url);
         }
         private void pasteToCtext()
@@ -5671,12 +5727,40 @@ namespace WindowsFormsApp1
                     System.Media.SystemSounds.Asterisk.Play();
                     textBox3.Text = clpTxt;
                     ClpTxtBefore = clpTxt;
-                    appActivateByName();//取得網址時順便貼上簡單修改模式下的文字
-                    Task.WaitAll();
-                    SendKeys.Send("{F6 3}");
-                    Task.WaitAll();
-                    SendKeys.Send("^a");
-                    SendKeys.Send("^x");
+
+                    switch (browsrOPMode)
+                    {
+                        case BrowserOPMode.appActivateByName:
+                            appActivateByName();//取得網址時順便貼上簡單修改模式下的文字
+                            Task.WaitAll();
+                            SendKeys.Send("{F6 3}");
+                            Task.WaitAll();
+                            SendKeys.Send("^a");
+                            SendKeys.Send("^x");
+                            break;
+                        case BrowserOPMode.selenium:
+                            //if (br.driver.Url != textBox3.Text) 
+
+                            try
+                            {
+                                //br.driver.ExecuteScript("window.open();");
+                                br.driver.SwitchTo().NewWindow(OpenQA.Selenium.WindowType.Tab);//取得網址時順便貼上簡單修改模式下的文字                            
+                            }
+                            catch (Exception)
+                            {
+                                br.driver.SwitchTo().Window(br.driver.WindowHandles.Last());
+                                //throw;
+                            }
+                            br.driver.Navigate().GoToUrl(clpTxt);
+                            Task.WaitAll();
+                            OpenQA.Selenium.IWebElement quick_edit_box = br.driver.FindElement(OpenQA.Selenium.By.Name("data"));
+                            Clipboard.SetText(quick_edit_box.Text);
+                            break;
+                        case BrowserOPMode.seleniumGet:
+                            break;
+                        default:
+                            break;
+                    }
                     string nowClpTxt = Clipboard.GetText();
                     if (nowClpTxt != "" && nowClpTxt != ClpTxtBefore)
                     {
@@ -6293,6 +6377,7 @@ namespace WindowsFormsApp1
             pageTextEndPosition = 0; pageEndText10 = "";
             lines_perPage = 0;
             normalLineParaLength = 0;
+            resetPageTextEndPositionPasteToCText();
             TopLine = false; Indents = true;
         }
 
