@@ -109,8 +109,19 @@ namespace TextForCtext
             }
             catch (Exception)
             {
-                //如果沒有按下「Quick edit」就按下它以開啟
-                selm.IWebElement quickedit = driver.FindElement(selm.By.Id("quickedit"));
+                selm.IWebElement quickedit;
+                try
+                {
+                    //如果沒有按下「Quick edit」就按下它以開啟
+                    quickedit = driver.FindElement(selm.By.Id("quickedit"));
+                }
+                catch (Exception)
+                {
+                    //cDrv.Navigate().GoToUrl(Form1.mainFromTextBox3Text ?? "https://ctext.org/account.pl?if=en");
+                    MessageBox.Show("請先登入 Ctext.org 再繼續。按下「確定(OK)」以繼續……");
+                    quickedit = driver.FindElement(selm.By.Id("quickedit"));
+                    //throw;
+                }
                 quickedit.Click();//預設當如下面「submit.Click();」會等網頁作出回應才執行下一步。感恩感恩　讚歎讚歎　南無阿彌陀佛
                 textbox = driver.FindElement(selm.By.Name("data"));
                 //throw;
@@ -268,6 +279,42 @@ namespace TextForCtext
             return output;
 
         }
+
+        internal static string GetImageUrl(string url=null)
+        {//20230104 creedit
+            using (var driver = new ChromeDriver())
+            {
+                // 移動到指定的網頁
+                driver.Navigate().GoToUrl(url??System.Windows.Forms.Application.OpenForms[0].Controls["textBox3"].Text);//("http://example.com/");
+
+                // 取得元件 scancont 的圖片網址
+                //IWebElement scancont = driver.FindElement(By.Id("content"));
+                //IWebElement scancont = driver.FindElement(By.Id("scancont"));
+                IList<OpenQA.Selenium.IWebElement> imageElements  = driver.FindElements(By.TagName("img"));
+                string imageUrl="";
+                foreach (IWebElement imageElement in imageElements)
+                {
+                    imageUrl = imageElement.GetAttribute("src");
+                    if (imageUrl.Substring(imageUrl.Length - 4, 4) == ".png"
+                        && ((imageUrl.IndexOf(".cn_")>-1)
+                        || imageUrl.IndexOf("dimage") > -1)) break;
+                    //Console.WriteLine(imageUrl);
+                }
+                //string imageUrl = imageElements.GetAttribute("src");
+
+                return imageUrl;
+            }
+        }
+        /* 以下是我先寫來問chatGPT的，依其建議改如上
+        internal static string getImageUrl() {
+
+            Browser br = new Browser(System.Windows.Forms.Application.OpenForms[0] as Form1);
+            ChromeDriver driver = new ChromeDriver();
+            IWebElement scancont = driver.FindElement(By.Id("scancont"));
+            return scancont.GetAttribute("src");
+
+        }
+        */
 
         internal static void downloadImage(string imageUrl)
         {/*20230103 creedit,chatGPT：

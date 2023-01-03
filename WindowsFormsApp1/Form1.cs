@@ -470,7 +470,7 @@ namespace WindowsFormsApp1
             }
             else
             { s = textBox1.SelectionStart; l = textBox1.SelectionLength; }
-            string xCopy = x.Substring(0, s + l);
+            string xCopy = x.Substring(0, s + l > x.Length ? x.Length : s + l);
             #region 置換為全形符號、及清除冗餘
             string[] replaceDChar = { ",", ";", ":", "．", "?", "：：", "《《", "》》", "〈〈", "〉〉", "。}}。}}" };
             string[] replaceChar = { "，", "；", "：", "·", "？", "：", "《《", "》", "〈", "〉", "。}}" };
@@ -4597,7 +4597,13 @@ namespace WindowsFormsApp1
                 if (e.KeyCode == Keys.O)
                 {//Alt + o :下載圖片，準備交給《古籍酷》OCR（待實作）
                     e.Handled = true;
-                    br.downloadImage(Clipboard.GetText());
+                    string imgUrl = Clipboard.GetText();
+                    if (imgUrl.Length > 4
+                        && imgUrl.Substring(0, 4) == "http"
+                        && imgUrl.Substring(imgUrl.Length - 4, 4) == ".png")
+                        br.downloadImage(imgUrl);
+                    else
+                        br.downloadImage(br.GetImageUrl());
                     return;
                 }
                 if (e.KeyCode == Keys.Left || e.KeyCode == Keys.Right)
