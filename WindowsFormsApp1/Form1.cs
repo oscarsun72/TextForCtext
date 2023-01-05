@@ -5110,7 +5110,7 @@ namespace WindowsFormsApp1
                     return @"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe";//"msedge"
 
                 case "chrome":// "ChromeHTML"://, "google chrome": '"chrome"
-                    if (File.Exists(@"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe"))
+                    if (File.Exists(@"C:\Program Files\Google\Chrome\Application\chrome.exe"))
                         return @"C:\Program Files\Google\Chrome\Application\chrome.exe";
                     else if (File.Exists(@"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe"))
                         return @"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe";

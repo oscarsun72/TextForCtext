@@ -59,8 +59,10 @@ namespace TextForCtext
                 ChromeDriverService driverService;
                 ChromeDriver cDrv;//綠色免安裝版仍搞不定，安裝 chrome 了就OK 20220101 chatGPT建議者未通；20220105自行解決了，詳下
 
+                string chrome_path = Form1.getDefaultBrowserEXE();
+
                 // 將 ChromeOptions 設定加入 ChromeDriver
-                ChromeOptions options = chromeOptions();
+                ChromeOptions options = chromeOptions(chrome_path);
                 //ChromeDriver cDrv = new ChromeDriver("C:\\Users\\oscar\\.cache\\selenium\\chromedriver\\win32\\108.0.5359.71\\chromedriver.exe", options);
 
                 //cDrv = new ChromeDriver(@"C:\Program Files\Google\Chrome\Application\chrome.exe",options);
@@ -68,7 +70,7 @@ namespace TextForCtext
                 //上述加入書籤並不管用！！！20230104//解法已詳下chromeOptions()中
 
 
-                string chrome_path = Form1.getDefaultBrowserEXE();
+
 
                 switch (chrome_path.Substring(0, 3))
                 {
@@ -90,7 +92,7 @@ namespace TextForCtext
                         #endregion      
                 }
 
-                driverService.HideCommandPromptWindow = true;//关闭黑色cmd窗口 https://blog.csdn.net/PLA12147111/article/details/92000480
+                //driverService.HideCommandPromptWindow = true;//关闭黑色cmd窗口 https://blog.csdn.net/PLA12147111/article/details/92000480
                 //先設定才能依其設定開啟，才不會出現cmd黑色屏幕視窗，若先創建Chrome瀏覽器視窗（即下一行），再設定「.HideCommandPromptWindow = true」則不行。邏輯！感恩感恩　讚歎讚歎　南無阿彌陀佛 202301051414
                 cDrv = new ChromeDriver(driverService, options, TimeSpan.FromSeconds(4));//等待重啟時間=4秒鐘：若寫成「 , TimeSpan.MinValue);」這會出現超出設定值範圍的錯誤//TimeSpan是設定決定重新啟動chromedriver.exe須等待的時間，太長則人則不耐，太短則chromedriver.exe來不及反應而出錯。感恩感恩　讚歎讚歎　南無阿彌陀佛 202301051751
                 originalWindow = cDrv.CurrentWindowHandle;
@@ -133,7 +135,7 @@ namespace TextForCtext
                 return driver;
         }
 
-        private static ChromeOptions chromeOptions()
+        private static ChromeOptions chromeOptions(string chrome_path)
         {
             // 建立 ChromeOptions 物件            
             ChromeOptions options = new ChromeOptions();
@@ -158,20 +160,24 @@ namespace TextForCtext
             //options.AddArgument( "--disable-features=VizDisplayCompositor" );
             #endregion
             #region it worked！！ ：D
-            //202301050205終於成了 這可以用原來的chrome（即使用者啟動操作慣用的一切設定，如書籤、擴充功能等等）而不是空白的、原始的來操作了 https://www.cnblogs.com/baihuitestsoftware/articles/7742069.html            
-            //options.AddArgument("--user-data-dir=C:\\Users\\oscar\\AppData\\Local\\Google\\Chrome\\User Data\\");
-            //有沒有「--」（--user or user）都可
-            //options.AddArgument("user-data-dir=" + Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "\\Google\\Chrome\\User Data\\");
-            ////https://www.cnblogs.com/hushaojun/p/5981646.html
+            if (chrome_path.IndexOf("W:\\") == -1)
+                //安裝版：
+                //202301050205終於成了 這可以用原來的chrome（即使用者啟動操作慣用的一切設定，如書籤、擴充功能等等）而不是空白的、原始的來操作了 https://www.cnblogs.com/baihuitestsoftware/articles/7742069.html            
+                //options.AddArgument("--user-data-dir=C:\\Users\\oscar\\AppData\\Local\\Google\\Chrome\\User Data\\");
+                //有沒有「--」（--user or user）都可
+                options.AddArgument("user-data-dir=" + Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "\\Google\\Chrome\\User Data\\");
 
-            //測試免安裝版：
-            //options.AddArgument("user-data-dir=" + "W:\\PortableApps\\PortableApps\\GoogleChromePortable\\Data\\profile\\");// + "\\Google\\Chrome\\User Data\\");
-            //根本就是在Chrome瀏覽器網址列以「chrome://version/」Enter後「命令列:」欄位所列的值嘛 202301051156 chatGPT也都不說 唉 還是要我自己來、Google大神和chatGPT桃園結義才能坐擁一方啊。哈。感恩感恩　讚歎讚歎　南無阿彌陀佛
-            options.AddArgument("--user-data-dir=" + "W:\\PortableApps\\PortableApps\\GoogleChromePortable\\Data\\profile\\");// + "\\Google\\Chrome\\User Data\\");
-            //免安裝版必須，其值所在詳上所述,雖然還未成功（瀏覽器未出現）但至少是這樣的訊息：「ChromeDriver was started successfully.」不會說找不到 binary（cannot find Chrome binary）了 
-            //options.AddArgument("--disk-cache-dir=\"C:\\Users\\oscar\\AppData\\Local\\Temp\\GoogleChromePortable\\");
-            //options.AddArgument("--flag-switches-begin");
-            //options.AddArgument("--flag-switches-end");
+            //https://www.cnblogs.com/hushaojun/p/5981646.html
+
+            else
+                //免安裝版：
+                //options.AddArgument("user-data-dir=" + "W:\\PortableApps\\PortableApps\\GoogleChromePortable\\Data\\profile\\");// + "\\Google\\Chrome\\User Data\\");
+                //根本就是在Chrome瀏覽器網址列以「chrome://version/」Enter後「命令列:」欄位所列的值嘛 202301051156 chatGPT也都不說 唉 還是要我自己來、Google大神和chatGPT桃園結義才能坐擁一方啊。哈。感恩感恩　讚歎讚歎　南無阿彌陀佛
+                options.AddArgument("--user-data-dir=" + "W:\\PortableApps\\PortableApps\\GoogleChromePortable\\Data\\profile\\");// + "\\Google\\Chrome\\User Data\\");
+                                                                                                                                  //免安裝版必須，其值所在詳上所述,雖然還未成功（瀏覽器未出現）但至少是這樣的訊息：「ChromeDriver was started successfully.」不會說找不到 binary（cannot find Chrome binary）了 
+                                                                                                                                  //options.AddArgument("--disk-cache-dir=\"C:\\Users\\oscar\\AppData\\Local\\Temp\\GoogleChromePortable\\");
+                                                                                                                                  //options.AddArgument("--flag-switches-begin");
+                                                                                                                                  //options.AddArgument("--flag-switches-end");
 
 
             //以下可以首頁為Google，而不是空白
@@ -301,45 +307,40 @@ namespace TextForCtext
 
         internal static void GoToUrlandActivate(string url)
         {
+
+            if (driver == null) driver = driverNew();
+            driver.SwitchTo().Window(driver.CurrentWindowHandle);
+            //driver.Close();//creedit
+            //creedit20230103 這樣處理誤關分頁頁籤的錯誤（例外情形）就成功了，但整個瀏覽器誤關則尚未
+            //chatGPT：在 C# 中使用 Selenium 取得 Chrome 瀏覽器開啟的頁籤（分頁）數量可以使用以下方法：                
+            int tabCount = 0;
             try
             {
                 if (driver == null) driver = driverNew();
-                driver.SwitchTo().Window(driver.CurrentWindowHandle);
-
+                tabCount = driver.WindowHandles.Count;
             }
             catch (Exception)
             {
-                //driver.Close();//creedit
-                //creedit20230103 這樣處理誤關分頁頁籤的錯誤（例外情形）就成功了，但整個瀏覽器誤關則尚未
-                //chatGPT：在 C# 中使用 Selenium 取得 Chrome 瀏覽器開啟的頁籤（分頁）數量可以使用以下方法：                
-                int tabCount = 0;
-                try
-                {
-                    if (driver == null) driver = driverNew();
-                    tabCount = driver.WindowHandles.Count;
-                }
-                catch (Exception)
-                {
-                    driver = null;
-                    driver = driverNew();
-                    //throw;
-                }
-                /*另外，您也可以使用以下方法在 C# 中取得 Chrome 瀏覽器的標籤（分頁）數量:
-                 // 取得 Chrome 瀏覽器的標籤數量
-                    int tabCount = driver.Manage().Window.Bounds.Width / 100;
-                 */
-                if (tabCount > 0)
-                {
-                    var hs = driver.WindowHandles;
-                    //driver.SwitchTo().Window(hs[0]);
-                    driver.SwitchTo().Window(driver.CurrentWindowHandle);
-                }
-                else
-                {
-                    Browser.openNewTab();
-                }
+                driver = null;
+                driver = driverNew();
                 //throw;
             }
+            /*另外，您也可以使用以下方法在 C# 中取得 Chrome 瀏覽器的標籤（分頁）數量:
+             // 取得 Chrome 瀏覽器的標籤數量
+                int tabCount = driver.Manage().Window.Bounds.Width / 100;
+             */
+            if (tabCount > 0)
+            {
+                var hs = driver.WindowHandles;
+                //driver.SwitchTo().Window(hs[0]);
+                driver.SwitchTo().Window(driver.CurrentWindowHandle);
+            }
+            else
+            {
+                Browser.openNewTab();
+            }
+            //throw;
+
             driver.Navigate().GoToUrl(url);
             //activate and move to most front of desktop
             driver.SwitchTo().Window(driver.CurrentWindowHandle);
