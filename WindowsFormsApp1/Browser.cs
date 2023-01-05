@@ -71,30 +71,44 @@ namespace TextForCtext
 
 
 
-
-                switch (chrome_path.Substring(0, 3))
+                string user_data_dir = options.Arguments[0];
+                #region 免安裝版要先將chromedriver.exe複製到chrome.exe可執行檔的路徑，與chrome.exe並列（同在一個目錄下）才行
+                if (user_data_dir.IndexOf("W:\\") > -1)// chrome_path.Substring(0, 3))
                 {
-                    #region 免安裝版要先將chromedriver.exe複製到chrome.exe可執行檔的路徑，與chrome.exe並列（同在一個目錄下）才行
-                    case "W:\\"://case-sensitive
-                        chrome_path = chrome_path.Replace("chrome.exe", "");//只能取目錄，不是全檔名
-                        //免安裝版測試：其實根本就是在Chrome瀏覽器網址列以「chrome://version/」Enter後「命令列:」欄位所列的值嘛20230105
-                        //ChromeDriver cDrv = new ChromeDriver(@"W:\PortableApps\PortableApps\GoogleChromePortable\App\Chrome-bin\chrome.exe", options);
-                        //要啟動Chrome瀏覽器時不要出現chromedriver.exe的cmd黑色視窗，免安裝版就須這樣寫，先設定好 ChromeDriverService 物件是由可執行檔的路徑（目錄，非其全檔名）創建，再帶入ChromeDriver()建構函數的第一個引數才行，如下所示
-                        driverService = ChromeDriverService.CreateDefaultService(chrome_path);
-                        //cDrv = new ChromeDriver(chrome_path, options);                        
-                        #endregion
-                        break;
 
-                    #region 預設安裝版，無須多餘指定，即可用空的引數（在無引數的情況下）完成，免安裝版則如上，必須指定相關引數才行 感恩感恩　讚歎讚歎　南無阿彌陀佛 202301051418
-                    default:
-                        driverService = ChromeDriverService.CreateDefaultService();
-                        break;
-                        #endregion      
+                    chrome_path = chrome_path.Replace("chrome.exe", "");//只能取目錄，不是全檔名
+                                                                        //免安裝版測試：其實根本就是在Chrome瀏覽器網址列以「chrome://version/」Enter後「命令列:」欄位所列的值嘛20230105
+                                                                        //ChromeDriver cDrv = new ChromeDriver(@"W:\PortableApps\PortableApps\GoogleChromePortable\App\Chrome-bin\chrome.exe", options);
+                                                                        //要啟動Chrome瀏覽器時不要出現chromedriver.exe的cmd黑色視窗，免安裝版就須這樣寫，先設定好 ChromeDriverService 物件是由可執行檔的路徑（目錄，非其全檔名）創建，再帶入ChromeDriver()建構函數的第一個引數才行，如下所示
+                    driverService = ChromeDriverService.CreateDefaultService(chrome_path);
+                    //cDrv = new ChromeDriver(chrome_path, options);                        
+
                 }
+                //如華岡學習雲無寫入權時的：
+                else if (user_data_dir.IndexOf("Documents") > -1)
+                {
+                    chrome_path = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + @"\GoogleChromePortable\App\Chrome-bin\";
+                    driverService = ChromeDriverService.CreateDefaultService(chrome_path);
+
+                }
+                #endregion
+                #region 預設安裝版，無須多餘指定，即可用空的引數（在無引數的情況下）完成，免安裝版則如上，必須指定相關引數才行 感恩感恩　讚歎讚歎　南無阿彌陀佛 202301051418
+                else
+                {
+                    driverService = ChromeDriverService.CreateDefaultService();//沒傳入引數在Windows系統則會自行用調用「C:\Users\（使用者帳號）\.cache\selenium\chromedriver\win32\（版本號）」，如：C:\Users\oscar\.cache\selenium\chromedriver\win32\108.0.5359.71
+                }
+                #endregion
 
                 //driverService.HideCommandPromptWindow = true;//关闭黑色cmd窗口 https://blog.csdn.net/PLA12147111/article/details/92000480
                 //先設定才能依其設定開啟，才不會出現cmd黑色屏幕視窗，若先創建Chrome瀏覽器視窗（即下一行），再設定「.HideCommandPromptWindow = true」則不行。邏輯！感恩感恩　讚歎讚歎　南無阿彌陀佛 202301051414
-                cDrv = new ChromeDriver(driverService, options, TimeSpan.FromSeconds(4));//等待重啟時間=4秒鐘：若寫成「 , TimeSpan.MinValue);」這會出現超出設定值範圍的錯誤//TimeSpan是設定決定重新啟動chromedriver.exe須等待的時間，太長則人則不耐，太短則chromedriver.exe來不及反應而出錯。感恩感恩　讚歎讚歎　南無阿彌陀佛 202301051751
+                if (user_data_dir.IndexOf("Documents") > -1)//無寫入權限的電腦，怕比較慢
+                                                            //可能是防火牆 OpenQA.Selenium.WebDriverException
+                                                            //HResult = 0x80131500
+                                                            //Message = The HTTP request to the remote WebDriver server for URL http://localhost:52966/session timed out after 60 seconds.
+                    cDrv = new ChromeDriver(driverService, options);
+                else
+                    //自己的電腦比較快
+                    cDrv = new ChromeDriver(driverService, options, TimeSpan.FromSeconds(4));//等待重啟時間=4秒鐘：若寫成「 , TimeSpan.MinValue);」這會出現超出設定值範圍的錯誤//TimeSpan是設定決定重新啟動chromedriver.exe須等待的時間，太長則人則不耐，太短則chromedriver.exe來不及反應而出錯。感恩感恩　讚歎讚歎　南無阿彌陀佛 202301051751
                 originalWindow = cDrv.CurrentWindowHandle;
                 //string chrome_path = Form1.getDefaultBrowserEXE();
                 //if (chrome_path.IndexOf(@"C:\") == -1)
@@ -160,7 +174,7 @@ namespace TextForCtext
             //options.AddArgument( "--disable-features=VizDisplayCompositor" );
             #endregion
             #region it worked！！ ：D
-            if (chrome_path.IndexOf("W:\\") == -1)
+            if (chrome_path.IndexOf("W:\\") == -1 && chrome_path.IndexOf("Documents") == -1)
                 //安裝版：
                 //202301050205終於成了 這可以用原來的chrome（即使用者啟動操作慣用的一切設定，如書籤、擴充功能等等）而不是空白的、原始的來操作了 https://www.cnblogs.com/baihuitestsoftware/articles/7742069.html            
                 //options.AddArgument("--user-data-dir=C:\\Users\\oscar\\AppData\\Local\\Google\\Chrome\\User Data\\");
@@ -168,7 +182,8 @@ namespace TextForCtext
                 options.AddArgument("user-data-dir=" + Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "\\Google\\Chrome\\User Data\\");
 
             //https://www.cnblogs.com/hushaojun/p/5981646.html
-
+            else if (chrome_path.IndexOf("W:\\") == -1)
+                options.AddArgument("user-data-dir=" + Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\GoogleChromePortable\\Data\\profile\\");
             else
                 //免安裝版：
                 //options.AddArgument("user-data-dir=" + "W:\\PortableApps\\PortableApps\\GoogleChromePortable\\Data\\profile\\");// + "\\Google\\Chrome\\User Data\\");

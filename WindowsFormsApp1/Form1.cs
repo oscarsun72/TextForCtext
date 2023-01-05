@@ -5110,11 +5110,13 @@ namespace WindowsFormsApp1
                     return @"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe";//"msedge"
 
                 case "chrome":// "ChromeHTML"://, "google chrome": '"chrome"
-                    if (File.Exists(@"C:\Program Files\Google\Chrome\Application\chrome.exe"))
-                        return @"C:\Program Files\Google\Chrome\Application\chrome.exe";
+                    if (File.Exists(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + @"\GoogleChromePortable\App\Chrome-bin\chrome.exe"))
+                        return "C:\\Users\\ssz3\\Documents\\GoogleChromePortable\\App\\Chrome-bin\\chrome.exe";
                     else if (File.Exists(@"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe"))
                         return @"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe";
                     //return @"W:\PortableApps\PortableApps\GoogleChromePortable\GoogleChromePortable.exe";
+                    else if(File.Exists(@"C:\Program Files\Google\Chrome\Application\chrome.exe"))
+                        return @"C:\Program Files\Google\Chrome\Application\chrome.exe";
                     else
                         return @"W:\PortableApps\PortableApps\GoogleChromePortable\App\Chrome-bin\chrome.exe";
                 default:
