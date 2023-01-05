@@ -88,7 +88,7 @@ Ctrl + + （加號，含函數字鍵盤） 或 Ctrl + -（數字鍵盤）  或 C
 
 Ctrl + Shift + c ：將textBox1的文本複製到剪貼簿 以備用
 
-Alt + o :下載圖片，準備交給《古籍酷》OCR（待實作）:複製圖片位址即可下載……
+Alt + o :下載圖片，準備交給[《古籍酷》](https://ocr.gj.cool/)[OCR](https://ocr.gj.cool/try_ocr)（待實作）:複製圖片位址即可下載……
 
 Alt + ←：視窗向左移動30dpi（+ Ctrl：徵調；插入點在textBox1時例外）
 

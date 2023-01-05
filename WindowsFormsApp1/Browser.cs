@@ -27,8 +27,7 @@ namespace TextForCtext
 {
     class Browser
     {
-        static ChromeDriverService driverService = ChromeDriverService.CreateDefaultService();        
-
+        
         // 創建Chrome驅動程序對象
         //selm.IWebDriver driver=driverNew();        
         //internal static selm.IWebDriver driver=driverNew();
@@ -57,24 +56,49 @@ namespace TextForCtext
         {
             if (driver == null)
             {
-                driverService.HideCommandPromptWindow = true;//关闭黑色cmd窗口
-                /*ChromeDriver cDrv;*///綠色免安裝版仍搞不定，安裝 chrome 了就OK 20220101 chatGPT建議者未通
+                ChromeDriverService driverService;
+                ChromeDriver cDrv;//綠色免安裝版仍搞不定，安裝 chrome 了就OK 20220101 chatGPT建議者未通；20220105自行解決了，詳下
 
-
-
-                ChromeOptions options = chromeOptions();
                 // 將 ChromeOptions 設定加入 ChromeDriver
-                ChromeDriver cDrv = new ChromeDriver(driverService, options);
+                ChromeOptions options = chromeOptions();
                 //ChromeDriver cDrv = new ChromeDriver("C:\\Users\\oscar\\.cache\\selenium\\chromedriver\\win32\\108.0.5359.71\\chromedriver.exe", options);
+
                 //cDrv = new ChromeDriver(@"C:\Program Files\Google\Chrome\Application\chrome.exe",options);
                 //cDrv = new ChromeDriver(@"x:\chromedriver.exe", options);
-                //上述加入書籤並不管用！！！20230104
+                //上述加入書籤並不管用！！！20230104//解法已詳下chromeOptions()中
+
+
+                string chrome_path = Form1.getDefaultBrowserEXE();
+
+                switch (chrome_path.Substring(0,3) )
+                {
+                        #region 免安裝版要先將chromedriver.exe複製到chrome.exe可執行檔的路徑，與chrome.exe並列（同在一個目錄下）才行
+                    case "W:\\"://case-sensitive
+                        chrome_path = chrome_path.Replace("chrome.exe", "");//只能取目錄，不是全檔名
+                        //免安裝版測試：其實根本就是在Chrome瀏覽器網址列以「chrome://version/」Enter後「命令列:」欄位所列的值嘛20230105
+                        //ChromeDriver cDrv = new ChromeDriver(@"W:\PortableApps\PortableApps\GoogleChromePortable\App\Chrome-bin\chrome.exe", options);
+                        //要啟動Chrome瀏覽器時不要出現chromedriver.exe的cmd黑色視窗，免安裝版就須這樣寫，先設定好 ChromeDriverService 物件是由可執行檔的路徑（目錄，非其全檔名）創建，再帶入ChromeDriver()建構函數的第一個引數才行，如下所示
+                        driverService = ChromeDriverService.CreateDefaultService(chrome_path);
+                        //cDrv = new ChromeDriver(chrome_path, options);                        
+                        #endregion
+                        break;
+
+                        #region 預設安裝版，無須多餘指定，即可用空的引數（在無引數的情況下）完成，免安裝版則如上，必須指定相關引數才行 感恩感恩　讚歎讚歎　南無阿彌陀佛 202301051418
+                    default:
+                        driverService = ChromeDriverService.CreateDefaultService();                        
+                        break;
+                        #endregion      
+                }
+
+                driverService.HideCommandPromptWindow = true;//关闭黑色cmd窗口 https://blog.csdn.net/PLA12147111/article/details/92000480
+                //先設定才能依其設定開啟，才不會出現cmd黑色屏幕視窗，若先創建Chrome瀏覽器視窗（即下一行），再設定「.HideCommandPromptWindow = true」則不行。邏輯！感恩感恩　讚歎讚歎　南無阿彌陀佛 202301051414
+                cDrv = new ChromeDriver(driverService, options);
 
                 //string chrome_path = Form1.getDefaultBrowserEXE();
                 //if (chrome_path.IndexOf(@"C:\") == -1)
                 //{
                 //try
-                //{//selenium 如何操作免安裝版的 chrome 瀏覽器 或自訂安裝路徑的 chrome 瀏覽器呢
+                //{//selenium 如何操作免安裝版的 chrome 瀏覽器 或自訂安裝路徑的 chrome 瀏覽器呢 //20230105這根本不管用，找錯路了。解法詳上
                 //    ////chatGPT:如果您看到 WebDriverException: unknown error: cannot find Chrome binary 的例外，可能是因為 ChromeDriver 找不到 Chrome 的可執行檔。您可以使用以下程式碼來解決這個問題：
                 //ChromeOptions options = new ChromeOptions();
                 //options.BinaryLocation = @"W:\PortableApps\PortableApps\GoogleChromePortable\App\Chrome-bin";
@@ -137,8 +161,18 @@ namespace TextForCtext
             //202301050205終於成了 這可以用原來的chrome（即使用者啟動操作慣用的一切設定，如書籤、擴充功能等等）而不是空白的、原始的來操作了 https://www.cnblogs.com/baihuitestsoftware/articles/7742069.html            
             //options.AddArgument("--user-data-dir=C:\\Users\\oscar\\AppData\\Local\\Google\\Chrome\\User Data\\");
             //有沒有「--」（--user or user）都可
-            options.AddArgument("user-data-dir=" + Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "\\Google\\Chrome\\User Data\\");
-            //https://www.cnblogs.com/hushaojun/p/5981646.html
+            //options.AddArgument("user-data-dir=" + Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "\\Google\\Chrome\\User Data\\");
+            ////https://www.cnblogs.com/hushaojun/p/5981646.html
+
+            //測試免安裝版：
+            //options.AddArgument("user-data-dir=" + "W:\\PortableApps\\PortableApps\\GoogleChromePortable\\Data\\profile\\");// + "\\Google\\Chrome\\User Data\\");
+            //根本就是在Chrome瀏覽器網址列以「chrome://version/」Enter後「命令列:」欄位所列的值嘛 202301051156 chatGPT也都不說 唉 還是要我自己來、Google大神和chatGPT桃園結義才能坐擁一方啊。哈。感恩感恩　讚歎讚歎　南無阿彌陀佛
+            options.AddArgument("--user-data-dir=" + "W:\\PortableApps\\PortableApps\\GoogleChromePortable\\Data\\profile\\");// + "\\Google\\Chrome\\User Data\\");
+            //免安裝版必須，其值所在詳上所述,雖然還未成功（瀏覽器未出現）但至少是這樣的訊息：「ChromeDriver was started successfully.」不會說找不到 binary（cannot find Chrome binary）了 
+            //options.AddArgument("--disk-cache-dir=\"C:\\Users\\oscar\\AppData\\Local\\Temp\\GoogleChromePortable\\");
+            //options.AddArgument("--flag-switches-begin");
+            //options.AddArgument("--flag-switches-end");
+
 
             //以下可以首頁為Google，而不是空白
             //options.AddArgument("--user-data-dir=C:\\Users\\oscar\\AppData\\Local\\Google\\Chrome\\User Data\\Default\\");

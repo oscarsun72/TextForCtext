@@ -67,6 +67,7 @@ namespace WindowsFormsApp1
         {
 
             InitializeComponent();
+            //設定屬性
             textBox1FontDefaultSize = textBox1.Font.Size;
             textBox4Location = textBox4.Location;
             textBox4Size = textBox4.Size;
@@ -91,13 +92,48 @@ namespace WindowsFormsApp1
                 textBox4.Font = new Font(cjk, textBox4.Font.Size);
             }
             thisHeight = this.Height; thisWidth = this.Width; thisLeft = this.Left; thisTop = this.Top;
+            //加入事件處理常式
             this.nICo = new NotifyIcon();
             this.nICo.Icon = this.Icon;
             this.nICo.MouseClick += new System.Windows.Forms.MouseEventHandler(nICo_MouseClick);
             this.nICo.MouseMove += new System.Windows.Forms.MouseEventHandler(nICo_MouseMove);
             //this.Shown += Form1_Shown;//https://stackoverflow.com/questions/32720207/change-caret-cursor-in-textbox-in-c-sharp
 
+            this.FormClosing += Form1_FormClosing;//202301050101 creedit
+
         }
+
+        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        {
+
+            //終止 chromedriver.exe 程序,釋放系統記憶體
+            Process[] processes = Process.GetProcessesByName("chromedriver");
+            foreach (Process process in processes)
+            {
+                process.Kill();
+            }
+            //有上式便不用以下了
+            //try
+            //{
+            //    //釋放應用程式佔用的記憶體
+            //    br.driver.Close();//202301051447(2013/1/5 14:47) creedit
+
+            //}
+            //catch (OpenQA.Selenium.WebDriverException ex)
+            //{
+            //    bool v = ex.HResult == -2146233088;//先手動關了 chromedriver.exe 時
+            //    if (v) { }
+            //    else
+            //    {
+            //        v = ex.HResult == -2146233036;
+            //        if (v) { }
+            //        else throw;
+            //    }
+
+            //}
+
+        }
+
 
         void Caret_Shown(Control ctl)
         {
