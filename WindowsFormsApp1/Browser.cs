@@ -27,7 +27,7 @@ namespace TextForCtext
 {
     class Browser
     {
-        
+
         // 創建Chrome驅動程序對象
         //selm.IWebDriver driver=driverNew();        
         //internal static selm.IWebDriver driver=driverNew();
@@ -54,8 +54,8 @@ namespace TextForCtext
 
         static ChromeDriver driverNew()
         {
-            if (Form1.browsrOPMode !=Form1.BrowserOPMode.appActivateByName && driver == null)
-            {                
+            if (Form1.browsrOPMode != Form1.BrowserOPMode.appActivateByName && driver == null)
+            {
                 ChromeDriverService driverService;
                 ChromeDriver cDrv;//綠色免安裝版仍搞不定，安裝 chrome 了就OK 20220101 chatGPT建議者未通；20220105自行解決了，詳下
 
@@ -70,9 +70,9 @@ namespace TextForCtext
 
                 string chrome_path = Form1.getDefaultBrowserEXE();
 
-                switch (chrome_path.Substring(0,3) )
+                switch (chrome_path.Substring(0, 3))
                 {
-                        #region 免安裝版要先將chromedriver.exe複製到chrome.exe可執行檔的路徑，與chrome.exe並列（同在一個目錄下）才行
+                    #region 免安裝版要先將chromedriver.exe複製到chrome.exe可執行檔的路徑，與chrome.exe並列（同在一個目錄下）才行
                     case "W:\\"://case-sensitive
                         chrome_path = chrome_path.Replace("chrome.exe", "");//只能取目錄，不是全檔名
                         //免安裝版測試：其實根本就是在Chrome瀏覽器網址列以「chrome://version/」Enter後「命令列:」欄位所列的值嘛20230105
@@ -83,16 +83,16 @@ namespace TextForCtext
                         #endregion
                         break;
 
-                        #region 預設安裝版，無須多餘指定，即可用空的引數（在無引數的情況下）完成，免安裝版則如上，必須指定相關引數才行 感恩感恩　讚歎讚歎　南無阿彌陀佛 202301051418
+                    #region 預設安裝版，無須多餘指定，即可用空的引數（在無引數的情況下）完成，免安裝版則如上，必須指定相關引數才行 感恩感恩　讚歎讚歎　南無阿彌陀佛 202301051418
                     default:
-                        driverService = ChromeDriverService.CreateDefaultService();                        
+                        driverService = ChromeDriverService.CreateDefaultService();
                         break;
                         #endregion      
                 }
 
                 driverService.HideCommandPromptWindow = true;//关闭黑色cmd窗口 https://blog.csdn.net/PLA12147111/article/details/92000480
                 //先設定才能依其設定開啟，才不會出現cmd黑色屏幕視窗，若先創建Chrome瀏覽器視窗（即下一行），再設定「.HideCommandPromptWindow = true」則不行。邏輯！感恩感恩　讚歎讚歎　南無阿彌陀佛 202301051414
-                cDrv = new ChromeDriver(driverService, options);
+                cDrv = new ChromeDriver(driverService, options, TimeSpan.FromSeconds(4));//等待重啟時間=4秒鐘：若寫成「 , TimeSpan.MinValue);」這會出現超出設定值範圍的錯誤//TimeSpan是設定決定重新啟動chromedriver.exe須等待的時間，太長則人則不耐，太短則chromedriver.exe來不及反應而出錯。感恩感恩　讚歎讚歎　南無阿彌陀佛 202301051751
                 originalWindow = cDrv.CurrentWindowHandle;
                 //string chrome_path = Form1.getDefaultBrowserEXE();
                 //if (chrome_path.IndexOf(@"C:\") == -1)
@@ -303,6 +303,7 @@ namespace TextForCtext
         {
             try
             {
+                if (driver == null) driver = driverNew();
                 driver.SwitchTo().Window(driver.CurrentWindowHandle);
 
             }
@@ -310,8 +311,19 @@ namespace TextForCtext
             {
                 //driver.Close();//creedit
                 //creedit20230103 這樣處理誤關分頁頁籤的錯誤（例外情形）就成功了，但整個瀏覽器誤關則尚未
-                //chatGPT：在 C# 中使用 Selenium 取得 Chrome 瀏覽器開啟的頁籤（分頁）數量可以使用以下方法：
-                int tabCount = driver.WindowHandles.Count;
+                //chatGPT：在 C# 中使用 Selenium 取得 Chrome 瀏覽器開啟的頁籤（分頁）數量可以使用以下方法：                
+                int tabCount = 0;
+                try
+                {
+                    if (driver == null) driver = driverNew();
+                    tabCount = driver.WindowHandles.Count;
+                }
+                catch (Exception)
+                {
+                    driver = null;
+                    driver = driverNew();
+                    //throw;
+                }
                 /*另外，您也可以使用以下方法在 C# 中取得 Chrome 瀏覽器的標籤（分頁）數量:
                  // 取得 Chrome 瀏覽器的標籤數量
                     int tabCount = driver.Manage().Window.Bounds.Width / 100;
@@ -340,7 +352,7 @@ namespace TextForCtext
             在 C# 中使用 Selenium 開啟新 Chrome 瀏覽器分頁可以使用以下方法：*/
             // 創建 ChromeDriver 實例
             //IWebDriver driver = new ChromeDriver();
-            ChromeDriver driver = new ChromeDriver();
+            ChromeDriver driver = driverNew();//new ChromeDriver();
 
             // 開啟新分頁
             driver.ExecuteScript("window.open();");

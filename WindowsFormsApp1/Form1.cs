@@ -4848,10 +4848,11 @@ namespace WindowsFormsApp1
                     Process.Start(url);
                     appActivateByName();
                     break;
-                case BrowserOPMode.seleniumNew:
+                case BrowserOPMode.seleniumNew:                    
                     br.GoToUrlandActivate(url);
                     break;
                 case BrowserOPMode.seleniumGet:
+                    //尚未實作
                     break;
                 default:
                     return;
@@ -6006,12 +6007,15 @@ namespace WindowsFormsApp1
             {
                 case "ap,":
                     browsrOPMode = BrowserOPMode.appActivateByName;
+                    textBox2.Text = "";
                     break;
                 case "sl,":
                     browsrOPMode = BrowserOPMode.seleniumNew;
+                    textBox2.Text = "";
                     break;
                 case "sg,":
                     browsrOPMode = BrowserOPMode.seleniumGet;
+                    textBox2.Text = "";
                     break;
 
                 default:
