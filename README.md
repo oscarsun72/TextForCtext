@@ -94,6 +94,7 @@ Ctrl + + （加號，含函數字鍵盤） 或 Ctrl + -（數字鍵盤）  或 C
 Ctrl + Shift + c ：將textBox1的文本複製到剪貼簿 以備用
 
 Alt + o :下載書頁圖片（簡稱「書圖」），準備交給[《古籍酷》](https://ocr.gj.cool/)[OCR](https://ocr.gj.cool/try_ocr)（待實作，目前已完成書圖下載作業）:複製圖片位址或由textBox3指定要下載的網頁網址即可下載……
+    - 下載路徑預設為 Dropbox 根目錄，檔名為 Ctext_Page_Image.png
 
 Alt + ←：視窗向左移動30dpi（+ Ctrl：徵調；插入點在textBox1時例外）
 

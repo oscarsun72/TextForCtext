@@ -24,6 +24,7 @@ using Font = System.Drawing.Font;
 using Task = System.Threading.Tasks.Task;
 using Application = System.Windows.Forms.Application;
 using System.Security.Cryptography;
+using System.Net;
 
 namespace WindowsFormsApp1
 {
@@ -4637,9 +4638,9 @@ namespace WindowsFormsApp1
                     if (imgUrl.Length > 4
                         && imgUrl.Substring(0, 4) == "http"
                         && imgUrl.Substring(imgUrl.Length - 4, 4) == ".png")
-                        br.downloadImage(imgUrl);
+                        downloadImage(imgUrl);
                     else
-                        br.downloadImage(br.GetImageUrl());
+                        downloadImage(br.GetImageUrl());
                     return;
                 }
                 if (e.KeyCode == Keys.Left || e.KeyCode == Keys.Right)
@@ -6575,6 +6576,28 @@ namespace WindowsFormsApp1
                 textBox1.Focus();
             }
 
+        }
+
+        internal void downloadImage(string imageUrl)
+        {/*20230103 creedit,chatGPT：
+          你可以使用 Selenium 來下載網絡圖片。
+            首先，你需要獲取圖片的 URL。然後，使用 WebClient 的 DownloadData 方法下載圖片的二進制數據。
+            最後，使用 FileStream 將二進制數據寫入文件即可。  
+          */
+            // 獲取圖片的 URL。
+            //imageUrl = "https://example.com/image.png";
+
+            // 使用 WebClient 下載圖片的二進制數據。
+            WebClient webClient = new WebClient();
+            byte[] imageBytes = webClient.DownloadData(imageUrl);
+
+            // 將二進制數據寫入文件。
+            string downloadImgFullName = dropBoxPathIncldBackSlash+ "Ctext_Page_Image.png";
+            using (FileStream fileStream = new FileStream(downloadImgFullName, FileMode.Create))
+            {
+                fileStream.Write(imageBytes, 0, imageBytes.Length);
+                Console.WriteLine("圖片已成功下載。");//在「即時運算視窗」寫出訊息
+            }
         }
 
         void openDatabase(string dbNameIncludeExt, ref ado.Connection cnt)
