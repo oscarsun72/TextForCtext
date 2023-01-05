@@ -21,11 +21,14 @@ using System.Runtime.CompilerServices;
 using System.IO;
 using System.Net;
 using static System.Net.WebRequestMethods;
+using System.Runtime.InteropServices.ComTypes;
 
 namespace TextForCtext
 {
     class Browser
     {
+        static ChromeDriverService driverService = ChromeDriverService.CreateDefaultService();        
+
         // 創建Chrome驅動程序對象
         //selm.IWebDriver driver=driverNew();        
         //internal static selm.IWebDriver driver=driverNew();
@@ -54,8 +57,19 @@ namespace TextForCtext
         {
             if (driver == null)
             {
-                ChromeDriver cDrv;//綠色免安裝版仍搞不定，安裝 chrome 了就OK 20220101 chatGPT建議者未通
-                cDrv = new ChromeDriver();
+                driverService.HideCommandPromptWindow = true;//关闭黑色cmd窗口
+                /*ChromeDriver cDrv;*///綠色免安裝版仍搞不定，安裝 chrome 了就OK 20220101 chatGPT建議者未通
+
+
+
+                ChromeOptions options = chromeOptions();
+                // 將 ChromeOptions 設定加入 ChromeDriver
+                ChromeDriver cDrv = new ChromeDriver(driverService, options);
+                //ChromeDriver cDrv = new ChromeDriver("C:\\Users\\oscar\\.cache\\selenium\\chromedriver\\win32\\108.0.5359.71\\chromedriver.exe", options);
+                //cDrv = new ChromeDriver(@"C:\Program Files\Google\Chrome\Application\chrome.exe",options);
+                //cDrv = new ChromeDriver(@"x:\chromedriver.exe", options);
+                //上述加入書籤並不管用！！！20230104
+
                 //string chrome_path = Form1.getDefaultBrowserEXE();
                 //if (chrome_path.IndexOf(@"C:\") == -1)
                 //{
@@ -83,12 +97,63 @@ namespace TextForCtext
                 cDrv.Navigate().GoToUrl(Form1.mainFromTextBox3Text ?? "https://ctext.org/account.pl?if=en");
                 //IWebElement clk = cDrv.FindElement(selm.By.Id("logininfo")); clk.Click();
                 //cDrv.FindElement(selm.By.Id("logininfo")).Click();
-                MessageBox.Show("請先登入 Ctext.org 再繼續。按下「確定(OK)」以繼續……");
+                /*202301050214 因為以下這行設定成功，可以用平常的Chrome來操作了，就不必再登入安裝（如擴充功能）匯入（如書籤）什麼的了 感恩感恩　讚歎讚歎　南無阿彌陀佛
+                 options.AddArgument("--user-data-dir=C:\\Users\\oscar\\AppData\\Local\\Google\\Chrome\\User Data\\");
+                options.AddArgument("--user-data-dir="+ Environment.GetFolderPath( Environment.SpecialFolder.LocalApplicationData) +"\\Google\\Chrome\\User Data\\");
+                 */
+                //MessageBox.Show("請先登入 Ctext.org 再繼續。按下「確定(OK)」以繼續……");
+
                 return cDrv;
             }
             else
                 return driver;
         }
+
+        private static ChromeOptions chromeOptions()
+        {
+            // 建立 ChromeOptions 物件            
+            ChromeOptions options = new ChromeOptions();
+
+            #region it not worked ><'''
+            // 設定書籤檔案的路徑
+            //options.AddArgument("–enable-bookmark-undo");//https://blog.csdn.net/weixin_43619065/article/details/88355371
+            //options.AddUserProfilePreference("browser.bookmarks.file", @"x:\bookmarks_2023_1_3.html");//, @"path/to/bookmarks_file.html");
+
+            //options.AddArgument("--password-store=basic");
+            //options.AddUserProfilePreference("bookmarks", new { import_bookmarks_from_file = @"x:\bookmarks_2023_1_3.html" });
+            //options.AddUserProfilePreference("bookmarks", @"x:\bookmarks_2023_1_3.html" );
+            //options.AddUserProfilePreference("bookmarks", @"C:\Users\oscar\AppData\Local\Google\Chrome\User Data\Default\Bookmarks");
+            //options.AddUserProfilePreference("import_bookmarks_from_file", @"x:\bookmarks_2023_1_3.html" );
+
+            //chatGPT：在使用 C# 和 Selenium 时，可以使用 ChromeOptions 物件來設定不要開啟 ChromeDriver.exe 的黑色屏幕視窗。            
+            //options.AddArgument("--headless");
+            //// GPU加速可能会导致Chrome出现黑屏及CPU占用率过高,所以禁用 https://blog.csdn.net/PLA12147111/article/details/92000480
+            //options.AddArgument("--disable-gpu");
+            //options.AddArgument("--no-sandbox");
+            //options.AddArgument("--ignore-gpu-blacklist");
+            //options.AddArgument( "--disable-features=VizDisplayCompositor" );
+            #endregion
+            #region it worked！！ ：D
+            //202301050205終於成了 這可以用原來的chrome（即使用者啟動操作慣用的一切設定，如書籤、擴充功能等等）而不是空白的、原始的來操作了 https://www.cnblogs.com/baihuitestsoftware/articles/7742069.html            
+            //options.AddArgument("--user-data-dir=C:\\Users\\oscar\\AppData\\Local\\Google\\Chrome\\User Data\\");
+            //有沒有「--」（--user or user）都可
+            options.AddArgument("user-data-dir=" + Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "\\Google\\Chrome\\User Data\\");
+            //https://www.cnblogs.com/hushaojun/p/5981646.html
+
+            //以下可以首頁為Google，而不是空白
+            //options.AddArgument("--user-data-dir=C:\\Users\\oscar\\AppData\\Local\\Google\\Chrome\\User Data\\Default\\");
+            //與上一行同，有沒有加「--」（--user or user）都可
+            //options.AddArgument("user-data-dir=C:\\Users\\oscar\\AppData\\Local\\Google\\Chrome\\User Data\\Default\\");
+            //禁用圖片https://vimsky.com/examples/detail/csharp-ex-OpenQA.Selenium.Chrome-ChromeOptions-AddUserProfilePreference-method.html
+            //options.AddUserProfilePreference("profile", new { default_content_setting_values = new { images = 2 } });
+            //options.AddUserProfilePreference("profile", new { default_content_setting_values = new { images = 2 } });
+            //options.AddArguments("--start-maximized");//最大化開啟
+            //options.AddArguments("headless");//以隱形方式（看不到Chrome視窗方式開啟）
+            //options.AddArguments("incognito");//以無痕模式開啟 https://www.agilequalitymadeeasy.com/post/selenium-c-tutorial-chrome-options-concepts-to-simplifying-web-testing            
+            #endregion
+            return options;
+        }
+
         internal static void 在Chrome瀏覽器的Quick_edit文字框中輸入文字(ChromeDriver driver, string xIuput, string url)//在Chrome瀏覽器的文字框中輸入文字,creedit
         {
 
@@ -280,23 +345,23 @@ namespace TextForCtext
 
         }
 
-        internal static string GetImageUrl(string url=null)
+        internal static string GetImageUrl(string url = null)
         {//20230104 creedit
             using (var driver = new ChromeDriver())
             {
                 // 移動到指定的網頁
-                driver.Navigate().GoToUrl(url??System.Windows.Forms.Application.OpenForms[0].Controls["textBox3"].Text);//("http://example.com/");
+                driver.Navigate().GoToUrl(url ?? System.Windows.Forms.Application.OpenForms[0].Controls["textBox3"].Text);//("http://example.com/");
 
                 // 取得元件 scancont 的圖片網址
                 //IWebElement scancont = driver.FindElement(By.Id("content"));
                 //IWebElement scancont = driver.FindElement(By.Id("scancont"));
-                IList<OpenQA.Selenium.IWebElement> imageElements  = driver.FindElements(By.TagName("img"));
-                string imageUrl="";
+                IList<OpenQA.Selenium.IWebElement> imageElements = driver.FindElements(By.TagName("img"));
+                string imageUrl = "";
                 foreach (IWebElement imageElement in imageElements)
                 {
                     imageUrl = imageElement.GetAttribute("src");
                     if (imageUrl.Substring(imageUrl.Length - 4, 4) == ".png"
-                        && ((imageUrl.IndexOf(".cn_")>-1)
+                        && ((imageUrl.IndexOf(".cn_") > -1)
                         || imageUrl.IndexOf("dimage") > -1)) break;
                     //Console.WriteLine(imageUrl);
                 }
@@ -373,6 +438,30 @@ namespace TextForCtext
             return url;
         }
 
+        internal static void importBookmarks(ref ChromeDriver drive)//(ref ChromeDriver drive)
+        {
+            /*  chatGPT： 20230104
+             您可以使用 ChromeDriver 和 ChromeOptions 類別來自動匯入書籤。
+            第一步是在您的 C# 專案中安裝 Selenium.WebDriver NuGet 套件。 然後，您可以使用以下程式碼來設定 ChromeDriver 和 ChromeOptions：
+            */
+            //// 設定 ChromeDriver 並指定 ChromeDriver 可執行檔的路徑
+            //IWebDriver driver = new ChromeDriver("path/to/chromedriver");
+
+            // 建立 ChromeOptions 物件
+            ChromeOptions options = new ChromeOptions();
+
+            //設定書籤檔案的路徑
+            options.AddUserProfilePreference("browser.bookmarks.file", @"x:\bookmarks_2023_1_3.html");
+
+            //// 將 ChromeOptions 設定加入 ChromeDriver
+            //driver = new ChromeDriver(options);
+
+            options.AddArgument("--password-store=basic");
+
+            // 將 ChromeOptions 設定加入 ChromeDriver
+
+            //return options;
+        }
 
     }
 }
