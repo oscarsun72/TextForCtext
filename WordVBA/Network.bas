@@ -129,6 +129,8 @@ Select Case deflBrowser
         Else
             GetDefaultBrowserEXE = userProfilePath & "\AppData\Local\BraveSoftware\Brave-Browser\Application\brave.exe"
         End If
+    Case "vivaldi":
+        GetDefaultBrowserEXE = userProfilePath & "\AppData\Local\Vivaldi\Application\vivaldi.exe"
     Case "Opera":
         GetDefaultBrowserEXE = ""
     Case "Safari":
@@ -136,11 +138,13 @@ Select Case deflBrowser
     Case "edge":
         GetDefaultBrowserEXE = "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe" '"msedge"
     Case "ChromeHTML", "google chrome": '"chrome"
-        If Dir("C:\Program Files (x86)\Google\Chrome\Application\chrome.exe") = "" Then
-            GetDefaultBrowserEXE = "W:\PortableApps\PortableApps\GoogleChromePortable\GoogleChromePortable.exe"
-        Else
-            GetDefaultBrowserEXE = "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe"
-        End If
+        GetDefaultBrowserEXE = SystemSetup.getChrome
+'
+'        If Dir("C:\Program Files (x86)\Google\Chrome\Application\chrome.exe") = "" Then
+'            GetDefaultBrowserEXE = "W:\PortableApps\PortableApps\GoogleChromePortable\GoogleChromePortable.exe"
+'        Else
+'            GetDefaultBrowserEXE = "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe"
+'        End If
     Case Else:
         Dim objShell
         Set objShell = CreateObject("WScript.Shell")
@@ -178,6 +182,8 @@ Select Case ProgID
         DefaultBrowserNameAppActivate = "google chrome"
     Case "BraveHTML":
         DefaultBrowserNameAppActivate = "brave"
+    Case "VivaldiHTM":
+        DefaultBrowserNameAppActivate = "vivaldi"
     Case "OperaStable":
         DefaultBrowserNameAppActivate = "Opera"
     Case "SafariHTML":

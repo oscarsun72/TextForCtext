@@ -335,7 +335,7 @@ Sub playSound(longShort As Single) 'Public Declare Function sndPlaySound32 Lib "
 End Sub
 
 
-Function getChrome()
+Function getChrome() As String
 Dim chromePath As String
 If fso Is Nothing Then Set fso = CreateObject("scripting.filesystemobject")
 If fso.fileexists("W:\PortableApps\PortableApps\GoogleChromePortable\App\Chrome-bin\chrome.exe") Then

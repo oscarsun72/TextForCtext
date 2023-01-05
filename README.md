@@ -88,7 +88,7 @@ Ctrl + + （加號，含函數字鍵盤） 或 Ctrl + -（數字鍵盤）  或 C
 
 Ctrl + Shift + c ：將textBox1的文本複製到剪貼簿 以備用
 
-Alt + o :下載圖片，準備交給[《古籍酷》](https://ocr.gj.cool/)[OCR](https://ocr.gj.cool/try_ocr)（待實作，目前已完成書圖下載作業）:複製圖片位址或由textBox3指定即可下載……
+Alt + o :下載書頁圖片（簡稱「書圖」），準備交給[《古籍酷》](https://ocr.gj.cool/)[OCR](https://ocr.gj.cool/try_ocr)（待實作，目前已完成書圖下載作業）:複製圖片位址或由textBox3指定要下載的網頁網址即可下載……
 
 Alt + ←：視窗向左移動30dpi（+ Ctrl：徵調；插入點在textBox1時例外）
 
@@ -314,8 +314,9 @@ Ctrl+ 滑鼠左鍵：清除框中所有文字
 - 點二下滑鼠左鍵，則將剪貼簿的文字內容讀入textBox1中
 
 ## 參照資源：
-（大於 25MB 無法在此上傳的檔案則表列於此。若有疏漏，尚祈提醒末學。感恩感恩　南無阿彌陀佛）
-- [查字.mdb](https://www.dropbox.com/s/889aqu6anxym6gp/%E6%9F%A5%E5%AD%97.mdb?dl=0)
+（大於 25MB 無法在此上傳的檔案則表列於此，且均是末學本機Dropbox上自己正在使用的最新檔。若有疏漏，尚祈提醒末學。感恩感恩　南無阿彌陀佛）
+- [查字.mdb](https://www.dropbox.com/s/889aqu6anxym6gp/%E6%9F%A5%E5%AD%97.mdb?dl=0)：此為資料檔；資料結構可參看此檔
+- [查字forInput.mdb](https://www.dropbox.com/s/x4mgb5wd2s5m2gs/%E6%9F%A5%E5%AD%97forInput.mdb?dl=0)：此為使用者介面及程式檔，末學均用此作為輸入的前端介面，將資料回存上一「查字.mdb」檔；即程式碼可參考此檔 202301051619（2023/1/5 16:19）
 - [《重編國語辭典修訂本》資料庫.mdb](https://www.dropbox.com/s/dxumn4awnx4e0o9/%E3%80%8A%E9%87%8D%E7%B7%A8%E5%9C%8B%E8%AA%9E%E8%BE%AD%E5%85%B8%E4%BF%AE%E8%A8%82%E6%9C%AC%E3%80%8B%E8%B3%87%E6%96%99%E5%BA%AB.mdb?dl=0)
 
 ## 操作演示：

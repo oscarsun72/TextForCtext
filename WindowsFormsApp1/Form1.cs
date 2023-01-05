@@ -53,7 +53,7 @@ namespace WindowsFormsApp1
                 selenium 純selenium模式，啟動新的 chrome 執行個體，且須登入；chatGPT 教的
                 seleniumGet 混合模式，且夫不啟動 chrome，而是取得已經運動的chrome的執行個體的； chatGPT 教的+之前網路學的
         */
-        public enum BrowserOPMode { appActivateByName, selenium, seleniumGet };
+        public enum BrowserOPMode { appActivateByName, seleniumNew, seleniumGet };
 
         internal static BrowserOPMode browsrOPMode = BrowserOPMode.appActivateByName;
 
@@ -3817,7 +3817,7 @@ namespace WindowsFormsApp1
                 case BrowserOPMode.appActivateByName://預設模式（1）
                     pasteToCtext();
                     break;
-                case BrowserOPMode.selenium://純Selenium模式（2）
+                case BrowserOPMode.seleniumNew://純Selenium模式（2）
                     pasteToCtext(textBox3.Text);
                     break;
                 case BrowserOPMode.seleniumGet://Selenium配合Windows API模式（1+2）或純不用Selenium模式
@@ -4848,7 +4848,7 @@ namespace WindowsFormsApp1
                     Process.Start(url);
                     appActivateByName();
                     break;
-                case BrowserOPMode.selenium:
+                case BrowserOPMode.seleniumNew:
                     br.GoToUrlandActivate(url);
                     break;
                 case BrowserOPMode.seleniumGet:
@@ -4876,7 +4876,7 @@ namespace WindowsFormsApp1
                         Task.WaitAll();
                         SendKeys.Send("^a");
                         break;
-                    case BrowserOPMode.selenium:
+                    case BrowserOPMode.seleniumNew:
                         break;
                     case BrowserOPMode.seleniumGet:
                         break;
@@ -4892,7 +4892,7 @@ namespace WindowsFormsApp1
                             Task.WaitAll();
                             SendKeys.Send("^x");//剪下一頁以便輸入備用
                             break;
-                        case BrowserOPMode.selenium:
+                        case BrowserOPMode.seleniumNew:
                             OpenQA.Selenium.IWebElement quick_edit_box = br.driver.FindElement(OpenQA.Selenium.By.Name("data"));
                             Task.WaitAll();
                             Clipboard.SetText(quick_edit_box.Text);
@@ -4917,7 +4917,7 @@ namespace WindowsFormsApp1
                             Task.Delay(500).Wait();
                             SendKeys.Send("^{PGUP}");//回上一頁籤檢查文本是否如願貼好
                             break;
-                        case BrowserOPMode.selenium:
+                        case BrowserOPMode.seleniumNew:
                             break;
                         case BrowserOPMode.seleniumGet:
                             break;
@@ -5780,7 +5780,7 @@ namespace WindowsFormsApp1
                             SendKeys.Send("^a");
                             SendKeys.Send("^x");
                             break;
-                        case BrowserOPMode.selenium:
+                        case BrowserOPMode.seleniumNew:
                             //if (br.driver.Url != textBox3.Text) 
 
                             try
@@ -6008,7 +6008,7 @@ namespace WindowsFormsApp1
                     browsrOPMode = BrowserOPMode.appActivateByName;
                     break;
                 case "sl,":
-                    browsrOPMode = BrowserOPMode.selenium;
+                    browsrOPMode = BrowserOPMode.seleniumNew;
                     break;
                 case "sg,":
                     browsrOPMode = BrowserOPMode.seleniumGet;
