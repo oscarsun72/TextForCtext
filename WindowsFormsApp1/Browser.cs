@@ -34,7 +34,7 @@ namespace TextForCtext
         internal static ChromeDriver driver = driverNew();
         //static selm.IWebDriver driverNew()
         //實測後發現：CurrentWindowHandle並不能取得瀏覽器現正作用中的分頁視窗，只能取得創建 ChromeDriver 物件時的最初及switch 方法執行後切換的分頁視窗 20230103 阿彌陀佛
-        static string originalWindow = driver.CurrentWindowHandle;
+        static string originalWindow;
 
         internal static string getOriginalWindow
         {
@@ -54,8 +54,8 @@ namespace TextForCtext
 
         static ChromeDriver driverNew()
         {
-            if (driver == null)
-            {
+            if (Form1.browsrOPMode !=Form1.BrowserOPMode.appActivateByName && driver == null)
+            {                
                 ChromeDriverService driverService;
                 ChromeDriver cDrv;//綠色免安裝版仍搞不定，安裝 chrome 了就OK 20220101 chatGPT建議者未通；20220105自行解決了，詳下
 
@@ -93,7 +93,7 @@ namespace TextForCtext
                 driverService.HideCommandPromptWindow = true;//关闭黑色cmd窗口 https://blog.csdn.net/PLA12147111/article/details/92000480
                 //先設定才能依其設定開啟，才不會出現cmd黑色屏幕視窗，若先創建Chrome瀏覽器視窗（即下一行），再設定「.HideCommandPromptWindow = true」則不行。邏輯！感恩感恩　讚歎讚歎　南無阿彌陀佛 202301051414
                 cDrv = new ChromeDriver(driverService, options);
-
+                originalWindow = cDrv.CurrentWindowHandle;
                 //string chrome_path = Form1.getDefaultBrowserEXE();
                 //if (chrome_path.IndexOf(@"C:\") == -1)
                 //{
