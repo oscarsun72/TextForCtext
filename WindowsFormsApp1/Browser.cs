@@ -99,7 +99,7 @@ namespace TextForCtext
                 }
                 #endregion
 
-                //driverService.HideCommandPromptWindow = true;//关闭黑色cmd窗口 https://blog.csdn.net/PLA12147111/article/details/92000480
+                driverService.HideCommandPromptWindow = true;//关闭黑色cmd窗口 https://blog.csdn.net/PLA12147111/article/details/92000480
                 //先設定才能依其設定開啟，才不會出現cmd黑色屏幕視窗，若先創建Chrome瀏覽器視窗（即下一行），再設定「.HideCommandPromptWindow = true」則不行。邏輯！感恩感恩　讚歎讚歎　南無阿彌陀佛 202301051414
                 if (user_data_dir.IndexOf("Documents") > -1)//無寫入權限的電腦，怕比較慢
                                                             //可能是防火牆 OpenQA.Selenium.WebDriverException
@@ -108,7 +108,7 @@ namespace TextForCtext
                     cDrv = new ChromeDriver(driverService, options);
                 else
                     //自己的電腦比較快
-                    cDrv = new ChromeDriver(driverService, options, TimeSpan.FromSeconds(4));//等待重啟時間=4秒鐘：若寫成「 , TimeSpan.MinValue);」這會出現超出設定值範圍的錯誤//TimeSpan是設定決定重新啟動chromedriver.exe須等待的時間，太長則人則不耐，太短則chromedriver.exe來不及反應而出錯。感恩感恩　讚歎讚歎　南無阿彌陀佛 202301051751
+                    cDrv = new ChromeDriver(driverService, options, TimeSpan.FromSeconds(4.5));//等待重啟時間=4秒鐘：若寫成「 , TimeSpan.MinValue);」這會出現超出設定值範圍的錯誤//TimeSpan是設定決定重新啟動chromedriver.exe須等待的時間，太長則人則不耐，太短則chromedriver.exe來不及反應而出錯。感恩感恩　讚歎讚歎　南無阿彌陀佛 202301051751
                 originalWindow = cDrv.CurrentWindowHandle;
                 //string chrome_path = Form1.getDefaultBrowserEXE();
                 //if (chrome_path.IndexOf(@"C:\") == -1)
@@ -409,28 +409,32 @@ namespace TextForCtext
 
         internal static string GetImageUrl(string url = null)
         {//20230104 creedit
-            using (var driver = new ChromeDriver())
+            if(Form1.browsrOPMode == Form1.BrowserOPMode.appActivateByName) Form1.browsrOPMode = Form1.BrowserOPMode.seleniumNew;
+            if (driver == null) driver = driverNew();
+            //using (driver)//var driver = new ChromeDriver())//若這樣寫則會出現「無法存取已處置的物件。」之錯誤    HResult	-2146232798	int               
+            //{因為 using(driver) 這 driver 只在 ) 後的第一層大括弧{}間有效，生命週期僅止於此間而已
+            // 移動到指定的網頁
+            driver.Navigate().GoToUrl(url ?? System.Windows.Forms.Application.OpenForms[0].Controls["textBox3"].Text);//("http://example.com/");
+                                                                                                                      //driver.Navigate().GoToUrl(url ?? Form1.mainFromTextBox3Text);
+
+            // 取得元件 scancont 的圖片網址
+            //IWebElement scancont = driver.FindElement(By.Id("content"));
+            //IWebElement scancont = driver.FindElement(By.Id("scancont"));
+            IList<OpenQA.Selenium.IWebElement> imageElements = driver.FindElements(By.TagName("img"));
+            string imageUrl = "";
+            foreach (IWebElement imageElement in imageElements)
             {
-                // 移動到指定的網頁
-                driver.Navigate().GoToUrl(url ?? System.Windows.Forms.Application.OpenForms[0].Controls["textBox3"].Text);//("http://example.com/");
-
-                // 取得元件 scancont 的圖片網址
-                //IWebElement scancont = driver.FindElement(By.Id("content"));
-                //IWebElement scancont = driver.FindElement(By.Id("scancont"));
-                IList<OpenQA.Selenium.IWebElement> imageElements = driver.FindElements(By.TagName("img"));
-                string imageUrl = "";
-                foreach (IWebElement imageElement in imageElements)
-                {
-                    imageUrl = imageElement.GetAttribute("src");
-                    if (imageUrl.Substring(imageUrl.Length - 4, 4) == ".png"
-                        && ((imageUrl.IndexOf(".cn_") > -1)
-                        || imageUrl.IndexOf("dimage") > -1)) break;
-                    //Console.WriteLine(imageUrl);
-                }
-                //string imageUrl = imageElements.GetAttribute("src");
-
-                return imageUrl;
+                imageUrl = imageElement.GetAttribute("src");
+                if (imageUrl.Substring(0, 26) == "https://library.ctext.org/"
+                || (imageUrl.Substring(imageUrl.Length - 4, 4) == ".png"
+                    && ((imageUrl.IndexOf(".cn_") > -1)
+                    || imageUrl.IndexOf("dimage") > -1))) break;
+                //Console.WriteLine(imageUrl);
             }
+            //string imageUrl = imageElements.GetAttribute("src");
+
+            return imageUrl;
+            //}
         }
         /* 以下是我先寫來問chatGPT的，依其建議改如上
         internal static string getImageUrl() {
@@ -443,7 +447,7 @@ namespace TextForCtext
         }
         */
 
-        
+
         string getUrl(forms.Keys eKeyCode)
         {
 

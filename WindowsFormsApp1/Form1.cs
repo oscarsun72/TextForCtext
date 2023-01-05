@@ -4849,7 +4849,7 @@ namespace WindowsFormsApp1
                     Process.Start(url);
                     appActivateByName();
                     break;
-                case BrowserOPMode.seleniumNew:                    
+                case BrowserOPMode.seleniumNew:
                     br.GoToUrlandActivate(url);
                     break;
                 case BrowserOPMode.seleniumGet:
@@ -5116,7 +5116,7 @@ namespace WindowsFormsApp1
                     else if (File.Exists(@"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe"))
                         return @"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe";
                     //return @"W:\PortableApps\PortableApps\GoogleChromePortable\GoogleChromePortable.exe";
-                    else if(File.Exists(@"C:\Program Files\Google\Chrome\Application\chrome.exe"))
+                    else if (File.Exists(@"C:\Program Files\Google\Chrome\Application\chrome.exe"))
                         return @"C:\Program Files\Google\Chrome\Application\chrome.exe";
                     else
                         return @"W:\PortableApps\PortableApps\GoogleChromePortable\App\Chrome-bin\chrome.exe";
@@ -6592,14 +6592,37 @@ namespace WindowsFormsApp1
             byte[] imageBytes = webClient.DownloadData(imageUrl);
 
             // 將二進制數據寫入文件。
-            string downloadImgFullName = dropBoxPathIncldBackSlash+ "Ctext_Page_Image.png";
+            string downloadImgFullName = dropBoxPathIncldBackSlash + "Ctext_Page_Image.png";
             using (FileStream fileStream = new FileStream(downloadImgFullName, FileMode.Create))
             {
                 fileStream.Write(imageBytes, 0, imageBytes.Length);
                 Console.WriteLine("圖片已成功下載。");//在「即時運算視窗」寫出訊息
             }
-        }
+            //在下載完後在檔案總管中將其選取
+            //https://www.ruyut.com/2022/05/csharp-open-in-file-explorer.html
+            if (prcssDownloadImgFullName != null && prcssDownloadImgFullName.HasExited)
+            {
+                prcssDownloadImgFullName.WaitForExit();
+                prcssDownloadImgFullName.Close();
+                ////prcssDownloadImgFullName.WaitForExit();
+                //prcssDownloadImgFullName.Kill();
+            }
+                prcssDownloadImgFullName = System.Diagnostics.Process.Start("Explorer.exe", $"/e, /select ,{downloadImgFullName}");
 
+            //以下chatGPT的 無效,上面才有效
+            //ProcessStartInfo startInfo = new ProcessStartInfo
+            //{
+            //    FileName = downloadImgFullName,
+            //    UseShellExecute = true,
+            //    Verb = "select"//選取
+            //    //Verb = "open" //打開
+            //};
+            //Process.Start(startInfo);
+            ////並將之打開
+            //Process.Start(downloadImgFullName);
+
+        }
+        Process prcssDownloadImgFullName;
         void openDatabase(string dbNameIncludeExt, ref ado.Connection cnt)
         {
             string root = dropBoxPathIncldBackSlash;
