@@ -107,31 +107,40 @@ namespace WindowsFormsApp1
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
 
-            //終止 chromedriver.exe 程序,釋放系統記憶體
-            Process[] processes = Process.GetProcessesByName("chromedriver");
-            foreach (Process process in processes)
+            //終止由 chromedriver.exe 程序開啟的Chrome瀏覽器,釋放系統記憶體
+            //new Task(Action ).Wait(4500);
+            if (br.driver != null)
             {
-                process.Kill();
+                if (MessageBox.Show("本軟件即將關閉，也會同時關閉由其開啟的Chrome瀏覽器，若有沒儲存的資訊，請先儲存再按「確定」鈕繼續；否則請按「取消」", "", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning) == DialogResult.Cancel) { e.Cancel = true; return; }
+                Task.WaitAny();
+                br.driver.Close();
+                br.driver.Dispose();
+                //終止 chromedriver.exe 程序,釋放系統記憶體
+                Process[] processes = Process.GetProcessesByName("chromedriver");
+                foreach (Process process in processes)
+                {
+                    process.Kill();
+                }
+                //有上式便不用以下了
+                //try
+                //{
+                //    //釋放應用程式佔用的記憶體
+                //    br.driver.Close();//202301051447(2013/1/5 14:47) creedit
+
+                //}
+                //catch (OpenQA.Selenium.WebDriverException ex)
+                //{
+                //    bool v = ex.HResult == -2146233088;//先手動關了 chromedriver.exe 時
+                //    if (v) { }
+                //    else
+                //    {
+                //        v = ex.HResult == -2146233036;
+                //        if (v) { }
+                //        else throw;
+                //    }
+
+                //}
             }
-            //有上式便不用以下了
-            //try
-            //{
-            //    //釋放應用程式佔用的記憶體
-            //    br.driver.Close();//202301051447(2013/1/5 14:47) creedit
-
-            //}
-            //catch (OpenQA.Selenium.WebDriverException ex)
-            //{
-            //    bool v = ex.HResult == -2146233088;//先手動關了 chromedriver.exe 時
-            //    if (v) { }
-            //    else
-            //    {
-            //        v = ex.HResult == -2146233036;
-            //        if (v) { }
-            //        else throw;
-            //    }
-
-            //}
 
         }
 
@@ -162,6 +171,7 @@ namespace WindowsFormsApp1
             this.Width = thisWidth;
             this.Left = thisLeft;
             this.Top = thisTop;
+            textBox3_MouseMove(new object(), new MouseEventArgs(MouseButtons.Left, 0, 0, 0, 0));
         }
 
         private void nICo_MouseClick(object sender, MouseEventArgs e)
@@ -4421,6 +4431,7 @@ namespace WindowsFormsApp1
                 {
                     textBox3.Text = x;
                     SystemSounds.Beep.Play();
+                    //if (browsrOPMode != BrowserOPMode.appActivateByName) br.GoToUrlandActivate(textBox3.Text);
                     textBox1.Focus();
                 }
 
@@ -6369,9 +6380,13 @@ namespace WindowsFormsApp1
 
 
         private void textBox3_TextChanged(object sender, EventArgs e)
-            {
+        {
             mainFromTextBox3Text = textBox3.Text;
-            if (textBox3.TextLength>4 && textBox3.Text.Substring(0,4)=="http" && browsrOPMode != BrowserOPMode.appActivateByName) br.GoToUrlandActivate(textBox3.Text);
+            if (textBox3.Text.IndexOf("http") == 0 && browsrOPMode != BrowserOPMode.appActivateByName)
+            {
+                br.GoToUrlandActivate(textBox3.Text);
+                if (Clipboard.GetText().IndexOf("http") == 0) Clipboard.Clear();
+            }
             if (keyinText) return;
             if (textBox3.Text == "")
             {
@@ -6608,7 +6623,7 @@ namespace WindowsFormsApp1
                 ////prcssDownloadImgFullName.WaitForExit();
                 //prcssDownloadImgFullName.Kill();
             }
-                prcssDownloadImgFullName = System.Diagnostics.Process.Start("Explorer.exe", $"/e, /select ,{downloadImgFullName}");
+            prcssDownloadImgFullName = System.Diagnostics.Process.Start("Explorer.exe", $"/e, /select ,{downloadImgFullName}");
 
             //以下chatGPT的 無效,上面才有效
             //ProcessStartInfo startInfo = new ProcessStartInfo
@@ -6625,10 +6640,11 @@ namespace WindowsFormsApp1
         }
         Process prcssDownloadImgFullName;
 
-        private void textBox3_MouseHover(object sender, EventArgs e)
+
+        private void textBox3_MouseMove(object sender, MouseEventArgs e)
         {
-            textBox3_Click(sender, e);
-            if (browsrOPMode != BrowserOPMode.appActivateByName) br.GoToUrlandActivate(textBox3.Text);
+            if (Clipboard.GetText() != textBox3.Text)
+                textBox3_Click(sender, e);
         }
 
         void openDatabase(string dbNameIncludeExt, ref ado.Connection cnt)
