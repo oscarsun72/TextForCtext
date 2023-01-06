@@ -108,7 +108,7 @@ namespace TextForCtext
                     cDrv = new ChromeDriver(driverService, options);
                 else
                     //自己的電腦比較快
-                    cDrv = new ChromeDriver(driverService, options, TimeSpan.FromSeconds(4.5));//等待重啟時間=4秒鐘：若寫成「 , TimeSpan.MinValue);」這會出現超出設定值範圍的錯誤//TimeSpan是設定決定重新啟動chromedriver.exe須等待的時間，太長則人則不耐，太短則chromedriver.exe來不及反應而出錯。感恩感恩　讚歎讚歎　南無阿彌陀佛 202301051751
+                    cDrv = new ChromeDriver(driverService, options, TimeSpan.FromSeconds(4.5));//等待重啟時間=4.5秒鐘：若寫成「 , TimeSpan.MinValue);」這會出現超出設定值範圍的錯誤//TimeSpan是設定決定重新啟動chromedriver.exe須等待的時間，太長則人則不耐，太短則chromedriver.exe來不及反應而出錯。感恩感恩　讚歎讚歎　南無阿彌陀佛 202301051751
                 originalWindow = cDrv.CurrentWindowHandle;
                 //string chrome_path = Form1.getDefaultBrowserEXE();
                 //if (chrome_path.IndexOf(@"C:\") == -1)
