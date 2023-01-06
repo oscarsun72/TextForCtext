@@ -6628,7 +6628,7 @@ namespace WindowsFormsApp1
         private void textBox3_MouseHover(object sender, EventArgs e)
         {
             textBox3_Click(sender, e);
-
+            if (browsrOPMode != BrowserOPMode.appActivateByName) br.GoToUrlandActivate(textBox3.Text);
         }
 
         void openDatabase(string dbNameIncludeExt, ref ado.Connection cnt)
