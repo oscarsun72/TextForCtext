@@ -310,8 +310,9 @@ Ctrl+ 滑鼠左鍵：清除框中所有文字
         
             
 
-### 在 textBox3 ：
+### 在 textBox3 （網址資訊專用方塊框）：
 - 拖曳網址在 textBox3 或 textBox1 上放開，則會讀入所拖曳的網址值給 textBox3
+- 若已複製網址在剪貼簿，則滑鼠點擊或在 textBox3 上滑過即會讀入所複製的網址值給 textBox3
 
 ### textBox4 取代文字用方塊框
 - (Ctrl + z 還原功能支援)

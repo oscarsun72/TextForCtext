@@ -6369,8 +6369,9 @@ namespace WindowsFormsApp1
 
 
         private void textBox3_TextChanged(object sender, EventArgs e)
-        {
+            {
             mainFromTextBox3Text = textBox3.Text;
+            if (textBox3.TextLength>4 && textBox3.Text.Substring(0,4)=="http" && browsrOPMode != BrowserOPMode.appActivateByName) br.GoToUrlandActivate(textBox3.Text);
             if (keyinText) return;
             if (textBox3.Text == "")
             {
@@ -6623,6 +6624,13 @@ namespace WindowsFormsApp1
 
         }
         Process prcssDownloadImgFullName;
+
+        private void textBox3_MouseHover(object sender, EventArgs e)
+        {
+            textBox3_Click(sender, e);
+
+        }
+
         void openDatabase(string dbNameIncludeExt, ref ado.Connection cnt)
         {
             string root = dropBoxPathIncldBackSlash;

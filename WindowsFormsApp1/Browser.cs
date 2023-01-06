@@ -322,7 +322,7 @@ namespace TextForCtext
 
         internal static void GoToUrlandActivate(string url)
         {
-                        
+
             //driver.Close();//creedit
             //creedit20230103 這樣處理誤關分頁頁籤的錯誤（例外情形）就成功了，但整個瀏覽器誤關則尚未
             //chatGPT：在 C# 中使用 Selenium 取得 Chrome 瀏覽器開啟的頁籤（分頁）數量可以使用以下方法：                
@@ -335,7 +335,10 @@ namespace TextForCtext
             }
             catch (Exception)
             {
-                driver = null;
+                if (driver != null)
+                {
+                    driver.Dispose(); driver = null;
+                }
                 driver = driverNew();
                 //throw;
             }
@@ -408,7 +411,7 @@ namespace TextForCtext
 
         internal static string GetImageUrl(string url = null)
         {//20230104 creedit
-            if(Form1.browsrOPMode == Form1.BrowserOPMode.appActivateByName) Form1.browsrOPMode = Form1.BrowserOPMode.seleniumNew;
+            if (Form1.browsrOPMode == Form1.BrowserOPMode.appActivateByName) Form1.browsrOPMode = Form1.BrowserOPMode.seleniumNew;
             if (driver == null) driver = driverNew();
             //using (driver)//var driver = new ChromeDriver())//若這樣寫則會出現「無法存取已處置的物件。」之錯誤    HResult	-2146232798	int               
             //{因為 using(driver) 這 driver 只在 ) 後的第一層大括弧{}間有效，生命週期僅止於此間而已

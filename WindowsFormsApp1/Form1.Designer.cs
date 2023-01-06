@@ -101,6 +101,7 @@ namespace WindowsFormsApp1
             this.textBox3.TextChanged += new System.EventHandler(this.textBox3_TextChanged);
             this.textBox3.DragDrop += new System.Windows.Forms.DragEventHandler(this.textBox3_DragDrop);
             this.textBox3.DragEnter += new System.Windows.Forms.DragEventHandler(this.textBox3_DragEnter);
+            this.textBox3.MouseHover += new System.EventHandler(this.textBox3_MouseHover);
             // 
             // textBox4
             // 
