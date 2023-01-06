@@ -5741,9 +5741,23 @@ namespace WindowsFormsApp1
                     {//可能按下Shift+Insert 剪下textBox1的內容時
                         hideToNICo();
                         //,通常是要準備貼上的，所以就要將目前在用的瀏覽器置前，確保它取得焦點，否則有時系統焦點會或交給工作列                        
-                        //if()
-                        //br.driver.SwitchTo();
-                        appActivateByName() ;
+                        if (browsrOPMode == BrowserOPMode.appActivateByName)
+                            appActivateByName();
+                        else
+                        //chatGPT：在 C# 中使用 Selenium 控制 Chrome 瀏覽器時，可以使用以下方法切換到 Chrome 瀏覽器視窗：
+                        {
+                            try
+                            {
+                                br.driver.SwitchTo().Window(br.driver.CurrentWindowHandle);
+
+                            }
+                            catch (Exception)
+                            {
+                                br.driver = null;
+                                br.driver = br.driverNew();
+                                //throw;
+                            }
+                        }
                     }
                 }
 

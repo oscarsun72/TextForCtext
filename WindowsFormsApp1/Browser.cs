@@ -52,7 +52,7 @@ namespace TextForCtext
 
 
 
-        static ChromeDriver driverNew()
+        internal static ChromeDriver driverNew()
         {
             if (Form1.browsrOPMode != Form1.BrowserOPMode.appActivateByName && driver == null)
             {
