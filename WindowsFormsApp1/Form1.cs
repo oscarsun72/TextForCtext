@@ -109,12 +109,15 @@ namespace WindowsFormsApp1
 
             //終止由 chromedriver.exe 程序開啟的Chrome瀏覽器,釋放系統記憶體
             //new Task(Action ).Wait(4500);
-            if (br.driver != null)
+            if (br.driver != null || browsrOPMode != BrowserOPMode.appActivateByName)
             {
                 if (MessageBox.Show("本軟件即將關閉，也會同時關閉由其開啟的Chrome瀏覽器，若有沒儲存的資訊，請先儲存再按「確定」鈕繼續；否則請按「取消」", "", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning) == DialogResult.Cancel) { e.Cancel = true; return; }
-                Task.WaitAny();
-                br.driver.Close();
-                br.driver.Dispose();
+                if (br.driver != null)
+                {
+                    Task.WaitAny();
+                    br.driver.Close();
+                    br.driver.Dispose();
+                }
                 //終止 chromedriver.exe 程序,釋放系統記憶體
                 Process[] processes = Process.GetProcessesByName("chromedriver");
                 foreach (Process process in processes)
@@ -5730,13 +5733,17 @@ namespace WindowsFormsApp1
             undoTextValueChanged(selStart, selLength);
             if (textBox1.Text == "" && !pasteAllOverWrite)
             {
-                if (!keyinText)
+                if (!keyinText)//非手動輸入時
                     hideToNICo();
                 else
-                {
+                {//在手動輸入模式下
                     if (ModifierKeys != Keys.None)
-                    {
+                    {//可能按下Shift+Insert 剪下textBox1的內容時
                         hideToNICo();
+                        //,通常是要準備貼上的，所以就要將目前在用的瀏覽器置前，確保它取得焦點，否則有時系統焦點會或交給工作列                        
+                        //if()
+                        //br.driver.SwitchTo();
+                        appActivateByName() ;
                     }
                 }
 
