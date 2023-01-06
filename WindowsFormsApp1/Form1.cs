@@ -174,7 +174,7 @@ namespace WindowsFormsApp1
             this.Width = thisWidth;
             this.Left = thisLeft;
             this.Top = thisTop;
-            textBox3_MouseMove(new object(), new MouseEventArgs(MouseButtons.Left, 0, 0, 0, 0));
+            textBox3_Click(new object(), new MouseEventArgs(MouseButtons.Left, 0, 0, 0, 0));//textBox3_MouseMove(new object(), new MouseEventArgs(MouseButtons.Left, 0, 0, 0, 0));
         }
 
         private void nICo_MouseClick(object sender, MouseEventArgs e)
@@ -4428,7 +4428,7 @@ namespace WindowsFormsApp1
         private void textBox3_Click(object sender, EventArgs e)
         {
             string x = Clipboard.GetText();
-            if (x == "" || x.Length < 4) return;
+            if (x == "" || x.Length < 4||x==textBox3.Text) return;
             if (x.Substring(0, 4) == "http")
                 if (x.IndexOf("ctext.org") > -1)
                 {
@@ -5738,7 +5738,7 @@ namespace WindowsFormsApp1
                 else
                 {//在手動輸入模式下
                     if (ModifierKeys != Keys.None)
-                    {//可能按下Shift+Insert 剪下textBox1的內容時
+                    {//可能按下Shift+Delete 剪下textBox1的內容時
                         hideToNICo();
                         //,通常是要準備貼上的，所以就要將目前在用的瀏覽器置前，確保它取得焦點，否則有時系統焦點會或交給工作列                        
                         if (browsrOPMode == BrowserOPMode.appActivateByName)
@@ -5749,7 +5749,19 @@ namespace WindowsFormsApp1
                             try
                             {
                                 br.driver.SwitchTo().Window(br.driver.CurrentWindowHandle);
-
+                                if (textBox3.Text.IndexOf("edit") > -1 && KeyboardInfo.getKeyStateToggled(System.Windows.Input.Key.Delete))//判斷Delete鍵是否被按下彈起
+                                {//手動輸入時，當按下 Shift+Delete 當即時要準備貼上該頁，故如此操作，以備確定無誤後手動按下 submit 按鈕
+                                    OpenQA.Selenium.IWebElement quick_edit_box = br.driver.FindElement(OpenQA.Selenium.By.Name("data"));
+                                    quick_edit_box.Clear();
+                                    quick_edit_box.Click();
+                                    quick_edit_box.SendKeys(OpenQA.Selenium.Keys.LeftShift + OpenQA.Selenium.Keys.Insert);
+                                    OpenQA.Selenium.IWebElement submit = br.driver.FindElement(OpenQA.Selenium.By.Id("savechangesbutton"));
+                                    //放在一個 Task 中去執行，並立即返回。                                     
+                                    Task.Run(() =>
+                                    {
+                                        submit.Click();
+                                    });
+                                }
                             }
                             catch (Exception)
                             {
@@ -6470,6 +6482,7 @@ namespace WindowsFormsApp1
         private void textBox3_DragDrop(object sender, DragEventArgs e)
         {
             //textBox3.DoDragDrop(e.Data, DragDropEffects.Copy);            
+            if (textBox3.Text == e.Data.GetData(DataFormats.UnicodeText).ToString()) return;
             textBox3.Text = e.Data.GetData(DataFormats.UnicodeText).ToString();
             textBox1.Select(0, 0); textBox1.ScrollToCaret();
             new SoundPlayer(@"C:\Windows\Media\recycle.wav").Play();
@@ -6664,8 +6677,8 @@ namespace WindowsFormsApp1
 
         private void textBox3_MouseMove(object sender, MouseEventArgs e)
         {
-            if (Clipboard.GetText() != textBox3.Text)
-                textBox3_Click(sender, e);
+            //if (Clipboard.GetText() != textBox3.Text)
+            //    textBox3_Click(sender, e);
         }
 
         void openDatabase(string dbNameIncludeExt, ref ado.Connection cnt)

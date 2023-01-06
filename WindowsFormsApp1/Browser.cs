@@ -337,7 +337,9 @@ namespace TextForCtext
             {
                 if (driver != null)
                 {
-                    driver.Dispose(); driver = null;
+                    //Task.WaitAny();
+                    //driver.Close(); driver.Dispose();
+                    driver = null;
                 }
                 driver = driverNew();
                 //throw;
