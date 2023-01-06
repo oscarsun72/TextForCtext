@@ -811,12 +811,13 @@ End Sub
 
 Sub mark易學關鍵字()
 Dim searchedTerm, e, ur As UndoRecord, d As Document, clipBTxt As String, flgPaste As Boolean, xd As String
-Dim strAutoCorrection, endDocOld As Long
+Dim strAutoCorrection, endDocOld As Long, rng As Range
 strAutoCorrection = Array("，〉", "〉，")
 'Set ur = SystemSetup.stopUndo("mark易學關鍵字")
 SystemSetup.stopUndo ur, "mark易學關鍵字"
 If Documents.Count = 0 Then Documents.Add
 Set d = ActiveDocument
+Set rng = d.Range
 endDocOld = d.Range.End
     If InStr(d.Range.Text, Chr(13) & Chr(13) & Chr(13) & Chr(13)) > 0 Then
 '        d.Range.Text = Replace(d.Range.Text, Chr(13) & Chr(13) & Chr(13) & Chr(13), Chr(13) & Chr(13) & Chr(13))
@@ -870,12 +871,9 @@ searchedTerm = Array("易", "卦", "爻", "周易", "易經", "系辭", "繫辭", "擊辭", "
             ActiveWindow.ScrollIntoView Selection
         End If
     Else
-        Dim rng As Range
-        Set rng = d.Range
         rng.Find.Execute VBA.Left(clipBTxt, 255), , , , , , , wdFindContinue
     End If
 'End If
-rng.SetRange endDocOld, endDocOld
 If flgPaste Then
     word.Application.ScreenUpdating = False
     If d.path <> "" And Not d.Saved Then d.Save
@@ -907,11 +905,18 @@ refres:
     文字處理.書名號篇名號標注
     word.Application.ScreenUpdating = True
     '顯示新貼上的文本頂端
-    If Not rng Is Nothing Then rng.Select
-    word.Application.ScreenRefresh
-    ActiveWindow.ScrollIntoView Selection, True
+    rng.SetRange endDocOld, endDocOld
+    Do Until rng.Font.ColorIndex = wdRed Or rng.End = d.Range.End - 1
+        rng.move
+    Loop
+    e = rng.End
+    rng.SetRange endDocOld, e
+    rng.Select
+'    word.Application.ScreenRefresh
+    ActiveWindow.ScrollIntoView Selection, False
 Return
 End Sub
+
 
 
 Sub 文件比對_抓抄襲()

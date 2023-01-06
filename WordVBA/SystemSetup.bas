@@ -52,7 +52,7 @@ Public Const MAXSIZE = 4096
 
 Public Property Get FileSystemObject() As Object
 If FsO Is Nothing Then Set FsO = CreateObject("scripting.filesystemobject")
-FileSystemObject = FsO
+Set FileSystemObject = FsO
 End Property
 
 Public Property Get UserProfilePathIncldBackSlash() As String

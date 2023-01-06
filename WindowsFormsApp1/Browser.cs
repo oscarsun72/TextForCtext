@@ -322,9 +322,7 @@ namespace TextForCtext
 
         internal static void GoToUrlandActivate(string url)
         {
-
-            if (driver == null) driver = driverNew();
-            driver.SwitchTo().Window(driver.CurrentWindowHandle);
+                        
             //driver.Close();//creedit
             //creedit20230103 這樣處理誤關分頁頁籤的錯誤（例外情形）就成功了，但整個瀏覽器誤關則尚未
             //chatGPT：在 C# 中使用 Selenium 取得 Chrome 瀏覽器開啟的頁籤（分頁）數量可以使用以下方法：                
@@ -333,6 +331,7 @@ namespace TextForCtext
             {
                 if (driver == null) driver = driverNew();
                 tabCount = driver.WindowHandles.Count;
+                driver.SwitchTo().Window(driver.CurrentWindowHandle);
             }
             catch (Exception)
             {
