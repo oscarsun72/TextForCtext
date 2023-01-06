@@ -766,7 +766,7 @@ If Not doNotAdd Then
         With .Font
             .NameFarEast = "標楷體"
             .Name = "標楷體"
-            .Position = 3
+            .position = 3
         End With
         .Visibility = True
         .Priority = 1
@@ -811,10 +811,13 @@ End Sub
 
 Sub mark易學關鍵字()
 Dim searchedTerm, e, ur As UndoRecord, d As Document, clipBTxt As String, flgPaste As Boolean, xd As String
+Dim strAutoCorrection, endDocOld As Long
+strAutoCorrection = Array("，〉", "〉，")
 'Set ur = SystemSetup.stopUndo("mark易學關鍵字")
 SystemSetup.stopUndo ur, "mark易學關鍵字"
 If Documents.Count = 0 Then Documents.Add
 Set d = ActiveDocument
+endDocOld = d.Range.End
     If InStr(d.Range.Text, Chr(13) & Chr(13) & Chr(13) & Chr(13)) > 0 Then
 '        d.Range.Text = Replace(d.Range.Text, Chr(13) & Chr(13) & Chr(13) & Chr(13), Chr(13) & Chr(13) & Chr(13))
     '保留格式，故用以下，不用以上
@@ -827,7 +830,10 @@ Set d = ActiveDocument
     End With
     End If
 clipBTxt = Replace(Replace(VBA.Trim(SystemSetup.GetClipboardText), Chr(13) + Chr(10) + "空句子" + Chr(13) + Chr(10), Chr(13) + Chr(10) + Chr(13) + Chr(10)), Chr(9), "")
-
+For e = 0 To UBound(strAutoCorrection)
+    clipBTxt = Replace(clipBTxt, strAutoCorrection(e), strAutoCorrection(e + 1))
+    e = e + 1
+Next e
 searchedTerm = Array("易", "卦", "爻", "周易", "易經", "系辭", "繫辭", "擊辭", "擊詞", "繫詞", "說卦", "序卦", "卦序", "敘卦", "雜卦", "文言", "乾坤", "無咎", ChrW(26080) & "咎", "天咎", "元亨", "利貞" _
     , "史記", "九五", "六二", "上九", "上六", "九二", "筮") ', "", "", "", "")
 
@@ -869,6 +875,7 @@ searchedTerm = Array("易", "卦", "爻", "周易", "易經", "系辭", "繫辭", "擊辭", "
         rng.Find.Execute VBA.Left(clipBTxt, 255), , , , , , , wdFindContinue
     End If
 'End If
+rng.SetRange endDocOld, endDocOld
 If flgPaste Then
     word.Application.ScreenUpdating = False
     If d.path <> "" And Not d.Saved Then d.Save
@@ -899,11 +906,13 @@ Exit Sub
 refres:
     文字處理.書名號篇名號標注
     word.Application.ScreenUpdating = True
+    '顯示新貼上的文本頂端
     If Not rng Is Nothing Then rng.Select
     word.Application.ScreenRefresh
     ActiveWindow.ScrollIntoView Selection, True
 Return
 End Sub
+
 
 Sub 文件比對_抓抄襲()
 Dim d1 As Document, d2 As Document, p As Paragraph, x As String, i As Byte, rng As Range, pc As Long, d1RngTxt, px As String, rng2 As Range

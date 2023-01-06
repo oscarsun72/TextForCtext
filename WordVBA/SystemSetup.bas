@@ -1,7 +1,6 @@
 Attribute VB_Name = "SystemSetup"
 Option Explicit
-Public fso As Object
-Public userProfilePath As String
+Public FsO As Object, UserProfilePath As String
 Public Declare PtrSafe Function sndPlaySound32 Lib "winmm.dll" Alias "sndPlaySoundA" (ByVal lpszSoundName As String, ByVal uFlags As Long) As Long
 
 'https://msdn.microsoft.com/zh-tw/library/office/ff192913.aspx
@@ -50,6 +49,24 @@ Public Declare PtrSafe Function SetForegroundWindow Lib "user32" (ByVal hWnd As 
 Public Const GHND = &H42
 Public Const CF_TEXT = 1
 Public Const MAXSIZE = 4096
+
+Public Property Get FileSystemObject() As Object
+If FsO Is Nothing Then Set FsO = CreateObject("scripting.filesystemobject")
+FileSystemObject = FsO
+End Property
+
+Public Property Get UserProfilePathIncldBackSlash() As String
+    UserProfilePathIncldBackSlash = 取得使用者路徑_含反斜線
+End Property
+Public Property Get DropBoxPathIncldBackSlash() As String
+    DropBoxPathIncldBackSlash = UserProfilePathIncldBackSlash & "Dropbox\"
+End Property
+Public Property Get UserAppDataRoamingPathIncldBackSlash() As String
+    UserAppDataRoamingPathIncldBackSlash = UserProfilePathIncldBackSlash + "AppData\Roaming\"
+End Property
+Public Property Get WordTemplatesPathIncldBackSlash() As String
+    WordTemplatesPathIncldBackSlash = UserProfilePathIncldBackSlash + "AppData\Roaming\Microsoft\Templates\"
+End Property
 Function ClipBoard_GetData()
    Dim hClipMemory As Long
    Dim lpClipMemory As Long
@@ -221,10 +238,10 @@ If Selection.Type = wdSelectionNormal Then
         ElseIf Dir("A:\", vbVolume) <> "" Then
             If Dir("A:\Users\oscar\Dropbox\VS\VB\網路搜尋_元搜尋-同時搜多個引擎\網路搜尋_元搜尋-同時搜多個引擎\bin\Debug\" & f) <> "" Then _
                 funame = "A:\Users\oscar\Dropbox\VS\VB\網路搜尋_元搜尋-同時搜多個引擎\網路搜尋_元搜尋-同時搜多個引擎\bin\Debug\" & f
-        ElseIf Dir(userProfilePath & "Dropbox\VS\VB\網路搜尋_元搜尋-同時搜多個引擎\網路搜尋_元搜尋-同時搜多個引擎\bin\Debug\" & f) <> "" Then
-            funame = userProfilePath & "Dropbox\VS\VB\網路搜尋_元搜尋-同時搜多個引擎\網路搜尋_元搜尋-同時搜多個引擎\bin\Debug\" & f
-        ElseIf Dir(userProfilePath & "Dropbox\VS\VB\網路搜尋_元搜尋-同時搜多個引擎\網路搜尋_元搜尋-同時搜多個引擎\bin\Debug\" & f) <> "" Then
-            funame = userProfilePath & "Dropbox\VS\VB\網路搜尋_元搜尋-同時搜多個引擎\網路搜尋_元搜尋-同時搜多個引擎\bin\Debug\" & f
+        ElseIf Dir(UserProfilePath & "Dropbox\VS\VB\網路搜尋_元搜尋-同時搜多個引擎\網路搜尋_元搜尋-同時搜多個引擎\bin\Debug\" & f) <> "" Then
+            funame = UserProfilePath & "Dropbox\VS\VB\網路搜尋_元搜尋-同時搜多個引擎\網路搜尋_元搜尋-同時搜多個引擎\bin\Debug\" & f
+        ElseIf Dir(UserProfilePath & "Dropbox\VS\VB\網路搜尋_元搜尋-同時搜多個引擎\網路搜尋_元搜尋-同時搜多個引擎\bin\Debug\" & f) <> "" Then
+            funame = UserProfilePath & "Dropbox\VS\VB\網路搜尋_元搜尋-同時搜多個引擎\網路搜尋_元搜尋-同時搜多個引擎\bin\Debug\" & f
         Else
             Exit Sub
         End If
@@ -337,12 +354,12 @@ End Sub
 
 Function getChrome() As String
 Dim chromePath As String
-If fso Is Nothing Then Set fso = CreateObject("scripting.filesystemobject")
-If fso.fileexists("W:\PortableApps\PortableApps\GoogleChromePortable\App\Chrome-bin\chrome.exe") Then
+If FsO Is Nothing Then Set FsO = CreateObject("scripting.filesystemobject")
+If FsO.fileexists("W:\PortableApps\PortableApps\GoogleChromePortable\App\Chrome-bin\chrome.exe") Then
     chromePath = "W:\PortableApps\PortableApps\GoogleChromePortable\App\Chrome-bin\chrome.exe"
 ElseIf Dir("C:\Program Files (x86)\Google\Chrome\Application\chrome.exe") <> "" Then
     chromePath = "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe"
-ElseIf fso.fileexists("C:\Program Files\Google\Chrome\Application\chrome.exe") Then
+ElseIf FsO.fileexists("C:\Program Files\Google\Chrome\Application\chrome.exe") Then
     chromePath = "C:\Program Files\Google\Chrome\Application\chrome.exe"
 End If
 getChrome = chromePath
