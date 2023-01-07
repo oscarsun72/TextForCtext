@@ -4484,7 +4484,7 @@ namespace WindowsFormsApp1
                     new SoundPlayer(@"C:\Windows\Media\Speech On.wav").Play();
                     keyinText = true; pasteAllOverWrite = false;
                     button1.Text = "分行分段";
-                    button1.ForeColor = new System.Drawing.Color();//https://stackoverflow.com/questions/10441000/how-to-programmatically-set-the-forecolor-of-a-label-to-its-default
+                    button1.ForeColor = new System.Drawing.Color();//預設色彩 預設顏色 https://stackoverflow.com/questions/10441000/how-to-programmatically-set-the-forecolor-of-a-label-to-its-default
                     return;
                 }
                 if (e.KeyCode == Keys.Oem5)
@@ -4772,7 +4772,7 @@ namespace WindowsFormsApp1
                 autoPastetoQuickEdit = true; autoPasteFromSBCKwhether = false;
                 new SoundPlayer(@"C:\Windows\Media\Speech On.wav").Play();
                 button1.Text = "送出貼上";
-                button1.ForeColor = Color.LawnGreen;//https://learn2android.blogspot.com/2013/04/c.html?lr=1                
+                button1.ForeColor = Color.DarkCyan;//https://learn2android.blogspot.com/2013/04/c.html?lr=1                
             }
             else
             {
