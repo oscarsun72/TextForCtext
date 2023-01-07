@@ -3672,7 +3672,7 @@ namespace WindowsFormsApp1
 
         string pageEndText10 = "";
 
-        private void keyDownCtrlAdd(bool shiftKeyDownYet)
+        private void keyDownCtrlAdd(bool shiftKeyDownYet = false)
         {
             int s = textBox1.SelectionStart, l = textBox1.SelectionLength;
             if (s == 0 && l == 0) return;
@@ -4428,7 +4428,7 @@ namespace WindowsFormsApp1
         private void textBox3_Click(object sender, EventArgs e)
         {
             string x = Clipboard.GetText();
-            if (x == "" || x.Length < 4||x==textBox3.Text) return;
+            if (x == "" || x.Length < 4 || x == textBox3.Text) return;
             if (x.Substring(0, 4) == "http")
                 if (x.IndexOf("ctext.org") > -1)
                 {
@@ -4472,7 +4472,7 @@ namespace WindowsFormsApp1
             }
             if ((m & Keys.Control) == Keys.Control
                 && (m & Keys.Shift) == Keys.Shift)
-            {   //按下 ctrl + shift + *  切換手動鍵入模式
+            {   //按下 ctrl + shift + *  toggle keyinTextmode 切換手動鍵入模式
                 if (e.KeyCode == Keys.Multiply)
                 {
                     e.Handled = true;
@@ -4483,6 +4483,8 @@ namespace WindowsFormsApp1
                     }
                     new SoundPlayer(@"C:\Windows\Media\Speech On.wav").Play();
                     keyinText = true; pasteAllOverWrite = false;
+                    button1.Text = "分行分段";
+                    button1.ForeColor = new System.Drawing.Color();//https://stackoverflow.com/questions/10441000/how-to-programmatically-set-the-forecolor-of-a-label-to-its-default
                     return;
                 }
                 if (e.KeyCode == Keys.Oem5)
@@ -4769,6 +4771,8 @@ namespace WindowsFormsApp1
             {
                 autoPastetoQuickEdit = true; autoPasteFromSBCKwhether = false;
                 new SoundPlayer(@"C:\Windows\Media\Speech On.wav").Play();
+                button1.Text = "送出貼上";
+                button1.ForeColor = Color.LawnGreen;//https://learn2android.blogspot.com/2013/04/c.html?lr=1                
             }
             else
             {
@@ -6611,7 +6615,7 @@ namespace WindowsFormsApp1
         }
 
         private void button1_MouseDown(object sender, MouseEventArgs e)
-        {
+        {//預設執行分行分段。然切換到自動連續輸入模式時，會轉成送出貼上 [簡單修改模式]（quick edit文字框）的功能。若切換到手動輸入模式時，才有必要分行分段的功能 20230107
             if (e.Button == MouseButtons.Left)
             {
                 if (ModifierKeys == Keys.Control)
@@ -6621,9 +6625,15 @@ namespace WindowsFormsApp1
                     textBox1.Focus();
                     return;
                 }
-
-                splitLineByFristLen();
-                textBox1.Focus();
+                if (button1.Text == "分行分段")
+                {
+                    splitLineByFristLen();
+                    textBox1.Focus();
+                }
+                else if (button1.Text == "送出貼上")
+                {
+                    keyDownCtrlAdd();
+                }
             }
 
         }
