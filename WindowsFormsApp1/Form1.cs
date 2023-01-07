@@ -4769,16 +4769,21 @@ namespace WindowsFormsApp1
         {
             if (!autoPastetoQuickEdit)
             {
-                autoPastetoQuickEdit = true; autoPasteFromSBCKwhether = false;
-                new SoundPlayer(@"C:\Windows\Media\Speech On.wav").Play();
-                button1.Text = "送出貼上";
-                button1.ForeColor = Color.DarkCyan;//https://learn2android.blogspot.com/2013/04/c.html?lr=1                
+                turnon_autoPastetoQuickEdit();
             }
             else
             {
                 new SoundPlayer(@"C:\Windows\Media\Speech Off.wav").Play();
                 autoPastetoQuickEdit = false;
             }
+        }
+
+        private void turnon_autoPastetoQuickEdit()
+        {//set autoPastetoQuickEdit = true
+            autoPastetoQuickEdit = true; autoPasteFromSBCKwhether = false;
+            new SoundPlayer(@"C:\Windows\Media\Speech On.wav").Play();
+            button1.Text = "送出貼上";
+            button1.ForeColor = Color.DarkCyan;//https://learn2android.blogspot.com/2013/04/c.html?lr=1                
         }
 
         [DllImport("user32")]
@@ -6457,7 +6462,8 @@ namespace WindowsFormsApp1
                     if (MessageBox.Show("AUTO paste to Ctext Quick Edit textBox ?", "", MessageBoxButtons.OKCancel
                             , MessageBoxIcon.Question, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly) == DialogResult.OK)
                     {
-                        autoPastetoQuickEdit = true; autoPasteFromSBCKwhether = false;
+                        //autoPastetoQuickEdit = true; autoPasteFromSBCKwhether = false;
+                        turnon_autoPastetoQuickEdit();
                         //if (MessageBox.Show("是否先檢查文本先前是否曾編輯過？" + Environment.NewLine +
                         //    "要檢查的話，請先複製其文本，再按確定（ok）按鈕", "", MessageBoxButtons.OKCancel
                         //    , MessageBoxIcon.Question, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly) == DialogResult.OK)
@@ -6632,7 +6638,7 @@ namespace WindowsFormsApp1
                 }
                 else if (button1.Text == "送出貼上")
                 {
-                    keyDownCtrlAdd(ModifierKeys==Keys.Shift);
+                    keyDownCtrlAdd(ModifierKeys == Keys.Shift);
                 }
             }
 
