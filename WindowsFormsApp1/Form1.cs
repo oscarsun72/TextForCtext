@@ -4873,6 +4873,7 @@ namespace WindowsFormsApp1
                     appActivateByName();
                     break;
                 case BrowserOPMode.seleniumNew:
+                    if (br.driver == null) br.driverNew();
                     br.GoToUrlandActivate(url);
                     break;
                 case BrowserOPMode.seleniumGet:
@@ -4918,6 +4919,7 @@ namespace WindowsFormsApp1
                             SendKeys.Send("^x");//剪下一頁以便輸入備用
                             break;
                         case BrowserOPMode.seleniumNew:
+                            if (br.driver == null) br.driverNew();
                             OpenQA.Selenium.IWebElement quick_edit_box = br.driver.FindElement(OpenQA.Selenium.By.Name("data"));
                             Task.WaitAll();
                             Clipboard.SetText(quick_edit_box.Text);
