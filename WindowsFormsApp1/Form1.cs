@@ -909,12 +909,23 @@ namespace WindowsFormsApp1
                 if (e.KeyCode == Keys.G || e.KeyCode == Keys.Packet)
                 { e.Handled = true; return; }
             }
-
+            
+            //Alt + Shift + s :  所有小注文都不換行。這個和我所使用的小小輸入法繁簡轉換快捷鍵有衝突，故須先停用小小輸入法才有作用。感恩感恩　南無阿彌陀佛
+            /*
             if ((m & Keys.Alt) == Keys.Alt && (m & Keys.Control) == Keys.Control && (m & Keys.Shift) != Keys.Shift
                 && e.KeyCode == Keys.S)
             { e.Handled = true; notes_a_line_all(false, true); return; }
-            #endregion
+            if (KeyboardInfo.getKeyStateDown(System.Windows.Input.Key.LeftAlt)  &&
+                KeyboardInfo.getKeyStateDown(System.Windows.Input.Key.LeftCtrl) &&
+                !KeyboardInfo.getKeyStateDown(System.Windows.Input.Key.LeftShift) &&
+                e.KeyCode == Keys.S)
+            { e.Handled = true; notes_a_line_all(false, true); return; }
+            */
+            if(e.Control && e.Alt && e.KeyCode == Keys.S)//chatGPT 202230107
+            { e.Handled = true; notes_a_line_all(false, true); return; }
+            //以上三種皆可Alt + Shift + s :  所有小注文都不換行。
 
+            #endregion
 
             #region 同時按下 Ctrl + Shift + Alt 
             if ((m & Keys.Alt) == Keys.Alt
@@ -6428,7 +6439,8 @@ namespace WindowsFormsApp1
             mainFromTextBox3Text = textBox3.Text;
             if (textBox3.Text.IndexOf("http") == 0 && browsrOPMode != BrowserOPMode.appActivateByName)
             {
-                br.GoToUrlandActivate(textBox3.Text);
+                if (br.driver == null) br.driver = br.driverNew();
+                if (br.driver.Url != textBox3.Text) br.GoToUrlandActivate(textBox3.Text);
                 if (Clipboard.GetText().IndexOf("http") == 0) Clipboard.Clear();
             }
             if (keyinText) return;
