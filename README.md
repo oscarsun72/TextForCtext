@@ -1,4 +1,3 @@
-# TextForCtext
 為了[《中國哲學書電子化計劃》](https://ctext.org/)[（Chinese Text Project,簡稱ctext）](https://zh.wikipedia.org/wiki/%E4%B8%AD%E5%9C%8B%E5%93%B2%E5%AD%B8%E6%9B%B8%E9%9B%BB%E5%AD%90%E5%8C%96%E8%A8%88%E5%8A%83)輸入用
 
 尤其由[中研院史語所《漢籍電子文獻資料庫》](http://hanchi.ihp.sinica.edu.tw/ihp/hanji.htm)輸入《十三經注疏》、[《維基文庫》](https://zh.wikisource.org/zh-hant/)輸入《四部叢刊》本、[《國學大師》](http://www.guoxuedashi.net/)輸入《四庫全書》本諸書圖文對照時，輔助加速，避免人工之失誤。感恩感恩　南無阿彌陀佛
@@ -8,10 +7,26 @@
 
 其他最新進度，詳鄙人此帖： [transferkit IPFS 永遠保存的電子文獻-藏富天下 暨《中國哲學書電子化計劃》愚所輸入完竣之諸本-任真的網路書房-千慮一得齋OnLine-觀死書齋原著及電子化文獻(不屑智慧財產權)歡迎多利用共玉于成](https://oscarsun72.blogspot.com/2022/02/transferkit-ipfs.html) 
 
-[免安裝可執行檔TextForCtextPortable下載，解壓後點擊 TextForCtext.exe 檔案即可](https://github.com/oscarsun72/TextForCtext/blob/master/TextForCtextPortable.zip)：202301052034（2023/1/5 20:34)
--無寫入權限的電腦(如無法安裝Chrome)，請將[GoogleChromePortable](https://portableapps.com/apps/internet/google_chrome_portable)複製到我的文件，並將壓縮檔內的chromedriver.exe移到:
+- 本軟件架構為以下三種操作模式：
+
+  在textbox2輸入「ap,」「sl,」「sg,」，可切換瀏覽操作模式設定： ap,=appActivateByName sl,=seleniumNew sg,=seleniumGet
+
+  第一種為預設模式，即在現前開啟的Chrome瀏覽器即可操作。
+
+  第二種操作模式是由selenium自動開啟另一個新的Chrome瀏覽器執行體來加以操作。
+
+  第三種模式則是混搭前兩種， 或由selenium 取得現用的瀏覽器。來操作。。尚未實作。
+
+  。要切換三種模式。可在textbox2輸入以上指令。
+
+
+
+- [免安裝可執行檔TextForCtextPortable下載，解壓後點擊 TextForCtext.exe 檔案即可](https://github.com/oscarsun72/TextForCtext/blob/master/TextForCtextPortable.zip)：202301052034（2023/1/5 20:34)
+
+  無寫入權限的電腦(如無法安裝Chrome)，請將[GoogleChromePortable](https://portableapps.com/apps/internet/google_chrome_portable)複製到我的文件，並將壓縮檔內的chromedriver.exe移到:
     C:\Users\(這是使用者登入作業系統的帳號名稱)\Documents\GoogleChromePortable\App\Chrome-bin 目錄下，與「chrome.exe」並置同一資料夾內
---末學目前無它電腦可試，以 Selenium 操控 Chrome瀏覽器或許需要其他權限，然而在母校華岡學習雲的公用電腦也可以成功動啟了，若無法開啟，請將您之前打開的Chrome瀏覽器給關閉再啟動本軟件。。若還有問題，請多反饋，仝玉于成。感恩感恩　南無阿彌陀佛
+
+  末學目前無它電腦可試，以 Selenium 操控 Chrome瀏覽器或許需要其他權限，然而在母校華岡學習雲的公用電腦也可以成功動啟了，若無法開啟，請將您之前打開的Chrome瀏覽器給關閉再啟動本軟件。。若還有問題，請多反饋，仝玉于成。感恩感恩　南無阿彌陀佛
 
 
 ## 介面簡介：
@@ -304,9 +319,13 @@ Ctrl+ 滑鼠左鍵：清除框中所有文字
 - 輸入前綴關鍵字「note:」，可以後綴之數字設定小注不換行的長度限制（byte : 0~255）
 - 輸入「msedge」「chrome」「brave」「vivaldi」，可以設定預設瀏覽器名稱
 - 輸入「ap,」「sl,」「sg,」，可以切換瀏覽操作模式設定：
+
         ap,=appActivateByName
-        sl,=selenium
+
+        sl,=seleniumNew
+
         sg,=seleniumGet
+
         
             
 
