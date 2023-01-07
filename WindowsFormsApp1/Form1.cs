@@ -6632,7 +6632,7 @@ namespace WindowsFormsApp1
                 }
                 else if (button1.Text == "送出貼上")
                 {
-                    keyDownCtrlAdd();
+                    keyDownCtrlAdd(ModifierKeys==Keys.Shift);
                 }
             }
 
