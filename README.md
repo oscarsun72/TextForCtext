@@ -11,7 +11,13 @@
 
 - 本軟件架構為以下三種操作模式：
 
-  在textbox2輸入「ap,」「sl,」「sg,」，可切換瀏覽操作模式設定： ap,=appActivateByName sl,=seleniumNew sg,=seleniumGet
+  在textbox2輸入「ap,」「sl,」「sg,」，可切換瀏覽操作模式設定：
+
+   ap,=appActivateByName
+
+   sl,=seleniumNew
+
+   sg,=seleniumGet
 
   第一種為預設模式，即在現前開啟的Chrome瀏覽器即可操作。
 
