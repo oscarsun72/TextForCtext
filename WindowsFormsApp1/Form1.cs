@@ -485,9 +485,9 @@ namespace WindowsFormsApp1
             if (x.IndexOf("<p>|") > -1 || x.IndexOf("|<p>") > -1 || x.IndexOf("||") > -1)
             {
                 x = x.Replace("<p>|", "<p>").Replace("|<p>", "<p>").Replace("||", "|");
-                if (textBox1.SelectedText.IndexOf("<p>|") > -1 || textBox1.SelectedText.IndexOf("|<p>") > -1)
+                if (textBox1.SelectedText.IndexOf("<p>|") > -1 || textBox1.SelectedText.IndexOf("|<p>") > -1|| textBox1.SelectedText.IndexOf("||")>-1)
                 {
-                    textBox1.SelectedText = textBox1.SelectedText.Replace("<p>|", "<p>").Replace("|<p>", "<p>");
+                    textBox1.SelectedText = textBox1.SelectedText.Replace("<p>|", "<p>").Replace("|<p>", "<p>").Replace("||", "|");
                     s = textBox1.SelectionStart; l = textBox1.SelectionLength;
                 }
             }
@@ -6490,9 +6490,9 @@ namespace WindowsFormsApp1
                     //if (dropStr.IndexOf("https://") == -1) dropStr = "https://" + dropStr;
                     //textBox3.Text = dropStr;
                     //new SoundPlayer(@"C:\Windows\Media\recycle.wav").Play();
-                    dragDropUrl = true;
+                    //dragDropUrl = true;
                     textBox3_DragDrop(sender, e);
-                    dragDropUrl = false;
+                    //dragDropUrl = false;
                 }
                 else
                 {
@@ -6522,7 +6522,7 @@ namespace WindowsFormsApp1
         }
 
 
-        bool dragDropUrl = false;
+        //bool dragDropUrl = false;
 
         private void textBox3_TextChanged(object sender, EventArgs e)
         {
@@ -6875,7 +6875,7 @@ namespace WindowsFormsApp1
             undoRecord();
             textBox1.Text = tx;
             //replaceBlank_ifNOTTitleAndAfterparagraphMark();
-            fixFormatErrorlike王文成公全書();
+            fixFormatErrorlike王文成公全書();            
             caretPositionRecall();
         }
 

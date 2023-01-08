@@ -22,6 +22,7 @@ using System.IO;
 using System.Net;
 using static System.Net.WebRequestMethods;
 using System.Runtime.InteropServices.ComTypes;
+using OpenQA.Selenium.Support.UI;
 
 namespace TextForCtext
 {
@@ -298,7 +299,21 @@ namespace TextForCtext
              */
             Task.Run(() =>
             {
+                try
+                {
                 submit.Click();
+
+                }
+                catch (Exception)
+                {//chatGPT：
+                    // 等待網頁元素出現，最多等待 10 秒
+                    submit = driver.FindElement(selm.By.Id("savechangesbutton"));
+                    WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(3));
+                    //wait.Until(ExpectedConditions.ElementToBeClickable(submit));
+                    // 在網頁元素載入完畢後，執行 Click 方法
+                    submit.Click();
+                    //throw;
+                }
             });
             //f = null;
 
