@@ -187,7 +187,7 @@ Alt + Shift + s : 小注文不換行：notes_a_line_all
 
 Alt + Shift + Ctrl + s : 小注文不換行(短於指定漢字長者 由變數 noteinLineLenLimit 限定）：notes_a_line_all 
 
-Ctrl + Alt + s : 標題下之小注文才不換行
+Ctrl + Alt + s : 標題下之小注文才不換行( 會與小小輸入法預設的繁簡轉換鍵衝突，使用時請先關閉輸入法。其他快捷鍵若無作用，也多係因有較其優先之如此系統快速鍵已指定的緣故) 20230108
 
 Ctrl + 7 ：如同鍵入「。}}」，於《周易正義》〈彖、象〉辭時適用
 

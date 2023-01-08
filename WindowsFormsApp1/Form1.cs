@@ -25,6 +25,7 @@ using Task = System.Threading.Tasks.Task;
 using Application = System.Windows.Forms.Application;
 using System.Security.Cryptography;
 using System.Net;
+using OpenQA.Selenium.DevTools.V106.CSS;
 
 namespace WindowsFormsApp1
 {
@@ -112,12 +113,24 @@ namespace WindowsFormsApp1
             if (br.driver != null || browsrOPMode != BrowserOPMode.appActivateByName)
             {
                 if (MessageBox.Show("本軟件即將關閉，也會同時關閉由其開啟的Chrome瀏覽器，若有沒儲存的資訊，請先儲存再按「確定」鈕繼續；否則請按「取消」", "", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning) == DialogResult.Cancel) { e.Cancel = true; return; }
-                if (br.driver != null)
+                Task.Run(() =>
                 {
-                    Task.WaitAny();
-                    br.driver.Close();
-                    br.driver.Dispose();
-                }
+                    if (br.driver != null)
+                    {
+                        try
+                        {
+                            Task.WaitAny();
+                            br.driver.Close();
+                            br.driver.Dispose();
+                        }
+                        catch (Exception)
+                        {
+                            br.driver = null;
+                            //throw;
+                        }
+
+                    }
+                });
                 //終止 chromedriver.exe 程序,釋放系統記憶體
                 Process[] processes = Process.GetProcessesByName("chromedriver");
                 foreach (Process process in processes)
@@ -4884,10 +4897,18 @@ namespace WindowsFormsApp1
                     appActivateByName();
                     break;
                 case BrowserOPMode.seleniumNew:
-                    if (br.driver == null) br.driverNew();
-                    br.GoToUrlandActivate(url);
+                    Task.Run(() =>
+                    {
+                        if (br.driver == null) br.driverNew();
+                        br.GoToUrlandActivate(url);
+                    });
                     break;
                 case BrowserOPMode.seleniumGet:
+                    Task.Run(() =>
+                    {
+                        if (br.driver == null) br.driverNew();
+                        br.GoToUrlandActivate(url);
+                    });
                     //尚未實作
                     break;
                 default:
@@ -4930,12 +4951,21 @@ namespace WindowsFormsApp1
                             SendKeys.Send("^x");//剪下一頁以便輸入備用
                             break;
                         case BrowserOPMode.seleniumNew:
-                            if (br.driver == null) br.driverNew();
-                            OpenQA.Selenium.IWebElement quick_edit_box = br.driver.FindElement(OpenQA.Selenium.By.Name("data"));
-                            Task.WaitAll();
-                            Clipboard.SetText(quick_edit_box.Text);
+                            Task.Run(() =>
+                            {
+                                if (br.driver == null) br.driverNew();
+                                OpenQA.Selenium.IWebElement quick_edit_box = br.driver.FindElement(OpenQA.Selenium.By.Name("data"));
+                                Task.WaitAll();
+                                Clipboard.SetText(quick_edit_box.Text);
+                            });
                             break;
                         case BrowserOPMode.seleniumGet:
+                            Task.Run(() =>
+                            {
+                                if (br.driver == null) br.driverNew(); OpenQA.Selenium.IWebElement quick_edit_box = br.driver.FindElement(OpenQA.Selenium.By.Name("data"));
+                                Task.WaitAll();
+                                Clipboard.SetText(quick_edit_box.Text);
+                            });
                             break;
                         default:
                             break;
@@ -5768,29 +5798,32 @@ namespace WindowsFormsApp1
                         else
                         //chatGPT：在 C# 中使用 Selenium 控制 Chrome 瀏覽器時，可以使用以下方法切換到 Chrome 瀏覽器視窗：
                         {
-                            try
+                            Task.Run(() =>
                             {
-                                br.driver.SwitchTo().Window(br.driver.CurrentWindowHandle);
-                                if (textBox3.Text.IndexOf("edit") > -1 && KeyboardInfo.getKeyStateToggled(System.Windows.Input.Key.Delete))//判斷Delete鍵是否被按下彈起
-                                {//手動輸入時，當按下 Shift+Delete 當即時要準備貼上該頁，故如此操作，以備確定無誤後手動按下 submit 按鈕
-                                    OpenQA.Selenium.IWebElement quick_edit_box = br.driver.FindElement(OpenQA.Selenium.By.Name("data"));
-                                    quick_edit_box.Clear();
-                                    quick_edit_box.Click();
-                                    quick_edit_box.SendKeys(OpenQA.Selenium.Keys.LeftShift + OpenQA.Selenium.Keys.Insert);
-                                    OpenQA.Selenium.IWebElement submit = br.driver.FindElement(OpenQA.Selenium.By.Id("savechangesbutton"));
-                                    //放在一個 Task 中去執行，並立即返回。                                     
-                                    Task.Run(() =>
-                                    {
-                                        submit.Click();
-                                    });
+                                try
+                                {
+                                    br.driver.SwitchTo().Window(br.driver.CurrentWindowHandle);
+                                    if (textBox3.Text.IndexOf("edit") > -1 && KeyboardInfo.getKeyStateToggled(System.Windows.Input.Key.Delete))//判斷Delete鍵是否被按下彈起
+                                    {//手動輸入時，當按下 Shift+Delete 當即時要準備貼上該頁，故如此操作，以備確定無誤後手動按下 submit 按鈕
+                                        OpenQA.Selenium.IWebElement quick_edit_box = br.driver.FindElement(OpenQA.Selenium.By.Name("data"));
+                                        quick_edit_box.Clear();
+                                        quick_edit_box.Click();
+                                        quick_edit_box.SendKeys(OpenQA.Selenium.Keys.LeftShift + OpenQA.Selenium.Keys.Insert);
+                                        OpenQA.Selenium.IWebElement submit = br.driver.FindElement(OpenQA.Selenium.By.Id("savechangesbutton"));
+                                        //放在一個 Task 中去執行，並立即返回。                                     
+                                        Task.Run(() =>
+                                        {
+                                            submit.Click();
+                                        });
+                                    }
                                 }
-                            }
-                            catch (Exception)
-                            {
-                                br.driver = null;
-                                br.driver = br.driverNew();
-                                //throw;
-                            }
+                                catch (Exception)
+                                {
+                                    br.driver = null;
+                                    br.driver = br.driverNew();
+                                    //throw;
+                                }
+                            });
                         }
                     }
                 }
@@ -5851,28 +5884,31 @@ namespace WindowsFormsApp1
                             SendKeys.Send("^x");
                             break;
                         case BrowserOPMode.seleniumNew:
-                            if (br.driver == null) br.driver = br.driverNew();
-                            if (br.driver.Url != textBox3.Text)
+                            Task.Run(() =>
                             {
-                                try
+                                if (br.driver == null) br.driver = br.driverNew();
+                                if (br.driver.Url != textBox3.Text)
                                 {
-                                    //br.driver.ExecuteScript("window.open();");
-                                    br.driver.SwitchTo().NewWindow(OpenQA.Selenium.WindowType.Tab);//取得網址時順便貼上簡單修改模式下的文字                            
+                                    try
+                                    {
+                                        //br.driver.ExecuteScript("window.open();");
+                                        br.driver.SwitchTo().NewWindow(OpenQA.Selenium.WindowType.Tab);//取得網址時順便貼上簡單修改模式下的文字                            
+                                    }
+                                    catch (Exception)
+                                    {
+                                        br.driver.SwitchTo().Window(br.driver.WindowHandles.Last());
+                                        //throw;
+                                    }
+                                    //br.driver.Navigate().GoToUrl(clpTxt);
+                                    br.GoToUrlandActivate(clpTxt);
                                 }
-                                catch (Exception)
-                                {
-                                    br.driver.SwitchTo().Window(br.driver.WindowHandles.Last());
-                                    //throw;
-                                }
-                                //br.driver.Navigate().GoToUrl(clpTxt);
-                                br.GoToUrlandActivate(clpTxt);
-                            }
-                            Task.WaitAny();
-                            OpenQA.Selenium.IWebElement quick_edit_box = br.driver.FindElement(OpenQA.Selenium.By.Name("data"));
-                            Clipboard.SetText(quick_edit_box.Text);
+                                Task.WaitAny();
+                                OpenQA.Selenium.IWebElement quick_edit_box = br.driver.FindElement(OpenQA.Selenium.By.Name("data"));
+                                Clipboard.SetText(quick_edit_box.Text);
+                            });
                             break;
                         case BrowserOPMode.seleniumGet:
-                            if (br.driver == null) br.driver = br.driverNew();
+                            Task.Run(() => { if (br.driver == null) br.driver = br.driverNew(); });
                             break;
                         default:
                             break;
@@ -6086,12 +6122,18 @@ namespace WindowsFormsApp1
                     break;
                 case "sl,":
                     browsrOPMode = BrowserOPMode.seleniumNew;
-                    if (br.driver == null) br.driver = br.driverNew();
+                    Task.Run(() =>
+                    {
+                        if (br.driver == null) br.driver = br.driverNew();
+                    });
                     textBox2.Text = "";
                     break;
                 case "sg,":
                     browsrOPMode = BrowserOPMode.seleniumGet;
-                    if (br.driver == null) br.driver = br.driverNew();
+                    Task.Run(() =>
+                    {
+                        if (br.driver == null) br.driver = br.driverNew();
+                    });
                     textBox2.Text = "";
                     break;
 
