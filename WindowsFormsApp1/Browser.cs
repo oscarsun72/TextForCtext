@@ -351,7 +351,7 @@ namespace TextForCtext
             }
             catch (Exception)
             {
-                driver= null;
+                driver = null;
                 driver = driverNew();
                 //throw;
             }
@@ -359,7 +359,24 @@ namespace TextForCtext
             {
                 //var hs = driver.WindowHandles;
                 ////driver.SwitchTo().Window(hs[0]);
-                driver.SwitchTo().Window(driver.CurrentWindowHandle);
+                try
+                {
+                    driver.SwitchTo().Window(driver.CurrentWindowHandle);
+                }
+                catch (Exception ex)
+                {
+                    switch (ex.HResult)
+                    {
+                        //操作中的分頁頁籤被手動誤關時
+                        //no such window: target window already closed
+                        case -2146233088:
+                            openNewTab();
+                            break;
+                        default:
+                            throw;
+                    }
+
+                }
             }
             else
             {
@@ -379,12 +396,25 @@ namespace TextForCtext
             在 C# 中使用 Selenium 開啟新 Chrome 瀏覽器分頁可以使用以下方法：*/
             // 創建 ChromeDriver 實例
             //IWebDriver driver = new ChromeDriver();
-            ChromeDriver driver = driverNew();//new ChromeDriver();
+            //ChromeDriver driver = driverNew();//new ChromeDriver();
+            if(driver == null) driver = driverNew();
+            try
+            {
+                driver.SwitchTo().NewWindow(WindowType.Tab);
 
-            // 開啟新分頁
-            driver.ExecuteScript("window.open();");
+            }
+            catch (Exception)
+            {
+                var hs = driver.WindowHandles;
+                driver.SwitchTo().Window(driver.WindowHandles.Last());
+                driver.SwitchTo().NewWindow(WindowType.Tab);
+                //throw;
+            }
+
+            //// 開啟新分頁
+            //driver.ExecuteScript("window.open();");
             // 切換到新分頁
-            driver.SwitchTo().Window(driver.WindowHandles.Last());
+            //driver.SwitchTo().Window(driver.WindowHandles.Last());
             //也可以以用：（自己找switch可用的方法時發現的）
             //driver.SwitchTo().NewWindow(WindowType.Tab);   
             return driver;

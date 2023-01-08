@@ -113,51 +113,59 @@ namespace WindowsFormsApp1
             if (br.driver != null || browsrOPMode != BrowserOPMode.appActivateByName)
             {
                 if (MessageBox.Show("本軟件即將關閉，也會同時關閉由其開啟的Chrome瀏覽器，若有沒儲存的資訊，請先儲存再按「確定」鈕繼續；否則請按「取消」", "", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning) == DialogResult.Cancel) { e.Cancel = true; return; }
-                Task.Run(() =>
+                else
                 {
-                    if (br.driver != null)
+
+                    Task.Run(() =>
                     {
-                        try
+                        if (br.driver != null)
                         {
-                            Task.WaitAny();
-                            br.driver.Close();
-                            br.driver.Dispose();
-                        }
-                        catch (Exception)
-                        {
-                            br.driver = null;
-                            //throw;
-                        }
+                            try
+                            {
+                                //Task.WaitAny();
+                                br.driver.Quit();
+                                //chatGPT：不過，建議使用 Quit() 方法來關閉 WebDriver 實例並釋放所有資源，因為它會同時處理 Close() 和 Dispose() 方法20230108
+                                //br.driver.Close();
+                                //br.driver.Dispose();
+                            }
+                            catch (Exception)
+                            {
+                                br.driver = null;
+                                //throw;
+                            }
 
+                        }
+                    });
+                    Task.WaitAll();
+                    //終止 chromedriver.exe 程序,釋放系統記憶體
+                    Process[] processes = Process.GetProcessesByName("chromedriver");
+                    foreach (Process process in processes)
+                    {
+                        process.Kill();
                     }
-                });
-                //終止 chromedriver.exe 程序,釋放系統記憶體
-                Process[] processes = Process.GetProcessesByName("chromedriver");
-                foreach (Process process in processes)
-                {
-                    process.Kill();
+
                 }
-                //有上式便不用以下了
-                //try
-                //{
-                //    //釋放應用程式佔用的記憶體
-                //    br.driver.Close();//202301051447(2013/1/5 14:47) creedit
-
-                //}
-                //catch (OpenQA.Selenium.WebDriverException ex)
-                //{
-                //    bool v = ex.HResult == -2146233088;//先手動關了 chromedriver.exe 時
-                //    if (v) { }
-                //    else
-                //    {
-                //        v = ex.HResult == -2146233036;
-                //        if (v) { }
-                //        else throw;
-                //    }
-
-                //}
             }
 
+            //有上式便不用以下了
+            //try
+            //{
+            //    //釋放應用程式佔用的記憶體
+            //    br.driver.Close();//202301051447(2013/1/5 14:47) creedit
+
+            //}
+            //catch (OpenQA.Selenium.WebDriverException ex)
+            //{
+            //    bool v = ex.HResult == -2146233088;//先手動關了 chromedriver.exe 時
+            //    if (v) { }
+            //    else
+            //    {
+            //        v = ex.HResult == -2146233036;
+            //        if (v) { }
+            //        else throw;
+            //    }
+
+            //}
         }
 
 
@@ -187,7 +195,10 @@ namespace WindowsFormsApp1
             this.Width = thisWidth;
             this.Left = thisLeft;
             this.Top = thisTop;
-            textBox3_Click(new object(), new MouseEventArgs(MouseButtons.Left, 0, 0, 0, 0));//textBox3_MouseMove(new object(), new MouseEventArgs(MouseButtons.Left, 0, 0, 0, 0));
+            if (!autoPastetoQuickEdit && keyinText)
+            {
+                textBox3_Click(new object(), new MouseEventArgs(MouseButtons.Left, 0, 0, 0, 0));//textBox3_MouseMove(new object(), new MouseEventArgs(MouseButtons.Left, 0, 0, 0, 0));
+            }
         }
 
         private void nICo_MouseClick(object sender, MouseEventArgs e)
@@ -471,9 +482,9 @@ namespace WindowsFormsApp1
             //{
             if (textBox2.Text != "＠") textBox2.Text = "";
             string x = textBox1.Text; int s = textBox1.SelectionStart, l = textBox1.SelectionLength;
-            if (x.IndexOf("<p>|") > -1 || x.IndexOf("|<p>") > -1)
+            if (x.IndexOf("<p>|") > -1 || x.IndexOf("|<p>") > -1 || x.IndexOf("||") > -1)
             {
-                x = x.Replace("<p>|", "<p>").Replace("|<p>", "<p>");
+                x = x.Replace("<p>|", "<p>").Replace("|<p>", "<p>").Replace("||", "|");
                 if (textBox1.SelectedText.IndexOf("<p>|") > -1 || textBox1.SelectedText.IndexOf("|<p>") > -1)
                 {
                     textBox1.SelectedText = textBox1.SelectedText.Replace("<p>|", "<p>").Replace("|<p>", "<p>");
@@ -869,6 +880,14 @@ namespace WindowsFormsApp1
             if ((m & Keys.Shift) == Keys.Shift && e.KeyCode == Keys.Insert && !keyinText) { pasteAllOverWrite = true; dragDrop = false; }
             else pasteAllOverWrite = false;
 
+            #region 同時按下 Ctrl + Shift + Alt 
+            if ((m & Keys.Alt) == Keys.Alt
+                && (m & Keys.Shift) == Keys.Shift && (m & Keys.Control) == Keys.Control
+                && e.KeyCode == Keys.S)
+            {//Alt + Shift + Ctrl + s : 小注文不換行(短於指定漢字長者)：notes_a_line_all 
+                e.Handled = true; notes_a_line_all(true); return;
+            }
+            #endregion
 
             #region 同時按下Ctrl+Shift
 
@@ -940,14 +959,6 @@ namespace WindowsFormsApp1
 
             #endregion
 
-            #region 同時按下 Ctrl + Shift + Alt 
-            if ((m & Keys.Alt) == Keys.Alt
-                && (m & Keys.Shift) == Keys.Shift && (m & Keys.Control) == Keys.Control
-                && e.KeyCode == Keys.S)
-            {//Alt + Shift + Ctrl + s : 小注文不換行(短於指定漢字長者)：notes_a_line_all 
-                e.Handled = true; notes_a_line_all(true); return;
-            }
-            #endregion
 
             #region 同時按下Alt+Shift
             //同時按下Alt+Shift
@@ -4451,7 +4462,28 @@ namespace WindowsFormsApp1
 
         private void textBox3_Click(object sender, EventArgs e)
         {
-            string x = Clipboard.GetText();
+            string x = "";
+            Task.WaitAny();
+            Application.DoEvents();
+            try
+            {
+                if (Clipboard.ContainsText())
+                {
+                    x = Clipboard.GetText();
+                }
+            }
+            catch (Exception ex)
+            {
+                switch (ex.HResult)
+                {
+                    //"要求的剪貼簿作業失敗。"
+                    case -2147221040://chatGPT 20230108                        
+                        x = Task.Run(() => Clipboard.GetText()).Result;
+                        break;
+                    default:
+                        throw;
+                }
+            }
             if (x == "" || x.Length < 4 || x == textBox3.Text) return;
             if (x.Substring(0, 4) == "http")
                 if (x.IndexOf("ctext.org") > -1)
@@ -4897,19 +4929,16 @@ namespace WindowsFormsApp1
                     appActivateByName();
                     break;
                 case BrowserOPMode.seleniumNew:
-                    Task.Run(() =>
-                    {
-                        if (br.driver == null) br.driverNew();
-                        br.GoToUrlandActivate(url);
-                    });
+                    if (br.driver == null) br.driverNew();
+                    br.GoToUrlandActivate(url);
+                    //Task.Run(() =>
+                    //{
+                    //    br.GoToUrlandActivate(url);
+                    //});
                     break;
                 case BrowserOPMode.seleniumGet:
-                    Task.Run(() =>
-                    {
-                        if (br.driver == null) br.driverNew();
-                        br.GoToUrlandActivate(url);
-                    });
-                    //尚未實作
+                    //後面的textBox3.Text = url;會觸發private void textBox3_TextChanged 事件程序，於彼處執行瀏覽即可
+                    //尚未實作完成
                     break;
                 default:
                     return;
@@ -4951,18 +4980,19 @@ namespace WindowsFormsApp1
                             SendKeys.Send("^x");//剪下一頁以便輸入備用
                             break;
                         case BrowserOPMode.seleniumNew:
+                            if (br.driver == null) br.driverNew();
                             Task.Run(() =>
                             {
-                                if (br.driver == null) br.driverNew();
                                 OpenQA.Selenium.IWebElement quick_edit_box = br.driver.FindElement(OpenQA.Selenium.By.Name("data"));
                                 Task.WaitAll();
                                 Clipboard.SetText(quick_edit_box.Text);
                             });
                             break;
                         case BrowserOPMode.seleniumGet:
+                            if (br.driver == null) br.driverNew();
                             Task.Run(() =>
                             {
-                                if (br.driver == null) br.driverNew(); OpenQA.Selenium.IWebElement quick_edit_box = br.driver.FindElement(OpenQA.Selenium.By.Name("data"));
+                                OpenQA.Selenium.IWebElement quick_edit_box = br.driver.FindElement(OpenQA.Selenium.By.Name("data"));
                                 Task.WaitAll();
                                 Clipboard.SetText(quick_edit_box.Text);
                             });
@@ -4995,8 +5025,7 @@ namespace WindowsFormsApp1
                 }
             }
             #endregion
-
-            textBox3.Text = url;
+            textBox3.Text = url;//此若寫在後面，會觸發textchanged事件程序，影響以下二種瀏覽模式
             if (stayInHere) this.Activate();
         }
 
@@ -5960,7 +5989,7 @@ namespace WindowsFormsApp1
                         }
                         runWordMacro("中國哲學書電子化計劃.清除頁前的分段符號");
                         Application.DoEvents();
-                        Task.WhenAny();
+                        Task.WaitAny();
                         ////Task.Delay(waitTimeforappActivateByName).Wait();
                         //Task.Delay(550).Wait();
                         try
@@ -6121,19 +6150,27 @@ namespace WindowsFormsApp1
                     textBox2.Text = "";
                     break;
                 case "sl,":
-                    browsrOPMode = BrowserOPMode.seleniumNew;
-                    Task.Run(() =>
+                sl: browsrOPMode = BrowserOPMode.seleniumNew;
+                    if (br.driver == null)
                     {
-                        if (br.driver == null) br.driver = br.driverNew();
-                    });
+                        Task.Run(() =>
+                        {
+                            br.driver = br.driverNew();
+                        });
+                    }
                     textBox2.Text = "";
                     break;
+                case "br":
+                    goto sl;
                 case "sg,":
                     browsrOPMode = BrowserOPMode.seleniumGet;
-                    Task.Run(() =>
+                    if (br.driver == null)
                     {
-                        if (br.driver == null) br.driver = br.driverNew();
-                    });
+                        Task.Run(() =>
+                        {
+                            br.driver = br.driverNew();
+                        });
+                    }
                     textBox2.Text = "";
                     break;
 
@@ -6453,7 +6490,9 @@ namespace WindowsFormsApp1
                     //if (dropStr.IndexOf("https://") == -1) dropStr = "https://" + dropStr;
                     //textBox3.Text = dropStr;
                     //new SoundPlayer(@"C:\Windows\Media\recycle.wav").Play();
+                    dragDropUrl = true;
                     textBox3_DragDrop(sender, e);
+                    dragDropUrl = false;
                 }
                 else
                 {
@@ -6483,22 +6522,37 @@ namespace WindowsFormsApp1
         }
 
 
+        bool dragDropUrl = false;
 
         private void textBox3_TextChanged(object sender, EventArgs e)
         {
             mainFromTextBox3Text = textBox3.Text;
             string oldValue = (string)textBox3.Tag;//chatGPT 20230108
-            if (textBox3.Text.IndexOf("http") == 0 && browsrOPMode != BrowserOPMode.appActivateByName)
-            {
-                Task.Run(() =>/*須使用多執行緒才不會出現以下錯誤:
-                               The HTTP request to the remote WebDriver server for URL http://localhost:6164/session/c574811b5a05d8f951364b5156b15ff8/window/handles timed out after 4.5 seconds.
-                               因為textBox3_DragDrop(sender, e)要用到這個函式（DragDrop事件執行時會吃掉系統焦點，則br.driver無法正常運行）20230108                               */
-                {
-                    if (br.driver == null) br.driver = br.driverNew();
-                    //if (Clipboard.GetText().IndexOf("http") == 0) Clipboard.Clear();                
-                    if (oldValue != mainFromTextBox3Text) br.GoToUrlandActivate(textBox3.Text);
-                });
-            }
+            
+            //if (!autoPastetoQuickEdit && mainFromTextBox3Text != "" && textBox3.Text.IndexOf("http") == 0 && browsrOPMode != BrowserOPMode.appActivateByName && oldValue != mainFromTextBox3Text)
+            //{
+            //    if (dragDropUrl)
+            //    {
+            //        Task.Run(() =>/*須使用多執行緒才不會出現以下錯誤:
+            //                   The HTTP request to the remote WebDriver server for URL http://localhost:6164/session/c574811b5a05d8f951364b5156b15ff8/window/handles timed out after 4.5 seconds.
+            //                   因為textBox3_DragDrop(sender, e)要用到這個函式（DragDrop事件執行時會吃掉系統焦點，則br.driver無法正常運行）20230108                               */
+            //        {
+            //            if (br.driver == null) br.driver = br.driverNew();
+            //            //if (Clipboard.GetText().IndexOf("http") == 0) Clipboard.Clear();
+            //            string url = br.driver.Url;//交給區域變數，才好監看
+            //            if (oldValue != mainFromTextBox3Text && url != mainFromTextBox3Text) br.GoToUrlandActivate(mainFromTextBox3Text);
+            //        });
+            //        dragDropUrl = false;
+            //    }
+            //    else
+            //    {
+            //        if (br.driver == null) br.driver = br.driverNew();
+            //        //if (Clipboard.GetText().IndexOf("http") == 0) Clipboard.Clear();                    
+            //        if (oldValue != mainFromTextBox3Text) br.GoToUrlandActivate(mainFromTextBox3Text);
+            //    }
+            //}
+            //Task.WaitAll();
+
             textBox3.Tag = mainFromTextBox3Text;
             if (keyinText) return;
             if (textBox3.Text == "")
@@ -6507,7 +6561,7 @@ namespace WindowsFormsApp1
                 return;
             }
             if (textBox3.Text.IndexOf("ctext.org") > -1) if (textBox3.Text.IndexOf("https://") == -1) textBox3.Text = "https://" + textBox3.Text;
-            autoPastetoOrNot();
+            if (oldValue == "" || oldValue == null) autoPastetoOrNot();
         }
 
         private void autoPastetoOrNot()
