@@ -6610,7 +6610,7 @@ namespace WindowsFormsApp1
             pageTextEndPosition = 0; pageEndText10 = "";
             lines_perPage = 0;
             normalLineParaLength = 0;
-            resetPageTextEndPositionPasteToCText();
+            //resetPageTextEndPositionPasteToCText();//不知何時誤貼的，到無問題時，即可刪去
             TopLine = false; Indents = true;
         }
 
