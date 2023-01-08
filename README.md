@@ -42,7 +42,7 @@
 
 textBox1:文本框
 
-textBox2:尋找文本用
+textBox2:尋找文本用、與設定配置指令用
 
 textBox3: URL瀏覽參照用（點一下，貼上要瀏覽的網址）
 
