@@ -909,7 +909,7 @@ namespace WindowsFormsApp1
                 if (e.KeyCode == Keys.G || e.KeyCode == Keys.Packet)
                 { e.Handled = true; return; }
             }
-            
+
             //Alt + Shift + s :  所有小注文都不換行。這個和我所使用的小小輸入法繁簡轉換快捷鍵有衝突，故須先停用小小輸入法才有作用。感恩感恩　南無阿彌陀佛
             /*
             if ((m & Keys.Alt) == Keys.Alt && (m & Keys.Control) == Keys.Control && (m & Keys.Shift) != Keys.Shift
@@ -921,7 +921,7 @@ namespace WindowsFormsApp1
                 e.KeyCode == Keys.S)
             { e.Handled = true; notes_a_line_all(false, true); return; }
             */
-            if(e.Control && e.Alt && e.KeyCode == Keys.S)//chatGPT 202230107
+            if (e.Control && e.Alt && e.KeyCode == Keys.S)//chatGPT 202230107
             { e.Handled = true; notes_a_line_all(false, true); return; }
             //以上三種皆可Alt + Shift + s :  所有小注文都不換行。
 
@@ -5851,24 +5851,28 @@ namespace WindowsFormsApp1
                             SendKeys.Send("^x");
                             break;
                         case BrowserOPMode.seleniumNew:
-                            //if (br.driver.Url != textBox3.Text) 
-
-                            try
+                            if (br.driver == null) br.driver = br.driverNew();
+                            if (br.driver.Url != textBox3.Text)
                             {
-                                //br.driver.ExecuteScript("window.open();");
-                                br.driver.SwitchTo().NewWindow(OpenQA.Selenium.WindowType.Tab);//取得網址時順便貼上簡單修改模式下的文字                            
+                                try
+                                {
+                                    //br.driver.ExecuteScript("window.open();");
+                                    br.driver.SwitchTo().NewWindow(OpenQA.Selenium.WindowType.Tab);//取得網址時順便貼上簡單修改模式下的文字                            
+                                }
+                                catch (Exception)
+                                {
+                                    br.driver.SwitchTo().Window(br.driver.WindowHandles.Last());
+                                    //throw;
+                                }
+                                //br.driver.Navigate().GoToUrl(clpTxt);
+                                br.GoToUrlandActivate(clpTxt);
                             }
-                            catch (Exception)
-                            {
-                                br.driver.SwitchTo().Window(br.driver.WindowHandles.Last());
-                                //throw;
-                            }
-                            br.driver.Navigate().GoToUrl(clpTxt);
-                            Task.WaitAll();
+                            Task.WaitAny();
                             OpenQA.Selenium.IWebElement quick_edit_box = br.driver.FindElement(OpenQA.Selenium.By.Name("data"));
                             Clipboard.SetText(quick_edit_box.Text);
                             break;
                         case BrowserOPMode.seleniumGet:
+                            if (br.driver == null) br.driver = br.driverNew();
                             break;
                         default:
                             break;
@@ -5920,6 +5924,7 @@ namespace WindowsFormsApp1
                         }
                         runWordMacro("中國哲學書電子化計劃.清除頁前的分段符號");
                         Application.DoEvents();
+                        Task.WhenAny();
                         ////Task.Delay(waitTimeforappActivateByName).Wait();
                         //Task.Delay(550).Wait();
                         try
@@ -5929,6 +5934,7 @@ namespace WindowsFormsApp1
                         catch (Exception)
                         {
                             Application.DoEvents();
+                            Task.WhenAny();
                             Clipboard.Clear();
                             //throw;
                         }
@@ -6080,10 +6086,12 @@ namespace WindowsFormsApp1
                     break;
                 case "sl,":
                     browsrOPMode = BrowserOPMode.seleniumNew;
+                    if (br.driver == null) br.driver = br.driverNew();
                     textBox2.Text = "";
                     break;
                 case "sg,":
                     browsrOPMode = BrowserOPMode.seleniumGet;
+                    if (br.driver == null) br.driver = br.driverNew();
                     textBox2.Text = "";
                     break;
 
@@ -6437,12 +6445,19 @@ namespace WindowsFormsApp1
         private void textBox3_TextChanged(object sender, EventArgs e)
         {
             mainFromTextBox3Text = textBox3.Text;
+            string oldValue = (string)textBox3.Tag;//chatGPT 20230108
             if (textBox3.Text.IndexOf("http") == 0 && browsrOPMode != BrowserOPMode.appActivateByName)
             {
-                if (br.driver == null) br.driver = br.driverNew();
-                if (br.driver.Url != textBox3.Text) br.GoToUrlandActivate(textBox3.Text);
-                if (Clipboard.GetText().IndexOf("http") == 0) Clipboard.Clear();
+                Task.Run(() =>/*須使用多執行緒才不會出現以下錯誤:
+                               The HTTP request to the remote WebDriver server for URL http://localhost:6164/session/c574811b5a05d8f951364b5156b15ff8/window/handles timed out after 4.5 seconds.
+                               因為textBox3_DragDrop(sender, e)要用到這個函式（DragDrop事件執行時會吃掉系統焦點，則br.driver無法正常運行）20230108                               */
+                {
+                    if (br.driver == null) br.driver = br.driverNew();
+                    //if (Clipboard.GetText().IndexOf("http") == 0) Clipboard.Clear();                
+                    if (oldValue != mainFromTextBox3Text) br.GoToUrlandActivate(textBox3.Text);
+                });
             }
+            textBox3.Tag = mainFromTextBox3Text;
             if (keyinText) return;
             if (textBox3.Text == "")
             {

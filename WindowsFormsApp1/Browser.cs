@@ -324,46 +324,52 @@ namespace TextForCtext
         internal static void GoToUrlandActivate(string url)
         {
 
-            //driver.Close();//creedit
-            //creedit20230103 這樣處理誤關分頁頁籤的錯誤（例外情形）就成功了，但整個瀏覽器誤關則尚未
-            //chatGPT：在 C# 中使用 Selenium 取得 Chrome 瀏覽器開啟的頁籤（分頁）數量可以使用以下方法：                
+            ////driver.Close();//creedit
+            ////creedit20230103 這樣處理誤關分頁頁籤的錯誤（例外情形）就成功了，但整個瀏覽器誤關則尚未
+            ////chatGPT：在 C# 中使用 Selenium 取得 Chrome 瀏覽器開啟的頁籤（分頁）數量可以使用以下方法：                
             int tabCount = 0;
             try
             {
                 if (driver == null) driver = driverNew();
-                tabCount = driver.WindowHandles.Count;
-                driver.SwitchTo().Window(driver.CurrentWindowHandle);
             }
             catch (Exception)
             {
                 if (driver != null)
                 {
-                    //Task.WaitAny();
-                    //driver.Close(); driver.Dispose();
                     driver = null;
                 }
                 driver = driverNew();
-                //throw;
+                ////throw;
             }
             /*另外，您也可以使用以下方法在 C# 中取得 Chrome 瀏覽器的標籤（分頁）數量:
              // 取得 Chrome 瀏覽器的標籤數量
                 int tabCount = driver.Manage().Window.Bounds.Width / 100;
              */
+            try
+            {
+                tabCount = driver.WindowHandles.Count;
+            }
+            catch (Exception)
+            {
+                driver= null;
+                driver = driverNew();
+                //throw;
+            }
             if (tabCount > 0)
             {
-                var hs = driver.WindowHandles;
-                //driver.SwitchTo().Window(hs[0]);
+                //var hs = driver.WindowHandles;
+                ////driver.SwitchTo().Window(hs[0]);
                 driver.SwitchTo().Window(driver.CurrentWindowHandle);
             }
             else
             {
-                Browser.openNewTab();
+                openNewTab();
             }
             //throw;
 
             driver.Navigate().GoToUrl(url);
             //activate and move to most front of desktop
-            driver.SwitchTo().Window(driver.CurrentWindowHandle);
+            //driver.SwitchTo().Window(driver.CurrentWindowHandle);
             driver.ExecuteScript("window.scrollTo(0, 0)");//chatGPT:您好！如果您使用 C# 和 Selenium 來控制 Chrome 瀏覽器，您可以使用以下的程式碼將網頁捲到最上面：
         }
 
