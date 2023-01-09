@@ -485,7 +485,7 @@ namespace WindowsFormsApp1
             if (x.IndexOf("<p>|") > -1 || x.IndexOf("|<p>") > -1 || x.IndexOf("||") > -1)
             {
                 x = x.Replace("<p>|", "<p>").Replace("|<p>", "<p>").Replace("||", "|");
-                if (textBox1.SelectedText.IndexOf("<p>|") > -1 || textBox1.SelectedText.IndexOf("|<p>") > -1|| textBox1.SelectedText.IndexOf("||")>-1)
+                if (textBox1.SelectedText.IndexOf("<p>|") > -1 || textBox1.SelectedText.IndexOf("|<p>") > -1 || textBox1.SelectedText.IndexOf("||") > -1)
                 {
                     textBox1.SelectedText = textBox1.SelectedText.Replace("<p>|", "<p>").Replace("|<p>", "<p>").Replace("||", "|");
                     s = textBox1.SelectionStart; l = textBox1.SelectionLength;
@@ -6152,27 +6152,40 @@ namespace WindowsFormsApp1
                     break;
                 case "sl,":
                 sl: browsrOPMode = BrowserOPMode.seleniumNew;
+                    //第一次開啟Chrome瀏覽器，或前有未關閉的瀏覽器時
                     if (br.driver == null)
-                            br.driver = br.driverNew();
-                    //{
-                    //    Task.Run(() =>
-                    //    {
-                    //    });
-                    //}
+                        br.driver = br.driverNew();//不用Task.Run()包裹也成了
+                    else
+                    {//如果Chrome瀏覽器都沒有開啟或被誤關的話20230109
+                        //因為 br.driver != null 先清除chromedriver：
+                        Process[] chromeInstances = Process.GetProcessesByName("chrome");
+                        if (chromeInstances.Length == 0)
+                        {
+                            chromeInstances = Process.GetProcessesByName("chromedriver");
+                            foreach (var chromeInstance in chromeInstances)
+                            {
+                                chromeInstance.Kill();
+                            }
+                            Task.WaitAll();
+                            //清除完後創建新的執行個體實例
+                            br.driver = null; br.driverNew();
+                        }
+                    }
                     textBox2.Text = "";
                     break;
                 case "br":
                     goto sl;
                 case "sg,":
-                    browsrOPMode = BrowserOPMode.seleniumGet;
-                    if (br.driver == null)
-                    {
-                        Task.Run(() =>
-                        {
-                            br.driver = br.driverNew();
-                        });
-                    }
-                    textBox2.Text = "";
+                    //還未實作
+                    //browsrOPMode = BrowserOPMode.seleniumGet;
+                    //if (br.driver == null)
+                    //{
+                    //    Task.Run(() =>
+                    //    {
+                    //        br.driver = br.driverNew();
+                    //    });
+                    //}
+                    //textBox2.Text = "";
                     break;
 
                 default:
@@ -6529,7 +6542,7 @@ namespace WindowsFormsApp1
         {
             mainFromTextBox3Text = textBox3.Text;
             string oldValue = (string)textBox3.Tag;//chatGPT 20230108
-            
+
             //if (!autoPastetoQuickEdit && mainFromTextBox3Text != "" && textBox3.Text.IndexOf("http") == 0 && browsrOPMode != BrowserOPMode.appActivateByName && oldValue != mainFromTextBox3Text)
             //{
             //    if (dragDropUrl)
@@ -6876,7 +6889,7 @@ namespace WindowsFormsApp1
             undoRecord();
             textBox1.Text = tx;
             //replaceBlank_ifNOTTitleAndAfterparagraphMark();
-            fixFormatErrorlike王文成公全書();            
+            fixFormatErrorlike王文成公全書();
             caretPositionRecall();
         }
 

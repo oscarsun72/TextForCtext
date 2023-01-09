@@ -122,6 +122,7 @@ namespace TextForCtext
                 {
                     switch (ex.HResult)
                     {
+                        //已有Chrome瀏覽器開啟在先者：
                         case -2146233088://"unknown error: Chrome failed to start: exited normally.\n  (unknown error: DevToolsActivePort file doesn't exist)\n  (The process started from chrome location W:\\PortableApps\\PortableApps\\GoogleChromePortable\\App\\Chrome-bin\\chrome.exe is no longer running, so ChromeDriver is assuming that Chrome has crashed.)"
                             //options.AddArgument("--headless");//唯有此行有效，但不顯示實體，即看不到Chrome瀏覽器，無法手動操作及監控，故今只能以關閉先前已開啟的瀏覽器暫行了 20230109
                             //options.AddArgument("--ignore-certificate-errors");
