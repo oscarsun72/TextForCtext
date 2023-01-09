@@ -187,3 +187,39 @@ URLDecode = URLDecode & Mid(strIn, tl)
 
 End Function
 
+
+
+'https://narkive.com/t730ls1c
+'https://microsoft.public.tw.excel.narkive.com/t730ls1c/big-5
+'是否有函數可將文字之內碼(BIG-5)顯示出來
+'(??太久?法回复)
+'robert788417 years ago
+'Permalink例如 =code('A') 結果為(65)
+'=???(心) 結果為(A4DF) <------BIG-5碼
+'
+'或許是笨問題 但誠心求教 謝謝!!
+'璉璉17 years ago
+'PermalinkVBA:
+'Print Hex(Asc("心")) ' Big5
+'A4DF
+'Print Hex(AscW("心")) ' Unicode
+'5 FC3
+'
+'所以用 VBA 包一個函數：
+'Function MyAsc(ByVal strChar As String) As String
+'MyAsc = Hex(Asc(strChar))
+'End Function
+'
+'在工作表用
+'=MyAsc(A1)
+
+
+Sub 清除所有程式碼註解()
+
+With ActiveDocument.Range.Find
+    .ClearFormatting
+    .Font.ColorIndex = 11
+    .Execute "", , , , , , , wdFindContinue, , "", wdReplaceAll
+    .ClearFormatting
+End With
+End Sub

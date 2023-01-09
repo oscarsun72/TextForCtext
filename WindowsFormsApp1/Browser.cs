@@ -24,7 +24,7 @@ using static System.Net.WebRequestMethods;
 using System.Runtime.InteropServices.ComTypes;
 using OpenQA.Selenium.Support.UI;
 using SeleniumExtras.WaitHelpers;
-
+using System.Diagnostics;
 
 namespace TextForCtext
 {
@@ -59,6 +59,7 @@ namespace TextForCtext
         {
             if (Form1.browsrOPMode != Form1.BrowserOPMode.appActivateByName && driver == null)
             {
+                tryagain:
                 ChromeDriverService driverService;
                 ChromeDriver cDrv;//綠色免安裝版仍搞不定，安裝 chrome 了就OK 20220101 chatGPT建議者未通；20220105自行解決了，詳下
 
@@ -104,15 +105,91 @@ namespace TextForCtext
                 #endregion
 
                 driverService.HideCommandPromptWindow = true;//关闭黑色cmd窗口 https://blog.csdn.net/PLA12147111/article/details/92000480
-                //先設定才能依其設定開啟，才不會出現cmd黑色屏幕視窗，若先創建Chrome瀏覽器視窗（即下一行），再設定「.HideCommandPromptWindow = true」則不行。邏輯！感恩感恩　讚歎讚歎　南無阿彌陀佛 202301051414
-                if (user_data_dir.IndexOf("Documents") > -1)//無寫入權限的電腦，怕比較慢
-                                                            //可能是防火牆 OpenQA.Selenium.WebDriverException
-                                                            //HResult = 0x80131500
-                                                            //Message = The HTTP request to the remote WebDriver server for URL http://localhost:52966/session timed out after 60 seconds.
-                    cDrv = new ChromeDriver(driverService, options);
-                else
-                    //自己的電腦比較快
-                    cDrv = new ChromeDriver(driverService, options, TimeSpan.FromSeconds(4.5));//等待重啟時間=4.5秒鐘：若寫成「 , TimeSpan.MinValue);」這會出現超出設定值範圍的錯誤//TimeSpan是設定決定重新啟動chromedriver.exe須等待的時間，太長則人則不耐，太短則chromedriver.exe來不及反應而出錯。感恩感恩　讚歎讚歎　南無阿彌陀佛 202301051751
+                                                             //先設定才能依其設定開啟，才不會出現cmd黑色屏幕視窗，若先創建Chrome瀏覽器視窗（即下一行），再設定「.HideCommandPromptWindow = true」則不行。邏輯！感恩感恩　讚歎讚歎　南無阿彌陀佛 202301051414
+                #region 啟動Chrome瀏覽器 （最會出錯的部分！！）
+                try
+                {
+                    if (user_data_dir.IndexOf("Documents") > -1)//無寫入權限的電腦，怕比較慢
+                                                                //可能是防火牆 OpenQA.Selenium.WebDriverException
+                                                                //HResult = 0x80131500
+                                                                //Message = The HTTP request to the remote WebDriver server for URL http://localhost:52966/session timed out after 60 seconds.
+                        cDrv = new ChromeDriver(driverService, options);
+                    else
+                        //自己的電腦比較快
+                        cDrv = new ChromeDriver(driverService, options, TimeSpan.FromSeconds(4.5));//等待重啟時間=4.5秒鐘：若寫成「 , TimeSpan.MinValue);」這會出現超出設定值範圍的錯誤//TimeSpan是設定決定重新啟動chromedriver.exe須等待的時間，太長則人則不耐，太短則chromedriver.exe來不及反應而出錯。感恩感恩　讚歎讚歎　南無阿彌陀佛 202301051751
+                }
+                catch (Exception ex)
+                {
+                    switch (ex.HResult)
+                    {
+                        case -2146233088://"unknown error: Chrome failed to start: exited normally.\n  (unknown error: DevToolsActivePort file doesn't exist)\n  (The process started from chrome location W:\\PortableApps\\PortableApps\\GoogleChromePortable\\App\\Chrome-bin\\chrome.exe is no longer running, so ChromeDriver is assuming that Chrome has crashed.)"
+                            //options.AddArgument("--headless");//唯有此行有效，但不顯示實體，即看不到Chrome瀏覽器，無法手動操作及監控，故今只能以關閉先前已開啟的瀏覽器暫行了 20230109
+                            //options.AddArgument("--ignore-certificate-errors");
+                            //options.AddArgument("--remote-debugging-port=9222");                            
+                            //options.AddArgument("--no-sandbox");
+                            //options.AddUserProfilePreference("profile.managed_default_content_settings.popups", 0);
+                            //options.AddArgument("--window-size=1920,1080");
+                            options.AddArgument("--new-window");
+                            //options.AddArgument("--start-maximized");
+                            //options.AddArgument("--disable-dev-shm-usage");
+                            //options.AddArgument("blink-settings=imagesEnabled=false");//https://blog.csdn.net/zhangpeterx/article/details/83502641
+                            //options.AddArgument("--disable-gpu");
+                            //https://stackoverflow.com/questions/50642308/webdriverexception-unknown-error-devtoolsactiveport-file-doesnt-exist-while-t
+                            //options.AddArguments("start-maximized"); // open Browser in maximized mode
+                            //options.AddArguments("disable-infobars"); // disabling infobars
+                            //options.AddArguments("--disable-extensions"); // disabling extensions
+                            //options.AddArguments("--disable-gpu"); // applicable to windows os only
+                            //options.AddArguments("--disable-dev-shm-usage"); // overcome limited resource problems
+                            //options.AddArguments("--no-sandbox");  // Bypass OS security model
+
+                            ////https://johncylee.github.io/2022/05/14/chrome-headless-%E6%A8%A1%E5%BC%8F%E4%B8%8B-devtoolsactiveport-file-doesn-t-exist-%E5%95%8F%E9%A1%8C/
+                            //options.AddArgument(@"crash-dumps-dir={os.path.expanduser('~/tmp/Crashpad')}");
+
+                            //string chromeExePath = chrome_path+ @"\chrome.exe";//"path/to/chrome.exe";
+                            //string port = "9222";
+                            //string chromeDriverExePath = chrome_path + @"\chromedriver.exe";//"path/to/chromedriver.exe";
+
+                            //using (var service = ChromeDriverService.CreateDefaultService(chromeDriverExePath))
+                            //{
+                            //    service.Port = int.Parse(port);
+                            //    options.BinaryLocation = chromeExePath;
+                            //    using (var driver = new ChromeDriver(service, options))
+                            //    {
+                            //        // do something
+                            //    }
+                            //}
+                            if (MessageBox.Show("按「ok」確定，以繼續，將會關閉所有在運行中的Chrome瀏覽器，若須手動關閉，請關完後再按確定……", "", MessageBoxButtons.OKCancel
+                                , MessageBoxIcon.Warning) == DialogResult.OK)
+                            {//creedit by chatGPT：
+                                Process[] chromeInstances = Process.GetProcessesByName("chrome");
+                                foreach (var chromeInstance in chromeInstances)
+                                {
+                                    chromeInstance.Kill();
+                                }
+                                chromeInstances = Process.GetProcessesByName("chromedriver");
+                                foreach (var chromeInstance in chromeInstances)
+                                {
+                                    chromeInstance.Kill();
+                                }
+                                Task.WaitAll();
+                                goto tryagain;
+                            }
+                            else
+                            {
+                                Form1.browsrOPMode = Form1.BrowserOPMode.appActivateByName;
+                                return null;
+                            }
+                            //driverService = ChromeDriverService.CreateDefaultService(chrome_path);
+                            //driverService.HideCommandPromptWindow = true;
+                            //cDrv = new ChromeDriver(driverService, options);//, TimeSpan.FromSeconds(50));
+                            //break;
+                        default:
+                            throw;
+                    }
+                }
+                #endregion
+
+                #region 成功開啟Chrome瀏覽器後
                 originalWindow = cDrv.CurrentWindowHandle;
                 //string chrome_path = Form1.getDefaultBrowserEXE();
                 //if (chrome_path.IndexOf(@"C:\") == -1)
@@ -151,6 +228,7 @@ namespace TextForCtext
             }
             else
                 return driver;
+            #endregion
         }
 
         private static ChromeOptions chromeOptions(string chrome_path)
@@ -303,7 +381,7 @@ namespace TextForCtext
             {
                 try
                 {
-                submit.Click();
+                    submit.Click();
 
                 }
                 catch (Exception)
@@ -426,7 +504,7 @@ namespace TextForCtext
             // 創建 ChromeDriver 實例
             //IWebDriver driver = new ChromeDriver();
             //ChromeDriver driver = driverNew();//new ChromeDriver();
-            if(driver == null) driver = driverNew();
+            if (driver == null) driver = driverNew();
             try
             {
                 driver.SwitchTo().NewWindow(WindowType.Tab);

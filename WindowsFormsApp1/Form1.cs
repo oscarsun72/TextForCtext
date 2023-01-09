@@ -4893,6 +4893,7 @@ namespace WindowsFormsApp1
         {
             string url = textBox3.Text;
             if (url == "") return;
+            if (url.IndexOf("&page=") == -1) return;
             int edit = url.IndexOf("&editwiki");
             int page = 0; string urlSub = url;
             if (edit > -1)
@@ -6152,12 +6153,12 @@ namespace WindowsFormsApp1
                 case "sl,":
                 sl: browsrOPMode = BrowserOPMode.seleniumNew;
                     if (br.driver == null)
-                    {
-                        Task.Run(() =>
-                        {
                             br.driver = br.driverNew();
-                        });
-                    }
+                    //{
+                    //    Task.Run(() =>
+                    //    {
+                    //    });
+                    //}
                     textBox2.Text = "";
                     break;
                 case "br":
