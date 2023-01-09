@@ -59,7 +59,7 @@ namespace TextForCtext
         {
             if (Form1.browsrOPMode != Form1.BrowserOPMode.appActivateByName && driver == null)
             {
-                tryagain:
+            tryagain:
                 ChromeDriverService driverService;
                 ChromeDriver cDrv;//綠色免安裝版仍搞不定，安裝 chrome 了就OK 20220101 chatGPT建議者未通；20220105自行解決了，詳下
 
@@ -165,7 +165,16 @@ namespace TextForCtext
                                 Process[] chromeInstances = Process.GetProcessesByName("chrome");
                                 foreach (var chromeInstance in chromeInstances)
                                 {
-                                    chromeInstance.Kill();
+                                    try
+                                    {
+                                        chromeInstance.Kill();
+
+                                    }
+                                    catch (Exception)
+                                    {
+                                        Task.WaitAny();
+                                        //throw;
+                                    }
                                 }
                                 chromeInstances = Process.GetProcessesByName("chromedriver");
                                 foreach (var chromeInstance in chromeInstances)
@@ -180,10 +189,10 @@ namespace TextForCtext
                                 Form1.browsrOPMode = Form1.BrowserOPMode.appActivateByName;
                                 return null;
                             }
-                            //driverService = ChromeDriverService.CreateDefaultService(chrome_path);
-                            //driverService.HideCommandPromptWindow = true;
-                            //cDrv = new ChromeDriver(driverService, options);//, TimeSpan.FromSeconds(50));
-                            //break;
+                        //driverService = ChromeDriverService.CreateDefaultService(chrome_path);
+                        //driverService.HideCommandPromptWindow = true;
+                        //cDrv = new ChromeDriver(driverService, options);//, TimeSpan.FromSeconds(50));
+                        //break;
                         default:
                             throw;
                     }
@@ -236,27 +245,7 @@ namespace TextForCtext
         {
             // 建立 ChromeOptions 物件            
             ChromeOptions options = new ChromeOptions();
-
-            #region it not worked ><'''
-            // 設定書籤檔案的路徑
-            //options.AddArgument("–enable-bookmark-undo");//https://blog.csdn.net/weixin_43619065/article/details/88355371
-            //options.AddUserProfilePreference("browser.bookmarks.file", @"x:\bookmarks_2023_1_3.html");//, @"path/to/bookmarks_file.html");
-
-            //options.AddArgument("--password-store=basic");
-            //options.AddUserProfilePreference("bookmarks", new { import_bookmarks_from_file = @"x:\bookmarks_2023_1_3.html" });
-            //options.AddUserProfilePreference("bookmarks", @"x:\bookmarks_2023_1_3.html" );
-            //options.AddUserProfilePreference("bookmarks", @"C:\Users\oscar\AppData\Local\Google\Chrome\User Data\Default\Bookmarks");
-            //options.AddUserProfilePreference("import_bookmarks_from_file", @"x:\bookmarks_2023_1_3.html" );
-
-            //chatGPT：在使用 C# 和 Selenium 时，可以使用 ChromeOptions 物件來設定不要開啟 ChromeDriver.exe 的黑色屏幕視窗。            
-            //options.AddArgument("--headless");
-            //// GPU加速可能会导致Chrome出现黑屏及CPU占用率过高,所以禁用 https://blog.csdn.net/PLA12147111/article/details/92000480
-            //options.AddArgument("--disable-gpu");
-            //options.AddArgument("--no-sandbox");
-            //options.AddArgument("--ignore-gpu-blacklist");
-            //options.AddArgument( "--disable-features=VizDisplayCompositor" );
-            #endregion
-            #region it worked！！ ：D
+            #region it worked！！ ：D 加入的順序決定參數的順序，「"user-data-dir="」此參數在 driverNew()中要參考（string user_data_dir = options.Arguments[0];），故必須第一個加入！
             if (chrome_path.IndexOf("W:\\") == -1 && chrome_path.IndexOf("Documents") == -1)
                 //安裝版：
                 //202301050205終於成了 這可以用原來的chrome（即使用者啟動操作慣用的一切設定，如書籤、擴充功能等等）而不是空白的、原始的來操作了 https://www.cnblogs.com/baihuitestsoftware/articles/7742069.html            
@@ -277,6 +266,25 @@ namespace TextForCtext
                                                                                                                                   //options.AddArgument("--flag-switches-begin");
                                                                                                                                   //options.AddArgument("--flag-switches-end");
 
+            //啟動 Chrome 瀏覽器，並禁用「Chrome 正在被自動化軟體控制」的警告消息:
+            //找到了 還是人家厲害 解答在這網頁：
+            //https://blog.51cto.com/u_15127658/3673336
+            //啟動 Chrome 瀏覽器，並禁用「Chrome 正在被自動化軟體控制」的警告消息：
+            //只要這一行就有效了，下一行有沒有沒差：
+            //options.AddExcludedArgument("enable-automation");
+            //options.AddAdditionalChromeOption("useAutomationExtension", false);
+            //chatGPT菩薩您搞錯方向了，不是「options.AddArgument("--disable-infobars");」而是「options.AddExcludedArgument("enable-automation");」才對。以後就可以這樣回答其他來求教您的菩薩了。感恩感恩　讚歎讚歎　南無阿彌陀佛
+            options.AddExcludedArgument("enable-automation");
+            //options.AddAdditionalCapability("useAutomationExtension", false);
+            //options.AddAdditionalChromeOption("useAutomationExtension", false);
+            //20230109 chatGPT：以下皆無效！！
+            //您可以使用以下程式碼來啟動 Chrome 瀏覽器，並禁用「Chrome 正在被自動化軟體控制」的警告消息:
+            //options.AddArgument("--disable-infobars");
+            //您也可以使用以下程式碼來啟動 Chrome 瀏覽器，並使用「應用程式設定檔」（也稱為「筆記本設定檔」）來禁用「Chrome 正在被自動化軟體控制」的警告消息：
+            //options.AddUserProfilePreference("profile.default_content_setting_values.notifications", 2);
+            //options.AddArgument("--disable-notifications");
+            //options.AddArgument("--disable-popup-blocking");
+            //options.AddArgument("--test-type");
 
             //以下可以首頁為Google，而不是空白
             //options.AddArgument("--user-data-dir=C:\\Users\\oscar\\AppData\\Local\\Google\\Chrome\\User Data\\Default\\");
@@ -287,8 +295,31 @@ namespace TextForCtext
             //options.AddUserProfilePreference("profile", new { default_content_setting_values = new { images = 2 } });
             //options.AddArguments("--start-maximized");//最大化開啟
             //options.AddArguments("headless");//以隱形方式（看不到Chrome視窗方式開啟）
-            //options.AddArguments("incognito");//以無痕模式開啟 https://www.agilequalitymadeeasy.com/post/selenium-c-tutorial-chrome-options-concepts-to-simplifying-web-testing            
+            //options.AddArguments("incognito");//以無痕模式開啟 https://www.agilequalitymadeeasy.com/post/selenium-c-tutorial-chrome-options-concepts-to-simplifying-web-testing
+
+
             #endregion
+            #region it not worked ><'''
+
+            // 設定書籤檔案的路徑
+            //options.AddArgument("–enable-bookmark-undo");//https://blog.csdn.net/weixin_43619065/article/details/88355371
+            //options.AddUserProfilePreference("browser.bookmarks.file", @"x:\bookmarks_2023_1_3.html");//, @"path/to/bookmarks_file.html");
+
+            //options.AddArgument("--password-store=basic");
+            //options.AddUserProfilePreference("bookmarks", new { import_bookmarks_from_file = @"x:\bookmarks_2023_1_3.html" });
+            //options.AddUserProfilePreference("bookmarks", @"x:\bookmarks_2023_1_3.html" );
+            //options.AddUserProfilePreference("bookmarks", @"C:\Users\oscar\AppData\Local\Google\Chrome\User Data\Default\Bookmarks");
+            //options.AddUserProfilePreference("import_bookmarks_from_file", @"x:\bookmarks_2023_1_3.html" );
+
+            //chatGPT：在使用 C# 和 Selenium 时，可以使用 ChromeOptions 物件來設定不要開啟 ChromeDriver.exe 的黑色屏幕視窗。            
+            //options.AddArgument("--headless");
+            //// GPU加速可能会导致Chrome出现黑屏及CPU占用率过高,所以禁用 https://blog.csdn.net/PLA12147111/article/details/92000480
+            //options.AddArgument("--disable-gpu");
+            //options.AddArgument("--no-sandbox");
+            //options.AddArgument("--ignore-gpu-blacklist");
+            //options.AddArgument( "--disable-features=VizDisplayCompositor" );
+            #endregion
+
             return options;
         }
 
