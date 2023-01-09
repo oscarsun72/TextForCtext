@@ -59,19 +59,18 @@ namespace TextForCtext
         {
             if (Form1.browsrOPMode != Form1.BrowserOPMode.appActivateByName && driver == null)
             {
-            tryagain:
-                ChromeDriverService driverService;
-                ChromeDriver cDrv;//綠色免安裝版仍搞不定，安裝 chrome 了就OK 20220101 chatGPT建議者未通；20220105自行解決了，詳下
-
                 string chrome_path = Form1.getDefaultBrowserEXE();
 
                 // 將 ChromeOptions 設定加入 ChromeDriver
-                ChromeOptions options = chromeOptions(chrome_path);
-                //ChromeDriver cDrv = new ChromeDriver("C:\\Users\\oscar\\.cache\\selenium\\chromedriver\\win32\\108.0.5359.71\\chromedriver.exe", options);
+                ChromeOptions options = chromeOptions(chrome_path);//加入參數的順序重要，要參考「string user_data_dir = options.Arguments[0];」
+                                                                   //ChromeDriver cDrv = new ChromeDriver("C:\\Users\\oscar\\.cache\\selenium\\chromedriver\\win32\\108.0.5359.71\\chromedriver.exe", options);
+                                                                   //cDrv = new ChromeDriver(@"C:\Program Files\Google\Chrome\Application\chrome.exe",options);
+                                                                   //cDrv = new ChromeDriver(@"x:\chromedriver.exe", options);
+                                                                   //上述加入書籤並不管用！！！20230104//解法已詳下chromeOptions()中
 
-                //cDrv = new ChromeDriver(@"C:\Program Files\Google\Chrome\Application\chrome.exe",options);
-                //cDrv = new ChromeDriver(@"x:\chromedriver.exe", options);
-                //上述加入書籤並不管用！！！20230104//解法已詳下chromeOptions()中
+            tryagain:
+                ChromeDriverService driverService;
+                ChromeDriver cDrv;//綠色免安裝版仍搞不定，安裝 chrome 了就OK 20220101 chatGPT建議者未通；20220105自行解決了，詳下
 
 
 
