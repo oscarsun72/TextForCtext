@@ -25,7 +25,10 @@ using Task = System.Threading.Tasks.Task;
 using Application = System.Windows.Forms.Application;
 using System.Security.Cryptography;
 using System.Net;
-using OpenQA.Selenium.DevTools.V106.CSS;
+//using OpenQA.Selenium.DevTools.V106.CSS;
+//using OpenQA.Selenium.Support.UI;
+//using SeleniumExtras.WaitHelpers;
+//using OpenQA.Selenium;
 
 namespace WindowsFormsApp1
 {
@@ -4354,7 +4357,7 @@ namespace WindowsFormsApp1
                     //    + "……" + textBox1.SelectedText, "", MessageBoxButtons.OKCancel,MessageBoxIcon.Question,
                     //    MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly) == DialogResult.OK)
                     if (MessageBox.Show("auto paste to Ctext Quit Edit textBox?" + Environment.NewLine + Environment.NewLine
-                        + "……" + textBox1.SelectedText, "", MessageBoxButtons.OKCancel, MessageBoxIcon.Question,MessageBoxDefaultButton.Button1, 
+                        + "……" + textBox1.SelectedText, "", MessageBoxButtons.OKCancel, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1,
                         //獨占式訊息
                         MessageBoxOptions.DefaultDesktopOnly)
                             == DialogResult.OK)
@@ -4933,11 +4936,12 @@ namespace WindowsFormsApp1
                     break;
                 case BrowserOPMode.seleniumNew:
                     if (br.driver == null) br.driverNew();
-                    br.GoToUrlandActivate(url);
-                    //Task.Run(() =>
-                    //{
-                    //    br.GoToUrlandActivate(url);
-                    //});
+                    //br.GoToUrlandActivate(url);
+                    Task.Run(() =>
+                    {
+                        br.GoToUrlandActivate(url);
+                    });
+                    Task.WaitAll();
                     break;
                 case BrowserOPMode.seleniumGet:
                     //後面的textBox3.Text = url;會觸發private void textBox3_TextChanged 事件程序，於彼處執行瀏覽即可
@@ -4975,6 +4979,7 @@ namespace WindowsFormsApp1
                 }
                 if (keyinText)
                 {
+                    OpenQA.Selenium.IWebElement quick_edit_box;
                     switch (browsrOPMode)
                     {
                         case BrowserOPMode.appActivateByName:
@@ -4983,22 +4988,29 @@ namespace WindowsFormsApp1
                             SendKeys.Send("^x");//剪下一頁以便輸入備用
                             break;
                         case BrowserOPMode.seleniumNew:
-                            if (br.driver == null) br.driverNew();
-                            Task.Run(() =>
+                            br.driver = br.driver ?? br.driverNew();
+                            try
                             {
-                                OpenQA.Selenium.IWebElement quick_edit_box = br.driver.FindElement(OpenQA.Selenium.By.Name("data"));
-                                Task.WaitAll();
+                                quick_edit_box = br.driver.FindElement(OpenQA.Selenium.By.Name("data"));
+                                //chatGPT：
+                                // 等待網頁元素出現，最多等待 2 秒
+                                OpenQA.Selenium.Support.UI.WebDriverWait wait =
+                                    new OpenQA.Selenium.Support.UI.WebDriverWait
+                                    (br.driver, TimeSpan.FromSeconds(2));
+                                //安裝了 Selenium.WebDriver 套件，才說沒有「ExpectedConditions」，然後照Visual Studio 2022的改正建議又用NuGet 安裝了 Selenium.Suport 套件，也自動「 using OpenQA.Selenium.Support.UI;」了，末學自己還用物件瀏覽器找過了 「OpenQA.Selenium.Support.UI」，可就是沒有「ExpectedConditions」靜態類別可用，即使官方文件也說有 ： https://www.selenium.dev/selenium/docs/api/dotnet/html/T_OpenQA_Selenium_Support_UI_ExpectedConditions.htm 20230109 未知何故 阿彌陀佛
+                                //wait.Until(ExpectedConditions.ElementToBeClickable(quick_edit_box));
+                                wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(quick_edit_box));
+                                // 在網頁元素載入完畢後                          
+                                //Task.Delay(-1);
                                 Clipboard.SetText(quick_edit_box.Text);
-                            });
+                            }
+                            catch (Exception)
+                            {
+                                throw;
+                            }
                             break;
                         case BrowserOPMode.seleniumGet:
-                            if (br.driver == null) br.driverNew();
-                            Task.Run(() =>
-                            {
-                                OpenQA.Selenium.IWebElement quick_edit_box = br.driver.FindElement(OpenQA.Selenium.By.Name("data"));
-                                Task.WaitAll();
-                                Clipboard.SetText(quick_edit_box.Text);
-                            });
+
                             break;
                         default:
                             break;
@@ -5686,7 +5698,7 @@ namespace WindowsFormsApp1
         private void textBox1_MouseDown(object sender, MouseEventArgs e)
         {
             var m = ModifierKeys;
-            //mouseMiddleBtnDown(textBox1, e);            
+            //mouseMiddleBtnDown(textBox1, e);
             mouseMiddleBtnDown(sender, e);
             //if ((m & Keys.Control) == Keys.Control && (m & Keys.Shift) == Keys.Shift)
             //{
@@ -5708,6 +5720,7 @@ namespace WindowsFormsApp1
 
             }
 
+            //點一下加新分行
             if (ModifierKeys == Keys.Control && e.Button == MouseButtons.Left)
             {
                 if (textBox1.SelectionLength == 0)
@@ -5723,6 +5736,7 @@ namespace WindowsFormsApp1
                 //switchRichTextBox1();
                 return;
             }
+
             if (ModifierKeys == Keys.Control && e.Button == MouseButtons.Right)
             { switchRichTextBox1(); return; }
             if (m == Keys.Alt && e.Button == MouseButtons.Left)
@@ -5935,6 +5949,7 @@ namespace WindowsFormsApp1
                                     br.GoToUrlandActivate(clpTxt);
                                 }
                                 Task.WaitAny();
+                                Task.Delay(-1);
                                 OpenQA.Selenium.IWebElement quick_edit_box = br.driver.FindElement(OpenQA.Selenium.By.Name("data"));
                                 Clipboard.SetText(quick_edit_box.Text);
                             });
@@ -6361,14 +6376,17 @@ namespace WindowsFormsApp1
 
         private void Form1_MouseDown(object sender, MouseEventArgs e)
         {
+            
             mouseMiddleBtnDown(sender, e);
         }
 
+        DateTime nextPageStartTime;
         void mouseMiddleBtnDown(object sender, MouseEventArgs e)
         {
             #region ModifierKeys == Keys.None
             if (ModifierKeys == Keys.None)
             {
+                TimeSpan timeDifference;
                 switch (e.Button)
                 {
                     case MouseButtons.Left:
@@ -6386,6 +6404,7 @@ namespace WindowsFormsApp1
                         break;
                     case MouseButtons.Right:
                         break;
+                    //隱藏到任務列（系統列）中
                     case MouseButtons.Middle:
                         if (textBox1.SelectionLength == predictEndofPageSelectedTextLen
                                 && textBox1.Text.Substring(textBox1.SelectionStart + predictEndofPageSelectedTextLen, 2) == Environment.NewLine)
@@ -6394,12 +6413,28 @@ namespace WindowsFormsApp1
                             //預設為最上層顯示，則按下Esc鍵或滑鼠中鍵會隱藏到任務列（系統列）中；滑鼠在其 ico 圖示上滑過即恢復
                             hideToNICo();
                         break;
+
+                    //須避免textbox1 與Form的同一事件衝突（呼叫 nextpage方法太頻繁）變成連翻上下頁，以致 chromedriver不及反應而出錯當掉20230111
                     case MouseButtons.XButton1:
+                        if (browsrOPMode != BrowserOPMode.appActivateByName)
+                        {//過於頻繁會造成chromedriver反應不及而當掉。終於抓到 bugs了！202301110632
+                            timeDifference = DateTime.Now.Subtract(nextPageStartTime);
+                            if (timeDifference.TotalSeconds < 0.3)
+                                return;
+                            nextPageStartTime = DateTime.Now;
+                        }
                         nextPages(Keys.PageUp, true);
                         //上一頁
                         //keyDownCtrlAdd(false);
                         break;
                     case MouseButtons.XButton2:
+                        if (browsrOPMode != BrowserOPMode.appActivateByName)
+                        {//過於頻繁會造成chromedriver反應不及而當掉
+                            timeDifference = DateTime.Now.Subtract(nextPageStartTime);
+                            if (timeDifference.TotalSeconds < 0.3)
+                                return;
+                            nextPageStartTime = DateTime.Now;
+                        }
                         //keyDownCtrlAdd(true);
                         //下一頁
                         nextPages(Keys.PageDown, true);
@@ -6837,6 +6872,11 @@ namespace WindowsFormsApp1
         {
             //if (Clipboard.GetText() != textBox3.Text)
             //    textBox3_Click(sender, e);
+        }
+
+        private void richTextBox1_Enter(object sender, EventArgs e)
+        {//20230111 creedit YouChat：如果您想要在指定的控制項之前捕獲鼠標按下事件，您可以將控件的TabStop屬性設置為false，這樣就可以確保該控制項的Mousedown事件會先被捕獲。你可以使用以下示例代碼來實現：
+            textBox1.TabStop = false;
         }
 
         void openDatabase(string dbNameIncludeExt, ref ado.Connection cnt)

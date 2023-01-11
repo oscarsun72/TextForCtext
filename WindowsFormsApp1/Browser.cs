@@ -158,8 +158,8 @@ namespace TextForCtext
                             //        // do something
                             //    }
                             //}
-                            if (MessageBox.Show("按「ok」確定，以繼續，將會關閉所有在運行中的Chrome瀏覽器，若須手動關閉，請關完後再按確定……", "", MessageBoxButtons.OKCancel
-                                , MessageBoxIcon.Warning) == DialogResult.OK)
+                            if (MessageBox.Show("按「ok」確定，以繼續，將會關閉所有在運行中的Chrome瀏覽器，若須手動關閉，請關完後再按確定……", ""
+                                , MessageBoxButtons.OKCancel, MessageBoxIcon.Warning,MessageBoxDefaultButton.Button1,MessageBoxOptions.DefaultDesktopOnly) == DialogResult.OK)
                             {//creedit by chatGPT：
                                 Process[] chromeInstances = Process.GetProcessesByName("chrome");
                                 foreach (var chromeInstance in chromeInstances)
@@ -485,6 +485,7 @@ namespace TextForCtext
              */
             try
             {
+                driver = driver ?? Browser.driverNew();
                 tabCount = driver.WindowHandles.Count;
             }
             catch (Exception)
@@ -499,6 +500,7 @@ namespace TextForCtext
                 ////driver.SwitchTo().Window(hs[0]);
                 try
                 {
+                    driver = driver ?? Browser.driverNew();
                     driver.SwitchTo().Window(driver.CurrentWindowHandle);
                 }
                 catch (Exception ex)
