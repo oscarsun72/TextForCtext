@@ -4354,7 +4354,9 @@ namespace WindowsFormsApp1
                     //    + "……" + textBox1.SelectedText, "", MessageBoxButtons.OKCancel,MessageBoxIcon.Question,
                     //    MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly) == DialogResult.OK)
                     if (MessageBox.Show("auto paste to Ctext Quit Edit textBox?" + Environment.NewLine + Environment.NewLine
-                        + "……" + textBox1.SelectedText, "", MessageBoxButtons.OKCancel, MessageBoxIcon.Question)
+                        + "……" + textBox1.SelectedText, "", MessageBoxButtons.OKCancel, MessageBoxIcon.Question,MessageBoxDefaultButton.Button1, 
+                        //獨占式訊息
+                        MessageBoxOptions.DefaultDesktopOnly)
                             == DialogResult.OK)
                     {
                         if (autoPastetoQuickEdit && (ModifierKeys == Keys.Control || check_the_adjacent_pages))
@@ -6805,6 +6807,7 @@ namespace WindowsFormsApp1
             }
             //在下載完後在檔案總管中將其選取
             //https://www.ruyut.com/2022/05/csharp-open-in-file-explorer.html
+            //把之前開過的關閉
             if (prcssDownloadImgFullName != null && prcssDownloadImgFullName.HasExited)
             {
                 prcssDownloadImgFullName.WaitForExit();
