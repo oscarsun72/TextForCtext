@@ -25,6 +25,7 @@ using Task = System.Threading.Tasks.Task;
 using Application = System.Windows.Forms.Application;
 using System.Security.Cryptography;
 using System.Net;
+using System.Net.Http.Headers;
 //using OpenQA.Selenium.DevTools.V106.CSS;
 //using OpenQA.Selenium.Support.UI;
 //using SeleniumExtras.WaitHelpers;
@@ -3883,6 +3884,7 @@ namespace WindowsFormsApp1
             //if (!shiftKeyDownYet ) nextPages(Keys.PageDown, false);
             if (!shiftKeyDownYet && !check_the_adjacent_pages) nextPages(Keys.PageDown, false);
             predictEndofPage();
+            //重設自動判斷頁尾值
             pageTextEndPosition = 0; pageEndText10 = "";
         }
 
@@ -4937,7 +4939,7 @@ namespace WindowsFormsApp1
                 case BrowserOPMode.seleniumNew:
                     if (br.driver == null) br.driverNew();
                     //br.GoToUrlandActivate(url);
-                    Task.Run(() =>
+                    Task.Run(() =>//此間操作，因為沒有要操作的元件，所以可以跑線程。20230111
                     {
                         br.GoToUrlandActivate(url);
                     });
@@ -4958,6 +4960,7 @@ namespace WindowsFormsApp1
 
                 switch (browsrOPMode)
                 {
+                    //預設瀏覽模式（即開發Selenium架構前）：
                     case BrowserOPMode.appActivateByName:
                         //Task.Delay(500).Wait(); //2200
                         //Task.Delay(1900).Wait(); //2200
@@ -4965,11 +4968,12 @@ namespace WindowsFormsApp1
                         Task.Delay(waitTimeforappActivateByName).Wait();
                         //SendKeys.Send("{Tab 24}");
                         SendKeys.Send("{Tab}"); //("{Tab 24}");
-                                                //要尾綴「#editor」如是格式的才能只按一個tab就入文字框中 ： https://ctext.org/library.pl?if=gb&file=77367&page=59&editwiki=415472#editor
+                                                //網址尾綴為「#editor」的才能只按一個tab就入文字框中，如 ： https://ctext.org/library.pl?if=gb&file=77367&page=59&editwiki=415472#editor
                         Task.Delay(200).Wait();//200
                         Task.WaitAll();
                         SendKeys.Send("^a");
                         break;
+                    //Selenium New Chrome瀏覽器實例模式：
                     case BrowserOPMode.seleniumNew:
                         break;
                     case BrowserOPMode.seleniumGet:
@@ -4977,6 +4981,8 @@ namespace WindowsFormsApp1
                     default:
                         break;
                 }
+
+                //如果是手動輸入模式：
                 if (keyinText)
                 {
                     OpenQA.Selenium.IWebElement quick_edit_box;
@@ -4988,9 +4994,10 @@ namespace WindowsFormsApp1
                             SendKeys.Send("^x");//剪下一頁以便輸入備用
                             break;
                         case BrowserOPMode.seleniumNew:
+                        retry:
                             br.driver = br.driver ?? br.driverNew();
                             try
-                            {
+                            {//這裡需要參照元件來操作就不宜跑線程了！故此區塊最後的剪貼簿，要求須是單線程者，蓋因剪貼簿須獨占式使用故也20230111
                                 quick_edit_box = br.driver.FindElement(OpenQA.Selenium.By.Name("data"));
                                 //chatGPT：
                                 // 等待網頁元素出現，最多等待 2 秒
@@ -4998,14 +5005,14 @@ namespace WindowsFormsApp1
                                     new OpenQA.Selenium.Support.UI.WebDriverWait
                                     (br.driver, TimeSpan.FromSeconds(2));
                                 //安裝了 Selenium.WebDriver 套件，才說沒有「ExpectedConditions」，然後照Visual Studio 2022的改正建議又用NuGet 安裝了 Selenium.Suport 套件，也自動「 using OpenQA.Selenium.Support.UI;」了，末學自己還用物件瀏覽器找過了 「OpenQA.Selenium.Support.UI」，可就是沒有「ExpectedConditions」靜態類別可用，即使官方文件也說有 ： https://www.selenium.dev/selenium/docs/api/dotnet/html/T_OpenQA_Selenium_Support_UI_ExpectedConditions.htm 20230109 未知何故 阿彌陀佛
-                                //wait.Until(ExpectedConditions.ElementToBeClickable(quick_edit_box));
                                 wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(quick_edit_box));
-                                // 在網頁元素載入完畢後                          
+                                // 在網頁元素載入完畢後才能讀取其.Text屬性值，存入剪貼簿
                                 //Task.Delay(-1);
                                 Clipboard.SetText(quick_edit_box.Text);
                             }
                             catch (Exception)
                             {
+                                Task.Delay(1200); goto retry;
                                 throw;
                             }
                             break;
@@ -5015,21 +5022,24 @@ namespace WindowsFormsApp1
                         default:
                             break;
                     }
-
+                    //備份textbox1的內容
                     undoRecord();
                     Task.WaitAll();
                     Application.DoEvents();
                     //設定textbox1的內容以備編輯
                     textBox1.Text = Clipboard.GetText() + Environment.NewLine + textBox1.Text;
                 }
+
+                //如果該書沒有「OCR_MATCH」tag的話，即不是上下臨近頁牽連編輯模式者：
                 if (!check_the_adjacent_pages)
                 {
                     switch (browsrOPMode)
                     {
                         case BrowserOPMode.appActivateByName:
                             Task.Delay(500).Wait();
-                            SendKeys.Send("^{PGUP}");//回上一頁籤檢查文本是否如願貼好
+                            SendKeys.Send("^{PGUP}");//回瀏覽器上一頁籤檢查文本是否如願貼好
                             break;
+                        //Selenium模式不須回上一頁，但若是自己keyin的失誤，漏字多字掉字……還是自行回去看看比較好，目前是原頁顯示頁面後才會再翻去下一頁書圖
                         case BrowserOPMode.seleniumNew:
                             break;
                         case BrowserOPMode.seleniumGet:
@@ -5040,7 +5050,7 @@ namespace WindowsFormsApp1
                 }
             }
             #endregion
-            textBox3.Text = url;//此若寫在後面，會觸發textchanged事件程序，影響以下二種瀏覽模式
+            textBox3.Text = url;//此會觸發textchanged事件程序
             if (stayInHere) this.Activate();
         }
 
@@ -5351,6 +5361,7 @@ namespace WindowsFormsApp1
                 //20230103 目前無法抓到正在作用中的視窗，只能以使用者習慣，通常在用的都是最後一個視窗，先試試 感恩感恩　南無阿彌陀佛
                 //br.driver.SwitchTo().Window(br.driver.WindowHandles.Last());//br.driver.SwitchTo().Window(br.driver.CurrentWindowHandle).Url;
                 //20230103 目前所知也只能用以下的笨方法了，雖然土，但管用。∴就不必上一行多此一舉了。感恩感恩　南無阿彌陀佛
+                br.driver = br.driver ?? br.driverNew();  
                 if (br.driver.Url != textBox3.Text)
                 {
                     bool found = false;
@@ -5370,6 +5381,7 @@ namespace WindowsFormsApp1
             }
             br.在Chrome瀏覽器的Quick_edit文字框中輸入文字(br.driver, Clipboard.GetText(), url);
         }
+
         private void pasteToCtext()
         {//for .BrowserOPMode.appActivateByName
             appActivateByName();
@@ -5699,7 +5711,7 @@ namespace WindowsFormsApp1
         {
             var m = ModifierKeys;
             //mouseMiddleBtnDown(textBox1, e);
-            mouseMiddleBtnDown(sender, e);
+            mouseBtnDown(sender, e);
             //if ((m & Keys.Control) == Keys.Control && (m & Keys.Shift) == Keys.Shift)
             //{
             //    runWord("漢籍電子文獻資料庫文本整理_十三經注疏");
@@ -5842,34 +5854,36 @@ namespace WindowsFormsApp1
                         if (browsrOPMode == BrowserOPMode.appActivateByName)
                             appActivateByName();
                         else
-                        //chatGPT：在 C# 中使用 Selenium 控制 Chrome 瀏覽器時，可以使用以下方法切換到 Chrome 瀏覽器視窗：
                         {
-                            Task.Run(() =>
+                        retry:
+                            try
                             {
-                                try
-                                {
-                                    br.driver.SwitchTo().Window(br.driver.CurrentWindowHandle);
-                                    if (textBox3.Text.IndexOf("edit") > -1 && KeyboardInfo.getKeyStateToggled(System.Windows.Input.Key.Delete))//判斷Delete鍵是否被按下彈起
-                                    {//手動輸入時，當按下 Shift+Delete 當即時要準備貼上該頁，故如此操作，以備確定無誤後手動按下 submit 按鈕
-                                        OpenQA.Selenium.IWebElement quick_edit_box = br.driver.FindElement(OpenQA.Selenium.By.Name("data"));
-                                        quick_edit_box.Clear();
-                                        quick_edit_box.Click();
-                                        quick_edit_box.SendKeys(OpenQA.Selenium.Keys.LeftShift + OpenQA.Selenium.Keys.Insert);
-                                        OpenQA.Selenium.IWebElement submit = br.driver.FindElement(OpenQA.Selenium.By.Id("savechangesbutton"));
-                                        //放在一個 Task 中去執行，並立即返回。                                     
-                                        Task.Run(() =>
-                                        {
-                                            submit.Click();
-                                        });
-                                    }
+                                br.driver = br.driver ?? br.driverNew();
+                                //chatGPT：在 C# 中使用 Selenium 控制 Chrome 瀏覽器時，可以使用以下方法切換到 Chrome 瀏覽器視窗：
+                                br.driver.SwitchTo().Window(br.driver.CurrentWindowHandle);
+                                if (textBox3.Text.IndexOf("edit") > -1 && KeyboardInfo.getKeyStateToggled(System.Windows.Input.Key.Delete))//判斷Delete鍵是否被按下彈起
+                                {//手動輸入時，當按下 Shift+Delete 當即時要準備貼上該頁，故如此操作，以備確定無誤後手動按下 submit 按鈕
+                                    OpenQA.Selenium.IWebElement quick_edit_box = br.driver.FindElement(OpenQA.Selenium.By.Name("data"));
+                                    OpenQA.Selenium.Support.UI.WebDriverWait wait = new OpenQA.Selenium.Support.UI.WebDriverWait(br.driver, TimeSpan.FromSeconds(2));
+                                    wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(quick_edit_box));
+                                    quick_edit_box.Clear();
+                                    quick_edit_box.Click();
+                                    quick_edit_box.SendKeys(OpenQA.Selenium.Keys.LeftShift + OpenQA.Selenium.Keys.Insert);
+                                    OpenQA.Selenium.IWebElement submit = br.driver.FindElement(OpenQA.Selenium.By.Id("savechangesbutton"));
+                                    wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(submit));
+                                    //放在一個 Task 中去執行，並立即返回。                                     
+                                    Task.Run(() =>
+                                    {//送出按鈕按下後可以跑線程，其他要取得元件操作者，就不移另跑線程。20230111 現在終於破解bugs找到癥結所在了。感恩感恩　讚歎讚歎　南無阿彌陀佛 19:09
+                                        submit.Click();
+                                    });
                                 }
-                                catch (Exception)
-                                {
-                                    br.driver = null;
-                                    br.driver = br.driverNew();
-                                    //throw;
-                                }
-                            });
+                            }
+                            catch (Exception)
+                            {
+                                br.driver = null;
+                                br.driver = br.driverNew(); goto retry;
+                                //throw;
+                            }
                         }
                     }
                 }
@@ -6091,9 +6105,10 @@ namespace WindowsFormsApp1
                 bool nextPageAuto = false;
                 if (ModifierKeys == Keys.Control)//如果按下Ctrl則自動翻到下一頁
                     nextPageAuto = true;
+                //處理《維基文庫》的每卷文本準備貼入
                 runWordMacro("維基文庫四部叢刊本轉來");
-                if (nextPageAuto)
-                {
+                if (nextPageAuto&&browsrOPMode==BrowserOPMode.appActivateByName)
+                {//自動模式通常在最後一頁會停住，故自行翻下一頁（下一卷首）備用
                     Task.WaitAll();
                     nextPages(Keys.PageDown, false);
                     Task.WaitAll();
@@ -6376,12 +6391,12 @@ namespace WindowsFormsApp1
 
         private void Form1_MouseDown(object sender, MouseEventArgs e)
         {
-            
-            mouseMiddleBtnDown(sender, e);
+
+            mouseBtnDown(sender, e);
         }
 
         DateTime nextPageStartTime;
-        void mouseMiddleBtnDown(object sender, MouseEventArgs e)
+        void mouseBtnDown(object sender, MouseEventArgs e)
         {
             #region ModifierKeys == Keys.None
             if (ModifierKeys == Keys.None)

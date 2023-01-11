@@ -225,7 +225,7 @@ namespace TextForCtext
                 //        throw;
                 //}
                 cDrv.Navigate().GoToUrl(Form1.mainFromTextBox3Text ?? "https://ctext.org/account.pl?if=en");
-                //IWebElement clk = cDrv.FindElement(selm.By.Id("logininfo")); clk.Click();
+                //IWebElemen弓t clk = cDrv.FindElement(selm.By.Id("logininfo")); clk.Click();
                 //cDrv.FindElement(selm.By.Id("logininfo")).Click();
                 /*202301050214 因為以下這行設定成功，可以用平常的Chrome來操作了，就不必再登入安裝（如擴充功能）匯入（如書籤）什麼的了 感恩感恩　讚歎讚歎　南無阿彌陀佛
                  options.AddArgument("--user-data-dir=C:\\Users\\oscar\\AppData\\Local\\Google\\Chrome\\User Data\\");
@@ -322,18 +322,19 @@ namespace TextForCtext
             return options;
         }
 
-        internal static void 在Chrome瀏覽器的Quick_edit文字框中輸入文字(ChromeDriver driver, string xIuput, string url)//在Chrome瀏覽器的文字框中輸入文字,creedit
+        //在Chrome瀏覽器的文字框(ctext.org 的 Quick edit ）中輸入文字,creedit
+        internal static void 在Chrome瀏覽器的Quick_edit文字框中輸入文字(ChromeDriver driver, string xIuput, string url)
         {
-
+            #region 檢查網址
             if (url.IndexOf("edit") == -1) return;
-            //selm.IWebDriver driver = new ChromeDriver();
-
+                        
             if (url != driver.Url && driver.Url.IndexOf(url.Replace("editor", "box")) == -1)
                 // 使用driver導航到給定的URL
                 driver.Navigate().GoToUrl(url);
             //("https://ctext.org/library.pl?if=en&file=79166&page=85&editwiki=297821#editor");//("http://www.example.com");
+            #endregion
 
-            // 查找名稱為"textbox"的文字框元素
+            #region 查找名稱為"data"的文字框(textbox)或ID為"quickedit"的元件，須要用到元件者均不宜另跑線程。這些名稱，都由按下 F12 或 Ctrl + shift + i 開啟開發者模式中「Elements」分頁頁籤中取得
             selm.IWebElement textbox;
             try
             {
@@ -355,11 +356,13 @@ namespace TextForCtext
                     quickedit = driver.FindElement(selm.By.Id("quickedit"));
                     //throw;
                 }
-                quickedit.Click();//預設當如下面「submit.Click();」會等網頁作出回應才執行下一步。感恩感恩　讚歎讚歎　南無阿彌陀佛
+                quickedit.Click();//下面「submit.Click();」不必等網頁作出回應才執行下一步，但這裡接下來還要取元件操作，就得在同一線程中跑。感恩感恩　南無阿彌陀佛
                 textbox = driver.FindElement(selm.By.Name("data"));
                 //throw;
             }
+            #endregion
 
+            //清除原來文字，準備貼上新的
             textbox.Clear();
             // 在文字框中輸入文字
             //textbox.SendKeys(@xIuput); //("Hello, World!");
@@ -408,7 +411,7 @@ namespace TextForCtext
             /* creedit 我問：在C#  用selenium 控制 chrome 瀏覽器時，怎麼樣才能不必等待網頁作出回應即續編處理按下來的程式碼 。如，以下程式碼，請問，如何在按下 submit.Click(); 後不必等這個動作完成或作出回應，即能繼續執行之後的程式碼呢 感恩感恩　南無阿彌陀佛
                         chatGPT他答：你可以將 submit.Click(); 放在一個 Task 中去執行，並立即返回。
              */
-            Task.Run(() =>
+            Task.Run(() =>//接下來不用理會，也沒有元件要操作、沒有訊息要回應，就可以給另一個線程去處理了。
             {
                 try
                 {
@@ -417,7 +420,7 @@ namespace TextForCtext
                 }
                 catch (Exception)
                 {//chatGPT：
-                    // 等待網頁元素出現，最多等待 10 秒
+                    // 等待網頁元素出現，最多等待 3 秒//應該不用這個，因為會貼上時，不太可能「savechangesbutton」按鈕還沒出現，除非網頁載入不完整……
                     submit = driver.FindElement(selm.By.Id("savechangesbutton"));
                     WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(3));
                     //安裝了 Selenium.WebDriver 套件，才說沒有「ExpectedConditions」，然後照Visual Studio 2022的改正建議又用NuGet 安裝了 Selenium.Suport 套件，也自動「 using OpenQA.Selenium.Support.UI;」了，末學自己還用物件瀏覽器找過了 「OpenQA.Selenium.Support.UI」，可就是沒有「ExpectedConditions」靜態類別可用，即使官方文件也說有 ： https://www.selenium.dev/selenium/docs/api/dotnet/html/T_OpenQA_Selenium_Support_UI_ExpectedConditions.htm 20230109 未知何故 阿彌陀佛
@@ -438,11 +441,6 @@ namespace TextForCtext
                     //throw;
                 }
             });
-            //f = null;
-
-
-            //// 關閉瀏覽器
-            //driver.Close();
         }
 
         static internal bool isAllinBmp(string xChk)
