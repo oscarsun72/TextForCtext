@@ -24,8 +24,13 @@ using Font = System.Drawing.Font;
 using Task = System.Threading.Tasks.Task;
 using Application = System.Windows.Forms.Application;
 using System.Security.Cryptography;
-using System.Net;
-using System.Net.Http.Headers;
+//using System.Net;
+//using System.Net.Http.Headers;
+using System.Collections.ObjectModel;
+using System.Security.Policy;
+using System.Web.SessionState;
+//using System.Windows.Input;
+//using OpenQA.Selenium;
 //using OpenQA.Selenium.DevTools.V106.CSS;
 //using OpenQA.Selenium.Support.UI;
 //using SeleniumExtras.WaitHelpers;
@@ -36,13 +41,13 @@ namespace WindowsFormsApp1
 
     public partial class Form1 : Form
     {
+        internal string dropBoxPathIncldBackSlash;
         readonly System.Drawing.Point textBox4Location; readonly Size textBox4Size;
-        internal readonly string dropBoxPathIncldBackSlash;
         readonly Size textBox1SizeToForm;
         //string[] CJKBiggestSet = new string[]{ "HanaMinB", "KaiXinSongB", "TH-Tshyn-P1" };
         string[] CJKBiggestSet = { "全宋體(等寬)", "新細明體-ExtB", "HanaMinB", "KaiXinSongB", "TH-Tshyn-P1", "HanaMinA", "Plangothic P1", "Plangothic P2" };
         Color button2BackColorDefault;
-        bool insertMode = true, check_the_adjacent_pages = false, keyinText = false//手動輸入
+        bool insertMode = true, check_the_adjacent_pages = false, keyinText = false//手動輸入;
             , TopLine = false//抬頭
             , Indents = true;//縮排
         internal string textBox3Text
@@ -50,16 +55,18 @@ namespace WindowsFormsApp1
             get { return textBox3.Text; }
             set { textBox3.Text = value; }
         }
+        //取得輸入模式：手動或自動
+        internal bool KeyinTextMode { get{ return keyinText; } } 
 
-        static internal string mainFromTextBox3Text;
+    //static internal string mainFromTextBox3Text;
 
 
-        /*browser operation mode:
-             appActivateByName:本來原始的；網路學來的
-                selenium 純selenium模式，啟動新的 chrome 執行個體，且須登入；chatGPT 教的
-                seleniumGet 混合模式，且夫不啟動 chrome，而是取得已經運動的chrome的執行個體的； chatGPT 教的+之前網路學的
-        */
-        public enum BrowserOPMode { appActivateByName, seleniumNew, seleniumGet };
+    /*browser operation mode:
+         appActivateByName:本來原始的；網路學來的
+            selenium 純selenium模式，啟動新的 chrome 執行個體，且須登入；chatGPT 教的
+            seleniumGet 混合模式，且夫不啟動 chrome，而是取得已經運動的chrome的執行個體的； chatGPT 教的+之前網路學的
+    */
+    public enum BrowserOPMode { appActivateByName, seleniumNew, seleniumGet };
 
         internal static BrowserOPMode browsrOPMode = BrowserOPMode.appActivateByName;
 
@@ -192,16 +199,34 @@ namespace WindowsFormsApp1
         //}
         void show_nICo()
         {
-            nICo.Visible = false;
+
             this.Show();
+            nICo.Visible = false;
             this.WindowState = FormWindowState.Normal;
             this.Height = thisHeight;
             this.Width = thisWidth;
             this.Left = thisLeft;
             this.Top = thisTop;
+            //手動編輯模式時：
             if (!autoPastetoQuickEdit && keyinText)
             {
-                textBox3_Click(new object(), new MouseEventArgs(MouseButtons.Left, 0, 0, 0, 0));//textBox3_MouseMove(new object(), new MouseEventArgs(MouseButtons.Left, 0, 0, 0, 0));
+                string xClp = Clipboard.GetText();
+                if (xClp != "" && xClp.Substring(0, "https://ctext.org/".Length) == "https://ctext.org/" &&
+                    xClp.Substring(xClp.LastIndexOf("#editor")) == "#editor")
+                {
+                    string url = xClp;
+                    textBox3_Click(new object(), new MouseEventArgs(MouseButtons.Left, 0, 0, 0, 0));//textBox3_MouseMove(new object(), new MouseEventArgs(MouseButtons.Left, 0, 0, 0, 0));
+                    if (browsrOPMode != BrowserOPMode.appActivateByName)
+                    {
+                        br.driver = br.driver ?? br.driverNew();
+                        br.GoToUrlandActivate(url);
+                        //url此頁的Quick edit值傳到textBox1
+                        textBox1.Text = br.waitFindWebElementByNameToBeClickable("data", 3).Text;
+                    }
+                    else
+                    { Process.Start(url); appActivateByName(); }
+                    Clipboard.Clear();
+                }
             }
         }
 
@@ -3864,6 +3889,7 @@ namespace WindowsFormsApp1
             //貼到 Ctext Quick edit 前的文本檢查
             if (!newTextBox1()) return;
 
+            # region 貼到 Ctext Quick edit 
             //根據不同輸入模式需求操作
             switch (browsrOPMode)
             {
@@ -3879,12 +3905,13 @@ namespace WindowsFormsApp1
                 default:
                     break;
             }
-
+            #endregion
             //決定是否要到下一頁
             //if (!shiftKeyDownYet ) nextPages(Keys.PageDown, false);
             if (!shiftKeyDownYet && !check_the_adjacent_pages) nextPages(Keys.PageDown, false);
+            //預測下一頁頁末尾端在哪裡
             predictEndofPage();
-            //重設自動判斷頁尾值
+            //重設自動判斷頁尾之值
             pageTextEndPosition = 0; pageEndText10 = "";
         }
 
@@ -4997,17 +5024,17 @@ namespace WindowsFormsApp1
                         retry:
                             br.driver = br.driver ?? br.driverNew();
                             try
-                            {//這裡需要參照元件來操作就不宜跑線程了！故此區塊最後的剪貼簿，要求須是單線程者，蓋因剪貼簿須獨占式使用故也20230111
-                                quick_edit_box = br.driver.FindElement(OpenQA.Selenium.By.Name("data"));
-                                //chatGPT：
-                                // 等待網頁元素出現，最多等待 2 秒
-                                OpenQA.Selenium.Support.UI.WebDriverWait wait =
-                                    new OpenQA.Selenium.Support.UI.WebDriverWait
-                                    (br.driver, TimeSpan.FromSeconds(2));
-                                //安裝了 Selenium.WebDriver 套件，才說沒有「ExpectedConditions」，然後照Visual Studio 2022的改正建議又用NuGet 安裝了 Selenium.Suport 套件，也自動「 using OpenQA.Selenium.Support.UI;」了，末學自己還用物件瀏覽器找過了 「OpenQA.Selenium.Support.UI」，可就是沒有「ExpectedConditions」靜態類別可用，即使官方文件也說有 ： https://www.selenium.dev/selenium/docs/api/dotnet/html/T_OpenQA_Selenium_Support_UI_ExpectedConditions.htm 20230109 未知何故 阿彌陀佛
-                                wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(quick_edit_box));
-                                // 在網頁元素載入完畢後才能讀取其.Text屬性值，存入剪貼簿
-                                //Task.Delay(-1);
+                            {//這裡需要參照元件來操作就不宜跑線程了！故此區塊最後的剪貼簿，要求須是單線程者，蓋因剪貼簿須獨占式使用故也20230111                                
+                                quick_edit_box = br.waitFindWebElementByNameToBeClickable("data",2);//br.driver.FindElement(OpenQA.Selenium.By.Name("data"));
+                                ////chatGPT：
+                                //// 等待網頁元素出現，最多等待 2 秒
+                                //OpenQA.Selenium.Support.UI.WebDriverWait wait =
+                                //    new OpenQA.Selenium.Support.UI.WebDriverWait
+                                //    (br.driver, TimeSpan.FromSeconds(2));
+                                ////安裝了 Selenium.WebDriver 套件，才說沒有「ExpectedConditions」，然後照Visual Studio 2022的改正建議又用NuGet 安裝了 Selenium.Suport 套件，也自動「 using OpenQA.Selenium.Support.UI;」了，末學自己還用物件瀏覽器找過了 「OpenQA.Selenium.Support.UI」，可就是沒有「ExpectedConditions」靜態類別可用，即使官方文件也說有 ： https://www.selenium.dev/selenium/docs/api/dotnet/html/T_OpenQA_Selenium_Support_UI_ExpectedConditions.htm 20230109 未知何故 阿彌陀佛
+                                //wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(quick_edit_box));
+                                //// 在網頁元素載入完畢後才能讀取其.Text屬性值，存入剪貼簿
+                                ////Task.Delay(-1);
                                 Clipboard.SetText(quick_edit_box.Text);
                             }
                             catch (Exception)
@@ -5345,10 +5372,18 @@ namespace WindowsFormsApp1
         }
 
 
+
+        //for .BrowserOPMode.selenium    browsrOPMode!=BrowserOPMode.appActivateByName
         private void pasteToCtext(string url)
-        {//for .BrowserOPMode.selenium            
+        {
+            br.driver = br.driver ?? br.driverNew();
+            //取得所有現行窗體（分頁頁籤）
+            System.Collections.ObjectModel.ReadOnlyCollection<string> tabWindowHandles = br.driver.WindowHandles;
+            //手動輸入模式時
             if (keyinText)
             {
+                //Task task = Task.Run(() =>
+                //{
                 //url = br.driver.Url;
                 //string activeTabTitlel = br.driver.Title;
                 //br.driver.SwitchTo();//br.driver.SwitchTo().Window(br.driver.CurrentWindowHandle).Url;
@@ -5361,25 +5396,84 @@ namespace WindowsFormsApp1
                 //20230103 目前無法抓到正在作用中的視窗，只能以使用者習慣，通常在用的都是最後一個視窗，先試試 感恩感恩　南無阿彌陀佛
                 //br.driver.SwitchTo().Window(br.driver.WindowHandles.Last());//br.driver.SwitchTo().Window(br.driver.CurrentWindowHandle).Url;
                 //20230103 目前所知也只能用以下的笨方法了，雖然土，但管用。∴就不必上一行多此一舉了。感恩感恩　南無阿彌陀佛
-                br.driver = br.driver ?? br.driverNew();  
-                if (br.driver.Url != textBox3.Text)
+                //檢查driver物件是否為空
+
+                #region 先檢查是否有已開啟的編輯頁尚未送出儲存(因為許多異體字須一次取代，往往會打開一個chapter單位來edit) 其網址有「&action=editchapter」關鍵字，如：https://ctext.org/wiki.pl?if=en&chapter=687756&action=editchapter#12450
+                bool waitUpdate = false;
+                //Task wait = Task.Run(() =>
+                //{
+                foreach (string tabWin in tabWindowHandles)
                 {
-                    bool found = false;
-                    //string[] tabUrls = br.driver.WindowHandles;
-                    System.Collections.ObjectModel.ReadOnlyCollection<string> tabUrls = br.driver.WindowHandles;
-                    foreach (string tabUrl in tabUrls)
+                    if (br.driver.SwitchTo().Window(tabWin).Url.IndexOf("&action=editchapter") > -1)
                     {
-                        string taburl = br.driver.SwitchTo().Window(tabUrl).Url;
-                        if (taburl == textBox3.Text || taburl.IndexOf(textBox3.Text.Replace("editor", "box")) > -1) { found = true; break; }
+                        waitUpdate = true;
+                        OpenQA.Selenium.IWebElement commit = br.waitFindWebElementByNameToBeClickable("commit", 2); //br.driver.FindElement(OpenQA.Selenium.By.Name("commit"));
+                        //OpenQA.Selenium.Support.UI.WebDriverWait waitcommit = new OpenQA.Selenium.Support.UI.WebDriverWait(br.driver, TimeSpan.FromSeconds(2));
+                        //waitcommit.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(commit));
+                        Task.Run(() =>
+                        { //送出後也不必等待，也沒有其他須用到的元件，故可交給作業系統開個新線程去跑就好，但因為editchapter上傳儲存時常較Quit edit費時，故保險起見，還是在後加個Task.delay一下比較好
+                            try
+                            {
+                                commit.Click();
+                            }
+                            catch (Exception ex)
+                            {
+                                switch (ex.HResult)
+                                {
+                                    case -2146233088://原有窗體被關閉時："stale element reference: element is not attached to the page document
+                                        ////string urlOld = br.driver.SwitchTo().Window(tabWin).Url;
+                                        ////br.driver.Navigate().GoToUrl(br.driver.SwitchTo().Window(tabWin).Url);
+                                        //MessageBox.Show("原有窗體已被關閉，請自行先送出儲存，再回來按OK確定！","",
+                                        //    MessageBoxButtons.OK,MessageBoxIcon.Warning,MessageBoxDefaultButton.Button1,
+                                        //    MessageBoxOptions.DefaultDesktopOnly);
+                                        break;
+                                    default:
+                                        throw;
+                                }
+                            }
+                        });//只要有找到，都按下送出，反正若沒修改，也沒有任何影響202301112128                        
                     }
-                    if (!found)
-                        br.driver = br.openNewTab();
                 }
-                url = textBox3.Text;
-                //textBox3.Text = url;
-                //string urlLast= url = br.driver.Url;
+                //});
+                //確保所有editchapter都已上傳完畢
+                //https://learn.microsoft.com/zh-tw/dotnet/api/system.threading.tasks.task.delay?view=netframework-4.8&f1url=%3FappId%3DDev16IDEF1%26l%3DZH-TW%26k%3Dk(System.Threading.Tasks.Task.Delay)%3Bk(TargetFrameworkMoniker-.NETFramework%2CVersion%253Dv4.8)%3Bk(DevLang-csharp)%26rd%3Dtrue
+                if (waitUpdate) Task.Delay(4000).Wait();
+                #endregion
+
+                //檢查textbox3的值與現用網頁相同否
+                url = chkUrlIsTextBox3Text(tabWindowHandles);
+
+                br.在Chrome瀏覽器的Quick_edit文字框中輸入文字(br.driver, Clipboard.GetText(), url);
+                //});
+                //task.Wait();
             }
-            br.在Chrome瀏覽器的Quick_edit文字框中輸入文字(br.driver, Clipboard.GetText(), url);
+            else
+            {
+                url = chkUrlIsTextBox3Text(tabWindowHandles);
+                br.在Chrome瀏覽器的Quick_edit文字框中輸入文字(br.driver, Clipboard.GetText(), url);
+            }
+        }
+
+        //檢查textbox3的Text值與現用網頁是否相同
+        private string chkUrlIsTextBox3Text(ReadOnlyCollection<string> tabWindowHandles)
+        {
+            string url;
+            //再回到正在編輯的本頁，準備貼入
+            if (br.driver.Url != textBox3.Text)
+            {
+                bool found = false;
+                foreach (string tabUrl in tabWindowHandles)
+                {
+                    string taburl = br.driver.SwitchTo().Window(tabUrl).Url;
+                    if (taburl == textBox3.Text || taburl.IndexOf(textBox3.Text.Replace("editor", "box")) > -1) { found = true; break; }
+                }
+                if (!found)
+                    br.driver = br.openNewTab();//網址由下面「在Chrome瀏覽器的Quick_edit文字框中輸入文字」那行給
+            }
+            url = textBox3.Text;
+            //textBox3.Text = url;
+            //string urlLast= url = br.driver.Url;
+            return url;
         }
 
         private void pasteToCtext()
@@ -5863,14 +5957,14 @@ namespace WindowsFormsApp1
                                 br.driver.SwitchTo().Window(br.driver.CurrentWindowHandle);
                                 if (textBox3.Text.IndexOf("edit") > -1 && KeyboardInfo.getKeyStateToggled(System.Windows.Input.Key.Delete))//判斷Delete鍵是否被按下彈起
                                 {//手動輸入時，當按下 Shift+Delete 當即時要準備貼上該頁，故如此操作，以備確定無誤後手動按下 submit 按鈕
-                                    OpenQA.Selenium.IWebElement quick_edit_box = br.driver.FindElement(OpenQA.Selenium.By.Name("data"));
-                                    OpenQA.Selenium.Support.UI.WebDriverWait wait = new OpenQA.Selenium.Support.UI.WebDriverWait(br.driver, TimeSpan.FromSeconds(2));
-                                    wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(quick_edit_box));
+                                    OpenQA.Selenium.IWebElement quick_edit_box = br.waitFindWebElementByNameToBeClickable("data", 2);//br.driver.FindElement(OpenQA.Selenium.By.Name("data"));
+                                    //OpenQA.Selenium.Support.UI.WebDriverWait wait = new OpenQA.Selenium.Support.UI.WebDriverWait(br.driver, TimeSpan.FromSeconds(2));
+                                    //wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(quick_edit_box));
                                     quick_edit_box.Clear();
                                     quick_edit_box.Click();
                                     quick_edit_box.SendKeys(OpenQA.Selenium.Keys.LeftShift + OpenQA.Selenium.Keys.Insert);
-                                    OpenQA.Selenium.IWebElement submit = br.driver.FindElement(OpenQA.Selenium.By.Id("savechangesbutton"));
-                                    wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(submit));
+                                    OpenQA.Selenium.IWebElement submit = br.waitFindWebElementByIdToBeClickable("savechangesbutton", 2);//br.driver.FindElement(OpenQA.Selenium.By.Id("savechangesbutton"));
+                                    //wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(submit));
                                     //放在一個 Task 中去執行，並立即返回。                                     
                                     Task.Run(() =>
                                     {//送出按鈕按下後可以跑線程，其他要取得元件操作者，就不移另跑線程。20230111 現在終於破解bugs找到癥結所在了。感恩感恩　讚歎讚歎　南無阿彌陀佛 19:09
@@ -5944,29 +6038,29 @@ namespace WindowsFormsApp1
                             SendKeys.Send("^x");
                             break;
                         case BrowserOPMode.seleniumNew:
-                            Task.Run(() =>
+                            //Task.Run(() =>
+                            //{
+                            if (br.driver == null) br.driver = br.driverNew();
+                            if (br.driver.Url != textBox3.Text)
                             {
-                                if (br.driver == null) br.driver = br.driverNew();
-                                if (br.driver.Url != textBox3.Text)
+                                try
                                 {
-                                    try
-                                    {
-                                        //br.driver.ExecuteScript("window.open();");
-                                        br.driver.SwitchTo().NewWindow(OpenQA.Selenium.WindowType.Tab);//取得網址時順便貼上簡單修改模式下的文字                            
-                                    }
-                                    catch (Exception)
-                                    {
-                                        br.driver.SwitchTo().Window(br.driver.WindowHandles.Last());
-                                        //throw;
-                                    }
-                                    //br.driver.Navigate().GoToUrl(clpTxt);
-                                    br.GoToUrlandActivate(clpTxt);
+                                    //br.driver.ExecuteScript("window.open();");
+                                    br.driver.SwitchTo().NewWindow(OpenQA.Selenium.WindowType.Tab);//取得網址時順便貼上簡單修改模式下的文字                            
                                 }
-                                Task.WaitAny();
-                                Task.Delay(-1);
-                                OpenQA.Selenium.IWebElement quick_edit_box = br.driver.FindElement(OpenQA.Selenium.By.Name("data"));
-                                Clipboard.SetText(quick_edit_box.Text);
-                            });
+                                catch (Exception)
+                                {
+                                    br.driver.SwitchTo().Window(br.driver.WindowHandles.Last());
+                                    //throw;
+                                }
+                                //br.driver.Navigate().GoToUrl(clpTxt);
+                                br.GoToUrlandActivate(clpTxt);
+                            }
+                            Task.WaitAny();
+                            Task.Delay(-1);
+                            OpenQA.Selenium.IWebElement quick_edit_box = br.driver.FindElement(OpenQA.Selenium.By.Name("data"));
+                            Clipboard.SetText(quick_edit_box.Text);
+                            //});
                             break;
                         case BrowserOPMode.seleniumGet:
                             Task.Run(() => { if (br.driver == null) br.driver = br.driverNew(); });
@@ -6107,7 +6201,7 @@ namespace WindowsFormsApp1
                     nextPageAuto = true;
                 //處理《維基文庫》的每卷文本準備貼入
                 runWordMacro("維基文庫四部叢刊本轉來");
-                if (nextPageAuto&&browsrOPMode==BrowserOPMode.appActivateByName)
+                if (nextPageAuto && browsrOPMode == BrowserOPMode.appActivateByName)
                 {//自動模式通常在最後一頁會停住，故自行翻下一頁（下一卷首）備用
                     Task.WaitAll();
                     nextPages(Keys.PageDown, false);
@@ -6333,6 +6427,9 @@ namespace WindowsFormsApp1
                     }
                 }
             }
+
+            //如果是取代輸入模式
+            string w;
             if (!insertMode)
             {//https://stackoverflow.com/questions/1428047/how-to-set-winforms-textbox-to-overwrite-mode/70502655#70502655
                 if (textBox1.Text.Length != textBox1.MaxLength && textBox1.SelectedText == ""
@@ -6342,10 +6439,10 @@ namespace WindowsFormsApp1
                     //    string xNext = x.Substring(s);
                     //    StringInfo xInfo = new StringInfo(xNext);                    
                     textBox1.SelectionLength = 1;//對於已經輸入完成的 surrogate C#應該會正確判斷其字長度；實際測試非然也
-                    if (char.IsSurrogate(textBox1.SelectedText.ToCharArray()[0]))
-                    {
-                        textBox1.SelectionLength = 2;
-                    }
+                    //對標點符號punctuations所佔字位不取代
+                    w = textBox1.SelectedText;
+                    if (punctuations.IndexOf(e.KeyChar) > -1) textBox1.SelectionLength = 0;
+                    else if (char.IsSurrogate(w.ToCharArray()[0])) textBox1.SelectionLength = 2;
                 }
             }
             //if (ModifierKeys == Keys.None)
@@ -6356,10 +6453,13 @@ namespace WindowsFormsApp1
             {
                 if (!insertMode)
                 {
-                    if (selStart + 1 > textBox1.TextLength)
+                    w = textBox1.Text.Substring(selStart, 1);//對標點符號punctuations所佔字位不取代
+                    if (selStart + 1 > textBox1.TextLength || punctuations.IndexOf(e.KeyChar) > -1)
                         textBox1.Select(selStart, 0);
                     else
-                        textBox1.Select(selStart, char.IsHighSurrogate(textBox1.Text.Substring(selStart, 1).ToCharArray()[0]) ? 2 : 1);
+                    {
+                        textBox1.Select(selStart, char.IsHighSurrogate(w.ToCharArray()[0]) ? 2 : 1);
+                    }
                 }
                 else
                     textBox1.Select(selStart, selLength);
@@ -6592,7 +6692,7 @@ namespace WindowsFormsApp1
 
         private void textBox3_TextChanged(object sender, EventArgs e)
         {
-            mainFromTextBox3Text = textBox3.Text;
+            //mainFromTextBox3Text = textBox3.Text;
             string oldValue = (string)textBox3.Tag;//chatGPT 20230108
 
             //if (!autoPastetoQuickEdit && mainFromTextBox3Text != "" && textBox3.Text.IndexOf("http") == 0 && browsrOPMode != BrowserOPMode.appActivateByName && oldValue != mainFromTextBox3Text)
@@ -6619,7 +6719,7 @@ namespace WindowsFormsApp1
             //}
             //Task.WaitAll();
 
-            textBox3.Tag = mainFromTextBox3Text;
+            textBox3.Tag = textBox3Text;
             if (keyinText) return;
             if (textBox3.Text == "")
             {
@@ -6845,7 +6945,7 @@ namespace WindowsFormsApp1
             //imageUrl = "https://example.com/image.png";
 
             // 使用 WebClient 下載圖片的二進制數據。
-            WebClient webClient = new WebClient();
+            System.Net.WebClient webClient = new System.Net.WebClient();
             byte[] imageBytes = webClient.DownloadData(imageUrl);
 
             // 將二進制數據寫入文件。

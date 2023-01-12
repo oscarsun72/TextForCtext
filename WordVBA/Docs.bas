@@ -1033,7 +1033,7 @@ Select Case Err.Number
         Shell (Network.getDefaultBrowserFullname + " https://old.gj.cool/gjcool/index")
         AppActivate Network.getDefaultBrowserNameAppActivate '"¥jÄy»Å"
         DoEvents
-        SystemSetup.Wait 2.5
+        SystemSetup.Wait 2.9 '2.5
         'SendKeys "{TAB 16}", True
         Resume Next
     Case Else

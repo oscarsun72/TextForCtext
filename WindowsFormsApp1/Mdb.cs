@@ -8,20 +8,21 @@ using System.IO;
 using WindowsFormsApp1;
 using System.Windows.Forms;
 using System.Web.UI;
+using OpenQA.Selenium.DevTools.V85.ApplicationCache;
 
 namespace TextForCtext
 {
     class Mdb
     {
+        static Form1 frm = Application.OpenForms["Form1"] as Form1;        
         internal static string fileFullName(string dbNameIncludeExt)
         {
-            Form1 f = new Form1();
-            string root = f.dropBoxPathIncldBackSlash;
+            string root = frm.dropBoxPathIncldBackSlash;
             if (!File.Exists(root + dbNameIncludeExt))
             {
                 root = root.Replace("C:", "A:");
             }
-            f = null;
+            frm = null;
             if (!File.Exists(root + dbNameIncludeExt)) { MessageBox.Show(root + dbNameIncludeExt + "not found"); return ""; }
             else
                 return root + dbNameIncludeExt;

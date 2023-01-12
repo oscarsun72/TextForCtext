@@ -9,7 +9,7 @@ using forms = System.Windows.Forms;
 using WindowsFormsApp1;
 using System.Windows.Forms;
 using System.Drawing.Imaging;
-using static System.Net.Mime.MediaTypeNames;
+//using static System.Net.Mime.MediaTypeNames;
 using System.Security.Policy;
 using System.Drawing;
 using OpenQA.Selenium;
@@ -19,8 +19,8 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 //https://dotblogs.com.tw/supergary/2020/10/29/selenium#images-3
 using System.IO;
-using System.Net;
-using static System.Net.WebRequestMethods;
+//using System.Net;
+//using static System.Net.WebRequestMethods;
 using System.Runtime.InteropServices.ComTypes;
 using OpenQA.Selenium.Support.UI;
 using SeleniumExtras.WaitHelpers;
@@ -30,6 +30,13 @@ namespace TextForCtext
 {
     class Browser
     {
+        static Form1 frm;
+
+        //creedit 
+        public Browser(Form1 form)
+        {
+            frm = form;
+        }
 
         // 創建Chrome驅動程序對象
         //selm.IWebDriver driver=driverNew();        
@@ -38,22 +45,37 @@ namespace TextForCtext
         //static selm.IWebDriver driverNew()
         //實測後發現：CurrentWindowHandle並不能取得瀏覽器現正作用中的分頁視窗，只能取得創建 ChromeDriver 物件時的最初及switch 方法執行後切換的分頁視窗 20230103 阿彌陀佛
         static string originalWindow;
-
         internal static string getOriginalWindow
         {
             get
             {
                 return originalWindow;
             }
+
         }
 
-        static Form1 frm;//creedit 
-        public Browser(Form1 form)
+        internal static string getDriverUrl
         {
-            frm = form;
+            get
+            {
+                return driver != null ? driver.Url : "";
+            }
         }
 
-
+        internal static IWebElement waitFindWebElementByNameToBeClickable(string name, float second)
+        {
+            IWebElement e = driver.FindElement(By.Name(name));
+            WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(second));
+            wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(e));
+            return e;
+        }
+        internal static IWebElement waitFindWebElementByIdToBeClickable(string id, float second)
+        {
+            IWebElement e = driver.FindElement(By.Id(id));
+            WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(second));
+            wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(e));
+            return e;
+        }
 
         internal static ChromeDriver driverNew()
         {
@@ -115,7 +137,8 @@ namespace TextForCtext
                         cDrv = new ChromeDriver(driverService, options);
                     else
                         //自己的電腦比較快
-                        cDrv = new ChromeDriver(driverService, options, TimeSpan.FromSeconds(4.5));//等待重啟時間=4.5秒鐘：若寫成「 , TimeSpan.MinValue);」這會出現超出設定值範圍的錯誤//TimeSpan是設定決定重新啟動chromedriver.exe須等待的時間，太長則人則不耐，太短則chromedriver.exe來不及反應而出錯。感恩感恩　讚歎讚歎　南無阿彌陀佛 202301051751
+                        cDrv = new ChromeDriver(driverService, options, TimeSpan.FromSeconds(8.5));//等待重啟時間=8.5秒鐘：其實也是等待伺服器回應的時間，太短則在完整編輯（如網址有「&action=editchapter」）送出時，會逾時
+                                                                                                   //若寫成「 , TimeSpan.MinValue);」這會出現超出設定值範圍的錯誤//TimeSpan是設定決定重新啟動chromedriver.exe須等待的時間，太長則人則不耐，太短則chromedriver.exe來不及反應而出錯。感恩感恩　讚歎讚歎　南無阿彌陀佛 202301051751                    
                 }
                 catch (Exception ex)
                 {
@@ -159,7 +182,7 @@ namespace TextForCtext
                             //    }
                             //}
                             if (MessageBox.Show("按「ok」確定，以繼續，將會關閉所有在運行中的Chrome瀏覽器，若須手動關閉，請關完後再按確定……", ""
-                                , MessageBoxButtons.OKCancel, MessageBoxIcon.Warning,MessageBoxDefaultButton.Button1,MessageBoxOptions.DefaultDesktopOnly) == DialogResult.OK)
+                                , MessageBoxButtons.OKCancel, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly) == DialogResult.OK)
                             {//creedit by chatGPT：
                                 Process[] chromeInstances = Process.GetProcessesByName("chrome");
                                 foreach (var chromeInstance in chromeInstances)
@@ -223,15 +246,24 @@ namespace TextForCtext
                 //    }
                 //    else
                 //        throw;
-                //}
-                cDrv.Navigate().GoToUrl(Form1.mainFromTextBox3Text ?? "https://ctext.org/account.pl?if=en");
-                //IWebElemen弓t clk = cDrv.FindElement(selm.By.Id("logininfo")); clk.Click();
+                //}                
+                frm = Application.OpenForms["Form1"] as Form1;
+                cDrv.Navigate().GoToUrl(frm.textBox3Text ?? "https://ctext.org/account.pl?if=en");
+                //IWebElement clk  = cDrv.FindElement(selm.By.Id("logininfo")); clk.Click();
                 //cDrv.FindElement(selm.By.Id("logininfo")).Click();
                 /*202301050214 因為以下這行設定成功，可以用平常的Chrome來操作了，就不必再登入安裝（如擴充功能）匯入（如書籤）什麼的了 感恩感恩　讚歎讚歎　南無阿彌陀佛
                  options.AddArgument("--user-data-dir=C:\\Users\\oscar\\AppData\\Local\\Google\\Chrome\\User Data\\");
                 options.AddArgument("--user-data-dir="+ Environment.GetFolderPath( Environment.SpecialFolder.LocalApplicationData) +"\\Google\\Chrome\\User Data\\");
                  */
-                //MessageBox.Show("請先登入 Ctext.org 再繼續。按下「確定(OK)」以繼續……");
+                //MessageBox.Show("請先登入 Ctext.org 再繼續。按下「確定(OK)」以繼續……");                
+
+                //如果是手動輸入模式且在簡單編輯頁面，則將其Quick edit值傳到textBox1
+                if (frm.KeyinTextMode && isQuickEditUrl(frm.textBox3Text ?? ""))
+                {
+                    driver = cDrv;
+                    frm.Controls["textBox1"].Text = waitFindWebElementByNameToBeClickable("data", 3).Text;
+                }
+
 
                 return cDrv;
             }
@@ -327,7 +359,7 @@ namespace TextForCtext
         {
             #region 檢查網址
             if (url.IndexOf("edit") == -1) return;
-                        
+
             if (url != driver.Url && driver.Url.IndexOf(url.Replace("editor", "box")) == -1)
                 // 使用driver導航到給定的URL
                 driver.Navigate().GoToUrl(url);
@@ -459,6 +491,7 @@ namespace TextForCtext
 
         internal static void GoToUrlandActivate(string url)
         {
+            if (string.IsNullOrEmpty(url) || url.Substring(0, 4) != "http") return;
 
             ////driver.Close();//creedit
             ////creedit20230103 這樣處理誤關分頁頁籤的錯誤（例外情形）就成功了，但整個瀏覽器誤關則尚未
@@ -625,6 +658,31 @@ namespace TextForCtext
 
         }
         */
+
+        #region Ctext 三種網頁模式判斷
+        internal static bool isQuickEditUrl(string url)
+        {
+            if (url != "" && url.Substring(0, "https://ctext.org/".Length) == "https://ctext.org/" &&
+                    url.Substring(url.LastIndexOf("#editor")) == "#editor") return true;
+            else
+                return false;
+        }
+        internal static bool isEditChapterUrl(string url)
+        {
+            if (url != "" && url.Substring(0, "https://ctext.org/".Length) == "https://ctext.org/" &&
+                    url.LastIndexOf("&action = editchapter") > -1) return true;
+
+            else
+                return false;
+        }
+        internal static bool isFilePageView(string url)
+        {
+            if (url != "" && url.Substring(0, "https://ctext.org/".Length) == "https://ctext.org/" &&
+                    url.IndexOf("edit") == -1) return true;
+            else
+                return false;
+        }
+        #endregion
 
 
         string getUrl(forms.Keys eKeyCode)
