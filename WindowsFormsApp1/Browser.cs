@@ -663,6 +663,7 @@ namespace TextForCtext
         internal static bool isQuickEditUrl(string url)
         {
             if (url != "" && url.Substring(0, "https://ctext.org/".Length) == "https://ctext.org/" &&
+                url.IndexOf("edit") > -1 &&
                     url.Substring(url.LastIndexOf("#editor")) == "#editor") return true;
             else
                 return false;

@@ -56,17 +56,17 @@ namespace WindowsFormsApp1
             set { textBox3.Text = value; }
         }
         //取得輸入模式：手動或自動
-        internal bool KeyinTextMode { get{ return keyinText; } } 
+        internal bool KeyinTextMode { get { return keyinText; } }
 
-    //static internal string mainFromTextBox3Text;
+        //static internal string mainFromTextBox3Text;
 
 
-    /*browser operation mode:
-         appActivateByName:本來原始的；網路學來的
-            selenium 純selenium模式，啟動新的 chrome 執行個體，且須登入；chatGPT 教的
-            seleniumGet 混合模式，且夫不啟動 chrome，而是取得已經運動的chrome的執行個體的； chatGPT 教的+之前網路學的
-    */
-    public enum BrowserOPMode { appActivateByName, seleniumNew, seleniumGet };
+        /*browser operation mode:
+             appActivateByName:本來原始的；網路學來的
+                selenium 純selenium模式，啟動新的 chrome 執行個體，且須登入；chatGPT 教的
+                seleniumGet 混合模式，且夫不啟動 chrome，而是取得已經運動的chrome的執行個體的； chatGPT 教的+之前網路學的
+        */
+        public enum BrowserOPMode { appActivateByName, seleniumNew, seleniumGet };
 
         internal static BrowserOPMode browsrOPMode = BrowserOPMode.appActivateByName;
 
@@ -121,7 +121,7 @@ namespace WindowsFormsApp1
 
             //終止由 chromedriver.exe 程序開啟的Chrome瀏覽器,釋放系統記憶體
             //new Task(Action ).Wait(4500);
-            if (br.driver != null || browsrOPMode != BrowserOPMode.appActivateByName)
+            if (Name == "Form1" && (br.driver != null || browsrOPMode != BrowserOPMode.appActivateByName))
             {
                 if (MessageBox.Show("本軟件即將關閉，也會同時關閉由其開啟的Chrome瀏覽器，若有沒儲存的資訊，請先儲存再按「確定」鈕繼續；否則請按「取消」", "", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning) == DialogResult.Cancel) { e.Cancel = true; return; }
                 else
@@ -211,8 +211,9 @@ namespace WindowsFormsApp1
             if (!autoPastetoQuickEdit && keyinText)
             {
                 string xClp = Clipboard.GetText();
-                if (xClp != "" && xClp.Substring(0, "https://ctext.org/".Length) == "https://ctext.org/" &&
-                    xClp.Substring(xClp.LastIndexOf("#editor")) == "#editor")
+                if (xClp != "" &&
+                    xClp.Length > "https://ctext.org/".Length + "#editor".Length
+                    && xClp.Substring(0, "https://ctext.org/".Length) == "https://ctext.org/")
                 {
                     string url = xClp;
                     textBox3_Click(new object(), new MouseEventArgs(MouseButtons.Left, 0, 0, 0, 0));//textBox3_MouseMove(new object(), new MouseEventArgs(MouseButtons.Left, 0, 0, 0, 0));
@@ -220,8 +221,10 @@ namespace WindowsFormsApp1
                     {
                         br.driver = br.driver ?? br.driverNew();
                         br.GoToUrlandActivate(url);
-                        //url此頁的Quick edit值傳到textBox1
-                        textBox1.Text = br.waitFindWebElementByNameToBeClickable("data", 3).Text;
+                        if (xClp.IndexOf("edit") > -1 && xClp.Substring(xClp.LastIndexOf("#editor")) == "#editor")
+
+                            //url此頁的Quick edit值傳到textBox1
+                            textBox1.Text = br.waitFindWebElementByNameToBeClickable("data", 3).Text;
                     }
                     else
                     { Process.Start(url); appActivateByName(); }
@@ -2030,8 +2033,8 @@ namespace WindowsFormsApp1
             undoRecord(); stopUndoRec = true;
             int s = textBox1.SelectionStart;
             string xSel = textBox1.SelectedText;
-            if (xSel.Substring(xSel.Length - 3) == "<p>") { textBox1.Select(s, xSel.Length - 3); xSel = textBox1.SelectedText; }//最後一個<p>不處理
-            if (xSel.Substring(xSel.Length - 5) == "<p>" + Environment.NewLine) { textBox1.Select(s, xSel.Length - 5); xSel = textBox1.SelectedText; }//最後一個<p>不處理
+            if (xSel.Length > 2 && xSel.Substring(xSel.Length - 3) == "<p>") { textBox1.Select(s, xSel.Length - 3); xSel = textBox1.SelectedText; }//最後一個<p>不處理
+            if (xSel.Length > 4 && xSel.Substring(xSel.Length - 5) == "<p>" + Environment.NewLine) { textBox1.Select(s, xSel.Length - 5); xSel = textBox1.SelectedText; }//最後一個<p>不處理
             xSel = xSel.Replace("<p>", "|").Replace("　", "􏿽");
             if (xSel.IndexOf("*") > -1)
             {
@@ -4587,14 +4590,27 @@ namespace WindowsFormsApp1
                 }
             }
 
+            //Ctrl + Shift + t 同Chrome瀏覽器 --還原最近關閉的頁籤
             if ((m & Keys.Control) == Keys.Control && (m & Keys.Shift) == Keys.Shift && e.KeyCode == Keys.T)
-            {//Ctrl + Shift + t 同Chrome瀏覽器 --還原最近關閉的頁籤
+            {
                 e.Handled = true;
                 appActivateByName();
                 SendKeys.Send("^+t");
                 return;
 
             }
+
+            //Ctrl + Shift + n : 開新Form1 實例
+            if (((m & Keys.Control) == Keys.Control && (m & Keys.Shift) == Keys.Shift && e.KeyCode == Keys.N)
+                || ((m & Keys.Shift) == Keys.Shift && e.KeyCode == Keys.F1))
+            {
+                e.Handled = true;
+                Form1 formNew = new Form1();
+                formNew.Show();
+                formNew.Name = "Form" + Application.OpenForms.Count;
+                return;
+            }
+            //以上 Ctrl + Shift
             #endregion
 
             #region 按下 Alt+ Shift
@@ -5025,7 +5041,7 @@ namespace WindowsFormsApp1
                             br.driver = br.driver ?? br.driverNew();
                             try
                             {//這裡需要參照元件來操作就不宜跑線程了！故此區塊最後的剪貼簿，要求須是單線程者，蓋因剪貼簿須獨占式使用故也20230111                                
-                                quick_edit_box = br.waitFindWebElementByNameToBeClickable("data",2);//br.driver.FindElement(OpenQA.Selenium.By.Name("data"));
+                                quick_edit_box = br.waitFindWebElementByNameToBeClickable("data", 2);//br.driver.FindElement(OpenQA.Selenium.By.Name("data"));
                                 ////chatGPT：
                                 //// 等待網頁元素出現，最多等待 2 秒
                                 //OpenQA.Selenium.Support.UI.WebDriverWait wait =
