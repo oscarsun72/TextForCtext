@@ -248,7 +248,7 @@ namespace TextForCtext
                 //        throw;
                 //}                
                 frm = Application.OpenForms["Form1"] as Form1;
-                cDrv.Navigate().GoToUrl(frm.textBox3Text ?? "https://ctext.org/account.pl?if=en");
+                cDrv.Navigate().GoToUrl(frm.Controls["textBox3"].Text !=""? frm.Controls["textBox3"].Text: "https://ctext.org/account.pl?if=en");
                 //IWebElement clk  = cDrv.FindElement(selm.By.Id("logininfo")); clk.Click();
                 //cDrv.FindElement(selm.By.Id("logininfo")).Click();
                 /*202301050214 因為以下這行設定成功，可以用平常的Chrome來操作了，就不必再登入安裝（如擴充功能）匯入（如書籤）什麼的了 感恩感恩　讚歎讚歎　南無阿彌陀佛
