@@ -6313,6 +6313,7 @@ namespace WindowsFormsApp1
                             br.driver = null; br.driverNew();
                         }
                     }
+                    if (br.driver.Url != textBox3.Text) br.GoToUrlandActivate(textBox3.Text);
                     textBox2.Text = "";
                     break;
                 case "br":

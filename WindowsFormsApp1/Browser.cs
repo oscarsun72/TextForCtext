@@ -439,7 +439,8 @@ namespace TextForCtext
             //Task.WaitAll();
             //System.Windows.Forms.Application.DoEvents();
             //送出
-            selm.IWebElement submit = driver.FindElement(selm.By.Id("savechangesbutton"));//("textbox"));
+            //selm.IWebElement submit = driver.FindElement(selm.By.Id("savechangesbutton"));//("textbox"));
+            selm.IWebElement submit = submit = waitFindWebElementByIdToBeClickable("savechangesbutton", 3);
             /* creedit 我問：在C#  用selenium 控制 chrome 瀏覽器時，怎麼樣才能不必等待網頁作出回應即續編處理按下來的程式碼 。如，以下程式碼，請問，如何在按下 submit.Click(); 後不必等這個動作完成或作出回應，即能繼續執行之後的程式碼呢 感恩感恩　南無阿彌陀佛
                         chatGPT他答：你可以將 submit.Click(); 放在一個 Task 中去執行，並立即返回。
              */
@@ -453,10 +454,10 @@ namespace TextForCtext
                 catch (Exception)
                 {//chatGPT：
                     // 等待網頁元素出現，最多等待 3 秒//應該不用這個，因為會貼上時，不太可能「savechangesbutton」按鈕還沒出現，除非網頁載入不完整……
-                    submit = driver.FindElement(selm.By.Id("savechangesbutton"));
-                    WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(3));
-                    //安裝了 Selenium.WebDriver 套件，才說沒有「ExpectedConditions」，然後照Visual Studio 2022的改正建議又用NuGet 安裝了 Selenium.Suport 套件，也自動「 using OpenQA.Selenium.Support.UI;」了，末學自己還用物件瀏覽器找過了 「OpenQA.Selenium.Support.UI」，可就是沒有「ExpectedConditions」靜態類別可用，即使官方文件也說有 ： https://www.selenium.dev/selenium/docs/api/dotnet/html/T_OpenQA_Selenium_Support_UI_ExpectedConditions.htm 20230109 未知何故 阿彌陀佛
-                    wait.Until(ExpectedConditions.ElementToBeClickable(submit));
+                    submit = waitFindWebElementByIdToBeClickable("savechangesbutton", 3);  //driver.FindElement(selm.By.Id("savechangesbutton"));
+                    //WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(3));
+                    ////安裝了 Selenium.WebDriver 套件，才說沒有「ExpectedConditions」，然後照Visual Studio 2022的改正建議又用NuGet 安裝了 Selenium.Suport 套件，也自動「 using OpenQA.Selenium.Support.UI;」了，末學自己還用物件瀏覽器找過了 「OpenQA.Selenium.Support.UI」，可就是沒有「ExpectedConditions」靜態類別可用，即使官方文件也說有 ： https://www.selenium.dev/selenium/docs/api/dotnet/html/T_OpenQA_Selenium_Support_UI_ExpectedConditions.htm 20230109 未知何故 阿彌陀佛
+                    //wait.Until(ExpectedConditions.ElementToBeClickable(submit));
                     /*chatGPT 您好，謝謝您將您的程式碼提供給我，我現在有更多的資訊可以幫助我了解您遇到的問題。按照您的程式碼，我可以確認您已經在您的項目中安裝了 Selenium.WebDriver 和 Selenium.Support NuGet 套件，並且在您的程式碼中使用了 using OpenQA.Selenium.Support.UI; 的聲明。
                      * 然而，我注意到您正在使用 .NET Framework 4.8，而非 .NET Core。根據 Selenium 文件，ExpectedConditions 類別在 .NET Framework 中只支援 .NET Core。
                      * 因此，如果您想在 .NET Framework 中使用 ExpectedConditions 類別，則您需要使用 .NET Core 來建立您的項目。如果您無法更改您的項目類型， 我現在繼續提供您有關解決方法的更多資訊。
