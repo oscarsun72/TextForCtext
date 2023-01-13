@@ -4367,7 +4367,7 @@ namespace WindowsFormsApp1
         void autoPastetoCtextQuitEditTextbox()
         {
             ////if (new StringInfo(textBox1.SelectedText).LengthInTextElements == predictEndofPageSelectedTextLen &&
-            ////        textBox1.Text.Substring(textBox1.SelectionStart + textBox1.SelectionLength, 2) == Environment.NewLine)
+            ////        textBox1.Text.Substring(textBox1.SelectionStart + textBox1.SelectionLength, 2) == Environment.NewLine)            
             if (textBox1.SelectionLength == predictEndofPageSelectedTextLen &&
                     textBox1.Text.Substring(textBox1.SelectionStart + textBox1.SelectionLength, 2) == Environment.NewLine)
             {
@@ -4401,21 +4401,38 @@ namespace WindowsFormsApp1
 
                                             MessageBoxOptions.DefaultDesktopOnly) == DialogResult.OK)
                     {
+                        if (browsrOPMode == BrowserOPMode.appActivateByName) textBox1.Enabled = false;//避免誤觸
                         if (_autoPastetoQuickEdit && (ModifierKeys == Keys.Control || _check_the_adjacent_pages))
                         {
-                            appActivateByName();
                             if (browsrOPMode == BrowserOPMode.appActivateByName)
+                            {
+                                appActivateByName();
                                 SendKeys.Send("^{F4}");
+                            }
                             if (_check_the_adjacent_pages) nextPages(Keys.PageDown, false);
+
                         }
                         keyDownCtrlAdd(false);
+                        if (browsrOPMode != BrowserOPMode.appActivateByName)
+                        {
+                            //預估下一頁尾位置predictEndofPage()在前面keyDownCtrlAdd(false);已做
+                            autoPastetoCtextQuitEditTextbox();//遞迴（recursion） 20230113
+                        }
                     }
+                    //取消自動輸入時
                     else
                     {
+                        //避免誤觸
+                        if (browsrOPMode != BrowserOPMode.appActivateByName) textBox1.Enabled = false;
                         pageTextEndPosition = textBox1.SelectionStart + predictEndofPageSelectedTextLen;
                         pageEndText10 = textBox1.Text.Substring(pageTextEndPosition > 9 ? pageTextEndPosition - 10 : pageTextEndPosition);
                         textBox1.Select(pageTextEndPosition, 0);
+                        //焦點交回表單
+                        //如果是鄰近頁牽連編輯，則自動翻到下一頁書圖以備檢覆
                         if (check_the_adjacent_pages) nextPages(Keys.PageDown, false);
+                        Activate();
+                        ////解除 textbox防觸鎖定，並準備檢視編輯，交給上一行Activate();處理
+                        //if (!textBox1.Enabled) textBox1.Enabled = true;
                     }
                 }
                 else
@@ -6113,6 +6130,11 @@ namespace WindowsFormsApp1
                     return;
                 }
             }
+            if (autoPastetoQuickEdit && textBox1.Enabled == false)
+            {
+                textBox1.Enabled = true;
+                textBox1.Focus(); textBox1.Refresh();
+            }
             if (textBox1.Focused)
             {
                 if (insertMode) Caret_Shown(textBox1); else Caret_Shown_OverwriteMode(textBox1);
@@ -6121,7 +6143,12 @@ namespace WindowsFormsApp1
                 {
                     textBox1.Select(selStart, selLength);
                 }
-                if (!keyinText && (autoPastetoQuickEdit || (autoPastetoQuickEdit && ModifierKeys != Keys.None))) autoPastetoCtextQuitEditTextbox();
+                if (!keyinText && (autoPastetoQuickEdit || (autoPastetoQuickEdit && ModifierKeys != Keys.None)))
+                {
+                    autoPastetoCtextQuitEditTextbox();
+                    if (textBox1.TextLength >= 100)//配合下面「if (textBox1.TextLength < 100)」還要執行
+                        return;//20230113
+                }
             }
             if (textBox2.BackColor == Color.GreenYellow &&
                 doNotLeaveTextBox2 && textBox2.Focused) textBox2.SelectAll();
@@ -6280,6 +6307,7 @@ namespace WindowsFormsApp1
         }
         private void textBox2_TextChanged(object sender, EventArgs e)
         {
+            if (!textBox1.Enabled) textBox1.Enabled = true;
             string x = textBox2.Text;
             #region 輸入末綴為「0」的數字可以設定開啟Chrome頁面的等待毫秒時間
             if (x != "" && x.Length > 2)
@@ -6647,7 +6675,7 @@ namespace WindowsFormsApp1
 
         private void Form1_MouseDoubleClick(object sender, MouseEventArgs e)
         {
-            textBox1.Text = Clipboard.GetText();
+            //textBox1.Text = Clipboard.GetText();
         }
 
         private void textBox1_DragEnter(object sender, DragEventArgs e)
