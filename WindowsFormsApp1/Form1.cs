@@ -15,8 +15,8 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Windows.Forms;
 using TextForCtext;
-                  //引用adodb 要將其「內嵌 Interop 類型」（Embed Interop Type）屬性設為false（預設是true）才不會出現以下錯誤：  HResult=0x80131522  Message=無法從組件 載入類型 'ADODB.FieldsToInternalFieldsMarshaler'。
-                  //https://stackoverflow.com/questions/5666265/adodbcould-not-load-type-adodb-fieldstointernalfieldsmarshaler-from-assembly  https://blog.csdn.net/m15188153014/article/details/119895082
+//引用adodb 要將其「內嵌 Interop 類型」（Embed Interop Type）屬性設為false（預設是true）才不會出現以下錯誤：  HResult=0x80131522  Message=無法從組件 載入類型 'ADODB.FieldsToInternalFieldsMarshaler'。
+//https://stackoverflow.com/questions/5666265/adodbcould-not-load-type-adodb-fieldstointernalfieldsmarshaler-from-assembly  https://blog.csdn.net/m15188153014/article/details/119895082
 using ado = ADODB;//https://docs.microsoft.com/zh-tw/dotnet/csharp/language-reference/keywords/using-directive
 using Application = System.Windows.Forms.Application;
 using br = TextForCtext.Browser;
@@ -4366,30 +4366,47 @@ namespace WindowsFormsApp1
 
         void autoPastetoCtextQuitEditTextbox()
         {
-            //if (new StringInfo(textBox1.SelectedText).LengthInTextElements == predictEndofPageSelectedTextLen &&
-            //        textBox1.Text.Substring(textBox1.SelectionStart + textBox1.SelectionLength, 2) == Environment.NewLine)
+            ////if (new StringInfo(textBox1.SelectedText).LengthInTextElements == predictEndofPageSelectedTextLen &&
+            ////        textBox1.Text.Substring(textBox1.SelectionStart + textBox1.SelectionLength, 2) == Environment.NewLine)
             if (textBox1.SelectionLength == predictEndofPageSelectedTextLen &&
                     textBox1.Text.Substring(textBox1.SelectionStart + textBox1.SelectionLength, 2) == Environment.NewLine)
             {
                 if (autoPastetoQuickEdit)
                 {
-                    //if (MessageBox.Show("auto paste to Ctext Quit Edit textBox?" + Environment.NewLine + Environment.NewLine
-                    //    + "……" + textBox1.SelectedText, "", MessageBoxButtons.OKCancel,MessageBoxIcon.Question,
-                    //    MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly) == DialogResult.OK)
+                    //        //if (MessageBox.Show("auto paste to Ctext Quit Edit textBox?" + Environment.NewLine + Environment.NewLine
+                    //        //    + "……" + textBox1.SelectedText, "", MessageBoxButtons.OKCancel,MessageBoxIcon.Question,
+                    //        //    MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly) == DialogResult.OK)
+                    //        if (MessageBox.Show("auto paste to Ctext Quit Edit textBox?" + Environment.NewLine + Environment.NewLine
+                    //            + "……" + textBox1.SelectedText, "", MessageBoxButtons.OKCancel, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1,
+                    //            //獨占式訊息
+                    //            MessageBoxOptions.DefaultDesktopOnly)
+                    //                == DialogResult.OK)
+                    //        {
+                    //            if (autoPastetoQuickEdit && (ModifierKeys == Keys.Control || check_the_adjacent_pages))
+                    //            {
+                    //                appActivateByName();
+                    //                //Browser.driver == null)
+                    //                if (browsrOPMode == BrowserOPMode.appActivateByName)
+                    //                    //當啟用預估頁尾後，按下 Ctrl 或 Shift Alt 可以自動貼入 Quick Edit ，唯此處僅用 Ctrl 及 Shift 控制關閉前一頁所瀏覽之 Ctext 網頁                
+                    //                    SendKeys.Send("^{F4}");//關閉前一頁
+                    //                if (check_the_adjacent_pages) nextPages(Keys.PageDown, false);
+                    //            }
+                    //            keyDownCtrlAdd(false);
+                    //        }
+                    //20230113 creedit with chatGPT：設定訊息方塊獨占性：
+                    bool _autoPastetoQuickEdit = autoPastetoQuickEdit;
+                    bool _check_the_adjacent_pages = check_the_adjacent_pages;
                     if (MessageBox.Show("auto paste to Ctext Quit Edit textBox?" + Environment.NewLine + Environment.NewLine
-                        + "……" + textBox1.SelectedText, "", MessageBoxButtons.OKCancel, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1,
-                        //獨占式訊息
-                        MessageBoxOptions.DefaultDesktopOnly)
-                            == DialogResult.OK)
+                                            + "……" + textBox1.SelectedText, "", MessageBoxButtons.OKCancel, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1,
+
+                                            MessageBoxOptions.DefaultDesktopOnly) == DialogResult.OK)
                     {
-                        if (autoPastetoQuickEdit && (ModifierKeys == Keys.Control || check_the_adjacent_pages))
+                        if (_autoPastetoQuickEdit && (ModifierKeys == Keys.Control || _check_the_adjacent_pages))
                         {
                             appActivateByName();
-                            //Browser.driver == null)
                             if (browsrOPMode == BrowserOPMode.appActivateByName)
-                                //當啟用預估頁尾後，按下 Ctrl 或 Shift Alt 可以自動貼入 Quick Edit ，唯此處僅用 Ctrl 及 Shift 控制關閉前一頁所瀏覽之 Ctext 網頁                
-                                SendKeys.Send("^{F4}");//關閉前一頁
-                            if (check_the_adjacent_pages) nextPages(Keys.PageDown, false);
+                                SendKeys.Send("^{F4}");
+                            if (_check_the_adjacent_pages) nextPages(Keys.PageDown, false);
                         }
                         keyDownCtrlAdd(false);
                     }
@@ -5030,15 +5047,15 @@ namespace WindowsFormsApp1
                             try
                             {//這裡需要參照元件來操作就不宜跑線程了！故此區塊最後的剪貼簿，要求須是單線程者，蓋因剪貼簿須獨占式使用故也20230111                                
                                 quick_edit_box = br.waitFindWebElementByNameToBeClickable("data", 2);//br.driver.FindElement(OpenQA.Selenium.By.Name("data"));
-                                ////chatGPT：
-                                //// 等待網頁元素出現，最多等待 2 秒
-                                //OpenQA.Selenium.Support.UI.WebDriverWait wait =
-                                //    new OpenQA.Selenium.Support.UI.WebDriverWait
-                                //    (br.driver, TimeSpan.FromSeconds(2));
-                                ////安裝了 Selenium.WebDriver 套件，才說沒有「ExpectedConditions」，然後照Visual Studio 2022的改正建議又用NuGet 安裝了 Selenium.Suport 套件，也自動「 using OpenQA.Selenium.Support.UI;」了，末學自己還用物件瀏覽器找過了 「OpenQA.Selenium.Support.UI」，可就是沒有「ExpectedConditions」靜態類別可用，即使官方文件也說有 ： https://www.selenium.dev/selenium/docs/api/dotnet/html/T_OpenQA_Selenium_Support_UI_ExpectedConditions.htm 20230109 未知何故 阿彌陀佛
-                                //wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(quick_edit_box));
-                                //// 在網頁元素載入完畢後才能讀取其.Text屬性值，存入剪貼簿
-                                ////Task.Delay(-1);
+                                                                                                     ////chatGPT：
+                                                                                                     //// 等待網頁元素出現，最多等待 2 秒
+                                                                                                     //OpenQA.Selenium.Support.UI.WebDriverWait wait =
+                                                                                                     //    new OpenQA.Selenium.Support.UI.WebDriverWait
+                                                                                                     //    (br.driver, TimeSpan.FromSeconds(2));
+                                                                                                     ////安裝了 Selenium.WebDriver 套件，才說沒有「ExpectedConditions」，然後照Visual Studio 2022的改正建議又用NuGet 安裝了 Selenium.Suport 套件，也自動「 using OpenQA.Selenium.Support.UI;」了，末學自己還用物件瀏覽器找過了 「OpenQA.Selenium.Support.UI」，可就是沒有「ExpectedConditions」靜態類別可用，即使官方文件也說有 ： https://www.selenium.dev/selenium/docs/api/dotnet/html/T_OpenQA_Selenium_Support_UI_ExpectedConditions.htm 20230109 未知何故 阿彌陀佛
+                                                                                                     //wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(quick_edit_box));
+                                                                                                     //// 在網頁元素載入完畢後才能讀取其.Text屬性值，存入剪貼簿
+                                                                                                     ////Task.Delay(-1);
                                 Clipboard.SetText(quick_edit_box.Text);
                             }
                             catch (Exception)
@@ -5088,7 +5105,7 @@ namespace WindowsFormsApp1
         private void runWordMacro(string runName)
         {
             if (!isClipBoardAvailable_Text()) return;
-            string xClpBd= Clipboard.GetText();            
+            string xClpBd = Clipboard.GetText();
             if (autoPastetoQuickEdit && xClpBd.Length < 250 && xClpBd.IndexOf("Bot", StringComparison.Ordinal) == -1) return;
             Color C = this.BackColor; this.BackColor = Color.Green;
             SystemSounds.Hand.Play();
@@ -5162,7 +5179,8 @@ namespace WindowsFormsApp1
         public static bool isClipBoardAvailable_Text()
         {// creedit with chatGPT：Clipboard Availability in C#：https://www.facebook.com/oscarsun72/posts/pfbid0dhv46wssuupa5PfH6RTNSZF58wUVbE6jehnQuYF9HtE9kozDBzCvjsowDkZTxkmcl
             /*在 C# 的 System.Windows.Forms 中，可以使用 Clipboard.ContainsData 或 Clipboard.ContainsText 方法來確定剪貼簿是否可用。*/
-            if (!Clipboard.ContainsText()) { 
+            if (!Clipboard.ContainsText())
+            {
                 Thread.Sleep(1000);
                 Task.Delay(1000);
             }
@@ -5424,8 +5442,8 @@ namespace WindowsFormsApp1
                     {
                         waitUpdate = true;
                         OpenQA.Selenium.IWebElement commit = br.waitFindWebElementByNameToBeClickable("commit", 2); //br.driver.FindElement(OpenQA.Selenium.By.Name("commit"));
-                        //OpenQA.Selenium.Support.UI.WebDriverWait waitcommit = new OpenQA.Selenium.Support.UI.WebDriverWait(br.driver, TimeSpan.FromSeconds(2));
-                        //waitcommit.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(commit));
+                                                                                                                    //OpenQA.Selenium.Support.UI.WebDriverWait waitcommit = new OpenQA.Selenium.Support.UI.WebDriverWait(br.driver, TimeSpan.FromSeconds(2));
+                                                                                                                    //waitcommit.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(commit));
                         Task.Run(() =>
                         { //送出後也不必等待，也沒有其他須用到的元件，故可交給作業系統開個新線程去跑就好，但因為editchapter上傳儲存時常較Quit edit費時，故保險起見，還是在後加個Task.delay一下比較好
                             try
@@ -5437,11 +5455,11 @@ namespace WindowsFormsApp1
                                 switch (ex.HResult)
                                 {
                                     case -2146233088://原有窗體被關閉時："stale element reference: element is not attached to the page document
-                                        ////string urlOld = br.driver.SwitchTo().Window(tabWin).Url;
-                                        ////br.driver.Navigate().GoToUrl(br.driver.SwitchTo().Window(tabWin).Url);
-                                        //MessageBox.Show("原有窗體已被關閉，請自行先送出儲存，再回來按OK確定！","",
-                                        //    MessageBoxButtons.OK,MessageBoxIcon.Warning,MessageBoxDefaultButton.Button1,
-                                        //    MessageBoxOptions.DefaultDesktopOnly);
+                                                     ////string urlOld = br.driver.SwitchTo().Window(tabWin).Url;
+                                                     ////br.driver.Navigate().GoToUrl(br.driver.SwitchTo().Window(tabWin).Url);
+                                                     //MessageBox.Show("原有窗體已被關閉，請自行先送出儲存，再回來按OK確定！","",
+                                                     //    MessageBoxButtons.OK,MessageBoxIcon.Warning,MessageBoxDefaultButton.Button1,
+                                                     //    MessageBoxOptions.DefaultDesktopOnly);
                                         break;
                                     default:
                                         throw;
@@ -5974,14 +5992,14 @@ namespace WindowsFormsApp1
                                 if (textBox3.Text.IndexOf("edit") > -1 && KeyboardInfo.getKeyStateToggled(System.Windows.Input.Key.Delete))//判斷Delete鍵是否被按下彈起
                                 {//手動輸入時，當按下 Shift+Delete 當即時要準備貼上該頁，故如此操作，以備確定無誤後手動按下 submit 按鈕
                                     OpenQA.Selenium.IWebElement quick_edit_box = br.waitFindWebElementByNameToBeClickable("data", 2);//br.driver.FindElement(OpenQA.Selenium.By.Name("data"));
-                                    //OpenQA.Selenium.Support.UI.WebDriverWait wait = new OpenQA.Selenium.Support.UI.WebDriverWait(br.driver, TimeSpan.FromSeconds(2));
-                                    //wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(quick_edit_box));
+                                                                                                                                     //OpenQA.Selenium.Support.UI.WebDriverWait wait = new OpenQA.Selenium.Support.UI.WebDriverWait(br.driver, TimeSpan.FromSeconds(2));
+                                                                                                                                     //wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(quick_edit_box));
                                     quick_edit_box.Clear();
                                     quick_edit_box.Click();
                                     quick_edit_box.SendKeys(OpenQA.Selenium.Keys.LeftShift + OpenQA.Selenium.Keys.Insert);
                                     OpenQA.Selenium.IWebElement submit = br.waitFindWebElementByIdToBeClickable("savechangesbutton", 2);//br.driver.FindElement(OpenQA.Selenium.By.Id("savechangesbutton"));
-                                    //wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(submit));
-                                    //放在一個 Task 中去執行，並立即返回。                                     
+                                                                                                                                        //wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(submit));
+                                                                                                                                        //放在一個 Task 中去執行，並立即返回。                                     
                                     Task.Run(() =>
                                     {//送出按鈕按下後可以跑線程，其他要取得元件操作者，就不移另跑線程。20230111 現在終於破解bugs找到癥結所在了。感恩感恩　讚歎讚歎　南無阿彌陀佛 19:09
                                         submit.Click();
@@ -6301,7 +6319,7 @@ namespace WindowsFormsApp1
                         br.driver = br.driverNew();//不用Task.Run()包裹也成了
                     else
                     {//如果Chrome瀏覽器都沒有開啟或被誤關的話20230109
-                        //因為 br.driver != null 先清除chromedriver：
+                     //因為 br.driver != null 先清除chromedriver：
                         Process[] chromeInstances = Process.GetProcessesByName("chrome");
                         if (chromeInstances.Length == 0)
                         {
@@ -6458,7 +6476,7 @@ namespace WindowsFormsApp1
                     //    string xNext = x.Substring(s);
                     //    StringInfo xInfo = new StringInfo(xNext);                    
                     textBox1.SelectionLength = 1;//對於已經輸入完成的 surrogate C#應該會正確判斷其字長度；實際測試非然也
-                    //對標點符號punctuations所佔字位不取代
+                                                 //對標點符號punctuations所佔字位不取代
                     w = textBox1.SelectedText;
                     if (punctuations.IndexOf(e.KeyChar) > -1) textBox1.SelectionLength = 0;
                     else if (char.IsSurrogate(w.ToCharArray()[0])) textBox1.SelectionLength = 2;
