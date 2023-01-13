@@ -1,6 +1,7 @@
 ﻿using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Text;
@@ -11,30 +12,17 @@ using System.Media;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
+using System.Threading;
 using System.Windows.Forms;
-using Microsoft.Office.Interop.Word;
-using ado = ADODB;//https://docs.microsoft.com/zh-tw/dotnet/csharp/language-reference/keywords/using-directive
+using TextForCtext;
                   //引用adodb 要將其「內嵌 Interop 類型」（Embed Interop Type）屬性設為false（預設是true）才不會出現以下錯誤：  HResult=0x80131522  Message=無法從組件 載入類型 'ADODB.FieldsToInternalFieldsMarshaler'。
                   //https://stackoverflow.com/questions/5666265/adodbcould-not-load-type-adodb-fieldstointernalfieldsmarshaler-from-assembly  https://blog.csdn.net/m15188153014/article/details/119895082
-using TextForCtext;
-using br = TextForCtext.Browser;
-using Point = System.Drawing.Point;
-using Font = System.Drawing.Font;
-using Task = System.Threading.Tasks.Task;
+using ado = ADODB;//https://docs.microsoft.com/zh-tw/dotnet/csharp/language-reference/keywords/using-directive
 using Application = System.Windows.Forms.Application;
-using System.Security.Cryptography;
-//using System.Net;
-//using System.Net.Http.Headers;
-using System.Collections.ObjectModel;
-using System.Security.Policy;
-using System.Web.SessionState;
-//using System.Windows.Input;
-//using OpenQA.Selenium;
-//using OpenQA.Selenium.DevTools.V106.CSS;
-//using OpenQA.Selenium.Support.UI;
-//using SeleniumExtras.WaitHelpers;
-//using OpenQA.Selenium;
+using br = TextForCtext.Browser;
+using Font = System.Drawing.Font;
+using Point = System.Drawing.Point;
+using Task = System.Threading.Tasks.Task;
 
 namespace WindowsFormsApp1
 {
@@ -5099,7 +5087,8 @@ namespace WindowsFormsApp1
 
         private void runWordMacro(string runName)
         {
-            string xClpBd = Clipboard.GetText();
+            if (!isClipBoardAvailable_Text()) return;
+            string xClpBd= Clipboard.GetText();            
             if (autoPastetoQuickEdit && xClpBd.Length < 250 && xClpBd.IndexOf("Bot", StringComparison.Ordinal) == -1) return;
             Color C = this.BackColor; this.BackColor = Color.Green;
             SystemSounds.Hand.Play();
@@ -5137,6 +5126,7 @@ namespace WindowsFormsApp1
                 default:
                     //清除多餘的空行,排除卷末的空行
                     Task.WaitAll();
+                    while (!isClipBoardAvailable_Text()) { }
                     xClpBd = Clipboard.GetText();
                     if (xClpBd.Length > 100)
                     {
@@ -5167,6 +5157,16 @@ namespace WindowsFormsApp1
             this.BackColor = C;
             show_nICo();
             normalLineParaLength = 0;
+        }
+
+        public static bool isClipBoardAvailable_Text()
+        {// creedit with chatGPT：Clipboard Availability in C#：https://www.facebook.com/oscarsun72/posts/pfbid0dhv46wssuupa5PfH6RTNSZF58wUVbE6jehnQuYF9HtE9kozDBzCvjsowDkZTxkmcl
+            /*在 C# 的 System.Windows.Forms 中，可以使用 Clipboard.ContainsData 或 Clipboard.ContainsText 方法來確定剪貼簿是否可用。*/
+            if (!Clipboard.ContainsText()) { 
+                Thread.Sleep(1000);
+                Task.Delay(1000);
+            }
+            return Clipboard.ContainsText();
         }
 
         const string fName_to_Save_Txt = "cText.txt";
@@ -5389,7 +5389,7 @@ namespace WindowsFormsApp1
 
 
 
-        //for .BrowserOPMode.selenium    browsrOPMode!=BrowserOPMode.appActivateByName
+        //for .BrowserOPMode.Selenium……    browsrOPMode!=BrowserOPMode.appActivateByName
         private void pasteToCtext(string url)
         {
             br.driver = br.driver ?? br.driverNew();
@@ -5453,7 +5453,7 @@ namespace WindowsFormsApp1
                 //});
                 //確保所有editchapter都已上傳完畢
                 //https://learn.microsoft.com/zh-tw/dotnet/api/system.threading.tasks.task.delay?view=netframework-4.8&f1url=%3FappId%3DDev16IDEF1%26l%3DZH-TW%26k%3Dk(System.Threading.Tasks.Task.Delay)%3Bk(TargetFrameworkMoniker-.NETFramework%2CVersion%253Dv4.8)%3Bk(DevLang-csharp)%26rd%3Dtrue
-                if (waitUpdate) Task.Delay(4000).Wait();
+                if (waitUpdate) { Task.Delay(4000).Wait(); Thread.Sleep(1200); }
                 #endregion
 
                 //檢查textbox3的值與現用網頁相同否
@@ -6031,6 +6031,7 @@ namespace WindowsFormsApp1
                 //Task.Delay(900).Wait();
                 Task.WaitAll();
                 Application.DoEvents();
+                while (!isClipBoardAvailable_Text()) { }
                 clpTxt = Clipboard.GetText();
                 //throw;
             }
@@ -6084,6 +6085,7 @@ namespace WindowsFormsApp1
                         default:
                             break;
                     }
+                    while (!isClipBoardAvailable_Text()) { }
                     string nowClpTxt = Clipboard.GetText();
                     if (nowClpTxt != "" && nowClpTxt != ClpTxtBefore)
                     {
