@@ -218,6 +218,8 @@ Alt + s 或 Alt + Shift + 6 ：小注文不換行 ： notes_a_line()
 
 Alt + Shift + s :  所有小注文都不換行
 
+Alt + t ：預測游標所在行是否為標題 執行 detectTitleYetWithoutPreSpace()
+
 Alt + u : 鍵入 《
 
 Alt + v： 檢查[查字.mdb].[異體字反正]資料表中是否已有該字記錄

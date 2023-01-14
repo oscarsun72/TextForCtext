@@ -167,6 +167,16 @@ namespace WindowsFormsApp1
             //}
         }
 
+        internal bool Active
+        {//20230114 creedit chatGPT：Windows Forms Active Detection
+            get
+            {
+                if (!this.Visible) return false;
+                if (this.WindowState == FormWindowState.Minimized)
+                    return false;
+                return this.Focused;
+            }
+        }
 
         void Caret_Shown(Control ctl)
         {
@@ -1657,6 +1667,11 @@ namespace WindowsFormsApp1
                     e.Handled = true; notes_a_line(); return;
                 }
 
+                if (e.KeyCode == Keys.T)
+                {//Alt + t ：預測游標所在行是否為標題
+                    e.Handled = true; detectTitleYetWithoutPreSpace(); return;
+                }
+
                 if (e.KeyCode == Keys.V)// Alt + v
                 {
                     e.Handled = true;
@@ -2354,6 +2369,114 @@ namespace WindowsFormsApp1
             stopUndoRec = false;
         }
 
+        //標題（篇名）判斷，在無前置空格時時 20230114
+        void detectTitleYetWithoutPreSpace()
+        {//Alt + t ：預測游標所在行是否為標題
+            if (normalLineParaLength == 0)
+                normalLineParaLength = wordsPerLinePara;
+            if (wordsPerLinePara != 0)
+            {
+                MessageBox.Show("請先執行Word VBA 「轉成黑豆以作行字數長度判斷用」程序以取得正文每行正常長度再執行。感恩感恩　南無阿彌陀佛", "", MessageBoxButtons.OK, MessageBoxIcon.Stop); return;
+            }
+            int s = textBox1.SelectionStart, p = 0;
+            string x = textBox1.Text, nl = x.IndexOf("<p>") == -1 ? Environment.NewLine : "<p>" + Environment.NewLine;
+
+            do
+            {
+                if (textBox1.Text.Substring(s).Length < 100)
+                {
+                    textBox1.Select(s, 1); break;
+                }
+                string currentLineTxt = getLineTxt(textBox1.Text, s);
+                int lp = new StringInfo(currentLineTxt).LengthInTextElements;//行長度
+                p = textBox1.Text.IndexOf(nl, s);
+                if (currentLineTxt.IndexOf("*") > -1)
+                {
+                    s = p + nl.Length + 1;
+                    continue;
+                }
+                if (normalLineParaLength > lp)
+                {
+                    MessageBoxDefaultButton dbtn = MessageBoxDefaultButton.Button2;
+
+                    //如果行長度相差太多（目前設為4）且下一行又是一般正文的行長度時，則很可能是標題，故預設按鈕為 Yes
+                    if (normalLineParaLength - lp > 4 &&
+                        new StringInfo(getLineTxt(textBox1.Text, p + nl.Length)).LengthInTextElements == normalLineParaLength &&
+                        currentLineTxt.IndexOf("|") == -1)
+                        dbtn = MessageBoxDefaultButton.Button1;
+                    if (dbtn == MessageBoxDefaultButton.Button1)//檢查標題關鍵字
+                    {
+                        var ks = chkTitleKeyWord(currentLineTxt);
+                        if ((int)ks < 2)
+                        {
+                            textBox1.Select(s + 1, 0);
+                            keysTitleCode();
+                            continue;
+                        }                        
+                    }
+                    textBox1.Select(s, 0); textBox1.ScrollToCaret();
+                    DialogResult r =
+                    MessageBox.Show("這行是標題（篇名）嗎？", "篇名判斷式", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question,
+                        dbtn, MessageBoxOptions.ServiceNotification);
+                    switch (r)
+                    {
+                        case DialogResult.Yes:
+                            textBox1.Select(s + 1, 0);
+                            keysTitleCode();
+                            break;
+                        case DialogResult.No:
+                            break;//繼續do while 迴圈
+                        default://Cancel,停止操作
+                            //訊息方塊就是一個表單，顯示時會讓此表單失去焦點。
+                            if (!Active) Activate();
+                            return;
+                    }
+                }
+                s = p + nl.Length + 1;
+            } while (p > -1);
+        }
+
+        enum keyWordPos { pre, end, yes, no }
+        //檢查標題關鍵字
+        keyWordPos chkTitleKeyWord(string chkText)
+        {
+            #region 檢查標題關鍵字宣告            
+            string[] titleKeywordEnd = { "墓誌", "墓誌銘", "墓志銘", "權厝志" };//後綴
+            string[] titleKeywordPre = { "", "", "" }; //前綴
+            string[] titleKeyword = { "", "" };
+            //20230114 chatGPT菩薩：C# 2D Array Conversion:
+            string[][] titleKeywords = { titleKeywordEnd, titleKeywordPre, titleKeyword };
+            #endregion
+            for (int keysMember = 0; keysMember < titleKeywords.Length; keysMember++)
+            {
+                string[] Items = titleKeywords[keysMember];
+                foreach (string item in Items)
+                {
+                    if (item != "" && chkText.IndexOf(item) > -1)
+                    {
+                        switch (keysMember)
+                        {
+                            case 0://後綴
+                                if (chkText.Substring(chkText.LastIndexOf(item)) == item)
+                                    return (keyWordPos)keysMember;//keyWordPos.end;
+                                break;
+                            case 1://前綴
+                                if (chkText.Substring(chkText.IndexOf(item)) == item)
+                                    return (keyWordPos)keysMember;//keyWordPos.pre;
+                                break;
+                            case 2:
+                                if (chkText.Substring(chkText.IndexOf(item)) == item)
+                                    return (keyWordPos)keysMember;//keyWordPos.yes;
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                }
+                keysMember++;
+            }
+            return keyWordPos.no;
+        }
         void autoMarkTitles()
         {
             undoRecord();
@@ -3901,12 +4024,12 @@ namespace WindowsFormsApp1
             //決定是否要到下一頁
             //if (!shiftKeyDownYet ) nextPages(Keys.PageDown, false);
             if (!shiftKeyDownYet && !check_the_adjacent_pages) nextPages(Keys.PageDown, false);
-                //預測下一頁頁末尾端在哪裡
-                predictEndofPage();
+            //預測下一頁頁末尾端在哪裡
+            predictEndofPage();
             //重設自動判斷頁尾之值
             pageTextEndPosition = 0; pageEndText10 = "";
             if (browsrOPMode != BrowserOPMode.appActivateByName)
-                autoPastetoCtextQuitEditTextbox();
+                autoPastetoCtextQuitEditTextbox();//在此中自會判斷autoPastetoQuickEdit值
         }
 
         const string omitStr = "．‧.…【】〖〗＝{}<p>（）《》〈〉：；、，。「」『』？！0123456789-‧·\r\n";//"　"
@@ -4410,6 +4533,7 @@ namespace WindowsFormsApp1
                             if (browsrOPMode == BrowserOPMode.appActivateByName)
                             {
                                 appActivateByName();
+                                //關閉瀏覽器分頁
                                 SendKeys.Send("^{F4}");
                             }
                             if (_check_the_adjacent_pages) nextPages(Keys.PageDown, false);
@@ -4434,9 +4558,14 @@ namespace WindowsFormsApp1
                         //焦點交回表單
                         //如果是鄰近頁牽連編輯，則自動翻到下一頁書圖以備檢覆
                         if (check_the_adjacent_pages) nextPages(Keys.PageDown, false);
-                        Activate();
-                        ////解除 textbox防觸鎖定，並準備檢視編輯，交給上一行Activate();處理
-                        //if (!textBox1.Enabled) textBox1.Enabled = true;
+
+                        #region 解除 textbox防觸鎖定，並準備檢視編輯；如果訊息方塊不是在取得 Cancel回應值時即關閉，則此下程式恐怕要移出這個 if else區塊才行
+                        //Activate();已會觸發Form1_Activated(new object(), new EventArgs());事件
+                        //訊息方塊就是一個表單，顯示時會讓此表單失去焦點。
+                        if (!Active) { Activate(); Application.DoEvents(); }
+                        //解除 textbox防觸鎖定，並準備檢視編輯，交給上一行Activate();處理
+                        if (!textBox1.Enabled) { textBox1.Enabled = true; textBox1.Focus(); }
+                        #endregion
                     }
                 }
                 else
