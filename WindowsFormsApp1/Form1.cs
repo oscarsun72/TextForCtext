@@ -3730,7 +3730,7 @@ namespace WindowsFormsApp1
         private void keyDownCtrlAdd(bool shiftKeyDownYet = false)
         {
             int s = textBox1.SelectionStart, l = textBox1.SelectionLength;
-            if (s == 0 && l == 0) return;
+            if (s == 0 && l == 0) { Activate(); return; }
 
             string x = textBox1.Text;
             //if (pageTextEndPosition == 0) pageTextEndPosition = s;
@@ -3833,7 +3833,7 @@ namespace WindowsFormsApp1
                     {
                         MessageBox.Show("請重新指定頁面結束位置", "", MessageBoxButtons.OK, MessageBoxIcon.Stop);
                         pageTextEndPosition = 0; pageEndText10 = "";
-                        return;
+                        Activate(); return;
                     }
                 }
             }
@@ -3864,6 +3864,7 @@ namespace WindowsFormsApp1
                                 pageTextEndPosition = s;
                         }
 
+                        Activate();
                         return;
                     }
                     else
@@ -3878,7 +3879,7 @@ namespace WindowsFormsApp1
             #endregion
 
             //貼到 Ctext Quick edit 前的文本檢查
-            if (!newTextBox1()) return;
+            if (!newTextBox1()) { Activate(); return; }
 
             # region 貼到 Ctext Quick edit 
             //根據不同輸入模式需求操作
@@ -3900,10 +3901,12 @@ namespace WindowsFormsApp1
             //決定是否要到下一頁
             //if (!shiftKeyDownYet ) nextPages(Keys.PageDown, false);
             if (!shiftKeyDownYet && !check_the_adjacent_pages) nextPages(Keys.PageDown, false);
-            //預測下一頁頁末尾端在哪裡
-            predictEndofPage();
+                //預測下一頁頁末尾端在哪裡
+                predictEndofPage();
             //重設自動判斷頁尾之值
             pageTextEndPosition = 0; pageEndText10 = "";
+            if (browsrOPMode != BrowserOPMode.appActivateByName)
+                autoPastetoCtextQuitEditTextbox();
         }
 
         const string omitStr = "．‧.…【】〖〗＝{}<p>（）《》〈〉：；、，。「」『』？！0123456789-‧·\r\n";//"　"
@@ -4414,8 +4417,9 @@ namespace WindowsFormsApp1
                         }
                         keyDownCtrlAdd(false);
                         if (browsrOPMode != BrowserOPMode.appActivateByName)
-                        {
-                            //預估下一頁尾位置predictEndofPage()在前面keyDownCtrlAdd(false);已做
+                        {//if (autoPastetoQuickEdit) 會在autoPastetoCtextQuitEditTextbox()中判斷
+                            //預估下一頁尾位置
+                            //predictEndofPage();//在前面keyDownCtrlAdd(false);已做一次，這次做是給遞迴（recursion）用的「if (textBox1.SelectionLength == predictEndofPageSelectedTextLen &&……」這行要判斷
                             autoPastetoCtextQuitEditTextbox();//遞迴（recursion） 20230113
                         }
                     }
@@ -5004,11 +5008,13 @@ namespace WindowsFormsApp1
                 case BrowserOPMode.seleniumNew:
                     if (br.driver == null) br.driverNew();
                     //br.GoToUrlandActivate(url);
-                    Task.Run(() =>//此間操作，因為沒有要操作的元件，所以可以跑線程。20230111
+                    Task wait = Task.Run(() =>//此間操作，因為沒有要操作的元件，所以可以跑線程。20230111
                     {
                         br.GoToUrlandActivate(url);
                     });
                     Task.WaitAll();
+                    wait.Wait();
+                    if (!keyinText && autoPastetoQuickEdit) Activate();
                     break;
                 case BrowserOPMode.seleniumGet:
                     //後面的textBox3.Text = url;會觸發private void textBox3_TextChanged 事件程序，於彼處執行瀏覽即可
@@ -5040,6 +5046,7 @@ namespace WindowsFormsApp1
                         break;
                     //Selenium New Chrome瀏覽器實例模式：
                     case BrowserOPMode.seleniumNew:
+                        //if(!keyinText&& autoPastetoQuickEdit) Activate();
                         break;
                     case BrowserOPMode.seleniumGet:
                         break;
