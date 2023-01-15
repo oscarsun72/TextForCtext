@@ -13,6 +13,7 @@ using System.Media;
 using System.Net.Http.Headers;
 using System.Runtime.InteropServices;
 using System.Runtime.Remoting.Contexts;
+using System.Security.Policy;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -652,6 +653,8 @@ namespace WindowsFormsApp1
                 if (blankParagraphPosition + 4 >= xCopy.Length) break;
             }
             #endregion
+
+            #region 檢查無效的漢字字元
             int missWordPositon = xCopy.IndexOf(" ");
             if (missWordPositon == -1) missWordPositon = xCopy.IndexOfAny("�".ToCharArray());
             if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("□");
@@ -673,6 +676,7 @@ namespace WindowsFormsApp1
             if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("ဉ");
             if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("▱");
             if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("ꗍ");
+            #endregion
 
             #region 檢查不當分段
 
@@ -801,14 +805,47 @@ namespace WindowsFormsApp1
                 this.BackColor = Color.Yellow;
                 Task.Delay(400).Wait();
                 this.BackColor = c;
+                bool omit = false;
                 if (chkP > 0)
                 {
-                    textBox1.Select(chkP - (+"<p>".Length + Environment.NewLine.Length), 3);
-                    textBox1.ScrollToCaret();
-                    Clipboard.SetText("　");//準備空格以填補缺額
-                    return false;
+                    string xTbx1 = textBox1.Text; int double_chkP = chkP - (+"<p>".Length + Environment.NewLine.Length);
+                    string[] stringPre = { "銘曰", "辭曰" };
+                    string[] stringNext = { "論曰", "舊史氏曰" };
+                    string[][] strings = { stringPre, stringNext };
+                    for (int i = 0; i < strings.Length; i++)
+                    {
+                        foreach (var item in strings[i])
+                        {
+                            int sItem = 0;
+                            switch (i)
+                            {
+                                case 0://pre
+                                    sItem = double_chkP - item.Length;
+                                    if (sItem >= 0)
+                                        if (xTbx1.Substring(sItem, item.Length) == item) { omit = true; break; }
+                                    break;
+                                case 1://next
+                                    sItem = double_chkP + "<p>".Length + Environment.NewLine.Length;
+                                    if (xTbx1.Length >= sItem + item.Length)
+                                        if (xTbx1.Substring(sItem, item.Length) == item) { omit = true; break; }
+                                    break;
+                                default:
+                                    break;
+                            }
+                            if (omit) break;
+                        }
+                        if (omit) break;
+                    }
+                    if (!omit)
+                    {
+                        textBox1.Select(chkP - (+"<p>".Length + Environment.NewLine.Length), 3);
+                        textBox1.ScrollToCaret();
+                        Clipboard.SetText("　");//準備空格以填補缺額
+                        return false;
+                    }
                 }
-                if (xCopy.IndexOf("□") > -1 && xCopy.IndexOfAny("�".ToCharArray()) == -1 && xCopy.IndexOf(" ") == -1 || chkP == 0)
+                if (xCopy.IndexOf("□") > -1 && xCopy.IndexOfAny("�".ToCharArray()) == -1 && xCopy.IndexOf(" ") == -1
+                    || chkP == 0 || omit)
                 {
                     //if (MessageBox.Show("有造字，是否先予訂補上？", "", MessageBoxButtons.OKCancel, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1) == DialogResult.OK)
                     //{
@@ -2441,7 +2478,7 @@ namespace WindowsFormsApp1
                 p = textBox1.Text.IndexOf(Environment.NewLine, s);
                 string nextLineTxt = getLineTxtWithoutPunctuation(textBox1.Text, p + newLineTag.Length);
                 int nextLineTxtLength = new StringInfo(nextLineTxt).LengthInTextElements;
-                if (currentLineTxt.IndexOf("*") > -1)
+                if (currentLineTxt.IndexOf("*") > -1 || currentLineTxt == "")
                 {
                     s = p + newLineTag.Length + 1;
                     continue;
@@ -2454,7 +2491,7 @@ namespace WindowsFormsApp1
                         nextLineTxtLength >= normalLineParaLength)
                     {
                         //檢查標題關鍵字
-                        var keywordPostion = chkTitleKeyWord(currentLineTxt);
+                        var keywordPostion = chkTitleKeyWords(currentLineTxt);
                         if ((int)keywordPostion < 2)
                         {
                             if (currentLineTxt.IndexOf("{") > -1)
@@ -2469,6 +2506,7 @@ namespace WindowsFormsApp1
                                 textBox1.Select(s + 1, 0);
                             SystemSounds.Beep.Play();
                             keysTitleCode();
+                            s = p + newLineTag.Length + 1;
                             continue;
                         }
                         else if (keywordPostion == keyWordPos.no)
@@ -2537,7 +2575,7 @@ namespace WindowsFormsApp1
                         case DialogResult.No:
                             break;//繼續do while 迴圈
                         default://Cancel,停止操作
-                            //訊息方塊就是一個表單，顯示時會讓此表單失去焦點。
+                                //訊息方塊就是一個表單，顯示時會讓此表單失去焦點。
                             if (!Active) Activate();
                             return;
                     }
@@ -2545,18 +2583,21 @@ namespace WindowsFormsApp1
                 s = p + newLineTag.Length + 1;
             } while (p > -1);
             playSound(soundLike.over);
+            bringBackMousePosFrmCenter();
         }
 
         enum keyWordPos { pre, end, yes, no }
         //檢查標題關鍵字
-        keyWordPos chkTitleKeyWord(string chkText)
+        keyWordPos chkTitleKeyWords(string chkText)
         {
-            #region 檢查標題關鍵字宣告            
+            #region 檢查標題關鍵字宣告
             string[] titleKeywordEnd = { "文","序", "又", "詩", "韻", "韵","解","議","論","說","說二","說上","說下",
-                "傳", "記","逸事","述", "碑","𥓓", "銘", "表", "誌", "權厝志","書","書後","書後一","書後二","書後三","跋","䟦"
-                ,"帖","{{并序}}" };//,"{{佚}}" 後面不會有內容的，所以不太可能長度等於正文正常長度，應該是接下一個標題
-            //,"墓表", "墓誌", "墓誌銘", "墓志銘"};//後綴
-            string[] titleKeywordPre = { "上", "答", "荅", "與", "題", "祭", "讀", "說", "釋", "記" }; //前綴
+                "傳", "記","逸事","述","賦", "碑","𥓓", "銘","詺", "碣","表", "誌", "權厝志","書","書後","一","二","三","四","五",
+                "序","敘","敍","引","跋","䟦","箋","牋","略","狀","道","箴","頌","辭"
+                ,"帖","事","{{并序}}","{{代}}" };//,"{{佚}}" 後面不會有內容的，所以不太可能長度等於正文正常長度，應該是接下一個標題
+                                            //,"墓表", "墓誌", "墓誌銘", "墓志銘"};//後綴
+            string[] titleKeywordPre = { "上", "答", "又", "再", "荅", "復", "覆", "與", "題", "祭", "讀", "說"
+                    , "釋", "記", "書" ,"辯","論","送","擬","最錄"}; //前綴
             string[] titleKeyword = { "", "" };
             //20230114 chatGPT菩薩：C# 2D Array Conversion:
             string[][] titleKeywords = { titleKeywordEnd, titleKeywordPre, titleKeyword };
@@ -2646,6 +2687,8 @@ namespace WindowsFormsApp1
         {
             int s = textBox1.SelectionStart, i = s;
             string x = textBox1.Text;
+            //下行僅debug時用，因為還有2星以上的階層標題
+            //if (getLineTxt(x,s).IndexOf("*") > -1) return;
             if (!stopUndoRec)
             {
                 undoRecord();
@@ -3264,8 +3307,8 @@ namespace WindowsFormsApp1
             {
                 textBox1.ScrollToCaret();
                 textBox1.AutoScrollOffset = caretPosition;//還不行！再研究 20220723
-                //ScrollableControl scrl = new ScrollableControl();
-                //scrl.ScrollControlIntoView(textBox1);
+                                                          //ScrollableControl scrl = new ScrollableControl();
+                                                          //scrl.ScrollControlIntoView(textBox1);
             }
         }
 
@@ -3588,10 +3631,10 @@ namespace WindowsFormsApp1
                 e = textBox1.Text.IndexOf(Environment.NewLine, s);
                 if (e == -1) break;
                 se = textBox1.Text.Substring(s, e - s);//本行/段文字
-                //foreach (var item in punctuations)
-                //{
-                //    se = se.Replace(item.ToString(), "");
-                //}
+                                                       //foreach (var item in punctuations)
+                                                       //{
+                                                       //    se = se.Replace(item.ToString(), "");
+                                                       //}
                 if (se != "")
                 {
                     string tx = textBox1.Text;
@@ -4145,7 +4188,7 @@ namespace WindowsFormsApp1
             //貼到 Ctext Quick edit 前的文本檢查
             if (!newTextBox1()) { Activate(); return; }
 
-            # region 貼到 Ctext Quick edit 
+            #region 貼到 Ctext Quick edit 
             //根據不同輸入模式需求操作
             switch (browsrOPMode)
             {
@@ -4153,10 +4196,13 @@ namespace WindowsFormsApp1
                     pasteToCtext();
                     break;
                 case BrowserOPMode.seleniumNew://純Selenium模式（2）
-                    pasteToCtext(textBox3.Text);
+                                               //終於找到bug了 NextPage()裡的textBox3.Text=url 設定太晚
+                    pasteToCtext(textBox3.Text);///////////////////////
+                                                //string currentUrl = br.driver.Url;
+                                                //pasteToCtext(currentUrl);//故改用 br.……
                     break;
                 case BrowserOPMode.seleniumGet://Selenium配合Windows API模式（1+2）或純不用Selenium模式
-                    //還未實作
+                                               //還未實作
                     break;
                 default:
                     break;
@@ -4170,8 +4216,14 @@ namespace WindowsFormsApp1
             predictEndofPage();
             //重設自動判斷頁尾之值
             pageTextEndPosition = 0; pageEndText10 = "";
-            if (browsrOPMode != BrowserOPMode.appActivateByName)//&&autoPastetoQuickEdit 
-                autoPastetoCtextQuitEditTextbox();//在此中自會判斷autoPastetoQuickEdit值
+            if (browsrOPMode != BrowserOPMode.appActivateByName)
+            { //&&autoPastetoQuickEdit 
+                bool callFunc = true; DialogResult dialogresult = new DialogResult();
+                if (callFunc)
+                    autoPastetoCtextQuitEditTextbox(out dialogresult);//在此中自會判斷autoPastetoQuickEdit值
+                if (dialogresult == DialogResult.OK) callFunc = true;
+                else callFunc = false;
+            }
         }
 
         const string omitStr = "．‧.…【】〖〗＝{}<p>（）《》〈〉：；、，。「」『』？！0123456789-‧·\r\n";//"　"
@@ -4632,10 +4684,11 @@ namespace WindowsFormsApp1
             //throw new NotImplementedException();
         }
 
-        void autoPastetoCtextQuitEditTextbox()
+        void autoPastetoCtextQuitEditTextbox(out DialogResult dialogResult)
         {
             ////if (new StringInfo(textBox1.SelectedText).LengthInTextElements == predictEndofPageSelectedTextLen &&
-            ////        textBox1.Text.Substring(textBox1.SelectionStart + textBox1.SelectionLength, 2) == Environment.NewLine)            
+            ////        textBox1.Text.Substring(textBox1.SelectionStart + textBox1.SelectionLength, 2) == Environment.NewLine)
+            dialogResult = DialogResult.Cancel;
             if (textBox1.SelectionLength == predictEndofPageSelectedTextLen &&
                     textBox1.Text.Substring(textBox1.SelectionStart + textBox1.SelectionLength, 2) == Environment.NewLine)
             {
@@ -4664,10 +4717,10 @@ namespace WindowsFormsApp1
                     //20230113 creedit with chatGPT：設定訊息方塊獨占性：
                     bool _autoPastetoQuickEdit = autoPastetoQuickEdit;
                     bool _check_the_adjacent_pages = check_the_adjacent_pages;
-                    if (MessageBox.Show("auto paste to Ctext Quit Edit textBox?" + Environment.NewLine + Environment.NewLine
+                    dialogResult = MessageBox.Show("auto paste to Ctext Quit Edit textBox?" + Environment.NewLine + Environment.NewLine
                                             + "……" + textBox1.SelectedText, "", MessageBoxButtons.OKCancel, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1,
-
-                                            MessageBoxOptions.DefaultDesktopOnly) == DialogResult.OK)
+                                            MessageBoxOptions.DefaultDesktopOnly);
+                    if (dialogResult == DialogResult.OK)
                     {
                         if (browsrOPMode == BrowserOPMode.appActivateByName) textBox1.Enabled = false;//避免誤觸
                         if (_autoPastetoQuickEdit && (ModifierKeys == Keys.Control || _check_the_adjacent_pages))
@@ -4684,9 +4737,9 @@ namespace WindowsFormsApp1
                         keyDownCtrlAdd(false);
                         if (browsrOPMode != BrowserOPMode.appActivateByName)
                         {//if (autoPastetoQuickEdit) 會在autoPastetoCtextQuitEditTextbox()中判斷
-                            //預估下一頁尾位置
-                            //predictEndofPage();//在前面keyDownCtrlAdd(false);已做一次，這次做是給遞迴（recursion）用的「if (textBox1.SelectionLength == predictEndofPageSelectedTextLen &&……」這行要判斷
-                            autoPastetoCtextQuitEditTextbox();//遞迴（recursion） 20230113
+                         //預估下一頁尾位置
+                         //predictEndofPage();//在前面keyDownCtrlAdd(false);已做一次，這次做是給遞迴（recursion）用的「if (textBox1.SelectionLength == predictEndofPageSelectedTextLen &&……」這行要判斷
+                            autoPastetoCtextQuitEditTextbox(out DialogResult dialogresult);//遞迴（recursion） 20230113
                         }
                     }
                     //取消自動輸入時
@@ -4701,59 +4754,41 @@ namespace WindowsFormsApp1
                         {
                             if (browsrOPMode != BrowserOPMode.appActivateByName)
                             {//決定是否清除原在quickedit_data_textbox裡的文字
-
-                                try
+                                switch (quickedit_data_textboxtxt)
                                 {
-                                    //if (br.Quickedit_data_textboxTxt== br.chkClearQuickedit_data_textboxTxtStr)// "\t")
-                                    if (quickedit_data_textboxtxt == br.chkClearQuickedit_data_textboxTxtStr)// "\t")
-
-                                        //br.driver = br.driver ?? br.driverNew();
-                                        //OpenQA.Selenium.IWebElement data = br.waitFindWebElementByNameToBeClickable("data", 2);
-                                        //string dataText = data.Text;
-                                        //if (dataText == " ")// "\t")
-                                        //{
-                                        if (DialogResult.OK == MessageBox.Show("是否清除當前頁面中的空白內容？（其實是有由tab鍵所按下的值）", "",
+                                    //如果是Word VBA 新頁面所產生的 tab鍵 \t（讀取值是「 」，非"\t"）
+                                    case " ":// br.chkClearQuickedit_data_textboxTxtStr:
+                                        dialogResult = MessageBox.Show("是否清除當前頁面中的空白內容？（其實是有由tab鍵所按下的值）", "",
                                         MessageBoxButtons.OKCancel, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1,
-                                        MessageBoxOptions.DefaultDesktopOnly))
+                                        MessageBoxOptions.DefaultDesktopOnly);
+                                        if (DialogResult.OK == dialogResult)
                                         {
-                                            //br.在Chrome瀏覽器的Quick_edit文字框中輸入文字(br.driver, br.chkClearQuickedit_data_textboxTxtStr, textBox3.Text);
-                                            //data.Click();
-                                            //data.Clear();
-                                            //OpenQA.Selenium.IWebElement submit = br.waitFindWebElementByIdToBeClickable("savechangesbutton", 3);
-                                            ////Task.Run(() =>
-                                            ////{
-                                            //try
-                                            //{
-                                            //    submit.Click();
-                                            //}
-                                            //catch (Exception)
-                                            //{
-                                            //    submit = br.waitFindWebElementByIdToBeClickable("savechangesbutton", 3);
-                                            //    submit.Click();
-                                            //    //throw;
-                                            //}
-                                            ////});
-                                            ///
 
                                             #region 以下是據方法函式「keyDownCtrlAdd(bool shiftKeyDownYet = false)」而來
                                             pasteToCtext(textBox3.Text, br.chkClearQuickedit_data_textboxTxtStr);
                                             //if (!textBox1.Enabled) { textBox1.Enabled = true; textBox1.Focus(); }
+                                            //Task.WaitAll(); Thread.Sleep(500);
                                             nextPages(Keys.PageDown, false);
-                                            //預測下一頁頁末尾端在哪裡
-                                            predictEndofPage();
-                                            //重設自動判斷頁尾之值
-                                            pageTextEndPosition = 0; pageEndText10 = "";
+                                            ////預測下一頁頁末尾端在哪裡
+                                            //predictEndofPage();
+                                            ////重設自動判斷頁尾之值
+                                            //pageTextEndPosition = 0; pageEndText10 = "";
                                             #endregion
-
-                                            autoPastetoCtextQuitEditTextbox();//在此中自會判斷autoPastetoQuickEdit值
+                                            autoPastetoCtextQuitEditTextbox(out DialogResult dialogresult);//在此中自會判斷autoPastetoQuickEdit值
                                         }
-                                    //}
-                                }
-                                catch (Exception ex)
-                                {
-                                    Console.WriteLine(ex.HResult + ":" + ex.Message);
-                                    //br.在Chrome瀏覽器的Quick_edit文字框中輸入文字(br.driver, br.chkClearQuickedit_data_textboxTxtStr, textBox3.Text);
-                                    throw;
+                                        break;
+                                    case ""://如果文字框裡沒內容（即空白頁）
+                                        dialogResult = MessageBox.Show("是否移到下一頁？", "",
+                                        MessageBoxButtons.OKCancel, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1,
+                                        MessageBoxOptions.DefaultDesktopOnly);
+                                        if (DialogResult.OK == dialogResult)
+                                        {
+                                            nextPages(Keys.PageDown, false);
+                                            autoPastetoCtextQuitEditTextbox(out DialogResult dialogresult);
+                                        }
+                                        break;
+                                    default:
+                                        break;
                                 }
                             }
                         }
@@ -4770,13 +4805,7 @@ namespace WindowsFormsApp1
                         //訊息方塊就是一個表單，顯示時會讓此表單失去焦點。
                         if (!Active)
                         {
-                            Activate(); Application.DoEvents();
-                            //20230115 chatGPT大菩薩：Cursor back to form：
-                            Point formPos = new Point(this.Location.X + this.Size.Width / 2, this.Location.Y + this.Size.Height / 2);
-                            Cursor.Position = formPos;
-                            //上面這段程式碼將滑鼠游標的位置設置為表單的中心點位置。
-                            //Point cursorPos = Cursor.Position;
-                            //this.Location = cursorPos;
+                            bringBackMousePosFrmCenter();
                         }
                         //解除 textbox防觸鎖定，並準備檢視編輯，交給上一行Activate();處理
                         if (!textBox1.Enabled) { textBox1.Enabled = true; textBox1.Focus(); }
@@ -4787,6 +4816,18 @@ namespace WindowsFormsApp1
                     keyDownCtrlAdd(false);
                 //return;
             }
+        }
+
+        //將滑鼠位置帶回表單中心
+        private void bringBackMousePosFrmCenter()
+        {
+            Activate(); Application.DoEvents();
+            //20230115 chatGPT大菩薩：Cursor back to form：
+            Point formPos = new Point(this.Location.X + this.Size.Width / 2, this.Location.Y + this.Size.Height / 2);
+            Cursor.Position = formPos;
+            //上面這段程式碼將滑鼠游標的位置設置為表單的中心點位置。
+            //Point cursorPos = Cursor.Position;
+            //this.Location = cursorPos;
         }
 
         bool autoPasteFromSBCKwhether = false;
@@ -4808,7 +4849,7 @@ namespace WindowsFormsApp1
             if (!(kys == Keys.F1 || kys == Keys.Pause) || ModifierKeys != Keys.None) return;
             if (kys == Keys.F1)
             {
-                autoPastetoCtextQuitEditTextbox();
+                autoPastetoCtextQuitEditTextbox(out DialogResult dialogResult);
                 return;
             }
             string x = textBox1.SelectedText;
@@ -5357,6 +5398,7 @@ namespace WindowsFormsApp1
                     //Task wait = Task.Run(() =>//此間操作，因為沒有要操作的元件，所以可以跑線程。20230111
                     //{以別處還要參考，故取消Task
                     br.GoToUrlandActivate(url);
+                    if (textBox3.Text != url) textBox3.Text = url;
                     //});
                     //Task.WaitAll();
                     //wait.Wait();
@@ -5877,7 +5919,7 @@ namespace WindowsFormsApp1
         private string chkUrlIsTextBox3Text(ReadOnlyCollection<string> tabWindowHandles)
         {
             string url;
-            //再回到正在編輯的本頁，準備貼入
+            //再回到正在編輯的本頁，準備貼入            
             if (br.driver.Url != textBox3.Text)
             {
                 bool found = false;
@@ -6513,7 +6555,9 @@ namespace WindowsFormsApp1
                 }
                 if (!keyinText && (autoPastetoQuickEdit || (autoPastetoQuickEdit && ModifierKeys != Keys.None)))
                 {
-                    autoPastetoCtextQuitEditTextbox();
+                    //20230115 非Selenium模式才執行，因為 Selenium模式 已在函式方法裡啟用遞迴（recursion），不必靠表單此Activated事件才能再次啟動了貼上機制了，真正達到全自動化的境地
+                    if (browsrOPMode == BrowserOPMode.appActivateByName)
+                        autoPastetoCtextQuitEditTextbox(out DialogResult dialogResult);
                     if (textBox1.TextLength >= 100)//配合下面「if (textBox1.TextLength < 100)」還要執行
                         return;//20230113
                 }
@@ -6729,7 +6773,7 @@ namespace WindowsFormsApp1
                             br.driver = null; br.driverNew();
                         }
                     }
-                    if (br.driver.Url != textBox3.Text) br.GoToUrlandActivate(textBox3.Text);
+                    if (br.driver != null && br.driver.Url != textBox3.Text) br.GoToUrlandActivate(textBox3.Text);
                     textBox2.Text = "";
                     break;
                 case "br":
