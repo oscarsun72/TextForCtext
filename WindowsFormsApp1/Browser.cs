@@ -62,10 +62,20 @@ namespace TextForCtext
             }
         }
 
-        internal static IWebElement waitFindWebElementByNameToBeClickable(string name, float second)
+        internal static IWebElement Quickedit_data_textbox { get; private set; }
+        private static string quickedit_data_textboxTxt = "";
+        internal static string Quickedit_data_textboxTxt
         {
-            IWebElement e = driver.FindElement(By.Name(name));
-            WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(second));
+            get
+            {
+                return quickedit_data_textboxTxt;
+            }
+        }
+        internal static IWebElement waitFindWebElementByNameToBeClickable(string name, float second,
+            IWebDriver drver=null)        {
+            
+            IWebElement e = (driver??drver).FindElement(By.Name(name));
+            WebDriverWait wait = new WebDriverWait((driver??drver), TimeSpan.FromSeconds(second));
             wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(e));
             return e;
         }
@@ -248,7 +258,11 @@ namespace TextForCtext
                 //        throw;
                 //}                
                 frm = Application.OpenForms["Form1"] as Form1;
-                cDrv.Navigate().GoToUrl(frm.Controls["textBox3"].Text !=""? frm.Controls["textBox3"].Text: "https://ctext.org/account.pl?if=en");
+                //到指定網頁
+                string url = frm.Controls["textBox3"].Text != "" ? frm.Controls["textBox3"].Text : "https://ctext.org/account.pl?if=en";
+                cDrv.Navigate().GoToUrl(url);
+                //配置quickedit_data_textbox以備用
+                quickedit_data_textboxSetting(url,null,cDrv);
                 //IWebElement clk  = cDrv.FindElement(selm.By.Id("logininfo")); clk.Click();
                 //cDrv.FindElement(selm.By.Id("logininfo")).Click();
                 /*202301050214 因為以下這行設定成功，可以用平常的Chrome來操作了，就不必再登入安裝（如擴充功能）匯入（如書籤）什麼的了 感恩感恩　讚歎讚歎　南無阿彌陀佛
@@ -354,7 +368,8 @@ namespace TextForCtext
             return options;
         }
 
-        //在Chrome瀏覽器的文字框(ctext.org 的 Quick edit ）中輸入文字,creedit
+        internal static readonly string chkClearQuickedit_data_textboxTxtStr = " ";// "\t"（其實是有由tab鍵所按下的值，或其他亂碼字），此與 Word VBA 中國哲學書電子化計劃.新頁面 為速新章節單位的配置有關 碼詳：https://github.com/oscarsun72/TextForCtext/blob/f75b5da5a5e6eca69baaae0b98ed2d6c286a3aab/WordVBA/%E4%B8%AD%E5%9C%8B%E5%93%B2%E5%AD%B8%E6%9B%B8%E9%9B%BB%E5%AD%90%E5%8C%96%E8%A8%88%E5%8A%83.bas#L32
+        //在Chrome瀏覽器的文字框(ctext.org 的 Quick edit ）中輸入文字,creedit//若 xIuput= " "則清除而不輸入
         internal static void 在Chrome瀏覽器的Quick_edit文字框中輸入文字(ChromeDriver driver, string xIuput, string url)
         {
             #region 檢查網址
@@ -392,10 +407,14 @@ namespace TextForCtext
                 textbox = driver.FindElement(selm.By.Name("data"));
                 //throw;
             }
+            quickedit_data_textboxSetting(url, textbox);
+
             #endregion
 
             //清除原來文字，準備貼上新的
             textbox.Clear();
+
+            #region paste to textbox
             // 在文字框中輸入文字
             //textbox.SendKeys(@xIuput); //("Hello, World!");
             /*
@@ -415,7 +434,7 @@ namespace TextForCtext
             //若含BMP外的字則用系統貼上的方法
             //else//今一律用貼上省事便捷 20230102
             //{
-            #region paste to textbox
+
             //文字框取得焦點
             textbox.Click();
             //chrome取得焦點
@@ -426,13 +445,15 @@ namespace TextForCtext
                                                                   //driver.Manage().Window.Maximize();//creedit chatGPT
                                                                   //driver.Manage().Window.Position = new Point(0, 0);
 
-            // 建立 Actions 物件
-            //Actions actions = new Actions(driver);//creedit
-            // 貼上剪貼簿中的文字
-            //actions.MoveToElement(textbox).Click().Perform();
-            //actions.SendKeys(OpenQA.Selenium.Keys.Control + "v").Build().Perform();
-            //actions.SendKeys(OpenQA.Selenium.Keys.LeftShift + OpenQA.Selenium.Keys.Insert).Build().Perform();
-            textbox.SendKeys(OpenQA.Selenium.Keys.LeftShift + OpenQA.Selenium.Keys.Insert);
+            //清除內容不輸入(前已有textbox.Clear();）
+            if (xIuput != chkClearQuickedit_data_textboxTxtStr)//" ")// "\t")//是否清除當前頁面中的內容？（其實是有由tab鍵所按下的值)
+                                                               // 建立 Actions 物件
+                                                               //Actions actions = new Actions(driver);//creedit
+                                                               // 貼上剪貼簿中的文字
+                                                               //actions.MoveToElement(textbox).Click().Perform();
+                                                               //actions.SendKeys(OpenQA.Selenium.Keys.Control + "v").Build().Perform();
+                                                               //actions.SendKeys(OpenQA.Selenium.Keys.LeftShift + OpenQA.Selenium.Keys.Insert).Build().Perform();
+                textbox.SendKeys(OpenQA.Selenium.Keys.LeftShift + OpenQA.Selenium.Keys.Insert);
             //SendKeys.Send("^v{tab}~");
             #endregion
             //}
@@ -440,7 +461,7 @@ namespace TextForCtext
             //System.Windows.Forms.Application.DoEvents();
             //送出
             //selm.IWebElement submit = driver.FindElement(selm.By.Id("savechangesbutton"));//("textbox"));
-            selm.IWebElement submit = submit = waitFindWebElementByIdToBeClickable("savechangesbutton", 3);
+            selm.IWebElement submit = waitFindWebElementByIdToBeClickable("savechangesbutton", 3);
             /* creedit 我問：在C#  用selenium 控制 chrome 瀏覽器時，怎麼樣才能不必等待網頁作出回應即續編處理按下來的程式碼 。如，以下程式碼，請問，如何在按下 submit.Click(); 後不必等這個動作完成或作出回應，即能繼續執行之後的程式碼呢 感恩感恩　南無阿彌陀佛
                         chatGPT他答：你可以將 submit.Click(); 放在一個 Task 中去執行，並立即返回。
              */
@@ -555,13 +576,23 @@ namespace TextForCtext
                 openNewTab();
             }
             //throw;
-
             driver.Navigate().GoToUrl(url);
             //activate and move to most front of desktop
             //driver.SwitchTo().Window(driver.CurrentWindowHandle);
             driver.ExecuteScript("window.scrollTo(0, 0)");//chatGPT:您好！如果您使用 C# 和 Selenium 來控制 Chrome 瀏覽器，您可以使用以下的程式碼將網頁捲到最上面：
+            quickedit_data_textboxSetting(url);
         }
 
+        private static void quickedit_data_textboxSetting(string url, IWebElement textbox = null,IWebDriver driver=null)
+        {
+            if (url.IndexOf("edit") > -1)
+            {
+                if (textbox != null) Quickedit_data_textbox = textbox;
+                else
+                    Quickedit_data_textbox = waitFindWebElementByNameToBeClickable("data", 2,driver);
+                quickedit_data_textboxTxt = Quickedit_data_textbox.Text;
+            }
+        }
 
         internal static ChromeDriver openNewTab()//creedit 20230103
         {/*chatGPT

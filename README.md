@@ -46,7 +46,7 @@ button1 「分行分段」或「送出貼上」按鈕:
  - 若有按下Ctrl才按此鈕則執行[圖文脫鉤 Word VBA](https://github.com/oscarsun72/TextForCtext/blob/4e140975f3881bae8e7f5acc5899c7d61a4794d3/WordVBA/%E4%B8%AD%E5%9C%8B%E5%93%B2%E5%AD%B8%E6%9B%B8%E9%9B%BB%E5%AD%90%E5%8C%96%E8%A8%88%E5%8A%83.bas#L346) ；或在本應用程式介面視窗從作業系統得到焦點、成為作用中的視窗時，只要有按下 Ctrl 或 Shift ，亦會由剪貼簿現存的內容來判斷，是否要執行同一個圖文脫鉤的VBA程序；沒按下的話，預設是執行「中國哲學書電子化計劃.清除頁前的分段符號」程序，如果剪貼簿裡的文字本含有完整「編輯」模式下的文本特徵時（詳程式碼內原理，在[中國哲學書電子化計劃.bas](https://github.com/oscarsun72/TextForCtext/blob/4e140975f3881bae8e7f5acc5899c7d61a4794d3/WordVBA/%E4%B8%AD%E5%9C%8B%E5%93%B2%E5%AD%B8%E6%9B%B8%E9%9B%BB%E5%AD%90%E5%8C%96%E8%A8%88%E5%8A%83.bas#L136)模組檔案裡）。
 
 ## 基本功能
-（一切為加速 ctext 網站圖文對照文本編輯而設。目前不免以本人主觀習慣為主）
+（**一切為加速 ctext 網站圖文對照文本編輯而設。目前不免以本人主觀習慣為主**）
 - 操作介面之表單視窗預設為最上層顯示，當表單視窗不在作用中時，只要焦點/插入點不在 textBox2 中，即非最上層顯示；若恢復作用中時（取得焦點時），則最上層顯示。（或：即自動隱藏至系統右下方之系統列/任務列中，當滑鼠滑過任務列中的縮圖ico時，即還原/恢復視窗窗體－－此隱藏功能先棄置）
 - 當 textBox1、textBox3 內容為空白時，滑鼠左鍵點一下即讀進剪貼簿內容。
 - 當離開 textBox2 或 textBox4 文字方塊時，即自執行在 textBox1 尋找或取代文字功能（增罝透過 button2 的切換，決定是否只在選取區中執行尋找、取代）
@@ -212,13 +212,17 @@ Alt + i : 鍵入 》（如 MS Word 自動校正，會依前面的符號作結尾
 
 Alt + j : 鍵入換行分段符號（newline）（同 Ctrl + j 的系統預設）
 
+Alt + l : 檢查/輸入抬頭平抬時的條件：執行topLineFactorIuput04condition()
+    > 目前只支援新增 condition=0與4 的情形，故名為 0condition，即當後綴是什麼時，此行文字雖短，不是分段，乃是平抬 
+    >> 0=後綴；1=前綴；2=前後之前；3前後之後；4是前+後之詞彙；5非前+後之詞彙；6非後綴之詞彙；7非前綴之詞彙
+
 Alt + p 或 Alt + ` : 鍵入 "<p>" + newline（分行分段符號）；若置於行/段之首，則會自動移至前一段末再執行
 
 Alt + s 或 Alt + Shift + 6 ：小注文不換行 ： notes_a_line()
 
 Alt + Shift + s :  所有小注文都不換行
 
-Alt + t ：預測游標所在行是否為標題 執行 detectTitleYetWithoutPreSpace()
+Alt + t ：預測游標所在行是否為標題（在前無空格縮排時） 執行 detectTitleYetWithoutPreSpace()
 
 Alt + u : 鍵入 《
 

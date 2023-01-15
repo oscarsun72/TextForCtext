@@ -9,14 +9,17 @@ using WindowsFormsApp1;
 using System.Windows.Forms;
 using System.Web.UI;
 using OpenQA.Selenium.DevTools.V85.ApplicationCache;
+using System.Windows.Media.Animation;
 
 namespace TextForCtext
 {
     class Mdb
     {
-        static Form1 frm = Application.OpenForms["Form1"] as Form1;        
+        static Form1 frm = Application.OpenForms["Form1"] as Form1;
+
         internal static string fileFullName(string dbNameIncludeExt)
         {
+            if (frm == null) frm = Application.OpenForms["Form1"] as Form1;
             string root = frm.dropBoxPathIncldBackSlash;
             if (!File.Exists(root + dbNameIncludeExt))
             {
@@ -26,6 +29,17 @@ namespace TextForCtext
             if (!File.Exists(root + dbNameIncludeExt)) { MessageBox.Show(root + dbNameIncludeExt + "not found"); return ""; }
             else
                 return root + dbNameIncludeExt;
+        }
+
+        private static void openDb(string dbFileFullname, out OleDbConnection conn)
+        {
+            string connectionString = "Provider=Microsoft.Jet.OLEDB.4.0;Data Source=" + dbFileFullname;
+
+            // 建立連接物件            
+            conn = new OleDbConnection(connectionString);
+
+            // 開啟資料庫連接
+            conn.Open();
         }
 
         internal static bool VariantsExist(string wordtoChk)//以chatGPT建立再自己略加修潤的 Alt + v:即以以下與chatGPT對話所得者：C# 檢查[查字.mdb].[異體字反正]資料表中是否已有該字記錄,擬自創 creedit 一動詞以作紀念，日後若有標識 creedit（creeditted 、 creeditting) 者，即為取自 chatGPT AI 而改寫者，意為：「create from chatGPT AI and edit」,以取 create 諧音且兼其義以識別非純自創也 感恩感恩　讚歎讚歎　南無阿彌陀佛 
@@ -40,12 +54,12 @@ namespace TextForCtext
             */
             // 建立連接字串
             string f = fileFullName("查字.mdb");
-            if (f == "") return false;
-            string connectionString = "Provider=Microsoft.Jet.OLEDB.4.0;Data Source=" + f;
-            
-            // 建立連接物件
-            OleDbConnection conn = new OleDbConnection(connectionString);
-
+            if (f == "")
+            {
+                MessageBox.Show("找不到「查字.mdb」");
+                return false;
+            }
+            openDb(f, out OleDbConnection conn);
             // 建立命令物件
             OleDbCommand cmd = conn.CreateCommand();
 
@@ -53,12 +67,8 @@ namespace TextForCtext
             //cmd.CommandText = "SELECT COUNT(*) FROM 異體字轉正 WHERE 異體字 = @word";//@word 為參數名，用「=」比對中文會不正確，在cjk-擴充字集時
             cmd.CommandText = "SELECT COUNT(*) FROM 異體字轉正 WHERE strcomp(異體字 , @word)=0";//@word 為參數名
 
-
             // 設定命令的參數
             cmd.Parameters.AddWithValue("@word", wordtoChk);
-
-            // 開啟資料庫連接
-            conn.Open();
 
             // 執行命令並取得結果
             int count = (int)cmd.ExecuteScalar();
@@ -66,7 +76,6 @@ namespace TextForCtext
 
             // 關閉資料庫連接
             conn.Close();
-
             // 判斷結果
             if (count > 0)
             {
@@ -78,6 +87,97 @@ namespace TextForCtext
                 return false;// 資料表中沒有該字記錄
             }
 
+        }
+
+
+        //輸入平抬條件：0=後綴；1=前綴；2=前後之前；3前後之後；4是前+後之詞彙；5非前+後之詞彙；6非後綴之詞彙；7非前綴之詞彙
+        internal static void topLineFactorIuput04condition(string termtoChk)
+        {
+            //TextBox tb = (TextBox)frm.Controls["textBox1"];
+            //string termtoChk = tb.SelectedText;
+
+            //開啟"查字.mdb"資料庫
+            string f = fileFullName("查字.mdb");
+            if (f == "")
+            {
+                MessageBox.Show("找不到「查字.mdb」");
+                return;
+            }
+            
+            openDb(f, out OleDbConnection conn);
+
+            //20230114 creedit chatGPT大菩薩：新增資料庫資料：
+            //在這個程式碼中,使用了一個 T-SQL 的 IF @@ROWCOUNT = 0 判斷當前存在與否,如果不存在就新增,否則就查詢。
+            //這樣子就可以同時達到查詢和新增的目的了。
+            using (OleDbCommand cmd = conn.CreateCommand())
+            {
+                int condition = 0;//輸入平抬條件：0=後綴；1=前綴；2=前後之前；3前後之後；4是前+後之詞彙；5非前+後之詞彙；6非後綴之詞彙；7非前綴之詞彙
+                if (termtoChk.IndexOf("|"+Environment.NewLine)>-1)
+                {
+                    termtoChk = termtoChk.Replace("|" + Environment.NewLine,"");
+                    condition = 4;
+                }
+                //cmd.CommandText = "SELECT COUNT(*) FROM 每行字數判斷用 WHERE strcomp(term , @term)=0; " +
+                //                  "IF @@ROWCOUNT = 0 " +
+                //                  "INSERT INTO 每行字數判斷用 (term,condition) VALUES (@term, @condition);" +
+                //                  "ELSE " +
+                //"SELECT term,condition FROM 每行字數判斷用 WHERE strcomp(term , @term)=0;";
+                cmd.CommandText = "SELECT term,condition FROM 每行字數判斷用 WHERE strcomp(term , @term)=0;";
+                cmd.Parameters.AddWithValue("@term", termtoChk);
+                //string input = Microsoft.VisualBasic.Interaction.InputBox("Prompt", "Title", "Default Value", -1, -1);                
+                cmd.Parameters.AddWithValue("@condition", condition);
+                string term_condition = "";
+                using (OleDbDataReader reader = cmd.ExecuteReader())
+                {
+                    //if (reader.RecordsAffected == 0)
+                    if (reader.HasRows)
+                    {
+                        //reader.NextResult();
+                        while (reader.Read())
+                        {
+                            term_condition += reader["term"].ToString() + "=" +
+                             reader["condition"].ToString() + Environment.NewLine;
+                            // do something with term and condition
+                        }
+                    }
+                    else
+                    {
+                        if (DialogResult.OK == MessageBox.Show("確定新增？", "", MessageBoxButtons.OKCancel, MessageBoxIcon.Exclamation))
+                        {
+                            cmd.CommandText = "INSERT INTO 每行字數判斷用 (term,condition) VALUES (@term, @condition);";
+                            reader.Close();
+                            cmd.ExecuteReader().Close();
+                        }
+                    }
+                }
+                if (term_condition != "")
+                    MessageBox.Show("現有資料：" + Environment.NewLine + term_condition);
+            }
+            conn.Close();
+            ////設定查詢指令
+            //int count = 0;
+            //using (OleDbCommand cmd = conn.CreateCommand())
+            //{
+            //    cmd.CommandText = "SELECT COUNT(*) FROM 每行字數判斷用 WHERE strcomp(term , @term)=0";//@word 為參數名
+            //    cmd.Parameters.AddWithValue("@word", termtoChk);
+            //    count = (int)cmd.ExecuteScalar();
+
+            //    if (count == 0)
+            //    {//新增 termtoChk 值 至 每行字數判斷用 資料表中
+            //     //20230114 creedit chatGPT大菩薩：新增資料庫資料：
+            //        using (OleDbCommand cmdAddNewRec = conn.CreateCommand())
+            //        {
+            //            cmdAddNewRec.CommandText = "INSERT INTO 每行字數判斷用 (term) VALUES (@term)";
+            //            cmdAddNewRec.Parameters.AddWithValue("@term", termtoChk);
+            //            cmdAddNewRec.ExecuteNonQuery();
+            //        }
+
+            //    }
+            //    else
+            //    {
+            //        MessageBox.Show("term="+);
+            //    }
+            //}
         }
     }
 }

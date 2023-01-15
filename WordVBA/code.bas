@@ -222,4 +222,11 @@ With ActiveDocument.Range.Find
     .Execute "", , , , , , , wdFindContinue, , "", wdReplaceAll
     .ClearFormatting
 End With
+If InStr(ActiveDocument.Range, "//") > 0 Then
+    Dim p As Paragraph
+    For Each p In ActiveDocument.Paragraphs
+        If InStr(p.Range, "//") > 0 Then p.Range.Delete
+    Next p
+End If
+ActiveDocument.Range = VBA.Replace(ActiveDocument.Range, Chr(13) & Chr(13), Chr(13))
 End Sub
