@@ -1,5 +1,4 @@
-﻿using Microsoft.Office.Interop.Word;
-using Microsoft.Win32;
+﻿using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -10,17 +9,14 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Media;
-using System.Net.Http.Headers;
 using System.Runtime.InteropServices;
-using System.Runtime.Remoting.Contexts;
-using System.Security.Policy;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 //using System.Windows;
 using System.Windows.Forms;
 using TextForCtext;
-using static System.Net.Mime.MediaTypeNames;
+//using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 //引用adodb 要將其「內嵌 Interop 類型」（Embed Interop Type）屬性設為false（預設是true）才不會出現以下錯誤：  HResult=0x80131522  Message=無法從組件 載入類型 'ADODB.FieldsToInternalFieldsMarshaler'。
 //https://stackoverflow.com/questions/5666265/adodbcould-not-load-type-adodb-fieldstointernalfieldsmarshaler-from-assembly  https://blog.csdn.net/m15188153014/article/details/119895082
 using ado = ADODB;//https://docs.microsoft.com/zh-tw/dotnet/csharp/language-reference/keywords/using-directive
@@ -41,6 +37,7 @@ namespace WindowsFormsApp1
         //string[] CJKBiggestSet = new string[]{ "HanaMinB", "KaiXinSongB", "TH-Tshyn-P1" };
         string[] CJKBiggestSet = { "全宋體(等寬)", "新細明體-ExtB", "HanaMinB", "KaiXinSongB", "TH-Tshyn-P1", "HanaMinA", "Plangothic P1", "Plangothic P2" };
         Color button2BackColorDefault;
+        string _currentPage = "";
         bool insertMode = true, check_the_adjacent_pages = false, keyinText = false//手動輸入;
             , TopLine = false//抬頭
             , Indents = true;//縮排
@@ -52,6 +49,7 @@ namespace WindowsFormsApp1
         //取得輸入模式：手動或自動
         internal bool KeyinTextMode { get { return keyinText; } }
 
+        internal string CurrentPage { get { return _currentPage; } }
         //static internal string mainFromTextBox3Text;
 
 
@@ -107,7 +105,7 @@ namespace WindowsFormsApp1
             //this.Shown += Form1_Shown;//https://stackoverflow.com/questions/32720207/change-caret-cursor-in-textbox-in-c-sharp
 
             this.FormClosing += Form1_FormClosing;//202301050101 creedit
-
+            textBox3.MouseMove += textBox3_MouseMove;
         }
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
@@ -5858,44 +5856,50 @@ namespace WindowsFormsApp1
 
                 #region 先檢查是否有已開啟的編輯頁尚未送出儲存(因為許多異體字須一次取代，往往會打開一個chapter單位來edit) 其網址有「&action=editchapter」關鍵字，如：https://ctext.org/wiki.pl?if=en&chapter=687756&action=editchapter#12450
                 bool waitUpdate = false;
-                //Task wait = Task.Run(() =>
-                //{
-                foreach (string tabWin in tabWindowHandles)
+                Task wait = Task.Run(() =>
                 {
-                    if (br.driver.SwitchTo().Window(tabWin).Url.IndexOf("&action=editchapter") > -1)
+                    foreach (string tabWin in tabWindowHandles)
                     {
-                        waitUpdate = true;
-                        OpenQA.Selenium.IWebElement commit = br.waitFindWebElementByNameToBeClickable("commit", 2); //br.driver.FindElement(OpenQA.Selenium.By.Name("commit"));
-                                                                                                                    //OpenQA.Selenium.Support.UI.WebDriverWait waitcommit = new OpenQA.Selenium.Support.UI.WebDriverWait(br.driver, TimeSpan.FromSeconds(2));
-                                                                                                                    //waitcommit.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(commit));
-                        Task.Run(() =>
-                        { //送出後也不必等待，也沒有其他須用到的元件，故可交給作業系統開個新線程去跑就好，但因為editchapter上傳儲存時常較Quit edit費時，故保險起見，還是在後加個Task.delay一下比較好
-                            try
-                            {
-                                commit.Click();
-                            }
-                            catch (Exception ex)
-                            {
-                                switch (ex.HResult)
+                        if (br.driver.SwitchTo().Window(tabWin).Url.IndexOf("&action=editchapter") > -1)
+                        {
+                            waitUpdate = true;
+                            OpenQA.Selenium.IWebElement commit = br.waitFindWebElementByNameToBeClickable("commit", 2); //br.driver.FindElement(OpenQA.Selenium.By.Name("commit"));
+                                                                                                                        //OpenQA.Selenium.Support.UI.WebDriverWait waitcommit = new OpenQA.Selenium.Support.UI.WebDriverWait(br.driver, TimeSpan.FromSeconds(2));
+                                                                                                                        //waitcommit.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(commit));
+                            Task.Run(() =>
+                            { //送出後也不必等待，也沒有其他須用到的元件，故可交給作業系統開個新線程去跑就好，但因為editchapter上傳儲存時常較Quit edit費時，故保險起見，還是在後加個Task.delay一下比較好
+                                try
                                 {
-                                    case -2146233088://原有窗體被關閉時："stale element reference: element is not attached to the page document
-                                                     ////string urlOld = br.driver.SwitchTo().Window(tabWin).Url;
-                                                     ////br.driver.Navigate().GoToUrl(br.driver.SwitchTo().Window(tabWin).Url);
-                                                     //MessageBox.Show("原有窗體已被關閉，請自行先送出儲存，再回來按OK確定！","",
-                                                     //    MessageBoxButtons.OK,MessageBoxIcon.Warning,MessageBoxDefaultButton.Button1,
-                                                     //    MessageBoxOptions.DefaultDesktopOnly);
-                                        break;
-                                    default:
-                                        throw;
+                                    commit.Click();
                                 }
-                            }
-                        });//只要有找到，都按下送出，反正若沒修改，也沒有任何影響202301112128                        
+                                catch (Exception ex)
+                                {
+                                    switch (ex.HResult)
+                                    {
+                                        case -2146233088://原有窗體被關閉時："stale element reference: element is not attached to the page document
+                                                         ////string urlOld = br.driver.SwitchTo().Window(tabWin).Url;
+                                                         ////br.driver.Navigate().GoToUrl(br.driver.SwitchTo().Window(tabWin).Url);
+                                                         //MessageBox.Show("原有窗體已被關閉，請自行先送出儲存，再回來按OK確定！","",
+                                                         //    MessageBoxButtons.OK,MessageBoxIcon.Warning,MessageBoxDefaultButton.Button1,
+                                                         //    MessageBoxOptions.DefaultDesktopOnly);
+                                            break;
+                                        default:
+                                            throw;
+                                    }
+                                }
+                            });//只要有找到，都按下送出，反正若沒修改，也沒有任何影響202301112128                        
+                        }
                     }
-                }
-                //});
+                });
                 //確保所有editchapter都已上傳完畢
                 //https://learn.microsoft.com/zh-tw/dotnet/api/system.threading.tasks.task.delay?view=netframework-4.8&f1url=%3FappId%3DDev16IDEF1%26l%3DZH-TW%26k%3Dk(System.Threading.Tasks.Task.Delay)%3Bk(TargetFrameworkMoniker-.NETFramework%2CVersion%253Dv4.8)%3Bk(DevLang-csharp)%26rd%3Dtrue
-                if (waitUpdate) { Task.Delay(4000).Wait(); Thread.Sleep(1200); }
+                if (waitUpdate)
+                {
+                    //Task.Delay(4000).Wait(); //20230117 chatGPT大菩薩：Task 類別是用來創建新的執行緒來執行非同步作業的，而 Thread 類別則是用來管理當前執行緒的。Task 類別提供了許多用於創建和管理多個執行緒的方法，而 Thread 類別則提供了許多用於管理當前執行緒的方法，例如 Sleep() 方法和 Start() 方法。
+                    Thread.Sleep(1200);
+                }
+                else
+                    wait.Wait();
                 #endregion
 
                 //檢查textbox3的值與現用網頁相同否
@@ -5904,7 +5908,6 @@ namespace WindowsFormsApp1
                 ////手動輸入時一般當不必自動清除框中文字
                 //br.在Chrome瀏覽器的Quick_edit文字框中輸入文字(br.driver, Clipboard.GetText(), url);                
                 //});
-                //task.Wait();
             }
             else//不是在手動鍵入時
             {
@@ -7164,11 +7167,27 @@ namespace WindowsFormsApp1
             return new int[] { s, nextS };
         }
 
-
+        ToolTip toolTip = new ToolTip();
+        private void tooltipConstructor(object sender, string tooltipText)
+        {
+            if (toolTip.GetToolTip((Control)sender) != tooltipText)
+                toolTip.SetToolTip((Control)sender, tooltipText);
+        }
         //bool dragDropUrl = false;
-
+        private void textBox3_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (_currentPage != "")
+                tooltipConstructor(sender, "現在在第" + _currentPage + "頁");
+        }
         private void textBox3_TextChanged(object sender, EventArgs e)
         {
+            string url = textBox3.Text;
+            if (url.IndexOf("&page=") > -1)
+            {//取得現前頁碼
+                int s = url.IndexOf("&page=") + "&page=".Length;
+                _currentPage = url.Substring(s, url.IndexOf("&", s) > -1 ? url.IndexOf("&", s) - s : url.Length - s);
+            }
+            else _currentPage = "";
             //mainFromTextBox3Text = textBox3.Text;
             string oldValue = (string)textBox3.Tag;//chatGPT 20230108
 
@@ -7198,12 +7217,12 @@ namespace WindowsFormsApp1
 
             textBox3.Tag = textBox3Text;
             if (keyinText) return;
-            if (textBox3.Text == "")
+            if (url == "")
             {
                 resetBooksPagesFeatures(); previousBookID = 0;
                 return;
             }
-            if (textBox3.Text.IndexOf("ctext.org") > -1) if (textBox3.Text.IndexOf("https://") == -1) textBox3.Text = "https://" + textBox3.Text;
+            if (url.IndexOf("ctext.org") > -1) if (url.IndexOf("https://") == -1) textBox3.Text = "https://" + url;
             if (oldValue == "" || oldValue == null) autoPastetoOrNot();
         }
 
@@ -7458,12 +7477,6 @@ namespace WindowsFormsApp1
 
         }
         Process prcssDownloadImgFullName;
-
-        private void textBox3_MouseMove(object sender, MouseEventArgs e)
-        {
-            //if (Clipboard.GetText() != textBox3.Text)
-            //    textBox3_Click(sender, e);
-        }
 
         private void richTextBox1_Enter(object sender, EventArgs e)
         {//20230111 creedit YouChat：如果您想要在指定的控制項之前捕獲鼠標按下事件，您可以將控件的TabStop屬性設置為false，這樣就可以確保該控制項的Mousedown事件會先被捕獲。你可以使用以下示例代碼來實現：
