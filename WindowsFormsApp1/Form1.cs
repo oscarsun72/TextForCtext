@@ -541,24 +541,24 @@ namespace WindowsFormsApp1
             s = textBox1.SelectionStart; l = textBox1.SelectionLength;
             string x = textBox1.Text;
             if (x == "") return false;
-            textBox1.Select(0, s + l);string xHandle = textBox1.SelectedText;
+            textBox1.Select(0, s + l); string xHandle = textBox1.SelectedText;
 
             saveText();//備份以防萬一
             //if (textBox1.SelectedText != "")
             //{
-            if (textBox2.Text != "＠"&&textBox2.Text!="") textBox2.Text = "";
+            if (textBox2.Text != "＠" && textBox2.Text != "") textBox2.Text = "";
 
 
             #region 清除冗碼（清除冗餘要留意會動到 l 的值！！）
             if (x.IndexOf("<p>|") > -1 || x.IndexOf("|<p>") > -1 || x.IndexOf("||") > -1)
             {//先除掉全部的，再清除目前要貼上的
                 x = x.Replace("<p>|", "<p>").Replace("|<p>", "<p>").Replace("||", "|");
-                if (xHandle.IndexOf("<p>|") > -1 || xHandle.IndexOf("|<p>") > -1 
+                if (xHandle.IndexOf("<p>|") > -1 || xHandle.IndexOf("|<p>") > -1
                     || xHandle.IndexOf("||") > -1)
                 {
                     textBox1.SelectedText = xHandle.Replace("<p>|", "<p>").Replace("|<p>", "<p>")
                         .Replace("||", "|");
-                     s = textBox1.SelectionStart; l = textBox1.SelectionLength;
+                    s = textBox1.SelectionStart; l = textBox1.SelectionLength;
                 }
             }
             #endregion
@@ -2431,7 +2431,7 @@ namespace WindowsFormsApp1
 
         private void keysAsteriskPreTitle()
         {
-            string x = textBox1.SelectedText; int s = textBox1.SelectionStart;
+            string x = textBox1.SelectedText; int s = textBox1.SelectionStart, originalS = s;
             if (textBox1.SelectedText != "")
                 expandSelectedTextRangeToWholeLinePara(s, textBox1.SelectionLength, textBox1.Text);
             else
@@ -2457,7 +2457,9 @@ namespace WindowsFormsApp1
                 //if (i > -1) i += j;
                 j++;
             }
-            caretPositionRecall();
+            //回到執行前之位置
+            if (j > 0) textBox1.Select(originalS + j, 0);
+            else caretPositionRecall();
             stopUndoRec = false;
         }
 
@@ -4194,8 +4196,8 @@ namespace WindowsFormsApp1
             #endregion
 
             //貼到 Ctext Quick edit 前的文本檢查
-            if (!newTextBox1(out s,out l)) { Activate(); return; }//在 newTextBox1函式中可能會更動 s、l 二值，故得如此處置，以免s、l值跑掉
-            
+            if (!newTextBox1(out s, out l)) { Activate(); return; }//在 newTextBox1函式中可能會更動 s、l 二值，故得如此處置，以免s、l值跑掉
+
             #region 貼到 Ctext Quick edit 
             //根據不同輸入模式需求操作
             switch (browsrOPMode)

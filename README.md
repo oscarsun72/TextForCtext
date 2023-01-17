@@ -250,9 +250,9 @@ F4 ： 重複輸入最後一個字
 
 Shift + F5 ： 在textBox1 回到上1次插入點（游標）所在處（且與最近「charIndexListSize」次瀏覽處作切換，如 MS Word）。charIndexListSize 目前=  3。
 
-F6 : 標題降階（增加標題前之星號）
+F6 : 標題降階（增加標題前之星號）[keysAsteriskPreTitle()]
 
-Alt + F6 或 Alt + F8 或 選取標題文字前之空格再按下 Alt + ` : run autoMarkTitles 自動標識標題（篇名）
+Alt + F6 或 Alt + F8 或 選取標題文字前之空格再按下 Alt + ` : run autoMarkTitles 自動標識標題（篇名）[autoMarkTitles()]
 
 F7 ： 每行縮排，即每行/段前空一格；全部縮排的機會少，若要全部，則請將插入點放在全文前端或末尾
 
