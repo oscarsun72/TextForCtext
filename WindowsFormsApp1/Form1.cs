@@ -536,24 +536,32 @@ namespace WindowsFormsApp1
         }
 
         bool chkPTitleNotEnd = false;//為檢查不當分段設置的，以判斷前一頁末是否不含標明尾，其尾卻在此頁前，以便略過檢查
-        private bool newTextBox1()
+        private bool newTextBox1(out int s, out int l)
         {
-            if (textBox1.Text == "") return false;
-            saveText();
+            s = textBox1.SelectionStart; l = textBox1.SelectionLength;
+            string x = textBox1.Text;
+            if (x == "") return false;
+            textBox1.Select(0, s + l);string xHandle = textBox1.SelectedText;
+
+            saveText();//備份以防萬一
             //if (textBox1.SelectedText != "")
             //{
-            if (textBox2.Text != "＠") textBox2.Text = "";
-            string x = textBox1.Text; int s = textBox1.SelectionStart, l = textBox1.SelectionLength;
+            if (textBox2.Text != "＠"&&textBox2.Text!="") textBox2.Text = "";
+
+
+            #region 清除冗碼（清除冗餘要留意會動到 l 的值！！）
             if (x.IndexOf("<p>|") > -1 || x.IndexOf("|<p>") > -1 || x.IndexOf("||") > -1)
-            {
+            {//先除掉全部的，再清除目前要貼上的
                 x = x.Replace("<p>|", "<p>").Replace("|<p>", "<p>").Replace("||", "|");
-                if (textBox1.SelectedText.IndexOf("<p>|") > -1 || textBox1.SelectedText.IndexOf("|<p>") > -1 || textBox1.SelectedText.IndexOf("||") > -1)
+                if (xHandle.IndexOf("<p>|") > -1 || xHandle.IndexOf("|<p>") > -1 
+                    || xHandle.IndexOf("||") > -1)
                 {
-                    textBox1.SelectedText = textBox1.SelectedText.Replace("<p>|", "<p>").Replace("|<p>", "<p>").Replace("||", "|");
-                    s = textBox1.SelectionStart; l = textBox1.SelectionLength;
+                    textBox1.SelectedText = xHandle.Replace("<p>|", "<p>").Replace("|<p>", "<p>")
+                        .Replace("||", "|");
+                     s = textBox1.SelectionStart; l = textBox1.SelectionLength;
                 }
             }
-
+            #endregion
 
             if (pageTextEndPosition - 10 < 0 || pageTextEndPosition > x.Length) pageTextEndPosition = s;
             if (pageTextEndPosition != 0 && s + l < pageTextEndPosition)
@@ -607,7 +615,7 @@ namespace WindowsFormsApp1
             else
             { s = textBox1.SelectionStart; l = textBox1.SelectionLength; }
             string xCopy = x.Substring(0, s + l > x.Length ? x.Length : s + l);
-            #region 置換為全形符號、及清除冗餘
+            #region 置換為全形符號、及清除冗餘（清除冗餘要留意會動到 l 的值！！）
             string[] replaceDChar = { ",", ";", ":", "．", "?", "：：", "《《", "》》", "〈〈", "〉〉", "。}}。}}" };
             string[] replaceChar = { "，", "；", "：", "·", "？", "：", "《《", "》", "〈", "〉", "。}}" };
             foreach (var item in replaceDChar)
@@ -4115,8 +4123,10 @@ namespace WindowsFormsApp1
             if (s < 0 || s + l > x.Length) s = textBox1.SelectionStart;
             string xCopy = x.Substring(0, s + l);
             ////////////string xCopy = x.Substring(0, s + textBox1.SelectionLength);//前有處理過文本∴不能用textBox1.SelectionLength！！！20230102
-            //if (pageEndText10.Length > 20)
-            //    pageEndText10 = "";////////////20230102
+
+            //if (pageEndText10.Length > 20)//此bug已在autoPastetoCtextQuitEditTextbox()內抓到了20230117
+            //    pageEndText10 = "";//20230102
+
             if (pageEndText10 == "") pageEndText10 = xCopy.Substring(xCopy.Length - 10 >= 0 ? xCopy.Length - 10 : xCopy.Length);
             else
             {
@@ -4142,11 +4152,11 @@ namespace WindowsFormsApp1
                     }
                 }
             }
+
+
             #region checkAbnormalLinePara method test unit
             try
             {
-
-
                 int[] chk = checkAbnormalLinePara(xCopy);
                 if (chk.Length > 0)
                 {
@@ -4184,8 +4194,8 @@ namespace WindowsFormsApp1
             #endregion
 
             //貼到 Ctext Quick edit 前的文本檢查
-            if (!newTextBox1()) { Activate(); return; }
-
+            if (!newTextBox1(out s,out l)) { Activate(); return; }//在 newTextBox1函式中可能會更動 s、l 二值，故得如此處置，以免s、l值跑掉
+            
             #region 貼到 Ctext Quick edit 
             //根據不同輸入模式需求操作
             switch (browsrOPMode)
@@ -4444,13 +4454,24 @@ namespace WindowsFormsApp1
 
         int lines_perPage = 0;
         int normalLineParaLength = 0;
+
+        //20230117 creedit chatGPT大菩薩：C# Visual Studio 註解顯示:/// 是用於多行註解，用於註釋程式碼的多行。……在 C# 中，使用三個斜線 (///) 來撰寫註解文字，並將它放在該函式的宣告之前，就可以在 Visual Studio 中在自訂函式上停駐滑鼠游標時顯示該函式的提示文字。……這樣可以顯示註解文字，且註解文字可以在 Intellisense 中顯示。
+        /// <summary>
+        /// 檢查非常長度的行（段）
+        /// </summary>
+        /// <param name="xChk">這引數是指定要傳入檢查的文本</param>
+        /// <returns>若發現非常長度的行，則傳回一個數組（陣列）以表示非常行諸特徵：
+        /// { lineSeprtStart（起點）, lineSeprtEnd - lineSeprtStart（非常長度） ,
+        ///     normalLineParaLength（通常長度）,len（長度）};
+        /// 。</returns>
         private int[] checkAbnormalLinePara(string xChk)
         {
-            saveText();
+            saveText();//備份以防萬一
             string[] xLineParas = xChk.Split(
                 Environment.NewLine.ToArray(),
                 StringSplitOptions.RemoveEmptyEntries);
-            #region get lines_perPage
+
+            #region get lines_perPage//取得該頁的每行（段）文字
             //lines_perPage = 0;
             lines_perPage = linesParasPerPage != -1 ? linesParasPerPage : countLinesPerPage(xChk);
             if (linesParasPerPage == -1) linesParasPerPage = lines_perPage;
@@ -4480,7 +4501,7 @@ namespace WindowsFormsApp1
                 }
             }
             if (normalLineParaLength < 7) return new int[0];
-            int i = -1, gap = 0, len = 0;
+            int i = -1, len = 0;
             foreach (string lineParaText in xLineParas)
             {
                 i++;
@@ -4490,6 +4511,7 @@ namespace WindowsFormsApp1
                 }
                 int noteTextBlendStart = lineParaText.IndexOf("{"),
                     noteTextBlendEnd = lineParaText.IndexOf("}");
+                int gap;
                 if (noteTextBlendStart != -1 || noteTextBlendEnd != -1)
                 {//blend text and note                     
                     string text = "", note = "";
@@ -4659,7 +4681,7 @@ namespace WindowsFormsApp1
                     if (alarm)
                     {
                         string x = textBox1.Text;
-                        int j = -1, lineSeprtEnd = 0, lineSeprtStart = lineSeprtEnd;
+                        int j = -1, lineSeprtEnd = 0, lineSeprtStart = lineSeprtEnd;//Seprt=Separate
                         lineSeprtEnd = x.IndexOf(Environment.NewLine, lineSeprtEnd);
                         while (lineSeprtEnd > -1)
                         {
@@ -4838,6 +4860,10 @@ namespace WindowsFormsApp1
             textBox1.Text += xClipboard;
             textBox1.Select(textBox1.TextLength, 0);
             textBox1.ScrollToCaret();
+            //每分鐘自動備份
+            TimeSpan timeSpan = new TimeSpan();
+            timeSpan = DateTime.Now.Subtract(new FileInfo(FName_to_Save_Txt_fullname).LastWriteTime);
+            if (timeSpan.TotalMinutes > 1) saveText();
             new SoundPlayer(@"C:\Windows\Media\windows default.wav").Play();
         }
 
@@ -5610,6 +5636,9 @@ namespace WindowsFormsApp1
         }
 
         const string fName_to_Save_Txt = "cText.txt";
+
+        internal string FName_to_Save_Txt_fullname { get { return dropBoxPathIncldBackSlash + fName_to_Save_Txt; } }
+
         private void saveText()
         {
             //C# 對文字檔案的幾種讀寫方法總結:https://codertw.com/%E7%A8%8B%E5%BC%8F%E8%AA%9E%E8%A8%80/542361/
