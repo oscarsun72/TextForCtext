@@ -1008,6 +1008,8 @@ End Sub
 Sub 中國哲學書電子化計劃_只保留正文注文_且注文前後加括弧_貼到古籍酷自動標點()
 Dim ur As UndoRecord
 SystemSetup.stopUndo ur, "中國哲學書電子化計劃_註文前後加括弧_貼到古籍酷自動標點"
+If (ActiveDocument.path <> "" And Not ActiveDocument.Saved) Then ActiveDocument.Save
+VBA.DoEvents
 中國哲學書電子化計劃.只保留正文注文_且注文前後加括弧
 貼到古籍酷自動標點
 SystemSetup.contiUndo ur
@@ -1021,16 +1023,19 @@ d.Range.Cut
 On Error GoTo app
 AppActivate "古籍酷"
 DoEvents
-SendKeys "{TAB 16}", True
+'SendKeys "{TAB 16}", True'舊版
+SendKeys "{TAB 15}", True
 SendKeys "^v"
 DoEvents
-SendKeys "+{TAB 2}~", True
+'SendKeys "+{TAB 2}~", True '舊版
+SendKeys "+{TAB 1}~", True
 If d.path = "" Then d.Close wdDoNotSaveChanges
 Exit Sub
 app:
 Select Case Err.Number
     Case 5
-        Shell (Network.getDefaultBrowserFullname + " https://old.gj.cool/gjcool/index")
+        'Shell (Network.getDefaultBrowserFullname + " https://old.gj.cool/gjcool/index")'舊版
+        Shell (Network.getDefaultBrowserFullname + " https://gj.cool/punct")
         AppActivate Network.getDefaultBrowserNameAppActivate '"古籍酷"
         DoEvents
         SystemSetup.Wait 2.9 '2.5

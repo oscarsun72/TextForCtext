@@ -72,10 +72,11 @@ namespace TextForCtext
             }
         }
         internal static IWebElement waitFindWebElementByNameToBeClickable(string name, float second,
-            IWebDriver drver=null)        {
-            
-            IWebElement e = (driver??drver).FindElement(By.Name(name));
-            WebDriverWait wait = new WebDriverWait((driver??drver), TimeSpan.FromSeconds(second));
+            IWebDriver drver = null)
+        {
+
+            IWebElement e = (driver ?? drver).FindElement(By.Name(name));
+            WebDriverWait wait = new WebDriverWait((driver ?? drver), TimeSpan.FromSeconds(second));
             wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(e));
             return e;
         }
@@ -194,26 +195,27 @@ namespace TextForCtext
                             if (MessageBox.Show("按「ok」確定，以繼續，將會關閉所有在運行中的Chrome瀏覽器，若須手動關閉，請關完後再按確定……", ""
                                 , MessageBoxButtons.OKCancel, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly) == DialogResult.OK)
                             {//creedit by chatGPT：
-                                Process[] chromeInstances = Process.GetProcessesByName("chrome");
-                                foreach (var chromeInstance in chromeInstances)
-                                {
-                                    try
-                                    {
-                                        chromeInstance.Kill();
+                                //Process[] chromeInstances = Process.GetProcessesByName("chrome");
+                                //foreach (var chromeInstance in chromeInstances)
+                                //{
+                                //    try
+                                //    {
+                                //        chromeInstance.Kill();
 
-                                    }
-                                    catch (Exception)
-                                    {
-                                        Task.WaitAny();
-                                        //throw;
-                                    }
-                                }
-                                chromeInstances = Process.GetProcessesByName("chromedriver");
-                                foreach (var chromeInstance in chromeInstances)
-                                {
-                                    chromeInstance.Kill();
-                                }
-                                Task.WaitAll();
+                                //    }
+                                //    catch (Exception)
+                                //    {
+                                //        Task.WaitAny();
+                                //        //throw;
+                                //    }
+                                //}
+                                //chromeInstances = Process.GetProcessesByName("chromedriver");
+                                //foreach (var chromeInstance in chromeInstances)
+                                //{
+                                //    chromeInstance.Kill();
+                                //}
+                                //Task.WaitAll();
+                                killProcesses(new string []{"chrome", "chromedriver"}); 
                                 goto tryagain;
                             }
                             else
@@ -262,7 +264,7 @@ namespace TextForCtext
                 string url = frm.Controls["textBox3"].Text != "" ? frm.Controls["textBox3"].Text : "https://ctext.org/account.pl?if=en";
                 cDrv.Navigate().GoToUrl(url);
                 //配置quickedit_data_textbox以備用
-                quickedit_data_textboxSetting(url,null,cDrv);
+                quickedit_data_textboxSetting(url, null, cDrv);
                 //IWebElement clk  = cDrv.FindElement(selm.By.Id("logininfo")); clk.Click();
                 //cDrv.FindElement(selm.By.Id("logininfo")).Click();
                 /*202301050214 因為以下這行設定成功，可以用平常的Chrome來操作了，就不必再登入安裝（如擴充功能）匯入（如書籤）什麼的了 感恩感恩　讚歎讚歎　南無阿彌陀佛
@@ -541,11 +543,19 @@ namespace TextForCtext
                 driver = driver ?? Browser.driverNew();
                 tabCount = driver.WindowHandles.Count;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                driver = null;
-                driver = driverNew();
-                //throw;
+                switch (ex.HResult)
+                {
+                    case -2146233088://"The HTTP request to the remote WebDriver server for URL http://localhost:4144/session/a5d7705c0a6199c76529de0e157667f9/window/handles timed out after 8.5 seconds."
+                        killProcesses(new string[] {"chromedriver" });//手動關閉由Selenium啟動的Chrome瀏覽器須由此才能清除
+                        driver = null;
+                        driver = driverNew();
+                        break;
+                    default:
+                        throw;
+                        //break;
+                }
             }
             if (tabCount > 0)
             {
@@ -583,13 +593,13 @@ namespace TextForCtext
             quickedit_data_textboxSetting(url);
         }
 
-        private static void quickedit_data_textboxSetting(string url, IWebElement textbox = null,IWebDriver driver=null)
+        private static void quickedit_data_textboxSetting(string url, IWebElement textbox = null, IWebDriver driver = null)
         {
             if (url.IndexOf("edit") > -1)
             {
                 if (textbox != null) Quickedit_data_textbox = textbox;
                 else
-                    Quickedit_data_textbox = waitFindWebElementByNameToBeClickable("data", 2,driver);
+                    Quickedit_data_textbox = waitFindWebElementByNameToBeClickable("data", 2, driver);
                 quickedit_data_textboxTxt = Quickedit_data_textbox.Text;
             }
         }
@@ -717,6 +727,27 @@ namespace TextForCtext
         }
         #endregion
 
+        internal static void killProcesses(string[] processName)
+        {
+            foreach (var item in processName)
+            {
+                Process[] processInstances = Process.GetProcessesByName(item);
+                foreach (var processInstance in processInstances)
+                {
+                    try
+                    {
+                        processInstance.Kill();
+
+                    }
+                    catch (Exception)
+                    {
+                        Task.WaitAny();
+                        //throw;
+                    }
+                }
+            }
+            Task.WaitAll();
+        }
 
         string getUrl(forms.Keys eKeyCode)
         {

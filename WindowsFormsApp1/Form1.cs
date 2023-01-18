@@ -1,4 +1,5 @@
 ﻿using Microsoft.Win32;
+using OpenQA.Selenium.Support.UI;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -24,7 +25,8 @@ using Application = System.Windows.Forms.Application;
 using br = TextForCtext.Browser;
 using Font = System.Drawing.Font;
 using Point = System.Drawing.Point;
-using Task = System.Threading.Tasks.Task;
+//using Task = System.Threading.Tasks.Task;
+using System.Threading.Tasks;
 
 namespace WindowsFormsApp1
 {
@@ -37,7 +39,7 @@ namespace WindowsFormsApp1
         //string[] CJKBiggestSet = new string[]{ "HanaMinB", "KaiXinSongB", "TH-Tshyn-P1" };
         string[] CJKBiggestSet = { "全宋體(等寬)", "新細明體-ExtB", "HanaMinB", "KaiXinSongB", "TH-Tshyn-P1", "HanaMinA", "Plangothic P1", "Plangothic P2" };
         Color button2BackColorDefault;
-        string _currentPage = "";
+        string _currentPageNum = "";
         bool insertMode = true, check_the_adjacent_pages = false, keyinText = false//手動輸入;
             , TopLine = false//抬頭
             , Indents = true;//縮排
@@ -49,7 +51,7 @@ namespace WindowsFormsApp1
         //取得輸入模式：手動或自動
         internal bool KeyinTextMode { get { return keyinText; } }
 
-        internal string CurrentPage { get { return _currentPage; } }
+        internal string CurrentPageNum { get { return _currentPageNum; } }
         //static internal string mainFromTextBox3Text;
 
 
@@ -141,12 +143,12 @@ namespace WindowsFormsApp1
                     });
                     Task.WaitAll();
                     //終止 chromedriver.exe 程序,釋放系統記憶體
-                    Process[] processes = Process.GetProcessesByName("chromedriver");
-                    foreach (Process process in processes)
-                    {
-                        process.Kill();
-                    }
-
+                    //Process[] processes = Process.GetProcessesByName("chromedriver");
+                    //foreach (Process process in processes)
+                    //{
+                    //    process.Kill();
+                    //}
+                    br.killProcesses(new string[]{"chromedriver"} );
                 }
             }
 
@@ -956,9 +958,10 @@ namespace WindowsFormsApp1
             if (charIndexRecallTimes - 1 < 0) { charIndexRecallTimes = charIndexListSize - 1; return; }
             TextBox tb = textBox1;
             int s = tb.SelectionStart;
+            if (charIndexList.Count - 1 < 0 || charIndexRecallTimes - 1 < 0) return;
             int sLast = charIndexList[charIndexRecallTimes - 1 > charIndexList.Count - 1 ?
-                charIndexList.Count - 1 :
-                charIndexRecallTimes--];
+                                        charIndexList.Count - 1 :
+                                            charIndexRecallTimes--];
             while (sLast == s)
             {
                 sLast = charIndexList[charIndexRecallTimes - 1 > charIndexList.Count - 1 ?
@@ -4042,6 +4045,13 @@ namespace WindowsFormsApp1
         //記下每頁最後10字元長的字以作判斷用
         string pageEndText10 = "";
 
+        /// <summary>
+        /// Ctrl + + （加號，含函數字鍵盤） 或 Ctrl + -（數字鍵盤）  或 Ctrl + 5 (數字鍵盤） 或 Alt + + ：
+        /// 將插入點或選取文字（含）之前的文本剪下貼到 ctext 的[簡單修改模式]框中，並按下「保存編輯」鈕，且
+        /// 在非自動連續輸入時于瀏覽器新頁籤（預設值，Selenium架構時不會）開啟下一頁準備編輯文本，並回到前一頁籤以供檢視所貼上之文本是否無誤。
+        /// </summary>
+        /// <param name="shiftKeyDownYet">按下Shift則留下本頁不自動翻至下一頁</param>
+        /// <param name="clear">選擇性參數：若指定chkClearQuickedit_data_textboxTxtStr則會清除當前文字框內容而非輸入新內容</param>        
         private void keyDownCtrlAdd(bool shiftKeyDownYet = false, string clear = "")
         {
             int s = textBox1.SelectionStart, l = textBox1.SelectionLength;
@@ -4226,13 +4236,10 @@ namespace WindowsFormsApp1
             predictEndofPage();
             //重設自動判斷頁尾之值
             pageTextEndPosition = 0; pageEndText10 = "";
-            if (browsrOPMode != BrowserOPMode.appActivateByName)
-            { //&&autoPastetoQuickEdit 
-                bool callFunc = true; DialogResult dialogresult = new DialogResult();
-                if (callFunc)
-                    autoPastetoCtextQuitEditTextbox(out dialogresult);//在此中自會判斷autoPastetoQuickEdit值
-                if (dialogresult == DialogResult.OK) callFunc = true;
-                else callFunc = false;
+            DialogResult dialogresult = new DialogResult();
+            if (browsrOPMode != BrowserOPMode.appActivateByName && autoPastetoQuickEdit)
+            {
+                autoPastetoCtextQuitEditTextbox(out dialogresult);//在此中雖有判斷autoPastetoQuickEdit時，然呼叫它會造成無限遞迴（recursion）
             }
         }
 
@@ -4835,8 +4842,11 @@ namespace WindowsFormsApp1
                     }
                 }
                 else
+                {
+                    dialogResult = DialogResult.Cancel;
                     keyDownCtrlAdd(false);
-                //return;
+                    return;//注意會不會造成無窮遞迴
+                }
             }
         }
 
@@ -5411,6 +5421,9 @@ namespace WindowsFormsApp1
                 if (eKeyCode == Keys.PageUp)
                     url = urlSub + (page - 1).ToString();
             }
+
+            textBox3.Text = url;//此會觸發textchanged事件程序
+
             #region 僅瀏覽而不編輯
             switch (browsrOPMode)
             {
@@ -5424,7 +5437,6 @@ namespace WindowsFormsApp1
                     //Task wait = Task.Run(() =>//此間操作，因為沒有要操作的元件，所以可以跑線程。20230111
                     //{以別處還要參考，故取消Task
                     br.GoToUrlandActivate(url);
-                    if (textBox3.Text != url) textBox3.Text = url;
                     //});
                     //Task.WaitAll();
                     //wait.Wait();
@@ -5481,6 +5493,7 @@ namespace WindowsFormsApp1
                             SendKeys.Send("^x");//剪下一頁以便輸入備用
                             break;
                         case BrowserOPMode.seleniumNew:
+                            int retrytimes = 0;
                         retry:
                             br.driver = br.driver ?? br.driverNew();
                             try
@@ -5499,8 +5512,11 @@ namespace WindowsFormsApp1
                             }
                             catch (Exception)
                             {
-                                Task.Delay(1200); goto retry;
-                                throw;
+                                if (retrytimes < 2)
+                                {
+                                    Task.Delay(1200); retrytimes++; goto retry;
+                                }
+                                //throw;
                             }
                             break;
                         case BrowserOPMode.seleniumGet:
@@ -5537,7 +5553,7 @@ namespace WindowsFormsApp1
                 }
             }
             #endregion
-            textBox3.Text = url;//此會觸發textchanged事件程序
+
             if (stayInHere) this.Activate();
         }
 
@@ -5886,18 +5902,18 @@ namespace WindowsFormsApp1
                 //檢查driver物件是否為空
 
                 #region 先檢查是否有已開啟的編輯頁尚未送出儲存(因為許多異體字須一次取代，往往會打開一個chapter單位來edit) 其網址有「&action=editchapter」關鍵字，如：https://ctext.org/wiki.pl?if=en&chapter=687756&action=editchapter#12450
-                bool waitUpdate = false;
-                Task wait = Task.Run(() =>
+                //bool waitUpdate = false;
+                Task wait = Task.Run(async () =>
                 {
                     foreach (string tabWin in tabWindowHandles)
                     {
                         if (br.driver.SwitchTo().Window(tabWin).Url.IndexOf("&action=editchapter") > -1)
                         {
-                            waitUpdate = true;
+                            //waitUpdate = true;
                             OpenQA.Selenium.IWebElement commit = br.waitFindWebElementByNameToBeClickable("commit", 2); //br.driver.FindElement(OpenQA.Selenium.By.Name("commit"));
                                                                                                                         //OpenQA.Selenium.Support.UI.WebDriverWait waitcommit = new OpenQA.Selenium.Support.UI.WebDriverWait(br.driver, TimeSpan.FromSeconds(2));
                                                                                                                         //waitcommit.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(commit));
-                            Task.Run(() =>
+                            await Task.Run(() =>
                             { //送出後也不必等待，也沒有其他須用到的元件，故可交給作業系統開個新線程去跑就好，但因為editchapter上傳儲存時常較Quit edit費時，故保險起見，還是在後加個Task.delay一下比較好
                                 try
                                 {
@@ -5918,32 +5934,44 @@ namespace WindowsFormsApp1
                                             throw;
                                     }
                                 }
-                            });//只要有找到，都按下送出，反正若沒修改，也沒有任何影響202301112128                        
+                            });//只要有找到，都按下送出，反正若沒修改，也沒有任何影響202301112128
+
                         }
                     }
                 });
                 //確保所有editchapter都已上傳完畢
                 //https://learn.microsoft.com/zh-tw/dotnet/api/system.threading.tasks.task.delay?view=netframework-4.8&f1url=%3FappId%3DDev16IDEF1%26l%3DZH-TW%26k%3Dk(System.Threading.Tasks.Task.Delay)%3Bk(TargetFrameworkMoniker-.NETFramework%2CVersion%253Dv4.8)%3Bk(DevLang-csharp)%26rd%3Dtrue
-                if (waitUpdate)
-                {
-                    //Task.Delay(4000).Wait(); //20230117 chatGPT大菩薩：Task 類別是用來創建新的執行緒來執行非同步作業的，而 Thread 類別則是用來管理當前執行緒的。Task 類別提供了許多用於創建和管理多個執行緒的方法，而 Thread 類別則提供了許多用於管理當前執行緒的方法，例如 Sleep() 方法和 Start() 方法。
-                    Thread.Sleep(1200);
-                }
-                else
-                    wait.Wait();
+                //if (waitUpdate)
+                //{
+                //    //Task.Delay(4000).Wait(); //20230117 chatGPT大菩薩：Task 類別是用來創建新的執行緒來執行非同步作業的，而 Thread 類別則是用來管理當前執行緒的。Task 類別提供了許多用於創建和管理多個執行緒的方法，而 Thread 類別則提供了許多用於管理當前執行緒的方法，例如 Sleep() 方法和 Start() 方法。
+                //    //Thread.Sleep(1200);
+                //}
+                wait.Wait();//要有這行和async await 配合才行
+                /* 20230118 creedit 與chatGPT菩薩討論：
+                 * 是的 我想也應該是這樣的 我的程式改成如下 就成功了。 在其中 async 、 await  、 .wait() 三者 缺一不可 您看是嗎？（我已試著省略 wait.wait() 這行，則即使已有了 async await ，也不會等待而會接著下面的程式去做。只有加了 wait.wait() 這行 async await的標記才有作用
+                 總結來說 它的邏輯應該是這樣的：
+                  await 是在宣告 async 的 Task.Run 裡 等待這個Run 方法裡的另一個Task.Run()方法完成 故此第二個Task.Run() 前面會冠上  await ；而 第一個Task.Run方法回傳的名為 wait 的Task型別變數，使用它的 .Wait() 方法來等待第一個（即最外層的） Task.Run()完成 這樣 程式在執行時才能確實等待最外圈的 Task.完成 而最外圈的 Task 也確實等到了 內圈有加 await 關鍵字的 Task 都完成了，才算完成 是這樣吧
+                 */
+
                 #endregion
 
                 //檢查textbox3的值與現用網頁相同否
-                url = chkUrlIsTextBox3Text(tabWindowHandles);
+                //url = chkUrlIsTextBox3Text(tabWindowHandles);
 
                 ////手動輸入時一般當不必自動清除框中文字
                 //br.在Chrome瀏覽器的Quick_edit文字框中輸入文字(br.driver, Clipboard.GetText(), url);                
                 //});
             }
-            else//不是在手動鍵入時
+            //else//不是在手動鍵入時
+            //{//檢查textbox3的值與現用網頁相同否
+
+
+            Task wait1 = Task.Run(() =>
             {
-                url = chkUrlIsTextBox3Text(tabWindowHandles);
-            }
+                chkUrlIsTextBox3Text(tabWindowHandles);
+            });
+            wait1.Wait();
+            //}
             //在連續輸入時能清除框中文字；手動輸入時一般當不必自動清除框中文字
             //br.在Chrome瀏覽器的Quick_edit文字框中輸入文字(br.driver, clear == " " ? clear : Clipboard.GetText(), url);
             br.在Chrome瀏覽器的Quick_edit文字框中輸入文字(br.driver, clear == br.chkClearQuickedit_data_textboxTxtStr ? clear : Clipboard.GetText(), url);
@@ -6534,29 +6562,35 @@ namespace WindowsFormsApp1
                             SendKeys.Send("^x");
                             break;
                         case BrowserOPMode.seleniumNew:
-                            //Task.Run(() =>
-                            //{
                             if (br.driver == null) br.driver = br.driverNew();
-                            if (br.driver.Url != textBox3.Text)
-                            {
-                                try
+                            try
+                            {//自動取得 textBox3.Text = clpTxt 網頁內 quick_edit_box 框內文字內容
+                                if (br.driver.Url != clpTxt)
                                 {
                                     //br.driver.ExecuteScript("window.open();");
-                                    br.driver.SwitchTo().NewWindow(OpenQA.Selenium.WindowType.Tab);//取得網址時順便貼上簡單修改模式下的文字                            
+                                    //br.driver.SwitchTo().NewWindow(OpenQA.Selenium.WindowType.Tab);//取得網址時順便貼上簡單修改模式下的文字
+                                    br.GoToUrlandActivate(clpTxt);
                                 }
-                                catch (Exception)
+                                if (br.driver.Url.IndexOf("edit") > -1)
                                 {
-                                    br.driver.SwitchTo().Window(br.driver.WindowHandles.Last());
-                                    //throw;
+                                    OpenQA.Selenium.IWebElement quick_edit_box = br.driver.FindElement(OpenQA.Selenium.By.Name("data"));
+                                    Clipboard.SetText(quick_edit_box.Text);
                                 }
-                                //br.driver.Navigate().GoToUrl(clpTxt);
-                                br.GoToUrlandActivate(clpTxt);
                             }
-                            Task.WaitAny();
-                            Task.Delay(-1);
-                            OpenQA.Selenium.IWebElement quick_edit_box = br.driver.FindElement(OpenQA.Selenium.By.Name("data"));
-                            Clipboard.SetText(quick_edit_box.Text);
-                            //});
+                            catch (Exception ex)
+                            {
+                                switch (ex.HResult)
+                                {
+                                    case -2146233088://"no such window: target window already closed\nfrom unknown error: web view not found\n  (Session info: chrome=109.0.5414.75)"
+                                        br.driver.SwitchTo().Window(br.driver.WindowHandles.Last());
+                                        //br.driver.Navigate().GoToUrl(clpTxt);
+                                        br.GoToUrlandActivate(clpTxt);
+                                        break;
+                                    default:
+                                        throw;
+                                        //break;
+                                }
+                            }
                             break;
                         case BrowserOPMode.seleniumGet:
                             Task.Run(() => { if (br.driver == null) br.driver = br.driverNew(); });
@@ -7207,8 +7241,8 @@ namespace WindowsFormsApp1
         //bool dragDropUrl = false;
         private void textBox3_MouseMove(object sender, MouseEventArgs e)
         {
-            if (_currentPage != "")
-                tooltipConstructor(sender, "現在在第" + _currentPage + "頁");
+            if (_currentPageNum != "")
+                tooltipConstructor(sender, "現在在第" + _currentPageNum + "頁");
         }
         private void textBox3_TextChanged(object sender, EventArgs e)
         {
@@ -7216,9 +7250,9 @@ namespace WindowsFormsApp1
             if (url.IndexOf("&page=") > -1)
             {//取得現前頁碼
                 int s = url.IndexOf("&page=") + "&page=".Length;
-                _currentPage = url.Substring(s, url.IndexOf("&", s) > -1 ? url.IndexOf("&", s) - s : url.Length - s);
+                _currentPageNum = url.Substring(s, url.IndexOf("&", s) > -1 ? url.IndexOf("&", s) - s : url.Length - s);
             }
-            else _currentPage = "";
+            else _currentPageNum = "";
             //mainFromTextBox3Text = textBox3.Text;
             string oldValue = (string)textBox3.Tag;//chatGPT 20230108
 
