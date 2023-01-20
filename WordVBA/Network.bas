@@ -24,18 +24,19 @@ If Selection.Type = wdSelectionNormal Then
         funame = "W:\!! for hpr\VB\查詢國語辭典\查詢國語辭典\bin\Debug\" & f
     ElseIf Dir("C:\查詢國語辭典\查詢國語辭典\bin\Debug\" & f) <> "" Then
         funame = "C:\查詢國語辭典\查詢國語辭典\bin\Debug\" & f
-    ElseIf Dir(userProfilePath & "Dropbox\VS\VB\查詢國語辭典\查詢國語辭典\bin\Debug\" & f) <> "" Then
-        funame = userProfilePath & "Dropbox\VS\VB\查詢國語辭典\查詢國語辭典\bin\Debug\" & f
+    ElseIf Dir(UserProfilePath & "Dropbox\VS\VB\查詢國語辭典\查詢國語辭典\bin\Debug\" & f) <> "" Then
+        funame = UserProfilePath & "Dropbox\VS\VB\查詢國語辭典\查詢國語辭典\bin\Debug\" & f
     ElseIf Dir("A:\", vbVolume) <> "" Then
         If Dir("A:\Users\oscar\Dropbox\VS\VB\查詢國語辭典\查詢國語辭典\bin\Debug\" & f) <> "" Then _
         funame = "A:\Users\oscar\Dropbox\VS\VB\查詢國語辭典\查詢國語辭典\bin\Debug\" & f
-    ElseIf Dir(userProfilePath & "Dropbox\VS\VB\查詢國語辭典\查詢國語辭典\bin\Debug\" & f) <> "" Then
-        funame = userProfilePath & "Dropbox\VS\VB\查詢國語辭典\查詢國語辭典\bin\Debug\" & f
+    ElseIf Dir(UserProfilePath & "Dropbox\VS\VB\查詢國語辭典\查詢國語辭典\bin\Debug\" & f) <> "" Then
+        funame = UserProfilePath & "Dropbox\VS\VB\查詢國語辭典\查詢國語辭典\bin\Debug\" & f
     Else
         Exit Sub
     End If
     Shell funame
 End If
+查國語辭典
 End Sub
 
 Sub A速檢網路字辭典() '指定鍵:Alt+F12'2010/10/18修訂
@@ -52,12 +53,12 @@ If Selection.Type = wdSelectionNormal Then
         funame = "W:\!! for hpr\VB\速檢網路字辭典\速檢網路字辭典\bin\Debug\" & f
     ElseIf Dir("C:\速檢網路字辭典\速檢網路字辭典\bin\Debug\" & f) <> "" Then
         funame = "C:\速檢網路字辭典\速檢網路字辭典\bin\Debug\" & f
-    ElseIf Dir(userProfilePath & "Dropbox\VS\VB\速檢網路字辭典\速檢網路字辭典\bin\Debug\" & f) <> "" Then
+    ElseIf Dir(UserProfilePath & "Dropbox\VS\VB\速檢網路字辭典\速檢網路字辭典\bin\Debug\" & f) <> "" Then
         funame = "A:\Users\oscar\Dropbox\VS\VB\速檢網路字辭典\速檢網路字辭典\bin\Debug\" & f
-    ElseIf Dir(userProfilePath & "Dropbox\VS\VB\速檢網路字辭典\速檢網路字辭典\bin\Debug\" & f) <> "" Then
+    ElseIf Dir(UserProfilePath & "Dropbox\VS\VB\速檢網路字辭典\速檢網路字辭典\bin\Debug\" & f) <> "" Then
         funame = "A:\Users\oscar\Dropbox\VS\VB\速檢網路字辭典\速檢網路字辭典\bin\Debug\" & f
-    ElseIf Dir(userProfilePath & "Dropbox\VS\VB\速檢網路字辭典\速檢網路字辭典\bin\Debug\" & f) <> "" Then
-        funame = userProfilePath & "Dropbox\VS\VB\速檢網路字辭典\速檢網路字辭典\bin\Debug\" & f
+    ElseIf Dir(UserProfilePath & "Dropbox\VS\VB\速檢網路字辭典\速檢網路字辭典\bin\Debug\" & f) <> "" Then
+        funame = UserProfilePath & "Dropbox\VS\VB\速檢網路字辭典\速檢網路字辭典\bin\Debug\" & f
     Else
         Exit Sub
     End If
@@ -66,10 +67,23 @@ End If
 
 End Sub
 
+Sub 查國語辭典()
+SeleniumOP.dictRevisedSearch VBA.Replace(Selection, Chr(13), "")
+End Sub
+
+'Sub 擷取國語辭典詞條網址()
+'SeleniumOP.grabDictRevisedUrl VBA.Replace(Selection, Chr(13), "")
+'End Sub
+
+Sub 查百度()
+SeleniumOP.BaiduSearch Selection
+End Sub
+
+
 Function GetUserAddress() As Boolean
     Dim x As String, a As Object 'Access.Application
     On Error GoTo Error_GetUserAddress
-    x = Selection.Text
+    x = Selection.text
     Set a = GetObject("D:\千慮一得齋\書籍資料\圖書管理.mdb") '2010/10/18修訂
     If x = "" Then x = InputBox("請輸入欲查詢的字串")
     x = a.Run("查詢字串轉換_國語會碼", x)
@@ -124,13 +138,13 @@ Select Case deflBrowser
             GetDefaultBrowserEXE = "W:\PortableApps\PortableApps\FirefoxPortable\App\Firefox64\firefox.exe"
         End If
     Case "brave":
-        If Dir(userProfilePath & "\AppData\Local\BraveSoftware\Brave-Browser\Application\brave.exe") = "" Then
+        If Dir(UserProfilePath & "\AppData\Local\BraveSoftware\Brave-Browser\Application\brave.exe") = "" Then
             GetDefaultBrowserEXE = "C:\Program Files (x86)\BraveSoftware\Brave-Browser\Application\brave.exe"
         Else
-            GetDefaultBrowserEXE = userProfilePath & "\AppData\Local\BraveSoftware\Brave-Browser\Application\brave.exe"
+            GetDefaultBrowserEXE = UserProfilePath & "\AppData\Local\BraveSoftware\Brave-Browser\Application\brave.exe"
         End If
     Case "vivaldi":
-        GetDefaultBrowserEXE = userProfilePath & "\AppData\Local\Vivaldi\Application\vivaldi.exe"
+        GetDefaultBrowserEXE = UserProfilePath & "\AppData\Local\Vivaldi\Application\vivaldi.exe"
     Case "Opera":
         GetDefaultBrowserEXE = ""
     Case "Safari":
@@ -199,7 +213,7 @@ End Function
 
 
 Sub AppActivateDefaultBrowser()
-On Error GoTo eh
+On Error GoTo eH
 Dim i As Byte, a
 a = Array("google chrome", "brave", "edge")
 DoEvents
@@ -207,7 +221,7 @@ If DefaultBrowserNameAppActivate = "" Then getDefaultBrowserNameAppActivate
 AppActivate DefaultBrowserNameAppActivate
 DoEvents
 Exit Sub
-eh:
+eH:
     Select Case Err.Number
         Case 5
             DefaultBrowserNameAppActivate = a(i)

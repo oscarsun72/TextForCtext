@@ -64,7 +64,11 @@ namespace WindowsFormsApp1
 
         internal static BrowserOPMode browsrOPMode = BrowserOPMode.appActivateByName;
 
-        System.Windows.Forms.NotifyIcon nICo;
+        /// <summary>
+        /// 隱藏到系統列用
+        /// </summary>
+        System.Windows.Forms.NotifyIcon ntfyICo;
+
         int thisHeight, thisWidth, thisLeft, thisTop;
         [DllImport("user32.dll")]
         static extern bool CreateCaret(IntPtr hWnd, IntPtr hBitmap, int nWidth, int nHeight);
@@ -100,10 +104,10 @@ namespace WindowsFormsApp1
             }
             thisHeight = this.Height; thisWidth = this.Width; thisLeft = this.Left; thisTop = this.Top;
             //加入事件處理常式
-            this.nICo = new NotifyIcon();
-            this.nICo.Icon = this.Icon;
-            this.nICo.MouseClick += new System.Windows.Forms.MouseEventHandler(nICo_MouseClick);
-            this.nICo.MouseMove += new System.Windows.Forms.MouseEventHandler(nICo_MouseMove);
+            this.ntfyICo = new NotifyIcon();
+            this.ntfyICo.Icon = this.Icon;
+            this.ntfyICo.MouseClick += new System.Windows.Forms.MouseEventHandler(nICo_MouseClick);
+            this.ntfyICo.MouseMove += new System.Windows.Forms.MouseEventHandler(nICo_MouseMove);
             //this.Shown += Form1_Shown;//https://stackoverflow.com/questions/32720207/change-caret-cursor-in-textbox-in-c-sharp
 
             this.FormClosing += Form1_FormClosing;//202301050101 creedit
@@ -148,7 +152,8 @@ namespace WindowsFormsApp1
                     //{
                     //    process.Kill();
                     //}
-                    br.killProcesses(new string[]{"chromedriver"} );
+                    //br.killProcesses(new string[] { "chromedriver" });
+                    br.killchromedriverFromHere();
                 }
             }
 
@@ -173,6 +178,9 @@ namespace WindowsFormsApp1
             //}
         }
 
+        /// <summary>
+        /// 主表單是否在作用中（有系統焦點）
+        /// </summary>
         internal bool Active
         {//20230114 creedit chatGPT：Windows Forms Active Detection
             get
@@ -204,8 +212,8 @@ namespace WindowsFormsApp1
         void show_nICo()
         {
 
-            this.Show();
-            nICo.Visible = false;
+            this.Show();            
+            ntfyICo.Visible = false;
             this.WindowState = FormWindowState.Normal;
             this.Height = thisHeight;
             this.Width = thisWidth;
@@ -4237,9 +4245,30 @@ namespace WindowsFormsApp1
             //重設自動判斷頁尾之值
             pageTextEndPosition = 0; pageEndText10 = "";
             DialogResult dialogresult = new DialogResult();
-            if (browsrOPMode != BrowserOPMode.appActivateByName && autoPastetoQuickEdit)
+            if (browsrOPMode != BrowserOPMode.appActivateByName)
+            {//使用selenium模式時（非預設模式時）
+                if (autoPastetoQuickEdit)
+                {//全自動輸入模式時
+                    autoPastetoCtextQuitEditTextbox(out dialogresult);//在此中雖有判斷autoPastetoQuickEdit時，然呼叫它會造成無限遞迴（recursion）
+                }
+                //鍵入輸入模式或非全自動輸入時（如欲瀏覽、或順便編輯時）還原被隱藏的主表單以利後續操作，若不欲，則按Esc鍵即可再度隱藏：20230119壬寅大寒小年夜前一日
+                else if (keyinText||!autoPastetoQuickEdit)
+                {
+                    if (HiddenIcon) show_nICo();
+                    availableInUseKeysMouse();
+                }
+            }
+        }
+
+        /// <summary>
+        /// 把作業系統的焦點與游標拉回主表單中
+        /// </summary>
+        private void availableInUseKeysMouse()
+        {
+            if (!Active)
             {
-                autoPastetoCtextQuitEditTextbox(out dialogresult);//在此中雖有判斷autoPastetoQuickEdit時，然呼叫它會造成無限遞迴（recursion）
+                Activate();
+                bringBackMousePosFrmCenter();
             }
         }
 
@@ -4850,7 +4879,9 @@ namespace WindowsFormsApp1
             }
         }
 
-        //將滑鼠位置帶回表單中心
+        /// <summary>
+        /// 將滑鼠位置帶回主表單中心
+        /// </summary>
         private void bringBackMousePosFrmCenter()
         {
             Activate(); Application.DoEvents();
@@ -5346,7 +5377,15 @@ namespace WindowsFormsApp1
             SetCursorPos(this.Left + 30, this.Top + 100);
         }
 
+        /// <summary>
+        /// 指示是否要隱藏主表單到系統列中
+        /// </summary>
         bool dontHide = false;
+     
+        /// <summary>
+        /// 指示現在主表單是否已隱藏到系統列中
+        /// </summary>
+        internal bool HiddenIcon { get {return ntfyICo.Visible; } }
         void hideToNICo()
         {
             if (dontHide) return;
@@ -5359,7 +5398,7 @@ namespace WindowsFormsApp1
             //this.WindowState = FormWindowState.Minimized;
             this.TopMost = false;
             this.Hide();
-            this.nICo.Visible = true;
+            this.ntfyICo.Visible = true;            
         }
         const string fName_to_Backup_Txt = "cTextBK.txt";
         void BackupLastPageText(string x, bool updateLastBackup, bool showColorSignal)

@@ -125,6 +125,7 @@ Public Sub SetClipboard(sUniText As String)
     CloseClipboard
 End Sub
 
+'取得剪貼簿內文字
 Public Function GetClipboard() As String
     Dim iStrPtr As Long
     Dim iLen As Long
@@ -146,14 +147,14 @@ Public Function GetClipboard() As String
     CloseClipboard
 End Function
 
-Sub CopyText(Text As String) 'https://stackoverflow.com/questions/14219455/excel-vba-code-to-copy-a-specific-string-to-clipboard
+Sub CopyText(text As String) 'https://stackoverflow.com/questions/14219455/excel-vba-code-to-copy-a-specific-string-to-clipboard
     'VBA Macro using late binding to copy text to clipboard.
     'By Justin Kay, 8/15/2014
     Dim MSForms_DataObject As Object
     Set MSForms_DataObject = CreateObject("new:{1C3B4210-F441-11CE-B9EA-00AA006B1A69}")
 '    Set MSForms_DataObject = New MSForms.DataObject 與上式相同
 '    MSForms_DataObject.Clear
-    MSForms_DataObject.SetText Text
+    MSForms_DataObject.SetText text
     MSForms_DataObject.PutInClipboard
     Set MSForms_DataObject = Nothing
 End Sub
@@ -288,13 +289,13 @@ a = VBA.Replace(a, "AppData\Roaming", "")
 End Function
 
 Function GetClipboardText()
-On Error GoTo eh
+On Error GoTo eH
 Dim clipboard As New MSForms.DataObject
 DoEvents
 clipboard.GetFromClipboard
 GetClipboardText = clipboard.GetText
 Exit Function
-eh:
+eH:
     Select Case Err.Number
         Case -2147221040 'DataObject:GetFromClipboard OpenClipboard 失敗
             SystemSetup.Wait 0.8
@@ -351,6 +352,12 @@ Sub playSound(longShort As Single) 'Public Declare Function sndPlaySound32 Lib "
     
 End Sub
 
+Property Get getChromePathIncludeBackslash() As String
+Dim chromeFullname As String
+chromeFullname = getChrome
+getChromePathIncludeBackslash = VBA.Replace(chromeFullname, Dir(chromeFullname, vbDirectory), "")
+End Property
+
 
 Function getChrome() As String
 Dim chromePath As String
@@ -381,7 +388,7 @@ End Sub
 
 
 Public Function appActivatedYet(exeName As String) As Boolean
-On Error GoTo eh:
+On Error GoTo eH:
       exeName = exeName & ".exe": exeName = StrConv(exeName, vbUpperCase)
 'https://stackoverflow.com/questions/44075292/determine-process-id-with-vba
 'https://stackoverflow.com/questions/26277214/vba-getting-program-names-and-task-id-of-running-processes
@@ -403,7 +410,7 @@ On Error GoTo eh:
     
     Set objProcessSet = Nothing
 Exit Function
-eh:
+eH:
 Select Case Err.Number
     Case 5 '程序呼叫或引數不正確
     Case Else
@@ -441,3 +448,132 @@ Sub appActivateChrome()
     'https://stackoverflow.com/questions/19705797/find-the-window-handle-for-a-chrome-browser
 
 End Sub
+
+Sub backupNormal_dotm() '自動備份Normal.dotm
+'If ActiveDocument.path = "" Then Exit Sub
+Dim source As String, destination As String
+source = SystemSetup.DropBoxPathIncldBackSlash + "Normal.dotm"
+destination = SystemSetup.WordTemplatesPathIncldBackSlash + "Normal.dotm"
+On Error GoTo eH
+With SystemSetup.FileSystemObject
+If (.getfile(source).DateLastModified < _
+    .getfile(destination).DateLastModified) Then _
+        .CopyFile source, destination
+End With
+Exit Sub
+eH:
+Select Case Err.Number
+    Case 70
+        MsgBox "Normal.dotm還未備份", vbExclamation
+    Case Else
+        MsgBox Err.Number & Err.Description
+End Select
+End Sub
+Sub seleniumDllReference()
+'20230119 creedit chatGPT大菩薩：
+' 設置 dll 檔案所在的路徑
+Dim dllPath As String
+dllPath = "C:\Users\oscar\AppData\Local\SeleniumBasic\Selenium.dll"
+
+' 將 dll 文件加入參考
+Dim ref 'As Reference
+'Set ref = ThisWorkbook.VBProject.References.AddFromFile(dllPath)
+Set ref = Templates("Normal").VBProject.References.AddFromFile(dllPath)
+End Sub
+
+Sub killProcessByName(imageName As String) 'ex: ChromeDriver.exe
+Shell "taskkill /im " + imageName + " /f", vbHide
+End Sub
+Rem 20230119：chatGPT大菩薩：VBA 操控 Chrome 瀏覽器：
+                Rem 在您結束使用 Selenium Basic 庫操作 Chrome 瀏覽器之後，您可以使用 VBA 程式碼來結束 chromedriver.exe 程序。您可以使用 VBA 的 "Shell" 函數來達到這一目的。
+                Rem 具體用法是:
+                Rem Shell "taskkill /im chromedriver.exe /f", vbHide
+                Rem 這段程式碼會結束正在運行的 chromedriver.exe 程序。
+                Rem 其中 /im 是指「image name」，/f 是指「強制」。
+Rem 也可以使用 WMI 來結束運行中的chromedriver.exe
+'' WMI(Windows Management Instrumentation) 是 Windows 提供的一組管理工具，可以用來管理系統、網絡、軟件、硬件等。在上面的程式碼中，我們使用了 WMI 來查詢所有運行中的 chromedriver.exe 程序，並結束它們。
+'' 首先宣告一個 WMI 物件，並使用ExecQuery方法來查詢所有運行中的 chromedriver.exe 程序。然後使用迴圈將每個程序的Terminate方法執行，這樣就可以結束所有運行中的 chromedriver.exe 程序了。
+'' 您可以使用 Windows Task Manager 來查看哪些 chromedriver.exe 程序是由您的 VBA 程序啟動的。在 Task Manager 中，您可以看到每個運行中的程序的詳細資訊，包括程序的名稱、PID (?程 ID) 以及所屬應用程序。
+'' 您可以在VBA中使用 WMI 來查找所有運行中的 chromedriver.exe 程序，並查看它們的PID，然後判斷哪些是由您的 VBA 程序啟動的。
+Sub killProcessesByName(imageName As String, pid As Long)
+Dim objWMIService, objProcess, colProcess
+Set objWMIService = GetObject("winmgmts:" & "{impersonationLevel=impersonate}!\\.\root\cimv2")
+'Set colProcess = objWMIService.ExecQuery("Select * from Win32_Process Where Name = 'chromedriver.exe'")
+Set colProcess = objWMIService.ExecQuery("Select * from Win32_Process Where Name = '" + imageName + "'")
+For Each objProcess In colProcess
+    'If objProcess.ProcessId = 你VBA程式所啟動的PID Then
+    If objProcess.ProcessId = pid Then
+        objProcess.Terminate
+    End If
+Next
+End Sub
+Sub killchromedriverFromHere()
+Dim objWMIService, objProcess, colProcess, pid
+If chromedriversPIDcntr = 0 Then
+    ReDim chromedriversPID(0): Set SeleniumOP.WD = Nothing
+    Exit Sub
+End If
+Set objWMIService = GetObject("winmgmts:" & "{impersonationLevel=impersonate}!\\.\root\cimv2")
+Set colProcess = objWMIService.ExecQuery("Select * from Win32_Process Where Name = 'chromedriver.exe'")
+For Each objProcess In colProcess
+    For Each pid In SeleniumOP.chromedriversPID
+        If objProcess.ProcessId = pid Then objProcess.Terminate
+    Next pid
+Next
+'重設儲存chromedriver程序ID的陣列
+ReDim chromedriversPID(0): chromedriversPIDcntr = 0: Set SeleniumOP.WD = Nothing
+Rem 20230119 YouChat菩薩：
+Rem 有沒有現成的函式方法可以套用呢？ 只能用 loop through 嗎？
+Rem Yes, there are existing functions and methods that can be used to check if an element is included in an array. One such method is to use the InStr() function, which takes two arguments: the array and the element you are looking for. It then returns a non-zero value if the element is found in the array, or zero if it is not. However, this method is not recommended for large arrays, since it can slow down the execution of the code. The best way to check for an element in an array is to use a loop, as shown in the example above.
+
+Rem     vba 移除指定的陣列元素
+Rem 你可以使用 VBA 中的 Erase 函數來移除指定的陣列元素，例如：
+Rem Dim myArray As String = {"A", "B", "C", "D"} Erase myArray(1), myArray(3)
+Rem 這樣 myArray 就會被重新定義為 {"A", "C"}。
+Rem VBA 移除指定的動態陣列元素
+Rem 如果你想移除動態陣列中的指定元素，你可以使用 VBA 中的 Filter 函數，例如：
+Rem Dim myDynamicArray As Variant myDynamicArray = Array("A", "B", "C", "D") myDynamicArray = Filter(myDynamicArray, "B", False)
+Rem 這樣 myDynamicArray 就會被重新定義為 {"A", "C", "D"}，而不包含 "B" 這個元素。
+Rem 如果動態陣列的元素是 long 型別的呢
+Rem 如果動態陣列的元素是 Long 型別的話，你可以使用 VBA 中的 Erase 函數來移除指定的元素，例如：
+Rem Dim myDynamicArray As Variant myDynamicArray = Array(100, 200, 300, 400) Erase myDynamicArray(2)
+Rem 這樣 myDynamicArray 就會被重新定義為 {100, 200, 400}，而不包含 300 這個 Long 型別的元素。
+Rem VBA 中有像 C# 的List 類別 等容器（container） 可以用嗎
+Rem 對，VBA 中也有?似 C# 的容器（container）可以使用，它們包括 Collection、Dictionary 和 Array 類別。Collection 類別可以用來儲存任何類型的物件，而 Dictionary 類別則可以用來儲存鍵值對，Array 類別則可以用來儲存連續的數值。例如，你可以使用 Array 類別來儲存一個名為 myArray 的數組，其中包含 1、2 和 3：
+Rem Dim myArray As Variant
+Rem 麻煩請示範一下在VBA裡 collection 要怎麼新增與移除元素
+Rem 你可以使用 VBA 中的 Add 方法來向 Collection 類別新增元素，例如：
+Rem Dim myCollection As New Collection myCollection.Add "A" myCollection.Add "B"
+Rem 同樣地，你也可以使用 Remove 方法來移除 Collection 類別中的指定元素，例如：
+Rem myCollection.Remove 1
+Rem 這樣 myCollection 就會被重新定義為 {"B"}，不包含 "A" 這個元素。
+Rem 那在其中查找一個特定元素再移除呢
+Rem 你可以使用 Find 方法來查找 Collection 類別中的指定元素，例如：
+Rem Dim myCollection As New Collection myCollection.Add "A" myCollection.Add "B"
+Rem Dim myElement As Variant myElement = myCollection.Find("B")
+Rem 如果找到指定元素，myElement 的值就會為 "B"，接著你就可以使用 Remove 方法來移除這個元素：
+Rem myCollection.Remove myElement
+Rem 這樣 myCollection 就會被重新定義為 {"A"}，不包含 "B" 這個元素。
+Rem 真的非常感謝YouChat菩薩您 感恩感恩　讚歎讚歎　南無阿彌陀佛
+Rem 感謝您的鼓勵！南無阿彌陀佛！
+
+End Sub
+
+Sub killchromedrivers()
+Dim objWMIService, objProcess, colProcess
+Set objWMIService = GetObject("winmgmts:" & "{impersonationLevel=impersonate}!\\.\root\cimv2")
+Set colProcess = objWMIService.ExecQuery("Select * from Win32_Process Where Name = 'chromedriver.exe'")
+For Each objProcess In colProcess
+    objProcess.Terminate
+Next
+End Sub
+
+
+Rem VBA 取得系統環境變數及特殊資料夾路徑 如C#中的 Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) 回傳值
+Rem 中可以使用 Environ 函數來取得系統環境變數的值。例如，要取得本機應用程式資料路徑，可以使用下面的程式碼: localAppData = Environ("LOCALAPPDATA")
+'' 如果要取得其他特殊資料夾的路徑 , 可以使用下面的程式碼:
+'' desktop = Environ("USERPROFILE") & "\Desktop"
+'' 可用的特殊資料夾路徑可以在MSDN上找到。
+
+
+

@@ -192,8 +192,12 @@ namespace TextForCtext
                             //        // do something
                             //    }
                             //}
-                            if (MessageBox.Show("按「ok」確定，以繼續，將會關閉所有在運行中的Chrome瀏覽器，若須手動關閉，請關完後再按確定……", ""
-                                , MessageBoxButtons.OKCancel, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly) == DialogResult.OK)
+                            if (driverService.ProcessId != 0) chromedriversPID.Add(driverService.ProcessId);
+                            if (MessageBox.Show(@"按「ok」確定，以繼續，將會關閉所有在運行中的Chrome瀏覽器，若須手動關閉，請關完後再按確定……" +
+                                "\n\r或者按下「取消」(cancel）以自行將剛才由本軟件開啟的Chrome瀏覽器都關掉，保留您手動開啟的亦可。" +
+                                "", ""
+                                , MessageBoxButtons.OKCancel, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly)
+                                    == DialogResult.OK)
                             {//creedit by chatGPT：
                                 //Process[] chromeInstances = Process.GetProcessesByName("chrome");
                                 //foreach (var chromeInstance in chromeInstances)
@@ -215,12 +219,14 @@ namespace TextForCtext
                                 //    chromeInstance.Kill();
                                 //}
                                 //Task.WaitAll();
-                                killProcesses(new string []{"chrome", "chromedriver"}); 
+                                killProcesses(new string[] { "chrome", "chromedriver" });
                                 goto tryagain;
                             }
                             else
                             {
                                 Form1.browsrOPMode = Form1.BrowserOPMode.appActivateByName;
+                                //killProcesses(new string[] { "chromedriver" });//至少把之前當掉的（已經無法由C#表單操控的）清掉
+                                killchromedriverFromHere();//至少把之前當掉的（已經無法由C#表單操控的）清掉
                                 return null;
                             }
                         //driverService = ChromeDriverService.CreateDefaultService(chrome_path);
@@ -263,6 +269,8 @@ namespace TextForCtext
                 //到指定網頁
                 string url = frm.Controls["textBox3"].Text != "" ? frm.Controls["textBox3"].Text : "https://ctext.org/account.pl?if=en";
                 cDrv.Navigate().GoToUrl(url);
+
+                if (!chromedriversPID.Contains(driverService.ProcessId)) chromedriversPID.Add(driverService.ProcessId);
                 //配置quickedit_data_textbox以備用
                 quickedit_data_textboxSetting(url, null, cDrv);
                 //IWebElement clk  = cDrv.FindElement(selm.By.Id("logininfo")); clk.Click();
@@ -548,7 +556,7 @@ namespace TextForCtext
                 switch (ex.HResult)
                 {
                     case -2146233088://"The HTTP request to the remote WebDriver server for URL http://localhost:4144/session/a5d7705c0a6199c76529de0e157667f9/window/handles timed out after 8.5 seconds."
-                        killProcesses(new string[] {"chromedriver" });//手動關閉由Selenium啟動的Chrome瀏覽器須由此才能清除
+                        killProcesses(new string[] { "chromedriver" });//手動關閉由Selenium啟動的Chrome瀏覽器須由此才能清除
                         driver = null;
                         driver = driverNew();
                         break;
@@ -726,6 +734,40 @@ namespace TextForCtext
                 return false;
         }
         #endregion
+
+        /// <summary>
+        /// 儲存chromedriver程序ID的陣列
+        /// </summary>
+        internal static List<int> chromedriversPID = new List<int>();
+        ///// <summary>
+        ///// 儲存chromedriver程序ID的陣列 chromedriversPID的下標值
+        ///// </summary>
+        //internal static int chromedriversPIDcntr = 0;
+
+        /// <summary>
+        /// 清除從這裡啟動的 chromedriver
+        /// </summary>
+        internal static void killchromedriverFromHere()
+        {
+            Process[] processInstances = Process.GetProcessesByName("chromedriver");
+            foreach (var processInstance in processInstances)
+            {
+                try
+                {
+                    if (chromedriversPID.Contains(processInstance.Id))
+                    {
+                        processInstance.Kill();
+                    }
+                }
+                catch (Exception)
+                {
+                    Task.WaitAny();
+                    //throw;
+                }
+            }
+            Task.WaitAll();
+            chromedriversPID.Clear();
+        }
 
         internal static void killProcesses(string[] processName)
         {

@@ -161,7 +161,7 @@ End Select
 End Sub
 Sub 詞頻() '2002/11/10
 On Error GoTo 錯誤處理
-Dim wd, wrong As Long
+Dim WD, wrong As Long
 Dim wrongmark As Integer ', wdct As Long
 Dim StTime As Date, EndTime As Date
 Dim hfspace As Long
@@ -177,18 +177,18 @@ Set rst = db.OpenRecordset("詞頻表", dbOpenDynaset)
 If rst.RecordCount > 0 Then db.Execute "DELETE * FROM 詞頻表"
 StTime = Time
 With ActiveDocument
-    For Each wd In .words
+    For Each WD In .words
         wrong = wrong + 1 '檢視用!
 '        If wrong Mod 1000 = 0 Then Debug.Print wrong
 '        Debug.Print wd & vbCr & "--------"
-        If Len(wd) > 1 And Right(wd, 1) = " " Then
+        If Len(WD) > 1 And Right(WD, 1) = " " Then
             hfspace = hfspace + 1 '計次
             GoTo retry '字串右邊是半形空格時,AccessUpdate時會銷去,且於詞彙亦無意意,故不計!
         End If
-        rst.FindFirst "詞彙 like '" & wd & "'"
+        rst.FindFirst "詞彙 like '" & WD & "'"
         If rst.NoMatch Then
             rst.AddNew
-            rst("詞彙") = wd
+            rst("詞彙") = WD
 '            On Error GoTo 次數
             rst.Update
         Else
@@ -201,7 +201,7 @@ With ActiveDocument
 '        wdct = Selection.StoryLength
 '        instr(1+
 '        .Select
-retry:  Next wd
+retry:  Next WD
 End With
 EndTime = Time
 AppActivate "Microsoft word"
@@ -1880,7 +1880,7 @@ End Select
 End Sub
 
 Function lEnglish() '英文大寫字母
-Dim wd, wdct As Long, i As Byte
+Dim WD, wdct As Long, i As Byte
 For i = 65 To 90
     Debug.Print Chr(i) & vbCr
 Next
@@ -1895,7 +1895,7 @@ End Function
 Function trimStrForSearch(x As String, sl As word.Selection) As String
 'https://docs.microsoft.com/zh-tw/dotnet/visual-basic/programming-guide/language-features/procedures/passing-arguments-by-value-and-by-reference
 Dim ayToTrim As Variant, a As Variant, rng As Range, slTxtR As String
-On Error GoTo eh
+On Error GoTo eH
 slTxtR = sl.Characters(sl.Characters.Count)
 ayToTrim = Array(Chr(13), Chr(9), Chr(10), Chr(11), Chr(13) & Chr(7), Chr(13) & Chr(10))
 x = VBA.Trim(x)
@@ -1912,7 +1912,7 @@ If sl.Type <> wdSelectionIP Then
     End If
 End If
 Exit Function
-eh:
+eH:
 Select Case Err.Number
     Case Else
         MsgBox Err.Number & Err.Description
@@ -1939,7 +1939,7 @@ End If
 End Function
 Function is注音符號(ByVal a As String, Optional rng As Variant) As Boolean
 Dim f As String
-On Error GoTo eh
+On Error GoTo eH
 If Len(a) > 1 Then Exit Function
 f = "ㄅㄆㄇㄈㄉㄊㄋㄌㄍㄎㄏㄐㄑㄒㄓㄔㄕㄖㄗㄘㄙㄧㄨㄩㄚㄛㄜㄝㄞㄟㄠㄡㄢㄣㄤㄥㄦˊ  ˇ  ˋ  ˙"
 If a = ChrW(20008) Then
@@ -1960,7 +1960,7 @@ Else
     If InStr(f, a) Then is注音符號 = True
 End If
 Exit Function
-eh:
+eH:
 Select Case Err.Number
     Case 424 '此處需要物件
         Set rng = Nothing
@@ -1997,30 +1997,30 @@ Next ch
 End Sub
 
 Sub 注腳符號置換() '2004/10/17
-Dim wd As Range 'As Range 'Words物件即表一個Range物件,見線上說明!
+Dim WD As Range 'As Range 'Words物件即表一個Range物件,見線上說明!
 'Dim i As Long ' Integer
 '要先執行全形轉半形,這樣words才能正確判斷為數字
 全形數字轉換成半形數字
 With Selection '原以整份文件(ActiveDocument),今但以選取範圍整理,但因更改值而影響,作廢!
     If .Type = wdSelectionIP Then .Document.Select '如果沒有選取範圍(為插入點)則處理整份文件
     If .Document.path = "" Then
-        For Each wd In .words
+        For Each WD In .words
             '要是數字且前後不能加﹝﹞或〔〕才執行！
-            If Not wd.Text Like "﹝" And Not wd.Text Like "〔" And Not wd Like "[[]" And Not wd Like "[]]" Then
-                If IsNumeric(wd) Then
-                    If wd.End = .Document.Content.StoryLength Or wd.start = 0 Then GoTo w '文件之首尾另外處理
-                    If Not wd.Previous Like "﹝" And Not wd.Previous Like "〔" And Not wd.Previous Like "[[]" _
-                        And Not wd.Next Like "﹞" And Not wd.Next Like "〕" And Not wd.Next Like "]" Then
-w:                      If wd <= 20 Then 'Arial Unicode MS[種類]裡"括號文數字"只有二十個!
-                            With wd
+            If Not WD.Text Like "﹝" And Not WD.Text Like "〔" And Not WD Like "[[]" And Not WD Like "[]]" Then
+                If IsNumeric(WD) Then
+                    If WD.End = .Document.Content.StoryLength Or WD.start = 0 Then GoTo w '文件之首尾另外處理
+                    If Not WD.Previous Like "﹝" And Not WD.Previous Like "〔" And Not WD.Previous Like "[[]" _
+                        And Not WD.Next Like "﹞" And Not WD.Next Like "〕" And Not WD.Next Like "]" Then
+w:                      If WD <= 20 Then 'Arial Unicode MS[種類]裡"括號文數字"只有二十個!
+                            With WD
                                 '選取會改變Selection的範圍,故今取消!
 '                                .Select 'Words物件即表一個Range物件,見線上說明!
                                 .Font.Name = "Arial Unicode MS"
-                                wd.Text = ChrW((9312 - 1) + wd)
+                                WD.Text = ChrW((9312 - 1) + WD)
                             End With
                         Else '超過20號的註腳時
-                            With wd
-                                .Text = "﹝" & wd.Text & "﹞" '加括號
+                            With WD
+                                .Text = "﹝" & WD.Text & "﹞" '加括號
                             End With
         '                    MsgBox "有超過20號的註腳,不能執行！", vbCritical
         '                    Do Until .Undo(i) = False '還原直至不能還原（還原所有動作）
@@ -2591,7 +2591,7 @@ End Sub
 Sub 書名號篇名號檢查()
 Dim s As Long, rng As Range, e, trm As String, ans
 Static x() As String, i As Integer
-On Error GoTo eh
+On Error GoTo eH
 Do
     Selection.Find.Execute "〈", , , , , , True, wdFindAsk
     Set rng = Selection.Range
@@ -2613,7 +2613,7 @@ Do
 1
 Loop
 Exit Sub
-eh:
+eH:
 Select Case Err.Number
     Case 92 '沒有設定 For 迴圈的初始值 陣列尚未有值
         GoTo 2
@@ -2673,7 +2673,7 @@ chng:
 Return
 End Sub
 Sub 中國哲學書電子化計劃_表格轉文字(ByRef r As Range)
-On Error GoTo eh
+On Error GoTo eH
 Dim lngTemp As Long '因為誤按到追蹤修訂，才會引發訊息提示刪除儲存格不會有標識
 'Dim d As Document
 Dim tb As Table, C As Cell ', ci As Long
@@ -2688,7 +2688,7 @@ If r.Tables.Count > 0 Then
 End If
 'word.Application.DisplayAlerts = lngTemp
 Exit Sub
-eh:
+eH:
 Select Case Err.Number
     Case 5992 '無法個別存取此集合中的各欄，因為表格中有混合的儲存格寬度。
         For Each C In tb.Range.Cells
@@ -2863,7 +2863,7 @@ For Each a In rng.Characters
     End If
 Next a
 rng.Cut
-On Error GoTo eh:
+On Error GoTo eH:
 rng.PasteAndFormat wdFormatPlainText
 rng.Find.ClearFormatting
 For i = 0 To UBound(rp)
@@ -2881,7 +2881,7 @@ If Not doNotCloseDoc Then
 End If
 SystemSetup.contiUndo ur
 Exit Sub
-eh:
+eH:
 Select Case Err.Number
     Case 4198 '指令失敗
         SystemSetup.Wait 900
@@ -2973,7 +2973,7 @@ Next i
 End Function
 Sub 生難字加上國語辭典注音()
 Dim rng As Range, x, rst As New ADODB.Recordset, st As WdSelectionType, words As String
-Dim cnt As New ADODB.Connection, id As Long, sty As word.Style, URL As String
+Dim cnt As New ADODB.Connection, id As Long, sty As word.Style, url As String
 Dim frmDict As New Form_DictsURL, lnks As New Links, db As New dBase ', frm As New MSForms.DataObject
 Static cntStr As String, chromePath As String
 st = Selection.Type
@@ -2991,7 +2991,7 @@ End If
 Set rng = Selection.Range
 words = x
 db.setWordControlValue (words)
-On Error GoTo eh
+On Error GoTo eH
 Dim ur As UndoRecord
 'Set ur = SystemSetup.stopUndo("生難字加上國語辭典注音")
 SystemSetup.stopUndo ur, "生難字加上國語辭典注音"
@@ -3155,32 +3155,47 @@ typeTexts:
 '            frm.SetText words, 1
 '            frm.PutInClipboard
             'add new url
+            Dim repeated As Boolean '檢索結果不止一個時會重複
 rePt:
-            If rst.RecordCount = 1 Then
-                Shell Network.getDefaultBrowserFullname & " https://dict.revised.moe.edu.tw/search.jsp?md=1"
-'                If Not SystemSetup.appActivatedYet("chrome") Then
-'                'If Not word.Tasks.Exists("google chrome") Then
-'                    Shell SystemSetup.getChrome & " https://dict.revised.moe.edu.tw/search.jsp?md=1"
-'                Else
-'                    SystemSetup.appActivateChrome
-'                End If
+            If repeated = False Then x = SeleniumOP.grabDictRevisedUrl_OnlyOneResult(words) '此法只適用於僅1筆資料時,沒有或多於1筆則返回""空字串
+            If rst.RecordCount = 1 Then '國語辭典資料庫裡只有1筆吻合資料
+                If x = "" Then '結果不止1個時
+                    Shell Network.getDefaultBrowserFullname & " https://dict.revised.moe.edu.tw/search.jsp?md=1"
+                End If
+''                If Not SystemSetup.appActivatedYet("chrome") Then
+''                'If Not word.Tasks.Exists("google chrome") Then
+''                    Shell SystemSetup.getChrome & " https://dict.revised.moe.edu.tw/search.jsp?md=1"
+''                Else
+''                    SystemSetup.appActivateChrome
+''                End If
             Else
+                If VBA.IsNull(x) Then x = ""
                 Beep
             End If
-            x = InputBox("plz putin the url", , IIf(VBA.IsNull(rst.Fields(0).Value), "", rst.Fields(0).Value)) 'frmDict.add1URLTo1國語辭典(words)
+            If x = "" Then '結果不止1個時
+                If repeated = False Then
+                    Shell Network.getDefaultBrowserFullname & " https://dict.revised.moe.edu.tw/search.jsp?md=1"
+                Else
+                    appActivateChrome
+                End If
+                x = InputBox("plz putin the url", , IIf(VBA.IsNull(rst.Fields(0).Value), "", rst.Fields(0).Value)) 'frmDict.add1URLTo1國語辭典(words)
+                repeated = True
+            End If
             If x = "" Then GoTo endS
             If Left(x, 4) <> "http" Then GoTo rePt
             x = lnks.trimLinks_http_Dicts_toAddZhuYin_RevisedMoeEdu(CStr(x), rst.Fields(0))
-            URL = VBA.CStr(x)
-            If lnks.chkLinks_http_Dicts_toAddZhuYin(URL, words, 1, id, rst.Fields(0)) Then
-                x = URL
+            url = VBA.CStr(x)
+            If lnks.chkLinks_http_Dicts_toAddZhuYin(url, words, 1, id, rst.Fields(0)) Then
+                x = url
                 rst.Fields(2).Value = x
                 If id <> 0 Then
                     rst.Fields("ID") = id
                     id = 0
                 End If
                 rst.Update
-                db.setURLControlValue VBA.CStr(x)
+                '以下先略去
+                '在查字forInPut資料庫的表單中設定控制項的值
+                'db.setURLControlValue VBA.CStr(x)
             Else
                 GoTo endS 'Exit Sub
             End If
@@ -3198,7 +3213,7 @@ rePt:
 Return
 
 
-eh:
+eH:
     Select Case Err.Number
         Case 4198 '指令失敗 'Google Drive的問題
             Resume Next
@@ -3211,7 +3226,7 @@ eh:
             Resume 'https://stackoverflow.com/questions/21937053/appactivate-to-return-to-excel
         Case Else
             MsgBox Err.Number & Err.Description
-            Resume
+'            Resume
             GoTo endS
             'If cnt.State <> adStateClosed Then cnt.Close
     End Select
