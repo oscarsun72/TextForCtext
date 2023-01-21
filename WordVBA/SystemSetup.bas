@@ -510,7 +510,7 @@ End Sub
 Sub killchromedriverFromHere()
 Dim objWMIService, objProcess, colProcess, pid
 If chromedriversPIDcntr = 0 Then
-    ReDim chromedriversPID(0): Set SeleniumOP.WD = Nothing
+    ReDim chromedriversPID(0): If Not WD Is Nothing Then WD.Quit: Set SeleniumOP.WD = Nothing
     Exit Sub
 End If
 Set objWMIService = GetObject("winmgmts:" & "{impersonationLevel=impersonate}!\\.\root\cimv2")

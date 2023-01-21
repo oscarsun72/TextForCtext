@@ -1007,8 +1007,9 @@ End If
 End Sub
 
 Sub 中國哲學書電子化計劃_只保留正文注文_且注文前後加括弧_貼到古籍酷自動標點()
-Dim ur As UndoRecord
-SystemSetup.stopUndo ur, "中國哲學書電子化計劃_註文前後加括弧_貼到古籍酷自動標點"
+'Dim ur As UndoRecord
+'SystemSetup.stopUndo; ur, "中國哲學書電子化計劃_註文前後加括弧_貼到古籍酷自動標點"
+If Documents.Count = 0 Then Docs.空白的新文件
 If (ActiveDocument.path <> "" And Not ActiveDocument.Saved) Then ActiveDocument.Save
 VBA.DoEvents
 中國哲學書電子化計劃.只保留正文注文_且注文前後加括弧
@@ -1024,12 +1025,18 @@ DoEvents
 'If d.path = "" Then '前已作判斷 If d.path <> "" Then Exit Sub
 d.Close wdDoNotSaveChanges
 
-貼到古籍酷自動標點
-SystemSetup.contiUndo ur
+
+If 貼到古籍酷自動標點() = True Then
+    '自動執行易學關鍵字標識
+    If Documents.Count > 0 Then
+        If InStr(ActiveDocument.path, "已初步標點") > 0 Then mark易學關鍵字
+    End If
+End If
+'SystemSetup.contiUndo ur
 End Sub
 
 '先要複製到剪貼簿
-Sub 貼到古籍酷自動標點()
+Function 貼到古籍酷自動標點() As Boolean
 Dim x As String, result As String
 On Error GoTo Err1
 x = SystemSetup.GetClipboard
@@ -1044,9 +1051,10 @@ Else
     SystemSetup.SetClipboard result
     '完成放音效
     SystemSetup.playSound 1.469
+    貼到古籍酷自動標點 = True
 End If
 
-Exit Sub
+Exit Function
 Err1:
     Select Case Err.Number
         Case 49 'DLL 呼叫規格錯誤
@@ -1057,7 +1065,7 @@ Err1:
 '           Resume
     End Select
 
-End Sub
+End Function
 Sub 貼到古籍酷自動標點SendKeys()
 'Dim d As Document
 'Set d = ActiveDocument

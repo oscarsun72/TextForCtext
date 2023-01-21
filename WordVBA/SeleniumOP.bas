@@ -3,6 +3,17 @@ Option Explicit
 Public WD As SeleniumBasic.IWebDriver
 Public chromedriversPID() As Long '儲存chromedriver程序ID的陣列
 Public chromedriversPIDcntr As Integer 'chromedriversPID的下標值
+
+Sub tesSeleniumBasic() 'https://github.com/florentbr/SeleniumBasic
+'20230119 creedit chatGPT大菩薩
+
+    Dim driver As New Selenium.WebDriver
+    'driver.start "chrome", "https://www.google.com"
+    driver.SetBinary getChromePathIncludeBackslash
+    driver.start getChromePathIncludeBackslash + "chrome.exe", "https://www.google.com"
+    driver.Get "/"
+
+End Sub
 Sub openChrome(Optional url As String)
 reStart:
     'Dim WD As SeleniumBasic.IWebDriver
@@ -67,13 +78,6 @@ Select Case Err.Number
 '        Resume
 End Select
 
-'20230119 creedit chatGPT大菩薩
-
-'    Dim driver As New Selenium.WebDriver
-'    'driver.start "chrome", "https://www.google.com"
-'    driver.SetBinary getChromePathIncludeBackslash
-'    driver.start getChromePathIncludeBackslash + "chrome.exe", "https://www.google.com"
-'    driver.Get "/"
 End Sub
 
 Function openChromeBackground(url As String) As SeleniumBasic.IWebDriver
@@ -249,16 +253,34 @@ url = "https://dict.revised.moe.edu.tw/search.jsp?md=1"
 
 On Error GoTo Err1
 
-Dim WD As SeleniumBasic.IWebDriver
-    Set WD = openChromeBackground(url)
-'    If WD.url <> url Then WD.url = url
+Dim wdB As SeleniumBasic.IWebDriver, WBQuit As Boolean '=true 則可以關Chrome瀏覽器
+WBQuit = True '因為在背景執行，預設要可以關
+
+    Set wdB = openChromeBackground(url)
+'    If wdB.url <> url Then wdB.url = url
     Dim form As SeleniumBasic.IWebElement
     Dim keyword As SeleniumBasic.IWebElement
     Dim button As SeleniumBasic.IWebElement
-    Set form = WD.FindElementById("searchF")
+    Set form = wdB.FindElementById("searchF")
     Set keyword = form.FindElementByName("word")
     Set button = form.FindElementByClassName("submit")
     keyword.SendKeys searchStr
+    Rem 在 headless 參數設定下開啟的Chrome瀏覽器，是無法使用系統貼上功能的
+    Rem Dim key As New SeleniumBasic.keys
+    Rem     keyword.SendKeys key.Control + "v"
+    Rem     keyword.SendKeys key.LeftShift + key.Insert
+    Rem 改用Chrome瀏覽器介面功能表的貼上功能試試 20230121 也不行：
+    Rem <stale element reference: element is not attached to the page document(Session info: headless chrome=109.0.5414.75)>
+    Rem 因為只能操控網頁，不是瀏覽器介面
+    Rem With keyword
+'        .Click
+'        .SendKeys key.Alt + "e"
+'        .SendKeys "l"
+'        .SendKeys key.Escape
+'        .SendKeys key.Down: .SendKeys key.Down: .SendKeys key.Down
+'        .SendKeys key.Enter
+'    End With
+
     If Not button Is Nothing Then
         button.Click
     Else
@@ -266,18 +288,31 @@ Dim WD As SeleniumBasic.IWebDriver
 '            Dim k As New SeleniumBasic.keys
 '            keyword.SendKeys k.Enter
     End If
-    url = WD.url
+    url = wdB.url
     If InStr(url, notFoundOrMultiKey) = 0 Then
         grabDictRevisedUrl_OnlyOneResult = url '有找到則傳回網址
     Else
         grabDictRevisedUrl_OnlyOneResult = "" '沒有找到傳回空字串
     End If
-    '退出瀏覽器
-    WD.Quit
+    If WBQuit Then
+        '退出瀏覽器
+        wdB.Quit
+    End If
     Exit Function
 Err1:
-    MsgBox Err.Description, vbCritical
-'    Resume
+    Select Case Err.Number
+        Case 49 'DLL 呼叫規格錯誤
+            Resume
+        Case -2146233088 'unknown error: ChromeDriver only supports characters in the BMP  (Session info: chrome=109.0.5414.75)
+            'textbox.SendKeys key.LeftShift + key.Insert
+            WBQuit = pasteWhenOutBMP(wdB, url, "word", searchStr, keyword)
+            Resume Next
+        Case Else
+            MsgBox Err.Description, vbCritical
+            wdB.Quit
+            SystemSetup.killchromedriverFromHere
+'           Resume
+    End Select
 
 End Function
 
@@ -314,50 +349,75 @@ End Sub
 
 '貼到古籍酷自動標點()
 Function grabGjCoolPunctResult(text As String) As String
-Dim WD As SeleniumBasic.IWebDriver
-Dim textbox As SeleniumBasic.IWebElement, btn As SeleniumBasic.IWebElement, btn2 As SeleniumBasic.IWebElement, item As SeleniumBasic.IWebElement
+Const url = "https://gj.cool/punct"
+Dim wdB As SeleniumBasic.IWebDriver, WBQuit As Boolean '=true 則可以關Chrome瀏覽器
+Dim textBox As SeleniumBasic.IWebElement, btn As SeleniumBasic.IWebElement, btn2 As SeleniumBasic.IWebElement, item As SeleniumBasic.IWebElement
 On Error GoTo Err1
-Set WD = openChromeBackground("https://gj.cool/punct")
-'If WD Is Nothing Then openChrome ("https://gj.cool/punct")
-If WD Is Nothing Then Exit Function
+Set wdB = openChromeBackground(url)
+'If WDB Is Nothing Then openChrome ("https://gj.cool/punct")
+If wdB Is Nothing Then Exit Function
+WBQuit = True '因為在背景執行，預設要可以關
+'整理文本
+Dim chkStr As String: chkStr = VBA.Chr(13) & Chr(10) & Chr(7) & Chr(9) & Chr(8)
+text = VBA.Trim(text)
+Do While VBA.InStr(chkStr, VBA.Left(text, 1)) > 0
+    text = Mid(text, 2)
+Loop
+Do While VBA.InStr(chkStr, VBA.Right(text, 1)) > 0
+    text = Left(text, Len(text) - 1)
+Loop
+
 
 '貼上文本
-Set textbox = WD.FindElementById("PunctArea")
+Set textBox = wdB.FindElementById("PunctArea")
 Dim key As New SeleniumBasic.keys
-textbox.Click
-textbox.Clear
+textBox.Click
+textBox.Clear
 'textbox.SendKeys key.LeftShift + key.Insert
 'textbox.SendKeys VBA.KeyCodeConstants.vbKeyControl & VBA.KeyCodeConstants.vbKeyV
-textbox.SendKeys text 'SystemSetup.GetClipboardText
-'textbox.SendKeys sys
+textBox.SendKeys text 'SystemSetup.GetClipboardText
+
+'貼上不成則退出
+Dim WaitDt As Date, nx As String, xl As Integer
+nx = textBox.text
+If nx = "" Then
+    grabGjCoolPunctResult = ""
+    wdB.Quit
+    Exit Function
+End If
+
 '標點
-Set btn = WD.FindElementByCssSelector("#main > div.my-4 > div.p-1.p-md-3.d-flex.justify-content-end > div.ms-2 > button")
+Set btn = wdB.FindElementByCssSelector("#main > div.my-4 > div.p-1.p-md-3.d-flex.justify-content-end > div.ms-2 > button")
 btn.Click
 '等待標點完成
 'SystemSetup.Wait 3.6
-Dim WaitDt As Date
-WaitDt = DateAdd("s", 6, Now()) '極限6秒
 
-Do While VBA.StrComp(text, textbox.text) = 0
+WaitDt = DateAdd("s", 6, Now()) '極限6秒
+xl = VBA.Len(text)
+Do
+    nx = textBox.text
+    'VBA.StrComp(text, nx) <> 0
+    If InStr(nx, "，") > 0 And InStr(nx, "。") > 0 And Len(nx) > xl Then Exit Do
     If Now > WaitDt Then
         'Exit Do '超過指定時間後離開
         grabGjCoolPunctResult = ""
+        wdB.Quit
         Exit Function
     End If
 Loop
-'Set btn2 = WD.FindElementById("dropdownMenuButton2")
+'Set btn2 = WDB.FindElementById("dropdownMenuButton2")
 'btn2.Click
 '
 ''複製
-'Set item = WD.FindElementByCssSelector("#main > div > div.p-1.p-md-3.d-flex.justify-content-end > div.dropdown > ul > li:nth-child(4) > a")
+'Set item = WDB.FindElementByCssSelector("#main > div > div.p-1.p-md-3.d-flex.justify-content-end > div.dropdown > ul > li:nth-child(4) > a")
 'item.Click
 '
 ''讀取剪貼簿作為回傳值
 'SystemSetup.Wait 0.3
 'SystemSetup.SetClipboard textbox.text
 'grabGjCoolPunctResult = SystemSetup.GetClipboardText
-grabGjCoolPunctResult = textbox.text
-WD.Quit
+grabGjCoolPunctResult = textBox.text
+If WBQuit Then wdB.Quit
 'Debug.Print grabGjCoolPunctResult
 Exit Function
 
@@ -366,12 +426,65 @@ Err1:
         Case 49 'DLL 呼叫規格錯誤
             Resume
         Case -2146233088 'unknown error: ChromeDriver only supports characters in the BMP  (Session info: chrome=109.0.5414.75)
-            textbox.SendKeys key.LeftShift + key.Insert
+            Rem 完全無作用
+            Rem SystemSetup.SetClipboard text
+            Rem SystemSetup.Wait 0.3
+            Rem textBox.SendKeys key.Control + "v"
+            Rem textBox.SendKeys key.LeftShift + key.Insert
+            WBQuit = pasteWhenOutBMP(wdB, url, "PunctArea", text, textBox)
             Resume Next
         Case Else
             MsgBox Err.Description, vbCritical
+            wdB.Quit
             SystemSetup.killchromedriverFromHere
 '           Resume
     End Select
 
+End Function
+
+Private Function pasteWhenOutBMP(ByRef iwd As SeleniumBasic.IWebDriver, url, textBoxToPastedID, pastedTxt As String, ByRef textBox As SeleniumBasic.IWebElement) As Boolean ''unknown error: ChromeDriver only supports characters in the BMP  (Session info: chrome=109.0.5414.75)
+Rem creedit chatGPT大菩薩：您提到的確實是 Selenium 的 SendKeys 方法不能貼上 BMP 外的字的問題。
+On Error GoTo Err1
+DoEvents
+SystemSetup.SetClipboard pastedTxt
+'SystemSetup.Wait 0.2
+iwd.Quit
+If WD Is Nothing Then
+    openChrome (url)
+    pasteWhenOutBMP = True
+End If
+Set iwd = WD
+If iwd.url <> url Then iwd.Navigate.GoToUrl (url)
+Dim key As New SeleniumBasic.keys
+Set textBox = iwd.FindElementById(textBoxToPastedID)
+textBox.Click
+
+'貼上
+'SystemSetup.Wait 1.5
+'textbox.SendKeys key.LeftShift + key.Insert
+textBox.SendKeys key.Control + "v"
+
+Exit Function
+Err1:
+    Select Case Err.Number
+        Case 49 'DLL 呼叫規格錯誤
+            Resume
+        Case -2146233088 '兩個錯誤的號碼是一樣的，只能用描述來判斷了
+        'unknown error: ChromeDriver only supports characters in the BMP  (Session info: chrome=109.0.5414.75)
+'            textbox.SendKeys key.LeftShift + key.Insert
+'            usePaste WD, url
+'            Resume Next
+            If InStr(Err.Description, "timed out after 60 seconds") Or InStr(Err.Description, "無法連接至遠端伺服器") Then
+                'The HTTP request to the remote WebDriver server for URL http://localhost:1944/session/d83a0c74803e25f1e7f48999b87a6b7d/element/69589515-4189-4db6-8655-80e30fc05ee0/value timed out after 60 seconds.
+                'A exception with a null response was thrown sending an HTTP request to the remote WebDriver server for URL http://localhost:1921/session//element/a9208c93-91ae-4956-9455-d42f51719f23/text. The status of the exception was ConnectFailure, and the message was: 無法連接至遠端伺服器
+                iwd.Quit
+                SystemSetup.killchromedriverFromHere
+            End If
+        Case Else
+            MsgBox Err.Description, vbCritical
+'            WD.Quit
+            iwd.Quit
+            SystemSetup.killchromedriverFromHere
+'           Resume
+    End Select
 End Function
