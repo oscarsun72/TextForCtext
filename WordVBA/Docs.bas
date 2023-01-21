@@ -1018,9 +1018,10 @@ Dim d As Document
 Set d = ActiveDocument
 If d.path <> "" Then Exit Sub
 If Len(d.Range) = 1 Then Exit Sub '空白文件不處理
-'先要複製到剪貼簿
-d.Range.Cut
 
+'先要複製到剪貼簿,純文字操作即可
+'d.Range.Cut
+SystemSetup.SetClipboard d.Range.text
 DoEvents
 'If d.path = "" Then '前已作判斷 If d.path <> "" Then Exit Sub
 d.Close wdDoNotSaveChanges

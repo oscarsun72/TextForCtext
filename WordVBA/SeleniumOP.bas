@@ -446,9 +446,10 @@ Private Function pasteWhenOutBMP(ByRef iwd As SeleniumBasic.IWebDriver, url, tex
 Rem creedit chatGPT大菩薩：您提到的確實是 Selenium 的 SendKeys 方法不能貼上 BMP 外的字的問題。
 On Error GoTo Err1
 DoEvents
-SystemSetup.SetClipboard pastedTxt
+'SystemSetup.SetClipboard pastedTxt
 'SystemSetup.Wait 0.2
 iwd.Quit
+retry:
 If WD Is Nothing Then
     openChrome (url)
     pasteWhenOutBMP = True
@@ -480,11 +481,15 @@ Err1:
                 iwd.Quit
                 SystemSetup.killchromedriverFromHere
             End If
+        Case -2147467261 '並未將物件參考設定為物件的執行個體。
+            If Not WD Is Nothing Then WD.Quit
+            Set WD = Nothing
+            GoTo retry
         Case Else
             MsgBox Err.Description, vbCritical
 '            WD.Quit
             iwd.Quit
             SystemSetup.killchromedriverFromHere
-'           Resume
+           Resume
     End Select
 End Function

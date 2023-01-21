@@ -4745,6 +4745,10 @@ namespace WindowsFormsApp1
             //throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// Ctrl + F2 切換語音操作（預設為非 Windows 語音辨識操作）識別用
+        /// </summary>
+        bool speechRecognitionOPmode = false;
         void autoPastetoCtextQuitEditTextbox(out DialogResult dialogResult)
         {
             ////if (new StringInfo(textBox1.SelectedText).LengthInTextElements == predictEndofPageSelectedTextLen &&
@@ -4778,9 +4782,14 @@ namespace WindowsFormsApp1
                     //20230113 creedit with chatGPT：設定訊息方塊獨占性：
                     bool _autoPastetoQuickEdit = autoPastetoQuickEdit;
                     bool _check_the_adjacent_pages = check_the_adjacent_pages;
-                    dialogResult = MessageBox.Show("auto paste to Ctext Quit Edit textBox?" + Environment.NewLine + Environment.NewLine
-                                            + "……" + textBox1.SelectedText, "", MessageBoxButtons.OKCancel, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1,
-                                            MessageBoxOptions.DefaultDesktopOnly);
+                    if (!speechRecognitionOPmode)
+                        dialogResult = MessageBox.Show("auto paste to Ctext Quit Edit textBox?" + Environment.NewLine + Environment.NewLine
+                                                + "……" + textBox1.SelectedText, "", MessageBoxButtons.OKCancel, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1,
+                                                 MessageBoxOptions.DefaultDesktopOnly);
+                    else
+                        dialogResult = MessageBox.Show("auto paste to Ctext Quit Edit textBox?" + Environment.NewLine + Environment.NewLine
+                                                + "……" + textBox1.SelectedText, "", MessageBoxButtons.OKCancel, MessageBoxIcon.Question
+                                                 );
                     if (dialogResult == DialogResult.OK)
                     {
                         if (browsrOPMode == BrowserOPMode.appActivateByName) textBox1.Enabled = false;//避免誤觸
@@ -5121,6 +5130,16 @@ namespace WindowsFormsApp1
             #region 按下Ctrl鍵
             if (Control.ModifierKeys == Keys.Control)
             {//按下Ctrl鍵
+
+                // Ctrl + F2 切換語音操作（預設為非 Windows 語音辨識操作）識別用
+                if (e.KeyCode == Keys.F2)
+                {
+                    e.Handled = true;
+                    speechRecognitionOPmode = !speechRecognitionOPmode;
+                    if (speechRecognitionOPmode) new SoundPlayer(@"C:\Windows\Media\Speech On.wav").Play();
+                    else new SoundPlayer(@"C:\Windows\Media\Speech Off.wav").Play();
+                    return;
+                }
                 if (e.KeyCode == Keys.F)
                 {
                     e.Handled = true;
@@ -5923,7 +5942,24 @@ namespace WindowsFormsApp1
         {
             br.driver = br.driver ?? br.driverNew();
             //取得所有現行窗體（分頁頁籤）
-            System.Collections.ObjectModel.ReadOnlyCollection<string> tabWindowHandles = br.driver.WindowHandles;
+            System.Collections.ObjectModel.ReadOnlyCollection<string> tabWindowHandles = new ReadOnlyCollection<string>(new List<string>());
+            try
+            {
+                tabWindowHandles = br.driver.WindowHandles;
+            }
+            catch (Exception ex)
+            {
+                switch (ex.HResult)
+                {
+                    case -2146233088: //"An unknown exception was encountered sending an HTTP request to the remote WebDriver server for URL http://localhost:6763/session/b17084f4c8e209d232d5a9eb18cf181a/window/handles. The exception message was: 傳送要求時發生錯誤。"
+                        br.driver.Quit();
+                        br.driver = null; br.driverNew();
+                        tabWindowHandles = br.driver.WindowHandles;
+                        break;
+                    default:
+                        throw;
+                }
+            }
             //手動輸入模式時
             if (keyinText)
             {
