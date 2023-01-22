@@ -4782,13 +4782,18 @@ namespace WindowsFormsApp1
                     //20230113 creedit with chatGPT：設定訊息方塊獨占性：
                     bool _autoPastetoQuickEdit = autoPastetoQuickEdit;
                     bool _check_the_adjacent_pages = check_the_adjacent_pages;
+
                     if (!speechRecognitionOPmode)
                         dialogResult = MessageBox.Show("auto paste to Ctext Quit Edit textBox?" + Environment.NewLine + Environment.NewLine
-                                                + "……" + textBox1.SelectedText, "現在處理第" + CurrentPageNum + "頁", MessageBoxButtons.OKCancel, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1,
+                                                + "……" + textBox1.SelectedText, "現在處理第" +(
+                                                _check_the_adjacent_pages ? (int.Parse(_currentPageNum)+1).ToString() : CurrentPageNum)
+                                                 + "頁", MessageBoxButtons.OKCancel, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1,
                                                  MessageBoxOptions.DefaultDesktopOnly);
                     else
                         dialogResult = MessageBox.Show("auto paste to Ctext Quit Edit textBox?" + Environment.NewLine + Environment.NewLine
-                                                + "……" + textBox1.SelectedText, "現在處理第" + CurrentPageNum + "頁", MessageBoxButtons.OKCancel, MessageBoxIcon.Question
+                                                + "……" + textBox1.SelectedText, "現在處理第" +(
+                                                _check_the_adjacent_pages ? (int.Parse(_currentPageNum) + 1).ToString() : CurrentPageNum)
+                                                + "頁", MessageBoxButtons.OKCancel, MessageBoxIcon.Question
                                                  );
                     if (dialogResult == DialogResult.OK)
                     {
