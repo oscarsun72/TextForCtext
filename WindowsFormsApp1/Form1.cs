@@ -236,7 +236,7 @@ namespace WindowsFormsApp1
                         if (xClp.IndexOf("edit") > -1 && xClp.Substring(xClp.LastIndexOf("#editor")) == "#editor")
 
                             //url此頁的Quick edit值傳到textBox1
-                            textBox1.Text = br.waitFindWebElementByName_ToBeClickable("data", 3).Text;
+                            textBox1.Text = br.waitFindWebElementByName_ToBeClickable("data", br.WebDriverWaitTimeSpan).Text;
                     }
                     else
                     { Process.Start(url); appActivateByName(); }
@@ -5559,7 +5559,7 @@ namespace WindowsFormsApp1
                             br.driver = br.driver ?? br.driverNew();
                             try
                             {//這裡需要參照元件來操作就不宜跑線程了！故此區塊最後的剪貼簿，要求須是單線程者，蓋因剪貼簿須獨占式使用故也20230111                                
-                                quick_edit_box = br.waitFindWebElementByName_ToBeClickable("data", 2);//br.driver.FindElement(OpenQA.Selenium.By.Name("data"));
+                                quick_edit_box = br.waitFindWebElementByName_ToBeClickable("data", br.WebDriverWaitTimeSpan);//br.driver.FindElement(OpenQA.Selenium.By.Name("data"));
                                                                                                       ////chatGPT：
                                                                                                       //// 等待網頁元素出現，最多等待 2 秒
                                                                                                       //OpenQA.Selenium.Support.UI.WebDriverWait wait =
@@ -5988,7 +5988,7 @@ namespace WindowsFormsApp1
                         if (br.driver.SwitchTo().Window(tabWin).Url.IndexOf("&action=editchapter") > -1)
                         {
                             //waitUpdate = true;
-                            OpenQA.Selenium.IWebElement commit = br.waitFindWebElementByName_ToBeClickable("commit", 2); //br.driver.FindElement(OpenQA.Selenium.By.Name("commit"));
+                            OpenQA.Selenium.IWebElement commit = br.waitFindWebElementByName_ToBeClickable("commit", br.WebDriverWaitTimeSpan); //br.driver.FindElement(OpenQA.Selenium.By.Name("commit"));
                                                                                                                          //OpenQA.Selenium.Support.UI.WebDriverWait waitcommit = new OpenQA.Selenium.Support.UI.WebDriverWait(br.driver, TimeSpan.FromSeconds(2));
                                                                                                                          //waitcommit.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(commit));
                             await Task.Run(() =>
@@ -6059,8 +6059,8 @@ namespace WindowsFormsApp1
         private string chkUrlIsTextBox3Text(ReadOnlyCollection<string> tabWindowHandles)
         {
             string url;
-            //再回到正在編輯的本頁，準備貼入            
-            if (br.driver.Url != textBox3.Text)
+            //再回到正在編輯的本頁，準備貼入
+            if (br.getDriverUrl != textBox3.Text)
             {
                 bool found = false;
                 foreach (string tabUrl in tabWindowHandles)
@@ -6558,13 +6558,13 @@ namespace WindowsFormsApp1
                                 br.driver.SwitchTo().Window(br.driver.CurrentWindowHandle);
                                 if (textBox3.Text.IndexOf("edit") > -1 && KeyboardInfo.getKeyStateToggled(System.Windows.Input.Key.Delete))//判斷Delete鍵是否被按下彈起
                                 {//手動輸入時，當按下 Shift+Delete 當即時要準備貼上該頁，故如此操作，以備確定無誤後手動按下 submit 按鈕
-                                    OpenQA.Selenium.IWebElement quick_edit_box = br.waitFindWebElementByName_ToBeClickable("data", 2);//br.driver.FindElement(OpenQA.Selenium.By.Name("data"));
+                                    OpenQA.Selenium.IWebElement quick_edit_box = br.waitFindWebElementByName_ToBeClickable("data", br.WebDriverWaitTimeSpan);//br.driver.FindElement(OpenQA.Selenium.By.Name("data"));
                                                                                                                                       //OpenQA.Selenium.Support.UI.WebDriverWait wait = new OpenQA.Selenium.Support.UI.WebDriverWait(br.driver, TimeSpan.FromSeconds(2));
                                                                                                                                       //wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(quick_edit_box));
                                     quick_edit_box.Clear();
                                     quick_edit_box.Click();
                                     quick_edit_box.SendKeys(OpenQA.Selenium.Keys.LeftShift + OpenQA.Selenium.Keys.Insert);
-                                    OpenQA.Selenium.IWebElement submit = br.waitFindWebElementById_ToBeClickable("savechangesbutton", 13);//br.driver.FindElement(OpenQA.Selenium.By.Id("savechangesbutton"));
+                                    OpenQA.Selenium.IWebElement submit = br.waitFindWebElementById_ToBeClickable("savechangesbutton", br.WebDriverWaitTimeSpan);//br.driver.FindElement(OpenQA.Selenium.By.Id("savechangesbutton"));
                                                                                                                                           //wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(submit));
                                                                                                                                           //放在一個 Task 中去執行，並立即返回。                                     
                                     Task.Run(() =>
