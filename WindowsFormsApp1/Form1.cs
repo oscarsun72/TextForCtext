@@ -6924,7 +6924,7 @@ namespace WindowsFormsApp1
 
 
             #region 輸入末綴為「0」的數字可以設定開啟Chrome頁面的等待毫秒時間
-            if (x != "" && x.Length > 2)
+            if (x != "" && x.Length > 2 && int.TryParse(x,out int c) )
             {
                 if (x.Substring(x.Length - 1) == "0")
                 {
