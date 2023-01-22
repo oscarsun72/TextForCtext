@@ -7026,18 +7026,24 @@ namespace WindowsFormsApp1
             #region 輸入tS或tE分別設定等待伺服器或網頁元件的時間上限（秒鐘）
             //- 輸入「tS」前綴，如「tS10」即10秒設定 Selenium 操控的 Chrome瀏覽器伺服器（ChromeDriverService）的等待秒數（即「new ChromeDriver()」的「TimeSpan」引數值）。預設為 8.5。因昨大年夜 Ctext.org 網頁載入速慢又不穩，因此設置，以防萬一 20230122癸卯年初一 感恩感恩　讚歎讚歎　南無阿彌陀佛
             //- 輸入「tE」前綴，如「tE5」即5秒，設定 Selenium 操控的 Chrome瀏覽器中網頁元件的的等待秒數（WebDriverWait。即「new WebDriverWait()」的「TimeSpan」引數值）。預設為 3。
-            if (double.TryParse(x.Substring(2), out double t))
+            if (x.Length > 2)
             {
-                switch (x.Substring(0, 2))
+                if (double.TryParse(x.Substring(2), out double t))
                 {
-                    case "tS":
-                        br.ChromeDriverServiceTimeSpan = t;
-                        return;                        
-                    case "tE":
-                        br.WebDriverWaitTimeSpan = t;
-                        return;                        
+                    switch (x.Substring(0, 2))
+                    {
+                        case "tS":
+                            br.ChromeDriverServiceTimeSpan = t;
+                            textBox2.Clear();
+                            return;
+                        case "tE":
+                            br.WebDriverWaitTimeSpan = t;
+                            textBox2.Clear();
+                            return;
+                    }
                 }
             }
+
 
             #endregion
 
