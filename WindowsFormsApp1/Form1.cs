@@ -236,7 +236,7 @@ namespace WindowsFormsApp1
                         if (xClp.IndexOf("edit") > -1 && xClp.Substring(xClp.LastIndexOf("#editor")) == "#editor")
 
                             //url此頁的Quick edit值傳到textBox1
-                            textBox1.Text = br.waitFindWebElementByNameToBeClickable("data", 3).Text;
+                            textBox1.Text = br.waitFindWebElementByName_ToBeClickable("data", 3).Text;
                     }
                     else
                     { Process.Start(url); appActivateByName(); }
@@ -5559,16 +5559,16 @@ namespace WindowsFormsApp1
                             br.driver = br.driver ?? br.driverNew();
                             try
                             {//這裡需要參照元件來操作就不宜跑線程了！故此區塊最後的剪貼簿，要求須是單線程者，蓋因剪貼簿須獨占式使用故也20230111                                
-                                quick_edit_box = br.waitFindWebElementByNameToBeClickable("data", 2);//br.driver.FindElement(OpenQA.Selenium.By.Name("data"));
-                                                                                                     ////chatGPT：
-                                                                                                     //// 等待網頁元素出現，最多等待 2 秒
-                                                                                                     //OpenQA.Selenium.Support.UI.WebDriverWait wait =
-                                                                                                     //    new OpenQA.Selenium.Support.UI.WebDriverWait
-                                                                                                     //    (br.driver, TimeSpan.FromSeconds(2));
-                                                                                                     ////安裝了 Selenium.WebDriver 套件，才說沒有「ExpectedConditions」，然後照Visual Studio 2022的改正建議又用NuGet 安裝了 Selenium.Suport 套件，也自動「 using OpenQA.Selenium.Support.UI;」了，末學自己還用物件瀏覽器找過了 「OpenQA.Selenium.Support.UI」，可就是沒有「ExpectedConditions」靜態類別可用，即使官方文件也說有 ： https://www.selenium.dev/selenium/docs/api/dotnet/html/T_OpenQA_Selenium_Support_UI_ExpectedConditions.htm 20230109 未知何故 阿彌陀佛
-                                                                                                     //wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(quick_edit_box));
-                                                                                                     //// 在網頁元素載入完畢後才能讀取其.Text屬性值，存入剪貼簿
-                                                                                                     ////Task.Delay(-1);
+                                quick_edit_box = br.waitFindWebElementByName_ToBeClickable("data", 2);//br.driver.FindElement(OpenQA.Selenium.By.Name("data"));
+                                                                                                      ////chatGPT：
+                                                                                                      //// 等待網頁元素出現，最多等待 2 秒
+                                                                                                      //OpenQA.Selenium.Support.UI.WebDriverWait wait =
+                                                                                                      //    new OpenQA.Selenium.Support.UI.WebDriverWait
+                                                                                                      //    (br.driver, TimeSpan.FromSeconds(2));
+                                                                                                      ////安裝了 Selenium.WebDriver 套件，才說沒有「ExpectedConditions」，然後照Visual Studio 2022的改正建議又用NuGet 安裝了 Selenium.Suport 套件，也自動「 using OpenQA.Selenium.Support.UI;」了，末學自己還用物件瀏覽器找過了 「OpenQA.Selenium.Support.UI」，可就是沒有「ExpectedConditions」靜態類別可用，即使官方文件也說有 ： https://www.selenium.dev/selenium/docs/api/dotnet/html/T_OpenQA_Selenium_Support_UI_ExpectedConditions.htm 20230109 未知何故 阿彌陀佛
+                                                                                                      //wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(quick_edit_box));
+                                                                                                      //// 在網頁元素載入完畢後才能讀取其.Text屬性值，存入剪貼簿
+                                                                                                      ////Task.Delay(-1);
                                 Clipboard.SetText(quick_edit_box.Text);
                             }
                             catch (Exception)
@@ -5988,9 +5988,9 @@ namespace WindowsFormsApp1
                         if (br.driver.SwitchTo().Window(tabWin).Url.IndexOf("&action=editchapter") > -1)
                         {
                             //waitUpdate = true;
-                            OpenQA.Selenium.IWebElement commit = br.waitFindWebElementByNameToBeClickable("commit", 2); //br.driver.FindElement(OpenQA.Selenium.By.Name("commit"));
-                                                                                                                        //OpenQA.Selenium.Support.UI.WebDriverWait waitcommit = new OpenQA.Selenium.Support.UI.WebDriverWait(br.driver, TimeSpan.FromSeconds(2));
-                                                                                                                        //waitcommit.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(commit));
+                            OpenQA.Selenium.IWebElement commit = br.waitFindWebElementByName_ToBeClickable("commit", 2); //br.driver.FindElement(OpenQA.Selenium.By.Name("commit"));
+                                                                                                                         //OpenQA.Selenium.Support.UI.WebDriverWait waitcommit = new OpenQA.Selenium.Support.UI.WebDriverWait(br.driver, TimeSpan.FromSeconds(2));
+                                                                                                                         //waitcommit.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(commit));
                             await Task.Run(() =>
                             { //送出後也不必等待，也沒有其他須用到的元件，故可交給作業系統開個新線程去跑就好，但因為editchapter上傳儲存時常較Quit edit費時，故保險起見，還是在後加個Task.delay一下比較好
                                 try
@@ -6558,15 +6558,15 @@ namespace WindowsFormsApp1
                                 br.driver.SwitchTo().Window(br.driver.CurrentWindowHandle);
                                 if (textBox3.Text.IndexOf("edit") > -1 && KeyboardInfo.getKeyStateToggled(System.Windows.Input.Key.Delete))//判斷Delete鍵是否被按下彈起
                                 {//手動輸入時，當按下 Shift+Delete 當即時要準備貼上該頁，故如此操作，以備確定無誤後手動按下 submit 按鈕
-                                    OpenQA.Selenium.IWebElement quick_edit_box = br.waitFindWebElementByNameToBeClickable("data", 2);//br.driver.FindElement(OpenQA.Selenium.By.Name("data"));
-                                                                                                                                     //OpenQA.Selenium.Support.UI.WebDriverWait wait = new OpenQA.Selenium.Support.UI.WebDriverWait(br.driver, TimeSpan.FromSeconds(2));
-                                                                                                                                     //wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(quick_edit_box));
+                                    OpenQA.Selenium.IWebElement quick_edit_box = br.waitFindWebElementByName_ToBeClickable("data", 2);//br.driver.FindElement(OpenQA.Selenium.By.Name("data"));
+                                                                                                                                      //OpenQA.Selenium.Support.UI.WebDriverWait wait = new OpenQA.Selenium.Support.UI.WebDriverWait(br.driver, TimeSpan.FromSeconds(2));
+                                                                                                                                      //wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(quick_edit_box));
                                     quick_edit_box.Clear();
                                     quick_edit_box.Click();
                                     quick_edit_box.SendKeys(OpenQA.Selenium.Keys.LeftShift + OpenQA.Selenium.Keys.Insert);
-                                    OpenQA.Selenium.IWebElement submit = br.waitFindWebElementByIdToBeClickable("savechangesbutton", 13);//br.driver.FindElement(OpenQA.Selenium.By.Id("savechangesbutton"));
-                                                                                                                                        //wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(submit));
-                                                                                                                                        //放在一個 Task 中去執行，並立即返回。                                     
+                                    OpenQA.Selenium.IWebElement submit = br.waitFindWebElementById_ToBeClickable("savechangesbutton", 13);//br.driver.FindElement(OpenQA.Selenium.By.Id("savechangesbutton"));
+                                                                                                                                          //wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(submit));
+                                                                                                                                          //放在一個 Task 中去執行，並立即返回。                                     
                                     Task.Run(() =>
                                     {//送出按鈕按下後可以跑線程，其他要取得元件操作者，就不移另跑線程。20230111 現在終於破解bugs找到癥結所在了。感恩感恩　讚歎讚歎　南無阿彌陀佛 19:09
                                         submit.Click();
@@ -6921,6 +6921,8 @@ namespace WindowsFormsApp1
         {
             if (!textBox1.Enabled) textBox1.Enabled = true;
             string x = textBox2.Text;
+
+
             #region 輸入末綴為「0」的數字可以設定開啟Chrome頁面的等待毫秒時間
             if (x != "" && x.Length > 2)
             {
@@ -6928,8 +6930,7 @@ namespace WindowsFormsApp1
                 {
                     if (Int32.Parse(x) % 10 == 0 && x.Length > 2)
                     {
-                        int w;
-                        if (Int32.TryParse(x, out w))
+                        if (Int32.TryParse(x, out int w))
                         {
                             waitTimeforappActivateByName = w;
                             textBox2.Text = "";
@@ -6942,16 +6943,16 @@ namespace WindowsFormsApp1
 
             #region 預設瀏覽器名稱設定
             //輸入「msedge」「chrome」「brave」「vivaldi」，可以設定預設瀏覽器名稱
-            if (x == "msedge" || x == "chrome" || x == "brave" || x == "vivaldi") defaultBrowserName = x;
+            if (x == "msedge" || x == "chrome" || x == "brave" || x == "vivaldi") { defaultBrowserName = x; return; }
             #endregion
 
-            #region 瀏覽操作模式設定
+            #region 軟件架構-瀏覽操作模式設定
             switch (textBox2.Text)
             {
                 case "ap,":
                     browsrOPMode = BrowserOPMode.appActivateByName;
                     textBox2.Text = "";
-                    break;
+                    return;
                 case "sl,":
                 sl: browsrOPMode = BrowserOPMode.seleniumNew;
                     //第一次開啟Chrome瀏覽器，或前有未關閉的瀏覽器時
@@ -6989,7 +6990,7 @@ namespace WindowsFormsApp1
                         }
                     }
                     textBox2.Text = "";
-                    break;
+                    return;
                 case "br":
                     goto sl;
                 case "sg,":
@@ -7003,7 +7004,7 @@ namespace WindowsFormsApp1
                     //    });
                     //}
                     //textBox2.Text = "";
-                    break;
+                    return;
 
                 default:
                     break;
@@ -7017,9 +7018,29 @@ namespace WindowsFormsApp1
                 if (Int32.TryParse(x.Substring(5), out int n))
                 {
                     noteinLineLenLimit = (byte)(n > 255 ? 255 : n);
+                    return;
                 }
             }
             #endregion
+
+            #region 輸入tS或tE分別設定等待伺服器或網頁元件的時間上限（秒鐘）
+            //- 輸入「tS」前綴，如「tS10」即10秒設定 Selenium 操控的 Chrome瀏覽器伺服器（ChromeDriverService）的等待秒數（即「new ChromeDriver()」的「TimeSpan」引數值）。預設為 8.5。因昨大年夜 Ctext.org 網頁載入速慢又不穩，因此設置，以防萬一 20230122癸卯年初一 感恩感恩　讚歎讚歎　南無阿彌陀佛
+            //- 輸入「tE」前綴，如「tE5」即5秒，設定 Selenium 操控的 Chrome瀏覽器中網頁元件的的等待秒數（WebDriverWait。即「new WebDriverWait()」的「TimeSpan」引數值）。預設為 3。
+            if (double.TryParse(x.Substring(2), out double t))
+            {
+                switch (x.Substring(0, 2))
+                {
+                    case "tS":
+                        br.ChromeDriverServiceTimeSpan = t;
+                        return;                        
+                    case "tE":
+                        br.WebDriverWaitTimeSpan = t;
+                        return;                        
+                }
+            }
+
+            #endregion
+
             if (button2.Text == "選取文") return;
             string x1 = textBox1.Text;
             if (x == "" || x1 == "") return;

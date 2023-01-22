@@ -71,7 +71,7 @@ namespace TextForCtext
                 return quickedit_data_textboxTxt;
             }
         }
-        internal static IWebElement waitFindWebElementByNameToBeClickable(string name, float second,
+        internal static IWebElement waitFindWebElementByName_ToBeClickable(string name, double second,
             IWebDriver drver = null)
         {
 
@@ -80,7 +80,7 @@ namespace TextForCtext
             wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(e));
             return e;
         }
-        internal static IWebElement waitFindWebElementByIdToBeClickable(string id, float second)
+        internal static IWebElement waitFindWebElementById_ToBeClickable(string id, double second)
         {
             IWebElement e = driver.FindElement(By.Id(id));
             WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(second));
@@ -88,6 +88,27 @@ namespace TextForCtext
             return e;
         }
 
+        
+        /// <summary>
+        /// Selenium 操控的 Chrome瀏覽器伺服器（ChromeDriverService）的等待秒數（即「new ChromeDriver()」的「TimeSpan」引數值）。預設為 8.5。
+        /// </summary>
+        static double _chromeDriverServiceTimeSpan = 8.5;
+        /// <summary>
+        ///  Selenium 操控的 Chrome瀏覽器中網頁元件的的等待秒數（WebDriverWait。即「new WebDriverWait()」的「TimeSpan」引數值）。預設為 3。
+        /// </summary>
+        static double _webDriverWaitTimSpan = 3;
+        /// <summary>
+        /// - 在textBox2 輸入「tS」設定 Selenium 操控的 Chrome瀏覽器伺服器（ChromeDriverService）的等待秒數（即「new ChromeDriver()」的「TimeSpan」引數值）。預設為 8.5。
+        /// </summary>
+        internal static double ChromeDriverServiceTimeSpan { get { return _chromeDriverServiceTimeSpan; } set { _chromeDriverServiceTimeSpan = value; } }
+        /// <summary>
+        /// 在textBox2  輸入「tE」設定 Selenium 操控的 Chrome瀏覽器中網頁元件的的等待秒數（WebDriverWait。即「new WebDriverWait()」的「TimeSpan」引數值）。預設為 3。
+        /// </summary>
+        internal static double WebDriverWaitTimeSpan { get { return _webDriverWaitTimSpan; } set { _webDriverWaitTimSpan = value; } }
+        /// <summary>
+        /// 在driver是null時才創建新的chromedriver
+        /// </summary>
+        /// <returns></returns>
         internal static ChromeDriver driverNew()
         {
             if (Form1.browsrOPMode != Form1.BrowserOPMode.appActivateByName && driver == null)
@@ -141,15 +162,15 @@ namespace TextForCtext
                 #region 啟動Chrome瀏覽器 （最會出錯的部分！！）
                 try
                 {
-                    if (user_data_dir.IndexOf("Documents") > -1)//無寫入權限的電腦，怕比較慢
-                                                                //可能是防火牆 OpenQA.Selenium.WebDriverException
-                                                                //HResult = 0x80131500
-                                                                //Message = The HTTP request to the remote WebDriver server for URL http://localhost:52966/session timed out after 60 seconds.
-                        cDrv = new ChromeDriver(driverService, options);
-                    else
-                        //自己的電腦比較快
-                        cDrv = new ChromeDriver(driverService, options, TimeSpan.FromSeconds(18.5));//等待重啟時間=18.5秒鐘：其實也是等待伺服器回應的時間，太短則在完整編輯（如網址有「&action=editchapter」）送出時，會逾時
-                                                                                                   //若寫成「 , TimeSpan.MinValue);」這會出現超出設定值範圍的錯誤//TimeSpan是設定決定重新啟動chromedriver.exe須等待的時間，太長則人則不耐，太短則chromedriver.exe來不及反應而出錯。感恩感恩　讚歎讚歎　南無阿彌陀佛 202301051751                    
+                    //if (user_data_dir.IndexOf("Documents") > -1)//無寫入權限的電腦，怕比較慢//今均以 _chromeDriverServiceTimeSpan控制，預設為 8.5秒 20230122癸卯年初一
+                    //                                            //可能是防火牆 OpenQA.Selenium.WebDriverException
+                    //                                            //HResult = 0x80131500
+                    //                                            //Message = The HTTP request to the remote WebDriver server for URL http://localhost:52966/session timed out after 60 seconds.
+                    //    cDrv = new ChromeDriver(driverService, options,TimeSpan.FromSeconds(_chromeDriverServiceTimeSpan));
+                    //else
+                    ////自己的電腦比較快
+                    cDrv = new ChromeDriver(driverService, options, TimeSpan.FromSeconds(_chromeDriverServiceTimeSpan));//等待重啟時間，預設為 8.5秒鐘：其實也是等待伺服器回應的時間，太短則在完整編輯（如網址有「&action=editchapter」）送出時，會逾時
+                                                                                                                        //若寫成「 , TimeSpan.MinValue);」這會出現超出設定值範圍的錯誤//TimeSpan是設定決定重新啟動chromedriver.exe須等待的時間，太長則人則不耐，太短則chromedriver.exe來不及反應而出錯。感恩感恩　讚歎讚歎　南無阿彌陀佛 202301051751
                 }
                 catch (Exception ex)
                 {
@@ -285,7 +306,7 @@ namespace TextForCtext
                 if (frm.KeyinTextMode && isQuickEditUrl(frm.textBox3Text ?? ""))
                 {
                     driver = cDrv;
-                    frm.Controls["textBox1"].Text = waitFindWebElementByNameToBeClickable("data", 3).Text;
+                    frm.Controls["textBox1"].Text = waitFindWebElementByName_ToBeClickable("data", _webDriverWaitTimSpan).Text;
                 }
 
 
@@ -471,7 +492,7 @@ namespace TextForCtext
             //System.Windows.Forms.Application.DoEvents();
             //送出
             //selm.IWebElement submit = driver.FindElement(selm.By.Id("savechangesbutton"));//("textbox"));
-            selm.IWebElement submit = waitFindWebElementByIdToBeClickable("savechangesbutton", 13);
+            selm.IWebElement submit = waitFindWebElementById_ToBeClickable("savechangesbutton", 13);
             /* creedit 我問：在C#  用selenium 控制 chrome 瀏覽器時，怎麼樣才能不必等待網頁作出回應即續編處理按下來的程式碼 。如，以下程式碼，請問，如何在按下 submit.Click(); 後不必等這個動作完成或作出回應，即能繼續執行之後的程式碼呢 感恩感恩　南無阿彌陀佛
                         chatGPT他答：你可以將 submit.Click(); 放在一個 Task 中去執行，並立即返回。
              */
@@ -485,7 +506,7 @@ namespace TextForCtext
                 catch (Exception)
                 {//chatGPT：
                     // 等待網頁元素出現，最多等待 3 秒//應該不用這個，因為會貼上時，不太可能「savechangesbutton」按鈕還沒出現，除非網頁載入不完整……
-                    submit = waitFindWebElementByIdToBeClickable("savechangesbutton", 13);  //driver.FindElement(selm.By.Id("savechangesbutton"));
+                    submit = waitFindWebElementById_ToBeClickable("savechangesbutton", 13);  //driver.FindElement(selm.By.Id("savechangesbutton"));
                     //WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(3));
                     ////安裝了 Selenium.WebDriver 套件，才說沒有「ExpectedConditions」，然後照Visual Studio 2022的改正建議又用NuGet 安裝了 Selenium.Suport 套件，也自動「 using OpenQA.Selenium.Support.UI;」了，末學自己還用物件瀏覽器找過了 「OpenQA.Selenium.Support.UI」，可就是沒有「ExpectedConditions」靜態類別可用，即使官方文件也說有 ： https://www.selenium.dev/selenium/docs/api/dotnet/html/T_OpenQA_Selenium_Support_UI_ExpectedConditions.htm 20230109 未知何故 阿彌陀佛
                     //wait.Until(ExpectedConditions.ElementToBeClickable(submit));
@@ -607,7 +628,7 @@ namespace TextForCtext
             {
                 if (textbox != null) Quickedit_data_textbox = textbox;
                 else
-                    Quickedit_data_textbox = waitFindWebElementByNameToBeClickable("data", 2, driver);
+                    Quickedit_data_textbox = waitFindWebElementByName_ToBeClickable("data", 2, driver);
                 quickedit_data_textboxTxt = Quickedit_data_textbox.Text;
             }
         }
