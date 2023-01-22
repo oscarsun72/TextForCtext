@@ -16,7 +16,7 @@
     - sg,=seleniumGet
       - 第一種為預設模式，即在現前開啟的Chrome瀏覽器即可操作。（去年（2022）大致完成了）
       - 第二種操作模式是由selenium自動開啟另一個新的Chrome瀏覽器執行體來加以操作。（大致完成了 20230113）
-       > ★在全自動連續輸入模式下可配合 Windows 內建的語音辨識軟體 *Windows Speech Recognition* 完全不動手即可操作。快速鍵**Ctrl + F2**可切換此操作）20230121 23:50壬寅年除夕夜
+       > ★在全自動連續輸入模式下可配合 Windows 內建的語音辨識軟體 *Windows Speech Recognition* 完全不動手即可操作。快速鍵**Ctrl + F2**可切換此操作，並自動啟動軟體與結束）20230121 23:50壬寅年除夕夜
       - 第三種模式則是混搭前兩種， 或由selenium 取得現用的瀏覽器。來操作。。尚未實作。
   - 要切換三種模式。可在textbox2輸入以上指令。
 - [免安裝可執行檔TextForCtextPortable下載，解壓後點擊 TextForCtext.exe 檔案即可](https://github.com/oscarsun72/TextForCtext/blob/master/TextForCtextPortable.zip)：202301052034（2023/1/5 20:34)
