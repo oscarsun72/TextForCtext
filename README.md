@@ -43,6 +43,7 @@ button1 「分行分段」或「送出貼上」按鈕:
    然切換到自動連續輸入模式（按下 Ctrl + / （數字鍵盤上的） 詳後 ）時，會轉成「送出貼上」 [簡單修改模式]（quick edit文字框）的功能。
    
    若切換到手動輸入模式（按下 Ctrl + Shift + * （數字鍵盤上的）時，會再切換回「分行分段」的功能。因為一般在手動輸入時才有分行分段的必要 20230107
+   > 若為鄰近連動編輯模式*（check_the_adjacent_pages=true）*，則顯示為較淺之青色*Aquamarine*，否則為深青色 *DarkCyan*。
 
  - 若有按下Ctrl才按此鈕則執行[圖文脫鉤 Word VBA](https://github.com/oscarsun72/TextForCtext/blob/4e140975f3881bae8e7f5acc5899c7d61a4794d3/WordVBA/%E4%B8%AD%E5%9C%8B%E5%93%B2%E5%AD%B8%E6%9B%B8%E9%9B%BB%E5%AD%90%E5%8C%96%E8%A8%88%E5%8A%83.bas#L346) ；或在本應用程式介面視窗從作業系統得到焦點、成為作用中的視窗時，只要有按下 Ctrl 或 Shift ，亦會由剪貼簿現存的內容來判斷，是否要執行同一個圖文脫鉤的VBA程序；沒按下的話，預設是執行「中國哲學書電子化計劃.清除頁前的分段符號」程序，如果剪貼簿裡的文字本含有完整「編輯」模式下的文本特徵時（詳程式碼內原理，在[中國哲學書電子化計劃.bas](https://github.com/oscarsun72/TextForCtext/blob/4e140975f3881bae8e7f5acc5899c7d61a4794d3/WordVBA/%E4%B8%AD%E5%9C%8B%E5%93%B2%E5%AD%B8%E6%9B%B8%E9%9B%BB%E5%AD%90%E5%8C%96%E8%A8%88%E5%8A%83.bas#L136)模組檔案裡）。
 
@@ -334,7 +335,7 @@ Ctrl+ 滑鼠左鍵：清除框中所有文字
 - 輸入末綴為「0」的數字可以設定開啟Chrome頁面的等待毫秒時間
 - 輸入前綴關鍵字「note:」，可以後綴之數字設定小注不換行的長度限制（byte : 0~255）
 - 輸入「msedge」「chrome」「brave」「vivaldi」，可以設定預設瀏覽器名稱
-- 輸入「ap,」「sl,」(或 br )「sg,」，可以切換瀏覽操作模式設定：
+- 輸入「ap,」「sl,」(或 br、bb、ss )「sg,」，可以切換瀏覽操作模式設定：
 
         ap,=appActivateByName
 

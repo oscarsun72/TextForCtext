@@ -31,7 +31,7 @@ End Sub
 
 Sub 新頁面()
 'the page begin
-Dim start As Integer
+Dim start As Integer, ur As UndoRecord
 ' the page end
 Dim e As Integer
 ' the book
@@ -40,6 +40,7 @@ Dim fileID As Long
 
 Dim x As String ', data As New MSForms.DataObject
 Dim i As Integer, rng As Range, d As Document
+SystemSetup.stopUndo ur, "新頁面"
 Set d = ActiveDocument
 Set rng = d.Range
 start = CInt(Replace(rng.Paragraphs(1).Range, Chr(13), ""))
@@ -61,7 +62,8 @@ rng.Paragraphs(3).Range = CLng(Replace(rng.Paragraphs(3).Range, Chr(13), "")) + 
 'data.SetText Replace(x, "/>", "/>●", 1, 1)
 'data.PutInClipboard
 'SystemSetup.SetClipboard x
-SystemSetup.CopyText x
+'SystemSetup.CopyText x
+SystemSetup.SetClipboard x
 If SystemSetup.GetClipboardText <> x Then
     rng.SetRange d.Range.End - 1, d.Range.End - 1
     rng.InsertAfter x
@@ -71,7 +73,7 @@ rng.Document.ActiveWindow.WindowState = wdWindowStateMinimize
 DoEvents
 Network.AppActivateDefaultBrowser
 SendKeys "^v"
-
+SystemSetup.contiUndo ur
 End Sub
 Sub setPage1Code() '(ByRef d As Document)
 Dim xd As String
@@ -1340,6 +1342,11 @@ Sub 國學大師_四庫全書本轉來()
 Dim rng As Range, noteRng As Range
 Set rng = Documents.Add().Range
 rng.Paste
+'With rng.Find
+'    .ClearAllFuzzyOptions
+'    .ClearFormatting
+'    .Execute "^l", , , True, , , True, wdFindContinue, , "^p", wdReplaceAll
+'End With
 With rng.Find
     .ClearAllFuzzyOptions
     .ClearFormatting
@@ -1363,6 +1370,9 @@ Do While rng.Find.Execute("", , , False, , , True, wdFindStop)
     Loop
     noteRng.text = "{{" & Replace(noteRng, "/", "") & "}}"
 Loop
+
+文字處理.書名號篇名號標注
+
 With rng.Document
 '    With .Range.Find
 '        .ClearFormatting
@@ -1375,6 +1385,7 @@ With rng.Document
     DoEvents
     .Close wdDoNotSaveChanges
 End With
+SystemSetup.playSound 1.921
 End Sub
 
 Sub mdb開發_千慮一得齋Export()

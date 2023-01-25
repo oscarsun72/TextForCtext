@@ -27,6 +27,7 @@ using Font = System.Drawing.Font;
 using Point = System.Drawing.Point;
 //using Task = System.Threading.Tasks.Task;
 using System.Threading.Tasks;
+//using Microsoft.Office.Interop.Word;
 
 namespace WindowsFormsApp1
 {
@@ -36,13 +37,33 @@ namespace WindowsFormsApp1
         internal string dropBoxPathIncldBackSlash;
         readonly System.Drawing.Point textBox4Location; readonly Size textBox4Size;
         readonly Size textBox1SizeToForm;
+        /// <summary>
+        /// CJK大字集字型集合（陣列。含CJK 擴充字集者）
+        /// </summary>
         //string[] CJKBiggestSet = new string[]{ "HanaMinB", "KaiXinSongB", "TH-Tshyn-P1" };
         string[] CJKBiggestSet = { "全宋體(等寬)", "新細明體-ExtB", "HanaMinB", "KaiXinSongB", "TH-Tshyn-P1", "HanaMinA", "Plangothic P1", "Plangothic P2" };
         Color button2BackColorDefault;
         string _currentPageNum = "";
-        bool insertMode = true, check_the_adjacent_pages = false, keyinText = false//手動輸入;
-            , TopLine = false//抬頭
-            , Indents = true;//縮排
+        /// <summary>
+        /// 插入鍵入或取代鍵入模式
+        /// </summary>
+        bool insertMode = true;
+        /// <summary>
+        /// 鄰近頁連動編輯模式
+        /// </summary>
+        bool check_the_adjacent_pages = false;
+        /// <summary>
+        /// 手動輸入;
+        /// </summary>
+        bool keyinText = false;
+        /// <summary>
+        /// 原文有抬頭平抬格式
+        /// </summary>
+        bool TopLine = false;
+        /// <summary>
+        /// 現行行是否屬縮排；或書內是否含有縮排格式
+        /// </summary>
+        bool Indents = true;
         internal string textBox3Text
         {
             get { return textBox3.Text; }
@@ -54,7 +75,9 @@ namespace WindowsFormsApp1
         internal string CurrentPageNum { get { return _currentPageNum; } }
         //static internal string mainFromTextBox3Text;
 
-
+        /// <summary>
+        /// 軟體進行時的架構
+        /// </summary>
         /*browser operation mode:
              appActivateByName:本來原始的；網路學來的
                 selenium 純selenium模式，啟動新的 chrome 執行個體，且須登入；chatGPT 教的
@@ -62,6 +85,9 @@ namespace WindowsFormsApp1
         */
         public enum BrowserOPMode { appActivateByName, seleniumNew, seleniumGet };
 
+        /// <summary>
+        /// 現行軟體運行之架構是哪種（appActivateByName, seleniumNew, seleniumGet……）
+        /// </summary>
         internal static BrowserOPMode browsrOPMode = BrowserOPMode.appActivateByName;
 
         /// <summary>
@@ -509,7 +535,12 @@ namespace WindowsFormsApp1
             }
         }
 
-        //取得游標/插入點所在行文字（含標點標誌tag(*|<p>)）
+        /// <summary>
+        /// 取得游標/插入點所在行文字（含標點標誌tag(*|<p>)）
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="s"></param>
+        /// <returns></returns>
         string getLineTxt(string x, int s)
         {
             int preP = x.LastIndexOf(Environment.NewLine, s), p = x.IndexOf(Environment.NewLine, s);
@@ -517,7 +548,14 @@ namespace WindowsFormsApp1
             int lineL = p == -1 ? x.Length - lineS : p - Environment.NewLine.Length - preP;
             return x.Substring(lineS, lineL);
         }
-        //取得游標/插入點所在行文字+行的起始位置與長度（含標點與標誌tag(*|<p>)）
+        /// <summary>
+        /// 取得游標/插入點所在行文字+行的起始位置與長度（含標點與標誌tag(*|<p>)）
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="s"></param>
+        /// <param name="lineS"></param>
+        /// <param name="lineL"></param>
+        /// <returns></returns>
         string getLineTxt(string x, int s, out int lineS, out int lineL)
         {
             int preP = x.LastIndexOf(Environment.NewLine, s), p = x.IndexOf(Environment.NewLine, s);
@@ -546,6 +584,13 @@ namespace WindowsFormsApp1
         }
 
         bool chkPTitleNotEnd = false;//為檢查不當分段設置的，以判斷前一頁末是否不含標明尾，其尾卻在此頁前，以便略過檢查
+
+        /// <summary>
+        /// 貼去Ctext 後（包括對要貼去的內容作最後的檢查）設定新的 textBox1的內容。若執行成功則傳回true
+        /// </summary>
+        /// <param name="s"></param>
+        /// <param name="l"></param>
+        /// <returns></returns>
         private bool newTextBox1(out int s, out int l)
         {
             s = textBox1.SelectionStart; l = textBox1.SelectionLength;
@@ -692,6 +737,7 @@ namespace WindowsFormsApp1
             if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("ဉ");
             if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("▱");
             if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("ꗍ");
+            if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("/");//《國學大師》本《四庫全書》
             #endregion
 
             #region 檢查不當分段
@@ -887,6 +933,8 @@ namespace WindowsFormsApp1
             {
                 xCopy = xCopy.Replace(item, "");
             }
+
+            if (xCopy == "") return false;
 
             Clipboard.SetText(xCopy); BackupLastPageText(xCopy, false, false);
             if (s + l + 2 < textBox1.Text.Length)
@@ -2324,14 +2372,17 @@ namespace WindowsFormsApp1
             }
             return cntr;
         }
+        /// <summary>
+        /// Alt + Shift + 1 如宋詞中的換片空格，只將文中的空格轉成空白，其他如首綴前罝以明段落或標題者不轉換
+        /// </summary>
         private void SpacesBlanksInContext()
-        {//Alt + Shift + 1 如宋詞中的換片空格，只將文中的空格轉成空白，其他如首綴前罝以明段落或標題者不轉換
-            string x = textBox1.SelectedText; bool notTitleIndent = true; int s = textBox1.SelectionStart, offset = 0;
+        {
+            string x = textBox1.SelectedText; bool notTitleIndent = true; int s = textBox1.SelectionStart, offset = 0;//記下位移數（因為「　」與「􏿽」的Length不同
             if (x == "") x = textBox1.Text;
             undoRecord(); stopUndoRec = true;
-            for (int i = 0; i < x.Length; i++)
+            for (int i = 0; i < x.Length; i++)//用每個字去算
             {
-                if (x.Substring(i, 1) == "　")
+                if (x.Substring(i, 1) == "　")//逐如果字比對，如果是「　」（space空格）
                 {
                     if (i > 1 && x.Substring(i - 2, 2) != Environment.NewLine && notTitleIndent)
                     {
@@ -2350,6 +2401,29 @@ namespace WindowsFormsApp1
                         {
                             notTitleIndent = false;
                         }
+                        //前、後一行（段）開頭都不是空格space（縮排），且不是標題時
+                        if (x.Length > p + Environment.NewLine.Length + 1 && x.Substring(p + Environment.NewLine.Length, 1) != "　"
+                            && x.LastIndexOf(Environment.NewLine, x.LastIndexOf(Environment.NewLine, i)) > 0
+                            && x.Substring(x.LastIndexOf(Environment.NewLine, x.LastIndexOf(Environment.NewLine, i)) + Environment.NewLine.Length, 1) != "　")
+                        {
+                            string xLine = getLineTxt(x, i);
+                            #region 偵錯檢查用
+                            //if (xLine.IndexOf("明後世猶或")>-1)
+                            //{
+                            //    xLine = xLine;
+                            //}
+                            #endregion
+                            if (xLine.Substring(1, 1) != "　" && xLine.IndexOf("*") == -1)
+                            {
+                                textBox1.Select(i + offset, 1);
+                                if (textBox1.SelectedText == "　")
+                                {
+                                    textBox1.SelectedText = "􏿽";
+                                    offset++;
+                                }
+                                notTitleIndent = true;
+                            }
+                        }
                         //else
                         //    notTitleIndent = false;
                     }
@@ -2360,6 +2434,9 @@ namespace WindowsFormsApp1
             restoreCaretPosition(textBox1, s, 0);
             stopUndoRec = false;
         }
+        /// <summary>
+        /// Alt + 1 : 鍵入本站制式留空空格標記「􏿽」：若有選取則取代全形空格「　」為「􏿽」
+        /// </summary>
         private void keysSpacesBlank()
         {
             string x = textBox1.Text;
@@ -2583,7 +2660,8 @@ namespace WindowsFormsApp1
                     textBox1.Select(s, 0); textBox1.ScrollToCaret();
                     if (dbtn == MessageBoxDefaultButton.Button2) SystemSounds.Asterisk.Play();
                     DialogResult response =
-                    MessageBox.Show("這行是標題（篇名）嗎？", "篇名判斷式", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question,
+                    MessageBox.Show(currentLineTxt + Environment.NewLine + Environment.NewLine +
+                    "這行是標題（篇名）嗎？", "篇名判斷式", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question,
                         dbtn, MessageBoxOptions.DefaultDesktopOnly);
                     switch (response)
                     {
@@ -2610,11 +2688,14 @@ namespace WindowsFormsApp1
         keyWordPos chkTitleKeyWords(string chkText)
         {
             #region 檢查標題關鍵字宣告
-            string[] titleKeywordEnd = { "文","序", "又", "詩", "韻", "韵","解","議","論","說","說二","說上","說下",
+            string[] titleKeywordEnd = { "文","序", "又", "詩", "韻", "韵","歌","咏","詠","篇","章","聯句",
+                "解","疏","章奏","讚","贊",
+                "議","論","策","䇿","詔","詔文","旨","㫖","令","說","說二","說上","說下",
                 "傳", "記","逸事","述","賦", "碑","𥓓", "銘","詺", "碣","表", "誌", "權厝志","書","書後","一","二","三","四","五",
-                "序","敘","敍","引","跋","䟦","箋","牋","略","狀","道","箴","頌","辭"
-                ,"帖","事","{{并序}}","{{代}}" };//,"{{佚}}" 後面不會有內容的，所以不太可能長度等於正文正常長度，應該是接下一個標題
-                                            //,"墓表", "墓誌", "墓誌銘", "墓志銘"};//後綴
+                "序","敘","敍","叙","引","跋","䟦","箋","牋","略","狀","道","箴","頌","辭"
+                ,"帖","事","實録","實錄","起居注","起居註","政紀","録","錄","注","註",
+                "{{并序}}","{{代}}" };//,"{{佚}}" 後面不會有內容的，所以不太可能長度等於正文正常長度，應該是接下一個標題
+                                   //,"墓表", "墓誌", "墓誌銘", "墓志銘"};//後綴
             string[] titleKeywordPre = { "上", "答", "又", "再", "荅", "復", "覆", "與", "題", "祭", "讀", "說"
                     , "釋", "記", "書" ,"辯","論","送","擬","最錄"}; //前綴
             string[] titleKeyword = { "", "" };
@@ -4241,18 +4322,24 @@ namespace WindowsFormsApp1
             //if (!shiftKeyDownYet ) nextPages(Keys.PageDown, false);
             if (!shiftKeyDownYet && !check_the_adjacent_pages) nextPages(Keys.PageDown, false);
             //預測下一頁頁末尾端在哪裡
+            //if (pageTextEndPosition == 0 && pageEndText10 == "" && !keyinText && autoPastetoQuickEdit)
+            //{
+            //    pageTextEndPosition = textBox1.SelectionStart + textBox1.SelectionLength;
+            //    pageEndText10 = textBox1.Text.Substring(pageTextEndPosition, 10);
+            //}
             predictEndofPage();
             //重設自動判斷頁尾之值
             pageTextEndPosition = 0; pageEndText10 = "";
             DialogResult dialogresult = new DialogResult();
             if (browsrOPMode != BrowserOPMode.appActivateByName)
             {//使用selenium模式時（非預設模式時）
-                if (autoPastetoQuickEdit)
+                if (autoPastetoQuickEdit && !keyinText)
                 {//全自動輸入模式時
                     autoPastetoCtextQuitEditTextbox(out dialogresult);//在此中雖有判斷autoPastetoQuickEdit時，然呼叫它會造成無限遞迴（recursion）
                 }
                 //鍵入輸入模式或非全自動輸入時（如欲瀏覽、或順便編輯時）還原被隱藏的主表單以利後續操作，若不欲，則按Esc鍵即可再度隱藏：20230119壬寅大寒小年夜前一日
-                else if (keyinText || !autoPastetoQuickEdit)
+                //else if (keyinText || !autoPastetoQuickEdit)
+                else if (keyinText && !autoPastetoQuickEdit)
                 {
                     if (HiddenIcon) show_nICo();
                     availableInUseKeysMouse();
@@ -4285,9 +4372,19 @@ namespace WindowsFormsApp1
             return x;
         }
 
+        /// <summary>
+        /// 是否是自動連續輸入模式
+        /// </summary>
         bool autoPastetoQuickEdit = false;
+        /// <summary>
+        /// 前一本所處理的書籍ID（網址中「&file=」的引數值）以供與現在要處理的作比較，看是不是同一本書（可決定版面特徵是否當予更改）
+        /// </summary>
         int previousBookID = 0;
 
+
+        /// <summary>
+        /// 預測準備處理的那一頁，其頁末的位置及其文字
+        /// </summary>
         void predictEndofPage()
         {
             if (lines_perPage == 0) return;
@@ -4749,6 +4846,10 @@ namespace WindowsFormsApp1
         /// Ctrl + F2 切換語音操作（預設為非 Windows 語音辨識操作）識別用
         /// </summary>
         bool speechRecognitionOPmode = false;
+        /// <summary>
+        /// 進行自動連續輸入實作的主要函式方法
+        /// </summary>
+        /// <param name="dialogResult"></param>
         void autoPastetoCtextQuitEditTextbox(out DialogResult dialogResult)
         {
             ////if (new StringInfo(textBox1.SelectedText).LengthInTextElements == predictEndofPageSelectedTextLen &&
@@ -4785,13 +4886,13 @@ namespace WindowsFormsApp1
 
                     if (!speechRecognitionOPmode)
                         dialogResult = MessageBox.Show("auto paste to Ctext Quit Edit textBox?" + Environment.NewLine + Environment.NewLine
-                                                + "……" + textBox1.SelectedText, "現在處理第" +(
-                                                _check_the_adjacent_pages ? (int.Parse(_currentPageNum)+1).ToString() : CurrentPageNum)
+                                                + "……" + textBox1.SelectedText, "現在處理第" + (
+                                                _check_the_adjacent_pages ? (int.Parse(_currentPageNum) + 1).ToString() : CurrentPageNum)
                                                  + "頁", MessageBoxButtons.OKCancel, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1,
                                                  MessageBoxOptions.DefaultDesktopOnly);
                     else
                         dialogResult = MessageBox.Show("auto paste to Ctext Quit Edit textBox?" + Environment.NewLine + Environment.NewLine
-                                                + "……" + textBox1.SelectedText, "現在處理第" +(
+                                                + "……" + textBox1.SelectedText, "現在處理第" + (
                                                 _check_the_adjacent_pages ? (int.Parse(_currentPageNum) + 1).ToString() : CurrentPageNum)
                                                 + "頁", MessageBoxButtons.OKCancel, MessageBoxIcon.Question
                                                  );
@@ -5070,7 +5171,8 @@ namespace WindowsFormsApp1
                         keyinText = false; return;
                     }
                     new SoundPlayer(@"C:\Windows\Media\Speech On.wav").Play();
-                    keyinText = true; pasteAllOverWrite = false;
+                    //設定成手動，自動及全部覆蓋之貼上則設成false
+                    keyinText = true; pasteAllOverWrite = false; autoPastetoQuickEdit = false;
                     button1.Text = "分行分段";
                     button1.ForeColor = new System.Drawing.Color();//預設色彩 預設顏色 https://stackoverflow.com/questions/10441000/how-to-programmatically-set-the-forecolor-of-a-label-to-its-default
                     return;
@@ -5364,21 +5466,25 @@ namespace WindowsFormsApp1
             if (!check_the_adjacent_pages)
             {
                 check_the_adjacent_pages = true; new SoundPlayer(@"C:\Windows\Media\Speech On.wav").Play();
+                button1.ForeColor = Color.Aquamarine;//如果是鄰近頁連動編輯模式，則顯示為較亮青色Aquamarine，否則為深青色 Color.DarkCyan
                 if (MessageBox.Show("是否先檢查文本先前是否曾編輯過？" + Environment.NewLine +
                     "要檢查的話，請先複製其文本，再按確定（ok）按鈕", "", MessageBoxButtons.OKCancel
-                    , MessageBoxIcon.Question, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly) == DialogResult.OK)
+                    , MessageBoxIcon.Question, MessageBoxDefaultButton.Button2, MessageBoxOptions.DefaultDesktopOnly) == DialogResult.OK)
                 {
                     runWordMacro("checkEditingOfPreviousVersion");
                 }
-
             }
             else
             {
                 check_the_adjacent_pages = false; new SoundPlayer(@"C:\Windows\Media\Speech Off.wav").Play();
+                button1.ForeColor = Color.DarkCyan;//https://learn2android.blogspot.com/2013/04/c.html?lr=1                
             }
             autoPasteFromSBCKwhether = false;
         }
 
+        /// <summary>
+        /// 設定是否要以《四部叢刊資料庫》中複製的文本貼上
+        /// </summary>
         private void toggleAutoPasteFromSBCKwhether()
         {
             if (!autoPasteFromSBCKwhether)
@@ -5391,12 +5497,14 @@ namespace WindowsFormsApp1
             }
             return;
         }
-
+        /// <summary>
+        /// 設定是否是自動連續輸入模式
+        /// </summary>
         private void toggleAutoPastetoQuickEdit()
         {
             if (!autoPastetoQuickEdit)
             {
-                turnon_autoPastetoQuickEdit();
+                turnOn_autoPastetoQuickEdit();
             }
             else
             {
@@ -5404,13 +5512,22 @@ namespace WindowsFormsApp1
                 autoPastetoQuickEdit = false;
             }
         }
-
-        private void turnon_autoPastetoQuickEdit()
-        {//set autoPastetoQuickEdit = true
-            autoPastetoQuickEdit = true; autoPasteFromSBCKwhether = false;
+        /// <summary>
+        /// 設定自動連續輸入的實作處理程式
+        /// >> 如果是鄰近頁連動編輯模式，則顯示為較淺之青色 LightCyan，否則為深青色 Color.DarkCyan。
+        /// </summary>
+        private void turnOn_autoPastetoQuickEdit()
+        {//set autoPastetoQuickEdit = true//禁遏《四部叢刊資料庫》貼上機制，手動鍵入亦設成false
+            autoPastetoQuickEdit = true; keyinText = false; autoPasteFromSBCKwhether = false;
             new SoundPlayer(@"C:\Windows\Media\Speech On.wav").Play();
             button1.Text = "送出貼上";
-            button1.ForeColor = Color.DarkCyan;//https://learn2android.blogspot.com/2013/04/c.html?lr=1                
+            //如果是鄰近頁連動編輯模式，則顯示為較亮青色 Aquamarine，否則為深青色 Color.DarkCyan。
+            if (check_the_adjacent_pages)
+            {
+                button1.ForeColor = Color.LightCyan;
+            }
+            else
+                button1.ForeColor = Color.DarkCyan;//https://learn2android.blogspot.com/2013/04/c.html?lr=1                
         }
 
         [DllImport("user32")]
@@ -5671,29 +5788,43 @@ namespace WindowsFormsApp1
                     throw;
                 }
             }
+
+            //自剪貼簿擷取Word VBA結果
+            while (!isClipBoardAvailable_Text()) { }
+            xClpBd = Clipboard.GetText();
             switch (runName)
             {
                 case "中國哲學書電子化計劃.清除頁前的分段符號":
                     break;
                 case "中國哲學書電子化計劃.撤掉與書圖的對應_脫鉤":
                     break;
+
                 default:
-                    //清除多餘的空行,排除卷末的空行
-                    Task.WaitAll();
-                    while (!isClipBoardAvailable_Text()) { }
-                    xClpBd = Clipboard.GetText();
+                    //清除多餘的空行,排除卷末的空行                                        
                     if (xClpBd.Length > 100)
                     {
                         textBox1.Text = xClpBd.Substring(0, xClpBd.Length - 100).Replace(Environment.NewLine + Environment.NewLine, Environment.NewLine)
                             + xClpBd.Substring(xClpBd.Length - 100);
                     }
-                    else
-                        textBox1.Text = xClpBd;
+                    //else
+                    //    textBox1.Text = xClpBd;
 
-                    if (runName == "漢籍電子文獻資料庫文本整理_以轉貼到中國哲學書電子化計劃")
+                    switch (runName)
                     {
-                        saveText();
+                        case "漢籍電子文獻資料庫文本整理_以轉貼到中國哲學書電子化計劃":
+
+                            saveText();
+                            break;
+                        case "中國哲學書電子化計劃.國學大師_四庫全書本轉來":
+                            xClpBd = xClpBd.Replace(" /\v\v", Environment.NewLine).Replace("\v", Environment.NewLine)                                    
+                                    .Replace(" /", "");
+                                    //這要做標題判斷，不能取代掉.Replace(Environment.NewLine + Environment.NewLine, Environment.NewLine)
+                            xClpBd = "*欽定四庫全書<p>" + xClpBd.Substring(xClpBd.IndexOf("欽定《四庫全書》") + "欽定《四庫全書》".Length);
+                            break;
+                        default:
+                            break;
                     }
+                    textBox1.Text = xClpBd;
                     textBox1.Select(0, 0);
                     textBox1.ScrollToCaret();
                     break;
@@ -5744,6 +5875,7 @@ namespace WindowsFormsApp1
             //C# 對文字檔案的幾種讀寫方法總結:https://codertw.com/%E7%A8%8B%E5%BC%8F%E8%AA%9E%E8%A8%80/542361/
             string str1 = textBox1.Text;
             File.WriteAllText(dropBoxPathIncldBackSlash + fName_to_Save_Txt, str1, Encoding.UTF8);
+            Task.WaitAny();
             // 也可以指定編碼方式 File.WriteAllText(@”c:\temp\test\ascii-2.txt”, str1, Encoding.ASCII);
         }
 
@@ -6739,12 +6871,13 @@ namespace WindowsFormsApp1
                         //return;
                         //}
                         //插入點游標置於頁首
+                        //if(keyinText)//已於巢外的if判定了
                         textBox1.Select(0, 0);
                     }
 
                     return;
                 }
-            }//以上處置鍵入模式
+            }//以上處置鍵入模式（keyinText=true）
             #endregion
 
             #region 自動連續輸入模式的處置
@@ -6784,7 +6917,7 @@ namespace WindowsFormsApp1
 
             //bool autoPasteFromSBCKwhether = false; this.autoPasteFromSBCKwhether = autoPasteFromSBCKwhether;            
 
-            #region 在textBox1內容文字少於100時的檢查，以自行決定其他的操作
+            #region 在textBox1內容文字少於100時的檢查，以自行決定其他的操作，如《中國哲學書電子化計劃》清除頁前的分段符號、撤掉與書圖的對應_脫鉤,《國學大師》的《四庫全書》本文等
             if (textBox1.TextLength < 100)
             {
                 //如果剪貼簿裡的文字內容長於500個字元，則執行相關的 Word VBA
@@ -6826,7 +6959,7 @@ namespace WindowsFormsApp1
                     }
 
                     //對複製自《國學大師》的《四庫全書》文本的處置
-                    else if (clpTxt.IndexOf("1a]") > -1 || clpTxt.IndexOf("1a] ") > -1)
+                    else if (clpTxt.IndexOf("a]") > -1 || clpTxt.IndexOf("a] ") > -1)
                     {
                         runWordMacro("中國哲學書電子化計劃.國學大師_四庫全書本轉來");
                         return;
@@ -7014,6 +7147,10 @@ namespace WindowsFormsApp1
                     return;
                 case "br":
                     goto sl;
+                case "bb":
+                    goto sl;
+                case "ss":
+                    goto sl;
                 case "sg,":
                     //還未實作
                     //browsrOPMode = BrowserOPMode.seleniumGet;
@@ -7030,7 +7167,7 @@ namespace WindowsFormsApp1
                 default:
                     break;
             }
-            #endregion
+            #endregion 軟件架構-瀏覽操作模式設定
 
             #region 設定小注不換行的長度限制
 
@@ -7519,7 +7656,7 @@ namespace WindowsFormsApp1
                             , MessageBoxIcon.Question, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly) == DialogResult.OK)
                     {
                         //autoPastetoQuickEdit = true; autoPasteFromSBCKwhether = false;
-                        turnon_autoPastetoQuickEdit();
+                        turnOn_autoPastetoQuickEdit();
                         //if (MessageBox.Show("是否先檢查文本先前是否曾編輯過？" + Environment.NewLine +
                         //    "要檢查的話，請先複製其文本，再按確定（ok）按鈕", "", MessageBoxButtons.OKCancel
                         //    , MessageBoxIcon.Question, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly) == DialogResult.OK)
