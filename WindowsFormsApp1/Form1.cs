@@ -538,11 +538,12 @@ namespace WindowsFormsApp1
         /// <summary>
         /// 取得游標/插入點所在行文字（含標點標誌tag(*|<p>)）
         /// </summary>
-        /// <param name="x"></param>
-        /// <param name="s"></param>
+        /// <param name="x">要處理的文本</param>
+        /// <param name="s">插入點位置</param>
         /// <returns></returns>
-        string getLineTxt(string x, int s)
+        internal static string getLineTxt(string x, int s)
         {
+            if (s < 0 || string.IsNullOrEmpty(x)) return "";
             int preP = x.LastIndexOf(Environment.NewLine, s), p = x.IndexOf(Environment.NewLine, s);
             int lineS = preP == -1 ? 0 : preP + Environment.NewLine.Length;
             int lineL = p == -1 ? x.Length - lineS : p - Environment.NewLine.Length - preP;
@@ -551,22 +552,31 @@ namespace WindowsFormsApp1
         /// <summary>
         /// 取得游標/插入點所在行文字+行的起始位置與長度（含標點與標誌tag(*|<p>)）
         /// </summary>
-        /// <param name="x"></param>
-        /// <param name="s"></param>
-        /// <param name="lineS"></param>
-        /// <param name="lineL"></param>
+        /// <param name="x">要處理的文本</param>
+        /// <param name="s">插入點位置</param>
+        /// <param name="lineS">本行的起始位置</param>
+        /// <param name="lineL">本行的長度</param>
         /// <returns></returns>
-        string getLineTxt(string x, int s, out int lineS, out int lineL)
+        internal static string getLineTxt(string x, int s, out int lineS, out int lineL)
         {
+            if (s < 0 || string.IsNullOrEmpty(x)) { lineS = 0; lineL = 0; return ""; }
             int preP = x.LastIndexOf(Environment.NewLine, s), p = x.IndexOf(Environment.NewLine, s);
             lineS = preP == -1 ? 0 : preP + Environment.NewLine.Length;
-            lineL = p == -1 ? x.Length - lineS : p - Environment.NewLine.Length - preP;
+            //lineL = p == -1 ? x.Length - lineS : p - Environment.NewLine.Length - preP;
+            lineL = p == -1 ? x.Length - lineS : p - lineS;
+            lineL = lineL < 0 ? 0 : lineL;
             return x.Substring(lineS, lineL);
         }
 
-        //取得游標/插入點所在行文字（不含標點）
-        string getLineTxtWithoutPunctuation(string x, int s)
+        /// <summary>
+        /// 取得游標/插入點所在行文字（不含標點）
+        /// </summary>
+        /// <param name="x">要處理的文本</param>
+        /// <param name="s">插入點位置</param>
+        /// <returns></returns>
+        internal static string getLineTxtWithoutPunctuation(string x, int s)
         {
+            if (s < 0 || string.IsNullOrEmpty(x)) return "";
             string returnTxt = getLineTxt(x, s);
             //https://useadrenaline.com/playground
             //20230115 adrenaline 大菩薩：
@@ -2436,12 +2446,18 @@ namespace WindowsFormsApp1
         }
         /// <summary>
         /// Alt + 1 : 鍵入本站制式留空空格標記「􏿽」：若有選取則取代全形空格「　」為「􏿽」
+        /// 若被選取的是{{或}}則逕以「􏿽」取代（《國學大師》的《四庫全書》本常見
         /// </summary>
         private void keysSpacesBlank()
         {
             string x = textBox1.Text;
             int s = textBox1.SelectionStart, l = textBox1.SelectionLength;
             string sTxt = textBox1.SelectedText;
+            if ("{{}}".IndexOf(sTxt) > -1)
+            {
+                textBox1.SelectedText = "􏿽";
+                return;
+            }
             dontHide = true;
             if (sTxt != "")
             {//有選取範圍
@@ -4342,7 +4358,7 @@ namespace WindowsFormsApp1
                 else if (keyinText && !autoPastetoQuickEdit)
                 {
                     if (HiddenIcon) show_nICo();
-                    availableInUseKeysMouse();
+                    availableInUseBothKeysMouse();
                     //將插入點置於頁首，以備編輯
                     textBox1.Select(0, 0);
                     textBox1.ScrollToCaret();
@@ -4353,7 +4369,7 @@ namespace WindowsFormsApp1
         /// <summary>
         /// 把作業系統的焦點與游標拉回主表單中
         /// </summary>
-        private void availableInUseKeysMouse()
+        private void availableInUseBothKeysMouse()
         {
             if (!Active)
             {
@@ -5271,6 +5287,26 @@ namespace WindowsFormsApp1
                     return;
                 }
 
+                if (e.KeyCode == Keys.R)
+                {//Ctrl + r ：刷新目前 Chrome瀏覽器 或 預設瀏覽器 網頁（同於網頁上按下F5鍵）；因為有時瀏覽器網頁未完整開啟必須重載
+                    e.Handled = true;
+                    appActivateByName();
+                    SendKeys.Send("{F5}");
+                    //textBox1.Focused; ⇒此為取得在桌面的焦面，不是表單中的焦點，故當表單並非桌面中作用中的表單時，此值也會是fasle，因為TextBox是在表單Form容器中的子元件故 20230125癸卯年初四
+                    if (ActiveControl.Name == "textBox1" && !Active) { availableInUseBothKeysMouse(); }
+                    return;
+                    /* 20230125 孫守真 × chatGPT大菩薩：
+                     * 老師菩薩新年吉祥，煩請老師菩薩慈悲指導，我這想法是否正確，如下程式碼，我想要在喚起預設瀏覽器後判斷若textBox1是表單中有焦點的控制項，則我想把桌面的焦點再拉回我的表單中，其中的程式碼註解就是我的想法，焦點的取得與判斷，是否是像我想的這樣呢？……
+                     * 您的想法是正確的。程式碼中，當使用者按下Ctrl + r鍵時會啟動預設瀏覽器並刷新網頁，然後判斷textBox1是否為表單中有焦點的控制項。如果是，則調用availableInUseBothKeysMouse()方法將桌面的焦點拉回表單中。
+                     * ActiveControl.Name== "textBox1" 可以取得目前表單中有焦點的控制項
+                     * Active 屬性判斷目前表單是否是作用中的表單。
+                     * 如果您的目的是在啟動預設瀏覽器後，將桌面的焦點拉回表單中，那麼程式碼應該是能夠達到您的需求。
+                     * 孫守真
+                     * 確實是執行正常，達到需求，也謝謝老師菩薩幫我印證我的想法是正確的。感恩感恩　南無阿彌陀佛
+                     * 我很高興能夠幫助您。如果您有任何其他問題，歡迎隨時問我。南無阿彌陀佛，祝您新年吉祥。
+                     */
+                }
+
                 if (e.KeyCode == Keys.PageDown || e.KeyCode == Keys.PageUp)
                 {
                     e.Handled = true;//取得或設定值，指出是否處理事件。https://docs.microsoft.com/zh-tw/dotnet/api/system.windows.forms.keyeventargs.handled?view=netframework-4.7.2&f1url=%3FappId%3DDev16IDEF1%26l%3DZH-TW%26k%3Dk(System.Windows.Forms.KeyEventArgs.Handled);k(TargetFrameworkMoniker-.NETFramework,Version%253Dv4.7.2);k(DevLang-csharp)%26rd%3Dtrue
@@ -5813,18 +5849,21 @@ namespace WindowsFormsApp1
                     {
                         case "漢籍電子文獻資料庫文本整理_以轉貼到中國哲學書電子化計劃":
 
+                            textBox1.Text = xClpBd;
                             saveText();
                             break;
                         case "中國哲學書電子化計劃.國學大師_四庫全書本轉來":
-                            xClpBd = xClpBd.Replace(" /\v\v", Environment.NewLine).Replace("\v", Environment.NewLine)                                    
-                                    .Replace(" /", "");
-                                    //這要做標題判斷，不能取代掉.Replace(Environment.NewLine + Environment.NewLine, Environment.NewLine)
-                            xClpBd = "*欽定四庫全書<p>" + xClpBd.Substring(xClpBd.IndexOf("欽定《四庫全書》") + "欽定《四庫全書》".Length);
+                            using (GXDS gxds = new GXDS(this)) { gxds.StandardizeSKQSContext(ref xClpBd); }
+                            textBox1.Text = xClpBd; saveText();
+                            //xClpBd = xClpBd.Replace(" /\v\v", Environment.NewLine).Replace("\v", Environment.NewLine)                                    
+                            //        .Replace(" /", "");
+                            //        //這要做標題判斷，不能取代掉.Replace(Environment.NewLine + Environment.NewLine, Environment.NewLine)
+                            //xClpBd = "*欽定四庫全書<p>" + xClpBd.Substring(xClpBd.IndexOf("欽定《四庫全書》") + "欽定《四庫全書》".Length);
                             break;
                         default:
                             break;
                     }
-                    textBox1.Text = xClpBd;
+                    if(textBox1.Text != xClpBd)textBox1.Text = xClpBd;
                     textBox1.Select(0, 0);
                     textBox1.ScrollToCaret();
                     break;
@@ -5870,7 +5909,7 @@ namespace WindowsFormsApp1
 
         internal string FName_to_Save_Txt_fullname { get { return dropBoxPathIncldBackSlash + fName_to_Save_Txt; } }
 
-        private void saveText()
+        internal void saveText()
         {
             //C# 對文字檔案的幾種讀寫方法總結:https://codertw.com/%E7%A8%8B%E5%BC%8F%E8%AA%9E%E8%A8%80/542361/
             string str1 = textBox1.Text;
