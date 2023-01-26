@@ -294,6 +294,15 @@ namespace WindowsFormsApp1
             //if (this.Top <0 && this.Left<0) show_nICo();            
         }
 
+        /// <summary>
+        /// 曝露給其他類別操作textBox1的方法。20230126癸卯年初五 creedit with chatGPT大菩薩："C# 繼承 Form1 控制項"：在不更動 textBox1的修飾符（modifier）private 下的權宜方法
+        /// </summary>
+        /// <param name="operation"></param>
+        internal void PerformTextBoxOperation(Action<TextBox> operation)
+        {//chatGPT大菩薩：在Form1類別中的PerformTextBoxOperation方法可以接受一個Action<TextBox>類型的參數，該參數是一個委派，將會在呼叫時執行。您可以使用SwapText類別中的Swap方法來實例化該委派並將其傳入PerformTextBoxOperation方法中。如此一來，在執行PerformTextBoxOperation方法時，就會執行SwapText類別中的Swap方法，對Form1上的textBox1進行操作。
+            operation(textBox1);
+        }
+
         int FontFamilyNowIndex = 0;
         FontFamily getCJKExtFontInstalled(string fontName)
         { //https://www.cnblogs.com/arxive/p/7795232.html            
@@ -1850,6 +1859,15 @@ namespace WindowsFormsApp1
                 if (e.KeyCode == Keys.Add || e.KeyCode == Keys.Oemplus)//|| e.KeyCode == Keys.Subtract || e.KeyCode == Keys.NumPad5)
                 {// Alt + +
                     e.Handled = true; keyDownCtrlAdd(false); return;
+                }
+
+                if (e.KeyCode == Keys.OemMinus)
+                {// Alt + -（字母區的減號） : 如果被選取的是「􏿽」則與下一個「{{」對調，反之亦然。（針對《國學大師》《四庫全書》文本小注文誤標而開發）
+                    e.Handled = true;
+                    undoRecord(); stopUndoRec = true;
+                    using (GXDS gxds = new GXDS(this)) { gxds.correctBlankAndUppercurlybrackets(ref textBox1); }
+                    stopUndoRec = false;
+                    return;
                 }
 
                 if (e.KeyCode == Keys.OemBackslash || e.KeyCode == Keys.Oem5)

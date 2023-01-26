@@ -2,18 +2,21 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Policy;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using WindowsFormsApp1;
+using System.Windows.Forms;
 
 namespace TextForCtext
 {
     /// <summary>
     /// 《國學大師》網站的操作
-    /// </summary>
+    /// </summary>    
     public class GXDS : IDisposable
     {
+
         /// <summary>
         /// = Environment.NewLine;
         /// </summary>
@@ -23,17 +26,30 @@ namespace TextForCtext
         /// </summary>
         int newLineLen = Environment.NewLine.Length;
         /// <summary>
-        /// =Form1.cs（主表單）
+        /// =Form1.cs（主表單）；
         /// </summary>
-        Form1 frm1;
+        Form1 frm, frmRef;
         /// <summary>
+
+        /// <summary>
+        /// =Form1.cs（主表單）； 不能被Dispose
+        /// </summary>
+        Form1 frm1 = Application.OpenForms[0] as Form1;
+        /// <summary>
+
         /// 建構器（constructor）
         /// </summary>
         /// <param name="frm"></param>
-        internal GXDS
-            (Form1 frm)
+        internal GXDS(Form1 form)
         {
-            frm1 = frm;
+            frm = form;
+        }
+        /// 建構器（constructor）
+        /// </summary>
+        /// <param name="frm"></param>
+        internal GXDS(ref Form1 form)
+        {
+            frmRef = form;
         }
 
         /*20230125 Implement Dispose Method： chatGPT大菩薩新年吉祥 我想實作我以下類別的 Dispose 方法 請問這樣對嗎？
@@ -122,7 +138,7 @@ namespace TextForCtext
         {
             //if (!frm1.IsDisposed)
             //    frm1.Dispose();
-            frm1 = null;
+            frm = null;
             newLineLen = 0;
             newLine = null;
             //throw new NotImplementedException();
@@ -187,14 +203,49 @@ namespace TextForCtext
                 s = xForMark.IndexOf(newLine, sLineStart + sLineLen + newLineLen);
             }
             //清除跨行標題誤標的後面部分: xForMark.Replace("<p><p>\r\n*", "\r\n");
-            //xForMark= xForMark.Replace("<p><p>"+newLine+"*",  newLine );
-            Regex.Replace(xForMark, "<p><p>" + newLine + "*", newLine);
+            xForMark = xForMark.Replace("<p><p>" + newLine + "*", newLine);
+            //Regex.Replace(xForMark, "<p><p>" + newLine + "*", newLine);//此無效，應該是要pattern才行，不能指定字串
             //清除末尾冗餘
             if (xForMark.Substring(xForMark.Length - 1, 1) == "\r") xForMark = xForMark.Substring(0, xForMark.Length - 1);
         }
 
-    }
 
+        /// <summary>
+        /// 更正《國學大師》《四庫全書》本小註文標識錯誤：
+        /// Alt + - （字母區的減號）: 如果被選取的是「􏿽」則與下一個「{{」對調，反之亦然。（針對《國學大師》《四庫全書》文本小注文誤標而開發）
+        /// </summary>
+        internal void correctBlankAndUppercurlybrackets(ref TextBox txb)
+        {
+            const string Uppercurlybrackets = "{{";
+            const string Lowercurlybrackets = "}}";
+            string x = txb.Text,  wrng = txb.SelectedText, blank = "􏿽"; int s = txb.SelectionStart, sN=-1;
+
+            switch (wrng)
+            {
+                case "􏿽":
+                    blank = Uppercurlybrackets;
+                    sN = x.IndexOf(Uppercurlybrackets, s);
+                    break;
+                //case Uppercurlybrackets:
+                //    blank = "􏿽";
+                //    break;
+                case Lowercurlybrackets:
+                    blank = "􏿽";
+                    sN = x.IndexOf(blank, s);
+                    break;
+            }
+            if (("􏿽"+Lowercurlybrackets).IndexOf(wrng) > -1)
+            {
+                if (x.Substring(sN, blank.Length) == blank)
+                {
+                    txb.SelectedText = blank;
+                    txb.Select(sN, blank.Length);
+                    txb.SelectedText = wrng;
+                }
+            }
+        }
+
+    }
 
 }
 
