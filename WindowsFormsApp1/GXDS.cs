@@ -186,9 +186,11 @@ namespace TextForCtext
                 //設定下一個處理點
                 s = xForMark.IndexOf(newLine, sLineStart + sLineLen + newLineLen);
             }
-            //清除跨行標題誤標的後面部分
-            xForMark.Replace("<p><p>"+newLine+"*",  newLine );
-            
+            //清除跨行標題誤標的後面部分: xForMark.Replace("<p><p>\r\n*", "\r\n");
+            //xForMark= xForMark.Replace("<p><p>"+newLine+"*",  newLine );
+            Regex.Replace(xForMark, "<p><p>" + newLine + "*", newLine);
+            //清除末尾冗餘
+            if (xForMark.Substring(xForMark.Length - 1, 1) == "\r") xForMark = xForMark.Substring(0, xForMark.Length - 1);
         }
 
     }

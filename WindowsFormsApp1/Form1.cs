@@ -180,6 +180,11 @@ namespace WindowsFormsApp1
                     //}
                     //br.killProcesses(new string[] { "chromedriver" });
                     br.killchromedriverFromHere();
+                    if (br.getChromedrivers().Length > 0)
+                        if (MessageBox.Show("還有chromedriver.exe程序在運行，是否全部清除？", "chromedrivers still there"
+                            , MessageBoxButtons.OKCancel, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly)
+                            == DialogResult.OK)
+                            br.killProcesses(new string[] { "chromedriver" });
                 }
             }
 
@@ -2453,14 +2458,15 @@ namespace WindowsFormsApp1
             string x = textBox1.Text;
             int s = textBox1.SelectionStart, l = textBox1.SelectionLength;
             string sTxt = textBox1.SelectedText;
-            if ("{{}}".IndexOf(sTxt) > -1)
-            {
-                textBox1.SelectedText = "􏿽";
-                return;
-            }
             dontHide = true;
             if (sTxt != "")
             {//有選取範圍
+                //如果已選取「{{」或「}}」則逕以「􏿽」取代（《國學大師》的《四庫全書》本常見
+                if ("{{}}".IndexOf(sTxt) > -1)
+                {
+                    textBox1.SelectedText = "􏿽";
+                    return;
+                }
                 if (sTxt == "<p>")
                 { undoRecord(); stopUndoRec = true; textBox1.SelectedText = "􏿽"; stopUndoRec = false; }
                 else
@@ -5574,7 +5580,7 @@ namespace WindowsFormsApp1
         }
 
         /// <summary>
-        /// 指示是否要隱藏主表單到系統列中
+        /// 指示是否要隱藏主表單到系統列中：=true則不隱藏
         /// </summary>
         bool dontHide = false;
 
@@ -5863,7 +5869,7 @@ namespace WindowsFormsApp1
                         default:
                             break;
                     }
-                    if(textBox1.Text != xClpBd)textBox1.Text = xClpBd;
+                    if (textBox1.Text != xClpBd) textBox1.Text = xClpBd;
                     textBox1.Select(0, 0);
                     textBox1.ScrollToCaret();
                     break;

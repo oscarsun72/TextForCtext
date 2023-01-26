@@ -88,7 +88,7 @@ namespace TextForCtext
             return e;
         }
 
-        
+
         /// <summary>
         /// Selenium 操控的 Chrome瀏覽器伺服器（ChromeDriverService）的等待秒數（即「new ChromeDriver()」的「TimeSpan」引數值）。預設為 8.5。
         /// </summary>
@@ -788,6 +788,10 @@ namespace TextForCtext
             }
             Task.WaitAll();
             chromedriversPID.Clear();
+        }
+        internal static Process[] getChromedrivers()
+        {
+            return Process.GetProcessesByName("chromedriver");
         }
 
         internal static void killProcesses(string[] processName)
