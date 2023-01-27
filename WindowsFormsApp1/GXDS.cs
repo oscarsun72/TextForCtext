@@ -8,6 +8,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using WindowsFormsApp1;
 using System.Windows.Forms;
+using System.Globalization;
 
 namespace TextForCtext
 {
@@ -159,6 +160,8 @@ namespace TextForCtext
             //這要做標題判斷，不能取代掉.Replace(Environment.NewLine + Environment.NewLine, Environment.NewLine)
             skqsTitleMark_WithoutPreSpaceWrappedinBlankLines(ref xForStandardize);
 
+            noteBeforeTitleSplitTwoLine(ref xForStandardize);
+
             xForStandardize = "*欽定四庫全書<p>〖文淵|閣寶〗<p>" + xForStandardize.Substring(xForStandardize.IndexOf("欽定《四庫全書》") + "欽定《四庫全書》".Length);
 
 
@@ -212,14 +215,25 @@ namespace TextForCtext
 
         /// <summary>
         /// 更正《國學大師》《四庫全書》本小註文標識錯誤：
-        /// Alt + - （字母區的減號）: 如果被選取的是「􏿽」則與下一個「{{」對調，反之亦然。（針對《國學大師》《四庫全書》文本小注文誤標而開發）
+        /// Alt + - （字母區的減號）: 如果被選取的是「􏿽」則與下一個「{{」對調；若是「}}」則與「􏿽」對調。（針對《國學大師》《四庫全書》文本小注文誤標而開發）
+        /// 若無選取文字，則自動從插入點往後找「􏿽」或「}}」，直到該行/段末為止
         /// </summary>
         internal void correctBlankAndUppercurlybrackets(ref TextBox txb)
         {
             const string Uppercurlybrackets = "{{";
             const string Lowercurlybrackets = "}}";
-            string x = txb.Text,  wrng = txb.SelectedText, blank = "􏿽"; int s = txb.SelectionStart, sN=-1;
+            string x = txb.Text, wrng = txb.SelectedText, blank = "􏿽"; int s = txb.SelectionStart, sN = -1;
 
+            //若無選取則自動找到
+            while (wrng == "")
+            {
+                if (("􏿽" + Lowercurlybrackets + newLine).IndexOf(x.Substring(s++, 2)) > -1)
+                {
+                    if (x.Substring(s, 2) == newLine) break;
+                    txb.Select(--s, 2); wrng = txb.SelectedText; break;
+                }
+            }
+            if (wrng == "") return;
             switch (wrng)
             {
                 case "􏿽":
@@ -234,7 +248,7 @@ namespace TextForCtext
                     sN = x.IndexOf(blank, s);
                     break;
             }
-            if (("􏿽"+Lowercurlybrackets).IndexOf(wrng) > -1)
+            if (("􏿽" + Lowercurlybrackets).IndexOf(wrng) > -1)
             {
                 if (x.Substring(sN, blank.Length) == blank)
                 {
@@ -245,6 +259,52 @@ namespace TextForCtext
             }
         }
 
+        /// <summary>
+        /// 將在標題前的純小注文分成二行。
+        /// </summary>
+        /// <param name="xOp"></param>
+        internal void noteBeforeTitleSplitTwoLine(ref string xOp)
+        {
+            int s = xOp.IndexOf(newLine);
+            while (s > -1)
+            {
+                //本行如果是標題
+                if (Form1.getLineTxt(xOp, s).IndexOf("*") > -1)
+                {
+                    if (s - 1 > 0)
+                    {
+                        int preS = xOp.LastIndexOf(newLine, s - 1);
+                        if (preS > 0)
+                        {
+                            string XBefrTitleLine = Form1.getLineTxt(xOp, preS, out int plineS, out int plineL);
+                            int XBefrTitleLineLen = XBefrTitleLine.Length;
+                            //如果標題前一行/段是純小注文
+                            if (XBefrTitleLineLen - 5 > 0)
+                            {
+                                if (XBefrTitleLine.Substring(XBefrTitleLineLen - 5) == "}}<p>" &&
+                                    //在{{前可能會有空一格
+                                    (XBefrTitleLine.Substring(0, 2) == "{{" || XBefrTitleLine.Substring(1, 2) == "{{"))
+                                {
+                                    string ch = Regex.Replace(XBefrTitleLine, "[{{}}<p>]", "");
+                                    int llen = new StringInfo(ch).LengthInTextElements;
+                                    llen = llen % 2 == 0 ? llen / 2 : (llen + 1) / 2;
+                                    XBefrTitleLine = XBefrTitleLine.Substring(0, XBefrTitleLine.IndexOf("{{") + 2) +
+                                        //漢文部分                                     
+                                        ch.Substring(0, llen) + newLine + ch.Substring(llen)+
+                                        XBefrTitleLine.Substring(XBefrTitleLine.IndexOf("}}"));
+                                    //XBefrTitleLine = XBefrTitleLine.Substring(0, llen) + newLine +
+                                    //    XBefrTitleLine.Substring(llen);
+                                    xOp = xOp.Substring(0, plineS) + XBefrTitleLine + xOp.Substring(plineS + plineL);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                s = xOp.IndexOf(newLine, ++s);
+            }
+
+        }
     }
 
 }

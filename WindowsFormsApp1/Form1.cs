@@ -761,7 +761,9 @@ namespace WindowsFormsApp1
             if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("ဉ");
             if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("▱");
             if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("ꗍ");
-            if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("/");//《國學大師》本《四庫全書》
+            //以下《國學大師》本《四庫全書》發生者
+            if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("/");
+            if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("B");
             #endregion
 
             #region 檢查不當分段
@@ -1862,7 +1864,7 @@ namespace WindowsFormsApp1
                 }
 
                 if (e.KeyCode == Keys.OemMinus)
-                {// Alt + -（字母區的減號） : 如果被選取的是「􏿽」則與下一個「{{」對調，反之亦然。（針對《國學大師》《四庫全書》文本小注文誤標而開發）
+                {// Alt + -（字母區的減號） : 如果被選取的是「􏿽」則與下一個「{{」對調；若是「}}」則與「􏿽」對調。。（針對《國學大師》《四庫全書》文本小注文誤標而開發）
                     e.Handled = true;
                     undoRecord(); stopUndoRec = true;
                     using (GXDS gxds = new GXDS(this)) { gxds.correctBlankAndUppercurlybrackets(ref textBox1); }
@@ -5936,9 +5938,19 @@ namespace WindowsFormsApp1
         internal void saveText()
         {
             //C# 對文字檔案的幾種讀寫方法總結:https://codertw.com/%E7%A8%8B%E5%BC%8F%E8%AA%9E%E8%A8%80/542361/
-            string str1 = textBox1.Text;
-            File.WriteAllText(dropBoxPathIncldBackSlash + fName_to_Save_Txt, str1, Encoding.UTF8);
-            Task.WaitAny();
+            string str1 = textBox1.Text, f = dropBoxPathIncldBackSlash + fName_to_Save_Txt;
+            try
+            {
+                using (var streamWriter = new StreamWriter(f)) { streamWriter.Write(str1); }
+                //File.WriteAllText(f, str1, Encoding.UTF8);
+            }
+            catch (Exception)
+            {
+                //Task.WaitAny();
+                //Thread.Sleep(TimeSpan.FromSeconds(2));
+                //File.WriteAllText(f, str1, Encoding.UTF8);
+                //throw;
+            }
             // 也可以指定編碼方式 File.WriteAllText(@”c:\temp\test\ascii-2.txt”, str1, Encoding.ASCII);
         }
 

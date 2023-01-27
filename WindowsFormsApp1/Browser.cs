@@ -58,7 +58,20 @@ namespace TextForCtext
         {
             get
             {
-                return driver != null ? driver.Url : "";
+                try
+                {
+                    return driver != null ? driver.Url : "";
+                }
+                catch (Exception ex)
+                {
+                    switch (ex.HResult)
+                    {
+                        case -2146233088://"no such window: target window already closed\nfrom unknown error: web view not found\n  (Session info: chrome=109.0.5414.120)"
+                            return "";
+                        default:
+                            throw;
+                    }
+                }
             }
         }
 
