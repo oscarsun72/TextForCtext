@@ -1014,14 +1014,15 @@ If (ActiveDocument.path <> "" And Not ActiveDocument.Saved) Then ActiveDocument.
 VBA.DoEvents
 中國哲學書電子化計劃.只保留正文注文_且注文前後加括弧
 
-Dim d As Document
+Dim d As Document, x As String, i As Long
 Set d = ActiveDocument
 If d.path <> "" Then Exit Sub
 If Len(d.Range) = 1 Then Exit Sub '空白文件不處理
 
 '先要複製到剪貼簿,純文字操作即可
 'd.Range.Cut
-SystemSetup.SetClipboard d.Range.text
+x = 文字處理.trimStrForSearch_PlainText(d.Range)
+SystemSetup.SetClipboard x
 DoEvents
 'If d.path = "" Then '前已作判斷 If d.path <> "" Then Exit Sub
 d.Close wdDoNotSaveChanges

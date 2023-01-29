@@ -283,14 +283,15 @@ namespace TextForCtext
                             {
                                 if (XBefrTitleLine.Substring(XBefrTitleLineLen - 5) == "}}<p>" &&
                                     //在{{前可能會有空一格
-                                    (XBefrTitleLine.Substring(0, 2) == "{{" || XBefrTitleLine.Substring(1, 2) == "{{"))
+                                    (XBefrTitleLine.Substring(0, 2) == "{{" ||
+                                    (XBefrTitleLine.Substring(1, 2) == "{{" && XBefrTitleLine.Substring(0, 1) == "　")))
                                 {
                                     string ch = Regex.Replace(XBefrTitleLine, "[{{}}<p>]", "");
                                     int llen = new StringInfo(ch).LengthInTextElements;
                                     llen = llen % 2 == 0 ? llen / 2 : (llen + 1) / 2;
                                     XBefrTitleLine = XBefrTitleLine.Substring(0, XBefrTitleLine.IndexOf("{{") + 2) +
                                         //漢文部分                                     
-                                        ch.Substring(0, llen) + newLine + ch.Substring(llen)+
+                                        ch.Substring(0, llen) + newLine + ch.Substring(llen) +
                                         XBefrTitleLine.Substring(XBefrTitleLine.IndexOf("}}"));
                                     //XBefrTitleLine = XBefrTitleLine.Substring(0, llen) + newLine +
                                     //    XBefrTitleLine.Substring(llen);

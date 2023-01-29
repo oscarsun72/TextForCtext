@@ -402,6 +402,7 @@ Do
         'Exit Do '超過指定時間後離開
         grabGjCoolPunctResult = ""
         wdB.Quit
+        SystemSetup.playSound 1.469
         Exit Function
     End If
 Loop

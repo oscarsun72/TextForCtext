@@ -43,6 +43,15 @@ namespace WindowsFormsApp1
         //string[] CJKBiggestSet = new string[]{ "HanaMinB", "KaiXinSongB", "TH-Tshyn-P1" };
         string[] CJKBiggestSet = { "全宋體(等寬)", "新細明體-ExtB", "HanaMinB", "KaiXinSongB", "TH-Tshyn-P1", "HanaMinA", "Plangothic P1", "Plangothic P2" };
         Color button2BackColorDefault;
+
+        /// <summary>
+        /// 在 Selenium連續輸入時是否為快捷模式，即不檢視貼上結果即進行至下一頁的動作
+        /// </summary>
+        internal static bool FastMode = false;
+
+        /// <summary>
+        /// 記下當前頁數頁碼
+        /// </summary>
         string _currentPageNum = "";
         /// <summary>
         /// 插入鍵入或取代鍵入模式
@@ -138,8 +147,44 @@ namespace WindowsFormsApp1
 
             this.FormClosing += Form1_FormClosing;//202301050101 creedit
             textBox3.MouseMove += textBox3_MouseMove;
+            textBox1.MouseWheel += new MouseEventHandler(textBox1_MouseWheel);
         }
 
+        /// <summary>
+        /// 調整textBox1的字形大小、切換上一頁下一頁等功能
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void textBox1_MouseWheel(object sender, MouseEventArgs e)
+        {
+            switch (ModifierKeys)
+            {
+                case Keys.Control:
+                    if (e.Delta > 0)
+                    {
+                        // 滾輪向上，增大字型
+                        textBox1.Font = new Font(textBox1.Font.FontFamily, textBox1.Font.Size + 1);
+                    }
+                    else
+                    {
+                        // 滾輪向下，縮小字型
+                        textBox1.Font = new Font(textBox1.Font.FontFamily, textBox1.Font.Size - 1);
+                    }
+                    break;
+                case Keys.Alt:
+                    if (e.Delta > 0)
+                    {
+                        // 滾輪向上，上一頁
+                        nextPages(Keys.PageUp, false);
+                    }
+                    else
+                    {
+                        // 滾輪向下，下一頁
+                        nextPages(Keys.PageDown, false);
+                    }
+                    break;
+            }
+        }
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
 
@@ -4417,6 +4462,11 @@ namespace WindowsFormsApp1
         /// <summary>
         /// 是否是自動連續輸入模式
         /// </summary>
+        internal bool AutoPasteToCtext { get { return autoPastetoQuickEdit; } }
+
+        /// <summary>
+        /// 是否是自動連續輸入模式
+        /// </summary>
         bool autoPastetoQuickEdit = false;
         /// <summary>
         /// 前一本所處理的書籍ID（網址中「&file=」的引數值）以供與現在要處理的作比較，看是不是同一本書（可決定版面特徵是否當予更改）
@@ -6533,6 +6583,7 @@ namespace WindowsFormsApp1
 
         private void textBox4_Enter(object sender, EventArgs e)
         {
+            //if (textBox1.Text == "") return;
             if (textBox4.Size == textBox4Size)
                 textBox4SizeLarger();
             if (new StringInfo(textBox1.SelectedText).LengthInTextElements > 1) { Clipboard.SetText(textBox1.SelectedText); textBox4.Text = textBox1.SelectedText; textBox4.DeselectAll(); }

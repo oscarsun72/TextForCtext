@@ -25,12 +25,13 @@ using System.Runtime.InteropServices.ComTypes;
 using OpenQA.Selenium.Support.UI;
 using SeleniumExtras.WaitHelpers;
 using System.Diagnostics;
+using System.Threading;
 
 namespace TextForCtext
 {
     class Browser
     {
-        static Form1 frm;
+        static Form1 frm;        
 
         //creedit 
         public Browser(Form1 form)
@@ -95,10 +96,23 @@ namespace TextForCtext
         }
         internal static IWebElement waitFindWebElementById_ToBeClickable(string id, double second)
         {
-            IWebElement e = driver.FindElement(By.Id(id));
-            WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(second));
-            wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(e));
-            return e;
+            try
+            {
+                IWebElement e = driver.FindElement(By.Id(id));
+                WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(second));
+                wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(e));
+                return e;
+            }
+            catch (Exception ex)
+            {
+                switch (ex.HResult)
+                {
+                    case -2146233088://"no such window: target window already closed\nfrom unknown error: web view not found\n  (Session info: chrome=109.0.5414.120)"
+                        return null;
+                    default:
+                        throw;
+                }
+            }
         }
 
 
@@ -539,6 +553,12 @@ namespace TextForCtext
                     //throw;
                 }
             });
+            //加速連續性輸入（不必檢視貼入的文本時，很有效）
+            if (frm.AutoPasteToCtext && Form1.FastMode)
+            {
+                Thread.Sleep(10);//等待 submit = waitFin……完成
+                driver.Close(); //需要重啟檢視時，只要開啟前一個被關掉的分頁頁籤即可（快速鍵時 Ctrl + Shift + t）
+            }
         }
 
         static internal bool isAllinBmp(string xChk)
