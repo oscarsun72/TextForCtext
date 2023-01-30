@@ -46,8 +46,13 @@ namespace WindowsFormsApp1
 
         /// <summary>
         /// 在 Selenium連續輸入時是否為快捷模式，即不檢視貼上結果即進行至下一頁的動作
+        /// Alt + f ：切換 Fast Mode 不待網頁回應即進行下一頁的貼入動作（即在不須檢覈貼上之文本正確與否，肯定、八成是無誤的，就可以執行此項以加快輸入文本的動作）當是 fast mode 模式時「送出貼上」按鈕會呈現紅綠燈的綠色表示一路直行通行順暢 20230130癸卯年初九第一上班日週一
         /// </summary>
         internal static bool FastMode = false;
+        /// <summary>
+        /// 記下切換 FastModd 前的顏色
+        /// </summary>
+        Color notFastModeColor;
 
         /// <summary>
         /// 記下當前頁數頁碼
@@ -5484,10 +5489,26 @@ namespace WindowsFormsApp1
                 }
             }//按下Shift鍵 終
             #endregion
-
+                                   
             #region 按下Alt鍵
             if (Control.ModifierKeys == Keys.Alt)
             {//按下Alt鍵
+                if (e.KeyCode == Keys.F)
+                {//Alt + f ：切換 Fast Mode 不待網頁回應即進行下一頁的貼入動作（即在不須檢覈貼上之文本正確與否，肯定、八成是無誤的，就可以執行此項以加快輸入文本的動作）當是 fast mode 模式時「送出貼上」按鈕會呈現紅綠燈的綠色表示一路直行通行順暢 20230130癸卯年初九第一上班日週一
+                    e.Handled = true;
+                    FastMode = !FastMode;
+                    if (FastMode)
+                    {
+                        //YouChat菩薩：在C#中，紅綠燈的綠色值為Color.FromArgb(0, 255, 0)。它可以指定RGB顏色，其中紅色的值為0，綠色的值為255，藍色的值為0
+                        notFastModeColor = button1.ForeColor;
+                        button1.ForeColor = Color.FromArgb(0, 255, 0);
+                    }
+                    else
+                    {
+                        if (notFastModeColor != null) button1.ForeColor = notFastModeColor;
+                    }
+                    return;
+                }
                 if (e.KeyCode == Keys.O)
                 {//Alt + o :下載圖片，準備交給《古籍酷》OCR（待實作）
                     e.Handled = true;
