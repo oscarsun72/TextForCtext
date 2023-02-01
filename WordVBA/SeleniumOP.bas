@@ -348,7 +348,7 @@ Err1:
 End Sub
 
 '貼到古籍酷自動標點()
-Function grabGjCoolPunctResult(text As String) As String
+Function grabGjCoolPunctResult(Text As String) As String
 Const url = "https://gj.cool/punct"
 Dim wdB As SeleniumBasic.IWebDriver, WBQuit As Boolean '=true 則可以關Chrome瀏覽器
 Dim textBox As SeleniumBasic.IWebElement, btn As SeleniumBasic.IWebElement, btn2 As SeleniumBasic.IWebElement, item As SeleniumBasic.IWebElement
@@ -359,12 +359,12 @@ If wdB Is Nothing Then Exit Function
 WBQuit = True '因為在背景執行，預設要可以關
 '整理文本
 Dim chkStr As String: chkStr = VBA.Chr(13) & Chr(10) & Chr(7) & Chr(9) & Chr(8)
-text = VBA.Trim(text)
-Do While VBA.InStr(chkStr, VBA.Left(text, 1)) > 0
-    text = Mid(text, 2)
+Text = VBA.Trim(Text)
+Do While VBA.InStr(chkStr, VBA.Left(Text, 1)) > 0
+    Text = Mid(Text, 2)
 Loop
-Do While VBA.InStr(chkStr, VBA.Right(text, 1)) > 0
-    text = Left(text, Len(text) - 1)
+Do While VBA.InStr(chkStr, VBA.Right(Text, 1)) > 0
+    Text = Left(Text, Len(Text) - 1)
 Loop
 
 
@@ -375,11 +375,15 @@ textBox.Click
 textBox.Clear
 'textbox.SendKeys key.LeftShift + key.Insert
 'textbox.SendKeys VBA.KeyCodeConstants.vbKeyControl & VBA.KeyCodeConstants.vbKeyV
-textBox.SendKeys text 'SystemSetup.GetClipboardText
+
+'如果只有chr(13)而沒有chr(13)&chr(10)則這行會使分段符號消失；因為下面標點按鈕一按，仍會使一組分段符號消失，必須換成兩組，才能保留一組
+If InStr(Text, Chr(13) & Chr(10)) = 0 And InStr(Text, Chr(13)) > 0 Then Text = Replace(Text, Chr(13), Chr(13) & Chr(10) & Chr(13) & Chr(10))
+textBox.SendKeys Text 'SystemSetup.GetClipboardText
 
 '貼上不成則退出
 Dim WaitDt As Date, nx As String, xl As Integer
-nx = textBox.text
+
+nx = textBox.Text
 If nx = "" Then
     grabGjCoolPunctResult = ""
     wdB.Quit
@@ -388,14 +392,15 @@ End If
 
 '標點
 Set btn = wdB.FindElementByCssSelector("#main > div.my-4 > div.p-1.p-md-3.d-flex.justify-content-end > div.ms-2 > button")
+'即便是有chr(13)&chr(10)以下這行仍會使分段符號消失,故若要保持段落，仍須「Chr(13) & Chr(10) & Chr(13) & Chr(10)」二組分段符號，不能只有一個
 btn.Click
 '等待標點完成
 'SystemSetup.Wait 3.6
 
-WaitDt = DateAdd("s", 6, Now()) '極限6秒
-xl = VBA.Len(text)
+WaitDt = DateAdd("s", 10, Now()) '極限10秒
+xl = VBA.Len(Text)
 Do
-    nx = textBox.text
+    nx = textBox.Text
     'VBA.StrComp(text, nx) <> 0
     If InStr(nx, "，") > 0 And InStr(nx, "。") > 0 And Len(nx) > xl Then Exit Do
     If Now > WaitDt Then
@@ -417,8 +422,8 @@ Loop
 'SystemSetup.Wait 0.3
 'SystemSetup.SetClipboard textbox.text
 'grabGjCoolPunctResult = SystemSetup.GetClipboardText
-grabGjCoolPunctResult = textBox.text
-If WBQuit Then wdB.Quit
+grabGjCoolPunctResult = textBox.Text
+If WBQuit Then wdB.Close
 'Debug.Print grabGjCoolPunctResult
 Exit Function
 
@@ -432,7 +437,7 @@ Err1:
             Rem SystemSetup.Wait 0.3
             Rem textBox.SendKeys key.Control + "v"
             Rem textBox.SendKeys key.LeftShift + key.Insert
-            WBQuit = pasteWhenOutBMP(wdB, url, "PunctArea", text, textBox)
+            WBQuit = pasteWhenOutBMP(wdB, url, "PunctArea", Text, textBox)
             Resume Next
         Case Else
             MsgBox Err.Description, vbCritical
@@ -479,17 +484,17 @@ Err1:
             If InStr(Err.Description, "timed out after 60 seconds") Or InStr(Err.Description, "無法連接至遠端伺服器") Then
                 'The HTTP request to the remote WebDriver server for URL http://localhost:1944/session/d83a0c74803e25f1e7f48999b87a6b7d/element/69589515-4189-4db6-8655-80e30fc05ee0/value timed out after 60 seconds.
                 'A exception with a null response was thrown sending an HTTP request to the remote WebDriver server for URL http://localhost:1921/session//element/a9208c93-91ae-4956-9455-d42f51719f23/text. The status of the exception was ConnectFailure, and the message was: 無法連接至遠端伺服器
-                iwd.Quit
+                iwd.Close
                 SystemSetup.killchromedriverFromHere
             End If
         Case -2147467261 '並未將物件參考設定為物件的執行個體。
-            If Not WD Is Nothing Then WD.Quit
+'            If Not WD Is Nothing Then WD.Quit
             Set WD = Nothing
             GoTo retry
         Case Else
             MsgBox Err.Description, vbCritical
 '            WD.Quit
-            iwd.Quit
+            iwd.Close
             SystemSetup.killchromedriverFromHere
            Resume
     End Select

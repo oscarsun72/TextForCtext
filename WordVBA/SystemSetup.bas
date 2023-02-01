@@ -147,14 +147,14 @@ Public Function GetClipboard() As String
     CloseClipboard
 End Function
 
-Sub CopyText(text As String) 'https://stackoverflow.com/questions/14219455/excel-vba-code-to-copy-a-specific-string-to-clipboard
+Sub CopyText(Text As String) 'https://stackoverflow.com/questions/14219455/excel-vba-code-to-copy-a-specific-string-to-clipboard
     'VBA Macro using late binding to copy text to clipboard.
     'By Justin Kay, 8/15/2014
     Dim MSForms_DataObject As Object
     Set MSForms_DataObject = CreateObject("new:{1C3B4210-F441-11CE-B9EA-00AA006B1A69}")
 '    Set MSForms_DataObject = New MSForms.DataObject 與上式相同
 '    MSForms_DataObject.Clear
-    MSForms_DataObject.SetText text
+    MSForms_DataObject.SetText Text
     MSForms_DataObject.PutInClipboard
     Set MSForms_DataObject = Nothing
 End Sub
@@ -184,6 +184,8 @@ Dim x As Variant
   End With
 
 End Function
+
+
 Sub 按下掃描鍵() 'ctrl+1 2008/7/23 F7'原為ToolsProofing
 On Error Resume Next
     setOX
@@ -289,16 +291,16 @@ a = VBA.Replace(a, "AppData\Roaming", "")
 End Function
 
 Function GetClipboardText()
-On Error GoTo eH
+On Error GoTo eh
 Dim clipboard As New MSForms.DataObject
 DoEvents
 clipboard.GetFromClipboard
 GetClipboardText = clipboard.GetText
 Exit Function
-eH:
+eh:
     Select Case Err.Number
         Case -2147221040 'DataObject:GetFromClipboard OpenClipboard 失敗
-            SystemSetup.Wait 0.8
+            SystemSetup.wait 0.8
             Resume
         Case Else
             MsgBox Err.Number + Err.Description
@@ -329,25 +331,27 @@ End Sub
 
 
 'https://analystcave.com/vba-status-bar-progress-bar-sounds-emails-alerts-vba/#:~:text=The%20VBA%20Status%20Bar%20is%20a%20panel%20that,Bar%20we%20need%20to%20Enable%20it%20using%20Application.DisplayStatusBar%3A
-Sub playSound(longShort As Single) 'Public Declare Function sndPlaySound32 Lib "winmm.dll" Alias "sndPlaySoundA" (ByVal lpszSoundName As String, ByVal uFlags As Long) As Long
-    '播放聲音、音效、音樂
+Sub playSound(longShort As Single, Optional waittoPlay As Byte = 1) 'Public Declare Function sndPlaySound32 Lib "winmm.dll" Alias "sndPlaySoundA" (ByVal lpszSoundName As String, ByVal uFlags As Long) As Long
+    '播放聲音、音效、音樂'https://blog.csdn.net/xuemanqianshan/article/details/113485233
     Select Case longShort
         Case 1
-            sndPlaySound32 "C:\Windows\Media\Chimes.wav", &H0
+            sndPlaySound32 "C:\Windows\Media\Chimes.wav", waittoPlay '&H1 '&H0:等播完才執行之後的程式碼，&H1=1，一播放，不等播完，即執行接下來的程式碼
+        Case 1.294 'https://learn.microsoft.com/en-us/previous-versions/dd798676(v=vs.85)
+            sndPlaySound32 "C:\Windows\Media\notify.wav", waittoPlay
         Case 1.469
-            sndPlaySound32 "C:\Windows\Media\Windows Message Nudge.wav", &H0
+            sndPlaySound32 "C:\Windows\Media\Windows Message Nudge.wav", waittoPlay
         Case 1.921
-            sndPlaySound32 "C:\Windows\Media\Windows Notify System Generic.wav", &H0 '以 PotPlayer 播放即可於清單中檢視英文檔名
+            sndPlaySound32 "C:\Windows\Media\Windows Notify System Generic.wav", waittoPlay '以 PotPlayer 播放即可於清單中檢視英文檔名
         Case 2
-            sndPlaySound32 "C:\Windows\Media\Windows Notify Calendar.wav", &H0
+            sndPlaySound32 "C:\Windows\Media\Windows Notify Calendar.wav", waittoPlay
         Case 3
-            sndPlaySound32 "C:\Windows\Media\Alarm10.wav", &H0
+            sndPlaySound32 "C:\Windows\Media\Alarm10.wav", waittoPlay
         Case 4
-            sndPlaySound32 "C:\Windows\Media\Alarm03.wav", &H0
+            sndPlaySound32 "C:\Windows\Media\Alarm03.wav", waittoPlay
         Case 7
-            sndPlaySound32 "C:\Windows\Media\Ring10.wav", &H0
+            sndPlaySound32 "C:\Windows\Media\Ring10.wav", waittoPlay
         Case 12
-            sndPlaySound32 "C:\Windows\Media\Ring05.wav", &H0
+            sndPlaySound32 "C:\Windows\Media\Ring05.wav", waittoPlay
     End Select
     
 End Sub
@@ -388,7 +392,7 @@ End Sub
 
 
 Public Function appActivatedYet(exeName As String) As Boolean
-On Error GoTo eH:
+On Error GoTo eh:
       exeName = exeName & ".exe": exeName = StrConv(exeName, vbUpperCase)
 'https://stackoverflow.com/questions/44075292/determine-process-id-with-vba
 'https://stackoverflow.com/questions/26277214/vba-getting-program-names-and-task-id-of-running-processes
@@ -410,7 +414,7 @@ On Error GoTo eH:
     
     Set objProcessSet = Nothing
 Exit Function
-eH:
+eh:
 Select Case Err.Number
     Case 5 '程序呼叫或引數不正確
     Case Else
@@ -431,7 +435,7 @@ Function apicShowWindow(strClassName As String, strWindowName As String, lngStat
   SetForegroundWindow lngWnd 'https://zechs.taipei/?p=146
 End Function
 
-Sub Wait(sec As Single)
+Sub wait(sec As Single)
 'http://vbcity.com/forums/t/81315.aspx
 Dim WaitDt As Date
 WaitDt = DateAdd("s", sec, Now())
@@ -454,14 +458,14 @@ Sub backupNormal_dotm() '自動備份Normal.dotm
 Dim source As String, destination As String
 source = SystemSetup.DropBoxPathIncldBackSlash + "Normal.dotm"
 destination = SystemSetup.WordTemplatesPathIncldBackSlash + "Normal.dotm"
-On Error GoTo eH
+On Error GoTo eh
 With SystemSetup.FileSystemObject
 If (.getfile(source).DateLastModified < _
     .getfile(destination).DateLastModified) Then _
         .CopyFile source, destination
 End With
 Exit Sub
-eH:
+eh:
 Select Case Err.Number
     Case 70
         MsgBox "Normal.dotm還未備份", vbExclamation
@@ -510,8 +514,13 @@ End Sub
 Sub killchromedriverFromHere()
 Dim objWMIService, objProcess, colProcess, pid
 If chromedriversPIDcntr = 0 Then
-    ReDim chromedriversPID(0): If Not WD Is Nothing Then WD.Quit: Set SeleniumOP.WD = Nothing
-    Exit Sub
+    ReDim chromedriversPID(0)
+    If Not SeleniumOP.WD Is Nothing Then
+        On Error GoTo eh:
+        SeleniumOP.WD.Quit
+        Set SeleniumOP.WD = Nothing
+        Exit Sub
+    End If
 End If
 Set objWMIService = GetObject("winmgmts:" & "{impersonationLevel=impersonate}!\\.\root\cimv2")
 Set colProcess = objWMIService.ExecQuery("Select * from Win32_Process Where Name = 'chromedriver.exe'")
@@ -522,6 +531,15 @@ For Each objProcess In colProcess
 Next
 '重設儲存chromedriver程序ID的陣列
 ReDim chromedriversPID(0): chromedriversPIDcntr = 0: Set SeleniumOP.WD = Nothing
+
+Exit Sub
+eh:
+Select Case Err.Number
+    Case -2147467261 '並未將物件參考設定為物件的執行個體。
+        Resume Next
+    Case Else
+        MsgBox Err.Number + Err.Description
+End Select
 Rem 20230119 YouChat菩薩：
 Rem 有沒有現成的函式方法可以套用呢？ 只能用 loop through 嗎？
 Rem Yes, there are existing functions and methods that can be used to check if an element is included in an array. One such method is to use the InStr() function, which takes two arguments: the array and the element you are looking for. It then returns a non-zero value if the element is found in the array, or zero if it is not. However, this method is not recommended for large arrays, since it can slow down the execution of the code. The best way to check for an element in an array is to use a loop, as shown in the example above.

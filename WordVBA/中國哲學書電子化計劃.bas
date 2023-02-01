@@ -121,16 +121,16 @@ SystemSetup.contiUndo ur
 SystemSetup.playSound 1.469
 Exit Sub
 code:
-    rng.text = rng.text + "*"
+    rng.Text = rng.Text + "*"
     s = rng.End + 1
     rng.Collapse wdCollapseStart
     rng.SetRange rng.start, rng.start
     'rng.MoveStartUntil ">"
-    Do Until rng.Next.text = "<"
+    Do Until rng.Next.Text = "<"
         rng.move wdCharacter, -1
     Loop
     rng.move
-    rng.text = rng.text + Chr(13) + Chr(13)
+    rng.Text = rng.Text + Chr(13) + Chr(13)
     rng.SetRange s, d.Range.End
     Return
 End Sub
@@ -152,7 +152,7 @@ Do While rng.Find.Execute("<scanbegin ") '<scanbegin file="80564" page="13" y="4
     rng.MoveEnd
 '    rng.Select
     rng.SetRange rng.End, rng.End + 2
-    If rng.text = Chr(13) & Chr(13) Then
+    If rng.Text = Chr(13) & Chr(13) Then
 '        rng.Select
         e = rng.End
         rng.Delete
@@ -172,7 +172,7 @@ Do While rng.Find.Execute("<scanend file=") ', , , , , , True, wdFindStop)
     rng.MoveEnd
 '    rng.Select
     rng.SetRange rng.End, rng.End + 2
-    If rng.text = Chr(13) & Chr(13) Then
+    If rng.Text = Chr(13) & Chr(13) Then
 '        e = rng.End
 '        rng.Select
         rng.Cut
@@ -186,7 +186,7 @@ Loop
 
 
 DoEvents
-xd = d.Range.text
+xd = d.Range.Text
 'If d.Characters.Count < 50000 Then ' 147686
 '    d.Range.Cut '原來是Word的 cut 到剪貼簿裡有問題
 'Else
@@ -194,7 +194,7 @@ xd = d.Range.text
     SystemSetup.ClipboardPutIn xd
 'End If
 DoEvents
-playSound 1
+playSound 1, 0
 DoEvents
 pastetoEditBox "將星號前的分段符號移置前段之末 & 清除頁前的分段符號"
 d.Close wdDoNotSaveChanges
@@ -206,7 +206,7 @@ Dim rng As Range, e As Long, s As Long, rngP As Range
 'd As Document,Set d = Documents.Add
 Set rng = d.Range
 DoEvents
-On Error GoTo eH
+On Error GoTo eh
 rng.Paste
 rng.Find.ClearFormatting
 Do While rng.Find.Execute("*")
@@ -239,10 +239,10 @@ Loop
 playSound 1
 'pastetoEditBox "將星號前的分段符號移置前段之末"
 Exit Sub
-eH:
+eh:
 Select Case Err.Number
     Case 4605, 13 '此方法或屬性無法使用，因為[剪貼簿] 是空的或無效的。
-        SystemSetup.Wait 0.8
+        SystemSetup.wait 0.8
         Resume
     Case Else
         MsgBox Err.Number + Err.Description
@@ -273,7 +273,7 @@ DoEvents
 SendKeys "+{INSERT}" '"(^v)" ', True'恐怕要去掉這個才是；都不是！實際上問題是出在Word的剪下傳送到剪貼簿的資料是空的
 DoEvents ' DoEvents: DoEvents
 Beep
-SystemSetup.Wait 0.3
+SystemSetup.wait 0.3
 DoEvents:
 SendKeys "{tab}"
 AppActivateDefaultBrowser
@@ -301,12 +301,12 @@ Do While rng.Find.Execute("}}|" & Chr(13) & "{{", , , , , , True, wdFindStop)
     Loop
     rngDel.SetRange s + 1, rng.start
     'rngDel.Select
-    If rngDel.text <> "" Then If Replace(rngDel, "　", "") = "" Then rngDel.Delete
+    If rngDel.Text <> "" Then If Replace(rngDel, "　", "") = "" Then rngDel.Delete
     rng.SetRange s + Len("}}|" & Chr(13) & "{{"), d.Range.End
     
     'Set rng = d.Range
 Loop
-d.Range.text = Replace(Replace(d.Range.text, "|" & Chr(13) & "　", ""), "}}|" & Chr(13) & "{{", Chr(13))
+d.Range.Text = Replace(Replace(d.Range.Text, "|" & Chr(13) & "　", ""), "}}|" & Chr(13) & "{{", Chr(13))
 d.Range.Copy
 SystemSetup.contiUndo ur
 SystemSetup.playSound 2
@@ -323,7 +323,7 @@ Set p = Selection.Paragraphs(1)
 cntr = p.Range.Characters.Count - 1
 For i = 1 To cntr
     Set a = p.Range.Characters(i)
-    If a.text <> Chr(13) Then a.text = "●"
+    If a.Text <> Chr(13) Then a.Text = "●"
 Next i
 p.Range.Cut
 SystemSetup.contiUndo ur
@@ -355,7 +355,7 @@ Do While rng.Find.Execute("<")
     rng.MoveEndUntil ">"
     rng.SetRange rng.start, rng.End + 1
     angleRng.SetRange rng.start, rng.End
-    If InStr(angleRng.text, "file") > 0 Then
+    If InStr(angleRng.Text, "file") > 0 Then
         angleRng.Delete
     Else
         rng.SetRange rng.End, rng.Document.Range.End - 1
@@ -380,7 +380,7 @@ rng.Paste
 For Each a In d.Characters
     If a = spcs Then
         If a.Next = spcs Then
-            If InStr(a.Paragraphs(1).Range.text, "*") = 0 Then
+            If InStr(a.Paragraphs(1).Range.Text, "*") = 0 Then
                 a.Select
                 s = a.start
                 Do Until Selection.Next <> spcs
@@ -396,7 +396,7 @@ For Each a In d.Characters
                 
                     rng.SetRange s, e
                     'rng.Select
-                    rng.text = Replace(rng.text, "　", ChrW(-9217) & ChrW(-8195))
+                    rng.Text = Replace(rng.Text, "　", ChrW(-9217) & ChrW(-8195))
                     Set a = rng.Characters(rng.Characters.Count)
                 End If
             End If
@@ -425,7 +425,7 @@ Do While rng.Find.Execute("^p")
             If a.Previous.Previous <> ">" Then
                 For yi = 1 To 99
                     yStr = 文字轉換.數字轉漢字2位數(yi) + y
-                    If a.text = yStr Then
+                    If a.Text = yStr Then
                         rng.InsertBefore "<p>"
                         ok = True: Exit For
                     End If
@@ -445,7 +445,7 @@ d.Close wdDoNotSaveChanges
 End Sub
 Sub 維基文庫四部叢刊本轉來()
 Dim d As Document, a, i, p As Paragraph, xP As String, acP As Integer, space As String, rng As Range
-On Error GoTo eH
+On Error GoTo eh
 a = Array(ChrW(12296), "{{", ChrW(12297), "}}", "〈", "{{", "〉", "}}", _
     "○", ChrW(12295))
 '《容齋三筆》等小注作正文省版面者 https://ctext.org/library.pl?if=gb&file=89545&page=24
@@ -489,7 +489,7 @@ For Each p In d.Range.Paragraphs
                 If InStr(xP, "{{") = 0 And InStr(xP, "}}") = 0 Then
                     Set rng = p.Range
                     rng.SetRange rng.Characters(1).start, rng.Characters(i + 1).End
-                    rng.text = "{{" & space
+                    rng.Text = "{{" & space
                     acP = p.Range.Characters.Count - 1 - Len(space)
                     If acP Mod 2 = 0 Then
                         acP = CInt(acP / 2) + Len(space) + 1
@@ -516,7 +516,7 @@ d.Range.Cut
 d.Close wdDoNotSaveChanges
 SystemSetup.playSound 2
 Exit Sub
-eH:
+eh:
 Select Case Err.Number
     Case 5904 '無法編輯 [範圍]。
         If p.Range.Characters(acP).Hyperlinks.Count > 0 Then p.Range.Characters(acP).Hyperlinks(1).Delete
@@ -546,7 +546,7 @@ End Sub
 
 Sub searchuCtext()
 ' Alt+,
-Select Case Selection.text
+Select Case Selection.Text
     Case "", Chr(13), Chr(9), Chr(7), Chr(10), " ", "　"
         MsgBox "no selected text for search !", vbCritical: Exit Sub
 End Select
@@ -581,7 +581,7 @@ End If
 If Not VBA.IsNumeric(bookID) Then
     MsgBox "error . not the proper bookID ref ", vbCritical: Exit Sub
 End If
-e = Selection.text
+e = Selection.Text
 'searchedTerm = 'Array("卦", "爻", "周易", "易經", "系辭", "繫辭", "擊辭", "說卦", "序卦", "卦序", "敘卦", "雜卦", "文言", "乾坤", "無咎", ChrW(26080) & "咎", "天咎", "元亨", "利貞", "易") ', "", "", "", "")
 ''https://ctext.org/wiki.pl?if=gb&res=757381&searchu=%E5%8D%A6
 'For Each e In searchedTerm
@@ -624,14 +624,14 @@ d.Range.Paste
 維基文庫造字圖取代為文字 d.Range
 d.Range.Cut
 d.Range.PasteAndFormat wdFormatPlainText
-d.Range.text = VBA.Replace(d.Range.text, " ", "")
+d.Range.Text = VBA.Replace(d.Range.Text, " ", "")
 For i = 0 To UBound(a) - 1
     If a(i) = "^p^p^p" Then
-        px = d.Range.text
+        px = d.Range.Text
         Do While InStr(px, Chr(13) & Chr(13) & Chr(13))
             px = Replace(px, Chr(13) & Chr(13) & Chr(13), Chr(13) & Chr(13))
         Loop
-        d.Range.text = px
+        d.Range.Text = px
         'Set rng = d.Range
 '        Do While rng.Find.Execute(a(i), , , , , , True, wdFindContinue, , a(i + 1), wdReplaceAll)
 '            If rng.End = d.Range.End Then Exit Do
@@ -644,16 +644,16 @@ Next i
 文字處理.書名號篇名號標注
 Set rng = Selection.Range
 For Each p In d.Paragraphs
-    px = p.Range.text
+    px = p.Range.Text
     If Left(px, 7) = "{{" & ChrW(-9217) & ChrW(-8195) & "{{{" Then '注腳段落
         e = p.Range.Characters(1).End
         rng.SetRange e, e
         rng.MoveEndUntil "〕"
         If rng.Next.Next = "　" Then rng.Next.Next.Delete
-        If InStr(p.Range.text, "　") Then
+        If InStr(p.Range.Text, "　") Then
             For Each pa In p.Range.Characters
                 If pa = "　" Then
-                    pa.text = ChrW(-9217) & ChrW(-8195)
+                    pa.Text = ChrW(-9217) & ChrW(-8195)
                 End If
             Next
 '            p.Range.text = VBA.Replace(p.Range.text, "　", ChrW(-9217) & ChrW(-8195))
@@ -668,7 +668,7 @@ For Each p In d.Paragraphs
         rng.Select
         Selection.MoveRight wdCharacter, 1, wdExtend
         Selection.TypeText "〉}}}" '將注腳編號〔一〕的右邊〕改成}}}
-        px = p.Range.text
+        px = p.Range.Text
         If InStr(Right(px, 4), "<p>") Then
             e = p.Range.Characters(p.Range.Characters.Count - 4).End
         Else
@@ -679,22 +679,22 @@ For Each p In d.Paragraphs
     Else '正文段落
         e = p.Range.Characters(1).start
         Set pRng = p.Range
-        Do While InStr(pRng.text, "〔")
+        Do While InStr(pRng.Text, "〔")
             rng.SetRange e, e
             rng.MoveEndUntil "〔"
             If rng.Characters(rng.Characters.Count) <> "）" Then  ' if not correction
                 rng.Collapse wdCollapseEnd
                 rng.move , 1
                 rng.MoveEnd wdCharacter, 1
-                If rng.text Like "[一二三四五六七八九]" Then  ' is footnote No.
+                If rng.Text Like "[一二三四五六七八九]" Then  ' is footnote No.
                     e = rng.start
                     'rng.Collapse wdCollapseEnd
                     rng.SetRange e - 1, e
-                    rng.text = "　{{{〈"
+                    rng.Text = "　{{{〈"
                     rng.MoveEndUntil "〕"
                     rng.Collapse wdCollapseEnd
                     rng.MoveEnd wdCharacter, 1
-                    rng.text = "〉}}}"
+                    rng.Text = "〉}}}"
                 Else 'is correction to insert words
 '                    rng.MoveEndUntil "〕"
 '                    rng.SetRange rng.End + 2, rng.End + 2
@@ -715,18 +715,18 @@ For Each p In d.Paragraphs
             
         Loop
     End If
-    If VBA.Left(p.Range.text, 9) = ChrW(-9217) & ChrW(-8195) & ChrW(-9217) & ChrW(-8195) & "【《索隱》" Then
+    If VBA.Left(p.Range.Text, 9) = ChrW(-9217) & ChrW(-8195) & ChrW(-9217) & ChrW(-8195) & "【《索隱》" Then
         Set rng = p.Range
         p.Range.Characters(1).Delete
         rng.SetRange p.Range.start, p.Range.start
         rng.InsertAfter "{{"
         rng.SetRange p.Range.Characters(p.Range.Characters.Count - 4).End, p.Range.Characters(p.Range.Characters.Count - 4).End
         rng.InsertAfter "}}"
-        If Len(rng.Paragraphs(1).Next.Range.text) = 1 Then rng.Paragraphs(1).Next.Range.Delete
+        If Len(rng.Paragraphs(1).Next.Range.Text) = 1 Then rng.Paragraphs(1).Next.Range.Delete
     End If
     
     If Len(p.Range) < 20 Then
-        If (InStr(p.Range, "《史記》卷") Or VBA.Left(p.Range.text, 3) = "史記卷") And InStr(p.Range, "*") = 0 Then
+        If (InStr(p.Range, "《史記》卷") Or VBA.Left(p.Range.Text, 3) = "史記卷") And InStr(p.Range, "*") = 0 Then
             rng.SetRange p.Range.start, p.Range.start
             rng.InsertAfter "*"
             For Each pa In p.Range.Characters
@@ -738,7 +738,7 @@ For Each p In d.Paragraphs
         End If
     End If
     If Len(p.Range) < 25 Then
-        If VBA.InStr(p.Range.text, "第") And InStr(p.Range, "*") = 0 _
+        If VBA.InStr(p.Range.Text, "第") And InStr(p.Range, "*") = 0 _
                 And (InStr(p.Range, "本紀") Or InStr(p.Range, "書") Or InStr(p.Range, "表") _
                 Or InStr(p.Range, "世家") Or InStr(p.Range, "列傳")) Then
             rng.SetRange p.Range.start, p.Range.start
@@ -753,22 +753,22 @@ For Each p In d.Paragraphs
     End If
 
 Next p
-If VBA.Left(d.Paragraphs(1).Range.text, 3) = "史記卷" And InStr(d.Paragraphs(1).Range.text, "*") = 0 Then
+If VBA.Left(d.Paragraphs(1).Range.Text, 3) = "史記卷" And InStr(d.Paragraphs(1).Range.Text, "*") = 0 Then
     Set p = d.Paragraphs(1)
     rng.SetRange p.Range.start, p.Range.start
     rng.InsertAfter "*"
 '    rng.SetRange p.Range.Characters(p.Range.Characters.Count - 1).End, p.Range.Characters(p.Range.Characters.Count - 1).End
 '    rng.InsertAfter "<p>"
 End If
-If VBA.InStr(d.Paragraphs(2).Range.text, "第") And InStr(d.Paragraphs(2).Range.text, "*") = 0 Then
+If VBA.InStr(d.Paragraphs(2).Range.Text, "第") And InStr(d.Paragraphs(2).Range.Text, "*") = 0 Then
     Set p = d.Paragraphs(2)
 '    rng.SetRange p.Range.start, p.Range.start
 '    rng.InsertAfter "　*"
 ''    rng.SetRange p.Range.Characters(p.Range.Characters.Count - 1).End, p.Range.Characters(p.Range.Characters.Count - 1).End
 ''    rng.InsertAfter "<p>"
-    p.Range.text = VBA.Replace(p.Range.text, ChrW(-9217) & ChrW(-8195) & ChrW(-9217) & ChrW(-8195), "　*")
+    p.Range.Text = VBA.Replace(p.Range.Text, ChrW(-9217) & ChrW(-8195) & ChrW(-9217) & ChrW(-8195), "　*")
     Set p = d.Paragraphs(2)
-    p.Range.text = VBA.Replace(VBA.Replace(p.Range.text, "〈", ""), "〉", "")
+    p.Range.Text = VBA.Replace(VBA.Replace(p.Range.Text, "〈", ""), "〉", "")
 End If
 
 'Set rng = d.Range
@@ -811,7 +811,7 @@ Next i
 文字處理.書名號篇名號標注
 Set rng = Selection.Range
 For Each p In d.Paragraphs
-    px = p.Range.text
+    px = p.Range.Text
     If Left(px, 7) = "{{" & ChrW(-9217) & ChrW(-8195) & "{{{" Then '注腳段落
         e = p.Range.Characters(1).End
         rng.SetRange e, e
@@ -821,7 +821,7 @@ For Each p In d.Paragraphs
         rng.Select
         Selection.MoveRight wdCharacter, 1, wdExtend
         Selection.TypeText "〉}}}" '將注腳編號〔一〕的右邊〕改成}}}
-        px = p.Range.text
+        px = p.Range.Text
         If InStr(Right(px, 4), "<p>") Then
             e = p.Range.Characters(p.Range.Characters.Count - 4).End
         Else
@@ -832,22 +832,22 @@ For Each p In d.Paragraphs
     Else '正文段落
         e = p.Range.Characters(1).start
         Set pRng = p.Range
-        Do While InStr(pRng.text, "〔")
+        Do While InStr(pRng.Text, "〔")
             rng.SetRange e, e
             rng.MoveEndUntil "〔"
             If rng.Characters(rng.Characters.Count) <> "）" Then  ' if not correction
                 rng.Collapse wdCollapseEnd
                 rng.move , 1
                 rng.MoveEnd wdCharacter, 1
-                If rng.text Like "[一二三四五六七八九]" Then  ' is footnote No.
+                If rng.Text Like "[一二三四五六七八九]" Then  ' is footnote No.
                     e = rng.start
                     'rng.Collapse wdCollapseEnd
                     rng.SetRange e - 1, e
-                    rng.text = "　{{{〈"
+                    rng.Text = "　{{{〈"
                     rng.MoveEndUntil "〕"
                     rng.Collapse wdCollapseEnd
                     rng.MoveEnd wdCharacter, 1
-                    rng.text = "〉}}}"
+                    rng.Text = "〉}}}"
                 Else 'is correction to insert words
 '                    rng.MoveEndUntil "〕"
 '                    rng.SetRange rng.End + 2, rng.End + 2
@@ -868,7 +868,7 @@ For Each p In d.Paragraphs
             
         Loop
     End If
-    If VBA.Left(p.Range.text, 9) = ChrW(-9217) & ChrW(-8195) & ChrW(-9217) & ChrW(-8195) & "【《索隱》" Then
+    If VBA.Left(p.Range.Text, 9) = ChrW(-9217) & ChrW(-8195) & ChrW(-9217) & ChrW(-8195) & "【《索隱》" Then
         Set rng = p.Range
         p.Range.Characters(1).Delete
         rng.SetRange p.Range.start, p.Range.start
@@ -877,20 +877,20 @@ For Each p In d.Paragraphs
         rng.InsertAfter "}}"
     End If
 Next p
-If VBA.Left(d.Paragraphs(1).Range.text, 3) = "史記卷" Then
+If VBA.Left(d.Paragraphs(1).Range.Text, 3) = "史記卷" Then
     Set p = d.Paragraphs(1)
     rng.SetRange p.Range.start, p.Range.start
     rng.InsertAfter "*"
     rng.SetRange p.Range.Characters(p.Range.Characters.Count - 1).End, p.Range.Characters(p.Range.Characters.Count - 1).End
     rng.InsertAfter "<p>"
 End If
-If VBA.InStr(d.Paragraphs(2).Range.text, "第") Then
+If VBA.InStr(d.Paragraphs(2).Range.Text, "第") Then
     Set p = d.Paragraphs(2)
     rng.SetRange p.Range.start, p.Range.start
     rng.InsertAfter "　*"
 '    rng.SetRange p.Range.Characters(p.Range.Characters.Count - 1).End, p.Range.Characters(p.Range.Characters.Count - 1).End
 '    rng.InsertAfter "<p>"
-    p.Range.text = VBA.Replace(VBA.Replace(p.Range.text, "〈", ""), "〉", "")
+    p.Range.Text = VBA.Replace(VBA.Replace(p.Range.Text, "〈", ""), "〉", "")
 End If
 
 
@@ -926,8 +926,8 @@ d.Range.Find.Execute "〈〈", , , , , , True, wdFindContinue, , "〈", wdReplaceAl
 d.Range.Find.Execute "〉〉", , , , , , True, wdFindContinue, , "〉", wdReplaceAll
 Set rng = Selection.Range
 For Each p In d.Paragraphs
-    px = p.Range.text
-    If Left(p.Range.text, 7) = "{{" & ChrW(-9217) & ChrW(-8195) & "{{{" Then
+    px = p.Range.Text
+    If Left(p.Range.Text, 7) = "{{" & ChrW(-9217) & ChrW(-8195) & "{{{" Then
         If InStr(Right(px, 4), "<p>") Then
             e = p.Range.Characters(p.Range.Characters.Count - 4).End
         Else
@@ -1002,7 +1002,7 @@ If Selection.Type = wdSelectionNormal Then
 End If
 'Shell "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe https://ctext.org/wiki.pl?if=gb&res=384378&searchu=" & Selection.text
 'Shell Normal.SystemSetup.getChrome & searchWhatsUrl & Selection.Text
-Shell Normal.Network.GetDefaultBrowserEXE & searchWhatsUrl & Selection.text
+Shell Normal.Network.GetDefaultBrowserEXE & searchWhatsUrl & Selection.Text
 End Sub
 
 Sub search史記三家注()
@@ -1118,8 +1118,8 @@ For Each p In rngDoc.Paragraphs
 Next
 If ok Then
     For Each p In rngDoc.Paragraphs
-        If Left(p.Range.text, 3) = "{{　" And p.Range.Characters(p.Range.Characters.Count - 1) = "}" Then
-            a = p.Range.text
+        If Left(p.Range.Text, 3) = "{{　" And p.Range.Characters(p.Range.Characters.Count - 1) = "}" Then
+            a = p.Range.Text
             a = Mid(a, 4, Len(a) - 6)
             If InStr(a, "　") > 0 And InStr(a, "{") = 0 And InStr(a, "}") = 0 Then
                 rngCnt = p.Range.Characters.Count
@@ -1368,7 +1368,7 @@ Do While rng.Find.Execute("", , , False, , , True, wdFindStop)
     Do While noteRng.Next.Font.Color = 16711935
         noteRng.SetRange noteRng.start, noteRng.Next.End
     Loop
-    noteRng.text = "{{" & Replace(noteRng, "/", "") & "}}"
+    noteRng.Text = "{{" & Replace(noteRng, "/", "") & "}}"
 Loop
 
 文字處理.書名號篇名號標注
@@ -1381,7 +1381,7 @@ With rng.Document
 '        .Execute , , , , , , True, wdFindContinue, , , wdReplaceAll
 '    End With
     '.Range.Cut
-    SystemSetup.ClipboardPutIn .Range.text
+    SystemSetup.ClipboardPutIn .Range.Text
     DoEvents
     .Close wdDoNotSaveChanges
 End With
@@ -1416,9 +1416,9 @@ Set rng = Documents.Add().Range
 rng.Paste
 Docs.清除所有符號
 For Each e In sybol
-    rng.text = Replace(rng, e, "")
+    rng.Text = Replace(rng, e, "")
 Next e
-rng.text = "#" & rng.text
+rng.Text = "#" & rng.Text
 rng.Cut
 rng.Document.Close wdDoNotSaveChanges
 DoEvents
@@ -1478,7 +1478,7 @@ With slRng.Find
 End With
 Do While slRng.Find.Execute(, , , , , , True, wdFindStop)
     If InStr(Chr(13) & Chr(11) & Chr(7) & Chr(8) & Chr(9) & Chr(10), slRng) = 0 Then
-    slRng.text = "（" + slRng.text + "）"
+    slRng.Text = "（" + slRng.Text + "）"
     slRng.SetRange slRng.End, d.Range.End
     End If
 Loop
@@ -1526,7 +1526,7 @@ rng.Find.ClearFormatting
 db.cnt查字 cnt
 rst.Open tbName, cnt, adOpenForwardOnly, adLockReadOnly
 Do Until rst.EOF
-    If InStr(rng.text, rst.Fields(0).Value) Then _
+    If InStr(rng.Text, rst.Fields(0).Value) Then _
         rng.Find.Execute rst.Fields(0).Value, , , , , , True, wdFindContinue, , rst.Fields(1).Value, wdReplaceAll
     rst.MoveNext
 Loop
@@ -1576,7 +1576,7 @@ Do While rng.Find.Execute(markStrOpen)
     If d.Range(rng.End, rng.End + 7) = "entity>" Then
         rng.SetRange rng.start, rng.End - 2
         ReDim Preserve ay(i)
-        ay(i) = VBA.Split(rng.text, ">")
+        ay(i) = VBA.Split(rng.Text, ">")
         i = i + 1
     End If
     
@@ -1599,7 +1599,7 @@ reFind:
                 rngMark.move wdCharacter, -1
             Loop
             rngMark.SetRange rngMark.start, rng.start
-            If Left(rngMark.text, 8) <> "<entity " Then
+            If Left(rngMark.Text, 8) <> "<entity " Then
                 GoSub mark
             Else
                 rng.SetRange rng.End, DoctoMarked.Range.End
@@ -1647,8 +1647,8 @@ fontColor:
     rng.Find.Font.Color = 8912896 '{{{}}}語法下的文字
     rng.Find.Replacement.ClearFormatting
     With rng.Find
-        .text = ""
-        .Replacement.text = ""
+        .Text = ""
+        .Replacement.Text = ""
         .Forward = True
         .Wrap = wdFindContinue
         .Format = True
@@ -1668,7 +1668,7 @@ punctuations:
     Dim punctus, e
     punctus = Array("，", "。", "「", "·", "：", "（")  '檢查幾個具代表者即可
     For Each e In punctus
-        If InStr(rng.text, e) > 0 Then
+        If InStr(rng.Text, e) > 0 Then
             rng.Find.Execute e
             GoTo CheckOut
         End If
@@ -1687,7 +1687,7 @@ Dim rng As Range, pageNum As Range, d As Document, ur As UndoRecord
 Set d = ActiveDocument
 
 '文件前3段分別是以下資訊,執行完會清除
-If Not VBA.IsNumeric(VBA.Replace(d.Range.Paragraphs(1).Range.text, Chr(13), "")) Then
+If Not VBA.IsNumeric(VBA.Replace(d.Range.Paragraphs(1).Range.Text, Chr(13), "")) Then
     MsgBox "請在文件前3段分別是以下資訊（皆是數字）,執行完會清除" & vbCr & vbCr & _
         "1. 頁數差(來源-(減去)目的）" & vbCr & _
         "2. 目的的 file number。要置換成的；不取代則為0，省略則預設為0" & vbCr & _
@@ -1695,34 +1695,34 @@ If Not VBA.IsNumeric(VBA.Replace(d.Range.Paragraphs(1).Range.text, Chr(13), ""))
     Exit Sub
 End If
 Dim differPageNum  As Integer '頁數差(來源-(減去)目的）
-differPageNum = VBA.Replace(d.Paragraphs(1).Range.text, Chr(13), "") '頁數差(來源-(減去)目的）
+differPageNum = VBA.Replace(d.Paragraphs(1).Range.Text, Chr(13), "") '頁數差(來源-(減去)目的）
 Dim file
-file = VBA.Replace(d.Paragraphs(2).Range.text, Chr(13), "") ' 目的。不取代則為0
+file = VBA.Replace(d.Paragraphs(2).Range.Text, Chr(13), "") ' 目的。不取代則為0
 If file = "" Then file = 0
 Dim fileFrom As String
-fileFrom = VBA.Replace(d.Paragraphs(3).Range.text, Chr(13), "") ' '來源
+fileFrom = VBA.Replace(d.Paragraphs(3).Range.Text, Chr(13), "") ' '來源
 If fileFrom = "" Then
-    Dim s As String: s = VBA.InStr(d.Range.text, "<scanbegin file="): s = s + VBA.Len("<scanbegin file=")
-    fileFrom = Mid(d.Range.text, s + 1, InStr(s + 1, d.Range.text, """") - s - 1)
+    Dim s As String: s = VBA.InStr(d.Range.Text, "<scanbegin file="): s = s + VBA.Len("<scanbegin file=")
+    fileFrom = Mid(d.Range.Text, s + 1, InStr(s + 1, d.Range.Text, """") - s - 1)
 End If
 Set rng = d.Range
 'Set ur = SystemSetup.stopUndo("EditMakeupCtext")
 SystemSetup.stopUndo ur, "EditMakeupCtext"
 If file > 0 Then
     'rng.Find.Execute " file=""77991""", True, True, , , , True, wdFindContinue, , " file=""" & file & """", wdReplaceAll
-    rng.text = Replace(rng.text, " file=""" & fileFrom & """", " file=""" & file & """")
+    rng.Text = Replace(rng.Text, " file=""" & fileFrom & """", " file=""" & file & """")
 End If
 
 Do While rng.Find.Execute(" page=""", , , , , , True, wdFindStop)
     Set pageNum = rng
     pageNum.SetRange rng.End, rng.End + 1
     pageNum.MoveEndUntil """"
-    pageNum.text = CStr(CInt(pageNum.text) - differPageNum)
+    pageNum.Text = CStr(CInt(pageNum.Text) - differPageNum)
     rng.SetRange pageNum.End, d.Range.End
 Loop
 rng.SetRange d.Range.Paragraphs(1).Range.start, d.Range.Paragraphs(3).Range.End
 rng.Delete
-SystemSetup.SetClipboard d.Range.text
+SystemSetup.SetClipboard d.Range.Text
 SystemSetup.contiUndo ur
 SystemSetup.playSound 1
 

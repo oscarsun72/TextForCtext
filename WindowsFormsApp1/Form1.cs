@@ -662,9 +662,9 @@ namespace WindowsFormsApp1
         /// <summary>
         /// 貼去Ctext 後（包括對要貼去的內容作最後的檢查）設定新的 textBox1的內容。若執行成功則傳回true
         /// </summary>
-        /// <param name="s"></param>
-        /// <param name="l"></param>
-        /// <returns></returns>
+        /// <param name="s">若檢查不通過，傳回有問題的地方起始點start</param>
+        /// <param name="l">若檢查不通過，傳回有問題的地方之長度length</param>
+        /// <returns>若通過檢查，執行成功則傳回true；否則為false</returns>
         private bool newTextBox1(out int s, out int l)
         {
             s = textBox1.SelectionStart; l = textBox1.SelectionLength;
@@ -1090,7 +1090,8 @@ namespace WindowsFormsApp1
             if (charIndexRecallTimes - 1 < 0) { charIndexRecallTimes = charIndexListSize - 1; return; }
             TextBox tb = textBox1;
             int s = tb.SelectionStart;
-            if (charIndexList.Count - 1 < 0 || charIndexRecallTimes - 1 < 0) return;
+            if (charIndexList.Count - 1 < 0 || charIndexRecallTimes - 1 < 0 ||
+                charIndexRecallTimes > charIndexList.Count - 1) return;
             int sLast = charIndexList[charIndexRecallTimes - 1 > charIndexList.Count - 1 ?
                                         charIndexList.Count - 1 :
                                             charIndexRecallTimes--];
@@ -5489,7 +5490,7 @@ namespace WindowsFormsApp1
                 }
             }//按下Shift鍵 終
             #endregion
-                                   
+
             #region 按下Alt鍵
             if (Control.ModifierKeys == Keys.Alt)
             {//按下Alt鍵
@@ -5894,6 +5895,7 @@ namespace WindowsFormsApp1
             if (!isClipBoardAvailable_Text()) return;
             string xClpBd = Clipboard.GetText();
             if (autoPastetoQuickEdit && xClpBd.Length < 250 && xClpBd.IndexOf("Bot", StringComparison.Ordinal) == -1) return;
+            //&& runName!="Docs.中國哲學書電子化計劃_只保留正文注文_且注文前後加括弧_貼到古籍酷自動標點"
             Color C = this.BackColor; this.BackColor = Color.Green;
             SystemSounds.Hand.Play();
             hideToNICo();
@@ -6236,7 +6238,11 @@ namespace WindowsFormsApp1
 
 
 
-        //for .BrowserOPMode.Selenium……    browsrOPMode!=BrowserOPMode.appActivateByName
+        /// <summary>
+        /// for .BrowserOPMode.Selenium……    browsrOPMode!=BrowserOPMode.appActivateByName
+        /// </summary>
+        /// <param name="url">url to paste to</param>
+        /// <param name="clear">whether clear the texts in quick edit box ;optional. if yes then set this param value to 「chkClearQuickedit_data_textboxTxtStr」 </param>
         private void pasteToCtext(string url, string clear = "")
         {
             br.driver = br.driver ?? br.driverNew();
@@ -6349,6 +6355,7 @@ namespace WindowsFormsApp1
             });
             wait1.Wait();
             //}
+            //Task.WaitAny();//如上所設「wait.Wait();」「wait1.Wait();」，即不必此行了
             //在連續輸入時能清除框中文字；手動輸入時一般當不必自動清除框中文字
             //br.在Chrome瀏覽器的Quick_edit文字框中輸入文字(br.driver, clear == " " ? clear : Clipboard.GetText(), url);
             br.在Chrome瀏覽器的Quick_edit文字框中輸入文字(br.driver, clear == br.chkClearQuickedit_data_textboxTxtStr ? clear : Clipboard.GetText(), url);
@@ -6856,7 +6863,11 @@ namespace WindowsFormsApp1
                                 br.driver = br.driver ?? br.driverNew();
                                 //chatGPT：在 C# 中使用 Selenium 控制 Chrome 瀏覽器時，可以使用以下方法切換到 Chrome 瀏覽器視窗：
                                 br.driver.SwitchTo().Window(br.driver.CurrentWindowHandle);
-                                if (textBox3.Text.IndexOf("edit") > -1 && KeyboardInfo.getKeyStateToggled(System.Windows.Input.Key.Delete))//判斷Delete鍵是否被按下彈起
+
+                                //以下按鍵判斷若仍出錯，則改用新增一個欄位作參考，記錄下在非按下 Ctrl + Shift + + 等鍵時造成的text改變
+                                if (textBox3.Text.IndexOf("edit") > -1 &&
+                                    (!KeyboardInfo.getKeyStateDown(System.Windows.Input.Key.LeftCtrl) && KeyboardInfo.getKeyStateNone(System.Windows.Input.Key.Add)) &&
+                                    KeyboardInfo.getKeyStateToggled(System.Windows.Input.Key.Delete))//判斷Delete鍵是否被按下彈起
                                 {//手動輸入時，當按下 Shift+Delete 當即時要準備貼上該頁，故如此操作，以備確定無誤後手動按下 submit 按鈕
                                     OpenQA.Selenium.IWebElement quick_edit_box = br.waitFindWebElementByName_ToBeClickable("data", br.WebDriverWaitTimeSpan);//br.driver.FindElement(OpenQA.Selenium.By.Name("data"));
                                                                                                                                                              //OpenQA.Selenium.Support.UI.WebDriverWait wait = new OpenQA.Selenium.Support.UI.WebDriverWait(br.driver, TimeSpan.FromSeconds(2));
@@ -7005,7 +7016,7 @@ namespace WindowsFormsApp1
                     //讀取剪貼簿裡的內容（即擷取自 quick_edit_box 框內的文字）
                     string nowClpTxt = Clipboard.GetText();
                     //確認資料
-                    if (nowClpTxt != "" && nowClpTxt != ClpTxtBefore)
+                    if (nowClpTxt != "" && nowClpTxt != ClpTxtBefore && nowClpTxt.IndexOf("http")==-1)
                     {
                         //設定內容
                         textBox1.Text = nowClpTxt;
