@@ -1,0 +1,13 @@
+References
+bin
+obj
+Xlbin
+*.exe
+*.log
+*.bak
+*.user
+*.lnk
+*.pyc
+*.user
+*.xlt
+*.xls

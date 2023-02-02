@@ -531,9 +531,12 @@ namespace WindowsFormsApp1
         {
             if (textBox1.Text == "" && ModifierKeys == Keys.None)
             {
-                textBox1.Text = Clipboard.GetText();
-                textBox1.Select(0, 0);
-                textBox1.ScrollToCaret();
+                if (isClipBoardAvailable_Text())
+                {
+                    textBox1.Text = Clipboard.GetText();
+                    textBox1.Select(0, 0);
+                    textBox1.ScrollToCaret();
+                }
             }
         }
 
@@ -1914,8 +1917,8 @@ namespace WindowsFormsApp1
                     e.Handled = true; keyDownCtrlAdd(false); return;
                 }
 
-                if (e.KeyCode == Keys.OemMinus)
-                {// Alt + -（字母區的減號） : 如果被選取的是「􏿽」則與下一個「{{」對調；若是「}}」則與「􏿽」對調。。（針對《國學大師》《四庫全書》文本小注文誤標而開發）
+                if (e.KeyCode == Keys.OemMinus|| e.KeyCode==Keys.Subtract)
+                {// Alt + -（字母區與數字鍵盤的減號） : 如果被選取的是「􏿽」則與下一個「{{」對調；若是「}}」則與「􏿽」對調。。（針對《國學大師》《四庫全書》文本小注文誤標而開發）
                     e.Handled = true;
                     undoRecord(); stopUndoRec = true;
                     using (GXDS gxds = new GXDS(this)) { gxds.correctBlankAndUppercurlybrackets(ref textBox1); }
@@ -5982,6 +5985,10 @@ namespace WindowsFormsApp1
             normalLineParaLength = 0;
         }
 
+        /// <summary>
+        /// 等待剪貼簿內的文字可用時
+        /// </summary>
+        /// <returns></returns>
         public static bool isClipBoardAvailable_Text()
         {// creedit with chatGPT：Clipboard Availability in C#：https://www.facebook.com/oscarsun72/posts/pfbid0dhv46wssuupa5PfH6RTNSZF58wUVbE6jehnQuYF9HtE9kozDBzCvjsowDkZTxkmcl
         /*在 C# 的 System.Windows.Forms 中，可以使用 Clipboard.ContainsData 或 Clipboard.ContainsText 方法來確定剪貼簿是否可用。*/
@@ -7016,7 +7023,7 @@ namespace WindowsFormsApp1
                     //讀取剪貼簿裡的內容（即擷取自 quick_edit_box 框內的文字）
                     string nowClpTxt = Clipboard.GetText();
                     //確認資料
-                    if (nowClpTxt != "" && nowClpTxt != ClpTxtBefore && nowClpTxt.IndexOf("http")==-1)
+                    if (nowClpTxt != "" && nowClpTxt != ClpTxtBefore && nowClpTxt.IndexOf("http") == -1)
                     {
                         //設定內容
                         textBox1.Text = nowClpTxt;
