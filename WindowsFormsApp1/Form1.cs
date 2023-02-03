@@ -932,8 +932,8 @@ namespace WindowsFormsApp1
 
             }
             else chkP = -1;
-            #endregion
-            chksum:
+#endregion
+chksum:
             if (missWordPositon > -1 || chkP > -1)
             //if (xCopy.IndexOf(" ") > -1 || xCopy.IndexOfAny("�".ToCharArray()) > -1 ||
             //xCopy.IndexOf("□") > -1)//□為《維基文庫》《四庫全書》的缺字符，" "則是《四部叢刊》的，"�"則是《四部叢刊》的造字符。
@@ -1014,6 +1014,23 @@ namespace WindowsFormsApp1
             }
 
             if (xCopy == "") return false;
+
+            #region 檢查如《國學大師》《四庫全書》文本小注標識錯位處--每頁只檢查第一個可疑者，其他請自行注意 癸卯元宵前2日
+            using (GXDS gxds = new GXDS(this))
+            {
+                int sGxds = 0; int lGxds = 0;//之後還要參考 s、l 不能於此更動
+                string[] linesxCopy = xCopy.Split(Environment.NewLine.ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
+                foreach (string item in linesxCopy)
+                {
+                    if (gxds.detectIncorrectBlankAndCurlybrackets_Suspected_aPageaTime(item, out sGxds, out lGxds))
+                    {
+                        new SoundPlayer(@"C:\Windows\Media\Windows Notify Email.wav").Play();
+                        s = xCopy.IndexOf(item); l = item.Length;
+                        return false;
+                    }
+                }
+            }
+            #endregion
 
             Clipboard.SetText(xCopy); BackupLastPageText(xCopy, false, false);
             if (s + l + 2 < textBox1.Text.Length)
@@ -1826,7 +1843,7 @@ namespace WindowsFormsApp1
                     {
                         insX = "》";
                     }
-                insert:
+insert:
                     insertWords(insX, textBox1, x);
                     return;
                 }
@@ -1917,7 +1934,7 @@ namespace WindowsFormsApp1
                     e.Handled = true; keyDownCtrlAdd(false); return;
                 }
 
-                if (e.KeyCode == Keys.OemMinus|| e.KeyCode==Keys.Subtract)
+                if (e.KeyCode == Keys.OemMinus || e.KeyCode == Keys.Subtract)
                 {// Alt + -（字母區與數字鍵盤的減號） : 如果被選取的是「􏿽」則與下一個「{{」對調；若是「}}」則與「􏿽」對調。。（針對《國學大師》《四庫全書》文本小注文誤標而開發）
                     e.Handled = true;
                     undoRecord(); stopUndoRec = true;
@@ -2304,7 +2321,7 @@ namespace WindowsFormsApp1
 
                     textBox1.Select(i, 0);
                     space = notes_a_line(false, ctrl);
-                omit:
+omit:
                     if (textBox1.TextLength >= i + space + 1)
                         i = textBox1.Text.IndexOf("}}", i + space + 1);
                     else
@@ -2923,7 +2940,7 @@ namespace WindowsFormsApp1
                     string nx = x.Substring(j, 2);
                     if (nx == Environment.NewLine || nx == "{{" || nx == "<p")
                     {
-                    longTitle:
+longTitle:
                         if (nx == Environment.NewLine)
                         {
                             //標題（篇名）過長時之處理：
@@ -3455,7 +3472,7 @@ namespace WindowsFormsApp1
                 goto notFound;
             textBox1.ScrollToCaret();
             return;
-        notFound:
+notFound:
             MessageBox.Show("not found!");
 
         }
@@ -4391,7 +4408,11 @@ namespace WindowsFormsApp1
             #endregion
 
             //貼到 Ctext Quick edit 前的文本檢查
-            if (!newTextBox1(out s, out l)) { Activate(); return; }//在 newTextBox1函式中可能會更動 s、l 二值，故得如此處置，以免s、l值跑掉
+            if (!newTextBox1(out s, out l))
+            {
+                if (s != 0 && l != 0) textBox1.Select(s, l);
+                Activate(); return;
+            }//在 newTextBox1函式中可能會更動 s、l 二值，故得如此處置，以免s、l值跑掉
 
             #region 貼到 Ctext Quick edit 
             //根據不同輸入模式需求操作
@@ -5830,7 +5851,7 @@ namespace WindowsFormsApp1
                             break;
                         case BrowserOPMode.seleniumNew:
                             int retrytimes = 0;
-                        retry:
+retry:
                             br.driver = br.driver ?? br.driverNew();
                             try
                             {//這裡需要參照元件來操作就不宜跑線程了！故此區塊最後的剪貼簿，要求須是單線程者，蓋因剪貼簿須獨占式使用故也20230111                                
@@ -5991,8 +6012,8 @@ namespace WindowsFormsApp1
         /// <returns></returns>
         public static bool isClipBoardAvailable_Text()
         {// creedit with chatGPT：Clipboard Availability in C#：https://www.facebook.com/oscarsun72/posts/pfbid0dhv46wssuupa5PfH6RTNSZF58wUVbE6jehnQuYF9HtE9kozDBzCvjsowDkZTxkmcl
-        /*在 C# 的 System.Windows.Forms 中，可以使用 Clipboard.ContainsData 或 Clipboard.ContainsText 方法來確定剪貼簿是否可用。*/
-        retry:
+/*在 C# 的 System.Windows.Forms 中，可以使用 Clipboard.ContainsData 或 Clipboard.ContainsText 方法來確定剪貼簿是否可用。*/
+retry:
             try
             {
                 if (!Clipboard.ContainsText())
@@ -6197,8 +6218,8 @@ namespace WindowsFormsApp1
         internal static string defaultBrowserName = string.Empty;//https://cybarlab.com/web-browser-name-in-c-sharp
         internal void appActivateByName()
         {
-        //Process[] procsBrowser = Process.GetProcessesByName("chrome");
-        tryagain:
+//Process[] procsBrowser = Process.GetProcessesByName("chrome");
+tryagain:
             Process[] procsBrowser = Process.GetProcessesByName(defaultBrowserName);
             if (procsBrowser.Length <= 0)
             {
@@ -6864,7 +6885,7 @@ namespace WindowsFormsApp1
                             appActivateByName();
                         else
                         {
-                        retry:
+retry:
                             try
                             {
                                 br.driver = br.driver ?? br.driverNew();
@@ -7273,7 +7294,7 @@ namespace WindowsFormsApp1
                     textBox2.Text = "";
                     return;
                 case "sl,":
-                sl: browsrOPMode = BrowserOPMode.seleniumNew;
+sl: browsrOPMode = BrowserOPMode.seleniumNew;
                     //第一次開啟Chrome瀏覽器，或前有未關閉的瀏覽器時
                     if (br.driver == null)
                         br.driver = br.driverNew();//不用Task.Run()包裹也成了

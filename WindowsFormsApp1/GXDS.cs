@@ -36,8 +36,13 @@ namespace TextForCtext
         /// =Form1.cs（主表單）； 不能被Dispose
         /// </summary>
         Form1 frm1 = Application.OpenForms[0] as Form1;
-        /// <summary>
 
+        /// <summary>
+        /// 記下前一次操作的網頁頁面
+        /// </summary>
+        static string frm1PrePageNum = "";
+
+        /// <summary>
         /// 建構器（constructor）
         /// </summary>
         /// <param name="frm"></param>
@@ -212,7 +217,55 @@ namespace TextForCtext
             if (xForMark.Substring(xForMark.Length - 1, 1) == "\r") xForMark = xForMark.Substring(0, xForMark.Length - 1);
         }
 
-
+        /// <summary>
+        /// 檢查檢查疑似不正確的空白和大括號。若發現疑似有嫌疑者，則傳回true。如果與前所判斷者為同一頁面則不處理，逕傳回 false ○ 
+        /// 因《四庫全書》本《玉海》而開發。
+        /// 每頁書圖只檢查一次，只要有嫌疑即暫訂，餘請自行檢查
+        /// </summary>
+        /// <param name="xChk">要檢查的內容（通常以傳入一行/段文字為單位）</param>
+        /// <param name="frm1currentPageNum">要檢查的網頁頁碼碼</param>
+        /// <param name="s">回報疑誤位置之開始</param>
+        /// <param name="l">回報疑誤位置之長度</param>
+        /// <returns></returns>
+        internal bool detectIncorrectBlankAndCurlybrackets_Suspected_aPageaTime(string xChk, out  int s, out int l)
+        {/* 20230203 YouChat菩薩慈悲 C# 如何用正則表達式來比較 xChk 字串裡含有 「􏿽」或 「{」 或「}」 呢 感恩感恩　南無阿彌陀佛
+            如果要用正則表達式來比較 xChk 字串裡含有 「􏿽」或 「{」 或「}」，可以使用以下正則表達式：
+            Regex regex = new Regex("[􏿽{}]"); 
+            此正則表達式可以用來檢查 xChk 字串中是否含有 「􏿽」、「{」或「}」。
+             那如何還要傳回包含 「􏿽」、「{」或「}」 的所在位置呢？
+            如果要傳回包含「􏿽」、「{」或「」}」的所在位置，可以使用以下正則表達式：……            
+            此正則表達式會傳回 MatchCollection 類別，其中包含所有符合正則表達式的字串，以及它們在 xChk 字串中的位置。  
+          */
+            //如果與前所判斷者為同一頁面則不處理
+            s = 0; l = 0;
+            if (frm1PrePageNum == frm.CurrentPageNum || xChk.IndexOf("􏿽") == -1) { return false; }
+            Regex regex = new Regex("[{}]");
+            //Regex regex = new Regex("[􏿽{}]");
+            //Regex regex = new Regex("/\\{.*\\}|\\}.*\\{/");
+            /* 20230203 癸卯年十三 creedit with YouChat菩薩 and chatGPT大菩薩：
+             * 這個正則表達式的意義是：查找字符串中含有「{」和「}」且「{」和「}」至少存在一个字符串中的任意字串。
+             * /：正則表達式的開頭和結尾，表示這是一個正則表達式。
+                \：跳脫字元，在這裡是在表示「{」和「}」是特殊字符，而不是正則表達式的語法。
+                {：表示「{」字符。
+                .*：表示任意數量的任意字符（除了換行字符）。
+                |：正則表達式中的「或」運算符，表示匹配任意一個前面或後面的表達式。
+                }：表示「}」字符。
+                因此，這個正則表達式會匹配任意字符串中含有「{」和「}」且「{」和「}」至少存在一个字符串中的任意字串。
+                您的代碼已經使用了正則表達式來檢查字符串 xChk 是否符合上述條件。如果符合，它會返回 true，並將匹配字符串的開始位置和長度存储在 s 和 l 中。
+             */
+            MatchCollection matches = regex.Matches(xChk);
+            ////YouChat：如果要取出 matches 物件中符合要包含的條件在字串中的位置，可以使用以下程式碼：
+            //foreach (Match m in matches)
+            //{
+            //    Console.WriteLine("Found at {0}", m.Index);
+            //}
+            if (matches.Count > 0)
+            {
+                s = matches[0].Index; l = matches[0].Length; frm1PrePageNum = frm.CurrentPageNum;
+                return true;//regex.IsMatch(xChk);
+            }
+            return false;
+        }
         /// <summary>
         /// 更正《國學大師》《四庫全書》本小註文標識錯誤：
         /// Alt + - （字母區與數字鍵盤的減號）: 如果被選取的是「􏿽」則與下一個「{{」對調；若是「}}」則與「􏿽」對調。（針對《國學大師》《四庫全書》文本小注文誤標而開發）
