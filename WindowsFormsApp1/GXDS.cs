@@ -227,7 +227,7 @@ namespace TextForCtext
         /// <param name="s">回報疑誤位置之開始</param>
         /// <param name="l">回報疑誤位置之長度</param>
         /// <returns></returns>
-        internal bool detectIncorrectBlankAndCurlybrackets_Suspected_aPageaTime(string xChk, out  int s, out int l)
+        internal bool detectIncorrectBlankAndCurlybrackets_Suspected_aPageaTime(string xChk, out int s, out int l)
         {/* 20230203 YouChat菩薩慈悲 C# 如何用正則表達式來比較 xChk 字串裡含有 「􏿽」或 「{」 或「}」 呢 感恩感恩　南無阿彌陀佛
             如果要用正則表達式來比較 xChk 字串裡含有 「􏿽」或 「{」 或「}」，可以使用以下正則表達式：
             Regex regex = new Regex("[􏿽{}]"); 
@@ -340,11 +340,13 @@ namespace TextForCtext
                                     (XBefrTitleLine.Substring(1, 2) == "{{" && XBefrTitleLine.Substring(0, 1) == "　")))
                                 {
                                     string ch = Regex.Replace(XBefrTitleLine, "[{{}}<p>]", "");
-                                    int llen = new StringInfo(ch).LengthInTextElements;
+                                    StringInfo CH = new StringInfo(ch);
+                                    int llen = CH.LengthInTextElements;
                                     llen = llen % 2 == 0 ? llen / 2 : (llen + 1) / 2;
                                     XBefrTitleLine = XBefrTitleLine.Substring(0, XBefrTitleLine.IndexOf("{{") + 2) +
-                                        //漢文部分                                     
-                                        ch.Substring(0, llen) + newLine + ch.Substring(llen) +
+                                        //漢文部分
+                                        //ch.Substring(0, llen) + newLine + ch.Substring(llen) +
+                                        CH.SubstringByTextElements(0, llen) + newLine + CH.SubstringByTextElements(llen) +
                                         XBefrTitleLine.Substring(XBefrTitleLine.IndexOf("}}"));
                                     //XBefrTitleLine = XBefrTitleLine.Substring(0, llen) + newLine +
                                     //    XBefrTitleLine.Substring(llen);
