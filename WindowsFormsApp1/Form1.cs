@@ -1019,13 +1019,14 @@ chksum:
             using (GXDS gxds = new GXDS(this))
             {
                 int sGxds = 0; int lGxds = 0;//之後還要參考 s、l 不能於此更動
-                string[] linesxCopy = xCopy.Split(Environment.NewLine.ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
-                foreach (string item in linesxCopy)
+                string[] lines_xCopy = xCopy.Split(Environment.NewLine.ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
+                foreach (string line_xCopy in lines_xCopy)
                 {
-                    if (gxds.detectIncorrectBlankAndCurlybrackets_Suspected_aPageaTime(item, out sGxds, out lGxds))
-                    {
+                    if (gxds.detectIncorrectBlankAndCurlybrackets_Suspected_aPageaTime(line_xCopy, out sGxds, out lGxds))
+                    {// out 出來的是每行(item）位置，不是原來textBox1裡要給剪貼簿的文字(xCopy)內的位置
                         new SoundPlayer(@"C:\Windows\Media\Windows Notify Email.wav").Play();
-                        s = xCopy.IndexOf(item); l = item.Length;
+                        textBox1.Select(xCopy.IndexOf(line_xCopy), line_xCopy.Length);
+                        textBox1.ScrollToCaret();
                         return false;
                     }
                 }
@@ -4410,7 +4411,10 @@ notFound:
             //貼到 Ctext Quick edit 前的文本檢查
             if (!newTextBox1(out s, out l))
             {
-                if (s != 0 && l != 0) textBox1.Select(s, l);
+                if (s != 0 && l != 0 && textBox1.SelectionLength == 0)
+                {//若無選取，則將有問題的部分選取以供檢視
+                    textBox1.Select(s, l); textBox1.ScrollToCaret();
+                }
                 Activate(); return;
             }//在 newTextBox1函式中可能會更動 s、l 二值，故得如此處置，以免s、l值跑掉
 
