@@ -215,18 +215,20 @@ End Function
 
 
 Sub 清除所有程式碼註解()
-
+Dim ur As UndoRecord
+SystemSetup.stopUndo ur, "清除所有程式碼註解"
 With ActiveDocument.Range.Find
     .ClearFormatting
     .Font.ColorIndex = 11
     .Execute "", , , , , , , wdFindContinue, , "", wdReplaceAll
     .ClearFormatting
 End With
-If InStr(ActiveDocument.Range, "//") > 0 Then
+If InStr(ActiveDocument.Range, "//") Or InStr(ActiveDocument.Range, Chr(39)) > 0 Then
     Dim p As Paragraph
     For Each p In ActiveDocument.Paragraphs
-        If InStr(p.Range, "//") > 0 Then p.Range.Delete
+        If InStr(p.Range, "//") > 0 Or InStr(1, p.Range, Chr(39), vbTextCompare) > 0 Then p.Range.Delete
     Next p
 End If
 ActiveDocument.Range = VBA.Replace(ActiveDocument.Range, Chr(13) & Chr(13), Chr(13))
+SystemSetup.contiUndo ur
 End Sub

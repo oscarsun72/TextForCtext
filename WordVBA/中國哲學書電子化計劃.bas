@@ -455,6 +455,8 @@ a = Array(ChrW(12296), "{{", ChrW(12297), "}}", "〈", "{{", "〉", "}}", _
 
 Set d = Documents.Add()
 d.Range.Paste
+'提示貼上無礙
+SystemSetup.playSound 1
 維基文庫造字圖取代為文字 d.Range
 For i = 0 To UBound(a) - 1
     d.Range.Find.Execute a(i), , , , , , True, wdFindContinue, , a(i + 1), wdReplaceAll
@@ -1342,6 +1344,8 @@ Sub 國學大師_四庫全書本轉來()
 Dim rng As Range, noteRng As Range
 Set rng = Documents.Add().Range
 rng.Paste
+'提示貼上無礙
+SystemSetup.playSound 1
 'With rng.Find
 '    .ClearAllFuzzyOptions
 '    .ClearFormatting

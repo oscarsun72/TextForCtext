@@ -35,7 +35,8 @@ namespace TextForCtext
         /// <summary>
         /// =Form1.cs（主表單）； 不能被Dispose
         /// </summary>
-        Form1 frm1 = Application.OpenForms[0] as Form1;
+        Form1 frm1 = (Application.OpenForms.Count>0?
+            Application.OpenForms[0]:null) as Form1;
 
         /// <summary>
         /// 記下前一次操作的網頁頁面
@@ -339,18 +340,37 @@ namespace TextForCtext
                                     (XBefrTitleLine.Substring(0, 2) == "{{" ||
                                     (XBefrTitleLine.Substring(1, 2) == "{{" && XBefrTitleLine.Substring(0, 1) == "　")))
                                 {
+                                    //忽略標點符號與數字
                                     string ch = Regex.Replace(XBefrTitleLine, "[{{}}<p>]", "");
+                                    foreach (var item in Form1.punctuationsNum)
+                                    {
+                                        if (ch.IndexOf(item) > -1) ch = ch.Replace(item.ToString(), ""); 
+                                    }
+                                    //不含標點符號與數字
                                     StringInfo CH = new StringInfo(ch);
                                     int llen = CH.LengthInTextElements;
-                                    llen = llen % 2 == 0 ? llen / 2 : (llen + 1) / 2;
-                                    XBefrTitleLine = XBefrTitleLine.Substring(0, XBefrTitleLine.IndexOf("{{") + 2) +
-                                        //漢文部分
-                                        //ch.Substring(0, llen) + newLine + ch.Substring(llen) +
-                                        CH.SubstringByTextElements(0, llen) + newLine + CH.SubstringByTextElements(llen) +
-                                        XBefrTitleLine.Substring(XBefrTitleLine.IndexOf("}}"));
-                                    //XBefrTitleLine = XBefrTitleLine.Substring(0, llen) + newLine +
-                                    //    XBefrTitleLine.Substring(llen);
-                                    xOp = xOp.Substring(0, plineS) + XBefrTitleLine + xOp.Substring(plineS + plineL);
+                                    if (llen > 1)//中文長度多於1個字才處理
+                                    {
+                                        //    llen = llen % 2 == 0 ? llen / 2 : (llen + 1) / 2;                                        
+                                        //        //漢文部分
+                                        //        //ch.Substring(0, llen) + newLine + ch.Substring(llen) +                                            
+                                        //        int iS=0;
+                                        //        for (int i = 0; i < CH.LengthInTextElements; i++)
+                                        //    {
+                                        //        if (i > llen) { iS = i; break; }
+
+                                        //    }
+                                        //XBefrTitleLine = XBefrTitleLine.Substring(0, XBefrTitleLine.IndexOf("{{") + 2) +
+
+                                        //CH.SubstringByTextElements(0, llen) + newLine + CH.SubstringByTextElements(llen) +
+
+                                        //XBefrTitleLine.Substring(XBefrTitleLine.IndexOf("}}"));
+
+                                        //XBefrTitleLine = XBefrTitleLine.Substring(0, llen) + newLine +
+                                        //    XBefrTitleLine.Substring(llen);
+                                        //xOp = xOp.Substring(0, plineS) + XBefrTitleLine + xOp.Substring(plineS + plineL);
+                                        xOp = xOp.Substring(0, plineS) + CnText.SplitStringIntoTwoLines(XBefrTitleLine) + xOp.Substring(plineS + plineL);
+                                    }
                                 }
                             }
                         }

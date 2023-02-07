@@ -14,6 +14,21 @@ Sub tesSeleniumBasic() 'https://github.com/florentbr/SeleniumBasic
     driver.Get "/"
 
 End Sub
+
+Sub openNewTabWhenTabAlreadyExit(ByRef WD As SeleniumBasic.IWebDriver)
+Dim iw As Byte, ew, ii As Byte
+For Each ew In WD.WindowHandles
+    iw = iw + 1
+Next ew
+If iw > 0 Then
+      WD.ExecuteScript "window.open('about:blank','_blank');"
+      For Each ew In WD.WindowHandles
+            ii = ii + 1
+            If ii = iw + 1 Then Exit For
+      Next ew
+      WD.SwitchTo().Window (ew)
+End If
+End Sub
 Sub openChrome(Optional url As String)
 reStart:
     'Dim WD As SeleniumBasic.IWebDriver
@@ -43,7 +58,7 @@ reStart:
             'C#：options.AddArgument("user-data-dir=" + Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "\\Google\\Chrome\\User Data\\");
             .AddArgument "user-data-dir=" + VBA.Environ("LOCALAPPDATA") + _
                 "\Google\Chrome\User Data\"
-            
+'            .AddArgument "--new-window"
             '.AddArgument "--start-maximized"
             '.DebuggerAddress = "127.0.0.1:9999" '不要与其他几個混用
         End With
@@ -54,6 +69,7 @@ reStart:
             chromedriversPID(chromedriversPIDcntr) = pid
             chromedriversPIDcntr = chromedriversPIDcntr + 1
         End If
+        openNewTabWhenTabAlreadyExit WD
         WD.url = url
     End If
 Exit Sub

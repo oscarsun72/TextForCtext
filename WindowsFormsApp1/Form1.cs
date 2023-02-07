@@ -105,7 +105,7 @@ namespace WindowsFormsApp1
         internal static BrowserOPMode browsrOPMode = BrowserOPMode.appActivateByName;
 
         /// <summary>
-        /// 隱藏到系統列用
+        /// 隱藏到系統列用物件
         /// </summary>
         System.Windows.Forms.NotifyIcon ntfyICo;
 
@@ -181,11 +181,13 @@ namespace WindowsFormsApp1
                     {
                         // 滾輪向上，上一頁
                         nextPages(Keys.PageUp, false);
+                        if (autoPastetoQuickEdit) availableInUseBothKeysMouse();
                     }
                     else
                     {
                         // 滾輪向下，下一頁
                         nextPages(Keys.PageDown, false);
+                        if (autoPastetoQuickEdit) availableInUseBothKeysMouse();
                     }
                     break;
             }
@@ -290,6 +292,10 @@ namespace WindowsFormsApp1
         //    //CreateCaret(textBox1.Handle, IntPtr.Zero, 5, int.Parse(textBox1.Font.SizeInPoints.ToString()));
         //    //ShowCaret(textBox1.Handle);            
         //}
+
+        /// <summary>
+        /// 還原已隱藏到系統列的物件
+        /// </summary>
         void show_nICo()
         {
 
@@ -325,23 +331,60 @@ namespace WindowsFormsApp1
                 }
             }
         }
-
+        /// <summary>
+        /// 在已隱藏到系統列的物件圖示上點一下
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void nICo_MouseClick(object sender, MouseEventArgs e)
         {
             show_nICo();
         }
-
+        /// <summary>
+        /// 在已隱藏到系統列的物件圖示上滑過滑鼠（nICo= notifyIcon）
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void nICo_MouseMove(object sender, MouseEventArgs e)
         {
+            if (Visible||!HiddenIcon) return;
             #region 縮至系統工具列在右方時
             //if (Cursor.Position.Y > this.Top + this.Height ||
             //    Cursor.Position.X > this.Left + this.Width) show_nICo();
             #endregion
             #region 縮至系統工具列在左方時
-            if (Cursor.Position.Y > this.Top + this.Height ||
-                Cursor.Position.X < 420) show_nICo();//this.Left + this.Width) show_nICo();
+            //if (Cursor.Position.Y > this.Top + this.Height &&
+            //    Cursor.Position.X < 420) show_nICo();//this.Left + this.Width) show_nICo();
+            if (Cursor.Position.Y > Screen.PrimaryScreen.Bounds.Height - 230 &&
+                Cursor.Position.X < 80) show_nICo();//this.Left + this.Width) show_nICo();
             #endregion
-            //if (this.Top <0 && this.Left<0) show_nICo();            
+            #region 縮至系統工具列在下方時
+            if (Cursor.Position.Y > Screen.PrimaryScreen.Bounds.Height - 50 &&
+                Cursor.Position.X > Screen.PrimaryScreen.Bounds.Width - 270) show_nICo();//this.Left + this.Width) show_nICo();
+            #endregion
+            ////if (this.Top <0 && this.Left<0) show_nICo();
+            ///
+            #region 20230207 creedit with chatGPT大菩薩：失敗
+            ////20230207 creedit with chatGPT大菩薩：
+
+            //Point iconLocation = new Point(ntfyICo.Bounds.X, ntfyICo.Bounds.Y);
+            //Point iconLocationOnScreen = ntfyICo.Parent.PointToScreen(iconLocation);
+            //int iconX = iconLocationOnScreen.X;
+            //int iconY = iconLocationOnScreen.Y;
+
+            //Control ni = (Control)sender;
+            //Point pnt = ni.PointToScreen(new Point(ni.Left, ni.Top));
+            //int iconX = pnt.X, iconY = pnt.Y;
+            //// 計算滑鼠位置是否在表單圖示的範圍內
+            ////if (e.X >= iconX && e.X <= iconX + iconWidth && e.Y >= iconY && e.Y <= iconY + iconHeight)
+            //if (e.X >= iconX && e.X <= iconX + ni.Width && e.Y >= iconY && e.Y <= iconY + ni.Height)
+            //{
+
+            //    // 顯示表單
+            //    show_nICo();
+            //} 
+            #endregion
+
         }
 
         /// <summary>
@@ -647,9 +690,9 @@ namespace WindowsFormsApp1
             string returnTxt = getLineTxt(x, s);
             //https://useadrenaline.com/playground
             //20230115 adrenaline 大菩薩：
-            for (int i = 0; i < punctuations.Length; i++)
+            for (int i = 0; i < punctuationsNum.Length; i++)
             {
-                returnTxt = returnTxt.Replace(punctuations[i].ToString(), " ".ToCharArray()[0].ToString());
+                returnTxt = returnTxt.Replace(punctuationsNum[i].ToString(), " ".ToCharArray()[0].ToString());
             }
             return returnTxt.Replace("   ", " ").Replace("  ", " ");
 
@@ -1024,7 +1067,7 @@ chksum:
                 {
                     if (gxds.detectIncorrectBlankAndCurlybrackets_Suspected_aPageaTime(line_xCopy, out sGxds, out lGxds))
                     {// out 出來的是每行(item）位置，不是原來textBox1裡要給剪貼簿的文字(xCopy)內的位置
-                        new SoundPlayer(@"C:\Windows\Media\Windows Notify Email.wav").Play();
+                        playSound(soundLike.warn);
                         textBox1.Select(xCopy.IndexOf(line_xCopy), line_xCopy.Length);
                         textBox1.ScrollToCaret();
                         return false;
@@ -1932,6 +1975,7 @@ insert:
 
                 if (e.KeyCode == Keys.Add || e.KeyCode == Keys.Oemplus)//|| e.KeyCode == Keys.Subtract || e.KeyCode == Keys.NumPad5)
                 {// Alt + +
+                    if (e.KeyCode == Keys.Oemplus && autoPastetoQuickEdit) return;//防止在連續輸入時誤按
                     e.Handled = true; keyDownCtrlAdd(false); return;
                 }
 
@@ -2398,7 +2442,7 @@ omit:
             }
             for (i = 0; i + spaceCntr < xSelInfo.LengthInTextElements; i++)
             {
-                if (punctuations.IndexOf(xSelInfo.SubstringByTextElements(i, 1)) == -1)
+                if (punctuationsNum.IndexOf(xSelInfo.SubstringByTextElements(i, 1)) == -1)
                     xSel += "　";
             }
             textBox1.Select(s, e - s);
@@ -2557,6 +2601,7 @@ omit:
                 if ("{{}}".IndexOf(sTxt) > -1)
                 {
                     textBox1.SelectedText = "􏿽";
+                    dontHide = false;
                     return;
                 }
                 if (sTxt == "<p>")
@@ -2601,7 +2646,7 @@ omit:
                         {
                             textBox1.Select(sn, 3);
                             undoRecord(); stopUndoRec = true; textBox1.SelectedText = "􏿽"; stopUndoRec = false;
-                            stopUndoRec = false;
+                            stopUndoRec = false; dontHide = false;
                             return;
                         }
                     }
@@ -3717,7 +3762,7 @@ notFound:
         int countWordsLenPerLinePara(string xLinePara)
         {
             //StringInfo seInfo = new StringInfo(se);
-            foreach (var item in punctuations)//標點符號不計
+            foreach (var item in punctuationsNum)//標點符號不計
             {
                 xLinePara = xLinePara.Replace(item.ToString(), "");
             }
@@ -3969,27 +4014,37 @@ notFound:
         enum soundLike { over, done, stop, info, error, warn, exam }
         void playSound(soundLike sndlike)
         {
+            string mediaPathWithBackslash = Environment.GetFolderPath(Environment.SpecialFolder.Windows) + "\\Media\\";
+            string wav = "";
             switch (sndlike)
             {
                 case soundLike.over:
-                    new SoundPlayer(@"C:\Windows\Media\windows logoff sound.wav").Play();
+                    wav = "windows logoff sound.wav";
                     break;
                 case soundLike.done:
-                    new SoundPlayer(@"C:\Windows\Media\windows logoff sound.wav").Play();
+                    wav = "windows logoff sound.wav";
                     break;
                 case soundLike.stop:
+                    wav = "Windows Exclamation";
                     break;
                 case soundLike.info:
+                    wav = "tada";
                     break;
                 case soundLike.error:
+                    wav = "Windows Notify";
                     break;
                 case soundLike.warn:
+                    wav = "Windows Proximity Notification";
                     break;
                 case soundLike.exam:
+                    wav = "Windows Notify Email";
                     break;
                 default:
                     break;
             }
+            mediaPathWithBackslash += (wav + ".wav");
+            if (File.Exists(mediaPathWithBackslash))
+                new SoundPlayer(mediaPathWithBackslash).Play();
 
         }
         //將<p>後的空格「　」取代為「􏿽」，只要該行不是篇名
@@ -4064,7 +4119,7 @@ notFound:
 
         }
 
-        private void insertWords(string insX, TextBox tBox, string x = "")
+        internal void insertWords(string insX, TextBox tBox, string x = "")
         {
             undoRecord();
             stopUndoRec = true;
@@ -4085,7 +4140,7 @@ notFound:
         }
 
         List<string> lastKeyPress = new List<string>();
-        int findNotChineseCharFarLength(string x, bool forward)
+        internal static int findNotChineseCharFarLength(string x, bool forward)
         {
             int isC = 0, l = 0;
             StringInfo xInfo = new StringInfo(x);
@@ -4140,11 +4195,19 @@ notFound:
             }
             return -1;
         }
-
-        const string punctuations = ".,;?@'\"。，；！？、－-—…:：《·》〈‧〉「」『』〖〗【】（）()[]〔〕［］0123456789";
-        int isChineseChar(string x, bool skipPunctuation)
+        /// <summary>
+        /// 標點符號和數字
+        /// </summary>
+        public static string punctuationsNum = ".,;?@'\"。，；！？、－-—…:：《·》〈‧〉「」『』〖〗【】（）()[]〔〕［］0123456789";
+        /// <summary>
+        /// 判斷中文字
+        /// </summary>
+        /// <param name="x">要檢測的字元字串</param>
+        /// <param name="skipPunctuation">是否忽略標點符號</param>
+        /// <returns></returns>
+        internal static int isChineseChar(string x, bool skipPunctuation)
         {
-            if (skipPunctuation) if (punctuations.IndexOf(x, StringComparison.Ordinal) > -1) return -1;
+            if (skipPunctuation) if (punctuationsNum.IndexOf(x, StringComparison.Ordinal) > -1) return -1;
             const string cha = "�□▫စခငဇဌ◍ᗍⲲ⛋ဂဃဆဈဉ";
             string notChineseCharPriority = cha + "〇　 \r\n<>{}.,;?@●'\"。，；！？、－-《》〈〉「」『』〖〗【】（）()[]〔〕［］0123456789";
 
@@ -4213,7 +4276,7 @@ notFound:
         }
 
         //C#中文字轉換Unicode(\u ):http://trufflepenne.blogspot.com/2013/03/cunicode.html
-        private string StringToUnicode(string srcText)
+        public static string StringToUnicode(string srcText)
         {
             string dst = "";
             char[] src = srcText.ToCharArray();
@@ -4226,7 +4289,7 @@ notFound:
             return dst;
         }
 
-        private string UnicodeToString(string srcText)
+        public static string UnicodeToString(string srcText)
         {
             string dst = "";
             string src = srcText;
@@ -4389,12 +4452,12 @@ notFound:
                         }
                         else
                         {
-                            if (MessageBox.Show("reset the page end ? ", "", MessageBoxButtons.OKCancel, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1,
-                                MessageBoxOptions.ServiceNotification) == DialogResult.OK)
-                                pageTextEndPosition = s;
+                            //if (MessageBox.Show("reset the page end ? ", "", MessageBoxButtons.OKCancel, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1,
+                            //    MessageBoxOptions.ServiceNotification) == DialogResult.OK)
+                            pageTextEndPosition = s;
                         }
 
-                        Activate();
+                        Activate(); bringBackMousePosFrmCenter();
                         return;
                     }
                     else
@@ -4415,7 +4478,7 @@ notFound:
                 {//若無選取，則將有問題的部分選取以供檢視
                     textBox1.Select(s, l); textBox1.ScrollToCaret();
                 }
-                Activate(); return;
+                Activate(); bringBackMousePosFrmCenter(); return;
             }//在 newTextBox1函式中可能會更動 s、l 二值，故得如此處置，以免s、l值跑掉
 
             #region 貼到 Ctext Quick edit 
@@ -4925,7 +4988,7 @@ notFound:
                     gap = Math.Abs(len - normalLineParaLength);
                 }
 
-                const int gapRef = 9;
+                const int gapRef = 3;//9;
 
                 //the normal rule
                 if (gap > gapRef && !(len < normalLineParaLength
@@ -5421,6 +5484,7 @@ notFound:
                 {
                     e.Handled = true;//取得或設定值，指出是否處理事件。https://docs.microsoft.com/zh-tw/dotnet/api/system.windows.forms.keyeventargs.handled?view=netframework-4.7.2&f1url=%3FappId%3DDev16IDEF1%26l%3DZH-TW%26k%3Dk(System.Windows.Forms.KeyEventArgs.Handled);k(TargetFrameworkMoniker-.NETFramework,Version%253Dv4.7.2);k(DevLang-csharp)%26rd%3Dtrue
                     nextPages(e.KeyCode, true);
+                    if (autoPastetoQuickEdit) availableInUseBothKeysMouse();
                     return;
                 }
                 if (e.KeyCode == Keys.Left || e.KeyCode == Keys.Right)
@@ -5482,7 +5546,11 @@ notFound:
                 if (e.KeyCode == Keys.Multiply)
                 {//按下 Ctrl + * 設定為將《四部叢刊》資料庫所複製的文本在表單得到焦點時直接貼到 textBox1 的末尾,或反設定
                     e.Handled = true;
-                    toggleAutoPasteFromSBCKwhether();
+                    //避免誤按
+                    if (!autoPastetoQuickEdit && !FastMode)
+                    {
+                        toggleAutoPasteFromSBCKwhether();
+                    }
                     return;
                 }
 
@@ -5708,13 +5776,16 @@ notFound:
         /// 指示現在主表單是否已隱藏到系統列中
         /// </summary>
         internal bool HiddenIcon { get { return ntfyICo.Visible; } }
+        /// <summary>
+        /// 隱藏到系統列中
+        /// </summary>
         void hideToNICo()
         {
             if (dontHide) return;
             //https://dotblogs.com.tw/jimmyyu/2009/09/21/10733
             //https://dotblogs.com.tw/chou/2009/02/25/7284 https://yl9111524.pixnet.net/blog/post/49024854
             if (this.WindowState != FormWindowState.Minimized)
-            {
+            {//記下隱藏前的位置與大小
                 thisHeight = this.Height; thisWidth = this.Width; thisLeft = this.Left; thisTop = this.Top;
             }
             //this.WindowState = FormWindowState.Minimized;
@@ -5722,7 +5793,16 @@ notFound:
             this.Hide();
             this.ntfyICo.Visible = true;
         }
+        /// <summary>
+        /// 備份已貼上之文本的檔名+副檔名（不含路徑）
+        /// </summary>
         const string fName_to_Backup_Txt = "cTextBK.txt";
+        /// <summary>
+        /// 備份已貼上之文本到指定的檔案（以追加方式）
+        /// </summary>
+        /// <param name="x">要追加備份的內容</param>
+        /// <param name="updateLastBackup"></param>
+        /// <param name="showColorSignal">是否以顏色指示操作中</param>
         void BackupLastPageText(string x, bool updateLastBackup, bool showColorSignal)
         {
             Color C = this.BackColor;
@@ -5749,6 +5829,11 @@ notFound:
         int waitTimeforappActivateByName = 680;//1100;
 
         private string quickedit_data_textboxtxt = "";
+        /// <summary>
+        /// 到下一頁
+        /// </summary>
+        /// <param name="eKeyCode">按下什麼鍵</param>
+        /// <param name="stayInHere">留在本頁而不到下一頁則為true</param>
         private void nextPages(Keys eKeyCode, bool stayInHere)
         {
             string url = textBox3.Text;
@@ -5915,7 +6000,7 @@ retry:
             }
             #endregion
 
-            if (stayInHere) this.Activate();
+            if (stayInHere) availableInUseBothKeysMouse();//this.Activate();
         }
 
         private void runWordMacro(string runName)
@@ -6646,13 +6731,18 @@ tryagain:
             //if (textBox1.Text == "") return;
             if (textBox4.Size == textBox4Size)
                 textBox4SizeLarger();
-            if (new StringInfo(textBox1.SelectedText).LengthInTextElements > 1) { Clipboard.SetText(textBox1.SelectedText); textBox4.Text = textBox1.SelectedText; textBox4.DeselectAll(); }
+            if (new StringInfo(textBox1.SelectedText).LengthInTextElements > 1)
+            {
+                Clipboard.SetText(textBox1.SelectedText);
+                textBox4.Text = textBox1.SelectedText; textBox4.DeselectAll();
+            }
             string rplsdWord = textBox1.SelectedText, x = textBox1.Text;
             int s = textBox1.SelectionStart, l = char.IsHighSurrogate(x.Substring(s, 1), 0) ? 2 : 1;
-            if (rplsdWord == "" && insertMode == false)
+            if (rplsdWord == "") //&& insertMode == false)
             {
                 rplsdWord = x.Substring(s, l);
             }
+            #region 預設取代字串
             if (rplsdWord != "")
             {
                 string rplsWord = getReplaceWordDefault(rplsdWord);
@@ -6662,6 +6752,7 @@ tryagain:
                     if (rplsWord.IndexOf(Environment.NewLine) > -1) textBox4.Height = textBox4Size.Height * 3;
                 }
             }
+            #endregion 預設取代字串
             restoreCaretPosition(textBox1, selStart, selLength == 0 ? l : selLength);
         }
 
@@ -7508,8 +7599,8 @@ sl: browsrOPMode = BrowserOPMode.seleniumNew;
                                                  //對標點符號punctuations所佔字位不取代
                     w = textBox1.SelectedText;
                     //標點符號不取代漢字，但可被取代
-                    if (punctuations.IndexOf(e.KeyChar) > -1 &&
-                        punctuations.IndexOf(textBox1.Text.Substring(textBox1.SelectionStart, 1)) == -1)
+                    if (punctuationsNum.IndexOf(e.KeyChar) > -1 &&
+                        punctuationsNum.IndexOf(textBox1.Text.Substring(textBox1.SelectionStart, 1)) == -1)
                         textBox1.SelectionLength = 0;
                     else if (char.IsSurrogate(w.ToCharArray()[0])) textBox1.SelectionLength = 2;
                 }
@@ -7525,9 +7616,9 @@ sl: browsrOPMode = BrowserOPMode.seleniumNew;
                 {
                     w = textBox1.Text.Substring(selStart, 1);//對標點符號punctuations所佔字位不取代
                     if (selStart + 1 > textBox1.TextLength ||
-                        (punctuations.IndexOf(e.KeyChar) > -1 &&
+                        (punctuationsNum.IndexOf(e.KeyChar) > -1 &&
                         //標點符號不取代漢字，但可被取代
-                        punctuations.IndexOf(textBox1.Text.Substring(textBox1.SelectionStart, 1)) == -1))
+                        punctuationsNum.IndexOf(textBox1.Text.Substring(textBox1.SelectionStart, 1)) == -1))
                         textBox1.Select(selStart, 0);
                     else
                     {
@@ -7542,7 +7633,9 @@ sl: browsrOPMode = BrowserOPMode.seleniumNew;
             #endregion
 
         }
-
+        /// <summary>
+        /// 記下更動前的文本以利還原
+        /// </summary>
         private void undoRecord()
         {
             if (stopUndoRec) return;
@@ -7615,6 +7708,7 @@ sl: browsrOPMode = BrowserOPMode.seleniumNew;
                             nextPageStartTime = DateTime.Now;
                         }
                         nextPages(Keys.PageUp, true);
+                        if (autoPastetoQuickEdit) availableInUseBothKeysMouse();
                         //上一頁
                         //keyDownCtrlAdd(false);
                         break;
@@ -7629,6 +7723,7 @@ sl: browsrOPMode = BrowserOPMode.seleniumNew;
                         //keyDownCtrlAdd(true);
                         //下一頁
                         nextPages(Keys.PageDown, true);
+                        if (autoPastetoQuickEdit) availableInUseBothKeysMouse();
                         break;
                     default:
                         break;
