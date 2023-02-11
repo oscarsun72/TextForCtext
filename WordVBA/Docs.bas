@@ -1096,6 +1096,9 @@ Err1:
     Select Case Err.Number
         Case 49 'DLL ©I¥s³W®æ¿ù»~
             Resume
+        Case 5 'https://www.google.com/search?q=vba+Err.Number+5&oq=vba+Err.Number+5&aqs=chrome..69i57j0i10i30j0i30l2j0i5i30.4768j0j7&sourceid=chrome&ie=UTF-8
+            SystemSetup.wait 1.5
+            Resume
         Case Else
             MsgBox Err.Description, vbCritical
             SystemSetup.killchromedriverFromHere

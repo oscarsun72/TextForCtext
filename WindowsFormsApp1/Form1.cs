@@ -67,9 +67,9 @@ namespace WindowsFormsApp1
         /// </summary>
         bool check_the_adjacent_pages = false;
         /// <summary>
-        /// 手動輸入;
+        /// 手動輸入模式時為true
         /// </summary>
-        bool keyinText = false;
+        bool keyinTextMode = false;
         /// <summary>
         /// 原文有抬頭平抬格式
         /// </summary>
@@ -84,7 +84,7 @@ namespace WindowsFormsApp1
             set { textBox3.Text = value; }
         }
         //取得輸入模式：手動或自動
-        internal bool KeyinTextMode { get { return keyinText; } }
+        internal bool KeyinTextMode { get { return keyinTextMode; } }
 
         internal string CurrentPageNum { get { return _currentPageNum; } }
         //static internal string mainFromTextBox3Text;
@@ -307,7 +307,7 @@ namespace WindowsFormsApp1
             this.Left = thisLeft;
             this.Top = thisTop;
             //手動編輯模式時：
-            if (!autoPastetoQuickEdit && keyinText)
+            if (!autoPastetoQuickEdit && keyinTextMode)
             {
                 string xClp = Clipboard.GetText();
                 if (xClp != "" &&
@@ -347,7 +347,7 @@ namespace WindowsFormsApp1
         /// <param name="e"></param>
         private void nICo_MouseMove(object sender, MouseEventArgs e)
         {
-            if (Visible||!HiddenIcon) return;
+            if (Visible || !HiddenIcon) return;
             #region 縮至系統工具列在右方時
             //if (Cursor.Position.Y > this.Top + this.Height ||
             //    Cursor.Position.X > this.Left + this.Width) show_nICo();
@@ -865,7 +865,7 @@ namespace WindowsFormsApp1
             #region 檢查不當分段
 
             int chkP = xCopy.IndexOf("<p>") + ("<p>".Length + Environment.NewLine.Length);//檢查不當分段（目前僅找最前面的一個，餘於停下手動檢索時人工目測
-            if (keyinText) { chkP = -1; goto chksum; }//手動輸入、非半自動連續輸入時，略過不處理
+            if (keyinTextMode) { chkP = -1; goto chksum; }//手動輸入、非半自動連續輸入時，略過不處理
             if (xCopy.IndexOf("<p>") > -1 && chkP + 1 <= x.Length)//&& ("　􏿽|" + Environment.NewLine).IndexOf(x.Substring(chkP, 1)) == -1)
             {
                 int asteriskPos = xCopy.IndexOf("*");
@@ -1059,18 +1059,21 @@ chksum:
             if (xCopy == "") return false;
 
             #region 檢查如《國學大師》《四庫全書》文本小注標識錯位處--每頁只檢查第一個可疑者，其他請自行注意 癸卯元宵前2日
-            using (GXDS gxds = new GXDS(this))
+            if (!keyinTextMode)
             {
-                int sGxds = 0; int lGxds = 0;//之後還要參考 s、l 不能於此更動
-                string[] lines_xCopy = xCopy.Split(Environment.NewLine.ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
-                foreach (string line_xCopy in lines_xCopy)
+                using (GXDS gxds = new GXDS(this))
                 {
-                    if (gxds.detectIncorrectBlankAndCurlybrackets_Suspected_aPageaTime(line_xCopy, out sGxds, out lGxds))
-                    {// out 出來的是每行(item）位置，不是原來textBox1裡要給剪貼簿的文字(xCopy)內的位置
-                        playSound(soundLike.warn);
-                        textBox1.Select(xCopy.IndexOf(line_xCopy), line_xCopy.Length);
-                        textBox1.ScrollToCaret();
-                        return false;
+                    int sGxds = 0; int lGxds = 0;//之後還要參考 s、l 不能於此更動
+                    string[] lines_xCopy = xCopy.Split(Environment.NewLine.ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
+                    foreach (string line_xCopy in lines_xCopy)
+                    {
+                        if (gxds.detectIncorrectBlankAndCurlybrackets_Suspected_aPageaTime(line_xCopy, out sGxds, out lGxds))
+                        {// out 出來的是每行(item）位置，不是原來textBox1裡要給剪貼簿的文字(xCopy)內的位置
+                            playSound(soundLike.warn);
+                            textBox1.Select(xCopy.IndexOf(line_xCopy), line_xCopy.Length);
+                            textBox1.ScrollToCaret();
+                            return false;
+                        }
                     }
                 }
             }
@@ -1183,7 +1186,7 @@ chksum:
             //if ((m & Keys.Control) == Keys.Control && (m & Keys.Alt) == Keys.Alt && e.KeyCode == Keys.G)
             //if((int)Control.ModifierKeys ==
             //    (int)Keys.Control + (int)Keys.Alt && e.KeyCode == Keys.G)
-            if ((m & Keys.Shift) == Keys.Shift && e.KeyCode == Keys.Insert && !keyinText) { pasteAllOverWrite = true; dragDrop = false; }
+            if ((m & Keys.Shift) == Keys.Shift && e.KeyCode == Keys.Insert && !keyinTextMode) { pasteAllOverWrite = true; dragDrop = false; }
             else pasteAllOverWrite = false;
 
             #region 同時按下 Ctrl + Shift + Alt 
@@ -2014,7 +2017,7 @@ insert:
                 {//Alt + Insert ：將剪貼簿的文字內容讀入textBox1中
                     e.Handled = true;
                     string clpTxt = Clipboard.GetText();
-                    if (keyinText && clpTxt != ClpTxtBefore &&
+                    if (keyinTextMode && clpTxt != ClpTxtBefore &&
                         clpTxt.IndexOf("《") == -1 && clpTxt.IndexOf("〈") == -1 && clpTxt.IndexOf("·") == -1
                         ) textBox1.Text = booksPunctuation(clpTxt);
                     else textBox1.Text = clpTxt;
@@ -3258,7 +3261,7 @@ longTitle:
             {
                 if (s == 0 || s == textBox1.TextLength)
                 {
-                    if (!keyinText) pasteAllOverWrite = true;
+                    if (!keyinTextMode) pasteAllOverWrite = true;
                     textBox1.SelectAll();
                     l = textBox1.TextLength;
                 }
@@ -4517,13 +4520,13 @@ notFound:
             DialogResult dialogresult = new DialogResult();
             if (browsrOPMode != BrowserOPMode.appActivateByName)
             {//使用selenium模式時（非預設模式時）
-                if (autoPastetoQuickEdit && !keyinText)
+                if (autoPastetoQuickEdit && !keyinTextMode)
                 {//全自動輸入模式時
                     autoPastetoCtextQuitEditTextbox(out dialogresult);//在此中雖有判斷autoPastetoQuickEdit時，然呼叫它會造成無限遞迴（recursion）
                 }
                 //鍵入輸入模式或非全自動輸入時（如欲瀏覽、或順便編輯時）還原被隱藏的主表單以利後續操作，若不欲，則按Esc鍵即可再度隱藏：20230119壬寅大寒小年夜前一日
                 //else if (keyinText || !autoPastetoQuickEdit)
-                else if (keyinText && !autoPastetoQuickEdit)
+                else if (keyinTextMode && !autoPastetoQuickEdit)
                 {
                     if (HiddenIcon) show_nICo();
                     availableInUseBothKeysMouse();
@@ -5354,14 +5357,14 @@ notFound:
                 if (e.KeyCode == Keys.Multiply)
                 {
                     e.Handled = true;
-                    if (keyinText)
+                    if (keyinTextMode)
                     {
                         new SoundPlayer(@"C:\Windows\Media\Speech Off.wav").Play();
-                        keyinText = false; return;
+                        keyinTextMode = false; return;
                     }
                     new SoundPlayer(@"C:\Windows\Media\Speech On.wav").Play();
                     //設定成手動，自動及全部覆蓋之貼上則設成false
-                    keyinText = true; pasteAllOverWrite = false; autoPastetoQuickEdit = false;
+                    keyinTextMode = true; pasteAllOverWrite = false; autoPastetoQuickEdit = false;
                     button1.Text = "分行分段";
                     button1.ForeColor = new System.Drawing.Color();//預設色彩 預設顏色 https://stackoverflow.com/questions/10441000/how-to-programmatically-set-the-forecolor-of-a-label-to-its-default
                     return;
@@ -5748,7 +5751,7 @@ notFound:
         /// </summary>
         private void turnOn_autoPastetoQuickEdit()
         {//set autoPastetoQuickEdit = true//禁遏《四部叢刊資料庫》貼上機制，手動鍵入亦設成false
-            autoPastetoQuickEdit = true; keyinText = false; autoPasteFromSBCKwhether = false;
+            autoPastetoQuickEdit = true; keyinTextMode = false; autoPasteFromSBCKwhether = false;
             new SoundPlayer(@"C:\Windows\Media\Speech On.wav").Play();
             button1.Text = "送出貼上";
             //如果是鄰近頁連動編輯模式，則顯示為較亮青色 Aquamarine，否則為深青色 Color.DarkCyan。
@@ -5886,7 +5889,7 @@ notFound:
                     //});
                     //Task.WaitAll();
                     //wait.Wait();
-                    if (!keyinText && autoPastetoQuickEdit) Activate();
+                    if (!keyinTextMode && autoPastetoQuickEdit) Activate();
                     break;
                 case BrowserOPMode.seleniumGet:
                     //後面的textBox3.Text = url;會觸發private void textBox3_TextChanged 事件程序，於彼處執行瀏覽即可
@@ -5928,7 +5931,7 @@ notFound:
                 }
 
                 //如果是手動鍵入模式：
-                if (keyinText)
+                if (keyinTextMode)
                 {
                     OpenQA.Selenium.IWebElement quick_edit_box;
                     switch (browsrOPMode)
@@ -6383,7 +6386,7 @@ tryagain:
                 }
             }
             //手動輸入模式時
-            if (keyinText)
+            if (keyinTextMode)
             {
                 //Task task = Task.Run(() =>
                 //{
@@ -6968,7 +6971,7 @@ tryagain:
             undoTextValueChanged(selStart, selLength);
             if (textBox1.Text == "" && !pasteAllOverWrite)
             {
-                if (!keyinText)//非手動輸入時
+                if (!keyinTextMode)//非手動輸入時
                     hideToNICo();
                 else
                 {//在手動輸入模式下
@@ -7039,7 +7042,7 @@ retry:
             //最上層顯示
             if (!this.TopMost) this.TopMost = true;
             //不全部貼上取代原文字
-            if (keyinText && !pasteAllOverWrite) pasteAllOverWrite = false;
+            if (keyinTextMode && !pasteAllOverWrite) pasteAllOverWrite = false;
 
             //當自動由《四部叢刊資料庫》貼入，不做以下處置
             if (autoPasteFromSBCKwhether) { autoPasteFromSBCK(autoPasteFromSBCKwhether); return; }
@@ -7062,7 +7065,7 @@ retry:
             }
 
             #region 鍵入模式時的處置
-            if (keyinText)
+            if (keyinTextMode)
             {
                 //如果剪貼簿裡的是網址內容的話
                 if (ClpTxtBefore != clpTxt && clpTxt.IndexOf("http") > -1 && clpTxt.IndexOf("#editor") > -1)
@@ -7143,12 +7146,12 @@ retry:
                     {
                         //設定內容
                         textBox1.Text = nowClpTxt;
-                        ClpTxtBefore = clpTxt;//記下這次內容以供下次比對
+                        ClpTxtBefore = nowClpTxt;//clpTxt;//記下這次內容以供下次比對
                                               //自動加上書名號
                                               ////只要剪貼簿裡的內容合於以下條件
                                               //if (ClpTxtBefore != clpTxt && textBox1.Text == "" && clpTxt.IndexOf("http") == -1 && clpTxt.IndexOf("<scanb") == -1)
                                               //{
-                        textBox1.Text = booksPunctuation(clpTxt);
+                        textBox1.Text = booksPunctuation(nowClpTxt);
                         //return;
                         //}
                         //插入點游標置於頁首
@@ -7178,7 +7181,7 @@ retry:
                 }
 
                 //如果是在全自動模式下，且無按下控制鍵 Ctrl 等
-                if (!keyinText && (autoPastetoQuickEdit || (autoPastetoQuickEdit && ModifierKeys != Keys.None)))
+                if (!keyinTextMode && (autoPastetoQuickEdit || (autoPastetoQuickEdit && ModifierKeys != Keys.None)))
                 {
                     //20230115 非Selenium模式才執行，因為 Selenium模式 已在函式方法裡啟用遞迴（recursion），不必靠表單此Activated事件才能再次啟動了貼上機制了，真正達到全自動化的境地
                     if (browsrOPMode == BrowserOPMode.appActivateByName)
@@ -7385,9 +7388,11 @@ retry:
             switch (textBox2.Text)
             {
                 case "ap,":
-                    browsrOPMode = BrowserOPMode.appActivateByName;
+ap:                 browsrOPMode = BrowserOPMode.appActivateByName;
                     textBox2.Text = "";
                     return;
+                case "aa":                    
+                    goto ap;
                 case "sl,":
 sl: browsrOPMode = BrowserOPMode.seleniumNew;
                     //第一次開啟Chrome瀏覽器，或前有未關閉的瀏覽器時
@@ -7610,7 +7615,7 @@ sl: browsrOPMode = BrowserOPMode.seleniumNew;
             //{
             //    undoRecord();
             //}
-            if (keyinText && textBox1.TextLength > 0 && textBox1.SelectionLength == textBox1.TextLength)
+            if (keyinTextMode && textBox1.TextLength > 0 && textBox1.SelectionLength == textBox1.TextLength)
             {
                 if (!insertMode)
                 {
@@ -7907,7 +7912,7 @@ sl: browsrOPMode = BrowserOPMode.seleniumNew;
             //Task.WaitAll();
 
             textBox3.Tag = textBox3Text;
-            if (keyinText) return;
+            if (keyinTextMode) return;
             if (url == "")
             {
                 resetBooksPagesFeatures(); previousBookID = 0;

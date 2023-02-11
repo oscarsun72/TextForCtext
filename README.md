@@ -347,7 +347,7 @@ Ctrl+ 滑鼠左鍵：清除框中所有文字
 - 輸入末綴為「0」的數字可以設定開啟Chrome頁面的等待毫秒時間
 - 輸入前綴關鍵字「note:」，可以後綴之數字設定小注不換行的長度限制（byte : 0~255）
 - 輸入「msedge」「chrome」「brave」「vivaldi」，可以設定預設瀏覽器名稱
-- 輸入「ap,」「sl,」(或 br、bb、ss )「sg,」，可以切換瀏覽操作模式設定：
+- 輸入「ap,」（或 aa）「sl,」(或 br、bb、ss )「sg,」，可以切換瀏覽操作模式設定：
 
         ap,=appActivateByName
 

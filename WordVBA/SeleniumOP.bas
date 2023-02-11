@@ -397,9 +397,10 @@ If InStr(Text, Chr(13) & Chr(10)) = 0 And InStr(Text, Chr(13)) > 0 Then Text = R
 textBox.SendKeys Text 'SystemSetup.GetClipboardText
 
 '貼上不成則退出
-Dim WaitDt As Date, nx As String, xl As Integer
+Dim WaitDt As Date, chkTxtTime As Date, nx As String, xl As Integer
 
 nx = textBox.Text
+SystemSetup.playSound 1.294
 If nx = "" Then
     grabGjCoolPunctResult = ""
     wdB.Quit
@@ -415,8 +416,13 @@ btn.Click
 
 WaitDt = DateAdd("s", 10, Now()) '極限10秒
 xl = VBA.Len(Text)
+chkTxtTime = VBA.Now
 Do
-    nx = textBox.Text
+    If VBA.DateDiff("s", chkTxtTime, VBA.Now) > 1.5 Then
+        nx = textBox.Text
+        SystemSetup.playSound 1
+        chkTxtTime = Now
+    End If
     'VBA.StrComp(text, nx) <> 0
     If InStr(nx, "，") > 0 And InStr(nx, "。") > 0 And Len(nx) > xl Then Exit Do
     If Now > WaitDt Then
