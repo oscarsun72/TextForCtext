@@ -514,10 +514,16 @@ Err1:
             Set WD = Nothing
             GoTo retry
         Case Else
-            MsgBox Err.Description, vbCritical
-'            WD.Quit
-            iwd.Close
-            SystemSetup.killchromedriverFromHere
-           Resume
+            If WD Is Nothing Then
+                openChrome (url)
+                pasteWhenOutBMP = True
+                Resume Next
+            Else
+                MsgBox Err.Description, vbCritical
+    '            WD.Quit
+                iwd.Close
+                SystemSetup.killchromedriverFromHere
+               Resume
+            End If
     End Select
 End Function

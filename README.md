@@ -390,4 +390,4 @@ Ctrl+ 滑鼠左鍵：清除框中所有文字
 - [《臨川先生文集》圖文對照錄入實境秀再續-把她完成-在《中國哲學書電子化計劃》網站](https://youtu.be/mO5TUsovwec)
 - [《臨川先生文集》圖文對照錄入實境秀-程式設計增益功能-在《中國哲學書電子化計劃》網站](https://youtu.be/THOe_56bknQ)
 - [TextForCtext 聲控全自動連續輸入至《中國哲學書電子化計劃》Quick edit Box演示](https://youtu.be/bgsOwh2rEkc)
-
+- [TextForCtext 輸入《中國哲學書電子化計劃》《四庫全書》本《玉海》實境秀](https://youtube.com/live/kwhOSXiNJVs)

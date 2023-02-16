@@ -366,7 +366,9 @@ End Property
 Function getChrome() As String
 Dim chromePath As String
 If FsO Is Nothing Then Set FsO = CreateObject("scripting.filesystemobject")
-If FsO.fileexists("W:\PortableApps\PortableApps\GoogleChromePortable\App\Chrome-bin\chrome.exe") Then
+If FsO.fileexists("W:\PortableApps\PortableApps\GoogleChromePortable\GoogleChromePortable.exe") Then '用這個才不會和 Selenium 打架
+    chromePath = "W:\PortableApps\PortableApps\GoogleChromePortable\GoogleChromePortable.exe"
+ElseIf FsO.fileexists("W:\PortableApps\PortableApps\GoogleChromePortable\App\Chrome-bin\chrome.exe") Then
     chromePath = "W:\PortableApps\PortableApps\GoogleChromePortable\App\Chrome-bin\chrome.exe"
 ElseIf Dir("C:\Program Files (x86)\Google\Chrome\Application\chrome.exe") <> "" Then
     chromePath = "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe"

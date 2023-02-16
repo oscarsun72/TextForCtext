@@ -1343,9 +1343,10 @@ End Sub
 Sub 國學大師_四庫全書本轉來()
 Dim rng As Range, noteRng As Range
 Set rng = Documents.Add().Range
+SystemSetup.playSound 1
 rng.Paste
 '提示貼上無礙
-SystemSetup.playSound 1
+SystemSetup.playSound 1 '光貼上耗時就很久了，後面這一大堆式子反而快 20230211
 'With rng.Find
 '    .ClearAllFuzzyOptions
 '    .ClearFormatting

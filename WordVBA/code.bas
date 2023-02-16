@@ -232,3 +232,27 @@ End If
 ActiveDocument.Range = VBA.Replace(ActiveDocument.Range, Chr(13) & Chr(13), Chr(13))
 SystemSetup.contiUndo ur
 End Sub
+
+Rem 20230215 chatGPT敌履
+Rem 硂琿絏い IsChineseCharacter ㄧ计ノ耞虫才琌琌CJK┪CJK耎甶才栋い簙τ IsChineseString ㄧ计玥ノ耞才﹃琌场パCJK┪CJK耎甶才栋い簙舱Θ
+Rem VBAいиㄏノ AscW ㄧ计ㄓ莉才Unicode絪絏礛и碞ㄏノ㎝C#い摸よΑㄓ耞才琌妮CJK┪CJK耎甶才栋い簙
+' 耞才琌琌CJK┪CJK耎甶才栋い簙
+Public Function IsChineseCharacter(c As String) As Boolean
+    ' Unicode絛瞅: CJK才栋絛瞅4E009FFFCJK耎甶才栋絛瞅200002A6DF
+    Dim unicodeVal As Long
+    unicodeVal = AscW(c)
+    IsChineseCharacter = (unicodeVal >= &H4E00 And unicodeVal <= &H9FFF) Or (unicodeVal >= &H20000 And unicodeVal <= &H2A6DF)
+End Function
+
+' 耞才﹃琌场パCJK┪CJK耎甶才栋い簙舱Θ
+Public Function IsChineseString(s As String) As Boolean
+    Dim i As Long
+    For i = 1 To Len(s)
+        If Not IsChineseCharacter(Mid(s, i, 1)) Then
+            IsChineseString = False
+            Exit Function
+        End If
+    Next i
+    IsChineseString = True
+End Function
+

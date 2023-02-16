@@ -101,6 +101,7 @@ namespace WindowsFormsApp1
 
         /// <summary>
         /// 現行軟體運行之架構是哪種（appActivateByName, seleniumNew, seleniumGet……）
+        /// 每表獨立的表單可指定不同的模式，故不能是 static；有空再來改
         /// </summary>
         internal static BrowserOPMode browsrOPMode = BrowserOPMode.appActivateByName;
 
@@ -4278,7 +4279,45 @@ notFound:
             return 0;
         }
 
-        //C#中文字轉換Unicode(\u ):http://trufflepenne.blogspot.com/2013/03/cunicode.html
+        /// <summary>
+        ///判断CJK字符集// 判断一个字符是否是CJK或CJK扩展字符集中的汉字
+        /// 202302015 chatGPT大菩薩
+        /// 在C#中，可以使用Unicode字符编码值的范围来判断一个字符是否是CJK或CJK扩展字符集中的汉字。……
+        /// 这段代码中的 IsChineseCharacter 方法用于判断单个字符是否是CJK或CJK扩展字符集中的汉字，而 IsChineseString 方法则用于判断一个字符串是否全部由CJK或CJK扩展字符集中的汉字组成。
+        /// 在判断一个字符是否是CJK或CJK扩展字符集中的汉字时，我们使用Unicode字符编码值的范围来进行判断。CJK字符集范围是从0x4e00到0x9fff，而CJK扩展字符集范围是从0x20000到0x2a6df。因此，如果一个字符的Unicode编码值在这个范围内，那么就可以判断它是CJK或CJK扩展字符集中的汉字。
+        /// </summary>
+        /// <param name="c">要檢查的字元</param>
+        /// <returns></returns>
+        public static bool IsChineseCharacter(char c)
+        {
+            // Unicode范围: CJK字符集范围：4E00–9FFF，CJK扩展字符集范围：20000–2A6DF
+            return (c >= 0x4e00 && c <= 0x9fff) || (c >= 0x20000 && c <= 0x2a6df);
+        }
+
+        /// <summary>
+        /// 判断一个字符串是否全部由CJK或CJK扩展字符集中的汉字组成
+        /// 202302015 chatGPT大菩薩
+        /// </summary>
+        /// <param name="s">要檢查的文本</param>
+        /// <returns></returns>        
+        public static bool IsChineseString(string s)
+        {
+            foreach (char c in s)
+            {
+                if (!IsChineseCharacter(c))
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+
+        /// <summary>
+        /// C#中文字轉換Unicode(\u ):http://trufflepenne.blogspot.com/2013/03/cunicode.html
+        /// </summary>
+        /// <param name="srcText"></param>
+        /// <returns></returns>        
         public static string StringToUnicode(string srcText)
         {
             string dst = "";
@@ -6702,7 +6741,7 @@ tryagain:
                 textBox1.Select(s, 2);
             saveText();
             replaceWord(textBox1.SelectedText, textBox4.Text);
-            Clipboard.SetText(textBox4.Text);
+            if (textBox4.Text != "") Clipboard.SetText(textBox4.Text);
             textBox4Resize();
             textBox4.Text = "";
             textBox1.Focus();
@@ -7147,10 +7186,10 @@ retry:
                         //設定內容
                         textBox1.Text = nowClpTxt;
                         ClpTxtBefore = nowClpTxt;//clpTxt;//記下這次內容以供下次比對
-                                              //自動加上書名號
-                                              ////只要剪貼簿裡的內容合於以下條件
-                                              //if (ClpTxtBefore != clpTxt && textBox1.Text == "" && clpTxt.IndexOf("http") == -1 && clpTxt.IndexOf("<scanb") == -1)
-                                              //{
+                                                 //自動加上書名號
+                                                 ////只要剪貼簿裡的內容合於以下條件
+                                                 //if (ClpTxtBefore != clpTxt && textBox1.Text == "" && clpTxt.IndexOf("http") == -1 && clpTxt.IndexOf("<scanb") == -1)
+                                                 //{
                         textBox1.Text = booksPunctuation(nowClpTxt);
                         //return;
                         //}
@@ -7388,10 +7427,10 @@ retry:
             switch (textBox2.Text)
             {
                 case "ap,":
-ap:                 browsrOPMode = BrowserOPMode.appActivateByName;
+ap: browsrOPMode = BrowserOPMode.appActivateByName;
                     textBox2.Text = "";
                     return;
-                case "aa":                    
+                case "aa":
                     goto ap;
                 case "sl,":
 sl: browsrOPMode = BrowserOPMode.seleniumNew;

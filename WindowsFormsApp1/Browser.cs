@@ -31,8 +31,8 @@ namespace TextForCtext
 {
     class Browser
     {
-        static Form1 frm;        
-
+        static Form1 frm;
+        readonly Form1 Form1 = Application.OpenForms.Count > 0 ? Application.OpenForms[0] as Form1 : null;
         //creedit 
         public Browser(Form1 form)
         {
@@ -149,9 +149,9 @@ namespace TextForCtext
                                                                    //cDrv = new ChromeDriver(@"x:\chromedriver.exe", options);
                                                                    //上述加入書籤並不管用！！！20230104//解法已詳下chromeOptions()中
 
-            tryagain:
+tryagain:
                 ChromeDriverService driverService;
-                ChromeDriver cDrv;//綠色免安裝版仍搞不定，安裝 chrome 了就OK 20220101 chatGPT建議者未通；20220105自行解決了，詳下
+                ChromeDriver cDrv=null;//綠色免安裝版仍搞不定，安裝 chrome 了就OK 20220101 chatGPT建議者未通；20220105自行解決了，詳下
 
 
 
@@ -281,6 +281,10 @@ namespace TextForCtext
                         //driverService.HideCommandPromptWindow = true;
                         //cDrv = new ChromeDriver(driverService, options);//, TimeSpan.FromSeconds(50));
                         //break;
+                        case -2146233079://0x80131509:session not created: This version of ChromeDriver only supports Chrome version 108 Current browser version is 110.0.5481.78 with binary path W:\PortableApps\PortableApps\GoogleChromePortable\App\Chrome - bin\chrome.exe(SessionNotCreated)
+                            MessageBox.Show("請更新 chromedriver 才能繼續");
+                            Form1.browsrOPMode= Form1.BrowserOPMode.appActivateByName; killchromedriverFromHere();
+                            return null;
                         default:
                             throw;
                     }
