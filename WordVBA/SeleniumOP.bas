@@ -44,15 +44,21 @@ reStart:
     If WD Is Nothing Then
         Set WD = New SeleniumBasic.IWebDriver
         Set Service = New SeleniumBasic.ChromeDriverService
+            
+            Dim chromePath As String
+            chromePath = getChromePathIncludeBackslash
+            If InStr(chromePath, "GoogleChromePortable") Then
+                chromePath = "W:\PortableApps\PortableApps\GoogleChromePortable\App\Chrome-bin\"
+            End If
+
         With Service
-            .CreateDefaultService driverPath:=getChromePathIncludeBackslash
+            .CreateDefaultService driverPath:=chromePath 'getChromePathIncludeBackslash
             '.CreateDefaultService driverPath:="E:\Selenium\Drivers"
             .HideCommandPromptWindow = True '不顯示命令提示字元視窗
         End With
         Set Options = New SeleniumBasic.ChromeOptions
         With Options
-            '.BinaryLocation = "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe"
-            .BinaryLocation = getChromePathIncludeBackslash + "chrome.exe"
+            .BinaryLocation = chromePath + "chrome.exe"
             .AddExcludedArgument "enable-automation" '禁用「Chrome 正在被自動化軟體控制」的警告消息
             
             'C#：options.AddArgument("user-data-dir=" + Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "\\Google\\Chrome\\User Data\\");
@@ -78,20 +84,28 @@ Select Case Err.Number
 
     Case -2146233088 '**'
         'Debug.Print Err.Description
-        '' err.Descriptionunknown error: Chrome failed to start: exited normally.
-        ''  (unknown error: DevToolsActivePort file doesn't exist)
-        '' (The process started from chrome location W:\PortableApps\PortableApps\GoogleChromePortable\App\Chrome-bin\chrome.exe is no longer running, so ChromeDriver is assuming that Chrome has crashed.)
-        If MsgBox("請關閉先前開啟的Chrome瀏覽器再繼續", vbExclamation + vbOKCancel) = vbOK Then
-                'killProcessesByName "ChromeDriver.exe", pid
+        If InStr(Err.Description, "Chrome failed to start: exited normally.") Then
+            '' err.Descriptionunknown error: Chrome failed to start: exited normally.
+            ''  (unknown error: DevToolsActivePort file doesn't exist)
+            '' (The process started from chrome location W:\PortableApps\PortableApps\GoogleChromePortable\App\Chrome-bin\chrome.exe is no longer running, so ChromeDriver is assuming that Chrome has crashed.)
+            If MsgBox("請關閉先前開啟的Chrome瀏覽器再繼續", vbExclamation + vbOKCancel) = vbOK Then
+                    'killProcessesByName "ChromeDriver.exe", pid
+                    killchromedriverFromHere
+                GoTo reStart
+            Else
+    '            WD.Quit
                 killchromedriverFromHere
+            End If
+        ElseIf InStr(Err.Description, "no such window: No target with given id found") Then
+            killchromedriverFromHere
             GoTo reStart
         Else
-'            WD.Quit
-            killchromedriverFromHere
+            MsgBox Err.Description, vbCritical
+            Stop
         End If
     Case Else
         MsgBox Err.Description, vbCritical
-'        Resume
+        Resume
 End Select
 
 End Sub
@@ -107,13 +121,26 @@ reStart:
     
         Set WD = New SeleniumBasic.IWebDriver
         Set Service = New SeleniumBasic.ChromeDriverService
+        
+        Dim chromePath As String
+        chromePath = getChromePathIncludeBackslash
+        If InStr(chromePath, "GoogleChromePortable") Then
+            chromePath = "W:\PortableApps\PortableApps\GoogleChromePortable\App\Chrome-bin\"
+        End If
+        
         With Service
-            .CreateDefaultService driverPath:=getChromePathIncludeBackslash
+            .CreateDefaultService driverPath:=chromePath 'getChromePathIncludeBackslash
             .HideCommandPromptWindow = True '不顯示命令提示字元視窗
+            If chromedriversPIDcntr = 0 Then chromedriversPIDcntr = 1
+            ReDim chromedriversPID(chromedriversPIDcntr - 1)
+'            chromedriversPID(chromedriversPIDcntr - 1) = Service.ProcessId'還未啟動=0
         End With
+        
         Set Options = New SeleniumBasic.ChromeOptions
         With Options
-            .BinaryLocation = getChromePathIncludeBackslash + "chrome.exe"
+            '.BinaryLocation = getChromePathIncludeBackslash + "chrome.exe"
+            .BinaryLocation = chromePath + "chrome.exe"
+            
             .AddExcludedArgument "enable-automation" '禁用「Chrome 正在被自動化軟體控制」的警告消息
             
             'C#：options.AddArgument("user-data-dir=" + Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "\\Google\\Chrome\\User Data\\");
@@ -148,10 +175,18 @@ Select Case Err.Number
         '' err.Descriptionunknown error: Chrome failed to start: exited normally.
         ''  (unknown error: DevToolsActivePort file doesn't exist)
         '' (The process started from chrome location W:\PortableApps\PortableApps\GoogleChromePortable\App\Chrome-bin\chrome.exe is no longer running, so ChromeDriver is assuming that Chrome has crashed.)
-        If MsgBox("請關閉先前開啟的Chrome瀏覽器再繼續", vbExclamation + vbOKCancel) = vbOK Then
+        If chromedriversPIDcntr = 0 Then chromedriversPIDcntr = 1
+        ReDim chromedriversPID(chromedriversPIDcntr - 1)
+        chromedriversPID(chromedriversPIDcntr - 1) = Service.ProcessId
+        If InStr(Err.Description, "/session timed out after 60 seconds.") Then
+            killchromedriverFromHere
+            Set openChromeBackground = Nothing
+        Else
+            If MsgBox("請關閉先前開啟的Chrome瀏覽器再繼續", vbExclamation + vbOKCancel) = vbOK Then
                 'killProcessesByName "ChromeDriver.exe", pid
                 killchromedriverFromHere
             GoTo reStart
+            End If
         End If
     Case Else
         MsgBox Err.Description, vbCritical
@@ -259,28 +294,49 @@ Err1:
 End Sub
 
 '擷取國語辭典詞條網址
-Function grabDictRevisedUrl_OnlyOneResult(searchStr As String) As String
+Function grabDictRevisedUrl_OnlyOneResult(searchStr As String, Optional Background As Boolean) As String
 'If searchStr = "" And Selection = "" Then Exit Sub
 If searchStr = "" Then Exit Function
 If VBA.Left(searchStr, 1) <> "=" Then searchStr = "=" + searchStr '精確搜尋字串指令
 Const notFoundOrMultiKey As String = "&qMd=0&qCol=1" '查無資料或如果不止一條時，網址後綴都有此關鍵字
-Dim url As String
+Dim url As String, retryTime As Byte
 url = "https://dict.revised.moe.edu.tw/search.jsp?md=1"
 
 On Error GoTo Err1
 
 Dim wdB As SeleniumBasic.IWebDriver, WBQuit As Boolean '=true 則可以關Chrome瀏覽器
-WBQuit = True '因為在背景執行，預設要可以關
 
+If Background Then
+    WBQuit = True '因為在背景執行，預設要可以關
     Set wdB = openChromeBackground(url)
-'    If wdB.url <> url Then wdB.url = url
+    If wdB Is Nothing Then
+        If WD Is Nothing Then
+            openChrome url
+        Else
+            WBQuit = False
+        End If
+        Set wdB = WD
+    End If
+Else
+    WBQuit = False
+        If WD Is Nothing Then
+            openChrome url
+        Else
+            Set wdB = WD
+        End If
+End If
+retry:
+    If wdB.url <> url Then WD.Navigate.GoToUrl url ' wdB.url = url
     Dim form As SeleniumBasic.IWebElement
     Dim keyword As SeleniumBasic.IWebElement
     Dim button As SeleniumBasic.IWebElement
     Set form = wdB.FindElementById("searchF")
     Set keyword = form.FindElementByName("word")
     Set button = form.FindElementByClassName("submit")
-    keyword.SendKeys searchStr
+    If keyword.Text <> searchStr Then
+        keyword.Clear
+        keyword.SendKeys searchStr
+    End If
     Rem 在 headless 參數設定下開啟的Chrome瀏覽器，是無法使用系統貼上功能的
     Rem Dim key As New SeleniumBasic.keys
     Rem     keyword.SendKeys key.Control + "v"
@@ -313,15 +369,46 @@ WBQuit = True '因為在背景執行，預設要可以關
     If WBQuit Then
         '退出瀏覽器
         wdB.Quit
+        If Not Background Then Set WD = Nothing
+    Else
+        wdB.Close
     End If
     Exit Function
 Err1:
     Select Case Err.Number
         Case 49 'DLL 呼叫規格錯誤
             Resume
+        Case 91 '沒有設定物件變數或 With 區塊變數
+            If retryTime > 1 Then
+                MsgBox Err.Number + Err.Description
+            Else
+'                SystemSetup.wait 0.5
+'                Resume
+'                Set WD = Nothing
+'                openChrome url
+                Set wdB = WD
+'                WBQuit = True
+                retryTime = retryTime + 1
+                GoTo retry
+            End If
+        Case -2147467261 '並未將物件參考設定為物件的執行個體。
+            Set WD = Nothing
+            killchromedriverFromHere
+            openChrome url
+            Set wdB = WD
+            WBQuit = True
+            Resume
         Case -2146233088 'unknown error: ChromeDriver only supports characters in the BMP  (Session info: chrome=109.0.5414.75)
-            'textbox.SendKeys key.LeftShift + key.Insert
-            WBQuit = pasteWhenOutBMP(wdB, url, "word", searchStr, keyword)
+            If InStr(Err.Description, "/session timed out after 60 seconds.") Then
+                If WD Is Nothing Then openChrome (url)
+                Set wdB = WD
+            ElseIf InStr(Err.Description, "no such window: target window already closed") Or InStr(Err.Description, "invalid session id") Then
+                WD.Quit: Set WD = Nothing: killchromedriverFromHere: openChrome (url)
+                Set wdB = WD
+            Else
+                'textbox.SendKeys key.LeftShift + key.Insert
+                WBQuit = pasteWhenOutBMP(wdB, url, "word", searchStr, keyword, Background)
+            End If
             Resume Next
         Case Else
             MsgBox Err.Description, vbCritical
@@ -364,15 +451,29 @@ Err1:
 End Sub
 
 '貼到古籍酷自動標點()
-Function grabGjCoolPunctResult(Text As String) As String
+Function grabGjCoolPunctResult(Text As String, Optional Background As Boolean) As String
 Const url = "https://gj.cool/punct"
 Dim wdB As SeleniumBasic.IWebDriver, WBQuit As Boolean '=true 則可以關Chrome瀏覽器
 Dim textBox As SeleniumBasic.IWebElement, btn As SeleniumBasic.IWebElement, btn2 As SeleniumBasic.IWebElement, item As SeleniumBasic.IWebElement
+
 On Error GoTo Err1
-Set wdB = openChromeBackground(url)
-'If WDB Is Nothing Then openChrome ("https://gj.cool/punct")
+
+If Background Then
+    Rem 隱藏
+    Set wdB = openChromeBackground(url)
+    WBQuit = True '因為在背景執行，預設要可以關
+    If wdB Is Nothing Then
+        If WD Is Nothing Then openChrome ("https://gj.cool/punct")
+        Set wdB = WD
+    End If
+Else
+    Rem 顯示
+    If WD Is Nothing Then openChrome ("https://gj.cool/punct")
+    Set wdB = WD
+End If
 If wdB Is Nothing Then Exit Function
-WBQuit = True '因為在背景執行，預設要可以關
+If wdB.url <> url Then wdB.Navigate.GoToUrl url
+
 '整理文本
 Dim chkStr As String: chkStr = VBA.Chr(13) & Chr(10) & Chr(7) & Chr(9) & Chr(8)
 Text = VBA.Trim(Text)
@@ -400,10 +501,11 @@ textBox.SendKeys Text 'SystemSetup.GetClipboardText
 Dim WaitDt As Date, chkTxtTime As Date, nx As String, xl As Integer
 
 nx = textBox.Text
+Text = nx
 SystemSetup.playSound 1.294
 If nx = "" Then
     grabGjCoolPunctResult = ""
-    wdB.Quit
+    If WBQuit Then wdB.Quit
     Exit Function
 End If
 
@@ -422,9 +524,10 @@ Do
         nx = textBox.Text
         SystemSetup.playSound 1
         chkTxtTime = Now
+        'VBA.StrComp(text, nx) <> 0
+        If nx <> Text Then Exit Do
+        If InStr(nx, "，") > 0 And InStr(nx, "。") > 0 And Len(nx) > xl Then Exit Do
     End If
-    'VBA.StrComp(text, nx) <> 0
-    If InStr(nx, "，") > 0 And InStr(nx, "。") > 0 And Len(nx) > xl Then Exit Do
     If Now > WaitDt Then
         'Exit Do '超過指定時間後離開
         grabGjCoolPunctResult = ""
@@ -445,7 +548,12 @@ Loop
 'SystemSetup.SetClipboard textbox.text
 'grabGjCoolPunctResult = SystemSetup.GetClipboardText
 grabGjCoolPunctResult = textBox.Text
-If WBQuit Then wdB.Close
+If WBQuit = False Then
+    wdB.Close
+Else
+    wdB.Quit
+    If Not Background Then Set WD = Nothing
+End If
 'Debug.Print grabGjCoolPunctResult
 Exit Function
 
@@ -453,14 +561,43 @@ Err1:
     Select Case Err.Number
         Case 49 'DLL 呼叫規格錯誤
             Resume
+        Case 91 '沒有設定物件變數或 With 區塊變數
+                killchromedriverFromHere
+                openChrome url
+                Set wdB = WD
+            Resume
         Case -2146233088 'unknown error: ChromeDriver only supports characters in the BMP  (Session info: chrome=109.0.5414.75)
             Rem 完全無作用
             Rem SystemSetup.SetClipboard text
             Rem SystemSetup.Wait 0.3
             Rem textBox.SendKeys key.Control + "v"
             Rem textBox.SendKeys key.LeftShift + key.Insert
-            WBQuit = pasteWhenOutBMP(wdB, url, "PunctArea", Text, textBox)
-            Resume Next
+            If InStr(Err.Description, "ChromeDriver only supports characters in the BMP") Then
+                WBQuit = pasteWhenOutBMP(wdB, url, "PunctArea", Text, textBox, Background)
+                Resume Next
+            ElseIf InStr(Err.Description, "invalid session id") Or InStr(Err.Description, "A exception with a null response was thrown sending an HTTP request to the remote WebDriver server for URL http://localhost:4609/session/455865a54d3f64364cf76b41fe7953a3/url. The status of the exception was ConnectFailure, and the message was: 無法連接至遠端伺服器") Then
+                killchromedriverFromHere
+                openChrome url
+                Set wdB = WD
+                Resume
+            ElseIf InStr(Err.Description, "no such window: target window already closed") Then
+                openNewTabWhenTabAlreadyExit wdB
+                wdB.Navigate.GoToUrl url
+                Resume
+            Else
+                MsgBox Err.Number + Err.Description
+                Stop
+            End If
+        Case -2147467261 '並未將物件參考設定為物件的執行個體。
+            If InStr(Err.Description, "並未將物件參考設定為物件的執行個體。") Then
+                killchromedriverFromHere 'WD.Quit: Set WD = Nothing:
+                 openChrome url
+                Set wdB = WD
+                Resume
+            Else
+                MsgBox Err.Description, vbCritical
+                Stop
+            End If
         Case Else
             MsgBox Err.Description, vbCritical
             wdB.Quit
@@ -470,22 +607,26 @@ Err1:
 
 End Function
 
-Private Function pasteWhenOutBMP(ByRef iwd As SeleniumBasic.IWebDriver, url, textBoxToPastedID, pastedTxt As String, ByRef textBox As SeleniumBasic.IWebElement) As Boolean ''unknown error: ChromeDriver only supports characters in the BMP  (Session info: chrome=109.0.5414.75)
+Private Function pasteWhenOutBMP(ByRef iwd As SeleniumBasic.IWebDriver, url, textBoxToPastedID, pastedTxt As String, ByRef textBox As SeleniumBasic.IWebElement, Background As Boolean) As Boolean ''unknown error: ChromeDriver only supports characters in the BMP  (Session info: chrome=109.0.5414.75)
 Rem creedit chatGPT大菩薩：您提到的確實是 Selenium 的 SendKeys 方法不能貼上 BMP 外的字的問題。
 On Error GoTo Err1
+Dim retryTimes As Byte
 DoEvents
 'SystemSetup.SetClipboard pastedTxt
 'SystemSetup.Wait 0.2
-iwd.Quit
+If Background Then iwd.Quit
 retry:
-If WD Is Nothing Then
-    openChrome (url)
-    pasteWhenOutBMP = True
+If iwd Is Nothing Then
+    If WD Is Nothing Then
+        openChrome (url)
+        pasteWhenOutBMP = True
+    End If
+    Set iwd = WD
 End If
-Set iwd = WD
 If iwd.url <> url Then iwd.Navigate.GoToUrl (url)
 Dim key As New SeleniumBasic.keys
 Set textBox = iwd.FindElementById(textBoxToPastedID)
+If textBox Is Nothing Then Set textBox = iwd.FindElementByName(textBoxToPastedID)
 textBox.Click
 
 '貼上
@@ -498,6 +639,13 @@ Err1:
     Select Case Err.Number
         Case 49 'DLL 呼叫規格錯誤
             Resume
+        Case 91 '未設定物件變數
+            If retryTimes > 1 Then
+                MsgBox Err.Number + Err.Description
+            Else
+                retryTimes = retryTimes + 1
+                GoTo retry
+            End If
         Case -2146233088 '兩個錯誤的號碼是一樣的，只能用描述來判斷了
         'unknown error: ChromeDriver only supports characters in the BMP  (Session info: chrome=109.0.5414.75)
 '            textbox.SendKeys key.LeftShift + key.Insert

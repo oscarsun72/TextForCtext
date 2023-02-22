@@ -11,7 +11,7 @@ using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 namespace TextForCtext
 {
     /// <summary>
-    /// Cntext=context，處理一切上下文、前後文文字的運算
+    /// Cntext=context=ChineseText，處理一切上下文、前後文文字的運算
     /// </summary>
     //public static class CnText
     public struct CnText

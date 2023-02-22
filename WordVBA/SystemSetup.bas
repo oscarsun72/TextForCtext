@@ -528,7 +528,7 @@ Set objWMIService = GetObject("winmgmts:" & "{impersonationLevel=impersonate}!\\
 Set colProcess = objWMIService.ExecQuery("Select * from Win32_Process Where Name = 'chromedriver.exe'")
 For Each objProcess In colProcess
     For Each pid In SeleniumOP.chromedriversPID
-        If objProcess.ProcessId = pid Then objProcess.Terminate
+        If objProcess.ProcessId = pid And objProcess.ProcessId <> 0 Then objProcess.Terminate
     Next pid
 Next
 '重設儲存chromedriver程序ID的陣列

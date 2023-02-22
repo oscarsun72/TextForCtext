@@ -256,3 +256,14 @@ Public Function IsChineseString(s As String) As Boolean
     IsChineseString = True
 End Function
 
+Rem 20230221 chatGPT大菩薩: VBA檢查surrogate字符：
+Rem 在 VBA 中，您可以使用 AscW 函數將一個字符轉換為 Unicode 編碼。然後，您可以檢查該編碼是否在代理對範圍內。
+Rem Unicode 中的代理對範圍為 U+D800 到 U+DFFF，共有 2048 個代碼點。代理對是一種特殊的編碼形式，由兩個 Unicode 編碼組成，用於表示較大的字符集，如 Emoji。
+Rem 下面是一個示例函數，該函數接受一個字符並返回一個布爾值，指示該字符是否為代理對中的字符：
+Function IsSurrogate(ByVal ch As String) As Boolean
+    Dim code As Long
+    code = AscW(ch)
+    IsSurrogate = (code >= &HD800 And code <= &HDFFF)
+    Rem 這個函數將字符轉換為 Unicode 編碼，並檢查該編碼是否在代理對範圍內。如果是，則函數返回 True，否則返回 False。請注意，AscW 函數只能用於 Unicode 字符串，如果您要處理 ANSI 字符串，則需要使用 Asc 函數。
+End Function
+

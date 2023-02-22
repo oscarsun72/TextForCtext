@@ -19,6 +19,11 @@ namespace TextForCtext
     {
 
         /// <summary>
+        /// 在textBox2內輸入「nb,」可以切換 GXDS.SKQSnoteBlank 值以指定是否要檢查注文中因空白而誤標的情形
+        /// </summary>
+        internal static bool SKQSnoteBlank=false;
+
+        /// <summary>
         /// = Environment.NewLine;
         /// </summary>
         string newLine = Environment.NewLine;

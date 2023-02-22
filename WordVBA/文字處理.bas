@@ -104,7 +104,7 @@ retry:  Next ch
     EndTime = Time
     AppActivate "Microsoft word"
     MsgBox "統計完成!!" & vbCr & "(※共執行了" & wrong & "次的檢查※)" _
-        & vbCr & "※耗時:" & format(EndTime - StTime, "n分s秒") & "※" _
+        & vbCr & "※耗時:" & Format(EndTime - StTime, "n分s秒") & "※" _
         & vbCr & "字元數=" & .Characters.Count & vbCr '_
 '        & firstword
 '    MsgBox "統計完成!!" & vbCr & "(※共執行了" & wrong & "次的檢查※)" _
@@ -207,7 +207,7 @@ EndTime = Time
 AppActivate "Microsoft word"
 MsgBox "統計完成!!" & vbCr & "(※共執行了" & wrong & "次的檢查※)" _
     & "詞彙右邊半形空格凡" & hfspace & "次,忽略不計!" _
-    & vbCr & "※耗時:" & format(EndTime - StTime, "n分s秒") & "※"
+    & vbCr & "※耗時:" & Format(EndTime - StTime, "n分s秒") & "※"
 If MsgBox("要即刻檢視結果嗎?", vbYesNo + vbQuestion) = vbYes Then
 '    Set d = GetObject("d:\千慮一得齋\書籍資料\詞頻.mdb")
     AppActivate "Microsoft access"
@@ -359,7 +359,7 @@ End With
     AppActivate "Microsoft word"
     MsgBox "統計完成!!" & vbCr & "(※共執行了" & wrong & "次的檢查※)" _
         & "詞彙右邊半形空格凡" & hfspace & "次,忽略不計!" _
-        & vbCr & "※耗時:" & format(EndTime - StTime, "n分s秒") & "※" _
+        & vbCr & "※耗時:" & Format(EndTime - StTime, "n分s秒") & "※" _
         & vbCr & "字元數=" & dwL '.Characters.Count
 'End With
 'd.Visible = True
@@ -458,7 +458,7 @@ With ActiveDocument
     AppActivate "Microsoft word"
     MsgBox "統計完成!!" & vbCr & "(※共執行了" & wrong & "次的檢查※)" _
         & "詞彙右邊半形空格凡" & hfspace & "次,忽略不計!" _
-        & vbCr & "※耗時:" & format(EndTime - StTime, "n分s秒") & "※" _
+        & vbCr & "※耗時:" & Format(EndTime - StTime, "n分s秒") & "※" _
         & vbCr & "字元數=" & .Characters.Count
 End With
 'd.Visible = True
@@ -601,7 +601,7 @@ With ActiveDocument
     AppActivate "Microsoft word"
     MsgBox "統計完成!!" & vbCr & "(※共執行了" & wrong & "次的檢查※)" _
         & "詞彙右邊半形空格凡" & hfspace & "次,忽略不計!" _
-        & vbCr & "※耗時:" & format(EndTime - StTime, "n分s秒") & "※" _
+        & vbCr & "※耗時:" & Format(EndTime - StTime, "n分s秒") & "※" _
         & vbCr & "字元數=" & .Characters.Count
 End With
 If MsgBox("要即刻檢視結果嗎?", vbYesNo + vbQuestion) = vbYes Then
@@ -687,7 +687,7 @@ With ActiveDocument
     AppActivate "Microsoft word"
     MsgBox "統計完成!!" & vbCr & "(※共執行了" & wrong & "次的檢查※)" _
         & "詞彙右邊半形空格凡" & hfspace & "次,忽略不計!" _
-        & vbCr & "※耗時:" & format(EndTime - StTime, "n分s秒") & "※" _
+        & vbCr & "※耗時:" & Format(EndTime - StTime, "n分s秒") & "※" _
         & vbCr & "字元數=" & .Characters.Count
 End With
 If MsgBox("要即刻檢視結果嗎?", vbYesNo + vbQuestion) = vbYes Then
@@ -769,7 +769,7 @@ With ActiveDocument
     AppActivate "Microsoft word"
     MsgBox "統計完成!!" & vbCr & "(※共執行了" & wrong & "次的檢查※)" _
         & "詞彙右邊半形空格凡" & hfspace & "次,忽略不計!" _
-        & vbCr & "※耗時:" & format(EndTime - StTime, "n分s秒") & "※" _
+        & vbCr & "※耗時:" & Format(EndTime - StTime, "n分s秒") & "※" _
         & vbCr & "字元數=" & .Characters.Count
 End With
 If MsgBox("要即刻檢視結果嗎?", vbYesNo + vbQuestion) = vbYes Then
@@ -852,7 +852,7 @@ With ActiveDocument
     AppActivate "Microsoft word"
     MsgBox "統計完成!!" & vbCr & "(※共執行了" & wrong & "次的檢查※)" _
         & "詞彙右邊半形空格凡" & hfspace & "次,忽略不計!" _
-        & vbCr & "※耗時:" & format(EndTime - StTime, "n分s秒") & "※" _
+        & vbCr & "※耗時:" & Format(EndTime - StTime, "n分s秒") & "※" _
         & vbCr & "字元數=" & .Characters.Count
 End With
 If MsgBox("要即刻檢視結果嗎?", vbYesNo + vbQuestion) = vbYes Then
@@ -935,7 +935,7 @@ With ActiveDocument
     AppActivate "Microsoft word"
     MsgBox "統計完成!!" & vbCr & "(※共執行了" & wrong & "次的檢查※)" _
         & "詞彙右邊半形空格凡" & hfspace & "次,忽略不計!" _
-        & vbCr & "※耗時:" & format(EndTime - StTime, "n分s秒") & "※" _
+        & vbCr & "※耗時:" & Format(EndTime - StTime, "n分s秒") & "※" _
         & vbCr & "字元數=" & .Characters.Count
 End With
 If MsgBox("要即刻檢視結果嗎?", vbYesNo + vbQuestion) = vbYes Then
@@ -1016,7 +1016,7 @@ With ActiveDocument
     AppActivate "Microsoft word"
     MsgBox "統計完成!!" & vbCr & "(※共執行了" & wrong & "次的檢查※)" _
         & "詞彙右邊半形空格凡" & hfspace & "次,忽略不計!" _
-        & vbCr & "※耗時:" & format(EndTime - StTime, "n分s秒") & "※" _
+        & vbCr & "※耗時:" & Format(EndTime - StTime, "n分s秒") & "※" _
         & vbCr & "字元數=" & .Characters.Count
 End With
 If MsgBox("要即刻檢視結果嗎?", vbYesNo + vbQuestion) = vbYes Then
@@ -1097,7 +1097,7 @@ With ActiveDocument
     AppActivate "Microsoft word"
     MsgBox "統計完成!!" & vbCr & "(※共執行了" & wrong & "次的檢查※)" _
         & "詞彙右邊半形空格凡" & hfspace & "次,忽略不計!" _
-        & vbCr & "※耗時:" & format(EndTime - StTime, "n分s秒") & "※" _
+        & vbCr & "※耗時:" & Format(EndTime - StTime, "n分s秒") & "※" _
         & vbCr & "字元數=" & .Characters.Count
 End With
 If MsgBox("要即刻檢視結果嗎?", vbYesNo + vbQuestion) = vbYes Then
@@ -1176,7 +1176,7 @@ With ActiveDocument
     AppActivate "Microsoft word"
     MsgBox "統計完成!!" & vbCr & "(※共執行了" & wrong & "次的檢查※)" _
         & "詞彙右邊半形空格凡" & hfspace & "次,忽略不計!" _
-        & vbCr & "※耗時:" & format(EndTime - StTime, "n分s秒") & "※" _
+        & vbCr & "※耗時:" & Format(EndTime - StTime, "n分s秒") & "※" _
         & vbCr & "字元數=" & .Characters.Count
 End With
 If MsgBox("要即刻檢視結果嗎?", vbYesNo + vbQuestion) = vbYes Then
@@ -1256,7 +1256,7 @@ With ActiveDocument
     AppActivate "Microsoft word"
     MsgBox "統計完成!!" & vbCr & "(※共執行了" & wrong & "次的檢查※)" _
         & "詞彙右邊半形空格凡" & hfspace & "次,忽略不計!" _
-        & vbCr & "※耗時:" & format(EndTime - StTime, "n分s秒") & "※" _
+        & vbCr & "※耗時:" & Format(EndTime - StTime, "n分s秒") & "※" _
         & vbCr & "字元數=" & .Characters.Count
 End With
 If MsgBox("要即刻檢視結果嗎?", vbYesNo + vbQuestion) = vbYes Then
@@ -1335,7 +1335,7 @@ With ActiveDocument
     AppActivate "Microsoft word"
     MsgBox "統計完成!!" & vbCr & "(※共執行了" & wrong & "次的檢查※)" _
         & "詞彙右邊半形空格凡" & hfspace & "次,忽略不計!" _
-        & vbCr & "※耗時:" & format(EndTime - StTime, "n分s秒") & "※" _
+        & vbCr & "※耗時:" & Format(EndTime - StTime, "n分s秒") & "※" _
         & vbCr & "字元數=" & .Characters.Count
 End With
 If MsgBox("要即刻檢視結果嗎?", vbYesNo + vbQuestion) = vbYes Then
@@ -1413,7 +1413,7 @@ With ActiveDocument
     AppActivate "Microsoft word"
     MsgBox "統計完成!!" & vbCr & "(※共執行了" & wrong & "次的檢查※)" _
         & "詞彙右邊半形空格凡" & hfspace & "次,忽略不計!" _
-        & vbCr & "※耗時:" & format(EndTime - StTime, "n分s秒") & "※" _
+        & vbCr & "※耗時:" & Format(EndTime - StTime, "n分s秒") & "※" _
         & vbCr & "字元數=" & .Characters.Count
 End With
 If MsgBox("要即刻檢視結果嗎?", vbYesNo + vbQuestion) = vbYes Then
@@ -1498,7 +1498,7 @@ With ActiveDocument
     AppActivate "Microsoft word"
     MsgBox "統計完成!!" & vbCr & "(※共執行了" & wrong & "次的檢查※)" _
         & "詞彙右邊半形空格凡" & hfspace & "次,忽略不計!" _
-        & vbCr & "※耗時:" & format(EndTime - StTime, "n分s秒") & "※" _
+        & vbCr & "※耗時:" & Format(EndTime - StTime, "n分s秒") & "※" _
         & vbCr & "字元數=" & .Characters.Count
 End With
 If MsgBox("要即刻檢視結果嗎?", vbYesNo + vbQuestion) = vbYes Then
@@ -1593,7 +1593,7 @@ With ActiveDocument
     AppActivate "Microsoft word"
     MsgBox "統計完成!!" & vbCr & "(※共執行了" & wrong & "次的檢查※)" _
         & "詞彙右邊半形空格凡" & hfspace & "次,忽略不計!" _
-        & vbCr & "※耗時:" & format(EndTime - StTime, "n分s秒") & "※" _
+        & vbCr & "※耗時:" & Format(EndTime - StTime, "n分s秒") & "※" _
         & vbCr & "字元數=" & .Characters.Count
 End With
 If MsgBox("要即刻檢視結果嗎?", vbYesNo + vbQuestion) = vbYes Then
@@ -1684,7 +1684,7 @@ With ActiveDocument
     AppActivate "Microsoft word"
     MsgBox "統計完成!!" & vbCr & "(※共執行了" & wrong & "次的檢查※)" _
         & "詞彙右邊半形空格凡" & hfspace & "次,忽略不計!" _
-        & vbCr & "※耗時:" & format(EndTime - StTime, "n分s秒") & "※" _
+        & vbCr & "※耗時:" & Format(EndTime - StTime, "n分s秒") & "※" _
         & vbCr & "字元數=" & .Characters.Count
 End With
 If MsgBox("要即刻檢視結果嗎?", vbYesNo + vbQuestion) = vbYes Then
@@ -1892,14 +1892,6 @@ For i = 97 To 122
 Next
 End Function
 
-Rem 判斷剪貼簿裡的純文字(或指定的文字)內容是否在文件中已存在
-Function isDocumentContainClipboardText(d As Document, Optional chkClipboardText As String) As Boolean
-If chkClipboardText = "" Then chkClipboardText = SystemSetup.GetClipboardText
-Rem 剪貼簿裡的換行符號值是chr(13)&chr(10)而在Word文件中是只有 chr(13)
-chkClipboardText = VBA.Replace(chkClipboardText, Chr(13) & Chr(10), Chr(13))
-If VBA.InStr(d.Range.Text, chkClipboardText) > 0 Then isDocumentContainClipboardText = True
-End Function
-
 Function trimStrForSearch_PlainText(x As String) As String
 Rem 20230128 癸卯年初七 孫守真×chatGPT大菩薩：VBA Overload Functionality：
 'chatGPT大菩薩新年吉祥： 想請問 VBA 是不是不能像 C# 一樣函式方法可以 多載、重載（overload）？
@@ -1972,9 +1964,9 @@ f = Array("。", "」", Chr(-24152), "：", "，", "；", _
 End Function
 Function isSymbol(ByVal a As String) As Boolean
 Dim f As String
- f = "（。「」『』[]【】〔〕《》〈〉-－"",  ：，；" _
+ f = "（）。「」『』[]【】〔〕《》〈〉-－"",  ：，；？?" _
     & "、. :,;" _
-    & "……...）!)-" & Chr(34) & Chr(-24152)
+    & "……...!()-·‧" & Chr(34) & Chr(-24153) & Chr(-24152) & Chr(-24155) & Chr(-24154) & ChrW(8218) '34：雙引號。大陸標點符號上下雙引號、上下單引數、逗號
 If InStr(1, f, a, vbTextCompare) Then
     isSymbol = True
 End If
@@ -2048,7 +2040,7 @@ With Selection '原以整份文件(ActiveDocument),今但以選取範圍整理,但因更改值而影響
     If .Document.path = "" Then
         For Each WD In .words
             '要是數字且前後不能加﹝﹞或〔〕才執行！
-            If Not WD.Text Like "﹝" And Not WD.Text Like "〔" And Not WD Like "[[]" And Not WD Like "[]]" Then
+            If Not WD.text Like "﹝" And Not WD.text Like "〔" And Not WD Like "[[]" And Not WD Like "[]]" Then
                 If IsNumeric(WD) Then
                     If WD.End = .Document.Content.StoryLength Or WD.start = 0 Then GoTo w '文件之首尾另外處理
                     If Not WD.Previous Like "﹝" And Not WD.Previous Like "〔" And Not WD.Previous Like "[[]" _
@@ -2058,11 +2050,11 @@ w:                      If WD <= 20 Then 'Arial Unicode MS[種類]裡"括號文數字"只
                                 '選取會改變Selection的範圍,故今取消!
 '                                .Select 'Words物件即表一個Range物件,見線上說明!
                                 .Font.Name = "Arial Unicode MS"
-                                WD.Text = ChrW((9312 - 1) + WD)
+                                WD.text = ChrW((9312 - 1) + WD)
                             End With
                         Else '超過20號的註腳時
                             With WD
-                                .Text = "﹝" & WD.Text & "﹞" '加括號
+                                .text = "﹝" & WD.text & "﹞" '加括號
                             End With
         '                    MsgBox "有超過20號的註腳,不能執行！", vbCritical
         '                    Do Until .Undo(i) = False '還原直至不能還原（還原所有動作）
@@ -2089,8 +2081,8 @@ HNumArray = Array("0", "1", "2", "3", "4", "5", "6", "7", "8", "9")
 With ActiveDocument
     For Each e In .Characters
         For i = 1 To UBound(FNumArray) + 1
-            If e.Text Like FNumArray(i - 1) Then
-                e.Text = HNumArray(i - 1)
+            If e.text Like FNumArray(i - 1) Then
+                e.text = HNumArray(i - 1)
         End If
         Next i
     Next e
@@ -2104,7 +2096,7 @@ End With
 End Sub
 Sub 圓括號改篇名號()
 If Selection.Type = wdSelectionIP Then Selection.HomeKey wdStory: Selection.EndKey wdStory, wdExtend
-Selection.Text = Replace(Replace(Selection.Text, "（", "〈"), "）", "〉")
+Selection.text = Replace(Replace(Selection.text, "（", "〈"), "）", "〉")
 End Sub
 
 
@@ -2199,7 +2191,7 @@ With Selection
 '        End With
 '        If .Find.Execute() = False Then Exit Do
         'Application.Browser.Next
-        .TypeText Text:="["
+        .TypeText text:="["
         .MoveLeft Unit:=wdCharacter, Count:=1, Extend:=wdExtend
         .Font.Superscript = wdToggle
 '        Selection.Copy
@@ -2212,7 +2204,7 @@ With Selection
 '        Selection.MoveLeft Unit:=wdCharacter, Count:=1
         Selection.MoveRight Unit:=wdCharacter, Count:=2
         'Selection.TypeBackspace
-        Selection.TypeText Text:="]"
+        Selection.TypeText text:="]"
         'Selection.MoveRight Unit:=wdCharacter, Count:=1
     Loop 'While .Find.Execute()
 End With
@@ -2706,7 +2698,7 @@ Exit Sub
 chng:
                     For Each aM In chRng.Characters
                         If aM.Next = ":" Then
-                            aM.Next.Next.Text = Str((CInt(aM.Next.Next) * 10 + CInt(aM) * 60) / 10)
+                            aM.Next.Next.text = str((CInt(aM.Next.Next) * 10 + CInt(aM) * 60) / 10)
                             aM.Next.Delete
                             aM.Delete
                             Exit For
@@ -2718,7 +2710,7 @@ Sub 中國哲學書電子化計劃_表格轉文字(ByRef r As Range)
 On Error GoTo eh
 Dim lngTemp As Long '因為誤按到追蹤修訂，才會引發訊息提示刪除儲存格不會有標識
 'Dim d As Document
-Dim tb As Table, C As Cell ', ci As Long
+Dim tb As Table, c As Cell ', ci As Long
 'Set d = ActiveDocument
 lngTemp = word.Application.DisplayAlerts
 If r.Tables.Count > 0 Then
@@ -2733,16 +2725,16 @@ Exit Sub
 eh:
 Select Case Err.Number
     Case 5992 '無法個別存取此集合中的各欄，因為表格中有混合的儲存格寬度。
-        For Each C In tb.Range.Cells
+        For Each c In tb.Range.Cells
 '            ci = ci + 1
 '            If ci Mod 3 = 2 Then
                 'If VBA.IsNumeric(VBA.Left(c.Range.text, VBA.InStr(c.Range.text, "?") - 1)) Then
-                If VBA.InStr(C.Range.Text, ChrW(160) & ChrW(47)) > 0 Then
+                If VBA.InStr(c.Range.text, ChrW(160) & ChrW(47)) > 0 Then
 '                    word.Application.DisplayAlerts = False
-                    C.Delete  '刪除編號之儲存格
+                    c.Delete  '刪除編號之儲存格
                 End If
 '            End If
-        Next C
+        Next c
         Resume Next
     Case Else
         MsgBox Err.Number & Err.Description
@@ -2876,7 +2868,7 @@ Dim rp As Variant, i As Byte
 SystemSetup.stopUndo ur, "漢籍電子文獻資料庫文本整理_以轉貼到中國哲學書電子化計劃"
 If Documents.Count = 0 Then Documents.Add
 Set d = ActiveDocument
-If d.path <> "" Or d.Content.Text <> Chr(13) Then
+If d.path <> "" Or d.Content.text <> Chr(13) Then
     Set d = Documents.Add()
     'Exit Sub
 End If
@@ -2909,7 +2901,7 @@ On Error GoTo eh:
 rng.PasteAndFormat wdFormatPlainText
 rng.Find.ClearFormatting
 For i = 0 To UBound(rp)
-    If InStr(rng.Text, rp(i)) > 0 Then
+    If InStr(rng.text, rp(i)) > 0 Then
         rng.Find.Execute rp(i), , , , , , , wdFindContinue, , rp(i + 1), wdReplaceAll
     End If
     i = i + 1
@@ -2926,7 +2918,7 @@ Exit Sub
 eh:
 Select Case Err.Number
     Case 4198 '指令失敗
-        SystemSetup.Wait 900
+        SystemSetup.wait 900
         Resume
     Case Else
         MsgBox Err.Number + Err.Description
@@ -3021,13 +3013,13 @@ Static cntStr As String, chromePath As String
 st = Selection.Type
 If st = wdSelectionIP Then
     If Selection.start = 0 Then Exit Sub
-    x = Selection.Previous.Characters(Selection.Previous.Characters.Count).Text
+    x = Selection.Previous.Characters(Selection.Previous.Characters.Count).text
     If InStr("。，；「」『』〈〉《》？.,;""?－-──--（）()【】〔〕<>[]…! 　！", x) Then Exit Sub
 '    Selection.Previous.Copy
 Else
-    x = trimStrForSearch(VBA.CStr(Selection.Text), Selection)
+    x = trimStrForSearch(VBA.CStr(Selection.text), Selection)
     'Selection.Copy
-    SystemSetup.ClipboardPutIn "=" & Selection.Text
+    SystemSetup.ClipboardPutIn "=" & Selection.text
 End If
     If 文字處理.isSymbol(CStr(x)) Or 文字處理.is注音符號(CStr(x)) Or 文字處理.isLetter(CStr(x)) Or 文字處理.isNum(CStr(x)) Then Exit Sub
 Set rng = Selection.Range
@@ -3184,11 +3176,11 @@ typeTexts:
                         Dim rngW As Range
                         Set rngW = Selection.Range
                         rngW.SetRange Selection.Previous.Characters(Selection.Previous.Characters.Count).start, Selection.Previous.Characters(Selection.Previous.Characters.Count).End
-                        SystemSetup.ClipboardPutIn "=" & rngW.Text '"^" & rngW.text & "$" 'version 6's new settings
+                        SystemSetup.ClipboardPutIn "=" & rngW.text '"^" & rngW.text & "$" 'version 6's new settings
                         Set rngW = Nothing
                     Else
                         Set rngW = Selection.Previous.Characters(Selection.Previous.Characters.Count)
-                        SystemSetup.ClipboardPutIn "=" & rngW.Text
+                        SystemSetup.ClipboardPutIn "=" & rngW.text
                         'Selection.Previous.Characters(Selection.Previous.Characters.Count).Copy
                     End If
                 End If
@@ -3218,7 +3210,7 @@ rePt:
                 If repeated = False Then Shell Network.getDefaultBrowserFullname & " https://dict.revised.moe.edu.tw/search.jsp?md=1"
                 x = InputBox("plz putin the url", , IIf(VBA.IsNull(rst.Fields(0).Value), "", rst.Fields(0).Value)) 'frmDict.add1URLTo1國語辭典(words)
                 If repeated Then
-                    SystemSetup.Wait 1 '先確定要輸入哪個詞條，再將瀏覽器置前
+                    SystemSetup.wait 1 '先確定要輸入哪個詞條，再將瀏覽器置前
                     appActivateChrome
                 End If
                 repeated = True
@@ -3263,7 +3255,7 @@ eh:
             Docs.樣式add_沛榮按等樣式
             Resume
         Case 5 '程序呼叫或引數不正確
-            SystemSetup.Wait 3 'http://vbcity.com/forums/t/81315.aspx
+            SystemSetup.wait 3 'http://vbcity.com/forums/t/81315.aspx
             'Application.Wait (Now + TimeValue("0:00:10")) '<~~ Waits ten seconds.
             Resume 'https://stackoverflow.com/questions/21937053/appactivate-to-return-to-excel
         Case Else
@@ -3299,28 +3291,28 @@ db.cnt查字 cnt
 'Else
 '    MsgBox "路徑不存在！", vbCritical: Exit Sub
 'End If
-Set d = ActiveDocument: dx = d.Range.Text: Set rngF = d.Range
+Set d = ActiveDocument: dx = d.Range.text: Set rngF = d.Range
 'cnt.Open cntStr
 
 GoSub bookmarks '標點符號_書名號_自動加上用
 rst.Open "select * from 標點符號_篇名號_自動加上用 order by 排序", cnt, adOpenForwardOnly, adLockReadOnly
-Set rngF = d.Range: dx = d.Range.Text
+Set rngF = d.Range: dx = d.Range.text
 Do Until rst.EOF
     If VBA.InStr(dx, rst("篇名").Value) Then 'if found
         Do While rngF.Find.Execute(rst("篇名").Value, , , , , , True, wdFindStop)
             If InStr("》〉·‧", IIf(rngF.Characters(rngF.Characters.Count).Next Is Nothing, "", rngF.Characters(rngF.Characters.Count).Next)) = 0 And _
                 InStr("《〈·‧", IIf(rngF.Characters(1).Previous Is Nothing, "", rngF.Characters(1).Previous)) = 0 Then
                 If VBA.IsNull(rst("取代為").Value) Then
-                    rngF.Text = "〈" & rst("篇名").Value & "〉"
+                    rngF.text = "〈" & rst("篇名").Value & "〉"
                               'd.Range.Find.Execute rst("篇名").Value, , , , , , True, wdFindContinue, , "〈" & rst("篇名").Value & "〉", wdReplaceAll
                 Else
-                    rngF.Text = rst("取代為").Value
+                    rngF.text = rst("取代為").Value
                     'd.Range.Find.Execute rst("篇名").Value, , , , , , True, wdFindContinue, , rst("取代為").Value, wdReplaceAll
                 End If
                 rngF.SetRange rngF.End, d.Range.End
             End If
         Loop
-        Set rngF = d.Range: dx = d.Range.Text
+        Set rngF = d.Range: dx = d.Range.text
     End If
     
     rst.MoveNext
@@ -3342,16 +3334,16 @@ Do Until rst.EOF
             If InStr("》〉·‧", IIf(rngF.Characters(rngF.Characters.Count).Next Is Nothing, "", rngF.Characters(rngF.Characters.Count).Next)) = 0 And _
                 InStr("《〈·‧", IIf(rngF.Characters(1).Previous Is Nothing, "", rngF.Characters(1).Previous)) = 0 Then
                 If VBA.IsNull(rst("取代為").Value) Then
-                    rngF.Text = "《" & rst("書名").Value & "》"
+                    rngF.text = "《" & rst("書名").Value & "》"
         '            d.Range.Find.Execute rst("書名").Value, , , , , , True, wdFindContinue, , "《" & rst("書名").Value & "》", wdReplaceAll
                 Else
-                    rngF.Text = rst("取代為").Value
+                    rngF.text = rst("取代為").Value
         '            d.Range.Find.Execute rst("書名").Value, , , , , , True, wdFindContinue, , rst("取代為").Value, wdReplaceAll
                 End If
                 rngF.SetRange rngF.End, d.Range.End
             End If
         Loop
-        Set rngF = d.Range: dx = d.Range.Text
+        Set rngF = d.Range: dx = d.Range.text
     End If
     
     rst.MoveNext
@@ -3380,9 +3372,9 @@ Set p = rng.Paragraphs(1)
 For Each a In p.Range.Characters
     If InStr(omitStr, a) = 0 Then wordCount = wordCount + 1
 Next a
-dx = rng.Text
+dx = rng.text
 wl = InStr(dx, Chr(13))
-rng.Text = Left(dx, wl) & Replace(dx, Chr(13), "", wl)
+rng.text = Left(dx, wl) & Replace(dx, Chr(13), "", wl)
 
 i = 1
 Do Until rng.Paragraphs(rng.Paragraphs.Count).Range.Characters.Count < wordCount
@@ -3416,9 +3408,9 @@ If chars.Count < 2 And InStr(Selection, Chr(9)) = 0 Then Exit Sub
 If chars.Count > 2 Then
     s = InStr(Selection, Chr(9))
     If s > 0 Then
-        If InStr(Mid(Selection.Text, s + 1), Chr(9)) = 0 Then
-            chars = VBA.Split(Selection.Text, Chr(9))
-            Selection.Text = Left(Selection.Text, s - 1)
+        If InStr(Mid(Selection.text, s + 1), Chr(9)) = 0 Then
+            chars = VBA.split(Selection.text, Chr(9))
+            Selection.text = Left(Selection.text, s - 1)
             s = 0
             f = chars(s): r = chars(s + 1) 'VBA.IIf(chars(s + 1) = Chr(9), "", chars(s + 1))
         Else
@@ -3456,4 +3448,16 @@ Loop
 Selection.HomeKey wdStory, wdExtend
 End Sub
 
+Rem 字串轉字串陣列 creedit with chatGPT大菩薩
+Function SplitWithoutDelimiter_StringToStringArray(str As String) As String()
+Dim lenStr  As Long, arr() As String, i As Long
+lenStr = VBA.Len(str)
 
+'str =要轉換為陣列的字串
+ReDim arr(lenStr - 1) ' 調整陣列大小，使其與字串長度相同
+' 將字串轉換為陣列
+For i = 1 To Len(str)
+    arr(i - 1) = Mid(str, i, 1)
+Next i
+SplitWithoutDelimiter_StringToStringArray = arr
+End Function

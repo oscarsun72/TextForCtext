@@ -27,6 +27,9 @@ using Font = System.Drawing.Font;
 using Point = System.Drawing.Point;
 //using Task = System.Threading.Tasks.Task;
 using System.Threading.Tasks;
+//using OpenQA.Selenium;
+//using OpenQA.Selenium;
+//using System.Windows.Input;
 //using Microsoft.Office.Interop.Word;
 
 namespace WindowsFormsApp1
@@ -357,11 +360,21 @@ namespace WindowsFormsApp1
             //if (Cursor.Position.Y > this.Top + this.Height &&
             //    Cursor.Position.X < 420) show_nICo();//this.Left + this.Width) show_nICo();
             if (Cursor.Position.Y > Screen.PrimaryScreen.Bounds.Height - 230 &&
-                Cursor.Position.X < 80) show_nICo();//this.Left + this.Width) show_nICo();
+                Cursor.Position.X < 80)
+            {
+                //按下Ctrl時，自動將Quick edit的連結複製到剪貼簿
+                if (keyinTextMode) copyQuickeditLinkWhenKeyinMode(ModifierKeys);
+                show_nICo();//this.Left + this.Width) show_nICo();
+            }
             #endregion
             #region 縮至系統工具列在下方時
             if (Cursor.Position.Y > Screen.PrimaryScreen.Bounds.Height - 50 &&
-                Cursor.Position.X > Screen.PrimaryScreen.Bounds.Width - 270) show_nICo();//this.Left + this.Width) show_nICo();
+                Cursor.Position.X > Screen.PrimaryScreen.Bounds.Width - 270)
+            {
+                if (keyinTextMode)
+                    copyQuickeditLinkWhenKeyinMode(ModifierKeys);
+                show_nICo();//this.Left + this.Width) show_nICo();
+            }
             #endregion
             ////if (this.Top <0 && this.Left<0) show_nICo();
             ///
@@ -386,6 +399,44 @@ namespace WindowsFormsApp1
             //} 
             #endregion
 
+        }
+
+
+        /// <summary>
+        /// 自動將Quick edit的連結複製到剪貼簿
+        /// 按下的控制鍵是Ctrl時才執行
+        /// </summary>
+        /// <param name="modifierKeys">按下的控制鍵是Ctrl時才執行</param>
+        void copyQuickeditLinkWhenKeyinMode(Keys modifierKeys)
+        {
+            switch (modifierKeys)
+            {
+                case Keys.Control:
+                    try
+                    {
+                        br.driver = br.driver ?? Browser.driverNew();//creedit with chatGPT大菩薩
+                        //OpenQA.Selenium.IWebElement quickEditLink = br.driver.FindElement(OpenQA.Selenium.By.XPath("//a[@title='Quick edit']"));
+                        OpenQA.Selenium.IWebElement quickEditLink = br.driver.FindElement(OpenQA.Selenium.By.XPath("//*[@id=\"quickedit\"]/a"));
+                        string quickEditLinkUrl = quickEditLink.GetAttribute("href");
+                        Clipboard.SetText(quickEditLinkUrl);
+                    }
+                    catch (Exception ex)
+                    {
+                        switch (ex.HResult)
+                        {
+                            case -2146233088:
+                                //"stale element reference: element is not attached to the page document\n  (Session info: chrome=110.0.5481.100)"
+                                //"no such window: target window already closed\nfrom unknown error: web view not found\n  (Session info: chrome=110.0.5481.100)"
+                                break;
+                            default:
+                                MessageBox.Show(ex.HResult + ex.Message);
+                                //throw;
+                                break;
+                        }
+
+                    }
+                    break;
+            }
         }
 
         /// <summary>
@@ -1060,7 +1111,7 @@ chksum:
             if (xCopy == "") return false;
 
             #region 檢查如《國學大師》《四庫全書》文本小注標識錯位處--每頁只檢查第一個可疑者，其他請自行注意 癸卯元宵前2日
-            if (!keyinTextMode)
+            if (GXDS.SKQSnoteBlank && !keyinTextMode)
             {
                 using (GXDS gxds = new GXDS(this))
                 {
@@ -2460,11 +2511,14 @@ omit:
             //throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// Alt + 2 : 鍵入全形空格「　」space（非空白「􏿽」blank）
+        /// </summary>
         private void keysSpaces()
         {
             string selX = textBox1.SelectedText;
             int s = textBox1.SelectionStart, l = textBox1.SelectionLength; string x = textBox1.Text;
-            if (s + l + 2 <= x.Length && s - 2 >= 0)
+            if (s + l + 2 <= x.Length && s - 2 >= 1)
             {
                 if (x.Substring(s + l, 2) == "􏿽" || x.Substring(s - 2, 2) == "􏿽")
                 {//自動把插入點所在處前後「􏿽」置換成「　」
@@ -2480,6 +2534,18 @@ omit:
                     textBox1.SelectedText = textBox1.SelectedText.Replace("􏿽", "　");
                     stopUndoRec = false;
                     return;
+                }
+            }
+            else if (s <= 2 && x.Substring(s, 2) == "􏿽")
+            {//插入點在textBox1最前端時的處理
+                if (selX == "")
+                {
+                    int sLen = 2;
+                    while (s + 2 < x.Length && x.Substring(s, sLen) == "􏿽")
+                    {
+                        sLen += 2;
+                    }
+                    textBox1.Select(s, sLen -= 2); selX = textBox1.SelectedText;
                 }
             }
             undoRecord();
@@ -7398,7 +7464,15 @@ retry:
         {
             if (!textBox1.Enabled) textBox1.Enabled = true;
             string x = textBox2.Text;
+            if (x == "") return;
 
+            #region 輸入「nb,」可以切換 GXDS.SKQSnoteBlank 值以指定是否要檢查注文中因空白而誤標的情形
+            if (x == "nb,")
+            {
+                GXDS.SKQSnoteBlank = !GXDS.SKQSnoteBlank;
+                textBox2.Text = "";
+            }
+            #endregion
 
             #region 輸入末綴為「0」的數字可以設定開啟Chrome頁面的等待毫秒時間
             if (x != "" && x.Length > 2 && int.TryParse(x, out int c))

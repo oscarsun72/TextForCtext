@@ -151,7 +151,7 @@ namespace TextForCtext
 
 tryagain:
                 ChromeDriverService driverService;
-                ChromeDriver cDrv=null;//綠色免安裝版仍搞不定，安裝 chrome 了就OK 20220101 chatGPT建議者未通；20220105自行解決了，詳下
+                ChromeDriver cDrv = null;//綠色免安裝版仍搞不定，安裝 chrome 了就OK 20220101 chatGPT建議者未通；20220105自行解決了，詳下
 
 
 
@@ -283,7 +283,7 @@ tryagain:
                         //break;
                         case -2146233079://0x80131509:session not created: This version of ChromeDriver only supports Chrome version 108 Current browser version is 110.0.5481.78 with binary path W:\PortableApps\PortableApps\GoogleChromePortable\App\Chrome - bin\chrome.exe(SessionNotCreated)
                             MessageBox.Show("請更新 chromedriver 才能繼續");
-                            Form1.browsrOPMode= Form1.BrowserOPMode.appActivateByName; killchromedriverFromHere();
+                            Form1.browsrOPMode = Form1.BrowserOPMode.appActivateByName; killchromedriverFromHere();
                             return null;
                         default:
                             throw;
@@ -741,8 +741,24 @@ tryagain:
             //using (driver)//var driver = new ChromeDriver())//若這樣寫則會出現「無法存取已處置的物件。」之錯誤    HResult	-2146232798	int               
             //{因為 using(driver) 這 driver 只在 ) 後的第一層大括弧{}間有效，生命週期僅止於此間而已
             // 移動到指定的網頁
-            driver.Navigate().GoToUrl(url ?? System.Windows.Forms.Application.OpenForms[0].Controls["textBox3"].Text);//("http://example.com/");
-                                                                                                                      //driver.Navigate().GoToUrl(url ?? Form1.mainFromTextBox3Text);
+            GoToUrlandActivate(url ?? System.Windows.Forms.Application.OpenForms[0].Controls["textBox3"].Text);
+            //try
+            //{
+            //    driver.Navigate().GoToUrl(url ?? System.Windows.Forms.Application.OpenForms[0].Controls["textBox3"].Text);//("http://example.com/");
+            //}
+            //catch (Exception ex)
+            //{
+            //    switch (ex.HResult)
+            //    {
+            //        case -2146233088://no such window: target window already closed\nfrom unknown error: web view not found\n  (Session info: chrome=110.0.5481.100)
+                        
+            //            //driver.Navigate().GoToUrl(url ?? System.Windows.Forms.Application.OpenForms[0].Controls["textBox3"].Text);//("http://example.com/");
+            //            break;
+            //        default:
+            //            throw;
+            //    }
+            //}
+            //driver.Navigate().GoToUrl(url ?? Form1.mainFromTextBox3Text);
 
             // 取得元件 scancont 的圖片網址
             //IWebElement scancont = driver.FindElement(By.Id("content"));

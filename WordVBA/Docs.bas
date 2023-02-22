@@ -33,7 +33,7 @@ Sub 在本文件中尋找選取字串_迅速() '指定鍵:Alt+Ctrl+Down 2015/11/1
 Static x As String
 With Selection
     If .Type = wdSelectionNormal Then
-        x = 文字處理.trimStrForSearch(.Text, Selection)
+        x = 文字處理.trimStrForSearch(.text, Selection)
         .Copy
         .Collapse wdCollapseEnd
         .Find.ClearAllFuzzyOptions
@@ -76,16 +76,16 @@ ReDim a1(0 To UBound(a)) As String
 For i = 1 To sectionct '執行逐節插入註腳(每節為不重複的一筆記錄!)
     For j = 0 To UBound(a)
         '由頁與札記來比對相應的冊書篇名卷...等資料
-        If Not Left(h.Sections(i).Range.Paragraphs(2).Range.Text, Len(h.Sections(i).Range.Paragraphs(2).Range.Text) - 1) Like "..." Then
-            rst.FindFirst "頁 = " & Left(h.Sections(i).Range.Paragraphs(1).Range.Text, Len(h.Sections(i).Range.Paragraphs(1).Range.Text) - 1) _
-                & "and 札記 like '" & "*" & Left(h.Sections(i).Range.Paragraphs(2).Range.Text, _
-                    Len(h.Sections(i).Range.Paragraphs(2).Range.Text) - 1) & "*'"
+        If Not Left(h.Sections(i).Range.Paragraphs(2).Range.text, Len(h.Sections(i).Range.Paragraphs(2).Range.text) - 1) Like "..." Then
+            rst.FindFirst "頁 = " & Left(h.Sections(i).Range.Paragraphs(1).Range.text, Len(h.Sections(i).Range.Paragraphs(1).Range.text) - 1) _
+                & "and 札記 like '" & "*" & Left(h.Sections(i).Range.Paragraphs(2).Range.text, _
+                    Len(h.Sections(i).Range.Paragraphs(2).Range.text) - 1) & "*'"
     '            & "and 札記 like '" & "*" & Replace(h.Sections(i).Range.Paragraphs(2).Range.Text, Chr(12), "") & "*'"
                 'chr(12)暫不知是什麼(應是分節符號!),但會影響比對,故予取代為空字串 _
                 因為最後一節沒有分節符號(Chr(12))而是段落符號(Chr(13),故若以Replace函數須分別處理 _
                 為免麻煩,一律用Left函數不取最右方之字元即可(不管是Chr(12)或Chr(13))
         Else '札記為""時的處理
-            rst.FindFirst "頁 = " & Left(h.Sections(i).Range.Paragraphs(1).Range.Text, Len(h.Sections(i).Range.Paragraphs(1).Range.Text) - 1) _
+            rst.FindFirst "頁 = " & Left(h.Sections(i).Range.Paragraphs(1).Range.text, Len(h.Sections(i).Range.Paragraphs(1).Range.text) - 1) _
                 & "and 札記 = """"" '在此,不用CSng型態轉換是可以的! _
                 因為頁有小數點,故在作頁比對時,不能用Words物件(會將小數點之數字分開算成不同的Word),如果頁沒有小數點的話就可以了! _
                 減一,同札記,是為了剔除最右方的Chr(10)(換行符號、段落符號)
@@ -367,9 +367,9 @@ With ActiveDocument
     If .path = "" Then
         For i = 0 To UBound(a) - 1
             With .Range.Find
-                .Text = a(i)
+                .text = a(i)
                 With .Replacement
-                    .Text = b(i)
+                    .text = b(i)
                 End With
                 .Execute , , , , , , , wdFindContinue, , , wdReplaceAll
             End With
@@ -528,7 +528,7 @@ With Selection '快速鍵：Alt+Ctrl+Down
 If .Type = wdSelectionIP Then MsgBox "請選取想要尋找之文字", vbExclamation: Exit Sub
 If .Type = wdSelectionNormal Then ' <> wdNoSelection OR wdSelectionIP Then '不為插入點
 '    If InStr(ActiveDocument.Content, .Text) = InStrRev(ActiveDocument.Content, .Text) Then MsgBox "本文只有此處!", vbInformation: Exit Sub
-    FdText = 文字處理.trimStrForSearch(.Text, Selection)
+    FdText = 文字處理.trimStrForSearch(.text, Selection)
     st = .start: ed = .End
     .Collapse wdCollapseEnd
     MnText = .Document.StoryRanges(wdMainTextStory) '變數化處理較快2003/4/8
@@ -550,7 +550,7 @@ If .Type = wdSelectionNormal Then ' <> wdNoSelection OR wdSelectionIP Then '不為
 '                .Document.ActiveWindow.ActivePane.Previous.Activate
 '                .Document.Select '此法可將焦點轉移到正文
                 With .Document.Range.Find
-                    .Text = FdText
+                    .text = FdText
                     .Execute
                     .Parent.Select
                 End With
@@ -571,7 +571,7 @@ If .Type = wdSelectionNormal Then ' <> wdNoSelection OR wdSelectionIP Then '不為
                         .ActivePane.Next.Activate
                     End If
                     With .ActivePane.Selection.Find
-                        .Text = FdText
+                        .text = FdText
 '                        .Forward = True
                         .Wrap = wdFindContinue '要有這行才能正確尋找
                         .Execute
@@ -603,7 +603,7 @@ If .Type = wdSelectionNormal Then ' <> wdNoSelection OR wdSelectionIP Then '不為
             .Forward = True
             .Wrap = wdFindAsk
             .MatchCase = True
-            .Text = FdText '.Parent.Text
+            .text = FdText '.Parent.Text
             .Execute
 '            .Parent.Select'用Range物件得用此方法才能改變選取
         End With
@@ -614,7 +614,7 @@ Exit Sub
 errHH:
 Select Case Err.Number
     Case 7 '記憶體不足
-        ActiveDocument.ActiveWindow.Selection.Find.Execute Selection.Text
+        ActiveDocument.ActiveWindow.Selection.Find.Execute Selection.text
     Case Else
         MsgBox Err.Number & Err.Description
         Resume
@@ -626,7 +626,7 @@ Sub 書籤_以選取文字作為書籤() 'ALT+SHIFT+B
 
 ' 巨集錄製於 2015/9/20，錄製者 王觀如
     With ActiveDocument.bookmarks
-        .Add Range:=Selection.Range, Name:=Replace(Selection.Text, Chr(13), "")
+        .Add Range:=Selection.Range, Name:=Replace(Selection.text, Chr(13), "")
         .DefaultSorting = wdSortByName
         .ShowHidden = False
     End With
@@ -642,7 +642,7 @@ For Each p In d.Paragraphs
     If Not flg Then
         p.Range.Font.Hidden = True
     Else
-        prngTxt = p.Range.Text
+        prngTxt = p.Range.text
         s = InStr(prngTxt, " ")
         If VBA.Len(VBA.Mid(prngTxt, s + 1)) < 5 Then
             p.Range.Font.Hidden = True
@@ -660,7 +660,7 @@ Set d = ActiveDocument
 Dim p As Paragraph, s As Byte, prngTxt As String, msgResult As Integer
 For Each p In d.Paragraphs
     If Not p.Range.Font.Hidden Then
-        prngTxt = p.Range.Text
+        prngTxt = p.Range.text
         s = InStr(prngTxt, VBA.Chr(32))
         If VBA.Len(VBA.Mid(prngTxt, s + 1)) > 4 Then
             DoEvents
@@ -671,7 +671,7 @@ For Each p In d.Paragraphs
                 Case vbYes
                     小小輸入法詞庫cj5_ftzk刪存至cj5_ftzk_other
                 Case vbNo
-                    Debug.Print p.Next.Range.Text
+                    Debug.Print p.Next.Range.text
                     Exit Sub
             End Select
         End If
@@ -692,7 +692,7 @@ Else
         ShowAll
 End If
 If Not Selection.Range.TextRetrievalMode.IncludeHiddenText Then
-    x = Selection.Text
+    x = Selection.text
     Selection.Delete
     'Selection.Cut
         GoSub subP
@@ -705,7 +705,7 @@ Else
     For Each p In pSelRng.Paragraphs
         If Not p.Range.Font.Hidden Then 'prepare to delete
             'p.Range.Cut
-            x = p.Range.Text
+            x = p.Range.text
             p.Range.Delete
             GoSub subP
         End If
@@ -813,7 +813,8 @@ End Sub
 Sub mark易學關鍵字()
 Dim searchedTerm, e, ur As UndoRecord, d As Document, clipBTxt As String, flgPaste As Boolean, xd As String
 Dim strAutoCorrection, endDocOld As Long, rng As Range
-strAutoCorrection = Array("，〉", "〉，", "〈、", "〈", "〈。", "〈", "。〉", "〉", "〈：", "〈", "：〉", "〉", "〈，", "〈")
+Dim punc As New Punctuation
+strAutoCorrection = Array("，〉", "〉，", "〈、", "〈", "〈。", "〈", "。〉", "〉", "〈：", "〈", "：〉", "〉", "〈，", "〈", "、〉", "〉")
 'If Documents.Count = 0 Then Documents.Add
 If Documents.Count = 0 Then Docs.空白的新文件
 If ClipBoardOp.Is_ClipboardContainCtext_Note_InlinecommentColor Then
@@ -828,11 +829,11 @@ Rem 因為前面尚有「中國哲學書電子化計劃.只保留正文注文_且注文前後加括弧」會用到Un
 SystemSetup.stopUndo ur, "mark易學關鍵字"
 Set rng = d.Range
 endDocOld = d.Range.End
-    If InStr(d.Range.Text, Chr(13) & Chr(13) & Chr(13) & Chr(13)) > 0 Then
+    If InStr(d.Range.text, Chr(13) & Chr(13) & Chr(13) & Chr(13)) > 0 Then
 '        d.Range.Text = Replace(d.Range.Text, Chr(13) & Chr(13) & Chr(13) & Chr(13), Chr(13) & Chr(13) & Chr(13))
     '保留格式，故用以下，不用以上
         With d.Range.Find
-            If InStr(.Parent.Text, Chr(13) & Chr(13) & Chr(13) & Chr(13)) > 1 Then
+            If InStr(.Parent.text, Chr(13) & Chr(13) & Chr(13) & Chr(13)) > 1 Then
                 .ClearFormatting
                 '.Execute Chr(13) & Chr(13) & Chr(13) & Chr(13), , , , , , True, wdFindContinue, , Chr(13) & Chr(13) & Chr(13), wdReplaceAll
                 .Execute "^p^p^p^p", , , , , , True, wdFindContinue, , "^p^p^p", wdReplaceAll
@@ -840,6 +841,8 @@ endDocOld = d.Range.End
             .ClearFormatting
         End With
     End If
+
+Rem 將剪貼簿內擬加入的文本規範化
 clipBTxt = Replace(Replace(Replace(Replace(VBA.Trim(SystemSetup.GetClipboardText), Chr(13) + Chr(10) + "空句子" + Chr(13) + Chr(10), Chr(13) + Chr(10) + Chr(13) + Chr(10)), Chr(9), ""), "．　", ""), "　．", "")
 clipBTxt = 文字處理.trimStrForSearch_PlainText(clipBTxt)
 For e = 0 To UBound(strAutoCorrection)
@@ -850,10 +853,19 @@ searchedTerm = Array("易", "卦", "爻", "周易", "易經", "系辭", "繫辭", "擊辭", "
     , "史記", "九五", "六二", "上九", "上六", "九二", "筮") ', "", "", "", "")
 
 'If Selection.Type = wdSelectionIP Then
-    If Not 文字處理.isDocumentContainClipboardText(d, clipBTxt) Then
+    Rem 判斷是否已含有該文本
+    '如果不含其文本
+    If Not Docs.isDocumentContainClipboardText_IgnorePunctuation(d, clipBTxt) Then
+        Rem 文本相似度比對
+        If Docs.similarTextCheckInSpecificDocument(d, clipBTxt) Then
+            If MsgBox("要貼入的文本在原文件中有類似的段落，請自行檢查是否要再貼入" & vbCr & vbCr & "按下「取消」則忽略檢查，將繼續執行", vbExclamation + vbOKCancel) = vbOK Then Exit Sub
+        End If
+        Rem end 文本相似度比對
+        
+        Rem 含有必須的關鍵字才貼上
         For Each e In searchedTerm
             If InStr(clipBTxt, e) > 0 Then
-                flgPaste = True
+                flgPaste = True '如果含有必須的關鍵字
                 Exit For
             End If
         Next e
@@ -885,26 +897,36 @@ searchedTerm = Array("易", "卦", "爻", "周易", "易經", "系辭", "繫辭", "擊辭", "
             ActiveWindow.ScrollIntoView Selection
         End If
     Else '如果文件中已有文本，則顯示其所在處
-        'rng.Find.Execute VBA.Left(clipBTxt, 255), , , , , , , wdFindContinue
-        Dim ps As Integer, sx As String
-        ps = InStr(clipBTxt, Chr(13)) '如有本來要貼入的文本中有段落，則止到其段落前為止；若沒有，則取能尋找的最大值255個字元長的內容作搜尋
-        sx = VBA.IIf(ps > 0, VBA.Mid(clipBTxt, VBA.IIf(ps > 0, ps, 2) - 1), VBA.Left(clipBTxt, 255))
+        Dim sx As String
+        If InStr(d.Content, clipBTxt) Then
+            'rng.Find.Execute VBA.Left(clipBTxt, 255), , , , , , , wdFindContinue
+            Dim ps As Integer
+            ps = InStr(clipBTxt, Chr(13)) '如有本來要貼入的文本中有段落，則止到其段落前為止；若沒有，則取能尋找的最大值255個字元長的內容作搜尋
+            sx = VBA.IIf(ps > 0, VBA.Mid(clipBTxt, VBA.IIf(ps > 0, ps, 2) - 1), VBA.Left(clipBTxt, 255))
+        Else '標點符號處理：確定文本已有只是標點符號不同者
+            punc.clearPunctuations clipBTxt
+            punc.restoreOriginalTextPunctuations d.Range.text, clipBTxt
+            Set punc = Nothing
+            SystemSetup.SetClipboard clipBTxt
+            sx = VBA.Left(clipBTxt, 255)
+        End If
         rng.Find.Execute sx, , , , , , , wdFindContinue
         endDocOld = rng.End
+
     End If
 'End If
 If flgPaste Then
     Rem 標識關鍵字
     word.Application.ScreenUpdating = False
     If d.path <> "" And Not d.Saved Then d.Save
-    xd = d.Range.Text
+    xd = d.Range.text
     For Each e In searchedTerm
         If InStr(xd, e) > 0 Then
             With d.Range.Find
                 .ClearFormatting
-                .Text = e
+                .text = e
                 With .Replacement
-                    .Text = e
+                    .text = e
                     .Font.ColorIndex = wdRed
                     .Highlight = True
                 End With
@@ -949,11 +971,50 @@ End Sub
 
 
 
+Rem 判斷剪貼簿裡的純文字(或指定的文字)內容是否在文件中已存在
+Function isDocumentContainClipboardText_IgnorePunctuation(d As Document, Optional chkClipboardText As String) As Boolean
+    Dim xd As String
+    If chkClipboardText = "" Then chkClipboardText = SystemSetup.GetClipboardText
+    Rem 剪貼簿裡的換行符號值是chr(13)&chr(10)而在Word文件中是只有 chr(13)
+    chkClipboardText = VBA.Replace(chkClipboardText, Chr(13) & Chr(10), Chr(13))
+    xd = d.Range.text
+    If VBA.InStr(xd, chkClipboardText) > 0 Then
+        isDocumentContainClipboardText_IgnorePunctuation = True
+    Else '忽略標點符號的比對
+        Dim punc As New Punctuation
+        If punc.inStrIgnorePunctuation(xd, chkClipboardText) Then
+            isDocumentContainClipboardText_IgnorePunctuation = True
+        Else
+            If isDocumentContainClipboardText_IgnorePunctuation Then isDocumentContainClipboardText_IgnorePunctuation = False
+        End If
+        Set punc = Nothing
+    End If
+End Function
+
+Function similarTextCheckInSpecificDocument(d As Document, text As String) As Boolean
+Rem 文本相似度比對
+Dim similartext As New similartext, dClearPunctuation As String, textClearPunctuation As String, dCleanParagraphs() As String, punc As New Punctuation, e
+dClearPunctuation = d.Content.text
+textClearPunctuation = text
+punc.clearPunctuations textClearPunctuation: punc.clearPunctuations dClearPunctuation
+dCleanParagraphs = VBA.split(dClearPunctuation, Chr(13))
+For Each e In dCleanParagraphs
+    If e <> "" Then
+        If similartext.Similarity(e, textClearPunctuation) Then
+            similarTextCheckInSpecificDocument = True: Exit For
+        ElseIf similartext.SimilarityPercent(e, textClearPunctuation) > 80 Then
+            similarTextCheckInSpecificDocument = True: Exit For
+        End If
+    End If
+Next e
+Set similartext = Nothing
+Rem end 文本相似度比對
+End Function
 Sub 文件比對_抓抄襲()
 Dim d1 As Document, d2 As Document, p As Paragraph, x As String, i As Byte, rng As Range, pc As Long, d1RngTxt, px As String, rng2 As Range
 Static pi As Long
 Set d1 = Documents(1) '來源
-d1RngTxt = d1.Range.Text
+d1RngTxt = d1.Range.text
 Set d2 = Documents(2) '抄襲或引用(須先將。，的句子單位拆成各段文字）
 pc = d2.Paragraphs.Count
 If pi = 0 Then pi = 1
@@ -996,7 +1057,7 @@ For Each hplnk In ActiveDocument.Hyperlinks
     x = x & hplnk.Address & Chr(13)
 Next hplnk
 Set d = Documents.Add
-d.Range.Text = x
+d.Range.text = x
 d.Range.Cut
 d.Close wdDoNotSaveChanges
 End Sub
@@ -1005,11 +1066,11 @@ End Sub
 Sub 插入超連結_文件中的位置_標題() 'Alt+P 原是「引詩」樣式'2021/11/27
 Dim d As Document, title As String, p As Paragraph, pTxt As String, subAddrs As String, flg As Boolean
 Set d = ActiveDocument
-title = Selection.Text
+title = Selection.text
 title = 文字處理.trimStrForSearch(title, Selection)
 For Each p In d.Paragraphs
     If Left(p.Style.NameLocal, 2) = "標題" Then
-        pTxt = p.Range.Text
+        pTxt = p.Range.text
         pTxt = Left(pTxt, Len(pTxt) - 1)
         If StrComp(pTxt, title) = 0 Then
             subAddrs = title
