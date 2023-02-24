@@ -862,11 +862,14 @@ searchedTerm = Array("易", "卦", "爻", "周易", "易經", "系辭", "繫辭", "擊辭", "
         If similarCompare.item(1) Then
             If MsgBox("要貼入的文本在原文件中有類似的段落，請自行檢查是否要再貼入" & vbCr & vbCr & "按下「取消」則忽略檢查，將繼續執行", vbExclamation + vbOKCancel) = vbOK Then
                 Set rng = d.Range
-                If rng.Find.Execute(VBA.Left(similarCompare.item(2), 255), , , , , , , wdFindContinue) Then rng.Select '標示相似文本
+                If rng.Find.Execute(VBA.Left(similarCompare.item(2), 255), , , , , , , wdFindContinue) Then
+                    If VBA.Len(similarCompare.item(2)) > 255 Then rng.Paragraphs(1).Range.Select                  '標示相似文本
+                End If
                 Set similarCompare = Nothing
                 GoTo exitSub
             End If
         End If
+        Set similarCompare = Nothing
         Rem end 文本相似度比對
         
         Rem 含有必須的關鍵字才貼上
@@ -1002,7 +1005,7 @@ Function isDocumentContainClipboardText_IgnorePunctuation(d As Document, Optiona
     End If
 End Function
 
-Function similarTextCheckInSpecificDocument(d As Document, text As String) As Collection 'As Boolean
+Function similarTextCheckInSpecificDocument(d As Document, text As String) As Collection 'item1 as Boolean(文本是否相似),item2 as string(找到的相似文本段落)
 Rem 文本相似度比對
 Dim similartext As New similartext, dClearPunctuation As String, textClearPunctuation As String, dCleanParagraphs() As String, punc As New punctuation, e, Similarity As Boolean, result As New Collection
 dClearPunctuation = d.Content.text
