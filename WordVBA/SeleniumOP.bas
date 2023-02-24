@@ -21,6 +21,7 @@ For Each ew In WD.WindowHandles
     iw = iw + 1
 Next ew
 If iw > 0 Then
+    On Error GoTo eH
       WD.ExecuteScript "window.open('about:blank','_blank');"
       For Each ew In WD.WindowHandles
             ii = ii + 1
@@ -28,6 +29,30 @@ If iw > 0 Then
       Next ew
       WD.SwitchTo().Window (ew)
 End If
+Exit Sub
+eH:
+Select Case Err.Number
+    Case -2146233088
+        If InStr(Err.Description, "no such window: target window already closed") Then
+            If iw > 0 Then
+                For Each ew In WD.WindowHandles
+                    Exit For
+                Next ew
+                WD.SwitchTo.Window (ew)
+                Resume
+            Else
+                Stop
+            End If
+        Else
+            MsgBox Err.Number + Err.Description
+            Stop
+        End If
+    Case Else
+        MsgBox Err.Description, vbCritical
+        WD.Quit
+        SystemSetup.killchromedriverFromHere
+'           Resume
+End Select
 End Sub
 Sub openChrome(Optional url As String)
 reStart:
@@ -333,8 +358,8 @@ retry:
     Set form = wdB.FindElementById("searchF")
     Set keyword = form.FindElementByName("word")
     Set button = form.FindElementByClassName("submit")
-    If keyword.Text <> searchStr Then
-        keyword.Clear
+    If keyword.text <> searchStr Then
+        keyword.clear
         keyword.SendKeys searchStr
     End If
     Rem 在 headless 參數設定下開啟的Chrome瀏覽器，是無法使用系統貼上功能的
@@ -451,7 +476,7 @@ Err1:
 End Sub
 
 '貼到古籍酷自動標點()
-Function grabGjCoolPunctResult(Text As String, Optional Background As Boolean) As String
+Function grabGjCoolPunctResult(text As String, Optional Background As Boolean) As String
 Const url = "https://gj.cool/punct"
 Dim wdB As SeleniumBasic.IWebDriver, WBQuit As Boolean '=true 則可以關Chrome瀏覽器
 Dim textBox As SeleniumBasic.IWebElement, btn As SeleniumBasic.IWebElement, btn2 As SeleniumBasic.IWebElement, item As SeleniumBasic.IWebElement
@@ -476,12 +501,12 @@ If wdB.url <> url Then wdB.Navigate.GoToUrl url
 
 '整理文本
 Dim chkStr As String: chkStr = VBA.Chr(13) & Chr(10) & Chr(7) & Chr(9) & Chr(8)
-Text = VBA.Trim(Text)
-Do While VBA.InStr(chkStr, VBA.Left(Text, 1)) > 0
-    Text = Mid(Text, 2)
+text = VBA.Trim(text)
+Do While VBA.InStr(chkStr, VBA.Left(text, 1)) > 0
+    text = Mid(text, 2)
 Loop
-Do While VBA.InStr(chkStr, VBA.Right(Text, 1)) > 0
-    Text = Left(Text, Len(Text) - 1)
+Do While VBA.InStr(chkStr, VBA.Right(text, 1)) > 0
+    text = Left(text, Len(text) - 1)
 Loop
 
 
@@ -489,19 +514,24 @@ Loop
 Set textBox = wdB.FindElementById("PunctArea")
 Dim key As New SeleniumBasic.keys
 textBox.Click
-textBox.Clear
+textBox.clear
 'textbox.SendKeys key.LeftShift + key.Insert
 'textbox.SendKeys VBA.KeyCodeConstants.vbKeyControl & VBA.KeyCodeConstants.vbKeyV
 
 '如果只有chr(13)而沒有chr(13)&chr(10)則這行會使分段符號消失；因為下面標點按鈕一按，仍會使一組分段符號消失，必須換成兩組，才能保留一組
-If InStr(Text, Chr(13) & Chr(10)) = 0 And InStr(Text, Chr(13)) > 0 Then Text = Replace(Text, Chr(13), Chr(13) & Chr(10) & Chr(13) & Chr(10))
-textBox.SendKeys Text 'SystemSetup.GetClipboardText
+If InStr(text, Chr(13) & Chr(10)) = 0 And InStr(text, Chr(13)) > 0 Then text = Replace(text, Chr(13), Chr(13) & Chr(10) & Chr(13) & Chr(10))
+If Background Then
+    textBox.SendKeys text 'SystemSetup.GetClipboardText
+Else
+    SystemSetup.SetClipboard text
+    textBox.SendKeys key.Control + "v"
+End If
 
 '貼上不成則退出
 Dim WaitDt As Date, chkTxtTime As Date, nx As String, xl As Integer
 
-nx = textBox.Text
-Text = nx
+nx = textBox.text
+text = nx
 SystemSetup.playSound 1.294
 If nx = "" Then
     grabGjCoolPunctResult = ""
@@ -517,15 +547,15 @@ btn.Click
 'SystemSetup.Wait 3.6
 
 WaitDt = DateAdd("s", 10, Now()) '極限10秒
-xl = VBA.Len(Text)
+xl = VBA.Len(text)
 chkTxtTime = VBA.Now
 Do
     If VBA.DateDiff("s", chkTxtTime, VBA.Now) > 1.5 Then
-        nx = textBox.Text
+        nx = textBox.text
         SystemSetup.playSound 1
         chkTxtTime = Now
         'VBA.StrComp(text, nx) <> 0
-        If nx <> Text Then Exit Do
+        If nx <> text Then Exit Do
         If InStr(nx, "，") > 0 And InStr(nx, "。") > 0 And Len(nx) > xl Then Exit Do
     End If
     If Now > WaitDt Then
@@ -547,7 +577,7 @@ Loop
 'SystemSetup.Wait 0.3
 'SystemSetup.SetClipboard textbox.text
 'grabGjCoolPunctResult = SystemSetup.GetClipboardText
-grabGjCoolPunctResult = textBox.Text
+grabGjCoolPunctResult = textBox.text
 If WBQuit = False Then
     wdB.Close
 Else
@@ -573,12 +603,12 @@ Err1:
             Rem textBox.SendKeys key.Control + "v"
             Rem textBox.SendKeys key.LeftShift + key.Insert
             If InStr(Err.Description, "ChromeDriver only supports characters in the BMP") Then
-                WBQuit = pasteWhenOutBMP(wdB, url, "PunctArea", Text, textBox, Background)
+                WBQuit = pasteWhenOutBMP(wdB, url, "PunctArea", text, textBox, Background)
                 Resume Next
-            ElseIf InStr(Err.Description, "invalid session id") Or InStr(Err.Description, "A exception with a null response was thrown sending an HTTP request to the remote WebDriver server for URL http://localhost:4609/session/455865a54d3f64364cf76b41fe7953a3/url. The status of the exception was ConnectFailure, and the message was: 無法連接至遠端伺服器") Then
+            ElseIf InStr(Err.Description, "invalid session id") Or InStr(Err.Description, "A exception with a null response was thrown sending an HTTP request to the remote WebDriver server for URL http://localhost:4609/session/455865a54d3f64364cf76b41fe7953a3/url. The status of the exception was ConnectFailure, and the message was: 無法連接至遠端伺服器") Then 'Or InStr(Err.Description, "no such window: target window already closed") Then
                 killchromedriverFromHere
                 openChrome url
-                Set wdB = WD
+                Set wdB = WD: WBQuit = True
                 Resume
             ElseIf InStr(Err.Description, "no such window: target window already closed") Then
                 openNewTabWhenTabAlreadyExit wdB

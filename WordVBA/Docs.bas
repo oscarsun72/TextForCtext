@@ -813,7 +813,7 @@ End Sub
 Sub mark易學關鍵字()
 Dim searchedTerm, e, ur As UndoRecord, d As Document, clipBTxt As String, flgPaste As Boolean, xd As String
 Dim strAutoCorrection, endDocOld As Long, rng As Range
-Dim punc As New Punctuation
+Dim punc As New punctuation
 strAutoCorrection = Array("，〉", "〉，", "〈、", "〈", "〈。", "〈", "。〉", "〉", "〈：", "〈", "：〉", "〉", "〈，", "〈", "、〉", "〉")
 'If Documents.Count = 0 Then Documents.Add
 If Documents.Count = 0 Then Docs.空白的新文件
@@ -857,8 +857,15 @@ searchedTerm = Array("易", "卦", "爻", "周易", "易經", "系辭", "繫辭", "擊辭", "
     '如果不含其文本
     If Not Docs.isDocumentContainClipboardText_IgnorePunctuation(d, clipBTxt) Then
         Rem 文本相似度比對
-        If Docs.similarTextCheckInSpecificDocument(d, clipBTxt) Then
-            If MsgBox("要貼入的文本在原文件中有類似的段落，請自行檢查是否要再貼入" & vbCr & vbCr & "按下「取消」則忽略檢查，將繼續執行", vbExclamation + vbOKCancel) = vbOK Then Exit Sub
+        Dim similarCompare As New Collection
+        Set similarCompare = Docs.similarTextCheckInSpecificDocument(d, clipBTxt)
+        If similarCompare.item(1) Then
+            If MsgBox("要貼入的文本在原文件中有類似的段落，請自行檢查是否要再貼入" & vbCr & vbCr & "按下「取消」則忽略檢查，將繼續執行", vbExclamation + vbOKCancel) = vbOK Then
+                Set rng = d.Range
+                If rng.Find.Execute(VBA.Left(similarCompare.item(2), 255), , , , , , , wdFindContinue) Then rng.Select '標示相似文本
+                Set similarCompare = Nothing
+                GoTo exitSub
+            End If
         End If
         Rem end 文本相似度比對
         
@@ -889,7 +896,7 @@ searchedTerm = Array("易", "卦", "爻", "周易", "易經", "系辭", "繫辭", "擊辭", "
             Selection.Collapse wdCollapseEnd
             Selection.TypeText clipBTxt
             'SystemSetup.SetClipboard clipBTxt
-            On Error GoTo eh
+            On Error GoTo eH
             'Docs.貼上純文字
             
             Selection.InsertParagraphAfter: Selection.InsertParagraphAfter: Selection.InsertParagraphAfter
@@ -940,9 +947,13 @@ Else '文件內已有內容時
     GoSub refres
     SystemSetup.playSound 1.294
 End If
+
+exitSub:
 SystemSetup.contiUndo ur
 Set ur = Nothing
 Exit Sub
+
+
 refres:
     文字處理.書名號篇名號標注
     word.Application.ScreenUpdating = True
@@ -962,7 +973,7 @@ refres:
     ActiveWindow.ScrollIntoView Selection, False
 Return
 
-eh:
+eH:
 Select Case Err.Number
     Case Else
         MsgBox Err.Number + Err.Description
@@ -981,7 +992,7 @@ Function isDocumentContainClipboardText_IgnorePunctuation(d As Document, Optiona
     If VBA.InStr(xd, chkClipboardText) > 0 Then
         isDocumentContainClipboardText_IgnorePunctuation = True
     Else '忽略標點符號的比對
-        Dim punc As New Punctuation
+        Dim punc As New punctuation
         If punc.inStrIgnorePunctuation(xd, chkClipboardText) Then
             isDocumentContainClipboardText_IgnorePunctuation = True
         Else
@@ -991,23 +1002,29 @@ Function isDocumentContainClipboardText_IgnorePunctuation(d As Document, Optiona
     End If
 End Function
 
-Function similarTextCheckInSpecificDocument(d As Document, text As String) As Boolean
+Function similarTextCheckInSpecificDocument(d As Document, text As String) As Collection 'As Boolean
 Rem 文本相似度比對
-Dim similartext As New similartext, dClearPunctuation As String, textClearPunctuation As String, dCleanParagraphs() As String, punc As New Punctuation, e
+Dim similartext As New similartext, dClearPunctuation As String, textClearPunctuation As String, dCleanParagraphs() As String, punc As New punctuation, e, Similarity As Boolean, result As New Collection
 dClearPunctuation = d.Content.text
 textClearPunctuation = text
+'清除標點符號
 punc.clearPunctuations textClearPunctuation: punc.clearPunctuations dClearPunctuation
 dCleanParagraphs = VBA.split(dClearPunctuation, Chr(13))
 For Each e In dCleanParagraphs
     If e <> "" Then
         If similartext.Similarity(e, textClearPunctuation) Then
-            similarTextCheckInSpecificDocument = True: Exit For
+            Similarity = True: Exit For
         ElseIf similartext.SimilarityPercent(e, textClearPunctuation) > 80 Then
-            similarTextCheckInSpecificDocument = True: Exit For
+            Similarity = True: Exit For
         End If
     End If
 Next e
+result.Add Similarity '文本是否相似
+dClearPunctuation = e
+punc.restoreOriginalTextPunctuations d.Content.text, dClearPunctuation
+result.Add dClearPunctuation '找到的相似文本段落
 Set similartext = Nothing
+Set similarTextCheckInSpecificDocument = result
 Rem end 文本相似度比對
 End Function
 Sub 文件比對_抓抄襲()
@@ -1160,10 +1177,24 @@ Err1:
         Case 5 'https://www.google.com/search?q=vba+Err.Number+5&oq=vba+Err.Number+5&aqs=chrome..69i57j0i10i30j0i30l2j0i5i30.4768j0j7&sourceid=chrome&ie=UTF-8
             SystemSetup.wait 1.5
             Resume
+        Case 13
+            If InStr(Err.Description, "型態不符合") Then
+                SystemSetup.killchromedriverFromHere
+                Stop
+                Resume
+            Else
+                MsgBox Err.Description, vbCritical
+                Stop
+    '           Resume
+            End If
         Case Else
-            MsgBox Err.Description, vbCritical
-            SystemSetup.killchromedriverFromHere
-'           Resume
+            If InStr(Err.Description, "no such window") Then
+                If Not WD Is Nothing Then Resume
+            Else
+                MsgBox Err.Description, vbCritical
+                SystemSetup.killchromedriverFromHere
+    '           Resume
+            End If
     End Select
 
 End Function

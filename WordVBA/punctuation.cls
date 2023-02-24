@@ -11,10 +11,7 @@ Option Explicit
 Dim punctuationStr As String, punctuation_Array, punctuation_Collection As VBA.Collection, punctuation_Dictionary As Scripting.Dictionary
 
 Private Sub Class_Initialize()
-punctuationStr = "（）。「」『』[]【】〔〕《》〈〉-－"",  ：，；？?" _
-    & "、. :,;" _
-    & "……...!()-·‧" & Chr(34) & Chr(-24153) & Chr(-24152) & Chr(-24155) & Chr(-24154) & ChrW(8218) '34：雙引號。大陸標點符號上下雙引號、上下單引數、逗號
-    
+    punctuationStr = 文字處理.PunctuationString
 End Sub
 
 Rem 20230221 chatGPT大菩薩：忽略標點符號的搜尋：在 VBA 中，可以使用 Dictionary 或 Collection 這兩個物件來實現映射表的功能，不一定非要用陣列。
@@ -64,7 +61,7 @@ Set CreateContextPunctuationCollection = contextCollection
 End Function
 
 Rem 20230221 creedit with YouChat菩薩：
-Rem vba 如何將以下字串轉成字串陣列或 collection 或 dictionary ? punctuationStr = "（。「」『』[]【】〔〕《》〈〉-－"", ：，；？?" _ & "、. :,;" _ & "……...）!)-" & Chr(34) & Chr(-24153) & Chr(-24152)
+Rem vba 如何將以下字串轉成字串陣列或 collection 或 dictionary ? punctuationStr = "（。「」……
 Rem You can use the Split function in VBA to convert the string into an array or collection. For example:
 Property Get PunctuationArray()
 If VBA.IsEmpty(punctuation_Array) Then
@@ -141,14 +138,17 @@ For iCntcontextCollection = 1 To cntcontextCollection
         Do While VBA.InStr(RemovedPunctuationsTextSubStr, contextCollection.item(jCntcontextCollection)(0)) = 1 And RemovedPunctuationsTextSubStr <> ""
             RemovedPunctuationsTextSubStr = Mid(RemovedPunctuationsTextSubStr, Len(contextCollection.item(jCntcontextCollection)(0)) + 1)
             jCntcontextCollection = jCntcontextCollection + 1
+            If jCntcontextCollection > contextCollection.Count Then Exit Do
         Loop
         If RemovedPunctuationsTextSubStr = "" Then '比對吻合，離開迴圈，取得含標點符號之原文片段
+            Exit For
+        ElseIf VBA.Replace(RemovedPunctuationsTextSubStr, Chr(13), "") = "" Then '只剩下分段符號
             Exit For
         End If
     End If
 Next iCntcontextCollection
 '取得含標點符號之原文片段
-If RemovedPunctuationsTextSubStr = "" Then
+If RemovedPunctuationsTextSubStr = "" Or VBA.Replace(RemovedPunctuationsTextSubStr, Chr(13), "") = "" Then
     For iCntcontextCollection = iCntcontextCollection To jCntcontextCollection - 1
         RemovedPunctuationsTextSubStr = RemovedPunctuationsTextSubStr + contextCollection.item(iCntcontextCollection)(0) + contextCollection.item(iCntcontextCollection)(1)
     Next iCntcontextCollection

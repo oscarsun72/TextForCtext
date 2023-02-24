@@ -1,5 +1,6 @@
 Attribute VB_Name = "文字處理"
 Option Explicit
+Dim punctuationStr As String ' 標點符號字串
 Dim rst As Recordset, d As Object
 Dim db As Database 'set db=CurrentDb _
 只能在已開啟之Access中參照一次 , 二次以上的參照 _
@@ -9,6 +10,18 @@ Dim db As Database 'set db=CurrentDb _
     Dim dbsCurrent As Database, dbsContacts As Database'由 CurrentDb 的線上說明複製 _
     Set dbsCurrent = CurrentDb _
     Set dbsContacts = DBEngine.Workspaces(0).OpenDatabase("Contacts.mdb")
+
+Rem 標點符號字串
+Public Static Property Get PunctuationString() As String
+If punctuationStr = "" Then _
+    punctuationStr = "（）。「」『』[]【】〔〕《》〈〉-－"",  ：，；！？?" _
+        & "、. :,;" _
+        & "……...!()-·‧" & Chr(34) & Chr(-24153) & Chr(-24152) & Chr(-24155) & Chr(-24154) & ChrW(8218) '34：雙引號。大陸標點符號上下雙引號、上下單引數、逗號
+PunctuationString = punctuationStr
+End Property
+'Public Static Property Let Punctionn(ByVal vNewValue As Variant)
+'
+'End Property
 
 
 Function isNum(x As String) As Boolean
@@ -1898,13 +1911,13 @@ Rem 20230128 癸卯年初七 孫守真×chatGPT大菩薩：VBA Overload Functionality：
 'VBA (Visual Basic for Applications) 是一種微軟的程式語言，主要用於自動化 Microsoft Office 應用程式中。VBA 不支援函式的多載和重載。這意味著，您不能在 VBA 中定義具有相同名稱但參數不同的多個函式。
 
 Dim ayToTrim As Variant, a As Variant
-On Error GoTo eh
+On Error GoTo eH
 ayToTrim = Array(Chr(13), Chr(9), Chr(10), Chr(11), Chr(13) & Chr(7), Chr(13) & Chr(10))
 x = VBA.Trim(x)
 For Each a In ayToTrim
     'x = VBA.Replace(x, a, "")
     Do While VBA.Left(x, Len(a)) = a
-        x = VBA.Mid(x, Len(a))
+        x = VBA.Mid(x, Len(a) + 1)
     Loop
     Do While VBA.Right(x, Len(a)) = a
         x = VBA.Mid(x, 1, Len(x) - Len(a))
@@ -1912,7 +1925,7 @@ For Each a In ayToTrim
 Next a
 trimStrForSearch_PlainText = x
 Exit Function
-eh:
+eH:
 Select Case Err.Number
     Case Else
         MsgBox Err.Number & Err.Description
@@ -1923,7 +1936,7 @@ End Function
 Function trimStrForSearch(x As String, sl As word.Selection) As String
 'https://docs.microsoft.com/zh-tw/dotnet/visual-basic/programming-guide/language-features/procedures/passing-arguments-by-value-and-by-reference
 Dim ayToTrim As Variant, a As Variant, rng As Range, slTxtR As String
-On Error GoTo eh
+On Error GoTo eH
 slTxtR = sl.Characters(sl.Characters.Count)
 ayToTrim = Array(Chr(13), Chr(9), Chr(10), Chr(11), Chr(13) & Chr(7), Chr(13) & Chr(10))
 x = VBA.Trim(x)
@@ -1946,7 +1959,7 @@ If sl.Type <> wdSelectionIP Then
     End If
 End If
 Exit Function
-eh:
+eH:
 Select Case Err.Number
     Case Else
         MsgBox Err.Number & Err.Description
@@ -1955,25 +1968,23 @@ End Select
 End Function
 
 
-Function Symbol() '標點符號表
-Dim f As Variant
-f = Array("。", "」", Chr(-24152), "：", "，", "；", _
-    "、", "「", ".", Chr(34), ":", ",", ";", _
-    "……", "...", "）", ")", "-")  '先設定標點符號陣列以備用
-                                'Chr(-24152)是「”」,由Asc函數在選取(.SelText)「”」時取得;Chr(34):「"」
-End Function
+'Function Symbol() '標點符號表
+'Dim f As Variant
+'f = Array("。", "」", Chr(-24152), "：", "，", "；", _
+'    "、", "「", ".", Chr(34), ":", ",", ";", _
+'    "……", "...", "）", ")", "-")  '先設定標點符號陣列以備用
+'                                'Chr(-24152)是「”」,由Asc函數在選取(.SelText)「”」時取得;Chr(34):「"」
+'End Function
 Function isSymbol(ByVal a As String) As Boolean
 Dim f As String
- f = "（）。「」『』[]【】〔〕《》〈〉-－"",  ：，；？?" _
-    & "、. :,;" _
-    & "……...!()-·‧" & Chr(34) & Chr(-24153) & Chr(-24152) & Chr(-24155) & Chr(-24154) & ChrW(8218) '34：雙引號。大陸標點符號上下雙引號、上下單引數、逗號
+f = punctuationStr
 If InStr(1, f, a, vbTextCompare) Then
     isSymbol = True
 End If
 End Function
 Function is注音符號(ByVal a As String, Optional rng As Variant) As Boolean
 Dim f As String
-On Error GoTo eh
+On Error GoTo eH
 If Len(a) > 1 Then Exit Function
 f = "ㄅㄆㄇㄈㄉㄊㄋㄌㄍㄎㄏㄐㄑㄒㄓㄔㄕㄖㄗㄘㄙㄧㄨㄩㄚㄛㄜㄝㄞㄟㄠㄡㄢㄣㄤㄥㄦˊ  ˇ  ˋ  ˙"
 If a = ChrW(20008) Then
@@ -1994,7 +2005,7 @@ Else
     If InStr(f, a) Then is注音符號 = True
 End If
 Exit Function
-eh:
+eH:
 Select Case Err.Number
     Case 424 '此處需要物件
         Set rng = Nothing
@@ -2625,7 +2636,7 @@ End Sub
 Sub 書名號篇名號檢查()
 Dim s As Long, rng As Range, e, trm As String, ans
 Static x() As String, i As Integer
-On Error GoTo eh
+On Error GoTo eH
 Do
     Selection.Find.Execute "〈", , , , , , True, wdFindAsk
     Set rng = Selection.Range
@@ -2647,7 +2658,7 @@ Do
 1
 Loop
 Exit Sub
-eh:
+eH:
 Select Case Err.Number
     Case 92 '沒有設定 For 迴圈的初始值 陣列尚未有值
         GoTo 2
@@ -2707,7 +2718,7 @@ chng:
 Return
 End Sub
 Sub 中國哲學書電子化計劃_表格轉文字(ByRef r As Range)
-On Error GoTo eh
+On Error GoTo eH
 Dim lngTemp As Long '因為誤按到追蹤修訂，才會引發訊息提示刪除儲存格不會有標識
 'Dim d As Document
 Dim tb As Table, c As Cell ', ci As Long
@@ -2722,7 +2733,7 @@ If r.Tables.Count > 0 Then
 End If
 'word.Application.DisplayAlerts = lngTemp
 Exit Sub
-eh:
+eH:
 Select Case Err.Number
     Case 5992 '無法個別存取此集合中的各欄，因為表格中有混合的儲存格寬度。
         For Each c In tb.Range.Cells
@@ -2897,7 +2908,7 @@ For Each a In rng.Characters
     End If
 Next a
 rng.Cut
-On Error GoTo eh:
+On Error GoTo eH:
 rng.PasteAndFormat wdFormatPlainText
 rng.Find.ClearFormatting
 For i = 0 To UBound(rp)
@@ -2915,7 +2926,7 @@ If Not doNotCloseDoc Then
 End If
 SystemSetup.contiUndo ur
 Exit Sub
-eh:
+eH:
 Select Case Err.Number
     Case 4198 '指令失敗
         SystemSetup.wait 900
@@ -3025,7 +3036,7 @@ End If
 Set rng = Selection.Range
 words = x
 db.setWordControlValue (words)
-On Error GoTo eh
+On Error GoTo eH
 Dim ur As UndoRecord
 'Set ur = SystemSetup.stopUndo("生難字加上國語辭典注音")
 SystemSetup.stopUndo ur, "生難字加上國語辭典注音"
@@ -3247,7 +3258,7 @@ rePt:
 Return
 
 
-eh:
+eH:
     Select Case Err.Number
         Case 4198 '指令失敗 'Google Drive的問題
             Resume Next
@@ -3461,3 +3472,4 @@ For i = 1 To Len(str)
 Next i
 SplitWithoutDelimiter_StringToStringArray = arr
 End Function
+

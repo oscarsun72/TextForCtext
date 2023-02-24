@@ -8,7 +8,7 @@ Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
 Option Explicit
-Dim dict1 As New Scripting.Dictionary, dict2 As New Scripting.Dictionary, s1 As Variant, s2 As Variant
+Dim dict1 As New Scripting.Dictionary, dict2 As New Scripting.Dictionary, s1 As Variant, s2 As Variant, similarTextCopy As String, similarWithTextCopy As String
 Private Function Initialize(ByVal text1, ByVal text2) As similartext
 If s1 = text1 And s2 = text2 Then Exit Function
 Dim w, str1, str2
@@ -46,26 +46,30 @@ If s2 <> text2 Then
 End If
 End Function
 '判斷文本間是否相似
-Function Similarity(ByVal text1, ByVal text2) As Boolean
+Function Similarity(ByVal text1, ByVal text2) As Boolean 'text1 被比對者 text2 拿來比對者
 If IsEmpty(text2) Or IsEmpty(text1) Then Exit Function
+similarWithTextCopy = text2
 Initialize text1, text2
 If Me.CompareDictionaries(dict1, dict2) Then
-    Similarity = True: Exit Function
+    Similarity = True
+ElseIf Me.CompareDictionarySimilarity(dict1, dict2) > 0.8 Then
+    Similarity = True
+ElseIf cosine_Similarity() > 0.8 Then
+    Similarity = True
+ElseIf jaccard_Similarity() > 0.8 Then
+    Similarity = True
 End If
-If Me.CompareDictionarySimilarity(dict1, dict2) > 0.8 Then
-    Similarity = True: Exit Function
-End If
-If cosine_Similarity() > 0.8 Then
-    Similarity = True: Exit Function
-End If
-If jaccard_Similarity() > 0.8 Then
-    Similarity = True: Exit Function
+If Similarity Then
+    similarTextCopy = text1
+Else
+    similarTextCopy = ""
 End If
 End Function
 
 '回傳文本間相似的百分比
-Function SimilarityPercent(ByVal text1, ByVal text2) As Variant
+Function SimilarityPercent(ByVal text1, ByVal text2) As Variant 'text1 被比對者 text2 拿來比對者
 If IsEmpty(text2) Or IsEmpty(text1) Then Exit Function
+similarWithTextCopy = text2
 Dim sim As Double
 Initialize text1, text2
 If Me.CompareDictionaries(dict1, dict2) Then

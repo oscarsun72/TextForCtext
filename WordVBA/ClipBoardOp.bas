@@ -1,7 +1,7 @@
 Attribute VB_Name = "ClipBoardOp"
 Option Explicit
-Declare Function IsClipboardFormatAvailable Lib "user32" (ByVal format As Integer) As Long
-Declare Function GetClipboardData Lib "user32" (ByVal uFormat As Integer) As Long
+Declare PtrSafe Function IsClipboardFormatAvailable Lib "user32" (ByVal Format As Integer) As Long
+Declare PtrSafe Function GetClipboardData Lib "user32" (ByVal uFormat As Integer) As Long
 Const CF_HTML = &HC3&
 
 '複製網頁文本到剪貼簿，一樣沒用；只能取得純文字內容，得不到HTML等格式化標記
