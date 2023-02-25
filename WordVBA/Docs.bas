@@ -860,7 +860,7 @@ searchedTerm = Array("易", "卦", "爻", "周易", "易經", "系辭", "繫辭", "擊辭", "
         Dim similarCompare As New Collection
         Set similarCompare = Docs.similarTextCheckInSpecificDocument(d, clipBTxt)
         If similarCompare.item(1) Then
-            If MsgBox("要貼入的文本在原文件中有類似的段落，請自行檢查是否要再貼入" & vbCr & vbCr & "按下「取消」則忽略檢查，將繼續執行", vbExclamation + vbOKCancel) = vbOK Then
+            If MsgBox("要貼入的文本在原文件中有類似的段落!!!" & vbCr & vbCr & "按下「確定」將會選取類似段落，請自行檢查是否仍要再貼入" & vbCr & vbCr & "按下「取消」則忽略檢查，將繼續執行", vbExclamation + vbOKCancel) = vbOK Then
                 Set rng = d.Range
                 If rng.Find.Execute(VBA.Left(similarCompare.item(2), 255), , , , , , , wdFindContinue) Then
                     If VBA.Len(similarCompare.item(2)) > 255 Then rng.Paragraphs(1).Range.Select                  '標示相似文本
@@ -946,6 +946,9 @@ If flgPaste Then
     Next e
     GoSub refres
     SystemSetup.playSound 1.921
+    'HanaMinB還不支援G以後的
+    Docs.ChangeFontOfSurrogatePairs_Range "HanaMinB", d.Range(Selection.Paragraphs(1).Range.start, d.Range.End), CJK_Unified_Ideographs_Extension_F
+    
 Else '文件內已有內容時
     GoSub refres
     SystemSetup.playSound 1.294
@@ -1022,7 +1025,8 @@ For Each e In dCleanParagraphs
         End If
     End If
 Next e
-result.Add Similarity '文本是否相似
+Rem index   Required. An expression that specifies the position of a member of the collection. If a numeric expression, index must be a number from 1 to the value of the collection's Count property. If a string expression, index must correspond to the key argument specified when the member referred to was added to the collection.
+result.Add Similarity '文本是否相似'https://learn.microsoft.com/en-us/office/vba/Language/Reference/User-Interface-Help/item-method-visual-basic-for-applications
 dClearPunctuation = e
 punc.restoreOriginalTextPunctuations d.Content.text, dClearPunctuation
 result.Add dClearPunctuation '找到的相似文本段落
@@ -1245,6 +1249,117 @@ Select Case Err.Number
 End Select
 End Sub
 
+Rem 20230224 creedit with  Bing菩薩：
+Sub ChangeFontOfSurrogatePairs_ActiveDocument(fontName As String, Optional whatCJKBlock As CJKBlockName)
+    Dim rng         As Range
+    Dim c           As String
+    Dim i           As Long
+    Dim ur As UndoRecord
+    SystemSetup.stopUndo ur, "ChangeFontOfSurrogatePairs_ActiveDocument"
+    ' Loop through each character in the document
+    For Each rng In ActiveDocument.Characters
+        c = rng.text
+        ' Check if the character is a high surrogate
+        If AscW(c) >= &HD800 And AscW(c) <= &HDBFF Then
+            ' Check if the next character is a low surrogate
+            If rng.End < ActiveDocument.Content.End Then
+                i = rng.End + 1        ' The index of the next character
+                If i < ActiveDocument.Range.End Then
+                    c = c & ActiveDocument.Range(i, i).text        ' The combined character
+                End If
+                If AscW(Right(c, 1)) >= &HDC00 And AscW(Right(c, 1)) <= &HDFFF Then
+                    ' Check if the combined character is in CJK extension B or later
+                    'If AscW(Left(c, 1)) >= &HD840 Then
+                    If AscW(Left(c, 1)) >= SurrogateCodePoint.HighStart Then '前導代理 (lead surrogates)，介於 D800 至 DBFF 之間，第二個被稱為 後尾代理 (trail surrogates)，介於 DC00 至 DFFF 之間
+                        Dim change As Boolean
+                        change = True
+'                        rng.Select
+                        Select Case whatCJKBlock
+                            Case CJKBlockName.CJK_Unified_Ideographs_Extension_F
+                                'change = isCJK_ExtF(c)
+                                change = isCJK_Ext(c, CJK_Unified_Ideographs_Extension_F)
+                            Case CJKBlockName.CJK_Unified_Ideographs_Extension_G
+                                change = isCJK_Ext(c, CJK_Unified_Ideographs_Extension_G)
+                            Case CJKBlockName.CJK_Unified_Ideographs_Extension_H
+                                change = isCJK_Ext(c, CJK_Unified_Ideographs_Extension_H)
+                            Case Else
+                            ' Change the font name to HanaMinB
+                            ' Change the font name to fontName
+                        End Select
+                        If change Then rng.Font.Name = fontName '"HanaMinB"
+                    End If
+                End If
+            End If
+        End If
+    Next rng
+    SystemSetup.contiUndo ur
+End Sub
+Sub ChangeFontOfSurrogatePairs_Range(fontName As String, rngtoChange As Range, Optional whatCJKBlock As CJKBlockName)
+    Dim rng         As Range
+    Dim c           As String
+    Dim i           As Long
+    Dim ur As UndoRecord
+    SystemSetup.stopUndo ur, "ChangeFontOfSurrogatePairs_Range"
+    For Each rng In rngtoChange.Characters
+        c = rng.text
+        ' Check if the character is a high surrogate
+        If AscW(c) >= &HD800 And AscW(c) <= &HDBFF Then
+'            ' Check if the next character is a low surrogate
+'            'If rng.End < ActiveDocument.Content.End Then
+'            If rng.End < rngtoChange.End Then
+'                i = rng.End + 1        ' The index of the next character
+'                'If i < ActiveDocument.Range.End Then
+'                If i < rngtoChange.End Then
+'                    'c = c & ActiveDocument.Range(i, i).text        ' The combined character
+'                    c = c & Mid(rngtoChange, i, 1).text        ' The combined character
+'                End If
+                If AscW(Right(c, 1)) >= &HDC00 And AscW(Right(c, 1)) <= &HDFFF Then
+                    ' Check if the combined character is in CJK extension B or later
+                    'If AscW(Left(c, 1)) >= &HD840 Then
+                    If AscW(Left(c, 1)) >= SurrogateCodePoint.HighStart Then '前導代理 (lead surrogates)，介於 D800 至 DBFF 之間，第二個被稱為 後尾代理 (trail surrogates)，介於 DC00 至 DFFF 之間
+                        Dim change As Boolean
+                        change = True
+'                        rng.Select
+                        Select Case whatCJKBlock
+                            Case CJKBlockName.CJK_Unified_Ideographs_Extension_F
+                                'change = isCJK_ExtF(c)
+                                change = isCJK_Ext(c, CJK_Unified_Ideographs_Extension_F)
+                            Case CJKBlockName.CJK_Unified_Ideographs_Extension_G
+                                change = isCJK_Ext(c, CJK_Unified_Ideographs_Extension_G)
+                            Case CJKBlockName.CJK_Unified_Ideographs_Extension_H
+                                change = isCJK_Ext(c, CJK_Unified_Ideographs_Extension_H)
+                            Case Else
+                            ' Change the font name to HanaMinB
+                            ' Change the font name to fontName
+                        End Select
+                        If change Then rng.Font.Name = fontName '"HanaMinB"
+                    End If
+                End If
+'            End If
+        End If
+    Next rng
+    SystemSetup.contiUndo ur
+End Sub
+Sub ChangeCharacterFontName(character As String, fontName As String, d As Document, Optional fontNameFarEast As String)
+With d.Range
+    With .Find
+        With .Replacement.Font
+            .Name = fontName
+            .NameFarEast = fontNameFarEast
+        End With
+        .Execute character, , , , , , True, wdFindContinue, , , wdReplaceAll
+    End With
+End With
+End Sub
+
+Sub ChangeCharacterFontNameAccordingSelection()
+Dim fontName As String, fontNameFarEast As String
+With Selection
+    fontName = .Font.Name
+    fontNameFarEast = .Font.NameFarEast
+    ChangeCharacterFontName .text, fontName, .Document, fontNameFarEast
+End With
+End Sub
 Sub updateURL() '更新超連結網址
 Dim site As String
 Dim lnk As New Links

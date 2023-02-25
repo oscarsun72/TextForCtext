@@ -1,7 +1,122 @@
 Attribute VB_Name = "code"
 Option Explicit
 
+Enum CJKBlockName 'https://en.wikipedia.org/wiki/CJK_characters
+    CJK_Unified_Ideographs 'Enum（列舉）沒有指定常值，則從整數0開始
+    CJK_Unified_Ideographs_Extension_A
+    CJK_Unified_Ideographs_Extension_B
+    CJK_Unified_Ideographs_Extension_C
+    CJK_Unified_Ideographs_Extension_D
+    CJK_Unified_Ideographs_Extension_E
+    CJK_Unified_Ideographs_Extension_F
+    CJK_Unified_Ideographs_Extension_G
+    CJK_Unified_Ideographs_Extension_H
+    CJK_Radicals_Supplement
+    Kangxi_Radicals
+    Ideographic_Description_Characters
+    CJK_Symbols_and_Punctuation
+    CJK_Strokes
+    Enclosed_CJK_Letters_and_Months
+    CJK_Compatibility
+    CJK_Compatibility_Ideographs
+    CJK_Compatibility_Forms
+    Enclosed_Ideographic_Supplement
+    CJK_Compatibility_Ideographs_Supplement
+End Enum
 
+Enum CJKChartRange 'https://en.wikipedia.org/wiki/CJK_characters
+CJK_Unified_Ideographs_start = &H4E00
+CJK_Unified_Ideographs_Extension_A_start = &H3400
+CJK_Unified_Ideographs_Extension_B_start = &H20000
+CJK_Unified_Ideographs_Extension_C_start = &H2A700
+CJK_Unified_Ideographs_Extension_D_start = &H2B740
+CJK_Unified_Ideographs_Extension_E_start = &H2B820
+CJK_Unified_Ideographs_Extension_F_start = &H2CEB0
+CJK_Unified_Ideographs_Extension_G_start = &H30000
+CJK_Unified_Ideographs_Extension_H_start = &H31350
+CJK_Radicals_Supplement_start = &H2E80
+Kangxi_Radicals_start = &H2F00
+Ideographic_Description_Characters_start = &H2FF0
+CJK_Symbols_and_Punctuation_start = &H3000
+CJK_Strokes_start = &H31C0
+Enclosed_CJK_Letters_and_Months_start = &H3200
+CJK_Compatibility_start = &H3300
+CJK_Compatibility_Ideographs_start = &HF900
+CJK_Compatibility_Forms_start = &HFE30
+Enclosed_Ideographic_Supplement_start = &H1F200
+CJK_Compatibility_Ideographs_Supplement_start = &H2F800
+CJK_Unified_Ideographs_end = &H9FFF
+CJK_Unified_Ideographs_Extension_A_end = &H4DBF
+CJK_Unified_Ideographs_Extension_B_end = &H2A6DF
+CJK_Unified_Ideographs_Extension_C_end = &H2B73F
+CJK_Unified_Ideographs_Extension_D_end = &H2B81F
+CJK_Unified_Ideographs_Extension_E_end = &H2CEAF
+CJK_Unified_Ideographs_Extension_F_end = &H2EBEF
+CJK_Unified_Ideographs_Extension_G_end = &H3134F
+CJK_Unified_Ideographs_Extension_H_end = &H323AF
+CJK_Radicals_Supplement_end = &H2EFF
+Kangxi_Radicals_end = &H2FDF
+Ideographic_Description_Characters_end = &H2FFF
+CJK_Symbols_and_Punctuation_end = &H303F
+CJK_Strokes_end = &H31EF
+Enclosed_CJK_Letters_and_Months_end = &H32FF
+CJK_Compatibility_end = &H33FF
+CJK_Compatibility_Ideographs_end = &HFAFF
+CJK_Compatibility_Forms_end = &HFE4F
+Enclosed_Ideographic_Supplement_end = &H1F2FF
+CJK_Compatibility_Ideographs_Supplement_end = &H2FA1F
+
+End Enum
+Enum CJKChartRangeString 'https://en.wikipedia.org/wiki/CJK_characters
+CJK_Unified_Ideographs_start = "&H4E00"
+CJK_Unified_Ideographs_Extension_A_start = "&H3400"
+CJK_Unified_Ideographs_Extension_B_start = "&H20000"
+CJK_Unified_Ideographs_Extension_C_start = "&H2A700"
+CJK_Unified_Ideographs_Extension_D_start = "&H2B740"
+CJK_Unified_Ideographs_Extension_E_start = "&H2B820"
+CJK_Unified_Ideographs_Extension_F_start = "&H2CEB0"
+CJK_Unified_Ideographs_Extension_G_start = "&H30000"
+CJK_Unified_Ideographs_Extension_H_start = "&H31350"
+CJK_Radicals_Supplement_start = "&H2E80"
+Kangxi_Radicals_start = "&H2F00"
+Ideographic_Description_Characters_start = "&H2FF0"
+CJK_Symbols_and_Punctuation_start = "&H3000"
+CJK_Strokes_start = "&H31C0"
+Enclosed_CJK_Letters_and_Months_start = "&H3200"
+CJK_Compatibility_start = "&H3300"
+CJK_Compatibility_Ideographs_start = "&HF900"
+CJK_Compatibility_Forms_start = "&HFE30"
+Enclosed_Ideographic_Supplement_start = "&H1F200"
+CJK_Compatibility_Ideographs_Supplement_start = "&H2F800"
+CJK_Unified_Ideographs_end = "&H9FFF"
+CJK_Unified_Ideographs_Extension_A_end = "&H4DBF"
+CJK_Unified_Ideographs_Extension_B_end = "&H2A6DF"
+CJK_Unified_Ideographs_Extension_C_end = "&H2B73F"
+CJK_Unified_Ideographs_Extension_D_end = "&H2B81F"
+CJK_Unified_Ideographs_Extension_E_end = "&H2CEAF"
+CJK_Unified_Ideographs_Extension_F_end = "&H2EBEF"
+CJK_Unified_Ideographs_Extension_G_end = "&H3134F"
+CJK_Unified_Ideographs_Extension_H_end = "&H323AF"
+CJK_Radicals_Supplement_end = "&H2EFF"
+Kangxi_Radicals_end = "&H2FDF"
+Ideographic_Description_Characters_end = "&H2FFF"
+CJK_Symbols_and_Punctuation_end = "&H303F"
+CJK_Strokes_end = "&H31EF"
+Enclosed_CJK_Letters_and_Months_end = "&H32FF"
+CJK_Compatibility_end = "&H33FF"
+CJK_Compatibility_Ideographs_end = "&HFAFF"
+CJK_Compatibility_Forms_end = "&HFE4F"
+Enclosed_Ideographic_Supplement_end = "&H1F2FF"
+CJK_Compatibility_Ideographs_Supplement_end = "&H2FA1F"
+
+End Enum
+
+Enum SurrogateCodePoint 'https://zhuanlan.zhihu.com/p/147339588
+    HighStart = &HD800 'UTF-16 可以儲存 U+0000 至 U+10FFFF 之間的字碼，U+FFFF 以下的字碼以 2 個 byte 儲存，而 U+10000 以上的字碼，會被拆成兩個介於 D800 至 DFFF 之間的整數，第一個被稱為 前導代理 (lead surrogates)，介於 D800 至 DBFF 之間，第二個被稱為 後尾代理 (trail surrogates)，介於 DC00 至 DFFF 之間，UTF-16 就是利用這兩個代理對來表示 FFFF 之外，其他輔助平面的文字。
+    HighEnd = &HDBFF 'https://ithelp.ithome.com.tw/articles/10198444#_=_
+    LowStart = &HDC00 'https://zh.wikipedia.org/zh-tw/UTF-16
+    LowEnd = &HDFFF
+End Enum
 
 Public Function UrlEncode(ByRef szString As String) As String '以下函數可以編碼中文的URL： VBA與Unicode Ansi URL編碼解碼等相關的代碼集錦 - 成功需要自律的文章 - 知乎 https://zhuanlan.zhihu.com/p/435181691
 Dim szChar As String
@@ -238,10 +353,11 @@ Rem 這段代碼中的 IsChineseCharacter 函數用於判斷單個字符是否是CJK或CJK擴展字符集
 Rem 在VBA中，我們使用了 AscW 函數來獲取字符的Unicode編碼值。然後，我們就可以使用和C#中類似的方式來判斷字符是否屬於CJK或CJK擴展字符集中的漢字。
 ' 判斷一個字符是否是CJK或CJK擴展字符集中的漢字
 Public Function IsChineseCharacter(c As String) As Boolean
-    ' Unicode範圍: CJK字符集範圍：4E00–9FFF，CJK擴展字符集範圍：20000–2A6DF
-    Dim unicodeVal As Long
-    unicodeVal = AscW(c)
-    IsChineseCharacter = (unicodeVal >= &H4E00 And unicodeVal <= &H9FFF) Or (unicodeVal >= &H20000 And unicodeVal <= &H2A6DF)
+'    chatGPT大菩薩： Unicode範圍: CJK字符集範圍：4E00–9FFF，CJK擴展字符集範圍：20000–2A6DF 孫守真按：這樣根本不夠，只有 CJK統一表意符號和CJK擴展B
+'    Dim unicodeVal As Long
+'    unicodeVal = AscW(c)
+'    IsChineseCharacter = (unicodeVal >= &H4E00 And unicodeVal <= &H9FFF) Or (unicodeVal >= &H20000 And unicodeVal <= &H2A6DF)
+    IsChineseCharacter = IsCJK(c)(1)
 End Function
 
 ' 判斷一個字符串是否全部由CJK或CJK擴展字符集中的漢字組成
@@ -263,7 +379,248 @@ Rem 下面是一個示例函數，該函數接受一個字符並返回一個布爾值，指示該字符是否為代理
 Function IsSurrogate(ByVal ch As String) As Boolean
     Dim code As Long
     code = AscW(ch)
-    IsSurrogate = (code >= &HD800 And code <= &HDFFF)
+    'IsSurrogate = (code >= &HD800 And code <= &HDFFF) 'https://ithelp.ithome.com.tw/articles/10198444#_=_
+    IsSurrogate = (code >= &HD800 And code <= &HDBFF) _
+                Or (code >= &HDC00 And code <= &HDFFF) 'https://ithelp.ithome.com.tw/articles/10198444#_=_
+    'UTF-16 可以儲存 U+0000 至 U+10FFFF 之間的字碼，U+FFFF 以下的字碼以 2 個 byte 儲存，而 U+10000 以上的字碼，會被拆成兩個介於 D800 至 DFFF 之間的整數，
+    '第一個被稱為 前導代理 (lead surrogates)，介於 D800 至 DBFF 之間，第二個被稱為 後尾代理 (trail surrogates)，介於 DC00 至 DFFF 之間，UTF-16 就是利用這兩個代理對來表示 FFFF 之外，其他輔助平面的文字。
     Rem 這個函數將字符轉換為 Unicode 編碼，並檢查該編碼是否在代理對範圍內。如果是，則函數返回 True，否則返回 False。請注意，AscW 函數只能用於 Unicode 字符串，如果您要處理 ANSI 字符串，則需要使用 Asc 函數。
 End Function
+Function IsHighSurrogate(ByVal ch As String) As Boolean
+    Dim code As Long
+    code = AscW(ch)
+    IsHighSurrogate = (code >= &HD800 And code <= &HDBFF) 'https://ithelp.ithome.com.tw/articles/10198444#_=_
+    'UTF-16 可以儲存 U+0000 至 U+10FFFF 之間的字碼，U+FFFF 以下的字碼以 2 個 byte 儲存，而 U+10000 以上的字碼，會被拆成兩個介於 D800 至 DFFF 之間的整數，
+    '第一個被稱為 前導代理 (lead surrogates)，介於 D800 至 DBFF 之間
+    
+End Function
+Function IsLowSurrogate(ByVal ch As String) As Boolean
+    Dim code As Long
+    code = AscW(ch)
+    IsLowSurrogate = (code >= &HDC00 And code <= &HDFFF) 'https://ithelp.ithome.com.tw/articles/10198444#_=_
+    'UTF-16 可以儲存 U+0000 至 U+10FFFF 之間的字碼，U+FFFF 以下的字碼以 2 個 byte 儲存，而 U+10000 以上的字碼，會被拆成兩個介於 D800 至 DFFF 之間的整數，
+    '第二個被稱為 後尾代理 (trail surrogates)，介於 DC00 至 DFFF 之間，UTF-16 就是利用這兩個代理對來表示 FFFF 之外，其他輔助平面的文字。
+    
+End Function
+
+Rem 20230224 chatGPT大菩薩：對於surrogate pair字符，應該使用Unicode標準中所述的方法將其轉換為單個代理字符。具體來說，將代理對（surrogate pair）的兩個元素分別稱為high surrogate和low surrogate。
+Rem 以下是將代理對轉換為代理字符的方法:
+Private Function CombineSurrogatePair(ByVal highSurrogate As String, ByVal lowSurrogate As String) As String
+    CombineSurrogatePair = ChrW((AscW(highSurrogate) - &HD800&) * &H400& + (AscW(lowSurrogate) - &HDC00&) + &H10000)
+End Function
+Rem 使用這個函數，您可以通過在循環中處理單個字符，並使用上面的範圍來判斷字符是否在CJK全字集範圍內。 如果找到代理字符，則可以使用該函數將其轉換為Unicode字符。
+
+Function IsCJK(c As String) As Collection 'Boolean,CJKBlockName
+    Dim code As Long, cjk As Boolean, cjkBlackName As CJKBlockName, result As New Collection
+'    Dim code
+    Rem chatGPT大菩薩：是的，您說得沒錯。在 VBA 中，使用 AscW 函式取得 Unicode 字元的整數值時，如果傳入的字串是 surrogate pair，那麼函式只會計算 pair 的第一個字元（即 High surrogate）的值。因此，可以直接使用 AscW(c) 來計算 c 的整數值，而不必再使用 Left 函式來取得第一個字元。
+    'code = AscW(Left(c, 1))
+    'code = AscW(c)
+    If Len(c) = 1 Then
+        code = AscW(c) 'AscW_IncludeSurrogatePairUnicodecode(c)
+    Else
+        getCodePoint c, code
+    End If
+    Rem https://en.wikipedia.org/wiki/CJK_characters
+    'CJK Unified Ideographs
+    'If code >= CLng("&H4E00") And code <= CLng("&H9FFF") Then'一定要「CLng("&H9FFF")」 不能 「CLng(&H9FFF)」
+    If code >= CLng(CJKChartRangeString.CJK_Unified_Ideographs_start) And code <= CLng(CJKChartRangeString.CJK_Unified_Ideographs_end) Then
+        cjk = True: cjkBlackName = CJKBlockName.CJK_Unified_Ideographs
+    'CJK Compatibility Ideographs
+    'ElseIf code >= CLng("&HF900") And code <= CLng("&HFAFF") Then
+    ElseIf code >= CLng(CJKChartRangeString.CJK_Compatibility_Ideographs_start) And code <= CLng(CJKChartRangeString.CJK_Compatibility_Ideographs_end) Then
+        cjk = True: cjkBlackName = CJKBlockName.CJK_Compatibility_Ideographs
+    'CJK Unified Ideographs Extension A
+    'ElseIf code >= CLng(&H3400") And code <= CLng("&H4DBF") Then
+    ElseIf code >= CLng(CJKChartRangeString.CJK_Unified_Ideographs_Extension_A_start) And code <= CLng(CJKChartRangeString.CJK_Unified_Ideographs_Extension_A_end) Then
+        cjk = True: cjkBlackName = CJKBlockName.CJK_Unified_Ideographs_Extension_A
+    'CJK Unified Ideographs Extension B
+    'ElseIf code >= CLng("&H20000") And code <= CLng("&H2A6DF") Then
+    ElseIf code >= CLng(CJKChartRangeString.CJK_Unified_Ideographs_Extension_B_start) And code <= CLng(CJKChartRangeString.CJK_Unified_Ideographs_Extension_B_end) Then
+        cjk = True: cjkBlackName = CJKBlockName.CJK_Unified_Ideographs_Extension_B
+    'CJK Unified Ideographs Extension C
+'    ElseIf code >= CLng("&H2A700") And code <= CLng("&H2B73F") Then
+    ElseIf code >= CLng(CJKChartRangeString.CJK_Unified_Ideographs_Extension_C_start) And code <= CLng(CJKChartRangeString.CJK_Unified_Ideographs_Extension_C_end) Then
+        cjk = True: cjkBlackName = CJKBlockName.CJK_Unified_Ideographs_Extension_C
+    'CJK Unified Ideographs Extension D
+'    ElseIf code >= CLng("&H2B740") And code <= CLng("&H2B81F") Then
+    ElseIf code >= CLng(CJKChartRangeString.CJK_Unified_Ideographs_Extension_D_start) And code <= CLng(CJKChartRangeString.CJK_Unified_Ideographs_Extension_D_end) Then
+        cjk = True: cjkBlackName = CJKBlockName.CJK_Unified_Ideographs_Extension_D
+    'CJK Unified Ideographs Extension E
+    'ElseIf code >= CLng("&H2B820") And code <= CLng("&H2CEAF") Then
+    ElseIf code >= CLng(CJKChartRangeString.CJK_Unified_Ideographs_Extension_E_start) And code <= CLng(CJKChartRangeString.CJK_Unified_Ideographs_Extension_E_end) Then
+        cjk = True: cjkBlackName = CJKBlockName.CJK_Unified_Ideographs_Extension_E
+    'CJK Unified Ideographs Extension F
+    'ElseIf code >= CLng("&H2CEB0") And code <= CLng("&H2EBEF") Then
+    ElseIf code >= CLng(CJKChartRangeString.CJK_Unified_Ideographs_Extension_F_start) And code <= CLng(CJKChartRangeString.CJK_Unified_Ideographs_Extension_F_end) Then
+        cjk = True: cjkBlackName = CJKBlockName.CJK_Unified_Ideographs_Extension_F
+    'CJK Unified Ideographs Extension G
+    ElseIf code >= CLng(CJKChartRangeString.CJK_Unified_Ideographs_Extension_G_start) And code <= CLng(CJKChartRangeString.CJK_Unified_Ideographs_Extension_G_end) Then
+        cjk = True: cjkBlackName = CJKBlockName.CJK_Unified_Ideographs_Extension_G
+    'CJK Unified Ideographs Extension H
+    ElseIf code >= CLng(CJKChartRangeString.CJK_Unified_Ideographs_Extension_H_start) And code <= CLng(CJKChartRangeString.CJK_Unified_Ideographs_Extension_H_end) Then
+        cjk = True: cjkBlackName = CJKBlockName.CJK_Unified_Ideographs_Extension_H
+    'CJK Radicals Supplement
+    ElseIf code >= CLng(CJKChartRangeString.CJK_Radicals_Supplement_start) And code <= CLng(CJKChartRangeString.CJK_Radicals_Supplement_end) Then
+        cjk = True: cjkBlackName = CJKBlockName.CJK_Radicals_Supplement
+    'Kangxi Radicals
+    ElseIf code >= CLng(CJKChartRangeString.Kangxi_Radicals_start) And code <= CLng(CJKChartRangeString.Kangxi_Radicals_end) Then
+        cjk = True: cjkBlackName = CJKBlockName.Kangxi_Radicals
+    'Ideographic Description Characters
+    ElseIf code >= CLng(CJKChartRangeString.Ideographic_Description_Characters_start) And code <= CLng(CJKChartRangeString.Ideographic_Description_Characters_end) Then
+        cjk = True: cjkBlackName = CJKBlockName.Ideographic_Description_Characters
+    'CJK Symbols And punctuation
+    ElseIf code >= CLng(CJKChartRangeString.CJK_Symbols_and_Punctuation_start) And code <= CLng(CJKChartRangeString.CJK_Symbols_and_Punctuation_end) Then
+        cjk = True: cjkBlackName = CJKBlockName.CJK_Symbols_and_Punctuation
+    'CJK Strokes
+    ElseIf code >= CLng(CJKChartRangeString.CJK_Strokes_start) And code <= CLng(CJKChartRangeString.CJK_Strokes_end) Then
+        cjk = True: cjkBlackName = CJKBlockName.CJK_Strokes
+    'Enclosed CJK Letters and Months
+    ElseIf code >= CLng(CJKChartRangeString.Enclosed_CJK_Letters_and_Months_start) And code <= CLng(CJKChartRangeString.Enclosed_CJK_Letters_and_Months_end) Then
+        cjk = True: cjkBlackName = CJKBlockName.Enclosed_CJK_Letters_and_Months
+    'CJK Compatibility
+    ElseIf code >= CLng(CJKChartRangeString.CJK_Compatibility_start) And code <= CLng(CJKChartRangeString.CJK_Compatibility_end) Then
+        cjk = True: cjkBlackName = CJKBlockName.CJK_Compatibility
+    'CJK Compatibility Forms
+    ElseIf code >= CLng(CJKChartRangeString.CJK_Compatibility_Forms_start) And code <= CLng(CJKChartRangeString.CJK_Compatibility_Forms_end) Then
+        cjk = True: cjkBlackName = CJKBlockName.CJK_Compatibility_Forms
+    'Enclosed Ideographic Supplement
+    ElseIf code >= CLng(CJKChartRangeString.Enclosed_Ideographic_Supplement_start) And code <= CLng(CJKChartRangeString.Enclosed_Ideographic_Supplement_end) Then
+        cjk = True: cjkBlackName = CJKBlockName.Enclosed_Ideographic_Supplement
+    'CJK Compatibility Ideographs Supplement
+    'ElseIf code >= CLng("&H2F800") And code <= CLng("&H2FA1F") Then
+    ElseIf code >= CLng(CJKChartRangeString.CJK_Compatibility_Ideographs_Supplement_start) And code <= CLng(CJKChartRangeString.CJK_Compatibility_Ideographs_Supplement_end) Then
+        cjk = True: cjkBlackName = CJKBlockName.CJK_Compatibility_Ideographs_Supplement
+    Else
+        cjk = False
+    End If
+    result.Add cjk
+    result.Add cjkBlackName
+    Set IsCJK = result
+Rem chatGPT大菩薩：抱歉，我之前回答的有誤。您提到的「元」字的Unicode碼確實是5143，屬於CJK基本集範圍內。
+Rem 另外，我之前的計算是有誤的，因為將16進制轉為10進制時需要注意正負號。正確的範圍應為：
+Rem CJK基本集：4E00（19968）到9FFF（40959）
+Rem CJK擴展A：3400（13312）到4DBF（19871）
+Rem CJK擴展B：20000（131072）到2A6DF（173791）
+Rem CJK擴展C：2A700（173824）到2B73F（177983）
+Rem CJK擴展D：2B740（177984）到2B81F（178207）
+Rem CJK擴展E：2B820（178208）到2CEAF（235519）
+Rem CJK擴展F：2CEB0（235520）到2EBEF（303231）
+Rem 關於 &H9FFF 轉成負數的問題，是因為在VBA中，整數類型的最高位為符號位，如果最高位為1，則表示負數。因此，&H9FFF 將被當作負數處理，其實際值為 -24577。
+End Function
+Function HextoLng(hexValue As String) As Long
+    'HextoLng = CLng(hexValue) And &HFFFF 'Val("&H" & Right("0000" & hexValue, 4))
+    HextoLng = CLng(hexValue)
+End Function
+
+Function AscW_IncludeSurrogatePairUnicodecode(ByVal str As String) As Long
+    Dim utf16 As String
+    utf16 = StrConv(str, vbUnicode)
+    Dim code As Long
+    If Len(utf16) = 2 Then ' surrogate pair
+        code = (CLng(AscW(Mid(utf16, 1, 1))) - &HD800&) * &H400& + (CLng(AscW(Mid(utf16, 2, 1))) - &HDC00&) + &H10000
+    Else
+        code = AscW(utf16)
+    End If
+    AscW_IncludeSurrogatePairUnicodecode = code
+End Function
+Sub getCodePoint(character As String, codepoint As Long)
+' 獲取字符串的 high surrogate 和 low surrogate 的 AscW() 值
+codepoint = ((CLng(AscW(Left(character, 1))) - &HD800) * &H400) + (CLng(AscW(Right(character, 1))) - &HDC00) + &H10000
+Rem 沒有「CLng」轉型會溢位，若者如 isCJK_Ext()函式中的方式，以型別為 Long 的變數儲存其值，亦會隱含轉型
+End Sub
+
+
+Function isCJK_Ext(str As String, whatBlockNameInExt As CJKBlockName) As Boolean
+Dim codepoint As Long
+Dim highSurrogate As Long
+Dim lowSurrogate As Long
+
+' 獲取字符串的 high surrogate 和 low surrogate 的 AscW() 值
+highSurrogate = AscW(Left(str, 1))
+lowSurrogate = AscW(Right(str, 1))
+
+If (highSurrogate >= SurrogateCodePoint.HighStart And highSurrogate <= SurrogateCodePoint.HighEnd) _
+    And (lowSurrogate >= SurrogateCodePoint.LowStart And lowSurrogate <= SurrogateCodePoint.LowEnd) Then
+    ' 計算字符的碼點值!!!!!!!!!!!!!!!!!
+'    codepoint = ((highSurrogate - &HD800) * &H400) + (lowSurrogate - &HDC00) + &H10000
+    getCodePoint str, codepoint '若沒以「CLng()」轉型會溢位，以型別為 Long 的變數儲存其值，即會隱含轉型
+    Select Case whatBlockNameInExt
+        Case CJKBlockName.CJK_Unified_Ideographs_Extension_A
+            If codepoint >= CJKChartRange.CJK_Unified_Ideographs_Extension_A_start And codepoint <= CJKChartRange.CJK_Unified_Ideographs_Extension_A_end Then isCJK_Ext = True
+        Case CJKBlockName.CJK_Unified_Ideographs_Extension_B
+            If codepoint >= CJKChartRange.CJK_Unified_Ideographs_Extension_B_start And codepoint <= CJKChartRange.CJK_Unified_Ideographs_Extension_B_end Then isCJK_Ext = True
+        Case CJKBlockName.CJK_Unified_Ideographs_Extension_C
+            If codepoint >= CJKChartRange.CJK_Unified_Ideographs_Extension_C_start And codepoint <= CJKChartRange.CJK_Unified_Ideographs_Extension_C_end Then isCJK_Ext = True
+        Case CJKBlockName.CJK_Unified_Ideographs_Extension_D
+            If codepoint >= CJKChartRange.CJK_Unified_Ideographs_Extension_D_start And codepoint <= CJKChartRange.CJK_Unified_Ideographs_Extension_D_end Then isCJK_Ext = True
+        Case CJKBlockName.CJK_Unified_Ideographs_Extension_E
+            If codepoint >= CJKChartRange.CJK_Unified_Ideographs_Extension_E_start And codepoint <= CJKChartRange.CJK_Unified_Ideographs_Extension_E_end Then isCJK_Ext = True
+        Case CJKBlockName.CJK_Unified_Ideographs_Extension_F
+            If codepoint >= CJKChartRange.CJK_Unified_Ideographs_Extension_F_start And codepoint <= CJKChartRange.CJK_Unified_Ideographs_Extension_F_end Then isCJK_Ext = True
+        Case CJKBlockName.CJK_Unified_Ideographs_Extension_G
+            If codepoint >= CJKChartRange.CJK_Unified_Ideographs_Extension_G_start And codepoint <= CJKChartRange.CJK_Unified_Ideographs_Extension_G_end Then isCJK_Ext = True
+        Case CJKBlockName.CJK_Unified_Ideographs_Extension_H
+            If codepoint >= CJKChartRange.CJK_Unified_Ideographs_Extension_H_start And codepoint <= CJKChartRange.CJK_Unified_Ideographs_Extension_H_end Then isCJK_Ext = True
+    End Select
+End If
+End Function
+
+Rem 20230225 chatGPT大菩薩：CJK-ext F high surrogate.：判斷 Unicode 字符是否在 CJK-Ext F 範圍內，並且計算出字符的碼點值：
+Function isCJK_ExtF(str As String) As Boolean
+'https://ithelp.ithome.com.tw/articles/10198444#_=_
+'第一個被稱為 前導代理 (lead surrogates)，介於 D800 至 DBFF 之間
+'第二個被稱為 後尾代理 (trail surrogates)，介於 DC00 至 DFFF 之間
+
+Dim codepoint As Long
+Dim highSurrogate As Long
+Dim lowSurrogate As Long
+
+' 獲取字符串的 high surrogate 和 low surrogate 的 AscW() 值
+highSurrogate = AscW(Left(str, 1))
+lowSurrogate = AscW(Right(str, 1))
+
+If (highSurrogate >= &HD84D And highSurrogate <= &HDBFF) And (lowSurrogate >= &HDC00 And lowSurrogate <= &HDFFF) Then
+    ' 計算字符的碼點值
+    codepoint = ((highSurrogate - &HD800) * &H400) + (lowSurrogate - &HDC00) + &H10000
+    
+    If codepoint >= &H2CEB0 And codepoint <= &H2EBEF Then
+        ' 字符在 CJK-Ext F 範圍內
+        isCJK_ExtF = True
+    Else
+        ' 字符不在 CJK-Ext F 範圍內
+    End If
+Else
+    ' 字符不在 CJK-Ext F 範圍內
+End If
+'代碼邏輯如下:
+'
+'先獲取字符串的 high surrogate 和 low surrogate 的 AscW() 值。
+'如果 high surrogate 和 low surrogate 的 AscW() 值都在 CJK-Ext F 範圍內，則計算字符的碼點值。
+'判斷字符的碼點值是否在 CJK-Ext F 範圍內，如果在，則說明字符在 CJK-Ext F 範圍內；如果不在，則說明字符不在 CJK-Ext F 範圍內。
+'計算字符的碼點值的公式如下:
+'
+'codePoint = ((highSurrogate - &HD800) * &H400) + (lowSurrogate - &HDC00) + &H10000
+'
+'其中，&HD800 和 &HDC00 分別是 high surrogate 和 low surrogate 的基準值，&H400 是 surrogate pair 的偏移量，&H10000 是 Unicode 編碼的基準值。
+
+End Function
+Rem chatGPT大菩薩：
+Sub ConvertToUnicode()
+    Dim selectedText As String
+    Dim unicodeCode As Long
+    
+    selectedText = Selection.Range.text
+    
+    If Len(selectedText) = 1 Then
+        unicodeCode = AscW(selectedText)
+    ElseIf Len(selectedText) = 2 Then
+        unicodeCode = (AscW(Mid(selectedText, 1, 1)) - &HD800&) * &H400& + (AscW(Mid(selectedText, 2, 1)) - &HDC00&) + &H10000
+    Else
+        MsgBox "Invalid selection"
+        Exit Sub
+    End If
+    
+    Selection.Range.text = ChrW(unicodeCode)
+End Sub
 

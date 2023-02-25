@@ -2466,6 +2466,10 @@ omit:
             #endregion
             s++;
             int e = x.IndexOf("}", s), spaceCntr = 0;
+            if (e < 0) {
+                MessageBox.Show("請在注文末端加入「}}」再繼續！");
+                return 0;
+            }
             xSel = x.Substring(s, e - s);
             #region 如果末已綴有空格
             if (xSel.Length > 0)
@@ -5724,6 +5728,8 @@ notFound:
                         downloadImage(imgUrl);
                     else
                         downloadImage(br.GetImageUrl());
+                    Process.Start("https://gj.cool/try_ocr");
+                    Process.Start("https://keep.google.com/#NOTE/1XHzZWpH5DCDGOctKjMwNad9qGdtUiYQpSw7HtkmfuEEAJOCtlj37xJg5XgRzWoE");
                     return;
                 }
                 if (e.KeyCode == Keys.Left || e.KeyCode == Keys.Right)

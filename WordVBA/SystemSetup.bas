@@ -147,14 +147,14 @@ Public Function GetClipboard() As String
     CloseClipboard
 End Function
 
-Sub CopyText(Text As String) 'https://stackoverflow.com/questions/14219455/excel-vba-code-to-copy-a-specific-string-to-clipboard
+Sub CopyText(text As String) 'https://stackoverflow.com/questions/14219455/excel-vba-code-to-copy-a-specific-string-to-clipboard
     'VBA Macro using late binding to copy text to clipboard.
     'By Justin Kay, 8/15/2014
     Dim MSForms_DataObject As Object
     Set MSForms_DataObject = CreateObject("new:{1C3B4210-F441-11CE-B9EA-00AA006B1A69}")
 '    Set MSForms_DataObject = New MSForms.DataObject 與上式相同
 '    MSForms_DataObject.Clear
-    MSForms_DataObject.SetText Text
+    MSForms_DataObject.SetText text
     MSForms_DataObject.PutInClipboard
     Set MSForms_DataObject = Nothing
 End Sub
@@ -291,13 +291,13 @@ a = VBA.Replace(a, "AppData\Roaming", "")
 End Function
 
 Function GetClipboardText()
-On Error GoTo eh
+On Error GoTo eH
 Dim clipboard As New MSForms.DataObject
 DoEvents
 clipboard.GetFromClipboard
 GetClipboardText = clipboard.GetText
 Exit Function
-eh:
+eH:
     Select Case Err.Number
         Case -2147221040 'DataObject:GetFromClipboard OpenClipboard 失敗
             SystemSetup.wait 0.8
@@ -394,7 +394,7 @@ End Sub
 
 
 Public Function appActivatedYet(exeName As String) As Boolean
-On Error GoTo eh:
+On Error GoTo eH:
       exeName = exeName & ".exe": exeName = StrConv(exeName, vbUpperCase)
 'https://stackoverflow.com/questions/44075292/determine-process-id-with-vba
 'https://stackoverflow.com/questions/26277214/vba-getting-program-names-and-task-id-of-running-processes
@@ -416,7 +416,7 @@ On Error GoTo eh:
     
     Set objProcessSet = Nothing
 Exit Function
-eh:
+eH:
 Select Case Err.Number
     Case 5 '程序呼叫或引數不正確
     Case Else
@@ -442,7 +442,7 @@ Sub wait(sec As Single)
 Dim WaitDt As Date
 WaitDt = DateAdd("s", sec, Now())
 Do While Now < WaitDt
-Loop
+ Loop
 End Sub
 
 Sub appActivateChrome()
@@ -460,14 +460,14 @@ Sub backupNormal_dotm() '自動備份Normal.dotm
 Dim source As String, destination As String
 source = SystemSetup.DropBoxPathIncldBackSlash + "Normal.dotm"
 destination = SystemSetup.WordTemplatesPathIncldBackSlash + "Normal.dotm"
-On Error GoTo eh
+On Error GoTo eH
 With SystemSetup.FileSystemObject
 If (.getfile(source).DateLastModified < _
     .getfile(destination).DateLastModified) Then _
         .CopyFile source, destination
 End With
 Exit Sub
-eh:
+eH:
 Select Case Err.Number
     Case 70
         MsgBox "Normal.dotm還未備份", vbExclamation
@@ -518,7 +518,7 @@ Dim objWMIService, objProcess, colProcess, pid
 If chromedriversPIDcntr = 0 Then
     ReDim chromedriversPID(0)
     If Not SeleniumOP.WD Is Nothing Then
-        On Error GoTo eh:
+        On Error GoTo eH:
         SeleniumOP.WD.Quit
         Set SeleniumOP.WD = Nothing
         Exit Sub
@@ -535,7 +535,7 @@ Next
 ReDim chromedriversPID(0): chromedriversPIDcntr = 0: Set SeleniumOP.WD = Nothing
 
 Exit Sub
-eh:
+eH:
 Select Case Err.Number
     Case -2147467261 '並未將物件參考設定為物件的執行個體。
         Resume Next

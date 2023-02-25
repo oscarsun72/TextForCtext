@@ -206,7 +206,7 @@ Dim rng As Range, e As Long, s As Long, rngP As Range
 'd As Document,Set d = Documents.Add
 Set rng = d.Range
 DoEvents
-On Error GoTo eh
+On Error GoTo eH
 rng.Paste
 rng.Find.ClearFormatting
 Do While rng.Find.Execute("*")
@@ -239,7 +239,7 @@ Loop
 playSound 1
 'pastetoEditBox "將星號前的分段符號移置前段之末"
 Exit Sub
-eh:
+eH:
 Select Case Err.Number
     Case 4605, 13 '此方法或屬性無法使用，因為[剪貼簿] 是空的或無效的。
         SystemSetup.wait 0.8
@@ -317,7 +317,7 @@ End Sub
 
 Sub 轉成黑豆以作行字數長度判斷用()
 Dim p As Paragraph, a, i As Byte, cntr As Byte, ur As UndoRecord
-'Set ur = SystemSetup.stopUndo("轉成黑豆以作行字數長度判斷用")
+If ActiveDocument.path <> "" Then Exit Sub
 SystemSetup.stopUndo ur, "轉成黑豆以作行字數長度判斷用"
 Set p = Selection.Paragraphs(1)
 cntr = p.Range.Characters.Count - 1
@@ -445,7 +445,7 @@ d.Close wdDoNotSaveChanges
 End Sub
 Sub 維基文庫四部叢刊本轉來()
 Dim d As Document, a, i, p As Paragraph, xP As String, acP As Integer, space As String, rng As Range
-On Error GoTo eh
+On Error GoTo eH
 a = Array(ChrW(12296), "{{", ChrW(12297), "}}", "〈", "{{", "〉", "}}", _
     "○", ChrW(12295))
 '《容齋三筆》等小注作正文省版面者 https://ctext.org/library.pl?if=gb&file=89545&page=24
@@ -518,7 +518,7 @@ d.Range.Cut
 d.Close wdDoNotSaveChanges
 SystemSetup.playSound 2
 Exit Sub
-eh:
+eH:
 Select Case Err.Number
     Case 5904 '無法編輯 [範圍]。
         If p.Range.Characters(acP).Hyperlinks.Count > 0 Then p.Range.Characters(acP).Hyperlinks(1).Delete
@@ -1581,7 +1581,7 @@ Do While rng.Find.Execute(markStrOpen)
     If d.Range(rng.End, rng.End + 7) = "entity>" Then
         rng.SetRange rng.start, rng.End - 2
         ReDim Preserve ay(i)
-        ay(i) = VBA.Split(rng.text, ">")
+        ay(i) = VBA.split(rng.text, ">")
         i = i + 1
     End If
     
