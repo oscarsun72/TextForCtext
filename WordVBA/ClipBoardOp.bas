@@ -28,6 +28,7 @@ Function Is_ClipboardContainCtext_Note_InlinecommentColor() As Boolean
 '    d.Windows(1).Visible = False
     ' 將剪貼簿的內容加入Word檔案
     Set TextRange = d.Range
+    On Error GoTo eH
     TextRange.Paste
 
     ' 檢查字型顏色是否為綠色
@@ -42,6 +43,16 @@ Function Is_ClipboardContainCtext_Note_InlinecommentColor() As Boolean
 '            MsgBox "剪貼簿中沒有綠色文字"
         End If
     Next a
+exitFunction:
     d.Close wdDoNotSaveChanges
     word.Application.ScreenUpdating = True
+Exit Function
+eH:
+    Select Case Err.Number
+        Case 4605
+            MsgBox Err.Description '此方法或屬性無法使用，因為[剪貼簿] 是空的或無效的。
+            GoTo exitFunction
+        Case Else
+            MsgBox Err.Number + Err.Description
+    End Select
 End Function

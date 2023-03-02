@@ -829,18 +829,19 @@ Rem 因為前面尚有「中國哲學書電子化計劃.只保留正文注文_且注文前後加括弧」會用到Un
 SystemSetup.stopUndo ur, "mark易學關鍵字"
 Set rng = d.Range
 endDocOld = d.Range.End
-    If InStr(d.Range.text, Chr(13) & Chr(13) & Chr(13) & Chr(13)) > 0 Then
-'        d.Range.Text = Replace(d.Range.Text, Chr(13) & Chr(13) & Chr(13) & Chr(13), Chr(13) & Chr(13) & Chr(13))
-    '保留格式，故用以下，不用以上
-        With d.Range.Find
-            If InStr(.Parent.text, Chr(13) & Chr(13) & Chr(13) & Chr(13)) > 1 Then
-                .ClearFormatting
-                '.Execute Chr(13) & Chr(13) & Chr(13) & Chr(13), , , , , , True, wdFindContinue, , Chr(13) & Chr(13) & Chr(13), wdReplaceAll
-                .Execute "^p^p^p^p", , , , , , True, wdFindContinue, , "^p^p^p", wdReplaceAll
-            End If
-            .ClearFormatting
-        End With
-    End If
+'    If InStr(d.Range.text, Chr(13) & Chr(13) & Chr(13) & Chr(13)) > 0 Then
+''        d.Range.Text = Replace(d.Range.Text, Chr(13) & Chr(13) & Chr(13) & Chr(13), Chr(13) & Chr(13) & Chr(13))
+'    '保留格式，故用以下，不用以上
+'        With d.Range.Find
+'            If InStr(.Parent.text, Chr(13) & Chr(13) & Chr(13) & Chr(13)) > 1 Then
+'                .ClearFormatting
+'                '.Execute Chr(13) & Chr(13) & Chr(13) & Chr(13), , , , , , True, wdFindContinue, , Chr(13) & Chr(13) & Chr(13), wdReplaceAll
+                Rem 此行會造成Word crash
+'                .Execute "^p^p^p^p", , , , , , True, wdFindContinue, , "^p^p^p", wdReplaceAll
+'            End If
+'            .ClearFormatting
+'        End With
+'    End If
 
 Rem 將剪貼簿內擬加入的文本規範化
 clipBTxt = Replace(Replace(Replace(Replace(VBA.Trim(SystemSetup.GetClipboardText), Chr(13) + Chr(10) + "空句子" + Chr(13) + Chr(10), Chr(13) + Chr(10) + Chr(13) + Chr(10)), Chr(9), ""), "．　", ""), "　．", "")
@@ -860,10 +861,17 @@ searchedTerm = Array("易", "卦", "爻", "周易", "易經", "系辭", "繫辭", "擊辭", "
         Dim similarCompare As New Collection
         Set similarCompare = Docs.similarTextCheckInSpecificDocument(d, clipBTxt)
         If similarCompare.item(1) Then
-            If MsgBox("要貼入的文本在原文件中有類似的段落!!!" & vbCr & vbCr & "按下「確定」將會選取類似段落，請自行檢查是否仍要再貼入" & vbCr & vbCr & "按下「取消」則忽略檢查，將繼續執行", vbExclamation + vbOKCancel) = vbOK Then
+            If MsgBox("文本相似度為 " & vbCr & similarCompare.item(3) _
+                & vbCr & VBA.vbTab & "相似段落為：" & VBA.IIf(VBA.Len(similarCompare.item(2)) > 255, VBA.Left(similarCompare.item(2), 255) & "……", similarCompare.item(2)) _
+                & vbCr & vbCr & "按下「確定」將會選取類似段落，請自行檢查是否仍要再貼入" & vbCr & vbCr & "按下「取消」則忽略檢查，將繼續執行", vbExclamation + vbOKCancel, "要貼入的文本在原文件中有類似的段落!!!") = vbOK Then
                 Set rng = d.Range
                 If rng.Find.Execute(VBA.Left(similarCompare.item(2), 255), , , , , , , wdFindContinue) Then
-                    If VBA.Len(similarCompare.item(2)) > 255 Then rng.Paragraphs(1).Range.Select                  '標示相似文本
+                    If VBA.Len(similarCompare.item(2)) > 255 Then
+                        rng.Paragraphs(1).Range.Select                  '標示相似文本
+                        d.ActiveWindow.ScrollIntoView Selection.Characters(1), True
+                    Else
+                        rng.Select
+                    End If
                 End If
                 Set similarCompare = Nothing
                 GoTo exitSub
@@ -917,8 +925,9 @@ searchedTerm = Array("易", "卦", "爻", "周易", "易經", "系辭", "繫辭", "擊辭", "
             punc.clearPunctuations clipBTxt
             punc.restoreOriginalTextPunctuations d.Range.text, clipBTxt
             Set punc = Nothing
-            SystemSetup.SetClipboard clipBTxt
-            sx = VBA.Left(clipBTxt, 255)
+            sx = 文字處理.trimStrForSearch_PlainText(clipBTxt)
+            SystemSetup.SetClipboard sx
+            sx = VBA.Left(sx, 255)
         End If
         rng.Find.Execute sx, , , , , , , wdFindContinue
         endDocOld = rng.End
@@ -947,8 +956,8 @@ If flgPaste Then
     GoSub refres
     SystemSetup.playSound 1.921
     'HanaMinB還不支援G以後的
+    Docs.ChangeFontOfSurrogatePairs_Range "HanaMinB", d.Range(Selection.Paragraphs(1).Range.start, d.Range.End), CJK_Unified_Ideographs_Extension_E
     Docs.ChangeFontOfSurrogatePairs_Range "HanaMinB", d.Range(Selection.Paragraphs(1).Range.start, d.Range.End), CJK_Unified_Ideographs_Extension_F
-    
 Else '文件內已有內容時
     GoSub refres
     SystemSetup.playSound 1.294
@@ -957,14 +966,17 @@ End If
 exitSub:
 SystemSetup.contiUndo ur
 Set ur = Nothing
+'word.Application.ScreenUpdating = True
+'word.Application.ScreenRefresh
 Exit Sub
 
 
 refres:
-    文字處理.書名號篇名號標注
     word.Application.ScreenUpdating = True
     If flgPaste Then
-    '顯示新貼上的文本頂端
+        文字處理.書名號篇名號標注
+        'If flgPaste Then'測試無礙後可刪此行
+        '顯示新貼上的文本頂端
         rng.SetRange endDocOld, endDocOld
         Do Until rng.Font.ColorIndex = wdRed Or rng.End = d.Range.End - 1
             rng.move
@@ -1008,7 +1020,7 @@ Function isDocumentContainClipboardText_IgnorePunctuation(d As Document, Optiona
     End If
 End Function
 
-Function similarTextCheckInSpecificDocument(d As Document, text As String) As Collection 'item1 as Boolean(文本是否相似),item2 as string(找到的相似文本段落)
+Function similarTextCheckInSpecificDocument(d As Document, text As String) As Collection 'item1 as Boolean(文本是否相似),item2 as string(找到的相似文本段落),item3 as String from Dictionary SimilarityResult(相似度名&相似度)
 Rem 文本相似度比對
 Dim similartext As New similartext, dClearPunctuation As String, textClearPunctuation As String, dCleanParagraphs() As String, punc As New punctuation, e, Similarity As Boolean, result As New Collection
 dClearPunctuation = d.Content.text
@@ -1025,11 +1037,13 @@ For Each e In dCleanParagraphs
         End If
     End If
 Next e
+'If Similarity = True Then Stop 'for test
 Rem index   Required. An expression that specifies the position of a member of the collection. If a numeric expression, index must be a number from 1 to the value of the collection's Count property. If a string expression, index must correspond to the key argument specified when the member referred to was added to the collection.
-result.Add Similarity '文本是否相似'https://learn.microsoft.com/en-us/office/vba/Language/Reference/User-Interface-Help/item-method-visual-basic-for-applications
+result.Add Similarity 'item1:文本是否相似'https://learn.microsoft.com/en-us/office/vba/Language/Reference/User-Interface-Help/item-method-visual-basic-for-applications
 dClearPunctuation = e
 punc.restoreOriginalTextPunctuations d.Content.text, dClearPunctuation
-result.Add dClearPunctuation '找到的相似文本段落
+result.Add dClearPunctuation 'item2:找到的相似文本段落
+result.Add similartext.SimilarityResultsString 'item3:相似度名&相似度
 Set similartext = Nothing
 Set similarTextCheckInSpecificDocument = result
 Rem end 文本相似度比對
@@ -1148,8 +1162,8 @@ If 貼到古籍酷自動標點() = True Then
     '自動執行易學關鍵字標識
     If Documents.Count > 0 Then
         If InStr(ActiveDocument.path, "已初步標點") > 0 Then
-            mark易學關鍵字
             ActiveDocument.Application.Activate
+            mark易學關鍵字
         End If
     End If
 End If
@@ -1275,6 +1289,14 @@ Sub ChangeFontOfSurrogatePairs_ActiveDocument(fontName As String, Optional whatC
                         change = True
 '                        rng.Select
                         Select Case whatCJKBlock
+                            Case CJKBlockName.CJK_Unified_Ideographs_Extension_B
+                                change = isCJK_Ext(c, CJK_Unified_Ideographs_Extension_B)
+                            Case CJKBlockName.CJK_Unified_Ideographs_Extension_C
+                                change = isCJK_Ext(c, CJK_Unified_Ideographs_Extension_C)
+                            Case CJKBlockName.CJK_Unified_Ideographs_Extension_D
+                                change = isCJK_Ext(c, CJK_Unified_Ideographs_Extension_D)
+                            Case CJKBlockName.CJK_Unified_Ideographs_Extension_E
+                                change = isCJK_Ext(c, CJK_Unified_Ideographs_Extension_E)
                             Case CJKBlockName.CJK_Unified_Ideographs_Extension_F
                                 'change = isCJK_ExtF(c)
                                 change = isCJK_Ext(c, CJK_Unified_Ideographs_Extension_F)
@@ -1321,6 +1343,14 @@ Sub ChangeFontOfSurrogatePairs_Range(fontName As String, rngtoChange As Range, O
                         change = True
 '                        rng.Select
                         Select Case whatCJKBlock
+                            Case CJKBlockName.CJK_Unified_Ideographs_Extension_B
+                                change = isCJK_Ext(c, CJK_Unified_Ideographs_Extension_B)
+                            Case CJKBlockName.CJK_Unified_Ideographs_Extension_C
+                                change = isCJK_Ext(c, CJK_Unified_Ideographs_Extension_C)
+                            Case CJKBlockName.CJK_Unified_Ideographs_Extension_D
+                                change = isCJK_Ext(c, CJK_Unified_Ideographs_Extension_D)
+                            Case CJKBlockName.CJK_Unified_Ideographs_Extension_E
+                                change = isCJK_Ext(c, CJK_Unified_Ideographs_Extension_E)
                             Case CJKBlockName.CJK_Unified_Ideographs_Extension_F
                                 'change = isCJK_ExtF(c)
                                 change = isCJK_Ext(c, CJK_Unified_Ideographs_Extension_F)
@@ -1360,6 +1390,47 @@ With Selection
     ChangeCharacterFontName .text, fontName, .Document, fontNameFarEast
 End With
 End Sub
+
+Rem 20230224 chatGPT大菩薩或Bing in Skype 菩薩:
+Sub FindMissingCharacters() '這應該只是找文件中的字不能以新細明體、標楷體來顯示者
+    Dim doc As Document
+    Set doc = ActiveDocument
+    
+    '定義新細明體和標楷體字型的集合
+    Dim nmf As Font
+    Set nmf = doc.Styles("Normal").Font
+    Dim kff As Font
+    Set kff = doc.Styles("段落").Font
+    
+    Dim p As Paragraph
+    Dim r As Range
+    Dim c As Variant
+    
+    ' 遍歷文檔中的每個段落和字符
+    For Each p In doc.Paragraphs
+        For Each r In p.Range.Characters
+            
+            ' 判斷字符是否在新細明體或標楷體字型中
+            c = r.text
+            If Len(c) > 0 Then
+                If (AscW(Left(c, 1)) >= &H4E00 And AscW(Left(c, 1)) <= &H9FFF) _
+                    Or (AscW(Left(c, 1)) >= &H3400 And AscW(Left(c, 1)) <= &H4DBF) _
+                    Or (AscW(Left(c, 1)) >= &H20000 And AscW(Left(c, 1)) <= &H2A6DF) _
+                    Or (AscW(Left(c, 1)) >= &H2A700 And AscW(Left(c, 1)) <= &H2B73F) _
+                    Or (AscW(Left(c, 1)) >= &H2B740 And AscW(Left(c, 1)) <= &H2B81F) _
+                    Or (AscW(Left(c, 1)) >= &H2B820 And AscW(Left(c, 1)) <= &H2CEAF) _
+                    Or (AscW(Left(c, 1)) >= &HF900 And AscW(Left(c, 1)) <= &HFAFF) _
+                    Or (AscW(Left(c, 1)) >= &H2F800 And AscW(Left(c, 1)) <= &H2FA1F) Then '這裡沒取碼點，必定有誤，待改寫！！！！！！！！
+                    If Not r.Font.Name = nmf.Name And Not r.Font.Name = kff.Name Then '運用之原理在此行！！！！
+                        ' 如果字符不在新細明體或標楷體字型中，則將其字體更改為HanaMinB
+                        r.Font.Name = "HanaMinB"
+                    End If
+                End If
+            End If
+        Next r
+    Next p
+End Sub
+
 Sub updateURL() '更新超連結網址
 Dim site As String
 Dim lnk As New Links

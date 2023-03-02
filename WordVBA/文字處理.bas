@@ -1773,7 +1773,7 @@ With d
     Next char
 End With
 
-Dim Doc As New Document, Xsort() As String, u As Long ', xTsort() As Integer, k As Long, so As Long, ww As String
+Dim doc As New Document, Xsort() As String, u As Long ', xTsort() As Integer, k As Long, so As Long, ww As String
 'ReDim Xsort(i) As String ', xtsort(i) as Integer
 'ReDim Xsort(d.Characters.Count) As String
 If u = 0 Then u = 1 '若無執行「字頻加一:」副程序,若無超過1次的字頻，則　Xsort(xT(j - 1)) = Xsort(xT(j - 1)) & "、" & x(j - 1) & _
@@ -1792,7 +1792,7 @@ End With
 'U = UBound(Xsort)
 For j = u To 0 Step -1 '陣列排序'2010/10/29
     If Xsort(j) <> "" Then
-        With Doc
+        With doc
             If Len(.Range) = 1 Then '尚未輸入內容
                 .Range.InsertAfter "字頻 = " & j & "次：（" & Len(Replace(Xsort(j), "、", "")) & "字）"
                 .Range.Paragraphs(1).Range.Font.Size = 12
@@ -1824,15 +1824,15 @@ For j = u To 0 Step -1 '陣列排序'2010/10/29
     End If
 Next j
 
-With Doc.Paragraphs(1).Range
+With doc.Paragraphs(1).Range
      .InsertParagraphBefore
      .Font.NameAscii = "times new roman"
-    Doc.Paragraphs(1).Range.InsertParagraphAfter
-    Doc.Paragraphs(1).Range.InsertParagraphAfter
-    Doc.Paragraphs(1).Range.InsertAfter "你提供的文本共使用了" & i & "個不同的字（傳統字與簡化字不予合併）"
+    doc.Paragraphs(1).Range.InsertParagraphAfter
+    doc.Paragraphs(1).Range.InsertParagraphAfter
+    doc.Paragraphs(1).Range.InsertAfter "你提供的文本共使用了" & i & "個不同的字（傳統字與簡化字不予合併）"
 End With
 
-Doc.ActiveWindow.Visible = True
+doc.ActiveWindow.Visible = True
 '
 
 'U = UBound(xT)
@@ -1867,7 +1867,7 @@ MsgBox "完成！" & vbCr & vbCr & "費時" & Left(de - ds, 5) & "秒!"
 ExcelSheet.Application.Visible = True
 ExcelSheet.Application.UserControl = True
 ExcelSheet.SaveAs xlsp '"C:\Macros\守真TEST.XLS"
-Doc.SaveAs Replace(xlsp, "XLS", "doc") '分大小寫
+doc.SaveAs Replace(xlsp, "XLS", "doc") '分大小寫
 'Doc.SaveAs "c:\test1.doc"
 AppActivate "microsoft excel"
 Exit Sub
@@ -2294,7 +2294,7 @@ With d
     Next char
 End With
 
-Dim Doc As New Document, Xsort() As String, u As Long ', xTsort() As Integer, k As Long, so As Long, ww As String
+Dim doc As New Document, Xsort() As String, u As Long ', xTsort() As Integer, k As Long, so As Long, ww As String
 'ReDim Xsort(i) As String ', xtsort(i) as Integer
 'ReDim Xsort(d.Characters.Count) As String
 If u = 0 Then u = 1 '若無執行「字頻加一:」副程序,若無超過1次的字頻，則　Xsort(xT(j - 1)) = Xsort(xT(j - 1)) & "、" & x(j - 1) & _
@@ -2316,7 +2316,7 @@ End With
 'U = UBound(Xsort)
 For j = u To 0 Step -1 '陣列排序'2010/10/29
     If Xsort(j) <> "" Then
-        With Doc
+        With doc
             If Len(.Range) = 1 Then '尚未輸入內容
                 .Range.InsertAfter "字頻 = " & j & "次：（" & Len(Replace(Xsort(j), "、", "")) & "字）"
                 .Range.Paragraphs(1).Range.Font.Size = 12
@@ -2348,15 +2348,15 @@ For j = u To 0 Step -1 '陣列排序'2010/10/29
     End If
 Next j
 
-With Doc.Paragraphs(1).Range
+With doc.Paragraphs(1).Range
      .InsertParagraphBefore
      .Font.NameAscii = "times new roman"
-    Doc.Paragraphs(1).Range.InsertParagraphAfter
-    Doc.Paragraphs(1).Range.InsertParagraphAfter
-    Doc.Paragraphs(1).Range.InsertAfter "你提供的文本共使用了" & i & "個不同的字（傳統字與簡化字不予合併）"
+    doc.Paragraphs(1).Range.InsertParagraphAfter
+    doc.Paragraphs(1).Range.InsertParagraphAfter
+    doc.Paragraphs(1).Range.InsertAfter "你提供的文本共使用了" & i & "個不同的字（傳統字與簡化字不予合併）"
 End With
 
-Doc.ActiveWindow.Visible = True
+doc.ActiveWindow.Visible = True
 '
 
 'U = UBound(xT)
@@ -2392,7 +2392,7 @@ MsgBox "完成！" & vbCr & vbCr & "費時" & Left(de - ds, 5) & "秒!", vbInformation
 xlSheet.Application.Visible = True
 xlSheet.Application.UserControl = True
 xlSheet.SaveAs xlsp '"C:\Macros\守真TEST.XLS"
-Doc.SaveAs Replace(xlsp, "XLS", "doc") '分大小寫
+doc.SaveAs Replace(xlsp, "XLS", "doc") '分大小寫
 Set Excel.Application = Nothing
 Exit Sub
 字頻加一:
@@ -2421,8 +2421,8 @@ Select Case Err.Number
     '    End If
         'Doc.Application.ActiveWindow.View.ReadingLayout
         d.ActiveWindow.View.ReadingLayout = Not d.ActiveWindow.View.ReadingLayout
-        Doc.ActiveWindow.View.ReadingLayout = False
-        Doc.ActiveWindow.Visible = False
+        doc.ActiveWindow.View.ReadingLayout = False
+        doc.ActiveWindow.Visible = False
         ReadingLayoutB = True
         Resume
     Case Else
@@ -2517,7 +2517,7 @@ With d
     Next
 End With
 12
-Dim Doc As New Document, Xsort() As String, u As Long ', xTsort() As Integer, k As Long, so As Long, ww As String
+Dim doc As New Document, Xsort() As String, u As Long ', xTsort() As Integer, k As Long, so As Long, ww As String
 If u = 0 Then u = 1 '若無執行「詞頻加一:」副程序,若無超過1次的詞頻，則　Xsort(xT(j - 1)) = Xsort(xT(j - 1)) & "、" & x(j - 1) & _
                                 會出錯：陣列索引超出範圍 2015/11/5
 
@@ -2532,12 +2532,12 @@ With xlSheet.Application
         Xsort(xT(j - 1)) = Xsort(xT(j - 1)) & "、" & x(j - 1) 'Xsort(xT(j - 1)) & ww '陣列排序'2010/10/29
     Next j
 End With
-Doc.ActiveWindow.Visible = False
+doc.ActiveWindow.Visible = False
 If d.ActiveWindow.View.ReadingLayout Then ReadingLayoutB = True: d.ActiveWindow.View.ReadingLayout = Not d.ActiveWindow.View.ReadingLayout
 'U = UBound(Xsort)
 For j = u To 0 Step -1 '陣列排序'2010/10/29
     If Xsort(j) <> "" Then
-        With Doc
+        With doc
             If Len(.Range) = 1 Then '尚未輸入內容
                 .Range.InsertAfter "詞頻 = " & j & "次：（" & Len(Replace(Xsort(j), "、", "")) / ln & "個）"
                 .Range.Paragraphs(1).Range.Font.Size = 12
@@ -2569,18 +2569,18 @@ For j = u To 0 Step -1 '陣列排序'2010/10/29
     End If
 Next j
 
-With Doc.Paragraphs(1).Range
+With doc.Paragraphs(1).Range
      .InsertParagraphBefore
      .Font.NameAscii = "times new roman"
-    Doc.Paragraphs(1).Range.InsertParagraphAfter
-    Doc.Paragraphs(1).Range.InsertParagraphAfter
-    Doc.Paragraphs(1).Range.InsertAfter "你提供的文本共使用了" & i & "個不同的詞彙（傳統字與簡化字不予合併）"
+    doc.Paragraphs(1).Range.InsertParagraphAfter
+    doc.Paragraphs(1).Range.InsertParagraphAfter
+    doc.Paragraphs(1).Range.InsertAfter "你提供的文本共使用了" & i & "個不同的詞彙（傳統字與簡化字不予合併）"
 End With
 
-Doc.ActiveWindow.Visible = True
+doc.ActiveWindow.Visible = True
 
 de = VBA.Timer
-Doc.SaveAs Replace(xlsp, "XLS", "doc") '分大小寫
+doc.SaveAs Replace(xlsp, "XLS", "doc") '分大小寫
 If ReadingLayoutB Then d.ActiveWindow.View.ReadingLayout = Not d.ActiveWindow.View.ReadingLayout
 Set d = Nothing ' ActiveDocument.Close wdDoNotSaveChanges
 
@@ -2617,8 +2617,8 @@ Select Case Err.Number
     '    End If
         'Doc.Application.ActiveWindow.View.ReadingLayout
         d.ActiveWindow.View.ReadingLayout = False ' Not d.ActiveWindow.View.ReadingLayout
-        Doc.ActiveWindow.View.ReadingLayout = False
-        Doc.ActiveWindow.Visible = False
+        doc.ActiveWindow.View.ReadingLayout = False
+        doc.ActiveWindow.Visible = False
         ReadingLayoutB = True
         Resume
     
@@ -3461,14 +3461,20 @@ End Sub
 
 Rem 字串轉字串陣列 creedit with chatGPT大菩薩
 Function SplitWithoutDelimiter_StringToStringArray(str As String) As String()
-Dim lenStr  As Long, arr() As String, i As Long
+Dim lenStr  As Long, arr() As String, i As Long, ch As String, eCount As Long
 lenStr = VBA.Len(str)
 
 'str =要轉換為陣列的字串
-ReDim arr(lenStr - 1) ' 調整陣列大小，使其與字串長度相同
+
 ' 將字串轉換為陣列
-For i = 1 To Len(str)
-    arr(i - 1) = Mid(str, i, 1)
+For i = 1 To lenStr
+    ch = Mid(str, i, 1)
+    eCount = eCount + 1
+    If code.IsHighSurrogate(ch) Then
+        ch = Mid(str, i, 2): i = i + 1
+    End If
+    ReDim Preserve arr(eCount - 1) ' 調整陣列大小，使其與字串長度相同
+    arr(eCount - 1) = ch
 Next i
 SplitWithoutDelimiter_StringToStringArray = arr
 End Function

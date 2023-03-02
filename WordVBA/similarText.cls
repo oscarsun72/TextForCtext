@@ -8,7 +8,12 @@ Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
 Option Explicit
-Dim dict1 As New Scripting.Dictionary, dict2 As New Scripting.Dictionary, s1 As Variant, s2 As Variant, similarTextCopy As String, similarWithTextCopy As String
+Dim dict1 As New Scripting.Dictionary, dict2 As New Scripting.Dictionary, s1 As Variant, s2 As Variant
+Dim similarTextCopy As String '³Q¤ñ¸û¤å¥»ªº°Æ¥»¡]§Y¤ñ¹ï¥Ø¼Ðª«¡^
+Dim similarWithTextCopy As String '¥Î¨Ó¤ñ¸ûªº¤å¥»ªº°Æ¥»¡]¥Î¨Ó¤ñ¹ïªº¨Ó·½¡^
+Dim SimilarityResult As New Scripting.Dictionary '<¬Û¦ü«×¦W,¬Û¦ü«×>
+Dim currentProcedureName As String '¥¿¦b°õ¦æªºµ{§Ç¦WºÙ
+Dim ProceduresNameAliasPair As New Scripting.Dictionary '°O¤U©Ò¦³°õ¦æ¹Lªºµ{§Ç¦WºÙ¤Î¨ä§O¦W<currentProcedureName,procedureNameAlias>
 Private Function Initialize(ByVal text1, ByVal text2) As similartext
 If s1 = text1 And s2 = text2 Then Exit Function
 Dim w, str1, str2
@@ -16,6 +21,7 @@ If s1 <> text1 Then
     If dict1.Count > 0 Then dict1.RemoveAll
     s1 = text1
     If VBA.VarType(s1) = vbString Then
+        Rem ¹ï©ósurrogate ¤w­×¥¿¡A«Ý´ú¸Õ¡AÆ[¹î¤¤ 20230227
         str1 = ¤å¦r³B²z.SplitWithoutDelimiter_StringToStringArray((s1)) '±j¨î¥H¶Ç­È¤è¦¡¶Ç»¼¤Þ¼Æ https://learn.microsoft.com/zh-tw/dotnet/visual-basic/programming-guide/language-features/procedures/how-to-force-an-argument-to-be-passed-by-value
     Else
         str1 = s1
@@ -48,15 +54,16 @@ End Function
 '§PÂ_¤å¥»¶¡¬O§_¬Û¦ü
 Function Similarity(ByVal text1, ByVal text2) As Boolean 'text1 ³Q¤ñ¹ïªÌ text2 ®³¨Ó¤ñ¹ïªÌ
 If IsEmpty(text2) Or IsEmpty(text1) Then Exit Function
+If SimilarityResult.Count > 0 Then SimilarityResult.RemoveAll
 similarWithTextCopy = text2
 Initialize text1, text2
 If Me.CompareDictionaries(dict1, dict2) Then
     Similarity = True
 ElseIf Me.CompareDictionarySimilarity(dict1, dict2) > 0.8 Then
     Similarity = True
-ElseIf cosine_Similarity() > 0.8 Then
-    Similarity = True
 ElseIf jaccard_Similarity() > 0.8 Then
+    Similarity = True
+ElseIf cosine_Similarity() > 0.92 Then 'cosine¾l©¶¤èªk¦n¹³¦b¤å¦r¦h®É·|¥¢»~¡A«ÝÆ[¹î¡I ·P®¦·P®¦¡@«nµLªüÀ±ªû¦ò 20230227
     Similarity = True
 End If
 If Similarity Then
@@ -69,6 +76,7 @@ End Function
 '¦^¶Ç¤å¥»¶¡¬Û¦üªº¦Ê¤À¤ñ
 Function SimilarityPercent(ByVal text1, ByVal text2) As Variant 'text1 ³Q¤ñ¹ïªÌ text2 ®³¨Ó¤ñ¹ïªÌ
 If IsEmpty(text2) Or IsEmpty(text1) Then Exit Function
+If SimilarityResult.Count > 0 Then SimilarityResult.RemoveAll
 similarWithTextCopy = text2
 Dim sim As Double
 Initialize text1, text2
@@ -85,6 +93,8 @@ Rem ¦b VBA ¤¤¡A¤ñ¸û¨â­Ó Dictionary ¹ï¶Hªº¬Û¦ü«×©Î§¹¥þ¬Û¦P¡A»Ý­n¤À§O¤ñ¸û¥¦­ÌªºÁä©
 Rem 1.  ¤ñ¸û¨â­Ó Dictionary ¬O§_§¹¥þ¬Û¦P:
 'Function CompareDictionaries(ByVal dict1 As Object, ByVal dict2 As Object) As Boolean
 Function CompareDictionaries(ByVal dict1 As Scripting.Dictionary, ByVal dict2 As Scripting.Dictionary) As Boolean
+currentProcedureName = "CompareDictionaries"
+ProceduresNameAliasPair(currentProcedureName) = "¥Î¦r¬Û¦ü«×"
     If dict1.Count = 0 Or dict2.Count = 0 Then Exit Function
     If dict1.Count <> dict2.Count Then
         CompareDictionaries = False
@@ -110,15 +120,21 @@ End Function
 Rem 2.  ¤ñ¸û¨â­Ó Dictionary ªº¬Û¦ü«×¡G
 'Function CompareDictionarySimilarity(ByVal dict1 As Object, ByVal dict2 As Object) As Double
 Function CompareDictionarySimilarity(ByVal dict1 As Scripting.Dictionary, ByVal dict2 As Scripting.Dictionary) As Double
-    If dict1.Count = 0 Or dict2.Count = 0 Then Exit Function
-    Dim totalKeys As Integer
-    Dim matchedKeys As Integer
-    
-    totalKeys = dict1.Count
-    If totalKeys = 0 Then
-        CompareDictionarySimilarity = 1
+currentProcedureName = "CompareDictionarySimilarity"
+ProceduresNameAliasPair(currentProcedureName) = "¥Î¦r¬Û¦ü«×"
+    If dict1.Count = 0 Or dict2.Count = 0 Then
+        SimilarityResult(ProceduresNameAliasPair(currentProcedureName)) = 0 ': CompareDictionarySimilarity = 0 'The default value of Double is 0. https://learn.microsoft.com/en-us/dotnet/visual-basic/language-reference/data-types/double-data-type
         Exit Function
     End If
+    Dim totalKeys As Long
+    Dim matchedKeys As Long
+    
+    totalKeys = dict1.Count
+    Rem «e¤w§@§PÂ_¡A¥HÂ÷¶}¨ç¦¡
+'    If totalKeys = 0 Then '¦pªG¬OªÅ¦r¦ê¡A«hµL±q¤ñ¹ï¡B¥çµL©Ò¿×¬Û¦ü«×
+'        CompareDictionarySimilarity = 0: similarityResult = 0 '­ì¬° 1 ¡A¤µ§ó¥¿¡C«Ý´ú¸Õ«á§Y§R°£¦¹ª`¸Ñ
+'        Exit Function
+'    End If
     
     Dim key As Variant
     For Each key In dict1.keys
@@ -126,11 +142,39 @@ Function CompareDictionarySimilarity(ByVal dict1 As Scripting.Dictionary, ByVal 
             If dict1(key) = dict2(key) Then matchedKeys = matchedKeys + 1
         End If
     Next
-    
-    CompareDictionarySimilarity = matchedKeys / totalKeys
+    SimilarityResult(ProceduresNameAliasPair(currentProcedureName)) = matchedKeys / totalKeys
+    CompareDictionarySimilarity = SimilarityResult(ProceduresNameAliasPair(currentProcedureName))
     Rem ¤W­z¥N½X·|­pºâ¨â­Ó Dictionary ªº¬Û¦ü«×¡C¥¦·|ÀË¬d¨â­Ó Dictionary ¤¤¦³¦h¤ÖÁä­È¹ï¬O¬Û¦Pªº¡AµM«á­pºâ¥¦­Ìªº¤ñ¨Ò¡C¦pªG¨â­Ó Dictionary §¹¥þ¬Û¦P¡A«hªð¦^ 1¡C¦pªG¨â­Ó Dictionary ¨S¦³¥ô¦ó¬Û¦PªºÁä­È¹ï¡A«hªð¦^ 0¡C
 End Function
 
+Rem 20230227¥Î¦r¤Î¨ä¦r¶Z¬Û¦ü«×(unfinished)
+Function CompareDictionarySimilarityDistance(ByVal dict1 As Scripting.Dictionary, ByVal dict2 As Scripting.Dictionary) As Double
+currentProcedureName = "CompareDictionarySimilarityDistance"
+ProceduresNameAliasPair(currentProcedureName) = "¥Î¦r¤Î¨ä¦r¶Z¬Û¦ü«×"
+    If dict1.Count = 0 Or dict2.Count = 0 Then
+        SimilarityResult(ProceduresNameAliasPair(currentProcedureName)) = 0 ': CompareDictionarySimilarity = 0 'The default value of Double is 0. https://learn.microsoft.com/en-us/dotnet/visual-basic/language-reference/data-types/double-data-type
+        Exit Function
+    End If
+    Dim totalKeys As Long
+    Dim matchedKeys As Long
+
+    totalKeys = dict1.Count
+    Rem «e¤w§@§PÂ_¡A¥HÂ÷¶}¨ç¦¡
+'    If totalKeys = 0 Then '¦pªG¬OªÅ¦r¦ê¡A«hµL±q¤ñ¹ï¡B¥çµL©Ò¿×¬Û¦ü«×
+'        CompareDictionarySimilarity = 0: similarityResult = 0 '­ì¬° 1 ¡A¤µ§ó¥¿¡C«Ý´ú¸Õ«á§Y§R°£¦¹ª`¸Ñ
+'        Exit Function
+'    End If
+
+    Dim key As Variant
+    For Each key In dict1.keys
+        If dict2.Exists(key) Then '­Y dict¤¤¨S¦³¸ÓÁä­Èkey¡A«h¦b°õ¦æ dict(key)®É¡A·|¦Û°Ê²K¤J¸ÓÁä­È¹ï¤§¤¸¯À¡A§ó°Êdictª«¥ó
+            If dict1(key) = dict2(key) Then matchedKeys = matchedKeys + 1
+        End If
+    Next
+    SimilarityResult(ProceduresNameAliasPair(currentProcedureName)) = matchedKeys / totalKeys
+    CompareDictionarySimilarityDistance = SimilarityResult(ProceduresNameAliasPair(currentProcedureName))
+    Rem ¤W­z¥N½X·|­pºâ¨â­Ó Dictionary ªº¬Û¦ü«×¡C¥¦·|ÀË¬d¨â­Ó Dictionary ¤¤¦³¦h¤ÖÁä­È¹ï¬O¬Û¦Pªº¡AµM«á­pºâ¥¦­Ìªº¤ñ¨Ò¡C¦pªG¨â­Ó Dictionary §¹¥þ¬Û¦P¡A«hªð¦^ 1¡C¦pªG¨â­Ó Dictionary ¨S¦³¥ô¦ó¬Û¦PªºÁä­È¹ï¡A«hªð¦^ 0¡C
+End Function
 
 Rem ¤ñ¸û¨â­Ó¤å¥»ªº¬Û¦ü«×¥i¥H¨Ï¥Î¾l©¶¬Û¦ü«×©ÎªÌJaccard¬Û¦ü«×µ¥ºâªk¡C
 Rem "¾l©¶¬Û¦ü«×"©M"Jaccard¬Û¦ü«×"¬O±`¥Îªº¤å¥»¬Û¦ü«×ºâªk¡A¥Î©ó¤ñ¸û¨â­Ó¤å¥»¤§¶¡ªº¬Û¦üµ{«×¡C
@@ -221,6 +265,8 @@ End Function
 
 Private Function cosine_Similarity() As Double
 If dict1.Count = 0 Or dict2.Count = 0 Then Exit Function
+currentProcedureName = "cosine_Similarity"
+ProceduresNameAliasPair(currentProcedureName) = "¾l©¶¬Û¦ü«×"
 'Private Function Cosine_Similarity(s1 As Variant, s2 As Variant) As Double
 '    Dim dict1 As Object, dict2 As Object
 '    Set dict1 = CreateObject("Scripting.Dictionary")
@@ -259,13 +305,16 @@ If dict1.Count = 0 Or dict2.Count = 0 Then Exit Function
     mag2 = Sqr(mag2)
     
     If mag1 * mag2 = 0 Then
-        cosine_Similarity = 0
+         SimilarityResult(ProceduresNameAliasPair(currentProcedureName)) = 0 ':cosine_Similarity = 0' The default value of Double is 0.
     Else
-        cosine_Similarity = dotProduct / (mag1 * mag2)
+        SimilarityResult(ProceduresNameAliasPair(currentProcedureName)) = dotProduct / (mag1 * mag2)
+        cosine_Similarity = SimilarityResult(ProceduresNameAliasPair(currentProcedureName))
     End If
 End Function
 Private Function jaccard_Similarity() As Double
 If dict1.Count = 0 Or dict2.Count = 0 Then Exit Function
+currentProcedureName = "jaccard_Similarity"
+ProceduresNameAliasPair(currentProcedureName) = "jaccard¬Û¦ü«×"
 'Private Function jaccard_Similarity(s1 As Variant, s2 As Variant) As Double
 '    Dim dict1 As Object, dict2 As Object
 '    Set dict1 = CreateObject("Scripting.Dictionary")
@@ -297,16 +346,159 @@ If dict1.Count = 0 Or dict2.Count = 0 Then Exit Function
     Next word
     
     If union = 0 Then
-        jaccard_Similarity = 0
+        SimilarityResult(ProceduresNameAliasPair(currentProcedureName)) = 0 ':jaccard_Similarity = 0'The default value of Double is 0.
     Else
-        jaccard_Similarity = intersection / union
+        SimilarityResult(ProceduresNameAliasPair(currentProcedureName)) = intersection / union
+        jaccard_Similarity = SimilarityResult(ProceduresNameAliasPair(currentProcedureName))
     End If
 End Function
-
-
 Rem 20230222 chatGPT¤jµÐÂÄ¡G
 Rem ³o­Ó¹ê§@¬Ý°_¨Ó«Ü¤£¿ù¡I¥H¤U¬O§Ú«ØÄ³ªº¤@¨Ç¤p§ï¶i¡G
 Rem ¦b Initialize ¨ç¼Æªº¶}ÀY¡AÀ³±N¶Ç¤Jªº text1 ©M text2 Âà´«¬°¤p¼g¡A¥H«K¦b¤ñ¸û³æµü®É©¿²¤¤j¤p¼g¡C
 Rem ¦b SimilarityPercent ¨ç¼Æ¤¤¡AÀ³±NÅÜ¼Æ sim ªº¼Æ¾ÚÃþ«¬Án©ú¬° Double¡A¥H«K§ó·Ç½T¦a­pºâ¬Û¦ü«×¡C
 Rem ¦b SimilarityPercent ¨ç¼Æ¤¤¡AÀ³¨Ï¥Î Round ¨ç¼Æªº²Ä¤G­Ó°Ñ¼Æ¡A¥H«ü©w¤p¼ÆÂI«á«O¯dªº¦ì¼Æ¡C¨Ò¦p¡A­n«O¯d¤@¦ì¤p¼Æ¡A¥i¥H¨Ï¥Î VBA.Round(sim * 100, 1)¡C
 Rem ³o¨Ç§ï¶i¥u¬O¤@¨Ç¤p²Ó¸` , §Aªº¹ê§@¤w¸g«D±`¦n¤F!
+
+
+Public Property Get SimilarityResults() As Scripting.Dictionary
+    Set SimilarityResults = SimilarityResult
+End Property
+
+Public Property Get SimilarityResultsString() As String
+Dim resultStr As String, key
+For Each key In SimilarityResult.keys
+    resultStr = resultStr & key & space(2) & VBA.vbTab & VBA.CStr(VBA.Round(SimilarityResult(key), 2) * 100) & "¢H" & vbCr
+Next key
+SimilarityResultsString = VBA.Left(resultStr, Len(resultStr) - Len(vbCr))
+End Property
+
+
+
+Rem(unfinished)
+'Rem 20230227 BingµÐÂÄ¡G¤å¥»¬Û¦ü«×¤ñ¹ï¡G¦bVBA¤¤¹ê²{½s¿è¶ZÂ÷ºâªk»Ý­n¨Ï¥Î¤@¨Ç´`Àô©M°}¦C¾Þ§@ (blog.csdn.net)¡C¥H¤U¬O¤@­Ó¥i¯àªº¥N½X¥Ü¨Ò¡G
+'Rem https://blog.csdn.net/dyfgs/article/details/7177088
+'Private Function EditDistance() As Integer
+'Dim len_s1 As Integer 'the length of string 1
+'Dim len_s2 As Integer 'the length of string 2
+'Dim i As Integer 'the loop variable for string 1
+'Dim j As Integer 'the loop variable for string 2
+'Dim cost As Integer 'the cost of substitution
+'Dim matrix As Integer 'the matrix to store the edit distance values
+'
+'len_s1 = Len(len_s1)
+'len_s2 = Len(len_s2)
+'
+'If len_s1 = 0 Then 'if string 1 is empty, return the length of string 2 as edit distance
+'EditDistance = len_s2
+'Exit Function
+'End If
+'
+'If len_s2 = 0 Then 'if string 2 is empty, return the length of string 1 as edit distance
+'EditDistance = len_s1
+'Exit Function
+'End If
+'
+'ReDim matrix(0 To len_s1, 0 To len_s2) 'initialize the matrix with appropriate size
+'
+'For i = 0 To len_s1 'fill in the first column with i values
+'matrix(i, 0) = i
+'Next i
+'
+'For j = 0 To len_s2 'fill in the first row with j values
+'matrix(0, j) = j
+'Next j
+'
+'For i = 1 To len_s1
+'For j = 1 To len_s2
+'If Mid(s1, i, 1) = Mid(s2, j, 1) Then 'if the characters are equal, no cost is needed
+'cost = 0
+'Else
+'cost = 1 'otherwise, a substitution cost is needed
+'End If
+'
+'matrix(i, j) = min(matrix(i - 1, j) + 1, matrix(i, j - 1) + 1, matrix(i - 1, j - 1) + cost) 'find the minimum value among insertion, deletion and substitution
+'Next j
+'Next i
+'
+''EditDistance=matrix(len_ s_ _ _ _ _ _ _ _ _ _ _) '_return_the_final_value_in_the_bottom_right_corner_of_the_matrix_
+'
+'End Function
+'
+'Private Function min(a, b, c) As Integer '_a_helper_function_to_find_the_minimum_among_three_values_
+'min = a '_assume_a_is_the_minimum_
+'If b < min Then min = b '_compare_with_b_and_update_if_needed_
+'If c < min Then min = c '_compare_with_c_and_update_if_needed_
+'End Function
+Rem end 20230227 BingµÐÂÄ¡G
+
+Rem «Ý³B²z¡Ghttps://blog.csdn.net/dyfgs/article/details/7177088
+Private Function min(one As Integer, two As Integer, three As Integer)
+    min = one
+    If (two < min) Then
+     min = two
+    End If
+    If (three < min) Then
+     min = three
+    End If
+End Function
+ 
+Private Function ld(str1 As String, str2 As String)
+Dim n, m, i, j As Integer
+Dim ch1, ch2 As String
+    n = Len(str1)
+    m = Len(str2)
+    Dim temp As Integer
+    If (n = 0) Then
+        ld = m
+    End If
+    If (m = 0) Then
+        ld = n
+    End If
+Dim d As Variant
+ReDim d(n + 1, m + 1) As Variant
+    For i = 0 To n
+        d(i, 0) = i
+    Next i
+    For j = 0 To m
+        d(0, j) = j
+    Next j
+    For i = 1 To n
+        ch1 = Mid(str1, i, 1)
+        For j = 1 To m
+            ch2 = Mid(str2, j, 1)
+            If (ch1 = ch2) Then
+            temp = 0
+            Else
+                temp = 1
+            End If
+            d(i, j) = min(d(i - 1, j) + 1, d(i, j - 1) + 1, d(i - 1, j - 1) + temp)
+        Next j
+    Next i
+    ld = d(n, m)
+End Function
+ 
+Public Function sim(str1 As String, str2 As String)
+    Dim ldint As Integer
+    ldint = ld(str1, str2)
+    Dim strlen As Integer
+    If (Len(str1) >= Len(str2)) Then
+        strlen = Len(str1)
+    Else
+        strlen = Len(str2)
+    End If
+    sim = 1 - ldint / strlen
+End Function
+Rem end ¥H¤W©|«Ý³B²z¡Ghttps://blog.csdn.net/dyfgs/article/details/7177088 ·P®¦·P®¦¡@«nµLªüÀ±ªû¦ò
+
+
+
+Private Sub Class_Terminate()
+Set SimilarityResult = Nothing
+Set dict1 = Nothing
+Set dict2 = Nothing
+s1 = Empty: s2 = Empty
+similarTextCopy = Empty
+similarWithTextCopy = Empty
+Set ProceduresNameAliasPair = Nothing
+currentProcedureName = Empty
+End Sub

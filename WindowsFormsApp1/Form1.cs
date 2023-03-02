@@ -3526,7 +3526,7 @@ longTitle:
 
         private void keysParagraphSymbol()
         {
-            int s = textBox1.SelectionStart;
+            int s = textBox1.SelectionStart;if (textBox1.TextLength < 2) return;
             string x = textBox1.Text, stxtPre = x.Substring(s < 2 ? s : s - 2, 2);
             undoRecord();
             stopUndoRec = true;

@@ -605,8 +605,12 @@ End If
 '其中，&HD800 和 &HDC00 分別是 high surrogate 和 low surrogate 的基準值，&H400 是 surrogate pair 的偏移量，&H10000 是 Unicode 編碼的基準值。
 
 End Function
-Rem chatGPT大菩薩：
-Sub ConvertToUnicode()
+
+
+Rem chatGPT大菩薩:WordVBA缺字顯示:在 Word 中，按下 Alt + X 鍵可以將所選文字轉換為其對應的 Unicode 碼點，這個功能稱為 Unicode 字符輸入。
+Rem 在 VBA 中，可以使用 Selection.Range.Text 或 Range.Text 屬性來獲取所選文字或範圍的內容，然後使用 Selection.Range.Text = ChrW(unicode_code) 或 Range.Text = ChrW(unicode_code) 來將其轉換為 Unicode 碼點所對應的字符。
+Rem 以下是一個示例，展示了如何使用 VBA 在 Word 中將選定範圍的內容轉換為其 Unicode 碼點：
+Sub ConvertToUnicode_SelectionToggleCharacterCode() '類似實作 Selection.ToggleCharacterCode 方法
     Dim selectedText As String
     Dim unicodeCode As Long
     
@@ -614,13 +618,34 @@ Sub ConvertToUnicode()
     
     If Len(selectedText) = 1 Then
         unicodeCode = AscW(selectedText)
+        Selection.Range.text = Hex(unicodeCode)
     ElseIf Len(selectedText) = 2 Then
-        unicodeCode = (AscW(Mid(selectedText, 1, 1)) - &HD800&) * &H400& + (AscW(Mid(selectedText, 2, 1)) - &HDC00&) + &H10000
+        unicodeCode = (AscW(Mid(selectedText, 1, 1)) - &HD800&) * &H400& + (AscW(Mid(selectedText, 2, 1)) - &HDC00&) + &H10000 '
+        getCodePoint selectedText, unicodeCode
+        Selection.Range.text = Hex(unicodeCode)
     Else
         MsgBox "Invalid selection"
         Exit Sub
     End If
     
-    Selection.Range.text = ChrW(unicodeCode)
+'    Selection.Range.text = ChrW(unicodeCode)
+    Rem chatGPT菩薩：注意，在處理 surrogate pair 時，需要將兩個代理對的 Unicode 碼點轉換為實際的 Unicode 碼點。上述示例中的代碼就是將 surrogate pair 轉換為實際的 Unicode 碼點的範例。
 End Sub
+Rem creedit with chatGPT大菩薩：
+Function ConvertToUnicode(chartoConvert As String) As Long
+    Dim unicodeCode As Long
+    If Len(chartoConvert) = 1 Then
+        unicodeCode = AscW(chartoConvert)
+    ElseIf Len(chartoConvert) = 2 Then
+        'unicodeCode = (CLng(AscW(Mid(chartoConvert, 1, 1))) - &HD800&) * &H400& + (CLng(AscW(Mid(chartoConvert, 2, 1))) - &HDC00&) + &H10000
+        'unicodeCode = ((CLng(AscW(Mid(chartoConvert, 1, 1))) - &HD800)) * &H400 + (CLng(AscW(Mid(chartoConvert, 2, 1))) - &HDC00) + &H10000
+        getCodePoint chartoConvert, unicodeCode
+    Else
+        MsgBox "Invalid character"
+        Exit Function
+    End If
+    ConvertToUnicode = unicodeCode
+    
+End Function
+
 

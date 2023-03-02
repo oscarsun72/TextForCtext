@@ -155,3 +155,10 @@ If RemovedPunctuationsTextSubStr = "" Or VBA.Replace(RemovedPunctuationsTextSubS
     RemovedPunctuationsText = RemovedPunctuationsTextSubStr
 End If
 End Sub
+
+Private Sub Class_Terminate()
+punctuationStr = Empty
+punctuation_Array = Empty
+Set punctuation_Collection = Nothing
+Set punctuation_Dictionary = Nothing
+End Sub
