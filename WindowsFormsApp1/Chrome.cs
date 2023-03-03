@@ -33,11 +33,8 @@ namespace TextForCtext
         {
             get
             {
-                //string url = getUrl(ControlType.Edit).Trim();
-                //url = url.StartsWith("https://") ? url : "https://" + url;
-                string url = HttpContext.Current.Request.Url.AbsoluteUri;
-
-
+                string url = getUrl(ControlType.Edit).Trim();
+                url = url.StartsWith("https://") ? url : "https://" + url;
                 return url;
             }
         }
