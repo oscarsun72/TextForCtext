@@ -907,7 +907,7 @@ searchedTerm = Array("易", "卦", "爻", "周易", "易經", "系辭", "繫辭", "擊辭", "
             Selection.Collapse wdCollapseEnd
             Selection.TypeText clipBTxt
             'SystemSetup.SetClipboard clipBTxt
-            On Error GoTo eH
+            On Error GoTo eh
             'Docs.貼上純文字
             
             Selection.InsertParagraphAfter: Selection.InsertParagraphAfter: Selection.InsertParagraphAfter
@@ -991,7 +991,7 @@ refres:
     ActiveWindow.ScrollIntoView Selection, False
 Return
 
-eH:
+eh:
 Select Case Err.Number
     Case Else
         MsgBox Err.Number + Err.Description
@@ -1162,6 +1162,16 @@ If 貼到古籍酷自動標點() = True Then
     '自動執行易學關鍵字標識
     If Documents.Count > 0 Then
         If InStr(ActiveDocument.path, "已初步標點") > 0 Then
+        On Error GoTo eh:
+            If Not SeleniumOP.WD Is Nothing Then
+                Dim ws() As String
+                ws = SeleniumOP.WindowHandles
+                If Not VBA.IsEmpty(ws) Then
+                    WD.SwitchTo.Window ws(UBound(ws))
+                    SeleniumOP.WD.Manage.Window.Minimize
+                End If
+            End If
+mark:
             ActiveDocument.Application.Activate
             mark易學關鍵字
         End If
@@ -1169,6 +1179,19 @@ If 貼到古籍酷自動標點() = True Then
 End If
 SystemSetup.contiUndo ur
 word.Application.ScreenUpdating = True
+Exit Sub
+eh:
+    Select Case Err.Number
+        Case 9
+            If InStr(Err.Description, "陣列索引超出範圍") Then
+                GoTo mark
+            Else
+                GoTo msg:
+            End If
+        Case Else
+msg:
+            MsgBox Err.Number + Err.Description
+    End Select
 End Sub
 
 '先要複製到剪貼簿
@@ -1201,11 +1224,22 @@ Err1:
         Case 13
             If InStr(Err.Description, "型態不符合") Then
                 SystemSetup.killchromedriverFromHere
-                Stop
+'                Stop
                 Resume
             Else
                 MsgBox Err.Description, vbCritical
                 Stop
+    '           Resume
+            End If
+        Case -2146233088
+            If InStr(Err.Description, "disconnected: not connected to DevTools") Then '(failed to check if window was closed: disconnected: not connected to DevTools)
+                                                                                        '(Session info: chrome=110.0.5481.178)
+                SystemSetup.killchromedriverFromHere
+                Stop
+                Resume
+            Else
+                MsgBox Err.Description, vbCritical
+                SystemSetup.killchromedriverFromHere
     '           Resume
             End If
         Case Else

@@ -124,6 +124,10 @@ Select Case Err.Number
         ElseIf InStr(Err.Description, "no such window: No target with given id found") Then
             killchromedriverFromHere
             GoTo reStart
+        ElseIf InStr(Err.Description, "disconnected: received Inspector.detached event") Then '(failed to check if window was closed: disconnected: not connected to DevTools)
+                                                                                                '(Session info: chrome=110.0.5481.178)
+            killchromedriverFromHere
+            GoTo reStart
         Else
             MsgBox Err.Description, vbCritical
             Stop
@@ -705,3 +709,23 @@ Err1:
             End If
     End Select
 End Function
+
+
+Public Property Get WindowHandles() As String()
+On Error GoTo eH:
+If Not WD Is Nothing Then WindowHandles = WD.WindowHandles
+Exit Property
+eH:
+Select Case Err.Number
+    Case -2146233088
+        If InStr(Err.Description, "invalid session id") Then
+            SystemSetup.killchromedriverFromHere
+        Else
+            GoTo msg
+        End If
+    Case Else
+msg:
+        MsgBox Err.Number + Err.Description
+End Select
+End Property
+

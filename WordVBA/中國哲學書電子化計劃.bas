@@ -105,6 +105,28 @@ Do Until s = 0
 Loop
 SystemSetup.ClipboardPutIn xd
 End Sub
+Sub clearRedundantText()
+'清除誤判的注文
+clearWrongNoteText
+End Sub
+Sub clearWrongNoteText() '有些有評點或斷句的版本，OCR時分行切字，乃至誤將其右傍圈點者判讀為字。此則清除之。
+Dim d As Document, p As Paragraph
+Set d = Documents.Add(, , , False)
+d.Range.Paste
+For Each p In d.Range.Paragraphs
+    If InStr(p.Range, "{{") Or InStr(p.Range, "}}") Then
+        p.Range.Delete
+    End If
+Next p
+DoEvents
+d.Range.Copy
+d.Close wdDoNotSaveChanges
+appActivateChrome
+'SendKeys "+{insert}{tab}~"
+SendKeys "+{insert}"
+
+End Sub
+
 
 Sub formatTitleCode() '標題格式設定
 Dim rng As Range, d As Document, y As Byte, s As Long, ur As UndoRecord
