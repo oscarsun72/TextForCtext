@@ -26,6 +26,7 @@ using OpenQA.Selenium.Support.UI;
 using SeleniumExtras.WaitHelpers;
 using System.Diagnostics;
 using System.Threading;
+using System.Windows.Automation;
 
 namespace TextForCtext
 {
@@ -442,7 +443,7 @@ tryagain:
         internal static void 在Chrome瀏覽器的Quick_edit文字框中輸入文字(ChromeDriver driver, string xIuput, string url)
         {
             #region 檢查網址
-            if (url.IndexOf("edit") == -1) return;
+            if (url.IndexOf("edit") == -1 && driver.Url.IndexOf("edit") == -1) return;
 
             if (url != driver.Url && driver.Url.IndexOf(url.Replace("editor", "box")) == -1)
                 // 使用driver導航到給定的URL
@@ -509,10 +510,14 @@ tryagain:
             //chrome取得焦點
             //Form1 f = new Form1();
             //f.appActivateByName();
-            driver.SwitchTo().Window(driver.CurrentWindowHandle); //https://stackoverflow.com/questions/23200168/how-to-bring-selenium-browser-to-the-front#_=_
-                                                                  // 讓 Chrome 瀏覽器成為作用中的程式
-                                                                  //driver.Manage().Window.Maximize();//creedit chatGPT
-                                                                  //driver.Manage().Window.Position = new Point(0, 0);
+
+            #region 測試無誤////////……此行即可清除，不知為何多此一舉
+            //////////////driver.SwitchTo().Window(driver.CurrentWindowHandle); //https://stackoverflow.com/questions/23200168/how-to-bring-selenium-browser-to-the-front#_=_
+            // 讓 Chrome 瀏覽器成為作用中的程式
+            //driver.Manage().Window.Maximize();//creedit chatGPT
+            //driver.Manage().Window.Position = new Point(0, 0);
+            #endregion
+
 
             //清除內容不輸入(前已有textbox.Clear();）
             if (xIuput != chkClearQuickedit_data_textboxTxtStr)//" ")// "\t")//是否清除當前頁面中的內容？（其實是有由tab鍵所按下的值)
@@ -584,6 +589,140 @@ tryagain:
         static bool IsInBmp(char c)//creedit 2023/1/1
         {
             return (0 <= c && c <= 0xFFFF) && !char.IsSurrogate(c);
+        }
+
+        public static string ActiveTabURL
+        {
+            get
+            {
+                string url = getUrl(ControlType.Edit).Trim();
+                url = url.StartsWith("https://") ? url : "https://" + url;
+                return url;
+            }
+        }
+
+        static string browsername = Form1.defaultBrowserName;//  "chrome";
+        /// <summary>
+        /// 取得Chrome瀏覽器現前網址。結果竟然是我自己之前就實作過的，完全忘了！
+        /// https://www.youtube.com/live/pT1xv4oly1o?feature=share
+        /// https://github.com/oscarsun72/C-sharp-MSEdge_Chromium_Browser_automating/blob/97b6485328b1838397d8b31b2c3902a64127a56b/C-sharp-MSEdge_Chromium_Browser_automating/Browser.cs#L59
+        /// https://www.bing.com/search?q=c%23+%E5%A6%82%E4%BD%95%E5%8F%96%E5%BE%97%E7%8F%BE%E5%89%8DChrome%E7%80%8F%E8%A6%BD%E5%99%A8%E7%9A%84%E7%B6%B2%E5%9D%80&qs=n&form=QBRE&sp=-1&lq=0&pq=c%23+%E5%A6%82%E4%BD%95%E5%8F%96%E5%BE%97%E7%8F%BE%E5%89%8Dchrome%E7%80%8F%E8%A6%BD%E5%99%A8%E7%9A%84%E7%B6%B2%E5%9D%80&sc=6-21&sk=&cvid=1BA2FB0FBF4D48BE904A2209E4D9F85C&ghsh=0&ghacc=0&ghpl=
+        /// </summary>
+        /// <param name="controlType"></param>
+        /// <returns></returns>
+        static string getUrl(ControlType controlType)
+        {
+            string urls = "";
+            try
+            {
+                //Process[] procsChrome = Process.GetProcessesByName("chrome");
+                Process[] procsBrowser = Process.GetProcessesByName(browsername);
+                if (procsBrowser.Length <= 0)
+                {
+                    //    MessageBox.Show("Chrome is not running");
+                    MessageBox.Show(browsername + " " +
+                        "is not the source running browser" + "\n" +
+                        "來源流覽器");
+                }
+                else
+                {
+                    foreach (Process proc in procsBrowser)
+                    {
+                        // the chrome process must have a window
+                        if (proc.MainWindowHandle == IntPtr.Zero)
+                        {
+                            continue;
+                        }
+
+                        // find the automation element
+                        AutomationElement elm = AutomationElement.FromHandle
+                            (proc.MainWindowHandle);
+                        //AutomationElement elmUrlBar =
+                        //    elm.FindFirst(TreeScope.Descendants,
+                        //    new PropertyCondition(AutomationElement.NameProperty,
+                        //    "Address and search bar"));
+                        AutomationElementCollection elmUrlBar =
+                            elm.FindAll(TreeScope.Subtree,
+                            new PropertyCondition(
+                                AutomationElement.ControlTypeProperty,
+                                controlType));//https://social.msdn.microsoft.com/Forums/en-US/f9cb8d8a-ab6e-4551-8590-bda2c38a2994/retrieve-chrome-url-using-automation-element-in-c-application?forum=csharpgeneral
+                        /*要用Edit屬性才抓得到網址列,Text也不行
+                         */
+
+                        // if it can be found, get the value from the URL bar
+                        if (elmUrlBar != null)
+                        {
+                            int i = 0; int cnt = elmUrlBar.Count;
+nx: foreach (AutomationElement Elm in elmUrlBar)
+                            {
+                                try
+                                {
+                                    i++; if (i > cnt) break;
+                                    string vp = ((ValuePattern)Elm.
+                                    GetCurrentPattern(ValuePattern.Pattern)).
+                                    Current.Value as string;
+                                    //if (urls.IndexOf(vp) == -1)
+                                    if ((vp.StartsWith("http") || vp.StartsWith("ctext")) && urls.IndexOf(vp) == -1)
+                                        urls += (vp + " ");
+                                }
+                                catch (Exception)
+                                {
+                                    goto nx;
+                                    //throw;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                //textBox2.Text = ex.ToString();
+                MessageBox.Show(ex.ToString());
+            }
+            return urls;
+        }
+
+        internal static void GoToCurrentUserActivateTab()
+        {
+            string urlActiveTab = ActiveTabURL, url = "";
+            if (urlActiveTab != "")
+            {
+                try
+                {
+                    url = driver.Url;
+                }
+                catch (Exception ex)
+                {
+                    switch (ex.HResult)
+                    {
+                        case -2146233088:
+                            if (ex.Message.IndexOf("no such window: target window already closed") > -1) //"no such window: target window already closed\nfrom unknown error: web view not found\n  (Session info: chrome=110.0.5481.178)"
+                            {
+                                driver.SwitchTo().Window(driver.WindowHandles[0]);
+                            }
+                            else
+                            {
+                                MessageBox.Show(ex.HResult + ex.Message);
+                            }
+                            break;
+                        default:
+                            MessageBox.Show(ex.HResult + ex.Message);
+                            break;
+                    }
+                }
+                if (urlActiveTab != url)
+                {
+                    foreach (var item in driver.WindowHandles)
+                    {
+                        url = driver.Url;
+                        if (urlActiveTab == url) break;
+                        driver.SwitchTo().Window(item);
+                    }
+                }
+            }
+
+
         }
 
         internal static void GoToUrlandActivate(string url)
@@ -751,7 +890,7 @@ tryagain:
             //    switch (ex.HResult)
             //    {
             //        case -2146233088://no such window: target window already closed\nfrom unknown error: web view not found\n  (Session info: chrome=110.0.5481.100)
-                        
+
             //            //driver.Navigate().GoToUrl(url ?? System.Windows.Forms.Application.OpenForms[0].Controls["textBox3"].Text);//("http://example.com/");
             //            break;
             //        default:
