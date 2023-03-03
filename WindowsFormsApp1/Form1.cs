@@ -1285,7 +1285,7 @@ chksum:
             if ((m & Keys.Control) == Keys.Control && (m & Keys.Shift) == Keys.Shift)
             {
                 if (e.KeyCode == Keys.Add || e.KeyCode == Keys.Oemplus || e.KeyCode == Keys.Subtract || e.KeyCode == Keys.NumPad5)
-                {
+                {//Ctrl + Shift + +
                     e.Handled = true;
                     keyDownCtrlAdd(true);
                     return;
@@ -4602,7 +4602,7 @@ notFound:
                     break;
                 case BrowserOPMode.seleniumNew://純Selenium模式（2）
                                                //終於找到bug了 NextPage()裡的textBox3.Text=url 設定太晚
-                    pasteToCtext(textBox3.Text);///////////////////////
+                    pasteToCtext(textBox3.Text,shiftKeyDownYet);///////////////////////
                                                 //string currentUrl = br.driver.Url;
                                                 //pasteToCtext(currentUrl);//故改用 br.……
                     break;
@@ -5242,7 +5242,7 @@ notFound:
                                         {
 
                                             #region 以下是據方法函式「keyDownCtrlAdd(bool shiftKeyDownYet = false)」而來
-                                            pasteToCtext(textBox3.Text, br.chkClearQuickedit_data_textboxTxtStr);
+                                            pasteToCtext(textBox3.Text,false, br.chkClearQuickedit_data_textboxTxtStr);
                                             //if (!textBox1.Enabled) { textBox1.Enabled = true; textBox1.Focus(); }
                                             //Task.WaitAll(); Thread.Sleep(500);
                                             nextPages(Keys.PageDown, false);
@@ -6474,7 +6474,7 @@ tryagain:
         /// </summary>
         /// <param name="url">url to paste to</param>
         /// <param name="clear">whether clear the texts in quick edit box ;optional. if yes then set this param value to 「chkClearQuickedit_data_textboxTxtStr」 </param>
-        private void pasteToCtext(string url, string clear = "")
+        private void pasteToCtext(string url,bool statyhere=false, string clear = "")
         {
             br.driver = br.driver ?? br.driverNew();
             //取得所有現行窗體（分頁頁籤）
