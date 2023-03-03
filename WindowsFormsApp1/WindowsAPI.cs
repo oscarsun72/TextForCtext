@@ -12,6 +12,7 @@ using br = TextForCtext.Browser;
 using System.Windows.Forms;
 using System.Globalization;
 using System.Text.RegularExpressions;
+using System.Windows.Automation;
 
 namespace TextForCtext
 {

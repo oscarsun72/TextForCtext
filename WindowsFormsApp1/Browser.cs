@@ -26,6 +26,7 @@ using OpenQA.Selenium.Support.UI;
 using SeleniumExtras.WaitHelpers;
 using System.Diagnostics;
 using System.Threading;
+using System.Windows.Automation;
 
 namespace TextForCtext
 {
@@ -597,12 +598,25 @@ tryagain:
 
         internal static void GoToCurrentUserActivateTab()
         {
-            using (WindowsAPI wAPI = new WindowsAPI())
+            //using (WindowsAPI wAPI = new WindowsAPI())
+            //{
+            //    string currentwindowhandle = wAPI.GetChromeActiveTabWindowHandle();
+            //    if (currentwindowhandle!=""&&driver.CurrentWindowHandle != currentwindowhandle)
+            //        driver.SwitchTo().Window(currentwindowhandle);
+            //}
+            //var urlActiveTab = GetActiveTabUrl();            
+            var urlActiveTab = GetActiveTabUrlchatGPT();            
+            if (urlActiveTab!=null)
             {
-                string currentwindowhandle = wAPI.GetChromeActiveTabWindowHandle();
-                if (currentwindowhandle!=""&&driver.CurrentWindowHandle != currentwindowhandle)
-                    driver.SwitchTo().Window(currentwindowhandle);
+                while (urlActiveTab != driver.Url)
+                {
+                    foreach (var item in driver.WindowHandles)
+                    {
+                        driver.SwitchTo().Window(item);
+                    }
+                }
             }
+                
 
         }
         internal static void GoToUrlandActivate(string url)
@@ -959,6 +973,7 @@ tryagain:
 
             //return options;
         }
+
 
     }
 }
