@@ -605,7 +605,7 @@ tryagain:
             //        driver.SwitchTo().Window(currentwindowhandle);
             //}
             //var urlActiveTab = GetActiveTabUrl();            
-            var urlActiveTab = GetActiveTabUrlchatGPT();            
+            var urlActiveTab = Chrome.ActiveTabTitle;
             if (urlActiveTab!=null)
             {
                 while (urlActiveTab != driver.Url)
