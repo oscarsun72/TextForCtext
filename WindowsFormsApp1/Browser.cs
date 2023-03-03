@@ -32,7 +32,7 @@ namespace TextForCtext
     class Browser
     {
         static Form1 frm;
-        readonly Form1 Form1 = Application.OpenForms.Count > 0 ? Application.OpenForms[0] as Form1 : null;
+        //////////////readonly Form1 Form1 = Application.OpenForms.Count > 0 ? Application.OpenForms[0] as Form1 : null;
         //creedit 
         public Browser(Form1 form)
         {
@@ -281,10 +281,18 @@ tryagain:
                         //driverService.HideCommandPromptWindow = true;
                         //cDrv = new ChromeDriver(driverService, options);//, TimeSpan.FromSeconds(50));
                         //break;
-                        case -2146233079://0x80131509:session not created: This version of ChromeDriver only supports Chrome version 108 Current browser version is 110.0.5481.78 with binary path W:\PortableApps\PortableApps\GoogleChromePortable\App\Chrome - bin\chrome.exe(SessionNotCreated)
-                            MessageBox.Show("請更新 chromedriver 才能繼續");
-                            Form1.browsrOPMode = Form1.BrowserOPMode.appActivateByName; killchromedriverFromHere();
-                            return null;
+                        case -2146233079:
+                            if (ex.Message.IndexOf("This version of ChromeDriver only supports Chrome version") > -1) //0x80131509:session not created: This version of ChromeDriver only supports Chrome version 108 Current browser version is 110.0.5481.78 with binary path W:\PortableApps\PortableApps\GoogleChromePortable\App\Chrome - bin\chrome.exe(SessionNotCreated)
+                            {
+                                MessageBox.Show("請更新 chromedriver 才能繼續", "", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
+                                Form1.browsrOPMode = Form1.BrowserOPMode.appActivateByName; killchromedriverFromHere();
+                                return null;
+                            }
+                            else
+                            {
+                                MessageBox.Show(ex.HResult + ex.Message, "", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
+                                break;
+                            }
                         default:
                             throw;
                     }
@@ -586,6 +594,17 @@ tryagain:
             return (0 <= c && c <= 0xFFFF) && !char.IsSurrogate(c);
         }
 
+
+        internal static void GoToCurrentUserActivateTab()
+        {
+            using (WindowsAPI wAPI = new WindowsAPI())
+            {
+                string currentwindowhandle = wAPI.GetChromeActiveTabWindowHandle();
+                if (currentwindowhandle!=""&&driver.CurrentWindowHandle != currentwindowhandle)
+                    driver.SwitchTo().Window(currentwindowhandle);
+            }
+
+        }
         internal static void GoToUrlandActivate(string url)
         {
             if (string.IsNullOrEmpty(url) || url.Substring(0, 4) != "http") return;
@@ -751,7 +770,7 @@ tryagain:
             //    switch (ex.HResult)
             //    {
             //        case -2146233088://no such window: target window already closed\nfrom unknown error: web view not found\n  (Session info: chrome=110.0.5481.100)
-                        
+
             //            //driver.Navigate().GoToUrl(url ?? System.Windows.Forms.Application.OpenForms[0].Controls["textBox3"].Text);//("http://example.com/");
             //            break;
             //        default:
@@ -849,9 +868,13 @@ tryagain:
             Task.WaitAll();
             chromedriversPID.Clear();
         }
-        internal static Process[] getChromedrivers()
+        internal static Process[] getChromedriversPID()
         {
             return Process.GetProcessesByName("chromedriver");
+        }
+        internal static Process[] getChromesPID()
+        {
+            return Process.GetProcessesByName("chrome");
         }
 
         internal static void killProcesses(string[] processName)

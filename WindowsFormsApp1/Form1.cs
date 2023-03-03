@@ -236,7 +236,7 @@ namespace WindowsFormsApp1
                     //}
                     //br.killProcesses(new string[] { "chromedriver" });
                     br.killchromedriverFromHere();
-                    if (br.getChromedrivers().Length > 0)
+                    if (br.getChromedriversPID().Length > 0)
                         if (MessageBox.Show("還有chromedriver.exe程序在運行，是否全部清除？", "chromedrivers still there"
                             , MessageBoxButtons.OKCancel, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly)
                             == DialogResult.OK)
@@ -1285,8 +1285,9 @@ chksum:
             if ((m & Keys.Control) == Keys.Control && (m & Keys.Shift) == Keys.Shift)
             {
                 if (e.KeyCode == Keys.Add || e.KeyCode == Keys.Oemplus || e.KeyCode == Keys.Subtract || e.KeyCode == Keys.NumPad5)
-                {
+                {//Ctrl + Shift + +
                     e.Handled = true;
+                    if (browsrOPMode != BrowserOPMode.appActivateByName) br.GoToCurrentUserActivateTab();
                     keyDownCtrlAdd(true);
                     return;
                 }
@@ -2466,7 +2467,8 @@ omit:
             #endregion
             s++;
             int e = x.IndexOf("}", s), spaceCntr = 0;
-            if (e < 0) {
+            if (e < 0)
+            {
                 MessageBox.Show("請在注文末端加入「}}」再繼續！");
                 return 0;
             }
@@ -3526,7 +3528,7 @@ longTitle:
 
         private void keysParagraphSymbol()
         {
-            int s = textBox1.SelectionStart;if (textBox1.TextLength < 2) return;
+            int s = textBox1.SelectionStart; if (textBox1.TextLength < 2) return;
             string x = textBox1.Text, stxtPre = x.Substring(s < 2 ? s : s - 2, 2);
             undoRecord();
             stopUndoRec = true;
@@ -4602,7 +4604,7 @@ notFound:
                     break;
                 case BrowserOPMode.seleniumNew://純Selenium模式（2）
                                                //終於找到bug了 NextPage()裡的textBox3.Text=url 設定太晚
-                    pasteToCtext(textBox3.Text);///////////////////////
+                    pasteToCtext(textBox3.Text,shiftKeyDownYet);///////////////////////
                                                 //string currentUrl = br.driver.Url;
                                                 //pasteToCtext(currentUrl);//故改用 br.……
                     break;
@@ -5242,7 +5244,7 @@ notFound:
                                         {
 
                                             #region 以下是據方法函式「keyDownCtrlAdd(bool shiftKeyDownYet = false)」而來
-                                            pasteToCtext(textBox3.Text, br.chkClearQuickedit_data_textboxTxtStr);
+                                            pasteToCtext(textBox3.Text,false, br.chkClearQuickedit_data_textboxTxtStr);
                                             //if (!textBox1.Enabled) { textBox1.Enabled = true; textBox1.Focus(); }
                                             //Task.WaitAll(); Thread.Sleep(500);
                                             nextPages(Keys.PageDown, false);
@@ -6474,9 +6476,10 @@ tryagain:
         /// </summary>
         /// <param name="url">url to paste to</param>
         /// <param name="clear">whether clear the texts in quick edit box ;optional. if yes then set this param value to 「chkClearQuickedit_data_textboxTxtStr」 </param>
-        private void pasteToCtext(string url, string clear = "")
+        private void pasteToCtext(string url, bool stayhere = false, string clear = "")
         {
             br.driver = br.driver ?? br.driverNew();
+            if (stayhere) WindowsAPI.SetforegroundWindowHandle();
             //取得所有現行窗體（分頁頁籤）
             System.Collections.ObjectModel.ReadOnlyCollection<string> tabWindowHandles = new ReadOnlyCollection<string>(new List<string>());
             try
@@ -6579,12 +6582,18 @@ tryagain:
             //else//不是在手動鍵入時
             //{//檢查textbox3的值與現用網頁相同否
 
-
-            Task wait1 = Task.Run(() =>
+            if (stayhere)
             {
-                chkUrlIsTextBox3Text(tabWindowHandles);
-            });
-            wait1.Wait();
+                br.GoToCurrentUserActivateTab();
+            }
+            else
+            {
+                Task wait1 = Task.Run(() =>
+                {
+                    chkUrlIsTextBox3Text(tabWindowHandles);
+                });
+                wait1.Wait();
+            }
             //}
             //Task.WaitAny();//如上所設「wait.Wait();」「wait1.Wait();」，即不必此行了
             //在連續輸入時能清除框中文字；手動輸入時一般當不必自動清除框中文字
@@ -7106,6 +7115,8 @@ retry:
                                     (!KeyboardInfo.getKeyStateDown(System.Windows.Input.Key.LeftCtrl) && KeyboardInfo.getKeyStateNone(System.Windows.Input.Key.Add)) &&
                                     KeyboardInfo.getKeyStateToggled(System.Windows.Input.Key.Delete))//判斷Delete鍵是否被按下彈起
                                 {//手動輸入時，當按下 Shift+Delete 當即時要準備貼上該頁，故如此操作，以備確定無誤後手動按下 submit 按鈕
+
+                                    br.GoToCurrentUserActivateTab();
                                     OpenQA.Selenium.IWebElement quick_edit_box = br.waitFindWebElementByName_ToBeClickable("data", br.WebDriverWaitTimeSpan);//br.driver.FindElement(OpenQA.Selenium.By.Name("data"));
                                                                                                                                                              //OpenQA.Selenium.Support.UI.WebDriverWait wait = new OpenQA.Selenium.Support.UI.WebDriverWait(br.driver, TimeSpan.FromSeconds(2));
                                                                                                                                                              //wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(quick_edit_box));
