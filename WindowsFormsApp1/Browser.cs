@@ -1,32 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using selm = OpenQA.Selenium;
-using OpenQA.Selenium.Chrome;
-using forms = System.Windows.Forms;
-using WindowsFormsApp1;
-using System.Windows.Forms;
-using System.Drawing.Imaging;
-//using static System.Net.Mime.MediaTypeNames;
-using System.Security.Policy;
-using System.Drawing;
+﻿//using static System.Net.Mime.MediaTypeNames;
 using OpenQA.Selenium;
-using OpenQA.Selenium.Interactions;
-using OpenQA.Selenium.DevTools.V85.ApplicationCache;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
+using OpenQA.Selenium.Chrome;
 //https://dotblogs.com.tw/supergary/2020/10/29/selenium#images-3
-using System.IO;
 //using System.Net;
 //using static System.Net.WebRequestMethods;
-using System.Runtime.InteropServices.ComTypes;
 using OpenQA.Selenium.Support.UI;
-using SeleniumExtras.WaitHelpers;
+using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading;
-using System.Windows.Automation;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using WindowsFormsApp1;
+using forms = System.Windows.Forms;
+using selm = OpenQA.Selenium;
 
 namespace TextForCtext
 {
@@ -357,6 +345,7 @@ tryagain:
             #endregion
         }
 
+        
         private static ChromeOptions chromeOptions(string chrome_path)
         {
             // 建立 ChromeOptions 物件            
@@ -605,14 +594,17 @@ tryagain:
             //        driver.SwitchTo().Window(currentwindowhandle);
             //}
             //var urlActiveTab = GetActiveTabUrl();            
-            var urlActiveTab = Chrome.ActiveTabTitle;
-            if (urlActiveTab!=null)
+            var urlActiveTab = Chrome.ActiveTabURL;
+            if (urlActiveTab!="")
             {
-                while (urlActiveTab != driver.Url)
+                string url = driver.Url;
+                if (urlActiveTab != url)
                 {
                     foreach (var item in driver.WindowHandles)
                     {
-                        driver.SwitchTo().Window(item);
+                        url = driver.Url;
+                        if (urlActiveTab == url) break;
+                            driver.SwitchTo().Window(item);
                     }
                 }
             }
@@ -973,7 +965,6 @@ tryagain:
 
             //return options;
         }
-
 
     }
 }
