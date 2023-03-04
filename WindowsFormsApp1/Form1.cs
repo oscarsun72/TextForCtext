@@ -1285,7 +1285,7 @@ chksum:
             if ((m & Keys.Control) == Keys.Control && (m & Keys.Shift) == Keys.Shift)
             {
                 if (e.KeyCode == Keys.Add || e.KeyCode == Keys.Oemplus || e.KeyCode == Keys.Subtract || e.KeyCode == Keys.NumPad5)
-                {//Ctrl + Shift + +
+                {// Ctrl + Shift + + 
                     e.Handled = true;
                     if (browsrOPMode != BrowserOPMode.appActivateByName)
                     {
