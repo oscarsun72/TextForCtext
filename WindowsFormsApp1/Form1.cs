@@ -39,6 +39,8 @@ namespace WindowsFormsApp1
     {
         internal string dropBoxPathIncldBackSlash;
         readonly System.Drawing.Point textBox4Location; readonly Size textBox4Size;
+        private readonly Color textBox2BackColorDefault;
+        private readonly Color FormBackColorDefault;
         readonly Size textBox1SizeToForm;
         /// <summary>
         /// CJK大字集字型集合（陣列。含CJK 擴充字集者）
@@ -129,6 +131,7 @@ namespace WindowsFormsApp1
             textBox1SizeToForm = new Size(this.Width - textBox1.Width, this.Height - textBox1.Height);
             dropBoxPathIncldBackSlash = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + @"\Dropbox\";
             dropBoxPathIncldBackSlash = Directory.Exists(dropBoxPathIncldBackSlash) ? dropBoxPathIncldBackSlash : dropBoxPathIncldBackSlash.Replace(@"C:\", @"A:\");
+            FormBackColorDefault = this.BackColor;
             button2BackColorDefault = button2.BackColor;
             textBox2BackColorDefault = textBox2.BackColor;
             defaultBrowserName = GetWebBrowserName();
@@ -1287,11 +1290,9 @@ chksum:
                 if (e.KeyCode == Keys.Add || e.KeyCode == Keys.Oemplus || e.KeyCode == Keys.Subtract || e.KeyCode == Keys.NumPad5)
                 {// Ctrl + Shift + + 
                     e.Handled = true;
-                    if (browsrOPMode != BrowserOPMode.appActivateByName)
+                    if (browsrOPMode != BrowserOPMode.appActivateByName && br.driver != null)
                     {
-                        br.GoToCurrentUserActivateTab();
-                        string url = br.driver.Url;
-                        if (textBox3.Text != "" && textBox3.Text != url) textBox3.Text = url;
+                        br.SwitchToCurrentForeActivateTab(ref textBox3);
                     }
                     keyDownCtrlAdd(true);
                     return;
@@ -1757,7 +1758,7 @@ chksum:
                 }//以上 Shift + F5
 
                 if (e.KeyCode == Keys.F7)
-                {//Shfit + F7 每行凸排
+                {//Shift + F7 每行凸排
                     e.Handled = true; deleteSpacePreParagraphs_ConvexRow(); return;
                 }//以上 Shift + F7
 
@@ -2025,7 +2026,15 @@ insert:
                     e.Handled = true;
                     if (examSeledWord(out string wordtoChk))
                         if (Mdb.VariantsExist(wordtoChk)) //SystemSounds.Hand.Play();
-                            MessageBox.Show("existed!!");
+                                                          //如果已有資料對應，則閃示橘紅色（表單顏色）示警
+                                                          //MessageBox.Show("existed!!");
+                        {
+                            this.BackColor = Color.Tomato;
+                            this.Refresh();
+                            Thread.Sleep(20);
+                            this.BackColor = this.FormBackColorDefault;
+                        }
+
                     return;
                 }
 
@@ -3267,7 +3276,7 @@ longTitle:
         }
 
         private void deleteSpacePreParagraphs_ConvexRow()
-        { //Shfit + F7 每行凸排
+        { //Shift + F7 每行凸排
             int s = textBox1.SelectionStart, so = s, l = textBox1.SelectionLength, cntr = 0, i; dontHide = true; string x = textBox1.Text, selTxt;
             if (l == 0)
             {
@@ -6591,7 +6600,7 @@ tryagain:
                 br.driver.SwitchTo().Window(currentWin);
             Task wait1 = Task.Run(() =>
             {
-                chkUrlIsTextBox3Text(tabWindowHandles);
+                chkUrlIsTextBox3Text(tabWindowHandles, textBox3.Text);
             });
             wait1.Wait();
             //}
@@ -6602,9 +6611,8 @@ tryagain:
         }
 
         //檢查textbox3的Text值與現用網頁是否相同
-        private string chkUrlIsTextBox3Text(ReadOnlyCollection<string> tabWindowHandles)
-        {
-            string url = textBox3.Text;
+        private string chkUrlIsTextBox3Text(ReadOnlyCollection<string> tabWindowHandles, string url)
+        {            
             if (url == "") return url;
             //再回到正在編輯的本頁，準備貼入
 
@@ -7074,8 +7082,9 @@ tryagain:
             }
 
         }
+
+
         int selStart = 0; int selLength = 0;
-        private Color textBox2BackColorDefault;
 
         int pageTextEndPosition = 0;
 

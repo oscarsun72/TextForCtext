@@ -591,6 +591,9 @@ tryagain:
             return (0 <= c && c <= 0xFFFF) && !char.IsSurrogate(c);
         }
 
+        /// <summary>
+        /// 取得現行前景之分頁網址。尤其是為使用者手動切換者
+        /// </summary>
         public static string ActiveTabURL
         {
             get
@@ -603,7 +606,7 @@ tryagain:
 
         static string browsername = Form1.defaultBrowserName;//  "chrome";
         /// <summary>
-        /// 取得Chrome瀏覽器現前網址。結果竟然是我自己之前就實作過的，完全忘了！
+        /// 取得Chrome瀏覽器現前網址（現行前景之分頁頁籤的網址）。結果竟然是我自己之前就實作過的，完全忘了！
         /// https://www.youtube.com/live/pT1xv4oly1o?feature=share
         /// https://github.com/oscarsun72/C-sharp-MSEdge_Chromium_Browser_automating/blob/97b6485328b1838397d8b31b2c3902a64127a56b/C-sharp-MSEdge_Chromium_Browser_automating/Browser.cs#L59
         /// https://www.bing.com/search?q=c%23+%E5%A6%82%E4%BD%95%E5%8F%96%E5%BE%97%E7%8F%BE%E5%89%8DChrome%E7%80%8F%E8%A6%BD%E5%99%A8%E7%9A%84%E7%B6%B2%E5%9D%80&qs=n&form=QBRE&sp=-1&lq=0&pq=c%23+%E5%A6%82%E4%BD%95%E5%8F%96%E5%BE%97%E7%8F%BE%E5%89%8Dchrome%E7%80%8F%E8%A6%BD%E5%99%A8%E7%9A%84%E7%B6%B2%E5%9D%80&sc=6-21&sk=&cvid=1BA2FB0FBF4D48BE904A2209E4D9F85C&ghsh=0&ghacc=0&ghpl=
@@ -683,9 +686,44 @@ nx: foreach (AutomationElement Elm in elmUrlBar)
             return urls;
         }
 
-        internal static void GoToCurrentUserActivateTab()
+        internal static void SwitchToCurrentForeActivateTab(ref TextBox textBox3)
         {
-            string urlActiveTab = ActiveTabURL, url = "";
+            string url = "", urlActiveTab = "";
+            try
+            {
+                url = driver.Url; urlActiveTab = ActiveTabURL;
+            }
+            catch (Exception ex)
+            {
+                switch (ex.HResult)
+                {
+                    case -2146233088:
+                        if (ex.Message.IndexOf("no such window: target window already closed") > -1)//"no such window: target window already closed\nfrom unknown error: web view not found\n  (Session info: chrome=110.0.5481.178)"
+                        {
+                            driver.SwitchTo().Window(driver.WindowHandles[0]);
+                            url = driver.Url; if (urlActiveTab == "") urlActiveTab = ActiveTabURL;
+                        }
+                        else
+                            MessageBox.Show(ex.HResult + ex.Message);
+                        break;
+                    default:
+                        MessageBox.Show(ex.HResult + ex.Message);
+                        break;
+                }
+            }
+
+            if (url != urlActiveTab)//如果現行的頁面不同於程式所在之頁面
+                GoToCurrentUserActivateTab(urlActiveTab);//那麼就將程式所在之頁面轉到、設定為現行的前景頁面
+            if (textBox3.Text != "" && textBox3.Text != urlActiveTab) textBox3.Text = urlActiveTab;//如果textBox3非空值且與現行頁面網址不合，亦轉設為現行前景頁面之網址}
+        }
+        /// <summary>
+        /// 將程式所在頁面轉到現行前景的分頁頁面
+        /// </summary>
+        /// <param name="urlActiveTab">若已取得現行前景分頁頁面之網址則作此引數傳入，免得再取一次，徒耗資源，減損效能</param>
+        internal static void GoToCurrentUserActivateTab(string urlActiveTab = "")
+        {
+            if (urlActiveTab == "") urlActiveTab = ActiveTabURL;
+            string url = "";
             if (urlActiveTab != "")
             {
                 try
