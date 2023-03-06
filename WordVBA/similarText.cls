@@ -128,6 +128,7 @@ ProceduresNameAliasPair(currentProcedureName) = "用字相似度"
     End If
     Dim totalKeys As Long
     Dim matchedKeys As Long
+    Dim result As Double
     
     totalKeys = dict1.Count
     Rem 前已作判斷，以離開函式
@@ -142,7 +143,17 @@ ProceduresNameAliasPair(currentProcedureName) = "用字相似度"
             If dict1(key) = dict2(key) Then matchedKeys = matchedKeys + 1
         End If
     Next
-    SimilarityResult(ProceduresNameAliasPair(currentProcedureName)) = matchedKeys / totalKeys
+    If (matchedKeys / totalKeys) > 0.8 And dict2.Count > dict1.Count Then
+        For Each key In dict2.keys
+            If dict1.Exists(key) Then '若 dict中沒有該鍵值key，則在執行 dict(key)時，會自動添入該鍵值對之元素，更動dict物件
+                If dict1(key) = dict2(key) Then matchedKeys = matchedKeys + 1
+            End If
+        Next
+        result = VBA.Round(matchedKeys / (totalKeys + dict2.Count), 2)
+    Else
+        result = VBA.Round(matchedKeys / totalKeys, 2)
+    End If
+    SimilarityResult(ProceduresNameAliasPair(currentProcedureName)) = result
     CompareDictionarySimilarity = SimilarityResult(ProceduresNameAliasPair(currentProcedureName))
     Rem 上述代碼會計算兩個 Dictionary 的相似度。它會檢查兩個 Dictionary 中有多少鍵值對是相同的，然後計算它們的比例。如果兩個 Dictionary 完全相同，則返回 1。如果兩個 Dictionary 沒有任何相同的鍵值對，則返回 0。
 End Function
@@ -157,6 +168,7 @@ ProceduresNameAliasPair(currentProcedureName) = "用字及其字距相似度"
     End If
     Dim totalKeys As Long
     Dim matchedKeys As Long
+    Dim result As Double
 
     totalKeys = dict1.Count
     Rem 前已作判斷，以離開函式
@@ -171,7 +183,17 @@ ProceduresNameAliasPair(currentProcedureName) = "用字及其字距相似度"
             If dict1(key) = dict2(key) Then matchedKeys = matchedKeys + 1
         End If
     Next
-    SimilarityResult(ProceduresNameAliasPair(currentProcedureName)) = matchedKeys / totalKeys
+    If (matchedKeys / totalKeys) > 0.8 And dict2.Count > dict1.Count Then
+        For Each key In dict2.keys
+            If dict1.Exists(key) Then '若 dict中沒有該鍵值key，則在執行 dict(key)時，會自動添入該鍵值對之元素，更動dict物件
+                If dict1(key) = dict2(key) Then matchedKeys = matchedKeys + 1
+            End If
+        Next
+        result = VBA.Round(matchedKeys / (totalKeys + dict2.Count), 2)
+    Else
+        result = VBA.Round(matchedKeys / totalKeys, 2)
+    End If
+    SimilarityResult(ProceduresNameAliasPair(currentProcedureName)) = result
     CompareDictionarySimilarityDistance = SimilarityResult(ProceduresNameAliasPair(currentProcedureName))
     Rem 上述代碼會計算兩個 Dictionary 的相似度。它會檢查兩個 Dictionary 中有多少鍵值對是相同的，然後計算它們的比例。如果兩個 Dictionary 完全相同，則返回 1。如果兩個 Dictionary 沒有任何相同的鍵值對，則返回 0。
 End Function

@@ -114,12 +114,14 @@ Ctrl + Shift + w 關閉 Chrome 網頁視窗
 
 Ctrl + Shift + \ 切換抬頭平抬格式設定（bool TopLine）
 
-Ctrl + PageUp ：根據 textBox3所載的網址，瀏覽ctext書影的上一頁
+Ctrl + PageUp 或 Alt + 滑鼠滾輪向上：根據 textBox3所載的網址，瀏覽ctext書影的上一頁
 
-Ctrl + PageDown ： 根據 textBox3所載的網址，瀏覽ctext書影的下一頁
+Ctrl + PageDown 或 Alt + 滑鼠滾輪向下 ： 根據 textBox3所載的網址，瀏覽ctext書影的下一頁
 
 Ctrl + + （加號，含函數字鍵盤） 或 Ctrl + -（數字鍵盤）  或 Ctrl + 5 (數字鍵盤） 或 Alt + + ：將插入點或選取文字（含）之前的文本剪下貼到 ctext 的[簡單修改模式]框中，並按下「保存編輯」鈕，
         在非自動連續輸入時于瀏覽器新頁籤（預設值，Selenium架構時不會）開啟下一頁準備編輯文本，並回到前一頁籤以供檢視所貼上之文本是否無誤。
+        
+    Ctrl + Shift + + （即若按住 Shift ）即留在原頁，不會移至下一頁（若textBox3有指定之網址時）；且同時抓到所在處理頁面，並將Selenium 創建的 driver 的 URL屬性指定到同一頁面或同一網址頁面（如有多分頁網址相同時。機制目前是以網址作判斷故；即類似人工手動指定 driver.Url 的值。） 感恩感恩　讚歎讚歎　南無阿彌陀佛 20230304
 
 Ctrl + Shift + c ：將textBox1的文本複製到剪貼簿 以備用
 
@@ -142,7 +144,7 @@ Alt + Shift + F1 ：切換 textbox1 之字型： 切換支援 CJK - Ext 擴充�
 
 按下 Ctrl + * （Multiply）設定為將《四部叢刊》資料庫所複製的文本在表單得到焦點時直接貼到 textBox1 的末尾,或反設定
 
-按下 ctrl + shift + *  切換手動鍵入模式
+按下 ctrl + shift + * （數字鍵盤上的「*」）  切換手動鍵入模式
 
 按下 Ctrl + / （Divide，數字鍵盤上的） 切換自動連續輸入功能
 
@@ -238,7 +240,7 @@ Alt + t ：預測游標所在行是否為標題（在前無空格縮排時） �
 
 Alt + u : 鍵入 《
 
-Alt + v： 檢查[查字.mdb].[異體字反正]資料表中是否已有該字記錄
+Alt + v： 檢查[查字.mdb].[異體字反正]資料表中是否已有該字記錄；如果已有資料對應，則閃示橘紅色（表單顏色=Color.Tomato）0.02秒以示警
 
 Alt + y : 鍵入 〈
 
@@ -250,7 +252,7 @@ Alt + -（字母區與數字鍵盤的減號） : 如果被選取的是「􏿽」
 
 Alt + Del : 刪除插入點後第一個分行分段
 
-Alt + Insert ：將剪貼簿的文字內容讀入textBox1中
+Alt + Insert ：將剪貼簿的文字內容讀入textBox1中；在手動輸入鍵入模式下，會自動加上書名號、篇名號
 
 Alt + F1 : 輸入■；若其後為「　」或「􏿽」或「\<p\>」或「*」則清除之。若有選取，則置換選取區中的「　」或「􏿽」或「\<p\>」
 
@@ -272,7 +274,7 @@ Alt + F6 或 Alt + F8 或 選取標題文字前之空格再按下 Alt + ` : run 
 
 F7 ： 每行縮排，即每行/段前空一格；全部縮排的機會少，若要全部，則請將插入點放在全文前端或末尾
 
-Shfit + F7 : 每行凸排: deleteSpacePreParagraphs_ConvexRow()；全部凸排的機會少，若要全部，則請將插入點放在全文前端或末尾
+Shift + F7 : 每行凸排: deleteSpacePreParagraphs_ConvexRow()；全部凸排的機會少，若要全部，則請將插入點放在全文前端或末尾
 
 Alt + F7 : 每行縮排一格後將其末誤標之\<p\>清除:keysSpacePreParagraphs_indent_ClearEnd＿P_Mark；全部縮排的機會少，若要全部，則請將插入點放在全文前端或末尾
 
@@ -392,3 +394,4 @@ Ctrl+ 滑鼠左鍵：清除框中所有文字
 - [《臨川先生文集》圖文對照錄入實境秀-程式設計增益功能-在《中國哲學書電子化計劃》網站](https://youtu.be/THOe_56bknQ)
 - [TextForCtext 聲控全自動連續輸入至《中國哲學書電子化計劃》Quick edit Box演示](https://youtu.be/bgsOwh2rEkc)
 - [TextForCtext 輸入《中國哲學書電子化計劃》《四庫全書》本《玉海》實境秀](https://youtube.com/live/kwhOSXiNJVs)
+- [TextForCtext 輸入《中國哲學書電子化計劃》：使用者手動鍵入演示及實境秀](https://youtube.com/live/f4JlRogZorw)

@@ -920,7 +920,7 @@ searchedTerm = Array("易", "卦", "爻", "周易", "易經", "系辭", "繫辭", "擊辭", "
             'rng.Find.Execute VBA.Left(clipBTxt, 255), , , , , , , wdFindContinue
             Dim ps As Integer
             ps = InStr(clipBTxt, Chr(13)) '如有本來要貼入的文本中有段落，則止到其段落前為止；若沒有，則取能尋找的最大值255個字元長的內容作搜尋
-            sx = VBA.IIf(ps > 0, VBA.Mid(clipBTxt, VBA.IIf(ps > 0, ps, 2) - 1), VBA.Left(clipBTxt, 255))
+            sx = VBA.IIf(ps > 0, VBA.Left(VBA.Mid(clipBTxt, 1, VBA.IIf(ps > 0, ps, 2) - 1), 255), VBA.Left(clipBTxt, 255))
         Else '標點符號處理：確定文本已有只是標點符號不同者
             punc.clearPunctuations clipBTxt
             punc.restoreOriginalTextPunctuations d.Range.text, clipBTxt
@@ -988,7 +988,7 @@ refres:
     End If
     rng.Select
 '    word.Application.ScreenRefresh
-    ActiveWindow.ScrollIntoView Selection, False
+    ActiveWindow.ScrollIntoView Selection.Characters(1) ', False
 Return
 
 eh:
@@ -1030,6 +1030,7 @@ punc.clearPunctuations textClearPunctuation: punc.clearPunctuations dClearPunctu
 dCleanParagraphs = VBA.split(dClearPunctuation, Chr(13))
 For Each e In dCleanParagraphs
     If e <> "" Then
+'        If e = "易" Then Stop
         If similartext.Similarity(e, textClearPunctuation) Then
             Similarity = True: Exit For
         ElseIf similartext.SimilarityPercent(e, textClearPunctuation) > 80 Then
@@ -1235,7 +1236,7 @@ Err1:
             If InStr(Err.Description, "disconnected: not connected to DevTools") Then '(failed to check if window was closed: disconnected: not connected to DevTools)
                                                                                         '(Session info: chrome=110.0.5481.178)
                 SystemSetup.killchromedriverFromHere
-                Stop
+'                Stop
                 Resume
             Else
                 MsgBox Err.Description, vbCritical
