@@ -1030,6 +1030,7 @@ punc.clearPunctuations textClearPunctuation: punc.clearPunctuations dClearPunctu
 dCleanParagraphs = VBA.split(dClearPunctuation, Chr(13))
 For Each e In dCleanParagraphs
     If e <> "" Then
+'        If e = "©ö" Then Stop
         If similartext.Similarity(e, textClearPunctuation) Then
             Similarity = True: Exit For
         ElseIf similartext.SimilarityPercent(e, textClearPunctuation) > 80 Then

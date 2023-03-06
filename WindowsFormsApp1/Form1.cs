@@ -2644,6 +2644,7 @@ omit:
                         }
                         //前、後一行（段）開頭都不是空格space（縮排），且不是標題時
                         if (x.Length > p + Environment.NewLine.Length + 1 && x.Substring(p + Environment.NewLine.Length, 1) != "　"
+                            && x.LastIndexOf(Environment.NewLine, i) > -1
                             && x.LastIndexOf(Environment.NewLine, x.LastIndexOf(Environment.NewLine, i)) > 0
                             && x.Substring(x.LastIndexOf(Environment.NewLine, x.LastIndexOf(Environment.NewLine, i)) + Environment.NewLine.Length, 1) != "　")
                         {
