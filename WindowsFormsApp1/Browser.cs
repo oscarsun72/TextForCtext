@@ -27,6 +27,8 @@ using SeleniumExtras.WaitHelpers;
 using System.Diagnostics;
 using System.Threading;
 using System.Windows.Automation;
+using OpenQA.Selenium.Remote;
+using OpenQA.Selenium.Firefox;
 
 namespace TextForCtext
 {
@@ -43,7 +45,57 @@ namespace TextForCtext
         // 創建Chrome驅動程序對象
         //selm.IWebDriver driver=driverNew();        
         //internal static selm.IWebDriver driver=driverNew();
-        internal static ChromeDriver driver = driverNew();
+        //internal static ChromeDriver driver = driverNew();
+        static string browserName = Form1.defaultBrowserName;//  "chrome";
+        internal static string chrome_path = Form1.getDefaultBrowserEXE();
+        static Process[] chromeProcessInstances = Process.GetProcessesByName(browserName);//("chrome");
+        internal static ChromeDriverService driverService;
+        internal static ChromeOptions options = chromeOptions(chrome_path);
+        internal static ChromeDriver driver = initiateChromeDriver().Item1;
+        internal static RemoteWebDriver driverRemote = initiateChromeDriver().Item2;
+        internal static Process[] GetChromeProcessInstances
+        {
+            get
+            {
+                chromeProcessInstances = Process.GetProcessesByName("chrome");
+                return chromeProcessInstances;
+            }
+
+        }
+
+        /// <summary>
+        /// 對成員driver欄位初始化
+        /// </summary>
+        /// <returns></returns>
+        static Tuple<ChromeDriver, RemoteWebDriver> initiateChromeDriver()
+        {
+            ////////如果抓得到非由 Selenium啟動的 Chrome瀏覽器再說
+            //////if (chromeProcessInstances.Length > 0)
+            //////    return driverGet();
+            //////else
+            return new Tuple<ChromeDriver, RemoteWebDriver>(driverNew(), null);
+        }
+
+        //private static Tuple<ChromeDriver, RemoteWebDriver> driverGet()
+        //{
+
+        //    var options = new ChromeOptions();
+        //    options.DebuggerAddress = "127.0.0.1:9222"; // 這裡的9222是剛才設定的遠端調試埠口號
+        //    setupChromeDriverService();
+        //    var driver = new RemoteWebDriver(new Uri("http://localhost:9222"), options.ToCapabilities(), TimeSpan.FromSeconds(30));
+        //    driver.Navigate().GoToUrl("https://www.google.com");
+
+
+
+        //    options = chromeOptions(chrome_path);
+        //    options.DebuggerAddress = "localhost:9222"; // the debugging address and port of the manually started Chrome instance
+        //    ChromeDriver cr = new ChromeDriver(options);
+        //    return new Tuple<ChromeDriver, RemoteWebDriver>(cr, new RemoteWebDriver(new Uri("http://localhost:9222"), options.ToCapabilities(), TimeSpan.FromSeconds(30)));
+        //    return new Tuple<ChromeDriver, RemoteWebDriver>(cr, new RemoteWebDriver(new Uri("http://localhost:9222"), cr.Capabilities, TimeSpan.FromSeconds(30)));
+
+        //}
+
+
         //static selm.IWebDriver driverNew()
         //實測後發現：CurrentWindowHandle並不能取得瀏覽器現正作用中的分頁視窗，只能取得創建 ChromeDriver 物件時的最初及switch 方法執行後切換的分頁視窗 20230103 阿彌陀佛
         static string originalWindow;
@@ -115,6 +167,26 @@ namespace TextForCtext
                 }
             }
         }
+        internal static IWebElement waitFindWebElementBySelector_ToBeClickable(string selector, double second = 2)
+        {
+            try
+            {
+                IWebElement e = driver.FindElement(By.CssSelector(selector));
+                WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(second));
+                wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(e));
+                return e;
+            }
+            catch (Exception ex)
+            {
+                switch (ex.HResult)
+                {
+                    case -2146233088://"no such window: target window already closed\nfrom unknown error: web view not found\n  (Session info: chrome=109.0.5414.120)"
+                        return null;
+                    default:
+                        throw;
+                }
+            }
+        }
 
 
         /// <summary>
@@ -123,8 +195,8 @@ namespace TextForCtext
         static double _chromeDriverServiceTimeSpan = 8.5;
         /// <summary>
         ///  Selenium 操控的 Chrome瀏覽器中網頁元件的的等待秒數（WebDriverWait。即「new WebDriverWait()」的「TimeSpan」引數值）。預設為 3。
-        /// </summary>
         static double _webDriverWaitTimSpan = 3;
+        /// </summary>
         /// <summary>
         /// - 在textBox2 輸入「tS」設定 Selenium 操控的 Chrome瀏覽器伺服器（ChromeDriverService）的等待秒數（即「new ChromeDriver()」的「TimeSpan」引數值）。預設為 8.5。
         /// </summary>
@@ -141,52 +213,22 @@ namespace TextForCtext
         {
             if (Form1.browsrOPMode != Form1.BrowserOPMode.appActivateByName && driver == null)
             {
-                string chrome_path = Form1.getDefaultBrowserEXE();
+                //string chrome_path = Form1.getDefaultBrowserEXE();
 
                 // 將 ChromeOptions 設定加入 ChromeDriver
-                ChromeOptions options = chromeOptions(chrome_path);//加入參數的順序重要，要參考「string user_data_dir = options.Arguments[0];」
-                                                                   //ChromeDriver cDrv = new ChromeDriver("C:\\Users\\oscar\\.cache\\selenium\\chromedriver\\win32\\108.0.5359.71\\chromedriver.exe", options);
-                                                                   //cDrv = new ChromeDriver(@"C:\Program Files\Google\Chrome\Application\chrome.exe",options);
-                                                                   //cDrv = new ChromeDriver(@"x:\chromedriver.exe", options);
-                                                                   //上述加入書籤並不管用！！！20230104//解法已詳下chromeOptions()中
+                options = chromeOptions(chrome_path);//加入參數的順序重要，要參考「string user_data_dir = options.Arguments[0];」
+                                                     //ChromeDriver cDrv = new ChromeDriver("C:\\Users\\oscar\\.cache\\selenium\\chromedriver\\win32\\108.0.5359.71\\chromedriver.exe", options);
+                                                     //cDrv = new ChromeDriver(@"C:\Program Files\Google\Chrome\Application\chrome.exe",options);
+                                                     //cDrv = new ChromeDriver(@"x:\chromedriver.exe", options);
+                                                     //上述加入書籤並不管用！！！20230104//解法已詳下chromeOptions()中
 
-tryagain:
-                ChromeDriverService driverService;
+            tryagain:
+                //////////////ChromeDriverService driverService;
                 ChromeDriver cDrv = null;//綠色免安裝版仍搞不定，安裝 chrome 了就OK 20220101 chatGPT建議者未通；20220105自行解決了，詳下
 
 
 
-                string user_data_dir = options.Arguments[0];
-                #region 免安裝版要先將chromedriver.exe複製到chrome.exe可執行檔的路徑，與chrome.exe並列（同在一個目錄下）才行
-                if (user_data_dir.IndexOf("W:\\") > -1)// chrome_path.Substring(0, 3))
-                {
-
-                    chrome_path = chrome_path.Replace("chrome.exe", "");//只能取目錄，不是全檔名
-                                                                        //免安裝版測試：其實根本就是在Chrome瀏覽器網址列以「chrome://version/」Enter後「命令列:」欄位所列的值嘛20230105
-                                                                        //ChromeDriver cDrv = new ChromeDriver(@"W:\PortableApps\PortableApps\GoogleChromePortable\App\Chrome-bin\chrome.exe", options);
-                                                                        //要啟動Chrome瀏覽器時不要出現chromedriver.exe的cmd黑色視窗，免安裝版就須這樣寫，先設定好 ChromeDriverService 物件是由可執行檔的路徑（目錄，非其全檔名）創建，再帶入ChromeDriver()建構函數的第一個引數才行，如下所示
-                    driverService = ChromeDriverService.CreateDefaultService(chrome_path);
-                    //cDrv = new ChromeDriver(chrome_path, options);                        
-
-                }
-                //如華岡學習雲無寫入權時的：
-                else if (user_data_dir.IndexOf("Documents") > -1)
-                {
-                    chrome_path = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + @"\GoogleChromePortable\App\Chrome-bin\";
-                    driverService = ChromeDriverService.CreateDefaultService(chrome_path);
-
-                }
-
-                #endregion
-                #region 預設安裝版，無須多餘指定，即可用空的引數（在無引數的情況下）完成，免安裝版則如上，必須指定相關引數才行 感恩感恩　讚歎讚歎　南無阿彌陀佛 202301051418
-                else
-                {
-                    driverService = ChromeDriverService.CreateDefaultService();//沒傳入引數在Windows系統則會自行用調用「C:\Users\（使用者帳號）\.cache\selenium\chromedriver\win32\（版本號）」，如：C:\Users\oscar\.cache\selenium\chromedriver\win32\108.0.5359.71
-                }
-                #endregion
-
-                driverService.HideCommandPromptWindow = true;//关闭黑色cmd窗口 https://blog.csdn.net/PLA12147111/article/details/92000480
-                                                             //先設定才能依其設定開啟，才不會出現cmd黑色屏幕視窗，若先創建Chrome瀏覽器視窗（即下一行），再設定「.HideCommandPromptWindow = true」則不行。邏輯！感恩感恩　讚歎讚歎　南無阿彌陀佛 202301051414
+                setupChromeDriverService();
                 #region 啟動Chrome瀏覽器 （最會出錯的部分！！）
                 try
                 {
@@ -349,10 +391,46 @@ tryagain:
             #endregion
         }
 
+        private static void setupChromeDriverService()
+        {
+            string user_data_dir = options.Arguments[0];
+            #region 免安裝版要先將chromedriver.exe複製到chrome.exe可執行檔的路徑，與chrome.exe並列（同在一個目錄下）才行
+            if (user_data_dir.IndexOf("W:\\") > -1)// chrome_path.Substring(0, 3))
+            {
+
+                chrome_path = chrome_path.Replace("chrome.exe", "");//只能取目錄，不是全檔名
+                                                                    //免安裝版測試：其實根本就是在Chrome瀏覽器網址列以「chrome://version/」Enter後「命令列:」欄位所列的值嘛20230105
+                                                                    //ChromeDriver cDrv = new ChromeDriver(@"W:\PortableApps\PortableApps\GoogleChromePortable\App\Chrome-bin\chrome.exe", options);
+                                                                    //要啟動Chrome瀏覽器時不要出現chromedriver.exe的cmd黑色視窗，免安裝版就須這樣寫，先設定好 ChromeDriverService 物件是由可執行檔的路徑（目錄，非其全檔名）創建，再帶入ChromeDriver()建構函數的第一個引數才行，如下所示
+                driverService = ChromeDriverService.CreateDefaultService(chrome_path);
+                //cDrv = new ChromeDriver(chrome_path, options);                        
+
+            }
+            //如華岡學習雲無寫入權時的：
+            else if (user_data_dir.IndexOf("Documents") > -1)
+            {
+                chrome_path = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + @"\GoogleChromePortable\App\Chrome-bin\";
+                driverService = ChromeDriverService.CreateDefaultService(chrome_path);
+
+            }
+
+            #endregion
+            #region 預設安裝版，無須多餘指定，即可用空的引數（在無引數的情況下）完成，免安裝版則如上，必須指定相關引數才行 感恩感恩　讚歎讚歎　南無阿彌陀佛 202301051418
+            else
+            {
+                driverService = ChromeDriverService.CreateDefaultService();//沒傳入引數在Windows系統則會自行用調用「C:\Users\（使用者帳號）\.cache\selenium\chromedriver\win32\（版本號）」，如：C:\Users\oscar\.cache\selenium\chromedriver\win32\108.0.5359.71
+            }
+            #endregion
+
+            driverService.HideCommandPromptWindow = true;//关闭黑色cmd窗口 https://blog.csdn.net/PLA12147111/article/details/92000480
+                                                         //先設定才能依其設定開啟，才不會出現cmd黑色屏幕視窗，若先創建Chrome瀏覽器視窗（即下一行），再設定「.HideCommandPromptWindow = true」則不行。邏輯！感恩感恩　讚歎讚歎　南無阿彌陀佛 202301051414
+        }
+
         private static ChromeOptions chromeOptions(string chrome_path)
         {
             // 建立 ChromeOptions 物件            
             ChromeOptions options = new ChromeOptions();
+
             #region it worked！！ ：D 加入的順序決定參數的順序，「"user-data-dir="」此參數在 driverNew()中要參考（string user_data_dir = options.Arguments[0];），故必須第一個加入！
             if (chrome_path.IndexOf("W:\\") == -1 && chrome_path.IndexOf("Documents") == -1)
                 //安裝版：
@@ -598,13 +676,63 @@ tryagain:
         {
             get
             {
-                string url = getUrl(ControlType.Edit).Trim();
+                //string url = getUrl(ControlType.Edit).Trim();
+                string url = getUrlFaster(ControlType.Edit).Trim();
                 url = url.StartsWith("https://") ? url : "https://" + url;
                 return url;
             }
         }
 
-        static string browsername = Form1.defaultBrowserName;//  "chrome";
+        /// <summary>
+        /// geturl 修改後的程式碼:20230308 creedit with NotionAI大菩薩
+        /// 〈get url FindAll vs FindFirst〉https://www.notion.so/get-url-FindAll-vs-FindFirst-88505499d53e4557a45fe8e844f0ee4a
+        /// </summary>
+        /// <param name="controlType"></param>
+        /// <returns></returns>
+        static string getUrlFaster(ControlType controlType)
+        {
+
+            string url = "";
+            try
+            {
+                //Process[] procsBrowser = GetChromeProcessInstances;
+                Process[] procsBrowser = Process.GetProcessesByName(browserName);
+                if (procsBrowser.Length <= 0)
+                {
+                    MessageBox.Show(browserName + " " + "is not the source running browser" + "\n" + "來源流覽器");
+                }
+                else
+                {
+                    foreach (Process proc in procsBrowser)
+                    {
+                        // the chrome process must have a window
+                        if (proc.MainWindowHandle == IntPtr.Zero)
+                        {
+                            continue;
+                        }
+
+                        AutomationElement elm = AutomationElement.FromHandle(proc.MainWindowHandle);
+                        AutomationElement elmUrlBar = elm.FindFirst(TreeScope.Descendants, new PropertyCondition(AutomationElement.ControlTypeProperty, controlType));
+
+                        if (elmUrlBar != null)
+                        {
+                            url = ((ValuePattern)elmUrlBar.GetCurrentPattern(ValuePattern.Pattern)).Current.Value as string;
+                            if ((url.StartsWith("http") || url.StartsWith("ctext")))
+                            {
+                                return url;
+                            }
+                        }
+                    }
+                }
+            }
+            catch
+            {
+                // Ignore exception
+            }
+            return url;
+
+        }
+
         /// <summary>
         /// 取得Chrome瀏覽器現前網址（現行前景之分頁頁籤的網址）。結果竟然是我自己之前就實作過的，完全忘了！
         /// https://www.youtube.com/live/pT1xv4oly1o?feature=share
@@ -619,11 +747,11 @@ tryagain:
             try
             {
                 //Process[] procsChrome = Process.GetProcessesByName("chrome");
-                Process[] procsBrowser = Process.GetProcessesByName(browsername);
+                Process[] procsBrowser = Process.GetProcessesByName(browserName);
                 if (procsBrowser.Length <= 0)
                 {
                     //    MessageBox.Show("Chrome is not running");
-                    MessageBox.Show(browsername + " " +
+                    MessageBox.Show(browserName + " " +
                         "is not the source running browser" + "\n" +
                         "來源流覽器");
                 }
@@ -644,11 +772,24 @@ tryagain:
                         //    elm.FindFirst(TreeScope.Descendants,
                         //    new PropertyCondition(AutomationElement.NameProperty,
                         //    "Address and search bar"));
+
+                        //AutomationElement elmUrlBar =
+                        //    elm.FindFirst(TreeScope.Subtree,
+                        //    new PropertyCondition(
+                        //        AutomationElement.ControlTypeProperty,
+                        //        controlType));
+                        //AutomationElement elmUrlBar =
+                        //    elm.FindFirst(TreeScope.Subtree,
+                        //    new PropertyCondition(
+                        //        AutomationElement.ControlTypeProperty,
+                        //        controlType));
+
                         AutomationElementCollection elmUrlBar =
                             elm.FindAll(TreeScope.Subtree,
                             new PropertyCondition(
                                 AutomationElement.ControlTypeProperty,
                                 controlType));//https://social.msdn.microsoft.com/Forums/en-US/f9cb8d8a-ab6e-4551-8590-bda2c38a2994/retrieve-chrome-url-using-automation-element-in-c-application?forum=csharpgeneral
+
                         /*要用Edit屬性才抓得到網址列,Text也不行
                          */
 
@@ -656,7 +797,7 @@ tryagain:
                         if (elmUrlBar != null)
                         {
                             int i = 0; int cnt = elmUrlBar.Count;
-nx: foreach (AutomationElement Elm in elmUrlBar)
+                        nx: foreach (AutomationElement Elm in elmUrlBar)
                             {
                                 try
                                 {
@@ -823,7 +964,7 @@ nx: foreach (AutomationElement Elm in elmUrlBar)
                         //操作中的分頁頁籤被手動誤關時
                         //no such window: target window already closed
                         case -2146233088:
-                            openNewTab();
+                            openNewTabWindow();
                             break;
                         default:
                             throw;
@@ -833,7 +974,7 @@ nx: foreach (AutomationElement Elm in elmUrlBar)
             }
             else
             {
-                openNewTab();
+                openNewTabWindow();
             }
             //throw;
             driver.Navigate().GoToUrl(url);
@@ -854,7 +995,7 @@ nx: foreach (AutomationElement Elm in elmUrlBar)
             }
         }
 
-        internal static ChromeDriver openNewTab()//creedit 20230103
+        internal static ChromeDriver openNewTabWindow(WindowType tabOrwindow = WindowType.Tab)//creedit 20230103
         {/*chatGPT
             在 C# 中使用 Selenium 開啟新 Chrome 瀏覽器分頁可以使用以下方法：*/
             // 創建 ChromeDriver 實例
@@ -863,14 +1004,14 @@ nx: foreach (AutomationElement Elm in elmUrlBar)
             if (driver == null) driver = driverNew();
             try
             {
-                driver.SwitchTo().NewWindow(WindowType.Tab);
+                driver.SwitchTo().NewWindow(tabOrwindow);
 
             }
             catch (Exception)
             {
                 var hs = driver.WindowHandles;
                 driver.SwitchTo().Window(driver.WindowHandles.Last());
-                driver.SwitchTo().NewWindow(WindowType.Tab);
+                driver.SwitchTo().NewWindow(tabOrwindow);
                 //throw;
             }
 
@@ -1112,6 +1253,158 @@ nx: foreach (AutomationElement Elm in elmUrlBar)
             // 將 ChromeOptions 設定加入 ChromeDriver
 
             //return options;
+        }
+
+        /// <summary>
+        /// Google Keep OCR
+        /// </summary>
+        /// <param name="downloadImgFullName">書圖檔所在位置=全檔名</param>
+        /// <returns></returns>
+        internal static bool OCR_GoogleKeep(string downloadImgFullName)
+        {
+            driver = driver ?? driverNew();
+            string currentWindowHndl = driver.CurrentWindowHandle;
+            //const string keep = "https://keep.google.com/#NOTE/1XHzZWpH5DCDGOctKjMwNad9qGdtUiYQpSw7HtkmfuEEAJOCtlj37xJg5XgRzWoE";
+            const string keep = "https://keep.new";
+            openNewTabWindow(WindowType.Window);
+            driver.Navigate().GoToUrl(keep);
+            //取得文字框
+            IWebElement iwe = waitFindWebElementBySelector_ToBeClickable("body > div.VIpgJd-TUo6Hb.XKSfm-L9AdLc.eo9XGd > div > div.IZ65Hb-TBnied.zTETae-h1U9Be-hxXJme > div.IZ65Hb-s2gQvd > div.IZ65Hb-qJTHM-haAclf > div.notranslate.IZ65Hb-YPqjbf.fmcmS-x3Eknd.h1U9Be-YPqjbf");
+            iwe.Click();
+            //iwe.Clear();
+            //按下：新增圖片
+            waitFindWebElementBySelector_ToBeClickable("body > div.VIpgJd-TUo6Hb.XKSfm-L9AdLc.eo9XGd > div > div.IZ65Hb-TBnied.zTETae-h1U9Be-hxXJme > div.IZ65Hb-yePe5c > div.IZ65Hb-INgbqf > div.Q0hgme-LgbsSe.Q0hgme-Bz112c-LgbsSe.Ge5tnd-HiaYvf.INgbqf-LgbsSe.VIpgJd-LgbsSe", 6).Click();
+            Thread.Sleep(1200);
+            //輸入：檔案名稱
+            //SendKeys.Send(downloadImgFullName);
+            Clipboard.SetText(downloadImgFullName);
+            SendKeys.Send("+{Insert}");//or "^v"
+            SendKeys.Send("{ENTER}");
+            //待圖載入
+            Thread.Sleep(6220);
+            //按下：…更多
+            IWebElement iwe_morebtn = waitFindWebElementBySelector_ToBeClickable("body > div.VIpgJd-TUo6Hb.XKSfm-L9AdLc.eo9XGd > div > div.IZ65Hb-TBnied.zTETae-h1U9Be-hxXJme > div.IZ65Hb-yePe5c > div.IZ65Hb-INgbqf > div.Q0hgme-LgbsSe.Q0hgme-Bz112c-LgbsSe.xl07Ob.INgbqf-LgbsSe.VIpgJd-LgbsSe");
+            iwe_morebtn.Click();
+            byte tryTimes = 1;//重做記數，防有例外情形、成無窮迴圈；如「按下：新增圖片」處可能還來不及待輸入框出現程式便兀自執行下去
+        retry:
+            //按下：擷取圖片文字
+            Thread.Sleep(300);
+            IWebElement iwe_ocr =
+            waitFindWebElementBySelector_ToBeClickable("#\\:8 > div", 0);
+            if (iwe_ocr == null)
+            {
+                Thread.Sleep(10); iwe_morebtn.Click(); tryTimes++;
+                if (tryTimes < 6) goto retry;
+                else
+                {
+                    //MessageBox.Show("請重來一次；重新執行一次。感恩感恩　南無阿彌陀佛", "", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
+                    return false;
+                }
+            }
+            iwe_ocr.Click();
+            Thread.Sleep(500);
+            //將OCR結果複製到剪貼簿                    
+            if (iwe.Text == "")
+            {
+                Thread.Sleep(800); iwe_morebtn.Click();
+                goto retry;
+            }
+            Clipboard.SetText(iwe.Text);
+            #region 刪除一則記事
+            iwe_morebtn.Click();
+            //IWebElement iwe_del =
+            waitFindWebElementBySelector_ToBeClickable("#\\:1 > div").Click();
+            //移除圖片
+
+            //IWebElement iwe_pic=
+            //waitFindWebElementBySelector_ToBeClickable("body > div.VIpgJd-TUo6Hb.XKSfm-L9AdLc.eo9XGd > div > div.IZ65Hb-TBnied.zTETae-h1U9Be-hxXJme > div.IZ65Hb-s2gQvd > div.IZ65Hb-hYUzqc > div > div > img");
+            //Cursor.Position= new Point( (iwe_pic.Location.X+iwe_pic.Size.Width)/2,(iwe_pic.Location.Y+iwe_pic.Size.Height)/2);
+            //waitFindWebElementBySelector_ToBeClickable("body > div.VIpgJd-TUo6Hb.XKSfm-L9AdLc.eo9XGd > div > div.IZ65Hb-TBnied.zTETae-h1U9Be-hxXJme > div.IZ65Hb-s2gQvd > div.IZ65Hb-hYUzqc > div > div > div",3).Click();
+
+            //iwe.Click();
+            //SendKeys.Send("^a{delete}");
+            //清除
+            //iwe.Clear();
+            #endregion
+
+            #region 關閉OCR視窗後回到原來分頁視窗
+            driver.Close();
+            driver.SwitchTo().Window(currentWindowHndl);
+            #endregion
+            return true;
+
+        }/// <summary>
+         /// 《古籍酷》OCR：自動識別(豎版)
+         /// </summary>
+         /// <param name="downloadImgFullName">書圖檔全檔名</param>
+         /// <returns></returns>
+        internal static bool OCR_GJcool_AutoRecognizeVertical(string downloadImgFullName)
+        {
+            driver = driver ?? driverNew();
+            string currentWindowHndl = driver.CurrentWindowHandle;
+            const string gjCool = "https://gj.cool/try_ocr";
+            openNewTabWindow(WindowType.Window);
+            driver.Navigate().GoToUrl(gjCool);
+            //按下：新增圖片：選擇檔案
+            waitFindWebElementBySelector_ToBeClickable("#line_img_form > div > input[type=file]", 6).Click();
+            Thread.Sleep(1200);
+            //輸入：檔案名稱 //SendKeys.Send(downloadImgFullName);
+            Clipboard.SetText(downloadImgFullName);
+            byte tryTimes = 1;
+        retry:
+            SendKeys.Send("+{Insert}");//or "^v"
+            SendKeys.Send("{ENTER}");
+            //待圖載入
+            Thread.Sleep(6220);
+            //按下「Pro」
+            IWebElement iwe = waitFindWebElementBySelector_ToBeClickable("#line_img_form > div > input[type=file]");
+            if (iwe == null)
+            {
+                tryTimes++;
+                if (tryTimes > 5) return false;
+                goto retry;
+            }
+            iwe.Click();
+            //按下「自動識別(豎版)」
+            iwe = waitFindWebElementBySelector_ToBeClickable("# OneLine > div.d-flex.justify-content-between.mt-2.mb-1 > div:nth-child(1) > div:nth-child(2) > ul > li:nth-child(2) > button");
+            iwe.Click();
+            Thread.Sleep(3220);
+            //按下「導出數據」：
+            iwe = waitFindWebElementBySelector_ToBeClickable("# outputDropdown");
+            iwe.Click();
+            //按下：「坐標」核取方塊，取消之
+            iwe = waitFindWebElementBySelector_ToBeClickable("# outputSelect1");
+            iwe.Click();
+            //按下：「識別概率」核取方塊，取消之
+            iwe = waitFindWebElementBySelector_ToBeClickable("#outputSelect2");
+            iwe.Click();
+            //按下：「TXT」選項，匯出成純文字檔
+            iwe = waitFindWebElementBySelector_ToBeClickable("#OneLine > div.d-flex.justify-content-between.mt-2.mb-1 > div.d-flex.justify-content-end.input-group > div:nth-child(3) > ul > li:nth-child(2) > a");
+            iwe.Click();
+            Thread.Sleep(520);
+            #region 將OCR結果讀入剪貼簿 creedit with chatGPT大菩薩：
+            #region 取得瀏覽器下載目錄 ：
+            // 注入 JavaScript 代碼以獲取下載目錄
+            string downloadDirectory = (string)driver.ExecuteScript("return window.navigator.userAgent.toLowerCase().indexOf('win') > -1 ? window.localStorage.getItem('download.default_directory') : null;");
+            #endregion
+            #region 讀入文本 creedit with chatGPT大菩薩：
+            //取得所匯出的檔案路徑
+            string filePath = Path.Combine(downloadDirectory, Path.GetFileNameWithoutExtension(downloadImgFullName)); //@"X:\Ctext_Page_Image.txt";
+            if (File.Exists(filePath))
+            {
+                string text = File.ReadAllText(filePath, System.Text.Encoding.UTF8);
+                Clipboard.SetText(text);
+                //刪除下載檔案，以便下次載入
+                Task.Run(()=> File.Delete(filePath));
+            }
+            #endregion
+            #endregion
+
+            #region 關閉OCR視窗後回到原來分頁視窗
+            driver.Close();
+            driver.SwitchTo().Window(currentWindowHndl);
+            #endregion
+            return true;
         }
 
     }

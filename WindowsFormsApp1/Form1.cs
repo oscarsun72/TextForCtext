@@ -27,8 +27,7 @@ using Font = System.Drawing.Font;
 using Point = System.Drawing.Point;
 //using Task = System.Threading.Tasks.Task;
 using System.Threading.Tasks;
-//using OpenQA.Selenium;
-//using OpenQA.Selenium;
+using System.Net.Http.Headers;
 //using System.Windows.Input;
 //using Microsoft.Office.Interop.Word;
 
@@ -1030,8 +1029,8 @@ namespace WindowsFormsApp1
 
             }
             else chkP = -1;
-#endregion
-chksum:
+            #endregion
+            chksum:
             if (missWordPositon > -1 || chkP > -1)
             //if (xCopy.IndexOf(" ") > -1 || xCopy.IndexOfAny("�".ToCharArray()) > -1 ||
             //xCopy.IndexOf("□") > -1)//□為《維基文庫》《四庫全書》的缺字符，" "則是《四部叢刊》的，"�"則是《四部叢刊》的造字符。
@@ -1949,7 +1948,7 @@ chksum:
                     {
                         insX = "》";
                     }
-insert:
+                insert:
                     insertWords(insX, textBox1, x);
                     return;
                 }
@@ -2436,7 +2435,7 @@ insert:
 
                     textBox1.Select(i, 0);
                     space = notes_a_line(false, ctrl);
-omit:
+                omit:
                     if (textBox1.TextLength >= i + space + 1)
                         i = textBox1.Text.IndexOf("}}", i + space + 1);
                     else
@@ -3077,7 +3076,7 @@ omit:
                     string nx = x.Substring(j, 2);
                     if (nx == Environment.NewLine || nx == "{{" || nx == "<p")
                     {
-longTitle:
+                    longTitle:
                         if (nx == Environment.NewLine)
                         {
                             //標題（篇名）過長時之處理：
@@ -3609,7 +3608,7 @@ longTitle:
                 goto notFound;
             textBox1.ScrollToCaret();
             return;
-notFound:
+        notFound:
             MessageBox.Show("not found!");
 
         }
@@ -5549,6 +5548,30 @@ notFound:
                     }
                     e.Handled = true; return;
                 }
+
+                if (e.KeyCode == Keys.O)
+                {//Alt + Shift + o ：交給《古籍酷》 OCR ，模擬使用者手動操作的功能（待測試！！！！）
+                    if (browsrOPMode == BrowserOPMode.appActivateByName) return;
+                    e.Handled = true;
+                    string imgUrl = Clipboard.GetText(), downloadImgFullName;
+                    if (imgUrl.Length > 4
+                        && imgUrl.Substring(0, 4) == "http"
+                        && imgUrl.Substring(imgUrl.Length - 4, 4) == ".png")
+                        downloadImage(imgUrl, out downloadImgFullName);
+                    else
+                    {
+                        imgUrl = br.GetImageUrl();
+                        downloadImage(imgUrl, out downloadImgFullName);
+                    }
+
+                    #region toOCR
+                    if (!br.OCR_GJcool_AutoRecognizeVertical(downloadImgFullName)) MessageBox.Show("請重來一次；重新執行一次。感恩感恩　南無阿彌陀佛", "", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
+                    //const string gjcool = "https://gj.cool/try_ocr";
+                    //Process.Start(gjcool);
+                    if (!Active) bringBackMousePosFrmCenter();
+                    #endregion
+                    return;
+                }
             }
             #endregion
 
@@ -5735,20 +5758,34 @@ notFound:
                     }
                     return;
                 }
+
                 if (e.KeyCode == Keys.O)
-                {//Alt + o :下載圖片，準備交給《古籍酷》OCR（待實作）
+                {//Alt + o :下載圖片，交給Google Keep OCR
+                    if (browsrOPMode == BrowserOPMode.appActivateByName) return;
                     e.Handled = true;
-                    string imgUrl = Clipboard.GetText();
+                    string imgUrl = Clipboard.GetText(), downloadImgFullName;
                     if (imgUrl.Length > 4
                         && imgUrl.Substring(0, 4) == "http"
                         && imgUrl.Substring(imgUrl.Length - 4, 4) == ".png")
-                        downloadImage(imgUrl);
+                        downloadImage(imgUrl, out downloadImgFullName);
                     else
-                        downloadImage(br.GetImageUrl());
-                    Process.Start("https://gj.cool/try_ocr");
-                    Process.Start("https://keep.google.com/#NOTE/1XHzZWpH5DCDGOctKjMwNad9qGdtUiYQpSw7HtkmfuEEAJOCtlj37xJg5XgRzWoE");
+                    {
+                        imgUrl = br.GetImageUrl();
+                        downloadImage(imgUrl, out downloadImgFullName);
+                    }
+
+                    #region toOCR
+                    if (!br.OCR_GoogleKeep(downloadImgFullName)) MessageBox.Show("請重來一次；重新執行一次。感恩感恩　南無阿彌陀佛", "", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
+                    //const string gjcool = "https://gj.cool/try_ocr";
+
+                    //Process.Start(gjcool);
+                    //Process.Start(keep);
+                    if (!Active) bringBackMousePosFrmCenter();
+                    #endregion
                     return;
                 }
+
+
                 if (e.KeyCode == Keys.Left || e.KeyCode == Keys.Right)
                 {/*Alt + ←：視窗向左移動30dpi（+ Ctrl：徵調）
                   * Alt + →：視窗向右移動30dpi（+ Ctrl：徵調）*/
@@ -6071,7 +6108,7 @@ notFound:
                             break;
                         case BrowserOPMode.seleniumNew:
                             int retrytimes = 0;
-retry:
+                        retry:
                             br.driver = br.driver ?? br.driverNew();
                             try
                             {//這裡需要參照元件來操作就不宜跑線程了！故此區塊最後的剪貼簿，要求須是單線程者，蓋因剪貼簿須獨占式使用故也20230111                                
@@ -6232,8 +6269,8 @@ retry:
         /// <returns></returns>
         public static bool isClipBoardAvailable_Text()
         {// creedit with chatGPT：Clipboard Availability in C#：https://www.facebook.com/oscarsun72/posts/pfbid0dhv46wssuupa5PfH6RTNSZF58wUVbE6jehnQuYF9HtE9kozDBzCvjsowDkZTxkmcl
-/*在 C# 的 System.Windows.Forms 中，可以使用 Clipboard.ContainsData 或 Clipboard.ContainsText 方法來確定剪貼簿是否可用。*/
-retry:
+        /*在 C# 的 System.Windows.Forms 中，可以使用 Clipboard.ContainsData 或 Clipboard.ContainsText 方法來確定剪貼簿是否可用。*/
+        retry:
             try
             {
                 if (!Clipboard.ContainsText())
@@ -6438,8 +6475,8 @@ retry:
         internal static string defaultBrowserName = string.Empty;//https://cybarlab.com/web-browser-name-in-c-sharp
         internal void appActivateByName()
         {
-//Process[] procsBrowser = Process.GetProcessesByName("chrome");
-tryagain:
+        //Process[] procsBrowser = Process.GetProcessesByName("chrome");
+        tryagain:
             Process[] procsBrowser = Process.GetProcessesByName(defaultBrowserName);
             if (procsBrowser.Length <= 0)
             {
@@ -6613,7 +6650,7 @@ tryagain:
 
         //檢查textbox3的Text值與現用網頁是否相同
         private string chkUrlIsTextBox3Text(ReadOnlyCollection<string> tabWindowHandles, string url)
-        {            
+        {
             if (url == "") return url;
             //再回到正在編輯的本頁，準備貼入
 
@@ -6627,7 +6664,7 @@ tryagain:
                     if (taburl == textBox3.Text || taburl.IndexOf(url.Replace("editor", "box")) > -1) { found = true; break; }
                 }
                 if (!found)
-                    br.driver = br.openNewTab();//網址由下面「在Chrome瀏覽器的Quick_edit文字框中輸入文字」那行給
+                    br.driver = br.openNewTabWindow();//網址由下面「在Chrome瀏覽器的Quick_edit文字框中輸入文字」那行給
             }
             //url = textBox3.Text;
             //textBox3.Text = url;
@@ -7116,7 +7153,7 @@ tryagain:
                             appActivateByName();
                         else
                         {
-retry:
+                        retry:
                             try
                             {
                                 br.driver = br.driver ?? br.driverNew();
@@ -7530,13 +7567,13 @@ retry:
             switch (textBox2.Text)
             {
                 case "ap,":
-ap: browsrOPMode = BrowserOPMode.appActivateByName;
+                ap: browsrOPMode = BrowserOPMode.appActivateByName;
                     textBox2.Text = "";
                     return;
                 case "aa":
                     goto ap;
                 case "sl,":
-sl: browsrOPMode = BrowserOPMode.seleniumNew;
+                sl: browsrOPMode = BrowserOPMode.seleniumNew;
                     //第一次開啟Chrome瀏覽器，或前有未關閉的瀏覽器時
                     if (br.driver == null)
                         br.driver = br.driverNew();//不用Task.Run()包裹也成了
@@ -8269,7 +8306,7 @@ sl: browsrOPMode = BrowserOPMode.seleniumNew;
 
         }
 
-        internal void downloadImage(string imageUrl)
+        internal void downloadImage(string imageUrl, out string downloadImgFullName, bool selectedInExplorer = false)
         {/*20230103 creedit,chatGPT：
           你可以使用 Selenium 來下載網絡圖片。
             首先，你需要獲取圖片的 URL。然後，使用 WebClient 的 DownloadData 方法下載圖片的二進制數據。
@@ -8283,36 +8320,41 @@ sl: browsrOPMode = BrowserOPMode.seleniumNew;
             byte[] imageBytes = webClient.DownloadData(imageUrl);
 
             // 將二進制數據寫入文件。
-            string downloadImgFullName = dropBoxPathIncldBackSlash + "Ctext_Page_Image.png";
+            //string downloadImgFullName = dropBoxPathIncldBackSlash + "Ctext_Page_Image.png";
+            downloadImgFullName = dropBoxPathIncldBackSlash + "Ctext_Page_Image.png";
             using (FileStream fileStream = new FileStream(downloadImgFullName, FileMode.Create))
             {
                 fileStream.Write(imageBytes, 0, imageBytes.Length);
-                Console.WriteLine("圖片已成功下載。");//在「即時運算視窗」寫出訊息
+                //Console.WriteLine("圖片已成功下載。");//在「即時運算視窗」寫出訊息
             }
-            //在下載完後在檔案總管中將其選取
-            //https://www.ruyut.com/2022/05/csharp-open-in-file-explorer.html
-            //把之前開過的關閉
-            if (prcssDownloadImgFullName != null && prcssDownloadImgFullName.HasExited)
+            #region 在下載完後在檔案總管中將其選取MyRegion
+            if (selectedInExplorer)
             {
-                prcssDownloadImgFullName.WaitForExit();
-                prcssDownloadImgFullName.Close();
-                ////prcssDownloadImgFullName.WaitForExit();
-                //prcssDownloadImgFullName.Kill();
+                //https://www.ruyut.com/2022/05/csharp-open-in-file-explorer.html
+                //把之前開過的關閉
+                if (prcssDownloadImgFullName != null && prcssDownloadImgFullName.HasExited)
+                {
+                    prcssDownloadImgFullName.WaitForExit();
+                    //prcssDownloadImgFullName.CloseMainWindow();
+                    prcssDownloadImgFullName.Close();
+                    ////prcssDownloadImgFullName.WaitForExit();
+                    //prcssDownloadImgFullName.Kill();
+                }
+                prcssDownloadImgFullName = System.Diagnostics.Process.Start("Explorer.exe", $"/e, /select ,{downloadImgFullName}");
+
+                //以下chatGPT的 無效,上面才有效
+                //ProcessStartInfo startInfo = new ProcessStartInfo
+                //{
+                //    FileName = downloadImgFullName,
+                //    UseShellExecute = true,
+                //    Verb = "select"//選取
+                //    //Verb = "open" //打開
+                //};
+                //Process.Start(startInfo);
+                ////並將之打開
+                //Process.Start(downloadImgFullName);
             }
-            prcssDownloadImgFullName = System.Diagnostics.Process.Start("Explorer.exe", $"/e, /select ,{downloadImgFullName}");
-
-            //以下chatGPT的 無效,上面才有效
-            //ProcessStartInfo startInfo = new ProcessStartInfo
-            //{
-            //    FileName = downloadImgFullName,
-            //    UseShellExecute = true,
-            //    Verb = "select"//選取
-            //    //Verb = "open" //打開
-            //};
-            //Process.Start(startInfo);
-            ////並將之打開
-            //Process.Start(downloadImgFullName);
-
+            #endregion
         }
         Process prcssDownloadImgFullName;
 

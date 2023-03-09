@@ -47,21 +47,21 @@ With ActiveDocument.Range
     With .Find
         .MatchWildcards = False
         .ClearFormatting
-        .Text = "<img src="
+        .text = "<img src="
         .Forward = True
         .Wrap = wdFindStop
-        .Replacement.Text = "<a href=""" & x & i & """><img src="
+        .Replacement.text = "<a href=""" & x & i & """><img src="
         Do While .Execute(, , , , , , , , , , wdReplaceOne)
             .Parent.move
             i = i + 1
             With .Replacement
-                .Text = "<a href=""" & x & i & """><img src="
+                .text = "<a href=""" & x & i & """><img src="
             End With
         Loop
         .Parent.move wdStory
         .Forward = False
-        .Text = ".jpg"" />"
-        .Replacement.Text = ".jpg"" /></a>"
+        .text = ".jpg"" />"
+        .Replacement.text = ".jpg"" /></a>"
         .Execute , , , , , , , , , , wdReplaceAll
     End With
 End With
@@ -112,7 +112,7 @@ With d.Range
 '    Do Until s = e - 10
 '        .move wdStory
         Set x = d.Range(InStr(d.Range, "<img src=""") - 1, InStr(d.Range, ".jpg"" />") + Len(".jpg"" />") - 1)
-        t = x.Text
+        t = x.text
         .SetRange InStr(d.Range, "<img src=""") - 1, InStr(d.Range, ".jpg"" /><br>") + Len(".jpg"" /><br>") - 1
         .Delete
         With Selection
@@ -240,7 +240,7 @@ With Selection
             End If
             o = True '記下已是在處理html碼,以供下面用.2007/11/4
             With ActiveWindow.Selection
-                If Len(.Text) = 1 Then .GoTo wdGoToBookmark, , , "游標_暫存"
+                If Len(.text) = 1 Then .GoTo wdGoToBookmark, , , "游標_暫存"
                 bt = .Range
                 h = InputBox("請輸入上文網址")
                 'If h = "" Or InStr(h, "http") = 0 Then Exit Sub
@@ -312,7 +312,7 @@ Else
     Documents("暫存").Activate
 End If
 With ActiveWindow.Selection
-    If Len(.Text) = 1 Then .GoTo wdGoToBookmark, , , "游標_暫存"
+    If Len(.text) = 1 Then .GoTo wdGoToBookmark, , , "游標_暫存"
     .Copy
     '.Parent.WindowState wdWindowStateMinimize
     ActiveWindow.Visible = False
@@ -360,7 +360,7 @@ e = "/><br>"
 With d
     .Range.Paste
     Do
-        x = .Range.Text
+        x = .Range.text
         ep = InStr(x, e) + Len(e) - 1
         sp = InStr(x, s)
         If sp = 0 Then Exit Do
@@ -387,6 +387,16 @@ If rng.Hyperlinks.Count = 0 Then '如果所在位置沒有超連結，則看其前有否；若又無，
         GoSub nxt
     ElseIf rng.End = rng.Document.Range.End - 1 Then
         GoSub pre
+    ElseIf rng.End < rng.Document.Range.End - 1 Then
+        '為 「生難字加上國語辭典注音」 而設
+        Dim rngNext As Range
+        Set rngNext = rng.Next
+        If rngNext.text = "（" Then
+            If rngNext.Next.Hyperlinks.Count > 0 Then
+                rng.SetRange rngNext.Next.start, rngNext.Next.End
+                GoSub nxt
+            End If
+        End If
     Else
         GoSub position
     End If
@@ -494,14 +504,14 @@ Sub 插入超連結() '2008/9/1 指定鍵(快捷鍵) Ctrl+shift+K(原系統指定在smallcaps為)
 End Sub
 Sub insertHydzdLink()
 Dim lk As New Links, db As New dBase
-db.setWordControlValue (文字處理.trimStrForSearch(Selection.Text, Selection))
+db.setWordControlValue (文字處理.trimStrForSearch(Selection.text, Selection))
 db.setDictControlValue 3
 lk.insertLinktoHydzd
 Set lk = Nothing: Set db = Nothing
 End Sub
 Sub insertHydcdLink()
 Dim lk As New Links, db As New dBase
-db.setWordControlValue (文字處理.trimStrForSearch(Selection.Text, Selection))
+db.setWordControlValue (文字處理.trimStrForSearch(Selection.text, Selection))
 db.setDictControlValue 4
 lk.insertLinktoHydcd
 Set lk = Nothing: Set db = Nothing
@@ -515,7 +525,7 @@ End Sub
 Sub saveV5URL()
 Dim ac As Object, lnk As String
 Dim dbFullName As String
-dbFullName = userProfilePath & "Dropbox\《重編國語辭典修訂本》資料庫.mdb"
+dbFullName = UserProfilePath & "Dropbox\《重編國語辭典修訂本》資料庫.mdb"
 If Selection.Hyperlinks.Count > 0 Then
     lnk = Selection.Hyperlinks(1).Address
 Else
@@ -686,7 +696,7 @@ End If
 Debug.Print p
 End Sub
 Sub 由程式碼中取出圖片並排序()
-Dim d, x As String, a, s As Long, e As Long, p As String, pe As String, pS As String, pL As Byte
+Dim d, x As String, a, s As Long, e As Long, p As String, pe As String, ps As String, pL As Byte
 setOX
 'Set d = ActiveDocument
 d = OX.ClipGet
@@ -695,10 +705,10 @@ x = d
 If InStr(x, "<a name") Then MsgBox "本頁有書籤,請檢查!!", vbCritical: Exit Sub
 s = InStr(x, """><img src=""http://tw.blog.yahoo.com/photo/photo.php?id=ob4NscCdAxS_yWJbxTvlgfR.&amp;photo=ap_")
 If s Then
-    pS = """><img src=""http://tw.blog.yahoo.com/photo/photo.php?id=ob4NscCdAxS_yWJbxTvlgfR.&amp;photo=ap_"
+    ps = """><img src=""http://tw.blog.yahoo.com/photo/photo.php?id=ob4NscCdAxS_yWJbxTvlgfR.&amp;photo=ap_"
 ElseIf InStr(x, """><img alt="""""""" src=""http://tw.blog.yahoo.com/photo/photo.php?id=ob4NscCdAxS_yWJbxTvlgfR.&amp;photo=ap_") Then
-    pS = """><img alt="""""""" src=""http://tw.blog.yahoo.com/photo/photo.php?id=ob4NscCdAxS_yWJbxTvlgfR.&amp;photo=ap_"
-    s = InStr(x, pS)
+    ps = """><img alt="""""""" src=""http://tw.blog.yahoo.com/photo/photo.php?id=ob4NscCdAxS_yWJbxTvlgfR.&amp;photo=ap_"
+    s = InStr(x, ps)
 End If
 If s Then
     e = InStr(s, x, ".jpg"" /></a></p>")
@@ -715,7 +725,7 @@ If s Then
     With d
         Do Until s = 0
             p = p & Mid(x, s + 2, (e - (s - 1)) + 5 + pL) & "<br>" '16=len(".jpg"" /></a></p>")
-            s = InStr(s + 1, x, pS)
+            s = InStr(s + 1, x, ps)
             e = InStr(s + 1, x, pe) 'e = InStr(s + 1, x, ".jpg"" /></a></p>")
         Loop
     End With
@@ -779,9 +789,9 @@ With d.Application.Selection
     If d.Range(.start - 2, .start) = "異." Then
         Do Until st = ".htm"
             .MoveRight wdCharacter, 1, wdExtend
-            st = VBA.Right(.Text, 4)
+            st = VBA.Right(.text, 4)
         Loop
-        h = .Text
+        h = .text
         .Delete
         h = StrConv(h, vbNarrow) '全形轉半形
         .Hyperlinks.Add d.Range(.start - 2, .start - 1), h '.Range, h
@@ -789,10 +799,10 @@ With d.Application.Selection
     ElseIf d.Range(.start - 1, .start) = Chr(9) Or d.Range(.start - 1, .start) = "』" Then '以tab鍵定位字元為判斷,蓋在資料庫chr(13)皆會被轉成此字元故也.
         Do Until st = Chr(9) Or st = " " Or .Next.Font.Size > 8
             .MoveRight wdCharacter, 1, wdExtend
-            st = VBA.Right(.Text, 1)
+            st = VBA.Right(.text, 1)
         Loop
         .MoveLeft wdCharacter, 1, wdExtend
-        h = .Text
+        h = .text
         .Delete
         h = StrConv(h, vbNarrow) '全形轉半形
         .Hyperlinks.Add d.Range(.start - 1, .start), h      '.Range, h

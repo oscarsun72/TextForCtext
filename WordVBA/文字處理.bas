@@ -1911,7 +1911,7 @@ Rem 20230128 癸卯年初七 孫守真×chatGPT大菩薩：VBA Overload Functionality：
 'VBA (Visual Basic for Applications) 是一種微軟的程式語言，主要用於自動化 Microsoft Office 應用程式中。VBA 不支援函式的多載和重載。這意味著，您不能在 VBA 中定義具有相同名稱但參數不同的多個函式。
 
 Dim ayToTrim As Variant, a As Variant
-On Error GoTo eH
+On Error GoTo eh
 ayToTrim = Array(Chr(13), Chr(9), Chr(10), Chr(11), Chr(13) & Chr(7), Chr(13) & Chr(10))
 x = VBA.Trim(x)
 For Each a In ayToTrim
@@ -1925,7 +1925,7 @@ For Each a In ayToTrim
 Next a
 trimStrForSearch_PlainText = x
 Exit Function
-eH:
+eh:
 Select Case Err.Number
     Case Else
         MsgBox Err.Number & Err.Description
@@ -1936,7 +1936,7 @@ End Function
 Function trimStrForSearch(x As String, sl As word.Selection) As String
 'https://docs.microsoft.com/zh-tw/dotnet/visual-basic/programming-guide/language-features/procedures/passing-arguments-by-value-and-by-reference
 Dim ayToTrim As Variant, a As Variant, rng As Range, slTxtR As String
-On Error GoTo eH
+On Error GoTo eh
 slTxtR = sl.Characters(sl.Characters.Count)
 ayToTrim = Array(Chr(13), Chr(9), Chr(10), Chr(11), Chr(13) & Chr(7), Chr(13) & Chr(10))
 x = VBA.Trim(x)
@@ -1959,7 +1959,7 @@ If sl.Type <> wdSelectionIP Then
     End If
 End If
 Exit Function
-eH:
+eh:
 Select Case Err.Number
     Case Else
         MsgBox Err.Number & Err.Description
@@ -1984,7 +1984,7 @@ End If
 End Function
 Function is注音符號(ByVal a As String, Optional rng As Variant) As Boolean
 Dim f As String
-On Error GoTo eH
+On Error GoTo eh
 If Len(a) > 1 Then Exit Function
 f = "ㄅㄆㄇㄈㄉㄊㄋㄌㄍㄎㄏㄐㄑㄒㄓㄔㄕㄖㄗㄘㄙㄧㄨㄩㄚㄛㄜㄝㄞㄟㄠㄡㄢㄣㄤㄥㄦˊ  ˇ  ˋ  ˙"
 If a = ChrW(20008) Then
@@ -2005,7 +2005,7 @@ Else
     If InStr(f, a) Then is注音符號 = True
 End If
 Exit Function
-eH:
+eh:
 Select Case Err.Number
     Case 424 '此處需要物件
         Set rng = Nothing
@@ -2636,7 +2636,7 @@ End Sub
 Sub 書名號篇名號檢查()
 Dim s As Long, rng As Range, e, trm As String, ans
 Static x() As String, i As Integer
-On Error GoTo eH
+On Error GoTo eh
 Do
     Selection.Find.Execute "〈", , , , , , True, wdFindAsk
     Set rng = Selection.Range
@@ -2658,7 +2658,7 @@ Do
 1
 Loop
 Exit Sub
-eH:
+eh:
 Select Case Err.Number
     Case 92 '沒有設定 For 迴圈的初始值 陣列尚未有值
         GoTo 2
@@ -2718,7 +2718,7 @@ chng:
 Return
 End Sub
 Sub 中國哲學書電子化計劃_表格轉文字(ByRef r As Range)
-On Error GoTo eH
+On Error GoTo eh
 Dim lngTemp As Long '因為誤按到追蹤修訂，才會引發訊息提示刪除儲存格不會有標識
 'Dim d As Document
 Dim tb As Table, c As Cell ', ci As Long
@@ -2733,7 +2733,7 @@ If r.Tables.Count > 0 Then
 End If
 'word.Application.DisplayAlerts = lngTemp
 Exit Sub
-eH:
+eh:
 Select Case Err.Number
     Case 5992 '無法個別存取此集合中的各欄，因為表格中有混合的儲存格寬度。
         For Each c In tb.Range.Cells
@@ -2908,7 +2908,7 @@ For Each a In rng.Characters
     End If
 Next a
 rng.Cut
-On Error GoTo eH:
+On Error GoTo eh:
 rng.PasteAndFormat wdFormatPlainText
 rng.Find.ClearFormatting
 For i = 0 To UBound(rp)
@@ -2926,7 +2926,7 @@ If Not doNotCloseDoc Then
 End If
 SystemSetup.contiUndo ur
 Exit Sub
-eH:
+eh:
 Select Case Err.Number
     Case 4198 '指令失敗
         SystemSetup.wait 900
@@ -3036,7 +3036,7 @@ End If
 Set rng = Selection.Range
 words = x
 db.setWordControlValue (words)
-On Error GoTo eH
+On Error GoTo eh
 Dim ur As UndoRecord
 'Set ur = SystemSetup.stopUndo("生難字加上國語辭典注音")
 SystemSetup.stopUndo ur, "生難字加上國語辭典注音"
@@ -3203,6 +3203,7 @@ typeTexts:
             Dim repeated As Boolean '檢索結果不止一個時會重複
 rePt:
             If repeated = False Then x = SeleniumOP.grabDictRevisedUrl_OnlyOneResult(words) '此法只適用於僅1筆資料時,沒有或多於1筆則返回""空字串
+            rng.Document.ActiveWindow.Application.Activate
             If rst.RecordCount = 1 Then '國語辭典資料庫裡只有1筆吻合資料
                 If x = "" Then '結果不止1個時
                     Shell Network.getDefaultBrowserFullname & " https://dict.revised.moe.edu.tw/search.jsp?md=1"
@@ -3258,7 +3259,7 @@ rePt:
 Return
 
 
-eH:
+eh:
     Select Case Err.Number
         Case 4198 '指令失敗 'Google Drive的問題
             Resume Next
