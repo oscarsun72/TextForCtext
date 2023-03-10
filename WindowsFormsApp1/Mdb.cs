@@ -10,13 +10,25 @@ using System.Windows.Forms;
 using System.Web.UI;
 using OpenQA.Selenium.DevTools.V85.ApplicationCache;
 using System.Windows.Media.Animation;
+//引用adodb 要將其「內嵌 Interop 類型」（Embed Interop Type）屬性設為false（預設是true）才不會出現以下錯誤：  HResult=0x80131522  Message=無法從組件 載入類型 'ADODB.FieldsToInternalFieldsMarshaler'。
+//https://stackoverflow.com/questions/5666265/adodbcould-not-load-type-adodb-fieldstointernalfieldsmarshaler-from-assembly  https://blog.csdn.net/m15188153014/article/details/119895082
+using ado = ADODB;//https://docs.microsoft.com/zh-tw/dotnet/csharp/language-reference/keywords/using-directive
 
 namespace TextForCtext
 {
     class Mdb
     {
         static Form1 frm = Application.OpenForms["Form1"] as Form1;
-
+        static string DropBoxPathIncldBackSlash = getDropBoxPathIncldBackSlash();
+        static string getDropBoxPathIncldBackSlash()
+        {
+            if (string.IsNullOrEmpty(DropBoxPathIncldBackSlash))
+            {
+                DropBoxPathIncldBackSlash = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + @"\Dropbox\";
+                DropBoxPathIncldBackSlash = Directory.Exists(DropBoxPathIncldBackSlash) ? DropBoxPathIncldBackSlash : DropBoxPathIncldBackSlash.Replace(@"C:\", @"A:\");
+            }
+            return DropBoxPathIncldBackSlash;
+        }
         internal static string fileFullName(string dbNameIncludeExt)
         {
             if (frm == null) frm = Application.OpenForms["Form1"] as Form1;
@@ -31,6 +43,50 @@ namespace TextForCtext
                 return root + dbNameIncludeExt;
         }
 
+        /// <summary>
+        /// ado.Connection
+        /// </summary>
+        /// <param name="dbNameIncludeExt"></param>
+        /// <param name="cnt"></param>
+        internal static void openDatabase(string dbNameIncludeExt, ref ado.Connection cnt)
+        {
+            string root = getDropBoxPathIncldBackSlash();//DropBoxPathIncldBackSlash;
+            if (!File.Exists(root + dbNameIncludeExt))
+            {
+                root = root.Replace("C:", "A:");
+            }
+            if (!File.Exists(root + dbNameIncludeExt)) { MessageBox.Show(root + dbNameIncludeExt + "not found"); return; }
+            //string conStr = "Provider=Microsoft.ACE.OLEDB.12.0;Data Source = " + root + dbNameIncludeExt;
+            string conStr = "Provider=Microsoft.Jet.OLEDB.4.0;Data Source = " + root + dbNameIncludeExt;
+            try
+            {
+
+                cnt.Open(conStr);
+            }
+            catch (Exception)
+            {
+
+                try
+                {
+                    //conStr = conStr.Replace("Microsoft.ACE.OLEDB.12.0", "Microsoft.Jet.OLEDB.4.0");
+                    conStr = conStr.Replace("Microsoft.Jet.OLEDB.4.0", "Microsoft.ACE.OLEDB.12.0");
+                    cnt.Open(conStr);
+
+                }
+                catch (Exception)
+                {
+
+                    throw;
+                }
+
+
+            }
+        }
+        /// <summary>
+        /// OleDbConnection
+        /// </summary>
+        /// <param name="dbFileFullname"></param>
+        /// <param name="conn"></param>
         private static void openDb(string dbFileFullname, out OleDbConnection conn)
         {
             string connectionString = "Provider=Microsoft.Jet.OLEDB.4.0;Data Source=" + dbFileFullname;
@@ -103,7 +159,7 @@ namespace TextForCtext
                 MessageBox.Show("找不到「查字.mdb」");
                 return;
             }
-            
+
             openDb(f, out OleDbConnection conn);
 
             //20230114 creedit chatGPT大菩薩：新增資料庫資料：
@@ -112,9 +168,9 @@ namespace TextForCtext
             using (OleDbCommand cmd = conn.CreateCommand())
             {
                 int condition = 0;//輸入平抬條件：0=後綴；1=前綴；2=前後之前；3前後之後；4是前+後之詞彙；5非前+後之詞彙；6非後綴之詞彙；7非前綴之詞彙
-                if (termtoChk.IndexOf("|"+Environment.NewLine)>-1)
+                if (termtoChk.IndexOf("|" + Environment.NewLine) > -1)
                 {
-                    termtoChk = termtoChk.Replace("|" + Environment.NewLine,"");
+                    termtoChk = termtoChk.Replace("|" + Environment.NewLine, "");
                     condition = 4;
                 }
                 //cmd.CommandText = "SELECT COUNT(*) FROM 每行字數判斷用 WHERE strcomp(term , @term)=0; " +

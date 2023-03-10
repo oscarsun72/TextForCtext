@@ -10,7 +10,7 @@ Sub 空白的新文件() '20210209
 Dim a As Document, flg As Boolean
 If Documents.Count = 0 Then GoTo a:
 If ActiveDocument.Characters.Count = 1 Then
-    Selection.Paste
+    selection.Paste
 ElseIf ActiveDocument.Characters.Count > 1 Then
     For Each a In Documents
         If a.path = "" Or a.Characters.Count = 1 Then
@@ -24,16 +24,16 @@ ElseIf ActiveDocument.Characters.Count > 1 Then
     If flg = False Then GoTo a
 Else
 a: Documents.Add
-    Selection.Paste
+    selection.Paste
 End If
 End Sub
 
 
 Sub 在本文件中尋找選取字串_迅速() '指定鍵:Alt+Ctrl+Down 2015/11/1
 Static x As String
-With Selection
+With selection
     If .Type = wdSelectionNormal Then
-        x = 文字處理.trimStrForSearch(.text, Selection)
+        x = 文字處理.trimStrForSearch(.text, selection)
         .Copy
         .Collapse wdCollapseEnd
         .Find.ClearAllFuzzyOptions
@@ -127,8 +127,8 @@ If MsgBox("是否要清除符號?", vbQuestion + vbOKCancel) = vbOK Then
 End If
 If dn = "" Then dn = d1.Name
 If Not d1.Name Like dn And Not d1.Name Like dn Then i = 0: dn = d1.Name
-If Selection.start + 1 = ActiveDocument.Content.End Then Selection.HomeKey wdStory, wdMove '如果插入點為文件末時...
-If i = 0 Then i = Selection.start 'ActiveDocument.Range.Start
+If selection.start + 1 = ActiveDocument.Content.End Then selection.HomeKey wdStory, wdMove '如果插入點為文件末時...
+If i = 0 Then i = selection.start 'ActiveDocument.Range.Start
 If d1.Characters.Count >= d2.Characters.Count Then
     j = d1.Characters.Count
     k = d2.Characters.Count
@@ -193,8 +193,8 @@ If MsgBox("是否要清除符號?", vbQuestion + vbOKCancel) = vbOK Then
 End If
 If DwN = "" Then DwN = Dw1.Name
 If Not Dw1.Name Like DwN And Not Dw1.Name Like DwN Then i = 0: DwN = Dw1.Name
-If Dw1.Selection.start + 1 = ActiveDocument.Content.End Then Selection.HomeKey wdStory, wdMove '如果插入點為文件末時...
-If i = 0 Then i = Dw1.Selection.start 'ActiveDocument.Range.Start
+If Dw1.selection.start + 1 = ActiveDocument.Content.End Then selection.HomeKey wdStory, wdMove '如果插入點為文件末時...
+If i = 0 Then i = Dw1.selection.start 'ActiveDocument.Range.Start
 If Dw1.Characters.Count >= Dw2.Characters.Count Then
     j = Dw1.Characters.Count
     k = Dw2.Characters.Count
@@ -258,7 +258,7 @@ End Sub
 Sub 注腳符號() '注釋符號、註釋符號、註腳符號
 Dim i As Integer
 For i = 9312 To 9331
-    With Selection.Range.Find
+    With selection.Range.Find
         .Replacement.Font.Name = "Arial Unicode MS"
         .Execute ChrW(i), , , , , , , wdFindContinue, , ChrW(i), wdReplaceAll
     End With
@@ -275,14 +275,14 @@ End Sub
 
 Sub 貼上引文() '將已複製到剪貼簿的內容貼成引文
 Dim s As Long, e As Long, r  As Range
-If Selection.Type = wdSelectionNormal And Right(Selection, 1) Like Chr(13) Then _
-            Selection.MoveLeft wdCharacter, 1, wdExtend '不要包含分段符號!
-If Selection.Style <> "引文" Then Selection.Style = "引文" '如果不是引文樣式時,則改成引文樣式
-s = Selection.start '記下起始位置
-Selection.PasteSpecial , , , , wdPasteText '貼上純文字
-e = Selection.End '記下貼上後的結束位置
-Selection.SetRange s, e
-Set r = Selection.Range
+If selection.Type = wdSelectionNormal And Right(selection, 1) Like Chr(13) Then _
+            selection.MoveLeft wdCharacter, 1, wdExtend '不要包含分段符號!
+If selection.Style <> "引文" Then selection.Style = "引文" '如果不是引文樣式時,則改成引文樣式
+s = selection.start '記下起始位置
+selection.PasteSpecial , , , , wdPasteText '貼上純文字
+e = selection.End '記下貼上後的結束位置
+selection.SetRange s, e
+Set r = selection.Range
 With r
     r.Find.Execute Chr(13), , , , , , , wdFindStop, , Chr(11), wdReplaceAll '將分行符號改成手動分行符號
 End With
@@ -291,13 +291,13 @@ End Sub
 Sub 貼上純文字() 'shift+insert 2016/7/20
 Dim hl, s As Long, r As Range
 On Error GoTo ErrHandler
-hl = Selection.Range.HighlightColorIndex
+hl = selection.Range.HighlightColorIndex
 
-s = Selection.start
-Set r = Selection.Range
+s = selection.start
+Set r = selection.Range
 'Selection.PasteSpecial , , , , wdPasteText '貼上純文字
-Selection.PasteAndFormat (wdFormatPlainText)
-r.SetRange s, Selection.End
+selection.PasteAndFormat (wdFormatPlainText)
+r.SetRange s, selection.End
 If hl <> 9999999 Then r.HighlightColorIndex = hl
 Exit Sub
 ErrHandler:
@@ -311,7 +311,7 @@ End Sub
 Sub 貼上簡化字文本轉正()
 Dim rng As Range, ur As UndoRecord
 SystemSetup.stopUndo ur, "貼上簡化字文本轉正"
-Set rng = Selection.Range
+Set rng = selection.Range
 rng.PasteAndFormat (wdFormatPlainText)
 標點符號置換 rng: 清除半形空格 rng: 半形括號轉全形 rng
 If MsgBox("是否簡轉正？", vbOKCancel) = vbOK Then
@@ -324,7 +324,7 @@ End Sub
 Sub 簡化字文本轉正()
 Dim rng As Range, ur As UndoRecord
 SystemSetup.stopUndo ur, "簡化字文本轉正"
-Set rng = Selection.Range
+Set rng = selection.Range
 標點符號置換 rng: 清除半形空格 rng: 半形括號轉全形 rng
 rng.TCSCConverter wdTCSCConverterDirectionAuto
 SystemSetup.contiUndo ur
@@ -351,7 +351,7 @@ End Function
 
 
 Sub 一字一段()
-With Selection
+With selection
     .HomeKey wdStory
     Do Until .End = .Document.Range.End - 1
         .MoveRight
@@ -381,7 +381,7 @@ End Sub
 Sub 在同目錄下尋找符合關鍵字之文本() '2009/8/4'Alt+shift+F3
 Dim x As String, d As Document, i As Integer
 Set d = ActiveDocument
-x = Selection
+x = selection
 With word.Application.FileSearch
     .NewSearch
     If d.path = "" Then
@@ -443,17 +443,17 @@ End Sub
 
 Sub 開新視窗() '快速鍵:alt+shift+w-原為OLE至備忘欄()指定鍵  '2011/6/23''2012/5/20 2003不能設定Alt+w 原設於"字形轉換_華康儷粗黑"
 Dim l As Long, s As Long, YwdInFootnoteEndnotePane
-    YwdInFootnoteEndnotePane = Selection.Information(wdInFootnoteEndnotePane) '記下開新視窗前註腳窗格狀態
-    l = Selection.End '.Information(wdActiveEndPageNumber)
-    s = Selection.start '記下原位置
+    YwdInFootnoteEndnotePane = selection.Information(wdInFootnoteEndnotePane) '記下開新視窗前註腳窗格狀態
+    l = selection.End '.Information(wdActiveEndPageNumber)
+    s = selection.start '記下原位置
     If CommandBars("web").Visible Then CommandBars("web").Visible = False
     NewWindow
     'ActiveWindow.Document.Range.Characters(l).Select
     If YwdInFootnoteEndnotePane Then '如果在註腳窗格中
         ActiveWindow.View.SplitSpecial = wdPaneFootnotes '2011/8/13
     End If
-    Selection.End = l ' 'Selection.GoTo wdGoToObject, wdGoToAbsolute, l
-    Selection.start = s '到原位置
+    selection.End = l ' 'Selection.GoTo wdGoToObject, wdGoToAbsolute, l
+    selection.start = s '到原位置
 End Sub
 
 Sub 文件引導模式切換() ' Alt+M 2011/6/26
@@ -461,19 +461,19 @@ Sub 文件引導模式切換() ' Alt+M 2011/6/26
 ' 巨集錄製於 2011/6/26，錄製者 Oscar Sun
 '
 Dim s As Long, e As Long, YwdInFootnoteEndnotePane
-YwdInFootnoteEndnotePane = Selection.Information(wdInFootnoteEndnotePane) '記下開新視窗前註腳窗格狀態
+YwdInFootnoteEndnotePane = selection.Information(wdInFootnoteEndnotePane) '記下開新視窗前註腳窗格狀態
 If YwdInFootnoteEndnotePane Then '如果在註腳窗格中
     ActiveWindow.ActivePane.Close '2011/9/24
 End If
-s = Selection.start
-e = Selection.End
+s = selection.start
+e = selection.End
 If ActiveWindow.DocumentMap Then
     ActiveWindow.DocumentMap = False
 ElseIf ActiveWindow.DocumentMap = False Then
     ActiveWindow.DocumentMap = True
 End If
-Selection.start = s
-Selection.End = e
+selection.start = s
+selection.End = e
 End Sub
 
 Sub 目錄字形更正() '2011/8/23'蓋若標題改用非標題大小之字形,會bug
@@ -484,14 +484,14 @@ With ActiveDocument
 ''        .Font.Size>12
 '        .Execute
 '
-    Do Until Selection.End = e - 1
-        Selection.MoveRight
-            If Selection.Next.Font.Size > 12 Then '目錄預設為12字形
-                Selection.MoveRight
-                Do Until Selection.Next.Font.Size = 12
-                    Selection.MoveRight , , wdExtend
+    Do Until selection.End = e - 1
+        selection.MoveRight
+            If selection.Next.Font.Size > 12 Then '目錄預設為12字形
+                selection.MoveRight
+                Do Until selection.Next.Font.Size = 12
+                    selection.MoveRight , , wdExtend
                 Loop
-                If MsgBox("是否要縮小為10號字?", vbQuestion + vbOKCancel) = vbOK Then Selection.Font.Size = 10
+                If MsgBox("是否要縮小為10號字?", vbQuestion + vbOKCancel) = vbOK Then selection.Font.Size = 10
         End If
     Loop
 End With
@@ -502,7 +502,7 @@ Dim h
 h = wdYellow
 '無為0,淡藍為3,.......
 'If h = "" Then h = Selection.Range.HighlightColorIndex
-Do Until Selection.Range.HighlightColorIndex <> h
+Do Until selection.Range.HighlightColorIndex <> h
 
     Exit Do 'Selection.Range.HighlightColorIndex = wdAuto
 Loop
@@ -523,12 +523,12 @@ Sub 在本文件中尋找選取字串() 'Ctrl+Alt+Down 2020/10/4改用 Ctrl+Shift+PageDown
 If ActiveDocument.path <> "" Then If ActiveDocument.Saved = False Then ActiveDocument.Save
 Dim ins(4) As Long, MnText As String, FnText As String, FdText As String, st As Long, ed As Long
 On Error GoTo errHH
-With Selection '快速鍵：Alt+Ctrl+Down
+With selection '快速鍵：Alt+Ctrl+Down
 'If Not .Text Like "" Then '快速鍵：Alt+Ctrl+Down
 If .Type = wdSelectionIP Then MsgBox "請選取想要尋找之文字", vbExclamation: Exit Sub
 If .Type = wdSelectionNormal Then ' <> wdNoSelection OR wdSelectionIP Then '不為插入點
 '    If InStr(ActiveDocument.Content, .Text) = InStrRev(ActiveDocument.Content, .Text) Then MsgBox "本文只有此處!", vbInformation: Exit Sub
-    FdText = 文字處理.trimStrForSearch(.text, Selection)
+    FdText = 文字處理.trimStrForSearch(.text, selection)
     st = .start: ed = .End
     .Collapse wdCollapseEnd
     MnText = .Document.StoryRanges(wdMainTextStory) '變數化處理較快2003/4/8
@@ -570,7 +570,7 @@ If .Type = wdSelectionNormal Then ' <> wdNoSelection OR wdSelectionIP Then '不為
                     Else
                         .ActivePane.Next.Activate
                     End If
-                    With .ActivePane.Selection.Find
+                    With .ActivePane.selection.Find
                         .text = FdText
 '                        .Forward = True
                         .Wrap = wdFindContinue '要有這行才能正確尋找
@@ -614,7 +614,7 @@ Exit Sub
 errHH:
 Select Case Err.Number
     Case 7 '記憶體不足
-        ActiveDocument.ActiveWindow.Selection.Find.Execute Selection.text
+        ActiveDocument.ActiveWindow.selection.Find.Execute selection.text
     Case Else
         MsgBox Err.Number & Err.Description
         Resume
@@ -626,7 +626,7 @@ Sub 書籤_以選取文字作為書籤() 'ALT+SHIFT+B
 
 ' 巨集錄製於 2015/9/20，錄製者 王觀如
     With ActiveDocument.bookmarks
-        .Add Range:=Selection.Range, Name:=Replace(Selection.text, Chr(13), "")
+        .Add Range:=selection.Range, Name:=Replace(selection.text, Chr(13), "")
         .DefaultSorting = wdSortByName
         .ShowHidden = False
     End With
@@ -683,17 +683,17 @@ Sub 小小輸入法詞庫cj5_ftzk刪存至cj5_ftzk_other()
 Dim rng As Range, p As Paragraph, pc As Integer, pSelRng As Range, x As String
 If ActiveDocument.Name <> "cj5-ftzk.txt" Then Exit Sub
 word.Application.ScreenUpdating = False
-If Selection.Type = wdSelectionIP Then
-    If Not Selection.Range.TextRetrievalMode.IncludeHiddenText Then
-        Selection.Paragraphs(1).Range.Select
+If selection.Type = wdSelectionIP Then
+    If Not selection.Range.TextRetrievalMode.IncludeHiddenText Then
+        selection.Paragraphs(1).Range.Select
     End If
 Else
     ActiveWindow.ActivePane.View.ShowAll = Not ActiveWindow.ActivePane.View. _
         ShowAll
 End If
-If Not Selection.Range.TextRetrievalMode.IncludeHiddenText Then
-    x = Selection.text
-    Selection.Delete
+If Not selection.Range.TextRetrievalMode.IncludeHiddenText Then
+    x = selection.text
+    selection.Delete
     'Selection.Cut
         GoSub subP
 '        ActiveWindow.ActivePane.View.ShowAll = Not ActiveWindow.ActivePane.View. _
@@ -701,7 +701,7 @@ If Not Selection.Range.TextRetrievalMode.IncludeHiddenText Then
         word.Application.ScreenUpdating = True
         Exit Sub
 Else
-    Set pSelRng = Selection.Range
+    Set pSelRng = selection.Range
     For Each p In pSelRng.Paragraphs
         If Not p.Range.Font.Hidden Then 'prepare to delete
             'p.Range.Cut
@@ -804,7 +804,7 @@ Sub DocBackgroundFillColor() '頁面色彩
 End Sub
 
 Sub 內文前空二格() 'Alt+n
-With Selection.ParagraphFormat
+With selection.ParagraphFormat
     .Style = "內文"
     .CharacterUnitFirstLineIndent = 2
 End With
@@ -868,7 +868,7 @@ searchedTerm = Array("易", "卦", "爻", "周易", "易經", "系辭", "繫辭", "擊辭", "
                 If rng.Find.Execute(VBA.Left(similarCompare.item(2), 255), , , , , , , wdFindContinue) Then
                     If VBA.Len(similarCompare.item(2)) > 255 Then
                         rng.Paragraphs(1).Range.Select                  '標示相似文本
-                        d.ActiveWindow.ScrollIntoView Selection.Characters(1), True
+                        d.ActiveWindow.ScrollIntoView selection.Characters(1), True
                     Else
                         rng.Select
                     End If
@@ -901,18 +901,18 @@ searchedTerm = Array("易", "卦", "爻", "周易", "易經", "系辭", "繫辭", "擊辭", "
         End If
         
         If flgPaste Then
-            Selection.EndKey wdStory
-            Selection.InsertParagraphAfter
+            selection.EndKey wdStory
+            selection.InsertParagraphAfter
 '            Selection.InsertParagraphAfter
-            Selection.Collapse wdCollapseEnd
-            Selection.TypeText clipBTxt
+            selection.Collapse wdCollapseEnd
+            selection.TypeText clipBTxt
             'SystemSetup.SetClipboard clipBTxt
             On Error GoTo eh
             'Docs.貼上純文字
             
-            Selection.InsertParagraphAfter: Selection.InsertParagraphAfter: Selection.InsertParagraphAfter
-            Selection.Collapse wdCollapseEnd
-            ActiveWindow.ScrollIntoView Selection
+            selection.InsertParagraphAfter: selection.InsertParagraphAfter: selection.InsertParagraphAfter
+            selection.Collapse wdCollapseEnd
+            ActiveWindow.ScrollIntoView selection
         End If
     Else '如果文件中已有文本，則顯示其所在處
         Dim sx As String
@@ -955,9 +955,16 @@ If flgPaste Then
     Next e
     GoSub refres
     SystemSetup.playSound 1.921
+    Rem https://en.wikipedia.org/wiki/CJK_Unified_Ideographs
+    Rem 兼容字
+    'https://en.wikipedia.org/wiki/CJK_Compatibility_Ideographs
+'    Docs.ChangeFontOfSurrogatePairs_Range "HanaMinA", d.Range(selection.Paragraphs(1).Range.start, d.Range.End), CJK_Compatibility_Ideographs
+    'https://en.wikipedia.org/wiki/CJK_Compatibility_Ideographs_Supplement
+    Docs.ChangeFontOfSurrogatePairs_Range "HanaMinA", d.Range(selection.Paragraphs(1).Range.start, d.Range.End), CJK_Compatibility_Ideographs_Supplement
+    Rem 擴充字集
     'HanaMinB還不支援G以後的
-    Docs.ChangeFontOfSurrogatePairs_Range "HanaMinB", d.Range(Selection.Paragraphs(1).Range.start, d.Range.End), CJK_Unified_Ideographs_Extension_E
-    Docs.ChangeFontOfSurrogatePairs_Range "HanaMinB", d.Range(Selection.Paragraphs(1).Range.start, d.Range.End), CJK_Unified_Ideographs_Extension_F
+    Docs.ChangeFontOfSurrogatePairs_Range "HanaMinB", d.Range(selection.Paragraphs(1).Range.start, d.Range.End), CJK_Unified_Ideographs_Extension_E
+    Docs.ChangeFontOfSurrogatePairs_Range "HanaMinB", d.Range(selection.Paragraphs(1).Range.start, d.Range.End), CJK_Unified_Ideographs_Extension_F
 Else '文件內已有內容時
     GoSub refres
     SystemSetup.playSound 1.294
@@ -988,7 +995,7 @@ refres:
     End If
     rng.Select
 '    word.Application.ScreenRefresh
-    ActiveWindow.ScrollIntoView Selection.Characters(1) ', False
+    ActiveWindow.ScrollIntoView selection.Characters(1) ', False
 Return
 
 eh:
@@ -1079,7 +1086,7 @@ For pi = pi To pc
             Set rng2 = d2.Range
             rng2.Find.Execute x
             rng2.Select
-            If d2.ActiveWindow.Selection.Range.HighlightColorIndex = 0 Then
+            If d2.ActiveWindow.selection.Range.HighlightColorIndex = 0 Then
                 SystemSetup.playSound 2
                 Exit Sub
             End If
@@ -1105,8 +1112,8 @@ End Sub
 Sub 插入超連結_文件中的位置_標題() 'Alt+P 原是「引詩」樣式'2021/11/27
 Dim d As Document, title As String, p As Paragraph, pTxt As String, subAddrs As String, flg As Boolean
 Set d = ActiveDocument
-title = Selection.text
-title = 文字處理.trimStrForSearch(title, Selection)
+title = selection.text
+title = 文字處理.trimStrForSearch(title, selection)
 For Each p In d.Paragraphs
     If Left(p.Style.NameLocal, 2) = "標題" Then
         pTxt = p.Range.text
@@ -1128,7 +1135,7 @@ Next p
 '    'ChangeFileOpenDirectory d.path & "\"  ''userProfilePath & "Dropbox\"
 '
 If flg Then
-    d.Hyperlinks.Add Anchor:=Selection.Range, Address:="", _
+    d.Hyperlinks.Add Anchor:=selection.Range, Address:="", _
         SubAddress:=subAddrs, ScreenTip:="", TextToDisplay:=title
 Else
     MsgBox "請手動插入！", vbExclamation
@@ -1201,7 +1208,7 @@ Dim x As String, result As String
 On Error GoTo Err1
 x = SystemSetup.GetClipboard
 x = Replace(x, Chr(0), "")
-If x = "" Then x = Selection
+If x = "" Then x = selection
 result = SeleniumOP.grabGjCoolPunctResult(x)
 If result = "" Or result = x Then
     DoEvents
@@ -1374,10 +1381,20 @@ Sub ChangeFontOfSurrogatePairs_Range(fontName As String, rngtoChange As Range, O
                     ' Check if the combined character is in CJK extension B or later
                     'If AscW(Left(c, 1)) >= &HD840 Then
                     If AscW(Left(c, 1)) >= SurrogateCodePoint.HighStart Then '前導代理 (lead surrogates)，介於 D800 至 DBFF 之間，第二個被稱為 後尾代理 (trail surrogates)，介於 DC00 至 DFFF 之間
-                        Dim change As Boolean
+                        Dim change As Boolean, isCjkResult As Collection
                         change = True
 '                        rng.Select
                         Select Case whatCJKBlock
+                            Case CJKBlockName.CJK_Compatibility_Ideographs
+                                 Set isCjkResult = IsCJK(c)
+                                 If isCjkResult.item(1) Then
+                                    If isCjkResult.item(2) <> CJKBlockName.CJK_Compatibility_Ideographs Then change = False
+                                 End If
+                            Case CJKBlockName.CJK_Compatibility_Ideographs_Supplement
+                                 Set isCjkResult = IsCJK(c)
+                                 If isCjkResult.item(1) Then
+                                    If isCjkResult.item(2) <> CJKBlockName.CJK_Compatibility_Ideographs_Supplement Then change = False
+                                 End If
                             Case CJKBlockName.CJK_Unified_Ideographs_Extension_B
                                 change = isCJK_Ext(c, CJK_Unified_Ideographs_Extension_B)
                             Case CJKBlockName.CJK_Unified_Ideographs_Extension_C
@@ -1419,7 +1436,7 @@ End Sub
 
 Sub ChangeCharacterFontNameAccordingSelection()
 Dim fontName As String, fontNameFarEast As String
-With Selection
+With selection
     fontName = .Font.Name
     fontNameFarEast = .Font.NameFarEast
     ChangeCharacterFontName .text, fontName, .Document, fontNameFarEast

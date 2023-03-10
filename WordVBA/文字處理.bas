@@ -1801,7 +1801,7 @@ For j = u To 0 Step -1 '°}¦C±Æ§Ç'2010/10/29
                 '.Range.Paragraphs(1).Range.Font.Bold = True
             Else
                 .Range.InsertParagraphAfter
-                .ActiveWindow.Selection.Range.Collapse Direction:=wdCollapseEnd
+                .ActiveWindow.selection.Range.Collapse Direction:=wdCollapseEnd
                 .Range.InsertAfter "¦rÀW = " & j & "¦¸¡G¡]" & Len(Replace(Xsort(j), "¡B", "")) & "¦r¡^"
                 .Range.Paragraphs(.Paragraphs.Count).Range.Font.Size = 12
                 '.Range.Paragraphs(.Paragraphs.Count).Range.Bold = True
@@ -1809,7 +1809,7 @@ For j = u To 0 Step -1 '°}¦C±Æ§Ç'2010/10/29
                 .Range.Paragraphs(.Paragraphs.Count).Range.Font.NameAscii = "Times New Roman"
             End If
             .Range.InsertParagraphAfter
-            .ActiveWindow.Selection.Range.Collapse Direction:=wdCollapseEnd
+            .ActiveWindow.selection.Range.Collapse Direction:=wdCollapseEnd
             .Range.Paragraphs(.Paragraphs.Count).Range.Font.Size = 12
 '            .Range.Paragraphs(.Paragraphs.Count).Range.Bold = False
             .Range.InsertAfter Replace(Xsort(j), "¡B", Chr(9), 1, 1) 'chr(9)¬°©w¦ì¦r¤¸(TabÁä­È)
@@ -1911,7 +1911,7 @@ Rem 20230128 ¬Ñ¥f¦~ªì¤C ®]¦u¯u¡ÑchatGPT¤jµÐÂÄ¡GVBA Overload Functionality¡G
 'VBA (Visual Basic for Applications) ¬O¤@ºØ·L³nªºµ{¦¡»y¨¥¡A¥D­n¥Î©ó¦Û°Ê¤Æ Microsoft Office À³¥Îµ{¦¡¤¤¡CVBA ¤£¤ä´©¨ç¦¡ªº¦h¸ü©M­«¸ü¡C³o·N¨ýµÛ¡A±z¤£¯à¦b VBA ¤¤©w¸q¨ã¦³¬Û¦P¦WºÙ¦ý°Ñ¼Æ¤£¦Pªº¦h­Ó¨ç¦¡¡C
 
 Dim ayToTrim As Variant, a As Variant
-On Error GoTo eH
+On Error GoTo eh
 ayToTrim = Array(Chr(13), Chr(9), Chr(10), Chr(11), Chr(13) & Chr(7), Chr(13) & Chr(10))
 x = VBA.Trim(x)
 For Each a In ayToTrim
@@ -1925,7 +1925,7 @@ For Each a In ayToTrim
 Next a
 trimStrForSearch_PlainText = x
 Exit Function
-eH:
+eh:
 Select Case Err.Number
     Case Else
         MsgBox Err.Number & Err.Description
@@ -1933,10 +1933,10 @@ Select Case Err.Number
 End Select
 End Function
 
-Function trimStrForSearch(x As String, sl As word.Selection) As String
+Function trimStrForSearch(x As String, sl As word.selection) As String
 'https://docs.microsoft.com/zh-tw/dotnet/visual-basic/programming-guide/language-features/procedures/passing-arguments-by-value-and-by-reference
 Dim ayToTrim As Variant, a As Variant, rng As Range, slTxtR As String
-On Error GoTo eH
+On Error GoTo eh
 slTxtR = sl.Characters(sl.Characters.Count)
 ayToTrim = Array(Chr(13), Chr(9), Chr(10), Chr(11), Chr(13) & Chr(7), Chr(13) & Chr(10))
 x = VBA.Trim(x)
@@ -1959,7 +1959,7 @@ If sl.Type <> wdSelectionIP Then
     End If
 End If
 Exit Function
-eH:
+eh:
 Select Case Err.Number
     Case Else
         MsgBox Err.Number & Err.Description
@@ -1984,7 +1984,7 @@ End If
 End Function
 Function isª`­µ²Å¸¹(ByVal a As String, Optional rng As Variant) As Boolean
 Dim f As String
-On Error GoTo eH
+On Error GoTo eh
 If Len(a) > 1 Then Exit Function
 f = "£t£u£v£w£x£y£z£{£|£}£~£¡£¢£££¤£¥£¦£§£¨£©£ª£¸£¹£º£«£¬£­£®£¯£°£±£²£³£´£µ£¶£·£½  £¾  £¿  £»"
 If a = ChrW(20008) Then
@@ -2005,7 +2005,7 @@ Else
     If InStr(f, a) Then isª`­µ²Å¸¹ = True
 End If
 Exit Function
-eH:
+eh:
 Select Case Err.Number
     Case 424 '¦¹³B»Ý­nª«¥ó
         Set rng = Nothing
@@ -2046,7 +2046,7 @@ Dim WD As Range 'As Range 'Wordsª«¥ó§Yªí¤@­ÓRangeª«¥ó,¨£½u¤W»¡©ú!
 'Dim i As Long ' Integer
 '­n¥ý°õ¦æ¥þ§ÎÂà¥b§Î,³o¼Ëwords¤~¯à¥¿½T§PÂ_¬°¼Æ¦r
 ¥þ§Î¼Æ¦rÂà´«¦¨¥b§Î¼Æ¦r
-With Selection '­ì¥H¾ã¥÷¤å¥ó(ActiveDocument),¤µ¦ý¥H¿ï¨ú½d³ò¾ã²z,¦ý¦]§ó§ï­È¦Ó¼vÅT,§@¼o!
+With selection '­ì¥H¾ã¥÷¤å¥ó(ActiveDocument),¤µ¦ý¥H¿ï¨ú½d³ò¾ã²z,¦ý¦]§ó§ï­È¦Ó¼vÅT,§@¼o!
     If .Type = wdSelectionIP Then .Document.Select '¦pªG¨S¦³¿ï¨ú½d³ò(¬°´¡¤JÂI)«h³B²z¾ã¥÷¤å¥ó
     If .Document.path = "" Then
         For Each WD In .words
@@ -2101,13 +2101,13 @@ End With
 End Sub
 
 Sub ¥þ§ÎÂà¥b§Î()
-With Selection
+With selection
     .Range = StrConv(.Range, vbNarrow)
 End With
 End Sub
 Sub ¶ê¬A¸¹§ï½g¦W¸¹()
-If Selection.Type = wdSelectionIP Then Selection.HomeKey wdStory: Selection.EndKey wdStory, wdExtend
-Selection.text = Replace(Replace(Selection.text, "¡]", "¡q"), "¡^", "¡r")
+If selection.Type = wdSelectionIP Then selection.HomeKey wdStory: selection.EndKey wdStory, wdExtend
+selection.text = Replace(Replace(selection.text, "¡]", "¡q"), "¡^", "¡r")
 End Sub
 
 
@@ -2121,8 +2121,8 @@ Register_Event_Handler
 '    Selection.EndKey Unit:=wdLine
 '    Selection.MoveLeft Unit:=wdCharacter, Count:=1
 '    Selection.MoveLeft Unit:=wdCharacter, Count:=2, Extend:=wdExtend
-If Selection.Type = wdSelectionIP Then Exit Sub
-    With Selection.Font.Shading
+If selection.Type = wdSelectionIP Then Exit Sub
+    With selection.Font.Shading
         If InStr(ActiveDocument.Name, "±Æ¦L") Then
             .Parent.Color = wdColorRed
             .Texture = wdTextureNone
@@ -2146,7 +2146,7 @@ If Selection.Type = wdSelectionIP Then Exit Sub
         Dim e
         Set e = Excel.Application
         Dim r As Long, i As Byte
-        With Selection
+        With selection
             Set e = GetObject(, "Excel.application")
             AppActivate "microsoft excel"
             With e
@@ -2161,12 +2161,12 @@ If Selection.Type = wdSelectionIP Then Exit Sub
                 .Cells(r, 1).Activate
                 DoEvents
                 .activesheet.Paste
-                .Cells(r, 2).Value = Selection
+                .Cells(r, 2).Value = selection
                 .Cells(r, 2).Font.Color = wdColorRed
-                If Not Selection Like "*[óòñõôöø÷ùûúüýþ¡¸¡¹¡U¡@]*" Then
-                    .Cells(r, 5) = Len(Selection)
-                ElseIf Selection Like "*¡@*" Then
-                    .Cells(r, 5) = Len(Selection) - 1
+                If Not selection Like "*[óòñõôöø÷ùûúüýþ¡¸¡¹¡U¡@]*" Then
+                    .Cells(r, 5) = Len(selection)
+                ElseIf selection Like "*¡@*" Then
+                    .Cells(r, 5) = Len(selection) - 1
                 Else
                     .Cells(r, 5) = 1
                 End If
@@ -2181,12 +2181,12 @@ If Selection.Type = wdSelectionIP Then Exit Sub
 End Sub
 
 Sub µù¸}½s¸¹«e«á¥[¤è¬A¸¹()
-With Selection
+With selection
     Do
 
-        Selection.GoTo What:=wdGoToFootnote, Which:=wdGoToNext, Count:=1, Name:=""
+        selection.GoTo What:=wdGoToFootnote, Which:=wdGoToNext, Count:=1, Name:=""
 '        Selection.GoTo What:=wdGoToFootnote, Which:=wdGoToNext, Count:=1, Name:=""
-        Selection.Find.ClearFormatting
+        selection.Find.ClearFormatting
 '        With Selection.Find
 '            .Text = ""
 '            .Replacement.Text = ""
@@ -2213,9 +2213,9 @@ With Selection
 '        Selection.Delete Unit:=wdCharacter, Count:=1
 '        Selection.TypeText Text:="¡n"
 '        Selection.MoveLeft Unit:=wdCharacter, Count:=1
-        Selection.MoveRight Unit:=wdCharacter, Count:=2
+        selection.MoveRight Unit:=wdCharacter, Count:=2
         'Selection.TypeBackspace
-        Selection.TypeText text:="]"
+        selection.TypeText text:="]"
         'Selection.MoveRight Unit:=wdCharacter, Count:=1
     Loop 'While .Find.Execute()
 End With
@@ -2325,7 +2325,7 @@ For j = u To 0 Step -1 '°}¦C±Æ§Ç'2010/10/29
                 '.Range.Paragraphs(1).Range.Font.Bold = True
             Else
                 .Range.InsertParagraphAfter
-                .ActiveWindow.Selection.Range.Collapse Direction:=wdCollapseEnd
+                .ActiveWindow.selection.Range.Collapse Direction:=wdCollapseEnd
                 .Range.InsertAfter "¦rÀW = " & j & "¦¸¡G¡]" & Len(Replace(Xsort(j), "¡B", "")) & "¦r¡^"
                 .Range.Paragraphs(.Paragraphs.Count).Range.Font.Size = 12
                 '.Range.Paragraphs(.Paragraphs.Count).Range.Bold = True
@@ -2333,7 +2333,7 @@ For j = u To 0 Step -1 '°}¦C±Æ§Ç'2010/10/29
                 .Range.Paragraphs(.Paragraphs.Count).Range.Font.NameAscii = "Times New Roman"
             End If
             .Range.InsertParagraphAfter
-            .ActiveWindow.Selection.Range.Collapse Direction:=wdCollapseEnd
+            .ActiveWindow.selection.Range.Collapse Direction:=wdCollapseEnd
             .Range.Paragraphs(.Paragraphs.Count).Range.Font.Size = 12
 '            .Range.Paragraphs(.Paragraphs.Count).Range.Bold = False
             .Range.InsertAfter Replace(Xsort(j), "¡B", Chr(9), 1, 1) 'chr(9)¬°©w¦ì¦r¤¸(TabÁä­È)
@@ -2546,7 +2546,7 @@ For j = u To 0 Step -1 '°}¦C±Æ§Ç'2010/10/29
                 '.Range.Paragraphs(1).Range.Font.Bold = True
             Else
                 .Range.InsertParagraphAfter
-                .ActiveWindow.Selection.Range.Collapse Direction:=wdCollapseEnd
+                .ActiveWindow.selection.Range.Collapse Direction:=wdCollapseEnd
                 .Range.InsertAfter "µüÀW = " & j & "¦¸¡G¡]" & Len(Replace(Xsort(j), "¡B", "")) / ln & "­Ó¡^"
                 .Range.Paragraphs(.Paragraphs.Count).Range.Font.Size = 12
                 '.Range.Paragraphs(.Paragraphs.Count).Range.Bold = True
@@ -2554,7 +2554,7 @@ For j = u To 0 Step -1 '°}¦C±Æ§Ç'2010/10/29
                 .Range.Paragraphs(.Paragraphs.Count).Range.Font.NameAscii = "Times New Roman"
             End If
             .Range.InsertParagraphAfter
-            .ActiveWindow.Selection.Range.Collapse Direction:=wdCollapseEnd
+            .ActiveWindow.selection.Range.Collapse Direction:=wdCollapseEnd
             .Range.Paragraphs(.Paragraphs.Count).Range.Font.Size = 12
 '            .Range.Paragraphs(.Paragraphs.Count).Range.Bold = False
             .Range.InsertAfter Replace(Xsort(j), "¡B", Chr(9), 1, 1) 'chr(9)¬°©w¦ì¦r¤¸(TabÁä­È)
@@ -2636,10 +2636,10 @@ End Sub
 Sub ®Ñ¦W¸¹½g¦W¸¹ÀË¬d()
 Dim s As Long, rng As Range, e, trm As String, ans
 Static x() As String, i As Integer
-On Error GoTo eH
+On Error GoTo eh
 Do
-    Selection.Find.Execute "¡q", , , , , , True, wdFindAsk
-    Set rng = Selection.Range
+    selection.Find.Execute "¡q", , , , , , True, wdFindAsk
+    Set rng = selection.Range
     rng.MoveEndUntil "¡r"
     trm = Mid(rng, 2)
     
@@ -2658,7 +2658,7 @@ Do
 1
 Loop
 Exit Sub
-eH:
+eh:
 Select Case Err.Number
     Case 92 '¨S¦³³]©w For °j°éªºªì©l­È °}¦C©|¥¼¦³­È
         GoTo 2
@@ -2718,7 +2718,7 @@ chng:
 Return
 End Sub
 Sub ¤¤°ê­õ¾Ç®Ñ¹q¤l¤Æ­p¹º_ªí®æÂà¤å¦r(ByRef r As Range)
-On Error GoTo eH
+On Error GoTo eh
 Dim lngTemp As Long '¦]¬°»~«ö¨ì°lÂÜ­×­q¡A¤~·|¤Þµo°T®§´£¥Ü§R°£Àx¦s®æ¤£·|¦³¼ÐÃÑ
 'Dim d As Document
 Dim tb As Table, c As Cell ', ci As Long
@@ -2733,7 +2733,7 @@ If r.Tables.Count > 0 Then
 End If
 'word.Application.DisplayAlerts = lngTemp
 Exit Sub
-eH:
+eh:
 Select Case Err.Number
     Case 5992 'µLªk­Ó§O¦s¨ú¦¹¶°¦X¤¤ªº¦UÄæ¡A¦]¬°ªí®æ¤¤¦³²V¦XªºÀx¦s®æ¼e«×¡C
         For Each c In tb.Range.Cells
@@ -2755,7 +2755,7 @@ End Sub
 
 Sub ¤¤°ê­õ¾Ç®Ñ¹q¤l¤Æ­p¹º_µù¤åÅÜ¤p¥¿¤å¦^¤j()
 Dim slRng As Range, a
-Set slRng = Selection.Range
+Set slRng = selection.Range
 ¤¤°ê­õ¾Ç®Ñ¹q¤l¤Æ­p¹º_ªí®æÂà¤å¦r slRng
 For Each a In slRng.Characters
     Select Case a.Font.Color
@@ -2771,9 +2771,9 @@ Dim slRng As Range, a, ur As UndoRecord
 'Set ur = SystemSetup.stopUndo("¤¤°ê­õ¾Ç®Ñ¹q¤l¤Æ­p¹º_¥h±¼µù¤å«O¯d¥¿¤å")
 SystemSetup.stopUndo ur, "¤¤°ê­õ¾Ç®Ñ¹q¤l¤Æ­p¹º_¥h±¼µù¤å«O¯d¥¿¤å"
 Docs.ªÅ¥Õªº·s¤å¥ó
-If ActiveDocument.Characters.Count = 1 Then Selection.Paste
-If Selection.Type = wdSelectionIP Then ActiveDocument.Select
-Set slRng = Selection.Range
+If ActiveDocument.Characters.Count = 1 Then selection.Paste
+If selection.Type = wdSelectionIP Then ActiveDocument.Select
+Set slRng = selection.Range
 ¤¤°ê­õ¾Ç®Ñ¹q¤l¤Æ­p¹º_ªí®æÂà¤å¦r slRng
 For Each a In slRng.Characters
     Select Case a.Font.Color
@@ -2793,8 +2793,8 @@ Dim slRng As Range, a, flg As Boolean, ur As UndoRecord 'Alt+1
 'Set ur = SystemSetup.stopUndo("¤¤°ê­õ¾Ç®Ñ¹q¤l¤Æ­p¹º_µù¤å«e«á¥[¬A©·")
 SystemSetup.stopUndo ur, "¤¤°ê­õ¾Ç®Ñ¹q¤l¤Æ­p¹º_µù¤å«e«á¥[¬A©·"
 Docs.ªÅ¥Õªº·s¤å¥ó
-If Selection.Type = wdSelectionIP Then ActiveDocument.Select
-Set slRng = Selection.Range
+If selection.Type = wdSelectionIP Then ActiveDocument.Select
+Set slRng = selection.Range
 ¤¤°ê­õ¾Ç®Ñ¹q¤l¤Æ­p¹º_ªí®æÂà¤å¦r slRng
 For Each a In slRng.Document.Paragraphs 'forº~Äy¹q¤l¤åÄm¸ê®Æ®w
     If VBA.Left(a.Range, 3) = "[²¨]" Then
@@ -2803,17 +2803,17 @@ For Each a In slRng.Document.Paragraphs 'forº~Äy¹q¤l¤åÄm¸ê®Æ®w
         slRng.Font.Size = 7.5
     End If
 Next a
-If Selection.Type = wdSelectionIP Then ActiveDocument.Select
-Set slRng = Selection.Range
+If selection.Type = wdSelectionIP Then ActiveDocument.Select
+Set slRng = selection.Range
 For Each a In slRng.Characters
     Select Case a.Font.Color
         Case 34816, 8912896, 15776152 '34816:ºñ¦â¤pª`
 p:          If flg = False Then
                 a.Select
-                Selection.Range.InsertBefore "¡]"
-                Selection.Range.SetRange Selection.start, Selection.start + 1
-                Selection.Range.Font.Size = a.Characters(2).Font.Size
-                Selection.Range.Font.Color = a.Characters(2).Font.Color
+                selection.Range.InsertBefore "¡]"
+                selection.Range.SetRange selection.start, selection.start + 1
+                selection.Range.Font.Size = a.Characters(2).Font.Size
+                selection.Range.Font.Color = a.Characters(2).Font.Color
 '                a.Font.Size = a.Next.Font.Size
 '                a.Font.Color = a.Next.Font.Color
                 flg = True
@@ -2845,7 +2845,7 @@ b:
                 Else
                     a.Previous.Select
                 End If
-                Selection.Range.InsertAfter "¡^"
+                selection.Range.InsertAfter "¡^"
                 flg = False
             End If
         Case -16777216 'black'º~Äy¹q¤l¤åÄm¸ê®Æ®w
@@ -2864,11 +2864,11 @@ Next a
 slRng.Find.Execute "¡]¡]", True, , , , , , , , "¡]", wdReplaceAll
 slRng.Find.Execute "¡^¡^", True, , , , , , , , "¡^", wdReplaceAll
 Beep
-Selection.EndKey wdStory
+selection.EndKey wdStory
 Do
-   Selection.MoveLeft
-   If Selection = Chr(13) Then Selection.Delete
-Loop While Selection = Chr(13)
+   selection.MoveLeft
+   If selection = Chr(13) Then selection.Delete
+Loop While selection = Chr(13)
 'MsgBox "done!", vbInformation
 SystemSetup.contiUndo ur
 End Sub
@@ -2908,7 +2908,7 @@ For Each a In rng.Characters
     End If
 Next a
 rng.Cut
-On Error GoTo eH:
+On Error GoTo eh:
 rng.PasteAndFormat wdFormatPlainText
 rng.Find.ClearFormatting
 For i = 0 To UBound(rp)
@@ -2926,7 +2926,7 @@ If Not doNotCloseDoc Then
 End If
 SystemSetup.contiUndo ur
 Exit Sub
-eH:
+eh:
 Select Case Err.Number
     Case 4198 '«ü¥O¥¢±Ñ
         SystemSetup.wait 900
@@ -2967,12 +2967,12 @@ Beep
 End Sub
 Sub ¸Ö¥y¤À¦æ()
 Dim slRng As Range, a
-Set slRng = Selection.Range
+Set slRng = selection.Range
 For Each a In slRng.Characters
     If a Like "[¡C¡A¡F¡H¡I¡u¡v¡y¡z]" Then
         a.Select
-        Selection.move
-        Selection.TypeText Chr(11)
+        selection.move
+        selection.TypeText Chr(11)
     End If
 Next a
 End Sub
@@ -2989,8 +2989,8 @@ With rng.Find
         If InStr(rng.Characters(rng.Characters.Count).Next.Style, "®Õ®×") _
             Or InStr(rng.Characters(1).Previous.Style, "®Õ®×") Then
             rng.Select
-            Selection.Delete
-            rng.SetRange Selection.start, e
+            selection.Delete
+            rng.SetRange selection.start, e
         End If
     Loop While .Execute(, , , , , , , wdFindStop)  ', , "" ', wdReplaceAll
 End With
@@ -3021,22 +3021,22 @@ Dim rng As Range, x, rst As New ADODB.Recordset, st As WdSelectionType, words As
 Dim cnt As New ADODB.Connection, id As Long, sty As word.Style, url As String
 Dim frmDict As New Form_DictsURL, lnks As New Links, db As New dBase ', frm As New MSForms.DataObject
 Static cntStr As String, chromePath As String
-st = Selection.Type
+st = selection.Type
 If st = wdSelectionIP Then
-    If Selection.start = 0 Then Exit Sub
-    x = Selection.Previous.Characters(Selection.Previous.Characters.Count).text
+    If selection.start = 0 Then Exit Sub
+    x = selection.Previous.Characters(selection.Previous.Characters.Count).text
     If InStr("¡C¡A¡F¡u¡v¡y¡z¡q¡r¡m¡n¡H.,;""?¡Ð-¢w¢w--¡]¡^()¡i¡j¡e¡f<>[]¡K! ¡@¡I", x) Then Exit Sub
 '    Selection.Previous.Copy
 Else
-    x = trimStrForSearch(VBA.CStr(Selection.text), Selection)
+    x = trimStrForSearch(VBA.CStr(selection.text), selection)
     'Selection.Copy
-    SystemSetup.ClipboardPutIn "=" & Selection.text
+    SystemSetup.ClipboardPutIn "=" & selection.text
 End If
     If ¤å¦r³B²z.isSymbol(CStr(x)) Or ¤å¦r³B²z.isª`­µ²Å¸¹(CStr(x)) Or ¤å¦r³B²z.isLetter(CStr(x)) Or ¤å¦r³B²z.isNum(CStr(x)) Then Exit Sub
-Set rng = Selection.Range
+Set rng = selection.Range
 words = x
 db.setWordControlValue (words)
-On Error GoTo eH
+On Error GoTo eh
 Dim ur As UndoRecord
 'Set ur = SystemSetup.stopUndo("¥ÍÃø¦r¥[¤W°ê»yÃã¨åª`­µ")
 SystemSetup.stopUndo ur, "¥ÍÃø¦r¥[¤W°ê»yÃã¨åª`­µ"
@@ -3067,7 +3067,7 @@ End If
             GoSub list
         Else
 2
-            If Selection.Characters.Count = 1 Then 'words  ³æ¦r
+            If selection.Characters.Count = 1 Then 'words  ³æ¦r
                 frmDict.getDictVariantsRecS words, rst
                 If rst.RecordCount > 0 Then
                     GoSub list
@@ -3109,7 +3109,7 @@ Exit Sub
 
 notFound:
                 If st = wdSelectionIP Then
-                    Selection.Previous.Copy
+                    selection.Previous.Copy
                     'Selection.Document.FollowHyperlink "https://dict.variants.moe.edu.tw/variants/rbt/query_by_standard_tiles.rbt?command=clear"
                     x = frmDict.add1URLTo1²§Åé¦r¦r¨å(words)
                     If x = "" Then GoTo endS
@@ -3117,7 +3117,7 @@ notFound:
                 Else
                     rst.Close
                     rst.Open "select ª`­µ¤@¦¡,ÄÀ¸q,url,ID,¦h­µ±Æ§Ç from [¡m­«½s°ê»yÃã¨å­×­q¥»¡n Á`ªí] where instr(¦rµü¦W,""" & x & """)>0 order by ¦h­µ±Æ§Ç", cnt, adOpenKeyset, adLockOptimistic
-                    Selection.Copy
+                    selection.Copy
                     If rst.RecordCount > 0 Then
                         Beep
                         'Selection.Document.FollowHyperlink "https://www.zdic.net/hans/" & x, , True
@@ -3183,14 +3183,14 @@ typeTexts:
         x = rst.Fields(2).Value 'URL  'frmDict.get1URLfor1(words)
         If VBA.IsNull(x) Then
                 If st = wdSelectionIP Then
-                    If Selection.Previous.Characters(Selection.Previous.Characters.Count).Hyperlinks.Count > 0 Then
+                    If selection.Previous.Characters(selection.Previous.Characters.Count).Hyperlinks.Count > 0 Then
                         Dim rngW As Range
-                        Set rngW = Selection.Range
-                        rngW.SetRange Selection.Previous.Characters(Selection.Previous.Characters.Count).start, Selection.Previous.Characters(Selection.Previous.Characters.Count).End
+                        Set rngW = selection.Range
+                        rngW.SetRange selection.Previous.Characters(selection.Previous.Characters.Count).start, selection.Previous.Characters(selection.Previous.Characters.Count).End
                         SystemSetup.ClipboardPutIn "=" & rngW.text '"^" & rngW.text & "$" 'version 6's new settings
                         Set rngW = Nothing
                     Else
-                        Set rngW = Selection.Previous.Characters(Selection.Previous.Characters.Count)
+                        Set rngW = selection.Previous.Characters(selection.Previous.Characters.Count)
                         SystemSetup.ClipboardPutIn "=" & rngW.text
                         'Selection.Previous.Characters(Selection.Previous.Characters.Count).Copy
                     End If
@@ -3203,6 +3203,7 @@ typeTexts:
             Dim repeated As Boolean 'ÀË¯Áµ²ªG¤£¤î¤@­Ó®É·|­«½Æ
 rePt:
             If repeated = False Then x = SeleniumOP.grabDictRevisedUrl_OnlyOneResult(words) '¦¹ªk¥u¾A¥Î©ó¶È1µ§¸ê®Æ®É,¨S¦³©Î¦h©ó1µ§«hªð¦^""ªÅ¦r¦ê
+            rng.Document.ActiveWindow.Application.Activate
             If rst.RecordCount = 1 Then '°ê»yÃã¨å¸ê®Æ®w¸Ì¥u¦³1µ§§k¦X¸ê®Æ
                 If x = "" Then 'µ²ªG¤£¤î1­Ó®É
                     Shell Network.getDefaultBrowserFullname & " https://dict.revised.moe.edu.tw/search.jsp?md=1"
@@ -3258,7 +3259,7 @@ rePt:
 Return
 
 
-eH:
+eh:
     Select Case Err.Number
         Case 4198 '«ü¥O¥¢±Ñ 'Google Driveªº°ÝÃD
             Resume Next
@@ -3289,6 +3290,116 @@ Sub ¥ÍÃø¦r¥[¤W°ê»yÃã¨åª`­µnextTable(ByRef rst As ADODB.Recordset, ByRef cnt As A
     rst.Open srcs & src, cnt, adOpenKeyset
 End Sub
 
+Rem «Å§i¥¢±Ñ¡G¦b¡udx = regEx.Replace(dx, rw)¡v³o¦æ·|¥X²{¡G 5017¡GÀ³¥Îµ{¦¡©Îª«¥ó©w¸q¤Wªº¿ù»~
+Rem 20230309 creedit with chatGPT¤jµÐÂÄ¡G®Ñ¦W¸¹¼ÐÂI»P¥¿«hªí¹F¦¡ADO.NET¡BLINQ¡G
+Sub ®Ñ¦W¸¹½g¦W¸¹¼Ðª`_¥¿«hªí¹F¦¡RegularExpression_Plaintext()
+Dim cnt As New ADODB.Connection, rst As New ADODB.Recordset
+Dim cntStr As String, d As Document, dx As String, w As String, rw As String
+Dim db As New dBase
+db.cnt¬d¦r cnt
+Dim regEx As Object
+'Dim regEx As New RegExp
+    Set regEx = CreateObject("VBScript.RegExp")
+Dim replacedText As String
+Set d = ActiveDocument: dx = d.Range.text
+rst.Open "select * from ¼ÐÂI²Å¸¹_®Ñ¦W¸¹_¦Û°Ê¥[¤W¥Î order by ±Æ§Ç", cnt, adOpenForwardOnly, adLockReadOnly
+Do Until rst.EOF
+    w = rst("®Ñ¦W").Value
+    If VBA.InStr(dx, w) Then 'if found
+        If VBA.IsNull(rst("¨ú¥N¬°").Value) Then
+            rw = "¡m" & rst("®Ñ¦W").Value & "¡n"
+        Else
+            rw = rst("¨ú¥N¬°").Value
+        End If
+        With regEx
+            '.Pattern = "(?<!¡m)(?<!¡q)(?<![\\p{P}&&[^¡n¡r]]+)" + regEx.Escape(w) + "(?!¡n)(?!¡r)"
+            .Pattern = "(?<!¡m)(?<!¡q)(?<![\\p{P}&&[^¡n¡r]]+)" + Replace(Replace(w, "\", "\\"), ".", "\.") + "(?!¡n)(?!¡r)"
+            Rem ¦b Word VBA ¤¤¡ARegExp ª«¥óªº Escape ¤èªk¬O¤£³Q¤ä´©ªº¡C©Ò¥H±z»Ý­n§â³o­Ó¤èªk§ï¦¨¨Ï¥Î Replace ¤èªk±N¯S®í¦r²ÅÂà´«¬°¥¿«hªí¹F¦¡ªºÂà¸q¦r²Å¡C
+            Rem ³o­Ó¡uregEx.Escape(w)¡v¨ì©³¬O¤°»ò·N¸q¡H
+            Rem regEx.Escape(w) ¬O±N¦r¦ê w ¤¤©Ò¦³ªº¥¿«hªí¹F¦¡¤¸¦r²Å (¨Ò¦p *, ?, [, ], \, (, ), {, }, +, ^, $, ., |) Âà´«¦¨¯Â¤å¦r¡A¥HÁ×§K³o¨Ç¤¸¦r²Å³Q·í§@¥¿«hªí¹F¦¡ªº¤¸¯À¦Ó¥X²{¿ù»~¡C
+            Rem ¨Ò¦p¡A¦pªG w ¬° test*¡A«h regEx.Escape(w) ·|¦^¶Ç test\*¡A³o¼Ë¥¿«hªí¹F¦¡¤ÞÀº´N·|§â * µø¬°¤@¯ë¦r¤¸¡A¦Ó¤£¬O¥¿«hªí¹F¦¡¤¤ªº¶qµü
+            .Global = True
+        End With
+        dx = regEx.Replace(dx, rw)
+    End If
+    rst.MoveNext
+Loop
+Documents.Add.Range.text = dx
+rst.Close
+'rst.Open "select * from ¼ÐÂI²Å¸¹_½g¦W¸¹_¦Û°Ê¥[¤W¥Î order by ±Æ§Ç", cnt, adOpenForwardOnly, adLockReadOnly
+rst.Close: cnt.Close
+Exit Sub
+Rem ³o¼Ëªº¼gªk¤]¥i¥HÀ³¥Î¦bWord VBA¶Ü ¦p¦ó¹ê§@
+Rem ¬Oªº¡A³o¼Ëªº¥¿«hªí¹F¦¡¼gªk¤]¥i¥H¦b Word VBA ¤¤À³¥Î¡C¥H¤U¬O¤@­ÓÂ²³æªº¥Ü¨Ò VBA µ{§Ç¡A¥i¥H±N¿ï¤¤¤å¥»¤¤ªº®Ñ¦W¸¹©M½g¦W¸¹´À´«¦¨¤¤¤åªº¥þ§Î¼ÐÂI²Å¸¹¡G
+Rem
+Rem vba
+Rem Copy code
+Rem Sub ReplacePunctuation()
+Rem
+Rem     Dim regEx As Object
+Rem     Set regEx = CreateObject("VBScript.RegExp")
+Rem
+Rem     With regEx
+Rem         .Pattern = "(?<!¡m)(?<!¡q)[,.;:!?()]*(¡m.*?¡n|¡q.*?¡r)[,.;:!?()]*"
+Rem         .Global = True
+Rem     End With
+Rem
+Rem     Dim selection As Range
+Rem     Set selection = Selection.Range
+Rem
+Rem     Dim replacedText As String
+Rem     replacedText = regEx.Replace(selection.Text, "¡m$1¡n")
+Rem
+Rem     selection.Text = replacedText
+Rem
+Rem End Sub
+Rem ³o­Óµ{¦¡·|¨Ï¥Î»P«e­± Python µ{§Ç¬Û¦Pªº¥¿«hªí¹F¦¡¨Ó¶i¦æ´À´«¡C¥¦·|¥ý¿ï¤¤¤@¬q¤å¦r¡AµM«á±N¨ä¤¤ªº®Ñ¦W¸¹©M½g¦W¸¹´À´«¦¨¤¤¤åªº¥þ§Î¼ÐÂI²Å¸¹¡Cµ{¦¡¤¤¨Ï¥Î¤F Word VBA ¤º«Øªº Range ©M Selection ¹ï¶H¡A¥H¤Î VBScript.RegExp Ãþ§Oªº CreateObject ¤èªk¨Ó³Ð«Ø¥¿«hªí¹F¦¡¹ï¶H¡C
+Rem
+Rem
+Rem
+Rem
+Rem ®]¦u¯u
+Rem .Global=true ¬O¤°»ò·N«ä
+Rem .Global=true ¬O¥¿«hªí¹F¦¡¹ï¶Hªº¤@­ÓÄÝ©Ê¡A¥Î©ó«ü©w¦b¤å¥»¤¤¤Ç°t©Ò¦³²Å¦X±ø¥óªº¼Ò¦¡¡A¦Ó¤£¶È¶È¬O²Ä¤@­Ó¤Ç°t¶µ¡CÀq»{±¡ªp¤U¡A¥¿«hªí¹F¦¡¥u¤Ç°t²Ä¤@­Ó²Å¦X±ø¥óªº¼Ò¦¡¡AµM«á´N°±¤î¤Ç°t¡C¦]¦¹¡A±N .Global ÄÝ©Ê³]¸m¬° true ¥i¥H«OÃÒ¤Ç°t¨ì©Ò¦³ªº¼Ò¦¡¡C
+Rem
+Rem ¦b¤W­±ªº¨Ò¤l¤¤¡Aregex ¹ï¶H³Q³Ð«Ø®É¡A.Global ÄÝ©Ê³Q³]¸m¬° true¡A³o¼Ë´N¥i¥H¤Ç°t¤å¥»¤¤©Ò¦³ªº¼ÐÂI²Å¸¹¤F¡C¦b Word VBA ¤¤¡A±z¥i¥H³q¹L³]¸m Match.Global ÄÝ©Ê¨Ó¹ê²{Ãþ¦üªº¥\¯à¡C¨Ò¦p¡G
+Rem
+Rem vbnet
+Rem Copy code
+Rem Sub ReplacePunctuation()
+Rem
+Rem     Dim regEx As New RegExp
+Rem     regEx.Pattern = "\\p{P}"
+Rem     regEx.Global = True
+Rem
+Rem     ActiveDocument.Content.Select
+Rem     Selection.Find.ClearFormatting
+Rem     Selection.Find.Replacement.ClearFormatting
+Rem     With Selection.Find
+Rem         .Text = regEx.Pattern
+Rem         .Replacement.Text = "¡A"
+Rem         .Forward = True
+Rem         .Wrap = wdFindContinue
+Rem         .Format = False
+Rem         .MatchCase = False
+Rem         .MatchWholeWord = False
+Rem         .MatchAllWordForms = False
+Rem         .MatchSoundsLike = False
+Rem         .MatchWildcards = True
+Rem         .Execute Replace:=wdReplaceAll
+Rem     End With
+Rem
+Rem End Sub
+Rem ¦b³o­Ó¨Ò¤l¤¤¡A§Ú­Ì³Ð«Ø¤F¤@­Ó RegExp ¹ï¶H regEx¡A¨Ã±N¨ä .Pattern ÄÝ©Ê³]¸m¬° \\p{P}¡A±N .Global ÄÝ©Ê³]¸m¬° True¡CµM«á§Ú­Ì¿ï¤¤¤åÀÉ¤¤ªº©Ò¦³¤º®e¡A°õ¦æ¬d§ä©M´À´«¾Þ§@¡A±N©Ò¦³²Å¦X¼Ò¦¡ªº¼ÐÂI²Å¸¹´À´«¦¨¤¤¤å³r¸¹¡C.MatchWildcards ÄÝ©Ê³Q³]¸m¬° True¡A³o¼Ë¦b¬d§ä®É´N¥i¥H¨Ï¥Î¥¿«hªí¹F¦¡¼Ò¦¡¡C
+Rem
+Rem
+Rem
+Rem
+Rem ®]¦u¯u
+Rem ©Ò¥H Find ª«¥óªº .Text ÄÝ©Ê¬O¥i¥H³]¬°¥¿«hªí¹F¦¡Åo¡H ¦ý­n±N .MatchWildcards ³]¦¨ true ´N¬O¤F¡H §_«h´N·|³Q·í§@¤@¯ë¤å¦r¬d§ä¡A¦Ó¤£¬O¥H¥¿«hªí¹F¦¡ªº³W«h¤ñ¹ïÅo¡H ¬O³o¼Ë¶Ü¡H¦Ñ®vµÐÂÄ
+Rem ¬Oªº¡A±z»¡±o«D±`¥¿½T¡C¦b Word VBA ¤¤¡A­n±N Find ª«¥óªº .Text ÄÝ©Ê³]¬°¥¿«hªí¹F¦¡¡A¥²¶·¥ý±N .MatchWildcards ³]¬° true¡A§_«h Word ·|±N¨äµø¬°¤@¯ë¤å¦r¬d§ä¡C¦]¦¹¡A¦pªG±z·Q­n¨Ï¥Î¥¿«hªí¹F¦¡¶i¦æ¬d§ä©M´À´«¾Þ§@¡A½Ð°O±o±N .MatchWildcards ³]¬° true¡C
+Rem
+End Sub
 
 Sub ®Ñ¦W¸¹½g¦W¸¹¼Ðª`()
 Dim cnt As New ADODB.Connection, rst As New ADODB.Recordset
@@ -3414,14 +3525,14 @@ End Sub
 Sub replaceWithNextChararcter() 'Alt+Shift+h
 Dim s As Integer, chars 'As Characters
 Dim f As String, r As String
-Set chars = Selection.Characters
-If chars.Count < 2 And InStr(Selection, Chr(9)) = 0 Then Exit Sub
+Set chars = selection.Characters
+If chars.Count < 2 And InStr(selection, Chr(9)) = 0 Then Exit Sub
 If chars.Count > 2 Then
-    s = InStr(Selection, Chr(9))
+    s = InStr(selection, Chr(9))
     If s > 0 Then
-        If InStr(Mid(Selection.text, s + 1), Chr(9)) = 0 Then
-            chars = VBA.split(Selection.text, Chr(9))
-            Selection.text = Left(Selection.text, s - 1)
+        If InStr(Mid(selection.text, s + 1), Chr(9)) = 0 Then
+            chars = VBA.split(selection.text, Chr(9))
+            selection.text = Left(selection.text, s - 1)
             s = 0
             f = chars(s): r = chars(s + 1) 'VBA.IIf(chars(s + 1) = Chr(9), "", chars(s + 1))
         Else
@@ -3434,9 +3545,9 @@ Else
     s = 1
     f = chars(s)
     r = VBA.IIf(chars(s + 1) = Chr(9), "", chars(s + 1))
-    Selection.Characters(s + 1) = ""
+    selection.Characters(s + 1) = ""
 End If
-Selection.Find.Execute f, , , , , , True, wdFindContinue, , r, wdReplaceAll
+selection.Find.Execute f, , , , , , True, wdFindContinue, , r, wdReplaceAll
 End Sub
 
 Sub °ê»yÃã¨åºô§}¤ÎID©|¯ÊªÌ¦C¥X()
@@ -3447,16 +3558,16 @@ End Sub
 Sub °ê»yÃã¨åºô§}¤ÎID©|¯ÊªÌ¶ñ¤J()
 Dim i As Long
 ActiveDocument.Range.Find.Execute Chr(13), , , , , , , wdFindContinue, , "", wdReplaceAll
-Do Until Selection.End = ActiveDocument.Range.End - 1
-    Selection.move
-    If Selection.Previous <> ChrW(20008) And Selection.Hyperlinks.Count = 0 Then
+Do Until selection.End = ActiveDocument.Range.End - 1
+    selection.move
+    If selection.Previous <> ChrW(20008) And selection.Hyperlinks.Count = 0 Then
         ¥ÍÃø¦r¥[¤W°ê»yÃã¨åª`­µ
-        ActiveWindow.ScrollIntoView Selection, False
+        ActiveWindow.ScrollIntoView selection, False
         i = i + 1
     End If
     If i = 40 Then Exit Sub
 Loop
-Selection.HomeKey wdStory, wdExtend
+selection.HomeKey wdStory, wdExtend
 End Sub
 
 Rem ¦r¦êÂà¦r¦ê°}¦C creedit with chatGPT¤jµÐÂÄ
