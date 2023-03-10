@@ -145,6 +145,7 @@ namespace TextForCtext
         /// <returns></returns>
         internal static string booksPunctuation(string clpTxt)
         {
+            //提示音
             //new SoundPlayer(@"C:\Windows\Media\Windows Balloon.wav").Play();
             System.Media.SystemSounds.Asterisk.Play();
             ado.Connection cnt = new ado.Connection();
@@ -188,7 +189,7 @@ namespace TextForCtext
         /// 檢查要標點上的書名號或篇名號詞彙，是否已經標過
         /// 20230309 creedit with chatGPT大菩薩：書名號標點與正則表達式ADO.NET、LINQ：
         /// </summary>
-        /// <param name="context">預防大文本，故以傳址（pass by reference）方式</param>
+        /// <param name="context">預防大文本，故以傳址（pass by reference）方式。呼叫端也當如此，如booksPunctuation()函式待改！</param>
         /// <param name="term">須標上書名號或篇名號之詞彙</param>
         /// <returns>傳回標識後的結果文本</returns>
         static bool booksPunctuationExamReplace(ref string context, string term, string termReplaced)

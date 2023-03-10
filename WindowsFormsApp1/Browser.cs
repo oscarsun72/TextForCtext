@@ -1,5 +1,4 @@
 ﻿//using static System.Net.Mime.MediaTypeNames;
-using ADODB;
 using Newtonsoft.Json.Linq;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
@@ -13,7 +12,6 @@ using System.Diagnostics;
 //https://dotblogs.com.tw/supergary/2020/10/29/selenium#images-3
 using System.IO;
 using System.Linq;
-using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Automation;
@@ -1352,7 +1350,7 @@ namespace TextForCtext
             if (iwe_ocr == null)
             {
                 Thread.Sleep(90); iwe_morebtn.Click(); tryTimes++;
-                if (tryTimes < 6) goto retry;
+                if (tryTimes < 10) goto retry;
                 else
                 {
                     //MessageBox.Show("請重來一次；重新執行一次。感恩感恩　南無阿彌陀佛", "", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
@@ -1404,10 +1402,16 @@ namespace TextForCtext
             string downloadDirectory = DownloadDirectory_Chrome;
             //string downloadDirectory=null;//= getChromeDownloadDirectory();
 
-            if (string.IsNullOrEmpty(downloadDirectory))
+            if (string.IsNullOrEmpty(downloadDirectory) || !Directory.Exists(downloadDirectory))
             {
-                Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("請先指定Chrome瀏覽器的下載目錄，再繼續！感恩感恩　南無阿彌陀佛");
-                return false;
+                downloadDirectory = getChromeDownloadDirectory_YouChatchatGPT();
+                if (string.IsNullOrEmpty(downloadDirectory) || !Directory.Exists(downloadDirectory))
+                {
+                    Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("請先指定Chrome瀏覽器的下載目錄，再繼續！感恩感恩　南無阿彌陀佛");
+                    return false;
+                }
+                else//更新downloadDirectory_Chrome 欄位（若有異動時）
+                    DownloadDirectory_Chrome = downloadDirectory;
             }
             #endregion
 
@@ -1469,7 +1473,13 @@ namespace TextForCtext
 
             #region 讀入文本 creedit with chatGPT大菩薩：
             //取得所匯出的檔案路徑
-            string filePath = Path.Combine(downloadDirectory, Path.GetFileNameWithoutExtension(downloadImgFullName) + ".txt"); //@"X:\Ctext_Page_Image.txt";
+            string filePath = Path.Combine(downloadDirectory, Path.GetFileNameWithoutExtension(downloadImgFullName) + ".txt"); //@"X:\Ctext_Page_Image.txt";            
+            //等待下載完成
+            TimeSpan waitFileExitTimeSpan = TimeSpan.FromSeconds(10);//最多等待時間
+            DateTime waitFileExitBegin = DateTime.Now;
+            while (!File.Exists(filePath) && DateTime.Now.Subtract(waitFileExitBegin) < waitFileExitTimeSpan)
+            {
+            }
             if (File.Exists(filePath))
             {
                 string text = File.ReadAllText(filePath, System.Text.Encoding.UTF8);
@@ -1477,6 +1487,7 @@ namespace TextForCtext
                 //刪除下載檔案，以便下次載入
                 Task.Run(() => File.Delete(filePath));
             }
+            else return false;
             #endregion
             #endregion
 
@@ -1533,7 +1544,31 @@ namespace TextForCtext
         /// <returns></returns>
         private static string getChromeDownloadDirectory_YouChatchatGPT()
         {
-            //YouChat大菩薩：
+            #region YouChat菩薩的成功了
+            /*用 C# 和 Selenium 可以取得Chrome瀏覽器的下載目錄嗎
+                是的，你可以使用 C# 和 Selenium 来获取 Chrome 浏览器的下载目录。你需要使用 ChromeOptions 类来设置 ChromeDriver，然后使用 Options 属性的 AddUserProfilePreference 方法来设置下载目录。以下是一个示例代码片段：
+
+                using OpenQA.Selenium;
+                using OpenQA.Selenium.Chrome;
+
+                namespace SeleniumDemo
+                {
+                    class Program
+                    {
+                        static void Main(string[] args)
+                        {
+                            ChromeOptions options = new ChromeOptions();
+                            options.AddUserProfilePreference("download.default_directory", "C:\\Users\\yourusername\\Downloads");
+                            IWebDriver driver = new ChromeDriver(options);
+                            // rest of your code
+                        }
+                    }
+                }
+                在这个示例中，我们使用 ChromeOptions 类来设置 ChromeDriver，将下载目录设置为 "C:\Users\yourusername\Downloads"。然后我们创建了一个 ChromeDriver 实例，并将 options 参数传递给它。现在，每当您使用该驱动程序下载文件时，它将被下载到指定的目录。
+
+                我是要取得，不是設定
+                非常抱歉，我的前一个回答有误。要获取 Chrome 浏览器的下载目录，您需要打开 Chrome 首选项文件，然后查找下载目录。以下是一个示例代码片段：
+             */
             string userProfile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
             string chromeUserDir = Path.Combine(userProfile, "AppData", "Local", "Google", "Chrome", "User Data", "Default");
             if (!Directory.Exists(chromeUserDir))
@@ -1542,10 +1577,29 @@ namespace TextForCtext
 
             if (File.Exists(preferencesFile))
             {
-                #region YouChat菩薩的成功了
+
                 string preferencesText = File.ReadAllText(preferencesFile);
                 JObject preferencesJson = JObject.Parse(preferencesText);
                 downloadDirectory_Chrome = preferencesJson["download"]["default_directory"].ToString();
+                /* YouChat大菩薩：在这个示例中，我们首先获取当前用户的主文件夹，然后使用 Path.Combine 方法创建一个路径字符串，以便打开 Chrome 用户数据目录。然后，我们查找名为 Preferences 的文件，它包含 Chrome 首选项的 JSON 格式。我们使用 JObject.Parse 方法将 Preferences 文件的内容解析为 JSON 格式，然后查找下载目录的默认路径。最后，我们输出下载目录的值。 请注意，下载目录设置可能存在多个偏好文件，因此您可能需要查找适用于您的系统和 Chrome 版本的正确偏好文件。此外，这种方法依赖于 Chrome 的偏好文件格式，因此可能会因 Chrome 的更新而改变。 如果您想在下载文件时将文件保存到自定义目录中，建议使用我在前一个回答中提供的示例代码。
+                 * 用這個 JObject 物件有什麼先決條件吧 必須裝載什麼組件或套件呢 YouChat大菩薩：
+                    JObject is a class in the Newtonsoft.Json.Linq namespace that is used to represent a JSON object in C#.
+
+                    To use JObject in your C# code, you first need to make sure that the Newtonsoft.Json NuGet package is installed in your project. You can install it using the NuGet Package Manager in Visual Studio, or by running the following command in the Package Manager Console:
+
+                    Install-Package Newtonsoft.Json
+                    Once you have the Newtonsoft.Json package installed, you can create a new JObject object like this:
+
+                    using Newtonsoft.Json.Linq;
+
+                    JObject obj = new JObject();
+                    You can also parse a JSON string into a JObject like this:
+
+                    string jsonString = "{\"name\":\"John Smith\",\"age\":42}";
+                    JObject obj = JObject.Parse(jsonString);
+                    Note that you need to include the using Newtonsoft.Json.Linq; directive at the top of your C# file to access the JObject class.
+                 */
+
                 #endregion
 
                 #region chatGPT菩薩的有誤

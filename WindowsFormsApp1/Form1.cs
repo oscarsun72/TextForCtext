@@ -153,6 +153,7 @@ namespace WindowsFormsApp1
             this.ntfyICo = new NotifyIcon();
             this.ntfyICo.Icon = this.Icon;
             this.ntfyICo.MouseClick += new System.Windows.Forms.MouseEventHandler(nICo_MouseClick);
+            //this.ntfyICo.MouseClick += new System.Windows.Forms.MouseEventHandler(nICo_MouseMove);
             this.ntfyICo.MouseMove += new System.Windows.Forms.MouseEventHandler(nICo_MouseMove);
             //this.Shown += Form1_Shown;//https://stackoverflow.com/questions/32720207/change-caret-cursor-in-textbox-in-c-sharp
 
@@ -327,13 +328,22 @@ namespace WindowsFormsApp1
                         br.driver = br.driver ?? br.driverNew();
                         br.GoToUrlandActivate(url);
                         if (xClp.IndexOf("edit") > -1 && xClp.Substring(xClp.LastIndexOf("#editor")) == "#editor")
+                        //url此頁的Quick edit值傳到textBox1,並存入剪貼簿以備用
+                        {
+                            string text = br.waitFindWebElementByName_ToBeClickable("data", br.WebDriverWaitTimeSpan).Text;
+                            text=CnText.booksPunctuation(text);
+                            textBox1.Text = text;
+                            Clipboard.SetText(text);
+                            if (!Active)
+                            {
+                                Activate();bringBackMousePosFrmCenter();
+                            }
+                        }
 
-                            //url此頁的Quick edit值傳到textBox1
-                            textBox1.Text = br.waitFindWebElementByName_ToBeClickable("data", br.WebDriverWaitTimeSpan).Text;
                     }
                     else
                     { Process.Start(url); appActivateByName(); }
-                    Clipboard.Clear();
+                    //Clipboard.Clear();
                 }
             }
         }
@@ -5884,7 +5894,7 @@ namespace WindowsFormsApp1
                 default:
                     break;
             }
-            if (!ocrResult) MessageBox.Show("請重來一次；重新執行一次。感恩感恩　南無阿彌陀佛", "", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
+            if (!ocrResult) MessageBox.Show("請重來一次；重新執行一次。感恩感恩　南無阿彌陀佛", "發生錯誤", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
             #region 如果是手動鍵入輸入模式且OCR程序無誤則直接貼上結果並自動標上書名號篇名號，20230309 creedit with chatGPT大菩薩：
             if (ocrResult && keyinTextMode)
             {
@@ -7262,6 +7272,7 @@ namespace WindowsFormsApp1
             #region forDebugTest權作測試偵錯用20230310
             //string x = br.DownloadDirectory_Chrome;
             //Console.WriteLine(x);//在「即時運算視窗」寫出訊息
+            //keyinNotepadPlusplus("","南無阿彌陀佛");
             #endregion
 
 
@@ -7800,11 +7811,13 @@ namespace WindowsFormsApp1
              * 在 C# 中，您可以使用正则表达式来删除给定字符串中的特定字符。以下是删除 punctuationsNum 字符串中的 "《" 和 "〈" 字符的示例代码：……
              * 在这里，我们使用 Regex.Replace 方法将匹配正则表达式模式 [《〈] 的所有字符替换为空字符串。此模式匹配任何包含 "《" 或 "〈" 的字符。
              * */
-            string regexPattern = "[《〈]";
-            string w, punctuationsNumWithout前書名號與前篇名號 = Regex.Replace(punctuationsNum, regexPattern, ""); ;
+            string regexPattern = "[《〈]", omitSymbols = "●＝{}" + Environment.NewLine;//輸入缺字構字式●＝＝及注文標記符{{}}時不取代
+            string w;//, punctuationsNumWithout前書名號與前篇名號 = Regex.Replace(Form1.punctuationsNum, regexPattern, ""); 
             if (!insertMode
                 && textBox1.SelectionStart < textBox1.TextLength
-                && textBox1.Text.Substring(textBox1.SelectionStart, 1) != Environment.NewLine.Substring(0, 1))
+                && (regexPattern + Environment.NewLine).IndexOf(textBox1.Text.Substring(textBox1.SelectionStart, 1)) == -1
+                //&& omitSymbols.IndexOf(e.KeyChar.ToString()) == -1
+                && Regex.IsMatch(e.KeyChar.ToString(), "[^a-zA-Z"+ omitSymbols + "]"))//YouChat菩薩
             {//https://stackoverflow.com/questions/1428047/how-to-set-winforms-textbox-to-overwrite-mode/70502655#70502655
                 if (textBox1.Text.Length != textBox1.MaxLength && textBox1.SelectedText == ""
                     && textBox1.Text != "" && textBox1.SelectionStart != textBox1.Text.Length)
@@ -7816,8 +7829,8 @@ namespace WindowsFormsApp1
                                                  //對標點符號punctuations所佔字位不取代
                     w = textBox1.SelectedText;
                     //標點符號不取代漢字，但可被取代
-                    if (punctuationsNumWithout前書名號與前篇名號.IndexOf(e.KeyChar) > -1 &&
-                        punctuationsNumWithout前書名號與前篇名號.IndexOf(textBox1.Text.Substring(textBox1.SelectionStart, 1)) == -1)
+                    if (punctuationsNum.IndexOf(e.KeyChar) > -1 &&
+                        punctuationsNum.IndexOf(textBox1.Text.Substring(textBox1.SelectionStart, 1)) == -1)
                         textBox1.SelectionLength = 0;
                     else if (char.IsSurrogate(w.ToCharArray()[0])) textBox1.SelectionLength = 2;
                 }
@@ -7831,13 +7844,15 @@ namespace WindowsFormsApp1
             {
                 if (!insertMode
                     && textBox1.SelectionStart < textBox1.TextLength
-                    && textBox1.Text.Substring(textBox1.SelectionStart, 1) != Environment.NewLine.Substring(0, 1))
+                    && (regexPattern + Environment.NewLine).IndexOf(textBox1.Text.Substring(textBox1.SelectionStart, 1)) == -1
+                    //&& omitSymbols.IndexOf(e.KeyChar.ToString()) == -1
+                    && Regex.IsMatch(e.KeyChar.ToString(), "[^a-zA-Z" + omitSymbols + "]"))//YouChat菩薩
                 {
                     w = textBox1.Text.Substring(selStart, 1);//對標點符號punctuations所佔字位不取代
                     if (selStart + 1 > textBox1.TextLength ||
-                        (punctuationsNumWithout前書名號與前篇名號.IndexOf(e.KeyChar) > -1 &&
+                        (punctuationsNum.IndexOf(e.KeyChar) > -1 &&
                         //標點符號不取代漢字，但可被取代
-                        punctuationsNumWithout前書名號與前篇名號.IndexOf(textBox1.Text.Substring(textBox1.SelectionStart, 1)) == -1))
+                        punctuationsNum.IndexOf(textBox1.Text.Substring(textBox1.SelectionStart, 1)) == -1))
                         textBox1.Select(selStart, 0);
                     else
                     {
@@ -8396,11 +8411,39 @@ namespace WindowsFormsApp1
         Process prcssDownloadImgFullName;
 
 
-        internal static void MessageBoxShowOKExclamationDefaultDesktopOnly(string text ,string caption="")
+        internal static void MessageBoxShowOKExclamationDefaultDesktopOnly(string text, string caption = "")
         {
             MessageBox.Show(text, caption, MessageBoxButtons.OKCancel
                 , MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
         }
+
+
+        #region 取得Windows作業系統現行的程式視窗。此乃為自己練習&測試用爾 https://ithelp.ithome.com.tw/questions/10212282#answer-388757        
+
+        // 定義Windows API函數
+        [DllImport("user32.dll")]
+        static extern IntPtr GetDlgItem(IntPtr hDlg, int nIDDlgItem);
+
+        [DllImport("user32.dll")]
+        public static extern int SendMessage(IntPtr hWnd, int Msg, int wParam, string lParam);
+
+        // 定義WM_SETTEXT訊息常數
+        const int WM_SETTEXT = 0x000C;
+
+        internal static void keyinNotepadPlusplus(string getProcessesByName, string keyinText)
+        {
+            // 取得目標程式的視窗控制代碼（handle）
+            //IntPtr targetWindow = Process.GetProcessesByName("notepad")[0].MainWindowHandle;
+            IntPtr targetWindow = Process.GetProcessesByName("notepad++")[0].MainWindowHandle;
+
+            // 取得目標程式的textbox輸入框的控制代碼（handle）
+            IntPtr targetTextBox = GetDlgItem(targetWindow, 15);
+
+            // 傳送WM_SETTEXT訊息和文字到textbox輸入框
+            SendMessage(targetTextBox, WM_SETTEXT, 0, keyinText);
+        }
+        #endregion
+
 
         private void richTextBox1_Enter(object sender, EventArgs e)
         {//20230111 creedit YouChat：如果您想要在指定的控制項之前捕獲鼠標按下事件，您可以將控件的TabStop屬性設置為false，這樣就可以確保該控制項的Mousedown事件會先被捕獲。你可以使用以下示例代碼來實現：
