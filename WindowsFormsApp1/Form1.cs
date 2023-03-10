@@ -27,8 +27,7 @@ using Font = System.Drawing.Font;
 using Point = System.Drawing.Point;
 //using Task = System.Threading.Tasks.Task;
 using System.Threading.Tasks;
-//using OpenQA.Selenium;
-//using OpenQA.Selenium;
+using System.Net.Http.Headers;
 //using System.Windows.Input;
 //using Microsoft.Office.Interop.Word;
 
@@ -154,6 +153,7 @@ namespace WindowsFormsApp1
             this.ntfyICo = new NotifyIcon();
             this.ntfyICo.Icon = this.Icon;
             this.ntfyICo.MouseClick += new System.Windows.Forms.MouseEventHandler(nICo_MouseClick);
+            //this.ntfyICo.MouseClick += new System.Windows.Forms.MouseEventHandler(nICo_MouseMove);
             this.ntfyICo.MouseMove += new System.Windows.Forms.MouseEventHandler(nICo_MouseMove);
             //this.Shown += Form1_Shown;//https://stackoverflow.com/questions/32720207/change-caret-cursor-in-textbox-in-c-sharp
 
@@ -328,13 +328,22 @@ namespace WindowsFormsApp1
                         br.driver = br.driver ?? br.driverNew();
                         br.GoToUrlandActivate(url);
                         if (xClp.IndexOf("edit") > -1 && xClp.Substring(xClp.LastIndexOf("#editor")) == "#editor")
+                        //url此頁的Quick edit值傳到textBox1,並存入剪貼簿以備用
+                        {
+                            string text = br.waitFindWebElementByName_ToBeClickable("data", br.WebDriverWaitTimeSpan).Text;
+                            text=CnText.booksPunctuation(text);
+                            textBox1.Text = text;
+                            Clipboard.SetText(text);
+                            if (!Active)
+                            {
+                                Activate();bringBackMousePosFrmCenter();
+                            }
+                        }
 
-                            //url此頁的Quick edit值傳到textBox1
-                            textBox1.Text = br.waitFindWebElementByName_ToBeClickable("data", br.WebDriverWaitTimeSpan).Text;
                     }
                     else
                     { Process.Start(url); appActivateByName(); }
-                    Clipboard.Clear();
+                    //Clipboard.Clear();
                 }
             }
         }
@@ -1030,8 +1039,8 @@ namespace WindowsFormsApp1
 
             }
             else chkP = -1;
-#endregion
-chksum:
+            #endregion
+            chksum:
             if (missWordPositon > -1 || chkP > -1)
             //if (xCopy.IndexOf(" ") > -1 || xCopy.IndexOfAny("�".ToCharArray()) > -1 ||
             //xCopy.IndexOf("□") > -1)//□為《維基文庫》《四庫全書》的缺字符，" "則是《四部叢刊》的，"�"則是《四部叢刊》的造字符。
@@ -1949,7 +1958,7 @@ chksum:
                     {
                         insX = "》";
                     }
-insert:
+                insert:
                     insertWords(insX, textBox1, x);
                     return;
                 }
@@ -2081,12 +2090,12 @@ insert:
                 }
 
                 if (e.KeyCode == Keys.Insert)
-                {//Alt + Insert ：將剪貼簿的文字內容讀入textBox1中
+                {//Alt + Insert ：將剪貼簿的文字內容讀入textBox1中;若在手動鍵入輸入模式下則自動加上書名號篇名號
                     e.Handled = true;
                     string clpTxt = Clipboard.GetText();
                     if (keyinTextMode && clpTxt != ClpTxtBefore &&
                         clpTxt.IndexOf("《") == -1 && clpTxt.IndexOf("〈") == -1 && clpTxt.IndexOf("·") == -1
-                        ) textBox1.Text = booksPunctuation(clpTxt);
+                        ) textBox1.Text = CnText.booksPunctuation(clpTxt);
                     else textBox1.Text = clpTxt;
                     dragDrop = false;
                     return;
@@ -2254,7 +2263,7 @@ insert:
             string x = textBox1.SelectedText;
             ado.Connection cnt = new ado.Connection();
             ado.Recordset rst = new ado.Recordset();
-            openDatabase("查字.mdb", ref cnt);
+            Mdb.openDatabase("查字.mdb", ref cnt);
             if (x != "")
             {
                 StringInfo xInfo = new StringInfo(x);
@@ -2436,7 +2445,7 @@ insert:
 
                     textBox1.Select(i, 0);
                     space = notes_a_line(false, ctrl);
-omit:
+                omit:
                     if (textBox1.TextLength >= i + space + 1)
                         i = textBox1.Text.IndexOf("}}", i + space + 1);
                     else
@@ -3077,7 +3086,7 @@ omit:
                     string nx = x.Substring(j, 2);
                     if (nx == Environment.NewLine || nx == "{{" || nx == "<p")
                     {
-longTitle:
+                    longTitle:
                         if (nx == Environment.NewLine)
                         {
                             //標題（篇名）過長時之處理：
@@ -3609,7 +3618,7 @@ longTitle:
                 goto notFound;
             textBox1.ScrollToCaret();
             return;
-notFound:
+        notFound:
             MessageBox.Show("not found!");
 
         }
@@ -3971,7 +3980,7 @@ notFound:
             ado.Connection cnt = new ado.Connection(); ado.Recordset rst = new ado.Recordset();
             if (topLine)
             {
-                openDatabase("查字.mdb", ref cnt);
+                Mdb.openDatabase("查字.mdb", ref cnt);
                 rst.Open("select * from 每行字數判斷用 where condition=0", cnt, ado.CursorTypeEnum.adOpenKeyset, ado.LockTypeEnum.adLockReadOnly);
             }
             undoRecord(); stopUndoRec = true;
@@ -5549,6 +5558,43 @@ notFound:
                     }
                     e.Handled = true; return;
                 }
+
+                if (e.KeyCode == Keys.O)
+                {//Alt + Shift + o ：交給《古籍酷》 OCR ，模擬使用者手動操作的功能（待測試！！！！）
+                    if (browsrOPMode == BrowserOPMode.appActivateByName) return;
+                    e.Handled = true;
+                    toOCR(br.OCRSiteTitle.GJcool);
+                    //if (browsrOPMode == BrowserOPMode.appActivateByName) return;
+                    //e.Handled = true;
+                    //string imgUrl = Clipboard.GetText(), downloadImgFullName;
+                    //if (imgUrl.Length > 4
+                    //    && imgUrl.Substring(0, 4) == "http"
+                    //    && imgUrl.Substring(imgUrl.Length - 4, 4) == ".png")
+                    //    downloadImage(imgUrl, out downloadImgFullName);
+                    //else
+                    //{
+                    //    imgUrl = br.GetImageUrl();
+                    //    downloadImage(imgUrl, out downloadImgFullName);
+                    //}
+
+                    //#region toOCR
+                    //bool ocrResult = br.OCR_GJcool_AutoRecognizeVertical(downloadImgFullName);
+                    //if (!ocrResult) MessageBox.Show("請重來一次；重新執行一次。感恩感恩　南無阿彌陀佛", "", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
+                    //if (!Active) bringBackMousePosFrmCenter();
+                    //#region 如果是手動鍵入輸入模式且OCR程序無誤則直接貼上結果並自動標上書名號篇名號，20230309 creedit with chatGPT大菩薩：
+                    //if (ocrResult && keyinTextMode)
+                    //{ //Form1_KeyDown(sender, new KeyEventArgs(Keys.Alt & Keys.Insert));
+                    //  // 建立 Keys.Alt + Keys.Insert 的組合鍵
+                    //    Keys comboKey = Keys.Alt | Keys.Insert;//在 C# 中，要表示兩個按鍵的組合鍵，需要使用 "|" 運算子進行位元運算，而不是 "&" 或 "+" 運算子。 "|" 運算子可以將兩個按鍵的 KeyCode 合併成一個整數，表示按下這兩個按鍵的組合鍵。
+                    //                                           // 使用 SendKeys 方法觸發按下組合鍵
+                    //    SendKeys.Send("{" + comboKey + "}");
+                    //}
+                    //#endregion
+                    ////const string gjcool = "https://gj.cool/try_ocr";
+                    ////Process.Start(gjcool);
+                    //#endregion
+                    return;
+                }
             }
             #endregion
 
@@ -5735,20 +5781,16 @@ notFound:
                     }
                     return;
                 }
+
                 if (e.KeyCode == Keys.O)
-                {//Alt + o :下載圖片，準備交給《古籍酷》OCR（待實作）
+                {//Alt + o :下載圖片，交給Google Keep OCR
+                    if (browsrOPMode == BrowserOPMode.appActivateByName) return;
                     e.Handled = true;
-                    string imgUrl = Clipboard.GetText();
-                    if (imgUrl.Length > 4
-                        && imgUrl.Substring(0, 4) == "http"
-                        && imgUrl.Substring(imgUrl.Length - 4, 4) == ".png")
-                        downloadImage(imgUrl);
-                    else
-                        downloadImage(br.GetImageUrl());
-                    Process.Start("https://gj.cool/try_ocr");
-                    Process.Start("https://keep.google.com/#NOTE/1XHzZWpH5DCDGOctKjMwNad9qGdtUiYQpSw7HtkmfuEEAJOCtlj37xJg5XgRzWoE");
+                    toOCR(br.OCRSiteTitle.GoogleKeep);
                     return;
                 }
+
+
                 if (e.KeyCode == Keys.Left || e.KeyCode == Keys.Right)
                 {/*Alt + ←：視窗向左移動30dpi（+ Ctrl：徵調）
                   * Alt + →：視窗向右移動30dpi（+ Ctrl：徵調）*/
@@ -5819,6 +5861,60 @@ notFound:
                     //}
                 }
             }//以上 按下單一鍵
+            #endregion
+        }
+
+
+        /// <summary>
+        /// 執行OCR主程式
+        /// </summary>
+        private void toOCR(br.OCRSiteTitle ocrSiteTitle)
+        {
+            string imgUrl = Clipboard.GetText(), downloadImgFullName;
+            if (imgUrl.Length > 4
+                && imgUrl.Substring(0, 4) == "http"
+                && imgUrl.Substring(imgUrl.Length - 4, 4) == ".png")
+                downloadImage(imgUrl, out downloadImgFullName);
+            else
+            {
+                imgUrl = br.GetImageUrl();
+                downloadImage(imgUrl, out downloadImgFullName);
+            }
+
+            #region toOCR            
+            bool ocrResult = false;
+            switch (ocrSiteTitle)
+            {
+                case br.OCRSiteTitle.GoogleKeep:
+                    ocrResult = br.OCR_GoogleKeep(downloadImgFullName);
+                    break;
+                case br.OCRSiteTitle.GJcool:
+                    ocrResult = br.OCR_GJcool_AutoRecognizeVertical(downloadImgFullName);
+                    break;
+                default:
+                    break;
+            }
+            if (!ocrResult) MessageBox.Show("請重來一次；重新執行一次。感恩感恩　南無阿彌陀佛", "發生錯誤", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
+            #region 如果是手動鍵入輸入模式且OCR程序無誤則直接貼上結果並自動標上書名號篇名號，20230309 creedit with chatGPT大菩薩：
+            if (ocrResult && keyinTextMode)
+            {
+                //KeyEventArgs e = new KeyEventArgs(new Keys().);
+                //e.KeyCode = (Keys.Alt & Keys.Insert);
+                //Form1_KeyDown(sender, e);
+                // 建立 Keys.Alt + Keys.Insert 的組合鍵
+                //Keys comboKey = Keys.Alt & Keys.Insert;//在 C# 中，要表示兩個按鍵的組合鍵，需要使用 "|" 運算子進行位元運算，而不是 "&" 或 "+" 運算子。 "|" 運算子可以將兩個按鍵的 KeyCode 合併成一個整數，表示按下這兩個按鍵的組合鍵。
+                //                                       // 使用 SendKeys 方法觸發按下組合鍵
+                Activate();
+                if (!textBox1.Focused) textBox1.Focus();
+                //SendKeys.Send("{" + comboKey + "}");
+                SendKeys.Send("%{insert}");
+            }
+            #endregion
+            //const string gjcool = "https://gj.cool/try_ocr";
+
+            //Process.Start(gjcool);
+            //Process.Start(keep);
+            if (!Active) bringBackMousePosFrmCenter();
             #endregion
         }
 
@@ -6071,7 +6167,7 @@ notFound:
                             break;
                         case BrowserOPMode.seleniumNew:
                             int retrytimes = 0;
-retry:
+                        retry:
                             br.driver = br.driver ?? br.driverNew();
                             try
                             {//這裡需要參照元件來操作就不宜跑線程了！故此區塊最後的剪貼簿，要求須是單線程者，蓋因剪貼簿須獨占式使用故也20230111                                
@@ -6232,8 +6328,8 @@ retry:
         /// <returns></returns>
         public static bool isClipBoardAvailable_Text()
         {// creedit with chatGPT：Clipboard Availability in C#：https://www.facebook.com/oscarsun72/posts/pfbid0dhv46wssuupa5PfH6RTNSZF58wUVbE6jehnQuYF9HtE9kozDBzCvjsowDkZTxkmcl
-/*在 C# 的 System.Windows.Forms 中，可以使用 Clipboard.ContainsData 或 Clipboard.ContainsText 方法來確定剪貼簿是否可用。*/
-retry:
+        /*在 C# 的 System.Windows.Forms 中，可以使用 Clipboard.ContainsData 或 Clipboard.ContainsText 方法來確定剪貼簿是否可用。*/
+        retry:
             try
             {
                 if (!Clipboard.ContainsText())
@@ -6438,8 +6534,8 @@ retry:
         internal static string defaultBrowserName = string.Empty;//https://cybarlab.com/web-browser-name-in-c-sharp
         internal void appActivateByName()
         {
-//Process[] procsBrowser = Process.GetProcessesByName("chrome");
-tryagain:
+        //Process[] procsBrowser = Process.GetProcessesByName("chrome");
+        tryagain:
             Process[] procsBrowser = Process.GetProcessesByName(defaultBrowserName);
             if (procsBrowser.Length <= 0)
             {
@@ -6613,7 +6709,7 @@ tryagain:
 
         //檢查textbox3的Text值與現用網頁是否相同
         private string chkUrlIsTextBox3Text(ReadOnlyCollection<string> tabWindowHandles, string url)
-        {            
+        {
             if (url == "") return url;
             //再回到正在編輯的本頁，準備貼入
 
@@ -6627,7 +6723,7 @@ tryagain:
                     if (taburl == textBox3.Text || taburl.IndexOf(url.Replace("editor", "box")) > -1) { found = true; break; }
                 }
                 if (!found)
-                    br.driver = br.openNewTab();//網址由下面「在Chrome瀏覽器的Quick_edit文字框中輸入文字」那行給
+                    br.driver = br.openNewTabWindow();//網址由下面「在Chrome瀏覽器的Quick_edit文字框中輸入文字」那行給
             }
             //url = textBox3.Text;
             //textBox3.Text = url;
@@ -7116,7 +7212,7 @@ tryagain:
                             appActivateByName();
                         else
                         {
-retry:
+                        retry:
                             try
                             {
                                 br.driver = br.driver ?? br.driverNew();
@@ -7173,6 +7269,13 @@ retry:
         string ClpTxtBefore = "";
         private void Form1_Activated(object sender, EventArgs e)
         {
+            #region forDebugTest權作測試偵錯用20230310
+            //string x = br.DownloadDirectory_Chrome;
+            //Console.WriteLine(x);//在「即時運算視窗」寫出訊息
+            //keyinNotepadPlusplus("","南無阿彌陀佛");
+            #endregion
+
+
             //最上層顯示
             if (!this.TopMost) this.TopMost = true;
             //不全部貼上取代原文字
@@ -7285,18 +7388,22 @@ retry:
                                                  ////只要剪貼簿裡的內容合於以下條件
                                                  //if (ClpTxtBefore != clpTxt && textBox1.Text == "" && clpTxt.IndexOf("http") == -1 && clpTxt.IndexOf("<scanb") == -1)
                                                  //{
-                        textBox1.Text = booksPunctuation(nowClpTxt);
+                        textBox1.Text = CnText.booksPunctuation(nowClpTxt);
                         //return;
                         //}
                         //插入點游標置於頁首
                         //if(keyinText)//已於巢外的if判定了
                         textBox1.Select(0, 0);
                     }
-
+                    if (!Active)
+                    {
+                        Activate();
+                        bringBackMousePosFrmCenter();
+                    }
                     return;
                 }
             }//以上處置鍵入模式（keyinText=true）
-            #endregion
+            #endregion            
 
             #region 自動連續輸入模式的處置
             if (autoPastetoQuickEdit && textBox1.Enabled == false)
@@ -7388,45 +7495,9 @@ retry:
 
         }//完成 From1的 Activated事件處理程序
 
-        private string booksPunctuation(string clpTxt)
-        {
-            //new SoundPlayer(@"C:\Windows\Media\Windows Balloon.wav").Play();
-            System.Media.SystemSounds.Asterisk.Play();
-            ado.Connection cnt = new ado.Connection();
-            ado.Recordset rst = new ado.Recordset();
-            openDatabase("查字.mdb", ref cnt);
-            rst.Open("select * from 標點符號_書名號_自動加上用 order by 排序", cnt, ado.CursorTypeEnum.adOpenForwardOnly);
-            string w, rw;
-            while (!rst.EOF)
-            {
-                w = rst.Fields["書名"].Value.ToString();
-                rw = rst.Fields["取代為"].Value.ToString();
-                rw = rw == "" ? "《" + w + "》" : rw;
-                if (clpTxt.IndexOf(w) > -1)
-                {
-                    clpTxt = clpTxt.Replace(w, rw);
-                }
-                rst.MoveNext();
-            }
-            rst.Close();
-            rst.Open("select * from 標點符號_篇名號_自動加上用 order by 排序", cnt, ado.CursorTypeEnum.adOpenForwardOnly);
-            while (!rst.EOF)
-            {
-                w = rst.Fields["篇名"].Value.ToString();
-                rw = rst.Fields["取代為"].Value.ToString();
-                rw = rw == "" ? "〈" + w + "〉" : rw;
-                if (clpTxt.IndexOf(w) > -1)
-                {
-                    clpTxt = clpTxt.Replace(w, rw);
-                }
-                rst.MoveNext();
-            }
-
-            //textBox1.Text = clpTxt;
-            rst.Close(); cnt.Close();
-            return clpTxt.Replace("《《", "《").Replace("》》", "》").Replace("〈〈", "〈").Replace("〉〉", "〉");
-        }
-
+        /// <summary>
+        /// 執行WordVBA
+        /// </summary>
         private void autoRunWordVBAMacro()
         {
             string xClip = "";
@@ -7530,13 +7601,13 @@ retry:
             switch (textBox2.Text)
             {
                 case "ap,":
-ap: browsrOPMode = BrowserOPMode.appActivateByName;
+                ap: browsrOPMode = BrowserOPMode.appActivateByName;
                     textBox2.Text = "";
                     return;
                 case "aa":
                     goto ap;
                 case "sl,":
-sl: browsrOPMode = BrowserOPMode.seleniumNew;
+                sl: browsrOPMode = BrowserOPMode.seleniumNew;
                     //第一次開啟Chrome瀏覽器，或前有未關閉的瀏覽器時
                     if (br.driver == null)
                         br.driver = br.driverNew();//不用Task.Run()包裹也成了
@@ -7732,9 +7803,21 @@ sl: browsrOPMode = BrowserOPMode.seleniumNew;
                 }
             }
 
-            #region 如果是取代輸入模式：標點符號不取代漢字，但可被取代
-            string w;
-            if (!insertMode)
+            #region 如果是取代輸入模式：標點符號不取代漢字，但可被取代；分段處不取代
+            /* 20230309 chatGPT大菩薩晚安吉祥：
+             * public static string punctuationsNum = ".,;?@'\"。，；！？、－-—…:：《·》〈‧〉「」『』〖〗【】（）()[]〔〕［］0123456789";
+             * 在 C# 我想剔除以上字中的 「《」和「〈」要怎麼寫才最簡潔有效呢？正則表達式的寫法會是最好的選擇嗎？ 感恩感恩　南無阿彌陀佛
+             * 感恩合十，南无阿弥陀佛。
+             * 在 C# 中，您可以使用正则表达式来删除给定字符串中的特定字符。以下是删除 punctuationsNum 字符串中的 "《" 和 "〈" 字符的示例代码：……
+             * 在这里，我们使用 Regex.Replace 方法将匹配正则表达式模式 [《〈] 的所有字符替换为空字符串。此模式匹配任何包含 "《" 或 "〈" 的字符。
+             * */
+            string regexPattern = "[《〈]", omitSymbols = "●＝{}" + Environment.NewLine;//輸入缺字構字式●＝＝及注文標記符{{}}時不取代
+            string w;//, punctuationsNumWithout前書名號與前篇名號 = Regex.Replace(Form1.punctuationsNum, regexPattern, ""); 
+            if (!insertMode
+                && textBox1.SelectionStart < textBox1.TextLength
+                && (regexPattern + Environment.NewLine).IndexOf(textBox1.Text.Substring(textBox1.SelectionStart, 1)) == -1
+                //&& omitSymbols.IndexOf(e.KeyChar.ToString()) == -1
+                && Regex.IsMatch(e.KeyChar.ToString(), "[^a-zA-Z"+ omitSymbols + "]"))//YouChat菩薩
             {//https://stackoverflow.com/questions/1428047/how-to-set-winforms-textbox-to-overwrite-mode/70502655#70502655
                 if (textBox1.Text.Length != textBox1.MaxLength && textBox1.SelectedText == ""
                     && textBox1.Text != "" && textBox1.SelectionStart != textBox1.Text.Length)
@@ -7759,7 +7842,11 @@ sl: browsrOPMode = BrowserOPMode.seleniumNew;
             //}
             if (keyinTextMode && textBox1.TextLength > 0 && textBox1.SelectionLength == textBox1.TextLength)
             {
-                if (!insertMode)
+                if (!insertMode
+                    && textBox1.SelectionStart < textBox1.TextLength
+                    && (regexPattern + Environment.NewLine).IndexOf(textBox1.Text.Substring(textBox1.SelectionStart, 1)) == -1
+                    //&& omitSymbols.IndexOf(e.KeyChar.ToString()) == -1
+                    && Regex.IsMatch(e.KeyChar.ToString(), "[^a-zA-Z" + omitSymbols + "]"))//YouChat菩薩
                 {
                     w = textBox1.Text.Substring(selStart, 1);//對標點符號punctuations所佔字位不取代
                     if (selStart + 1 > textBox1.TextLength ||
@@ -7780,6 +7867,8 @@ sl: browsrOPMode = BrowserOPMode.seleniumNew;
             #endregion
 
         }
+
+
         /// <summary>
         /// 記下更動前的文本以利還原
         /// </summary>
@@ -8182,7 +8271,7 @@ sl: browsrOPMode = BrowserOPMode.seleniumNew;
             bool cntClose = false, rstClose = false, flg = true;//const string tableName = "每行字數判斷用";
             if (cnt == null)
             {
-                openDatabase("查字.mdb", ref cnt);
+                Mdb.openDatabase("查字.mdb", ref cnt);
                 cntClose = true;
             }
             //SELECT 每行字數判斷用.term, 每行字數判斷用.condition FROM 每行字數判斷用 WHERE(((每行字數判斷用.condition) = 0)) ORDER BY 每行字數判斷用.term DESC;
@@ -8269,7 +8358,7 @@ sl: browsrOPMode = BrowserOPMode.seleniumNew;
 
         }
 
-        internal void downloadImage(string imageUrl)
+        internal void downloadImage(string imageUrl, out string downloadImgFullName, bool selectedInExplorer = false)
         {/*20230103 creedit,chatGPT：
           你可以使用 Selenium 來下載網絡圖片。
             首先，你需要獲取圖片的 URL。然後，使用 WebClient 的 DownloadData 方法下載圖片的二進制數據。
@@ -8283,84 +8372,91 @@ sl: browsrOPMode = BrowserOPMode.seleniumNew;
             byte[] imageBytes = webClient.DownloadData(imageUrl);
 
             // 將二進制數據寫入文件。
-            string downloadImgFullName = dropBoxPathIncldBackSlash + "Ctext_Page_Image.png";
+            //string downloadImgFullName = dropBoxPathIncldBackSlash + "Ctext_Page_Image.png";
+            downloadImgFullName = dropBoxPathIncldBackSlash + "Ctext_Page_Image.png";
             using (FileStream fileStream = new FileStream(downloadImgFullName, FileMode.Create))
             {
                 fileStream.Write(imageBytes, 0, imageBytes.Length);
-                Console.WriteLine("圖片已成功下載。");//在「即時運算視窗」寫出訊息
+                //Console.WriteLine("圖片已成功下載。");//在「即時運算視窗」寫出訊息
             }
-            //在下載完後在檔案總管中將其選取
-            //https://www.ruyut.com/2022/05/csharp-open-in-file-explorer.html
-            //把之前開過的關閉
-            if (prcssDownloadImgFullName != null && prcssDownloadImgFullName.HasExited)
+            #region 在下載完後在檔案總管中將其選取MyRegion
+            if (selectedInExplorer)
             {
-                prcssDownloadImgFullName.WaitForExit();
-                prcssDownloadImgFullName.Close();
-                ////prcssDownloadImgFullName.WaitForExit();
-                //prcssDownloadImgFullName.Kill();
+                //https://www.ruyut.com/2022/05/csharp-open-in-file-explorer.html
+                //把之前開過的關閉
+                if (prcssDownloadImgFullName != null && prcssDownloadImgFullName.HasExited)
+                {
+                    prcssDownloadImgFullName.WaitForExit();
+                    //prcssDownloadImgFullName.CloseMainWindow();
+                    prcssDownloadImgFullName.Close();
+                    ////prcssDownloadImgFullName.WaitForExit();
+                    //prcssDownloadImgFullName.Kill();
+                }
+                prcssDownloadImgFullName = System.Diagnostics.Process.Start("Explorer.exe", $"/e, /select ,{downloadImgFullName}");
+
+                //以下chatGPT的 無效,上面才有效
+                //ProcessStartInfo startInfo = new ProcessStartInfo
+                //{
+                //    FileName = downloadImgFullName,
+                //    UseShellExecute = true,
+                //    Verb = "select"//選取
+                //    //Verb = "open" //打開
+                //};
+                //Process.Start(startInfo);
+                ////並將之打開
+                //Process.Start(downloadImgFullName);
             }
-            prcssDownloadImgFullName = System.Diagnostics.Process.Start("Explorer.exe", $"/e, /select ,{downloadImgFullName}");
-
-            //以下chatGPT的 無效,上面才有效
-            //ProcessStartInfo startInfo = new ProcessStartInfo
-            //{
-            //    FileName = downloadImgFullName,
-            //    UseShellExecute = true,
-            //    Verb = "select"//選取
-            //    //Verb = "open" //打開
-            //};
-            //Process.Start(startInfo);
-            ////並將之打開
-            //Process.Start(downloadImgFullName);
-
+            #endregion
         }
         Process prcssDownloadImgFullName;
+
+
+        internal static void MessageBoxShowOKExclamationDefaultDesktopOnly(string text, string caption = "")
+        {
+            MessageBox.Show(text, caption, MessageBoxButtons.OKCancel
+                , MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
+        }
+
+
+        #region 取得Windows作業系統現行的程式視窗。此乃為自己練習&測試用爾 https://ithelp.ithome.com.tw/questions/10212282#answer-388757        
+
+        // 定義Windows API函數
+        [DllImport("user32.dll")]
+        static extern IntPtr GetDlgItem(IntPtr hDlg, int nIDDlgItem);
+
+        [DllImport("user32.dll")]
+        public static extern int SendMessage(IntPtr hWnd, int Msg, int wParam, string lParam);
+
+        // 定義WM_SETTEXT訊息常數
+        const int WM_SETTEXT = 0x000C;
+
+        internal static void keyinNotepadPlusplus(string getProcessesByName, string keyinText)
+        {
+            // 取得目標程式的視窗控制代碼（handle）
+            //IntPtr targetWindow = Process.GetProcessesByName("notepad")[0].MainWindowHandle;
+            IntPtr targetWindow = Process.GetProcessesByName("notepad++")[0].MainWindowHandle;
+
+            // 取得目標程式的textbox輸入框的控制代碼（handle）
+            IntPtr targetTextBox = GetDlgItem(targetWindow, 15);
+
+            // 傳送WM_SETTEXT訊息和文字到textbox輸入框
+            SendMessage(targetTextBox, WM_SETTEXT, 0, keyinText);
+        }
+        #endregion
+
 
         private void richTextBox1_Enter(object sender, EventArgs e)
         {//20230111 creedit YouChat：如果您想要在指定的控制項之前捕獲鼠標按下事件，您可以將控件的TabStop屬性設置為false，這樣就可以確保該控制項的Mousedown事件會先被捕獲。你可以使用以下示例代碼來實現：
             textBox1.TabStop = false;
         }
 
-        void openDatabase(string dbNameIncludeExt, ref ado.Connection cnt)
-        {
-            string root = dropBoxPathIncldBackSlash;
-            if (!File.Exists(root + dbNameIncludeExt))
-            {
-                root = root.Replace("C:", "A:");
-            }
-            if (!File.Exists(root + dbNameIncludeExt)) { MessageBox.Show(root + dbNameIncludeExt + "not found"); return; }
-            //string conStr = "Provider=Microsoft.ACE.OLEDB.12.0;Data Source = " + root + dbNameIncludeExt;
-            string conStr = "Provider=Microsoft.Jet.OLEDB.4.0;Data Source = " + root + dbNameIncludeExt;
-            try
-            {
 
-                cnt.Open(conStr);
-            }
-            catch (Exception)
-            {
-
-                try
-                {
-                    //conStr = conStr.Replace("Microsoft.ACE.OLEDB.12.0", "Microsoft.Jet.OLEDB.4.0");
-                    conStr = conStr.Replace("Microsoft.Jet.OLEDB.4.0", "Microsoft.ACE.OLEDB.12.0");
-                    cnt.Open(conStr);
-
-                }
-                catch (Exception)
-                {
-
-                    throw;
-                }
-
-
-            }
-        }
 
         void replaceXdirrectly()
         {// F11
             string tx = textBox1.Text, rx;
             ado.Connection cnt = new ado.Connection();
-            openDatabase("查字.mdb", ref cnt);
+            Mdb.openDatabase("查字.mdb", ref cnt);
             ado.Recordset rst = new ado.Recordset();
             rst.Open("select * from 維基文庫等欲直接抽換之字 where doit=true order by len(replaced) desc", cnt, ado.CursorTypeEnum.adOpenForwardOnly, ado.LockTypeEnum.adLockReadOnly);
             while (!rst.EOF)

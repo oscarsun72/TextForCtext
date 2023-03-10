@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ado = ADODB;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -7,6 +8,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using WindowsFormsApp1;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace TextForCtext
 {
@@ -134,6 +136,82 @@ namespace TextForCtext
             //char[] punctuations = new char[] { '。', '，', '、', '；', '：', '？', '！' };
             //return Array.IndexOf(punctuations, text[0]) >= 0;
             return ("{{}}<p>" + Form1.punctuationsNum).IndexOf(text) > -1;
+        }
+
+        /// <summary>
+        /// 自動加上書名號篇名號
+        /// </summary>
+        /// <param name="clpTxt">剪貼簿中的文字--需要加上書名號篇名號的文本</param>
+        /// <returns></returns>
+        internal static string booksPunctuation(string clpTxt)
+        {
+            //提示音
+            //new SoundPlayer(@"C:\Windows\Media\Windows Balloon.wav").Play();
+            System.Media.SystemSounds.Asterisk.Play();
+            ado.Connection cnt = new ado.Connection();
+            ado.Recordset rst = new ado.Recordset();
+            Mdb.openDatabase("查字.mdb", ref cnt);
+            rst.Open("select * from 標點符號_書名號_自動加上用 order by 排序", cnt, ado.CursorTypeEnum.adOpenForwardOnly);
+            string w, rw;
+            while (!rst.EOF)
+            {
+                w = rst.Fields["書名"].Value.ToString();
+                rw = rst.Fields["取代為"].Value.ToString();
+                rw = rw == "" ? "《" + w + "》" : rw;
+                if (clpTxt.IndexOf(w) > -1)
+                {
+                    //clpTxt = clpTxt.Replace(w, rw);
+                    booksPunctuationExamReplace(ref clpTxt, w, rw);
+                }
+                rst.MoveNext();
+            }
+            rst.Close();
+            rst.Open("select * from 標點符號_篇名號_自動加上用 order by 排序", cnt, ado.CursorTypeEnum.adOpenForwardOnly);
+            while (!rst.EOF)
+            {
+                w = rst.Fields["篇名"].Value.ToString();
+                rw = rst.Fields["取代為"].Value.ToString();
+                rw = rw == "" ? "〈" + w + "〉" : rw;
+                if (clpTxt.IndexOf(w) > -1)
+                {
+                    //clpTxt = clpTxt.Replace(w, rw);
+                    booksPunctuationExamReplace(ref clpTxt, w, rw);
+                }
+                rst.MoveNext();
+            }
+
+            //textBox1.Text = clpTxt;
+            rst.Close(); cnt.Close();
+            return clpTxt.Replace("《《", "《").Replace("》》", "》").Replace("〈〈", "〈").Replace("〉〉", "〉");
+        }
+
+        /// <summary>
+        /// 檢查要標點上的書名號或篇名號詞彙，是否已經標過
+        /// 20230309 creedit with chatGPT大菩薩：書名號標點與正則表達式ADO.NET、LINQ：
+        /// </summary>
+        /// <param name="context">預防大文本，故以傳址（pass by reference）方式。呼叫端也當如此，如booksPunctuation()函式待改！</param>
+        /// <param name="term">須標上書名號或篇名號之詞彙</param>
+        /// <returns>傳回標識後的結果文本</returns>
+        static bool booksPunctuationExamReplace(ref string context, string term, string termReplaced)
+        {
+            //string pattern = "(?<!《)(?<!〈)" + Regex.Escape(item[0]) + "(?!》)(?!〉)";
+            //string pattern = "(?<!《)(?<!〈)" + Regex.Escape(term) + "(?!》)(?!〉)";
+            //chatGPT大菩薩：其中的 (?<![\\p{P}&&[^》〉]]+) 表示前面沒有其他的標點符號（但是可以有其他非標點符號的字符）。這樣就可以避免誤標的情況了。
+            string pattern = "(?<!《)(?<!〈)(?<![\\p{P}&&[^》〉]]+)" + Regex.Escape(term) + "(?!》)(?!〉)";
+            /*\\p{P}是什麼意思 \\ 前一個 \ 是逸出字元吧？
+                是的，你說的沒錯。在正則表達式中，反斜杠符號 \ 是用來表示特殊字符的逸出字符，它可以使得某些字符在正則表達式中具有特殊含義，例如 .、* 等。如果要匹配 \ 本身，那麼需要使用 \\ 逸出一個反斜杠字符。
+                而 \\p{P} 則是一個 Unicode 屬性表達式，表示匹配任何一個 Unicode 的標點符號字符。其中 \\p{} 是用來匹配具有某個 Unicode 屬性的字符，而 {P} 則是用來指定匹配的 Unicode 屬性是「標點符號」。
+                孫守真
+                為什麼要用 p 是內建的關鍵字還是需要自己宣告的變數？
+                孫守真
+                喔 所以 p 就是 punct 也是 punctiaton 的簡寫（縮寫）囉
+                是的，您理解得很對。p是punctuation(標點符號)的簡寫，而\p{P}是正則表達式的一種語法，用於匹配任何標點符號。             
+             */
+            //string replacement = item[1];
+            string replacement = termReplaced;
+            //text = Regex.Replace(text, pattern, replacement);
+            context = Regex.Replace(context, pattern, replacement);
+            return true;
         }
 
     }

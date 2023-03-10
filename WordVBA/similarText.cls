@@ -391,7 +391,7 @@ Dim resultStr As String, key
 For Each key In SimilarityResult.keys
     resultStr = resultStr & key & space(2) & VBA.vbTab & VBA.CStr(VBA.Round(SimilarityResult(key), 2) * 100) & "¢H" & vbCr
 Next key
-SimilarityResultsString = VBA.Left(resultStr, Len(resultStr) - Len(vbCr))
+If resultStr <> "" Then SimilarityResultsString = VBA.Left(resultStr, Len(resultStr) - Len(vbCr))
 End Property
 
 

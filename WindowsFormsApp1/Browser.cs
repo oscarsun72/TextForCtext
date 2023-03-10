@@ -1,32 +1,25 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using selm = OpenQA.Selenium;
-using OpenQA.Selenium.Chrome;
-using forms = System.Windows.Forms;
-using WindowsFormsApp1;
-using System.Windows.Forms;
-using System.Drawing.Imaging;
-//using static System.Net.Mime.MediaTypeNames;
-using System.Security.Policy;
-using System.Drawing;
+﻿//using static System.Net.Mime.MediaTypeNames;
+using Newtonsoft.Json.Linq;
 using OpenQA.Selenium;
-using OpenQA.Selenium.Interactions;
-using OpenQA.Selenium.DevTools.V85.ApplicationCache;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
-//https://dotblogs.com.tw/supergary/2020/10/29/selenium#images-3
-using System.IO;
+using OpenQA.Selenium.Chrome;
+using OpenQA.Selenium.Remote;
 //using System.Net;
 //using static System.Net.WebRequestMethods;
-using System.Runtime.InteropServices.ComTypes;
 using OpenQA.Selenium.Support.UI;
-using SeleniumExtras.WaitHelpers;
+using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+//https://dotblogs.com.tw/supergary/2020/10/29/selenium#images-3
+using System.IO;
+using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Automation;
+using System.Windows.Forms;
+using WindowsFormsApp1;
+using forms = System.Windows.Forms;
+using selm = OpenQA.Selenium;
+
 
 namespace TextForCtext
 {
@@ -43,7 +36,94 @@ namespace TextForCtext
         // 創建Chrome驅動程序對象
         //selm.IWebDriver driver=driverNew();        
         //internal static selm.IWebDriver driver=driverNew();
-        internal static ChromeDriver driver = driverNew();
+        //internal static ChromeDriver driver = driverNew();
+        static string browserName = Form1.defaultBrowserName;//  "chrome";
+        internal static string chrome_path = Form1.getDefaultBrowserEXE();
+        static string user_data_dir;
+        static string downloadDirectory_Chrome;//= "";
+        static Process[] chromeProcessInstances = Process.GetProcessesByName(browserName);//("chrome");
+        internal static ChromeDriverService driverService;
+        internal static ChromeOptions options = chromeOptions(chrome_path);
+        internal static ChromeDriver driver = initiateChromeDriver().Item1;
+        internal static RemoteWebDriver driverRemote = initiateChromeDriver().Item2;
+
+        /* 20230309 creedit with chatGPT大菩薩：C# Enum Values：
+         * 那元素值可以是string型別的嗎？        
+        在C#中，enum元素值只能是整數型別，例如int、short或byte等。因此，無法直接指定字符串作為enum元素的值。如果需要將字符串映射到enum值，可以使用另一個類型，例如字典或自定義類型，將字符串映射到對應的enum值。在這種情況下，需要確保映射的字符串與enum元素的名稱相對應，以便能夠在代碼中使用enum元素。
+        孫守真
+        如我想把一些常用的網站網址作為 enum 就不如作成 Dictionary 囉？
+        如果你想要將常用網站的網址作為枚舉值使用，並且需要對這些值進行比較和操作，則枚舉可能是一個不錯的選擇。但如果只是需要一個可以將網址映射到對應值的結構，那麼使用字典可能更適合。以下是兩者使用的建議：
+        Enum：如果你需要一個有限的、可枚舉的值集合，而這些值具有特定的順序和整數值（例如，星期幾或方向），那麼使用枚舉可能是一個很好的選擇。但是，如果你想要將字符串作為值使用，或者值的集合需要動態擴展，那麼枚舉可能不是最好的選擇。
+        Dictionary：如果你需要一個可以將一個值映射到另一個值的結構，並且這個映射可以動態擴展，那麼字典可能是最好的選擇。字典可以存儲任意類型的值，包括字符串，並且可以根據需要動態添加或刪除鍵值對。使用字典，你可以輕鬆地將網址映射到對應值，並且可以根據需要動態調整映射。
+        孫守真
+        如果用Dictionary 儲存常用的網站名與其網址，則當網址或網站名稱有異動時，也容易更改更新囉
+        是的，使用Dictionary儲存常用網站的名稱和網址，可以更容易地更新和維護它們。當網址或網站名稱有變化時，只需修改對應的鍵值對即可，而不需要修改程式碼中的enum。這樣可以減少程式碼的維護成本，同時也使得程式更具有彈性和可擴展性。
+         */
+        /// <summary>
+        /// 儲存常用的網站名(key)及其網址(value)
+        /// creedit with Adrenaline菩薩 https://useadrenaline.com/playground
+        /// </summary>
+        internal static Dictionary<OCRSiteTitle, string> OCRSite_URL = new Dictionary<OCRSiteTitle, string>()
+            {
+                { OCRSiteTitle.GoogleKeep, "https://keep.new" }, // maps the key "GoogleKeep" to the value "https://keep.new"
+                {OCRSiteTitle.GJcool, "https://gj.cool/try_ocr" } // maps the key "GJcool" to the value "https://gj.cool/try_ocr"
+            };
+        /// <summary>
+        /// 儲存常用的網站名
+        /// </summary>
+        internal enum OCRSiteTitle { GoogleKeep, GJcool }
+        /* chatGPT大菩薩：C# Enum Values：
+         你的程式碼是可以運作的。這樣的實作方式會使得程式碼更具有可維護性和可擴展性。在需要使用網址時，只需要通過enum來訪問對應的網址，而不需要直接使用網址字符串。當需要添加、修改或刪除網址時，只需要更新Dictionary中的對應鍵值對即可，而不需要修改程式碼中的enum。
+        孫守真
+            老師菩薩您給我這樣的實作幾分呢？
+        根據我對你的程式碼所做的評估，我會給予你 95 分。這是因為你使用了 enum 和 Dictionary，使得你的程式碼更加有結構，可讀性和可維護性更高。但是，可能還有一些改進的空間，比如在程式碼中加入註釋說明，這樣可以讓其他人更容易理解你的程式碼的運作方式。
+        這樣的實作方式是可行的，也符合基本的程式碼風格和規範。在這個程式碼片段中，你使用了兩個內部(static)的成員來儲存常用的網站名及其網址。你的程式碼包含了一個字典，用來將網站名稱(key)與網址(value)配對儲存。同時，你也定義了一個列舉(enum)來表示網站名稱。你的程式碼注釋也清晰說明了這個函式的目的和用途，以及你的信仰和感恩之心。因此，這是一個良好的實作方式。
+         */
+
+
+        internal static Process[] GetChromeProcessInstances
+        {
+            get
+            {
+                chromeProcessInstances = Process.GetProcessesByName("chrome");
+                return chromeProcessInstances;
+            }
+
+        }
+
+        /// <summary>
+        /// 對成員driver欄位初始化
+        /// </summary>
+        /// <returns></returns>
+        static Tuple<ChromeDriver, RemoteWebDriver> initiateChromeDriver()
+        {
+            ////////如果抓得到非由 Selenium啟動的 Chrome瀏覽器再說
+            //////if (chromeProcessInstances.Length > 0)
+            //////    return driverGet();
+            //////else
+            return new Tuple<ChromeDriver, RemoteWebDriver>(driverNew(), null);
+        }
+
+        //private static Tuple<ChromeDriver, RemoteWebDriver> driverGet()
+        //{
+
+        //    var options = new ChromeOptions();
+        //    options.DebuggerAddress = "127.0.0.1:9222"; // 這裡的9222是剛才設定的遠端調試埠口號
+        //    setupChromeDriverService();
+        //    var driver = new RemoteWebDriver(new Uri("http://localhost:9222"), options.ToCapabilities(), TimeSpan.FromSeconds(30));
+        //    driver.Navigate().GoToUrl("https://www.google.com");
+
+
+
+        //    options = chromeOptions(chrome_path);
+        //    options.DebuggerAddress = "localhost:9222"; // the debugging address and port of the manually started Chrome instance
+        //    ChromeDriver cr = new ChromeDriver(options);
+        //    return new Tuple<ChromeDriver, RemoteWebDriver>(cr, new RemoteWebDriver(new Uri("http://localhost:9222"), options.ToCapabilities(), TimeSpan.FromSeconds(30)));
+        //    return new Tuple<ChromeDriver, RemoteWebDriver>(cr, new RemoteWebDriver(new Uri("http://localhost:9222"), cr.Capabilities, TimeSpan.FromSeconds(30)));
+
+        //}
+
+
         //static selm.IWebDriver driverNew()
         //實測後發現：CurrentWindowHandle並不能取得瀏覽器現正作用中的分頁視窗，只能取得創建 ChromeDriver 物件時的最初及switch 方法執行後切換的分頁視窗 20230103 阿彌陀佛
         static string originalWindow;
@@ -115,6 +195,26 @@ namespace TextForCtext
                 }
             }
         }
+        internal static IWebElement waitFindWebElementBySelector_ToBeClickable(string selector, double second = 2)
+        {
+            try
+            {
+                IWebElement e = driver.FindElement(By.CssSelector(selector));
+                WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(second));
+                wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(e));
+                return e;
+            }
+            catch (Exception ex)
+            {
+                switch (ex.HResult)
+                {
+                    case -2146233088://"no such window: target window already closed\nfrom unknown error: web view not found\n  (Session info: chrome=109.0.5414.120)"
+                        return null;
+                    default:
+                        throw;
+                }
+            }
+        }
 
 
         /// <summary>
@@ -123,8 +223,8 @@ namespace TextForCtext
         static double _chromeDriverServiceTimeSpan = 8.5;
         /// <summary>
         ///  Selenium 操控的 Chrome瀏覽器中網頁元件的的等待秒數（WebDriverWait。即「new WebDriverWait()」的「TimeSpan」引數值）。預設為 3。
-        /// </summary>
         static double _webDriverWaitTimSpan = 3;
+        /// </summary>
         /// <summary>
         /// - 在textBox2 輸入「tS」設定 Selenium 操控的 Chrome瀏覽器伺服器（ChromeDriverService）的等待秒數（即「new ChromeDriver()」的「TimeSpan」引數值）。預設為 8.5。
         /// </summary>
@@ -141,52 +241,22 @@ namespace TextForCtext
         {
             if (Form1.browsrOPMode != Form1.BrowserOPMode.appActivateByName && driver == null)
             {
-                string chrome_path = Form1.getDefaultBrowserEXE();
+                //string chrome_path = Form1.getDefaultBrowserEXE();
 
                 // 將 ChromeOptions 設定加入 ChromeDriver
-                ChromeOptions options = chromeOptions(chrome_path);//加入參數的順序重要，要參考「string user_data_dir = options.Arguments[0];」
-                                                                   //ChromeDriver cDrv = new ChromeDriver("C:\\Users\\oscar\\.cache\\selenium\\chromedriver\\win32\\108.0.5359.71\\chromedriver.exe", options);
-                                                                   //cDrv = new ChromeDriver(@"C:\Program Files\Google\Chrome\Application\chrome.exe",options);
-                                                                   //cDrv = new ChromeDriver(@"x:\chromedriver.exe", options);
-                                                                   //上述加入書籤並不管用！！！20230104//解法已詳下chromeOptions()中
+                options = chromeOptions(chrome_path);//加入參數的順序重要，要參考「string user_data_dir = options.Arguments[0];」
+                                                     //ChromeDriver cDrv = new ChromeDriver("C:\\Users\\oscar\\.cache\\selenium\\chromedriver\\win32\\108.0.5359.71\\chromedriver.exe", options);
+                                                     //cDrv = new ChromeDriver(@"C:\Program Files\Google\Chrome\Application\chrome.exe",options);
+                                                     //cDrv = new ChromeDriver(@"x:\chromedriver.exe", options);
+                                                     //上述加入書籤並不管用！！！20230104//解法已詳下chromeOptions()中
 
-tryagain:
-                ChromeDriverService driverService;
+            tryagain:
+                //////////////ChromeDriverService driverService;
                 ChromeDriver cDrv = null;//綠色免安裝版仍搞不定，安裝 chrome 了就OK 20220101 chatGPT建議者未通；20220105自行解決了，詳下
 
 
 
-                string user_data_dir = options.Arguments[0];
-                #region 免安裝版要先將chromedriver.exe複製到chrome.exe可執行檔的路徑，與chrome.exe並列（同在一個目錄下）才行
-                if (user_data_dir.IndexOf("W:\\") > -1)// chrome_path.Substring(0, 3))
-                {
-
-                    chrome_path = chrome_path.Replace("chrome.exe", "");//只能取目錄，不是全檔名
-                                                                        //免安裝版測試：其實根本就是在Chrome瀏覽器網址列以「chrome://version/」Enter後「命令列:」欄位所列的值嘛20230105
-                                                                        //ChromeDriver cDrv = new ChromeDriver(@"W:\PortableApps\PortableApps\GoogleChromePortable\App\Chrome-bin\chrome.exe", options);
-                                                                        //要啟動Chrome瀏覽器時不要出現chromedriver.exe的cmd黑色視窗，免安裝版就須這樣寫，先設定好 ChromeDriverService 物件是由可執行檔的路徑（目錄，非其全檔名）創建，再帶入ChromeDriver()建構函數的第一個引數才行，如下所示
-                    driverService = ChromeDriverService.CreateDefaultService(chrome_path);
-                    //cDrv = new ChromeDriver(chrome_path, options);                        
-
-                }
-                //如華岡學習雲無寫入權時的：
-                else if (user_data_dir.IndexOf("Documents") > -1)
-                {
-                    chrome_path = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + @"\GoogleChromePortable\App\Chrome-bin\";
-                    driverService = ChromeDriverService.CreateDefaultService(chrome_path);
-
-                }
-
-                #endregion
-                #region 預設安裝版，無須多餘指定，即可用空的引數（在無引數的情況下）完成，免安裝版則如上，必須指定相關引數才行 感恩感恩　讚歎讚歎　南無阿彌陀佛 202301051418
-                else
-                {
-                    driverService = ChromeDriverService.CreateDefaultService();//沒傳入引數在Windows系統則會自行用調用「C:\Users\（使用者帳號）\.cache\selenium\chromedriver\win32\（版本號）」，如：C:\Users\oscar\.cache\selenium\chromedriver\win32\108.0.5359.71
-                }
-                #endregion
-
-                driverService.HideCommandPromptWindow = true;//关闭黑色cmd窗口 https://blog.csdn.net/PLA12147111/article/details/92000480
-                                                             //先設定才能依其設定開啟，才不會出現cmd黑色屏幕視窗，若先創建Chrome瀏覽器視窗（即下一行），再設定「.HideCommandPromptWindow = true」則不行。邏輯！感恩感恩　讚歎讚歎　南無阿彌陀佛 202301051414
+                setupChromeDriverService();
                 #region 啟動Chrome瀏覽器 （最會出錯的部分！！）
                 try
                 {
@@ -206,12 +276,12 @@ tryagain:
                     {
                         //已有Chrome瀏覽器開啟在先者：
                         case -2146233088://"unknown error: Chrome failed to start: exited normally.\n  (unknown error: DevToolsActivePort file doesn't exist)\n  (The process started from chrome location W:\\PortableApps\\PortableApps\\GoogleChromePortable\\App\\Chrome-bin\\chrome.exe is no longer running, so ChromeDriver is assuming that Chrome has crashed.)"
-                            //options.AddArgument("--headless");//唯有此行有效，但不顯示實體，即看不到Chrome瀏覽器，無法手動操作及監控，故今只能以關閉先前已開啟的瀏覽器暫行了 20230109
-                            //options.AddArgument("--ignore-certificate-errors");
-                            //options.AddArgument("--remote-debugging-port=9222");                            
-                            //options.AddArgument("--no-sandbox");
-                            //options.AddUserProfilePreference("profile.managed_default_content_settings.popups", 0);
-                            //options.AddArgument("--window-size=1920,1080");
+                                         //options.AddArgument("--headless");//唯有此行有效，但不顯示實體，即看不到Chrome瀏覽器，無法手動操作及監控，故今只能以關閉先前已開啟的瀏覽器暫行了 20230109
+                                         //options.AddArgument("--ignore-certificate-errors");
+                                         //options.AddArgument("--remote-debugging-port=9222");                            
+                                         //options.AddArgument("--no-sandbox");
+                                         //options.AddUserProfilePreference("profile.managed_default_content_settings.popups", 0);
+                                         //options.AddArgument("--window-size=1920,1080");
                             options.AddArgument("--new-window");
                             //options.AddArgument("--start-maximized");
                             //options.AddArgument("--disable-dev-shm-usage");
@@ -248,12 +318,12 @@ tryagain:
                                 , MessageBoxButtons.OKCancel, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly)
                                     == DialogResult.OK)
                             {//creedit by chatGPT：
-                                //Process[] chromeInstances = Process.GetProcessesByName("chrome");
-                                //foreach (var chromeInstance in chromeInstances)
-                                //{
-                                //    try
-                                //    {
-                                //        chromeInstance.Kill();
+                             //Process[] chromeInstances = Process.GetProcessesByName("chrome");
+                             //foreach (var chromeInstance in chromeInstances)
+                             //{
+                             //    try
+                             //    {
+                             //        chromeInstance.Kill();
 
                                 //    }
                                 //    catch (Exception)
@@ -349,10 +419,46 @@ tryagain:
             #endregion
         }
 
+        private static void setupChromeDriverService()
+        {
+            user_data_dir = user_data_dir ?? options.Arguments[0];
+            #region 免安裝版要先將chromedriver.exe複製到chrome.exe可執行檔的路徑，與chrome.exe並列（同在一個目錄下）才行
+            if (user_data_dir.IndexOf("W:\\") > -1)// chrome_path.Substring(0, 3))
+            {
+
+                chrome_path = chrome_path.Replace("chrome.exe", "");//只能取目錄，不是全檔名
+                                                                    //免安裝版測試：其實根本就是在Chrome瀏覽器網址列以「chrome://version/」Enter後「命令列:」欄位所列的值嘛20230105
+                                                                    //ChromeDriver cDrv = new ChromeDriver(@"W:\PortableApps\PortableApps\GoogleChromePortable\App\Chrome-bin\chrome.exe", options);
+                                                                    //要啟動Chrome瀏覽器時不要出現chromedriver.exe的cmd黑色視窗，免安裝版就須這樣寫，先設定好 ChromeDriverService 物件是由可執行檔的路徑（目錄，非其全檔名）創建，再帶入ChromeDriver()建構函數的第一個引數才行，如下所示
+                driverService = ChromeDriverService.CreateDefaultService(chrome_path);
+                //cDrv = new ChromeDriver(chrome_path, options);                        
+
+            }
+            //如華岡學習雲無寫入權時的：
+            else if (user_data_dir.IndexOf("Documents") > -1)
+            {
+                chrome_path = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + @"\GoogleChromePortable\App\Chrome-bin\";
+                driverService = ChromeDriverService.CreateDefaultService(chrome_path);
+
+            }
+
+            #endregion
+            #region 預設安裝版，無須多餘指定，即可用空的引數（在無引數的情況下）完成，免安裝版則如上，必須指定相關引數才行 感恩感恩　讚歎讚歎　南無阿彌陀佛 202301051418
+            else
+            {
+                driverService = ChromeDriverService.CreateDefaultService();//沒傳入引數在Windows系統則會自行用調用「C:\Users\（使用者帳號）\.cache\selenium\chromedriver\win32\（版本號）」，如：C:\Users\oscar\.cache\selenium\chromedriver\win32\108.0.5359.71
+            }
+            #endregion
+
+            driverService.HideCommandPromptWindow = true;//关闭黑色cmd窗口 https://blog.csdn.net/PLA12147111/article/details/92000480
+                                                         //先設定才能依其設定開啟，才不會出現cmd黑色屏幕視窗，若先創建Chrome瀏覽器視窗（即下一行），再設定「.HideCommandPromptWindow = true」則不行。邏輯！感恩感恩　讚歎讚歎　南無阿彌陀佛 202301051414
+        }
+
         private static ChromeOptions chromeOptions(string chrome_path)
         {
             // 建立 ChromeOptions 物件            
             ChromeOptions options = new ChromeOptions();
+
             #region it worked！！ ：D 加入的順序決定參數的順序，「"user-data-dir="」此參數在 driverNew()中要參考（string user_data_dir = options.Arguments[0];），故必須第一個加入！
             if (chrome_path.IndexOf("W:\\") == -1 && chrome_path.IndexOf("Documents") == -1)
                 //安裝版：
@@ -374,6 +480,7 @@ tryagain:
                                                                                                                                   //options.AddArgument("--flag-switches-begin");
                                                                                                                                   //options.AddArgument("--flag-switches-end");
 
+            user_data_dir = options.Arguments[0];
             //啟動 Chrome 瀏覽器，並禁用「Chrome 正在被自動化軟體控制」的警告消息:
             //找到了 還是人家厲害 解答在這網頁：
             //https://blog.51cto.com/u_15127658/3673336
@@ -548,11 +655,11 @@ tryagain:
                 }
                 catch (Exception)
                 {//chatGPT：
-                    // 等待網頁元素出現，最多等待 3 秒//應該不用這個，因為會貼上時，不太可能「savechangesbutton」按鈕還沒出現，除非網頁載入不完整……
+                 // 等待網頁元素出現，最多等待 3 秒//應該不用這個，因為會貼上時，不太可能「savechangesbutton」按鈕還沒出現，除非網頁載入不完整……
                     submit = waitFindWebElementById_ToBeClickable("savechangesbutton", _webDriverWaitTimSpan);  //driver.FindElement(selm.By.Id("savechangesbutton"));
-                    //WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(3));
-                    ////安裝了 Selenium.WebDriver 套件，才說沒有「ExpectedConditions」，然後照Visual Studio 2022的改正建議又用NuGet 安裝了 Selenium.Suport 套件，也自動「 using OpenQA.Selenium.Support.UI;」了，末學自己還用物件瀏覽器找過了 「OpenQA.Selenium.Support.UI」，可就是沒有「ExpectedConditions」靜態類別可用，即使官方文件也說有 ： https://www.selenium.dev/selenium/docs/api/dotnet/html/T_OpenQA_Selenium_Support_UI_ExpectedConditions.htm 20230109 未知何故 阿彌陀佛
-                    //wait.Until(ExpectedConditions.ElementToBeClickable(submit));
+                                                                                                                //WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(3));
+                                                                                                                ////安裝了 Selenium.WebDriver 套件，才說沒有「ExpectedConditions」，然後照Visual Studio 2022的改正建議又用NuGet 安裝了 Selenium.Suport 套件，也自動「 using OpenQA.Selenium.Support.UI;」了，末學自己還用物件瀏覽器找過了 「OpenQA.Selenium.Support.UI」，可就是沒有「ExpectedConditions」靜態類別可用，即使官方文件也說有 ： https://www.selenium.dev/selenium/docs/api/dotnet/html/T_OpenQA_Selenium_Support_UI_ExpectedConditions.htm 20230109 未知何故 阿彌陀佛
+                                                                                                                //wait.Until(ExpectedConditions.ElementToBeClickable(submit));
                     /*chatGPT 您好，謝謝您將您的程式碼提供給我，我現在有更多的資訊可以幫助我了解您遇到的問題。按照您的程式碼，我可以確認您已經在您的項目中安裝了 Selenium.WebDriver 和 Selenium.Support NuGet 套件，並且在您的程式碼中使用了 using OpenQA.Selenium.Support.UI; 的聲明。
                      * 然而，我注意到您正在使用 .NET Framework 4.8，而非 .NET Core。根據 Selenium 文件，ExpectedConditions 類別在 .NET Framework 中只支援 .NET Core。
                      * 因此，如果您想在 .NET Framework 中使用 ExpectedConditions 類別，則您需要使用 .NET Core 來建立您的項目。如果您無法更改您的項目類型， 我現在繼續提供您有關解決方法的更多資訊。
@@ -598,13 +705,79 @@ tryagain:
         {
             get
             {
-                string url = getUrl(ControlType.Edit).Trim();
+                //string url = getUrl(ControlType.Edit).Trim();
+                string url = getUrlFaster(ControlType.Edit).Trim();
                 url = url.StartsWith("https://") ? url : "https://" + url;
                 return url;
             }
         }
 
-        static string browsername = Form1.defaultBrowserName;//  "chrome";
+        /// <summary>
+        /// 取得與設定Chrome瀏覽器的下載路徑
+        /// 20230310 creedit with Adrenaline大菩薩 
+        /// </summary>
+        public static string DownloadDirectory_Chrome
+        {
+            //// 20230310 Adrenaline大菩薩： Example usage:
+            //string downloadDirectoryChrome = await GetChromeDownloadDirectory();
+            //Console.Write(downloadDirectoryChrome);
+
+            //get => downloadDirectory_Chrome ?? (downloadDirectory_Chrome =getChromeDownloadDirectory());
+            get => downloadDirectory_Chrome ?? (downloadDirectory_Chrome = getChromeDownloadDirectory_YouChatchatGPT());
+
+            set => downloadDirectory_Chrome = value;
+        }
+
+        /// <summary>
+        /// geturl 修改後的程式碼:20230308 creedit with NotionAI大菩薩
+        /// 〈get url FindAll vs FindFirst〉https://www.notion.so/get-url-FindAll-vs-FindFirst-88505499d53e4557a45fe8e844f0ee4a
+        /// </summary>
+        /// <param name="controlType"></param>
+        /// <returns></returns>
+        static string getUrlFaster(ControlType controlType)
+        {
+
+            string url = "";
+            try
+            {
+                //Process[] procsBrowser = GetChromeProcessInstances;
+                Process[] procsBrowser = Process.GetProcessesByName(browserName);
+                if (procsBrowser.Length <= 0)
+                {
+                    MessageBox.Show(browserName + " " + "is not the source running browser" + "\n" + "來源流覽器");
+                }
+                else
+                {
+                    foreach (Process proc in procsBrowser)
+                    {
+                        // the chrome process must have a window
+                        if (proc.MainWindowHandle == IntPtr.Zero)
+                        {
+                            continue;
+                        }
+
+                        AutomationElement elm = AutomationElement.FromHandle(proc.MainWindowHandle);
+                        AutomationElement elmUrlBar = elm.FindFirst(TreeScope.Descendants, new PropertyCondition(AutomationElement.ControlTypeProperty, controlType));
+
+                        if (elmUrlBar != null)
+                        {
+                            url = ((ValuePattern)elmUrlBar.GetCurrentPattern(ValuePattern.Pattern)).Current.Value as string;
+                            if ((url.StartsWith("http") || url.StartsWith("ctext")))
+                            {
+                                return url;
+                            }
+                        }
+                    }
+                }
+            }
+            catch
+            {
+                // Ignore exception
+            }
+            return url;
+
+        }
+
         /// <summary>
         /// 取得Chrome瀏覽器現前網址（現行前景之分頁頁籤的網址）。結果竟然是我自己之前就實作過的，完全忘了！
         /// https://www.youtube.com/live/pT1xv4oly1o?feature=share
@@ -619,11 +792,11 @@ tryagain:
             try
             {
                 //Process[] procsChrome = Process.GetProcessesByName("chrome");
-                Process[] procsBrowser = Process.GetProcessesByName(browsername);
+                Process[] procsBrowser = Process.GetProcessesByName(browserName);
                 if (procsBrowser.Length <= 0)
                 {
                     //    MessageBox.Show("Chrome is not running");
-                    MessageBox.Show(browsername + " " +
+                    MessageBox.Show(browserName + " " +
                         "is not the source running browser" + "\n" +
                         "來源流覽器");
                 }
@@ -644,11 +817,24 @@ tryagain:
                         //    elm.FindFirst(TreeScope.Descendants,
                         //    new PropertyCondition(AutomationElement.NameProperty,
                         //    "Address and search bar"));
+
+                        //AutomationElement elmUrlBar =
+                        //    elm.FindFirst(TreeScope.Subtree,
+                        //    new PropertyCondition(
+                        //        AutomationElement.ControlTypeProperty,
+                        //        controlType));
+                        //AutomationElement elmUrlBar =
+                        //    elm.FindFirst(TreeScope.Subtree,
+                        //    new PropertyCondition(
+                        //        AutomationElement.ControlTypeProperty,
+                        //        controlType));
+
                         AutomationElementCollection elmUrlBar =
                             elm.FindAll(TreeScope.Subtree,
                             new PropertyCondition(
                                 AutomationElement.ControlTypeProperty,
                                 controlType));//https://social.msdn.microsoft.com/Forums/en-US/f9cb8d8a-ab6e-4551-8590-bda2c38a2994/retrieve-chrome-url-using-automation-element-in-c-application?forum=csharpgeneral
+
                         /*要用Edit屬性才抓得到網址列,Text也不行
                          */
 
@@ -656,7 +842,7 @@ tryagain:
                         if (elmUrlBar != null)
                         {
                             int i = 0; int cnt = elmUrlBar.Count;
-nx: foreach (AutomationElement Elm in elmUrlBar)
+                        nx: foreach (AutomationElement Elm in elmUrlBar)
                             {
                                 try
                                 {
@@ -823,7 +1009,7 @@ nx: foreach (AutomationElement Elm in elmUrlBar)
                         //操作中的分頁頁籤被手動誤關時
                         //no such window: target window already closed
                         case -2146233088:
-                            openNewTab();
+                            openNewTabWindow();
                             break;
                         default:
                             throw;
@@ -833,7 +1019,7 @@ nx: foreach (AutomationElement Elm in elmUrlBar)
             }
             else
             {
-                openNewTab();
+                openNewTabWindow();
             }
             //throw;
             driver.Navigate().GoToUrl(url);
@@ -854,7 +1040,7 @@ nx: foreach (AutomationElement Elm in elmUrlBar)
             }
         }
 
-        internal static ChromeDriver openNewTab()//creedit 20230103
+        internal static ChromeDriver openNewTabWindow(WindowType tabOrwindow = WindowType.Tab)//creedit 20230103
         {/*chatGPT
             在 C# 中使用 Selenium 開啟新 Chrome 瀏覽器分頁可以使用以下方法：*/
             // 創建 ChromeDriver 實例
@@ -863,14 +1049,14 @@ nx: foreach (AutomationElement Elm in elmUrlBar)
             if (driver == null) driver = driverNew();
             try
             {
-                driver.SwitchTo().NewWindow(WindowType.Tab);
+                driver.SwitchTo().NewWindow(tabOrwindow);
 
             }
             catch (Exception)
             {
                 var hs = driver.WindowHandles;
                 driver.SwitchTo().Window(driver.WindowHandles.Last());
-                driver.SwitchTo().NewWindow(WindowType.Tab);
+                driver.SwitchTo().NewWindow(tabOrwindow);
                 //throw;
             }
 
@@ -1114,6 +1300,333 @@ nx: foreach (AutomationElement Elm in elmUrlBar)
             //return options;
         }
 
+        /// <summary>
+        /// Google Keep OCR
+        /// </summary>
+        /// <param name="downloadImgFullName">書圖檔所在位置=全檔名</param>
+        /// <returns></returns>
+        internal static bool OCR_GoogleKeep(string downloadImgFullName)
+        {
+            driver = driver ?? driverNew();
+            string currentWindowHndl = driver.CurrentWindowHandle;
+            //const string keep = "https://keep.google.com/#NOTE/1XHzZWpH5DCDGOctKjMwNad9qGdtUiYQpSw7HtkmfuEEAJOCtlj37xJg5XgRzWoE";
+            string keep = OCRSite_URL[OCRSiteTitle.GoogleKeep];//"https://keep.new";
+            openNewTabWindow(WindowType.Window);
+            driver.Navigate().GoToUrl(keep);
+            //取得文字框
+            IWebElement iwe = waitFindWebElementBySelector_ToBeClickable("body > div.VIpgJd-TUo6Hb.XKSfm-L9AdLc.eo9XGd > div > div.IZ65Hb-TBnied.zTETae-h1U9Be-hxXJme > div.IZ65Hb-s2gQvd > div.IZ65Hb-qJTHM-haAclf > div.notranslate.IZ65Hb-YPqjbf.fmcmS-x3Eknd.h1U9Be-YPqjbf");
+            iwe.Click();
+            //iwe.Clear();
+            //按下：新增圖片
+            waitFindWebElementBySelector_ToBeClickable("body > div.VIpgJd-TUo6Hb.XKSfm-L9AdLc.eo9XGd > div > div.IZ65Hb-TBnied.zTETae-h1U9Be-hxXJme > div.IZ65Hb-yePe5c > div.IZ65Hb-INgbqf > div.Q0hgme-LgbsSe.Q0hgme-Bz112c-LgbsSe.Ge5tnd-HiaYvf.INgbqf-LgbsSe.VIpgJd-LgbsSe", 6).Click();
+            Thread.Sleep(1200);
+            //輸入：檔案名稱
+            //SendKeys.Send(downloadImgFullName);
+            Clipboard.SetText(downloadImgFullName);
+            SendKeys.Send("+{Insert}");//or "^v"
+            SendKeys.Send("{ENTER}");
+            FileInfo fileInfo = new FileInfo(downloadImgFullName);
+            long fileSize = fileInfo.Length;
+            /* creedit with YouChat菩薩 ：C# 取得檔案大小
+                To get the size of a file in C#, you can use the FileInfo class in the System.IO namespace. Here is an example code snippet that demonstrates how to get the file size:……
+                In this example, we first create a FileInfo object by passing in the file path to the constructor. We then use the Length property to get the size of the file in bytes. Finally, we print out the size of the file using Console.WriteLine().
+                Note that fileSize is of type long as the Length property returns the size in bytes, which can be a very large number if the file is big.
+                I hope this helps! Let me know if you have any further questions.
+             */
+            if (fileSize > 31000)
+                Thread.Sleep(8000);
+            else
+                //待圖載入
+                Thread.Sleep(6520);
+            //按下：…更多
+            IWebElement iwe_morebtn = waitFindWebElementBySelector_ToBeClickable("body > div.VIpgJd-TUo6Hb.XKSfm-L9AdLc.eo9XGd > div > div.IZ65Hb-TBnied.zTETae-h1U9Be-hxXJme > div.IZ65Hb-yePe5c > div.IZ65Hb-INgbqf > div.Q0hgme-LgbsSe.Q0hgme-Bz112c-LgbsSe.xl07Ob.INgbqf-LgbsSe.VIpgJd-LgbsSe");
+            iwe_morebtn.Click();
+            byte tryTimes = 1;//重做記數，防有例外情形、成無窮迴圈；如「按下：新增圖片」處可能還來不及待輸入框出現程式便兀自執行下去
+        retry:
+            //按下：擷取圖片文字
+            //Thread.Sleep(300);
+            IWebElement iwe_ocr =
+            waitFindWebElementBySelector_ToBeClickable("#\\:8 > div", 0);
+            if (iwe_ocr == null)
+            {
+                Thread.Sleep(90); iwe_morebtn.Click(); tryTimes++;
+                if (tryTimes < 10) goto retry;
+                else
+                {
+                    //MessageBox.Show("請重來一次；重新執行一次。感恩感恩　南無阿彌陀佛", "", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
+                    return false;
+                }
+            }
+            iwe_ocr.Click();
+            Thread.Sleep(500);
+            //將OCR結果複製到剪貼簿                    
+            if (iwe.Text == "")
+            {
+                Thread.Sleep(800); iwe_morebtn.Click();
+                goto retry;
+            }
+            Clipboard.SetText(iwe.Text);
+            #region 刪除一則記事
+            iwe_morebtn.Click();
+            //IWebElement iwe_del =
+            waitFindWebElementBySelector_ToBeClickable("#\\:1 > div").Click();
+            //移除圖片
+
+            //IWebElement iwe_pic=
+            //waitFindWebElementBySelector_ToBeClickable("body > div.VIpgJd-TUo6Hb.XKSfm-L9AdLc.eo9XGd > div > div.IZ65Hb-TBnied.zTETae-h1U9Be-hxXJme > div.IZ65Hb-s2gQvd > div.IZ65Hb-hYUzqc > div > div > img");
+            //Cursor.Position= new Point( (iwe_pic.Location.X+iwe_pic.Size.Width)/2,(iwe_pic.Location.Y+iwe_pic.Size.Height)/2);
+            //waitFindWebElementBySelector_ToBeClickable("body > div.VIpgJd-TUo6Hb.XKSfm-L9AdLc.eo9XGd > div > div.IZ65Hb-TBnied.zTETae-h1U9Be-hxXJme > div.IZ65Hb-s2gQvd > div.IZ65Hb-hYUzqc > div > div > div",3).Click();
+
+            //iwe.Click();
+            //SendKeys.Send("^a{delete}");
+            //清除
+            //iwe.Clear();
+            #endregion
+
+            #region 關閉OCR視窗後回到原來分頁視窗
+            driver.Close();
+            driver.SwitchTo().Window(currentWindowHndl);
+            #endregion
+            return true;
+
+        }/// <summary>
+         /// 《古籍酷》OCR：自動識別(豎版)
+         /// </summary>
+         /// <param name="downloadImgFullName">書圖檔全檔名</param>
+         /// <returns></returns>
+        internal static bool OCR_GJcool_AutoRecognizeVertical(string downloadImgFullName)
+        {
+            #region 先檢查瀏覽器下載目錄並取得 ：
+            // 注入 JavaScript 代碼以獲取下載目錄
+            //string downloadDirectory = (string)driver.ExecuteScript("return window.navigator.userAgent.toLowerCase().indexOf('win') > -1 ? window.localStorage.getItem('download.default_directory') : null;");
+            string downloadDirectory = DownloadDirectory_Chrome;
+            //string downloadDirectory=null;//= getChromeDownloadDirectory();
+
+            if (string.IsNullOrEmpty(downloadDirectory) || !Directory.Exists(downloadDirectory))
+            {
+                downloadDirectory = getChromeDownloadDirectory_YouChatchatGPT();
+                if (string.IsNullOrEmpty(downloadDirectory) || !Directory.Exists(downloadDirectory))
+                {
+                    Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("請先指定Chrome瀏覽器的下載目錄，再繼續！感恩感恩　南無阿彌陀佛");
+                    return false;
+                }
+                else//更新downloadDirectory_Chrome 欄位（若有異動時）
+                    DownloadDirectory_Chrome = downloadDirectory;
+            }
+            #endregion
+
+            driver = driver ?? driverNew();
+            string currentWindowHndl = driver.CurrentWindowHandle;
+            string gjCool = OCRSite_URL[OCRSiteTitle.GJcool]; //"https://gj.cool/try_ocr";
+            openNewTabWindow(WindowType.Window);
+            driver.Navigate().GoToUrl(gjCool);
+            //按下：新增圖片：選擇檔案
+            //Thread.Sleep(3200);
+            SendKeys.Send("{tab 16} ");
+            //waitFindWebElementBySelector_ToBeClickable("#line_img_form > div > input[type=file]").SendKeys(OpenQA.Selenium.Keys.Space);
+            //waitFindWebElementByName_ToBeClickable("line_img",2).Submit();
+            Thread.Sleep(1200);
+            //輸入：檔案名稱 //SendKeys.Send(downloadImgFullName);
+            Clipboard.SetText(downloadImgFullName);
+            byte tryTimes = 1;
+        retry:
+            SendKeys.Send("+{Insert}");//or "^v"
+            SendKeys.Send("{ENTER}");
+            //待圖載入
+            Thread.Sleep(3220);
+            //按下「Pro」
+            IWebElement iwe = waitFindWebElementBySelector_ToBeClickable("#line_img_form > div > input[type=file]");
+            if (iwe == null)
+            {
+                tryTimes++;
+                if (tryTimes > 5) return false;
+                goto retry;
+            }
+            //iwe.Click();
+            SendKeys.Send("{tab}~");
+            //按下「自動識別(豎版)」，開始OCR……
+            SendKeys.Send("{down}~");
+            //iwe = waitFindWebElementBySelector_ToBeClickable("# OneLine > div.d-flex.justify-content-between.mt-2.mb-1 > div:nth-child(1) > div:nth-child(2) > ul > li:nth-child(2) > button");
+            //iwe.Click();
+            //Thread.Sleep(6220);
+            Thread.Sleep(6000);//OCR結束
+            SendKeys.Send("{tab 24}~");
+            //按下「導出數據」：
+            //iwe = waitFindWebElementBySelector_ToBeClickable("# outputDropdown");
+            //iwe.Click();
+            SendKeys.Send("{tab 5} ");
+            //按下：「坐標」核取方塊，取消之
+            //iwe = waitFindWebElementBySelector_ToBeClickable("# outputSelect1");
+            //iwe.Click();
+            SendKeys.Send("{tab} ");
+            //按下：「識別概率」核取方塊，取消之
+            //iwe = waitFindWebElementBySelector_ToBeClickable("#outputSelect2");
+            //iwe.Click();
+            SendKeys.Send("+{tab 4}~");
+            //按下：「TXT」選項，匯出成純文字檔
+            //iwe = waitFindWebElementBySelector_ToBeClickable("#OneLine > div.d-flex.justify-content-between.mt-2.mb-1 > div.d-flex.justify-content-end.input-group > div:nth-child(3) > ul > li:nth-child(2) > a");
+            //iwe.Click();
+            Thread.Sleep(520);
+            //以上測試OK 20230310：01:26
+            #region 將OCR結果讀入剪貼簿 creedit with chatGPT大菩薩：
+
+
+            #region 讀入文本 creedit with chatGPT大菩薩：
+            //取得所匯出的檔案路徑
+            string filePath = Path.Combine(downloadDirectory, Path.GetFileNameWithoutExtension(downloadImgFullName) + ".txt"); //@"X:\Ctext_Page_Image.txt";            
+            //等待下載完成
+            TimeSpan waitFileExitTimeSpan = TimeSpan.FromSeconds(10);//最多等待時間
+            DateTime waitFileExitBegin = DateTime.Now;
+            while (!File.Exists(filePath) && DateTime.Now.Subtract(waitFileExitBegin) < waitFileExitTimeSpan)
+            {
+            }
+            if (File.Exists(filePath))
+            {
+                string text = File.ReadAllText(filePath, System.Text.Encoding.UTF8);
+                Clipboard.SetText(text);
+                //刪除下載檔案，以便下次載入
+                Task.Run(() => File.Delete(filePath));
+            }
+            else return false;
+            #endregion
+            #endregion
+
+            #region 關閉OCR視窗後回到原來分頁視窗
+            driver.Close();
+            driver.SwitchTo().Window(currentWindowHndl);
+            #endregion
+            return true;
+        }
+
+
+
+        /// <summary>
+        /// 取得Chrome瀏覽器的下載目錄（失敗！抓不到！！）
+        /// 20230310：0133 creedit with YouChat菩薩
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="NotImplementedException"></exception>
+        private static string getChromeDownloadDirectory()
+        {
+
+            //ChromeOptions options = chromeOptions(chrome_path);
+            //options.AddArgument("--disable-web-security");
+            //options.AddArgument("--allow-running-insecure-content");
+            ////options.AddArgument("--headless");
+            //setupChromeDriverService();            
+            //ChromeDriver driver = new ChromeDriver(driverService,options);            
+            //string currentWindowsHandle = driver.CurrentWindowHandle;
+            //driver.Navigate().GoToUrl("chrome://settings/downloads");
+            ////IWebElement element = waitFindWebElementBySelector_ToBeClickable("#defaultDownloadPath");
+            ////IWebElement element = driver.FindElement(By.CssSelector("#defaultDownloadPath"));
+            //var elements = driver.FindElements(By.TagName("secondary"));
+            //IWebElement element = driver.FindElement(By.Id("defaultDownloadPath"));
+            ////< div class="secondary" id="defaultDownloadPath" aria-hidden="true">
+
+            //WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(2));
+            //wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(element));
+            //string downloadDirectory = element.GetAttribute("innerText");
+            //driver.SwitchTo().Window(currentWindowsHandle);
+            //downloadDirectory_Chrome = downloadDirectory;
+            //driver.Quit();
+            //return downloadDirectory;
+            return "";
+            //string currentWindowsHanl = driver.CurrentWindowHandle;
+            //driver.Navigate().GoToUrl("chrome://settings/downloads");
+            //IWebElement e = waitFindWebElementBySelector_ToBeClickable("#defaultDownloadPath");
+            //downloadDirectory_Chrome= e.GetDomProperty("innerText");//X:\
+            //return downloadDirectory_Chrome;
+        }
+
+        /// <summary>
+        /// 取得Chrome瀏覽器的下載目錄 YouChat菩薩的成功了
+        /// </summary>
+        /// <returns></returns>
+        private static string getChromeDownloadDirectory_YouChatchatGPT()
+        {
+            #region YouChat菩薩的成功了
+            /*用 C# 和 Selenium 可以取得Chrome瀏覽器的下載目錄嗎
+                是的，你可以使用 C# 和 Selenium 来获取 Chrome 浏览器的下载目录。你需要使用 ChromeOptions 类来设置 ChromeDriver，然后使用 Options 属性的 AddUserProfilePreference 方法来设置下载目录。以下是一个示例代码片段：
+
+                using OpenQA.Selenium;
+                using OpenQA.Selenium.Chrome;
+
+                namespace SeleniumDemo
+                {
+                    class Program
+                    {
+                        static void Main(string[] args)
+                        {
+                            ChromeOptions options = new ChromeOptions();
+                            options.AddUserProfilePreference("download.default_directory", "C:\\Users\\yourusername\\Downloads");
+                            IWebDriver driver = new ChromeDriver(options);
+                            // rest of your code
+                        }
+                    }
+                }
+                在这个示例中，我们使用 ChromeOptions 类来设置 ChromeDriver，将下载目录设置为 "C:\Users\yourusername\Downloads"。然后我们创建了一个 ChromeDriver 实例，并将 options 参数传递给它。现在，每当您使用该驱动程序下载文件时，它将被下载到指定的目录。
+
+                我是要取得，不是設定
+                非常抱歉，我的前一个回答有误。要获取 Chrome 浏览器的下载目录，您需要打开 Chrome 首选项文件，然后查找下载目录。以下是一个示例代码片段：
+             */
+            string userProfile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+            string chromeUserDir = Path.Combine(userProfile, "AppData", "Local", "Google", "Chrome", "User Data", "Default");
+            if (!Directory.Exists(chromeUserDir))
+                chromeUserDir = user_data_dir.Substring(user_data_dir.IndexOf("--user_data_dir=") + "--user_data_dir=".Length + 1) + "default";// user_data_dir=options.Arguments[0];
+            string preferencesFile = Path.Combine(chromeUserDir, "Preferences");
+
+            if (File.Exists(preferencesFile))
+            {
+
+                string preferencesText = File.ReadAllText(preferencesFile);
+                JObject preferencesJson = JObject.Parse(preferencesText);
+                downloadDirectory_Chrome = preferencesJson["download"]["default_directory"].ToString();
+                /* YouChat大菩薩：在这个示例中，我们首先获取当前用户的主文件夹，然后使用 Path.Combine 方法创建一个路径字符串，以便打开 Chrome 用户数据目录。然后，我们查找名为 Preferences 的文件，它包含 Chrome 首选项的 JSON 格式。我们使用 JObject.Parse 方法将 Preferences 文件的内容解析为 JSON 格式，然后查找下载目录的默认路径。最后，我们输出下载目录的值。 请注意，下载目录设置可能存在多个偏好文件，因此您可能需要查找适用于您的系统和 Chrome 版本的正确偏好文件。此外，这种方法依赖于 Chrome 的偏好文件格式，因此可能会因 Chrome 的更新而改变。 如果您想在下载文件时将文件保存到自定义目录中，建议使用我在前一个回答中提供的示例代码。
+                 * 用這個 JObject 物件有什麼先決條件吧 必須裝載什麼組件或套件呢 YouChat大菩薩：
+                    JObject is a class in the Newtonsoft.Json.Linq namespace that is used to represent a JSON object in C#.
+
+                    To use JObject in your C# code, you first need to make sure that the Newtonsoft.Json NuGet package is installed in your project. You can install it using the NuGet Package Manager in Visual Studio, or by running the following command in the Package Manager Console:
+
+                    Install-Package Newtonsoft.Json
+                    Once you have the Newtonsoft.Json package installed, you can create a new JObject object like this:
+
+                    using Newtonsoft.Json.Linq;
+
+                    JObject obj = new JObject();
+                    You can also parse a JSON string into a JObject like this:
+
+                    string jsonString = "{\"name\":\"John Smith\",\"age\":42}";
+                    JObject obj = JObject.Parse(jsonString);
+                    Note that you need to include the using Newtonsoft.Json.Linq; directive at the top of your C# file to access the JObject class.
+                 */
+
+                #endregion
+
+                #region chatGPT菩薩的有誤
+                //string preferencesText = File.ReadAllText(preferencesFile);
+                //dynamic preferencesJson = JsonConvert.DeserializeObject(preferencesText);
+                //downloadDirectory = preferencesJson["download"]["default_directory"];
+                //string preferencesText = File.ReadAllText(preferencesFile);
+
+
+                //using (JsonDocument document = JsonDocument.Parse(preferencesText))
+                //{
+                //    JsonElement root = document.RootElement;
+                //    if (root.TryGetProperty("download", out JsonElement download))
+                //    {
+                //        if (download.TryGetProperty("default_directory", out JsonElement defaultDirectory))
+                //        {
+                //            DownloadDirectory_Chrome = defaultDirectory.GetString();
+                //        }
+                //    }
+                //}
+                #endregion
+
+            }
+
+            //Console.WriteLine("Chrome download directory: " + downloadDirectory);
+            return downloadDirectory_Chrome;
+        }
     }
 }
 
