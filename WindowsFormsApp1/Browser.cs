@@ -1538,7 +1538,22 @@ namespace TextForCtext
             //return downloadDirectory_Chrome;
         }
 
+       
         /// <summary>
+        /// 20230311 YouChat菩薩，待測試！！！！
+        /// </summary>
+        /// <returns></returns>
+        private static string getChromeDownloadDirectory_YouChat()
+        {//用 C# 和 Selenium 可以取得Chrome瀏覽器的下載目錄嗎            
+            //YouChat菩薩：可以使用 C# 和 Selenium 获取 Chrome 浏览器的下载目录。可以使用以下代码示例来实现：
+            IWebElement downloadsFolderInput = driver.FindElement(By.Name("download.default_directory"));
+            string downloadsFolder = downloadsFolderInput.GetAttribute("value");
+            //在这个示例中，我们使用 OpenQA.Selenium 和 OpenQA.Selenium.Chrome 命名空间中提供的 ChromeDriver 类来创建一个 Chrome 浏览器实例。接下来，我们使用 driver.FindElement(By.Name("download.default_directory")) 方法查找 Chrome 浏览器下载目录的输入框，然后使用 downloadsFolderInput.GetAttribute("value") 获取输入框中的值，即下载目录的路径。
+            //请注意，要在计算机上成功运行此代码，您必须安装 Selenium Webdriver 和 ChromeDriver，并将其与您的 C# 项目一起使用。
+            return downloadsFolder;
+        }
+
+         /// <summary>
         /// 取得Chrome瀏覽器的下載目錄 YouChat菩薩的成功了
         /// </summary>
         /// <returns></returns>

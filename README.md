@@ -128,7 +128,7 @@ Ctrl + Shift + c ：將textBox1的文本複製到剪貼簿 以備用
 Alt + o :下載書頁圖片（簡稱「書圖」），交給[Google Keep](https://keep.new/) OCR : 
 
   複製圖片位址或由textBox3指定要下載的網頁網址即可下載，下載完成後將會自動開啟檔案總管並將該檔案選取。為尊重版權，防止濫用，僅設計一次一頁書圖，以便用即可。知足常樂。感恩感恩　南無阿彌陀佛
-  - 下載路徑預設為 Dropbox 根目錄，檔名為 Ctext_Page_Image.png（）    
+  - 下載路徑預設為 Dropbox 根目錄，檔名為 Ctext_Page_Image.png
    - 若不安裝Dropbox者可以自行在其裝路徑裡新增資料夾備置，本軟件許多功能仰賴於此。如備份已輸入之文本及暫存將貼入的文本等等。如我登入Windows作業系統的帳戶名稱為「oscar」，其默認安裝路徑即為：
         C:\Users\oscar\Dropbox。
      - 在非appActivateByName模式下：

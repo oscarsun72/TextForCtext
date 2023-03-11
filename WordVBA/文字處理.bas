@@ -1982,6 +1982,32 @@ If InStr(1, f, a, vbTextCompare) Then
     isSymbol = True
 End If
 End Function
+
+Sub 清除選取處的所有符號() '由圖書管理symbles模組清除標點符號改編'包括註腳、數字
+'Dim F, a As String, i As Integer
+Dim f, i As Integer, ur As UndoRecord
+SystemSetup.stopUndo ur, "清除選取處的所有符號"
+f = Array("·", "‧", "。", "」", Chr(-24152), "：", "，", "；", _
+    "、", "「", ".", Chr(34), ":", ",", ";", _
+    "……", "...", "．", "【", "】", " ", "《", "》", "〈", "〉", "？" _
+    , "！", "﹝", "﹞", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0" _
+    , "『", "』", Chr(13), ChrW(9312), ChrW(9313), ChrW(9314), ChrW(9315), ChrW(9316) _
+    , ChrW(9317), ChrW(9318), ChrW(9319), ChrW(9320), ChrW(9321), ChrW(9322), ChrW(9323) _
+    , ChrW(9324), ChrW(9325), ChrW(9326), ChrW(9327), ChrW(9328), ChrW(9329), ChrW(9330) _
+    , ChrW(9331), ChrW(8221), """") '先設定標點符號陣列以備用
+    '全形圓括弧暫不取代！
+    'a = ActiveDocument.Content
+'    Set a = ActiveDocument.Range.FormattedText '包含格式化的資訊
+    For i = 0 To UBound(f)
+        If InStr(selection.Range.text, f(i)) Then
+            'a = Replace(a, F(i), "")
+            selection.Range.Find.Execute f(i), True, , , , , , wdFindStop, True, "", wdReplaceAll
+        End If
+    Next
+    'ActiveDocument.Content = a
+SystemSetup.contiUndo ur
+End Sub
+
 Function is注音符號(ByVal a As String, Optional rng As Variant) As Boolean
 Dim f As String
 On Error GoTo eh

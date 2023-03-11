@@ -336,7 +336,7 @@ namespace WindowsFormsApp1
                             Clipboard.SetText(text);
                             if (!Active)
                             {
-                                Activate();bringBackMousePosFrmCenter();
+                                Activate(); bringBackMousePosFrmCenter();
                             }
                         }
 
@@ -2093,9 +2093,8 @@ namespace WindowsFormsApp1
                 {//Alt + Insert ：將剪貼簿的文字內容讀入textBox1中;若在手動鍵入輸入模式下則自動加上書名號篇名號
                     e.Handled = true;
                     string clpTxt = Clipboard.GetText();
-                    if (keyinTextMode && clpTxt != ClpTxtBefore &&
-                        clpTxt.IndexOf("《") == -1 && clpTxt.IndexOf("〈") == -1 && clpTxt.IndexOf("·") == -1
-                        ) textBox1.Text = CnText.booksPunctuation(ref clpTxt);
+                    if (keyinTextMode && clpTxt != ClpTxtBefore)// &&clpTxt.IndexOf("《") == -1 && clpTxt.IndexOf("〈") == -1 && clpTxt.IndexOf("·") == -1)//之前是沒有優化 booksPunctuation 才需要避免已經標點過的又標，現在有正則表達式把關，就沒有這問題了。感恩感恩　讚歎讚歎　chatGPT大菩薩+Bing大菩薩 南無阿彌陀佛
+                        textBox1.Text = CnText.booksPunctuation(ref clpTxt);
                     else textBox1.Text = clpTxt;
                     dragDrop = false;
                     return;
@@ -7817,7 +7816,7 @@ namespace WindowsFormsApp1
                 && textBox1.SelectionStart < textBox1.TextLength
                 && (regexPattern + Environment.NewLine).IndexOf(textBox1.Text.Substring(textBox1.SelectionStart, 1)) == -1
                 //&& omitSymbols.IndexOf(e.KeyChar.ToString()) == -1
-                && Regex.IsMatch(e.KeyChar.ToString(), "[^a-zA-Z"+ omitSymbols + "]"))//YouChat菩薩
+                && Regex.IsMatch(e.KeyChar.ToString(), "[^a-zA-Z" + omitSymbols + "]"))//YouChat菩薩
             {//https://stackoverflow.com/questions/1428047/how-to-set-winforms-textbox-to-overwrite-mode/70502655#70502655
                 if (textBox1.Text.Length != textBox1.MaxLength && textBox1.SelectedText == ""
                     && textBox1.Text != "" && textBox1.SelectionStart != textBox1.Text.Length)
