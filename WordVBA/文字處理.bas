@@ -3426,10 +3426,24 @@ Rem ©Ò¥H Find ª«¥óªº .Text ÄÝ©Ê¬O¥i¥H³]¬°¥¿«hªí¹F¦¡Åo¡H ¦ý­n±N .MatchWildcards ³
 Rem ¬Oªº¡A±z»¡±o«D±`¥¿½T¡C¦b Word VBA ¤¤¡A­n±N Find ª«¥óªº .Text ÄÝ©Ê³]¬°¥¿«hªí¹F¦¡¡A¥²¶·¥ý±N .MatchWildcards ³]¬° true¡A§_«h Word ·|±N¨äµø¬°¤@¯ë¤å¦r¬d§ä¡C¦]¦¹¡A¦pªG±z·Q­n¨Ï¥Î¥¿«hªí¹F¦¡¶i¦æ¬d§ä©M´À´«¾Þ§@¡A½Ð°O±o±N .MatchWildcards ³]¬° true¡C
 Rem
 End Sub
-
+Function ®Ñ¦W¸¹½g¦W¸¹¼Ðª`PreExamOK(d As Document, term As String, startPos_term As Long, Optional endPos_term As Long) As Boolean
+Dim rngChk As Range, xChk As String
+Set rngChk = d.Range(1, startPos_term)
+xChk = rngChk.text
+'If term = "¸êªv³qÅ²" Then Stop
+Dim result As Boolean
+'«e­±³£¨S¡m¡n¡q¡r®É
+If InStr(xChk, "¡m") = 0 And InStr(xChk, "¡n") = 0 And InStr(xChk, "¡q") = 0 And InStr(xChk, "¡r") = 0 Then
+    result = True
+'«e­±ªº¡m¡q¦b¡n¡rªº«e­±
+ElseIf InStrRev(xChk, "¡m") < InStrRev(xChk, "¡n") Or InStrRev(xChk, "¡q") < InStrRev(xChk, "¡r") Then
+    result = True
+End If
+®Ñ¦W¸¹½g¦W¸¹¼Ðª`PreExamOK = result
+End Function
 Sub ®Ñ¦W¸¹½g¦W¸¹¼Ðª`()
 Dim cnt As New ADODB.Connection, rst As New ADODB.Recordset
-Dim cntStr As String, d As Document, dx As String, rngF As Range
+Dim cntStr As String, d As Document, dx As String, rngF As Range, title As String
 Dim db As New dBase
 db.cnt¬d¦r cnt
 'If Dir("H:\§Úªº¶³ºÝµwºÐ\¨p¤H\¤d¼{¤@±oÂN(C¼Ñª©)\®ÑÄy¸ê®Æ\¹Ï®ÑºÞ²zªþ¥ó", vbDirectory) <> "" Then
@@ -3446,18 +3460,21 @@ GoSub bookmarks '¼ÐÂI²Å¸¹_®Ñ¦W¸¹_¦Û°Ê¥[¤W¥Î
 rst.Open "select * from ¼ÐÂI²Å¸¹_½g¦W¸¹_¦Û°Ê¥[¤W¥Î order by ±Æ§Ç", cnt, adOpenForwardOnly, adLockReadOnly
 Set rngF = d.Range: dx = d.Range.text
 Do Until rst.EOF
-    If VBA.InStr(dx, rst("½g¦W").Value) Then 'if found
-        Do While rngF.Find.Execute(rst("½g¦W").Value, , , , , , True, wdFindStop)
+    title = rst("½g¦W").Value
+    If VBA.InStr(dx, title) Then 'if found
+        Do While rngF.Find.Execute(title, , , , , , True, wdFindStop)
             If InStr("¡n¡r¡P¡E", IIf(rngF.Characters(rngF.Characters.Count).Next Is Nothing, "", rngF.Characters(rngF.Characters.Count).Next)) = 0 And _
                 InStr("¡m¡q¡P¡E", IIf(rngF.Characters(1).Previous Is Nothing, "", rngF.Characters(1).Previous)) = 0 Then
-                If VBA.IsNull(rst("¨ú¥N¬°").Value) Then
-                    rngF.text = "¡q" & rst("½g¦W").Value & "¡r"
-                              'd.Range.Find.Execute rst("½g¦W").Value, , , , , , True, wdFindContinue, , "¡q" & rst("½g¦W").Value & "¡r", wdReplaceAll
-                Else
-                    rngF.text = rst("¨ú¥N¬°").Value
-                    'd.Range.Find.Execute rst("½g¦W").Value, , , , , , True, wdFindContinue, , rst("¨ú¥N¬°").Value, wdReplaceAll
+                If ®Ñ¦W¸¹½g¦W¸¹¼Ðª`PreExamOK(d, title, rngF.start) Then
+                    If VBA.IsNull(rst("¨ú¥N¬°").Value) Then
+                        rngF.text = "¡q" & title & "¡r"
+                                  'd.Range.Find.Execute title, , , , , , True, wdFindContinue, , "¡q" & title & "¡r", wdReplaceAll
+                    Else
+                        rngF.text = rst("¨ú¥N¬°").Value
+                        'd.Range.Find.Execute title, , , , , , True, wdFindContinue, , rst("¨ú¥N¬°").Value, wdReplaceAll
+                    End If
+                    rngF.SetRange rngF.End, d.Range.End
                 End If
-                rngF.SetRange rngF.End, d.Range.End
             End If
         Loop
         Set rngF = d.Range: dx = d.Range.text
@@ -3477,18 +3494,27 @@ bookmarks:
 If rst.State = adStateOpen Then rst.Close
 rst.Open "select * from ¼ÐÂI²Å¸¹_®Ñ¦W¸¹_¦Û°Ê¥[¤W¥Î order by ±Æ§Ç", cnt, adOpenForwardOnly, adLockReadOnly
 Do Until rst.EOF
-    If VBA.InStr(dx, rst("®Ñ¦W").Value) Then 'if found
-        Do While rngF.Find.Execute(rst("®Ñ¦W").Value, , , , , , True, wdFindStop)
+    title = rst("®Ñ¦W").Value
+    
+'    If title = "¸êªv³qÅ²" Then Stop
+    
+    If VBA.InStr(dx, title) Then 'if found
+        Do While rngF.Find.Execute(title, , , , , , True, wdFindStop)
             If InStr("¡n¡r¡P¡E", IIf(rngF.Characters(rngF.Characters.Count).Next Is Nothing, "", rngF.Characters(rngF.Characters.Count).Next)) = 0 And _
                 InStr("¡m¡q¡P¡E", IIf(rngF.Characters(1).Previous Is Nothing, "", rngF.Characters(1).Previous)) = 0 Then
-                If VBA.IsNull(rst("¨ú¥N¬°").Value) Then
-                    rngF.text = "¡m" & rst("®Ñ¦W").Value & "¡n"
-        '            d.Range.Find.Execute rst("®Ñ¦W").Value, , , , , , True, wdFindContinue, , "¡m" & rst("®Ñ¦W").Value & "¡n", wdReplaceAll
-                Else
-                    rngF.text = rst("¨ú¥N¬°").Value
-        '            d.Range.Find.Execute rst("®Ñ¦W").Value, , , , , , True, wdFindContinue, , rst("¨ú¥N¬°").Value, wdReplaceAll
+                If ®Ñ¦W¸¹½g¦W¸¹¼Ðª`PreExamOK(d, title, rngF.start) Then
+                    
+                    If title = "¸êªv³qÅ²" Then Stop
+                    
+                    If VBA.IsNull(rst("¨ú¥N¬°").Value) Then
+                        rngF.text = "¡m" & title & "¡n"
+            '            d.Range.Find.Execute title, , , , , , True, wdFindContinue, , "¡m" & title & "¡n", wdReplaceAll
+                    Else
+                        rngF.text = rst("¨ú¥N¬°").Value
+            '            d.Range.Find.Execute title, , , , , , True, wdFindContinue, , rst("¨ú¥N¬°").Value, wdReplaceAll
+                    End If
+                    rngF.SetRange rngF.End, d.Range.End
                 End If
-                rngF.SetRange rngF.End, d.Range.End
             End If
         Loop
         Set rngF = d.Range: dx = d.Range.text
