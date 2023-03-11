@@ -331,7 +331,7 @@ namespace WindowsFormsApp1
                         //url此頁的Quick edit值傳到textBox1,並存入剪貼簿以備用
                         {
                             string text = br.waitFindWebElementByName_ToBeClickable("data", br.WebDriverWaitTimeSpan).Text;
-                            text=CnText.booksPunctuation(text);
+                            CnText.booksPunctuation(ref text);
                             textBox1.Text = text;
                             Clipboard.SetText(text);
                             if (!Active)
@@ -2095,7 +2095,7 @@ namespace WindowsFormsApp1
                     string clpTxt = Clipboard.GetText();
                     if (keyinTextMode && clpTxt != ClpTxtBefore &&
                         clpTxt.IndexOf("《") == -1 && clpTxt.IndexOf("〈") == -1 && clpTxt.IndexOf("·") == -1
-                        ) textBox1.Text = CnText.booksPunctuation(clpTxt);
+                        ) textBox1.Text = CnText.booksPunctuation(ref clpTxt);
                     else textBox1.Text = clpTxt;
                     dragDrop = false;
                     return;
@@ -7388,7 +7388,7 @@ namespace WindowsFormsApp1
                                                  ////只要剪貼簿裡的內容合於以下條件
                                                  //if (ClpTxtBefore != clpTxt && textBox1.Text == "" && clpTxt.IndexOf("http") == -1 && clpTxt.IndexOf("<scanb") == -1)
                                                  //{
-                        textBox1.Text = CnText.booksPunctuation(nowClpTxt);
+                        textBox1.Text = CnText.booksPunctuation(ref nowClpTxt);
                         //return;
                         //}
                         //插入點游標置於頁首

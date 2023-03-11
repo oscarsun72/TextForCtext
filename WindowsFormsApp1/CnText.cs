@@ -141,9 +141,9 @@ namespace TextForCtext
         /// <summary>
         /// 自動加上書名號篇名號
         /// </summary>
-        /// <param name="clpTxt">剪貼簿中的文字--需要加上書名號篇名號的文本</param>
-        /// <returns></returns>
-        internal static string booksPunctuation(string clpTxt)
+        /// <param name="clpTxt">剪貼簿中的文字--需要加上書名號篇名號的文本。預防大文本，故以傳址（pass by reference）方式</param>
+        /// <returns>傳址回傳clpTxt被標點後的結果</returns>
+        internal static ref string booksPunctuation(ref string clpTxt)
         {
             //提示音
             //new SoundPlayer(@"C:\Windows\Media\Windows Balloon.wav").Play();
@@ -182,17 +182,17 @@ namespace TextForCtext
 
             //textBox1.Text = clpTxt;
             rst.Close(); cnt.Close();
-            return clpTxt.Replace("《《", "《").Replace("》》", "》").Replace("〈〈", "〈").Replace("〉〉", "〉");
+            clpTxt = clpTxt.Replace("《《", "《").Replace("》》", "》").Replace("〈〈", "〈").Replace("〉〉", "〉");
+            return ref clpTxt;
         }
 
         /// <summary>
         /// 檢查要標點上的書名號或篇名號詞彙，是否已經標過
         /// 20230309 creedit with chatGPT大菩薩：書名號標點與正則表達式ADO.NET、LINQ：
         /// </summary>
-        /// <param name="context">預防大文本，故以傳址（pass by reference）方式。呼叫端也當如此，如booksPunctuation()函式待改！</param>
-        /// <param name="term">須標上書名號或篇名號之詞彙</param>
-        /// <returns>傳回標識後的結果文本</returns>
-        static bool booksPunctuationExamReplace(ref string context, string term, string termReplaced)
+        /// <param name="context">預防大文本，故以傳址（pass by reference）方式。呼叫端也當如此，如booksPunctuation()函式</param>
+        /// <param name="term">須標上書名號或篇名號之詞彙</param>        
+        static void booksPunctuationExamReplace(ref string context, string term, string termReplaced)
         {
             //string pattern = "(?<!《)(?<!〈)" + Regex.Escape(item[0]) + "(?!》)(?!〉)";
             //string pattern = "(?<!《)(?<!〈)" + Regex.Escape(term) + "(?!》)(?!〉)";
@@ -208,10 +208,9 @@ namespace TextForCtext
                 是的，您理解得很對。p是punctuation(標點符號)的簡寫，而\p{P}是正則表達式的一種語法，用於匹配任何標點符號。             
              */
             //string replacement = item[1];
-            string replacement = termReplaced;
+            //string replacement = termReplaced;
             //text = Regex.Replace(text, pattern, replacement);
-            context = Regex.Replace(context, pattern, replacement);
-            return true;
+            context = Regex.Replace(context, pattern, termReplaced);
         }
 
     }
