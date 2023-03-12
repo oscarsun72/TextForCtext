@@ -201,10 +201,10 @@ End Sub
 Sub 查詢奇摩() 'Ctrl+Shift+Y
 On Error GoTo ErrMsg '只查google
 'FollowHyperlink "http://tw.search.yahoo.com/search", , , , "fr=slv1-ptec&p=" & Screen.ActiveControl.seltext
-Selection.Copy
+selection.Copy
 'FollowHyperlink "http://tw.search.yahoo.com/search", , , , "p=" & Selection, msoMethodGet
 'If Tasks.Exists("skqs professional version") Then
-    Shell Replace(GetDefaultBrowserEXE, """%1", "http://tw.search.yahoo.com/search?p=" & Selection)
+    Shell Replace(GetDefaultBrowserEXE, """%1", "http://tw.search.yahoo.com/search?p=" & selection)
 'Else
 '    Shell "C:\Program Files\Opera\opera.exe" & " http://tw.search.yahoo.com/search?p=" & Selection, vbNormalFocus
 'End If
@@ -223,8 +223,8 @@ Const st As String = "C:\Program Files\孫守真\網路搜尋_元搜尋-同時搜多個引擎\"
 Dim funame As String
 'FollowHyperlink "http://tw.search.yahoo.com/search", , , , "fr=slv1-ptec&p=" & Screen.ActiveControl.seltext
 'FollowHyperlink "http://www.google.com.tw/search", , , , "q=" & Screen.ActiveControl.seltext, msoMethodGet
-If Selection.Type = wdSelectionNormal Then
-    Selection.Copy
+If selection.Type = wdSelectionNormal Then
+    selection.Copy
     If ActiveDocument.Saved = False And ActiveDocument.path <> "" Then ActiveDocument.Save: DoEvents
 '    If Tasks.Exists("skqs professional version") Then
 '        Shell Replace(GetDefaultBrowserEXE, """%1", "http://www.google.com.tw/search?q=" & Selection)
@@ -291,13 +291,13 @@ a = VBA.Replace(a, "AppData\Roaming", "")
 End Function
 
 Function GetClipboardText()
-On Error GoTo eH
+On Error GoTo eh
 Dim clipboard As New MSForms.DataObject
 DoEvents
 clipboard.GetFromClipboard
 GetClipboardText = clipboard.GetText
 Exit Function
-eH:
+eh:
     Select Case Err.Number
         Case -2147221040 'DataObject:GetFromClipboard OpenClipboard 失敗
             SystemSetup.wait 0.8
@@ -308,7 +308,7 @@ eH:
 End Function
 
 Sub insertNowTime()
-With Selection.Range 'Alt+t
+With selection.Range 'Alt+t
     .InsertAfter Now
     .Font.Subscript = True
 End With
@@ -390,11 +390,12 @@ End Sub
 
 Sub contiUndo(ByRef ur As UndoRecord)
 ur.EndCustomRecord
+Set ur = Nothing
 End Sub
 
 
 Public Function appActivatedYet(exeName As String) As Boolean
-On Error GoTo eH:
+On Error GoTo eh:
       exeName = exeName & ".exe": exeName = StrConv(exeName, vbUpperCase)
 'https://stackoverflow.com/questions/44075292/determine-process-id-with-vba
 'https://stackoverflow.com/questions/26277214/vba-getting-program-names-and-task-id-of-running-processes
@@ -416,7 +417,7 @@ On Error GoTo eH:
     
     Set objProcessSet = Nothing
 Exit Function
-eH:
+eh:
 Select Case Err.Number
     Case 5 '程序呼叫或引數不正確
     Case Else
@@ -460,14 +461,14 @@ Sub backupNormal_dotm() '自動備份Normal.dotm
 Dim source As String, destination As String
 source = SystemSetup.DropBoxPathIncldBackSlash + "Normal.dotm"
 destination = SystemSetup.WordTemplatesPathIncldBackSlash + "Normal.dotm"
-On Error GoTo eH
+On Error GoTo eh
 With SystemSetup.FileSystemObject
 If (.getfile(source).DateLastModified < _
     .getfile(destination).DateLastModified) Then _
         .CopyFile source, destination
 End With
 Exit Sub
-eH:
+eh:
 Select Case Err.Number
     Case 70
         MsgBox "Normal.dotm還未備份", vbExclamation
@@ -518,7 +519,7 @@ Dim objWMIService, objProcess, colProcess, pid
 If chromedriversPIDcntr = 0 Then
     ReDim chromedriversPID(0)
     If Not SeleniumOP.WD Is Nothing Then
-        On Error GoTo eH:
+        On Error GoTo eh:
         SeleniumOP.WD.Quit
         Set SeleniumOP.WD = Nothing
         Exit Sub
@@ -535,7 +536,7 @@ Next
 ReDim chromedriversPID(0): chromedriversPIDcntr = 0: Set SeleniumOP.WD = Nothing
 
 Exit Sub
-eH:
+eh:
 Select Case Err.Number
     Case -2147467261 '並未將物件參考設定為物件的執行個體。
         Resume Next

@@ -1987,7 +1987,7 @@ Sub 清除選取處的所有符號() '由圖書管理symbles模組清除標點符號改編'包括註腳、數字
 'Dim F, a As String, i As Integer
 Dim f, i As Integer, ur As UndoRecord
 SystemSetup.stopUndo ur, "清除選取處的所有符號"
-f = Array("·", "‧", "。", "」", Chr(-24152), "：", "，", "；", _
+f = Array("-", "·", "‧", "。", "」", Chr(-24152), "：", "，", "；", _
     "、", "「", ".", Chr(34), ":", ",", ";", _
     "……", "...", "．", "【", "】", " ", "《", "》", "〈", "〉", "？" _
     , "！", "﹝", "﹞", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0" _
@@ -3432,32 +3432,40 @@ Set rngChk = d.Range(1, startPos_term)
 xChk = rngChk.text
 'If term = "資治通鑑" Then Stop
 Dim result As Boolean
-'前面都沒《》〈〉時
-If InStr(xChk, "《") = 0 And InStr(xChk, "》") = 0 And InStr(xChk, "〈") = 0 And InStr(xChk, "〉") = 0 Then
-    result = True
-'前面的《〈在》〉的前面
+If whatMark = "《" Then ' = ？ 如：此時會「=」：If InStr(xChk, "《") = 0 And InStr(xChk, "》") = 0 And InStr(xChk, "〈") = 0 And InStr(xChk, "〉") = 0 Then 20230312 優化。感恩感恩　讚歎讚歎　南無阿彌陀佛。沒有佛菩薩加持，我孫守真可能嗎？
+    If InStrRev(xChk, "《") <= InStrRev(xChk, "》") Then result = True
 Else
-    'If InStrRev(xChk, "《") < InStrRev(xChk, "》") Or InStrRev(xChk, "〈") < InStrRev(xChk, "〉") Then result = True
-    If whatMark = "《" Then
-        If InStr(xChk, "《") = 0 And InStr(xChk, "》") = 0 Then
-            result = True
-        Else
-            If InStrRev(xChk, "《") < InStrRev(xChk, "》") Then result = True
-        End If
-    ElseIf whatMark = "〈" Then
-        If InStr(xChk, "〈") = 0 And InStr(xChk, "〉") = 0 Then
-            result = True
-        Else
-            If InStrRev(xChk, "〈") < InStrRev(xChk, "〉") Then result = True
-        End If
-    End If
+    If InStrRev(xChk, "〈") <= InStrRev(xChk, "〉") Then result = True
 End If
+
+''前面都沒《》〈〉時
+'If InStr(xChk, "《") = 0 And InStr(xChk, "》") = 0 And InStr(xChk, "〈") = 0 And InStr(xChk, "〉") = 0 Then
+'    result = True
+''前面的《〈在》〉的前面
+'Else
+'    'If InStrRev(xChk, "《") < InStrRev(xChk, "》") Or InStrRev(xChk, "〈") < InStrRev(xChk, "〉") Then result = True
+'    If whatMark = "《" Then
+'        If InStr(xChk, "《") = 0 And InStr(xChk, "》") = 0 Then
+'            result = True
+'        Else
+'            If InStrRev(xChk, "《") < InStrRev(xChk, "》") Then result = True
+'        End If
+'    ElseIf whatMark = "〈" Then
+'        If InStr(xChk, "〈") = 0 And InStr(xChk, "〉") = 0 Then
+'            result = True
+'        Else
+'            If InStrRev(xChk, "〈") < InStrRev(xChk, "〉") Then result = True
+'        End If
+'    End If
+'End If
 書名號篇名號標注PreExamOK = result
 End Function
 Sub 書名號篇名號標注()
 Dim cnt As New ADODB.Connection, rst As New ADODB.Recordset
 Dim cntStr As String, d As Document, dx As String, rngF As Range, title As String
 Dim db As New dBase
+Dim ur As UndoRecord
+SystemSetup.stopUndo ur, "書名號篇名號標注"
 db.cnt查字 cnt
 'If Dir("H:\我的雲端硬碟\私人\千慮一得齋(C槽版)\書籍資料\圖書管理附件", vbDirectory) <> "" Then
 '    cntStr = "Provider=Microsoft.ACE.OLEDB.12.0;User ID=Admin;Data Source=H:\我的雲端硬碟\私人\千慮一得齋(C槽版)\書籍資料\圖書管理附件\查字.mdb;"
@@ -3476,8 +3484,8 @@ Do Until rst.EOF
     title = rst("篇名").Value
     If VBA.InStr(dx, title) Then 'if found
         Do While rngF.Find.Execute(title, , , , , , True, wdFindStop)
-            If InStr("》〉·‧", IIf(rngF.Characters(rngF.Characters.Count).Next Is Nothing, "", rngF.Characters(rngF.Characters.Count).Next)) = 0 And _
-                InStr("《〈·‧", IIf(rngF.Characters(1).Previous Is Nothing, "", rngF.Characters(1).Previous)) = 0 Then
+'            If InStr("》〉·‧", IIf(rngF.Characters(rngF.Characters.Count).Next Is Nothing, "", rngF.Characters(rngF.Characters.Count).Next)) = 0 And _
+'                InStr("《〈·‧", IIf(rngF.Characters(1).Previous Is Nothing, "", rngF.Characters(1).Previous)) = 0 Then
                 If 書名號篇名號標注PreExamOK(d, title, "〈", rngF.start) Then
                     If VBA.IsNull(rst("取代為").Value) Then
                         rngF.text = "〈" & title & "〉"
@@ -3488,7 +3496,7 @@ Do Until rst.EOF
                     End If
                     rngF.SetRange rngF.End, d.Range.End
                 End If
-            End If
+'            End If
         Loop
         Set rngF = d.Range: dx = d.Range.text
     End If
@@ -3501,7 +3509,7 @@ d.Range.Find.Execute "〈〈", , , , , , True, wdFindContinue, , "〈", wdReplaceAl
 d.Range.Find.Execute "〉〉", , , , , , True, wdFindContinue, , "〉", wdReplaceAll
 
 'GoSub bookmarks 'do again to check and correct SHOULD BE use another table to do this
-rst.Close: cnt.Close
+rst.Close: cnt.Close: SystemSetup.contiUndo ur
 Exit Sub
 bookmarks:
 If rst.State = adStateOpen Then rst.Close
@@ -3513,8 +3521,8 @@ Do Until rst.EOF
     
     If VBA.InStr(dx, title) Then 'if found
         Do While rngF.Find.Execute(title, , , , , , True, wdFindStop)
-            If InStr("》〉·‧", IIf(rngF.Characters(rngF.Characters.Count).Next Is Nothing, "", rngF.Characters(rngF.Characters.Count).Next)) = 0 And _
-                InStr("《〈·‧", IIf(rngF.Characters(1).Previous Is Nothing, "", rngF.Characters(1).Previous)) = 0 Then
+'            If InStr("》〉·‧", IIf(rngF.Characters(rngF.Characters.Count).Next Is Nothing, "", rngF.Characters(rngF.Characters.Count).Next)) = 0 And _
+'                InStr("《〈·‧", IIf(rngF.Characters(1).Previous Is Nothing, "", rngF.Characters(1).Previous)) = 0 Then
                 If 書名號篇名號標注PreExamOK(d, title, "《", rngF.start) Then
                     
                     If title = "資治通鑑" Then Stop
@@ -3528,7 +3536,7 @@ Do Until rst.EOF
                     End If
                     rngF.SetRange rngF.End, d.Range.End
                 End If
-            End If
+'            End If
         Loop
         Set rngF = d.Range: dx = d.Range.text
     End If
