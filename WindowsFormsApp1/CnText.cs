@@ -195,6 +195,21 @@ namespace TextForCtext
         /// <param name="term">須標上書名號或篇名號之詞彙</param>        
         static void booksPunctuationExamReplace(ref string context, string term, string termReplaced)
         {
+            int pos_Term =context.IndexOf(term);//ABBREVIATION:1.position https://www.collinsdictionary.com/dictionary/english/pos
+            if (pos_Term==-1) return;
+            //我自己的，更簡短，更優化
+            string patternCntext = context.Substring(0, pos_Term);
+            //if(patternCntext.LastIndexOf("")==-1&& patternCntext.LastIndexOf("")==-1)
+            if (termReplaced.IndexOf("《") > -1) {
+                if (patternCntext.LastIndexOf("《") <= patternCntext.LastIndexOf("》"))  
+                        context = context.Replace(term,termReplaced);
+            }
+            else
+            {
+                if (patternCntext.LastIndexOf("〈") <= patternCntext.LastIndexOf("〉"))
+                    context = context.Replace(term, termReplaced);
+            }
+
             //string pattern = "(?<!《)(?<!〈)" + Regex.Escape(item[0]) + "(?!》)(?!〉)";
             //string pattern = "(?<!《)(?<!〈)" + Regex.Escape(term) + "(?!》)(?!〉)";
             //chatGPT大菩薩：其中的 (?<![\\p{P}&&[^》〉]]+) 表示前面沒有其他的標點符號（但是可以有其他非標點符號的字符）。這樣就可以避免誤標的情況了。
@@ -208,13 +223,14 @@ namespace TextForCtext
                 喔 所以 p 就是 punct 也是 punctiaton 的簡寫（縮寫）囉
                 是的，您理解得很對。p是punctuation(標點符號)的簡寫，而\p{P}是正則表達式的一種語法，用於匹配任何標點符號。             
              */
-            //string replacement = item[1];
-            //string replacement = termReplaced;
-            //text = Regex.Replace(text, pattern, replacement);
-            //20230311 Bing大菩薩：
-            //string pattern = "(?<!《[^》]*)(?<!〈[^〉]*)" + Regex.Escape(term) + "(?![^《]*》)(?![^〈]*〉)";
-            //20230311 合併Bing大菩薩與之前chatGPT大菩薩的：
-            string pattern = "(?<!《[^》]*)(?<!〈[^〉]*)(?<![\\p{P}&&[^》〉]]+)" + Regex.Escape(term) + "(?![^《]*》)(?![^〈]*〉)";
+            ////string replacement = item[1];
+            ////string replacement = termReplaced;
+            ////text = Regex.Replace(text, pattern, replacement);
+            ////20230311 Bing大菩薩：
+            ////string pattern = "(?<!《[^》]*)(?<!〈[^〉]*)" + Regex.Escape(term) + "(?![^《]*》)(?![^〈]*〉)";
+            ////20230311 合併Bing大菩薩與之前chatGPT大菩薩的：
+            //string pattern = "(?<!《[^》]*)(?<!〈[^〉]*)(?<![\\p{P}&&[^》〉]]+)" + Regex.Escape(term) + "(?![^《]*》)(?![^〈]*〉)";
+
             /* the result of this one : (?<!《)(?<!〈)(?<![\\p{P}&&[^》〉]]+)" + Regex.Escape(term) + "(?!》)(?!〉) will be 《續《資治通鑑》長編》 not 《續資治通鑑長編》 however it should not to be "《續《資治通鑑》長編》" ,because when ready to mark "資治通鑑"，the code should check out of the "資治通鑑" is already marked "《續資治通鑑長編》",so it should jump this replacement
              * Bing大菩薩：
              * I see. It seems that the regular expression pattern "(?<!《)(?<!〈)(?<![\\p{P}&&[^》〉]]+)" + Regex.Escape(term) + "(?!》)(?!〉)" is not working as intended and is resulting in nested replacements like “《續《資治通鑑》長編》” instead of “《續資治通鑑長編》”.
@@ -232,7 +248,8 @@ namespace TextForCtext
                 This should prevent nested replacements and ensure that terms that are already enclosed within another pair of 《》 or 〈〉 symbols are not replaced again.
                 Let me know if this works for you or if you have any further questions.
              */
-            context = Regex.Replace(context, pattern, termReplaced);
+
+            //context = Regex.Replace(context, pattern, termReplaced);
         }
 
     }

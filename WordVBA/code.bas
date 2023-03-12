@@ -545,6 +545,11 @@ If (highSurrogate >= SurrogateCodePoint.HighStart And highSurrogate <= Surrogate
     ' 計算字符的碼點值!!!!!!!!!!!!!!!!!
 '    codepoint = ((highSurrogate - &HD800) * &H400) + (lowSurrogate - &HDC00) + &H10000
     getCodePoint str, codepoint '若沒以「CLng()」轉型會溢位，以型別為 Long 的變數儲存其值，即會隱含轉型
+        
+        Rem forDebugText
+'    If codepoint = &H2E4E5 Then Stop
+'    If Hex(codepoint) = "2E4E5" Then Stop
+
     Select Case whatBlockNameInExt
         Case CJKBlockName.CJK_Unified_Ideographs_Extension_A
             If codepoint >= CJKChartRange.CJK_Unified_Ideographs_Extension_A_start And codepoint <= CJKChartRange.CJK_Unified_Ideographs_Extension_A_end Then isCJK_Ext = True
@@ -614,15 +619,15 @@ Sub ConvertToUnicode_SelectionToggleCharacterCode() '類似實作 Selection.ToggleCh
     Dim selectedText As String
     Dim unicodeCode As Long
     
-    selectedText = Selection.Range.text
+    selectedText = selection.Range.text
     
     If Len(selectedText) = 1 Then
         unicodeCode = AscW(selectedText)
-        Selection.Range.text = Hex(unicodeCode)
+        selection.Range.text = Hex(unicodeCode)
     ElseIf Len(selectedText) = 2 Then
         unicodeCode = (AscW(Mid(selectedText, 1, 1)) - &HD800&) * &H400& + (AscW(Mid(selectedText, 2, 1)) - &HDC00&) + &H10000 '
         getCodePoint selectedText, unicodeCode
-        Selection.Range.text = Hex(unicodeCode)
+        selection.Range.text = Hex(unicodeCode)
     Else
         MsgBox "Invalid selection"
         Exit Sub

@@ -960,11 +960,13 @@ If flgPaste Then
     'https://en.wikipedia.org/wiki/CJK_Compatibility_Ideographs
 '    Docs.ChangeFontOfSurrogatePairs_Range "HanaMinA", d.Range(selection.Paragraphs(1).Range.start, d.Range.End), CJK_Compatibility_Ideographs
     'https://en.wikipedia.org/wiki/CJK_Compatibility_Ideographs_Supplement
-    Docs.ChangeFontOfSurrogatePairs_Range "HanaMinA", d.Range(selection.Paragraphs(1).Range.start, d.Range.End), CJK_Compatibility_Ideographs_Supplement
+    Dim rngChangeFontName As Range
+    Set rngChangeFontName = d.Range(selection.Paragraphs(1).Range.start, d.Range.End)
+    Docs.ChangeFontOfSurrogatePairs_Range "HanaMinA", rngChangeFontName, CJK_Compatibility_Ideographs_Supplement
     Rem 擴充字集
     'HanaMinB還不支援G以後的
-    Docs.ChangeFontOfSurrogatePairs_Range "HanaMinB", d.Range(selection.Paragraphs(1).Range.start, d.Range.End), CJK_Unified_Ideographs_Extension_E
-    Docs.ChangeFontOfSurrogatePairs_Range "HanaMinB", d.Range(selection.Paragraphs(1).Range.start, d.Range.End), CJK_Unified_Ideographs_Extension_F
+    Docs.ChangeFontOfSurrogatePairs_Range "HanaMinB", rngChangeFontName, CJK_Unified_Ideographs_Extension_E
+    Docs.ChangeFontOfSurrogatePairs_Range "HanaMinB", rngChangeFontName, CJK_Unified_Ideographs_Extension_F
 Else '文件內已有內容時
     GoSub refres
     SystemSetup.playSound 1.294
@@ -1366,6 +1368,10 @@ Sub ChangeFontOfSurrogatePairs_Range(fontName As String, rngtoChange As Range, O
     SystemSetup.stopUndo ur, "ChangeFontOfSurrogatePairs_Range"
     For Each rng In rngtoChange.Characters
         c = rng.text
+        
+        Rem forDebugText
+'        If c = ChrW(-10122) & ChrW(-8820) Or c = ChrW(-10119) & ChrW(-8987) Then Stop
+        
         ' Check if the character is a high surrogate
         If AscW(c) >= &HD800 And AscW(c) <= &HDBFF Then
 '            ' Check if the next character is a low surrogate

@@ -1340,6 +1340,7 @@ namespace TextForCtext
                 Thread.Sleep(6520);
             //按下：…更多
             IWebElement iwe_morebtn = waitFindWebElementBySelector_ToBeClickable("body > div.VIpgJd-TUo6Hb.XKSfm-L9AdLc.eo9XGd > div > div.IZ65Hb-TBnied.zTETae-h1U9Be-hxXJme > div.IZ65Hb-yePe5c > div.IZ65Hb-INgbqf > div.Q0hgme-LgbsSe.Q0hgme-Bz112c-LgbsSe.xl07Ob.INgbqf-LgbsSe.VIpgJd-LgbsSe");
+            if (iwe_morebtn == null) return false;
             iwe_morebtn.Click();
             byte tryTimes = 1;//重做記數，防有例外情形、成無窮迴圈；如「按下：新增圖片」處可能還來不及待輸入框出現程式便兀自執行下去
         retry:
@@ -1420,6 +1421,24 @@ namespace TextForCtext
             string gjCool = OCRSite_URL[OCRSiteTitle.GJcool]; //"https://gj.cool/try_ocr";
             openNewTabWindow(WindowType.Window);
             driver.Navigate().GoToUrl(gjCool);
+
+            #region 先檢查點數是否足夠
+            const byte pointCoin = 150;//「自動識別(豎版)」所需點數120，載入圖檔要30
+            IWebElement iwe = waitFindWebElementBySelector_ToBeClickable("#compute-value");
+            if (iwe != null)
+            {
+                //取得點數，如「 117 / 1000」格式
+                string innerText = iwe.GetAttribute("innerText"); int points = 0;
+                if (innerText.IndexOf(" /") > -1 && " ".Length + innerText.IndexOf(" /") - " ".Length <= innerText.Length)
+                    int.TryParse(innerText.Substring(" ".Length, innerText.IndexOf(" /") - " ".Length), out points);
+                if (points < pointCoin)
+                {
+                    return false;
+                }
+                else { points = 0; innerText = null; }//釋放記憶體
+            }
+            #endregion
+
             //按下：新增圖片：選擇檔案
             //Thread.Sleep(3200);
             SendKeys.Send("{tab 16} ");
@@ -1435,7 +1454,7 @@ namespace TextForCtext
             //待圖載入
             Thread.Sleep(3220);
             //按下「Pro」
-            IWebElement iwe = waitFindWebElementBySelector_ToBeClickable("#line_img_form > div > input[type=file]");
+            iwe = waitFindWebElementBySelector_ToBeClickable("#line_img_form > div > input[type=file]");
             if (iwe == null)
             {
                 tryTimes++;
@@ -1538,7 +1557,7 @@ namespace TextForCtext
             //return downloadDirectory_Chrome;
         }
 
-       
+
         /// <summary>
         /// 20230311 YouChat菩薩，待測試！！！！
         /// </summary>
@@ -1553,7 +1572,7 @@ namespace TextForCtext
             return downloadsFolder;
         }
 
-         /// <summary>
+        /// <summary>
         /// 取得Chrome瀏覽器的下載目錄 YouChat菩薩的成功了
         /// </summary>
         /// <returns></returns>

@@ -115,7 +115,7 @@ With d.Range
         t = x.text
         .SetRange InStr(d.Range, "<img src=""") - 1, InStr(d.Range, ".jpg"" /><br>") + Len(".jpg"" /><br>") - 1
         .Delete
-        With Selection
+        With selection
             .HomeKey wdStory
             .Find.ClearFormatting
             .Find.MatchWildcards = False
@@ -225,7 +225,7 @@ SendKeys "{tab 3}"
 End Sub
 Sub 全選剪下後關閉文件() '以利貼上部落格也'2007/10/30-貼上上頁下頁書首回總目的html碼.
 Dim Dnow As Document, bt As String, hide As Boolean
-With Selection
+With selection
     If ActiveDocument.path = "" Then
         Set Dnow = ActiveDocument
         If InStr(Dnow.Range, "<a href=") Then '表示要貼上html碼了!
@@ -239,7 +239,7 @@ With Selection
                 Documents("暫存").Activate
             End If
             o = True '記下已是在處理html碼,以供下面用.2007/11/4
-            With ActiveWindow.Selection
+            With ActiveWindow.selection
                 If Len(.text) = 1 Then .GoTo wdGoToBookmark, , , "游標_暫存"
                 bt = .Range
                 h = InputBox("請輸入上文網址")
@@ -311,7 +311,7 @@ If o = False Then
 Else
     Documents("暫存").Activate
 End If
-With ActiveWindow.Selection
+With ActiveWindow.selection
     If Len(.text) = 1 Then .GoTo wdGoToBookmark, , , "游標_暫存"
     .Copy
     '.Parent.WindowState wdWindowStateMinimize
@@ -381,7 +381,7 @@ End Sub
 Sub 開啟超連結()
 'Ctrl +i   系統預設是 italic（即斜體字），此配合 ExcelVBA設定
 Dim rng As Range
-Set rng = Selection.Range
+Set rng = selection.Range
 If rng.Hyperlinks.Count = 0 Then '如果所在位置沒有超連結，則看其前有否；若又無，則再看其後有否；若都無則不執行 2022/12/20
     If rng.start = 0 Then
         GoSub nxt
@@ -396,6 +396,8 @@ If rng.Hyperlinks.Count = 0 Then '如果所在位置沒有超連結，則看其前有否；若又無，
                 rng.SetRange rngNext.Next.start, rngNext.Next.End
                 GoSub nxt
             End If
+        Else
+            GoSub position
         End If
     Else
         GoSub position
@@ -433,7 +435,7 @@ Sub 插入超連結() '2008/9/1 指定鍵(快捷鍵) Ctrl+shift+K(原系統指定在smallcaps為)
         StrConv(GetClipboard, vbNarrow) _
         , SubAddress:="" '    Selection.Collapse Direction:=wdCollapseEnd
     Dim rng As Range, b As Boolean, ur As UndoRecord ', wndo As Window ', d As Document ', sty As String
-    Set rng = Selection.Range ': Set wndo = ActiveWindow
+    Set rng = selection.Range ': Set wndo = ActiveWindow
     If rng.Information(wdInFootnote) Then
         If rng.Document.Windows.Count > 1 Then '因為開多視窗時若在第1個以外的視窗的註腳中執行「rng.Hyperlinks.Add」則會誤插到第1個視窗體中
             Dim wnd As Window, ww, i As Byte
@@ -460,7 +462,7 @@ Sub 插入超連結() '2008/9/1 指定鍵(快捷鍵) Ctrl+shift+K(原系統指定在smallcaps為)
         For Each ww In wnds
             If Not ww Is wnd Then '不能用 ww.Caption <> wnd.Caption 因為下面有ww.Close 視窗一旦關閉，則Caption屬性也會異動
                 ReDim Preserve slRng(i)
-                Set slRng(i) = ww.Selection.Range
+                Set slRng(i) = ww.selection.Range
                 ww.Close '既然不能改變視窗前後，就只能先關閉，且記下其游標所在位置了
                 i = i + 1
             End If
@@ -504,14 +506,14 @@ Sub 插入超連結() '2008/9/1 指定鍵(快捷鍵) Ctrl+shift+K(原系統指定在smallcaps為)
 End Sub
 Sub insertHydzdLink()
 Dim lk As New Links, db As New dBase
-db.setWordControlValue (文字處理.trimStrForSearch(Selection.text, Selection))
+db.setWordControlValue (文字處理.trimStrForSearch(selection.text, selection))
 db.setDictControlValue 3
 lk.insertLinktoHydzd
 Set lk = Nothing: Set db = Nothing
 End Sub
 Sub insertHydcdLink()
 Dim lk As New Links, db As New dBase
-db.setWordControlValue (文字處理.trimStrForSearch(Selection.text, Selection))
+db.setWordControlValue (文字處理.trimStrForSearch(selection.text, selection))
 db.setDictControlValue 4
 lk.insertLinktoHydcd
 Set lk = Nothing: Set db = Nothing
@@ -526,11 +528,11 @@ Sub saveV5URL()
 Dim ac As Object, lnk As String
 Dim dbFullName As String
 dbFullName = UserProfilePath & "Dropbox\《重編國語辭典修訂本》資料庫.mdb"
-If Selection.Hyperlinks.Count > 0 Then
-    lnk = Selection.Hyperlinks(1).Address
+If selection.Hyperlinks.Count > 0 Then
+    lnk = selection.Hyperlinks(1).Address
 Else
-    Selection.MoveRight wdCharacter, 1, wdExtend
-    lnk = Selection.Hyperlinks(1).Address
+    selection.MoveRight wdCharacter, 1, wdExtend
+    lnk = selection.Hyperlinks(1).Address
 End If
 Set ac = GetObject(dbFullName).Application
 ac.Run "saveV5URL", lnk
@@ -542,7 +544,7 @@ lnks.updateURL國學大師 ActiveDocument
 'SystemSetup.playSound 7
 End Sub
 Sub 標題文字()
-With Selection.Font
+With selection.Font
     .Size = 20
     .Bold = True
 End With
@@ -651,9 +653,9 @@ Set r = ActiveDocument.Range
     With ActiveDocument
         .Range = r
         With .Windows(1)
-            .Selection.EndKey wdStory, wdMove
-            Do Until .Selection.Previous <> Chr(13)
-                .Selection.TypeBackspace
+            .selection.EndKey wdStory, wdMove
+            Do Until .selection.Previous <> Chr(13)
+                .selection.TypeBackspace
             Loop
         End With
         .Range.WholeStory
@@ -669,7 +671,7 @@ Set d = Documents.Add
 d.Range.PasteAndFormat (wdFormatPlainText)
 If InStr(d.Range, "?") Then
     MsgBox "有亂碼!!", vbCritical
-    With d.Windows(1).Selection.Find
+    With d.Windows(1).selection.Find
         .ClearFormatting
         .Execute "?"
     End With
@@ -764,13 +766,13 @@ SendKeys "{tab}", True: SendKeys "{tab}", True:: SendKeys " ", True
 End Sub
 
 Sub 查詢奇摩我的部落格blog() 'Alt+Q
-If Selection.Type = wdSelectionIP Then Exit Sub
+If selection.Type = wdSelectionIP Then Exit Sub
 If ActiveDocument.path <> "" And ActiveDocument.Saved = False Then ActiveDocument.Save
 If myaccess Is Nothing Then
     Set myaccess = GetObject("C:\千慮一得齋\書籍資料\圖書管理(C槽版).mdb")
 End If
-myaccess.Run "查詢奇摩我的部落格blog_word參照", Selection
-Selection.Copy
+myaccess.Run "查詢奇摩我的部落格blog_word參照", selection
+selection.Copy
 myaccess.UserControl = True
 Set myaccess = Nothing
 End Sub
@@ -780,7 +782,7 @@ Dim st As String, h As String, d As Document
 If ActiveDocument.path <> "" Then Exit Sub
 Set d = ActiveDocument
 If InStr(d.Range, "http") = 0 Then Exit Sub
-With d.Application.Selection
+With d.Application.selection
     .HomeKey wdStory, wdMove
     .Find.ClearFormatting
     Do
@@ -884,7 +886,7 @@ End Sub
 Sub 插入頁圖() '20161105
 Dim p  As Paragraph, s As Long, lnk As String
 Const x As String = "\\VBOXSVR\d_drive\千慮一得齋\資料庫\掃描資料庫\書藏\2487_語言與人生\"
-s = Selection.End
+s = selection.End
 For Each p In ActiveDocument.Paragraphs
     If p.Range.End > s Then
         If IsNumeric(p.Range) And p.Range.Font.Size = 16 Then
