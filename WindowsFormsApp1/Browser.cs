@@ -6,17 +6,20 @@ using OpenQA.Selenium.Remote;
 //using System.Net;
 //using static System.Net.WebRequestMethods;
 using OpenQA.Selenium.Support.UI;
+using SeleniumExtras.WaitHelpers;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 //https://dotblogs.com.tw/supergary/2020/10/29/selenium#images-3
 using System.IO;
 using System.Linq;
+using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Automation;
 using System.Windows.Forms;
 using WindowsFormsApp1;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.Tab;
 using forms = System.Windows.Forms;
 using selm = OpenQA.Selenium;
 
@@ -26,7 +29,20 @@ namespace TextForCtext
     class Browser
     {
         static Form1 frm;
-        readonly Form1 Form1 = Application.OpenForms.Count > 0 ? Application.OpenForms[0] as Form1 : null;
+        //readonly Form1 Form1 = Application.OpenForms.Count > 0 ? Application.OpenForms[0] as Form1 : null;
+        /*如何取得作用中的表單？ 20230312 chatGPT大菩薩：
+        您好！如果您使用的是 Windows.Forms，您可以使用以下方法来获取当前处于活动状态的表单：
+        Form activeForm = Form.ActiveForm;
+        这将返回当前活动的表单对象，您可以使用该对象的属性和方法来访问和操作该表单。
+        请注意，此方法仅适用于您的应用程序具有焦点，并且该方法将返回具有焦点的表单。如果没有焦点的表单，该方法将返回 null。
+        如果您想要获取应用程序中的其他表单而不是当前处于活动状态的表单，您可以使用以下方法之一：
+        使用表单的名称或类型来查找表单：
+        Form myForm = Application.OpenForms["MyFormName"];
+        或
+        Form myForm = Application.OpenForms.OfType<MyFormType>().FirstOrDefault();
+        在您的代码中保留对表单对象的引用，并在需要时使用该引用来访问该表单。
+        */
+
         //creedit 
         public Browser(Form1 form)
         {
@@ -216,11 +232,31 @@ namespace TextForCtext
             }
         }
 
+        internal static IWebElement waitFindWebElementByTagName_ToBeClickable(string TagName, double second = 2)
+        {
+            try
+            {
+                IWebElement e = driver.FindElement(By.TagName(TagName));
+                WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(second));
+                wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(e));
+                return e;
+            }
+            catch (Exception ex)
+            {
+                switch (ex.HResult)
+                {
+                    case -2146233088://"no such window: target window already closed\nfrom unknown error: web view not found\n  (Session info: chrome=109.0.5414.120)"
+                        return null;
+                    default:
+                        throw;
+                }
+            }
+        }
 
         /// <summary>
-        /// Selenium 操控的 Chrome瀏覽器伺服器（ChromeDriverService）的等待秒數（即「new ChromeDriver()」的「TimeSpan」引數值）。預設為 8.5。
+        /// Selenium 操控的 Chrome瀏覽器伺服器（ChromeDriverService）的等待秒數（即「new ChromeDriver()」的「TimeSpan」引數值）。預設為 15.5。
         /// </summary>
-        static double _chromeDriverServiceTimeSpan = 8.5;
+        static double _chromeDriverServiceTimeSpan = 15.5;//《古籍酷》OCR所需
         /// <summary>
         ///  Selenium 操控的 Chrome瀏覽器中網頁元件的的等待秒數（WebDriverWait。即「new WebDriverWait()」的「TimeSpan」引數值）。預設為 3。
         static double _webDriverWaitTimSpan = 3;
@@ -699,15 +735,15 @@ namespace TextForCtext
         }
 
         /// <summary>
-        /// 取得現行前景之分頁網址。尤其是為使用者手動切換者
+        /// 取得現行Ctext 編輯時前景之分頁網址。尤其是為使用者手動切換者；若找不到則傳回""
         /// </summary>
-        public static string ActiveTabURL
+        public static string ActiveTabURL_Ctext_Edit
         {
             get
             {
                 //string url = getUrl(ControlType.Edit).Trim();
-                string url = getUrlFaster(ControlType.Edit).Trim();
-                url = url.StartsWith("https://") ? url : "https://" + url;
+                string url = getUrlFirst_Ctext_Edit(ControlType.Edit).Trim();
+                if (url != "") url = url.StartsWith("https://") ? url : "https://" + url;
                 return url;
             }
         }
@@ -734,7 +770,7 @@ namespace TextForCtext
         /// </summary>
         /// <param name="controlType"></param>
         /// <returns></returns>
-        static string getUrlFaster(ControlType controlType)
+        static string getUrlFirst_Ctext_Edit(ControlType controlType)
         {
 
             string url = "";
@@ -755,14 +791,30 @@ namespace TextForCtext
                         {
                             continue;
                         }
+                        /* 20230313 AutomationElement 可以用using (){} 來寫嗎：Bing大菩薩：
+                         * `AutomationElement` 不實現 `IDisposable`，因為它們沒有非托管資源。只要刪除了對它的所有引用，內存就會被釋放 - 例如將每個指針設置為空或變量超出範圍⁷。
+                         * 您所謂的「指針」就是指參考型別的變數，而「變量」是指實質型別的變數吧？設置為空，就是「=null」吧 是嗎？                         * 
+                         * 是的，您說得對。在 C# 中，「指針」通常指的是參考型別的變數，而「變量」可以指實質型別或參考型別的變數。將一個參考型別的變數設置為空，就是將它賦值為 null。
 
+                            來源: 與 Bing 的交談， 2023/3/13(1) When does AutomationElement get disposed?. https://social.msdn.microsoft.com/Forums/windowsdesktop/en-US/105794db-fa1a-41d0-827a-6993973abde9/when-does-automationelement-get-disposed?forum=windowsaccessibilityandautomation 已存取 2023/3/13.
+                            (2) Invoke a Control Using UI Automation - .NET Framework. https://learn.microsoft.com/en-us/dotnet/framework/ui-automation/invoke-a-control-using-ui-automation 已存取 2023/3/13.
+                            (3) Obtaining UI Automation Elements - .NET Framework. https://learn.microsoft.com/en-us/dotnet/framework/ui-automation/obtaining-ui-automation-elements 已存取 2023/3/13.
+                            (4) How can I send a right-click event to an AutomationElement using WPF's UI automation? - Stack Overflow. https://stackoverflow.com/questions/6554494/how-can-i-send-a-right-click-event-to-an-automationelement-using-wpfs-ui-automa 已存取 2023/3/13.
+                            (5) Invoke a Control Using UI Automation - .NET Framework. https://learn.microsoft.com/en-us/dotnet/framework/ui-automation/invoke-a-control-using-ui-automation 已存取 2023/3/13.
+                            (6) Using objects that implement IDisposable | Microsoft Learn. https://learn.microsoft.com/en-us/dotnet/standard/garbage-collection/using-objects 已存取 2023/3/13.
+                            (7) Obtaining UI Automation Elements - .NET Framework. https://learn.microsoft.com/en-us/dotnet/framework/ui-automation/obtaining-ui-automation-elements 已存取 2023/3/13.
+                            (8) AutomationElement Class (System.Windows.Automation). https://learn.microsoft.com/en-us/dotnet/api/system.windows.automation.automationelement?view=windowsdesktop-8.0 已存取 2023/3/13.
+                            (9) Obtaining UI Automation Elements - .NET Framework. https://learn.microsoft.com/en-us/dotnet/framework/ui-automation/obtaining-ui-automation-elements 已存取 2023/3/13.
+                            (10) c# - selecting combobox item using ui automation - Stack Overflow. https://stackoverflow.com/questions/5814779/selecting-combobox-item-using-ui-automation 已存取 2023/3/13.
+                         */
                         AutomationElement elm = AutomationElement.FromHandle(proc.MainWindowHandle);
                         AutomationElement elmUrlBar = elm.FindFirst(TreeScope.Descendants, new PropertyCondition(AutomationElement.ControlTypeProperty, controlType));
 
                         if (elmUrlBar != null)
                         {
                             url = ((ValuePattern)elmUrlBar.GetCurrentPattern(ValuePattern.Pattern)).Current.Value as string;
-                            if ((url.StartsWith("http") || url.StartsWith("ctext")))
+                            //if ((url.StartsWith("http") || url.StartsWith("ctext")))
+                            if (((url.StartsWith("ctext.org/")) || (url.StartsWith("https://ctext.org/")) && url.EndsWith("#editor")))
                             {
                                 return url;
                             }
@@ -774,7 +826,7 @@ namespace TextForCtext
             {
                 // Ignore exception
             }
-            return url;
+            return "";//url;
 
         }
 
@@ -877,7 +929,7 @@ namespace TextForCtext
             string url = "", urlActiveTab = "";
             try
             {
-                url = driver.Url; urlActiveTab = ActiveTabURL;
+                url = driver.Url; urlActiveTab = ActiveTabURL_Ctext_Edit;
             }
             catch (Exception ex)
             {
@@ -887,7 +939,7 @@ namespace TextForCtext
                         if (ex.Message.IndexOf("no such window: target window already closed") > -1)//"no such window: target window already closed\nfrom unknown error: web view not found\n  (Session info: chrome=110.0.5481.178)"
                         {
                             driver.SwitchTo().Window(driver.WindowHandles[0]);
-                            url = driver.Url; if (urlActiveTab == "") urlActiveTab = ActiveTabURL;
+                            url = driver.Url; if (urlActiveTab == "") urlActiveTab = ActiveTabURL_Ctext_Edit;
                         }
                         else
                             MessageBox.Show(ex.HResult + ex.Message);
@@ -902,13 +954,14 @@ namespace TextForCtext
                 GoToCurrentUserActivateTab(urlActiveTab);//那麼就將程式所在之頁面轉到、設定為現行的前景頁面
             if (textBox3.Text != "" && textBox3.Text != urlActiveTab) textBox3.Text = urlActiveTab;//如果textBox3非空值且與現行頁面網址不合，亦轉設為現行前景頁面之網址}
         }
+
         /// <summary>
         /// 將程式所在頁面轉到現行前景的分頁頁面
         /// </summary>
         /// <param name="urlActiveTab">若已取得現行前景分頁頁面之網址則作此引數傳入，免得再取一次，徒耗資源，減損效能</param>
         internal static void GoToCurrentUserActivateTab(string urlActiveTab = "")
         {
-            if (urlActiveTab == "") urlActiveTab = ActiveTabURL;
+            if (urlActiveTab == "") urlActiveTab = ActiveTabURL_Ctext_Edit;
             string url = "";
             if (urlActiveTab != "")
             {
@@ -949,7 +1002,7 @@ namespace TextForCtext
 
         }
 
-        internal static void GoToUrlandActivate(string url)
+        internal static void GoToUrlandActivate(string url, bool frmKeyinTextModeTopWindow = false)
         {
             if (string.IsNullOrEmpty(url) || url.Substring(0, 4) != "http") return;
 
@@ -1024,9 +1077,50 @@ namespace TextForCtext
             //throw;
             driver.Navigate().GoToUrl(url);
             //activate and move to most front of desktop
-            //driver.SwitchTo().Window(driver.CurrentWindowHandle);
-            driver.ExecuteScript("window.scrollTo(0, 0)");//chatGPT:您好！如果您使用 C# 和 Selenium 來控制 Chrome 瀏覽器，您可以使用以下的程式碼將網頁捲到最上面：
+            //driver.SwitchTo().Window(driver.CurrentWindowHandle);            
+            if (frmKeyinTextModeTopWindow) WindowsScrolltoTop();//將分頁視窗頁面捲到頂端
             quickedit_data_textboxSetting(url);
+        }
+
+        /// <summary>
+        /// 將分頁視窗頁面捲到頂端
+        /// </summary>
+        internal static void WindowsScrolltoTop()
+        {
+            //driver.ExecuteScript("window.scrollTo(0, 0)");//chatGPT:您好！如果您使用 C# 和 Selenium 來控制 Chrome 瀏覽器，您可以使用以下的程式碼將網頁捲到最上面：
+
+            ///*20220312 chatGPT大菩薩：您好！要將分頁視窗的瀏覽位置調整到最上方，可以使用 Selenium 的 JavaScriptExecutor 物件，透過執行 JavaScript 的方式來操作瀏覽器。
+            //    以下是一個使用 JavaScriptExecutor 調整瀏覽位置的範例：*/
+            //// 取得目前的分頁視窗物件
+            //IWebElement body = driver.FindElement(By.TagName("body"));
+            //var data = waitFindWebElementByName_ToBeClickable("data", 10);
+            //if (data != null)
+            //{
+            //    // 使用 WebDriverWait 等待目標元素出現
+            //    //var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
+            //    //var body = wait.Until(ExpectedConditions.ElementExists(By.TagName("body")));
+
+            //    //IWebElement body = waitFindWebElementByTagName_ToBeClickable("body",10);
+
+            //    // 使用 JavaScriptExecutor 將分頁視窗的瀏覽位置調整到最上方
+            //    IJavaScriptExecutor js = (IJavaScriptExecutor)driver;
+            //    js.ExecuteScript("arguments[0].scrollTop = 0;", body);
+            //    /*程式碼會使用 FindElement 方法取得分頁視窗的 body 元素，
+            //     * 然後再透過 JavaScriptExecutor 的 ExecuteScript 方法來執行 JavaScript，將分頁視窗的 scrollTop 屬性設定為 0，即將瀏覽位置調整到最上方。
+            //     */
+
+            //    //這兩種方法都可以將瀏覽位置調整到最上方，但有時候可能會因為某些原因無法正常工作。
+            //    //建議您可以嘗試使用以下程式碼來調整瀏覽位置，這個方法使用了 window.scrollBy(0, -document.body.scrollHeight)，可以將瀏覽位置調整到最上方。
+            //    js.ExecuteScript("window.scrollBy(0, -document.body.scrollHeight)");
+            //    //如果這個方法仍然無法正常工作，建議您再檢查一下網頁上是否有其他的元素會影響瀏覽位置，例如 iframe 或 div。如果有的話，您需要先切換到相應的 iframe 或找到影響瀏覽位置的 div，然後再使用 JavaScriptExecutor 調整瀏覽位置。
+            //}
+
+            //以上都不行，只好來這個殺手鐧了
+            driver.Navigate().Refresh();//https://www.guru99.com/selenium-refresh-page.html
+            //Pressing F5 key on any textbox using sendKeys command
+            //driver.findElement(By textboxLocator).sendKeys(Keys.F5);
+            //data.SendKeys(OpenQA.Selenium.Keys.F5);
+            //https://artoftesting.com/refresh-a-page-in-selenium-webdriver-java
         }
 
         private static void quickedit_data_textboxSetting(string url, IWebElement textbox = null, IWebDriver driver = null)
@@ -1420,7 +1514,21 @@ namespace TextForCtext
             string currentWindowHndl = driver.CurrentWindowHandle;
             string gjCool = OCRSite_URL[OCRSiteTitle.GJcool]; //"https://gj.cool/try_ocr";
             openNewTabWindow(WindowType.Window);
-            driver.Navigate().GoToUrl(gjCool);
+            try
+            {
+                driver.Navigate().GoToUrl(gjCool);
+            }
+            catch (Exception ex)
+            {
+                switch (ex.HResult)
+                {
+                    default:
+                        string msgText=ex.HResult.ToString() + ex.Message;
+                        Console.WriteLine(msgText);
+                        Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(msgText);
+                        return false;
+                }                
+            }
 
             #region 先檢查點數是否足夠
             const byte pointCoin = 150;//「自動識別(豎版)」所需點數120，載入圖檔要30
@@ -1501,7 +1609,34 @@ namespace TextForCtext
             }
             if (File.Exists(filePath))
             {
-                string text = File.ReadAllText(filePath, System.Text.Encoding.UTF8);
+
+                string text=null;
+                try
+                {
+                    text = File.ReadAllText(filePath, System.Text.Encoding.UTF8);
+                }
+                catch (Exception ex)
+                {
+                    switch (ex.HResult)
+                    {
+                        case -2147024864:
+                            Thread.Sleep(3);//"由於另一個處理序正在使用檔案 'X:\\Ctext_Page_Image.txt'，所以無法存取該檔案。"
+                            text = File.ReadAllText(filePath, System.Text.Encoding.UTF8);
+                            goto retry;
+                            break;
+                        default:
+                            Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.Message);
+                            break;
+                    }
+                    
+                }
+                
+                if (text == null)
+                {
+                    if (DialogResult.Cancel == Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly
+                            ("文本未下成功，請自行下載，好了之後再按「確定」繼續完成讀入到textBox1的工作；      或按「取消」結束此次操作。\n\r感恩感恩　南無阿彌陀佛"))
+                        return false;
+                }
                 Clipboard.SetText(text);
                 //刪除下載檔案，以便下次載入
                 Task.Run(() => File.Delete(filePath));

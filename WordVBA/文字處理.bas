@@ -3426,17 +3426,20 @@ Rem ©Ò¥H Find ª«¥óªº .Text ÄÝ©Ê¬O¥i¥H³]¬°¥¿«hªí¹F¦¡Åo¡H ¦ý­n±N .MatchWildcards ³
 Rem ¬Oªº¡A±z»¡±o«D±`¥¿½T¡C¦b Word VBA ¤¤¡A­n±N Find ª«¥óªº .Text ÄÝ©Ê³]¬°¥¿«hªí¹F¦¡¡A¥²¶·¥ý±N .MatchWildcards ³]¬° true¡A§_«h Word ·|±N¨äµø¬°¤@¯ë¤å¦r¬d§ä¡C¦]¦¹¡A¦pªG±z·Q­n¨Ï¥Î¥¿«hªí¹F¦¡¶i¦æ¬d§ä©M´À´«¾Þ§@¡A½Ð°O±o±N .MatchWildcards ³]¬° true¡C
 Rem
 End Sub
-Function ®Ñ¦W¸¹½g¦W¸¹¼Ðª`PreExamOK(d As Document, term As String, whatMark As String, startPos_term As Long, Optional endPos_term As Long) As Boolean
+'Function ®Ñ¦W¸¹½g¦W¸¹¼Ðª`PreExamOK(d As Document, term As String, whatMark As String, startPos_term As Long, Optional endPos_term As Long) As Boolean
+Function ®Ñ¦W¸¹½g¦W¸¹¼Ðª`PreExamOK(d As Document, term As String, startPos_term As Long, Optional endPos_term As Long) As Boolean
 Dim rngChk As Range, xChk As String
 Set rngChk = d.Range(1, startPos_term)
 xChk = rngChk.text
 'If term = "¸êªv³qÅ²" Then Stop
-Dim result As Boolean
-If whatMark = "¡m" Then ' = ¡H ¦p¡G¦¹®É·|¡u=¡v¡GIf InStr(xChk, "¡m") = 0 And InStr(xChk, "¡n") = 0 And InStr(xChk, "¡q") = 0 And InStr(xChk, "¡r") = 0 Then 20230312 Àu¤Æ¡C·P®¦·P®¦¡@Æg¼ÛÆg¼Û¡@«nµLªüÀ±ªû¦ò¡C¨S¦³¦òµÐÂÄ¥[«ù¡A§Ú®]¦u¯u¥i¯à¶Ü¡H
-    If InStrRev(xChk, "¡m") <= InStrRev(xChk, "¡n") Then result = True
-Else
-    If InStrRev(xChk, "¡q") <= InStrRev(xChk, "¡r") Then result = True
-End If
+If InStrRev(xChk, "¡m") <= InStrRev(xChk, "¡n") And InStrRev(xChk, "¡q") <= InStrRev(xChk, "¡r") Then ®Ñ¦W¸¹½g¦W¸¹¼Ðª`PreExamOK = True
+
+'Dim result As Boolean
+'If whatMark = "¡m" Then ' = ¡H ¦p¡G¦¹®É·|¡u=¡v¡GIf InStr(xChk, "¡m") = 0 And InStr(xChk, "¡n") = 0 And InStr(xChk, "¡q") = 0 And InStr(xChk, "¡r") = 0 Then 20230312 Àu¤Æ¡C·P®¦·P®¦¡@Æg¼ÛÆg¼Û¡@«nµLªüÀ±ªû¦ò¡C¨S¦³¦òµÐÂÄ¥[«ù¡A§Ú®]¦u¯u¥i¯à¶Ü¡H
+'    If InStrRev(xChk, "¡m") <= InStrRev(xChk, "¡n") Then result = True
+'Else
+'    If InStrRev(xChk, "¡q") <= InStrRev(xChk, "¡r") Then result = True
+'End If
 
 ''«e­±³£¨S¡m¡n¡q¡r®É
 'If InStr(xChk, "¡m") = 0 And InStr(xChk, "¡n") = 0 And InStr(xChk, "¡q") = 0 And InStr(xChk, "¡r") = 0 Then
@@ -3458,7 +3461,7 @@ End If
 '        End If
 '    End If
 'End If
-®Ñ¦W¸¹½g¦W¸¹¼Ðª`PreExamOK = result
+'®Ñ¦W¸¹½g¦W¸¹¼Ðª`PreExamOK = result
 End Function
 Sub ®Ñ¦W¸¹½g¦W¸¹¼Ðª`()
 Dim cnt As New ADODB.Connection, rst As New ADODB.Recordset
@@ -3486,7 +3489,7 @@ Do Until rst.EOF
         Do While rngF.Find.Execute(title, , , , , , True, wdFindStop)
 '            If InStr("¡n¡r¡P¡E", IIf(rngF.Characters(rngF.Characters.Count).Next Is Nothing, "", rngF.Characters(rngF.Characters.Count).Next)) = 0 And _
 '                InStr("¡m¡q¡P¡E", IIf(rngF.Characters(1).Previous Is Nothing, "", rngF.Characters(1).Previous)) = 0 Then
-                If ®Ñ¦W¸¹½g¦W¸¹¼Ðª`PreExamOK(d, title, "¡q", rngF.start) Then
+                If ®Ñ¦W¸¹½g¦W¸¹¼Ðª`PreExamOK(d, title, rngF.start) Then
                     If VBA.IsNull(rst("¨ú¥N¬°").Value) Then
                         rngF.text = "¡q" & title & "¡r"
                                   'd.Range.Find.Execute title, , , , , , True, wdFindContinue, , "¡q" & title & "¡r", wdReplaceAll
@@ -3523,7 +3526,7 @@ Do Until rst.EOF
         Do While rngF.Find.Execute(title, , , , , , True, wdFindStop)
 '            If InStr("¡n¡r¡P¡E", IIf(rngF.Characters(rngF.Characters.Count).Next Is Nothing, "", rngF.Characters(rngF.Characters.Count).Next)) = 0 And _
 '                InStr("¡m¡q¡P¡E", IIf(rngF.Characters(1).Previous Is Nothing, "", rngF.Characters(1).Previous)) = 0 Then
-                If ®Ñ¦W¸¹½g¦W¸¹¼Ðª`PreExamOK(d, title, "¡m", rngF.start) Then
+                If ®Ñ¦W¸¹½g¦W¸¹¼Ðª`PreExamOK(d, title, rngF.start) Then
                     
                     If title = "¸êªv³qÅ²" Then Stop
                     

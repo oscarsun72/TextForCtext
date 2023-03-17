@@ -329,31 +329,45 @@ KeyBindings.Add _
     KeyCode:=BuildKeyCode(wdKeyShift, wdKeyInsert)
 End Sub
 
+Rem 20230314 VBA Environ函式可以取得Windows的 Media(預設在C:\Windows\Media)路徑嗎？ 感恩感恩　南無阿彌陀佛
+Rem The YouChat大菩薩 ：VBA Environ function returns the value of a Windows environment variable. In order to retrieve the path of the Windows Media directory (which is located by default in "C:\Windows\Media"), you can use the Environ function along with the relevant environment variable. Here is an example VBA code that retrieves the path of the Windows Media directory using the Environ function:
+Function getWinMediaPath() As String
+Dim mediaPath As String, path As New Paths
+mediaPath = path.CombineFullName(Environ("windir"), "\Media\")
+Set path = Nothing
+getWinMediaPath = mediaPath
+Rem In this code, the windir environment variable is used to retrieve the path of the Windows directory (usually "C:\Windows"), and then the "Media" subdirectory is appended to that path using the "&" operator. The resulting mediaPath variable will contain a string representing the path to the Windows Media directory.
+Rem I hope this helps! Let me know if you have any further questions.
+End Function
 
 'https://analystcave.com/vba-status-bar-progress-bar-sounds-emails-alerts-vba/#:~:text=The%20VBA%20Status%20Bar%20is%20a%20panel%20that,Bar%20we%20need%20to%20Enable%20it%20using%20Application.DisplayStatusBar%3A
 Sub playSound(longShort As Single, Optional waittoPlay As Byte = 1) 'Public Declare Function sndPlaySound32 Lib "winmm.dll" Alias "sndPlaySoundA" (ByVal lpszSoundName As String, ByVal uFlags As Long) As Long
     '播放聲音、音效、音樂'https://blog.csdn.net/xuemanqianshan/article/details/113485233
+    Dim mediaPath As String, path As New Paths
+    mediaPath = getWinMediaPath()
     Select Case longShort
+        Case 0.484
+            sndPlaySound32 path.CombineFullName(mediaPath, "Windows Pop-up Blocked.wav"), waittoPlay
         Case 1
-            sndPlaySound32 "C:\Windows\Media\Chimes.wav", waittoPlay '&H1 '&H0:等播完才執行之後的程式碼，&H1=1，一播放，不等播完，即執行接下來的程式碼
+            sndPlaySound32 path.CombineFullName(mediaPath, "Chimes.wav"), waittoPlay '"C:\Windows\Media\Chimes.wav", waittoPlay '&H1 '&H0:等播完才執行之後的程式碼，&H1=1，一播放，不等播完，即執行接下來的程式碼
         Case 1.294 'https://learn.microsoft.com/en-us/previous-versions/dd798676(v=vs.85)
-            sndPlaySound32 "C:\Windows\Media\notify.wav", waittoPlay
+            sndPlaySound32 path.CombineFullName(mediaPath, "notify.wav"), waittoPlay
         Case 1.469
-            sndPlaySound32 "C:\Windows\Media\Windows Message Nudge.wav", waittoPlay
+            sndPlaySound32 path.CombineFullName(mediaPath, "Windows Message Nudge.wav"), waittoPlay
         Case 1.921
-            sndPlaySound32 "C:\Windows\Media\Windows Notify System Generic.wav", waittoPlay '以 PotPlayer 播放即可於清單中檢視英文檔名
+            sndPlaySound32 path.CombineFullName(mediaPath, "Windows Notify System Generic.wav"), waittoPlay '以 PotPlayer 播放即可於清單中檢視英文檔名
         Case 2
-            sndPlaySound32 "C:\Windows\Media\Windows Notify Calendar.wav", waittoPlay
+            sndPlaySound32 path.CombineFullName(mediaPath, "Windows Notify Calendar.wav"), waittoPlay
         Case 3
-            sndPlaySound32 "C:\Windows\Media\Alarm10.wav", waittoPlay
+            sndPlaySound32 path.CombineFullName(mediaPath, "Alarm10.wav"), waittoPlay
         Case 4
-            sndPlaySound32 "C:\Windows\Media\Alarm03.wav", waittoPlay
+            sndPlaySound32 path.CombineFullName(mediaPath, "Alarm03.wav"), waittoPlay
         Case 7
-            sndPlaySound32 "C:\Windows\Media\Ring10.wav", waittoPlay
+            sndPlaySound32 path.CombineFullName(mediaPath, "Ring10.wav"), waittoPlay
         Case 12
-            sndPlaySound32 "C:\Windows\Media\Ring05.wav", waittoPlay
+            sndPlaySound32 path.CombineFullName(mediaPath, "Ring05.wav"), waittoPlay
     End Select
-    
+    Set path = Nothing
 End Sub
 
 Property Get getChromePathIncludeBackslash() As String

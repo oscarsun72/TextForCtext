@@ -28,6 +28,7 @@ using Point = System.Drawing.Point;
 //using Task = System.Threading.Tasks.Task;
 using System.Threading.Tasks;
 using System.Net.Http.Headers;
+using System.Web;
 //using System.Windows.Input;
 //using Microsoft.Office.Interop.Word;
 
@@ -326,17 +327,17 @@ namespace WindowsFormsApp1
                     if (browsrOPMode != BrowserOPMode.appActivateByName)
                     {
                         br.driver = br.driver ?? br.driverNew();
-                        br.GoToUrlandActivate(url);
+                        br.GoToUrlandActivate(url, keyinTextMode);
                         if (xClp.IndexOf("edit") > -1 && xClp.Substring(xClp.LastIndexOf("#editor")) == "#editor")
                         //url此頁的Quick edit值傳到textBox1,並存入剪貼簿以備用
                         {
                             string text = br.waitFindWebElementByName_ToBeClickable("data", br.WebDriverWaitTimeSpan).Text;
-                            CnText.booksPunctuation(ref text);
+                            CnText.BooksPunctuation(ref text);
                             textBox1.Text = text;
                             Clipboard.SetText(text);
                             if (!Active)
                             {
-                                Activate(); bringBackMousePosFrmCenter();
+                                availableInUseBothKeysMouse();
                             }
                         }
 
@@ -2094,7 +2095,7 @@ namespace WindowsFormsApp1
                     e.Handled = true;
                     string clpTxt = Clipboard.GetText();
                     if (keyinTextMode && clpTxt != ClpTxtBefore)// &&clpTxt.IndexOf("《") == -1 && clpTxt.IndexOf("〈") == -1 && clpTxt.IndexOf("·") == -1)//之前是沒有優化 booksPunctuation 才需要避免已經標點過的又標，現在有正則表達式把關，就沒有這問題了。感恩感恩　讚歎讚歎　chatGPT大菩薩+Bing大菩薩 南無阿彌陀佛
-                        textBox1.Text = CnText.booksPunctuation(ref clpTxt);
+                        textBox1.Text = CnText.BooksPunctuation(ref clpTxt);
                     else textBox1.Text = clpTxt;
                     dragDrop = false;
                     return;
@@ -3502,7 +3503,7 @@ namespace WindowsFormsApp1
                     && textBox1.SelectedText.Substring(textBox1.SelectedText.Length - 3) != "<p>")
             {//找到處理範圍裡最後一個<p>，若碰到換行而無<p>者，即停止
                 textBox1.Select(textBox1.SelectionStart, textBox1.SelectionLength++);
-
+                if (textBox1.Text.IndexOf(Environment.NewLine) == -1 || textBox1.Text.IndexOf("<p>") == -1) break;
             }
             if ("<p>".IndexOf(textBox1.SelectedText.Substring(0, 1)) > -1)
             {
@@ -4594,7 +4595,7 @@ namespace WindowsFormsApp1
                             pageTextEndPosition = s;
                         }
 
-                        Activate(); bringBackMousePosFrmCenter();
+                        availableInUseBothKeysMouse();
                         return;
                     }
                     else
@@ -4615,7 +4616,7 @@ namespace WindowsFormsApp1
                 {//若無選取，則將有問題的部分選取以供檢視
                     textBox1.Select(s, l); textBox1.ScrollToCaret();
                 }
-                Activate(); bringBackMousePosFrmCenter(); return;
+                availableInUseBothKeysMouse(); return;
             }//在 newTextBox1函式中可能會更動 s、l 二值，故得如此處置，以免s、l值跑掉
 
             #region 貼到 Ctext Quick edit 
@@ -4667,6 +4668,7 @@ namespace WindowsFormsApp1
                     //將插入點置於頁首，以備編輯
                     textBox1.Select(0, 0);
                     textBox1.ScrollToCaret();
+                    //br.WindowsScrolltoTop();
                 }
             }
         }
@@ -4676,11 +4678,8 @@ namespace WindowsFormsApp1
         /// </summary>
         private void availableInUseBothKeysMouse()
         {
-            if (!Active)
-            {
-                Activate();
-                bringBackMousePosFrmCenter();
-            }
+            if (!Active) Activate();
+            bringBackMousePosFrmCenter();
         }
 
         const string omitStr = "．‧.…【】〖〗＝{}<p>（）《》〈〉：；、，。「」『』？！0123456789-‧·\r\n";//"　"
@@ -5903,17 +5902,25 @@ namespace WindowsFormsApp1
                 // 建立 Keys.Alt + Keys.Insert 的組合鍵
                 //Keys comboKey = Keys.Alt & Keys.Insert;//在 C# 中，要表示兩個按鍵的組合鍵，需要使用 "|" 運算子進行位元運算，而不是 "&" 或 "+" 運算子。 "|" 運算子可以將兩個按鍵的 KeyCode 合併成一個整數，表示按下這兩個按鍵的組合鍵。
                 //                                       // 使用 SendKeys 方法觸發按下組合鍵
-                Activate();
+                availableInUseBothKeysMouse();//Activate();
                 if (!textBox1.Focused) textBox1.Focus();
+                string x = Clipboard.GetText();
+                //textBox1.Text = x;
                 //SendKeys.Send("{" + comboKey + "}");
-                SendKeys.Send("%{insert}");
+                //SendKeys.Send("%{insert}");
+                ////儲存結果備份，以備還原（若原文即含英數字者）(剪貼簿還保留原樣，姑不用。感恩感恩　南無阿彌陀佛）
+                //saveText();
+                //清除英數字（OCR辨識誤讀者）                //加上書名號篇名號
+                textBox1.Text = CnText.BooksPunctuation(ref CnText.ClearOthers_ExceptUnicodeCharacters(ref x));
+                //textBox1.Text = CnText.BooksPunctuation(ref CnText.ClearLettersAndDigits_UseUnicodeCategory(ref x));//清不掉「-」
+                //textBox1.Text = CnText.BooksPunctuation(ref CnText.ClearLettersAndDigits(ref x));
             }
             #endregion
             //const string gjcool = "https://gj.cool/try_ocr";
 
             //Process.Start(gjcool);
             //Process.Start(keep);
-            if (!Active) bringBackMousePosFrmCenter();
+            if (!Active) availableInUseBothKeysMouse();
             #endregion
         }
 
@@ -6108,7 +6115,7 @@ namespace WindowsFormsApp1
                     //br.GoToUrlandActivate(url);
                     //Task wait = Task.Run(() =>//此間操作，因為沒有要操作的元件，所以可以跑線程。20230111
                     //{以別處還要參考，故取消Task
-                    br.GoToUrlandActivate(url);
+                    br.GoToUrlandActivate(url, keyinTextMode);
                     //});
                     //Task.WaitAll();
                     //wait.Wait();
@@ -6347,10 +6354,34 @@ namespace WindowsFormsApp1
             return Clipboard.ContainsText();
         }
 
+
+        /// <summary>
+        /// 儲存當前文本的標名+副檔名
+        /// </summary>
         const string fName_to_Save_Txt = "cText.txt";
 
-        internal string FName_to_Save_Txt_fullname { get { return dropBoxPathIncldBackSlash + fName_to_Save_Txt; } }
+        /// <summary>
+        /// 儲存當前文本的全檔名；預設路徑在Dropbox預設安裝路徑
+        /// 20230313 creedit with Adrenaline
+        /// </summary>
+        internal string FName_to_Save_Txt_fullname { get => Path.Combine(dropBoxPathIncldBackSlash + fName_to_Save_Txt); }
+        //internal string FName_to_Save_Txt_fullname { get { return dropBoxPathIncldBackSlash + fName_to_Save_Txt; } }
+        /*菩薩慈悲： 請這兩個程式碼是否與等價？ 
+          * Yes, these two code snippets are equivalent.
+            They both define an internal property called
+            `FName_to_Save_Txt_fullname` that returns a string value made up of a file path.
+            In the first code snippet, an expression-bodied member syntax is used to define the property, and it concatenates the
+            `dropBoxPathIncldBackSlash` and
+            `fName_to_Save_Txt` values using the
+            `Path.Combine` method.
+            In the second code snippet, a property with a getter is used instead, and it returns a string produced by concatenating
+            `dropBoxPathIncldBackSlash` and
+            `fName_to_Save_Txt`.
+         */
 
+        /// <summary>
+        /// 儲存當前文本以備份；預設路徑在Dropbox預設安裝路徑
+        /// </summary>
         internal void saveText()
         {
             //C# 對文字檔案的幾種讀寫方法總結:https://codertw.com/%E7%A8%8B%E5%BC%8F%E8%AA%9E%E8%A8%80/542361/
@@ -6370,6 +6401,9 @@ namespace WindowsFormsApp1
             // 也可以指定編碼方式 File.WriteAllText(@”c:\temp\test\ascii-2.txt”, str1, Encoding.ASCII);
         }
 
+        /// <summary>
+        /// 由所儲存備份的文本重新載入到 textBox1
+        /// </summary>
         private void loadText()
         {
             //C# 對文字檔案的幾種讀寫方法總結:https://codertw.com/%E7%A8%8B%E5%BC%8F%E8%AA%9E%E8%A8%80/542361/
@@ -6378,7 +6412,11 @@ namespace WindowsFormsApp1
 
         #region browsers 
 
-        static public string GetWebBrowserName()//預設瀏覽器
+        /// <summary>
+        /// 取得預設瀏覽器名稱
+        /// </summary>
+        /// <returns></returns>
+        static public string GetWebBrowserName()
         {
 
             //https://stackoverflow.com/questions/13621467/how-to-find-default-web-browser-using-c
@@ -6438,6 +6476,10 @@ namespace WindowsFormsApp1
             //https://stackoverflow.com/questions/13621467/how-to-find-default-web-browser-using-c
         }
 
+        /// <summary>
+        /// 取得預設瀏覽器執行檔全檔名
+        /// </summary>
+        /// <returns></returns>
         internal static string getDefaultBrowserEXE()
         {
             string userProfilePath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);//https://stackoverflow.com/questions/38252474/c-sharp-service-how-to-get-user-profile-folder-path
@@ -6480,6 +6522,10 @@ namespace WindowsFormsApp1
             }
         }
 
+        /// <summary>
+        /// 取得預設瀏覽器執行檔路徑
+        /// </summary>
+        /// <returns></returns>
         static private string GetDefaultWebBrowserFilePath()//chrome-extension://lcghoajegeldpfkfaejegfobkapnemjl/sandbox.html?src=https%3A%2F%2Fwww.796t.com%2Fcontent%2F1546728863.html
         {
             //舊的如此，抓不準！廢罝不用！
@@ -6630,6 +6676,7 @@ namespace WindowsFormsApp1
                 //檢查driver物件是否為空
 
                 #region 先檢查是否有已開啟的編輯頁尚未送出儲存(因為許多異體字須一次取代，往往會打開一個chapter單位來edit) 其網址有「&action=editchapter」關鍵字，如：https://ctext.org/wiki.pl?if=en&chapter=687756&action=editchapter#12450
+                //mark:在版本netframework-4.8 之前的環境，好像無效（在母校華岡學習雲測試後的結果，似並不會執行這個檢查，該機唯有4.6.1版）
                 //bool waitUpdate = false;
                 Task wait = Task.Run(async () =>
                 {
@@ -6733,14 +6780,27 @@ namespace WindowsFormsApp1
         private void pasteToCtext()
         {//for .BrowserOPMode.appActivateByName
             appActivateByName();
+            
+            //if (ModifierKeys == Keys.None)//在textBox1_TextChanged事件中已處理按著Shift時的行為
+            //{
+            //    string currentForeTabUrl = br.ActiveTabURL_Ctext_Edit;
+            //    appActivateByName();
+            //    //如果視窗改變，非原所見之分頁，則回到按下 Ctrl + Shift + + 組合鍵時的分頁視窗
+            //    if (currentForeTabUrl != br.ActiveTabURL_Ctext_Edit)
+            //    {
+            //        br.driver = br.driver ?? br.driverNew();
+            //        br.GoToUrlandActivate(currentForeTabUrl);
+            //    }
+            //}
+            
             //if (keyinText)
             //{
             //    hideToNICo();
             //}
-            if (ModifierKeys == Keys.Shift)//|| (autoPastetoQuickEdit && ModifierKeys == Keys.Control)) //|| ModifierKeys == Keys.Control
-                                           //||autoPastetoQuickEdit)//
-                                           //&& (textBox1.SelectionLength == predictEndofPageSelectedTextLen
-                                           //&& textBox1.Text.Substring(textBox1.SelectionStart + textBox1.SelectionLength, 2) == Environment.NewLine))
+            if (ModifierKeys == Keys.Shift && autoPastetoQuickEdit)//|| (autoPastetoQuickEdit && ModifierKeys == Keys.Control)) //|| ModifierKeys == Keys.Control
+                                                                   //||autoPastetoQuickEdit)//
+                                                                   //&& (textBox1.SelectionLength == predictEndofPageSelectedTextLen
+                                                                   //&& textBox1.Text.Substring(textBox1.SelectionStart + textBox1.SelectionLength, 2) == Environment.NewLine))
             {//當啟用預估頁尾後，按下 Ctrl 或 Shift Alt 可以自動貼入 Quick Edit ，唯此處僅用 Ctrl 及 Shift 控制關閉前一頁所瀏覽之 Ctext 網頁                
                 SendKeys.Send("^{F4}");//關閉前一頁                
             }
@@ -7208,7 +7268,12 @@ namespace WindowsFormsApp1
                         hideToNICo();
                         //,通常是要準備貼上的，所以就要將目前在用的瀏覽器置前，確保它取得焦點，否則有時系統焦點會或交給工作列                        
                         if (browsrOPMode == BrowserOPMode.appActivateByName)
+                        {
+                            //string currentForeTabUrl = br.ActiveTabURL_Ctext_Edit;
                             appActivateByName();
+                            //if (currentForeTabUrl != br.ActiveTabURL_Ctext_Edit)
+                            //    br.GoToUrlandActivate(currentForeTabUrl);
+                        }
                         else
                         {
                         retry:
@@ -7267,9 +7332,14 @@ namespace WindowsFormsApp1
 
         string ClpTxtBefore = "";
         private void Form1_Activated(object sender, EventArgs e)
-        {
+
+        {//此中斷點專為偵錯測試用 感恩感恩　南無阿彌陀佛 20230314
+
             #region forDebugTest權作測試偵錯用20230310
-            //string x = br.DownloadDirectory_Chrome;
+            //string x = Clipboard.GetText();
+            //CnText.ClearLettersAndDigits(ref x);
+            //CnText.ClearLettersAndDigits_UseUnicodeCategory(ref x);
+            //CnText.ClearOthers_ExceptUnicodeCharacters(ref x);
             //Console.WriteLine(x);//在「即時運算視窗」寫出訊息
             //keyinNotepadPlusplus("","南無阿彌陀佛");
             #endregion
@@ -7338,7 +7408,7 @@ namespace WindowsFormsApp1
                                 {
                                     //br.driver.ExecuteScript("window.open();");
                                     //br.driver.SwitchTo().NewWindow(OpenQA.Selenium.WindowType.Tab);//取得網址時順便貼上簡單修改模式下的文字
-                                    br.GoToUrlandActivate(clpTxt);
+                                    br.GoToUrlandActivate(clpTxt, keyinTextMode);
                                 }
 
                                 //如果是要編輯而不瀏覽，使擷取其中 quick_edit_box 框內的文字內容，複製到剪貼簿
@@ -7356,7 +7426,7 @@ namespace WindowsFormsApp1
                                     case -2146233088://"no such window: target window already closed\nfrom unknown error: web view not found\n  (Session info: chrome=109.0.5414.75)"
                                         //br.driver.SwitchTo().Window(br.driver.WindowHandles.Last());
                                         //br.driver.Navigate().GoToUrl(clpTxt);
-                                        br.GoToUrlandActivate(clpTxt);
+                                        br.GoToUrlandActivate(clpTxt, keyinTextMode);
                                         break;
                                     default:
                                         throw;
@@ -7387,18 +7457,14 @@ namespace WindowsFormsApp1
                                                  ////只要剪貼簿裡的內容合於以下條件
                                                  //if (ClpTxtBefore != clpTxt && textBox1.Text == "" && clpTxt.IndexOf("http") == -1 && clpTxt.IndexOf("<scanb") == -1)
                                                  //{
-                        textBox1.Text = CnText.booksPunctuation(ref nowClpTxt);
+                        textBox1.Text = CnText.BooksPunctuation(ref nowClpTxt);
                         //return;
                         //}
                         //插入點游標置於頁首
                         //if(keyinText)//已於巢外的if判定了
                         textBox1.Select(0, 0);
                     }
-                    if (!Active)
-                    {
-                        Activate();
-                        bringBackMousePosFrmCenter();
-                    }
+                    if (!Active) availableInUseBothKeysMouse();
                     return;
                 }
             }//以上處置鍵入模式（keyinText=true）
@@ -7628,14 +7694,14 @@ namespace WindowsFormsApp1
                     }
                     try
                     {
-                        if (br.driver != null && br.driver.Url != textBox3.Text) br.GoToUrlandActivate(textBox3.Text);
+                        if (br.driver != null && br.driver.Url != textBox3.Text) br.GoToUrlandActivate(textBox3.Text, keyinTextMode);
                     }
                     catch (Exception ex)
                     {
                         switch (ex.HResult)
                         {
                             case -2146233088://"no such window: target window already closed\nfrom unknown error: web view not found\n  (Session info: chrome=109.0.5414.75)"
-                                br.GoToUrlandActivate(textBox3.Text);
+                                br.GoToUrlandActivate(textBox3.Text, keyinTextMode);
                                 break;
                             default:
                                 throw;
@@ -8412,10 +8478,14 @@ namespace WindowsFormsApp1
 
         internal static void MessageBoxShowOKExclamationDefaultDesktopOnly(string text, string caption = "")
         {
-            MessageBox.Show(text, caption, MessageBoxButtons.OKCancel
+            MessageBox.Show(text, caption, MessageBoxButtons.OK
                 , MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
         }
-
+        internal static DialogResult MessageBoxShowOKCancelExclamationDefaultDesktopOnly(string text, string caption = "")
+        {
+            return MessageBox.Show(text, caption, MessageBoxButtons.OKCancel
+                , MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
+        }
 
         #region 取得Windows作業系統現行的程式視窗。此乃為自己練習&測試用爾 https://ithelp.ithome.com.tw/questions/10212282#answer-388757        
 

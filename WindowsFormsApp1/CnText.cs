@@ -66,27 +66,27 @@ namespace TextForCtext
             //}
 
             //string text = "{{後《漢·志》注多引之}}<p>";
-            int charCount = GetCharCount(text);
+            int charCount = getCharCount(text);
 
             if (charCount % 2 == 0)
             {
                 int line1CharCount = charCount / 2;
                 int line2CharCount = charCount / 2;
                 //Console.WriteLine(SplitString(text, line1CharCount, line2CharCount));
-                text = SplitString(text, line1CharCount, line2CharCount);
+                text = splitString(text, line1CharCount, line2CharCount);
             }
             else
             {
                 int line1CharCount = charCount / 2 + 1;
                 int line2CharCount = charCount / 2;
                 //Console.WriteLine(SplitString(text, line1CharCount, line2CharCount));
-                text = SplitString(text, line1CharCount, line2CharCount);
+                text = splitString(text, line1CharCount, line2CharCount);
             }
             //Console.ReadLine();
             return text;
         }
 
-        private static int GetCharCount(string text)
+        private static int getCharCount(string text)
         {
             int charCount = 0;
             StringInfo si = new StringInfo(text);
@@ -94,7 +94,7 @@ namespace TextForCtext
             for (int i = 0; i < si.LengthInTextElements; i++)
             {
                 string subString = si.SubstringByTextElements(i, 1);
-                if (!IsPunctuationNumTagSymbol(subString))
+                if (!isPunctuationNumTagSymbol(subString))
                 {
                     charCount++;
                 }
@@ -102,7 +102,7 @@ namespace TextForCtext
 
             return charCount;
         }
-        private static string SplitString(string text, int line1CharCount, int line2CharCount)
+        private static string splitString(string text, int line1CharCount, int line2CharCount)
         {
             StringBuilder sb = new StringBuilder();
             StringInfo si = new StringInfo(text);
@@ -111,7 +111,7 @@ namespace TextForCtext
             for (int i = 0; i < si.LengthInTextElements; i++)
             {
                 string subString = si.SubstringByTextElements(i, 1);
-                if (!IsPunctuationNumTagSymbol(subString))
+                if (!isPunctuationNumTagSymbol(subString))
                 {
                     charCount++;
                 }
@@ -131,7 +131,7 @@ namespace TextForCtext
             return sb.ToString();
         }
 
-        private static bool IsPunctuationNumTagSymbol(string text)
+        private static bool isPunctuationNumTagSymbol(string text)
         {
             //char[] punctuations = new char[] { '。', '，', '、', '；', '：', '？', '！' };
             //return Array.IndexOf(punctuations, text[0]) >= 0;
@@ -143,7 +143,7 @@ namespace TextForCtext
         /// </summary>
         /// <param name="clpTxt">剪貼簿中的文字--需要加上書名號篇名號的文本。預防大文本，故以傳址（pass by reference）方式</param>
         /// <returns>傳址回傳clpTxt被標點後的結果</returns>
-        internal static ref string booksPunctuation(ref string clpTxt)
+        internal static ref string BooksPunctuation(ref string clpTxt)
         {
             //提示音
             //new SoundPlayer(@"C:\Windows\Media\Windows Balloon.wav").Play();
@@ -195,20 +195,30 @@ namespace TextForCtext
         /// <param name="term">須標上書名號或篇名號之詞彙</param>        
         static void booksPunctuationExamReplace(ref string context, string term, string termReplaced)
         {
-            int pos_Term =context.IndexOf(term);//ABBREVIATION:1.position https://www.collinsdictionary.com/dictionary/english/pos
-            if (pos_Term==-1) return;
-            //我自己的，更簡短，更優化
-            string patternCntext = context.Substring(0, pos_Term);
+            int pos_Term = context.IndexOf(term);//ABBREVIATION:1.position https://www.collinsdictionary.com/dictionary/english/pos
+            if (pos_Term == -1) return;
+            ////我自己的，更簡短，更優化；運作邏輯忖度，應當還是用正則表達式好，因為這是一次取代，與WordVBA中的逐一檢查不同；以下這樣寫，則只瞻前、未顧後，誠掛一漏萬者也。感恩感恩　南無阿彌陀佛 20230312
+            //string patternCntext = context.Substring(0, pos_Term);
+            //if (patternCntext.LastIndexOf("《") <= patternCntext.LastIndexOf("》")
+            //    && patternCntext.LastIndexOf("〈") <= patternCntext.LastIndexOf("〉"))
+            //    context = context.Replace(term, termReplaced);
+
+
             //if(patternCntext.LastIndexOf("")==-1&& patternCntext.LastIndexOf("")==-1)
-            if (termReplaced.IndexOf("《") > -1) {
-                if (patternCntext.LastIndexOf("《") <= patternCntext.LastIndexOf("》"))  
-                        context = context.Replace(term,termReplaced);
-            }
-            else
-            {
-                if (patternCntext.LastIndexOf("〈") <= patternCntext.LastIndexOf("〉"))
-                    context = context.Replace(term, termReplaced);
-            }
+            //if (termReplaced.IndexOf("《") > -1)
+            //{
+            //    if (patternCntext.LastIndexOf("《") <= patternCntext.LastIndexOf("》")
+            //        && patternCntext.LastIndexOf("〈") <= patternCntext.LastIndexOf("〉"))
+            //        context = context.Replace(term, termReplaced);
+            //}
+            //else
+            //{
+            //    if (patternCntext.LastIndexOf("〈") <= patternCntext.LastIndexOf("〉")
+            //        && patternCntext.LastIndexOf("《") <= patternCntext.LastIndexOf("》"))
+            //        context = context.Replace(term, termReplaced);
+            //}
+
+
 
             //string pattern = "(?<!《)(?<!〈)" + Regex.Escape(item[0]) + "(?!》)(?!〉)";
             //string pattern = "(?<!《)(?<!〈)" + Regex.Escape(term) + "(?!》)(?!〉)";
@@ -228,8 +238,8 @@ namespace TextForCtext
             ////text = Regex.Replace(text, pattern, replacement);
             ////20230311 Bing大菩薩：
             ////string pattern = "(?<!《[^》]*)(?<!〈[^〉]*)" + Regex.Escape(term) + "(?![^《]*》)(?![^〈]*〉)";
-            ////20230311 合併Bing大菩薩與之前chatGPT大菩薩的：
-            //string pattern = "(?<!《[^》]*)(?<!〈[^〉]*)(?<![\\p{P}&&[^》〉]]+)" + Regex.Escape(term) + "(?![^《]*》)(?![^〈]*〉)";
+            //20230311 合併Bing大菩薩與之前chatGPT大菩薩的：
+            string pattern = "(?<!《[^》]*)(?<!〈[^〉]*)(?<![\\p{P}&&[^》〉]]+)" + Regex.Escape(term) + "(?![^《]*》)(?![^〈]*〉)";
 
             /* the result of this one : (?<!《)(?<!〈)(?<![\\p{P}&&[^》〉]]+)" + Regex.Escape(term) + "(?!》)(?!〉) will be 《續《資治通鑑》長編》 not 《續資治通鑑長編》 however it should not to be "《續《資治通鑑》長編》" ,because when ready to mark "資治通鑑"，the code should check out of the "資治通鑑" is already marked "《續資治通鑑長編》",so it should jump this replacement
              * Bing大菩薩：
@@ -249,8 +259,168 @@ namespace TextForCtext
                 Let me know if this works for you or if you have any further questions.
              */
 
-            //context = Regex.Replace(context, pattern, termReplaced);
+            context = Regex.Replace(context, pattern, termReplaced);
         }
 
+        /// <summary>
+        /// NotionAI大菩薩所提的3、4種方式也是會清除中文，茲不錄。此即其所建構者。以或者可用到，暫先保留
+        /// </summary>
+        enum CharType { Letter, Digit, Other }
+        /// <summary>
+        /// 清除所有英文字與數字
+        /// 20230313 creedit with YouChat菩薩
+        /// 也會留下「-」
+        /// </summary>
+        /// <param name="text">要處理的文本。考慮到大文本，故用傳址（pass by reference）</param>
+        internal static ref string ClearLettersAndDigits(ref string text)
+        {
+            //Adrenaline菩薩的這個會把中文也清除了：(NotionAI大菩薩所提的3、4種方式也是，茲不錄。enum CharType 即其所建構者)
+            //text= new string(text.Where(c => !char.IsLetterOrDigit(c)).ToArray());
+            //return ref text;
+
+            text = Regex.Replace(text, "[a-zA-Z0-9]+", "");//消不掉「-」，蓋條件僅限在英數故
+            return ref text;
+
+            /* YouChat菩薩：
+             * Hello! How can I help you?
+                C# 清除所有英文字與數字 怎麼寫 感恩感恩　南無阿彌陀佛
+                To remove all the English alphabets and numeric digits from a string in C#, you can use a regular expression. Here's an example:
+
+                using System.Text.RegularExpressions;
+                //...
+                string str = "C# 清除所有英文字與數字怎麼寫 感恩感恩 南無阿彌陀佛";
+                str = Regex.Replace(str, "[a-zA-Z0-9]+", "");
+                Console.WriteLine(str);
+                This code will output "C# 清除所有英文字與數字怎麼寫 感恩感恩 南無阿彌陀佛", which is the original string with all English alphabets and numeric digits removed. The regular expression "[a-zA-Z0-9]+" matches one or more English alphabets or numeric digits. The Regex.Replace() method is then used to replace all matches with an empty string.
+
+                有現成的函式方法可以套用嗎？
+                Yes, there are built-in methods in C# that you can use to achieve the same result. Here's an example using only built-in methods:
+
+                string str = "C# 清除所有英文字與數字怎麼寫 感恩感恩 南無阿彌陀佛";
+                str = new string(str.Where(c => !char.IsLetterOrDigit(c)).ToArray());
+                Console.WriteLine(str);
+                This code will also output "C# 清除所有英文字與數字怎麼寫 感恩感恩 南無阿彌陀佛", which is the original string with all English alphabets and numeric digits removed. The LINQ Where() method is used to filter out all the letters and digits, and the ToArray() method is then used to convert the resulting IEnumerable<char> to a char[]. Finally, the new string(char[]) constructor is used to create a new string from the resulting character array.
+             *「"[a-zA-Z0-9]+"」 最後的加號（「+」）是什麼意思？ 謝謝
+                The plus sign ("+") in the regular expression "[a-zA-Z0-9]+" means "match one or more occurrences of the preceding character or group". In this case, it means "match one or more occurrences of any uppercase or lowercase letter in the English alphabet or any numeric digit". So this regular expression will match any sequence of one or more consecutive English alphabets or numeric digits in a string.
+             */
+        }
+
+        /// <summary>
+        /// 清除所有英文字與數字
+        ///  20230314 creedit with Bing大菩薩
+        ///  會留下「-」
+        /// </summary>
+        /// <param name="text">要處理的文本。考慮到大文本，故用傳址（pass by reference）</param>
+        /// <returns>傳址回傳結果</returns>
+        internal static ref string ClearLettersAndDigits_UseUnicodeCategory(ref string text){
+            // 這是對的，測試成功：Bing大菩薩：您好!這是一個使用 C# 來清除英數字但保留中文的程式碼示例:
+            string input = text;// "這是1個測試ABC";
+            string output = string.Empty;
+            foreach (char c in input)
+            {
+                if (!char.IsLetterOrDigit(c) || char.GetUnicodeCategory(c) == System.Globalization.UnicodeCategory.OtherLetter)
+                {//會留下「-」清不乾淨
+                    output += c;
+                }
+            }
+            //Console.WriteLine(output);
+            //ConsoIe.WriteLine(output);這段程式碼會輸出 這是個測試 。希望對您有所幫助!
+            text = output;
+            return ref text;
+
+        }
+        /// <summary>
+        /// 只保留unicode文字（不限中文），不含其他符號
+        /// </summary>
+        /// <param name="text">要清理的文本，以傳址（pass by reference）方式傳遞</param>
+        /// <returns></returns>
+        internal static ref string ClearOthers_ExceptUnicodeCharacters(ref string text)
+        {
+            //20230314 creedit with Bing大菩薩（參見ClearLettersAndDigitsUseUnicodeCategory()）：
+            StringBuilder sb = new StringBuilder();//bool isUnicodeCharacters=false;
+            foreach (char c in text)//這行設中斷點暫停，可以明白各個字元究竟在哪個UnicodeCategory中  https://learn.microsoft.com/zh-tw/dotnet/api/system.globalization.unicodecategory?view=netframework-4.8 可配合Form1_Activated()事件程序中來測試
+            {
+                switch (System.Globalization.CharUnicodeInfo.GetUnicodeCategory(c))
+                {
+                    case UnicodeCategory.UppercaseLetter:
+                        break;
+                    case UnicodeCategory.LowercaseLetter:
+                        break;
+                    case UnicodeCategory.TitlecaseLetter:
+                        break;
+                    case UnicodeCategory.ModifierLetter:
+                        break;
+                    case UnicodeCategory.OtherLetter://cjk非surrogate的在這，如「積(7A4D=31309)」。
+                        sb.Append(c);
+                        break;
+                    case UnicodeCategory.NonSpacingMark:
+                        break;
+                    case UnicodeCategory.SpacingCombiningMark:
+                        break;
+                    case UnicodeCategory.EnclosingMark:
+                        break;
+                    case UnicodeCategory.DecimalDigitNumber://[0-9]
+                        break;
+                    case UnicodeCategory.LetterNumber:
+                        break;
+                    case UnicodeCategory.OtherNumber:
+                        break;
+                    case UnicodeCategory.SpaceSeparator:
+                        break;
+                    case UnicodeCategory.LineSeparator:
+                        break;
+                    case UnicodeCategory.ParagraphSeparator:
+                        break;
+                    case UnicodeCategory.Control://\r\n在這
+                        switch (c)
+                        {
+                            case '\r':
+                                sb.Append(c);
+                                break;
+                            case '\n':
+                                sb.Append(c);
+                                break;
+                            default:
+                                break;
+                        }
+                        break;
+                    case UnicodeCategory.Format:
+                        break;
+                    case UnicodeCategory.Surrogate:
+                        sb.Append(c);
+                        break;
+                    case UnicodeCategory.PrivateUse:
+                        break;
+                    case UnicodeCategory.ConnectorPunctuation://_在這
+                        break;
+                    case UnicodeCategory.DashPunctuation://-在這
+                        break;
+                    case UnicodeCategory.OpenPunctuation:
+                        break;
+                    case UnicodeCategory.ClosePunctuation:
+                        break;
+                    case UnicodeCategory.InitialQuotePunctuation:
+                        break;
+                    case UnicodeCategory.FinalQuotePunctuation:
+                        break;
+                    case UnicodeCategory.OtherPunctuation://*!/在這
+                        break;
+                    case UnicodeCategory.MathSymbol://+在這
+                        break;
+                    case UnicodeCategory.CurrencySymbol:
+                        break;
+                    case UnicodeCategory.ModifierSymbol://^在這
+                        break;
+                    case UnicodeCategory.OtherSymbol:
+                        break;
+                    case UnicodeCategory.OtherNotAssigned:
+                        break;
+                    default:
+                        break;
+                }
+            }
+            text = sb.ToString();
+            return ref text;
+        }
     }
 }

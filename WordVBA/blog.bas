@@ -10,7 +10,7 @@ Sub 儲存供google索引並備分(dp As Document)  '2008/12/24
     htmFilename = InputBox("請輸入檔名", , "htmfilename")
     If htmFilename = "" Then Exit Sub
     On Error GoTo eh:
-    dp.SaveAs FileName:= _
+    dp.SaveAs fileName:= _
         "P:\我的部落格\5160_\" & Left(htmFilename, 235) & ".html", _
         FileFormat:=wdFormatUnicodeText, LockComments:=False, Password:="", _
         AddToRecentFiles:=True, WritePassword:="", ReadOnlyRecommended:=False, _
@@ -384,10 +384,15 @@ Dim rng As Range
 Set rng = selection.Range
 If rng.Hyperlinks.Count = 0 Then '如果所在位置沒有超連結，則看其前有否；若又無，則再看其後有否；若都無則不執行 2022/12/20
     If rng.start = 0 Then
-        GoSub nxt
+        If selection.Type = wdSelectionNormal Then
+            GoTo Selected_Range
+        Else
+            GoSub nxt
+        End If
     ElseIf rng.End = rng.Document.Range.End - 1 Then
         GoSub pre
     ElseIf rng.End < rng.Document.Range.End - 1 Then
+Selected_Range:
         '為 「生難字加上國語辭典注音」 而設
         Dim rngNext As Range
         Set rngNext = rng.Next
@@ -411,6 +416,7 @@ If rng.Hyperlinks.Count > 0 Then
     Else
         strLnk = rng.Hyperlinks(1).Address
     End If
+    SystemSetup.playSound 0.484
     Shell getDefaultBrowserFullname + " " + strLnk
 End If
 Exit Sub
