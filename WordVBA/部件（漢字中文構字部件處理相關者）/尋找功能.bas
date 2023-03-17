@@ -89,7 +89,7 @@ End Sub
 
 Rem 20230316 creedit with Bing大菩薩
 '查看只因部首變形而構成不同漢字中文所有相關的漢字（即除了部首變形外，其他的部件皆同。尚不計其排列方式）
-Rem 衣部變形部首分上下者，先不錯，只有此例，其實可以人工找出
+Rem 衣部變形部首分上下者，先不做，只有此例，其實可以人工找出
 Sub 找出所有只有一個變形部首部件不同的字Dictionary()
 Dim t As Table, d As Document, a As Range, c As Cell, result As String
 Dim dictComponents As New Scripting.Dictionary, components As New components, componentsArray() As String, w As String, wList As String, key As String

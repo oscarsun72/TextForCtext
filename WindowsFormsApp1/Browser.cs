@@ -254,9 +254,9 @@ namespace TextForCtext
         }
 
         /// <summary>
-        /// Selenium 操控的 Chrome瀏覽器伺服器（ChromeDriverService）的等待秒數（即「new ChromeDriver()」的「TimeSpan」引數值）。預設為 15.5。
+        /// Selenium 操控的 Chrome瀏覽器伺服器（ChromeDriverService）的等待秒數（即「new ChromeDriver()」的「TimeSpan」引數值）。預設為 20.5。
         /// </summary>
-        static double _chromeDriverServiceTimeSpan = 15.5;//《古籍酷》OCR所需
+        static double _chromeDriverServiceTimeSpan = 20.5;//《古籍酷》OCR所需
         /// <summary>
         ///  Selenium 操控的 Chrome瀏覽器中網頁元件的的等待秒數（WebDriverWait。即「new WebDriverWait()」的「TimeSpan」引數值）。預設為 3。
         static double _webDriverWaitTimSpan = 3;
@@ -1523,11 +1523,11 @@ namespace TextForCtext
                 switch (ex.HResult)
                 {
                     default:
-                        string msgText=ex.HResult.ToString() + ex.Message;
+                        string msgText = ex.HResult.ToString() + ex.Message;
                         Console.WriteLine(msgText);
                         Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(msgText);
                         return false;
-                }                
+                }
             }
 
             #region 先檢查點數是否足夠
@@ -1547,6 +1547,14 @@ namespace TextForCtext
             }
             #endregion
 
+            //取得所匯出的檔案路徑
+            string filePath = Path.Combine(downloadDirectory, Path.GetFileNameWithoutExtension(downloadImgFullName) + ".txt");//@"X:\Ctext_Page_Image.txt";
+            //刪除之前的檔案，以免因檔案存在而被下載端重新命名
+            Task.Run(() =>
+            { 
+                if (File.Exists(filePath)) File.Delete(filePath);
+            });
+
             //按下：新增圖片：選擇檔案
             //Thread.Sleep(3200);
             SendKeys.Send("{tab 16} ");
@@ -1559,7 +1567,7 @@ namespace TextForCtext
         retry:
             SendKeys.Send("+{Insert}");//or "^v"
             SendKeys.Send("{ENTER}");
-            //待圖載入
+            //待圖載入            
             Thread.Sleep(3220);
             //按下「Pro」
             iwe = waitFindWebElementBySelector_ToBeClickable("#line_img_form > div > input[type=file]");
@@ -1576,7 +1584,8 @@ namespace TextForCtext
             //iwe = waitFindWebElementBySelector_ToBeClickable("# OneLine > div.d-flex.justify-content-between.mt-2.mb-1 > div:nth-child(1) > div:nth-child(2) > ul > li:nth-child(2) > button");
             //iwe.Click();
             //Thread.Sleep(6220);
-            Thread.Sleep(6000);//OCR結束
+            //Thread.Sleep(6000);//OCR結束
+            Thread.Sleep(9000);//OCR結束
             SendKeys.Send("{tab 24}~");
             //按下「導出數據」：
             //iwe = waitFindWebElementBySelector_ToBeClickable("# outputDropdown");
@@ -1599,8 +1608,6 @@ namespace TextForCtext
 
 
             #region 讀入文本 creedit with chatGPT大菩薩：
-            //取得所匯出的檔案路徑
-            string filePath = Path.Combine(downloadDirectory, Path.GetFileNameWithoutExtension(downloadImgFullName) + ".txt"); //@"X:\Ctext_Page_Image.txt";            
             //等待下載完成
             TimeSpan waitFileExitTimeSpan = TimeSpan.FromSeconds(10);//最多等待時間
             DateTime waitFileExitBegin = DateTime.Now;
@@ -1610,7 +1617,8 @@ namespace TextForCtext
             if (File.Exists(filePath))
             {
 
-                string text=null;
+                string text = null;
+            retryReadFile:
                 try
                 {
                     text = File.ReadAllText(filePath, System.Text.Encoding.UTF8);
@@ -1622,15 +1630,14 @@ namespace TextForCtext
                         case -2147024864:
                             Thread.Sleep(3);//"由於另一個處理序正在使用檔案 'X:\\Ctext_Page_Image.txt'，所以無法存取該檔案。"
                             text = File.ReadAllText(filePath, System.Text.Encoding.UTF8);
-                            goto retry;
-                            break;
+                            goto retryReadFile;
                         default:
                             Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.Message);
                             break;
                     }
-                    
+
                 }
-                
+
                 if (text == null)
                 {
                     if (DialogResult.Cancel == Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly
