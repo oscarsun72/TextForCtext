@@ -368,7 +368,7 @@ Ctrl+ 滑鼠左鍵：清除框中所有文字
 - 輸入「tE」前綴，設定 Selenium 操控的 Chrome瀏覽器中網頁元件的的等待秒數（WebDriverWait。即「new WebDriverWait()」的「TimeSpan」引數值）。預設為 3。
     > 如「tS10」即設定伺服器等候上限是10秒鐘，「tE8」則是設定網頁元件出現的逾時點是8秒鐘
 - 輸入「nb,」可以切換 GXDS.SKQSnoteBlank 值以指定是否要檢查注文中因空白而誤標的情形
-            
+- 輸入資料夾路徑可指定有效的Chrome瀏覽器的下載位置
 
 ### 在 textBox3 網址資訊專用方塊框：
 - 拖曳網址在 textBox3 或 textBox1 上放開，則會讀入所拖曳的網址值給 textBox3

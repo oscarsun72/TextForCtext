@@ -983,7 +983,8 @@ Exit Sub
 refres:
     word.Application.ScreenUpdating = True
     If flgPaste Then
-        ¤å¦r³B²z.®Ñ¦W¸¹½g¦W¸¹¼Ðª`
+        Rem ¥ý¬Ù²¤¡A§K±o¨C¦¸¶K¤J³£°µ¤@¦¸¡A¤å¦r³B²z.®Ñ¦W¸¹½g¦W¸¹¼Ðª`¡AÀ³·íµ¥°µ§¹®É­nÃö³¬ÀÉ®×«e¦A°µ
+        '¤å¦r³B²z.®Ñ¦W¸¹½g¦W¸¹¼Ðª`
         'If flgPaste Then'´ú¸ÕµLÃª«á¥i§R¦¹¦æ
         'Åã¥Ü·s¶K¤Wªº¤å¥»³»ºÝ
         rng.SetRange endDocOld, endDocOld
@@ -1310,44 +1311,44 @@ End Sub
 Rem 20230224 creedit with  BingµÐÂÄ¡G
 Sub ChangeFontOfSurrogatePairs_ActiveDocument(fontName As String, Optional whatCJKBlock As CJKBlockName)
     Dim rng         As Range
-    Dim c           As String
+    Dim C           As String
     Dim i           As Long
     Dim ur As UndoRecord
     SystemSetup.stopUndo ur, "ChangeFontOfSurrogatePairs_ActiveDocument"
     ' Loop through each character in the document
     For Each rng In ActiveDocument.Characters
-        c = rng.text
+        C = rng.text
         ' Check if the character is a high surrogate
-        If AscW(c) >= &HD800 And AscW(c) <= &HDBFF Then
+        If AscW(C) >= &HD800 And AscW(C) <= &HDBFF Then
             ' Check if the next character is a low surrogate
             If rng.End < ActiveDocument.Content.End Then
                 i = rng.End + 1        ' The index of the next character
                 If i < ActiveDocument.Range.End Then
-                    c = c & ActiveDocument.Range(i, i).text        ' The combined character
+                    C = C & ActiveDocument.Range(i, i).text        ' The combined character
                 End If
-                If AscW(Right(c, 1)) >= &HDC00 And AscW(Right(c, 1)) <= &HDFFF Then
+                If AscW(Right(C, 1)) >= &HDC00 And AscW(Right(C, 1)) <= &HDFFF Then
                     ' Check if the combined character is in CJK extension B or later
                     'If AscW(Left(c, 1)) >= &HD840 Then
-                    If AscW(Left(c, 1)) >= SurrogateCodePoint.HighStart Then '«e¾É¥N²z (lead surrogates)¡A¤¶©ó D800 ¦Ü DBFF ¤§¶¡¡A²Ä¤G­Ó³QºÙ¬° «á§À¥N²z (trail surrogates)¡A¤¶©ó DC00 ¦Ü DFFF ¤§¶¡
+                    If AscW(Left(C, 1)) >= SurrogateCodePoint.HighStart Then '«e¾É¥N²z (lead surrogates)¡A¤¶©ó D800 ¦Ü DBFF ¤§¶¡¡A²Ä¤G­Ó³QºÙ¬° «á§À¥N²z (trail surrogates)¡A¤¶©ó DC00 ¦Ü DFFF ¤§¶¡
                         Dim change As Boolean
                         change = True
 '                        rng.Select
                         Select Case whatCJKBlock
                             Case CJKBlockName.CJK_Unified_Ideographs_Extension_B
-                                change = isCJK_Ext(c, CJK_Unified_Ideographs_Extension_B)
+                                change = isCJK_Ext(C, CJK_Unified_Ideographs_Extension_B)
                             Case CJKBlockName.CJK_Unified_Ideographs_Extension_C
-                                change = isCJK_Ext(c, CJK_Unified_Ideographs_Extension_C)
+                                change = isCJK_Ext(C, CJK_Unified_Ideographs_Extension_C)
                             Case CJKBlockName.CJK_Unified_Ideographs_Extension_D
-                                change = isCJK_Ext(c, CJK_Unified_Ideographs_Extension_D)
+                                change = isCJK_Ext(C, CJK_Unified_Ideographs_Extension_D)
                             Case CJKBlockName.CJK_Unified_Ideographs_Extension_E
-                                change = isCJK_Ext(c, CJK_Unified_Ideographs_Extension_E)
+                                change = isCJK_Ext(C, CJK_Unified_Ideographs_Extension_E)
                             Case CJKBlockName.CJK_Unified_Ideographs_Extension_F
                                 'change = isCJK_ExtF(c)
-                                change = isCJK_Ext(c, CJK_Unified_Ideographs_Extension_F)
+                                change = isCJK_Ext(C, CJK_Unified_Ideographs_Extension_F)
                             Case CJKBlockName.CJK_Unified_Ideographs_Extension_G
-                                change = isCJK_Ext(c, CJK_Unified_Ideographs_Extension_G)
+                                change = isCJK_Ext(C, CJK_Unified_Ideographs_Extension_G)
                             Case CJKBlockName.CJK_Unified_Ideographs_Extension_H
-                                change = isCJK_Ext(c, CJK_Unified_Ideographs_Extension_H)
+                                change = isCJK_Ext(C, CJK_Unified_Ideographs_Extension_H)
                             Case Else
                             ' Change the font name to HanaMinB
                             ' Change the font name to fontName
@@ -1362,18 +1363,18 @@ Sub ChangeFontOfSurrogatePairs_ActiveDocument(fontName As String, Optional whatC
 End Sub
 Sub ChangeFontOfSurrogatePairs_Range(fontName As String, rngtoChange As Range, Optional whatCJKBlock As CJKBlockName)
     Dim rng         As Range
-    Dim c           As String
+    Dim C           As String
     Dim i           As Long
     Dim ur As UndoRecord
     SystemSetup.stopUndo ur, "ChangeFontOfSurrogatePairs_Range"
     For Each rng In rngtoChange.Characters
-        c = rng.text
+        C = rng.text
         
         Rem forDebugText
 '        If c = ChrW(-10122) & ChrW(-8820) Or c = ChrW(-10119) & ChrW(-8987) Then Stop
         
         ' Check if the character is a high surrogate
-        If AscW(c) >= &HD800 And AscW(c) <= &HDBFF Then
+        If AscW(C) >= &HD800 And AscW(C) <= &HDBFF Then
 '            ' Check if the next character is a low surrogate
 '            'If rng.End < ActiveDocument.Content.End Then
 '            If rng.End < rngtoChange.End Then
@@ -1383,39 +1384,39 @@ Sub ChangeFontOfSurrogatePairs_Range(fontName As String, rngtoChange As Range, O
 '                    'c = c & ActiveDocument.Range(i, i).text        ' The combined character
 '                    c = c & Mid(rngtoChange, i, 1).text        ' The combined character
 '                End If
-                If AscW(Right(c, 1)) >= &HDC00 And AscW(Right(c, 1)) <= &HDFFF Then
+                If AscW(Right(C, 1)) >= &HDC00 And AscW(Right(C, 1)) <= &HDFFF Then
                     ' Check if the combined character is in CJK extension B or later
                     'If AscW(Left(c, 1)) >= &HD840 Then
-                    If AscW(Left(c, 1)) >= SurrogateCodePoint.HighStart Then '«e¾É¥N²z (lead surrogates)¡A¤¶©ó D800 ¦Ü DBFF ¤§¶¡¡A²Ä¤G­Ó³QºÙ¬° «á§À¥N²z (trail surrogates)¡A¤¶©ó DC00 ¦Ü DFFF ¤§¶¡
+                    If AscW(Left(C, 1)) >= SurrogateCodePoint.HighStart Then '«e¾É¥N²z (lead surrogates)¡A¤¶©ó D800 ¦Ü DBFF ¤§¶¡¡A²Ä¤G­Ó³QºÙ¬° «á§À¥N²z (trail surrogates)¡A¤¶©ó DC00 ¦Ü DFFF ¤§¶¡
                         Dim change As Boolean, isCjkResult As Collection
                         change = True
 '                        rng.Select
                         Select Case whatCJKBlock
                             Case CJKBlockName.CJK_Compatibility_Ideographs
-                                 Set isCjkResult = IsCJK(c)
+                                 Set isCjkResult = IsCJK(C)
                                  If isCjkResult.item(1) Then
                                     If isCjkResult.item(2) <> CJKBlockName.CJK_Compatibility_Ideographs Then change = False
                                  End If
                             Case CJKBlockName.CJK_Compatibility_Ideographs_Supplement
-                                 Set isCjkResult = IsCJK(c)
+                                 Set isCjkResult = IsCJK(C)
                                  If isCjkResult.item(1) Then
                                     If isCjkResult.item(2) <> CJKBlockName.CJK_Compatibility_Ideographs_Supplement Then change = False
                                  End If
                             Case CJKBlockName.CJK_Unified_Ideographs_Extension_B
-                                change = isCJK_Ext(c, CJK_Unified_Ideographs_Extension_B)
+                                change = isCJK_Ext(C, CJK_Unified_Ideographs_Extension_B)
                             Case CJKBlockName.CJK_Unified_Ideographs_Extension_C
-                                change = isCJK_Ext(c, CJK_Unified_Ideographs_Extension_C)
+                                change = isCJK_Ext(C, CJK_Unified_Ideographs_Extension_C)
                             Case CJKBlockName.CJK_Unified_Ideographs_Extension_D
-                                change = isCJK_Ext(c, CJK_Unified_Ideographs_Extension_D)
+                                change = isCJK_Ext(C, CJK_Unified_Ideographs_Extension_D)
                             Case CJKBlockName.CJK_Unified_Ideographs_Extension_E
-                                change = isCJK_Ext(c, CJK_Unified_Ideographs_Extension_E)
+                                change = isCJK_Ext(C, CJK_Unified_Ideographs_Extension_E)
                             Case CJKBlockName.CJK_Unified_Ideographs_Extension_F
                                 'change = isCJK_ExtF(c)
-                                change = isCJK_Ext(c, CJK_Unified_Ideographs_Extension_F)
+                                change = isCJK_Ext(C, CJK_Unified_Ideographs_Extension_F)
                             Case CJKBlockName.CJK_Unified_Ideographs_Extension_G
-                                change = isCJK_Ext(c, CJK_Unified_Ideographs_Extension_G)
+                                change = isCJK_Ext(C, CJK_Unified_Ideographs_Extension_G)
                             Case CJKBlockName.CJK_Unified_Ideographs_Extension_H
-                                change = isCJK_Ext(c, CJK_Unified_Ideographs_Extension_H)
+                                change = isCJK_Ext(C, CJK_Unified_Ideographs_Extension_H)
                             Case Else
                             ' Change the font name to HanaMinB
                             ' Change the font name to fontName
@@ -1462,23 +1463,23 @@ Sub FindMissingCharacters() '³oÀ³¸Ó¥u¬O§ä¤å¥ó¤¤ªº¦r¤£¯à¥H·s²Ó©úÅé¡B¼Ð·¢Åé¨ÓÅã¥Üª
     
     Dim p As Paragraph
     Dim r As Range
-    Dim c As Variant
+    Dim C As Variant
     
     ' ¹M¾ú¤åÀÉ¤¤ªº¨C­Ó¬q¸¨©M¦r²Å
     For Each p In doc.Paragraphs
         For Each r In p.Range.Characters
             
             ' §PÂ_¦r²Å¬O§_¦b·s²Ó©úÅé©Î¼Ð·¢Åé¦r«¬¤¤
-            c = r.text
-            If Len(c) > 0 Then
-                If (AscW(Left(c, 1)) >= &H4E00 And AscW(Left(c, 1)) <= &H9FFF) _
-                    Or (AscW(Left(c, 1)) >= &H3400 And AscW(Left(c, 1)) <= &H4DBF) _
-                    Or (AscW(Left(c, 1)) >= &H20000 And AscW(Left(c, 1)) <= &H2A6DF) _
-                    Or (AscW(Left(c, 1)) >= &H2A700 And AscW(Left(c, 1)) <= &H2B73F) _
-                    Or (AscW(Left(c, 1)) >= &H2B740 And AscW(Left(c, 1)) <= &H2B81F) _
-                    Or (AscW(Left(c, 1)) >= &H2B820 And AscW(Left(c, 1)) <= &H2CEAF) _
-                    Or (AscW(Left(c, 1)) >= &HF900 And AscW(Left(c, 1)) <= &HFAFF) _
-                    Or (AscW(Left(c, 1)) >= &H2F800 And AscW(Left(c, 1)) <= &H2FA1F) Then '³o¸Ì¨S¨ú½XÂI¡A¥²©w¦³»~¡A«Ý§ï¼g¡I¡I¡I¡I¡I¡I¡I¡I
+            C = r.text
+            If Len(C) > 0 Then
+                If (AscW(Left(C, 1)) >= &H4E00 And AscW(Left(C, 1)) <= &H9FFF) _
+                    Or (AscW(Left(C, 1)) >= &H3400 And AscW(Left(C, 1)) <= &H4DBF) _
+                    Or (AscW(Left(C, 1)) >= &H20000 And AscW(Left(C, 1)) <= &H2A6DF) _
+                    Or (AscW(Left(C, 1)) >= &H2A700 And AscW(Left(C, 1)) <= &H2B73F) _
+                    Or (AscW(Left(C, 1)) >= &H2B740 And AscW(Left(C, 1)) <= &H2B81F) _
+                    Or (AscW(Left(C, 1)) >= &H2B820 And AscW(Left(C, 1)) <= &H2CEAF) _
+                    Or (AscW(Left(C, 1)) >= &HF900 And AscW(Left(C, 1)) <= &HFAFF) _
+                    Or (AscW(Left(C, 1)) >= &H2F800 And AscW(Left(C, 1)) <= &H2FA1F) Then '³o¸Ì¨S¨ú½XÂI¡A¥²©w¦³»~¡A«Ý§ï¼g¡I¡I¡I¡I¡I¡I¡I¡I
                     If Not r.Font.Name = nmf.Name And Not r.Font.Name = kff.Name Then '¹B¥Î¤§­ì²z¦b¦¹¦æ¡I¡I¡I¡I
                         ' ¦pªG¦r²Å¤£¦b·s²Ó©úÅé©Î¼Ð·¢Åé¦r«¬¤¤¡A«h±N¨ä¦rÅé§ó§ï¬°HanaMinB
                         r.Font.Name = "HanaMinB"

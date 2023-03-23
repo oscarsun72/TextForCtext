@@ -18,6 +18,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Automation;
 using System.Windows.Forms;
+using WebSocketSharp;
 using WindowsFormsApp1;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.Tab;
 using forms = System.Windows.Forms;
@@ -28,7 +29,13 @@ namespace TextForCtext
 {
     class Browser
     {
-        static Form1 frm;
+        /// <summary>
+        /// 作為模擬「參數」供給此類別操作時參考
+        /// </summary>
+        private static Form1 frm;
+
+
+
         //readonly Form1 Form1 = Application.OpenForms.Count > 0 ? Application.OpenForms[0] as Form1 : null;
         /*如何取得作用中的表單？ 20230312 chatGPT大菩薩：
         您好！如果您使用的是 Windows.Forms，您可以使用以下方法来获取当前处于活动状态的表单：
@@ -46,7 +53,7 @@ namespace TextForCtext
         //creedit 
         public Browser(Form1 form)
         {
-            frm = form;
+            ActiveForm1 = form;
         }
 
         // 創建Chrome驅動程序對象
@@ -424,9 +431,9 @@ namespace TextForCtext
                 //    else
                 //        throw;
                 //}                
-                frm = Application.OpenForms["Form1"] as Form1;
+                ActiveForm1 = Application.OpenForms["Form1"] as Form1;
                 //到指定網頁
-                string url = frm.Controls["textBox3"].Text != "" ? frm.Controls["textBox3"].Text : "https://ctext.org/account.pl?if=en";
+                string url = ActiveForm1.Controls["textBox3"].Text != "" ? ActiveForm1.Controls["textBox3"].Text : "https://ctext.org/account.pl?if=en";
                 cDrv.Navigate().GoToUrl(url);
 
                 if (!chromedriversPID.Contains(driverService.ProcessId)) chromedriversPID.Add(driverService.ProcessId);
@@ -441,10 +448,10 @@ namespace TextForCtext
                 //MessageBox.Show("請先登入 Ctext.org 再繼續。按下「確定(OK)」以繼續……");                
 
                 //如果是手動輸入模式且在簡單編輯頁面，則將其Quick edit值傳到textBox1
-                if (frm.KeyinTextMode && isQuickEditUrl(frm.textBox3Text ?? ""))
+                if (ActiveForm1.KeyinTextMode && isQuickEditUrl(ActiveForm1.textBox3Text ?? ""))
                 {
                     driver = cDrv;
-                    frm.Controls["textBox1"].Text = waitFindWebElementByName_ToBeClickable("data", _webDriverWaitTimSpan).Text;
+                    ActiveForm1.Controls["textBox1"].Text = waitFindWebElementByName_ToBeClickable("data", _webDriverWaitTimSpan).Text;
                 }
 
 
@@ -713,7 +720,7 @@ namespace TextForCtext
                 }
             });
             //加速連續性輸入（不必檢視貼入的文本時，很有效）
-            if (frm.AutoPasteToCtext && Form1.FastMode)
+            if (ActiveForm1.AutoPasteToCtext && Form1.FastMode)
             {
                 Thread.Sleep(10);//等待 submit = waitFin……完成
                 driver.Close(); //需要重啟檢視時，只要開啟前一個被關掉的分頁頁籤即可（快速鍵時 Ctrl + Shift + t）
@@ -763,6 +770,7 @@ namespace TextForCtext
 
             set => downloadDirectory_Chrome = value;
         }
+        internal static Form1 ActiveForm1 { get => frm; set => frm = value; }
 
         /// <summary>
         /// geturl 修改後的程式碼:20230308 creedit with NotionAI大菩薩
@@ -1440,16 +1448,20 @@ namespace TextForCtext
         retry:
             //按下：擷取圖片文字
             //Thread.Sleep(300);
-            IWebElement iwe_ocr =
-            waitFindWebElementBySelector_ToBeClickable("#\\:8 > div", 0);
-            if (iwe_ocr == null)
-            {
-                Thread.Sleep(90); iwe_morebtn.Click(); tryTimes++;
-                if (tryTimes < 10) goto retry;
-                else
+            IWebElement iwe_ocr = waitFindWebElementBySelector_ToBeClickable("#\\:8 > div", 0); int waitTime = 900;
+            while (iwe_ocr == null)
+            {   //愈等愈短時間    
+                Thread.Sleep(waitTime); iwe_morebtn.Click(); tryTimes++;
+                waitTime -= 90;
+                if (waitTime < 0 || tryTimes == 10)
                 {
                     //MessageBox.Show("請重來一次；重新執行一次。感恩感恩　南無阿彌陀佛", "", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
                     return false;
+                }
+                else
+                {
+                    goto retry;
+
                 }
             }
             iwe_ocr.Click();
@@ -1495,7 +1507,9 @@ namespace TextForCtext
             // 注入 JavaScript 代碼以獲取下載目錄
             //string downloadDirectory = (string)driver.ExecuteScript("return window.navigator.userAgent.toLowerCase().indexOf('win') > -1 ? window.localStorage.getItem('download.default_directory') : null;");
             string downloadDirectory = DownloadDirectory_Chrome;
-            //string downloadDirectory=null;//= getChromeDownloadDirectory();
+            if (downloadDirectory.IsNullOrEmpty()) downloadDirectory = Path.GetFullPath(downloadImgFullName);
+            //if (!Directory.Exists(downloadDirectory)&& !Form1.DriveExist(downloadDirectory)) { Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("菩薩慈悲："+Environment.NewLine+downloadDirectory +"並不存在！請在textBox2（尋找方塊）中輸入以指定正確的路徑。感恩感恩　南無阿彌陀佛"); return false; }
+            if (!Directory.Exists(downloadDirectory)) { Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("菩薩慈悲："+Environment.NewLine+downloadDirectory +"並不存在！請在textBox2（尋找方塊）中輸入以指定正確的路徑。感恩感恩　南無阿彌陀佛"); return false; }
 
             if (string.IsNullOrEmpty(downloadDirectory) || !Directory.Exists(downloadDirectory))
             {
@@ -1542,6 +1556,7 @@ namespace TextForCtext
                 if (points < pointCoin)
                 {
                     return false;
+
                 }
                 else { points = 0; innerText = null; }//釋放記憶體
             }
@@ -1551,15 +1566,35 @@ namespace TextForCtext
             string filePath = Path.Combine(downloadDirectory, Path.GetFileNameWithoutExtension(downloadImgFullName) + ".txt");//@"X:\Ctext_Page_Image.txt";
             //刪除之前的檔案，以免因檔案存在而被下載端重新命名
             Task.Run(() =>
-            { 
+            {
                 if (File.Exists(filePath)) File.Delete(filePath);
             });
 
             //按下：新增圖片：選擇檔案
             //Thread.Sleep(3200);
-            SendKeys.Send("{tab 16} ");
+            //等待「選擇檔案」控制項出現，最多等30秒；
+            //為免tab鍵數不同，而須手動操作，以免表單遮住畫面:
+            if(ActiveForm1.TopMost) ActiveForm1.TopMost = false;
+            DateTime begin = DateTime.Now;
+            TimeSpan timeSpan = new TimeSpan();
+            iwe = waitFindWebElementBySelector_ToBeClickable("#line_img_form > div > input[type=file]");
+            while (iwe == null)
+            {
+                iwe = waitFindWebElementBySelector_ToBeClickable("#line_img_form > div > input[type=file]");
+                timeSpan = (DateTime.Now.Subtract(begin));
+                if (timeSpan.TotalSeconds > 30) return false;
+            }
+            //選取「選擇檔案」控制項
+            //SendKeys.Send("{tab 16} ");
+            SendKeys.Send("{tab 16}");
+            //如果按下tab鍵16次後「選擇檔案」控制項沒有被選中（不同環境下網頁元件數可能會有所不同！）
+            //這種寫法應該不會成功，因為Selenium可應用的範圍是程式自動化操作而不是使用者手動manual操作者20230322 果然！ 13:47
+            //if (!iwe.Selected) Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("菩薩慈悲：請手動執行OCR，OCR完成之後程式會接手執行。感恩感恩　南無阿彌陀佛"+ Environment.NewLine +"按下「確定（OK）」後繼續…… 阿彌陀佛");            
+            //if (!iwe.Selected) System.Diagnostics.Debugger.Break();
+            SendKeys.Send(" ");
             //waitFindWebElementBySelector_ToBeClickable("#line_img_form > div > input[type=file]").SendKeys(OpenQA.Selenium.Keys.Space);
             //waitFindWebElementByName_ToBeClickable("line_img",2).Submit();
+            //等待選取檔案對話框開啟
             Thread.Sleep(1200);
             //輸入：檔案名稱 //SendKeys.Send(downloadImgFullName);
             Clipboard.SetText(downloadImgFullName);
@@ -1581,11 +1616,22 @@ namespace TextForCtext
             SendKeys.Send("{tab}~");
             //按下「自動識別(豎版)」，開始OCR……
             SendKeys.Send("{down}~");
+            //等待OCR，上限為30秒
             //iwe = waitFindWebElementBySelector_ToBeClickable("# OneLine > div.d-flex.justify-content-between.mt-2.mb-1 > div:nth-child(1) > div:nth-child(2) > ul > li:nth-child(2) > button");
+            iwe = waitFindWebElementBySelector_ToBeClickable("#line_list_table > tbody > tr:nth-child(1) > td:nth-child(2)");
+            begin = DateTime.Now;
+            while (iwe == null)
+            {
+                iwe = waitFindWebElementBySelector_ToBeClickable("#line_list_table > tbody > tr:nth-child(1) > td:nth-child(2)");
+                //上限為30秒
+                if (begin.Subtract(DateTime.Now).TotalSeconds > 30) return false;
+            }
             //iwe.Click();
             //Thread.Sleep(6220);
             //Thread.Sleep(6000);//OCR結束
-            Thread.Sleep(9000);//OCR結束
+            //Thread.Sleep(10500);//OCR結束
+            Thread.Sleep(1100);//OCR結束
+
             SendKeys.Send("{tab 24}~");
             //按下「導出數據」：
             //iwe = waitFindWebElementBySelector_ToBeClickable("# outputDropdown");

@@ -29,6 +29,7 @@ using Point = System.Drawing.Point;
 using System.Threading.Tasks;
 using System.Net.Http.Headers;
 using System.Web;
+using WebSocketSharp;
 //using System.Windows.Input;
 //using Microsoft.Office.Interop.Word;
 
@@ -1526,7 +1527,9 @@ namespace WindowsFormsApp1
                 {
                     //不知為何，就是會將插入點前一個字元給刪除,即使有以下此行也無效
                     e.Handled = true;
-                    textBox1OriginalText = textBox1.Text; selLength = textBox1.SelectionLength; selStart = textBox1.SelectionStart;
+                    textBox1OriginalText = textBox1.Text; selStart = textBox1.SelectionStart;
+                    //插件/取代模式不同處理
+                    selLength = insertMode ? textBox1.SelectionLength : (textBox1.SelectionLength + 1 > textBox1.TextLength) ? textBox1.SelectionLength : ++textBox1.SelectionLength;
                     textBox4.Focus();
                     return;
                 }
@@ -5887,6 +5890,7 @@ namespace WindowsFormsApp1
                     ocrResult = br.OCR_GoogleKeep(downloadImgFullName);
                     break;
                 case br.OCRSiteTitle.GJcool:
+                    br.ActiveForm1 = this;
                     ocrResult = br.OCR_GJcool_AutoRecognizeVertical(downloadImgFullName);
                     break;
                 default:
@@ -6209,8 +6213,9 @@ namespace WindowsFormsApp1
                     Task.WaitAll();
                     Application.DoEvents();
                     //設定textbox1的內容以備編輯
-                    textBox1.Text = Clipboard.GetText() + Environment.NewLine + Environment.NewLine + Environment.NewLine + textBox1.Text;
-                }
+                    string nextpagetextBox1Text_Default = Clipboard.GetText();
+                    textBox1.Text = CnText.BooksPunctuation(ref nextpagetextBox1Text_Default);// + Environment.NewLine + Environment.NewLine + Environment.NewLine + textBox1.Text;                    
+                }//end if (keyinTextMode)
 
                 //如果該書沒有「OCR_MATCH」tag的話，即不是上下臨近頁牽連編輯模式者：
                 if (!check_the_adjacent_pages)
@@ -6680,8 +6685,35 @@ namespace WindowsFormsApp1
                 //bool waitUpdate = false;
                 Task wait = Task.Run(async () =>
                 {
-                    foreach (string tabWin in tabWindowHandles)
+                    string tabWin;
+                    /*20230322 菩薩慈悲：請問C#中 for each 陳述句可以反向遍歷麼？ 感恩感恩　南無阿彌陀佛:
+                     * Bing大菩薩：在 C# 中，`foreach` 语句是用来遍历集合中的每一个元素。它通常用于按顺序遍历集合，而不是反向遍历。如果您想要反向遍历一个集合，可以使用 `for` 循环⁵。您可以使用 `for` 循环的索引来直接访问列表中的元素，并以相反的顺序进行迭代。
+                     * 來源: 與 Bing 的交談， 2023/3/22(1) c# - Possible to iterate backwards through a foreach? - Stack Overflow. https://stackoverflow.com/questions/1211608/possible-to-iterate-backwards-through-a-foreach 已存取 2023/3/22.
+                     * (2) C# 用于每个逆序, C# for 循环逆序, 反向列表 C#, C# 反向迭代栈, C# for 循环倒退, C# 列表反向不起作用, C 锐利 for .... https://zditect.com/article/90996.html 已存取 2023/3/22.
+                     * (3) Foreach如何实现反向遍历啊-CSDN社区. https://bbs.csdn.net/topics/390373229 已存取 2023/3/22.
+                     * (4) C#-使用迭代器实现倒序遍历_c# foreach 倒序_dxm809的博客-CSDN博客. https://blog.csdn.net/dxm809/article/details/90552743 已存取 2023/3/22.
+                     * (5) C# foreach循环. http://c.biancheng.net/csharp/foreach.html 已存取 2023/3/22.
+                     * (6) Iteration statements -for, foreach, do, and while | Microsoft Learn. https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/statements/iteration-statements 已存取 2023/3/22.
+                     * (7) C# Foreach Reverse Loop. https://thedeveloperblog.com/foreach-reverse 已存取 2023/3/22.
+                     */
+                    //因為多數情況皆是使用者在作用/使用中的的分頁為最後開啟的，故反向巡覽遍歷檢查，以省去不必要的查找（尤其在分頁很多的時候）
+                    //且多在目前簡單編輯（Quick edit）分頁後，故只找到目前簡單編輯（Quick edit）分頁為止，以加速效率
+                    for (int i = tabWindowHandles.Count - 1; i > -1; i--)
                     {
+                        tabWin = tabWindowHandles[i];
+                        //try
+                        //{
+                        //    currentWin = br.driver.CurrentWindowHandle;
+                        //}
+                        //catch (Exception ex)
+                        //{
+                        //    Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.Message);
+                        //    break;
+                        //}
+                        if (tabWin == currentWin) break;
+                        //}
+                        //foreach (string tabWin in tabWindowHandles)
+                        //{
                         if (br.driver.SwitchTo().Window(tabWin).Url.IndexOf("&action=editchapter") > -1)
                         {
                             //waitUpdate = true;
@@ -6762,8 +6794,12 @@ namespace WindowsFormsApp1
             if (br.getDriverUrl != textBox3.Text)
             {
                 bool found = false;
-                foreach (string tabWindowHandle in tabWindowHandles)
+                for (int i = tabWindowHandles.Count - 1; i > -1; i--)
                 {
+                    string tabWindowHandle = tabWindowHandles[i];
+                    //}
+                    //foreach (string tabWindowHandle in tabWindowHandles)
+                    //{
                     string taburl = br.driver.SwitchTo().Window(tabWindowHandle).Url;
                     //if (taburl == textBox3.Text || taburl.IndexOf(textBox3.Text.Replace("editor", "box")) > -1) { found = true; break; }
                     if (taburl == textBox3.Text || taburl.IndexOf(url.Replace("editor", "box")) > -1) { found = true; break; }
@@ -6780,7 +6816,7 @@ namespace WindowsFormsApp1
         private void pasteToCtext()
         {//for .BrowserOPMode.appActivateByName
             appActivateByName();
-            
+
             //if (ModifierKeys == Keys.None)//在textBox1_TextChanged事件中已處理按著Shift時的行為
             //{
             //    string currentForeTabUrl = br.ActiveTabURL_Ctext_Edit;
@@ -6792,7 +6828,7 @@ namespace WindowsFormsApp1
             //        br.GoToUrlandActivate(currentForeTabUrl);
             //    }
             //}
-            
+
             //if (keyinText)
             //{
             //    hideToNICo();
@@ -7625,17 +7661,77 @@ namespace WindowsFormsApp1
             if (surrogate % 2 != 0) { surrogate = 0; return true; }
             else { surrogate = 0; return false; }
         }
+        /// <summary>
+        /// 20230321 creedit with chatGPT大菩薩： C#中有類似vba的 stop 述句嗎 感恩感恩　南無阿彌陀佛
+        /// Unfortunately, C# does not have an EnableEvent method that can be used to temporarily pause events from being triggered. However, there are a few workarounds that can be used to achieve something similar:
+        /// Use a boolean variable to indicate whether the event should be triggered or not.
+        /// Remove and re-add the event handlers as needed.
+        /// Make use of the Application.DoEvents() method to allow the event to be processed before continuing with the remainder of the code.
+        /// Here is an example of using a boolean variable to temporarily disable an event handler:
+        /// private bool _eventsEnabled = true;
+        //private void MyEventHandler(object sender, EventArgs e)
+        //{
+        //    if (!_eventsEnabled)
+        //        return;
+        //    // Handle event normally
+        //}
+        //By setting _eventsEnabled to false, the event handler will not be executed until it is resumed by setting _eventsEnabled back to true.
+        //Keep in mind that if you have multiple event handlers attached to the same event, this approach will disable all of them, since it is based on a boolean variable check.
+        /// </summary>
+        private bool _eventsEnabled = true;
+
+        private void pauseEvents()
+        {
+            _eventsEnabled = false;
+        }
+
+        private void resumeEvents()
+        {
+            _eventsEnabled = true;
+        }
+
+        /// <summary>
+        /// 20230321 chatGPT大菩薩慈悲：C#中如何判斷磁碟機存在不存在，不能用 Directory.Exists 方法判斷，是吧？感恩感恩　南無阿彌陀佛
+        /// 您好！ 要判斷C#中磁碟機是否存在，可以使用DriveInfo類別。以下是使用DriveInfo類別的簡單範例：
+        /// DriveInfo driveInfo = new DriveInfo("C");
+        /// bool isDriveExist = (driveInfo != null && driveInfo.IsReady);
+        /// 在上面的例子中，DriveInfo建構式的參數是磁碟機的名稱，例如 C。然後，使用IsReady屬性檢查磁碟是否已準備好。如果磁碟機不存在或未就緒，則DriveInfo將為null，並且IsReady屬性將返回false。 希望這可以幫助您！
+        /// </summary>        
+        /// <summary>
+        /// 判斷磁碟機存在不存在
+        /// </summary>
+        internal static bool DriveExist(string driveName)
+        {
+            if (driveName.IsNullOrEmpty() || driveName.Length > 3) return false;
+            DriveInfo driveInfo = new DriveInfo(driveName.Substring(0, 1));//("C"); 
+            return driveInfo != null && driveInfo.IsReady;
+        }
+
+
+
         private void textBox2_TextChanged(object sender, EventArgs e)
         {
+            if (!_eventsEnabled) return;
             if (!textBox1.Enabled) textBox1.Enabled = true;
             string x = textBox2.Text;
             if (x == "") return;
+
+            #region 輸入資料夾路徑可指定有效的Chrome瀏覽器的下載位置
+            if (Directory.Exists(x))
+            {
+                pauseEvents();
+                br.DownloadDirectory_Chrome = x;
+                resumeEvents(); textBox2.Text = ""; return;
+            }
+            #endregion
 
             #region 輸入「nb,」可以切換 GXDS.SKQSnoteBlank 值以指定是否要檢查注文中因空白而誤標的情形
             if (x == "nb,")
             {
                 GXDS.SKQSnoteBlank = !GXDS.SKQSnoteBlank;
+                pauseEvents();
                 textBox2.Text = "";
+                resumeEvents(); return;
             }
             #endregion
 
@@ -7649,7 +7745,9 @@ namespace WindowsFormsApp1
                         if (Int32.TryParse(x, out int w))
                         {
                             waitTimeforappActivateByName = w;
+                            pauseEvents();
                             textBox2.Text = "";
+                            resumeEvents();
                             return;
                         }
                     }
@@ -7667,7 +7765,9 @@ namespace WindowsFormsApp1
             {
                 case "ap,":
                 ap: browsrOPMode = BrowserOPMode.appActivateByName;
+                    pauseEvents();
                     textBox2.Text = "";
+                    resumeEvents();
                     return;
                 case "aa":
                     goto ap;
@@ -7707,7 +7807,9 @@ namespace WindowsFormsApp1
                                 throw;
                         }
                     }
+                    pauseEvents();
                     textBox2.Text = "";
+                    resumeEvents();
                     return;
                 case "br":
                     goto sl;
@@ -7756,11 +7858,15 @@ namespace WindowsFormsApp1
                     {
                         case "tS":
                             br.ChromeDriverServiceTimeSpan = t;
+                            pauseEvents();
                             textBox2.Clear();
+                            resumeEvents();
                             return;
                         case "tE":
                             br.WebDriverWaitTimeSpan = t;
+                            pauseEvents();
                             textBox2.Clear();
+                            resumeEvents();
                             return;
                     }
                 }
@@ -7815,6 +7921,8 @@ namespace WindowsFormsApp1
 
         private void textBox1_KeyPress(object sender, KeyPressEventArgs e)
         {
+            //按下BackSpace鍵
+            if (e.KeyChar == 8) return;
             //if (e.KeyChar==30)
             //{
             //    return;
@@ -7908,7 +8016,7 @@ namespace WindowsFormsApp1
             if (keyinTextMode && textBox1.TextLength > 0 && textBox1.SelectionLength == textBox1.TextLength)
             {
                 if (!insertMode
-                    && textBox1.SelectionStart < textBox1.TextLength
+                    && textBox1.SelectionStart < textBox1.TextLength && selStart < textBox1.TextLength
                     && (regexPattern + Environment.NewLine).IndexOf(textBox1.Text.Substring(textBox1.SelectionStart, 1)) == -1
                     //&& omitSymbols.IndexOf(e.KeyChar.ToString()) == -1
                     && Regex.IsMatch(e.KeyChar.ToString(), "[^a-zA-Z" + omitSymbols + "]"))//YouChat菩薩

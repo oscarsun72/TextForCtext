@@ -21,7 +21,7 @@ For Each ew In WD.WindowHandles
     iw = iw + 1
 Next ew
 If iw > 0 Then
-    On Error GoTo eH
+    On Error GoTo eh
       WD.ExecuteScript "window.open('about:blank','_blank');"
       For Each ew In WD.WindowHandles
             ii = ii + 1
@@ -30,7 +30,7 @@ If iw > 0 Then
       WD.SwitchTo().Window (ew)
 End If
 Exit Sub
-eH:
+eh:
 Select Case Err.Number
     Case -2146233088
         If InStr(Err.Description, "no such window: target window already closed") Then
@@ -484,7 +484,7 @@ Function grabGjCoolPunctResult(text As String, Optional Background As Boolean) A
 Const url = "https://gj.cool/punct"
 Dim wdB As SeleniumBasic.IWebDriver, WBQuit As Boolean '=true 則可以關Chrome瀏覽器
 Dim textBox As SeleniumBasic.IWebElement, btn As SeleniumBasic.IWebElement, btn2 As SeleniumBasic.IWebElement, item As SeleniumBasic.IWebElement
-
+Dim timeOut As Byte '最多等 timeOut 秒
 On Error GoTo Err1
 
 If Background Then
@@ -550,7 +550,13 @@ btn.Click
 '等待標點完成
 'SystemSetup.Wait 3.6
 
-WaitDt = DateAdd("s", 10, Now()) '極限10秒
+If VBA.Len(text) < 3000 Then
+    timeOut = 10
+Else
+    timeOut = 20
+End If
+'最多等 timeOut 秒
+WaitDt = DateAdd("s", timeOut, Now()) '極限10秒
 xl = VBA.Len(text)
 chkTxtTime = VBA.Now
 Do
@@ -712,10 +718,10 @@ End Function
 
 
 Public Property Get WindowHandles() As String()
-On Error GoTo eH:
+On Error GoTo eh:
 If Not WD Is Nothing Then WindowHandles = WD.WindowHandles
 Exit Property
-eH:
+eh:
 Select Case Err.Number
     Case -2146233088
         If InStr(Err.Description, "invalid session id") Then
