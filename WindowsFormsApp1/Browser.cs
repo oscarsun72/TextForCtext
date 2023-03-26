@@ -1555,6 +1555,7 @@ namespace TextForCtext
                     int.TryParse(innerText.Substring(" ".Length, innerText.IndexOf(" /") - " ".Length), out points);
                 if (points < pointCoin)
                 {
+                    Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("點數（算力配额）不足！目前僅有"+ points + " 至少需要"+pointCoin);
                     return false;
 
                 }
@@ -1575,14 +1576,14 @@ namespace TextForCtext
             //等待「選擇檔案」控制項出現，最多等30秒；
             //為免tab鍵數不同，而須手動操作，以免表單遮住畫面:
             if(ActiveForm1.TopMost) ActiveForm1.TopMost = false;
-            DateTime begin = DateTime.Now;
+            DateTime begin = DateTime.Now;const int timeSpanSecs = 30;
             TimeSpan timeSpan = new TimeSpan();
             iwe = waitFindWebElementBySelector_ToBeClickable("#line_img_form > div > input[type=file]");
             while (iwe == null)
             {
                 iwe = waitFindWebElementBySelector_ToBeClickable("#line_img_form > div > input[type=file]");
                 timeSpan = (DateTime.Now.Subtract(begin));
-                if (timeSpan.TotalSeconds > 30) return false;
+                if (timeSpan.TotalSeconds > timeSpanSecs) return false;
             }
             //選取「選擇檔案」控制項
             //SendKeys.Send("{tab 16} ");
@@ -1624,7 +1625,7 @@ namespace TextForCtext
             {
                 iwe = waitFindWebElementBySelector_ToBeClickable("#line_list_table > tbody > tr:nth-child(1) > td:nth-child(2)");
                 //上限為30秒
-                if (begin.Subtract(DateTime.Now).TotalSeconds > 30) return false;
+                if (DateTime.Now.Subtract(begin).TotalSeconds > timeSpanSecs) return false;
             }
             //iwe.Click();
             //Thread.Sleep(6220);

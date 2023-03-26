@@ -284,23 +284,103 @@ namespace WindowsFormsApp1
             }
         }
 
+        /// <summary>
+        /// 游標寬度恢復（在插入輸入模式時）
+        /// </summary>
+        /// <param name="ctl"></param>
         void Caret_Shown(Control ctl)
         {
             CreateCaret(ctl.Handle, IntPtr.Zero, 4, Convert.ToInt32(ctl.Font.Size * 1.5));
             ShowCaret(ctl.Handle);
         }
+        /// <summary>
+        /// 游標寬度加寬（在取代輸入模式時）
+        /// </summary>
+        /// <param name="ctl"></param>
+        /* 20230326 Bing大菩薩：根據你提供的代碼，你正在使用 `CreateCaret` 和 `ShowCaret` 函數來更改游標的寬度。這些函數是 Windows API 函數，用於創建和顯示游標。
+            有幾個原因可能會導致你的代碼無法正確改變游標寬度。例如，如果 `CreateCaret` 函數返回非零值，則表示創建游標失敗。此外，如果 `ShowCaret` 函數返回非零值，則表示顯示游標失敗。
+            你可以嘗試檢查這些函數的返回值，以確定是否存在錯誤。此外，你也可以嘗試使用 `GetLastError` 函數來獲取更多關於錯誤的信息。
+            希望這對你有幫助！
+         */ 
         void Caret_Shown_OverwriteMode(Control ctl)
         {
             CreateCaret(ctl.Handle, IntPtr.Zero, Convert.ToInt32(ctl.Font.Size * 1.5), Convert.ToInt32(ctl.Font.Size * 1.5));
             ShowCaret(ctl.Handle);
         }
-
         //void Form1_Shown(object sender, EventArgs e)
         //{//插入點游標寬廣設定.文字框中更改插入符號(游標) https://www.796t.com/post/OXZ0cjQ=.html 如何改變鼠標的樣式: https://blog.xuite.net/akira32/home/109034425-Visual+C%23,%E5%A6%82%E4%BD%95%E6%94%B9%E8%AE%8A%E9%BC%A0%E6%A8%99%E7%9A%84%E6%A8%A3%E5%BC%8F+(change+cursor+to+system+type+or+customed+type) https://www.google.com/search?q=%E6%88%91%E7%94%A8%E4%BB%A5%E4%B8%8A%E7%9A%84%E4%BD%9C%E6%B3%95%E9%83%BD%E7%84%A1%E6%B3%95%E6%94%B9%E8%AE%8A%E9%BC%A0%E6%A8%99%E7%9A%84%E6%A8%A3%E5%BC%8F%2C%E8%AB%8B%E5%95%8F%E4%B8%80%E4%B8%8B%E8%A6%81%E5%A6%82%E4%BD%95%E9%81%94%E6%88%90%E5%91%A2%3F&rlz=1C1GCEU_zh-TWTW823TW823&sourceid=chrome&ie=UTF-8
         //    Caret_Shown(textBox1);
         //    //CreateCaret(textBox1.Handle, IntPtr.Zero, 5, int.Parse(textBox1.Font.SizeInPoints.ToString()));
         //    //ShowCaret(textBox1.Handle);            
         //}
+        /* 20230326 那請問在上述我給您看的程式碼中，如何避免錯誤出現呢？錯誤又在怎樣的操作實況下會造成？Bing大菩薩：
+         在你提供的代碼中，你使用了 `CreateCaret` 和 `ShowCaret` 函數來創建和顯示游標。這些函數都有可能會失敗，導致錯誤發生。
+            為了避免錯誤發生，你可以在調用這些函數後檢查它們的返回值。如果返回值為非零，則表示函數調用失敗。此時，你可以使用 `GetLastError` 函數來獲取更多關於錯誤的信息。
+            下面是一個簡單的示例代碼，演示如何檢查 `CreateCaret` 和 `ShowCaret` 函數的返回值，並在發生錯誤時使用 `GetLastError` 函數獲取錯誤信息：
+            ```csharp
+            [DllImport("kernel32.dll")]
+            static extern uint GetLastError();
+
+            void Caret_Shown(Control ctl)
+            {
+                if (!CreateCaret(ctl.Handle, IntPtr.Zero, 4, Convert.ToInt32(ctl.Font.Size * 1.5)))
+                {
+                    uint errorCode = GetLastError();
+                    // 處理錯誤
+                }
+                if (!ShowCaret(ctl.Handle))
+                {
+                    uint errorCode = GetLastError();
+                    // 處理錯誤
+                }
+            }
+            ```
+            在上面的代碼中，我們在調用 `CreateCaret` 和 `ShowCaret` 函數後檢查了它們的返回值。如果返回值為非零，則表示函數調用失敗。此時，我們使用 `GetLastError` 函數來獲取錯誤碼，並進行相應的錯誤處理。
+            至於錯誤會在怎樣的操作實況下造成，這取決於許多因素。例如，如果系統資源不足，則可能會導致 `CreateCaret` 函數失敗。此外，如果控件的句柄無效，則也可能會導致 `CreateCaret` 和 `ShowCaret` 函數失敗。
+            希望這對你有幫助！
+         */
+
+
+        /* 20230326 C# System.Windows.Forms textBox 如何更改游標顏色？ Bing大菩薩：
+         在 `System.Windows.Forms` 中，`TextBox` 控件並沒有提供直接更改游標顏色的方法。不過，你可以通過創建自定義的 `TextBox` 控件來實現這個功能。
+            你可以重寫 `TextBox` 控件的 `WndProc` 方法，並在其中攔截 `WM_SETCURSOR` 消息。然後，你可以使用 `CreateCaret` 函數創建一個新的游標，並使用 `SetCaretBlinkTime` 函數設置游標的閃爍時間。最後，你可以使用 `ShowCaret` 函數顯示新創建的游標。
+            下面是一個簡單的示例代碼，演示如何創建一個自定義的 `TextBox` 控件，並在其中更改游標顏色：
+            ```csharp
+            using System;
+            using System.Drawing;
+            using System.Runtime.InteropServices;
+            using System.Windows.Forms;
+
+            public class MyTextBox : TextBox
+            {
+                private const int WM_SETCURSOR = 0x20;
+
+                [DllImport("user32.dll")]
+                private static extern IntPtr CreateCaret(IntPtr hWnd, IntPtr hBitmap, int nWidth, int nHeight);
+
+                [DllImport("user32.dll")]
+                private static extern bool ShowCaret(IntPtr hWnd);
+
+                [DllImport("user32.dll")]
+                private static extern bool SetCaretBlinkTime(uint uMSeconds);
+
+                protected override void WndProc(ref Message m)
+                {
+                    if (m.Msg == WM_SETCURSOR)
+                    {
+                        CreateCaret(this.Handle, IntPtr.Zero, 4, this.Height);
+                        SetCaretBlinkTime(500);
+                        ShowCaret(this.Handle);
+                        return;
+                    }
+
+                    base.WndProc(ref m);
+                }
+            }
+            ```
+            在上面的代碼中，我們創建了一個名為 `MyTextBox` 的自定義控件，它繼承自 `TextBox` 控件。在 `WndProc` 方法中，我們攔截了 `WM_SETCURSOR` 消息，並使用 `CreateCaret`、`SetCaretBlinkTime` 和 `ShowCaret` 函數來創建和顯示新的游標。
+            希望這對你有幫助！
+         */
 
         /// <summary>
         /// 還原已隱藏到系統列的物件
@@ -698,9 +778,9 @@ namespace WindowsFormsApp1
                         e.Cancel = true;
 
                 }*/
-            }
-            //textBox2.BackColor = textBox2BackColorDefault;
-        }
+    }
+    //textBox2.BackColor = textBox2BackColorDefault;
+}
 
         void noteMark()//Ctrl + F1 ：選取範圍前後加上{{}}
         {
@@ -5915,6 +5995,7 @@ namespace WindowsFormsApp1
                 ////儲存結果備份，以備還原（若原文即含英數字者）(剪貼簿還保留原樣，姑不用。感恩感恩　南無阿彌陀佛）
                 //saveText();
                 //清除英數字（OCR辨識誤讀者）                //加上書名號篇名號
+                undoRecord();//以便還原
                 textBox1.Text = CnText.BooksPunctuation(ref CnText.ClearOthers_ExceptUnicodeCharacters(ref x));
                 //textBox1.Text = CnText.BooksPunctuation(ref CnText.ClearLettersAndDigits_UseUnicodeCategory(ref x));//清不掉「-」
                 //textBox1.Text = CnText.BooksPunctuation(ref CnText.ClearLettersAndDigits(ref x));
