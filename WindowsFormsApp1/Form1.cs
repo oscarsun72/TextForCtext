@@ -301,7 +301,7 @@ namespace WindowsFormsApp1
             有幾個原因可能會導致你的代碼無法正確改變游標寬度。例如，如果 `CreateCaret` 函數返回非零值，則表示創建游標失敗。此外，如果 `ShowCaret` 函數返回非零值，則表示顯示游標失敗。
             你可以嘗試檢查這些函數的返回值，以確定是否存在錯誤。此外，你也可以嘗試使用 `GetLastError` 函數來獲取更多關於錯誤的信息。
             希望這對你有幫助！
-         */ 
+         */
         void Caret_Shown_OverwriteMode(Control ctl)
         {
             CreateCaret(ctl.Handle, IntPtr.Zero, Convert.ToInt32(ctl.Font.Size * 1.5), Convert.ToInt32(ctl.Font.Size * 1.5));
@@ -778,9 +778,9 @@ namespace WindowsFormsApp1
                         e.Cancel = true;
 
                 }*/
-    }
-    //textBox2.BackColor = textBox2BackColorDefault;
-}
+            }
+            //textBox2.BackColor = textBox2BackColorDefault;
+        }
 
         void noteMark()//Ctrl + F1 ：選取範圍前後加上{{}}
         {
@@ -6763,7 +6763,7 @@ namespace WindowsFormsApp1
 
                 #region 先檢查是否有已開啟的編輯頁尚未送出儲存(因為許多異體字須一次取代，往往會打開一個chapter單位來edit) 其網址有「&action=editchapter」關鍵字，如：https://ctext.org/wiki.pl?if=en&chapter=687756&action=editchapter#12450
                 //mark:在版本netframework-4.8 之前的環境，好像無效（在母校華岡學習雲測試後的結果，似並不會執行這個檢查，該機唯有4.6.1版）
-                //bool waitUpdate = false;
+                bool waitUpdate = false; string waitTabWindowHandles = "";
                 Task wait = Task.Run(async () =>
                 {
                     string tabWin;
@@ -6797,7 +6797,7 @@ namespace WindowsFormsApp1
                         //{
                         if (br.driver.SwitchTo().Window(tabWin).Url.IndexOf("&action=editchapter") > -1)
                         {
-                            //waitUpdate = true;
+                            waitUpdate = true; waitTabWindowHandles = tabWin;
                             OpenQA.Selenium.IWebElement commit = br.waitFindWebElementByName_ToBeClickable("commit", br.WebDriverWaitTimeSpan); //br.driver.FindElement(OpenQA.Selenium.By.Name("commit"));
                                                                                                                                                 //OpenQA.Selenium.Support.UI.WebDriverWait waitcommit = new OpenQA.Selenium.Support.UI.WebDriverWait(br.driver, TimeSpan.FromSeconds(2));
                                                                                                                                                 //waitcommit.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(commit));
@@ -6840,6 +6840,12 @@ namespace WindowsFormsApp1
                  總結來說 它的邏輯應該是這樣的：
                   await 是在宣告 async 的 Task.Run 裡 等待這個Run 方法裡的另一個Task.Run()方法完成 故此第二個Task.Run() 前面會冠上  await ；而 第一個Task.Run方法回傳的名為 wait 的Task型別變數，使用它的 .Wait() 方法來等待第一個（即最外層的） Task.Run()完成 這樣 程式在執行時才能確實等待最外圈的 Task.完成 而最外圈的 Task 也確實等到了 內圈有加 await 關鍵字的 Task 都完成了，才算完成 是這樣吧
                  */
+                //如果有編輯送出，待完成後關閉該分頁視窗
+                if (waitUpdate && waitTabWindowHandles != "")
+                {
+                    br.driver.SwitchTo().Window(waitTabWindowHandles); br.driver.Close();
+                    br.driver.SwitchTo().Window(currentWin);
+                }
 
                 #endregion
 

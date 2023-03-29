@@ -1633,7 +1633,8 @@ namespace TextForCtext
             //Thread.Sleep(10500);//OCR結束
             Thread.Sleep(1100);//OCR結束
 
-            SendKeys.Send("{tab 24}~");
+            //SendKeys.Send("{tab 24}~");
+            SendKeys.Send("{tab 18}~");
             //按下「導出數據」：
             //iwe = waitFindWebElementBySelector_ToBeClickable("# outputDropdown");
             //iwe.Click();
