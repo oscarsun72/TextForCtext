@@ -6,21 +6,18 @@ using OpenQA.Selenium.Remote;
 //using System.Net;
 //using static System.Net.WebRequestMethods;
 using OpenQA.Selenium.Support.UI;
-using SeleniumExtras.WaitHelpers;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 //https://dotblogs.com.tw/supergary/2020/10/29/selenium#images-3
 using System.IO;
 using System.Linq;
-using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Automation;
 using System.Windows.Forms;
 using WebSocketSharp;
 using WindowsFormsApp1;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.Tab;
 using forms = System.Windows.Forms;
 using selm = OpenQA.Selenium;
 
@@ -261,9 +258,9 @@ namespace TextForCtext
         }
 
         /// <summary>
-        /// Selenium 操控的 Chrome瀏覽器伺服器（ChromeDriverService）的等待秒數（即「new ChromeDriver()」的「TimeSpan」引數值）。預設為 20.5。
+        /// Selenium 操控的 Chrome瀏覽器伺服器（ChromeDriverService）的等待秒數（即「new ChromeDriver()」的「TimeSpan」引數值）。預設為 30.5。
         /// </summary>
-        static double _chromeDriverServiceTimeSpan = 20.5;//《古籍酷》OCR所需
+        static double _chromeDriverServiceTimeSpan = 30.5;//《古籍酷》OCR所需
         /// <summary>
         ///  Selenium 操控的 Chrome瀏覽器中網頁元件的的等待秒數（WebDriverWait。即「new WebDriverWait()」的「TimeSpan」引數值）。預設為 3。
         static double _webDriverWaitTimSpan = 3;
@@ -1500,28 +1497,12 @@ namespace TextForCtext
          /// 《古籍酷》OCR：自動識別(豎版)
          /// </summary>
          /// <param name="downloadImgFullName">書圖檔全檔名</param>
-         /// <returns></returns>
+         /// <returns>順利完成則回傳true</returns>
         internal static bool OCR_GJcool_AutoRecognizeVertical(string downloadImgFullName)
         {
             #region 先檢查瀏覽器下載目錄並取得 ：
-            // 注入 JavaScript 代碼以獲取下載目錄
-            //string downloadDirectory = (string)driver.ExecuteScript("return window.navigator.userAgent.toLowerCase().indexOf('win') > -1 ? window.localStorage.getItem('download.default_directory') : null;");
             string downloadDirectory = DownloadDirectory_Chrome;
-            if (downloadDirectory.IsNullOrEmpty()) downloadDirectory = Path.GetFullPath(downloadImgFullName);
-            //if (!Directory.Exists(downloadDirectory)&& !Form1.DriveExist(downloadDirectory)) { Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("菩薩慈悲："+Environment.NewLine+downloadDirectory +"並不存在！請在textBox2（尋找方塊）中輸入以指定正確的路徑。感恩感恩　南無阿彌陀佛"); return false; }
-            if (!Directory.Exists(downloadDirectory)) { Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("菩薩慈悲："+Environment.NewLine+downloadDirectory +"並不存在！請在textBox2（尋找方塊）中輸入以指定正確的路徑。感恩感恩　南無阿彌陀佛"); return false; }
-
-            if (string.IsNullOrEmpty(downloadDirectory) || !Directory.Exists(downloadDirectory))
-            {
-                downloadDirectory = getChromeDownloadDirectory_YouChatchatGPT();
-                if (string.IsNullOrEmpty(downloadDirectory) || !Directory.Exists(downloadDirectory))
-                {
-                    Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("請先指定Chrome瀏覽器的下載目錄，再繼續！感恩感恩　南無阿彌陀佛");
-                    return false;
-                }
-                else//更新downloadDirectory_Chrome 欄位（若有異動時）
-                    DownloadDirectory_Chrome = downloadDirectory;
-            }
+            if (!ChkDownloadDirectory_Chrome(downloadImgFullName, downloadDirectory)) return false;
             #endregion
 
             driver = driver ?? driverNew();
@@ -1555,8 +1536,11 @@ namespace TextForCtext
                     int.TryParse(innerText.Substring(" ".Length, innerText.IndexOf(" /") - " ".Length), out points);
                 if (points < pointCoin)
                 {
-                    Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("點數（算力配额）不足！目前僅有"+ points + " 至少需要"+pointCoin);
-                    return false;
+                    //Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("點數（算力配额）不足！目前僅有"+ points + " 至少需要"+pointCoin);
+                    //轉由首頁「快速體驗」執行
+                    bool fastXResulut = OCR_GJcool_FastExperience(downloadImgFullName);
+                    if(fastXResulut) driver.Close();driver.SwitchTo().Window(currentWindowHndl);                    
+                    return fastXResulut; 
 
                 }
                 else { points = 0; innerText = null; }//釋放記憶體
@@ -1707,7 +1691,170 @@ namespace TextForCtext
             return true;
         }
 
+        /// <summary>
+        /// 檢查Chrome瀏覽器的下載路徑。
+        /// </summary>
+        /// <param name="downloadImgFullName">準備下載的檔案之全檔名</param>
+        /// <param name="downloadDirectory">Chrome瀏覽器的下載路徑</param>
+        /// <returns>合格則傳回true</returns>
+        internal static bool ChkDownloadDirectory_Chrome(string downloadImgFullName, string downloadDirectory)
+        {
+            // 注入 JavaScript 代碼以獲取下載目錄
+            //string downloadDirectory = (string)driver.ExecuteScript("return window.navigator.userAgent.toLowerCase().indexOf('win') > -1 ? window.localStorage.getItem('download.default_directory') : null;");
+            //string downloadDirectory = DownloadDirectory_Chrome;
+            if (downloadDirectory.IsNullOrEmpty()) downloadDirectory = Path.GetFullPath(downloadImgFullName);
+            //if (!Directory.Exists(downloadDirectory)&& !Form1.DriveExist(downloadDirectory)) { Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("菩薩慈悲："+Environment.NewLine+downloadDirectory +"並不存在！請在textBox2（尋找方塊）中輸入以指定正確的路徑。感恩感恩　南無阿彌陀佛"); return false; }
+            if (!Directory.Exists(downloadDirectory)) { Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("菩薩慈悲：" + Environment.NewLine + downloadDirectory + "並不存在！請在textBox2（尋找方塊）中輸入以指定正確的路徑。感恩感恩　南無阿彌陀佛"); return false; }
 
+            if (string.IsNullOrEmpty(downloadDirectory) || !Directory.Exists(downloadDirectory))
+            {
+                downloadDirectory = getChromeDownloadDirectory_YouChatchatGPT();
+                if (string.IsNullOrEmpty(downloadDirectory) || !Directory.Exists(downloadDirectory))
+                {
+                    Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("請先指定Chrome瀏覽器的下載目錄，再繼續！感恩感恩　南無阿彌陀佛");
+                    return false;
+                }
+                else//更新downloadDirectory_Chrome 欄位（若有異動時）
+                    DownloadDirectory_Chrome = downloadDirectory;
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// 以《古籍酷》首頁快速體驗OCR。不計點數（算力配额）
+        /// </summary>
+        /// <param name="downloadImgFullName">由《中國哲學書電子化計劃》下載的書圖全檔名</param>
+        /// <returns>順利完成則傳回true</returns>
+        internal static bool OCR_GJcool_FastExperience(string downloadImgFullName)
+        {
+            #region 先檢查瀏覽器下載目錄並取得 ：
+            string downloadDirectory = DownloadDirectory_Chrome;
+            if (!ChkDownloadDirectory_Chrome(downloadImgFullName, downloadDirectory)) return false;
+            #endregion
+
+            driver = driver ?? driverNew();
+            string currentWindowHndl = driver.CurrentWindowHandle;
+            const string gjCool = "https://gj.cool/";
+            //openNewTabWindow(WindowType.Window);
+            try
+            {
+                driver.Navigate().GoToUrl(gjCool);
+            }
+            catch (Exception ex)
+            {
+                switch (ex.HResult)
+                {
+                    default:
+                        string msgText = ex.HResult.ToString() + ex.Message;
+                        Console.WriteLine(msgText);
+                        Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(msgText);
+                        return false;
+                }
+            }
+
+            if (ActiveForm1.TopMost) ActiveForm1.TopMost = false;
+            //首頁「快速體驗」按鈕：
+            IWebElement iwe= waitFindWebElementBySelector_ToBeClickable("body > div.container-fluid.bg-dark.px-1 > div > h2.text-center.my-2.py-4 > button > div");
+            iwe.Click();
+
+            //「上傳 拍照」按鈕：
+            iwe = waitFindWebElementBySelector_ToBeClickable("#task-upload-btn");
+            iwe.Click();
+
+            ////按下：新增圖片：選擇檔案
+            ////Thread.Sleep(3200);
+            ////等待「選擇檔案」控制項出現，最多等30秒；
+            ////為免tab鍵數不同，而須手動操作，以免表單遮住畫面:
+
+            //DateTime begin = DateTime.Now; const int timeSpanSecs = 30;
+            //TimeSpan timeSpan = new TimeSpan();
+            //iwe = waitFindWebElementBySelector_ToBeClickable("#line_img_form > div > input[type=file]");
+            //while (iwe == null)
+            //{
+            //    iwe = waitFindWebElementBySelector_ToBeClickable("#line_img_form > div > input[type=file]");
+            //    timeSpan = (DateTime.Now.Subtract(begin));
+            //    if (timeSpan.TotalSeconds > timeSpanSecs) return false;
+            //}
+            ////選取「選擇檔案」控制項
+            ////SendKeys.Send("{tab 16} ");
+            //SendKeys.Send("{tab 16}");
+            ////如果按下tab鍵16次後「選擇檔案」控制項沒有被選中（不同環境下網頁元件數可能會有所不同！）
+            ////這種寫法應該不會成功，因為Selenium可應用的範圍是程式自動化操作而不是使用者手動manual操作者20230322 果然！ 13:47
+            ////if (!iwe.Selected) Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("菩薩慈悲：請手動執行OCR，OCR完成之後程式會接手執行。感恩感恩　南無阿彌陀佛"+ Environment.NewLine +"按下「確定（OK）」後繼續…… 阿彌陀佛");            
+            ////if (!iwe.Selected) System.Diagnostics.Debugger.Break();
+            //SendKeys.Send(" ");
+            //waitFindWebElementBySelector_ToBeClickable("#line_img_form > div > input[type=file]").SendKeys(OpenQA.Selenium.Keys.Space);
+            //waitFindWebElementByName_ToBeClickable("line_img",2).Submit();
+            //等待選取檔案對話框開啟
+            Thread.Sleep(1200);
+            //輸入：檔案名稱 //SendKeys.Send(downloadImgFullName);
+            //貼上圖檔全名
+            Clipboard.SetText(downloadImgFullName);
+            //byte tryTimes = 1;
+        //retry:
+            SendKeys.Send("+{Insert}");//or "^v"
+            SendKeys.Send("{ENTER}");
+
+            //等待結果顯示：結果顯示元件：#text_b81d8450
+            //也會變動                #text_1043686b9
+            //iwe = waitFindWebElementBySelector_ToBeClickable("#text_b81d8450");
+
+            //Thread.Sleep(3220);
+            //if (iwe == null)
+            //{
+            //    tryTimes++;
+            //    if (tryTimes > 5) return false;
+            //    goto retry;
+            //}
+            //iwe.Click();
+            //SendKeys.Send("{tab}~");
+            ////按下「自動識別(豎版)」，開始OCR……
+            //SendKeys.Send("{down}~");
+            //等待OCR，上限為30秒
+            //等待「複製」按鈕出現
+            //「複製」按鈕的 BySelector 會變動
+            //iwe = waitFindWebElementBySelector_ToBeClickable("#dialog_b81d8450 > div.col > div.d-flex.py-1 > button");
+            //                                                  #dialog_483f217a > div.col > div.d-flex.py-1 > button
+            //iwe=waitFindWeb
+            //DateTime begin = DateTime.Now;int timeSpanSecs=10;
+            //while (iwe == null)
+            //{
+            //    iwe = waitFindWebElementBySelector_ToBeClickable("#text_b81d8450");
+            //    //上限為10秒
+            //    if (DateTime.Now.Subtract(begin).TotalSeconds > timeSpanSecs) return false;
+            //}
+            //待OCR結束
+            Thread.Sleep(10000);
+            #region 將OCR結果讀入剪貼簿：
+            Clipboard.Clear();
+            //按下複製按鈕複製到剪貼簿
+            //SendKeys.Send("{tab 4}~");
+            //SendKeys.Send("{tab 9}~");
+            SendKeys.Send("~");
+            
+            //iwe.Click();
+            //複製結果顯示到剪貼簿
+            //Clipboard.SetText(iwe.Text);
+            #endregion
+
+            #region 關閉OCR視窗後回到原來分頁視窗
+            if (Clipboard.GetText()=="")
+            {
+                /*
+                 20230330 Bing大菩薩：在C#中，與VBA中的Stop語句等效的是 `System.Diagnostics.Debugger.Break()`¹。這樣可以在程式執行到這一行時暫停並進入調試器，類似於設置斷點¹。
+                    來源: 與 Bing 的交談， 2023 / 3 / 30(1) Can I do a Visual Basic(VB) Stop in C#?. https://social.msdn.microsoft.com/Forums/vstudio/en-US/db9dfe97-c98d-4f4b-bb8f-ba2edffee988/can-i-do-a-visual-basic-vb-stop-in-c?forum=csharpgeneral 已存取 2023/3/30.
+                    (2) VBA) (Stop 語句 | Microsoft Learn.https://learn.microsoft.com/zh-tw/office/vba/language/reference/user-interface-help/stop-statement 已存取 2023/3/30.
+                    (3) What is the equivalent of End(VB6/ VBA) in order to end in C# for Windows applications? - Stack Overflow. https://stackoverflow.com/questions/2033141/what-is-the-equivalent-of-end-vb6-vba-in-order-to-end-in-c-sharp-for-windows-a 已存取 2023/3/30.*/
+                System.Diagnostics.Debugger.Break();
+                return false;
+                //driver.Close();
+                //driver.SwitchTo().Window(currentWindowHndl);
+            }
+            //driver.Close();
+            //driver.SwitchTo().Window(currentWindowHndl);
+            #endregion            
+            return true;
+        }
 
         /// <summary>
         /// 取得Chrome瀏覽器的下載目錄（失敗！抓不到！！）

@@ -3743,6 +3743,7 @@ namespace WindowsFormsApp1
 
         private static void restoreCaretPosition(TextBox textBox1, int s, int l)
         {
+            if (s < 0 || l < 0) return;
             textBox1.Select(s, l);
             Point caretPosition = textBox1.GetPositionFromCharIndex(s);//c# caret position: https://stackoverflow.com/questions/37782986/how-to-find-the-caret-position-in-a-textbox-using-c
             if (caretPosition.Y > textBox1.Height - textBox1.Top || caretPosition.Y < textBox1.Top)
@@ -6881,6 +6882,7 @@ namespace WindowsFormsApp1
             if (br.getDriverUrl != textBox3.Text)
             {
                 bool found = false;
+                if(tabWindowHandles.Count < br.driver.WindowHandles.Count) tabWindowHandles = br.driver.WindowHandles;//避免分頁視窗被關閉了。
                 for (int i = tabWindowHandles.Count - 1; i > -1; i--)
                 {
                     string tabWindowHandle = tabWindowHandles[i];
@@ -7459,6 +7461,7 @@ namespace WindowsFormsApp1
         {//此中斷點專為偵錯測試用 感恩感恩　南無阿彌陀佛 20230314
 
             #region forDebugTest權作測試偵錯用20230310
+            //br.OCR_GJcool_FastExperience(@"C:\Users\oscar\Dropbox\Ctext_Page_Image.png");
             //string x = Clipboard.GetText();
             //CnText.ClearLettersAndDigits(ref x);
             //CnText.ClearLettersAndDigits_UseUnicodeCategory(ref x);
