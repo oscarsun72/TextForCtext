@@ -9,6 +9,7 @@ using OpenQA.Selenium.Support.UI;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing;
 //https://dotblogs.com.tw/supergary/2020/10/29/selenium#images-3
 using System.IO;
 using System.Linq;
@@ -1493,22 +1494,45 @@ namespace TextForCtext
             #endregion
             return true;
 
-        }/// <summary>
-         /// 《古籍酷》OCR：自動識別(豎版)
-         /// </summary>
-         /// <param name="downloadImgFullName">書圖檔全檔名</param>
-         /// <returns>順利完成則回傳true</returns>
+        }
+
+        /// <summary>
+        /// 當《古籍酷》點數（算力值、算力配额）小於150時=true
+        /// </summary>
+        internal static bool waitGJcoolPoint = false;
+        /// <summary>
+        /// 當《古籍酷》點數（算力值、算力配额）小於150時，須待3小時以上乃可再執行故，以此記下其時間
+        /// </summary>
+        internal static DateTime gjCoolPointLess150When = new DateTime();
+        /// <summary>
+        /// 150點算力值（算力配额）須3個多鐘頭才能補足
+        /// </summary>
+        internal static TimeSpan gjCoolPointEnoughTimespan = new TimeSpan(3, 20, 0);
+
+        /// <summary>
+        /// 《古籍酷》OCR：自動識別(豎版)
+        /// </summary>
+        /// <param name="downloadImgFullName">書圖檔全檔名</param>
+        /// <returns>順利完成則回傳true</returns>
         internal static bool OCR_GJcool_AutoRecognizeVertical(string downloadImgFullName)
         {
-            #region 先檢查瀏覽器下載目錄並取得 ：
-            string downloadDirectory = DownloadDirectory_Chrome;
-            if (!ChkDownloadDirectory_Chrome(downloadImgFullName, downloadDirectory)) return false;
-            #endregion
+
+
 
             driver = driver ?? driverNew();
             string currentWindowHndl = driver.CurrentWindowHandle;
-            string gjCool = OCRSite_URL[OCRSiteTitle.GJcool]; //"https://gj.cool/try_ocr";
+            string gjCool = string.Empty;
             openNewTabWindow(WindowType.Window);
+            //點數（算力值、算力配额）不足逕用「快速體驗」執行
+            if (waitGJcoolPoint && DateTime.Now.Subtract(gjCoolPointLess150When) < gjCoolPointEnoughTimespan)
+            {
+
+                bool fastXResulut = OCR_GJcool_FastExperience(downloadImgFullName);
+                if (fastXResulut) driver.Close(); driver.SwitchTo().Window(currentWindowHndl);
+                return fastXResulut;
+            }
+            else
+                gjCool = OCRSite_URL[OCRSiteTitle.GJcool]; //"https://gj.cool/try_ocr";
             try
             {
                 driver.Navigate().GoToUrl(gjCool);
@@ -1536,15 +1560,22 @@ namespace TextForCtext
                     int.TryParse(innerText.Substring(" ".Length, innerText.IndexOf(" /") - " ".Length), out points);
                 if (points < pointCoin)
                 {
+                    waitGJcoolPoint = true;
+                    gjCoolPointLess150When = DateTime.Now;
                     //Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("點數（算力配额）不足！目前僅有"+ points + " 至少需要"+pointCoin);
                     //轉由首頁「快速體驗」執行
                     bool fastXResulut = OCR_GJcool_FastExperience(downloadImgFullName);
-                    if(fastXResulut) driver.Close();driver.SwitchTo().Window(currentWindowHndl);                    
-                    return fastXResulut; 
+                    if (fastXResulut) driver.Close(); driver.SwitchTo().Window(currentWindowHndl);
+                    return fastXResulut;
 
                 }
-                else { points = 0; innerText = null; }//釋放記憶體
+                else { waitGJcoolPoint = false; points = 0; innerText = null; }//釋放記憶體
             }
+            #endregion
+
+            #region 再檢查瀏覽器下載目錄並取得 ：
+            string downloadDirectory = DownloadDirectory_Chrome;
+            if (!ChkDownloadDirectory_Chrome(downloadImgFullName, downloadDirectory)) return false;
             #endregion
 
             //取得所匯出的檔案路徑
@@ -1559,8 +1590,8 @@ namespace TextForCtext
             //Thread.Sleep(3200);
             //等待「選擇檔案」控制項出現，最多等30秒；
             //為免tab鍵數不同，而須手動操作，以免表單遮住畫面:
-            if(ActiveForm1.TopMost) ActiveForm1.TopMost = false;
-            DateTime begin = DateTime.Now;const int timeSpanSecs = 30;
+            if (ActiveForm1.TopMost) ActiveForm1.TopMost = false;
+            DateTime begin = DateTime.Now; const int timeSpanSecs = 30;
             TimeSpan timeSpan = new TimeSpan();
             iwe = waitFindWebElementBySelector_ToBeClickable("#line_img_form > div > input[type=file]");
             while (iwe == null)
@@ -1733,7 +1764,7 @@ namespace TextForCtext
             #endregion
 
             driver = driver ?? driverNew();
-            string currentWindowHndl = driver.CurrentWindowHandle;
+            //string currentWindowHndl = driver.CurrentWindowHandle;
             const string gjCool = "https://gj.cool/";
             //openNewTabWindow(WindowType.Window);
             try
@@ -1754,99 +1785,92 @@ namespace TextForCtext
 
             if (ActiveForm1.TopMost) ActiveForm1.TopMost = false;
             //首頁「快速體驗」按鈕：
-            IWebElement iwe= waitFindWebElementBySelector_ToBeClickable("body > div.container-fluid.bg-dark.px-1 > div > h2.text-center.my-2.py-4 > button > div");
+            IWebElement iwe = waitFindWebElementBySelector_ToBeClickable("body > div.container-fluid.bg-dark.px-1 > div > h2.text-center.my-2.py-4 > button > div");
             iwe.Click();
 
             //「上傳 拍照」按鈕：
             iwe = waitFindWebElementBySelector_ToBeClickable("#task-upload-btn");
             iwe.Click();
-
-            ////按下：新增圖片：選擇檔案
-            ////Thread.Sleep(3200);
-            ////等待「選擇檔案」控制項出現，最多等30秒；
-            ////為免tab鍵數不同，而須手動操作，以免表單遮住畫面:
-
-            //DateTime begin = DateTime.Now; const int timeSpanSecs = 30;
-            //TimeSpan timeSpan = new TimeSpan();
-            //iwe = waitFindWebElementBySelector_ToBeClickable("#line_img_form > div > input[type=file]");
-            //while (iwe == null)
-            //{
-            //    iwe = waitFindWebElementBySelector_ToBeClickable("#line_img_form > div > input[type=file]");
-            //    timeSpan = (DateTime.Now.Subtract(begin));
-            //    if (timeSpan.TotalSeconds > timeSpanSecs) return false;
-            //}
-            ////選取「選擇檔案」控制項
-            ////SendKeys.Send("{tab 16} ");
-            //SendKeys.Send("{tab 16}");
-            ////如果按下tab鍵16次後「選擇檔案」控制項沒有被選中（不同環境下網頁元件數可能會有所不同！）
-            ////這種寫法應該不會成功，因為Selenium可應用的範圍是程式自動化操作而不是使用者手動manual操作者20230322 果然！ 13:47
-            ////if (!iwe.Selected) Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("菩薩慈悲：請手動執行OCR，OCR完成之後程式會接手執行。感恩感恩　南無阿彌陀佛"+ Environment.NewLine +"按下「確定（OK）」後繼續…… 阿彌陀佛");            
-            ////if (!iwe.Selected) System.Diagnostics.Debugger.Break();
-            //SendKeys.Send(" ");
-            //waitFindWebElementBySelector_ToBeClickable("#line_img_form > div > input[type=file]").SendKeys(OpenQA.Selenium.Keys.Space);
-            //waitFindWebElementByName_ToBeClickable("line_img",2).Submit();
             //等待選取檔案對話框開啟
             Thread.Sleep(1200);
             //輸入：檔案名稱 //SendKeys.Send(downloadImgFullName);
             //貼上圖檔全名
             Clipboard.SetText(downloadImgFullName);
             //byte tryTimes = 1;
-        //retry:
             SendKeys.Send("+{Insert}");//or "^v"
             SendKeys.Send("{ENTER}");
 
             //等待結果顯示：結果顯示元件：#text_b81d8450
-            //也會變動                #text_1043686b9
+            //也會變動  ！！              #text_1043686b9
             //iwe = waitFindWebElementBySelector_ToBeClickable("#text_b81d8450");
 
-            //Thread.Sleep(3220);
-            //if (iwe == null)
-            //{
-            //    tryTimes++;
-            //    if (tryTimes > 5) return false;
-            //    goto retry;
-            //}
-            //iwe.Click();
-            //SendKeys.Send("{tab}~");
-            ////按下「自動識別(豎版)」，開始OCR……
             //SendKeys.Send("{down}~");
             //等待OCR，上限為30秒
             //等待「複製」按鈕出現
-            //「複製」按鈕的 BySelector 會變動
+            //「複製」按鈕的 BySelector 會變動！！
             //iwe = waitFindWebElementBySelector_ToBeClickable("#dialog_b81d8450 > div.col > div.d-flex.py-1 > button");
             //                                                  #dialog_483f217a > div.col > div.d-flex.py-1 > button
-            //iwe=waitFindWeb
-            //DateTime begin = DateTime.Now;int timeSpanSecs=10;
-            //while (iwe == null)
-            //{
-            //    iwe = waitFindWebElementBySelector_ToBeClickable("#text_b81d8450");
-            //    //上限為10秒
-            //    if (DateTime.Now.Subtract(begin).TotalSeconds > timeSpanSecs) return false;
-            //}
+
             //待OCR結束
-            Thread.Sleep(10000);
+            Thread.Sleep(5000);
             #region 將OCR結果讀入剪貼簿：
             Clipboard.Clear();
             //按下複製按鈕複製到剪貼簿
             //SendKeys.Send("{tab 4}~");
-            //SendKeys.Send("{tab 9}~");
-            SendKeys.Send("~");
-            
+            //SendKeys.Send("{tab 7}~");
+            //SendKeys.Send("+{tab 10}");
+            //Thread.Sleep(3000);
+            //SendKeys.Send("+{tab 4}");
+            //SendKeys.Send("~");
+
             //iwe.Click();
             //複製結果顯示到剪貼簿
             //Clipboard.SetText(iwe.Text);
             #endregion
 
             #region 關閉OCR視窗後回到原來分頁視窗
-            if (Clipboard.GetText()=="")
+            //！！！！此須手動按下「複製」按鈕了！！！！
+            //待手動成功複製，上限為10秒
+            DateTime begin = DateTime.Now; int timeSpanSecs = 10;
+            //滑鼠定位，以備手動按下「複製」按鈕（須視窗最大化）
+            Point copyBtnPos = new Point(838, 711);//用PRTSC鍵拍下全螢幕後，貼到小畫家以滑鼠取得坐標位置（即顯示在狀態列中）
+            Cursor.Position = copyBtnPos;
+            Thread.Sleep(800);//要等一下才行否則反應不過來
+            /* 20230401 Bing大菩薩：在C#中，您可以使用 `MouseOperations` 类来模拟鼠标点击。这个类中有一个名为 `MouseEvent` 的方法，它可以接受一个 `MouseEventFlags` 枚举值作为参数，用来指定要执行的鼠标操作¹。例如，要模拟鼠标左键点击，可以这样写：
+            ```csharp
+                MouseOperations.MouseEvent(MouseOperations.MouseEventFlags.LeftDown);
+                MouseOperations.MouseEvent(MouseOperations.MouseEventFlags.LeftUp);
+                ```
+                來源: 與 Bing 的交談， 2023/4/1(1) .net - How do you simulate Mouse Click in C#? - Stack Overflow. https://stackoverflow.com/questions/2416748/how-do-you-simulate-mouse-click-in-c 已存取 2023/4/1.
+                (2) c# - Using SendMessage to simulate mouse clicks - Stack Overflow. https://stackoverflow.com/questions/14876345/using-sendmessage-to-simulate-mouse-clicks 已存取 2023/4/1.
+                (3) How to programatically trigger a mouse left click in C#?. https://stackoverflow.com/questions/2736965/how-to-programatically-trigger-a-mouse-left-click-in-c 已存取 2023/4/1.
+                (4) c# - I want to send mouse click with SendMessage but it's not working, What wrong with my code? - Stack Overflow. https://stackoverflow.com/questions/46306860/i-want-to-send-mouse-click-with-sendmessage-but-its-not-working-what-wrong-wit 已存取 2023/4/1.
+             */
+            //MouseOperations.MouseEvent(MouseOperations.MouseEventFlags.LeftDown);
+            //MouseOperations.MouseEvent(MouseOperations.MouseEventFlags.LeftUp);            
+            MouseOperations.MouseEventMousePos(MouseOperations.MouseEventFlags.LeftDown, copyBtnPos);
+            MouseOperations.MouseEventMousePos(MouseOperations.MouseEventFlags.LeftUp, copyBtnPos);
+
+
+            /*Bing大菩薩：您好，`MouseOperations` 不是 C# 的内置类。它是一个自定义类，您可以在 Stack Overflow 上找到它的源代码。您可以将这些代码复制到您的项目中，然后使用它来模拟鼠标点击。
+             */
+            while (Clipboard.GetText() == "")
             {
+                //每半秒按下滑鼠左鍵1次
+                Thread.Sleep(500);
+                MouseOperations.MouseEventMousePos(MouseOperations.MouseEventFlags.LeftDown, copyBtnPos);
+                MouseOperations.MouseEventMousePos(MouseOperations.MouseEventFlags.LeftUp, copyBtnPos);
                 /*
                  20230330 Bing大菩薩：在C#中，與VBA中的Stop語句等效的是 `System.Diagnostics.Debugger.Break()`¹。這樣可以在程式執行到這一行時暫停並進入調試器，類似於設置斷點¹。
                     來源: 與 Bing 的交談， 2023 / 3 / 30(1) Can I do a Visual Basic(VB) Stop in C#?. https://social.msdn.microsoft.com/Forums/vstudio/en-US/db9dfe97-c98d-4f4b-bb8f-ba2edffee988/can-i-do-a-visual-basic-vb-stop-in-c?forum=csharpgeneral 已存取 2023/3/30.
                     (2) VBA) (Stop 語句 | Microsoft Learn.https://learn.microsoft.com/zh-tw/office/vba/language/reference/user-interface-help/stop-statement 已存取 2023/3/30.
                     (3) What is the equivalent of End(VB6/ VBA) in order to end in C# for Windows applications? - Stack Overflow. https://stackoverflow.com/questions/2033141/what-is-the-equivalent-of-end-vb6-vba-in-order-to-end-in-c-sharp-for-windows-a 已存取 2023/3/30.*/
-                System.Diagnostics.Debugger.Break();
-                return false;
+                //System.Diagnostics.Debugger.Break();
+                if (DateTime.Now.Subtract(begin).TotalSeconds > timeSpanSecs) return false;
+                //if (Clipboard.GetText() == "")
+                //    return false;
+                //else
+                //return true;
                 //driver.Close();
                 //driver.SwitchTo().Window(currentWindowHndl);
             }

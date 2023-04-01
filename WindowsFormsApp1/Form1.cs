@@ -6000,6 +6000,9 @@ namespace WindowsFormsApp1
                 textBox1.Text = CnText.BooksPunctuation(ref CnText.ClearOthers_ExceptUnicodeCharacters(ref x));
                 //textBox1.Text = CnText.BooksPunctuation(ref CnText.ClearLettersAndDigits_UseUnicodeCategory(ref x));//清不掉「-」
                 //textBox1.Text = CnText.BooksPunctuation(ref CnText.ClearLettersAndDigits(ref x));
+
+                //刪除下載的書圖
+                if (File.Exists(downloadImgFullName)) File.Delete(downloadImgFullName);
             }
             #endregion
             //const string gjcool = "https://gj.cool/try_ocr";
@@ -6885,11 +6888,21 @@ namespace WindowsFormsApp1
                 if(tabWindowHandles.Count < br.driver.WindowHandles.Count) tabWindowHandles = br.driver.WindowHandles;//避免分頁視窗被關閉了。
                 for (int i = tabWindowHandles.Count - 1; i > -1; i--)
                 {
-                    string tabWindowHandle = tabWindowHandles[i];
-                    //}
-                    //foreach (string tabWindowHandle in tabWindowHandles)
-                    //{
-                    string taburl = br.driver.SwitchTo().Window(tabWindowHandle).Url;
+                    string tabWindowHandle = tabWindowHandles[i];string taburl = string.Empty;
+                    try
+                    {
+                        taburl=br.driver.SwitchTo().Window(tabWindowHandle).Url;
+                    }
+                    catch (Exception ex)
+                    {
+                        switch (ex.HResult)
+                        {
+                            case -2146233088://"no such window: target window already closed
+                                continue;
+                            default:
+                                break;
+                        }
+                    }
                     //if (taburl == textBox3.Text || taburl.IndexOf(textBox3.Text.Replace("editor", "box")) > -1) { found = true; break; }
                     if (taburl == textBox3.Text || taburl.IndexOf(url.Replace("editor", "box")) > -1) { found = true; break; }
                 }
@@ -8622,7 +8635,12 @@ namespace WindowsFormsApp1
         }
 
         internal void downloadImage(string imageUrl, out string downloadImgFullName, bool selectedInExplorer = false)
-        {/*20230103 creedit,chatGPT：
+        {
+            downloadImgFullName = dropBoxPathIncldBackSlash + "Ctext_Page_Image.png";
+            //每次OCR成功即刪除該項圖檔，故若圖檔已存在，則不復下載，以免重複，又免誤按。20230401
+            if (File.Exists(downloadImgFullName)) return;
+
+            /*20230103 creedit,chatGPT：
           你可以使用 Selenium 來下載網絡圖片。
             首先，你需要獲取圖片的 URL。然後，使用 WebClient 的 DownloadData 方法下載圖片的二進制數據。
             最後，使用 FileStream 將二進制數據寫入文件即可。  
@@ -8634,9 +8652,7 @@ namespace WindowsFormsApp1
             System.Net.WebClient webClient = new System.Net.WebClient();
             byte[] imageBytes = webClient.DownloadData(imageUrl);
 
-            // 將二進制數據寫入文件。
-            //string downloadImgFullName = dropBoxPathIncldBackSlash + "Ctext_Page_Image.png";
-            downloadImgFullName = dropBoxPathIncldBackSlash + "Ctext_Page_Image.png";
+            // 將二進制數據寫入文件。            
             using (FileStream fileStream = new FileStream(downloadImgFullName, FileMode.Create))
             {
                 fileStream.Write(imageBytes, 0, imageBytes.Length);
