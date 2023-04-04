@@ -446,6 +446,8 @@ namespace WindowsFormsApp1
         private void nICo_MouseMove(object sender, MouseEventArgs e)
         {
             if (Visible || !HiddenIcon) return;
+            if (!_eventsEnabled) return;
+            pauseEvents();
             #region 縮至系統工具列在右方時
             //if (Cursor.Position.Y > this.Top + this.Height ||
             //    Cursor.Position.X > this.Left + this.Width) show_nICo();
@@ -462,7 +464,7 @@ namespace WindowsFormsApp1
             }
             #endregion
             #region 縮至系統工具列在下方時
-            if (Cursor.Position.Y > Screen.PrimaryScreen.Bounds.Height - 50 &&
+            else if (Cursor.Position.Y > Screen.PrimaryScreen.Bounds.Height - 50 &&
                 Cursor.Position.X > Screen.PrimaryScreen.Bounds.Width - 270)
             {
                 if (keyinTextMode)
@@ -492,7 +494,7 @@ namespace WindowsFormsApp1
             //    show_nICo();
             //} 
             #endregion
-
+            resumeEvents();
         }
 
 
@@ -527,7 +529,52 @@ namespace WindowsFormsApp1
                                 //throw;
                                 break;
                         }
+                    }
+                    break;
+                //自動擷取「簡單修改模式」（selector: # quickedit > a的連結)
+                case Keys.None:
+                    if (Clipboard.GetText().IndexOf("#editor") == -1)
+                    {
+                        try
+                        {
+                            br.driver = br.driver ?? Browser.driverNew();
+                            br.GoToCurrentUserActivateTab();
+                            string quickEditLinkUrl = br.driver.Url;
+                            if (quickEditLinkUrl.IndexOf("&page=") == -1)
+                            {
+                                for (int i = br.driver.WindowHandles.Count - 1; i > -1; i--)
+                                {
+                                    if (br.driver.SwitchTo().Window(br.driver.WindowHandles[i]).Url.IndexOf("&page=") > -1) break;
+                                }
+                                quickEditLinkUrl = br.driver.Url;
+                            }
+                            if (quickEditLinkUrl.IndexOf("#editor") == -1 && quickEditLinkUrl.IndexOf("&page=") > -1)
+                            {
+                                OpenQA.Selenium.IWebElement quickEditLink = br.
+                                    waitFindWebElementBySelector_ToBeClickable("#quickedit > a");
+                                if (quickEditLink != null)
+                                {
+                                    quickEditLinkUrl = quickEditLink.GetAttribute("href");
+                                }
+                            }
+                            if (quickEditLinkUrl.IndexOf("#editor") > -1)
+                                Clipboard.SetText(quickEditLinkUrl);
+                        }
+                        catch (Exception ex)
+                        {
+                            switch (ex.HResult)
+                            {
+                                case -2146233088:
+                                    //"stale element reference: element is not attached to the page document\n  (Session info: chrome=110.0.5481.100)"
+                                    //"no such window: target window already closed\nfrom unknown error: web view not found\n  (Session info: chrome=110.0.5481.100)"
+                                    break;
+                                default:
+                                    MessageBox.Show(ex.HResult + ex.Message);
+                                    //throw;
+                                    break;
+                            }
 
+                        }
                     }
                     break;
             }
@@ -5411,7 +5458,7 @@ namespace WindowsFormsApp1
         /// </summary>
         private void bringBackMousePosFrmCenter()
         {
-            Activate(); Application.DoEvents();
+            Activate(); //Application.DoEvents();
             //20230115 chatGPT大菩薩：Cursor back to form：
             Point formPos = new Point(this.Location.X + this.Size.Width / 2, this.Location.Y + this.Size.Height / 2);
             Cursor.Position = formPos;
@@ -5617,6 +5664,20 @@ namespace WindowsFormsApp1
                 return;
             }
             //以上 Ctrl + Shift
+            #endregion
+
+            #region Ctrl + Alt
+            if ((m & Keys.Control) == Keys.Control && (m & Keys.Alt) == Keys.Alt)
+            {
+                if (e.KeyCode == Keys.O)
+                {//Ctrl + Alt + o :下載圖片，交給Google Keep OCR
+                    if (browsrOPMode == BrowserOPMode.appActivateByName) return;
+                    e.Handled = true;
+                    toOCR(br.OCRSiteTitle.GoogleKeep);
+                    return;
+                }
+            }
+
             #endregion
 
             #region 按下 Alt+ Shift
@@ -5864,14 +5925,6 @@ namespace WindowsFormsApp1
                     return;
                 }
 
-                if (e.KeyCode == Keys.O)
-                {//Alt + o :下載圖片，交給Google Keep OCR
-                    if (browsrOPMode == BrowserOPMode.appActivateByName) return;
-                    e.Handled = true;
-                    toOCR(br.OCRSiteTitle.GoogleKeep);
-                    return;
-                }
-
 
                 if (e.KeyCode == Keys.Left || e.KeyCode == Keys.Right)
                 {/*Alt + ←：視窗向左移動30dpi（+ Ctrl：徵調）
@@ -5952,6 +6005,7 @@ namespace WindowsFormsApp1
         /// </summary>
         private void toOCR(br.OCRSiteTitle ocrSiteTitle)
         {
+            //下載書圖
             string imgUrl = Clipboard.GetText(), downloadImgFullName;
             if (imgUrl.Length > 4
                 && imgUrl.Substring(0, 4) == "http"
@@ -6001,8 +6055,8 @@ namespace WindowsFormsApp1
                 //textBox1.Text = CnText.BooksPunctuation(ref CnText.ClearLettersAndDigits_UseUnicodeCategory(ref x));//清不掉「-」
                 //textBox1.Text = CnText.BooksPunctuation(ref CnText.ClearLettersAndDigits(ref x));
 
-                //刪除下載的書圖
-                if (File.Exists(downloadImgFullName)) File.Delete(downloadImgFullName);
+                ////刪除下載的書圖
+                //if (File.Exists(downloadImgFullName)) File.Delete(downloadImgFullName);
             }
             #endregion
             //const string gjcool = "https://gj.cool/try_ocr";
@@ -6885,13 +6939,13 @@ namespace WindowsFormsApp1
             if (br.getDriverUrl != textBox3.Text)
             {
                 bool found = false;
-                if(tabWindowHandles.Count < br.driver.WindowHandles.Count) tabWindowHandles = br.driver.WindowHandles;//避免分頁視窗被關閉了。
+                if (tabWindowHandles.Count < br.driver.WindowHandles.Count) tabWindowHandles = br.driver.WindowHandles;//避免分頁視窗被關閉了。
                 for (int i = tabWindowHandles.Count - 1; i > -1; i--)
                 {
-                    string tabWindowHandle = tabWindowHandles[i];string taburl = string.Empty;
+                    string tabWindowHandle = tabWindowHandles[i]; string taburl = string.Empty;
                     try
                     {
-                        taburl=br.driver.SwitchTo().Window(tabWindowHandle).Url;
+                        taburl = br.driver.SwitchTo().Window(tabWindowHandle).Url;
                     }
                     catch (Exception ex)
                     {
@@ -7483,6 +7537,7 @@ namespace WindowsFormsApp1
             //keyinNotepadPlusplus("","南無阿彌陀佛");
             #endregion
 
+            if (!_eventsEnabled) return;
 
             //最上層顯示
             if (!this.TopMost) this.TopMost = true;
@@ -7493,7 +7548,8 @@ namespace WindowsFormsApp1
             if (autoPasteFromSBCKwhether) { autoPasteFromSBCK(autoPasteFromSBCKwhether); return; }
 
             //汲取剪貼簿內資料
-            Application.DoEvents(); string clpTxt = "";//記錄剪貼簿內文字資料
+            //Application.DoEvents(); 
+            string clpTxt = "";//記錄剪貼簿內文字資料
             try
             {
                 clpTxt = Clipboard.GetText();
@@ -8637,8 +8693,8 @@ namespace WindowsFormsApp1
         internal void downloadImage(string imageUrl, out string downloadImgFullName, bool selectedInExplorer = false)
         {
             downloadImgFullName = dropBoxPathIncldBackSlash + "Ctext_Page_Image.png";
-            //每次OCR成功即刪除該項圖檔，故若圖檔已存在，則不復下載，以免重複，又免誤按。20230401
-            if (File.Exists(downloadImgFullName)) return;
+            ////若圖檔已存在，且是1分鐘前存檔的，則不復下載，以免重複，又免誤按。20230404，改 google keep的快捷鍵以免誤按
+            //if (File.Exists(downloadImgFullName) && DateTime.Now.Subtract(File.GetLastWriteTime(downloadImgFullName)).TotalMinutes < 1) return;
 
             /*20230103 creedit,chatGPT：
           你可以使用 Selenium 來下載網絡圖片。

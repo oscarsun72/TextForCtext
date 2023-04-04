@@ -127,7 +127,7 @@ Ctrl + + （加號，含函數字鍵盤） 或 Ctrl + -（數字鍵盤）  或 C
 
 Ctrl + Shift + c ：將textBox1的文本複製到剪貼簿 以備用
 
-Alt + o :下載書頁圖片（簡稱「書圖」），交給[Google Keep](https://keep.new/) OCR : 
+Ctrl + Alt + o :下載書頁圖片（簡稱「書圖」），交給[Google Keep](https://keep.new/) OCR : 
 
   複製圖片位址或由textBox3指定要下載的網頁網址即可下載，下載完成後將會自動開啟檔案總管並將該檔案選取。為尊重版權，防止濫用，僅設計一次一頁書圖，以便用即可。知足常樂。感恩感恩　南無阿彌陀佛
   - 下載路徑預設為 Dropbox 根目錄，檔名為 Ctext_Page_Image.png

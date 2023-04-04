@@ -192,8 +192,11 @@ namespace TextForCtext
         {
 
             IWebElement e = (driver ?? drver).FindElement(By.Name(name));
-            WebDriverWait wait = new WebDriverWait((driver ?? drver), TimeSpan.FromSeconds(second));
-            wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(e));
+            if (e != null)
+            {
+                WebDriverWait wait = new WebDriverWait((driver ?? drver), TimeSpan.FromSeconds(second));
+                wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(e));
+            }
             return e;
         }
         internal static IWebElement waitFindWebElementById_ToBeClickable(string id, double second)
@@ -1136,7 +1139,7 @@ namespace TextForCtext
                 if (textbox != null) Quickedit_data_textbox = textbox;
                 else
                     Quickedit_data_textbox = waitFindWebElementByName_ToBeClickable("data", _webDriverWaitTimSpan, driver);
-                quickedit_data_textboxTxt = Quickedit_data_textbox.Text;
+                quickedit_data_textboxTxt = Quickedit_data_textbox==null? "": Quickedit_data_textbox.Text;
             }
         }
 
@@ -1516,9 +1519,6 @@ namespace TextForCtext
         /// <returns>順利完成則回傳true</returns>
         internal static bool OCR_GJcool_AutoRecognizeVertical(string downloadImgFullName)
         {
-
-
-
             driver = driver ?? driverNew();
             string currentWindowHndl = driver.CurrentWindowHandle;
             string gjCool = string.Empty;
@@ -1528,7 +1528,7 @@ namespace TextForCtext
             {
 
                 bool fastXResulut = OCR_GJcool_FastExperience(downloadImgFullName);
-                if (fastXResulut) driver.Close(); driver.SwitchTo().Window(currentWindowHndl);
+                driver.Close(); driver.SwitchTo().Window(currentWindowHndl);
                 return fastXResulut;
             }
             else
@@ -1588,7 +1588,7 @@ namespace TextForCtext
 
             //按下：新增圖片：選擇檔案
             //Thread.Sleep(3200);
-            //等待「選擇檔案」控制項出現，最多等30秒；
+            //等待「選擇檔案」控制項出現，最多等timeSpanSecs秒；
             //為免tab鍵數不同，而須手動操作，以免表單遮住畫面:
             if (ActiveForm1.TopMost) ActiveForm1.TopMost = false;
             DateTime begin = DateTime.Now; const int timeSpanSecs = 30;
@@ -1707,7 +1707,7 @@ namespace TextForCtext
                             ("文本未下成功，請自行下載，好了之後再按「確定」繼續完成讀入到textBox1的工作；      或按「取消」結束此次操作。\n\r感恩感恩　南無阿彌陀佛"))
                         return false;
                 }
-                Clipboard.SetText(text);
+                Clipboard.SetText(text.Replace("\n", "\r\n"));
                 //刪除下載檔案，以便下次載入
                 Task.Run(() => File.Delete(filePath));
             }
@@ -1830,8 +1830,8 @@ namespace TextForCtext
 
             #region 關閉OCR視窗後回到原來分頁視窗
             //！！！！此須手動按下「複製」按鈕了！！！！
-            //待手動成功複製，上限為10秒
-            DateTime begin = DateTime.Now; int timeSpanSecs = 10;
+            //待手動成功複製，上限為 timeSpanSecs 秒
+            DateTime begin = DateTime.Now; int timeSpanSecs = 7;
             //滑鼠定位，以備手動按下「複製」按鈕（須視窗最大化）
             Point copyBtnPos = new Point(838, 711);//用PRTSC鍵拍下全螢幕後，貼到小畫家以滑鼠取得坐標位置（即顯示在狀態列中）
             Cursor.Position = copyBtnPos;
