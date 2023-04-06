@@ -402,3 +402,4 @@ Ctrl+ 滑鼠左鍵：清除框中所有文字
 - [TextForCtext 聲控全自動連續輸入至《中國哲學書電子化計劃》Quick edit Box演示](https://youtu.be/bgsOwh2rEkc)
 - [TextForCtext 輸入《中國哲學書電子化計劃》《四庫全書》本《玉海》實境秀](https://youtube.com/live/kwhOSXiNJVs)
 - [TextForCtext 輸入《中國哲學書電子化計劃》：使用者手動鍵入演示及實境秀](https://youtube.com/live/f4JlRogZorw)
+- [TextForCtext 輸入《中國哲學書電子化計劃》：利用《古籍酷》OCR功能，由使用者手動鍵入之演示及實境秀](https://youtube.com/live/iLxgIiIdXuY?feature=share)
