@@ -214,7 +214,7 @@ Alt + 2 : 鍵入全形空格「　」
 
 Alt + Shift + 2 : 將選取區內的「\<p\>」取代為「|」 ，而「　」取代為「􏿽」並清除「*」且將無「|」前綴的分行符號加上「|」（詩偈排版格式用）
 
-Alt + 3 : 鍵入全形空格「〇」
+Alt + 3 : 鍵入「〇」（原文有大圈界格者）
 
 Alt + 4 : 新增【四部叢刊造字對照表】資料並取代其造字,若無選取文字以指定文字，則加以取代
 
@@ -402,3 +402,4 @@ Ctrl+ 滑鼠左鍵：清除框中所有文字
 - [TextForCtext 聲控全自動連續輸入至《中國哲學書電子化計劃》Quick edit Box演示](https://youtu.be/bgsOwh2rEkc)
 - [TextForCtext 輸入《中國哲學書電子化計劃》《四庫全書》本《玉海》實境秀](https://youtube.com/live/kwhOSXiNJVs)
 - [TextForCtext 輸入《中國哲學書電子化計劃》：使用者手動鍵入演示及實境秀](https://youtube.com/live/f4JlRogZorw)
+- [TextForCtext 輸入《中國哲學書電子化計劃》：利用《古籍酷》OCR功能，由使用者手動鍵入之演示及實境秀](https://youtube.com/live/iLxgIiIdXuY?feature=share)
