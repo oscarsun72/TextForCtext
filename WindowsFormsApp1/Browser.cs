@@ -190,7 +190,6 @@ namespace TextForCtext
         internal static IWebElement waitFindWebElementByName_ToBeClickable(string name, double second,
             IWebDriver drver = null)
         {
-
             IWebElement e = (driver ?? drver).FindElement(By.Name(name));
             if (e != null)
             {
@@ -219,6 +218,12 @@ namespace TextForCtext
                 }
             }
         }
+        /// <summary>
+        /// 以 Selector 為條件尋找網頁元件
+        /// </summary>
+        /// <param name="selector">所根據的 Selector 字串值</param>
+        /// <param name="second">等待元素出現的秒數上限</param>
+        /// <returns>成功找到則回傳該元件物件，出錯則回傳 null</returns>
         internal static IWebElement waitFindWebElementBySelector_ToBeClickable(string selector, double second = 2)
         {
             try
@@ -1076,7 +1081,6 @@ namespace TextForCtext
                         default:
                             throw;
                     }
-
                 }
             }
             else
@@ -1093,43 +1097,49 @@ namespace TextForCtext
 
         /// <summary>
         /// 將分頁視窗頁面捲到頂端
+        /// activate and move to most front of desktop
         /// </summary>
         internal static void WindowsScrolltoTop()
         {
-            //driver.ExecuteScript("window.scrollTo(0, 0)");//chatGPT:您好！如果您使用 C# 和 Selenium 來控制 Chrome 瀏覽器，您可以使用以下的程式碼將網頁捲到最上面：
+            if (ActiveForm1.KeyinTextMode)
+            {
+                driver.ExecuteScript("window.scrollTo(0, 0)");//chatGPT:您好！如果您使用 C# 和 Selenium 來控制 Chrome 瀏覽器，您可以使用以下的程式碼將網頁捲到最上面：
 
-            ///*20220312 chatGPT大菩薩：您好！要將分頁視窗的瀏覽位置調整到最上方，可以使用 Selenium 的 JavaScriptExecutor 物件，透過執行 JavaScript 的方式來操作瀏覽器。
-            //    以下是一個使用 JavaScriptExecutor 調整瀏覽位置的範例：*/
-            //// 取得目前的分頁視窗物件
-            //IWebElement body = driver.FindElement(By.TagName("body"));
-            //var data = waitFindWebElementByName_ToBeClickable("data", 10);
-            //if (data != null)
-            //{
-            //    // 使用 WebDriverWait 等待目標元素出現
-            //    //var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
-            //    //var body = wait.Until(ExpectedConditions.ElementExists(By.TagName("body")));
+                ///*20220312 chatGPT大菩薩：您好！要將分頁視窗的瀏覽位置調整到最上方，可以使用 Selenium 的 JavaScriptExecutor 物件，透過執行 JavaScript 的方式來操作瀏覽器。
+                //    以下是一個使用 JavaScriptExecutor 調整瀏覽位置的範例：*/
+                //// 取得目前的分頁視窗物件
+                //IWebElement body = driver.FindElement(By.TagName("body"));
+                //var data = waitFindWebElementByName_ToBeClickable("data", 10);
+                //if (data != null)
+                //{
+                //    // 使用 WebDriverWait 等待目標元素出現
+                //    //var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
+                //    //var body = wait.Until(ExpectedConditions.ElementExists(By.TagName("body")));
 
-            //    //IWebElement body = waitFindWebElementByTagName_ToBeClickable("body",10);
+                //    //IWebElement body = waitFindWebElementByTagName_ToBeClickable("body",10);
 
-            //    // 使用 JavaScriptExecutor 將分頁視窗的瀏覽位置調整到最上方
-            //    IJavaScriptExecutor js = (IJavaScriptExecutor)driver;
-            //    js.ExecuteScript("arguments[0].scrollTop = 0;", body);
-            //    /*程式碼會使用 FindElement 方法取得分頁視窗的 body 元素，
-            //     * 然後再透過 JavaScriptExecutor 的 ExecuteScript 方法來執行 JavaScript，將分頁視窗的 scrollTop 屬性設定為 0，即將瀏覽位置調整到最上方。
-            //     */
+                //    // 使用 JavaScriptExecutor 將分頁視窗的瀏覽位置調整到最上方
+                //    IJavaScriptExecutor js = (IJavaScriptExecutor)driver;
+                //    js.ExecuteScript("arguments[0].scrollTop = 0;", body);
+                //    /*程式碼會使用 FindElement 方法取得分頁視窗的 body 元素，
+                //     * 然後再透過 JavaScriptExecutor 的 ExecuteScript 方法來執行 JavaScript，將分頁視窗的 scrollTop 屬性設定為 0，即將瀏覽位置調整到最上方。
+                //     */
 
-            //    //這兩種方法都可以將瀏覽位置調整到最上方，但有時候可能會因為某些原因無法正常工作。
-            //    //建議您可以嘗試使用以下程式碼來調整瀏覽位置，這個方法使用了 window.scrollBy(0, -document.body.scrollHeight)，可以將瀏覽位置調整到最上方。
-            //    js.ExecuteScript("window.scrollBy(0, -document.body.scrollHeight)");
-            //    //如果這個方法仍然無法正常工作，建議您再檢查一下網頁上是否有其他的元素會影響瀏覽位置，例如 iframe 或 div。如果有的話，您需要先切換到相應的 iframe 或找到影響瀏覽位置的 div，然後再使用 JavaScriptExecutor 調整瀏覽位置。
-            //}
-
-            //以上都不行，只好來這個殺手鐧了
-            driver.Navigate().Refresh();//https://www.guru99.com/selenium-refresh-page.html
-            //Pressing F5 key on any textbox using sendKeys command
-            //driver.findElement(By textboxLocator).sendKeys(Keys.F5);
-            //data.SendKeys(OpenQA.Selenium.Keys.F5);
-            //https://artoftesting.com/refresh-a-page-in-selenium-webdriver-java
+                //    //這兩種方法都可以將瀏覽位置調整到最上方，但有時候可能會因為某些原因無法正常工作。
+                //    //建議您可以嘗試使用以下程式碼來調整瀏覽位置，這個方法使用了 window.scrollBy(0, -document.body.scrollHeight)，可以將瀏覽位置調整到最上方。
+                //    js.ExecuteScript("window.scrollBy(0, -document.body.scrollHeight)");
+                //    //如果這個方法仍然無法正常工作，建議您再檢查一下網頁上是否有其他的元素會影響瀏覽位置，例如 iframe 或 div。如果有的話，您需要先切換到相應的 iframe 或找到影響瀏覽位置的 div，然後再使用 JavaScriptExecutor 調整瀏覽位置。
+                //}
+            }
+            else
+            {
+                //以上都不行，只好來這個殺手鐧了
+                driver.Navigate().Refresh();//https://www.guru99.com/selenium-refresh-page.html
+                                            //Pressing F5 key on any textbox using sendKeys command
+                                            //driver.findElement(By textboxLocator).sendKeys(Keys.F5);
+                                            //data.SendKeys(OpenQA.Selenium.Keys.F5);
+                                            //https://artoftesting.com/refresh-a-page-in-selenium-webdriver-java
+            }
         }
 
         private static void quickedit_data_textboxSetting(string url, IWebElement textbox = null, IWebDriver driver = null)
@@ -1139,7 +1149,7 @@ namespace TextForCtext
                 if (textbox != null) Quickedit_data_textbox = textbox;
                 else
                     Quickedit_data_textbox = waitFindWebElementByName_ToBeClickable("data", _webDriverWaitTimSpan, driver);
-                quickedit_data_textboxTxt = Quickedit_data_textbox==null? "": Quickedit_data_textbox.Text;
+                quickedit_data_textboxTxt = Quickedit_data_textbox == null ? "" : Quickedit_data_textbox.Text;
             }
         }
 
@@ -1158,8 +1168,23 @@ namespace TextForCtext
             catch (Exception)
             {
                 var hs = driver.WindowHandles;
-                driver.SwitchTo().Window(driver.WindowHandles.Last());
-                driver.SwitchTo().NewWindow(tabOrwindow);
+                try
+                {
+                    driver.SwitchTo().Window(driver.WindowHandles.Last());
+                    driver.SwitchTo().NewWindow(tabOrwindow);
+                }
+                catch (Exception ex)
+                {
+                    switch (ex.HResult)
+                    {
+                        case -2146233079://"序列未包含項目"
+                            //誤關Chrome瀏覽器的時候
+                            openNewTabWindow(WindowType.Window);
+                            break;
+                        default:
+                            throw;
+                    }
+                }
                 //throw;
             }
 
@@ -1785,7 +1810,8 @@ namespace TextForCtext
 
             if (ActiveForm1.TopMost) ActiveForm1.TopMost = false;
             //首頁「快速體驗」按鈕：
-            IWebElement iwe = waitFindWebElementBySelector_ToBeClickable("body > div.container-fluid.bg-dark.px-1 > div > h2.text-center.my-2.py-4 > button > div");
+            IWebElement iwe = waitFindWebElementBySelector_ToBeClickable("body > div.container-fluid.bg-dark.px-1 > div > h2.text-center.my-2.py-4 > button > div", 10);
+            if (iwe == null) return false;
             iwe.Click();
 
             //「上傳 拍照」按鈕：

@@ -412,7 +412,7 @@ namespace WindowsFormsApp1
                         if (xClp.IndexOf("edit") > -1 && xClp.Substring(xClp.LastIndexOf("#editor")) == "#editor")
                         //url此頁的Quick edit值傳到textBox1,並存入剪貼簿以備用
                         {
-                            string text = br.waitFindWebElementByName_ToBeClickable("data", br.WebDriverWaitTimeSpan).Text;
+                            string text = br.waitFindWebElementByName_ToBeClickable("data", br.WebDriverWaitTimeSpan).Text ?? "";
                             CnText.BooksPunctuation(ref text);
                             textBox1.Text = text;
                             Clipboard.SetText(text);
@@ -452,6 +452,7 @@ namespace WindowsFormsApp1
             //if (Cursor.Position.Y > this.Top + this.Height ||
             //    Cursor.Position.X > this.Left + this.Width) show_nICo();
             #endregion
+
             #region 縮至系統工具列在左方時
             //if (Cursor.Position.Y > this.Top + this.Height &&
             //    Cursor.Position.X < 420) show_nICo();//this.Left + this.Width) show_nICo();
@@ -463,6 +464,7 @@ namespace WindowsFormsApp1
                 show_nICo();//this.Left + this.Width) show_nICo();
             }
             #endregion
+
             #region 縮至系統工具列在下方時
             else if (Cursor.Position.Y > Screen.PrimaryScreen.Bounds.Height - 50 &&
                 Cursor.Position.X > Screen.PrimaryScreen.Bounds.Width - 270)
@@ -505,6 +507,8 @@ namespace WindowsFormsApp1
         /// <param name="modifierKeys">按下的控制鍵是Ctrl時才執行</param>
         void copyQuickeditLinkWhenKeyinMode(Keys modifierKeys)
         {
+            //在規範編輯/修改模式中的文字時不處理
+            if (Clipboard.GetText().IndexOf("<scanbegin ") > -1) return;
             switch (modifierKeys)
             {
                 case Keys.Control:
@@ -540,11 +544,13 @@ namespace WindowsFormsApp1
                             br.driver = br.driver ?? Browser.driverNew();
                             br.GoToCurrentUserActivateTab();
                             string quickEditLinkUrl = br.driver.Url;
-                            if (quickEditLinkUrl.IndexOf("&page=") == -1)
+                            if (quickEditLinkUrl.IndexOf("&page=") == -1 ||
+                                (quickEditLinkUrl.IndexOf("#editor") > -1 && quickEditLinkUrl.IndexOf("&page=1") > -1))
                             {
                                 for (int i = br.driver.WindowHandles.Count - 1; i > -1; i--)
-                                {
-                                    if (br.driver.SwitchTo().Window(br.driver.WindowHandles[i]).Url.IndexOf("&page=") > -1) break;
+                                {//找到分頁是書圖圖文對照瀏覽頁面且非第1頁者：
+                                    string foundUrl = br.driver.SwitchTo().Window(br.driver.WindowHandles[i]).Url;
+                                    if (foundUrl.IndexOf("&page=") > -1 && foundUrl.IndexOf("&page=1&") == -1) break;
                                 }
                                 quickEditLinkUrl = br.driver.Url;
                             }
@@ -6006,10 +6012,10 @@ namespace WindowsFormsApp1
         private void toOCR(br.OCRSiteTitle ocrSiteTitle)
         {
             //下載書圖
-            string imgUrl = Clipboard.GetText(), downloadImgFullName;
+            string imgUrl = Clipboard.GetText(), downloadImgFullName ;
             if (imgUrl.Length > 4
-                && imgUrl.Substring(0, 4) == "http"
-                && imgUrl.Substring(imgUrl.Length - 4, 4) == ".png")
+            && imgUrl.Substring(0, 4) == "http"
+            && imgUrl.Substring(imgUrl.Length - 4, 4) == ".png")
                 downloadImage(imgUrl, out downloadImgFullName);
             else
             {
@@ -6055,8 +6061,8 @@ namespace WindowsFormsApp1
                 //textBox1.Text = CnText.BooksPunctuation(ref CnText.ClearLettersAndDigits_UseUnicodeCategory(ref x));//清不掉「-」
                 //textBox1.Text = CnText.BooksPunctuation(ref CnText.ClearLettersAndDigits(ref x));
 
-                ////刪除下載的書圖
-                //if (File.Exists(downloadImgFullName)) File.Delete(downloadImgFullName);
+                //OCR成功後則刪除下載的書圖
+                if (File.Exists(downloadImgFullName)) File.Delete(downloadImgFullName);
             }
             #endregion
             //const string gjcool = "https://gj.cool/try_ocr";
@@ -7619,8 +7625,8 @@ namespace WindowsFormsApp1
                                 {
                                     //重新定位網頁
                                     case -2146233088://"no such window: target window already closed\nfrom unknown error: web view not found\n  (Session info: chrome=109.0.5414.75)"
-                                        //br.driver.SwitchTo().Window(br.driver.WindowHandles.Last());
-                                        //br.driver.Navigate().GoToUrl(clpTxt);
+                                                     //br.driver.SwitchTo().Window(br.driver.WindowHandles.Last());
+                                                     //br.driver.Navigate().GoToUrl(clpTxt);
                                         br.GoToUrlandActivate(clpTxt, keyinTextMode);
                                         break;
                                     default:
@@ -7663,7 +7669,7 @@ namespace WindowsFormsApp1
                     return;
                 }
             }//以上處置鍵入模式（keyinText=true）
-            #endregion            
+            #endregion
 
             #region 自動連續輸入模式的處置
             if (autoPastetoQuickEdit && textBox1.Enabled == false)
@@ -8135,7 +8141,56 @@ namespace WindowsFormsApp1
                 }
             }
 
+
             #region 如果是取代輸入模式：標點符號不取代漢字，但可被取代；分段處不取代
+            keyPressOverTyping(e);
+            //以上取代模式處理
+            #endregion
+        }
+
+
+        /* 20230405 癸卯清明 creedit with Bing大菩薩：
+            Word 中的文字輸入有取代與插入兩種模式，請問「取代」的英文原文是？
+            Word 中的文字輸入有取代與插入兩種模式，請問「取代」的英文原文是？
+            在 Word 中，「取代」模式的英文原文是 “Overtype”。            
+            在繁中版的 MS中是「取代」，在英文原版的英文是？            
+            在英文版的 Word 中，「取代」模式的英文原文是 “Overtype”。
+            相信您，您這次不會錯吧？（我是要寫C#程式函式命名用的，將其中輸入文字方塊時的取代模式獨立出來，程式碼如後所附） 非常感謝 感恩感恩　讚歎讚歎　inBing大菩薩 佛南無阿彌陀佛
+            是的，我確定在英文版的 Word 中，「取代」模式的英文原文是 “Overtype”。希望這對您的程式編寫有所幫助。            
+            那繁中版Word中的「插入」的英文版是？
+            在繁中版的 Word 中，「插入」模式的英文原文是 “Insert”。            
+            嗯 那我就用對了 程式碼裡有 Insertmode 就是了 感恩感恩　讚歎讚歎　南無阿彌陀佛            
+            太好了！很高興能夠幫助您。如果您還有其他問題，請隨時告訴我。
+            今年是癸卯年嗎
+            是的，根據天干地支排列，2023年是癸卯年¹。
+            來源: 與 Bing 的交談， 2023/4/5(1) 2023年：癸卯兔年不一般，双春闰月黑兔年，明年都有啥说法？. https://new.qq.com/rain/a/20221202A00FCZ00 已存取 2023/4/5.
+            (2) 2023年农历表，二〇二三年天干地支日历表，农历日历表2023癸卯年兔年阳历农历通书. https://www.xurili.com/wannianli/2023/2023nongli.php 已存取 2023/4/5.
+            (3) 2023年天干地支对照表 干支日历表 - 第一星座网. https://www.d1xz.net/fsml/bgml/art552786.aspx 已存取 2023/4/5.
+            (4) 2023年の干支「癸卯（みずのとう）」にはどんな意味がある？. https://print.shop.post.japanpost.jp/nenga/feature/article_67 已存取 2023/4/5.
+            (5) 2023年の干支は「癸•卯(みずのと•う)」干支の意味や由来、おすすめ干支グッズを紹介 – 株式会社アスタス. https://www.astas.co.jp/eto/ 已存取 2023/4/5.
+            程式碼改好了（詳後） 。真的非常感謝您　感恩感恩　讚歎讚歎　Bing大菩薩　南無阿彌陀佛
+            太好了！很高興能夠幫助您。如果您還有其他問題，請隨時告訴我。
+
+            喔 這裡的發問是有字數限制的？ 我發現剛才貼給您的程式碼並不完整，後面被截掉，不見了。            
+            是的，這裡的發問和回答都有字數限制。如果您的程式碼太長，可以考慮將其分成幾個部分發送。
+            那如果日後要給您看很長的程式碼和長文章摘要話 怎麼辦呢？ 只要在分幾個部分時發送時，暫時停止您的回應就好了嗎？
+            如果您想要給我看很長的程式碼或文章摘要，您可以將其分成幾個部分發送。我會在收到每一部分後回應您。如果您希望我暫時不回應，可以在發送信息時註明，我會等待您發送完整個信息後再回應您。
+            喔 真的嘛 「如果您希望我暫時不回應，可以在發送信息時註明」 是在一開始告訴您還是每段發送時都要告訴您，請您暫不回應
+            您可以在發送第一部分信息時註明希望我暫時不回應，直到您發送完整個信息。這樣我就會等待您發送完整個信息後再回應您。
+            好的 也就是說在第一則信息請您暫別回應，在最後一則發完後再請您對以上各部分作總結整體的回應 ？
+            是的，您可以在發送第一部分信息時註明希望我暫時不回應，直到您發送完整個信息。當您發送完整個信息後，我會對您發送的所有信息進行總結並回應您。
+            好的 謝謝您 Bing大菩薩 感恩感恩　讚歎讚歎　Bing大菩薩　南無阿彌陀佛
+            不客氣，很高興能夠幫助您。如果您還有其他問題，請隨時告訴我。
+         */
+        /// <summary>
+        /// KeyPress事件中的取代模式處理。
+        /// 1.如果是取代輸入模式：標點符號不取代漢字，但可被取代；
+        /// 2.英文、上書名號、前篇名號（《〈）、缺字構字式符號（●＝＝）、小注文標識號（{}）、及分段處不取代。        
+        /// </summary>
+        /// <param name="e"></param>
+        private void keyPressOverTyping(KeyPressEventArgs e)
+        {
+
             /* 20230309 chatGPT大菩薩晚安吉祥：
              * public static string punctuationsNum = ".,;?@'\"。，；！？、－-—…:：《·》〈‧〉「」『』〖〗【】（）()[]〔〕［］0123456789";
              * 在 C# 我想剔除以上字中的 「《」和「〈」要怎麼寫才最簡潔有效呢？正則表達式的寫法會是最好的選擇嗎？ 感恩感恩　南無阿彌陀佛
@@ -8143,11 +8198,12 @@ namespace WindowsFormsApp1
              * 在 C# 中，您可以使用正则表达式来删除给定字符串中的特定字符。以下是删除 punctuationsNum 字符串中的 "《" 和 "〈" 字符的示例代码：……
              * 在这里，我们使用 Regex.Replace 方法将匹配正则表达式模式 [《〈] 的所有字符替换为空字符串。此模式匹配任何包含 "《" 或 "〈" 的字符。
              * */
-            string regexPattern = "[《〈]", omitSymbols = "●＝{}" + Environment.NewLine;//輸入缺字構字式●＝＝及注文標記符{{}}時不取代
+            string regexPattern = "[《〈]", omitSymbols = "●＝{}□■" + Environment.NewLine;//輸入缺字構字式●＝＝及注文標記符{{}}時不取代
             string w;//, punctuationsNumWithout前書名號與前篇名號 = Regex.Replace(Form1.punctuationsNum, regexPattern, ""); 
             if (!insertMode
                 && textBox1.SelectionStart < textBox1.TextLength
-                && (regexPattern + Environment.NewLine).IndexOf(textBox1.Text.Substring(textBox1.SelectionStart, 1)) == -1
+                //現在鍵入位置的後一個字不能是
+                && (regexPattern + omitSymbols + Environment.NewLine).IndexOf(textBox1.Text.Substring(textBox1.SelectionStart, 1)) == -1
                 //&& omitSymbols.IndexOf(e.KeyChar.ToString()) == -1
                 && Regex.IsMatch(e.KeyChar.ToString(), "[^a-zA-Z" + omitSymbols + "]"))//YouChat菩薩
             {//https://stackoverflow.com/questions/1428047/how-to-set-winforms-textbox-to-overwrite-mode/70502655#70502655
@@ -8176,7 +8232,8 @@ namespace WindowsFormsApp1
             {
                 if (!insertMode
                     && textBox1.SelectionStart < textBox1.TextLength && selStart < textBox1.TextLength
-                    && (regexPattern + Environment.NewLine).IndexOf(textBox1.Text.Substring(textBox1.SelectionStart, 1)) == -1
+                    //現在鍵入位置的後一個字不能是
+                    && (regexPattern + omitSymbols + Environment.NewLine).IndexOf(textBox1.Text.Substring(textBox1.SelectionStart, 1)) == -1
                     //&& omitSymbols.IndexOf(e.KeyChar.ToString()) == -1
                     && Regex.IsMatch(e.KeyChar.ToString(), "[^a-zA-Z" + omitSymbols + "]"))//YouChat菩薩
                 {
@@ -8195,9 +8252,6 @@ namespace WindowsFormsApp1
                     textBox1.Select(selStart, selLength);
                 //textBox1.DeselectAll();
             }
-            //以上取代模式處理
-            #endregion
-
         }
 
 
@@ -8693,6 +8747,8 @@ namespace WindowsFormsApp1
         internal void downloadImage(string imageUrl, out string downloadImgFullName, bool selectedInExplorer = false)
         {
             downloadImgFullName = dropBoxPathIncldBackSlash + "Ctext_Page_Image.png";
+            //若圖已存在則不復下載，因OCR成功後會刪除此圖故
+            if (File.Exists(downloadImgFullName)) return;
             ////若圖檔已存在，且是1分鐘前存檔的，則不復下載，以免重複，又免誤按。20230404，改 google keep的快捷鍵以免誤按
             //if (File.Exists(downloadImgFullName) && DateTime.Now.Subtract(File.GetLastWriteTime(downloadImgFullName)).TotalMinutes < 1) return;
 
