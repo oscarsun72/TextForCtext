@@ -2,7 +2,7 @@ Attribute VB_Name = "SystemSetup"
 Option Explicit
 Public FsO As Object, UserProfilePath As String
 Public Declare PtrSafe Function sndPlaySound32 Lib "winmm.dll" Alias "sndPlaySoundA" (ByVal lpszSoundName As String, ByVal uFlags As Long) As Long
-
+'
 'https://msdn.microsoft.com/zh-tw/library/office/ff192913.aspx
 Private Declare PtrSafe Function OpenClipboard Lib "user32.dll" (ByVal hWnd As Long) As Long
 Private Declare PtrSafe Function EmptyClipboard Lib "user32.dll" () As Long
@@ -20,16 +20,16 @@ Public Declare PtrSafe Function ShellExecute Lib "shell32.dll" Alias "ShellExecu
     (ByVal hWnd As Long, ByVal lpOperation As String, ByVal lpFile As String, _
   ByVal lpParameters As String, ByVal lpDirectory As String, _
   ByVal nShowCmd As Long) As Long 'https://www.mrexcel.com/board/threads/vba-api-call-issues-with-show-window-activation.920147/
-Public Declare PtrSafe Function ShowWindow Lib "user32" _
+Public Declare PtrSafe Function ShowWindow Lib "User32" _
   (ByVal hWnd As Long, ByVal nCmdSHow As Long) As Long
-Public Declare PtrSafe Function FindWindow Lib "user32" Alias "FindWindowA" _
+Public Declare PtrSafe Function FindWindow Lib "User32" Alias "FindWindowA" _
   (ByVal lpClassName As String, ByVal lpWindowName As String) As Long
   
-Public Declare PtrSafe Function SetForegroundWindow Lib "user32" (ByVal hWnd As Long) As Boolean
+Public Declare PtrSafe Function SetForegroundWindow Lib "User32" (ByVal hWnd As Long) As Boolean
   
   
   
-'https://msdn.microsoft.com/zh-tw/library/office/ff194373.aspx
+''https://msdn.microsoft.com/zh-tw/library/office/ff194373.aspx
 'Declare Function OpenClipboard Lib "User32" (ByVal hWnd As Long) _
 '   As Long
 'Declare Function CloseClipboard Lib "User32" () As Long
@@ -68,16 +68,30 @@ Public Property Get WordTemplatesPathIncldBackSlash() As String
     WordTemplatesPathIncldBackSlash = UserProfilePathIncldBackSlash + "AppData\Roaming\Microsoft\Templates\"
 End Property
 Function ClipBoard_GetData()
+#If VBA7 Then
+    'https://zhuanlan.zhihu.com/p/540531195
+    'Office 2013 & above
+    #If Win64 Then
+    'x64 host
+            Rem 尚未實作
+            ClipBoard_GetData = ClipBoardOp.ClipBoard_GetData
+            Exit Function
+        #Else
+    'x86 host
+    #End If
+#Else
+    'Office 2010 & under:
+#End If
    Dim hClipMemory As Long
    Dim lpClipMemory As Long
    Dim MyString As String
    Dim RetVal As Long
- 
+
    If OpenClipboard(0&) = 0 Then
       MsgBox "Cannot open Clipboard. Another app. may have it open"
       Exit Function
    End If
-          
+
    ' Obtain the handle to the global memory
    ' block that is referencing the text.
    hClipMemory = GetClipboardData(CF_TEXT)
@@ -85,29 +99,42 @@ Function ClipBoard_GetData()
       MsgBox "Could not allocate memory"
       GoTo OutOfHere
    End If
- 
+
    ' Lock Clipboard memory so we can reference
    ' the actual data string.
    lpClipMemory = GlobalLock(hClipMemory)
- 
+
    If Not IsNull(lpClipMemory) Then
       MyString = space$(MAXSIZE)
       RetVal = lstrcpy(MyString, lpClipMemory)
       RetVal = GlobalUnlock(hClipMemory)
-       
+
       ' Peel off the null terminating character.
       MyString = Mid(MyString, 1, InStr(1, MyString, Chr$(0), 0) - 1)
    Else
       MsgBox "Could not lock memory to copy string from."
    End If
- 
+
 OutOfHere:
- 
+
    RetVal = CloseClipboard()
    ClipBoard_GetData = MyString
- 
 End Function
 Public Sub SetClipboard(sUniText As String)
+#If VBA7 Then
+    'https://zhuanlan.zhihu.com/p/540531195
+    'Office 2013 & above
+    #If Win64 Then
+    'x64 host
+            ClipBoard.SetClipboard sUniText
+            Exit Sub
+        #Else
+    'x86 host
+    #End If
+#Else
+    'Office 2010 & under:
+#End If
+    
     Dim iStrPtr As Long
     Dim iLen As Long
     Dim iLock As Long
@@ -127,6 +154,20 @@ End Sub
 
 '取得剪貼簿內文字
 Public Function GetClipboard() As String
+#If VBA7 Then
+    'https://zhuanlan.zhihu.com/p/540531195
+    'Office 2013 & above
+    #If Win64 Then
+    'x64 host
+            GetClipboard = ClipBoard.GetClipboard
+            Exit Function
+        #Else
+    'x86 host
+    #End If
+#Else
+    'Office 2010 & under:
+#End If
+    
     Dim iStrPtr As Long
     Dim iLen As Long
     Dim iLock As Long
@@ -292,10 +333,10 @@ End Function
 
 Function GetClipboardText()
 On Error GoTo eh
-Dim clipboard As New MSForms.DataObject
+Dim ClipBoard As New MSForms.DataObject
 DoEvents
-clipboard.GetFromClipboard
-GetClipboardText = clipboard.GetText
+ClipBoard.GetFromClipboard
+GetClipboardText = ClipBoard.GetText
 Exit Function
 eh:
     Select Case Err.Number

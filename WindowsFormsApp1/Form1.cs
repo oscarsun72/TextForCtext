@@ -4435,7 +4435,7 @@ namespace WindowsFormsApp1
         /// <summary>
         /// 標點符號和數字
         /// </summary>
-        public static string punctuationsNum = ".,;?@'\"。，；！？、－-—…:：《·》〈‧〉「」『』〖〗【】（）()[]〔〕［］0123456789";
+        public static readonly string punctuationsNum = ".,;?@'\"。，；！？、－-—…:：《·》〈‧〉「」『』〖〗【】（）()[]〔〕［］0123456789";
         /// <summary>
         /// 判斷中文字
         /// </summary>
@@ -4585,6 +4585,23 @@ namespace WindowsFormsApp1
 
         //記下每頁最後10字元長的字以作判斷用
         string pageEndText10 = "";
+
+        /* 20230408 Bing大菩薩 ： 您可以使用正則表達式來簡化您的 if 判斷句。例如，您可以將條件提取到一個單獨的函數中，並使用正則表達式來檢查 url 是否包含特定字符串：
+         */
+        /// <summary>
+        /// 檢查要輸入簡單修改模式頁面的指定網址是否合法
+        /// </summary>
+        /// <param name="url">要檢查的網址字串值</param>
+        /// <returns>回傳網址是否合法</returns>
+        internal static bool IsValidUrl＿keyDownCtrlAdd(string url)
+        {
+            return !Regex.IsMatch(url, @"(#editor|&page=|ctext\.org)");
+            /*
+             * Bing大菩薩：是的，在正則表達式中，小數點「.」是一個特殊字符，它匹配任何單個字符（除了換行符）。如果您想在正則表達式中匹配字面上的小數點，則需要在前面加上反斜杠「\」來對其進行轉義。
+             * 在 C# 中，由於反斜杠「\」本身也是一個轉義字符，所以您需要使用兩個反斜杠「\\」來表示一個字面上的反斜杠。因此，在 C# 中的正則表達式中，要匹配字面上的小數點，您需要寫成「\\.」。
+                希望這對您有所幫助！*/
+        }
+
 
         /// <summary>
         /// Ctrl + + （加號，含函數字鍵盤） 或 Ctrl + -（數字鍵盤）  或 Ctrl + 5 (數字鍵盤） 或 Alt + + ：
@@ -4765,9 +4782,23 @@ namespace WindowsFormsApp1
                     break;
                 case BrowserOPMode.seleniumNew://純Selenium模式（2）
                                                //終於找到bug了 NextPage()裡的textBox3.Text=url 設定太晚
-                    pasteToCtext(textBox3.Text, shiftKeyDownYet);///////////////////////
-                                                                 //string currentUrl = br.driver.Url;
-                                                                 //pasteToCtext(currentUrl);//故改用 br.……
+                    string url = textBox3.Text;
+                    //if (url.IndexOf("#editor") == -1 && url.IndexOf("&page=") == -1 && url.IndexOf("ctext.org") == -1)
+                    if (IsValidUrl＿keyDownCtrlAdd(br.driver.Url))
+                    {
+                        br.GoToCurrentUserActivateTab();
+                        if (IsValidUrl＿keyDownCtrlAdd(br.driver.Url))
+                        //if (br.driver.Url.IndexOf("#editor") == -1 && br.driver.Url.IndexOf("&page=") == -1 && br.driver.Url.IndexOf("ctext.org") == -1)
+                        {
+                            Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("請檢查 textBox3 中是否是有效的簡單修改模式的網址");
+                            return;
+                        }
+                        else
+                            pasteToCtext(br.driver.Url, shiftKeyDownYet);
+                    }
+                    else
+                        pasteToCtext(textBox3.Text, shiftKeyDownYet);//string currentUrl = br.driver.Url;
+                                                                     //pasteToCtext(currentUrl);//故改用 br.……
                     break;
                 case BrowserOPMode.seleniumGet://Selenium配合Windows API模式（1+2）或純不用Selenium模式
                                                //還未實作
@@ -6012,7 +6043,7 @@ namespace WindowsFormsApp1
         private void toOCR(br.OCRSiteTitle ocrSiteTitle)
         {
             //下載書圖
-            string imgUrl = Clipboard.GetText(), downloadImgFullName ;
+            string imgUrl = Clipboard.GetText(), downloadImgFullName;
             if (imgUrl.Length > 4
             && imgUrl.Substring(0, 4) == "http"
             && imgUrl.Substring(imgUrl.Length - 4, 4) == ".png")
@@ -8747,10 +8778,10 @@ namespace WindowsFormsApp1
         internal void downloadImage(string imageUrl, out string downloadImgFullName, bool selectedInExplorer = false)
         {
             downloadImgFullName = dropBoxPathIncldBackSlash + "Ctext_Page_Image.png";
-            //若圖已存在則不復下載，因OCR成功後會刪除此圖故
-            if (File.Exists(downloadImgFullName)) return;
+            //若圖已存在則不復下載，因OCR成功後會刪除此圖故//避免隔太久又忘了刪除圖檔，還是改以下判斷
+            //if (File.Exists(downloadImgFullName)) return;
             ////若圖檔已存在，且是1分鐘前存檔的，則不復下載，以免重複，又免誤按。20230404，改 google keep的快捷鍵以免誤按
-            //if (File.Exists(downloadImgFullName) && DateTime.Now.Subtract(File.GetLastWriteTime(downloadImgFullName)).TotalMinutes < 1) return;
+            if (File.Exists(downloadImgFullName) && DateTime.Now.Subtract(File.GetLastWriteTime(downloadImgFullName)).TotalMinutes < 5) return;
 
             /*20230103 creedit,chatGPT：
           你可以使用 Selenium 來下載網絡圖片。

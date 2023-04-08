@@ -616,18 +616,39 @@ namespace TextForCtext
             }
             catch (Exception)
             {
-                selm.IWebElement quickedit;
+                selm.IWebElement quickedit = null;
                 try
                 {
                     //如果沒有按下「Quick edit」就按下它以開啟
                     quickedit = driver.FindElement(selm.By.Id("quickedit"));
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
-                    //cDrv.Navigate().GoToUrl(Form1.mainFromTextBox3Text ?? "https://ctext.org/account.pl?if=en");
-                    MessageBox.Show("請先登入 Ctext.org 再繼續。按下「確定(OK)」以繼續……");
-                    quickedit = driver.FindElement(selm.By.Id("quickedit"));
-                    //throw;
+                    switch (ex.HResult)
+                    {
+                        case -2146233088:
+                            if (ex.Message.IndexOf("no such window: target window already closed") > -1)//"no such window: target window already closed\nfrom unknown error: web view not found\n  (Session info: chrome=110.0.5481.178)"
+                            {
+                                GoToUrlandActivate(url);
+                                return;
+                            }
+                            //"no such element: Unable to locate element: {\"method\":\"css selector\",\"selector\":\"#quickedit\"}\n  (Session info: chrome=111.0.5563.147)"
+                            else if (ex.Message.IndexOf("no such element: Unable to locate elementno") > -1)
+                            {
+                                GoToCurrentUserActivateTab();
+                                quickedit = driver.FindElement(selm.By.Id("quickedit"));
+                            }
+                            else
+                                MessageBox.Show(ex.HResult + ex.Message);
+                            break;
+                        default:
+                            //cDrv.Navigate().GoToUrl(Form1.mainFromTextBox3Text ?? "https://ctext.org/account.pl?if=en");                    
+                            //MessageBox.Show("請先登入 Ctext.org 再繼續。按下「確定(OK)」以繼續……");
+                            Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("請先登入 Ctext.org 再繼續。按下「確定(OK)」以繼續……");
+                            quickedit = driver.FindElement(selm.By.Id("quickedit"));
+                            //throw;
+                            break;
+                    }
                 }
                 quickedit.Click();//下面「submit.Click();」不必等網頁作出回應才執行下一步，但這裡接下來還要取元件操作，就得在同一線程中跑。感恩感恩　南無阿彌陀佛
                 textbox = driver.FindElement(selm.By.Name("data"));
