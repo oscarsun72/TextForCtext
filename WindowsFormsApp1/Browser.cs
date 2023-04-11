@@ -1184,7 +1184,6 @@ namespace TextForCtext
             try
             {
                 driver.SwitchTo().NewWindow(tabOrwindow);
-
             }
             catch (Exception)
             {
@@ -1574,7 +1573,26 @@ namespace TextForCtext
             {
 
                 bool fastXResulut = OCR_GJcool_FastExperience(downloadImgFullName);
-                driver.Close(); driver.SwitchTo().Window(currentWindowHndl);
+                try
+                {
+                    driver.Close();
+                }
+                catch (Exception ex)
+                {
+                    switch (ex.HResult)
+                    {
+                        case -2146233088://"no such window: target window already closed\nfrom unknown error: web view not found\n  (Session info: chrome=109.0.5414.120)"                            
+                            if (ex.Message.IndexOf("no such window: target window already closed") > -1) { }
+                            else
+                                Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
+                            break;
+                        default:
+                            Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
+                            break;
+                    }
+
+                }
+                driver.SwitchTo().Window(currentWindowHndl);
                 return fastXResulut;
             }
             else
@@ -1665,7 +1683,8 @@ namespace TextForCtext
             SendKeys.Send("+{Insert}");//or "^v"
             SendKeys.Send("{ENTER}");
             //待圖載入            
-            Thread.Sleep(3220);
+            //Thread.Sleep(3220);
+            Thread.Sleep(1220);
             //按下「Pro」
             iwe = waitFindWebElementBySelector_ToBeClickable("#line_img_form > div > input[type=file]");
             if (iwe == null)
@@ -1859,7 +1878,8 @@ namespace TextForCtext
             //                                                  #dialog_483f217a > div.col > div.d-flex.py-1 > button
 
             //待OCR結束
-            Thread.Sleep(5000);
+            //Thread.Sleep(5000);
+            Thread.Sleep(4300);
             #region 將OCR結果讀入剪貼簿：
             Clipboard.Clear();
             //按下複製按鈕複製到剪貼簿
@@ -1878,7 +1898,7 @@ namespace TextForCtext
             #region 關閉OCR視窗後回到原來分頁視窗
             //！！！！此須手動按下「複製」按鈕了！！！！
             //待手動成功複製，上限為 timeSpanSecs 秒
-            DateTime begin = DateTime.Now; int timeSpanSecs = 7;
+            DateTime begin = DateTime.Now; int timeSpanSecs = 8;
             //滑鼠定位，以備手動按下「複製」按鈕（須視窗最大化）
             Point copyBtnPos = new Point(838, 711);//用PRTSC鍵拍下全螢幕後，貼到小畫家以滑鼠取得坐標位置（即顯示在狀態列中）
             Cursor.Position = copyBtnPos;
@@ -1897,16 +1917,16 @@ namespace TextForCtext
             //MouseOperations.MouseEvent(MouseOperations.MouseEventFlags.LeftUp);            
             MouseOperations.MouseEventMousePos(MouseOperations.MouseEventFlags.LeftDown, copyBtnPos);
             MouseOperations.MouseEventMousePos(MouseOperations.MouseEventFlags.LeftUp, copyBtnPos);
-
-
             /*Bing大菩薩：您好，`MouseOperations` 不是 C# 的内置类。它是一个自定义类，您可以在 Stack Overflow 上找到它的源代码。您可以将这些代码复制到您的项目中，然后使用它来模拟鼠标点击。
              */
             while (Clipboard.GetText() == "")
             {
                 //每半秒按下滑鼠左鍵1次
-                Thread.Sleep(500);
+                //Thread.Sleep(400);
+                Thread.Sleep(300);
                 MouseOperations.MouseEventMousePos(MouseOperations.MouseEventFlags.LeftDown, copyBtnPos);
                 MouseOperations.MouseEventMousePos(MouseOperations.MouseEventFlags.LeftUp, copyBtnPos);
+                if (Clipboard.GetText() != "") break;
                 /*
                  20230330 Bing大菩薩：在C#中，與VBA中的Stop語句等效的是 `System.Diagnostics.Debugger.Break()`¹。這樣可以在程式執行到這一行時暫停並進入調試器，類似於設置斷點¹。
                     來源: 與 Bing 的交談， 2023 / 3 / 30(1) Can I do a Visual Basic(VB) Stop in C#?. https://social.msdn.microsoft.com/Forums/vstudio/en-US/db9dfe97-c98d-4f4b-bb8f-ba2edffee988/can-i-do-a-visual-basic-vb-stop-in-c?forum=csharpgeneral 已存取 2023/3/30.

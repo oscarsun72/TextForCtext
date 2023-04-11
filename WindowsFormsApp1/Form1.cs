@@ -30,6 +30,8 @@ using System.Threading.Tasks;
 using System.Net.Http.Headers;
 using System.Web;
 using WebSocketSharp;
+using System.Diagnostics.Eventing.Reader;
+
 //using System.Windows.Input;
 //using Microsoft.Office.Interop.Word;
 
@@ -385,7 +387,7 @@ namespace WindowsFormsApp1
         /// <summary>
         /// 還原已隱藏到系統列的物件
         /// </summary>
-        void show_nICo()
+        void show_nICo(Keys modifierKeys)
         {
 
             this.Show();
@@ -412,10 +414,16 @@ namespace WindowsFormsApp1
                         if (xClp.IndexOf("edit") > -1 && xClp.Substring(xClp.LastIndexOf("#editor")) == "#editor")
                         //url此頁的Quick edit值傳到textBox1,並存入剪貼簿以備用
                         {
-                            string text = br.waitFindWebElementByName_ToBeClickable("data", br.WebDriverWaitTimeSpan).Text ?? "";
-                            CnText.BooksPunctuation(ref text);
-                            textBox1.Text = text;
-                            Clipboard.SetText(text);
+                            //若此時按下 Shift 則不會取得文本而是逕行送去《古籍酷》OCR取回文本至textBox1以備用
+                            if (modifierKeys == Keys.Shift)
+                                toOCR(br.OCRSiteTitle.GJcool);
+                            else
+                            {
+                                string text = br.waitFindWebElementByName_ToBeClickable("data", br.WebDriverWaitTimeSpan).Text ?? "";
+                                CnText.BooksPunctuation(ref text);
+                                textBox1.Text = text;
+                                Clipboard.SetText(text);
+                            }
                             if (!Active)
                             {
                                 availableInUseBothKeysMouse();
@@ -436,7 +444,7 @@ namespace WindowsFormsApp1
         /// <param name="e"></param>
         private void nICo_MouseClick(object sender, MouseEventArgs e)
         {
-            show_nICo();
+            show_nICo(ModifierKeys);
         }
         /// <summary>
         /// 在已隱藏到系統列的物件圖示上滑過滑鼠（nICo= notifyIcon）
@@ -448,6 +456,9 @@ namespace WindowsFormsApp1
             if (Visible || !HiddenIcon) return;
             if (!_eventsEnabled) return;
             pauseEvents();
+
+            Keys modifierKeys = ModifierKeys;
+
             #region 縮至系統工具列在右方時
             //if (Cursor.Position.Y > this.Top + this.Height ||
             //    Cursor.Position.X > this.Left + this.Width) show_nICo();
@@ -460,8 +471,8 @@ namespace WindowsFormsApp1
                 Cursor.Position.X < 80)
             {
                 //按下Ctrl時，自動將Quick edit的連結複製到剪貼簿
-                if (keyinTextMode) copyQuickeditLinkWhenKeyinMode(ModifierKeys);
-                show_nICo();//this.Left + this.Width) show_nICo();
+                if (keyinTextMode) copyQuickeditLinkWhenKeyinMode(modifierKeys);
+                show_nICo(modifierKeys);//this.Left + this.Width) show_nICo();
             }
             #endregion
 
@@ -470,8 +481,8 @@ namespace WindowsFormsApp1
                 Cursor.Position.X > Screen.PrimaryScreen.Bounds.Width - 270)
             {
                 if (keyinTextMode)
-                    copyQuickeditLinkWhenKeyinMode(ModifierKeys);
-                show_nICo();//this.Left + this.Width) show_nICo();
+                    copyQuickeditLinkWhenKeyinMode(modifierKeys);
+                show_nICo(modifierKeys);//this.Left + this.Width) show_nICo();
             }
             #endregion
             ////if (this.Top <0 && this.Left<0) show_nICo();
@@ -535,54 +546,66 @@ namespace WindowsFormsApp1
                         }
                     }
                     break;
+                //自動擷取「簡單修改模式」（selector: # quickedit > a的連結)準備到《古籍酷》OCR
+                case Keys.Shift:
+                    copyQuickeditLinkWhenKeyinModeSub();
+                    break;
                 //自動擷取「簡單修改模式」（selector: # quickedit > a的連結)
                 case Keys.None:
-                    if (Clipboard.GetText().IndexOf("#editor") == -1)
-                    {
-                        try
-                        {
-                            br.driver = br.driver ?? Browser.driverNew();
-                            br.GoToCurrentUserActivateTab();
-                            string quickEditLinkUrl = br.driver.Url;
-                            if (quickEditLinkUrl.IndexOf("&page=") == -1 ||
-                                (quickEditLinkUrl.IndexOf("#editor") > -1 && quickEditLinkUrl.IndexOf("&page=1") > -1))
-                            {
-                                for (int i = br.driver.WindowHandles.Count - 1; i > -1; i--)
-                                {//找到分頁是書圖圖文對照瀏覽頁面且非第1頁者：
-                                    string foundUrl = br.driver.SwitchTo().Window(br.driver.WindowHandles[i]).Url;
-                                    if (foundUrl.IndexOf("&page=") > -1 && foundUrl.IndexOf("&page=1&") == -1) break;
-                                }
-                                quickEditLinkUrl = br.driver.Url;
-                            }
-                            if (quickEditLinkUrl.IndexOf("#editor") == -1 && quickEditLinkUrl.IndexOf("&page=") > -1)
-                            {
-                                OpenQA.Selenium.IWebElement quickEditLink = br.
-                                    waitFindWebElementBySelector_ToBeClickable("#quickedit > a");
-                                if (quickEditLink != null)
-                                {
-                                    quickEditLinkUrl = quickEditLink.GetAttribute("href");
-                                }
-                            }
-                            if (quickEditLinkUrl.IndexOf("#editor") > -1)
-                                Clipboard.SetText(quickEditLinkUrl);
-                        }
-                        catch (Exception ex)
-                        {
-                            switch (ex.HResult)
-                            {
-                                case -2146233088:
-                                    //"stale element reference: element is not attached to the page document\n  (Session info: chrome=110.0.5481.100)"
-                                    //"no such window: target window already closed\nfrom unknown error: web view not found\n  (Session info: chrome=110.0.5481.100)"
-                                    break;
-                                default:
-                                    MessageBox.Show(ex.HResult + ex.Message);
-                                    //throw;
-                                    break;
-                            }
+                    copyQuickeditLinkWhenKeyinModeSub();
+                    break;
+            }
+        }
 
+        /// <summary>
+        /// 自動擷取「簡單修改模式」（selector: # quickedit > a的連結)到剪貼簿
+        /// </summary>
+        void copyQuickeditLinkWhenKeyinModeSub()
+        {
+            if (Clipboard.GetText().IndexOf("#editor") == -1)
+            {
+                try
+                {
+                    br.driver = br.driver ?? Browser.driverNew();
+                    br.GoToCurrentUserActivateTab();
+                    string quickEditLinkUrl = br.driver.Url;
+                    if (quickEditLinkUrl.IndexOf("&page=") == -1 ||
+                        (quickEditLinkUrl.IndexOf("#editor") > -1 && quickEditLinkUrl.IndexOf("&page=1") > -1))
+                    {
+                        for (int i = br.driver.WindowHandles.Count - 1; i > -1; i--)
+                        {//找到分頁是書圖圖文對照瀏覽頁面且非第1頁者：
+                            string foundUrl = br.driver.SwitchTo().Window(br.driver.WindowHandles[i]).Url;
+                            if (foundUrl.IndexOf("&page=") > -1 && foundUrl.IndexOf("&page=1&") == -1) break;
+                        }
+                        quickEditLinkUrl = br.driver.Url;
+                    }
+                    if (quickEditLinkUrl.IndexOf("#editor") == -1 && quickEditLinkUrl.IndexOf("&page=") > -1)
+                    {
+                        OpenQA.Selenium.IWebElement quickEditLink = br.
+                            waitFindWebElementBySelector_ToBeClickable("#quickedit > a");
+                        if (quickEditLink != null)
+                        {
+                            quickEditLinkUrl = quickEditLink.GetAttribute("href");
                         }
                     }
-                    break;
+                    if (quickEditLinkUrl.IndexOf("#editor") > -1)
+                        Clipboard.SetText(quickEditLinkUrl);
+                }
+                catch (Exception ex)
+                {
+                    switch (ex.HResult)
+                    {
+                        case -2146233088:
+                            //"stale element reference: element is not attached to the page document\n  (Session info: chrome=110.0.5481.100)"
+                            //"no such window: target window already closed\nfrom unknown error: web view not found\n  (Session info: chrome=110.0.5481.100)"
+                            break;
+                        default:
+                            MessageBox.Show(ex.HResult + ex.Message);
+                            //throw;
+                            break;
+                    }
+
+                }
             }
         }
 
@@ -1946,6 +1969,7 @@ namespace WindowsFormsApp1
                 {//Alt + 1 : 鍵入本站制式留空空格標記「􏿽」：若有選取則取代全形空格「　」為「􏿽」
                     e.Handled = true;
                     keysSpacesBlank();
+                    if (!Active) availableInUseBothKeysMouse();
                     return;
                 }
 
@@ -4831,7 +4855,7 @@ namespace WindowsFormsApp1
                 //else if (keyinText || !autoPastetoQuickEdit)
                 else if (keyinTextMode && !autoPastetoQuickEdit)
                 {
-                    if (HiddenIcon) show_nICo();
+                    if (HiddenIcon) show_nICo(ModifierKeys);
                     availableInUseBothKeysMouse();
                     //將插入點置於頁首，以備編輯
                     textBox1.Select(0, 0);
@@ -6092,8 +6116,9 @@ namespace WindowsFormsApp1
                 //textBox1.Text = CnText.BooksPunctuation(ref CnText.ClearLettersAndDigits_UseUnicodeCategory(ref x));//清不掉「-」
                 //textBox1.Text = CnText.BooksPunctuation(ref CnText.ClearLettersAndDigits(ref x));
 
-                //OCR成功後則刪除下載的書圖
+                //OCR成功後則刪除下載的書圖,備份OCR結果
                 if (File.Exists(downloadImgFullName)) File.Delete(downloadImgFullName);
+                saveText();
             }
             #endregion
             //const string gjcool = "https://gj.cool/try_ocr";
@@ -6505,7 +6530,7 @@ namespace WindowsFormsApp1
                 //throw;
             }
             this.BackColor = C;
-            show_nICo();
+            show_nICo(ModifierKeys);
             normalLineParaLength = 0;
         }
 
