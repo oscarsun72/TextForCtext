@@ -1199,7 +1199,8 @@ namespace TextForCtext
                     {
                         case -2146233079://"序列未包含項目"
                             //誤關Chrome瀏覽器的時候
-                            openNewTabWindow(WindowType.Window);
+                            //openNewTabWindow(WindowType.Window);
+                            driverNew();
                             break;
                         default:
                             throw;
@@ -1682,9 +1683,10 @@ namespace TextForCtext
         retry:
             SendKeys.Send("+{Insert}");//or "^v"
             SendKeys.Send("{ENTER}");
-            //待圖載入            
+            //待圖載入完畢：
             //Thread.Sleep(3220);
-            Thread.Sleep(1220);
+            //Thread.Sleep(1220);
+            Thread.Sleep(920);
             //按下「Pro」
             iwe = waitFindWebElementBySelector_ToBeClickable("#line_img_form > div > input[type=file]");
             if (iwe == null)

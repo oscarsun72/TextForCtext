@@ -391,7 +391,7 @@ namespace WindowsFormsApp1
         {
 
             this.Show();
-            ntfyICo.Visible = false;
+            if(ntfyICo.Visible)ntfyICo.Visible = false;
             this.WindowState = FormWindowState.Normal;
             this.Height = thisHeight;
             this.Width = thisWidth;
@@ -470,6 +470,7 @@ namespace WindowsFormsApp1
             if (Cursor.Position.Y > Screen.PrimaryScreen.Bounds.Height - 230 &&
                 Cursor.Position.X < 80)
             {
+                ntfyICo.Visible = false;
                 //按下Ctrl時，自動將Quick edit的連結複製到剪貼簿
                 if (keyinTextMode) copyQuickeditLinkWhenKeyinMode(modifierKeys);
                 show_nICo(modifierKeys);//this.Left + this.Width) show_nICo();
@@ -480,6 +481,7 @@ namespace WindowsFormsApp1
             else if (Cursor.Position.Y > Screen.PrimaryScreen.Bounds.Height - 50 &&
                 Cursor.Position.X > Screen.PrimaryScreen.Bounds.Width - 270)
             {
+                ntfyICo.Visible = false;
                 if (keyinTextMode)
                     copyQuickeditLinkWhenKeyinMode(modifierKeys);
                 show_nICo(modifierKeys);//this.Left + this.Width) show_nICo();
