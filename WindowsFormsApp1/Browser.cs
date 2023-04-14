@@ -1583,7 +1583,7 @@ namespace TextForCtext
                     switch (ex.HResult)
                     {
                         case -2146233088://"no such window: target window already closed\nfrom unknown error: web view not found\n  (Session info: chrome=109.0.5414.120)"                            
-                            if (ex.Message.IndexOf("no such window: target window already closed") > -1) { }
+                            if (ex.Message.IndexOf("no such window: target window already closed") > -1) { if (File.Exists(downloadImgFullName)) File.Delete(downloadImgFullName); }
                             else
                                 Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
                             break;
@@ -1846,6 +1846,7 @@ namespace TextForCtext
                         string msgText = ex.HResult.ToString() + ex.Message;
                         Console.WriteLine(msgText);
                         Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(msgText);
+                        //if (File.Exists(downloadImgFullName)) File.Delete(downloadImgFullName);
                         return false;
                 }
             }
@@ -1921,14 +1922,18 @@ namespace TextForCtext
             MouseOperations.MouseEventMousePos(MouseOperations.MouseEventFlags.LeftUp, copyBtnPos);
             /*Bing大菩薩：您好，`MouseOperations` 不是 C# 的内置类。它是一个自定义类，您可以在 Stack Overflow 上找到它的源代码。您可以将这些代码复制到您的项目中，然后使用它来模拟鼠标点击。
              */
-            while (Clipboard.GetText() == "")
+            string txtchkClipboard = Clipboard.GetText();
+            while ((txtchkClipboard == "" || txtchkClipboard.IndexOf("正在识别") > -1) && txtchkClipboard.Length < 200)
             {
                 //每半秒按下滑鼠左鍵1次
                 //Thread.Sleep(400);
                 Thread.Sleep(300);
                 MouseOperations.MouseEventMousePos(MouseOperations.MouseEventFlags.LeftDown, copyBtnPos);
                 MouseOperations.MouseEventMousePos(MouseOperations.MouseEventFlags.LeftUp, copyBtnPos);
-                if (Clipboard.GetText() != "") break;
+                txtchkClipboard = Clipboard.GetText();
+                if (txtchkClipboard != "")
+                    if (txtchkClipboard.IndexOf("正在识别") == -1 && txtchkClipboard.Length > 200)
+                        break;
                 /*
                  20230330 Bing大菩薩：在C#中，與VBA中的Stop語句等效的是 `System.Diagnostics.Debugger.Break()`¹。這樣可以在程式執行到這一行時暫停並進入調試器，類似於設置斷點¹。
                     來源: 與 Bing 的交談， 2023 / 3 / 30(1) Can I do a Visual Basic(VB) Stop in C#?. https://social.msdn.microsoft.com/Forums/vstudio/en-US/db9dfe97-c98d-4f4b-bb8f-ba2edffee988/can-i-do-a-visual-basic-vb-stop-in-c?forum=csharpgeneral 已存取 2023/3/30.

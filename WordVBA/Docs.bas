@@ -820,6 +820,7 @@ If Documents.Count = 0 Then Docs.空白的新文件
 If ClipBoardOp.Is_ClipboardContainCtext_Note_InlinecommentColor Then
     中國哲學書電子化計劃.只保留正文注文_且注文前後加括弧
     Set d = ActiveDocument
+    On Error GoTo eh:
     DoEvents
     d.Range.Cut
     d.Close wdDoNotSaveChanges
@@ -1003,6 +1004,8 @@ Return
 
 eh:
 Select Case Err.Number
+    Case 5825 '物件已被刪除。
+        GoTo exitSub
     Case Else
         MsgBox Err.Number + Err.Description
 End Select
@@ -1161,7 +1164,7 @@ If Len(d.Range) = 1 Then Exit Sub '空白文件不處理
 '先要複製到剪貼簿,純文字操作即可
 'd.Range.Cut
 x = 文字處理.trimStrForSearch_PlainText(d.Range)
-SystemSetup.SetClipboard x
+SystemSetup.SetClipboard VBA.Replace(x, "·", "") '以《古籍酷》自動標點不會清除「·」，造成書名號標點機制不正確，故於此先清除之。
 DoEvents
 'If d.path = "" Then '前已作判斷 If d.path <> "" Then Exit Sub
 d.Close wdDoNotSaveChanges
@@ -1169,6 +1172,7 @@ d.Close wdDoNotSaveChanges
 Rem 這行要寫在不用的文件關閉後才有效，蓋其與文件併走也（雖UndoRecord為Application的屬性，但在文件被關閉時，其所載之復原記錄也會隨之清除，故須寫在文件關閉後才有效）
 SystemSetup.stopUndo ur, "中國哲學書電子化計劃_註文前後加括弧_貼到古籍酷自動標點"
 
+'將剪貼簿中的文本內容，送交古籍酷自動標點
 If 貼到古籍酷自動標點() = True Then
     '自動執行易學關鍵字標識
     If Documents.Count > 0 Then

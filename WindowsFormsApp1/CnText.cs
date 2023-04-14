@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using WindowsFormsApp1;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using static System.Net.Mime.MediaTypeNames;
+using System.Reflection;
 
 namespace TextForCtext
 {
@@ -312,7 +313,8 @@ namespace TextForCtext
         /// </summary>
         /// <param name="text">要處理的文本。考慮到大文本，故用傳址（pass by reference）</param>
         /// <returns>傳址回傳結果</returns>
-        internal static ref string ClearLettersAndDigits_UseUnicodeCategory(ref string text){
+        internal static ref string ClearLettersAndDigits_UseUnicodeCategory(ref string text)
+        {
             // 這是對的，測試成功：Bing大菩薩：您好!這是一個使用 C# 來清除英數字但保留中文的程式碼示例:
             string input = text;// "這是1個測試ABC";
             string output = string.Empty;
@@ -421,6 +423,33 @@ namespace TextForCtext
             }
             text = sb.ToString();
             return ref text;
+        }
+
+        /* 20230414 YouChat大菩薩：
+         * 我想在textBox1中，將前後不是英數字的小數點（英文句號）「.」取代為中文句號「。」要怎麼寫呢 C# Windows.Forms應用程式
+            * 要將textbox1中前後不是英數字的小數點取代為中文句號，你可以使用正則表達式和replace方法。下面是一個可能的實現方式：
+         */
+        /// <summary>
+        /// 將中文文本中的小數點取代為句號
+        /// </summary>
+        /// <param name="text">要置換的文本，以傳址（pass　by　reference）方式傳遞</param>        
+        internal static void PeriodsReplace_ChinesePunctuationMarks(ref string text)
+        {
+            //string pattern = @"(?<![a-zA-Z0-9])\.(?![a-zA-Z0-9])";
+            string pattern = @"(?<![a-zA-Z0-9])\.";
+            // 那如果只要前面是英數字，而後面未必是英數字才取代為「。」呢？
+            //YouChat大菩薩：如果你只想將前面是英文或數字的小數點取代為中文句號，而後面的字符不需要是英文或數字，你可以將正則表達式修改為： 
+            //string pattern = @"(?<=\w)\.(?!\w)";
+            //這樣，正則表達式會匹配前面是任何英文字母或數字的小數點，並且後面不是任何英文字母或數字的位置。 
+            string replacement = "。";
+            text = Regex.Replace(text, pattern, replacement);
+            /* YouChat大菩薩：
+             *這樣會用中文句號"。"取代文本框中不在英文或數字前後出現的小數點。注意，我們使用正則表達式來定義模式，它的含義如下：
+            (?<![a-zA-Z0-9]) 匹配前面不是英文字母或數字的位置（負向零寬度後願）
+            \. 匹配小數點（需要用反斜杠對點進行轉義）
+            (?![a-zA-Z0-9]) 匹配後面不是英文字母或數字的位置（正向零寬度先行斷言）
+            該詞匹配任何前後包含字母或數字的字串中的小數點。replace方法在這種情況下會使用中文句號替換它們。
+             */
         }
     }
 }

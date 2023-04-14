@@ -391,7 +391,7 @@ namespace WindowsFormsApp1
         {
 
             this.Show();
-            if(ntfyICo.Visible)ntfyICo.Visible = false;
+            if (ntfyICo.Visible) ntfyICo.Visible = false;
             this.WindowState = FormWindowState.Normal;
             this.Height = thisHeight;
             this.Width = thisWidth;
@@ -1032,6 +1032,8 @@ namespace WindowsFormsApp1
                     break;
                 }
             }
+            //置換中文文本中的英文句號（小數點）
+            CnText.PeriodsReplace_ChinesePunctuationMarks(ref xCopy);
             #endregion
             #region 清空末尾空行段落
             int blankParagraphPosition = xCopy.LastIndexOf(Environment.NewLine);
@@ -4810,7 +4812,30 @@ namespace WindowsFormsApp1
                                                //終於找到bug了 NextPage()裡的textBox3.Text=url 設定太晚
                     string url = textBox3.Text;
                     //if (url.IndexOf("#editor") == -1 && url.IndexOf("&page=") == -1 && url.IndexOf("ctext.org") == -1)
-                    if (IsValidUrl＿keyDownCtrlAdd(br.driver.Url))
+                    string driverUrl = "";
+                    try
+                    {
+                        driverUrl = br.driver.Url;
+                    }
+                    catch (Exception ex)
+                    {
+                        switch (ex.HResult)
+                        {
+                            case -2146233088:
+                                //"no such window: target window already closed\nfrom unknown error: web view not found\n  (Session info: chrome=111.0.5563.147)"
+                                if (ex.Message.IndexOf("no such window: target window already closed") > -1)
+                                {
+                                    br.GoToUrlandActivate(url);
+                                }
+                                break;
+                            default:
+                                Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.Message);
+                                Debugger.Break();
+                                break;
+                        }
+                        //throw;
+                    }
+                    if (IsValidUrl＿keyDownCtrlAdd(driverUrl))
                     {
                         br.GoToCurrentUserActivateTab();
                         if (IsValidUrl＿keyDownCtrlAdd(br.driver.Url))
