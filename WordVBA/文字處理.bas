@@ -2747,7 +2747,7 @@ Sub 中國哲學書電子化計劃_表格轉文字(ByRef r As Range)
 On Error GoTo eh
 Dim lngTemp As Long '因為誤按到追蹤修訂，才會引發訊息提示刪除儲存格不會有標識
 'Dim d As Document
-Dim tb As Table, c As Cell ', ci As Long
+Dim tb As Table, C As Cell ', ci As Long
 'Set d = ActiveDocument
 lngTemp = word.Application.DisplayAlerts
 If r.Tables.Count > 0 Then
@@ -2762,16 +2762,16 @@ Exit Sub
 eh:
 Select Case Err.Number
     Case 5992 '無法個別存取此集合中的各欄，因為表格中有混合的儲存格寬度。
-        For Each c In tb.Range.Cells
+        For Each C In tb.Range.Cells
 '            ci = ci + 1
 '            If ci Mod 3 = 2 Then
                 'If VBA.IsNumeric(VBA.Left(c.Range.text, VBA.InStr(c.Range.text, "?") - 1)) Then
-                If VBA.InStr(c.Range.text, ChrW(160) & ChrW(47)) > 0 Then
+                If VBA.InStr(C.Range.text, ChrW(160) & ChrW(47)) > 0 Then
 '                    word.Application.DisplayAlerts = False
-                    c.Delete  '刪除編號之儲存格
+                    C.Delete  '刪除編號之儲存格
                 End If
 '            End If
-        Next c
+        Next C
         Resume Next
     Case Else
         MsgBox Err.Number & Err.Description
@@ -3479,6 +3479,7 @@ db.cnt查字 cnt
 'End If
 Set d = ActiveDocument: dx = d.Range.text: Set rngF = d.Range
 'cnt.Open cntStr
+word.Application.ScreenUpdating = False
 
 GoSub bookmarks '標點符號_書名號_自動加上用
 rst.Open "select * from 標點符號_篇名號_自動加上用 order by 排序", cnt, adOpenForwardOnly, adLockReadOnly
@@ -3513,7 +3514,10 @@ d.Range.Find.Execute "〉〉", , , , , , True, wdFindContinue, , "〉", wdReplaceAl
 
 'GoSub bookmarks 'do again to check and correct SHOULD BE use another table to do this
 rst.Close: cnt.Close: SystemSetup.contiUndo ur
+word.Application.ScreenUpdating = True
 Exit Sub
+
+
 bookmarks:
 If rst.State = adStateOpen Then rst.Close
 rst.Open "select * from 標點符號_書名號_自動加上用 order by 排序", cnt, adOpenForwardOnly, adLockReadOnly

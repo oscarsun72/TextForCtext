@@ -1651,7 +1651,7 @@ namespace TextForCtext
                 if (File.Exists(filePath)) File.Delete(filePath);
             });
 
-            //按下：新增圖片：選擇檔案
+            //等「新增圖片」按鈕可按：選擇檔案
             //Thread.Sleep(3200);
             //等待「選擇檔案」控制項出現，最多等timeSpanSecs秒；
             //為免tab鍵數不同，而須手動操作，以免表單遮住畫面:

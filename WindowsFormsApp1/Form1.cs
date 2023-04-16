@@ -1015,8 +1015,8 @@ namespace WindowsFormsApp1
             { s = textBox1.SelectionStart; l = textBox1.SelectionLength; }
             string xCopy = x.Substring(0, s + l > x.Length ? x.Length : s + l);
             #region 置換為全形符號、及清除冗餘（清除冗餘要留意會動到 l 的值！！）
-            string[] replaceDChar = { ",", ";", ":", "．", "?", "：：", "《《", "》》", "〈〈", "〉〉", "。}}。}}" };
-            string[] replaceChar = { "，", "；", "：", "·", "？", "：", "《《", "》", "〈", "〉", "。}}" };
+            string[] replaceDChar = { "'", ",", ";", ":", "．", "?", "：：", "《《", "》》", "〈〈", "〉〉", "。}}。}}" };
+            string[] replaceChar = {"、", "，", "；", "：", "·", "？", "：", "《《", "》", "〈", "〉", "。}}" };
             foreach (var item in replaceDChar)
             {
                 if (xCopy.IndexOf(item) > -1)
