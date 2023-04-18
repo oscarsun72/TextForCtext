@@ -1831,7 +1831,7 @@ namespace TextForCtext
             #endregion
 
             driver = driver ?? driverNew();
-            //string currentWindowHndl = driver.CurrentWindowHandle;
+            string currentWindowHndl = driver.CurrentWindowHandle;
             const string gjCool = "https://gj.cool/";
             //openNewTabWindow(WindowType.Window);
             try
@@ -1859,6 +1859,7 @@ namespace TextForCtext
 
             //「上傳 拍照」按鈕：
             iwe = waitFindWebElementBySelector_ToBeClickable("#task-upload-btn");
+            if (iwe == null) return false;
             iwe.Click();
             //等待選取檔案對話框開啟
             Thread.Sleep(1200);
@@ -1947,6 +1948,16 @@ namespace TextForCtext
                 //return true;
                 //driver.Close();
                 //driver.SwitchTo().Window(currentWindowHndl);
+                
+                //藉由手動關閉視窗以提早/強制中止程序
+                try
+                {
+                    if(currentWindowHndl != driver.CurrentWindowHandle) { };
+                }
+                catch (Exception)
+                {
+                    return false;                    
+                }
             }
             //driver.Close();
             //driver.SwitchTo().Window(currentWindowHndl);

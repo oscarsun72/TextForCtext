@@ -939,10 +939,14 @@ If flgPaste Then
     Rem º–√—√ˆ¡‰¶r
     word.Application.ScreenUpdating = False
     If d.path <> "" And Not d.Saved Then d.Save
-    xd = d.Range.text
+'    xd = d.Range.text
+    Dim rngMark As Range
     For Each e In searchedTerm
+        Set rngMark = d.Range(endDocOld, d.Range.End)
+        xd = rngMark.text
         If InStr(xd, e) > 0 Then
-            With d.Range.Find
+'            With d.Range.Find
+            With rngMark.Find
                 .ClearFormatting
                 .text = e
                 With .Replacement
