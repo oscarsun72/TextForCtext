@@ -826,7 +826,7 @@ If ClipBoardOp.Is_ClipboardContainCtext_Note_InlinecommentColor Then
     d.Close wdDoNotSaveChanges
 End If
 Set d = ActiveDocument
-Rem 因為前面尚有「中國哲學書電子化計劃.只保留正文注文_且注文前後加括弧」會用到UndoRecord物件，且會關閉其文件，故以下此行所寫位置就很關鍵，否則會隨文件關閉而隨之無效。20230201癸卯年十一
+Rem 因為前面尚有「中國哲學書電子化計劃.只保留正文注文_且注文前後加括弧」會用到UndoRecord物件，且會關閉其文件，故以下此行所寫位置就很關鍵，否則會隨文件關閉而隨之無效。20230201癸卯年十一
 SystemSetup.stopUndo ur, "mark易學關鍵字"
 Set rng = d.Range
 endDocOld = d.Range.End

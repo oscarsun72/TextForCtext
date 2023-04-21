@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
+using System.Globalization;
 //https://dotblogs.com.tw/supergary/2020/10/29/selenium#images-3
 using System.IO;
 using System.Linq;
@@ -1200,6 +1201,7 @@ namespace TextForCtext
                         case -2146233079://"序列未包含項目"
                             //誤關Chrome瀏覽器的時候
                             //openNewTabWindow(WindowType.Window);
+                            driver = null;
                             driverNew();
                             break;
                         default:
@@ -1923,18 +1925,45 @@ namespace TextForCtext
             MouseOperations.MouseEventMousePos(MouseOperations.MouseEventFlags.LeftUp, copyBtnPos);
             /*Bing大菩薩：您好，`MouseOperations` 不是 C# 的内置类。它是一个自定义类，您可以在 Stack Overflow 上找到它的源代码。您可以将这些代码复制到您的项目中，然后使用它来模拟鼠标点击。
              */
-            string txtchkClipboard = Clipboard.GetText();
-            while ((txtchkClipboard == "" || txtchkClipboard.IndexOf("正在识别") > -1) && txtchkClipboard.Length < 200)
+            Thread.Sleep(450);
+            while (Clipboard.GetText().Length == 0)
+            {
+                
+                MouseOperations.MouseEventMousePos(MouseOperations.MouseEventFlags.LeftDown, copyBtnPos);
+                MouseOperations.MouseEventMousePos(MouseOperations.MouseEventFlags.LeftUp, copyBtnPos);
+
+                //藉由手動關閉視窗以提早/強制中止程序
+                try
+                {
+                    if (currentWindowHndl != driver.CurrentWindowHandle) { };
+                }
+                catch (Exception)
+                {
+                    return false;
+                }
+                Thread.Sleep(450);
+            }
+            string txtchkClipboard = new StringInfo(Clipboard.GetText()).SubstringByTextElements(0);
+            while ((txtchkClipboard == "" || txtchkClipboard.IndexOf("正在识别") > -1) && txtchkClipboard.Length < 22)
             {
                 //每半秒按下滑鼠左鍵1次
                 //Thread.Sleep(400);
-                Thread.Sleep(300);
+                Thread.Sleep(200);
                 MouseOperations.MouseEventMousePos(MouseOperations.MouseEventFlags.LeftDown, copyBtnPos);
                 MouseOperations.MouseEventMousePos(MouseOperations.MouseEventFlags.LeftUp, copyBtnPos);
-                txtchkClipboard = Clipboard.GetText();
+                Thread.Sleep(450);
+                txtchkClipboard = new StringInfo(Clipboard.GetText()).SubstringByTextElements(0);
                 if (txtchkClipboard != "")
-                    if (txtchkClipboard.IndexOf("正在识别") == -1 && txtchkClipboard.Length > 200)
-                        break;
+                {
+                    if (txtchkClipboard.Length > 22)
+                    {
+                        if (txtchkClipboard.IndexOf("正在识别") == -1)
+                        {
+                            Clipboard.SetText(txtchkClipboard);
+                            break;
+                        }
+                    }
+                }
                 /*
                  20230330 Bing大菩薩：在C#中，與VBA中的Stop語句等效的是 `System.Diagnostics.Debugger.Break()`¹。這樣可以在程式執行到這一行時暫停並進入調試器，類似於設置斷點¹。
                     來源: 與 Bing 的交談， 2023 / 3 / 30(1) Can I do a Visual Basic(VB) Stop in C#?. https://social.msdn.microsoft.com/Forums/vstudio/en-US/db9dfe97-c98d-4f4b-bb8f-ba2edffee988/can-i-do-a-visual-basic-vb-stop-in-c?forum=csharpgeneral 已存取 2023/3/30.
@@ -1948,15 +1977,15 @@ namespace TextForCtext
                 //return true;
                 //driver.Close();
                 //driver.SwitchTo().Window(currentWindowHndl);
-                
+
                 //藉由手動關閉視窗以提早/強制中止程序
                 try
                 {
-                    if(currentWindowHndl != driver.CurrentWindowHandle) { };
+                    if (currentWindowHndl != driver.CurrentWindowHandle) { };
                 }
                 catch (Exception)
                 {
-                    return false;                    
+                    return false;
                 }
             }
             //driver.Close();
