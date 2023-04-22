@@ -717,12 +717,15 @@ namespace TextForCtext
             /* creedit 我問：在C#  用selenium 控制 chrome 瀏覽器時，怎麼樣才能不必等待網頁作出回應即續編處理按下來的程式碼 。如，以下程式碼，請問，如何在按下 submit.Click(); 後不必等這個動作完成或作出回應，即能繼續執行之後的程式碼呢 感恩感恩　南無阿彌陀佛
                         chatGPT他答：你可以將 submit.Click(); 放在一個 Task 中去執行，並立即返回。
              */
+            if (submit == null) {
+                Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("請檢查頁面中的 Quict edit 是否可用，再按下確定繼續！");
+                submit = waitFindWebElementById_ToBeClickable("savechangesbutton", _webDriverWaitTimSpan);
+            }
             Task.Run(() =>//接下來不用理會，也沒有元件要操作、沒有訊息要回應，就可以給另一個線程去處理了。
             {
                 try
                 {
                     submit.Click();
-
                 }
                 catch (Exception)
                 {//chatGPT：
@@ -1012,7 +1015,10 @@ namespace TextForCtext
                         case -2146233088:
                             if (ex.Message.IndexOf("no such window: target window already closed") > -1) //"no such window: target window already closed\nfrom unknown error: web view not found\n  (Session info: chrome=110.0.5481.178)"
                             {
-                                driver.SwitchTo().Window(driver.WindowHandles[0]);
+                                openNewTabWindow();
+                                url=urlActiveTab;
+                                driver.Navigate().GoToUrl(url);
+                                //driver.SwitchTo().Window(driver.WindowHandles[0]);
                             }
                             else
                             {
