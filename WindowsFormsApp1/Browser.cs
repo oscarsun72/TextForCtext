@@ -717,7 +717,8 @@ namespace TextForCtext
             /* creedit 我問：在C#  用selenium 控制 chrome 瀏覽器時，怎麼樣才能不必等待網頁作出回應即續編處理按下來的程式碼 。如，以下程式碼，請問，如何在按下 submit.Click(); 後不必等這個動作完成或作出回應，即能繼續執行之後的程式碼呢 感恩感恩　南無阿彌陀佛
                         chatGPT他答：你可以將 submit.Click(); 放在一個 Task 中去執行，並立即返回。
              */
-            if (submit == null) {
+            if (submit == null)
+            {
                 Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("請檢查頁面中的 Quict edit 是否可用，再按下確定繼續！");
                 submit = waitFindWebElementById_ToBeClickable("savechangesbutton", _webDriverWaitTimSpan);
             }
@@ -781,6 +782,7 @@ namespace TextForCtext
             {
                 //string url = getUrl(ControlType.Edit).Trim();
                 string url = getUrlFirst_Ctext_Edit(ControlType.Edit).Trim();
+                //if (url == "") url = getUrl(ControlType.Edit).Trim();
                 if (url != "") url = url.StartsWith("https://") ? url : "https://" + url;
                 return url;
             }
@@ -1016,7 +1018,7 @@ namespace TextForCtext
                             if (ex.Message.IndexOf("no such window: target window already closed") > -1) //"no such window: target window already closed\nfrom unknown error: web view not found\n  (Session info: chrome=110.0.5481.178)"
                             {
                                 openNewTabWindow();
-                                url=urlActiveTab;
+                                url = urlActiveTab;
                                 driver.Navigate().GoToUrl(url);
                                 //driver.SwitchTo().Window(driver.WindowHandles[0]);
                             }
@@ -1624,7 +1626,10 @@ namespace TextForCtext
 
             #region 先檢查點數是否足夠
             const byte pointCoin = 150;//「自動識別(豎版)」所需點數120，載入圖檔要30
-            IWebElement iwe = waitFindWebElementBySelector_ToBeClickable("#compute-value");
+            //IWebElement iwe = waitFindWebElementBySelector_ToBeClickable("#compute-value");
+            //IWebElement iwe = driver.FindElement(By.CssSelector("#compute-value"));
+            WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(_chromeDriverServiceTimeSpan));
+            IWebElement iwe = wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementIsVisible(By.CssSelector("#compute-value")));
             if (iwe != null)
             {
                 //取得點數，如「 117 / 1000」格式
@@ -1934,7 +1939,7 @@ namespace TextForCtext
             Thread.Sleep(450);
             while (Clipboard.GetText().Length == 0)
             {
-                
+
                 MouseOperations.MouseEventMousePos(MouseOperations.MouseEventFlags.LeftDown, copyBtnPos);
                 MouseOperations.MouseEventMousePos(MouseOperations.MouseEventFlags.LeftUp, copyBtnPos);
 

@@ -570,7 +570,28 @@ namespace WindowsFormsApp1
                 {
                     br.driver = br.driver ?? Browser.driverNew();
                     br.GoToCurrentUserActivateTab();
-                    string quickEditLinkUrl = br.driver.Url;
+                    string quickEditLinkUrl = "";
+                    try
+                    {
+                        quickEditLinkUrl = br.driver.Url;
+                    }
+                    catch (Exception ex)
+                    {
+                        switch (ex.HResult)
+                        {
+                            case -2146233088:
+                                //"stale element reference: element is not attached to the page document\n  (Session info: chrome=110.0.5481.100)"
+                                //"no such window: target window already closed\nfrom unknown error: web view not found\n  (Session info: chrome=110.0.5481.100)"
+                                br.driver.SwitchTo().Window(br.driver.WindowHandles[br.driver.WindowHandles.Count - 1]);
+                                quickEditLinkUrl = br.driver.Url;                                
+                                break;
+                            default:
+                                MessageBox.Show(ex.HResult + ex.Message);
+                                //throw;
+                                break;
+                        }
+                    }
+                
                     if (quickEditLinkUrl.IndexOf("&page=") == -1 ||
                         (quickEditLinkUrl.IndexOf("#editor") > -1 && quickEditLinkUrl.IndexOf("&page=1") > -1))
                     {
@@ -1016,7 +1037,7 @@ namespace WindowsFormsApp1
             string xCopy = x.Substring(0, s + l > x.Length ? x.Length : s + l);
             #region 置換為全形符號、及清除冗餘（清除冗餘要留意會動到 l 的值！！）
             string[] replaceDChar = { "'", ",", ";", ":", "．", "?", "：：", "《《", "》》", "〈〈", "〉〉", "。}}。}}" };
-            string[] replaceChar = {"、", "，", "；", "：", "·", "？", "：", "《《", "》", "〈", "〉", "。}}" };
+            string[] replaceChar = { "、", "，", "；", "：", "·", "？", "：", "《《", "》", "〈", "〉", "。}}" };
             foreach (var item in replaceDChar)
             {
                 if (xCopy.IndexOf(item) > -1)
