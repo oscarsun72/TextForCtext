@@ -583,7 +583,7 @@ namespace WindowsFormsApp1
                                 //"stale element reference: element is not attached to the page document\n  (Session info: chrome=110.0.5481.100)"
                                 //"no such window: target window already closed\nfrom unknown error: web view not found\n  (Session info: chrome=110.0.5481.100)"
                                 br.driver.SwitchTo().Window(br.driver.WindowHandles[br.driver.WindowHandles.Count - 1]);
-                                quickEditLinkUrl = br.driver.Url;                                
+                                quickEditLinkUrl = br.driver.Url;
                                 break;
                             default:
                                 MessageBox.Show(ex.HResult + ex.Message);
@@ -591,7 +591,7 @@ namespace WindowsFormsApp1
                                 break;
                         }
                     }
-                
+
                     if (quickEditLinkUrl.IndexOf("&page=") == -1 ||
                         (quickEditLinkUrl.IndexOf("#editor") > -1 && quickEditLinkUrl.IndexOf("&page=1") > -1))
                     {
@@ -3227,6 +3227,10 @@ namespace WindowsFormsApp1
             stopUndoRec = false;
             textBox1.Select(ss, 0); textBox1.ScrollToCaret();
         }
+        /// <summary>
+        /// 篇名標題標注
+        /// 加上篇名格式代碼
+        /// </summary>
         private void keysTitleCode()
         {
             int s = textBox1.SelectionStart, i = s;
@@ -3322,7 +3326,7 @@ namespace WindowsFormsApp1
             if (s == 0)
             {
                 int sl = textBox1.SelectionLength;
-                while (textBox1.SelectedText.Substring(0, 1) == "　")
+                while (textBox1.SelectedText != "" && textBox1.SelectedText.Substring(0, 1) == "　")
                 {
                     textBox1.Select(++s, --sl);
                 }
@@ -4662,7 +4666,18 @@ namespace WindowsFormsApp1
         private void keyDownCtrlAdd(bool shiftKeyDownYet = false, string clear = "")
         {
             int s = textBox1.SelectionStart, l = textBox1.SelectionLength;
-            if (s == 0 && l == 0) { Activate(); return; }
+
+            if (keyinTextMode)
+            {
+                if (s == 0 && l == 0) s = textBox1.TextLength;
+                else if (s + l < textBox1.TextLength)
+                {
+                    if (DialogResult.Cancel == Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly(
+                        "插入點位置似有誤，請「確定」從此處之前的才貼上？\n\r\n\r" +
+                        "忽略此訊息，改為【整面貼上】請按「取消」感恩感恩　南無阿彌陀佛")) { s = textBox1.TextLength; l = 0; }
+                }
+            }
+            else { if (s == 0 && l == 0) { Activate(); return; } }
 
             string x = textBox1.Text;
             //if (pageTextEndPosition == 0) pageTextEndPosition = s;
@@ -6123,7 +6138,9 @@ namespace WindowsFormsApp1
             else
             {
                 imgUrl = br.GetImageUrl();
+                if (imgUrl == "") return;
                 downloadImage(imgUrl, out downloadImgFullName);
+                if (downloadImgFullName == "") return;
             }
 
             #region toOCR            
@@ -6135,7 +6152,23 @@ namespace WindowsFormsApp1
                     break;
                 case br.OCRSiteTitle.GJcool:
                     br.ActiveForm1 = this;
-                    ocrResult = br.OCR_GJcool_AutoRecognizeVertical(downloadImgFullName);
+                    try
+                    {
+                        ocrResult = br.OCR_GJcool_AutoRecognizeVertical(downloadImgFullName);
+                    }
+                    catch (Exception ex)
+                    {
+                        switch (ex.HResult)
+                        {
+                            case -2146233088://"no such window\n  (Session info: chrome=112.0.5615.138)"
+                                if (ex.Message.IndexOf("no such window") > -1)
+                                    break;//手動關閉或誤關視窗時忽略不計。
+                                break;
+                            default:
+                                Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
+                                break;
+                        }
+                    }
                     break;
                 default:
                     break;
@@ -7608,9 +7641,25 @@ namespace WindowsFormsApp1
                             }
                             catch (Exception)
                             {
-                                br.driver = null;
-                                br.driver = br.driverNew(); goto retry;
-                                //throw;
+                                try
+                                {
+                                    br.driver = null;
+                                    br.driver = br.driverNew(); goto retry;
+                                }
+                                catch (Exception ex)
+                                {
+                                    switch (ex.HResult)
+                                    {
+                                        case -2146233088://"no such window: target window already closed
+                                            if (ex.Message.IndexOf("no such window") > -1)
+                                                break;
+                                            break;
+                                        default:
+                                            Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
+                                            Debugger.Break();
+                                            break;
+                                    }
+                                }
                             }
                         }
                     }
@@ -8850,11 +8899,17 @@ namespace WindowsFormsApp1
 
         internal void downloadImage(string imageUrl, out string downloadImgFullName, bool selectedInExplorer = false)
         {
+            if (imageUrl == "")
+            {
+                downloadImgFullName = ""; return;
+            }
             downloadImgFullName = dropBoxPathIncldBackSlash + "Ctext_Page_Image.png";
             //若圖已存在則不復下載，因OCR成功後會刪除此圖故//避免隔太久又忘了刪除圖檔，還是改以下判斷
             //if (File.Exists(downloadImgFullName)) return;
-            ////若圖檔已存在，且是1分鐘前存檔的，則不復下載，以免重複，又免誤按。20230404，改 google keep的快捷鍵以免誤按
-            if (File.Exists(downloadImgFullName) && DateTime.Now.Subtract(File.GetLastWriteTime(downloadImgFullName)).TotalMinutes < 5) return;
+            ////若圖檔已存在，且是2.5分鐘前存檔的，則不復下載，以免重複，又免誤按。20230404，改 google keep的快捷鍵以免誤按
+            if (File.Exists(downloadImgFullName) &&
+                (DateTime.Now.Subtract(File.GetLastWriteTime(downloadImgFullName)).TotalMinutes < 1.5
+                && !(DateTime.Now.Subtract(File.GetLastWriteTime(downloadImgFullName)).TotalDays >= 1))) return;
 
             /*20230103 creedit,chatGPT：
           你可以使用 Selenium 來下載網絡圖片。

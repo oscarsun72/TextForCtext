@@ -10,7 +10,7 @@ Sub ªÅ¥Õªº·s¤å¥ó() '20210209
 Dim a As Document, flg As Boolean
 If Documents.Count = 0 Then GoTo a:
 If ActiveDocument.Characters.Count = 1 Then
-    selection.Paste
+    Selection.Paste
 ElseIf ActiveDocument.Characters.Count > 1 Then
     For Each a In Documents
         If a.path = "" Or a.Characters.Count = 1 Then
@@ -24,16 +24,16 @@ ElseIf ActiveDocument.Characters.Count > 1 Then
     If flg = False Then GoTo a
 Else
 a: Documents.Add
-    selection.Paste
+    Selection.Paste
 End If
 End Sub
 
 
 Sub ¦b¥»¤å¥ó¤¤´M§ä¿ï¨ú¦r¦ê_¨³³t() '«ü©wÁä:Alt+Ctrl+Down 2015/11/1
 Static x As String
-With selection
+With Selection
     If .Type = wdSelectionNormal Then
-        x = ¤å¦r³B²z.trimStrForSearch(.text, selection)
+        x = ¤å¦r³B²z.trimStrForSearch(.text, Selection)
         .Copy
         .Collapse wdCollapseEnd
         .Find.ClearAllFuzzyOptions
@@ -76,16 +76,16 @@ ReDim a1(0 To UBound(a)) As String
 For i = 1 To sectionct '°õ¦æ³v¸`´¡¤Jµù¸}(¨C¸`¬°¤£­«½Æªº¤@µ§°O¿ý!)
     For j = 0 To UBound(a)
         '¥Ñ­¶»P¥¾°O¨Ó¤ñ¹ï¬ÛÀ³ªº¥U®Ñ½g¦W¨÷...µ¥¸ê®Æ
-        If Not Left(h.Sections(i).Range.Paragraphs(2).Range.text, Len(h.Sections(i).Range.Paragraphs(2).Range.text) - 1) Like "..." Then
-            rst.FindFirst "­¶ = " & Left(h.Sections(i).Range.Paragraphs(1).Range.text, Len(h.Sections(i).Range.Paragraphs(1).Range.text) - 1) _
-                & "and ¥¾°O like '" & "*" & Left(h.Sections(i).Range.Paragraphs(2).Range.text, _
+        If Not left(h.Sections(i).Range.Paragraphs(2).Range.text, Len(h.Sections(i).Range.Paragraphs(2).Range.text) - 1) Like "..." Then
+            rst.FindFirst "­¶ = " & left(h.Sections(i).Range.Paragraphs(1).Range.text, Len(h.Sections(i).Range.Paragraphs(1).Range.text) - 1) _
+                & "and ¥¾°O like '" & "*" & left(h.Sections(i).Range.Paragraphs(2).Range.text, _
                     Len(h.Sections(i).Range.Paragraphs(2).Range.text) - 1) & "*'"
     '            & "and ¥¾°O like '" & "*" & Replace(h.Sections(i).Range.Paragraphs(2).Range.Text, Chr(12), "") & "*'"
                 'chr(12)¼È¤£ª¾¬O¤°»ò(À³¬O¤À¸`²Å¸¹!),¦ý·|¼vÅT¤ñ¹ï,¬G¤©¨ú¥N¬°ªÅ¦r¦ê _
                 ¦]¬°³Ì«á¤@¸`¨S¦³¤À¸`²Å¸¹(Chr(12))¦Ó¬O¬q¸¨²Å¸¹(Chr(13),¬G­Y¥HReplace¨ç¼Æ¶·¤À§O³B²z _
                 ¬°§K³Â·Ð,¤@«ß¥ÎLeft¨ç¼Æ¤£¨ú³Ì¥k¤è¤§¦r¤¸§Y¥i(¤£ºÞ¬OChr(12)©ÎChr(13))
         Else '¥¾°O¬°""®Éªº³B²z
-            rst.FindFirst "­¶ = " & Left(h.Sections(i).Range.Paragraphs(1).Range.text, Len(h.Sections(i).Range.Paragraphs(1).Range.text) - 1) _
+            rst.FindFirst "­¶ = " & left(h.Sections(i).Range.Paragraphs(1).Range.text, Len(h.Sections(i).Range.Paragraphs(1).Range.text) - 1) _
                 & "and ¥¾°O = """"" '¦b¦¹,¤£¥ÎCSng«¬ºAÂà´«¬O¥i¥Hªº! _
                 ¦]¬°­¶¦³¤p¼ÆÂI,¬G¦b§@­¶¤ñ¹ï®É,¤£¯à¥ÎWordsª«¥ó(·|±N¤p¼ÆÂI¤§¼Æ¦r¤À¶}ºâ¦¨¤£¦PªºWord),¦pªG­¶¨S¦³¤p¼ÆÂIªº¸Ü´N¥i¥H¤F! _
                 ´î¤@,¦P¥¾°O,¬O¬°¤F­ç°£³Ì¥k¤èªºChr(10)(´«¦æ²Å¸¹¡B¬q¸¨²Å¸¹)
@@ -127,8 +127,8 @@ If MsgBox("¬O§_­n²M°£²Å¸¹?", vbQuestion + vbOKCancel) = vbOK Then
 End If
 If dn = "" Then dn = d1.Name
 If Not d1.Name Like dn And Not d1.Name Like dn Then i = 0: dn = d1.Name
-If selection.start + 1 = ActiveDocument.Content.End Then selection.HomeKey wdStory, wdMove '¦pªG´¡¤JÂI¬°¤å¥ó¥½®É...
-If i = 0 Then i = selection.start 'ActiveDocument.Range.Start
+If Selection.start + 1 = ActiveDocument.Content.End Then Selection.HomeKey wdStory, wdMove '¦pªG´¡¤JÂI¬°¤å¥ó¥½®É...
+If i = 0 Then i = Selection.start 'ActiveDocument.Range.Start
 If d1.Characters.Count >= d2.Characters.Count Then
     j = d1.Characters.Count
     k = d2.Characters.Count
@@ -193,8 +193,8 @@ If MsgBox("¬O§_­n²M°£²Å¸¹?", vbQuestion + vbOKCancel) = vbOK Then
 End If
 If DwN = "" Then DwN = Dw1.Name
 If Not Dw1.Name Like DwN And Not Dw1.Name Like DwN Then i = 0: DwN = Dw1.Name
-If Dw1.selection.start + 1 = ActiveDocument.Content.End Then selection.HomeKey wdStory, wdMove '¦pªG´¡¤JÂI¬°¤å¥ó¥½®É...
-If i = 0 Then i = Dw1.selection.start 'ActiveDocument.Range.Start
+If Dw1.Selection.start + 1 = ActiveDocument.Content.End Then Selection.HomeKey wdStory, wdMove '¦pªG´¡¤JÂI¬°¤å¥ó¥½®É...
+If i = 0 Then i = Dw1.Selection.start 'ActiveDocument.Range.Start
 If Dw1.Characters.Count >= Dw2.Characters.Count Then
     j = Dw1.Characters.Count
     k = Dw2.Characters.Count
@@ -258,7 +258,7 @@ End Sub
 Sub ª`¸}²Å¸¹() 'ª`ÄÀ²Å¸¹¡BµùÄÀ²Å¸¹¡Bµù¸}²Å¸¹
 Dim i As Integer
 For i = 9312 To 9331
-    With selection.Range.Find
+    With Selection.Range.Find
         .Replacement.Font.Name = "Arial Unicode MS"
         .Execute ChrW(i), , , , , , , wdFindContinue, , ChrW(i), wdReplaceAll
     End With
@@ -275,14 +275,14 @@ End Sub
 
 Sub ¶K¤W¤Þ¤å() '±N¤w½Æ»s¨ì°Å¶KÃ¯ªº¤º®e¶K¦¨¤Þ¤å
 Dim s As Long, e As Long, r  As Range
-If selection.Type = wdSelectionNormal And Right(selection, 1) Like Chr(13) Then _
-            selection.MoveLeft wdCharacter, 1, wdExtend '¤£­n¥]§t¤À¬q²Å¸¹!
-If selection.Style <> "¤Þ¤å" Then selection.Style = "¤Þ¤å" '¦pªG¤£¬O¤Þ¤å¼Ë¦¡®É,«h§ï¦¨¤Þ¤å¼Ë¦¡
-s = selection.start '°O¤U°_©l¦ì¸m
-selection.PasteSpecial , , , , wdPasteText '¶K¤W¯Â¤å¦r
-e = selection.End '°O¤U¶K¤W«áªºµ²§ô¦ì¸m
-selection.SetRange s, e
-Set r = selection.Range
+If Selection.Type = wdSelectionNormal And right(Selection, 1) Like Chr(13) Then _
+            Selection.MoveLeft wdCharacter, 1, wdExtend '¤£­n¥]§t¤À¬q²Å¸¹!
+If Selection.Style <> "¤Þ¤å" Then Selection.Style = "¤Þ¤å" '¦pªG¤£¬O¤Þ¤å¼Ë¦¡®É,«h§ï¦¨¤Þ¤å¼Ë¦¡
+s = Selection.start '°O¤U°_©l¦ì¸m
+Selection.PasteSpecial , , , , wdPasteText '¶K¤W¯Â¤å¦r
+e = Selection.End '°O¤U¶K¤W«áªºµ²§ô¦ì¸m
+Selection.SetRange s, e
+Set r = Selection.Range
 With r
     r.Find.Execute Chr(13), , , , , , , wdFindStop, , Chr(11), wdReplaceAll '±N¤À¦æ²Å¸¹§ï¦¨¤â°Ê¤À¦æ²Å¸¹
 End With
@@ -291,13 +291,13 @@ End Sub
 Sub ¶K¤W¯Â¤å¦r() 'shift+insert 2016/7/20
 Dim hl, s As Long, r As Range
 On Error GoTo ErrHandler
-hl = selection.Range.HighlightColorIndex
+hl = Selection.Range.HighlightColorIndex
 
-s = selection.start
-Set r = selection.Range
+s = Selection.start
+Set r = Selection.Range
 'Selection.PasteSpecial , , , , wdPasteText '¶K¤W¯Â¤å¦r
-selection.PasteAndFormat (wdFormatPlainText)
-r.SetRange s, selection.End
+Selection.PasteAndFormat (wdFormatPlainText)
+r.SetRange s, Selection.End
 If hl <> 9999999 Then r.HighlightColorIndex = hl
 Exit Sub
 ErrHandler:
@@ -311,7 +311,7 @@ End Sub
 Sub ¶K¤WÂ²¤Æ¦r¤å¥»Âà¥¿()
 Dim rng As Range, ur As UndoRecord
 SystemSetup.stopUndo ur, "¶K¤WÂ²¤Æ¦r¤å¥»Âà¥¿"
-Set rng = selection.Range
+Set rng = Selection.Range
 rng.PasteAndFormat (wdFormatPlainText)
 ¼ÐÂI²Å¸¹¸m´« rng: ²M°£¥b§ÎªÅ®æ rng: ¥b§Î¬A¸¹Âà¥þ§Î rng
 If MsgBox("¬O§_Â²Âà¥¿¡H", vbOKCancel) = vbOK Then
@@ -324,7 +324,7 @@ End Sub
 Sub Â²¤Æ¦r¤å¥»Âà¥¿()
 Dim rng As Range, ur As UndoRecord
 SystemSetup.stopUndo ur, "Â²¤Æ¦r¤å¥»Âà¥¿"
-Set rng = selection.Range
+Set rng = Selection.Range
 ¼ÐÂI²Å¸¹¸m´« rng: ²M°£¥b§ÎªÅ®æ rng: ¥b§Î¬A¸¹Âà¥þ§Î rng
 rng.TCSCConverter wdTCSCConverterDirectionAuto
 SystemSetup.contiUndo ur
@@ -351,7 +351,7 @@ End Function
 
 
 Sub ¤@¦r¤@¬q()
-With selection
+With Selection
     .HomeKey wdStory
     Do Until .End = .Document.Range.End - 1
         .MoveRight
@@ -381,7 +381,7 @@ End Sub
 Sub ¦b¦P¥Ø¿ý¤U´M§ä²Å¦XÃöÁä¦r¤§¤å¥»() '2009/8/4'Alt+shift+F3
 Dim x As String, d As Document, i As Integer
 Set d = ActiveDocument
-x = selection
+x = Selection
 With word.Application.FileSearch
     .NewSearch
     If d.path = "" Then
@@ -443,17 +443,17 @@ End Sub
 
 Sub ¶}·sµøµ¡() '§Ö³tÁä:alt+shift+w-­ì¬°OLE¦Ü³Æ§ÑÄæ()«ü©wÁä  '2011/6/23''2012/5/20 2003¤£¯à³]©wAlt+w ­ì³]©ó"¦r§ÎÂà´«_µØ±dÄ×²Ê¶Â"
 Dim l As Long, s As Long, YwdInFootnoteEndnotePane
-    YwdInFootnoteEndnotePane = selection.Information(wdInFootnoteEndnotePane) '°O¤U¶}·sµøµ¡«eµù¸}µ¡®æª¬ºA
-    l = selection.End '.Information(wdActiveEndPageNumber)
-    s = selection.start '°O¤U­ì¦ì¸m
+    YwdInFootnoteEndnotePane = Selection.Information(wdInFootnoteEndnotePane) '°O¤U¶}·sµøµ¡«eµù¸}µ¡®æª¬ºA
+    l = Selection.End '.Information(wdActiveEndPageNumber)
+    s = Selection.start '°O¤U­ì¦ì¸m
     If CommandBars("web").Visible Then CommandBars("web").Visible = False
     NewWindow
     'ActiveWindow.Document.Range.Characters(l).Select
     If YwdInFootnoteEndnotePane Then '¦pªG¦bµù¸}µ¡®æ¤¤
         ActiveWindow.View.SplitSpecial = wdPaneFootnotes '2011/8/13
     End If
-    selection.End = l ' 'Selection.GoTo wdGoToObject, wdGoToAbsolute, l
-    selection.start = s '¨ì­ì¦ì¸m
+    Selection.End = l ' 'Selection.GoTo wdGoToObject, wdGoToAbsolute, l
+    Selection.start = s '¨ì­ì¦ì¸m
 End Sub
 
 Sub ¤å¥ó¤Þ¾É¼Ò¦¡¤Á´«() ' Alt+M 2011/6/26
@@ -461,19 +461,19 @@ Sub ¤å¥ó¤Þ¾É¼Ò¦¡¤Á´«() ' Alt+M 2011/6/26
 ' ¥¨¶°¿ý»s©ó 2011/6/26¡A¿ý»sªÌ Oscar Sun
 '
 Dim s As Long, e As Long, YwdInFootnoteEndnotePane
-YwdInFootnoteEndnotePane = selection.Information(wdInFootnoteEndnotePane) '°O¤U¶}·sµøµ¡«eµù¸}µ¡®æª¬ºA
+YwdInFootnoteEndnotePane = Selection.Information(wdInFootnoteEndnotePane) '°O¤U¶}·sµøµ¡«eµù¸}µ¡®æª¬ºA
 If YwdInFootnoteEndnotePane Then '¦pªG¦bµù¸}µ¡®æ¤¤
     ActiveWindow.ActivePane.Close '2011/9/24
 End If
-s = selection.start
-e = selection.End
+s = Selection.start
+e = Selection.End
 If ActiveWindow.DocumentMap Then
     ActiveWindow.DocumentMap = False
 ElseIf ActiveWindow.DocumentMap = False Then
     ActiveWindow.DocumentMap = True
 End If
-selection.start = s
-selection.End = e
+Selection.start = s
+Selection.End = e
 End Sub
 
 Sub ¥Ø¿ý¦r§Î§ó¥¿() '2011/8/23'»\­Y¼ÐÃD§ï¥Î«D¼ÐÃD¤j¤p¤§¦r§Î,·|bug
@@ -484,14 +484,14 @@ With ActiveDocument
 ''        .Font.Size>12
 '        .Execute
 '
-    Do Until selection.End = e - 1
-        selection.MoveRight
-            If selection.Next.Font.Size > 12 Then '¥Ø¿ý¹w³]¬°12¦r§Î
-                selection.MoveRight
-                Do Until selection.Next.Font.Size = 12
-                    selection.MoveRight , , wdExtend
+    Do Until Selection.End = e - 1
+        Selection.MoveRight
+            If Selection.Next.Font.Size > 12 Then '¥Ø¿ý¹w³]¬°12¦r§Î
+                Selection.MoveRight
+                Do Until Selection.Next.Font.Size = 12
+                    Selection.MoveRight , , wdExtend
                 Loop
-                If MsgBox("¬O§_­nÁY¤p¬°10¸¹¦r?", vbQuestion + vbOKCancel) = vbOK Then selection.Font.Size = 10
+                If MsgBox("¬O§_­nÁY¤p¬°10¸¹¦r?", vbQuestion + vbOKCancel) = vbOK Then Selection.Font.Size = 10
         End If
     Loop
 End With
@@ -502,7 +502,7 @@ Dim h
 h = wdYellow
 'µL¬°0,²HÂÅ¬°3,.......
 'If h = "" Then h = Selection.Range.HighlightColorIndex
-Do Until selection.Range.HighlightColorIndex <> h
+Do Until Selection.Range.HighlightColorIndex <> h
 
     Exit Do 'Selection.Range.HighlightColorIndex = wdAuto
 Loop
@@ -523,12 +523,12 @@ Sub ¦b¥»¤å¥ó¤¤´M§ä¿ï¨ú¦r¦ê() 'Ctrl+Alt+Down 2020/10/4§ï¥Î Ctrl+Shift+PageDown
 If ActiveDocument.path <> "" Then If ActiveDocument.Saved = False Then ActiveDocument.Save
 Dim ins(4) As Long, MnText As String, FnText As String, FdText As String, st As Long, ed As Long
 On Error GoTo errHH
-With selection '§Ö³tÁä¡GAlt+Ctrl+Down
+With Selection '§Ö³tÁä¡GAlt+Ctrl+Down
 'If Not .Text Like "" Then '§Ö³tÁä¡GAlt+Ctrl+Down
 If .Type = wdSelectionIP Then MsgBox "½Ð¿ï¨ú·Q­n´M§ä¤§¤å¦r", vbExclamation: Exit Sub
 If .Type = wdSelectionNormal Then ' <> wdNoSelection OR wdSelectionIP Then '¤£¬°´¡¤JÂI
 '    If InStr(ActiveDocument.Content, .Text) = InStrRev(ActiveDocument.Content, .Text) Then MsgBox "¥»¤å¥u¦³¦¹³B!", vbInformation: Exit Sub
-    FdText = ¤å¦r³B²z.trimStrForSearch(.text, selection)
+    FdText = ¤å¦r³B²z.trimStrForSearch(.text, Selection)
     st = .start: ed = .End
     .Collapse wdCollapseEnd
     MnText = .Document.StoryRanges(wdMainTextStory) 'ÅÜ¼Æ¤Æ³B²z¸û§Ö2003/4/8
@@ -570,7 +570,7 @@ If .Type = wdSelectionNormal Then ' <> wdNoSelection OR wdSelectionIP Then '¤£¬°
                     Else
                         .ActivePane.Next.Activate
                     End If
-                    With .ActivePane.selection.Find
+                    With .ActivePane.Selection.Find
                         .text = FdText
 '                        .Forward = True
                         .Wrap = wdFindContinue '­n¦³³o¦æ¤~¯à¥¿½T´M§ä
@@ -614,7 +614,7 @@ Exit Sub
 errHH:
 Select Case Err.Number
     Case 7 '°O¾ÐÅé¤£¨¬
-        ActiveDocument.ActiveWindow.selection.Find.Execute selection.text
+        ActiveDocument.ActiveWindow.Selection.Find.Execute Selection.text
     Case Else
         MsgBox Err.Number & Err.Description
         Resume
@@ -626,7 +626,7 @@ Sub ®ÑÅÒ_¥H¿ï¨ú¤å¦r§@¬°®ÑÅÒ() 'ALT+SHIFT+B
 
 ' ¥¨¶°¿ý»s©ó 2015/9/20¡A¿ý»sªÌ ¤ýÆ[¦p
     With ActiveDocument.bookmarks
-        .Add Range:=selection.Range, Name:=Replace(selection.text, Chr(13), "")
+        .Add Range:=Selection.Range, Name:=Replace(Selection.text, Chr(13), "")
         .DefaultSorting = wdSortByName
         .ShowHidden = False
     End With
@@ -683,17 +683,17 @@ Sub ¤p¤p¿é¤Jªkµü®wcj5_ftzk§R¦s¦Ücj5_ftzk_other()
 Dim rng As Range, p As Paragraph, pc As Integer, pSelRng As Range, x As String
 If ActiveDocument.Name <> "cj5-ftzk.txt" Then Exit Sub
 word.Application.ScreenUpdating = False
-If selection.Type = wdSelectionIP Then
-    If Not selection.Range.TextRetrievalMode.IncludeHiddenText Then
-        selection.Paragraphs(1).Range.Select
+If Selection.Type = wdSelectionIP Then
+    If Not Selection.Range.TextRetrievalMode.IncludeHiddenText Then
+        Selection.Paragraphs(1).Range.Select
     End If
 Else
     ActiveWindow.ActivePane.View.ShowAll = Not ActiveWindow.ActivePane.View. _
         ShowAll
 End If
-If Not selection.Range.TextRetrievalMode.IncludeHiddenText Then
-    x = selection.text
-    selection.Delete
+If Not Selection.Range.TextRetrievalMode.IncludeHiddenText Then
+    x = Selection.text
+    Selection.Delete
     'Selection.Cut
         GoSub subP
 '        ActiveWindow.ActivePane.View.ShowAll = Not ActiveWindow.ActivePane.View. _
@@ -701,7 +701,7 @@ If Not selection.Range.TextRetrievalMode.IncludeHiddenText Then
         word.Application.ScreenUpdating = True
         Exit Sub
 Else
-    Set pSelRng = selection.Range
+    Set pSelRng = Selection.Range
     For Each p In pSelRng.Paragraphs
         If Not p.Range.Font.Hidden Then 'prepare to delete
             'p.Range.Cut
@@ -804,7 +804,7 @@ Sub DocBackgroundFillColor() '­¶­±¦â±m
 End Sub
 
 Sub ¤º¤å«eªÅ¤G®æ() 'Alt+n
-With selection.ParagraphFormat
+With Selection.ParagraphFormat
     .Style = "¤º¤å"
     .CharacterUnitFirstLineIndent = 2
 End With
@@ -826,7 +826,7 @@ If ClipBoardOp.Is_ClipboardContainCtext_Note_InlinecommentColor Then
     d.Close wdDoNotSaveChanges
 End If
 Set d = ActiveDocument
-Rem ¦]¬°«e­±©|¦³¡u¤¤°ê­õ¾Ç®Ñ¹q¤l¤Æ­p¹º.¥u«O¯d¥¿¤åª`¤å_¥Bª`¤å«e«á¥[¬A©·¡v·|¥Î¨ìUndoRecordª«¥ó¡A¥B·|Ãö³¬¨ä¤å¥ó¡A¬G¥H¤U¦¹¦æ©Ò¼g¦ì¸m´N«ÜÃöÁä¡A§_«h·|ÀH¤å¥óÃö³¬¦ÓÀH¤§µL®Ä¡C20230201¬Ñ¥f¦~¢Ì¤@
+Rem ¦]¬°«e­±©|¦³¡u¤¤°ê­õ¾Ç®Ñ¹q¤l¤Æ­p¹º.¥u«O¯d¥¿¤åª`¤å_¥Bª`¤å«e«á¥[¬A©·¡v·|¥Î¨ìUndoRecordª«¥ó¡A¥B·|Ãö³¬¨ä¤å¥ó¡A¬G¥H¤U¦¹¦æ©Ò¼g¦ì¸m´N«ÜÃöÁä¡A§_«h·|ÀH¤å¥óÃö³¬¦ÓÀH¤§µL®Ä¡C20230201¬Ñ¥f¦~¤Q¤@
 SystemSetup.stopUndo ur, "mark©ö¾ÇÃöÁä¦r"
 Set rng = d.Range
 endDocOld = d.Range.End
@@ -863,13 +863,13 @@ searchedTerm = Array("©ö", "¨ö", "¤ø", "©P©ö", "©ö¸g", "¨tÃã", "Ã´Ãã", "À»Ãã", "
         Set similarCompare = Docs.similarTextCheckInSpecificDocument(d, clipBTxt)
         If similarCompare.item(1) Then
             If MsgBox("¤å¥»¬Û¦ü«×¬° " & vbCr & similarCompare.item(3) _
-                & vbCr & VBA.vbTab & "¬Û¦ü¬q¸¨¬°¡G" & VBA.IIf(VBA.Len(similarCompare.item(2)) > 255, VBA.Left(similarCompare.item(2), 255) & "¡K¡K", similarCompare.item(2)) _
+                & vbCr & VBA.vbTab & "¬Û¦ü¬q¸¨¬°¡G" & VBA.IIf(VBA.Len(similarCompare.item(2)) > 255, VBA.left(similarCompare.item(2), 255) & "¡K¡K", similarCompare.item(2)) _
                 & vbCr & vbCr & "«ö¤U¡u½T©w¡v±N·|¿ï¨úÃþ¦ü¬q¸¨¡A½Ð¦Û¦æÀË¬d¬O§_¤´­n¦A¶K¤J" & vbCr & vbCr & "«ö¤U¡u¨ú®ø¡v«h©¿²¤ÀË¬d¡A±NÄ~Äò°õ¦æ", vbExclamation + vbOKCancel, "­n¶K¤Jªº¤å¥»¦b­ì¤å¥ó¤¤¦³Ãþ¦üªº¬q¸¨!!!") = vbOK Then
                 Set rng = d.Range
-                If rng.Find.Execute(VBA.Left(similarCompare.item(2), 255), , , , , , , wdFindContinue) Then
+                If rng.Find.Execute(VBA.left(similarCompare.item(2), 255), , , , , , , wdFindContinue) Then
                     If VBA.Len(similarCompare.item(2)) > 255 Then
                         rng.Paragraphs(1).Range.Select                  '¼Ð¥Ü¬Û¦ü¤å¥»
-                        d.ActiveWindow.ScrollIntoView selection.Characters(1), True
+                        d.ActiveWindow.ScrollIntoView Selection.Characters(1), True
                     Else
                         rng.Select
                     End If
@@ -902,18 +902,18 @@ searchedTerm = Array("©ö", "¨ö", "¤ø", "©P©ö", "©ö¸g", "¨tÃã", "Ã´Ãã", "À»Ãã", "
         End If
         
         If flgPaste Then
-            selection.EndKey wdStory
-            selection.InsertParagraphAfter
+            Selection.EndKey wdStory
+            Selection.InsertParagraphAfter
 '            Selection.InsertParagraphAfter
-            selection.Collapse wdCollapseEnd
-            selection.TypeText clipBTxt
+            Selection.Collapse wdCollapseEnd
+            Selection.TypeText clipBTxt
             'SystemSetup.SetClipboard clipBTxt
             On Error GoTo eh
             'Docs.¶K¤W¯Â¤å¦r
             
-            selection.InsertParagraphAfter: selection.InsertParagraphAfter: selection.InsertParagraphAfter
-            selection.Collapse wdCollapseEnd
-            ActiveWindow.ScrollIntoView selection
+            Selection.InsertParagraphAfter: Selection.InsertParagraphAfter: Selection.InsertParagraphAfter
+            Selection.Collapse wdCollapseEnd
+            ActiveWindow.ScrollIntoView Selection
         End If
     Else '¦pªG¤å¥ó¤¤¤w¦³¤å¥»¡A«hÅã¥Ü¨ä©Ò¦b³B
         Dim sx As String
@@ -921,14 +921,14 @@ searchedTerm = Array("©ö", "¨ö", "¤ø", "©P©ö", "©ö¸g", "¨tÃã", "Ã´Ãã", "À»Ãã", "
             'rng.Find.Execute VBA.Left(clipBTxt, 255), , , , , , , wdFindContinue
             Dim ps As Integer
             ps = InStr(clipBTxt, Chr(13)) '¦p¦³¥»¨Ó­n¶K¤Jªº¤å¥»¤¤¦³¬q¸¨¡A«h¤î¨ì¨ä¬q¸¨«e¬°¤î¡F­Y¨S¦³¡A«h¨ú¯à´M§äªº³Ì¤j­È255­Ó¦r¤¸ªøªº¤º®e§@·j´M
-            sx = VBA.IIf(ps > 0, VBA.Left(VBA.Mid(clipBTxt, 1, VBA.IIf(ps > 0, ps, 2) - 1), 255), VBA.Left(clipBTxt, 255))
+            sx = VBA.IIf(ps > 0, VBA.left(VBA.Mid(clipBTxt, 1, VBA.IIf(ps > 0, ps, 2) - 1), 255), VBA.left(clipBTxt, 255))
         Else '¼ÐÂI²Å¸¹³B²z¡G½T©w¤å¥»¤w¦³¥u¬O¼ÐÂI²Å¸¹¤£¦PªÌ
             punc.clearPunctuations clipBTxt
             punc.restoreOriginalTextPunctuations d.Range.text, clipBTxt
             Set punc = Nothing
             sx = ¤å¦r³B²z.trimStrForSearch_PlainText(clipBTxt)
             SystemSetup.SetClipboard sx
-            sx = VBA.Left(sx, 255)
+            sx = VBA.left(sx, 255)
         End If
         rng.Find.Execute sx, , , , , , , wdFindContinue
         endDocOld = rng.End
@@ -966,7 +966,7 @@ If flgPaste Then
 '    Docs.ChangeFontOfSurrogatePairs_Range "HanaMinA", d.Range(selection.Paragraphs(1).Range.start, d.Range.End), CJK_Compatibility_Ideographs
     'https://en.wikipedia.org/wiki/CJK_Compatibility_Ideographs_Supplement
     Dim rngChangeFontName As Range
-    Set rngChangeFontName = d.Range(selection.Paragraphs(1).Range.start, d.Range.End)
+    Set rngChangeFontName = d.Range(Selection.Paragraphs(1).Range.start, d.Range.End)
     Docs.ChangeFontOfSurrogatePairs_Range "HanaMinA", rngChangeFontName, CJK_Compatibility_Ideographs_Supplement
     Rem ÂX¥R¦r¶°
     'HanaMinBÁÙ¤£¤ä´©G¥H«áªº
@@ -1003,7 +1003,7 @@ refres:
     End If
     rng.Select
 '    word.Application.ScreenRefresh
-    ActiveWindow.ScrollIntoView selection.Characters(1) ', False
+    ActiveWindow.ScrollIntoView Selection.Characters(1) ', False
 Return
 
 eh:
@@ -1039,18 +1039,18 @@ End Function
 
 Function similarTextCheckInSpecificDocument(d As Document, text As String) As Collection 'item1 as Boolean(¤å¥»¬O§_¬Û¦ü),item2 as string(§ä¨ìªº¬Û¦ü¤å¥»¬q¸¨),item3 as String from Dictionary SimilarityResult(¬Û¦ü«×¦W&¬Û¦ü«×)
 Rem ¤å¥»¬Û¦ü«×¤ñ¹ï
-Dim similartext As New similartext, dClearPunctuation As String, textClearPunctuation As String, dCleanParagraphs() As String, punc As New punctuation, e, Similarity As Boolean, result As New Collection
+Dim similarText As New similarText, dClearPunctuation As String, textClearPunctuation As String, dCleanParagraphs() As String, punc As New punctuation, e, Similarity As Boolean, result As New Collection
 dClearPunctuation = d.Content.text
 textClearPunctuation = text
 '²M°£¼ÐÂI²Å¸¹
 punc.clearPunctuations textClearPunctuation: punc.clearPunctuations dClearPunctuation
-dCleanParagraphs = VBA.split(dClearPunctuation, Chr(13))
+dCleanParagraphs = VBA.Split(dClearPunctuation, Chr(13))
 For Each e In dCleanParagraphs
     If e <> "" Then
 '        If e = "©ö" Then Stop
-        If similartext.Similarity(e, textClearPunctuation) Then
+        If similarText.Similarity(e, textClearPunctuation) Then
             Similarity = True: Exit For
-        ElseIf similartext.SimilarityPercent(e, textClearPunctuation) > 80 Then
+        ElseIf similarText.SimilarityPercent(e, textClearPunctuation) > 80 Then
             Similarity = True: Exit For
         End If
     End If
@@ -1061,8 +1061,8 @@ result.Add Similarity 'item1:¤å¥»¬O§_¬Û¦ü'https://learn.microsoft.com/en-us/offi
 dClearPunctuation = e
 punc.restoreOriginalTextPunctuations d.Content.text, dClearPunctuation
 result.Add dClearPunctuation 'item2:§ä¨ìªº¬Û¦ü¤å¥»¬q¸¨
-result.Add similartext.SimilarityResultsString 'item3:¬Û¦ü«×¦W&¬Û¦ü«×
-Set similartext = Nothing
+result.Add similarText.SimilarityResultsString 'item3:¬Û¦ü«×¦W&¬Û¦ü«×
+Set similarText = Nothing
 Set similarTextCheckInSpecificDocument = result
 Rem end ¤å¥»¬Û¦ü«×¤ñ¹ï
 End Function
@@ -1078,9 +1078,9 @@ For pi = pi To pc
     Set p = d2.Paragraphs(pi)
     If p.Range.Font.NameFarEast <> "¼Ð·¢Åé" And p.Range.HighlightColorIndex = 0 Then
         px = p.Range
-        x = VBA.Trim(Left(px, Len(px) - 1)) '¥h±¼¤À¬q²Å¸¹
+        x = VBA.Trim(left(px, Len(px) - 1)) '¥h±¼¤À¬q²Å¸¹
         If Len(x) > 2 Then
-            x = VBA.Left(x, Len(x) - 1) '¥h±¼ºÝ«á¼ÐÂI¡C¡Aµ¥
+            x = VBA.left(x, Len(x) - 1) '¥h±¼ºÝ«á¼ÐÂI¡C¡Aµ¥
             If VBA.InStr(d1RngTxt, x) Then
                 i = i + 1
             Else
@@ -1096,7 +1096,7 @@ For pi = pi To pc
             Set rng2 = d2.Range
             rng2.Find.Execute x
             rng2.Select
-            If d2.ActiveWindow.selection.Range.HighlightColorIndex = 0 Then
+            If d2.ActiveWindow.Selection.Range.HighlightColorIndex = 0 Then
                 SystemSetup.playSound 2
                 Exit Sub
             End If
@@ -1122,12 +1122,12 @@ End Sub
 Sub ´¡¤J¶W³sµ²_¤å¥ó¤¤ªº¦ì¸m_¼ÐÃD() 'Alt+P ­ì¬O¡u¤Þ¸Ö¡v¼Ë¦¡'2021/11/27
 Dim d As Document, title As String, p As Paragraph, pTxt As String, subAddrs As String, flg As Boolean
 Set d = ActiveDocument
-title = selection.text
-title = ¤å¦r³B²z.trimStrForSearch(title, selection)
+title = Selection.text
+title = ¤å¦r³B²z.trimStrForSearch(title, Selection)
 For Each p In d.Paragraphs
-    If Left(p.Style.NameLocal, 2) = "¼ÐÃD" Then
+    If left(p.Style.NameLocal, 2) = "¼ÐÃD" Then
         pTxt = p.Range.text
-        pTxt = Left(pTxt, Len(pTxt) - 1)
+        pTxt = left(pTxt, Len(pTxt) - 1)
         If StrComp(pTxt, title) = 0 Then
             subAddrs = title
             flg = True
@@ -1145,7 +1145,7 @@ Next p
 '    'ChangeFileOpenDirectory d.path & "\"  ''userProfilePath & "Dropbox\"
 '
 If flg Then
-    d.Hyperlinks.Add Anchor:=selection.Range, Address:="", _
+    d.Hyperlinks.Add Anchor:=Selection.Range, Address:="", _
         SubAddress:=subAddrs, ScreenTip:="", TextToDisplay:=title
 Else
     MsgBox "½Ð¤â°Ê´¡¤J¡I", vbExclamation
@@ -1178,6 +1178,7 @@ SystemSetup.stopUndo ur, "¤¤°ê­õ¾Ç®Ñ¹q¤l¤Æ­p¹º_µù¤å«e«á¥[¬A©·_¶K¨ì¥jÄy»Å¦Û°Ê¼ÐÂI
 
 '±N°Å¶KÃ¯¤¤ªº¤å¥»¤º®e¡A°e¥æ¥jÄy»Å¦Û°Ê¼ÐÂI
 If ¶K¨ì¥jÄy»Å¦Û°Ê¼ÐÂI() = True Then
+    ActiveDocument.Application.Activate
     '¦Û°Ê°õ¦æ©ö¾ÇÃöÁä¦r¼ÐÃÑ
     If Documents.Count > 0 Then
         If InStr(ActiveDocument.path, "¤wªì¨B¼ÐÂI") > 0 Then
@@ -1219,7 +1220,7 @@ Dim x As String, result As String
 On Error GoTo Err1
 x = SystemSetup.GetClipboard
 x = Replace(x, Chr(0), "")
-If x = "" Then x = selection
+If x = "" Then x = Selection
 result = SeleniumOP.grabGjCoolPunctResult(x)
 If result = "" Or result = x Then
     DoEvents
@@ -1334,10 +1335,10 @@ Sub ChangeFontOfSurrogatePairs_ActiveDocument(fontName As String, Optional whatC
                 If i < ActiveDocument.Range.End Then
                     C = C & ActiveDocument.Range(i, i).text        ' The combined character
                 End If
-                If AscW(Right(C, 1)) >= &HDC00 And AscW(Right(C, 1)) <= &HDFFF Then
+                If AscW(right(C, 1)) >= &HDC00 And AscW(right(C, 1)) <= &HDFFF Then
                     ' Check if the combined character is in CJK extension B or later
                     'If AscW(Left(c, 1)) >= &HD840 Then
-                    If AscW(Left(C, 1)) >= SurrogateCodePoint.HighStart Then '«e¾É¥N²z (lead surrogates)¡A¤¶©ó D800 ¦Ü DBFF ¤§¶¡¡A²Ä¤G­Ó³QºÙ¬° «á§À¥N²z (trail surrogates)¡A¤¶©ó DC00 ¦Ü DFFF ¤§¶¡
+                    If AscW(left(C, 1)) >= SurrogateCodePoint.HighStart Then '«e¾É¥N²z (lead surrogates)¡A¤¶©ó D800 ¦Ü DBFF ¤§¶¡¡A²Ä¤G­Ó³QºÙ¬° «á§À¥N²z (trail surrogates)¡A¤¶©ó DC00 ¦Ü DFFF ¤§¶¡
                         Dim change As Boolean
                         change = True
 '                        rng.Select
@@ -1392,10 +1393,10 @@ Sub ChangeFontOfSurrogatePairs_Range(fontName As String, rngtoChange As Range, O
 '                    'c = c & ActiveDocument.Range(i, i).text        ' The combined character
 '                    c = c & Mid(rngtoChange, i, 1).text        ' The combined character
 '                End If
-                If AscW(Right(C, 1)) >= &HDC00 And AscW(Right(C, 1)) <= &HDFFF Then
+                If AscW(right(C, 1)) >= &HDC00 And AscW(right(C, 1)) <= &HDFFF Then
                     ' Check if the combined character is in CJK extension B or later
                     'If AscW(Left(c, 1)) >= &HD840 Then
-                    If AscW(Left(C, 1)) >= SurrogateCodePoint.HighStart Then '«e¾É¥N²z (lead surrogates)¡A¤¶©ó D800 ¦Ü DBFF ¤§¶¡¡A²Ä¤G­Ó³QºÙ¬° «á§À¥N²z (trail surrogates)¡A¤¶©ó DC00 ¦Ü DFFF ¤§¶¡
+                    If AscW(left(C, 1)) >= SurrogateCodePoint.HighStart Then '«e¾É¥N²z (lead surrogates)¡A¤¶©ó D800 ¦Ü DBFF ¤§¶¡¡A²Ä¤G­Ó³QºÙ¬° «á§À¥N²z (trail surrogates)¡A¤¶©ó DC00 ¦Ü DFFF ¤§¶¡
                         Dim change As Boolean, isCjkResult As Collection
                         change = True
 '                        rng.Select
@@ -1451,7 +1452,7 @@ End Sub
 
 Sub ChangeCharacterFontNameAccordingSelection()
 Dim fontName As String, fontNameFarEast As String
-With selection
+With Selection
     fontName = .Font.Name
     fontNameFarEast = .Font.NameFarEast
     ChangeCharacterFontName .text, fontName, .Document, fontNameFarEast
@@ -1480,14 +1481,14 @@ Sub FindMissingCharacters() '³oÀ³¸Ó¥u¬O§ä¤å¥ó¤¤ªº¦r¤£¯à¥H·s²Ó©úÅé¡B¼Ð·¢Åé¨ÓÅã¥Üª
             ' §PÂ_¦r²Å¬O§_¦b·s²Ó©úÅé©Î¼Ð·¢Åé¦r«¬¤¤
             C = r.text
             If Len(C) > 0 Then
-                If (AscW(Left(C, 1)) >= &H4E00 And AscW(Left(C, 1)) <= &H9FFF) _
-                    Or (AscW(Left(C, 1)) >= &H3400 And AscW(Left(C, 1)) <= &H4DBF) _
-                    Or (AscW(Left(C, 1)) >= &H20000 And AscW(Left(C, 1)) <= &H2A6DF) _
-                    Or (AscW(Left(C, 1)) >= &H2A700 And AscW(Left(C, 1)) <= &H2B73F) _
-                    Or (AscW(Left(C, 1)) >= &H2B740 And AscW(Left(C, 1)) <= &H2B81F) _
-                    Or (AscW(Left(C, 1)) >= &H2B820 And AscW(Left(C, 1)) <= &H2CEAF) _
-                    Or (AscW(Left(C, 1)) >= &HF900 And AscW(Left(C, 1)) <= &HFAFF) _
-                    Or (AscW(Left(C, 1)) >= &H2F800 And AscW(Left(C, 1)) <= &H2FA1F) Then '³o¸Ì¨S¨ú½XÂI¡A¥²©w¦³»~¡A«Ý§ï¼g¡I¡I¡I¡I¡I¡I¡I¡I
+                If (AscW(left(C, 1)) >= &H4E00 And AscW(left(C, 1)) <= &H9FFF) _
+                    Or (AscW(left(C, 1)) >= &H3400 And AscW(left(C, 1)) <= &H4DBF) _
+                    Or (AscW(left(C, 1)) >= &H20000 And AscW(left(C, 1)) <= &H2A6DF) _
+                    Or (AscW(left(C, 1)) >= &H2A700 And AscW(left(C, 1)) <= &H2B73F) _
+                    Or (AscW(left(C, 1)) >= &H2B740 And AscW(left(C, 1)) <= &H2B81F) _
+                    Or (AscW(left(C, 1)) >= &H2B820 And AscW(left(C, 1)) <= &H2CEAF) _
+                    Or (AscW(left(C, 1)) >= &HF900 And AscW(left(C, 1)) <= &HFAFF) _
+                    Or (AscW(left(C, 1)) >= &H2F800 And AscW(left(C, 1)) <= &H2FA1F) Then '³o¸Ì¨S¨ú½XÂI¡A¥²©w¦³»~¡A«Ý§ï¼g¡I¡I¡I¡I¡I¡I¡I¡I
                     If Not r.Font.Name = nmf.Name And Not r.Font.Name = kff.Name Then '¹B¥Î¤§­ì²z¦b¦¹¦æ¡I¡I¡I¡I
                         ' ¦pªG¦r²Å¤£¦b·s²Ó©úÅé©Î¼Ð·¢Åé¦r«¬¤¤¡A«h±N¨ä¦rÅé§ó§ï¬°HanaMinB
                         r.Font.Name = "HanaMinB"

@@ -242,10 +242,10 @@ End Sub
 Sub 查詢奇摩() 'Ctrl+Shift+Y
 On Error GoTo ErrMsg '只查google
 'FollowHyperlink "http://tw.search.yahoo.com/search", , , , "fr=slv1-ptec&p=" & Screen.ActiveControl.seltext
-selection.Copy
+Selection.Copy
 'FollowHyperlink "http://tw.search.yahoo.com/search", , , , "p=" & Selection, msoMethodGet
 'If Tasks.Exists("skqs professional version") Then
-    Shell Replace(GetDefaultBrowserEXE, """%1", "http://tw.search.yahoo.com/search?p=" & selection)
+    Shell Replace(GetDefaultBrowserEXE, """%1", "http://tw.search.yahoo.com/search?p=" & Selection)
 'Else
 '    Shell "C:\Program Files\Opera\opera.exe" & " http://tw.search.yahoo.com/search?p=" & Selection, vbNormalFocus
 'End If
@@ -264,8 +264,8 @@ Const st As String = "C:\Program Files\孫守真\網路搜尋_元搜尋-同時搜多個引擎\"
 Dim funame As String
 'FollowHyperlink "http://tw.search.yahoo.com/search", , , , "fr=slv1-ptec&p=" & Screen.ActiveControl.seltext
 'FollowHyperlink "http://www.google.com.tw/search", , , , "q=" & Screen.ActiveControl.seltext, msoMethodGet
-If selection.Type = wdSelectionNormal Then
-    selection.Copy
+If Selection.Type = wdSelectionNormal Then
+    Selection.Copy
     If ActiveDocument.Saved = False And ActiveDocument.path <> "" Then ActiveDocument.Save: DoEvents
 '    If Tasks.Exists("skqs professional version") Then
 '        Shell Replace(GetDefaultBrowserEXE, """%1", "http://www.google.com.tw/search?q=" & Selection)
@@ -349,7 +349,7 @@ eh:
 End Function
 
 Sub insertNowTime()
-With selection.Range 'Alt+t
+With Selection.Range 'Alt+t
     .InsertAfter Now
     .Font.Subscript = True
 End With
@@ -358,7 +358,7 @@ Sub 重啟小小輸入法() 'Alt+q
 Shell Replace(SystemSetup.取得桌面路徑, "Desktop", "Dropbox") & "\VS\bat\重啟小小輸入法.bat"
 End Sub
 
-Sub shortcutKeys() '指定快速鍵
+Sub ShortcutKeys() '指定快速鍵
 CustomizationContext = NormalTemplate
 'KeyBindings.Add _
     KeyCategory:=wdKeyCategoryCommand, _
@@ -368,6 +368,12 @@ KeyBindings.Add _
     KeyCategory:=wdKeyCategoryCommand, _
     Command:="Docs.貼上純文字", _
     KeyCode:=BuildKeyCode(wdKeyShift, wdKeyInsert)
+
+KeyBindings.Add _
+    KeyCategory:=wdKeyCategoryCommand, _
+    Command:="EditCopy", _
+    KeyCode:=BuildKeyCode(wdKeyControl, wdKeyInsert)
+
 End Sub
 
 Rem 20230314 VBA Environ函式可以取得Windows的 Media(預設在C:\Windows\Media)路徑嗎？ 感恩感恩　南無阿彌陀佛
@@ -512,24 +518,25 @@ Sub appActivateChrome()
 End Sub
 
 Sub backupNormal_dotm() '自動備份Normal.dotm
-'If ActiveDocument.path = "" Then Exit Sub
-Dim source As String, destination As String
-source = SystemSetup.DropBoxPathIncldBackSlash + "Normal.dotm"
-destination = SystemSetup.WordTemplatesPathIncldBackSlash + "Normal.dotm"
-On Error GoTo eh
-With SystemSetup.FileSystemObject
-If (.getfile(source).DateLastModified < _
-    .getfile(destination).DateLastModified) Then _
-        .CopyFile source, destination
-End With
-Exit Sub
+    'If ActiveDocument.path = "" Then Exit Sub
+    Dim source As String, destination As String
+    source = SystemSetup.WordTemplatesPathIncldBackSlash + "Normal.dotm"
+    destination = SystemSetup.DropBoxPathIncldBackSlash + "Normal.dotm"
+    
+    On Error GoTo eh
+    With SystemSetup.FileSystemObject
+        If (.getfile(source).DateLastModified > _
+            .getfile(destination).DateLastModified) Then _
+                .CopyFile source, destination
+        End With
+    Exit Sub
 eh:
-Select Case Err.Number
-    Case 70
-        MsgBox "Normal.dotm還未備份", vbExclamation
-    Case Else
-        MsgBox Err.Number & Err.Description
-End Select
+    Select Case Err.Number
+        Case 70
+            MsgBox "Normal.dotm還未備份", vbExclamation
+        Case Else
+            MsgBox Err.Number & Err.Description
+    End Select
 End Sub
 Sub seleniumDllReference()
 '20230119 creedit chatGPT大菩薩：

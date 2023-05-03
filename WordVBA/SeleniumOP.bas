@@ -3,6 +3,7 @@ Option Explicit
 Public WD As SeleniumBasic.IWebDriver
 Public chromedriversPID() As Long '儲存chromedriver程序ID的陣列
 Public chromedriversPIDcntr As Integer 'chromedriversPID的下標值
+Public ActiveXComponentsCanNotBeCreated As Boolean
 
 Sub tesSeleniumBasic() 'https://github.com/florentbr/SeleniumBasic
 '20230119 creedit chatGPT大菩薩
@@ -103,6 +104,7 @@ reStart:
         openNewTabWhenTabAlreadyExit WD
         WD.url = url
     End If
+    If ActiveXComponentsCanNotBeCreated Then ActiveXComponentsCanNotBeCreated = False
 Exit Sub
 ErrH:
 Select Case Err.Number
@@ -132,6 +134,9 @@ Select Case Err.Number
             MsgBox Err.Description, vbCritical
             Stop
         End If
+    Case 429 'ActiveX 元件無法產生物件'
+        ActiveXComponentsCanNotBeCreated = True
+        Exit Sub
     Case Else
         MsgBox Err.Description, vbCritical
         Resume
@@ -326,7 +331,7 @@ End Sub
 Function grabDictRevisedUrl_OnlyOneResult(searchStr As String, Optional Background As Boolean) As String
 'If searchStr = "" And Selection = "" Then Exit Sub
 If searchStr = "" Then Exit Function
-If VBA.Left(searchStr, 1) <> "=" Then searchStr = "=" + searchStr '精確搜尋字串指令
+If VBA.left(searchStr, 1) <> "=" Then searchStr = "=" + searchStr '精確搜尋字串指令
 Const notFoundOrMultiKey As String = "&qMd=0&qCol=1" '查無資料或如果不止一條時，網址後綴都有此關鍵字
 Dim url As String, retryTime As Byte
 url = "https://dict.revised.moe.edu.tw/search.jsp?md=1"
@@ -352,6 +357,9 @@ Else
             openChrome url
         Else
             Set wdB = WD
+        End If
+        If ActiveXComponentsCanNotBeCreated Then
+            Exit Function
         End If
 End If
 retry:
@@ -506,11 +514,11 @@ If wdB.url <> url Then wdB.Navigate.GoToUrl url
 '整理文本
 Dim chkStr As String: chkStr = VBA.Chr(13) & Chr(10) & Chr(7) & Chr(9) & Chr(8)
 text = VBA.Trim(text)
-Do While VBA.InStr(chkStr, VBA.Left(text, 1)) > 0
+Do While VBA.InStr(chkStr, VBA.left(text, 1)) > 0
     text = Mid(text, 2)
 Loop
-Do While VBA.InStr(chkStr, VBA.Right(text, 1)) > 0
-    text = Left(text, Len(text) - 1)
+Do While VBA.InStr(chkStr, VBA.right(text, 1)) > 0
+    text = left(text, Len(text) - 1)
 Loop
 
 

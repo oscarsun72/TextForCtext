@@ -287,7 +287,7 @@ namespace TextForCtext
             //若無選取則自動找到
             while (wrng == "")
             {
-                if (("􏿽" + Lowercurlybrackets + newLine).IndexOf(x.Substring(s++, 2)) > -1)
+                if (x.Length >= s + 1 + 2 && ("􏿽" + Lowercurlybrackets + newLine).IndexOf(x.Substring(s++, 2)) > -1)
                 {
                     if (x.Substring(s, 2) == newLine) break;
                     txb.Select(--s, 2); wrng = txb.SelectedText; break;

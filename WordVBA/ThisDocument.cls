@@ -10,10 +10,14 @@ Attribute VB_Exposed = True
 Option Explicit
 Dim db As DAO.Database
 Sub 在整頁模式中不顯示頁面間的空白區域()
-    If word.ActiveWindow.View.ReadingLayout Then _
-        ActiveWindow.View.ReadingLayout = Not ActiveWindow.View.ReadingLayout
-    DoEvents
-    word.ActiveWindow.View.DisplayPageBoundaries = False
+    If word.Documents.Count = 0 Then Exit Sub
+    If word.Documents(1).Windows.Count = 0 Then Exit Sub
+    If word.Documents(1).Windows(1).Visible Then
+        If word.ActiveWindow.View.ReadingLayout Then _
+            ActiveWindow.View.ReadingLayout = Not ActiveWindow.View.ReadingLayout
+        DoEvents
+        word.ActiveWindow.View.DisplayPageBoundaries = False
+    End If
 End Sub
 
 Sub Word資料匯入Access(wcontent As String, Terms As String, beforeTerm As String, acpath As String, before部首, selRange As Range) '2010/10/20修訂
@@ -25,8 +29,8 @@ Static 不輸入字序 As Byte, 不覆蓋原資料 As Byte
 On Error GoTo ErrH:
 'Set w = GetObject("C:\Documents and Settings\Superwings\桌面\0001（定稿）_詞典.mdb參照.doc")
 'wcontent = w.Application.Run(ThisDocument.詞典條目內容擷取)
-ss = VBA.Right(wcontent, 4)
-wcontent = Left(wcontent, Len(wcontent) - 4)
+ss = VBA.right(wcontent, 4)
+wcontent = left(wcontent, Len(wcontent) - 4)
 If db Is Nothing Then
     Set db = DBEngine.Workspaces(0).OpenDatabase(acpath) '("D:\千慮一得齋\書信\圖書管理\黃沛榮老師助理\詞典.mdb")
 End If
@@ -105,29 +109,29 @@ End If
 Select Case ss
     Case "XXX字"
         Set rst = db.OpenRecordset("字") '原此行為a:標籤
-        Dim selrangeP As Paragraph, zhu, Uzhu As Byte, ZhuYin, Char As Long, zhuyinText As String, pinyinText As String, charItem As Integer '輸入注音與拼音'2010/10/23
+        Dim selrangeP As Paragraph, zhu, Uzhu As Byte, ZhuYin, char As Long, zhuyinText As String, pinyinText As String, charItem As Integer '輸入注音與拼音'2010/10/23
         Dim Zhuyins() As String, Pinyins() As String, zps As Byte '一字多音時, 用陳列儲存
         Dim 注音拼音rst As Recordset, 注音ID As Long, 拼音ID As Long
-        zhu = 注音符號: Uzhu = UBound(zhu): Char = 1
+        zhu = 注音符號: Uzhu = UBound(zhu): char = 1
         For Each selrangeP In selRange.Paragraphs
-            charItem = 1: Char = charItem
+            charItem = 1: char = charItem
             For Each ZhuYin In zhu
 '                If ZhuYin = ChrW(20008) Then Stop
-                If Char > selrangeP.Range.Characters.Count Then Exit For '如果找完本段,即不再找,換下一段
+                If char > selrangeP.Range.Characters.Count Then Exit For '如果找完本段,即不再找,換下一段
                 If InStr(selrangeP.Range, ZhuYin) Then  '找出要處理的段落-即段落中含注音的(必含拼音)
-                    selrangeP.Range.SetRange Char, selrangeP.Range.Characters.Count '重新取得range範圍--在找到前一個值得(即注音、拼音陣列的下一個索引之元素)
+                    selrangeP.Range.SetRange char, selrangeP.Range.Characters.Count '重新取得range範圍--在找到前一個值得(即注音、拼音陣列的下一個索引之元素)
 '                    charItem = InStr(selrangeP.Range, ZhuYin) '取得此段落第一個注音符號的位置--非也,乃比對有注音段落時,第一個比對到的注音符號(與陣列中次序有關也)!
-                    For Char = charItem To selrangeP.Range.Characters.Count '要從找到注音的段落從第一字,逐字檢查,凡係注音符號,即寫入陣列(此因注音在拼音前故可如是寫也)
+                    For char = charItem To selrangeP.Range.Characters.Count '要從找到注音的段落從第一字,逐字檢查,凡係注音符號,即寫入陣列(此因注音在拼音前故可如是寫也)
                     '所以此順序與注音符號陣列之順序極相關也.輕聲符號必置於最前才能不漏掉,否則要再加一行,繼續搜尋此段裡是否還有注音陣列裡的元素,且還在注音陣列中找到的,在原段落更前的位置.此才能抓到真正的第一注音符號位置!
                     '然據下找到注音符號位置,並無關注音陣列內順序也.
                         'If Not IsEmpty(Filter(zhu, selrangeP.Range.Characters(Char), False, vbBinaryCompare)) Then  '找到注音符號
                         '原用上行,但因找不到依然傳回陣列(與線上說明所言有異!!),唯其找到一個則陣列索引值會減一,故改寫成下式:
-                        If UBound(Filter(zhu, selrangeP.Range.Characters(Char), False, vbBinaryCompare)) < Uzhu Then '找到注音符號
-                            If selrangeP.Range.Characters(Char) = "．" And selrangeP.Range.Characters(Char).Font.Name <> "標楷體" Then GoTo nextP '"．"此輕聲符號與數字編號符號相同,故只能以字形,或其後接字元是否為注音符號判斷了.今暫以字形耳.
-                            charItem = Char 'InStr(selrangeP, selrangeP.Range.Characters(Char)) '取得第一個注音符號的位置
-                            If selrangeP.Range.Characters(Char) <> ChrW(20008) Or (selrangeP.Range.Characters(Char) <> ChrW(20008) And InStr(selrangeP.Range, "】") = 0) Then
+                        If UBound(Filter(zhu, selrangeP.Range.Characters(char), False, vbBinaryCompare)) < Uzhu Then '找到注音符號
+                            If selrangeP.Range.Characters(char) = "．" And selrangeP.Range.Characters(char).Font.Name <> "標楷體" Then GoTo nextP '"．"此輕聲符號與數字編號符號相同,故只能以字形,或其後接字元是否為注音符號判斷了.今暫以字形耳.
+                            charItem = char 'InStr(selrangeP, selrangeP.Range.Characters(Char)) '取得第一個注音符號的位置
+                            If selrangeP.Range.Characters(char) <> ChrW(20008) Or (selrangeP.Range.Characters(char) <> ChrW(20008) And InStr(selrangeP.Range, "】") = 0) Then
 11                              Do Until selrangeP.Range.Characters(charItem).Font.Name = "SimSun" Or selrangeP.Range.Characters(charItem).Font.Name = "Pintone Times" Or selrangeP.Range.Characters(charItem) = Chr(13)
-                                    If UBound(Filter(zhu, selrangeP.Range.Characters(Char), False, vbBinaryCompare)) < Uzhu Then
+                                    If UBound(Filter(zhu, selrangeP.Range.Characters(char), False, vbBinaryCompare)) < Uzhu Then
                                         zhuyinText = zhuyinText & selrangeP.Range.Characters(charItem)
                                     End If
                                     charItem = charItem + 1
@@ -150,17 +154,17 @@ Select Case ss
                                 zps = zps + 1
                                 zhuyinText = ""
                                 pinyinText = ""
-                                Char = charItem
+                                char = charItem
                             Else
 '                                If InStr(selrangeP.Range, Char) > InStr(selrangeP.Range, "】") Then
-                                If Char > InStr(selrangeP.Range, "】") Then
+                                If char > InStr(selrangeP.Range, "】") Then
                                     GoTo 11
                                 End If
                             End If
 '                        Else
 '                            Stop
                         End If
-                    Next Char
+                    Next char
                 End If
             Next
 nextP: Next
@@ -174,19 +178,19 @@ nextP: Next
             If .NoMatch Then
                 .AddNew
             Else
-                .Edit
+                .edit
             End If
             .Fields("字") = Terms
             .Fields("釋文") = wcontent
-            If IsNumeric(Left(wcontent, 5)) Then
+            If IsNumeric(left(wcontent, 5)) Then
                 Set rst1 = db.OpenRecordset("字")
                 With rst1
                     .Index = "字序"
-                    .Seek "=", Left(wcontent, 5)
+                    .Seek "=", left(wcontent, 5)
                     If .NoMatch = False Then
                         If .Fields("字ID") <> 字ID Then
                             If 不輸入字序 <> vbNo Then
-                                不輸入字序 = MsgBox("字序" & Left(wcontent, 5) & "重複了!要繼續,則不會匯入字序!" & vbCr & vbCr _
+                                不輸入字序 = MsgBox("字序" & left(wcontent, 5) & "重複了!要繼續,則不會匯入字序!" & vbCr & vbCr _
                                     & "  要終止這次匯入,以改正原檔案,請按[取消]!!" & _
                                     "要繼續,請按[是].   不再檢覈字序,直接略過(不輸入字序)則按[否]   " & _
                                     "按下〔取消〕後,此字序有誤之字,其條目內容將會反白顯示!", vbExclamation + vbYesNoCancel, "字序重複了!!!")
@@ -198,10 +202,10 @@ nextP: Next
                                 End Select
                             End If
                         Else
-                            rst.Fields("字序") = Left(wcontent, 5)
+                            rst.Fields("字序") = left(wcontent, 5)
                         End If
                     Else
-                        rst.Fields("字序") = Left(wcontent, 5)
+                        rst.Fields("字序") = left(wcontent, 5)
                     End If
                 End With
             End If
@@ -260,18 +264,18 @@ nextP: Next
             Set rst = db.OpenRecordset("字_注音") '輸入字_注音
             With rst
     '            If zps > 0 Then Stop
-                For Char = 0 To zps  'UBound(Zhuyins(zps))
+                For char = 0 To zps  'UBound(Zhuyins(zps))
                     Set 注音拼音rst = db.OpenRecordset("注音") '檢查注音有無
                     With 注音拼音rst
-                        If InStr(1, "．˙‧" & ChrW(12539), Left(Zhuyins(Char), 1), vbBinaryCompare) Then 'Debug.Print Terms: Stop
-                            If MsgBox("注音「" & Zhuyins(Char) & "」是否輸入？" & vbCr & vbCr & "因為輕聲符號有與此黑點符號相同者，故程式可能會抓錯。請判斷！", vbExclamation + vbOKCancel + vbDefaultButton2, "輕聲注音輸入確認！！") = vbCancel Then GoTo exitZhuyin
+                        If InStr(1, "．˙‧" & ChrW(12539), left(Zhuyins(char), 1), vbBinaryCompare) Then 'Debug.Print Terms: Stop
+                            If MsgBox("注音「" & Zhuyins(char) & "」是否輸入？" & vbCr & vbCr & "因為輕聲符號有與此黑點符號相同者，故程式可能會抓錯。請判斷！", vbExclamation + vbOKCancel + vbDefaultButton2, "輕聲注音輸入確認！！") = vbCancel Then GoTo exitZhuyin
                         End If
-                        Zhuyins(Char) = Replace(Replace(Replace(Zhuyins(Char), "˙", "‧"), "．", "‧"), ChrW(12539), "‧")
+                        Zhuyins(char) = Replace(Replace(Replace(Zhuyins(char), "˙", "‧"), "．", "‧"), ChrW(12539), "‧")
 21                      .Index = "注音"
-                        .Seek "=", Zhuyins(Char)
+                        .Seek "=", Zhuyins(char)
                         If .NoMatch Then
                             .AddNew
-                            .Fields("注音") = Zhuyins(Char)
+                            .Fields("注音") = Zhuyins(char)
                             .Update
                             '.Close '果然不能關掉,關掉則無效了,得重新set
                             .OpenRecordset
@@ -283,10 +287,10 @@ nextP: Next
                     Set 注音拼音rst = db.OpenRecordset("拼音") '檢查拼音有無
                     With 注音拼音rst
 22                      .Index = "拼音"
-                        .Seek "=", Pinyins(Char)
+                        .Seek "=", Pinyins(char)
                         If .NoMatch Then
                             .AddNew
-                            .Fields("拼音") = Pinyins(Char)
+                            .Fields("拼音") = Pinyins(char)
                             .Update
                             .OpenRecordset
                             GoTo 22 '新增後再去找注音ID值
@@ -300,13 +304,13 @@ nextP: Next
                     If .NoMatch Then
                         .AddNew
                     Else
-                        .Edit
+                        .edit
                     End If
                     .Fields("字ID") = 字ID
                     .Fields("注音ID") = 注音ID
                     .Fields("拼音ID") = 拼音ID
                     .Update
-exitZhuyin:    Next Char
+exitZhuyin:    Next char
             End With
         End If
         'beforeTerm = Terms
@@ -327,7 +331,7 @@ exitZhuyin:    Next Char
                         & "請按[取消]!", vbOKCancel + vbExclamation, "覆蓋原資料確認!!!") = vbCancel Then _
                             GoTo 不匯入
                 End If
-                .Edit
+                .edit
             End If
             .Fields("字ID") = 字ID
             .Fields("詞") = Terms
@@ -344,7 +348,7 @@ exitZhuyin:    Next Char
             If .NoMatch Then
                 .AddNew
             Else
-                .Edit
+                .edit
             End If
             .Fields("字ID") = 字ID
             .Fields("衍") = wcontent
@@ -400,7 +404,7 @@ With w.ActiveWindow.Selection
                             '9999999乃包括隱藏與不隱藏也.
 '            If InStr(.Paragraphs(1).Range, "◆") Then Stop
 '            If InStr(.Paragraphs(1).Range, "橖") Then Stop
-            If Left(.Paragraphs(1).Range, 1) = "◆" Then ''字之部首處理
+            If left(.Paragraphs(1).Range, 1) = "◆" Then ''字之部首處理
 '                If InStr(.Paragraphs(1).Range, "木部") Then Stop
 '                If InStr(.Paragraphs(1).Range, "日部") Then Stop
                 GoSub 選取
@@ -470,8 +474,8 @@ Exit Sub
     .Paragraphs(1).Range.Select
     If .Range.End = docEnd Then e = True: Return
     Do Until InStr(.Next.Paragraphs(1).Range, "【") Or _
-            Left(.Next.Paragraphs(1).Range, 1) = "◇" Or _
-            Left(.Next.Paragraphs(1).Range, 1) = "◆" Or _
+            left(.Next.Paragraphs(1).Range, 1) = "◇" Or _
+            left(.Next.Paragraphs(1).Range, 1) = "◆" Or _
             .Next.Paragraphs(1).Range.Font.Hidden = (True Or 9999999)
         .MoveDown wdParagraph, 1, wdExtend
         If .Range.End = docEnd Then e = True: Exit Do
@@ -530,7 +534,7 @@ End Sub
 
 Sub 漢語拼音置換() 'PinTone轉SimSun
 Dim db As Database, p As Paragraph, chra As word.Characters, m As Long, pinL As Long
-Dim rst As Recordset, rstReplace As Recordset, Paragraph As String, ParagraphNew As String, pL As Integer, pS As Integer
+Dim rst As Recordset, rstReplace As Recordset, Paragraph As String, ParagraphNew As String, pL As Integer, ps As Integer
 Dim zhu, Uzhu, i As Byte, zhuL As Integer ', zhuYes As Boolean
 Dim tble, t As Byte, b As Byte
 Dim ds As Date, de As Date, times As Long
@@ -553,7 +557,7 @@ With rstReplace
         Paragraph = .Fields("拼音Pintone")
         ParagraphNew = .Fields("拼音")
         With Selection.Range.Find
-            .Text = Paragraph
+            .text = Paragraph
             .ClearFormatting
 '            .Font.Name = "Pintone Times"
             .Font.NameAscii = "Pintone Times"
@@ -564,7 +568,7 @@ With rstReplace
                 .Replacement.Font.NameAscii = "SimSun"
                 .Replacement.Font.NameFarEast = "SimSun"
                 .Replacement.Font.NameOther = "SimSun"
-                .Replacement.Text = ParagraphNew
+                .Replacement.text = ParagraphNew
                 .Execute , True, False, , , , True, wdFindContinue, , , wdReplaceAll
                 times = times + 1
             End If
@@ -644,6 +648,7 @@ MsgBox "完成!" & vbCr & "費時" & Minute(de - ds) & "分" & Second(de - ds) & "秒"
 End Sub
 
 Private Sub Document_Close()
+
 ''閉閉文件時以書籤方式記住游標位置
 'With ThisDocument
 'If Not .path = "" Then '舊檔才檢查2003/4/1
@@ -688,12 +693,13 @@ End Sub
 Private Sub Document_New()
 On Error Resume Next
 Register_Event_Handler '原來會失效是因為我在"在另一文件中尋找選取字串"用了END啦!
-If ActiveDocument.AttachedTemplate.Name = "Normal.dot" Then
-    CommandBars.Item("blog").Visible = True
-Else
-    CommandBars.Item("blog").Visible = False
-End If
-Docs.DocBackgroundFillColor
+'If ActiveDocument.AttachedTemplate.Name = "Normal.dot" Then
+'    CommandBars.Item("blog").Visible = True
+'Else
+'    CommandBars.Item("blog").Visible = False
+'End If
+'Docs.DocBackgroundFillColor'原來頁面會設置暗墨綠色是由於這行啊。哈哈，現在才發現，一直傻傻地在設計那裡找與設定也無效，剛才靈機一動，該不會是用程式設定的吧，一查，果然！感恩感恩　讚歎讚歎　南無阿彌陀佛
+'上面也都是舊版的了，除了事件處理程式掛鉤要留外，其餘均註解掉了 20230111
 End Sub
 
 
@@ -704,17 +710,17 @@ Private Sub Document_Open()
 Dim bk As bookmark, bkIdx As Integer, tp As Template '2015/11/4
 Register_Event_Handler
 With ThisDocument
-    If Left(.Name, 2) = "排印" Then .ActiveWindow.DisplayVerticalRuler = False
+    If left(.Name, 2) = "排印" Then .ActiveWindow.DisplayVerticalRuler = False
     With .Application.CommandBars
         If Application.Templates.Count > 1 Then
             For Each tp In Application.Templates
-                If tp.Name = "mywork.dot" Then If .Item("得士派").Visible Then .Item("得士派").Visible = False
+                If tp.Name = "mywork.dot" Then If .item("得士派").Visible Then .item("得士派").Visible = False
             Next
         End If
-        If Left(ThisDocument, 7) Like "Access_" _
+        If left(ThisDocument, 7) Like "Access_" _
             Or InStr(ThisDocument.FullName, "文字檔資料庫") Then _
-            .Item("論文＿札記瀏覽").Visible = True
-        If .Item("Web").Visible = True Then .Item("web").Visible = False
+            .item("論文＿札記瀏覽").Visible = True
+        If .item("Web").Visible = True Then .item("web").Visible = False
     End With
     If .bookmarks.Count > 0 Then '有書籤時才做
         '        For bkIdx = 1 To .Bookmarks.Count
@@ -750,7 +756,7 @@ With ThisDocument
         '        Next bkIdx
     End If
     With .Application.CommandBars
-        If .Item("web").Visible = True Then .Item("web").Visible = False
+        If .item("web").Visible = True Then .item("web").Visible = False
     End With
 '    .ActiveWindow.WindowState = wdWindowStateMaximize
 '    .ActiveWindow.Application.GoBack '到最後編輯處,作用等同於按 Shift+F5 鍵
@@ -771,6 +777,11 @@ End With
 'End Select
 DoEvents
 Me.在整頁模式中不顯示頁面間的空白區域
-If userProfilePath = "" Then userProfilePath = SystemSetup.取得使用者路徑_含反斜線()
+If UserProfilePath = "" Then UserProfilePath = SystemSetup.取得使用者路徑_含反斜線()
 End Sub
 
+Private Sub Application_Quit()
+'20230119 YouChat菩薩:'根本就不會觸動啟動此程序！
+  ' Perform the event handling procedure here.
+  SystemSetup.killchromedriverFromHere
+End Sub

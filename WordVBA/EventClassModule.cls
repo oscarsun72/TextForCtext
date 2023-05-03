@@ -33,18 +33,19 @@ Attribute App.VB_VarHelpID = -1
 
 Private Sub app_Quit()
 
-'自動備份Normal.dotm
-backupNormal_dotm
-
-'清除Word Selenium所開啟的chromedriver
-'20230119 chatGPT菩薩：VBA  如何結束 MS word 時處理程序呢：
-'https://learn.microsoft.com/zh-tw/office/vba/word/concepts/objects-properties-methods/using-events-with-the-application-object-word
-SystemSetup.killchromedriverFromHere
+    '自動備份Normal.dotm
+    SystemSetup.backupNormal_dotm
+        
+    
+    '清除Word Selenium所開啟的chromedriver
+    '20230119 chatGPT菩薩：VBA  如何結束 MS word 時處理程序呢：
+    'https://learn.microsoft.com/zh-tw/office/vba/word/concepts/objects-properties-methods/using-events-with-the-application-object-word
+    SystemSetup.killchromedriverFromHere
 End Sub
 
 
-Private Sub App_DocumentBeforeSave(ByVal Doc As Document, SaveAsUI As Boolean, Cancel As Boolean)
-'隱藏字表
+Private Sub App_DocumentBeforeSave(ByVal doc As Document, SaveAsUI As Boolean, Cancel As Boolean)
+    '隱藏字表
 End Sub
 
 Private Sub App_DocumentChange() '寫在此處較有效!2010/10/20
@@ -58,7 +59,7 @@ End Sub
 
 
 
-Private Sub App_WindowActivate(ByVal Doc As Document, ByVal Wn As Window)
+Private Sub App_WindowActivate(ByVal doc As Document, ByVal Wn As Window)
 ''If InStr(Doc.Name, "字表7") = 0 Then Wn.Visible = False
 ''    'Wn.WindowState = wdWindowStateMaximize
 ''    隱藏字表
@@ -72,7 +73,7 @@ Private Sub App_WindowActivate(ByVal Doc As Document, ByVal Wn As Window)
 'End If
 End Sub
 
-Private Sub App_WindowDeactivate(ByVal Doc As Document, ByVal Wn As Window) '寫在App_DocumentChange較有效!2010/10/20
+Private Sub App_WindowDeactivate(ByVal doc As Document, ByVal Wn As Window) '寫在App_DocumentChange較有效!2010/10/20
 'Register_Event_Handler
 'If Documents.Count > 1 Then
 '    If InStr(Doc.Name, "字表7") Then Wn.Visible = False

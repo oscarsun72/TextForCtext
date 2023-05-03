@@ -630,6 +630,7 @@ namespace TextForCtext
                         case -2146233088:
                             if (ex.Message.IndexOf("no such window: target window already closed") > -1)//"no such window: target window already closed\nfrom unknown error: web view not found\n  (Session info: chrome=110.0.5481.178)"
                             {
+                                if (!url.EndsWith("#editor")) url = ActiveTabURL_Ctext_Edit_includingEditorStr;
                                 GoToUrlandActivate(url);
                                 return;
                             }
@@ -641,6 +642,7 @@ namespace TextForCtext
                             }
                             else
                                 MessageBox.Show(ex.HResult + ex.Message);
+                            Debugger.Break();
                             break;
                         default:
                             //cDrv.Navigate().GoToUrl(Form1.mainFromTextBox3Text ?? "https://ctext.org/account.pl?if=en");                    
@@ -782,7 +784,20 @@ namespace TextForCtext
             {
                 //string url = getUrl(ControlType.Edit).Trim();
                 string url = getUrlFirst_Ctext_Edit(ControlType.Edit).Trim();
-                //if (url == "") url = getUrl(ControlType.Edit).Trim();
+                if (url == "") url = getUrl(ControlType.Edit).Trim();
+                if (url != "") url = url.StartsWith("https://") ? url : "https://" + url;
+                return url;
+            }
+        }
+        /// <summary>
+        /// 取得現行Ctext 編輯時前景之分頁網址（須含有"#editor"尾綴）。尤其是為使用者手動切換者；若找不到則傳回""
+        /// </summary>
+        public static string ActiveTabURL_Ctext_Edit_includingEditorStr
+        {
+            get
+            {
+                string url = getUrlFirst_Ctext_Edit(ControlType.Edit, true).Trim();
+                if (url == "") url = getUrl(ControlType.Edit).Trim();
                 if (url != "") url = url.StartsWith("https://") ? url : "https://" + url;
                 return url;
             }
@@ -810,8 +825,9 @@ namespace TextForCtext
         /// 〈get url FindAll vs FindFirst〉https://www.notion.so/get-url-FindAll-vs-FindFirst-88505499d53e4557a45fe8e844f0ee4a
         /// </summary>
         /// <param name="controlType"></param>
+        /// <param name="endwithEditorStr">是否要取得末綴為「#editor」的網址</param>
         /// <returns></returns>
-        static string getUrlFirst_Ctext_Edit(ControlType controlType)
+        static string getUrlFirst_Ctext_Edit(ControlType controlType, bool endwithEditorStr = false)
         {
 
             string url = "";
@@ -855,9 +871,19 @@ namespace TextForCtext
                         {
                             url = ((ValuePattern)elmUrlBar.GetCurrentPattern(ValuePattern.Pattern)).Current.Value as string;
                             //if ((url.StartsWith("http") || url.StartsWith("ctext")))
-                            if (((url.StartsWith("ctext.org/")) || (url.StartsWith("https://ctext.org/")) && url.EndsWith("#editor")))
+                            if (endwithEditorStr)
                             {
-                                return url;
+                                if ((url.StartsWith("ctext.org/") || url.StartsWith("https://ctext.org/")) && url.IndexOf("&page=") > -1 && url.EndsWith("#editor"))
+                                {
+                                    return url;
+                                }
+                            }
+                            else
+                            {
+                                if ((url.StartsWith("ctext.org/") || url.StartsWith("https://ctext.org/")) && url.IndexOf("&page=") > -1)//&& url.EndsWith("#editor"))
+                                {
+                                    return url;
+                                }
                             }
                         }
                     }
@@ -1131,6 +1157,7 @@ namespace TextForCtext
         /// </summary>
         internal static void WindowsScrolltoTop()
         {
+            if (Form1.ModifierKeys != forms.Keys.LControlKey) return;
             if (ActiveForm1.KeyinTextMode)
             {
                 driver.ExecuteScript("window.scrollTo(0, 0)");//chatGPT:您好！如果您使用 C# 和 Selenium 來控制 Chrome 瀏覽器，您可以使用以下的程式碼將網頁捲到最上面：
@@ -1178,7 +1205,18 @@ namespace TextForCtext
             {
                 if (textbox != null) Quickedit_data_textbox = textbox;
                 else
-                    Quickedit_data_textbox = waitFindWebElementByName_ToBeClickable("data", _webDriverWaitTimSpan, driver);
+                    try
+                    {
+                        Quickedit_data_textbox = waitFindWebElementByName_ToBeClickable("data", _webDriverWaitTimSpan, driver);
+                    }
+                    catch (Exception ex)
+                    {
+                        //分頁視窗若關閉則忽略、繼續
+                        Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.Message);
+                        return;
+                        //throw;
+                    }
+                Quickedit_data_textbox = waitFindWebElementByName_ToBeClickable("data", _webDriverWaitTimSpan, driver);
                 quickedit_data_textboxTxt = Quickedit_data_textbox == null ? "" : Quickedit_data_textbox.Text;
             }
         }
@@ -1263,7 +1301,28 @@ namespace TextForCtext
             //using (driver)//var driver = new ChromeDriver())//若這樣寫則會出現「無法存取已處置的物件。」之錯誤    HResult	-2146232798	int               
             //{因為 using(driver) 這 driver 只在 ) 後的第一層大括弧{}間有效，生命週期僅止於此間而已
             // 移動到指定的網頁
-            GoToUrlandActivate(url ?? System.Windows.Forms.Application.OpenForms[0].Controls["textBox3"].Text);
+            try
+            {
+                GoToUrlandActivate(url ?? System.Windows.Forms.Application.OpenForms[0].Controls["textBox3"].Text);
+            }
+            catch (Exception ex)
+            {
+                switch (ex.HResult)
+                {
+                    case -2146233088:
+                        if (ex.Message.IndexOf("timed out after ") > -1) return "";
+                        else
+                        {
+                            Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
+                            break;
+
+                        }
+                    default:
+                        Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
+                        break;
+                }
+                //throw;
+            }
             //try
             //{
             //    driver.Navigate().GoToUrl(url ?? System.Windows.Forms.Application.OpenForms[0].Controls["textBox3"].Text);//("http://example.com/");
@@ -1626,10 +1685,34 @@ namespace TextForCtext
 
             #region 先檢查點數是否足夠
             const byte pointCoin = 150;//「自動識別(豎版)」所需點數120，載入圖檔要30
-            //IWebElement iwe = waitFindWebElementBySelector_ToBeClickable("#compute-value");
-            //IWebElement iwe = driver.FindElement(By.CssSelector("#compute-value"));
-            WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(_chromeDriverServiceTimeSpan));
-            IWebElement iwe = wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementIsVisible(By.CssSelector("#compute-value")));
+            IWebElement iwe = null;
+            try
+            {//以備隨時被使用者關閉
+                //IWebElement iwe = waitFindWebElementBySelector_ToBeClickable("#compute-value");
+                //IWebElement iwe = driver.FindElement(By.CssSelector("#compute-value"));
+                WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(_chromeDriverServiceTimeSpan));
+                iwe = wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementIsVisible(By.CssSelector("#compute-value")));
+            }
+            catch (Exception ex)
+            {
+                switch (ex.HResult)
+                {
+                    case -2147467261:
+                        if (ex.Message.IndexOf("並未將物件參考設定為物件的執行個體。") > -1)
+                            return false;
+                        else
+                        {
+                            Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
+                            Debugger.Break();
+                        }
+                        break;
+                    default:
+                        Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
+                        Debugger.Break();
+                        break;
+                }
+                //throw;
+            }
             if (iwe != null)
             {
                 //取得點數，如「 117 / 1000」格式
@@ -1895,48 +1978,86 @@ namespace TextForCtext
             //                                                  #dialog_483f217a > div.col > div.d-flex.py-1 > button
 
             //待OCR結束
-            //Thread.Sleep(5000);
-            Thread.Sleep(4300);
+            Thread.Sleep(4600);//可多設時間以等待，若多餘，可手動按下複製按鈕即可。
+            //Thread.Sleep(4300);
             #region 將OCR結果讀入剪貼簿：
-            Clipboard.Clear();
-            //按下複製按鈕複製到剪貼簿
-            //SendKeys.Send("{tab 4}~");
-            //SendKeys.Send("{tab 7}~");
-            //SendKeys.Send("+{tab 10}");
-            //Thread.Sleep(3000);
-            //SendKeys.Send("+{tab 4}");
-            //SendKeys.Send("~");
-
-            //iwe.Click();
-            //複製結果顯示到剪貼簿
-            //Clipboard.SetText(iwe.Text);
-            #endregion
-
-            #region 關閉OCR視窗後回到原來分頁視窗
-            //！！！！此須手動按下「複製」按鈕了！！！！
+            Point copyBtnPos = new Point(); DateTime begin = DateTime.Now;
             //待手動成功複製，上限為 timeSpanSecs 秒
-            DateTime begin = DateTime.Now; int timeSpanSecs = 8;
-            //滑鼠定位，以備手動按下「複製」按鈕（須視窗最大化）
-            Point copyBtnPos = new Point(838, 711);//用PRTSC鍵拍下全螢幕後，貼到小畫家以滑鼠取得坐標位置（即顯示在狀態列中）
-            Cursor.Position = copyBtnPos;
-            Thread.Sleep(800);//要等一下才行否則反應不過來
-            /* 20230401 Bing大菩薩：在C#中，您可以使用 `MouseOperations` 类来模拟鼠标点击。这个类中有一个名为 `MouseEvent` 的方法，它可以接受一个 `MouseEventFlags` 枚举值作为参数，用来指定要执行的鼠标操作¹。例如，要模拟鼠标左键点击，可以这样写：
-            ```csharp
-                MouseOperations.MouseEvent(MouseOperations.MouseEventFlags.LeftDown);
-                MouseOperations.MouseEvent(MouseOperations.MouseEventFlags.LeftUp);
-                ```
-                來源: 與 Bing 的交談， 2023/4/1(1) .net - How do you simulate Mouse Click in C#? - Stack Overflow. https://stackoverflow.com/questions/2416748/how-do-you-simulate-mouse-click-in-c 已存取 2023/4/1.
-                (2) c# - Using SendMessage to simulate mouse clicks - Stack Overflow. https://stackoverflow.com/questions/14876345/using-sendmessage-to-simulate-mouse-clicks 已存取 2023/4/1.
-                (3) How to programatically trigger a mouse left click in C#?. https://stackoverflow.com/questions/2736965/how-to-programatically-trigger-a-mouse-left-click-in-c 已存取 2023/4/1.
-                (4) c# - I want to send mouse click with SendMessage but it's not working, What wrong with my code? - Stack Overflow. https://stackoverflow.com/questions/46306860/i-want-to-send-mouse-click-with-sendmessage-but-its-not-working-what-wrong-wit 已存取 2023/4/1.
-             */
-            //MouseOperations.MouseEvent(MouseOperations.MouseEventFlags.LeftDown);
-            //MouseOperations.MouseEvent(MouseOperations.MouseEventFlags.LeftUp);            
-            MouseOperations.MouseEventMousePos(MouseOperations.MouseEventFlags.LeftDown, copyBtnPos);
-            MouseOperations.MouseEventMousePos(MouseOperations.MouseEventFlags.LeftUp, copyBtnPos);
-            /*Bing大菩薩：您好，`MouseOperations` 不是 C# 的内置类。它是一个自定义类，您可以在 Stack Overflow 上找到它的源代码。您可以将这些代码复制到您的项目中，然后使用它来模拟鼠标点击。
-             */
-            Thread.Sleep(450);
+            int timeSpanSecs = 0;
+            try
+            {
+                Clipboard.Clear();
+                //按下複製按鈕複製到剪貼簿
+                //SendKeys.Send("{tab 4}~");
+                //SendKeys.Send("{tab 7}~");
+                //SendKeys.Send("+{tab 10}");
+                //Thread.Sleep(3000);
+                //SendKeys.Send("+{tab 4}");
+                //SendKeys.Send("~");
+
+                //iwe.Click();
+                //複製結果顯示到剪貼簿
+                //Clipboard.SetText(iwe.Text);
+                #endregion
+
+                #region 關閉OCR視窗後回到原來分頁視窗
+                //！！！！此須手動按下「複製」按鈕了！！！！
+                timeSpanSecs = 8;
+                //滑鼠定位，以備手動按下「複製」按鈕（須視窗最大化）
+                copyBtnPos = new Point(838, 711);//用PRTSC鍵拍下全螢幕後，貼到小畫家以滑鼠取得坐標位置（即顯示在狀態列中）
+                Cursor.Position = copyBtnPos;
+                Thread.Sleep(800);//要等一下才行否則反應不過來
+                /* 20230401 Bing大菩薩：在C#中，您可以使用 `MouseOperations` 类来模拟鼠标点击。这个类中有一个名为 `MouseEvent` 的方法，它可以接受一个 `MouseEventFlags` 枚举值作为参数，用来指定要执行的鼠标操作¹。例如，要模拟鼠标左键点击，可以这样写：
+                ```csharp
+                    MouseOperations.MouseEvent(MouseOperations.MouseEventFlags.LeftDown);
+                    MouseOperations.MouseEvent(MouseOperations.MouseEventFlags.LeftUp);
+                    ```
+                    來源: 與 Bing 的交談， 2023/4/1(1) .net - How do you simulate Mouse Click in C#? - Stack Overflow. https://stackoverflow.com/questions/2416748/how-do-you-simulate-mouse-click-in-c 已存取 2023/4/1.
+                    (2) c# - Using SendMessage to simulate mouse clicks - Stack Overflow. https://stackoverflow.com/questions/14876345/using-sendmessage-to-simulate-mouse-clicks 已存取 2023/4/1.
+                    (3) How to programatically trigger a mouse left click in C#?. https://stackoverflow.com/questions/2736965/how-to-programatically-trigger-a-mouse-left-click-in-c 已存取 2023/4/1.
+                    (4) c# - I want to send mouse click with SendMessage but it's not working, What wrong with my code? - Stack Overflow. https://stackoverflow.com/questions/46306860/i-want-to-send-mouse-click-with-sendmessage-but-its-not-working-what-wrong-wit 已存取 2023/4/1.
+                 */
+                //MouseOperations.MouseEvent(MouseOperations.MouseEventFlags.LeftDown);
+                //MouseOperations.MouseEvent(MouseOperations.MouseEventFlags.LeftUp);            
+                MouseOperations.MouseEventMousePos(MouseOperations.MouseEventFlags.LeftDown, copyBtnPos);
+                MouseOperations.MouseEventMousePos(MouseOperations.MouseEventFlags.LeftUp, copyBtnPos);
+                /*Bing大菩薩：您好，`MouseOperations` 不是 C# 的内置类。它是一个自定义类，您可以在 Stack Overflow 上找到它的源代码。您可以将这些代码复制到您的项目中，然后使用它来模拟鼠标点击。
+                 */
+                Thread.Sleep(450);
+            }
+            catch (Exception ex)
+            {
+                if (ex.Message.IndexOf("剪貼簿") == -1)
+                {
+                    if (Clipboard.GetText().Length > 22)
+                        Console.WriteLine(ex.HResult + ex.Message);
+                }
+                else
+                    //剪貼簿失效忽略不計（可能是手動按下複製了；也就不必等待了）
+                    Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message + "\n\r\n\r程式將忽略此錯誤，繼續進行。");
+                //throw;
+            }
+
+
+            while (!Form1.isClipBoardAvailable_Text())
+            {
+                if (timeSpanSecs > 0 && DateTime.Now.Subtract(begin).TotalSeconds > timeSpanSecs) return false;
+                //藉由手動關閉視窗以提早/強制中止程序
+                try
+                {
+                    if (currentWindowHndl != driver.CurrentWindowHandle) { };
+                }
+                catch (Exception)
+                {
+                    return false;
+                }
+                if (copyBtnPos.X > 0)//= Point(838, 711)
+                {
+                    Thread.Sleep(800);
+                    MouseOperations.MouseEventMousePos(MouseOperations.MouseEventFlags.LeftDown, copyBtnPos);
+                    MouseOperations.MouseEventMousePos(MouseOperations.MouseEventFlags.LeftUp, copyBtnPos);
+                }
+            }
             while (Clipboard.GetText().Length == 0)
             {
 
