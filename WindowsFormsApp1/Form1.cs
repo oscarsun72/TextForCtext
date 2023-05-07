@@ -2648,6 +2648,7 @@ namespace WindowsFormsApp1
         {//Alt + Shift + 6 或 Alt + s 小注文不換行
             textBox1.DeselectAll();
             string xSel = textBox1.SelectedText, x = textBox1.Text; int s = textBox1.SelectionStart; bool flg = false;
+            if (s == x.Length) return 0;
             if (undoRe)
             {
                 undoRecord(); stopUndoRec = true;
@@ -4301,8 +4302,8 @@ namespace WindowsFormsApp1
             TopMost = topmost;
         }
 
-        enum soundLike { over, done, stop, info, error, warn, exam }
-        void playSound(soundLike sndlike)
+        public enum soundLike { over, done, stop, info, error, warn, exam }
+        public static void playSound(soundLike sndlike)
         {
             string mediaPathWithBackslash = Environment.GetFolderPath(Environment.SpecialFolder.Windows) + "\\Media\\";
             string wav = "";
@@ -6152,23 +6153,23 @@ namespace WindowsFormsApp1
                     break;
                 case br.OCRSiteTitle.GJcool:
                     br.ActiveForm1 = this;
-                    try
-                    {
-                        ocrResult = br.OCR_GJcool_AutoRecognizeVertical(downloadImgFullName);
-                    }
-                    catch (Exception ex)
-                    {
-                        switch (ex.HResult)
-                        {
-                            case -2146233088://"no such window\n  (Session info: chrome=112.0.5615.138)"
-                                if (ex.Message.IndexOf("no such window") > -1)
-                                    break;//手動關閉或誤關視窗時忽略不計。
-                                break;
-                            default:
-                                Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
-                                break;
-                        }
-                    }
+                    //try
+                    //{
+                    ocrResult = br.OCR_GJcool_AutoRecognizeVertical(downloadImgFullName);
+                    //}
+                    //catch (Exception ex)
+                    //{
+                    //    switch (ex.HResult)
+                    //    {
+                    //        case -2146233088://"no such window\n  (Session info: chrome=112.0.5615.138)"
+                    //            if (ex.Message.IndexOf("no such window") > -1)
+                    //                break;//手動關閉或誤關視窗時忽略不計。
+                    //            break;
+                    //        default:
+                    //            Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
+                    //            break;
+                    //    }
+                    //}
                     break;
                 default:
                     break;
@@ -6619,7 +6620,7 @@ namespace WindowsFormsApp1
         /// 等待剪貼簿內的文字可用時
         /// </summary>
         /// <returns></returns>
-        public static bool isClipBoardAvailable_Text()
+        public static bool isClipBoardAvailable_Text(int waitMilliSecond = 1000)
         {// creedit with chatGPT：Clipboard Availability in C#：https://www.facebook.com/oscarsun72/posts/pfbid0dhv46wssuupa5PfH6RTNSZF58wUVbE6jehnQuYF9HtE9kozDBzCvjsowDkZTxkmcl
         /*在 C# 的 System.Windows.Forms 中，可以使用 Clipboard.ContainsData 或 Clipboard.ContainsText 方法來確定剪貼簿是否可用。*/
         retry:
@@ -6627,15 +6628,15 @@ namespace WindowsFormsApp1
             {
                 if (!Clipboard.ContainsText())
                 {
-                    Thread.Sleep(1000);
-                    Task.Delay(1000);
+                    Thread.Sleep(waitMilliSecond);
+                    Task.Delay(waitMilliSecond);
                 }
 
             }
             catch (Exception)
             {
-                Thread.Sleep(1000);
-                Task.Delay(1000); goto retry;
+                Thread.Sleep(waitMilliSecond);
+                Task.Delay(waitMilliSecond); goto retry;
                 throw;
             }
             return Clipboard.ContainsText();
@@ -7797,7 +7798,7 @@ namespace WindowsFormsApp1
                     }
 
                     //確定剪貼簿是可用的
-                    while (!isClipBoardAvailable_Text()) { }
+                    while (!Form1.isClipBoardAvailable_Text()) { }
 
                     //讀取剪貼簿裡的內容（即擷取自 quick_edit_box 框內的文字）
                     string nowClpTxt = Clipboard.GetText();
@@ -8731,6 +8732,10 @@ namespace WindowsFormsApp1
             previousBookID = bookID;
         }
 
+        /// <summary>
+        /// 重設書本的頁面資訊（一頁幾行，一行幾字……）。
+        /// 可藉由textBox3.Text值的改變（不同的書ID值）即會自動執行此項
+        /// </summary>
         private void resetBooksPagesFeatures()
         {
             linesParasPerPage = -1;//每頁行/段數

@@ -1911,7 +1911,7 @@ Rem 20230128 癸卯年初七 孫守真×chatGPT大菩薩：VBA Overload Functionality：
 'VBA (Visual Basic for Applications) 是一種微軟的程式語言，主要用於自動化 Microsoft Office 應用程式中。VBA 不支援函式的多載和重載。這意味著，您不能在 VBA 中定義具有相同名稱但參數不同的多個函式。
 
 Dim ayToTrim As Variant, a As Variant
-On Error GoTo eh
+On Error GoTo eH
 ayToTrim = Array(Chr(13), Chr(9), Chr(10), Chr(11), Chr(13) & Chr(7), Chr(13) & Chr(10))
 x = VBA.Trim(x)
 For Each a In ayToTrim
@@ -1925,7 +1925,7 @@ For Each a In ayToTrim
 Next a
 trimStrForSearch_PlainText = x
 Exit Function
-eh:
+eH:
 Select Case Err.Number
     Case Else
         MsgBox Err.Number & Err.Description
@@ -1936,7 +1936,7 @@ End Function
 Function trimStrForSearch(x As String, sl As word.Selection) As String
 'https://docs.microsoft.com/zh-tw/dotnet/visual-basic/programming-guide/language-features/procedures/passing-arguments-by-value-and-by-reference
 Dim ayToTrim As Variant, a As Variant, rng As Range, slTxtR As String
-On Error GoTo eh
+On Error GoTo eH
 slTxtR = sl.Characters(sl.Characters.Count)
 ayToTrim = Array(Chr(13), Chr(9), Chr(10), Chr(11), Chr(13) & Chr(7), Chr(13) & Chr(10))
 x = VBA.Trim(x)
@@ -1959,7 +1959,7 @@ If sl.Type <> wdSelectionIP Then
     End If
 End If
 Exit Function
-eh:
+eH:
 Select Case Err.Number
     Case Else
         MsgBox Err.Number & Err.Description
@@ -2010,7 +2010,7 @@ End Sub
 
 Function is注音符號(ByVal a As String, Optional rng As Variant) As Boolean
 Dim f As String
-On Error GoTo eh
+On Error GoTo eH
 If Len(a) > 1 Then Exit Function
 f = "ㄅㄆㄇㄈㄉㄊㄋㄌㄍㄎㄏㄐㄑㄒㄓㄔㄕㄖㄗㄘㄙㄧㄨㄩㄚㄛㄜㄝㄞㄟㄠㄡㄢㄣㄤㄥㄦˊ  ˇ  ˋ  ˙"
 If a = ChrW(20008) Then
@@ -2031,7 +2031,7 @@ Else
     If InStr(f, a) Then is注音符號 = True
 End If
 Exit Function
-eh:
+eH:
 Select Case Err.Number
     Case 424 '此處需要物件
         Set rng = Nothing
@@ -2662,7 +2662,7 @@ End Sub
 Sub 書名號篇名號檢查()
 Dim s As Long, rng As Range, e, trm As String, ans
 Static x() As String, i As Integer
-On Error GoTo eh
+On Error GoTo eH
 Do
     Selection.Find.Execute "〈", , , , , , True, wdFindAsk
     Set rng = Selection.Range
@@ -2684,7 +2684,7 @@ Do
 1
 Loop
 Exit Sub
-eh:
+eH:
 Select Case Err.Number
     Case 92 '沒有設定 For 迴圈的初始值 陣列尚未有值
         GoTo 2
@@ -2744,7 +2744,7 @@ chng:
 Return
 End Sub
 Sub 中國哲學書電子化計劃_表格轉文字(ByRef r As Range)
-On Error GoTo eh
+On Error GoTo eH
 Dim lngTemp As Long '因為誤按到追蹤修訂，才會引發訊息提示刪除儲存格不會有標識
 'Dim d As Document
 Dim tb As Table, C As Cell ', ci As Long
@@ -2759,7 +2759,7 @@ If r.Tables.Count > 0 Then
 End If
 'word.Application.DisplayAlerts = lngTemp
 Exit Sub
-eh:
+eH:
 Select Case Err.Number
     Case 5992 '無法個別存取此集合中的各欄，因為表格中有混合的儲存格寬度。
         For Each C In tb.Range.Cells
@@ -2934,7 +2934,7 @@ For Each a In rng.Characters
     End If
 Next a
 rng.Cut
-On Error GoTo eh:
+On Error GoTo eH:
 rng.PasteAndFormat wdFormatPlainText
 rng.Find.ClearFormatting
 For i = 0 To UBound(rp)
@@ -2952,7 +2952,7 @@ If Not doNotCloseDoc Then
 End If
 SystemSetup.contiUndo ur
 Exit Sub
-eh:
+eH:
 Select Case Err.Number
     Case 4198 '指令失敗
         SystemSetup.wait 900
@@ -3062,7 +3062,7 @@ End If
 Set rng = Selection.Range
 words = x
 db.setWordControlValue (words)
-On Error GoTo eh
+On Error GoTo eH
 Dim ur As UndoRecord
 'Set ur = SystemSetup.stopUndo("生難字加上國語辭典注音")
 SystemSetup.stopUndo ur, "生難字加上國語辭典注音"
@@ -3294,7 +3294,7 @@ rePt:
 Return
 
 
-eh:
+eH:
     Select Case Err.Number
         Case 4198 '指令失敗 'Google Drive的問題
             Resume Next
@@ -3439,10 +3439,22 @@ End Sub
 'Function 書名號篇名號標注PreExamOK(d As Document, term As String, whatMark As String, startPos_term As Long, Optional endPos_term As Long) As Boolean
 Function 書名號篇名號標注PreExamOK(d As Document, term As String, startPos_term As Long, Optional endPos_term As Long) As Boolean
 Dim rngChk As Range, xChk As String
-Set rngChk = d.Range(1, startPos_term)
+On Error GoTo eH:
+Set rngChk = d.Range(0, startPos_term)
 xChk = rngChk.text
 'If term = "資治通鑑" Then Stop
 If InStrRev(xChk, "《") <= InStrRev(xChk, "》") And InStrRev(xChk, "〈") <= InStrRev(xChk, "〉") Then 書名號篇名號標注PreExamOK = True
+
+Exit Function
+eH:
+    Select Case Err.Number
+        'Case 4608 '數值超出範圍
+            'Resume
+        Case Else
+            MsgBox Err.Number + Err.Description
+'            Resume
+    End Select
+
 
 'Dim result As Boolean
 'If whatMark = "《" Then ' = ？ 如：此時會「=」：If InStr(xChk, "《") = 0 And InStr(xChk, "》") = 0 And InStr(xChk, "〈") = 0 And InStr(xChk, "〉") = 0 Then 20230312 優化。感恩感恩　讚歎讚歎　南無阿彌陀佛。沒有佛菩薩加持，我孫守真可能嗎？
@@ -3478,6 +3490,7 @@ Dim cnt As New ADODB.Connection, rst As New ADODB.Recordset
 Dim cntStr As String, d As Document, dx As String, rngF As Range, title As String
 Dim db As New dBase
 Dim ur As UndoRecord
+On Error GoTo eH:
 SystemSetup.stopUndo ur, "書名號篇名號標注"
 db.cnt查字 cnt
 'If Dir("H:\我的雲端硬碟\私人\千慮一得齋(C槽版)\書籍資料\圖書管理附件", vbDirectory) <> "" Then
@@ -3563,6 +3576,12 @@ Loop
 rst.Close
 Return
 
+eH:
+    Select Case Err.Number
+        Case Else
+            MsgBox Err.Number + Err.Description
+'            Resume
+    End Select
 End Sub
 
 

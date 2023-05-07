@@ -1146,9 +1146,16 @@ namespace TextForCtext
             //throw;
             driver.Navigate().GoToUrl(url);
             //activate and move to most front of desktop
-            //driver.SwitchTo().Window(driver.CurrentWindowHandle);            
-            if (frmKeyinTextModeTopWindow) WindowsScrolltoTop();//將分頁視窗頁面捲到頂端
-            quickedit_data_textboxSetting(url);
+            //driver.SwitchTo().Window(driver.CurrentWindowHandle;
+            try
+            {
+                if (frmKeyinTextModeTopWindow) WindowsScrolltoTop();//將分頁視窗頁面捲到頂端
+                quickedit_data_textboxSetting(url);
+            }
+            catch (Exception)
+            {
+                //忽略錯誤不處理
+            }
         }
 
         /// <summary>
@@ -1157,9 +1164,9 @@ namespace TextForCtext
         /// </summary>
         internal static void WindowsScrolltoTop()
         {
-            if (Form1.ModifierKeys != forms.Keys.LControlKey) return;
             if (ActiveForm1.KeyinTextMode)
             {
+                if (Form1.ModifierKeys != forms.Keys.LControlKey) return;
                 driver.ExecuteScript("window.scrollTo(0, 0)");//chatGPT:您好！如果您使用 C# 和 Selenium 來控制 Chrome 瀏覽器，您可以使用以下的程式碼將網頁捲到最上面：
 
                 ///*20220312 chatGPT大菩薩：您好！要將分頁視窗的瀏覽位置調整到最上方，可以使用 Selenium 的 JavaScriptExecutor 物件，透過執行 JavaScript 的方式來操作瀏覽器。
@@ -1966,6 +1973,9 @@ namespace TextForCtext
             SendKeys.Send("+{Insert}");//or "^v"
             SendKeys.Send("{ENTER}");
 
+            Thread.Sleep(200);
+            Clipboard.Clear();
+
             //等待結果顯示：結果顯示元件：#text_b81d8450
             //也會變動  ！！              #text_1043686b9
             //iwe = waitFindWebElementBySelector_ToBeClickable("#text_b81d8450");
@@ -1978,7 +1988,7 @@ namespace TextForCtext
             //                                                  #dialog_483f217a > div.col > div.d-flex.py-1 > button
 
             //待OCR結束
-            Thread.Sleep(4600);//可多設時間以等待，若多餘，可手動按下複製按鈕即可。
+            Thread.Sleep(4700);//可多設時間以等待，若多餘，可手動按下複製按鈕即可。
             //Thread.Sleep(4300);
             #region 將OCR結果讀入剪貼簿：
             Point copyBtnPos = new Point(); DateTime begin = DateTime.Now;
@@ -1986,7 +1996,7 @@ namespace TextForCtext
             int timeSpanSecs = 0;
             try
             {
-                Clipboard.Clear();
+                //Clipboard.Clear();
                 //按下複製按鈕複製到剪貼簿
                 //SendKeys.Send("{tab 4}~");
                 //SendKeys.Send("{tab 7}~");
@@ -2006,7 +2016,8 @@ namespace TextForCtext
                 //滑鼠定位，以備手動按下「複製」按鈕（須視窗最大化）
                 copyBtnPos = new Point(838, 711);//用PRTSC鍵拍下全螢幕後，貼到小畫家以滑鼠取得坐標位置（即顯示在狀態列中）
                 Cursor.Position = copyBtnPos;
-                Thread.Sleep(800);//要等一下才行否則反應不過來
+                //Thread.Sleep(800);//要等一下才行否則反應不過來
+                Thread.Sleep(300);//要等一下才行否則反應不過來
                 /* 20230401 Bing大菩薩：在C#中，您可以使用 `MouseOperations` 类来模拟鼠标点击。这个类中有一个名为 `MouseEvent` 的方法，它可以接受一个 `MouseEventFlags` 枚举值作为参数，用来指定要执行的鼠标操作¹。例如，要模拟鼠标左键点击，可以这样写：
                 ```csharp
                     MouseOperations.MouseEvent(MouseOperations.MouseEventFlags.LeftDown);
@@ -2018,12 +2029,26 @@ namespace TextForCtext
                     (4) c# - I want to send mouse click with SendMessage but it's not working, What wrong with my code? - Stack Overflow. https://stackoverflow.com/questions/46306860/i-want-to-send-mouse-click-with-sendmessage-but-its-not-working-what-wrong-wit 已存取 2023/4/1.
                  */
                 //MouseOperations.MouseEvent(MouseOperations.MouseEventFlags.LeftDown);
-                //MouseOperations.MouseEvent(MouseOperations.MouseEventFlags.LeftUp);            
+                //MouseOperations.MouseEvent(MouseOperations.MouseEventFlags.LeftUp);                
                 MouseOperations.MouseEventMousePos(MouseOperations.MouseEventFlags.LeftDown, copyBtnPos);
+                Form1.playSound(Form1.soundLike.info);
+                Thread.Sleep(50);
                 MouseOperations.MouseEventMousePos(MouseOperations.MouseEventFlags.LeftUp, copyBtnPos);
                 /*Bing大菩薩：您好，`MouseOperations` 不是 C# 的内置类。它是一个自定义类，您可以在 Stack Overflow 上找到它的源代码。您可以将这些代码复制到您的项目中，然后使用它来模拟鼠标点击。
                  */
+
+                //藉由手動關閉視窗以提早/強制中止程序
+                try
+                {
+                    if (currentWindowHndl != driver.CurrentWindowHandle) { };
+                }
+                catch (Exception)
+                {
+                    return false;
+                }
+
                 Thread.Sleep(450);
+                //Thread.Sleep(1550);
             }
             catch (Exception ex)
             {
@@ -2039,9 +2064,9 @@ namespace TextForCtext
             }
 
 
-            while (!Form1.isClipBoardAvailable_Text())
+            while (!Form1.isClipBoardAvailable_Text(100))
             {
-                if (timeSpanSecs > 0 && DateTime.Now.Subtract(begin).TotalSeconds > timeSpanSecs) return false;
+                //if (timeSpanSecs > 0 && DateTime.Now.Subtract(begin).TotalSeconds > timeSpanSecs) return false;
                 //藉由手動關閉視窗以提早/強制中止程序
                 try
                 {
@@ -2051,31 +2076,34 @@ namespace TextForCtext
                 {
                     return false;
                 }
-                if (copyBtnPos.X > 0)//= Point(838, 711)
-                {
-                    Thread.Sleep(800);
-                    MouseOperations.MouseEventMousePos(MouseOperations.MouseEventFlags.LeftDown, copyBtnPos);
-                    MouseOperations.MouseEventMousePos(MouseOperations.MouseEventFlags.LeftUp, copyBtnPos);
-                }
+                //if (copyBtnPos.X > 0)//= Point(838, 711)
+                //{
+                //    MouseOperations.MouseEventMousePos(MouseOperations.MouseEventFlags.LeftDown, copyBtnPos);
+                //    Thread.Sleep(50);
+                //    MouseOperations.MouseEventMousePos(MouseOperations.MouseEventFlags.LeftUp, copyBtnPos);
+                //    Thread.Sleep(100);
+                //}
             }
-            while (Clipboard.GetText().Length == 0)
-            {
+            //while (Clipboard.GetText().Length == 0)
+            //{
 
-                MouseOperations.MouseEventMousePos(MouseOperations.MouseEventFlags.LeftDown, copyBtnPos);
-                MouseOperations.MouseEventMousePos(MouseOperations.MouseEventFlags.LeftUp, copyBtnPos);
+            //    MouseOperations.MouseEventMousePos(MouseOperations.MouseEventFlags.LeftDown, copyBtnPos);
+            //    MouseOperations.MouseEventMousePos(MouseOperations.MouseEventFlags.LeftUp, copyBtnPos);
 
-                //藉由手動關閉視窗以提早/強制中止程序
-                try
-                {
-                    if (currentWindowHndl != driver.CurrentWindowHandle) { };
-                }
-                catch (Exception)
-                {
-                    return false;
-                }
-                Thread.Sleep(450);
-            }
-            string txtchkClipboard = new StringInfo(Clipboard.GetText()).SubstringByTextElements(0);
+            //    //藉由手動關閉視窗以提早/強制中止程序
+            //    try
+            //    {
+            //        if (currentWindowHndl != driver.CurrentWindowHandle) { };
+            //    }
+            //    catch (Exception)
+            //    {
+            //        return false;
+            //    }
+            //    Thread.Sleep(450);
+            //}
+            string txtchkClipboard = "";
+            if (Clipboard.GetText() != "")
+                txtchkClipboard = new StringInfo(Clipboard.GetText()).SubstringByTextElements(0);
             while ((txtchkClipboard == "" || txtchkClipboard.IndexOf("正在识别") > -1) && txtchkClipboard.Length < 22)
             {
                 //每半秒按下滑鼠左鍵1次
@@ -2084,7 +2112,8 @@ namespace TextForCtext
                 MouseOperations.MouseEventMousePos(MouseOperations.MouseEventFlags.LeftDown, copyBtnPos);
                 MouseOperations.MouseEventMousePos(MouseOperations.MouseEventFlags.LeftUp, copyBtnPos);
                 Thread.Sleep(450);
-                txtchkClipboard = new StringInfo(Clipboard.GetText()).SubstringByTextElements(0);
+                if (Clipboard.GetText() != "")
+                    txtchkClipboard = new StringInfo(Clipboard.GetText()).SubstringByTextElements(0);
                 if (txtchkClipboard != "")
                 {
                     if (txtchkClipboard.Length > 22)

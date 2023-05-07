@@ -29,6 +29,7 @@ SystemSetup.contiUndo ur
 SystemSetup.playSound 2
 End Sub
 
+Rem 在新文件上操作：第一段為始頁碼、第二段為終頁碼、第三段為書ID
 Sub 新頁面()
 'the page begin
 Dim start As Integer, ur As UndoRecord
@@ -228,7 +229,7 @@ Dim rng As Range, e As Long, s As Long, rngP As Range
 'd As Document,Set d = Documents.Add
 Set rng = d.Range
 DoEvents
-On Error GoTo eH
+On Error GoTo eh
 rng.Paste
 rng.Find.ClearFormatting
 Do While rng.Find.Execute("*")
@@ -261,7 +262,7 @@ Loop
 playSound 1
 'pastetoEditBox "將星號前的分段符號移置前段之末"
 Exit Sub
-eH:
+eh:
 Select Case Err.Number
     Case 4605, 13 '此方法或屬性無法使用，因為[剪貼簿] 是空的或無效的。
         SystemSetup.wait 0.8
@@ -443,7 +444,7 @@ Do While rng.Find.Execute("^p")
     For i = 4 To 2 Step -1
         a.SetRange rng.End, rng.End + i
 '        a.Select
-        If Right(a, 1) = y Then
+        If right(a, 1) = y Then
             If a.Previous.Previous <> ">" Then
                 For yi = 1 To 99
                     yStr = 文字轉換.數字轉漢字2位數(yi) + y
@@ -467,7 +468,7 @@ d.Close wdDoNotSaveChanges
 End Sub
 Sub 維基文庫四部叢刊本轉來()
 Dim d As Document, a, i, p As Paragraph, xP As String, acP As Integer, space As String, rng As Range
-On Error GoTo eH
+On Error GoTo eh
 a = Array(ChrW(12296), "{{", ChrW(12297), "}}", "〈", "{{", "〉", "}}", _
     "○", ChrW(12295))
 '《容齋三筆》等小注作正文省版面者 https://ctext.org/library.pl?if=gb&file=89545&page=24
@@ -486,7 +487,7 @@ For i = 0 To UBound(a) - 1
 Next i
 For Each p In d.Range.Paragraphs
     xP = p.Range
-    If Left(xP, 2) = "{{" And Right(xP, 3) = "}}" & Chr(13) Then
+    If left(xP, 2) = "{{" And right(xP, 3) = "}}" & Chr(13) Then
         xP = Mid(p.Range, 3, Len(xP) - 5)
         If InStr(xP, "{{") = 0 And InStr(xP, "}}") = 0 Then
             acP = p.Range.Characters.Count - 1
@@ -504,9 +505,9 @@ For Each p In d.Range.Paragraphs
                 p.Range.Characters(acP).InsertParagraphAfter
             End If
         End If
-    ElseIf Left(xP, 1) = "　" Then '前有空格的
+    ElseIf left(xP, 1) = "　" Then '前有空格的
         i = InStr(xP, "{{")
-        If i > 0 And Right(xP, 3) = "}}" & Chr(13) Then
+        If i > 0 And right(xP, 3) = "}}" & Chr(13) Then
             space = Mid(xP, 1, i - 1)
             If Replace(space, "　", "") = "" Then
                 xP = Mid(xP, i + 2, Len(xP) - 3 - (i + 2))
@@ -540,7 +541,7 @@ d.Range.Cut
 d.Close wdDoNotSaveChanges
 SystemSetup.playSound 2
 Exit Sub
-eH:
+eh:
 Select Case Err.Number
     Case 5904 '無法編輯 [範圍]。
         If p.Range.Characters(acP).Hyperlinks.Count > 0 Then p.Range.Characters(acP).Hyperlinks(1).Delete
@@ -578,7 +579,7 @@ Static bookID
 Dim searchedTerm, e, addressHyper As String, bID As String, cndn As String
 'Const site As String = "https://ctext.org/wiki.pl?if=gb&res="
 Const site As String = "https://ctext.org/wiki.pl?if=gb"
-bID = Left(ActiveDocument.Paragraphs(1).Range, Len(ActiveDocument.Paragraphs(1).Range) - 1)
+bID = left(ActiveDocument.Paragraphs(1).Range, Len(ActiveDocument.Paragraphs(1).Range) - 1)
 If Not VBA.IsNumeric(bID) Then
     If InStr(bID, site) = 0 Then
         bookID = InputBox("plz input the book id ", , bookID)
@@ -669,7 +670,7 @@ Next i
 Set rng = Selection.Range
 For Each p In d.Paragraphs
     px = p.Range.text
-    If Left(px, 7) = "{{" & ChrW(-9217) & ChrW(-8195) & "{{{" Then '注腳段落
+    If left(px, 7) = "{{" & ChrW(-9217) & ChrW(-8195) & "{{{" Then '注腳段落
         e = p.Range.Characters(1).End
         rng.SetRange e, e
         rng.MoveEndUntil "〕"
@@ -693,7 +694,7 @@ For Each p In d.Paragraphs
         Selection.MoveRight wdCharacter, 1, wdExtend
         Selection.TypeText "〉}}}" '將注腳編號〔一〕的右邊〕改成}}}
         px = p.Range.text
-        If InStr(Right(px, 4), "<p>") Then
+        If InStr(right(px, 4), "<p>") Then
             e = p.Range.Characters(p.Range.Characters.Count - 4).End
         Else
             e = p.Range.Characters(p.Range.Characters.Count - 1).End
@@ -739,7 +740,7 @@ For Each p In d.Paragraphs
             
         Loop
     End If
-    If VBA.Left(p.Range.text, 9) = ChrW(-9217) & ChrW(-8195) & ChrW(-9217) & ChrW(-8195) & "【《索隱》" Then
+    If VBA.left(p.Range.text, 9) = ChrW(-9217) & ChrW(-8195) & ChrW(-9217) & ChrW(-8195) & "【《索隱》" Then
         Set rng = p.Range
         p.Range.Characters(1).Delete
         rng.SetRange p.Range.start, p.Range.start
@@ -750,7 +751,7 @@ For Each p In d.Paragraphs
     End If
     
     If Len(p.Range) < 20 Then
-        If (InStr(p.Range, "《史記》卷") Or VBA.Left(p.Range.text, 3) = "史記卷") And InStr(p.Range, "*") = 0 Then
+        If (InStr(p.Range, "《史記》卷") Or VBA.left(p.Range.text, 3) = "史記卷") And InStr(p.Range, "*") = 0 Then
             rng.SetRange p.Range.start, p.Range.start
             rng.InsertAfter "*"
             For Each pa In p.Range.Characters
@@ -777,7 +778,7 @@ For Each p In d.Paragraphs
     End If
 
 Next p
-If VBA.Left(d.Paragraphs(1).Range.text, 3) = "史記卷" And InStr(d.Paragraphs(1).Range.text, "*") = 0 Then
+If VBA.left(d.Paragraphs(1).Range.text, 3) = "史記卷" And InStr(d.Paragraphs(1).Range.text, "*") = 0 Then
     Set p = d.Paragraphs(1)
     rng.SetRange p.Range.start, p.Range.start
     rng.InsertAfter "*"
@@ -836,7 +837,7 @@ Next i
 Set rng = Selection.Range
 For Each p In d.Paragraphs
     px = p.Range.text
-    If Left(px, 7) = "{{" & ChrW(-9217) & ChrW(-8195) & "{{{" Then '注腳段落
+    If left(px, 7) = "{{" & ChrW(-9217) & ChrW(-8195) & "{{{" Then '注腳段落
         e = p.Range.Characters(1).End
         rng.SetRange e, e
         rng.MoveEndUntil "〕"
@@ -846,7 +847,7 @@ For Each p In d.Paragraphs
         Selection.MoveRight wdCharacter, 1, wdExtend
         Selection.TypeText "〉}}}" '將注腳編號〔一〕的右邊〕改成}}}
         px = p.Range.text
-        If InStr(Right(px, 4), "<p>") Then
+        If InStr(right(px, 4), "<p>") Then
             e = p.Range.Characters(p.Range.Characters.Count - 4).End
         Else
             e = p.Range.Characters(p.Range.Characters.Count - 1).End
@@ -892,7 +893,7 @@ For Each p In d.Paragraphs
             
         Loop
     End If
-    If VBA.Left(p.Range.text, 9) = ChrW(-9217) & ChrW(-8195) & ChrW(-9217) & ChrW(-8195) & "【《索隱》" Then
+    If VBA.left(p.Range.text, 9) = ChrW(-9217) & ChrW(-8195) & ChrW(-9217) & ChrW(-8195) & "【《索隱》" Then
         Set rng = p.Range
         p.Range.Characters(1).Delete
         rng.SetRange p.Range.start, p.Range.start
@@ -901,7 +902,7 @@ For Each p In d.Paragraphs
         rng.InsertAfter "}}"
     End If
 Next p
-If VBA.Left(d.Paragraphs(1).Range.text, 3) = "史記卷" Then
+If VBA.left(d.Paragraphs(1).Range.text, 3) = "史記卷" Then
     Set p = d.Paragraphs(1)
     rng.SetRange p.Range.start, p.Range.start
     rng.InsertAfter "*"
@@ -951,8 +952,8 @@ d.Range.Find.Execute "〉〉", , , , , , True, wdFindContinue, , "〉", wdReplaceAl
 Set rng = Selection.Range
 For Each p In d.Paragraphs
     px = p.Range.text
-    If Left(p.Range.text, 7) = "{{" & ChrW(-9217) & ChrW(-8195) & "{{{" Then
-        If InStr(Right(px, 4), "<p>") Then
+    If left(p.Range.text, 7) = "{{" & ChrW(-9217) & ChrW(-8195) & "{{{" Then
+        If InStr(right(px, 4), "<p>") Then
             e = p.Range.Characters(p.Range.Characters.Count - 4).End
         Else
             e = p.Range.Characters(p.Range.Characters.Count - 1).End
@@ -1142,7 +1143,7 @@ For Each p In rngDoc.Paragraphs
 Next
 If ok Then
     For Each p In rngDoc.Paragraphs
-        If Left(p.Range.text, 3) = "{{　" And p.Range.Characters(p.Range.Characters.Count - 1) = "}" Then
+        If left(p.Range.text, 3) = "{{　" And p.Range.Characters(p.Range.Characters.Count - 1) = "}" Then
             a = p.Range.text
             a = Mid(a, 4, Len(a) - 6)
             If InStr(a, "　") > 0 And InStr(a, "{") = 0 And InStr(a, "}") = 0 Then
@@ -1466,7 +1467,7 @@ cde = code.URLDecode(cde)
 s = Selection.start
 SystemSetup.stopUndo ur, "插入超連結_將顯示之編碼改為中文"
 With Selection
-    .Hyperlinks.Add Selection.Range, lnk, , , Left(lnk, InStr(lnk, keys) + Len(keys) - 1) + cde
+    .Hyperlinks.Add Selection.Range, lnk, , , left(lnk, InStr(lnk, keys) + Len(keys) - 1) + cde
     'd.Range(Selection.End, Selection.End + Len(cde)).Select
     'Selection.Collapse
     .MoveLeft wdCharacter, Len(cde)
@@ -1603,7 +1604,7 @@ Do While rng.Find.Execute(markStrOpen)
     If d.Range(rng.End, rng.End + 7) = "entity>" Then
         rng.SetRange rng.start, rng.End - 2
         ReDim Preserve ay(i)
-        ay(i) = VBA.split(rng.text, ">")
+        ay(i) = VBA.Split(rng.text, ">")
         i = i + 1
     End If
     
@@ -1626,7 +1627,7 @@ reFind:
                 rngMark.move wdCharacter, -1
             Loop
             rngMark.SetRange rngMark.start, rng.start
-            If Left(rngMark.text, 8) <> "<entity " Then
+            If left(rngMark.text, 8) <> "<entity " Then
                 GoSub mark
             Else
                 rng.SetRange rng.End, DoctoMarked.Range.End
