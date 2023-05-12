@@ -3438,150 +3438,153 @@ Rem
 End Sub
 'Function 書名號篇名號標注PreExamOK(d As Document, term As String, whatMark As String, startPos_term As Long, Optional endPos_term As Long) As Boolean
 Function 書名號篇名號標注PreExamOK(d As Document, term As String, startPos_term As Long, Optional endPos_term As Long) As Boolean
-Dim rngChk As Range, xChk As String
-On Error GoTo eH:
-Set rngChk = d.Range(0, startPos_term)
-xChk = rngChk.text
-'If term = "資治通鑑" Then Stop
-If InStrRev(xChk, "《") <= InStrRev(xChk, "》") And InStrRev(xChk, "〈") <= InStrRev(xChk, "〉") Then 書名號篇名號標注PreExamOK = True
-
-Exit Function
+    Dim rngChk As Range, xChk As String
+    On Error GoTo eH:
+    Set rngChk = d.Range(0, startPos_term)
+    xChk = rngChk.text
+    'If term = "資治通鑑" Then Stop
+    If InStrRev(xChk, "《") <= InStrRev(xChk, "》") And InStrRev(xChk, "〈") <= InStrRev(xChk, "〉") Then 書名號篇名號標注PreExamOK = True
+    
+    Exit Function
 eH:
-    Select Case Err.Number
-        'Case 4608 '數值超出範圍
-            'Resume
-        Case Else
-            MsgBox Err.Number + Err.Description
-'            Resume
-    End Select
-
-
-'Dim result As Boolean
-'If whatMark = "《" Then ' = ？ 如：此時會「=」：If InStr(xChk, "《") = 0 And InStr(xChk, "》") = 0 And InStr(xChk, "〈") = 0 And InStr(xChk, "〉") = 0 Then 20230312 優化。感恩感恩　讚歎讚歎　南無阿彌陀佛。沒有佛菩薩加持，我孫守真可能嗎？
-'    If InStrRev(xChk, "《") <= InStrRev(xChk, "》") Then result = True
-'Else
-'    If InStrRev(xChk, "〈") <= InStrRev(xChk, "〉") Then result = True
-'End If
-
-''前面都沒《》〈〉時
-'If InStr(xChk, "《") = 0 And InStr(xChk, "》") = 0 And InStr(xChk, "〈") = 0 And InStr(xChk, "〉") = 0 Then
-'    result = True
-''前面的《〈在》〉的前面
-'Else
-'    'If InStrRev(xChk, "《") < InStrRev(xChk, "》") Or InStrRev(xChk, "〈") < InStrRev(xChk, "〉") Then result = True
-'    If whatMark = "《" Then
-'        If InStr(xChk, "《") = 0 And InStr(xChk, "》") = 0 Then
-'            result = True
-'        Else
-'            If InStrRev(xChk, "《") < InStrRev(xChk, "》") Then result = True
-'        End If
-'    ElseIf whatMark = "〈" Then
-'        If InStr(xChk, "〈") = 0 And InStr(xChk, "〉") = 0 Then
-'            result = True
-'        Else
-'            If InStrRev(xChk, "〈") < InStrRev(xChk, "〉") Then result = True
-'        End If
-'    End If
-'End If
-'書名號篇名號標注PreExamOK = result
+        Select Case Err.Number
+            'Case 4608 '數值超出範圍
+                'Resume
+            Case Else
+                MsgBox Err.Number + Err.Description
+    '            Resume
+        End Select
+    
+    
+    'Dim result As Boolean
+    'If whatMark = "《" Then ' = ？ 如：此時會「=」：If InStr(xChk, "《") = 0 And InStr(xChk, "》") = 0 And InStr(xChk, "〈") = 0 And InStr(xChk, "〉") = 0 Then 20230312 優化。感恩感恩　讚歎讚歎　南無阿彌陀佛。沒有佛菩薩加持，我孫守真可能嗎？
+    '    If InStrRev(xChk, "《") <= InStrRev(xChk, "》") Then result = True
+    'Else
+    '    If InStrRev(xChk, "〈") <= InStrRev(xChk, "〉") Then result = True
+    'End If
+    
+    ''前面都沒《》〈〉時
+    'If InStr(xChk, "《") = 0 And InStr(xChk, "》") = 0 And InStr(xChk, "〈") = 0 And InStr(xChk, "〉") = 0 Then
+    '    result = True
+    ''前面的《〈在》〉的前面
+    'Else
+    '    'If InStrRev(xChk, "《") < InStrRev(xChk, "》") Or InStrRev(xChk, "〈") < InStrRev(xChk, "〉") Then result = True
+    '    If whatMark = "《" Then
+    '        If InStr(xChk, "《") = 0 And InStr(xChk, "》") = 0 Then
+    '            result = True
+    '        Else
+    '            If InStrRev(xChk, "《") < InStrRev(xChk, "》") Then result = True
+    '        End If
+    '    ElseIf whatMark = "〈" Then
+    '        If InStr(xChk, "〈") = 0 And InStr(xChk, "〉") = 0 Then
+    '            result = True
+    '        Else
+    '            If InStrRev(xChk, "〈") < InStrRev(xChk, "〉") Then result = True
+    '        End If
+    '    End If
+    'End If
+    '書名號篇名號標注PreExamOK = result
 End Function
 Sub 書名號篇名號標注()
-Dim cnt As New ADODB.Connection, rst As New ADODB.Recordset
-Dim cntStr As String, d As Document, dx As String, rngF As Range, title As String
-Dim db As New dBase
-Dim ur As UndoRecord
-On Error GoTo eH:
-SystemSetup.stopUndo ur, "書名號篇名號標注"
-db.cnt查字 cnt
-'If Dir("H:\我的雲端硬碟\私人\千慮一得齋(C槽版)\書籍資料\圖書管理附件", vbDirectory) <> "" Then
-'    cntStr = "Provider=Microsoft.ACE.OLEDB.12.0;User ID=Admin;Data Source=H:\我的雲端硬碟\私人\千慮一得齋(C槽版)\書籍資料\圖書管理附件\查字.mdb;"
-'ElseIf Dir("D:\千慮一得齋\書籍資料\圖書管理附件", vbDirectory) <> "" Then
-'    cntStr = "Provider=Microsoft.ACE.OLEDB.12.0;User ID=Admin;Data Source=D:\千慮一得齋\書籍資料\圖書管理附件\查字.mdb;"
-'Else
-'    MsgBox "路徑不存在！", vbCritical: Exit Sub
-'End If
-Set d = ActiveDocument: dx = d.Range.text: Set rngF = d.Range
-'cnt.Open cntStr
-word.Application.ScreenUpdating = False
-
-GoSub bookmarks '標點符號_書名號_自動加上用
-rst.Open "select * from 標點符號_篇名號_自動加上用 order by 排序", cnt, adOpenForwardOnly, adLockReadOnly
-Set rngF = d.Range: dx = d.Range.text
-Do Until rst.EOF
-    title = rst("篇名").Value
-    If VBA.InStr(dx, title) Then 'if found
-        Do While rngF.Find.Execute(title, , , , , , True, wdFindStop)
-'            If InStr("》〉·‧", IIf(rngF.Characters(rngF.Characters.Count).Next Is Nothing, "", rngF.Characters(rngF.Characters.Count).Next)) = 0 And _
-'                InStr("《〈·‧", IIf(rngF.Characters(1).Previous Is Nothing, "", rngF.Characters(1).Previous)) = 0 Then
-                If 書名號篇名號標注PreExamOK(d, title, rngF.start) Then
-                    If VBA.IsNull(rst("取代為").Value) Then
-                        rngF.text = "〈" & title & "〉"
-                                  'd.Range.Find.Execute title, , , , , , True, wdFindContinue, , "〈" & title & "〉", wdReplaceAll
-                    Else
-                        rngF.text = rst("取代為").Value
-                        'd.Range.Find.Execute title, , , , , , True, wdFindContinue, , rst("取代為").Value, wdReplaceAll
-                    End If
-                    rngF.SetRange rngF.End, d.Range.End
-                End If
-'            End If
-        Loop
-        Set rngF = d.Range: dx = d.Range.text
-    End If
+    Dim cnt As New ADODB.Connection, rst As New ADODB.Recordset
+    Dim cntStr As String, d As Document, dx As String, rngF As Range, title As String
+    Dim db As New dBase
+    Dim ur As UndoRecord
+    On Error GoTo eH:
+    SystemSetup.stopUndo ur, "書名號篇名號標注"
+    db.cnt查字 cnt
+    'If Dir("H:\我的雲端硬碟\私人\千慮一得齋(C槽版)\書籍資料\圖書管理附件", vbDirectory) <> "" Then
+    '    cntStr = "Provider=Microsoft.ACE.OLEDB.12.0;User ID=Admin;Data Source=H:\我的雲端硬碟\私人\千慮一得齋(C槽版)\書籍資料\圖書管理附件\查字.mdb;"
+    'ElseIf Dir("D:\千慮一得齋\書籍資料\圖書管理附件", vbDirectory) <> "" Then
+    '    cntStr = "Provider=Microsoft.ACE.OLEDB.12.0;User ID=Admin;Data Source=D:\千慮一得齋\書籍資料\圖書管理附件\查字.mdb;"
+    'Else
+    '    MsgBox "路徑不存在！", vbCritical: Exit Sub
+    'End If
+    Set d = ActiveDocument: dx = d.Range.text: Set rngF = d.Range
+    'cnt.Open cntStr
+    word.Application.ScreenUpdating = False
     
-    rst.MoveNext
-Loop
-d.Range.Find.Execute "《《", , , , , , True, wdFindContinue, , "《", wdReplaceAll
-d.Range.Find.Execute "》》", , , , , , True, wdFindContinue, , "》", wdReplaceAll
-d.Range.Find.Execute "〈〈", , , , , , True, wdFindContinue, , "〈", wdReplaceAll
-d.Range.Find.Execute "〉〉", , , , , , True, wdFindContinue, , "〉", wdReplaceAll
-
-'GoSub bookmarks 'do again to check and correct SHOULD BE use another table to do this
-rst.Close: cnt.Close: SystemSetup.contiUndo ur
-word.Application.ScreenUpdating = True
-Exit Sub
-
-
+    GoSub bookmarks '標點符號_書名號_自動加上用
+    rst.Open "select * from 標點符號_篇名號_自動加上用 order by 排序", cnt, adOpenForwardOnly, adLockReadOnly
+    Set rngF = d.Range: dx = d.Range.text
+    Do Until rst.EOF
+        title = rst("篇名").Value
+        If VBA.InStr(dx, title) Then 'if found
+            Do While rngF.Find.Execute(title, , , , , , True, wdFindStop)
+    '            If InStr("》〉·‧", IIf(rngF.Characters(rngF.Characters.Count).Next Is Nothing, "", rngF.Characters(rngF.Characters.Count).Next)) = 0 And _
+    '                InStr("《〈·‧", IIf(rngF.Characters(1).Previous Is Nothing, "", rngF.Characters(1).Previous)) = 0 Then
+                    If 書名號篇名號標注PreExamOK(d, title, rngF.start) Then
+                        If VBA.IsNull(rst("取代為").Value) Then
+                            rngF.text = "〈" & title & "〉"
+                                      'd.Range.Find.Execute title, , , , , , True, wdFindContinue, , "〈" & title & "〉", wdReplaceAll
+                        Else
+                            rngF.text = rst("取代為").Value
+                            'd.Range.Find.Execute title, , , , , , True, wdFindContinue, , rst("取代為").Value, wdReplaceAll
+                        End If
+                        rngF.SetRange rngF.End, d.Range.End
+                    End If
+    '            End If
+            Loop
+            Set rngF = d.Range: dx = d.Range.text
+        End If
+        
+        rst.MoveNext
+    Loop
+    d.Range.Find.Execute "《《", , , , , , True, wdFindContinue, , "《", wdReplaceAll
+    d.Range.Find.Execute "》》", , , , , , True, wdFindContinue, , "》", wdReplaceAll
+    d.Range.Find.Execute "〈〈", , , , , , True, wdFindContinue, , "〈", wdReplaceAll
+    d.Range.Find.Execute "〉〉", , , , , , True, wdFindContinue, , "〉", wdReplaceAll
+    
+    'GoSub bookmarks 'do again to check and correct SHOULD BE use another table to do this
+    rst.Close: cnt.Close: SystemSetup.contiUndo ur
+    word.Application.ScreenUpdating = True
+    
+    SystemSetup.playSound 1.921
+    
+    Exit Sub
+    
+    
 bookmarks:
-If rst.State = adStateOpen Then rst.Close
-rst.Open "select * from 標點符號_書名號_自動加上用 order by 排序", cnt, adOpenForwardOnly, adLockReadOnly
-Do Until rst.EOF
-    title = rst("書名").Value
-    
-'    If title = "資治通鑑" Then Stop
-    
-    If VBA.InStr(dx, title) Then 'if found
-        Do While rngF.Find.Execute(title, , , , , , True, wdFindStop)
-'            If InStr("》〉·‧", IIf(rngF.Characters(rngF.Characters.Count).Next Is Nothing, "", rngF.Characters(rngF.Characters.Count).Next)) = 0 And _
-'                InStr("《〈·‧", IIf(rngF.Characters(1).Previous Is Nothing, "", rngF.Characters(1).Previous)) = 0 Then
-                If 書名號篇名號標注PreExamOK(d, title, rngF.start) Then
-                    
-                    If title = "資治通鑑" Then Stop
-                    
-                    If VBA.IsNull(rst("取代為").Value) Then
-                        rngF.text = "《" & title & "》"
-            '            d.Range.Find.Execute title, , , , , , True, wdFindContinue, , "《" & title & "》", wdReplaceAll
-                    Else
-                        rngF.text = rst("取代為").Value
-            '            d.Range.Find.Execute title, , , , , , True, wdFindContinue, , rst("取代為").Value, wdReplaceAll
+    If rst.State = adStateOpen Then rst.Close
+    rst.Open "select * from 標點符號_書名號_自動加上用 order by 排序", cnt, adOpenForwardOnly, adLockReadOnly
+    Do Until rst.EOF
+        title = rst("書名").Value
+        
+    '    If title = "資治通鑑" Then Stop
+        
+        If VBA.InStr(dx, title) Then 'if found
+            Do While rngF.Find.Execute(title, , , , , , True, wdFindStop)
+    '            If InStr("》〉·‧", IIf(rngF.Characters(rngF.Characters.Count).Next Is Nothing, "", rngF.Characters(rngF.Characters.Count).Next)) = 0 And _
+    '                InStr("《〈·‧", IIf(rngF.Characters(1).Previous Is Nothing, "", rngF.Characters(1).Previous)) = 0 Then
+                    If 書名號篇名號標注PreExamOK(d, title, rngF.start) Then
+                        
+                        If title = "資治通鑑" Then Stop
+                        
+                        If VBA.IsNull(rst("取代為").Value) Then
+                            rngF.text = "《" & title & "》"
+                '            d.Range.Find.Execute title, , , , , , True, wdFindContinue, , "《" & title & "》", wdReplaceAll
+                        Else
+                            rngF.text = rst("取代為").Value
+                '            d.Range.Find.Execute title, , , , , , True, wdFindContinue, , rst("取代為").Value, wdReplaceAll
+                        End If
+                        rngF.SetRange rngF.End, d.Range.End
                     End If
-                    rngF.SetRange rngF.End, d.Range.End
-                End If
-'            End If
-        Loop
-        Set rngF = d.Range: dx = d.Range.text
-    End If
+    '            End If
+            Loop
+            Set rngF = d.Range: dx = d.Range.text
+        End If
+        
+        rst.MoveNext
+    Loop
+    rst.Close
+    Return
     
-    rst.MoveNext
-Loop
-rst.Close
-Return
-
 eH:
-    Select Case Err.Number
-        Case Else
-            MsgBox Err.Number + Err.Description
-'            Resume
-    End Select
+        Select Case Err.Number
+            Case Else
+                MsgBox Err.Number + Err.Description
+    '            Resume
+        End Select
 End Sub
 
 

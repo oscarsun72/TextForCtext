@@ -2173,14 +2173,14 @@ namespace WindowsFormsApp1
                     return;
                 }
 
-                /*Alt + l : 檢查/輸入抬頭平抬時的條件：執行topLineFactorIuput0condition()
+                /* Alt + l : 檢查/輸入抬頭平抬時的條件：執行topLineFactorIuput0condition()
                  *     > 目前只支援新增 condition=0 的情形，故名為 0condition，即當後綴是什麼時，此行文字雖短，不是分段，乃是平抬 
                  *     >> 0=後綴；1=前綴；2=前後之前；3前後之後；4是前+後之詞彙；5非前+後之詞彙；6非後綴之詞彙；7非前綴之詞彙*/
                 if (e.KeyCode == Keys.L)
                 {
                     e.Handled = true;
                     if (examSeledWord(out string termtochk))
-                        Mdb.topLineFactorIuput04condition(termtochk);
+                        Mdb.TopLineFactorIuput04condition(termtochk);
                     return;
                 }
 
@@ -4671,7 +4671,8 @@ namespace WindowsFormsApp1
             if (keyinTextMode)
             {
                 if (s == 0 && l == 0) s = textBox1.TextLength;
-                else if (s + l < textBox1.TextLength)
+                else if (s + l < textBox1.TextLength &&//空格與分行/段符號網頁會自動忽略
+                    textBox1.Text.Substring(s + l, textBox1.TextLength - s - l).Replace("　", "").Replace(Environment.NewLine, "") != "")
                 {
                     if (DialogResult.Cancel == Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly(
                         "插入點位置似有誤，請「確定」從此處之前的才貼上？\n\r\n\r" +
@@ -5653,6 +5654,7 @@ namespace WindowsFormsApp1
             {
                 for (int i = s - 1; i > -1; i--)
                 {
+                    if (x.Length < i + 2) break;
                     if (x.Substring(i, 2) == Environment.NewLine)
                     {
                         s = i + 2;
@@ -6472,9 +6474,15 @@ namespace WindowsFormsApp1
                                                                                                                              //    (br.driver, TimeSpan.FromSeconds(2));
                                                                                                                              ////安裝了 Selenium.WebDriver 套件，才說沒有「ExpectedConditions」，然後照Visual Studio 2022的改正建議又用NuGet 安裝了 Selenium.Suport 套件，也自動「 using OpenQA.Selenium.Support.UI;」了，末學自己還用物件瀏覽器找過了 「OpenQA.Selenium.Support.UI」，可就是沒有「ExpectedConditions」靜態類別可用，即使官方文件也說有 ： https://www.selenium.dev/selenium/docs/api/dotnet/html/T_OpenQA_Selenium_Support_UI_ExpectedConditions.htm 20230109 未知何故 阿彌陀佛
                                                                                                                              //wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(quick_edit_box));
-                                                                                                                             //// 在網頁元素載入完畢後才能讀取其.Text屬性值，存入剪貼簿
-                                                                                                                             ////Task.Delay(-1);
-                                Clipboard.SetText(quick_edit_box.Text);
+
+                                //// 在網頁元素載入完畢後才能讀取其.Text屬性值，存入剪貼簿,前置空格會被削去，當是Selenium實作時的問題。
+                                //string xq = quick_edit_box.Text;
+                                //Clipboard.SetText(xq);
+                                quick_edit_box.SendKeys(OpenQA.Selenium.Keys.LeftControl + "a");
+                                quick_edit_box.SendKeys(OpenQA.Selenium.Keys.LeftControl + "c");
+                                ////Task.Delay(-1);
+                                //Clipboard.SetText(quick_edit_box.Text);
+
                             }
                             catch (Exception)
                             {
@@ -6679,14 +6687,35 @@ namespace WindowsFormsApp1
                 using (var streamWriter = new StreamWriter(f)) { streamWriter.Write(str1); }
                 //File.WriteAllText(f, str1, Encoding.UTF8);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 //Task.WaitAny();
                 //Thread.Sleep(TimeSpan.FromSeconds(2));
                 //File.WriteAllText(f, str1, Encoding.UTF8);
                 //throw;
+                Console.WriteLine(ex.HResult + ":" + ex.Message);
+                Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
+                return;
             }
             // 也可以指定編碼方式 File.WriteAllText(@”c:\temp\test\ascii-2.txt”, str1, Encoding.ASCII);
+
+            //取得OCR所匯出的檔案路徑
+            #region 再檢查瀏覽器下載目錄並取得 ：
+            Task.Run(() =>
+            {
+                string downloadDirectory = br.DownloadDirectory_Chrome;
+                string downloadImgFullName = dropBoxPathIncldBackSlash + "Ctext_Page_Image.png";
+                if (br.ChkDownloadDirectory_Chrome(downloadImgFullName, downloadDirectory))
+                {
+                    #endregion
+                    string filePath = Path.Combine(downloadDirectory,
+                        Path.GetFileNameWithoutExtension(downloadImgFullName) + ".txt");//@"X:\Ctext_Page_Image.txt";
+                                                                                        //刪除之前的檔案，以免因檔案存在而被下載端重新命名
+
+                    if (File.Exists(filePath)) File.Delete(filePath);
+                }
+            });
+
         }
 
         /// <summary>
@@ -7701,6 +7730,14 @@ namespace WindowsFormsApp1
 
             //最上層顯示
             if (!this.TopMost) this.TopMost = true;
+
+            Keys modifierKey = ModifierKeys;
+            //直接針對目前的分頁開啟古籍酷OCR
+            if (modifierKey == Keys.Shift && keyinTextMode && !HiddenIcon)
+            {
+                copyQuickeditLinkWhenKeyinMode(modifierKey);
+            }
+
             //不全部貼上取代原文字
             if (keyinTextMode && !pasteAllOverWrite) pasteAllOverWrite = false;
 
@@ -8909,12 +8946,12 @@ namespace WindowsFormsApp1
                 downloadImgFullName = ""; return;
             }
             downloadImgFullName = dropBoxPathIncldBackSlash + "Ctext_Page_Image.png";
-            //若圖已存在則不復下載，因OCR成功後會刪除此圖故//避免隔太久又忘了刪除圖檔，還是改以下判斷
-            //if (File.Exists(downloadImgFullName)) return;
-            ////若圖檔已存在，且是2.5分鐘前存檔的，則不復下載，以免重複，又免誤按。20230404，改 google keep的快捷鍵以免誤按
-            if (File.Exists(downloadImgFullName) &&
-                (DateTime.Now.Subtract(File.GetLastWriteTime(downloadImgFullName)).TotalMinutes < 1.5
-                && !(DateTime.Now.Subtract(File.GetLastWriteTime(downloadImgFullName)).TotalDays >= 1))) return;
+            ////若圖已存在則不復下載，因OCR成功後會刪除此圖故//避免隔太久又忘了刪除圖檔，還是改以下判斷
+            ////if (File.Exists(downloadImgFullName)) return;
+            //////若圖檔已存在，且是2.5分鐘前存檔的，則不復下載，以免重複，又免誤按。20230404，改 google keep的快捷鍵以免誤按
+            //if (File.Exists(downloadImgFullName) &&
+            //    (DateTime.Now.Subtract(File.GetLastWriteTime(downloadImgFullName)).TotalMinutes < 1.5
+            //    && !(DateTime.Now.Subtract(File.GetLastWriteTime(downloadImgFullName)).TotalDays >= 1))) return;
 
             /*20230103 creedit,chatGPT：
           你可以使用 Selenium 來下載網絡圖片。

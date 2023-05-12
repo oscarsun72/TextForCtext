@@ -146,8 +146,12 @@ namespace TextForCtext
         }
 
 
-        //輸入平抬條件：0=後綴；1=前綴；2=前後之前；3前後之後；4是前+後之詞彙；5非前+後之詞彙；6非後綴之詞彙；7非前綴之詞彙
-        internal static void topLineFactorIuput04condition(string termtoChk)
+        /// <summary>
+        /// 輸入平抬條件：0=後綴；1=前綴；2=前後之前；3前後之後；4是前+後之詞彙；5非前+後之詞彙；6非後綴之詞彙；7非前綴之詞彙
+        /// Alt + l
+        /// </summary>
+        /// <param name="termtoChk"></param>
+        internal static void TopLineFactorIuput04condition(string termtoChk)
         {
             //TextBox tb = (TextBox)frm.Controls["textBox1"];
             //string termtoChk = tb.SelectedText;
