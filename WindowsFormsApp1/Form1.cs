@@ -410,7 +410,19 @@ namespace WindowsFormsApp1
                     if (browsrOPMode != BrowserOPMode.appActivateByName)
                     {
                         br.driver = br.driver ?? br.driverNew();
-                        br.GoToUrlandActivate(url, keyinTextMode);
+                        try
+                        {
+                            br.GoToUrlandActivate(url, keyinTextMode);
+                        }
+                        catch (Exception ex)
+                        {
+                            switch (ex.HResult)
+                            {
+                                default:
+                                    Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
+                                    break;
+                            }
+                        }
                         if (xClp.IndexOf("edit") > -1 && xClp.Substring(xClp.LastIndexOf("#editor")) == "#editor")
                         //url此頁的Quick edit值傳到textBox1,並存入剪貼簿以備用
                         {
@@ -1036,8 +1048,8 @@ namespace WindowsFormsApp1
             { s = textBox1.SelectionStart; l = textBox1.SelectionLength; }
             string xCopy = x.Substring(0, s + l > x.Length ? x.Length : s + l);
             #region 置換為全形符號、及清除冗餘（清除冗餘要留意會動到 l 的值！！）
-            string[] replaceDChar = { "'", ",", ";", ":", "．", "?", "：：", "《《", "》》", "〈〈", "〉〉", "。}}。}}" };
-            string[] replaceChar = { "、", "，", "；", "：", "·", "？", "：", "《《", "》", "〈", "〉", "。}}" };
+            string[] replaceDChar = { "'", ",", ";", ":", "．", "?", "：：", "《《", "》》", "〈〈", "〉〉", "。}}。}}", "。。", "，，" };
+            string[] replaceChar = { "、", "，", "；", "：", "·", "？", "：", "《《", "》", "〈", "〉", "。}}", "。", "，" };
             foreach (var item in replaceDChar)
             {
                 if (xCopy.IndexOf(item) > -1)
@@ -6699,23 +6711,25 @@ namespace WindowsFormsApp1
             }
             // 也可以指定編碼方式 File.WriteAllText(@”c:\temp\test\ascii-2.txt”, str1, Encoding.ASCII);
 
-            //取得OCR所匯出的檔案路徑
-            #region 再檢查瀏覽器下載目錄並取得 ：
-            Task.Run(() =>
+            if (keyinTextMode && !autoPastetoQuickEdit)
             {
-                string downloadDirectory = br.DownloadDirectory_Chrome;
-                string downloadImgFullName = dropBoxPathIncldBackSlash + "Ctext_Page_Image.png";
-                if (br.ChkDownloadDirectory_Chrome(downloadImgFullName, downloadDirectory))
+                //取得OCR所匯出的檔案路徑
+                #region 再檢查瀏覽器下載目錄並取得 ：
+                Task.Run(() =>
                 {
-                    #endregion
-                    string filePath = Path.Combine(downloadDirectory,
-                        Path.GetFileNameWithoutExtension(downloadImgFullName) + ".txt");//@"X:\Ctext_Page_Image.txt";
-                                                                                        //刪除之前的檔案，以免因檔案存在而被下載端重新命名
+                    string downloadDirectory = br.DownloadDirectory_Chrome;
+                    string downloadImgFullName = dropBoxPathIncldBackSlash + "Ctext_Page_Image.png";
+                    if (br.ChkDownloadDirectory_Chrome(downloadImgFullName, downloadDirectory))
+                    {
+                        #endregion
+                        string filePath = Path.Combine(downloadDirectory,
+                            Path.GetFileNameWithoutExtension(downloadImgFullName) + ".txt");//@"X:\Ctext_Page_Image.txt";
+                                                                                            //刪除之前的檔案，以免因檔案存在而被下載端重新命名
 
-                    if (File.Exists(filePath)) File.Delete(filePath);
-                }
-            });
-
+                        if (File.Exists(filePath)) File.Delete(filePath);
+                    }
+                });
+            }
         }
 
         /// <summary>

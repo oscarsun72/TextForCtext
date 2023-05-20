@@ -1147,11 +1147,11 @@ namespace TextForCtext
                 openNewTabWindow();
             }
             //throw;
-            driver.Navigate().GoToUrl(url);
-            //activate and move to most front of desktop
-            //driver.SwitchTo().Window(driver.CurrentWindowHandle;
             try
             {
+                driver.Navigate().GoToUrl(url);
+                //activate and move to most front of desktop
+                //driver.SwitchTo().Window(driver.CurrentWindowHandle;
                 if (frmKeyinTextModeTopWindow) WindowsScrolltoTop();//將分頁視窗頁面捲到頂端
                 quickedit_data_textboxSetting(url);
             }
@@ -1656,6 +1656,7 @@ namespace TextForCtext
                 try
                 {
                     driver.Close();
+                    driver.SwitchTo().Window(currentWindowHndl);
                 }
                 catch (Exception ex)
                 {
@@ -1672,7 +1673,6 @@ namespace TextForCtext
                     }
 
                 }
-                driver.SwitchTo().Window(currentWindowHndl);
                 return fastXResulut;
             }
             else
@@ -1716,6 +1716,15 @@ namespace TextForCtext
                             Debugger.Break();
                         }
                         break;
+                    case -2146233088:
+                        if (ex.Message.IndexOf("Timed out after 30.5 seconds") > -1)
+                            return false;
+                        else
+                        {
+                            Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
+                            Debugger.Break();
+                        }
+                        break;
                     default:
                         Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
                         Debugger.Break();
@@ -1742,6 +1751,7 @@ namespace TextForCtext
                 }
                 else { waitGJcoolPoint = false; points = 0; innerText = null; }//釋放記憶體
             }
+            else return false;
             #endregion
 
             #region 再檢查瀏覽器下載目錄並取得 ：
@@ -1771,6 +1781,17 @@ namespace TextForCtext
                 timeSpan = (DateTime.Now.Subtract(begin));
                 if (timeSpan.TotalSeconds > timeSpanSecs) return false;
             }
+
+            //檢查使用者是否已關閉視窗，取消這次的操作（比如說才發現已經有OCR了、或弄錯頁了……等等，可逕接關閉《古籍酷》OCR視窗以終結之）
+            try
+            {
+                if (driver.CurrentWindowHandle == currentWindowHndl) { };
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+
             //選取「選擇檔案」控制項
             //SendKeys.Send("{tab 16} ");
             SendKeys.Send("{tab 16}");
@@ -1991,8 +2012,8 @@ namespace TextForCtext
             //                                                  #dialog_483f217a > div.col > div.d-flex.py-1 > button
 
             //待OCR結束
-            Thread.Sleep(4700);//可多設時間以等待，若多餘，可手動按下複製按鈕即可。
-            //Thread.Sleep(4300);
+            //Thread.Sleep(4700);//可多設時間以等待，若多餘，可手動按下複製按鈕即可。
+            Thread.Sleep(4300);
             #region 將OCR結果讀入剪貼簿：
             Point copyBtnPos = new Point(); DateTime begin = DateTime.Now;
             //待手動成功複製，上限為 timeSpanSecs 秒
@@ -2034,9 +2055,10 @@ namespace TextForCtext
                 //MouseOperations.MouseEvent(MouseOperations.MouseEventFlags.LeftDown);
                 //MouseOperations.MouseEvent(MouseOperations.MouseEventFlags.LeftUp);                
                 MouseOperations.MouseEventMousePos(MouseOperations.MouseEventFlags.LeftDown, copyBtnPos);
-                Form1.playSound(Form1.soundLike.info);
-                Thread.Sleep(50);
+                //Thread.Sleep(50);
                 MouseOperations.MouseEventMousePos(MouseOperations.MouseEventFlags.LeftUp, copyBtnPos);
+                //Form1.playSound(Form1.soundLike.info);
+
                 /*Bing大菩薩：您好，`MouseOperations` 不是 C# 的内置类。它是一个自定义类，您可以在 Stack Overflow 上找到它的源代码。您可以将这些代码复制到您的项目中，然后使用它来模拟鼠标点击。
                  */
 
@@ -2066,9 +2088,9 @@ namespace TextForCtext
                 //throw;
             }
 
-
-            while (!Form1.isClipBoardAvailable_Text(100))
+            while (!Form1.isClipBoardAvailable_Text(10))
             {
+                Form1.playSound(Form1.soundLike.info);
                 //if (timeSpanSecs > 0 && DateTime.Now.Subtract(begin).TotalSeconds > timeSpanSecs) return false;
                 //藉由手動關閉視窗以提早/強制中止程序
                 try

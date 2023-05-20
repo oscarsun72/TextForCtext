@@ -1,7 +1,7 @@
 Attribute VB_Name = "Docs"
 Option Explicit
 Public d字表 As Document, x As New EventClassModule   '這才是所謂的建立"新"的類別模組--實際上是建立對它的參照.'原照線上說明乃Dim也.
-
+'https://learn.microsoft.com/en-us/office/vba/word/concepts/objects-properties-methods/using-events-with-the-application-object-word
 Public Sub Register_Event_Handler() '使自設物件類別模組有效的登錄程序.見「使用 Application 物件 (Application Object) 的事件」
     Set x.App = word.Application '此即使新建的物件與Word.Application物件作上關聯
 End Sub
@@ -820,7 +820,7 @@ If Documents.Count = 0 Then Docs.空白的新文件
 If ClipBoardOp.Is_ClipboardContainCtext_Note_InlinecommentColor Then
     中國哲學書電子化計劃.只保留正文注文_且注文前後加括弧
     Set d = ActiveDocument
-    On Error GoTo eh:
+    On Error GoTo eH:
     DoEvents
     d.Range.Cut
     d.Close wdDoNotSaveChanges
@@ -908,12 +908,15 @@ searchedTerm = Array("易", "卦", "爻", "周易", "易經", "系辭", "繫辭", "擊辭", "
             Selection.Collapse wdCollapseEnd
             Selection.TypeText clipBTxt
             'SystemSetup.SetClipboard clipBTxt
-            On Error GoTo eh
+            On Error GoTo eH
             'Docs.貼上純文字
             
             Selection.InsertParagraphAfter: Selection.InsertParagraphAfter: Selection.InsertParagraphAfter
             Selection.Collapse wdCollapseEnd
             ActiveWindow.ScrollIntoView Selection
+        Else
+            Dim noneYijingKeyword As Boolean
+            noneYijingKeyword = True
         End If
     Else '如果文件中已有文本，則顯示其所在處
         Dim sx As String
@@ -975,6 +978,7 @@ If flgPaste Then
 Else '文件內已有內容時
     GoSub refres
     SystemSetup.playSound 1.294
+    If noneYijingKeyword Then MsgBox "要貼上的文本並不含有易學關鍵字哦！" + vbCr + vbCr + "請再檢查所複製到剪貼簿的內容是否正確。感恩感恩　南無阿彌陀佛"
 End If
 
 exitSub:
@@ -1006,7 +1010,7 @@ refres:
     ActiveWindow.ScrollIntoView Selection.Characters(1) ', False
 Return
 
-eh:
+eH:
 Select Case Err.Number
     Case 5825 '物件已被刪除。
         GoTo exitSub
@@ -1182,7 +1186,7 @@ If 貼到古籍酷自動標點() = True Then
     '自動執行易學關鍵字標識
     If Documents.Count > 0 Then
         If InStr(ActiveDocument.path, "已初步標點") > 0 Then
-        On Error GoTo eh:
+        On Error GoTo eH:
             If Not SeleniumOP.WD Is Nothing Then
                 Dim ws() As String
                 ws = SeleniumOP.WindowHandles
@@ -1200,7 +1204,7 @@ End If
 SystemSetup.contiUndo ur
 word.Application.ScreenUpdating = True
 Exit Sub
-eh:
+eH:
     Select Case Err.Number
         Case 9
             If InStr(Err.Description, "陣列索引超出範圍") Then

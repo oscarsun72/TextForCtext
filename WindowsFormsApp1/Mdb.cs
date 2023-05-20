@@ -98,6 +98,11 @@ namespace TextForCtext
             conn.Open();
         }
 
+        /// <summary>
+        /// 檢查異體字轉正之資料存在否
+        /// </summary>
+        /// <param name="wordtoChk">要檢查的異體字</param>
+        /// <returns></returns>
         internal static bool VariantsExist(string wordtoChk)//以chatGPT建立再自己略加修潤的 Alt + v:即以以下與chatGPT對話所得者：C# 檢查[查字.mdb].[異體字反正]資料表中是否已有該字記錄,擬自創 creedit 一動詞以作紀念，日後若有標識 creedit（creeditted 、 creeditting) 者，即為取自 chatGPT AI 而改寫者，意為：「create from chatGPT AI and edit」,以取 create 諧音且兼其義以識別非純自創也 感恩感恩　讚歎讚歎　南無阿彌陀佛 
         {//20221231,心得感觸啟發可略見此（末學臉書）：https://www.facebook.com/oscarsun72/posts/pfbid0TXr2QwArfHcL3XqsFHMg8cFbzj8zd2fBzzoMXermrrNqXccb626hfZasb6hB1p7Ql
             /*
