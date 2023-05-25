@@ -2013,7 +2013,8 @@ namespace TextForCtext
 
             //待OCR結束
             //Thread.Sleep(4700);//可多設時間以等待，若多餘，可手動按下複製按鈕即可。
-            Thread.Sleep(4300);
+            //Thread.Sleep(4300);
+            Thread.Sleep(3900);
             #region 將OCR結果讀入剪貼簿：
             Point copyBtnPos = new Point(); DateTime begin = DateTime.Now;
             //待手動成功複製，上限為 timeSpanSecs 秒
@@ -2041,7 +2042,8 @@ namespace TextForCtext
                 copyBtnPos = new Point(838, 711);//用PRTSC鍵拍下全螢幕後，貼到小畫家以滑鼠取得坐標位置（即顯示在狀態列中）
                 Cursor.Position = copyBtnPos;
                 //Thread.Sleep(800);//要等一下才行否則反應不過來
-                Thread.Sleep(300);//要等一下才行否則反應不過來
+                Form1.playSound(Form1.soundLike.info);
+                Thread.Sleep(300);//要等一下才行否則反應不過來                
                 /* 20230401 Bing大菩薩：在C#中，您可以使用 `MouseOperations` 类来模拟鼠标点击。这个类中有一个名为 `MouseEvent` 的方法，它可以接受一个 `MouseEventFlags` 枚举值作为参数，用来指定要执行的鼠标操作¹。例如，要模拟鼠标左键点击，可以这样写：
                 ```csharp
                     MouseOperations.MouseEvent(MouseOperations.MouseEventFlags.LeftDown);
@@ -2072,7 +2074,7 @@ namespace TextForCtext
                     return false;
                 }
 
-                Thread.Sleep(450);
+                //Thread.Sleep(450);
                 //Thread.Sleep(1550);
             }
             catch (Exception ex)
@@ -2090,7 +2092,7 @@ namespace TextForCtext
 
             while (!Form1.isClipBoardAvailable_Text(10))
             {
-                Form1.playSound(Form1.soundLike.info);
+                //Form1.playSound(Form1.soundLike.info);
                 //if (timeSpanSecs > 0 && DateTime.Now.Subtract(begin).TotalSeconds > timeSpanSecs) return false;
                 //藉由手動關閉視窗以提早/強制中止程序
                 try

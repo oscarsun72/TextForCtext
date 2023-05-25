@@ -423,7 +423,7 @@ namespace WindowsFormsApp1
                                     break;
                             }
                         }
-                        if (xClp.IndexOf("edit") > -1 && xClp.Substring(xClp.LastIndexOf("#editor")) == "#editor")
+                        if (xClp.IndexOf("edit") > -1 && xClp.IndexOf("&page") > -1)//xClp.Substring(xClp.LastIndexOf("#editor")) == "#editor")
                         //url此頁的Quick edit值傳到textBox1,並存入剪貼簿以備用
                         {
                             //若此時按下 Shift 則不會取得文本而是逕行送去《古籍酷》OCR取回文本至textBox1以備用
@@ -1048,8 +1048,8 @@ namespace WindowsFormsApp1
             { s = textBox1.SelectionStart; l = textBox1.SelectionLength; }
             string xCopy = x.Substring(0, s + l > x.Length ? x.Length : s + l);
             #region 置換為全形符號、及清除冗餘（清除冗餘要留意會動到 l 的值！！）
-            string[] replaceDChar = { "'", ",", ";", ":", "．", "?", "：：", "《《", "》》", "〈〈", "〉〉", "。}}。}}", "。。", "，，" };
-            string[] replaceChar = { "、", "，", "；", "：", "·", "？", "：", "《《", "》", "〈", "〉", "。}}", "。", "，" };
+            string[] replaceDChar = { "'", ",", ";", ":", "．", "?", "：：", "《《", "》》", "〈〈", "〉〉", "。}}。}}", "。。", "，，", "@" };
+            string[] replaceChar = { "、", "，", "；", "：", "·", "？", "：", "《《", "》", "〈", "〉", "。}}", "。", "，", "●" };
             foreach (var item in replaceDChar)
             {
                 if (xCopy.IndexOf(item) > -1)
@@ -3754,11 +3754,11 @@ namespace WindowsFormsApp1
 
         private void keysParagraphSymbol()
         {
-            int s = textBox1.SelectionStart; if (textBox1.TextLength < 2) return;
+            if (textBox1.TextLength < 2) return; int s = textBox1.SelectionStart;
             string x = textBox1.Text, stxtPre = x.Substring(s < 2 ? s : s - 2, 2);
             undoRecord();
             stopUndoRec = true;
-            if (stxtPre == Environment.NewLine)
+            if (stxtPre == Environment.NewLine && s > 1)
                 textBox1.SelectionStart = s - 2 > 0 ? s - 2 : 0;
             else if (stxtPre.IndexOf("|", 1) > -1)
             {
