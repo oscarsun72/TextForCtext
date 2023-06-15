@@ -1644,39 +1644,41 @@ namespace TextForCtext
         /// <returns>順利完成則回傳true</returns>
         internal static bool OCR_GJcool_AutoRecognizeVertical(string downloadImgFullName)
         {
-            driver = driver ?? driverNew();
-            string currentWindowHndl = driver.CurrentWindowHandle;
-            string gjCool = string.Empty;
-            openNewTabWindow(WindowType.Window);
-            //點數（算力值、算力配额）不足逕用「快速體驗」執行
-            if (waitGJcoolPoint && DateTime.Now.Subtract(gjCoolPointLess150When) < gjCoolPointEnoughTimespan)
+            string gjCool = string.Empty; string currentWindowHndl = "";
+            try
             {
-
-                bool fastXResulut = OCR_GJcool_FastExperience(downloadImgFullName);
-                try
+                driver = driver ?? driverNew();
+                currentWindowHndl = driver.CurrentWindowHandle;
+                openNewTabWindow(WindowType.Window);
+                //點數（算力值、算力配额）不足逕用「快速體驗」執行
+                if (waitGJcoolPoint && DateTime.Now.Subtract(gjCoolPointLess150When) < gjCoolPointEnoughTimespan)
                 {
+
+                    bool fastXResulut = OCR_GJcool_FastExperience(downloadImgFullName);
+
                     driver.Close();
                     driver.SwitchTo().Window(currentWindowHndl);
+                    return fastXResulut;
                 }
-                catch (Exception ex)
-                {
-                    switch (ex.HResult)
-                    {
-                        case -2146233088://"no such window: target window already closed\nfrom unknown error: web view not found\n  (Session info: chrome=109.0.5414.120)"                            
-                            if (ex.Message.IndexOf("no such window: target window already closed") > -1) { if (File.Exists(downloadImgFullName)) File.Delete(downloadImgFullName); }
-                            else
-                                Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
-                            break;
-                        default:
-                            Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
-                            break;
-                    }
-
-                }
-                return fastXResulut;
+                else
+                    gjCool = OCRSite_URL[OCRSiteTitle.GJcool]; //"https://gj.cool/try_ocr";
             }
-            else
-                gjCool = OCRSite_URL[OCRSiteTitle.GJcool]; //"https://gj.cool/try_ocr";
+            catch (Exception ex)
+            {
+                switch (ex.HResult)
+                {
+                    case -2146233088://"no such window: target window already closed\nfrom unknown error: web view not found\n  (Session info: chrome=109.0.5414.120)"                            
+                        if (ex.Message.IndexOf("no such window: target window already closed") > -1) { if (File.Exists(downloadImgFullName)) File.Delete(downloadImgFullName); }
+                        else
+                            Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
+                        break;
+                    default:
+                        Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
+                        break;
+                }
+
+            }
+
             try
             {
                 driver.Navigate().GoToUrl(gjCool);

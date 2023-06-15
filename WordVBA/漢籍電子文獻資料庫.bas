@@ -8,7 +8,7 @@ With rng
     .Paste
     .Find.Font.Shading.BackgroundPatternColor = 65535
     Do While .Find.Execute()
-        If Asc(.Text) > 13 Or Asc(.Text) < 0 Then
+        If Asc(.text) > 13 Or Asc(.text) < 0 Then
             .Shading.BackgroundPatternColor = wdColorAutomatic
             With .Font
                 .Color = 0
@@ -96,10 +96,46 @@ For Each a In rng.Characters
         End If
     End If
 Next a
-rng.Text = x
+rng.text = x
 文字處理.書名號篇名號標注
 rng.Cut
 rng.Document.Close wdDoNotSaveChanges
 'SystemSetup.ClipboardPutIn x
 Beep
 End Sub
+
+Rem 20230610 YouChat大菩薩：https://you.com/search?q=%E6%89%80%E4%BB%A5+Python%E8%A3%A1%E9%A0%AD%E7%9A%84+re.Sub+%E5%B0%B1%E9%A1%9E%E4%BC%BC++VBA%E4%B8%AD%E7%9A%84+re.Replace+%E5%9B%89&cid=c1_fb622a50-b65c-41dd-8f1d-0ad276074e80&tbm=youchat
+'Function CleanTextPicPageMark1(text As String)
+'  Dim re As New RegExp
+'  'Dim text As String
+'  Dim cleanedText As String
+'
+'  'Set re = New RegExp
+'  Set re = CreateObject("vbscript.regexp")
+'  re.Pattern = "\d+-\d+\s*【圖】?\s*"
+'  re.Global = True
+'  'cleanedText = VBA.Replace(re.Replace(text, vbNullString), Chr(13), vbNullString)
+'  cleanedText = re.Replace(text, vbNullString)
+'  CleanTextPicPageMark = cleanedText
+'  Debug.Print cleanedText
+'End Function
+Rem 20230610 Bing大菩薩：
+Function CleanTextPicPageMark(text As String)
+    Dim re As Object 'New RegExp
+    Dim cleanedText As String
+
+    Set re = CreateObject("vbscript.regexp")
+    re.Pattern = "\s*\d+-\d+\s*【圖】\s*" '「\s」：space 和 分段符號等
+    're.Pattern = "\d+-\d+\s*【圖】?\s*"
+     '清除諸如：
+        '「
+        '7-2
+        '【圖】
+        '」
+'        之文本
+    re.Global = True
+    cleanedText = re.Replace(text, vbNullString)
+    CleanTextPicPageMark = cleanedText
+End Function
+
+

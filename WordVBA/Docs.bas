@@ -847,6 +847,7 @@ endDocOld = d.Range.End
 Rem 將剪貼簿內擬加入的文本規範化
 clipBTxt = Replace(Replace(Replace(Replace(VBA.Trim(SystemSetup.GetClipboardText), Chr(13) + Chr(10) + "空句子" + Chr(13) + Chr(10), Chr(13) + Chr(10) + Chr(13) + Chr(10)), Chr(9), ""), "．　", ""), "　．", "")
 clipBTxt = 文字處理.trimStrForSearch_PlainText(clipBTxt)
+clipBTxt = 漢籍電子文獻資料庫.CleanTextPicPageMark(clipBTxt)
 For e = 0 To UBound(strAutoCorrection)
     clipBTxt = Replace(clipBTxt, strAutoCorrection(e), strAutoCorrection(e + 1))
     e = e + 1
@@ -1172,6 +1173,7 @@ If Len(d.Range) = 1 Then Exit Sub '空白文件不處理
 '先要複製到剪貼簿,純文字操作即可
 'd.Range.Cut
 x = 文字處理.trimStrForSearch_PlainText(d.Range)
+x = 漢籍電子文獻資料庫.CleanTextPicPageMark(x)
 SystemSetup.SetClipboard VBA.Replace(x, "·", "") '以《古籍酷》自動標點不會清除「·」，造成書名號標點機制不正確，故於此先清除之。
 DoEvents
 'If d.path = "" Then '前已作判斷 If d.path <> "" Then Exit Sub
@@ -1182,6 +1184,7 @@ SystemSetup.stopUndo ur, "中國哲學書電子化計劃_註文前後加括弧_貼到古籍酷自動標點
 
 '將剪貼簿中的文本內容，送交古籍酷自動標點
 If 貼到古籍酷自動標點() = True Then
+    If Documents.Count = 0 Then GoTo exitSub
     ActiveDocument.Application.Activate
     '自動執行易學關鍵字標識
     If Documents.Count > 0 Then
@@ -1201,6 +1204,7 @@ mark:
         End If
     End If
 End If
+exitSub:
 SystemSetup.contiUndo ur
 word.Application.ScreenUpdating = True
 Exit Sub
