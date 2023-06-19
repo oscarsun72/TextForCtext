@@ -229,7 +229,7 @@ Dim rng As Range, e As Long, s As Long, rngP As Range
 'd As Document,Set d = Documents.Add
 Set rng = d.Range
 DoEvents
-On Error GoTo eh
+On Error GoTo eH
 rng.Paste
 rng.Find.ClearFormatting
 Do While rng.Find.Execute("*")
@@ -262,7 +262,7 @@ Loop
 playSound 1
 'pastetoEditBox "將星號前的分段符號移置前段之末"
 Exit Sub
-eh:
+eH:
 Select Case Err.Number
     Case 4605, 13 '此方法或屬性無法使用，因為[剪貼簿] 是空的或無效的。
         SystemSetup.wait 0.8
@@ -468,7 +468,7 @@ d.Close wdDoNotSaveChanges
 End Sub
 Sub 維基文庫四部叢刊本轉來()
 Dim d As Document, a, i, p As Paragraph, xP As String, acP As Integer, space As String, rng As Range
-On Error GoTo eh
+On Error GoTo eH
 a = Array(ChrW(12296), "{{", ChrW(12297), "}}", "〈", "{{", "〉", "}}", _
     "○", ChrW(12295))
 '《容齋三筆》等小注作正文省版面者 https://ctext.org/library.pl?if=gb&file=89545&page=24
@@ -541,7 +541,7 @@ d.Range.Cut
 d.Close wdDoNotSaveChanges
 SystemSetup.playSound 2
 Exit Sub
-eh:
+eH:
 Select Case Err.Number
     Case 5904 '無法編輯 [範圍]。
         If p.Range.Characters(acP).Hyperlinks.Count > 0 Then p.Range.Characters(acP).Hyperlinks(1).Delete
@@ -1655,105 +1655,108 @@ Return
 End Sub
 
 Sub checkEditingOfPreviousVersion()
-Dim d As Document, rng As Range
-Set d = Documents.Add()
-Set rng = d.Range
-rng.Paste
-GoSub fontColor
-GoSub punctuations
-If d.Application.Documents.Count = 1 Then
-    d.Application.Quit wdDoNotSaveChanges
-Else
-    d.Close wdDoNotSaveChanges
-End If
-Exit Sub
- 
- 
+    Dim d As Document, rng As Range
+    Set d = Documents.Add()
+    Set rng = d.Range
+    rng.Paste
+    GoSub fontColor
+    GoSub punctuations
+    If d.Application.Documents.Count = 1 Then
+        d.Application.Quit wdDoNotSaveChanges
+    Else
+        d.Close wdDoNotSaveChanges
+    End If
+    Exit Sub
+     
+     
 fontColor:
-
-    rng.Find.ClearFormatting
-    rng.Find.Font.Color = 8912896 '{{{}}}語法下的文字
-    rng.Find.Replacement.ClearFormatting
-    With rng.Find
-        .text = ""
-        .Replacement.text = ""
-        .Forward = True
-        .Wrap = wdFindContinue
-        .Format = True
-        .MatchCase = False
-        .MatchWholeWord = False
-        .MatchByte = True
-        .MatchWildcards = False
-        .MatchSoundsLike = False
-        .MatchAllWordForms = False
-    End With
-    If (rng.Find.Execute) Then GoSub CheckOut
-Return
-
+    
+        rng.Find.ClearFormatting
+        rng.Find.Font.Color = 8912896 '{{{}}}語法下的文字
+        rng.Find.Replacement.ClearFormatting
+        With rng.Find
+            .text = ""
+            .Replacement.text = ""
+            .Forward = True
+            .Wrap = wdFindContinue
+            .Format = True
+            .MatchCase = False
+            .MatchWholeWord = False
+            .MatchByte = True
+            .MatchWildcards = False
+            .MatchSoundsLike = False
+            .MatchAllWordForms = False
+        End With
+        If (rng.Find.Execute) Then GoSub CheckOut
+    Return
+    
 punctuations:
-    rng.Find.ClearFormatting
-    rng.Find.Replacement.ClearFormatting
-    Dim punctus, e
-    punctus = Array("，", "。", "「", "·", "：", "（")  '檢查幾個具代表者即可
-    For Each e In punctus
-        If InStr(rng.text, e) > 0 Then
-            rng.Find.Execute e
-            GoTo CheckOut
-        End If
-    Next e
-Return
-
+        rng.Find.ClearFormatting
+        rng.Find.Replacement.ClearFormatting
+        Dim punctus, e
+        punctus = Array("，", "。", "「", "·", "：", "（")  '檢查幾個具代表者即可
+        For Each e In punctus
+            If InStr(rng.text, e) > 0 Then
+                rng.Find.Execute e
+                GoTo CheckOut
+            End If
+        Next e
+    Return
+    
 CheckOut:
-    rng.Select
-    d.ActiveWindow.Visible = True
-    d.ActiveWindow.ScrollIntoView rng
-    MsgBox "plz check it out !", vbExclamation
+        rng.Select
+        d.ActiveWindow.Visible = True
+        d.ActiveWindow.ScrollIntoView rng
+        MsgBox "plz check it out !", vbExclamation
 End Sub
 
 Sub EditModeMakeup_changeFile_Page() '同版本文本帶入置換file id 和 頁數
-Dim rng As Range, pageNum As Range, d As Document, ur As UndoRecord
-Set d = ActiveDocument
-
-'文件前3段分別是以下資訊,執行完會清除
-If Not VBA.IsNumeric(VBA.Replace(d.Range.Paragraphs(1).Range.text, Chr(13), "")) Then
-    MsgBox "請在文件前3段分別是以下資訊（皆是數字）,執行完會清除" & vbCr & vbCr & _
-        "1. 頁數差(來源-(減去)目的）" & vbCr & _
-        "2. 目的的 file number。要置換成的；不取代則為0，省略則預設為0" & vbCr & _
-        "3. 來源的 file number，要被取代的,省略（仍要空其段落=空行）則取文件中的file=後的值"
-    Exit Sub
-End If
-Dim differPageNum  As Integer '頁數差(來源-(減去)目的）
-differPageNum = VBA.Replace(d.Paragraphs(1).Range.text, Chr(13), "") '頁數差(來源-(減去)目的）
-Dim file
-file = VBA.Replace(d.Paragraphs(2).Range.text, Chr(13), "") ' 目的。不取代則為0
-If file = "" Then file = 0
-Dim fileFrom As String
-fileFrom = VBA.Replace(d.Paragraphs(3).Range.text, Chr(13), "") ' '來源
-If fileFrom = "" Then
-    Dim s As String: s = VBA.InStr(d.Range.text, "<scanbegin file="): s = s + VBA.Len("<scanbegin file=")
-    fileFrom = Mid(d.Range.text, s + 1, InStr(s + 1, d.Range.text, """") - s - 1)
-End If
-Set rng = d.Range
-'Set ur = SystemSetup.stopUndo("EditMakeupCtext")
-SystemSetup.stopUndo ur, "EditMakeupCtext"
-If file > 0 Then
-    'rng.Find.Execute " file=""77991""", True, True, , , , True, wdFindContinue, , " file=""" & file & """", wdReplaceAll
-    rng.text = Replace(rng.text, " file=""" & fileFrom & """", " file=""" & file & """")
-End If
-
-Do While rng.Find.Execute(" page=""", , , , , , True, wdFindStop)
-    Set pageNum = rng
-    pageNum.SetRange rng.End, rng.End + 1
-    pageNum.MoveEndUntil """"
-    pageNum.text = CStr(CInt(pageNum.text) - differPageNum)
-    rng.SetRange pageNum.End, d.Range.End
-Loop
-rng.SetRange d.Range.Paragraphs(1).Range.start, d.Range.Paragraphs(3).Range.End
-rng.Delete
-SystemSetup.SetClipboard d.Range.text
-SystemSetup.contiUndo ur
-SystemSetup.playSound 1
-
+    Dim rng As Range, pageNum As Range, d As Document, ur As UndoRecord
+    Set d = ActiveDocument
+    
+    '文件前3段分別是以下資訊,執行完會清除
+    'If Not VBA.IsNumeric(VBA.Replace(d.Range.Paragraphs(1).Range.text, Chr(13), "")) then
+    If Replace(d.Paragraphs(1).Range + d.Paragraphs(2).Range + d.Paragraphs(3).Range, Chr(13), "") = "" _
+        Or Not IsNumeric(Replace(d.Paragraphs(1).Range + d.Paragraphs(2).Range + d.Paragraphs(3).Range, Chr(13), "")) Then
+        MsgBox "請在文件前3段分別是以下資訊（皆是數字）,執行完會清除" & vbCr & vbCr & _
+            "1. 頁數差(來源-(減去)目的）。無頁差則為0，省略則預設為0" & vbCr & _
+            "2. 目的的 file number。要置換成的；不取代則為0，省略則預設為0" & vbCr & _
+            "3. 來源的 file number，要被取代的,省略（仍要空其段落=空行）則取文件中的file=後的值"
+        Exit Sub
+    End If
+    Dim differPageNum  As Integer '頁數差(來源-(減去)目的）
+    differPageNum = VBA.IIf(d.Paragraphs(1).Range.Characters.Count = 1, 0, VBA.Replace(d.Paragraphs(1).Range.text, Chr(13), "")) '頁數差(來源-(減去)目的）
+    Dim file
+    file = VBA.Replace(d.Paragraphs(2).Range.text, Chr(13), "") ' 目的。不取代則為0
+    If file = "" Then file = 0
+    Dim fileFrom As String
+    fileFrom = VBA.Replace(d.Paragraphs(3).Range.text, Chr(13), "") ' '來源
+    If fileFrom = "" Then
+        Dim s As String: s = VBA.InStr(d.Range.text, "<scanbegin file="): s = s + VBA.Len("<scanbegin file=")
+        fileFrom = Mid(d.Range.text, s + 1, InStr(s + 1, d.Range.text, """") - s - 1)
+    End If
+    Set rng = d.Range
+    'Set ur = SystemSetup.stopUndo("EditMakeupCtext")
+    SystemSetup.stopUndo ur, "EditMakeupCtext"
+    If file > 0 Then
+        'rng.Find.Execute " file=""77991""", True, True, , , , True, wdFindContinue, , " file=""" & file & """", wdReplaceAll
+        rng.text = Replace(rng.text, " file=""" & fileFrom & """", " file=""" & file & """")
+    End If
+    
+    Do While rng.Find.Execute(" page=""", , , , , , True, wdFindStop)
+        Set pageNum = rng
+        pageNum.SetRange rng.End, rng.End + 1
+        pageNum.MoveEndUntil """"
+        pageNum.text = CStr(CInt(pageNum.text) - differPageNum)
+        rng.SetRange pageNum.End, d.Range.End
+    Loop
+    rng.SetRange d.Range.Paragraphs(1).Range.start, d.Range.Paragraphs(3).Range.End
+    rng.Delete
+    'd.Range.Cut
+    SystemSetup.SetClipboard d.Range.text
+    SystemSetup.contiUndo ur
+    SystemSetup.playSound 1
+    d.Application.Activate
 End Sub
 
 

@@ -912,6 +912,7 @@ namespace WindowsFormsApp1
         {
             if (s < 0 || string.IsNullOrEmpty(x)) return "";
             int preP = x.LastIndexOf(Environment.NewLine, s), p = x.IndexOf(Environment.NewLine, s);
+            //if (p == 0) return "";///////////watching  if ok  then the comment can be remove 20230617  
             int lineS = preP == -1 ? 0 : preP + Environment.NewLine.Length;
             int lineL = p == -1 ? x.Length - lineS : p - Environment.NewLine.Length - preP;
             return x.Substring(lineS, lineL);
@@ -3380,7 +3381,7 @@ namespace WindowsFormsApp1
                 if (x.Substring(i > 3 ? i - 3 : i, 5).IndexOf("<p>") == -1)
                 {
                     endCode = "<p>" + Environment.NewLine;
-                    if (x.Substring(i + 2, 2) == Environment.NewLine)
+                    if (i + 2 + 2 <= x.Length && x.Substring(i + 2, 2) == Environment.NewLine)
                         endCode = "<p>";
                     textBox1.Select(i, 2); textBox1.SelectedText = endCode; endPostion += endCode.Length;
                 }

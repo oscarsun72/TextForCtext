@@ -2229,7 +2229,7 @@ With Selection
 '        If .Find.Execute() = False Then Exit Do
         'Application.Browser.Next
         .TypeText text:="["
-        .MoveLeft Unit:=wdCharacter, Count:=1, Extend:=wdExtend
+        .MoveLeft unit:=wdCharacter, Count:=1, Extend:=wdExtend
         .Font.Superscript = wdToggle
 '        Selection.Copy
 '        Selection.MoveRight Unit:=wdCharacter, Count:=3
@@ -2239,7 +2239,7 @@ With Selection
 '        Selection.Delete Unit:=wdCharacter, Count:=1
 '        Selection.TypeText Text:="》"
 '        Selection.MoveLeft Unit:=wdCharacter, Count:=1
-        Selection.MoveRight Unit:=wdCharacter, Count:=2
+        Selection.MoveRight unit:=wdCharacter, Count:=2
         'Selection.TypeBackspace
         Selection.TypeText text:="]"
         'Selection.MoveRight Unit:=wdCharacter, Count:=1
@@ -3536,10 +3536,14 @@ Sub 書名號篇名號標注()
     d.Range.Find.Execute "〉〉", , , , , , True, wdFindContinue, , "〉", wdReplaceAll
     
     'GoSub bookmarks 'do again to check and correct SHOULD BE use another table to do this
+    If ur.CustomRecordLevel > 0 Then
+        SystemSetup.playSound 1.921
+    Else
+        SystemSetup.playSound 1
+    End If
     rst.Close: cnt.Close: SystemSetup.contiUndo ur
     word.Application.ScreenUpdating = True
     
-    SystemSetup.playSound 1.921
     
     Exit Sub
     
@@ -3558,7 +3562,7 @@ bookmarks:
     '                InStr("《〈·‧", IIf(rngF.Characters(1).Previous Is Nothing, "", rngF.Characters(1).Previous)) = 0 Then
                     If 書名號篇名號標注PreExamOK(d, title, rngF.start) Then
                         
-                        If title = "資治通鑑" Then Stop
+'                        If title = "資治通鑑" Then Stop 'just for test
                         
                         If VBA.IsNull(rst("取代為").Value) Then
                             rngF.text = "《" & title & "》"
