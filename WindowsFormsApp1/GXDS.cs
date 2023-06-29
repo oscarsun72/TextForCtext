@@ -280,6 +280,7 @@ namespace TextForCtext
         internal void correctBlankAndUppercurlybrackets(ref TextBox txb)
         {
             if (txb.Text.IndexOf("􏿽") == -1) return;
+            if (txb.SelectionStart == txb.TextLength) return;
             const string Uppercurlybrackets = "{{";
             const string Lowercurlybrackets = "}}";
             string x = txb.Text, wrng = txb.SelectedText, blank = "􏿽"; int s = txb.SelectionStart, sN = -1;
