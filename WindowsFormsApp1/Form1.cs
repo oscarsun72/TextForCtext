@@ -401,7 +401,7 @@ namespace WindowsFormsApp1
             if (!autoPastetoQuickEdit && keyinTextMode)
             {
                 string xClp = Clipboard.GetText();
-                if (xClp != "" &&
+                if (modifierKeys != Keys.Control && xClp != "" &&
                     xClp.Length > "https://ctext.org/".Length + "#editor".Length
                     && xClp.Substring(0, "https://ctext.org/".Length) == "https://ctext.org/")
                 {
@@ -1500,6 +1500,10 @@ namespace WindowsFormsApp1
                         br.SwitchToCurrentForeActivateTab(ref textBox3);
                     }
                     keyDownCtrlAdd(true);
+                    //非最上層顯示以便檢視
+                    //this.TopMost = false;
+                    //this.WindowState = FormWindowState.Minimized;
+                    hideToNICo();
                     return;
                 }
             }

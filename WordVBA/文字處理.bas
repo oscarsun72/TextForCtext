@@ -3686,6 +3686,36 @@ Loop
 Selection.HomeKey wdStory, wdExtend
 End Sub
 
+Rem 20230707 Bing大菩薩： 判斷全形半形字
+Public Function FullOrHalf(ByVal str As String) As Integer
+    Dim strLocal As String
+    Debug.Assert Len(str) = 1
+    If Len(str) <> 1 Then
+        FullOrHalf = -1
+        Exit Function
+    End If
+    strLocal = StrConv(str, vbFromUnicode)
+    If Len(str) * 2 = LenB(strLocal) Then
+        FullOrHalf = 2 ' wide
+    ElseIf Len(str) = LenB(strLocal) Then
+        FullOrHalf = 1 ' narrow
+    Else
+        FullOrHalf = 0 ' error
+    End If
+End Function
+Rem Bing大菩薩：
+'這個函數接受一個字符串作為輸入，返回一個整數值。如果返回值為 2，則表示輸入的字符是全角；如果返回值為 1，則表示輸入的字符是半角；如果返回值為 -1 或 0，則表示出現錯誤。
+'
+'判斷的原理是將編碼從 Unicode 轉為本地編碼，然後比較轉換前後字符串的長度。如果轉換前後字符串長度相等，則表示輸入的字符是半角；如果轉換後字符串長度是轉換前字符串長度的兩倍，則表示輸入的字符是全角(1)。
+'
+'來源: 與 Bing 的交談， 2023/7/7
+'(1) 一文徹底搞定vba處理全角半角 - 知乎. https://zhuanlan.zhihu.com/p/600306305.
+'(2) WordVBA：半角字符轉為全角字符（結合查找方法）_word半角符號改為全角符號宏_VBA-守候的博客-CSDN博客. https://blog.csdn.net/qq_64613735/article/details/124760907.
+'(3) office軟件word文檔中如何辨別半角和全角 - 百度知道. https://zhidao.baidu.com/question/347564125.html.
+'(4) VBA函數批量將將字符由全角轉為半角，或由半角轉為全角-同時適用Excel Access - Excel函數公式 - Office交流網. https://www.office-cn.net/excel-func/297.html.
+'(5) 如何分辨word文章中的標點是全角還是半角？_百度知道. https://zhidao.baidu.com/question/45987987.html.
+
+
 Rem 字串轉字串陣列 creedit with chatGPT大菩薩
 Function SplitWithoutDelimiter_StringToStringArray(str As String) As String()
 Dim lenStr  As Long, arr() As String, i As Long, ch As String, eCount As Long

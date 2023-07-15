@@ -1018,26 +1018,27 @@ End With
 Beep
 End Sub
 
-Sub Search(searchWhatsUrl As String)
-Dim d As Document
-Set d = ActiveDocument
-If d.path <> "" Then If d.Saved = False Then d.Save
-If Selection.Type = wdSelectionNormal Then
-    Selection.Copy
-End If
-'Shell "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe https://ctext.org/wiki.pl?if=gb&res=384378&searchu=" & Selection.text
-'Shell Normal.SystemSetup.getChrome & searchWhatsUrl & Selection.Text
-Shell Normal.Network.GetDefaultBrowserEXE & searchWhatsUrl & Selection.text
-End Sub
+Rem 回傳網址
+Function Search(searchWhatsUrl As String) As String
+    Dim d As Document
+    Set d = ActiveDocument
+    If d.path <> "" Then If d.Saved = False Then d.Save
+    If Selection.Type = wdSelectionNormal Then
+        Selection.Copy
+    End If
+    'Shell "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe https://ctext.org/wiki.pl?if=gb&res=384378&searchu=" & Selection.text
+    'Shell Normal.SystemSetup.getChrome & searchWhatsUrl & Selection.Text
+    Shell Normal.Network.GetDefaultBrowserEXE & searchWhatsUrl & Selection.text
+    Search = searchWhatsUrl & Selection.text
+End Function
 
 Sub search史記三家注()
-Search " https://ctext.org/wiki.pl?if=gb&res=384378&searchu="
+    ActiveDocument.Hyperlinks.Add Selection.Range, Search(" https://ctext.org/wiki.pl?if=gb&res=384378&searchu=")
 End Sub
 
 Sub search周易正義_阮元十三經注疏()
-Search " https://ctext.org/wiki.pl?if=gb&res=315747&searchu="
+    ActiveDocument.Hyperlinks.Add Selection.Range, Search(" https://ctext.org/wiki.pl?if=gb&res=315747&searchu=")
 End Sub
-
 
 
 Sub 讀史記三家注()

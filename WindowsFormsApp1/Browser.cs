@@ -1237,7 +1237,12 @@ namespace TextForCtext
             // 創建 ChromeDriver 實例
             //IWebDriver driver = new ChromeDriver();
             //ChromeDriver driver = driverNew();//new ChromeDriver();
-            if (driver == null) driver = driverNew();
+            if (driver == null)
+            {
+                if (Form1.browsrOPMode == Form1.BrowserOPMode.appActivateByName)
+                    Form1.browsrOPMode = Form1.BrowserOPMode.seleniumNew;
+                driver = driverNew();
+            }
             try
             {
                 driver.SwitchTo().NewWindow(tabOrwindow);
@@ -1905,7 +1910,16 @@ namespace TextForCtext
                 }
                 Clipboard.SetText(text.Replace("\n", "\r\n"));
                 //刪除下載檔案，以便下次載入
-                Task.Run(() => File.Delete(filePath));
+                Task.Run(() =>
+                {
+
+                    File.Copy(filePath, Path.Combine(//備一份以備萬一
+                        Path.GetDirectoryName(filePath) + Path.GetFileNameWithoutExtension(filePath) + "1" +
+                            Path.GetExtension(filePath)), true);
+
+
+                    File.Delete(filePath);
+                });
             }
             else return false;
             #endregion

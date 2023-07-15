@@ -14,7 +14,7 @@ Sub 在整頁模式中不顯示頁面間的空白區域()
     If word.Documents(1).Windows.Count = 0 Then Exit Sub
     If word.Documents(1).Windows(1).Visible Then
         If word.ActiveWindow.View.ReadingLayout Then _
-            ActiveWindow.View.ReadingLayout = Not ActiveWindow.View.ReadingLayout
+            word.ActiveWindow.View.ReadingLayout = Not word.ActiveWindow.View.ReadingLayout
         DoEvents
         word.ActiveWindow.View.DisplayPageBoundaries = False
     End If
@@ -707,7 +707,7 @@ Private Sub Document_Open()
 'Public Sub Document_Open() '其他範本參照用!故不用Private'2004/10/17
 'On Error GoTo eH
 
-Dim bk As bookmark, bkIdx As Integer, tp As Template '2015/11/4
+Dim bk As Bookmark, bkIdx As Integer, tp As Template '2015/11/4
 Register_Event_Handler
 With ThisDocument
     If left(.Name, 2) = "排印" Then .ActiveWindow.DisplayVerticalRuler = False
