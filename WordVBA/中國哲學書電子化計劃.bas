@@ -1508,7 +1508,7 @@ End With
 Do While slRng.Find.Execute(, , , , , , True, wdFindStop)
     If InStr(Chr(13) & Chr(11) & Chr(7) & Chr(8) & Chr(9) & Chr(10), slRng) = 0 Then
     slRng.text = "¡]" + slRng.text + "¡^"
-    slRng.SetRange slRng.End, d.Range.End
+    'slRng.SetRange slRng.End, d.Range.End
     End If
 Loop
 SystemSetup.contiUndo ur
