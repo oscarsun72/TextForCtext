@@ -3351,7 +3351,7 @@ namespace WindowsFormsApp1
             }
             #endregion
 
-            #region 20221019補訂，為最後一行為標題者
+            #region 20230723補訂，為最後一行為標題者
             if (textBox1.TextLength == s + x.Length
                 && x.IndexOf(Environment.NewLine)==-1)
                 textBox1.Select(s, textBox1.TextLength);
