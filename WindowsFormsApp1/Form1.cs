@@ -3287,61 +3287,57 @@ namespace WindowsFormsApp1
                 }
                 if (i != 0) s = i + 2;
                 else s = i;
+                //借用x變數，取得插入點後的文字
                 x = x.Substring(s);
-                if (s + x.Length != textBox1.TextLength)
+                for (int j = 0; j + 2 <= x.Length; j++)
                 {
-                    for (int j = 0; j + 2 <= x.Length; j++)
+                    string nx = x.Substring(j, 2);
+                    if (nx == Environment.NewLine || nx == "{{" || nx == "<p")
                     {
-                        string nx = x.Substring(j, 2);
-                        if (nx == Environment.NewLine || nx == "{{" || nx == "<p")
+                    longTitle:
+                        if (nx == Environment.NewLine)
                         {
-                        longTitle:
-                            if (nx == Environment.NewLine)
-                            {
-                                //標題（篇名）過長時之處理：
-                                if (j + 2 + 1 <= x.Length) if (x.Substring(j + 2, 1) == "　") continue;
-                            }
-                            //如果篇名標題有小注，則在其結尾處加上分段符號<p>
-                            if (nx == "{{")
-                            {
-                                #region 標題中有小注 bugs still
-                                int sCloseCurlyBrackets = x.IndexOf("}}", j), sNewLine = x.IndexOf(Environment.NewLine, j);
-                                if (sCloseCurlyBrackets > -1)
-                                {
-                                    if (sCloseCurlyBrackets < sNewLine - "}}".Length &&
-                                        x.Substring(sCloseCurlyBrackets + 2, 3) != "<p>")
-                                    {
-                                        //nx = Environment.NewLine;
-                                        j = sNewLine; nx = x.Substring(j, 2);
-                                        goto longTitle;
-                                    }
-                                }
-                                #endregion
-                                if (j + 2 + 1 <= x.Length)
-                                {
-                                    int k = x.IndexOf(Environment.NewLine, j + 2 + 1);
-                                    //if (k > -1 || k == x.Length - 2)
-                                    while (k + 1 <= x.Length || k > -1 || k == x.Length - 2)
-                                    {
-                                        if (k - 2 < 0)
-                                        {
-                                            stopUndoRec = false; return;
-                                        }
-                                        if (x.Substring(k - 2, 2) == "}}" && x.Substring(k + 2, 2) != "{{")
-                                        {
-                                            textBox1.Select(s + k, 0); textBox1.SelectedText = "<p>"; break;
-                                        }
-                                        k = x.IndexOf(Environment.NewLine, k + 1);
-                                    }
-                                }
-                            }
-                            textBox1.Select(s, j);//選取標題文字內容,準備將標題格式，置換成標題語法格式
-                            break;
+                            //標題（篇名）過長時之處理：
+                            if (j + 2 + 1 <= x.Length) if (x.Substring(j + 2, 1) == "　") continue;
                         }
+                        //如果篇名標題有小注，則在其結尾處加上分段符號<p>
+                        if (nx == "{{")
+                        {
+                            #region 標題中有小注 bugs still
+                            int sCloseCurlyBrackets = x.IndexOf("}}", j), sNewLine = x.IndexOf(Environment.NewLine, j);
+                            if (sCloseCurlyBrackets > -1)
+                            {
+                                if (sCloseCurlyBrackets < sNewLine - "}}".Length &&
+                                    x.Substring(sCloseCurlyBrackets + 2, 3) != "<p>")
+                                {
+                                    //nx = Environment.NewLine;
+                                    j = sNewLine; nx = x.Substring(j, 2);
+                                    goto longTitle;
+                                }
+                            }
+                            #endregion
+                            if (j + 2 + 1 <= x.Length)
+                            {
+                                int k = x.IndexOf(Environment.NewLine, j + 2 + 1);
+                                //if (k > -1 || k == x.Length - 2)
+                                while (k + 1 <= x.Length || k > -1 || k == x.Length - 2)
+                                {
+                                    if (k - 2 < 0)
+                                    {
+                                        stopUndoRec = false; return;
+                                    }
+                                    if (x.Substring(k - 2, 2) == "}}" && x.Substring(k + 2, 2) != "{{")
+                                    {
+                                        textBox1.Select(s + k, 0); textBox1.SelectedText = "<p>"; break;
+                                    }
+                                    k = x.IndexOf(Environment.NewLine, k + 1);
+                                }
+                            }
+                        }
+                        textBox1.Select(s, j);//選取標題文字內容,準備將標題格式，置換成標題語法格式
+                        break;
                     }
                 }
-                else
-                    textBox1.Select(s, textBox1.TextLength);
             }
 
             #region 20221019補訂，為第一行為標題者
@@ -3353,6 +3349,12 @@ namespace WindowsFormsApp1
                     textBox1.Select(++s, --sl);
                 }
             }
+            #endregion
+
+            #region 20221019補訂，為最後一行為標題者
+            if (textBox1.TextLength == s + x.Length
+                && x.IndexOf(Environment.NewLine)==-1)
+                textBox1.Select(s, textBox1.TextLength);
             #endregion
 
             x = textBox1.Text; string endCode = "<p>";
