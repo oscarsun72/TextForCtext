@@ -1614,7 +1614,7 @@ namespace WindowsFormsApp1
                 }
                 if (e.KeyCode == Keys.Oem3)
                 {//` 或 Ctrl + ` ： 於插入點處起至「　」或「􏿽」或「|」或「<」或分段符號前止之文字加上黑括號【】//Print/SysRq 為OS鎖定不能用
-                    e.Handled = true; 加上黑括號(); return;
+                    e.Handled = true; preceded_followed_specify_symbols("【】"); return;
                 }
 
                 if (e.KeyCode == Keys.Add || e.KeyCode == Keys.Oemplus || e.KeyCode == Keys.Subtract || e.KeyCode == Keys.NumPad5)
@@ -2303,6 +2303,28 @@ namespace WindowsFormsApp1
                     return;
                 }
 
+                /*20230723Bing大菩薩：
+                                 您可以在 KeyDown 事件中檢查是否按下了「Alt + [」組合鍵。在 KeyEventArgs 中，您可以使用 e.Modifiers 屬性來檢查是否按下了修飾鍵（例如 Alt），並使用 e.KeyCode 屬性來檢查是否按下了其他鍵（例如 [）。以下是一個示例代碼：
+                        請注意，您需要將 Form 的 KeyPreview 屬性設置為 true，才能使此代碼正常工作。¹
+
+                        來源: 與 Bing 的交談， 2023/7/23
+                        (1) 檢查按下哪一個修飾詞按鍵 - Windows Forms .NET | Microsoft Learn. https://learn.microsoft.com/zh-tw/dotnet/desktop/winforms/input-keyboard/how-to-check-modifier-key?view=netdesktop-7.0.
+                        (2) 鍵盤輸入概觀 - Windows Forms .NET | Microsoft Learn. https://learn.microsoft.com/zh-tw/dotnet/desktop/winforms/input-keyboard/overview?view=netdesktop-7.0.
+                        (3) 作法：判斷按下的輔助按鍵 - Windows Forms .NET Framework. https://learn.microsoft.com/zh-tw/dotnet/desktop/winforms/how-to-determine-which-modifier-key-was-pressed?view=netframeworkdesktop-4.8.
+                 */
+                if (e.Modifiers == Keys.Alt && e.KeyCode == Keys.Oem4)
+                {
+                    e.Handled = true;
+                    preceded_followed_specify_symbols("〖〗");
+                    return;
+                }
+                /*
+                 `Keys.OemOpenBrackets` 是 `System.Windows.Forms.Keys` 枚舉中的一個值，表示 OEM 左方括號鍵。OEM 鍵是指隨地區鍵盤而變化的鍵。例如，美國鍵盤上有方括號和大括號，而德國鍵盤上則有變音符號。它們被稱為「OEM」，因為鍵盤的原始設備製造商負責定義它們的功能¹。
+                    來源: 與 Bing 的交談， 2023/7/23
+                    (1) .net - What are the "OEM" keys in the System.Windows.Forms.Keys enumeration? - Stack Overflow. https://stackoverflow.com/questions/582403/what-are-the-oem-keys-in-the-system-windows-forms-keys-enumeration.
+                    (2) Key Enum (System.Windows.Input) | Microsoft Learn. https://learn.microsoft.com/en-us/dotnet/api/system.windows.input.key?view=windowsdesktop-7.0.
+                    (3) Keys Enumeration. http://docs.go-mono.com/monodoc.ashx?link=T%3ASystem.Windows.Forms.Keys.
+                 */
 
             }//以上 Alt
             #endregion
@@ -2588,7 +2610,12 @@ namespace WindowsFormsApp1
             stopUndoRec = false;
         }
 
-        private void 加上黑括號()
+
+        /// <summary>
+        /// 前後加上指定符號－－ 由「加上黑括號」改編擴展而來
+        /// </summary>
+        /// <param name="whatSymbol">成對的符號，如果前後一致，如若想前後加上「●」，則要傳入「●●」，或只傳一個「●」</param>
+        private void preceded_followed_specify_symbols(string whatSymbol)
         {//`： 於插入點處起至「　」或「􏿽」前止之文字加上黑括號【】//Print/SysRq 為OS鎖定不能用
          //throw new NotImplementedException();
             int s = textBox1.SelectionStart; string x = textBox1.Text;
@@ -2609,7 +2636,13 @@ namespace WindowsFormsApp1
             else//如果非插入點，則將選取區前後加上黑括號
             { }
             undoRecord(); stopUndoRec = true;
-            textBox1.SelectedText = "【" + textBox1.SelectedText + "】";
+            //成對的符號，如果前後一致，如若想前後加上「●」，則要傳入「●●」，或只傳一個「●」
+            StringInfo si = new StringInfo(whatSymbol);
+            //textBox1.SelectedText = "【" + textBox1.SelectedText + "】";
+            if (si.LengthInTextElements > 1)
+                textBox1.SelectedText = si.SubstringByTextElements(0,1) + textBox1.SelectedText + si.SubstringByTextElements(1);
+            else
+                textBox1.SelectedText = si.SubstringByTextElements(0) + textBox1.SelectedText + si.SubstringByTextElements(0);
             stopUndoRec = false;
         }
 
@@ -3353,7 +3386,7 @@ namespace WindowsFormsApp1
 
             #region 20230723補訂，為最後一行為標題者
             if (textBox1.TextLength == s + x.Length
-                && x.IndexOf(Environment.NewLine)==-1)
+                && x.IndexOf(Environment.NewLine) == -1)
                 textBox1.Select(s, textBox1.TextLength);
             #endregion
 
@@ -8326,7 +8359,8 @@ namespace WindowsFormsApp1
             }
             if (e.KeyChar == 96)
             {//`： 於插入點處起至「　」或「􏿽」前止之文字加上黑括號【】//Print/SysRq 為OS鎖定不能用
-                e.Handled = true; 加上黑括號(); return;
+                //e.Handled = true; 加上黑括號(); return;
+                e.Handled = true; preceded_followed_specify_symbols("【】"); return;
             }
             if (e.KeyChar == 127)
             {//`： 於插入點處起至「　」或「􏿽」前止之文字加上黑括號【】//Print/SysRq 為OS鎖定不能用
