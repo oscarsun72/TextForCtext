@@ -1649,6 +1649,7 @@ namespace TextForCtext
         /// <returns>順利完成則回傳true</returns>
         internal static bool OCR_GJcool_AutoRecognizeVertical(string downloadImgFullName)
         {
+            //Form1.playSound(Form1.soundLike.press);
             string gjCool = string.Empty; string currentWindowHndl = "";
             try
             {
@@ -1912,10 +1913,10 @@ namespace TextForCtext
                 //刪除下載檔案，以便下次載入
                 Task.Run(() =>
                 {
-
-                    File.Copy(filePath, Path.Combine(//備一份以備萬一
-                        Path.GetDirectoryName(filePath) + Path.GetFileNameWithoutExtension(filePath) + "1" +
-                            Path.GetExtension(filePath)), true);
+                    //不必備份，似乎是《古籍酷》本身有bug，明明是一張圖，輸出的卻是不一樣的文本，或上次或之前哪次的文本 20230802
+                    //File.Copy(filePath, Path.Combine(//備一份以備萬一
+                    //    Path.GetDirectoryName(filePath) + Path.GetFileNameWithoutExtension(filePath) + "1" +
+                    //        Path.GetExtension(filePath)), true);
 
 
                     File.Delete(filePath);
@@ -1993,7 +1994,8 @@ namespace TextForCtext
                         return false;
                 }
             }
-
+            
+            //Form1.playSound(Form1.soundLike.processing);
             if (ActiveForm1.TopMost) ActiveForm1.TopMost = false;
             //首頁「快速體驗」按鈕：
             IWebElement iwe = waitFindWebElementBySelector_ToBeClickable("body > div.container-fluid.bg-dark.px-1 > div > h2.text-center.my-2.py-4 > button > div", 10);
@@ -2013,6 +2015,8 @@ namespace TextForCtext
             SendKeys.Send("+{Insert}");//or "^v"
             SendKeys.Send("{ENTER}");
 
+            Form1.playSound(Form1.soundLike.processing);
+
             Thread.Sleep(200);
             Clipboard.Clear();
 
@@ -2028,9 +2032,9 @@ namespace TextForCtext
             //                                                  #dialog_483f217a > div.col > div.d-flex.py-1 > button
 
             //待OCR結束
-            //Thread.Sleep(4700);//可多設時間以等待，若多餘，可手動按下複製按鈕即可。
+            Thread.Sleep(5200);//可多設時間以等待，若多餘，可手動按下複製按鈕即可。
             //Thread.Sleep(4300);
-            Thread.Sleep(3900);
+            //Thread.Sleep(3900);
             #region 將OCR結果讀入剪貼簿：
             Point copyBtnPos = new Point(); DateTime begin = DateTime.Now;
             //待手動成功複製，上限為 timeSpanSecs 秒

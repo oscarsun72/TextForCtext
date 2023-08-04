@@ -31,6 +31,8 @@ using System.Net.Http.Headers;
 using System.Web;
 using WebSocketSharp;
 using System.Diagnostics.Eventing.Reader;
+using static System.Net.Mime.MediaTypeNames;
+using System.Runtime.InteropServices.WindowsRuntime;
 
 //using System.Windows.Input;
 //using Microsoft.Office.Interop.Word;
@@ -2640,7 +2642,7 @@ namespace WindowsFormsApp1
             StringInfo si = new StringInfo(whatSymbol);
             //textBox1.SelectedText = "【" + textBox1.SelectedText + "】";
             if (si.LengthInTextElements > 1)
-                textBox1.SelectedText = si.SubstringByTextElements(0,1) + textBox1.SelectedText + si.SubstringByTextElements(1);
+                textBox1.SelectedText = si.SubstringByTextElements(0, 1) + textBox1.SelectedText + si.SubstringByTextElements(1);
             else
                 textBox1.SelectedText = si.SubstringByTextElements(0) + textBox1.SelectedText + si.SubstringByTextElements(0);
             stopUndoRec = false;
@@ -4358,7 +4360,7 @@ namespace WindowsFormsApp1
             TopMost = topmost;
         }
 
-        public enum soundLike { over, done, stop, info, error, warn, exam }
+        public enum soundLike { over, done, stop, info, error, warn, exam, processing, press }
         public static void playSound(soundLike sndlike)
         {
             string mediaPathWithBackslash = Environment.GetFolderPath(Environment.SpecialFolder.Windows) + "\\Media\\";
@@ -4385,6 +4387,12 @@ namespace WindowsFormsApp1
                     break;
                 case soundLike.exam:
                     wav = "Windows Notify Email";
+                    break;
+                case soundLike.processing:
+                    wav = "Chimes";
+                    break;
+                case soundLike.press:
+                    wav = "Windows Pop-up Blocked";
                     break;
                 default:
                     break;
@@ -4978,10 +4986,20 @@ namespace WindowsFormsApp1
                 {
                     if (HiddenIcon) show_nICo(ModifierKeys);
                     availableInUseBothKeysMouse();
-                    //將插入點置於頁首，以備編輯
-                    textBox1.Select(0, 0);
-                    textBox1.ScrollToCaret();
-                    //br.WindowsScrolltoTop();
+
+                    if (ModifierKeys == Keys.Shift)
+                    {//自動送交賢超法師《古籍酷AI》OCR
+                        //已改寫在 nextpage 裡
+                        //Form1.playSound(Form1.soundLike.press);
+                        //toOCR(br.OCRSiteTitle.GJcool);
+                    }
+                    else
+                    {
+                        //將插入點置於頁首，以備編輯
+                        textBox1.Select(0, 0);
+                        textBox1.ScrollToCaret();
+                        //br.WindowsScrolltoTop();
+                    }
                 }
             }
         }
@@ -5855,7 +5873,7 @@ namespace WindowsFormsApp1
                 if (e.KeyCode == Keys.O)
                 {//Ctrl + Alt + o :下載圖片，交給Google Keep OCR
                     if (browsrOPMode == BrowserOPMode.appActivateByName) return;
-                    e.Handled = true;
+                    e.Handled = true; Form1.playSound(Form1.soundLike.press);
                     toOCR(br.OCRSiteTitle.GoogleKeep);
                     return;
                 }
@@ -5888,7 +5906,7 @@ namespace WindowsFormsApp1
                 if (e.KeyCode == Keys.O)
                 {//Alt + Shift + o ：交給《古籍酷》 OCR ，模擬使用者手動操作的功能（待測試！！！！）
                     if (browsrOPMode == BrowserOPMode.appActivateByName) return;
-                    e.Handled = true;
+                    e.Handled = true; Form1.playSound(Form1.soundLike.press);
                     toOCR(br.OCRSiteTitle.GJcool);
                     //if (browsrOPMode == BrowserOPMode.appActivateByName) return;
                     //e.Handled = true;
@@ -6188,6 +6206,28 @@ namespace WindowsFormsApp1
         /// </summary>
         private void toOCR(br.OCRSiteTitle ocrSiteTitle)
         {
+            //Form1.playSound(Form1.soundLike.press);
+
+            #region 檢查是否必要 20230804Bard大菩薩：https://g.co/bard/share/9130d688e253
+            string quickedit_data_textboxTxt = br.Quickedit_data_textboxTxt;
+            //bool chk = false;
+            //if (quickedit_data_textboxTxt.Length > 1000)
+            //{
+            //    Regex regex = new Regex(@"\，|\。");
+            //    Match match = regex.Match(quickedit_data_textboxTxt);
+            //    chk = match.Success;
+            //}
+            //else
+            //{
+            //    chk = quickedit_data_textboxTxt.Contains("，") || quickedit_data_textboxTxt.Contains("。");
+            //}
+            if (CnText.HasPunctuationMarks_period_comma(ref quickedit_data_textboxTxt))
+            {
+                if (DialogResult.Cancel == Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("目前頁面似乎已經整理過了，確定還要繼續嗎？")) return;
+            }
+            #endregion
+
+
             //下載書圖
             string imgUrl = Clipboard.GetText(), downloadImgFullName;
             if (imgUrl.Length > 4
@@ -6508,6 +6548,10 @@ namespace WindowsFormsApp1
                 //如果是手動鍵入模式：
                 if (keyinTextMode)
                 {
+                    Keys modifierKeys = ModifierKeys;
+                    if (modifierKeys == Keys.Shift)
+                        Form1.playSound(Form1.soundLike.press);
+
                     OpenQA.Selenium.IWebElement quick_edit_box;
                     switch (browsrOPMode)
                     {
@@ -6517,36 +6561,43 @@ namespace WindowsFormsApp1
                             SendKeys.Send("^x");//剪下一頁以便輸入備用
                             break;
                         case BrowserOPMode.seleniumNew:
-                            int retrytimes = 0;
-                        retry:
-                            br.driver = br.driver ?? br.driverNew();
-                            try
-                            {//這裡需要參照元件來操作就不宜跑線程了！故此區塊最後的剪貼簿，要求須是單線程者，蓋因剪貼簿須獨占式使用故也20230111                                
-                                quick_edit_box = br.waitFindWebElementByName_ToBeClickable("data", br.WebDriverWaitTimeSpan);//br.driver.FindElement(OpenQA.Selenium.By.Name("data"));
-                                                                                                                             ////chatGPT：
-                                                                                                                             //// 等待網頁元素出現，最多等待 2 秒
-                                                                                                                             //OpenQA.Selenium.Support.UI.WebDriverWait wait =
-                                                                                                                             //    new OpenQA.Selenium.Support.UI.WebDriverWait
-                                                                                                                             //    (br.driver, TimeSpan.FromSeconds(2));
-                                                                                                                             ////安裝了 Selenium.WebDriver 套件，才說沒有「ExpectedConditions」，然後照Visual Studio 2022的改正建議又用NuGet 安裝了 Selenium.Suport 套件，也自動「 using OpenQA.Selenium.Support.UI;」了，末學自己還用物件瀏覽器找過了 「OpenQA.Selenium.Support.UI」，可就是沒有「ExpectedConditions」靜態類別可用，即使官方文件也說有 ： https://www.selenium.dev/selenium/docs/api/dotnet/html/T_OpenQA_Selenium_Support_UI_ExpectedConditions.htm 20230109 未知何故 阿彌陀佛
-                                                                                                                             //wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(quick_edit_box));
-
-                                //// 在網頁元素載入完畢後才能讀取其.Text屬性值，存入剪貼簿,前置空格會被削去，當是Selenium實作時的問題。
-                                //string xq = quick_edit_box.Text;
-                                //Clipboard.SetText(xq);
-                                quick_edit_box.SendKeys(OpenQA.Selenium.Keys.LeftControl + "a");
-                                quick_edit_box.SendKeys(OpenQA.Selenium.Keys.LeftControl + "c");
-                                ////Task.Delay(-1);
-                                //Clipboard.SetText(quick_edit_box.Text);
-
-                            }
-                            catch (Exception)
+                            if (modifierKeys == Keys.None)
                             {
-                                if (retrytimes < 2)
-                                {
-                                    Task.Delay(1200); retrytimes++; goto retry;
+                                int retrytimes = 0;
+                            retry:
+                                br.driver = br.driver ?? br.driverNew();
+                                try
+                                {//這裡需要參照元件來操作就不宜跑線程了！故此區塊最後的剪貼簿，要求須是單線程者，蓋因剪貼簿須獨占式使用故也20230111                                
+                                    quick_edit_box = br.waitFindWebElementByName_ToBeClickable("data", br.WebDriverWaitTimeSpan);//br.driver.FindElement(OpenQA.Selenium.By.Name("data"));
+                                                                                                                                 ////chatGPT：
+                                                                                                                                 //// 等待網頁元素出現，最多等待 2 秒
+                                                                                                                                 //OpenQA.Selenium.Support.UI.WebDriverWait wait =
+                                                                                                                                 //    new OpenQA.Selenium.Support.UI.WebDriverWait
+                                                                                                                                 //    (br.driver, TimeSpan.FromSeconds(2));
+                                                                                                                                 ////安裝了 Selenium.WebDriver 套件，才說沒有「ExpectedConditions」，然後照Visual Studio 2022的改正建議又用NuGet 安裝了 Selenium.Suport 套件，也自動「 using OpenQA.Selenium.Support.UI;」了，末學自己還用物件瀏覽器找過了 「OpenQA.Selenium.Support.UI」，可就是沒有「ExpectedConditions」靜態類別可用，即使官方文件也說有 ： https://www.selenium.dev/selenium/docs/api/dotnet/html/T_OpenQA_Selenium_Support_UI_ExpectedConditions.htm 20230109 未知何故 阿彌陀佛
+                                                                                                                                 //wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(quick_edit_box));
+
+                                    //// 在網頁元素載入完畢後才能讀取其.Text屬性值，存入剪貼簿,前置空格會被削去，當是Selenium實作時的問題。
+                                    //string xq = quick_edit_box.Text;
+                                    //Clipboard.SetText(xq);
+                                    quick_edit_box.SendKeys(OpenQA.Selenium.Keys.LeftControl + "a");
+                                    quick_edit_box.SendKeys(OpenQA.Selenium.Keys.LeftControl + "c");
+                                    ////Task.Delay(-1);
+                                    //Clipboard.SetText(quick_edit_box.Text);
+
                                 }
-                                //throw;
+                                catch (Exception)
+                                {
+                                    if (retrytimes < 2)
+                                    {
+                                        Task.Delay(1200); retrytimes++; goto retry;
+                                    }
+                                    //throw;
+                                }
+                            }
+                            else if (modifierKeys == Keys.Shift)
+                            {
+                                toOCR(br.OCRSiteTitle.GJcool);
                             }
                             break;
                         case BrowserOPMode.seleniumGet:
@@ -6555,13 +6606,16 @@ namespace WindowsFormsApp1
                         default:
                             break;
                     }
-                    //備份textbox1的內容
-                    undoRecord();
-                    Task.WaitAll();
-                    Application.DoEvents();
-                    //設定textbox1的內容以備編輯
-                    string nextpagetextBox1Text_Default = Clipboard.GetText();
-                    textBox1.Text = CnText.BooksPunctuation(ref nextpagetextBox1Text_Default);// + Environment.NewLine + Environment.NewLine + Environment.NewLine + textBox1.Text;                    
+                    if (modifierKeys != Keys.Shift)
+                    {
+                        //備份textbox1的內容
+                        undoRecord();
+                        Task.WaitAll();
+                        Application.DoEvents();
+                        //設定textbox1的內容以備編輯
+                        string nextpagetextBox1Text_Default = Clipboard.GetText();
+                        textBox1.Text = CnText.BooksPunctuation(ref nextpagetextBox1Text_Default);// + Environment.NewLine + Environment.NewLine + Environment.NewLine + textBox1.Text;                    
+                    }
                 }//end if (keyinTextMode)
 
                 //如果該書沒有「OCR_MATCH」tag的話，即不是上下臨近頁牽連編輯模式者：
@@ -7408,8 +7462,11 @@ namespace WindowsFormsApp1
             //    textBox1.Select(s
             //        , char.IsHighSurrogate(textBox1.Text.Substring(s, 1), 0) ? 2 : 1);
             //}
-            if (char.IsHighSurrogate(textBox1.SelectedText, 0) && textBox1.SelectedText.Length < 3)
-                textBox1.Select(s, 2);
+            if (textBox1.SelectedText != "")
+            {
+                if (char.IsHighSurrogate(textBox1.SelectedText, 0) && textBox1.SelectedText.Length < 3)
+                    textBox1.Select(s, 2);
+            }
             saveText();
             replaceWord(textBox1.SelectedText, textBox4.Text);
             if (textBox4.Text != "") Clipboard.SetText(textBox4.Text);

@@ -10,6 +10,7 @@ using WindowsFormsApp1;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using static System.Net.Mime.MediaTypeNames;
 using System.Reflection;
+using System.Web.UI.WebControls;
 
 namespace TextForCtext
 {
@@ -461,6 +462,22 @@ namespace TextForCtext
             (?![a-zA-Z0-9]) 匹配後面不是英文字母或數字的位置（正向零寬度先行斷言）
             該詞匹配任何前後包含字母或數字的字串中的小數點。replace方法在這種情況下會使用中文句號替換它們。
              */
+        }
+
+        internal static bool HasPunctuationMarks_period_comma(ref string text)
+        {
+            if (text.Length == 0) return false;
+            if (text.Length > 1000)
+            {
+                Regex regex = new Regex(@"\，|\。");
+                Match match = regex.Match(text);
+                return match.Success;
+            }
+            else
+            {
+                return (text.Contains("，") || text.Contains("。"));
+            }
+
         }
     }
 }
