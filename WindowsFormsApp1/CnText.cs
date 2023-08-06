@@ -464,20 +464,62 @@ namespace TextForCtext
              */
         }
 
-        internal static bool HasPunctuationMarks_period_comma(ref string text)
+        internal static bool HasEditedWithPunctuationMarks(ref string text)
         {
             if (text.Length == 0) return false;
             if (text.Length > 1000)
             {
-                Regex regex = new Regex(@"\，|\。");
+                Regex regex = new Regex(@"\，|\。|\〈|\〉|\《|\》|\：|\『|\』|\「|\」|\􏿽");
                 Match match = regex.Match(text);
                 return match.Success;
             }
             else
             {
-                return (text.Contains("，") || text.Contains("。"));
+                return (text.Contains("，") || text.Contains("。") || text.Contains("：") || text.Contains("􏿽")
+                    || text.Contains("《") || text.Contains("〈")
+                    || text.Contains("『") || text.Contains("』")
+                    || text.Contains("「") || text.Contains("」")
+                    || text.Contains("》") || text.Contains("〉"));
             }
 
         }
+
+        /// <summary>
+        /// 文本規範化，正規化，以合於[簡單修改模式]接受的形式。如半形標點符號轉全形。置換為全形符號。
+        /// 由narrow2WidePunctuationMarks擴展而來
+        /// 從newTextBox1抽離出來的
+        /// </summary>
+        /// <param name="x">須轉換的文本。傳址（pass　by　reference）</param>        
+        internal static void FormalizeText(ref string x)
+        {
+            if (x.Length == 0) return;
+            //20230806Bing大菩薩：
+            //string pattern = "[\\u0021-\\u002F\\u003A-\\u0040\\u005B-\\u0060\\u007B-\\u007E]";
+            ////string pattern = "[,.;]";
+            //MatchEvaluator evaluator = match => ((char)(match.Value[0] + 65248)).ToString();
+            ////x= Regex.Replace(x, pattern, evaluator);
+            //x = Regex.Replace(x, pattern, evaluator).Replace("．", "。");
+
+            string[] replaceDChar = { "'", ",", ";", ":", "．", "?", "：：", "《《", "》》", "〈〈", "〉〉", "。}}。}}", "。。", "，，", "@" };
+            string[] replaceChar = { "、", "，", "；", "：", "·", "？", "：", "《《", "》", "〈", "〉", "。}}", "。", "，", "●" };
+            foreach (var item in replaceDChar)
+            {
+                if (x.IndexOf(item) > -1)
+                {
+                    //if (MessageBox.Show("含半形標點，是否取代為全形？", "", MessageBoxButtons.OKCancel,
+                    //    MessageBoxIcon.Error) == DialogResult.OK)
+                    //{//直接將半形標點符號轉成全形
+                    for (int i = 0; i < replaceChar.Length; i++)
+                    {
+                        x = x.Replace(replaceDChar[i], replaceChar[i]);
+                    }
+                    //}
+                    break;
+                }
+            }
+            //置換中文文本中的英文句號（小數點）
+            CnText.PeriodsReplace_ChinesePunctuationMarks(ref x);
+        }
+
     }
 }

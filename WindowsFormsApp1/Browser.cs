@@ -1994,7 +1994,7 @@ namespace TextForCtext
                         return false;
                 }
             }
-            
+
             //Form1.playSound(Form1.soundLike.processing);
             if (ActiveForm1.TopMost) ActiveForm1.TopMost = false;
             //首頁「快速體驗」按鈕：
@@ -2006,8 +2006,9 @@ namespace TextForCtext
             iwe = waitFindWebElementBySelector_ToBeClickable("#task-upload-btn");
             if (iwe == null) return false;
             iwe.Click();
-            //等待選取檔案對話框開啟
-            Thread.Sleep(1200);
+            //等待「開啟」檔案對話框開啟
+            //Thread.Sleep(1200);
+            Thread.Sleep(1300);
             //輸入：檔案名稱 //SendKeys.Send(downloadImgFullName);
             //貼上圖檔全名
             Clipboard.SetText(downloadImgFullName);
@@ -2032,11 +2033,12 @@ namespace TextForCtext
             //                                                  #dialog_483f217a > div.col > div.d-flex.py-1 > button
 
             //待OCR結束
-            Thread.Sleep(5200);//可多設時間以等待，若多餘，可手動按下複製按鈕即可。
+            //Thread.Sleep(5200);//可多設時間以等待，若多餘，可手動按下複製按鈕即可。
             //Thread.Sleep(4300);
-            //Thread.Sleep(3900);
+            Thread.Sleep(3900);
             #region 將OCR結果讀入剪貼簿：
             Point copyBtnPos = new Point(); DateTime begin = DateTime.Now;
+
             //待手動成功複製，上限為 timeSpanSecs 秒
             int timeSpanSecs = 0;
             try
@@ -2110,6 +2112,18 @@ namespace TextForCtext
                 //throw;
             }
 
+            //如果 「Thread.Sleep(3900);」 太短，則再一次試試：
+            Task.Run(() =>
+            {
+                if (Clipboard.GetText() == "")
+                {
+                    Thread.Sleep(1300);
+                    //Cursor.Position = copyBtnPos;
+                    Form1.playSound(Form1.soundLike.info);
+                    MouseOperations.MouseEventMousePos(MouseOperations.MouseEventFlags.LeftDown, copyBtnPos);
+                    MouseOperations.MouseEventMousePos(MouseOperations.MouseEventFlags.LeftUp, copyBtnPos);
+                }
+            });
             while (!Form1.isClipBoardAvailable_Text(10))
             {
                 //Form1.playSound(Form1.soundLike.info);

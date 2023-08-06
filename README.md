@@ -246,6 +246,8 @@ Alt + l : 檢查/輸入抬頭平抬時的條件：執行topLineFactorIuput04cond
 
 Alt + p 或 Alt + ` : 鍵入 "\<p\>" + newline（分行分段符號）；若置於行/段之首，則會自動移至前一段末再執行
 
+Alt + Shift + p : 鍵入 "。\<p\>" + newline（句號+分行分段符號）；若置於行/段之首，則會自動移至前一段末再執行
+
 Alt + s 或 Alt + Shift + 6 ：小注文不換行 ： notes_a_line()
 
 Alt + Shift + s :  所有小注文都不換行
