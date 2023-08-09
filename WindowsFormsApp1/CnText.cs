@@ -469,14 +469,14 @@ namespace TextForCtext
             if (text.Length == 0) return false;
             if (text.Length > 1000)
             {
-                Regex regex = new Regex(@"\，|\。|\〈|\〉|\《|\》|\：|\『|\』|\「|\」|\􏿽");
+                Regex regex = new Regex(@"\，|\。|\？|\！|\〈|\〉|\《|\》|\：|\『|\』|\「|\」|\􏿽");
                 Match match = regex.Match(text);
                 return match.Success;
             }
             else
             {
                 return (text.Contains("，") || text.Contains("。") || text.Contains("：") || text.Contains("􏿽")
-                    || text.Contains("《") || text.Contains("〈")
+                    || text.Contains("！") || text.Contains("？") || text.Contains("《") || text.Contains("〈")
                     || text.Contains("『") || text.Contains("』")
                     || text.Contains("「") || text.Contains("」")
                     || text.Contains("》") || text.Contains("〉"));
@@ -493,12 +493,15 @@ namespace TextForCtext
         internal static void FormalizeText(ref string x)
         {
             if (x.Length == 0) return;
+
+            #region narrow2WidePunctuationMarks 半形轉全形。置換為全形符號。
             //20230806Bing大菩薩：
             //string pattern = "[\\u0021-\\u002F\\u003A-\\u0040\\u005B-\\u0060\\u007B-\\u007E]";
             ////string pattern = "[,.;]";
             //MatchEvaluator evaluator = match => ((char)(match.Value[0] + 65248)).ToString();
             ////x= Regex.Replace(x, pattern, evaluator);
             //x = Regex.Replace(x, pattern, evaluator).Replace("．", "。");
+            #endregion
 
             string[] replaceDChar = { "'", ",", ";", ":", "．", "?", "：：", "《《", "》》", "〈〈", "〉〉", "。}}。}}", "。。", "，，", "@" };
             string[] replaceChar = { "、", "，", "；", "：", "·", "？", "：", "《《", "》", "〈", "〉", "。}}", "。", "，", "●" };

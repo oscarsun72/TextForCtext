@@ -1400,7 +1400,7 @@ namespace WindowsFormsApp1
         }
 
 
-        const string soundWarningLocation = @"c:\windows\media\Windows Foreground.wav";
+        //const string soundWarningLocation = @"c:\windows\media\Windows Foreground.wav";
 
         string textBox1OriginalText = "";
 
@@ -4394,7 +4394,7 @@ namespace WindowsFormsApp1
             TopMost = topmost;
         }
 
-        public enum soundLike { over, done, stop, info, error, warn, exam, processing, press }
+        public enum soundLike { none, over, done, stop, info, error, warn, exam, processing, press }
         public static void playSound(soundLike sndlike)
         {
             string mediaPathWithBackslash = Environment.GetFolderPath(Environment.SpecialFolder.Windows) + "\\Media\\";
@@ -4764,7 +4764,7 @@ namespace WindowsFormsApp1
         /// <param name="clear">選擇性參數：若指定chkClearQuickedit_data_textboxTxtStr則會清除當前文字框內容而非輸入新內容</param>        
         private bool keyDownCtrlAdd(bool shiftKeyDownYet = false, string clear = "")
         {
-            int s = textBox1.SelectionStart, l = textBox1.SelectionLength; 
+            int s = textBox1.SelectionStart, l = textBox1.SelectionLength;
 
 
             if (keyinTextMode)
@@ -6220,6 +6220,7 @@ namespace WindowsFormsApp1
                     e.Handled = true;
                     //SystemSounds.Question.Play();
                     string x = Clipboard.GetText();
+                    if (x == "") { x = textBox1.Text; textBox1.Clear(); }
                     if (MessageBox.Show("clear the Environment.NewLine?", "", MessageBoxButtons.OKCancel) == DialogResult.OK)
                     {
                         x = x.Replace(Environment.NewLine, "");
@@ -7816,6 +7817,8 @@ namespace WindowsFormsApp1
                             {
                                 br.driver = br.driver ?? br.driverNew();
                                 //chatGPT：在 C# 中使用 Selenium 控制 Chrome 瀏覽器時，可以使用以下方法切換到 Chrome 瀏覽器視窗：
+                                if (br.driver == null) { Form1.browsrOPMode = BrowserOPMode.seleniumNew; br.driverNew(); }
+
                                 br.driver.SwitchTo().Window(br.driver.CurrentWindowHandle);
 
                                 //以下按鍵判斷若仍出錯，則改用新增一個欄位作參考，記錄下在非按下 Ctrl + Shift + + 等鍵時造成的text改變
@@ -8560,7 +8563,7 @@ namespace WindowsFormsApp1
              * 在 C# 中，您可以使用正则表达式来删除给定字符串中的特定字符。以下是删除 punctuationsNum 字符串中的 "《" 和 "〈" 字符的示例代码：……
              * 在这里，我们使用 Regex.Replace 方法将匹配正则表达式模式 [《〈] 的所有字符替换为空字符串。此模式匹配任何包含 "《" 或 "〈" 的字符。
              * */
-            string regexPattern = "[《〈]", omitSymbols = "●＝{}□■" + Environment.NewLine;//輸入缺字構字式●＝＝及注文標記符{{}}時不取代
+            string regexPattern = "[《〈]", omitSymbols = "●＝{}□■<>" + Environment.NewLine;//輸入缺字構字式●＝＝及注文標記符{{}}時不取代
             string w;//, punctuationsNumWithout前書名號與前篇名號 = Regex.Replace(Form1.punctuationsNum, regexPattern, ""); 
             if (!insertMode
                 && textBox1.SelectionStart < textBox1.TextLength

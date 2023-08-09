@@ -274,72 +274,74 @@ Next i
 End Sub
 
 Sub 貼上引文() '將已複製到剪貼簿的內容貼成引文
-Dim s As Long, e As Long, r  As Range
-If Selection.Type = wdSelectionNormal And right(Selection, 1) Like Chr(13) Then _
-            Selection.MoveLeft wdCharacter, 1, wdExtend '不要包含分段符號!
-If Selection.Style <> "引文" Then Selection.Style = "引文" '如果不是引文樣式時,則改成引文樣式
-s = Selection.start '記下起始位置
-Selection.PasteSpecial , , , , wdPasteText '貼上純文字
-e = Selection.End '記下貼上後的結束位置
-Selection.SetRange s, e
-Set r = Selection.Range
-With r
-    r.Find.Execute Chr(13), , , , , , , wdFindStop, , Chr(11), wdReplaceAll '將分行符號改成手動分行符號
-End With
-r.Footnotes.Add r '插入註腳!
+    Dim s As Long, e As Long, r  As Range
+    If Selection.Type = wdSelectionNormal And right(Selection, 1) Like Chr(13) Then _
+                Selection.MoveLeft wdCharacter, 1, wdExtend '不要包含分段符號!
+    If Selection.Style <> "引文" Then Selection.Style = "引文" '如果不是引文樣式時,則改成引文樣式
+    s = Selection.start '記下起始位置
+    Selection.PasteSpecial , , , , wdPasteText '貼上純文字
+    e = Selection.End '記下貼上後的結束位置
+    Selection.SetRange s, e
+    Set r = Selection.Range
+    With r
+        r.Find.Execute Chr(13), , , , , , , wdFindStop, , Chr(11), wdReplaceAll '將分行符號改成手動分行符號
+    End With
+    r.Footnotes.Add r '插入註腳!
 End Sub
 Sub 貼上純文字() 'shift+insert 2016/7/20
-Dim hl, s As Long, r As Range
-On Error GoTo ErrHandler
-hl = Selection.Range.HighlightColorIndex
-
-s = Selection.start
-Set r = Selection.Range
-'Selection.PasteSpecial , , , , wdPasteText '貼上純文字
-Selection.PasteAndFormat (wdFormatPlainText)
-r.SetRange s, Selection.End
-If hl <> 9999999 Then r.HighlightColorIndex = hl
-Exit Sub
+    Dim hl, s As Long, r As Range
+    On Error GoTo ErrHandler
+    hl = Selection.Range.HighlightColorIndex
+    
+    s = Selection.start
+    Set r = Selection.Range
+    '如果有選取則清除
+    If s < Selection.End Then Selection.text = vbNullString
+    'Selection.PasteSpecial , , , , wdPasteText '貼上純文字
+    Selection.PasteAndFormat (wdFormatPlainText)
+    r.SetRange s, Selection.End
+    If hl <> 9999999 Then r.HighlightColorIndex = hl '9999999 is multi-color 多重高亮色彩則無顯示9999999（7位數9）的值
+    Exit Sub
 ErrHandler:
-Select Case Err.Number
-    Case 5342 '指定的資料類型無法取得。
-        
-    Case Else
-        MsgBox Err.Number & Err.Description
-End Select
+    Select Case Err.Number
+        Case 5342 '指定的資料類型無法取得。
+            
+        Case Else
+            MsgBox Err.Number & Err.Description
+    End Select
 End Sub
 Sub 貼上簡化字文本轉正()
-Dim rng As Range, ur As UndoRecord
-SystemSetup.stopUndo ur, "貼上簡化字文本轉正"
-Set rng = Selection.Range
-rng.PasteAndFormat (wdFormatPlainText)
-標點符號置換 rng: 清除半形空格 rng: 半形括號轉全形 rng
-If MsgBox("是否簡轉正？", vbOKCancel) = vbOK Then
-    'rng.Select
-    rng.TCSCConverter wdTCSCConverterDirectionAuto
-    'Selection.Range.TCSCConverter wdTCSCConverterDirectionAuto
-End If
-SystemSetup.contiUndo ur
-End Sub
+    Dim rng As Range, ur As UndoRecord
+    SystemSetup.stopUndo ur, "貼上簡化字文本轉正"
+    Set rng = Selection.Range
+    rng.PasteAndFormat (wdFormatPlainText)
+    標點符號置換 rng: 清除半形空格 rng: 半形括號轉全形 rng
+    If MsgBox("是否簡轉正？", vbOKCancel) = vbOK Then
+        'rng.Select
+        rng.TCSCConverter wdTCSCConverterDirectionAuto
+        'Selection.Range.TCSCConverter wdTCSCConverterDirectionAuto
+    End If
+    SystemSetup.contiUndo ur
+    End Sub
 Sub 簡化字文本轉正()
-Dim rng As Range, ur As UndoRecord
-SystemSetup.stopUndo ur, "簡化字文本轉正"
-Set rng = Selection.Range
-標點符號置換 rng: 清除半形空格 rng: 半形括號轉全形 rng
-rng.TCSCConverter wdTCSCConverterDirectionAuto
-SystemSetup.contiUndo ur
-SystemSetup.playSound 1
+    Dim rng As Range, ur As UndoRecord
+    SystemSetup.stopUndo ur, "簡化字文本轉正"
+    Set rng = Selection.Range
+    標點符號置換 rng: 清除半形空格 rng: 半形括號轉全形 rng
+    rng.TCSCConverter wdTCSCConverterDirectionAuto
+    SystemSetup.contiUndo ur
+    SystemSetup.playSound 1
 End Sub
 Function 標點符號置換(Optional rng As Range)
-Dim ay, i As Integer
-ay = Array(ChrW(8220), "「", ChrW(8221), "」", ChrW(-431), "、", ChrW(-432), "，" _
-    , ChrW(58), "：", ChrW(8216), "『", ChrW(8217), "』", _
-    ChrW(-428), "；", "·", "‧", ",", "，", ";", "；" _
-    , "?", "？", ":", "：", "﹕", "：")
-For i = 0 To UBound(ay)
-    rng.Find.Execute ay(i), , , , , , , wdFindContinue, , ay(i + 1), wdReplaceAll
-    i = i + 1
-Next i
+    Dim ay, i As Integer
+    ay = Array(ChrW(8220), "「", ChrW(8221), "」", ChrW(-431), "、", ChrW(-432), "，" _
+        , ChrW(58), "：", ChrW(8216), "『", ChrW(8217), "』", _
+        ChrW(-428), "；", "·", "‧", ",", "，", ";", "；" _
+        , "?", "？", ":", "：", "﹕", "：")
+    For i = 0 To UBound(ay)
+        rng.Find.Execute ay(i), , , , , , , wdFindContinue, , ay(i + 1), wdReplaceAll
+        i = i + 1
+    Next i
 End Function
 Function 清除半形空格(Optional rng As Range)
 rng.Find.Execute " ", , , , , , , wdFindContinue, , "", wdReplaceAll

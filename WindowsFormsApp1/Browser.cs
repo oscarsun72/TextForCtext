@@ -14,6 +14,7 @@ using System.Globalization;
 //https://dotblogs.com.tw/supergary/2020/10/29/selenium#images-3
 using System.IO;
 using System.Linq;
+using System.Media;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Automation;
@@ -285,7 +286,7 @@ namespace TextForCtext
         internal static double WebDriverWaitTimeSpan { get { return _webDriverWaitTimSpan; } set { _webDriverWaitTimSpan = value; } }
         /// <summary>
         /// 在driver是null時才創建新的chromedriver
-        /// </summary>
+        /// </summary>gjc
         /// <returns></returns>
         internal static ChromeDriver driverNew()
         {
@@ -821,7 +822,7 @@ namespace TextForCtext
 
             set => downloadDirectory_Chrome = value;
         }
-        internal static Form1 ActiveForm1 { get => frm; set => frm = value; }
+        internal static Form1 ActiveForm1 { get => frm ?? Application.OpenForms[0] as Form1; set => frm = value; }
 
         /// <summary>
         /// geturl 修改後的程式碼:20230308 creedit with NotionAI大菩薩
@@ -1037,6 +1038,11 @@ namespace TextForCtext
             {
                 try
                 {
+                    if (driver == null && Form1.browsrOPMode == Form1.BrowserOPMode.appActivateByName)
+                    {
+                        Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("請先在textBox2執行「br」指令，切換為SeleniumNew模式再繼續。");
+                        return;
+                    }
                     url = driver.Url;
                 }
                 catch (Exception ex)
@@ -1643,6 +1649,11 @@ namespace TextForCtext
         internal static TimeSpan gjCoolPointEnoughTimespan = new TimeSpan(3, 20, 0);
 
         /// <summary>
+        /// 參照賢超法師《古籍酷AI》OCR視窗是否已關閉用
+        /// </summary>
+        static bool _OCR_GJcool_WindowClosed = true;
+
+        /// <summary>
         /// 《古籍酷》OCR：自動識別(豎版)
         /// </summary>
         /// <param name="downloadImgFullName">書圖檔全檔名</param>
@@ -1656,13 +1667,14 @@ namespace TextForCtext
                 driver = driver ?? driverNew();
                 currentWindowHndl = driver.CurrentWindowHandle;
                 openNewTabWindow(WindowType.Window);
+                _OCR_GJcool_WindowClosed = false;
                 //點數（算力值、算力配额）不足逕用「快速體驗」執行
                 if (waitGJcoolPoint && DateTime.Now.Subtract(gjCoolPointLess150When) < gjCoolPointEnoughTimespan)
                 {
 
                     bool fastXResulut = OCR_GJcool_FastExperience(downloadImgFullName);
-
                     driver.Close();
+                    _OCR_GJcool_WindowClosed = true;
                     driver.SwitchTo().Window(currentWindowHndl);
                     return fastXResulut;
                 }
@@ -1753,7 +1765,7 @@ namespace TextForCtext
                     //Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("點數（算力配额）不足！目前僅有"+ points + " 至少需要"+pointCoin);
                     //轉由首頁「快速體驗」執行
                     bool fastXResulut = OCR_GJcool_FastExperience(downloadImgFullName);
-                    if (fastXResulut) driver.Close(); driver.SwitchTo().Window(currentWindowHndl);
+                    if (fastXResulut) driver.Close(); _OCR_GJcool_WindowClosed = true; driver.SwitchTo().Window(currentWindowHndl);
                     return fastXResulut;
 
                 }
@@ -1927,7 +1939,7 @@ namespace TextForCtext
             #endregion
 
             #region 關閉OCR視窗後回到原來分頁視窗
-            driver.Close();
+            driver.Close(); _OCR_GJcool_WindowClosed = true;
             driver.SwitchTo().Window(currentWindowHndl);
             #endregion
             return true;
@@ -1981,6 +1993,7 @@ namespace TextForCtext
             try
             {
                 driver.Navigate().GoToUrl(gjCool);
+                _OCR_GJcool_WindowClosed = false;
             }
             catch (Exception ex)
             {
@@ -2035,7 +2048,8 @@ namespace TextForCtext
             //待OCR結束
             //Thread.Sleep(5200);//可多設時間以等待，若多餘，可手動按下複製按鈕即可。
             //Thread.Sleep(4300);
-            Thread.Sleep(3900);
+            //Thread.Sleep(3900);
+            Thread.Sleep(2900);
             #region 將OCR結果讀入剪貼簿：
             Point copyBtnPos = new Point(); DateTime begin = DateTime.Now;
 
@@ -2064,7 +2078,7 @@ namespace TextForCtext
                 copyBtnPos = new Point(838, 711);//用PRTSC鍵拍下全螢幕後，貼到小畫家以滑鼠取得坐標位置（即顯示在狀態列中）
                 Cursor.Position = copyBtnPos;
                 //Thread.Sleep(800);//要等一下才行否則反應不過來
-                Form1.playSound(Form1.soundLike.info);
+                //Form1.playSound(Form1.soundLike.info);
                 Thread.Sleep(300);//要等一下才行否則反應不過來                
                 /* 20230401 Bing大菩薩：在C#中，您可以使用 `MouseOperations` 类来模拟鼠标点击。这个类中有一个名为 `MouseEvent` 的方法，它可以接受一个 `MouseEventFlags` 枚举值作为参数，用来指定要执行的鼠标操作¹。例如，要模拟鼠标左键点击，可以这样写：
                 ```csharp
@@ -2076,12 +2090,14 @@ namespace TextForCtext
                     (3) How to programatically trigger a mouse left click in C#?. https://stackoverflow.com/questions/2736965/how-to-programatically-trigger-a-mouse-left-click-in-c 已存取 2023/4/1.
                     (4) c# - I want to send mouse click with SendMessage but it's not working, What wrong with my code? - Stack Overflow. https://stackoverflow.com/questions/46306860/i-want-to-send-mouse-click-with-sendmessage-but-its-not-working-what-wrong-wit 已存取 2023/4/1.
                  */
-                //MouseOperations.MouseEvent(MouseOperations.MouseEventFlags.LeftDown);
-                //MouseOperations.MouseEvent(MouseOperations.MouseEventFlags.LeftUp);                
-                MouseOperations.MouseEventMousePos(MouseOperations.MouseEventFlags.LeftDown, copyBtnPos);
-                //Thread.Sleep(50);
-                MouseOperations.MouseEventMousePos(MouseOperations.MouseEventFlags.LeftUp, copyBtnPos);
-                //Form1.playSound(Form1.soundLike.info);
+                ////MouseOperations.MouseEvent(MouseOperations.MouseEventFlags.LeftDown);
+                ////MouseOperations.MouseEvent(MouseOperations.MouseEventFlags.LeftUp);                
+                //MouseOperations.MouseEventMousePos(MouseOperations.MouseEventFlags.LeftDown, copyBtnPos);
+                ////Thread.Sleep(50);
+                //MouseOperations.MouseEventMousePos(MouseOperations.MouseEventFlags.LeftUp, copyBtnPos);
+                ////Form1.playSound(Form1.soundLike.info);
+                clickCopybutton_GjcoolFastExperience(copyBtnPos,Form1.soundLike.none);
+
 
                 /*Bing大菩薩：您好，`MouseOperations` 不是 C# 的内置类。它是一个自定义类，您可以在 Stack Overflow 上找到它的源代码。您可以将这些代码复制到您的项目中，然后使用它来模拟鼠标点击。
                  */
@@ -2097,7 +2113,8 @@ namespace TextForCtext
                 }
 
                 //Thread.Sleep(450);
-                //Thread.Sleep(1550);
+                Thread.Sleep(1050);
+                if (Clipboard.GetText() == "") clickCopybutton_GjcoolFastExperience(copyBtnPos);
             }
             catch (Exception ex)
             {
@@ -2113,17 +2130,28 @@ namespace TextForCtext
             }
 
             //如果 「Thread.Sleep(3900);」 太短，則再一次試試：
-            Task.Run(() =>
+            if (Clipboard.GetText() == "")
             {
-                if (Clipboard.GetText() == "")
+                Task.Run(() =>
                 {
-                    Thread.Sleep(1300);
-                    //Cursor.Position = copyBtnPos;
-                    Form1.playSound(Form1.soundLike.info);
-                    MouseOperations.MouseEventMousePos(MouseOperations.MouseEventFlags.LeftDown, copyBtnPos);
-                    MouseOperations.MouseEventMousePos(MouseOperations.MouseEventFlags.LeftUp, copyBtnPos);
-                }
-            });
+                    Thread.Sleep(1300);//要寫在這，讓_OCR_GJcool_WindowClosed能設定完成
+                    if (Clipboard.GetText() == "" && !_OCR_GJcool_WindowClosed)
+                        //if (!_OCR_GJcool_WindowClosed)
+                        clickCopybutton_GjcoolFastExperience(copyBtnPos);
+
+                    if (Clipboard.GetText() == "")
+                    {
+                        Task.Run(() =>
+                        {
+                            Thread.Sleep(800);//要寫在這，讓_OCR_GJcool_WindowClosed能設定完成
+                            if (Clipboard.GetText() == "" && !_OCR_GJcool_WindowClosed) clickCopybutton_GjcoolFastExperience(copyBtnPos);
+                        });
+                    }
+
+                });
+            }
+            else
+                _OCR_GJcool_WindowClosed = true;
             while (!Form1.isClipBoardAvailable_Text(10))
             {
                 //Form1.playSound(Form1.soundLike.info);
@@ -2212,8 +2240,18 @@ namespace TextForCtext
             }
             //driver.Close();
             //driver.SwitchTo().Window(currentWindowHndl);
-            #endregion            
+            #endregion  
+            if (!_OCR_GJcool_WindowClosed) _OCR_GJcool_WindowClosed = true;
             return true;
+        }
+
+        private static void clickCopybutton_GjcoolFastExperience(Point copyBtnPos, Form1.soundLike soundlike = Form1.soundLike.info)
+        {
+            //Thread.Sleep(1300);
+            //Cursor.Position = copyBtnPos;            
+            Form1.playSound(soundlike);
+            MouseOperations.MouseEventMousePos(MouseOperations.MouseEventFlags.LeftDown, copyBtnPos);
+            MouseOperations.MouseEventMousePos(MouseOperations.MouseEventFlags.LeftUp, copyBtnPos);
         }
 
         /// <summary>
