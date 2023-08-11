@@ -475,6 +475,7 @@ namespace WindowsFormsApp1
             pauseEvents();
 
             Keys modifierKeys = ModifierKeys;
+            if (modifierKeys == Keys.Shift) Form1.playSound(Form1.soundLike.press);
 
             #region 縮至系統工具列在右方時
             //if (Cursor.Position.Y > this.Top + this.Height ||
@@ -4394,7 +4395,14 @@ namespace WindowsFormsApp1
             TopMost = topmost;
         }
 
+        /// <summary>
+        /// 軟體操作時提醒之系統音效參照
+        /// </summary>
         public enum soundLike { none, over, done, stop, info, error, warn, exam, processing, press }
+        /// <summary>
+        /// 播放指定音效
+        /// </summary>
+        /// <param name="sndlike">音效的名稱（作用、含義）</param>
         public static void playSound(soundLike sndlike)
         {
             string mediaPathWithBackslash = Environment.GetFolderPath(Environment.SpecialFolder.Windows) + "\\Media\\";
@@ -4402,10 +4410,10 @@ namespace WindowsFormsApp1
             switch (sndlike)
             {
                 case soundLike.over:
-                    wav = "windows logoff sound.wav";
+                    wav = "windows logoff sound";
                     break;
                 case soundLike.done:
-                    wav = "windows logoff sound.wav";
+                    wav = "windows logoff sound";
                     break;
                 case soundLike.stop:
                     wav = "Windows Exclamation";
@@ -4436,7 +4444,11 @@ namespace WindowsFormsApp1
                 new SoundPlayer(mediaPathWithBackslash).Play();
 
         }
-        //將<p>後的空格「　」取代為「􏿽」，只要該行不是篇名
+
+
+        /// <summary>
+        /// 將<p>後的空格「　」取代為「􏿽」，只要該行不是篇名
+        /// </summary>
         void replaceBlank_ifNOTTitleAndAfterparagraphMark()
         {
             int e = textBox1.Text.IndexOf(Environment.NewLine), s = 0; string px, x = textBox1.Text;
@@ -8622,10 +8634,11 @@ namespace WindowsFormsApp1
 
         /// <summary>
         /// 記下更動前的文本以利還原
+        /// 若textBox1是空字串、無內容則不記錄。
         /// </summary>
         private void undoRecord()
         {
-            if (stopUndoRec) return;
+            if (stopUndoRec) return; if (textBox1.TextLength == 0) return;
             selStart = textBox1.SelectionStart; selLength = textBox1.SelectionLength;
             undoTextBox1Text.Add(textBox1.Text);
             if (undoTimes != 0) undoTimes = 0;
@@ -8913,7 +8926,7 @@ namespace WindowsFormsApp1
 
         internal int GetBookIDFromTextBox3()
         {
-            string url = textBox3Text;
+            string url = textBox3Text; if (url == "") return 0;
             const string f = "file="; int s = url.IndexOf(f);
             return int.Parse(url.Substring(s + f.Length, url.IndexOf("&", s + 1) - s - f.Length));
         }

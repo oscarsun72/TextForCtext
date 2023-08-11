@@ -1661,12 +1661,13 @@ namespace TextForCtext
         internal static bool OCR_GJcool_AutoRecognizeVertical(string downloadImgFullName)
         {
             //Form1.playSound(Form1.soundLike.press);
-            string gjCool = string.Empty; string currentWindowHndl = "";
+            string gjCool = string.Empty; string currentWindowHndl = ""; WindowType windowType = WindowType.Tab;
             try
             {
                 driver = driver ?? driverNew();
                 currentWindowHndl = driver.CurrentWindowHandle;
-                openNewTabWindow(WindowType.Window);
+                //openNewTabWindow(WindowType.Window);
+                openNewTabWindow(windowType);
                 _OCR_GJcool_WindowClosed = false;
                 //點數（算力值、算力配额）不足逕用「快速體驗」執行
                 if (waitGJcoolPoint && DateTime.Now.Subtract(gjCoolPointLess150When) < gjCoolPointEnoughTimespan)
@@ -1690,6 +1691,25 @@ namespace TextForCtext
                         else
                             Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
                         break;
+                    case -2147221040:
+                        if (ex.Message.IndexOf("要求的剪貼簿作業失敗。") > -1)
+                        {
+                            DateTime dt = DateTime.Now;
+                            Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("請手動複製OCR文本");
+                            //Clipboard.Clear();//此時剪貼簿還不能用
+                            while (!Form1.isClipBoardAvailable_Text(100)) { if (DateTime.Now.Subtract(dt).Seconds > 0.5) break; }
+                            driver.Close();
+                            _OCR_GJcool_WindowClosed = true;
+                            driver.SwitchTo().Window(currentWindowHndl);
+                            return true;
+                        }
+                        else
+                        {
+                            Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
+                            Debugger.Break();
+                        }
+                        break;
+
                     default:
                         Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
                         break;
@@ -1765,7 +1785,30 @@ namespace TextForCtext
                     //Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("點數（算力配额）不足！目前僅有"+ points + " 至少需要"+pointCoin);
                     //轉由首頁「快速體驗」執行
                     bool fastXResulut = OCR_GJcool_FastExperience(downloadImgFullName);
-                    if (fastXResulut) driver.Close(); _OCR_GJcool_WindowClosed = true; driver.SwitchTo().Window(currentWindowHndl);
+                    if (fastXResulut) driver.Close(); _OCR_GJcool_WindowClosed = true;
+                    try
+                    {
+                        driver.SwitchTo().Window(currentWindowHndl);
+                    }
+                    catch (Exception ex)
+                    {
+                        switch (ex.HResult)
+                        {
+                            case -2146233088:
+                                //"no such window: target window already closed
+                                if (ex.Message.IndexOf("no such window") > -1)
+                                {
+                                    openNewTabWindow();
+                                    GoToUrlandActivate(frm.textBox3Text);
+                                }
+                                else
+                                    Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
+                                break;
+                            default:
+                                Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
+                                break;
+                        }
+                    }
                     return fastXResulut;
 
                 }
@@ -1812,13 +1855,22 @@ namespace TextForCtext
                 return false;
             }
 
-            //選取「選擇檔案」控制項
-            //SendKeys.Send("{tab 16} ");
-            SendKeys.Send("{tab 16}");
-            //如果按下tab鍵16次後「選擇檔案」控制項沒有被選中（不同環境下網頁元件數可能會有所不同！）
-            //這種寫法應該不會成功，因為Selenium可應用的範圍是程式自動化操作而不是使用者手動manual操作者20230322 果然！ 13:47
-            //if (!iwe.Selected) Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("菩薩慈悲：請手動執行OCR，OCR完成之後程式會接手執行。感恩感恩　南無阿彌陀佛"+ Environment.NewLine +"按下「確定（OK）」後繼續…… 阿彌陀佛");            
-            //if (!iwe.Selected) System.Diagnostics.Debugger.Break();
+            //取得「選擇檔案」控制項
+            if (windowType == WindowType.Window)
+            {
+                //SendKeys.Send("{tab 16} ");
+                SendKeys.Send("{tab 16}");
+                //如果按下tab鍵16次後「選擇檔案」控制項沒有被選中（不同環境下網頁元件數可能會有所不同！）
+                //這種寫法應該不會成功，因為Selenium可應用的範圍是程式自動化操作而不是使用者手動manual操作者20230322 果然！ 13:47
+                //if (!iwe.Selected) Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("菩薩慈悲：請手動執行OCR，OCR完成之後程式會接手執行。感恩感恩　南無阿彌陀佛"+ Environment.NewLine +"按下「確定（OK）」後繼續…… 阿彌陀佛");            
+                //if (!iwe.Selected) System.Diagnostics.Debugger.Break();
+            }
+            else if (windowType == WindowType.Tab)
+                SendKeys.Send("{tab 13}");
+            else
+                Debugger.Break();
+
+            //按下「選擇檔案」控制項
             SendKeys.Send(" ");
             //waitFindWebElementBySelector_ToBeClickable("#line_img_form > div > input[type=file]").SendKeys(OpenQA.Selenium.Keys.Space);
             //waitFindWebElementByName_ToBeClickable("line_img",2).Submit();
@@ -1830,6 +1882,7 @@ namespace TextForCtext
         retry:
             SendKeys.Send("+{Insert}");//or "^v"
             SendKeys.Send("{ENTER}");
+            Form1.playSound(Form1.soundLike.processing);
             //待圖載入完畢：
             //Thread.Sleep(3220);
             //Thread.Sleep(1220);
@@ -1846,6 +1899,7 @@ namespace TextForCtext
             SendKeys.Send("{tab}~");
             //按下「自動識別(豎版)」，開始OCR……
             SendKeys.Send("{down}~");
+            Form1.playSound(Form1.soundLike.processing);
             //等待OCR，上限為30秒
             //iwe = waitFindWebElementBySelector_ToBeClickable("# OneLine > div.d-flex.justify-content-between.mt-2.mb-1 > div:nth-child(1) > div:nth-child(2) > ul > li:nth-child(2) > button");
             iwe = waitFindWebElementBySelector_ToBeClickable("#line_list_table > tbody > tr:nth-child(1) > td:nth-child(2)");
@@ -2013,6 +2067,7 @@ namespace TextForCtext
             //首頁「快速體驗」按鈕：
             IWebElement iwe = waitFindWebElementBySelector_ToBeClickable("body > div.container-fluid.bg-dark.px-1 > div > h2.text-center.my-2.py-4 > button > div", 10);
             if (iwe == null) return false;
+            Form1.playSound(Form1.soundLike.processing);
             iwe.Click();
 
             //「上傳 拍照」按鈕：
@@ -2049,7 +2104,7 @@ namespace TextForCtext
             //Thread.Sleep(5200);//可多設時間以等待，若多餘，可手動按下複製按鈕即可。
             //Thread.Sleep(4300);
             //Thread.Sleep(3900);
-            Thread.Sleep(2900);
+            Thread.Sleep(2050);
             #region 將OCR結果讀入剪貼簿：
             Point copyBtnPos = new Point(); DateTime begin = DateTime.Now;
 
@@ -2096,7 +2151,8 @@ namespace TextForCtext
                 ////Thread.Sleep(50);
                 //MouseOperations.MouseEventMousePos(MouseOperations.MouseEventFlags.LeftUp, copyBtnPos);
                 ////Form1.playSound(Form1.soundLike.info);
-                clickCopybutton_GjcoolFastExperience(copyBtnPos,Form1.soundLike.none);
+                //clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.soundLike.none);
+                Task tk = Task.Run(() => { clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.soundLike.none); });
 
 
                 /*Bing大菩薩：您好，`MouseOperations` 不是 C# 的内置类。它是一个自定义类，您可以在 Stack Overflow 上找到它的源代码。您可以将这些代码复制到您的项目中，然后使用它来模拟鼠标点击。
@@ -2113,8 +2169,27 @@ namespace TextForCtext
                 }
 
                 //Thread.Sleep(450);
-                Thread.Sleep(1050);
-                if (Clipboard.GetText() == "") clickCopybutton_GjcoolFastExperience(copyBtnPos);
+                tk.Wait();
+                if (Clipboard.GetText() == "")
+                {
+                    Thread.Sleep(850);
+                    Task tk1 = Task.Run(() => { clickCopybutton_GjcoolFastExperience(copyBtnPos); });
+                    tk1.Wait();
+
+                    if (Clipboard.GetText() == "")
+                    {
+                        Thread.Sleep(450);
+                        Task tk2 = Task.Run(() => { clickCopybutton_GjcoolFastExperience(copyBtnPos); });
+                        tk2.Wait();
+                        if (Clipboard.GetText() == "")
+                        {
+                            Thread.Sleep(950);
+                            Task tk3 = Task.Run(() => { clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.soundLike.over); });
+                            tk3.Wait();
+                        }
+                    }
+                }
+
             }
             catch (Exception ex)
             {
@@ -2125,7 +2200,23 @@ namespace TextForCtext
                 }
                 else
                     //剪貼簿失效忽略不計（可能是手動按下複製了；也就不必等待了）
-                    Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message + "\n\r\n\r程式將忽略此錯誤，繼續進行。");
+                    switch (ex.HResult)
+                    {
+                        case -2147221040:
+                            if (ex.Message.IndexOf("要求的剪貼簿作業失敗。") > -1)
+                            {
+                                //Clipboard.Clear();//Clipboard.Clear();//此時剪貼簿還不能用
+                                //Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("請手動操作複製按鈕！");
+                                //Debugger.Break();
+                                DateTime date = DateTime.Now;
+                                while (!Form1.isClipBoardAvailable_Text(100)) { if (DateTime.Now.Subtract(date).Seconds > 0.5) break; }
+                                //Thread.Sleep(500);
+                            }
+                            break;
+                        default:
+                            Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message + "\n\r\n\r程式將忽略此錯誤，繼續進行。");
+                            break;
+                    }
                 //throw;
             }
 

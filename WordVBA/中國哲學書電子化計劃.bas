@@ -248,6 +248,15 @@ Do While rng.Find.Execute("*")
                         If rngP.start = 0 Then GoTo NextOne
                         rngP.move wdCharacter, -1
                     Loop
+                    '檢查是否正在跨頁處 20230811
+                    If d.Range(rngP.start, rngP.start + 11) = "><scanbegin" Then
+                        rngP.move Count:=-1
+                        Do Until rngP.Next = "<"
+                            If rngP.start = 0 Then GoTo NextOne
+                            rngP.move wdCharacter, -1
+                        Loop
+                    End If
+                    '以上 檢查是否正在跨頁處 20230811
                     rngP.move
                     rngP.InsertAfter Chr(13) & Chr(13)
                 End If
