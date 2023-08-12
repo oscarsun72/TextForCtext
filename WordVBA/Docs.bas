@@ -295,8 +295,10 @@ Sub 貼上純文字() 'shift+insert 2016/7/20
     
     s = Selection.start
     Set r = Selection.Range
-    '如果有選取則清除
-    If s < Selection.End Then Selection.text = vbNullString
+'    '如果有選取則清除
+    If Selection.Flags <> 24 And Selection.Flags <> 25 Or Selection.Flags = 9 Then
+        If s < Selection.End Then Selection.text = vbNullString
+    End If
     'Selection.PasteSpecial , , , , wdPasteText '貼上純文字
     Selection.PasteAndFormat (wdFormatPlainText)
     r.SetRange s, Selection.End
