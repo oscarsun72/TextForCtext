@@ -2073,6 +2073,7 @@ namespace TextForCtext
             //「上傳 拍照」按鈕：
             iwe = waitFindWebElementBySelector_ToBeClickable("#task-upload-btn");
             if (iwe == null) return false;
+            Form1.playSound(Form1.soundLike.processing);
             iwe.Click();
             //等待「開啟」檔案對話框開啟
             //Thread.Sleep(1200);

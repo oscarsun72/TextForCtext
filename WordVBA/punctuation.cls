@@ -24,10 +24,10 @@ Sub CreatePunctuationMap()
     Dim map As New Scripting.Dictionary
     Dim i As Long
     For i = 1 To Len(text)
-        Dim c As String
-        c = Mid(text, i, 1)
-        If c Like "[!A-Za-z0-9 ]" Then
-            map.Add i, c
+        Dim C As String
+        C = Mid(text, i, 1)
+        If C Like "[!A-Za-z0-9 ]" Then
+            map.Add i, C
         End If
     Next i
     
@@ -42,39 +42,39 @@ Sub CreatePunctuationMap()
 End Sub
 
 Function CreateContextPunctuationCollection(x As String) As Collection
-Dim i As Long, xLen As Long, dict As Scripting.Dictionary, a As String, text As String, contextCollection As New Collection
-Set dict = PunctuationDictionary
-xLen = VBA.Len(x)
-For i = 1 To xLen
-    a = Mid(x, i, 1)
-    If dict.Exists(a) Or a = Chr(13) Then '以標點符號及分段為斷句處，加入集合中成為元素
-        ReDim pare(1) As String '以元素為2個的陣列儲存原文訊息
-        pare(0) = text '記文文字片段
-        pare(1) = a '記下文字片段後的標點符號
-        contextCollection.Add pare
-        text = ""
-    Else
-        text = text + a
-    End If
-Next i
-Set CreateContextPunctuationCollection = contextCollection
+    Dim i As Long, xLen As Long, dict As Scripting.Dictionary, a As String, text As String, contextCollection As New Collection
+    Set dict = PunctuationDictionary
+    xLen = VBA.Len(x)
+    For i = 1 To xLen
+        a = Mid(x, i, 1)
+        If dict.Exists(a) Or a = Chr(13) Then '以標點符號及分段為斷句處，加入集合中成為元素
+            ReDim pare(1) As String '以元素為2個的陣列儲存原文訊息
+            pare(0) = text '記文文字片段
+            pare(1) = a '記下文字片段後的標點符號
+            contextCollection.Add pare
+            text = ""
+        Else
+            text = text + a
+        End If
+    Next i
+    Set CreateContextPunctuationCollection = contextCollection
 End Function
 
 Rem 20230221 creedit with YouChat菩薩：
 Rem vba 如何將以下字串轉成字串陣列或 collection 或 dictionary ? punctuationStr = "（。「」……
 Rem You can use the Split function in VBA to convert the string into an array or collection. For example:
 Property Get PunctuationArray()
-If VBA.IsEmpty(punctuation_Array) Then
-    Dim i As Long, lenpunctuationStr As Long
-    lenpunctuationStr = Len(punctuationStr)
-    ReDim punc(lenpunctuationStr - 1) As String
-    For i = 1 To lenpunctuationStr
-         punc(i - 1) = Mid(punctuationStr, i, 1)
-    Next i
-    'PunctuationArray = VBA.Split(punctuationStr)
-    punctuation_Array = punc
-End If
-PunctuationArray = punctuation_Array
+    If VBA.IsEmpty(punctuation_Array) Then
+        Dim i As Long, lenpunctuationStr As Long
+        lenpunctuationStr = Len(punctuationStr)
+        ReDim punc(lenpunctuationStr - 1) As String
+        For i = 1 To lenpunctuationStr
+             punc(i - 1) = Mid(punctuationStr, i, 1)
+        Next i
+        'PunctuationArray = VBA.Split(punctuationStr)
+        punctuation_Array = punc
+    End If
+    PunctuationArray = punctuation_Array
 End Property
 
 Property Get PunctuationCollection() As Collection
@@ -105,60 +105,81 @@ End Property
 
 Rem 清除x文本中的標點符號
 Sub clearPunctuations(ByRef x As String)
-Dim punc, e
-punc = PunctuationArray
-For Each e In punc
-    If InStr(x, e) Then x = VBA.Replace(x, e, "")
-Next e
+    Dim punc, e
+    punc = PunctuationArray
+    For Each e In punc
+        If InStr(x, e) Then x = VBA.Replace(x, e, "")
+    Next e
 End Sub
 
 Rem 忽略標點符號的找字串
 Function inStrIgnorePunctuation(ByVal xDomain As String, ByVal chkClipboardText As String) As Long
-'Dim x As String, chkx As String
-'x = xDomain: chkx = chkClipboardText
-Me.clearPunctuations chkClipboardText '強制以傳值方式傳遞引數 :https://learn.microsoft.com/zh-tw/dotnet/visual-basic/programming-guide/language-features/procedures/how-to-force-an-argument-to-be-passed-by-value
-Me.clearPunctuations xDomain
-inStrIgnorePunctuation = VBA.InStr(xDomain, chkClipboardText)
+    'Dim x As String, chkx As String
+    'x = xDomain: chkx = chkClipboardText
+    Me.clearPunctuations chkClipboardText '強制以傳值方式傳遞引數 :https://learn.microsoft.com/zh-tw/dotnet/visual-basic/programming-guide/language-features/procedures/how-to-force-an-argument-to-be-passed-by-value
+    Me.clearPunctuations xDomain
+    inStrIgnorePunctuation = VBA.InStr(xDomain, chkClipboardText)
 End Function
 
 Sub restoreOriginalTextPunctuations(ByRef OriginalText As String, ByRef RemovedPunctuationsText As String)
-Dim RemovedPunctuationsTextSubStr As String
-RemovedPunctuationsTextSubStr = OriginalText
-Me.clearPunctuations RemovedPunctuationsTextSubStr
-'若原文有標點符號之文本 OriginalText 並不包含要還原其標點符號之文本 則不處理
-If InStr(RemovedPunctuationsTextSubStr, RemovedPunctuationsText) = 0 Then Exit Sub
-
-Dim contextCollection As Collection, iCntcontextCollection As Long, jCntcontextCollection As Long, cntcontextCollection As Long
-Set contextCollection = CreateContextPunctuationCollection(OriginalText)
-cntcontextCollection = contextCollection.Count
-For iCntcontextCollection = 1 To cntcontextCollection
-    If contextCollection.item(iCntcontextCollection)(0) <> "" And VBA.InStr(RemovedPunctuationsText, contextCollection.item(iCntcontextCollection)(0)) = 1 Then '找到符合要加入而重複的文字片段
-        jCntcontextCollection = iCntcontextCollection + 1
-        RemovedPunctuationsTextSubStr = Mid(RemovedPunctuationsText, Len(contextCollection.item(iCntcontextCollection)(0)) + 1)
-        Do While VBA.InStr(RemovedPunctuationsTextSubStr, contextCollection.item(jCntcontextCollection)(0)) = 1 And RemovedPunctuationsTextSubStr <> ""
-            RemovedPunctuationsTextSubStr = Mid(RemovedPunctuationsTextSubStr, Len(contextCollection.item(jCntcontextCollection)(0)) + 1)
-            jCntcontextCollection = jCntcontextCollection + 1
-            If jCntcontextCollection > contextCollection.Count Then Exit Do
-        Loop
-        If RemovedPunctuationsTextSubStr = "" Then '比對吻合，離開迴圈，取得含標點符號之原文片段
-            Exit For
-        ElseIf VBA.Replace(RemovedPunctuationsTextSubStr, Chr(13), "") = "" Then '只剩下分段符號
-            Exit For
+    Dim RemovedPunctuationsTextSubStr As String, match As Boolean, s As Long, prefixRemovedPunctuationsText As String
+    RemovedPunctuationsTextSubStr = OriginalText
+    Me.clearPunctuations RemovedPunctuationsTextSubStr
+    '若原文有標點符號之文本 OriginalText 並不包含要還原其標點符號之文本 則不處理
+    If InStr(RemovedPunctuationsTextSubStr, RemovedPunctuationsText) = 0 Then Exit Sub
+    
+    Dim contextCollection As Collection, iCntcontextCollection As Long, jCntcontextCollection As Long, cntcontextCollection As Long
+    Set contextCollection = CreateContextPunctuationCollection(OriginalText)
+    cntcontextCollection = contextCollection.Count
+    For iCntcontextCollection = 1 To cntcontextCollection
+        prefixRemovedPunctuationsText = ""
+        s = VBA.InStr(RemovedPunctuationsText, contextCollection.item(iCntcontextCollection)(0))
+        If contextCollection.item(iCntcontextCollection)(0) <> "" And s >= 1 Then '找到符合要加入而重複的文字片段,s=1 是剛好開頭即完整段落（標點符號間隔的一段文字）
+            jCntcontextCollection = iCntcontextCollection + 1
+            If s = 1 Then
+                RemovedPunctuationsTextSubStr = VBA.Mid(RemovedPunctuationsText, Len(contextCollection.item(iCntcontextCollection)(0)) + 1)
+            Else 's>1 即用以比對的字串開頭不完整的一個標點符號區段
+                If iCntcontextCollection > 1 Then
+                    'If contextCollection.item(iCntcontextCollection)(0) = "六經言之者少" Then Stop 'just for check
+                    prefixRemovedPunctuationsText = left(RemovedPunctuationsText, s - 1) + contextCollection.item(iCntcontextCollection - 1)(1)
+                    RemovedPunctuationsTextSubStr = VBA.Mid(RemovedPunctuationsText, Len(contextCollection.item(iCntcontextCollection)(0)) + s)
+                Else
+                    Stop 'check
+                End If
+            End If
+            Do While VBA.InStr(RemovedPunctuationsTextSubStr, contextCollection.item(jCntcontextCollection)(0)) = 1 And RemovedPunctuationsTextSubStr <> ""
+                RemovedPunctuationsTextSubStr = Mid(RemovedPunctuationsTextSubStr, Len(contextCollection.item(jCntcontextCollection)(0)) + 1)
+                jCntcontextCollection = jCntcontextCollection + 1
+                If jCntcontextCollection > contextCollection.Count Then Exit Do
+            Loop
+            If RemovedPunctuationsTextSubStr = "" Then '比對吻合，離開迴圈，取得含標點符號之原文片段
+                match = True
+                Exit For
+            ElseIf VBA.Replace(RemovedPunctuationsTextSubStr, Chr(13), "") = "" Then '只剩下分段符號
+                match = True
+                Exit For
+            ElseIf VBA.InStr(contextCollection.item(jCntcontextCollection)(0), RemovedPunctuationsTextSubStr) = 1 And VBA.StrComp(RemovedPunctuationsTextSubStr, left(contextCollection.item(jCntcontextCollection)(0), VBA.Len(RemovedPunctuationsTextSubStr))) = 0 Then '只剩下不完整的片段（即不到一個標點符號的長度）；即用來比對的字串不是完整的段落，只摘取前面隨意長度的部分來比對
+                match = True
+                Exit For
+            End If
         End If
-    End If
-Next iCntcontextCollection
-'取得含標點符號之原文片段
-If RemovedPunctuationsTextSubStr = "" Or VBA.Replace(RemovedPunctuationsTextSubStr, Chr(13), "") = "" Then
-    For iCntcontextCollection = iCntcontextCollection To jCntcontextCollection - 1
-        RemovedPunctuationsTextSubStr = RemovedPunctuationsTextSubStr + contextCollection.item(iCntcontextCollection)(0) + contextCollection.item(iCntcontextCollection)(1)
     Next iCntcontextCollection
-    RemovedPunctuationsText = RemovedPunctuationsTextSubStr
-End If
+    '取得含標點符號之原文片段
+    'If RemovedPunctuationsTextSubStr = "" Or VBA.Replace(RemovedPunctuationsTextSubStr, Chr(13), "") = "" Then
+    If match Then
+        RemovedPunctuationsText = ""
+        For iCntcontextCollection = iCntcontextCollection To jCntcontextCollection - 1
+            RemovedPunctuationsText = RemovedPunctuationsText + contextCollection.item(iCntcontextCollection)(0) + contextCollection.item(iCntcontextCollection)(1)
+        Next iCntcontextCollection
+        '如果不是完整的段落，就加上最後剩下的部分，以符合原來比對的字串
+        If RemovedPunctuationsTextSubStr <> "" Then RemovedPunctuationsText = RemovedPunctuationsText + RemovedPunctuationsTextSubStr
+        If prefixRemovedPunctuationsText <> "" Then RemovedPunctuationsText = prefixRemovedPunctuationsText + RemovedPunctuationsText
+    End If
 End Sub
 
 Private Sub Class_Terminate()
-punctuationStr = Empty
-punctuation_Array = Empty
-Set punctuation_Collection = Nothing
-Set punctuation_Dictionary = Nothing
+    punctuationStr = Empty
+    punctuation_Array = Empty
+    Set punctuation_Collection = Nothing
+    Set punctuation_Dictionary = Nothing
 End Sub

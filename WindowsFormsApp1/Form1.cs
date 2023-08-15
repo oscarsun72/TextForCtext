@@ -2252,6 +2252,7 @@ namespace WindowsFormsApp1
                                                           //如果已有資料對應，則閃示橘紅色（表單顏色）示警
                                                           //MessageBox.Show("existed!!");
                         {
+                            Form1.playSound(soundLike.info);
                             this.BackColor = Color.Tomato;
                             this.Refresh();
                             Thread.Sleep(20);
@@ -2966,8 +2967,11 @@ namespace WindowsFormsApp1
                 //如果已選取「{{」或「}}」則逕以「􏿽」取代（《國學大師》的《四庫全書》本常見
                 if ("{{}}".IndexOf(sTxt) > -1)
                 {
+                    undoRecord();
+                    stopUndoRec = true;
                     textBox1.SelectedText = "􏿽";
                     dontHide = false;
+                    stopUndoRec = false;
                     return;
                 }
                 if (sTxt == "<p>")
@@ -2980,6 +2984,7 @@ namespace WindowsFormsApp1
                     stopUndoRec = true;
                     textBox1.SelectedText = sTxtChk;
                     dontHide = false;
+                    stopUndoRec = false;
                     /*
                     textBox1.Text = x.Substring(0, s) + sTxtChk + x.Substring(s + sTxt.Length);
                     //string sTxtChk = sTxt.Replace("　", "");
@@ -6311,7 +6316,7 @@ namespace WindowsFormsApp1
             }
 
             #region toOCR            
-            bool ocrResult = false;
+            bool ocrResult = false; string currentWindowHndl = br.driver.CurrentWindowHandle;
             switch (ocrSiteTitle)
             {
                 case br.OCRSiteTitle.GoogleKeep:
@@ -6340,7 +6345,12 @@ namespace WindowsFormsApp1
                 default:
                     break;
             }
-            if (!ocrResult) MessageBox.Show("請重來一次；重新執行一次。感恩感恩　南無阿彌陀佛", "發生錯誤", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
+            if (!ocrResult)
+            {
+                MessageBox.Show("請重來一次；重新執行一次。感恩感恩　南無阿彌陀佛", "發生錯誤", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
+                //br.driver.SwitchTo().Window(br.driver.WindowHandles[br.driver.WindowHandles.Count-1]);
+                br.driver.SwitchTo().Window(currentWindowHndl);
+            }
             #region 如果是手動鍵入輸入模式且OCR程序無誤則直接貼上結果並自動標上書名號篇名號，20230309 creedit with chatGPT大菩薩：
             if (ocrResult && keyinTextMode)
             {
