@@ -300,6 +300,10 @@ F11 : run replaceXdirrectly() 維基文庫等欲直接抽換之字
 
 Ctrl + h ：移至 textBox4 準備取代文本文字
 
+Ctrl + y ： 重做（即復原還原的動作），目前上限為50個記錄
+
+Ctrl + z ： 還原文本，目前上限為50個記錄
+
 Ctrl + F12 ：就 textBox1 所選之字串，執行「[查詢國語辭典.exe](https://github.com/oscarsun72/lookupChineseWords.git)」以查詢網路詞典
 
 Alt + G ：就 textBox1 所選之字串，執行「[網路搜尋_元搜尋-同時搜多個引擎.exe](https://github.com/oscarsun72/SearchEnginesConsole.git)」以查詢 Google 等網站

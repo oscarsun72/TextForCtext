@@ -1722,6 +1722,14 @@ namespace WindowsFormsApp1
                     return;
                 }
 
+                //Ctrl + y
+                if (e.KeyCode == Keys.Y)
+                {//還原功能
+                    e.Handled = true;
+                    redoTextBox(textBox1);
+                    return;
+                }
+
                 //Ctrl + z
                 if (e.KeyCode == Keys.Z)
                 {//還原功能
@@ -1729,6 +1737,7 @@ namespace WindowsFormsApp1
                     undoTextBox(textBox1);
                     return;
                 }
+
 
                 //Ctrl + h
                 if (e.KeyCode == Keys.H)
@@ -2355,12 +2364,12 @@ namespace WindowsFormsApp1
                 {
                     if (insertMode)
                     {
-                        insertMode = false;
+                        insertMode = false; textBox1.Font = new Font(textBox1.Font.FontFamily,textBox1.Font.Size, FontStyle.Bold);
                         Caret_Shown_OverwriteMode(textBox1);
                     }
                     else
                     {
-                        insertMode = true;
+                        insertMode = true; textBox1.Font = new Font(textBox1.Font.FontFamily,textBox1.Font.Size, FontStyle.Regular);
                         Caret_Shown(textBox1);
                     }
                     return;
@@ -3926,9 +3935,21 @@ namespace WindowsFormsApp1
             restoreCaretPosition(textBox1, s, 0);//textBox1.ScrollToCaret();
         }
 
+        /// <summary>
+        /// 記下還原了幾次
+        /// </summary>
+        private int undoTimes;
+        /// <summary>
+        /// 設定不要進行還原記錄
+        /// </summary>
         bool undoTextBoxing = false;
+
+        /// <summary>
+        /// Ctrl + z 還原機制，目前上限為50個記錄
+        /// </summary>
+        /// <param name="textBox1"></param>
         private void undoTextBox(TextBox textBox1)
-        {//Ctrl + z 還原機制            
+        {
             int s = textBox1.SelectionStart, l = textBox1.SelectionLength;
             if (selStart != s && selStart != 0)
             {
@@ -3936,13 +3957,57 @@ namespace WindowsFormsApp1
             }
             if (undoTextBox1Text.Count - undoTimes - 1 > -1)
             {
-                undoTextBoxing = true;
-                textBox1.Text = undoTextBox1Text[undoTextBox1Text.Count - ++undoTimes];
-                restoreCaretPosition(textBox1, s, l);
-                undoTextBoxing = false;
+                string x = undoTextBox1Text[undoTextBox1Text.Count - ++undoTimes];
+                while (x == "")
+                {
+                    if (undoTextBox1Text.Count - undoTimes - 1 < 0) break;
+                    x = undoTextBox1Text[undoTextBox1Text.Count - ++undoTimes];
+
+                }
+                if (x != "")
+                {
+                    undoTextBoxing = true;
+                    textBox1.Text = x;
+                    restoreCaretPosition(textBox1, s, l);
+                    undoTextBoxing = false;
+                }
             }
             else
                 MessageBox.Show("no more to undo!");
+
+        }
+        /// <summary>
+        /// Ctrl + y 重做（即復原還原的動作），目前上限為50個記錄
+        /// </summary>
+        /// <param name="textBox1"></param>
+        private void redoTextBox(TextBox textBox1)
+        {
+            if (undoTimes == 0) { MessageBox.Show("no more to redo!"); return; }
+            int s = textBox1.SelectionStart, l = textBox1.SelectionLength;
+            if (selStart != s && selStart != 0)
+            {
+                s = selStart; l = selLength;
+            }
+            if (undoTextBox1Text.Count - undoTimes - 1 > -1)
+            {
+                string x = undoTextBox1Text[undoTextBox1Text.Count - --undoTimes - 1];
+                while (x == "")
+                {
+                    if (undoTextBox1Text.Count - --undoTimes - 1 < 0) break;
+                    if (undoTextBox1Text.Count - --undoTimes - 1 > undoTextBox1Text.Count - 1) break;
+                    x = undoTextBox1Text[undoTextBox1Text.Count - --undoTimes - 1];
+                }
+                if (x != "")
+                {
+                    undoTextBoxing = true;
+                    //textBox1.Text = undoTextBox1Text[undoTextBox1Text.Count - ++undoTimes];
+                    textBox1.Text = x;
+                    restoreCaretPosition(textBox1, s, l);
+                    undoTextBoxing = false;
+                }
+            }
+            else
+                MessageBox.Show("no more to redo!");
 
         }
 
@@ -4771,7 +4836,6 @@ namespace WindowsFormsApp1
                 希望這對您有所幫助！*/
         }
 
-
         /// <summary>
         /// Ctrl + + （加號，含函數字鍵盤） 或 Ctrl + -（數字鍵盤）  或 Ctrl + 5 (數字鍵盤） 或 Alt + + ：
         /// 將插入點或選取文字（含）之前的文本剪下貼到 ctext 的[簡單修改模式]框中，並按下「保存編輯」鈕，且
@@ -4779,6 +4843,7 @@ namespace WindowsFormsApp1
         /// </summary>
         /// <param name="shiftKeyDownYet">按下Shift則留下本頁不自動翻至下一頁</param>
         /// <param name="clear">選擇性參數：若指定chkClearQuickedit_data_textboxTxtStr則會清除當前文字框內容而非輸入新內容</param>        
+        /// <returns>執行不成功則回傳false</returns>
         private bool keyDownCtrlAdd(bool shiftKeyDownYet = false, string clear = "")
         {
             int s = textBox1.SelectionStart, l = textBox1.SelectionLength;
@@ -5009,8 +5074,8 @@ namespace WindowsFormsApp1
                             pasteToCtext(br.driver.Url, shiftKeyDownYet);
                     }
                     else
-                        pasteToCtext(textBox3.Text, shiftKeyDownYet);//string currentUrl = br.driver.Url;
-                                                                     //pasteToCtext(currentUrl);//故改用 br.……
+                        if (!pasteToCtext(textBox3.Text, shiftKeyDownYet)) return false;//string currentUrl = br.driver.Url;
+                                                                                        //pasteToCtext(currentUrl);//故改用 br.……
                     break;
                 case BrowserOPMode.seleniumGet://Selenium配合Windows API模式（1+2）或純不用Selenium模式
                                                //還未實作
@@ -6349,7 +6414,14 @@ namespace WindowsFormsApp1
             {
                 MessageBox.Show("請重來一次；重新執行一次。感恩感恩　南無阿彌陀佛", "發生錯誤", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
                 //br.driver.SwitchTo().Window(br.driver.WindowHandles[br.driver.WindowHandles.Count-1]);
-                br.driver.SwitchTo().Window(currentWindowHndl);
+                try
+                {
+                    br.driver.SwitchTo().Window(currentWindowHndl);
+                }
+                catch (Exception)
+                {
+                    //throw;
+                }
             }
             #region 如果是手動鍵入輸入模式且OCR程序無誤則直接貼上結果並自動標上書名號篇名號，20230309 creedit with chatGPT大菩薩：
             if (ocrResult && keyinTextMode)
@@ -7133,14 +7205,16 @@ namespace WindowsFormsApp1
         }
 
 
-
         /// <summary>
         /// for .BrowserOPMode.Selenium……    browsrOPMode!=BrowserOPMode.appActivateByName
         /// </summary>
         /// <param name="url">url to paste to</param>
         /// <param name="clear">whether clear the texts in quick edit box ;optional. if yes then set this param value to 「chkClearQuickedit_data_textboxTxtStr」 </param>
-        private void pasteToCtext(string url, bool statyhere = false, string clear = "")
+        /// <returns>執行不成功則傳回false</returns>
+        private bool pasteToCtext(string url, bool statyhere = false, string clear = "")
         {
+            if (!(url.IndexOf("&file=") > -1 && url.IndexOf("&page=") > -1 && url.IndexOf("&editwiki=") > -1 && url.EndsWith("#editor"))) return false;
+
             br.driver = br.driver ?? br.driverNew();
             //取得所有現行窗體（分頁頁籤）
             System.Collections.ObjectModel.ReadOnlyCollection<string> tabWindowHandles = new ReadOnlyCollection<string>(new List<string>());
@@ -7291,6 +7365,7 @@ namespace WindowsFormsApp1
             //在連續輸入時能清除框中文字；手動輸入時一般當不必自動清除框中文字
             //br.在Chrome瀏覽器的Quick_edit文字框中輸入文字(br.driver, clear == " " ? clear : Clipboard.GetText(), url);
             br.在Chrome瀏覽器的Quick_edit文字框中輸入文字(br.driver, clear == br.chkClearQuickedit_data_textboxTxtStr ? clear : Clipboard.GetText(), url);
+            return true;
         }
 
         //檢查textbox3的Text值與現用網頁是否相同
@@ -7961,7 +8036,7 @@ namespace WindowsFormsApp1
             if (keyinTextMode)
             {
                 //如果剪貼簿裡的是網址內容的話
-                if (ClpTxtBefore != clpTxt && clpTxt.IndexOf("http") > -1 && clpTxt.IndexOf("#editor") > -1)
+                if (ClpTxtBefore != clpTxt && clpTxt.StartsWith("http") && clpTxt.EndsWith("#editor"))
                 {
                     //new SoundPlayer(@"C:\Windows\Media\Windows Balloon.wav").Play();
                     System.Media.SystemSounds.Asterisk.Play();
@@ -8051,7 +8126,12 @@ namespace WindowsFormsApp1
                         //if(keyinText)//已於巢外的if判定了
                         textBox1.Select(0, 0);
                     }
-                    if (!Active) availableInUseBothKeysMouse();
+                    if (!Active)
+                    {
+                        pauseEvents();
+                        availableInUseBothKeysMouse();
+                        resumeEvents();
+                    }
                     return;
                 }
             }//以上處置鍵入模式（keyinText=true）
@@ -8193,7 +8273,6 @@ namespace WindowsFormsApp1
         }
 
         int surrogate = 0;
-        private int undoTimes;
 
         bool isKeyDownSurrogate(string x)
         {/*解決輸入CJK字元長度為2的字串問題 https://docs.microsoft.com/en-us/previous-versions/windows/desktop/indexsrv/surrogate-pairs
@@ -8937,7 +9016,7 @@ namespace WindowsFormsApp1
         internal int GetBookIDFromTextBox3()
         {
             string url = textBox3Text; if (url == "") return 0;
-            const string f = "file="; int s = url.IndexOf(f);
+            const string f = "file="; if (url.IndexOf(f) == -1) return 0; int s = url.IndexOf(f);
             return int.Parse(url.Substring(s + f.Length, url.IndexOf("&", s + 1) - s - f.Length));
         }
 

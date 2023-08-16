@@ -1043,7 +1043,15 @@ namespace TextForCtext
                         Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("請先在textBox2執行「br」指令，切換為SeleniumNew模式再繼續。");
                         return;
                     }
-                    url = driver.Url;
+                    try
+                    {
+                        url = driver.Url;
+                    }
+                    catch (Exception ex)
+                    {
+                        driver.SwitchTo().Window(driver.WindowHandles[driver.WindowHandles.Count - 1]);
+                        url = driver.Url;
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -1069,11 +1077,13 @@ namespace TextForCtext
                 }
                 if (urlActiveTab != url)
                 {
-                    foreach (var item in driver.WindowHandles)
+                    //foreach (var item in driver.WindowHandles)
+                    //{
+                    for (int i = driver.WindowHandles.Count - 1; i > -1; i--)
                     {
+                        driver.SwitchTo().Window(driver.WindowHandles[i]);
                         url = driver.Url;
                         if (urlActiveTab == url) break;
-                        driver.SwitchTo().Window(item);
                     }
                 }
             }
@@ -1652,7 +1662,15 @@ namespace TextForCtext
         /// 參照賢超法師《古籍酷AI》OCR視窗是否已關閉用
         /// </summary>
         static bool _OCR_GJcool_WindowClosed = true;
-
+        /// <summary>
+        ///若換切換《古籍酷》帳號則為true，以重設算力值的時間區段（點數；算力值、算力配额） 
+        /// </summary>
+        static bool _OCR_GJcool_AccountChanged = false;
+        /// <summary>
+        /// 設定 _OCR_GJcool_AccountChanged值；若換切換《古籍酷》帳號則請設為true，以重設算力值的時間區段（點數；算力值、算力配额） 
+        /// </summary>
+        public static bool OCR_GJcool_AccountChanged { get => _OCR_GJcool_AccountChanged; set => _OCR_GJcool_AccountChanged = value; }
+        public static void OCR_GJcool_AccountChanged_Switch() { _OCR_GJcool_AccountChanged = !_OCR_GJcool_AccountChanged; }
         /// <summary>
         /// 《古籍酷》OCR：自動識別(豎版)
         /// </summary>
@@ -1670,7 +1688,7 @@ namespace TextForCtext
                 openNewTabWindow(windowType);
                 _OCR_GJcool_WindowClosed = false;
                 //點數（算力值、算力配额）不足逕用「快速體驗」執行
-                if (waitGJcoolPoint && DateTime.Now.Subtract(gjCoolPointLess150When) < gjCoolPointEnoughTimespan)
+                if (!OCR_GJcool_AccountChanged && waitGJcoolPoint && DateTime.Now.Subtract(gjCoolPointLess150When) < gjCoolPointEnoughTimespan)
                 {
 
                     bool fastXResulut = OCR_GJcool_FastExperience(downloadImgFullName);
@@ -1681,6 +1699,7 @@ namespace TextForCtext
                 }
                 else
                     gjCool = OCRSite_URL[OCRSiteTitle.GJcool]; //"https://gj.cool/try_ocr";
+                if (_OCR_GJcool_AccountChanged) { _OCR_GJcool_AccountChanged = !_OCR_GJcool_AccountChanged; gjCoolPointLess150When = DateTime.Now; }
             }
             catch (Exception ex)
             {
