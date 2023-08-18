@@ -1511,10 +1511,16 @@ namespace WindowsFormsApp1
                         br.SwitchToCurrentForeActivateTab(ref textBox3);
                     }
                     if (keyDownCtrlAdd(true))
+                    {
                         //非最上層顯示以便檢視
                         //this.TopMost = false;
                         //this.WindowState = FormWindowState.Minimized;
+                        if (textBox1.Text != "")
+                        {
+                            pauseEvents(); textBox1.Text = ""; resumeEvents();
+                        }
                         hideToNICo();
+                    }
                     return;
                 }
             }
@@ -1636,7 +1642,8 @@ namespace WindowsFormsApp1
                         resetPageTextEndPositionPasteToCText();
                         return;
                     }
-                    keyDownCtrlAdd(false);
+                    //if (keyDownCtrlAdd(false))  if (textBox1.Text != "") { pauseEvents(); textBox1.Text = ""; resumeEvents(); }
+                    keyDownCtrlAdd(false);// if (textBox1.Text != "") { pauseEvents(); textBox1.Text = ""; resumeEvents(); }
                     return;
                 }
 
@@ -2190,7 +2197,8 @@ namespace WindowsFormsApp1
                 if (e.KeyCode == Keys.A)
                 {//Alt + a : 
                     e.Handled = true;
-                    keyDownCtrlAdd(false);
+                    //if (keyDownCtrlAdd(false)) // if (textBox1.Text != "") { pauseEvents(); textBox1.Text = ""; resumeEvents(); }
+                    keyDownCtrlAdd(false);// if (textBox1.Text != "") { pauseEvents(); textBox1.Text = ""; resumeEvents(); }
                     return;
                 }
                 if (e.KeyCode == Keys.G)
@@ -2280,6 +2288,7 @@ namespace WindowsFormsApp1
                 {// Alt + +
                     if (e.KeyCode == Keys.Oemplus && autoPastetoQuickEdit) return;//防止在連續輸入時誤按
                     e.Handled = true;
+                    //if (keyDownCtrlAdd(false)) if (textBox1.Text != "") { pauseEvents(); textBox1.Text = ""; resumeEvents(); }
                     keyDownCtrlAdd(false);
                     return;
                 }
@@ -2364,12 +2373,12 @@ namespace WindowsFormsApp1
                 {
                     if (insertMode)
                     {
-                        insertMode = false; textBox1.Font = new Font(textBox1.Font.FontFamily,textBox1.Font.Size, FontStyle.Bold);
+                        insertMode = false; textBox1.Font = new Font(textBox1.Font.FontFamily, textBox1.Font.Size, FontStyle.Bold);
                         Caret_Shown_OverwriteMode(textBox1);
                     }
                     else
                     {
-                        insertMode = true; textBox1.Font = new Font(textBox1.Font.FontFamily,textBox1.Font.Size, FontStyle.Regular);
+                        insertMode = true; textBox1.Font = new Font(textBox1.Font.FontFamily, textBox1.Font.Size, FontStyle.Regular);
                         Caret_Shown(textBox1);
                     }
                     return;
@@ -2973,7 +2982,7 @@ namespace WindowsFormsApp1
             dontHide = true;
             if (sTxt != "")
             {//有選取範圍
-                //如果已選取「{{」或「}}」則逕以「􏿽」取代（《國學大師》的《四庫全書》本常見
+             //如果已選取「{{」或「}}」則逕以「􏿽」取代（《國學大師》的《四庫全書》本常見
                 if ("{{}}".IndexOf(sTxt) > -1)
                 {
                     undoRecord();
@@ -5005,7 +5014,7 @@ namespace WindowsFormsApp1
                         return false;
                     }
                     else
-                        normalLineParaLength = 0;
+                    { normalLineParaLength = 0; wordsPerLinePara = chk[chk.Length - 1]; }// 目前 chk[chk.Length-1]=3
                 }
             }
             catch (Exception)
@@ -5113,9 +5122,9 @@ namespace WindowsFormsApp1
 
                     if (ModifierKeys == Keys.Shift)
                     {//自動送交賢超法師《古籍酷AI》OCR
-                        //已改寫在 nextpage 裡
-                        //Form1.playSound(Form1.soundLike.press);
-                        //toOCR(br.OCRSiteTitle.GJcool);
+                     //已改寫在 nextpage 裡
+                     //Form1.playSound(Form1.soundLike.press);
+                     //toOCR(br.OCRSiteTitle.GJcool);
                     }
                     else
                     {
@@ -5392,7 +5401,13 @@ namespace WindowsFormsApp1
 
             #region get lines_perPage//取得該頁的每行（段）文字
             //lines_perPage = 0;
-            lines_perPage = linesParasPerPage != -1 ? linesParasPerPage : countLinesPerPage(xChk);
+            if (keyinTextMode)
+            {
+                lines_perPage = countLinesPerPage(xChk);
+                linesParasPerPage = lines_perPage;
+            }
+            else
+                lines_perPage = linesParasPerPage != -1 ? linesParasPerPage : countLinesPerPage(xChk);
             if (linesParasPerPage == -1) linesParasPerPage = lines_perPage;
             //lines_perPage = xLineParas.Length;
             /*
@@ -5784,7 +5799,7 @@ namespace WindowsFormsApp1
         private void bringBackMousePosFrmCenter()
         {
             Activate(); //Application.DoEvents();
-            //20230115 chatGPT大菩薩：Cursor back to form：
+                        //20230115 chatGPT大菩薩：Cursor back to form：
             Point formPos = new Point(this.Location.X + this.Size.Width / 2, this.Location.Y + this.Size.Height / 2);
             Cursor.Position = formPos;
             //上面這段程式碼將滑鼠游標的位置設置為表單的中心點位置。
@@ -6157,6 +6172,7 @@ namespace WindowsFormsApp1
                         resetPageTextEndPositionPasteToCText();
                         return;
                     }
+                    //if (keyDownCtrlAdd(false)) if (textBox1.Text != "") { pauseEvents(); textBox1.Text = ""; resumeEvents(); }
                     keyDownCtrlAdd(false);
                     return;
                 }
@@ -7803,6 +7819,7 @@ namespace WindowsFormsApp1
             {
                 if (textBox1.SelectionLength == predictEndofPageSelectedTextLen
                     && textBox1.Text.Substring(textBox1.SelectionStart + predictEndofPageSelectedTextLen, 2) == Environment.NewLine)
+                    //if (keyDownCtrlAdd(false)) if (textBox1.Text != "") { pauseEvents(); textBox1.Text = ""; resumeEvents(); }
                     keyDownCtrlAdd(false);
                 else
                     BackupLastPageText(Clipboard.GetText(), true, true);
@@ -8291,7 +8308,9 @@ namespace WindowsFormsApp1
             if (surrogate % 2 != 0) { surrogate = 0; return true; }
             else { surrogate = 0; return false; }
         }
+
         /// <summary>
+        /// 允許觸發事件程序
         /// 20230321 creedit with chatGPT大菩薩： C#中有類似vba的 stop 述句嗎 感恩感恩　南無阿彌陀佛
         /// Unfortunately, C# does not have an EnableEvent method that can be used to temporarily pause events from being triggered. However, there are a few workarounds that can be used to achieve something similar:
         /// Use a boolean variable to indicate whether the event should be triggered or not.
@@ -8299,14 +8318,14 @@ namespace WindowsFormsApp1
         /// Make use of the Application.DoEvents() method to allow the event to be processed before continuing with the remainder of the code.
         /// Here is an example of using a boolean variable to temporarily disable an event handler:
         /// private bool _eventsEnabled = true;
-        //private void MyEventHandler(object sender, EventArgs e)
-        //{
-        //    if (!_eventsEnabled)
-        //        return;
-        //    // Handle event normally
-        //}
-        //By setting _eventsEnabled to false, the event handler will not be executed until it is resumed by setting _eventsEnabled back to true.
-        //Keep in mind that if you have multiple event handlers attached to the same event, this approach will disable all of them, since it is based on a boolean variable check.
+        ///private void MyEventHandler(object sender, EventArgs e)
+        ///{
+        ///    if (!_eventsEnabled)
+        ///        return;
+        ///    // Handle event normally
+        ///}
+        ///By setting _eventsEnabled to false, the event handler will not be executed until it is resumed by setting _eventsEnabled back to true.
+        ///Keep in mind that if you have multiple event handlers attached to the same event, this approach will disable all of them, since it is based on a boolean variable check.
         /// </summary>
         private bool _eventsEnabled = true;
 
@@ -8505,6 +8524,15 @@ namespace WindowsFormsApp1
 
             #endregion
 
+            #region 切換《古籍酷》帳號
+            if (x.Length > 2)
+                if (x == "gjk")
+                {
+                    pauseEvents();
+                    textBox2.Text = ""; resumeEvents(); br.OCR_GJcool_AccountChanged_Switch(); return;
+                }
+            #endregion
+
             if (button2.Text == "選取文") return;
             string x1 = textBox1.Text;
             if (x == "" || x1 == "") return;
@@ -8575,7 +8603,7 @@ namespace WindowsFormsApp1
             }
             if (e.KeyChar == 96)
             {//`： 於插入點處起至「　」或「􏿽」前止之文字加上黑括號【】//Print/SysRq 為OS鎖定不能用
-                //e.Handled = true; 加上黑括號(); return;
+             //e.Handled = true; 加上黑括號(); return;
                 e.Handled = true; preceded_followed_specify_symbols("【】"); return;
             }
             if (e.KeyChar == 127)
@@ -8781,6 +8809,7 @@ namespace WindowsFormsApp1
                     case MouseButtons.Middle:
                         if (textBox1.SelectionLength == predictEndofPageSelectedTextLen
                                 && textBox1.Text.Substring(textBox1.SelectionStart + predictEndofPageSelectedTextLen, 2) == Environment.NewLine)
+                            //if (keyDownCtrlAdd(false)) if (textBox1.Text != "") { pauseEvents(); textBox1.Text = ""; resumeEvents(); }
                             keyDownCtrlAdd(false);
                         else
                             //預設為最上層顯示，則按下Esc鍵或滑鼠中鍵會隱藏到任務列（系統列）中；滑鼠在其 ico 圖示上滑過即恢復
@@ -8838,6 +8867,7 @@ namespace WindowsFormsApp1
                         //if (new StringInfo(textBox1.SelectedText).LengthInTextElements == predictEndofPageSelectedTextLen)
                         if (textBox1.SelectionLength == predictEndofPageSelectedTextLen
                                 && textBox1.Text.Substring(textBox1.SelectionStart + predictEndofPageSelectedTextLen, 2) == Environment.NewLine)
+                            //if (keyDownCtrlAdd(false)) if (textBox1.Text != "") { pauseEvents(); textBox1.Text = ""; resumeEvents(); }
                             keyDownCtrlAdd(false);
                         break;
                     case MouseButtons.XButton1:
@@ -8865,6 +8895,7 @@ namespace WindowsFormsApp1
             if (s > 2 && textBox1.Text.Substring(s - 2, 2) == Environment.NewLine) s -= 2;
             pageTextEndPosition = s + textBox1.SelectionLength;//重設 pageTextEndPosition 值
             pageEndText10 = "";
+            //if (keyDownCtrlAdd(false)) if (textBox1.Text != "") { pauseEvents(); textBox1.Text = ""; resumeEvents(); }
             keyDownCtrlAdd(false);
         }
 
@@ -9223,6 +9254,7 @@ namespace WindowsFormsApp1
                 }
                 else if (button1.Text == "送出貼上")
                 {
+                    //if (keyDownCtrlAdd(ModifierKeys == Keys.Shift)) if (textBox1.Text != "") { pauseEvents(); textBox1.Text = ""; resumeEvents(); }
                     keyDownCtrlAdd(ModifierKeys == Keys.Shift);
                 }
             }

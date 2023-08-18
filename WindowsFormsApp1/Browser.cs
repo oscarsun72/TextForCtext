@@ -877,14 +877,14 @@ namespace TextForCtext
                             //if ((url.StartsWith("http") || url.StartsWith("ctext")))
                             if (endwithEditorStr)
                             {
-                                if ((url.StartsWith("ctext.org/") || url.StartsWith("https://ctext.org/")) && url.IndexOf("&page=") > -1 && url.EndsWith("#editor"))
+                                if ((url.StartsWith("ctext.org/") || url.StartsWith("https://ctext.org/")) && url.IndexOf("&file=") > -1 && url.IndexOf("&page=") > -1 && url.EndsWith("#editor"))
                                 {
                                     return url;
                                 }
                             }
                             else
                             {
-                                if ((url.StartsWith("ctext.org/") || url.StartsWith("https://ctext.org/")) && url.IndexOf("&page=") > -1)//&& url.EndsWith("#editor"))
+                                if ((url.StartsWith("ctext.org/") || url.StartsWith("https://ctext.org/")) && url.IndexOf("&file=") > -1 && url.IndexOf("&page=") > -1)//&& url.EndsWith("#editor"))
                                 {
                                     return url;
                                 }
@@ -1047,7 +1047,7 @@ namespace TextForCtext
                     {
                         url = driver.Url;
                     }
-                    catch (Exception ex)
+                    catch (Exception)
                     {
                         driver.SwitchTo().Window(driver.WindowHandles[driver.WindowHandles.Count - 1]);
                         url = driver.Url;
@@ -1670,7 +1670,17 @@ namespace TextForCtext
         /// 設定 _OCR_GJcool_AccountChanged值；若換切換《古籍酷》帳號則請設為true，以重設算力值的時間區段（點數；算力值、算力配额） 
         /// </summary>
         public static bool OCR_GJcool_AccountChanged { get => _OCR_GJcool_AccountChanged; set => _OCR_GJcool_AccountChanged = value; }
-        public static void OCR_GJcool_AccountChanged_Switch() { _OCR_GJcool_AccountChanged = !_OCR_GJcool_AccountChanged; }
+        /// <summary>
+        /// 切換《古籍酷》帳戶時用
+        /// </summary>
+        public static void OCR_GJcool_AccountChanged_Switch()
+        {
+            _OCR_GJcool_AccountChanged = !_OCR_GJcool_AccountChanged;
+            openNewTabWindow(WindowType.Tab);
+            driver.Navigate().GoToUrl("https://gj.cool/account");
+
+        }
+
         /// <summary>
         /// 《古籍酷》OCR：自動識別(豎版)
         /// </summary>
