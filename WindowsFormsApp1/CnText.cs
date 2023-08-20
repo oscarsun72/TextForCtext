@@ -7,10 +7,10 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using WindowsFormsApp1;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
-using static System.Net.Mime.MediaTypeNames;
-using System.Reflection;
-using System.Web.UI.WebControls;
+using System.Windows.Forms;
+//using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+//using static System.Net.Mime.MediaTypeNames;
+//using System.Reflection;
 
 namespace TextForCtext
 {
@@ -508,8 +508,10 @@ namespace TextForCtext
             //x = Regex.Replace(x, pattern, evaluator).Replace("．", "。");
             #endregion
 
-            string[] replaceDChar = { "'", ",", ";", ":", "．", "?", "：：", "《《", "》》", "〈〈", "〉〉", "。}}。}}", "。。", "，，", "@" };
-            string[] replaceChar = { "、", "，", "；", "：", "·", "？", "：", "《《", "》", "〈", "〉", "。}}", "。", "，", "●" };
+            string[] replaceDChar = { "'", ",", ";", ":", "．", "?", "：：", "《《", "》》", "〈〈", "〉〉",
+                "。}}。}}", "。}}。<p>", "}}。<p>", "。。", "，，", "@" };
+            string[] replaceChar = { "、", "，", "；", "：", "·", "？", "：", "《", "》", "〈", "〉",
+                "。}}", "。}}<p>", "}}<p>", "。", "，", "●" };
             foreach (var item in replaceDChar)
             {
                 if (x.IndexOf(item) > -1)
@@ -527,6 +529,25 @@ namespace TextForCtext
             }
             //置換中文文本中的英文句號（小數點）
             CnText.PeriodsReplace_ChinesePunctuationMarks(ref x);
+        }
+
+        /// <summary>
+        /// 當取代模式輸入時，改變選取的範圍
+        /// </summary>
+        /// <param name="seltext"></param>
+        internal static string ChangeSeltextWhenOverwriteMode(bool insertMode, TextBox textBox1)
+        {
+            string x = textBox1.SelectedText; int s = textBox1.SelectionStart;
+            if (s + 1 <= textBox1.TextLength)
+            {
+
+                if (!insertMode)
+                {
+                    x = textBox1.Text;
+                    x = char.IsHighSurrogate(x.Substring(s, 1).ToArray()[0]) ? textBox1.SelectedText + x.Substring(s + textBox1.SelectionLength, 2) : textBox1.SelectedText + x.Substring(s + textBox1.SelectionLength, 1);
+                }
+            }
+            return x;
         }
 
     }

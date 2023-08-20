@@ -474,8 +474,7 @@ namespace WindowsFormsApp1
             if (!_eventsEnabled) return;
             pauseEvents();
 
-            Keys modifierKeys = ModifierKeys;
-            if (modifierKeys == Keys.Shift) Form1.playSound(Form1.soundLike.press);
+            Keys modifierKeys = ModifierKeys;            
 
             #region 縮至系統工具列在右方時
             //if (Cursor.Position.Y > this.Top + this.Height ||
@@ -488,7 +487,7 @@ namespace WindowsFormsApp1
             if (Cursor.Position.Y > Screen.PrimaryScreen.Bounds.Height - 230 &&
                 Cursor.Position.X < 80)
             {
-                ntfyICo.Visible = false;
+                ntfyICo.Visible = false; if (modifierKeys == Keys.Shift) Form1.playSound(Form1.soundLike.press);
                 //按下Ctrl時，自動將Quick edit的連結複製到剪貼簿
                 if (keyinTextMode) copyQuickeditLinkWhenKeyinMode(modifierKeys);
                 show_nICo(modifierKeys);//this.Left + this.Width) show_nICo();
@@ -499,7 +498,7 @@ namespace WindowsFormsApp1
             else if (Cursor.Position.Y > Screen.PrimaryScreen.Bounds.Height - 50 &&
                 Cursor.Position.X > Screen.PrimaryScreen.Bounds.Width - 270)
             {
-                ntfyICo.Visible = false;
+                ntfyICo.Visible = false; if (modifierKeys == Keys.Shift) Form1.playSound(Form1.soundLike.press);
                 if (keyinTextMode)
                     copyQuickeditLinkWhenKeyinMode(modifierKeys);
                 show_nICo(modifierKeys);//this.Left + this.Width) show_nICo();
@@ -1505,22 +1504,25 @@ namespace WindowsFormsApp1
             {
                 if (e.KeyCode == Keys.Add || e.KeyCode == Keys.Oemplus || e.KeyCode == Keys.Subtract || e.KeyCode == Keys.NumPad5)
                 {// Ctrl + Shift + + 
-                    e.Handled = true;
+                    e.Handled = true; bool thisTopMost = this.TopMost;
+                    this.TopMost = false;
                     if (browsrOPMode != BrowserOPMode.appActivateByName && br.driver != null)
                     {
                         br.SwitchToCurrentForeActivateTab(ref textBox3);
                     }
+                    if (this.TopMost) this.TopMost = false;
                     if (keyDownCtrlAdd(true))
                     {
                         //非最上層顯示以便檢視
                         //this.TopMost = false;
                         //this.WindowState = FormWindowState.Minimized;
-                        if (textBox1.Text != "")
-                        {
-                            pauseEvents(); textBox1.Text = ""; resumeEvents();
-                        }
+                        //if (textBox1.Text != "" && keyinTextMode)
+                        //{
+                        //    pauseEvents(); textBox1.Text = ""; resumeEvents();
+                        //}
                         hideToNICo();
                     }
+                    this.TopMost = thisTopMost;
                     return;
                 }
             }
@@ -1752,9 +1754,13 @@ namespace WindowsFormsApp1
                 {
                     //不知為何，就是會將插入點前一個字元給刪除,即使有以下此行也無效
                     e.Handled = true;
-                    textBox1OriginalText = textBox1.Text; selStart = textBox1.SelectionStart;
+                    textBox1OriginalText = textBox1.Text; selStart = textBox1.SelectionStart; selLength = textBox1.SelectionLength;
                     //插件/取代模式不同處理
-                    selLength = insertMode ? textBox1.SelectionLength : (textBox1.SelectionLength + 1 > textBox1.TextLength) ? textBox1.SelectionLength : ++textBox1.SelectionLength;
+                    char nextChar = textBox1.Text.Substring(selStart, selLength + 1).ToArray()[0];
+                    selLength = insertMode ? selLength :
+                        (selLength + 1 > textBox1.TextLength) ? selLength :
+                        char.IsHighSurrogate(nextChar) || nextChar == Environment.NewLine.Substring(1).ToArray()[0] ?
+                        textBox1.SelectionLength += 2 : ++textBox1.SelectionLength;
                     textBox4.Focus();
                     return;
                 }
@@ -2202,8 +2208,9 @@ namespace WindowsFormsApp1
                     return;
                 }
                 if (e.KeyCode == Keys.G)
-                {
-                    string x = textBox1.SelectedText;
+                {//Alt + g
+                    e.Handled = true;
+                    string x = CnText.ChangeSeltextWhenOverwriteMode(insertMode, textBox1);
                     if (x != "")
                     {
                         Clipboard.SetText(x);
@@ -4838,13 +4845,24 @@ namespace WindowsFormsApp1
         /// <returns>回傳網址是否合法</returns>
         internal static bool IsValidUrl＿keyDownCtrlAdd(string url)
         {
-            return !Regex.IsMatch(url, @"(#editor|&page=|ctext\.org)");
+            //return Regex.IsMatch(url, @"(#editor|&page=|ctext\.org)");
+            //return Regex.IsMatch(url, @"ctext\.org.*&file.*&page=.*#editor");
+            //也有可能是這種網址：https://ctext.org/library.pl?if=gb&file=34195&page=142&editwiki=826120#box(140,120,2,0)
+            return Regex.IsMatch(url, @"ctext\.org.*&file.*&page=.*&edit");
             /*
              * Bing大菩薩：是的，在正則表達式中，小數點「.」是一個特殊字符，它匹配任何單個字符（除了換行符）。如果您想在正則表達式中匹配字面上的小數點，則需要在前面加上反斜杠「\」來對其進行轉義。
              * 在 C# 中，由於反斜杠「\」本身也是一個轉義字符，所以您需要使用兩個反斜杠「\\」來表示一個字面上的反斜杠。因此，在 C# 中的正則表達式中，要匹配字面上的小數點，您需要寫成「\\.」。
                 希望這對您有所幫助！*/
         }
-
+        /// <summary>
+        /// 檢查是否是瀏覽圖文對照之頁面
+        /// </summary>
+        /// <param name="url">要檢查的網址字串值</param>
+        /// <returns></returns>
+        internal static bool IsValidUrl＿ImageTextComparisonPage(string url)
+        {
+            return Regex.IsMatch(url, @"ctext\.org.*&file.*&page=");
+        }
         /// <summary>
         /// Ctrl + + （加號，含函數字鍵盤） 或 Ctrl + -（數字鍵盤）  或 Ctrl + 5 (數字鍵盤） 或 Alt + + ：
         /// 將插入點或選取文字（含）之前的文本剪下貼到 ctext 的[簡單修改模式]框中，並按下「保存編輯」鈕，且
@@ -5070,17 +5088,31 @@ namespace WindowsFormsApp1
                         }
                         //throw;
                     }
-                    if (IsValidUrl＿keyDownCtrlAdd(driverUrl))
+                    if (!IsValidUrl＿keyDownCtrlAdd(driverUrl))
                     {
-                        br.GoToCurrentUserActivateTab();
-                        if (IsValidUrl＿keyDownCtrlAdd(br.driver.Url))
+                        string brdriverUrl = br.GoToCurrentUserActivateTab();
+                        //if (!IsValidUrl＿keyDownCtrlAdd(br.driver.Url))
+                        if (!IsValidUrl＿keyDownCtrlAdd(brdriverUrl))
                         //if (br.driver.Url.IndexOf("#editor") == -1 && br.driver.Url.IndexOf("&page=") == -1 && br.driver.Url.IndexOf("ctext.org") == -1)
                         {
-                            Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("請檢查 textBox3 中是否是有效的簡單修改模式的網址");
-                            return false;
+                            //Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("請檢查 textBox3 中是否是有效的簡單修改模式的網址");
+                            if (IsValidUrl＿ImageTextComparisonPage(brdriverUrl))
+                            {
+                                if (DialogResult.OK == Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("是否要切換到「簡單修改模式」頁面以供輸入？"))
+                                {
+                                    brdriverUrl = br.GetQuickeditUrl();
+                                    br.GetQuickeditIWebElement().Click();
+                                    if (!pasteToCtext(brdriverUrl, shiftKeyDownYet)) return false;
+                                }
+                                else
+                                    return false;
+                            }
+                            else
+                                return false;
                         }
                         else
-                            pasteToCtext(br.driver.Url, shiftKeyDownYet);
+                            //pasteToCtext(br.driver.Url, shiftKeyDownYet);
+                            if (!pasteToCtext(brdriverUrl, shiftKeyDownYet)) return false;
                     }
                     else
                         if (!pasteToCtext(textBox3.Text, shiftKeyDownYet)) return false;//string currentUrl = br.driver.Url;
@@ -6715,7 +6747,7 @@ namespace WindowsFormsApp1
                 if (keyinTextMode)
                 {
                     Keys modifierKeys = ModifierKeys;
-                    if (modifierKeys == Keys.Shift)
+                    if (modifierKeys == Keys.Shift && !stayInHere)
                         Form1.playSound(Form1.soundLike.press);
 
                     OpenQA.Selenium.IWebElement quick_edit_box;
@@ -7229,7 +7261,10 @@ namespace WindowsFormsApp1
         /// <returns>執行不成功則傳回false</returns>
         private bool pasteToCtext(string url, bool statyhere = false, string clear = "")
         {
-            if (!(url.IndexOf("&file=") > -1 && url.IndexOf("&page=") > -1 && url.IndexOf("&editwiki=") > -1 && url.EndsWith("#editor"))) return false;
+            //if (!(url.IndexOf("&file=") > -1 && url.IndexOf("&page=") > -1 && url.IndexOf("&editwiki=") > -1 && url.EndsWith("#editor"))) return false;
+            //也有可能是這種網址：https://ctext.org/library.pl?if=gb&file=34195&page=142&editwiki=826120#box(140,120,2,0)
+            //if (!(url.IndexOf("&file=") > -1 && url.IndexOf("&page=") > -1 && url.IndexOf("&editwiki=") > -1 && url.IndexOf("#edit") == -1)) return false;
+            if (!IsValidUrl＿keyDownCtrlAdd(url)) return false;
 
             br.driver = br.driver ?? br.driverNew();
             //取得所有現行窗體（分頁頁籤）
@@ -8015,15 +8050,16 @@ namespace WindowsFormsApp1
 
             if (!_eventsEnabled) return;
 
-            //最上層顯示
-            if (!this.TopMost) this.TopMost = true;
-
             Keys modifierKey = ModifierKeys;
             //直接針對目前的分頁開啟古籍酷OCR
             if (modifierKey == Keys.Shift && keyinTextMode && !HiddenIcon)
             {
                 copyQuickeditLinkWhenKeyinMode(modifierKey);
+                return;
             }
+
+            //最上層顯示
+            if (!this.TopMost) this.TopMost = true;
 
             //不全部貼上取代原文字
             if (keyinTextMode && !pasteAllOverWrite) pasteAllOverWrite = false;
@@ -8147,6 +8183,7 @@ namespace WindowsFormsApp1
                     {
                         pauseEvents();
                         availableInUseBothKeysMouse();
+                        if (!this.TopMost) this.TopMost = true;
                         resumeEvents();
                     }
                     return;
@@ -8692,7 +8729,7 @@ namespace WindowsFormsApp1
              * 在 C# 中，您可以使用正则表达式来删除给定字符串中的特定字符。以下是删除 punctuationsNum 字符串中的 "《" 和 "〈" 字符的示例代码：……
              * 在这里，我们使用 Regex.Replace 方法将匹配正则表达式模式 [《〈] 的所有字符替换为空字符串。此模式匹配任何包含 "《" 或 "〈" 的字符。
              * */
-            string regexPattern = "[《〈]", omitSymbols = "●＝{}□■<>" + Environment.NewLine;//輸入缺字構字式●＝＝及注文標記符{{}}時不取代
+            string regexPattern = "[《〈]", omitSymbols = "●＝{}□■<>*" + Environment.NewLine;//輸入缺字構字式●＝＝、及注文標記符{{}}、及標題星號*時不取代
             string w;//, punctuationsNumWithout前書名號與前篇名號 = Regex.Replace(Form1.punctuationsNum, regexPattern, ""); 
             if (!insertMode
                 && textBox1.SelectionStart < textBox1.TextLength

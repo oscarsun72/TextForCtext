@@ -825,6 +825,25 @@ namespace TextForCtext
         internal static Form1 ActiveForm1 { get => frm ?? Application.OpenForms[0] as Form1; set => frm = value; }
 
         /// <summary>
+        /// 取得「簡單修改模式」的網址
+        /// </summary>
+        /// <returns>傳回「簡單修改模式」的網址</returns>
+        internal static string GetQuickeditUrl()
+        {
+            string url = "";
+            if (driver == null) driver = driverNew();
+            IWebElement ie = GetQuickeditIWebElement();
+            if (ie != null) url = ie.GetAttribute("href");
+            return url;
+        }
+
+        internal static IWebElement GetQuickeditIWebElement()
+        {
+            if (driver == null) driver = driverNew();
+            return waitFindWebElementBySelector_ToBeClickable("#quickedit > a");
+        }
+
+        /// <summary>
         /// geturl 修改後的程式碼:20230308 creedit with NotionAI大菩薩
         /// 〈get url FindAll vs FindFirst〉https://www.notion.so/get-url-FindAll-vs-FindFirst-88505499d53e4557a45fe8e844f0ee4a
         /// </summary>
@@ -1030,7 +1049,8 @@ namespace TextForCtext
         /// 將程式所在頁面轉到現行前景的分頁頁面
         /// </summary>
         /// <param name="urlActiveTab">若已取得現行前景分頁頁面之網址則作此引數傳入，免得再取一次，徒耗資源，減損效能</param>
-        internal static void GoToCurrentUserActivateTab(string urlActiveTab = "")
+        /// <returns>傳回目前作用中的分頁頁籤網址字串值</returns>
+        internal static string GoToCurrentUserActivateTab(string urlActiveTab = "")
         {
             if (urlActiveTab == "") urlActiveTab = ActiveTabURL_Ctext_Edit;
             string url = "";
@@ -1041,7 +1061,7 @@ namespace TextForCtext
                     if (driver == null && Form1.browsrOPMode == Form1.BrowserOPMode.appActivateByName)
                     {
                         Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("請先在textBox2執行「br」指令，切換為SeleniumNew模式再繼續。");
-                        return;
+                        return "";
                     }
                     try
                     {
@@ -1075,6 +1095,12 @@ namespace TextForCtext
                             break;
                     }
                 }
+
+                //會有這種情形： url= "https://ctext.org/library.pl?if=gb&file=34096&page=29#%E6%98%93"
+                //urlActiveTab= "https://ctext.org/library.pl?if=gb&file=34096&page=29#易"
+                //即一用中文，一為編碼
+                urlActiveTab = urlActiveTab.IndexOf("#") == -1 ? urlActiveTab : urlActiveTab.Substring(0, urlActiveTab.IndexOf("#"));
+                url = url.IndexOf("#") == -1 ? url : url.Substring(0, url.IndexOf("#"));
                 if (urlActiveTab != url)
                 {
                     //foreach (var item in driver.WindowHandles)
@@ -1082,12 +1108,15 @@ namespace TextForCtext
                     for (int i = driver.WindowHandles.Count - 1; i > -1; i--)
                     {
                         driver.SwitchTo().Window(driver.WindowHandles[i]);
-                        url = driver.Url;
+                        url = driver.Url; url = url.IndexOf("#") == -1 ? url : url.Substring(0, url.IndexOf("#"));
                         if (urlActiveTab == url) break;
                     }
                 }
             }
-
+            if (url == "" && urlActiveTab == "")
+                return driver.Url;
+            else
+                return url == "" ? urlActiveTab : url;
 
         }
 
@@ -1675,6 +1704,7 @@ namespace TextForCtext
         /// </summary>
         public static void OCR_GJcool_AccountChanged_Switch()
         {
+            if (ActiveForm1.TopMost) ActiveForm1.TopMost = false;
             _OCR_GJcool_AccountChanged = !_OCR_GJcool_AccountChanged;
             openNewTabWindow(WindowType.Tab);
             driver.Navigate().GoToUrl("https://gj.cool/account");
@@ -1697,6 +1727,7 @@ namespace TextForCtext
                 //openNewTabWindow(WindowType.Window);
                 openNewTabWindow(windowType);
                 _OCR_GJcool_WindowClosed = false;
+                if (ActiveForm1.TopMost) ActiveForm1.TopMost = false;
                 //點數（算力值、算力配额）不足逕用「快速體驗」執行
                 if (!OCR_GJcool_AccountChanged && waitGJcoolPoint && DateTime.Now.Subtract(gjCoolPointLess150When) < gjCoolPointEnoughTimespan)
                 {
