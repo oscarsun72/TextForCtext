@@ -2,12 +2,14 @@
 using Newtonsoft.Json.Linq;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
+using OpenQA.Selenium.DevTools;
 using OpenQA.Selenium.Remote;
 //using System.Net;
 //using static System.Net.WebRequestMethods;
 using OpenQA.Selenium.Support.UI;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Drawing;
 using System.Globalization;
@@ -149,6 +151,9 @@ namespace TextForCtext
 
         //static selm.IWebDriver driverNew()
         //實測後發現：CurrentWindowHandle並不能取得瀏覽器現正作用中的分頁視窗，只能取得創建 ChromeDriver 物件時的最初及switch 方法執行後切換的分頁視窗 20230103 阿彌陀佛
+        /// <summary>
+        /// 記下啟動Selenium chromedriver時的第一個WindowHandle
+        /// </summary>
         static string originalWindow;
         internal static string getOriginalWindow
         {
@@ -157,6 +162,39 @@ namespace TextForCtext
                 return originalWindow;
             }
 
+        }
+        /// <summary>
+        /// 記下操作時最後一個有效的WindowHandle        
+        /// </summary>
+        static string _lastValidWindowHandle;
+        /// <summary>
+        /// 取得/設定最近一個有效的WindowHandle
+        /// 以便取得視窗或頁籤關閉後所發生的錯誤，在此之前可用有效的視窗或分頁。
+        /// </summary>
+        public static string LastValidWindow
+        {
+            get
+            {
+                if (driver == null) return string.Empty;
+                ReadOnlyCollection<string> whs = driver.WindowHandles;
+                if (whs.Count == 0) return string.Empty;
+                _lastValidWindowHandle = _lastValidWindowHandle == null ? whs[whs.Count - 1] : _lastValidWindowHandle;
+                if (!whs.Contains(_lastValidWindowHandle))
+                    return whs[whs.Count - 1];
+                else
+                    return _lastValidWindowHandle;
+                /* 20230822 Bing大菩薩： https://sl.bing.net/fo9YWhdvMWG
+                 沒關係，我知道您想問的是 `vbNullString`。`vbNullString` 是 VBA 中的一個常量，它表示空字串。它與 `""` 不同，因為 `vbNullString` 是一個空指針，而 `""` 是一個長度為零的實際字串¹²。在 VBA 中，使用 `vbNullString` 比使用 `""` 更快且更省內存²。但是，在 C# 中，您可以使用 `string.Empty` 或 `""` 來表示空字串，它們的效能差異非常小，幾乎可以忽略不計¹³⁴。希望我的回答能夠幫助您！
+                    來源: 與 Bing 的交談， 2023/8/22
+                    (1) vba - What is vbNullString, How it use? - Stack Overflow. https://stackoverflow.com/questions/46006679/what-is-vbnullstring-how-it-use.
+                    (2) Is there any difference between vbNullString and - Stack Overflow. https://stackoverflow.com/questions/32435320/is-there-any-difference-between-vbnullstring-and.
+                    (3) VBAのEmptyやNothingやNull等の違いを整理 ｜ Excel作業をVBAで効率化. https://vbabeginner.net/organize-differences-empty-nothing-null/.
+                    (4) VB中判断空的几种方法,Null, Missing, Empty, Nothing, vbNullString区别 - *（00）* - 博客园. https://www.cnblogs.com/zouhao/p/3664651.html.
+                    (5) undefined. http://www.aivosto.com/vbtips/stringopt.html.
+                 */
+            }
+
+            set => _lastValidWindowHandle = value;
         }
 
         internal static string getDriverUrl
@@ -180,7 +218,20 @@ namespace TextForCtext
             }
         }
 
-        internal static IWebElement Quickedit_data_textbox { get; private set; }
+        /// <summary>
+        /// 取得[簡單修改模式]的文字方塊
+        /// Get the textbox of [Quick edit] 
+        /// </summary>
+        internal static IWebElement Quickedit_data_textbox
+        {
+            get { return quickedit_data_textbox == null ? waitFindWebElementByName_ToBeClickable("data", WebDriverWaitTimeSpan) : quickedit_data_textbox; }
+            private set { quickedit_data_textbox = value; }
+        }
+        /// <summary>
+        /// 儲存[簡單修改模式]的文字方塊
+        /// </summary>
+        private static IWebElement quickedit_data_textbox = null;
+
         private static string quickedit_data_textboxTxt = "";
         internal static string Quickedit_data_textboxTxt
         {
@@ -414,7 +465,7 @@ namespace TextForCtext
                 #endregion
 
                 #region 成功開啟Chrome瀏覽器後
-                originalWindow = cDrv.CurrentWindowHandle;
+                originalWindow = cDrv.CurrentWindowHandle; LastValidWindow = originalWindow;
                 //string chrome_path = Form1.getDefaultBrowserEXE();
                 //if (chrome_path.IndexOf(@"C:\") == -1)
                 //{
@@ -1290,6 +1341,7 @@ namespace TextForCtext
             }
             try
             {
+                LastValidWindow = driver.CurrentWindowHandle;
                 driver.SwitchTo().NewWindow(tabOrwindow);
             }
             catch (Exception)
@@ -1699,6 +1751,7 @@ namespace TextForCtext
         /// 設定 _OCR_GJcool_AccountChanged值；若換切換《古籍酷》帳號則請設為true，以重設算力值的時間區段（點數；算力值、算力配额） 
         /// </summary>
         public static bool OCR_GJcool_AccountChanged { get => _OCR_GJcool_AccountChanged; set => _OCR_GJcool_AccountChanged = value; }
+
         /// <summary>
         /// 切換《古籍酷》帳戶時用
         /// </summary>
@@ -1785,6 +1838,13 @@ namespace TextForCtext
             {
                 switch (ex.HResult)
                 {
+                    case -2146233088:
+                        if (ex.Message.IndexOf("no such window: target window already closed") > -1)
+                        {
+                            driver.SwitchTo().Window(LastValidWindow);
+                            return false;
+                        }
+                        break;
                     default:
                         string msgText = ex.HResult.ToString() + ex.Message;
                         Console.WriteLine(msgText);

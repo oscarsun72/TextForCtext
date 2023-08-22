@@ -434,7 +434,13 @@ namespace WindowsFormsApp1
                                 toOCR(br.OCRSiteTitle.GJcool);
                             else
                             {
-                                string text = br.waitFindWebElementByName_ToBeClickable("data", br.WebDriverWaitTimeSpan).Text ?? "";
+                                OpenQA.Selenium.IWebElement ie = br.Quickedit_data_textbox;//.waitFindWebElementByName_ToBeClickable("data", br.WebDriverWaitTimeSpan);
+                                if (keyinTextMode)
+                                {
+                                    //全選文字方塊內容以備貼入
+                                    ie.SendKeys(OpenQA.Selenium.Keys.Control + "a");
+                                }
+                                string text = ie.Text ?? "";
                                 CnText.BooksPunctuation(ref text);
                                 textBox1.Text = text;
                                 Clipboard.SetText(text);
@@ -474,7 +480,7 @@ namespace WindowsFormsApp1
             if (!_eventsEnabled) return;
             pauseEvents();
 
-            Keys modifierKeys = ModifierKeys;            
+            Keys modifierKeys = ModifierKeys;
 
             #region 縮至系統工具列在右方時
             //if (Cursor.Position.Y > this.Top + this.Height ||
@@ -567,6 +573,7 @@ namespace WindowsFormsApp1
                     break;
                 //自動擷取「簡單修改模式」（selector: # quickedit > a的連結)準備到《古籍酷》OCR
                 case Keys.Shift:
+                    //toOCR(br.OCRSiteTitle.GJcool);
                     copyQuickeditLinkWhenKeyinModeSub();
                     break;
                 //自動擷取「簡單修改模式」（selector: # quickedit > a的連結)
@@ -1756,11 +1763,15 @@ namespace WindowsFormsApp1
                     e.Handled = true;
                     textBox1OriginalText = textBox1.Text; selStart = textBox1.SelectionStart; selLength = textBox1.SelectionLength;
                     //插件/取代模式不同處理
-                    char nextChar = textBox1.Text.Substring(selStart, selLength + 1).ToArray()[0];
-                    selLength = insertMode ? selLength :
-                        (selLength + 1 > textBox1.TextLength) ? selLength :
-                        char.IsHighSurrogate(nextChar) || nextChar == Environment.NewLine.Substring(1).ToArray()[0] ?
-                        textBox1.SelectionLength += 2 : ++textBox1.SelectionLength;
+                    char nextChar;
+                    if (selStart + selLength + 1 <= textBox1.TextLength)
+                    {
+                        nextChar = textBox1.Text.Substring(selStart, selLength + 1).ToArray()[0];
+                        selLength = insertMode ? selLength :
+                            (selLength + 1 > textBox1.TextLength) ? selLength :
+                            char.IsHighSurrogate(nextChar) || nextChar == Environment.NewLine.ToArray()[0] ?
+                            textBox1.SelectionLength += 2 : ++textBox1.SelectionLength;
+                    }
                     textBox4.Focus();
                     return;
                 }
@@ -6309,7 +6320,7 @@ namespace WindowsFormsApp1
                 if (e.KeyCode == Keys.Left || e.KeyCode == Keys.Right)
                 {/*Alt + ←：視窗向左移動30dpi（+ Ctrl：徵調）
                   * Alt + →：視窗向右移動30dpi（+ Ctrl：徵調）*/
-                    e.Handled = true;
+                    e.Handled = true;//目前在textBox1時照樣
                     const int w = 30;
                     //int w = this.Width / 2;
                     if (e.KeyCode == Keys.Left) this.Left -= w;
@@ -6318,6 +6329,16 @@ namespace WindowsFormsApp1
                     return;
                 }
 
+                if (e.KeyCode == Keys.Up || e.KeyCode == Keys.Down)
+                {/*Alt + ↑：視窗向上移動30dpi（+ Ctrl：徵調；插入點在textBox1時例外）
+                  *Alt + ↓：視窗向下移動30dpi（+ Ctrl：徵調；插入點在textBox1時例外）*/
+                    e.Handled = true;
+                    const int h = 30;//目前在textBox1時照樣
+                    if (e.KeyCode == Keys.Up) this.Top -= h;
+                    if (e.KeyCode == Keys.Down) this.Top += h;
+                    mouseMovein();
+                    return;
+                }
 
                 if (e.KeyCode == Keys.F6 || e.KeyCode == Keys.F8)
                 {//Alt + F6、Alt + F8 : run autoMarkTitles 自動標識標題（篇名）
@@ -6578,6 +6599,9 @@ namespace WindowsFormsApp1
 
         [DllImport("user32")]
         static extern bool SetCursorPos(int X, int Y);
+        /// <summary>
+        /// 讓滑鼠游標光標Cursor拉回到表單範圍
+        /// </summary>
         private void mouseMovein()
         {//https://lolikitty.pixnet.net/blog/post/164569578
             SetCursorPos(this.Left + 30, this.Top + 100);
