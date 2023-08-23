@@ -4229,9 +4229,14 @@ namespace WindowsFormsApp1
             }
             return i;//count;
         }
-
-        int linesParasPerPage = -1;//每頁行/段數
-        int wordsPerLinePara = -1;//每行/段字數
+        /// <summary>
+        /// 每頁行/段數
+        /// </summary>
+        int linesParasPerPage = -1;
+        /// <summary>
+        /// 每行/段字數
+        /// </summary>
+        int wordsPerLinePara = -1;
         int countNoteLen(string notePure)
         {//同時取商數與餘數 https://dotblogs.com.tw/abbee/2010/09/28/17943
             int l = new StringInfo(notePure).LengthInTextElements;
@@ -4886,6 +4891,7 @@ namespace WindowsFormsApp1
         {
             int s = textBox1.SelectionStart, l = textBox1.SelectionLength;
 
+            if (TopMost) TopMost = false;
 
             if (keyinTextMode)
             {
@@ -5003,9 +5009,27 @@ namespace WindowsFormsApp1
                     }
                     else
                     {
-                        MessageBox.Show("請重新指定頁面結束位置", "", MessageBoxButtons.OK, MessageBoxIcon.Stop);
-                        pageTextEndPosition = 0; pageEndText10 = "";
-                        Activate(); return false;
+                        //如果在手動輸入模式下且所指定的範圍為整個textBox1文字方塊，就不再作頁面末10字（pageEndText10）之檢查
+                        if (keyinTextMode)
+                        {
+                            if (textBox1.SelectionStart < textBox1.TextLength)
+                            {
+                                MessageBox.Show("請重新指定頁面結束位置", "", MessageBoxButtons.OK, MessageBoxIcon.Stop);
+                                pageTextEndPosition = 0; pageEndText10 = "";
+                                Activate(); return false;
+                            }
+                            else
+                            {
+                                s = textBox1.SelectionStart; l = 0;
+                                xCopy = textBox1.Text.Substring(0, s + l); pageEndText10 = string.Empty;
+                            }
+                        }
+                        else
+                        {
+                            MessageBox.Show("請重新指定頁面結束位置", "", MessageBoxButtons.OK, MessageBoxIcon.Stop);
+                            pageTextEndPosition = 0; pageEndText10 = "";
+                            Activate(); return false;
+                        }
                     }
                 }
             }
@@ -5423,7 +5447,13 @@ namespace WindowsFormsApp1
             }
         }
 
+        /// <summary>
+        /// 正常的每頁行數
+        /// </summary>
         int lines_perPage = 0;
+        /// <summary>
+        /// 正常的行/段長度（漢字數）
+        /// </summary>
         int normalLineParaLength = 0;
 
         //20230117 creedit chatGPT大菩薩：C# Visual Studio 註解顯示:/// 是用於多行註解，用於註釋程式碼的多行。……在 C# 中，使用三個斜線 (///) 來撰寫註解文字，並將它放在該函式的宣告之前，就可以在 Visual Studio 中在自訂函式上停駐滑鼠游標時顯示該函式的提示文字。……這樣可以顯示註解文字，且註解文字可以在 Intellisense 中顯示。
@@ -5477,7 +5507,14 @@ namespace WindowsFormsApp1
                         normalLineParaLength = countWordsLenPerLinePara(xLineParas[xLineParas.Length - 1]);// new StringInfo(xLineParas[0]).LengthInTextElements;
                 }
             }
-            if (normalLineParaLength < 7) return new int[0];
+
+            /////暫時取消此條件，7改成4（即每行3字內，自行目測檢查。）20230822
+            //if (normalLineParaLength < 7)
+            if (normalLineParaLength < 4)
+            {//如果正常漢字數小於7則不執行
+                return new int[0];
+            }
+
             int i = -1, len = 0;
             foreach (string lineParaText in xLineParas)
             {
@@ -9207,10 +9244,27 @@ namespace WindowsFormsApp1
             //}
         }
 
+        /// <summary>
+        /// Ctrl + w 關閉 Chrome 網頁頁籤
+        /// </summary>
         void closeChromeTab()
-        {//Ctrl + w 關閉 Chrome 網頁頁籤
-            appActivateByName();
-            SendKeys.Send("^{F4}");//關閉頁籤
+        {
+            switch (browsrOPMode)
+            {
+                case BrowserOPMode.appActivateByName:
+                    appActivateByName();
+                    SendKeys.Send("^{F4}");//關閉頁籤
+                    break;
+                case BrowserOPMode.seleniumNew:
+                    if (br.driver != null)
+                    {
+                        br.GoToCurrentUserActivateTab();
+                        br.driver.Close();
+                    }
+                    break;
+                case BrowserOPMode.seleniumGet:
+                    break;
+            }
             bool autoPastetoQuickEditMemo = autoPastetoQuickEdit;
             autoPastetoQuickEdit = false;
             this.Activate();
