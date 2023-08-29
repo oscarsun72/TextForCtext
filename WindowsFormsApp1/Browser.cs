@@ -178,7 +178,7 @@ namespace TextForCtext
                 if (driver == null) return string.Empty;
                 ReadOnlyCollection<string> whs = driver.WindowHandles;
                 if (whs.Count == 0) return string.Empty;
-                _lastValidWindowHandle = _lastValidWindowHandle == null ? whs[whs.Count - 1] : _lastValidWindowHandle;
+                _lastValidWindowHandle = _lastValidWindowHandle == null ? (whs.Count > 0 ? whs[whs.Count - 1] : null) : _lastValidWindowHandle;
                 if (!whs.Contains(_lastValidWindowHandle))
                     return whs[whs.Count - 1];
                 else
@@ -197,7 +197,7 @@ namespace TextForCtext
             set => _lastValidWindowHandle = value;
         }
 
-        internal static string getDriverUrl
+        internal static string GetDriverUrl
         {
             get
             {
@@ -219,12 +219,22 @@ namespace TextForCtext
         }
 
         /// <summary>
-        /// 取得[簡單修改模式]的文字方塊
+        /// 取得[簡單修改模式]的文字方塊；若失敗則回傳null
         /// Get the textbox of [Quick edit] 
         /// </summary>
         internal static IWebElement Quickedit_data_textbox
         {
-            get { return quickedit_data_textbox == null ? waitFindWebElementByName_ToBeClickable("data", WebDriverWaitTimeSpan) : quickedit_data_textbox; }
+            //get { return quickedit_data_textbox == null ? waitFindWebElementByName_ToBeClickable("data", WebDriverWaitTimeSpan) : quickedit_data_textbox; }
+            get
+            {
+                if (Form1.IsValidUrl＿keyDownCtrlAdd(ActiveForm1.textBox3Text))
+                {
+                    quickedit_data_textbox = waitFindWebElementByName_ToBeClickable("data", WebDriverWaitTimeSpan);
+                }
+                else
+                    quickedit_data_textbox = null;
+                return quickedit_data_textbox;
+            }
             private set { quickedit_data_textbox = value; }
         }
         /// <summary>
@@ -233,17 +243,59 @@ namespace TextForCtext
         private static IWebElement quickedit_data_textbox = null;
 
         private static string quickedit_data_textboxTxt = "";
+
+        /// <summary>
+        /// 取得[簡單修改模式]的文字；若失敗則回傳空字串
+        /// </summary>
         internal static string Quickedit_data_textboxTxt
         {
             get
             {
-                return quickedit_data_textboxTxt;
+                if (!Form1.IsValidUrl＿keyDownCtrlAdd(ActiveForm1.textBox3Text)) return string.Empty;
+                IWebElement ie = Quickedit_data_textbox;
+                if (ie != null)
+                {
+                    if (quickedit_data_textboxTxt != Quickedit_data_textbox.Text) quickedit_data_textboxTxt = quickedit_data_textbox.Text;
+                    return quickedit_data_textboxTxt;
+                }
+                else
+                    return string.Empty;
             }
         }
         internal static IWebElement waitFindWebElementByName_ToBeClickable(string name, double second,
             IWebDriver drver = null)
         {
-            IWebElement e = (driver ?? drver).FindElement(By.Name(name));
+            IWebElement e = null;
+            try
+            {
+                e = (driver ?? drver).FindElement(By.Name(name));
+            }
+            catch (Exception ex)
+            {
+                switch (ex.HResult)
+                {
+                    case -2146233088:
+                        if (ex.Message.IndexOf("no such window: target window already closed") > -1)
+                            GoToCurrentUserActivateTab();
+                        else if (ex.Message.IndexOf("no such element: Unable to locate element") > -1)
+                            GoToUrlandActivate(GetQuickeditUrl());
+                        try
+                        {
+                            e = (driver ?? drver).FindElement(By.Name(name));
+                        }
+                        catch (Exception exex)
+                        {
+                            if (exex.Message.IndexOf("no such element: Unable to locate element") == -1)
+                            {
+                                Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(exex.HResult + exex.Message);
+                                return null;
+                            }
+                        }
+                        break;
+                    default:
+                        break;
+                }
+            }
             if (e != null)
             {
                 WebDriverWait wait = new WebDriverWait((driver ?? drver), TimeSpan.FromSeconds(second));
@@ -981,7 +1033,7 @@ namespace TextForCtext
         /// <returns></returns>
         static string getUrl(ControlType controlType)
         {
-            string urls = "";
+            string urls = ""; Form1.playSound(Form1.soundLike.over);
             try
             {
                 //Process[] procsChrome = Process.GetProcessesByName("chrome");
@@ -1118,10 +1170,25 @@ namespace TextForCtext
                     {
                         url = driver.Url;
                     }
-                    catch (Exception)
+                    catch (Exception ex)
                     {
-                        driver.SwitchTo().Window(driver.WindowHandles[driver.WindowHandles.Count - 1]);
-                        url = driver.Url;
+                        switch (ex.HResult)
+                        {
+                            case -2146233088:
+                                if (ex.Message.StartsWith("no such window: target window already closed"))
+                                {
+                                    Form1.playSound(Form1.soundLike.error);
+                                    driver.SwitchTo().Window(driver.WindowHandles[driver.WindowHandles.Count - 1]);
+                                    url = driver.Url;
+                                }
+                                else
+                                    Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
+                                break;
+                            default:
+                                Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
+                                break;
+                        }
+
                     }
                 }
                 catch (Exception ex)
@@ -1878,11 +1945,15 @@ namespace TextForCtext
                         break;
                     case -2146233088:
                         if (ex.Message.IndexOf("Timed out after 30.5 seconds") > -1)
+                        {
+                            driver.SwitchTo().Window(LastValidWindow);
                             return false;
+                        }
                         else
                         {
                             Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
                             Debugger.Break();
+                            driver.SwitchTo().Window(LastValidWindow);
                         }
                         break;
                     default:
@@ -2255,6 +2326,7 @@ namespace TextForCtext
                 Cursor.Position = copyBtnPos;
                 //Thread.Sleep(800);//要等一下才行否則反應不過來
                 //Form1.playSound(Form1.soundLike.info);
+                if (ActiveForm1.TopMost) ActiveForm1.TopMost = false;
                 Thread.Sleep(300);//要等一下才行否則反應不過來                
                 /* 20230401 Bing大菩薩：在C#中，您可以使用 `MouseOperations` 类来模拟鼠标点击。这个类中有一个名为 `MouseEvent` 的方法，它可以接受一个 `MouseEventFlags` 枚举值作为参数，用来指定要执行的鼠标操作¹。例如，要模拟鼠标左键点击，可以这样写：
                 ```csharp

@@ -282,10 +282,21 @@ namespace WindowsFormsApp1
         {//20230114 creedit chatGPT：Windows Forms Active Detection
             get
             {
-                if (!this.Visible) return false;
-                if (this.WindowState == FormWindowState.Minimized)
+                if (this.WindowState == FormWindowState.Minimized || !this.Visible)
                     return false;
-                return this.Focused;
+                if (this.Visible && this.WindowState != FormWindowState.Minimized)
+                {
+                    bool focused = false;
+                    foreach (Control item in this.Controls)
+                    {
+                        if (item.Focused) { focused = true; break; }
+                    }
+
+                    if (focused) return focused;
+                    else return this.Focused;//textBox1.Focused=true時這個會是false
+                }
+                else
+                    return this.Focused;
             }
         }
 
@@ -458,6 +469,22 @@ namespace WindowsFormsApp1
                     { Process.Start(url); appActivateByName(); }
                     //Clipboard.Clear();
                 }
+                //若此時按下 Shift 則不會取得文本而是逕行送去《古籍酷》OCR取回文本至textBox1以備用
+                else if (modifierKeys == Keys.Shift && browsrOPMode != BrowserOPMode.appActivateByName)
+                {
+                    br.GoToCurrentUserActivateTab();
+                    string brUrl = br.GetDriverUrl;//.driver.Url;
+                    if (brUrl.IndexOf("ctext.org") > -1 && brUrl.IndexOf("&file=") > -1 && brUrl.IndexOf("&page=") > -1)
+                    {
+                        if (brUrl.IndexOf("edit") == -1)
+                        {
+                            brUrl = br.GetQuickeditUrl();
+                            br.driver.Navigate().GoToUrl(brUrl);
+                        }
+                        if (textBox3.Text != brUrl) textBox3.Text = brUrl;
+                        toOCR(br.OCRSiteTitle.GJcool);
+                    }
+                }
             }
         }
         /// <summary>
@@ -480,7 +507,10 @@ namespace WindowsFormsApp1
             if (!_eventsEnabled) return;
             pauseEvents();
 
+            #region 記錄相關變數
             Keys modifierKeys = ModifierKeys;
+            int x = Cursor.Position.X, y = Cursor.Position.Y;
+            #endregion
 
             #region 縮至系統工具列在右方時
             //if (Cursor.Position.Y > this.Top + this.Height ||
@@ -490,23 +520,24 @@ namespace WindowsFormsApp1
             #region 縮至系統工具列在左方時
             //if (Cursor.Position.Y > this.Top + this.Height &&
             //    Cursor.Position.X < 420) show_nICo();//this.Left + this.Width) show_nICo();
-            if (Cursor.Position.Y > Screen.PrimaryScreen.Bounds.Height - 230 &&
-                Cursor.Position.X < 80)
+            if (y > Screen.PrimaryScreen.Bounds.Height - 230 &&
+                x < 80)
             {
                 ntfyICo.Visible = false; if (modifierKeys == Keys.Shift) Form1.playSound(Form1.soundLike.press);
                 //按下Ctrl時，自動將Quick edit的連結複製到剪貼簿
                 if (keyinTextMode) copyQuickeditLinkWhenKeyinMode(modifierKeys);
+                //Form1.playSound(Form1.soundLike.exam);
                 show_nICo(modifierKeys);//this.Left + this.Width) show_nICo();
             }
             #endregion
 
             #region 縮至系統工具列在下方時
-            else if (Cursor.Position.Y > Screen.PrimaryScreen.Bounds.Height - 50 &&
-                Cursor.Position.X > Screen.PrimaryScreen.Bounds.Width - 270)
+            else if (y > Screen.PrimaryScreen.Bounds.Height - 50 &&
+                x > Screen.PrimaryScreen.Bounds.Width - 270)
             {
                 ntfyICo.Visible = false; if (modifierKeys == Keys.Shift) Form1.playSound(Form1.soundLike.press);
-                if (keyinTextMode)
-                    copyQuickeditLinkWhenKeyinMode(modifierKeys);
+                if (keyinTextMode) copyQuickeditLinkWhenKeyinMode(modifierKeys);
+                Form1.playSound(Form1.soundLike.error);
                 show_nICo(modifierKeys);//this.Left + this.Width) show_nICo();
             }
             #endregion
@@ -1356,14 +1387,28 @@ namespace WindowsFormsApp1
             }
             #endregion
 
+
             Clipboard.SetText(xCopy); BackupLastPageText(xCopy, false, false);
+
+
             if (s + l + 2 < textBox1.Text.Length)
             {
-                if (x.Substring(s + l, 1) == Environment.NewLine)
+                //if (x.Substring(s + l, 1) == Environment.NewLine)//原式 20230824以前
+                if (x.Substring(s + l, 2) == Environment.NewLine)
+                {
                     x = x.Substring(s + l + 2);
+                    //用新的要貼上Quit Edit的文字作為還原textBox1.Text時的備份 20230824
+                    undoRecord(xCopy + Environment.NewLine + x);
+                }
                 else
+                {
                     x = x.Substring(s + l);
+                    undoRecord(xCopy + x);
+                }
             }
+
+
+
             if (s + l >= textBox1.Text.Length)
             {
                 x = "";
@@ -1527,7 +1572,14 @@ namespace WindowsFormsApp1
                         //{
                         //    pauseEvents(); textBox1.Text = ""; resumeEvents();
                         //}
+                        Visible = false;
                         hideToNICo();
+                        //隱藏表單後使瀏覽器取得焦點；以下皆未妥當
+                        //if (browsrOPMode != BrowserOPMode.appActivateByName && br.driver != null)
+                        //br.driver.Navigate().Refresh();
+                        //br.driver.Navigate().GoToUrl(br.driver.Url);
+                        //    //br.SwitchToCurrentForeActivateTab(ref textBox3);
+                        //br.driver.SwitchTo().Window(br.driver.CurrentWindowHandle);
                     }
                     this.TopMost = thisTopMost;
                     return;
@@ -1839,29 +1891,32 @@ namespace WindowsFormsApp1
                     e.Handled = true;
                     if (e.KeyCode == Keys.Left)
                     {//Ctrl  + ← Ctrl + 向左鍵
-                        if (endStr.IndexOf(textBox1.Text.Substring(s - 1, 1)) > -1) s--;
-                        isIPCharHanzi = isChineseChar(x.Substring(s - 1, 1), true) == 0 ? false : true;
-                        if (isIPCharHanzi) l = findNotChineseCharFarLength(x.Substring(0, s), false);
-                        else l = findChineseCharFarLength(x.Substring(0, s), false);
-                        if (l != -1)
+                        if (s - 1 > 0)
                         {
-                            s = s - l + 1;
-
-                            if (endStr.IndexOf(textBox1.Text.Substring(s, 1)) > -1)
+                            if (endStr.IndexOf(textBox1.Text.Substring(s - 1, 1)) > -1) s--;
+                            isIPCharHanzi = isChineseChar(x.Substring(s - 1, 1), true) == 0 ? false : true;
+                            if (isIPCharHanzi) l = findNotChineseCharFarLength(x.Substring(0, s), false);
+                            else l = findChineseCharFarLength(x.Substring(0, s), false);
+                            if (l != -1)
                             {
-                                if (textBox1.Text.Substring(s, 2) == Environment.NewLine)
-                                    s += 2;
-                                //else
-                                //s++;
+                                s = s - l + 1;
+
+                                if (endStr.IndexOf(textBox1.Text.Substring(s, 1)) > -1)
+                                {
+                                    if (textBox1.Text.Substring(s, 2) == Environment.NewLine)
+                                        s += 2;
+                                    //else
+                                    //s++;
+                                }
+                                ////if (textBox1.Text.Substring(s - 1, 2)!= "􏿽")
+                                ////{
+                                //s--;////////////////////新增以除錯的。還原「s = s - l + 1;」多加之1
+                                ////}
+                                textBox1.Select(s, 0);
+                                restoreCaretPosition(textBox1, s, 0);//textBox1.ScrollToCaret();
+                                e.Handled = true;
+                                //return;
                             }
-                            ////if (textBox1.Text.Substring(s - 1, 2)!= "􏿽")
-                            ////{
-                            //s--;////////////////////新增以除錯的。還原「s = s - l + 1;」多加之1
-                            ////}
-                            textBox1.Select(s, 0);
-                            restoreCaretPosition(textBox1, s, 0);//textBox1.ScrollToCaret();
-                            e.Handled = true;
-                            //return;
                         }
                     }
                     else
@@ -3785,8 +3840,11 @@ namespace WindowsFormsApp1
         public static extern int SendMessage(IntPtr hWnd, Int32 wMsg, bool wParam, Int32 lParam);
         private const int WM_SETREDRAW = 11;
 
+        /// <summary>
+        /// Alt + F7 (先改 Pause/Break）: 每行縮排一格後、清除其末誤標之<p>
+        /// </summary>
         private void keysSpacePreParagraphs_indent_ClearEnd＿P_Mark()
-        {//Alt + F7 (先改 Pause/Break）: 每行縮排一格後將其末誤標之<p>
+        {
             int l = textBox1.SelectionLength; int s = textBox1.SelectionStart; dontHide = true;
             if (l == 0)
             {
@@ -3795,7 +3853,7 @@ namespace WindowsFormsApp1
                     textBox1.SelectAll();
                     l = textBox1.TextLength;
                 }
-                //else { textBox1.Select(s, 1); l = 1; }                
+                //else { textBox1.Select(s, 1); l = 1; }
             }
 
             if (l == textBox1.TextLength)
@@ -3822,7 +3880,7 @@ namespace WindowsFormsApp1
                 textBox1.Select(textBox1.SelectionStart, textBox1.SelectionLength++);
                 if (textBox1.Text.IndexOf(Environment.NewLine) == -1 || textBox1.Text.IndexOf("<p>") == -1) break;
             }
-            if ("<p>".IndexOf(textBox1.SelectedText.Substring(0, 1)) > -1)
+            if (textBox1.SelectedText != string.Empty && "<p>".IndexOf(textBox1.SelectedText.Substring(0, 1)) > -1)
             {
                 while (textBox1.SelectionStart >= 1 && textBox1.SelectedText.Substring(0, 3) != "<p>")
                 {
@@ -4229,12 +4287,13 @@ namespace WindowsFormsApp1
             }
             return i;//count;
         }
+
         /// <summary>
-        /// 每頁行/段數
+        /// 每頁行/段數。初始化（歸零）值為-1
         /// </summary>
         int linesParasPerPage = -1;
         /// <summary>
-        /// 每行/段字數
+        /// 每行/段字數。初始化（歸零）值為-1
         /// </summary>
         int wordsPerLinePara = -1;
         int countNoteLen(string notePure)
@@ -5512,6 +5571,8 @@ namespace WindowsFormsApp1
             //if (normalLineParaLength < 7)
             if (normalLineParaLength < 4)
             {//如果正常漢字數小於7則不執行
+                //normalLineParaLength歸零、wordsPerLinePara歸零
+                if (keyinTextMode) { normalLineParaLength = 0; wordsPerLinePara = -1; }
                 return new int[0];
             }
 
@@ -5879,7 +5940,11 @@ namespace WindowsFormsApp1
         private void bringBackMousePosFrmCenter()
         {
             Activate(); //Application.DoEvents();
-                        //20230115 chatGPT大菩薩：Cursor back to form：
+            //if (!this.TopMost) this.TopMost = true;
+
+            // 判斷滑鼠游標是否在表單內 20230824Bing大菩薩
+            if (this.Bounds.Contains(Cursor.Position)) return;
+            //20230115 chatGPT大菩薩：Cursor back to form：
             Point formPos = new Point(this.Location.X + this.Size.Width / 2, this.Location.Y + this.Size.Height / 2);
             Cursor.Position = formPos;
             //上面這段程式碼將滑鼠游標的位置設置為表單的中心點位置。
@@ -6074,14 +6139,12 @@ namespace WindowsFormsApp1
 
             }
 
-            //Ctrl + Shift + n : 開新Form1 實例
+            //Ctrl + Shift + n 或 Ctrl + Shift + F1 或 Shift + F1 : 開新Form1 實例
             if (((m & Keys.Control) == Keys.Control && (m & Keys.Shift) == Keys.Shift && e.KeyCode == Keys.N)
                 || ((m & Keys.Shift) == Keys.Shift && e.KeyCode == Keys.F1))
             {
                 e.Handled = true;
-                Form1 formNew = new Form1();
-                formNew.Show();
-                formNew.Name = "Form" + Application.OpenForms.Count;
+                newForm1();
                 return;
             }
             //以上 Ctrl + Shift
@@ -6130,8 +6193,9 @@ namespace WindowsFormsApp1
                 }
 
                 if (e.KeyCode == Keys.O)
-                {//Alt + Shift + o ：交給《古籍酷》 OCR ，模擬使用者手動操作的功能（待測試！！！！）
+                {//Alt + Shift + o ：交給《古籍酷》 OCR ，模擬使用者手動操作的功能（測試成功！！！！）
                     if (browsrOPMode == BrowserOPMode.appActivateByName) return;
+                    if (!IsValidUrl＿ImageTextComparisonPage(textBox3.Text)) return;
                     e.Handled = true; Form1.playSound(Form1.soundLike.press);
                     toOCR(br.OCRSiteTitle.GJcool);
                     //if (browsrOPMode == BrowserOPMode.appActivateByName) return;
@@ -6163,6 +6227,15 @@ namespace WindowsFormsApp1
                     ////const string gjcool = "https://gj.cool/try_ocr";
                     ////Process.Start(gjcool);
                     //#endregion
+                    return;
+                }
+
+
+                if (e.KeyCode == Keys.V)
+                {//Alt + Shift + v ：新增一個直書的文字方塊
+                    //20230824 chatGPT大菩薩：中文文字方塊直書示例:根本就是失敗的。沒有用。沒變成直書，且亂排了一通。如果能截圖給您看，我就截給您看了。感恩感恩　南無阿彌陀佛
+                    e.Handled = true; Form1.playSound(Form1.soundLike.press);
+                    //AddVerticalTextBox();
                     return;
                 }
             }
@@ -6438,6 +6511,18 @@ namespace WindowsFormsApp1
             #endregion
         }
 
+        /// <summary>
+        /// 開啟/新增一個Form1（主表單）
+        /// </summary>
+        /// <returns></returns>
+        private static Form1 newForm1()
+        {
+            Form1 formNew = new Form1();
+            formNew.Show();
+            formNew.Name = "Form" + Application.OpenForms.Count;
+            return formNew;
+        }
+
 
         /// <summary>
         /// 執行OCR主程式
@@ -6446,7 +6531,8 @@ namespace WindowsFormsApp1
         {
             //Form1.playSound(Form1.soundLike.press);
 
-            #region 檢查是否必要 20230804Bard大菩薩：https://g.co/bard/share/9130d688e253
+            br.ActiveForm1 = this;
+            #region 檢查是否必要 20230804Bard大菩薩：https://g.co/bard/share/9130d688e253            
             string quickedit_data_textboxTxt = br.Quickedit_data_textboxTxt;
             //bool chk = false;
             //if (quickedit_data_textboxTxt.Length > 1000)
@@ -6461,7 +6547,9 @@ namespace WindowsFormsApp1
             //}
             if (CnText.HasEditedWithPunctuationMarks(ref quickedit_data_textboxTxt))
             {
-                if (DialogResult.Cancel == Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("目前頁面似乎已經整理過了，確定還要繼續嗎？"))
+                if (DialogResult.Cancel == Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("目前頁面似乎已經整理過了，確定還要繼續嗎？" +
+                      Environment.NewLine + Environment.NewLine + "================" + Environment.NewLine +
+                    quickedit_data_textboxTxt))
                 {
                     undoRecord();
                     textBox1.Text = quickedit_data_textboxTxt;
@@ -6795,7 +6883,14 @@ namespace WindowsFormsApp1
                         break;
                     //Selenium New Chrome瀏覽器實例模式：
                     case BrowserOPMode.seleniumNew:
-                        quickedit_data_textboxtxt = br.Quickedit_data_textboxTxt;
+                        try
+                        {
+                            quickedit_data_textboxtxt = br.Quickedit_data_textboxTxt;
+                        }
+                        catch (Exception ex)
+                        {
+                            Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
+                        }
                         //if(!keyinText&& autoPastetoQuickEdit) Activate();
                         break;
                     case BrowserOPMode.seleniumGet:
@@ -6839,8 +6934,11 @@ namespace WindowsFormsApp1
                                     //// 在網頁元素載入完畢後才能讀取其.Text屬性值，存入剪貼簿,前置空格會被削去，當是Selenium實作時的問題。
                                     //string xq = quick_edit_box.Text;
                                     //Clipboard.SetText(xq);
-                                    quick_edit_box.SendKeys(OpenQA.Selenium.Keys.LeftControl + "a");
-                                    quick_edit_box.SendKeys(OpenQA.Selenium.Keys.LeftControl + "c");
+                                    if (quick_edit_box != null)
+                                    {
+                                        quick_edit_box.SendKeys(OpenQA.Selenium.Keys.LeftControl + "a");
+                                        quick_edit_box.SendKeys(OpenQA.Selenium.Keys.LeftControl + "c");
+                                    }
                                     ////Task.Delay(-1);
                                     //Clipboard.SetText(quick_edit_box.Text);
 
@@ -7486,7 +7584,7 @@ namespace WindowsFormsApp1
             if (url == "") return url;
             //再回到正在編輯的本頁，準備貼入
 
-            if (br.getDriverUrl != textBox3.Text)
+            if (br.GetDriverUrl != textBox3.Text)
             {
                 bool found = false;
                 if (tabWindowHandles.Count < br.driver.WindowHandles.Count) tabWindowHandles = br.driver.WindowHandles;//避免分頁視窗被關閉了。
@@ -8081,6 +8179,9 @@ namespace WindowsFormsApp1
             }
         }
 
+        /// <summary>
+        /// textBox1還原記錄儲存器
+        /// </summary>
         List<string> undoTextBox1Text = new List<string>();
         private void undoTextValueChanged(int s, int l)
         {
@@ -8850,12 +8951,17 @@ namespace WindowsFormsApp1
         /// <summary>
         /// 記下更動前的文本以利還原
         /// 若textBox1是空字串、無內容則不記錄。
+        /// <param name="undoText">若另有指定要備份的還原內容，則指定此引數。</param>
         /// </summary>
-        private void undoRecord()
+        private void undoRecord(string undoText = "")
         {
             if (stopUndoRec) return; if (textBox1.TextLength == 0) return;
             selStart = textBox1.SelectionStart; selLength = textBox1.SelectionLength;
-            undoTextBox1Text.Add(textBox1.Text);
+
+            if (undoText == string.Empty)
+                undoTextBox1Text.Add(textBox1.Text);
+            else
+                undoTextBox1Text.Add(undoText);
             if (undoTimes != 0) undoTimes = 0;
             if (undoTextBox1Text.Count > 50)//還原上限定為50個
             {
@@ -9129,10 +9235,15 @@ namespace WindowsFormsApp1
             //重設判斷不正常行長度的變數。
             int bookID = GetBookIDFromTextBox3();
             if (previousBookID != bookID || url == "")
-            { normalLineParaLength = 0; previousBookID = bookID; }
+            { //normalLineParaLength = 0;
+                resetBooksPagesFeatures();
+                previousBookID = bookID;
+            }
 
             textBox3.Tag = textBox3Text;
-            if (keyinTextMode) return;
+
+            //if (keyinTextMode) return;
+
             if (url == "")
             {
                 resetBooksPagesFeatures(); previousBookID = 0;
@@ -9198,7 +9309,8 @@ namespace WindowsFormsApp1
             wordsPerLinePara = -1;//每行/段字數 reset
             pageTextEndPosition = 0; pageEndText10 = "";
             lines_perPage = 0;
-            normalLineParaLength = 0;
+            //normalLineParaLength = 0;
+            normalLineParaLength = 0; wordsPerLinePara = -1;
             //resetPageTextEndPositionPasteToCText();//不知何時誤貼的，到無問題時，即可刪去
             TopLine = false; Indents = true;
         }
@@ -9249,22 +9361,25 @@ namespace WindowsFormsApp1
         /// </summary>
         void closeChromeTab()
         {
-            switch (browsrOPMode)
-            {
-                case BrowserOPMode.appActivateByName:
-                    appActivateByName();
-                    SendKeys.Send("^{F4}");//關閉頁籤
-                    break;
-                case BrowserOPMode.seleniumNew:
-                    if (br.driver != null)
-                    {
-                        br.GoToCurrentUserActivateTab();
-                        br.driver.Close();
-                    }
-                    break;
-                case BrowserOPMode.seleniumGet:
-                    break;
-            }
+            appActivateByName();
+            SendKeys.Send("^{F4}");//關閉頁籤
+            //switch (browsrOPMode)
+            //{
+            //    case BrowserOPMode.appActivateByName:
+            //        appActivateByName();
+            //        SendKeys.Send("^{F4}");//關閉頁籤
+            //        break;
+            //    case BrowserOPMode.seleniumNew:
+            //        if (br.driver != null && Active)//表單不在最前面時也會觸發
+            //        {
+            //            //br.GoToCurrentUserActivateTab();
+            //            //br.driver.Navigate().Refresh();
+            //            br.driver.Close();
+            //        }
+            //        break;
+            //    case BrowserOPMode.seleniumGet:
+            //        break;
+            //}
             bool autoPastetoQuickEditMemo = autoPastetoQuickEdit;
             autoPastetoQuickEdit = false;
             this.Activate();
@@ -9618,6 +9733,52 @@ namespace WindowsFormsApp1
             //const string cntStr = @"Provider=Microsoft.ACE.OLEDB.12.0;Data Source=D:\千慮一得齋\書籍資料\開發_千慮一得齋.mdb";
             runWordMacro("中國哲學書電子化計劃.mdb開發_千慮一得齋Export");
         }
+        #endregion
+
+        #region 直書文字方塊 20230824 chatGPT大菩薩 中文文字方塊直書示例:根本就是失敗的。沒有用。沒變成直書，且亂排了一通。
+
+        internal void AddVerticalTextBox()
+        {
+            InitializeVerticalTextBox();
+        }
+        private void InitializeVerticalTextBox()
+        {
+            TextBox verticalTextBox = new TextBox();
+            verticalTextBox.Multiline = true;
+            verticalTextBox.ScrollBars = ScrollBars.Vertical;
+            verticalTextBox.Width = 100;
+            verticalTextBox.Height = 200;
+            verticalTextBox.Location = new Point(50, 50);
+            verticalTextBox.Paint += VerticalTextBox_Paint;
+            // 設定文字方向為垂直
+            verticalTextBox.Text = "感恩感恩\n南無阿彌陀佛";
+            verticalTextBox.TextAlign = HorizontalAlignment.Center;
+            verticalTextBox.RightToLeft = RightToLeft.Yes;
+            Form1 form1 = newForm1();
+            form1.Controls.Add(verticalTextBox);
+            //this.Controls[this.Controls.Count - 1].Visible = true;
+            form1.Controls["textBox1"].Visible = false;
+
+        }
+
+        private void VerticalTextBox_Paint(object sender, PaintEventArgs e)
+        {
+            TextBox textBox = sender as TextBox;
+            string text = textBox.Text;
+
+            Font font = new Font("Arial", 12);
+            Brush brush = Brushes.Black;
+            float x = 0;
+            float y = 0;
+            float lineHeight = font.GetHeight();
+
+            foreach (char c in text)
+            {
+                e.Graphics.DrawString(c.ToString(), font, brush, x, y);
+                y += lineHeight;
+            }
+        }
+
         #endregion
 
     }
