@@ -292,7 +292,7 @@ namespace WindowsFormsApp1
                         if (item.Focused) { focused = true; break; }
                     }
 
-                    if (focused) return focused;
+                    if (focused) return focused & this.Focused;
                     else return this.Focused;//textBox1.Focused=true時這個會是false
                 }
                 else
@@ -451,7 +451,7 @@ namespace WindowsFormsApp1
                                     //全選文字方塊內容以備貼入
                                     ie.SendKeys(OpenQA.Selenium.Keys.Control + "a");
                                 }
-                                string text = ie.Text ?? "";
+                                string text = br.CopyQuickedit_data_textboxText();//ie.Text ?? "";
                                 CnText.BooksPunctuation(ref text);
                                 textBox1.Text = text;
                                 Clipboard.SetText(text);
@@ -461,6 +461,7 @@ namespace WindowsFormsApp1
                                 availableInUseBothKeysMouse();
                             }
                             //避免剪貼簿內還殘留上一次用過的網址
+                            xClp = Clipboard.GetText();
                             if (xClp.IndexOf("edit") > -1 && xClp.IndexOf("&page") > -1) Clipboard.Clear();
                         }
 
@@ -479,10 +480,14 @@ namespace WindowsFormsApp1
                         if (brUrl.IndexOf("edit") == -1)
                         {
                             brUrl = br.GetQuickeditUrl();
-                            br.driver.Navigate().GoToUrl(brUrl);
+                            if (brUrl != string.Empty)
+                                br.driver.Navigate().GoToUrl(brUrl);
                         }
-                        if (textBox3.Text != brUrl) textBox3.Text = brUrl;
-                        toOCR(br.OCRSiteTitle.GJcool);
+                        if (brUrl != string.Empty)
+                        {
+                            if (textBox3.Text != brUrl) textBox3.Text = brUrl;
+                            toOCR(br.OCRSiteTitle.GJcool);
+                        }
                     }
                 }
             }
@@ -6063,8 +6068,10 @@ namespace WindowsFormsApp1
             if (x.Substring(0, 4) == "http")
                 if (x.IndexOf("ctext.org") > -1)
                 {
-                    textBox3.Text = x;
-                    SystemSounds.Beep.Play();
+                    if (textBox3.Text != x)
+                        textBox3.Text = x;
+                    //SystemSounds.Beep.Play();
+                    Form1.playSound(Form1.soundLike.processing);
                     //if (browsrOPMode != BrowserOPMode.appActivateByName) br.GoToUrlandActivate(textBox3.Text);
                     textBox1.Focus();
                 }
@@ -6906,7 +6913,7 @@ namespace WindowsFormsApp1
                     if (modifierKeys == Keys.Shift && !stayInHere)
                         Form1.playSound(Form1.soundLike.press);
 
-                    OpenQA.Selenium.IWebElement quick_edit_box;
+                    //OpenQA.Selenium.IWebElement quick_edit_box;
                     switch (browsrOPMode)
                     {
                         case BrowserOPMode.appActivateByName:
@@ -6922,26 +6929,27 @@ namespace WindowsFormsApp1
                                 br.driver = br.driver ?? br.driverNew();
                                 try
                                 {//這裡需要參照元件來操作就不宜跑線程了！故此區塊最後的剪貼簿，要求須是單線程者，蓋因剪貼簿須獨占式使用故也20230111                                
-                                    quick_edit_box = br.waitFindWebElementByName_ToBeClickable("data", br.WebDriverWaitTimeSpan);//br.driver.FindElement(OpenQA.Selenium.By.Name("data"));
-                                                                                                                                 ////chatGPT：
-                                                                                                                                 //// 等待網頁元素出現，最多等待 2 秒
-                                                                                                                                 //OpenQA.Selenium.Support.UI.WebDriverWait wait =
-                                                                                                                                 //    new OpenQA.Selenium.Support.UI.WebDriverWait
-                                                                                                                                 //    (br.driver, TimeSpan.FromSeconds(2));
-                                                                                                                                 ////安裝了 Selenium.WebDriver 套件，才說沒有「ExpectedConditions」，然後照Visual Studio 2022的改正建議又用NuGet 安裝了 Selenium.Suport 套件，也自動「 using OpenQA.Selenium.Support.UI;」了，末學自己還用物件瀏覽器找過了 「OpenQA.Selenium.Support.UI」，可就是沒有「ExpectedConditions」靜態類別可用，即使官方文件也說有 ： https://www.selenium.dev/selenium/docs/api/dotnet/html/T_OpenQA_Selenium_Support_UI_ExpectedConditions.htm 20230109 未知何故 阿彌陀佛
-                                                                                                                                 //wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(quick_edit_box));
+                                    //quick_edit_box = br.waitFindWebElementByName_ToBeClickable("data", br.WebDriverWaitTimeSpan);//br.driver.FindElement(OpenQA.Selenium.By.Name("data"));
+                                    //                                                                                             ////chatGPT：
+                                    //                                                                                             //// 等待網頁元素出現，最多等待 2 秒
+                                    //                                                                                             //OpenQA.Selenium.Support.UI.WebDriverWait wait =
+                                    //                                                                                             //    new OpenQA.Selenium.Support.UI.WebDriverWait
+                                    //                                                                                             //    (br.driver, TimeSpan.FromSeconds(2));
+                                    //                                                                                             ////安裝了 Selenium.WebDriver 套件，才說沒有「ExpectedConditions」，然後照Visual Studio 2022的改正建議又用NuGet 安裝了 Selenium.Suport 套件，也自動「 using OpenQA.Selenium.Support.UI;」了，末學自己還用物件瀏覽器找過了 「OpenQA.Selenium.Support.UI」，可就是沒有「ExpectedConditions」靜態類別可用，即使官方文件也說有 ： https://www.selenium.dev/selenium/docs/api/dotnet/html/T_OpenQA_Selenium_Support_UI_ExpectedConditions.htm 20230109 未知何故 阿彌陀佛
+                                    //                                                                                             //wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(quick_edit_box));
 
-                                    //// 在網頁元素載入完畢後才能讀取其.Text屬性值，存入剪貼簿,前置空格會被削去，當是Selenium實作時的問題。
-                                    //string xq = quick_edit_box.Text;
-                                    //Clipboard.SetText(xq);
-                                    if (quick_edit_box != null)
-                                    {
-                                        quick_edit_box.SendKeys(OpenQA.Selenium.Keys.LeftControl + "a");
-                                        quick_edit_box.SendKeys(OpenQA.Selenium.Keys.LeftControl + "c");
-                                    }
-                                    ////Task.Delay(-1);
-                                    //Clipboard.SetText(quick_edit_box.Text);
-
+                                    ////// 在網頁元素載入完畢後才能讀取其.Text屬性值，存入剪貼簿,前置空格會被削去，當是Selenium實作時的問題。
+                                    ////string xq = quick_edit_box.Text;
+                                    ////Clipboard.SetText(xq);
+                                    //if (quick_edit_box != null)
+                                    //{
+                                    //    //用Text屬性（quick_edit_box.Text）取得的值若前有全形空格會被清除
+                                    //    quick_edit_box.SendKeys(OpenQA.Selenium.Keys.LeftControl + "a");
+                                    //    quick_edit_box.SendKeys(OpenQA.Selenium.Keys.LeftControl + "c");
+                                    //}
+                                    //////Task.Delay(-1);
+                                    ////Clipboard.SetText(quick_edit_box.Text);
+                                    br.CopyQuickedit_data_textboxText();
                                 }
                                 catch (Exception)
                                 {

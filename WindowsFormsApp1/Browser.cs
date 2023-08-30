@@ -262,6 +262,23 @@ namespace TextForCtext
                     return string.Empty;
             }
         }
+        /// <summary>
+        /// 當Quickedit_data_textbox的內容是以全形空格開頭的會被清除，類似Trim的功能，故須用複製文本的方式取得正確的值
+        /// 解決Selenium在[簡單修改模式]文字方塊內容若以全形空格為開頭的，會被截去的方案 20230829
+        /// </summary>
+        /// <returns>回傳所複製的Quickedit_data_textbox文本</returns>
+        internal static string CopyQuickedit_data_textboxText()
+        {
+            IWebElement ie = Quickedit_data_textbox;
+            if (ie != null)
+            {
+                ie.SendKeys(OpenQA.Selenium.Keys.Control + "a");
+                ie.SendKeys(OpenQA.Selenium.Keys.Control + "c");
+                return Clipboard.GetText();
+            }
+            else
+                return string.Empty;
+        }
         internal static IWebElement waitFindWebElementByName_ToBeClickable(string name, double second,
             IWebDriver drver = null)
         {
