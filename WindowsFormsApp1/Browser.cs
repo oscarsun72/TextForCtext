@@ -309,14 +309,41 @@ namespace TextForCtext
                             }
                         }
                         break;
+                    case -2147467261:
+                        if (ex.Message.IndexOf("並未將物件參考設定為物件的執行個體。") > -1)
+                            return null;
+                        else
+                        {
+                            Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
+                            return null;
+                        }
                     default:
-                        break;
+                        Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
+                        return null;
                 }
             }
             if (e != null)
             {
-                WebDriverWait wait = new WebDriverWait((driver ?? drver), TimeSpan.FromSeconds(second));
-                wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(e));
+                try
+                {
+                    WebDriverWait wait = new WebDriverWait((driver ?? drver), TimeSpan.FromSeconds(second));
+                    wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(e));
+                }
+                catch (Exception ex)
+                {
+                    switch (ex.HResult)
+                    {
+                        case -2147467261:
+                            if (ex.Message.IndexOf("並未將物件參考設定為物件的執行個體。") > -1)
+                            {
+                                return null;
+                            }
+                            break;
+                        default:
+                            Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
+                            break;
+                    }
+                }
             }
             return e;
         }
@@ -361,8 +388,17 @@ namespace TextForCtext
                 {
                     case -2146233088://"no such window: target window already closed\nfrom unknown error: web view not found\n  (Session info: chrome=109.0.5414.120)"
                         return null;
+                    case -2147467261:
+                        if (ex.Message.IndexOf("並未將物件參考設定為物件的執行個體。") > -1)
+                            return null;
+                        else
+                        {
+                            Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
+                            return null;
+                        }
                     default:
-                        throw;
+                        Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
+                        return null;
                 }
             }
         }
@@ -955,6 +991,14 @@ namespace TextForCtext
             IWebElement ie = GetQuickeditIWebElement();
             if (ie != null) url = ie.GetAttribute("href");
             return url;
+            /*
+             OpenQA.Selenium.IWebElement quickEditLink = br.
+                 waitFindWebElementBySelector_ToBeClickable("#quickedit > a");
+                    if (quickEditLink != null)
+                    {
+                        quickEditLinkUrl = quickEditLink.GetAttribute("href");
+                    }
+             */
         }
 
         internal static IWebElement GetQuickeditIWebElement()

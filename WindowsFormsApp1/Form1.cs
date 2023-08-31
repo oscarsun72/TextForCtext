@@ -486,6 +486,7 @@ namespace WindowsFormsApp1
                         if (brUrl != string.Empty)
                         {
                             if (textBox3.Text != brUrl) textBox3.Text = brUrl;
+                            Form1.playSound(Form1.soundLike.press);
                             toOCR(br.OCRSiteTitle.GJcool);
                         }
                     }
@@ -664,12 +665,13 @@ namespace WindowsFormsApp1
                     }
                     if (quickEditLinkUrl.IndexOf("#editor") == -1 && quickEditLinkUrl.IndexOf("&page=") > -1)
                     {
-                        OpenQA.Selenium.IWebElement quickEditLink = br.
-                            waitFindWebElementBySelector_ToBeClickable("#quickedit > a");
-                        if (quickEditLink != null)
-                        {
-                            quickEditLinkUrl = quickEditLink.GetAttribute("href");
-                        }
+                        //OpenQA.Selenium.IWebElement quickEditLink = br.
+                        //    waitFindWebElementBySelector_ToBeClickable("#quickedit > a");
+                        //if (quickEditLink != null)
+                        //{
+                        //    quickEditLinkUrl = quickEditLink.GetAttribute("href");
+                        //}
+                        quickEditLinkUrl = br.GetQuickeditUrl();
                     }
                     if (quickEditLinkUrl.IndexOf("#editor") > -1)
                         Clipboard.SetText(quickEditLinkUrl);
@@ -1563,6 +1565,8 @@ namespace WindowsFormsApp1
                 {// Ctrl + Shift + + 
                     e.Handled = true; bool thisTopMost = this.TopMost;
                     this.TopMost = false;
+                    string urlActive = br.ActiveTabURL_Ctext_Edit;
+                    if (textBox3.Text == "" && IsValidUrl＿keyDownCtrlAdd(urlActive)) textBox3.Text = urlActive;
                     if (browsrOPMode != BrowserOPMode.appActivateByName && br.driver != null)
                     {
                         br.SwitchToCurrentForeActivateTab(ref textBox3);
@@ -5108,6 +5112,7 @@ namespace WindowsFormsApp1
                 int[] chk = checkAbnormalLinePara(xCopy);
                 if (chk.Length > 0)
                 {
+                    bringBackMousePosFrmCenter();
                     if (MessageBox.Show("there is abnormal LinePara Length , check it now?" +
                         Environment.NewLine + Environment.NewLine +
                         "normal= " + chk[2] + "\tabnormal= " + chk[3], "",
@@ -6071,7 +6076,8 @@ namespace WindowsFormsApp1
                     if (textBox3.Text != x)
                         textBox3.Text = x;
                     //SystemSounds.Beep.Play();
-                    Form1.playSound(Form1.soundLike.processing);
+                    //Form1.playSound(Form1.soundLike.processing);
+                    Form1.playSound(Form1.soundLike.done); if (TopMost) TopMost = false;
                     //if (browsrOPMode != BrowserOPMode.appActivateByName) br.GoToUrlandActivate(textBox3.Text);
                     textBox1.Focus();
                 }
@@ -6559,7 +6565,7 @@ namespace WindowsFormsApp1
                     quickedit_data_textboxTxt))
                 {
                     undoRecord();
-                    textBox1.Text = quickedit_data_textboxTxt;
+                    textBox1.Text = br.CopyQuickedit_data_textboxText();//quickedit_data_textboxTxt;
                     if (!Active) availableInUseBothKeysMouse();
                     return;
                 }
@@ -9565,11 +9571,15 @@ namespace WindowsFormsApp1
 
         internal static void MessageBoxShowOKExclamationDefaultDesktopOnly(string text, string caption = "")
         {
+            Form1 form1 = Application.OpenForms[0] as Form1;
+            form1.bringBackMousePosFrmCenter();
             MessageBox.Show(text, caption, MessageBoxButtons.OK
                 , MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
         }
         internal static DialogResult MessageBoxShowOKCancelExclamationDefaultDesktopOnly(string text, string caption = "")
         {
+            Form1 form1 = Application.OpenForms[0] as Form1;
+            form1.bringBackMousePosFrmCenter();
             return MessageBox.Show(text, caption, MessageBoxButtons.OKCancel
                 , MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
         }
