@@ -602,6 +602,7 @@ namespace TextForCtext
 
                 if (!chromedriversPID.Contains(driverService.ProcessId)) chromedriversPID.Add(driverService.ProcessId);
                 //配置quickedit_data_textbox以備用
+                driver = cDrv;// quickedit_data_textboxSetting 方法堆疊（stack）中要用到driver參考
                 quickedit_data_textboxSetting(url, null, cDrv);
                 //IWebElement clk  = cDrv.FindElement(selm.By.Id("logininfo")); clk.Click();
                 //cDrv.FindElement(selm.By.Id("logininfo")).Click();
@@ -614,7 +615,7 @@ namespace TextForCtext
                 //如果是手動輸入模式且在簡單編輯頁面，則將其Quick edit值傳到textBox1
                 if (ActiveForm1.KeyinTextMode && isQuickEditUrl(ActiveForm1.textBox3Text ?? ""))
                 {
-                    driver = cDrv;
+                    //driver = cDrv;
                     ActiveForm1.Controls["textBox1"].Text = waitFindWebElementByName_ToBeClickable("data", _webDriverWaitTimSpan).Text;
                 }
 
@@ -936,7 +937,7 @@ namespace TextForCtext
         }
 
         /// <summary>
-        /// 取得現行Ctext 編輯時前景之分頁網址。尤其是為使用者手動切換者；若找不到則傳回""
+        /// 取得現行Ctext 編輯時前景之分頁網址。尤其是為使用者手動切換者；若找不到則傳回""（空字串）
         /// </summary>
         public static string ActiveTabURL_Ctext_Edit
         {
@@ -944,20 +945,33 @@ namespace TextForCtext
             {
                 //string url = getUrl(ControlType.Edit).Trim();
                 string url = getUrlFirst_Ctext_Edit(ControlType.Edit).Trim();
-                if (url == "") url = getUrl(ControlType.Edit).Trim();
+                if (url == "")
+                {
+                    if (Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("目前作用中的分頁並非有效的圖文對照頁面，是否要讓程式繼續比對？") == DialogResult.OK)
+                    {
+                        url = getUrl(ControlType.Edit).Trim();
+                    }
+                }
                 if (url != "") url = url.StartsWith("https://") ? url : "https://" + url;
                 return url;
             }
         }
         /// <summary>
-        /// 取得現行Ctext 編輯時前景之分頁網址（須含有"#editor"尾綴）。尤其是為使用者手動切換者；若找不到則傳回""
+        /// 取得現行Ctext 編輯時前景之分頁網址（須含有"#editor"尾綴）。尤其是為使用者手動切換者；若找不到則傳回""（空字串）
         /// </summary>
         public static string ActiveTabURL_Ctext_Edit_includingEditorStr
         {
             get
             {
                 string url = getUrlFirst_Ctext_Edit(ControlType.Edit, true).Trim();
-                if (url == "") url = getUrl(ControlType.Edit).Trim();
+                if (url == "")
+                {
+                    if (Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("目前作用中的分頁並非有效的圖文對照頁面，是否要讓程式繼續比對？") == DialogResult.OK)
+                    {
+
+                        url = getUrl(ControlType.Edit).Trim();
+                    }
+                }
                 if (url != "") url = url.StartsWith("https://") ? url : "https://" + url;
                 return url;
             }
@@ -1178,12 +1192,18 @@ namespace TextForCtext
             return urls;
         }
 
-        internal static void SwitchToCurrentForeActivateTab(ref TextBox textBox3)
+        /// <summary>
+        /// 切換到目前現在正在作用中的（程式抓到最前端的）分頁
+        /// </summary>
+        /// <param name="textBox3"></param>
+        /// <param name="urlActiveTab"></param>
+        /// <returns>若切換失敗，即回傳false</returns>
+        internal static bool SwitchToCurrentForeActivateTab(ref TextBox textBox3, string urlActiveTab = "")
         {
-            string url = "", urlActiveTab = "";
+            string url = "";
             try
             {
-                url = driver.Url; urlActiveTab = ActiveTabURL_Ctext_Edit;
+                url = driver.Url; urlActiveTab = urlActiveTab == "" ? ActiveTabURL_Ctext_Edit : urlActiveTab;
             }
             catch (Exception ex)
             {
@@ -1204,16 +1224,26 @@ namespace TextForCtext
                 }
             }
 
-            if (url != urlActiveTab)//如果現行的頁面不同於程式所在之頁面
-                GoToCurrentUserActivateTab(urlActiveTab);//那麼就將程式所在之頁面轉到、設定為現行的前景頁面
-            if (textBox3.Text != "" && textBox3.Text != urlActiveTab) textBox3.Text = urlActiveTab;//如果textBox3非空值且與現行頁面網址不合，亦轉設為現行前景頁面之網址}
+            if (url != urlActiveTab//如果現行的頁面不同於程式所在之頁面
+                && url.Length > 8 && url.Substring(8) != urlActiveTab)//會有省略「https://」者
+            {
+                LastValidWindow = driver.CurrentWindowHandle;
+                if (GoToCurrentUserActivateTab(urlActiveTab) == string.Empty)//那麼就將程式所在之頁面轉到、設定為現行的前景頁面
+                {
+                    driver.SwitchTo().Window(LastValidWindow);
+                    Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("程式找到的作用中的分頁並不在chromedriver中，請手動檢查，是否是另外開了一個Chrome瀏覽器實例。");
+                    return false;
+                }
+            }
+            if (textBox3.Text != "" && textBox3.Text != urlActiveTab && urlActiveTab.StartsWith("http")) textBox3.Text = urlActiveTab;//如果textBox3非空值且與現行頁面網址不合，亦轉設為現行前景頁面之網址}
+            return true;
         }
 
         /// <summary>
         /// 將程式所在頁面轉到現行前景的分頁頁面
         /// </summary>
         /// <param name="urlActiveTab">若已取得現行前景分頁頁面之網址則作此引數傳入，免得再取一次，徒耗資源，減損效能</param>
-        /// <returns>傳回目前作用中的分頁頁籤網址字串值</returns>
+        /// <returns>傳回目前作用中的分頁頁籤網址字串值；如果無匹配者，即網址不存在於目前的chromedriver中則傳回空字串""</returns>
         internal static string GoToCurrentUserActivateTab(string urlActiveTab = "")
         {
             if (urlActiveTab == "") urlActiveTab = ActiveTabURL_Ctext_Edit;
@@ -1282,14 +1312,16 @@ namespace TextForCtext
                 url = url.IndexOf("#") == -1 ? url : url.Substring(0, url.IndexOf("#"));
                 if (urlActiveTab != url)
                 {
+                    bool found = false;
                     //foreach (var item in driver.WindowHandles)
                     //{
                     for (int i = driver.WindowHandles.Count - 1; i > -1; i--)
                     {
                         driver.SwitchTo().Window(driver.WindowHandles[i]);
                         url = driver.Url; url = url.IndexOf("#") == -1 ? url : url.Substring(0, url.IndexOf("#"));
-                        if (urlActiveTab == url) break;
+                        if (urlActiveTab == url) { found = true; break; }
                     }
+                    if (!found) return string.Empty;
                 }
             }
             if (url == "" && urlActiveTab == "")

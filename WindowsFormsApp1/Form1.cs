@@ -452,9 +452,10 @@ namespace WindowsFormsApp1
                                     ie.SendKeys(OpenQA.Selenium.Keys.Control + "a");
                                 }
                                 string text = br.CopyQuickedit_data_textboxText();//ie.Text ?? "";
-                                CnText.BooksPunctuation(ref text);
+                                CnText.BooksPunctuation(ref text, false);
                                 textBox1.Text = text;
-                                Clipboard.SetText(text);
+                                if (Clipboard.GetText() != text)//CopyQuickedit_data_textboxText已用到等價 SetText 的方法了
+                                    Clipboard.SetText(text);
                             }
                             if (!Active)
                             {
@@ -1566,10 +1567,15 @@ namespace WindowsFormsApp1
                     e.Handled = true; bool thisTopMost = this.TopMost;
                     this.TopMost = false;
                     string urlActive = br.ActiveTabURL_Ctext_Edit;
-                    if (textBox3.Text == "" && IsValidUrl＿keyDownCtrlAdd(urlActive)) textBox3.Text = urlActive;
-                    if (browsrOPMode != BrowserOPMode.appActivateByName && br.driver != null)
+                    if (textBox3.Text == "" && IsValidUrl＿keyDownCtrlAdd(urlActive))
                     {
-                        br.SwitchToCurrentForeActivateTab(ref textBox3);
+                        playSound(soundLike.done);
+                        textBox3.Text = urlActive;
+                    }
+                    if (browsrOPMode != BrowserOPMode.appActivateByName && br.driver != null
+                        && textBox3.Text!= urlActive)
+                    {
+                        br.SwitchToCurrentForeActivateTab(ref textBox3, urlActive);
                     }
                     if (this.TopMost) this.TopMost = false;
                     if (keyDownCtrlAdd(true))
@@ -2411,7 +2417,7 @@ namespace WindowsFormsApp1
                     e.Handled = true;
                     string clpTxt = Clipboard.GetText();
                     if (keyinTextMode && clpTxt != ClpTxtBefore)// &&clpTxt.IndexOf("《") == -1 && clpTxt.IndexOf("〈") == -1 && clpTxt.IndexOf("·") == -1)//之前是沒有優化 booksPunctuation 才需要避免已經標點過的又標，現在有正則表達式把關，就沒有這問題了。感恩感恩　讚歎讚歎　chatGPT大菩薩+Bing大菩薩 南無阿彌陀佛
-                        textBox1.Text = CnText.BooksPunctuation(ref clpTxt);
+                        textBox1.Text = CnText.BooksPunctuation(ref clpTxt, false);
                     else textBox1.Text = clpTxt;
                     dragDrop = false;
                     return;
@@ -2453,16 +2459,8 @@ namespace WindowsFormsApp1
 
                 if (e.KeyCode == Keys.Insert)
                 {
-                    if (insertMode)
-                    {
-                        insertMode = false; textBox1.Font = new Font(textBox1.Font.FontFamily, textBox1.Font.Size, FontStyle.Bold);
-                        Caret_Shown_OverwriteMode(textBox1);
-                    }
-                    else
-                    {
-                        insertMode = true; textBox1.Font = new Font(textBox1.Font.FontFamily, textBox1.Font.Size, FontStyle.Regular);
-                        Caret_Shown(textBox1);
-                    }
+                    e.Handled = true;
+                    InserModeSwitcher();
                     return;
                 }
                 if (e.KeyCode == Keys.F1 || e.KeyCode == Keys.Pause)//暫時取消，釋放 F1、 Pause 鍵給 Alt + Shift + 2 、Alt + F7用
@@ -2554,6 +2552,26 @@ namespace WindowsFormsApp1
                 }
             }//以上按下單一鍵
             #endregion
+        }
+
+
+        /// <summary>
+        /// 切換「插入」輸入模式與「取代」輸入模式
+        /// </summary>
+        internal void InserModeSwitcher()
+        {
+            if (insertMode)
+            {
+                insertMode = false;
+                textBox1.Font = new Font(textBox1.Font.FontFamily, textBox1.Font.Size, FontStyle.Bold);
+                Caret_Shown_OverwriteMode(textBox1);
+            }
+            else
+            {
+                insertMode = true;
+                textBox1.Font = new Font(textBox1.Font.FontFamily, textBox1.Font.Size, FontStyle.Regular);
+                Caret_Shown(textBox1);
+            }
         }
 
         internal bool examSeledWord(out string wordtoChk)
@@ -6649,7 +6667,7 @@ namespace WindowsFormsApp1
                 //saveText();
                 //清除英數字（OCR辨識誤讀者）                //加上書名號篇名號
                 undoRecord();//以便還原
-                textBox1.Text = CnText.BooksPunctuation(ref CnText.ClearOthers_ExceptUnicodeCharacters(ref x));
+                textBox1.Text = CnText.BooksPunctuation(ref CnText.ClearOthers_ExceptUnicodeCharacters(ref x), false);
                 //textBox1.Text = CnText.BooksPunctuation(ref CnText.ClearLettersAndDigits_UseUnicodeCategory(ref x));//清不掉「-」
                 //textBox1.Text = CnText.BooksPunctuation(ref CnText.ClearLettersAndDigits(ref x));
 
@@ -6985,7 +7003,7 @@ namespace WindowsFormsApp1
                         Application.DoEvents();
                         //設定textbox1的內容以備編輯
                         string nextpagetextBox1Text_Default = Clipboard.GetText();
-                        textBox1.Text = CnText.BooksPunctuation(ref nextpagetextBox1Text_Default);// + Environment.NewLine + Environment.NewLine + Environment.NewLine + textBox1.Text;                    
+                        textBox1.Text = CnText.BooksPunctuation(ref nextpagetextBox1Text_Default, false);// + Environment.NewLine + Environment.NewLine + Environment.NewLine + textBox1.Text;                    
                     }
                 }//end if (keyinTextMode)
 
@@ -8164,27 +8182,37 @@ namespace WindowsFormsApp1
                                     });
                                 }
                             }
-                            catch (Exception)
+                            catch (Exception ex1)
                             {
-                                try
+                                switch (ex1.HResult)
                                 {
-                                    br.driver = null;
-                                    br.driver = br.driverNew(); goto retry;
+                                    case -2146233088:
+                                        if (ex1.Message.IndexOf("no such window: target window already closed") > -1)
+                                        { br.GoToCurrentUserActivateTab(); goto retry; }
+                                        break;
+                                    default:
+                                        try
+                                        {
+                                            br.driver = null;
+                                            br.driver = br.driverNew(); goto retry;
+                                        }
+                                        catch (Exception ex)
+                                        {
+                                            switch (ex.HResult)
+                                            {
+                                                case -2146233088://"no such window: target window already closed
+                                                    if (ex.Message.IndexOf("no such window") > -1)
+                                                        break;
+                                                    break;
+                                                default:
+                                                    Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
+                                                    Debugger.Break();
+                                                    break;
+                                            }
+                                        }
+                                        break;
                                 }
-                                catch (Exception ex)
-                                {
-                                    switch (ex.HResult)
-                                    {
-                                        case -2146233088://"no such window: target window already closed
-                                            if (ex.Message.IndexOf("no such window") > -1)
-                                                break;
-                                            break;
-                                        default:
-                                            Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
-                                            Debugger.Break();
-                                            break;
-                                    }
-                                }
+
                             }
                         }
                     }
@@ -8348,7 +8376,7 @@ namespace WindowsFormsApp1
                                                  ////只要剪貼簿裡的內容合於以下條件
                                                  //if (ClpTxtBefore != clpTxt && textBox1.Text == "" && clpTxt.IndexOf("http") == -1 && clpTxt.IndexOf("<scanb") == -1)
                                                  //{
-                        textBox1.Text = CnText.BooksPunctuation(ref nowClpTxt);
+                        textBox1.Text = CnText.BooksPunctuation(ref nowClpTxt, false);
                         //return;
                         //}
                         //插入點游標置於頁首
@@ -8906,11 +8934,12 @@ namespace WindowsFormsApp1
              * 在这里，我们使用 Regex.Replace 方法将匹配正则表达式模式 [《〈] 的所有字符替换为空字符串。此模式匹配任何包含 "《" 或 "〈" 的字符。
              * */
             string regexPattern = "[《〈]", omitSymbols = "●＝{}□■<>*" + Environment.NewLine;//輸入缺字構字式●＝＝、及注文標記符{{}}、及標題星號*時不取代
+            checkkeyPressOverTyping_oscarsun72note_Inserting_switch2insertMode(e.KeyChar, regexPattern + omitSymbols);
             string w;//, punctuationsNumWithout前書名號與前篇名號 = Regex.Replace(Form1.punctuationsNum, regexPattern, ""); 
             if (!insertMode
                 && textBox1.SelectionStart < textBox1.TextLength
                 //現在鍵入位置的後一個字不能是
-                && (regexPattern + omitSymbols + Environment.NewLine).IndexOf(textBox1.Text.Substring(textBox1.SelectionStart, 1)) == -1
+                && (regexPattern + omitSymbols).IndexOf(textBox1.Text.Substring(textBox1.SelectionStart, 1)) == -1
                 //&& omitSymbols.IndexOf(e.KeyChar.ToString()) == -1
                 && Regex.IsMatch(e.KeyChar.ToString(), "[^a-zA-Z" + omitSymbols + "]"))//YouChat菩薩
             {//https://stackoverflow.com/questions/1428047/how-to-set-winforms-textbox-to-overwrite-mode/70502655#70502655
@@ -8940,7 +8969,8 @@ namespace WindowsFormsApp1
                 if (!insertMode
                     && textBox1.SelectionStart < textBox1.TextLength && selStart < textBox1.TextLength
                     //現在鍵入位置的後一個字不能是
-                    && (regexPattern + omitSymbols + Environment.NewLine).IndexOf(textBox1.Text.Substring(textBox1.SelectionStart, 1)) == -1
+                    //&& (regexPattern + omitSymbols + Environment.NewLine).IndexOf(textBox1.Text.Substring(textBox1.SelectionStart, 1)) == -1
+                    && (regexPattern + omitSymbols).IndexOf(textBox1.Text.Substring(textBox1.SelectionStart, 1)) == -1
                     //&& omitSymbols.IndexOf(e.KeyChar.ToString()) == -1
                     && Regex.IsMatch(e.KeyChar.ToString(), "[^a-zA-Z" + omitSymbols + "]"))//YouChat菩薩
                 {
@@ -8961,6 +8991,30 @@ namespace WindowsFormsApp1
             }
         }
 
+        /// <summary>
+        /// 檢查是否正在手動輸入{{{孫守真按：}}}{{{佛弟子文獻學者孫守真任真甫按：}}}之類的文字。如果是，則改為插入輸入模式而非取代輸入模式。20230902
+        /// 取代模式時才處理
+        /// {{{ }}}	Specifies that the characters between the {{{ and }}} are marginal notes or textual remarks not occurring in the main body of the text. https://ctext.org/instructions/wiki-formatting
+        /// </summary>
+        /// <param name="c">正在輸入的字元</param>
+        void checkkeyPressOverTyping_oscarsun72note_Inserting_switch2insertMode(char c, string omitSymbols = "")
+        {
+
+            int s = textBox1.SelectionStart; string x = textBox1.Text;
+            if (insertMode || c != '{' || s < 2 || s == x.Length) return;
+            //如果插入點在分段符號前（輸入）亦略過
+            //if (s + 1 < x.Length) { if (x.Substring(s, 1) == Environment.NewLine.Substring(0, 1)) return; }
+            //只要後面接著omitSymbols所包含的就略過。
+            if (s + 1 < x.Length) { if (omitSymbols.Contains(x.Substring(s, 1))) return; }
+
+            if (x.Substring(s - 2, 2) == "{{" && c == '{')
+            //if (textBox1.Text.Substring(textBox1.SelectionStart - 2, 2) == "{{" && c == '{')
+            {//if (x.Substring(s - 2) == "{{" && c == "{".ToCharArray()[0])
+                //insertMode = true;
+                InserModeSwitcher();
+                playSound(soundLike.exam);
+            }
+        }
 
         /// <summary>
         /// 記下更動前的文本以利還原

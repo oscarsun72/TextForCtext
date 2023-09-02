@@ -141,12 +141,14 @@ namespace TextForCtext
         }
 
         /// <summary>
-        /// 自動加上書名號篇名號
+        /// 自動加上書名號篇名號、及相關標點（如冒號、句號等）
         /// </summary>
-        /// <param name="clpTxt">剪貼簿中的文字--需要加上書名號篇名號的文本。預防大文本，故以傳址（pass by reference）方式</param>
+        /// <param name="clpTxt">剪貼簿中的文字（不必是剪貼簿）--需要加上書名號篇名號的文本。預防大文本，故以傳址（pass by reference）方式</param>
+        /// <param name="force2mark">強制執行標點，不管已有、或已做過了沒。</param>
         /// <returns>傳址回傳clpTxt被標點後的結果</returns>
-        internal static ref string BooksPunctuation(ref string clpTxt)
+        internal static ref string BooksPunctuation(ref string clpTxt, bool force2mark = false)
         {
+            if (!force2mark) if (HasEditedWithPunctuationMarks(ref clpTxt)) { Form1.playSound(Form1.soundLike.error); return ref clpTxt; }
             //提示音
             //new SoundPlayer(@"C:\Windows\Media\Windows Balloon.wav").Play();
             System.Media.SystemSounds.Asterisk.Play();
@@ -469,7 +471,7 @@ namespace TextForCtext
             if (text.Length == 0) return false;
             if (text.Length > 1000)
             {
-                Regex regex = new Regex(@"\，|\。|\？|\！|\〈|\〉|\《|\》|\：|\『|\』|\「|\」|\􏿽|、|●|□|■|·|\*\*|\{\{\{|\}\}\}|\||〇|　}}");
+                Regex regex = new Regex(@"\，|\。|\？|\！|\〈|\〉|\《|\》|\：|\『|\』|\「|\」|\􏿽|、|●|□|■|·|\*\*|\{\{\{|\}\}\}|\||〇|　}}|\*　");
                 Match match = regex.Match(text);
                 return match.Success;
             }
@@ -484,7 +486,7 @@ namespace TextForCtext
                     || text.Contains("●") || text.Contains("、")
                     || text.Contains("·") || text.Contains("**")
                     || text.Contains("|") || text.Contains("　}}")
-                    || text.Contains("〇")
+                    || text.Contains("〇") || text.Contains("*　")
                     || text.Contains(@"{{{") || text.Contains(@"}}}"));
             }
 
@@ -510,9 +512,9 @@ namespace TextForCtext
             #endregion
 
             string[] replaceDChar = { "'", ",", ";", ":", "．", "?", "：：", "《《", "》》", "〈〈", "〉〉",
-                "。}}。}}", "。}}。<p>", "}}。<p>",".<p>" ,"。。", "，，", "@" };
+                "。}}。}}", "。}}。<p>", "}}。<p>",".<p>" ,"<p>。<p>","。。", "，，", "@" };
             string[] replaceChar = { "、", "，", "；", "：", "·", "？", "：", "《", "》", "〈", "〉",
-                "。}}", "。}}<p>", "}}<p>","。<p>", "。", "，", "●" };
+                "。}}", "。}}<p>", "}}<p>","。<p>","<p>", "。", "，", "●" };
             foreach (var item in replaceDChar)
             {
                 if (x.IndexOf(item) > -1)
