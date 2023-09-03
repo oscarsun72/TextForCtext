@@ -1325,7 +1325,7 @@ namespace TextForCtext
                 }
             }
             if (url == "" && urlActiveTab == "")
-                return driver.Url;
+                return string.Empty;//driver.Url;
             else
                 return url == "" ? urlActiveTab : url;
 

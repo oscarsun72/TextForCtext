@@ -1573,7 +1573,7 @@ namespace WindowsFormsApp1
                         textBox3.Text = urlActive;
                     }
                     if (browsrOPMode != BrowserOPMode.appActivateByName && br.driver != null
-                        && textBox3.Text!= urlActive)
+                        && textBox3.Text != urlActive)
                     {
                         br.SwitchToCurrentForeActivateTab(ref textBox3, urlActive);
                     }
@@ -2417,7 +2417,7 @@ namespace WindowsFormsApp1
                     e.Handled = true;
                     string clpTxt = Clipboard.GetText();
                     if (keyinTextMode && clpTxt != ClpTxtBefore)// &&clpTxt.IndexOf("《") == -1 && clpTxt.IndexOf("〈") == -1 && clpTxt.IndexOf("·") == -1)//之前是沒有優化 booksPunctuation 才需要避免已經標點過的又標，現在有正則表達式把關，就沒有這問題了。感恩感恩　讚歎讚歎　chatGPT大菩薩+Bing大菩薩 南無阿彌陀佛
-                        textBox1.Text = CnText.BooksPunctuation(ref clpTxt, false);
+                        textBox1.Text = CnText.BooksPunctuation(ref clpTxt, true);
                     else textBox1.Text = clpTxt;
                     dragDrop = false;
                     return;
@@ -2759,7 +2759,7 @@ namespace WindowsFormsApp1
 
                 }
                 int so = s;//記下起始處
-                while ((Environment.NewLine + "　|<{" + "􏿽".Substring(0, 1)).IndexOf(x.Substring(++s, 1)) == -1)
+                while (s + 1 <= x.Length && (Environment.NewLine + "　|<{" + "􏿽".Substring(0, 1)).IndexOf(x.Substring(++s, 1)) == -1)
                 {
 
                 }
@@ -7712,9 +7712,20 @@ namespace WindowsFormsApp1
 
         const int CJK_Crtr_Len_Max = 2;//因為目前CJK最長為2字元
 
+        /// <summary>
+        /// 取代文字
+        /// </summary>
+        /// <param name="replacedword">要被取代的字串</param>
+        /// <param name="rplsword">用以取代的字串</param>
         private void replaceWord(string replacedword, string rplsword)
         {
             if (rplsword == "") return;
+            bool editListMode = false;
+            if (rplsword.StartsWith("@"))
+            {//如果在此框輸入的字串前綴半形「@」符號，則會將被取代的字串其對應的用以取代之字串改成目前指定的這個（即在「@」後的字串）20230903蘇拉Saola颱風大菩薩往生後海葵Haikui颱風大菩薩光臨臺灣本島日。感恩感恩　讚歎讚歎　南無阿彌陀佛
+                editListMode = true;
+                rplsword = rplsword.Substring("@".Length);
+            }
             if (textBox1.SelectionStart == textBox1.Text.Length) return;
             StringInfo selWord = new StringInfo(rplsword);
             string x = textBox1.Text;
@@ -7760,7 +7771,7 @@ namespace WindowsFormsApp1
             {
                 s += beforeScntr * (rplsword.Length - replacedword.Length);
             }
-            addReplaceWordDefault(replacedword, rplsword);
+            addReplaceWordDefault(replacedword, rplsword, editListMode);
             #region 自動將圓括弧置換成{{}}
             if (replacedword == "（" && rplsword == "{{") textBox1.Text = textBox1.Text.Replace("）", "}}");
             if (replacedword == "）" && rplsword == "}}") textBox1.Text = textBox1.Text.Replace("（", "{{");
@@ -7798,20 +7809,36 @@ namespace WindowsFormsApp1
             return replsWord;
 
         }
-        void addReplaceWordDefault(string replacedWord,
-                string replaceWord)
+        /// <summary>
+        /// 加入取代字串之資料
+        /// </summary>
+        /// <param name="replacedWord"></param>
+        /// <param name="replaceWord"></param>
+        /// <param name="editMode">如果是改訂已存在的資料，就是true</param>
+        void addReplaceWordDefault(string replacedWord, string replaceWord, bool editMode = false)
         {
             if (replacedWordList.Contains(replacedWord))
             {
                 int i = 0, count = replacedWordList.Count;
-                while (i < count)
+                if (editMode)
                 {
-                    if (replacedWordList.IndexOf(replacedWord, i) == replaceWordList.IndexOf(replaceWord, i))
-                    {
-                        return;
-                    }
-                    i++;
+                    if (replaceWordList[replacedWordList.IndexOf(replacedWord)] != replaceWord)
+                        replaceWordList[replacedWordList.IndexOf(replacedWord)] = replaceWord;
+                    return;
                 }
+                else
+                {
+                    while (i < count)
+                    {
+
+                        if (replacedWordList.IndexOf(replacedWord, i) == replaceWordList.IndexOf(replaceWord, i))
+                        {
+                            return;
+                        }
+                        i++;
+                    }
+                }
+
             }
             replacedWordList.Add(replacedWord);
             replaceWordList.Add(replaceWord);
@@ -7841,6 +7868,11 @@ namespace WindowsFormsApp1
             }
             return cntr;
         }
+        /// <summary>
+        /// 取代字串
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void textBox4_Leave(object sender, EventArgs e)
         {
             if (textBox4.Text == "")
@@ -7862,11 +7894,15 @@ namespace WindowsFormsApp1
                 if (char.IsHighSurrogate(textBox1.SelectedText, 0) && textBox1.SelectedText.Length < 3)
                     textBox1.Select(s, 2);
             }
+            //取代前備份
             saveText();
+            //實際執行取代文字
             replaceWord(textBox1.SelectedText, textBox4.Text);
             if (textBox4.Text != "") Clipboard.SetText(textBox4.Text);
             textBox4Resize();
+            pauseEvents();
             textBox4.Text = "";
+            resumeEvents();
             textBox1.Focus();
         }
 
@@ -8933,7 +8969,7 @@ namespace WindowsFormsApp1
              * 在 C# 中，您可以使用正则表达式来删除给定字符串中的特定字符。以下是删除 punctuationsNum 字符串中的 "《" 和 "〈" 字符的示例代码：……
              * 在这里，我们使用 Regex.Replace 方法将匹配正则表达式模式 [《〈] 的所有字符替换为空字符串。此模式匹配任何包含 "《" 或 "〈" 的字符。
              * */
-            string regexPattern = "[《〈]", omitSymbols = "●＝{}□■<>*" + Environment.NewLine;//輸入缺字構字式●＝＝、及注文標記符{{}}、及標題星號*時不取代
+            string regexPattern = "[《〈]", omitSymbols = "●＝{}□■<>*〇○" + Environment.NewLine;//輸入缺字構字式●＝＝、及注文標記符{{}}、及標題星號*時不取代
             checkkeyPressOverTyping_oscarsun72note_Inserting_switch2insertMode(e.KeyChar, regexPattern + omitSymbols);
             string w;//, punctuationsNumWithout前書名號與前篇名號 = Regex.Replace(Form1.punctuationsNum, regexPattern, ""); 
             if (!insertMode
@@ -9080,6 +9116,7 @@ namespace WindowsFormsApp1
                     //隱藏到任務列（系統列）中
                     case MouseButtons.Middle:
                         if (textBox1.SelectionLength == predictEndofPageSelectedTextLen
+                                && textBox1.SelectionStart + predictEndofPageSelectedTextLen + 2 <= textBox1.TextLength
                                 && textBox1.Text.Substring(textBox1.SelectionStart + predictEndofPageSelectedTextLen, 2) == Environment.NewLine)
                             //if (keyDownCtrlAdd(false)) if (textBox1.Text != "") { pauseEvents(); textBox1.Text = ""; resumeEvents(); }
                             keyDownCtrlAdd(false);
