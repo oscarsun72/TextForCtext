@@ -175,8 +175,32 @@ namespace TextForCtext
         {
             get
             {
-                if (driver == null) return string.Empty;
-                ReadOnlyCollection<string> whs = driver.WindowHandles;
+                if (driver == null) return string.Empty; ReadOnlyCollection<string> whs = null;
+                try
+                {
+                    whs = driver.WindowHandles;
+
+                }
+                catch (Exception ex)
+                {
+                    switch (ex.HResult)
+                    {
+                        case -2146233088:
+                            if (ex.Message.IndexOf("An unknown exception was encountered sending an HTTP request to the remote WebDriver server for URL") > -1)
+                            {
+                                Form1.playSound(Form1.soundLike.error);
+                                _lastValidWindowHandle = driver.WindowHandles[driver.WindowHandles.Count - 1];
+                                return _lastValidWindowHandle;
+                            }
+                            else
+                                Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
+                            break;
+                        default:
+                            Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
+                            break;
+                    }
+                }
+
                 if (whs.Count == 0) return string.Empty;
                 _lastValidWindowHandle = _lastValidWindowHandle == null ? (whs.Count > 0 ? whs[whs.Count - 1] : null) : _lastValidWindowHandle;
                 if (!whs.Contains(_lastValidWindowHandle))
@@ -1917,7 +1941,8 @@ namespace TextForCtext
         /// </summary>
         public static void OCR_GJcool_AccountChanged_Switch()
         {
-            if (ActiveForm1.TopMost) ActiveForm1.TopMost = false;
+            //隱藏主表單，以便在切換帳號後，以【按下Shift鍵+滑鼠滑過任務列的表單圖示】，來直接送交《古籍酷》OCR
+            ActiveForm1.HideToNICo();//if (ActiveForm1.TopMost) ActiveForm1.TopMost = false;
             _OCR_GJcool_AccountChanged = !_OCR_GJcool_AccountChanged;
             openNewTabWindow(WindowType.Tab);
             driver.Navigate().GoToUrl("https://gj.cool/account");
@@ -2037,14 +2062,15 @@ namespace TextForCtext
                         }
                         break;
                     case -2146233088:
-                        if (ex.Message.IndexOf("Timed out after 30.5 seconds") > -1)
-                        {
+                        if (ex.Message.IndexOf("timed out after 30.5 seconds") > -1)
+                        {//"The HTTP request to the remote WebDriver server for URL http://localhost:5837/session/0e0cfa1c2cdcd0298a952b8267079906/element timed out after 30.5 seconds."
                             driver.SwitchTo().Window(LastValidWindow);
                             return false;
                         }
                         else
                         {
                             Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
+                            Console.WriteLine(ex.HResult + ex.Message);
                             Debugger.Break();
                             driver.SwitchTo().Window(LastValidWindow);
                         }

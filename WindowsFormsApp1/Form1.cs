@@ -6790,6 +6790,13 @@ namespace WindowsFormsApp1
             this.ntfyICo.Visible = true;
         }
         /// <summary>
+        /// 封裝hideToNICo()方法以供外用
+        /// </summary>
+        internal void HideToNICo()
+        {
+            hideToNICo();
+        }
+        /// <summary>
         /// 備份已貼上之文本的檔名+副檔名（不含路徑）
         /// </summary>
         const string fName_to_Backup_Txt = "cTextBK.txt";
@@ -8969,7 +8976,7 @@ namespace WindowsFormsApp1
              * 在 C# 中，您可以使用正则表达式来删除给定字符串中的特定字符。以下是删除 punctuationsNum 字符串中的 "《" 和 "〈" 字符的示例代码：……
              * 在这里，我们使用 Regex.Replace 方法将匹配正则表达式模式 [《〈] 的所有字符替换为空字符串。此模式匹配任何包含 "《" 或 "〈" 的字符。
              * */
-            string regexPattern = "[《〈]", omitSymbols = "●＝{}□■<>*〇○" + Environment.NewLine;//輸入缺字構字式●＝＝、及注文標記符{{}}、及標題星號*時不取代
+            string regexPattern = "[《〈]", omitSymbols = "●＝{}□■<>*〇○ " + Environment.NewLine;//輸入缺字構字式●＝＝、及注文標記符{{}}、及標題星號*時不取代
             checkkeyPressOverTyping_oscarsun72note_Inserting_switch2insertMode(e.KeyChar, regexPattern + omitSymbols);
             string w;//, punctuationsNumWithout前書名號與前篇名號 = Regex.Replace(Form1.punctuationsNum, regexPattern, ""); 
             if (!insertMode
