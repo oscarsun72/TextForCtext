@@ -1528,17 +1528,18 @@ namespace TextForCtext
                 LastValidWindow = driver.CurrentWindowHandle;
                 driver.SwitchTo().NewWindow(tabOrwindow);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                var hs = driver.WindowHandles;
+                Console.WriteLine(ex.HResult+ex.Message);
                 try
                 {
+                    var hs = driver.WindowHandles;
                     driver.SwitchTo().Window(driver.WindowHandles.Last());
                     driver.SwitchTo().NewWindow(tabOrwindow);
                 }
-                catch (Exception ex)
+                catch (Exception ex1)
                 {
-                    switch (ex.HResult)
+                    switch (ex1.HResult)
                     {
                         case -2146233079://"序列未包含項目"
                             //誤關Chrome瀏覽器的時候
@@ -2029,7 +2030,8 @@ namespace TextForCtext
                             driver.SwitchTo().Window(LastValidWindow);
                             return false;
                         }
-                        break;
+                        else
+                            goto default;
                     default:
                         string msgText = ex.HResult.ToString() + ex.Message;
                         Console.WriteLine(msgText);
@@ -2062,7 +2064,7 @@ namespace TextForCtext
                         }
                         break;
                     case -2146233088:
-                        if (ex.Message.IndexOf("timed out after 30.5 seconds") > -1)
+                        if (ex.Message.IndexOf("Timed out after") > -1)//"Timed out after 30.5 seconds"
                         {//"The HTTP request to the remote WebDriver server for URL http://localhost:5837/session/0e0cfa1c2cdcd0298a952b8267079906/element timed out after 30.5 seconds."
                             driver.SwitchTo().Window(LastValidWindow);
                             return false;
@@ -2498,6 +2500,12 @@ namespace TextForCtext
                             Thread.Sleep(950);
                             Task tk3 = Task.Run(() => { clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.soundLike.over); });
                             tk3.Wait();
+                            if (Clipboard.GetText() == "")
+                            {
+                                Thread.Sleep(750);
+                                Task tk4 = Task.Run(() => { clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.soundLike.done); });
+                                tk4.Wait();
+                            }
                         }
                     }
                 }

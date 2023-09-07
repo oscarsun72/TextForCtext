@@ -601,6 +601,16 @@ namespace WindowsFormsApp1
                             case -2146233088:
                                 //"stale element reference: element is not attached to the page document\n  (Session info: chrome=110.0.5481.100)"
                                 //"no such window: target window already closed\nfrom unknown error: web view not found\n  (Session info: chrome=110.0.5481.100)"
+                                if (ex.Message.StartsWith(@"The HTTP request to the remote WebDriver server for URL http://localhost:") && ex.Message.IndexOf("timed out after") > -1)
+                                {
+                                    MessageBoxShowOKExclamationDefaultDesktopOnly("Chrome瀏覽器分頁頁籤進入休眠省電模式，請藉由激活（Activate）它將之喚醒。");
+                                    br.LastValidWindow = br.driver.CurrentWindowHandle;
+                                    foreach (var item in br.driver.WindowHandles)
+                                    {
+                                        br.driver.SwitchTo().Window(item);
+                                    }
+                                    br.driver.SwitchTo().Window(br.LastValidWindow);
+                                }
                                 break;
                             default:
                                 MessageBox.Show(ex.HResult + ex.Message);
@@ -684,6 +694,7 @@ namespace WindowsFormsApp1
                         case -2146233088:
                             //"stale element reference: element is not attached to the page document\n  (Session info: chrome=110.0.5481.100)"
                             //"no such window: target window already closed\nfrom unknown error: web view not found\n  (Session info: chrome=110.0.5481.100)"
+                            Console.WriteLine(ex.HResult + ex.Message);
                             break;
                         default:
                             MessageBox.Show(ex.HResult + ex.Message);
@@ -4987,7 +4998,7 @@ namespace WindowsFormsApp1
                 {
                     if (DialogResult.Cancel == Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly(
                         "插入點位置似有誤，請「確定」從此處之前的才貼上？\n\r\n\r" +
-                        "忽略此訊息，改為【整面貼上】請按「取消」感恩感恩　南無阿彌陀佛")) { s = textBox1.TextLength; l = 0; }
+                        "忽略此訊息，改為【整面貼上】請按「取消」感恩感恩　南無阿彌陀佛")) { s = textBox1.TextLength; l = 0; pageTextEndPosition = s + l; }
                 }
             }
             else { if (s == 0 && l == 0) { Activate(); return false; } }
@@ -5562,9 +5573,17 @@ namespace WindowsFormsApp1
             #region get lines_perPage//取得該頁的每行（段）文字
             //lines_perPage = 0;
             if (keyinTextMode)
-            {
+            {//如果是手動輸入模式：
                 lines_perPage = countLinesPerPage(xChk);
                 linesParasPerPage = lines_perPage;
+                //略過只含有「　」的元素
+                xLineParas = xLineParas.Where(x => x.Trim('　') != "").ToArray();
+                /* 20230907 Bing大菩薩：
+                 太好了，我很高興能幫助您！LINQ 是 Language Integrated Query 的簡稱，它是一種用於查詢和操作數據的語言。在 C# 中，LINQ 可以用來查詢各種數據源，包括數組、列表、XML 文件等。
+                    在上面的例子中，我們使用了 LINQ 的 `Where` 方法來過濾出 `xLineParas` 中不符合條件的元素。`Where` 方法接受一個委託作為參數，該委託定義了過濾條件。在這個例子中，我們定義了一個匿名函數 `x => x.Trim('　') != ""` 作為過濾條件。這個函數會對每個元素進行判斷，如果元素去掉前後的「　」後不為空字符串，則返回 `true`，否則返回 `false`。
+                    `Where` 方法會根據過濾條件返回一個新的序列，其中只包含符合條件的元素。最後，我們使用 `ToArray` 方法將序列轉換為數組。
+                    希望這對您有所幫助！如果您還有其他問題，請隨時告訴我。感恩感恩　讚歎讚歎　南無阿彌陀佛。
+                */
             }
             else
                 lines_perPage = linesParasPerPage != -1 ? linesParasPerPage : countLinesPerPage(xChk);
@@ -6558,7 +6577,9 @@ namespace WindowsFormsApp1
         /// <summary>
         /// 執行OCR主程式
         /// </summary>
-        private void toOCR(br.OCRSiteTitle ocrSiteTitle)
+        /// <param name="ocrSiteTitle">指OCR網站（Google Keep或《古籍酷》）</param>
+        /// <returns>成功執行傳回true</returns>
+        private bool toOCR(br.OCRSiteTitle ocrSiteTitle)
         {
             //Form1.playSound(Form1.soundLike.press);
 
@@ -6585,7 +6606,19 @@ namespace WindowsFormsApp1
                     undoRecord();
                     textBox1.Text = br.CopyQuickedit_data_textboxText();//quickedit_data_textboxTxt;
                     if (!Active) availableInUseBothKeysMouse();
-                    return;
+                    return false;
+                }
+            }
+            else if (new StringInfo(quickedit_data_textboxTxt).LengthInTextElements < normalLineParaLength)
+            {
+                if (DialogResult.Cancel == Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("目前頁面內容似乎太短了，確定還要交給OCR嗎？" +
+                        Environment.NewLine + Environment.NewLine + "================" + Environment.NewLine +
+                        quickedit_data_textboxTxt))
+                {
+                    undoRecord();
+                    textBox1.Text = br.CopyQuickedit_data_textboxText();//quickedit_data_textboxTxt;
+                    if (!Active) availableInUseBothKeysMouse();
+                    return false;
                 }
             }
             #endregion
@@ -6600,9 +6633,9 @@ namespace WindowsFormsApp1
             else
             {
                 imgUrl = br.GetImageUrl();
-                if (imgUrl == "") return;
+                if (imgUrl == "") return false;
                 downloadImage(imgUrl, out downloadImgFullName);
-                if (downloadImgFullName == "") return;
+                if (downloadImgFullName == "") return false;
             }
 
             #region toOCR            
@@ -6645,6 +6678,7 @@ namespace WindowsFormsApp1
                 }
                 catch (Exception)
                 {
+                    return false;
                     //throw;
                 }
             }
@@ -6681,6 +6715,7 @@ namespace WindowsFormsApp1
             //Process.Start(gjcool);
             //Process.Start(keep);
             if (!Active) availableInUseBothKeysMouse();
+            return true;
             #endregion
         }
 
@@ -8976,7 +9011,7 @@ namespace WindowsFormsApp1
              * 在 C# 中，您可以使用正则表达式来删除给定字符串中的特定字符。以下是删除 punctuationsNum 字符串中的 "《" 和 "〈" 字符的示例代码：……
              * 在这里，我们使用 Regex.Replace 方法将匹配正则表达式模式 [《〈] 的所有字符替换为空字符串。此模式匹配任何包含 "《" 或 "〈" 的字符。
              * */
-            string regexPattern = "[《〈]", omitSymbols = "●＝{}□■<>*〇○ " + Environment.NewLine;//輸入缺字構字式●＝＝、及注文標記符{{}}、及標題星號*時不取代
+            string regexPattern = "[《〈」】〗]", omitSymbols = "●＝{}□■<>*〇○ " + Environment.NewLine;//輸入缺字構字式●＝＝、及注文標記符{{}}、及標題星號*時不取代
             checkkeyPressOverTyping_oscarsun72note_Inserting_switch2insertMode(e.KeyChar, regexPattern + omitSymbols);
             string w;//, punctuationsNumWithout前書名號與前篇名號 = Regex.Replace(Form1.punctuationsNum, regexPattern, ""); 
             if (!insertMode
