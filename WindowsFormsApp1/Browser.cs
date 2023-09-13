@@ -126,7 +126,7 @@ namespace TextForCtext
             //////if (chromeProcessInstances.Length > 0)
             //////    return driverGet();
             //////else
-            return new Tuple<ChromeDriver, RemoteWebDriver>(driverNew(), null);
+            return new Tuple<ChromeDriver, RemoteWebDriver>(DriverNew(), null);
         }
 
         //private static Tuple<ChromeDriver, RemoteWebDriver> driverGet()
@@ -317,9 +317,9 @@ namespace TextForCtext
                 {
                     case -2146233088:
                         if (ex.Message.IndexOf("no such window: target window already closed") > -1)
-                            GoToCurrentUserActivateTab();
-                        else if (ex.Message.IndexOf("no such element: Unable to locate element") > -1)
-                            GoToUrlandActivate(GetQuickeditUrl());
+                            if (GoToCurrentUserActivateTab() == string.Empty) return null;
+                            else if (ex.Message.IndexOf("no such element: Unable to locate element") > -1)
+                                GoToUrlandActivate(GetQuickeditUrl());
                         try
                         {
                             e = (driver ?? drver).FindElement(By.Name(name));
@@ -468,7 +468,7 @@ namespace TextForCtext
         /// 在driver是null時才創建新的chromedriver
         /// </summary>gjc
         /// <returns></returns>
-        internal static ChromeDriver driverNew()
+        internal static ChromeDriver DriverNew()
         {
             if (Form1.browsrOPMode != Form1.BrowserOPMode.appActivateByName && driver == null)
             {
@@ -650,7 +650,16 @@ namespace TextForCtext
                 return driver;
             #endregion
         }
-
+        /// <summary>
+        /// 重啟chromedriver
+        /// </summary>
+        /// <returns>重啟成功則傳回true</returns>
+        internal static bool RestartDriver()
+        {
+            driver = null;
+            killchromedriverFromHere();
+            return DriverNew() == null ? false : true;
+        }
         private static void setupChromeDriverService()
         {
             user_data_dir = user_data_dir ?? options.Arguments[0];
@@ -1025,7 +1034,7 @@ namespace TextForCtext
         internal static string GetQuickeditUrl()
         {
             string url = "";
-            if (driver == null) driver = driverNew();
+            if (driver == null) driver = DriverNew();
             IWebElement ie = GetQuickeditIWebElement();
             if (ie != null) url = ie.GetAttribute("href");
             return url;
@@ -1041,7 +1050,7 @@ namespace TextForCtext
 
         internal static IWebElement GetQuickeditIWebElement()
         {
-            if (driver == null) driver = driverNew();
+            if (driver == null) driver = DriverNew();
             return waitFindWebElementBySelector_ToBeClickable("#quickedit > a");
         }
 
@@ -1296,6 +1305,10 @@ namespace TextForCtext
                                     driver.SwitchTo().Window(driver.WindowHandles[driver.WindowHandles.Count - 1]);
                                     url = driver.Url;
                                 }
+                                else if (ex.Message.StartsWith(@"An unknown exception was encountered sending an HTTP request to the remote WebDriver server for URL http:/"))
+                                {
+                                    return string.Empty;
+                                }
                                 else
                                     Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
                                 break;
@@ -1365,7 +1378,7 @@ namespace TextForCtext
             int tabCount = 0;
             try
             {
-                if (driver == null) driver = driverNew();
+                if (driver == null) driver = DriverNew();
             }
             catch (Exception)
             {
@@ -1373,7 +1386,7 @@ namespace TextForCtext
                 {
                     driver = null;
                 }
-                driver = driverNew();
+                driver = DriverNew();
                 ////throw;
             }
             /*另外，您也可以使用以下方法在 C# 中取得 Chrome 瀏覽器的標籤（分頁）數量:
@@ -1382,7 +1395,7 @@ namespace TextForCtext
              */
             try
             {
-                driver = driver ?? Browser.driverNew();
+                driver = driver ?? Browser.DriverNew();
                 tabCount = driver.WindowHandles.Count;
             }
             catch (Exception ex)
@@ -1392,7 +1405,7 @@ namespace TextForCtext
                     case -2146233088://"The HTTP request to the remote WebDriver server for URL http://localhost:4144/session/a5d7705c0a6199c76529de0e157667f9/window/handles timed out after 8.5 seconds."
                         killProcesses(new string[] { "chromedriver" });//手動關閉由Selenium啟動的Chrome瀏覽器須由此才能清除
                         driver = null;
-                        driver = driverNew();
+                        driver = DriverNew();
                         break;
                     default:
                         throw;
@@ -1405,7 +1418,7 @@ namespace TextForCtext
                 ////driver.SwitchTo().Window(hs[0]);
                 try
                 {
-                    driver = driver ?? Browser.driverNew();
+                    driver = driver ?? Browser.DriverNew();
                     driver.SwitchTo().Window(driver.CurrentWindowHandle);
                 }
                 catch (Exception ex)
@@ -1521,7 +1534,7 @@ namespace TextForCtext
             {
                 if (Form1.browsrOPMode == Form1.BrowserOPMode.appActivateByName)
                     Form1.browsrOPMode = Form1.BrowserOPMode.seleniumNew;
-                driver = driverNew();
+                driver = DriverNew();
             }
             try
             {
@@ -1530,28 +1543,49 @@ namespace TextForCtext
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.HResult+ex.Message);
-                try
+                switch (ex.HResult)
                 {
-                    var hs = driver.WindowHandles;
-                    driver.SwitchTo().Window(driver.WindowHandles.Last());
-                    driver.SwitchTo().NewWindow(tabOrwindow);
+                    case -2146233088:
+                        if (ex.Message.StartsWith(@"An unknown exception was encountered sending an HTTP request to the remote WebDriver server for URL http://localhost:"))
+                        {
+                            RestartDriver();
+                        }
+                        else
+                            goto default;
+                        break;
+                    default:
+                        Console.WriteLine(ex.HResult + ex.Message);
+                        try
+                        {
+                            var hs = driver.WindowHandles;
+                            driver.SwitchTo().Window(driver.WindowHandles.Last());
+                            driver.SwitchTo().NewWindow(tabOrwindow);
+                        }
+                        catch (Exception ex1)
+                        {
+                            switch (ex1.HResult)
+                            {
+                                case -2146233079://"序列未包含項目"
+                                                 //誤關Chrome瀏覽器的時候
+                                                 //openNewTabWindow(WindowType.Window);
+                                    RestartDriver();
+                                    break;
+                                case -2146233088:
+                                    if (ex1.Message.StartsWith(@"An unknown exception was encountered sending an HTTP request to the remote WebDriver server for URL http://localhost:"))
+                                    {
+                                        RestartDriver();
+                                    }
+                                    else
+                                        goto default;
+                                    break;
+                                default:
+                                    Console.Write(ex1.HResult + ex1.Message);
+                                    Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex1.HResult + ex1.Message);
+                                    break;
+                            }
+                        }
+                        break;
                 }
-                catch (Exception ex1)
-                {
-                    switch (ex1.HResult)
-                    {
-                        case -2146233079://"序列未包含項目"
-                            //誤關Chrome瀏覽器的時候
-                            //openNewTabWindow(WindowType.Window);
-                            driver = null;
-                            driverNew();
-                            break;
-                        default:
-                            throw;
-                    }
-                }
-                //throw;
             }
 
             //// 開啟新分頁
@@ -1594,7 +1628,7 @@ namespace TextForCtext
         internal static string GetImageUrl(string url = null)
         {//20230104 creedit
             if (Form1.browsrOPMode == Form1.BrowserOPMode.appActivateByName) Form1.browsrOPMode = Form1.BrowserOPMode.seleniumNew;
-            if (driver == null) driver = driverNew();
+            if (driver == null) driver = DriverNew();
             //using (driver)//var driver = new ChromeDriver())//若這樣寫則會出現「無法存取已處置的物件。」之錯誤    HResult	-2146232798	int               
             //{因為 using(driver) 這 driver 只在 ) 後的第一層大括弧{}間有效，生命週期僅止於此間而已
             // 移動到指定的網頁
@@ -1822,7 +1856,7 @@ namespace TextForCtext
         /// <returns></returns>
         internal static bool OCR_GoogleKeep(string downloadImgFullName)
         {
-            driver = driver ?? driverNew();
+            driver = driver ?? DriverNew();
             string currentWindowHndl = driver.CurrentWindowHandle;
             //const string keep = "https://keep.google.com/#NOTE/1XHzZWpH5DCDGOctKjMwNad9qGdtUiYQpSw7HtkmfuEEAJOCtlj37xJg5XgRzWoE";
             string keep = OCRSite_URL[OCRSiteTitle.GoogleKeep];//"https://keep.new";
@@ -1942,12 +1976,11 @@ namespace TextForCtext
         /// </summary>
         public static void OCR_GJcool_AccountChanged_Switch()
         {
-            //隱藏主表單，以便在切換帳號後，以【按下Shift鍵+滑鼠滑過任務列的表單圖示】，來直接送交《古籍酷》OCR
-            ActiveForm1.HideToNICo();//if (ActiveForm1.TopMost) ActiveForm1.TopMost = false;
             _OCR_GJcool_AccountChanged = !_OCR_GJcool_AccountChanged;
             openNewTabWindow(WindowType.Tab);
             driver.Navigate().GoToUrl("https://gj.cool/account");
-
+            //隱藏主表單，以便在切換帳號後，以【按下Shift鍵+滑鼠滑過任務列的表單圖示】，來直接送交《古籍酷》OCR
+            ActiveForm1.HideToNICo();//if (ActiveForm1.TopMost) ActiveForm1.TopMost = false;
         }
 
         /// <summary>
@@ -1961,7 +1994,7 @@ namespace TextForCtext
             string gjCool = string.Empty; string currentWindowHndl = ""; WindowType windowType = WindowType.Tab;
             try
             {
-                driver = driver ?? driverNew();
+                driver = driver ?? DriverNew();
                 currentWindowHndl = driver.CurrentWindowHandle;
                 //openNewTabWindow(WindowType.Window);
                 openNewTabWindow(windowType);
@@ -2352,7 +2385,7 @@ namespace TextForCtext
             if (!ChkDownloadDirectory_Chrome(downloadImgFullName, downloadDirectory)) return false;
             #endregion
 
-            driver = driver ?? driverNew();
+            driver = driver ?? DriverNew();
             string currentWindowHndl = driver.CurrentWindowHandle;
             const string gjCool = "https://gj.cool/";
             //openNewTabWindow(WindowType.Window);
@@ -2422,9 +2455,10 @@ namespace TextForCtext
             Point copyBtnPos = new Point(); DateTime begin = DateTime.Now;
 
             //待手動成功複製，上限為 timeSpanSecs 秒
-            int timeSpanSecs = 0;
+            int timeSpanSecs = 0; Task task = null;
             try
             {
+
                 //Clipboard.Clear();
                 //按下複製按鈕複製到剪貼簿
                 //SendKeys.Send("{tab 4}~");
@@ -2466,7 +2500,7 @@ namespace TextForCtext
                 //MouseOperations.MouseEventMousePos(MouseOperations.MouseEventFlags.LeftUp, copyBtnPos);
                 ////Form1.playSound(Form1.soundLike.info);
                 //clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.soundLike.none);
-                Task tk = Task.Run(() => { clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.soundLike.none); });
+                task = Task.Run(() => { clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.soundLike.none); });
 
 
                 /*Bing大菩薩：您好，`MouseOperations` 不是 C# 的内置类。它是一个自定义类，您可以在 Stack Overflow 上找到它的源代码。您可以将这些代码复制到您的项目中，然后使用它来模拟鼠标点击。
@@ -2483,33 +2517,41 @@ namespace TextForCtext
                 }
 
                 //Thread.Sleep(450);
-                tk.Wait();
-                if (Clipboard.GetText() == "")
+                task.Wait();
+                task = Task.Run(async delegate
                 {
-                    Thread.Sleep(850);
-                    Task tk1 = Task.Run(() => { clickCopybutton_GjcoolFastExperience(copyBtnPos); });
-                    tk1.Wait();
-
-                    if (Clipboard.GetText() == "")
+                    await Task.Run(async () =>
                     {
-                        Thread.Sleep(450);
-                        Task tk2 = Task.Run(() => { clickCopybutton_GjcoolFastExperience(copyBtnPos); });
-                        tk2.Wait();
                         if (Clipboard.GetText() == "")
                         {
-                            Thread.Sleep(950);
-                            Task tk3 = Task.Run(() => { clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.soundLike.over); });
-                            tk3.Wait();
+                            Thread.Sleep(850);
+                            await Task.Run(async () => { await clickCopybutton_GjcoolFastExperience(copyBtnPos); });
+                            //tk1.Wait();
+
                             if (Clipboard.GetText() == "")
                             {
-                                Thread.Sleep(750);
-                                Task tk4 = Task.Run(() => { clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.soundLike.done); });
-                                tk4.Wait();
+                                Thread.Sleep(450);
+                                await Task.Run(async () => { await clickCopybutton_GjcoolFastExperience(copyBtnPos); });
+                                //Task tk2 = Task.Run(() => { clickCopybutton_GjcoolFastExperience(copyBtnPos); });
+                                //tk2.Wait();
+                                if (Clipboard.GetText() == "")
+                                {
+                                    Thread.Sleep(950);
+                                    await Task.Run(async () => { await clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.soundLike.over); });
+                                    //Task tk3 = Task.Run(() => { clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.soundLike.over); });
+                                    //tk3.Wait();
+                                    if (Clipboard.GetText() == "")
+                                    {
+                                        Thread.Sleep(950);
+                                        Task tk4 = Task.Run(async () => { await clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.soundLike.done); });
+                                        //Task tk4 = Task.Run(() => { clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.soundLike.done); });
+                                        //tk4.Wait();
+                                    }
+                                }
                             }
                         }
-                    }
-                }
-
+                    });
+                });
             }
             catch (Exception ex)
             {
@@ -2540,10 +2582,12 @@ namespace TextForCtext
                 //throw;
             }
 
+            task.Wait();
+
             //如果 「Thread.Sleep(3900);」 太短，則再一次試試：
             if (Clipboard.GetText() == "")
             {
-                Task.Run(() =>
+                Task ts = Task.Run(() =>
                 {
                     Thread.Sleep(1300);//要寫在這，讓_OCR_GJcool_WindowClosed能設定完成
                     if (Clipboard.GetText() == "" && !_OCR_GJcool_WindowClosed)
@@ -2552,14 +2596,16 @@ namespace TextForCtext
 
                     if (Clipboard.GetText() == "")
                     {
-                        Task.Run(() =>
+                        Task ts1 = Task.Run(() =>
                         {
                             Thread.Sleep(800);//要寫在這，讓_OCR_GJcool_WindowClosed能設定完成
-                            if (Clipboard.GetText() == "" && !_OCR_GJcool_WindowClosed) clickCopybutton_GjcoolFastExperience(copyBtnPos);
+                            if (Clipboard.GetText() == "" && !_OCR_GJcool_WindowClosed) clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.soundLike.done);
                         });
+                        ts1.Wait();
                     }
 
                 });
+                ts.Wait();
             }
             else
                 _OCR_GJcool_WindowClosed = true;
@@ -2656,13 +2702,26 @@ namespace TextForCtext
             return true;
         }
 
-        private static void clickCopybutton_GjcoolFastExperience(Point copyBtnPos, Form1.soundLike soundlike = Form1.soundLike.info)
+
+        /// <summary>
+        /// 滑鼠左鍵點擊網頁上的複製按鈕並發出提示音
+        /// </summary>
+        /// <param name="copyBtnPos">要點擊的座標</param>
+        /// <param name="soundlike">指定所發出的提示音</param>
+        /// <returns>執行完畢即傳回一個Task物件以供await參考</returns>
+        private static Task clickCopybutton_GjcoolFastExperience(Point copyBtnPos, Form1.soundLike soundlike = Form1.soundLike.info)
         {
             //Thread.Sleep(1300);
             //Cursor.Position = copyBtnPos;            
-            Form1.playSound(soundlike);
-            MouseOperations.MouseEventMousePos(MouseOperations.MouseEventFlags.LeftDown, copyBtnPos);
-            MouseOperations.MouseEventMousePos(MouseOperations.MouseEventFlags.LeftUp, copyBtnPos);
+            //Form1.playSound(soundlike);
+            //MouseOperations.MouseEventMousePos(MouseOperations.MouseEventFlags.LeftDown, copyBtnPos);
+            //MouseOperations.MouseEventMousePos(MouseOperations.MouseEventFlags.LeftUp, copyBtnPos);
+            return Task.Run(() =>
+            {
+                Form1.playSound(soundlike);
+                MouseOperations.MouseEventMousePos(MouseOperations.MouseEventFlags.LeftDown, copyBtnPos);
+                MouseOperations.MouseEventMousePos(MouseOperations.MouseEventFlags.LeftUp, copyBtnPos);
+            });
         }
 
         /// <summary>

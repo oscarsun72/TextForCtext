@@ -69,22 +69,27 @@ namespace WindowsFormsApp1
         /// 記下當前頁數頁碼
         /// </summary>
         string _currentPageNum = "";
+
         /// <summary>
-        /// 插入鍵入或取代鍵入模式
+        /// 插入鍵入或取代鍵入模式；取代模式（overwrite mode, overtype mode）時則為false
         /// </summary>
         bool insertMode = true;
+
         /// <summary>
         /// 鄰近頁連動編輯模式
         /// </summary>
         bool check_the_adjacent_pages = false;
+
         /// <summary>
         /// 手動輸入模式時為true
         /// </summary>
         bool keyinTextMode = false;
+
         /// <summary>
         /// 原文有抬頭平抬格式
         /// </summary>
         bool TopLine = false;
+
         /// <summary>
         /// 現行行是否屬縮排；或書內是否含有縮排格式
         /// </summary>
@@ -318,7 +323,7 @@ namespace WindowsFormsApp1
             你可以嘗試檢查這些函數的返回值，以確定是否存在錯誤。此外，你也可以嘗試使用 `GetLastError` 函數來獲取更多關於錯誤的信息。
             希望這對你有幫助！
          */
-        void Caret_Shown_OverwriteMode(Control ctl)
+        void Caret_Shown_OverTypeMode(Control ctl)
         {
             CreateCaret(ctl.Handle, IntPtr.Zero, Convert.ToInt32(ctl.Font.Size * 1.5), Convert.ToInt32(ctl.Font.Size * 1.5));
             ShowCaret(ctl.Handle);
@@ -423,7 +428,7 @@ namespace WindowsFormsApp1
                     textBox3_Click(new object(), new MouseEventArgs(MouseButtons.Left, 0, 0, 0, 0));//textBox3_MouseMove(new object(), new MouseEventArgs(MouseButtons.Left, 0, 0, 0, 0));
                     if (browsrOPMode != BrowserOPMode.appActivateByName)
                     {
-                        br.driver = br.driver ?? br.driverNew();
+                        br.driver = br.driver ?? br.DriverNew();
                         try
                         {
                             br.GoToUrlandActivate(url, keyinTextMode);
@@ -588,7 +593,7 @@ namespace WindowsFormsApp1
                 case Keys.Control:
                     try
                     {
-                        br.driver = br.driver ?? Browser.driverNew();//creedit with chatGPT大菩薩
+                        br.driver = br.driver ?? Browser.DriverNew();//creedit with chatGPT大菩薩
                         //OpenQA.Selenium.IWebElement quickEditLink = br.driver.FindElement(OpenQA.Selenium.By.XPath("//a[@title='Quick edit']"));
                         OpenQA.Selenium.IWebElement quickEditLink = br.driver.FindElement(OpenQA.Selenium.By.XPath("//*[@id=\"quickedit\"]/a"));
                         string quickEditLinkUrl = quickEditLink.GetAttribute("href");
@@ -634,14 +639,15 @@ namespace WindowsFormsApp1
         /// <summary>
         /// 自動擷取「簡單修改模式」（selector: # quickedit > a的連結)到剪貼簿
         /// </summary>
-        void copyQuickeditLinkWhenKeyinModeSub()
+        /// <returns>執行成功傳回true</returns>
+        bool copyQuickeditLinkWhenKeyinModeSub()
         {
             if (Clipboard.GetText().IndexOf("#editor") == -1)
             {
                 try
                 {
-                    br.driver = br.driver ?? Browser.driverNew();
-                    br.GoToCurrentUserActivateTab();
+                    br.driver = br.driver ?? Browser.DriverNew();
+                    if (br.GoToCurrentUserActivateTab() == "") return false;
                     string quickEditLinkUrl = "";
                     try
                     {
@@ -695,15 +701,17 @@ namespace WindowsFormsApp1
                             //"stale element reference: element is not attached to the page document\n  (Session info: chrome=110.0.5481.100)"
                             //"no such window: target window already closed\nfrom unknown error: web view not found\n  (Session info: chrome=110.0.5481.100)"
                             Console.WriteLine(ex.HResult + ex.Message);
-                            break;
+                            return false;
                         default:
                             MessageBox.Show(ex.HResult + ex.Message);
-                            //throw;
-                            break;
+                            return false;
                     }
 
                 }
+                return true;
             }
+            else
+                return false;
         }
 
         /// <summary>
@@ -957,9 +965,10 @@ namespace WindowsFormsApp1
 
         void noteMark()//Ctrl + F1 ：選取範圍前後加上{{}}
         {
-            if (textBox1.SelectionLength > 0)
+            if (insertMode && textBox1.SelectionLength > 0 || !insertMode)
             {
                 undoRecord();
+                overtypeModeSelectedTextSetting(ref textBox1);
                 textBox1.SelectedText = "{{" + textBox1.SelectedText + "}}";
             }
         }
@@ -1075,14 +1084,18 @@ namespace WindowsFormsApp1
                         }
                         else
                         {
-                            MessageBox.Show("請指定頁尾處位置"); textBox1.Select(pageTextEndPosition, 0); pageTextEndPosition = 0;
+                            //MessageBox.Show("請指定頁尾處位置");
+                            MessageBoxShowOKExclamationDefaultDesktopOnly("請指定頁尾處位置");
+                            textBox1.Select(pageTextEndPosition, 0); pageTextEndPosition = 0;
                             pageEndText10 = ""; return false;
                         }
 
                     }
                     else
                     {
-                        MessageBox.Show("請指定頁尾處位置"); textBox1.Select(pageTextEndPosition, 0); pageTextEndPosition = 0;
+                        //MessageBox.Show("請指定頁尾處位置"); 
+                        MessageBoxShowOKExclamationDefaultDesktopOnly("請指定頁尾處位置");
+                        textBox1.Select(pageTextEndPosition, 0); pageTextEndPosition = 0;
                         pageEndText10 = ""; return false;
                     }
                 }
@@ -1703,18 +1716,20 @@ namespace WindowsFormsApp1
                 }
                 if (e.KeyCode == Keys.Insert)
                 {//Ctrl + Insert ：無選取時則複製插入點後一CJK字長
-                    int s = textBox1.SelectionStart, l = textBox1.SelectionLength;
-                    if (l > 0 || !insertMode)
-                    {
-                        e.Handled = true;
-                        if (s + l < textBox1.TextLength && !insertMode)
-                        {
-                            l += char.IsHighSurrogate(textBox1.Text.Substring(s + l, 1).ToCharArray()[0]) ? 2 : 1;
-                        }
-                        l = s + l > textBox1.TextLength ? l - 1 : l;
-                        Clipboard.SetText(new StringInfo(textBox1.Text.Substring(s, l)).String);
-                        return;
-                    }
+                 //int s = textBox1.SelectionStart, l = textBox1.SelectionLength;
+                 //if (l > 0 || !insertMode)
+                 //{
+                    e.Handled = true;
+                    //if (s + l < textBox1.TextLength && !insertMode)
+                    //{
+                    //    l += char.IsHighSurrogate(textBox1.Text.Substring(s + l, 1).ToCharArray()[0]) ? 2 : 1;
+                    //}
+                    //l = s + l > textBox1.TextLength ? l - 1 : l;
+                    //Clipboard.SetText(new StringInfo(textBox1.Text.Substring(s, l)).String);
+                    overtypeModeSelectedTextSetting(ref textBox1);
+                    Clipboard.SetText(new StringInfo(textBox1.SelectedText).String);
+                    return;
+                    //}
                 }
                 if (e.KeyCode == Keys.Oem3)
                 {//` 或 Ctrl + ` ： 於插入點處起至「　」或「􏿽」或「|」或「<」或分段符號前止之文字加上黑括號【】//Print/SysRq 為OS鎖定不能用
@@ -1839,17 +1854,18 @@ namespace WindowsFormsApp1
                 {
                     //不知為何，就是會將插入點前一個字元給刪除,即使有以下此行也無效
                     e.Handled = true;
+                    overtypeModeSelectedTextSetting(ref textBox1);
                     textBox1OriginalText = textBox1.Text; selStart = textBox1.SelectionStart; selLength = textBox1.SelectionLength;
-                    //插件/取代模式不同處理
-                    char nextChar;
-                    if (selStart + selLength + 1 <= textBox1.TextLength)
-                    {
-                        nextChar = textBox1.Text.Substring(selStart, selLength + 1).ToArray()[0];
-                        selLength = insertMode ? selLength :
-                            (selLength + 1 > textBox1.TextLength) ? selLength :
-                            char.IsHighSurrogate(nextChar) || nextChar == Environment.NewLine.ToArray()[0] ?
-                            textBox1.SelectionLength += 2 : ++textBox1.SelectionLength;
-                    }
+                    ////插件/取代模式不同處理
+                    //char nextChar;
+                    //if (selStart + selLength + 1 <= textBox1.TextLength)
+                    //{
+                    //    nextChar = textBox1.Text.Substring(selStart, selLength + 1).ToArray()[0];
+                    //    selLength = insertMode ? selLength :
+                    //        (selLength + 1 > textBox1.TextLength) ? selLength :
+                    //        char.IsHighSurrogate(nextChar) || nextChar == Environment.NewLine.ToArray()[0] ?
+                    //        textBox1.SelectionLength += 2 : ++textBox1.SelectionLength;
+                    //}
                     textBox4.Focus();
                     return;
                 }
@@ -2067,9 +2083,10 @@ namespace WindowsFormsApp1
             if ((m & Keys.Shift) == Keys.Shift)
             {
                 if (e.KeyCode == Keys.F3)
-                {
+                {//Shift + F3
                     e.Handled = true;
                     int foundwhere;
+                    if (textBox1.SelectionLength == 0) overtypeModeSelectedTextSetting(ref textBox1);
                     string findword = textBox1.SelectionLength == 0 ? lastFindStr : textBox1.SelectedText;
                     if (findword == "") findword = textBox2.Text;
                     if (findword != "")
@@ -2302,7 +2319,7 @@ namespace WindowsFormsApp1
                 if (e.KeyCode == Keys.G)
                 {//Alt + g
                     e.Handled = true;
-                    string x = CnText.ChangeSeltextWhenOverwriteMode(insertMode, textBox1);
+                    string x = overtypeModeSelectedTextSetting(ref textBox1);//CnText.ChangeSeltextWhenOvertypeMode(insertMode, textBox1);
                     if (x != "")
                     {
                         Clipboard.SetText(x);
@@ -2471,7 +2488,7 @@ namespace WindowsFormsApp1
                 if (e.KeyCode == Keys.Insert)
                 {
                     e.Handled = true;
-                    InserModeSwitcher();
+                    InsertModeSwitcher();
                     return;
                 }
                 if (e.KeyCode == Keys.F1 || e.KeyCode == Keys.Pause)//暫時取消，釋放 F1、 Pause 鍵給 Alt + Shift + 2 、Alt + F7用
@@ -2490,13 +2507,14 @@ namespace WindowsFormsApp1
 
 
                 if (e.KeyCode == Keys.F2)
-                {
+                {//按下 F2 鍵
                     keyDownF2(textBox1); return;
                 }
                 if (e.KeyCode == Keys.F3)
-                {
+                {//按下 F3 鍵
                     e.Handled = true;
                     int foundwhere;
+                    if (textBox1.SelectionLength == 0) overtypeModeSelectedTextSetting(ref textBox1);
                     string findword = textBox1.SelectionLength == 0 ? lastFindStr : textBox1.SelectedText;
                     if (findword == "") findword = textBox2.Text;
                     if (findword != "")
@@ -2513,7 +2531,8 @@ namespace WindowsFormsApp1
                         //{
 
                         //}
-                        textBox1.SelectionLength = findword.Length; textBox1.ScrollToCaret();
+                        textBox1.SelectionLength = findword.Length;
+                        textBox1.ScrollToCaret();
                     }
                     if (findword != "") lastFindStr = findword;
                     return;
@@ -2569,13 +2588,13 @@ namespace WindowsFormsApp1
         /// <summary>
         /// 切換「插入」輸入模式與「取代」輸入模式
         /// </summary>
-        internal void InserModeSwitcher()
+        internal void InsertModeSwitcher()
         {
             if (insertMode)
             {
                 insertMode = false;
                 textBox1.Font = new Font(textBox1.Font.FontFamily, textBox1.Font.Size, FontStyle.Bold);
-                Caret_Shown_OverwriteMode(textBox1);
+                Caret_Shown_OverTypeMode(textBox1);
             }
             else
             {
@@ -2583,6 +2602,29 @@ namespace WindowsFormsApp1
                 textBox1.Font = new Font(textBox1.Font.FontFamily, textBox1.Font.Size, FontStyle.Regular);
                 Caret_Shown(textBox1);
             }
+        }
+
+        /// <summary>
+        /// 取代模式時的選字行為
+        /// 此法可與CnText類別中的 ChangeSeltextWhenOverwriteMode 互用。該法「不會」改變文字方塊的選取範圍，只會取得其「改變」後的實際值
+        /// </summary>
+        /// <param name="tBox">要操作的文字方塊對象。傳址（pass by reference）</param>        
+        /// <returns>回傳文字方塊中，被重新選取的字</returns>
+        string overtypeModeSelectedTextSetting(ref TextBox tBox)
+        {
+            if (!insertMode)
+            {
+                int s = tBox.SelectionStart, l = tBox.SelectionLength;
+                if (s + l < tBox.TextLength)
+                {
+                    string nextchar = tBox.Text.Substring(s + l, 1);
+                    l += char.IsHighSurrogate(nextchar.ToCharArray()[0]) || nextchar == Environment.NewLine.Substring(0, 1) ? 2 : 1;
+                }
+                l = s + l > tBox.TextLength ? l - 1 : l;
+                //改變選取範圍
+                tBox.Select(s, l);
+            }
+            return tBox.SelectedText;
         }
 
         internal bool examSeledWord(out string wordtoChk)
@@ -5816,7 +5858,7 @@ namespace WindowsFormsApp1
                         {
                             SystemSounds.Hand.Play();
                         }
-                        return new int[] { lineSeprtStart, lineSeprtEnd - lineSeprtStart ,
+                        return new int[] { lineSeprtStart, (lineSeprtEnd==-1?x.Length:lineSeprtEnd) - lineSeprtStart ,
                         normalLineParaLength,len};
 
                     }
@@ -6916,7 +6958,7 @@ namespace WindowsFormsApp1
                     appActivateByName();
                     break;
                 case BrowserOPMode.seleniumNew:
-                    if (br.driver == null) br.driverNew();
+                    if (br.driver == null) br.DriverNew();
                     //br.GoToUrlandActivate(url);
                     //Task wait = Task.Run(() =>//此間操作，因為沒有要操作的元件，所以可以跑線程。20230111
                     //{以別處還要參考，故取消Task
@@ -6992,7 +7034,7 @@ namespace WindowsFormsApp1
                             {
                                 int retrytimes = 0;
                             retry:
-                                br.driver = br.driver ?? br.driverNew();
+                                br.driver = br.driver ?? br.DriverNew();
                                 try
                                 {//這裡需要參照元件來操作就不宜跑線程了！故此區塊最後的剪貼簿，要求須是單線程者，蓋因剪貼簿須獨占式使用故也20230111                                
                                     //quick_edit_box = br.waitFindWebElementByName_ToBeClickable("data", br.WebDriverWaitTimeSpan);//br.driver.FindElement(OpenQA.Selenium.By.Name("data"));
@@ -7499,7 +7541,7 @@ namespace WindowsFormsApp1
             //if (!(url.IndexOf("&file=") > -1 && url.IndexOf("&page=") > -1 && url.IndexOf("&editwiki=") > -1 && url.IndexOf("#edit") == -1)) return false;
             if (!IsValidUrl＿keyDownCtrlAdd(url)) return false;
 
-            br.driver = br.driver ?? br.driverNew();
+            br.driver = br.driver ?? br.DriverNew();
             //取得所有現行窗體（分頁頁籤）
             System.Collections.ObjectModel.ReadOnlyCollection<string> tabWindowHandles = new ReadOnlyCollection<string>(new List<string>());
             string currentWin = "";
@@ -7514,7 +7556,7 @@ namespace WindowsFormsApp1
                 {
                     case -2146233088: //"An unknown exception was encountered sending an HTTP request to the remote WebDriver server for URL http://localhost:6763/session/b17084f4c8e209d232d5a9eb18cf181a/window/handles. The exception message was: 傳送要求時發生錯誤。"
                         br.driver.Quit();
-                        br.driver = null; br.driver = br.driverNew();
+                        br.driver = null; br.driver = br.DriverNew();
                         tabWindowHandles = br.driver.WindowHandles;
                         break;
                     default:
@@ -8035,19 +8077,19 @@ namespace WindowsFormsApp1
             if (ModifierKeys == Keys.None)
             {//只按下單一鍵
                 if (e.KeyCode == Keys.F1 || e.KeyCode == Keys.Pause)
-                {
+                {//按下 F1 鍵 或 Pause 鍵
                     e.Handled = true;
                     splitLineParabySeltext(e.KeyCode);
                     if (doNotLeaveTextBox2) textBox2.Focus();//方便快速分行分段
                     return;
                 }
                 if (e.KeyCode == Keys.F2)
-                {
+                {//按下 F2 鍵
                     keyDownF2(textBox2);
                     return;
                 }
                 if (e.KeyCode == Keys.F3)
-                {
+                {//按下 F3 鍵
                     KeyEventArgs ekey = new KeyEventArgs(Keys.F3);
                     textBox1_KeyDown(textBox1, ekey);
                 }
@@ -8233,9 +8275,9 @@ namespace WindowsFormsApp1
                         retry:
                             try
                             {
-                                br.driver = br.driver ?? br.driverNew();
+                                br.driver = br.driver ?? br.DriverNew();
                                 //chatGPT：在 C# 中使用 Selenium 控制 Chrome 瀏覽器時，可以使用以下方法切換到 Chrome 瀏覽器視窗：
-                                if (br.driver == null) { Form1.browsrOPMode = BrowserOPMode.seleniumNew; br.driverNew(); }
+                                if (br.driver == null) { Form1.browsrOPMode = BrowserOPMode.seleniumNew; br.DriverNew(); }
 
                                 br.driver.SwitchTo().Window(br.driver.CurrentWindowHandle);
 
@@ -8272,7 +8314,7 @@ namespace WindowsFormsApp1
                                         try
                                         {
                                             br.driver = null;
-                                            br.driver = br.driverNew(); goto retry;
+                                            br.driver = br.DriverNew(); goto retry;
                                         }
                                         catch (Exception ex)
                                         {
@@ -8395,7 +8437,7 @@ namespace WindowsFormsApp1
                             break;
                         //在Selenium操控Chrome瀏覽器時鍵入
                         case BrowserOPMode.seleniumNew:
-                            if (br.driver == null) br.driver = br.driverNew();
+                            if (br.driver == null) br.driver = br.DriverNew();
 
                             //自動取得網址 textBox3.Text = clpTxt 網頁內 quick_edit_box 框內的文字內容
                             try
@@ -8482,7 +8524,7 @@ namespace WindowsFormsApp1
             if (textBox1.Focused)
             {
                 //設置插入點游標
-                if (insertMode) Caret_Shown(textBox1); else Caret_Shown_OverwriteMode(textBox1);
+                if (insertMode) Caret_Shown(textBox1); else Caret_Shown_OverTypeMode(textBox1);
 
                 if (textBox1.TextLength > 0 && textBox1.SelectionLength == textBox1.TextLength && selLength < textBox1.SelectionLength && selLength < 30)
                 {
@@ -8600,7 +8642,7 @@ namespace WindowsFormsApp1
         private void textBox1_Enter(object sender, EventArgs e)
         {
             if (insertMode) Caret_Shown(textBox1);
-            else Caret_Shown_OverwriteMode(textBox1);
+            else Caret_Shown_OverTypeMode(textBox1);
         }
 
         private void textBox2_Enter(object sender, EventArgs e)
@@ -8743,7 +8785,7 @@ namespace WindowsFormsApp1
                 sl: browsrOPMode = BrowserOPMode.seleniumNew;
                     //第一次開啟Chrome瀏覽器，或前有未關閉的瀏覽器時
                     if (br.driver == null)
-                        br.driver = br.driverNew();//不用Task.Run()包裹也成了
+                        br.driver = br.DriverNew();//不用Task.Run()包裹也成了
                     else
                     {//如果Chrome瀏覽器都沒有開啟或被誤關的話20230109
                      //因為 br.driver != null 先清除chromedriver：
@@ -8757,7 +8799,7 @@ namespace WindowsFormsApp1
                             }
                             Task.WaitAll();
                             //清除完後創建新的執行個體實例
-                            br.driver = null; br.driverNew();
+                            br.driver = null; br.DriverNew();
                         }
                     }
                     try
@@ -8844,8 +8886,8 @@ namespace WindowsFormsApp1
             #endregion
 
             #region 切換《古籍酷》帳號
-            if (x.Length > 2)
-                if (x == "gjk")
+            if (x.Length >= 2)
+                if (x == "gjk" || x == "gg" || x == "kk")
                 {
                     pauseEvents();
                     textBox2.Text = ""; resumeEvents(); br.OCR_GJcool_AccountChanged_Switch(); return;
@@ -9011,7 +9053,7 @@ namespace WindowsFormsApp1
              * 在 C# 中，您可以使用正则表达式来删除给定字符串中的特定字符。以下是删除 punctuationsNum 字符串中的 "《" 和 "〈" 字符的示例代码：……
              * 在这里，我们使用 Regex.Replace 方法将匹配正则表达式模式 [《〈] 的所有字符替换为空字符串。此模式匹配任何包含 "《" 或 "〈" 的字符。
              * */
-            string regexPattern = "[《〈」】〗]", omitSymbols = "●＝{}□■<>*〇○ " + Environment.NewLine;//輸入缺字構字式●＝＝、及注文標記符{{}}、及標題星號*時不取代
+            string regexPattern = "[《〈」】〗]", omitSymbols = "●＝{}□■<>*〇○ ⿰⿱" + Environment.NewLine;//輸入缺字構字式●＝＝、及注文標記符{{}}、及標題星號*時不取代
             checkkeyPressOverTyping_oscarsun72note_Inserting_switch2insertMode(e.KeyChar, regexPattern + omitSymbols);
             string w;//, punctuationsNumWithout前書名號與前篇名號 = Regex.Replace(Form1.punctuationsNum, regexPattern, ""); 
             if (!insertMode
@@ -9089,7 +9131,7 @@ namespace WindowsFormsApp1
             //if (textBox1.Text.Substring(textBox1.SelectionStart - 2, 2) == "{{" && c == '{')
             {//if (x.Substring(s - 2) == "{{" && c == "{".ToCharArray()[0])
                 //insertMode = true;
-                InserModeSwitcher();
+                InsertModeSwitcher();
                 playSound(soundLike.exam);
             }
         }

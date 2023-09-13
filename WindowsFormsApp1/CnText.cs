@@ -512,9 +512,9 @@ namespace TextForCtext
             #endregion
 
             string[] replaceDChar = { "'", ",", ";", ":", "．", "?", "：：", "《《", "》》", "〈〈", "〉〉",
-                "。}}。}}", "。}}。<p>", "}}。<p>",".<p>" ,"<p>。<p>","。。", "，，", "@" };
+                "。}}。}}", "。}}。<p>", "}}。<p>",".<p>","·<p>" ,"<p>。<p>","。。", "，，", "@" };
             string[] replaceChar = { "、", "，", "；", "：", "·", "？", "：", "《", "》", "〈", "〉",
-                "。}}", "。}}<p>", "}}<p>","。<p>","<p>", "。", "，", "●" };
+                "。}}", "。}}<p>", "}}<p>","。<p>","。<p>","<p>", "。", "，", "●" };
             foreach (var item in replaceDChar)
             {
                 if (x.IndexOf(item) > -1)
@@ -535,10 +535,13 @@ namespace TextForCtext
         }
 
         /// <summary>
-        /// 當取代模式輸入時，改變選取的範圍
-        /// </summary>
-        /// <param name="seltext"></param>
-        internal static string ChangeSeltextWhenOverwriteMode(bool insertMode, TextBox textBox1)
+        /// 當取代模式輸入時，改變選取範圍的實際值（不會改變選取範圍）
+        /// 此法可與Form1類別中的 overwriteModeSelectedTextSetting 互用。該法會改變文字方塊的選取範圍
+        /// </summary>        
+        /// <param name="insertMode">是否是取代模式；即Form1的insertMode欄位值</param>
+        /// <param name="textBox1">要操作的文字方塊</param>
+        /// <returns>回傳實際「選取」取得的值。</returns>
+        internal static string ChangeSeltextWhenOvertypeMode(bool insertMode, TextBox textBox1)
         {
             string x = textBox1.SelectedText; int s = textBox1.SelectionStart;
             if (s + 1 <= textBox1.TextLength)
