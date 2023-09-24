@@ -584,11 +584,27 @@ namespace TextForCtext
                         //cDrv = new ChromeDriver(driverService, options);//, TimeSpan.FromSeconds(50));
                         //break;
                         case -2146233079://0x80131509:session not created: This version of ChromeDriver only supports Chrome version 108 Current browser version is 110.0.5481.78 with binary path W:\PortableApps\PortableApps\GoogleChromePortable\App\Chrome - bin\chrome.exe(SessionNotCreated)
-                            MessageBox.Show("請更新 chromedriver 才能繼續");
-                            Form1.browsrOPMode = Form1.BrowserOPMode.appActivateByName; killchromedriverFromHere();
-                            return null;
+                            if (ex.Message.IndexOf("This version of ChromeDriver only supports Chrome") > -1)
+                            {
+                                Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("請更新 chromedriver 才能繼續");
+                                Form1.browsrOPMode = Form1.BrowserOPMode.appActivateByName; killchromedriverFromHere();
+                                return null;
+                            }
+                            else if (ex.Message.StartsWith("session not created: Chrome failed to start: exited normally."))//"session not created: Chrome failed to start: exited normally.\n  (session not created: DevToolsActivePort file doesn't exist)\n  (The process started from chrome location W:\\PortableApps\\PortableApps\\GoogleChromePortable\\App\\Chrome-bin\\chrome.exe is no longer running, so ChromeDriver is assuming that Chrome has crashed.) (SessionNotCreated)"
+                            {
+                                Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(@"請手動關閉Chrome瀏覽器，再按「ok」確定，以繼續");
+                                goto tryagain;
+                            }
+                            else
+                            {
+                                Console.WriteLine(ex.HResult + ex.Message);
+                                Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
+                                return null;
+                            }
                         default:
-                            throw;
+                            Console.WriteLine(ex.HResult + ex.Message);
+                            Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
+                            return null;
                     }
                 }
                 #endregion
@@ -1977,10 +1993,13 @@ namespace TextForCtext
         public static void OCR_GJcool_AccountChanged_Switch()
         {
             _OCR_GJcool_AccountChanged = !_OCR_GJcool_AccountChanged;
-            openNewTabWindow(WindowType.Tab);
-            driver.Navigate().GoToUrl("https://gj.cool/account");
-            //隱藏主表單，以便在切換帳號後，以【按下Shift鍵+滑鼠滑過任務列的表單圖示】，來直接送交《古籍酷》OCR
+            Task.Run(() =>
+            {
+                openNewTabWindow(WindowType.Tab);
+                driver.Navigate().GoToUrl("https://gj.cool/account");
+            });
             ActiveForm1.HideToNICo();//if (ActiveForm1.TopMost) ActiveForm1.TopMost = false;
+            //隱藏主表單，以便在切換帳號後，以【按下Shift鍵+滑鼠滑過任務列的表單圖示】，來直接送交《古籍酷》OCR
         }
 
         /// <summary>
@@ -2473,7 +2492,7 @@ namespace TextForCtext
                 //Clipboard.SetText(iwe.Text);
                 #endregion
 
-                #region 關閉OCR視窗後回到原來分頁視窗
+                #region 關閉OCR視窗後回到原來分頁視窗-手動按下「複製」按鈕
                 //！！！！此須手動按下「複製」按鈕了！！！！
                 timeSpanSecs = 8;
                 //滑鼠定位，以備手動按下「複製」按鈕（須視窗最大化）
@@ -2517,6 +2536,9 @@ namespace TextForCtext
                 }
 
                 //Thread.Sleep(450);
+
+                if (Clipboard.GetText() != "") goto finish;
+
                 task.Wait();
                 task = Task.Run(async delegate
                 {
@@ -2550,6 +2572,7 @@ namespace TextForCtext
                                 }
                             }
                         }
+
                     });
                 });
             }
@@ -2608,7 +2631,13 @@ namespace TextForCtext
                 ts.Wait();
             }
             else
-                _OCR_GJcool_WindowClosed = true;
+            {
+                //_OCR_GJcool_WindowClosed = true;
+                goto finish;
+            }
+
+            if (Clipboard.GetText() != "") goto finish;
+
             while (!Form1.isClipBoardAvailable_Text(10))
             {
                 //Form1.playSound(Form1.soundLike.info);
@@ -2647,6 +2676,13 @@ namespace TextForCtext
             //    }
             //    Thread.Sleep(450);
             //}
+
+            if (Clipboard.GetText() != "")
+            {
+                _OCR_GJcool_WindowClosed = true;
+                goto finish;
+            }
+
             string txtchkClipboard = "";
             if (Clipboard.GetText() != "")
                 txtchkClipboard = new StringInfo(Clipboard.GetText()).SubstringByTextElements(0);
@@ -2695,11 +2731,15 @@ namespace TextForCtext
                     return false;
                 }
             }
-            //driver.Close();
-            //driver.SwitchTo().Window(currentWindowHndl);
-            #endregion  
+        //driver.Close();
+        //driver.SwitchTo().Window(currentWindowHndl);
+        #endregion
+
+        #region 關閉OCR視窗後回到原來分頁視窗
+        finish:
             if (!_OCR_GJcool_WindowClosed) _OCR_GJcool_WindowClosed = true;
             return true;
+            #endregion
         }
 
 

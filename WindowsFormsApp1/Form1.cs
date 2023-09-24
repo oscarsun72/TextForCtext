@@ -596,8 +596,11 @@ namespace WindowsFormsApp1
                         br.driver = br.driver ?? Browser.DriverNew();//creedit with chatGPT大菩薩
                         //OpenQA.Selenium.IWebElement quickEditLink = br.driver.FindElement(OpenQA.Selenium.By.XPath("//a[@title='Quick edit']"));
                         OpenQA.Selenium.IWebElement quickEditLink = br.driver.FindElement(OpenQA.Selenium.By.XPath("//*[@id=\"quickedit\"]/a"));
-                        string quickEditLinkUrl = quickEditLink.GetAttribute("href");
-                        Clipboard.SetText(quickEditLinkUrl);
+                        if (quickEditLink != null)
+                        {
+                            string quickEditLinkUrl = quickEditLink.GetAttribute("href");
+                            Clipboard.SetText(quickEditLinkUrl);
+                        }
                     }
                     catch (Exception ex)
                     {
@@ -968,7 +971,8 @@ namespace WindowsFormsApp1
             if (insertMode && textBox1.SelectionLength > 0 || !insertMode)
             {
                 undoRecord();
-                overtypeModeSelectedTextSetting(ref textBox1);
+                if (textBox1.SelectionLength == 0)
+                    overtypeModeSelectedTextSetting(ref textBox1);
                 textBox1.SelectedText = "{{" + textBox1.SelectedText + "}}";
             }
         }
@@ -986,6 +990,7 @@ namespace WindowsFormsApp1
             //if (p == 0) return "";///////////watching  if ok  then the comment can be remove 20230617  
             int lineS = preP == -1 ? 0 : preP + Environment.NewLine.Length;
             int lineL = p == -1 ? x.Length - lineS : p - Environment.NewLine.Length - preP;
+            if (lineL < 0) return string.Empty;
             return x.Substring(lineS, lineL);
         }
         /// <summary>
@@ -1651,6 +1656,16 @@ namespace WindowsFormsApp1
             { e.Handled = true; notes_a_line_all(false, true); return; }
             //以上三種皆可Alt + Shift + s :  所有小注文都不換行。
 
+
+            //Ctrl + Alt + + （數字鍵盤加號） ： 同上，唯先將textBox1全選後再執行貼入；即按下此組合鍵則會並不會受插入點所在位置處影響。
+            if (e.Control && e.Alt && e.KeyCode == Keys.Add)
+            {
+                e.Handled = true;
+                textBox1.SelectAll();
+                keyDownCtrlAdd(false);
+                return;
+            }
+
             #endregion
 
 
@@ -1701,6 +1716,7 @@ namespace WindowsFormsApp1
                 }
                 if (e.KeyCode == Keys.F12)
                 {//Ctrl + F12
+                    overtypeModeSelectedTextSetting(ref textBox1);
                     string x = textBox1.SelectedText;
                     e.Handled = true;
                     if (x != "")
@@ -2112,7 +2128,10 @@ namespace WindowsFormsApp1
 
                 if (e.KeyCode == Keys.F7)
                 {//Shift + F7 每行凸排
-                    e.Handled = true; deleteSpacePreParagraphs_ConvexRow(); return;
+                    e.Handled = true; deleteSpacePreParagraphs_ConvexRow();
+                    if (!Active)
+                        bringBackMousePosFrmCenter();
+                    return;
                 }//以上 Shift + F7
 
             }//以上 Shift
@@ -3629,9 +3648,9 @@ namespace WindowsFormsApp1
             {
                 if (x.Substring(i > 3 ? i - 3 : i, 5).IndexOf("<p>") == -1)
                 {
-                    endCode = "<p>" + Environment.NewLine;
+                    endCode = "。<p>" + Environment.NewLine;
                     if (i + 2 + 2 <= x.Length && x.Substring(i + 2, 2) == Environment.NewLine)
-                        endCode = "<p>";
+                        endCode = "。<p>";
                     textBox1.Select(i, 2); textBox1.SelectedText = endCode; endPostion += endCode.Length;
                 }
             }
@@ -5153,9 +5172,11 @@ namespace WindowsFormsApp1
                         {
                             if (textBox1.SelectionStart < textBox1.TextLength)
                             {
-                                MessageBox.Show("請重新指定頁面結束位置", "", MessageBoxButtons.OK, MessageBoxIcon.Stop);
+                                //MessageBox.Show("請重新指定頁面結束位置", "", MessageBoxButtons.OK, MessageBoxIcon.Stop);
+                                Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("請重新指定頁面結束位置");
                                 pageTextEndPosition = 0; pageEndText10 = "";
-                                Activate(); return false;
+                                //Activate(); 
+                                return false;
                             }
                             else
                             {
@@ -6425,7 +6446,9 @@ namespace WindowsFormsApp1
 
                 if (e.KeyCode == Keys.D1)
                 {
-                    runWordMacro("漢籍電子文獻資料庫文本整理_以轉貼到中國哲學書電子化計劃");
+                    //現在少用，故以此機制防制：
+                    if (DialogResult.OK == Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("執行「漢籍電子文獻資料庫文本整理_以轉貼到中國哲學書電子化計劃」？"))
+                        runWordMacro("漢籍電子文獻資料庫文本整理_以轉貼到中國哲學書電子化計劃");
                     e.Handled = true; return;
                 }
                 if (e.KeyCode == Keys.D3)
@@ -8468,8 +8491,10 @@ namespace WindowsFormsApp1
                                         br.GoToUrlandActivate(clpTxt, keyinTextMode);
                                         break;
                                     default:
-                                        throw;
-                                        //break;
+                                        Console.WriteLine(ex.HResult + ex.Message);
+                                        Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
+                                        //throw;
+                                        break;
                                 }
                             }
                             break;
@@ -8555,8 +8580,8 @@ namespace WindowsFormsApp1
             #region 在textBox1內容文字少於100時的檢查，以自行決定其他的操作，如《中國哲學書電子化計劃》清除頁前的分段符號、撤掉與書圖的對應_脫鉤,《國學大師》的《四庫全書》本文等
             if (textBox1.TextLength < 100)
             {
-                //如果剪貼簿裡的文字內容長於500個字元，則執行相關的 Word VBA
-                if (clpTxt.Length > 500)
+                //如果剪貼簿裡的文字內容長於300個字元，則執行相關的 Word VBA
+                if (clpTxt.Length > 300)
                 {
                     //根據剪貼簿裡的文本特徵來作動作
                     if (clpTxt.IndexOf("<scanbegin file=") > -1 && clpTxt.IndexOf(" page=") > -1)
