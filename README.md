@@ -201,6 +201,8 @@ Ctrl + Shift + 6 ：鍵入「}}」(在前面有「{」時，按下 Alt + i 也�
 
 Ctrl + F1 ：選取範圍前後加上{{}}
 
+Ctrl + Shift + F1：選取範圍前後加上{{}}並清除分行/段符號
+
 Alt + Shift + 6 或 Alt + s：小注文不換行：notes_a_line()
 
 Alt + Shift + s : 小注文不換行：notes_a_line_all 

@@ -17,6 +17,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Media;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Automation;
@@ -1992,7 +1993,13 @@ namespace TextForCtext
         /// </summary>
         public static void OCR_GJcool_AccountChanged_Switch()
         {
-            _OCR_GJcool_AccountChanged = !_OCR_GJcool_AccountChanged;
+            //_OCR_GJcool_AccountChanged = !_OCR_GJcool_AccountChanged;
+            _OCR_GJcool_AccountChanged = true;
+
+            //waitFindWebElementBySelector_ToBeClickable("#navbarNav > ul:nth-child(2) > li:nth-child(2) > a > p.mb-0.fs-6.fst-italic").Click();
+            //Thread.Sleep(150);
+            ProtonVPNSwitcher();
+            Thread.Sleep(550);
             Task.Run(() =>
             {
                 openNewTabWindow(WindowType.Tab);
@@ -2001,6 +2008,49 @@ namespace TextForCtext
             ActiveForm1.HideToNICo();//if (ActiveForm1.TopMost) ActiveForm1.TopMost = false;
             //隱藏主表單，以便在切換帳號後，以【按下Shift鍵+滑鼠滑過任務列的表單圖示】，來直接送交《古籍酷》OCR
         }
+
+        [DllImport("user32.dll")]
+        public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
+        [DllImport("user32.dll")]
+        public static extern bool SetForegroundWindow(IntPtr hWnd);
+        [DllImport("user32.dll")]
+        public static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+        //private const int SW_RESTORE = 9;
+        private const int SW_MAXIMIZE = 3; // 使用SW_MAXIMIZE來最大化視窗:chatGPT大菩薩：如果你想將視窗最大化，你可以使用 SW_MAXIMIZE 作為 ShowWindow 函數的參數，而不是 SW_RESTORE。這樣可以確保視窗被最大化，而不僅僅是還原到正常大小。
+        /// <summary>
+        /// 切換ProtonVPN。請將其視窗最大化
+        /// </summary>
+        /// <returns></returns>
+        internal static bool ProtonVPNSwitcher()
+        {
+            string targetProcessName = "Proton VPN";//"ProtonVPN.exe"; // 目標程序的名稱
+
+            // 查找具有指定程式名稱的窗體
+            IntPtr targetWindowHandle = FindWindow(null, targetProcessName);
+
+            if (targetWindowHandle != IntPtr.Zero)
+            {
+                // 將目標窗口切換到最前面
+                ShowWindow(targetWindowHandle, SW_MAXIMIZE);//SW_RESTORE);
+                SetForegroundWindow(targetWindowHandle);
+                /* chatGPT大菩薩：20230926
+                 * 你正確，SetForegroundWindow 方法在視窗最小化時可能無法成功將其切換到最前面。為了解決這個問題，你可以嘗試使用 ShowWindow 函數來將視窗恢復到正常狀態，然後再調用 SetForegroundWindow。這樣可以確保視窗在最前面並且可見。
+                 */
+                Thread.Sleep(150);
+                // 模擬滑鼠左鍵點擊指定座標（Random Connect按鈕）
+                int x = 338;
+                int y = 364;
+                Point copyBtnPos = new Point(x,y);
+                Cursor.Position = copyBtnPos;
+                //ClickLeftMouse(x, y);
+                Thread.Sleep(150); 
+                clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.soundLike.none);
+                return true;
+            }
+            return false;
+        }
+
+
 
         /// <summary>
         /// 《古籍酷》OCR：自動識別(豎版)
@@ -2022,7 +2072,7 @@ namespace TextForCtext
                 //點數（算力值、算力配额）不足逕用「快速體驗」執行
                 if (!OCR_GJcool_AccountChanged && waitGJcoolPoint && DateTime.Now.Subtract(gjCoolPointLess150When) < gjCoolPointEnoughTimespan)
                 {
-
+                    //Form1.playSound(Form1.soundLike.processing);
                     bool fastXResulut = OCR_GJcool_FastExperience(downloadImgFullName);
                     driver.Close();
                     _OCR_GJcool_WindowClosed = true;
@@ -2031,6 +2081,7 @@ namespace TextForCtext
                 }
                 else
                     gjCool = OCRSite_URL[OCRSiteTitle.GJcool]; //"https://gj.cool/try_ocr";
+                //Form1.playSound(Form1.soundLike.processing);
                 if (_OCR_GJcool_AccountChanged) { _OCR_GJcool_AccountChanged = !_OCR_GJcool_AccountChanged; gjCoolPointLess150When = DateTime.Now; }
             }
             catch (Exception ex)
@@ -2101,6 +2152,7 @@ namespace TextForCtext
                 //IWebElement iwe = driver.FindElement(By.CssSelector("#compute-value"));
                 WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(_chromeDriverServiceTimeSpan));
                 iwe = wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementIsVisible(By.CssSelector("#compute-value")));
+                //Form1.playSound(Form1.soundLike.processing);
             }
             catch (Exception ex)
             {
@@ -2138,6 +2190,7 @@ namespace TextForCtext
             }
             if (iwe != null)
             {
+                Form1.playSound(Form1.soundLike.processing);
                 //取得點數，如「 117 / 1000」格式
                 string innerText = iwe.GetAttribute("innerText"); int points = 0;
                 if (innerText.IndexOf(" /") > -1 && " ".Length + innerText.IndexOf(" /") - " ".Length <= innerText.Length)

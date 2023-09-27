@@ -5175,7 +5175,7 @@ namespace WindowsFormsApp1
                                 //MessageBox.Show("請重新指定頁面結束位置", "", MessageBoxButtons.OK, MessageBoxIcon.Stop);
                                 Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("請重新指定頁面結束位置");
                                 pageTextEndPosition = 0; pageEndText10 = "";
-                                //Activate(); 
+                                Activate();
                                 return false;
                             }
                             else
@@ -6252,7 +6252,34 @@ namespace WindowsFormsApp1
 
             }
 
-            //Ctrl + Shift + n 或 Ctrl + Shift + F1 或 Shift + F1 : 開新Form1 實例
+            //Ctrl + Shift + F1：選取範圍前後加上{{}}並清除分行/段符號
+            if (e.Control && e.Shift && e.KeyCode == Keys.F1)
+            {
+                e.Handled = true;
+                if (insertMode && textBox1.SelectionLength > 0 || !insertMode)
+                {
+                    undoRecord();
+                    stopUndoRec = true;
+                    if (textBox1.SelectionLength == 0)
+                        overtypeModeSelectedTextSetting(ref textBox1);
+                    string x = textBox1.SelectedText;
+                    x = "{{" + x.Replace(Environment.NewLine, "") + "}}";
+                    textBox1.SelectedText = x;
+                    //清除後續的分行/段符號
+                    int s = textBox1.SelectionStart, l = textBox1.SelectionLength;
+                    if (textBox1.TextLength > s + l + 2)
+                    {
+                        if (textBox1.Text.Substring(s + l, 2) == Environment.NewLine)
+                        {
+                            textBox1.Select(s + l, 2); textBox1.SelectedText = string.Empty;
+                        }
+                    }
+                    stopUndoRec = false;
+                }
+                return;
+            }
+
+            //Ctrl + Shift + n 或 Shift + F1 : 開新Form1 實例
             if (((m & Keys.Control) == Keys.Control && (m & Keys.Shift) == Keys.Shift && e.KeyCode == Keys.N)
                 || ((m & Keys.Shift) == Keys.Shift && e.KeyCode == Keys.F1))
             {
@@ -9078,7 +9105,7 @@ namespace WindowsFormsApp1
              * 在 C# 中，您可以使用正则表达式来删除给定字符串中的特定字符。以下是删除 punctuationsNum 字符串中的 "《" 和 "〈" 字符的示例代码：……
              * 在这里，我们使用 Regex.Replace 方法将匹配正则表达式模式 [《〈] 的所有字符替换为空字符串。此模式匹配任何包含 "《" 或 "〈" 的字符。
              * */
-            string regexPattern = "[《〈」】〗]", omitSymbols = "●＝{}□■<>*〇○ ⿰⿱" + Environment.NewLine;//輸入缺字構字式●＝＝、及注文標記符{{}}、及標題星號*時不取代
+            string regexPattern = "[《〈」】〗]", omitSymbols = "●＝{}□■<>*〇○ ⿰⿱」』" + Environment.NewLine;//輸入缺字構字式●＝＝、及注文標記符{{}}、及標題星號*時不取代
             checkkeyPressOverTyping_oscarsun72note_Inserting_switch2insertMode(e.KeyChar, regexPattern + omitSymbols);
             string w;//, punctuationsNumWithout前書名號與前篇名號 = Regex.Replace(Form1.punctuationsNum, regexPattern, ""); 
             if (!insertMode
