@@ -1989,24 +1989,112 @@ namespace TextForCtext
         public static bool OCR_GJcool_AccountChanged { get => _OCR_GJcool_AccountChanged; set => _OCR_GJcool_AccountChanged = value; }
 
         /// <summary>
+        /// 計算已經使用的帳戶
+        /// </summary>
+        static int gjcoolAccountCounter = 0;
+        /// <summary>
+        /// 儲存帳的清單：每個元素由帳戶名稱與登入時間組成。登入時間預設為今天（開始設計此機制）的日期20230929
+        /// </summary>
+        internal static List<Tuple<string, DateTime>> GJcoolAccounts = new List<Tuple<string, DateTime>>()
+            { new Tuple<string,DateTime>("oscarsun", DateTime.Parse("2023/9/29")),
+                new Tuple<string,DateTime>("ssz3ulive", DateTime.Parse("2023/9/29")),
+                new Tuple<string,DateTime>("ssz3google", DateTime.Parse("2023/9/29")),
+                new Tuple<string,DateTime>("osyahoo", DateTime.Parse("2023/9/29")),
+                new Tuple<string,DateTime>("osfoxmail", DateTime.Parse("2023/9/29")),
+                new Tuple<string,DateTime>("osqqmail", DateTime.Parse("2023/9/29")),
+                new Tuple<string,DateTime>("997013585", DateTime.Parse("2023/9/29")),
+                new Tuple<string,DateTime>("9401121", DateTime.Parse("2023/9/29")),
+                new Tuple<string,DateTime>("oscarsun72ap1pccu", DateTime.Parse("2023/9/29")),
+                new Tuple<string,DateTime>("g8910512", DateTime.Parse("2023/9/29")),
+                new Tuple<string,DateTime>("g9206508", DateTime.Parse("2023/9/29")),
+                new Tuple<string,DateTime>("92065082", DateTime.Parse("2023/9/29")),
+                new Tuple<string,DateTime>("ossina", DateTime.Parse("2023/9/29")),
+                new Tuple<string,DateTime>("997013587", DateTime.Parse("2023/9/29")),
+                new Tuple<string,DateTime>("997013588", DateTime.Parse("2023/9/29")),
+                new Tuple<string,DateTime>("997013589", DateTime.Parse("2023/9/29")),
+                new Tuple<string,DateTime>("997013584", DateTime.Parse("2023/9/29")),
+                new Tuple<string,DateTime>("997013583", DateTime.Parse("2023/9/29")),
+                new Tuple<string,DateTime>("997013582", DateTime.Parse("2023/9/29")),
+                new Tuple<string,DateTime>("997013580", DateTime.Parse("2023/9/29")),
+                new Tuple<string,DateTime>("997013581", DateTime.Parse("2023/9/29")),
+                new Tuple<string,DateTime>("osprotonme", DateTime.Parse("2023/9/29"))};
+        /// <summary>
         /// 切換《古籍酷》帳戶時用
         /// </summary>
-        public static void OCR_GJcool_AccountChanged_Switch()
+        public static void OCR_GJcool_AccountChanged_Switcher()
         {
             //_OCR_GJcool_AccountChanged = !_OCR_GJcool_AccountChanged;
             _OCR_GJcool_AccountChanged = true;
 
             //waitFindWebElementBySelector_ToBeClickable("#navbarNav > ul:nth-child(2) > li:nth-child(2) > a > p.mb-0.fs-6.fst-italic").Click();
             //Thread.Sleep(150);
+            //bool ProtonVPNOn = ProtonVPNSwitcher();
+            ActiveForm1.TopMost = false;
             ProtonVPNSwitcher();
-            Thread.Sleep(550);
-            Task.Run(() =>
+            Thread.Sleep(5950);
+            //Thread.Sleep(6950);
+            Task ts = Task.Run(() =>
             {
                 openNewTabWindow(WindowType.Tab);
-                driver.Navigate().GoToUrl("https://gj.cool/account");
+                //driver.Navigate().GoToUrl("https://gj.cool/account");
+                driver.Navigate().GoToUrl("https://gj.cool/login");
+
+
             });
+
             ActiveForm1.HideToNICo();//if (ActiveForm1.TopMost) ActiveForm1.TopMost = false;
-            //隱藏主表單，以便在切換帳號後，以【按下Shift鍵+滑鼠滑過任務列的表單圖示】，來直接送交《古籍酷》OCR
+                                     //隱藏主表單，以便在切換帳號後，以【按下Shift鍵+滑鼠滑過任務列的表單圖示】，來直接送交《古籍酷》OCR
+                                     //if (ProtonVPNOn)
+                                     //{
+
+            //我想在0~20個數字中隨機取1個 chatGPT大菩薩、Bing大菩薩 20230929
+
+            Random rand = new Random(); int gjcoolaccountsCount = GJcoolAccounts.Count; int i = 0;
+            if (gjcoolAccountCounter == gjcoolaccountsCount)
+            {
+                for (int j = 0; j < GJcoolAccounts.Count; j++)
+                {
+                    GJcoolAccounts[j] = new Tuple<string, DateTime>(GJcoolAccounts[j].Item1, DateTime.Parse("2023/9/29"));
+                }
+                gjcoolAccountCounter = 0;
+                Form1.playSound(Form1.soundLike.warn);
+            }
+            else
+                gjcoolAccountCounter++;
+            while (GJcoolAccounts[i].Item2 != DateTime.Parse("2023/9/29"))
+            {
+                //if (DateTime.Now.Subtract(GJcoolAccounts[i].Item2).Days > 0)
+                if (DateTime.Now.Subtract(GJcoolAccounts[i].Item2).Hours > 21)
+                {
+                    gjcoolAccountCounter--;
+                    Form1.playSound(Form1.soundLike.exam);
+                    break;
+                }
+                i = rand.Next(0, gjcoolaccountsCount);
+            }
+
+            string currentAccount = GJcoolAccounts[i].Item1;
+            Clipboard.SetText(currentAccount);
+
+            ts.Wait();
+
+            IWebElement ie = waitFindWebElementBySelector_ToBeClickable("#username");
+            if (ie != null)
+            {
+                //ie.Clear();ie.SendKeys(OpenQA.Selenium.Keys.Control + "v");            
+                while (ie.Text != "" || ie.Text == null) ie.Clear();//取得的竟是""，故只能以下行執行了
+                ie.SendKeys(OpenQA.Selenium.Keys.Control + "a");
+                //Thread.Sleep(200);
+                //while(ie.Text != "") ie.Clear();
+                ie.SendKeys(currentAccount);
+                //將插入點置於輸入「驗證碼」處：
+                waitFindWebElementBySelector_ToBeClickable("#captcha").Click();//此方法無法將鍵入輸入之插入點實際切換到此方塊內，故須以下行執行
+                SendKeys.Send("{tab 14}");//driver.Navigate().GoToUrl("https://gj.cool/login");
+                //SendKeys.Send("{tab 15}");//driver.Navigate().GoToUrl("https://gj.cool/account");
+                Form1.playSound(Form1.soundLike.done);
+                GJcoolAccounts[i] = new Tuple<string, DateTime>(GJcoolAccounts[i].Item1, DateTime.Now);
+
+            }
         }
 
         [DllImport("user32.dll")]
@@ -2040,10 +2128,10 @@ namespace TextForCtext
                 // 模擬滑鼠左鍵點擊指定座標（Random Connect按鈕）
                 int x = 338;
                 int y = 364;
-                Point copyBtnPos = new Point(x,y);
+                Point copyBtnPos = new Point(x, y);
                 Cursor.Position = copyBtnPos;
                 //ClickLeftMouse(x, y);
-                Thread.Sleep(150); 
+                Thread.Sleep(150);
                 clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.soundLike.none);
                 return true;
             }
@@ -2588,11 +2676,12 @@ namespace TextForCtext
                     return false;
                 }
 
-                //Thread.Sleep(450);
+                task.Wait();
+                Thread.Sleep(450);//待寫入剪貼簿
 
                 if (Clipboard.GetText() != "") goto finish;
 
-                task.Wait();
+
                 task = Task.Run(async delegate
                 {
                     await Task.Run(async () =>
@@ -2601,7 +2690,9 @@ namespace TextForCtext
                         {
                             Thread.Sleep(850);
                             await Task.Run(async () => { await clickCopybutton_GjcoolFastExperience(copyBtnPos); });
-                            //tk1.Wait();
+
+                            Thread.Sleep(250);//等寫入剪貼簿
+
 
                             if (Clipboard.GetText() == "")
                             {
@@ -2814,6 +2905,8 @@ namespace TextForCtext
                 Form1.playSound(soundlike);
                 MouseOperations.MouseEventMousePos(MouseOperations.MouseEventFlags.LeftDown, copyBtnPos);
                 MouseOperations.MouseEventMousePos(MouseOperations.MouseEventFlags.LeftUp, copyBtnPos);
+                //Thread.Sleep(150);//讓複製功能讀入剪貼簿。
+                Task.WaitAll();
             });
         }
 

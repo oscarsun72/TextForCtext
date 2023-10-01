@@ -459,7 +459,7 @@ namespace WindowsFormsApp1
                                 string text = br.CopyQuickedit_data_textboxText();//ie.Text ?? "";
                                 CnText.BooksPunctuation(ref text, false);
                                 textBox1.Text = text;
-                                if (Clipboard.GetText() != text)//CopyQuickedit_data_textboxText已用到等價 SetText 的方法了
+                                if (Clipboard.GetText() != text&&text!="")//CopyQuickedit_data_textboxText已用到等價 SetText 的方法了
                                     Clipboard.SetText(text);
                             }
                             if (!Active)
@@ -2134,6 +2134,39 @@ namespace WindowsFormsApp1
                     return;
                 }//以上 Shift + F7
 
+                if (e.KeyCode == Keys.F8)//20230929實歲五十一之生日
+                {//Shift + F8 ： 加上篇名格式代碼並前置2個全形空格
+                    //Shift + F8 ： 加上篇名格式代碼並前置N個全形空格.N，預設為2.且可在執行此項時，選取空格數以重設篇名前要空的格數
+                    e.Handled = true;
+                    //若有選取全形空格數，則據以前置其數量，否則預設為2
+                    int spaceCnt = 2;
+                    //重設篇名前的全形空格（spaceStrBreforeTitle）之值
+                    if (textBox1.SelectedText.IndexOf("　") > -1 && textBox1.SelectedText.Replace("　", "") == string.Empty)
+                    {
+                        spaceCnt = textBox1.SelectedText.Length;
+                        spaceStrBreforeTitle = "";
+                        for (int i = 0; i < spaceCnt; i++)
+                        {
+                            spaceStrBreforeTitle += "　";
+                        }
+                    }
+                    keysTitleCode();
+                    stopUndoRec = true;
+                    if (textBox1.SelectionStart > 1 && textBox1.Text.Substring(textBox1.SelectionStart - 2, 2) == Environment.NewLine)
+                        textBox1.Select(textBox1.SelectionStart - 2, 0);
+                    int sPre = textBox1.Text.LastIndexOf(Environment.NewLine, textBox1.SelectionStart);
+                    sPre = sPre == -1 ? 0 : sPre + 2;
+                    textBox1.Select(sPre, textBox1.SelectionStart - sPre);
+                    if (!textBox1.SelectedText.StartsWith("　"))
+                        textBox1.SelectedText = spaceStrBreforeTitle + textBox1.SelectedText;
+                    stopUndoRec = false;
+                    if (!Active)
+                        bringBackMousePosFrmCenter();
+                    return;
+                }//以上 Shift + F8
+
+
+
             }//以上 Shift
             #endregion
 
@@ -3504,6 +3537,10 @@ namespace WindowsFormsApp1
             textBox1.Select(ss, 0); textBox1.ScrollToCaret();
         }
         /// <summary>
+        /// 篇名前的全形空格字串，預設為2個全形空格
+        /// </summary>
+        string spaceStrBreforeTitle = "　　";
+        /// <summary>
         /// 篇名標題標注
         /// 加上篇名格式代碼
         /// </summary>
@@ -3535,8 +3572,8 @@ namespace WindowsFormsApp1
                         if (i == l) break;
                     }
                     s = i;
-                }
-                string titieBeginChar = x.Substring(i == 0 ? i : i--, 1);
+                }                
+                string titieBeginChar = x.Substring(i == 0 ? i : --i, 1);//若寫成「i--」，則在 i==x.Length時會出現錯誤，因為為--i是先減再用，而i--則是先用再減，先用，則第2個引數就會超出x的長度 20230930
                 while (titieBeginChar != "　" &&
                     titieBeginChar != Environment.NewLine.Substring(Environment.NewLine.Length - 1, 1))
                 {
@@ -8942,7 +8979,7 @@ namespace WindowsFormsApp1
                 if (x == "gjk" || x == "gg" || x == "kk")
                 {
                     pauseEvents();
-                    textBox2.Text = ""; resumeEvents(); br.OCR_GJcool_AccountChanged_Switch(); return;
+                    textBox2.Text = ""; resumeEvents(); br.OCR_GJcool_AccountChanged_Switcher(); return;
                 }
             #endregion
 
@@ -9105,7 +9142,8 @@ namespace WindowsFormsApp1
              * 在 C# 中，您可以使用正则表达式来删除给定字符串中的特定字符。以下是删除 punctuationsNum 字符串中的 "《" 和 "〈" 字符的示例代码：……
              * 在这里，我们使用 Regex.Replace 方法将匹配正则表达式模式 [《〈] 的所有字符替换为空字符串。此模式匹配任何包含 "《" 或 "〈" 的字符。
              * */
-            string regexPattern = "[《〈」】〗]", omitSymbols = "●＝{}□■<>*〇○ ⿰⿱」』" + Environment.NewLine;//輸入缺字構字式●＝＝、及注文標記符{{}}、及標題星號*時不取代
+            if (e.KeyChar == " ".ToCharArray()[0]) return;//半形空格可被輸入、被取代，而不能取代別人
+            string regexPattern = "[《〈」】〗]", omitSymbols = "●＝{}□■<>*〇○⿰⿱」』" + Environment.NewLine;//輸入缺字構字式●＝＝、及注文標記符{{}}、及標題星號*時不取代
             checkkeyPressOverTyping_oscarsun72note_Inserting_switch2insertMode(e.KeyChar, regexPattern + omitSymbols);
             string w;//, punctuationsNumWithout前書名號與前篇名號 = Regex.Replace(Form1.punctuationsNum, regexPattern, ""); 
             if (!insertMode

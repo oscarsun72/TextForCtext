@@ -302,6 +302,8 @@ Alt + F7 : 每行縮排一格後將其末誤標之\<p\>清除:keysSpacePreParagr
 
 F8 或 Alt + ` ： 加上篇名格式代碼
 
+Shift + F8 ： 加上篇名格式代碼並前置N個全形空格.N，預設為2.且可在執行此項時，選取空格數以重設篇名前要空的格數
+
 F11 : run replaceXdirrectly() 維基文庫等欲直接抽換之字
 
 Ctrl + h ：移至 textBox4 準備取代文本文字

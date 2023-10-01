@@ -8,6 +8,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using WindowsFormsApp1;
 using System.Windows.Forms;
+using System.Diagnostics;
 //using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 //using static System.Net.Mime.MediaTypeNames;
 //using System.Reflection;
@@ -356,6 +357,7 @@ namespace TextForCtext
             StringBuilder sb = new StringBuilder();//bool isUnicodeCharacters=false;
             foreach (char c in text)//這行設中斷點暫停，可以明白各個字元究竟在哪個UnicodeCategory中  https://learn.microsoft.com/zh-tw/dotnet/api/system.globalization.unicodecategory?view=netframework-4.8 可配合Form1_Activated()事件程序中來測試
             {
+                //if (c == "〇".ToCharArray()[0]) Debugger.Break();
                 switch (System.Globalization.CharUnicodeInfo.GetUnicodeCategory(c))
                 {
                     case UnicodeCategory.UppercaseLetter:
@@ -378,6 +380,7 @@ namespace TextForCtext
                     case UnicodeCategory.DecimalDigitNumber://[0-9]
                         break;
                     case UnicodeCategory.LetterNumber:
+                        if (c == "〇".ToCharArray()[0]) sb.Append(c);
                         break;
                     case UnicodeCategory.OtherNumber:
                         break;
@@ -471,7 +474,7 @@ namespace TextForCtext
             if (text.Length == 0) return false;
             if (text.Length > 1000)
             {
-                Regex regex = new Regex(@"\，|\。|\？|\！|\〈|\〉|\《|\》|\：|\『|\』|\「|\」|\􏿽|、|●|□|■|·|\*\*|\{\{\{|\}\}\}|\||〇|　}}|\*　");
+                Regex regex = new Regex(@"\，|\。|\？|\！|\〈|\〉|\《|\》|\：|\『|\』|\「|\」|\􏿽|、|●|□|■|·|\*\*|\{\{\{|\}\}\}|\||〇|{{　|　}}|\*　");
                 Match match = regex.Match(text);
                 return match.Success;
             }
@@ -485,7 +488,7 @@ namespace TextForCtext
                     || text.Contains("□") || text.Contains("■")
                     || text.Contains("●") || text.Contains("、")
                     || text.Contains("·") || text.Contains("**")
-                    || text.Contains("|") || text.Contains("　}}")
+                    || text.Contains("|") || text.Contains("　}}") || text.Contains("{{　")
                     || text.Contains("〇") || text.Contains("*　")
                     || text.Contains(@"{{{") || text.Contains(@"}}}"));
             }
