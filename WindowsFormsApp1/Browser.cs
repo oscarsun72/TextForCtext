@@ -2017,7 +2017,40 @@ namespace TextForCtext
                 new Tuple<string,DateTime>("997013582", DateTime.Parse("2023/9/29")),
                 new Tuple<string,DateTime>("997013580", DateTime.Parse("2023/9/29")),
                 new Tuple<string,DateTime>("997013581", DateTime.Parse("2023/9/29")),
-                new Tuple<string,DateTime>("osprotonme", DateTime.Parse("2023/9/29"))};
+                new Tuple<string,DateTime>("osprotonme", DateTime.Parse("2023/9/29")),
+                new Tuple<string,DateTime>("ssz3Proton", DateTime.Parse("2023/9/29")),
+                new Tuple<string,DateTime>("ssz2Proton", DateTime.Parse("2023/9/29")),
+                new Tuple<string,DateTime>("ssz1Proton", DateTime.Parse("2023/9/29")),
+                new Tuple<string,DateTime>("sszProton", DateTime.Parse("2023/9/29")),
+                new Tuple<string,DateTime>("osproton", DateTime.Parse("2023/9/29")),
+                new Tuple<string,DateTime>("osprotonssz", DateTime.Parse("2023/9/29")),
+                new Tuple<string,DateTime>("protonmeos", DateTime.Parse("2023/9/29")),
+                new Tuple<string,DateTime>("protonos", DateTime.Parse("2023/9/29")),
+                new Tuple<string,DateTime>("ossszproton", DateTime.Parse("2023/9/29")),
+                new Tuple<string,DateTime>("sszprotonos", DateTime.Parse("2023/9/29")),
+                new Tuple<string,DateTime>("28324674", DateTime.Parse("2023/9/29")),
+                new Tuple<string,DateTime>("protonsun", DateTime.Parse("2023/9/29")),
+                new Tuple<string,DateTime>("0936158941", DateTime.Parse("2023/9/29")),
+                new Tuple<string,DateTime>("philipssun", DateTime.Parse("2023/9/29")),
+                new Tuple<string,DateTime>("sunchouchen", DateTime.Parse("2023/9/29")),
+                new Tuple<string,DateTime>("sunshouzhen", DateTime.Parse("2023/9/29")),
+                new Tuple<string,DateTime>("renzhen", DateTime.Parse("2023/9/29")),
+                new Tuple<string,DateTime>("Buddhistdisciple", DateTime.Parse("2023/9/29")),
+                new Tuple<string,DateTime>("chiefsun", DateTime.Parse("2023/9/29")),
+                new Tuple<string,DateTime>("ambilight", DateTime.Parse("2023/9/29")),
+                new Tuple<string,DateTime>("ambilighttv", DateTime.Parse("2023/9/29")),
+                new Tuple<string,DateTime>("oscarsun72maggie", DateTime.Parse("2023/9/29")),
+                new Tuple<string,DateTime>("amituofo", DateTime.Parse("2023/9/29")),
+                new Tuple<string,DateTime>("Amitabha", DateTime.Parse("2023/9/29")),
+                new Tuple<string,DateTime>("AmidaBuddha", DateTime.Parse("2023/9/29")),
+                new Tuple<string,DateTime>("AmitabhaBuddha", DateTime.Parse("2023/9/29")),
+                new Tuple<string,DateTime>("simplesetupapp", DateTime.Parse("2023/9/29")),
+                new Tuple<string,DateTime>("gjcool", DateTime.Parse("2023/9/29")),
+                new Tuple<string,DateTime>("ilovegjcool", DateTime.Parse("2023/9/29")),
+                new Tuple<string,DateTime>("gjcoolocr", DateTime.Parse("2023/9/29")),
+                new Tuple<string,DateTime>("TextForCtext", DateTime.Parse("2023/9/29")),
+                new Tuple<string,DateTime>("thanksxianchaofashi", DateTime.Parse("2023/9/29")),
+                new Tuple<string,DateTime>("xianchaofashi", DateTime.Parse("2023/9/29")) };
         /// <summary>
         /// 切換《古籍酷》帳戶時用
         /// </summary>
@@ -2660,7 +2693,7 @@ namespace TextForCtext
                 //MouseOperations.MouseEventMousePos(MouseOperations.MouseEventFlags.LeftUp, copyBtnPos);
                 ////Form1.playSound(Form1.soundLike.info);
                 //clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.soundLike.none);
-                task = Task.Run(() => { clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.soundLike.none); });
+                task = Task.Run(() => { clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.soundLike.press); });
 
 
                 /*Bing大菩薩：您好，`MouseOperations` 不是 C# 的内置类。它是一个自定义类，您可以在 Stack Overflow 上找到它的源代码。您可以将这些代码复制到您的项目中，然后使用它来模拟鼠标点击。
@@ -2691,15 +2724,15 @@ namespace TextForCtext
                             Thread.Sleep(850);
                             await Task.Run(async () => { await clickCopybutton_GjcoolFastExperience(copyBtnPos); });
 
-                            Thread.Sleep(250);//等寫入剪貼簿
-
+                            Thread.Sleep(950);//等寫入剪貼簿
 
                             if (Clipboard.GetText() == "")
                             {
-                                Thread.Sleep(450);
+                                //Thread.Sleep(450);
                                 await Task.Run(async () => { await clickCopybutton_GjcoolFastExperience(copyBtnPos); });
                                 //Task tk2 = Task.Run(() => { clickCopybutton_GjcoolFastExperience(copyBtnPos); });
                                 //tk2.Wait();
+                                Thread.Sleep(950);
                                 if (Clipboard.GetText() == "")
                                 {
                                     Thread.Sleep(950);

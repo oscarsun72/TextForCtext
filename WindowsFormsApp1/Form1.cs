@@ -459,7 +459,7 @@ namespace WindowsFormsApp1
                                 string text = br.CopyQuickedit_data_textboxText();//ie.Text ?? "";
                                 CnText.BooksPunctuation(ref text, false);
                                 textBox1.Text = text;
-                                if (Clipboard.GetText() != text&&text!="")//CopyQuickedit_data_textboxText已用到等價 SetText 的方法了
+                                if (Clipboard.GetText() != text && text != "")//CopyQuickedit_data_textboxText已用到等價 SetText 的方法了
                                     Clipboard.SetText(text);
                             }
                             if (!Active)
@@ -3572,7 +3572,7 @@ namespace WindowsFormsApp1
                         if (i == l) break;
                     }
                     s = i;
-                }                
+                }
                 string titieBeginChar = x.Substring(i == 0 ? i : --i, 1);//若寫成「i--」，則在 i==x.Length時會出現錯誤，因為為--i是先減再用，而i--則是先用再減，先用，則第2個引數就會超出x的長度 20230930
                 while (titieBeginChar != "　" &&
                     titieBeginChar != Environment.NewLine.Substring(Environment.NewLine.Length - 1, 1))
@@ -3860,15 +3860,18 @@ namespace WindowsFormsApp1
 
         int indentRow()
         {//每行縮排 //此函式執行完時會將執行結果的範圍選取，以便後續處理。傳回值為處理了幾行/段
-            int s = textBox1.SelectionStart; int l = textBox1.SelectionLength; String xn = "", x = textBox1.Text;
+            int s = textBox1.SelectionStart; int l = textBox1.SelectionLength; String xn, x = textBox1.Text;
             bool stopUndoRecFlag = false;
             if (textBox1.SelectedText == "")//全部縮排的機會少，若要全部，則請將插入點放在全文前端或末尾
             {
-                if (s == 0 || s == textBox1.TextLength)
+                if (s == 0 || s == textBox1.TextLength || (s == textBox1.TextLength - 2 && textBox1.Text.Substring(s, 2) == Environment.NewLine))
                 {
                     if (!keyinTextMode) pasteAllOverWrite = true;
-                    textBox1.SelectAll();
-                    l = textBox1.TextLength;
+                    if (s == textBox1.TextLength - 2 && textBox1.Text.Substring(s, 2) == Environment.NewLine)
+                    {
+                        textBox1.Text = textBox1.Text.Substring(0, s);
+                    }
+                    textBox1.SelectAll(); s = 0; l = textBox1.TextLength;
                 }
                 //已有「expandSelectedTextRangeToWholeLinePara」此行當不必下行
                 //else { textBox1.Select(s, 1); l = 1; }
@@ -6830,7 +6833,7 @@ namespace WindowsFormsApp1
                 //saveText();
                 //清除英數字（OCR辨識誤讀者）                //加上書名號篇名號
                 undoRecord();//以便還原
-                textBox1.Text = CnText.BooksPunctuation(ref CnText.ClearOthers_ExceptUnicodeCharacters(ref x), false);
+                textBox1.Text = CnText.BooksPunctuation(ref CnText.ClearOthers_ExceptUnicodeCharacters(ref x), true);
                 //textBox1.Text = CnText.BooksPunctuation(ref CnText.ClearLettersAndDigits_UseUnicodeCategory(ref x));//清不掉「-」
                 //textBox1.Text = CnText.BooksPunctuation(ref CnText.ClearLettersAndDigits(ref x));
 
