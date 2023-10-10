@@ -2135,33 +2135,9 @@ namespace WindowsFormsApp1
                 }//以上 Shift + F7
 
                 if (e.KeyCode == Keys.F8)//20230929實歲五十一之生日
-                {//Shift + F8 ： 加上篇名格式代碼並前置2個全形空格
-                    //Shift + F8 ： 加上篇名格式代碼並前置N個全形空格.N，預設為2.且可在執行此項時，選取空格數以重設篇名前要空的格數
+                {
                     e.Handled = true;
-                    //若有選取全形空格數，則據以前置其數量，否則預設為2
-                    int spaceCnt = 2;
-                    //重設篇名前的全形空格（spaceStrBreforeTitle）之值
-                    if (textBox1.SelectedText.IndexOf("　") > -1 && textBox1.SelectedText.Replace("　", "") == string.Empty)
-                    {
-                        spaceCnt = textBox1.SelectedText.Length;
-                        spaceStrBreforeTitle = "";
-                        for (int i = 0; i < spaceCnt; i++)
-                        {
-                            spaceStrBreforeTitle += "　";
-                        }
-                    }
-                    keysTitleCode();
-                    stopUndoRec = true;
-                    if (textBox1.SelectionStart > 1 && textBox1.Text.Substring(textBox1.SelectionStart - 2, 2) == Environment.NewLine)
-                        textBox1.Select(textBox1.SelectionStart - 2, 0);
-                    int sPre = textBox1.Text.LastIndexOf(Environment.NewLine, textBox1.SelectionStart);
-                    sPre = sPre == -1 ? 0 : sPre + 2;
-                    textBox1.Select(sPre, textBox1.SelectionStart - sPre);
-                    if (!textBox1.SelectedText.StartsWith("　"))
-                        textBox1.SelectedText = spaceStrBreforeTitle + textBox1.SelectedText;
-                    stopUndoRec = false;
-                    if (!Active)
-                        bringBackMousePosFrmCenter();
+                    keysTitleCodeAndPreWideSpace();
                     return;
                 }//以上 Shift + F8
 
@@ -2195,7 +2171,7 @@ namespace WindowsFormsApp1
                 }
 
                 if (e.KeyCode == Keys.OemPeriod)
-                {
+                {// Alt + . //插入書名、篇名號中間符號
                     insertWords("·", textBox1, textBox1.Text);
                     e.Handled = true;
                     return;
@@ -2503,6 +2479,13 @@ namespace WindowsFormsApp1
                     return;
                 }
 
+                if (e.KeyCode == Keys.Pause)//20231005
+                {//Shift + F8 或 Alt + Pause ： 加上篇名格式代碼並前置N個全形空格.N，預設為2.且可在執行此項時，選取空格數以重設篇名前要空的格數
+                    e.Handled = true;
+                    keysTitleCodeAndPreWideSpace();
+                    return;
+                }
+
                 /*20230723Bing大菩薩：
                                  您可以在 KeyDown 事件中檢查是否按下了「Alt + [」組合鍵。在 KeyEventArgs 中，您可以使用 e.Modifiers 屬性來檢查是否按下了修飾鍵（例如 Alt），並使用 e.KeyCode 屬性來檢查是否按下了其他鍵（例如 [）。以下是一個示例代碼：
                         請注意，您需要將 Form 的 KeyPreview 屬性設置為 true，才能使此代碼正常工作。¹
@@ -2634,6 +2617,38 @@ namespace WindowsFormsApp1
                 }
             }//以上按下單一鍵
             #endregion
+        }
+
+        /// <summary>
+        /// Shift + F8 或 Alt + Pause ： 加上篇名格式代碼並前置2個全形空格
+        /// 加上篇名格式代碼並前置N個全形空格.N，預設為2.且可在執行此項時，選取空格數以重設篇名前要空的格數
+        /// </summary>
+        private void keysTitleCodeAndPreWideSpace()
+        {
+            //若有選取全形空格數，則據以前置其數量，否則預設為2
+            int spaceCnt = 2;
+            //重設篇名前的全形空格（spaceStrBreforeTitle）之值
+            if (textBox1.SelectedText.IndexOf("　") > -1 && textBox1.SelectedText.Replace("　", "") == string.Empty)
+            {
+                spaceCnt = textBox1.SelectedText.Length;
+                spaceStrBreforeTitle = "";
+                for (int i = 0; i < spaceCnt; i++)
+                {
+                    spaceStrBreforeTitle += "　";
+                }
+            }
+            keysTitleCode();
+            stopUndoRec = true;
+            if (textBox1.SelectionStart > 1 && textBox1.Text.Substring(textBox1.SelectionStart - 2, 2) == Environment.NewLine)
+                textBox1.Select(textBox1.SelectionStart - 2, 0);
+            int sPre = textBox1.Text.LastIndexOf(Environment.NewLine, textBox1.SelectionStart);
+            sPre = sPre == -1 ? 0 : sPre + 2;
+            textBox1.Select(sPre, textBox1.SelectionStart - sPre);
+            if (!textBox1.SelectedText.StartsWith("　"))
+                textBox1.SelectedText = spaceStrBreforeTitle + textBox1.SelectedText;
+            stopUndoRec = false;
+            if (!Active)
+                bringBackMousePosFrmCenter();
         }
 
 
@@ -3573,15 +3588,21 @@ namespace WindowsFormsApp1
                     }
                     s = i;
                 }
-                string titieBeginChar = x.Substring(i == 0 ? i : --i, 1);//若寫成「i--」，則在 i==x.Length時會出現錯誤，因為為--i是先減再用，而i--則是先用再減，先用，則第2個引數就會超出x的長度 20230930
-                while (titieBeginChar != "　" &&
-                    titieBeginChar != Environment.NewLine.Substring(Environment.NewLine.Length - 1, 1))
+
+                if (!(s > 1 && x.Substring(s - 2, 2) == Environment.NewLine))
                 {
-                    if (i == 0) break;
-                    titieBeginChar = x.Substring(i == 0 ? i : i--, 1);
+                    string titieBeginChar = x.Substring(i == 0 ? i : --i, 1);//若寫成「i--」，則在 i==x.Length時會出現錯誤，因為為--i是先減再用，而i--則是先用再減，先用，則第2個引數就會超出x的長度 20230930
+                    while (titieBeginChar != "　" &&
+                        titieBeginChar != Environment.NewLine.Substring(Environment.NewLine.Length - 1, 1))
+                    {
+                        if (i == 0) break;
+                        titieBeginChar = x.Substring(i == 0 ? i : i--, 1);
+                    }
+                    if (i != 0)
+                        s = i + 2;
+                    else s = i;
                 }
-                if (i != 0) s = i + 2;
-                else s = i;
+
                 //借用x變數，取得插入點後的文字
                 x = x.Substring(s);
                 for (int j = 0; j + 2 <= x.Length; j++)
@@ -4546,6 +4567,8 @@ namespace WindowsFormsApp1
 
             if (se.Replace("●", "") == "") textBox1.Text = textBox1.Text.Substring(e + 2);//●●●●●●●●乃作為權訂每行字數之參考，故可刪去
                                                                                           //if (countWordsLenPerLinePara(se) == wordsPerLinePara && se.Replace("●", "") == "") textBox1.Text = textBox1.Text.Substring(e + 2);
+
+            string p = keyinTextMode ? "。<p>" : "<p>";
             if (wordsPerLinePara == -1)
             {
                 wordsPerLinePara = l;
@@ -4555,7 +4578,7 @@ namespace WindowsFormsApp1
             {
                 if (se.IndexOf("<p>") == -1 && se.IndexOf("*") == -1 && countWordsLenPerLinePara(se) < wordsPerLinePara)
                 {
-                    textBox1.Text = textBox1.Text.Substring(0, e) + "<p>"
+                    textBox1.Text = textBox1.Text.Substring(0, e) + p//"<p>"
                         + textBox1.Text.Substring(e);
                     e += 3;//"<p>".length
                 }
@@ -4602,7 +4625,7 @@ namespace WindowsFormsApp1
                                         tx.Substring(tx.LastIndexOf(Environment.NewLine, e) + 2, e - tx.LastIndexOf(Environment.NewLine, e) - 2)
                                         , cnt, rst))
                                     {
-                                        textBox1.SelectedText = "<p>";
+                                        textBox1.SelectedText = p;//"<p>";
                                         e += 3;
                                         if ((int)rst.AbsolutePosition > 1) rst.MoveFirst();
                                     }
@@ -4615,14 +4638,14 @@ namespace WindowsFormsApp1
                                 }
                                 else
                                 {
-                                    textBox1.SelectedText = "<p>";
+                                    textBox1.SelectedText = p;//"<p>";
                                     e += 3;
                                 }
                             }
                             else
                             {
                                 textBox1.Select(e, 0);
-                                textBox1.SelectedText = "<p>";
+                                textBox1.SelectedText = p;//"<p>";
                                 e += 3;
                                 if (topLine)
                                 {
@@ -4658,7 +4681,7 @@ namespace WindowsFormsApp1
                                             (tx.Substring(e + 2, 2) == "{{" && "　􏿽".IndexOf(se.Substring(2, 1)) == -1))
                                         {
                                             textBox1.Select(e, 0);
-                                            textBox1.SelectedText = "<p>";
+                                            textBox1.SelectedText = p;//"<p>";
                                             e += 3;
                                         }
                                         else
@@ -4674,7 +4697,7 @@ namespace WindowsFormsApp1
                                                 if (new StringInfo(tx.Substring(e + 2, isp)).LengthInTextElements > spaceCnt)
                                                 {
                                                     textBox1.Select(e, 0);
-                                                    textBox1.SelectedText = "<p>";
+                                                    textBox1.SelectedText = p;//"<p>";
                                                     e += 3;
                                                 }
                                             }
@@ -4691,7 +4714,11 @@ namespace WindowsFormsApp1
             fillSpace_to_PinchNote_in_LineStart();
             playSound(soundLike.over);
             if (topLine) { rst.Close(); cnt.Close(); rst = null; cnt = null; }
-            textBox1.Select(rs, rl); textBox1.ScrollToCaret();
+            if (keyinTextMode)
+                textBox1.Select(textBox1.TextLength, 0);
+            else
+                textBox1.Select(rs, rl);
+            textBox1.ScrollToCaret();
             TopMost = topmost;
         }
 
@@ -8982,7 +9009,12 @@ namespace WindowsFormsApp1
                 if (x == "gjk" || x == "gg" || x == "kk")
                 {
                     pauseEvents();
-                    textBox2.Text = ""; resumeEvents(); br.OCR_GJcool_AccountChanged_Switcher(); return;
+                    textBox2.Text = ""; resumeEvents();
+                    if (x == "gjk")
+                        br.OCR_GJcool_AccountChanged = true;
+                    else
+                        br.OCR_GJcool_AccountChanged_Switcher();
+                    return;
                 }
             #endregion
 

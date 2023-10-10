@@ -93,6 +93,7 @@ namespace TextForCtext
             {
                 { OCRSiteTitle.GoogleKeep, "https://keep.new" }, // maps the key "GoogleKeep" to the value "https://keep.new"
                 {OCRSiteTitle.GJcool, "https://gj.cool/try_ocr" } // maps the key "GJcool" to the value "https://gj.cool/try_ocr"
+                //{OCRSiteTitle.GJcool, "https://ocr.gj.cool/try_ocr" } // maps the key "GJcool" to the value "https://gj.cool/try_ocr"
             };
         /// <summary>
         /// 儲存常用的網站名
@@ -2049,6 +2050,8 @@ namespace TextForCtext
                 new Tuple<string,DateTime>("ilovegjcool", DateTime.Parse("2023/9/29")),
                 new Tuple<string,DateTime>("gjcoolocr", DateTime.Parse("2023/9/29")),
                 new Tuple<string,DateTime>("TextForCtext", DateTime.Parse("2023/9/29")),
+                new Tuple<string,DateTime>("touchvpn", DateTime.Parse("2023/9/29")),
+                new Tuple<string,DateTime>("ivacyvpn", DateTime.Parse("2023/9/29")),
                 new Tuple<string,DateTime>("thanksxianchaofashi", DateTime.Parse("2023/9/29")),
                 new Tuple<string,DateTime>("xianchaofashi", DateTime.Parse("2023/9/29")) };
         /// <summary>
@@ -2063,15 +2066,17 @@ namespace TextForCtext
             //Thread.Sleep(150);
             //bool ProtonVPNOn = ProtonVPNSwitcher();
             ActiveForm1.TopMost = false;
-            ProtonVPNSwitcher();
+            if (!ProtonVPNSwitcher()) if (!IvacyVPNSwitcher()) IvacyVPNExtensionSwitcher();
             Thread.Sleep(5950);
             //Thread.Sleep(6950);
             Task ts = Task.Run(() =>
             {
                 openNewTabWindow(WindowType.Tab);
                 //driver.Navigate().GoToUrl("https://gj.cool/account");
-                driver.Navigate().GoToUrl("https://gj.cool/login");
-
+                //driver.Navigate().GoToUrl("https://gj.cool/login");
+                driver.Navigate().GoToUrl("https://gj.cool/login?next=%2Ftry_ocr");
+                //driver.Navigate().GoToUrl("https://ocr.gj.cool/login?next=%2Faccount");
+                //https://ocr.gj.cool/login?next=%2Ftry_ocr
 
             });
 
@@ -2136,12 +2141,42 @@ namespace TextForCtext
         public static extern bool SetForegroundWindow(IntPtr hWnd);
         [DllImport("user32.dll")]
         public static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
-        //private const int SW_RESTORE = 9;
+        private const int SW_RESTORE = 9;
         private const int SW_MAXIMIZE = 3; // 使用SW_MAXIMIZE來最大化視窗:chatGPT大菩薩：如果你想將視窗最大化，你可以使用 SW_MAXIMIZE 作為 ShowWindow 函數的參數，而不是 SW_RESTORE。這樣可以確保視窗被最大化，而不僅僅是還原到正常大小。
+
+        /// <summary>
+        /// 切換IvacyVPN擴充功能。
+        /// </summary>
+        /// <returns>成功則傳回true</returns>
+        internal static bool IvacyVPNExtensionSwitcher()
+        {
+            Point copyBtnPos = new Point(1739, 55);//擴充功能顯示清單中最右邊的位置
+            Cursor.Position = copyBtnPos;
+            //ClickLeftMouse(x, y);
+            //Thread.Sleep(150);
+            clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.soundLike.press);
+            Thread.Sleep(450);
+            //copyBtnPos = new Point(1597, 295);//連接（Connect）按鈕位置
+            copyBtnPos = new Point(1595, 333);//連接（Connect）按鈕位置（此與TouchVPN的有交集）
+            Cursor.Position = copyBtnPos;
+            clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.soundLike.over);
+            Thread.Sleep(250);
+            copyBtnPos = new Point(1700, 160);//TouchVPN的Stop按鈕
+            Cursor.Position = copyBtnPos;
+            clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.soundLike.over);
+            Thread.Sleep(2400);//TouchVPN比較久
+            copyBtnPos = new Point(1595, 333);
+            Cursor.Position = copyBtnPos;
+            clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.soundLike.done);
+            Thread.Sleep(150);
+            SendKeys.Send("{esc}");
+            return true;
+
+        }
         /// <summary>
         /// 切換ProtonVPN。請將其視窗最大化
         /// </summary>
-        /// <returns></returns>
+        /// <returns>成功則傳回true</returns>
         internal static bool ProtonVPNSwitcher()
         {
             string targetProcessName = "Proton VPN";//"ProtonVPN.exe"; // 目標程序的名稱
@@ -2165,6 +2200,41 @@ namespace TextForCtext
                 Cursor.Position = copyBtnPos;
                 //ClickLeftMouse(x, y);
                 Thread.Sleep(150);
+                clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.soundLike.none);
+                return true;
+            }
+            return false;
+        }
+        /// <summary>
+        /// 切換IvacyVPN。請將其視窗最大化
+        /// </summary>
+        /// <returns>成功則傳回true</returns>
+        internal static bool IvacyVPNSwitcher()
+        {
+            string targetProcessName = "Ivacy"; // 目標程序的名稱
+
+            // 查找具有指定程式名稱的窗體
+            IntPtr targetWindowHandle = FindWindow(null, targetProcessName);
+
+            if (targetWindowHandle != IntPtr.Zero)
+            {
+                // 將目標窗口切換到最前面
+                //ShowWindow(targetWindowHandle, SW_MAXIMIZE);//SW_RESTORE);
+                ShowWindow(targetWindowHandle, SW_RESTORE);
+                SetForegroundWindow(targetWindowHandle);
+                /* chatGPT大菩薩：20230926
+                 * 你正確，SetForegroundWindow 方法在視窗最小化時可能無法成功將其切換到最前面。為了解決這個問題，你可以嘗試使用 ShowWindow 函數來將視窗恢復到正常狀態，然後再調用 SetForegroundWindow。這樣可以確保視窗在最前面並且可見。
+                 */
+                Thread.Sleep(150);
+                // 模擬滑鼠左鍵點擊指定座標（Random Connect按鈕）
+                int x = 1018;
+                int y = 652;
+                Point copyBtnPos = new Point(x, y);
+                Cursor.Position = copyBtnPos;
+                //ClickLeftMouse(x, y);
+                Thread.Sleep(150);
+                clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.soundLike.none);
+                Thread.Sleep(1150);//等待斷開
                 clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.soundLike.none);
                 return true;
             }
@@ -2320,9 +2390,11 @@ namespace TextForCtext
                 {
                     waitGJcoolPoint = true;
                     gjCoolPointLess150When = DateTime.Now;
+                    ////登出帳戶： 以下這會跳出訊息方塊，得處理，故改為傳引數的方式
+                    //waitFindWebElementBySelector_ToBeClickable("#navbarNav > ul:nth-child(2) > li:nth-child(2) > a > p.mb-0.fs-6.fst-italic").Click();
                     //Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("點數（算力配额）不足！目前僅有"+ points + " 至少需要"+pointCoin);
                     //轉由首頁「快速體驗」執行
-                    bool fastXResulut = OCR_GJcool_FastExperience(downloadImgFullName);
+                    bool fastXResulut = OCR_GJcool_FastExperience(downloadImgFullName, true);
                     if (fastXResulut) driver.Close(); _OCR_GJcool_WindowClosed = true;
                     try
                     {
@@ -2571,7 +2643,7 @@ namespace TextForCtext
         /// </summary>
         /// <param name="downloadImgFullName">由《中國哲學書電子化計劃》下載的書圖全檔名</param>
         /// <returns>順利完成則傳回true</returns>
-        internal static bool OCR_GJcool_FastExperience(string downloadImgFullName)
+        internal static bool OCR_GJcool_FastExperience(string downloadImgFullName, bool signOut = false)
         {
             #region 先檢查瀏覽器下載目錄並取得 ：
             string downloadDirectory = DownloadDirectory_Chrome;
@@ -2586,6 +2658,8 @@ namespace TextForCtext
             {
                 driver.Navigate().GoToUrl(gjCool);
                 _OCR_GJcool_WindowClosed = false;
+                if (signOut) waitFindWebElementBySelector_ToBeClickable("#navbarNav > ul:nth-child(2) > li:nth-child(2) > a > p.mb-0.fs-6.fst-italic").Click();
+                //if (signOut)waitFindWebElementBySelector_ToBeClickable("#navbarNav > ul:nth-child(2) > li > a > p.mb-0.fs-6.fst-italic").Click();
             }
             catch (Exception ex)
             {
@@ -2615,7 +2689,7 @@ namespace TextForCtext
             iwe.Click();
             //等待「開啟」檔案對話框開啟
             //Thread.Sleep(1200);
-            Thread.Sleep(1300);
+            Thread.Sleep(1400);
             //輸入：檔案名稱 //SendKeys.Send(downloadImgFullName);
             //貼上圖檔全名
             Clipboard.SetText(downloadImgFullName);
@@ -2643,7 +2717,7 @@ namespace TextForCtext
             //Thread.Sleep(5200);//可多設時間以等待，若多餘，可手動按下複製按鈕即可。
             //Thread.Sleep(4300);
             //Thread.Sleep(3900);
-            Thread.Sleep(2050);
+            Thread.Sleep(550);
             #region 將OCR結果讀入剪貼簿：
             Point copyBtnPos = new Point(); DateTime begin = DateTime.Now;
 
@@ -2721,10 +2795,10 @@ namespace TextForCtext
                     {
                         if (Clipboard.GetText() == "")
                         {
-                            Thread.Sleep(850);
+                            //Thread.Sleep(850);
                             await Task.Run(async () => { await clickCopybutton_GjcoolFastExperience(copyBtnPos); });
 
-                            Thread.Sleep(950);//等寫入剪貼簿
+                            Thread.Sleep(450);//等寫入剪貼簿
 
                             if (Clipboard.GetText() == "")
                             {
@@ -2732,19 +2806,20 @@ namespace TextForCtext
                                 await Task.Run(async () => { await clickCopybutton_GjcoolFastExperience(copyBtnPos); });
                                 //Task tk2 = Task.Run(() => { clickCopybutton_GjcoolFastExperience(copyBtnPos); });
                                 //tk2.Wait();
-                                Thread.Sleep(950);
+                                //Thread.Sleep(450);
+                                Thread.Sleep(900);
                                 if (Clipboard.GetText() == "")
                                 {
-                                    Thread.Sleep(950);
                                     await Task.Run(async () => { await clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.soundLike.over); });
                                     //Task tk3 = Task.Run(() => { clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.soundLike.over); });
                                     //tk3.Wait();
+                                    Thread.Sleep(450);
                                     if (Clipboard.GetText() == "")
                                     {
-                                        Thread.Sleep(950);
                                         Task tk4 = Task.Run(async () => { await clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.soundLike.done); });
                                         //Task tk4 = Task.Run(() => { clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.soundLike.done); });
                                         //tk4.Wait();
+                                        Thread.Sleep(450);
                                     }
                                 }
                             }
@@ -2789,10 +2864,11 @@ namespace TextForCtext
             {
                 Task ts = Task.Run(() =>
                 {
-                    Thread.Sleep(1300);//要寫在這，讓_OCR_GJcool_WindowClosed能設定完成
+                    //Thread.Sleep(1300);//要寫在這，讓_OCR_GJcool_WindowClosed能設定完成
+                    Thread.Sleep(600);//要寫在這，讓_OCR_GJcool_WindowClosed能設定完成
                     if (Clipboard.GetText() == "" && !_OCR_GJcool_WindowClosed)
                         //if (!_OCR_GJcool_WindowClosed)
-                        clickCopybutton_GjcoolFastExperience(copyBtnPos);
+                        clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.soundLike.press);
 
                     if (Clipboard.GetText() == "")
                     {
@@ -2802,6 +2878,25 @@ namespace TextForCtext
                             if (Clipboard.GetText() == "" && !_OCR_GJcool_WindowClosed) clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.soundLike.done);
                         });
                         ts1.Wait();
+                        if (Clipboard.GetText() == "")
+                        {
+                            Task ts2 = Task.Run(() =>
+                            {
+                                //前已有ts1.Wait();或不再需要
+                                Thread.Sleep(400);//要寫在這，讓_OCR_GJcool_WindowClosed能設定完成
+                                if (Clipboard.GetText() == "" && !_OCR_GJcool_WindowClosed) clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.soundLike.done);
+                            });
+                            ts2.Wait();
+                            if (Clipboard.GetText() == "")
+                            {
+                                Task ts3 = Task.Run(() =>
+                                {
+                                    Thread.Sleep(800);//要寫在這，讓_OCR_GJcool_WindowClosed能設定完成
+                                    if (Clipboard.GetText() == "" && !_OCR_GJcool_WindowClosed) clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.soundLike.done);
+                                });
+                                ts3.Wait();
+                            }
+                        }
                     }
 
                 });
