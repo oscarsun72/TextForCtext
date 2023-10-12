@@ -243,7 +243,20 @@ namespace TextForCtext
                 }
             }
         }
-
+        /// <summary>
+        /// 自動全選[Quick edit]的內容，方便有時候須用剪下貼上者
+        /// </summary>
+        /// <returns>成功則傳回true</returns>
+        internal static bool SelectAllQuickedit_data_textboxContent()
+        {
+            OpenQA.Selenium.IWebElement ie = Quickedit_data_textbox;//br.GetQuickeditIWebElement();
+            if (ie != null)
+            {
+                ie.SendKeys(OpenQA.Selenium.Keys.Control + "a");
+                return true;
+            }
+            return false;
+        }
         /// <summary>
         /// 取得[簡單修改模式]的文字方塊；若失敗則回傳null
         /// Get the textbox of [Quick edit] 
@@ -2057,7 +2070,9 @@ namespace TextForCtext
         /// <summary>
         /// 切換《古籍酷》帳戶時用
         /// </summary>
-        public static void OCR_GJcool_AccountChanged_Switcher(bool justIPSwitch = false)
+        /// <param name="justIPSwitch">只切換IP，不換《古籍酷》帳號，則為true</param>
+        /// <param name="justSwitchAccount">只切換《古籍酷》帳號，不換IP，則為true</param>
+        public static void OCR_GJcool_AccountChanged_Switcher(bool justIPSwitch = false, bool justSwitchAccount = false)
         {
 
             //waitFindWebElementBySelector_ToBeClickable("#navbarNav > ul:nth-child(2) > li:nth-child(2) > a > p.mb-0.fs-6.fst-italic").Click();
@@ -2066,12 +2081,12 @@ namespace TextForCtext
 
             //ActiveForm1.TopMost = false;//改寫在呼叫端，以免多執行緒時出錯
 
-            if (!ProtonVPNSwitcher()) if (!IvacyVPNSwitcher()) IvacyVPNExtensionSwitcher();
+            if (!justSwitchAccount) if (!ProtonVPNSwitcher()) if (!IvacyVPNSwitcher()) IvacyVPNExtensionSwitcher();
             if (justIPSwitch) { } //{ if (!ActiveForm1.Active) { ActiveForm1.BringToFront(); } }//改寫在呼叫端，以免多執行緒時出錯
             else
             {
                 _OCR_GJcool_AccountChanged = true;
-                Thread.Sleep(5950);
+                if (!justSwitchAccount) Thread.Sleep(5950);
                 //Thread.Sleep(6950);
                 Task ts = Task.Run(() =>
                 {
@@ -2132,7 +2147,7 @@ namespace TextForCtext
                     //while(ie.Text != "") ie.Clear();
                     ie.SendKeys(currentAccount);
                     //將插入點置於輸入「驗證碼」處：
-                    IWebElement ie1= waitFindWebElementBySelector_ToBeClickable("#captcha");
+                    IWebElement ie1 = waitFindWebElementBySelector_ToBeClickable("#captcha");
                     ie1.Click();//此方法無法將鍵入輸入之插入點實際切換到此方塊內，故須以下行執行
                     ie1.SendKeys(currentAccount);
                     SendKeys.Send("{tab 14}");//driver.Navigate().GoToUrl("https://gj.cool/login");
@@ -2187,7 +2202,7 @@ namespace TextForCtext
             Cursor.Position = copyBtnPos;
             clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.soundLike.done);
             Thread.Sleep(150);
-            SendKeys.Send("{esc}");
+            SendKeys.SendWait("{esc}");
             return true;
 
         }

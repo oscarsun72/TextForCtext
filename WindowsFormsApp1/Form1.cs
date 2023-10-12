@@ -450,11 +450,12 @@ namespace WindowsFormsApp1
                                 toOCR(br.OCRSiteTitle.GJcool);
                             else
                             {
-                                OpenQA.Selenium.IWebElement ie = br.Quickedit_data_textbox;//.waitFindWebElementByName_ToBeClickable("data", br.WebDriverWaitTimeSpan);
+                                //OpenQA.Selenium.IWebElement ie = br.Quickedit_data_textbox;//.waitFindWebElementByName_ToBeClickable("data", br.WebDriverWaitTimeSpan);
                                 if (keyinTextMode)
                                 {
                                     //全選文字方塊內容以備貼入
-                                    ie.SendKeys(OpenQA.Selenium.Keys.Control + "a");
+                                    //ie.SendKeys(OpenQA.Selenium.Keys.Control + "a");
+                                    br.SelectAllQuickedit_data_textboxContent();
                                 }
                                 string text = br.CopyQuickedit_data_textboxText();//ie.Text ?? "";
                                 CnText.BooksPunctuation(ref text, false);
@@ -1554,6 +1555,19 @@ namespace WindowsFormsApp1
                 && e.KeyCode == Keys.S)
             {//Alt + Shift + Ctrl + s : 小注文不換行(短於指定漢字長者)：notes_a_line_all 
                 e.Handled = true; notes_a_line_all(true); return;
+            }
+
+            if (e.Control && e.Shift && e.Alt && e.KeyCode == Keys.Add)
+            {//Ctrl + Shift + Alt + + 或 Ctrl + Alt + Shift + + （數字鍵盤加號） ： 同上，唯先將textBox1全選後再執行貼入；即按下此組合鍵則會並不會受插入點所在位置處影響。並翻到下一頁直接將它送去《古籍酷》OCR
+                e.Handled = true;
+                playSound(soundLike.press);
+                textBox1.SelectAll();
+                if (keyDownCtrlAdd(false, "", true))
+                {
+                    playSound(soundLike.press);
+                    toOCR(br.OCRSiteTitle.GJcool);
+                }
+                return;
             }
             #endregion
 
@@ -4547,6 +4561,10 @@ namespace WindowsFormsApp1
                 return new StringInfo(xLinePara.Replace("{{", "").Replace("}}", "")).LengthInTextElements;
 
         }
+
+        /// <summary>
+        /// 若沒有用●的長度來指定每行字數，則根據第一段長來自動將故短的行尾，標上段落標記<p>
+        /// </summary>
         void paragraphMarkAccordingFirstOne()
         {
             bool topmost = TopMost;
@@ -4715,7 +4733,12 @@ namespace WindowsFormsApp1
             playSound(soundLike.over);
             if (topLine) { rst.Close(); cnt.Close(); rst = null; cnt = null; }
             if (keyinTextMode)
+            {
+                stopUndoRec = true;
+                textBox1.Text = textBox1.Text.Replace("。<p>\r\n{{", "\r\n{{");
+                stopUndoRec = false;
                 textBox1.Select(textBox1.TextLength, 0);
+            }
             else
                 textBox1.Select(rs, rl);
             textBox1.ScrollToCaret();
@@ -5112,7 +5135,7 @@ namespace WindowsFormsApp1
         /// <param name="shiftKeyDownYet">按下Shift則留下本頁不自動翻至下一頁</param>
         /// <param name="clear">選擇性參數：若指定chkClearQuickedit_data_textboxTxtStr則會清除當前文字框內容而非輸入新內容</param>        
         /// <returns>執行不成功則回傳false</returns>
-        private bool keyDownCtrlAdd(bool shiftKeyDownYet = false, string clear = "")
+        private bool keyDownCtrlAdd(bool shiftKeyDownYet = false, string clear = "", bool notBooksPunctuation = false)
         {
             int s = textBox1.SelectionStart, l = textBox1.SelectionLength;
 
@@ -5391,7 +5414,7 @@ namespace WindowsFormsApp1
 
             //決定是否要到下一頁
             //if (!shiftKeyDownYet ) nextPages(Keys.PageDown, false);
-            if (!shiftKeyDownYet && !check_the_adjacent_pages) nextPages(Keys.PageDown, false);
+            if (!shiftKeyDownYet && !check_the_adjacent_pages) nextPages(Keys.PageDown, false, notBooksPunctuation);
             //預測下一頁頁末尾端在哪裡
             //if (pageTextEndPosition == 0 && pageEndText10 == "" && !keyinText && autoPastetoQuickEdit)
             //{
@@ -6332,13 +6355,34 @@ namespace WindowsFormsApp1
                     string x = textBox1.SelectedText;
                     x = "{{" + x.Replace(Environment.NewLine, "") + "}}";
                     textBox1.SelectedText = x;
-                    //清除後續的分行/段符號
+                    //清除後續的分行/段符號及1個全形空格
                     int s = textBox1.SelectionStart, l = textBox1.SelectionLength;
                     if (textBox1.TextLength > s + l + 2)
                     {
-                        if (textBox1.Text.Substring(s + l, 2) == Environment.NewLine)
+                        string nextStr = textBox1.Text.Substring(s + l, 2);
+                        if (nextStr == Environment.NewLine)
                         {
+
+                            stopUndoRec = true; pauseEvents();
                             textBox1.Select(s + l, 2); textBox1.SelectedText = string.Empty;
+                            s = textBox1.SelectionStart;
+                            if (s + 2 < textBox1.TextLength && textBox1.Text.Substring(s, 1) == "　")
+                            {
+                                if (textBox1.Text.Substring(s + 1, 1) != "　")
+                                    textBox1.Select(s + l, 1); textBox1.SelectedText = string.Empty;
+                            }
+                            stopUndoRec = false; resumeEvents();
+                        }
+                        else if (nextStr.StartsWith("　"))
+                        {
+                            if (nextStr.Substring(1, 1) != "　")
+                            {
+                                stopUndoRec = true; pauseEvents();
+                                textBox1.Select(s + l, 1);
+                                textBox1.SelectedText = string.Empty;
+                                stopUndoRec = false; resumeEvents();
+                            }
+
                         }
                     }
                     stopUndoRec = false;
@@ -6874,8 +6918,17 @@ namespace WindowsFormsApp1
             //Process.Start(gjcool);
             //Process.Start(keep);
             if (!Active) availableInUseBothKeysMouse();
+
+            //if (keyinTextMode)
+            //{//如果在手動輸入模式下則自動選取[Quick edit]的內容，方便有時候須用剪下貼上者
+            //其實不用，只要按下1個Tab鍵再全選即可。
+            //br.SelectAllQuickedit_data_textboxContent();
+            //}
+
             return true;
             #endregion
+
+
         }
 
         private void toggleCheck_the_adjacent_pages()
@@ -7031,7 +7084,7 @@ namespace WindowsFormsApp1
         /// </summary>
         /// <param name="eKeyCode">按下什麼鍵</param>
         /// <param name="stayInHere">留在本頁而不到下一頁則為true</param>
-        private void nextPages(Keys eKeyCode, bool stayInHere)
+        private void nextPages(Keys eKeyCode, bool stayInHere, bool notBooksPunctuation = false)
         {
             string url = textBox3.Text;
             if (url == "") return;
@@ -7204,7 +7257,8 @@ namespace WindowsFormsApp1
                         Application.DoEvents();
                         //設定textbox1的內容以備編輯
                         string nextpagetextBox1Text_Default = Clipboard.GetText();
-                        textBox1.Text = CnText.BooksPunctuation(ref nextpagetextBox1Text_Default, false);// + Environment.NewLine + Environment.NewLine + Environment.NewLine + textBox1.Text;                    
+                        //textBox1.Text = CnText.BooksPunctuation(ref nextpagetextBox1Text_Default, false);// + Environment.NewLine + Environment.NewLine + Environment.NewLine + textBox1.Text;                    
+                        textBox1.Text = notBooksPunctuation ? nextpagetextBox1Text_Default : CnText.BooksPunctuation(ref nextpagetextBox1Text_Default, false);
                     }
                 }//end if (keyinTextMode)
 
@@ -8361,6 +8415,8 @@ namespace WindowsFormsApp1
 
         private void textBox1_TextChanged(object sender, EventArgs e)
         {
+            if (!_eventsEnabled) return;
+            Keys mk = ModifierKeys;
             if (textBox1.Text.IndexOf("") > -1)
             {//Ctrl+Shift+6會插入這個""符號
                 int s = textBox1.SelectionStart, l = textBox1.SelectionLength;
@@ -8376,7 +8432,7 @@ namespace WindowsFormsApp1
                     hideToNICo();
                 else
                 {//在手動輸入模式下
-                    if (ModifierKeys != Keys.None)
+                    if (mk != Keys.None)
                     {//可能按下Shift+Delete 剪下textBox1的內容時
                         hideToNICo();
                         //,通常是要準備貼上的，所以就要將目前在用的瀏覽器置前，確保它取得焦點，否則有時系統焦點會或交給工作列                        
@@ -8417,6 +8473,12 @@ namespace WindowsFormsApp1
                                     {//送出按鈕按下後可以跑線程，其他要取得元件操作者，就不移另跑線程。20230111 現在終於破解bugs找到癥結所在了。感恩感恩　讚歎讚歎　南無阿彌陀佛 19:09
                                         submit.Click();
                                     });
+                                }
+
+                                else if (mk == Keys.Shift && mk != (Keys.Shift | Keys.Control))//(mk == (Keys.Shift|Keys.Delete))
+                                {//如果是準備剪下貼上：
+                                    playSound(soundLike.press);
+                                    br.SelectAllQuickedit_data_textboxContent();
                                 }
                             }
                             catch (Exception ex1)
@@ -9006,7 +9068,7 @@ namespace WindowsFormsApp1
 
             #region 切換《古籍酷》帳號
             if (x.Length >= 2)
-                if (x == "gjk" || x == "gg" || x == "kk")
+                if (x == "gjk" || x == "gg" || x == "jj" || x == "kk")
                 {
                     pauseEvents();
                     textBox2.Text = ""; resumeEvents();
@@ -9018,12 +9080,14 @@ namespace WindowsFormsApp1
                     else if (x == "kk")//只切換IP，不切換《古籍酷》帳戶
                     {
                         if (TopMost) TopMost = false; if (!br.waitGJcoolPoint) br.waitGJcoolPoint = true;
-                        Task tk = Task.Run(() => { br.OCR_GJcool_AccountChanged_Switcher(true); });
+                        Task tk = Task.Run(() => { br.OCR_GJcool_AccountChanged_Switcher(true, false); });
                         tk.Wait();
                         //if (!Active) BringToFront(); 
                         availableInUseBothKeysMouse();
 
                     }
+                    else if (x == "jj")//只切換《古籍酷》帳號，不換IP
+                        br.OCR_GJcool_AccountChanged_Switcher(false, true);
                     else
                     {
                         if (TopMost) TopMost = false;
