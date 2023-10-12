@@ -9010,10 +9010,25 @@ namespace WindowsFormsApp1
                 {
                     pauseEvents();
                     textBox2.Text = ""; resumeEvents();
-                    if (x == "gjk")
+                    if (x == "gjk")//只手動告知系統《古籍酷》帳號已切換                        
+                    {
                         br.OCR_GJcool_AccountChanged = true;
+                        if (br.waitGJcoolPoint) br.waitGJcoolPoint = false;
+                    }
+                    else if (x == "kk")//只切換IP，不切換《古籍酷》帳戶
+                    {
+                        if (TopMost) TopMost = false; if (!br.waitGJcoolPoint) br.waitGJcoolPoint = true;
+                        Task tk = Task.Run(() => { br.OCR_GJcool_AccountChanged_Switcher(true); });
+                        tk.Wait();
+                        //if (!Active) BringToFront(); 
+                        availableInUseBothKeysMouse();
+
+                    }
                     else
+                    {
+                        if (TopMost) TopMost = false;
                         br.OCR_GJcool_AccountChanged_Switcher();
+                    }
                     return;
                 }
             #endregion
