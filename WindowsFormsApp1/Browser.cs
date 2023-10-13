@@ -2234,6 +2234,7 @@ namespace TextForCtext
                 //ClickLeftMouse(x, y);
                 Thread.Sleep(350);
                 clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.soundLike.none);
+                Thread.Sleep(150);
                 return true;
             }
             return false;
