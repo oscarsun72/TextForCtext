@@ -2176,6 +2176,7 @@ namespace TextForCtext
         public static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
         private const int SW_RESTORE = 9;
         private const int SW_MAXIMIZE = 3; // 使用SW_MAXIMIZE來最大化視窗:chatGPT大菩薩：如果你想將視窗最大化，你可以使用 SW_MAXIMIZE 作為 ShowWindow 函數的參數，而不是 SW_RESTORE。這樣可以確保視窗被最大化，而不僅僅是還原到正常大小。
+        private const int SW_MINIMIZE = 6;
 
         /// <summary>
         /// 切換IvacyVPN擴充功能。
@@ -2235,6 +2236,7 @@ namespace TextForCtext
                 Thread.Sleep(350);
                 clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.soundLike.none);
                 Thread.Sleep(150);
+                Task.Run(() => { Thread.Sleep(5800); ShowWindow(targetWindowHandle, SW_MINIMIZE); });
                 return true;
             }
             return false;
@@ -2831,21 +2833,21 @@ namespace TextForCtext
                         if (Clipboard.GetText() == "")
                         {
                             //Thread.Sleep(850);
-                            await Task.Run(async () => { await clickCopybutton_GjcoolFastExperience(copyBtnPos); });
+                            await Task.Run(async () => { await clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.soundLike.none); });
 
                             Thread.Sleep(450);//等寫入剪貼簿
 
                             if (Clipboard.GetText() == "")
                             {
                                 //Thread.Sleep(450);
-                                await Task.Run(async () => { await clickCopybutton_GjcoolFastExperience(copyBtnPos); });
+                                await Task.Run(async () => { await clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.soundLike.over); });
                                 //Task tk2 = Task.Run(() => { clickCopybutton_GjcoolFastExperience(copyBtnPos); });
                                 //tk2.Wait();
                                 //Thread.Sleep(450);
                                 Thread.Sleep(900);
                                 if (Clipboard.GetText() == "")
                                 {
-                                    await Task.Run(async () => { await clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.soundLike.over); });
+                                    await Task.Run(async () => { await clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.soundLike.none); });
                                     //Task tk3 = Task.Run(() => { clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.soundLike.over); });
                                     //tk3.Wait();
                                     Thread.Sleep(450);
@@ -2910,7 +2912,7 @@ namespace TextForCtext
                         Task ts1 = Task.Run(() =>
                         {
                             Thread.Sleep(800);//要寫在這，讓_OCR_GJcool_WindowClosed能設定完成
-                            if (Clipboard.GetText() == "" && !_OCR_GJcool_WindowClosed) clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.soundLike.done);
+                            if (Clipboard.GetText() == "" && !_OCR_GJcool_WindowClosed) clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.soundLike.none);
                         });
                         ts1.Wait();
                         if (Clipboard.GetText() == "")
@@ -2919,7 +2921,7 @@ namespace TextForCtext
                             {
                                 //前已有ts1.Wait();或不再需要
                                 Thread.Sleep(400);//要寫在這，讓_OCR_GJcool_WindowClosed能設定完成
-                                if (Clipboard.GetText() == "" && !_OCR_GJcool_WindowClosed) clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.soundLike.done);
+                                if (Clipboard.GetText() == "" && !_OCR_GJcool_WindowClosed) clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.soundLike.none);
                             });
                             ts2.Wait();
                             if (Clipboard.GetText() == "")

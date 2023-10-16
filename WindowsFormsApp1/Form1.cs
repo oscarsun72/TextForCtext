@@ -6828,21 +6828,23 @@ namespace WindowsFormsApp1
 
 
             //下載書圖
-            string imgUrl = Clipboard.GetText(), downloadImgFullName;
+            string imgUrl = Clipboard.GetText(), downloadImgFullName; bool ocrResult = false;
             if (imgUrl.Length > 4
             && imgUrl.Substring(0, 4) == "http"
             && imgUrl.Substring(imgUrl.Length - 4, 4) == ".png")
-                downloadImage(imgUrl, out downloadImgFullName);
+                ocrResult = downloadImage(imgUrl, out downloadImgFullName);
             else
             {
                 imgUrl = br.GetImageUrl();
                 if (imgUrl == "") return false;
-                downloadImage(imgUrl, out downloadImgFullName);
+                ocrResult = downloadImage(imgUrl, out downloadImgFullName);
                 if (downloadImgFullName == "") return false;
             }
 
+            if (!ocrResult) { return false; }
+            ocrResult = false; TopMost = false; Visible = false;//WindowState = FormWindowState.Minimized;
             #region toOCR            
-            bool ocrResult = false; string currentWindowHndl = br.driver.CurrentWindowHandle;
+            string currentWindowHndl = br.driver.CurrentWindowHandle;
             switch (ocrSiteTitle)
             {
                 case br.OCRSiteTitle.GoogleKeep:
@@ -6885,6 +6887,8 @@ namespace WindowsFormsApp1
                     //throw;
                 }
             }
+            //WindowState = FormWindowState.Normal;
+            Visible = true;
             #region 如果是手動鍵入輸入模式且OCR程序無誤則直接貼上結果並自動標上書名號篇名號，20230309 creedit with chatGPT大菩薩：
             if (ocrResult && keyinTextMode)
             {
@@ -9033,6 +9037,9 @@ namespace WindowsFormsApp1
                 if (Int32.TryParse(x.Substring(5), out int n))
                 {
                     noteinLineLenLimit = (byte)(n > 255 ? 255 : n);
+                    pauseEvents();
+                    textBox2.Text = string.Empty;
+                    resumeEvents();
                     return;
                 }
             }
@@ -9883,12 +9890,18 @@ namespace WindowsFormsApp1
             }
 
         }
-
-        internal void downloadImage(string imageUrl, out string downloadImgFullName, bool selectedInExplorer = false)
+        /// <summary>
+        /// 下載書圖以供OCR用
+        /// </summary>
+        /// <param name="imageUrl">書圖網址</param>
+        /// <param name="downloadImgFullName">下載路徑全檔名</param>
+        /// <param name="selectedInExplorer">是否在載後於檔案總管開啟、並將所下載之檔案選取</param>
+        /// <returns>若下載成功則傳回true</returns>
+        internal bool downloadImage(string imageUrl, out string downloadImgFullName, bool selectedInExplorer = false)
         {
             if (imageUrl == "")
             {
-                downloadImgFullName = ""; return;
+                downloadImgFullName = ""; return false;
             }
             downloadImgFullName = dropBoxPathIncldBackSlash + "Ctext_Page_Image.png";
             ////若圖已存在則不復下載，因OCR成功後會刪除此圖故//避免隔太久又忘了刪除圖檔，還是改以下判斷
@@ -9906,15 +9919,23 @@ namespace WindowsFormsApp1
             // 獲取圖片的 URL。
             //imageUrl = "https://example.com/image.png";
 
-            // 使用 WebClient 下載圖片的二進制數據。
-            System.Net.WebClient webClient = new System.Net.WebClient();
-            byte[] imageBytes = webClient.DownloadData(imageUrl);
-
-            // 將二進制數據寫入文件。            
-            using (FileStream fileStream = new FileStream(downloadImgFullName, FileMode.Create))
+            try
             {
-                fileStream.Write(imageBytes, 0, imageBytes.Length);
-                //Console.WriteLine("圖片已成功下載。");//在「即時運算視窗」寫出訊息
+                // 使用 WebClient 下載圖片的二進制數據。
+                System.Net.WebClient webClient = new System.Net.WebClient();
+                byte[] imageBytes = webClient.DownloadData(imageUrl);
+
+                // 將二進制數據寫入文件。            
+                using (FileStream fileStream = new FileStream(downloadImgFullName, FileMode.Create))
+                {
+                    fileStream.Write(imageBytes, 0, imageBytes.Length);
+                    //Console.WriteLine("圖片已成功下載。");//在「即時運算視窗」寫出訊息
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
+                return false;
             }
             #region 在下載完後在檔案總管中將其選取MyRegion
             if (selectedInExplorer)
@@ -9944,6 +9965,7 @@ namespace WindowsFormsApp1
                 //Process.Start(downloadImgFullName);
             }
             #endregion
+            return true;
         }
         Process prcssDownloadImgFullName;
 
