@@ -1769,6 +1769,7 @@ namespace WindowsFormsApp1
                 if (e.KeyCode == Keys.Add || e.KeyCode == Keys.Oemplus || e.KeyCode == Keys.Subtract || e.KeyCode == Keys.NumPad5)
                 {//Ctrl + + Ctrl + -
                     e.Handled = true;
+                    TopMost = false;
                     if (e.KeyCode == Keys.Subtract)
                     {// Ctrl + -（數字鍵盤） 會重設以插入點位置為頁面結束位國
                         resetPageTextEndPositionPasteToCText();
@@ -1776,6 +1777,7 @@ namespace WindowsFormsApp1
                     }
                     //if (keyDownCtrlAdd(false))  if (textBox1.Text != "") { pauseEvents(); textBox1.Text = ""; resumeEvents(); }
                     keyDownCtrlAdd(false);// if (textBox1.Text != "") { pauseEvents(); textBox1.Text = ""; resumeEvents(); }
+                    TopMost = true;
                     return;
                 }
 
@@ -6888,7 +6890,7 @@ namespace WindowsFormsApp1
                 }
             }
             //WindowState = FormWindowState.Normal;
-            Visible = true;
+            Visible = true; TopMost = true;
             #region 如果是手動鍵入輸入模式且OCR程序無誤則直接貼上結果並自動標上書名號篇名號，20230309 creedit with chatGPT大菩薩：
             if (ocrResult && keyinTextMode)
             {
@@ -8674,6 +8676,7 @@ namespace WindowsFormsApp1
                     //確認資料
                     if (nowClpTxt != "" && nowClpTxt != ClpTxtBefore && nowClpTxt.IndexOf("http") == -1)
                     {
+                        undoRecord();
                         //設定內容
                         textBox1.Text = nowClpTxt;
                         ClpTxtBefore = nowClpTxt;//clpTxt;//記下這次內容以供下次比對

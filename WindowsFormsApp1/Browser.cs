@@ -1736,9 +1736,9 @@ namespace TextForCtext
         #region Ctext 三種網頁模式判斷
         internal static bool isQuickEditUrl(string url)
         {
-            if (url != "" && url.Substring(0, "https://ctext.org/".Length) == "https://ctext.org/" &&
-                url.IndexOf("edit") > -1 &&
-                    url.Substring(url.LastIndexOf("#editor")) == "#editor") return true;
+            if (url != "" && url.Length >= "https://ctext.org/".Length
+                && url.Substring(0, "https://ctext.org/".Length) == "https://ctext.org/" && url.IndexOf("edit") > -1
+                    && url.LastIndexOf("#editor") > -1 && url.Substring(url.LastIndexOf("#editor")) == "#editor") return true;
             else
                 return false;
         }
@@ -2695,8 +2695,12 @@ namespace TextForCtext
             {
                 driver.Navigate().GoToUrl(gjCool);
                 _OCR_GJcool_WindowClosed = false;
-                if (signOut) waitFindWebElementBySelector_ToBeClickable("#navbarNav > ul:nth-child(2) > li:nth-child(2) > a > p.mb-0.fs-6.fst-italic").Click();
-                //if (signOut)waitFindWebElementBySelector_ToBeClickable("#navbarNav > ul:nth-child(2) > li > a > p.mb-0.fs-6.fst-italic").Click();
+                if (signOut)
+                {
+                    Form1.playSound(Form1.soundLike.over);
+                    waitFindWebElementBySelector_ToBeClickable("#navbarNav > ul:nth-child(2) > li:nth-child(2) > a > p.mb-0.fs-6.fst-italic").Click();
+                    //if (signOut)waitFindWebElementBySelector_ToBeClickable("#navbarNav > ul:nth-child(2) > li > a > p.mb-0.fs-6.fst-italic").Click();
+                }
             }
             catch (Exception ex)
             {

@@ -474,7 +474,7 @@ namespace TextForCtext
             if (text.Length == 0) return false;
             if (text.Length > 1000)
             {
-                Regex regex = new Regex(@"\，|\。|\？|\！|\〈|\〉|\《|\》|\：|\『|\』|\「|\」|\􏿽|、|●|□|■|·|\*\*|\{\{\{|\}\}\}|\||〇|{{　|　}}|\*　");
+                Regex regex = new Regex(@"\，|\。|\？|\！|\〈|\〉|\《|\》|\：|\『|\』|\「|\」|\􏿽|、|●|□|■|·|\*\*|\{\{\{|\}\}\}|\||〇|　}}|\*　");
                 Match match = regex.Match(text);
                 return match.Success;
             }
@@ -488,7 +488,7 @@ namespace TextForCtext
                     || text.Contains("□") || text.Contains("■")
                     || text.Contains("●") || text.Contains("、")
                     || text.Contains("·") || text.Contains("**")
-                    || text.Contains("|") || text.Contains("　}}") || text.Contains("{{　")
+                    || text.Contains("|") || text.Contains("　}}") 
                     || text.Contains("〇") || text.Contains("*　")
                     || text.Contains(@"{{{") || text.Contains(@"}}}"));
             }
