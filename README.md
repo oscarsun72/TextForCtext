@@ -89,7 +89,9 @@ F9 ：重啟小小輸入法
 
 F10 ： 執行 Word VBA Sub 巨集指令「中國哲學書電子化計劃_只保留正文注文_且注文前後加括弧_貼到古籍酷自動標點」
 
-F12  ： 更新最後的備份頁文本
+F12 ： 同 F8 或 Ctrl + Shift + Alt + + 或在非自動且手動輸入模式下單獨按下數字鍵盤的「+」
+
+Alt + F12  ： 更新最後的備份頁文本
 
 Esc 則按下Esc鍵會隱藏到任務列（系統列）中；滑鼠在其 ico 圖示上滑過即恢復
 
@@ -300,9 +302,14 @@ Shift + F7 : 每行凸排: deleteSpacePreParagraphs_ConvexRow()；全部凸排�
 
 Alt + F7 : 每行縮排一格後將其末誤標之\<p\>清除:keysSpacePreParagraphs_indent_ClearEnd＿P_Mark；全部縮排的機會少，若要全部，則請將插入點放在全文前端或末尾
 
-F8 或 Alt + ` ： 加上篇名格式代碼
+Alt + ` ： 加上篇名格式代碼
 
-Shift + F8 或 Alt + Pause ： 加上篇名格式代碼並前置N個全形空格.N，預設為2.且可在執行此項時，選取空格數以重設篇名前要空的格數
+F8 ： 整頁貼上Quick edit [簡單修改模式]  並將下一頁直接送交《古籍酷》OCR// 原為加上篇名格式代碼
+
+Shift + F8 或 Alt + Shift + Pause ： 加上篇名格式代碼並前置N個全形空格.N，預設為2.且可在執行此項時，選取空格數以重設篇名前要空的格數
+
+Alt + Pause ： 自動判斷標題行，加上篇名格式代碼並前置N個全形空格.N，預設為2.且可在執行此項時，選取空格數以重設篇名前要空的格數
+    > 此法可與 Alt + t detectTitleYetWithoutPreSpace() 參互應用
 
 F11 : run replaceXdirrectly() 維基文庫等欲直接抽換之字
 
@@ -320,7 +327,7 @@ Ctrl + + （加號，含函數字鍵盤） 或 Ctrl + -（數字鍵盤）  或 C
 
 Ctrl + Alt + + （數字鍵盤加號） ： 同上，唯先將textBox1全選後再執行貼入；即按下此組合鍵則會並不會受插入點所在位置處影響。
 
-Ctrl + Shift + Alt + + 或 Ctrl + Alt + Shift + + （數字鍵盤加號） ： 同上，唯先將textBox1全選後再執行貼入；即按下此組合鍵則會並不會受插入點所在位置處影響。並翻到下一頁直接將它送去《古籍酷》OCR
+Ctrl + Shift + Alt + + 或 Ctrl + Alt + Shift + + （數字鍵盤加號）或只按下Ctrl鍵 ： 同上，唯先將textBox1全選後再執行貼入；即按下此組合鍵則會並不會受插入點所在位置處影響。並翻到下一頁直接將它送去《古籍酷》OCR（//欲中止，請按下Ctrl鍵）
 
 Ctrl + -（數字鍵盤） 會重設以插入點位置為頁面結束位國,如以滑鼠左鍵點二下
 
@@ -349,6 +356,8 @@ Ctrl + <：到下一個<頭頂(原擬作縮小字型1點然，此功能不常用
 Ctrl + >：到下一個>尾端
 
 Ctrl + Shift + Delete ： 將選取文字於文本中全部清除(Ctrl + z 還原功能支援)
+
+Ctrl + Delete ： 將插入點所在位置之後的文字一律清除(Ctrl + z 還原功能支援)
 
 Alt + 滑鼠左鍵 ： 更新最後的備份頁文本
 
@@ -394,6 +403,7 @@ Ctrl+ 滑鼠左鍵：清除框中所有文字
     > 如「tS10」即設定伺服器等候上限是10秒鐘，「tE8」則是設定網頁元件出現的逾時點是8秒鐘
 - 輸入「nb,」可以切換 GXDS.SKQSnoteBlank 值以指定是否要檢查注文中因空白而誤標的情形
 - 輸入資料夾路徑可指定有效的Chrome瀏覽器的下載位置
+- 輸入「fc」可執行「formatCategory2Columns」函式：以選取範圍為格式化依據，將上下兩欄的目次內容格式化（取format,Category二字首，故為fc）執行時若無選取，則以之前的設定為準。若第一次，請務必要選取以供指定
 
 ### 在 textBox3 網址資訊專用方塊框：
 - 拖曳網址在 textBox3 或 textBox1 上放開，則會讀入所拖曳的網址值給 textBox3
@@ -429,3 +439,5 @@ Ctrl+ 滑鼠左鍵：清除框中所有文字
 - [TextForCtext 輸入《中國哲學書電子化計劃》《四庫全書》本《玉海》實境秀](https://youtube.com/live/kwhOSXiNJVs)
 - [TextForCtext 輸入《中國哲學書電子化計劃》：使用者手動鍵入演示及實境秀](https://youtube.com/live/f4JlRogZorw)
 - [TextForCtext 輸入《中國哲學書電子化計劃》：利用《古籍酷》OCR功能，由使用者手動鍵入之演示及實境秀](https://youtube.com/live/iLxgIiIdXuY?feature=share)
+- [TextForCtext 輸入《中國哲學書電子化計劃》：善用賢超法師《古籍酷AI》OCR功能，半自動操作演示曁實境秀：讀錄陳澧《東塾讀書記》褚人穫《堅瓠集》王念孫《讀書雜志》王引之《經義述聞》等](https://www.youtube.com/live/hF-vsdS9kb4?si=Z1YkZT_kVqr_9Y0l)
+- [TextForCtext 輸入《中國哲學書電子化計劃》：善用賢超法師《古籍酷AI》OCR 讀錄褚人穫《堅瓠集》實境秀](https://www.youtube.com/live/DSY_jkrUyKc?si=ImWaAAbTcRGIupd2)

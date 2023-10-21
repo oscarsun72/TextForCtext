@@ -17,6 +17,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Media;
+using System.Net.Http.Headers;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -668,12 +669,29 @@ namespace TextForCtext
                 //MessageBox.Show("請先登入 Ctext.org 再繼續。按下「確定(OK)」以繼續……");                
 
                 //如果是手動輸入模式且在簡單編輯頁面，則將其Quick edit值傳到textBox1
-                if (ActiveForm1.KeyinTextMode && isQuickEditUrl(ActiveForm1.textBox3Text ?? ""))
+                try
                 {
-                    //driver = cDrv;
-                    ActiveForm1.Controls["textBox1"].Text = waitFindWebElementByName_ToBeClickable("data", _webDriverWaitTimSpan).Text;
+                    if (ActiveForm1.KeyinTextMode && isQuickEditUrl(ActiveForm1.textBox3Text ?? ""))
+                    {
+                        //driver = cDrv;
+                        ActiveForm1.Controls["textBox1"].Text = waitFindWebElementByName_ToBeClickable("data", _webDriverWaitTimSpan).Text;
+                    }
                 }
-
+                catch (Exception ex)
+                {
+                    switch (ex.HResult)
+                    {
+                        case -2146233079:
+                            if (ex.Message == "跨執行緒作業無效: 存取控制項 'textBox1' 時所使用的執行緒與建立控制項的執行緒不同。")
+                                break;
+                            else
+                                goto default;
+                        default:
+                            Console.WriteLine(ex.HResult + ex.Message);
+                            Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
+                            break;
+                    }
+                }
 
                 return cDrv;
             }
@@ -946,6 +964,7 @@ namespace TextForCtext
                 Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("請檢查頁面中的 Quict edit 是否可用，再按下確定繼續！");
                 submit = waitFindWebElementById_ToBeClickable("savechangesbutton", _webDriverWaitTimSpan);
             }
+            LastValidWindow = driver.CurrentWindowHandle;
             Task.Run(() =>//接下來不用理會，也沒有元件要操作、沒有訊息要回應，就可以給另一個線程去處理了。
             {
                 try
@@ -1398,7 +1417,11 @@ namespace TextForCtext
                 return url == "" ? urlActiveTab : url;
 
         }
-
+        /// <summary>
+        /// Selenium 瀏覽所指定的網址所在的網頁
+        /// </summary>
+        /// <param name="url">要瀏覽的網址</param>
+        /// <param name="frmKeyinTextModeTopWindow">是否將視窗調到最頂端</param>
         internal static void GoToUrlandActivate(string url, bool frmKeyinTextModeTopWindow = false)
         {
             if (string.IsNullOrEmpty(url) || url.Substring(0, 4) != "http") return;
@@ -1473,7 +1496,7 @@ namespace TextForCtext
             //throw;
             try
             {
-                driver.Navigate().GoToUrl(url);
+                driver.Navigate().GoToUrl(url); LastValidWindow = driver.CurrentWindowHandle;
                 //activate and move to most front of desktop
                 //driver.SwitchTo().Window(driver.CurrentWindowHandle;
                 if (frmKeyinTextModeTopWindow) WindowsScrolltoTop();//將分頁視窗頁面捲到頂端
@@ -1493,8 +1516,10 @@ namespace TextForCtext
         {
             if (ActiveForm1.KeyinTextMode)
             {
-                if (Form1.ModifierKeys != forms.Keys.LControlKey) return;
+                //if (Form1.ModifierKeys != forms.Keys.LControlKey) return;
+                //此法有效！！20231019
                 driver.ExecuteScript("window.scrollTo(0, 0)");//chatGPT:您好！如果您使用 C# 和 Selenium 來控制 Chrome 瀏覽器，您可以使用以下的程式碼將網頁捲到最上面：
+                //driver.SwitchTo().Window(driver.CurrentWindowHandle).SwitchTo().DefaultContent();//20231019
 
                 ///*20220312 chatGPT大菩薩：您好！要將分頁視窗的瀏覽位置調整到最上方，可以使用 Selenium 的 JavaScriptExecutor 物件，透過執行 JavaScript 的方式來操作瀏覽器。
                 //    以下是一個使用 JavaScriptExecutor 調整瀏覽位置的範例：*/
@@ -1524,12 +1549,15 @@ namespace TextForCtext
             }
             else
             {
-                //以上都不行，只好來這個殺手鐧了
-                driver.Navigate().Refresh();//https://www.guru99.com/selenium-refresh-page.html
-                                            //Pressing F5 key on any textbox using sendKeys command
-                                            //driver.findElement(By textboxLocator).sendKeys(Keys.F5);
-                                            //data.SendKeys(OpenQA.Selenium.Keys.F5);
-                                            //https://artoftesting.com/refresh-a-page-in-selenium-webdriver-java
+                //driver.SwitchTo().Window(driver.CurrentWindowHandle).SwitchTo().DefaultContent();//20231019
+                //driver.Navigate().GoToUrl(driver.Url);
+                ////以上都不行，只好來這個殺手鐧了
+                //driver.Navigate().Refresh();//https://www.guru99.com/selenium-refresh-page.html
+                //Pressing F5 key on any textbox using sendKeys command
+                //driver.findElement(By textboxLocator).sendKeys(Keys.F5);
+                //data.SendKeys(OpenQA.Selenium.Keys.F5);
+                //https://artoftesting.com/refresh-a-page-in-selenium-webdriver-java
+                driver.ExecuteScript("window.scrollTo(0, 0)");//chatGPT:您好！如果您使用 C# 和 Selenium 來控制 Chrome 瀏覽器，您可以使用以下的程式碼將網頁捲到最上面：
             }
         }
 
@@ -1665,7 +1693,8 @@ namespace TextForCtext
             // 移動到指定的網頁
             try
             {
-                GoToUrlandActivate(url ?? System.Windows.Forms.Application.OpenForms[0].Controls["textBox3"].Text);
+                url = url ?? System.Windows.Forms.Application.OpenForms[0].Controls["textBox3"].Text;
+                if (IsSameBookPageWithDrive(url)) GoToUrlandActivate(url, true);
             }
             catch (Exception ex)
             {
@@ -1722,16 +1751,29 @@ namespace TextForCtext
             return imageUrl;
             //}
         }
-        /* 以下是我先寫來問chatGPT的，依其建議改如上
-        internal static string getImageUrl() {
-
-            Browser br = new Browser(System.Windows.Forms.Application.OpenForms[0] as Form1);
-            ChromeDriver driver = new ChromeDriver();
-            IWebElement scancont = driver.FindElement(By.Id("scancont"));
-            return scancont.GetAttribute("src");
-
+        /// <summary>
+        /// 判斷是否與目前的drive在同一本書的同一頁
+        /// </summary>
+        /// <param name="url">要比對的網址</param>
+        /// <returns></returns>
+        internal static bool IsSameBookPageWithDrive(string url)
+        {
+            int bookidDrive = ActiveForm1.GetBookIDFromUrl(driver.Url), pageNumDrive = ActiveForm1.GetPageNumFromUrl(driver.Url), bookid = ActiveForm1.GetBookIDFromUrl(url), pageNum = ActiveForm1.GetPageNumFromUrl(url);
+            if (bookidDrive != bookid && pageNumDrive != pageNum)
+                return true;
+            else return false;
         }
-        */
+
+        /* 以下是我先寫來問chatGPT的，依其建議改如上
+internal static string getImageUrl() {
+
+   Browser br = new Browser(System.Windows.Forms.Application.OpenForms[0] as Form1);
+   ChromeDriver driver = new ChromeDriver();
+   IWebElement scancont = driver.FindElement(By.Id("scancont"));
+   return scancont.GetAttribute("src");
+
+}
+*/
 
         #region Ctext 三種網頁模式判斷
         internal static bool isQuickEditUrl(string url)
@@ -2072,7 +2114,8 @@ namespace TextForCtext
         /// </summary>
         /// <param name="justIPSwitch">只切換IP，不換《古籍酷》帳號，則為true</param>
         /// <param name="justSwitchAccount">只切換《古籍酷》帳號，不換IP，則為true</param>
-        public static void OCR_GJcool_AccountChanged_Switcher(bool justIPSwitch = false, bool justSwitchAccount = false)
+        /// <returns>失敗則傳回false</returns>
+        public static bool OCR_GJcool_AccountChanged_Switcher(bool justIPSwitch = false, bool justSwitchAccount = false)
         {
 
             //waitFindWebElementBySelector_ToBeClickable("#navbarNav > ul:nth-child(2) > li:nth-child(2) > a > p.mb-0.fs-6.fst-italic").Click();
@@ -2085,19 +2128,125 @@ namespace TextForCtext
             if (justIPSwitch) { } //{ if (!ActiveForm1.Active) { ActiveForm1.BringToFront(); } }//改寫在呼叫端，以免多執行緒時出錯
             else
             {
-                _OCR_GJcool_AccountChanged = true;
+                _OCR_GJcool_AccountChanged = true; bool connectedOK = true;
                 if (!justSwitchAccount) Thread.Sleep(5950);
                 //Thread.Sleep(6950);
-                Task ts = Task.Run(() =>
+                Task ts = null;
+                CancellationTokenSource cts = new CancellationTokenSource();
+                try
                 {
-                    openNewTabWindow(WindowType.Tab);
-                    //driver.Navigate().GoToUrl("https://gj.cool/account");
-                    //driver.Navigate().GoToUrl("https://gj.cool/login");
-                    driver.Navigate().GoToUrl("https://gj.cool/login?next=%2Ftry_ocr");
-                    //driver.Navigate().GoToUrl("https://ocr.gj.cool/login?next=%2Faccount");
-                    //https://ocr.gj.cool/login?next=%2Ftry_ocr
+                    //20231021 Bing大菩薩：等待一分鐘
+                    ts = Task.Run(() =>
+                    {
+                        while (!cts.Token.IsCancellationRequested)
+                        {
+                            int retryCntr = 0;
+                        retry:
+                            openNewTabWindow(WindowType.Tab);
+                            try
+                            {
+                                //driver.Navigate().GoToUrl("https://gj.cool/account");
+                                //driver.Navigate().GoToUrl("https://gj.cool/login");
+                                driver.Navigate().GoToUrl("https://gj.cool/login?next=%2Ftry_ocr");
+                                //driver.Navigate().GoToUrl("https://ocr.gj.cool/login?next=%2Faccount");
+                                //https://ocr.gj.cool/login?next=%2Ftry_ocr
 
-                });
+                            }
+                            catch (Exception ex)
+                            {
+                                switch (ex.HResult)
+                                {
+                                    case -2146233088:
+                                        if (ex.Message.EndsWith("seconds."))//("timed out after 30.5 seconds."))
+                                        {
+                                            /* 20231020Bing大菩薩：
+                                             * 在C#中，如果你想要確認目前的程式碼是否在主執行緒上執行，你可以使用 `MainThread.IsMainThread` 屬性。如果呼叫此屬性的程式碼是在主執行緒上執行，則 `MainThread.IsMainThread` 屬性會傳回 `true`⁴。
+
+                                                至於你遇到的例外情形，這是因為你嘗試從一個執行緒去存取另一個執行緒所建立的控制項。在Windows Forms中，只有建立控制項的執行緒可以直接操作該控制項。如果你需要從其他執行緒操作控制項，你需要使用 `Control.Invoke` 或 `Control.BeginInvoke` 方法來將操作封送回建立控制項的執行緒。
+
+                                                以下是一個範例：
+
+                                                ```csharp
+                                                this.Invoke((MethodInvoker)delegate {
+                                                    // 你的程式碼
+                                                });
+                                                ```
+
+                                                這段程式碼會將你的操作封送回UI執行緒，這樣就可以避免跨執行緒作業的問題了。¹²⁴⁵
+
+                                                來源: 與 Bing 的交談， 2023/10/20
+                                                (1) 在主要 UI 執行緒上執行程式碼 - .NET MAUI | Microsoft Learn. https://learn.microsoft.com/zh-tw/dotnet/maui/platform-integration/appmodel/main-thread.
+                                                (2) 玩轉C#之【執行序-實際實作】 - iT 邦幫忙::一起幫忙解決難題，拯救 IT 人的一天. https://ithelp.ithome.com.tw/articles/10292658.
+                                                (3) 對多執行緒應用程式進行偵錯 - Visual Studio (Windows) | Microsoft Learn. https://learn.microsoft.com/zh-tw/visualstudio/debugger/how-to-use-the-threads-window?view=vs-2022.
+                                                (4) 玩轉C#之【執行序-執行緒安全】 - iT 邦幫忙::一起幫忙解決難題，拯救 IT 人的一天. https://ithelp.ithome.com.tw/articles/10292661.
+                                                (5) 在主要 UI 執行緒上執行程式碼 - .NET MAUI | Microsoft Learn. https://bing.com/search?q=C%23+%e5%88%a4%e6%96%b7%e6%98%af%e5%90%a6%e5%9c%a8%e5%90%8c%e4%b8%80%e5%9f%b7%e8%a1%8c%e7%b7%92.
+                                                (6) undefined. https://bing.com/search?q=.
+                                             */
+                                            ActiveForm1.Invoke((MethodInvoker)delegate
+                                            {
+                                                Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("連線超時！請試著改用其他IP。");
+                                            });
+                                            connectedOK = false;//return false;
+                                        }
+                                        else if (ex.Message.StartsWith("unknown error: net::ERR_CONNECTION_RESET"))
+                                        {
+                                            if (retryCntr++ < 3)
+                                            {
+                                                Thread.Sleep(2000);
+                                                goto retry;
+                                            }
+                                            else
+                                            {
+                                                ActiveForm1.Invoke((MethodInvoker)delegate
+                                                {
+                                                    Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("連線超時！請試著改用其他IP。");
+                                                });
+                                                connectedOK = false;//return false;
+                                            }
+
+                                        }
+                                        else
+                                        {
+                                            Console.WriteLine(ex.HResult + ex.Message);
+                                            Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
+                                        }
+                                        break;
+                                    default:
+                                        Console.WriteLine(ex.HResult + ex.Message);
+                                        ActiveForm1.Invoke((MethodInvoker)delegate
+                                        {
+                                            Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
+                                        });
+                                        break;
+                                }
+                            }
+                        }
+                        //});
+                    }, cts.Token);
+                }
+                catch (Exception ex)
+                {
+                    switch (ex.HResult)
+                    {
+                        case -2146233088:
+                            if (ex.Message.EndsWith("seconds."))//("timed out after 30.5 seconds."))
+                            {
+                                Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("連線超時！請試著改用其他IP。");
+                                return false;
+                            }
+                            else
+                            {
+                                Console.WriteLine(ex.HResult + ex.Message);
+                                Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
+                            }
+                            break;
+                        default:
+                            Console.WriteLine(ex.HResult + ex.Message);
+                            Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
+                            break;
+                    }
+                }
+                if (!connectedOK) return false;
 
                 ActiveForm1.HideToNICo();//if (ActiveForm1.TopMost) ActiveForm1.TopMost = false;
                                          //隱藏主表單，以便在切換帳號後，以【按下Shift鍵+滑鼠滑過任務列的表單圖示】，來直接送交《古籍酷》OCR
@@ -2121,7 +2270,7 @@ namespace TextForCtext
                 while (GJcoolAccounts[i].Item2 != DateTime.Parse("2023/9/29"))
                 {
                     //if (DateTime.Now.Subtract(GJcoolAccounts[i].Item2).Days > 0)
-                    if (DateTime.Now.Subtract(GJcoolAccounts[i].Item2).Hours > 21)
+                    if (DateTime.Now.Subtract(GJcoolAccounts[i].Item2).Hours > 22)
                     {
                         gjcoolAccountCounter--;
                         Form1.playSound(Form1.soundLike.exam);
@@ -2133,7 +2282,12 @@ namespace TextForCtext
                 string currentAccount = GJcoolAccounts[i].Item1;
                 Clipboard.SetText(currentAccount);
 
-                ts.Wait();
+
+                //ts.Wait();
+                if (!ts.Wait(TimeSpan.FromMinutes(1)))
+                {
+                    cts.Cancel();
+                }
 
                 IWebElement ie = waitFindWebElementBySelector_ToBeClickable("#username");
                 if (ie != null)
@@ -2165,7 +2319,7 @@ namespace TextForCtext
                     }
                 }
             }
-
+            return true;
         }
 
         [DllImport("user32.dll")]
@@ -2356,7 +2510,8 @@ namespace TextForCtext
                 switch (ex.HResult)
                 {
                     case -2146233088:
-                        if (ex.Message.IndexOf("no such window: target window already closed") > -1)
+                        if (ex.Message.IndexOf("no such window: target window already closed") > -1
+                            || ex.Message.EndsWith("seconds."))
                         {
                             driver.SwitchTo().Window(LastValidWindow);
                             return false;
@@ -2697,9 +2852,10 @@ namespace TextForCtext
                 _OCR_GJcool_WindowClosed = false;
                 if (signOut)
                 {
-                    Form1.playSound(Form1.soundLike.over);
+                    Form1.playSound(Form1.soundLike.done);
                     waitFindWebElementBySelector_ToBeClickable("#navbarNav > ul:nth-child(2) > li:nth-child(2) > a > p.mb-0.fs-6.fst-italic").Click();
                     //if (signOut)waitFindWebElementBySelector_ToBeClickable("#navbarNav > ul:nth-child(2) > li > a > p.mb-0.fs-6.fst-italic").Click();
+                    Form1.playSound(Form1.soundLike.over);
                 }
             }
             catch (Exception ex)
@@ -2857,7 +3013,7 @@ namespace TextForCtext
                                     Thread.Sleep(450);
                                     if (Clipboard.GetText() == "")
                                     {
-                                        Task tk4 = Task.Run(async () => { await clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.soundLike.done); });
+                                        Task tk4 = Task.Run(async () => { await clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.soundLike.none); });
                                         //Task tk4 = Task.Run(() => { clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.soundLike.done); });
                                         //tk4.Wait();
                                         Thread.Sleep(450);
