@@ -2150,7 +2150,7 @@ internal static string getImageUrl() {
                                 driver.Navigate().GoToUrl("https://gj.cool/login?next=%2Ftry_ocr");
                                 //driver.Navigate().GoToUrl("https://ocr.gj.cool/login?next=%2Faccount");
                                 //https://ocr.gj.cool/login?next=%2Ftry_ocr
-
+                                break;
                             }
                             catch (Exception ex)
                             {
@@ -2197,6 +2197,7 @@ internal static string getImageUrl() {
                                             }
                                             else
                                             {
+                                                cts.Cancel();
                                                 ActiveForm1.Invoke((MethodInvoker)delegate
                                                 {
                                                     Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("連線超時！請試著改用其他IP。");

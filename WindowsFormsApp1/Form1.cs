@@ -2654,7 +2654,7 @@ namespace WindowsFormsApp1
                         if (!pagePaste2GjcoolOCR())
                         { //數字鍵盤的「+」
                             bringBackMousePosFrmCenter();
-                            SendKeys.Send("^z");//因為會輸入「+」取代選取區文字
+                            //SendKeys.Send("^z");//因為會輸入「+」取代選取區文字//這應該是在下一個程序textBox1_KeyPress才會輸入，而不是在這時
                         }
                         return;
                     }
@@ -2666,14 +2666,19 @@ namespace WindowsFormsApp1
             }
         }
         /// <summary>
+        /// 記錄程式執行是否在 pagePaste2GjcoolOCR 方法套用的堆疊（stack）裡
+        /// </summary>
+        internal bool PagePaste2GjcoolOCR_ing = false;
+        /// <summary>
         /// Ctrl + Shift + Alt + + 或 Ctrl + Alt + Shift + + （數字鍵盤加號） ： 同上，唯先將textBox1全選後再執行貼入；即按下此組合鍵則會並不會受插入點所在位置處影響。並翻到下一頁直接將它送去《古籍酷》OCR
         /// 或只按下F8
         /// 整頁貼上Quick edit [簡單修改模式]  並將下一頁直接送交《古籍酷》OCR
+        /// 若欲中斷、不交去《古籍酷》OCR則須按下Ctrl
         /// </summary>
         /// <returns>執行失敗傳回false</returns>
         private bool pagePaste2GjcoolOCR()
         {
-            bool returnValue = false;
+            bool returnValue = false; PagePaste2GjcoolOCR_ing = true;
             //playSound(soundLike.press);
             //textBox1.SelectAll();//此方法必須在表單有焦點時才行
             TopMost = false;//將焦點交給Chrome瀏覽器
@@ -2681,11 +2686,12 @@ namespace WindowsFormsApp1
             textBox1.SelectionStart = textBox1.TextLength; textBox1.SelectionLength = 0;
             playSound(soundLike.waiting);//請靜待OCR完成
 
-            if (keyDownCtrlAdd(false, "", true))
+            if (keyDownCtrlAdd(false, "", true, true))
             {
                 if (textBox1.Text != string.Empty)
                 { undoRecord(); pauseEvents(); textBox1.Text = string.Empty; resumeEvents(); }
                 //欲中止，請按下Ctrl鍵
+                Console.WriteLine(ModifierKeys.ToString());//just for test
                 if (ModifierKeys != Keys.Control)
                 {
                     playSound(soundLike.press);
@@ -5407,7 +5413,7 @@ namespace WindowsFormsApp1
         /// <param name="shiftKeyDownYet">按下Shift則留下本頁不自動翻至下一頁</param>
         /// <param name="clear">選擇性參數：若指定chkClearQuickedit_data_textboxTxtStr則會清除當前文字框內容而非輸入新內容</param>        
         /// <returns>執行不成功則回傳false</returns>
-        private bool keyDownCtrlAdd(bool shiftKeyDownYet = false, string clear = "", bool notBooksPunctuation = false)
+        private bool keyDownCtrlAdd(bool shiftKeyDownYet = false, string clear = "", bool notBooksPunctuation = false, bool pagePaste2GjcoolOCR = false)
         {
             int s = textBox1.SelectionStart, l = textBox1.SelectionLength;
 
@@ -5635,7 +5641,7 @@ namespace WindowsFormsApp1
                     pasteToCtext();
                     break;
                 case BrowserOPMode.seleniumNew://純Selenium模式（2）
-                                               //終於找到bug了 NextPage()裡的textBox3.Text=url 設定太晚
+                                               //終於找到bug了 nextPage()裡的textBox3.Text=url 設定太晚
                     string url = textBox3.Text;
                     //if (url.IndexOf("#editor") == -1 && url.IndexOf("&page=") == -1 && url.IndexOf("ctext.org") == -1)
                     string driverUrl = "";
@@ -5701,7 +5707,7 @@ namespace WindowsFormsApp1
 
             //決定是否要到下一頁
             //if (!shiftKeyDownYet ) nextPages(Keys.PageDown, false);
-            if (!shiftKeyDownYet && !check_the_adjacent_pages) nextPages(Keys.PageDown, false, notBooksPunctuation);
+            if (!shiftKeyDownYet && !check_the_adjacent_pages) nextPages(Keys.PageDown, false, notBooksPunctuation, pagePaste2GjcoolOCR);
             //預測下一頁頁末尾端在哪裡
             //if (pageTextEndPosition == 0 && pageEndText10 == "" && !keyinText && autoPastetoQuickEdit)
             //{
@@ -5723,11 +5729,11 @@ namespace WindowsFormsApp1
                 else if (keyinTextMode && !autoPastetoQuickEdit)
                 {
                     if (HiddenIcon) show_nICo(ModifierKeys);
-                    availableInUseBothKeysMouse();
+                    if (!pagePaste2GjcoolOCR) availableInUseBothKeysMouse();
 
                     if (ModifierKeys == Keys.Shift)
                     {//自動送交賢超法師《古籍酷AI》OCR
-                     //已改寫在 nextpage 裡
+                     //已改寫在 nextPage 裡
                      //Form1.playSound(Form1.soundLike.press);
                      //toOCR(br.OCRSiteTitle.GJcool);
                     }
@@ -7404,7 +7410,7 @@ namespace WindowsFormsApp1
         /// </summary>
         /// <param name="eKeyCode">按下什麼鍵</param>
         /// <param name="stayInHere">留在本頁而不到下一頁則為true</param>
-        private void nextPages(Keys eKeyCode, bool stayInHere, bool notBooksPunctuation = false)
+        private void nextPages(Keys eKeyCode, bool stayInHere, bool notBooksPunctuation = false, bool pagePaste2GjcoolOCR = false)
         {
             string url = textBox3.Text;
             if (url == "") return;
@@ -7520,7 +7526,7 @@ namespace WindowsFormsApp1
                             SendKeys.Send("^x");//剪下一頁以便輸入備用
                             break;
                         case BrowserOPMode.seleniumNew:
-                            if (modifierKeys == Keys.None)
+                            if (modifierKeys == Keys.None && !pagePaste2GjcoolOCR)
                             {
                                 int retrytimes = 0;
                             retry:
@@ -7569,7 +7575,7 @@ namespace WindowsFormsApp1
                         default:
                             break;
                     }
-                    if (modifierKeys != Keys.Shift)
+                    if (modifierKeys != Keys.Shift && !pagePaste2GjcoolOCR)
                     {
                         //備份textbox1的內容
                         undoRecord();
@@ -7603,7 +7609,7 @@ namespace WindowsFormsApp1
             }
             #endregion
 
-            if (stayInHere) availableInUseBothKeysMouse();//this.Activate();
+            if (stayInHere && !pagePaste2GjcoolOCR) availableInUseBothKeysMouse();//this.Activate();
         }
 
         private void runWordMacro(string runName)
@@ -9479,6 +9485,8 @@ namespace WindowsFormsApp1
         {
             //按下BackSpace鍵
             if (e.KeyChar == 8) return;
+            //按下數字鍵盤的「+」執行 pagePaste2GjcoolOCR 方法時
+            if (PagePaste2GjcoolOCR_ing && e.KeyChar == 43) { e.Handled = true; PagePaste2GjcoolOCR_ing = false; return; }
             //if (e.KeyChar==30)
             //{
             //    return;
@@ -9747,7 +9755,7 @@ namespace WindowsFormsApp1
                             hideToNICo();
                         break;
 
-                    //須避免textbox1 與Form的同一事件衝突（呼叫 nextpage方法太頻繁）變成連翻上下頁，以致 chromedriver不及反應而出錯當掉20230111
+                    //須避免textbox1 與Form的同一事件衝突（呼叫 nextPage方法太頻繁）變成連翻上下頁，以致 chromedriver不及反應而出錯當掉20230111
                     case MouseButtons.XButton1:
                         if (browsrOPMode != BrowserOPMode.appActivateByName)
                         {//過於頻繁會造成chromedriver反應不及而當掉。終於抓到 bugs了！202301110632
@@ -10319,7 +10327,8 @@ namespace WindowsFormsApp1
             //20221021Bing大菩薩：C# 跨執行緒作業無效：
             if (br.ActiveForm1.InvokeRequired)
             {
-                br.ActiveForm1.Invoke((MethodInvoker)delegate {
+                br.ActiveForm1.Invoke((MethodInvoker)delegate
+                {
                     // 你的程式碼
                 });
             }
