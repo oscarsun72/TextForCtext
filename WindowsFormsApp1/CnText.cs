@@ -152,7 +152,7 @@ namespace TextForCtext
             if (!force2mark) if (HasEditedWithPunctuationMarks(ref clpTxt)) { Form1.playSound(Form1.soundLike.error); return ref clpTxt; }
             //提示音
             //new SoundPlayer(@"C:\Windows\Media\Windows Balloon.wav").Play();
-            System.Media.SystemSounds.Asterisk.Play();
+            string clpTxtOriginal = clpTxt;
             ado.Connection cnt = new ado.Connection();
             ado.Recordset rst = new ado.Recordset();
             Mdb.openDatabase("查字.mdb", ref cnt);
@@ -188,6 +188,10 @@ namespace TextForCtext
             //textBox1.Text = clpTxt;
             rst.Close(); cnt.Close();
             clpTxt = clpTxt.Replace("《《", "《").Replace("》》", "》").Replace("〈〈", "〈").Replace("〉〉", "〉");
+            if (clpTxt != clpTxtOriginal)
+                System.Media.SystemSounds.Asterisk.Play();
+            else
+                Form1.playSound(Form1.soundLike.warn);
             return ref clpTxt;
         }
 
@@ -488,7 +492,7 @@ namespace TextForCtext
                     || text.Contains("□") || text.Contains("■")
                     || text.Contains("●") || text.Contains("、")
                     || text.Contains("·") || text.Contains("**")
-                    || text.Contains("|") || text.Contains("　}}") 
+                    || text.Contains("|") || text.Contains("　}}")
                     || text.Contains("〇") || text.Contains("*　")
                     || text.Contains(@"{{{") || text.Contains(@"}}}"));
             }

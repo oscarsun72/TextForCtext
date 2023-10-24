@@ -2305,9 +2305,14 @@ internal static string getImageUrl() {
                     IWebElement ie1 = waitFindWebElementBySelector_ToBeClickable("#captcha");
                     ie1.Click();//此方法無法將鍵入輸入之插入點實際切換到此方塊內，故須以下行執行
                     ie1.SendKeys(currentAccount);
-                    SendKeys.Send("{tab 14}");//driver.Navigate().GoToUrl("https://gj.cool/login");
-                                              //SendKeys.Send("{tab 15}");//driver.Navigate().GoToUrl("https://gj.cool/account");
-                    Form1.playSound(Form1.soundLike.done);
+                    
+                    //SendKeys.Send("{tab 14}");//driver.Navigate().GoToUrl("https://gj.cool/login");
+                    //SendKeys.Send("{tab 15}");//driver.Navigate().GoToUrl("https://gj.cool/account");
+                    //Form1.playSound(Form1.soundLike.done);                    
+                    Point pt = new Point(1002, 656);
+                    Cursor.Position = pt;
+                    clickCopybutton_GjcoolFastExperience(pt, Form1.soundLike.done);
+                    
                     GJcoolAccounts[i] = new Tuple<string, DateTime>(GJcoolAccounts[i].Item1, DateTime.Now);
 
                     //});
@@ -2316,8 +2321,10 @@ internal static string getImageUrl() {
                     {
                         ie.Clear();
                         ie.SendKeys(currentAccount);
-                        SendKeys.Send("{tab 2}");
+                        //SendKeys.Send("{tab 2}");
+                        clickCopybutton_GjcoolFastExperience(pt, Form1.soundLike.none);
                     }
+
                 }
             }
             return true;

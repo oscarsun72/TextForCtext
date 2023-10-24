@@ -447,7 +447,7 @@ namespace WindowsFormsApp1
                         //url此頁的Quick edit值傳到textBox1,並存入剪貼簿以備用
                         {
                             //若此時按下 Shift 則不會取得文本而是逕行送去《古籍酷》OCR取回文本至textBox1以備用
-                            if (modifierKeys == Keys.Shift)
+                            if (modifierKeys == Keys.Shift && !PagePaste2GjcoolOCR_ing)
                                 toOCR(br.OCRSiteTitle.GJcool);
                             else
                             {
@@ -479,7 +479,7 @@ namespace WindowsFormsApp1
                     //Clipboard.Clear();
                 }
                 //若此時按下 Shift 則不會取得文本而是逕行送去《古籍酷》OCR取回文本至textBox1以備用
-                else if (modifierKeys == Keys.Shift && browsrOPMode != BrowserOPMode.appActivateByName)
+                else if (modifierKeys == Keys.Shift && !PagePaste2GjcoolOCR_ing && browsrOPMode != BrowserOPMode.appActivateByName)
                 {
                     br.GoToCurrentUserActivateTab();
                     string brUrl = br.GetDriverUrl;//.driver.Url;
@@ -2653,6 +2653,7 @@ namespace WindowsFormsApp1
                         //{ undoRecord(); pauseEvents(); textBox1.Text = string.Empty; resumeEvents(); }
                         if (!pagePaste2GjcoolOCR())
                         { //數字鍵盤的「+」
+                            if (!Visible) Visible = true;
                             bringBackMousePosFrmCenter();
                             //SendKeys.Send("^z");//因為會輸入「+」取代選取區文字//這應該是在下一個程序textBox1_KeyPress才會輸入，而不是在這時
                         }
@@ -2695,7 +2696,10 @@ namespace WindowsFormsApp1
                 if (ModifierKeys != Keys.Control)
                 {
                     playSound(soundLike.press);
-                    if (toOCR(br.OCRSiteTitle.GJcool)) returnValue = true;
+                    if (toOCR(br.OCRSiteTitle.GJcool))
+                        returnValue = true;
+                    else
+                        if (!Visible) Visible = true;
                 }
                 else
                     playSound(soundLike.stop);
@@ -2779,7 +2783,7 @@ namespace WindowsFormsApp1
                 //if (si.String == "我今弔死三清殿知道來年荒不荒至今") Debugger.Break();//just for check
 
                 //所在段落小於正常行長，且後面的行長須等於或大於正常行長、或是不存在後面的行/段
-                if (lenLine > 0 && lenLine < wordCountLimit)
+                if (lenLine > 0 && lenLine < wordCountLimit && !getLineTxt(x, s).EndsWith("<p>"))
                 //if (lenLine > 0)
                 {
                     //if (lenLine < wordCountLimit)
@@ -2807,7 +2811,7 @@ namespace WindowsFormsApp1
             }
 
             //if (lenLineNext > 0 && lenLineNext < wordCountLimit)
-            if (lenLineNext > 0)
+            if (lenLineNext > 0)// && !getLineTxt(x, s).EndsWith("<p>"))
             {
                 if (lenLineNext < wordCountLimit)
                 {
@@ -2851,6 +2855,7 @@ namespace WindowsFormsApp1
         /// 以選取範圍為格式化依據，將上下兩欄的目次內容格式化 20231018
         /// 在textBox2中輸入「fc」以執行（取format,Category二字首，故為fc）
         /// 執行時若無選取，則以之前的設定為準。若第一次，請務必要選取以供指定
+        /// 如果行末是<p>（不含分行/段符號）則停止處理
         /// </summary>
         private void formatCategory2Columns_GjcoolOCRResult()
         {
@@ -2894,6 +2899,8 @@ namespace WindowsFormsApp1
 
                 //清除段落（下一個行/段併到上一個）
                 if (x.IndexOf(Environment.NewLine, s) < 0) break;
+                //如果行末是<p>（不含分行/段符號）則停止處理
+                if (getLineTxt(x, s).EndsWith("<p>")) break;
                 textBox1.Select(x.IndexOf(Environment.NewLine, s), Environment.NewLine.Length);
                 textBox1.SelectedText = string.Empty;
                 x = textBox1.Text;
@@ -5705,31 +5712,40 @@ namespace WindowsFormsApp1
             }
             #endregion
 
-            //決定是否要到下一頁
+            #region 決定是否要到下一頁
             //if (!shiftKeyDownYet ) nextPages(Keys.PageDown, false);
             if (!shiftKeyDownYet && !check_the_adjacent_pages) nextPages(Keys.PageDown, false, notBooksPunctuation, pagePaste2GjcoolOCR);
-            //預測下一頁頁末尾端在哪裡
-            //if (pageTextEndPosition == 0 && pageEndText10 == "" && !keyinText && autoPastetoQuickEdit)
-            //{
-            //    pageTextEndPosition = textBox1.SelectionStart + textBox1.SelectionLength;
-            //    pageEndText10 = textBox1.Text.Substring(pageTextEndPosition, 10);
-            //}
-            predictEndofPage();
-            //重設自動判斷頁尾之值
+            #endregion
+
+            #region 預測下一頁頁末尾端在哪裡               
+            if (!pagePaste2GjcoolOCR)
+            {
+                //if (pageTextEndPosition == 0 && pageEndText10 == "" && !keyinText && autoPastetoQuickEdit)
+                //{
+                //    pageTextEndPosition = textBox1.SelectionStart + textBox1.SelectionLength;
+                //    pageEndText10 = textBox1.Text.Substring(pageTextEndPosition, 10);
+                //}
+                predictEndofPage();
+            }
+            //重設自動判斷頁尾之值(有翻頁就得重設！）
             pageTextEndPosition = 0; pageEndText10 = "";
-            DialogResult dialogresult = new DialogResult();
-            if (browsrOPMode != BrowserOPMode.appActivateByName)
+            #endregion
+
+            //DialogResult dialogresult = new DialogResult(); 原來在這裡！！！ 20231022
+            if (browsrOPMode != BrowserOPMode.appActivateByName && !pagePaste2GjcoolOCR)
             {//使用selenium模式時（非預設模式時）
+                DialogResult dialogresult = new DialogResult();
                 if (autoPastetoQuickEdit && !keyinTextMode)
                 {//全自動輸入模式時
                     autoPastetoCtextQuitEditTextbox(out dialogresult);//在此中雖有判斷autoPastetoQuickEdit時，然呼叫它會造成無限遞迴（recursion）
                 }
                 //鍵入輸入模式或非全自動輸入時（如欲瀏覽、或順便編輯時）還原被隱藏的主表單以利後續操作，若不欲，則按Esc鍵即可再度隱藏：20230119壬寅大寒小年夜前一日
                 //else if (keyinText || !autoPastetoQuickEdit)
-                else if (keyinTextMode && !autoPastetoQuickEdit)
+                else if (keyinTextMode && !autoPastetoQuickEdit)// && !pagePaste2GjcoolOCR)
                 {
                     if (HiddenIcon) show_nICo(ModifierKeys);
-                    if (!pagePaste2GjcoolOCR) availableInUseBothKeysMouse();
+                    //if (!pagePaste2GjcoolOCR) availableInUseBothKeysMouse();
+                    availableInUseBothKeysMouse();
 
                     if (ModifierKeys == Keys.Shift)
                     {//自動送交賢超法師《古籍酷AI》OCR
@@ -5739,10 +5755,13 @@ namespace WindowsFormsApp1
                     }
                     else
                     {
+                        //if (!pagePaste2GjcoolOCR)
+                        //{
                         //將插入點置於頁首，以備編輯
                         textBox1.Select(0, 0);
                         textBox1.ScrollToCaret();
                         //br.WindowsScrolltoTop();
+                        //}
                     }
                 }
             }
@@ -6738,6 +6757,7 @@ namespace WindowsFormsApp1
 
                 if (e.KeyCode == Keys.O)
                 {//Alt + Shift + o ：交給《古籍酷》 OCR ，模擬使用者手動操作的功能（測試成功！！！！）
+                    if (PagePaste2GjcoolOCR_ing) return;
                     if (browsrOPMode == BrowserOPMode.appActivateByName) return;
                     if (!IsValidUrl＿ImageTextComparisonPage(textBox3.Text)) return;
                     e.Handled = true; Form1.playSound(Form1.soundLike.press);
@@ -7162,7 +7182,8 @@ namespace WindowsFormsApp1
                 //br.WindowsScrolltoTop();
                 return false;
             }
-            ocrResult = false; TopMost = false; Visible = false;//WindowState = FormWindowState.Minimized;
+            ocrResult = false; TopMost = false;// Visible = false;//WindowState = FormWindowState.Minimized;
+
             #region toOCR            
             string currentWindowHndl = br.driver.CurrentWindowHandle;
             switch (ocrSiteTitle)
@@ -7172,8 +7193,10 @@ namespace WindowsFormsApp1
                     break;
                 case br.OCRSiteTitle.GJcool:
                     br.ActiveForm1 = this;
+                    br.ActiveForm1.TopMost = false;
                     //try
                     //{
+                    br.driver.SwitchTo().Window(currentWindowHndl);
                     ocrResult = br.OCR_GJcool_AutoRecognizeVertical(downloadImgFullName);
                     //}
                     //catch (Exception ex)
@@ -7196,6 +7219,7 @@ namespace WindowsFormsApp1
             if (!ocrResult)
             {
                 MessageBox.Show("請重來一次；重新執行一次。感恩感恩　南無阿彌陀佛", "發生錯誤", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
+                //if (!Visible) Visible = true;
                 //br.driver.SwitchTo().Window(br.driver.WindowHandles[br.driver.WindowHandles.Count-1]);
                 try
                 {
@@ -7209,7 +7233,8 @@ namespace WindowsFormsApp1
                 }
             }
             //WindowState = FormWindowState.Normal;
-            Visible = true; TopMost = true;
+            //Visible = true; TopMost = true;
+
             #region 如果是手動鍵入輸入模式且OCR程序無誤則直接貼上結果並自動標上書名號篇名號，20230309 creedit with chatGPT大菩薩：
             if (ocrResult && keyinTextMode)
             {
@@ -7221,7 +7246,14 @@ namespace WindowsFormsApp1
                 //                                       // 使用 SendKeys 方法觸發按下組合鍵
                 availableInUseBothKeysMouse();//Activate();
                 if (!textBox1.Focused) textBox1.Focus();
+
+                //取得OCR結果
                 string x = Clipboard.GetText();
+
+                //清除末綴的分行/段符號
+                while (x.Length > 1 && x.Substring(x.Length - Environment.NewLine.Length, Environment.NewLine.Length) == Environment.NewLine)
+                    x = x.Substring(0, x.Length - Environment.NewLine.Length);
+
                 //textBox1.Text = x;
                 //SendKeys.Send("{" + comboKey + "}");
                 //SendKeys.Send("%{insert}");
@@ -7564,7 +7596,7 @@ namespace WindowsFormsApp1
                                     //throw;
                                 }
                             }
-                            else if (modifierKeys == Keys.Shift)
+                            else if (modifierKeys == Keys.Shift && !pagePaste2GjcoolOCR && !PagePaste2GjcoolOCR_ing)
                             {
                                 toOCR(br.OCRSiteTitle.GJcool);
                             }
@@ -8881,7 +8913,7 @@ namespace WindowsFormsApp1
 
             Keys modifierKey = ModifierKeys;
             //直接針對目前的分頁開啟古籍酷OCR
-            if (modifierKey == Keys.Shift && keyinTextMode && !HiddenIcon)
+            if (modifierKey == Keys.Shift && keyinTextMode && !HiddenIcon && !PagePaste2GjcoolOCR_ing)
             {
                 copyQuickeditLinkWhenKeyinMode(modifierKey);
                 return;
@@ -9400,7 +9432,7 @@ namespace WindowsFormsApp1
             if (x.Length >= 2)
             {
                 #region 切換《古籍酷》帳號
-                if (x == "gjk" || x == "gg" || x == "jj" || x == "kk")
+                if (x == "gjk" || x == "gg" || x == "jj" || x == "kk" || x == "jk")
                 {
                     pauseEvents();
                     textBox2.Text = ""; resumeEvents();
@@ -9418,6 +9450,12 @@ namespace WindowsFormsApp1
                         availableInUseBothKeysMouse();
 
                     }
+                    else if (x == "jk")//不切換IP，不切換《古籍酷》帳戶，欲直接進入首頁快速體驗者
+                    {
+                        if (!br.waitGJcoolPoint) br.waitGJcoolPoint = true;
+                        //if (!Active) BringToFront(); 
+                        //availableInUseBothKeysMouse();
+                    }
                     else if (x == "jj")//只切換《古籍酷》帳號，不換IP
                         br.OCR_GJcool_AccountChanged_Switcher(false, true);
                     else
@@ -9432,7 +9470,7 @@ namespace WindowsFormsApp1
                 {
                     pauseEvents(); textBox2.Text = ""; resumeEvents();
                     formatCategory2Columns_GjcoolOCRResult();
-                    textBox1.Focus();
+                    textBox1.Focus(); bringBackMousePosFrmCenter();
                     return;
                 }
             }
