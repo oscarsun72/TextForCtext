@@ -9459,7 +9459,7 @@ namespace WindowsFormsApp1
                     else if (x == "jj")//只切換《古籍酷》帳號，不換IP
                         br.OCR_GJcool_AccountChanged_Switcher(false, true);
                     else
-                    {
+                    {//"gg" : 切換《古籍酷》帳號，且也換IP
                         if (TopMost) TopMost = false;
                         br.OCR_GJcool_AccountChanged_Switcher();
                     }

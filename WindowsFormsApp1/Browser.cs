@@ -2305,14 +2305,15 @@ internal static string getImageUrl() {
                     IWebElement ie1 = waitFindWebElementBySelector_ToBeClickable("#captcha");
                     ie1.Click();//此方法無法將鍵入輸入之插入點實際切換到此方塊內，故須以下行執行
                     ie1.SendKeys(currentAccount);
-                    
+
                     //SendKeys.Send("{tab 14}");//driver.Navigate().GoToUrl("https://gj.cool/login");
                     //SendKeys.Send("{tab 15}");//driver.Navigate().GoToUrl("https://gj.cool/account");
                     //Form1.playSound(Form1.soundLike.done);                    
-                    Point pt = new Point(1002, 656);
-                    Cursor.Position = pt;
+                    //Point pt = new Point(1002, 656);
+                    Point pt = new Point(1002, 666);
+                    //Cursor.Position = pt;
                     clickCopybutton_GjcoolFastExperience(pt, Form1.soundLike.done);
-                    
+
                     GJcoolAccounts[i] = new Tuple<string, DateTime>(GJcoolAccounts[i].Item1, DateTime.Now);
 
                     //});
@@ -2666,22 +2667,34 @@ internal static string getImageUrl() {
             }
 
             //取得「選擇檔案」控制項
-            if (windowType == WindowType.Window)
-            {
-                //SendKeys.Send("{tab 16} ");
-                SendKeys.Send("{tab 16}");
-                //如果按下tab鍵16次後「選擇檔案」控制項沒有被選中（不同環境下網頁元件數可能會有所不同！）
-                //這種寫法應該不會成功，因為Selenium可應用的範圍是程式自動化操作而不是使用者手動manual操作者20230322 果然！ 13:47
-                //if (!iwe.Selected) Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("菩薩慈悲：請手動執行OCR，OCR完成之後程式會接手執行。感恩感恩　南無阿彌陀佛"+ Environment.NewLine +"按下「確定（OK）」後繼續…… 阿彌陀佛");            
-                //if (!iwe.Selected) System.Diagnostics.Debugger.Break();
-            }
-            else if (windowType == WindowType.Tab)
-                SendKeys.Send("{tab 13}");
-            else
-                Debugger.Break();
+            //if (windowType == WindowType.Window)
+            //{
+            //    //SendKeys.Send("{tab 16} ");
+            //    SendKeys.Send("{tab 16}");
+            //    //如果按下tab鍵16次後「選擇檔案」控制項沒有被選中（不同環境下網頁元件數可能會有所不同！）
+            //    //這種寫法應該不會成功，因為Selenium可應用的範圍是程式自動化操作而不是使用者手動manual操作者20230322 果然！ 13:47
+            //    //if (!iwe.Selected) Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("菩薩慈悲：請手動執行OCR，OCR完成之後程式會接手執行。感恩感恩　南無阿彌陀佛"+ Environment.NewLine +"按下「確定（OK）」後繼續…… 阿彌陀佛");            
+            //    //if (!iwe.Selected) System.Diagnostics.Debugger.Break();
+            //}
+            //else if (windowType == WindowType.Tab)
+            //    SendKeys.Send("{tab 13}");
+            //    //SendKeys.Send("{tab 13}");
+            //else
+            //    Debugger.Break();
+            //    Debugger.Break();
 
+            //if (iwe.Selected)// "line_img")
             //按下「選擇檔案」控制項
-            SendKeys.Send(" ");
+            //    SendKeys.Send(" ");
+            //else
+            //if(iwe.Selected)
+            //iwe.Submit();
+            //iwe.Click();//不行，會出錯
+
+            //clickCopybutton_GjcoolFastExperience(new Point(137, 299), Form1.soundLike.press);//new Point(X, Y)=「選擇檔案」控制項之位置
+            clickCopybutton_GjcoolFastExperience(new Point(iwe.Location.X + 76, iwe.Location.Y + 120), Form1.soundLike.press);//new Point(X, Y)=「選擇檔案」控制項之位置
+                                                                                                                              //76 系統工具列在左側時的寬度//120 Chrome瀏覽器頂遄到書籤列下端的長度
+
             //waitFindWebElementBySelector_ToBeClickable("#line_img_form > div > input[type=file]").SendKeys(OpenQA.Selenium.Keys.Space);
             //waitFindWebElementByName_ToBeClickable("line_img",2).Submit();
             //等待選取檔案對話框開啟
@@ -2949,7 +2962,8 @@ internal static string getImageUrl() {
                 //！！！！此須手動按下「複製」按鈕了！！！！
                 timeSpanSecs = 8;
                 //滑鼠定位，以備手動按下「複製」按鈕（須視窗最大化）
-                copyBtnPos = new Point(838, 711);//用PRTSC鍵拍下全螢幕後，貼到小畫家以滑鼠取得坐標位置（即顯示在狀態列中）
+                //copyBtnPos = new Point(838, 711);//用PRTSC鍵拍下全螢幕後，貼到小畫家以滑鼠取得坐標位置（即顯示在狀態列中）
+                copyBtnPos = new Point(838, 721);//用PRTSC鍵拍下全螢幕後，貼到小畫家以滑鼠取得坐標位置（即顯示在狀態列中）
                 Cursor.Position = copyBtnPos;
                 //Thread.Sleep(800);//要等一下才行否則反應不過來
                 //Form1.playSound(Form1.soundLike.info);
@@ -3229,10 +3243,12 @@ internal static string getImageUrl() {
         private static Task clickCopybutton_GjcoolFastExperience(Point copyBtnPos, Form1.soundLike soundlike = Form1.soundLike.info)
         {
             //Thread.Sleep(1300);
-            //Cursor.Position = copyBtnPos;            
+            if (Cursor.Position != copyBtnPos)
+                Cursor.Position = copyBtnPos;
             //Form1.playSound(soundlike);
             //MouseOperations.MouseEventMousePos(MouseOperations.MouseEventFlags.LeftDown, copyBtnPos);
             //MouseOperations.MouseEventMousePos(MouseOperations.MouseEventFlags.LeftUp, copyBtnPos);
+
             return Task.Run(() =>
             {
                 Form1.playSound(soundlike);
