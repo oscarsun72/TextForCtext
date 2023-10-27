@@ -2289,6 +2289,7 @@ internal static string getImageUrl() {
                 if (!ts.Wait(TimeSpan.FromMinutes(1)))
                 {
                     cts.Cancel();
+                    if (!ActiveForm1.Visible && !ActiveForm1.HiddenIcon) ActiveForm1.Visible = true;
                 }
 
                 IWebElement ie = waitFindWebElementBySelector_ToBeClickable("#username");
@@ -2329,6 +2330,7 @@ internal static string getImageUrl() {
 
                 }
             }
+            if (!ActiveForm1.Visible&& !ActiveForm1.HiddenIcon) ActiveForm1.Visible = true;
             return true;
         }
 
@@ -2442,10 +2444,11 @@ internal static string getImageUrl() {
                 Point copyBtnPos = new Point(x, y);
                 Cursor.Position = copyBtnPos;
                 //ClickLeftMouse(x, y);
-                Thread.Sleep(150);
+                //Thread.Sleep(150);
+                Thread.Sleep(350);
                 clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.soundLike.none);
                 //Thread.Sleep(1150);//等待斷開
-                Thread.Sleep(1950);//等待斷開
+                Thread.Sleep(1250);//等待斷開
                 clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.soundLike.none);
                 Thread.Sleep(6000);//監看連線成功
                 return true;

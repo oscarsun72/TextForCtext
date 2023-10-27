@@ -3251,7 +3251,8 @@ namespace WindowsFormsApp1
 
                 }
                 int so = s;//記下起始處
-                while (s + 1 <= x.Length && (Environment.NewLine + "　|<{" + "􏿽".Substring(0, 1)).IndexOf(x.Substring(++s, 1)) == -1)
+                while (s + 1 < x.Length && (Environment.NewLine + "　|<{" + "􏿽".Substring(0, 1)).IndexOf(x.Substring(++s, 1)) == -1)
+                //while (s + 1 <= x.Length && (Environment.NewLine + "　|<{" + "􏿽".Substring(0, 1)).IndexOf(x.Substring(++s, 1)) == -1)
                 {
 
                 }
@@ -5543,6 +5544,7 @@ namespace WindowsFormsApp1
                 }
 
                 //檢查查是否有編輯標記
+                CnText.FormalizeText(ref x);
                 if (!CnText.HasEditedWithPunctuationMarks(ref x))
                 {
                     playSound(soundLike.warn);
@@ -7388,6 +7390,13 @@ namespace WindowsFormsApp1
                 //OCR成功後則刪除下載的書圖,備份OCR結果
                 if (File.Exists(downloadImgFullName)) File.Delete(downloadImgFullName);
                 saveText();
+                #region 如果在右邊有新開啟的分頁且網域均為《古籍酷》者等，即予關閉
+                if (br.driver.WindowHandles[br.driver.WindowHandles.Count - 1] != currentWindowHndl)
+                {
+                    SendKeys.Send("%r");//這是利用擴充功能設定的快速鍵：https://chrome.google.com/webstore/detail/shortkeys-custom-keyboard/logpjaacgmcbpdkdchjiaagddngobkck
+                    Thread.Sleep(250);
+                }
+                #endregion
             }
             #endregion
             //const string gjcool = "https://gj.cool/try_ocr";
@@ -7396,12 +7405,30 @@ namespace WindowsFormsApp1
             //Process.Start(keep);
             if (!Active) availableInUseBothKeysMouse();
 
-            //if (keyinTextMode)
-            //{//如果在手動輸入模式下則自動選取[Quick edit]的內容，方便有時候須用剪下貼上者
-            //其實不用，只要按下1個Tab鍵再全選即可。
-            //br.SelectAllQuickedit_data_textboxContent();
-            //}
+            if (keyinTextMode)
+            {//如果在手動輸入模式下則自動選取[Quick edit]的內容，方便有時候須用剪下貼上者
+             //其實不用，只要按下1個Tab鍵再全選即可。
+             //br.SelectAllQuickedit_data_textboxContent();
 
+                //#region 如果在右邊有新開啟的分頁且網域均為《古籍酷》者等，即予關閉
+                //for (int i = br.driver.WindowHandles.Count - 1; i > -1; i--)
+                //{
+                //    if (br.driver.WindowHandles[i] == currentWindowHndl) break;
+                //    //這樣的話，還要等網頁開好才能執行
+                //    br.driver.SwitchTo().Window(br.driver.WindowHandles[i]);
+                //    string urls = br.driver.Url;
+                //    if (urls.StartsWith("https://gj.cool/")
+                //        || urls.StartsWith("https://ocr.gj.cool/")
+                //        || urls == "https://iplocation.com/"
+                //        || urls.StartsWith("https://stackoverflow.com/"))
+                //    {
+                //        br.driver.Close();
+                //    }
+                //}
+                //#endregion
+            }
+
+            textBox1.Focus();
             //br.WindowsScrolltoTop();
             return true;
             #endregion
