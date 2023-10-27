@@ -105,6 +105,8 @@ Ctrl + f ：移至 textBox2 準備尋找文本
 
 Alt + f ：切換 Fast Mode 不待網頁回應即進行下一頁的貼入動作（即在不須檢覈貼上之文本正確與否，肯定、八成是無誤的，就可以執行此項以加快輸入文本的動作）當是 fast mode 模式時「送出貼上」按鈕會呈現紅綠燈的綠色表示一路直行通行順暢 20230130癸卯年初九第一上班日週一
 
+Alt + r ：在Selenium模式+手動輸入模式下、關閉所在Chrome瀏覽器右側之分頁。（因應《古籍酷》連線不暢所衍生之措施）20231026
+
 Ctrl + n ：開新預設瀏覽器視窗 //原：在新頁籤開啟 google 網頁，以備用（在預設瀏覽器為 Chrome 時）
 
 Ctrl + Shift + n 或 Shift + F1 : 開新Form1 實例
@@ -320,8 +322,12 @@ Ctrl + y ： 重做（即復原還原的動作），目前上限為50個記錄
 Ctrl + z ： 還原文本，目前上限為50個記錄
 
 Ctrl + F12 ：就 textBox1 所選之字串，執行「[查詢國語辭典.exe](https://github.com/oscarsun72/lookupChineseWords.git)」以查詢網路詞典
+  > 若在非 appActivateByName 模式下，則但開啟一個分頁以查詢國語辭典耳。唯有在 drive 是 null 時才會執行上述之網路辭典查詢
 
 Alt + G ：就 textBox1 所選之字串，執行「[網路搜尋_元搜尋-同時搜多個引擎.exe](https://github.com/oscarsun72/SearchEnginesConsole.git)」以查詢 Google 等網站
+  > 若在非 appActivateByName 模式下，則但開啟一個分頁以檢索Google大神耳。唯有在 drive 是 null 時才會執行上述之搜尋。
+
+Alt + z ：以所選之字（或插入點後之一字）檢索《字統網》等（或 執行【速檢網路字辭典.exe】）
 
 Ctrl + + （加號，含函數字鍵盤） 或 Ctrl + -（數字鍵盤）  或 Ctrl + 5 (數字鍵盤） 或 Alt + + 或 Alt + a ：將插入點或選取文字（含）之前的文本剪下貼到 ctext 的[簡單修改模式]框中，並按下「保存編輯」鈕，且在[簡單修改模式]下于瀏覽器新頁籤開啟下一頁準備編輯文本，並回到前一頁籤以供檢視所貼上之文本是否無誤。
 
@@ -441,3 +447,6 @@ Ctrl+ 滑鼠左鍵：清除框中所有文字
 - [TextForCtext 輸入《中國哲學書電子化計劃》：利用《古籍酷》OCR功能，由使用者手動鍵入之演示及實境秀](https://youtube.com/live/iLxgIiIdXuY?feature=share)
 - [TextForCtext 輸入《中國哲學書電子化計劃》：善用賢超法師《古籍酷AI》OCR功能，半自動操作演示曁實境秀：讀錄陳澧《東塾讀書記》褚人穫《堅瓠集》王念孫《讀書雜志》王引之《經義述聞》等](https://www.youtube.com/live/hF-vsdS9kb4?si=Z1YkZT_kVqr_9Y0l)
 - [TextForCtext 輸入《中國哲學書電子化計劃》：善用賢超法師《古籍酷AI》OCR 讀錄褚人穫《堅瓠集》實境秀](https://www.youtube.com/live/DSY_jkrUyKc?si=ImWaAAbTcRGIupd2)
+- [TextForCtext 輸入《中國哲學書電子化計劃》：善用賢超法師《古籍酷AI》OCR + ProtonVPN 讀錄 錢大昕《廿二史考異》褚人穫《堅瓠集》實境秀](https://youtube.com/live/E1i6cdej_Lk?feature=share)
+- []()
+

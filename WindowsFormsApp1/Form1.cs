@@ -1732,7 +1732,20 @@ namespace WindowsFormsApp1
                     if (x != "")
                     {
                         Clipboard.SetText(x);
-                        Process.Start(dropBoxPathIncldBackSlash + @"VS\VB\查詢國語辭典\查詢國語辭典\bin\Debug\查詢國語辭典.exe");
+
+                        if (browsrOPMode != BrowserOPMode.appActivateByName)
+                        {
+                            if (br.driver != null)
+                            {
+                                br.openNewTabWindow(OpenQA.Selenium.WindowType.Tab);
+                                br.driver.Navigate().GoToUrl("https://dict.revised.moe.edu.tw/search.jsp?md=1&word=" + x + "&qMd=0&qCol=1");
+                            }
+                            else
+                                if (MessageBoxShowOKCancelExclamationDefaultDesktopOnly("是否要執行【查詢網路辭典】？") == DialogResult.OK)
+                                Process.Start(dropBoxPathIncldBackSlash + @"VS\VB\查詢國語辭典\查詢國語辭典\bin\Debug\查詢國語辭典.exe");
+                        }
+                        else
+                            Process.Start(dropBoxPathIncldBackSlash + @"VS\VB\查詢國語辭典\查詢國語辭典\bin\Debug\查詢國語辭典.exe");
                     }
                     return;
                 }
@@ -2373,8 +2386,26 @@ namespace WindowsFormsApp1
                     string x = overtypeModeSelectedTextSetting(ref textBox1);//CnText.ChangeSeltextWhenOvertypeMode(insertMode, textBox1);
                     if (x != "")
                     {
+                        x = x.EndsWith("》") ? x.Substring(0, x.Length - 1) : x;
+                        x = x.EndsWith(Environment.NewLine) ? x.Substring(0, x.Length - 2) : x;
+                        x = x.EndsWith("\n") ? x.Substring(0, x.Length - 1) : x;
                         Clipboard.SetText(x);
-                        Process.Start(dropBoxPathIncldBackSlash + @"VS\VB\網路搜尋_元搜尋-同時搜多個引擎\網路搜尋_元搜尋-同時搜多個引擎\bin\Debug\網路搜尋_元搜尋-同時搜多個引擎.exe");
+                        //在Selenium模式下，直接以x搜尋網路
+                        if (browsrOPMode != BrowserOPMode.appActivateByName)
+                        {
+                            if (br.driver != null)
+                            {
+                                br.openNewTabWindow(OpenQA.Selenium.WindowType.Tab);
+                                br.driver.Navigate().GoToUrl("https://www.google.com/search?q=" + x);
+                            }
+                            else
+                            {
+                                if (MessageBoxShowOKCancelExclamationDefaultDesktopOnly("是否執行【網路搜尋_元搜尋-同時搜多個引擎】") == DialogResult.OK)
+                                    Process.Start(dropBoxPathIncldBackSlash + @"VS\VB\網路搜尋_元搜尋-同時搜多個引擎\網路搜尋_元搜尋-同時搜多個引擎\bin\Debug\網路搜尋_元搜尋-同時搜多個引擎.exe");
+                            }
+                        }
+                        else
+                            Process.Start(dropBoxPathIncldBackSlash + @"VS\VB\網路搜尋_元搜尋-同時搜多個引擎\網路搜尋_元搜尋-同時搜多個引擎\bin\Debug\網路搜尋_元搜尋-同時搜多個引擎.exe");
                     }
                     return;
                 }
@@ -2442,6 +2473,48 @@ namespace WindowsFormsApp1
                             Thread.Sleep(20);
                             this.BackColor = this.FormBackColorDefault;
                         }
+
+                    return;
+                }
+
+                if (e.KeyCode == Keys.Z)
+                {// Alt + z ：以所選之字（或插入點後之一字）檢索《字統網》等（或 執行【速檢網路字辭典.exe】）
+                    e.Handled = true;
+                    string x;
+                    //選取單字
+                    if (textBox1.SelectionLength == 0 && textBox1.SelectionStart < textBox1.TextLength)
+                    {
+                        if (!insertMode)
+                        {
+                            overtypeModeSelectedTextSetting(ref textBox1);
+                        }
+                        else
+                        {
+                            x = textBox1.Text.Substring(textBox1.SelectionStart, 1);
+                            textBox1.SelectionLength = char.IsHighSurrogate(x.ToCharArray()[0]) ? 2 : 1;
+                        }
+                    }
+                    x = textBox1.SelectedText;
+                    x = x.EndsWith(Environment.NewLine) ? x.Substring(0, x.Length - 2) : x;
+                    x = x.EndsWith("\n") ? x.Substring(0, x.Length - 1) : x;
+                    Clipboard.SetText(x);
+
+                    if (browsrOPMode != BrowserOPMode.appActivateByName)
+                    {
+                        if (br.driver != null)
+                        {
+                            br.openNewTabWindow(OpenQA.Selenium.WindowType.Tab);
+                            br.driver.Navigate().GoToUrl("https://zi.tools/zi/" + x);
+                        }
+                        else
+                        {
+                            if (MessageBoxShowOKCancelExclamationDefaultDesktopOnly("是否要執行【速檢網路字辭典】") == DialogResult.OK)
+                                Process.Start(dropBoxPathIncldBackSlash + @"VS\VB\速檢網路字辭典\速檢網路字辭典\bin\Debug\速檢網路字辭典.exe");
+                        }
+
+                    }
+                    else
+                        Process.Start(dropBoxPathIncldBackSlash + @"VS\VB\速檢網路字辭典\速檢網路字辭典\bin\Debug\速檢網路字辭典.exe");
 
                     return;
                 }
@@ -2761,21 +2834,24 @@ namespace WindowsFormsApp1
             if (wordsPerLinePara < 1) wordsPerLinePara = countWordsLenPerLinePara(getLineTxtWithoutPunctuation(x, s));
             while (s > -1)
             {
-                StringInfo si = new StringInfo(getLineTxtWithoutPunctuation(x, s));
+                //StringInfo si = new StringInfo(getLineTxtWithoutPunctuation(x, s));                
 
                 //if (si.String == "岳武穆遺詩") Debugger.Break();//just for check
 
-                lenLine = si.LengthInTextElements;
+                //lenLine = si.LengthInTextElements;
+                lenLine = countWordsLenPerLinePara(getLineTxtWithoutPunctuation(x, s));
                 int sNext = x.IndexOf(Environment.NewLine, s + 1), previousLineLen = 0;
                 if (sNext > -1)
                 {
-                    StringInfo siNext = new StringInfo(getLineTxtWithoutPunctuation(x, sNext));
-                    lenLineNext = siNext.LengthInTextElements;
+                    //StringInfo siNext = new StringInfo(getLineTxtWithoutPunctuation(x, sNext));
+                    //lenLineNext = siNext.LengthInTextElements;
+                    lenLineNext = countWordsLenPerLinePara(getLineTxtWithoutPunctuation(x, sNext));
                 }
                 else
                 {
                     if (s + 2 <= x.Length && x.Length - (s + 2) >= 0)
-                        lenLineNext = new StringInfo(x.Substring(s + 2, x.Length - (s + 2))).LengthInTextElements;
+                        //lenLineNext = new StringInfo(x.Substring(s + 2, x.Length - (s + 2))).LengthInTextElements;
+                        lenLineNext = countWordsLenPerLinePara(x.Substring(s + 2, x.Length - (s + 2)));
                     else
                         Debugger.Break();
                 }
@@ -2926,6 +3002,23 @@ namespace WindowsFormsApp1
                 if (x.Substring(x.Length - Environment.NewLine.Length, Environment.NewLine.Length) == Environment.NewLine)
                     textBox1.Text = x.Substring(0, x.Length - Environment.NewLine.Length);
             }
+
+            #region 清除最後落單的欄後面的冗餘􏿽􏿽
+            x = textBox1.Text;
+            if (x.Length > 2 && x.Substring(x.Length - 3, 3) == "􏿽|")
+            {
+                //清除末尾的「|」
+                x = x.Substring(0, x.Length - 1);
+                while (x.Length > -1 && x.Substring(x.Length - "􏿽".Length, "􏿽".Length) == "􏿽")
+                {
+                    x = x.Substring(0, x.Length - "􏿽".Length);
+                }
+                //末尾改成用「<p>」
+                x += "<p>";
+                textBox1.Text = x;
+            }
+            #endregion
+
             textBox1.Select(textBox1.TextLength, 0);
 
             resumeEvents(); stopUndoRec = false;
@@ -4747,7 +4840,7 @@ namespace WindowsFormsApp1
             return y == 0 ? x : ++x;
         }
         /// <summary>
-        /// 計算每行/段的字數
+        /// 計算單行/段的字數
         /// </summary>
         /// <param name="xLinePara">要計算的行/段的文字字串</param>
         /// <returns></returns>
@@ -4882,7 +4975,7 @@ namespace WindowsFormsApp1
                 Mdb.openDatabase("查字.mdb", ref cnt);
                 rst.Open("select * from 每行字數判斷用 where condition=0", cnt, ado.CursorTypeEnum.adOpenKeyset, ado.LockTypeEnum.adLockReadOnly);
             }
-            undoRecord(); stopUndoRec = true;
+            undoRecord(); stopUndoRec = true; pauseEvents();
             while (e > -1)
             {
                 s = e + 2;
@@ -5001,24 +5094,25 @@ namespace WindowsFormsApp1
                     }
                 }
             }
-            stopUndoRec = false;
+            stopUndoRec = false; resumeEvents();
             replaceBlank_ifNOTTitleAndAfterparagraphMark();
             fillSpace_to_PinchNote_in_LineStart();
             if (_eventsEnabled) pauseEvents();
-            stopUndoRec = true;
+            stopUndoRec = true; pauseEvents();
             //最後一行處理
-            if (textBox1.TextLength > 1 && textBox1.Text.Substring(textBox1.TextLength - Environment.NewLine.Length, Environment.NewLine.Length) != Environment.NewLine)
-                if (new StringInfo(getLineTxtWithoutPunctuation(textBox1.Text, textBox1.Text.LastIndexOf(Environment.NewLine)
-                    + Environment.NewLine.Length)).LengthInTextElements < wordsPerLinePara)
+            if (textBox1.TextLength > 1
+                && textBox1.Text.Substring(textBox1.TextLength - Environment.NewLine.Length, Environment.NewLine.Length) != Environment.NewLine)
+                if (countWordsLenPerLinePara(getLineTxtWithoutPunctuation(textBox1.Text, textBox1.Text.LastIndexOf(Environment.NewLine)
+                    + Environment.NewLine.Length)) < wordsPerLinePara)
                     if (textBox1.Text.Substring(textBox1.TextLength - 1, 1) != ">") textBox1.Text += "。<p>";
 
             playSound(soundLike.over);
             if (topLine) { rst.Close(); cnt.Close(); rst = null; cnt = null; }
             if (keyinTextMode)
             {
-                stopUndoRec = true;
+                stopUndoRec = true; pauseEvents();
                 textBox1.Text = textBox1.Text.Replace("。<p>\r\n{{", "\r\n{{");
-                stopUndoRec = false;
+                stopUndoRec = false; resumeEvents();
                 textBox1.Select(textBox1.TextLength, 0);
             }
             else
@@ -5422,15 +5516,17 @@ namespace WindowsFormsApp1
         /// <returns>執行不成功則回傳false</returns>
         private bool keyDownCtrlAdd(bool shiftKeyDownYet = false, string clear = "", bool notBooksPunctuation = false, bool pagePaste2GjcoolOCR = false)
         {
-            int s = textBox1.SelectionStart, l = textBox1.SelectionLength;
+            int s = textBox1.SelectionStart, l = textBox1.SelectionLength; string x = textBox1.Text; //今定義再置前
 
             if (TopMost) TopMost = false;
 
+            #region 在手動編輯模式下（尤其是需要OCR時）的前置檢查
             if (keyinTextMode)
             {
                 if (s == 0 && l == 0) s = textBox1.TextLength;
                 else if (s + l < textBox1.TextLength &&//空格與分行/段符號網頁會自動忽略
-                    textBox1.Text.Substring(s + l, textBox1.TextLength - s - l).Replace("　", "").Replace(Environment.NewLine, "") != "")
+                                                       //textBox1.Text.Substring(s + l, textBox1.TextLength - s - l).Replace("　", "").Replace(Environment.NewLine, "") != "")
+                    x.Substring(s + l, textBox1.TextLength - s - l).Replace("　", "").Replace(Environment.NewLine, "") != "")
                 {
                     if (DialogResult.Cancel == Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly(
                         "插入點位置似有誤，請「確定」從此處之前的才貼上？\n\r\n\r" +
@@ -5445,10 +5541,19 @@ namespace WindowsFormsApp1
                     //Cursor.Position = formPos;
                     //Thread.Sleep(501);// regedit : HKEY_CURRENT_USER\Control Panel\Desktop\ActiveWndTrkTimeout = 500（十進位）
                 }
+
+                //檢查查是否有編輯標記
+                if (!CnText.HasEditedWithPunctuationMarks(ref x))
+                {
+                    playSound(soundLike.warn);
+                    if (MessageBoxShowOKCancelExclamationDefaultDesktopOnly("尚未有以供程式判斷之編輯標記（標點符號及符號格式化字元等），是否確定送出？", string.Empty, true, MessageBoxDefaultButton.Button2) == DialogResult.Cancel) return false;
+                }
             }
             else { if (s == 0 && l == 0) { Activate(); return false; } }
+            #endregion
 
-            string x = textBox1.Text; //今定義置前
+
+            //string x = textBox1.Text; //今定義置前
 
 
             //if (pageTextEndPosition == 0) pageTextEndPosition = s;
@@ -6988,6 +7093,21 @@ namespace WindowsFormsApp1
                     else
                     {
                         if (notFastModeColor != null) button1.ForeColor = notFastModeColor;
+                    }
+                    return;
+                }
+                if (e.KeyCode == Keys.R)
+                {//Alt + r ：在Selenium模式+手動輸入模式下、關閉所在Chrome瀏覽器右側之分頁。（因應《古籍酷》連線不暢所衍生之措施）20231026
+                    //有時--尤其在傳回OCR結果時，等待過久，可以多開幾個《古籍酷》的頁面以刺激之。因為取得OCR結果後會切回目前交付OCR的頁面，故將其右方的分頁悉數關閉即可。
+                    e.Handled = true;
+                    if (browsrOPMode != BrowserOPMode.appActivateByName && keyinTextMode)
+                    {
+                        br.driver = br.driver ?? br.DriverNew();
+                        br.driver.SwitchTo().Window(br.driver.CurrentWindowHandle);
+                        SendKeys.Send("%r");
+                        Thread.Sleep(350);
+                        //Activate();
+                        bringBackMousePosFrmCenter();
                     }
                     return;
                 }
@@ -9446,9 +9566,9 @@ namespace WindowsFormsApp1
                         if (TopMost) TopMost = false; if (!br.waitGJcoolPoint) br.waitGJcoolPoint = true;
                         Task tk = Task.Run(() => { br.OCR_GJcool_AccountChanged_Switcher(true, false); });
                         tk.Wait();
-                        //if (!Active) BringToFront(); 
+                        BringToFront();
                         availableInUseBothKeysMouse();
-
+                        Activate();
                     }
                     else if (x == "jk")//不切換IP，不切換《古籍酷》帳戶，欲直接進入首頁快速體驗者
                     {
@@ -10006,11 +10126,13 @@ namespace WindowsFormsApp1
             //Task.WaitAll();
 
             //重設判斷不正常行長度的變數。
-            int bookID = GetBookIDFromUrl(textBox3Text);
-            if (previousBookID != bookID || url == "")
+            int bookID = GetBookID_fromUrl(textBox3Text);
+            //if (previousBookID != bookID || url == "")
+            if (Math.Abs(previousBookID - bookID) > 1 || url == "")
             { //normalLineParaLength = 0;
                 resetBooksPagesFeatures();
                 previousBookID = bookID;
+                playSound(soundLike.warn);
             }
 
             textBox3.Tag = textBox3Text;
@@ -10029,7 +10151,7 @@ namespace WindowsFormsApp1
         /// 由指定的url中擷取出 book ID
         /// </summary>
         /// <returns>傳回ID值</returns>
-        internal int GetBookIDFromUrl(string url)
+        internal int GetBookID_fromUrl(string url)
         {
             const string f = "file=";
             if (url == "" || url.IndexOf(f) == -1 || url.IndexOf("&") == -1) return 0;
@@ -10051,7 +10173,7 @@ namespace WindowsFormsApp1
             if (x == "") return;
             if (x.IndexOf("https://ctext.org/") == -1 || x.IndexOf("edit") == -1) return;
             //const string f = "file="; int s = x.IndexOf(f);
-            int bookID = GetBookIDFromUrl(textBox3Text);// int.Parse(x.Substring(s + f.Length, x.IndexOf("&", s + 1) - s - f.Length));
+            int bookID = GetBookID_fromUrl(textBox3Text);// int.Parse(x.Substring(s + f.Length, x.IndexOf("&", s + 1) - s - f.Length));
 
             if (bookID != previousBookID || previousBookID == 0)
             {
@@ -10380,12 +10502,12 @@ namespace WindowsFormsApp1
             }
 
         }
-        internal static DialogResult MessageBoxShowOKCancelExclamationDefaultDesktopOnly(string text, string caption = "", bool formActivated = true)
+        internal static DialogResult MessageBoxShowOKCancelExclamationDefaultDesktopOnly(string text, string caption = "", bool formActivated = true, MessageBoxDefaultButton defaultButton = MessageBoxDefaultButton.Button1)
         {
             Form1 form1 = Application.OpenForms[0] as Form1;
             form1.bringBackMousePosFrmCenter();
             DialogResult dr = MessageBox.Show(text, caption, MessageBoxButtons.OKCancel
-                , MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
+                , MessageBoxIcon.Exclamation, defaultButton, MessageBoxOptions.DefaultDesktopOnly);
             if (formActivated)
             {
                 form1.BringToFront(); form1.availableInUseBothKeysMouse();

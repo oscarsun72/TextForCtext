@@ -204,7 +204,7 @@ namespace TextForCtext
                     }
                 }
 
-                if (whs.Count == 0) return string.Empty;
+                if (whs == null || whs.Count == 0) return string.Empty;
                 _lastValidWindowHandle = _lastValidWindowHandle == null ? (whs.Count > 0 ? whs[whs.Count - 1] : null) : _lastValidWindowHandle;
                 if (!whs.Contains(_lastValidWindowHandle))
                     return whs[whs.Count - 1];
@@ -1421,7 +1421,7 @@ namespace TextForCtext
         /// Selenium 瀏覽所指定的網址所在的網頁
         /// </summary>
         /// <param name="url">要瀏覽的網址</param>
-        /// <param name="frmKeyinTextModeTopWindow">是否將視窗調到最頂端</param>
+        /// <param name="frmKeyinTextModeTopWindow">是否將視窗調到最頂端</param>        
         internal static void GoToUrlandActivate(string url, bool frmKeyinTextModeTopWindow = false)
         {
             if (string.IsNullOrEmpty(url) || url.Substring(0, 4) != "http") return;
@@ -1758,7 +1758,7 @@ namespace TextForCtext
         /// <returns></returns>
         internal static bool IsSameBookPageWithDrive(string url)
         {
-            int bookidDrive = ActiveForm1.GetBookIDFromUrl(driver.Url), pageNumDrive = ActiveForm1.GetPageNumFromUrl(driver.Url), bookid = ActiveForm1.GetBookIDFromUrl(url), pageNum = ActiveForm1.GetPageNumFromUrl(url);
+            int bookidDrive = ActiveForm1.GetBookID_fromUrl(driver.Url), pageNumDrive = ActiveForm1.GetPageNumFromUrl(driver.Url), bookid = ActiveForm1.GetBookID_fromUrl(url), pageNum = ActiveForm1.GetPageNumFromUrl(url);
             if (bookidDrive != bookid && pageNumDrive != pageNum)
                 return true;
             else return false;
@@ -2124,7 +2124,7 @@ internal static string getImageUrl() {
 
             //ActiveForm1.TopMost = false;//改寫在呼叫端，以免多執行緒時出錯
 
-            if (!justSwitchAccount) if (!ProtonVPNSwitcher()) if (!IvacyVPNSwitcher()) IvacyVPNExtensionSwitcher();
+            if (!justSwitchAccount) if (!ProtonVPNSwitcher()) if (!IvacyVPNSwitcher()) TouchVPN_IvacyVPN_ExtensionSwitcher();
             if (justIPSwitch) { } //{ if (!ActiveForm1.Active) { ActiveForm1.BringToFront(); } }//改寫在呼叫端，以免多執行緒時出錯
             else
             {
@@ -2271,7 +2271,8 @@ internal static string getImageUrl() {
                 while (GJcoolAccounts[i].Item2 != DateTime.Parse("2023/9/29"))
                 {
                     //if (DateTime.Now.Subtract(GJcoolAccounts[i].Item2).Days > 0)
-                    if (DateTime.Now.Subtract(GJcoolAccounts[i].Item2).Hours > 22)
+                    //if (DateTime.Now.Subtract(GJcoolAccounts[i].Item2).Hours > 22)
+                    if (DateTime.Now.Subtract(GJcoolAccounts[i].Item2).TotalHours > 23.4)
                     {
                         gjcoolAccountCounter--;
                         Form1.playSound(Form1.soundLike.exam);
@@ -2345,28 +2346,36 @@ internal static string getImageUrl() {
         /// 切換IvacyVPN擴充功能。
         /// </summary>
         /// <returns>成功則傳回true</returns>
-        internal static bool IvacyVPNExtensionSwitcher()
+        internal static bool TouchVPN_IvacyVPN_ExtensionSwitcher()
         {
-            Point copyBtnPos = new Point(1739, 55);//擴充功能顯示清單中最右邊的位置
+            //一個擴充功能按鈕長寬大約 35-39 點（35×35）
+            Point copyBtnPos = new Point(1700, 55);//擴充功能顯示清單中最右邊的位置 118.0.5993.89版以後
+            //Point copyBtnPos = new Point(1739, 55);//擴充功能顯示清單中最右邊的位置
             Cursor.Position = copyBtnPos;
             //ClickLeftMouse(x, y);
             //Thread.Sleep(150);
             clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.soundLike.press);
             Thread.Sleep(450);
             //copyBtnPos = new Point(1597, 295);//連接（Connect）按鈕位置
-            copyBtnPos = new Point(1595, 333);//連接（Connect）按鈕位置（此與TouchVPN的有交集）
+            //copyBtnPos = new Point(1595, 333);//連接（Connect）按鈕位置（此與TouchVPN的有交集）
+            copyBtnPos = new Point(1525, 333);//連接（Connect）按鈕位置（此與TouchVPN的有交集） 118.0.5993.89版以後
             Cursor.Position = copyBtnPos;
             clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.soundLike.over);
             Thread.Sleep(250);
-            copyBtnPos = new Point(1700, 160);//TouchVPN的Stop按鈕
+            //copyBtnPos = new Point(1700, 160);//TouchVPN的Stop按鈕
+            copyBtnPos = new Point(1630, 160);//TouchVPN的Stop按鈕  118.0.5993.89版以後
             Cursor.Position = copyBtnPos;
             clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.soundLike.over);
             Thread.Sleep(2400);//TouchVPN比較久
-            copyBtnPos = new Point(1595, 333);
+            //copyBtnPos = new Point(1595, 333);
+            copyBtnPos = new Point(1525, 333);// TouchVPN 連接（Connect）按鈕位置 118.0.5993.89版以後
             Cursor.Position = copyBtnPos;
             clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.soundLike.done);
             Thread.Sleep(150);
             SendKeys.SendWait("{esc}");
+            openNewTabWindow(WindowType.Tab);
+            Thread.Sleep(850);
+            GoToUrlandActivate("https://iplocation.com/");
             return true;
 
         }
@@ -2391,8 +2400,10 @@ internal static string getImageUrl() {
                  */
                 Thread.Sleep(150);
                 // 模擬滑鼠左鍵點擊指定座標（Random Connect按鈕）
-                int x = 338;
-                int y = 364;
+                int x = 229;////338;
+                int y = 210;//161//364;
+                            //Change server 按鈕
+                            //Disconnect 按鈕
                 Point copyBtnPos = new Point(x, y);
                 Cursor.Position = copyBtnPos;
                 //ClickLeftMouse(x, y);
@@ -2433,7 +2444,8 @@ internal static string getImageUrl() {
                 //ClickLeftMouse(x, y);
                 Thread.Sleep(150);
                 clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.soundLike.none);
-                Thread.Sleep(1150);//等待斷開
+                //Thread.Sleep(1150);//等待斷開
+                Thread.Sleep(1950);//等待斷開
                 clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.soundLike.none);
                 Thread.Sleep(6000);//監看連線成功
                 return true;
@@ -2692,8 +2704,8 @@ internal static string getImageUrl() {
             //iwe.Click();//不行，會出錯
 
             //clickCopybutton_GjcoolFastExperience(new Point(137, 299), Form1.soundLike.press);//new Point(X, Y)=「選擇檔案」控制項之位置
-            clickCopybutton_GjcoolFastExperience(new Point(iwe.Location.X + 76, iwe.Location.Y + 120), Form1.soundLike.press);//new Point(X, Y)=「選擇檔案」控制項之位置
-                                                                                                                              //76 系統工具列在左側時的寬度//120 Chrome瀏覽器頂遄到書籤列下端的長度
+            clickCopybutton_GjcoolFastExperience(new Point(iwe.Location.X + 76 + (iwe.Size.Width) / 2, iwe.Location.Y + 120 + (iwe.Size.Height) / 2), Form1.soundLike.press);//new Point(X, Y)=「選擇檔案」控制項之位置
+                                                                                                                                                                             //76 系統工具列在左側時的寬度//120 Chrome瀏覽器頂遄到書籤列下端的長度
 
             //waitFindWebElementBySelector_ToBeClickable("#line_img_form > div > input[type=file]").SendKeys(OpenQA.Selenium.Keys.Space);
             //waitFindWebElementByName_ToBeClickable("line_img",2).Submit();
