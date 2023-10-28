@@ -2108,7 +2108,9 @@ internal static string getImageUrl() {
                 new Tuple<string,DateTime>("touchvpn", DateTime.Parse("2023/9/29")),
                 new Tuple<string,DateTime>("ivacyvpn", DateTime.Parse("2023/9/29")),
                 new Tuple<string,DateTime>("thanksxianchaofashi", DateTime.Parse("2023/9/29")),
-                new Tuple<string,DateTime>("xianchaofashi", DateTime.Parse("2023/9/29")) };
+                new Tuple<string,DateTime>("xianchaofashi", DateTime.Parse("2023/9/29")),
+                new Tuple<string,DateTime>("protonpasstry", DateTime.Parse("2023/9/29")),
+                new Tuple<string,DateTime>("gjprotonpasstry", DateTime.Parse("2023/9/29")) };
         /// <summary>
         /// 切換《古籍酷》帳戶時用
         /// </summary>
@@ -2330,7 +2332,7 @@ internal static string getImageUrl() {
 
                 }
             }
-            if (!ActiveForm1.Visible&& !ActiveForm1.HiddenIcon) ActiveForm1.Visible = true;
+            if (!ActiveForm1.Visible && !ActiveForm1.HiddenIcon) ActiveForm1.Visible = true;
             return true;
         }
 
