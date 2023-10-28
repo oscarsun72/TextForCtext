@@ -2447,7 +2447,7 @@ internal static string getImageUrl() {
                 //Thread.Sleep(150);
                 Thread.Sleep(350);
                 clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.soundLike.none);
-                //Thread.Sleep(1150);//等待斷開
+                //Thread.Sleep(1150);//等待斷開 
                 Thread.Sleep(1250);//等待斷開
                 clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.soundLike.none);
                 Thread.Sleep(6000);//監看連線成功

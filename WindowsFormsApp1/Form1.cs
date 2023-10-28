@@ -10507,7 +10507,23 @@ namespace WindowsFormsApp1
         internal static void MessageBoxShowOKExclamationDefaultDesktopOnly(string text, string caption = "", bool formActivated = true)
         {
             Form1 form1 = Application.OpenForms[0] as Form1;
-            form1.bringBackMousePosFrmCenter();
+            //20221021Bing大菩薩：C# 跨執行緒作業無效：
+            //form1.bringBackMousePosFrmCenter();
+            if (br.ActiveForm1.InvokeRequired)
+            {
+                br.ActiveForm1.Invoke((MethodInvoker)delegate
+                {
+                    // 你的程式碼
+                });
+            }
+            else
+            {
+                // 你的程式碼
+                if (formActivated)
+                {
+                    form1.bringBackMousePosFrmCenter();
+                }
+            }            
             MessageBox.Show(text, caption, MessageBoxButtons.OK
                 , MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
 
