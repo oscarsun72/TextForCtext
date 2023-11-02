@@ -1,4 +1,5 @@
 ﻿//using static System.Net.Mime.MediaTypeNames;
+using ADODB;
 using Newtonsoft.Json.Linq;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
@@ -19,10 +20,13 @@ using System.Linq;
 using System.Media;
 using System.Net.Http.Headers;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography;
+using System.Security.Policy;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Automation;
 using System.Windows.Forms;
+using System.Xml.Linq;
 using WebSocketSharp;
 using WindowsFormsApp1;
 using forms = System.Windows.Forms;
@@ -319,6 +323,36 @@ namespace TextForCtext
             else
                 return string.Empty;
         }
+
+        internal static IWebElement Full_text_search_textbox_searchressingle
+        {
+            get
+            {
+                if (driver == null) return null;
+                IWebElement full_text_search_textbox_searchressingle = null;
+                try
+                {
+                    if (Form1.IsValidUrl＿keyDownCtrlAdd(ActiveForm1.textBox3Text))
+                    {
+                        //< input type = "hidden" name = "searchressingle" id = "searchressingle" value = "wiki:728745" style = "width: 80px;" >
+                        //full_text_search_textbox_searchressingle = driver.FindElement(By.Name("searchressingle"));
+                        full_text_search_textbox_searchressingle = driver.FindElement(By.CssSelector("#searchressingle"));
+                        if (full_text_search_textbox_searchressingle == null)
+                        {
+                            WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(2));
+                            full_text_search_textbox_searchressingle =
+                                wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementExists(By.Name("searchressingle")));
+                        }
+                    }
+                    return full_text_search_textbox_searchressingle;
+                }
+                catch (Exception)
+                {
+                    return null;
+                }
+
+            }
+        }
         internal static IWebElement waitFindWebElementByName_ToBeClickable(string name, double second,
             IWebDriver drver = null)
         {
@@ -419,7 +453,14 @@ namespace TextForCtext
             {
                 IWebElement e = driver.FindElement(By.CssSelector(selector));
                 WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(second));
-                wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(e));
+                try
+                {
+                    wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(e));
+                }
+                catch (Exception)
+                {
+                    //throw;
+                }
                 return e;
             }
             catch (Exception ex)
@@ -1735,8 +1776,16 @@ namespace TextForCtext
             // 取得元件 scancont 的圖片網址
             //IWebElement scancont = driver.FindElement(By.Id("content"));
             //IWebElement scancont = driver.FindElement(By.Id("scancont"));
-            IList<OpenQA.Selenium.IWebElement> imageElements = driver.FindElements(By.TagName("img"));
-            string imageUrl = "";
+            string imageUrl = ""; IList<OpenQA.Selenium.IWebElement> imageElements = null;
+            try
+            {
+                imageElements = driver.FindElements(By.TagName("img"));
+            }
+            catch (Exception)
+            {
+                return imageUrl;
+                //throw;
+            }
             foreach (IWebElement imageElement in imageElements)
             {
                 imageUrl = imageElement.GetAttribute("src");
@@ -2110,7 +2159,21 @@ internal static string getImageUrl() {
                 new Tuple<string,DateTime>("thanksxianchaofashi", DateTime.Parse("2023/9/29")),
                 new Tuple<string,DateTime>("xianchaofashi", DateTime.Parse("2023/9/29")),
                 new Tuple<string,DateTime>("protonpasstry", DateTime.Parse("2023/9/29")),
-                new Tuple<string,DateTime>("gjprotonpasstry", DateTime.Parse("2023/9/29")) };
+                new Tuple<string,DateTime>("gjprotonpasstry", DateTime.Parse("2023/9/29")) ,
+                new Tuple<string,DateTime>("gjsphere716", DateTime.Parse("2023/9/29")) ,
+                new Tuple<string,DateTime>("gjrecast113", DateTime.Parse("2023/9/29")) ,
+                new Tuple<string,DateTime>("ivacylithuania", DateTime.Parse("2023/9/29")) ,
+                new Tuple<string,DateTime>("ivacyhongkong", DateTime.Parse("2023/9/29")) ,
+                new Tuple<string,DateTime>("ivacyaustralia", DateTime.Parse("2023/9/29")) ,
+                new Tuple<string,DateTime>("ivacynorway", DateTime.Parse("2023/9/29")) ,
+                new Tuple<string,DateTime>("italyfastexperienceivacy", DateTime.Parse("2023/9/29")) ,
+                new Tuple<string,DateTime>("ivacyspain", DateTime.Parse("2023/9/29")) ,
+                new Tuple<string,DateTime>("ivacyportugal", DateTime.Parse("2023/9/29")) ,
+                new Tuple<string,DateTime>("slovakiafastexperienceivacy", DateTime.Parse("2023/9/29")) ,
+                new Tuple<string,DateTime>("britishvirginislandsivacy", DateTime.Parse("2023/9/29")) ,
+                new Tuple<string,DateTime>("bulgariasivacy", DateTime.Parse("2023/9/29")) ,
+                new Tuple<string,DateTime>("gjfrisk195", DateTime.Parse("2023/9/29")),
+                new Tuple<string,DateTime>("vpnbygoogleone", DateTime.Parse("2023/9/29")) };
         /// <summary>
         /// 切換《古籍酷》帳戶時用
         /// </summary>
@@ -2126,7 +2189,7 @@ internal static string getImageUrl() {
 
             //ActiveForm1.TopMost = false;//改寫在呼叫端，以免多執行緒時出錯
 
-            if (!justSwitchAccount) if (!ProtonVPNSwitcher()) if (!IvacyVPNSwitcher()) TouchVPN_IvacyVPN_ExtensionSwitcher();
+            if (!justSwitchAccount) if (!GoogleOneVPNSwitcher()) if (!ProtonVPNSwitcher()) if (!IvacyVPNSwitcher()) TouchVPN_IvacyVPN_ExtensionSwitcher();
             if (justIPSwitch) { } //{ if (!ActiveForm1.Active) { ActiveForm1.BringToFront(); } }//改寫在呼叫端，以免多執行緒時出錯
             else
             {
@@ -2420,7 +2483,7 @@ internal static string getImageUrl() {
             return false;
         }
         /// <summary>
-        /// 切換IvacyVPN。請將其視窗最大化
+        /// 切換IvacyVPN
         /// </summary>
         /// <returns>成功則傳回true</returns>
         internal static bool IvacyVPNSwitcher()
@@ -2457,15 +2520,544 @@ internal static string getImageUrl() {
             }
             return false;
         }
+        /// <summary>
+        /// 切換Google One VPN
+        /// 難怪用這個這麼超快急速的：因為我的回定IP就是設定這樣的：http://www.pcdiy.com.tw/detail/1412 〈Google Public DNS上網跑更快，用戶端趕快更換IPv4 DNS設定8.8.8.8與8.8.4.4〉感恩感恩　讚歎讚歎　Google大神大菩薩　南無阿彌陀佛
+        /// https://briian.com/6667/ Google 更快更安全的 DNS 伺服器：8.8.8.8 與 8.8.4.4 （含 iPv6）
+        /// https://www.google.com/search?q=DNS+8.8.4.48.8.8.8&oq=DNS+8.8.4.48.8.8.8&gs_lcrp=EgZjaHJvbWUyBggAEEUYOTIHCAEQABiiBDIHCAIQABiiBDIHCAMQABiiBDIHCAQQABiiBNIBCDEyMzZqMGo3qAIAsAIA&sourceid=chrome&ie=UTF-8
+        /// IP 設定
+        /// IP 指派: 手動
+        /// IPv4 DNS 伺服器:	8.8.4.4
+        /// 屬性
+        /// 連結速度(接收/傳輸):100 / 100 (M bps)
+        /// IPv4 位址:
+        /// IPv4 DNS 伺服器:	8.8.4.4
+        ///                 8.8.8.8
+        /// 主要 DNS 尾碼:	dynamic.kbronet.com.tw
+        /// 以上是用 Text-Grab 擷取畫面OCR再校訂的；以下是在Windows 設定中直接按下「複製」鈕的
+        /// 連結速度(接收/傳輸) :   100/100 (Mbps)
+        /// IPv4 位址:	180.176.40.208
+        /// IPv4 DNS 伺服器:	8.8.4.4
+        ///                 8.8.8.8
+        /// 主要 DNS 尾碼:	dynamic.kbronet.com.tw
+        /// 製造商:	Realtek        
+        /// </summary>
+        /// <returns>成功則傳回true</returns>
+        internal static bool GoogleOneVPNSwitcher()
+        {
+            string targetProcessName = "VPN by Google One"; // 目標程序的名稱
+
+            // 查找具有指定程式名稱的窗體
+            IntPtr targetWindowHandle = FindWindow(null, targetProcessName);
+
+            if (targetWindowHandle != IntPtr.Zero)
+            {
+                // 將目標窗口切換到最前面
+                //ShowWindow(targetWindowHandle, SW_MAXIMIZE);//SW_RESTORE);
+                ShowWindow(targetWindowHandle, SW_RESTORE);
+                SetForegroundWindow(targetWindowHandle);
+                /* chatGPT大菩薩：20230926
+                 * 你正確，SetForegroundWindow 方法在視窗最小化時可能無法成功將其切換到最前面。為了解決這個問題，你可以嘗試使用 ShowWindow 函數來將視窗恢復到正常狀態，然後再調用 SetForegroundWindow。這樣可以確保視窗在最前面並且可見。
+                 */
+                Thread.Sleep(150);
+                // 模擬滑鼠左鍵點擊指定座標（Random Connect按鈕）
+                int x = 1066;
+                int y = 528;
+                Point copyBtnPos = new Point(x, y);
+                Cursor.Position = copyBtnPos;
+                //ClickLeftMouse(x, y);
+                Thread.Sleep(150);
+                clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.soundLike.none);
+                Thread.Sleep(850);//等待斷開
+                clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.soundLike.none);
+                Thread.Sleep(900);//監看連線成功
+                return true;
+            }
+            return false;
+        }
 
 
 
         /// <summary>
-        /// 《古籍酷》OCR：自動識別(豎版)
+        /// 《古籍酷》OCR：自動識別(豎版)。由原本程式碼改良而來
+        /// 以直接點按【文本行】按鈕來將所開啟之文本窗口中的文本框，其內之文字內容選入剪貼簿中，以省卻下載、讀寫硬碟之煩，
+        /// 且不必擔心視窗不在作用中（即可切換到其他視窗放心工作，順待OCR結果取回）感恩感恩　讚歎讚歎　南無阿彌陀佛 20231028
+        /// </summary>
+        /// <param name="downloadImgFullName">書圖檔全檔名</param>
+        /// <param name="_downloadResult">若欲用原式（下載OCR結果）則為true。預設為改良式，並不下載，只讀入剪貼簿，故為false</param>
+        /// <returns>順利完成則回傳true</returns>
+        internal static bool OCR_GJcool_AutoRecognizeVertical(string downloadImgFullName, bool _downloadResult = false)
+        {
+            //Form1.playSound(Form1.soundLike.press);
+            string gjCool = string.Empty; string currentWindowHndl = ""; WindowType windowType = WindowType.Tab;
+            try
+            {
+                driver = driver ?? DriverNew();
+                currentWindowHndl = driver.CurrentWindowHandle;
+                //openNewTabWindow(WindowType.Window);
+                openNewTabWindow(windowType);
+                _OCR_GJcool_WindowClosed = false;
+                if (ActiveForm1.TopMost) ActiveForm1.TopMost = false;
+                //點數（算力值、算力配额）不足逕用「快速體驗」執行
+                if (!OCR_GJcool_AccountChanged && waitGJcoolPoint || (!OCR_GJcool_AccountChanged && waitGJcoolPoint && DateTime.Now.Subtract(gjCoolPointLess150When) < gjCoolPointEnoughTimespan))
+                {
+                    //Form1.playSound(Form1.soundLike.processing);
+                    bool fastXResulut = OCR_GJcool_FastExperience(downloadImgFullName);
+                    driver.Close();
+                    _OCR_GJcool_WindowClosed = true;
+                    driver.SwitchTo().Window(currentWindowHndl);
+                    return fastXResulut;
+                }
+                else
+                    gjCool = OCRSite_URL[OCRSiteTitle.GJcool]; //"https://gj.cool/try_ocr";
+                //Form1.playSound(Form1.soundLike.processing);
+                if (_OCR_GJcool_AccountChanged) { _OCR_GJcool_AccountChanged = !_OCR_GJcool_AccountChanged; gjCoolPointLess150When = DateTime.Now; }
+            }
+            catch (Exception ex)
+            {
+                switch (ex.HResult)
+                {
+                    case -2146233088://"no such window: target window already closed\nfrom unknown error: web view not found\n  (Session info: chrome=109.0.5414.120)"                            
+                        if (ex.Message.IndexOf("no such window: target window already closed") > -1)
+                        {
+                            #region OCR成功後則刪除下載的書圖,備份OCR結果; 因為 https://gj.cool/try_ocr 頁面時常傳回假資料（之前曾識別的文本），故今改寫在 textBox3.TextChanged事件中
+                            //if (File.Exists(downloadImgFullName))
+                            //{
+                            //    /* -2147024864：
+                            //     * "由於另一個處理序正在使用檔案 'C:\\Users\\oscar\\Dropbox\\Ctext_Page_Image.png'，所以無法存取該檔案。"
+                            //     * 20231028 Bing大菩薩： 刪除檔案問題：
+                            //     * 您好，這是Bing。您在刪除檔案時遇到的問題可能是因為該檔案正在被另一個程序使用。以下是一些可能的解決方案：
+                            //     * 使用垃圾回收1：在刪除檔案之前，您可以嘗試調用 System.GC.Collect() 和 System.GC.WaitForPendingFinalizers() 來強制進行垃圾回收。
+                            //     */
+                            //    //System.GC.Collect();
+                            //    //System.GC.WaitForPendingFinalizers();
+                            //    //以上無效！！！
+                            //    try
+                            //    {
+                            //        File.Delete(downloadImgFullName);
+                            //    }
+                            //    catch (Exception ex1)
+                            //    {
+                            //        switch (ex1.HResult)
+                            //        {
+                            //            case -2147024864:
+                            //                Task.Run(() =>
+                            //                {
+                            //                    Thread.Sleep(400);//"由於另一個處理序正在使用檔案 'X:\\Ctext_Page_Image.txt'，所以無法存取該檔案。"
+                            //                    File.Delete(downloadImgFullName);
+                            //                });
+                            //                break;
+                            //            default:
+                            //                Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex1.HResult + ex1.Message);
+                            //                return false;
+                            //        }
+                            //    }
+                            //}
+                            #endregion
+                        }
+                        else
+                            Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
+                        break;
+                    case -2147221040:
+                        if (ex.Message.IndexOf("要求的剪貼簿作業失敗。") > -1)
+                        {
+                            DateTime dt = DateTime.Now;
+                            Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("請手動複製OCR文本");
+                            //Clipboard.Clear();//此時剪貼簿還不能用
+                            while (!Form1.isClipBoardAvailable_Text(100)) { if (DateTime.Now.Subtract(dt).Seconds > 0.5) break; }
+                            driver.Close();
+                            _OCR_GJcool_WindowClosed = true;
+                            driver.SwitchTo().Window(currentWindowHndl);
+                            return true;
+                        }
+                        else
+                        {
+                            Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
+                            Debugger.Break();
+                        }
+                        break;
+
+                    default:
+                        Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
+                        break;
+                }
+
+            }
+
+            try
+            {
+                driver.Navigate().GoToUrl(gjCool);
+            }
+            catch (Exception ex)
+            {
+                switch (ex.HResult)
+                {
+                    case -2146233088:
+                        if (ex.Message.IndexOf("no such window: target window already closed") > -1
+                            || ex.Message.EndsWith("seconds."))
+                        {
+                            try
+                            {
+                                driver.SwitchTo().Window(LastValidWindow);
+                            }
+                            catch (Exception)
+                            {
+                                //throw;
+                            }
+                            return false;
+                        }
+                        else
+                            goto default;
+                    default:
+                        string msgText = ex.HResult.ToString() + ex.Message;
+                        Console.WriteLine(msgText);
+                        Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(msgText);
+                        return false;
+                }
+            }
+
+            #region 先檢查點數是否足夠
+            const byte pointCoin = 150;//「自動識別(豎版)」所需點數120，載入圖檔要30
+            IWebElement iwe = null;
+            try
+            {//以備隨時被使用者關閉
+                //IWebElement iwe = waitFindWebElementBySelector_ToBeClickable("#compute-value");
+                //IWebElement iwe = driver.FindElement(By.CssSelector("#compute-value"));
+                WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(_chromeDriverServiceTimeSpan));
+                try
+                {
+                    if (wait != null)
+                        iwe = wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementIsVisible(By.CssSelector("#compute-value")));
+                }
+                catch (Exception)
+                {
+                    return false;
+                }
+                //Form1.playSound(Form1.soundLike.processing);
+            }
+            catch (Exception ex)
+            {
+                switch (ex.HResult)
+                {
+                    case -2147467261:
+                        if (ex.Message.IndexOf("並未將物件參考設定為物件的執行個體。") > -1)
+                            return false;
+                        else
+                        {
+                            Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
+                            Debugger.Break();
+                        }
+                        break;
+                    case -2146233088:
+                        if (ex.Message.IndexOf("Timed out after") > -1)//"Timed out after 30.5 seconds"
+                        {//"The HTTP request to the remote WebDriver server for URL http://localhost:5837/session/0e0cfa1c2cdcd0298a952b8267079906/element timed out after 30.5 seconds."
+                            driver.SwitchTo().Window(LastValidWindow);
+                            return false;
+                        }
+                        else
+                        {
+                            Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
+                            Console.WriteLine(ex.HResult + ex.Message);
+                            Debugger.Break();
+                            driver.SwitchTo().Window(LastValidWindow);
+                        }
+                        break;
+                    default:
+                        Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
+                        Debugger.Break();
+                        break;
+                }
+                //throw;
+            }
+            if (iwe != null)
+            {
+                Form1.playSound(Form1.soundLike.processing);
+                //取得點數，如「 117 / 1000」格式
+                string innerText = iwe.GetAttribute("innerText"); int points = 0;
+                if (innerText.IndexOf(" /") > -1 && " ".Length + innerText.IndexOf(" /") - " ".Length <= innerText.Length)
+                    int.TryParse(innerText.Substring(" ".Length, innerText.IndexOf(" /") - " ".Length), out points);
+                if (points < pointCoin)
+                {
+                    waitGJcoolPoint = true;
+                    gjCoolPointLess150When = DateTime.Now;
+                    ////登出帳戶： 以下這會跳出訊息方塊，得處理，故改為傳引數的方式
+                    //waitFindWebElementBySelector_ToBeClickable("#navbarNav > ul:nth-child(2) > li:nth-child(2) > a > p.mb-0.fs-6.fst-italic").Click();
+                    //Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("點數（算力配额）不足！目前僅有"+ points + " 至少需要"+pointCoin);
+                    //轉由首頁「快速體驗」執行
+                    bool fastXResulut = OCR_GJcool_FastExperience(downloadImgFullName, true);
+                    if (fastXResulut) driver.Close(); _OCR_GJcool_WindowClosed = true;
+                    try
+                    {
+                        driver.SwitchTo().Window(currentWindowHndl);
+                    }
+                    catch (Exception ex)
+                    {
+                        switch (ex.HResult)
+                        {
+                            case -2146233088:
+                                //"no such window: target window already closed
+                                if (ex.Message.IndexOf("no such window") > -1)
+                                {
+                                    openNewTabWindow();
+                                    GoToUrlandActivate(frm.textBox3Text);
+                                }
+                                else
+                                    Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
+                                break;
+                            default:
+                                Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
+                                break;
+                        }
+                    }
+                    return fastXResulut;
+
+                }
+                else { waitGJcoolPoint = false; points = 0; innerText = null; }//釋放記憶體
+            }
+            else return false;
+            #endregion
+
+            //需要下載時才執行
+            string filePath = string.Empty;
+            if (_downloadResult)
+            {
+                #region 再檢查瀏覽器下載目錄並取得 ：
+                string downloadDirectory = DownloadDirectory_Chrome;
+                if (!ChkDownloadDirectory_Chrome(downloadImgFullName, downloadDirectory)) return false;
+                #endregion
+
+                //取得所匯出的檔案路徑
+                filePath = Path.Combine(downloadDirectory, Path.GetFileNameWithoutExtension(downloadImgFullName) + ".txt");//@"X:\Ctext_Page_Image.txt";
+                                                                                                                           //刪除之前的檔案，以免因檔案存在而被下載端重新命名
+                Task.Run(() =>
+                {
+                    if (File.Exists(filePath)) File.Delete(filePath);
+                });
+            }
+
+
+            //等「新增圖片」按鈕可按：選擇檔案
+            //Thread.Sleep(3200);
+            //等待「選擇檔案」控制項出現，最多等timeSpanSecs秒；
+            //為免tab鍵數不同，而須手動操作，以免表單遮住畫面:
+            if (ActiveForm1.TopMost) ActiveForm1.TopMost = false;
+            DateTime begin = DateTime.Now; const int timeSpanSecs = 30;
+            TimeSpan timeSpan = new TimeSpan();
+            iwe = waitFindWebElementBySelector_ToBeClickable("#line_img_form > div > input[type=file]");
+            while (iwe == null)
+            {
+                iwe = waitFindWebElementBySelector_ToBeClickable("#line_img_form > div > input[type=file]");
+                timeSpan = (DateTime.Now.Subtract(begin));
+                if (timeSpan.TotalSeconds > timeSpanSecs) return false;
+            }
+
+            //檢查使用者是否已關閉視窗，取消這次的操作（比如說才發現已經有OCR了、或弄錯頁了……等等，可逕接關閉《古籍酷》OCR視窗以終結之）
+            try
+            {
+                if (driver.CurrentWindowHandle == currentWindowHndl) { };
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+
+            //取得「選擇檔案」控制項
+            //if (windowType == WindowType.Window)
+            //{
+            //    //SendKeys.Send("{tab 16} ");
+            //    SendKeys.Send("{tab 16}");
+            //    //如果按下tab鍵16次後「選擇檔案」控制項沒有被選中（不同環境下網頁元件數可能會有所不同！）
+            //    //這種寫法應該不會成功，因為Selenium可應用的範圍是程式自動化操作而不是使用者手動manual操作者20230322 果然！ 13:47
+            //    //if (!iwe.Selected) Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("菩薩慈悲：請手動執行OCR，OCR完成之後程式會接手執行。感恩感恩　南無阿彌陀佛"+ Environment.NewLine +"按下「確定（OK）」後繼續…… 阿彌陀佛");            
+            //    //if (!iwe.Selected) System.Diagnostics.Debugger.Break();
+            //}
+            //else if (windowType == WindowType.Tab)
+            //    SendKeys.Send("{tab 13}");
+            //    //SendKeys.Send("{tab 13}");
+            //else
+            //    Debugger.Break();
+            //    Debugger.Break();
+
+            //if (iwe.Selected)// "line_img")
+            //按下「選擇檔案」控制項
+            //    SendKeys.Send(" ");
+            //else
+            //if(iwe.Selected)
+            //iwe.Submit();
+            //iwe.Click();//不行，會出錯
+
+            //clickCopybutton_GjcoolFastExperience(new Point(137, 299), Form1.soundLike.press);//new Point(X, Y)=「選擇檔案」控制項之位置
+            clickCopybutton_GjcoolFastExperience(new Point(iwe.Location.X + 76 + (iwe.Size.Width) / 2, iwe.Location.Y + 120 + (iwe.Size.Height) / 2), Form1.soundLike.press);//new Point(X, Y)=「選擇檔案」控制項之位置
+                                                                                                                                                                             //76 系統工具列在左側時的寬度//120 Chrome瀏覽器頂遄到書籤列下端的長度
+
+            //waitFindWebElementBySelector_ToBeClickable("#line_img_form > div > input[type=file]").SendKeys(OpenQA.Selenium.Keys.Space);
+            //waitFindWebElementByName_ToBeClickable("line_img",2).Submit();
+            //等待選取檔案對話框開啟
+            Thread.Sleep(1200);
+            //輸入：檔案名稱 //SendKeys.Send(downloadImgFullName);
+            Clipboard.SetText(downloadImgFullName);
+            byte tryTimes = 1;
+        retry:
+            SendKeys.Send("+{Insert}");//or "^v"
+            SendKeys.Send("{ENTER}");
+            Form1.playSound(Form1.soundLike.processing);
+            //待圖載入完畢：
+            //Thread.Sleep(3220);
+            //Thread.Sleep(1220);
+            Thread.Sleep(920);
+            //按下「Pro」
+            iwe = waitFindWebElementBySelector_ToBeClickable("#line_img_form > div > input[type=file]");
+            if (iwe == null)
+            {
+                tryTimes++;
+                if (tryTimes > 5) return false;
+                goto retry;
+            }
+            //iwe.Click();
+            SendKeys.Send("{tab}~");
+            //按下「自動識別(豎版)」，開始OCR……
+            SendKeys.Send("{down}~");
+            if (_downloadResult)
+                Form1.playSound(Form1.soundLike.processing);
+            else
+                Form1.playSound(Form1.soundLike.waiting);
+            //等待OCR，上限為30秒
+            //iwe = waitFindWebElementBySelector_ToBeClickable("# OneLine > div.d-flex.justify-content-between.mt-2.mb-1 > div:nth-child(1) > div:nth-child(2) > ul > li:nth-child(2) > button");
+            iwe = waitFindWebElementBySelector_ToBeClickable("#line_list_table > tbody > tr:nth-child(1) > td:nth-child(2)");
+            begin = DateTime.Now;
+            while (iwe == null)
+            {
+                iwe = waitFindWebElementBySelector_ToBeClickable("#line_list_table > tbody > tr:nth-child(1) > td:nth-child(2)");
+                //上限為30秒
+                if (DateTime.Now.Subtract(begin).TotalSeconds > timeSpanSecs) return false;
+            }
+            //iwe.Click();
+            //Thread.Sleep(6220);
+            //Thread.Sleep(6000);//OCR結束
+            //Thread.Sleep(10500);//OCR結束
+            Thread.Sleep(1100);//OCR結束
+
+            if (_downloadResult)
+            {
+
+                //SendKeys.Send("{tab 24}~");
+                SendKeys.Send("{tab 18}~");
+                //按下「導出數據」：
+                //iwe = waitFindWebElementBySelector_ToBeClickable("# outputDropdown");
+                //iwe.Click();
+                SendKeys.Send("{tab 5} ");
+                //按下：「坐標」核取方塊，取消之
+                //iwe = waitFindWebElementBySelector_ToBeClickable("# outputSelect1");
+                //iwe.Click();
+                SendKeys.Send("{tab} ");
+                //按下：「識別概率」核取方塊，取消之
+                //iwe = waitFindWebElementBySelector_ToBeClickable("#outputSelect2");
+                //iwe.Click();
+                SendKeys.Send("+{tab 4}~");
+                //按下：「TXT」選項，匯出成純文字檔
+                //iwe = waitFindWebElementBySelector_ToBeClickable("#OneLine > div.d-flex.justify-content-between.mt-2.mb-1 > div.d-flex.justify-content-end.input-group > div:nth-child(3) > ul > li:nth-child(2) > a");
+                //iwe.Click();
+                Thread.Sleep(520);
+                //以上測試OK 20230310：01:26
+                #region 將OCR結果讀入剪貼簿 creedit with chatGPT大菩薩：
+
+                #region 讀入文本 creedit with chatGPT大菩薩：
+                //等待下載完成
+                TimeSpan waitFileExitTimeSpan = TimeSpan.FromSeconds(10);//最多等待時間
+                DateTime waitFileExitBegin = DateTime.Now;
+                while (!File.Exists(filePath) && DateTime.Now.Subtract(waitFileExitBegin) < waitFileExitTimeSpan)
+                {
+                }
+                if (File.Exists(filePath))
+                {
+
+                    string text = null;
+                retryReadFile:
+                    try
+                    {
+                        text = File.ReadAllText(filePath, System.Text.Encoding.UTF8);
+                    }
+                    catch (Exception ex)
+                    {
+                        switch (ex.HResult)
+                        {
+                            case -2147024864:
+                                Thread.Sleep(3);//"由於另一個處理序正在使用檔案 'X:\\Ctext_Page_Image.txt'，所以無法存取該檔案。"
+                                text = File.ReadAllText(filePath, System.Text.Encoding.UTF8);
+                                goto retryReadFile;
+                            default:
+                                Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.Message);
+                                break;
+                        }
+
+                    }
+
+                    if (text == null)
+                    {
+                        if (DialogResult.Cancel == Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly
+                                ("文本未下成功，請自行下載，好了之後再按「確定」繼續完成讀入到textBox1的工作；      或按「取消」結束此次操作。\n\r感恩感恩　南無阿彌陀佛"))
+                            return false;
+                    }
+                    Clipboard.SetText(text.Replace("\n", "\r\n"));
+                    //刪除下載檔案，以便下次載入
+                    Task.Run(() =>
+                    {
+                        //不必備份，似乎是《古籍酷》本身有bug，明明是一張圖，輸出的卻是不一樣的文本，或上次或之前哪次的文本 20230802
+                        //File.Copy(filePath, Path.Combine(//備一份以備萬一
+                        //    Path.GetDirectoryName(filePath) + Path.GetFileNameWithoutExtension(filePath) + "1" +
+                        //        Path.GetExtension(filePath)), true);
+
+
+                        File.Delete(filePath);
+                    });
+                }
+                else return false;
+                #endregion
+                #endregion
+            }
+
+            #region 不下載時的處理：
+            else
+            {
+                //【文本行】按鈕
+                iwe = waitFindWebElementBySelector_ToBeClickable("#OneLine > div.d-flex.justify-content-between.mt-2.mb-1 > div:nth-child(3) > div:nth-child(6) > button:nth-child(2) > i");
+                if (iwe != null)
+                {
+                    iwe.Click();
+                    //文本窗口
+                    iwe = waitFindWebElementBySelector_ToBeClickable("#TextArea");
+                    if (iwe != null)
+                    {
+                        //將OCR結果讀入剪貼簿：
+                        if (iwe.Text != string.Empty)
+                            Clipboard.SetText(iwe.Text);
+                        else
+                            return false;
+                    }
+                    else
+                        return false;
+                }
+                else return false;
+            }
+
+
+            #endregion
+
+            #region 關閉OCR視窗後回到原來分頁視窗
+            driver.Close(); _OCR_GJcool_WindowClosed = true;
+            driver.SwitchTo().Window(currentWindowHndl);
+            #endregion
+            return true;
+        }
+
+        #region OCR_GJcool_AutoRecognizeVertical 原式
+        /*
+        /// <summary>
+        /// 《古籍酷》OCR：自動識別(豎版)【此乃原式20231028】
         /// </summary>
         /// <param name="downloadImgFullName">書圖檔全檔名</param>
         /// <returns>順利完成則回傳true</returns>
-        internal static bool OCR_GJcool_AutoRecognizeVertical(string downloadImgFullName)
+        internal static bool OCR_GJcool_AutoRecognizeVertical_DownloadResult(string downloadImgFullName)
         {
             //Form1.playSound(Form1.soundLike.press);
             string gjCool = string.Empty; string currentWindowHndl = ""; WindowType windowType = WindowType.Tab;
@@ -2838,6 +3430,8 @@ internal static string getImageUrl() {
             #endregion
             return true;
         }
+        */
+        #endregion
 
         /// <summary>
         /// 檢查Chrome瀏覽器的下載路徑。
@@ -2876,8 +3470,8 @@ internal static string getImageUrl() {
         internal static bool OCR_GJcool_FastExperience(string downloadImgFullName, bool signOut = false)
         {
             #region 先檢查瀏覽器下載目錄並取得 ：
-            string downloadDirectory = DownloadDirectory_Chrome;
-            if (!ChkDownloadDirectory_Chrome(downloadImgFullName, downloadDirectory)) return false;
+            //string downloadDirectory = DownloadDirectory_Chrome;
+            //if (!ChkDownloadDirectory_Chrome(downloadImgFullName, downloadDirectory)) return false;
             #endregion
 
             driver = driver ?? DriverNew();
@@ -3093,7 +3687,29 @@ internal static string getImageUrl() {
                 //throw;
             }
 
+            #region 方便提早取消作業（藉由關閉OCR視窗）
+            try
+            {
+                if (currentWindowHndl != driver.CurrentWindowHandle) { };
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+            #endregion
+
             task.Wait();
+
+            #region 方便提早取消作業（藉由關閉OCR視窗）
+            try
+            {
+                if (currentWindowHndl != driver.CurrentWindowHandle) { };
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+            #endregion
 
             //如果 「Thread.Sleep(3900);」 太短，則再一次試試：
             if (Clipboard.GetText() == "")
@@ -3144,6 +3760,17 @@ internal static string getImageUrl() {
                 goto finish;
             }
 
+            #region 方便提早取消作業（藉由關閉OCR視窗）
+            try
+            {
+                if (currentWindowHndl != driver.CurrentWindowHandle) { };
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+            #endregion
+
             if (Clipboard.GetText() != "") goto finish;
 
             while (!Form1.isClipBoardAvailable_Text(10))
@@ -3151,6 +3778,7 @@ internal static string getImageUrl() {
                 //Form1.playSound(Form1.soundLike.info);
                 //if (timeSpanSecs > 0 && DateTime.Now.Subtract(begin).TotalSeconds > timeSpanSecs) return false;
                 //藉由手動關閉視窗以提早/強制中止程序
+                #region 方便提早取消作業（藉由關閉OCR視窗）
                 try
                 {
                     if (currentWindowHndl != driver.CurrentWindowHandle) { };
@@ -3159,6 +3787,7 @@ internal static string getImageUrl() {
                 {
                     return false;
                 }
+                #endregion
                 //if (copyBtnPos.X > 0)//= Point(838, 711)
                 //{
                 //    MouseOperations.MouseEventMousePos(MouseOperations.MouseEventFlags.LeftDown, copyBtnPos);
