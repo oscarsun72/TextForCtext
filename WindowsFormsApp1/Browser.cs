@@ -18,12 +18,15 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Media;
+using System.Net;
 using System.Net.Http.Headers;
+using System.Net.NetworkInformation;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Security.Policy;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Web.SessionState;
 using System.Windows.Automation;
 using System.Windows.Forms;
 using System.Xml.Linq;
@@ -2571,12 +2574,184 @@ internal static string getImageUrl() {
                 Thread.Sleep(850);//等待斷開
                 clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.soundLike.none);
                 Thread.Sleep(900);//監看連線成功
+
+                Point form1Location = ActiveForm1.Location;
+                try
+                {
+                    ActiveForm1.PauseEvents();
+                    ActiveForm1.Location = new Point(form1Location.X + 800, form1Location.Y);
+                }
+                catch (Exception)
+                {
+
+                    //throw;
+                }
+                DateTime dt = DateTime.Now;
+                //while (GetPCIpAddress("SUNS TOTOLINK") == GetPublicIpAddress())
+                while (GetPCIpAddress("乙太網路") == GetPublicIpAddress("乙太網路")
+                || GetPCIpAddress("Wi-Fi NetGear") == GetPublicIpAddress("Wi-Fi NetGear"))
+                {
+                    Thread.Sleep(2200);
+                    if (DateTime.Now.Subtract(dt).Seconds > _chromeDriverServiceTimeSpan) return false;
+                }
+                if (IPExists1Day())
+                {
+                    if (ipChangedCounter < 10)
+                    { GoogleOneVPNSwitcher(); ipChangedCounter++; }
+                }
+                else
+                    ipChangedCounter = 0;//計數器歸零
+                try
+                {
+                    ActiveForm1.ResumeEvents();
+                    ActiveForm1.Location = form1Location;
+                }
+                catch (Exception)
+                {
+                    //throw;
+                }
                 return true;
             }
             return false;
         }
+        /// <summary>
+        /// 轉換IP、重試VPN連線的次數
+        /// </summary>
+        static int ipChangedCounter = 0;
+        /// <summary>
+        /// 用來存放已經使用的IP及開始使用的時間，以供後續參照比較
+        /// </summary>
+        internal static List<Tuple<string, DateTime>> IPUsedList = new List<Tuple<string, DateTime>>();
+        /// <summary>
+        /// 檢查目前IP是否在一天內已經用過了
+        /// </summary>
+        /// <returns>若在一天內已用過，則傳回true</returns>
+        internal static bool IPExists1Day()
+        {
 
 
+            ////20231102 Bing大菩薩：取得本機電腦的IPv4地址
+            //string hostName = Dns.GetHostName(); // 取得主機名稱
+            //Console.WriteLine("主機名稱: " + hostName);
+
+            //// 取得本機的IPv4地址
+            //var ipAddresses = Dns.GetHostAddresses(hostName)
+            //                      .Where(ip => ip.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
+            //                      .Select(ip => ip.ToString());
+
+            //if (ipAddresses.Count() > 2)
+            //{
+
+            //    Debugger.Break();//just for check out
+
+            //    foreach (var ipAddress in ipAddresses)
+            //    {
+            //        Console.WriteLine("IPv4 地址: " + ipAddress);
+            //    }
+            //}
+
+            string currentIP = GetPublicIpAddress("乙太網路"); //= ipAddresses.First();//.ElementAt(1);
+            if (string.IsNullOrEmpty(currentIP)) currentIP = GetPublicIpAddress("Wi-Fi NetGear");
+            //currentIP = GetVpnIpAddress("VPN by Google One");//("VPN by Google One 25");
+
+            //20231102 Bing大菩薩：查找 List 中的元素
+            bool returnValue = IPUsedList.Exists(item => item.Item1 == currentIP && (DateTime.Now - item.Item2).TotalDays <= 1);
+            if (!returnValue)
+            {
+                //if(IPUsedList.Exists(item => item.Item1 == currentIP))
+                //{
+                //    IPUsedList.Add new to
+                //}
+                #region internal static void UpdateIP(string currentIP)
+                //{
+                int index = IPUsedList.FindIndex(item => item.Item1 == currentIP);
+                if (index != -1)
+                {
+                    // 元素存在，更新日期時間
+                    IPUsedList[index] = new Tuple<string, DateTime>(currentIP, DateTime.Now);
+                }
+                else
+                {
+                    // 元素不存在，添加新元素
+                    IPUsedList.Add(new Tuple<string, DateTime>(currentIP, DateTime.Now));
+                }
+                #endregion    //}
+
+            }
+            return returnValue;
+            //foreach (Tuple<string,DateTime> item in IPUsedList)
+            //{
+            //    if (item.Item1 == currentIP)
+            //    {
+            //        if
+            //        break;
+            //    }
+            //}
+
+        }
+        /// <summary>
+        /// 這個 GetPublicIpAddress 方法會返回您的公共IP地址
+        /// 20231102 Bing大菩薩 ： 查找 List 中的元素
+        /// </summary>
+        /// <returns></returns>
+        public static string GetPublicIpAddress(string name)
+        {
+            string publicIpAddress;
+
+            using (var webClient = new WebClient())
+            {
+                publicIpAddress = webClient.DownloadString("https://api.ipify.org");
+                //string pcIpAddress = GetPCIpAddress("乙太網路");
+                string pcIpAddress = GetPCIpAddress(name);
+                if (publicIpAddress == pcIpAddress)
+                {
+                    //if (driver.Url == "https://api.ipify.org/") driver.Close();
+                    ActiveForm1.PauseEvents();
+                    openNewTabWindow();//要打開比較快更新
+                    driver.Navigate().GoToUrl("https://api.ipify.org");
+                    DateTime dt = DateTime.Now;
+                    IWebElement ie = waitFindWebElementBySelector_ToBeClickable("body > pre");
+                    while (ie == null)
+                    {
+                        ie = waitFindWebElementBySelector_ToBeClickable("body > pre");
+                        if (DateTime.Now.Subtract(dt).Seconds > 15)
+                        {
+                            Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("找不到外部網路IP");
+                            Debugger.Break();
+                            return string.Empty;
+                        }
+                    }
+                    publicIpAddress = ie.Text;
+                    driver.Close();
+                    driver.SwitchTo().Window(LastValidWindow);
+                    ActiveForm1.ResumeEvents();
+                    if (publicIpAddress != pcIpAddress) return publicIpAddress;
+                }
+            }
+            return publicIpAddress;
+        }
+        /// <summary>
+        /// 在C#中，您可以使用 System.Net.NetworkInformation 命名空間下的 NetworkInterface 類來獲取網絡接口的信息，包括VPN的IP地址。以下是一個範例：
+        /// 20231102Bing大菩薩：查找 List 中的元素
+        ///public static string GetVpnIpAddress(string vpnName)
+        /// </summary>
+        /// <param name="vpnName"></param>
+        /// <returns></returns>
+        public static string GetPCIpAddress(string vpnName)
+        {
+            var vpn = NetworkInterface.GetAllNetworkInterfaces().FirstOrDefault(x => x.Name == vpnName);
+            if (vpn != null)
+            {
+                var ipProperties = vpn.GetIPProperties();
+                var ipv4Address = ipProperties.UnicastAddresses.FirstOrDefault(x => x.Address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork);
+                if (ipv4Address != null)
+                {
+                    return ipv4Address.Address.ToString();
+                }
+            }
+
+            return null;
+        }
 
         /// <summary>
         /// 《古籍酷》OCR：自動識別(豎版)。由原本程式碼改良而來
@@ -2727,7 +2902,8 @@ internal static string getImageUrl() {
                 try
                 {
                     if (wait != null)
-                        iwe = wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementIsVisible(By.CssSelector("#compute-value")));
+                        //iwe = wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementIsVisible(By.CssSelector("#compute-value")));
+                        iwe = wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementExists(By.CssSelector("#compute-value")));
                 }
                 catch (Exception)
                 {
@@ -2817,6 +2993,7 @@ internal static string getImageUrl() {
             else return false;
             #endregion
 
+            #region 下載路徑取得
             //需要下載時才執行
             string filePath = string.Empty;
             if (_downloadResult)
@@ -2834,9 +3011,10 @@ internal static string getImageUrl() {
                     if (File.Exists(filePath)) File.Delete(filePath);
                 });
             }
+            #endregion
 
 
-            //等「新增圖片」按鈕可按：選擇檔案
+            #region 等「新增圖片」按鈕可按：選擇檔案
             //Thread.Sleep(3200);
             //等待「選擇檔案」控制項出現，最多等timeSpanSecs秒；
             //為免tab鍵數不同，而須手動操作，以免表單遮住畫面:
@@ -2886,6 +3064,35 @@ internal static string getImageUrl() {
             //iwe.Submit();
             //iwe.Click();//不行，會出錯
 
+            driver.SwitchTo().Window(driver.CurrentWindowHandle);//切換到目前Selenium操控的視窗，就不怕沒及時得到焦點而失誤了
+                                                                 //try
+                                                                 //{
+                                                                 //    iwe.Click();//不行，會出錯
+                                                                 //}
+                                                                 //catch (Exception exx)
+                                                                 //{
+                                                                 //    //Console.WriteLine(exx.HResult + exx.Message);
+                                                                 //    //throw;
+                                                                 //}
+                                                                 //try
+                                                                 //{
+                                                                 //    //iwe = driver.FindElement(By.XPath("/html/body/div[13]/div/div[1]/div[1]/div[1]/form/div/input"));
+                                                                 //    iwe = driver.FindElement(By.XPath("//*[@id=\"line_img_form\"]/div/input"));
+                                                                 //    //wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
+
+            //    //  "//*[@id=\"line_img_form\"]/div/input"
+            //    //iwe.Click();
+            //    iwe.SendKeys(OpenQA.Selenium.Keys.End);
+            //}
+            //catch (Exception ex11)
+            //{
+            //    Console.WriteLine(ex11.HResult + ex11.Message);
+            //    Debugger.Break();
+            //    //throw;
+            //}
+            #endregion
+
+            #region 點擊新增圖片按鈕並輸入書圖全檔名
             //clickCopybutton_GjcoolFastExperience(new Point(137, 299), Form1.soundLike.press);//new Point(X, Y)=「選擇檔案」控制項之位置
             clickCopybutton_GjcoolFastExperience(new Point(iwe.Location.X + 76 + (iwe.Size.Width) / 2, iwe.Location.Y + 120 + (iwe.Size.Height) / 2), Form1.soundLike.press);//new Point(X, Y)=「選擇檔案」控制項之位置
                                                                                                                                                                              //76 系統工具列在左側時的寬度//120 Chrome瀏覽器頂遄到書籤列下端的長度
@@ -2897,26 +3104,85 @@ internal static string getImageUrl() {
             //輸入：檔案名稱 //SendKeys.Send(downloadImgFullName);
             Clipboard.SetText(downloadImgFullName);
             byte tryTimes = 1;
-        retry:
+            //retry:
             SendKeys.Send("+{Insert}");//or "^v"
             SendKeys.Send("{ENTER}");
             Form1.playSound(Form1.soundLike.processing);
             //待圖載入完畢：
             //Thread.Sleep(3220);
             //Thread.Sleep(1220);
-            Thread.Sleep(920);
-            //按下「Pro」
-            iwe = waitFindWebElementBySelector_ToBeClickable("#line_img_form > div > input[type=file]");
-            if (iwe == null)
+            //Thread.Sleep(920);
+            Thread.Sleep(1920);
+        #endregion
+
+        redo:
+
+            #region「上傳完畢」對話方塊的「OK」按鈕 20231103
+            DateTime dtimr = DateTime.Now;
+            iwe = waitFindWebElementBySelector_ToBeClickable
+                ("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled");
+            //if (iwe == null) return false;
+            //try
+            //{
+            //    iwe.Click();
+            //}
+            //catch (Exception)
+            //{
+            //    if (tryTimes > 5) return false;
+            //    tryTimes++;
+            //    goto redo;
+            //    //throw;
+            //}
+            //tryTimes = 0;
+            //if (iwe == null) return false;
+            while (iwe == null)
             {
-                tryTimes++;
-                if (tryTimes > 5) return false;
-                goto retry;
+                iwe = waitFindWebElementBySelector_ToBeClickable
+                                ("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled",0.3);
+                if (DateTime.Now.Subtract(dtimr).Seconds > 50) return false;
             }
-            //iwe.Click();
-            SendKeys.Send("{tab}~");
-            //按下「自動識別(豎版)」，開始OCR……
-            SendKeys.Send("{down}~");
+            try
+            {
+                iwe.Click();
+            }
+            catch (Exception)
+            {
+                if (tryTimes > 10) return false;
+                tryTimes++;
+                Thread.Sleep(1000);
+                goto redo;
+                //throw;
+            }
+            tryTimes = 0;
+
+            #endregion
+
+            #region 按下「Pro」
+            iwe = waitFindWebElementBySelector_ToBeClickable("#auto_ocr");
+            //if (iwe == null)
+            while (iwe == null)
+            {
+                //tryTimes++;
+                //if (tryTimes > 5) return false;
+                //goto retry;
+
+                Thread.Sleep(1000);
+                iwe = waitFindWebElementBySelector_ToBeClickable("#auto_ocr");
+                if (DateTime.Now.Subtract(dtimr).Seconds > 20) return false;
+            }
+            driver.SwitchTo().Window(driver.CurrentWindowHandle);//切換到目前Selenium操控的視窗，就不怕沒及時得到焦點而失誤了
+            iwe.Click();
+            //SendKeys.Send("{tab}~");
+            //iwe.SendKeys(" ");//(OpenQA.Selenium.Keys.Enter);
+            //clickCopybutton_GjcoolFastExperience(new Point(iwe.Location.X + iwe.Size.Width / 2, iwe.Location.Y + iwe.Size.Height / 2), Form1.soundLike.press);
+            #endregion
+
+            #region 按下「自動識別(豎版)」，開始OCR……
+            //SendKeys.Send("{down}~");
+            iwe = waitFindWebElementBySelector_ToBeClickable("#OneLine > div.d-flex.justify-content-between.mt-2.mb-1 > div:nth-child(1) > div:nth-child(2) > ul > li:nth-child(2) > button");
+            iwe.Click();
+            #endregion
+
             if (_downloadResult)
                 Form1.playSound(Form1.soundLike.processing);
             else
@@ -3514,6 +3780,7 @@ internal static string getImageUrl() {
             //「上傳 拍照」按鈕：
             iwe = waitFindWebElementBySelector_ToBeClickable("#task-upload-btn");
             if (iwe == null) return false;
+            driver.SwitchTo().Window(driver.CurrentWindowHandle);//切換到目前Selenium操控的視窗，就不怕沒及時得到焦點而失誤了
             Form1.playSound(Form1.soundLike.processing);
             iwe.Click();
             //等待「開啟」檔案對話框開啟
@@ -3550,8 +3817,110 @@ internal static string getImageUrl() {
             #region 將OCR結果讀入剪貼簿：
             Point copyBtnPos = new Point(); DateTime begin = DateTime.Now;
 
+
+            #region 嘗試用元件操作複製OCR結果按鈕
+            //20231103 Bing大菩薩：Selenium中的FindElement方法：
+            //IWebElement e = driver.FindElement(By.CssSelector("div.col > div.d-flex.py-1 > button > i"));
+            //WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(second));
+
+            IWebElement e = null;
+            WebDriverWait wait = null;
+            //try
+            //{
+            //    e = driver.FindElement(By.XPath("//*[starts-with(@id, 'dialog_')] > div.col > div.d-flex.py-1 > button > i"));
+            //    wait = new WebDriverWait(driver, TimeSpan.FromSeconds(20));
+            //}
+            //catch (Exception et)
+            //{
+            //    Console.WriteLine(et.HResult + et.Message);
+            //    //throw;
+            //}
+            //if (e == null) Debugger.Break();
+
+
+            //try
+            //{
+            //    e = driver.FindElement(By.XPath("//*[starts-with(@id, 'dialog_')]//div[contains(@class, 'col')]//div[contains(@class, 'd-flex py-1')]//button//i"));
+            //    wait = new WebDriverWait(driver, TimeSpan.FromSeconds(4));
+            //    wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(e));
+            //}
+            //catch (Exception)// et)
+            //{
+            //    //Console.WriteLine(et.HResult + et.Message);
+            //    //Debugger.Break();
+            //    //throw;
+            //    Form1.playSound(Form1.soundLike.error);
+            //}
+
+
+            #region 方便提早取消作業（藉由關閉OCR視窗）
+            try
+            {
+                if (currentWindowHndl != driver.CurrentWindowHandle) { };
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+            #endregion
+
+            DateTime dateTime = DateTime.Now;
+
+            while (e == null)
+            {
+                try
+                {
+                    e = driver.FindElement(By.XPath("/html/body/div[1]/div/div/div[2]/div/div[1]/div[3]/div[2]/div[2]/button"));
+                    //wait = new WebDriverWait(driver, TimeSpan.FromSeconds(0.4));
+                    //wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(e));
+                    #region 方便提早取消作業（藉由關閉OCR視窗）
+                    try
+                    {
+                        if (currentWindowHndl != driver.CurrentWindowHandle) { };
+                    }
+                    catch (Exception)
+                    {
+                        return false;
+                    }
+                    #endregion
+                    //第 1 次好像會找不到，只好用手動了：
+                    Thread.Sleep(450);
+                    if (Clipboard.GetText() != "") goto finish;
+                    //Form1.playSound(Form1.soundLike.processing);
+                }
+                catch (Exception)
+                {
+                    //throw;
+                }
+                //Debugger.Break();
+                if (DateTime.Now.Subtract(dateTime).Seconds > 15) return false;
+            }
+
+            //copyBtnPos = e.Location;
+
+            //int x, y;
+            //x = e.Location.X; y = e.Location.Y;
+            //Console.WriteLine(e.Location.ToString());
+            //Console.WriteLine(x);
+            //Console.WriteLine(y);
+
+            //copyBtnPos.X = x + 76 + (e.Size.Width / 2);//76：Windows系統工具列在左邊時
+            //copyBtnPos.Y = y + 120 + (e.Size.Height / 2);//120：最大化Chrome瀏覽器網頁頂端至瀏覽器頂端的高度
+
+            //Cursor.Position = copyBtnPos;
+
+            driver.SwitchTo().Window(driver.CurrentWindowHandle);//切換到目前Selenium操控的視窗，就不怕沒及時得到焦點而失誤了
+            e.Click();
+            Form1.playSound(Form1.soundLike.done);//找到複製按鈕按下的音效
+            #endregion
+
+            int timeSpanSecs = 0;
+            #region 原式
+            /*
+             * 上面 Bing大菩薩指導的 找到元件了，原來這個就不必要了，留作紀念。畢竟幫我們完成了許多書頁。感恩感恩　讚歎讚歎　南無阿彌陀佛
+
             //待手動成功複製，上限為 timeSpanSecs 秒
-            int timeSpanSecs = 0; Task task = null;
+             Task task = null;
             try
             {
 
@@ -3575,12 +3944,13 @@ internal static string getImageUrl() {
                 //滑鼠定位，以備手動按下「複製」按鈕（須視窗最大化）
                 //copyBtnPos = new Point(838, 711);//用PRTSC鍵拍下全螢幕後，貼到小畫家以滑鼠取得坐標位置（即顯示在狀態列中）
                 copyBtnPos = new Point(838, 721);//用PRTSC鍵拍下全螢幕後，貼到小畫家以滑鼠取得坐標位置（即顯示在狀態列中）
+
                 Cursor.Position = copyBtnPos;
                 //Thread.Sleep(800);//要等一下才行否則反應不過來
                 //Form1.playSound(Form1.soundLike.info);
                 if (ActiveForm1.TopMost) ActiveForm1.TopMost = false;
                 Thread.Sleep(300);//要等一下才行否則反應不過來                
-                /* 20230401 Bing大菩薩：在C#中，您可以使用 `MouseOperations` 类来模拟鼠标点击。这个类中有一个名为 `MouseEvent` 的方法，它可以接受一个 `MouseEventFlags` 枚举值作为参数，用来指定要执行的鼠标操作¹。例如，要模拟鼠标左键点击，可以这样写：
+                / 20230401 Bing大菩薩：在C#中，您可以使用 `MouseOperations` 类来模拟鼠标点击。这个类中有一个名为 `MouseEvent` 的方法，它可以接受一个 `MouseEventFlags` 枚举值作为参数，用来指定要执行的鼠标操作¹。例如，要模拟鼠标左键点击，可以这样写：
                 ```csharp
                     MouseOperations.MouseEvent(MouseOperations.MouseEventFlags.LeftDown);
                     MouseOperations.MouseEvent(MouseOperations.MouseEventFlags.LeftUp);
@@ -3589,7 +3959,7 @@ internal static string getImageUrl() {
                     (2) c# - Using SendMessage to simulate mouse clicks - Stack Overflow. https://stackoverflow.com/questions/14876345/using-sendmessage-to-simulate-mouse-clicks 已存取 2023/4/1.
                     (3) How to programatically trigger a mouse left click in C#?. https://stackoverflow.com/questions/2736965/how-to-programatically-trigger-a-mouse-left-click-in-c 已存取 2023/4/1.
                     (4) c# - I want to send mouse click with SendMessage but it's not working, What wrong with my code? - Stack Overflow. https://stackoverflow.com/questions/46306860/i-want-to-send-mouse-click-with-sendmessage-but-its-not-working-what-wrong-wit 已存取 2023/4/1.
-                 */
+                 /
                 ////MouseOperations.MouseEvent(MouseOperations.MouseEventFlags.LeftDown);
                 ////MouseOperations.MouseEvent(MouseOperations.MouseEventFlags.LeftUp);                
                 //MouseOperations.MouseEventMousePos(MouseOperations.MouseEventFlags.LeftDown, copyBtnPos);
@@ -3600,8 +3970,8 @@ internal static string getImageUrl() {
                 task = Task.Run(() => { clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.soundLike.press); });
 
 
-                /*Bing大菩薩：您好，`MouseOperations` 不是 C# 的内置类。它是一个自定义类，您可以在 Stack Overflow 上找到它的源代码。您可以将这些代码复制到您的项目中，然后使用它来模拟鼠标点击。
-                 */
+                /Bing大菩薩：您好，`MouseOperations` 不是 C# 的内置类。它是一个自定义类，您可以在 Stack Overflow 上找到它的源代码。您可以将这些代码复制到您的项目中，然后使用它来模拟鼠标点击。
+                 /
 
                 //藉由手動關閉視窗以提早/強制中止程序
                 try
@@ -3700,6 +4070,10 @@ internal static string getImageUrl() {
 
             task.Wait();
 
+            */
+
+            #endregion
+
             #region 方便提早取消作業（藉由關閉OCR視窗）
             try
             {
@@ -3754,7 +4128,7 @@ internal static string getImageUrl() {
                 });
                 ts.Wait();
             }
-            else
+            else//剪貼簿已有資料
             {
                 //_OCR_GJcool_WindowClosed = true;
                 goto finish;

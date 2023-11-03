@@ -88,6 +88,11 @@ namespace WindowsFormsApp1
         bool keyinTextMode = false;
 
         /// <summary>
+        /// OCR輸入模式時為true
+        /// </summary>
+        bool ocrTextMode = false;
+
+        /// <summary>
         /// 原文有抬頭平抬格式
         /// </summary>
         bool TopLine = false;
@@ -521,7 +526,7 @@ namespace WindowsFormsApp1
         {
             if (Visible || !HiddenIcon) return;
             if (!_eventsEnabled) return;
-            pauseEvents();
+            PauseEvents();
 
             #region 記錄相關變數
             Keys modifierKeys = ModifierKeys;
@@ -579,7 +584,7 @@ namespace WindowsFormsApp1
             //    show_nICo();
             //} 
             #endregion
-            resumeEvents();
+            ResumeEvents();
         }
 
 
@@ -978,10 +983,14 @@ namespace WindowsFormsApp1
                 if (textBox1.SelectionLength == 0)
                     overtypeModeSelectedTextSetting(ref textBox1);
                 string x = textBox1.SelectedText;//如果其中有分行/段符號，則必均為獨立行小注（非與正文夾注者），故直接於其後前分別標識{{、}}，蓋}}{{可Ctext有自行取消成""之機制已。感恩感恩　讚歎讚歎　南無阿彌陀佛 20231031
-                stopUndoRec = true; pauseEvents();
-                textBox1.SelectedText = ("{{" + x + "}}").Replace(Environment.NewLine, "}}" + Environment.NewLine + "{{");
+                stopUndoRec = true; PauseEvents();
+                //textBox1.SelectedText = ("{{" + x + "}}").Replace(Environment.NewLine, "}}" + Environment.NewLine + "{{")
+                //    .Replace("{{{{", "{{").Replace("}}}}", "}}");
+                x = ("{{" + x + "}}").Replace(Environment.NewLine, "}}" + Environment.NewLine + "{{");
+                CnText.CurlybracesFormalizer(ref x);
+                textBox1.SelectedText = x;
                 if (!Active) bringBackMousePosFrmCenter();
-                stopUndoRec = false; resumeEvents();
+                stopUndoRec = false; ResumeEvents();
             }
         }
 
@@ -2129,7 +2138,7 @@ namespace WindowsFormsApp1
                     int s = textBox1.SelectionStart, l = textBox1.SelectionLength; string x = textBox1.Text;
                     if (s < textBox1.TextLength && l == 0)
                     {
-                        stopUndoRec = true; pauseEvents();
+                        stopUndoRec = true; PauseEvents();
                         if (x.Substring(s, 1) == "　")
                         {
                             while (textBox1.Text.Substring(s + l, 1) == "　")
@@ -2155,7 +2164,7 @@ namespace WindowsFormsApp1
                             textBox1.Select(textBox1.SelectionStart, textBox1.TextLength - textBox1.SelectionStart);
                             textBox1.SelectedText = string.Empty;
                         }
-                        stopUndoRec = false; resumeEvents();
+                        stopUndoRec = false; ResumeEvents();
                     }
                     return;
                 }
@@ -2639,12 +2648,12 @@ namespace WindowsFormsApp1
                 if (e.KeyCode == Keys.Pause)//20231005
                 {//Shift + F8 或 Alt + Shift + Pause ： 加上篇名格式代碼並前置N個全形空格.N，預設為2.且可在執行此項時，選取空格數以重設篇名前要空的格數
                     e.Handled = true;
-                    undoRecord(); stopUndoRec = true; pauseEvents();
+                    undoRecord(); stopUndoRec = true; PauseEvents();
                     if (e.Shift)
                         keysTitleCodeAndPreWideSpace();
                     else//alt + pause 自動判斷標題行，加上篇名格式代碼並前置N個全形空格.N，預設為2.且可在執行此項時，選取空格數以重設篇名前要空的格數
                         autoKeysTitleCodeAndPreWideSpace();
-                    resumeEvents(); stopUndoRec = false;
+                    ResumeEvents(); stopUndoRec = false;
                     return;
                 }
 
@@ -2787,10 +2796,10 @@ namespace WindowsFormsApp1
                         //{ undoRecord(); pauseEvents(); textBox1.Text = string.Empty; resumeEvents(); }
                         if (!pagePaste2GjcoolOCR())
                         { //數字鍵盤的「+」
-                            pauseEvents();//為了等待時可以切到別的視窗看看，在執行成功且完成後，再把這2個關鍵的視窗置前
+                            PauseEvents();//為了等待時可以切到別的視窗看看，在執行成功且完成後，再把這2個關鍵的視窗置前
                             br.driver.SwitchTo().Window(br.LastValidWindow);
                             Thread.Sleep(300);
-                            resumeEvents();
+                            ResumeEvents();
                             if (!Visible) Visible = true;
                             bringBackMousePosFrmCenter();
                             //SendKeys.Send("^z");//因為會輸入「+」取代選取區文字//這應該是在下一個程序textBox1_KeyPress才會輸入，而不是在這時
@@ -2798,6 +2807,17 @@ namespace WindowsFormsApp1
                         return;
                     }
 
+                }
+                if (e.KeyCode == Keys.Subtract)
+                {//"-"： 在非自動且手動輸入模式下單獨按下數字鍵盤的「-」，執行與按下 Scroll Lock 一樣的功能
+                    //將字數較少的行 / 段落尾末標上分行 / 段符號（「\< p\>」或「\。< p\>」
+                    if (keyinTextMode && !autoPastetoQuickEdit)
+                    {
+                        e.Handled = true;
+                        ocrTextMode = true;
+                        paragraphMarkAccordingFirstOne();
+                        return;
+                    }
                 }
 
                 //以上按下單一鍵
@@ -2821,16 +2841,17 @@ namespace WindowsFormsApp1
             //playSound(soundLike.press);
             //textBox1.SelectAll();//此方法必須在表單有焦點時才行
             TopMost = false;//將焦點交給Chrome瀏覽器
-            pauseEvents();
+            PauseEvents();
             br.driver.SwitchTo().Window(br.LastValidWindow);
-            resumeEvents();
+            ResumeEvents();
             textBox1.SelectionStart = textBox1.TextLength; textBox1.SelectionLength = 0;
+            pageTextEndPosition = 0; pageEndText10 = string.Empty;
             playSound(soundLike.waiting);//請靜待OCR完成
 
             if (keyDownCtrlAdd(false, "", true, true))
             {
                 if (textBox1.Text != string.Empty)
-                { undoRecord(); pauseEvents(); textBox1.Text = string.Empty; resumeEvents(); }
+                { undoRecord(); PauseEvents(); textBox1.Text = string.Empty; ResumeEvents(); }
                 //欲中止，請按下Ctrl鍵
                 Console.WriteLine(ModifierKeys.ToString());//just for test
                 if (ModifierKeys != Keys.Control)
@@ -3022,7 +3043,7 @@ namespace WindowsFormsApp1
                 , cntr = xSel == string.Empty ? -1 : 0;
 
             undoRecord();
-            pauseEvents(); stopUndoRec = true;
+            PauseEvents(); stopUndoRec = true;
 
 
 
@@ -3088,7 +3109,7 @@ namespace WindowsFormsApp1
 
             textBox1.Select(textBox1.TextLength, 0);
 
-            resumeEvents(); stopUndoRec = false;
+            ResumeEvents(); stopUndoRec = false;
         }
 
         /// <summary>
@@ -5024,7 +5045,7 @@ namespace WindowsFormsApp1
             TopMost = false;
             replaceXdirrectly();
             int s = 0, l, e = textBox1.Text.IndexOf(Environment.NewLine); if (e < 0) return;
-            pauseEvents();
+            PauseEvents();
             int rs = textBox1.SelectionStart, rl = textBox1.SelectionLength;
             string se = textBox1.Text.Substring(s, e - s);
             //int l = new StringInfo(se).LengthInTextElements;
@@ -5062,7 +5083,7 @@ namespace WindowsFormsApp1
                 Mdb.openDatabase("查字.mdb", ref cnt);
                 rst.Open("select * from 每行字數判斷用 where condition=0", cnt, ado.CursorTypeEnum.adOpenKeyset, ado.LockTypeEnum.adLockReadOnly);
             }
-            undoRecord(); stopUndoRec = true; pauseEvents();
+            undoRecord(); stopUndoRec = true; PauseEvents();
             while (e > -1)
             {
 
@@ -5076,7 +5097,7 @@ namespace WindowsFormsApp1
                                                        //    se = se.Replace(item.ToString(), "");
                                                        //}
 
-                //if (se.IndexOf("帝稱謂何也") > -1)//just for test
+                //if (se.IndexOf("跡驗父故邪夏侯方") > -1)//just for test
                 //    Debugger.Break();
 
 
@@ -5188,31 +5209,48 @@ namespace WindowsFormsApp1
                     }
                 }
             }
-            stopUndoRec = false; resumeEvents();
+            stopUndoRec = false; ResumeEvents();
             replaceBlank_ifNOTTitleAndAfterparagraphMark();
             fillSpace_to_PinchNote_in_LineStart();
-            if (_eventsEnabled) pauseEvents();
-            stopUndoRec = true; pauseEvents();
-            //最後一行處理
+            if (_eventsEnabled) PauseEvents();
+            stopUndoRec = true; PauseEvents();
+
+
+            #region 最後一行處理
+
             if (textBox1.TextLength > 1
                 && textBox1.Text.Substring(textBox1.TextLength - Environment.NewLine.Length, Environment.NewLine.Length) != Environment.NewLine)
-                if (countWordsLenPerLinePara(getLineTxtWithoutPunctuation(textBox1.Text, textBox1.Text.LastIndexOf(Environment.NewLine)
-                    + Environment.NewLine.Length)) < wordsPerLinePara)
-                    if (textBox1.Text.Substring(textBox1.TextLength - 1, 1) != ">") textBox1.Text += "。<p>";
+            {
+                se = getLineTxtWithoutPunctuation(textBox1.Text, textBox1.Text.LastIndexOf(Environment.NewLine)
+                    + Environment.NewLine.Length);
+
+                //if (se.IndexOf("跡驗父故邪夏侯方") > -1)//just for test
+                //    Debugger.Break();
+                e = countWordsLenPerLinePara(se);
+                if (e < wordsPerLinePara)
+                    if (se.StartsWith("{{") && se.EndsWith("}}"))
+                    {
+                        if (e < wordsPerLinePara / 2)
+                            if (textBox1.Text.Substring(textBox1.TextLength - 1, 1) != ">") textBox1.Text += "<p>";
+                    }
+                    else
+                        if (textBox1.Text.Substring(textBox1.TextLength - 1, 1) != ">") textBox1.Text += "。<p>";
+            }
+            #endregion
 
             playSound(soundLike.over);
             if (topLine) { rst.Close(); cnt.Close(); rst = null; cnt = null; }
             if (keyinTextMode)
             {
-                stopUndoRec = true; pauseEvents();
+                stopUndoRec = true; PauseEvents();
                 textBox1.Text = textBox1.Text.Replace("。<p>\r\n{{", "\r\n{{");
-                stopUndoRec = false; resumeEvents();
+                stopUndoRec = false; ResumeEvents();
                 textBox1.Select(textBox1.TextLength, 0);
             }
             else
                 textBox1.Select(rs, rl);
             textBox1.ScrollToCaret();
-            TopMost = topmost; stopUndoRec = false; resumeEvents();
+            TopMost = topmost; stopUndoRec = false; ResumeEvents();
         }
 
         /// <summary>
@@ -5292,9 +5330,9 @@ namespace WindowsFormsApp1
                 e = x.IndexOf(Environment.NewLine, s);
 
             }
-            stopUndoRec = true; undoRecord(); pauseEvents();
+            stopUndoRec = true; undoRecord(); PauseEvents();
             textBox1.Text = x;
-            stopUndoRec = false; resumeEvents();
+            stopUndoRec = false; ResumeEvents();
         }
 
         void fillSpace_to_PinchNote_in_LineStart()
@@ -5337,9 +5375,9 @@ namespace WindowsFormsApp1
                 s = e + Environment.NewLine.Length + i;
                 e = x.IndexOf(Environment.NewLine, s);
             }
-            stopUndoRec = true; undoRecord(); pauseEvents();
+            stopUndoRec = true; undoRecord(); PauseEvents();
             textBox1.Text = x;
-            stopUndoRec = false; resumeEvents();
+            stopUndoRec = false; ResumeEvents();
 
         }
 
@@ -5639,9 +5677,9 @@ namespace WindowsFormsApp1
                 //將焦點交給Chrome瀏覽器
                 if (browsrOPMode != BrowserOPMode.appActivateByName && br.driver != null)
                 {
-                    pauseEvents();
+                    PauseEvents();
                     br.driver.SwitchTo().Window(br.LastValidWindow);
-                    resumeEvents();
+                    ResumeEvents();
                 }
                 else
                     appActivateByName();
@@ -5796,7 +5834,7 @@ namespace WindowsFormsApp1
                     bringBackMousePosFrmCenter();
                     if (MessageBox.Show("there is abnormal LinePara Length , check it now?" +
                         Environment.NewLine + Environment.NewLine +
-                        "normal= " + chk[2] + "\tabnormal= " + chk[3], "",
+                        "normal= " + chk[2] + "\t【abnormal】= " + chk[3], "",
                         MessageBoxButtons.OKCancel, MessageBoxIcon.Warning,
                         MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly) == DialogResult.OK)//檢查行/段落長
                     {
@@ -6258,6 +6296,7 @@ namespace WindowsFormsApp1
         /// 。</returns>
         private int[] checkAbnormalLinePara(string xChk)
         {
+
             saveText();//備份以防萬一
             string[] xLineParas = xChk.Split(
                 Environment.NewLine.ToArray(),
@@ -6319,6 +6358,10 @@ namespace WindowsFormsApp1
             int i = -1, len = 0;
             foreach (string lineParaText in xLineParas)
             {
+                //if (lineParaText.IndexOf("本或作沉水") > -1) //just for check 
+                //    Debugger.Break();
+
+
                 i++;
                 if (lineParaText.IndexOf("{{{") > -1 || lineParaText.IndexOf("孫守真") > -1 || lineParaText.IndexOf("＝") > -1)//{{{孫守真按：}}}、缺字說明等略去，以人工校對
                 {
@@ -6862,6 +6905,21 @@ namespace WindowsFormsApp1
                     button1.ForeColor = new System.Drawing.Color();//預設色彩 預設顏色 https://stackoverflow.com/questions/10441000/how-to-programmatically-set-the-forecolor-of-a-label-to-its-default
                     return;
                 }
+                if (e.KeyCode == Keys.Subtract)
+                {//按下 Ctrl + Shift + - ： 切換OCR輸入模式
+                    e.Handled = true;
+                    if (ocrTextMode)
+                    {
+                        new SoundPlayer(@"C:\Windows\Media\Speech Off.wav").Play();
+                        ocrTextMode = false; return;
+                    }
+                    new SoundPlayer(@"C:\Windows\Media\Speech On.wav").Play();
+                    //設定成手動OCR輸入模式，自動及全部覆蓋之貼上則設成false
+                    ocrTextMode = true; keyinTextMode = true; pasteAllOverWrite = false; autoPastetoQuickEdit = false;
+                    button1.Text = "分行分段";
+                    button1.ForeColor = new System.Drawing.Color();//預設色彩 預設顏色 https://stackoverflow.com/questions/10441000/how-to-programmatically-set-the-forecolor-of-a-label-to-its-default
+                    return;
+                }
                 if (e.KeyCode == Keys.Oem5)
                 {//Ctrl + Shift + \ 切換抬頭平抬格式設定（bool TopLine）
                     e.Handled = true;
@@ -6893,7 +6951,9 @@ namespace WindowsFormsApp1
                     if (textBox1.SelectionLength == 0)
                         overtypeModeSelectedTextSetting(ref textBox1);
                     string x = textBox1.SelectedText;
+                    //x = "{{" + x.Replace(Environment.NewLine, "") + "}}".Replace("{{{{","{{").Replace("}}}}","}}");
                     x = "{{" + x.Replace(Environment.NewLine, "") + "}}";
+                    CnText.CurlybracesFormalizer(ref x);
                     textBox1.SelectedText = x;
                     //清除後續的分行/段符號及1個全形空格
                     int s = textBox1.SelectionStart, l = textBox1.SelectionLength;
@@ -6903,7 +6963,7 @@ namespace WindowsFormsApp1
                         if (nextStr == Environment.NewLine)
                         {
 
-                            stopUndoRec = true; pauseEvents();
+                            stopUndoRec = true; PauseEvents();
                             textBox1.Select(s + l, 2); textBox1.SelectedText = string.Empty;
                             s = textBox1.SelectionStart;
                             if (s + 2 < textBox1.TextLength && textBox1.Text.Substring(s, 1) == "　")
@@ -6911,16 +6971,16 @@ namespace WindowsFormsApp1
                                 if (textBox1.Text.Substring(s + 1, 1) != "　")
                                     textBox1.Select(s + l, 1); textBox1.SelectedText = string.Empty;
                             }
-                            stopUndoRec = false; resumeEvents();
+                            stopUndoRec = false; ResumeEvents();
                         }
                         else if (nextStr.StartsWith("　"))
                         {
                             if (nextStr.Substring(1, 1) != "　")
                             {
-                                stopUndoRec = true; pauseEvents();
+                                stopUndoRec = true; PauseEvents();
                                 textBox1.Select(s + l, 1);
                                 textBox1.SelectedText = string.Empty;
-                                stopUndoRec = false; resumeEvents();
+                                stopUndoRec = false; ResumeEvents();
                             }
 
                         }
@@ -8822,9 +8882,9 @@ namespace WindowsFormsApp1
             replaceWord(textBox1.SelectedText, textBox4.Text);
             if (textBox4.Text != "") Clipboard.SetText(textBox4.Text);
             textBox4Resize();
-            pauseEvents();
+            PauseEvents();
             textBox4.Text = "";
-            resumeEvents();
+            ResumeEvents();
             textBox1.Focus();
         }
 
@@ -9356,10 +9416,10 @@ namespace WindowsFormsApp1
                     if (!Active && !PagePaste2GjcoolOCR_ing)
                     //if (!Active && !PagePaste2GjcoolOCR_ing&& ModifierKeys!=Keys.Control)
                     {
-                        pauseEvents();
+                        PauseEvents();
                         availableInUseBothKeysMouse();
                         if (!this.TopMost) this.TopMost = true;
-                        resumeEvents();
+                        ResumeEvents();
                     }
                     return;
                 }
@@ -9541,12 +9601,12 @@ namespace WindowsFormsApp1
         /// </summary>
         private bool _eventsEnabled = true;
 
-        private void pauseEvents()
+        internal void PauseEvents()
         {
             _eventsEnabled = false;
         }
 
-        private void resumeEvents()
+        internal void ResumeEvents()
         {
             _eventsEnabled = true;
         }
@@ -9580,9 +9640,9 @@ namespace WindowsFormsApp1
             #region 輸入資料夾路徑可指定有效的Chrome瀏覽器的下載位置
             if (Directory.Exists(x))
             {
-                pauseEvents();
+                PauseEvents();
                 br.DownloadDirectory_Chrome = x;
-                resumeEvents(); textBox2.Text = ""; return;
+                ResumeEvents(); textBox2.Text = ""; return;
             }
             #endregion
 
@@ -9590,9 +9650,9 @@ namespace WindowsFormsApp1
             if (x == "nb,")
             {
                 GXDS.SKQSnoteBlank = !GXDS.SKQSnoteBlank;
-                pauseEvents();
+                PauseEvents();
                 textBox2.Text = "";
-                resumeEvents(); return;
+                ResumeEvents(); return;
             }
             #endregion
 
@@ -9606,9 +9666,9 @@ namespace WindowsFormsApp1
                         if (Int32.TryParse(x, out int w))
                         {
                             waitTimeforappActivateByName = w;
-                            pauseEvents();
+                            PauseEvents();
                             textBox2.Text = "";
-                            resumeEvents();
+                            ResumeEvents();
                             return;
                         }
                     }
@@ -9626,9 +9686,9 @@ namespace WindowsFormsApp1
             {
                 case "ap,":
                 ap: browsrOPMode = BrowserOPMode.appActivateByName;
-                    pauseEvents();
+                    PauseEvents();
                     textBox2.Text = "";
-                    resumeEvents();
+                    ResumeEvents();
                     return;
                 case "aa":
                     goto ap;
@@ -9668,9 +9728,9 @@ namespace WindowsFormsApp1
                                 throw;
                         }
                     }
-                    pauseEvents();
+                    PauseEvents();
                     textBox2.Text = "";
-                    resumeEvents();
+                    ResumeEvents();
                     return;
                 case "br":
                     goto sl;
@@ -9703,9 +9763,9 @@ namespace WindowsFormsApp1
                 if (Int32.TryParse(x.Substring(5), out int n))
                 {
                     noteinLineLenLimit = (byte)(n > 255 ? 255 : n);
-                    pauseEvents();
+                    PauseEvents();
                     textBox2.Text = string.Empty;
-                    resumeEvents();
+                    ResumeEvents();
                     return;
                 }
             }
@@ -9723,15 +9783,15 @@ namespace WindowsFormsApp1
                     {
                         case "tS":
                             br.ChromeDriverServiceTimeSpan = t;
-                            pauseEvents();
+                            PauseEvents();
                             textBox2.Clear();
-                            resumeEvents();
+                            ResumeEvents();
                             return;
                         case "tE":
                             br.WebDriverWaitTimeSpan = t;
-                            pauseEvents();
+                            PauseEvents();
                             textBox2.Clear();
-                            resumeEvents();
+                            ResumeEvents();
                             return;
                     }
                 }
@@ -9745,8 +9805,8 @@ namespace WindowsFormsApp1
                 #region 切換《古籍酷》帳號
                 if (x == "gjk" || x == "gg" || x == "jj" || x == "kk" || x == "jk")
                 {
-                    pauseEvents();
-                    textBox2.Text = ""; resumeEvents(); bool topmost = TopMost; TopMost = false;
+                    PauseEvents();
+                    textBox2.Text = ""; ResumeEvents(); bool topmost = TopMost; TopMost = false;
                     if (x == "gjk")//只手動告知系統《古籍酷》帳號已切換                        
                     {
                         br.OCR_GJcool_AccountChanged = true;
@@ -9780,7 +9840,7 @@ namespace WindowsFormsApp1
                 #endregion
                 if (x == "fc")
                 {
-                    pauseEvents(); textBox2.Text = ""; resumeEvents();
+                    PauseEvents(); textBox2.Text = ""; ResumeEvents();
                     formatCategory2Columns_GjcoolOCRResult();
                     textBox1.Focus(); bringBackMousePosFrmCenter();
                     return;
@@ -9837,6 +9897,12 @@ namespace WindowsFormsApp1
             if (e.KeyChar == 8) return;
             //按下數字鍵盤的「+」執行 pagePaste2GjcoolOCR 方法時
             if (PagePaste2GjcoolOCR_ing && e.KeyChar == 43) { e.Handled = true; PagePaste2GjcoolOCR_ing = false; return; }
+
+            //按下 Scroll Lock 將字數較少的行/段落尾末標上分行/段符號（「\<p\>」或「\。<p\>」
+            //> -： 在非自動且手動輸入模式下，在 textBox1 單獨按下數字鍵盤的「-」，執行與按下 Scroll Lock 一樣的功能
+            if (keyinTextMode && ocrTextMode && !autoPastetoQuickEdit && e.KeyChar == 45) { e.Handled = true; ocrTextMode = false; return; }
+
+
             //if (e.KeyChar==30)
             //{
             //    return;

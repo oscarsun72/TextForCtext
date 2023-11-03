@@ -564,6 +564,35 @@ namespace TextForCtext
             }
             return x;
         }
+        /// <summary>
+        /// 這段程式碼會將4個連續的大括號替換為2個，但不會影響到5個或更多的連續大括號。
+        /// 20231103 Bing大菩薩：正則表達式-大括弧的處理（和Bard大菩薩、chatGPT大菩薩一樣都不行； YouChat大菩薩先不問了）感恩感恩　南無阿彌陀佛
+        /// 取代文字中有4個上下花括號（大括號）的為2個，但若是5個在一起的就不取代
+        /// </summary>
+        /// <param name="text"></param>
+        /// <returns></returns>
+        internal static string CurlybracesFormalizer(ref string text)
+        {
+            string pattern = @"\{\{4\}\}";//這正則表達式應該都沒用，只是暫存而已
+            string replacement = "{{}}";
+            //text = text.Replace("{{{{", "{{").Replace("}}}}", "}}");
+            //text = text.Replace("{{{", "{{{{{").Replace("}}}", "}}}}}");
+            text = text.Replace("{{{{", "{{").Replace("}}}}", "}}").Replace("{{{", "{{{{{").Replace("}}}", "}}}}}");
+            Regex rgx = new Regex(pattern);
+            text = rgx.Replace(text, replacement);
+            return text;
 
+            //string pattern = "(?<=^|[^{]){{4}(?=[^}]|$)|(?<=^|[^}])}}(?=[^}])(?<=[^}])(?<=[^}])(?<=[^}])(?=[^}]|$)";
+            //string replacement = "{{}}";
+            //Regex rgx = new Regex(pattern, RegexOptions.IgnoreCase | RegexOptions.Multiline | RegexOptions.Singleline);
+            //text = rgx.Replace(text, replacement);
+            //return text;
+
+
+            //string pattern = "(?<!\\{)\\{\\{\\{(?!\\{)|(?<!\\})\\}\\}\\}(?!\\})";
+            //string replacement = "{{}}";
+            //Regex rgx = new Regex(pattern);            
+            //text = rgx.Replace(text, replacement);
+        }
     }
 }
