@@ -4032,20 +4032,21 @@ internal static string getImageUrl() {
                             }
                             catch (Exception)
                             {
+                                break;
                                 //if (Clipboard.GetText() == string.Empty) return false;
                                 //else goto finish;
                             }
                             //以滑鼠座標按下複製按鈕
-                            if (DateTime.Now.Subtract(dtMax).Seconds > 2 || Clipboard.GetText() != "" || StopOCR) break;
+                            if (DateTime.Now.Subtract(dtMax).Seconds > 1.7 || Clipboard.GetText() != "" || StopOCR) break;
 
-                            bool frmActive = false;
-                            ActiveForm1.Invoke((MethodInvoker)delegate { frmActive = ActiveForm1.Active; });
-                            if (!frmActive)
-                            {
+                            //bool frmActive = false;
+                            //ActiveForm1.Invoke((MethodInvoker)delegate { frmActive = ActiveForm1.Active; });
+                            //if (!frmActive)
+                            //{
                                 clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.soundLike.none);
                                 Thread.Sleep(200);
-                            }
-                            else break;
+                            //}
+                            //else break;
                         }
                         Form1.playSound(Form1.soundLike.info);
                         //Debugger.Break();
