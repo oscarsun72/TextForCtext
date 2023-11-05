@@ -4,6 +4,7 @@ using Newtonsoft.Json.Linq;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.DevTools;
+using OpenQA.Selenium.DevTools.V85.ApplicationCache;
 using OpenQA.Selenium.Remote;
 //using System.Net;
 //using static System.Net.WebRequestMethods;
@@ -2575,7 +2576,7 @@ internal static string getImageUrl() {
                 clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.soundLike.none);
                 Thread.Sleep(900);//監看連線成功
 
-                Point form1Location = ActiveForm1.Location;
+                Point form1Location = ActiveForm1.Location; bool eventEnable = ActiveForm1.EventsEnabled;
                 try
                 {
                     ActiveForm1.PauseEvents();
@@ -2603,7 +2604,8 @@ internal static string getImageUrl() {
                     ipChangedCounter = 0;//計數器歸零
                 try
                 {
-                    ActiveForm1.ResumeEvents();
+                    ActiveForm1.EventsEnabled = eventEnable;
+                    //ActiveForm1.ResumeEvents();
                     ActiveForm1.Location = form1Location;
                 }
                 catch (Exception)
@@ -2614,6 +2616,23 @@ internal static string getImageUrl() {
             }
             return false;
         }
+
+
+        /// <summary>
+        /// 更換VPN IP
+        /// </summary>
+        /// <returns>成功則傳回true</returns>
+        internal static bool IPSwitchOnly()
+        {
+            if (ActiveForm1.TopMost) ActiveForm1.TopMost = false; if (!waitGJcoolPoint) waitGJcoolPoint = true;
+            Task tk = Task.Run(() => { OCR_GJcool_AccountChanged_Switcher(true, false); });
+            tk.Wait(20000);
+            ActiveForm1.BringToFront();
+            //ActiveForm1.availableInUseBothKeysMouse();
+            ActiveForm1.Activate();
+            return true;
+        }
+
         /// <summary>
         /// 轉換IP、重試VPN連線的次數
         /// </summary>
@@ -2830,6 +2849,8 @@ internal static string getImageUrl() {
                             //}
                             #endregion
                         }
+                        else if (ex.Message.StartsWith("The HTTP request to the remote WebDriver server for URL"))
+                            return false;
                         else
                             Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
                         break;
@@ -2859,6 +2880,7 @@ internal static string getImageUrl() {
 
             }
 
+            if (gjCool == string.Empty) return false;
             try
             {
                 driver.Navigate().GoToUrl(gjCool);
@@ -3135,26 +3157,36 @@ internal static string getImageUrl() {
             //}
             //tryTimes = 0;
             //if (iwe == null) return false;
-            while (iwe == null)
+            while (iwe == null && waitFindWebElementBySelector_ToBeClickable("#auto_ocr") == null)
             {
+                Thread.Sleep(150);
                 iwe = waitFindWebElementBySelector_ToBeClickable
-                                ("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled",0.3);
+                                ("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled", 0.3);
                 if (DateTime.Now.Subtract(dtimr).Seconds > 50) return false;
             }
-            try
+            if (iwe != null)
             {
-                iwe.Click();
-            }
-            catch (Exception)
-            {
-                if (tryTimes > 10) return false;
-                tryTimes++;
-                Thread.Sleep(1000);
-                goto redo;
-                //throw;
-            }
-            tryTimes = 0;
+                try
+                {
+                    driver.SwitchTo().Window(driver.CurrentWindowHandle);//切換到目前Selenium操控的視窗，就不怕沒及時得到焦點而失誤了
+                    iwe.Click();//點擊「上傳完畢」對話方塊的「OK」按鈕 
+                }
+                catch (Exception)
+                {
+                    if (tryTimes == 0) Form1.playSound(Form1.soundLike.error);
+                    if (tryTimes > 50)
+                    {
+                        if (Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("已超時，是否繼續等候？") == DialogResult.Cancel)
+                            return false;
+                    }
 
+                    tryTimes++;
+                    Thread.Sleep(100);
+                    goto redo;
+                    //throw;
+                }
+                tryTimes = 0;
+            }
             #endregion
 
             #region 按下「Pro」
@@ -3166,21 +3198,37 @@ internal static string getImageUrl() {
                 //if (tryTimes > 5) return false;
                 //goto retry;
 
-                Thread.Sleep(1000);
+                Thread.Sleep(250);
                 iwe = waitFindWebElementBySelector_ToBeClickable("#auto_ocr");
                 if (DateTime.Now.Subtract(dtimr).Seconds > 20) return false;
             }
             driver.SwitchTo().Window(driver.CurrentWindowHandle);//切換到目前Selenium操控的視窗，就不怕沒及時得到焦點而失誤了
-            iwe.Click();
+            try
+            {
+                iwe.Click();
+            }
+            catch (Exception)
+            {
+                goto redo;
+            }
             //SendKeys.Send("{tab}~");
             //iwe.SendKeys(" ");//(OpenQA.Selenium.Keys.Enter);
             //clickCopybutton_GjcoolFastExperience(new Point(iwe.Location.X + iwe.Size.Width / 2, iwe.Location.Y + iwe.Size.Height / 2), Form1.soundLike.press);
             #endregion
 
             #region 按下「自動識別(豎版)」，開始OCR……
-            //SendKeys.Send("{down}~");
+            //SendKeys.Send("{down}~");            
             iwe = waitFindWebElementBySelector_ToBeClickable("#OneLine > div.d-flex.justify-content-between.mt-2.mb-1 > div:nth-child(1) > div:nth-child(2) > ul > li:nth-child(2) > button");
-            iwe.Click();
+            driver.SwitchTo().Window(driver.CurrentWindowHandle);
+            try
+            {
+                iwe.Click();
+            }
+            catch (Exception)
+            {
+                goto redo;
+                //throw;
+            }
             #endregion
 
             if (_downloadResult)
@@ -3253,7 +3301,7 @@ internal static string getImageUrl() {
                                 goto retryReadFile;
                             default:
                                 Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.Message);
-                                break;
+                                return false;
                         }
 
                     }
@@ -3729,6 +3777,12 @@ internal static string getImageUrl() {
         }
 
         /// <summary>
+        /// 作為中止OCR相關作業的指標
+        /// 欲中止OCR作業則設定為true，預設為false
+        /// </summary>
+        internal static bool StopOCR { get; set; } = false;
+
+        /// <summary>
         /// 以《古籍酷》首頁快速體驗OCR。不計點數（算力配额）
         /// </summary>
         /// <param name="downloadImgFullName">由《中國哲學書電子化計劃》下載的書圖全檔名</param>
@@ -3765,6 +3819,7 @@ internal static string getImageUrl() {
                         Console.WriteLine(msgText);
                         Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(msgText);
                         //if (File.Exists(downloadImgFullName)) File.Delete(downloadImgFullName);
+                        StopOCR = true;
                         return false;
                 }
             }
@@ -3818,13 +3873,13 @@ internal static string getImageUrl() {
             Point copyBtnPos = new Point(); DateTime begin = DateTime.Now;
 
 
-            #region 嘗試用元件操作複製OCR結果按鈕
+            #region 複製OCR結果按鈕_嘗試用元件操作
             //20231103 Bing大菩薩：Selenium中的FindElement方法：
             //IWebElement e = driver.FindElement(By.CssSelector("div.col > div.d-flex.py-1 > button > i"));
             //WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(second));
 
             IWebElement e = null;
-            WebDriverWait wait = null;
+            //WebDriverWait wait = null;
             //try
             //{
             //    e = driver.FindElement(By.XPath("//*[starts-with(@id, 'dialog_')] > div.col > div.d-flex.py-1 > button > i"));
@@ -3860,57 +3915,179 @@ internal static string getImageUrl() {
             }
             catch (Exception)
             {
+                StopOCR = true;
                 return false;
             }
             #endregion
 
-            DateTime dateTime = DateTime.Now;
-
+            DateTime dateTime = DateTime.Now; bool clicked = false;
+            Thread.Sleep(850);
             while (e == null)
             {
+                //Thread.Sleep(250);
+
+                #region 方便提早取消作業（藉由關閉OCR視窗）
+                try
+                {
+                    if (currentWindowHndl != driver.CurrentWindowHandle) { };
+                }
+                catch (Exception)
+                {
+                    StopOCR = true;
+                    return false;
+                }
+                #endregion
                 try
                 {
                     e = driver.FindElement(By.XPath("/html/body/div[1]/div/div/div[2]/div/div[1]/div[3]/div[2]/div[2]/button"));
                     //wait = new WebDriverWait(driver, TimeSpan.FromSeconds(0.4));
                     //wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(e));
-                    #region 方便提早取消作業（藉由關閉OCR視窗）
-                    try
-                    {
-                        if (currentWindowHndl != driver.CurrentWindowHandle) { };
-                    }
-                    catch (Exception)
-                    {
-                        return false;
-                    }
-                    #endregion
                     //第 1 次好像會找不到，只好用手動了：
-                    Thread.Sleep(450);
-                    if (Clipboard.GetText() != "") goto finish;
+                    //Thread.Sleep(450);
+                    //if (Clipboard.GetText() != "") goto finish;
                     //Form1.playSound(Form1.soundLike.processing);
                 }
                 catch (Exception)
                 {
                     //throw;
+                    if (Clipboard.GetText() != "") goto finish;
+                    else
+                    {
+
+                        Thread.Sleep(500);
+                        try
+                        {
+                            e = driver.FindElement(By.XPath("//*[starts-with(@id, 'dialog_')]//div[contains(@class, 'col')]//div[contains(@class, 'd-flex py-1')]//button//i"));
+                            //wait = new WebDriverWait(driver, TimeSpan.FromSeconds(0.4));
+                            //wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(e));
+                        }
+                        catch (Exception)// et)
+                        {
+                            //Console.WriteLine(et.HResult + et.Message);
+                            //Debugger.Break();
+                            //throw;
+                            //Form1.playSound(Form1.soundLike.error);
+
+
+                            //if (Clipboard.GetText() != "") goto finish;
+                            if (Clipboard.GetText().IndexOf(Environment.NewLine) > -1) goto finish;
+                            //else return false;
+                        }
+
+                    }
                 }
                 //Debugger.Break();
-                if (DateTime.Now.Subtract(dateTime).Seconds > 15) return false;
+                if (DateTime.Now.Subtract(dateTime).Seconds > 15)
+                {
+                    if (DialogResult.Cancel == Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("已超過15鈔，是否繼續？"))
+                    {
+                        StopOCR = true; return false;
+                    }
+                    dateTime = DateTime.Now;
+                    ActiveForm1.TopMost = false;
+                    driver.SwitchTo().Window(driver.CurrentWindowHandle);
+                }
+
+                IWebElement iwtext = null;
+                try
+                {
+                    iwtext = driver.FindElement(By.XPath("/html/body/div[1]/div/div/div[2]/div/div[1]/div[3]/div[2]/div"));
+                }
+                catch (Exception)
+                {
+                }
+                if (iwtext != null)
+                //textContent
+                {
+                    if (iwtext.Text.StartsWith("reach traffic limit."))
+                    {
+                        //Debugger.Break();
+
+                        if (DialogResult.OK == Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("是否讓程式自動更換IP？"))
+                        {
+                            //driver.Close();//return以後也還會再執行一次哦！注意
+
+                            Form1.playSound(Form1.soundLike.over);
+                            IPSwitchOnly();//此方法在切換TouchVPN時會再開啟一分頁以檢視IP轉換情形
+                        }
+                        return false;
+                    }
+                }
+
+                if (DateTime.Now.Subtract(dateTime).Seconds > 1 && !clicked && Clipboard.GetText() == string.Empty)
+                {
+                    clicked = true;
+                    Task.Run(() =>
+                    {
+                        //Form1.playSound(Form1.soundLike.info);
+
+                        //copyBtnPos = new Point(838, 711);
+                        copyBtnPos = new Point(835, 730);
+                        DateTime dtMax = DateTime.Now;
+                        while (Clipboard.GetText() == string.Empty && !StopOCR)
+                        {
+                            try
+                            {
+                                driver.SwitchTo().Window(driver.CurrentWindowHandle);
+                            }
+                            catch (Exception)
+                            {
+                                //if (Clipboard.GetText() == string.Empty) return false;
+                                //else goto finish;
+                            }
+                            //以滑鼠座標按下複製按鈕
+                            if (DateTime.Now.Subtract(dtMax).Seconds > 2 || Clipboard.GetText() != "" || StopOCR) break;
+
+                            bool frmActive = false;
+                            ActiveForm1.Invoke((MethodInvoker)delegate { frmActive = ActiveForm1.Active; });
+                            if (!frmActive)
+                            {
+                                clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.soundLike.none);
+                                Thread.Sleep(200);
+                            }
+                            else break;
+                        }
+                        Form1.playSound(Form1.soundLike.info);
+                        //Debugger.Break();
+                        //if (Clipboard.GetText() != string.Empty) Application.OpenForms[0].Activate();
+                    });
+                }
+                if (clicked && Clipboard.GetText() != string.Empty)
+                {
+                    ActiveForm1.Activate();
+                    goto finish;
+                }
             }
+
+            //找到複製按鈕以後
 
             //copyBtnPos = e.Location;
 
             //int x, y;
             //x = e.Location.X; y = e.Location.Y;
-            //Console.WriteLine(e.Location.ToString());
-            //Console.WriteLine(x);
-            //Console.WriteLine(y);
+            ////Console.WriteLine(e.Location.ToString());
+            ////Console.WriteLine(x);
+            ////Console.WriteLine(y);
 
             //copyBtnPos.X = x + 76 + (e.Size.Width / 2);//76：Windows系統工具列在左邊時
             //copyBtnPos.Y = y + 120 + (e.Size.Height / 2);//120：最大化Chrome瀏覽器網頁頂端至瀏覽器頂端的高度
 
-            //Cursor.Position = copyBtnPos;
+            ////Cursor.Position = copyBtnPos;
 
             driver.SwitchTo().Window(driver.CurrentWindowHandle);//切換到目前Selenium操控的視窗，就不怕沒及時得到焦點而失誤了
-            e.Click();
+
+            //clickCopybutton_GjcoolFastExperience(copyBtnPos);
+
+            if (Clipboard.GetText().IndexOf(Environment.NewLine) > -1) goto finish;
+
+            try
+            {
+                e?.Click();
+            }
+            catch (Exception)
+            {
+                //throw;
+            }
             Form1.playSound(Form1.soundLike.done);//找到複製按鈕按下的音效
             #endregion
 
@@ -4324,7 +4501,7 @@ internal static string getImageUrl() {
         /// <returns></returns>
         private static string getChromeDownloadDirectory_YouChat()
         {//用 C# 和 Selenium 可以取得Chrome瀏覽器的下載目錄嗎            
-            //YouChat菩薩：可以使用 C# 和 Selenium 获取 Chrome 浏览器的下载目录。可以使用以下代码示例来实现：
+         //YouChat菩薩：可以使用 C# 和 Selenium 获取 Chrome 浏览器的下载目录。可以使用以下代码示例来实现：
             IWebElement downloadsFolderInput = driver.FindElement(By.Name("download.default_directory"));
             string downloadsFolder = downloadsFolderInput.GetAttribute("value");
             //在这个示例中，我们使用 OpenQA.Selenium 和 OpenQA.Selenium.Chrome 命名空间中提供的 ChromeDriver 类来创建一个 Chrome 浏览器实例。接下来，我们使用 driver.FindElement(By.Name("download.default_directory")) 方法查找 Chrome 浏览器下载目录的输入框，然后使用 downloadsFolderInput.GetAttribute("value") 获取输入框中的值，即下载目录的路径。

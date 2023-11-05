@@ -46,6 +46,7 @@ namespace WindowsFormsApp1
     public partial class Form1 : Form
     {
         internal string dropBoxPathIncldBackSlash;
+        internal string MydocumentsPathIncldBackSlash;
         readonly System.Drawing.Point textBox4Location; readonly Size textBox4Size;
         private readonly Color textBox2BackColorDefault;
         private readonly Color FormBackColorDefault;
@@ -148,6 +149,7 @@ namespace WindowsFormsApp1
             textBox4Location = textBox4.Location;
             textBox4Size = textBox4.Size;
             textBox1SizeToForm = new Size(this.Width - textBox1.Width, this.Height - textBox1.Height);
+            MydocumentsPathIncldBackSlash = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\";
             dropBoxPathIncldBackSlash = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + @"\Dropbox\";
             dropBoxPathIncldBackSlash = Directory.Exists(dropBoxPathIncldBackSlash) ? dropBoxPathIncldBackSlash : dropBoxPathIncldBackSlash.Replace(@"C:\", @"A:\");
             FormBackColorDefault = this.BackColor;
@@ -525,7 +527,7 @@ namespace WindowsFormsApp1
         private void nICo_MouseMove(object sender, MouseEventArgs e)
         {
             if (Visible || !HiddenIcon) return;
-            if (!_eventsEnabled) return;
+            if (!EventsEnabled) return;
             PauseEvents();
 
             #region 記錄相關變數
@@ -2642,6 +2644,7 @@ namespace WindowsFormsApp1
                     }
                     else textBox1.Text = clpTxt;
                     dragDrop = false;
+                    availableInUseBothKeysMouse();
                     return;
                 }
 
@@ -2794,16 +2797,24 @@ namespace WindowsFormsApp1
                         e.Handled = true;
                         //if (textBox1.Text != string.Empty)
                         //{ undoRecord(); pauseEvents(); textBox1.Text = string.Empty; resumeEvents(); }
-                        if (!pagePaste2GjcoolOCR())
-                        { //數字鍵盤的「+」
-                            PauseEvents();//為了等待時可以切到別的視窗看看，在執行成功且完成後，再把這2個關鍵的視窗置前
-                            br.driver.SwitchTo().Window(br.LastValidWindow);
-                            Thread.Sleep(300);
-                            ResumeEvents();
-                            if (!Visible) Visible = true;
-                            bringBackMousePosFrmCenter();
-                            //SendKeys.Send("^z");//因為會輸入「+」取代選取區文字//這應該是在下一個程序textBox1_KeyPress才會輸入，而不是在這時
-                        }
+                        pagePaste2GjcoolOCR();
+                        //if (!pagePaste2GjcoolOCR())//因為失敗的結果非唯一，故改寫在方法之中
+                        //{ //數字鍵盤的「+」
+                        //    PauseEvents();//為了等待時可以切到別的視窗看看，在執行成功且完成後，再把這2個關鍵的視窗置前
+                        //    try
+                        //    {
+                        //        br.driver.SwitchTo().Window(br.LastValidWindow);
+                        //        Thread.Sleep(300);
+                        //    }
+                        //    catch (Exception)
+                        //    {
+                        //        br.LastValidWindow = null;
+                        //    }
+                        //    ResumeEvents();
+                        //    //SendKeys.Send("^z");//因為會輸入「+」取代選取區文字//這應該是在下一個程序textBox1_KeyPress才會輸入，而不是在這時
+                        //}
+                        //if (!Visible) Visible = true;
+                        //bringBackMousePosFrmCenter();
                         return;
                     }
 
@@ -2841,9 +2852,10 @@ namespace WindowsFormsApp1
             //playSound(soundLike.press);
             //textBox1.SelectAll();//此方法必須在表單有焦點時才行
             TopMost = false;//將焦點交給Chrome瀏覽器
-            PauseEvents();
+            bool eventsEnable = _eventsEnabled;
+            if (eventsEnable) PauseEvents();
             br.driver.SwitchTo().Window(br.LastValidWindow);
-            ResumeEvents();
+            //ResumeEvents();//見return前
             textBox1.SelectionStart = textBox1.TextLength; textBox1.SelectionLength = 0;
             pageTextEndPosition = 0; pageEndText10 = string.Empty;
             playSound(soundLike.waiting);//請靜待OCR完成
@@ -2863,8 +2875,45 @@ namespace WindowsFormsApp1
                         if (!Visible) Visible = true;
                 }
                 else
+                {
                     playSound(soundLike.stop);
+                    if (!Visible) Visible = true;
+                    bringBackMousePosFrmCenter();
+                    _eventsEnabled = eventsEnable;
+                    return false;
+                }
             }
+            else
+            {//keyDownCtrlAdd 操作中斷，直接退出
+                if (!Visible) Visible = true;
+                bringBackMousePosFrmCenter();
+                _eventsEnabled = eventsEnable;
+                return false;
+            }
+            if (returnValue)
+            {
+                if (!Visible) Visible = true;
+                bringBackMousePosFrmCenter();
+            }
+            else
+            {
+                //前後已有PauseEvents，故略去
+                //PauseEvents();//為了等待時可以切到別的視窗看看，在執行成功且完成後，再把這2個關鍵的視窗置前
+                try
+                {
+                    //br.driver.SwitchTo().Window(br.LastValidWindow);
+                    br.driver.SwitchTo().Window(br.driver.CurrentWindowHandle);
+                    Thread.Sleep(300);
+                }
+                catch (Exception)
+                {
+                    //br.LastValidWindow = null;
+                }
+                //ResumeEvents();
+
+            }
+            //ResumeEvents();//交由呼叫端處理
+            _eventsEnabled = eventsEnable;
             return returnValue;
         }
 
@@ -2886,7 +2935,7 @@ namespace WindowsFormsApp1
                     spaceStrBreforeTitle += "　";
                 }
             }
-            stopUndoRec = true; if (_eventsEnabled) undoRecord();
+            stopUndoRec = true; if (EventsEnabled) undoRecord();
             keysTitleCode();
             if (textBox1.SelectionStart > 1 && textBox1.Text.Substring(textBox1.SelectionStart - 2, 2) == Environment.NewLine)
                 textBox1.Select(textBox1.SelectionStart - 2, 0);
@@ -2906,7 +2955,8 @@ namespace WindowsFormsApp1
         /// </summary>
         private void autoKeysTitleCodeAndPreWideSpace()
         {
-            const int wordCountLimit = 12;//目前為少於12字
+            int wordCountLimit = 17;//目前為少於17字
+            if (wordCountLimit + 2 >= wordsPerLinePara) wordCountLimit = wordsPerLinePara - 2;//一般題目都是空二格故
             string x = textBox1.Text;
             int sOriginal = textBox1.SelectionStart, lOriginal = textBox1.SelectionLength, lenOriginal = x.Length;
             //清除最後末的分行/段符號
@@ -4556,7 +4606,7 @@ namespace WindowsFormsApp1
         {
             if (textBox1.TextLength < 2) return; int s = textBox1.SelectionStart;
             string x = textBox1.Text, stxtPre = x.Substring(s < 2 ? s : s - 2, 2);
-            if (_eventsEnabled) undoRecord();
+            if (EventsEnabled) undoRecord();
             stopUndoRec = true;
             string insertX = period ? "。<p>" : "<p>";
             if (stxtPre == Environment.NewLine && s > 1)
@@ -5212,7 +5262,7 @@ namespace WindowsFormsApp1
             stopUndoRec = false; ResumeEvents();
             replaceBlank_ifNOTTitleAndAfterparagraphMark();
             fillSpace_to_PinchNote_in_LineStart();
-            if (_eventsEnabled) PauseEvents();
+            if (EventsEnabled) PauseEvents();
             stopUndoRec = true; PauseEvents();
 
 
@@ -6722,6 +6772,7 @@ namespace WindowsFormsApp1
         /// </summary>
         private void bringBackMousePosFrmCenter()
         {
+            BringToFront();
             Activate(); //Application.DoEvents();
             //if (!this.TopMost) this.TopMost = true;
 
@@ -7495,7 +7546,8 @@ namespace WindowsFormsApp1
             }
             ocrResult = false; TopMost = false;// Visible = false;//WindowState = FormWindowState.Minimized;
 
-            #region toOCR            
+            #region toOCR
+            br.StopOCR = false;
             string currentWindowHndl = br.driver.CurrentWindowHandle;
             switch (ocrSiteTitle)
             {
@@ -7534,7 +7586,10 @@ namespace WindowsFormsApp1
                 //br.driver.SwitchTo().Window(br.driver.WindowHandles[br.driver.WindowHandles.Count-1]);
                 try
                 {
+                    bool eventenable = _eventsEnabled;
+                    if (EventsEnabled) PauseEvents();
                     br.driver.SwitchTo().Window(currentWindowHndl);
+                    _eventsEnabled = eventenable;
                 }
                 catch (Exception)
                 {
@@ -8135,6 +8190,7 @@ namespace WindowsFormsApp1
         /// 20230313 creedit with Adrenaline
         /// </summary>
         internal string FName_to_Save_Txt_fullname { get => Path.Combine(dropBoxPathIncldBackSlash + fName_to_Save_Txt); }
+
         //internal string FName_to_Save_Txt_fullname { get { return dropBoxPathIncldBackSlash + fName_to_Save_Txt; } }
         /*菩薩慈悲： 請這兩個程式碼是否與等價？ 
           * Yes, these two code snippets are equivalent.
@@ -8180,7 +8236,8 @@ namespace WindowsFormsApp1
                 Task.Run(() =>
                 {
                     string downloadDirectory = br.DownloadDirectory_Chrome;
-                    string downloadImgFullName = dropBoxPathIncldBackSlash + "Ctext_Page_Image.png";
+                    //string downloadImgFullName = dropBoxPathIncldBackSlash + "Ctext_Page_Image.png";
+                    string downloadImgFullName = MydocumentsPathIncldBackSlash + "Ctext_Page_Image.png";
                     if (br.ChkDownloadDirectory_Chrome(downloadImgFullName, downloadDirectory))
                     {
                         #endregion
@@ -9142,7 +9199,7 @@ namespace WindowsFormsApp1
 
         private void textBox1_TextChanged(object sender, EventArgs e)
         {
-            if (!_eventsEnabled) return;
+            if (!EventsEnabled) return;
             Keys mk = ModifierKeys;
             if (textBox1.Text.IndexOf("") > -1)
             {//Ctrl+Shift+6會插入這個""符號
@@ -9278,7 +9335,7 @@ namespace WindowsFormsApp1
             //keyinNotepadPlusplus("","南無阿彌陀佛");
             #endregion
 
-            if (!_eventsEnabled) return;
+            if (!EventsEnabled) return;
 
             Keys modifierKey = ModifierKeys;
             //直接針對目前的分頁開啟古籍酷OCR
@@ -9600,15 +9657,19 @@ namespace WindowsFormsApp1
         ///Keep in mind that if you have multiple event handlers attached to the same event, this approach will disable all of them, since it is based on a boolean variable check.
         /// </summary>
         private bool _eventsEnabled = true;
+        /// <summary>
+        /// 取得與設定允許事件處理程序與否
+        /// </summary>
+        public bool EventsEnabled { get => _eventsEnabled; set => _eventsEnabled = value; }
 
         internal void PauseEvents()
         {
-            _eventsEnabled = false;
+            EventsEnabled = false;
         }
 
         internal void ResumeEvents()
         {
-            _eventsEnabled = true;
+            EventsEnabled = true;
         }
 
         /// <summary>
@@ -9632,7 +9693,7 @@ namespace WindowsFormsApp1
 
         private void textBox2_TextChanged(object sender, EventArgs e)
         {
-            if (!_eventsEnabled) return;
+            if (!EventsEnabled) return;
             if (!textBox1.Enabled) textBox1.Enabled = true;
             string x = textBox2.Text;
             if (x == "") return;
@@ -9814,12 +9875,7 @@ namespace WindowsFormsApp1
                     }
                     else if (x == "kk")//只切換IP，不切換《古籍酷》帳戶
                     {
-                        if (TopMost) TopMost = false; if (!br.waitGJcoolPoint) br.waitGJcoolPoint = true;
-                        Task tk = Task.Run(() => { br.OCR_GJcool_AccountChanged_Switcher(true, false); });
-                        tk.Wait(20000);
-                        BringToFront();
-                        availableInUseBothKeysMouse();
-                        Activate();
+                        br.IPSwitchOnly();
                     }
                     else if (x == "jk")//不切換IP，不切換《古籍酷》帳戶，欲直接進入首頁快速體驗者
                     {
@@ -9871,6 +9927,7 @@ namespace WindowsFormsApp1
             textBox2.SelectAll();
 
         }
+
 
         bool checkSurrogatePairsOK(char cr)
         {
@@ -10423,7 +10480,7 @@ namespace WindowsFormsApp1
                 //imgResult = downloadImage(imgUrl, out downloadImgFullName);
                 //if (downloadImgFullName != "")
                 //{
-                downloadImgFullName = dropBoxPathIncldBackSlash + "Ctext_Page_Image.png";
+                downloadImgFullName = MydocumentsPathIncldBackSlash + "Ctext_Page_Image.png";
                 if (File.Exists(downloadImgFullName))
                 {
                     try
@@ -10581,7 +10638,7 @@ namespace WindowsFormsApp1
         }
         private void Form1_Deactivate(object sender, EventArgs e)
         {//預設表單視窗為最上層顯示，當表單視窗不在作用中時，自動隱藏至系統右下方之系統列/任務列中，當滑鼠滑過任務列中的縮圖ico時，即還原/恢復視窗窗體
-            if (!_eventsEnabled) return;
+            if (!EventsEnabled) return;
             if (!textBox2.Focused && textBox1.Text != "" && !dragDrop &&
                 !autoPasteFromSBCKwhether) this.TopMost = false;//hideToNICo();
             selStart = textBox1.SelectionStart; selLength = textBox1.SelectionLength;
@@ -10738,7 +10795,7 @@ namespace WindowsFormsApp1
             {
                 downloadImgFullName = ""; return false;
             }
-            downloadImgFullName = dropBoxPathIncldBackSlash + "Ctext_Page_Image.png";
+            downloadImgFullName = MydocumentsPathIncldBackSlash + "Ctext_Page_Image.png";
             ////若圖已存在則不復下載，因OCR成功後會刪除此圖故//避免隔太久又忘了刪除圖檔，還是改以下判斷
             if (File.Exists(downloadImgFullName)) return true;
             //////若圖檔已存在，且是2.5分鐘前存檔的，則不復下載，以免重複，又免誤按。20230404，改 google keep的快捷鍵以免誤按
