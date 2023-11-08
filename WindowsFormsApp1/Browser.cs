@@ -2556,6 +2556,16 @@ internal static string getImageUrl() {
 
             if (targetWindowHandle != IntPtr.Zero)
             {
+
+                if (ActiveForm1.InvokeRequired)
+                {
+                    ActiveForm1.Invoke((MethodInvoker)delegate
+                    {
+                        ActiveForm1.TopMost = false;// 你的程式碼
+                        //ActiveForm1.WindowState = FormWindowState.Minimized;
+                    });
+                }
+
                 // 將目標窗口切換到最前面
                 //ShowWindow(targetWindowHandle, SW_MAXIMIZE);//SW_RESTORE);
                 ShowWindow(targetWindowHandle, SW_RESTORE);
@@ -2579,41 +2589,106 @@ internal static string getImageUrl() {
                 Point form1Location = ActiveForm1.Location; bool eventEnable = ActiveForm1.EventsEnabled;
                 try
                 {
-                    ActiveForm1.PauseEvents();
-                    ActiveForm1.Location = new Point(form1Location.X + 800, form1Location.Y);
+                    if (ActiveForm1.InvokeRequired)
+                    {
+                        ActiveForm1.Invoke((MethodInvoker)delegate
+                        {
+                            ActiveForm1.PauseEvents();
+                            ActiveForm1.Location = new Point(form1Location.X + 800, form1Location.Y);
+                        });
+                    }
                 }
                 catch (Exception)
                 {
-
                     //throw;
                 }
+                Thread.Sleep(1500);//等候連線成功
                 DateTime dt = DateTime.Now;
-                //while (GetPCIpAddress("SUNS TOTOLINK") == GetPublicIpAddress())
+                //while (GetPCIpAddress("SUNS TOTOLINK") == GetPublicIpAddress())                
                 while (GetPCIpAddress("乙太網路") == GetPublicIpAddress("乙太網路")
                 || GetPCIpAddress("Wi-Fi NetGear") == GetPublicIpAddress("Wi-Fi NetGear"))
                 {
                     Thread.Sleep(2200);
-                    if (DateTime.Now.Subtract(dt).Seconds > _chromeDriverServiceTimeSpan) return false;
+                    if (DateTime.Now.Subtract(dt).Seconds > _chromeDriverServiceTimeSpan)
+                    {
+                        //if (ActiveForm1.InvokeRequired)
+                        //{
+                        //    ActiveForm1.Invoke((MethodInvoker)delegate
+                        //    {
+                        //        ActiveForm1.TopMost = false;// 你的程式碼
+                        //        //ActiveForm1.WindowState = FormWindowState.Normal;
+                        //        ActiveForm1.Activate();
+                        //    });
+                        //}
+                        return false;
+                    }
                 }
                 if (IPExists1Day())
                 {
                     if (ipChangedCounter < 10)
-                    { GoogleOneVPNSwitcher(); ipChangedCounter++; }
+                    {
+                        ipChangedCounter++;
+                        //Debugger.Break();
+                        Form1.playSound(Form1.soundLike.over);
+                        GoogleOneVPNSwitcher();
+                    }
+                    else
+                    {
+                        //if (DialogResult.OK == Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("已嘗試10次了,是否繼續？"))
+                        if (DialogResult.OK == MessageBox.Show("已嘗試10次了,是否繼續？", "google one vpn", MessageBoxButtons.OKCancel,
+                            MessageBoxIcon.Question, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly))
+                        {
+                            ipChangedCounter = 0; GoogleOneVPNSwitcher();
+                            //Console.WriteLine(IPUsedList.this[].ToString());
+                            foreach (var item in IPUsedList)
+                            {
+                                Console.WriteLine("IP: " + item.Item1 + ", Time: " + item.Item2);
+                            }
+                            Debugger.Break();
+                        }
+                    }
                 }
                 else
                     ipChangedCounter = 0;//計數器歸零
                 try
                 {
-                    ActiveForm1.EventsEnabled = eventEnable;
-                    //ActiveForm1.ResumeEvents();
-                    ActiveForm1.Location = form1Location;
+                    if (ActiveForm1.InvokeRequired)
+                    {
+                        ActiveForm1.Invoke((MethodInvoker)delegate
+                        {
+                            ActiveForm1.EventsEnabled = eventEnable;
+                            //ActiveForm1.ResumeEvents();
+                            ActiveForm1.Location = form1Location;
+                            ActiveForm1.AvailableInUseBothKeysMouse();
+                        });
+                    }
                 }
                 catch (Exception)
                 {
-                    //throw;
+                    throw;
                 }
+                Form1.playSound(Form1.soundLike.done);
+                //if (ActiveForm1.InvokeRequired)
+                //{
+                //    ActiveForm1.Invoke((MethodInvoker)delegate
+                //    {
+                //        ActiveForm1.TopMost = false;// 你的程式碼
+                //        //ActiveForm1.WindowState = FormWindowState.Normal;
+                //        ActiveForm1.Activate();
+                //    });
+                //}
                 return true;
             }
+            Form1.playSound(Form1.soundLike.done);
+            //if (ActiveForm1.InvokeRequired)
+            //{
+            //    ActiveForm1.Invoke((MethodInvoker)delegate
+            //    {
+            //        ActiveForm1.TopMost = false;// 你的程式碼
+            //        //ActiveForm1.WindowState = FormWindowState.Normal;
+            //        ActiveForm1.Activate();
+            //    });
+            //}
             return false;
         }
 
@@ -2626,10 +2701,12 @@ internal static string getImageUrl() {
         {
             if (ActiveForm1.TopMost) ActiveForm1.TopMost = false; if (!waitGJcoolPoint) waitGJcoolPoint = true;
             Task tk = Task.Run(() => { OCR_GJcool_AccountChanged_Switcher(true, false); });
-            tk.Wait(20000);
-            ActiveForm1.BringToFront();
-            //ActiveForm1.availableInUseBothKeysMouse();
-            ActiveForm1.Activate();
+            //if (tk.Wait(1500))
+            //{
+            //    ActiveForm1.BringToFront();
+            //    //ActiveForm1.availableInUseBothKeysMouse();
+            //    ActiveForm1.Activate();
+            //}
             return true;
         }
 
@@ -2726,21 +2803,31 @@ internal static string getImageUrl() {
                 {
                     //if (driver.Url == "https://api.ipify.org/") driver.Close();
                     ActiveForm1.PauseEvents();
+                    string ipUrl = "https://api.ipify.org", selector = "body > pre";
+                retry:
                     openNewTabWindow();//要打開比較快更新
-                    driver.Navigate().GoToUrl("https://api.ipify.org");
+                    driver.Navigate().GoToUrl(ipUrl);
                     DateTime dt = DateTime.Now;
-                    IWebElement ie = waitFindWebElementBySelector_ToBeClickable("body > pre");
+                    IWebElement ie = waitFindWebElementBySelector_ToBeClickable(selector);
                     while (ie == null)
                     {
-                        ie = waitFindWebElementBySelector_ToBeClickable("body > pre");
+                        ie = waitFindWebElementBySelector_ToBeClickable(selector);
                         if (DateTime.Now.Subtract(dt).Seconds > 15)
                         {
+                            if (ipUrl == "https://api.ipify.org")
+                            {
+                                selector = "body > b > span"; dt = DateTime.Now;
+                                ipUrl = "https://www.whatismyip.com.tw/"; goto retry;
+                            }
                             Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("找不到外部網路IP");
                             Debugger.Break();
                             return string.Empty;
                         }
                     }
                     publicIpAddress = ie.Text;
+                    ie = waitFindWebElementBySelector_ToBeClickable("body > i > span");
+                    if (ie != null)//顯示IP國家，ipUrl = "https://www.whatismyip.com.tw/" 才有
+                        MessageBox.Show(ie.Text, "country:", MessageBoxButtons.OK, MessageBoxIcon.Information, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
                     driver.Close();
                     driver.SwitchTo().Window(LastValidWindow);
                     ActiveForm1.ResumeEvents();
@@ -2797,9 +2884,10 @@ internal static string getImageUrl() {
                 {
                     //Form1.playSound(Form1.soundLike.processing);
                     bool fastXResulut = OCR_GJcool_FastExperience(downloadImgFullName);
-                    driver.Close();
+                    //driver.Close();
+                    driver?.Close();
                     _OCR_GJcool_WindowClosed = true;
-                    driver.SwitchTo().Window(currentWindowHndl);
+                    driver?.SwitchTo().Window(currentWindowHndl);
                     return fastXResulut;
                 }
                 else
@@ -3010,7 +3098,18 @@ internal static string getImageUrl() {
                     return fastXResulut;
 
                 }
-                else { waitGJcoolPoint = false; points = 0; innerText = null; }//釋放記憶體
+                else
+                {//點數足時：
+                    //此帳戶下的最後一次
+                    if (points - pointCoin < pointCoin)
+                        Task.Run(() =>
+                        {
+                            //using (SoundPlayer sp = new SoundPlayer("C:\\Windows\\Media\\Windows Unlock.wav")) { sp.Play(); }
+                            //using (SoundPlayer sp = new SoundPlayer("C:\\Windows\\Media\\Windows Proximity Connection.wav")) { sp.Play(); }
+                            using (SoundPlayer sp = new SoundPlayer("C:\\Windows\\Media\\Windows ringout.wav")) { sp.Play(); }
+                        });
+                    waitGJcoolPoint = false; points = 0; innerText = null;
+                }//釋放記憶體
             }
             else return false;
             #endregion
@@ -3129,7 +3228,14 @@ internal static string getImageUrl() {
             //retry:
             SendKeys.Send("+{Insert}");//or "^v"
             SendKeys.Send("{ENTER}");
-            Form1.playSound(Form1.soundLike.processing);
+            //Form1.playSound(Form1.soundLike.processing);
+
+            if (_downloadResult)
+                Form1.playSound(Form1.soundLike.processing);
+            else
+                //Form1.playSound(Form1.soundLike.waiting);
+                using (SoundPlayer sp = new SoundPlayer("C:\\Windows\\Media\\ring08.wav")) { sp.Play(); }
+
             //待圖載入完畢：
             //Thread.Sleep(3220);
             //Thread.Sleep(1220);
@@ -3142,7 +3248,7 @@ internal static string getImageUrl() {
             #region「上傳完畢」對話方塊的「OK」按鈕 20231103
             DateTime dtimr = DateTime.Now;
             iwe = waitFindWebElementBySelector_ToBeClickable
-                ("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled");
+                ("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled", 0.2);
             //if (iwe == null) return false;
             //try
             //{
@@ -3206,6 +3312,7 @@ internal static string getImageUrl() {
             try
             {
                 iwe.Click();
+                Form1.playSound(Form1.soundLike.processing);
             }
             catch (Exception)
             {
@@ -3231,10 +3338,7 @@ internal static string getImageUrl() {
             }
             #endregion
 
-            if (_downloadResult)
-                Form1.playSound(Form1.soundLike.processing);
-            else
-                Form1.playSound(Form1.soundLike.waiting);
+
             //等待OCR，上限為30秒
             //iwe = waitFindWebElementBySelector_ToBeClickable("# OneLine > div.d-flex.justify-content-between.mt-2.mb-1 > div:nth-child(1) > div:nth-child(2) > ul > li:nth-child(2) > button");
             iwe = waitFindWebElementBySelector_ToBeClickable("#line_list_table > tbody > tr:nth-child(1) > td:nth-child(2)");
@@ -3824,6 +3928,16 @@ internal static string getImageUrl() {
                 }
             }
 
+            //C# 如何取得使用者的螢幕解析度:https://blog.xuite.net/q10814/blog/48070595 https://www.delftstack.com/zh-tw/howto/csharp/screen-size-in-csharp/
+            Size Size = SystemInformation.PrimaryMonitorSize;
+            int Width = SystemInformation.PrimaryMonitorSize.Width;
+            int Height = SystemInformation.PrimaryMonitorSize.Height;
+            //MessageBox.Show("你的螢幕解析度是" + Size + "\n Width = " + Width + "\n Height = " + Height);
+            //複製按鈕的位置：20231106
+            int copyBtnPosX = Width / 1920 * 835, copyBtnPosY = Height / 1200 * 730;
+            //int copyBtnPosX = Width * (835 / 1920), copyBtnPosY = Height * (730 / 1200);
+
+
             //Form1.playSound(Form1.soundLike.processing);
             if (ActiveForm1.TopMost) ActiveForm1.TopMost = false;
             //首頁「快速體驗」按鈕：
@@ -3840,7 +3954,7 @@ internal static string getImageUrl() {
             iwe.Click();
             //等待「開啟」檔案對話框開啟
             //Thread.Sleep(1200);
-            Thread.Sleep(1250);
+            Thread.Sleep(1300);
             //輸入：檔案名稱 //SendKeys.Send(downloadImgFullName);
             //貼上圖檔全名
             Clipboard.SetText(downloadImgFullName);
@@ -3868,7 +3982,7 @@ internal static string getImageUrl() {
             //Thread.Sleep(5200);//可多設時間以等待，若多餘，可手動按下複製按鈕即可。
             //Thread.Sleep(4300);
             //Thread.Sleep(3900);
-            Thread.Sleep(550);
+            Thread.Sleep(1150);
             #region 將OCR結果讀入剪貼簿：
             Point copyBtnPos = new Point(); DateTime begin = DateTime.Now;
 
@@ -3879,7 +3993,7 @@ internal static string getImageUrl() {
             //WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(second));
 
             IWebElement e = null;
-            //WebDriverWait wait = null;
+            WebDriverWait wait = null;
             //try
             //{
             //    e = driver.FindElement(By.XPath("//*[starts-with(@id, 'dialog_')] > div.col > div.d-flex.py-1 > button > i"));
@@ -3921,7 +4035,64 @@ internal static string getImageUrl() {
             #endregion
 
             DateTime dateTime = DateTime.Now; bool clicked = false;
-            Thread.Sleep(850);
+            Thread.Sleep(950);
+            //if (DateTime.Now.Subtract(dateTime).Seconds > 1 && !clicked && Clipboard.GetText() == string.Empty)
+            //if (true)
+            //{
+            clicked = true;
+            Task.Run(() =>
+            {
+                //Form1.playSound(Form1.soundLike.info);
+
+                //copyBtnPos = new Point(838, 711);
+                copyBtnPos = new Point(835, 730);
+                //copyBtnPos = new Point(copyBtnPosX, copyBtnPosY);//複製按鈕的位置：20231106
+                DateTime dtMax = DateTime.Now;
+                while (Clipboard.GetText() == string.Empty && !StopOCR)
+                {
+                    //try
+                    //{
+                    //    driver.SwitchTo().Window(driver.CurrentWindowHandle);
+                    //}
+                    //catch (Exception)
+                    //{
+                    //    break;
+                    //    //if (Clipboard.GetText() == string.Empty) return false;
+                    //    //else goto finish;
+                    //}
+                    //以滑鼠座標按下複製按鈕
+                    if (DateTime.Now.Subtract(dtMax).Seconds > 5 || Clipboard.GetText() != string.Empty || StopOCR) break;
+
+                    //bool frmActive = false;
+                    //ActiveForm1.Invoke((MethodInvoker)delegate { frmActive = ActiveForm1.Active; });
+                    //if (!frmActive)
+                    //{
+                    clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.soundLike.none);
+                    Thread.Sleep(550);
+                    //}
+                    //else break;
+                }
+                Form1.playSound(Form1.soundLike.info);
+                //Debugger.Break();
+                //if (Clipboard.GetText() != string.Empty) Application.OpenForms[0].Activate();
+            });
+            //}
+            /*
+            if (Clipboard.GetText() != "") goto finish;
+            else
+            {
+                //Form1.playSound(Form1.soundLike.processing);//just for test
+                try
+                {
+                    //e = driver.FindElement(By.XPath("/html/body/div[1]/div/div/div[2]/div/div[1]/div[3]/div[2]/div[2]/button"));
+                    e = driver.FindElement(By.XPath("//*[starts-with(@id, 'dialog_')]//div[contains(@class, 'col')]//div[contains(@class, 'd-flex py-1')]//button//i"));
+                    wait = new WebDriverWait(driver, TimeSpan.FromSeconds(15));
+                    wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(e));
+                }
+                catch (Exception)
+                { }
+            }
+            */
             while (e == null)
             {
                 //Thread.Sleep(250);
@@ -3939,9 +4110,10 @@ internal static string getImageUrl() {
                 #endregion
                 try
                 {
-                    e = driver.FindElement(By.XPath("/html/body/div[1]/div/div/div[2]/div/div[1]/div[3]/div[2]/div[2]/button"));
-                    //wait = new WebDriverWait(driver, TimeSpan.FromSeconds(0.4));
-                    //wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(e));
+                    //e = driver.FindElement(By.XPath("/html/body/div[1]/div/div/div[2]/div/div[1]/div[3]/div[2]/div[2]/button"));
+                    e = driver.FindElement(By.XPath("//*[starts-with(@id, 'dialog_')]//div[contains(@class, 'col')]//div[contains(@class, 'd-flex py-1')]//button//i"));
+                    wait = new WebDriverWait(driver, TimeSpan.FromSeconds(0.05));
+                    wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(e));
                     //第 1 次好像會找不到，只好用手動了：
                     //Thread.Sleep(450);
                     //if (Clipboard.GetText() != "") goto finish;
@@ -3951,30 +4123,31 @@ internal static string getImageUrl() {
                 {
                     //throw;
                     if (Clipboard.GetText() != "") goto finish;
-                    else
-                    {
+                    //else
+                    //{
 
-                        Thread.Sleep(500);
-                        try
-                        {
-                            e = driver.FindElement(By.XPath("//*[starts-with(@id, 'dialog_')]//div[contains(@class, 'col')]//div[contains(@class, 'd-flex py-1')]//button//i"));
-                            //wait = new WebDriverWait(driver, TimeSpan.FromSeconds(0.4));
-                            //wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(e));
-                        }
-                        catch (Exception)// et)
-                        {
-                            //Console.WriteLine(et.HResult + et.Message);
-                            //Debugger.Break();
-                            //throw;
-                            //Form1.playSound(Form1.soundLike.error);
+                    //    //Thread.Sleep(500);
+                    //    try
+                    //    {
+                    //        Form1.playSound(Form1.soundLike.press);//just for test
+                    //        e = driver.FindElement(By.XPath("//*[starts-with(@id, 'dialog_')]//div[contains(@class, 'col')]//div[contains(@class, 'd-flex py-1')]//button//i"));
+                    //        wait = new WebDriverWait(driver, TimeSpan.FromSeconds(0.2));
+                    //        wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(e));
+                    //    }
+                    //    catch (Exception)// et)
+                    //    {
+                    //        //Console.WriteLine(et.HResult + et.Message);
+                    //        //Debugger.Break();
+                    //        //throw;
+                    //        //Form1.playSound(Form1.soundLike.error);
 
 
-                            //if (Clipboard.GetText() != "") goto finish;
-                            if (Clipboard.GetText().IndexOf(Environment.NewLine) > -1) goto finish;
-                            //else return false;
-                        }
+                    //        //if (Clipboard.GetText() != "") goto finish;
+                    //        if (Clipboard.GetText().IndexOf(Environment.NewLine) > -1) goto finish;
+                    //        //else return false;
+                    //    }
 
-                    }
+                    //}
                 }
                 //Debugger.Break();
                 if (DateTime.Now.Subtract(dateTime).Seconds > 15)
@@ -3988,77 +4161,64 @@ internal static string getImageUrl() {
                     driver.SwitchTo().Window(driver.CurrentWindowHandle);
                 }
 
+
+                #region reach traffic limit
                 IWebElement iwtext = null;
                 try
                 {
                     iwtext = driver.FindElement(By.XPath("/html/body/div[1]/div/div/div[2]/div/div[1]/div[3]/div[2]/div"));
+                    wait = new WebDriverWait(driver, TimeSpan.FromSeconds(0));
+                    wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(iwtext));
                 }
                 catch (Exception)
                 {
+                    try
+                    {
+                        iwtext = driver.FindElement(By.XPath("/html/body/div[2]/div/div/div[2]/div/div[1]/div[3]/div[2]/div"));
+                        wait = new WebDriverWait(driver, TimeSpan.FromSeconds(0));
+                        wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(iwtext));
+                    }
+                    catch (Exception)
+                    {
+                    }
                 }
                 if (iwtext != null)
                 //textContent
                 {
-                    if (iwtext.Text.StartsWith("reach traffic limit."))
+                    try
                     {
-                        //Debugger.Break();
-
-                        if (DialogResult.OK == Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("是否讓程式自動更換IP？"))
+                        if (iwtext.Text.StartsWith("reach traffic limit."))
                         {
-                            //driver.Close();//return以後也還會再執行一次哦！注意
+                            StopOCR = true;
+                            //Debugger.Break();
+                            ActiveForm1.TopMost = false;
+                            if (DialogResult.OK == Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("是否讓程式自動更換IP？"))
+                            {
+                                //driver.Close();//return以後也還會再執行一次哦！注意
 
-                            Form1.playSound(Form1.soundLike.over);
-                            IPSwitchOnly();//此方法在切換TouchVPN時會再開啟一分頁以檢視IP轉換情形
+                                Form1.playSound(Form1.soundLike.over);
+                                Task.Run(() =>
+                                {
+                                    IPSwitchOnly();//此方法在切換TouchVPN時會再開啟一分頁以檢視IP轉換情形
+                                });
+                            }
+                            return false;
                         }
-                        return false;
+                    }
+                    catch (Exception)
+                    {
+
                     }
                 }
+                #endregion
 
-                if (DateTime.Now.Subtract(dateTime).Seconds > 1 && !clicked && Clipboard.GetText() == string.Empty)
-                {
-                    clicked = true;
-                    Task.Run(() =>
-                    {
-                        //Form1.playSound(Form1.soundLike.info);
-
-                        //copyBtnPos = new Point(838, 711);
-                        copyBtnPos = new Point(835, 730);
-                        DateTime dtMax = DateTime.Now;
-                        while (Clipboard.GetText() == string.Empty && !StopOCR)
-                        {
-                            try
-                            {
-                                driver.SwitchTo().Window(driver.CurrentWindowHandle);
-                            }
-                            catch (Exception)
-                            {
-                                break;
-                                //if (Clipboard.GetText() == string.Empty) return false;
-                                //else goto finish;
-                            }
-                            //以滑鼠座標按下複製按鈕
-                            if (DateTime.Now.Subtract(dtMax).Seconds > 1.7 || Clipboard.GetText() != "" || StopOCR) break;
-
-                            //bool frmActive = false;
-                            //ActiveForm1.Invoke((MethodInvoker)delegate { frmActive = ActiveForm1.Active; });
-                            //if (!frmActive)
-                            //{
-                                clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.soundLike.none);
-                                Thread.Sleep(200);
-                            //}
-                            //else break;
-                        }
-                        Form1.playSound(Form1.soundLike.info);
-                        //Debugger.Break();
-                        //if (Clipboard.GetText() != string.Empty) Application.OpenForms[0].Activate();
-                    });
-                }
                 if (clicked && Clipboard.GetText() != string.Empty)
                 {
                     ActiveForm1.Activate();
                     goto finish;
                 }
-            }
+
+            }//以上待複製按鈕出現
 
             //找到複製按鈕以後
 
@@ -4426,6 +4586,7 @@ internal static string getImageUrl() {
 
         #region 關閉OCR視窗後回到原來分頁視窗
         finish:
+            StopOCR = true;
             if (!_OCR_GJcool_WindowClosed) _OCR_GJcool_WindowClosed = true;
             return true;
             #endregion

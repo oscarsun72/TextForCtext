@@ -139,7 +139,7 @@ Ctrl + Shift + c ：將textBox1的文本複製到剪貼簿 以備用
 Ctrl + Alt + o :下載書頁圖片（簡稱「書圖」），交給[Google Keep](https://keep.new/) OCR : 
 
   複製圖片位址或由textBox3指定要下載的網頁網址即可下載，下載完成後將會自動開啟檔案總管並將該檔案選取。為尊重版權，防止濫用，僅設計一次一頁書圖，以便用即可。知足常樂。感恩感恩　南無阿彌陀佛
-  - 下載路徑預設為 Dropbox 根目錄，檔名為 Ctext_Page_Image.png（下載路徑改為 我的文件 - 暫時沒有Dropbox同步的需求了，以免頻繁操作OCR時，系統多餘的負擔。）
+  - 下載路徑預設為 Dropbox 根目錄，檔名為 Ctext_Page_Image.png（下載路徑改為 我的文件\CtextTempFiles - 暫時沒有Dropbox同步的需求了，以免頻繁操作OCR時，系統多餘的負擔。）
    - 若不安裝Dropbox者可以自行在其裝路徑裡新增資料夾備置，本軟件許多功能仰賴於此。如備份已輸入之文本及暫存將貼入的文本等等。如我登入Windows作業系統的帳戶名稱為「oscar」，其默認安裝路徑即為：
         C:\Users\oscar\Dropbox。
      - 在非appActivateByName模式下：
@@ -319,7 +319,7 @@ Alt + Pause ： 自動判斷標題行，加上篇名格式代碼並前置N個全
 
 F11 : run replaceXdirrectly() 維基文庫等欲直接抽換之字
 
-Ctrl + h ：移至 textBox4 準備取代文本文字
+Ctrl + h ：移至 textBox4 準備取代文本文字（若已有取代成的預設值，可以前綴「7」來指定新的取代字串）
 
 Ctrl + y ： 重做（即復原還原的動作），目前上限為50個記錄
 

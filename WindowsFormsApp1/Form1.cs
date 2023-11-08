@@ -210,13 +210,13 @@ namespace WindowsFormsApp1
                     {
                         // 滾輪向上，上一頁
                         nextPages(Keys.PageUp, false);
-                        if (autoPastetoQuickEdit) availableInUseBothKeysMouse();
+                        if (autoPastetoQuickEdit) AvailableInUseBothKeysMouse();
                     }
                     else
                     {
                         // 滾輪向下，下一頁
                         nextPages(Keys.PageDown, false);
-                        if (autoPastetoQuickEdit) availableInUseBothKeysMouse();
+                        if (autoPastetoQuickEdit) AvailableInUseBothKeysMouse();
                     }
                     break;
             }
@@ -475,7 +475,7 @@ namespace WindowsFormsApp1
                             }
                             if (!Active)
                             {
-                                availableInUseBothKeysMouse();
+                                AvailableInUseBothKeysMouse();
                             }
                             //避免剪貼簿內還殘留上一次用過的網址
                             xClp = Clipboard.GetText();
@@ -2263,7 +2263,7 @@ namespace WindowsFormsApp1
                 {//Alt + 1 : 鍵入本站制式留空空格標記「􏿽」：若有選取則取代全形空格「　」為「􏿽」
                     e.Handled = true;
                     keysSpacesBlank();
-                    if (!Active) availableInUseBothKeysMouse();
+                    if (!Active) AvailableInUseBothKeysMouse();
                     return;
                 }
 
@@ -2644,7 +2644,7 @@ namespace WindowsFormsApp1
                     }
                     else textBox1.Text = clpTxt;
                     dragDrop = false;
-                    availableInUseBothKeysMouse();
+                    AvailableInUseBothKeysMouse();
                     return;
                 }
 
@@ -3053,7 +3053,10 @@ namespace WindowsFormsApp1
             //textBox1.Select(sOriginal + (s - (lenOriginal-(s-text(lenOriginal-sOriginal)))), lOriginal);            
             //textBox1.Select(sOriginal + (textBox1.TextLength - lenOriginal), lOriginal);
             //先假設必然在原來插入點之前會增加符號文字，再找接在其後、最近的分行/段符號位置，以此位置權作新的定位，至少有某個程度的可靠，省卻某一部分冗餘的操作20231019
-            s = textBox1.Text.IndexOf(Environment.NewLine, sOriginal);
+            if (sOriginal > textBox1.TextLength)
+                s = -1;
+            else
+                s = textBox1.Text.IndexOf(Environment.NewLine, sOriginal);
             sOriginal = s == -1 ? textBox1.TextLength : s;
             textBox1.Select(sOriginal, lOriginal);
         }
@@ -5901,7 +5904,7 @@ namespace WindowsFormsApp1
                             pageTextEndPosition = s;
                         }
 
-                        availableInUseBothKeysMouse();
+                        AvailableInUseBothKeysMouse();
                         BringToFront(); TopMost = true;
                         return false;
                     }
@@ -5918,7 +5921,7 @@ namespace WindowsFormsApp1
             catch (Exception)
             {
                 MessageBox.Show("  checkAbnormalLinePara函式有誤，請留意！！");
-                availableInUseBothKeysMouse();
+                AvailableInUseBothKeysMouse();
                 BringToFront();
             }
             #endregion
@@ -5931,7 +5934,7 @@ namespace WindowsFormsApp1
                 {//若無選取，則將有問題的部分選取以供檢視
                     textBox1.Select(s, l); textBox1.ScrollToCaret();
                 }
-                availableInUseBothKeysMouse(); return false;
+                AvailableInUseBothKeysMouse(); return false;
             }//在 newTextBox1函式中可能會更動 s、l 二值，故得如此處置，以免s、l值跑掉
 
 
@@ -6040,7 +6043,7 @@ namespace WindowsFormsApp1
                 {
                     if (HiddenIcon) show_nICo(ModifierKeys);
                     //if (!pagePaste2GjcoolOCR) availableInUseBothKeysMouse();
-                    availableInUseBothKeysMouse();
+                    AvailableInUseBothKeysMouse();
 
                     if (ModifierKeys == Keys.Shift)
                     {//自動送交賢超法師《古籍酷AI》OCR
@@ -6078,7 +6081,7 @@ namespace WindowsFormsApp1
         /// <summary>
         /// 把作業系統的焦點與游標拉回主表單中
         /// </summary>
-        private void availableInUseBothKeysMouse()
+        internal void AvailableInUseBothKeysMouse()
         {
             if (!Active) Activate();
             bringBackMousePosFrmCenter();
@@ -6944,6 +6947,8 @@ namespace WindowsFormsApp1
                 if (e.KeyCode == Keys.Multiply)
                 {
                     e.Handled = true;
+                    //重設欄位變量，以免OCR快速鍵失效
+                    PagePaste2GjcoolOCR_ing = false;
                     if (keyinTextMode)
                     {
                         new SoundPlayer(@"C:\Windows\Media\Speech Off.wav").Play();
@@ -7187,7 +7192,7 @@ namespace WindowsFormsApp1
                     appActivateByName();
                     SendKeys.Send("{F5}");
                     //textBox1.Focused; ⇒此為取得在桌面的焦面，不是表單中的焦點，故當表單並非桌面中作用中的表單時，此值也會是fasle，因為TextBox是在表單Form容器中的子元件故 20230125癸卯年初四
-                    if (ActiveControl.Name == "textBox1" && !Active) { availableInUseBothKeysMouse(); }
+                    if (ActiveControl.Name == "textBox1" && !Active) { AvailableInUseBothKeysMouse(); }
                     return;
                     /* 20230125 孫守真 × chatGPT大菩薩：
                      * 老師菩薩新年吉祥，煩請老師菩薩慈悲指導，我這想法是否正確，如下程式碼，我想要在喚起預設瀏覽器後判斷若textBox1是表單中有焦點的控制項，則我想把桌面的焦點再拉回我的表單中，其中的程式碼註解就是我的想法，焦點的取得與判斷，是否是像我想的這樣呢？……
@@ -7205,7 +7210,7 @@ namespace WindowsFormsApp1
                 {
                     e.Handled = true;//取得或設定值，指出是否處理事件。https://docs.microsoft.com/zh-tw/dotnet/api/system.windows.forms.keyeventargs.handled?view=netframework-4.7.2&f1url=%3FappId%3DDev16IDEF1%26l%3DZH-TW%26k%3Dk(System.Windows.Forms.KeyEventArgs.Handled);k(TargetFrameworkMoniker-.NETFramework,Version%253Dv4.7.2);k(DevLang-csharp)%26rd%3Dtrue
                     nextPages(e.KeyCode, true);
-                    if (autoPastetoQuickEdit) availableInUseBothKeysMouse();
+                    if (autoPastetoQuickEdit) AvailableInUseBothKeysMouse();
                     return;
                 }
                 if (e.KeyCode == Keys.Left || e.KeyCode == Keys.Right)
@@ -7496,7 +7501,7 @@ namespace WindowsFormsApp1
                 {
                     undoRecord();
                     textBox1.Text = br.CopyQuickedit_data_textboxText();//quickedit_data_textboxTxt;
-                    if (!Active) availableInUseBothKeysMouse();
+                    if (!Active) AvailableInUseBothKeysMouse();
                     //br.WindowsScrolltoTop();
                     return false;
                 }
@@ -7509,7 +7514,7 @@ namespace WindowsFormsApp1
                 {
                     undoRecord();
                     textBox1.Text = br.CopyQuickedit_data_textboxText();//quickedit_data_textboxTxt;
-                    if (!Active) availableInUseBothKeysMouse();
+                    if (!Active) AvailableInUseBothKeysMouse();
                     //br.WindowsScrolltoTop();
                     return false;
                 }
@@ -7588,18 +7593,32 @@ namespace WindowsFormsApp1
                 {
                     bool eventenable = _eventsEnabled;
                     if (EventsEnabled) PauseEvents();
-                    br.driver.SwitchTo().Window(currentWindowHndl);
+                    br.driver?.SwitchTo().Window(currentWindowHndl);
+                    if (Clipboard.GetText() != string.Empty)
+                    {
+                        AvailableInUseBothKeysMouse();
+                        SendKeys.Send("%{ins}");
+                        textBox1.Select(0, 0);
+                    }
+                    else
+                    {
+                        SendKeys.Send("%r");//關閉Chrome瀏覽器右邊所有分頁
+                    }
+
                     _eventsEnabled = eventenable;
                 }
                 catch (Exception)
                 {
                     //br.WindowsScrolltoTop();
+                    br.StopOCR = true;
                     return false;
                     //throw;
                 }
             }
             //WindowState = FormWindowState.Normal;
             //Visible = true; TopMost = true;
+
+            br.StopOCR = true;
 
             #region 如果是手動鍵入輸入模式且OCR程序無誤則直接貼上結果並自動標上書名號篇名號，20230309 creedit with chatGPT大菩薩：
             if (ocrResult && keyinTextMode)
@@ -7610,7 +7629,7 @@ namespace WindowsFormsApp1
                 // 建立 Keys.Alt + Keys.Insert 的組合鍵
                 //Keys comboKey = Keys.Alt & Keys.Insert;//在 C# 中，要表示兩個按鍵的組合鍵，需要使用 "|" 運算子進行位元運算，而不是 "&" 或 "+" 運算子。 "|" 運算子可以將兩個按鍵的 KeyCode 合併成一個整數，表示按下這兩個按鍵的組合鍵。
                 //                                       // 使用 SendKeys 方法觸發按下組合鍵
-                availableInUseBothKeysMouse();//Activate();
+                AvailableInUseBothKeysMouse();//Activate();
                 if (!textBox1.Focused) textBox1.Focus();
 
                 //取得OCR結果
@@ -7673,7 +7692,7 @@ namespace WindowsFormsApp1
 
             //Process.Start(gjcool);
             //Process.Start(keep);
-            if (!Active) availableInUseBothKeysMouse();
+            if (!Active) AvailableInUseBothKeysMouse();
 
             if (keyinTextMode)
             {//如果在手動輸入模式下則自動選取[Quick edit]的內容，方便有時候須用剪下貼上者
@@ -8058,7 +8077,7 @@ namespace WindowsFormsApp1
             }
             #endregion
 
-            if (stayInHere && !pagePaste2GjcoolOCR) availableInUseBothKeysMouse();//this.Activate();
+            if (stayInHere && !pagePaste2GjcoolOCR) AvailableInUseBothKeysMouse();//this.Activate();
         }
 
         private void runWordMacro(string runName)
@@ -8237,7 +8256,7 @@ namespace WindowsFormsApp1
                 {
                     string downloadDirectory = br.DownloadDirectory_Chrome;
                     //string downloadImgFullName = dropBoxPathIncldBackSlash + "Ctext_Page_Image.png";
-                    string downloadImgFullName = MydocumentsPathIncldBackSlash + "Ctext_Page_Image.png";
+                    string downloadImgFullName = MydocumentsPathIncldBackSlash + "CtextTempFiles\\Ctext_Page_Image.png";
                     if (br.ChkDownloadDirectory_Chrome(downloadImgFullName, downloadDirectory))
                     {
                         #endregion
@@ -8746,6 +8765,7 @@ namespace WindowsFormsApp1
 
         /// <summary>
         /// 取代文字
+        /// 用「7」為前綴以更新要取代成的字串
         /// </summary>
         /// <param name="replacedword">要被取代的字串</param>
         /// <param name="rplsword">用以取代的字串</param>
@@ -8753,10 +8773,10 @@ namespace WindowsFormsApp1
         {
             if (rplsword == "") return;
             bool editListMode = false;
-            if (rplsword.StartsWith("@"))
+            if (rplsword.StartsWith("7"))
             {//如果在此框輸入的字串前綴半形「@」符號，則會將被取代的字串其對應的用以取代之字串改成目前指定的這個（即在「@」後的字串）20230903蘇拉Saola颱風大菩薩往生後海葵Haikui颱風大菩薩光臨臺灣本島日。感恩感恩　讚歎讚歎　南無阿彌陀佛
                 editListMode = true;
-                rplsword = rplsword.Substring("@".Length);
+                rplsword = rplsword.Substring("7".Length);
             }
             if (textBox1.SelectionStart == textBox1.Text.Length) return;
             StringInfo selWord = new StringInfo(rplsword);
@@ -9324,7 +9344,7 @@ namespace WindowsFormsApp1
         private void Form1_Activated(object sender, EventArgs e)
 
         {//此中斷點專為偵錯測試用 感恩感恩　南無阿彌陀佛 20230314
-
+           
             #region forDebugTest權作測試偵錯用20230310
             //br.OCR_GJcool_FastExperience(@"C:\Users\oscar\Dropbox\Ctext_Page_Image.png");
             //string x = Clipboard.GetText();
@@ -9474,7 +9494,7 @@ namespace WindowsFormsApp1
                     //if (!Active && !PagePaste2GjcoolOCR_ing&& ModifierKeys!=Keys.Control)
                     {
                         PauseEvents();
-                        availableInUseBothKeysMouse();
+                        AvailableInUseBothKeysMouse();
                         if (!this.TopMost) this.TopMost = true;
                         ResumeEvents();
                     }
@@ -10238,7 +10258,7 @@ namespace WindowsFormsApp1
                             nextPageStartTime = DateTime.Now;
                         }
                         nextPages(Keys.PageUp, true);
-                        if (autoPastetoQuickEdit) availableInUseBothKeysMouse();
+                        if (autoPastetoQuickEdit) AvailableInUseBothKeysMouse();
                         //上一頁
                         //keyDownCtrlAdd(false);
                         break;
@@ -10253,7 +10273,7 @@ namespace WindowsFormsApp1
                         //keyDownCtrlAdd(true);
                         //下一頁
                         nextPages(Keys.PageDown, true);
-                        if (autoPastetoQuickEdit) availableInUseBothKeysMouse();
+                        if (autoPastetoQuickEdit) AvailableInUseBothKeysMouse();
                         break;
                     default:
                         break;
@@ -10480,7 +10500,7 @@ namespace WindowsFormsApp1
                 //imgResult = downloadImage(imgUrl, out downloadImgFullName);
                 //if (downloadImgFullName != "")
                 //{
-                downloadImgFullName = MydocumentsPathIncldBackSlash + "Ctext_Page_Image.png";
+                downloadImgFullName = MydocumentsPathIncldBackSlash + "CtextTempFiles\\Ctext_Page_Image.png";
                 if (File.Exists(downloadImgFullName))
                 {
                     try
@@ -10795,7 +10815,7 @@ namespace WindowsFormsApp1
             {
                 downloadImgFullName = ""; return false;
             }
-            downloadImgFullName = MydocumentsPathIncldBackSlash + "Ctext_Page_Image.png";
+            downloadImgFullName = MydocumentsPathIncldBackSlash + "CtextTempFiles\\Ctext_Page_Image.png";
             ////若圖已存在則不復下載，因OCR成功後會刪除此圖故//避免隔太久又忘了刪除圖檔，還是改以下判斷
             if (File.Exists(downloadImgFullName)) return true;
             //////若圖檔已存在，且是2.5分鐘前存檔的，則不復下載，以免重複，又免誤按。20230404，改 google keep的快捷鍵以免誤按
@@ -10898,7 +10918,7 @@ namespace WindowsFormsApp1
                 // 你的程式碼
                 if (formActivated)
                 {
-                    form1.BringToFront(); form1.availableInUseBothKeysMouse();
+                    form1.BringToFront(); form1.AvailableInUseBothKeysMouse();
                 }
             }
 
@@ -10911,7 +10931,7 @@ namespace WindowsFormsApp1
                 , MessageBoxIcon.Exclamation, defaultButton, MessageBoxOptions.DefaultDesktopOnly);
             if (formActivated)
             {
-                form1.BringToFront(); form1.availableInUseBothKeysMouse();
+                form1.BringToFront(); form1.AvailableInUseBothKeysMouse();
             }
             return dr;
         }
