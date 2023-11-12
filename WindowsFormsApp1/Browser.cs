@@ -4,6 +4,7 @@ using Newtonsoft.Json.Linq;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.DevTools;
+using OpenQA.Selenium.DevTools.V108.Profiler;
 using OpenQA.Selenium.DevTools.V85.ApplicationCache;
 using OpenQA.Selenium.Remote;
 //using System.Net;
@@ -181,6 +182,7 @@ namespace TextForCtext
         /// <summary>
         /// 取得/設定最近一個有效的WindowHandle
         /// 以便取得視窗或頁籤關閉後所發生的錯誤，在此之前可用有效的視窗或分頁。
+        /// 若有錯誤，則傳回null值；若沒有則傳回空字串""（string.Empty)
         /// </summary>
         public static string LastValidWindow
         {
@@ -200,15 +202,32 @@ namespace TextForCtext
                             if (ex.Message.IndexOf("An unknown exception was encountered sending an HTTP request to the remote WebDriver server for URL") > -1)
                             {
                                 Form1.playSound(Form1.soundLike.error);
-                                _lastValidWindowHandle = driver.WindowHandles[driver.WindowHandles.Count - 1];
+                                try
+                                {
+                                    _lastValidWindowHandle = driver.WindowHandles[driver.WindowHandles.Count - 1];
+                                }
+                                catch (Exception)
+                                {
+                                    try
+                                    {
+                                        return driver.CurrentWindowHandle;
+
+                                    }
+                                    catch (Exception)
+                                    {
+                                        return null;
+                                    }
+                                }
                                 return _lastValidWindowHandle;
                             }
                             else
+                            {
                                 Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
-                            break;
+                                return null;
+                            }
                         default:
                             Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
-                            break;
+                            return null;
                     }
                 }
 
@@ -2177,6 +2196,8 @@ internal static string getImageUrl() {
                 new Tuple<string,DateTime>("britishvirginislandsivacy", DateTime.Parse("2023/9/29")) ,
                 new Tuple<string,DateTime>("bulgariasivacy", DateTime.Parse("2023/9/29")) ,
                 new Tuple<string,DateTime>("gjfrisk195", DateTime.Parse("2023/9/29")),
+                new Tuple<string,DateTime>("estoniafastexperienceivacy", DateTime.Parse("2023/9/29")) ,
+                new Tuple<string,DateTime>("albaniaivacy", DateTime.Parse("2023/9/29")) ,
                 new Tuple<string,DateTime>("vpnbygoogleone", DateTime.Parse("2023/9/29")) };
         /// <summary>
         /// 切換《古籍酷》帳戶時用
@@ -2625,7 +2646,7 @@ internal static string getImageUrl() {
                 }
                 if (IPExists1Day())
                 {
-                    if (ipChangedCounter < 10)
+                    if (ipChangedCounter < 10)//23)
                     {
                         ipChangedCounter++;
                         //Debugger.Break();
@@ -2635,16 +2656,20 @@ internal static string getImageUrl() {
                     else
                     {
                         //if (DialogResult.OK == Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("已嘗試10次了,是否繼續？"))
-                        if (DialogResult.OK == MessageBox.Show("已嘗試10次了,是否繼續？", "google one vpn", MessageBoxButtons.OKCancel,
+                        if (DialogResult.OK == MessageBox.Show("已嘗試10次了,是否繼續？\n\r\n\r已經用掉" + IPUsedList.Count + "個IP了", "google one vpn", MessageBoxButtons.OKCancel,
                             MessageBoxIcon.Question, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly))
                         {
-                            ipChangedCounter = 0; GoogleOneVPNSwitcher();
                             //Console.WriteLine(IPUsedList.this[].ToString());
+                            string ipList = string.Empty;
                             foreach (var item in IPUsedList)
                             {
+                                ipList += item.Item1 + "\t" + item.Item2 + Environment.NewLine;
                                 Console.WriteLine("IP: " + item.Item1 + ", Time: " + item.Item2);
                             }
-                            Debugger.Break();
+                            //Debugger.Break();
+                            MessageBox.Show("已經用掉" + IPUsedList.Count + "個IP:\n\r\n\r" + ipList, "google one vpn", MessageBoxButtons.OK,
+                                MessageBoxIcon.Question, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
+                            ipChangedCounter = 0; GoogleOneVPNSwitcher();
                         }
                     }
                 }
@@ -2751,7 +2776,8 @@ internal static string getImageUrl() {
             //currentIP = GetVpnIpAddress("VPN by Google One");//("VPN by Google One 25");
 
             //20231102 Bing大菩薩：查找 List 中的元素
-            bool returnValue = IPUsedList.Exists(item => item.Item1 == currentIP && (DateTime.Now - item.Item2).TotalDays <= 1);
+            //bool returnValue = IPUsedList.Exists(item => item.Item1 == currentIP && (DateTime.Now - item.Item2).TotalDays <= 1);
+            bool returnValue = IPUsedList.Exists(item => item.Item1 == currentIP && (DateTime.Now - item.Item2).TotalHours <= 6);
             if (!returnValue)
             {
                 //if(IPUsedList.Exists(item => item.Item1 == currentIP))
@@ -2805,6 +2831,7 @@ internal static string getImageUrl() {
                     ActiveForm1.PauseEvents();
                     string ipUrl = "https://api.ipify.org", selector = "body > pre";
                 retry:
+                    //Thread.Sleep(5000);
                     openNewTabWindow();//要打開比較快更新
                     driver.Navigate().GoToUrl(ipUrl);
                     DateTime dt = DateTime.Now;
@@ -2888,6 +2915,7 @@ internal static string getImageUrl() {
                     driver?.Close();
                     _OCR_GJcool_WindowClosed = true;
                     driver?.SwitchTo().Window(currentWindowHndl);
+                    StopOCR = true;
                     return fastXResulut;
                 }
                 else
@@ -2938,7 +2966,9 @@ internal static string getImageUrl() {
                             #endregion
                         }
                         else if (ex.Message.StartsWith("The HTTP request to the remote WebDriver server for URL"))
-                            return false;
+                        {
+                            StopOCR = true; return false;
+                        }
                         else
                             Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
                         break;
@@ -2952,6 +2982,7 @@ internal static string getImageUrl() {
                             driver.Close();
                             _OCR_GJcool_WindowClosed = true;
                             driver.SwitchTo().Window(currentWindowHndl);
+                            StopOCR = true;
                             return true;
                         }
                         else
@@ -2968,7 +2999,10 @@ internal static string getImageUrl() {
 
             }
 
-            if (gjCool == string.Empty) return false;
+            if (gjCool == string.Empty)
+            {
+                StopOCR = true; return false;
+            }
             try
             {
                 driver.Navigate().GoToUrl(gjCool);
@@ -2989,6 +3023,7 @@ internal static string getImageUrl() {
                             {
                                 //throw;
                             }
+                            StopOCR = true;
                             return false;
                         }
                         else
@@ -2997,6 +3032,7 @@ internal static string getImageUrl() {
                         string msgText = ex.HResult.ToString() + ex.Message;
                         Console.WriteLine(msgText);
                         Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(msgText);
+                        StopOCR = true;
                         return false;
                 }
             }
@@ -3017,6 +3053,7 @@ internal static string getImageUrl() {
                 }
                 catch (Exception)
                 {
+                    StopOCR = true;
                     return false;
                 }
                 //Form1.playSound(Form1.soundLike.processing);
@@ -3027,7 +3064,10 @@ internal static string getImageUrl() {
                 {
                     case -2147467261:
                         if (ex.Message.IndexOf("並未將物件參考設定為物件的執行個體。") > -1)
+                        {
+                            StopOCR = true;
                             return false;
+                        }
                         else
                         {
                             Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
@@ -3038,6 +3078,7 @@ internal static string getImageUrl() {
                         if (ex.Message.IndexOf("Timed out after") > -1)//"Timed out after 30.5 seconds"
                         {//"The HTTP request to the remote WebDriver server for URL http://localhost:5837/session/0e0cfa1c2cdcd0298a952b8267079906/element timed out after 30.5 seconds."
                             driver.SwitchTo().Window(LastValidWindow);
+                            StopOCR = true;
                             return false;
                         }
                         else
@@ -3055,15 +3096,17 @@ internal static string getImageUrl() {
                 }
                 //throw;
             }
+            int points = 0;
             if (iwe != null)
             {
-                Form1.playSound(Form1.soundLike.processing);
                 //取得點數，如「 117 / 1000」格式
-                string innerText = iwe.GetAttribute("innerText"); int points = 0;
+                string innerText = iwe.GetAttribute("innerText");
                 if (innerText.IndexOf(" /") > -1 && " ".Length + innerText.IndexOf(" /") - " ".Length <= innerText.Length)
                     int.TryParse(innerText.Substring(" ".Length, innerText.IndexOf(" /") - " ".Length), out points);
+                //當點數不足時：
                 if (points < pointCoin)
                 {
+                    Form1.playSound(Form1.soundLike.processing);
                     waitGJcoolPoint = true;
                     gjCoolPointLess150When = DateTime.Now;
                     ////登出帳戶： 以下這會跳出訊息方塊，得處理，故改為傳引數的方式
@@ -3095,6 +3138,7 @@ internal static string getImageUrl() {
                                 break;
                         }
                     }
+                    StopOCR = true;
                     return fastXResulut;
 
                 }
@@ -3102,16 +3146,12 @@ internal static string getImageUrl() {
                 {//點數足時：
                     //此帳戶下的最後一次
                     if (points - pointCoin < pointCoin)
-                        Task.Run(() =>
-                        {
-                            //using (SoundPlayer sp = new SoundPlayer("C:\\Windows\\Media\\Windows Unlock.wav")) { sp.Play(); }
-                            //using (SoundPlayer sp = new SoundPlayer("C:\\Windows\\Media\\Windows Proximity Connection.wav")) { sp.Play(); }
-                            using (SoundPlayer sp = new SoundPlayer("C:\\Windows\\Media\\Windows ringout.wav")) { sp.Play(); }
-                        });
-                    waitGJcoolPoint = false; points = 0; innerText = null;
+                        //Form1.playSound(Form1.soundLike.stop);
+                        using (SoundPlayer sp = new SoundPlayer("C:\\Windows\\Media\\chord.wav")) { sp.Play(); }
+                    waitGJcoolPoint = false; innerText = null;
                 }//釋放記憶體
             }
-            else return false;
+            else { StopOCR = true; return false; }
             #endregion
 
             #region 下載路徑取得
@@ -3121,7 +3161,7 @@ internal static string getImageUrl() {
             {
                 #region 再檢查瀏覽器下載目錄並取得 ：
                 string downloadDirectory = DownloadDirectory_Chrome;
-                if (!ChkDownloadDirectory_Chrome(downloadImgFullName, downloadDirectory)) return false;
+                if (!ChkDownloadDirectory_Chrome(downloadImgFullName, downloadDirectory)) { StopOCR = true; return false; }
                 #endregion
 
                 //取得所匯出的檔案路徑
@@ -3147,7 +3187,7 @@ internal static string getImageUrl() {
             {
                 iwe = waitFindWebElementBySelector_ToBeClickable("#line_img_form > div > input[type=file]");
                 timeSpan = (DateTime.Now.Subtract(begin));
-                if (timeSpan.TotalSeconds > timeSpanSecs) return false;
+                if (timeSpan.TotalSeconds > timeSpanSecs) { StopOCR = true; return false; }
             }
 
             //檢查使用者是否已關閉視窗，取消這次的操作（比如說才發現已經有OCR了、或弄錯頁了……等等，可逕接關閉《古籍酷》OCR視窗以終結之）
@@ -3157,6 +3197,7 @@ internal static string getImageUrl() {
             }
             catch (Exception)
             {
+                StopOCR = true;
                 return false;
             }
 
@@ -3184,6 +3225,10 @@ internal static string getImageUrl() {
             //if(iwe.Selected)
             //iwe.Submit();
             //iwe.Click();//不行，會出錯
+
+            //欲提早結束時：
+            if (Clipboard.GetText().IndexOf(Environment.NewLine + Environment.NewLine) > -1) goto finished;
+
 
             driver.SwitchTo().Window(driver.CurrentWindowHandle);//切換到目前Selenium操控的視窗，就不怕沒及時得到焦點而失誤了
                                                                  //try
@@ -3213,17 +3258,22 @@ internal static string getImageUrl() {
             //}
             #endregion
 
+
+
             #region 點擊新增圖片按鈕並輸入書圖全檔名
             //clickCopybutton_GjcoolFastExperience(new Point(137, 299), Form1.soundLike.press);//new Point(X, Y)=「選擇檔案」控制項之位置
-            clickCopybutton_GjcoolFastExperience(new Point(iwe.Location.X + 76 + (iwe.Size.Width) / 2, iwe.Location.Y + 120 + (iwe.Size.Height) / 2), Form1.soundLike.press);//new Point(X, Y)=「選擇檔案」控制項之位置
-                                                                                                                                                                             //76 系統工具列在左側時的寬度//120 Chrome瀏覽器頂遄到書籤列下端的長度
+            clickCopybutton_GjcoolFastExperience(new Point(iwe.Location.X + 76 + (iwe.Size.Width) / 2, iwe.Location.Y + 120 + (iwe.Size.Height) / 2),
+                points - pointCoin < pointCoin ? Form1.soundLike.none : Form1.soundLike.press);//new Point(X, Y)=「選擇檔案」控制項之位置
+            points = 0;//釋放記憶體
+            //76 系統工具列在左側時的寬度//120 Chrome瀏覽器頂遄到書籤列下端的長度
 
             //waitFindWebElementBySelector_ToBeClickable("#line_img_form > div > input[type=file]").SendKeys(OpenQA.Selenium.Keys.Space);
             //waitFindWebElementByName_ToBeClickable("line_img",2).Submit();
+            Clipboard.SetText(downloadImgFullName);
             //等待選取檔案對話框開啟
             Thread.Sleep(1200);
+            Thread.Sleep(100);
             //輸入：檔案名稱 //SendKeys.Send(downloadImgFullName);
-            Clipboard.SetText(downloadImgFullName);
             byte tryTimes = 1;
             //retry:
             SendKeys.Send("+{Insert}");//or "^v"
@@ -3263,12 +3313,15 @@ internal static string getImageUrl() {
             //}
             //tryTimes = 0;
             //if (iwe == null) return false;
-            while (iwe == null && waitFindWebElementBySelector_ToBeClickable("#auto_ocr") == null)
+
+            //while (iwe == null && waitFindWebElementBySelector_ToBeClickable("#auto_ocr") == null)
+            while (iwe == null)// && waitFindWebElementBySelector_ToBeClickable("#auto_ocr") == null)
             {
+                if (Clipboard.GetText().IndexOf(Environment.NewLine + Environment.NewLine) > -1) goto finished;
                 Thread.Sleep(150);
                 iwe = waitFindWebElementBySelector_ToBeClickable
                                 ("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled", 0.3);
-                if (DateTime.Now.Subtract(dtimr).Seconds > 50) return false;
+                if (DateTime.Now.Subtract(dtimr).Seconds > 50) { StopOCR = true; return false; }
             }
             if (iwe != null)
             {
@@ -3283,7 +3336,10 @@ internal static string getImageUrl() {
                     if (tryTimes > 50)
                     {
                         if (Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("已超時，是否繼續等候？") == DialogResult.Cancel)
+                        {
+                            StopOCR = true;
                             return false;
+                        }
                     }
 
                     tryTimes++;
@@ -3294,6 +3350,11 @@ internal static string getImageUrl() {
                 tryTimes = 0;
             }
             #endregion
+            else
+            {
+                StopOCR = true;
+                return false;
+            }
 
             #region 按下「Pro」
             iwe = waitFindWebElementBySelector_ToBeClickable("#auto_ocr");
@@ -3303,10 +3364,14 @@ internal static string getImageUrl() {
                 //tryTimes++;
                 //if (tryTimes > 5) return false;
                 //goto retry;
+                if (Clipboard.GetText().IndexOf(Environment.NewLine + Environment.NewLine) > -1) goto finished;
 
                 Thread.Sleep(250);
                 iwe = waitFindWebElementBySelector_ToBeClickable("#auto_ocr");
-                if (DateTime.Now.Subtract(dtimr).Seconds > 20) return false;
+                if (DateTime.Now.Subtract(dtimr).Seconds > 20)
+                {
+                    StopOCR = true; return false;
+                }
             }
             driver.SwitchTo().Window(driver.CurrentWindowHandle);//切換到目前Selenium操控的視窗，就不怕沒及時得到焦點而失誤了
             try
@@ -3345,9 +3410,14 @@ internal static string getImageUrl() {
             begin = DateTime.Now;
             while (iwe == null)
             {
+                if (Clipboard.GetText().IndexOf(Environment.NewLine + Environment.NewLine) > -1) goto finished;
+
                 iwe = waitFindWebElementBySelector_ToBeClickable("#line_list_table > tbody > tr:nth-child(1) > td:nth-child(2)");
                 //上限為30秒
-                if (DateTime.Now.Subtract(begin).TotalSeconds > timeSpanSecs) return false;
+                if (DateTime.Now.Subtract(begin).TotalSeconds > timeSpanSecs)
+                {
+                    StopOCR = true; return false;
+                }
             }
             //iwe.Click();
             //Thread.Sleep(6220);
@@ -3405,6 +3475,7 @@ internal static string getImageUrl() {
                                 goto retryReadFile;
                             default:
                                 Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.Message);
+                                StopOCR = true;
                                 return false;
                         }
 
@@ -3414,24 +3485,29 @@ internal static string getImageUrl() {
                     {
                         if (DialogResult.Cancel == Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly
                                 ("文本未下成功，請自行下載，好了之後再按「確定」繼續完成讀入到textBox1的工作；      或按「取消」結束此次操作。\n\r感恩感恩　南無阿彌陀佛"))
-                            return false;
+                        {
+                            StopOCR = true; return false;
+                        }
+                        Clipboard.SetText(text.Replace("\n", "\r\n"));
+                        //刪除下載檔案，以便下次載入
+                        Task.Run(() =>
+                        {
+                            //不必備份，似乎是《古籍酷》本身有bug，明明是一張圖，輸出的卻是不一樣的文本，或上次或之前哪次的文本 20230802
+                            //File.Copy(filePath, Path.Combine(//備一份以備萬一
+                            //    Path.GetDirectoryName(filePath) + Path.GetFileNameWithoutExtension(filePath) + "1" +
+                            //        Path.GetExtension(filePath)), true);
+
+
+                            File.Delete(filePath);
+                        });
                     }
-                    Clipboard.SetText(text.Replace("\n", "\r\n"));
-                    //刪除下載檔案，以便下次載入
-                    Task.Run(() =>
+                    else
                     {
-                        //不必備份，似乎是《古籍酷》本身有bug，明明是一張圖，輸出的卻是不一樣的文本，或上次或之前哪次的文本 20230802
-                        //File.Copy(filePath, Path.Combine(//備一份以備萬一
-                        //    Path.GetDirectoryName(filePath) + Path.GetFileNameWithoutExtension(filePath) + "1" +
-                        //        Path.GetExtension(filePath)), true);
-
-
-                        File.Delete(filePath);
-                    });
+                        StopOCR = true; return false;
+                    }
+                    #endregion
+                    #endregion
                 }
-                else return false;
-                #endregion
-                #endregion
             }
 
             #region 不下載時的處理：
@@ -3450,21 +3526,46 @@ internal static string getImageUrl() {
                         if (iwe.Text != string.Empty)
                             Clipboard.SetText(iwe.Text);
                         else
+                        {
+                            StopOCR = true;
                             return false;
+                        }
                     }
                     else
+                    {
+                        StopOCR = true;
                         return false;
+                    }
                 }
-                else return false;
+                else
+                {
+                    StopOCR = true; return false;
+                }
             }
 
 
-            #endregion
+        #endregion
 
+
+        finished:
             #region 關閉OCR視窗後回到原來分頁視窗
-            driver.Close(); _OCR_GJcool_WindowClosed = true;
-            driver.SwitchTo().Window(currentWindowHndl);
+            try
+            {
+                driver.Close();
+            }
+            catch (Exception)
+            {
+            }
+            _OCR_GJcool_WindowClosed = true;
+            try
+            {
+                driver.SwitchTo().Window(currentWindowHndl);
+            }
+            catch (Exception)
+            {
+            }
             #endregion
+            StopOCR = true;
             return true;
         }
 
@@ -3951,13 +4052,14 @@ internal static string getImageUrl() {
             if (iwe == null) return false;
             driver.SwitchTo().Window(driver.CurrentWindowHandle);//切換到目前Selenium操控的視窗，就不怕沒及時得到焦點而失誤了
             Form1.playSound(Form1.soundLike.processing);
+            Clipboard.SetText(downloadImgFullName);
             iwe.Click();
+
             //等待「開啟」檔案對話框開啟
-            //Thread.Sleep(1200);
-            Thread.Sleep(1300);
+            Thread.Sleep(1200);
+            Thread.Sleep(500);
             //輸入：檔案名稱 //SendKeys.Send(downloadImgFullName);
             //貼上圖檔全名
-            Clipboard.SetText(downloadImgFullName);
             //byte tryTimes = 1;
             SendKeys.Send("+{Insert}");//or "^v"
             SendKeys.Send("{ENTER}");
@@ -4112,7 +4214,7 @@ internal static string getImageUrl() {
                 {
                     //e = driver.FindElement(By.XPath("/html/body/div[1]/div/div/div[2]/div/div[1]/div[3]/div[2]/div[2]/button"));
                     e = driver.FindElement(By.XPath("//*[starts-with(@id, 'dialog_')]//div[contains(@class, 'col')]//div[contains(@class, 'd-flex py-1')]//button//i"));
-                    wait = new WebDriverWait(driver, TimeSpan.FromSeconds(0.05));
+                    wait = new WebDriverWait(driver, TimeSpan.FromSeconds(0.4));
                     wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(e));
                     //第 1 次好像會找不到，只好用手動了：
                     //Thread.Sleep(450);
@@ -4197,12 +4299,25 @@ internal static string getImageUrl() {
                                 //driver.Close();//return以後也還會再執行一次哦！注意
 
                                 Form1.playSound(Form1.soundLike.over);
-                                Task.Run(() =>
+                                Task ts = Task.Run(() =>
                                 {
                                     IPSwitchOnly();//此方法在切換TouchVPN時會再開啟一分頁以檢視IP轉換情形
                                 });
                             }
-                            return false;
+                            string targetProcessName = "VPN by Google One"; // 目標程序的名稱
+                            IntPtr targetWindowHandle = FindWindow(null, targetProcessName);
+                            if (targetWindowHandle != IntPtr.Zero)
+                            {
+                                StopOCR = true;
+                                return false;
+                            }
+                            else
+                            {
+                                //driver.Close();//呼叫端會關！
+                                Thread.Sleep(4500);//the seconds ref: internal static bool TouchVPN_IvacyVPN_ExtensionSwitcher()
+
+                                goto finish;
+                            }
                         }
                     }
                     catch (Exception)

@@ -209,14 +209,14 @@ namespace WindowsFormsApp1
                     if (e.Delta > 0)
                     {
                         // 滾輪向上，上一頁
-                        nextPages(Keys.PageUp, false);
-                        if (autoPastetoQuickEdit) AvailableInUseBothKeysMouse();
+                        nextPages(Keys.PageUp, true);
+                        if (autoPastetoQuickEdit || keyinTextMode) AvailableInUseBothKeysMouse();
                     }
                     else
                     {
                         // 滾輪向下，下一頁
-                        nextPages(Keys.PageDown, false);
-                        if (autoPastetoQuickEdit) AvailableInUseBothKeysMouse();
+                        nextPages(Keys.PageDown, true);
+                        if (autoPastetoQuickEdit || keyinTextMode) AvailableInUseBothKeysMouse();
                     }
                     break;
             }
@@ -2854,7 +2854,8 @@ namespace WindowsFormsApp1
             TopMost = false;//將焦點交給Chrome瀏覽器
             bool eventsEnable = _eventsEnabled;
             if (eventsEnable) PauseEvents();
-            br.driver.SwitchTo().Window(br.LastValidWindow);
+            string _lastValidWindow = br.LastValidWindow;
+            if (!string.IsNullOrEmpty(_lastValidWindow)) br.driver.SwitchTo().Window(_lastValidWindow);
             //ResumeEvents();//見return前
             textBox1.SelectionStart = textBox1.TextLength; textBox1.SelectionLength = 0;
             pageTextEndPosition = 0; pageEndText10 = string.Empty;
@@ -6411,7 +6412,7 @@ namespace WindowsFormsApp1
             int i = -1, len = 0;
             foreach (string lineParaText in xLineParas)
             {
-                //if (lineParaText.IndexOf("本或作沉水") > -1) //just for check 
+                //if (lineParaText.IndexOf("身與此正同黃讀為掘穴則非") > -1) //just for check 
                 //    Debugger.Break();
 
 
@@ -6505,7 +6506,14 @@ namespace WindowsFormsApp1
                                 lText = noteTextBlendStart - st;
                             }
                             text = clearOmitChar(text); note = clearOmitChar(note);
-                            len = new StringInfo(text).LengthInTextElements + (int)Math.Ceiling((decimal)new StringInfo(note).LengthInTextElements / 2);
+                            //len = new StringInfo(text).LengthInTextElements + (int)Math.Ceiling((decimal)(new StringInfo(note).LengthInTextElements
+                            //    / ((lineParaText.Length - note.Length == 4 && lineParaText.StartsWith("{{") && lineParaText.EndsWith("}}") &&
+                            //    new StringInfo(note).LengthInTextElements == normalLineParaLength) ? 1 : 2)));
+                            len = new StringInfo(text).LengthInTextElements +
+                                (int)Math.Ceiling((decimal)new StringInfo(note).LengthInTextElements
+                                / ((lineParaText.StartsWith("{{") && lineParaText.EndsWith("}}") &&
+                                new StringInfo(lineParaText.Substring(2, lineParaText.Length - "{{}}".Length)).LengthInTextElements == normalLineParaLength) ? 1 : 2));
+                            //單行小注而字數與正文大字同時，則不折半
                         }
                         else
                         {// noteTextBlendEnd < noteTextBlendStart  
@@ -6572,7 +6580,8 @@ namespace WindowsFormsApp1
                     gap = Math.Abs(len - normalLineParaLength);
                 }
 
-                const int gapRef = 3;//9;
+                //誤差容錯值
+                const int gapRef = 0;//3;//9;
 
                 //the normal rule
                 if (gap > gapRef && !(len < normalLineParaLength
@@ -6584,7 +6593,8 @@ namespace WindowsFormsApp1
                     if (i + 1 < xLineParas.Length)
                     {
                         if (gap > gapRef && len < normalLineParaLength
-                            && xLineParas[i + 1].IndexOf("}}") > -1)
+                            && xLineParas[i + 1].IndexOf("}}") > -1
+                            && countWordsLenPerLinePara(xLineParas[i + 1]) < normalLineParaLength)
                         {
                             alarm = false;
                         }
@@ -8167,6 +8177,8 @@ namespace WindowsFormsApp1
                 //word 已被關閉
                 //throw;
             }
+
+            //finish:
             this.BackColor = C;
             show_nICo(ModifierKeys);
             normalLineParaLength = 0;
@@ -9344,7 +9356,7 @@ namespace WindowsFormsApp1
         private void Form1_Activated(object sender, EventArgs e)
 
         {//此中斷點專為偵錯測試用 感恩感恩　南無阿彌陀佛 20230314
-           
+
             #region forDebugTest權作測試偵錯用20230310
             //br.OCR_GJcool_FastExperience(@"C:\Users\oscar\Dropbox\Ctext_Page_Image.png");
             //string x = Clipboard.GetText();

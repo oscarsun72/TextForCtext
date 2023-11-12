@@ -453,5 +453,6 @@ Ctrl+ 滑鼠左鍵：清除框中所有文字
 - [TextForCtext 輸入《中國哲學書電子化計劃》：善用賢超法師《古籍酷AI》OCR功能，半自動操作演示曁實境秀：讀錄陳澧《東塾讀書記》褚人穫《堅瓠集》王念孫《讀書雜志》王引之《經義述聞》等](https://www.youtube.com/live/hF-vsdS9kb4?si=Z1YkZT_kVqr_9Y0l)
 - [TextForCtext 輸入《中國哲學書電子化計劃》：善用賢超法師《古籍酷AI》OCR 讀錄褚人穫《堅瓠集》實境秀](https://www.youtube.com/live/DSY_jkrUyKc?si=ImWaAAbTcRGIupd2)
 - [TextForCtext 輸入《中國哲學書電子化計劃》：善用賢超法師《古籍酷AI》OCR + ProtonVPN 讀錄 錢大昕《廿二史考異》褚人穫《堅瓠集》實境秀](https://youtube.com/live/E1i6cdej_Lk?feature=share)
+- [TextForCtext 輸入《中國哲學書電子化計劃》：善用賢超法師《古籍酷AI》OCR + TouchVPN、VPN by Google One 讀錄褚人穫《堅瓠集》完竣及陳澧《東塾讀書記》 實境秀](https://youtube.com/live/IEEX9jbpMIw?feature=share)
 - []()
 

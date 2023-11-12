@@ -187,11 +187,14 @@ namespace TextForCtext
 
             //textBox1.Text = clpTxt;
             rst.Close(); cnt.Close();
-            clpTxt = clpTxt.Replace("《《", "《").Replace("》》", "》").Replace("〈〈", "〈").Replace("〉〉", "〉");
+            clpTxt = clpTxt.Replace("《《", "《").Replace("》》", "》").Replace("〈〈", "〈").Replace("〉〉", "〉")
+                .Replace("。。", "。").Replace("，，", "，").Replace("：：", "：").Replace("；；", "；")
+                .Replace("、、", "、");
             if (clpTxt != clpTxtOriginal)
                 System.Media.SystemSounds.Asterisk.Play();
             else
                 Form1.playSound(Form1.soundLike.warn);
+
             return ref clpTxt;
         }
 
