@@ -7531,6 +7531,8 @@ namespace WindowsFormsApp1
         {
             //Form1.playSound(Form1.soundLike.press);
 
+            TopMost = false;
+
             br.ActiveForm1 = this;
             #region 檢查是否必要 20230804Bard大菩薩：https://g.co/bard/share/9130d688e253            
             string quickedit_data_textboxTxt = br.Quickedit_data_textboxTxt;
@@ -9735,6 +9737,7 @@ namespace WindowsFormsApp1
         /// 取得與設定允許事件處理程序與否
         /// </summary>
         public bool EventsEnabled { get => _eventsEnabled; set => _eventsEnabled = value; }
+        public int PreviousEditwikiID { get => previousEditwikiID; set => previousEditwikiID = value; }
 
         internal void PauseEvents()
         {

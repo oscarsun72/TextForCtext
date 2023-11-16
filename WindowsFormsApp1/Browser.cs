@@ -1485,7 +1485,7 @@ namespace TextForCtext
         /// Selenium 瀏覽所指定的網址所在的網頁
         /// </summary>
         /// <param name="url">要瀏覽的網址</param>
-        /// <param name="frmKeyinTextModeTopWindow">是否將視窗調到最頂端</param>        
+        /// <param name="frmKeyinTextModeTopWindow">是否將視窗內容可見位置調到最頂端</param>        
         internal static void GoToUrlandActivate(string url, bool frmKeyinTextModeTopWindow = false)
         {
             if (string.IsNullOrEmpty(url) || url.Substring(0, 4) != "http") return;
@@ -1757,8 +1757,11 @@ namespace TextForCtext
             // 移動到指定的網頁
             try
             {
-                url = url ?? System.Windows.Forms.Application.OpenForms[0].Controls["textBox3"].Text;
-                if (IsSameBookPageWithDrive(url)) GoToUrlandActivate(url, true);
+                //url = url ?? System.Windows.Forms.Application.OpenForms[0].Controls["textBox3"].Text;
+                url = url ?? ActiveForm1.textBox3Text;
+
+                //if (IsSameBookPageWithDrive(url) || ActiveForm1.GetEditwikiID_fromUrl(url) != ActiveForm1.PreviousEditwikiID) GoToUrlandActivate(url, true);
+                if (!IsSameBookPageWithDrive(url)) GoToUrlandActivate(url, true);
             }
             catch (Exception ex)
             {
@@ -1831,7 +1834,8 @@ namespace TextForCtext
         internal static bool IsSameBookPageWithDrive(string url)
         {
             int bookidDrive = ActiveForm1.GetBookID_fromUrl(driver.Url), pageNumDrive = ActiveForm1.GetPageNumFromUrl(driver.Url), bookid = ActiveForm1.GetBookID_fromUrl(url), pageNum = ActiveForm1.GetPageNumFromUrl(url);
-            if (bookidDrive != bookid && pageNumDrive != pageNum)
+            //if (bookidDrive != bookid && pageNumDrive != pageNum)
+            if (bookidDrive == bookid && pageNumDrive == pageNum)
                 return true;
             else return false;
         }
@@ -3033,6 +3037,11 @@ internal static string getImageUrl() {
             #region 方便提早取消作業（藉由關閉OCR視窗）
             try
             {
+                if (driver == null)
+                {
+                    StopOCR = true;
+                    return false;
+                }
                 if (currentWindowHndl != driver.CurrentWindowHandle) { };
             }
             catch (Exception)
@@ -3316,9 +3325,12 @@ internal static string getImageUrl() {
             //waitFindWebElementByName_ToBeClickable("line_img",2).Submit();
             byte tryTimes = 1;
             Clipboard.SetText(downloadImgFullName);
+
             //等待選取檔案對話框開啟
-            Thread.Sleep(1200);
-            Thread.Sleep(500);
+            Thread.Sleep(800);//最小值（須在重開機後或系統最小負載時）（連「開啟」舊檔之視窗也看不見，即可完成）
+            //Thread.Sleep(1200);
+            //Thread.Sleep(500);
+
             //輸入：檔案名稱 //SendKeys.Send(downloadImgFullName);
             //retry:
             SendKeys.Send("+{Insert}");//or "^v"
@@ -4114,8 +4126,11 @@ internal static string getImageUrl() {
             iwe.Click();
 
             //等待「開啟」檔案對話框開啟
-            Thread.Sleep(1200);
-            Thread.Sleep(800);
+            Thread.Sleep(800);//最小值（須在重開機後或系統最小負載時）（連「開啟」舊檔之視窗也看不見，即可完成）
+            //Thread.Sleep(1200);
+            //Thread.Sleep(300);
+            //Thread.Sleep(800);//最大值（夠久了，當電腦順時會停頓一下）
+
             //輸入：檔案名稱 //SendKeys.Send(downloadImgFullName);
             //貼上圖檔全名
             //byte tryTimes = 1;
@@ -4371,11 +4386,12 @@ internal static string getImageUrl() {
                             }
                             else
                             {//如果沒開啟
-                                //driver.Close();//呼叫端會關！
+                             //driver.Close();//呼叫端會關！
                                 Thread.Sleep(4500);//the seconds ref: internal static bool TouchVPN_IvacyVPN_ExtensionSwitcher()
 
                                 goto finish;
                             }
+
                         }
                     }
                     catch (Exception)
