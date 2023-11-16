@@ -2197,7 +2197,11 @@ internal static string getImageUrl() {
                 new Tuple<string,DateTime>("bulgariasivacy", DateTime.Parse("2023/9/29")) ,
                 new Tuple<string,DateTime>("gjfrisk195", DateTime.Parse("2023/9/29")),
                 new Tuple<string,DateTime>("estoniafastexperienceivacy", DateTime.Parse("2023/9/29")) ,
+                new Tuple<string,DateTime>("latviafastexperienceivacy", DateTime.Parse("2023/9/29")) ,
+                new Tuple<string,DateTime>("belgiumfastexperienceivacy", DateTime.Parse("2023/9/29")) ,
                 new Tuple<string,DateTime>("albaniaivacy", DateTime.Parse("2023/9/29")) ,
+                new Tuple<string,DateTime>("czechiaivacy", DateTime.Parse("2023/9/29")) ,
+                new Tuple<string,DateTime>("denmarkivacy", DateTime.Parse("2023/9/29")) ,
                 new Tuple<string,DateTime>("vpnbygoogleone", DateTime.Parse("2023/9/29")) };
         /// <summary>
         /// 切換《古籍酷》帳戶時用
@@ -2905,6 +2909,20 @@ internal static string getImageUrl() {
                 //openNewTabWindow(WindowType.Window);
                 openNewTabWindow(windowType);
                 _OCR_GJcool_WindowClosed = false;
+
+                #region 方便提早取消作業（藉由關閉OCR視窗）
+                try
+                {
+                    if (currentWindowHndl != driver.CurrentWindowHandle) { };
+                }
+                catch (Exception)
+                {
+                    StopOCR = true;
+                    return false;
+                }
+                #endregion
+
+
                 if (ActiveForm1.TopMost) ActiveForm1.TopMost = false;
                 //點數（算力值、算力配额）不足逕用「快速體驗」執行
                 if (!OCR_GJcool_AccountChanged && waitGJcoolPoint || (!OCR_GJcool_AccountChanged && waitGJcoolPoint && DateTime.Now.Subtract(gjCoolPointLess150When) < gjCoolPointEnoughTimespan))
@@ -2922,6 +2940,19 @@ internal static string getImageUrl() {
                     gjCool = OCRSite_URL[OCRSiteTitle.GJcool]; //"https://gj.cool/try_ocr";
                 //Form1.playSound(Form1.soundLike.processing);
                 if (_OCR_GJcool_AccountChanged) { _OCR_GJcool_AccountChanged = !_OCR_GJcool_AccountChanged; gjCoolPointLess150When = DateTime.Now; }
+
+                #region 方便提早取消作業（藉由關閉OCR視窗）
+                try
+                {
+                    if (currentWindowHndl != driver.CurrentWindowHandle) { };
+                }
+                catch (Exception)
+                {
+                    StopOCR = true;
+                    return false;
+                }
+                #endregion
+
             }
             catch (Exception ex)
             {
@@ -2998,6 +3029,20 @@ internal static string getImageUrl() {
                 }
 
             }
+
+            #region 方便提早取消作業（藉由關閉OCR視窗）
+            try
+            {
+                if (currentWindowHndl != driver.CurrentWindowHandle) { };
+            }
+            catch (Exception)
+            {
+                StopOCR = true;
+                return false;
+            }
+            #endregion
+
+
 
             if (gjCool == string.Empty)
             {
@@ -3269,12 +3314,12 @@ internal static string getImageUrl() {
 
             //waitFindWebElementBySelector_ToBeClickable("#line_img_form > div > input[type=file]").SendKeys(OpenQA.Selenium.Keys.Space);
             //waitFindWebElementByName_ToBeClickable("line_img",2).Submit();
+            byte tryTimes = 1;
             Clipboard.SetText(downloadImgFullName);
             //等待選取檔案對話框開啟
             Thread.Sleep(1200);
-            Thread.Sleep(100);
+            Thread.Sleep(500);
             //輸入：檔案名稱 //SendKeys.Send(downloadImgFullName);
-            byte tryTimes = 1;
             //retry:
             SendKeys.Send("+{Insert}");//or "^v"
             SendKeys.Send("{ENTER}");
@@ -3327,19 +3372,32 @@ internal static string getImageUrl() {
             {
                 try
                 {
-                    driver.SwitchTo().Window(driver.CurrentWindowHandle);//切換到目前Selenium操控的視窗，就不怕沒及時得到焦點而失誤了
+                    if (tryTimes < 51)
+                        driver.SwitchTo().Window(driver.CurrentWindowHandle);//切換到目前Selenium操控的視窗，就不怕沒及時得到焦點而失誤了
                     iwe.Click();//點擊「上傳完畢」對話方塊的「OK」按鈕 
                 }
                 catch (Exception)
                 {
                     if (tryTimes == 0) Form1.playSound(Form1.soundLike.error);
-                    if (tryTimes > 50)
+                    if (tryTimes % 50 == 0)//> 50)
                     {
                         if (Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("已超時，是否繼續等候？") == DialogResult.Cancel)
                         {
                             StopOCR = true;
+                            _OCR_GJcool_WindowClosed = true;
+                            driver.Close();
+                            /* 20231114 Bing大菩薩： C# Selenium 警告訊息關閉                             
+                             */
+                            try
+                            {
+                                driver.SwitchTo().Alert().Accept();//.SendKeys(OpenQA.Selenium.Keys.Enter);
+                            }
+                            catch (Exception)
+                            {
+                            }
                             return false;
                         }
+
                     }
 
                     tryTimes++;
@@ -4057,7 +4115,7 @@ internal static string getImageUrl() {
 
             //等待「開啟」檔案對話框開啟
             Thread.Sleep(1200);
-            Thread.Sleep(500);
+            Thread.Sleep(800);
             //輸入：檔案名稱 //SendKeys.Send(downloadImgFullName);
             //貼上圖檔全名
             //byte tryTimes = 1;
@@ -4214,7 +4272,7 @@ internal static string getImageUrl() {
                 {
                     //e = driver.FindElement(By.XPath("/html/body/div[1]/div/div/div[2]/div/div[1]/div[3]/div[2]/div[2]/button"));
                     e = driver.FindElement(By.XPath("//*[starts-with(@id, 'dialog_')]//div[contains(@class, 'col')]//div[contains(@class, 'd-flex py-1')]//button//i"));
-                    wait = new WebDriverWait(driver, TimeSpan.FromSeconds(0.4));
+                    wait = new WebDriverWait(driver, TimeSpan.FromMilliseconds(200));
                     wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(e));
                     //第 1 次好像會找不到，只好用手動了：
                     //Thread.Sleep(450);
@@ -4307,12 +4365,12 @@ internal static string getImageUrl() {
                             string targetProcessName = "VPN by Google One"; // 目標程序的名稱
                             IntPtr targetWindowHandle = FindWindow(null, targetProcessName);
                             if (targetWindowHandle != IntPtr.Zero)
-                            {
+                            {//如果有開啟 VPN by Google One
                                 StopOCR = true;
                                 return false;
                             }
                             else
-                            {
+                            {//如果沒開啟
                                 //driver.Close();//呼叫端會關！
                                 Thread.Sleep(4500);//the seconds ref: internal static bool TouchVPN_IvacyVPN_ExtensionSwitcher()
 

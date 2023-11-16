@@ -522,10 +522,16 @@ namespace TextForCtext
             #endregion
 
             string[] replaceDChar = { "'", ",", ";", ":", "．", "?", "：：", "《《", "》》", "〈〈", "〉〉",
-                "。}}。}}", "。}}。<p>", "}}。<p>",".<p>","·<p>" ,"<p>。<p>","。。", "，，", "@" ,"}}<p>\r\n{{","\r\n。<p>"
+                "。}}。}}", "。}}。<p>", "}}。<p>",".<p>","·<p>" ,"<p>。<p>"
+                ,"。。", "，，", "@" 
+                //,"}}<p>\r\n{{"//像《札迻》就有此種格式，不能取代掉！ https://ctext.org/library.pl?if=en&file=36575&page=12&editwiki=800245#editor
+                ,"\r\n。<p>"
                 ,"！。<p>","？。<p>"};
             string[] replaceChar = { "、", "，", "；", "：", "·", "？", "：", "《", "》", "〈", "〉",
-                "。}}", "。}}<p>", "}}<p>","。<p>","。<p>","<p>", "。", "，", "●" ,"}}\r\n{{","\r\n"
+                "。}}", "。}}<p>", "}}<p>","。<p>","。<p>","<p>"
+                , "。", "，", "●" 
+                //,"}}\r\n{{"//像《札迻》就有此種格式，不能取代掉！ https://ctext.org/library.pl?if=en&file=36575&page=12&editwiki=800245#editor
+                ,"\r\n"
                 ,"！<p>","？<p>"};
             foreach (var item in replaceDChar)
             {
@@ -544,6 +550,20 @@ namespace TextForCtext
             }
             //置換中文文本中的英文句號（小數點）
             CnText.PeriodsReplace_ChinesePunctuationMarks(ref x);
+
+            //清除\r 20231114Bing大菩薩：C# 字串取代：
+            string pattern = "(?<!\\n)\\r(?!\\n)";
+            string replacement = "";
+            Regex rgx = new Regex(pattern);
+            x = rgx.Replace(x, replacement);
+            pattern = "(?<!\\r)\\n(?!\\r)";
+            rgx = new Regex(pattern);
+            x = rgx.Replace(x, replacement);
+            /* 20231115 Bing大菩薩：C# 字串取代：
+             * 您的程式碼中有一個小錯誤。當您使用 Regex rgx = new Regex(pattern); 創建了一個正則表達式物件 rgx 之後，您在後續的程式碼中改變了 pattern 變數的值，但並沒有更新 rgx 物件。因此，當您再次調用 rgx.Replace(x, replacement); 時，它仍然使用的是原來的模式，也就是 "(?<!\\n)\\r(?!\\n)"，而不是您新指定的 "(?<!\\r)\\n(?!\\r)"。
+             * 您需要在改變 pattern 變數的值之後，再次創建一個新的 Regex 物件。             
+             */
+
         }
 
         /// <summary>

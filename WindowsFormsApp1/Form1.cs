@@ -705,7 +705,19 @@ namespace WindowsFormsApp1
                         quickEditLinkUrl = br.GetQuickeditUrl();
                     }
                     if (quickEditLinkUrl.IndexOf("#editor") > -1)
+                    {
+                        //即使書ID、PageID一致，但若章節變了，對應的圖文對照網址也會改變：20231115
+                        int editwikiID = GetEditwikiID_fromUrl(quickEditLinkUrl);
+                        if (editwikiID > 0 && editwikiID != GetEditwikiID_fromUrl(textBox3.Text))
+                        {
+                            bool eventEnable = _eventsEnabled;
+                            ResumeEvents();
+                            playSound(soundLike.error);
+                            textBox3.Text = quickEditLinkUrl;
+                            _eventsEnabled = eventEnable;
+                        }
                         Clipboard.SetText(quickEditLinkUrl);
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -2627,9 +2639,10 @@ namespace WindowsFormsApp1
                                 {
                                     br.driver.SwitchTo().Window(br.driver.CurrentWindowHandle);
                                     SendKeys.Send("%r");
-                                    //Thread.Sleep(550);
-                                    br.driver.SwitchTo().Alert().SendKeys(OpenQA.Selenium.Keys.Space);
-                                    SendKeys.Send(" ");
+                                    Thread.Sleep(550);
+                                    //br.driver.SwitchTo().Alert().SendKeys(OpenQA.Selenium.Keys.Space);
+                                    br.driver.SwitchTo().Alert().Accept();
+                                    //SendKeys.Send(" ");
 
                                     playSound(soundLike.exam);
                                     //Activate();
@@ -5297,7 +5310,10 @@ namespace WindowsFormsApp1
             if (keyinTextMode)
             {
                 stopUndoRec = true; PauseEvents();
-                textBox1.Text = textBox1.Text.Replace("。<p>\r\n{{", "\r\n{{");
+                //textBox1.Text = textBox1.Text.Replace("。<p>\r\n{{", "\r\n{{");//此不宜逕行取代，參見《札迻》版式，故今以下式取代，半自動手動校勘 20231114 感恩感恩　讚歎讚歎　南無阿彌陀佛
+                if (textBox1.Text.IndexOf("}}。<p>\r\n{{") > -1)
+                    if (MessageBoxShowOKCancelExclamationDefaultDesktopOnly("是否要清除注文間的段落符號？") == DialogResult.OK)
+                        textBox1.Text = textBox1.Text.Replace("}}。<p>\r\n{{", "}}\r\n{{");
                 stopUndoRec = false; ResumeEvents();
                 textBox1.Select(textBox1.TextLength, 0);
             }
@@ -5919,9 +5935,9 @@ namespace WindowsFormsApp1
                     }// 目前 chk[chk.Length-1]=3
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                MessageBox.Show("  checkAbnormalLinePara函式有誤，請留意！！");
+                MessageBoxShowOKExclamationDefaultDesktopOnly("  checkAbnormalLinePara函式有誤，請留意！！\n\r" + ex.HResult + ex.Message);
                 AvailableInUseBothKeysMouse();
                 BringToFront();
             }
@@ -6116,6 +6132,12 @@ namespace WindowsFormsApp1
         /// 或如 https://ctext.org/wiki.pl?if=en&res=728745 網址中的 res=後面的數值       
         /// </summary>
         int previousResID = 0;
+        /// <summary>
+        /// 前一個章節(wiki chapter）書籍 chapter ID（即URN: ctp:ws829144中的數值）以供與現在要處理的作比較，看是不是同一本書的同個章節（可決定版面特徵是否當予更改）
+        /// 或如 https://ctext.org/wiki.pl?if=en&chapter=829144 網址中的 chapter=後面的數值，
+        /// 或 https://ctext.org/library.pl?if=en&file=36583&page=27&editwiki=829144#editor 網址中的 editwiki= 後面的數值
+        /// </summary>
+        int previousEditwikiID = 0;
         /// <summary>
         /// 記下之前頁數頁碼
         /// </summary>
@@ -6412,7 +6434,7 @@ namespace WindowsFormsApp1
             int i = -1, len = 0;
             foreach (string lineParaText in xLineParas)
             {
-                //if (lineParaText.IndexOf("身與此正同黃讀為掘穴則非") > -1) //just for check 
+                //if (lineParaText.IndexOf("竝當與") > -1) //just for check 
                 //    Debugger.Break();
 
 
@@ -6449,7 +6471,17 @@ namespace WindowsFormsApp1
                     }
                     if (noteTextBlendStart != -1 && noteTextBlendEnd != -1)
                     {// {{ and }} both
-                        if (noteTextBlendStart < noteTextBlendEnd)
+                        if (noteTextBlendStart == 0 && noteTextBlendEnd + "}}".Length == lineParaText.Length)
+                        {
+                            note += lineParaText.Substring
+                                (noteTextBlendStart + 2,
+                                noteTextBlendEnd == -1 ?
+                                lineParaText.Length - (noteTextBlendStart + 2)
+                                : noteTextBlendEnd - (noteTextBlendStart + 2));
+                            note += new String('　', countWordsLenPerLinePara(note));//單行注文則補上空格以方便計算字數
+                            len = countWordsLenPerLinePara(note) / 2;
+                        }
+                        else if (noteTextBlendStart < noteTextBlendEnd)
                         {
                             int st = 0, lText = noteTextBlendStart;
                             while (noteTextBlendStart != -1)
@@ -6461,6 +6493,9 @@ namespace WindowsFormsApp1
                                     noteTextBlendEnd == -1 ?
                                     lineParaText.Length - (noteTextBlendStart + 2)
                                     : noteTextBlendEnd - (noteTextBlendStart + 2));
+                                if (countWordsLenPerLinePara(note) % 2 == 1)
+                                    note += "　";//如果一行中有兩處注文以上，可能剛好都缺1字（即均為單數長，又剛好有2的倍數量），造成字數統計上的失誤，如此例：　斗字作斤{{詳前《急就篇》}}與什形近{{《説文·敘》云：人持十為斗。}}此什卽斗字趙
+                                                //故補上空白以供計算
                                 noteTextBlendStart = lineParaText.IndexOf
                                     ("{", noteTextBlendStart + 2);
                                 if (noteTextBlendStart == -1)
@@ -6575,9 +6610,14 @@ namespace WindowsFormsApp1
                 }
                 else//only text or note
                 {
-                    len = new StringInfo(clearOmitChar(lineParaText)).
-                        LengthInTextElements;
-                    gap = Math.Abs(len - normalLineParaLength);
+                    len = countWordsLenPerLinePara(lineParaText.EndsWith("<p>") ? lineParaText.Substring(0, lineParaText.Length - "<p>".Length) : lineParaText);
+                    //len = new StringInfo(clearOmitChar(lineParaText)).LengthInTextElements;
+                    if ((xChk.IndexOf(lineParaText) + lineParaText.Length + lineParaText.Length <= xChk.Length
+                        && xChk.Substring(xChk.IndexOf(lineParaText) + lineParaText.Length, "<p>".Length) == "<p>") ||
+                        lineParaText.EndsWith("<p>"))
+                        gap = 0;
+                    else
+                        gap = Math.Abs(len - normalLineParaLength);
                 }
 
                 //誤差容錯值
@@ -6595,6 +6635,8 @@ namespace WindowsFormsApp1
                         if (gap > gapRef && len < normalLineParaLength
                             && xLineParas[i + 1].IndexOf("}}") > -1
                             && countWordsLenPerLinePara(xLineParas[i + 1]) < normalLineParaLength)
+                        //&& xChk.IndexOf(lineParaText) + lineParaText.Length - 1 > 0
+                        //&& xChk.Substring(xChk.IndexOf(lineParaText) + lineParaText.Length , "<p>".Length) == "<p>")
                         {
                             alarm = false;
                         }
@@ -7537,7 +7579,7 @@ namespace WindowsFormsApp1
             if (imgUrl.Length > 4
             && imgUrl.Substring(0, 4) == "http"
             && imgUrl.Substring(imgUrl.Length - 4, 4) == ".png")
-                ocrResult = downloadImage(imgUrl, out downloadImgFullName);
+                ocrResult = DownloadImage(imgUrl, out downloadImgFullName);
             else
             {
                 imgUrl = br.GetImageUrl();
@@ -7546,7 +7588,7 @@ namespace WindowsFormsApp1
                     //br.WindowsScrolltoTop();
                     return false;
                 }
-                ocrResult = downloadImage(imgUrl, out downloadImgFullName);
+                ocrResult = DownloadImage(imgUrl, out downloadImgFullName);
                 if (downloadImgFullName == "")
                 {
                     //br.WindowsScrolltoTop();
@@ -10474,10 +10516,15 @@ namespace WindowsFormsApp1
 
             #region 重設判斷不正常行長度的變數。
             int bookID = GetBookID_fromUrl(textBox3Text);//連續的冊數間的bookID其實是不連續的
-            int resID;
-            if (string.IsNullOrEmpty(url)) resID = 0;
+            int resID, editwikiID;
+            if (string.IsNullOrEmpty(url))
+            {
+                resID = 0;
+                editwikiID = 0;
+            }
             else
             {
+                editwikiID = GetEditwikiID_fromUrl(url);
                 OpenQA.Selenium.IWebElement ie = br.Full_text_search_textbox_searchressingle;
                 try
                 {
@@ -10497,8 +10544,20 @@ namespace WindowsFormsApp1
                 //if (url != string.Empty) Debugger.Break(); //just for test 
                 resetBooksPagesFeatures();
                 previousResID = resID;
+                if (editwikiID > 0 && editwikiID != previousEditwikiID) previousEditwikiID = editwikiID;
                 playSound(soundLike.warn);
             }
+            //else
+            //{
+            //    if (editwikiID > 0 && editwikiID != previousEditwikiID)
+            //    {
+            //        resetBooksPagesFeatures();
+            //        previousResID = resID;
+            //        previousEditwikiID = editwikiID;
+            //        playSound(soundLike.warn);
+            //    }
+            //}
+
             #endregion
 
 
@@ -10507,8 +10566,12 @@ namespace WindowsFormsApp1
             string downloadImgFullName = string.Empty, imgUrl = br.GetImageUrl(); //bool imgResult = false;
             //if (imgUrl != "")
             if (_previousPageNum != _currentPageNum ||
-                (_previousPageNum == _currentPageNum && previousBookID != GetBookID_fromUrl(textBox3Text)))
-            {//只要是換頁了就檢查
+                (_previousPageNum == _currentPageNum && previousBookID != GetBookID_fromUrl(textBox3Text))
+                || (_previousPageNum == _currentPageNum && previousBookID == GetBookID_fromUrl(textBox3Text)//頁碼一樣但章節不一樣時
+                    && editwikiID != previousEditwikiID))
+            {
+                previousEditwikiID = editwikiID;//更新previousEditwikiID值
+                //只要是換頁了就檢查
                 //imgResult = downloadImage(imgUrl, out downloadImgFullName);
                 //if (downloadImgFullName != "")
                 //{
@@ -10517,7 +10580,17 @@ namespace WindowsFormsApp1
                 {
                     try
                     {
+                        //Color cl = ForeColor;//表單若不出，如此設定沒意義。
+                        //ForeColor = Color.AliceBlue;
                         File.Delete(downloadImgFullName);
+                        //Thread.Sleep(350);
+                        //ForeColor = cl;
+                        //Task.Run(() =>
+                        //{
+                        //    using (SoundPlayer sp= new SoundPlayer("C:\\Windows\\Media\\recycle.wav")) { sp.Play(); }
+
+                        //    //playSound(soundLike.error);
+                        //});
                     }
                     catch (Exception ex1)
                     {
@@ -10561,7 +10634,7 @@ namespace WindowsFormsApp1
         /// <summary>
         /// 由指定的url中擷取出 book ID
         /// </summary>
-        /// <returns>傳回ID值</returns>
+        /// <returns>傳回ID值，找不到就傳回0</returns>
         internal int GetBookID_fromUrl(string url)
         {
             const string f = "file=";
@@ -10569,6 +10642,19 @@ namespace WindowsFormsApp1
             //if(url==string.Empty) url = textBox3Text; 
             int s = url.IndexOf(f);
             return int.Parse(url.Substring(s + f.Length, url.IndexOf("&", s + 1) - s - f.Length));
+        }
+        /// <summary>
+        /// 由指定的url中擷取出 editwiki ID 的數值
+        /// 如： https://ctext.org/library.pl?if=en&file=36583&page=27&editwiki=829144#editor 中的 829144
+        /// </summary>
+        /// <returns>傳回ID值，找不到就傳回0</returns>
+        internal int GetEditwikiID_fromUrl(string url)
+        {
+            const string f = "editwiki=";
+            if (url == "" || url.IndexOf(f) == -1 || url.IndexOf("&") == -1 || url.IndexOf("#") == -1) return 0;
+            //if(url==string.Empty) url = textBox3Text; 
+            int s = url.IndexOf(f);
+            return int.Parse(url.Substring(s + f.Length, url.IndexOf("#", s + 1) - s - f.Length));
         }
         /// <summary>
         /// 由指定的url中擷取出 頁數
@@ -10821,7 +10907,7 @@ namespace WindowsFormsApp1
         /// <param name="downloadImgFullName">下載路徑全檔名</param>
         /// <param name="selectedInExplorer">是否在載後於檔案總管開啟、並將所下載之檔案選取</param>
         /// <returns>若下載成功則傳回true</returns>
-        internal bool downloadImage(string imageUrl, out string downloadImgFullName, bool selectedInExplorer = false)
+        internal bool DownloadImage(string imageUrl, out string downloadImgFullName, bool selectedInExplorer = false)
         {
             if (imageUrl == "")
             {
