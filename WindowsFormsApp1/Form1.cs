@@ -92,6 +92,10 @@ namespace WindowsFormsApp1
         /// OCR輸入模式時為true
         /// </summary>
         bool ocrTextMode = false;
+        /// <summary>
+        /// 指定是否要在OCR讀入後自動標識標題語法標記
+        /// </summary>
+        bool autoTitleMark_OCRTextMode = false;
 
         /// <summary>
         /// 原文有抬頭平抬格式
@@ -7019,11 +7023,14 @@ namespace WindowsFormsApp1
                     if (ocrTextMode)
                     {
                         new SoundPlayer(@"C:\Windows\Media\Speech Off.wav").Play();
+                        autoTitleMark_OCRTextMode = false;
                         ocrTextMode = false; return;
                     }
                     new SoundPlayer(@"C:\Windows\Media\Speech On.wav").Play();
                     //設定成手動OCR輸入模式，自動及全部覆蓋之貼上則設成false
                     ocrTextMode = true; keyinTextMode = true; pasteAllOverWrite = false; autoPastetoQuickEdit = false;
+                    if (MessageBoxShowOKCancelExclamationDefaultDesktopOnly("是否要自動標識標題，在OCR識讀匯入後") == DialogResult.OK) autoTitleMark_OCRTextMode = true;
+                    else autoTitleMark_OCRTextMode = false;
                     button1.Text = "分行分段";
                     button1.ForeColor = new System.Drawing.Color();//預設色彩 預設顏色 https://stackoverflow.com/questions/10441000/how-to-programmatically-set-the-forecolor-of-a-label-to-its-default
                     return;
@@ -7503,6 +7510,18 @@ namespace WindowsFormsApp1
                     //}
                 }
 
+                if (e.KeyCode == Keys.Clear)
+                {//與 textBox1 按下 「Alt + Pause」同
+                 //當表單在Num Lock關閉時按下數字鍵盤的「5」 ：在表單按下數字鍵盤的「5」 ： 自動判斷標題行，加上篇名格式代碼並前置N個全形空格.N，預設為2.且可在執行此項時，選取空格數以重設篇名前要空的格數
+                 //> 此法可與 Alt + t detectTitleYetWithoutPreSpace() 參互應用
+                    e.Handled = true;
+                    undoRecord(); stopUndoRec = true; PauseEvents();
+                    autoKeysTitleCodeAndPreWideSpace();
+                    ResumeEvents(); stopUndoRec = false;
+
+                    return;
+
+                }
 
 
             }//以上 按下單一鍵
@@ -7773,6 +7792,14 @@ namespace WindowsFormsApp1
 
             textBox1.Focus();
             //br.WindowsScrolltoTop();
+            if (autoTitleMark_OCRTextMode)
+            {
+                undoRecord(); stopUndoRec = true;
+                bool ee = _eventsEnabled;
+                PauseEvents();
+                autoKeysTitleCodeAndPreWideSpace();
+                _eventsEnabled = ee; stopUndoRec = false;
+            }
             return true;
             #endregion
 

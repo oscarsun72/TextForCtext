@@ -3346,8 +3346,8 @@ internal static string getImageUrl() {
             //待圖載入完畢：
             //Thread.Sleep(3220);
             //Thread.Sleep(1220);
-            //Thread.Sleep(920);
-            Thread.Sleep(1920);
+            Thread.Sleep(920);
+            //Thread.Sleep(1920);
         #endregion
 
         redo:
@@ -4367,8 +4367,10 @@ internal static string getImageUrl() {
                             StopOCR = true;
                             //Debugger.Break();
                             ActiveForm1.TopMost = false;
+                            string targetProcessName = "VPN by Google One"; // 目標程序的名稱
+                            IntPtr targetWindowHandle = FindWindow(null, targetProcessName);
                             if (DialogResult.OK == Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("是否讓程式自動更換IP？"))
-                            {
+                            {//要自動切換IP時：
                                 //driver.Close();//return以後也還會再執行一次哦！注意
 
                                 Form1.playSound(Form1.soundLike.over);
@@ -4377,18 +4379,24 @@ internal static string getImageUrl() {
                                     IPSwitchOnly();//此方法在切換TouchVPN時會再開啟一分頁以檢視IP轉換情形
                                 });
                             }
-                            string targetProcessName = "VPN by Google One"; // 目標程序的名稱
-                            IntPtr targetWindowHandle = FindWindow(null, targetProcessName);
+                            else
+                            {
+                                if (targetWindowHandle != IntPtr.Zero)
+                                {//如果有開啟 VPN by Google One                                
+                                    //StopOCR = true;//前已有
+                                    return TouchVPN_IvacyVPN_ExtensionSwitcher();
+                                }
+                            }
+                            //不管要不要自動切換IP都執行
                             if (targetWindowHandle != IntPtr.Zero)
-                            {//如果有開啟 VPN by Google One
-                                StopOCR = true;
+                            {//如果有開啟 VPN by Google One                                
+                                //StopOCR = true;//前已有
                                 return false;
                             }
                             else
                             {//如果沒開啟
                              //driver.Close();//呼叫端會關！
                                 Thread.Sleep(4500);//the seconds ref: internal static bool TouchVPN_IvacyVPN_ExtensionSwitcher()
-
                                 goto finish;
                             }
 
