@@ -436,7 +436,8 @@ namespace WindowsFormsApp1
                 string xClp = Clipboard.GetText();
                 if (modifierKeys != Keys.Control && xClp.StartsWith("http") &&//xClp != "" &&
                     xClp.Length > "https://ctext.org/".Length + "#editor".Length
-                    && xClp.Substring(0, "https://ctext.org/".Length) == "https://ctext.org/")
+                    && xClp.Substring(0, "https://ctext.org/".Length) == "https://ctext.org/"
+                    && !ocrTextMode)
                 {
                     string url = xClp;
                     textBox3_Click(new object(), new MouseEventArgs(MouseButtons.Left, 0, 0, 0, 0));//textBox3_MouseMove(new object(), new MouseEventArgs(MouseButtons.Left, 0, 0, 0, 0));
@@ -492,7 +493,8 @@ namespace WindowsFormsApp1
                     //Clipboard.Clear();
                 }
                 //若此時按下 Shift 則不會取得文本而是逕行送去《古籍酷》OCR取回文本至textBox1以備用
-                else if (modifierKeys == Keys.Shift && !PagePaste2GjcoolOCR_ing && browsrOPMode != BrowserOPMode.appActivateByName)
+                else if ((modifierKeys == Keys.Shift || (ocrTextMode && modifierKeys != Keys.Control))
+                    && !PagePaste2GjcoolOCR_ing && browsrOPMode != BrowserOPMode.appActivateByName)
                 {
                     br.GoToCurrentUserActivateTab();
                     string brUrl = br.GetDriverUrl;//.driver.Url;
@@ -1088,7 +1090,16 @@ namespace WindowsFormsApp1
             if (x == "") return false;
             textBox1.Select(0, s + l); string xHandle = textBox1.SelectedText;
 
-            saveText();//備份以防萬一
+        retry:
+            try
+            {
+                saveText();//備份以防萬一
+            }
+            catch (Exception)
+            {
+                Thread.Sleep(500);
+                goto retry;
+            }
             //if (textBox1.SelectedText != "")
             //{
             if (textBox2.Text != "＠" && textBox2.Text != "") textBox2.Text = "";
@@ -2235,6 +2246,19 @@ namespace WindowsFormsApp1
                 if (e.KeyCode == Keys.F8)//20230929實歲五十一之生日
                 {
                     e.Handled = true;
+                    string x = textBox1.Text; int s = textBox1.SelectionStart, p = x.IndexOf(Environment.NewLine, s) == -1 ? x.Length : x.IndexOf(Environment.NewLine, s),
+                        preP = x.LastIndexOf(Environment.NewLine, s) == -1 ? 0 : x.LastIndexOf(Environment.NewLine, s);
+                    if (preP < p)
+                    {
+                        p = x.IndexOf("。<p>", preP, p - preP);
+                        if (p > -1)
+                        {//清除「。<p>」中的句號 20231119
+                            undoRecord(); PauseEvents();
+                            textBox1.Text = x.Substring(0, p) + x.Substring(p + "。".Length);
+                            textBox1.Select(s, 0); textBox1.ScrollToCaret();
+                            ResumeEvents();
+                        }
+                    }
                     keysTitleCodeAndPreWideSpace();
                     return;
                 }//以上 Shift + F8
@@ -2973,7 +2997,8 @@ namespace WindowsFormsApp1
         /// </summary>
         private void autoKeysTitleCodeAndPreWideSpace()
         {
-            int wordCountLimit = 17;//目前為少於17字
+            int wordCountLimit = 12;//少於12字才視標題
+            //int wordCountLimit = 17;//少於17字才視標題
             if (wordCountLimit + 2 >= wordsPerLinePara) wordCountLimit = wordsPerLinePara - 2;//一般題目都是空二格故
             string x = textBox1.Text;
             int sOriginal = textBox1.SelectionStart, lOriginal = textBox1.SelectionLength, lenOriginal = x.Length;
@@ -7023,12 +7048,13 @@ namespace WindowsFormsApp1
                     if (ocrTextMode)
                     {
                         new SoundPlayer(@"C:\Windows\Media\Speech Off.wav").Play();
-                        autoTitleMark_OCRTextMode = false;
+                        autoTitleMark_OCRTextMode = false; PagePaste2GjcoolOCR_ing = false;
                         ocrTextMode = false; return;
                     }
                     new SoundPlayer(@"C:\Windows\Media\Speech On.wav").Play();
                     //設定成手動OCR輸入模式，自動及全部覆蓋之貼上則設成false
                     ocrTextMode = true; keyinTextMode = true; pasteAllOverWrite = false; autoPastetoQuickEdit = false;
+                    PagePaste2GjcoolOCR_ing = false;
                     if (MessageBoxShowOKCancelExclamationDefaultDesktopOnly("是否要自動標識標題，在OCR識讀匯入後") == DialogResult.OK) autoTitleMark_OCRTextMode = true;
                     else autoTitleMark_OCRTextMode = false;
                     button1.Text = "分行分段";
@@ -8930,6 +8956,8 @@ namespace WindowsFormsApp1
                     textBox1.SelectionLength = 0;
             }
 
+            undoRecord();
+
             stopUndoRec = false;
         }
 
@@ -9765,6 +9793,7 @@ namespace WindowsFormsApp1
         /// </summary>
         public bool EventsEnabled { get => _eventsEnabled; set => _eventsEnabled = value; }
         public int PreviousEditwikiID { get => previousEditwikiID; set => previousEditwikiID = value; }
+        public bool OcrTextMode { get => ocrTextMode; set => ocrTextMode = value; }
 
         internal void PauseEvents()
         {
@@ -10176,7 +10205,7 @@ namespace WindowsFormsApp1
              * 在这里，我们使用 Regex.Replace 方法将匹配正则表达式模式 [《〈] 的所有字符替换为空字符串。此模式匹配任何包含 "《" 或 "〈" 的字符。
              * */
             if (e.KeyChar == " ".ToCharArray()[0]) return;//半形空格可被輸入、被取代，而不能取代別人
-            string regexPattern = "[《〈」】〗]", omitSymbols = "●＝{}□■<>*〇○⿰⿱」』" + Environment.NewLine;//輸入缺字構字式●＝＝、及注文標記符{{}}、及標題星號*時不取代
+            string regexPattern = "[《〈」】〗]", omitSymbols = "●＝{}□■<>*〇○⿰⿱」』|" + Environment.NewLine;//輸入缺字構字式●＝＝、及注文標記符{{}}、及標題星號*時不取代
             checkkeyPressOverTyping_oscarsun72note_Inserting_switch2insertMode(e.KeyChar, regexPattern + omitSymbols);
             string w;//, punctuationsNumWithout前書名號與前篇名號 = Regex.Replace(Form1.punctuationsNum, regexPattern, ""); 
             if (!insertMode

@@ -47,6 +47,11 @@ namespace TextForCtext
         /// </summary>
         private static Form1 frm;
 
+        /// <summary>
+        /// 指定延長等待開啟舊檔對話方塊出現的時間（毫秒數）
+        /// 在 textBox2 中輸入「ws」（wait second）以設定此值
+        /// </summary>
+        internal static int Extend_the_wait_time_for_the_Open_Old_File_dialog_box_to_appear_Millisecond = 0;
 
 
         //readonly Form1 Form1 = Application.OpenForms.Count > 0 ? Application.OpenForms[0] as Form1 : null;
@@ -2206,6 +2211,9 @@ internal static string getImageUrl() {
                 new Tuple<string,DateTime>("albaniaivacy", DateTime.Parse("2023/9/29")) ,
                 new Tuple<string,DateTime>("czechiaivacy", DateTime.Parse("2023/9/29")) ,
                 new Tuple<string,DateTime>("denmarkivacy", DateTime.Parse("2023/9/29")) ,
+                new Tuple<string,DateTime>("ivacyrussia", DateTime.Parse("2023/9/29")) ,
+                new Tuple<string,DateTime>("freevpnforchrome", DateTime.Parse("2023/9/29")) ,
+                new Tuple<string,DateTime>("vpnproxyveepn", DateTime.Parse("2023/9/29")) ,
                 new Tuple<string,DateTime>("vpnbygoogleone", DateTime.Parse("2023/9/29")) };
         /// <summary>
         /// 切換《古籍酷》帳戶時用
@@ -2222,7 +2230,7 @@ internal static string getImageUrl() {
 
             //ActiveForm1.TopMost = false;//改寫在呼叫端，以免多執行緒時出錯
 
-            if (!justSwitchAccount) if (!GoogleOneVPNSwitcher()) if (!ProtonVPNSwitcher()) if (!IvacyVPNSwitcher()) TouchVPN_IvacyVPN_ExtensionSwitcher();
+            if (!justSwitchAccount) if (!GoogleOneVPNSwitcher()) if (!ProtonVPNSwitcher()) if (!IvacyVPNSwitcher()) TouchVPN_IvacyVPN_VeePN_ExtensionSwitcher();
             if (justIPSwitch) { } //{ if (!ActiveForm1.Active) { ActiveForm1.BringToFront(); } }//改寫在呼叫端，以免多執行緒時出錯
             else
             {
@@ -2352,6 +2360,8 @@ internal static string getImageUrl() {
                                          //if (ProtonVPNOn)
                                          //{
 
+                ActiveForm1.OcrTextMode = true;
+
                 //我想在0~20個數字中隨機取1個 chatGPT大菩薩、Bing大菩薩 20230929
 
                 Random rand = new Random(); int gjcoolaccountsCount = GJcoolAccounts.Count; int i = 0;
@@ -2446,7 +2456,7 @@ internal static string getImageUrl() {
         /// 切換IvacyVPN擴充功能。
         /// </summary>
         /// <returns>成功則傳回true</returns>
-        internal static bool TouchVPN_IvacyVPN_ExtensionSwitcher()
+        internal static bool TouchVPN_IvacyVPN_VeePN_ExtensionSwitcher()
         {
             //一個擴充功能按鈕長寬大約 35-39 點（35×35）
             Point copyBtnPos = new Point(1700, 55);//擴充功能顯示清單中最右邊的位置 118.0.5993.89版以後
@@ -2458,7 +2468,8 @@ internal static string getImageUrl() {
             Thread.Sleep(450);
             //copyBtnPos = new Point(1597, 295);//連接（Connect）按鈕位置
             //copyBtnPos = new Point(1595, 333);//連接（Connect）按鈕位置（此與TouchVPN的有交集）
-            copyBtnPos = new Point(1525, 333);//連接（Connect）按鈕位置（此與TouchVPN的有交集） 118.0.5993.89版以後
+            //copyBtnPos = new Point(1525, 333);//連接（Connect）按鈕位置（此與TouchVPN的有交集） 118.0.5993.89版以後
+            copyBtnPos = new Point(1525, 320);//連接（Connect）按鈕位置（此與TouchVPN、VeePN的有交集） 118.0.5993.89版以後
             Cursor.Position = copyBtnPos;
             clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.soundLike.over);
             Thread.Sleep(250);
@@ -2468,7 +2479,8 @@ internal static string getImageUrl() {
             clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.soundLike.over);
             Thread.Sleep(2400);//TouchVPN比較久
             //copyBtnPos = new Point(1595, 333);
-            copyBtnPos = new Point(1525, 333);// TouchVPN 連接（Connect）按鈕位置 118.0.5993.89版以後
+            //copyBtnPos = new Point(1525, 333);// TouchVPN 連接（Connect）按鈕位置 118.0.5993.89版以後
+            copyBtnPos = new Point(1525, 320);// TouchVPN 連接（Connect）按鈕位置 118.0.5993.89版以後
             Cursor.Position = copyBtnPos;
             clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.soundLike.done);
             Thread.Sleep(150);
@@ -2476,6 +2488,10 @@ internal static string getImageUrl() {
             openNewTabWindow(WindowType.Tab);
             Thread.Sleep(850);
             GoToUrlandActivate("https://iplocation.com/");
+            Thread.Sleep(850);
+            GoToUrlandActivate("https://gj.cool/login?next=%2Ftry_ocr");//檢視IP是否被封鎖
+            Task.Run(() => { Form1.playSound(Form1.soundLike.over); });
+            Thread.Sleep(850);
             return true;
 
         }
@@ -3330,6 +3346,7 @@ internal static string getImageUrl() {
             Thread.Sleep(800);//最小值（須在重開機後或系統最小負載時）（連「開啟」舊檔之視窗也看不見，即可完成）
             //Thread.Sleep(1200);
             //Thread.Sleep(500);
+            Thread.Sleep(Extend_the_wait_time_for_the_Open_Old_File_dialog_box_to_appear_Millisecond);
 
             //輸入：檔案名稱 //SendKeys.Send(downloadImgFullName);
             //retry:
@@ -3347,7 +3364,7 @@ internal static string getImageUrl() {
             //Thread.Sleep(3220);
             //Thread.Sleep(1220);
             Thread.Sleep(920);
-            //Thread.Sleep(1920);
+        //Thread.Sleep(1920);
         #endregion
 
         redo:
@@ -4105,7 +4122,9 @@ internal static string getImageUrl() {
             int Height = SystemInformation.PrimaryMonitorSize.Height;
             //MessageBox.Show("你的螢幕解析度是" + Size + "\n Width = " + Width + "\n Height = " + Height);
             //複製按鈕的位置：20231106
-            int copyBtnPosX = Width / 1920 * 835, copyBtnPosY = Height / 1200 * 730;
+            //int copyBtnPosX = Width / 1920 * 835, copyBtnPosY = Height / 1200 * 730;
+            int copyBtnPosX = Width / 1920 * 835, copyBtnPosY = Height / 1200 * 711;
+            if (Copybutton_GjcoolFastExperience_Location.IsEmpty) Copybutton_GjcoolFastExperience_Location = new Point(copyBtnPosX, copyBtnPosY);
             //int copyBtnPosX = Width * (835 / 1920), copyBtnPosY = Height * (730 / 1200);
 
 
@@ -4130,6 +4149,7 @@ internal static string getImageUrl() {
             //Thread.Sleep(1200);
             //Thread.Sleep(300);
             //Thread.Sleep(800);//最大值（夠久了，當電腦順時會停頓一下）
+            Thread.Sleep(Extend_the_wait_time_for_the_Open_Old_File_dialog_box_to_appear_Millisecond);
 
             //輸入：檔案名稱 //SendKeys.Send(downloadImgFullName);
             //貼上圖檔全名
@@ -4219,8 +4239,9 @@ internal static string getImageUrl() {
             {
                 //Form1.playSound(Form1.soundLike.info);
 
+                if (Copybutton_GjcoolFastExperience_Location.IsEmpty) Copybutton_GjcoolFastExperience_Location = new Point(copyBtnPosX, copyBtnPosY);//Copybutton_GjcoolFastExperience_Location = new Point(835, 711);
                 //copyBtnPos = new Point(838, 711);
-                copyBtnPos = new Point(835, 730);
+                copyBtnPos = Copybutton_GjcoolFastExperience_Location;//new Point(835, 730);
                 //copyBtnPos = new Point(copyBtnPosX, copyBtnPosY);//複製按鈕的位置：20231106
                 DateTime dtMax = DateTime.Now;
                 while (Clipboard.GetText() == string.Empty && !StopOCR)
@@ -4270,7 +4291,7 @@ internal static string getImageUrl() {
             */
             while (e == null)
             {
-                //Thread.Sleep(250);
+                
 
                 #region 方便提早取消作業（藉由關閉OCR視窗）
                 try
@@ -4287,8 +4308,9 @@ internal static string getImageUrl() {
                 {
                     //e = driver.FindElement(By.XPath("/html/body/div[1]/div/div/div[2]/div/div[1]/div[3]/div[2]/div[2]/button"));
                     e = driver.FindElement(By.XPath("//*[starts-with(@id, 'dialog_')]//div[contains(@class, 'col')]//div[contains(@class, 'd-flex py-1')]//button//i"));
-                    wait = new WebDriverWait(driver, TimeSpan.FromMilliseconds(200));
+                    wait = new WebDriverWait(driver, TimeSpan.FromMilliseconds(333));
                     wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(e));
+                    Thread.Sleep(333);
                     //第 1 次好像會找不到，只好用手動了：
                     //Thread.Sleep(450);
                     //if (Clipboard.GetText() != "") goto finish;
@@ -4364,7 +4386,7 @@ internal static string getImageUrl() {
                     {
                         if (iwtext.Text.StartsWith("reach traffic limit."))
                         {
-                            StopOCR = true;
+                            StopOCR = true; ActiveForm1.PagePaste2GjcoolOCR_ing = false;
                             //Debugger.Break();
                             ActiveForm1.TopMost = false;
                             string targetProcessName = "VPN by Google One"; // 目標程序的名稱
@@ -4384,7 +4406,7 @@ internal static string getImageUrl() {
                                 if (targetWindowHandle != IntPtr.Zero)
                                 {//如果有開啟 VPN by Google One                                
                                     //StopOCR = true;//前已有
-                                    return TouchVPN_IvacyVPN_ExtensionSwitcher();
+                                    return TouchVPN_IvacyVPN_VeePN_ExtensionSwitcher();
                                 }
                             }
                             //不管要不要自動切換IP都執行
@@ -4788,7 +4810,10 @@ internal static string getImageUrl() {
             return true;
             #endregion
         }
-
+        /// <summary>
+        /// 存放《古籍酷》快速體驗OCR完成時的複製按鈕位置資訊
+        /// </summary>
+        internal static Point Copybutton_GjcoolFastExperience_Location = new Point();
 
         /// <summary>
         /// 滑鼠左鍵點擊網頁上的複製按鈕並發出提示音
