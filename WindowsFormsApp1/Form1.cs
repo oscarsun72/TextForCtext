@@ -9850,6 +9850,8 @@ namespace WindowsFormsApp1
             }
             #endregion
 
+
+
             #region 輸入末綴為「0」的數字可以設定開啟Chrome頁面的等待毫秒時間
             if (x != "" && x.Length > 2 && int.TryParse(x, out int c))
             {
@@ -9966,7 +9968,7 @@ namespace WindowsFormsApp1
             #endregion
 
 
-            #region 輸入tS或tE分別設定等待伺服器或網頁元件的時間上限（秒鐘）
+            #region 輸入前2字元為字母之指令。如輸入tS或tE分別設定等待伺服器或網頁元件的時間上限（秒鐘）
             //- 輸入「tS」前綴，如「tS10」即10秒設定 Selenium 操控的 Chrome瀏覽器伺服器（ChromeDriverService）的等待秒數（即「new ChromeDriver()」的「TimeSpan」引數值）。預設為 8.5。因昨大年夜 Ctext.org 網頁載入速慢又不穩，因此設置，以防萬一 20230122癸卯年初一 感恩感恩　讚歎讚歎　南無阿彌陀佛
             //- 輸入「tE」前綴，如「tE5」即5秒，設定 Selenium 操控的 Chrome瀏覽器中網頁元件的的等待秒數（WebDriverWait。即「new WebDriverWait()」的「TimeSpan」引數值）。預設為 3。
             if (x.Length > 2)
@@ -9983,6 +9985,12 @@ namespace WindowsFormsApp1
                             return;
                         case "tE":
                             br.WebDriverWaitTimeSpan = t;
+                            PauseEvents();
+                            textBox2.Clear();
+                            ResumeEvents();
+                            return;
+                        case "ws"://輸入「ws」（wait second）以指定延長等待開啟舊檔對話方塊出現的時間（毫秒數），如「ws1000」即延長1秒
+                            br.Extend_the_wait_time_for_the_Open_Old_File_dialog_box_to_appear_Millisecond = (int)t;
                             PauseEvents();
                             textBox2.Clear();
                             ResumeEvents();
