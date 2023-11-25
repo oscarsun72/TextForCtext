@@ -1,14 +1,8 @@
 ﻿//using static System.Net.Mime.MediaTypeNames;
-using ADODB;
 using Newtonsoft.Json.Linq;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
-using OpenQA.Selenium.DevTools;
-using OpenQA.Selenium.DevTools.V108.Profiler;
-using OpenQA.Selenium.DevTools.V85.ApplicationCache;
 using OpenQA.Selenium.Remote;
-//using System.Net;
-//using static System.Net.WebRequestMethods;
 using OpenQA.Selenium.Support.UI;
 using System;
 using System.Collections.Generic;
@@ -20,20 +14,16 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Media;
-using System.Net;
-using System.Net.Http.Headers;
-using System.Net.NetworkInformation;
+//using System.Net;
+//using System.Net.NetworkInformation;
 using System.Runtime.InteropServices;
-using System.Security.Cryptography;
-using System.Security.Policy;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Web.SessionState;
 using System.Windows.Automation;
 using System.Windows.Forms;
-using System.Xml.Linq;
 using WebSocketSharp;
 using WindowsFormsApp1;
+//using static System.Net.Mime.MediaTypeNames;
 using forms = System.Windows.Forms;
 using selm = OpenQA.Selenium;
 
@@ -50,6 +40,7 @@ namespace TextForCtext
         /// <summary>
         /// 指定延長等待開啟舊檔對話方塊出現的時間（毫秒數）
         /// 在 textBox2 中輸入「ws」（wait second）以設定此值
+        /// 若要縮減時間，請指定負數
         /// </summary>
         internal static int Extend_the_wait_time_for_the_Open_Old_File_dialog_box_to_appear_Millisecond = 0;
 
@@ -2214,6 +2205,26 @@ internal static string getImageUrl() {
                 new Tuple<string,DateTime>("ivacyrussia", DateTime.Parse("2023/9/29")) ,
                 new Tuple<string,DateTime>("freevpnforchrome", DateTime.Parse("2023/9/29")) ,
                 new Tuple<string,DateTime>("vpnproxyveepn", DateTime.Parse("2023/9/29")) ,
+                new Tuple<string,DateTime>("canadaadblockvpn", DateTime.Parse("2023/9/29")) ,
+                new Tuple<string,DateTime>("hongkongadblockvpn", DateTime.Parse("2023/9/29")) ,
+                new Tuple<string,DateTime>("irelandadblockvpn", DateTime.Parse("2023/9/29")) ,
+                new Tuple<string,DateTime>("mexicoadblockvpnfastexperience", DateTime.Parse("2023/9/29")) ,
+                new Tuple<string,DateTime>("austriaadblockvpnfastexperienc", DateTime.Parse("2023/9/29")) ,
+                new Tuple<string,DateTime>("franceadblockvpn", DateTime.Parse("2023/9/29")) ,
+                new Tuple<string,DateTime>("braziladblockvpnfastexperience", DateTime.Parse("2023/9/29")) ,
+                new Tuple<string,DateTime>("czechiaadblockvpnfastexperienc", DateTime.Parse("2023/9/29")) ,
+                new Tuple<string,DateTime>("romaniaadblockvpn", DateTime.Parse("2023/9/29")) ,
+                new Tuple<string,DateTime>("switzerlandadblockvpnfastexper", DateTime.Parse("2023/9/29")) ,
+                new Tuple<string,DateTime>("uslasvegasadblockvpn", DateTime.Parse("2023/9/29")) ,
+                new Tuple<string,DateTime>("ussanfranciscoadblockvpn", DateTime.Parse("2023/9/29")) ,
+                new Tuple<string,DateTime>("usseattleadblockvpn", DateTime.Parse("2023/9/29")) ,
+                new Tuple<string,DateTime>("usmiamiadblockvpn", DateTime.Parse("2023/9/29")) ,
+                new Tuple<string,DateTime>("usphoenixadblockvpn", DateTime.Parse("2023/9/29")) ,
+                new Tuple<string,DateTime>("finlandadblockvpn", DateTime.Parse("2023/9/29")) ,
+                new Tuple<string,DateTime>("netherlandsadblockvpn", DateTime.Parse("2023/9/29")) ,
+                new Tuple<string,DateTime>("spainadblockvpn", DateTime.Parse("2023/9/29")) ,
+
+
                 new Tuple<string,DateTime>("vpnbygoogleone", DateTime.Parse("2023/9/29")) };
         /// <summary>
         /// 切換《古籍酷》帳戶時用
@@ -2459,7 +2470,8 @@ internal static string getImageUrl() {
         internal static bool TouchVPN_IvacyVPN_VeePN_ExtensionSwitcher()
         {
             //一個擴充功能按鈕長寬大約 35-39 點（35×35）
-            Point copyBtnPos = new Point(1700, 55);//擴充功能顯示清單中最右邊的位置 118.0.5993.89版以後
+            Point copyBtnPos = new Point(1705, 55);//擴充功能顯示清單中最右邊的位置 118.0.5993.89版以後
+            //Point copyBtnPos = new Point(1700, 55);//擴充功能顯示清單中最右邊的位置 118.0.5993.89版以後
             //Point copyBtnPos = new Point(1739, 55);//擴充功能顯示清單中最右邊的位置
             Cursor.Position = copyBtnPos;
             //ClickLeftMouse(x, y);
@@ -2489,7 +2501,9 @@ internal static string getImageUrl() {
             Thread.Sleep(850);
             GoToUrlandActivate("https://iplocation.com/");
             Thread.Sleep(850);
+            openNewTabWindow(WindowType.Tab);
             GoToUrlandActivate("https://gj.cool/login?next=%2Ftry_ocr");//檢視IP是否被封鎖
+            Thread.Sleep(850);
             Task.Run(() => { Form1.playSound(Form1.soundLike.over); });
             Thread.Sleep(850);
             return true;
@@ -2844,7 +2858,7 @@ internal static string getImageUrl() {
         {
             string publicIpAddress;
 
-            using (var webClient = new WebClient())
+            using (var webClient = new System.Net.WebClient())
             {
                 publicIpAddress = webClient.DownloadString("https://api.ipify.org");
                 //string pcIpAddress = GetPCIpAddress("乙太網路");
@@ -2896,7 +2910,7 @@ internal static string getImageUrl() {
         /// <returns></returns>
         public static string GetPCIpAddress(string vpnName)
         {
-            var vpn = NetworkInterface.GetAllNetworkInterfaces().FirstOrDefault(x => x.Name == vpnName);
+            var vpn = System.Net.NetworkInformation.NetworkInterface.GetAllNetworkInterfaces().FirstOrDefault(x => x.Name == vpnName);
             if (vpn != null)
             {
                 var ipProperties = vpn.GetIPProperties();
@@ -3343,10 +3357,10 @@ internal static string getImageUrl() {
             Clipboard.SetText(downloadImgFullName);
 
             //等待選取檔案對話框開啟
-            Thread.Sleep(800);//最小值（須在重開機後或系統最小負載時）（連「開啟」舊檔之視窗也看不見，即可完成）
+            Thread.Sleep(800 + (
+                800 + Extend_the_wait_time_for_the_Open_Old_File_dialog_box_to_appear_Millisecond < 0 ? 0 : Extend_the_wait_time_for_the_Open_Old_File_dialog_box_to_appear_Millisecond));//最小值（須在重開機後或系統最小負載時）（連「開啟」舊檔之視窗也看不見，即可完成）
             //Thread.Sleep(1200);
-            //Thread.Sleep(500);
-            Thread.Sleep(Extend_the_wait_time_for_the_Open_Old_File_dialog_box_to_appear_Millisecond);
+            //Thread.Sleep(500);            
 
             //輸入：檔案名稱 //SendKeys.Send(downloadImgFullName);
             //retry:
@@ -3412,6 +3426,7 @@ internal static string getImageUrl() {
                     {
                         if (Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("已超時，是否繼續等候？") == DialogResult.Cancel)
                         {
+                            ActiveForm1.TopMost = false;
                             StopOCR = true;
                             _OCR_GJcool_WindowClosed = true;
                             driver.Close();
@@ -3428,7 +3443,7 @@ internal static string getImageUrl() {
                         }
 
                     }
-
+                    ActiveForm1.TopMost = false;
                     tryTimes++;
                     Thread.Sleep(100);
                     goto redo;
@@ -4145,11 +4160,16 @@ internal static string getImageUrl() {
             iwe.Click();
 
             //等待「開啟」檔案對話框開啟
-            Thread.Sleep(800);//最小值（須在重開機後或系統最小負載時）（連「開啟」舊檔之視窗也看不見，即可完成）
-            //Thread.Sleep(1200);
-            //Thread.Sleep(300);
-            //Thread.Sleep(800);//最大值（夠久了，當電腦順時會停頓一下）
-            Thread.Sleep(Extend_the_wait_time_for_the_Open_Old_File_dialog_box_to_appear_Millisecond);
+            Thread.Sleep(800 + (
+                800 + Extend_the_wait_time_for_the_Open_Old_File_dialog_box_to_appear_Millisecond < 0 ? 0 :
+                Extend_the_wait_time_for_the_Open_Old_File_dialog_box_to_appear_Millisecond));//最小值（須在重開機後或系統最小負載時）（連「開啟」舊檔之視窗也看不見，即可完成）
+                                                                                              //Thread.Sleep(1200);
+                                                                                              //Thread.Sleep(300);
+                                                                                              //Thread.Sleep(800);//最大值（夠久了，當電腦順時會停頓一下）
+
+            //MessageBox.Show((800 +
+            //    800 + Extend_the_wait_time_for_the_Open_Old_File_dialog_box_to_appear_Millisecond < 0 ? 0 :
+            //    Extend_the_wait_time_for_the_Open_Old_File_dialog_box_to_appear_Millisecond).ToString()); //jus for test
 
             //輸入：檔案名稱 //SendKeys.Send(downloadImgFullName);
             //貼上圖檔全名
@@ -4289,9 +4309,50 @@ internal static string getImageUrl() {
                 { }
             }
             */
+
+            Thread.Sleep(1750);
+            try
+            {
+                e = driver.FindElement(By.XPath("//*[starts-with(@id, 'dialog_')]//div[contains(@class, 'col')]//div[contains(@class, 'd-flex py-1')]//button//i"));
+            }
+            catch (Exception)
+            {
+                try
+                {
+                    e = driver.FindElement(By.XPath("//*[starts-with(@id, 'dialog_')]//div[contains(@class, 'col')]//div[contains(@class, 'd-flex py-1')]//button//i"));
+                }
+                catch (Exception)
+                {
+
+                }
+            }
+            try
+            {
+                wait = new WebDriverWait(driver, TimeSpan.FromMilliseconds(1250));
+                if (e != null && Clipboard.GetText() == string.Empty)
+                {
+                    Form1.playSound(Form1.soundLike.exam);
+                    wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(e));
+                }
+            }
+            catch (Exception)
+            {
+            }
+
+            if (clicked && Clipboard.GetText() != string.Empty)
+            {
+                ActiveForm1.Activate();
+                goto finish;
+            }
+
             while (e == null)
             {
-                
+
+                if (clicked && Clipboard.GetText() != string.Empty)
+                {
+                    ActiveForm1.Activate();
+                    goto finish;
+                }
 
                 #region 方便提早取消作業（藉由關閉OCR視窗）
                 try
@@ -4306,11 +4367,11 @@ internal static string getImageUrl() {
                 #endregion
                 try
                 {
+                    //找出「複製」按鈕
                     //e = driver.FindElement(By.XPath("/html/body/div[1]/div/div/div[2]/div/div[1]/div[3]/div[2]/div[2]/button"));
                     e = driver.FindElement(By.XPath("//*[starts-with(@id, 'dialog_')]//div[contains(@class, 'col')]//div[contains(@class, 'd-flex py-1')]//button//i"));
-                    wait = new WebDriverWait(driver, TimeSpan.FromMilliseconds(333));
+                    wait = new WebDriverWait(driver, TimeSpan.FromMilliseconds(2250));
                     wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(e));
-                    Thread.Sleep(333);
                     //第 1 次好像會找不到，只好用手動了：
                     //Thread.Sleep(450);
                     //if (Clipboard.GetText() != "") goto finish;
@@ -4364,7 +4425,7 @@ internal static string getImageUrl() {
                 try
                 {
                     iwtext = driver.FindElement(By.XPath("/html/body/div[1]/div/div/div[2]/div/div[1]/div[3]/div[2]/div"));
-                    wait = new WebDriverWait(driver, TimeSpan.FromSeconds(0));
+                    wait = new WebDriverWait(driver, TimeSpan.FromSeconds(0.2));
                     wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(iwtext));
                 }
                 catch (Exception)
@@ -4372,7 +4433,7 @@ internal static string getImageUrl() {
                     try
                     {
                         iwtext = driver.FindElement(By.XPath("/html/body/div[2]/div/div/div[2]/div/div[1]/div[3]/div[2]/div"));
-                        wait = new WebDriverWait(driver, TimeSpan.FromSeconds(0));
+                        wait = new WebDriverWait(driver, TimeSpan.FromSeconds(0.2));
                         wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(iwtext));
                     }
                     catch (Exception)
@@ -4395,7 +4456,7 @@ internal static string getImageUrl() {
                             {//要自動切換IP時：
                                 //driver.Close();//return以後也還會再執行一次哦！注意
 
-                                Form1.playSound(Form1.soundLike.over);
+                                Form1.playSound(Form1.soundLike.over); ActiveForm1.HideToNICo();// TopMost = false;
                                 Task ts = Task.Run(() =>
                                 {
                                     IPSwitchOnly();//此方法在切換TouchVPN時會再開啟一分頁以檢視IP轉換情形
@@ -4409,6 +4470,7 @@ internal static string getImageUrl() {
                                     return TouchVPN_IvacyVPN_VeePN_ExtensionSwitcher();
                                 }
                             }
+                            ActiveForm1.TopMost = false;
                             //不管要不要自動切換IP都執行
                             if (targetWindowHandle != IntPtr.Zero)
                             {//如果有開啟 VPN by Google One                                

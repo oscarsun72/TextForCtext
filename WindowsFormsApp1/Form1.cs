@@ -4400,7 +4400,8 @@ namespace WindowsFormsApp1
             expandSelectedTextRangeToWholeLinePara(s, l, x);
             s = textBox1.SelectionStart; l = textBox1.SelectionLength;
             selTxt = textBox1.SelectedText;
-            if (textBox1.SelectedText.Substring(0, 2) == "􏿽")//(textBox1.SelectedText.IndexOf("􏿽") > -1)
+            //if (textBox1.SelectedText.Substring(0, 2) == "􏿽")//(textBox1.SelectedText.IndexOf("􏿽") > -1)
+            if (selTxt.Length > 1 && selTxt.Substring(0, 2) == "􏿽")//(textBox1.SelectedText.IndexOf("􏿽") > -1)
             {
                 i = selTxt.IndexOf(Environment.NewLine + "􏿽");
                 while (i > -1)
@@ -4678,6 +4679,10 @@ namespace WindowsFormsApp1
         }
 
         bool stopUndoRec = false;
+        /// <summary>
+        /// Ctrl + Shift + Delete ： 將選取文字於文本中全部清除(Ctrl + z 還原功能支援)
+        /// 若是選取《·》〈〉{{}}以執行，則會清除相對應的符號，以便書名號篇名號及注文語法標記之增修。
+        /// </summary>
         private void clearSeltxt()
         {
             if (textBox1.SelectedText == "") return;
@@ -4686,14 +4691,22 @@ namespace WindowsFormsApp1
             undoRecord();
             caretPositionRecord();
             if ("{{}}".IndexOf(xClear) > -1)//自行將所有大括弧清除
-                textBox1.Text = textBox1.Text.Replace("{", "").Replace("}", "");
+                //textBox1.Text = textBox1.Text.Replace("{", "").Replace("}", "");
+                textBox1.Text = x.Replace("{", "").Replace("}", "");
+            else if("《·》〈〉".IndexOf(xClear)>-1)
+            {//若是選取《·》〈〉{{}}以執行，則會清除相對應的符號，以便書名號篇名號及注文語法標記之增修。
+                Regex rx = new Regex("[《·》〈〉]");
+                textBox1.Text=rx.Replace(x,string.Empty);
+                Clipboard.SetText(textBox1.Text);//以便按下 Alt + Insert 檢視書名號篇名號增修之結果。20231124
+            }
             else
-                textBox1.Text = textBox1.Text.Replace(xClear, "");
+                textBox1.Text = x.Replace(xClear, "");
             if (index > -1) s = -(xLen - textBox1.TextLength);
             caretPositionRecall();
             if (s > 0) restoreCaretPosition(textBox1, s, 0);
             //textBox1.SelectionStart = selStart;
             //textBox1.ScrollToCaret();
+            undoRecord();
         }
 
         private void keyDownCtrlAltUpDown(KeyEventArgs e)
