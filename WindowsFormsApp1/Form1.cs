@@ -93,6 +93,10 @@ namespace WindowsFormsApp1
         /// </summary>
         bool ocrTextMode = false;
         /// <summary>
+        /// 直接貼入OCR結果，先不管版面行款排版
+        /// </summary>
+        internal bool PasteOcrResultFisrtMode = false;
+        /// <summary>
         /// 指定是否要在OCR讀入後自動標識標題語法標記
         /// </summary>
         bool autoTitleMark_OCRTextMode = false;
@@ -496,6 +500,7 @@ namespace WindowsFormsApp1
                 else if ((modifierKeys == Keys.Shift || (ocrTextMode && modifierKeys != Keys.Control))
                     && !PagePaste2GjcoolOCR_ing && browsrOPMode != BrowserOPMode.appActivateByName)
                 {
+                    if (modifierKeys == Keys.Shift) ocrTextMode = true;
                     br.GoToCurrentUserActivateTab();
                     string brUrl = br.GetDriverUrl;//.driver.Url;
                     if (brUrl.IndexOf("ctext.org") > -1 && brUrl.IndexOf("&file=") > -1 && brUrl.IndexOf("&page=") > -1)
@@ -1618,12 +1623,12 @@ namespace WindowsFormsApp1
                 && e.KeyCode == Keys.Delete)
             {//Ctrl + Shift + Delete ： 將選取文字於文本中全部清除
              //int s = textBox1.SelectionStart;
-                if (textBox1.SelectionLength > 0)
-                {
-                    e.Handled = true;
-                    clearSeltxt();
-                    return;
-                }
+             //if (textBox1.SelectionLength > 0)
+             //{
+                e.Handled = true;
+                clearSeltxt();
+                return;
+                //}
             }
             if ((m & Keys.Control) == Keys.Control
                     && (m & Keys.Shift) == Keys.Shift
@@ -3845,7 +3850,9 @@ namespace WindowsFormsApp1
         private void keysAsteriskPreTitle()
         {
             string x = textBox1.SelectedText; int s = textBox1.SelectionStart, originalS = s;
-            if (textBox1.SelectedText != "")
+            if (keyinTextMode && x != string.Empty && x.IndexOf("*") == -1) { textBox1.DeselectAll(); x = string.Empty; }
+            //if (textBox1.SelectedText != "")                
+            if (x != "")
                 expandSelectedTextRangeToWholeLinePara(s, textBox1.SelectionLength, textBox1.Text);
             else
             {
@@ -4685,23 +4692,31 @@ namespace WindowsFormsApp1
         /// </summary>
         private void clearSeltxt()
         {
-            if (textBox1.SelectedText == "") return;
-            string xClear = textBox1.SelectedText, x = textBox1.Text;
-            int s = textBox1.SelectionStart, xLen = x.Length, index = x.Substring(0, (s == 0 ? s : s - 1)).IndexOf(xClear);
             undoRecord();
             caretPositionRecord();
-            if ("{{}}".IndexOf(xClear) > -1)//自行將所有大括弧清除
-                //textBox1.Text = textBox1.Text.Replace("{", "").Replace("}", "");
-                textBox1.Text = x.Replace("{", "").Replace("}", "");
-            else if("《·》〈〉".IndexOf(xClear)>-1)
-            {//若是選取《·》〈〉{{}}以執行，則會清除相對應的符號，以便書名號篇名號及注文語法標記之增修。
-                Regex rx = new Regex("[《·》〈〉]");
-                textBox1.Text=rx.Replace(x,string.Empty);
-                Clipboard.SetText(textBox1.Text);//以便按下 Alt + Insert 檢視書名號篇名號增修之結果。20231124
+            string xClear = textBox1.SelectedText, x = textBox1.Text;
+            int s = textBox1.SelectionStart;
+            if (xClear == "")
+            {
+                if (CnText.ClearHasEditedWithPunctuationMarks(ref x))
+                    textBox1.Text = x;
             }
             else
-                textBox1.Text = x.Replace(xClear, "");
-            if (index > -1) s = -(xLen - textBox1.TextLength);
+            {
+                int xLen = x.Length, index = x.Substring(0, (s == 0 ? s : s - 1)).IndexOf(xClear);
+                if ("{{}}".IndexOf(xClear) > -1)//自行將所有大括弧清除
+                                                //textBox1.Text = textBox1.Text.Replace("{", "").Replace("}", "");
+                    textBox1.Text = x.Replace("{", "").Replace("}", "");
+                else if ("《·》〈〉".IndexOf(xClear) > -1)
+                {//若是選取《·》〈〉{{}}以執行，則會清除相對應的符號，以便書名號篇名號及注文語法標記之增修。
+                    Regex rx = new Regex("[《·》〈〉]");
+                    textBox1.Text = rx.Replace(x, string.Empty);
+                    Clipboard.SetText(textBox1.Text);//以便按下 Alt + Insert 檢視書名號篇名號增修之結果。20231124
+                }
+                else
+                    textBox1.Text = x.Replace(xClear, "");
+                if (index > -1) s = -(xLen - textBox1.TextLength);
+            }
             caretPositionRecall();
             if (s > 0) restoreCaretPosition(textBox1, s, 0);
             //textBox1.SelectionStart = selStart;
@@ -5790,7 +5805,14 @@ namespace WindowsFormsApp1
                 if (browsrOPMode != BrowserOPMode.appActivateByName && br.driver != null)
                 {
                     PauseEvents();
-                    br.driver.SwitchTo().Window(br.LastValidWindow);
+                    try
+                    {
+                        br.driver.SwitchTo().Window(br.LastValidWindow);
+                    }
+                    catch (Exception ex)
+                    {
+                        Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message + Environment.NewLine + "◆請按「確定」繼續……◆");
+                    }
                     ResumeEvents();
                 }
                 else
@@ -5936,55 +5958,57 @@ namespace WindowsFormsApp1
 
             //規範化文本，如半形標點符號轉全形：
             CnText.FormalizeText(ref xCopy);
-
-            #region checkAbnormalLinePara method test unit
-            try
+            if (!PasteOcrResultFisrtMode)
             {
-                int[] chk = checkAbnormalLinePara(xCopy);
-                if (chk.Length > 0)
+                #region checkAbnormalLinePara method test unit
+                try
                 {
-                    bringBackMousePosFrmCenter();
-                    if (MessageBox.Show("there is abnormal LinePara Length , check it now?" +
-                        Environment.NewLine + Environment.NewLine +
-                        "normal= " + chk[2] + "\t【abnormal】= " + chk[3], "",
-                        MessageBoxButtons.OKCancel, MessageBoxIcon.Warning,
-                        MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly) == DialogResult.OK)//檢查行/段落長
+                    int[] chk = checkAbnormalLinePara(xCopy);
+                    if (chk.Length > 0)
                     {
-                        textBox1.Select(chk[0], chk[1]);
-                        textBox1.ScrollToCaret();
-                        if (s > pageTextEndPosition)
+                        bringBackMousePosFrmCenter();
+                        if (MessageBox.Show("there is abnormal LinePara Length , check it now?" +
+                            Environment.NewLine + Environment.NewLine +
+                            "normal= " + chk[2] + "\t【abnormal】= " + chk[3], "",
+                            MessageBoxButtons.OKCancel, MessageBoxIcon.Warning,
+                            MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly) == DialogResult.OK)//檢查行/段落長
                         {
-                            pageTextEndPosition = 0;
-                        }
-                        else
-                        {
-                            //if (MessageBox.Show("reset the page end ? ", "", MessageBoxButtons.OKCancel, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1,
-                            //    MessageBoxOptions.ServiceNotification) == DialogResult.OK)
-                            pageTextEndPosition = s;
-                        }
+                            textBox1.Select(chk[0], chk[1]);
+                            textBox1.ScrollToCaret();
+                            if (s > pageTextEndPosition)
+                            {
+                                pageTextEndPosition = 0;
+                            }
+                            else
+                            {
+                                //if (MessageBox.Show("reset the page end ? ", "", MessageBoxButtons.OKCancel, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1,
+                                //    MessageBoxOptions.ServiceNotification) == DialogResult.OK)
+                                pageTextEndPosition = s;
+                            }
 
-                        AvailableInUseBothKeysMouse();
-                        BringToFront(); TopMost = true;
-                        return false;
+                            AvailableInUseBothKeysMouse();
+                            BringToFront(); TopMost = true;
+                            return false;
+                        }
+                        else//按下cancel按鈕,忽略非常的行長度
+                        {
+                            //wordsPerLinePara為許多判斷行字數函式的重要參考，暫時不在此作調整！20231101
+                            normalLineParaLength = 0; //wordsPerLinePara = chk[chk.Length - 1];
+                            TopMost = false;
+                            br.driver?.SwitchTo().Window(br.driver.CurrentWindowHandle);
+
+                        }// 目前 chk[chk.Length-1]=3
                     }
-                    else//按下cancel按鈕,忽略非常的行長度
-                    {
-                        //wordsPerLinePara為許多判斷行字數函式的重要參考，暫時不在此作調整！20231101
-                        normalLineParaLength = 0; //wordsPerLinePara = chk[chk.Length - 1];
-                        TopMost = false;
-                        br.driver?.SwitchTo().Window(br.driver.CurrentWindowHandle);
-
-                    }// 目前 chk[chk.Length-1]=3
                 }
-            }
-            catch (Exception ex)
-            {
-                MessageBoxShowOKExclamationDefaultDesktopOnly("  checkAbnormalLinePara函式有誤，請留意！！\n\r" + ex.HResult + ex.Message);
-                AvailableInUseBothKeysMouse();
-                BringToFront();
-            }
-            #endregion
+                catch (Exception ex)
+                {
+                    MessageBoxShowOKExclamationDefaultDesktopOnly("  checkAbnormalLinePara函式有誤，請留意！！\n\r" + ex.HResult + ex.Message);
+                    AvailableInUseBothKeysMouse();
+                    BringToFront();
+                }
+                #endregion
 
+            }
 
             //貼到 Ctext Quick edit 前的文本檢查
             if (!newTextBox1(out s, out l))
@@ -9673,6 +9697,7 @@ namespace WindowsFormsApp1
                     //根據剪貼簿裡的文本特徵來作動作
                     if (clpTxt.IndexOf("<scanbegin file=") > -1 && clpTxt.IndexOf(" page=") > -1)
                     {
+                        ocrTextMode = false;
                         //若有按下Ctrl 或 Shift 則執行圖文脫鉤 Word VBA
                         if (ModifierKeys == Keys.Control || ModifierKeys == Keys.Shift)
                         {
@@ -9708,6 +9733,7 @@ namespace WindowsFormsApp1
                     //對複製自《國學大師》的《四庫全書》文本的處置
                     else if (clpTxt.IndexOf("a]") > -1 || clpTxt.IndexOf("a] ") > -1)
                     {
+                        ocrTextMode = false;
                         runWordMacro("中國哲學書電子化計劃.國學大師_四庫全書本轉來");
                         return;
                     }
@@ -9848,8 +9874,23 @@ namespace WindowsFormsApp1
             if (Directory.Exists(x))
             {
                 PauseEvents();
-                br.DownloadDirectory_Chrome = x;
-                ResumeEvents(); textBox2.Text = ""; return;
+                br.DownloadDirectory_Chrome = x; textBox2.Text = "";
+                ResumeEvents(); return;
+            }
+            #endregion
+
+            #region 輸入「x,y」（x、y 為整數以半形逗號間隔，如「835,711」），指定《古籍酷》首頁快速體驗OCR的複製按鈕位置 Copybutton_GjcoolFastExperience_Location的 X 與 Y值
+            //20231128Bing大菩薩：檢查文字方塊中的內容是否符合「x,y」的格式
+            string pattern = @"^\d+,\d+$";
+            Regex rgx = new Regex(pattern);
+            if (rgx.IsMatch(x))
+            {
+                string[] numbers = x.Split(',');
+                br.Copybutton_GjcoolFastExperience_Location.X = Int32.Parse(numbers[0]);
+                br.Copybutton_GjcoolFastExperience_Location.Y = Int32.Parse(numbers[1]);
+                PauseEvents(); textBox2.Text = "";
+                ResumeEvents(); return;
+
             }
             #endregion
 
@@ -9862,6 +9903,28 @@ namespace WindowsFormsApp1
                 ResumeEvents(); return;
             }
             #endregion
+
+            switch (x)
+            {
+                #region 輸入「oT」（ocr first ture）設定直接貼入OCR結果先不管版面行款排版模式 輸入「oF」（ocr first false ）設定直接貼入OCR結果先不管版面行款排版模式 PasteOcrResultFisrtMode = false
+
+                case "oT":
+                    PasteOcrResultFisrtMode = true;
+                    PauseEvents();
+                    textBox2.Text = "";
+                    ResumeEvents(); return;
+                case "oF":
+                    PasteOcrResultFisrtMode = false;
+                    PauseEvents();
+                    textBox2.Text = "";
+                    ResumeEvents(); return;
+                #endregion
+
+                default:
+                    break;
+            }
+
+
 
 
 

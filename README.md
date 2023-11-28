@@ -369,6 +369,7 @@ Ctrl + >：到下一個>尾端
 
 Ctrl + Shift + Delete ： 將選取文字於文本中全部清除(Ctrl + z 還原功能支援)
 > 若是選取《·》〈〉{{}}以執行，則會清除相對應的符號，以便書名號篇名號及注文語法標記之增修。
+> 若無選取，則清除所有標點符號等（即據以判斷是否已經人為手動編號的條件。）
 
 Ctrl + Delete ： 將插入點所在位置之後的文字一律清除(Ctrl + z 還原功能支援)
 > 如果插入點後是空格（space）或空白（􏿽）則清除到非空格空白，否則就一律清除
@@ -419,7 +420,11 @@ Ctrl+ 滑鼠左鍵：清除框中所有文字
 - 輸入資料夾路徑可指定有效的Chrome瀏覽器的下載位置
 - 輸入「fc」可執行「formatCategory2Columns」函式：以選取範圍為格式化依據，將上下兩欄的目錄/目次內容，從插入點所在位置開始向後格式化（取format,Category二字首，故為fc）執行時若無選取，則以之前的設定為準。若第一次，請務必要選取以供指定。
 - 輸入「ws」（wait second）以指定延長等待開啟舊檔對話方塊出現的時間（毫秒數），如「ws1000」即延長1秒；若要縮減時間，請指定負數，如「ws-200」則等待時間再減200毫秒
-- 
+- 輸入「oT」（ocr first ture）設定直接貼入OCR結果先不管版面行款排版模式 PasteOcrResultFisrtMode=true
+- 輸入「oF」（ocr first false ）設定直接貼入OCR結果先不管版面行款排版模式 PasteOcrResultFisrtMode=false
+- 輸入「x,y」（x、y 為整數以半形逗號間隔，如「835,711」；請打好後用複製貼上的方式來輸入），指定《古籍酷》首頁快速體驗OCR的複製按鈕位置 Copybutton_GjcoolFastExperience_Location的 X 與 Y值
+
+
 ### 在 textBox3 網址資訊專用方塊框：
 - 拖曳網址在 textBox3 或 textBox1 上放開，則會讀入所拖曳的網址值給 textBox3
 - 若已複製網址在剪貼簿，則滑鼠點擊即會讀入所複製的網址值給 textBox3；在軟件介面縮小至任務列時，滑過軟件圖示，也會啟動此功能
@@ -440,7 +445,7 @@ Ctrl+ 滑鼠左鍵：清除框中所有文字
 ## 參照資源：
 （大於 25MB 無法在此上傳的檔案則表列於此，且均是末學本機Dropbox上自己正在使用的最新檔。若有疏漏，尚祈提醒末學。感恩感恩　南無阿彌陀佛）
 - [查字.mdb](https://www.dropbox.com/s/nbbm2hbneq5g3vx/%E6%9F%A5%E5%AD%97.mdb?dl=0)：此為資料檔；資料結構可參看此檔
-- [查字forInput.mdb](https://www.dropbox.com/s/x4mgb5wd2s5m2gs/%E6%9F%A5%E5%AD%97forInput.mdb?dl=0)：此為使用者介面及程式檔，末學均用此作為輸入的前端介面，將資料回存上一「查字.mdb」檔；即程式碼可參考此檔 202301051619（2023/1/5 16:19）
+- [查字forInput.mdb](https://www.dropbox.com/scl/fi/meazmnt9o5pim0xssw5s0/forinput.mdb?rlkey=zdqcgvrvkc3xdz7wnfrjtd3sf&dl=0)：此為使用者介面及程式檔，末學均用此作為輸入的前端介面，將資料回存上一「查字.mdb」檔；即程式碼可參考此檔 202301051619（2023/1/5 16:19）
 - [《重編國語辭典修訂本》資料庫.mdb](https://www.dropbox.com/s/dxumn4awnx4e0o9/%E3%80%8A%E9%87%8D%E7%B7%A8%E5%9C%8B%E8%AA%9E%E8%BE%AD%E5%85%B8%E4%BF%AE%E8%A8%82%E6%9C%AC%E3%80%8B%E8%B3%87%E6%96%99%E5%BA%AB.mdb?dl=0)
 
 ## 操作演示：

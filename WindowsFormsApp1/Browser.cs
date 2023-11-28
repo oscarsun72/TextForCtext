@@ -2223,6 +2223,8 @@ internal static string getImageUrl() {
                 new Tuple<string,DateTime>("finlandadblockvpn", DateTime.Parse("2023/9/29")) ,
                 new Tuple<string,DateTime>("netherlandsadblockvpn", DateTime.Parse("2023/9/29")) ,
                 new Tuple<string,DateTime>("spainadblockvpn", DateTime.Parse("2023/9/29")) ,
+                new Tuple<string,DateTime>("ctextorg", DateTime.Parse("2023/9/29")) ,
+                new Tuple<string,DateTime>("greeceivacy", DateTime.Parse("2023/9/29")) ,
 
 
                 new Tuple<string,DateTime>("vpnbygoogleone", DateTime.Parse("2023/9/29")) };
@@ -2565,7 +2567,7 @@ internal static string getImageUrl() {
                 /* chatGPT大菩薩：20230926
                  * 你正確，SetForegroundWindow 方法在視窗最小化時可能無法成功將其切換到最前面。為了解決這個問題，你可以嘗試使用 ShowWindow 函數來將視窗恢復到正常狀態，然後再調用 SetForegroundWindow。這樣可以確保視窗在最前面並且可見。
                  */
-                Thread.Sleep(150);
+                Thread.Sleep(250);
                 // 模擬滑鼠左鍵點擊指定座標（Random Connect按鈕）
                 int x = 1018;
                 int y = 652;
@@ -2573,12 +2575,12 @@ internal static string getImageUrl() {
                 Cursor.Position = copyBtnPos;
                 //ClickLeftMouse(x, y);
                 //Thread.Sleep(150);
-                Thread.Sleep(350);
+                Thread.Sleep(450);
                 clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.soundLike.none);
                 //Thread.Sleep(1150);//等待斷開 
-                Thread.Sleep(1250);//等待斷開
+                Thread.Sleep(1350);//等待斷開
                 clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.soundLike.none);
-                Thread.Sleep(6000);//監看連線成功
+                Thread.Sleep(6500);//監看連線成功
                 return true;
             }
             return false;
@@ -2764,12 +2766,12 @@ internal static string getImageUrl() {
         {
             if (ActiveForm1.TopMost) ActiveForm1.TopMost = false; if (!waitGJcoolPoint) waitGJcoolPoint = true;
             Task tk = Task.Run(() => { OCR_GJcool_AccountChanged_Switcher(true, false); });
-            //if (tk.Wait(1500))
-            //{
-            //    ActiveForm1.BringToFront();
-            //    //ActiveForm1.availableInUseBothKeysMouse();
-            //    ActiveForm1.Activate();
-            //}
+            if (tk.Wait(4500))
+            {
+                //ActiveForm1.BringToFront();
+                ActiveForm1.AvailableInUseBothKeysMouse();
+                //ActiveForm1.Activate();
+            }
             return true;
         }
 
@@ -4138,7 +4140,7 @@ internal static string getImageUrl() {
             //MessageBox.Show("你的螢幕解析度是" + Size + "\n Width = " + Width + "\n Height = " + Height);
             //複製按鈕的位置：20231106
             //int copyBtnPosX = Width / 1920 * 835, copyBtnPosY = Height / 1200 * 730;
-            int copyBtnPosX = Width / 1920 * 835, copyBtnPosY = Height / 1200 * 711;
+            int copyBtnPosX = (Width / 1920) * 835, copyBtnPosY = (Height / 1200) * 711;
             if (Copybutton_GjcoolFastExperience_Location.IsEmpty) Copybutton_GjcoolFastExperience_Location = new Point(copyBtnPosX, copyBtnPosY);
             //int copyBtnPosX = Width * (835 / 1920), copyBtnPosY = Height * (730 / 1200);
 
@@ -4310,34 +4312,36 @@ internal static string getImageUrl() {
             }
             */
 
-            Thread.Sleep(1750);
-            try
-            {
-                e = driver.FindElement(By.XPath("//*[starts-with(@id, 'dialog_')]//div[contains(@class, 'col')]//div[contains(@class, 'd-flex py-1')]//button//i"));
-            }
-            catch (Exception)
-            {
-                try
-                {
-                    e = driver.FindElement(By.XPath("//*[starts-with(@id, 'dialog_')]//div[contains(@class, 'col')]//div[contains(@class, 'd-flex py-1')]//button//i"));
-                }
-                catch (Exception)
-                {
+            #region 測試可否快點，似無效，故省略
+            //Thread.Sleep(1750);
+            //try
+            //{
+            //    e = driver.FindElement(By.XPath("//*[starts-with(@id, 'dialog_')]//div[contains(@class, 'col')]//div[contains(@class, 'd-flex py-1')]//button//i"));
+            //}
+            //catch (Exception)
+            //{
+            //    try
+            //    {
+            //        e = driver.FindElement(By.XPath("//*[starts-with(@id, 'dialog_')]//div[contains(@class, 'col')]//div[contains(@class, 'd-flex py-1')]//button//i"));
+            //    }
+            //    catch (Exception)
+            //    {
 
-                }
-            }
-            try
-            {
-                wait = new WebDriverWait(driver, TimeSpan.FromMilliseconds(1250));
-                if (e != null && Clipboard.GetText() == string.Empty)
-                {
-                    Form1.playSound(Form1.soundLike.exam);
-                    wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(e));
-                }
-            }
-            catch (Exception)
-            {
-            }
+            //    }
+            //}
+            //try
+            //{
+            //    wait = new WebDriverWait(driver, TimeSpan.FromMilliseconds(1250));
+            //    if (e != null && Clipboard.GetText() == string.Empty)
+            //    {
+            //        Form1.playSound(Form1.soundLike.exam);
+            //        wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(e));
+            //    }
+            //}
+            //catch (Exception)
+            //{
+            //}
+            #endregion
 
             if (clicked && Clipboard.GetText() != string.Empty)
             {
@@ -4370,7 +4374,7 @@ internal static string getImageUrl() {
                     //找出「複製」按鈕
                     //e = driver.FindElement(By.XPath("/html/body/div[1]/div/div/div[2]/div/div[1]/div[3]/div[2]/div[2]/button"));
                     e = driver.FindElement(By.XPath("//*[starts-with(@id, 'dialog_')]//div[contains(@class, 'col')]//div[contains(@class, 'd-flex py-1')]//button//i"));
-                    wait = new WebDriverWait(driver, TimeSpan.FromMilliseconds(2250));
+                    wait = new WebDriverWait(driver, TimeSpan.FromMilliseconds(150));
                     wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(e));
                     //第 1 次好像會找不到，只好用手動了：
                     //Thread.Sleep(450);
@@ -4434,7 +4438,13 @@ internal static string getImageUrl() {
                     {
                         iwtext = driver.FindElement(By.XPath("/html/body/div[2]/div/div/div[2]/div/div[1]/div[3]/div[2]/div"));
                         wait = new WebDriverWait(driver, TimeSpan.FromSeconds(0.2));
-                        wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(iwtext));
+                        try
+                        {
+                            wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(iwtext));
+                        }
+                        catch (Exception)
+                        {
+                        }
                     }
                     catch (Exception)
                     {

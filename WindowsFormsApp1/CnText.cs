@@ -501,6 +501,20 @@ namespace TextForCtext
             }
 
         }
+        /// <summary>
+        /// 清除所有人為/手動的標記（如標點符號等）
+        /// </summary>
+        /// <param name="text"></param>
+        /// <returns></returns>
+        internal static bool ClearHasEditedWithPunctuationMarks(ref string text)
+        {
+            if (text.Length == 0) return false;
+            if (!HasEditedWithPunctuationMarks(ref text)) return false;
+            Regex regex = new Regex(@"\，|\。|\？|\！|\〈|\〉|\《|\》|\：|\『|\』|\「|\」|\􏿽|、|●|□|■|·|\*\*|\{\{\{|\}\}\}|\||〇|　}}|\*　");
+            text = regex.Replace(text, "");
+            return true;
+        }
+
 
         /// <summary>
         /// 文本規範化，正規化，以合於[簡單修改模式]接受的形式。如半形標點符號轉全形。置換為全形符號。
