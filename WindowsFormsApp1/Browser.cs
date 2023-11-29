@@ -2226,6 +2226,7 @@ internal static string getImageUrl() {
                 new Tuple<string,DateTime>("ctextorg", DateTime.Parse("2023/9/29")) ,
                 new Tuple<string,DateTime>("greeceivacy", DateTime.Parse("2023/9/29")) ,
 
+                new Tuple<string,DateTime>("egyptivacy", DateTime.Parse("2023/9/29")) ,
 
                 new Tuple<string,DateTime>("vpnbygoogleone", DateTime.Parse("2023/9/29")) };
         /// <summary>
@@ -2870,6 +2871,7 @@ internal static string getImageUrl() {
                     //if (driver.Url == "https://api.ipify.org/") driver.Close();
                     ActiveForm1.PauseEvents();
                     string ipUrl = "https://api.ipify.org", selector = "body > pre";
+                    //string ipUrl = "https://www.whatismyip.com.tw/", selector = "body > b > span";
                 retry:
                     //Thread.Sleep(5000);
                     openNewTabWindow();//要打開比較快更新
@@ -2886,15 +2888,20 @@ internal static string getImageUrl() {
                                 selector = "body > b > span"; dt = DateTime.Now;
                                 ipUrl = "https://www.whatismyip.com.tw/"; goto retry;
                             }
+                            else
+                            {
+                                selector = "body > pre";  dt = DateTime.Now;
+                                ipUrl = "https://api.ipify.org"; ; goto retry;
+                            }
                             Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("找不到外部網路IP");
                             Debugger.Break();
                             return string.Empty;
                         }
                     }
                     publicIpAddress = ie.Text;
-                    ie = waitFindWebElementBySelector_ToBeClickable("body > i > span");
-                    if (ie != null)//顯示IP國家，ipUrl = "https://www.whatismyip.com.tw/" 才有
-                        MessageBox.Show(ie.Text, "country:", MessageBoxButtons.OK, MessageBoxIcon.Information, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
+                    //ie = waitFindWebElementBySelector_ToBeClickable("body > i > span");
+                    //if (ie != null)//顯示IP國家，ipUrl = "https://www.whatismyip.com.tw/" 才有 //Google One 目前也僅提供臺灣的（最多2個日本的），故略去 20231129
+                    //    MessageBox.Show(ie.Text, "country:", MessageBoxButtons.OK, MessageBoxIcon.Information, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
                     driver.Close();
                     driver.SwitchTo().Window(LastValidWindow);
                     ActiveForm1.ResumeEvents();

@@ -1,5 +1,4 @@
 ﻿using Microsoft.Win32;
-using OpenQA.Selenium.Support.UI;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -14,9 +13,12 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
+//using Task = System.Threading.Tasks.Task;
+using System.Threading.Tasks;
 //using System.Windows;
 using System.Windows.Forms;
 using TextForCtext;
+using WebSocketSharp;
 //using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 //引用adodb 要將其「內嵌 Interop 類型」（Embed Interop Type）屬性設為false（預設是true）才不會出現以下錯誤：  HResult=0x80131522  Message=無法從組件 載入類型 'ADODB.FieldsToInternalFieldsMarshaler'。
 //https://stackoverflow.com/questions/5666265/adodbcould-not-load-type-adodb-fieldstointernalfieldsmarshaler-from-assembly  https://blog.csdn.net/m15188153014/article/details/119895082
@@ -25,17 +27,6 @@ using Application = System.Windows.Forms.Application;
 using br = TextForCtext.Browser;
 using Font = System.Drawing.Font;
 using Point = System.Drawing.Point;
-//using Task = System.Threading.Tasks.Task;
-using System.Threading.Tasks;
-using System.Net.Http.Headers;
-using System.Web;
-using WebSocketSharp;
-using System.Diagnostics.Eventing.Reader;
-using static System.Net.Mime.MediaTypeNames;
-using System.Runtime.InteropServices.WindowsRuntime;
-using System.Security.Policy;
-using System.Web.SessionState;
-using OpenQA.Selenium.DevTools.V108.Storage;
 
 //using System.Windows.Input;
 //using Microsoft.Office.Interop.Word;
@@ -4699,7 +4690,10 @@ namespace WindowsFormsApp1
             if (xClear == "")
             {
                 if (CnText.ClearHasEditedWithPunctuationMarks(ref x))
+                {
                     textBox1.Text = x;
+                    Clipboard.SetText(x);//寫入剪貼簿以備用，如重新標點符號。
+                }
             }
             else
             {
@@ -7829,6 +7823,10 @@ namespace WindowsFormsApp1
             //Process.Start(gjcool);
             //Process.Start(keep);
             if (!Active) AvailableInUseBothKeysMouse();
+
+            //在連續輸入OCR結果時，提供一次（一頁）操作完成的提示音，以提醒繼續下一頁 20231128
+            if (PasteOcrResultFisrtMode && File.Exists("C:\\Windows\\Media\\ring07.wav"))
+                using (SoundPlayer sp = new SoundPlayer("C:\\Windows\\Media\\ring07.wav")) { sp.Play(); }
 
             if (keyinTextMode)
             {//如果在手動輸入模式下則自動選取[Quick edit]的內容，方便有時候須用剪下貼上者
