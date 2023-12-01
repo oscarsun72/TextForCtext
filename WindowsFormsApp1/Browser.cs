@@ -2897,7 +2897,7 @@ internal static string getImageUrl() {
                                 selector = "body > b > span"; dt = DateTime.Now;
                                 ipUrl = "https://www.whatismyip.com.tw/"; goto retry;
                             }
-                            else
+                            else if (ipUrl == "https://www.whatismyip.com.tw/")
                             {
                                 selector = "body > pre"; dt = DateTime.Now;
                                 ipUrl = "https://api.ipify.org"; ; goto retry;
@@ -4267,7 +4267,7 @@ internal static string getImageUrl() {
             }
             #endregion
 
-            DateTime dateTime = DateTime.Now; bool clicked = false;
+            DateTime dateTime = DateTime.Now; bool clicked = false, trafficLimit = false;
             Thread.Sleep(950);
             //if (DateTime.Now.Subtract(dateTime).Seconds > 1 && !clicked && Clipboard.GetText() == string.Empty)
             //if (true)
@@ -4282,7 +4282,7 @@ internal static string getImageUrl() {
                 copyBtnPos = Copybutton_GjcoolFastExperience_Location;//new Point(835, 730);
                 //copyBtnPos = new Point(copyBtnPosX, copyBtnPosY);//複製按鈕的位置：20231106
                 DateTime dtMax = DateTime.Now;
-                while (Clipboard.GetText() == string.Empty && !StopOCR)
+                while (Clipboard.GetText() == string.Empty && !StopOCR && !trafficLimit)
                 {
                     //try
                     //{
@@ -4306,7 +4306,7 @@ internal static string getImageUrl() {
                     //}
                     //else break;
                 }
-                Form1.playSound(Form1.soundLike.info);
+                if (!trafficLimit) Form1.playSound(Form1.soundLike.info);
                 //Debugger.Break();
                 //if (Clipboard.GetText() != string.Empty) Application.OpenForms[0].Activate();
             });
@@ -4471,16 +4471,55 @@ internal static string getImageUrl() {
                 {
                     try
                     {
-                        if (iwtext.Text.StartsWith("reach traffic limit."))
+                        if (iwtext.Text.StartsWith("reach traffic limit.") || iwtext.Text.StartsWith("识别失败"))
                         {
+                            trafficLimit = true; DialogResult ds = DialogResult.None;
                             StopOCR = true; ActiveForm1.PagePaste2GjcoolOCR_ing = false;
                             //Debugger.Break();
                             ActiveForm1.TopMost = false;
                             string targetProcessName = "VPN by Google One"; // 目標程序的名稱
                             IntPtr targetWindowHandle = FindWindow(null, targetProcessName);
-                            if (DialogResult.OK == Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("是否讓程式自動更換IP？", "●切換IP？"))
+                            Task tsRing = Task.Run(() =>
+                            {
+                                if (File.Exists("C:\\Windows\\Media\\alarm05.wav"))
+                                {
+                                    using (SoundPlayer sp = new SoundPlayer("C:\\Windows\\Media\\alarm05.wav"))
+                                    {
+                                        sp.Play();
+                                        Thread.Sleep(7000);
+                                        if (File.Exists("C:\\Windows\\Media\\alarm10.wav") && Control.ModifierKeys != forms.Keys.Control && ds == DialogResult.None)//若需中止，按下Ctrl鍵
+                                        {
+                                            sp.SoundLocation = "C:\\Windows\\Media\\alarm10.wav";
+                                            sp.Play();
+                                            Thread.Sleep(3000);
+                                        }
+                                        if (File.Exists("C:\\Windows\\Media\\Windows Logon.wav") && Control.ModifierKeys != forms.Keys.Control && ds == DialogResult.None)
+                                        {
+                                            sp.SoundLocation = "C:\\Windows\\Media\\Windows Logon.wav";
+                                            sp.Play();
+                                            Thread.Sleep(4000);
+                                        }
+                                        if (File.Exists("C:\\Windows\\Media\\Windows Print complete.wav") && Control.ModifierKeys != forms.Keys.Control && ds == DialogResult.None)
+                                        {
+                                            sp.SoundLocation = "C:\\Windows\\Media\\Windows Print complete.wav";
+                                            sp.Play();
+                                            Thread.Sleep(2000);
+                                        }
+                                        if (File.Exists("C:\\Windows\\Media\\alarm01.wav") && Control.ModifierKeys != forms.Keys.Control && ds == DialogResult.None)
+                                        {
+                                            sp.SoundLocation = "C:\\Windows\\Media\\alarm01.wav";
+                                            sp.Play();
+                                            Thread.Sleep(5000);
+                                        }
+
+                                    }
+                                }
+                            });
+                            //tsRing.Wait(6000);
+                            ds = MessageBox.Show("是否讓程式自動更換IP？", "●切換IP？", MessageBoxButtons.OKCancel, MessageBoxIcon.None, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly); //Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("是否讓程式自動更換IP？", "●切換IP？")
+                            if (DialogResult.OK == ds)
                             {//要自動切換IP時：
-                                //driver.Close();//return以後也還會再執行一次哦！注意
+                             //driver.Close();//return以後也還會再執行一次哦！注意
 
                                 Form1.playSound(Form1.soundLike.over); ActiveForm1.HideToNICo();// TopMost = false;
                                 Task ts = Task.Run(() =>
@@ -4492,7 +4531,7 @@ internal static string getImageUrl() {
                             {
                                 if (targetWindowHandle != IntPtr.Zero)
                                 {//如果有開啟 VPN by Google One                                
-                                    //StopOCR = true;//前已有
+                                 //StopOCR = true;//前已有
                                     return TouchVPN_IvacyVPN_VeePN_ExtensionSwitcher();
                                 }
                             }
@@ -4500,7 +4539,7 @@ internal static string getImageUrl() {
                             //不管要不要自動切換IP都執行
                             if (targetWindowHandle != IntPtr.Zero)
                             {//如果有開啟 VPN by Google One                                
-                                //StopOCR = true;//前已有
+                             //StopOCR = true;//前已有
                                 return false;
                             }
                             else
@@ -4896,7 +4935,7 @@ internal static string getImageUrl() {
         finish:
             StopOCR = true;
             if (!_OCR_GJcool_WindowClosed) _OCR_GJcool_WindowClosed = true;
-            return returnFalse ? false : true;
+            return !returnFalse;
             #endregion
         }
         /// <summary>

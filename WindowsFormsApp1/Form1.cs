@@ -7875,7 +7875,7 @@ namespace WindowsFormsApp1
                 autoKeysTitleCodeAndPreWideSpace();
                 _eventsEnabled = ee; stopUndoRec = false;
             }
-            return true;
+            return ocrResult;// true;
             #endregion
 
 
