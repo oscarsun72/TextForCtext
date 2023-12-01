@@ -1712,7 +1712,15 @@ namespace WindowsFormsApp1
             {
                 e.Handled = true;
                 textBox1.SelectAll();
-                keyDownCtrlAdd(false);
+                if (keyDownCtrlAdd(false))
+                {
+                    if (textBox1.Text != br.Quickedit_data_textboxTxt)
+                    {
+                        playSound(soundLike.exam);
+                        textBox1.Text = br.Quickedit_data_textboxTxt;
+                    }
+                }
+                bringBackMousePosFrmCenter();
                 return;
             }
 
@@ -2832,9 +2840,12 @@ namespace WindowsFormsApp1
                     if (keyinTextMode && !autoPastetoQuickEdit)
                     {
                         e.Handled = true;
-                        //if (textBox1.Text != string.Empty)
-                        //{ undoRecord(); pauseEvents(); textBox1.Text = string.Empty; resumeEvents(); }
-                        pagePaste2GjcoolOCR();
+                    //if (textBox1.Text != string.Empty)
+                    //{ undoRecord(); pauseEvents(); textBox1.Text = string.Empty; resumeEvents(); }
+                    rep:
+                        if (pagePaste2GjcoolOCR() && PasteOcrResultFisrtMode && ModifierKeys != Keys.Control)
+                            goto rep;
+
                         //if (!pagePaste2GjcoolOCR())//因為失敗的結果非唯一，故改寫在方法之中
                         //{ //數字鍵盤的「+」
                         //    PauseEvents();//為了等待時可以切到別的視窗看看，在執行成功且完成後，再把這2個關鍵的視窗置前
@@ -7076,6 +7087,9 @@ namespace WindowsFormsApp1
                 if (e.KeyCode == Keys.Subtract)
                 {//按下 Ctrl + Shift + - ： 切換OCR輸入模式
                     e.Handled = true;
+
+                    if (!_eventsEnabled) _eventsEnabled = true;
+
                     if (ocrTextMode)
                     {
                         new SoundPlayer(@"C:\Windows\Media\Speech Off.wav").Play();
@@ -7825,7 +7839,7 @@ namespace WindowsFormsApp1
             if (!Active) AvailableInUseBothKeysMouse();
 
             //在連續輸入OCR結果時，提供一次（一頁）操作完成的提示音，以提醒繼續下一頁 20231128
-            if (PasteOcrResultFisrtMode && File.Exists("C:\\Windows\\Media\\ring07.wav"))
+            if (ocrResult && PasteOcrResultFisrtMode && File.Exists("C:\\Windows\\Media\\ring07.wav"))
                 using (SoundPlayer sp = new SoundPlayer("C:\\Windows\\Media\\ring07.wav")) { sp.Play(); }
 
             if (keyinTextMode)
@@ -9907,12 +9921,12 @@ namespace WindowsFormsApp1
                 #region 輸入「oT」（ocr first ture）設定直接貼入OCR結果先不管版面行款排版模式 輸入「oF」（ocr first false ）設定直接貼入OCR結果先不管版面行款排版模式 PasteOcrResultFisrtMode = false
 
                 case "oT":
-                    PasteOcrResultFisrtMode = true;
+                    PasteOcrResultFisrtMode = true; ocrTextMode = true;
                     PauseEvents();
                     textBox2.Text = "";
                     ResumeEvents(); return;
                 case "oF":
-                    PasteOcrResultFisrtMode = false;
+                    PasteOcrResultFisrtMode = false; ocrTextMode = false;
                     PauseEvents();
                     textBox2.Text = "";
                     ResumeEvents(); return;

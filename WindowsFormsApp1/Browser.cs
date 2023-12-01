@@ -2199,6 +2199,7 @@ internal static string getImageUrl() {
                 new Tuple<string,DateTime>("estoniafastexperienceivacy", DateTime.Parse("2023/9/29")) ,
                 new Tuple<string,DateTime>("latviafastexperienceivacy", DateTime.Parse("2023/9/29")) ,
                 new Tuple<string,DateTime>("belgiumfastexperienceivacy", DateTime.Parse("2023/9/29")) ,
+                new Tuple<string,DateTime>("finlandfastexperienceivacy", DateTime.Parse("2023/9/29")) ,
                 new Tuple<string,DateTime>("albaniaivacy", DateTime.Parse("2023/9/29")) ,
                 new Tuple<string,DateTime>("czechiaivacy", DateTime.Parse("2023/9/29")) ,
                 new Tuple<string,DateTime>("denmarkivacy", DateTime.Parse("2023/9/29")) ,
@@ -2769,9 +2770,17 @@ internal static string getImageUrl() {
             Task tk = Task.Run(() => { OCR_GJcool_AccountChanged_Switcher(true, false); });
             if (tk.Wait(4500))
             {
-                //ActiveForm1.BringToFront();
-                ActiveForm1.AvailableInUseBothKeysMouse();
-                //ActiveForm1.Activate();
+
+                //ActiveForm1.Invoke((MethodInvoker)delegate
+                //{
+                //    Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("連線超時！請試著改用其他IP。");
+                //});
+                ActiveForm1.Invoke((MethodInvoker)delegate
+                {
+                    //ActiveForm1.BringToFront();
+                    ActiveForm1.AvailableInUseBothKeysMouse();
+                    //ActiveForm1.Activate();
+                });
             }
             return true;
         }
@@ -2818,7 +2827,7 @@ internal static string getImageUrl() {
 
             //20231102 Bing大菩薩：查找 List 中的元素
             //bool returnValue = IPUsedList.Exists(item => item.Item1 == currentIP && (DateTime.Now - item.Item2).TotalDays <= 1);
-            bool returnValue = IPUsedList.Exists(item => item.Item1 == currentIP && (DateTime.Now - item.Item2).TotalHours <= 6);
+            bool returnValue = IPUsedList.Exists(item => item.Item1 == currentIP && (DateTime.Now - item.Item2).TotalHours <= 22);
             if (!returnValue)
             {
                 //if(IPUsedList.Exists(item => item.Item1 == currentIP))
@@ -2871,7 +2880,7 @@ internal static string getImageUrl() {
                     //if (driver.Url == "https://api.ipify.org/") driver.Close();
                     ActiveForm1.PauseEvents();
                     string ipUrl = "https://api.ipify.org", selector = "body > pre";
-                    //string ipUrl = "https://www.whatismyip.com.tw/", selector = "body > b > span";
+                //string ipUrl = "https://www.whatismyip.com.tw/", selector = "body > b > span";
                 retry:
                     //Thread.Sleep(5000);
                     openNewTabWindow();//要打開比較快更新
@@ -2890,7 +2899,7 @@ internal static string getImageUrl() {
                             }
                             else
                             {
-                                selector = "body > pre";  dt = DateTime.Now;
+                                selector = "body > pre"; dt = DateTime.Now;
                                 ipUrl = "https://api.ipify.org"; ; goto retry;
                             }
                             Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("找不到外部網路IP");
@@ -4109,7 +4118,7 @@ internal static string getImageUrl() {
             //string downloadDirectory = DownloadDirectory_Chrome;
             //if (!ChkDownloadDirectory_Chrome(downloadImgFullName, downloadDirectory)) return false;
             #endregion
-
+            bool returnFalse = false;
             driver = driver ?? DriverNew();
             string currentWindowHndl = driver.CurrentWindowHandle;
             const string gjCool = "https://gj.cool/";
@@ -4469,7 +4478,7 @@ internal static string getImageUrl() {
                             ActiveForm1.TopMost = false;
                             string targetProcessName = "VPN by Google One"; // 目標程序的名稱
                             IntPtr targetWindowHandle = FindWindow(null, targetProcessName);
-                            if (DialogResult.OK == Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("是否讓程式自動更換IP？"))
+                            if (DialogResult.OK == Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("是否讓程式自動更換IP？", "●切換IP？"))
                             {//要自動切換IP時：
                                 //driver.Close();//return以後也還會再執行一次哦！注意
 
@@ -4498,6 +4507,7 @@ internal static string getImageUrl() {
                             {//如果沒開啟
                              //driver.Close();//呼叫端會關！
                                 Thread.Sleep(4500);//the seconds ref: internal static bool TouchVPN_IvacyVPN_ExtensionSwitcher()
+                                returnFalse = true;
                                 goto finish;
                             }
 
@@ -4886,7 +4896,7 @@ internal static string getImageUrl() {
         finish:
             StopOCR = true;
             if (!_OCR_GJcool_WindowClosed) _OCR_GJcool_WindowClosed = true;
-            return true;
+            return returnFalse ? false : true;
             #endregion
         }
         /// <summary>
