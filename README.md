@@ -420,6 +420,8 @@ Ctrl+ 滑鼠左鍵：清除框中所有文字
 - 輸入資料夾路徑可指定有效的Chrome瀏覽器的下載位置
 - 輸入「fc」可執行「formatCategory2Columns」函式：以選取範圍為格式化依據，將上下兩欄的目錄/目次內容，從插入點所在位置開始向後格式化（取format,Category二字首，故為fc）執行時若無選取，則以之前的設定為準。若第一次，請務必要選取以供指定。
 - 輸入「ws」（wait second）以指定延長等待開啟舊檔對話方塊出現的時間（毫秒數），如「ws1000」即延長1秒；若要縮減時間，請指定負數，如「ws-200」則等待時間再減200毫秒
+- 輸入「wO」（wait OCR）以指定等待OCR諸過程最久的時間（以秒數），如「wO60」即最久等到60秒（1分鐘）
+   > 由變數 OCR_wait_time_Top_Limit＿second 掌握）
 - 輸入「oT」（ocr first ture）設定直接貼入OCR結果先不管版面行款排版模式 PasteOcrResultFisrtMode=true
 - 輸入「oF」（ocr first false ）設定直接貼入OCR結果先不管版面行款排版模式 PasteOcrResultFisrtMode=false
 - 輸入「x,y」（x、y 為整數以半形逗號間隔，如「835,711」；請打好後用複製貼上的方式來輸入），指定《古籍酷》首頁快速體驗OCR的複製按鈕位置 Copybutton_GjcoolFastExperience_Location的 X 與 Y值

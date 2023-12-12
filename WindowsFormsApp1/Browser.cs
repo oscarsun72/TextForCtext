@@ -43,6 +43,11 @@ namespace TextForCtext
         /// 若要縮減時間，請指定負數
         /// </summary>
         internal static int Extend_the_wait_time_for_the_Open_Old_File_dialog_box_to_appear_Millisecond = 0;
+        /// <summary>
+        /// 指定等待OCR諸過程最久的時間（以秒數）
+        /// 在 textBox2 中輸入「wO」（wait second）以設定此值
+        /// </summary>
+        internal static int OCR_wait_time_Top_Limit＿second = 15;
 
 
         //readonly Form1 Form1 = Application.OpenForms.Count > 0 ? Application.OpenForms[0] as Form1 : null;
@@ -1829,7 +1834,7 @@ namespace TextForCtext
         /// <returns></returns>
         internal static bool IsSameBookPageWithDrive(string url)
         {
-            int bookidDrive = ActiveForm1.GetBookID_fromUrl(driver.Url), pageNumDrive = ActiveForm1.GetPageNumFromUrl(driver.Url), bookid = ActiveForm1.GetBookID_fromUrl(url), pageNum = ActiveForm1.GetPageNumFromUrl(url);
+            int bookidDrive = ActiveForm1.GetBookID_fromUrl(driver?.Url ?? string.Empty), pageNumDrive = ActiveForm1.GetPageNumFromUrl(driver.Url), bookid = ActiveForm1.GetBookID_fromUrl(url), pageNum = ActiveForm1.GetPageNumFromUrl(url);
             //if (bookidDrive != bookid && pageNumDrive != pageNum)
             if (bookidDrive == bookid && pageNumDrive == pageNum)
                 return true;
@@ -2226,8 +2231,8 @@ internal static string getImageUrl() {
                 new Tuple<string,DateTime>("spainadblockvpn", DateTime.Parse("2023/9/29")) ,
                 new Tuple<string,DateTime>("ctextorg", DateTime.Parse("2023/9/29")) ,
                 new Tuple<string,DateTime>("greeceivacy", DateTime.Parse("2023/9/29")) ,
-
                 new Tuple<string,DateTime>("egyptivacy", DateTime.Parse("2023/9/29")) ,
+
 
                 new Tuple<string,DateTime>("vpnbygoogleone", DateTime.Parse("2023/9/29")) };
         /// <summary>
@@ -2244,6 +2249,14 @@ internal static string getImageUrl() {
             //bool ProtonVPNOn = ProtonVPNSwitcher();
 
             //ActiveForm1.TopMost = false;//改寫在呼叫端，以免多執行緒時出錯
+            try
+            {
+                if (driver.WindowHandles.Contains(driver.CurrentWindowHandle ?? string.Empty))
+                    LastValidWindow = driver.CurrentWindowHandle;
+            }
+            catch (Exception)
+            {
+            }
 
             if (!justSwitchAccount) if (!GoogleOneVPNSwitcher()) if (!ProtonVPNSwitcher()) if (!IvacyVPNSwitcher()) TouchVPN_IvacyVPN_VeePN_ExtensionSwitcher();
             if (justIPSwitch) { } //{ if (!ActiveForm1.Active) { ActiveForm1.BringToFront(); } }//改寫在呼叫端，以免多執行緒時出錯
@@ -2826,8 +2839,8 @@ internal static string getImageUrl() {
             //currentIP = GetVpnIpAddress("VPN by Google One");//("VPN by Google One 25");
 
             //20231102 Bing大菩薩：查找 List 中的元素
-            //bool returnValue = IPUsedList.Exists(item => item.Item1 == currentIP && (DateTime.Now - item.Item2).TotalDays <= 1);
-            bool returnValue = IPUsedList.Exists(item => item.Item1 == currentIP && (DateTime.Now - item.Item2).TotalHours <= 22);
+            //bool returnValue = IPUsedList.Exists(item => item.Item1 == currentIP && (DateTime.Now - item.Item2).TotalDays >= 1);
+            bool returnValue = IPUsedList.Exists(item => item.Item1 == currentIP && (DateTime.Now - item.Item2).TotalHours >= 22);
             if (!returnValue)
             {
                 //if(IPUsedList.Exists(item => item.Item1 == currentIP))
@@ -3219,7 +3232,7 @@ internal static string getImageUrl() {
                     if (fastXResulut) driver.Close(); _OCR_GJcool_WindowClosed = true;
                     try
                     {
-                        driver.SwitchTo().Window(currentWindowHndl);
+                        driver?.SwitchTo().Window(currentWindowHndl);
                     }
                     catch (Exception ex)
                     {
@@ -3427,7 +3440,7 @@ internal static string getImageUrl() {
                 Thread.Sleep(150);
                 iwe = waitFindWebElementBySelector_ToBeClickable
                                 ("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled", 0.3);
-                if (DateTime.Now.Subtract(dtimr).Seconds > 50) { StopOCR = true; return false; }
+                if (DateTime.Now.Subtract(dtimr).Seconds > OCR_wait_time_Top_Limit＿second+ 50) { StopOCR = true; return false; }
             }
             if (iwe != null)
             {
@@ -3440,7 +3453,8 @@ internal static string getImageUrl() {
                 catch (Exception)
                 {
                     if (tryTimes == 0) Form1.playSound(Form1.soundLike.error);
-                    if (tryTimes % 50 == 0)//> 50)
+                    //if (tryTimes % 50 == 0)//> 50)
+                    if (tryTimes % 50 == 0&& DateTime.Now.Subtract(dtimr).Seconds > OCR_wait_time_Top_Limit＿second)//> 50)
                     {
                         if (Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("已超時，是否繼續等候？") == DialogResult.Cancel)
                         {
@@ -4428,9 +4442,11 @@ internal static string getImageUrl() {
                     //}
                 }
                 //Debugger.Break();
-                if (DateTime.Now.Subtract(dateTime).Seconds > 15)
+                //if (DateTime.Now.Subtract(dateTime).Seconds > 15)
+                if (DateTime.Now.Subtract(dateTime).Seconds > OCR_wait_time_Top_Limit＿second)
                 {
-                    if (DialogResult.Cancel == Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("已超過15鈔，是否繼續？"))
+                    //if (DialogResult.Cancel == Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("已超過15鈔，是否繼續？"))
+                    if (DialogResult.Cancel == Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("已超過" + OCR_wait_time_Top_Limit＿second + "鈔，是否繼續？"))
                     {
                         StopOCR = true; return false;
                     }
@@ -4540,12 +4556,15 @@ internal static string getImageUrl() {
                             if (targetWindowHandle != IntPtr.Zero)
                             {//如果有開啟 VPN by Google One                                
                              //StopOCR = true;//前已有
+                                if (ds == DialogResult.Cancel)
+                                    Thread.Sleep(4500);//the seconds ref: internal static bool TouchVPN_IvacyVPN_ExtensionSwitcher()
                                 return false;
                             }
                             else
                             {//如果沒開啟
                              //driver.Close();//呼叫端會關！
-                                Thread.Sleep(4500);//the seconds ref: internal static bool TouchVPN_IvacyVPN_ExtensionSwitcher()
+                                if (ds == DialogResult.OK)
+                                    Thread.Sleep(4500);//the seconds ref: internal static bool TouchVPN_IvacyVPN_ExtensionSwitcher()
                                 returnFalse = true;
                                 goto finish;
                             }

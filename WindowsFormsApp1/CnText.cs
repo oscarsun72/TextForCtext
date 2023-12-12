@@ -197,6 +197,18 @@ namespace TextForCtext
 
             return ref clpTxt;
         }
+        /// <summary>
+        ///重新標識書名號篇名號
+        /// </summary>
+        /// <param name="clpTxt">要重新標識書名號篇名號的文本</param>        
+        /// <returns>重新標好的文本</returns>
+        internal static ref string RemarkBooksPunctuation(ref string clpTxt)
+        {
+            Regex rx = new Regex("[《·》〈〉]");
+            clpTxt = rx.Replace(clpTxt, string.Empty);
+            BooksPunctuation(ref clpTxt, true);
+            return ref clpTxt;
+        } 
 
         /// <summary>
         /// 檢查要標點上的書名號或篇名號詞彙，是否已經標過

@@ -84,7 +84,7 @@ namespace WindowsFormsApp1
         /// </summary>
         bool ocrTextMode = false;
         /// <summary>
-        /// 直接貼入OCR結果，先不管版面行款排版
+        /// 直接貼入OCR結果，先不管版面行款排版、及是否有編輯標記
         /// </summary>
         internal bool PasteOcrResultFisrtMode = false;
         /// <summary>
@@ -1711,16 +1711,21 @@ namespace WindowsFormsApp1
             if (e.Control && e.Alt && e.KeyCode == Keys.Add)
             {
                 e.Handled = true;
+                //PauseEvents();
                 textBox1.SelectAll();
+                string x = textBox1.Text;
                 if (keyDownCtrlAdd(false))
                 {
-                    if (textBox1.Text != br.Quickedit_data_textboxTxt)
+                    if (x != br.Quickedit_data_textboxTxt)
                     {
                         playSound(soundLike.exam);
-                        textBox1.Text = br.Quickedit_data_textboxTxt;
+                        x = br.Quickedit_data_textboxTxt;
                     }
+                    //非同步整理OCR文本時，這行就很需要：
+                    textBox1.Text = CnText.RemarkBooksPunctuation(ref x);
                 }
                 bringBackMousePosFrmCenter();
+                //ResumeEvents();
                 return;
             }
 
@@ -2837,7 +2842,8 @@ namespace WindowsFormsApp1
                 if (e.KeyCode == Keys.Add)
                 {//在非自動且手動輸入模式下單獨按下數字鍵盤的「+」("+") →方便檢索到這塊程式碼
                     //整頁貼上Quick edit [簡單修改模式]  並將下一頁直接送交《古籍酷》OCR// 原為加上篇名格式代碼
-                    if (keyinTextMode && !autoPastetoQuickEdit)
+
+                    if (keyinTextMode && !autoPastetoQuickEdit && OcrTextMode)
                     {
                         e.Handled = true;
                     //if (textBox1.Text != string.Empty)
@@ -2864,6 +2870,30 @@ namespace WindowsFormsApp1
                         //if (!Visible) Visible = true;
                         //bringBackMousePosFrmCenter();
                         return;
+                    }
+                    else
+                    {
+                        e.Handled = true;
+
+                        PagePaste2GjcoolOCR_ing = true;
+                        #region 與 Ctrl + Alt + + 同
+                        //PauseEvents();
+                        textBox1.SelectAll();
+                        string x = textBox1.Text;
+                        if (keyDownCtrlAdd(false))
+                        {
+                            if (x != br.Quickedit_data_textboxTxt)
+                            {
+                                playSound(soundLike.exam);
+                                x = br.Quickedit_data_textboxTxt;
+                            }
+                            //非同步整理OCR文本時，這行就很需要：
+                            textBox1.Text = CnText.RemarkBooksPunctuation(ref x);
+                        }
+                        bringBackMousePosFrmCenter();
+                        //ResumeEvents();
+                        return;
+                        #endregion
                     }
 
                 }
@@ -2951,7 +2981,7 @@ namespace WindowsFormsApp1
                 try
                 {
                     //br.driver.SwitchTo().Window(br.LastValidWindow);
-                    br.driver.SwitchTo().Window(br.driver.CurrentWindowHandle);
+                    br.driver?.SwitchTo().Window(br.driver.CurrentWindowHandle);
                     Thread.Sleep(300);
                 }
                 catch (Exception)
@@ -5797,12 +5827,15 @@ namespace WindowsFormsApp1
                         "忽略此訊息，改為【整面貼上】請按「取消」感恩感恩　南無阿彌陀佛", string.Empty, false)) { s = textBox1.TextLength; l = 0; pageTextEndPosition = s + l; }
                 }
 
-                //檢查查是否有編輯標記
-                CnText.FormalizeText(ref x);
-                if (!CnText.HasEditedWithPunctuationMarks(ref x))
-                {
-                    playSound(soundLike.warn);
-                    if (MessageBoxShowOKCancelExclamationDefaultDesktopOnly("尚未有以供程式判斷之編輯標記（標點符號及符號格式化字元等），是否確定送出？", string.Empty, true, MessageBoxDefaultButton.Button2) == DialogResult.Cancel) return false;
+
+                if (!PasteOcrResultFisrtMode)
+                {//檢查查是否有編輯標記
+                    CnText.FormalizeText(ref x);
+                    if (!CnText.HasEditedWithPunctuationMarks(ref x))
+                    {
+                        playSound(soundLike.warn);
+                        if (MessageBoxShowOKCancelExclamationDefaultDesktopOnly("尚未有以供程式判斷之編輯標記（標點符號及符號格式化字元等），是否確定送出？", string.Empty, true, MessageBoxDefaultButton.Button2) == DialogResult.Cancel) return false;
+                    }
                 }
 
                 TopMost = false;
@@ -6580,7 +6613,8 @@ namespace WindowsFormsApp1
                                 lText = noteTextBlendStart - st;//(noteTextBlendEnd + 2);
                                 if (lText < 0)
                                 {
-                                    MessageBox.Show("somethins must be wrong,plx check it out !", "", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                    MessageBox.Show("somethins must be wrong,plx check it out !", "", MessageBoxButtons.OK, MessageBoxIcon.Error
+                                        , MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
                                     return new int[0];
                                 }
                                 text += lineParaText.Substring
@@ -7624,6 +7658,20 @@ namespace WindowsFormsApp1
             TopMost = false;
 
             br.ActiveForm1 = this;
+
+
+            try
+            {
+                if (!br.driver.WindowHandles.Contains(br.driver.CurrentWindowHandle))
+                    br.driver.SwitchTo().Window(br.LastValidWindow);
+            }
+            catch (Exception)
+            {
+                br.driver.SwitchTo().Window(br.LastValidWindow);
+                playSound(soundLike.exam);
+            }
+            br.LastValidWindow = br.driver.CurrentWindowHandle;
+
             #region 檢查是否必要 20230804Bard大菩薩：https://g.co/bard/share/9130d688e253            
             string quickedit_data_textboxTxt = br.Quickedit_data_textboxTxt;
             //bool chk = false;
@@ -7698,6 +7746,7 @@ namespace WindowsFormsApp1
             #region toOCR
             br.StopOCR = false;
             string currentWindowHndl = br.driver.CurrentWindowHandle;
+            br.LastValidWindow = br.driver.CurrentWindowHandle;
             switch (ocrSiteTitle)
             {
                 case br.OCRSiteTitle.GoogleKeep:
@@ -9921,16 +9970,18 @@ namespace WindowsFormsApp1
                 #region 輸入「oT」（ocr first ture）設定直接貼入OCR結果先不管版面行款排版模式 輸入「oF」（ocr first false ）設定直接貼入OCR結果先不管版面行款排版模式 PasteOcrResultFisrtMode = false
 
                 case "oT":
-                    PasteOcrResultFisrtMode = true; ocrTextMode = true;
+                    PasteOcrResultFisrtMode = true; ocrTextMode = true; PagePaste2GjcoolOCR_ing = false; _eventsEnabled = true;
+                    br.OCR_wait_time_Top_Limit＿second = 60;
                     PauseEvents();
                     textBox2.Text = "";
                     ResumeEvents(); return;
                 case "oF":
-                    PasteOcrResultFisrtMode = false; ocrTextMode = false;
+                    PasteOcrResultFisrtMode = false; ocrTextMode = false; PagePaste2GjcoolOCR_ing = false; _eventsEnabled = true;
+                    br.OCR_wait_time_Top_Limit＿second = 15;
                     PauseEvents();
                     textBox2.Text = "";
                     ResumeEvents(); return;
-                #endregion
+                #endregion                
 
                 default:
                     break;
@@ -10083,6 +10134,13 @@ namespace WindowsFormsApp1
                             textBox2.Clear();
                             ResumeEvents();
                             return;
+                        case "wO"://輸入「wO」（wait OCR）以指定等待OCR諸過程最久的時間（以秒數），如「wO60」即最久等到60秒（1分鐘）
+                            br.OCR_wait_time_Top_Limit＿second= (int)t;
+                            PauseEvents();
+                            textBox2.Clear();
+                            ResumeEvents();
+                            return;
+
                     }
                 }
             }
