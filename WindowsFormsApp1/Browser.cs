@@ -449,6 +449,7 @@ namespace TextForCtext
         {
             try
             {
+                driver.SwitchTo().Window(driver.CurrentWindowHandle);
                 IWebElement e = driver.FindElement(By.Id(id));
                 WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(second));
                 wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(e));
@@ -483,6 +484,7 @@ namespace TextForCtext
                 }
                 catch (Exception)
                 {
+                    return null;
                     //throw;
                 }
                 return e;
@@ -738,8 +740,14 @@ namespace TextForCtext
                 {
                     if (ActiveForm1.KeyinTextMode && isQuickEditUrl(ActiveForm1.textBox3Text ?? ""))
                     {
-                        //driver = cDrv;
-                        ActiveForm1.Controls["textBox1"].Text = waitFindWebElementByName_ToBeClickable("data", _webDriverWaitTimSpan).Text;
+                        try
+                        {
+                            driver = driver ?? cDrv;
+                            ActiveForm1.Controls["textBox1"].Text = waitFindWebElementByName_ToBeClickable("data", _webDriverWaitTimSpan).Text;
+                        }
+                        catch (Exception)
+                        {
+                        }
                     }
                 }
                 catch (Exception ex)
@@ -1095,7 +1103,8 @@ namespace TextForCtext
                 string url = getUrlFirst_Ctext_Edit(ControlType.Edit).Trim();
                 if (url == "")
                 {
-                    if (Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("目前作用中的分頁並非有效的圖文對照頁面，是否要讓程式繼續比對？") == DialogResult.OK)
+                    if (Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("目前作用中的分頁並非有效的圖文對照頁面，是否要讓程式繼續比對？"
+                        , "ActiveTabURL_Ctext_Edit\n\r\n\rgetUrlFirst_Ctext_Edit=\"\"") == DialogResult.OK)
                     {
                         url = getUrl(ControlType.Edit).Trim();
                     }
@@ -1770,6 +1779,32 @@ namespace TextForCtext
                 {
                     case -2146233088:
                         if (ex.Message.IndexOf("timed out after ") > -1) return "";
+                        else if (ex.Message.StartsWith("no such window: target window already closed"))
+                        {
+                            ReadOnlyCollection<string> driverWindowHandles = null;
+                            try
+                            {
+                                driverWindowHandles = driver.WindowHandles;
+                            }
+                            catch (Exception)
+                            {
+                                Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
+                            }
+                            if (driverWindowHandles != null)
+                            {
+                                foreach (var item in driverWindowHandles)
+                                {
+                                    if (driver.SwitchTo().Window(item).Url == url)
+                                    {
+                                        if (!driverWindowHandles.Contains(LastValidWindow))
+                                            LastValidWindow = driver.CurrentWindowHandle;
+                                        if (!IsSameBookPageWithDrive(url)) GoToUrlandActivate(url, true);
+                                    }
+                                    break;
+                                }
+                            }
+                            break;
+                        }
                         else
                         {
                             Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
@@ -1816,6 +1851,7 @@ namespace TextForCtext
             foreach (IWebElement imageElement in imageElements)
             {
                 imageUrl = imageElement.GetAttribute("src");
+                if (imageUrl == null) continue;
                 if (imageUrl.Substring(0, 26) == "https://library.ctext.org/"
                 || (imageUrl.Substring(imageUrl.Length - 4, 4) == ".png"
                     && ((imageUrl.IndexOf(".cn_") > -1)
@@ -2045,6 +2081,7 @@ internal static string getImageUrl() {
         retry:
             //按下：擷取圖片文字
             //Thread.Sleep(300);
+
             IWebElement iwe_ocr = waitFindWebElementBySelector_ToBeClickable("#\\:8 > div", 0); int waitTime = 900;
             while (iwe_ocr == null)
             {   //愈等愈短時間    
@@ -2061,7 +2098,10 @@ internal static string getImageUrl() {
 
                 }
             }
+            Thread.Sleep(3000);
             iwe_ocr.Click();
+            //if (iwe_ocr.Location.X != 0)
+            //    clickCopybutton_GjcoolFastExperience(new Point(iwe_ocr.Location.X + iwe_ocr.Size.Width / 2, iwe_ocr.Location.Y + iwe_ocr.Size.Height / 2));
             Thread.Sleep(500);
             //將OCR結果複製到剪貼簿                    
             if (iwe.Text == "")
@@ -3163,8 +3203,23 @@ internal static string getImageUrl() {
                 try
                 {
                     if (wait != null)
-                        //iwe = wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementIsVisible(By.CssSelector("#compute-value")));
-                        iwe = wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementExists(By.CssSelector("#compute-value")));
+                    {
+                        while (true)
+                        {
+                            try
+                            {
+                                driver.SwitchTo().Window(driver.CurrentWindowHandle);
+                            }
+                            catch (Exception)
+                            {
+                                return false;
+                            }
+                            //iwe = wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementIsVisible(By.CssSelector("#compute-value")));
+                            iwe = wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementExists(By.CssSelector("#compute-value")));
+                            if (iwe != null) break;
+                        }
+                    }
+
                 }
                 catch (Exception)
                 {
@@ -3344,8 +3399,17 @@ internal static string getImageUrl() {
             //欲提早結束時：
             if (Clipboard.GetText().IndexOf(Environment.NewLine + Environment.NewLine) > -1) goto finished;
 
+            try
+            {
+                driver.SwitchTo().Window(driver.CurrentWindowHandle);
+            }
+            catch (Exception)
+            {
+                return false;
+            }
 
-            driver.SwitchTo().Window(driver.CurrentWindowHandle);//切換到目前Selenium操控的視窗，就不怕沒及時得到焦點而失誤了
+
+            //driver.SwitchTo().Window(driver.CurrentWindowHandle);//切換到目前Selenium操控的視窗，就不怕沒及時得到焦點而失誤了
                                                                  //try
                                                                  //{
                                                                  //    iwe.Click();//不行，會出錯
@@ -3409,13 +3473,13 @@ internal static string getImageUrl() {
             //Thread.Sleep(3220);
             //Thread.Sleep(1220);
             Thread.Sleep(920);
-        //Thread.Sleep(1920);
-        #endregion
+            //Thread.Sleep(1920);
+            #endregion
 
+            DateTime dtimr = DateTime.Now;
         redo:
 
             #region「上傳完畢」對話方塊的「OK」按鈕 20231103
-            DateTime dtimr = DateTime.Now;
             iwe = waitFindWebElementBySelector_ToBeClickable
                 ("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled", 0.2);
             //if (iwe == null) return false;
@@ -3436,11 +3500,20 @@ internal static string getImageUrl() {
             //while (iwe == null && waitFindWebElementBySelector_ToBeClickable("#auto_ocr") == null)
             while (iwe == null)// && waitFindWebElementBySelector_ToBeClickable("#auto_ocr") == null)
             {
+                try
+                {
+                    driver.SwitchTo().Window(driver.CurrentWindowHandle);
+                }
+                catch (Exception)
+                {
+                    return false;
+                }
+
                 if (Clipboard.GetText().IndexOf(Environment.NewLine + Environment.NewLine) > -1) goto finished;
                 Thread.Sleep(150);
                 iwe = waitFindWebElementBySelector_ToBeClickable
                                 ("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled", 0.3);
-                if (DateTime.Now.Subtract(dtimr).Seconds > OCR_wait_time_Top_Limit＿second+ 50) { StopOCR = true; return false; }
+                if (DateTime.Now.Subtract(dtimr).TotalSeconds > OCR_wait_time_Top_Limit＿second + 50) { StopOCR = true; return false; }
             }
             if (iwe != null)
             {
@@ -3454,7 +3527,7 @@ internal static string getImageUrl() {
                 {
                     if (tryTimes == 0) Form1.playSound(Form1.soundLike.error);
                     //if (tryTimes % 50 == 0)//> 50)
-                    if (tryTimes % 50 == 0&& DateTime.Now.Subtract(dtimr).Seconds > OCR_wait_time_Top_Limit＿second)//> 50)
+                    if (tryTimes % 50 == 0 && DateTime.Now.Subtract(dtimr).TotalSeconds > OCR_wait_time_Top_Limit＿second)//> 50)
                     {
                         if (Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("已超時，是否繼續等候？") == DialogResult.Cancel)
                         {
@@ -4487,7 +4560,8 @@ internal static string getImageUrl() {
                 {
                     try
                     {
-                        if (iwtext.Text.StartsWith("reach traffic limit.") || iwtext.Text.StartsWith("识别失败"))
+                        if (iwtext.Text.StartsWith("reach traffic limit.") || iwtext.Text.StartsWith("识别失败")
+                            || iwtext.Text.StartsWith("ip address banned"))
                         {
                             trafficLimit = true; DialogResult ds = DialogResult.None;
                             StopOCR = true; ActiveForm1.PagePaste2GjcoolOCR_ing = false;

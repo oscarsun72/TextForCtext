@@ -1711,21 +1711,22 @@ namespace WindowsFormsApp1
             if (e.Control && e.Alt && e.KeyCode == Keys.Add)
             {
                 e.Handled = true;
-                //PauseEvents();
-                textBox1.SelectAll();
-                string x = textBox1.Text;
-                if (keyDownCtrlAdd(false))
-                {
-                    if (x != br.Quickedit_data_textboxTxt)
-                    {
-                        playSound(soundLike.exam);
-                        x = br.Quickedit_data_textboxTxt;
-                    }
-                    //非同步整理OCR文本時，這行就很需要：
-                    textBox1.Text = CnText.RemarkBooksPunctuation(ref x);
-                }
-                bringBackMousePosFrmCenter();
-                //ResumeEvents();
+                ////PauseEvents();
+                PressAddKeyMethodPaste2QuickEditBox();
+                //textBox1.SelectAll();
+                //string x = textBox1.Text;
+                //if (keyDownCtrlAdd(false))
+                //{
+                //    if (x != br.Quickedit_data_textboxTxt)
+                //    {
+                //        playSound(soundLike.exam);
+                //        x = br.Quickedit_data_textboxTxt;
+                //    }
+                //    //非同步整理OCR文本時，這行就很需要：
+                //    textBox1.Text = CnText.RemarkBooksPunctuation(ref x);
+                //}
+                //bringBackMousePosFrmCenter();
+                ////ResumeEvents();
                 return;
             }
 
@@ -2829,7 +2830,9 @@ namespace WindowsFormsApp1
                 {
                     //F8 ：整頁貼上Quick edit [簡單修改模式]  並將下一頁直接送交《古籍酷》OCR// 原為加上篇名格式代碼
                     e.Handled = true;
-                    pagePaste2GjcoolOCR();//F8 :原為 keysTitleCode();
+                    if (!OcrTextMode) PressAddKeyMethodPaste2QuickEditBox();
+                    else
+                        pagePaste2GjcoolOCR();//F8 :原為 keysTitleCode();
                     return;
                 }
                 if (e.KeyCode == Keys.F11)
@@ -2876,24 +2879,8 @@ namespace WindowsFormsApp1
                         e.Handled = true;
 
                         PagePaste2GjcoolOCR_ing = true;
-                        #region 與 Ctrl + Alt + + 同
-                        //PauseEvents();
-                        textBox1.SelectAll();
-                        string x = textBox1.Text;
-                        if (keyDownCtrlAdd(false))
-                        {
-                            if (x != br.Quickedit_data_textboxTxt)
-                            {
-                                playSound(soundLike.exam);
-                                x = br.Quickedit_data_textboxTxt;
-                            }
-                            //非同步整理OCR文本時，這行就很需要：
-                            textBox1.Text = CnText.RemarkBooksPunctuation(ref x);
-                        }
-                        bringBackMousePosFrmCenter();
-                        //ResumeEvents();
+                        PressAddKeyMethodPaste2QuickEditBox();
                         return;
-                        #endregion
                     }
 
                 }
@@ -2913,6 +2900,34 @@ namespace WindowsFormsApp1
                 #endregion
             }
         }
+
+        /// <summary>
+        /// 在已經《古籍酷》OCR文本化後的資料，加以編輯再送出
+        /// 即整理完《古籍酷》OCR的文本後送出到簡易編輯【Quick edit】的機制
+        /// </summary>
+        internal void PressAddKeyMethodPaste2QuickEditBox()
+        {
+            #region 與 Ctrl + Alt + + 同
+            //PauseEvents();
+            pageTextEndPosition=0; pageEndText10 = "";
+            textBox1.SelectAll();
+            //textBox1.Select(textBox1.TextLength, 0);
+            string x = textBox1.Text;
+            if (keyDownCtrlAdd(false))
+            {
+                if (x != br.Quickedit_data_textboxTxt)
+                {
+                    playSound(soundLike.exam);
+                    x = br.Quickedit_data_textboxTxt;
+                }
+                //非同步整理OCR文本時，這行就很需要：
+                textBox1.Text = CnText.RemarkBooksPunctuation(ref x);
+            }
+            bringBackMousePosFrmCenter();
+            //ResumeEvents();
+            #endregion
+        }
+
         /// <summary>
         /// 記錄程式執行是否在 pagePaste2GjcoolOCR 方法套用的堆疊（stack）裡
         /// </summary>
@@ -7470,9 +7485,16 @@ namespace WindowsFormsApp1
 
             #region 按下Shift鍵
             if (Control.ModifierKeys == Keys.Shift)
-            {//按下Shift鍵
+            {//按下Shift鍵                
+                if (e.KeyCode == Keys.F9)
+                {//Shift + F9 ：重啟小小輸入法
+                    e.Handled = true;
+                    Process.Start(dropBoxPathIncldBackSlash + @"VS\bat\重啟小小輸入法.bat");
+                    AvailableInUseBothKeysMouse();
+                    return;
+                }
                 if (e.KeyCode == Keys.F12)
-                {
+                {// Shift + F12
                     e.Handled = true;
                     saveText();
                     return;
@@ -7578,9 +7600,13 @@ namespace WindowsFormsApp1
                     return;
                 }
                 if (e.KeyCode == Keys.F9)
-                {//F9 ：重啟小小輸入法
+                {//F9 ：同數字鍵盤「+」 F8 20231213
                     e.Handled = true;
-                    Process.Start(dropBoxPathIncldBackSlash + @"VS\bat\重啟小小輸入法.bat");
+                    //Process.Start(dropBoxPathIncldBackSlash + @"VS\bat\重啟小小輸入法.bat");
+                    if (ocrTextMode)
+                        pagePaste2GjcoolOCR();
+                    else
+                        PressAddKeyMethodPaste2QuickEditBox();
                     return;
                 }
                 if (e.KeyCode == Keys.F10)
@@ -7600,7 +7626,10 @@ namespace WindowsFormsApp1
                 if (e.KeyCode == Keys.F12)
                 {
                     e.Handled = true;
-                    pagePaste2GjcoolOCR();//F12
+                    if (OcrTextMode)
+                        pagePaste2GjcoolOCR();//F12
+                    else
+                        PressAddKeyMethodPaste2QuickEditBox();
                     return;
                 }
                 if (e.KeyCode == Keys.Escape)
@@ -7659,18 +7688,37 @@ namespace WindowsFormsApp1
 
             br.ActiveForm1 = this;
 
-
             try
             {
-                if (!br.driver.WindowHandles.Contains(br.driver.CurrentWindowHandle))
-                    br.driver.SwitchTo().Window(br.LastValidWindow);
+
+                try
+                {
+                    if (!br.driver.WindowHandles.Contains(br.driver.CurrentWindowHandle))
+                        br.driver.SwitchTo().Window(br.LastValidWindow);
+                }
+                catch (Exception)
+                {
+                    try
+                    {
+                        br.driver.SwitchTo().Window(br.LastValidWindow);
+                        playSound(soundLike.exam);
+                    }
+                    catch (Exception)
+                    {
+                        if (br.driver.WindowHandles.Count > 0)
+                        {
+                            br.driver.SwitchTo().Window(br.driver.WindowHandles[0]);
+                            br.LastValidWindow = br.driver.WindowHandles[0];
+                        }
+
+                    }
+                }
+                br.LastValidWindow = br.driver.CurrentWindowHandle;
             }
             catch (Exception)
             {
-                br.driver.SwitchTo().Window(br.LastValidWindow);
-                playSound(soundLike.exam);
             }
-            br.LastValidWindow = br.driver.CurrentWindowHandle;
+
 
             #region 檢查是否必要 20230804Bard大菩薩：https://g.co/bard/share/9130d688e253            
             string quickedit_data_textboxTxt = br.Quickedit_data_textboxTxt;
@@ -10135,7 +10183,7 @@ namespace WindowsFormsApp1
                             ResumeEvents();
                             return;
                         case "wO"://輸入「wO」（wait OCR）以指定等待OCR諸過程最久的時間（以秒數），如「wO60」即最久等到60秒（1分鐘）
-                            br.OCR_wait_time_Top_Limit＿second= (int)t;
+                            br.OCR_wait_time_Top_Limit＿second = (int)t;
                             PauseEvents();
                             textBox2.Clear();
                             ResumeEvents();
