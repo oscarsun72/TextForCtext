@@ -3284,7 +3284,17 @@ internal static string getImageUrl() {
                     //Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("點數（算力配额）不足！目前僅有"+ points + " 至少需要"+pointCoin);
                     //轉由首頁「快速體驗」執行
                     bool fastXResulut = OCR_GJcool_FastExperience(downloadImgFullName, true);
-                    if (fastXResulut) driver.Close(); _OCR_GJcool_WindowClosed = true;
+                    if (fastXResulut)
+                    {
+                        try
+                        {
+                            driver.Close();
+                        }
+                        catch (Exception)
+                        {
+                        }
+                    }
+                    _OCR_GJcool_WindowClosed = true;
                     try
                     {
                         driver?.SwitchTo().Window(currentWindowHndl);
@@ -3410,20 +3420,20 @@ internal static string getImageUrl() {
 
 
             //driver.SwitchTo().Window(driver.CurrentWindowHandle);//切換到目前Selenium操控的視窗，就不怕沒及時得到焦點而失誤了
-                                                                 //try
-                                                                 //{
-                                                                 //    iwe.Click();//不行，會出錯
-                                                                 //}
-                                                                 //catch (Exception exx)
-                                                                 //{
-                                                                 //    //Console.WriteLine(exx.HResult + exx.Message);
-                                                                 //    //throw;
-                                                                 //}
-                                                                 //try
-                                                                 //{
-                                                                 //    //iwe = driver.FindElement(By.XPath("/html/body/div[13]/div/div[1]/div[1]/div[1]/form/div/input"));
-                                                                 //    iwe = driver.FindElement(By.XPath("//*[@id=\"line_img_form\"]/div/input"));
-                                                                 //    //wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
+            //try
+            //{
+            //    iwe.Click();//不行，會出錯
+            //}
+            //catch (Exception exx)
+            //{
+            //    //Console.WriteLine(exx.HResult + exx.Message);
+            //    //throw;
+            //}
+            //try
+            //{
+            //    //iwe = driver.FindElement(By.XPath("/html/body/div[13]/div/div[1]/div[1]/div[1]/form/div/input"));
+            //    iwe = driver.FindElement(By.XPath("//*[@id=\"line_img_form\"]/div/input"));
+            //    //wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
 
             //    //  "//*[@id=\"line_img_form\"]/div/input"
             //    //iwe.Click();

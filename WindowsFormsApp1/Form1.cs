@@ -2909,7 +2909,7 @@ namespace WindowsFormsApp1
         {
             #region 與 Ctrl + Alt + + 同
             //PauseEvents();
-            pageTextEndPosition=0; pageEndText10 = "";
+            pageTextEndPosition = 0; pageEndText10 = "";
             textBox1.SelectAll();
             //textBox1.Select(textBox1.TextLength, 0);
             string x = textBox1.Text;
@@ -7921,7 +7921,15 @@ namespace WindowsFormsApp1
 
                 saveText();
                 #region 如果在右邊有新開啟的分頁且網域均為《古籍酷》者等，即予關閉（按下Ctrl鍵略過；有時只是開啟了上一頁欲修訂，就不希望被關掉）
-                if (ModifierKeys != Keys.Control && br.driver.WindowHandles[br.driver.WindowHandles.Count - 1] != currentWindowHndl)
+                bool chk = false;
+                try
+                {
+                    chk = (ModifierKeys != Keys.Control && br.driver.WindowHandles[br.driver.WindowHandles.Count - 1] != currentWindowHndl);
+                }
+                catch (Exception)
+                {
+                }
+                if (chk)
                 {
                     SendKeys.Send("%r");//這是利用擴充功能設定的快速鍵：https://chrome.google.com/webstore/detail/shortkeys-custom-keyboard/logpjaacgmcbpdkdchjiaagddngobkck
                     Thread.Sleep(250);
@@ -8838,7 +8846,18 @@ namespace WindowsFormsApp1
                         //}
                         //foreach (string tabWin in tabWindowHandles)
                         //{
-                        if (br.driver.SwitchTo().Window(tabWin).Url.IndexOf("&action=editchapter") > -1)
+                        int chkWindows = 0;
+                        try
+                        {
+                            chkWindows = br.driver.SwitchTo().Window(tabWin).Url.IndexOf("&action=editchapter");
+                        }
+                        catch (Exception)
+                        {
+                            continue;
+                        }
+
+                        //if (br.driver.SwitchTo().Window(tabWin).Url.IndexOf("&action=editchapter") > -1)
+                        if (chkWindows > -1)
                         {
                             waitUpdate = true; waitTabWindowHandles = tabWin;
                             OpenQA.Selenium.IWebElement commit = br.waitFindWebElementByName_ToBeClickable("commit", br.WebDriverWaitTimeSpan); //br.driver.FindElement(OpenQA.Selenium.By.Name("commit"));
