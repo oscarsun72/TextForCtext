@@ -743,7 +743,13 @@ namespace TextForCtext
                         try
                         {
                             driver = driver ?? cDrv;
-                            ActiveForm1.Controls["textBox1"].Text = waitFindWebElementByName_ToBeClickable("data", _webDriverWaitTimSpan).Text;
+                            try
+                            {
+                                ActiveForm1.Controls["textBox1"].Text = waitFindWebElementByName_ToBeClickable("data", _webDriverWaitTimSpan).Text;
+                            }
+                            catch (Exception)
+                            {
+                            }
                         }
                         catch (Exception)
                         {
@@ -2272,6 +2278,9 @@ internal static string getImageUrl() {
                 new Tuple<string,DateTime>("ctextorg", DateTime.Parse("2023/9/29")) ,
                 new Tuple<string,DateTime>("greeceivacy", DateTime.Parse("2023/9/29")) ,
                 new Tuple<string,DateTime>("egyptivacy", DateTime.Parse("2023/9/29")) ,
+                new Tuple<string,DateTime>("bahrainivacy", DateTime.Parse("2023/9/29")) ,
+                new Tuple<string,DateTime>("luxembourgivacy", DateTime.Parse("2023/9/29")) ,
+                new Tuple<string,DateTime>("afghanistanivacy", DateTime.Parse("2023/9/29")) ,
 
 
                 new Tuple<string,DateTime>("vpnbygoogleone", DateTime.Parse("2023/9/29")) };
@@ -2448,7 +2457,7 @@ internal static string getImageUrl() {
                 {
                     //if (DateTime.Now.Subtract(GJcoolAccounts[i].Item2).Days > 0)
                     //if (DateTime.Now.Subtract(GJcoolAccounts[i].Item2).Hours > 22)
-                    if (DateTime.Now.Subtract(GJcoolAccounts[i].Item2).TotalHours > 23.4)
+                    if (DateTime.Now.Subtract(GJcoolAccounts[i].Item2).TotalHours > 23.6)
                     {
                         gjcoolAccountCounter--;
                         Form1.playSound(Form1.soundLike.exam);
@@ -3037,7 +3046,15 @@ internal static string getImageUrl() {
                     //driver.Close();
                     driver?.Close();
                     _OCR_GJcool_WindowClosed = true;
-                    driver?.SwitchTo().Window(currentWindowHndl);
+                    try
+                    {
+                        driver?.SwitchTo().Window(currentWindowHndl);
+                    }
+                    catch (Exception)
+                    {
+                        StopOCR = true;
+                        return false;
+                    }
                     StopOCR = true;
                     return fastXResulut;
                 }
@@ -4545,7 +4562,15 @@ internal static string getImageUrl() {
                 {
                     iwtext = driver.FindElement(By.XPath("/html/body/div[1]/div/div/div[2]/div/div[1]/div[3]/div[2]/div"));
                     wait = new WebDriverWait(driver, TimeSpan.FromSeconds(0.2));
-                    wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(iwtext));
+                    try
+                    {
+                        wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(iwtext));
+                    }
+                    catch (Exception)
+                    {
+                        //returnFalse = true;
+                        //goto finish;
+                    }
                 }
                 catch (Exception)
                 {
@@ -4616,7 +4641,7 @@ internal static string getImageUrl() {
                                 }
                             });
                             //tsRing.Wait(6000);
-                            ds = MessageBox.Show("是否讓程式自動更換IP？", "●切換IP？", MessageBoxButtons.OKCancel, MessageBoxIcon.None, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly); //Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("是否讓程式自動更換IP？", "●切換IP？")
+                            ds = MessageBox.Show("是否讓程式自動更換IP？", "●切換IP？●『" + iwtext.Text + "』●", MessageBoxButtons.OKCancel, MessageBoxIcon.None, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly); //Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("是否讓程式自動更換IP？", "●切換IP？")
                             if (DialogResult.OK == ds)
                             {//要自動切換IP時：
                              //driver.Close();//return以後也還會再執行一次哦！注意
