@@ -2281,6 +2281,8 @@ internal static string getImageUrl() {
                 new Tuple<string,DateTime>("bahrainivacy", DateTime.Parse("2023/9/29")) ,
                 new Tuple<string,DateTime>("luxembourgivacy", DateTime.Parse("2023/9/29")) ,
                 new Tuple<string,DateTime>("afghanistanivacy", DateTime.Parse("2023/9/29")) ,
+                new Tuple<string,DateTime>("türkiyeivacy", DateTime.Parse("2023/9/29")) ,
+                new Tuple<string,DateTime>("omanivacy", DateTime.Parse("2023/9/29")) ,
 
 
                 new Tuple<string,DateTime>("vpnbygoogleone", DateTime.Parse("2023/9/29")) };

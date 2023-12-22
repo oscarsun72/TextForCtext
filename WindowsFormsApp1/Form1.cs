@@ -6016,7 +6016,8 @@ namespace WindowsFormsApp1
                 #region checkAbnormalLinePara method test unit
                 try
                 {
-                    int[] chk = checkAbnormalLinePara(xCopy);
+                    int[] chk = checkAbnormalLinePara(xCopy.Replace
+                        ("<p>" + Environment.NewLine, "★★★").Replace("<p>", string.Empty).Replace("★★★", "<p>" + Environment.NewLine));
                     if (chk.Length > 0)
                     {
                         bringBackMousePosFrmCenter();
@@ -7531,6 +7532,15 @@ namespace WindowsFormsApp1
                         {
                             br.driver = br.driver ?? br.DriverNew();
                             br.driver.SwitchTo().Window(br.driver.CurrentWindowHandle);
+
+                            OpenQA.Selenium.IWebElement iw = br.driver.FindElement(OpenQA.Selenium.By.XPath("/html/body/div[2]"));
+                            iw.Click();
+                            //Thread.Sleep(800);
+                            //Point copyBtnPos = new Point(100, 1050);
+                            //Cursor.Position = copyBtnPos;
+                            //MouseOperations.MouseEventMousePos(MouseOperations.MouseEventFlags.LeftDown, copyBtnPos);
+                            //MouseOperations.MouseEventMousePos(MouseOperations.MouseEventFlags.LeftUp, copyBtnPos);
+
                             SendKeys.Send("%r");
                             Thread.Sleep(350);
                             //Activate();
