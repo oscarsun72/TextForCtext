@@ -150,6 +150,111 @@ namespace TextForCtext
 
         }
 
+        /// <summary>
+        /// 檢查目前IP的狀態
+        /// 由 VariantsExist 改寫而來 20231224平安夜 由Bing大菩薩所改寫者
+        /// </summary>
+        /// <param name="iptoChk">要檢查的IP</param>
+        /// <returns>回傳一個Tuple分別對應IP資料表除了IP欄位外的各個欄位值
+        /// IpAddressBanned、IPisblocked、ctext、RecordDate
+        /// 若沒找到IP，則傳回null
+        /// </returns>
+        internal static Tuple<bool, bool, bool, DateTime> IPStatus(string iptoChk)
+        {
+            // 建立連接字串
+            string f = fileFullName("查字.mdb");
+            if (f == "")
+            {
+                MessageBox.Show("找不到「查字.mdb」");
+                return null;
+            }
+            openDb(f, out OleDbConnection conn);
+            // 建立命令物件
+            OleDbCommand cmd = conn.CreateCommand();
+
+            // 設定命令的文字
+            cmd.CommandText = "SELECT * FROM IP WHERE strcomp(IP , @IP)=0";//@word 為參數名
+
+            // 設定命令的參數
+            cmd.Parameters.AddWithValue("@IP", iptoChk);
+
+            // 執行命令並取得結果
+            OleDbDataReader reader = cmd.ExecuteReader();
+
+            // 判斷結果
+            if (reader.HasRows)
+            {
+                while (reader.Read())
+                {
+                    bool IpAddressBanned = reader.GetBoolean(reader.GetOrdinal("IpAddressBanned"));
+                    bool IPisblocked = reader.GetBoolean(reader.GetOrdinal("IPisblocked"));
+                    bool ctext = reader.GetBoolean(reader.GetOrdinal("ctext"));
+                    DateTime RecordDate = reader.GetDateTime(reader.GetOrdinal("RecordDate"));
+                    reader.Close();
+                    conn.Close();
+                    return new Tuple<bool, bool, bool, DateTime>(IpAddressBanned, IPisblocked, ctext, RecordDate);
+                }
+            }
+            else
+            {
+                try
+                {
+                    Clipboard.SetText(iptoChk);//複製到剪貼簿以便到MS Access 輸入新記錄時直接貼上
+                }
+                catch (Exception)
+                {
+                }
+                reader.Close();
+                conn.Close();
+                return null;// 資料表中沒有該字記錄
+            }
+            reader.Close();
+            conn.Close();
+            return null;
+        }
+
+        //internal static Tuple<bool,bool,bool,DateTime>    IPStatusTemp(string iptoChk)
+        //{
+        //    // 建立連接字串
+        //    string f = fileFullName("查字.mdb");
+        //    if (f == "")
+        //    {
+        //        MessageBox.Show("找不到「查字.mdb」");
+        //        return null;
+        //    }
+        //    openDb(f, out OleDbConnection conn);
+        //    // 建立命令物件
+        //    OleDbCommand cmd = conn.CreateCommand();
+
+        //    // 設定命令的文字
+        //    //cmd.CommandText = "SELECT COUNT(*) FROM 異體字轉正 WHERE 異體字 = @word";//@word 為參數名，用「=」比對中文會不正確，在cjk-擴充字集時
+        //    cmd.CommandText = "SELECT COUNT(*) FROM IP WHERE strcomp(IP , @IP)=0";//@word 為參數名
+
+        //    // 設定命令的參數
+        //    cmd.Parameters.AddWithValue("@IP", iptoChk);
+
+        //    // 執行命令並取得結果
+        //    int count = (int)cmd.ExecuteScalar();
+        //    //*/
+
+        //    // 關閉資料庫連接
+        //    conn.Close();
+        //    // 判斷結果
+        //    if (count > 0)
+        //    {
+        //        return new Tuple();// 資料表中已有該字記錄,則以Tuple回傳除了IP欄位外的各個欄位值
+        //    }
+        //    else
+        //    {
+        //        Clipboard.SetText(iptoChk);//複製到剪貼簿以便到MS Access 輸入新記錄時直接貼上
+        //        return null;// 資料表中沒有該字記錄
+        //    }
+
+        //}
+
+
+
+
 
         /// <summary>
         /// 輸入平抬條件：0=後綴；1=前綴；2=前後之前；3前後之後；4是前+後之詞彙；5非前+後之詞彙；6非後綴之詞彙；7非前綴之詞彙

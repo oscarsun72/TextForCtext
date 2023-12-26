@@ -7116,7 +7116,9 @@ namespace WindowsFormsApp1
             }
             if ((m & Keys.Control) == Keys.Control
                 && (m & Keys.Shift) == Keys.Shift)
-            {   //按下 ctrl + shift + *  toggle keyinTextmode 切換手動鍵入模式
+            {
+
+                //按下 ctrl + shift + *  toggle keyinTextmode 切換手動鍵入模式
                 if (e.KeyCode == Keys.Multiply)
                 {
                     e.Handled = true;
@@ -7240,6 +7242,15 @@ namespace WindowsFormsApp1
             #region Ctrl + Alt
             if ((m & Keys.Control) == Keys.Control && (m & Keys.Alt) == Keys.Alt)
             {
+                //Ctrl + Alt + i 檢查IP現狀
+                if (e.KeyCode == Keys.I)
+                {
+                    e.Handled = true;
+                    SystemSounds.Exclamation.Play();
+                    br.IPStatusMessageShow();
+                    bringBackMousePosFrmCenter();
+                    return;
+                }
                 if (e.KeyCode == Keys.O)
                 {//Ctrl + Alt + o :下載圖片，交給Google Keep OCR
                     if (browsrOPMode == BrowserOPMode.appActivateByName) return;
@@ -10240,6 +10251,7 @@ namespace WindowsFormsApp1
                     else if (x == "kk")//只切換IP，不切換《古籍酷》帳戶
                     {
                         br.IPSwitchOnly();
+                        br.IPStatusMessageShow();
                     }
                     else if (x == "jk")//不切換IP，不切換《古籍酷》帳戶，欲直接進入首頁快速體驗者
                     {
