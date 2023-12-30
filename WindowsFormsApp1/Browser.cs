@@ -1664,7 +1664,15 @@ namespace TextForCtext
                         //throw;
                     }
                 Quickedit_data_textbox = waitFindWebElementByName_ToBeClickable("data", _webDriverWaitTimSpan, driver);
-                quickedit_data_textboxTxt = Quickedit_data_textbox == null ? "" : Quickedit_data_textbox.Text;
+                try
+                {
+                    quickedit_data_textboxTxt = Quickedit_data_textbox == null ? "" : Quickedit_data_textbox.Text;
+
+                }
+                catch (Exception)
+                {
+                    quickedit_data_textboxTxt = string.Empty;
+                }
             }
         }
 
@@ -1719,6 +1727,9 @@ namespace TextForCtext
                                     {
                                         RestartDriver();
                                     }
+                                    else if (ex1.Message.StartsWith("no such window"))
+                                        //可能是按下擴充功能故 20231228
+                                        SendKeys.SendWait("{esc}");
                                     else
                                         goto default;
                                     break;
@@ -2296,6 +2307,8 @@ internal static string getImageUrl() {
                 new Tuple<string,DateTime>("886936158941", DateTime.Parse("2023/9/29")) ,
                 new Tuple<string,DateTime>("88628324674", DateTime.Parse("2023/9/29")) ,
                 new Tuple<string,DateTime>("111018", DateTime.Parse("2023/9/29")) ,
+                new Tuple<string,DateTime>("chilenord", DateTime.Parse("2023/9/29")) ,
+                new Tuple<string,DateTime>("czechianord", DateTime.Parse("2023/9/29")) ,
 
 
                 new Tuple<string,DateTime>("vpnbygoogleone", DateTime.Parse("2023/9/29")) };
@@ -2321,8 +2334,48 @@ internal static string getImageUrl() {
             catch (Exception)
             {
             }
+            if (!justSwitchAccount)
+            {
+                bool switherOk = false;
+                //if (!GoogleOneVPNSwitcher()) if (!ProtonVPNSwitcher()) if (!IvacyVPNSwitcher()) TouchVPN_IvacyVPN_VeePN_ExtensionSwitcher();
+                switherOk = GoogleOneVPNSwitcher();
+                if (!switherOk)
+                    switherOk = ProtonVPNSwitcher();
+                if (!switherOk)
+                    switherOk = IvacyVPNSwitcher();
+                if (!switherOk) switherOk = TouchVPN_IvacyVPN_VeePN_ExtensionSwitcher();
 
-            if (!justSwitchAccount) if (!GoogleOneVPNSwitcher()) if (!ProtonVPNSwitcher()) if (!IvacyVPNSwitcher()) TouchVPN_IvacyVPN_VeePN_ExtensionSwitcher();
+                if (switherOk)
+                {//檢查切換到的新IP狀態：
+                    Thread.Sleep(800);
+                    if (!IPStatusMessageShow())
+                    {
+
+                        //20231228  Bing大菩薩：C# 多執行緒存取剪貼簿：
+                        Thread thread = new Thread(() =>
+                        {
+                            VPNSwitchedCheckOut(CurrentIP);
+                        });
+                        thread.SetApartmentState(ApartmentState.STA); // 設定執行緒為 STA 模式
+                        thread.Start();
+                        //thread.Join(); // 等待該執行緒完成
+                        if (thread.IsAlive)
+                        {
+                            // The thread is still running.
+                            thread.Join(1000);
+                        }
+                        else
+                        {
+                            // The thread has completed.
+                        }
+
+                    }
+
+                }
+            }
+
+
+
             if (justIPSwitch) { } //{ if (!ActiveForm1.Active) { ActiveForm1.BringToFront(); } }//改寫在呼叫端，以免多執行緒時出錯
             else
             {
@@ -2448,7 +2501,7 @@ internal static string getImageUrl() {
                 }
                 if (!connectedOK) return false;
 
-                if (!justSwitchAccount) IPStatusMessageShow();
+
 
 
                 ActiveForm1.HideToNICo();//if (ActiveForm1.TopMost) ActiveForm1.TopMost = false;
@@ -2555,9 +2608,9 @@ internal static string getImageUrl() {
         internal static bool TouchVPN_IvacyVPN_VeePN_ExtensionSwitcher()
         {
             //一個擴充功能按鈕長寬大約 35-39 點（35×35）
-            Point copyBtnPos = new Point(1705, 55);//擴充功能顯示清單中最右邊的位置 118.0.5993.89版以後
+            //Point copyBtnPos = new Point(1705, 55);//擴充功能顯示清單中右邊第2位置 	120.0.6099.110版以後
             //Point copyBtnPos = new Point(1700, 55);//擴充功能顯示清單中最右邊的位置 118.0.5993.89版以後
-            //Point copyBtnPos = new Point(1739, 55);//擴充功能顯示清單中最右邊的位置
+            Point copyBtnPos = new Point(1739, 55);//擴充功能顯示清單中最右邊的位置
             Cursor.Position = copyBtnPos;
             //ClickLeftMouse(x, y);
             //Thread.Sleep(150);
@@ -2591,43 +2644,73 @@ internal static string getImageUrl() {
             {
                 //LastValidWindow = driver.WindowHandles[0];
             }
+            Thread.Sleep(650);
 
-            if (!IPStatusMessageShow())
-            {
-                openNewTabWindow(WindowType.Tab);
-                Thread.Sleep(850);
-                GoToUrlandActivate("https://iplocation.com/");
-                string ip = waitFindWebElementBySelector_ToBeClickable("body > div.top-container > div.bottom-container > div.rubber-container.result > div > table > tbody > tr:nth-child(1) > td > b")?.Text;
-                //Clipboard.SetText(
-                //waitFindWebElementBySelector_ToBeClickable("body > div.top-container > div.bottom-container > div.rubber-container.result > div > table > tbody > tr:nth-child(1) > td > b").Text);
-                Thread.Sleep(850);
-                openNewTabWindow(WindowType.Tab);
-                GoToUrlandActivate("https://gj.cool/login?next=%2Ftry_ocr");//檢視IP是否被封鎖
-                                                                            //Thread.Sleep(850);
-                Thread.Sleep(1450);
-                IWebElement iwe = waitFindWebElementBySelector_ToBeClickable("body > div.alert.alert-danger.alert-dismissible");
-                if (iwe != null)
-                {
-                    if (iwe.Text.Contains("IP已被封锁。 IP is blocked."))
-                    {//開啟Google Keep記錄，以檢視封鎖情況：
-                        openNewTabWindow(WindowType.Tab);
-                        GoToUrlandActivate("https://keep.google.com/#NOTE/1-bHzJG4vtIyJMsT7SSRkgSZ2DSvcAabhLC88WERCnPxTd9MqsSXwgpHxYFU2");
-                        if (!ip.IsNullOrEmpty())
-                        {
-                            SystemSounds.Exclamation.Play();
-                            Thread.Sleep(2200);
-                            SendKeys.SendWait("^f");
-                            SendKeys.SendWait(ip + "~");
-                        }
-                    }
-                }
-            }
             Task.Run(() => { Form1.playSound(Form1.soundLike.over); });
             Thread.Sleep(850);
 
             return true;
 
         }
+        /// <summary>
+        /// 在VPN切換IP後的檢查
+        /// </summary>
+        /// <param name="ip"></param>
+        /// <param name="already">若已經檢查，欲略過，則為true</param>
+        internal static void VPNSwitchedCheckOut(string ip = "", bool already = false)
+        {
+            if (already) return;
+            openNewTabWindow(WindowType.Window);
+            Thread.Sleep(850);
+            if (ip == string.Empty)
+            {
+                GoToUrlandActivate("https://iplocation.com/");
+                ip = waitFindWebElementBySelector_ToBeClickable("body > div.top-container > div.bottom-container > div.rubber-container.result > div > table > tbody > tr:nth-child(1) > td > b")?.Text;
+                Thread.Sleep(850);
+            }
+            //openNewTabWindow(WindowType.Tab);
+            GoToUrlandActivate("https://gj.cool/login?next=%2Ftry_ocr");//檢視IP是否被封鎖
+                                                                        //Thread.Sleep(850);
+            Thread.Sleep(1450);
+            IWebElement iwe = waitFindWebElementBySelector_ToBeClickable("body > div.alert.alert-danger.alert-dismissible");
+            if (iwe != null)
+            {
+                if (iwe.Text.Contains("IP已被封锁。 IP is blocked.") || iwe.Text.Contains("\r\n                        系统太忙。 System is busy.\r\n                        \r\n                    "))
+                {//開啟Google Keep記錄，以檢視封鎖情況：
+                 //openNewTabWindow(WindowType.Tab);
+                 //GoToUrlandActivate("https://keep.google.com/#NOTE/1-bHzJG4vtIyJMsT7SSRkgSZ2DSvcAabhLC88WERCnPxTd9MqsSXwgpHxYFU2");
+                 //if (!ip.IsNullOrEmpty())
+                 //{
+                 //    SystemSounds.Exclamation.Play();
+                 //    Thread.Sleep(2200);
+                 //    SendKeys.SendWait("^f");
+                 //    SendKeys.SendWait(ip + "~");
+                 //}
+                 //20231228  Bing大菩薩：C# 多執行緒存取剪貼簿：
+                    Clipboard.SetText(ip);
+
+                    if (File.Exists("C:\\Windows\\Media\\ring05.wav"))
+                    {
+                        using (SoundPlayer sp = new SoundPlayer("C:\\Windows\\Media\\ring05.wav"))
+                        {
+                            sp.Play();
+                        }
+                    }
+                }
+                
+            }
+            try
+            {
+                driver.Close();
+            }
+            catch (Exception)
+            {
+            }
+        }
+
+        [DllImport("user32.dll")]
+        public static extern bool IsWindowVisible(IntPtr hWnd);
+
         /// <summary>
         /// 切換ProtonVPN。請將其視窗最大化
         /// </summary>
@@ -2641,43 +2724,101 @@ internal static string getImageUrl() {
 
             if (targetWindowHandle != IntPtr.Zero)
             {
-                // 將目標窗口切換到最前面
-                ShowWindow(targetWindowHandle, SW_MAXIMIZE);//SW_RESTORE);
-                SetForegroundWindow(targetWindowHandle);
-                /* chatGPT大菩薩：20230926
-                 * 你正確，SetForegroundWindow 方法在視窗最小化時可能無法成功將其切換到最前面。為了解決這個問題，你可以嘗試使用 ShowWindow 函數來將視窗恢復到正常狀態，然後再調用 SetForegroundWindow。這樣可以確保視窗在最前面並且可見。
-                 */
-                Thread.Sleep(150);
-                // 模擬滑鼠左鍵點擊指定座標（Random Connect按鈕）
-                //免費版：
-                //int x = 229;////338;
-                //int y = 210;//161//364;
-                //            //Change server 按鈕
-                //            //Disconnect 按鈕
-                //付費版：
-                int x = 338;
-                int y = 364;
-                Point copyBtnPos = new Point(x, y);
-                Cursor.Position = copyBtnPos;
-                //ClickLeftMouse(x, y);
-                Thread.Sleep(350);
-                clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.soundLike.none);
-                Thread.Sleep(150);
-                //Task.Run(() => { Thread.Sleep(5800); ShowWindow(targetWindowHandle, SW_MINIMIZE); });
-                Task.Run(() => { Thread.Sleep(8800); ShowWindow(targetWindowHandle, SW_MINIMIZE); });
+
+                if (IsWindowVisible(targetWindowHandle))
+                {
+
+                    // 將目標窗口切換到最前面
+                    ShowWindow(targetWindowHandle, SW_MAXIMIZE);//SW_RESTORE);
+                    SetForegroundWindow(targetWindowHandle);
+                    /* chatGPT大菩薩：20230926
+                     * 你正確，SetForegroundWindow 方法在視窗最小化時可能無法成功將其切換到最前面。為了解決這個問題，你可以嘗試使用 ShowWindow 函數來將視窗恢復到正常狀態，然後再調用 SetForegroundWindow。這樣可以確保視窗在最前面並且可見。
+                     */
+                    Thread.Sleep(150);
+                    // 模擬滑鼠左鍵點擊指定座標（Random Connect按鈕）
+                    //免費版：
+                    //int x = 229;////338;
+                    //int y = 210;//161//364;
+                    //            //Change server 按鈕
+                    //            //Disconnect 按鈕
+                    //付費版：
+                    int x = 338;
+                    int y = 364;
+                    Point copyBtnPos = new Point(x, y);
+                    Cursor.Position = copyBtnPos;
+                    //ClickLeftMouse(x, y);
+                    Thread.Sleep(350);
+                    clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.soundLike.none);
+                    Thread.Sleep(150);
+                    //Task.Run(() => { Thread.Sleep(5800); ShowWindow(targetWindowHandle, SW_MINIMIZE); });
+                    Task.Run(() => { Thread.Sleep(8800); ShowWindow(targetWindowHandle, SW_MINIMIZE); });
+                }
+                else
+                    ChromeExtensionsProtonVPNSwitcher();
 
                 return true;
             }
             return false;
         }
+
+
+        internal static bool ChromeExtensionsProtonVPNSwitcher()
+        {
+
+            //一個擴充功能按鈕長寬大約 35-39 點（35×35）
+            //Point copyBtnPos = new Point(1662, 55);//擴充功能顯示清單中右邊第3位置 120.0.6099.110版以後
+            //Point copyBtnPos = new Point(1705, 55);//擴充功能顯示清單中右邊第2位置 	120.0.6099.110版以後
+            //Point copyBtnPos = new Point(1700, 55);//擴充功能顯示清單中最右邊的位置 118.0.5993.89版以後
+            Point copyBtnPos = new Point(1739, 55);//擴充功能顯示清單中最右邊的位置
+            Cursor.Position = copyBtnPos;
+            //ClickLeftMouse(x, y);
+            //Thread.Sleep(150);
+            clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.soundLike.press);
+            Thread.Sleep(450);
+
+            List<string> list = new List<string>() { "土耳其", "丹麥", "厄瓜多", "巴西", "巴基斯坦", "日本", "比利時", "以色列", "加拿大", "北馬其頓", "台灣", "立陶宛", "冰島", "匈牙利", "印尼", "印度", "西班牙", "克羅埃西亞", "希臘", "奈吉利亞", "拉脫維亞", "法國", "波多黎各", "波蘭", "芬蘭", "阿拉伯聯合大公國", "阿根廷", "俄羅斯", "保加利亞", "南非", "南韓", "柬埔寨", "美國", "英國", "香港", "哥倫比亞", "哥斯達黎加", "埃及", "挪威", "泰國", "烏克蘭", "秘魯", "紐西蘭", "馬來西亞", "馬爾他", "捷克", "荷蘭", "喬治亞", "斯洛伐克", "斯洛維尼亞", "智利", "菲律賓", "越南", "塞爾維亞", "奧地利", "愛沙尼亞", "愛爾蘭", "新加坡", "瑞士", "瑞典", "義大利", "葡萄牙", "德國", "摩洛哥", "摩爾多瓦", "緬甸", "墨西哥", "澳洲", "盧森堡", "賽普勒斯", "羅馬尼亞" };
+            //20231228 Bing大菩薩：使用C#隨機從清單中選取值：
+            /*如果您將 Random 物件的實例化放在方法內部，並且在很短的時間內連續呼叫該方法，那麼可能會產生相同的隨機數字。這是因為 Random 物件的預設種子值是系統時鐘，而系統時鐘的解析度可能只有15毫秒。因此，如果在這個解析度內連續創建 Random 物件，那麼它們的種子值將會是相同的，從而產生相同的隨機數字。
+             * 要解決這個問題，您可以將 Random 物件實例化一次，並將其作為類別的欄位或屬性，然後在需要的地方使用該物件。……是的，如果您相隔幾分鐘才調用這個方法一次，那麼 Random 物件的種子值（基於系統時鐘）將有足夠的時間變化，因此每次調用方法時，都能產生不同的隨機數字，從而選取清單中不同的元素。在這種情況下，您不需要將 Random 物件作為類別的欄位或屬性，可以直接在方法內部實例化 Random 物件。
+             */
+            Random rand = new Random();
+            //int index = rand.Next(list.Count);
+            //Console.WriteLine(list[index]);
+            string country = list[rand.Next(list.Count)];
+            Thread.Sleep(1650);
+            SendKeys.SendWait(country + "~");
+            try
+            {
+                LastValidWindow = driver.CurrentWindowHandle;
+
+            }
+            catch (Exception)
+            {
+                //LastValidWindow = driver.WindowHandles[0];
+            }
+            Thread.Sleep(650);
+            SendKeys.SendWait("{esc}");
+            Thread.Sleep(850);
+
+            Task.Run(() => { Form1.playSound(Form1.soundLike.over); });
+
+            return true;
+        }
+
         /// <summary>
         /// 顯示IP現狀。快速鍵 Ctrl + Alt + i
-        /// </summary>
+        /// </summary>        
+        /// <param name="currentip"></param>
+        /// <param name="already">若已經檢查，則為true</param>
         /// <returns>若IP OK，未被封鎖，則傳回 false 且不顯示訊息方塊 ；若封鎖，則傳回 true 且顯示訊息方塊</returns>
-        internal static bool IPStatusMessageShow()
+        internal static bool IPStatusMessageShow(string currentip = "", bool already = false)
         {
-            string currentip = GetPublicIpAddress(string.Empty);
-            if (CurrentIP == currentip) { MessageBox.Show("IP未更動！", "IP Status", MessageBoxButtons.OK, MessageBoxIcon.Information, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly); return false; }
+            if (already) return false;
+            if (currentip == string.Empty) currentip = GetPublicIpAddress(string.Empty);
+            else
+            {
+                if (currentip == GetPublicIpAddress(string.Empty)) { MessageBox.Show("IP未更動！", "IP Status", MessageBoxButtons.OK, MessageBoxIcon.Information, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly); return false; }
+            }
             CurrentIP = currentip;
             var ip = Mdb.IPStatus(CurrentIP);
             string msgText = "";
@@ -2695,14 +2836,25 @@ internal static string getImageUrl() {
             else
             {
                 if (ip.Item1 && !ip.Item2)
+                {
                     msgText = "只有快速体验 Fast Experience 被封鎖";
+                    MessageBox.Show(msgText, CurrentIP + "IP Status", MessageBoxButtons.OK, MessageBoxIcon.Information, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
+                }
                 else if (!ip.Item1 && ip.Item2)
+                {
                     msgText = "只有 try_ocr 被封鎖";
+                    MessageBox.Show(msgText, CurrentIP + "IP Status", MessageBoxButtons.OK, MessageBoxIcon.Information, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
+                }
                 else if (ip.Item1 && ip.Item2)
+                {
                     msgText = "《古籍酷》OCR皆被封鎖";
+                    MessageBox.Show(msgText, CurrentIP + "IP Status", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
+                }
                 else if (ip.Item3)
+                {
                     msgText = "只有《中國哲學書電子化計劃》被封鎖";
-                MessageBox.Show(msgText, "IP Status", MessageBoxButtons.OK, MessageBoxIcon.Information, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
+                    MessageBox.Show(msgText, CurrentIP + "IP Status", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
+                }
             }
             return msgText != "目前IP " + CurrentIP + " OK!";
         }
@@ -2939,6 +3091,14 @@ internal static string getImageUrl() {
                     ActiveForm1.AvailableInUseBothKeysMouse();
                     //ActiveForm1.Activate();
                 });
+
+
+                //Process.Start("https://gj.cool/login?next=%2Ftry_ocr https://iplocation.com/");
+                //Microsoft.VisualBasic.Interaction.Shell("W:\\PortableApps\\PortableApps\\GoogleChromePortable\\App\\Chrome-bin\\chrome.exe https://gj.cool/login?next=%2Ftry_ocr https://iplocation.com/"
+                //    , Microsoft.VisualBasic.AppWinStyle., bool, int)
+                // 前面 OCR_GJcool_AccountChanged_Switcher 中已經檢查過了
+                //if (!IPStatusMessageShow())
+                //    VPNSwitchedCheckOut(CurrentIP);
             }
             return true;
         }
@@ -3026,11 +3186,26 @@ internal static string getImageUrl() {
         /// <returns></returns>
         public static string GetPublicIpAddress(string name)
         {
-            string publicIpAddress;
+            string publicIpAddress = string.Empty;
 
             using (var webClient = new System.Net.WebClient())
             {
-                publicIpAddress = webClient.DownloadString("https://api.ipify.org");
+                try
+                {
+                    publicIpAddress = webClient.DownloadString("https://api.ipify.org");
+                }
+                catch (Exception)
+                {
+                    Thread.Sleep(2800);
+                    try
+                    {
+                        publicIpAddress = webClient.DownloadString("https://api.ipify.org");
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show(ex.HResult + ex.Message, "", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
+                    }
+                }
                 //string pcIpAddress = GetPCIpAddress("乙太網路");
                 string pcIpAddress = GetPCIpAddress(name);
                 if (publicIpAddress == pcIpAddress || pcIpAddress == null)
@@ -3042,7 +3217,15 @@ internal static string getImageUrl() {
                 retry:
                     //Thread.Sleep(5000);
                     openNewTabWindow();//要打開比較快更新
-                    driver.Navigate().GoToUrl(ipUrl);
+                    try
+                    {
+                        driver.Navigate().GoToUrl(ipUrl);
+                    }
+                    catch (Exception)
+                    {
+                        openNewTabWindow();//要打開比較快更新
+                        driver.Navigate().GoToUrl(ipUrl);
+                    }
                     DateTime dt = DateTime.Now;
                     IWebElement ie = waitFindWebElementBySelector_ToBeClickable(selector);
                     while (ie == null)
@@ -3072,11 +3255,11 @@ internal static string getImageUrl() {
                     try
                     {
                         driver.Close();
+                        driver.SwitchTo().Window(LastValidWindow);
                     }
                     catch (Exception)
                     {
                     }
-                    driver.SwitchTo().Window(LastValidWindow);
                     ActiveForm1.ResumeEvents();
                     if (publicIpAddress != pcIpAddress) return publicIpAddress;
                 }
@@ -3391,7 +3574,8 @@ internal static string getImageUrl() {
                 //取得點數，如「 117 / 1000」格式
                 string innerText = iwe.GetAttribute("innerText");
                 if (innerText.IndexOf(" /") > -1 && " ".Length + innerText.IndexOf(" /") - " ".Length <= innerText.Length)
-                    int.TryParse(innerText.Substring(" ".Length, innerText.IndexOf(" /") - " ".Length), out points);
+                    //int.TryParse(innerText.Substring(" ".Length, innerText.IndexOf(" /") - " ".Length), out points);
+                    int.TryParse(innerText.Substring(0, innerText.IndexOf(" /")), out points);
                 //當點數不足時：
                 if (points < pointCoin)
                 {
@@ -3626,6 +3810,9 @@ internal static string getImageUrl() {
             //tryTimes = 0;
             //if (iwe == null) return false;
 
+            //由頁籤數判斷，是否在上傳完畢後，OCR進行時，按下Chrome瀏覽器快速鍵 Alt + r 以關閉右邊的頁籤。因為有時很卡、甚至連線中斷，須開啟多個《古籍酷》頁面以刺激其連上
+            int tabCount = driver.WindowHandles.Count;
+
             //while (iwe == null && waitFindWebElementBySelector_ToBeClickable("#auto_ocr") == null)
             while (iwe == null)// && waitFindWebElementBySelector_ToBeClickable("#auto_ocr") == null)
             {
@@ -3739,6 +3926,8 @@ internal static string getImageUrl() {
             }
             #endregion
 
+            //若頁籤數較上傳時為多，則按下Chrome瀏覽器快速鍵 Alt + r 以關閉右側頁籤（當是輔助連線用所開啟者） 20231228
+            if (driver.WindowHandles.Count > tabCount) SendKeys.SendWait("%r");
 
             //等待OCR，上限為30秒
             //iwe = waitFindWebElementBySelector_ToBeClickable("# OneLine > div.d-flex.justify-content-between.mt-2.mb-1 > div:nth-child(1) > div:nth-child(2) > ul > li:nth-child(2) > button");
@@ -3850,10 +4039,24 @@ internal static string getImageUrl() {
             else
             {
                 //【文本行】按鈕
-                iwe = waitFindWebElementBySelector_ToBeClickable("#OneLine > div.d-flex.justify-content-between.mt-2.mb-1 > div:nth-child(3) > div:nth-child(6) > button:nth-child(2) > i");
+                //iwe = waitFindWebElementBySelector_ToBeClickable("#OneLine > div.d-flex.justify-content-between.mt-2.mb-1 > div:nth-child(3) > div:nth-child(6) > button:nth-child(2) > i");
+                iwe = waitFindWebElementBySelector_ToBeClickable("#OneLine > div.d-flex.justify-content-between.mt-2.mb-1 > div:nth-child(3) > div:nth-child(6) > button:nth-child(2)");
+                //if (iwe == null)
+                //{
+                //    SendKeys.SendWait("{esc}");
+                //    iwe = waitFindWebElementBySelector_ToBeClickable("#OneLine > div.d-flex.justify-content-between.mt-2.mb-1 > div:nth-child(3) > div:nth-child(6) > button:nth-child(2)");
+                //}
                 if (iwe != null)
                 {
-                    iwe.Click();
+                    try
+                    {
+                        iwe.Click();
+                    }
+                    catch (Exception)
+                    {
+                        SendKeys.SendWait("{esc}");
+                        iwe.Click();
+                    }
                     //文本窗口
                     iwe = waitFindWebElementBySelector_ToBeClickable("#TextArea");
                     if (iwe != null)
@@ -4344,11 +4547,32 @@ internal static string getImageUrl() {
                 driver.Navigate().GoToUrl(gjCool);
                 _OCR_GJcool_WindowClosed = false;
                 if (signOut)
-                {
+                {//登出帳號
                     Form1.playSound(Form1.soundLike.done);
                     waitFindWebElementBySelector_ToBeClickable("#navbarNav > ul:nth-child(2) > li:nth-child(2) > a > p.mb-0.fs-6.fst-italic").Click();
                     //if (signOut)waitFindWebElementBySelector_ToBeClickable("#navbarNav > ul:nth-child(2) > li > a > p.mb-0.fs-6.fst-italic").Click();
                     Form1.playSound(Form1.soundLike.over);
+
+                    //現在機制似乎改變了，故改成此式 20231228
+                    returnFalse = true;
+                    driver.Close();
+                    Thread.Sleep(900);
+
+                    string targetProcessName = "Proton VPN";//"ProtonVPN.exe"; // 目標程序的名稱
+                    // 查找具有指定程式名稱的窗體
+                    IntPtr targetWindowHandle = FindWindow(null, targetProcessName);
+                    if (targetWindowHandle != IntPtr.Zero)
+                    {
+                        if (IsWindowVisible(targetWindowHandle))//使用Proton App
+                            ActiveForm1.Controls["textBox2"].Text = "kk";
+                        else//使用Proton 擴充功能
+                            ActiveForm1.Controls["textBox2"].Text = "gg";
+                    }
+                    else
+                        ActiveForm1.Controls["textBox2"].Text = "kk";
+                    Thread.Sleep(900);
+                    SendKeys.SendWait("{esc}");
+                    goto finish;
                 }
             }
             catch (Exception ex)
@@ -4371,8 +4595,8 @@ internal static string getImageUrl() {
             int Height = SystemInformation.PrimaryMonitorSize.Height;
             //MessageBox.Show("你的螢幕解析度是" + Size + "\n Width = " + Width + "\n Height = " + Height);
             //複製按鈕的位置：20231106
-            //int copyBtnPosX = Width / 1920 * 835, copyBtnPosY = Height / 1200 * 730;
-            int copyBtnPosX = (Width / 1920) * 835, copyBtnPosY = (Height / 1200) * 711;
+            int copyBtnPosX = Width / 1920 * 835, copyBtnPosY = Height / 1200 * 730;//835,730
+            //int copyBtnPosX = (Width / 1920) * 835, copyBtnPosY = (Height / 1200) * 711;//835,711
             if (Copybutton_GjcoolFastExperience_Location.IsEmpty) Copybutton_GjcoolFastExperience_Location = new Point(copyBtnPosX, copyBtnPosY);
             //int copyBtnPosX = Width * (835 / 1920), copyBtnPosY = Height * (730 / 1200);
 
@@ -4383,7 +4607,14 @@ internal static string getImageUrl() {
             IWebElement iwe = waitFindWebElementBySelector_ToBeClickable("body > div.container-fluid.bg-dark.px-1 > div > h2.text-center.my-2.py-4 > button > div", 10);
             if (iwe == null) return false;
             Form1.playSound(Form1.soundLike.processing);
-            iwe.Click();
+            try
+            {
+                iwe.Click();
+            }
+            catch (Exception)
+            {
+                return false;
+            }
 
             //「上傳 拍照」按鈕：
             iwe = waitFindWebElementBySelector_ToBeClickable("#task-upload-btn");
@@ -4762,7 +4993,15 @@ internal static string getImageUrl() {
                             });
                             //tsRing.Wait(6000);
 
-                            if (iwtext.Text.StartsWith("ip address banned")) CurrentIP = GetPublicIpAddress(string.Empty);//CurrentIP = CurrentIP == string.Empty ? GetPublicIpAddress(string.Empty) : CurrentIP;
+                            try
+                            {
+                                if (iwtext.Text.StartsWith("ip address banned")) CurrentIP = GetPublicIpAddress(string.Empty);//CurrentIP = CurrentIP == string.Empty ? GetPublicIpAddress(string.Empty) : CurrentIP;
+                            }
+                            catch (Exception)
+                            {
+                                returnFalse = true;
+                                goto finish;
+                            }
                             string mark = iwtext.Text.StartsWith("识别失败") ? "●●●●●●●●●" : iwtext.Text.StartsWith("ip address banned") ? "★★★★★★★★★★★" + CurrentIP + "★★★★" : "●";
                             if (iwtext.Text.StartsWith("ip address banned")) Clipboard.SetText(CurrentIP);
                             ds = MessageBox.Show("是否讓程式自動更換IP？", "●切換IP？" + mark + "『" + iwtext.Text + "』" + mark, MessageBoxButtons.OKCancel, MessageBoxIcon.None, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly); //Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("是否讓程式自動更換IP？", "●切換IP？")
@@ -4771,11 +5010,33 @@ internal static string getImageUrl() {
                              //driver.Close();//return以後也還會再執行一次哦！注意
 
                                 Form1.playSound(Form1.soundLike.over); ActiveForm1.HideToNICo();// TopMost = false;
-                                Task ts = Task.Run(() =>
+
+                                //Task ts = Task.Run(() =>
+                                //{
+                                //    IPSwitchOnly();//此方法在切換TouchVPN時會再開啟一分頁以檢視IP轉換情形
+                                //    IPStatusMessageShow();
+                                //});
+
+
+                                //20231228  Bing大菩薩：C# 多執行緒存取剪貼簿：
+                                Thread thread = new Thread(() =>
                                 {
-                                    IPSwitchOnly();//此方法在切換TouchVPN時會再開啟一分頁以檢視IP轉換情形
-                                    IPStatusMessageShow();
+                                    IPSwitchOnly();
+                                    //IPStatusMessageShow();
                                 });
+                                thread.SetApartmentState(ApartmentState.STA); // 設定執行緒為 STA 模式
+                                thread.Start();
+                                //thread.Join(); // 等待該執行緒完成
+                                if (thread.IsAlive)
+                                {
+                                    // The thread is still running.
+                                    thread.Join(1000);
+                                }
+                                else
+                                {
+                                    // The thread has completed.
+                                }
+
                             }
                             else
                             {
@@ -5194,6 +5455,9 @@ internal static string getImageUrl() {
         }
         /// <summary>
         /// 存放《古籍酷》快速體驗OCR完成時的複製按鈕位置資訊
+        ///  835,711
+        ///  835,730
+        ///  706,840
         /// </summary>
         internal static Point Copybutton_GjcoolFastExperience_Location = new Point();
 

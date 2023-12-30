@@ -19,6 +19,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using TextForCtext;
 using WebSocketSharp;
+
 //using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 //引用adodb 要將其「內嵌 Interop 類型」（Embed Interop Type）屬性設為false（預設是true）才不會出現以下錯誤：  HResult=0x80131522  Message=無法從組件 載入類型 'ADODB.FieldsToInternalFieldsMarshaler'。
 //https://stackoverflow.com/questions/5666265/adodbcould-not-load-type-adodb-fieldstointernalfieldsmarshaler-from-assembly  https://blog.csdn.net/m15188153014/article/details/119895082
@@ -689,9 +690,17 @@ namespace WindowsFormsApp1
                     if (quickEditLinkUrl.IndexOf("&page=") == -1 ||
                         (quickEditLinkUrl.IndexOf("#editor") > -1 && quickEditLinkUrl.IndexOf("&page=1") > -1))
                     {
+                        string foundUrl = string.Empty;
                         for (int i = br.driver.WindowHandles.Count - 1; i > -1; i--)
-                        {//找到分頁是書圖圖文對照瀏覽頁面且非第1頁者：
-                            string foundUrl = br.driver.SwitchTo().Window(br.driver.WindowHandles[i]).Url;
+                        {//找到分頁是書圖圖文對照瀏覽頁面且非第1頁者：                            
+                            try
+                            {
+                                foundUrl = br.driver.SwitchTo().Window(br.driver.WindowHandles[i]).Url;
+                            }
+                            catch (Exception)
+                            {
+                                continue;
+                            }
                             if (foundUrl.IndexOf("&page=") > -1 && foundUrl.IndexOf("&page=1&") == -1) break;
                         }
                         quickEditLinkUrl = br.driver.Url;
@@ -2915,6 +2924,8 @@ namespace WindowsFormsApp1
             string x = textBox1.Text;
             if (keyDownCtrlAdd(false))
             {
+                //將頁面移至頂端，以便校對輸入時檢視
+                br.GoToUrlandActivate(br.driver.Url, true);
                 if (x != br.Quickedit_data_textboxTxt)
                 {
                     playSound(soundLike.exam);
@@ -6017,7 +6028,8 @@ namespace WindowsFormsApp1
                 try
                 {
                     int[] chk = checkAbnormalLinePara(xCopy.Replace
-                        ("<p>" + Environment.NewLine, "★★★").Replace("<p>", string.Empty).Replace("★★★", "<p>" + Environment.NewLine));
+                        ("<p>" + Environment.NewLine, "★★★").Replace("<p>", string.Empty).Replace("★★★", "<p>" + Environment.NewLine)
+                        + xCopy.Substring(xCopy.Length - "<p>".Length, "<p>".Length) == "<p>" ? "<p>" : string.Empty);
                     if (chk.Length > 0)
                     {
                         bringBackMousePosFrmCenter();
@@ -7247,7 +7259,8 @@ namespace WindowsFormsApp1
                 {
                     e.Handled = true;
                     SystemSounds.Exclamation.Play();
-                    br.IPStatusMessageShow();
+                    br.IPStatusMessageShow(string.Empty, false);
+                    if (Clipboard.GetText() != br.CurrentIP) Clipboard.SetText(br.CurrentIP);
                     bringBackMousePosFrmCenter();
                     return;
                 }
@@ -10251,11 +10264,12 @@ namespace WindowsFormsApp1
                     else if (x == "kk")//只切換IP，不切換《古籍酷》帳戶
                     {
                         br.IPSwitchOnly();
-                        br.IPStatusMessageShow();
+                        //br.IPStatusMessageShow();//在上一行 IPSwitchOnly 內已有
                     }
                     else if (x == "jk")//不切換IP，不切換《古籍酷》帳戶，欲直接進入首頁快速體驗者
                     {
                         if (!br.waitGJcoolPoint) br.waitGJcoolPoint = true;
+                        br.OCR_GJcool_AccountChanged = false;
                         //if (!Active) BringToFront(); 
                         //availableInUseBothKeysMouse();
                     }
