@@ -159,7 +159,7 @@ namespace TextForCtext
         /// IpAddressBanned、IPisblocked、ctext、RecordDate
         /// 若沒找到IP，則傳回null
         /// </returns>
-        internal static Tuple<bool, bool, bool, DateTime> IPStatus(string iptoChk)
+        internal static Tuple<bool, bool, bool, bool, DateTime> IPStatus(string iptoChk)
         {
             // 建立連接字串
             string f = fileFullName("查字.mdb");
@@ -189,10 +189,11 @@ namespace TextForCtext
                     bool IpAddressBanned = reader.GetBoolean(reader.GetOrdinal("IpAddressBanned"));
                     bool IPisblocked = reader.GetBoolean(reader.GetOrdinal("IPisblocked"));
                     bool ctext = reader.GetBoolean(reader.GetOrdinal("ctext"));
+                    bool Systemisbusy = reader.GetBoolean(reader.GetOrdinal("Systemisbusy"));
                     DateTime RecordDate = reader.GetDateTime(reader.GetOrdinal("RecordDate"));
                     reader.Close();
                     conn.Close();
-                    return new Tuple<bool, bool, bool, DateTime>(IpAddressBanned, IPisblocked, ctext, RecordDate);
+                    return new Tuple<bool, bool, bool, bool, DateTime>(IpAddressBanned, IPisblocked, ctext, Systemisbusy, RecordDate);
                 }
             }
             else

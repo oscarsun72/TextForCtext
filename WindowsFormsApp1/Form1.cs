@@ -3029,7 +3029,7 @@ namespace WindowsFormsApp1
         private void keysTitleCodeAndPreWideSpace()
         {
             //若有選取全形空格數，則據以前置其數量，否則預設為2
-            int spaceCnt = 2;
+            int spaceCnt = 0;
             //重設篇名前的全形空格（spaceStrBreforeTitle）之值
             if (textBox1.SelectedText.IndexOf("　") > -1 && textBox1.SelectedText.Replace("　", "") == string.Empty)
             {
@@ -7259,7 +7259,8 @@ namespace WindowsFormsApp1
                 {
                     e.Handled = true;
                     SystemSounds.Exclamation.Play();
-                    br.IPStatusMessageShow(string.Empty, false);
+                    Tuple<bool, bool, bool, bool, DateTime> ipStatus;
+                    br.IPStatusMessageShow(out ipStatus, string.Empty, false,true);
                     if (Clipboard.GetText() != br.CurrentIP) Clipboard.SetText(br.CurrentIP);
                     bringBackMousePosFrmCenter();
                     return;
@@ -10263,8 +10264,18 @@ namespace WindowsFormsApp1
                     }
                     else if (x == "kk")//只切換IP，不切換《古籍酷》帳戶
                     {
-                        br.IPSwitchOnly();
+                        TopMost = false;
+                        Task ts = Task.Run(() =>
+                        {
+                            br.IPSwitchOnly();
+
+                            
+                        });
                         //br.IPStatusMessageShow();//在上一行 IPSwitchOnly 內已有
+                        ts.Wait(7000);
+                        //SystemSounds.Exclamation.Play();
+                        AvailableInUseBothKeysMouse();
+                        //if (Mdb.IPStatus(br.CurrentIP??br.GetPublicIpAddress("")).Item4) textBox2.Text = "kk";
                     }
                     else if (x == "jk")//不切換IP，不切換《古籍酷》帳戶，欲直接進入首頁快速體驗者
                     {
