@@ -580,6 +580,7 @@ End Sub
 
 Sub searchuCtext()
 ' Alt+,
+SystemSetup.playSound 0.484
 Select Case Selection.text
     Case "", Chr(13), Chr(9), Chr(7), Chr(10), " ", "¡@"
         MsgBox "no selected text for search !", vbCritical: Exit Sub

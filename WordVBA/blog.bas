@@ -9,9 +9,9 @@ End Sub
 Sub Àx¦s¨Ñgoogle¯Á¤Þ¨Ã³Æ¤À(dp As Document)  '2008/12/24
     htmFilename = InputBox("½Ð¿é¤JÀÉ¦W", , "htmfilename")
     If htmFilename = "" Then Exit Sub
-    On Error GoTo eh:
+    On Error GoTo eH:
     dp.SaveAs fileName:= _
-        "P:\§Úªº³¡¸¨®æ\5160_\" & Left(htmFilename, 235) & ".html", _
+        "P:\§Úªº³¡¸¨®æ\5160_\" & left(htmFilename, 235) & ".html", _
         FileFormat:=wdFormatUnicodeText, LockComments:=False, Password:="", _
         AddToRecentFiles:=True, WritePassword:="", ReadOnlyRecommended:=False, _
         EmbedTrueTypeFonts:=False, SaveNativePictureFormat:=False, SaveFormsData _
@@ -24,7 +24,7 @@ Sub Àx¦s¨Ñgoogle¯Á¤Þ¨Ã³Æ¤À(dp As Document)  '2008/12/24
     OX.WinActivate "iexplorer"
     'AppActivate "iexplorer"
 Exit Sub
-eh:
+eH:
 Select Case Err.Number
     Case Else
         MsgBox Err.Number & " - " & Err.Description
@@ -39,29 +39,29 @@ Dim x As String, i As Long 'Integer
 x = InputBox("½Ð¿é¤J²Ä1­Ó¹Ï¤ùªº³sµ²ºô§}")
 'If x = "" Then End 'Exit Sub
 If x = "" Or InStr(x, "http") = 0 Then End
-If InStr(x, "&prev") > 0 Then x = Left(x, InStr(x, "&prev") - 1)
+If InStr(x, "&prev") > 0 Then x = left(x, InStr(x, "&prev") - 1)
 i = Int(Mid(x, InStrRev(x, "=") + 1))
-x = Left(x, InStrRev(x, "="))
+x = left(x, InStrRev(x, "="))
 Options.AutoFormatAsYouTypeReplaceQuotes = False 'Ãö±¼´¼¼z¤Þ¸¹,¦p¦¹"¤~¤£·|³Q¦Û°Ê¸m´«¬°¡¨¡]¦b¦Û°Ê®Õ¥¿¸Ì¨Ì·Ó±zªº¿é¤J¦Û°Ê®æ¦¡­¶ÅÒ¸Ì¡^
 With ActiveDocument.Range
     With .Find
         .MatchWildcards = False
         .ClearFormatting
-        .text = "<img src="
+        .Text = "<img src="
         .Forward = True
         .Wrap = wdFindStop
-        .Replacement.text = "<a href=""" & x & i & """><img src="
+        .Replacement.Text = "<a href=""" & x & i & """><img src="
         Do While .Execute(, , , , , , , , , , wdReplaceOne)
             .Parent.move
             i = i + 1
             With .Replacement
-                .text = "<a href=""" & x & i & """><img src="
+                .Text = "<a href=""" & x & i & """><img src="
             End With
         Loop
         .Parent.move wdStory
         .Forward = False
-        .text = ".jpg"" />"
-        .Replacement.text = ".jpg"" /></a>"
+        .Text = ".jpg"" />"
+        .Replacement.Text = ".jpg"" /></a>"
         .Execute , , , , , , , , , , wdReplaceAll
     End With
 End With
@@ -112,10 +112,10 @@ With d.Range
 '    Do Until s = e - 10
 '        .move wdStory
         Set x = d.Range(InStr(d.Range, "<img src=""") - 1, InStr(d.Range, ".jpg"" />") + Len(".jpg"" />") - 1)
-        t = x.text
+        t = x.Text
         .SetRange InStr(d.Range, "<img src=""") - 1, InStr(d.Range, ".jpg"" /><br>") + Len(".jpg"" /><br>") - 1
         .Delete
-        With selection
+        With Selection
             .HomeKey wdStory
             .Find.ClearFormatting
             .Find.MatchWildcards = False
@@ -225,7 +225,7 @@ SendKeys "{tab 3}"
 End Sub
 Sub ¥þ¿ï°Å¤U«áÃö³¬¤å¥ó() '¥H§Q¶K¤W³¡¸¨®æ¤]'2007/10/30-¶K¤W¤W­¶¤U­¶®Ñ­º¦^Á`¥Øªºhtml½X.
 Dim Dnow As Document, bt As String, hide As Boolean
-With selection
+With Selection
     If ActiveDocument.path = "" Then
         Set Dnow = ActiveDocument
         If InStr(Dnow.Range, "<a href=") Then 'ªí¥Ü­n¶K¤Whtml½X¤F!
@@ -239,14 +239,14 @@ With selection
                 Documents("¼È¦s").Activate
             End If
             o = True '°O¤U¤w¬O¦b³B²zhtml½X,¥H¨Ñ¤U­±¥Î.2007/11/4
-            With ActiveWindow.selection
-                If Len(.text) = 1 Then .GoTo wdGoToBookmark, , , "´å¼Ð_¼È¦s"
+            With ActiveWindow.Selection
+                If Len(.Text) = 1 Then .GoTo wdGoToBookmark, , , "´å¼Ð_¼È¦s"
                 bt = .Range
                 h = InputBox("½Ð¿é¤J¤W¤åºô§}")
                 'If h = "" Or InStr(h, "http") = 0 Then Exit Sub
                 If h = "" Then Exit Sub
                 If InStr(h, "http") <> 0 Then
-                    If InStr(h, "&prev") > 0 Then h = Left(h, InStr(h, "&prev") - 1)
+                    If InStr(h, "&prev") > 0 Then h = left(h, InStr(h, "&prev") - 1)
                     bt = Replace(bt, "¤W¤å", "<a href=""" & h & """>" & "¤W¤å</a>") '´¡¤J¤W¤åºô§}
                 End If
                 '.Parent.WindowState wdWindowStateMinimize
@@ -311,8 +311,8 @@ If o = False Then
 Else
     Documents("¼È¦s").Activate
 End If
-With ActiveWindow.selection
-    If Len(.text) = 1 Then .GoTo wdGoToBookmark, , , "´å¼Ð_¼È¦s"
+With ActiveWindow.Selection
+    If Len(.Text) = 1 Then .GoTo wdGoToBookmark, , , "´å¼Ð_¼È¦s"
     .Copy
     '.Parent.WindowState wdWindowStateMinimize
     ActiveWindow.Visible = False
@@ -346,7 +346,7 @@ With d
         i = i + a
     Loop
 
-.Range = Replace(d.Range, Chr(13), "")
+.Range = Replace(d.Range, chr(13), "")
 .Range.Font.Size = 8
 End With
 End Sub
@@ -360,7 +360,7 @@ e = "/><br>"
 With d
     .Range.Paste
     Do
-        x = .Range.text
+        x = .Range.Text
         ep = InStr(x, e) + Len(e) - 1
         sp = InStr(x, s)
         If sp = 0 Then Exit Do
@@ -381,10 +381,10 @@ End Sub
 Sub ¶}±Ò¶W³sµ²()
 'Ctrl +i   ¨t²Î¹w³]¬O italic¡]§Y±×Åé¦r¡^¡A¦¹°t¦X ExcelVBA³]©w
 Dim rng As Range
-Set rng = selection.Range
+Set rng = Selection.Range
 If rng.Hyperlinks.Count = 0 Then '¦pªG©Ò¦b¦ì¸m¨S¦³¶W³sµ²¡A«h¬Ý¨ä«e¦³§_¡F­Y¤SµL¡A«h¦A¬Ý¨ä«á¦³§_¡F­Y³£µL«h¤£°õ¦æ 2022/12/20
     If rng.start = 0 Then
-        If selection.Type = wdSelectionNormal Then
+        If Selection.Type = wdSelectionNormal Then
             GoTo Selected_Range
         Else
             GoSub nxt
@@ -396,7 +396,7 @@ Selected_Range:
         '¬° ¡u¥ÍÃø¦r¥[¤W°ê»yÃã¨åª`­µ¡v ¦Ó³]
         Dim rngNext As Range
         Set rngNext = rng.Next
-        If rngNext.text = "¡]" Then
+        If rngNext.Text = "¡]" Then
             If rngNext.Next.Hyperlinks.Count > 0 Then
                 rng.SetRange rngNext.Next.start, rngNext.Next.End
                 GoSub nxt
@@ -412,7 +412,11 @@ If rng.Hyperlinks.Count > 0 Then
     Dim strLnk As String, lnk As Hyperlink
     Set lnk = rng.Hyperlinks(1)
     If rng.Hyperlinks(1).SubAddress <> "" Then
-        strLnk = rng.Hyperlinks(1).Address + "#" + rng.Hyperlinks(1).SubAddress
+        Dim subAdrs As String
+        subAdrs = rng.Hyperlinks(1).SubAddress
+        strLnk = rng.Hyperlinks(1).Address + "#" + _
+            VBA.IIf(VBA.InStr(subAdrs, "%"), subAdrs, _
+            IIf(code.IsSurrogate(subAdrs), UrlEncode(subAdrs), code.UrlEncode_Big5UnicodOLNLY(subAdrs)))
     Else
         strLnk = rng.Hyperlinks(1).Address
     End If
@@ -440,13 +444,21 @@ Sub ´¡¤J¶W³sµ²() '2008/9/1 «ü©wÁä(§Ö±¶Áä) Ctrl+shift+K(­ì¨t²Î«ü©w¦bsmallcaps¬°)
 '    ActiveDocument.Hyperlinks.Add Anchor:=Selection.Range, Address:= _
         StrConv(GetClipboard, vbNarrow) _
         , SubAddress:="" '    Selection.Collapse Direction:=wdCollapseEnd
+        
+    Dim lnk As String
+    'lnk = UrlEncode(SystemSetup.GetClipboardText)
+    lnk = SystemSetup.GetClipboardText
+    If VBA.InStr(lnk, "http") = 0 Or VBA.InStr(lnk, "http") > 1 Then MsgBox "°Å¶KÃ¯¤¤«D¦³®Äºô§}¡I": Exit Sub
+        
     Dim rng As Range, b As Boolean, ur As UndoRecord ', wndo As Window ', d As Document ', sty As String
-    Set rng = selection.Range ': Set wndo = ActiveWindow
+    
+    
+    Set rng = Selection.Range ': Set wndo = ActiveWindow
     If rng.Information(wdInFootnote) Then
         If rng.Document.Windows.Count > 1 Then '¦]¬°¶}¦hµøµ¡®É­Y¦b²Ä1­Ó¥H¥~ªºµøµ¡ªºµù¸}¤¤°õ¦æ¡urng.Hyperlinks.Add¡v«h·|»~´¡¨ì²Ä1­Óµøµ¡Åé¤¤
             Dim wnd As Window, ww, i As Byte
             Set wnd = ActiveWindow
-            If CByte(Right(wnd.Caption, 1)) > 1 Then
+            If CByte(right(wnd.Caption, 1)) > 1 Then
                 Dim wnds() As Object
                 For Each ww In rng.Document.Windows
                     ReDim Preserve wnds(i)
@@ -468,14 +480,14 @@ Sub ´¡¤J¶W³sµ²() '2008/9/1 «ü©wÁä(§Ö±¶Áä) Ctrl+shift+K(­ì¨t²Î«ü©w¦bsmallcaps¬°)
         For Each ww In wnds
             If Not ww Is wnd Then '¤£¯à¥Î ww.Caption <> wnd.Caption ¦]¬°¤U­±¦³ww.Close µøµ¡¤@¥¹Ãö³¬¡A«hCaptionÄÝ©Ê¤]·|²§°Ê
                 ReDim Preserve slRng(i)
-                Set slRng(i) = ww.selection.Range
+                Set slRng(i) = ww.Selection.Range
                 ww.Close '¬JµM¤£¯à§ïÅÜµøµ¡«e«á¡A´N¥u¯à¥ýÃö³¬¡A¥B°O¤U¨ä´å¼Ð©Ò¦b¦ì¸m¤F
                 i = i + 1
             End If
         Next
     End If
     rng.Hyperlinks.Add Anchor:=rng, Address:= _
-        StrConv(SystemSetup.GetClipboardText, vbNarrow) _
+        StrConv(lnk, vbNarrow) _
         , SubAddress:="", Target:="_blank" '    Selection.Collapse Direction:=wdCollapseEnd
     'wndo.Activate
     If rng.Bold <> b Then rng.Bold = b
@@ -512,14 +524,14 @@ Sub ´¡¤J¶W³sµ²() '2008/9/1 «ü©wÁä(§Ö±¶Áä) Ctrl+shift+K(­ì¨t²Î«ü©w¦bsmallcaps¬°)
 End Sub
 Sub insertHydzdLink()
 Dim lk As New Links, db As New dBase
-db.setWordControlValue (¤å¦r³B²z.trimStrForSearch(selection.text, selection))
+db.setWordControlValue (¤å¦r³B²z.trimStrForSearch(Selection.Text, Selection))
 db.setDictControlValue 3
 lk.insertLinktoHydzd
 Set lk = Nothing: Set db = Nothing
 End Sub
 Sub insertHydcdLink()
 Dim lk As New Links, db As New dBase
-db.setWordControlValue (¤å¦r³B²z.trimStrForSearch(selection.text, selection))
+db.setWordControlValue (¤å¦r³B²z.trimStrForSearch(Selection.Text, Selection))
 db.setDictControlValue 4
 lk.insertLinktoHydcd
 Set lk = Nothing: Set db = Nothing
@@ -534,11 +546,11 @@ Sub saveV5URL()
 Dim ac As Object, lnk As String
 Dim dbFullName As String
 dbFullName = UserProfilePath & "Dropbox\¡m­«½s°ê»yÃã¨å­×­q¥»¡n¸ê®Æ®w.mdb"
-If selection.Hyperlinks.Count > 0 Then
-    lnk = selection.Hyperlinks(1).Address
+If Selection.Hyperlinks.Count > 0 Then
+    lnk = Selection.Hyperlinks(1).Address
 Else
-    selection.MoveRight wdCharacter, 1, wdExtend
-    lnk = selection.Hyperlinks(1).Address
+    Selection.MoveRight wdCharacter, 1, wdExtend
+    lnk = Selection.Hyperlinks(1).Address
 End If
 Set ac = GetObject(dbFullName).Application
 ac.Run "saveV5URL", lnk
@@ -550,7 +562,7 @@ lnks.updateURL°ê¾Ç¤j®v ActiveDocument
 'SystemSetup.playSound 7
 End Sub
 Sub ¼ÐÃD¤å¦r()
-With selection.Font
+With Selection.Font
     .Size = 20
     .Bold = True
 End With
@@ -659,9 +671,9 @@ Set r = ActiveDocument.Range
     With ActiveDocument
         .Range = r
         With .Windows(1)
-            .selection.EndKey wdStory, wdMove
-            Do Until .selection.Previous <> Chr(13)
-                .selection.TypeBackspace
+            .Selection.EndKey wdStory, wdMove
+            Do Until .Selection.Previous <> chr(13)
+                .Selection.TypeBackspace
             Loop
         End With
         .Range.WholeStory
@@ -677,7 +689,7 @@ Set d = Documents.Add
 d.Range.PasteAndFormat (wdFormatPlainText)
 If InStr(d.Range, "?") Then
     MsgBox "¦³¶Ã½X!!", vbCritical
-    With d.Windows(1).selection.Find
+    With d.Windows(1).Selection.Find
         .ClearFormatting
         .Execute "?"
     End With
@@ -772,13 +784,13 @@ SendKeys "{tab}", True: SendKeys "{tab}", True:: SendKeys " ", True
 End Sub
 
 Sub ¬d¸ß©_¼¯§Úªº³¡¸¨®æblog() 'Alt+Q
-If selection.Type = wdSelectionIP Then Exit Sub
+If Selection.Type = wdSelectionIP Then Exit Sub
 If ActiveDocument.path <> "" And ActiveDocument.Saved = False Then ActiveDocument.Save
 If myaccess Is Nothing Then
     Set myaccess = GetObject("C:\¤d¼{¤@±oÂN\®ÑÄy¸ê®Æ\¹Ï®ÑºÞ²z(C¼Ñª©).mdb")
 End If
-myaccess.Run "¬d¸ß©_¼¯§Úªº³¡¸¨®æblog_word°Ñ·Ó", selection
-selection.Copy
+myaccess.Run "¬d¸ß©_¼¯§Úªº³¡¸¨®æblog_word°Ñ·Ó", Selection
+Selection.Copy
 myaccess.UserControl = True
 Set myaccess = Nothing
 End Sub
@@ -788,7 +800,7 @@ Dim st As String, h As String, d As Document
 If ActiveDocument.path <> "" Then Exit Sub
 Set d = ActiveDocument
 If InStr(d.Range, "http") = 0 Then Exit Sub
-With d.Application.selection
+With d.Application.Selection
     .HomeKey wdStory, wdMove
     .Find.ClearFormatting
     Do
@@ -797,20 +809,20 @@ With d.Application.selection
     If d.Range(.start - 2, .start) = "²§." Then
         Do Until st = ".htm"
             .MoveRight wdCharacter, 1, wdExtend
-            st = VBA.Right(.text, 4)
+            st = VBA.right(.Text, 4)
         Loop
-        h = .text
+        h = .Text
         .Delete
         h = StrConv(h, vbNarrow) '¥þ§ÎÂà¥b§Î
         .Hyperlinks.Add d.Range(.start - 2, .start - 1), h '.Range, h
         st = ""
-    ElseIf d.Range(.start - 1, .start) = Chr(9) Or d.Range(.start - 1, .start) = "¡z" Then '¥HtabÁä©w¦ì¦r¤¸¬°§PÂ_,»\¦b¸ê®Æ®wchr(13)¬Ò·|³QÂà¦¨¦¹¦r¤¸¬G¤].
-        Do Until st = Chr(9) Or st = " " Or .Next.Font.Size > 8
+    ElseIf d.Range(.start - 1, .start) = chr(9) Or d.Range(.start - 1, .start) = "¡z" Then '¥HtabÁä©w¦ì¦r¤¸¬°§PÂ_,»\¦b¸ê®Æ®wchr(13)¬Ò·|³QÂà¦¨¦¹¦r¤¸¬G¤].
+        Do Until st = chr(9) Or st = " " Or .Next.Font.Size > 8
             .MoveRight wdCharacter, 1, wdExtend
-            st = VBA.Right(.text, 1)
+            st = VBA.right(.Text, 1)
         Loop
         .MoveLeft wdCharacter, 1, wdExtend
-        h = .text
+        h = .Text
         .Delete
         h = StrConv(h, vbNarrow) '¥þ§ÎÂà¥b§Î
         .Hyperlinks.Add d.Range(.start - 1, .start), h      '.Range, h
@@ -831,7 +843,7 @@ Set Dnow = Documents(1) '³Ì«á¤@­Ó¤å¥ó¬°¥Ø«e½Æ»s¦Ûemuleªº²M³æ,«e¤@­Ó¤å¥ó«h¬°blog²
 Set Dold = Documents(2)
 With Dold
     For Each p In .Paragraphs
-        x = Left(p.Range, Len(p.Range) - 1)
+        x = left(p.Range, Len(p.Range) - 1)
         l = InStr(Dnow.Range, x)
         If l = 0 Then
             p.Range.Select
@@ -858,7 +870,7 @@ With ActiveDocument
         Case """>"
             j = i + 2
             Do Until Mid(x, j, 1) & Mid(x, j + 1, 1) & Mid(x, j + 2, 1) = "</a"
-                x = Left(x, j - 1) & Mid(x, j + 1) ' Replace(x, Mid(x, j, 1), "", j, 1)
+                x = left(x, j - 1) & Mid(x, j + 1) ' Replace(x, Mid(x, j, 1), "", j, 1)
                 'Mid(x, j, 1) = ""
                 'j = j + 1
                 l = l - 1
@@ -867,7 +879,7 @@ With ActiveDocument
         Case "a>"
             j = i + 2
             Do Until Mid(x, j, 1) & Mid(x, j + 1, 1) & Mid(x, j + 2, 1) = "<a "
-                x = Left(x, j - 1) & Mid(x, j + 1)
+                x = left(x, j - 1) & Mid(x, j + 1)
                 l = l - 1
                 If Mid(x, j, 1) & Mid(x, j + 1, 1) & Mid(x, j + 2, 1) = "" Then Exit Do
             Loop
@@ -892,7 +904,7 @@ End Sub
 Sub ´¡¤J­¶¹Ï() '20161105
 Dim p  As Paragraph, s As Long, lnk As String
 Const x As String = "\\VBOXSVR\d_drive\¤d¼{¤@±oÂN\¸ê®Æ®w\±½´y¸ê®Æ®w\®ÑÂÃ\2487_»y¨¥»P¤H¥Í\"
-s = selection.End
+s = Selection.End
 For Each p In ActiveDocument.Paragraphs
     If p.Range.End > s Then
         If IsNumeric(p.Range) And p.Range.Font.Size = 16 Then

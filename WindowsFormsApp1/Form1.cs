@@ -43,6 +43,12 @@ namespace WindowsFormsApp1
         private readonly Color textBox2BackColorDefault;
         private readonly Color FormBackColorDefault;
         readonly Size textBox1SizeToForm;
+
+        /// <summary>
+        /// 《古籍酷》OCR批量處理。在textBox2中輸入bT以啟用，輸入bF以停用
+        /// </summary>
+        internal static bool BatchProcessingGJcoolOCR = true;
+
         /// <summary>
         /// CJK大字集字型集合（陣列。含CJK 擴充字集者）
         /// </summary>
@@ -1972,6 +1978,19 @@ namespace WindowsFormsApp1
                     //        textBox1.SelectionLength += 2 : ++textBox1.SelectionLength;
                     //}
                     textBox4.Focus();
+                    return;
+                }
+
+                if (e.KeyCode == Keys.K)
+                {// 依選取文字取得目前URL加該選取字為該頁之關鍵字的連結。如欲在此頁中標出「𢔶」字，即為：
+                    /// https://ctext.org/library.pl?if=gb&file=36575&page=53#𢔶
+                    /// Ctrl + k
+                    e.Handled = true;
+                    //CnText.ChangeSeltextWhenOvertypeMode(insertMode, textBox1);//這個只是取得文字，不會改變選取行為
+                    overtypeModeSelectedTextSetting(ref textBox1);//暫時恢復，再觀察。→因為之前常會先複製該關鍵字詞，就已會有選取範圍
+                    string x = br.GetPageUrlKeywordLink();
+                    if (x != string.Empty) Clipboard.SetText(x);
+                    else MessageBoxShowOKExclamationDefaultDesktopOnly("無法取得具關鍵字的連結字串，請檢查！");
                     return;
                 }
 
@@ -4177,9 +4196,9 @@ namespace WindowsFormsApp1
             textBox1.Select(ss, 0); textBox1.ScrollToCaret();
         }
         /// <summary>
-        /// 篇名前的全形空格字串，預設為2個全形空格
+        /// 篇名前的全形空格字串，預設為0個全形空格(如《人境廬詩草》即是）
         /// </summary>
-        string spaceStrBreforeTitle = "　　";
+        string spaceStrBreforeTitle = "";
         /// <summary>
         /// 篇名標題標注
         /// 加上篇名格式代碼
@@ -7260,7 +7279,7 @@ namespace WindowsFormsApp1
                     e.Handled = true;
                     SystemSounds.Exclamation.Play();
                     Tuple<bool, bool, bool, bool, DateTime> ipStatus;
-                    br.IPStatusMessageShow(out ipStatus, string.Empty, false,true);
+                    br.IPStatusMessageShow(out ipStatus, string.Empty, false, true);
                     if (Clipboard.GetText() != br.CurrentIP) Clipboard.SetText(br.CurrentIP);
                     bringBackMousePosFrmCenter();
                     return;
@@ -7841,7 +7860,10 @@ namespace WindowsFormsApp1
                     //try
                     //{
                     br.driver.SwitchTo().Window(currentWindowHndl);
-                    ocrResult = br.OCR_GJcool_AutoRecognizeVertical(downloadImgFullName);
+                    if (BatchProcessingGJcoolOCR)
+                        ocrResult = br.OCR_GJcool_BatchProcessing(downloadImgFullName);
+                    else
+                        ocrResult = br.OCR_GJcool_AutoRecognizeVertical(downloadImgFullName);
                     //}
                     //catch (Exception ex)
                     //{
@@ -10083,8 +10105,21 @@ namespace WindowsFormsApp1
                     PauseEvents();
                     textBox2.Text = "";
                     ResumeEvents(); return;
-                #endregion                
-
+                #endregion
+                #region 《古籍酷》OCR批量處理。在textBox2中輸入bT以啟用，輸入bF以停用
+                case "bT":
+                    BatchProcessingGJcoolOCR = true; PasteOcrResultFisrtMode = true; ocrTextMode = true; PagePaste2GjcoolOCR_ing = false; _eventsEnabled = true;
+                    br.OCR_wait_time_Top_Limit＿second = 60;
+                    PauseEvents();
+                    textBox2.Text = "";
+                    ResumeEvents(); return;
+                case "bF":
+                    BatchProcessingGJcoolOCR = false; PasteOcrResultFisrtMode = false; ocrTextMode = false; PagePaste2GjcoolOCR_ing = false; _eventsEnabled = true;
+                    br.OCR_wait_time_Top_Limit＿second = 15;
+                    PauseEvents();
+                    textBox2.Text = "";
+                    ResumeEvents(); return;
+                #endregion
                 default:
                     break;
             }
@@ -10115,7 +10150,12 @@ namespace WindowsFormsApp1
 
             #region 預設瀏覽器名稱設定
             //輸入「msedge」「chrome」「brave」「vivaldi」，可以設定預設瀏覽器名稱
-            if (x == "msedge" || x == "chrome" || x == "brave" || x == "vivaldi") { defaultBrowserName = x; return; }
+            if (x == "msedge" || x == "chrome" || x == "brave" || x == "vivaldi")
+            {
+                defaultBrowserName = x;
+                PauseEvents(); textBox2.Text = ""; ResumeEvents();
+                return;
+            }
             #endregion
 
             #region 軟件架構-瀏覽操作模式設定
@@ -10269,7 +10309,7 @@ namespace WindowsFormsApp1
                         {
                             br.IPSwitchOnly();
 
-                            
+
                         });
                         //br.IPStatusMessageShow();//在上一行 IPSwitchOnly 內已有
                         ts.Wait(7000);
@@ -10991,7 +11031,9 @@ namespace WindowsFormsApp1
         {
             const string p = "page=";
             if (url == "" || url.IndexOf(p) == -1 || url.IndexOf("&") == -1) return 0;
-            int s = url.IndexOf(p);
+            int s = url.LastIndexOf("#");
+            if (s > -1) url = url.Substring(0, s);
+            s = url.IndexOf(p);
             return int.Parse(url.Substring(s + p.Length, url.IndexOf("&", s + 1) == -1 ? url.Length - (s + p.Length) : url.IndexOf("&", s + 1) - s - p.Length));
         }
 

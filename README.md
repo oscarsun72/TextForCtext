@@ -326,6 +326,9 @@ F11 : run replaceXdirrectly() 維基文庫等欲直接抽換之字
 
 Ctrl + h ：移至 textBox4 準備取代文本文字（若已有取代成的預設值，可以前綴「7」來指定新的取代字串）
 
+Ctrl + K : 依選取文字取得目前URL加該選取字為該頁之關鍵字的連結。如欲在此頁中標出「𢔶」字，即為：
+> https://ctext.org/library.pl?if=gb&file=36575&page=53#𢔶
+
 Ctrl + y ： 重做（即復原還原的動作），目前上限為50個記錄
 
 Ctrl + z ： 還原文本，目前上限為50個記錄
@@ -427,6 +430,9 @@ Ctrl+ 滑鼠左鍵：清除框中所有文字
    > 由變數 OCR_wait_time_Top_Limit＿second 掌握）
 - 輸入「oT」（ocr first ture）設定直接貼入OCR結果先不管版面行款排版模式 PasteOcrResultFisrtMode=true
 - 輸入「oF」（ocr first false ）設定直接貼入OCR結果先不管版面行款排版模式 PasteOcrResultFisrtMode=false
+- 輸入「bT」（batch processing true ）《古籍酷》OCR批量處理。輸入bT以啟用，輸入bF以停用 BatchProcessingGJcoolOCR=true
+- 輸入「bF」（batch processing false ）《古籍酷》OCR批量處理。輸入bT以啟用，輸入bF以停用 BatchProcessingGJcoolOCR=false
+- 
 - 輸入「x,y」（x、y 為整數以半形逗號間隔，如「835,711」；請打好後用複製貼上的方式來輸入），指定《古籍酷》首頁快速體驗OCR的複製按鈕位置 Copybutton_GjcoolFastExperience_Location的 X 與 Y值
 
 

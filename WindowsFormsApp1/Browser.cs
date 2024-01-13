@@ -5,6 +5,7 @@ using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Remote;
 using OpenQA.Selenium.Support.UI;
 using System;
+using System.Drawing;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -19,6 +20,7 @@ using System.Media;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Web;
 using System.Windows.Automation;
 using System.Windows.Forms;
 using WebSocketSharp;
@@ -485,6 +487,11 @@ namespace TextForCtext
         {
             try
             {
+                if (driver == null)
+                {
+                    Form1.browsrOPMode = Form1.BrowserOPMode.seleniumNew;
+                    driver = DriverNew();
+                }
                 IWebElement e = driver.FindElement(By.CssSelector(selector));
                 WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(second));
                 try
@@ -3424,7 +3431,13 @@ internal static string getImageUrl() {
                     catch (Exception)
                     {
                         openNewTabWindow();//要打開比較快更新
-                        driver.Navigate().GoToUrl(ipUrl);
+                        try
+                        {
+                            driver.Navigate().GoToUrl(ipUrl);
+                        }
+                        catch (Exception)
+                        {
+                        }
                     }
                     DateTime dt = DateTime.Now;
                     IWebElement ie = waitFindWebElementBySelector_ToBeClickable(selector);
@@ -3488,6 +3501,135 @@ internal static string getImageUrl() {
 
             return null;
         }
+
+        internal static bool OCR_GJcool_BatchProcessing(string downloadImgFullName, bool _downloadResult = false){
+            driver = driver ?? DriverNew();
+            string currentWindowHndl = driver.CurrentWindowHandle;
+            openNewTabWindow(WindowType.Tab);
+            GoToUrlandActivate(OCRSite_URL[OCRSiteTitle.GJcool]);
+            
+            //按下「批量處理（面向授權用戶）」頁籤
+            IWebElement iwe = waitFindWebElementBySelector_ToBeClickable("#batch_Tab_A",15);
+            iwe.Click();
+            
+            //按下「批量處理（面向授權用戶）」頁面下的「選擇檔案」
+            iwe = waitFindWebElementBySelector_ToBeClickable("#BatchFilesInput");
+            clickCopybutton_GjcoolFastExperience(new Point(iwe.Location.X + 76 + (iwe.Size.Width) / 2, iwe.Location.Y + 120 + (iwe.Size.Height) / 2));//new Point(X, Y)=「選擇檔案」控制項之位置
+            //iwe.Click();
+
+            Clipboard.SetText(downloadImgFullName);
+
+            //等待選取檔案對話框開啟
+            Thread.Sleep(800 + (
+                800 + Extend_the_wait_time_for_the_Open_Old_File_dialog_box_to_appear_Millisecond < 0 ? 0 : Extend_the_wait_time_for_the_Open_Old_File_dialog_box_to_appear_Millisecond));//最小值（須在重開機後或系統最小負載時）（連「開啟」舊檔之視窗也看不見，即可完成）
+            //Thread.Sleep(1200);
+            //Thread.Sleep(500);            
+
+            //輸入：檔案名稱 //SendKeys.Send(downloadImgFullName);
+            SendKeys.Send("+{Insert}");//or "^v"
+            SendKeys.Send("{ENTER}");
+
+            //按下「上傳」
+            iwe = waitFindWebElementBySelector_ToBeClickable("#batchUploadDropdown");
+            iwe.Click();
+
+            //按下「豎排自動識別」
+            iwe = waitFindWebElementBySelector_ToBeClickable("#Batch > div.d-flex.justify-content-between.mt-3 > div > div > div:nth-child(2) > ul > li.dropdown-item > div > label");
+            iwe.Click();
+
+            //按下「上傳」
+            iwe = waitFindWebElementBySelector_ToBeClickable("#batchUploadDropdown");
+            iwe.Click();
+
+            //按下「圖片上傳」
+            iwe = waitFindWebElementBySelector_ToBeClickable("#Batch > div.d-flex.justify-content-between.mt-3 > div > div > div:nth-child(2) > ul > li:nth-child(1) > a");
+            iwe.Click();
+
+            Thread.Sleep(1000);
+            //按下「編輯」
+            iwe = waitFindWebElementBySelector_ToBeClickable("#result_edit_0",30);
+            while (iwe == null)
+                iwe = waitFindWebElementBySelector_ToBeClickable("#result_edit_0");
+            iwe.Click();
+
+            //#batchTable > tbody > tr > td.bs-checkbox > label > input[type=checkbox]
+
+            Thread.Sleep(2000);
+
+            //按下準備完畢OK
+            iwe = waitFindWebElementBySelector_ToBeClickable("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled");
+            while (iwe == null)
+                iwe = waitFindWebElementBySelector_ToBeClickable("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled");
+            iwe.Click();
+
+            //按下「文本行」
+            //【文本行】按鈕
+            //iwe = waitFindWebElementBySelector_ToBeClickable("#OneLine > div.d-flex.justify-content-between.mt-2.mb-1 > div:nth-child(3) > div:nth-child(6) > button:nth-child(2) > i");
+            iwe = waitFindWebElementBySelector_ToBeClickable("#OneLine > div.d-flex.justify-content-between.mt-2.mb-1 > div:nth-child(3) > div:nth-child(6) > button:nth-child(2)");
+            //if (iwe == null)
+            //{
+            //    SendKeys.SendWait("{esc}");
+            //    iwe = waitFindWebElementBySelector_ToBeClickable("#OneLine > div.d-flex.justify-content-between.mt-2.mb-1 > div:nth-child(3) > div:nth-child(6) > button:nth-child(2)");
+            //}
+            if (iwe != null)
+            {
+                try
+                {
+                    iwe.Click();
+                }
+                catch (Exception)
+                {
+                    SendKeys.SendWait("{esc}");
+                    iwe.Click();
+                }
+                //文本窗口
+                iwe = waitFindWebElementBySelector_ToBeClickable("#TextArea");
+                if (iwe != null)
+                {
+                    //將OCR結果讀入剪貼簿：
+                    if (iwe.Text != string.Empty)
+                        Clipboard.SetText(iwe.Text);
+                    else
+                    {
+                        StopOCR = true;
+                        return false;
+                    }
+                }
+                else
+                {
+                    StopOCR = true;
+                    return false;
+                }
+            }
+            else
+            {
+                StopOCR = true; return false;
+            }
+
+        //finished:
+            #region 關閉OCR視窗後回到原來分頁視窗
+            try
+            {
+                driver.Close();
+
+            }
+            catch (Exception)
+            {
+            }
+            _OCR_GJcool_WindowClosed = true;
+            try
+            {
+                driver.SwitchTo().Window(currentWindowHndl);
+            }
+            catch (Exception)
+            {
+            }
+            #endregion
+            StopOCR = true;
+            return true;
+
+        }
+
 
         /// <summary>
         /// 《古籍酷》OCR：自動識別(豎版)。由原本程式碼改良而來
@@ -5130,7 +5272,7 @@ internal static string getImageUrl() {
                     try
                     {
                         if (info.StartsWith("reach traffic limit.") || info.StartsWith("识别失败")
-                            || info.StartsWith("ip address banned")|| info.StartsWith("System is busy"))
+                            || info.StartsWith("ip address banned") || info.StartsWith("System is busy"))
                         {
                             trafficLimit = true; DialogResult ds = DialogResult.None;
                             StopOCR = true; ActiveForm1.PagePaste2GjcoolOCR_ing = false;
@@ -5140,7 +5282,7 @@ internal static string getImageUrl() {
                             IntPtr targetWindowHandle = FindWindow(null, targetProcessName);
                             Task tsRing = Task.Run(() =>
                             {
-                                if (info.StartsWith("System is busy")||info.StartsWith("ip address banned"))
+                                if (info.StartsWith("System is busy") || info.StartsWith("ip address banned"))
                                 {
 
                                     if (File.Exists("C:\\Windows\\Media\\ring05.wav"))
@@ -5193,7 +5335,7 @@ internal static string getImageUrl() {
                                 }
                             });
                             //tsRing.Wait(6000);
-                            
+
                             try
                             {
                                 if (info.StartsWith("System is busy") || info.StartsWith("ip address banned")) CurrentIP = GetPublicIpAddress(string.Empty);//CurrentIP = CurrentIP == string.Empty ? GetPublicIpAddress(string.Empty) : CurrentIP;
@@ -5203,8 +5345,8 @@ internal static string getImageUrl() {
                                 returnFalse = true;
                                 goto finish;
                             }
-                            
-                            string mark = info.StartsWith("识别失败") ? "●●●●●●●●●" : 
+
+                            string mark = info.StartsWith("识别失败") ? "●●●●●●●●●" :
                                 (info.StartsWith("System is busy") || info.StartsWith("ip address banned")) ? "★★★★★★★★★★★" + CurrentIP + "★★★★" : "●";
                             if (info.StartsWith("ip address banned")) Clipboard.SetText(CurrentIP);
                             ds = MessageBox.Show("是否讓程式自動更換IP？", "●切換IP？" + mark + "『" + info + "』" + mark, MessageBoxButtons.OKCancel, MessageBoxIcon.None, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly); //Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("是否讓程式自動更換IP？", "●切換IP？")
@@ -5830,6 +5972,43 @@ internal static string getImageUrl() {
 
             //Console.WriteLine("Chrome download directory: " + downloadDirectory);
             return downloadDirectory_Chrome;
+        }
+
+        /// <summary>
+        /// 依選取文字取得目前URL加該選取字為該頁之關鍵字的連結。如欲在此頁中標出「𢔶」字，即為：
+        /// https://ctext.org/library.pl?if=gb&file=36575&page=53#𢔶
+        /// Ctrl + k
+        /// </summary>
+        /// <returns></returns>
+        internal static string GetPageUrlKeywordLink()
+        {
+            if (!ActiveForm1.Controls["textBox1"].Focused) return string.Empty;
+            TextBox tb = ActiveForm1.Controls["textBox1"] as TextBox;
+            if (tb.SelectionLength == 0) return string.Empty;
+            string w = tb.SelectedText;
+            string url = ActiveForm1.Controls["textBox3"].Text; //driver.Url;
+            if (url == null) return string.Empty;
+            int i = url.IndexOf("&page=");
+            if (i == -1) return string.Empty;
+
+            i = url.IndexOf("&", i + "&page=".Length + 1);
+            if (i > -1) //20240102 Bard大菩薩：C# 找到字串中「=53」的結束位置
+                url = url.Substring(0, i);
+            else
+            {
+                i = url.IndexOf("&page=") + "&page=".Length + 1;
+                // 從起始位置開始，逐個字元比較，直到找到非數字或字串結束
+                int end = i;
+                while (end < url.Length && char.IsDigit(url[end]))
+                {
+                    end++;
+                }
+                url = url.Substring(0, end);
+            }
+            //Clipboard.SetText(w);
+            //return url + "#" + HttpUtility.UrlEncode(w) ;//VBA中文編碼好像還是有問題，先用這個，並先複製一個字進剪貼簿，可以利用 Win + v 的方式檢視調用
+            //以上VBA bug 已排除
+            return url + "#" + w ;//到VBA再轉碼，以便複製此字、不必再key也。況昨晚才經Bing大菩薩、StackOverflow AI大菩薩的加持，得以成功建置此生第1個 dll檔案，供Word VBA調用。感恩感恩　讚歎讚歎　南無阿彌陀佛
         }
     }
 }

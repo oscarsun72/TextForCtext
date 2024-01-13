@@ -117,89 +117,149 @@ Enum SurrogateCodePoint 'https://zhuanlan.zhihu.com/p/147339588
     LowStart = &HDC00 'https://zh.wikipedia.org/zh-tw/UTF-16
     LowEnd = &HDFFF
 End Enum
+'20240106 StackOverflow AI & Bing大菩薩:建置C#程式庫成dll檔案
+Public Function UrlEncode(ByRef szString As String) As String
+    Dim encoder As New UrlEncodingDLL.UrlEncoder
+    Dim encodedUrl As String
+    encodedUrl = encoder.UrlEncode(Selection) ' Chinese text
+    'Debug.Print encodedUrl ' Output: "%E4%BD%A0%E5%A5%BD%E4%B8%96%E7%95%8C"
+    UrlEncode = encodedUrl
+End Function
 
-Public Function UrlEncode(ByRef szString As String) As String '以下函數可以編碼中文的URL： VBA與Unicode Ansi URL編碼解碼等相關的代碼集錦 - 成功需要自律的文章 - 知乎 https://zhuanlan.zhihu.com/p/435181691
-Dim szChar As String
-Dim szTemp As String
-Dim szCode As String
-Dim szHex As String
-Dim szBin As String
-Dim iCount1 As Integer
-Dim iCount2 As Integer
-Dim iStrLen1 As Integer
-Dim iStrLen2 As Integer
-Dim lResult As Long
-Dim lAscVal As Long
-szString = Trim$(szString)
-iStrLen1 = Len(szString)
-For iCount1 = 1 To iStrLen1
-szChar = Mid$(szString, iCount1, 1)
-lAscVal = AscW(szChar)
-If lAscVal >= &H0 And lAscVal <= &HFF Then
-If (lAscVal >= &H30 And lAscVal <= &H39) Or _
-(lAscVal >= &H41 And lAscVal <= &H5A) Or _
-(lAscVal >= &H61 And lAscVal <= &H7A) Then
-szCode = szCode & szChar
-Else
-szCode = szCode & "%" & Hex(AscW(szChar))
-End If
-Else
-szHex = Hex(AscW(szChar))
-iStrLen2 = Len(szHex)
-For iCount2 = 1 To iStrLen2
-szChar = Mid$(szHex, iCount2, 1)
-Select Case szChar
-Case Is = "0"
-szBin = szBin & "0000"
-Case Is = "1"
-szBin = szBin & "0001"
-Case Is = "2"
-szBin = szBin & "0010"
-Case Is = "3"
-szBin = szBin & "0011"
-Case Is = "4"
-szBin = szBin & "0100"
-Case Is = "5"
-szBin = szBin & "0101"
-Case Is = "6"
-szBin = szBin & "0110"
-Case Is = "7"
-szBin = szBin & "0111"
-Case Is = "8"
-szBin = szBin & "1000"
-Case Is = "9"
-szBin = szBin & "1001"
-Case Is = "A"
-szBin = szBin & "1010"
-Case Is = "B"
-szBin = szBin & "1011"
-Case Is = "C"
-szBin = szBin & "1100"
-Case Is = "D"
-szBin = szBin & "1101"
-Case Is = "E"
-szBin = szBin & "1110"
-Case Is = "F"
-szBin = szBin & "1111"
-Case Else
-End Select
-Next iCount2
-szTemp = "1110" & Left$(szBin, 4) & "10" & Mid$(szBin, 5, 6) & "10" & Right$(szBin, 6)
-For iCount2 = 1 To 24
-If Mid$(szTemp, iCount2, 1) = "1" Then
-lResult = lResult + 1 * 2 ^ (24 - iCount2)
-Else: lResult = lResult + 0 * 2 ^ (24 - iCount2)
-End If
-Next iCount2
-szTemp = Hex(lResult)
-szCode = szCode & "%" & Left$(szTemp, 2) & "%" & Mid$(szTemp, 3, 2) & "%" & Right$(szTemp, 2)
-End If
-szBin = vbNullString
-lResult = 0
-Next iCount1
-UrlEncode = szCode
+
+Public Function UrlEncode_Big5UnicodOLNLY(ByRef szString As String) As String '以下函數可以編碼中文的URL： VBA與Unicode Ansi URL編碼解碼等相關的代碼集錦 - 成功需要自律的文章 - 知乎 https://zhuanlan.zhihu.com/p/435181691
+    Dim szChar As String
+    Dim szTemp As String
+    Dim szCode As String
+    Dim szHex As String
+    Dim szBin As String
+    Dim iCount1 As Integer
+    Dim iCount2 As Integer
+    Dim iStrLen1 As Integer
+    Dim iStrLen2 As Integer
+    Dim lResult As Long
+    Dim lAscVal As Long
+    szString = Trim$(szString)
+    iStrLen1 = Len(szString)
+    For iCount1 = 1 To iStrLen1
+    szChar = Mid$(szString, iCount1, 1)
+    lAscVal = AscW(szChar)
+    If lAscVal >= &H0 And lAscVal <= &HFF Then
+    If (lAscVal >= &H30 And lAscVal <= &H39) Or _
+    (lAscVal >= &H41 And lAscVal <= &H5A) Or _
+    (lAscVal >= &H61 And lAscVal <= &H7A) Then
+    szCode = szCode & szChar
+    Else
+    szCode = szCode & "%" & Hex(AscW(szChar))
+    End If
+    Else
+    szHex = Hex(AscW(szChar))
+    iStrLen2 = Len(szHex)
+    For iCount2 = 1 To iStrLen2
+    szChar = Mid$(szHex, iCount2, 1)
+    Select Case szChar
+    Case Is = "0"
+    szBin = szBin & "0000"
+    Case Is = "1"
+    szBin = szBin & "0001"
+    Case Is = "2"
+    szBin = szBin & "0010"
+    Case Is = "3"
+    szBin = szBin & "0011"
+    Case Is = "4"
+    szBin = szBin & "0100"
+    Case Is = "5"
+    szBin = szBin & "0101"
+    Case Is = "6"
+    szBin = szBin & "0110"
+    Case Is = "7"
+    szBin = szBin & "0111"
+    Case Is = "8"
+    szBin = szBin & "1000"
+    Case Is = "9"
+    szBin = szBin & "1001"
+    Case Is = "A"
+    szBin = szBin & "1010"
+    Case Is = "B"
+    szBin = szBin & "1011"
+    Case Is = "C"
+    szBin = szBin & "1100"
+    Case Is = "D"
+    szBin = szBin & "1101"
+    Case Is = "E"
+    szBin = szBin & "1110"
+    Case Is = "F"
+    szBin = szBin & "1111"
+    Case Else
+    End Select
+    Next iCount2
+    szTemp = "1110" & left$(szBin, 4) & "10" & Mid$(szBin, 5, 6) & "10" & right$(szBin, 6)
+    For iCount2 = 1 To 24
+    If Mid$(szTemp, iCount2, 1) = "1" Then
+    lResult = lResult + 1 * 2 ^ (24 - iCount2)
+    Else: lResult = lResult + 0 * 2 ^ (24 - iCount2)
+    End If
+    Next iCount2
+    szTemp = Hex(lResult)
+    szCode = szCode & "%" & left$(szTemp, 2) & "%" & Mid$(szTemp, 3, 2) & "%" & right$(szTemp, 2)
+    End If
+    szBin = vbNullString
+    lResult = 0
+    Next iCount1
+    UrlEncode_Big5UnicodOLNLY = szCode
 
 End Function
+
+Public Function UrlEncodeWorksheetFunction(ByRef szString As String) As String '20240103Bing大菩薩：VBA代碼中的問題：
+'您好，這是Bing。您的VBA代碼中的問題在於，當您嘗試對超出基本多語言平面（BMP）的Unicode字符（如「??」）進行編碼時，AscW函數會返回一個代理對，而不是實際的Unicode碼點。這就是為什麼您看到的結果是「%E5%B4%87%ED%A1%80%ED%B0%89」而不是「%E5%B4%87%F0%A0%80%89」。
+'要解決這個問題，您需要對代理對進行特殊處理。以下是一個修改後的UrlEncode函數，它可以正確處理這種情況：
+'這個修改後的函數會檢查每個字符是否為代理對的高代理項，如果是，則會將其與下一個低代理項組合以形成完整的Unicode碼點。然後，它將這個碼點轉換為十六進制並添加到輸出字符串中。希望這對您有所幫助！
+    Dim szChar As String
+    Dim szCode As String
+    Dim iCount1 As Integer
+    Dim iStrLen1 As Integer
+    Dim lAscVal As Long
+    Dim lAscVal2 As Long
+    szString = Trim$(szString)
+    iStrLen1 = Len(szString)
+    For iCount1 = 1 To iStrLen1
+        szChar = Mid$(szString, iCount1, 1)
+        lAscVal = AscW(szChar)
+        If lAscVal >= &HD800 And lAscVal <= &HDBFF And iCount1 < iStrLen1 Then
+            lAscVal2 = AscW(Mid$(szString, iCount1 + 1, 1))
+            If lAscVal2 >= &HDC00 And lAscVal2 <= &HDFFF Then
+                lAscVal = (lAscVal - &HD800) * &H400 + (lAscVal2 - &HDC00) + &H10000
+                iCount1 = iCount1 + 1
+            End If
+        End If
+        If lAscVal > &H7F Then
+        '須先安裝Excel 並引用參考才行！
+'            szCode = szCode & "%" & WorksheetFunction.Dec2Hex(lAscVal, 2)
+        Else
+            szCode = szCode & szChar
+        End If
+    Next iCount1
+    UrlEncodeWorksheetFunction = szCode
+End Function
+
+
+
+Function IsAlphaNumeric(ByVal asciiCode As Integer) As Boolean
+    IsAlphaNumeric = (asciiCode >= 48 And asciiCode <= 57) Or _
+                     (asciiCode >= 65 And asciiCode <= 90) Or _
+                     (asciiCode >= 97 And asciiCode <= 122)
+End Function
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -250,7 +310,7 @@ If Abs(a) < 128 Then
 
 sl = sl + 3
 
-URLDecode = URLDecode & Chr(a)
+URLDecode = URLDecode & chr(a)
 
 Else
 
@@ -288,7 +348,7 @@ sl = sl + 6
 
 End If
 
-URLDecode = URLDecode & Chr(a)
+URLDecode = URLDecode & chr(a)
 
 End Select
 
@@ -338,13 +398,13 @@ With ActiveDocument.Range.Find
     .Execute "", , , , , , , wdFindContinue, , "", wdReplaceAll
     .ClearFormatting
 End With
-If InStr(ActiveDocument.Range, "//") Or InStr(ActiveDocument.Range, Chr(39)) > 0 Then
+If InStr(ActiveDocument.Range, "//") Or InStr(ActiveDocument.Range, chr(39)) > 0 Then
     Dim p As Paragraph
     For Each p In ActiveDocument.Paragraphs
-        If InStr(p.Range, "//") > 0 Or InStr(1, p.Range, Chr(39), vbTextCompare) > 0 Then p.Range.Delete
+        If InStr(p.Range, "//") > 0 Or InStr(1, p.Range, chr(39), vbTextCompare) > 0 Then p.Range.Delete
     Next p
 End If
-ActiveDocument.Range = VBA.Replace(ActiveDocument.Range, Chr(13) & Chr(13), Chr(13))
+ActiveDocument.Range = VBA.Replace(ActiveDocument.Range, chr(13) & chr(13), chr(13))
 SystemSetup.contiUndo ur
 End Sub
 
@@ -352,12 +412,12 @@ Rem 20230215 chatGPT大菩薩：
 Rem 這段代碼中的 IsChineseCharacter 函數用於判斷單個字符是否是CJK或CJK擴展字符集中的漢字，而 IsChineseString 函數則用於判斷一個字符串是否全部由CJK或CJK擴展字符集中的漢字組成。
 Rem 在VBA中，我們使用了 AscW 函數來獲取字符的Unicode編碼值。然後，我們就可以使用和C#中類似的方式來判斷字符是否屬於CJK或CJK擴展字符集中的漢字。
 ' 判斷一個字符是否是CJK或CJK擴展字符集中的漢字
-Public Function IsChineseCharacter(c As String) As Boolean
+Public Function IsChineseCharacter(C As String) As Boolean
 '    chatGPT大菩薩： Unicode範圍: CJK字符集範圍：4E00–9FFF，CJK擴展字符集範圍：20000–2A6DF 孫守真按：這樣根本不夠，只有 CJK統一表意符號和CJK擴展B
 '    Dim unicodeVal As Long
 '    unicodeVal = AscW(c)
 '    IsChineseCharacter = (unicodeVal >= &H4E00 And unicodeVal <= &H9FFF) Or (unicodeVal >= &H20000 And unicodeVal <= &H2A6DF)
-    IsChineseCharacter = IsCJK(c)(1)
+    IsChineseCharacter = IsCJK(C)(1)
 End Function
 
 ' 判斷一個字符串是否全部由CJK或CJK擴展字符集中的漢字組成
@@ -410,16 +470,16 @@ Private Function CombineSurrogatePair(ByVal highSurrogate As String, ByVal lowSu
 End Function
 Rem 使用這個函數，您可以通過在循環中處理單個字符，並使用上面的範圍來判斷字符是否在CJK全字集範圍內。 如果找到代理字符，則可以使用該函數將其轉換為Unicode字符。
 
-Function IsCJK(c As String) As Collection 'Boolean,CJKBlockName
+Function IsCJK(C As String) As Collection 'Boolean,CJKBlockName
     Dim code As Long, cjk As Boolean, cjkBlackName As CJKBlockName, result As New Collection
 '    Dim code
     Rem chatGPT大菩薩：是的，您說得沒錯。在 VBA 中，使用 AscW 函式取得 Unicode 字元的整數值時，如果傳入的字串是 surrogate pair，那麼函式只會計算 pair 的第一個字元（即 High surrogate）的值。因此，可以直接使用 AscW(c) 來計算 c 的整數值，而不必再使用 Left 函式來取得第一個字元。
     'code = AscW(Left(c, 1))
     'code = AscW(c)
-    If Len(c) = 1 Then
-        code = AscW(c) 'AscW_IncludeSurrogatePairUnicodecode(c)
+    If Len(C) = 1 Then
+        code = AscW(C) 'AscW_IncludeSurrogatePairUnicodecode(c)
     Else
-        getCodePoint c, code
+        getCodePoint C, code
     End If
     Rem https://en.wikipedia.org/wiki/CJK_characters
     'CJK Unified Ideographs
@@ -524,27 +584,27 @@ Function AscW_IncludeSurrogatePairUnicodecode(ByVal str As String) As Long
     End If
     AscW_IncludeSurrogatePairUnicodecode = code
 End Function
-Sub getCodePoint(character As String, codepoint As Long)
+Sub getCodePoint(character As String, codePoint As Long)
 ' 獲取字符串的 high surrogate 和 low surrogate 的 AscW() 值
-codepoint = ((CLng(AscW(Left(character, 1))) - &HD800) * &H400) + (CLng(AscW(Right(character, 1))) - &HDC00) + &H10000
+codePoint = ((CLng(AscW(left(character, 1))) - &HD800) * &H400) + (CLng(AscW(right(character, 1))) - &HDC00) + &H10000
 Rem 沒有「CLng」轉型會溢位，若者如 isCJK_Ext()函式中的方式，以型別為 Long 的變數儲存其值，亦會隱含轉型
 End Sub
 
 
 Function isCJK_Ext(str As String, whatBlockNameInExt As CJKBlockName) As Boolean
-Dim codepoint As Long
+Dim codePoint As Long
 Dim highSurrogate As Long
 Dim lowSurrogate As Long
 
 ' 獲取字符串的 high surrogate 和 low surrogate 的 AscW() 值
-highSurrogate = AscW(Left(str, 1))
-lowSurrogate = AscW(Right(str, 1))
+highSurrogate = AscW(left(str, 1))
+lowSurrogate = AscW(right(str, 1))
 
 If (highSurrogate >= SurrogateCodePoint.HighStart And highSurrogate <= SurrogateCodePoint.HighEnd) _
     And (lowSurrogate >= SurrogateCodePoint.LowStart And lowSurrogate <= SurrogateCodePoint.LowEnd) Then
     ' 計算字符的碼點值!!!!!!!!!!!!!!!!!
 '    codepoint = ((highSurrogate - &HD800) * &H400) + (lowSurrogate - &HDC00) + &H10000
-    getCodePoint str, codepoint '若沒以「CLng()」轉型會溢位，以型別為 Long 的變數儲存其值，即會隱含轉型
+    getCodePoint str, codePoint '若沒以「CLng()」轉型會溢位，以型別為 Long 的變數儲存其值，即會隱含轉型
         
         Rem forDebugText
 '    If codepoint = &H2E4E5 Then Stop
@@ -552,21 +612,21 @@ If (highSurrogate >= SurrogateCodePoint.HighStart And highSurrogate <= Surrogate
 
     Select Case whatBlockNameInExt
         Case CJKBlockName.CJK_Unified_Ideographs_Extension_A
-            If codepoint >= CJKChartRange.CJK_Unified_Ideographs_Extension_A_start And codepoint <= CJKChartRange.CJK_Unified_Ideographs_Extension_A_end Then isCJK_Ext = True
+            If codePoint >= CJKChartRange.CJK_Unified_Ideographs_Extension_A_start And codePoint <= CJKChartRange.CJK_Unified_Ideographs_Extension_A_end Then isCJK_Ext = True
         Case CJKBlockName.CJK_Unified_Ideographs_Extension_B
-            If codepoint >= CJKChartRange.CJK_Unified_Ideographs_Extension_B_start And codepoint <= CJKChartRange.CJK_Unified_Ideographs_Extension_B_end Then isCJK_Ext = True
+            If codePoint >= CJKChartRange.CJK_Unified_Ideographs_Extension_B_start And codePoint <= CJKChartRange.CJK_Unified_Ideographs_Extension_B_end Then isCJK_Ext = True
         Case CJKBlockName.CJK_Unified_Ideographs_Extension_C
-            If codepoint >= CJKChartRange.CJK_Unified_Ideographs_Extension_C_start And codepoint <= CJKChartRange.CJK_Unified_Ideographs_Extension_C_end Then isCJK_Ext = True
+            If codePoint >= CJKChartRange.CJK_Unified_Ideographs_Extension_C_start And codePoint <= CJKChartRange.CJK_Unified_Ideographs_Extension_C_end Then isCJK_Ext = True
         Case CJKBlockName.CJK_Unified_Ideographs_Extension_D
-            If codepoint >= CJKChartRange.CJK_Unified_Ideographs_Extension_D_start And codepoint <= CJKChartRange.CJK_Unified_Ideographs_Extension_D_end Then isCJK_Ext = True
+            If codePoint >= CJKChartRange.CJK_Unified_Ideographs_Extension_D_start And codePoint <= CJKChartRange.CJK_Unified_Ideographs_Extension_D_end Then isCJK_Ext = True
         Case CJKBlockName.CJK_Unified_Ideographs_Extension_E
-            If codepoint >= CJKChartRange.CJK_Unified_Ideographs_Extension_E_start And codepoint <= CJKChartRange.CJK_Unified_Ideographs_Extension_E_end Then isCJK_Ext = True
+            If codePoint >= CJKChartRange.CJK_Unified_Ideographs_Extension_E_start And codePoint <= CJKChartRange.CJK_Unified_Ideographs_Extension_E_end Then isCJK_Ext = True
         Case CJKBlockName.CJK_Unified_Ideographs_Extension_F
-            If codepoint >= CJKChartRange.CJK_Unified_Ideographs_Extension_F_start And codepoint <= CJKChartRange.CJK_Unified_Ideographs_Extension_F_end Then isCJK_Ext = True
+            If codePoint >= CJKChartRange.CJK_Unified_Ideographs_Extension_F_start And codePoint <= CJKChartRange.CJK_Unified_Ideographs_Extension_F_end Then isCJK_Ext = True
         Case CJKBlockName.CJK_Unified_Ideographs_Extension_G
-            If codepoint >= CJKChartRange.CJK_Unified_Ideographs_Extension_G_start And codepoint <= CJKChartRange.CJK_Unified_Ideographs_Extension_G_end Then isCJK_Ext = True
+            If codePoint >= CJKChartRange.CJK_Unified_Ideographs_Extension_G_start And codePoint <= CJKChartRange.CJK_Unified_Ideographs_Extension_G_end Then isCJK_Ext = True
         Case CJKBlockName.CJK_Unified_Ideographs_Extension_H
-            If codepoint >= CJKChartRange.CJK_Unified_Ideographs_Extension_H_start And codepoint <= CJKChartRange.CJK_Unified_Ideographs_Extension_H_end Then isCJK_Ext = True
+            If codePoint >= CJKChartRange.CJK_Unified_Ideographs_Extension_H_start And codePoint <= CJKChartRange.CJK_Unified_Ideographs_Extension_H_end Then isCJK_Ext = True
     End Select
 End If
 End Function
@@ -577,19 +637,19 @@ Function isCJK_ExtF(str As String) As Boolean
 '第一個被稱為 前導代理 (lead surrogates)，介於 D800 至 DBFF 之間
 '第二個被稱為 後尾代理 (trail surrogates)，介於 DC00 至 DFFF 之間
 
-Dim codepoint As Long
+Dim codePoint As Long
 Dim highSurrogate As Long
 Dim lowSurrogate As Long
 
 ' 獲取字符串的 high surrogate 和 low surrogate 的 AscW() 值
-highSurrogate = AscW(Left(str, 1))
-lowSurrogate = AscW(Right(str, 1))
+highSurrogate = AscW(left(str, 1))
+lowSurrogate = AscW(right(str, 1))
 
 If (highSurrogate >= &HD84D And highSurrogate <= &HDBFF) And (lowSurrogate >= &HDC00 And lowSurrogate <= &HDFFF) Then
     ' 計算字符的碼點值
-    codepoint = ((highSurrogate - &HD800) * &H400) + (lowSurrogate - &HDC00) + &H10000
+    codePoint = ((highSurrogate - &HD800) * &H400) + (lowSurrogate - &HDC00) + &H10000
     
-    If codepoint >= &H2CEB0 And codepoint <= &H2EBEF Then
+    If codePoint >= &H2CEB0 And codePoint <= &H2EBEF Then
         ' 字符在 CJK-Ext F 範圍內
         isCJK_ExtF = True
     Else
@@ -619,15 +679,15 @@ Sub ConvertToUnicode_SelectionToggleCharacterCode() '類似實作 Selection.ToggleCh
     Dim selectedText As String
     Dim unicodeCode As Long
     
-    selectedText = selection.Range.text
+    selectedText = Selection.Range.Text
     
     If Len(selectedText) = 1 Then
         unicodeCode = AscW(selectedText)
-        selection.Range.text = Hex(unicodeCode)
+        Selection.Range.Text = Hex(unicodeCode)
     ElseIf Len(selectedText) = 2 Then
         unicodeCode = (AscW(Mid(selectedText, 1, 1)) - &HD800&) * &H400& + (AscW(Mid(selectedText, 2, 1)) - &HDC00&) + &H10000 '
         getCodePoint selectedText, unicodeCode
-        selection.Range.text = Hex(unicodeCode)
+        Selection.Range.Text = Hex(unicodeCode)
     Else
         MsgBox "Invalid selection"
         Exit Sub
