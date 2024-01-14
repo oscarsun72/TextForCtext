@@ -5512,7 +5512,27 @@ namespace WindowsFormsApp1
                 new SoundPlayer(mediaPathWithBackslash).Play();
 
         }
-
+        /// <summary>
+        /// 自動批量連續OCR操作被中止時發出的警示聲
+        /// </summary>
+        internal static void OCRBreakSoundNotification()
+        {
+            Task.Run(() =>
+            {
+                using (SoundPlayer sp = new SoundPlayer("C:\\Windows\\Media\\ring05.wav"))
+                {
+                    sp.Play();
+                    Keys k = Control.ModifierKeys;
+                    if (k != Keys.Control) Thread.Sleep(12000);
+                    if (File.Exists("C:\\Windows\\Media\\ring04.wav") && Control.ModifierKeys != Keys.Control && k != Keys.Control)//若需中止，按下Ctrl鍵
+                    {
+                        sp.SoundLocation = "C:\\Windows\\Media\\ring04.wav";
+                        sp.Play();
+                        Thread.Sleep(3000);
+                    }
+                }
+            });
+        }
 
         /// <summary>
         /// 將<p>後的空格「　」取代為「􏿽」，只要該行不是篇名
@@ -7789,6 +7809,7 @@ namespace WindowsFormsApp1
             //}
             if (CnText.HasEditedWithPunctuationMarks(ref quickedit_data_textboxTxt))
             {
+                OCRBreakSoundNotification();
                 if (DialogResult.Cancel == Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("目前頁面似乎已經整理過了，確定還要繼續嗎？" +
                       Environment.NewLine + Environment.NewLine + "================" + Environment.NewLine +
                     quickedit_data_textboxTxt))
@@ -7800,8 +7821,9 @@ namespace WindowsFormsApp1
                     return false;
                 }
             }
-            else if (new StringInfo(quickedit_data_textboxTxt).LengthInTextElements < normalLineParaLength)
+            else if (new StringInfo(quickedit_data_textboxTxt).LengthInTextElements < (normalLineParaLength == 0 ? 20 : normalLineParaLength))
             {
+                OCRBreakSoundNotification();
                 if (DialogResult.Cancel == Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("目前頁面內容似乎太短了，確定還要交給OCR嗎？" +
                         Environment.NewLine + Environment.NewLine + "================" + Environment.NewLine +
                         quickedit_data_textboxTxt))
