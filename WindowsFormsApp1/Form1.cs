@@ -5522,7 +5522,7 @@ namespace WindowsFormsApp1
                 {
                     sp.Play();
                     Keys k = ModifierKeys; DateTime dt = DateTime.Now;
-                    Task.Run(() => { while (DateTime.Now.Subtract(dt).TotalSeconds < 3) k = ModifierKeys; });
+                    Task.Run(() => { while (DateTime.Now.Subtract(dt).TotalSeconds < 8 && k == Keys.None) k = ModifierKeys; });
                     if (k != Keys.Control) Thread.Sleep(12000);
                     if (File.Exists("C:\\Windows\\Media\\ring04.wav") && ModifierKeys != Keys.Control && k != Keys.Control)//若需中止，按下Ctrl鍵
                     {

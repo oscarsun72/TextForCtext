@@ -3632,11 +3632,13 @@ internal static string getImageUrl() {
                 try
                 {
                     driver.SwitchTo().Window(currentWindowHndl);
+                    SendKeys.SendWait("%r");//關閉右方頁籤：Chrome瀏覽器擴充功能所設定的快速鍵
                 }
                 catch (Exception)
                 {
                 }
                 #endregion
+                
                 StopOCR = true;
                 return true;
             }
