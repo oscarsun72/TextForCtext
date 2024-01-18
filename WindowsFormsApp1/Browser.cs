@@ -3945,7 +3945,8 @@ internal static string getImageUrl() {
                     //waitFindWebElementBySelector_ToBeClickable("#navbarNav > ul:nth-child(2) > li:nth-child(2) > a > p.mb-0.fs-6.fst-italic").Click();
                     //Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("點數（算力配额）不足！目前僅有"+ points + " 至少需要"+pointCoin);
                     //轉由首頁「快速體驗」執行
-                    bool fastXResulut = OCR_GJcool_FastExperience(downloadImgFullName, true);
+                    //bool fastXResulut = OCR_GJcool_FastExperience(downloadImgFullName, true);
+                    bool fastXResulut = OCR_GJcool_FastExperience(downloadImgFullName, false);//申請「數字萬舟」計劃通過，取得批量處理授權帳戶後故
                     if (fastXResulut)
                     {
                         try
