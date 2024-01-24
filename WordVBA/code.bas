@@ -119,9 +119,10 @@ Enum SurrogateCodePoint 'https://zhuanlan.zhihu.com/p/147339588
 End Enum
 '20240106 StackOverflow AI & Bing大菩薩:建置C#程式庫成dll檔案
 Public Function UrlEncode(ByRef szString As String) As String
+    If InStr(szString, "%") Then UrlEncode = szString: Exit Function
     Dim encoder As New UrlEncodingDLL.UrlEncoder
     Dim encodedUrl As String
-    encodedUrl = encoder.UrlEncode(Selection) ' Chinese text
+    encodedUrl = encoder.UrlEncode(szString) ' Chinese text
     'Debug.Print encodedUrl ' Output: "%E4%BD%A0%E5%A5%BD%E4%B8%96%E7%95%8C"
     UrlEncode = encodedUrl
 End Function
@@ -412,12 +413,12 @@ Rem 20230215 chatGPT大菩薩：
 Rem 這段代碼中的 IsChineseCharacter 函數用於判斷單個字符是否是CJK或CJK擴展字符集中的漢字，而 IsChineseString 函數則用於判斷一個字符串是否全部由CJK或CJK擴展字符集中的漢字組成。
 Rem 在VBA中，我們使用了 AscW 函數來獲取字符的Unicode編碼值。然後，我們就可以使用和C#中類似的方式來判斷字符是否屬於CJK或CJK擴展字符集中的漢字。
 ' 判斷一個字符是否是CJK或CJK擴展字符集中的漢字
-Public Function IsChineseCharacter(C As String) As Boolean
+Public Function IsChineseCharacter(c As String) As Boolean
 '    chatGPT大菩薩： Unicode範圍: CJK字符集範圍：4E00–9FFF，CJK擴展字符集範圍：20000–2A6DF 孫守真按：這樣根本不夠，只有 CJK統一表意符號和CJK擴展B
 '    Dim unicodeVal As Long
 '    unicodeVal = AscW(c)
 '    IsChineseCharacter = (unicodeVal >= &H4E00 And unicodeVal <= &H9FFF) Or (unicodeVal >= &H20000 And unicodeVal <= &H2A6DF)
-    IsChineseCharacter = IsCJK(C)(1)
+    IsChineseCharacter = IsCJK(c)(1)
 End Function
 
 ' 判斷一個字符串是否全部由CJK或CJK擴展字符集中的漢字組成
@@ -431,6 +432,17 @@ Public Function IsChineseString(s As String) As Boolean
     Next i
     IsChineseString = True
 End Function
+
+Rem 20240122 Bing大菩薩：Excel中提取surrogate字元
+Rem 我明白您的問題了。在處理含有代理對的字串時，確實需要特別小心，以避免將代理對的字元錯誤地切割開來。在VBA中，我們可以使用一些特殊的方法來處理這種情況。
+Rem 一種可能的解決方案是使用一個自定義的函數來檢查每個字元是否為代理對的一部分。以下是一個可能的實現：
+Function IsSurrogatePair(str As String, pos As Integer) As Boolean
+    Dim c As Integer
+    c = AscW(Mid(str, pos, 1))
+    IsSurrogatePair = c >= &HD800 And c <= &HDFFF
+End Function
+Rem 這個函數會檢查字串中指定位置的字元是否為代理對的一部分。然後，您可以在逐字處理字串時使用這個函數來確保不會將代理對的字元切割開來。
+Rem 請注意，這只是一種可能的解決方案，並且可能需要根據您的具體需求進行調整。希望這對您有所幫助！如果您有其他問題，請隨時告訴我。南無阿彌陀佛。
 
 Rem 20230221 chatGPT大菩薩: VBA檢查surrogate字符：
 Rem 在 VBA 中，您可以使用 AscW 函數將一個字符轉換為 Unicode 編碼。然後，您可以檢查該編碼是否在代理對範圍內。
@@ -446,6 +458,7 @@ Function IsSurrogate(ByVal ch As String) As Boolean
     '第一個被稱為 前導代理 (lead surrogates)，介於 D800 至 DBFF 之間，第二個被稱為 後尾代理 (trail surrogates)，介於 DC00 至 DFFF 之間，UTF-16 就是利用這兩個代理對來表示 FFFF 之外，其他輔助平面的文字。
     Rem 這個函數將字符轉換為 Unicode 編碼，並檢查該編碼是否在代理對範圍內。如果是，則函數返回 True，否則返回 False。請注意，AscW 函數只能用於 Unicode 字符串，如果您要處理 ANSI 字符串，則需要使用 Asc 函數。
 End Function
+
 Function IsHighSurrogate(ByVal ch As String) As Boolean
     Dim code As Long
     code = AscW(ch)
@@ -470,20 +483,34 @@ Private Function CombineSurrogatePair(ByVal highSurrogate As String, ByVal lowSu
 End Function
 Rem 使用這個函數，您可以通過在循環中處理單個字符，並使用上面的範圍來判斷字符是否在CJK全字集範圍內。 如果找到代理字符，則可以使用該函數將其轉換為Unicode字符。
 
-Function IsCJK(C As String) As Collection 'Boolean,CJKBlockName
+Function IsCJK(c As String) As Collection 'Boolean,CJKBlockName
     Dim code As Long, cjk As Boolean, cjkBlackName As CJKBlockName, result As New Collection
+    Dim codeHex As String
 '    Dim code
     Rem chatGPT大菩薩：是的，您說得沒錯。在 VBA 中，使用 AscW 函式取得 Unicode 字元的整數值時，如果傳入的字串是 surrogate pair，那麼函式只會計算 pair 的第一個字元（即 High surrogate）的值。因此，可以直接使用 AscW(c) 來計算 c 的整數值，而不必再使用 Left 函式來取得第一個字元。
     'code = AscW(Left(c, 1))
     'code = AscW(c)
-    If Len(C) = 1 Then
-        code = AscW(C) 'AscW_IncludeSurrogatePairUnicodecode(c)
+    If Len(c) = 1 Then
+        code = AscW(c) 'AscW_IncludeSurrogatePairUnicodecode(c)
+        If code < 0 Then 'Bing大菩薩：您好，這是Bing。關於您的問題，AscW 函數在 VBA 中用於獲取字符的 Unicode 編碼。然而，對於某些字符（特別是一些中文字符），AscW 可能會返回負值。這是因為 AscW 返回的是一個 16 位的有符號整數，範圍是 -32768 到 327671。當字符的 Unicode 編碼超過 32767 時，AscW 會返回一個負數23。
+                        '解決這個問題的一種方法是對 AscW 返回的負值進行處理。如果 AscW 返回一個負數，您可以將該數值加上 65536 來獲得正確的 Unicode 編碼23。以下是一個修改過的函數：
+            code = code + 65536
+        End If
     Else
-        getCodePoint C, code
+        getCodePoint c, code
     End If
     Rem https://en.wikipedia.org/wiki/CJK_characters
     'CJK Unified Ideographs
-    'If code >= CLng("&H4E00") And code <= CLng("&H9FFF") Then'一定要「CLng("&H9FFF")」 不能 「CLng(&H9FFF)」
+'    If code >= CLng("&H4E00") And code <= CLng("&H9FFF") Then '一定要「CLng("&H9FFF")」 不能 「CLng(&H9FFF)」
+'        cjk = True: cjkBlackName = CJKBlockName.CJK_Unified_Ideographs
+'    ElseIf code >= CLng("&H6300") And code <= CLng("&H77FF") Then
+'        cjk = True: cjkBlackName = CJKBlockName.CJK_Unified_Ideographs
+'    ElseIf code >= CLng("&H7800") And code <= CLng("&H8CFF") Then
+'        cjk = True: cjkBlackName = CJKBlockName.CJK_Unified_Ideographs
+'    ElseIf code >= CLng("&H8D00") And code <= CLng("&H9FFF") Then
+'        cjk = True: cjkBlackName = CJKBlockName.CJK_Unified_Ideographs
+        
+
     If code >= CLng(CJKChartRangeString.CJK_Unified_Ideographs_start) And code <= CLng(CJKChartRangeString.CJK_Unified_Ideographs_end) Then
         cjk = True: cjkBlackName = CJKBlockName.CJK_Unified_Ideographs
     'CJK Compatibility Ideographs

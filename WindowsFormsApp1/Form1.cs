@@ -192,11 +192,13 @@ namespace WindowsFormsApp1
 
         /// <summary>
         /// 調整textBox1的字形大小、切換上一頁下一頁等功能
+        /// 按住 Ctrl 再滑鼠滾輪向上為增大字型，向下滾為縮小字型
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
         private void textBox1_MouseWheel(object sender, MouseEventArgs e)
         {
+            bool bold = textBox1.Font.Bold;
             switch (ModifierKeys)
             {
                 case Keys.Control:
@@ -226,6 +228,8 @@ namespace WindowsFormsApp1
                     }
                     break;
             }
+            if (bold)
+                textBox1.Font = new Font(textBox1.Font.FontFamily, textBox1.Font.Size, FontStyle.Bold);
         }
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
@@ -1482,8 +1486,18 @@ namespace WindowsFormsApp1
             }
             #endregion
 
+            while (!isClipBoardAvailable_Text()) { }
+            try
+            {
+                Clipboard.SetText(xCopy);
+            }
+            catch (Exception)
+            {
+                while (!isClipBoardAvailable_Text()) { }
+                Clipboard.SetText(xCopy);
+            }
 
-            Clipboard.SetText(xCopy); BackupLastPageText(xCopy, false, false);
+            BackupLastPageText(xCopy, false, false);
 
 
             if (s + l + 2 < textBox1.Text.Length)
@@ -2942,8 +2956,6 @@ namespace WindowsFormsApp1
             string x = textBox1.Text;
             if (keyDownCtrlAdd(false))
             {
-                //將頁面移至頂端，以便校對輸入時檢視
-                br.GoToUrlandActivate(br.driver.Url, true);
                 if (x != br.Quickedit_data_textboxTxt)
                 {
                     playSound(soundLike.exam);
@@ -2951,6 +2963,8 @@ namespace WindowsFormsApp1
                 }
                 //非同步整理OCR文本時，這行就很需要：
                 textBox1.Text = CnText.RemarkBooksPunctuation(ref x);
+                //將頁面移至頂端，以便校對輸入時檢視
+                br.GoToUrlandActivate(br.driver.Url, true);
             }
             bringBackMousePosFrmCenter();
             //ResumeEvents();

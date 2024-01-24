@@ -1,6 +1,26 @@
 Attribute VB_Name = "ArraysOP"
 Option Explicit
 
+Rem 20230509 YouChat大菩薩
+Rem 在 VBA 中，可以使用 IsArray 函數來判斷一個變量是否是一個數組，但無法確定數組是否具有元素。 如果要檢查數組是否已初始化，可以使用 UBound 函數，該函數返回數組中可用的最後一個索引。 如果數組未初始化，則將返回 -1。 以下是使用 IsArray 和 UBound 函數的示例代碼：
+Function IsArrayAlready(myArray) As Boolean
+    On Error GoTo invalid
+'    Dim myArray() As Integer
+    ' Check if array is initialized
+    If IsArray(myArray) And UBound(myArray) > -1 Then
+        ' Array is initialized and has at least one element
+        IsArrayAlready = True
+    Else
+        ' Array is not initialized or has no elements
+    End If
+    Exit Function
+invalid:
+    'If Err.Number = 9 Then '陣列索引超出範圍
+        IsArrayAlready = False
+    'End If
+    Rem 注意：無法直接檢查數組中是否存在元素，但是可以通過 UBound 函數檢查數組中可用的最後一個索引，以此來確定數組中是否有元素。
+End Function
+
 Rem 20230328 Adrenaline ：
 Rem 漢字會照部首再筆畫排序
 Public Sub SortArray_QuickSort(arrayToSort As Variant) 'VBA引數預設為傳址（pass by reference）
@@ -118,12 +138,12 @@ Function CharactersToArray(myRange As Range, Optional hanOnly As Boolean = False
     Dim i As Long
 
     If hanOnly Then
-        arr = SplitWithoutDelimiter_StringToStringArray(PunctuationString)
-        xRng = myRange.text
+        arr = str.Symbol_withoutEnter
+        xRng = myRange.Text
         For Each e In arr
             xRng = VBA.Replace(xRng, e, "")
         Next e
-        myRange.text = VBA.Replace(xRng, Chr(13), "")
+        myRange.Text = VBA.Replace(xRng, Chr(13), "")
     End If
         
     ReDim myArray(1 To myRange.Characters.Count)

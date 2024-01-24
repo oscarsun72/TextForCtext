@@ -449,7 +449,7 @@ Sub 插入超連結() '2008/9/1 指定鍵(快捷鍵) Ctrl+shift+K(原系統指定在smallcaps為)
     'lnk = UrlEncode(SystemSetup.GetClipboardText)
     lnk = SystemSetup.GetClipboardText
     If VBA.InStr(lnk, "http") = 0 Or VBA.InStr(lnk, "http") > 1 Then MsgBox "剪貼簿中非有效網址！": Exit Sub
-        
+            
     Dim rng As Range, b As Boolean, ur As UndoRecord ', wndo As Window ', d As Document ', sty As String
     
     
@@ -485,6 +485,14 @@ Sub 插入超連結() '2008/9/1 指定鍵(快捷鍵) Ctrl+shift+K(原系統指定在smallcaps為)
                 i = i + 1
             End If
         Next
+    End If
+    Dim ssharp As String
+    ssharp = InStr(lnk, "#")
+    If ssharp > 0 Then
+        Dim w As String
+        w = Mid(lnk, ssharp + 1, Len(lnk) - ssharp)
+        w = code.UrlEncode(w)   'byRef
+        lnk = Mid(lnk, 1, ssharp) + w
     End If
     rng.Hyperlinks.Add Anchor:=rng, Address:= _
         StrConv(lnk, vbNarrow) _

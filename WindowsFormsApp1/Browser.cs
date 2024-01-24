@@ -14,6 +14,8 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Media;
+using System.Net.Http.Headers;
+
 //using System.Net;
 //using System.Net.NetworkInformation;
 using System.Runtime.InteropServices;
@@ -3523,6 +3525,9 @@ internal static string getImageUrl() {
                 clickCopybutton_GjcoolFastExperience(new Point(iwe.Location.X + 76 + (iwe.Size.Width) / 2, iwe.Location.Y + 120 + (iwe.Size.Height) / 2));//new Point(X, Y)=「選擇檔案」控制項之位置
                                                                                                                                                           //iwe.Click();
 
+                ////移動到「選擇檔案」按鈕
+                //Task.Run(() => { SendKeys.SendWait("{tab 10}"); });
+
                 Clipboard.SetText(downloadImgFullName);
 
                 //等待選取檔案對話框開啟
@@ -3536,6 +3541,11 @@ internal static string getImageUrl() {
                 SendKeys.Send("+{Insert}");//or "^v"
                 SendKeys.Send("{ENTER}");
 
+                //图片预览
+                iwe = waitFindWebElementBySelector_ToBeClickable("#batch_figure_0");
+                while (iwe == null)
+                    iwe = waitFindWebElementBySelector_ToBeClickable("#batch_figure_0");
+
                 //按下「上傳」
                 iwe = waitFindWebElementBySelector_ToBeClickable("#batchUploadDropdown");
                 iwe.Click();
@@ -3544,6 +3554,7 @@ internal static string getImageUrl() {
                 iwe = waitFindWebElementBySelector_ToBeClickable("#Batch > div.d-flex.justify-content-between.mt-3 > div > div > div:nth-child(2) > ul > li.dropdown-item > div > label");
                 iwe.Click();
 
+            retry:
                 //按下「上傳」
                 iwe = waitFindWebElementBySelector_ToBeClickable("#batchUploadDropdown");
                 iwe.Click();
@@ -3555,10 +3566,25 @@ internal static string getImageUrl() {
                 Form1.playSound(Form1.soundLike.over);
 
                 Thread.Sleep(800);
+
                 //按下「編輯」
-                iwe = waitFindWebElementBySelector_ToBeClickable("#result_edit_0", 30);
+                //iwe = waitFindWebElementBySelector_ToBeClickable("#result_edit_0", 30);
+                iwe = waitFindWebElementBySelector_ToBeClickable("#result_edit_0",1);
                 while (iwe == null)
+                {
+                    //訊息方塊：文件 1 识别失败。Ocr failed
+                    IWebElement iw = waitFindWebElementBySelector_ToBeClickable("#swal2-html-container");
+                    //<div class="swal2-html-container" id="swal2-html-container" style="display: block;">文件 1 识别失败。Ocr failed</div>
+                    if (iw != null && iw.Text.Contains("文件 1 识别失败。Ocr failed"))
+                    {
+                        //按下ok:
+                        iw = waitFindWebElementBySelector_ToBeClickable("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled");
+                        iw.Click();
+                        goto retry;
+                    }
+
                     iwe = waitFindWebElementBySelector_ToBeClickable("#result_edit_0");
+                }
                 iwe.Click();
 
                 //#batchTable > tbody > tr > td.bs-checkbox > label > input[type=checkbox]
@@ -3567,10 +3593,11 @@ internal static string getImageUrl() {
                 //Thread.Sleep(1000);
                 Thread.Sleep(1050);
 
+
                 //按下準備完畢OK
-                iwe = waitFindWebElementBySelector_ToBeClickable("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled",1);
+                iwe = waitFindWebElementBySelector_ToBeClickable("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled", 1);
                 while (iwe == null)
-                    iwe = waitFindWebElementBySelector_ToBeClickable("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled",1);
+                    iwe = waitFindWebElementBySelector_ToBeClickable("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled", 1);
                 iwe.Click();
 
                 //按下「文本行」
@@ -3638,7 +3665,7 @@ internal static string getImageUrl() {
                 {
                 }
                 #endregion
-                
+
                 StopOCR = true;
                 return true;
             }
@@ -5197,10 +5224,13 @@ internal static string getImageUrl() {
                 try
                 {
                     //找出「複製」按鈕
+                    //e = waitFindWebElementBySelector_ToBeClickable("#dialog_24bb81d92 > div.col > div.d-flex.py-1 > button");
                     //e = driver.FindElement(By.XPath("/html/body/div[1]/div/div/div[2]/div/div[1]/div[3]/div[2]/div[2]/button"));
-                    e = driver.FindElement(By.XPath("//*[starts-with(@id, 'dialog_')]//div[contains(@class, 'col')]//div[contains(@class, 'd-flex py-1')]//button//i"));
+                    e = driver.FindElement(By.XPath("//*[@id=\"dialog_df933239\"]/div[2]/div[2]/button"));
+                    //e = driver.FindElement(By.XPath("//*[starts-with(@id, 'dialog_')]//div[contains(@class, 'col')]//div[contains(@class, 'd-flex py-1')]//button//i"));
                     wait = new WebDriverWait(driver, TimeSpan.FromMilliseconds(150));
                     wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(e));
+                    e.Click();
                     //第 1 次好像會找不到，只好用手動了：
                     //Thread.Sleep(450);
                     //if (Clipboard.GetText() != "") goto finish;
