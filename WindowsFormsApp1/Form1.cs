@@ -1968,7 +1968,10 @@ namespace WindowsFormsApp1
                 if (e.KeyCode == Keys.Z)
                 {//還原功能
                     e.Handled = true;
+                    saveText();//備份以便按下F5鍵還原操作此還原方法前的文本
                     undoTextBox(textBox1);
+                    //if (undoTextBox1Text.Last<string>() != textBox1.Text)
+                    //    undoRecord();
                     return;
                 }
 
@@ -2914,6 +2917,7 @@ namespace WindowsFormsApp1
                         //}
                         //if (!Visible) Visible = true;
                         //bringBackMousePosFrmCenter();
+                        if (PagePaste2GjcoolOCR_ing && (BatchProcessingGJcoolOCR || PasteOcrResultFisrtMode)) PagePaste2GjcoolOCR_ing = false;
                         return;
                     }
                     else
@@ -3926,7 +3930,9 @@ namespace WindowsFormsApp1
                 //{
                 undoRecord();
                 stopUndoRec = true;
-                textBox1.SelectedText = "􏿽";
+                //textBox1.SelectedText = "􏿽";
+                //20240126 Bing大菩薩：輸入特殊字符
+                textBox1.SelectedText = "\uDBFF\uDFFD";
                 //textBox1.Text = x;
                 //textBox1.SelectionStart = s + "􏿽".Length;
                 stopUndoRec = false;
@@ -4776,9 +4782,20 @@ namespace WindowsFormsApp1
         }
 
         bool stopUndoRec = false;
+
+        /// <summary>
+        /// 清除標題符碼標記
+        /// </summary>
+        void clearTitleMarkCode()
+        {
+            string x = textBox1.Text;
+            Regex rx = new Regex("[　*。<p>]");
+            textBox1.Text = rx.Replace(x, string.Empty);
+        }
         /// <summary>
         /// Ctrl + Shift + Delete ： 將選取文字於文本中全部清除(Ctrl + z 還原功能支援)
         /// 若是選取《·》〈〉{{}}以執行，則會清除相對應的符號，以便書名號篇名號及注文語法標記之增修。
+        /// 若是選取「*」或「。<p>」則清除「*」或「。<p>」（即清除OCR模式下自動標識的標題暨段落符碼
         /// </summary>
         private void clearSeltxt()
         {
@@ -4805,6 +4822,12 @@ namespace WindowsFormsApp1
                     Regex rx = new Regex("[《·》〈〉]");
                     textBox1.Text = rx.Replace(x, string.Empty);
                     Clipboard.SetText(textBox1.Text);//以便按下 Alt + Insert 檢視書名號篇名號增修之結果。20231124
+                }
+                else if ("*。<p>".IndexOf(xClear) > -1)
+                {//若是選取「*」或「。<p>」則清除「*」或「。<p>」（即清除OCR模式下自動標識的標題暨段落符碼                    
+                    //Regex rx = new Regex("[*。<p>]");
+                    //textBox1.Text = rx.Replace(x, string.Empty);
+                    clearTitleMarkCode();
                 }
                 else
                     textBox1.Text = x.Replace(xClear, "");
@@ -5426,6 +5449,10 @@ namespace WindowsFormsApp1
                     }
                 }
             }
+            //最後一行
+            string lastLineText = getLineTxtWithoutPunctuation(textBox1.Text, s);
+            if (new StringInfo(lastLineText).LengthInTextElements < wordsPerLinePara && lastLineText.IndexOf("<p>") == -1)
+                textBox1.Text = textBox1.Text + p;
             stopUndoRec = false; ResumeEvents();
             replaceBlank_ifNOTTitleAndAfterparagraphMark();
             fillSpace_to_PinchNote_in_LineStart();
@@ -7211,14 +7238,24 @@ namespace WindowsFormsApp1
                     {
                         new SoundPlayer(@"C:\Windows\Media\Speech Off.wav").Play();
                         autoTitleMark_OCRTextMode = false; PagePaste2GjcoolOCR_ing = false;
-                        ocrTextMode = false; return;
+                        ocrTextMode = false; if (BatchProcessingGJcoolOCR) BatchProcessingGJcoolOCR = false; return;
                     }
                     new SoundPlayer(@"C:\Windows\Media\Speech On.wav").Play();
                     //設定成手動OCR輸入模式，自動及全部覆蓋之貼上則設成false
                     ocrTextMode = true; keyinTextMode = true; pasteAllOverWrite = false; autoPastetoQuickEdit = false;
                     PagePaste2GjcoolOCR_ing = false;
-                    if (MessageBoxShowOKCancelExclamationDefaultDesktopOnly("是否要自動標識標題，在OCR識讀匯入後") == DialogResult.OK) autoTitleMark_OCRTextMode = true;
+                    if (MessageBoxShowOKCancelExclamationDefaultDesktopOnly("是否要自動標識標題，在OCR識讀匯入後") == DialogResult.OK)
+                    {
+                        autoTitleMark_OCRTextMode = true;
+                        linesParasPerPage = countLinesPerPage(textBox1.Text);
+                    }
                     else autoTitleMark_OCRTextMode = false;
+                    if (!BatchProcessingGJcoolOCR)
+                    {
+                        if (MessageBoxShowOKCancelExclamationDefaultDesktopOnly("要《古籍酷》批量處理嗎？") == DialogResult.OK)
+                            BatchProcessingGJcoolOCR = true;
+                    }
+
                     button1.Text = "分行分段";
                     button1.ForeColor = new System.Drawing.Color();//預設色彩 預設顏色 https://stackoverflow.com/questions/10441000/how-to-programmatically-set-the-forecolor-of-a-label-to-its-default
                     return;
@@ -7669,6 +7706,13 @@ namespace WindowsFormsApp1
                     BackupLastPageText(Clipboard.GetText(), true, true);//Alt + F12  ： 更新最後的備份頁文本
                     return;
                 }
+
+                if (e.KeyCode == Keys.Clear)
+                {// Alt + 5 （數字鍵盤）清除標題符碼標記
+                    e.Handled = true;
+                    clearTitleMarkCode();
+                    return;
+                }
             }//以上 按下Alt鍵
             #endregion
 
@@ -8073,11 +8117,15 @@ namespace WindowsFormsApp1
             //br.WindowsScrolltoTop();
             if (autoTitleMark_OCRTextMode)
             {
-                undoRecord(); stopUndoRec = true;
-                bool ee = _eventsEnabled;
-                PauseEvents();
-                autoKeysTitleCodeAndPreWideSpace();
-                _eventsEnabled = ee; stopUndoRec = false;
+                //or lines_perPage 
+                if (linesParasPerPage >= countLinesPerPage(textBox1.Text))//行數小於或等於正常行數時才執行，蓋《古籍酷》OCR會將小注分行輸出 20240126
+                {
+                    undoRecord(); stopUndoRec = true;
+                    bool ee = _eventsEnabled;
+                    PauseEvents();
+                    autoKeysTitleCodeAndPreWideSpace();
+                    _eventsEnabled = ee; stopUndoRec = false;
+                }
             }
             return ocrResult;// true;
             #endregion
@@ -8614,6 +8662,7 @@ namespace WindowsFormsApp1
 
         /// <summary>
         /// 儲存當前文本以備份；預設路徑在Dropbox預設安裝路徑
+        /// 按F5以載入所備份（刷新textBox1的內容）
         /// </summary>
         internal void saveText()
         {

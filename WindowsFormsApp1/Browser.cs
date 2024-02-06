@@ -3569,13 +3569,14 @@ internal static string getImageUrl() {
 
                 //按下「編輯」
                 //iwe = waitFindWebElementBySelector_ToBeClickable("#result_edit_0", 30);
-                iwe = waitFindWebElementBySelector_ToBeClickable("#result_edit_0",1);
+                iwe = waitFindWebElementBySelector_ToBeClickable("#result_edit_0", 1);
                 while (iwe == null)
                 {
                     //訊息方塊：文件 1 识别失败。Ocr failed
                     IWebElement iw = waitFindWebElementBySelector_ToBeClickable("#swal2-html-container");
                     //<div class="swal2-html-container" id="swal2-html-container" style="display: block;">文件 1 识别失败。Ocr failed</div>
-                    if (iw != null && iw.Text.Contains("文件 1 识别失败。Ocr failed"))
+                    //<div class="swal2-html-container" id="swal2-html-container" style="display: block;">出现错误。error.</div>
+                    if (iw != null && (iw.Text.Contains("文件 1 识别失败。Ocr failed") || iw.Text.Contains("出现错误。error.")))
                     {
                         //按下ok:
                         iw = waitFindWebElementBySelector_ToBeClickable("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled");
@@ -5147,7 +5148,6 @@ internal static string getImageUrl() {
                 //if (Clipboard.GetText() != string.Empty) Application.OpenForms[0].Activate();
             });
             //}
-            /*
             if (Clipboard.GetText() != "") goto finish;
             else
             {
@@ -5162,7 +5162,7 @@ internal static string getImageUrl() {
                 catch (Exception)
                 { }
             }
-            */
+            
 
             #region 測試可否快點，似無效，故省略
             //Thread.Sleep(1750);
@@ -5225,8 +5225,8 @@ internal static string getImageUrl() {
                 {
                     //找出「複製」按鈕
                     //e = waitFindWebElementBySelector_ToBeClickable("#dialog_24bb81d92 > div.col > div.d-flex.py-1 > button");
-                    //e = driver.FindElement(By.XPath("/html/body/div[1]/div/div/div[2]/div/div[1]/div[3]/div[2]/div[2]/button"));
-                    e = driver.FindElement(By.XPath("//*[@id=\"dialog_df933239\"]/div[2]/div[2]/button"));
+                    e = driver.FindElement(By.XPath("/html/body/div[1]/div/div/div[2]/div/div[1]/div[3]/div[2]/div[2]/button"));
+                    //e = driver.FindElement(By.XPath("//*[@id=\"dialog_df933239\"]/div[2]/div[2]/button"));
                     //e = driver.FindElement(By.XPath("//*[starts-with(@id, 'dialog_')]//div[contains(@class, 'col')]//div[contains(@class, 'd-flex py-1')]//button//i"));
                     wait = new WebDriverWait(driver, TimeSpan.FromMilliseconds(150));
                     wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(e));
@@ -5285,7 +5285,7 @@ internal static string getImageUrl() {
                 IWebElement iwtext = null;
                 try
                 {
-                    iwtext = driver.FindElement(By.XPath("/html/body/div[1]/div/div/div[2]/div/div[1]/div[3]/div[2]/div"));
+                    iwtext = driver.FindElement(By.XPath("/html/body/div[1]/div/div/div[2]/div/div[1]/div[3]/div[2]/div"));                    
                     wait = new WebDriverWait(driver, TimeSpan.FromSeconds(0.2));
                     try
                     {
@@ -5318,9 +5318,9 @@ internal static string getImageUrl() {
                 if (iwtext != null)
                 //textContent
                 {
-                    string info = iwtext.Text;
                     try
                     {
+                        string info = iwtext.Text;
                         if (info.StartsWith("reach traffic limit.") || info.StartsWith("识别失败")
                             || info.StartsWith("ip address banned") || info.StartsWith("System is busy"))
                         {
@@ -5440,6 +5440,13 @@ internal static string getImageUrl() {
                                 {//如果有開啟 VPN by Google One                                
                                  //StopOCR = true;//前已有
                                     return TouchVPN_IvacyVPN_VeePN_ExtensionSwitcher();
+                                }
+                                else
+                                {
+                                    if (MessageBox.Show("是否要切換成批量處理模式？", "", MessageBoxButtons.OKCancel, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly) == DialogResult.OK)
+                                        Form1.BatchProcessingGJcoolOCR = true;
+                                    else
+                                        Form1.BatchProcessingGJcoolOCR = false;
                                 }
                             }
                             ActiveForm1.TopMost = false;
@@ -6060,6 +6067,23 @@ internal static string getImageUrl() {
             //以上VBA bug 已排除
             return url + "#" + w;//到VBA再轉碼，以便複製此字、不必再key也。況昨晚才經Bing大菩薩、StackOverflow AI大菩薩的加持，得以成功建置此生第1個 dll檔案，供Word VBA調用。感恩感恩　讚歎讚歎　南無阿彌陀佛
         }
+
+        /// <summary>
+        /// 取得目前Chrome瀏覽器是否在最大化的狀態
+        /// 20240201 Copilot大菩薩：檢查 Chrome 瀏覽器是否已最大化：
+        /// 在 Selenium WebDriver 中，並沒有直接的方法可以檢查瀏覽器是否已最大化。但你可以透過比較當前視窗的尺寸和螢幕的解析度來間接判斷。以下是一個可能的 C# 程式碼片段：
+        /// 這個 IsBrowserMaximized 函數會回傳一個布林值，表示瀏覽器是否已最大化。請注意，這個方法可能無法在所有情況下正確運作，例如多螢幕設定或者視窗的尺寸與螢幕解析度不完全相同的情況。此外，這個方法需要參考 System.Windows.Forms，所以你需要在你的專案中加入這個參考。如果你的程式是在 .NET Core 或 .NET 5+ 環境下執行，你可能需要改用其他方式來取得螢幕的解析度。希望這個資訊對你有所幫助！
+        /// </summary>
+        /// <param name="driver"></param>
+        /// <returns></returns>
+        public static bool IsBrowserMaximized(ChromeDriver driver)
+        {
+            Size windowSize = driver.Manage().Window.Size;
+            Size workingAreaSize = Screen.PrimaryScreen.WorkingArea.Size;
+
+            return windowSize.Equals(workingAreaSize);
+        }
+
     }
 }
 
