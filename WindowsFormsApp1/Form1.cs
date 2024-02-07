@@ -5919,6 +5919,7 @@ namespace WindowsFormsApp1
             int s = textBox1.SelectionStart, l = textBox1.SelectionLength; string x = textBox1.Text; //今定義再置前
 
             if (TopMost) TopMost = false;
+            if(!string.IsNullOrEmpty(br.LastValidWindow)) br.driver.SwitchTo().Window(br.LastValidWindow);
 
             #region 在手動編輯模式下（尤其是需要OCR時）的前置檢查
             if (keyinTextMode)
