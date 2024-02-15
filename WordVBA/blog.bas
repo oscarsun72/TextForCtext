@@ -490,6 +490,7 @@ Sub 插入超連結() '2008/9/1 指定鍵(快捷鍵) Ctrl+shift+K(原系統指定在smallcaps為)
     ssharp = InStr(lnk, "#")
     If ssharp > 0 Then
         Dim w As String
+        lnk = VBA.Replace(lnk, ChrW(-9217) & ChrW(-8195), "　")
         w = Mid(lnk, ssharp + 1, Len(lnk) - ssharp)
         w = code.UrlEncode(w)   'byRef
         lnk = Mid(lnk, 1, ssharp) + w
@@ -530,6 +531,7 @@ Sub 插入超連結() '2008/9/1 指定鍵(快捷鍵) Ctrl+shift+K(原系統指定在smallcaps為)
     End If
     rng.Document.Save
 End Sub
+
 Sub insertHydzdLink()
 Dim lk As New Links, db As New dBase
 db.setWordControlValue (文字處理.trimStrForSearch(Selection.Text, Selection))

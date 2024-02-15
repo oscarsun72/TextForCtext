@@ -1486,7 +1486,8 @@ namespace WindowsFormsApp1
             }
             #endregion
 
-            while (!isClipBoardAvailable_Text()) { }
+            DateTime dt = DateTime.Now;
+            while (!isClipBoardAvailable_Text()) { if (DateTime.Now.Subtract(dt).TotalSeconds > 2) break; }
             try
             {
                 Clipboard.SetText(xCopy);
@@ -2235,7 +2236,7 @@ namespace WindowsFormsApp1
                         }
                         else if (s < x.Length - 1 && x.Substring(s, 2) == "􏿽")
                         {
-                            while (textBox1.Text.Substring(s + l, 2) == "􏿽")
+                            while (textBox1.TextLength >= s + l + 2 && textBox1.Text.Substring(s + l, 2) == "􏿽")
                             {
                                 textBox1.Select(s + l, 2); l += 2;
                                 //textBox1.SelectedText = string.Empty;
@@ -2556,7 +2557,14 @@ namespace WindowsFormsApp1
                     insertWords(Environment.NewLine, textBox1, textBox1.Text);
                     return;
                 }
-
+                if (e.KeyCode == Keys.K)
+                {//Alt + k : 將選取的字詞句及其網址位址送到以下檔案的末後
+                    // C:\Users\oscar\Dropbox\《古籍酷》AI%20OCR%20待改進者隨記%20感恩感恩 讚歎讚歎 南無阿彌陀佛.docx
+                    e.Handled = true;
+                    overtypeModeSelectedTextSetting(ref textBox1);
+                    br.ImproveGJcoolOCRMemo();
+                    return;
+                }
                 /* Alt + l : 檢查/輸入抬頭平抬時的條件：執行topLineFactorIuput0condition()
                  *     > 目前只支援新增 condition=0 的情形，故名為 0condition，即當後綴是什麼時，此行文字雖短，不是分段，乃是平抬 
                  *     >> 0=後綴；1=前綴；2=前後之前；3前後之後；4是前+後之詞彙；5非前+後之詞彙；6非後綴之詞彙；7非前綴之詞彙*/
@@ -2966,7 +2974,9 @@ namespace WindowsFormsApp1
                     x = br.Quickedit_data_textboxTxt;
                 }
                 //非同步整理OCR文本時，這行就很需要：
-                textBox1.Text = CnText.RemarkBooksPunctuation(ref x);
+                if (x.IndexOf("，") == -1 && x.IndexOf("。") == -1
+                    && (x.IndexOf("《") > -1 || x.IndexOf("〈") > -1 || x.IndexOf("：") > -1))
+                    textBox1.Text = CnText.RemarkBooksPunctuation(ref x);
                 //將頁面移至頂端，以便校對輸入時檢視
                 br.GoToUrlandActivate(br.driver.Url, true);
             }
@@ -5919,7 +5929,7 @@ namespace WindowsFormsApp1
             int s = textBox1.SelectionStart, l = textBox1.SelectionLength; string x = textBox1.Text; //今定義再置前
 
             if (TopMost) TopMost = false;
-            if(!string.IsNullOrEmpty(br.LastValidWindow)) br.driver.SwitchTo().Window(br.LastValidWindow);
+            if (!string.IsNullOrEmpty(br.LastValidWindow)) br.driver.SwitchTo().Window(br.LastValidWindow);
 
             #region 在手動編輯模式下（尤其是需要OCR時）的前置檢查
             if (keyinTextMode)
@@ -5945,7 +5955,7 @@ namespace WindowsFormsApp1
                     }
                 }
 
-                TopMost = false;
+                //TopMost = false;//前面已有： if (TopMost) TopMost = false; //20240211
                 //將焦點交給Chrome瀏覽器
                 if (browsrOPMode != BrowserOPMode.appActivateByName && br.driver != null)
                 {
@@ -6048,7 +6058,8 @@ namespace WindowsFormsApp1
             if (pageTextEndPosition == 0) pageTextEndPosition = s + l;
             else { s = pageTextEndPosition; l = 0; }
             if (s < 0 || s + l > x.Length) s = textBox1.SelectionStart;
-            string xCopy = x.Substring(0, s + l);
+            //string xCopy = x.Substring(0, s + l);
+            string xCopy = x.Substring(0, (s + l) <= x.Length ? s + l : x.Length);
             ////////////string xCopy = x.Substring(0, s + textBox1.SelectionLength);//前有處理過文本∴不能用textBox1.SelectionLength！！！20230102
 
             //if (pageEndText10.Length > 20)//此bug已在autoPastetoCtextQuitEditTextbox()內抓到了20230117
@@ -9921,31 +9932,35 @@ namespace WindowsFormsApp1
                     //確定剪貼簿是可用的
                     while (!Form1.isClipBoardAvailable_Text()) { }
 
-                    //讀取剪貼簿裡的內容（即擷取自 quick_edit_box 框內的文字）
-                    string nowClpTxt = Clipboard.GetText();
-                    //確認資料
-                    if (nowClpTxt != "" && nowClpTxt != ClpTxtBefore && nowClpTxt.IndexOf("http") == -1)
-                    {
-                        undoRecord();
-                        //設定內容
-                        textBox1.Text = nowClpTxt;
-                        ClpTxtBefore = nowClpTxt;//clpTxt;//記下這次內容以供下次比對
-                                                 //自動加上書名號
-                                                 ////只要剪貼簿裡的內容合於以下條件
-                                                 //if (ClpTxtBefore != clpTxt && textBox1.Text == "" && clpTxt.IndexOf("http") == -1 && clpTxt.IndexOf("<scanb") == -1)
-                                                 //{
-                        textBox1.Text = CnText.BooksPunctuation(ref nowClpTxt, false);
-                        //return;
-                        //}
-                        //插入點游標置於頁首
-                        //if(keyinText)//已於巢外的if判定了
-                        textBox1.Select(0, 0);
-                    }
+
+                    #region 讀取剪貼簿裡的內容（即擷取自 quick_edit_box 框內的文字）__先取消此功能，改交由別處進行！！！20240211大年初二
+                    //string nowClpTxt = Clipboard.GetText();
+                    ////確認資料
+                    //if (nowClpTxt != "" && nowClpTxt != ClpTxtBefore && nowClpTxt.IndexOf("http") == -1)
+                    //{
+                    //    undoRecord();
+                    //    //設定內容
+                    //    textBox1.Text = nowClpTxt;
+                    //    ClpTxtBefore = nowClpTxt;//clpTxt;//記下這次內容以供下次比對
+                    //                             //自動加上書名號
+                    //                             ////只要剪貼簿裡的內容合於以下條件
+                    //                             //if (ClpTxtBefore != clpTxt && textBox1.Text == "" && clpTxt.IndexOf("http") == -1 && clpTxt.IndexOf("<scanb") == -1)
+                    //                             //{
+                    //    textBox1.Text = CnText.BooksPunctuation(ref nowClpTxt, false);
+                    //    //return;
+                    //    //}
+                    //    //插入點游標置於頁首
+                    //    //if(keyinText)//已於巢外的if判定了
+                    //    textBox1.Select(0, 0);
+                    //}
+                    #endregion
+
                     if (!Active && !PagePaste2GjcoolOCR_ing)
                     //if (!Active && !PagePaste2GjcoolOCR_ing&& ModifierKeys!=Keys.Control)
                     {
                         PauseEvents();
                         AvailableInUseBothKeysMouse();
+                        //表單最上層顯示
                         if (!this.TopMost) this.TopMost = true;
                         ResumeEvents();
                     }

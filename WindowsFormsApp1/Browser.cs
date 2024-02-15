@@ -115,7 +115,8 @@ namespace TextForCtext
             {
                 { OCRSiteTitle.GoogleKeep, "https://keep.new" }, // maps the key "GoogleKeep" to the value "https://keep.new"
                 {OCRSiteTitle.GJcool, "https://gj.cool/try_ocr" } // maps the key "GJcool" to the value "https://gj.cool/try_ocr"
-                //{OCRSiteTitle.GJcool, "https://ocr.gj.cool/try_ocr" } // maps the key "GJcool" to the value "https://gj.cool/try_ocr"
+                //{OCRSiteTitle.GJcool, "https://ocr.gj.cool/try_ocr" } // maps the key "GJcool" to the value "https://gj.cool/try_ocr" 
+                //"https://ocr.gj.cool/try_ocr" 這個 oscarsun72 此帳戶可以登錄，而 "https://gj.cool/try_ocr" 似不行 20240208
             };
         /// <summary>
         /// 儲存常用的網站名
@@ -737,7 +738,8 @@ namespace TextForCtext
                 ActiveForm1 = Application.OpenForms["Form1"] as Form1;
                 //到指定網頁
                 string url = ActiveForm1.Controls["textBox3"].Text != "" ? ActiveForm1.Controls["textBox3"].Text : "https://ctext.org/account.pl?if=en";
-                cDrv.Navigate().GoToUrl(url);
+                if (url.StartsWith("http"))
+                    cDrv.Navigate().GoToUrl(url);
 
                 if (!chromedriversPID.Contains(driverService.ProcessId)) chromedriversPID.Add(driverService.ProcessId);
                 //配置quickedit_data_textbox以備用
@@ -5154,15 +5156,17 @@ internal static string getImageUrl() {
                 //Form1.playSound(Form1.soundLike.processing);//just for test
                 try
                 {
+                    if (Clipboard.GetText() != "") goto finish;
                     //e = driver.FindElement(By.XPath("/html/body/div[1]/div/div/div[2]/div/div[1]/div[3]/div[2]/div[2]/button"));
                     e = driver.FindElement(By.XPath("//*[starts-with(@id, 'dialog_')]//div[contains(@class, 'col')]//div[contains(@class, 'd-flex py-1')]//button//i"));
                     wait = new WebDriverWait(driver, TimeSpan.FromSeconds(15));
                     wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(e));
+
                 }
                 catch (Exception)
-                { }
+                { if (Clipboard.GetText() != "") goto finish; }
             }
-            
+
 
             #region 測試可否快點，似無效，故省略
             //Thread.Sleep(1750);
@@ -5285,7 +5289,7 @@ internal static string getImageUrl() {
                 IWebElement iwtext = null;
                 try
                 {
-                    iwtext = driver.FindElement(By.XPath("/html/body/div[1]/div/div/div[2]/div/div[1]/div[3]/div[2]/div"));                    
+                    iwtext = driver.FindElement(By.XPath("/html/body/div[1]/div/div/div[2]/div/div[1]/div[3]/div[2]/div"));
                     wait = new WebDriverWait(driver, TimeSpan.FromSeconds(0.2));
                     try
                     {
@@ -6067,6 +6071,54 @@ internal static string getImageUrl() {
             //以上VBA bug 已排除
             return url + "#" + w;//到VBA再轉碼，以便複製此字、不必再key也。況昨晚才經Bing大菩薩、StackOverflow AI大菩薩的加持，得以成功建置此生第1個 dll檔案，供Word VBA調用。感恩感恩　讚歎讚歎　南無阿彌陀佛
         }
+        /// <summary>
+        /// C:\Users\oscar\Dropbox\《古籍酷》AI%20OCR%20待改進者隨記%20感恩感恩 讚歎讚歎 南無阿彌陀佛.docx
+        /// </summary>
+        internal static Microsoft.Office.Interop.Word.Document ImproveGJcoolOCRMemoDoc;
+        /// <summary>
+        /// Alt + k : 將選取的字詞句及其網址位址送到以下檔案的末後
+        /// C:\Users\oscar\Dropbox\《古籍酷》AI%20OCR%20待改進者隨記%20感恩感恩 讚歎讚歎 南無阿彌陀佛.docx
+        /// 20240212大年初三
+        /// </summary>
+        internal static void ImproveGJcoolOCRMemo()
+        {
+            if (!ActiveForm1.Controls["textBox1"].Focused) return;
+            TextBox tb = ActiveForm1.Controls["textBox1"] as TextBox;
+            if (tb.SelectionLength == 0) return;
+            retry:
+            if (ImproveGJcoolOCRMemoDoc == null)
+            {
+                Microsoft.Office.Interop.Word.Application wordapp = new Microsoft.Office.Interop.Word.Application
+                {
+                    Visible = true
+                };
+                ImproveGJcoolOCRMemoDoc = wordapp.Documents.Open("C:\\Users\\oscar\\Dropbox\\《古籍酷》AI OCR 待改進者隨記 感恩感恩　讚歎讚歎　南無阿彌陀佛.docx");
+                //ImproveGJcoolOCRMemoDoc = wordapp.Documents.Open("C:\\Users\\oscar\\Dropbox\\《古籍酷》AI%20OCR%20待改進者隨記%20感恩感恩　讚歎讚歎　南無阿彌陀佛.docx");
+                ImproveGJcoolOCRMemoDoc.ActiveWindow.Selection.EndKey(Microsoft.Office.Interop.Word.WdUnits.wdStory);
+            }
+            try
+            {
+                string imporvement = tb.SelectedText, lnk = GetPageUrlKeywordLink();
+                if (ImproveGJcoolOCRMemoDoc.Content.Text.IndexOf(lnk) == -1)
+                {
+                    imporvement += ("\t" + lnk);
+                    ImproveGJcoolOCRMemoDoc.Range().InsertAfter(imporvement + Environment.NewLine);
+                    ImproveGJcoolOCRMemoDoc.Save();
+                    ImproveGJcoolOCRMemoDoc.Application.Activate();
+                    if(ImproveGJcoolOCRMemoDoc.Application.WindowState == Microsoft.Office.Interop.Word.WdWindowState.wdWindowStateMinimize)
+                        ImproveGJcoolOCRMemoDoc.Application.WindowState = Microsoft.Office.Interop.Word.WdWindowState.wdWindowStateNormal;
+                    Thread.Sleep(1000);
+                    ImproveGJcoolOCRMemoDoc.Application.WindowState = Microsoft.Office.Interop.Word.WdWindowState.wdWindowStateMinimize;
+                }
+            }
+            catch (Exception)
+            {
+                ImproveGJcoolOCRMemoDoc = null;
+                goto retry;
+            }
+
+        }
+
 
         /// <summary>
         /// 取得目前Chrome瀏覽器是否在最大化的狀態
