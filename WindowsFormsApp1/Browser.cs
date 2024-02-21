@@ -6099,13 +6099,20 @@ internal static string getImageUrl() {
             try
             {
                 string imporvement = tb.SelectedText, lnk = GetPageUrlKeywordLink();
+                if (lnk == string.Empty)
+                {
+                    if (!tb.Focused) tb.Focus();
+                    lnk = GetPageUrlKeywordLink();
+                }
                 if (ImproveGJcoolOCRMemoDoc.Content.Text.IndexOf(lnk) == -1)
                 {
                     imporvement += ("\t" + lnk);
                     ImproveGJcoolOCRMemoDoc.Range().InsertAfter(imporvement + Environment.NewLine);
+                    ImproveGJcoolOCRMemoDoc.ActiveWindow.ScrollIntoView(ImproveGJcoolOCRMemoDoc.Range(),false);
                     ImproveGJcoolOCRMemoDoc.Save();
+                    ImproveGJcoolOCRMemoDoc.Activate();
                     ImproveGJcoolOCRMemoDoc.Application.Activate();
-                    if(ImproveGJcoolOCRMemoDoc.Application.WindowState == Microsoft.Office.Interop.Word.WdWindowState.wdWindowStateMinimize)
+                    if (ImproveGJcoolOCRMemoDoc.Application.WindowState == Microsoft.Office.Interop.Word.WdWindowState.wdWindowStateMinimize)
                         ImproveGJcoolOCRMemoDoc.Application.WindowState = Microsoft.Office.Interop.Word.WdWindowState.wdWindowStateNormal;
                     Thread.Sleep(1000);
                     ImproveGJcoolOCRMemoDoc.Application.WindowState = Microsoft.Office.Interop.Word.WdWindowState.wdWindowStateMinimize;

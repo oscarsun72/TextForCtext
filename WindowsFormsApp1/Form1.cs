@@ -1985,6 +1985,7 @@ namespace WindowsFormsApp1
                     e.Handled = true;
                     overtypeModeSelectedTextSetting(ref textBox1);
                     textBox1OriginalText = textBox1.Text; selStart = textBox1.SelectionStart; selLength = textBox1.SelectionLength;
+                    if (textBox1.SelectedText != string.Empty) Clipboard.SetText(textBox1.SelectedText);
                     ////插件/取代模式不同處理
                     //char nextChar;
                     //if (selStart + selLength + 1 <= textBox1.TextLength)
@@ -2370,9 +2371,9 @@ namespace WindowsFormsApp1
                     return;
                 }
                 if (e.KeyCode == Keys.D3)
-                {//Alt + 3 : 鍵入全形空格「〇」
+                {//Alt + 3 : 鍵入全形空格「◯」
                     e.Handled = true;
-                    insertWords("〇", textBox1);
+                    insertWords("◯", textBox1);
                     return;
                 }
                 if (e.KeyCode == Keys.D4)
@@ -5749,7 +5750,7 @@ namespace WindowsFormsApp1
         {
             if (skipPunctuation) if (punctuationsNum.IndexOf(x, StringComparison.Ordinal) > -1) return -1;
             const string cha = "�□▫စခငဇဌ◍ᗍⲲ⛋ဂဃဆဈဉ";
-            string notChineseCharPriority = cha + "〇　 \r\n<>{}.,;?@●'\"。，；！？、－-《》〈〉「」『』〖〗【】（）()[]〔〕［］0123456789";
+            string notChineseCharPriority = cha + "〇◯　 \r\n<>{}.,;?@●'\"。，；！？、－-《》〈〉「」『』〖〗【】（）()[]〔〕［］0123456789";
 
             if (notChineseCharPriority.IndexOf(x, StringComparison.Ordinal) > -1) return 0;
 
@@ -10646,7 +10647,7 @@ namespace WindowsFormsApp1
              * 在这里，我们使用 Regex.Replace 方法将匹配正则表达式模式 [《〈] 的所有字符替换为空字符串。此模式匹配任何包含 "《" 或 "〈" 的字符。
              * */
             if (e.KeyChar == " ".ToCharArray()[0]) return;//半形空格可被輸入、被取代，而不能取代別人
-            string regexPattern = "[《〈」】〗]", omitSymbols = "●＝{}□■<>*〇○⿰⿱」』|" + Environment.NewLine;//輸入缺字構字式●＝＝、及注文標記符{{}}、及標題星號*時不取代
+            string regexPattern = "[《〈」】〗]", omitSymbols = "●＝{}□■<>*〇◯○⿰⿱」』|" + Environment.NewLine;//輸入缺字構字式●＝＝、及注文標記符{{}}、及標題星號*時不取代
             checkkeyPressOverTyping_oscarsun72note_Inserting_switch2insertMode(e.KeyChar, regexPattern + omitSymbols);
             string w;//, punctuationsNumWithout前書名號與前篇名號 = Regex.Replace(Form1.punctuationsNum, regexPattern, ""); 
             if (!insertMode

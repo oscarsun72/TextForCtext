@@ -399,7 +399,8 @@ namespace TextForCtext
                     case UnicodeCategory.DecimalDigitNumber://[0-9]
                         break;
                     case UnicodeCategory.LetterNumber:
-                        if (c == "〇".ToCharArray()[0]) sb.Append(c);
+                        //if (c == "〇".ToCharArray()[0]) sb.Append(c);
+                        if (c == "〇".ToCharArray()[0]) sb.Append("◯");
                         break;
                     case UnicodeCategory.OtherNumber:
                         break;
@@ -493,7 +494,7 @@ namespace TextForCtext
             if (text.Length == 0) return false;
             if (text.Length > 1000)
             {
-                Regex regex = new Regex(@"\，|\。|\？|\！|\〈|\〉|\《|\》|\：|\『|\』|\「|\」|\􏿽|、|●|□|■|·|\*\*|\{\{\{|\}\}\}|\||〇|　}}|\*　");
+                Regex regex = new Regex(@"\，|\。|\？|\！|\〈|\〉|\《|\》|\：|\『|\』|\「|\」|\􏿽|、|●|□|■|·|\*\*|\{\{\{|\}\}\}|\||〇|◯|　}}|\*　");
                 Match match = regex.Match(text);
                 return match.Success;
             }
@@ -508,6 +509,7 @@ namespace TextForCtext
                     || text.Contains("●") || text.Contains("、")
                     || text.Contains("·") || text.Contains("**")
                     || text.Contains("|") || text.Contains("　}}")
+                    || text.Contains("◯") 
                     || text.Contains("〇") || text.Contains("*　")
                     || text.Contains(@"{{{") || text.Contains(@"}}}"));
             }
@@ -522,7 +524,7 @@ namespace TextForCtext
         {
             if (text.Length == 0) return false;
             if (!HasEditedWithPunctuationMarks(ref text)) return false;
-            Regex regex = new Regex(@"\，|\。|\？|\！|\〈|\〉|\《|\》|\：|\『|\』|\「|\」|\􏿽|、|●|□|■|·|\*\*|\{\{\{|\}\}\}|\||〇|　}}|\*　");
+            Regex regex = new Regex(@"\，|\。|\？|\！|\〈|\〉|\《|\》|\：|\『|\』|\「|\」|\􏿽|、|●|□|■|·|\*\*|\{\{\{|\}\}\}|\||〇|◯|　}}|\*　");
             text = regex.Replace(text, "");
             return true;
         }
