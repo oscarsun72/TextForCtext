@@ -202,6 +202,7 @@ Ctrl + \ （反斜線） 或 Alt + \ ： 清除textBox1文本插入點後的分�
 
 按下 F1 鍵：以找到的字串位置**前**分行分段（在文字選取內容接的不是newline時；若是，且選取長度等於常數「predictEndofPageSelectedTextLen」則進行自動貼入 Ctext 的 quit edit 方塊中）
 //暫時取消，釋放 F1、 Pause 鍵給 Alt + Shift + 2 用
+> 目前按下F1時，若無選取，則複製textBox1的內容，若有選取，則執行 Alt + Shift + 2 功能（poetryFormat函式）
 
 按下 Pause Break 鍵：以找到的字串位置**後**分行分段//暫時取消，釋放  Pause 鍵給 Alt + F7 （原Alt + Shift + 2）
 
@@ -297,7 +298,9 @@ Alt + F1 : 輸入■；若其後為「　」或「􏿽」或「\<p\>」或「*�
 
 Alt + F2 : 輸入□；若其後為「　」或「􏿽」或「\<p\>」或「*」則清除之。若有選取，則置換選取區中的「　」或「􏿽」或「\<p\>」
 
-F2 : 全選/取消全選框裡文字。若原有選取文字則取消選取至其尾端
+F1 : 複製textBox1的內容到剪貼簿
+
+F2 : 全選/取消全選框裡文字。若原有選取文字則取消選取至其尾端。20240225元宵後一日：並複製textBox1的內容到剪貼簿
 
 F3 ： 在textBox1 從插入點（游標所在處）開始尋找下一個符合所選取的字串；如果沒有選取，則以 textBox2 的字串為據
 
@@ -328,6 +331,8 @@ Alt + Pause 或 當表單在Num Lock關閉時按下數字鍵盤的「5」 ： �
     > 此法可與 Alt + t detectTitleYetWithoutPreSpace() 參互應用
 
 F11 : run replaceXdirrectly() 維基文庫等欲直接抽換之字
+
+Ctrl + c ：若無選取，則複製textBox1內的內容
 
 Ctrl + h ：移至 textBox4 準備取代文本文字（若已有取代成的預設值，可以前綴「7」來指定新的取代字串）
 

@@ -195,6 +195,10 @@ namespace TextForCtext
             else
                 Form1.playSound(Form1.soundLike.warn);
 
+            //取代有規則的標點：20240221大年十二
+            clpTxt = clpTxt.Replace("》云", "》云：").Replace("〉云", "〉云：").Replace("》曰", "》曰：")
+                .Replace("〉曰", "〉曰：");
+            clpTxt = clpTxt.Replace("：：", "：");
             return ref clpTxt;
         }
         /// <summary>
@@ -208,7 +212,7 @@ namespace TextForCtext
             clpTxt = rx.Replace(clpTxt, string.Empty);
             BooksPunctuation(ref clpTxt, true);
             return ref clpTxt;
-        } 
+        }
 
         /// <summary>
         /// 檢查要標點上的書名號或篇名號詞彙，是否已經標過
@@ -509,7 +513,7 @@ namespace TextForCtext
                     || text.Contains("●") || text.Contains("、")
                     || text.Contains("·") || text.Contains("**")
                     || text.Contains("|") || text.Contains("　}}")
-                    || text.Contains("◯") 
+                    || text.Contains("◯")
                     || text.Contains("〇") || text.Contains("*　")
                     || text.Contains(@"{{{") || text.Contains(@"}}}"));
             }
@@ -554,13 +558,13 @@ namespace TextForCtext
                 ,"。。", "，，", "@" 
                 //,"}}<p>\r\n{{"//像《札迻》就有此種格式，不能取代掉！ https://ctext.org/library.pl?if=en&file=36575&page=12&editwiki=800245#editor
                 ,"\r\n。<p>"
-                ,"！。<p>","？。<p>"};
+                ,"！。<p>","？。<p>","+<p>","<p>+"};
             string[] replaceChar = { "、", "，", "；", "：", "·", "？", "：", "《", "》", "〈", "〉",
                 "。}}", "。}}<p>", "}}<p>","。<p>","。<p>","<p>"
                 , "。", "，", "●" 
                 //,"}}\r\n{{"//像《札迻》就有此種格式，不能取代掉！ https://ctext.org/library.pl?if=en&file=36575&page=12&editwiki=800245#editor
                 ,"\r\n"
-                ,"！<p>","？<p>"};
+                ,"！<p>","？<p>","<p>","<p>"};
             foreach (var item in replaceDChar)
             {
                 if (x.IndexOf(item) > -1)

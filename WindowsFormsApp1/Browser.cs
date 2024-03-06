@@ -1095,7 +1095,8 @@ namespace TextForCtext
                 }
             });
             //加速連續性輸入（不必檢視貼入的文本時，很有效）
-            if (ActiveForm1.AutoPasteToCtext && Form1.FastMode)
+            //if (ActiveForm1.AutoPasteToCtext && Form1.FastMode)
+            if (ActiveForm1.AutoPasteToCtext && Form1.FastMode && Form1.browsrOPMode == Form1.BrowserOPMode.appActivateByName)
             {
                 Thread.Sleep(10);//等待 submit = waitFin……完成
                 driver.Close(); //需要重啟檢視時，只要開啟前一個被關掉的分頁頁籤即可（快速鍵時 Ctrl + Shift + t）
@@ -1795,6 +1796,7 @@ namespace TextForCtext
 
         internal static string GetImageUrl(string url = null)
         {//20230104 creedit
+        retry:
             if (Form1.browsrOPMode == Form1.BrowserOPMode.appActivateByName) Form1.browsrOPMode = Form1.BrowserOPMode.seleniumNew;
             if (driver == null) driver = DriverNew();
             //using (driver)//var driver = new ChromeDriver())//若這樣寫則會出現「無法存取已處置的物件。」之錯誤    HResult	-2146232798	int               
@@ -1885,8 +1887,26 @@ namespace TextForCtext
             }
             foreach (IWebElement imageElement in imageElements)
             {
-                imageUrl = imageElement.GetAttribute("src");
-                if (imageUrl == null) continue;
+                try
+                {
+                    imageUrl = imageElement.GetAttribute("src");
+                }
+                catch (Exception ex)
+                {
+                    switch (ex.HResult)
+                    {
+                        case -2146233088:
+                            if (ex.Message.IndexOf("stale element reference: stale element not found") > -1)
+                                goto retry;
+                            else
+                                throw;
+                            break;
+                        default:
+                            throw;
+                    }
+                }
+
+                if (imageUrl.IsNullOrEmpty()) continue;
                 if (imageUrl.Substring(0, 26) == "https://library.ctext.org/"
                 || (imageUrl.Substring(imageUrl.Length - 4, 4) == ".png"
                     && ((imageUrl.IndexOf(".cn_") > -1)
@@ -3542,11 +3562,17 @@ internal static string getImageUrl() {
                 //輸入：檔案名稱 //SendKeys.Send(downloadImgFullName);
                 SendKeys.Send("+{Insert}");//or "^v"
                 SendKeys.Send("{ENTER}");
+                Clipboard.Clear();
 
                 //图片预览
                 iwe = waitFindWebElementBySelector_ToBeClickable("#batch_figure_0");
                 while (iwe == null)
+                {
                     iwe = waitFindWebElementBySelector_ToBeClickable("#batch_figure_0");
+                    //提前結束用
+                    if (Clipboard.GetText() != string.Empty)// && !Clipboard.GetText().Contains("Ctext_Page_Image"))
+                    { StopOCR = true; return false; }
+                }
 
                 //按下「上傳」
                 iwe = waitFindWebElementBySelector_ToBeClickable("#batchUploadDropdown");
@@ -5121,30 +5147,30 @@ internal static string getImageUrl() {
                 copyBtnPos = Copybutton_GjcoolFastExperience_Location;//new Point(835, 730);
                 //copyBtnPos = new Point(copyBtnPosX, copyBtnPosY);//複製按鈕的位置：20231106
                 DateTime dtMax = DateTime.Now;
-                while (Clipboard.GetText() == string.Empty && !StopOCR && !trafficLimit)
-                {
-                    //try
-                    //{
-                    //    driver.SwitchTo().Window(driver.CurrentWindowHandle);
-                    //}
-                    //catch (Exception)
-                    //{
-                    //    break;
-                    //    //if (Clipboard.GetText() == string.Empty) return false;
-                    //    //else goto finish;
-                    //}
-                    //以滑鼠座標按下複製按鈕
-                    if (DateTime.Now.Subtract(dtMax).Seconds > 5 || Clipboard.GetText() != string.Empty || StopOCR) break;
+                //while (Clipboard.GetText() == string.Empty && !StopOCR && !trafficLimit)
+                //{//先取消20240223
+                ////try
+                ////{
+                ////    driver.SwitchTo().Window(driver.CurrentWindowHandle);
+                ////}
+                ////catch (Exception)
+                ////{
+                ////    break;
+                ////    //if (Clipboard.GetText() == string.Empty) return false;
+                ////    //else goto finish;
+                ////}
+                ////以滑鼠座標按下複製按鈕
+                //if (DateTime.Now.Subtract(dtMax).Seconds > 5 || Clipboard.GetText() != string.Empty || StopOCR) break;
 
-                    //bool frmActive = false;
-                    //ActiveForm1.Invoke((MethodInvoker)delegate { frmActive = ActiveForm1.Active; });
-                    //if (!frmActive)
-                    //{
-                    clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.soundLike.none);
-                    Thread.Sleep(550);
-                    //}
-                    //else break;
-                }
+                ////bool frmActive = false;
+                ////ActiveForm1.Invoke((MethodInvoker)delegate { frmActive = ActiveForm1.Active; });
+                ////if (!frmActive)
+                ////{
+                clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.soundLike.none);
+                Thread.Sleep(550);
+                ////}
+                ////else break;
+                //}
                 if (!trafficLimit) Form1.playSound(Form1.soundLike.info);
                 //Debugger.Break();
                 //if (Clipboard.GetText() != string.Empty) Application.OpenForms[0].Activate();
@@ -6104,18 +6130,19 @@ internal static string getImageUrl() {
                     if (!tb.Focused) tb.Focus();
                     lnk = GetPageUrlKeywordLink();
                 }
-                if (ImproveGJcoolOCRMemoDoc.Content.Text.IndexOf(lnk) == -1)
+                if (ImproveGJcoolOCRMemoDoc.Content.Text.IndexOf(lnk + Environment.NewLine.Substring(0, 1)) == -1)
                 {
                     imporvement += ("\t" + lnk);
                     ImproveGJcoolOCRMemoDoc.Range().InsertAfter(imporvement + Environment.NewLine);
-                    ImproveGJcoolOCRMemoDoc.ActiveWindow.ScrollIntoView(ImproveGJcoolOCRMemoDoc.Range(),false);
+                    ImproveGJcoolOCRMemoDoc.ActiveWindow.ScrollIntoView(ImproveGJcoolOCRMemoDoc.Range(), false);
                     ImproveGJcoolOCRMemoDoc.Save();
                     ImproveGJcoolOCRMemoDoc.Activate();
                     ImproveGJcoolOCRMemoDoc.Application.Activate();
-                    if (ImproveGJcoolOCRMemoDoc.Application.WindowState == Microsoft.Office.Interop.Word.WdWindowState.wdWindowStateMinimize)
-                        ImproveGJcoolOCRMemoDoc.Application.WindowState = Microsoft.Office.Interop.Word.WdWindowState.wdWindowStateNormal;
+                    //if (ImproveGJcoolOCRMemoDoc.Application.WindowState == Microsoft.Office.Interop.Word.WdWindowState.wdWindowStateMinimize)
+                    //    ImproveGJcoolOCRMemoDoc.Application.WindowState = Microsoft.Office.Interop.Word.WdWindowState.wdWindowStateNormal;
                     Thread.Sleep(1000);
-                    ImproveGJcoolOCRMemoDoc.Application.WindowState = Microsoft.Office.Interop.Word.WdWindowState.wdWindowStateMinimize;
+                    //ImproveGJcoolOCRMemoDoc.Application.WindowState = Microsoft.Office.Interop.Word.WdWindowState.wdWindowStateMinimize;
+                    Form1.playSound(Form1.soundLike.done);
                 }
             }
             catch (Exception)

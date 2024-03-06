@@ -173,9 +173,12 @@ namespace TextForCtext
 
             noteBeforeTitleSplitTwoLine(ref xForStandardize);
 
-            xForStandardize = "*欽定四庫全書<p>〖文淵|閣寶〗<p>" + xForStandardize.Substring(xForStandardize.IndexOf("欽定《四庫全書》") + "欽定《四庫全書》".Length);
+            xForStandardize = "〖文淵|閣寶〗<p>\r\n*欽定四庫全書<p>" + xForStandardize.Substring(xForStandardize.IndexOf("《欽定四庫全書》") + "《欽定四庫全書》".Length);
 
-
+            xForStandardize = xForStandardize.Replace("○", "◯");
+            xForStandardize = xForStandardize.Replace("\r\n　\r\n　\r\n", "\r\n|\r\n|\r\n");
+            xForStandardize = xForStandardize.Replace("|\r\n　\r\n|", "|\r\n|\r\n|");
+            
         }
         /// <summary>
         /// 標題/篇名標識。只要一行/段之前後均只是空行的話（跨行以上的不處理，手動自行處理）
