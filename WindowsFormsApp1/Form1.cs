@@ -43,7 +43,10 @@ namespace WindowsFormsApp1
         private readonly Color textBox2BackColorDefault;
         private readonly Color FormBackColorDefault;
         readonly Size textBox1SizeToForm;
-
+        /// <summary>
+        /// 記下主表單Form1的位置
+        /// </summary>
+        internal Point Form1Pos = new Point();
         /// <summary>
         /// 《古籍酷》OCR批量處理。在textBox2中輸入bT以啟用，輸入bF以停用
         /// </summary>
@@ -2574,8 +2577,9 @@ namespace WindowsFormsApp1
                     // C:\Users\oscar\Dropbox\《古籍酷》AI%20OCR%20待改進者隨記%20感恩感恩 讚歎讚歎 南無阿彌陀佛.docx
                     e.Handled = true;
                     overtypeModeSelectedTextSetting(ref textBox1);
-                    br.ImproveGJcoolOCRMemo();
+                    Task.Run(() => { br.ImproveGJcoolOCRMemo(); });
                     Clipboard.SetText(textBox1.Text);//通常改正後是要再重標點，如書名等 20240306
+                    AvailableInUseBothKeysMouse();
                     return;
                 }
                 /* Alt + l : 檢查/輸入抬頭平抬時的條件：執行topLineFactorIuput0condition()
@@ -2976,6 +2980,14 @@ namespace WindowsFormsApp1
                         return;
                     }
                 }
+                if (e.KeyCode == Keys.F10)
+                {//F10 同上
+                    e.Handled = true;
+                    paragraphMarkAccordingFirstOne();
+                    Clipboard.SetText(textBox1.Text);
+                    return;
+
+                }
 
                 //以上按下單一鍵
                 #endregion
@@ -3006,7 +3018,8 @@ namespace WindowsFormsApp1
                     && (x.IndexOf("《") > -1 || x.IndexOf("〈") > -1 || x.IndexOf("：") > -1))
                     textBox1.Text = CnText.RemarkBooksPunctuation(ref x);
                 //將頁面移至頂端，以便校對輸入時檢視
-                br.GoToUrlandActivate(br.driver.Url, true);
+                if (br.driver.Url != textBox3.Text)
+                    br.GoToUrlandActivate(br.driver.Url, true);
             }
             bringBackMousePosFrmCenter();
             //ResumeEvents();
@@ -3769,7 +3782,7 @@ namespace WindowsFormsApp1
                     return;
                 }
             }
-            else if (s <= 2 && x.Substring(s, 2) == "􏿽")
+            else if (s <= 2 && x.Length > 1 && x.Substring(s, 2) == "􏿽")
             {//插入點在textBox1最前端時的處理
                 if (selX == "")
                 {
@@ -5324,8 +5337,16 @@ namespace WindowsFormsApp1
         /// </summary>
         void paragraphMarkAccordingFirstOne()
         {
-            bool topmost = TopMost;
+            bool topmost = TopMost, eventEnabled = _eventsEnabled;
             TopMost = false;
+            if (textBox1.TextLength > 2 && textBox1.Text.Substring(textBox1.TextLength - 2, 2) != Environment.NewLine)
+            {
+                if (eventEnabled)
+                    PauseEvents();
+                textBox1.Text += Environment.NewLine;
+                if (eventEnabled)
+                    ResumeEvents();
+            }
             replaceXdirrectly();
             int s = 0, l, e = textBox1.Text.IndexOf(Environment.NewLine); if (e < 0) return;
             PauseEvents();
@@ -5525,7 +5546,17 @@ namespace WindowsFormsApp1
             }
             #endregion
 
+            if (eventEnabled) PauseEvents();
             textBox1.Text = textBox1.Text.Replace("\r\n　<p>", "\r\n|");
+            if (textBox1.TextLength > Environment.NewLine.Length + p.Length &&
+                textBox1.Text.Substring(textBox1.TextLength - (Environment.NewLine.Length + p.Length), Environment.NewLine.Length + p.Length) == Environment.NewLine + p)
+                textBox1.Text = textBox1.Text.Substring(0, textBox1.TextLength - (Environment.NewLine.Length + p.Length));
+            if (textBox1.TextLength > p.Length
+                && textBox1.Text.Substring(textBox1.TextLength - p.Length, p.Length) == "。<p>"
+                && textBox1.Text.Substring(textBox1.Text.LastIndexOf(Environment.NewLine) + Environment.NewLine.Length
+                    , textBox1.TextLength - (textBox1.Text.LastIndexOf(Environment.NewLine) + Environment.NewLine.Length)).Replace("　", "").Replace("􏿽", "") == p)
+                textBox1.Text = textBox1.Text.Substring(0, textBox1.Text.LastIndexOf(Environment.NewLine));
+            if (eventEnabled) ResumeEvents();
 
             playSound(soundLike.over);
             if (topLine) { rst.Close(); cnt.Close(); rst = null; cnt = null; }
@@ -7666,6 +7697,20 @@ namespace WindowsFormsApp1
                     AvailableInUseBothKeysMouse();
                     return;
                 }
+                if (e.KeyCode == Keys.F10)
+                {//Shift + F10 ： 執行 Word VBA Sub 巨集指令「中國哲學書電子化計劃_只保留正文注文_且注文前後加括弧_貼到古籍酷自動標點」
+                    e.Handled = true;
+                    //SystemSounds.Question.Play();
+                    string x = Clipboard.GetText();
+                    if (x == "") { x = textBox1.Text; textBox1.Clear(); }
+                    if (MessageBox.Show("clear the Environment.NewLine?", "", MessageBoxButtons.OKCancel) == DialogResult.OK)
+                    {
+                        x = x.Replace(Environment.NewLine, "");
+                        Clipboard.SetText(x);
+                    }
+                    runWordMacro("Docs.中國哲學書電子化計劃_只保留正文注文_且注文前後加括弧_貼到古籍酷自動標點");
+                    return;
+                }
                 if (e.KeyCode == Keys.F12)
                 {// Shift + F12
                     e.Handled = true;
@@ -7796,20 +7841,6 @@ namespace WindowsFormsApp1
                         pagePaste2GjcoolOCR();
                     else
                         PressAddKeyMethodPaste2QuickEditBox();
-                    return;
-                }
-                if (e.KeyCode == Keys.F10)
-                {//F10 ： 執行 Word VBA Sub 巨集指令「中國哲學書電子化計劃_只保留正文注文_且注文前後加括弧_貼到古籍酷自動標點」
-                    e.Handled = true;
-                    //SystemSounds.Question.Play();
-                    string x = Clipboard.GetText();
-                    if (x == "") { x = textBox1.Text; textBox1.Clear(); }
-                    if (MessageBox.Show("clear the Environment.NewLine?", "", MessageBoxButtons.OKCancel) == DialogResult.OK)
-                    {
-                        x = x.Replace(Environment.NewLine, "");
-                        Clipboard.SetText(x);
-                    }
-                    runWordMacro("Docs.中國哲學書電子化計劃_只保留正文注文_且注文前後加括弧_貼到古籍酷自動標點");
                     return;
                 }
                 if (e.KeyCode == Keys.F12)
@@ -8335,7 +8366,7 @@ namespace WindowsFormsApp1
             if (showColorSignal) this.BackColor = C;
         }
 
-        int waitTimeforappActivateByName = 680;//1100;
+        int waitTimeforappActivateByName = 680;//1100;                                               
 
         private string quickedit_data_textboxtxt = "";
         /// <summary>
@@ -8394,7 +8425,15 @@ namespace WindowsFormsApp1
                     //Task wait = Task.Run(() =>//此間操作，因為沒有要操作的元件，所以可以跑線程。20230111
                     //{以別處還要參考，故取消Task
                     //br.GoToUrlandActivate(url, keyinTextMode);
-                    br.GoToUrlandActivate(url, true);
+                    try
+                    {
+                        if (br.driver.Url != url)
+                            br.GoToUrlandActivate(url, true);
+                    }
+                    catch (Exception)
+                    {
+                        br.GoToUrlandActivate(url, true);
+                    }
                     //});
                     //Task.WaitAll();
                     //wait.Wait();
@@ -8527,21 +8566,23 @@ namespace WindowsFormsApp1
                         #region 如果已經編輯，則將Form1移至旁邊
                         if (!ocrTextMode && keyinTextMode)
                         {
-                            int lf = Left, tp = Top;
-                            if (chkX.IndexOf("<p>") > -1 && chkX == nextpagetextBox1Text_Default && (lf < ((double)1235 / SystemInformation.PrimaryMonitorSize.Width) * 1235 || tp < ((double)687 / SystemInformation.PrimaryMonitorSize.Height) * 687))
+                            //int lf = Left, tp = Top;
+                            if (Form1Pos.X != Left && Form1Pos.Y != Top && (Left < 1235 || Top < 687)) { Form1Pos.X = Left; Form1Pos.Y = Top; }
+                            if (chkX.IndexOf("<p>") > -1 && chkX == nextpagetextBox1Text_Default && (Form1Pos.X < ((double)1235 / SystemInformation.PrimaryMonitorSize.Width) * 1235 || Form1Pos.Y < ((double)687 / SystemInformation.PrimaryMonitorSize.Height) * 687))
                             //if (chkX == nextpagetextBox1Text_Default && (Left < SystemInformation.PrimaryMonitorSize.Width / 587 * 587 || Top < SystemInformation.PrimaryMonitorSize.Height / 1035 * 1035))
                             {
                                 Top = 687; Left = 1235;//移動表單以供檢視已編輯的情形
                                 if (MessageBoxShowOKCancelExclamationDefaultDesktopOnly("操作介面是否要回原位？") == DialogResult.OK)
                                 {
-                                    Left = lf; Top = tp;
+                                    Left = Form1Pos.X; Top = Form1Pos.Y;
                                 }
                             }
                             else
                             {
                                 if (chkX.IndexOf("<p>") == -1 && (chkX.IndexOf("{") == -1 || chkX.IndexOf("}") == -1)
                                     && (Top >= 687 || Left >= 1235))
-                                { Top = 200; Left = 800; }
+                                //{ Top = 200; Left = 800; }
+                                { Top = Form1Pos.Y; Left = Form1Pos.X; }
                             }
                         }
                         #endregion
@@ -9466,7 +9507,16 @@ namespace WindowsFormsApp1
             saveText();
             //實際執行取代文字
             replaceWord(textBox1.SelectedText, textBox4.Text);
-            if (textBox4.Text != "") Clipboard.SetText(textBox4.Text);
+            if (textBox4.Text != "")
+            {
+                try
+                {
+                    Clipboard.SetText(textBox4.Text);
+                }
+                catch (Exception)
+                {
+                }
+            }
             textBox4Resize();
             PauseEvents();
             textBox4.Text = "";
@@ -11110,8 +11160,8 @@ namespace WindowsFormsApp1
 
             #region OCR成功後則刪除下載的書圖,備份OCR結果; 因為 https://gj.cool/try_ocr 頁面時常傳回假資料（之前曾識別的文本），故今改寫在 textBox3.TextChanged事件中
             //OCR成功後則刪除下載的書圖,備份OCR結果
-            string downloadImgFullName = string.Empty, imgUrl = br.GetImageUrl(); //bool imgResult = false;
-                                                                                  //if (imgUrl != "")
+            string downloadImgFullName = string.Empty;//, imgUrl = br.GetImageUrl(); //bool imgResult = false;
+                                                      //if (imgUrl != "")
             if (_previousPageNum != _currentPageNum ||
                 (_previousPageNum == _currentPageNum && previousBookID != GetBookID_fromUrl(textBox3Text))
                 || (_previousPageNum == _currentPageNum && previousBookID == GetBookID_fromUrl(textBox3Text)//頁碼一樣但章節不一樣時

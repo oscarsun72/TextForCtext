@@ -357,7 +357,10 @@ namespace TextForCtext
                 return Clipboard.GetText();
             }
             else
+            {
+                Clipboard.Clear();
                 return string.Empty;
+            }
         }
 
         internal static IWebElement Full_text_search_textbox_searchressingle
@@ -1900,7 +1903,6 @@ namespace TextForCtext
                                 goto retry;
                             else
                                 throw;
-                            break;
                         default:
                             throw;
                     }
@@ -6110,46 +6112,46 @@ internal static string getImageUrl() {
         {
             if (!ActiveForm1.Controls["textBox1"].Focused) return;
             TextBox tb = ActiveForm1.Controls["textBox1"] as TextBox;
-            if (tb.SelectionLength == 0) return;
+            if (tb.SelectionLength == 0) return;            
             retry:
-            if (ImproveGJcoolOCRMemoDoc == null)
-            {
-                Microsoft.Office.Interop.Word.Application wordapp = new Microsoft.Office.Interop.Word.Application
+                if (ImproveGJcoolOCRMemoDoc == null)
                 {
-                    Visible = true
-                };
-                ImproveGJcoolOCRMemoDoc = wordapp.Documents.Open("C:\\Users\\oscar\\Dropbox\\《古籍酷》AI OCR 待改進者隨記 感恩感恩　讚歎讚歎　南無阿彌陀佛.docx");
-                //ImproveGJcoolOCRMemoDoc = wordapp.Documents.Open("C:\\Users\\oscar\\Dropbox\\《古籍酷》AI%20OCR%20待改進者隨記%20感恩感恩　讚歎讚歎　南無阿彌陀佛.docx");
-                ImproveGJcoolOCRMemoDoc.ActiveWindow.Selection.EndKey(Microsoft.Office.Interop.Word.WdUnits.wdStory);
-            }
-            try
-            {
-                string imporvement = tb.SelectedText, lnk = GetPageUrlKeywordLink();
-                if (lnk == string.Empty)
-                {
-                    if (!tb.Focused) tb.Focus();
-                    lnk = GetPageUrlKeywordLink();
+                    Microsoft.Office.Interop.Word.Application wordapp = new Microsoft.Office.Interop.Word.Application
+                    {
+                        Visible = true
+                    };
+                    ImproveGJcoolOCRMemoDoc = wordapp.Documents.Open("C:\\Users\\oscar\\Dropbox\\《古籍酷》AI OCR 待改進者隨記 感恩感恩　讚歎讚歎　南無阿彌陀佛.docx");
+                    //ImproveGJcoolOCRMemoDoc = wordapp.Documents.Open("C:\\Users\\oscar\\Dropbox\\《古籍酷》AI%20OCR%20待改進者隨記%20感恩感恩　讚歎讚歎　南無阿彌陀佛.docx");
+                    ImproveGJcoolOCRMemoDoc.ActiveWindow.Selection.EndKey(Microsoft.Office.Interop.Word.WdUnits.wdStory);
                 }
-                if (ImproveGJcoolOCRMemoDoc.Content.Text.IndexOf(lnk + Environment.NewLine.Substring(0, 1)) == -1)
+                try
                 {
-                    imporvement += ("\t" + lnk);
-                    ImproveGJcoolOCRMemoDoc.Range().InsertAfter(imporvement + Environment.NewLine);
-                    ImproveGJcoolOCRMemoDoc.ActiveWindow.ScrollIntoView(ImproveGJcoolOCRMemoDoc.Range(), false);
-                    ImproveGJcoolOCRMemoDoc.Save();
-                    ImproveGJcoolOCRMemoDoc.Activate();
-                    ImproveGJcoolOCRMemoDoc.Application.Activate();
-                    //if (ImproveGJcoolOCRMemoDoc.Application.WindowState == Microsoft.Office.Interop.Word.WdWindowState.wdWindowStateMinimize)
-                    //    ImproveGJcoolOCRMemoDoc.Application.WindowState = Microsoft.Office.Interop.Word.WdWindowState.wdWindowStateNormal;
-                    Thread.Sleep(1000);
-                    //ImproveGJcoolOCRMemoDoc.Application.WindowState = Microsoft.Office.Interop.Word.WdWindowState.wdWindowStateMinimize;
-                    Form1.playSound(Form1.soundLike.done);
+                    string imporvement = tb.SelectedText, lnk = GetPageUrlKeywordLink();
+                    if (lnk == string.Empty)
+                    {
+                        if (!tb.Focused) tb.Focus();
+                        lnk = GetPageUrlKeywordLink();
+                    }
+                    if (ImproveGJcoolOCRMemoDoc.Content.Text.IndexOf(lnk + Environment.NewLine.Substring(0, 1)) == -1)
+                    {
+                        imporvement += ("\t" + lnk);
+                        ImproveGJcoolOCRMemoDoc.Range().InsertAfter(imporvement + Environment.NewLine);
+                        ImproveGJcoolOCRMemoDoc.ActiveWindow.ScrollIntoView(ImproveGJcoolOCRMemoDoc.Range(), false);
+                        ImproveGJcoolOCRMemoDoc.Save();
+                        ImproveGJcoolOCRMemoDoc.Activate();
+                        //ImproveGJcoolOCRMemoDoc.Application.Activate();
+                        //if (ImproveGJcoolOCRMemoDoc.Application.WindowState == Microsoft.Office.Interop.Word.WdWindowState.wdWindowStateMinimize)
+                        //    ImproveGJcoolOCRMemoDoc.Application.WindowState = Microsoft.Office.Interop.Word.WdWindowState.wdWindowStateNormal;
+                        //Thread.Sleep(1000);
+                        //ImproveGJcoolOCRMemoDoc.Application.WindowState = Microsoft.Office.Interop.Word.WdWindowState.wdWindowStateMinimize;
+                        Form1.playSound(Form1.soundLike.done);
+                    }
                 }
-            }
-            catch (Exception)
-            {
-                ImproveGJcoolOCRMemoDoc = null;
-                goto retry;
-            }
+                catch (Exception)
+                {
+                    ImproveGJcoolOCRMemoDoc = null;
+                    goto retry;
+                }
 
         }
 
