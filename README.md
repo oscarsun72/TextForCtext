@@ -444,6 +444,8 @@ Ctrl+ 滑鼠左鍵：清除框中所有文字
 - 輸入「oF」（ocr first false ）設定直接貼入OCR結果先不管版面行款排版模式 PasteOcrResultFisrtMode=false
 - 輸入「bT」（batch processing true ）《古籍酷》OCR批量處理。輸入bT以啟用，輸入bF以停用 BatchProcessingGJcoolOCR=true
 - 輸入「bF」（batch processing false ）《古籍酷》OCR批量處理。輸入bT以啟用，輸入bF以停用 BatchProcessingGJcoolOCR=false
+- 輸入「mt」（Mute in Processing）則在操作過程中靜音-不撥放音效。MuteProcessing=true。20240315
+- 輸入「mf」（Mute in Processing=false）則在操作過程中撥放音效。MuteProcessing=false。20240315
 - 
 - 輸入「x,y」（x、y 為整數以半形逗號間隔，如「835,711」；請打好後用複製貼上的方式來輸入），指定《古籍酷》首頁快速體驗OCR的複製按鈕位置 Copybutton_GjcoolFastExperience_Location的 X 與 Y值
 

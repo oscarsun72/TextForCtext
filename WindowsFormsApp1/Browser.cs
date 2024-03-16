@@ -19,6 +19,7 @@ using System.Net.Http.Headers;
 //using System.Net;
 //using System.Net.NetworkInformation;
 using System.Runtime.InteropServices;
+using System.Security.Policy;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Automation;
@@ -59,6 +60,10 @@ namespace TextForCtext
         /// 記錄切換VPN的次數
         /// </summary>
         internal static int VPNSwitchedTimer = 0;
+        /// <summary>
+        /// 因為剪貼簿的操作頻繁，故以此記下要貼去簡單修改模式方塊中的文字內容，以免被干擾
+        /// </summary>
+        internal static string TextPatst2Quick_editBox = "";
 
 
         //readonly Form1 Form1 = Application.OpenForms.Count > 0 ? Application.OpenForms[0] as Form1 : null;
@@ -335,7 +340,10 @@ namespace TextForCtext
                 IWebElement ie = Quickedit_data_textbox;
                 if (ie != null)
                 {
-                    if (quickedit_data_textboxTxt != Quickedit_data_textbox.Text) quickedit_data_textboxTxt = quickedit_data_textbox.Text;
+                    //.Text屬性會清除起首的全形空格！！20240313
+                    //if (quickedit_data_textboxTxt != Quickedit_data_textbox.Text) quickedit_data_textboxTxt = quickedit_data_textbox.Text;                    
+                    string quickedit_data_textbox_Txt = CopyQuickedit_data_textboxText();
+                    if (quickedit_data_textboxTxt != quickedit_data_textbox_Txt) quickedit_data_textboxTxt = quickedit_data_textbox_Txt;
                     return quickedit_data_textboxTxt;
                 }
                 else
@@ -344,7 +352,7 @@ namespace TextForCtext
         }
         /// <summary>
         /// 當Quickedit_data_textbox的內容是以全形空格開頭的會被清除，類似Trim的功能，故須用複製文本的方式取得正確的值
-        /// 解決Selenium在[簡單修改模式]文字方塊內容若以全形空格為開頭的，會被截去的方案 20230829
+        /// 解決Selenium在[簡單修改模式]文字方塊內容若以全形空格為開頭的，會被截去的方案 20230829        /// 
         /// </summary>
         /// <returns>回傳所複製的Quickedit_data_textbox文本</returns>
         internal static string CopyQuickedit_data_textboxText()
@@ -352,8 +360,15 @@ namespace TextForCtext
             IWebElement ie = Quickedit_data_textbox;
             if (ie != null)
             {
-                ie.SendKeys(OpenQA.Selenium.Keys.Control + "a");
-                ie.SendKeys(OpenQA.Selenium.Keys.Control + "c");
+                if (ie.Text != string.Empty)
+                {
+                    ie.SendKeys(OpenQA.Selenium.Keys.Control + "a");//會移動視窗焦點到文字方塊 ie（Quickedit_data_textbox）中
+                    ie.SendKeys(OpenQA.Selenium.Keys.Control + "c");
+                    WindowsScrolltoTop();
+                    //Clipboard.SetText(ie.Text);//.Text屬性會清除前首的全形空格，不適用！！20240313
+                }
+                else
+                    Clipboard.Clear();
                 return Clipboard.GetText();
             }
             else
@@ -1047,7 +1062,21 @@ namespace TextForCtext
                                                                //actions.MoveToElement(textbox).Click().Perform();
                                                                //actions.SendKeys(OpenQA.Selenium.Keys.Control + "v").Build().Perform();
                                                                //actions.SendKeys(OpenQA.Selenium.Keys.LeftShift + OpenQA.Selenium.Keys.Insert).Build().Perform();
+            {
+                //while (!Form1.isClipBoardAvailable_Text()) { }
+                try
+                {
+                    Clipboard.SetText(xIuput);
+                }
+                catch (Exception)
+                {
+                    Clipboard.Clear();
+                    //Clipboard.SetText("x");
+                    Form1.playSound(Form1.soundLike.error);
+                    Clipboard.SetText(xIuput);
+                }
                 textbox.SendKeys(OpenQA.Selenium.Keys.LeftShift + OpenQA.Selenium.Keys.Insert);
+            }
             //SendKeys.Send("^v{tab}~");
             #endregion
             //}
@@ -1574,8 +1603,10 @@ namespace TextForCtext
                 ////driver.SwitchTo().Window(hs[0]);
                 try
                 {
+                    //activate Chrome瀏覽器
                     driver = driver ?? Browser.DriverNew();
                     driver.SwitchTo().Window(driver.CurrentWindowHandle);
+
                 }
                 catch (Exception ex)
                 {
@@ -1619,8 +1650,27 @@ namespace TextForCtext
             if (ActiveForm1.KeyinTextMode)
             {
                 //if (Form1.ModifierKeys != forms.Keys.LControlKey) return;
-                //此法有效！！20231019
-                driver.ExecuteScript("window.scrollTo(0, 0)");//chatGPT:您好！如果您使用 C# 和 Selenium 來控制 Chrome 瀏覽器，您可以使用以下的程式碼將網頁捲到最上面：
+
+                if (ActiveForm1.InvokeRequired)
+                {
+                    ActiveForm1.Invoke((MethodInvoker)delegate
+                    {
+                        // 你的程式碼
+
+                        //此法有效！！20231019
+                        bool _events = ActiveForm1.EventsEnabled;
+                        ActiveForm1.PauseEvents();
+                        driver.ExecuteScript("window.scrollTo(0, 0)");//chatGPT:您好！如果您使用 C# 和 Selenium 來控制 Chrome 瀏覽器，您可以使用以下的程式碼將網頁捲到最上面：
+                        ActiveForm1.EventsEnabled = _events;
+                    });
+                }
+                else
+                {//此法有效！！20231019
+                    bool _events = ActiveForm1.EventsEnabled;
+                    ActiveForm1.PauseEvents();
+                    driver.ExecuteScript("window.scrollTo(0, 0)");//chatGPT:您好！如果您使用 C# 和 Selenium 來控制 Chrome 瀏覽器，您可以使用以下的程式碼將網頁捲到最上面：
+                    ActiveForm1.EventsEnabled = _events;
+                }
                 //driver.SwitchTo().Window(driver.CurrentWindowHandle).SwitchTo().DefaultContent();//20231019
 
                 ///*20220312 chatGPT大菩薩：您好！要將分頁視窗的瀏覽位置調整到最上方，可以使用 Selenium 的 JavaScriptExecutor 物件，透過執行 JavaScript 的方式來操作瀏覽器。
@@ -1683,7 +1733,14 @@ namespace TextForCtext
                 Quickedit_data_textbox = waitFindWebElementByName_ToBeClickable("data", _webDriverWaitTimSpan, driver);
                 try
                 {
-                    quickedit_data_textboxTxt = Quickedit_data_textbox == null ? "" : Quickedit_data_textbox.Text;
+                    //.Text屬性會清除起首的全形空格！！20240313
+                    //quickedit_data_textboxTxt = Quickedit_data_textbox == null ? "" : Quickedit_data_textbox.Text;
+                    if (Quickedit_data_textbox == null)
+                        quickedit_data_textboxTxt = "";
+                    else
+                    {
+                        quickedit_data_textboxTxt = Quickedit_data_textboxTxt;
+                    }
 
                 }
                 catch (Exception)
@@ -6064,18 +6121,17 @@ internal static string getImageUrl() {
         }
 
         /// <summary>
+        /// 焦點必須在textBox1！！20240313
         /// 依選取文字取得目前URL加該選取字為該頁之關鍵字的連結。如欲在此頁中標出「𢔶」字，即為：
         /// https://ctext.org/library.pl?if=gb&file=36575&page=53#𢔶
         /// Ctrl + k
         /// </summary>
         /// <returns></returns>
-        internal static string GetPageUrlKeywordLink()
+        internal static string GetPageUrlKeywordLink(string w, string url)
         {
-            if (!ActiveForm1.Controls["textBox1"].Focused) return string.Empty;
-            TextBox tb = ActiveForm1.Controls["textBox1"] as TextBox;
-            if (tb.SelectionLength == 0) return string.Empty;
-            string w = tb.SelectedText;
-            string url = ActiveForm1.Controls["textBox3"].Text; //driver.Url;
+            //if (!ActiveForm1.Controls["textBox1"].Focused) return string.Empty;
+            //TextBox tb = ActiveForm1.Controls["textBox1"] as TextBox;
+            //if (tb.SelectionLength == 0) return string.Empty;            
             if (url == null) return string.Empty;
             int i = url.IndexOf("&page=");
             if (i == -1) return string.Empty;
@@ -6104,55 +6160,64 @@ internal static string getImageUrl() {
         /// </summary>
         internal static Microsoft.Office.Interop.Word.Document ImproveGJcoolOCRMemoDoc;
         /// <summary>
+        /// 必須焦點在textBox1才行！！20240313
         /// Alt + k : 將選取的字詞句及其網址位址送到以下檔案的末後
         /// C:\Users\oscar\Dropbox\《古籍酷》AI%20OCR%20待改進者隨記%20感恩感恩 讚歎讚歎 南無阿彌陀佛.docx
         /// 20240212大年初三
         /// </summary>
-        internal static void ImproveGJcoolOCRMemo()
+        /// <param name="imporvement">要改進的字詞句（textBox1中被選取的字串）</param>
+        internal static void ImproveGJcoolOCRMemo(string imporvement, string url)
         {
-            if (!ActiveForm1.Controls["textBox1"].Focused) return;
-            TextBox tb = ActiveForm1.Controls["textBox1"] as TextBox;
-            if (tb.SelectionLength == 0) return;            
-            retry:
-                if (ImproveGJcoolOCRMemoDoc == null)
+        //TextBox tb = null;
+        //if (ActiveForm1.InvokeRequired)
+        //{
+        //    ActiveForm1.Invoke((MethodInvoker)delegate
+        //    {
+        // 你的程式碼
+        //if (!ActiveForm1.Controls["textBox1"].Focused) return;
+        //tb = ActiveForm1.Controls["textBox1"] as TextBox;
+        //if (tb.SelectionLength == 0) return;
+        retry:
+            if (ImproveGJcoolOCRMemoDoc == null)
+            {
+                Microsoft.Office.Interop.Word.Application wordapp = new Microsoft.Office.Interop.Word.Application
                 {
-                    Microsoft.Office.Interop.Word.Application wordapp = new Microsoft.Office.Interop.Word.Application
-                    {
-                        Visible = true
-                    };
-                    ImproveGJcoolOCRMemoDoc = wordapp.Documents.Open("C:\\Users\\oscar\\Dropbox\\《古籍酷》AI OCR 待改進者隨記 感恩感恩　讚歎讚歎　南無阿彌陀佛.docx");
-                    //ImproveGJcoolOCRMemoDoc = wordapp.Documents.Open("C:\\Users\\oscar\\Dropbox\\《古籍酷》AI%20OCR%20待改進者隨記%20感恩感恩　讚歎讚歎　南無阿彌陀佛.docx");
-                    ImproveGJcoolOCRMemoDoc.ActiveWindow.Selection.EndKey(Microsoft.Office.Interop.Word.WdUnits.wdStory);
-                }
-                try
+                    Visible = true
+                };
+                ImproveGJcoolOCRMemoDoc = wordapp.Documents.Open("C:\\Users\\oscar\\Dropbox\\《古籍酷》AI OCR 待改進者隨記 感恩感恩　讚歎讚歎　南無阿彌陀佛.docx");
+                //ImproveGJcoolOCRMemoDoc = wordapp.Documents.Open("C:\\Users\\oscar\\Dropbox\\《古籍酷》AI%20OCR%20待改進者隨記%20感恩感恩　讚歎讚歎　南無阿彌陀佛.docx");
+                ImproveGJcoolOCRMemoDoc.ActiveWindow.Selection.EndKey(Microsoft.Office.Interop.Word.WdUnits.wdStory);
+            }
+            try
+            {
+                string lnk = GetPageUrlKeywordLink(imporvement, url);
+                if (lnk == string.Empty)
                 {
-                    string imporvement = tb.SelectedText, lnk = GetPageUrlKeywordLink();
-                    if (lnk == string.Empty)
-                    {
-                        if (!tb.Focused) tb.Focus();
-                        lnk = GetPageUrlKeywordLink();
-                    }
-                    if (ImproveGJcoolOCRMemoDoc.Content.Text.IndexOf(lnk + Environment.NewLine.Substring(0, 1)) == -1)
-                    {
-                        imporvement += ("\t" + lnk);
-                        ImproveGJcoolOCRMemoDoc.Range().InsertAfter(imporvement + Environment.NewLine);
-                        ImproveGJcoolOCRMemoDoc.ActiveWindow.ScrollIntoView(ImproveGJcoolOCRMemoDoc.Range(), false);
-                        ImproveGJcoolOCRMemoDoc.Save();
-                        ImproveGJcoolOCRMemoDoc.Activate();
-                        //ImproveGJcoolOCRMemoDoc.Application.Activate();
-                        //if (ImproveGJcoolOCRMemoDoc.Application.WindowState == Microsoft.Office.Interop.Word.WdWindowState.wdWindowStateMinimize)
-                        //    ImproveGJcoolOCRMemoDoc.Application.WindowState = Microsoft.Office.Interop.Word.WdWindowState.wdWindowStateNormal;
-                        //Thread.Sleep(1000);
-                        //ImproveGJcoolOCRMemoDoc.Application.WindowState = Microsoft.Office.Interop.Word.WdWindowState.wdWindowStateMinimize;
-                        Form1.playSound(Form1.soundLike.done);
-                    }
+                    //if (!tb.Focused) tb.Focus();
+                    lnk = GetPageUrlKeywordLink(imporvement, url);
                 }
-                catch (Exception)
+                if (ImproveGJcoolOCRMemoDoc.Content.Text.IndexOf(lnk + Environment.NewLine.Substring(0, 1)) == -1)
                 {
-                    ImproveGJcoolOCRMemoDoc = null;
-                    goto retry;
+                    imporvement += ("\t" + lnk);
+                    ImproveGJcoolOCRMemoDoc.Range().InsertAfter(imporvement + Environment.NewLine);
+                    ImproveGJcoolOCRMemoDoc.ActiveWindow.ScrollIntoView(ImproveGJcoolOCRMemoDoc.Range(), false);
+                    ImproveGJcoolOCRMemoDoc.Save();
+                    ImproveGJcoolOCRMemoDoc.Activate();
+                    //ImproveGJcoolOCRMemoDoc.Application.Activate();
+                    //if (ImproveGJcoolOCRMemoDoc.Application.WindowState == Microsoft.Office.Interop.Word.WdWindowState.wdWindowStateMinimize)
+                    //    ImproveGJcoolOCRMemoDoc.Application.WindowState = Microsoft.Office.Interop.Word.WdWindowState.wdWindowStateNormal;
+                    //Thread.Sleep(1000);
+                    //ImproveGJcoolOCRMemoDoc.Application.WindowState = Microsoft.Office.Interop.Word.WdWindowState.wdWindowStateMinimize;
+                    Form1.playSound(Form1.soundLike.done, true);
                 }
-
+            }
+            catch (Exception)
+            {
+                ImproveGJcoolOCRMemoDoc = null;
+                goto retry;
+            }
+            //    });
+            //}
         }
 
 
