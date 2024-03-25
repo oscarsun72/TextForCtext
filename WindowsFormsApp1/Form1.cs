@@ -1505,7 +1505,7 @@ namespace WindowsFormsApp1
             }
             catch (Exception)
             {
-                while (!isClipBoardAvailable_Text()) { }
+                while (!isClipBoardAvailable_Text()) { if (DateTime.Now.Subtract(dt).TotalSeconds > 2) break; }
                 Clipboard.SetText(xCopy);
             }
             br.TextPatst2Quick_editBox = xCopy;
@@ -2947,8 +2947,8 @@ namespace WindowsFormsApp1
                 if (e.KeyCode == Keys.Add)
                 {//在非自動且手動輸入模式下單獨按下數字鍵盤的「+」("+") →方便檢索到這塊程式碼
                     //整頁貼上Quick edit [簡單修改模式]  並將下一頁直接送交《古籍酷》OCR// 原為加上篇名格式代碼
-
-                    if (keyinTextMode && !autoPastetoQuickEdit && OcrTextMode)
+                    if (autoPastetoQuickEdit) return;
+                    if (keyinTextMode && OcrTextMode)
                     {
                         e.Handled = true;
                     //if (textBox1.Text != string.Empty)
@@ -3638,6 +3638,7 @@ namespace WindowsFormsApp1
                 xSel = xSel.Replace("*", "");
                 xSel = xSel.Replace(Environment.NewLine, "|" + Environment.NewLine).Replace("||", "|");
             }
+            xSel = xSel.Replace("。", string.Empty);
             textBox1.SelectedText = xSel; textBox1.Select(s, xSel.Length);
             stopUndoRec = false;
         }
@@ -7508,7 +7509,7 @@ namespace WindowsFormsApp1
                     if (PagePaste2GjcoolOCR_ing) return;
                     if (browsrOPMode == BrowserOPMode.appActivateByName) return;
                     if (!IsValidUrl＿ImageTextComparisonPage(textBox3.Text)) return;
-                    e.Handled = true; Form1.playSound(Form1.soundLike.press,true);
+                    e.Handled = true; Form1.playSound(Form1.soundLike.press, true);
                     toOCR(br.OCRSiteTitle.GJcool);
                     //if (browsrOPMode == BrowserOPMode.appActivateByName) return;
                     //e.Handled = true;
@@ -10351,13 +10352,13 @@ namespace WindowsFormsApp1
                 #region 輸入「oT」（ocr first ture）設定直接貼入OCR結果先不管版面行款排版模式 輸入「oF」（ocr first false ）設定直接貼入OCR結果先不管版面行款排版模式 PasteOcrResultFisrtMode = false
 
                 case "oT":
-                    PasteOcrResultFisrtMode = true; ocrTextMode = true; PagePaste2GjcoolOCR_ing = false; _eventsEnabled = true;
+                    BatchProcessingGJcoolOCR = false; PasteOcrResultFisrtMode = true; ocrTextMode = true; PagePaste2GjcoolOCR_ing = false; _eventsEnabled = true;
                     br.OCR_wait_time_Top_Limit＿second = 60;
                     PauseEvents();
                     textBox2.Text = "";
                     ResumeEvents(); return;
                 case "oF":
-                    PasteOcrResultFisrtMode = false; ocrTextMode = false; PagePaste2GjcoolOCR_ing = false; _eventsEnabled = true;
+                    BatchProcessingGJcoolOCR = true; PasteOcrResultFisrtMode = false; ocrTextMode = false; PagePaste2GjcoolOCR_ing = false; _eventsEnabled = true;
                     br.OCR_wait_time_Top_Limit＿second = 15;
                     PauseEvents();
                     textBox2.Text = "";
@@ -10382,13 +10383,11 @@ namespace WindowsFormsApp1
                     PauseEvents();
                     textBox2.Text = "";
                     ResumeEvents(); return;
-                    break;
                 case "mf":
                     Form1.MuteProcessing = false;
                     PauseEvents();
                     textBox2.Text = "";
                     ResumeEvents(); return;
-                    break;
                 default:
                     break;
             }

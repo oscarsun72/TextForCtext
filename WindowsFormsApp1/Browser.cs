@@ -366,6 +366,7 @@ namespace TextForCtext
                     ie.SendKeys(OpenQA.Selenium.Keys.Control + "c");
                     WindowsScrolltoTop();
                     //Clipboard.SetText(ie.Text);//.Text屬性會清除前首的全形空格，不適用！！20240313
+                    while (!Form1.isClipBoardAvailable_Text()) {; };
                 }
                 else
                     Clipboard.Clear();
@@ -1070,9 +1071,10 @@ namespace TextForCtext
                 }
                 catch (Exception)
                 {
-                    Clipboard.Clear();
+                    Thread.Sleep(1500);
+                    //Clipboard.Clear();
                     //Clipboard.SetText("x");
-                    Form1.playSound(Form1.soundLike.error);
+                    Form1.playSound(Form1.soundLike.error, true);
                     Clipboard.SetText(xIuput);
                 }
                 textbox.SendKeys(OpenQA.Selenium.Keys.LeftShift + OpenQA.Selenium.Keys.Insert);
@@ -3599,12 +3601,17 @@ internal static string getImageUrl() {
                 IWebElement iwe = waitFindWebElementBySelector_ToBeClickable("#batch_Tab_A", 15);
                 iwe.Click();
 
+                //按下「OCR」
+                iwe = waitFindWebElementBySelector_ToBeClickable("#batchUploadSelect0");
+                iwe.Click();
 
                 driver.SwitchTo().Window(driver.CurrentWindowHandle);
                 //按下「批量處理（面向授權用戶）」頁面下的「選擇檔案」
-                iwe = waitFindWebElementBySelector_ToBeClickable("#BatchFilesInput");
-                clickCopybutton_GjcoolFastExperience(new Point(iwe.Location.X + 76 + (iwe.Size.Width) / 2, iwe.Location.Y + 120 + (iwe.Size.Height) / 2));//new Point(X, Y)=「選擇檔案」控制項之位置
-                                                                                                                                                          //iwe.Click();
+                //iwe = waitFindWebElementBySelector_ToBeClickable("#BatchFilesInput");
+                iwe = waitFindWebElementBySelector_ToBeClickable("#Batch > div.d-flex.justify-content-between.mt-2 > div.d-flex.ms-2 > div:nth-child(2) > button > i");
+                iwe.Click();
+                //clickCopybutton_GjcoolFastExperience(new Point(iwe.Location.X + 76 + (iwe.Size.Width) / 2, iwe.Location.Y + 120 + (iwe.Size.Height) / 2));//new Point(X, Y)=「選擇檔案」控制項之位置
+                //iwe.Click();
 
                 ////移動到「選擇檔案」按鈕
                 //Task.Run(() => { SendKeys.SendWait("{tab 10}"); });
@@ -3623,36 +3630,37 @@ internal static string getImageUrl() {
                 SendKeys.Send("{ENTER}");
                 Clipboard.Clear();
 
-                //图片预览
-                iwe = waitFindWebElementBySelector_ToBeClickable("#batch_figure_0");
-                while (iwe == null)
-                {
-                    iwe = waitFindWebElementBySelector_ToBeClickable("#batch_figure_0");
-                    //提前結束用
-                    if (Clipboard.GetText() != string.Empty)// && !Clipboard.GetText().Contains("Ctext_Page_Image"))
-                    { StopOCR = true; return false; }
-                }
+                ////图片预览
+                //iwe = waitFindWebElementBySelector_ToBeClickable("#batch_figure_0");
+                //while (iwe == null)
+                //{
+                //    iwe = waitFindWebElementBySelector_ToBeClickable("#batch_figure_0");
+                //    //提前結束用
+                //    if (Clipboard.GetText() != string.Empty)// && !Clipboard.GetText().Contains("Ctext_Page_Image"))
+                //    { StopOCR = true; return false; }
+                //}
 
-                //按下「上傳」
-                iwe = waitFindWebElementBySelector_ToBeClickable("#batchUploadDropdown");
-                iwe.Click();
+                ////按下「上傳」
+                //iwe = waitFindWebElementBySelector_ToBeClickable("#batchUploadDropdown");
+                //iwe.Click();
 
-                //按下「豎排自動識別」
-                iwe = waitFindWebElementBySelector_ToBeClickable("#Batch > div.d-flex.justify-content-between.mt-3 > div > div > div:nth-child(2) > ul > li.dropdown-item > div > label");
-                iwe.Click();
-
+                ////按下「豎排自動識別」
+                //iwe = waitFindWebElementBySelector_ToBeClickable("#Batch > div.d-flex.justify-content-between.mt-3 > div > div > div:nth-child(2) > ul > li.dropdown-item > div > label");
+                //iwe.Click();
+                
+                
             retry:
-                //按下「上傳」
-                iwe = waitFindWebElementBySelector_ToBeClickable("#batchUploadDropdown");
-                iwe.Click();
+                ////按下「上傳」
+                //iwe = waitFindWebElementBySelector_ToBeClickable("#batchUploadDropdown");
+                //iwe.Click();
 
-                //按下「圖片上傳」
-                iwe = waitFindWebElementBySelector_ToBeClickable("#Batch > div.d-flex.justify-content-between.mt-3 > div > div > div:nth-child(2) > ul > li:nth-child(1) > a");
-                iwe.Click();
+                ////按下「圖片上傳」
+                //iwe = waitFindWebElementBySelector_ToBeClickable("#Batch > div.d-flex.justify-content-between.mt-3 > div > div > div:nth-child(2) > ul > li:nth-child(1) > a");
+                //iwe.Click();
 
-                Form1.playSound(Form1.soundLike.over);
+                //Form1.playSound(Form1.soundLike.over);
 
-                Thread.Sleep(800);
+                //Thread.Sleep(800);
 
                 //按下「編輯」
                 //iwe = waitFindWebElementBySelector_ToBeClickable("#result_edit_0", 30);
@@ -3690,8 +3698,10 @@ internal static string getImageUrl() {
 
                 //按下「文本行」
                 //【文本行】按鈕
-                //iwe = waitFindWebElementBySelector_ToBeClickable("#OneLine > div.d-flex.justify-content-between.mt-2.mb-1 > div:nth-child(3) > div:nth-child(6) > button:nth-child(2) > i");
-                iwe = waitFindWebElementBySelector_ToBeClickable("#OneLine > div.d-flex.justify-content-between.mt-2.mb-1 > div:nth-child(3) > div:nth-child(6) > button:nth-child(2)");
+                iwe = waitFindWebElementBySelector_ToBeClickable("#line_image_panel > div > div:nth-child(2) > div:nth-child(8) > button:nth-child(2) > i");
+                
+                while (iwe == null)
+                    iwe = waitFindWebElementBySelector_ToBeClickable("#line_image_panel > div > div:nth-child(2) > div:nth-child(8) > button:nth-child(2) > i");
                 //if (iwe == null)
                 //{
                 //    SendKeys.SendWait("{esc}");
@@ -4145,7 +4155,8 @@ internal static string getImageUrl() {
             iwe = waitFindWebElementBySelector_ToBeClickable("#line_img_form > div > input[type=file]");
             while (iwe == null)
             {
-                iwe = waitFindWebElementBySelector_ToBeClickable("#line_img_form > div > input[type=file]");
+                //iwe = waitFindWebElementBySelector_ToBeClickable("#line_img_form > div > input[type=file]");
+                iwe = waitFindWebElementBySelector_ToBeClickable("#OneLine > div.d-flex.mt-2 > div:nth-child(1) > div.ps-1.pe-2.align-self-center > button > i");
                 timeSpan = (DateTime.Now.Subtract(begin));
                 if (timeSpan.TotalSeconds > timeSpanSecs) { StopOCR = true; return false; }
             }
@@ -4200,15 +4211,15 @@ internal static string getImageUrl() {
 
 
             //driver.SwitchTo().Window(driver.CurrentWindowHandle);//切換到目前Selenium操控的視窗，就不怕沒及時得到焦點而失誤了
-            //try
-            //{
-            //    iwe.Click();//不行，會出錯
-            //}
-            //catch (Exception exx)
-            //{
-            //    //Console.WriteLine(exx.HResult + exx.Message);
-            //    //throw;
-            //}
+            try
+            {
+                iwe.Click();//不行，會出錯
+            }
+            catch (Exception exx)
+            {
+                //Console.WriteLine(exx.HResult + exx.Message);
+                //throw;
+            }
             //try
             //{
             //    //iwe = driver.FindElement(By.XPath("/html/body/div[13]/div/div[1]/div[1]/div[1]/form/div/input"));
@@ -4230,14 +4241,14 @@ internal static string getImageUrl() {
 
 
             #region 點擊新增圖片按鈕並輸入書圖全檔名
-            //clickCopybutton_GjcoolFastExperience(new Point(137, 299), Form1.soundLike.press);//new Point(X, Y)=「選擇檔案」控制項之位置
-            clickCopybutton_GjcoolFastExperience(new Point(iwe.Location.X + 76 + (iwe.Size.Width) / 2, iwe.Location.Y + 120 + (iwe.Size.Height) / 2),
-                points - pointCoin < pointCoin ? Form1.soundLike.none : Form1.soundLike.press);//new Point(X, Y)=「選擇檔案」控制項之位置
-            points = 0;//釋放記憶體
-            //76 系統工具列在左側時的寬度//120 Chrome瀏覽器頂遄到書籤列下端的長度
+            ////clickCopybutton_GjcoolFastExperience(new Point(137, 299), Form1.soundLike.press);//new Point(X, Y)=「選擇檔案」控制項之位置
+            //clickCopybutton_GjcoolFastExperience(new Point(iwe.Location.X + 76 + (iwe.Size.Width) / 2, iwe.Location.Y + 120 + (iwe.Size.Height) / 2),
+            //    points - pointCoin < pointCoin ? Form1.soundLike.none : Form1.soundLike.press);//new Point(X, Y)=「選擇檔案」控制項之位置
+            //points = 0;//釋放記憶體
+            ////76 系統工具列在左側時的寬度//120 Chrome瀏覽器頂遄到書籤列下端的長度
 
-            //waitFindWebElementBySelector_ToBeClickable("#line_img_form > div > input[type=file]").SendKeys(OpenQA.Selenium.Keys.Space);
-            //waitFindWebElementByName_ToBeClickable("line_img",2).Submit();
+            ////waitFindWebElementBySelector_ToBeClickable("#line_img_form > div > input[type=file]").SendKeys(OpenQA.Selenium.Keys.Space);
+            ////waitFindWebElementByName_ToBeClickable("line_img",2).Submit();
             byte tryTimes = 1;
             Clipboard.SetText(downloadImgFullName);
 
@@ -4357,6 +4368,7 @@ internal static string getImageUrl() {
             }
 
             #region 按下「Pro」
+            //iwe = waitFindWebElementBySelector_ToBeClickable("#auto_ocr");
             iwe = waitFindWebElementBySelector_ToBeClickable("#auto_ocr");
             //if (iwe == null)
             while (iwe == null)
@@ -4390,7 +4402,8 @@ internal static string getImageUrl() {
 
             #region 按下「自動識別(豎版)」，開始OCR……
             //SendKeys.Send("{down}~");            
-            iwe = waitFindWebElementBySelector_ToBeClickable("#OneLine > div.d-flex.justify-content-between.mt-2.mb-1 > div:nth-child(1) > div:nth-child(2) > ul > li:nth-child(2) > button");
+            //iwe = waitFindWebElementBySelector_ToBeClickable("#OneLine > div.d-flex.justify-content-between.mt-2.mb-1 > div:nth-child(1) > div:nth-child(2) > ul > li:nth-child(2) > button");
+            iwe = waitFindWebElementBySelector_ToBeClickable("#OneLine > div.d-flex.mt-2 > div:nth-child(1) > div:nth-child(3) > ul > li:nth-child(2) > button");
             driver.SwitchTo().Window(driver.CurrentWindowHandle);
             try
             {
@@ -4517,7 +4530,8 @@ internal static string getImageUrl() {
             {
                 //【文本行】按鈕
                 //iwe = waitFindWebElementBySelector_ToBeClickable("#OneLine > div.d-flex.justify-content-between.mt-2.mb-1 > div:nth-child(3) > div:nth-child(6) > button:nth-child(2) > i");
-                iwe = waitFindWebElementBySelector_ToBeClickable("#OneLine > div.d-flex.justify-content-between.mt-2.mb-1 > div:nth-child(3) > div:nth-child(6) > button:nth-child(2)");
+                //iwe = waitFindWebElementBySelector_ToBeClickable("#OneLine > div.d-flex.justify-content-between.mt-2.mb-1 > div:nth-child(3) > div:nth-child(6) > button:nth-child(2)");
+                iwe = waitFindWebElementBySelector_ToBeClickable("#line_image_panel > div > div:nth-child(2) > div:nth-child(8) > button:nth-child(2) > i");
                 //if (iwe == null)
                 //{
                 //    SendKeys.SendWait("{esc}");
