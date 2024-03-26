@@ -3698,10 +3698,10 @@ internal static string getImageUrl() {
 
                 //按下「文本行」
                 //【文本行】按鈕
-                iwe = waitFindWebElementBySelector_ToBeClickable("#line_image_panel > div > div:nth-child(2) > div:nth-child(8) > button:nth-child(2) > i");
+                iwe = waitFindWebElementBySelector_ToBeClickable("#line_image_panel > div > div:nth-child(2) > div:nth-child(8) > button:nth-child(2)");
                 
                 while (iwe == null)
-                    iwe = waitFindWebElementBySelector_ToBeClickable("#line_image_panel > div > div:nth-child(2) > div:nth-child(8) > button:nth-child(2) > i");
+                    iwe = waitFindWebElementBySelector_ToBeClickable("#line_image_panel > div > div:nth-child(2) > div:nth-child(8) > button:nth-child(2)");
                 //if (iwe == null)
                 //{
                 //    SendKeys.SendWait("{esc}");
@@ -4213,12 +4213,12 @@ internal static string getImageUrl() {
             //driver.SwitchTo().Window(driver.CurrentWindowHandle);//切換到目前Selenium操控的視窗，就不怕沒及時得到焦點而失誤了
             try
             {
-                iwe.Click();//不行，會出錯
+                iwe.Click();//不行，會出錯;20240326新版不會出現錯誤了
             }
             catch (Exception exx)
             {
-                //Console.WriteLine(exx.HResult + exx.Message);
-                //throw;
+                Console.WriteLine(exx.HResult + exx.Message);
+                throw;
             }
             //try
             //{
@@ -4531,7 +4531,8 @@ internal static string getImageUrl() {
                 //【文本行】按鈕
                 //iwe = waitFindWebElementBySelector_ToBeClickable("#OneLine > div.d-flex.justify-content-between.mt-2.mb-1 > div:nth-child(3) > div:nth-child(6) > button:nth-child(2) > i");
                 //iwe = waitFindWebElementBySelector_ToBeClickable("#OneLine > div.d-flex.justify-content-between.mt-2.mb-1 > div:nth-child(3) > div:nth-child(6) > button:nth-child(2)");
-                iwe = waitFindWebElementBySelector_ToBeClickable("#line_image_panel > div > div:nth-child(2) > div:nth-child(8) > button:nth-child(2) > i");
+                //iwe = waitFindWebElementBySelector_ToBeClickable("#line_image_panel > div > div:nth-child(2) > div:nth-child(8) > button:nth-child(2) > i");
+                iwe = waitFindWebElementBySelector_ToBeClickable("#line_image_panel > div > div:nth-child(2) > div:nth-child(8) > button:nth-child(2)");
                 //if (iwe == null)
                 //{
                 //    SendKeys.SendWait("{esc}");

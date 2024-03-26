@@ -7989,7 +7989,7 @@ namespace WindowsFormsApp1
                     return false;
                 }
             }
-            else if (new StringInfo(quickedit_data_textboxTxt).LengthInTextElements < (normalLineParaLength == 0 ? 20 : normalLineParaLength))
+            else if (new StringInfo(br.Quickedit_data_textbox.Text).LengthInTextElements < (normalLineParaLength == 0 ? 20 : normalLineParaLength))
             {
                 OCRBreakSoundNotification();
                 if (DialogResult.Cancel == Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("目前頁面內容似乎太短了，確定還要交給OCR嗎？" +
