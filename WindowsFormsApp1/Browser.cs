@@ -3716,7 +3716,11 @@ internal static string getImageUrl() {
                     }
                     catch (Exception)
                     {
+                        Form1.playSound(Form1.soundLike.error,true);
+                        driver.SwitchTo().Window(driver.CurrentWindowHandle);
                         SendKeys.SendWait("{esc}");
+                        driver.SwitchTo().Window(driver.CurrentWindowHandle);
+                        SendKeys.SendWait("%r");
                         iwe.Click();
                     }
                     //文本窗口
@@ -4546,6 +4550,8 @@ internal static string getImageUrl() {
                     }
                     catch (Exception)
                     {
+                        Form1.playSound(Form1.soundLike.error, true);
+                        driver.SwitchTo().Window(driver.CurrentWindowHandle);
                         SendKeys.SendWait("{esc}");
                         iwe.Click();
                     }

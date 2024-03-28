@@ -4019,8 +4019,12 @@ namespace WindowsFormsApp1
             dontHide = false;
         }
 
+        /// <summary>
+        /// F6：標題降階（增加標題前之星號）
+        /// </summary>
         private void keysAsteriskPreTitle()
         {
+            if (textBox1.Text.IndexOf("*") == -1) return;
             string x = textBox1.SelectedText; int s = textBox1.SelectionStart, originalS = s;
             if (keyinTextMode && x != string.Empty && x.IndexOf("*") == -1) { textBox1.DeselectAll(); x = string.Empty; }
             //if (textBox1.SelectedText != "")                
@@ -5397,7 +5401,8 @@ namespace WindowsFormsApp1
                 {
                     textBox1.Text = textBox1.Text.Substring(0, e) + p//"<p>"
                         + textBox1.Text.Substring(e);
-                    e += 3;//"<p>".length
+                    //e += 3;//"<p>".length
+                    e += p.Length;
                 }
             }
             bool topLine = TopLine;//抬頭？
@@ -9944,13 +9949,13 @@ namespace WindowsFormsApp1
 
             if (!EventsEnabled) return;
 
-            Keys modifierKey = ModifierKeys;
-            //直接針對目前的分頁開啟古籍酷OCR
-            if (modifierKey == Keys.Shift && keyinTextMode && !HiddenIcon && !PagePaste2GjcoolOCR_ing)
-            {
-                copyQuickeditLinkWhenKeyinMode(modifierKey);
-                return;
-            }
+            //Keys modifierKey = ModifierKeys;
+            ////直接針對目前的分頁開啟古籍酷OCR//20240328暫取消
+            //if (modifierKey == Keys.Shift && keyinTextMode && !HiddenIcon && !PagePaste2GjcoolOCR_ing)
+            //{
+            //    copyQuickeditLinkWhenKeyinMode(modifierKey);
+            //    return;
+            //}
 
             //最上層顯示
             if (!this.TopMost && !PagePaste2GjcoolOCR_ing) this.TopMost = true;
@@ -9980,10 +9985,10 @@ namespace WindowsFormsApp1
                 //throw;
             }
 
-            #region 鍵入模式時的處置
+            #region 鍵入模式（手動輸入）時的處置
             if (keyinTextMode)
             {
-                //如果剪貼簿裡的是網址內容的話
+                #region 如果剪貼簿裡的是網址內容的話
                 if (ClpTxtBefore != clpTxt && clpTxt.StartsWith("http") && clpTxt.EndsWith("#editor"))
                 {
                     //new SoundPlayer(@"C:\Windows\Media\Windows Balloon.wav").Play();
@@ -10089,8 +10094,10 @@ namespace WindowsFormsApp1
                         if (!this.TopMost) this.TopMost = true;
                         ResumeEvents();
                     }
+                    Clipboard.Clear();
                     return;
                 }
+                #endregion//如果剪貼簿裡是網址內容的話
             }//以上處置鍵入模式（keyinText=true）
             #endregion
 
