@@ -815,10 +815,15 @@ End With
 End Sub
 
 Sub mark易學關鍵字()
-Dim searchedTerm, e, ur As UndoRecord, d As Document, clipBTxt As String, flgPaste As Boolean, xd As String
+Dim searchedTerm, e, ur As UndoRecord, d As Document, clipBTxt As String, flgPaste As Boolean, xd As String, dSource As Document
 Dim strAutoCorrection, endDocOld As Long, rng As Range
 Dim punc As New punctuation
 strAutoCorrection = Array("，〉", "〉，", "〈、", "〈", "〈。", "〈", "。〉", "〉", "〈：", "〈", "：〉", "〉", "〈，", "〈", "、〉", "〉")
+If InStr(ActiveDocument.path, "易學雜著文本") = 0 Then
+    If MsgBox("目前文件為" + ActiveDocument.Name + "是否繼續？", vbExclamation + vbOKCancel) = vbCancel Then Exit Sub
+End If
+SystemSetup.playSound 0.484
+Set dSource = ActiveDocument
 'If Documents.Count = 0 Then Documents.Add
 If Documents.Count = 0 Then Docs.空白的新文件
 If ClipBoardOp.Is_ClipboardContainCtext_Note_InlinecommentColor Then
@@ -829,7 +834,8 @@ If ClipBoardOp.Is_ClipboardContainCtext_Note_InlinecommentColor Then
     d.Range.Cut
     d.Close wdDoNotSaveChanges
 End If
-Set d = ActiveDocument
+'Set d = ActiveDocument
+Set d = dSource
 Rem 因為前面尚有「中國哲學書電子化計劃.只保留正文注文_且注文前後加括弧」會用到UndoRecord物件，且會關閉其文件，故以下此行所寫位置就很關鍵，否則會隨文件關閉而隨之無效。20230201癸卯年十一
 SystemSetup.stopUndo ur, "mark易學關鍵字"
 Set rng = d.Range
@@ -948,11 +954,16 @@ searchedTerm = Array("易", "卦", "爻", "周易", "易經", "系辭", "繫辭", "擊辭", "
 If flgPaste Then
     Rem 標識關鍵字
     word.Application.ScreenUpdating = False
-    If d.path <> "" And Not d.Saved Then d.Save
+    If d.path <> "" Then
+        If InStr(ActiveDocument.path, "易學雜著文本") = 0 Then
+            Set d = dSource
+        End If
+        If Not d.Saved Then d.Save
+    End If
 '    xd = d.Range.text
     Dim rngMark As Range
     For Each e In searchedTerm
-        Set rngMark = d.Range(endDocOld, d.Range.End)
+        Set rngMark = d.Range(IIf(endDocOld >= d.Range.End, d.Range.End - 1, endDocOld), d.Range.End)
         xd = rngMark.Text
         If InStr(xd, e) > 0 Then
 '            With d.Range.Find
@@ -1023,6 +1034,7 @@ Select Case Err.Number
         GoTo exitSub
     Case Else
         MsgBox Err.Number + Err.Description
+        Resume
 End Select
 End Sub
 

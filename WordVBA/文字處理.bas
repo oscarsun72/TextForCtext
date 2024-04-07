@@ -16,7 +16,7 @@ Public Static Property Get PunctuationString() As String
 If punctuationStr = "" Then _
     punctuationStr = "（）。「」『』[]【】〔〕《》〈〉-－"",  ：，；！？?" _
         & "、. :,;" _
-        & "……...!()-·‧" & Chr(34) & Chr(-24153) & Chr(-24152) & Chr(-24155) & Chr(-24154) & ChrW(8218) '34：雙引號。大陸標點符號上下雙引號、上下單引數、逗號
+        & "……...!()-·‧" & chr(34) & chr(-24153) & chr(-24152) & chr(-24155) & chr(-24154) & ChrW(8218) '34：雙引號。大陸標點符號上下雙引號、上下單引數、逗號
 PunctuationString = punctuationStr
 End Property
 'Public Static Property Let Punctionn(ByVal vNewValue As Variant)
@@ -1725,7 +1725,7 @@ End Select
 End Sub
 
 Sub 文件字頻_old()
-Dim DR As Range, d As Document, char, charText As String, preChar As String _
+Dim DR As Range, d As Document, Char, charText As String, preChar As String _
     , x() As String, xT() As Long, i As Long, j As Long, ExcelSheet  As Object, _
     ds As Date, de As Date '
 Static xlsp As String
@@ -1743,12 +1743,12 @@ If xlsp = "" Then Exit Sub
 ds = VBA.Timer
 
 With d
-    For Each char In d.Characters
-        charText = char
-        If Not charText = Chr(13) And charText <> "-" And Not charText Like "[a-zA-Z0-9０-９]" Then
+    For Each Char In d.Characters
+        charText = Char
+        If Not charText = chr(13) And charText <> "-" And Not charText Like "[a-zA-Z0-9０-９]" Then
             'If Not charText Like "[a-z1-9]" & Chr(-24153) & Chr(-24152) & " 　、'""「」『』（）－？！]" Then
 '            If InStr(Chr(-24153) & Chr(-24152) & Chr(2) & "‧[]〔〕﹝﹞…；,，.。． 　、'""‘’`\{}｛｝「」『』（）《》〈〉－？！]", charText) = 0 Then
-            If InStr(ChrW(-24153) & ChrW(-24152) & Chr(2) & "‧[]〔〕﹝﹞…；,，.。． 　、'""‘’`\{}｛｝「」『』（）《》〈〉－？！]", charText) = 0 Then
+            If InStr(ChrW(-24153) & ChrW(-24152) & chr(2) & "‧[]〔〕﹝﹞…；,，.。． 　、'""‘’`\{}｛｝「」『』（）《》〈〉－？！]", charText) = 0 Then
             'chr(2)可能是註腳標記
                 If preChar <> charText Then
                     'If UBound(X) > 0 Then
@@ -1767,10 +1767,10 @@ With d
                 Else
                     GoSub 字頻加一
                 End If
-                preChar = char
+                preChar = Char
             End If
         End If
-    Next char
+    Next Char
 End With
 
 Dim doc As New Document, Xsort() As String, u As Long ', xTsort() As Integer, k As Long, so As Long, ww As String
@@ -1812,7 +1812,7 @@ For j = u To 0 Step -1 '陣列排序'2010/10/29
             .ActiveWindow.Selection.Range.Collapse Direction:=wdCollapseEnd
             .Range.Paragraphs(.Paragraphs.Count).Range.Font.Size = 12
 '            .Range.Paragraphs(.Paragraphs.Count).Range.Bold = False
-            .Range.InsertAfter Replace(Xsort(j), "、", Chr(9), 1, 1) 'chr(9)為定位字元(Tab鍵值)
+            .Range.InsertAfter Replace(Xsort(j), "、", chr(9), 1, 1) 'chr(9)為定位字元(Tab鍵值)
             .Range.InsertParagraphAfter
             If InStr(.Range.Paragraphs(.Paragraphs.Count).Range, "字頻") = 0 Then
                 .Range.Paragraphs(.Paragraphs.Count - 1).Range.Font.Name = "標楷體"
@@ -1895,13 +1895,13 @@ End Sub
 Function lEnglish() '英文大寫字母
 Dim WD, wdct As Long, i As Byte
 For i = 65 To 90
-    Debug.Print Chr(i) & vbCr
+    Debug.Print chr(i) & vbCr
 Next
 End Function
 Function sEnglish() '英文小寫字母
 Dim i As Byte
 For i = 97 To 122
-    Debug.Print Chr(i) & vbCr
+    Debug.Print chr(i) & vbCr
 Next
 End Function
 
@@ -1912,7 +1912,7 @@ Rem 20230128 癸卯年初七 孫守真×chatGPT大菩薩：VBA Overload Functionality：
 
 Dim ayToTrim As Variant, a As Variant
 On Error GoTo eH
-ayToTrim = Array(Chr(13), Chr(9), Chr(10), Chr(11), Chr(13) & Chr(7), Chr(13) & Chr(10))
+ayToTrim = Array(chr(13), chr(9), chr(10), chr(11), chr(13) & chr(7), chr(13) & chr(10))
 x = VBA.Trim(x)
 For Each a In ayToTrim
     'x = VBA.Replace(x, a, "")
@@ -1938,7 +1938,7 @@ Function trimStrForSearch(x As String, sl As word.Selection) As String
 Dim ayToTrim As Variant, a As Variant, rng As Range, slTxtR As String
 On Error GoTo eH
 slTxtR = sl.Characters(sl.Characters.Count)
-ayToTrim = Array(Chr(13), Chr(9), Chr(10), Chr(11), Chr(13) & Chr(7), Chr(13) & Chr(10))
+ayToTrim = Array(chr(13), chr(9), chr(10), chr(11), chr(13) & chr(7), chr(13) & chr(10))
 x = VBA.Trim(x)
 For Each a In ayToTrim
     'x = VBA.Replace(x, a, "")
@@ -1987,11 +1987,11 @@ Sub 清除選取處的所有符號() '由圖書管理symbles模組清除標點符號改編'包括註腳、數字
 'Dim F, a As String, i As Integer
 Dim f, i As Integer, ur As UndoRecord
 SystemSetup.stopUndo ur, "清除選取處的所有符號"
-f = Array("-", "·", "‧", "。", "」", Chr(-24152), "：", "，", "；", _
-    "、", "「", ".", Chr(34), ":", ",", ";", _
+f = Array("-", "·", "‧", "。", "」", chr(-24152), "：", "，", "；", _
+    "、", "「", ".", chr(34), ":", ",", ";", _
     "……", "...", "．", "【", "】", " ", "《", "》", "〈", "〉", "？" _
     , "！", "﹝", "﹞", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0" _
-    , "『", "』", Chr(13), ChrW(9312), ChrW(9313), ChrW(9314), ChrW(9315), ChrW(9316) _
+    , "『", "』", chr(13), ChrW(9312), ChrW(9313), ChrW(9314), ChrW(9315), ChrW(9316) _
     , ChrW(9317), ChrW(9318), ChrW(9319), ChrW(9320), ChrW(9321), ChrW(9322), ChrW(9323) _
     , ChrW(9324), ChrW(9325), ChrW(9326), ChrW(9327), ChrW(9328), ChrW(9329), ChrW(9330) _
     , ChrW(9331), ChrW(8221), """") '先設定標點符號陣列以備用
@@ -1999,7 +1999,7 @@ f = Array("-", "·", "‧", "。", "」", Chr(-24152), "：", "，", "；", _
     'a = ActiveDocument.Content
 '    Set a = ActiveDocument.Range.FormattedText '包含格式化的資訊
     For i = 0 To UBound(f)
-        If InStr(Selection.Range.text, f(i)) Then
+        If InStr(Selection.Range.Text, f(i)) Then
             'a = Replace(a, F(i), "")
             Selection.Range.Find.Execute f(i), True, , , , , , wdFindStop, True, "", wdReplaceAll
         End If
@@ -2077,7 +2077,7 @@ With Selection '原以整份文件(ActiveDocument),今但以選取範圍整理,但因更改值而影響
     If .Document.path = "" Then
         For Each WD In .words
             '要是數字且前後不能加﹝﹞或〔〕才執行！
-            If Not WD.text Like "﹝" And Not WD.text Like "〔" And Not WD Like "[[]" And Not WD Like "[]]" Then
+            If Not WD.Text Like "﹝" And Not WD.Text Like "〔" And Not WD Like "[[]" And Not WD Like "[]]" Then
                 If IsNumeric(WD) Then
                     If WD.End = .Document.Content.StoryLength Or WD.start = 0 Then GoTo w '文件之首尾另外處理
                     If Not WD.Previous Like "﹝" And Not WD.Previous Like "〔" And Not WD.Previous Like "[[]" _
@@ -2087,11 +2087,11 @@ w:                      If WD <= 20 Then 'Arial Unicode MS[種類]裡"括號文數字"只
                                 '選取會改變Selection的範圍,故今取消!
 '                                .Select 'Words物件即表一個Range物件,見線上說明!
                                 .Font.Name = "Arial Unicode MS"
-                                WD.text = ChrW((9312 - 1) + WD)
+                                WD.Text = ChrW((9312 - 1) + WD)
                             End With
                         Else '超過20號的註腳時
                             With WD
-                                .text = "﹝" & WD.text & "﹞" '加括號
+                                .Text = "﹝" & WD.Text & "﹞" '加括號
                             End With
         '                    MsgBox "有超過20號的註腳,不能執行！", vbCritical
         '                    Do Until .Undo(i) = False '還原直至不能還原（還原所有動作）
@@ -2118,8 +2118,8 @@ HNumArray = Array("0", "1", "2", "3", "4", "5", "6", "7", "8", "9")
 With ActiveDocument
     For Each e In .Characters
         For i = 1 To UBound(FNumArray) + 1
-            If e.text Like FNumArray(i - 1) Then
-                e.text = HNumArray(i - 1)
+            If e.Text Like FNumArray(i - 1) Then
+                e.Text = HNumArray(i - 1)
         End If
         Next i
     Next e
@@ -2133,7 +2133,7 @@ End With
 End Sub
 Sub 圓括號改篇名號()
 If Selection.Type = wdSelectionIP Then Selection.HomeKey wdStory: Selection.EndKey wdStory, wdExtend
-Selection.text = Replace(Replace(Selection.text, "（", "〈"), "）", "〉")
+Selection.Text = Replace(Replace(Selection.Text, "（", "〈"), "）", "〉")
 End Sub
 
 
@@ -2228,7 +2228,7 @@ With Selection
 '        End With
 '        If .Find.Execute() = False Then Exit Do
         'Application.Browser.Next
-        .TypeText text:="["
+        .TypeText Text:="["
         .MoveLeft unit:=wdCharacter, Count:=1, Extend:=wdExtend
         .Font.Superscript = wdToggle
 '        Selection.Copy
@@ -2241,7 +2241,7 @@ With Selection
 '        Selection.MoveLeft Unit:=wdCharacter, Count:=1
         Selection.MoveRight unit:=wdCharacter, Count:=2
         'Selection.TypeBackspace
-        Selection.TypeText text:="]"
+        Selection.TypeText Text:="]"
         'Selection.MoveRight Unit:=wdCharacter, Count:=1
     Loop 'While .Find.Execute()
 End With
@@ -2257,14 +2257,14 @@ With ActiveDocument.Range.Find
         '.Text = a(i)
          '.Replacement.Text = b(i)
          .ClearFormatting
-         .Execute Chr(a(i)), , , , , , , , , b(i), wdReplaceAll
+         .Execute chr(a(i)), , , , , , , , , b(i), wdReplaceAll
     Next i
 End With
 End Sub
 
 
 Sub 文件字頻()
-Dim d As Document, char, charText As String, preChar As String _
+Dim d As Document, Char, charText As String, preChar As String _
     , x() As String, xT() As Long, i As Long, j As Long, ds As Date, de As Date     '
 'Dim ExcelSheet  As New Excel.Worksheet 'As Object,
 '這是之前以先期引用的方式，在設定引用項目中手動加入的寫法:https://hankvba.blogspot.com/2018/03/vba.html  、 http://markc0826.blogspot.com/2012/07/blog-post.html
@@ -2290,12 +2290,12 @@ If xlsp = "" Then Exit Sub
 ds = VBA.Timer
 
 With d
-    For Each char In d.Characters
-        charText = char
-        If InStr("()：>" & Chr(13) & Chr(9) & Chr(10) & Chr(11) & ChrW(12), charText) = 0 And charText <> "-" And Not charText Like "[a-zA-Z0-9０-９]" Then
+    For Each Char In d.Characters
+        charText = Char
+        If InStr("()：>" & chr(13) & chr(9) & chr(10) & chr(11) & ChrW(12), charText) = 0 And charText <> "-" And Not charText Like "[a-zA-Z0-9０-９]" Then
             'If Not charText Like "[a-z1-9]" & Chr(-24153) & Chr(-24152) & " 　、'""「」『』（）－？！]" Then
 '            If InStr(Chr(-24153) & Chr(-24152) & Chr(2) & "‧[]〔〕﹝﹞…；,，.。． 　、'""‘’`\{}｛｝「」『』（）《》〈〉－？！]", charText) = 0 Then
-            If InStr(ChrW(9312) & ChrW(-24153) & ChrW(-24152) & Chr(2) & "‧[]〔〕﹝﹞…；,，.。． 　、'""‘’`\{}｛｝「」『』（）《》〈〉－？！]▽□】【~/︵—" & Chr(-24152) & Chr(-24153), charText) = 0 Then
+            If InStr(ChrW(9312) & ChrW(-24153) & ChrW(-24152) & chr(2) & "‧[]〔〕﹝﹞…；,，.。． 　、'""‘’`\{}｛｝「」『』（）《》〈〉－？！]▽□】【~/︵—" & chr(-24152) & chr(-24153), charText) = 0 Then
             'chr(2)可能是註腳標記
                 If preChar <> charText Then
                     'If UBound(X) > 0 Then
@@ -2314,10 +2314,10 @@ With d
                 Else
                     GoSub 字頻加一
                 End If
-                preChar = char
+                preChar = Char
             End If
         End If
-    Next char
+    Next Char
 End With
 
 Dim doc As New Document, Xsort() As String, u As Long ', xTsort() As Integer, k As Long, so As Long, ww As String
@@ -2362,7 +2362,7 @@ For j = u To 0 Step -1 '陣列排序'2010/10/29
             .ActiveWindow.Selection.Range.Collapse Direction:=wdCollapseEnd
             .Range.Paragraphs(.Paragraphs.Count).Range.Font.Size = 12
 '            .Range.Paragraphs(.Paragraphs.Count).Range.Bold = False
-            .Range.InsertAfter Replace(Xsort(j), "、", Chr(9), 1, 1) 'chr(9)為定位字元(Tab鍵值)
+            .Range.InsertAfter Replace(Xsort(j), "、", chr(9), 1, 1) 'chr(9)為定位字元(Tab鍵值)
             .Range.InsertParagraphAfter
             If InStr(.Range.Paragraphs(.Paragraphs.Count).Range, "字頻") = 0 Then
                 .Range.Paragraphs(.Paragraphs.Count - 1).Range.Font.Name = "標楷體"
@@ -2460,7 +2460,7 @@ End Select
 End Sub
 
 Sub 文件詞頻() '由文件字頻改來'2015/11/28
-Dim d As Document, char, charText As String, preChar As String _
+Dim d As Document, Char, charText As String, preChar As String _
     , x() As String, xT() As Long, i As Long, j As Long, ds As Date, de As Date     '
 'Dim ExcelSheet  As New Excel.Worksheet 'As Object,
 'Dim xlApp As Excel.Application, xlBook As Excel.Workbook, xlSheet As Excel.Worksheet
@@ -2490,35 +2490,35 @@ If ln > 11 Or ln < 2 Then Exit Sub
 ds = VBA.Timer
 
 With d
-    For Each char In d.Characters
+    For Each Char In d.Characters
         Select Case ln
             Case 2
-                charText = char & char.Next
+                charText = Char & Char.Next
             Case 3
-                charText = char & char.Next & char.Next.Next
+                charText = Char & Char.Next & Char.Next.Next
             Case 4
-                charText = char & char.Next & char.Next.Next & char.Next.Next.Next
+                charText = Char & Char.Next & Char.Next.Next & Char.Next.Next.Next
             Case 5
-                charText = char & char.Next & char.Next.Next & char.Next.Next.Next & char.Next.Next.Next.Next
+                charText = Char & Char.Next & Char.Next.Next & Char.Next.Next.Next & Char.Next.Next.Next.Next
             Case 6
-                charText = char & char.Next & char.Next.Next & char.Next.Next.Next & char.Next.Next.Next.Next & char.Next.Next.Next.Next.Next
+                charText = Char & Char.Next & Char.Next.Next & Char.Next.Next.Next & Char.Next.Next.Next.Next & Char.Next.Next.Next.Next.Next
             Case 7
-                charText = char & char.Next & char.Next.Next & char.Next.Next.Next & char.Next.Next.Next.Next & char.Next.Next.Next.Next.Next & char.Next.Next.Next.Next.Next.Next
+                charText = Char & Char.Next & Char.Next.Next & Char.Next.Next.Next & Char.Next.Next.Next.Next & Char.Next.Next.Next.Next.Next & Char.Next.Next.Next.Next.Next.Next
             Case 8
-                charText = char & char.Next & char.Next.Next & char.Next.Next.Next & char.Next.Next.Next.Next & char.Next.Next.Next.Next.Next & char.Next.Next.Next.Next.Next.Next & char.Next.Next.Next.Next.Next.Next.Next
+                charText = Char & Char.Next & Char.Next.Next & Char.Next.Next.Next & Char.Next.Next.Next.Next & Char.Next.Next.Next.Next.Next & Char.Next.Next.Next.Next.Next.Next & Char.Next.Next.Next.Next.Next.Next.Next
             Case 9
-                charText = char & char.Next & char.Next.Next & char.Next.Next.Next & char.Next.Next.Next.Next & char.Next.Next.Next.Next.Next & char.Next.Next.Next.Next.Next.Next & char.Next.Next.Next.Next.Next.Next.Next & char.Next.Next.Next.Next.Next.Next.Next.Next
+                charText = Char & Char.Next & Char.Next.Next & Char.Next.Next.Next & Char.Next.Next.Next.Next & Char.Next.Next.Next.Next.Next & Char.Next.Next.Next.Next.Next.Next & Char.Next.Next.Next.Next.Next.Next.Next & Char.Next.Next.Next.Next.Next.Next.Next.Next
             Case 10
-                charText = char & char.Next & char.Next.Next & char.Next.Next.Next & char.Next.Next.Next.Next & char.Next.Next.Next.Next.Next & char.Next.Next.Next.Next.Next.Next & char.Next.Next.Next.Next.Next.Next.Next & char.Next.Next.Next.Next.Next.Next.Next.Next & char.Next.Next.Next.Next.Next.Next.Next.Next.Next
+                charText = Char & Char.Next & Char.Next.Next & Char.Next.Next.Next & Char.Next.Next.Next.Next & Char.Next.Next.Next.Next.Next & Char.Next.Next.Next.Next.Next.Next & Char.Next.Next.Next.Next.Next.Next.Next & Char.Next.Next.Next.Next.Next.Next.Next.Next & Char.Next.Next.Next.Next.Next.Next.Next.Next.Next
             Case 11
-                charText = char & char.Next & char.Next.Next & char.Next.Next.Next & char.Next.Next.Next.Next & char.Next.Next.Next.Next.Next & char.Next.Next.Next.Next.Next.Next & char.Next.Next.Next.Next.Next.Next.Next & char.Next.Next.Next.Next.Next.Next.Next.Next & char.Next.Next.Next.Next.Next.Next.Next.Next.Next & char.Next.Next.Next.Next.Next.Next.Next.Next.Next.Next
+                charText = Char & Char.Next & Char.Next.Next & Char.Next.Next.Next & Char.Next.Next.Next.Next & Char.Next.Next.Next.Next.Next & Char.Next.Next.Next.Next.Next.Next & Char.Next.Next.Next.Next.Next.Next.Next & Char.Next.Next.Next.Next.Next.Next.Next.Next & Char.Next.Next.Next.Next.Next.Next.Next.Next.Next & Char.Next.Next.Next.Next.Next.Next.Next.Next.Next.Next
         End Select
         If Not charText Like "*[-'　 。，、；：？:,;,〈〉《》 ''「」『』（）▽△？！（）【】—""()<>" _
-            & ChrW(9312) & Chr(-24153) & Chr(-24152) & ChrW(8218) & Chr(13) & Chr(10) & Chr(11) & ChrW(12) & Chr(63) & Chr(9) & Chr(-24152) & Chr(-24153) & "▽□】【~/︵—]*" _
-            And Not charText Like "*[a-zA-Z0-9０-９]*" And InStr(charText, ChrW(-243)) = 0 And InStr(charText, Chr(91)) = 0 And InStr(charText, Chr(93)) = 0 Then
+            & ChrW(9312) & chr(-24153) & chr(-24152) & ChrW(8218) & chr(13) & chr(10) & chr(11) & ChrW(12) & chr(63) & chr(9) & chr(-24152) & chr(-24153) & "▽□】【~/︵—]*" _
+            And Not charText Like "*[a-zA-Z0-9０-９]*" And InStr(charText, ChrW(-243)) = 0 And InStr(charText, chr(91)) = 0 And InStr(charText, chr(93)) = 0 Then
             'If Not charText Like "[a-z1-9]" & Chr(-24153) & Chr(-24152) & " 　、'""「」『』（）－？！]" Then
 '            If InStr(Chr(-24153) & Chr(-24152) & Chr(2) & "‧[]〔〕﹝﹞…；,，.。． 　、'""‘’`\{}｛｝「」『』（）《》〈〉－？！]", charText) = 0 Then
-            If Not charText Like "*[" & ChrW(-24153) & ChrW(-24152) & Chr(2) & "‧[]〔〕﹝﹞…；,，.。． 　、'""‘’`\{}｛｝「」『』（）《》〈〉－？！‘｛｝]*" Then
+            If Not charText Like "*[" & ChrW(-24153) & ChrW(-24152) & chr(2) & "‧[]〔〕﹝﹞…；,，.。． 　、'""‘’`\{}｛｝「」『』（）《》〈〉－？！‘｛｝]*" Then
             'chr(2)可能是註腳標記
                 If preChar <> charText Then
                     'If UBound(X) > 0 Then
@@ -2583,7 +2583,7 @@ For j = u To 0 Step -1 '陣列排序'2010/10/29
             .ActiveWindow.Selection.Range.Collapse Direction:=wdCollapseEnd
             .Range.Paragraphs(.Paragraphs.Count).Range.Font.Size = 12
 '            .Range.Paragraphs(.Paragraphs.Count).Range.Bold = False
-            .Range.InsertAfter Replace(Xsort(j), "、", Chr(9), 1, 1) 'chr(9)為定位字元(Tab鍵值)
+            .Range.InsertAfter Replace(Xsort(j), "、", chr(9), 1, 1) 'chr(9)為定位字元(Tab鍵值)
             .Range.InsertParagraphAfter
             If InStr(.Range.Paragraphs(.Paragraphs.Count).Range, "詞頻") = 0 Then
                 .Range.Paragraphs(.Paragraphs.Count - 1).Range.Font.Name = "標楷體"
@@ -2701,7 +2701,7 @@ s = -1
 For Each a In ActiveDocument.Characters
     If a.Font.Name = "Times New Roman" Then
         If s = -1 Then s = a.start
-        If a = Chr(13) Then GoTo 1
+        If a = chr(13) Then GoTo 1
     Else
 1       If s > -1 Then
             e = a.Previous.End
@@ -2735,7 +2735,7 @@ Exit Sub
 chng:
                     For Each aM In chRng.Characters
                         If aM.Next = ":" Then
-                            aM.Next.Next.text = str((CInt(aM.Next.Next) * 10 + CInt(aM) * 60) / 10)
+                            aM.Next.Next.Text = str((CInt(aM.Next.Next) * 10 + CInt(aM) * 60) / 10)
                             aM.Next.Delete
                             aM.Delete
                             Exit For
@@ -2747,7 +2747,7 @@ Sub 中國哲學書電子化計劃_表格轉文字(ByRef r As Range)
 On Error GoTo eH
 Dim lngTemp As Long '因為誤按到追蹤修訂，才會引發訊息提示刪除儲存格不會有標識
 'Dim d As Document
-Dim tb As Table, C As Cell ', ci As Long
+Dim tb As Table, c As Cell ', ci As Long
 'Set d = ActiveDocument
 lngTemp = word.Application.DisplayAlerts
 If r.Tables.Count > 0 Then
@@ -2762,16 +2762,16 @@ Exit Sub
 eH:
 Select Case Err.Number
     Case 5992 '無法個別存取此集合中的各欄，因為表格中有混合的儲存格寬度。
-        For Each C In tb.Range.Cells
+        For Each c In tb.Range.Cells
 '            ci = ci + 1
 '            If ci Mod 3 = 2 Then
                 'If VBA.IsNumeric(VBA.Left(c.Range.text, VBA.InStr(c.Range.text, "?") - 1)) Then
-                If VBA.InStr(C.Range.text, ChrW(160) & ChrW(47)) > 0 Then
+                If VBA.InStr(c.Range.Text, ChrW(160) & ChrW(47)) > 0 Then
 '                    word.Application.DisplayAlerts = False
-                    C.Delete  '刪除編號之儲存格
+                    c.Delete  '刪除編號之儲存格
                 End If
 '            End If
-        Next C
+        Next c
         Resume Next
     Case Else
         MsgBox Err.Number & Err.Description
@@ -2817,6 +2817,7 @@ End Sub
 Sub 中國哲學書電子化計劃_註文前後加括弧()
 Dim slRng As Range, a, flg As Boolean, ur As UndoRecord 'Alt+1
 'Set ur = SystemSetup.stopUndo("中國哲學書電子化計劃_註文前後加括弧")
+SystemSetup.playSound 0.484
 SystemSetup.stopUndo ur, "中國哲學書電子化計劃_註文前後加括弧"
 Docs.空白的新文件
 If Selection.Type = wdSelectionIP Then ActiveDocument.Select
@@ -2866,7 +2867,7 @@ p:          If flg = False Then
 b:
 '                a.Select
 '                Selection.Range.InsertBefore "）"
-                If a.Previous = Chr(13) Then
+                If a.Previous = chr(13) Then
                     a.Previous.Previous.Select
                 Else
                     a.Previous.Select
@@ -2893,8 +2894,8 @@ Beep
 Selection.EndKey wdStory
 Do
    Selection.MoveLeft
-   If Selection = Chr(13) Then Selection.Delete
-Loop While Selection = Chr(13)
+   If Selection = chr(13) Then Selection.Delete
+Loop While Selection = chr(13)
 'MsgBox "done!", vbInformation
 SystemSetup.contiUndo ur
 End Sub
@@ -2905,7 +2906,7 @@ Dim rp As Variant, i As Byte
 SystemSetup.stopUndo ur, "漢籍電子文獻資料庫文本整理_以轉貼到中國哲學書電子化計劃"
 If Documents.Count = 0 Then Documents.Add
 Set d = ActiveDocument
-If d.path <> "" Or d.Content.text <> Chr(13) Then
+If d.path <> "" Or d.Content.Text <> chr(13) Then
     Set d = Documents.Add()
     'Exit Sub
 End If
@@ -2915,11 +2916,11 @@ rp = Array("(", "{{", ")", "}}", ChrW(160), "", "【圖】", "", _
      ChrW(13) & ChrW(45) & ChrW(13), "^p", "{{ }}", "", "[", ChrW(12310), _
      "]", ChrW(12311), " ", "", "○", ChrW(12295), _
      "^p" & ChrW(12310) & "疏" & ChrW(12311), ChrW(12310) & "疏" & ChrW(12311) & "{{", _
-     "}}" & Chr(13) & "^#" & Chr(13) & "{{", "", _
-     "．．．．．．．．．．．．．．．．．．" & Chr(13), "", _
-     Chr(13) & "^#" & Chr(13), "", _
-     "}}" & Chr(13) & "^#" & Chr(13), "}}", _
-     "}}" & Chr(13) & "{{", "", _
+     "}}" & chr(13) & "^#" & chr(13) & "{{", "", _
+     "．．．．．．．．．．．．．．．．．．" & chr(13), "", _
+     chr(13) & "^#" & chr(13), "", _
+     "}}" & chr(13) & "^#" & chr(13), "}}", _
+     "}}" & chr(13) & "{{", "", _
      "-", "", "^#", "", "。。", "。") ', "。}}<p>。}}<p>", "。}}<p>")
      '原來「ChrW(13) & ChrW(45) & ChrW(13) & ChrW(13) & ChrW(11)」是其中有表格啊
 Set rng = d.Range
@@ -2938,7 +2939,7 @@ On Error GoTo eH:
 rng.PasteAndFormat wdFormatPlainText
 rng.Find.ClearFormatting
 For i = 0 To UBound(rp)
-    If InStr(rng.text, rp(i)) > 0 Then
+    If InStr(rng.Text, rp(i)) > 0 Then
         rng.Find.Execute rp(i), , , , , , , wdFindContinue, , rp(i + 1), wdReplaceAll
     End If
     i = i + 1
@@ -2998,7 +2999,7 @@ For Each a In slRng.Characters
     If a Like "[。，；？！「」『』]" Then
         a.Select
         Selection.move
-        Selection.TypeText Chr(11)
+        Selection.TypeText chr(11)
     End If
 Next a
 End Sub
@@ -3050,13 +3051,13 @@ Static cntStr As String, chromePath As String
 st = Selection.Type
 If st = wdSelectionIP Then
     If Selection.start = 0 Then Exit Sub
-    x = Selection.Previous.Characters(Selection.Previous.Characters.Count).text
+    x = Selection.Previous.Characters(Selection.Previous.Characters.Count).Text
     If InStr("。，；「」『』〈〉《》？.,;""?－-──--（）()【】〔〕<>[]…! 　！", x) Then Exit Sub
 '    Selection.Previous.Copy
 Else
-    x = trimStrForSearch(VBA.CStr(Selection.text), Selection)
+    x = trimStrForSearch(VBA.CStr(Selection.Text), Selection)
     'Selection.Copy
-    SystemSetup.ClipboardPutIn "=" & Selection.text
+    SystemSetup.ClipboardPutIn "=" & Selection.Text
 End If
     If 文字處理.isSymbol(CStr(x)) Or 文字處理.is注音符號(CStr(x)) Or 文字處理.isLetter(CStr(x)) Or 文字處理.isNum(CStr(x)) Then Exit Sub
 Set rng = Selection.Range
@@ -3213,11 +3214,11 @@ typeTexts:
                         Dim rngW As Range
                         Set rngW = Selection.Range
                         rngW.SetRange Selection.Previous.Characters(Selection.Previous.Characters.Count).start, Selection.Previous.Characters(Selection.Previous.Characters.Count).End
-                        SystemSetup.ClipboardPutIn "=" & rngW.text '"^" & rngW.text & "$" 'version 6's new settings
+                        SystemSetup.ClipboardPutIn "=" & rngW.Text '"^" & rngW.text & "$" 'version 6's new settings
                         Set rngW = Nothing
                     Else
                         Set rngW = Selection.Previous.Characters(Selection.Previous.Characters.Count)
-                        SystemSetup.ClipboardPutIn "=" & rngW.text
+                        SystemSetup.ClipboardPutIn "=" & rngW.Text
                         'Selection.Previous.Characters(Selection.Previous.Characters.Count).Copy
                     End If
                 End If
@@ -3337,7 +3338,7 @@ Dim regEx As Object
 'Dim regEx As New RegExp
     Set regEx = CreateObject("VBScript.RegExp")
 Dim replacedText As String
-Set d = ActiveDocument: dx = d.Range.text
+Set d = ActiveDocument: dx = d.Range.Text
 rst.Open "select * from 標點符號_書名號_自動加上用 order by 排序", cnt, adOpenForwardOnly, adLockReadOnly
 Do Until rst.EOF
     w = rst("書名").Value
@@ -3360,7 +3361,7 @@ Do Until rst.EOF
     End If
     rst.MoveNext
 Loop
-Documents.Add.Range.text = dx
+Documents.Add.Range.Text = dx
 rst.Close
 'rst.Open "select * from 標點符號_篇名號_自動加上用 order by 排序", cnt, adOpenForwardOnly, adLockReadOnly
 rst.Close: cnt.Close
@@ -3441,7 +3442,7 @@ Function 書名號篇名號標注PreExamOK(d As Document, term As String, startPos_term 
     Dim rngChk As Range, xChk As String
     On Error GoTo eH:
     Set rngChk = d.Range(0, startPos_term)
-    xChk = rngChk.text
+    xChk = rngChk.Text
     'If term = "資治通鑑" Then Stop
     If InStrRev(xChk, "《") <= InStrRev(xChk, "》") And InStrRev(xChk, "〈") <= InStrRev(xChk, "〉") Then 書名號篇名號標注PreExamOK = True
     
@@ -3500,13 +3501,13 @@ Sub 書名號篇名號標注()
     'Else
     '    MsgBox "路徑不存在！", vbCritical: Exit Sub
     'End If
-    Set d = ActiveDocument: dx = d.Range.text: Set rngF = d.Range
+    Set d = ActiveDocument: dx = d.Range.Text: Set rngF = d.Range
     'cnt.Open cntStr
     word.Application.ScreenUpdating = False
     
     GoSub bookmarks '標點符號_書名號_自動加上用
     rst.Open "select * from 標點符號_篇名號_自動加上用 order by 排序", cnt, adOpenForwardOnly, adLockReadOnly
-    Set rngF = d.Range: dx = d.Range.text
+    Set rngF = d.Range: dx = d.Range.Text
     Do Until rst.EOF
         title = rst("篇名").Value
         If VBA.InStr(dx, title) Then 'if found
@@ -3515,17 +3516,17 @@ Sub 書名號篇名號標注()
     '                InStr("《〈·‧", IIf(rngF.Characters(1).Previous Is Nothing, "", rngF.Characters(1).Previous)) = 0 Then
                     If 書名號篇名號標注PreExamOK(d, title, rngF.start) Then
                         If VBA.IsNull(rst("取代為").Value) Then
-                            rngF.text = "〈" & title & "〉"
+                            rngF.Text = "〈" & title & "〉"
                                       'd.Range.Find.Execute title, , , , , , True, wdFindContinue, , "〈" & title & "〉", wdReplaceAll
                         Else
-                            rngF.text = rst("取代為").Value
+                            rngF.Text = rst("取代為").Value
                             'd.Range.Find.Execute title, , , , , , True, wdFindContinue, , rst("取代為").Value, wdReplaceAll
                         End If
                         rngF.SetRange rngF.End, d.Range.End
                     End If
     '            End If
             Loop
-            Set rngF = d.Range: dx = d.Range.text
+            Set rngF = d.Range: dx = d.Range.Text
         End If
         
         rst.MoveNext
@@ -3565,17 +3566,17 @@ bookmarks:
 '                        If title = "資治通鑑" Then Stop 'just for test
                         
                         If VBA.IsNull(rst("取代為").Value) Then
-                            rngF.text = "《" & title & "》"
+                            rngF.Text = "《" & title & "》"
                 '            d.Range.Find.Execute title, , , , , , True, wdFindContinue, , "《" & title & "》", wdReplaceAll
                         Else
-                            rngF.text = rst("取代為").Value
+                            rngF.Text = rst("取代為").Value
                 '            d.Range.Find.Execute title, , , , , , True, wdFindContinue, , rst("取代為").Value, wdReplaceAll
                         End If
                         rngF.SetRange rngF.End, d.Range.End
                     End If
     '            End If
             Loop
-            Set rngF = d.Range: dx = d.Range.text
+            Set rngF = d.Range: dx = d.Range.Text
         End If
         
         rst.MoveNext
@@ -3595,7 +3596,7 @@ End Sub
 Sub 分行分段_根據第1行的字數長度來作切割()
 Dim wordCount As Byte, d As Document, rng As Range, i As Integer, dx As String, a, p As Paragraph, j As Byte, wl
 Dim omitStr As String
-omitStr = "{}<p>《》〈〉：，。「」『』　·0123456789-" & ChrW(8231) & ChrW(183) & Chr(13)
+omitStr = "{}<p>《》〈〉：，。「」『』　·0123456789-" & ChrW(8231) & ChrW(183) & chr(13)
 If word.Documents.Count = 0 Then
     Set d = Documents.Add()
 ElseIf ActiveDocument.path <> "" Then
@@ -3610,9 +3611,9 @@ Set p = rng.Paragraphs(1)
 For Each a In p.Range.Characters
     If InStr(omitStr, a) = 0 Then wordCount = wordCount + 1
 Next a
-dx = rng.text
-wl = InStr(dx, Chr(13))
-rng.text = left(dx, wl) & Replace(dx, Chr(13), "", wl)
+dx = rng.Text
+wl = InStr(dx, chr(13))
+rng.Text = left(dx, wl) & Replace(dx, chr(13), "", wl)
 
 i = 1
 Do Until rng.Paragraphs(rng.Paragraphs.Count).Range.Characters.Count < wordCount
@@ -3622,7 +3623,7 @@ Do Until rng.Paragraphs(rng.Paragraphs.Count).Range.Characters.Count < wordCount
     For Each a In p.Range.Characters
         If InStr(omitStr, a) = 0 Then j = j + 1
         If j = wordCount Then
-            a.InsertAfter Chr(13)
+            a.InsertAfter chr(13)
             j = 0
             Exit For
         End If
@@ -3642,13 +3643,13 @@ Sub replaceWithNextChararcter() 'Alt+Shift+h
 Dim s As Integer, chars 'As Characters
 Dim f As String, r As String
 Set chars = Selection.Characters
-If chars.Count < 2 And InStr(Selection, Chr(9)) = 0 Then Exit Sub
+If chars.Count < 2 And InStr(Selection, chr(9)) = 0 Then Exit Sub
 If chars.Count > 2 Then
-    s = InStr(Selection, Chr(9))
+    s = InStr(Selection, chr(9))
     If s > 0 Then
-        If InStr(Mid(Selection.text, s + 1), Chr(9)) = 0 Then
-            chars = VBA.Split(Selection.text, Chr(9))
-            Selection.text = left(Selection.text, s - 1)
+        If InStr(Mid(Selection.Text, s + 1), chr(9)) = 0 Then
+            chars = VBA.Split(Selection.Text, chr(9))
+            Selection.Text = left(Selection.Text, s - 1)
             s = 0
             f = chars(s): r = chars(s + 1) 'VBA.IIf(chars(s + 1) = Chr(9), "", chars(s + 1))
         Else
@@ -3660,7 +3661,7 @@ If chars.Count > 2 Then
 Else
     s = 1
     f = chars(s)
-    r = VBA.IIf(chars(s + 1) = Chr(9), "", chars(s + 1))
+    r = VBA.IIf(chars(s + 1) = chr(9), "", chars(s + 1))
     Selection.Characters(s + 1) = ""
 End If
 Selection.Find.Execute f, , , , , , True, wdFindContinue, , r, wdReplaceAll
@@ -3673,7 +3674,7 @@ SystemSetup.playSound 12
 End Sub
 Sub 國語辭典網址及ID尚缺者填入()
 Dim i As Long
-ActiveDocument.Range.Find.Execute Chr(13), , , , , , , wdFindContinue, , "", wdReplaceAll
+ActiveDocument.Range.Find.Execute chr(13), , , , , , , wdFindContinue, , "", wdReplaceAll
 Do Until Selection.End = ActiveDocument.Range.End - 1
     Selection.move
     If Selection.Previous <> ChrW(20008) And Selection.Hyperlinks.Count = 0 Then

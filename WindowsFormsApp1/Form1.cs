@@ -4903,7 +4903,8 @@ namespace WindowsFormsApp1
                     textBox1.Text = rx.Replace(x, string.Empty);
                     Clipboard.SetText(textBox1.Text);//以便按下 Alt + Insert 檢視書名號篇名號增修之結果。20231124
                 }
-                else if ("*。<p>".IndexOf(xClear) > -1)
+                else if ("*。<p>".IndexOf(xClear) > -1
+                    && textBox1.Text.IndexOf("*") > -1)
                 {//若是選取「*」或「。<p>」則清除「*」或「。<p>」（即清除OCR模式下自動標識的標題暨段落符碼                    
                     //Regex rx = new Regex("[*。<p>]");
                     //textBox1.Text = rx.Replace(x, string.Empty);
@@ -7353,7 +7354,8 @@ namespace WindowsFormsApp1
                     {
                         new SoundPlayer(@"C:\Windows\Media\Speech Off.wav").Play();
                         autoTitleMark_OCRTextMode = false; PagePaste2GjcoolOCR_ing = false;
-                        ocrTextMode = false; if (BatchProcessingGJcoolOCR) BatchProcessingGJcoolOCR = false; return;
+                        ocrTextMode = false; return;
+                        //if (BatchProcessingGJcoolOCR) BatchProcessingGJcoolOCR = false; return;
                     }
                     new SoundPlayer(@"C:\Windows\Media\Speech On.wav").Play();
                     //設定成手動OCR輸入模式，自動及全部覆蓋之貼上則設成false
@@ -7477,6 +7479,17 @@ namespace WindowsFormsApp1
                     toOCR(br.OCRSiteTitle.GoogleKeep);
                     return;
                 }
+                if (e.KeyCode == Keys.R)
+                {//Ctrl + Alt + r :將如《趙城金藏》3欄式的版面書圖《古籍酷》AI服務OCR結果重新排列 
+                    //if (browsrOPMode == BrowserOPMode.appActivateByName) return;
+                    e.Handled = true; Form1.playSound(Form1.soundLike.press);
+                    string x = textBox1.Text;
+                    undoRecord();
+                    CnText.Rearrangement3ColumnLayout(ref x);
+                    textBox1.Text = x;
+                    return;
+                }
+
             }
 
             #endregion
@@ -7994,7 +8007,8 @@ namespace WindowsFormsApp1
                     return false;
                 }
             }
-            else if (new StringInfo(br.Quickedit_data_textbox.Text).LengthInTextElements < (normalLineParaLength == 0 ? 20 : normalLineParaLength))
+            else if (new StringInfo(br.Quickedit_data_textbox.Text).LengthInTextElements < (normalLineParaLength == 0 ? 20 : normalLineParaLength)
+                && quickedit_data_textboxTxt != "\t")// 「	」"\t"是新建的維基文本故 20240405
             {
                 OCRBreakSoundNotification();
                 if (DialogResult.Cancel == Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("目前頁面內容似乎太短了，確定還要交給OCR嗎？" +

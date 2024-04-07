@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using WindowsFormsApp1;
 using System.Windows.Forms;
 using System.Diagnostics;
+using Microsoft.Office.Interop.Word;
 //using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 //using static System.Net.Mime.MediaTypeNames;
 //using System.Reflection;
@@ -558,13 +559,14 @@ namespace TextForCtext
                 ,"。。", "，，", "@" 
                 //,"}}<p>\r\n{{"//像《札迻》就有此種格式，不能取代掉！ https://ctext.org/library.pl?if=en&file=36575&page=12&editwiki=800245#editor
                 ,"\r\n。<p>"
-                ,"！。<p>","？。<p>","+<p>","<p>+","：。<p>"};
+                ,"！。<p>","？。<p>","+<p>","<p>+","：。<p>","。\r\n。"};
+
             string[] replaceChar = { "、", "，", "；", "：", "·", "？", "：", "《", "》", "〈", "〉",
                 "。}}", "。}}<p>", "}}<p>","。<p>","。<p>","<p>"
                 , "。", "，", "●" 
                 //,"}}\r\n{{"//像《札迻》就有此種格式，不能取代掉！ https://ctext.org/library.pl?if=en&file=36575&page=12&editwiki=800245#editor
                 ,"\r\n"
-                ,"！<p>","？<p>","<p>","<p>","：<p>"};
+                ,"！<p>","？<p>","<p>","<p>","：<p>","。\r\n"};
             foreach (var item in replaceDChar)
             {
                 if (x.IndexOf(item) > -1)
@@ -648,6 +650,35 @@ namespace TextForCtext
             //string replacement = "{{}}";
             //Regex rgx = new Regex(pattern);            
             //text = rgx.Replace(text, replacement);
+        }
+        /// <summary>
+        /// 將如《趙城金藏》3欄式的版面書圖《古籍酷》AI服務OCR結果重新排列
+        /// 要先將各欄的文字區別開來，再執行
+        /// </summary>
+        /// <param name="text">要處理的文本。通常就是textBox1.Text</param>
+        internal static void Rearrangement3ColumnLayout(ref string text)
+        {//20240405 Copilot大菩薩：C# 重新排列字串
+         //var paragraphs = text.Split(new[] { "\r\n\r\n" }, StringSplitOptions.None);
+            var paragraphs = text.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
+            var rearranged = paragraphs
+                //.Select((p, i) => new { Paragraph = p, Index = i / 3 })
+                .Select((p, i) => new { Paragraph = p, Index = i % 3 })
+                .OrderBy(x => x.Index)
+                .Select(x => x.Paragraph);
+            //text = string.Join("\r\n\r\n", rearranged);
+            text = string.Join(Environment.NewLine, rearranged);
+
+
+            ////有群組的
+            //var paragraphs = text.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
+            //var grouped = paragraphs.Select((p, i) => new { Paragraph = p, Group = i % 3 });
+            //var rearranged = grouped.OrderBy(x => x.Group).ThenBy(x => x.Paragraph).Select(x => x.Paragraph);
+            //text = string.Join(Environment.NewLine, rearranged);
+
+            ////沒群組的（應該與前面的相同。只是原誤作求商，而當求餘數才是。）
+            //var paragraphs = text.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
+            //var rearranged = paragraphs.Select((p, i) => new { Paragraph = p, Index = i % 3 }).OrderBy(x => x.Index).Select(x => x.Paragraph);
+            //text = string.Join(Environment.NewLine, rearranged);
         }
     }
 }
