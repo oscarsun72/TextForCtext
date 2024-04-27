@@ -2815,12 +2815,15 @@ Beep 'MsgBox "done!", vbInformation
 SystemSetup.contiUndo ur
 End Sub
 Sub 中國哲學書電子化計劃_註文前後加括弧()
-Dim slRng As Range, a, flg As Boolean, ur As UndoRecord 'Alt+1
+Dim slRng As Range, a, flg As Boolean, ur As UndoRecord, d As Document 'Alt+1
 'Set ur = SystemSetup.stopUndo("中國哲學書電子化計劃_註文前後加括弧")
 SystemSetup.playSound 0.484
 SystemSetup.stopUndo ur, "中國哲學書電子化計劃_註文前後加括弧"
-Docs.空白的新文件
-If Selection.Type = wdSelectionIP Then ActiveDocument.Select
+Set d = Docs.空白的新文件()
+'If Selection.Type = wdSelectionIP Then ActiveDocument.Select
+'If Selection.Type = wdSelectionIP Then d.Select
+If d Is Nothing Then Set d = ActiveDocument
+d.Activate
 Set slRng = Selection.Range
 中國哲學書電子化計劃_表格轉文字 slRng
 For Each a In slRng.Document.Paragraphs 'for漢籍電子文獻資料庫
@@ -2897,6 +2900,7 @@ Do
    If Selection = chr(13) Then Selection.Delete
 Loop While Selection = chr(13)
 'MsgBox "done!", vbInformation
+If Not ActiveDocument Is d Then d.Activate
 SystemSetup.contiUndo ur
 End Sub
 Sub 漢籍電子文獻資料庫文本整理_以轉貼到中國哲學書電子化計劃(Optional doNotCloseDoc As Boolean)

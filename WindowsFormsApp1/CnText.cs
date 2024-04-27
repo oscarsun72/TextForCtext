@@ -382,6 +382,8 @@ namespace TextForCtext
             foreach (char c in text)//這行設中斷點暫停，可以明白各個字元究竟在哪個UnicodeCategory中  https://learn.microsoft.com/zh-tw/dotnet/api/system.globalization.unicodecategory?view=netframework-4.8 可配合Form1_Activated()事件程序中來測試
             {
                 //if (c == "〇".ToCharArray()[0]) Debugger.Break();
+                //if (c == "{".ToCharArray()[0]) Debugger.Break();
+                //if (c == "}".ToCharArray()[0]) Debugger.Break();
                 switch (System.Globalization.CharUnicodeInfo.GetUnicodeCategory(c))
                 {
                     case UnicodeCategory.UppercaseLetter:
@@ -440,8 +442,10 @@ namespace TextForCtext
                     case UnicodeCategory.DashPunctuation://-在這
                         break;
                     case UnicodeCategory.OpenPunctuation:
+                        if (c == "{".ToCharArray()[0]) sb.Append("{");
                         break;
                     case UnicodeCategory.ClosePunctuation:
+                        if (c == "}".ToCharArray()[0]) sb.Append("}");
                         break;
                     case UnicodeCategory.InitialQuotePunctuation:
                         break;
@@ -554,14 +558,14 @@ namespace TextForCtext
             //x = Regex.Replace(x, pattern, evaluator).Replace("．", "。");
             #endregion
 
-            string[] replaceDChar = { "'", ",", ";", ":", "．", "?", "：：", "《《", "》》", "〈〈", "〉〉",
+            string[] replaceDChar = { "!","'", ",", ";", ":", "．", "?", "：：", "《《", "》》", "〈〈", "〉〉",
                 "。}}。}}", "。}}。<p>", "}}。<p>",".<p>","·<p>" ,"<p>。<p>"
                 ,"。。", "，，", "@" 
                 //,"}}<p>\r\n{{"//像《札迻》就有此種格式，不能取代掉！ https://ctext.org/library.pl?if=en&file=36575&page=12&editwiki=800245#editor
                 ,"\r\n。<p>"
                 ,"！。<p>","？。<p>","+<p>","<p>+","：。<p>","。\r\n。"};
 
-            string[] replaceChar = { "、", "，", "；", "：", "·", "？", "：", "《", "》", "〈", "〉",
+            string[] replaceChar = { "！","、", "，", "；", "：", "·", "？", "：", "《", "》", "〈", "〉",
                 "。}}", "。}}<p>", "}}<p>","。<p>","。<p>","<p>"
                 , "。", "，", "●" 
                 //,"}}\r\n{{"//像《札迻》就有此種格式，不能取代掉！ https://ctext.org/library.pl?if=en&file=36575&page=12&editwiki=800245#editor

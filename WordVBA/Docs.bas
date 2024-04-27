@@ -6,7 +6,7 @@ Public Sub Register_Event_Handler() '使自設物件類別模組有效的登錄程序.見「使用 A
     Set x.App = word.Application '此即使新建的物件與Word.Application物件作上關聯
 End Sub
 
-Sub 空白的新文件() '20210209
+Function 空白的新文件() As Document '20210209
 Dim a As Document, flg As Boolean
 If Documents.Count = 0 Then GoTo a:
 If ActiveDocument.Characters.Count = 1 Then
@@ -23,10 +23,11 @@ ElseIf ActiveDocument.Characters.Count > 1 Then
     Next a
     If flg = False Then GoTo a
 Else
-a: Documents.Add
+a: Set a = Documents.Add
     Selection.Paste
 End If
-End Sub
+Set 空白的新文件 = a
+End Function
 
 
 Sub 在本文件中尋找選取字串_迅速() '指定鍵:Alt+Ctrl+Down 2015/11/1
@@ -824,6 +825,16 @@ If InStr(ActiveDocument.path, "易學雜著文本") = 0 Then
 End If
 SystemSetup.playSound 0.484
 Set dSource = ActiveDocument
+Set rng = dSource.Range
+With rng.Find
+    .ClearAllFuzzyOptions
+    .ClearFormatting
+    If .Execute(left(SystemSetup.GetClipboard, 255), , , , , , True, wdFindContinue) Then
+        rng.Select
+        rng.Document.ActiveWindow.ScrollIntoView rng, True
+        Exit Sub
+    End If
+End With
 'If Documents.Count = 0 Then Documents.Add
 If Documents.Count = 0 Then Docs.空白的新文件
 If ClipBoardOp.Is_ClipboardContainCtext_Note_InlinecommentColor Then
@@ -834,6 +845,7 @@ If ClipBoardOp.Is_ClipboardContainCtext_Note_InlinecommentColor Then
     d.Range.Cut
     d.Close wdDoNotSaveChanges
 End If
+
 'Set d = ActiveDocument
 Set d = dSource
 Rem 因為前面尚有「中國哲學書電子化計劃.只保留正文注文_且注文前後加括弧」會用到UndoRecord物件，且會關閉其文件，故以下此行所寫位置就很關鍵，否則會隨文件關閉而隨之無效。20230201癸卯年十一
@@ -864,7 +876,8 @@ For e = 0 To UBound(strAutoCorrection)
 Next e
 searchedTerm = Array("易", "卦", "爻", "周易", "易經", "系辭", "繫辭", "擊辭", "擊詞", "繫詞", "說卦", "序卦", _
     "卦序", "敘卦", "雜卦", "文言", "乾坤", "無咎", ChrW(26080) & "咎", "天咎", "元亨", "利貞", "史記", "九五", _
-    "六二", "上九", "上六", "九二", "九三", "六四", "筮", "夬", "〈乾〉", "〈坤〉", "乾、坤", "〈乾、坤〉", "象傳", "彖傳", _
+    "六二", "上九", "上六", "九二", "九三", "六四", "筮", "夬", "〈乾〉", "〈坤〉", "乾、坤", "〈乾、坤〉" _
+        , "象曰", "象日", "象云", "象傳", "彖", _
     ChrW(26080) & ChrW(-10171) & ChrW(-8522))  ', "", "", "", "" )
 
 'If Selection.Type = wdSelectionIP Then
@@ -915,6 +928,10 @@ searchedTerm = Array("易", "卦", "爻", "周易", "易經", "系辭", "繫辭", "擊辭", "
         End If
         
         If flgPaste Then
+            d.Activate
+            If Selection.Document.FullName <> d.FullName Then
+                Stop
+            End If
             Selection.EndKey wdStory
             Selection.InsertParagraphAfter
 '            Selection.InsertParagraphAfter

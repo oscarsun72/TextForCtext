@@ -2163,6 +2163,7 @@ internal static string getImageUrl() {
             //const string keep = "https://keep.google.com/#NOTE/1XHzZWpH5DCDGOctKjMwNad9qGdtUiYQpSw7HtkmfuEEAJOCtlj37xJg5XgRzWoE";
             string keep = OCRSite_URL[OCRSiteTitle.GoogleKeep];//"https://keep.new";
             openNewTabWindow(WindowType.Window);
+            ActiveForm1.TopMost = false;
             driver.Navigate().GoToUrl(keep);
             //取得文字框
             IWebElement iwe = waitFindWebElementBySelector_ToBeClickable("body > div.VIpgJd-TUo6Hb.XKSfm-L9AdLc.eo9XGd > div > div.IZ65Hb-TBnied.zTETae-h1U9Be-hxXJme > div.IZ65Hb-s2gQvd > div.IZ65Hb-qJTHM-haAclf > div.notranslate.IZ65Hb-YPqjbf.fmcmS-x3Eknd.h1U9Be-YPqjbf");
@@ -3630,25 +3631,25 @@ internal static string getImageUrl() {
                 SendKeys.Send("{ENTER}");
                 Clipboard.Clear();
 
-                ////图片预览
-                //iwe = waitFindWebElementBySelector_ToBeClickable("#batch_figure_0");
-                //while (iwe == null)
-                //{
-                //    iwe = waitFindWebElementBySelector_ToBeClickable("#batch_figure_0");
-                //    //提前結束用
-                //    if (Clipboard.GetText() != string.Empty)// && !Clipboard.GetText().Contains("Ctext_Page_Image"))
-                //    { StopOCR = true; return false; }
-                //}
+            ////图片预览
+            //iwe = waitFindWebElementBySelector_ToBeClickable("#batch_figure_0");
+            //while (iwe == null)
+            //{
+            //    iwe = waitFindWebElementBySelector_ToBeClickable("#batch_figure_0");
+            //    //提前結束用
+            //    if (Clipboard.GetText() != string.Empty)// && !Clipboard.GetText().Contains("Ctext_Page_Image"))
+            //    { StopOCR = true; return false; }
+            //}
 
-                ////按下「上傳」
-                //iwe = waitFindWebElementBySelector_ToBeClickable("#batchUploadDropdown");
-                //iwe.Click();
+            ////按下「上傳」
+            //iwe = waitFindWebElementBySelector_ToBeClickable("#batchUploadDropdown");
+            //iwe.Click();
 
-                ////按下「豎排自動識別」
-                //iwe = waitFindWebElementBySelector_ToBeClickable("#Batch > div.d-flex.justify-content-between.mt-3 > div > div > div:nth-child(2) > ul > li.dropdown-item > div > label");
-                //iwe.Click();
-                
-                
+            ////按下「豎排自動識別」
+            //iwe = waitFindWebElementBySelector_ToBeClickable("#Batch > div.d-flex.justify-content-between.mt-3 > div > div > div:nth-child(2) > ul > li.dropdown-item > div > label");
+            //iwe.Click();
+
+
             retry:
                 ////按下「上傳」
                 //iwe = waitFindWebElementBySelector_ToBeClickable("#batchUploadDropdown");
@@ -3699,7 +3700,7 @@ internal static string getImageUrl() {
                 //按下「文本行」
                 //【文本行】按鈕
                 iwe = waitFindWebElementBySelector_ToBeClickable("#line_image_panel > div > div:nth-child(2) > div:nth-child(8) > button:nth-child(2)");
-                
+
                 while (iwe == null)
                     iwe = waitFindWebElementBySelector_ToBeClickable("#line_image_panel > div > div:nth-child(2) > div:nth-child(8) > button:nth-child(2)");
                 //if (iwe == null)
@@ -3716,7 +3717,7 @@ internal static string getImageUrl() {
                     }
                     catch (Exception)
                     {
-                        Form1.playSound(Form1.soundLike.error,true);
+                        Form1.playSound(Form1.soundLike.error, true);
                         driver.SwitchTo().Window(driver.CurrentWindowHandle);
                         SendKeys.SendWait("{esc}");
                         driver.SwitchTo().Window(driver.CurrentWindowHandle);
@@ -3778,6 +3779,422 @@ internal static string getImageUrl() {
 
         }
 
+        /// <summary>
+        /// 20240420
+        /// </summary>
+        /// <param name="downloadImgFullName"></param>
+        /// <param name="_downloadResult"></param>
+        /// <returns></returns>
+        internal static bool OCR_GJcool_BatchProcessing_new(string downloadImgFullName, bool _downloadResult = false)
+        {
+
+            driver = driver ?? DriverNew();
+            string currentWindowHndl = driver.CurrentWindowHandle;
+            IWebElement iwe = null;
+            try
+            {
+                openNewTabWindow(WindowType.Tab);
+                GoToUrlandActivate(OCRSite_URL[OCRSiteTitle.GJcool]);
+                //GoToUrlandActivate("https://gj.cool/try_ocr#");
+                //GoToUrlandActivate("https://gj.cool/try_ocr#Batch");
+                //ActiveForm1.TopMost = false;
+                //按下「批量處理(new)」頁籤
+                //IWebElement iwe = waitFindWebElementBySelector_ToBeClickable("#batch_Tab_A", 15);
+                iwe = waitFindWebElementBySelector_ToBeClickable("#File_Tab", 15);
+                iwe.Click();
+            }
+            catch (Exception)
+            {
+                //Console.WriteLine(ex.HResult + ex.Message);
+                StopOCR = true; return false;
+            }
+
+
+            #region 檢查並刪除文件
+            iwe = waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr:nth-child(1) > td.bs-checkbox > label > input[type=checkbox]", 1);
+            if (iwe != null)
+            {
+                try
+                {
+                    //按下選取方塊，準備刪除
+                    while (iwe == null)
+                        iwe = waitFindWebElementBySelector_ToBeClickable("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled");
+                    if (!iwe.Selected)
+                        iwe.Click();
+                }
+                catch (Exception)
+                {
+                    //if (!waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr > td.bs-checkbox > label > input[type=checkbox]").Selected
+                    //    && waitFindWebElementBySelector_ToBeClickable("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled") != null)
+                    //    goto reClickOCROK;
+
+                    throw;
+                }
+
+                //刪除文件
+                try
+                {
+                    iwe = waitFindWebElementBySelector_ToBeClickable("#FileUploadDropdown");
+                    //按下「上傳」
+                    while (iwe == null)
+                        iwe = waitFindWebElementBySelector_ToBeClickable("#FileUploadDropdown");
+                    iwe.Click();
+                    //按下「刪除文件」
+                    iwe = waitFindWebElementBySelector_ToBeClickable("#File > div.d-flex.justify-content-between.mt-2 > div.d-flex.mx-3 > div:nth-child(1) > div > ul > li:nth-child(6) > a");
+                    while (iwe == null)
+                        iwe = waitFindWebElementBySelector_ToBeClickable("#File > div.d-flex.justify-content-between.mt-2 > div.d-flex.mx-3 > div:nth-child(1) > div > ul > li:nth-child(6) > a");
+                    iwe.Click();
+
+                }
+                catch (Exception)
+                {
+                    //if (!waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr > td.bs-checkbox > label > input[type=checkbox]").Selected
+                    //    && waitFindWebElementBySelector_ToBeClickable("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled") != null)
+                    //    goto reClickOCROK;
+                    throw;
+                }
+                Thread.Sleep(800);
+            }
+            #endregion //以上檢查並刪除文件
+
+
+
+            //按下「上傳」
+            iwe = waitFindWebElementBySelector_ToBeClickable("#FileUploadDropdown");
+            iwe.Click();
+
+            driver.SwitchTo().Window(driver.CurrentWindowHandle);
+            //按下「上傳圖片」
+            //iwe = waitFindWebElementBySelector_ToBeClickable("#Batch > div.d-flex.justify-content-between.mt-2 > div.d-flex.ms-2 > div:nth-child(2) > button > i");
+            iwe = waitFindWebElementBySelector_ToBeClickable("#File > div.d-flex.justify-content-between.mt-2 > div.d-flex.mx-3 > div:nth-child(1) > div > ul > li:nth-child(3) > a");
+            iwe.Click();
+            //clickCopybutton_GjcoolFastExperience(new Point(iwe.Location.X + 76 + (iwe.Size.Width) / 2, iwe.Location.Y + 120 + (iwe.Size.Height) / 2));//new Point(X, Y)=「選擇檔案」控制項之位置
+            //iwe.Click();
+
+            ////移動到「選擇檔案」按鈕
+            //Task.Run(() => { SendKeys.SendWait("{tab 10}"); });
+
+            Clipboard.SetText(downloadImgFullName);
+
+            //等待選取檔案對話框開啟
+            //Thread.Sleep(800 + (
+            Thread.Sleep(1600 + (
+                800 + Extend_the_wait_time_for_the_Open_Old_File_dialog_box_to_appear_Millisecond < 0 ? 0 : Extend_the_wait_time_for_the_Open_Old_File_dialog_box_to_appear_Millisecond));//最小值（須在重開機後或系統最小負載時）（連「開啟」舊檔之視窗也看不見，即可完成）
+                                                                                                                                                                                          //Thread.Sleep(1200);
+                                                                                                                                                                                          //Thread.Sleep(500);            
+
+
+            //輸入：檔案名稱 //SendKeys.Send(downloadImgFullName);
+            SendKeys.Send("+{Insert}");//or "^v"
+            SendKeys.Send("{ENTER}");
+            Clipboard.Clear();
+
+
+            //retry:
+            ////按下「上傳」
+            //iwe = waitFindWebElementBySelector_ToBeClickable("#batchUploadDropdown");
+            //iwe.Click();
+
+            ////按下「圖片上傳」
+            //iwe = waitFindWebElementBySelector_ToBeClickable("#Batch > div.d-flex.justify-content-between.mt-3 > div > div > div:nth-child(2) > ul > li:nth-child(1) > a");
+            //iwe.Click();
+
+            //Form1.playSound(Form1.soundLike.over);
+
+            Thread.Sleep(1400);
+        reClickUploadOK:
+            try
+            {
+                //等待「上傳完成」訊息方塊出現
+                iwe = waitFindWebElementBySelector_ToBeClickable("#swal2-title", 1);
+                while (iwe == null)
+                {
+                    if (waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr > td:nth-child(4)").GetAttribute("textContent") != string.Empty) goto reRunOCR;
+                    iwe = waitFindWebElementBySelector_ToBeClickable("#swal2-title", 1);
+                }
+                //按下「上傳完成」按鈕
+                iwe = waitFindWebElementBySelector_ToBeClickable("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled", 1);
+                while (iwe == null)
+                {
+                    if (waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr > td:nth-child(4)").GetAttribute("textContent") != string.Empty) goto reRunOCR;
+                    iwe = waitFindWebElementBySelector_ToBeClickable("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled");
+                }
+                //{
+                ////訊息方塊：文件 1 识别失败。Ocr failed
+                //IWebElement iw = waitFindWebElementBySelector_ToBeClickable("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled");
+
+                ////<div class="swal2-html-container" id="swal2-html-container" style="display: block;">文件 1 识别失败。Ocr failed</div>
+                ////<div class="swal2-html-container" id="swal2-html-container" style="display: block;">出现错误。error.</div>
+                //if (iw != null && (iw.Text.Contains("文件 1 识别失败。Ocr failed") || iw.Text.Contains("出现错误。error.")))
+                //{
+                //    //按下ok:
+                //    iw = waitFindWebElementBySelector_ToBeClickable("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled");
+                //    iw.Click();
+                //    goto retry;
+                //}
+
+                //iwe = waitFindWebElementBySelector_ToBeClickable("#result_edit_0");
+                //}
+
+                iwe.Click();//按下「上傳完成」按鈕
+            }
+            catch (Exception)
+            {
+                goto reClickUploadOK;
+                throw;
+            }
+
+
+        reRunOCR:
+            //按下選取方塊，準備OCR
+            try
+            {
+                while (waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr > td:nth-child(4)").GetAttribute("textContent") == string.Empty) ;
+                iwe = waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr:nth-child(1) > td.bs-checkbox > label > input[type=checkbox]", 1);
+                while (iwe == null)
+                    iwe = waitFindWebElementBySelector_ToBeClickable("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled");
+                iwe.Click();
+
+            }
+            catch (Exception)
+            {
+                goto reClickUploadOK;
+                throw;
+            }
+
+            //按下「執行命令」按鈕
+            try
+            {
+                iwe = waitFindWebElementBySelector_ToBeClickable("#OcrFileDropdown");
+
+                iwe.Click();
+            }
+            catch (Exception)
+            {
+                goto reClickUploadOK;
+                throw;
+            }
+
+            //按下「OCR」按鈕
+            try
+            {
+                iwe = waitFindWebElementBySelector_ToBeClickable("#File > div.d-flex.justify-content-between.mt-2 > div.d-flex.mx-3 > div.d-flex.mx-2.align-self-center > div:nth-child(1) > ul > li:nth-child(2) > a");
+                iwe.Click();
+
+            }
+            catch (Exception)
+            {
+                if (waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr > td:nth-child(4)").GetAttribute("textContent") != string.Empty)
+                    goto reClickUploadOK;
+                throw;
+            }
+            Thread.Sleep(2200);
+        reClickOCROK:
+            try
+            {
+                //等待「OCR完成 OK」出現
+                iwe = waitFindWebElementBySelector_ToBeClickable("#swal2-title");
+                while (iwe == null)
+                {
+                    if (!waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr > td.bs-checkbox > label > input[type=checkbox]").Selected) goto reRunOCR;
+                    iwe = waitFindWebElementBySelector_ToBeClickable("#swal2-title");
+                }
+
+                //按下「OCR完成 OK」按鈕
+                iwe = waitFindWebElementBySelector_ToBeClickable("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled");
+                while (iwe == null)
+                {
+                    if (!waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr > td.bs-checkbox > label > input[type=checkbox]").Selected) goto reRunOCR;
+                    iwe = waitFindWebElementBySelector_ToBeClickable("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled");
+                    //提前結束用
+                    if (Clipboard.GetText() != string.Empty)// && !Clipboard.GetText().Contains("Ctext_Page_Image"))
+                    { StopOCR = true; return false; }
+                }
+                try
+                {
+                    iwe.Click();
+
+                }
+                catch (Exception)
+                {
+
+                    throw;
+                }
+            }
+            catch (Exception)
+            {
+                //有選取項目，且其「文本」欄位值非空
+                if (waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr > td.bs-checkbox > label > input[type=checkbox]")?.Selected == false
+                    && waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr > td:nth-child(7)")?.GetAttribute("textContent") == string.Empty)
+                    goto reRunOCR;
+                else if (waitFindWebElementBySelector_ToBeClickable("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled") != null)
+                    goto reClickUploadOK;
+                else
+                    goto reClickOCROK;
+                throw;
+            }
+
+            ////按下「上傳」
+            //iwe = waitFindWebElementBySelector_ToBeClickable("#batchUploadDropdown");
+            //iwe.Click();
+
+            ////按下「豎排自動識別」
+            //iwe = waitFindWebElementBySelector_ToBeClickable("#Batch > div.d-flex.justify-content-between.mt-3 > div > div > div:nth-child(2) > ul > li.dropdown-item > div > label");
+            //iwe.Click();
+
+            //Thread.Sleep(1100);
+            //Thread.Sleep(1000);
+            //Thread.Sleep(1050);
+
+
+            #region 複製OCR結果
+            try
+            {
+                // 取得網頁元素的 title 屬性值 
+                iwe = waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr:nth-child(1) > td:nth-child(7) > div");
+                if (iwe == null)
+                    goto reClickOCROK;
+                //while (iwe == null)
+                //    iwe = waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr:nth-child(1) > td:nth-child(7) > div");
+                string ocrResult = iwe.GetAttribute("title");
+                Clipboard.SetText(ocrResult.Replace("】【", string.Empty).Replace("【", "{{").Replace("】", "}}"));
+
+            }
+            catch (Exception)
+            {
+                goto reClickOCROK;
+                throw;
+            }
+            #endregion
+
+            #region 刪除文件
+
+            try
+            {
+
+                //按下選取方塊，準備刪除
+                iwe = waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr:nth-child(1) > td.bs-checkbox > label > input[type=checkbox]", 1);
+                while (iwe == null)
+                    iwe = waitFindWebElementBySelector_ToBeClickable("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled", 1);
+                if (!iwe.Selected) iwe.Click();
+            }
+            catch (Exception)
+            {
+                if (!waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr > td.bs-checkbox > label > input[type=checkbox]").Selected
+                    && waitFindWebElementBySelector_ToBeClickable("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled") != null)
+                    goto reClickOCROK;
+                else
+                    throw;
+            }
+
+            //刪除文件
+            try
+            {
+                iwe = waitFindWebElementBySelector_ToBeClickable("#FileUploadDropdown");
+                //按下「上傳」
+                while (iwe == null)
+                    iwe = waitFindWebElementBySelector_ToBeClickable("#FileUploadDropdown");
+                iwe.Click();
+                //按下「刪除文件」
+                iwe = waitFindWebElementBySelector_ToBeClickable("#File > div.d-flex.justify-content-between.mt-2 > div.d-flex.mx-3 > div:nth-child(1) > div > ul > li:nth-child(6) > a");
+                while (iwe == null)
+                    iwe = waitFindWebElementBySelector_ToBeClickable("#File > div.d-flex.justify-content-between.mt-2 > div.d-flex.mx-3 > div:nth-child(1) > div > ul > li:nth-child(6) > a");
+                iwe.Click();
+
+            }
+            catch (Exception)
+            {
+                if (!waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr > td.bs-checkbox > label > input[type=checkbox]").Selected
+                    && waitFindWebElementBySelector_ToBeClickable("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled") != null)
+                    goto reClickOCROK;
+                throw;
+            }
+            Thread.Sleep(800);
+
+            ////不必等待刪除完成按下OK按鈕了！！ 20240420
+            ////按下「刪除完成 OK」按鈕
+            //iwe = waitFindWebElementBySelector_ToBeClickable("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled");
+            //while (iwe == null)
+            //    iwe = waitFindWebElementBySelector_ToBeClickable("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled");
+            ////if (iwe == null)
+            ////{
+            ////    SendKeys.SendWait("{esc}");
+            ////    iwe = waitFindWebElementBySelector_ToBeClickable("#OneLine > div.d-flex.justify-content-between.mt-2.mb-1 > div:nth-child(3) > div:nth-child(6) > button:nth-child(2)");
+            ////}
+
+            //if (iwe != null)
+            //{
+            //    try
+            //    {
+            //        iwe.Click();
+            //    }
+            //    catch (Exception)
+            //    {
+            //        Form1.playSound(Form1.soundLike.error, true);
+            //        driver.SwitchTo().Window(driver.CurrentWindowHandle);
+            //        SendKeys.SendWait("{esc}");
+            //        driver.SwitchTo().Window(driver.CurrentWindowHandle);
+            //        SendKeys.SendWait("%r");
+            //        iwe.Click();
+            //    }
+            //    ////文本窗口
+            //    //iwe = waitFindWebElementBySelector_ToBeClickable("#TextArea");
+            //    //if (iwe != null)
+            //    //{
+            //    //    //將OCR結果讀入剪貼簿：
+            //    //    if (iwe.Text != string.Empty)
+            //    //        Clipboard.SetText(iwe.Text);
+            //    //    else
+            //    //    {
+            //    //        StopOCR = true;
+            //    //        return false;
+            //    //    }
+            //    //}
+            //    //else
+            //    //{
+            //    //    StopOCR = true;
+            //    //    return false;
+            //    //}
+            //}
+            //else
+            //{
+            //    StopOCR = true; return false;
+            //}
+
+            #endregion //以上刪除文件
+
+
+            //finished:
+            #region 關閉OCR視窗後回到原來分頁視窗
+            try
+            {
+                driver.Close();
+
+            }
+            catch (Exception)
+            {
+            }
+            _OCR_GJcool_WindowClosed = true;
+            try
+            {
+                driver.SwitchTo().Window(currentWindowHndl);
+                SendKeys.SendWait("%r");//關閉右方頁籤：Chrome瀏覽器擴充功能所設定的快速鍵
+            }
+            catch (Exception)
+            {
+            }
+            #endregion
+
+            StopOCR = true;
+            return true;
+            //}
+            //catch (Exception ex)
+            //{
+            //    Console.WriteLine(ex.HResult + ex.Message);
+            //    StopOCR = true; return false;
+            //}
+
+        }
 
         /// <summary>
         /// 《古籍酷》OCR：自動識別(豎版)。由原本程式碼改良而來
@@ -4154,6 +4571,7 @@ internal static string getImageUrl() {
             //等待「選擇檔案」控制項出現，最多等timeSpanSecs秒；
             //為免tab鍵數不同，而須手動操作，以免表單遮住畫面:
             if (ActiveForm1.TopMost) ActiveForm1.TopMost = false;
+            Clipboard.Clear();
             DateTime begin = DateTime.Now; const int timeSpanSecs = 30;
             TimeSpan timeSpan = new TimeSpan();
             iwe = waitFindWebElementBySelector_ToBeClickable("#line_img_form > div > input[type=file]");
@@ -4162,7 +4580,8 @@ internal static string getImageUrl() {
                 //iwe = waitFindWebElementBySelector_ToBeClickable("#line_img_form > div > input[type=file]");
                 iwe = waitFindWebElementBySelector_ToBeClickable("#OneLine > div.d-flex.mt-2 > div:nth-child(1) > div.ps-1.pe-2.align-self-center > button > i");
                 timeSpan = (DateTime.Now.Subtract(begin));
-                if (timeSpan.TotalSeconds > timeSpanSecs) { StopOCR = true; return false; }
+                if (timeSpan.TotalSeconds > timeSpanSecs||
+                    Clipboard.GetText()!=string.Empty) { StopOCR = true; return false; }
             }
 
             //檢查使用者是否已關閉視窗，取消這次的操作（比如說才發現已經有OCR了、或弄錯頁了……等等，可逕接關閉《古籍酷》OCR視窗以終結之）

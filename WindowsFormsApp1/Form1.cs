@@ -1109,10 +1109,11 @@ namespace WindowsFormsApp1
         /// <param name="s">若檢查不通過，傳回有問題的地方起始點start</param>
         /// <param name="l">若檢查不通過，傳回有問題的地方之長度length</param>
         /// <returns>若通過檢查，執行成功則傳回true；否則為false</returns>
-        private bool newTextBox1(out int s, out int l)
+        private bool newTextBox1(out int s, out int l, string x)
         {
             s = textBox1.SelectionStart; l = textBox1.SelectionLength;
-            string x = textBox1.Text;
+            //string x = textBox1.Text;
+            if (x == string.Empty) x = textBox1.Text;
             if (x == "") return false;
             textBox1.Select(0, s + l); string xHandle = textBox1.SelectedText;
 
@@ -1205,7 +1206,7 @@ namespace WindowsFormsApp1
 
             #region //規範化文本，如置換為全形符號、及清除冗餘（清除冗餘要留意會動到 l 的值！！）
             //此方法目前沒有別處參考，希望與checkAbnormalLinePara等合併或交互參照來做，但目前仍是取還textBox1的值，且s、l牽連影響甚大，俟後 20230806
-            CnText.FormalizeText(ref xCopy);
+            //CnText.FormalizeText(ref xCopy);//在呼叫端執行過，暫略看看 20240426
 
             //string[] replaceDChar = { "'", ",", ";", ":", "．", "?", "：：", "《《", "》》", "〈〈", "〉〉", "。}}。}}", "。。", "，，", "@" };
             //string[] replaceChar = { "、", "，", "；", "：", "·", "？", "：", "《《", "》", "〈", "〉", "。}}", "。", "，", "●" };
@@ -6206,7 +6207,7 @@ namespace WindowsFormsApp1
             }
 
 
-            //規範化文本，如半形標點符號轉全形：
+            //規範化文本，如半形標點符號轉全形：//在 下面 newTextBox1 會執行，此略（須加第3引數×才行，否則原本是根據textBox1.Text來執行的 20240427）
             CnText.FormalizeText(ref xCopy);
             if (!PasteOcrResultFisrtMode && (autoPastetoQuickEdit && lines_perPage == 0))//自動輸入時 lines_perPage 要由 checkAbnormalLinePara 取得
             {
@@ -6267,7 +6268,7 @@ namespace WindowsFormsApp1
             }
 
             //貼到 Ctext Quick edit 前的文本檢查
-            if (!newTextBox1(out s, out l))
+            if (!newTextBox1(out s, out l, xCopy))
             {
                 if (s != 0 && l != 0 && textBox1.SelectionLength == 0)
                 {//若無選取，則將有問題的部分選取以供檢視
@@ -8070,7 +8071,8 @@ namespace WindowsFormsApp1
                     //{
                     br.driver.SwitchTo().Window(currentWindowHndl);
                     if (BatchProcessingGJcoolOCR)
-                        ocrResult = br.OCR_GJcool_BatchProcessing(downloadImgFullName);
+                        //ocrResult = br.OCR_GJcool_BatchProcessing(downloadImgFullName);
+                        ocrResult = br.OCR_GJcool_BatchProcessing_new(downloadImgFullName);
                     else
                         ocrResult = br.OCR_GJcool_AutoRecognizeVertical(downloadImgFullName);
                     //}
@@ -8759,8 +8761,14 @@ namespace WindowsFormsApp1
         /// <returns></returns>
         public static bool isClipBoardAvailable_Text(int waitMilliSecond = 1000)
         {// creedit with chatGPT：Clipboard Availability in C#：https://www.facebook.com/oscarsun72/posts/pfbid0dhv46wssuupa5PfH6RTNSZF58wUVbE6jehnQuYF9HtE9kozDBzCvjsowDkZTxkmcl
-        /*在 C# 的 System.Windows.Forms 中，可以使用 Clipboard.ContainsData 或 Clipboard.ContainsText 方法來確定剪貼簿是否可用。*/
+            /*在 C# 的 System.Windows.Forms 中，可以使用 Clipboard.ContainsData 或 Clipboard.ContainsText 方法來確定剪貼簿是否可用。*/
+            DateTime dt = DateTime.Now;
         retry:
+            if (DateTime.Now.Subtract(dt).TotalSeconds > 12)
+            {
+                if (MessageBox.Show("剪貼簿檢查已逾12秒，是否繼續？", "", MessageBoxButtons.OKCancel, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2, MessageBoxOptions.DefaultDesktopOnly) == DialogResult.Cancel)
+                    return true;
+            }
             try
             {
                 if (!Clipboard.ContainsText())
