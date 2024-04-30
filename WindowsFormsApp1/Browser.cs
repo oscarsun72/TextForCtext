@@ -4,6 +4,7 @@ using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Remote;
 using OpenQA.Selenium.Support.UI;
+using OpenQA.Selenium.Interactions;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -3839,10 +3840,10 @@ internal static string getImageUrl() {
                     while (iwe == null)
                         iwe = waitFindWebElementBySelector_ToBeClickable("#FileUploadDropdown");
                     iwe.Click();
-                    //按下「刪除文件」
-                    iwe = waitFindWebElementBySelector_ToBeClickable("#File > div.d-flex.justify-content-between.mt-2 > div.d-flex.mx-3 > div:nth-child(1) > div > ul > li:nth-child(6) > a");
+                    //按下「刪除文件」                    
+                    iwe = waitFindWebElementBySelector_ToBeClickable("#File > div.d-flex.justify-content-between.mt-2 > div.d-flex.mx-3 > div:nth-child(1) > div > ul > li:nth-child(8) > a");
                     while (iwe == null)
-                        iwe = waitFindWebElementBySelector_ToBeClickable("#File > div.d-flex.justify-content-between.mt-2 > div.d-flex.mx-3 > div:nth-child(1) > div > ul > li:nth-child(6) > a");
+                        iwe = waitFindWebElementBySelector_ToBeClickable("#File > div.d-flex.justify-content-between.mt-2 > div.d-flex.mx-3 > div:nth-child(1) > div > ul > li:nth-child(8) > a");
                     iwe.Click();
 
                 }
@@ -3855,18 +3856,18 @@ internal static string getImageUrl() {
                 }
                 Thread.Sleep(800);
             }
-            #endregion //以上檢查並刪除文件
+        #endregion //以上檢查並刪除文件
 
 
-
+        reUpload:
             //按下「上傳」
             iwe = waitFindWebElementBySelector_ToBeClickable("#FileUploadDropdown");
             iwe.Click();
 
             driver.SwitchTo().Window(driver.CurrentWindowHandle);
             //按下「上傳圖片」
-            //iwe = waitFindWebElementBySelector_ToBeClickable("#Batch > div.d-flex.justify-content-between.mt-2 > div.d-flex.ms-2 > div:nth-child(2) > button > i");
-            iwe = waitFindWebElementBySelector_ToBeClickable("#File > div.d-flex.justify-content-between.mt-2 > div.d-flex.mx-3 > div:nth-child(1) > div > ul > li:nth-child(3) > a");
+            //iwe = waitFindWebElementBySelector_ToBeClickable("#File > div.d-flex.justify-content-between.mt-2 > div.d-flex.mx-3 > div:nth-child(1) > div > ul > li:nth-child(3) > a");
+            iwe = waitFindWebElementBySelector_ToBeClickable("#File > div.d-flex.justify-content-between.mt-2 > div.d-flex.mx-3 > div:nth-child(1) > div > ul > li:nth-child(4) > a");
             iwe.Click();
             //clickCopybutton_GjcoolFastExperience(new Point(iwe.Location.X + 76 + (iwe.Size.Width) / 2, iwe.Location.Y + 120 + (iwe.Size.Height) / 2));//new Point(X, Y)=「選擇檔案」控制項之位置
             //iwe.Click();
@@ -3885,8 +3886,8 @@ internal static string getImageUrl() {
 
 
             //輸入：檔案名稱 //SendKeys.Send(downloadImgFullName);
-            SendKeys.Send("+{Insert}");//or "^v"
-            SendKeys.Send("{ENTER}");
+            SendKeys.SendWait("+{Insert}");//or "^v"
+            SendKeys.SendWait("{ENTER}");
             Clipboard.Clear();
 
 
@@ -3909,14 +3910,17 @@ internal static string getImageUrl() {
                 iwe = waitFindWebElementBySelector_ToBeClickable("#swal2-title", 1);
                 while (iwe == null)
                 {
-                    if (waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr > td:nth-child(4)").GetAttribute("textContent") != string.Empty) goto reRunOCR;
+                    if (waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr > td:nth-child(4)").GetAttribute("textContent") != string.Empty
+                        && waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr > td:nth-child(7)")?.GetAttribute("textContent") == " ") goto reRunOCR;
                     iwe = waitFindWebElementBySelector_ToBeClickable("#swal2-title", 1);
                 }
                 //按下「上傳完成」按鈕
                 iwe = waitFindWebElementBySelector_ToBeClickable("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled", 1);
                 while (iwe == null)
                 {
-                    if (waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr > td:nth-child(4)").GetAttribute("textContent") != string.Empty) goto reRunOCR;
+                    if (waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr > td:nth-child(4)").GetAttribute("textContent") != string.Empty
+                        && waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr > td:nth-child(7)")?.GetAttribute("textContent") == " "
+                        && waitFindWebElementBySelector_ToBeClickable("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled") == null) goto reRunOCR;
                     iwe = waitFindWebElementBySelector_ToBeClickable("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled");
                 }
                 //{
@@ -3949,6 +3953,8 @@ internal static string getImageUrl() {
             //按下選取方塊，準備OCR
             try
             {
+                if (waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr > td:nth-child(7)")?.GetAttribute("textContent") != " ")
+                    System.Diagnostics.Debugger.Break();
                 while (waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr > td:nth-child(4)").GetAttribute("textContent") == string.Empty) ;
                 iwe = waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr:nth-child(1) > td.bs-checkbox > label > input[type=checkbox]", 1);
                 while (iwe == null)
@@ -3996,7 +4002,8 @@ internal static string getImageUrl() {
                 iwe = waitFindWebElementBySelector_ToBeClickable("#swal2-title");
                 while (iwe == null)
                 {
-                    if (!waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr > td.bs-checkbox > label > input[type=checkbox]").Selected) goto reRunOCR;
+                    if (!waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr > td.bs-checkbox > label > input[type=checkbox]").Selected
+                        && waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr > td:nth-child(7)")?.GetAttribute("textContent") == " ") goto reRunOCR;
                     iwe = waitFindWebElementBySelector_ToBeClickable("#swal2-title");
                 }
 
@@ -4004,7 +4011,8 @@ internal static string getImageUrl() {
                 iwe = waitFindWebElementBySelector_ToBeClickable("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled");
                 while (iwe == null)
                 {
-                    if (!waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr > td.bs-checkbox > label > input[type=checkbox]").Selected) goto reRunOCR;
+                    if (!waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr > td.bs-checkbox > label > input[type=checkbox]").Selected
+                        && waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr > td:nth-child(7)")?.GetAttribute("textContent") == " ") goto reRunOCR;
                     iwe = waitFindWebElementBySelector_ToBeClickable("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled");
                     //提前結束用
                     if (Clipboard.GetText() != string.Empty)// && !Clipboard.GetText().Contains("Ctext_Page_Image"))
@@ -4023,10 +4031,15 @@ internal static string getImageUrl() {
             }
             catch (Exception)
             {
+                IWebElement iew = waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr > td.bs-checkbox > label > input[type=checkbox]");
+                if (iew == null)
+                    goto reUpload;
+                else if (waitFindWebElementBySelector_ToBeClickable("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled") != null)
+                    goto reClickOCROK;
                 //有選取項目，且其「文本」欄位值非空
-                if (waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr > td.bs-checkbox > label > input[type=checkbox]")?.Selected == false
-                    && waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr > td:nth-child(7)")?.GetAttribute("textContent") == string.Empty)
-                    goto reRunOCR;
+                //else if (iew?.Selected == false
+                //    && waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr > td:nth-child(7)")?.GetAttribute("textContent") == " ")
+                //    goto reRunOCR;
                 else if (waitFindWebElementBySelector_ToBeClickable("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled") != null)
                     goto reClickUploadOK;
                 else
@@ -4096,9 +4109,9 @@ internal static string getImageUrl() {
                     iwe = waitFindWebElementBySelector_ToBeClickable("#FileUploadDropdown");
                 iwe.Click();
                 //按下「刪除文件」
-                iwe = waitFindWebElementBySelector_ToBeClickable("#File > div.d-flex.justify-content-between.mt-2 > div.d-flex.mx-3 > div:nth-child(1) > div > ul > li:nth-child(6) > a");
+                iwe = waitFindWebElementBySelector_ToBeClickable("#File > div.d-flex.justify-content-between.mt-2 > div.d-flex.mx-3 > div:nth-child(1) > div > ul > li:nth-child(8) > a");
                 while (iwe == null)
-                    iwe = waitFindWebElementBySelector_ToBeClickable("#File > div.d-flex.justify-content-between.mt-2 > div.d-flex.mx-3 > div:nth-child(1) > div > ul > li:nth-child(6) > a");
+                    iwe = waitFindWebElementBySelector_ToBeClickable("#File > div.d-flex.justify-content-between.mt-2 > div.d-flex.mx-3 > div:nth-child(1) > div > ul > li:nth-child(8) > a");
                 iwe.Click();
 
             }
@@ -4580,8 +4593,8 @@ internal static string getImageUrl() {
                 //iwe = waitFindWebElementBySelector_ToBeClickable("#line_img_form > div > input[type=file]");
                 iwe = waitFindWebElementBySelector_ToBeClickable("#OneLine > div.d-flex.mt-2 > div:nth-child(1) > div.ps-1.pe-2.align-self-center > button > i");
                 timeSpan = (DateTime.Now.Subtract(begin));
-                if (timeSpan.TotalSeconds > timeSpanSecs||
-                    Clipboard.GetText()!=string.Empty) { StopOCR = true; return false; }
+                if (timeSpan.TotalSeconds > timeSpanSecs ||
+                    Clipboard.GetText() != string.Empty) { StopOCR = true; return false; }
             }
 
             //檢查使用者是否已關閉視窗，取消這次的操作（比如說才發現已經有OCR了、或弄錯頁了……等等，可逕接關閉《古籍酷》OCR視窗以終結之）
@@ -6675,6 +6688,58 @@ internal static string getImageUrl() {
             Size workingAreaSize = Screen.PrimaryScreen.WorkingArea.Size;
 
             return windowSize.Equals(workingAreaSize);
+        }
+
+        /// <summary>       
+        /// 20240430 Copilot大菩薩：下載網頁圖片的錯誤處理：
+        /// 以下是一個使用 Selenium 來模擬「另存圖片」的基本範例。請注意，這個範例需要使用到 Actions 類別來模擬鼠標右鍵點擊和選擇「另存圖片」的選項，並且可能需要根據您的瀏覽器和操作系統的具體情況來調整。
+        /// 段程式碼會打開圖片的網頁，然後模擬鼠標右鍵點擊圖片，並選擇「另存圖片」的選項。然而，這只是一個基本的範例，並且可能需要根據您的具體情況來調整。例如，處理「另存為」對話框可能需要使用到其他的工具或方法，例如 AutoIt 或 SendKeys。
+        /// </summary>
+        /// <param name="imageUrl">圖片所在網址</param>
+        /// <param name="downloadImgFullName"></param>
+        /// <param name="selectedInExplorer"></param>
+        /// <returns></returns>
+        internal static bool DownloadImage(string imageUrl, string downloadImgFullName, bool selectedInExplorer = false)
+        {
+            //var driver = new ChromeDriver();
+            openNewTabWindow();
+            driver.Navigate().GoToUrl(imageUrl);
+
+            // 找到圖片元素
+            var imageElement = driver.FindElement(By.TagName("img"));
+
+            // 建立 Actions 物件
+            var action = new Actions(driver);
+
+            // 模擬鼠標右鍵點擊圖片
+            action.ContextClick(imageElement).Perform();
+
+            // 模擬按下「V」鍵，選擇「另存圖片」的選項
+            // 注意：這可能需要根據您的瀏覽器和語言設定來調整
+            action.SendKeys("v").Perform();
+            SendKeys.Send("v");
+
+            // TODO: 處理彈出的「另存為」對話框，輸入文件名並點擊「保存」
+            // 這可能需要使用到其他的工具或方法，例如 AutoIt 或 SendKeys
+            Clipboard.Clear(); Clipboard.SetText(downloadImgFullName);
+            Thread.Sleep(800 + (
+    800 + Extend_the_wait_time_for_the_Open_Old_File_dialog_box_to_appear_Millisecond < 0 ? 0 : Extend_the_wait_time_for_the_Open_Old_File_dialog_box_to_appear_Millisecond));//最小值（須在重開機後或系統最小負載時）（連「開啟」舊檔之視窗也看不見，即可完成）
+                                                                                                                                                                              //Thread.Sleep(1200);
+                                                                                                                                                                              //Thread.Sleep(500);            
+
+
+            //輸入：檔案名稱 //SendKeys.Send(downloadImgFullName);
+            SendKeys.SendWait("+{Insert}");//or "^v"
+            SendKeys.SendWait("{ENTER}");
+            Clipboard.Clear();
+
+            driver.Close();
+            DateTime dt = DateTime.Now;
+            while (!File.Exists(downloadImgFullName))
+            {
+                if (dt.Subtract(DateTime.Now).TotalSeconds > 8) return false;
+            }
+            return true;
         }
 
     }

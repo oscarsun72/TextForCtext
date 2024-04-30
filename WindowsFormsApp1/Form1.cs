@@ -1517,7 +1517,7 @@ namespace WindowsFormsApp1
             if (s + l + 2 < textBox1.Text.Length)
             {
                 //if (x.Substring(s + l, 1) == Environment.NewLine)//原式 20230824以前
-                if (x.Substring(s + l, 2) == Environment.NewLine)
+                if (s + l + 2 <= x.Length && x.Substring(s + l, 2) == Environment.NewLine)
                 {
                     x = x.Substring(s + l + 2);
                     //用新的要貼上Quit Edit的文字作為還原textBox1.Text時的備份 20230824
@@ -2995,6 +2995,7 @@ namespace WindowsFormsApp1
                     {
                         e.Handled = true;
                         paragraphMarkAccordingFirstOne();
+                        if (textBox1.Text.IsNullOrEmpty()) return;
                         Clipboard.SetText(textBox1.Text);
                         return;
                     }
@@ -8025,7 +8026,7 @@ namespace WindowsFormsApp1
             }
             #endregion
 
-
+            string currentWindowHndl = br.driver.CurrentWindowHandle;
             //下載書圖
             string imgUrl = Clipboard.GetText(), downloadImgFullName; bool ocrResult = false;
             if (imgUrl.Length > 4
@@ -8057,8 +8058,8 @@ namespace WindowsFormsApp1
 
             #region toOCR
             br.StopOCR = false;
-            string currentWindowHndl = br.driver.CurrentWindowHandle;
-            br.LastValidWindow = br.driver.CurrentWindowHandle;
+            //string currentWindowHndl = br.driver.CurrentWindowHandle;
+            br.LastValidWindow = currentWindowHndl;//br.driver.CurrentWindowHandle;
             switch (ocrSiteTitle)
             {
                 case br.OCRSiteTitle.GoogleKeep:
@@ -11595,11 +11596,18 @@ namespace WindowsFormsApp1
             // 獲取圖片的 URL。
             //imageUrl = "https://example.com/image.png";
 
+            bool returnVal = false;
             try
             {
+
+
+
+                #region //-2146233079：遠端伺服器傳回一個錯誤: (404) 找不到。
+
                 // 使用 WebClient 下載圖片的二進制數據。
                 System.Net.WebClient webClient = new System.Net.WebClient();
-                byte[] imageBytes = webClient.DownloadData(imageUrl);
+                //webClient.Headers.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537");// Copilot大菩薩 20240430：這段程式碼將 WebClient 的 User-Agent 設定為一個常見的瀏覽器（在這個例子中是 Chrome），然後嘗試下載圖片。如果這個方法仍然無法解決問題，那麼可能需要更深入地研究該網站的防爬蟲機制，或者聯繫網站管理員以獲取更多信息。
+                byte[] imageBytes = webClient.DownloadData(imageUrl);//-2146233079：遠端伺服器傳回一個錯誤: (404) 找不到。
 
                 // 將二進制數據寫入文件。            
                 using (FileStream fileStream = new FileStream(downloadImgFullName, FileMode.Create))
@@ -11607,11 +11615,23 @@ namespace WindowsFormsApp1
                     fileStream.Write(imageBytes, 0, imageBytes.Length);
                     //Console.WriteLine("圖片已成功下載。");//在「即時運算視窗」寫出訊息
                 }
+
+                #endregion
             }
             catch (Exception ex)
             {
-                MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
-                return false;
+                if (ex.HResult == -2146233079 && (
+                    ex.Message.StartsWith("遠端伺服器傳回一個錯誤: (404) 找不到。")
+                    ||ex.Message.StartsWith("遠端伺服器傳回一個錯誤: (403) 禁止。")))
+                    returnVal= br.DownloadImage(imageUrl, downloadImgFullName);
+                //20240430 Copilot大菩薩：如果 WebClient 的 DownloadData 方法無法滿足需求，那麼您可能需要考慮使用其他的方法來下載圖片。我之前提到的兩種方法是：
+                            //使用 Selenium 模擬瀏覽器操作：這種方法可以模擬「另存圖片」的操作，但可能需要一些複雜的程式碼，並且可能需要安裝特定的瀏覽器擴充功能。
+                            //使用 HttpClient 或其他第三方函式庫：這些函式庫通常提供了更靈活和強大的功能，可以處理更複雜的網路操作，例如處理 cookies、session、referer 等等。
+                else
+                {
+                    MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
+                    return false;
+                }
             }
             #region 在下載完後在檔案總管中將其選取MyRegion
             if (selectedInExplorer)
@@ -11641,7 +11661,7 @@ namespace WindowsFormsApp1
                 //Process.Start(downloadImgFullName);
             }
             #endregion
-            return true;
+            return returnVal;//true;
         }
         Process prcssDownloadImgFullName;
 
