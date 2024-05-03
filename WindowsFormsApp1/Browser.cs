@@ -3872,8 +3872,12 @@ internal static string getImageUrl() {
             //clickCopybutton_GjcoolFastExperience(new Point(iwe.Location.X + 76 + (iwe.Size.Width) / 2, iwe.Location.Y + 120 + (iwe.Size.Height) / 2));//new Point(X, Y)=「選擇檔案」控制項之位置
             //iwe.Click();
 
-            ////移動到「選擇檔案」按鈕
-            //Task.Run(() => { SendKeys.SendWait("{tab 10}"); });
+            //等待書圖檔下載完成
+            DateTime dt = DateTime.Now;
+            while (!File.Exists(downloadImgFullName))
+            {
+                if (DateTime.Now.Subtract(dt).TotalSeconds > 38) { StopOCR = true; return false; }
+            }
 
             Clipboard.SetText(downloadImgFullName);
 
@@ -3953,8 +3957,12 @@ internal static string getImageUrl() {
             //按下選取方塊，準備OCR
             try
             {
-                if (waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr > td:nth-child(7)")?.GetAttribute("textContent") != " ")
+                string tx = waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr > td:nth-child(7)")?.GetAttribute("textContent");
+                if (!tx.IsNullOrEmpty() && tx != " ")
+                {
                     System.Diagnostics.Debugger.Break();
+                    goto copyResult;
+                }
                 while (waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr > td:nth-child(4)").GetAttribute("textContent") == string.Empty) ;
                 iwe = waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr:nth-child(1) > td.bs-checkbox > label > input[type=checkbox]", 1);
                 while (iwe == null)
@@ -4047,20 +4055,21 @@ internal static string getImageUrl() {
                 throw;
             }
 
-            ////按下「上傳」
-            //iwe = waitFindWebElementBySelector_ToBeClickable("#batchUploadDropdown");
-            //iwe.Click();
+        ////按下「上傳」
+        //iwe = waitFindWebElementBySelector_ToBeClickable("#batchUploadDropdown");
+        //iwe.Click();
 
-            ////按下「豎排自動識別」
-            //iwe = waitFindWebElementBySelector_ToBeClickable("#Batch > div.d-flex.justify-content-between.mt-3 > div > div > div:nth-child(2) > ul > li.dropdown-item > div > label");
-            //iwe.Click();
+        ////按下「豎排自動識別」
+        //iwe = waitFindWebElementBySelector_ToBeClickable("#Batch > div.d-flex.justify-content-between.mt-3 > div > div > div:nth-child(2) > ul > li.dropdown-item > div > label");
+        //iwe.Click();
 
-            //Thread.Sleep(1100);
-            //Thread.Sleep(1000);
-            //Thread.Sleep(1050);
+        //Thread.Sleep(1100);
+        //Thread.Sleep(1000);
+        //Thread.Sleep(1050);
 
 
-            #region 複製OCR結果
+        #region 複製OCR結果
+        copyResult:
             try
             {
                 // 取得網頁元素的 title 屬性值 
@@ -4071,6 +4080,7 @@ internal static string getImageUrl() {
                 //    iwe = waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr:nth-child(1) > td:nth-child(7) > div");
                 string ocrResult = iwe.GetAttribute("title");
                 Clipboard.SetText(ocrResult.Replace("】【", string.Empty).Replace("【", "{{").Replace("】", "}}"));
+                //.Replace("0","◯").Replace("〇", "◯"));
 
             }
             catch (Exception)
@@ -6722,23 +6732,24 @@ internal static string getImageUrl() {
             // TODO: 處理彈出的「另存為」對話框，輸入文件名並點擊「保存」
             // 這可能需要使用到其他的工具或方法，例如 AutoIt 或 SendKeys
             Clipboard.Clear(); Clipboard.SetText(downloadImgFullName);
-            Thread.Sleep(800 + (
-    800 + Extend_the_wait_time_for_the_Open_Old_File_dialog_box_to_appear_Millisecond < 0 ? 0 : Extend_the_wait_time_for_the_Open_Old_File_dialog_box_to_appear_Millisecond));//最小值（須在重開機後或系統最小負載時）（連「開啟」舊檔之視窗也看不見，即可完成）
-                                                                                                                                                                              //Thread.Sleep(1200);
-                                                                                                                                                                              //Thread.Sleep(500);            
+            Thread.Sleep(1190 + (
+                800 + Extend_the_wait_time_for_the_Open_Old_File_dialog_box_to_appear_Millisecond < 0 ? 0 : Extend_the_wait_time_for_the_Open_Old_File_dialog_box_to_appear_Millisecond));//最小值（須在重開機後或系統最小負載時）（連「開啟」舊檔之視窗也看不見，即可完成）
+                                                                                                                                                                                          //Thread.Sleep(1200);
+                                                                                                                                                                                          //Thread.Sleep(500);            
 
 
             //輸入：檔案名稱 //SendKeys.Send(downloadImgFullName);
             SendKeys.SendWait("+{Insert}");//or "^v"
             SendKeys.SendWait("{ENTER}");
-            Clipboard.Clear();
+            //Clipboard.Clear();
 
             driver.Close();
-            DateTime dt = DateTime.Now;
-            while (!File.Exists(downloadImgFullName))
-            {
-                if (dt.Subtract(DateTime.Now).TotalSeconds > 8) return false;
-            }
+            ////等待書圖檔下載完成
+            //DateTime dt = DateTime.Now;
+            //while (!File.Exists(downloadImgFullName))
+            //{
+            //    if (DateTime.Now.Subtract(dt).TotalSeconds > 28) return false;
+            //}
             return true;
         }
 

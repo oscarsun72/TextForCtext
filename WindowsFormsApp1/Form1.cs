@@ -101,6 +101,11 @@ namespace WindowsFormsApp1
         /// </summary>
         bool ocrTextMode = false;
         /// <summary>
+        /// 自動移動表單位置以迴避圖文對照頁面的文本區，以便檢校是否已經編輯過 20240501
+        /// 在textBox2中以「fm」（form moving）切換設定
+        /// </summary>
+        bool autoTestPositionAvoidance = false;
+        /// <summary>
         /// 直接貼入OCR結果，先不管版面行款排版、及是否有編輯標記
         /// </summary>
         internal bool PasteOcrResultFisrtMode = false;
@@ -8612,7 +8617,7 @@ namespace WindowsFormsApp1
                             textBox1.Text = notBooksPunctuation ? nextpagetextBox1Text_Default : chkX;
                         }
                         #region 如果已經編輯，則將Form1移至旁邊
-                        if (!ocrTextMode && keyinTextMode)
+                        if (!ocrTextMode && keyinTextMode && autoTestPositionAvoidance)
                         {
                             //int lf = Left, tp = Top;
                             if (Form1Pos.X != Left && Form1Pos.Y != Top && (Left < 1235 || Top < 687)) { Form1Pos.X = Left; Form1Pos.Y = Top; }
@@ -10418,6 +10423,12 @@ namespace WindowsFormsApp1
                     PauseEvents();
                     textBox2.Text = "";
                     ResumeEvents(); return;
+                case "fm"://輸入「fm」（form move）切換設定-自動移動表單位置以迴避圖文對照頁面的文本區，以便檢校是否已經編輯過 autoTestPositionAvoidance=true 20240501
+                    if (autoTestPositionAvoidance) autoTestPositionAvoidance = false;
+                    else autoTestPositionAvoidance = true;
+                    PauseEvents();
+                    textBox2.Text = "";
+                    ResumeEvents(); return;
                 default:
                     break;
             }
@@ -11622,11 +11633,11 @@ namespace WindowsFormsApp1
             {
                 if (ex.HResult == -2146233079 && (
                     ex.Message.StartsWith("遠端伺服器傳回一個錯誤: (404) 找不到。")
-                    ||ex.Message.StartsWith("遠端伺服器傳回一個錯誤: (403) 禁止。")))
-                    returnVal= br.DownloadImage(imageUrl, downloadImgFullName);
+                    || ex.Message.StartsWith("遠端伺服器傳回一個錯誤: (403) 禁止。")))
+                    returnVal = br.DownloadImage(imageUrl, downloadImgFullName);
                 //20240430 Copilot大菩薩：如果 WebClient 的 DownloadData 方法無法滿足需求，那麼您可能需要考慮使用其他的方法來下載圖片。我之前提到的兩種方法是：
-                            //使用 Selenium 模擬瀏覽器操作：這種方法可以模擬「另存圖片」的操作，但可能需要一些複雜的程式碼，並且可能需要安裝特定的瀏覽器擴充功能。
-                            //使用 HttpClient 或其他第三方函式庫：這些函式庫通常提供了更靈活和強大的功能，可以處理更複雜的網路操作，例如處理 cookies、session、referer 等等。
+                //使用 Selenium 模擬瀏覽器操作：這種方法可以模擬「另存圖片」的操作，但可能需要一些複雜的程式碼，並且可能需要安裝特定的瀏覽器擴充功能。
+                //使用 HttpClient 或其他第三方函式庫：這些函式庫通常提供了更靈活和強大的功能，可以處理更複雜的網路操作，例如處理 cookies、session、referer 等等。
                 else
                 {
                     MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
