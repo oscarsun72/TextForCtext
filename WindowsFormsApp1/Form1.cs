@@ -2953,7 +2953,12 @@ namespace WindowsFormsApp1
                 if (e.KeyCode == Keys.Add)
                 {//在非自動且手動輸入模式下單獨按下數字鍵盤的「+」("+") →方便檢索到這塊程式碼
                     //整頁貼上Quick edit [簡單修改模式]  並將下一頁直接送交《古籍酷》OCR// 原為加上篇名格式代碼
+                    //全自動貼上模式不適用
                     if (autoPastetoQuickEdit) return;
+                    //防止誤按
+                    if (br.Quickedit_data_textboxTxt == "+" ||
+                        textBox1.Text.Replace("+", string.Empty) == string.Empty)//textBox1.Text == string.Empty 已包含
+                        return;
                     if (keyinTextMode && OcrTextMode)
                     {
                         e.Handled = true;
@@ -3001,7 +3006,8 @@ namespace WindowsFormsApp1
                         e.Handled = true;
                         paragraphMarkAccordingFirstOne();
                         if (textBox1.Text.IsNullOrEmpty()) return;
-                        Clipboard.SetText(textBox1.Text);
+                        if (isClipBoardAvailable_Text())
+                            Clipboard.SetText(textBox1.Text);
                         return;
                     }
                 }

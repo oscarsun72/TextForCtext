@@ -381,7 +381,7 @@ namespace TextForCtext
             StringBuilder sb = new StringBuilder();//bool isUnicodeCharacters=false;
             foreach (char c in text)//這行設中斷點暫停，可以明白各個字元究竟在哪個UnicodeCategory中  https://learn.microsoft.com/zh-tw/dotnet/api/system.globalization.unicodecategory?view=netframework-4.8 可配合Form1_Activated()事件程序中來測試
             {
-                //if (c == "0".ToCharArray()[0]) sb.Append("◯");
+                //if (c == "O".ToCharArray()[0]) sb.Append("◯");
                 if (c == "ｏ".ToCharArray()[0]) Debugger.Break();
                 if (c == "Ｏ".ToCharArray()[0]) Debugger.Break();
                 if (c == "O".ToCharArray()[0]) Debugger.Break();
@@ -393,6 +393,7 @@ namespace TextForCtext
                 switch (System.Globalization.CharUnicodeInfo.GetUnicodeCategory(c))
                 {
                     case UnicodeCategory.UppercaseLetter:
+                        if (c == "O".ToCharArray()[0]) sb.Append("◯");
                         break;
                     case UnicodeCategory.LowercaseLetter:
                         break;

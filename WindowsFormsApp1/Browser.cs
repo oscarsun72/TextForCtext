@@ -1072,11 +1072,11 @@ namespace TextForCtext
                 }
                 catch (Exception)
                 {
-                    Thread.Sleep(1500);
+                    //Thread.Sleep(1500);
                     //Clipboard.Clear();
                     //Clipboard.SetText("x");
                     Form1.playSound(Form1.soundLike.error, true);
-                    Clipboard.SetText(xIuput);
+                    //Clipboard.SetText(xIuput);
                 }
                 textbox.SendKeys(OpenQA.Selenium.Keys.LeftShift + OpenQA.Selenium.Keys.Insert);
             }
@@ -3952,8 +3952,21 @@ internal static string getImageUrl() {
                 throw;
             }
 
+            #region  檢查確實已上傳：
+            DateTime dddt = DateTime.Now;
+            iwe = driver.FindElement(By.XPath("/html/body/div[13]/div/div[2]/div[2]/div[1]/div[2]/div[2]/table/tbody/tr/td[6]/div/div"));
+            while (iwe == null)
+            {
+                iwe = driver.FindElement(By.XPath("/html/body/div[13]/div/div[2]/div[2]/div[1]/div[2]/div[2]/table/tbody/tr/td[6]/div/div"));
+                if (DateTime.Now.Subtract(dddt).TotalSeconds > 14)
+                    goto reUpload;
+            }
+            if (iwe.GetAttribute("textContent") != "已上传")
+                //Debugger.Break();
+                goto reUpload;
+            #endregion
 
-        reRunOCR:
+            reRunOCR:
             //按下選取方塊，準備OCR
             try
             {
@@ -4696,6 +4709,14 @@ internal static string getImageUrl() {
             ////waitFindWebElementBySelector_ToBeClickable("#line_img_form > div > input[type=file]").SendKeys(OpenQA.Selenium.Keys.Space);
             ////waitFindWebElementByName_ToBeClickable("line_img",2).Submit();
             byte tryTimes = 1;
+
+            //等待書圖檔下載完成
+            DateTime ddt = DateTime.Now;
+            while (!File.Exists(downloadImgFullName))
+            {
+                if (DateTime.Now.Subtract(ddt).TotalSeconds > 38) { StopOCR = true; return false; }
+            }
+
             Clipboard.SetText(downloadImgFullName);
 
             //等待選取檔案對話框開啟
