@@ -3973,7 +3973,7 @@ internal static string getImageUrl() {
                 string tx = waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr > td:nth-child(7)")?.GetAttribute("textContent");
                 if (!tx.IsNullOrEmpty() && tx != " ")
                 {
-                    System.Diagnostics.Debugger.Break();
+                    //System.Diagnostics.Debugger.Break();
                     goto copyResult;
                 }
                 while (waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr > td:nth-child(4)").GetAttribute("textContent") == string.Empty) ;
@@ -6773,6 +6773,27 @@ internal static string getImageUrl() {
             //}
             return true;
         }
+
+        /// <summary>
+        /// 在需要連續輸入截圖時 。按下Ctrl並按下滑鼠下一頁鍵時。今因《四庫全書》本《本草綱目》而設 20240510
+        /// 須先畫出之截圖區域，然後按下Ctrl並按下滑鼠下一頁鍵時，會自動按下頁面中的[Input picture]連結並再按下 Replace page with this data 按鈕
+        /// </summary>
+        internal static void Input_picture()
+        {
+            //按下頁面中的[Input picture]連結
+
+            IWebElement iwe = waitFindWebElementBySelector_ToBeClickable("#editor > a:nth-child(5)");
+            if (iwe != null)
+            {
+                iwe.Click();
+                //再按下 Replace page with this data 按鈕
+                iwe = waitFindWebElementBySelector_ToBeClickable("#pictureinput > input[type=submit]");
+                iwe?.Click();
+            }
+
+
+        }
+
 
     }
 }

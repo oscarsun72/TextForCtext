@@ -1512,7 +1512,8 @@ namespace WindowsFormsApp1
             catch (Exception)
             {
                 while (!isClipBoardAvailable_Text()) { if (DateTime.Now.Subtract(dt).TotalSeconds > 2) break; }
-                Clipboard.SetText(xCopy);
+                playSound(soundLike.error);
+                //Clipboard.SetText(xCopy);
             }
             br.TextPatst2Quick_editBox = xCopy;
 
@@ -2956,7 +2957,7 @@ namespace WindowsFormsApp1
                     //全自動貼上模式不適用
                     if (autoPastetoQuickEdit) return;
                     //防止誤按
-                    if (br.Quickedit_data_textboxTxt == "+" ||
+                    if (br.Quickedit_data_textboxTxt == "+" &&
                         textBox1.Text.Replace("+", string.Empty) == string.Empty)//textBox1.Text == string.Empty 已包含
                         return;
                     if (keyinTextMode && OcrTextMode)
@@ -3089,7 +3090,7 @@ namespace WindowsFormsApp1
                 if (textBox1.Text != string.Empty)
                 { undoRecord(); PauseEvents(); textBox1.Text = string.Empty; ResumeEvents(); }
                 //欲中止，請按下Ctrl鍵
-                Console.WriteLine(ModifierKeys.ToString());//just for test
+                //Console.WriteLine(ModifierKeys.ToString());//just for test
                 if (ModifierKeys != Keys.Control)
                 {
                     playSound(soundLike.press);
@@ -6280,7 +6281,7 @@ namespace WindowsFormsApp1
             }
 
             //貼到 Ctext Quick edit 前的文本檢查
-            if (!newTextBox1(out s, out l, xCopy))
+            if (!newTextBox1(out s, out l, autoPastetoQuickEdit ? x : xCopy))
             {
                 if (s != 0 && l != 0 && textBox1.SelectionLength == 0)
                 {//若無選取，則將有問題的部分選取以供檢視
@@ -7925,7 +7926,8 @@ namespace WindowsFormsApp1
                     undoRecord(); stopUndoRec = true; PauseEvents();
                     autoKeysTitleCodeAndPreWideSpace();
                     ResumeEvents(); stopUndoRec = false;
-                    Clipboard.SetText(textBox1.Text);
+                    if (!textBox1.Text.IsNullOrEmpty())
+                        Clipboard.SetText(textBox1.Text);
                     return;
 
                 }
@@ -10993,7 +10995,7 @@ namespace WindowsFormsApp1
                                 return;
                             nextPageStartTime = DateTime.Now;
                         }
-                        nextPages(Keys.PageUp, true);
+                        nextPages(Keys.PageUp, false);
                         if (autoPastetoQuickEdit) AvailableInUseBothKeysMouse();
                         //上一頁
                         //keyDownCtrlAdd(false);
@@ -11003,12 +11005,14 @@ namespace WindowsFormsApp1
                         {//過於頻繁會造成chromedriver反應不及而當掉
                             timeDifference = DateTime.Now.Subtract(nextPageStartTime);
                             if (timeDifference.TotalSeconds < 0.3)
-                                return;
+                                return;                        
                             nextPageStartTime = DateTime.Now;
+                            if (br.waitFindWebElementBySelector_ToBeClickable("#canvas > svg > rect") != null)
+                                br.Input_picture();
                         }
                         //keyDownCtrlAdd(true);
                         //下一頁
-                        nextPages(Keys.PageDown, true);
+                        nextPages(Keys.PageDown, false);
                         if (autoPastetoQuickEdit) AvailableInUseBothKeysMouse();
                         break;
                     default:
@@ -11041,6 +11045,15 @@ namespace WindowsFormsApp1
                     case MouseButtons.XButton1:
                         break;
                     case MouseButtons.XButton2:
+                        if (browsrOPMode != BrowserOPMode.appActivateByName)
+                        {//過於頻繁會造成chromedriver反應不及而當掉
+                            //timeDifference = DateTime.Now.Subtract(nextPageStartTime);
+                            //if (timeDifference.TotalSeconds < 0.3)
+                                //return;
+                            if (ModifierKeys == Keys.Control) br.Input_picture();
+                            //nextPageStartTime = DateTime.Now;
+                            nextPages(Keys.PageDown, true);
+                        }
                         break;
                     default:
                         break;

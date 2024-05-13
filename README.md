@@ -164,7 +164,10 @@ Alt + Shift + F1 ：切換 textbox1 之字型： 切換支援 CJK - Ext 擴充�
 
 滑鼠上一頁鍵： 同Ctrl + PageUp
 
-滑鼠下一頁鍵： 同Ctrl + PageDown
+滑鼠下一頁鍵： 同Ctrl + PageDown 
+> 如果書圖處有拉出截圖區域，則會自動執行如下輸入截圖模式（滑鼠下一頁鍵 + Ctrl 鍵）
+
+滑鼠下一頁鍵 + Ctrl 鍵： 在需要連續輸入截圖時 ，須先畫出之截圖區域，然後按下Ctrl並按下滑鼠下一頁鍵時，會自動按下頁面中的[Input picture]連結並再按下 Replace page with this data 按鈕
 
 按下 Ctrl 、Alt 或 Shift 任一鍵再啟用表單成為現用的（activate form1)則會啟動自動輸入( auto paste to Quick Edit textbox in Ctext).
 

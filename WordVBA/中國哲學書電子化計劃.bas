@@ -1191,6 +1191,28 @@ AppActivate "TextForCtext"
 SendKeys "%{insert}", True
 SystemSetup.playSound 4
 End Sub
+Sub 本草綱目縮排一格雙行小注格式_四庫全書_國學大師()
+    Dim d As Document, p As Paragraph, px As String, rng As Range, a As Range, ur As UndoRecord
+    Set d = ActiveDocument: Set rng = d.Range
+    SystemSetup.stopUndo ur, "本草綱目縮排一格雙行小注格式_四庫全書_國學大師"
+    For Each p In d.Paragraphs
+        px = p.Range.Text
+        If VBA.left(px, 3) = "　{{" And VBA.right(px, 3) = "}}" & chr(13) Then
+            rng.SetRange p.Range.start + 3, p.Range.End - 3
+            rng.Characters(Int(rng.Characters.Count / 2)).InsertAfter chr(13) & "　"
+        ElseIf VBA.left(px, 3) = "{{　" And VBA.right(px, 6) = "}}<p>" & chr(13) Then
+            rng.SetRange p.Range.start + 3, p.Range.End - 6
+            For Each a In rng.Characters
+                If a.Text = "　" Then
+                    a.InsertBefore chr(13)
+                End If
+            Next a
+        End If
+    Next p
+    SystemSetup.contiUndo ur
+End Sub
+
+
 Sub 維基文庫造字圖取代為文字(rng As Range)
 Dim inlnsp As InlineShape, aLtTxt As String
 Dim dictMdb As New dBase, cnt As New ADODB.Connection, rst As New ADODB.Recordset
