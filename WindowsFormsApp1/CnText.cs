@@ -611,6 +611,8 @@ namespace TextForCtext
              * 您需要在改變 pattern 變數的值之後，再次創建一個新的 Regex 物件。             
              */
 
+            RemoveInnerBraces(ref x);
+
         }
 
         /// <summary>
@@ -692,6 +694,39 @@ namespace TextForCtext
             //var paragraphs = text.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
             //var rearranged = paragraphs.Select((p, i) => new { Paragraph = p, Index = i % 3 }).OrderBy(x => x.Index).Select(x => x.Paragraph);
             //text = string.Join(Environment.NewLine, rearranged);
+        }
+        /// <summary>
+        /// 這段程式碼會將 textBox1 中的文字中的內部花括號移除。例如，它會將 {{Copilot{{大菩薩}} 或 {{Copilot}}大菩薩}} 轉換為 {{Copilot大菩薩}}。
+        /// 請注意，這個程式碼只會移除最內層的花括號。如果有多層花括號，您可能需要多次執行這個程式碼。
+        /// 20240515 Copilot大菩薩： C# 正則表達式移除內部花括號
+        /// </summary>
+        public static void RemoveInnerBraces(ref string text)
+        {
+            //string input = text;
+            //while (input.Contains("{{") && input.Contains("}}"))
+            //{
+            //    int firstIndex = input.IndexOf("{{");
+            //    int lastIndex = input.IndexOf("}}");
+            //    if (firstIndex < lastIndex)
+            //    {
+            //        string start = input.Substring(0, firstIndex);
+            //        string middle = input.Substring(firstIndex + 2, lastIndex - firstIndex - 2);
+            //        string end = input.Substring(lastIndex + 2);
+            //        input = start + "{{" + middle + "}}" + end;
+            //    }
+            //    else
+            //    {
+            //        break;
+            //    }
+            //}
+            //text = input;
+
+            //string pattern = @"\{\{([^{}]*\{[^{}]*\}[^{}]*)\}\}";
+            //string replacement = "{{$1}}";
+            //Regex rgx = new Regex(pattern);
+            //string input = text;
+            //string result = rgx.Replace(input, replacement);
+            //text= result;
         }
     }
 }
