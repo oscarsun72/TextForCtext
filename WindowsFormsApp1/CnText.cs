@@ -702,31 +702,38 @@ namespace TextForCtext
         /// </summary>
         public static void RemoveInnerBraces(ref string text)
         {
-            //string input = text;
-            //while (input.Contains("{{") && input.Contains("}}"))
-            //{
-            //    int firstIndex = input.IndexOf("{{");
-            //    int lastIndex = input.IndexOf("}}");
-            //    if (firstIndex < lastIndex)
-            //    {
-            //        string start = input.Substring(0, firstIndex);
-            //        string middle = input.Substring(firstIndex + 2, lastIndex - firstIndex - 2);
-            //        string end = input.Substring(lastIndex + 2);
-            //        input = start + "{{" + middle + "}}" + end;
-            //    }
-            //    else
-            //    {
-            //        break;
-            //    }
-            //}
-            //text = input;
+            string pattern = "{{([^{}]*?)}}([^}]*)}}";
+            string replacement = "{{$1$2}}";
+            //string result = Regex.Replace(text, pattern, replacement);
+            //MessageBox.Show(result);        
+            text = Regex.Replace(text, pattern, replacement);
 
-            //string pattern = @"\{\{([^{}]*\{[^{}]*\}[^{}]*)\}\}";
-            //string replacement = "{{$1}}";
-            //Regex rgx = new Regex(pattern);
-            //string input = text;
-            //string result = rgx.Replace(input, replacement);
-            //text= result;
-        }
+
+        //string input = text;
+        //while (input.Contains("{{") && input.Contains("}}"))
+        //{
+        //    int firstIndex = input.IndexOf("{{");
+        //    int lastIndex = input.IndexOf("}}");
+        //    if (firstIndex < lastIndex)
+        //    {
+        //        string start = input.Substring(0, firstIndex);
+        //        string middle = input.Substring(firstIndex + 2, lastIndex - firstIndex - 2);
+        //        string end = input.Substring(lastIndex + 2);
+        //        input = start + "{{" + middle + "}}" + end;
+        //    }
+        //    else
+        //    {
+        //        break;
+        //    }
+        //}
+        //text = input;
+
+        //string pattern = @"\{\{([^{}]*\{[^{}]*\}[^{}]*)\}\}";
+        //string replacement = "{{$1}}";
+        //Regex rgx = new Regex(pattern);
+        //string input = text;
+        //string result = rgx.Replace(input, replacement);
+        //text= result;
+    }
     }
 }

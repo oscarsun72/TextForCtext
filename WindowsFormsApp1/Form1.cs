@@ -1531,6 +1531,7 @@ namespace WindowsFormsApp1
                 }
                 else
                 {
+                    if (s + l >= x.Length) return false;//在自動貼入模式和手動輸入模式錯亂時防呆 20240520
                     x = x.Substring(s + l);
                     undoRecord(xCopy + x);
                 }
@@ -4356,7 +4357,8 @@ namespace WindowsFormsApp1
                         titieBeginChar = x.Substring(i == 0 ? i : i--, 1);
                     }
                     if (i != 0)
-                        s = i + 2;
+                        s = i + 2;//20240520 待觀察/////////////////////////// 全自動才用此（待測試）
+                    //s = i + 1;//20240521 自動標題會被影響！
                     else s = i;
                 }
 
@@ -9273,7 +9275,11 @@ namespace WindowsFormsApp1
             //在連續輸入時能清除框中文字；手動輸入時一般當不必自動清除框中文字
             //br.在Chrome瀏覽器的Quick_edit文字框中輸入文字(br.driver, clear == " " ? clear : Clipboard.GetText(), url);
             //br.在Chrome瀏覽器的Quick_edit文字框中輸入文字(br.driver, clear == br.chkClearQuickedit_data_textboxTxtStr ? clear : Clipboard.GetText(), url);
-            br.在Chrome瀏覽器的Quick_edit文字框中輸入文字(br.driver, clear == br.chkClearQuickedit_data_textboxTxtStr ? clear : br.TextPatst2Quick_editBox, url);
+            string formalX = clear == br.chkClearQuickedit_data_textboxTxtStr ? clear : br.TextPatst2Quick_editBox;
+            CnText.FormalizeText(ref formalX);
+            br.在Chrome瀏覽器的Quick_edit文字框中輸入文字(br.driver,
+                formalX
+                , url);
             return true;
         }
 
@@ -11005,7 +11011,7 @@ namespace WindowsFormsApp1
                         {//過於頻繁會造成chromedriver反應不及而當掉
                             timeDifference = DateTime.Now.Subtract(nextPageStartTime);
                             if (timeDifference.TotalSeconds < 0.3)
-                                return;                        
+                                return;
                             nextPageStartTime = DateTime.Now;
                             if (br.waitFindWebElementBySelector_ToBeClickable("#canvas > svg > rect") != null)
                                 br.Input_picture();
@@ -11047,9 +11053,9 @@ namespace WindowsFormsApp1
                     case MouseButtons.XButton2:
                         if (browsrOPMode != BrowserOPMode.appActivateByName)
                         {//過於頻繁會造成chromedriver反應不及而當掉
-                            //timeDifference = DateTime.Now.Subtract(nextPageStartTime);
-                            //if (timeDifference.TotalSeconds < 0.3)
-                                //return;
+                         //timeDifference = DateTime.Now.Subtract(nextPageStartTime);
+                         //if (timeDifference.TotalSeconds < 0.3)
+                         //return;
                             if (ModifierKeys == Keys.Control) br.Input_picture();
                             //nextPageStartTime = DateTime.Now;
                             nextPages(Keys.PageDown, true);

@@ -1197,22 +1197,53 @@ Sub 本草綱目縮排一格雙行小注格式_四庫全書_國學大師()
     SystemSetup.stopUndo ur, "本草綱目縮排一格雙行小注格式_四庫全書_國學大師"
     For Each p In d.Paragraphs
         px = p.Range.Text
-        If VBA.left(px, 3) = "　{{" And VBA.right(px, 3) = "}}" & chr(13) Then
+        If (VBA.left(px, 3) = "　{{" Or VBA.left(px, 3) = "{{　") And VBA.right(px, 3) = "}}" & chr(13) Then
             rng.SetRange p.Range.start + 3, p.Range.End - 3
-            rng.Characters(Int(rng.Characters.Count / 2)).InsertAfter chr(13) & "　"
+            If VBA.InStr(rng.Text, "}") = 0 Then
+                If rng.Characters.Count > 1 Then
+                    rng.Characters(Int(rng.Characters.Count / 2)).InsertAfter chr(13) & "　"
+                Else
+                    rng.Characters(1).InsertAfter chr(13) & "　"
+                End If
+            End If
         ElseIf VBA.left(px, 3) = "{{　" And VBA.right(px, 6) = "}}<p>" & chr(13) Then
             rng.SetRange p.Range.start + 3, p.Range.End - 6
-            For Each a In rng.Characters
-                If a.Text = "　" Then
-                    a.InsertBefore chr(13)
+            If VBA.InStr(rng.Text, "}") = 0 Then
+                If InStr(rng.Text, "　") Then
+                    For Each a In rng.Characters
+                        If a.Text = "　" Then
+                            a.InsertBefore chr(13)
+                        End If
+                    Next a
+                Else
+                    If rng.Characters.Count > 1 Then
+                        'Skype Copilot大菩薩 20240519
+                        rng.Characters(-Int(-(rng.Characters.Count / 2))).InsertAfter chr(13) & "　"
+                    Else
+                        rng.Characters(1).InsertAfter chr(13) & "　"
+                    End If
                 End If
-            Next a
+            End If
         End If
     Next p
     SystemSetup.contiUndo ur
 End Sub
 
-
+Sub 補括弧()
+    Dim d As Document, rng As Range, p As Paragraph, ur As UndoRecord
+    Set d = ActiveDocument: SystemSetup.stopUndo ur, "補括弧"
+    Set rng = d.Range
+    For Each p In d.Paragraphs
+        If VBA.left(p.Range.Text, 2) = "{{" And VBA.right(p.Range.Text, 3) <> "}}" & chr(13) Then
+            If VBA.right(p.Next.Range.Text, 3) = "}}" & chr(13) Then
+                rng.SetRange p.Range.start, p.Range.End - 1
+                rng.Text = VBA.left(p.Range.Text, VBA.Len(p.Range.Text) - 1) & "}}"
+                p.Next.Range.Text = "{{" & p.Next.Range.Text
+            End If
+        End If
+    Next p
+    SystemSetup.contiUndo ur
+End Sub
 Sub 維基文庫造字圖取代為文字(rng As Range)
 Dim inlnsp As InlineShape, aLtTxt As String
 Dim dictMdb As New dBase, cnt As New ADODB.Connection, rst As New ADODB.Recordset
