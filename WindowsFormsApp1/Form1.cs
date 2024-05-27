@@ -2994,7 +2994,7 @@ namespace WindowsFormsApp1
                     {
                         e.Handled = true;
 
-                        PagePaste2GjcoolOCR_ing = true;
+                        PagePaste2GjcoolOCR_ing = true;                        
                         PressAddKeyMethodPaste2QuickEditBox();
                         return;
                     }

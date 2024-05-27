@@ -4092,7 +4092,9 @@ internal static string getImageUrl() {
                 //while (iwe == null)
                 //    iwe = waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr:nth-child(1) > td:nth-child(7) > div");
                 string ocrResult = iwe.GetAttribute("title");
-                Clipboard.SetText(ocrResult.Replace("】【", string.Empty).Replace("【", "{{").Replace("】", "}}"));
+                ocrResult= ocrResult.Replace("】【", string.Empty).Replace("【", "{{").Replace("】", "}}");
+                CnText.RemoveInnerBraces(ref ocrResult);
+                Clipboard.SetText(ocrResult);
                 //.Replace("0","◯").Replace("〇", "◯"));
 
             }
@@ -5894,7 +5896,8 @@ internal static string getImageUrl() {
                     try
                     {
                         string info = iwtext.Text;
-                        if (info.StartsWith("reach traffic limit.") || info.StartsWith("识别失败")
+                        if (info=="reach limit"
+                            ||info.StartsWith("reach traffic limit.") || info.StartsWith("识别失败")
                             || info.StartsWith("ip address banned") || info.StartsWith("System is busy"))
                         {
                             trafficLimit = true; DialogResult ds = DialogResult.None;
