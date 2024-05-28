@@ -715,7 +715,7 @@ namespace TextForCtext
                 int closeBracesCount = result.Count(c => c == '}');
                 if (openBracesCount == closeBracesCount)
                 {
-                    Debugger.Break();
+                    //Debugger.Break();
                     text = result;
                 }
             }
