@@ -748,5 +748,17 @@ namespace TextForCtext
             //string result = rgx.Replace(input, replacement);
             //text= result;
         }
+        /// <summary>
+        /// 將文本中成對一組的半形空格「 」轉換成成對一組的雙大括弧「{{}}」
+        /// 20240529 Copilot大菩薩：C# 文本轉換
+        /// </summary>
+        /// <param name="text"></param>
+        public static void Spaces2Braces(ref string text)
+        {///這段程式碼使用了正則表達式（Regular Expression）來找出文本中成對一組的半形空格「 」，並將其替換為成對一組的雙大括弧「{{}}」。請將 “您的文本” 替換為您要處理的文本。
+            string pattern = " ([^ ]*) ";
+            string replacement = "{{$1}}";
+            string result = Regex.Replace(text, pattern, replacement);
+            if (result != text) { text = result; }
+        }
     }
 }
