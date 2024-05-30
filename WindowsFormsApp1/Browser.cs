@@ -3914,8 +3914,14 @@ internal static string getImageUrl() {
                 iwe = waitFindWebElementBySelector_ToBeClickable("#swal2-title", 1);
                 while (iwe == null)
                 {
-                    if (waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr > td:nth-child(4)").GetAttribute("textContent") != string.Empty
-                        && waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr > td:nth-child(7)")?.GetAttribute("textContent") == " ") goto reRunOCR;
+                    try
+                    {
+                        if (waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr > td:nth-child(4)").GetAttribute("textContent") != string.Empty
+                            && waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr > td:nth-child(7)")?.GetAttribute("textContent") == " ") goto reRunOCR;
+                    }
+                    catch (Exception)
+                    {
+                    }
                     iwe = waitFindWebElementBySelector_ToBeClickable("#swal2-title", 1);
                 }
                 //按下「上傳完成」按鈕

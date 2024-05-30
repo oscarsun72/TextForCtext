@@ -1551,6 +1551,7 @@ Docs.空白的新文件
 Set d = ActiveDocument
 If Selection.Type = wdSelectionIP Then ActiveDocument.Select
 Set slRng = Selection.Range
+清除文本頁中的編號儲存格 slRng
 中國哲學書電子化計劃_表格轉文字 slRng
 Dim ay, e
 ay = Array(254, 8912896)
@@ -1575,6 +1576,19 @@ Do While slRng.Find.Execute(, , , , , , True, wdFindStop)
     End If
 Loop
 SystemSetup.contiUndo ur
+End Sub
+
+Sub 清除文本頁中的編號儲存格(rng As Range)
+    Dim c As Cell, cx As String, t As Table
+    For Each t In rng.Tables
+        For Each c In t.Range.Cells
+            c.Select
+            cx = c.Range.Text
+            If VBA.IsNumeric(VBA.left(cx, 1)) And InStr(cx, ChrW(160) & ChrW(47)) > 0 Then
+                c.Delete
+            End If
+        Next c
+    Next t
 End Sub
 
 Sub 維基文庫等欲直接抽換之字(d As Document)

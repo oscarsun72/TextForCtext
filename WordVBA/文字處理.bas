@@ -2751,6 +2751,7 @@ Dim tb As Table, c As Cell ', ci As Long
 'Set d = ActiveDocument
 lngTemp = word.Application.DisplayAlerts
 If r.Tables.Count > 0 Then
+    中國哲學書電子化計劃.清除文本頁中的編號儲存格 r
     For Each tb In r.Tables
         'tb.Columns(1).Delete
         Err.Raise 5992

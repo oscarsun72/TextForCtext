@@ -25,8 +25,8 @@ Option Explicit
 '
 #If VBA7 Then
 '    Private Declare PtrSafe Function OpenClipboard Lib "User32" (ByVal hWnd As LongPtr) As Long
-    Private Declare PtrSafe Function IsClipboardFormatAvailable Lib "User32" (ByVal wFormat As Long) As Long
-    Private Declare PtrSafe Function GetClipboardData Lib "User32" (ByVal wFormat As Long) As LongPtr
+    Private Declare PtrSafe Function IsClipboardFormatAvailable Lib "user32" (ByVal wFormat As Long) As Long
+    Private Declare PtrSafe Function GetClipboardData Lib "user32" (ByVal wFormat As Long) As LongPtr
 '    Private Declare PtrSafe Function GlobalLock Lib "kernel32" (ByVal hMem As LongPtr) As LongPtr
 '    Private Declare PtrSafe Function GlobalSize Lib "kernel32" (ByVal hMem As LongPtr) As Long
 '    Private Declare PtrSafe Function lstrcpy Lib "kernel32" (ByVal lpString1 As Any, ByVal lpString2 As Any) As Long
@@ -35,7 +35,7 @@ Option Explicit
 #Else
 '    Private Declare PtrSafe Function OpenClipboard Lib "User32" (ByVal hWnd As Long) As Long
 '    Private Declare PtrSafe Function IsClipboardFormatAvailable Lib "User32" (ByVal wFormat As Long) As Long
-    Private Declare PtrSafe Function GetClipboardData Lib "User32" (ByVal wFormat As Long) As Long
+    Private Declare PtrSafe Function GetClipboardData Lib "user32" (ByVal wFormat As Long) As Long
 '    Private Declare PtrSafe Function GlobalLock Lib "kernel32" (ByVal hMem As Long) As Long
 '    Private Declare PtrSafe Function GlobalSize Lib "kernel32" (ByVal hMem As Long) As Long
 '    Private Declare PtrSafe Function lstrcpy Lib "kernel32" (ByVal lpString1 As Any, ByVal lpString2 As Any) As Long
@@ -78,9 +78,12 @@ Function Is_ClipboardContainCtext_Note_InlinecommentColor() As Boolean
 '    d.Windows(1).Visible = False
     ' 將剪貼簿的內容加入Word檔案
     Set TextRange = d.Range
-    On Error GoTo eh
+    On Error GoTo eH
     TextRange.Paste
-
+    If (TextRange.Tables.Count > 0) Then
+        中國哲學書電子化計劃.清除文本頁中的編號儲存格 TextRange
+        TextRange.Copy
+    End If
     ' 檢查字型顏色是否為綠色
     For Each a In TextRange.Characters
         If a.Font.Color = 34816 Then
@@ -97,7 +100,7 @@ exitFunction:
     d.Close wdDoNotSaveChanges
     word.Application.ScreenUpdating = True
 Exit Function
-eh:
+eH:
     Select Case Err.Number
         Case 4605
             MsgBox Err.Description '此方法或屬性無法使用，因為[剪貼簿] 是空的或無效的。
