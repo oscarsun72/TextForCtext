@@ -3930,7 +3930,7 @@ internal static string getImageUrl() {
                 {
                     try
                     {
-                        if (waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr > td:nth-child(4)").GetAttribute("textContent") != string.Empty
+                        if (waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr > td:nth-child(4)")?.GetAttribute("textContent") != string.Empty
                             && waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr > td:nth-child(7)")?.GetAttribute("textContent") == " "
                             && waitFindWebElementBySelector_ToBeClickable("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled") == null) goto reRunOCR;
                     }
