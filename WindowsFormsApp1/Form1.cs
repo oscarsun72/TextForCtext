@@ -2994,7 +2994,7 @@ namespace WindowsFormsApp1
                     {
                         e.Handled = true;
 
-                        PagePaste2GjcoolOCR_ing = true;                        
+                        PagePaste2GjcoolOCR_ing = true;
                         PressAddKeyMethodPaste2QuickEditBox();
                         return;
                     }
@@ -7929,7 +7929,14 @@ namespace WindowsFormsApp1
                     autoKeysTitleCodeAndPreWideSpace();
                     ResumeEvents(); stopUndoRec = false;
                     if (!textBox1.Text.IsNullOrEmpty())
-                        Clipboard.SetText(textBox1.Text);
+                        try
+                        {
+                            Clipboard.SetText(textBox1.Text);
+                        }
+                        catch (Exception)
+                        {
+                            playSound(soundLike.error, true);
+                        }
                     return;
 
                 }

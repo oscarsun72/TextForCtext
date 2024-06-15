@@ -1191,7 +1191,34 @@ AppActivate "TextForCtext"
 SendKeys "%{insert}", True
 SystemSetup.playSound 4
 End Sub
-Sub 本草綱目縮排一格雙行小注格式_四庫全書_國學大師()
+Sub 楚辭集注縮排N格雙行小注格式_四庫全書_國學大師()
+    Dim d As Document, p As Paragraph, px As String, rng As Range, a As Range, ur As UndoRecord, s As Long, e As Long, sx As String
+    Set d = ActiveDocument: Set rng = d.Range
+    SystemSetup.stopUndo ur, "楚辭集注縮排N格雙行小注格式_四庫全書_國學大師"
+    For Each p In d.Paragraphs
+        px = p.Range.Text
+        s = VBA.InStr(px, "{{"): e = VBA.InStr(px, "}}" & chr(13))
+        If e > 0 Then sx = Mid(px, s + 2, e - s - 2)
+        If e > 0 And s > 0 And VBA.InStr(sx, "{{") = 0 And VBA.InStr(sx, "}}") = 0 Then '前後有{{}}，但些中間不能再有{{}}
+            If s = 1 Then '如果前無縮排
+                rng.SetRange p.Range.start + 2, p.Range.End - 3
+                rng.Characters(Int(rng.Characters.Count / 2)).InsertAfter chr(13)
+            Else
+                If VBA.InStr(px, "　{{") > 0 Then
+                    sx = Mid(px, 1, s - 1)
+                    If Replace(sx, "　", vbNullString) = vbNullString Then '如前前綴都是全形空格；即縮排
+                        rng.SetRange p.Range.start + VBA.Len(sx) + 2, p.Range.End - 3
+                        rng.Characters(Int(rng.Characters.Count / 2)).InsertAfter chr(13) & Mid(px, 1, s - 1)
+                    End If
+                End If
+            End If
+        End If
+        
+    Next p
+    SystemSetup.contiUndo ur
+End Sub
+
+Sub 本草綱目縮排1格雙行小注格式_四庫全書_國學大師()
     Dim d As Document, p As Paragraph, px As String, rng As Range, a As Range, ur As UndoRecord
     Set d = ActiveDocument: Set rng = d.Range
     SystemSetup.stopUndo ur, "本草綱目縮排一格雙行小注格式_四庫全書_國學大師"

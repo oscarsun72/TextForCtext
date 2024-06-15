@@ -529,7 +529,7 @@ Sub 插入超連結() '2008/9/1 指定鍵(快捷鍵) Ctrl+shift+K(原系統指定在smallcaps為)
         Next
         wnd.Activate
     End If
-    rng.Document.Save
+    If rng.Document.path <> "" Then rng.Document.Save
 End Sub
 
 Sub insertHydzdLink()
