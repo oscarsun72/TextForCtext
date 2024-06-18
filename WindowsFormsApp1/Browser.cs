@@ -4060,7 +4060,16 @@ internal static string getImageUrl() {
                 }
                 try
                 {
+                    //訊息方塊：成功: 0, 失败: 1
+                    IWebElement iw = waitFindWebElementBySelector_ToBeClickable("#swal2-html-container");
+                    bool stopProcess = false;
+                    if (iw != null && iw.Text.Contains("成功: 0, 失败: 1"))
+                    {
+                        stopProcess = true;
+                    }
+
                     iwe.Click();
+                    if (stopProcess) { StopOCR = true; return false; }
 
                 }
                 catch (Exception)
