@@ -4144,9 +4144,10 @@ internal static string getImageUrl() {
             {
 
                 //按下選取方塊，準備刪除
-                iwe = waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr:nth-child(1) > td.bs-checkbox > label > input[type=checkbox]", 1);
+                //iwe = waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr:nth-child(1) > td.bs-checkbox > label > input[type=checkbox]", 1);
+                iwe = waitFindWebElementBySelector_ToBeClickable("#fileTable > thead > tr > th.bs-checkbox > div.th-inner > label > input[type=checkbox]", 1);
                 while (iwe == null)
-                    iwe = waitFindWebElementBySelector_ToBeClickable("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled", 1);
+                    iwe = waitFindWebElementBySelector_ToBeClickable("#fileTable > thead > tr > th.bs-checkbox > div.th-inner > label > input[type=checkbox]", 1);
                 if (!iwe.Selected) iwe.Click();
             }
             catch (Exception)
@@ -6771,6 +6772,7 @@ internal static string getImageUrl() {
             //var driver = new ChromeDriver();
             openNewTabWindow();
             driver.Navigate().GoToUrl(imageUrl);
+            driver.SwitchTo().Window(driver.CurrentWindowHandle);
 
             // 找到圖片元素
             var imageElement = driver.FindElement(By.TagName("img"));
@@ -6784,7 +6786,8 @@ internal static string getImageUrl() {
             // 模擬按下「V」鍵，選擇「另存圖片」的選項
             // 注意：這可能需要根據您的瀏覽器和語言設定來調整
             action.SendKeys("v").Perform();
-            SendKeys.Send("v");
+            //SendKeys.Send("{v 2}");
+            SendKeys.SendWait("v");
 
             // TODO: 處理彈出的「另存為」對話框，輸入文件名並點擊「保存」
             // 這可能需要使用到其他的工具或方法，例如 AutoIt 或 SendKeys

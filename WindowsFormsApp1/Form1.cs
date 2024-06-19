@@ -2964,8 +2964,9 @@ namespace WindowsFormsApp1
                     if (keyinTextMode && OcrTextMode)
                     {
                         e.Handled = true;
-                    //if (textBox1.Text != string.Empty)
-                    //{ undoRecord(); pauseEvents(); textBox1.Text = string.Empty; resumeEvents(); }
+                        //if (textBox1.Text != string.Empty)
+                        //{ undoRecord(); pauseEvents(); textBox1.Text = string.Empty; resumeEvents(); }
+                        TopMost = false;
                     rep:
                         if (pagePaste2GjcoolOCR() && PasteOcrResultFisrtMode && ModifierKeys != Keys.Control)
                             goto rep;

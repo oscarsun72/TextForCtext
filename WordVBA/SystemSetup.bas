@@ -20,12 +20,12 @@ Public Declare PtrSafe Function ShellExecute Lib "shell32.dll" Alias "ShellExecu
     (ByVal hWnd As Long, ByVal lpOperation As String, ByVal lpFile As String, _
   ByVal lpParameters As String, ByVal lpDirectory As String, _
   ByVal nShowCmd As Long) As Long 'https://www.mrexcel.com/board/threads/vba-api-call-issues-with-show-window-activation.920147/
-Public Declare PtrSafe Function ShowWindow Lib "User32" _
+Public Declare PtrSafe Function ShowWindow Lib "user32" _
   (ByVal hWnd As Long, ByVal nCmdSHow As Long) As Long
-Public Declare PtrSafe Function FindWindow Lib "User32" Alias "FindWindowA" _
+Public Declare PtrSafe Function FindWindow Lib "user32" Alias "FindWindowA" _
   (ByVal lpClassName As String, ByVal lpWindowName As String) As Long
   
-Public Declare PtrSafe Function SetForegroundWindow Lib "User32" (ByVal hWnd As Long) As Boolean
+Public Declare PtrSafe Function SetForegroundWindow Lib "user32" (ByVal hWnd As Long) As Boolean
   
   
   
@@ -110,7 +110,7 @@ Function ClipBoard_GetData()
       RetVal = GlobalUnlock(hClipMemory)
 
       ' Peel off the null terminating character.
-      MyString = Mid(MyString, 1, InStr(1, MyString, Chr$(0), 0) - 1)
+      MyString = Mid(MyString, 1, InStr(1, MyString, chr$(0), 0) - 1)
    Else
       MsgBox "Could not lock memory to copy string from."
    End If
@@ -188,14 +188,14 @@ Public Function GetClipboard() As String
     CloseClipboard
 End Function
 
-Sub CopyText(text As String) 'https://stackoverflow.com/questions/14219455/excel-vba-code-to-copy-a-specific-string-to-clipboard
+Sub CopyText(Text As String) 'https://stackoverflow.com/questions/14219455/excel-vba-code-to-copy-a-specific-string-to-clipboard
     'VBA Macro using late binding to copy text to clipboard.
     'By Justin Kay, 8/15/2014
     Dim MSForms_DataObject As Object
     Set MSForms_DataObject = CreateObject("new:{1C3B4210-F441-11CE-B9EA-00AA006B1A69}")
 '    Set MSForms_DataObject = New MSForms.DataObject »P¤W¦¡¬Û¦P
 '    MSForms_DataObject.Clear
-    MSForms_DataObject.SetText text
+    MSForms_DataObject.SetText Text
     MSForms_DataObject.PutInClipboard
     Set MSForms_DataObject = Nothing
 End Sub
@@ -273,9 +273,11 @@ If Selection.Type = wdSelectionNormal Then
         'Shell "C:\Program Files\Opera\opera.exe" & " http://www.google.com.tw/search?q=" & Selection, vbNormalFocus
         If Dir(st & f) <> "" Then
             funame = st & f
+        ElseIf Dir("C:\Users\oscar\Dropbox\VS\VB\ºô¸ô·j´M_¤¸·j´M-¦P®É·j¦h­Ó¤ÞÀº\ºô¸ô·j´M_¤¸·j´M-¦P®É·j¦h­Ó¤ÞÀº\bin\Debug\" & f) <> "" Then
+            funame = "C:\Users\oscar\Dropbox\VS\VB\ºô¸ô·j´M_¤¸·j´M-¦P®É·j¦h­Ó¤ÞÀº\ºô¸ô·j´M_¤¸·j´M-¦P®É·j¦h­Ó¤ÞÀº\bin\Debug\" & f
         ElseIf Dir("C:\Program Files (x86)\®]¦u¯u\ºô¸ô·j´M_¤¸·j´M-¦P®É·j¦h­Ó¤ÞÀº\" & f) <> "" Then
             funame = "C:\Program Files (x86)\®]¦u¯u\ºô¸ô·j´M_¤¸·j´M-¦P®É·j¦h­Ó¤ÞÀº\" & f
-        ElseIf Dir("W:\!! for hpr\VB\ºô¸ô·j´M_¤¸·j´M-¦P®É·j¦h­Ó¤ÞÀº\ºô¸ô·j´M_¤¸·j´M-¦P®É·j¦h­Ó¤ÞÀº\bin\Debug\" & f) <> "" Then
+         ElseIf Dir("W:\!! for hpr\VB\ºô¸ô·j´M_¤¸·j´M-¦P®É·j¦h­Ó¤ÞÀº\ºô¸ô·j´M_¤¸·j´M-¦P®É·j¦h­Ó¤ÞÀº\bin\Debug\" & f) <> "" Then
             funame = "W:\!! for hpr\VB\ºô¸ô·j´M_¤¸·j´M-¦P®É·j¦h­Ó¤ÞÀº\ºô¸ô·j´M_¤¸·j´M-¦P®É·j¦h­Ó¤ÞÀº\bin\Debug\" & f
         ElseIf Dir("C:\ºô¸ô·j´M_¤¸·j´M-¦P®É·j¦h­Ó¤ÞÀº\ºô¸ô·j´M_¤¸·j´M-¦P®É·j¦h­Ó¤ÞÀº\bin\Debug\" & f) <> "" Then
             funame = "C:\ºô¸ô·j´M_¤¸·j´M-¦P®É·j¦h­Ó¤ÞÀº\ºô¸ô·j´M_¤¸·j´M-¦P®É·j¦h­Ó¤ÞÀº\bin\Debug\" & f
@@ -332,13 +334,13 @@ a = VBA.Replace(a, "AppData\Roaming", "")
 End Function
 
 Function GetClipboardText()
-On Error GoTo eh
+On Error GoTo eH
 Dim ClipBoard As New MSForms.DataObject
 DoEvents
 ClipBoard.GetFromClipboard
 GetClipboardText = ClipBoard.GetText
 Exit Function
-eh:
+eH:
     Select Case Err.Number
         Case -2147221040 'DataObject:GetFromClipboard OpenClipboard ¥¢±Ñ
             SystemSetup.wait 0.8
@@ -359,20 +361,37 @@ Shell Replace(SystemSetup.¨ú±o®à­±¸ô®|, "Desktop", "Dropbox") & "\VS\bat\­«±Ò¤p¤
 End Sub
 
 Sub ShortcutKeys() '«ü©w§Ö³tÁä
-CustomizationContext = NormalTemplate
-'KeyBindings.Add _
-    KeyCategory:=wdKeyCategoryCommand, _
-    Command:="Docs.¦b¥»¤å¥ó¤¤´M§ä¿ï¨ú¦r¦ê", _
-    KeyCode:=BuildKeyCode(wdKeyControl, wdKeyShift, wdKeyPageDown)
-KeyBindings.Add _
-    KeyCategory:=wdKeyCategoryCommand, _
-    Command:="Docs.¶K¤W¯Â¤å¦r", _
-    KeyCode:=BuildKeyCode(wdKeyShift, wdKeyInsert)
+Dim kb As KeyBinding, shortcutKeys¶K¤W¯Â¤å¦r As Boolean, shortcutKeysEditCopy As Boolean
+For Each kb In KeyBindings
+    If kb.KeyCode = BuildKeyCode(wdKeyShift, wdKeyInsert) And kb.Command = "Docs.¶K¤W¯Â¤å¦r" Then
+'        Stop
+        shortcutKeys¶K¤W¯Â¤å¦r = True
+    ElseIf kb.KeyCode = BuildKeyCode(wdKeyControl, wdKeyInsert) And kb.Command = "EditCopy" Then
+'        Stop
+        shortcutKeysEditCopy = True
+    End If
+Next kb
+'Stop
+If Not shortcutKeys¶K¤W¯Â¤å¦r Then
+    CustomizationContext = NormalTemplate
+    KeyBindings.Add _
+        KeyCategory:=wdKeyCategoryCommand, _
+        Command:="Docs.¶K¤W¯Â¤å¦r", _
+        KeyCode:=BuildKeyCode(wdKeyShift, wdKeyInsert)
+End If
+If Not shortcutKeysEditCopy Then
+    CustomizationContext = NormalTemplate
+    KeyBindings.Add _
+        KeyCategory:=wdKeyCategoryCommand, _
+        Command:="EditCopy", _
+        KeyCode:=BuildKeyCode(wdKeyControl, wdKeyInsert)
+End If
 
-KeyBindings.Add _
-    KeyCategory:=wdKeyCategoryCommand, _
-    Command:="EditCopy", _
-    KeyCode:=BuildKeyCode(wdKeyControl, wdKeyInsert)
+'    CustomizationContext = NormalTemplate
+    'KeyBindings.Add _
+        KeyCategory:=wdKeyCategoryCommand, _
+        Command:="Docs.¦b¥»¤å¥ó¤¤´M§ä¿ï¨ú¦r¦ê", _
+        KeyCode:=BuildKeyCode(wdKeyControl, wdKeyShift, wdKeyPageDown)
 
 End Sub
 
@@ -456,7 +475,7 @@ End Sub
 
 
 Public Function appActivatedYet(exeName As String) As Boolean
-On Error GoTo eh:
+On Error GoTo eH:
       exeName = exeName & ".exe": exeName = StrConv(exeName, vbUpperCase)
 'https://stackoverflow.com/questions/44075292/determine-process-id-with-vba
 'https://stackoverflow.com/questions/26277214/vba-getting-program-names-and-task-id-of-running-processes
@@ -478,7 +497,7 @@ On Error GoTo eh:
     
     Set objProcessSet = Nothing
 Exit Function
-eh:
+eH:
 Select Case Err.Number
     Case 5 'µ{§Ç©I¥s©Î¤Þ¼Æ¤£¥¿½T
     Case Else
@@ -523,14 +542,14 @@ Sub backupNormal_dotm() '¦Û°Ê³Æ¥÷Normal.dotm
     source = SystemSetup.WordTemplatesPathIncldBackSlash + "Normal.dotm"
     destination = SystemSetup.DropBoxPathIncldBackSlash + "Normal.dotm"
     
-    On Error GoTo eh
+    On Error GoTo eH
     With SystemSetup.FileSystemObject
         If (.getfile(source).DateLastModified > _
             .getfile(destination).DateLastModified) Then _
                 .CopyFile source, destination
         End With
     Exit Sub
-eh:
+eH:
     Select Case Err.Number
         Case 70
             MsgBox "Normal.dotmÁÙ¥¼³Æ¥÷", vbExclamation
@@ -581,7 +600,7 @@ Dim objWMIService, objProcess, colProcess, pid
 If chromedriversPIDcntr = 0 Then
     ReDim chromedriversPID(0)
     If Not SeleniumOP.WD Is Nothing Then
-        On Error GoTo eh:
+        On Error GoTo eH:
         SeleniumOP.WD.Quit
         Set SeleniumOP.WD = Nothing
         Exit Sub
@@ -598,7 +617,7 @@ Next
 ReDim chromedriversPID(0): chromedriversPIDcntr = 0: Set SeleniumOP.WD = Nothing
 
 Exit Sub
-eh:
+eH:
 Select Case Err.Number
     Case -2147467261 '¨Ã¥¼±Nª«¥ó°Ñ¦Ò³]©w¬°ª«¥óªº°õ¦æ­ÓÅé¡C
         Resume Next
