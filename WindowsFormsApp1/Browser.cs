@@ -3988,7 +3988,7 @@ internal static string getImageUrl() {
                     //System.Diagnostics.Debugger.Break();
                     goto copyResult;
                 }
-                while (waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr > td:nth-child(4)").GetAttribute("textContent") == string.Empty) ;
+                while (waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr > td:nth-child(4)")?.GetAttribute("textContent") == string.Empty) ;
                 iwe = waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr:nth-child(1) > td.bs-checkbox > label > input[type=checkbox]", 1);
                 while (iwe == null)
                     iwe = waitFindWebElementBySelector_ToBeClickable("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled");
@@ -6773,6 +6773,9 @@ internal static string getImageUrl() {
             openNewTabWindow();
             driver.Navigate().GoToUrl(imageUrl);
             driver.SwitchTo().Window(driver.CurrentWindowHandle);
+            IWebElement iw = waitFindWebElementBySelector_ToBeClickable("body > img");
+            Cursor.Position = (Point)iw?.Location;
+            //if (iw != null)  clickCopybutton_GjcoolFastExperience(iw.Location); 
 
             // 找到圖片元素
             var imageElement = driver.FindElement(By.TagName("img"));
