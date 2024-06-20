@@ -6773,9 +6773,9 @@ internal static string getImageUrl() {
             openNewTabWindow();
             driver.Navigate().GoToUrl(imageUrl);
             driver.SwitchTo().Window(driver.CurrentWindowHandle);
-            IWebElement iw = waitFindWebElementBySelector_ToBeClickable("body > img");
-            Cursor.Position = (Point)iw?.Location;
-            //if (iw != null)  clickCopybutton_GjcoolFastExperience(iw.Location); 
+            //IWebElement iw = waitFindWebElementBySelector_ToBeClickable("body > img");
+            //Cursor.Position = (Point)iw?.Location;
+            ////if (iw != null)  clickCopybutton_GjcoolFastExperience(iw.Location); 
 
             // 找到圖片元素
             var imageElement = driver.FindElement(By.TagName("img"));
