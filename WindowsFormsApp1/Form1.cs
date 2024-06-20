@@ -2967,7 +2967,8 @@ namespace WindowsFormsApp1
                         //if (textBox1.Text != string.Empty)
                         //{ undoRecord(); pauseEvents(); textBox1.Text = string.Empty; resumeEvents(); }
                         TopMost = false;
-                        OpenQA.Selenium.IWebElement iw = br.waitFindWebElementBySelector_ToBeClickable("#canvas > svg");
+                        //OpenQA.Selenium.IWebElement iw = br.waitFindWebElementBySelector_ToBeClickable("#canvas > svg");
+                        OpenQA.Selenium.IWebElement iw = br.waitFindWebElementBySelector_ToBeClickable("#content > div:nth-child(7) > div:nth-child(1)");
                         Cursor.Position = (Point)iw?.Location;
                     //if (iw != null)  clickCopybutton_GjcoolFastExperience(iw.Location); 
 
