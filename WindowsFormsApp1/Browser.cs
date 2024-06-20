@@ -2160,7 +2160,8 @@ internal static string getImageUrl() {
         internal static bool OCR_GoogleKeep(string downloadImgFullName)
         {
             driver = driver ?? DriverNew();
-            string currentWindowHndl = driver.CurrentWindowHandle;
+            //string currentWindowHndl = driver.CurrentWindowHandle;
+            string currentWindowHndl = LastValidWindow;
             //const string keep = "https://keep.google.com/#NOTE/1XHzZWpH5DCDGOctKjMwNad9qGdtUiYQpSw7HtkmfuEEAJOCtlj37xJg5XgRzWoE";
             string keep = OCRSite_URL[OCRSiteTitle.GoogleKeep];//"https://keep.new";
             openNewTabWindow(WindowType.Window);
