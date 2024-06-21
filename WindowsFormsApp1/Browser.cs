@@ -3803,6 +3803,7 @@ internal static string getImageUrl() {
                 //按下「批量處理(new)」頁籤
                 //IWebElement iwe = waitFindWebElementBySelector_ToBeClickable("#batch_Tab_A", 15);
                 iwe = waitFindWebElementBySelector_ToBeClickable("#File_Tab", 15);
+                if (iwe == null) { StopOCR = true; return false; }
                 iwe.Click();
             }
             catch (Exception)

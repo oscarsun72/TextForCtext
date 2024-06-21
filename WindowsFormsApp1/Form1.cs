@@ -2968,7 +2968,7 @@ namespace WindowsFormsApp1
                         //{ undoRecord(); pauseEvents(); textBox1.Text = string.Empty; resumeEvents(); }
                         //OpenQA.Selenium.IWebElement iw = br.waitFindWebElementBySelector_ToBeClickable("#canvas > svg");
                         TopMost = false;
-                        OpenQA.Selenium.IWebElement iw = br.waitFindWebElementBySelector_ToBeClickable("#content > div:nth-child(7) > div:nth-child(1)");
+                        OpenQA.Selenium.IWebElement iw = br.waitFindWebElementBySelector_ToBeClickable("#content");
                         if (iw != null) // clickCopybutton_GjcoolFastExperience(iw.Location); 
                             Cursor.Position = (Point)iw.Location;
 
@@ -7500,7 +7500,7 @@ namespace WindowsFormsApp1
                     if (browsrOPMode == BrowserOPMode.appActivateByName) return;
                     e.Handled = true; Form1.playSound(Form1.soundLike.press);
                     TopMost = false;
-                    OpenQA.Selenium.IWebElement iw = br.waitFindWebElementBySelector_ToBeClickable("#content > div:nth-child(7) > div:nth-child(1)");
+                    OpenQA.Selenium.IWebElement iw = br.waitFindWebElementBySelector_ToBeClickable("#content");
                     if (iw != null) // clickCopybutton_GjcoolFastExperience(iw.Location); 
                         Cursor.Position = (Point)iw.Location;
                     toOCR(br.OCRSiteTitle.GoogleKeep);
@@ -7556,7 +7556,7 @@ namespace WindowsFormsApp1
                     if (!IsValidUrl＿ImageTextComparisonPage(textBox3.Text)) return;
                     e.Handled = true; Form1.playSound(Form1.soundLike.press, true);
                     TopMost = false;
-                    OpenQA.Selenium.IWebElement iw = br.waitFindWebElementBySelector_ToBeClickable("#content > div:nth-child(7) > div:nth-child(1)");
+                    OpenQA.Selenium.IWebElement iw = br.waitFindWebElementBySelector_ToBeClickable("#content");
                     if (iw != null) // clickCopybutton_GjcoolFastExperience(iw.Location); 
                         Cursor.Position = (Point)iw.Location;
                     toOCR(br.OCRSiteTitle.GJcool);
