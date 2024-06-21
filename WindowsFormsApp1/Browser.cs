@@ -4122,6 +4122,11 @@ internal static string getImageUrl() {
                 //while (iwe == null)
                 //    iwe = waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr:nth-child(1) > td:nth-child(7) > div");
                 string ocrResult = iwe.GetAttribute("title");
+                if (ocrResult.IsNullOrEmpty())
+                {
+                    Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("OCR結果是空字串，請檢查！");
+                    StopOCR = true; return false;
+                }
                 if (ocrResult.IndexOf(" ") > -1)
                 {
                     //Debugger.Break();
@@ -4133,8 +4138,9 @@ internal static string getImageUrl() {
                 //.Replace("0","◯").Replace("〇", "◯"));
 
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                if (ex.HResult == -2147467261 && ex.Message.StartsWith("值不能為 null。")) { Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("OCR結果是空字串，請檢查！"); StopOCR = true; return false; }
                 goto reClickOCROK;
                 throw;
             }
