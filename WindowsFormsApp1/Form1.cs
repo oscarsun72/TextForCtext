@@ -2969,10 +2969,10 @@ namespace WindowsFormsApp1
                         //OpenQA.Selenium.IWebElement iw = br.waitFindWebElementBySelector_ToBeClickable("#canvas > svg");
                         TopMost = false;
                         OpenQA.Selenium.IWebElement iw = br.waitFindWebElementBySelector_ToBeClickable("#content > div:nth-child(7) > div:nth-child(1)");
-                        Cursor.Position = (Point)iw?.Location;
-                    //if (iw != null)  clickCopybutton_GjcoolFastExperience(iw.Location); 
+                        if (iw != null) // clickCopybutton_GjcoolFastExperience(iw.Location); 
+                            Cursor.Position = (Point)iw.Location;
 
-                    rep:
+                        rep:
                         if (pagePaste2GjcoolOCR() && PasteOcrResultFisrtMode && ModifierKeys != Keys.Control)
                             goto rep;
 
@@ -3083,7 +3083,7 @@ namespace WindowsFormsApp1
             //playSound(soundLike.press);
             //textBox1.SelectAll();//此方法必須在表單有焦點時才行
             TopMost = false;//將焦點交給Chrome瀏覽器
-            
+
             bool eventsEnable = _eventsEnabled;
             if (eventsEnable) PauseEvents();
             string _lastValidWindow = br.LastValidWindow;
@@ -7501,8 +7501,8 @@ namespace WindowsFormsApp1
                     e.Handled = true; Form1.playSound(Form1.soundLike.press);
                     TopMost = false;
                     OpenQA.Selenium.IWebElement iw = br.waitFindWebElementBySelector_ToBeClickable("#content > div:nth-child(7) > div:nth-child(1)");
-                    Cursor.Position = (Point)iw?.Location;
-                    //if (iw != null)  clickCopybutton_GjcoolFastExperience(iw.Location); 
+                    if (iw != null) // clickCopybutton_GjcoolFastExperience(iw.Location); 
+                        Cursor.Position = (Point)iw.Location;
                     toOCR(br.OCRSiteTitle.GoogleKeep);
                     return;
                 }
@@ -7557,8 +7557,8 @@ namespace WindowsFormsApp1
                     e.Handled = true; Form1.playSound(Form1.soundLike.press, true);
                     TopMost = false;
                     OpenQA.Selenium.IWebElement iw = br.waitFindWebElementBySelector_ToBeClickable("#content > div:nth-child(7) > div:nth-child(1)");
-                    Cursor.Position = (Point)iw?.Location;
-                    //if (iw != null)  clickCopybutton_GjcoolFastExperience(iw.Location); 
+                    if (iw != null) // clickCopybutton_GjcoolFastExperience(iw.Location); 
+                        Cursor.Position = (Point)iw.Location;
                     toOCR(br.OCRSiteTitle.GJcool);
                     //if (browsrOPMode == BrowserOPMode.appActivateByName) return;
                     //e.Handled = true;
