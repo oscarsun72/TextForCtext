@@ -8046,7 +8046,7 @@ namespace WindowsFormsApp1
                     return false;
                 }
             }
-            else if (new StringInfo(br.Quickedit_data_textbox.Text)?.LengthInTextElements < (normalLineParaLength == 0 ? 20 : normalLineParaLength)
+            else if (new StringInfo(br.Quickedit_data_textbox?.Text)?.LengthInTextElements < (normalLineParaLength == 0 ? 20 : normalLineParaLength)
                 && quickedit_data_textboxTxt != "\t")// 「	」"\t"是新建的維基文本故 20240405
             {
                 OCRBreakSoundNotification();

@@ -4124,7 +4124,21 @@ internal static string getImageUrl() {
                 string ocrResult = iwe.GetAttribute("title");
                 if (ocrResult.IsNullOrEmpty())
                 {
-                    Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("OCR結果是空字串，請檢查！");
+                    DateTime dtt = DateTime.Now;
+                    //檢查「OCR完成 OK」按鈕
+                    while (waitFindWebElementBySelector_ToBeClickable("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled") == null)
+                    { if (DateTime.Now.Subtract(dtt).TotalSeconds > 5) break; }
+                    iwe = waitFindWebElementBySelector_ToBeClickable("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled");
+                    if (iwe == null)
+                    {
+                        Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("OCR結果是空字串，請檢查！");
+                        if (waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr:nth-child(1) > td:nth-child(7) > div")?.GetAttribute("title").IsNullOrEmpty() == false) { goto copyResult; }
+                    }
+                    else
+                    //按下「OCR完成 OK」按鈕                        
+                    {
+                        if (waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr:nth-child(1) > td:nth-child(7) > div")?.GetAttribute("title").IsNullOrEmpty() == false) { iwe.Click(); goto copyResult; }
+                    }
                     StopOCR = true; return false;
                 }
                 if (ocrResult.IndexOf(" ") > -1)
