@@ -7549,6 +7549,16 @@ namespace WindowsFormsApp1
                     keysParagraphSymbol(true); return;
                 }
 
+                if (e.KeyCode == Keys.K)
+                {//- Alt + Shift + k ：下載書圖並交給《看典古籍》OCR
+                    e.Handled = true; Form1.playSound(Form1.soundLike.press, true);
+                    TopMost = false;
+                    OpenQA.Selenium.IWebElement iw = br.waitFindWebElementBySelector_ToBeClickable("#content");
+                    if (iw != null) // clickCopybutton_GjcoolFastExperience(iw.Location); 
+                        Cursor.Position = (Point)iw.Location;
+                    toOCR(br.OCRSiteTitle.KanDianGuJi);
+                    return;
+                }
                 if (e.KeyCode == Keys.O)
                 {//Alt + Shift + o ：交給《古籍酷》 OCR ，模擬使用者手動操作的功能（測試成功！！！！）
                     if (PagePaste2GjcoolOCR_ing) return;
@@ -8127,6 +8137,9 @@ namespace WindowsFormsApp1
                     //            break;
                     //    }
                     //}
+                    break;
+                case br.OCRSiteTitle.KanDianGuJi:
+                    ocrResult = br.OCR_KanDianGuJi(downloadImgFullName);
                     break;
                 default:
                     break;

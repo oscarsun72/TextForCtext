@@ -120,14 +120,15 @@ namespace TextForCtext
         internal static Dictionary<OCRSiteTitle, string> OCRSite_URL = new Dictionary<OCRSiteTitle, string>()
             {
                 { OCRSiteTitle.GoogleKeep, "https://keep.new" }, // maps the key "GoogleKeep" to the value "https://keep.new"
-                {OCRSiteTitle.GJcool, "https://gj.cool/try_ocr" } // maps the key "GJcool" to the value "https://gj.cool/try_ocr"
+                { OCRSiteTitle.GJcool, "https://gj.cool/try_ocr" }, // maps the key "GJcool" to the value "https://gj.cool/try_ocr"
                 //{OCRSiteTitle.GJcool, "https://ocr.gj.cool/try_ocr" } // maps the key "GJcool" to the value "https://gj.cool/try_ocr" 
                 //"https://ocr.gj.cool/try_ocr" 這個 oscarsun72 此帳戶可以登錄，而 "https://gj.cool/try_ocr" 似不行 20240208
+                { OCRSiteTitle.KanDianGuJi, "https://kandianguji.com/ocr" } // maps the key "KanDianGuJi" to the value "https://kandianguji.com/ocr"
             };
         /// <summary>
         /// 儲存常用的網站名
         /// </summary>
-        internal enum OCRSiteTitle { GoogleKeep, GJcool }
+        internal enum OCRSiteTitle { GoogleKeep, GJcool , KanDianGuJi}
         /* chatGPT大菩薩：C# Enum Values：
          你的程式碼是可以運作的。這樣的實作方式會使得程式碼更具有可維護性和可擴展性。在需要使用網址時，只需要通過enum來訪問對應的網址，而不需要直接使用網址字符串。當需要添加、修改或刪除網址時，只需要更新Dictionary中的對應鍵值對即可，而不需要修改程式碼中的enum。
         孫守真
@@ -2253,6 +2254,69 @@ internal static string getImageUrl() {
             return true;
 
         }
+        /// <summary>
+        /// 《看典古籍》OCR
+        /// </summary>
+        /// <param name="downloadImgFullName">書圖下載全檔名</param>
+        /// <returns></returns>
+        internal static bool OCR_KanDianGuJi(string downloadImgFullName){
+            LastValidWindow = driver.CurrentWindowHandle;
+            openNewTabWindow();
+            GoToUrlandActivate("https://kandianguji.com/ocr");
+
+            //按下「選擇檔案」按鈕
+            //IWebElement iwe = waitFindWebElementBySelector_ToBeClickable("#image-input");
+            IWebElement iwe = waitFindWebElementBySelector_ToBeClickable("#convert-form > label.drop-container");
+            if(iwe==null){ StopOCR = true; return false; }
+            driver.SwitchTo().Window(driver.CurrentWindowHandle);
+            iwe.Click();
+
+            //等待書圖檔下載完成
+            DateTime dt = DateTime.Now;
+            while (!File.Exists(downloadImgFullName))
+            {
+                if (DateTime.Now.Subtract(dt).TotalSeconds > 38) { StopOCR = true; return false; }
+            }
+
+            Clipboard.SetText(downloadImgFullName);
+            driver.SwitchTo().Window(driver.CurrentWindowHandle);
+            //等待選取檔案對話框開啟
+            //Thread.Sleep(800 + (
+            Thread.Sleep(1600 + (
+                800 + Extend_the_wait_time_for_the_Open_Old_File_dialog_box_to_appear_Millisecond < 0 ? 0 : Extend_the_wait_time_for_the_Open_Old_File_dialog_box_to_appear_Millisecond));//最小值（須在重開機後或系統最小負載時）（連「開啟」舊檔之視窗也看不見，即可完成）
+
+            //輸入：檔案名稱 //SendKeys.Send(downloadImgFullName);
+            SendKeys.SendWait("+{Insert}");//or "^v"
+            SendKeys.SendWait("{ENTER}");
+            //Clipboard.Clear();
+
+            //按下「開始識別」按鈕：
+            iwe = waitFindWebElementBySelector_ToBeClickable("#convert-form > button:nth-child(8)");
+            if (iwe == null) { StopOCR = true; return false; }
+            iwe.Click();
+
+            //檢查結果出來沒：
+            iwe = waitFindWebElementBySelector_ToBeClickable("#result_text");
+            if (iwe == null) { StopOCR = true; return false; }
+            dt = DateTime.Now;
+            while(iwe.GetAttribute("textContent") == "识别结果")
+            {
+                if (DateTime.Now.Subtract(dt).TotalSeconds > 10) { StopOCR = true; return false; }
+            }
+
+            //選取OCR結果
+            string ocrResult = iwe.GetAttribute("textContent");
+            if(ocrResult.IsNullOrEmpty()) { StopOCR = true; return false; }
+            ocrResult = ocrResult.Replace("  ", Environment.NewLine);
+
+            //複製OCR結果
+
+            Clipboard.SetText(ocrResult);
+
+            driver.Close();
+            driver.SwitchTo().Window(LastValidWindow);
+            return true;
+        }
 
         /// <summary>
         /// 當《古籍酷》點數（算力值、算力配额）小於150時=true
@@ -3858,9 +3922,9 @@ internal static string getImageUrl() {
                 }
                 Thread.Sleep(800);
             }
-        #endregion //以上檢查並刪除文件
+            #endregion //以上檢查並刪除文件
 
-
+            
         reUpload:
             //按下「上傳」
             iwe = waitFindWebElementBySelector_ToBeClickable("#FileUploadDropdown");
@@ -3909,6 +3973,7 @@ internal static string getImageUrl() {
             //Form1.playSound(Form1.soundLike.over);
 
             Thread.Sleep(1400);
+            Byte reRunOCRTimer = 0;//避免虛耗額度，白白浪費 20240622
         reClickUploadOK:
             try
             {
@@ -3980,7 +4045,13 @@ internal static string getImageUrl() {
                 goto reUpload;
             #endregion
 
-            reRunOCR:
+            
+            
+        reRunOCR:
+            //Byte reRunOCRTimer = 0;//避免虛耗額度，白白浪費 20240622
+            reRunOCRTimer++; 
+            if (reRunOCRTimer > 3)  {Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("OCR結果有誤，請予檢查！"); StopOCR = true; return false; } 
+
             //按下選取方塊，準備OCR
             try
             {

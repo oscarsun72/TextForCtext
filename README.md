@@ -147,6 +147,7 @@ Ctrl + Alt + o :下載書頁圖片（簡稱「書圖」），交給[Google Keep]
      - 在非appActivateByName模式下：
        - Google Keep OCR ，模擬使用者手動操作的功能完成。利用其「擷取圖片文字」功能實作。完成後將結果文本複製到剪貼簿，以利貼上。配合快捷鍵 Alt + Insert（將剪貼簿的文字內容讀入textBox1中；在手動輸入鍵入模式下，會自動標出書名號、篇名號）則可直接載入到textBox1中。感恩感恩　讚歎讚歎　南無阿彌陀佛 20230309
        - Alt + Shift + o ：下載書圖並交給[《古籍酷》](https://ocr.gj.cool/)[OCR](https://ocr.gj.cool/try_ocr) 。模擬使用者手動操作，與交給 Google Keep 功能均已全自動化了。感恩感恩　讚歎讚歎　南無阿彌陀佛 20230311
+       - Alt + Shift + k ：下載書圖並交給[《看典古籍》](https://kandianguji.com/)[OCR](https://kandianguji.com/ocr) 。模擬使用者手動操作。感恩感恩　讚歎讚歎　南無阿彌陀佛 20240623
 
 Ctrl + Alt + r ：將如《趙城金藏》3欄式的版面書圖《古籍酷》AI服務OCR結果重新排列20240405清明後一日 調用 Rearrangement3ColumnLayout 方法
 
