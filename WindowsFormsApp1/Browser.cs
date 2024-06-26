@@ -128,7 +128,7 @@ namespace TextForCtext
         /// <summary>
         /// 儲存常用的網站名
         /// </summary>
-        internal enum OCRSiteTitle { GoogleKeep, GJcool , KanDianGuJi}
+        internal enum OCRSiteTitle { GoogleKeep, GJcool, KanDianGuJi }
         /* chatGPT大菩薩：C# Enum Values：
          你的程式碼是可以運作的。這樣的實作方式會使得程式碼更具有可維護性和可擴展性。在需要使用網址時，只需要通過enum來訪問對應的網址，而不需要直接使用網址字符串。當需要添加、修改或刪除網址時，只需要更新Dictionary中的對應鍵值對即可，而不需要修改程式碼中的enum。
         孫守真
@@ -2259,15 +2259,17 @@ internal static string getImageUrl() {
         /// </summary>
         /// <param name="downloadImgFullName">書圖下載全檔名</param>
         /// <returns></returns>
-        internal static bool OCR_KanDianGuJi(string downloadImgFullName){
-            LastValidWindow = driver.CurrentWindowHandle;
+        internal static bool OCR_KanDianGuJi(string downloadImgFullName)
+        {
+            //LastValidWindow = driver.CurrentWindowHandle;
             openNewTabWindow();
             GoToUrlandActivate("https://kandianguji.com/ocr");
 
             //按下「選擇檔案」按鈕
             //IWebElement iwe = waitFindWebElementBySelector_ToBeClickable("#image-input");
             IWebElement iwe = waitFindWebElementBySelector_ToBeClickable("#convert-form > label.drop-container");
-            if(iwe==null){ StopOCR = true; return false; }
+            if (iwe == null) { StopOCR = true; return false; }
+            ActiveForm1.TopMost = false;
             driver.SwitchTo().Window(driver.CurrentWindowHandle);
             iwe.Click();
 
@@ -2295,18 +2297,26 @@ internal static string getImageUrl() {
             if (iwe == null) { StopOCR = true; return false; }
             iwe.Click();
 
-            //檢查結果出來沒：
+            //檢查結果出來沒：            
             iwe = waitFindWebElementBySelector_ToBeClickable("#result_text");
-            if (iwe == null) { StopOCR = true; return false; }
+            if (iwe == null)
+            { //StopOCR = true; return false; }
+                dt = DateTime.Now;
+                while (waitFindWebElementBySelector_ToBeClickable("#result_text") == null)
+                {
+                    if (DateTime.Now.Subtract(dt).TotalSeconds > 10) { StopOCR = true; return false; }
+                }
+            }
+            iwe = waitFindWebElementBySelector_ToBeClickable("#result_text");
             dt = DateTime.Now;
-            while(iwe.GetAttribute("textContent") == "识别结果")
+            while (iwe.GetAttribute("textContent") == "识别结果")
             {
                 if (DateTime.Now.Subtract(dt).TotalSeconds > 10) { StopOCR = true; return false; }
             }
 
             //選取OCR結果
             string ocrResult = iwe.GetAttribute("textContent");
-            if(ocrResult.IsNullOrEmpty()) { StopOCR = true; return false; }
+            if (ocrResult.IsNullOrEmpty()) { StopOCR = true; return false; }
             ocrResult = ocrResult.Replace("  ", Environment.NewLine);
 
             //複製OCR結果
@@ -3922,9 +3932,9 @@ internal static string getImageUrl() {
                 }
                 Thread.Sleep(800);
             }
-            #endregion //以上檢查並刪除文件
+        #endregion //以上檢查並刪除文件
 
-            
+
         reUpload:
             //按下「上傳」
             iwe = waitFindWebElementBySelector_ToBeClickable("#FileUploadDropdown");
@@ -4045,12 +4055,12 @@ internal static string getImageUrl() {
                 goto reUpload;
             #endregion
 
-            
-            
-        reRunOCR:
+
+
+            reRunOCR:
             //Byte reRunOCRTimer = 0;//避免虛耗額度，白白浪費 20240622
-            reRunOCRTimer++; 
-            if (reRunOCRTimer > 3)  {Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("OCR結果有誤，請予檢查！"); StopOCR = true; return false; } 
+            reRunOCRTimer++;
+            if (reRunOCRTimer > 3) { Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("OCR結果有誤，請予檢查！"); StopOCR = true; return false; }
 
             //按下選取方塊，準備OCR
             try

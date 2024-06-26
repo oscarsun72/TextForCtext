@@ -2603,7 +2603,14 @@ namespace WindowsFormsApp1
                         string txtbox1SelText = textBox1.SelectedText, url = textBox3.Text;
                         //Task.Run(() => { br.ImproveGJcoolOCRMemo(); });//因為即使開新執行緒，但仍是用同一個表單！
                         Task.Run(() => { br.ImproveGJcoolOCRMemo(txtbox1SelText, url); });
-                        Clipboard.SetText(textBox1.Text);//通常改正後是要再重標點，如書名等 20240306
+                        try
+                        {
+                            Clipboard.SetText(textBox1.Text);//通常改正後是要再重標點，如書名等 20240306
+                        }
+                        catch (Exception)
+                        {
+                            playSound(soundLike.error);
+                        }
                         AvailableInUseBothKeysMouse();
                     }
                     return;
@@ -8056,7 +8063,7 @@ namespace WindowsFormsApp1
                     return false;
                 }
             }
-            else if (new StringInfo(br.Quickedit_data_textbox?.Text)?.LengthInTextElements < (normalLineParaLength == 0 ? 20 : normalLineParaLength)
+            else if ((br.Quickedit_data_textbox==null ? 0:(new StringInfo(br.Quickedit_data_textbox?.Text)?.LengthInTextElements))  < (normalLineParaLength == 0 ? 20 : normalLineParaLength)
                 && quickedit_data_textboxTxt != "\t")// 「	」"\t"是新建的維基文本故 20240405
             {
                 OCRBreakSoundNotification();
