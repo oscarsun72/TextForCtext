@@ -4001,6 +4001,8 @@ internal static string getImageUrl() {
                     }
                     iwe = waitFindWebElementBySelector_ToBeClickable("#swal2-title", 1);
                 }
+
+                while(iwe?.GetAttribute("textContent") != "上传完成") { }
                 //按下「上傳完成」按鈕
                 iwe = waitFindWebElementBySelector_ToBeClickable("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled", 1);
                 while (iwe == null)
