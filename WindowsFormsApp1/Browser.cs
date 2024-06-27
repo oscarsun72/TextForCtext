@@ -4002,7 +4002,14 @@ internal static string getImageUrl() {
                     iwe = waitFindWebElementBySelector_ToBeClickable("#swal2-title", 1);
                 }
 
-                while(iwe?.GetAttribute("textContent") != "上传完成") { }
+                dt = DateTime.Now;
+                while (iwe?.GetAttribute("textContent") != "上传完成")
+                {
+                    if (iwe?.GetAttribute("textContent") == "OCR完成") goto reClickOCROK;
+                    if (DateTime.Now.Subtract(dt).TotalSeconds > 68)
+                        if (Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("等候上傳完成已逾時，要繼續嗎？") == DialogResult.Cancel)
+                        { StopOCR = true; return false; }
+                }
                 //按下「上傳完成」按鈕
                 iwe = waitFindWebElementBySelector_ToBeClickable("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled", 1);
                 while (iwe == null)
@@ -4124,7 +4131,12 @@ internal static string getImageUrl() {
                         && waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr > td:nth-child(7)")?.GetAttribute("textContent") == " ") goto reRunOCR;
                     iwe = waitFindWebElementBySelector_ToBeClickable("#swal2-title");
                 }
-
+                dt = DateTime.Now;
+                while (iwe.GetAttribute("textContent") != "OCR完成")
+                {
+                    if (DateTime.Now.Subtract(dt).TotalSeconds > 45)
+                        if (Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("等待OCR完成已逾時，是否繼續？") == DialogResult.Cancel) { StopOCR = true; return false; }
+                }
                 //按下「OCR完成 OK」按鈕
                 iwe = waitFindWebElementBySelector_ToBeClickable("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled");
                 while (iwe == null)
@@ -4148,12 +4160,14 @@ internal static string getImageUrl() {
                     //訊息方塊：成功: 0, 失败: 1
                     IWebElement iw = waitFindWebElementBySelector_ToBeClickable("#swal2-html-container");
                     bool stopProcess = false;
-                    if (iw != null && iw.Text.Contains("成功: 0, 失败: 1"))
+
+                    if (iw != null)
                     {
-                        stopProcess = true;
+                        if (iw.Text.Contains("成功: 0, 失败: 1")) stopProcess = true;
+                        if (iw.Text.Contains("成功: 1, 失败: 0")) iwe.Click();
+
                     }
 
-                    iwe.Click();
                     if (stopProcess) { StopOCR = true; return false; }
 
                 }
@@ -4165,9 +4179,17 @@ internal static string getImageUrl() {
             }
             catch (Exception)
             {
+                IWebElement iewMsgBox = waitFindWebElementBySelector_ToBeClickable("#swal2-title");
                 IWebElement iew = waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr > td.bs-checkbox > label > input[type=checkbox]");
                 if (iew == null)
+                {
+                    if (iewMsgBox != null)
+                    {
+                        iewMsgBox = waitFindWebElementBySelector_ToBeClickable("#swal2-title");
+                        if (iewMsgBox.GetAttribute("textContent").Contains("OCR完成")) goto reClickOCROK;
+                    }
                     goto reUpload;
+                }
                 else if (waitFindWebElementBySelector_ToBeClickable("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled") != null)
                     goto reClickOCROK;
                 //有選取項目，且其「文本」欄位值非空
@@ -4178,6 +4200,7 @@ internal static string getImageUrl() {
                     goto reClickUploadOK;
                 else
                     goto reClickOCROK;
+                
                 throw;
             }
 
@@ -4210,7 +4233,7 @@ internal static string getImageUrl() {
                     DateTime dtt = DateTime.Now;
                     //檢查「OCR完成 OK」按鈕
                     while (waitFindWebElementBySelector_ToBeClickable("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled") == null)
-                    { if (DateTime.Now.Subtract(dtt).TotalSeconds > 5) break; }
+                    { if (DateTime.Now.Subtract(dtt).TotalSeconds > 45) break; }
                     iwe = waitFindWebElementBySelector_ToBeClickable("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled");
                     if (iwe == null)
                     {
