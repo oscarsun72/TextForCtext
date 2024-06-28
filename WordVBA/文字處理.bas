@@ -2751,7 +2751,7 @@ Dim tb As Table, c As Cell ', ci As Long
 'Set d = ActiveDocument
 lngTemp = word.Application.DisplayAlerts
 If r.Tables.Count > 0 Then
-    中國哲學書電子化計劃.清除文本頁中的編號儲存格 r
+    '中國哲學書電子化計劃.清除文本頁中的編號儲存格 r
     For Each tb In r.Tables
         'tb.Columns(1).Delete
         Err.Raise 5992
@@ -2794,7 +2794,7 @@ For Each a In slRng.Characters
 Next a
 End Sub
 Sub 中國哲學書電子化計劃_去掉註文保留正文()
-Dim slRng As Range, a, ur As UndoRecord
+Dim slRng As Range, a, ur As UndoRecord 'Alt + ]
 'Set ur = SystemSetup.stopUndo("中國哲學書電子化計劃_去掉註文保留正文")
 SystemSetup.stopUndo ur, "中國哲學書電子化計劃_去掉註文保留正文"
 Docs.空白的新文件

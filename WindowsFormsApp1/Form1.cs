@@ -8063,7 +8063,7 @@ namespace WindowsFormsApp1
                     return false;
                 }
             }
-            else if ((br.Quickedit_data_textbox==null ? 0:(new StringInfo(br.Quickedit_data_textbox?.Text)?.LengthInTextElements))  < (normalLineParaLength == 0 ? 20 : normalLineParaLength)
+            else if ((br.Quickedit_data_textbox == null ? 0 : (new StringInfo(br.Quickedit_data_textbox?.Text)?.LengthInTextElements)) < (normalLineParaLength == 0 ? 20 : normalLineParaLength)
                 && quickedit_data_textboxTxt != "\t")// 「	」"\t"是新建的維基文本故 20240405
             {
                 OCRBreakSoundNotification();
@@ -9669,7 +9669,14 @@ namespace WindowsFormsApp1
                 textBox4SizeLarger();
             if (new StringInfo(textBox1.SelectedText).LengthInTextElements > 1)
             {
-                Clipboard.SetText(textBox1.SelectedText);
+                try
+                {
+                    Clipboard.SetText(textBox1.SelectedText);
+                }
+                catch (Exception)
+                {
+                    playSound(soundLike.error, true);
+                }
                 textBox4.Text = textBox1.SelectedText; textBox4.DeselectAll();
             }
             string rplsdWord = textBox1.SelectedText, x = textBox1.Text;

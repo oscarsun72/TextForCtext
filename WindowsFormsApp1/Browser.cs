@@ -3988,7 +3988,7 @@ internal static string getImageUrl() {
             try
             {
                 //等待「上傳完成」訊息方塊出現
-                iwe = waitFindWebElementBySelector_ToBeClickable("#swal2-title", 1);
+                iwe = waitFindWebElementBySelector_ToBeClickable("#swal2-title");
                 while (iwe == null)
                 {
                     try
@@ -3999,7 +3999,7 @@ internal static string getImageUrl() {
                     catch (Exception)
                     {
                     }
-                    iwe = waitFindWebElementBySelector_ToBeClickable("#swal2-title", 1);
+                    iwe = waitFindWebElementBySelector_ToBeClickable("#swal2-title", 0.3);
                 }
 
                 dt = DateTime.Now;
@@ -4023,7 +4023,7 @@ internal static string getImageUrl() {
                     catch (Exception)
                     {
                     }
-                    iwe = waitFindWebElementBySelector_ToBeClickable("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled");
+                    iwe = waitFindWebElementBySelector_ToBeClickable("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled", 0.3);
                 }
                 //{
                 ////訊息方塊：文件 1 识别失败。Ocr failed
@@ -4129,7 +4129,7 @@ internal static string getImageUrl() {
                 {
                     if (waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr > td.bs-checkbox > label > input[type=checkbox]")?.Selected == false
                         && waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr > td:nth-child(7)")?.GetAttribute("textContent") == " ") goto reRunOCR;
-                    iwe = waitFindWebElementBySelector_ToBeClickable("#swal2-title");
+                    iwe = waitFindWebElementBySelector_ToBeClickable("#swal2-title",0.3);
                 }
                 dt = DateTime.Now;
                 while (iwe.GetAttribute("textContent") != "OCR完成")
@@ -4150,7 +4150,7 @@ internal static string getImageUrl() {
                     catch (Exception)
                     {
                     }
-                    iwe = waitFindWebElementBySelector_ToBeClickable("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled");
+                    iwe = waitFindWebElementBySelector_ToBeClickable("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled", 0.3);
                     //提前結束用
                     if (Clipboard.GetText() != string.Empty)// && !Clipboard.GetText().Contains("Ctext_Page_Image"))
                     { StopOCR = true; return false; }
