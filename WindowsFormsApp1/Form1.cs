@@ -11681,7 +11681,7 @@ namespace WindowsFormsApp1
             // 獲取圖片的 URL。
             //imageUrl = "https://example.com/image.png";
 
-            bool returnVal = false;
+            bool returnVal = true;
             try
             {
 
@@ -11700,7 +11700,6 @@ namespace WindowsFormsApp1
                     fileStream.Write(imageBytes, 0, imageBytes.Length);
                     //Console.WriteLine("圖片已成功下載。");//在「即時運算視窗」寫出訊息
                 }
-
                 #endregion
             }
             catch (Exception ex)
