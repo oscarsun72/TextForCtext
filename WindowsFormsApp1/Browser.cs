@@ -6932,6 +6932,7 @@ internal static string getImageUrl() {
             openNewTabWindow();
             driver.Navigate().GoToUrl(imageUrl);
             driver.SwitchTo().Window(driver.CurrentWindowHandle);
+            BringToFront("chrome");
             //IWebElement iw = waitFindWebElementBySelector_ToBeClickable("body > img");
             //Cursor.Position = (Point)iw?.Location;
             ////if (iw != null)  clickCopybutton_GjcoolFastExperience(iw.Location); 
@@ -6995,6 +6996,23 @@ internal static string getImageUrl() {
 
         }
 
+        /// <summary>
+        /// 將指定的程式視窗置於作業系統的最前面、最上端 
+        /// Copilot大菩薩 20240704 控制 Chrome 瀏覽器在 C# Windows.Forms 中:
+        /// </summary>
+        /// <param name="processName">所指定的視窗</param>
+        public static void BringToFront(string processName)
+        {
+            Process[] processes = Process.GetProcessesByName(processName);
+            foreach (Process proc in processes)
+            {
+                // The second parameter 9 means "restore" and "activate" the window.
+                //ShowWindow(proc.MainWindowHandle, 1);//Copilot大菩薩：在 ShowWindow 函數中，第二個參數是一個命令，用於指定視窗應該如何顯示。這個參數的值為 9 時，表示 “恢復” 和 “啟動” 視窗。如果視窗最小化或最大化，系統會將其恢復到原來的大小和位置。然後，系統會將該視窗設置為前景視窗。
+                //在您的情況下，我們不希望改變視窗的大小和位置，所以我們將該參數改為 1，這表示只 “啟動” 視窗，不改變其大小和位置。
+                //在這段程式碼中，我們完全移除了 ShowWindow 函數的調用，只保留了 SetForegroundWindow 函數，這樣就不會改變視窗的大小和位置了。
+                SetForegroundWindow(proc.MainWindowHandle);
+            }
+        }
 
     }
 }
