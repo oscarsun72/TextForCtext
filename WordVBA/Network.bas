@@ -47,6 +47,8 @@ If Selection.Type = wdSelectionNormal Then
     Selection.Copy
     If Dir(st & f) <> "" Then
         funame = st & f
+    ElseIf Dir("C:\Users\oscar\Dropbox\VS\VB\速檢網路字辭典\速檢網路字辭典\bin\Debug\" & f) <> "" Then
+        funame = "C:\Users\oscar\Dropbox\VS\VB\速檢網路字辭典\速檢網路字辭典\bin\Debug\" & f
     ElseIf Dir("C:\Program Files (x86)\孫守真\速檢網路字辭典\" & f) <> "" Then
         funame = "C:\Program Files (x86)\孫守真\速檢網路字辭典\" & f
     ElseIf Dir("W:\!! for hpr\VB\速檢網路字辭典\速檢網路字辭典\bin\Debug\" & f) <> "" Then
@@ -68,7 +70,7 @@ End If
 End Sub
 
 Sub 查國語辭典()
-SeleniumOP.dictRevisedSearch VBA.Replace(Selection, Chr(13), "")
+SeleniumOP.dictRevisedSearch VBA.Replace(Selection, chr(13), "")
 End Sub
 
 'Sub 擷取國語辭典詞條網址()
@@ -83,7 +85,7 @@ End Sub
 Function GetUserAddress() As Boolean
     Dim x As String, a As Object 'Access.Application
     On Error GoTo Error_GetUserAddress
-    x = Selection.text
+    x = Selection.Text
     Set a = GetObject("D:\千慮一得齋\書籍資料\圖書管理.mdb") '2010/10/18修訂
     If x = "" Then x = InputBox("請輸入欲查詢的字串")
     x = a.Run("查詢字串轉換_國語會碼", x)

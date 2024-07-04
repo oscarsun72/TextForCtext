@@ -3968,7 +3968,7 @@ internal static string getImageUrl() {
             //輸入：檔案名稱 //SendKeys.Send(downloadImgFullName);
             SendKeys.SendWait("+{Insert}");//or "^v"
             SendKeys.SendWait("{ENTER}");
-            Clipboard.Clear();
+            //Clipboard.Clear();
 
 
             //retry:
@@ -3988,18 +3988,18 @@ internal static string getImageUrl() {
             try
             {
                 //等待「上傳完成」訊息方塊出現
-                iwe = waitFindWebElementBySelector_ToBeClickable("#swal2-title");
+                iwe = waitFindWebElementBySelector_ToBeClickable("#swal2-title", 0.1);
                 while (iwe == null)
                 {
                     try
                     {
-                        if (waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr > td:nth-child(4)")?.GetAttribute("textContent") != string.Empty
-                            && waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr > td:nth-child(7)")?.GetAttribute("textContent") == " ") goto reRunOCR;
+                        if (waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr > td:nth-child(4)", 0.1)?.GetAttribute("textContent") != string.Empty
+                            && waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr > td:nth-child(7)", 0.1)?.GetAttribute("textContent") == " ") goto reRunOCR;
                     }
                     catch (Exception)
                     {
                     }
-                    iwe = waitFindWebElementBySelector_ToBeClickable("#swal2-title", 0.3);
+                    iwe = waitFindWebElementBySelector_ToBeClickable("#swal2-title", 0.1);
                 }
 
                 dt = DateTime.Now;
@@ -4011,19 +4011,19 @@ internal static string getImageUrl() {
                         { StopOCR = true; return false; }
                 }
                 //按下「上傳完成」按鈕
-                iwe = waitFindWebElementBySelector_ToBeClickable("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled", 1);
+                iwe = waitFindWebElementBySelector_ToBeClickable("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled", 0.1);
                 while (iwe == null)
                 {
                     try
                     {
-                        if (waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr > td:nth-child(4)")?.GetAttribute("textContent") != string.Empty
-                            && waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr > td:nth-child(7)")?.GetAttribute("textContent") == " "
-                            && waitFindWebElementBySelector_ToBeClickable("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled") == null) goto reRunOCR;
+                        if (waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr > td:nth-child(4)", 0.1)?.GetAttribute("textContent") != string.Empty
+                            && waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr > td:nth-child(7)", 0.1)?.GetAttribute("textContent") == " "
+                            && waitFindWebElementBySelector_ToBeClickable("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled", 0.1) == null) goto reRunOCR;
                     }
                     catch (Exception)
                     {
                     }
-                    iwe = waitFindWebElementBySelector_ToBeClickable("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled", 0.3);
+                    iwe = waitFindWebElementBySelector_ToBeClickable("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled", 0.1);
                 }
                 //{
                 ////訊息方塊：文件 1 识别失败。Ocr failed
@@ -4064,9 +4064,9 @@ internal static string getImageUrl() {
                 goto reUpload;
             #endregion
 
+            Clipboard.Clear();
 
-
-            reRunOCR:
+        reRunOCR:
             //Byte reRunOCRTimer = 0;//避免虛耗額度，白白浪費 20240622
             reRunOCRTimer++;
             if (reRunOCRTimer > 3) { Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("OCR結果有誤，請予檢查！"); StopOCR = true; return false; }
@@ -4074,16 +4074,16 @@ internal static string getImageUrl() {
             //按下選取方塊，準備OCR
             try
             {
-                string tx = waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr > td:nth-child(7)")?.GetAttribute("textContent");
+                string tx = waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr > td:nth-child(7)", 0.1)?.GetAttribute("textContent");
                 if (!tx.IsNullOrEmpty() && tx != " ")
                 {
                     //System.Diagnostics.Debugger.Break();
                     goto copyResult;
                 }
-                while (waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr > td:nth-child(4)")?.GetAttribute("textContent") == string.Empty) ;
-                iwe = waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr:nth-child(1) > td.bs-checkbox > label > input[type=checkbox]", 1);
+                while (waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr > td:nth-child(4)", 0.1)?.GetAttribute("textContent") == string.Empty) ;
+                iwe = waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr:nth-child(1) > td.bs-checkbox > label > input[type=checkbox]", 0.1);
                 while (iwe == null)
-                    iwe = waitFindWebElementBySelector_ToBeClickable("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled");
+                    iwe = waitFindWebElementBySelector_ToBeClickable("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled", 0.1);
                 iwe.Click();
 
             }
@@ -4096,7 +4096,7 @@ internal static string getImageUrl() {
             //按下「執行命令」按鈕
             try
             {
-                iwe = waitFindWebElementBySelector_ToBeClickable("#OcrFileDropdown");
+                iwe = waitFindWebElementBySelector_ToBeClickable("#OcrFileDropdown", 0.1);
 
                 iwe.Click();
             }
@@ -4109,13 +4109,13 @@ internal static string getImageUrl() {
             //按下「OCR」按鈕
             try
             {
-                iwe = waitFindWebElementBySelector_ToBeClickable("#File > div.d-flex.justify-content-between.mt-2 > div.d-flex.mx-3 > div.d-flex.mx-2.align-self-center > div:nth-child(1) > ul > li:nth-child(2) > a");
+                iwe = waitFindWebElementBySelector_ToBeClickable("#File > div.d-flex.justify-content-between.mt-2 > div.d-flex.mx-3 > div.d-flex.mx-2.align-self-center > div:nth-child(1) > ul > li:nth-child(2) > a", 0.1);
                 iwe.Click();
 
             }
             catch (Exception)
             {
-                if (waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr > td:nth-child(4)").GetAttribute("textContent") != string.Empty)
+                if (waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr > td:nth-child(4)", 0.1).GetAttribute("textContent") != string.Empty)
                     goto reClickUploadOK;
                 throw;
             }
@@ -4124,12 +4124,12 @@ internal static string getImageUrl() {
             try
             {
                 //等待「OCR完成 OK」出現
-                iwe = waitFindWebElementBySelector_ToBeClickable("#swal2-title");
+                iwe = waitFindWebElementBySelector_ToBeClickable("#swal2-title", 0.1);
                 while (iwe == null)
                 {
-                    if (waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr > td.bs-checkbox > label > input[type=checkbox]")?.Selected == false
-                        && waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr > td:nth-child(7)")?.GetAttribute("textContent") == " ") goto reRunOCR;
-                    iwe = waitFindWebElementBySelector_ToBeClickable("#swal2-title",0.3);
+                    if (waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr > td.bs-checkbox > label > input[type=checkbox]", 0.1)?.Selected == false
+                        && waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr > td:nth-child(7)", 0.1)?.GetAttribute("textContent") == " ") goto reRunOCR;
+                    iwe = waitFindWebElementBySelector_ToBeClickable("#swal2-title", 0.1);
                 }
                 dt = DateTime.Now;
                 while (iwe.GetAttribute("textContent") != "OCR完成")
@@ -4138,19 +4138,19 @@ internal static string getImageUrl() {
                         if (Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("等待OCR完成已逾時，是否繼續？") == DialogResult.Cancel) { StopOCR = true; return false; }
                 }
                 //按下「OCR完成 OK」按鈕
-                iwe = waitFindWebElementBySelector_ToBeClickable("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled");
+                iwe = waitFindWebElementBySelector_ToBeClickable("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled", 0.1);
                 while (iwe == null)
                 {
                     try
                     {
-                        if (waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr > td.bs-checkbox > label > input[type=checkbox]")?.Selected == false
-                            && waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr > td:nth-child(7)")?.GetAttribute("textContent") == " ") goto reRunOCR;
+                        if (waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr > td.bs-checkbox > label > input[type=checkbox]", 0.1)?.Selected == false
+                            && waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr > td:nth-child(7)", 0.1)?.GetAttribute("textContent") == " ") goto reRunOCR;
 
                     }
                     catch (Exception)
                     {
                     }
-                    iwe = waitFindWebElementBySelector_ToBeClickable("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled", 0.3);
+                    iwe = waitFindWebElementBySelector_ToBeClickable("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled", 0.1);
                     //提前結束用
                     if (Clipboard.GetText() != string.Empty)// && !Clipboard.GetText().Contains("Ctext_Page_Image"))
                     { StopOCR = true; return false; }
@@ -4158,7 +4158,7 @@ internal static string getImageUrl() {
                 try
                 {
                     //訊息方塊：成功: 0, 失败: 1
-                    IWebElement iw = waitFindWebElementBySelector_ToBeClickable("#swal2-html-container");
+                    IWebElement iw = waitFindWebElementBySelector_ToBeClickable("#swal2-html-container", 0.1);
                     bool stopProcess = false;
 
                     if (iw != null)
@@ -4179,28 +4179,28 @@ internal static string getImageUrl() {
             }
             catch (Exception)
             {
-                IWebElement iewMsgBox = waitFindWebElementBySelector_ToBeClickable("#swal2-title");
-                IWebElement iew = waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr > td.bs-checkbox > label > input[type=checkbox]");
+                IWebElement iewMsgBox = waitFindWebElementBySelector_ToBeClickable("#swal2-title", 0.1);
+                IWebElement iew = waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr > td.bs-checkbox > label > input[type=checkbox]", 0.1);
                 if (iew == null)
                 {
                     if (iewMsgBox != null)
                     {
-                        iewMsgBox = waitFindWebElementBySelector_ToBeClickable("#swal2-title");
+                        iewMsgBox = waitFindWebElementBySelector_ToBeClickable("#swal2-title", 0.1);
                         if (iewMsgBox.GetAttribute("textContent").Contains("OCR完成")) goto reClickOCROK;
                     }
                     goto reUpload;
                 }
-                else if (waitFindWebElementBySelector_ToBeClickable("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled") != null)
+                else if (waitFindWebElementBySelector_ToBeClickable("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled", 0.1) != null)
                     goto reClickOCROK;
                 //有選取項目，且其「文本」欄位值非空
                 //else if (iew?.Selected == false
                 //    && waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr > td:nth-child(7)")?.GetAttribute("textContent") == " ")
                 //    goto reRunOCR;
-                else if (waitFindWebElementBySelector_ToBeClickable("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled") != null)
+                else if (waitFindWebElementBySelector_ToBeClickable("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled", 0.1) != null)
                     goto reClickUploadOK;
                 else
                     goto reClickOCROK;
-                
+
                 throw;
             }
 
@@ -4222,7 +4222,7 @@ internal static string getImageUrl() {
             try
             {
                 // 取得網頁元素的 title 屬性值 
-                iwe = waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr:nth-child(1) > td:nth-child(7) > div");
+                iwe = waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr:nth-child(1) > td:nth-child(7) > div", 0.1);
                 if (iwe == null)
                     goto reClickOCROK;
                 //while (iwe == null)
@@ -4232,18 +4232,18 @@ internal static string getImageUrl() {
                 {
                     DateTime dtt = DateTime.Now;
                     //檢查「OCR完成 OK」按鈕
-                    while (waitFindWebElementBySelector_ToBeClickable("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled") == null)
+                    while (waitFindWebElementBySelector_ToBeClickable("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled", 0.1) == null)
                     { if (DateTime.Now.Subtract(dtt).TotalSeconds > 45) break; }
-                    iwe = waitFindWebElementBySelector_ToBeClickable("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled");
+                    iwe = waitFindWebElementBySelector_ToBeClickable("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled", 0.1);
                     if (iwe == null)
                     {
                         Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("OCR結果是空字串，請檢查！");
-                        if (waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr:nth-child(1) > td:nth-child(7) > div")?.GetAttribute("title").IsNullOrEmpty() == false) { goto copyResult; }
+                        if (waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr:nth-child(1) > td:nth-child(7) > div", 0.1)?.GetAttribute("title").IsNullOrEmpty() == false) { goto copyResult; }
                     }
                     else
                     //按下「OCR完成 OK」按鈕                        
                     {
-                        if (waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr:nth-child(1) > td:nth-child(7) > div")?.GetAttribute("title").IsNullOrEmpty() == false) { iwe.Click(); goto copyResult; }
+                        if (waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr:nth-child(1) > td:nth-child(7) > div", 0.1)?.GetAttribute("title").IsNullOrEmpty() == false) { iwe.Click(); goto copyResult; }
                     }
                     StopOCR = true; return false;
                 }
@@ -4273,15 +4273,15 @@ internal static string getImageUrl() {
 
                 //按下選取方塊，準備刪除
                 //iwe = waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr:nth-child(1) > td.bs-checkbox > label > input[type=checkbox]", 1);
-                iwe = waitFindWebElementBySelector_ToBeClickable("#fileTable > thead > tr > th.bs-checkbox > div.th-inner > label > input[type=checkbox]", 1);
+                iwe = waitFindWebElementBySelector_ToBeClickable("#fileTable > thead > tr > th.bs-checkbox > div.th-inner > label > input[type=checkbox]", 0.1);
                 while (iwe == null)
-                    iwe = waitFindWebElementBySelector_ToBeClickable("#fileTable > thead > tr > th.bs-checkbox > div.th-inner > label > input[type=checkbox]", 1);
+                    iwe = waitFindWebElementBySelector_ToBeClickable("#fileTable > thead > tr > th.bs-checkbox > div.th-inner > label > input[type=checkbox]", 0.1);
                 if (!iwe.Selected) iwe.Click();
             }
             catch (Exception)
             {
-                if (!waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr > td.bs-checkbox > label > input[type=checkbox]").Selected
-                    && waitFindWebElementBySelector_ToBeClickable("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled") != null)
+                if (!waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr > td.bs-checkbox > label > input[type=checkbox]", 0.1).Selected
+                    && waitFindWebElementBySelector_ToBeClickable("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled", 0.1) != null)
                     goto reClickOCROK;
                 else
                     throw;
@@ -4290,26 +4290,57 @@ internal static string getImageUrl() {
             //刪除文件
             try
             {
-                iwe = waitFindWebElementBySelector_ToBeClickable("#FileUploadDropdown");
+                iwe = waitFindWebElementBySelector_ToBeClickable("#FileUploadDropdown", 0.1);
                 //按下「上傳」
                 while (iwe == null)
-                    iwe = waitFindWebElementBySelector_ToBeClickable("#FileUploadDropdown");
+                    iwe = waitFindWebElementBySelector_ToBeClickable("#FileUploadDropdown", 0.1);
                 iwe.Click();
                 //按下「刪除文件」
-                iwe = waitFindWebElementBySelector_ToBeClickable("#File > div.d-flex.justify-content-between.mt-2 > div.d-flex.mx-3 > div:nth-child(1) > div > ul > li:nth-child(8) > a");
+                iwe = waitFindWebElementBySelector_ToBeClickable("#File > div.d-flex.justify-content-between.mt-2 > div.d-flex.mx-3 > div:nth-child(1) > div > ul > li:nth-child(8) > a", 0.1);
                 while (iwe == null)
-                    iwe = waitFindWebElementBySelector_ToBeClickable("#File > div.d-flex.justify-content-between.mt-2 > div.d-flex.mx-3 > div:nth-child(1) > div > ul > li:nth-child(8) > a");
+                    iwe = waitFindWebElementBySelector_ToBeClickable("#File > div.d-flex.justify-content-between.mt-2 > div.d-flex.mx-3 > div:nth-child(1) > div > ul > li:nth-child(8) > a", 0.1);
                 iwe.Click();
 
             }
             catch (Exception)
             {
-                if (!waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr > td.bs-checkbox > label > input[type=checkbox]").Selected
-                    && waitFindWebElementBySelector_ToBeClickable("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled") != null)
+                if (!waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr > td.bs-checkbox > label > input[type=checkbox]", 0.1).Selected
+                    && waitFindWebElementBySelector_ToBeClickable("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled", 0.1) != null)
                     goto reClickOCROK;
                 throw;
             }
-            Thread.Sleep(800);
+            //Thread.Sleep(300);
+            dt = DateTime.Now;
+            iwe = waitFindWebElementBySelector_ToBeClickable("#swal2-title", 0.02);
+            while (iwe == null || waitFindWebElementBySelector_ToBeClickable("#swal2-html-container", 0.02) == null)
+            {
+                try
+                {
+                    if (iwe != null && iwe.GetAttribute("textContent") == "删除完成") break;
+                }
+                catch (Exception)
+                {
+                }
+                if (DateTime.Now.Subtract(dt).TotalSeconds > 10)
+                {
+                    if (DialogResult.Cancel == Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("等待刪除完成訊息逾時，是否繼續？")) { StopOCR = true; return false; }
+                }
+
+                iwe = waitFindWebElementBySelector_ToBeClickable("#swal2-title", 0.02);
+
+            }
+
+            //if (iwe != null)
+            //{
+            //    dt = DateTime.Now;
+            //    while (iwe.GetAttribute("textContent") != "删除完成")
+            //    {
+            //        if (DateTime.Now.Subtract(dt).TotalSeconds > 10)
+            //        {
+            //            if (DialogResult.Cancel == Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("等待刪除完成訊息逾時，是否繼續？")) { StopOCR = true; return false; }
+            //        }
+            //    }
+            //}
 
             ////不必等待刪除完成按下OK按鈕了！！ 20240420
             ////按下「刪除完成 OK」按鈕
