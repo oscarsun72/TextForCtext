@@ -161,6 +161,8 @@ Alt + ↓：視窗向下移動30dpi（+ Ctrl：徵調；插入點在textBox1時�
 
 Alt + 5 （數字鍵盤）：清除標題符碼標記（執行clearTitleMarkCode）
 
+Alt + Shift + d : 下載當前頁面書圖
+
 Alt + Shift + F1 ：切換 textbox1 之字型： 切換支援 CJK - Ext 擴充字集的大字集字型
 
 滑鼠上一頁鍵： 同Ctrl + PageUp

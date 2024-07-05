@@ -7550,11 +7550,28 @@ namespace WindowsFormsApp1
                     e.Handled = true; return;
                 }
 
-                if (e.KeyCode == Keys.P)
-                {//Alt + Shift + p
+                if (e.KeyCode == Keys.D)
+                {//Alt + Shift + d : 下載當前頁面書圖
                     e.Handled = true;
-                    keysParagraphSymbol(true); return;
+                    Form1.playSound(Form1.soundLike.press, true);
+                    string f = MydocumentsPathIncldBackSlash + "CtextTempFiles\\Ctext_Page_Image.png", mspaint = "C:\\WINDOWS\\system32\\mspaint.exe";
+                    if (File.Exists(f))
+                        File.Delete(f);
+                    toOCR(br.OCRSiteTitle.KanDianGuJi, true);
+
+                    if (File.Exists(mspaint))
+                    {
+                        if (MessageBoxShowOKCancelExclamationDefaultDesktopOnly("是否要以小畫家開啟編輯？") == DialogResult.OK)
+                        {
+                            Process.Start(mspaint);
+                            Thread.Sleep(2000);
+                            SendKeys.SendWait("^o");
+                            SendKeys.SendWait(f + "~");
+                        }
+                    }
+                    return;
                 }
+
 
                 if (e.KeyCode == Keys.K)
                 {//- Alt + Shift + k ：下載書圖並交給《看典古籍》OCR
@@ -7607,6 +7624,12 @@ namespace WindowsFormsApp1
                     ////Process.Start(gjcool);
                     //#endregion
                     return;
+                }
+
+                if (e.KeyCode == Keys.P)
+                {//Alt + Shift + p
+                    e.Handled = true;
+                    keysParagraphSymbol(true); return;
                 }
 
 
@@ -7996,7 +8019,7 @@ namespace WindowsFormsApp1
         /// </summary>
         /// <param name="ocrSiteTitle">指OCR網站（Google Keep或《古籍酷》）</param>
         /// <returns>成功執行傳回true</returns>
-        private bool toOCR(br.OCRSiteTitle ocrSiteTitle)
+        private bool toOCR(br.OCRSiteTitle ocrSiteTitle, bool justDownloadImage = false)
         {
             //Form1.playSound(Form1.soundLike.press);
 
@@ -8035,50 +8058,52 @@ namespace WindowsFormsApp1
             {
             }
 
-
-            #region 檢查是否必要 20230804Bard大菩薩：https://g.co/bard/share/9130d688e253            
-            string quickedit_data_textboxTxt = br.Quickedit_data_textboxTxt;
-            //bool chk = false;
-            //if (quickedit_data_textboxTxt.Length > 1000)
-            //{
-            //    Regex regex = new Regex(@"\，|\。");
-            //    Match match = regex.Match(quickedit_data_textboxTxt);
-            //    chk = match.Success;
-            //}
-            //else
-            //{
-            //    chk = quickedit_data_textboxTxt.Contains("，") || quickedit_data_textboxTxt.Contains("。");
-            //}
-            if (CnText.HasEditedWithPunctuationMarks(ref quickedit_data_textboxTxt))
+            if (!justDownloadImage)
             {
-                OCRBreakSoundNotification();
-                if (DialogResult.Cancel == Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("目前頁面似乎已經整理過了，確定還要繼續嗎？" +
-                      Environment.NewLine + Environment.NewLine + "================" + Environment.NewLine +
-                    quickedit_data_textboxTxt))
+                #region 檢查是否必要 20230804Bard大菩薩：https://g.co/bard/share/9130d688e253            
+                string quickedit_data_textboxTxt = br.Quickedit_data_textboxTxt;
+                //bool chk = false;
+                //if (quickedit_data_textboxTxt.Length > 1000)
+                //{
+                //    Regex regex = new Regex(@"\，|\。");
+                //    Match match = regex.Match(quickedit_data_textboxTxt);
+                //    chk = match.Success;
+                //}
+                //else
+                //{
+                //    chk = quickedit_data_textboxTxt.Contains("，") || quickedit_data_textboxTxt.Contains("。");
+                //}
+                if (CnText.HasEditedWithPunctuationMarks(ref quickedit_data_textboxTxt))
                 {
-                    undoRecord();
-                    textBox1.Text = br.CopyQuickedit_data_textboxText();//quickedit_data_textboxTxt;
-                    if (!Active) AvailableInUseBothKeysMouse();
-                    //br.WindowsScrolltoTop();
-                    return false;
-                }
-            }
-            else if ((br.Quickedit_data_textbox == null ? 0 : (new StringInfo(br.Quickedit_data_textbox?.Text)?.LengthInTextElements)) < (normalLineParaLength == 0 ? 20 : normalLineParaLength)
-                && quickedit_data_textboxTxt != "\t")// 「	」"\t"是新建的維基文本故 20240405
-            {
-                OCRBreakSoundNotification();
-                if (DialogResult.Cancel == Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("目前頁面內容似乎太短了，確定還要交給OCR嗎？" +
-                        Environment.NewLine + Environment.NewLine + "================" + Environment.NewLine +
+                    OCRBreakSoundNotification();
+                    if (DialogResult.Cancel == Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("目前頁面似乎已經整理過了，確定還要繼續嗎？" +
+                          Environment.NewLine + Environment.NewLine + "================" + Environment.NewLine +
                         quickedit_data_textboxTxt))
-                {
-                    undoRecord();
-                    textBox1.Text = br.CopyQuickedit_data_textboxText();//quickedit_data_textboxTxt;
-                    if (!Active) AvailableInUseBothKeysMouse();
-                    //br.WindowsScrolltoTop();
-                    return false;
+                    {
+                        undoRecord();
+                        textBox1.Text = br.CopyQuickedit_data_textboxText();//quickedit_data_textboxTxt;
+                        if (!Active) AvailableInUseBothKeysMouse();
+                        //br.WindowsScrolltoTop();
+                        return false;
+                    }
                 }
+                else if ((br.Quickedit_data_textbox == null ? 0 : (new StringInfo(br.Quickedit_data_textbox?.Text)?.LengthInTextElements)) < (normalLineParaLength == 0 ? 20 : normalLineParaLength)
+                    && quickedit_data_textboxTxt != "\t")// 「	」"\t"是新建的維基文本故 20240405
+                {
+                    OCRBreakSoundNotification();
+                    if (DialogResult.Cancel == Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("目前頁面內容似乎太短了，確定還要交給OCR嗎？" +
+                            Environment.NewLine + Environment.NewLine + "================" + Environment.NewLine +
+                            quickedit_data_textboxTxt))
+                    {
+                        undoRecord();
+                        textBox1.Text = br.CopyQuickedit_data_textboxText();//quickedit_data_textboxTxt;
+                        if (!Active) AvailableInUseBothKeysMouse();
+                        //br.WindowsScrolltoTop();
+                        return false;
+                    }
+                }
+                #endregion
             }
-            #endregion
 
             string currentWindowHndl = br.driver.CurrentWindowHandle;
             //下載書圖
@@ -8108,6 +8133,9 @@ namespace WindowsFormsApp1
                 //br.WindowsScrolltoTop();
                 return false;
             }
+
+            if (justDownloadImage) return true;
+
             ocrResult = false; TopMost = false;// Visible = false;//WindowState = FormWindowState.Minimized;
 
             #region toOCR

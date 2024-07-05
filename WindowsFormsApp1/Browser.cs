@@ -6931,7 +6931,7 @@ internal static string getImageUrl() {
             //var driver = new ChromeDriver();
             openNewTabWindow();
             driver.Navigate().GoToUrl(imageUrl);
-            driver.SwitchTo().Window(driver.CurrentWindowHandle);
+            //driver.SwitchTo().Window(driver.CurrentWindowHandle);
             BringToFront("chrome");
             //IWebElement iw = waitFindWebElementBySelector_ToBeClickable("body > img");
             //Cursor.Position = (Point)iw?.Location;
