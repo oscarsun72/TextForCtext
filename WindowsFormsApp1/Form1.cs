@@ -8475,24 +8475,24 @@ namespace WindowsFormsApp1
         /// <param name="showColorSignal">是否以顏色指示操作中</param>
         void BackupLastPageText(string x, bool updateLastBackup, bool showColorSignal)
         {
-            Color C = this.BackColor;
+            Color C = this.BackColor; string fBackup = (ocrTextMode & PasteOcrResultFisrtMode) ? "cTextBKOCR.txt" : fName_to_Backup_Txt;
             if (showColorSignal) { this.BackColor = Color.Red; Task.Delay(800).Wait(); }
             //C# 對文字檔案的幾種讀寫方法總結:https://codertw.com/%E7%A8%8B%E5%BC%8F%E8%AA%9E%E8%A8%80/542361/
             string lastPageText = x + Environment.NewLine + "＠"; //"＠" 作為每頁的界號
-            if (File.Exists(dropBoxPathIncldBackSlash + fName_to_Backup_Txt))
+            if (File.Exists(dropBoxPathIncldBackSlash + fBackup))
             {
                 if (updateLastBackup)
                 {
-                    string bk = File.ReadAllText(dropBoxPathIncldBackSlash + fName_to_Backup_Txt);
+                    string bk = File.ReadAllText(dropBoxPathIncldBackSlash + fBackup);
                     int bkLastEnd = bk.LastIndexOf("＠"), bkLastStart = bk.LastIndexOf("＠", bkLastEnd - 1) + 1;
                     //if (bkLastStart == -1) bkLastStart = 0;
                     bk = bk.Substring(0, bkLastStart) + lastPageText;
-                    File.WriteAllText(dropBoxPathIncldBackSlash + fName_to_Backup_Txt, bk, Encoding.UTF8);
+                    File.WriteAllText(dropBoxPathIncldBackSlash + fBackup, bk, Encoding.UTF8);
                     if (showColorSignal) this.BackColor = C;
                     return;
                 }
             }
-            File.AppendAllText(dropBoxPathIncldBackSlash + fName_to_Backup_Txt, lastPageText, Encoding.UTF8);
+            File.AppendAllText(dropBoxPathIncldBackSlash + fBackup, lastPageText, Encoding.UTF8);
             if (showColorSignal) this.BackColor = C;
         }
 
@@ -8906,7 +8906,7 @@ namespace WindowsFormsApp1
         internal void saveText()
         {
             //C# 對文字檔案的幾種讀寫方法總結:https://codertw.com/%E7%A8%8B%E5%BC%8F%E8%AA%9E%E8%A8%80/542361/
-            string str1 = textBox1.Text, f = dropBoxPathIncldBackSlash + fName_to_Save_Txt;
+            string str1 = textBox1.Text, f = dropBoxPathIncldBackSlash + ((ocrTextMode & PasteOcrResultFisrtMode) ? "cTextOCR.txt" : fName_to_Save_Txt);
             try
             {
                 using (var streamWriter = new StreamWriter(f)) { streamWriter.Write(str1); }

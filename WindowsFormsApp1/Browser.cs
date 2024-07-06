@@ -2261,6 +2261,7 @@ internal static string getImageUrl() {
         /// <returns></returns>
         internal static bool OCR_KanDianGuJi(string downloadImgFullName)
         {
+            ActiveForm1.TopMost = false;
             //LastValidWindow = driver.CurrentWindowHandle;
             openNewTabWindow();
             GoToUrlandActivate("https://kandianguji.com/ocr");
@@ -2292,26 +2293,43 @@ internal static string getImageUrl() {
             SendKeys.SendWait("{ENTER}");
             //Clipboard.Clear();
 
+            iwe = waitFindWebElementBySelector_ToBeClickable("#image-input");
+            while (iwe == null) {
+                iwe = waitFindWebElementBySelector_ToBeClickable("#image-input");
+            }
+            while (!iwe.GetAttribute("value").Contains("Ctext_Page_Image.png")){}
+            Thread.Sleep(300);
+
+            dt = DateTime.Now;
             //按下「開始識別」按鈕：
-            iwe = waitFindWebElementBySelector_ToBeClickable("#convert-form > button:nth-child(8)");
-            if (iwe == null) { StopOCR = true; return false; }
+            iwe = waitFindWebElementBySelector_ToBeClickable("#convert-form > button:nth-child(9)");
+            while (iwe == null)
+            {
+                if (DateTime.Now.Subtract(dt).TotalSeconds > 5)
+                {
+                    if (Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("等候「開始識別」按鈕逾時，是否繼續？") == DialogResult.Cancel) { StopOCR = true; return false; }
+                }
+                iwe = waitFindWebElementBySelector_ToBeClickable("#convert-form > button:nth-child(9)");
+            }            
             iwe.Click();
 
+            //#result_image
+            //currentSrc=https://kandianguji.com/static/loading.gif
             //檢查結果出來沒：            
+            dt = DateTime.Now;
             iwe = waitFindWebElementBySelector_ToBeClickable("#result_text");
-            if (iwe == null)
-            { //StopOCR = true; return false; }
-                dt = DateTime.Now;
-                while (waitFindWebElementBySelector_ToBeClickable("#result_text") == null)
-                {
-                    if (DateTime.Now.Subtract(dt).TotalSeconds > 10) { StopOCR = true; return false; }
-                }
+            while (iwe == null)
+            {
+                if (DateTime.Now.Subtract(dt).TotalSeconds > 10)
+                    if (Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("等候OCR結果逾時，是否繼續？") == DialogResult.Cancel) { StopOCR = true; return false; }
+                iwe = waitFindWebElementBySelector_ToBeClickable("#result_text");
             }
-            iwe = waitFindWebElementBySelector_ToBeClickable("#result_text");
+
             dt = DateTime.Now;
             while (iwe.GetAttribute("textContent") == "识别结果")
             {
-                if (DateTime.Now.Subtract(dt).TotalSeconds > 10) { StopOCR = true; return false; }
+                if (DateTime.Now.Subtract(dt).TotalSeconds > 20)
+                    if (Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("等候OCR結果逾時，是否繼續？") == DialogResult.Cancel) { StopOCR = true; return false; }
             }
 
             //選取OCR結果
