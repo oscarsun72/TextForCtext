@@ -3312,7 +3312,11 @@ eH:
             'Application.Wait (Now + TimeValue("0:00:10")) '<~~ Waits ten seconds.
             Resume 'https://stackoverflow.com/questions/21937053/appactivate-to-return-to-excel
         Case Else
-            MsgBox Err.Number & Err.Description
+            If Err.Number = -2146233088 And Err.Description = "A exception with a null response was thrown sending an HTTP request to the remote WebDriver server for URL http://localhost:9674/session/a3f86609a0c2a502c01fe9cdbef88686/window. The status of the exception was ConnectFailure, and the message was: 無法連接至遠端伺服器" Then
+                SystemSetup.killchromedriverFromHere
+            Else
+                MsgBox Err.Number & Err.Description
+            End If
 '            Resume
             GoTo endS
             'If cnt.State <> adStateClosed Then cnt.Close

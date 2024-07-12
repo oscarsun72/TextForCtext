@@ -2600,7 +2600,17 @@ namespace WindowsFormsApp1
                     overtypeModeSelectedTextSetting(ref textBox1);
                     if (textBox1.SelectionLength > 0)
                     {
-                        string txtbox1SelText = textBox1.SelectedText, url = textBox3.Text;
+                        string txtbox1SelText = textBox1.SelectedText;
+                        //if (Math.Abs(isChineseChar(txtbox1SelText, false)) != 1 && "■□◯".IndexOf(txtbox1SelText) == -1) return;
+                        if (!IsChineseString(txtbox1SelText) && "■□◯".IndexOf(txtbox1SelText) == -1) return;
+                        //playSound(soundLike.press, true);
+                        Color clr = BackColor;
+                        BackColor = Color.Aqua;
+                        Refresh();//沒有這行還不行！20240709
+                        Thread.Sleep(9);
+                        BackColor = clr;
+                        string url = textBox3.Text;
+
                         //Task.Run(() => { br.ImproveGJcoolOCRMemo(); });//因為即使開新執行緒，但仍是用同一個表單！
                         Task.Run(() => { br.ImproveGJcoolOCRMemo(txtbox1SelText, url); });
                         try
@@ -3022,7 +3032,14 @@ namespace WindowsFormsApp1
                         paragraphMarkAccordingFirstOne();
                         if (textBox1.Text.IsNullOrEmpty()) return;
                         if (isClipBoardAvailable_Text())
-                            Clipboard.SetText(textBox1.Text);
+                            try
+                            {
+                                Clipboard.SetText(textBox1.Text);
+                            }
+                            catch (Exception)
+                            {
+                                playSound(soundLike.error, true);
+                            }
                         return;
                     }
                 }
@@ -4900,7 +4917,18 @@ namespace WindowsFormsApp1
         {
             string x = textBox1.Text;
             Regex rx = new Regex("[　*。<p>]");
-            Clipboard.SetText(textBox1.Text = rx.Replace(x, string.Empty));
+            x = rx.Replace(x, string.Empty);
+            if (!x.IsNullOrEmpty())
+                try
+                {
+                    Clipboard.SetText(textBox1.Text = x);
+                }
+                catch (Exception)
+                {
+                    playSound(soundLike.error, true);
+                }
+            else
+                textBox1.Text = x;
         }
         /// <summary>
         /// Ctrl + Shift + Delete ： 將選取文字於文本中全部清除(Ctrl + z 還原功能支援)
@@ -5867,7 +5895,7 @@ namespace WindowsFormsApp1
         /// </summary>
         /// <param name="x">要檢測的字元字串</param>
         /// <param name="skipPunctuation">是否忽略標點符號</param>
-        /// <returns></returns>
+        /// <returns>如果是中文傳回絕對值1（非surrogate=-1，surrogate=1；High or Low Surrogate=-1）</returns>
         internal static int isChineseChar(string x, bool skipPunctuation)
         {
             //if (skipPunctuation) if (punctuationsNum.IndexOf(x, StringComparison.Ordinal) > -1) return -1;
@@ -5966,7 +5994,8 @@ namespace WindowsFormsApp1
             {
                 if (!IsChineseCharacter(c))
                 {
-                    return false;
+                    //return false;
+                    return (Math.Abs(isChineseChar(s, false)) == 1) ? true : false;
                 }
             }
             return true;
@@ -7913,6 +7942,20 @@ namespace WindowsFormsApp1
                     autoMarkTitles(); return;
                 }
 
+                if (e.KeyCode == Keys.F9)
+                {//Alt + F9 : 在《漢籍全文資料庫》檢索易學關鍵字
+                    e.Handled = true;
+                    br.Hanchi_SearchingKeywordsYijing();
+                    return;
+                }
+
+                if (e.KeyCode == Keys.Oemcomma)
+                {//Alt + , : 在《漢籍全文資料庫》檢索易學關鍵字
+                    e.Handled = true;
+                    br.Hanchi_SearchingKeywordsYijing();
+                    return;
+                }
+
                 if (e.KeyCode == Keys.F12)
                 {
                     e.Handled = true;
@@ -8850,9 +8893,9 @@ namespace WindowsFormsApp1
             /*在 C# 的 System.Windows.Forms 中，可以使用 Clipboard.ContainsData 或 Clipboard.ContainsText 方法來確定剪貼簿是否可用。*/
             DateTime dt = DateTime.Now;
         retry:
-            if (DateTime.Now.Subtract(dt).TotalSeconds > 12)
+            if (DateTime.Now.Subtract(dt).TotalSeconds > 3)
             {
-                if (MessageBox.Show("剪貼簿檢查已逾12秒，是否繼續？", "", MessageBoxButtons.OKCancel, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2, MessageBoxOptions.DefaultDesktopOnly) == DialogResult.Cancel)
+                if (MessageBox.Show("剪貼簿檢查已逾3秒，是否繼續？", "", MessageBoxButtons.OKCancel, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2, MessageBoxOptions.DefaultDesktopOnly) == DialogResult.Cancel)
                     return true;
             }
             try
@@ -10520,6 +10563,11 @@ namespace WindowsFormsApp1
                     PauseEvents();
                     textBox2.Text = "";
                     ResumeEvents(); return;
+                case "lx"://輸入「lx」重設《漢籍全文資料庫》檢索易學關鍵字清單之索引值為0 即 ListIndex_Hanchi_SearchingKeywordsYijing=0。 
+                    br.ListIndex_Hanchi_SearchingKeywordsYijing = 0;
+                    PauseEvents();
+                    textBox2.Text = "";
+                    ResumeEvents(); return;
                 default:
                     break;
             }
@@ -11079,7 +11127,7 @@ namespace WindowsFormsApp1
                             nextPageStartTime = DateTime.Now;
                         }
                         nextPages(Keys.PageUp, false);
-                        if (autoPastetoQuickEdit) AvailableInUseBothKeysMouse();
+                        if (autoPastetoQuickEdit || keyinTextMode) AvailableInUseBothKeysMouse();
                         //上一頁
                         //keyDownCtrlAdd(false);
                         break;
@@ -11096,7 +11144,7 @@ namespace WindowsFormsApp1
                         //keyDownCtrlAdd(true);
                         //下一頁
                         nextPages(Keys.PageDown, false);
-                        if (autoPastetoQuickEdit) AvailableInUseBothKeysMouse();
+                        if (autoPastetoQuickEdit || keyinTextMode) AvailableInUseBothKeysMouse();
                         break;
                     default:
                         break;

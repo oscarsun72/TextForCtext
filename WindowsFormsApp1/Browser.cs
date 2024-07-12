@@ -2265,12 +2265,13 @@ internal static string getImageUrl() {
             //LastValidWindow = driver.CurrentWindowHandle;
             openNewTabWindow();
             GoToUrlandActivate("https://kandianguji.com/ocr");
+            Browser.BringToFront("chrome");
 
             //按下「選擇檔案」按鈕
             //IWebElement iwe = waitFindWebElementBySelector_ToBeClickable("#image-input");
             IWebElement iwe = waitFindWebElementBySelector_ToBeClickable("#convert-form > label.drop-container");
             if (iwe == null) { StopOCR = true; return false; }
-            ActiveForm1.TopMost = false;
+            //ActiveForm1.TopMost = false;//前已有
             driver.SwitchTo().Window(driver.CurrentWindowHandle);
             iwe.Click();
 
@@ -2294,10 +2295,11 @@ internal static string getImageUrl() {
             //Clipboard.Clear();
 
             iwe = waitFindWebElementBySelector_ToBeClickable("#image-input");
-            while (iwe == null) {
+            while (iwe == null)
+            {
                 iwe = waitFindWebElementBySelector_ToBeClickable("#image-input");
             }
-            while (!iwe.GetAttribute("value").Contains("Ctext_Page_Image.png")){}
+            while (!iwe.GetAttribute("value").Contains("Ctext_Page_Image.png")) { }
             Thread.Sleep(300);
 
             dt = DateTime.Now;
@@ -2310,7 +2312,7 @@ internal static string getImageUrl() {
                     if (Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("等候「開始識別」按鈕逾時，是否繼續？") == DialogResult.Cancel) { StopOCR = true; return false; }
                 }
                 iwe = waitFindWebElementBySelector_ToBeClickable("#convert-form > button:nth-child(9)");
-            }            
+            }
             iwe.Click();
 
             //#result_image
@@ -3970,7 +3972,11 @@ internal static string getImageUrl() {
             DateTime dt = DateTime.Now;
             while (!File.Exists(downloadImgFullName))
             {
-                if (DateTime.Now.Subtract(dt).TotalSeconds > 38) { StopOCR = true; return false; }
+                if (DateTime.Now.Subtract(dt).TotalSeconds > 38)
+                {
+                    if (DialogResult.Cancel == Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("是否上傳完成？"))
+                    { StopOCR = true; return false; }
+                }
             }
 
             Clipboard.SetText(downloadImgFullName);
@@ -6853,6 +6859,167 @@ internal static string getImageUrl() {
             //以上VBA bug 已排除
             return url + "#" + w;//到VBA再轉碼，以便複製此字、不必再key也。況昨晚才經Bing大菩薩、StackOverflow AI大菩薩的加持，得以成功建置此生第1個 dll檔案，供Word VBA調用。感恩感恩　讚歎讚歎　南無阿彌陀佛
         }
+
+        internal static int ListIndex_Hanchi_SearchingKeywordsYijing = 0;
+
+        /// <summary>
+        /// 《漢籍全文資料庫》檢索易學關鍵字
+        /// 【進階檢索】中指定書名請自行輸入
+        /// 在textBox2中輸入「lx」重設《漢籍全文資料庫》檢索易學關鍵字清單之索引值為0 即 ListIndex_Hanchi_SearchingKeywordsYijing=0。 
+        /// textBox3.Text 會顯示關鍵字清單的索引值（從0開始）
+        /// </summary>
+        internal static void Hanchi_SearchingKeywordsYijing()
+        {
+            if (driver == null) return;
+            List<string> keywords = new List<string> { "易", "卦", "爻", "繫詞", "繫辭", "文言", "乾坤","元亨","利貞", "咎"
+                , "夬", "頤","巽","坎","兌","小畜","大畜","歸妹","明夷","同人","大有","豫","蠱","噬嗑","賁","剝","大過","小過","遯","大壯","睽","蹇","姤","萃","艮","渙","中孚","既濟","未濟"
+                ,"无妄", "彖", "象曰", "象傳", "象日", "象云", "筮"
+            ,"初九","九二","九三","九四","九五","上九","初六","六二","六三","六四","六五","上六"};
+
+            string title = "";
+            try
+            {
+                title = driver.Title;//避免誤關出錯
+            }
+            catch (Exception)
+            {
+                //《漢籍全文資料庫》網頁介面
+                foreach (var item in driver.WindowHandles)
+                {
+                    driver.SwitchTo().Window(item);
+                    if (driver.Title.Contains("漢籍全文")) break;
+                }
+                if (!driver.Title.Contains("漢籍全文"))
+                {
+                    Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("請開啟《漢籍全文資料庫》網頁檢索介面，再開始操作");
+                    return;
+                }
+                title = driver.Title;
+            }
+
+            IWebElement iwe1 = waitFindWebElementBySelector_ToBeClickable("body > form > table > tbody > tr:nth-child(2) > td > table > tbody > tr > td.leftbg > table > tbody > tr:nth-child(1) > td > table > tbody > tr:nth-child(2) > td > input[type=text]:nth-child(2)");
+            string caption = iwe1 == null ? "漢籍全文資料庫" : "漢籍全文文本閱讀";
+
+            if (!title.Contains(caption))
+            {
+                //《漢籍全文資料庫》網頁介面
+                foreach (var item in driver.WindowHandles)
+                {
+                    driver.SwitchTo().Window(item);
+                    if (driver.Title.Contains(caption)) break;
+                }
+                if (!driver.Title.Contains(caption))
+                {
+                    Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("請開啟《漢籍全文資料庫》網頁檢索介面，再開始操作");
+                    return;
+                }
+            }
+            string keyword = keywords[ListIndex_Hanchi_SearchingKeywordsYijing]; Clipboard.SetText(keyword);
+            ActiveForm1.PauseEvents();
+            ActiveForm1.textBox3Text = ListIndex_Hanchi_SearchingKeywordsYijing.ToString();
+            ActiveForm1.Controls["textBox1"].Text = keyword;
+            ActiveForm1.ResumeEvents();
+
+            if (caption == "漢籍全文資料庫")
+            {
+
+                //輸入「任意詞」：KeywordInputBox
+                IWebElement iweKeywordInputBox = waitFindWebElementBySelector_ToBeClickable("#frmTitle > table > tbody > tr:nth-child(2) > td > table > tbody > tr:nth-child(1) > td > table > tbody > tr > td > table > tbody > tr:nth-child(1) > td:nth-child(2) > nobr > input[type=TEXT]");
+                if (iweKeywordInputBox == null)
+                {
+                    if (iwe1 == null)
+                    {
+                        Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("請開啟《漢籍全文資料庫》網頁檢索介面，再開始操作");
+                        return;
+                    }
+
+                }
+
+                iweKeywordInputBox.Clear();
+                iweKeywordInputBox.SendKeys(keyword);
+
+                //按下「搜尋」：
+                //IWebElement iwe = waitFindWebElementBySelector_ToBeClickable("#frmTitle > table > tbody > tr:nth-child(2) > td > table > tbody > tr:nth-child(8) > td > input[type=IMAGE]:nth-child(1)");
+                IWebElement iwe = waitFindWebElementByName_ToBeClickable("_IMG_搜尋", 2);
+                if (iwe != null && iweKeywordInputBox.GetAttribute("value") == keyword)
+                {
+                    iwe.Click();
+                    iwe = waitFindWebElementBySelector_ToBeClickable("body > form > table > tbody > tr:nth-child(2) > td:nth-child(3) > center > table > tbody > tr:nth-child(2) > td > font");
+                    if (iwe != null)
+                    {
+                        if (iwe.GetAttribute("innerText") == "　抱歉，找不到您所查詢的資料")
+                        {
+                            Form1.playSound(Form1.soundLike.error, true);
+                            ActiveForm1.AvailableInUseBothKeysMouse();
+                        }
+                    }
+                    else
+                    {
+
+                        ActiveForm1.TopMost = false;
+                        iwe = waitFindWebElementByName_ToBeClickable("_IMG_檢索報表", 2);
+                        if (iwe != null)//   ?.Click();
+                        {//20240710 Copilot大菩薩：要在 Selenium 中使用鍵盤的 Shift 鍵，您可以使用 Actions 類別來模擬鍵盤和滑鼠的操作。以下是一個範例程式碼：
+                         // 建立一個新的 Actions 物件
+                            Actions action = new Actions(driver);
+                            // 按下 Shift 鍵，然後點擊元素，最後釋放 Shift 鍵
+                            action.KeyDown(OpenQA.Selenium.Keys.Shift).Click(iwe).KeyUp(OpenQA.Selenium.Keys.Shift).Build().Perform();
+                            Browser.BringToFront("chrome");
+                        }
+                    }
+
+                }
+            }
+            else//文本閱讀內的檢索
+            {
+                //輸入查詢關鍵字
+                iwe1.Clear();
+                iwe1.SendKeys(keyword);
+
+                //按下「查詢」按鈕
+                iwe1 = waitFindWebElementBySelector_ToBeClickable("body > form > table > tbody > tr:nth-child(2) > td > table > tbody > tr > td.leftbg > table > tbody > tr:nth-child(1) > td > table > tbody > tr:nth-child(2) > td > input.s_btn.hjblock");
+                while (iwe1 == null)
+                {
+                    iwe1 = waitFindWebElementBySelector_ToBeClickable("body > form > table > tbody > tr:nth-child(2) > td > table > tbody > tr > td.leftbg > table > tbody > tr:nth-child(1) > td > table > tbody > tr:nth-child(2) > td > input.s_btn.hjblock", 0.3);
+                }
+                Task.Run(() => { iwe1.Click(); });
+
+                Form1.playSound(Form1.soundLike.press);
+                //查詢結果
+                ////iwe1 = waitFindWebElementBySelector_ToBeClickable("body > form > table > tbody > tr:nth-child(2) > td > table > tbody > tr > td.leftbg > table > tbody > tr:nth-child(1) > td > table > tbody > tr:nth-child(2) > td > div > span");
+                //iwe1 = waitFindWebElementBySelector_ToBeClickable("body > form > table > tbody > tr:nth-child(2) > td > table > tbody > tr > td > table > tbody > tr:nth-child(2) > td > table > tbody > tr:nth-child(1) > td.seqno > a");
+                ////while (iwe1 == null)
+                ////{
+                ////iwe1 = waitFindWebElementBySelector_ToBeClickable("body > form > table > tbody > tr:nth-child(2) > td > table > tbody > tr > td.leftbg > table > tbody > tr:nth-child(1) > td > table > tbody > tr:nth-child(2) > td > input.s_btn.hjblock",0.3);
+                ////}
+                ////if (iwe1.GetAttribute("innerText") == "找不到您的檢索詞")
+                //if (iwe1 == null)
+                //{
+                //    Form1.playSound(Form1.soundLike.error, true);
+                //    ActiveForm1.AvailableInUseBothKeysMouse();
+
+                //}
+                //else
+                //{
+                ActiveForm1.TopMost = false;
+                BringToFront("chrome");
+                //}
+            }
+
+            ListIndex_Hanchi_SearchingKeywordsYijing++;
+            if (ListIndex_Hanchi_SearchingKeywordsYijing > keywords.Count - 1)
+            {
+                ListIndex_Hanchi_SearchingKeywordsYijing = 0;
+                Form1.playSound(Form1.soundLike.warn, true);
+            }
+            // 建立一個新的 Actions 物件
+            Actions action1 = new Actions(driver);
+            action1.KeyDown(OpenQA.Selenium.Keys.Escape).Perform();
+            //action.KeyDown(OpenQA.Selenium.Keys.Escape).Build().Perform();
+            SendKeys.SendWait("{esc}");
+
+        }
+
         /// <summary>
         /// C:\Users\oscar\Dropbox\《古籍酷》AI%20OCR%20待改進者隨記%20感恩感恩 讚歎讚歎 南無阿彌陀佛.docx
         /// </summary>
@@ -6955,34 +7122,45 @@ internal static string getImageUrl() {
             //Cursor.Position = (Point)iw?.Location;
             ////if (iw != null)  clickCopybutton_GjcoolFastExperience(iw.Location); 
 
-            // 找到圖片元素
-            var imageElement = driver.FindElement(By.TagName("img"));
+            try
+            {
+                // 找到圖片元素
+                var imageElement = driver.FindElement(By.TagName("img"));
 
-            // 建立 Actions 物件
-            var action = new Actions(driver);
+                // 建立 Actions 物件
+                var action = new Actions(driver);
 
-            // 模擬鼠標右鍵點擊圖片
-            action.ContextClick(imageElement).Perform();
+                // 模擬鼠標右鍵點擊圖片
 
-            // 模擬按下「V」鍵，選擇「另存圖片」的選項
-            // 注意：這可能需要根據您的瀏覽器和語言設定來調整
-            action.SendKeys("v").Perform();
-            //SendKeys.Send("{v 2}");
-            SendKeys.SendWait("v");
+                action.ContextClick(imageElement).Perform();
 
-            // TODO: 處理彈出的「另存為」對話框，輸入文件名並點擊「保存」
-            // 這可能需要使用到其他的工具或方法，例如 AutoIt 或 SendKeys
-            Clipboard.Clear(); Clipboard.SetText(downloadImgFullName);
-            Thread.Sleep(1190 + (
-                800 + Extend_the_wait_time_for_the_Open_Old_File_dialog_box_to_appear_Millisecond < 0 ? 0 : Extend_the_wait_time_for_the_Open_Old_File_dialog_box_to_appear_Millisecond));//最小值（須在重開機後或系統最小負載時）（連「開啟」舊檔之視窗也看不見，即可完成）
-                                                                                                                                                                                          //Thread.Sleep(1200);
-                                                                                                                                                                                          //Thread.Sleep(500);            
+                // 模擬按下「V」鍵，選擇「另存圖片」的選項
+                // 注意：這可能需要根據您的瀏覽器和語言設定來調整
+                action.SendKeys("v").Perform();
+                //SendKeys.Send("{v 2}");
+                SendKeys.SendWait("v");
+
+                // TODO: 處理彈出的「另存為」對話框，輸入文件名並點擊「保存」
+                // 這可能需要使用到其他的工具或方法，例如 AutoIt 或 SendKeys
+                Clipboard.Clear(); Clipboard.SetText(downloadImgFullName);
+                //Thread.Sleep(1190 + (
+                Thread.Sleep(1900 + (
+                    800 + Extend_the_wait_time_for_the_Open_Old_File_dialog_box_to_appear_Millisecond < 0 ? 0 : Extend_the_wait_time_for_the_Open_Old_File_dialog_box_to_appear_Millisecond));//最小值（須在重開機後或系統最小負載時）（連「開啟」舊檔之視窗也看不見，即可完成）
+                                                                                                                                                                                              //Thread.Sleep(1200);
+                                                                                                                                                                                              //Thread.Sleep(500);            
 
 
-            //輸入：檔案名稱 //SendKeys.Send(downloadImgFullName);
-            SendKeys.SendWait("+{Insert}");//or "^v"
-            SendKeys.SendWait("{ENTER}");
-            //Clipboard.Clear();
+                //輸入：檔案名稱 //SendKeys.Send(downloadImgFullName);
+                SendKeys.SendWait("+{Insert}");//or "^v"
+                SendKeys.SendWait("{ENTER}");
+                //Clipboard.Clear();
+
+                Thread.Sleep(300);
+            }
+            catch (Exception)
+            {
+                return false;
+            }
 
             driver.Close();
             ////等待書圖檔下載完成

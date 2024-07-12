@@ -43,6 +43,7 @@ Dim x As String ', data As New MSForms.DataObject
 Dim i As Integer, rng As Range, d As Document
 SystemSetup.stopUndo ur, "·s­¶­±"
 Set d = ActiveDocument
+If d.path <> "" Then Exit Sub
 Set rng = d.Range
 start = CInt(Replace(rng.Paragraphs(1).Range, chr(13), ""))
 e = CInt(Replace(rng.Paragraphs(2).Range, chr(13), ""))

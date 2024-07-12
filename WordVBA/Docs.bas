@@ -867,7 +867,7 @@ endDocOld = d.Range.End
 '    End If
 
 Rem 將剪貼簿內擬加入的文本規範化
-clipBTxt = Replace(Replace(Replace(Replace(VBA.Trim(SystemSetup.GetClipboardText), chr(13) + chr(10) + "空句子" + chr(13) + chr(10), chr(13) + chr(10) + chr(13) + chr(10)), chr(9), ""), "．　", ""), "　．", "")
+clipBTxt = Replace(Replace(Replace(Replace(Replace(VBA.Trim(SystemSetup.GetClipboardText), chr(13) + chr(10) + "空句子" + chr(13) + chr(10), chr(13) + chr(10) + chr(13) + chr(10)), chr(9), ""), "．　", ""), "　．", ""), " ", vbNullString)
 clipBTxt = 文字處理.trimStrForSearch_PlainText(clipBTxt)
 clipBTxt = 漢籍電子文獻資料庫.CleanTextPicPageMark(clipBTxt)
 For e = 0 To UBound(strAutoCorrection)
@@ -878,6 +878,7 @@ searchedTerm = Array("易", "卦", "爻", "周易", "易經", "系辭", "繫辭", "擊辭", "
     "卦序", "敘卦", "雜卦", "文言", "乾坤", "無咎", ChrW(26080) & "咎", "天咎", "元亨", "利貞", "史記", "九五", _
     "六二", "上九", "上六", "九二", "九三", "六四", "筮", "夬", "〈乾〉", "〈坤〉", "乾、坤", "〈乾、坤〉" _
         , "象曰", "象日", "象云", "象傳", "彖", _
+        "艮", "頤", "坎", "中孚", _
     ChrW(26080) & ChrW(-10171) & ChrW(-8522))  ', "", "", "", "" )
 
 'If Selection.Type = wdSelectionIP Then
@@ -1251,20 +1252,25 @@ eH:
             Else
                 GoTo msg:
             End If
+        Case -2146233088 'unknown error: unhandled inspector error: {"code":-32000,"message":"Browser window not found"}
+                          '(Session info: chrome=126.0.6478.127)
+            If VBA.InStr(Err.Description, "unknown error: unhandled inspector error:") > 0 Then
+                GoTo mark
+            End If
         Case Else
 msg:
-            MsgBox Err.Number + Err.Description
+            MsgBox Err.Number & Err.Description
     End Select
 End Sub
 
 '先要複製到剪貼簿
 Function 貼到古籍酷自動標點() As Boolean
-Dim x As String, result As String
+Dim x As String, result As String, resumeTimer As Byte
 On Error GoTo Err1
 x = SystemSetup.GetClipboard
 x = Replace(x, chr(0), "")
 If x = "" Then x = Selection
-result = SeleniumOP.grabGjCoolPunctResult(x)
+result = SeleniumOP.grabGjCoolPunctResult(x, result)
 If result = "" Or result = x Then
     DoEvents
     貼到古籍酷自動標點SendKeys
@@ -1280,15 +1286,33 @@ Exit Function
 Err1:
     Select Case Err.Number
         Case 49 'DLL 呼叫規格錯誤
-            Resume
+            resumeTimer = resumeTimer + 1
+            If resumeTimer > 2 Then
+                MsgBox Err.Description, vbCritical
+                SystemSetup.killchromedriverFromHere
+            Else
+                Resume
+            End If
         Case 5 'https://www.google.com/search?q=vba+Err.Number+5&oq=vba+Err.Number+5&aqs=chrome..69i57j0i10i30j0i30l2j0i5i30.4768j0j7&sourceid=chrome&ie=UTF-8
             SystemSetup.wait 1.5
-            Resume
+            resumeTimer = resumeTimer + 1
+            If resumeTimer > 2 Then
+                MsgBox Err.Description, vbCritical
+                SystemSetup.killchromedriverFromHere
+            Else
+                Resume
+            End If
         Case 13
             If InStr(Err.Description, "型態不符合") Then
                 SystemSetup.killchromedriverFromHere
 '                Stop
-                Resume
+                resumeTimer = resumeTimer + 1
+                If resumeTimer > 2 Then
+                    MsgBox Err.Description, vbCritical
+                    SystemSetup.killchromedriverFromHere
+                Else
+                    Resume
+                End If
             Else
                 MsgBox Err.Description, vbCritical
                 Stop
@@ -1299,7 +1323,14 @@ Err1:
                                                                                         '(Session info: chrome=110.0.5481.178)
                 SystemSetup.killchromedriverFromHere
 '                Stop
-                Resume
+                resumeTimer = resumeTimer + 1
+                If resumeTimer > 2 Then
+                    MsgBox Err.Description, vbCritical
+                    SystemSetup.killchromedriverFromHere
+                Else
+                    Resume
+                End If
+
             Else
                 MsgBox Err.Description, vbCritical
                 SystemSetup.killchromedriverFromHere
