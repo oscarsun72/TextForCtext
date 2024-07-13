@@ -7945,14 +7945,16 @@ namespace WindowsFormsApp1
                 if (e.KeyCode == Keys.F9)
                 {//Alt + F9 : 在《漢籍全文資料庫》檢索易學關鍵字
                     e.Handled = true;
-                    br.Hanchi_SearchingKeywordsYijing();
+                    while (true)
+                        if (br.Hanchi_SearchingKeywordsYijing()) break;
                     return;
                 }
 
                 if (e.KeyCode == Keys.Oemcomma)
                 {//Alt + , : 在《漢籍全文資料庫》檢索易學關鍵字
                     e.Handled = true;
-                    br.Hanchi_SearchingKeywordsYijing();
+                    while (true)
+                        if (br.Hanchi_SearchingKeywordsYijing()) break;
                     return;
                 }
 
@@ -11371,7 +11373,8 @@ namespace WindowsFormsApp1
                 resetBooksPagesFeatures();
                 previousResID = resID;
                 if (editwikiID > 0 && editwikiID != previousEditwikiID) previousEditwikiID = editwikiID;
-                playSound(soundLike.warn);
+                if (textBox3.Text.StartsWith("http"))
+                    playSound(soundLike.warn);
             }
             //else
             //{

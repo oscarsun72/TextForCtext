@@ -84,18 +84,34 @@ Function Is_ClipboardContainCtext_Note_InlinecommentColor() As Boolean
         中國哲學書電子化計劃.清除文本頁中的編號儲存格 TextRange
         TextRange.Copy
     End If
-    ' 檢查字型顏色是否為綠色
-    For Each a In TextRange.Characters
-        If a.Font.Color = 34816 Then
-            'MsgBox "剪貼簿中有綠色文字"
-            Is_ClipboardContainCtext_Note_InlinecommentColor = True
-            d.Close wdDoNotSaveChanges
-            word.Application.ScreenUpdating = True
-            Exit Function
-'        Else
-'            MsgBox "剪貼簿中沒有綠色文字"
+    ' 檢查字型顏色是否為綠色34816 和湛藍色8912896的字
+    With TextRange.Find
+        .ClearFormatting
+        .Text = vbNullString
+        .Font.Color = 8912896
+        .Forward = True
+        .Wrap = wdFindContinue
+        If .Execute() Then
+            Is_ClipboardContainCtext_Note_InlinecommentColor = True = True
+        Else
+            .Font.Color = 34816
+            If .Execute() Then Is_ClipboardContainCtext_Note_InlinecommentColor = True = True
         End If
-    Next a
+    End With
+    
+    
+'    For Each a In TextRange.Characters
+'        If a.Font.Color = 34816 Or a.Font.ColorIndex = 9 Then
+'            'MsgBox "剪貼簿中有綠色文字" 和湛藍色的字
+'            Is_ClipboardContainCtext_Note_InlinecommentColor = True
+'            d.Close wdDoNotSaveChanges
+'            word.Application.ScreenUpdating = True
+'            Exit Function
+''        Else
+''            MsgBox "剪貼簿中沒有綠色文字"
+'        End If
+'    Next a
+    
 exitFunction:
     d.Close wdDoNotSaveChanges
     word.Application.ScreenUpdating = True

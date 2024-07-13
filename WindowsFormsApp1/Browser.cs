@@ -6866,11 +6866,12 @@ internal static string getImageUrl() {
         /// 《漢籍全文資料庫》檢索易學關鍵字
         /// 【進階檢索】中指定書名請自行輸入
         /// 在textBox2中輸入「lx」重設《漢籍全文資料庫》檢索易學關鍵字清單之索引值為0 即 ListIndex_Hanchi_SearchingKeywordsYijing=0。 
-        /// textBox3.Text 會顯示關鍵字清單的索引值（從0開始）
+        /// textBox3.Text 會顯示關鍵字清單的索引值（從0開始）        
+        /// <returns>檢索有結果、或關鍵字清單找完一遍了、或失敗則傳回則傳回true（以供呼叫端判斷是否停止繼續呼叫） 若檢索成功但沒結果，則傳回false </returns>
         /// </summary>
-        internal static void Hanchi_SearchingKeywordsYijing()
+        internal static bool Hanchi_SearchingKeywordsYijing()
         {
-            if (driver == null) return;
+            if (driver == null) return true;
             List<string> keywords = new List<string> { "易", "卦", "爻", "繫詞", "繫辭", "文言", "乾坤","元亨","利貞", "咎"
                 , "夬", "頤","巽","坎","兌","小畜","大畜","歸妹","明夷","同人","大有","豫","蠱","噬嗑","賁","剝","大過","小過","遯","大壯","睽","蹇","姤","萃","艮","渙","中孚","既濟","未濟"
                 ,"无妄", "彖", "象曰", "象傳", "象日", "象云", "筮"
@@ -6892,7 +6893,7 @@ internal static string getImageUrl() {
                 if (!driver.Title.Contains("漢籍全文"))
                 {
                     Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("請開啟《漢籍全文資料庫》網頁檢索介面，再開始操作");
-                    return;
+                    return true;
                 }
                 title = driver.Title;
             }
@@ -6911,7 +6912,7 @@ internal static string getImageUrl() {
                 if (!driver.Title.Contains(caption))
                 {
                     Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("請開啟《漢籍全文資料庫》網頁檢索介面，再開始操作");
-                    return;
+                    return true;
                 }
             }
             string keyword = keywords[ListIndex_Hanchi_SearchingKeywordsYijing]; Clipboard.SetText(keyword);
@@ -6919,6 +6920,7 @@ internal static string getImageUrl() {
             ActiveForm1.textBox3Text = ListIndex_Hanchi_SearchingKeywordsYijing.ToString();
             ActiveForm1.Controls["textBox1"].Text = keyword;
             ActiveForm1.ResumeEvents();
+            bool returnValue = false;
 
             if (caption == "漢籍全文資料庫")
             {
@@ -6930,7 +6932,7 @@ internal static string getImageUrl() {
                     if (iwe1 == null)
                     {
                         Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("請開啟《漢籍全文資料庫》網頁檢索介面，再開始操作");
-                        return;
+                        return true;
                     }
 
                 }
@@ -6947,15 +6949,15 @@ internal static string getImageUrl() {
                     iwe = waitFindWebElementBySelector_ToBeClickable("body > form > table > tbody > tr:nth-child(2) > td:nth-child(3) > center > table > tbody > tr:nth-child(2) > td > font");
                     if (iwe != null)
                     {
-                        if (iwe.GetAttribute("innerText") == "　抱歉，找不到您所查詢的資料")
-                        {
-                            Form1.playSound(Form1.soundLike.error, true);
-                            ActiveForm1.AvailableInUseBothKeysMouse();
-                        }
+                        //if (iwe.GetAttribute("innerText") == "　抱歉，找不到您所查詢的資料")
+                        //{
+                        //    //Form1.playSound(Form1.soundLike.error, true);
+                        //    //ActiveForm1.AvailableInUseBothKeysMouse();
+                        //}
                     }
                     else
                     {
-
+                        returnValue = true;
                         ActiveForm1.TopMost = false;
                         iwe = waitFindWebElementByName_ToBeClickable("_IMG_檢索報表", 2);
                         if (iwe != null)//   ?.Click();
@@ -6986,13 +6988,27 @@ internal static string getImageUrl() {
 
                 Form1.playSound(Form1.soundLike.press);
                 //查詢結果
-                ////iwe1 = waitFindWebElementBySelector_ToBeClickable("body > form > table > tbody > tr:nth-child(2) > td > table > tbody > tr > td.leftbg > table > tbody > tr:nth-child(1) > td > table > tbody > tr:nth-child(2) > td > div > span");
+                iwe1 = waitFindWebElementBySelector_ToBeClickable("body > form > table > tbody > tr:nth-child(2) > td > table > tbody > tr > td.leftbg > table > tbody > tr:nth-child(1) > td > table > tbody > tr:nth-child(2) > td > div > span");
                 //iwe1 = waitFindWebElementBySelector_ToBeClickable("body > form > table > tbody > tr:nth-child(2) > td > table > tbody > tr > td > table > tbody > tr:nth-child(2) > td > table > tbody > tr:nth-child(1) > td.seqno > a");
-                ////while (iwe1 == null)
-                ////{
-                ////iwe1 = waitFindWebElementBySelector_ToBeClickable("body > form > table > tbody > tr:nth-child(2) > td > table > tbody > tr > td.leftbg > table > tbody > tr:nth-child(1) > td > table > tbody > tr:nth-child(2) > td > input.s_btn.hjblock",0.3);
-                ////}
-                ////if (iwe1.GetAttribute("innerText") == "找不到您的檢索詞")
+                while (iwe1 == null)
+                {
+                    if (waitFindWebElementBySelector_ToBeClickable("body > form > table > tbody > tr:nth-child(2) > td > table > tbody > tr > td > table > tbody > tr:nth-child(2) > td > table > tbody > tr:nth-child(1) > td.seqno", 0.3) != null)
+                    {
+                        returnValue = true;
+                        break;
+                    }
+                    iwe1 = waitFindWebElementBySelector_ToBeClickable("body > form > table > tbody > tr:nth-child(2) > td > table > tbody > tr > td.leftbg > table > tbody > tr:nth-child(1) > td > table > tbody > tr:nth-child(2) > td > input.s_btn.hjblock", 0.3);
+                }
+
+                //if (iwe1 != null && waitFindWebElementBySelector_ToBeClickable("body > form > table > tbody > tr:nth-child(2) > td > table > tbody > tr > td > table > tbody > tr:nth-child(2) > td > table > tbody > tr:nth-child(1) > td.seqno", 0.3) == null)
+                //{
+                //    if (iwe1.GetAttribute("innerText") == "找不到您的檢索詞")
+                //    //while (waitFindWebElementBySelector_ToBeClickable("body > form > table > tbody > tr:nth-child(2) > td > table > tbody > tr > td.leftbg > table > tbody > tr:nth-child(1) > td > table > tbody > tr:nth-child(2) > td > div > span")?.GetAttribute("innerText") == "找不到您的檢索詞"&& waitFindWebElementBySelector_ToBeClickable("body > form > table > tbody > tr:nth-child(2) > td > table > tbody > tr > td > table > tbody > tr:nth-child(2) > td > table > tbody > tr:nth-child(1) > td.seqno", 0.3) == null)
+                //    {
+
+                //    }
+                //}
+
                 //if (iwe1 == null)
                 //{
                 //    Form1.playSound(Form1.soundLike.error, true);
@@ -7001,8 +7017,11 @@ internal static string getImageUrl() {
                 //}
                 //else
                 //{
-                ActiveForm1.TopMost = false;
-                BringToFront("chrome");
+                if (returnValue)
+                {
+                    ActiveForm1.TopMost = false;
+                    BringToFront("chrome");
+                }
                 //}
             }
 
@@ -7011,13 +7030,18 @@ internal static string getImageUrl() {
             {
                 ListIndex_Hanchi_SearchingKeywordsYijing = 0;
                 Form1.playSound(Form1.soundLike.warn, true);
+                returnValue = true;
             }
-            // 建立一個新的 Actions 物件
-            Actions action1 = new Actions(driver);
-            action1.KeyDown(OpenQA.Selenium.Keys.Escape).Perform();
-            //action.KeyDown(OpenQA.Selenium.Keys.Escape).Build().Perform();
-            SendKeys.SendWait("{esc}");
-
+            if (!returnValue)
+            {
+                // 建立一個新的 Actions 物件
+                Actions action1 = new Actions(driver);
+                action1.KeyDown(OpenQA.Selenium.Keys.Escape).Perform();
+                //action.KeyDown(OpenQA.Selenium.Keys.Escape).Build().Perform();
+                SendKeys.Send("{esc}");
+                SendKeys.SendWait("{esc}");
+            }
+            return returnValue;
         }
 
         /// <summary>

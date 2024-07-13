@@ -1573,37 +1573,37 @@ End With
 SystemSetup.contiUndo ur
 End Sub
 Sub 只保留正文注文_且注文前後加括弧()
-Dim d As Document, ur As UndoRecord, slRng As Range
-SystemSetup.stopUndo ur, "中國哲學書電子化計劃_只保留正文注文_且注文前後加括弧"
-Docs.空白的新文件
-Set d = ActiveDocument
-If Selection.Type = wdSelectionIP Then ActiveDocument.Select
-Set slRng = Selection.Range
-清除文本頁中的編號儲存格 slRng
-中國哲學書電子化計劃_表格轉文字 slRng
-Dim ay, e
-ay = Array(254, 8912896)
-With d.Range.Find
-    .ClearFormatting
-End With
-For Each e In ay
+    Dim d As Document, ur As UndoRecord, slRng As Range
+    SystemSetup.stopUndo ur, "中國哲學書電子化計劃_只保留正文注文_且注文前後加括弧"
+    Docs.空白的新文件
+    Set d = ActiveDocument
+    If Selection.Type = wdSelectionIP Then ActiveDocument.Select
+    Set slRng = Selection.Range
+    清除文本頁中的編號儲存格 slRng
+    中國哲學書電子化計劃_表格轉文字 slRng
+    Dim ay, e
+    ay = Array(254, 8912896)
     With d.Range.Find
-        .Font.Color = e
-        .Execute "", , , , , , True, wdFindContinue, , "", wdReplaceAll
+        .ClearFormatting
     End With
-Next e
-Set slRng = d.Range
-With slRng.Find
-    .ClearFormatting
-    .Font.Color = 34816
-End With
-Do While slRng.Find.Execute(, , , , , , True, wdFindStop)
-    If InStr(chr(13) & chr(11) & chr(7) & chr(8) & chr(9) & chr(10), slRng) = 0 Then
-    slRng.Text = "（" + slRng.Text + "）"
-    'slRng.SetRange slRng.End, d.Range.End
-    End If
-Loop
-SystemSetup.contiUndo ur
+    For Each e In ay
+        With d.Range.Find
+            .Font.Color = e
+            .Execute "", , , , , , True, wdFindContinue, , "", wdReplaceAll
+        End With
+    Next e
+    Set slRng = d.Range
+    With slRng.Find
+        .ClearFormatting
+        .Font.Color = 34816
+    End With
+    Do While slRng.Find.Execute(, , , , , , True, wdFindStop)
+        If InStr(chr(13) & chr(11) & chr(7) & chr(8) & chr(9) & chr(10), slRng) = 0 Then
+        slRng.Text = "（" + slRng.Text + "）"
+        'slRng.SetRange slRng.End, d.Range.End
+        End If
+    Loop
+    SystemSetup.contiUndo ur
 End Sub
 
 Sub 清除文本頁中的編號儲存格(rng As Range)
