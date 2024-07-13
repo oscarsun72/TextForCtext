@@ -3978,8 +3978,13 @@ internal static string getImageUrl() {
                     { StopOCR = true; return false; }
                 }
             }
-
-            Clipboard.SetText(downloadImgFullName);
+            try
+            {
+                Clipboard.SetText(downloadImgFullName);
+            }
+            catch (Exception)
+            {
+            }
 
             //等待選取檔案對話框開啟
             //Thread.Sleep(800 + (
@@ -4278,9 +4283,21 @@ internal static string getImageUrl() {
                 }
                 ocrResult = ocrResult.Replace("】【", string.Empty).Replace("【", "{{").Replace("】", "}}");
                 CnText.RemoveInnerBraces(ref ocrResult);
-                Clipboard.SetText(ocrResult);
+
+                //Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("copy to clipboard!");
+                try
+                {
+                    Clipboard.SetText(ocrResult);
+                }
+                catch (Exception)
+                {
+
+                    //Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("無法複製OCR結果！");
+                    //StopOCR = true; return false;
+                }
                 //.Replace("0","◯").Replace("〇", "◯"));
 
+                //Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("copied to clipboard!");
             }
             catch (Exception ex)
             {
@@ -4290,16 +4307,23 @@ internal static string getImageUrl() {
             }
             #endregion
 
-            #region 刪除文件
+            //Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("ready to delete doc");
 
+            #region 刪除文件
             try
             {
 
                 //按下選取方塊，準備刪除
+                //dt = DateTime.Now;
                 //iwe = waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr:nth-child(1) > td.bs-checkbox > label > input[type=checkbox]", 1);
                 iwe = waitFindWebElementBySelector_ToBeClickable("#fileTable > thead > tr > th.bs-checkbox > div.th-inner > label > input[type=checkbox]", 0.1);
                 while (iwe == null)
+                {
+                    //if (DateTime.Now.Subtract(dt).TotalSeconds > 30)
+                    //    if (DialogResult.Cancel == Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("「選取方塊」等候逾時，是否繼續？")) { StopOCR = true; return false; }
                     iwe = waitFindWebElementBySelector_ToBeClickable("#fileTable > thead > tr > th.bs-checkbox > div.th-inner > label > input[type=checkbox]", 0.1);
+                }
+
                 if (!iwe.Selected) iwe.Click();
             }
             catch (Exception)
@@ -4314,15 +4338,25 @@ internal static string getImageUrl() {
             //刪除文件
             try
             {
+                //dt = DateTime.Now;
                 iwe = waitFindWebElementBySelector_ToBeClickable("#FileUploadDropdown", 0.1);
                 //按下「上傳」
                 while (iwe == null)
+                {
+                    //if (DateTime.Now.Subtract(dt).TotalSeconds > 30)
+                    //    if (DialogResult.Cancel == Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("「上傳」等候逾時，是否繼續？")) { StopOCR = true; return false; }
                     iwe = waitFindWebElementBySelector_ToBeClickable("#FileUploadDropdown", 0.1);
+                }
                 iwe.Click();
                 //按下「刪除文件」
+                //dt = DateTime.Now;
                 iwe = waitFindWebElementBySelector_ToBeClickable("#File > div.d-flex.justify-content-between.mt-2 > div.d-flex.mx-3 > div:nth-child(1) > div > ul > li:nth-child(8) > a", 0.1);
                 while (iwe == null)
+                {
+                    //if (DateTime.Now.Subtract(dt).TotalSeconds > 30)
+                    //    if (DialogResult.Cancel == Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("「刪除文件」等候逾時，是否繼續？")) { StopOCR = true; return false; }
                     iwe = waitFindWebElementBySelector_ToBeClickable("#File > div.d-flex.justify-content-between.mt-2 > div.d-flex.mx-3 > div:nth-child(1) > div > ul > li:nth-child(8) > a", 0.1);
+                }
                 iwe.Click();
 
             }
@@ -7032,7 +7066,7 @@ internal static string getImageUrl() {
                 Form1.playSound(Form1.soundLike.warn, true);
                 returnValue = true;
             }
-            if (!returnValue)
+            if (!returnValue && caption == "漢籍全文文本閱讀")//因為網頁完全開啟會等很久
             {
                 // 建立一個新的 Actions 物件
                 Actions action1 = new Actions(driver);
@@ -7166,7 +7200,14 @@ internal static string getImageUrl() {
 
                 // TODO: 處理彈出的「另存為」對話框，輸入文件名並點擊「保存」
                 // 這可能需要使用到其他的工具或方法，例如 AutoIt 或 SendKeys
-                Clipboard.Clear(); Clipboard.SetText(downloadImgFullName);
+                Clipboard.Clear();
+                try
+                {
+                    Clipboard.SetText(downloadImgFullName);
+                }
+                catch (Exception)
+                {
+                }
                 //Thread.Sleep(1190 + (
                 Thread.Sleep(1900 + (
                     800 + Extend_the_wait_time_for_the_Open_Old_File_dialog_box_to_appear_Millisecond < 0 ? 0 : Extend_the_wait_time_for_the_Open_Old_File_dialog_box_to_appear_Millisecond));//最小值（須在重開機後或系統最小負載時）（連「開啟」舊檔之視窗也看不見，即可完成）

@@ -1512,7 +1512,7 @@ namespace WindowsFormsApp1
             catch (Exception)
             {
                 while (!isClipBoardAvailable_Text()) { if (DateTime.Now.Subtract(dt).TotalSeconds > 2) break; }
-                playSound(soundLike.error);
+                //playSound(soundLike.error);
                 //Clipboard.SetText(xCopy);
             }
             br.TextPatst2Quick_editBox = xCopy;
@@ -3038,7 +3038,7 @@ namespace WindowsFormsApp1
                             }
                             catch (Exception)
                             {
-                                playSound(soundLike.error, true);
+                                //playSound(soundLike.error, true);
                             }
                         return;
                     }
@@ -8234,7 +8234,7 @@ namespace WindowsFormsApp1
                     bool eventenable = _eventsEnabled;
                     if (EventsEnabled) PauseEvents();
                     br.driver?.SwitchTo().Window(currentWindowHndl);
-                    if (Clipboard.GetText() != string.Empty)
+                    if (Clipboard.GetText() != string.Empty && !PasteOcrResultFisrtMode)
                     {
                         AvailableInUseBothKeysMouse();
                         SendKeys.Send("%{ins}");
@@ -8895,10 +8895,10 @@ namespace WindowsFormsApp1
             /*在 C# 的 System.Windows.Forms 中，可以使用 Clipboard.ContainsData 或 Clipboard.ContainsText 方法來確定剪貼簿是否可用。*/
             DateTime dt = DateTime.Now;
         retry:
-            if (DateTime.Now.Subtract(dt).TotalSeconds > 3)
+            if (DateTime.Now.Subtract(dt).TotalSeconds > 2)
             {
-                if (MessageBox.Show("剪貼簿檢查已逾3秒，是否繼續？", "", MessageBoxButtons.OKCancel, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2, MessageBoxOptions.DefaultDesktopOnly) == DialogResult.Cancel)
-                    return true;
+                //if (MessageBox.Show("剪貼簿檢查已逾3秒，是否繼續？", "", MessageBoxButtons.OKCancel, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2, MessageBoxOptions.DefaultDesktopOnly) == DialogResult.Cancel)
+                return true;
             }
             try
             {
