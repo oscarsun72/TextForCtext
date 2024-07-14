@@ -589,7 +589,7 @@ namespace WindowsFormsApp1
             {
                 ntfyICo.Visible = false; if (modifierKeys == Keys.Shift) Form1.playSound(Form1.soundLike.press);
                 if (keyinTextMode) copyQuickeditLinkWhenKeyinMode(modifierKeys);
-                Form1.playSound(Form1.soundLike.error);
+                Form1.playSound(Form1.soundLike.over);
                 show_nICo(modifierKeys);//this.Left + this.Width) show_nICo();
             }
             #endregion
@@ -7945,6 +7945,7 @@ namespace WindowsFormsApp1
                 if (e.KeyCode == Keys.F9)
                 {//Alt + F9 : 在《漢籍全文資料庫》檢索易學關鍵字
                     e.Handled = true;
+                    playSound(soundLike.press, true);
                     while (true)
                         if (br.Hanchi_SearchingKeywordsYijing()) break;
                     return;
@@ -7953,6 +7954,7 @@ namespace WindowsFormsApp1
                 if (e.KeyCode == Keys.Oemcomma)
                 {//Alt + , : 在《漢籍全文資料庫》檢索易學關鍵字
                     e.Handled = true;
+                    playSound(soundLike.press, true);
                     while (true)
                         if (br.Hanchi_SearchingKeywordsYijing()) break;
                     return;
@@ -8234,8 +8236,9 @@ namespace WindowsFormsApp1
                     bool eventenable = _eventsEnabled;
                     if (EventsEnabled) PauseEvents();
                     br.driver?.SwitchTo().Window(currentWindowHndl);
-                    if (Clipboard.GetText() != string.Empty && !PasteOcrResultFisrtMode)
+                    if (Clipboard.GetText() != string.Empty)
                     {
+                        playSound(soundLike.waiting);
                         AvailableInUseBothKeysMouse();
                         SendKeys.Send("%{ins}");
                         textBox1.Select(0, 0);
@@ -8269,9 +8272,11 @@ namespace WindowsFormsApp1
                 // 建立 Keys.Alt + Keys.Insert 的組合鍵
                 //Keys comboKey = Keys.Alt & Keys.Insert;//在 C# 中，要表示兩個按鍵的組合鍵，需要使用 "|" 運算子進行位元運算，而不是 "&" 或 "+" 運算子。 "|" 運算子可以將兩個按鍵的 KeyCode 合併成一個整數，表示按下這兩個按鍵的組合鍵。
                 //                                       // 使用 SendKeys 方法觸發按下組合鍵                
-                AvailableInUseBothKeysMouse();//Activate();
-                if (!textBox1.Focused) textBox1.Focus();
-
+                if (!PasteOcrResultFisrtMode)
+                {
+                    AvailableInUseBothKeysMouse();//Activate();
+                    if (!textBox1.Focused) textBox1.Focus();
+                }
                 //取得OCR結果
                 string x = Clipboard.GetText();
 

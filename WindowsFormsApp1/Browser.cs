@@ -1076,7 +1076,7 @@ namespace TextForCtext
                     //Thread.Sleep(1500);
                     //Clipboard.Clear();
                     //Clipboard.SetText("x");
-                    Form1.playSound(Form1.soundLike.error, true);
+                    //Form1.playSound(Form1.soundLike.error, true);
                     //Clipboard.SetText(xIuput);
                 }
                 textbox.SendKeys(OpenQA.Selenium.Keys.LeftShift + OpenQA.Selenium.Keys.Insert);
@@ -1559,7 +1559,7 @@ namespace TextForCtext
         /// <param name="frmKeyinTextModeTopWindow">是否將視窗內容可見位置調到最頂端</param>        
         internal static void GoToUrlandActivate(string url, bool frmKeyinTextModeTopWindow = false)
         {
-            if (string.IsNullOrEmpty(url) || url.Substring(0, 4) != "http") return;
+            if (string.IsNullOrEmpty(url) || url.Length < 7 || url.Substring(0, 4) != "http") return;
 
             ////driver.Close();//creedit
             ////creedit20230103 這樣處理誤關分頁頁籤的錯誤（例外情形）就成功了，但整個瀏覽器誤關則尚未
@@ -2282,7 +2282,13 @@ internal static string getImageUrl() {
                 if (DateTime.Now.Subtract(dt).TotalSeconds > 38) { StopOCR = true; return false; }
             }
 
-            Clipboard.SetText(downloadImgFullName);
+            try
+            {
+                Clipboard.SetText(downloadImgFullName);
+            }
+            catch (Exception)
+            {
+            }
             driver.SwitchTo().Window(driver.CurrentWindowHandle);
             //等待選取檔案對話框開啟
             //Thread.Sleep(800 + (
@@ -4113,7 +4119,14 @@ internal static string getImageUrl() {
                 iwe = waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr:nth-child(1) > td.bs-checkbox > label > input[type=checkbox]", 0.1);
                 while (iwe == null)
                     iwe = waitFindWebElementBySelector_ToBeClickable("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled", 0.1);
-                iwe.Click();
+                dt = DateTime.Now;
+                while (!iwe.Selected)
+                {
+                    if (DateTime.Now.Subtract(dt).TotalSeconds > 10)
+                        if (DialogResult.Cancel == Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("勾選檔案準備OCR作業逾時，是否繼續？")) { StopOCR = true; return false; }
+                    iwe.Click();
+                }
+
 
             }
             catch (Exception)
@@ -6979,6 +6992,8 @@ internal static string getImageUrl() {
                 IWebElement iwe = waitFindWebElementByName_ToBeClickable("_IMG_搜尋", 2);
                 if (iwe != null && iweKeywordInputBox.GetAttribute("value") == keyword)
                 {
+                    //iwe.Submit();
+                    //iweKeywordInputBox.SendKeys(OpenQA.Selenium.Keys.Enter);
                     iwe.Click();
                     iwe = waitFindWebElementBySelector_ToBeClickable("body > form > table > tbody > tr:nth-child(2) > td:nth-child(3) > center > table > tbody > tr:nth-child(2) > td > font");
                     if (iwe != null)
@@ -7000,6 +7015,8 @@ internal static string getImageUrl() {
                             Actions action = new Actions(driver);
                             // 按下 Shift 鍵，然後點擊元素，最後釋放 Shift 鍵
                             action.KeyDown(OpenQA.Selenium.Keys.Shift).Click(iwe).KeyUp(OpenQA.Selenium.Keys.Shift).Build().Perform();
+                            ActiveForm1.TopMost = false;
+                            Form1.playSound(Form1.soundLike.info);
                             Browser.BringToFront("chrome");
                         }
                     }
@@ -7018,9 +7035,27 @@ internal static string getImageUrl() {
                 {
                     iwe1 = waitFindWebElementBySelector_ToBeClickable("body > form > table > tbody > tr:nth-child(2) > td > table > tbody > tr > td.leftbg > table > tbody > tr:nth-child(1) > td > table > tbody > tr:nth-child(2) > td > input.s_btn.hjblock", 0.3);
                 }
-                Task.Run(() => { iwe1.Click(); });
+                //Task.Run(() => { iwe1.Click(); });
+                //20240714 Copilot大菩薩：Selenium 網頁操作中的等待問題
+                try
+                {
+                    driver.Manage().Timeouts().PageLoad = TimeSpan.FromSeconds(1.5); // 設定頁面載入超時時間為10秒
+                    //var element = driver.FindElement(By.CssSelector("your_css_selector"));
+                    //element.Click();
+                    iwe1.Click();
+                    Form1.playSound(Form1.soundLike.info);
+                    ActiveForm1.TopMost = false;
+                }
+                catch (WebDriverTimeoutException)
+                {
+                    // 處理頁面未在指定時間內載入完成的情況
+                    // 在這裡不進行任何操作
+                    //Form1.playSound(Form1.soundLike.error);
+                }
 
-                Form1.playSound(Form1.soundLike.press);
+                // 繼續執行後續的程式碼
+
+
                 //查詢結果
                 iwe1 = waitFindWebElementBySelector_ToBeClickable("body > form > table > tbody > tr:nth-child(2) > td > table > tbody > tr > td.leftbg > table > tbody > tr:nth-child(1) > td > table > tbody > tr:nth-child(2) > td > div > span");
                 //iwe1 = waitFindWebElementBySelector_ToBeClickable("body > form > table > tbody > tr:nth-child(2) > td > table > tbody > tr > td > table > tbody > tr:nth-child(2) > td > table > tbody > tr:nth-child(1) > td.seqno > a");
@@ -7068,12 +7103,14 @@ internal static string getImageUrl() {
             }
             if (!returnValue && caption == "漢籍全文文本閱讀")//因為網頁完全開啟會等很久
             {
-                // 建立一個新的 Actions 物件
-                Actions action1 = new Actions(driver);
-                action1.KeyDown(OpenQA.Selenium.Keys.Escape).Perform();
-                //action.KeyDown(OpenQA.Selenium.Keys.Escape).Build().Perform();
-                SendKeys.Send("{esc}");
+                driver.SwitchTo().Window(driver.CurrentWindowHandle);
+                Browser.BringToFront("chrome");
                 SendKeys.SendWait("{esc}");
+                //// 建立一個新的 Actions 物件//這個還是要等前面的完成才會執行！
+                //Actions action1 = new Actions(driver);
+                //action1.KeyDown(OpenQA.Selenium.Keys.Escape).Perform();
+                ////action.KeyDown(OpenQA.Selenium.Keys.Escape).Build().Perform();
+                //SendKeys.Send("{esc}");
             }
             return returnValue;
         }
@@ -7123,7 +7160,14 @@ internal static string getImageUrl() {
                 {
                     imporvement += ("\t" + lnk);
                     ImproveGJcoolOCRMemoDoc.Range().InsertAfter(imporvement + Environment.NewLine);
-                    ImproveGJcoolOCRMemoDoc.ActiveWindow.ScrollIntoView(ImproveGJcoolOCRMemoDoc.Range(), false);
+                    try
+                    {
+                        ImproveGJcoolOCRMemoDoc.ActiveWindow.ScrollIntoView(ImproveGJcoolOCRMemoDoc.Range(), false);
+                    }
+                    catch (Exception)
+                    {
+                        return;
+                    }
                     ImproveGJcoolOCRMemoDoc.Save();
                     ImproveGJcoolOCRMemoDoc.Activate();
                     //ImproveGJcoolOCRMemoDoc.Application.Activate();
@@ -7217,7 +7261,9 @@ internal static string getImageUrl() {
 
                 //輸入：檔案名稱 //SendKeys.Send(downloadImgFullName);
                 SendKeys.SendWait("+{Insert}");//or "^v"
+                Thread.Sleep(200);
                 SendKeys.SendWait("{ENTER}");
+                SendKeys.SendWait("%s");
                 //Clipboard.Clear();
 
                 Thread.Sleep(300);
