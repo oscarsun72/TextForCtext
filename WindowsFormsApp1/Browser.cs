@@ -3982,6 +3982,8 @@ internal static string getImageUrl() {
                 {
                     if (DialogResult.Cancel == Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("是否上傳完成？"))
                     { StopOCR = true; return false; }
+                    else
+                        goto reClickUploadOK;
                 }
             }
             try
@@ -4018,8 +4020,8 @@ internal static string getImageUrl() {
             //Form1.playSound(Form1.soundLike.over);
 
             Thread.Sleep(1400);
-            Byte reRunOCRTimer = 0;//避免虛耗額度，白白浪費 20240622
         reClickUploadOK:
+            Byte reRunOCRTimer = 0;//避免虛耗額度，白白浪費 20240622
             try
             {
                 //等待「上傳完成」訊息方塊出現
@@ -6922,7 +6924,8 @@ internal static string getImageUrl() {
             List<string> keywords = new List<string> { "易", "卦", "爻", "繫詞", "繫辭", "文言", "乾坤","元亨","利貞", "咎"
                 , "夬", "頤","巽","坎","兌","小畜","大畜","歸妹","明夷","同人","大有","豫","蠱","噬嗑","賁","剝","大過","小過","遯","大壯","睽","蹇","姤","萃","艮","渙","中孚","既濟","未濟"
                 ,"无妄", "彖", "象曰", "象傳", "象日", "象云", "筮"
-            ,"初九","九二","九三","九四","九五","上九","初六","六二","六三","六四","六五","上六"};
+            ,"初九","九二","九三","九四","九五","上九","初六","六二","六三","六四","六五","上六"
+            ,"用九","用六"};
 
             string title = "";
             try
@@ -7039,7 +7042,7 @@ internal static string getImageUrl() {
                 //20240714 Copilot大菩薩：Selenium 網頁操作中的等待問題
                 try
                 {
-                    driver.Manage().Timeouts().PageLoad = TimeSpan.FromSeconds(1.5); // 設定頁面載入超時時間為10秒
+                    driver.Manage().Timeouts().PageLoad = TimeSpan.FromSeconds(1.25); // 設定頁面載入超時時間為10秒
                     //var element = driver.FindElement(By.CssSelector("your_css_selector"));
                     //element.Click();
                     iwe1.Click();
@@ -7089,6 +7092,7 @@ internal static string getImageUrl() {
                 if (returnValue)
                 {
                     ActiveForm1.TopMost = false;
+                    driver.SwitchTo().Window(driver.CurrentWindowHandle);
                     BringToFront("chrome");
                 }
                 //}
@@ -7101,17 +7105,20 @@ internal static string getImageUrl() {
                 Form1.playSound(Form1.soundLike.warn, true);
                 returnValue = true;
             }
-            if (!returnValue && caption == "漢籍全文文本閱讀")//因為網頁完全開啟會等很久
-            {
-                driver.SwitchTo().Window(driver.CurrentWindowHandle);
-                Browser.BringToFront("chrome");
-                SendKeys.SendWait("{esc}");
-                //// 建立一個新的 Actions 物件//這個還是要等前面的完成才會執行！
-                //Actions action1 = new Actions(driver);
-                //action1.KeyDown(OpenQA.Selenium.Keys.Escape).Perform();
-                ////action.KeyDown(OpenQA.Selenium.Keys.Escape).Build().Perform();
-                //SendKeys.Send("{esc}");
-            }
+
+            ////前已由Copilot大菩薩提供 Timeouts 方法及相關類別解決了。感恩感恩　讚歎讚歎　Copilot大菩薩　南無阿彌陀佛
+            //if (!returnValue && caption == "漢籍全文文本閱讀")//因為網頁完全開啟會等很久
+            //{
+            //    driver.SwitchTo().Window(driver.CurrentWindowHandle);
+            //    Browser.BringToFront("chrome");
+            //    SendKeys.SendWait("{esc}");
+            //    //// 建立一個新的 Actions 物件//這個還是要等前面的完成才會執行！
+            //    //Actions action1 = new Actions(driver);
+            //    //action1.KeyDown(OpenQA.Selenium.Keys.Escape).Perform();
+            //    ////action.KeyDown(OpenQA.Selenium.Keys.Escape).Build().Perform();
+            //    //SendKeys.Send("{esc}");
+            //}
+
             return returnValue;
         }
 
@@ -7260,13 +7267,13 @@ internal static string getImageUrl() {
 
 
                 //輸入：檔案名稱 //SendKeys.Send(downloadImgFullName);
-                SendKeys.SendWait("+{Insert}");//or "^v"
-                Thread.Sleep(200);
-                SendKeys.SendWait("{ENTER}");
-                SendKeys.SendWait("%s");
+                SendKeys.SendWait("+{Insert}~");//or "^v"
+                //Thread.Sleep(200);
+                //SendKeys.SendWait("{ENTER}");
+                //SendKeys.SendWait("%s");
                 //Clipboard.Clear();
 
-                Thread.Sleep(300);
+                //Thread.Sleep(300);
             }
             catch (Exception)
             {
