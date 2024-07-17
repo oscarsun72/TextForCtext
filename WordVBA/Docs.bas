@@ -6,25 +6,24 @@ Public Sub Register_Event_Handler() '使自設物件類別模組有效的登錄程序.見「使用 A
     Set x.App = word.Application '此即使新建的物件與Word.Application物件作上關聯
 End Sub
 
-Function 空白的新文件() As Document '20210209
+Function 空白的新文件(Optional docVisible As Boolean = False) As Document '20210209
 Dim a As Document, flg As Boolean
 If Documents.Count = 0 Then GoTo a:
 If ActiveDocument.Characters.Count = 1 Then
-    Selection.Paste
+    Set a = ActiveDocument
 ElseIf ActiveDocument.Characters.Count > 1 Then
     For Each a In Documents
         If a.path = "" Or a.Characters.Count = 1 Then
-            a.Range.Paste
-            a.Activate
-            a.ActiveWindow.Activate
+'            a.Range.Paste'原來都有貼上，現在不要，單純找+開新文件就好
+'            a.Activate
+'            a.ActiveWindow.Activate
             flg = True
             Exit For
         End If
     Next a
     If flg = False Then GoTo a
 Else
-a: Set a = Documents.Add
-    Selection.Paste
+a: Set a = Documents.Add(Visible:=docVisible)
 End If
 Set 空白的新文件 = a
 End Function
@@ -824,7 +823,7 @@ Sub mark易學關鍵字()
         If MsgBox("目前文件為" + ActiveDocument.Name + "是否繼續？", vbExclamation + vbOKCancel) = vbCancel Then Exit Sub
     End If
     SystemSetup.playSound 0.484
-    Set dSource = ActiveDocument
+    Set dSource = ActiveDocument: If Not dSource.Saved Then dSource.Save
     Set rng = dSource.Range
     With rng.Find
         .ClearAllFuzzyOptions
@@ -836,9 +835,10 @@ Sub mark易學關鍵字()
         End If
     End With
     'If Documents.Count = 0 Then Documents.Add
-    If Documents.Count = 0 Then Docs.空白的新文件
+    'If Documents.Count = 0 Then Docs.空白的新文件
+    Set d = Docs.空白的新文件()
     If ClipBoardOp.Is_ClipboardContainCtext_Note_InlinecommentColor Then
-        中國哲學書電子化計劃.只保留正文注文_且注文前後加括弧
+        中國哲學書電子化計劃.只保留正文注文_且注文前後加括弧 d
         Set d = ActiveDocument
         On Error GoTo eH:
         DoEvents
@@ -878,7 +878,8 @@ Sub mark易學關鍵字()
         "卦序", "敘卦", "雜卦", "文言", "乾坤", "無咎", ChrW(26080) & "咎", "天咎", "元亨", "利貞", "史記", "九五", _
         "六二", "上九", "上六", "九二", "九三", "六四", "筮", "夬", "〈乾〉", "〈坤〉", "乾、坤", "〈乾、坤〉" _
             , "象曰", "象日", "象云", "象傳", "彖", _
-            "艮", "頤", "坎", "中孚", "兌", _
+            "艮", "頤", "坎", "中孚", "兌", "蠱", "姤", _
+            "咸恒", "咸恆", _
         ChrW(26080) & ChrW(-10171) & ChrW(-8522))  ', "", "", "", "" )
     
     'If Selection.Type = wdSelectionIP Then
@@ -1194,21 +1195,26 @@ End If
 End Sub
 
 Sub 中國哲學書電子化計劃_只保留正文注文_且注文前後加括弧_貼到古籍酷自動標點()
-Dim ur As UndoRecord
-If Documents.Count = 0 Then Docs.空白的新文件
-word.Application.ScreenUpdating = False
+Dim ur As UndoRecord, d As Document, x As String, i As Long
 If (ActiveDocument.path <> "" And Not ActiveDocument.Saved) Then ActiveDocument.Save
+'If Documents.Count = 0 Then
+'    Set d = Docs.空白的新文件()
+'Else
+'    Set d = ActiveDocument
+'End If
+Set d = Docs.空白的新文件()
+word.Application.ScreenUpdating = False
 VBA.DoEvents
-中國哲學書電子化計劃.只保留正文注文_且注文前後加括弧
+中國哲學書電子化計劃.只保留正文注文_且注文前後加括弧 d
 
-Dim d As Document, x As String, i As Long
-Set d = ActiveDocument
 If d.path <> "" Then Exit Sub
 If Len(d.Range) = 1 Then Exit Sub '空白文件不處理
 
+'以下2行已不必，待觀察 20240716
 '先要複製到剪貼簿,純文字操作即可
 'd.Range.Cut
-x = 文字處理.trimStrForSearch_PlainText(d.Range)
+
+x = 文字處理.trimStrForSearch_PlainText(d.Range.Text)
 x = 漢籍電子文獻資料庫.CleanTextPicPageMark(x)
 SystemSetup.SetClipboard VBA.Replace(x, "·", "") '以《古籍酷》自動標點不會清除「·」，造成書名號標點機制不正確，故於此先清除之。
 DoEvents

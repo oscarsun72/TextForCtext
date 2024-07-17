@@ -368,7 +368,9 @@ namespace TextForCtext
                     ie.SendKeys(OpenQA.Selenium.Keys.Control + "c");
                     WindowsScrolltoTop();
                     //Clipboard.SetText(ie.Text);//.Text屬性會清除前首的全形空格，不適用！！20240313
-                    while (!Form1.isClipBoardAvailable_Text()) {; };
+                    DateTime dt = DateTime.Now;
+                    while (!Form1.isClipBoardAvailable_Text())
+                        if (DateTime.Now.Subtract(dt).TotalSeconds > 2) break;
                 }
                 else
                     Clipboard.Clear();
@@ -6923,6 +6925,7 @@ internal static string getImageUrl() {
             if (driver == null) return true;
             List<string> keywords = new List<string> { "易", "卦", "爻", "繫詞", "繫辭", "文言", "乾坤","元亨","利貞", "咎"
                 , "夬", "頤","巽","坎","兌","小畜","大畜","歸妹","明夷","同人","大有","豫","蠱","噬嗑","賁","剝","大過","小過","遯","大壯","睽","蹇","姤","萃","艮","渙","中孚","既濟","未濟"
+                ,"咸恆"
                 ,"无妄", "彖", "象曰", "象傳", "象日", "象云", "筮"
             ,"初九","九二","九三","九四","九五","上九","初六","六二","六三","六四","六五","上六"
             ,"用九","用六"};
@@ -7008,18 +7011,18 @@ internal static string getImageUrl() {
                         //}
                     }
                     else
-                    {
+                    {//檢索有結果：
+                        Form1.playSound(Form1.soundLike.info);
                         returnValue = true;
                         ActiveForm1.TopMost = false;
                         iwe = waitFindWebElementByName_ToBeClickable("_IMG_檢索報表", 2);
                         if (iwe != null)//   ?.Click();
                         {//20240710 Copilot大菩薩：要在 Selenium 中使用鍵盤的 Shift 鍵，您可以使用 Actions 類別來模擬鍵盤和滑鼠的操作。以下是一個範例程式碼：
                          // 建立一個新的 Actions 物件
+                         //ActiveForm1.TopMost = false;
                             Actions action = new Actions(driver);
                             // 按下 Shift 鍵，然後點擊元素，最後釋放 Shift 鍵
                             action.KeyDown(OpenQA.Selenium.Keys.Shift).Click(iwe).KeyUp(OpenQA.Selenium.Keys.Shift).Build().Perform();
-                            ActiveForm1.TopMost = false;
-                            Form1.playSound(Form1.soundLike.info);
                             Browser.BringToFront("chrome");
                         }
                     }
@@ -7042,7 +7045,7 @@ internal static string getImageUrl() {
                 //20240714 Copilot大菩薩：Selenium 網頁操作中的等待問題
                 try
                 {
-                    driver.Manage().Timeouts().PageLoad = TimeSpan.FromSeconds(1.25); // 設定頁面載入超時時間為10秒
+                    driver.Manage().Timeouts().PageLoad = TimeSpan.FromSeconds(1); // 設定頁面載入超時時間為10秒
                     //var element = driver.FindElement(By.CssSelector("your_css_selector"));
                     //element.Click();
                     iwe1.Click();
@@ -7053,7 +7056,7 @@ internal static string getImageUrl() {
                 {
                     // 處理頁面未在指定時間內載入完成的情況
                     // 在這裡不進行任何操作
-                    //Form1.playSound(Form1.soundLike.error);
+                    Form1.playSound(Form1.soundLike.error);
                 }
 
                 // 繼續執行後續的程式碼
@@ -7106,7 +7109,7 @@ internal static string getImageUrl() {
                 returnValue = true;
             }
 
-            ////前已由Copilot大菩薩提供 Timeouts 方法及相關類別解決了。感恩感恩　讚歎讚歎　Copilot大菩薩　南無阿彌陀佛
+            ////（還似不行！故還原）前已由Copilot大菩薩提供 Timeouts 方法及相關類別解決了。感恩感恩　讚歎讚歎　Copilot大菩薩　南無阿彌陀佛
             //if (!returnValue && caption == "漢籍全文文本閱讀")//因為網頁完全開啟會等很久
             //{
             //    driver.SwitchTo().Window(driver.CurrentWindowHandle);
@@ -7135,23 +7138,26 @@ internal static string getImageUrl() {
         /// <param name="imporvement">要改進的字詞句（textBox1中被選取的字串）</param>
         internal static void ImproveGJcoolOCRMemo(string imporvement, string url)
         {
-        //TextBox tb = null;
-        //if (ActiveForm1.InvokeRequired)
-        //{
-        //    ActiveForm1.Invoke((MethodInvoker)delegate
-        //    {
-        // 你的程式碼
-        //if (!ActiveForm1.Controls["textBox1"].Focused) return;
-        //tb = ActiveForm1.Controls["textBox1"] as TextBox;
-        //if (tb.SelectionLength == 0) return;
-        retry:
+            //TextBox tb = null;
+            //if (ActiveForm1.InvokeRequired)
+            //{
+            //    ActiveForm1.Invoke((MethodInvoker)delegate
+            //    {
+            // 你的程式碼
+            //if (!ActiveForm1.Controls["textBox1"].Focused) return;
+            //tb = ActiveForm1.Controls["textBox1"] as TextBox;
+            //if (tb.SelectionLength == 0) return;
+            string f = Path.Combine(Mdb.DropBoxPathIncldBackSlash, "《古籍酷》AI OCR 待改進者隨記 感恩感恩　讚歎讚歎　南無阿彌陀佛.docx");
+            if (!File.Exists(f)) return;
+            retry:
             if (ImproveGJcoolOCRMemoDoc == null)
             {
                 Microsoft.Office.Interop.Word.Application wordapp = new Microsoft.Office.Interop.Word.Application
                 {
                     Visible = true
                 };
-                ImproveGJcoolOCRMemoDoc = wordapp.Documents.Open("C:\\Users\\oscar\\Dropbox\\《古籍酷》AI OCR 待改進者隨記 感恩感恩　讚歎讚歎　南無阿彌陀佛.docx");
+                //ImproveGJcoolOCRMemoDoc = wordapp.Documents.Open("C:\\Users\\oscar\\Dropbox\\《古籍酷》AI OCR 待改進者隨記 感恩感恩　讚歎讚歎　南無阿彌陀佛.docx");
+                ImproveGJcoolOCRMemoDoc = wordapp.Documents.Open(f);
                 //ImproveGJcoolOCRMemoDoc = wordapp.Documents.Open("C:\\Users\\oscar\\Dropbox\\《古籍酷》AI%20OCR%20待改進者隨記%20感恩感恩　讚歎讚歎　南無阿彌陀佛.docx");
                 ImproveGJcoolOCRMemoDoc.ActiveWindow.Selection.EndKey(Microsoft.Office.Interop.Word.WdUnits.wdStory);
             }

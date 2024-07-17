@@ -19,7 +19,7 @@ namespace TextForCtext
     class Mdb
     {
         static Form1 frm = Application.OpenForms["Form1"] as Form1;
-        static string DropBoxPathIncldBackSlash = getDropBoxPathIncldBackSlash();
+        public static string DropBoxPathIncldBackSlash = getDropBoxPathIncldBackSlash();
         static string getDropBoxPathIncldBackSlash()
         {
             if (string.IsNullOrEmpty(DropBoxPathIncldBackSlash))

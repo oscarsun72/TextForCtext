@@ -1572,13 +1572,16 @@ With Selection
 End With
 SystemSetup.contiUndo ur
 End Sub
-Sub 只保留正文注文_且注文前後加括弧()
-    Dim d As Document, ur As UndoRecord, slRng As Range
+Sub 只保留正文注文_且注文前後加括弧(d As Document)
+    Dim ur As UndoRecord, slRng As Range
     SystemSetup.stopUndo ur, "中國哲學書電子化計劃_只保留正文注文_且注文前後加括弧"
-    Docs.空白的新文件
-    Set d = ActiveDocument
-    If Selection.Type = wdSelectionIP Then ActiveDocument.Select
-    Set slRng = Selection.Range
+'    Set d = Docs.空白的新文件()
+'    Set d = ActiveDocument
+'    d.Activate
+    d.Range.Paste
+    'If Selection.Type = wdSelectionIP Then ActiveDocument.Select
+'    Set slRng = Selection.Range
+    Set slRng = d.Range
     清除文本頁中的編號儲存格 slRng
     中國哲學書電子化計劃_表格轉文字 slRng
     Dim ay, e

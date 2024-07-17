@@ -8272,7 +8272,7 @@ namespace WindowsFormsApp1
                 // 建立 Keys.Alt + Keys.Insert 的組合鍵
                 //Keys comboKey = Keys.Alt & Keys.Insert;//在 C# 中，要表示兩個按鍵的組合鍵，需要使用 "|" 運算子進行位元運算，而不是 "&" 或 "+" 運算子。 "|" 運算子可以將兩個按鍵的 KeyCode 合併成一個整數，表示按下這兩個按鍵的組合鍵。
                 //                                       // 使用 SendKeys 方法觸發按下組合鍵                
-                if (!PasteOcrResultFisrtMode)
+                if (!PasteOcrResultFisrtMode || ocrSiteTitle == br.OCRSiteTitle.KanDianGuJi)
                 {
                     AvailableInUseBothKeysMouse();//Activate();
                     if (!textBox1.Focused) textBox1.Focus();

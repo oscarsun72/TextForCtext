@@ -2794,13 +2794,14 @@ For Each a In slRng.Characters
 Next a
 End Sub
 Sub 中國哲學書電子化計劃_去掉註文保留正文()
-Dim slRng As Range, a, ur As UndoRecord 'Alt + ]
+Dim slRng As Range, a, ur As UndoRecord, d As Document 'Alt + ]
 'Set ur = SystemSetup.stopUndo("中國哲學書電子化計劃_去掉註文保留正文")
 SystemSetup.stopUndo ur, "中國哲學書電子化計劃_去掉註文保留正文"
-Docs.空白的新文件
-If ActiveDocument.Characters.Count = 1 Then Selection.Paste
-If Selection.Type = wdSelectionIP Then ActiveDocument.Select
-Set slRng = Selection.Range
+Set d = Docs.空白的新文件()
+'If ActiveDocument.Characters.Count = 1 Then Selection.Paste
+If d.Characters.Count = 1 Then d.ActiveWindow.Selection.Paste
+If d.ActiveWindow.Selection.Type = wdSelectionIP Then d.Select
+Set slRng = d.ActiveWindow.Selection.Range
 中國哲學書電子化計劃_表格轉文字 slRng
 For Each a In slRng.Characters
     Select Case a.Font.Color
@@ -2824,6 +2825,7 @@ Set d = Docs.空白的新文件()
 'If Selection.Type = wdSelectionIP Then ActiveDocument.Select
 'If Selection.Type = wdSelectionIP Then d.Select
 If d Is Nothing Then Set d = ActiveDocument
+d.Range.Paste
 d.Activate
 Set slRng = Selection.Range
 中國哲學書電子化計劃_表格轉文字 slRng
@@ -2967,35 +2969,91 @@ Select Case Err.Number
         MsgBox Err.Number + Err.Description
 End Select
 End Sub
-Sub 漢籍電子文獻資料庫文本整理_注文前後加括號()
-Dim rng As Range, fColor As Long, flg As Boolean
-Const fSize As Byte = 10
-Set rng = ActiveDocument.Range
-rng.Collapse wdCollapseStart
-fColor = rng.Font.Color
-Do While rng.End < rng.Document.Range.End - 1
-    rng.move wdCharacter, 1
-    If rng.Font.Color = 204 And rng.Font.Size = 11 Then
-        rng.Delete
-    ElseIf rng.Font.Color = 0 And rng.Font.Size = 7.5 Then
-        GoTo mark
-    ElseIf (rng.Font.Color <> fColor Or rng.Font.Size = fSize) And _
-                (rng.Font.Color <> 234 And rng.Font.Bold = False) Then '紅字+粗體為檢索結果
-mark:
-        If flg = False Then
-            If rng.Font.Color <> -16777216 Then
-                rng.InsertBefore "("
-                rng.Characters(1).Font.Color = rng.Next.Next.Font.Color
-                rng.Characters(1).Font.Size = rng.Next.Next.Font.Size
-                flg = True
-            End If
-        End If
-    ElseIf rng.Font.Color = fColor And flg = True Then
-        rng.Previous.InsertAfter ")"
-        flg = False
+Sub 漢籍電子文獻資料庫文本整理_注文前後加括號() '最後執行 Docs.mark易學關鍵字
+    Dim rng As Range, ur As UndoRecord, d As Document, fontsize(1) As Single, fsz
+    SystemSetup.stopUndo ur, "漢籍電子文獻資料庫文本整理_注文前後加括號"
+    word.Application.ScreenUpdating = False
+    Set d = ActiveDocument
+    Set rng = d.Range
+    
+    If rng.Document.path = "" Then
+        If rng.Text = "" Then rng.Paste
+    Else
+        Set rng = Docs.空白的新文件.Range
     End If
-Loop
-Beep
+    
+    rng.Paste
+    fontsize(0) = 10: fontsize(1) = 7.5
+    For Each fsz In fontsize
+        With rng.Find
+            .ClearFormatting
+            .Font.Size = fsz
+            .Forward = True
+            .Wrap = wdFindStop
+        End With
+        Do While rng.Find.Execute()
+            If rng.Font.Size <> fsz Then Exit Do
+            If rng.Characters(1) = "（" Then
+                Exit Do
+            End If
+            rng.Text = "（" & rng.Text & "）"
+        Loop
+    Next fsz
+            
+    rng.Find.ClearFormatting
+    If InStr(rng.Document.Range.Text, "）（。）") Then
+        With rng.Find
+            .Text = "）（。）"
+            .Replacement.Text = "。）"
+            .Execute , , , , , , , wdFindContinue, , , wdReplaceAll
+        End With
+    End If
+    
+    
+    SystemSetup.contiUndo ur
+        
+    DoEvents
+    rng.Document.Range.Copy
+    
+    If rng.Document.path = "" Then rng.Document.Close wdDoNotSaveChanges
+    
+    DoEvents
+    d.Activate
+    DoEvents
+    Docs.mark易學關鍵字
+    word.Application.ScreenUpdating = True
+End Sub
+
+Sub 漢籍電子文獻資料庫文本整理_注文前後加括號_old()
+    Dim rng As Range, fColor As Long, flg As Boolean, ur As UndoRecord
+    Const fSize As Byte = 10
+      
+    Set rng = ActiveDocument.Range
+    rng.Collapse wdCollapseStart
+    fColor = rng.Font.Color
+    Do While rng.End < rng.Document.Range.End - 1
+        rng.move wdCharacter, 1
+        If rng.Font.Color = 204 And rng.Font.Size = 11 Then
+            rng.Delete
+        ElseIf rng.Font.Color = 0 And rng.Font.Size = 7.5 Then
+            GoTo mark
+        ElseIf (rng.Font.Color <> fColor Or rng.Font.Size = fSize) And _
+                    (rng.Font.Color <> 234 And rng.Font.Bold = False) Then '紅字+粗體為檢索結果
+mark:
+            If flg = False Then
+                If rng.Font.Color <> -16777216 Then
+                    rng.InsertBefore "("
+                    rng.Characters(1).Font.Color = rng.Next.Next.Font.Color
+                    rng.Characters(1).Font.Size = rng.Next.Next.Font.Size
+                    flg = True
+                End If
+            End If
+        ElseIf rng.Font.Color = fColor And flg = True Then
+            rng.Previous.InsertAfter ")"
+            flg = False
+        End If
+    Loop
+    Beep
 End Sub
 Sub 詩句分行()
 Dim slRng As Range, a
