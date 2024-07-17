@@ -2298,8 +2298,8 @@ internal static string getImageUrl() {
                 800 + Extend_the_wait_time_for_the_Open_Old_File_dialog_box_to_appear_Millisecond < 0 ? 0 : Extend_the_wait_time_for_the_Open_Old_File_dialog_box_to_appear_Millisecond));//最小值（須在重開機後或系統最小負載時）（連「開啟」舊檔之視窗也看不見，即可完成）
 
             //輸入：檔案名稱 //SendKeys.Send(downloadImgFullName);
-            SendKeys.SendWait("+{Insert}");//or "^v"
-            SendKeys.SendWait("{ENTER}");
+            SendKeys.SendWait("+{Insert}~");//or "^v"
+            //SendKeys.SendWait("{ENTER}");
             //Clipboard.Clear();
 
             iwe = waitFindWebElementBySelector_ToBeClickable("#image-input");
@@ -3731,8 +3731,8 @@ internal static string getImageUrl() {
 
 
                 //輸入：檔案名稱 //SendKeys.Send(downloadImgFullName);
-                SendKeys.Send("+{Insert}");//or "^v"
-                SendKeys.Send("{ENTER}");
+                SendKeys.Send("+{Insert}~");//or "^v"
+                //SendKeys.Send("{ENTER}");
                 Clipboard.Clear();
 
             ////图片预览
@@ -4005,8 +4005,8 @@ internal static string getImageUrl() {
 
 
             //輸入：檔案名稱 //SendKeys.Send(downloadImgFullName);
-            SendKeys.SendWait("+{Insert}");//or "^v"
-            SendKeys.SendWait("{ENTER}");
+            SendKeys.SendWait("+{Insert}~");//or "^v"
+            //SendKeys.SendWait("{ENTER}");
             //Clipboard.Clear();
 
 
@@ -4997,8 +4997,8 @@ internal static string getImageUrl() {
 
             //輸入：檔案名稱 //SendKeys.Send(downloadImgFullName);
             //retry:
-            SendKeys.Send("+{Insert}");//or "^v"
-            SendKeys.Send("{ENTER}");
+            SendKeys.Send("+{Insert}~");//or "^v"
+            //SendKeys.Send("{ENTER}");
             //Form1.playSound(Form1.soundLike.processing);
 
             if (_downloadResult)
@@ -5870,8 +5870,8 @@ internal static string getImageUrl() {
             //輸入：檔案名稱 //SendKeys.Send(downloadImgFullName);
             //貼上圖檔全名
             //byte tryTimes = 1;
-            SendKeys.Send("+{Insert}");//or "^v"
-            SendKeys.Send("{ENTER}");
+            SendKeys.Send("+{Insert}~");//or "^v"
+            //SendKeys.Send("{ENTER}");
 
             Form1.playSound(Form1.soundLike.processing);
 
@@ -7231,8 +7231,8 @@ internal static string getImageUrl() {
             //var driver = new ChromeDriver();
             openNewTabWindow();
             driver.Navigate().GoToUrl(imageUrl);
-            //driver.SwitchTo().Window(driver.CurrentWindowHandle);
             BringToFront("chrome");
+            driver.SwitchTo().Window(driver.CurrentWindowHandle);
             //IWebElement iw = waitFindWebElementBySelector_ToBeClickable("body > img");
             //Cursor.Position = (Point)iw?.Location;
             ////if (iw != null)  clickCopybutton_GjcoolFastExperience(iw.Location); 
