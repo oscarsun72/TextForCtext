@@ -8,6 +8,7 @@ using System.Drawing.Text;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Media;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -675,7 +676,30 @@ namespace WindowsFormsApp1
                 //自動擷取「簡單修改模式」（selector: # quickedit > a的連結)
                 case Keys.None:
                     copyQuickeditLinkWhenKeyinModeSub();
+                    ResetLastValidWindow();
                     break;
+            }
+        }
+
+        internal static void ResetLastValidWindow()
+        {
+            string wh = string.Empty;
+            try
+            {
+                wh = br.driver.CurrentWindowHandle;
+            }
+            catch (Exception)
+            {
+                wh = string.Empty;
+            }
+            if (wh != string.Empty)
+                br.LastValidWindow = wh;
+            else
+            {
+                wh = br.LastValidWindow;
+                if (br.driver.WindowHandles.Count > 0 && !br.driver.WindowHandles.Contains(wh))
+                    br.LastValidWindow = br.driver.WindowHandles.Last();
+                br.driver.SwitchTo().Window(wh);
             }
         }
 
@@ -1756,6 +1780,39 @@ namespace WindowsFormsApp1
             { e.Handled = true; notes_a_line_all(false, true); return; }
             //以上三種皆可Alt + Shift + s :  所有小注文都不換行。
 
+            //Ctrl + Alt + k ： 在完整編輯頁面中直接取代文字。請將被取代+取代成之二字前後並置，並將其選取後（或在被取代之文字前放置插入點）再按下此組合鍵以執行直接取代 20240718
+            if (e.Control && e.Alt && e.KeyCode == Keys.K)// 20240718
+            {
+                e.Handled = true;
+                StringInfo character = new StringInfo(string.Empty); int s = textBox1.SelectionStart, l = 1;
+                if (textBox1.SelectionLength == 0)
+                {
+                    while (character.LengthInTextElements < 2)
+                    {
+                        if (s + l <= textBox1.Text.Length && char.IsHighSurrogate(textBox1.Text.Substring(s + l - 1, 1).ToCharArray()[0]))
+                            l++;
+                        character = new StringInfo(textBox1.Text.Substring(s, l));
+                        l++;
+                    }
+                    textBox1.Select(s, l - 1);
+
+                }
+                else
+                    character = new StringInfo(textBox1.SelectedText);
+                //br.driver.SwitchTo().Window(br.driver.CurrentWindowHandle);
+                string lastValidWindow = br.LastValidWindow;
+                ResetLastValidWindow();
+                if (br.DirectlyReplacingCharacters(character))
+                {
+                    AvailableInUseBothKeysMouse();
+                    //清除前一個要被取代的單字
+                    undoRecord(); PauseEvents();
+                    textBox1.SelectedText = character.SubstringByTextElements(1, 1);
+                    ResumeEvents();
+                    textBox1.Select(s, 0);
+                }
+                return;
+            }
 
             //Ctrl + Alt + + （數字鍵盤加號） ： 同上，唯先將textBox1全選後再執行貼入；即按下此組合鍵則會並不會受插入點所在位置處影響。
             if (e.Control && e.Alt && e.KeyCode == Keys.Add)
@@ -2558,6 +2615,38 @@ namespace WindowsFormsApp1
                     keyDownCtrlAdd(false);// if (textBox1.Text != "") { pauseEvents(); textBox1.Text = ""; resumeEvents(); }
                     return;
                 }
+                if (e.KeyCode == Keys.E)
+                {// Alt + e ：在完整編輯頁面中直接取代文字。請將被取代+取代成之二字前後並置，並將其選取後（或在被取代之文字前放置插入點）再按下此組合鍵以執行直接取代 20240718
+                    e.Handled = true;
+                    StringInfo character = new StringInfo(string.Empty); int s = textBox1.SelectionStart, l = 1;
+                    if (textBox1.SelectionLength == 0)
+                    {
+                        while (character.LengthInTextElements < 2)
+                        {
+                            if (s + l <= textBox1.Text.Length && char.IsHighSurrogate(textBox1.Text.Substring(s + l - 1, 1).ToCharArray()[0]))
+                                l++;
+                            character = new StringInfo(textBox1.Text.Substring(s, l));
+                            l++;
+                        }
+                        textBox1.Select(s, l - 1);
+
+                    }
+                    else
+                        character = new StringInfo(textBox1.SelectedText);
+                    //br.driver.SwitchTo().Window(br.driver.CurrentWindowHandle);
+                    string lastValidWindow = br.LastValidWindow;
+                    ResetLastValidWindow();
+                    if (br.DirectlyReplacingCharacters(character))
+                    {
+                        AvailableInUseBothKeysMouse();
+                        //清除前一個要被取代的單字
+                        undoRecord(); PauseEvents();
+                        textBox1.SelectedText = character.SubstringByTextElements(1, 1);
+                        ResumeEvents();
+                        textBox1.Select(s, 0);
+                    }
+                    return;
+                }
                 if (e.KeyCode == Keys.G)
                 {//Alt + g
                     e.Handled = true;
@@ -3048,7 +3137,15 @@ namespace WindowsFormsApp1
                     e.Handled = true;
                     paragraphMarkAccordingFirstOne();
                     if (textBox1.Text != string.Empty)
-                        Clipboard.SetText(textBox1.Text);
+                    {
+                        try
+                        {
+                            Clipboard.SetText(textBox1.Text);
+                        }
+                        catch (Exception)
+                        {
+                        }
+                    }
                     return;
 
                 }
@@ -7385,22 +7482,11 @@ namespace WindowsFormsApp1
                 && (m & Keys.Shift) == Keys.Shift)
             {
 
-                //按下 ctrl + shift + *  toggle keyinTextmode 切換手動鍵入模式
+                //按下 ctrl + shift + * （數字鍵盤的星號）  toggle keyinTextmode 切換手動鍵入模式
                 if (e.KeyCode == Keys.Multiply)
                 {
                     e.Handled = true;
-                    //重設欄位變量，以免OCR快速鍵失效
-                    PagePaste2GjcoolOCR_ing = false;
-                    if (keyinTextMode)
-                    {
-                        new SoundPlayer(@"C:\Windows\Media\Speech Off.wav").Play();
-                        keyinTextMode = false; return;
-                    }
-                    new SoundPlayer(@"C:\Windows\Media\Speech On.wav").Play();
-                    //設定成手動，自動及全部覆蓋之貼上則設成false
-                    keyinTextMode = true; pasteAllOverWrite = false; autoPastetoQuickEdit = false;
-                    button1.Text = "分行分段";
-                    button1.ForeColor = new System.Drawing.Color();//預設色彩 預設顏色 https://stackoverflow.com/questions/10441000/how-to-programmatically-set-the-forecolor-of-a-label-to-its-default
+                    KeyinTextmodeSwitcher();
                     return;
                 }
                 if (e.KeyCode == Keys.Subtract)
@@ -7945,9 +8031,16 @@ namespace WindowsFormsApp1
                 if (e.KeyCode == Keys.F9)
                 {//Alt + F9 : 在《漢籍全文資料庫》檢索易學關鍵字
                     e.Handled = true;
+                    //if(keyinTextMode)keyinTextMode = false;
+                    //if(autoPasteFromSBCKwhether)autoPasteFromSBCKwhether    = false;
+                    //if (autoPastetoQuickEdit) autoPastetoQuickEdit = false;
+                    if (keyinTextMode) KeyinTextmodeSwitcher();
                     playSound(soundLike.press, true);
                     while (true)
+                    {
+                        if (TopMost) TopMost = false;
                         if (br.Hanchi_SearchingKeywordsYijing()) break;
+                    }
                     return;
                 }
 
@@ -8046,6 +8139,24 @@ namespace WindowsFormsApp1
 
             }//以上 按下單一鍵
             #endregion
+        }
+        /// <summary>
+        /// 手動輸入模式切換用 20240719
+        /// </summary>
+        internal void KeyinTextmodeSwitcher()
+        {
+            //重設欄位變量，以免OCR快速鍵失效
+            PagePaste2GjcoolOCR_ing = false;
+            if (keyinTextMode)
+            {
+                new SoundPlayer(@"C:\Windows\Media\Speech Off.wav").Play();
+                keyinTextMode = false; return;
+            }
+            new SoundPlayer(@"C:\Windows\Media\Speech On.wav").Play();
+            //設定成手動，自動及全部覆蓋之貼上則設成false
+            keyinTextMode = true; pasteAllOverWrite = false; autoPastetoQuickEdit = false;
+            button1.Text = "分行分段";
+            button1.ForeColor = new System.Drawing.Color();//預設色彩 預設顏色 https://stackoverflow.com/questions/10441000/how-to-programmatically-set-the-forecolor-of-a-label-to-its-default
         }
 
         /// <summary>
@@ -8152,7 +8263,15 @@ namespace WindowsFormsApp1
                 #endregion
             }
 
-            string currentWindowHndl = br.driver.CurrentWindowHandle;
+            string currentWindowHndl = string.Empty;
+            try
+            {
+                currentWindowHndl = br.driver.CurrentWindowHandle;
+            }
+            catch (Exception)
+            {
+                currentWindowHndl = br.driver.WindowHandles.Last();
+            }
             //下載書圖
             string imgUrl = Clipboard.GetText(), downloadImgFullName; bool ocrResult = false;
             if (imgUrl.Length > 4
@@ -8221,7 +8340,16 @@ namespace WindowsFormsApp1
                     //}
                     break;
                 case br.OCRSiteTitle.KanDianGuJi:
-                    ocrResult = br.OCR_KanDianGuJi(downloadImgFullName);
+                    try
+                    {
+                        ocrResult = br.OCR_KanDianGuJi(downloadImgFullName);
+
+                    }
+                    catch (Exception)
+                    {
+
+                        throw;
+                    }
                     break;
                 default:
                     break;
@@ -9369,7 +9497,10 @@ namespace WindowsFormsApp1
                 if (waitUpdate && waitTabWindowHandles != "")
                 {
                     br.driver.SwitchTo().Window(waitTabWindowHandles); br.driver.Close();
+                    if (br.DirectlyReplacingCharactersPageWindowHandle != string.Empty)
+                        br.DirectlyReplacingCharactersPageWindowHandle = string.Empty;//重設；
                     br.driver.SwitchTo().Window(currentWin);
+                    br.LastValidWindow = currentWin;
                 }
 
                 #endregion
@@ -9400,6 +9531,7 @@ namespace WindowsFormsApp1
             br.在Chrome瀏覽器的Quick_edit文字框中輸入文字(br.driver,
                 formalX
                 , url);
+            br.LastValidWindow = br.driver.CurrentWindowHandle;
             return true;
         }
 

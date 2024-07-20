@@ -6,26 +6,26 @@ Public Sub Register_Event_Handler() '使自設物件類別模組有效的登錄程序.見「使用 A
     Set x.App = word.Application '此即使新建的物件與Word.Application物件作上關聯
 End Sub
 
-Function 空白的新文件(Optional docVisible As Boolean = False) As Document '20210209
-Dim a As Document, flg As Boolean
-If Documents.Count = 0 Then GoTo a:
-If ActiveDocument.Characters.Count = 1 Then
-    Set a = ActiveDocument
-ElseIf ActiveDocument.Characters.Count > 1 Then
-    For Each a In Documents
-        If a.path = "" Or a.Characters.Count = 1 Then
-'            a.Range.Paste'原來都有貼上，現在不要，單純找+開新文件就好
-'            a.Activate
-'            a.ActiveWindow.Activate
-            flg = True
-            Exit For
-        End If
-    Next a
-    If flg = False Then GoTo a
-Else
-a: Set a = Documents.Add(Visible:=docVisible)
-End If
-Set 空白的新文件 = a
+Function 空白的新文件(Optional newDocVisible As Boolean = True) As Document '20210209
+    Dim a As Document, flg As Boolean
+    If Documents.Count = 0 Then GoTo a:
+    If ActiveDocument.Characters.Count = 1 Then
+        Set a = ActiveDocument
+    ElseIf ActiveDocument.Characters.Count > 1 Then
+        For Each a In Documents
+            If a.path = "" Or a.Characters.Count = 1 Then
+    '            a.Range.Paste'原來都有貼上，現在不要，單純找+開新文件就好
+    '            a.Activate
+    '            a.ActiveWindow.Activate
+                flg = True
+                Exit For
+            End If
+        Next a
+        If flg = False Then GoTo a
+    Else
+a:     Set a = Documents.Add(Visible:=newDocVisible)
+    End If
+    Set 空白的新文件 = a
 End Function
 
 
@@ -828,7 +828,7 @@ Sub mark易學關鍵字()
     With rng.Find
         .ClearAllFuzzyOptions
         .ClearFormatting
-        If .Execute(left(SystemSetup.GetClipboard, 255), , , , , , True, wdFindContinue) Then
+        If .Execute(VBA.Trim(VBA.left(SystemSetup.GetClipboard, 255)), , , , , , True, wdFindContinue) Then
             rng.Select
             rng.Document.ActiveWindow.ScrollIntoView rng, True
             Exit Sub
@@ -836,15 +836,15 @@ Sub mark易學關鍵字()
     End With
     'If Documents.Count = 0 Then Documents.Add
     'If Documents.Count = 0 Then Docs.空白的新文件
-    Set d = Docs.空白的新文件()
+    Set d = Docs.空白的新文件(False)
     If ClipBoardOp.Is_ClipboardContainCtext_Note_InlinecommentColor Then
         中國哲學書電子化計劃.只保留正文注文_且注文前後加括弧 d
         Set d = ActiveDocument
         On Error GoTo eH:
         DoEvents
         d.Range.Cut
-        d.Close wdDoNotSaveChanges
     End If
+    d.Close wdDoNotSaveChanges
     
     'Set d = ActiveDocument
     Set d = dSource
@@ -879,6 +879,7 @@ Sub mark易學關鍵字()
         "六二", "上九", "上六", "九二", "九三", "六四", "筮", "夬", "〈乾〉", "〈坤〉", "乾、坤", "〈乾、坤〉" _
             , "象曰", "象日", "象云", "象傳", "彖", _
             "艮", "頤", "坎", "中孚", "兌", "蠱", "姤", _
+            "老陰", "老陽", "少陰", "少陽", _
             "咸恒", "咸恆", _
         ChrW(26080) & ChrW(-10171) & ChrW(-8522))  ', "", "", "", "" )
     
@@ -918,10 +919,11 @@ Sub mark易學關鍵字()
             Next e
             If Not flgPaste Then
                 'ChrW() & ChrW() &'ChrW() & ChrW() &
-                Dim gua
-                gua = Array(ChrW(-10119), ChrW(-8742), ChrW(-30233), ChrW(-10164), ChrW(-8698), ChrW(-31827), ChrW(-10132), ChrW(-8313), ChrW(20810), ChrW(-10167), ChrW(-8698), ChrW(-26587), ChrW(21093), ChrW(14615), ChrW(20089), ChrW(26080), "妄", ChrW(26083), "濟" _
-                            , "遘", "遁", ChrW(20089), "离", "乾", "小畜", "履", "臨", "觀", "大過", "坤", "泰", "否", "噬嗑", "賁", "坎", "屯", "蒙", "同人", "大有", "剝", "復", "離", "需", "訟", "謙", "豫", "無妄", "大畜", "師", "比", "隨", "蠱", "頤", "咸", "恒", "損", "益", "震", "艮", "中孚", "遯", "大壯", "夬", "姤", "漸", "歸妹", "小過", "晉", "明夷", "萃", "升", "豐", "旅", "既濟", "未濟", "家人", "睽", "困", "井", "巽", "兌", "蹇", "解", "革", "鼎", "渙", "節", "太極", "陰陽", "兩儀", "象", "彖")
-                For Each e In gua
+                Dim guaKeyword
+                guaKeyword = Array(ChrW(-10119), ChrW(-8742), ChrW(-30233), ChrW(-10164), ChrW(-8698), ChrW(-31827), ChrW(-10132), ChrW(-8313), ChrW(20810), ChrW(-10167), ChrW(-8698), ChrW(-26587), ChrW(21093), ChrW(14615), ChrW(20089), ChrW(26080), "妄", ChrW(26083), "濟" _
+                            , "遘", "遁", ChrW(20089), "离", "乾", "小畜", "履", "臨", "觀", "大過", "坤", "泰", "否", "噬嗑", "賁", "坎", "屯", "蒙", "同人", "大有", "剝", "復", "離", "需", "訟", "謙", "豫", "無妄", "大畜", "師", "比", "隨", "蠱", "頤", "咸", "恒", "損", "益", "震", "艮", "中孚", "遯", "大壯", "夬", "姤", "漸", "歸妹", "小過", "晉", "明夷", "萃", "升", "豐", "旅", "既濟", "未濟", "家人", "睽", "困", "井", "巽", "兌", "蹇", "解", "革", "鼎", "渙", "節", "太極", "陰陽", "兩儀", "象", "彖", _
+                            "老陰", "老陽", "少陰", "少陽")
+                For Each e In guaKeyword
                     If InStr(clipBTxt, e) > 0 Then
                         flgPaste = True
                         Exit For
@@ -930,6 +932,7 @@ Sub mark易學關鍵字()
             End If
             
             If flgPaste Then
+pasteAnyway:
                 d.Activate
                 If Selection.Document.FullName <> d.FullName Then
                     Stop
@@ -994,7 +997,8 @@ Sub mark易學關鍵字()
                         .Font.ColorIndex = wdRed
                         .Highlight = True
                     End With
-                    .Execute , , , , , , True, wdFindContinue, , , wdReplaceAll
+                    '.Execute , , , , , , True, wdFindContinue, , , wdReplaceAll
+                    .Execute , , , , , , True, wdFindStop, , , Replace:=wdReplaceAll
                 End With
             End If
         Next e
@@ -1015,7 +1019,12 @@ Sub mark易學關鍵字()
     Else '文件內已有內容時
         GoSub refres
         SystemSetup.playSound 1.294
-        If noneYijingKeyword Then MsgBox "要貼上的文本並不含有易學關鍵字哦！" + vbCr + vbCr + "請再檢查所複製到剪貼簿的內容是否正確。感恩感恩　南無阿彌陀佛"
+        If noneYijingKeyword Then
+            If MsgBox("要貼上的文本並不含有易學關鍵字哦！" + vbCr + vbCr + "請再檢查所複製到剪貼簿的內容是否正確。感恩感恩　南無阿彌陀佛○是否仍要貼上？" + vbCr + vbCr + clipBTxt, vbOKCancel + vbExclamation + vbDefaultButton2) = vbOK Then
+                noneYijingKeyword = False
+                GoTo pasteAnyway
+            End If
+        End If
     End If
     
 exitSub:

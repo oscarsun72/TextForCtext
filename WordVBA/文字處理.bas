@@ -2797,7 +2797,7 @@ Sub 中國哲學書電子化計劃_去掉註文保留正文()
 Dim slRng As Range, a, ur As UndoRecord, d As Document 'Alt + ]
 'Set ur = SystemSetup.stopUndo("中國哲學書電子化計劃_去掉註文保留正文")
 SystemSetup.stopUndo ur, "中國哲學書電子化計劃_去掉註文保留正文"
-Set d = Docs.空白的新文件()
+Set d = Docs.空白的新文件(True)
 'If ActiveDocument.Characters.Count = 1 Then Selection.Paste
 If d.Characters.Count = 1 Then d.ActiveWindow.Selection.Paste
 If d.ActiveWindow.Selection.Type = wdSelectionIP Then d.Select
@@ -2817,94 +2817,94 @@ Beep 'MsgBox "done!", vbInformation
 SystemSetup.contiUndo ur
 End Sub
 Sub 中國哲學書電子化計劃_註文前後加括弧()
-Dim slRng As Range, a, flg As Boolean, ur As UndoRecord, d As Document 'Alt+1
-'Set ur = SystemSetup.stopUndo("中國哲學書電子化計劃_註文前後加括弧")
-SystemSetup.playSound 0.484
-SystemSetup.stopUndo ur, "中國哲學書電子化計劃_註文前後加括弧"
-Set d = Docs.空白的新文件()
-'If Selection.Type = wdSelectionIP Then ActiveDocument.Select
-'If Selection.Type = wdSelectionIP Then d.Select
-If d Is Nothing Then Set d = ActiveDocument
-d.Range.Paste
-d.Activate
-Set slRng = Selection.Range
-中國哲學書電子化計劃_表格轉文字 slRng
-For Each a In slRng.Document.Paragraphs 'for漢籍電子文獻資料庫
-    If VBA.left(a.Range, 3) = "[疏]" Then
-        slRng.SetRange a.Range.Characters(4).start _
-            , a.Range.End
-        slRng.Font.Size = 7.5
-    End If
-Next a
-If Selection.Type = wdSelectionIP Then ActiveDocument.Select
-Set slRng = Selection.Range
-For Each a In slRng.Characters
-    Select Case a.Font.Color
-        Case 34816, 8912896, 15776152 '34816:綠色小注
-p:          If flg = False Then
-                a.Select
-                Selection.Range.InsertBefore "（"
-                Selection.Range.SetRange Selection.start, Selection.start + 1
-                Selection.Range.Font.Size = a.Characters(2).Font.Size
-                Selection.Range.Font.Color = a.Characters(2).Font.Color
-'                a.Font.Size = a.Next.Font.Size
-'                a.Font.Color = a.Next.Font.Color
-                flg = True
-            Else
-                If a.Font.Color = 8912896 And a.Previous.Font.Color = 34816 Then '8912896藍字小注
-                    a.InsertBefore "）（"
-                    a.SetRange a.start, a.start + 2
-                    a.Font.Size = a.Characters(2).Next.Font.Size
-                    a.Font.Color = a.Characters(2).Next.Font.Color
-'                    a.Characters(1).Font.Color = a.Characters(1).Previous.Font.Color
+    Dim slRng As Range, a, flg As Boolean, ur As UndoRecord, d As Document 'Alt+1
+    'Set ur = SystemSetup.stopUndo("中國哲學書電子化計劃_註文前後加括弧")
+    SystemSetup.playSound 0.484
+    SystemSetup.stopUndo ur, "中國哲學書電子化計劃_註文前後加括弧"
+    Set d = Docs.空白的新文件(True)
+    'If Selection.Type = wdSelectionIP Then ActiveDocument.Select
+    'If Selection.Type = wdSelectionIP Then d.Select
+    If d Is Nothing Then Set d = ActiveDocument
+    d.Range.Paste
+    d.Activate
+    Set slRng = Selection.Range
+    中國哲學書電子化計劃_表格轉文字 slRng
+    For Each a In slRng.Document.Paragraphs 'for漢籍電子文獻資料庫
+        If VBA.left(a.Range, 3) = "[疏]" Then
+            slRng.SetRange a.Range.Characters(4).start _
+                , a.Range.End
+            slRng.Font.Size = 7.5
+        End If
+    Next a
+    If Selection.Type = wdSelectionIP Then ActiveDocument.Select
+    Set slRng = Selection.Range
+    For Each a In slRng.Characters
+        Select Case a.Font.Color
+            Case 34816, 8912896, 15776152 '34816:綠色小注
+p:              If flg = False Then
+                    a.Select
+                    Selection.Range.InsertBefore "（"
+                    Selection.Range.SetRange Selection.start, Selection.start + 1
+                    Selection.Range.Font.Size = a.Characters(2).Font.Size
+                    Selection.Range.Font.Color = a.Characters(2).Font.Color
+    '                a.Font.Size = a.Next.Font.Size
+    '                a.Font.Color = a.Next.Font.Color
+                    flg = True
+                Else
+                    If a.Font.Color = 8912896 And a.Previous.Font.Color = 34816 Then '8912896藍字小注
+                        a.InsertBefore "）（"
+                        a.SetRange a.start, a.start + 2
+                        a.Font.Size = a.Characters(2).Next.Font.Size
+                        a.Font.Color = a.Characters(2).Next.Font.Color
+    '                    a.Characters(1).Font.Color = a.Characters(1).Previous.Font.Color
+                    End If
                 End If
-            End If
-'        Case 8912896 '8912896藍字小注
-            
-        Case 0, 15595002, 15649962
-            If a.Font.Color = 0 Then 'black'漢籍電子文獻資料庫
+    '        Case 8912896 '8912896藍字小注
+                
+            Case 0, 15595002, 15649962
+                If a.Font.Color = 0 Then 'black'漢籍電子文獻資料庫
+                    If a.Font.Size = 7.5 And Not flg Then
+                        GoTo p
+                    ElseIf a.Font.Size > 7.5 And flg Then
+                        GoTo b
+                    End If
+                'End If
+                ElseIf flg Then
+b:
+    '                a.Select
+    '                Selection.Range.InsertBefore "）"
+                    If a.Previous = chr(13) Then
+                        a.Previous.Previous.Select
+                    Else
+                        a.Previous.Select
+                    End If
+                    Selection.Range.InsertAfter "）"
+                    flg = False
+                End If
+            Case -16777216 'black'漢籍電子文獻資料庫
                 If a.Font.Size = 7.5 And Not flg Then
                     GoTo p
                 ElseIf a.Font.Size > 7.5 And flg Then
                     GoTo b
                 End If
-            'End If
-            ElseIf flg Then
-b:
-'                a.Select
-'                Selection.Range.InsertBefore "）"
-                If a.Previous = chr(13) Then
-                    a.Previous.Previous.Select
-                Else
-                    a.Previous.Select
-                End If
-                Selection.Range.InsertAfter "）"
-                flg = False
-            End If
-        Case -16777216 'black'漢籍電子文獻資料庫
-            If a.Font.Size = 7.5 And Not flg Then
-                GoTo p
-            ElseIf a.Font.Size > 7.5 And flg Then
-                GoTo b
-            End If
-        Case 255 'red'漢籍電子文獻資料庫
-            Select Case a.Font.Size
-                Case 7.5, 10
-                    a.Delete
-            End Select
-    End Select
-Next a
-slRng.Find.Execute "（（", True, , , , , , , , "（", wdReplaceAll
-slRng.Find.Execute "））", True, , , , , , , , "）", wdReplaceAll
-Beep
-Selection.EndKey wdStory
-Do
-   Selection.MoveLeft
-   If Selection = chr(13) Then Selection.Delete
-Loop While Selection = chr(13)
-'MsgBox "done!", vbInformation
-If Not ActiveDocument Is d Then d.Activate
-SystemSetup.contiUndo ur
+            Case 255 'red'漢籍電子文獻資料庫
+                Select Case a.Font.Size
+                    Case 7.5, 10
+                        a.Delete
+                End Select
+        End Select
+    Next a
+    slRng.Find.Execute "（（", True, , , , , , , , "（", wdReplaceAll
+    slRng.Find.Execute "））", True, , , , , , , , "）", wdReplaceAll
+    Beep
+    Selection.EndKey wdStory
+    Do
+       Selection.MoveLeft
+       If Selection = chr(13) Then Selection.Delete
+    Loop While Selection = chr(13)
+    'MsgBox "done!", vbInformation
+    If Not ActiveDocument Is d Then d.Activate
+    SystemSetup.contiUndo ur
 End Sub
 Sub 漢籍電子文獻資料庫文本整理_以轉貼到中國哲學書電子化計劃(Optional doNotCloseDoc As Boolean)
 Dim rng As Range, d As Document, a, ur As UndoRecord

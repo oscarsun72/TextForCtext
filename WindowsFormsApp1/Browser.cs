@@ -1770,7 +1770,8 @@ namespace TextForCtext
             }
             try
             {
-                LastValidWindow = driver.CurrentWindowHandle;
+                //LastValidWindow = driver.CurrentWindowHandle;
+                Form1.ResetLastValidWindow();
                 driver.SwitchTo().NewWindow(tabOrwindow);
             }
             catch (Exception ex)
@@ -2265,20 +2266,29 @@ internal static string getImageUrl() {
         {
             ActiveForm1.TopMost = false;
             //LastValidWindow = driver.CurrentWindowHandle;
+            //Form1.ResetLastValidWindow();
             openNewTabWindow();
             GoToUrlandActivate("https://kandianguji.com/ocr");
+            //driver.Navigate().GoToUrl("https://kandianguji.com/ocr");
             Browser.BringToFront("chrome");
 
             //按下「選擇檔案」按鈕
             //IWebElement iwe = waitFindWebElementBySelector_ToBeClickable("#image-input");
-            IWebElement iwe = waitFindWebElementBySelector_ToBeClickable("#convert-form > label.drop-container");
-            if (iwe == null) { StopOCR = true; return false; }
+            IWebElement iwe = waitFindWebElementBySelector_ToBeClickable("#convert-form > label.drop-container",3);
+            DateTime dt = DateTime.Now;
+            while (iwe == null)
+            {
+                if (DateTime.Now.Subtract(dt).TotalSeconds > 10)
+                    if (Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("等候「選擇檔案」按鈕逾時，是否繼續？") == DialogResult.Cancel)
+                    { StopOCR = true; return false; }
+                iwe = waitFindWebElementBySelector_ToBeClickable("#convert-form > label.drop-container");
+            }
             //ActiveForm1.TopMost = false;//前已有
             driver.SwitchTo().Window(driver.CurrentWindowHandle);
             iwe.Click();
 
             //等待書圖檔下載完成
-            DateTime dt = DateTime.Now;
+            dt = DateTime.Now;
             while (!File.Exists(downloadImgFullName))
             {
                 if (DateTime.Now.Subtract(dt).TotalSeconds > 38) { StopOCR = true; return false; }
@@ -2296,6 +2306,8 @@ internal static string getImageUrl() {
             //Thread.Sleep(800 + (
             Thread.Sleep(1600 + (
                 800 + Extend_the_wait_time_for_the_Open_Old_File_dialog_box_to_appear_Millisecond < 0 ? 0 : Extend_the_wait_time_for_the_Open_Old_File_dialog_box_to_appear_Millisecond));//最小值（須在重開機後或系統最小負載時）（連「開啟」舊檔之視窗也看不見，即可完成）
+
+            while (!File.Exists(downloadImgFullName)) { }
 
             //輸入：檔案名稱 //SendKeys.Send(downloadImgFullName);
             SendKeys.SendWait("+{Insert}~");//or "^v"
@@ -5018,8 +5030,16 @@ internal static string getImageUrl() {
         redo:
 
             #region「上傳完畢」對話方塊的「OK」按鈕 20231103
-            iwe = waitFindWebElementBySelector_ToBeClickable
-                ("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled", 0.2);
+            try
+            {
+                iwe = waitFindWebElementBySelector_ToBeClickable
+                    //("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled", 0.2);
+                    ("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled", 5);
+
+            }
+            catch (Exception)
+            {
+            }
             //if (iwe == null) return false;
             //try
             //{
@@ -5052,8 +5072,15 @@ internal static string getImageUrl() {
 
                 if (Clipboard.GetText().IndexOf(Environment.NewLine + Environment.NewLine) > -1) goto finished;
                 Thread.Sleep(150);
-                iwe = waitFindWebElementBySelector_ToBeClickable
-                                ("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled", 0.3);
+                try
+                {
+                    iwe = waitFindWebElementBySelector_ToBeClickable
+                                    ("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled", 0.3);
+
+                }
+                catch (Exception)
+                {
+                }
                 if (DateTime.Now.Subtract(dtimr).TotalSeconds > OCR_wait_time_Top_Limit＿second + 50) { StopOCR = true; return false; }
             }
             if (iwe != null)
@@ -6925,8 +6952,8 @@ internal static string getImageUrl() {
             if (driver == null) return true;
             List<string> keywords = new List<string> { "易", "卦", "爻", "繫詞", "繫辭", "文言", "乾坤","元亨","利貞", "咎"
                 , "夬", "頤","巽","坎","兌","小畜","大畜","歸妹","明夷","同人","大有","豫","蠱","噬嗑","賁","剝","大過","小過","遯","大壯","睽","蹇","姤","萃","艮","渙","中孚","既濟","未濟"
-                ,"咸恆"
-                ,"无妄", "彖", "象曰", "象傳", "象日", "象云", "筮"
+                ,"咸恆","老陰", "老陽", "少陰", "少陽"
+                ,"无咎", "天咎","无妄", "彖", "象曰", "象傳", "象日", "象云", "筮"
             ,"初九","九二","九三","九四","九五","上九","初六","六二","六三","六四","六五","上六"
             ,"用九","用六"};
 
@@ -6945,29 +6972,34 @@ internal static string getImageUrl() {
                 }
                 if (!driver.Title.Contains("漢籍全文"))
                 {
-                    Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("請開啟《漢籍全文資料庫》網頁檢索介面，再開始操作");
-                    return true;
+                    title = string.Empty;
+                    foreach (var item in driver.WindowHandles)
+                    {
+                        if (driver.SwitchTo().Window(item).Url.StartsWith("https://ctext.org/wiki.pl?if=gb&res="))
+                        { title = driver.Title; break; }
+
+                    }
+                    if (title == string.Empty)
+                    {
+                        Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("請開啟《漢籍全文資料庫》網頁檢索介面，再開始操作");
+                        return true;
+                    }
                 }
                 title = driver.Title;
             }
 
-            IWebElement iwe1 = waitFindWebElementBySelector_ToBeClickable("body > form > table > tbody > tr:nth-child(2) > td > table > tbody > tr > td.leftbg > table > tbody > tr:nth-child(1) > td > table > tbody > tr:nth-child(2) > td > input[type=text]:nth-child(2)");
-            string caption = iwe1 == null ? "漢籍全文資料庫" : "漢籍全文文本閱讀";
-
-            if (!title.Contains(caption))
+            //異體字處理
+            if (title.EndsWith("中國哲學書電子化計劃"))
             {
-                //《漢籍全文資料庫》網頁介面
-                foreach (var item in driver.WindowHandles)
-                {
-                    driver.SwitchTo().Window(item);
-                    if (driver.Title.Contains(caption)) break;
-                }
-                if (!driver.Title.Contains(caption))
-                {
-                    Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("請開啟《漢籍全文資料庫》網頁檢索介面，再開始操作");
-                    return true;
-                }
+                //新增List元素。因為《中國哲學書電子化計劃》異體字的支援機制沒有《漢籍全文資料庫》那麼好
+                //20240719 Copilot大菩薩：C# Windows.Forms List 新增多個元素：您好，如果您想要在程式進行中對 List<string> 新增多個元素，可以使用 AddRange 方法。這是一個範例：
+                //keywords.Add();
+                List<string> additionalKeywords = new List<string> { "无𡚶", "𧰼", "系辭", "擊詞", "擊辭", "繫驟",
+                    "乹","〈乾〉", "〈坤〉", "〈乾坤〉", "咸恒","剥","頥","㢲",
+                "𥘉九","𭃨九","𭃡九","𥘉六","𭃨六","𭃡六"};
+                keywords.AddRange(additionalKeywords);
             }
+
             string keyword = keywords[ListIndex_Hanchi_SearchingKeywordsYijing]; Clipboard.SetText(keyword);
             ActiveForm1.PauseEvents();
             ActiveForm1.textBox3Text = ListIndex_Hanchi_SearchingKeywordsYijing.ToString();
@@ -6975,130 +7007,227 @@ internal static string getImageUrl() {
             ActiveForm1.ResumeEvents();
             bool returnValue = false;
 
-            if (caption == "漢籍全文資料庫")
+            //if (title.Contains("中國哲學書電子化計劃"))
+            if (title.EndsWith("中國哲學書電子化計劃"))
             {
-
-                //輸入「任意詞」：KeywordInputBox
-                IWebElement iweKeywordInputBox = waitFindWebElementBySelector_ToBeClickable("#frmTitle > table > tbody > tr:nth-child(2) > td > table > tbody > tr:nth-child(1) > td > table > tbody > tr > td > table > tbody > tr:nth-child(1) > td:nth-child(2) > nobr > input[type=TEXT]");
-                if (iweKeywordInputBox == null)
+            //檢索方塊
+            researchCtext:
+                IWebElement iwe = waitFindWebElementBySelector_ToBeClickable("#content > div.wikibox > table > tbody > tr.mobilesearch > td > form > input[type=text]:nth-child(3)");
+                if (iwe != null)
                 {
-                    if (iwe1 == null)
+                    iwe.Clear();
+                    try
+                    {
+                        Clipboard.SetText(keyword);
+                    }
+                    catch (Exception)
+                    {
+
+                    }
+                    //iwe.SendKeys(keyword);
+                    iwe.SendKeys(OpenQA.Selenium.Keys.Shift + OpenQA.Selenium.Keys.Insert);
+                    iwe.SendKeys(OpenQA.Selenium.Keys.Enter);
+
+                    //Total 0
+                    iwe = waitFindWebElementBySelector_ToBeClickable("#content > table.searchsummary > tbody > tr:nth-child(4) > th > b", 5);
+                    if (iwe != null)
+                    {
+                        if (iwe.GetAttribute("textContent") == "Total 0")
+                        {
+                            driver.Navigate().Back();
+                            returnValue = false;
+                        }
+                        else
+                        { returnValue = true; Clipboard.SetText(keyword); ActiveForm1.KeyinTextmodeSwitcher(); }//ActiveForm1.HideToNICo(); }
+
+                    }
+                    else
+                    { returnValue = true; Clipboard.SetText(keyword); ActiveForm1.KeyinTextmodeSwitcher(); }//ActiveForm1.HideToNICo(); }
+                }
+                else
+                {
+                    string url = driver.Url;
+                    // 一直回到有「檢索方塊」的上一頁
+                    while (null == waitFindWebElementBySelector_ToBeClickable("#content > div.wikibox > table > tbody > tr.mobilesearch > td > form > input[type=text]:nth-child(3)"))
+                    {
+                        driver.Navigate().Back();
+                        if (url == driver.Url) //沒有上一頁了
+                        {
+                            returnValue = true;
+                            break;
+                        }
+                        url = driver.Url;
+                    }
+                    if (null != waitFindWebElementBySelector_ToBeClickable("#content > div.wikibox > table > tbody > tr.mobilesearch > td > form > input[type=text]:nth-child(3)"))
+                        goto researchCtext;
+                    ////Total 標籤
+                    //if (waitFindWebElementBySelector_ToBeClickable("#content > table.searchsummary > tbody > tr:nth-child(4) > th > b", 5)?.GetAttribute("textContent").StartsWith("Total ") == true)
+                    //{
+                    //    driver.Navigate().Back();
+                    //    goto researchCtext;
+                    //}
+                    //else
+                    //{
+                    //    driver.Navigate().Back();
+                    //    returnValue = false;
+                    //}
+                }
+            }
+            else
+            {//如果檢索《漢籍全文資料庫》
+
+                IWebElement iwe1 = waitFindWebElementBySelector_ToBeClickable("body > form > table > tbody > tr:nth-child(2) > td > table > tbody > tr > td.leftbg > table > tbody > tr:nth-child(1) > td > table > tbody > tr:nth-child(2) > td > input[type=text]:nth-child(2)");
+                string caption = iwe1 == null ? "漢籍全文資料庫" : "漢籍全文文本閱讀";
+
+                if (!title.Contains(caption))
+                {
+                    //《漢籍全文資料庫》網頁介面
+                    foreach (var item in driver.WindowHandles)
+                    {
+                        driver.SwitchTo().Window(item);
+                        if (driver.Title.Contains(caption)) break;
+                    }
+                    if (!driver.Title.Contains(caption))
                     {
                         Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("請開啟《漢籍全文資料庫》網頁檢索介面，再開始操作");
                         return true;
                     }
-
                 }
 
-                iweKeywordInputBox.Clear();
-                iweKeywordInputBox.SendKeys(keyword);
-
-                //按下「搜尋」：
-                //IWebElement iwe = waitFindWebElementBySelector_ToBeClickable("#frmTitle > table > tbody > tr:nth-child(2) > td > table > tbody > tr:nth-child(8) > td > input[type=IMAGE]:nth-child(1)");
-                IWebElement iwe = waitFindWebElementByName_ToBeClickable("_IMG_搜尋", 2);
-                if (iwe != null && iweKeywordInputBox.GetAttribute("value") == keyword)
+                if (caption == "漢籍全文資料庫")
                 {
-                    //iwe.Submit();
-                    //iweKeywordInputBox.SendKeys(OpenQA.Selenium.Keys.Enter);
-                    iwe.Click();
-                    iwe = waitFindWebElementBySelector_ToBeClickable("body > form > table > tbody > tr:nth-child(2) > td:nth-child(3) > center > table > tbody > tr:nth-child(2) > td > font");
-                    if (iwe != null)
+
+                    //輸入「任意詞」：KeywordInputBox
+                    IWebElement iweKeywordInputBox = waitFindWebElementBySelector_ToBeClickable("#frmTitle > table > tbody > tr:nth-child(2) > td > table > tbody > tr:nth-child(1) > td > table > tbody > tr > td > table > tbody > tr:nth-child(1) > td:nth-child(2) > nobr > input[type=TEXT]");
+                    if (iweKeywordInputBox == null)
                     {
-                        //if (iwe.GetAttribute("innerText") == "　抱歉，找不到您所查詢的資料")
-                        //{
-                        //    //Form1.playSound(Form1.soundLike.error, true);
-                        //    //ActiveForm1.AvailableInUseBothKeysMouse();
-                        //}
-                    }
-                    else
-                    {//檢索有結果：
-                        Form1.playSound(Form1.soundLike.info);
-                        returnValue = true;
-                        ActiveForm1.TopMost = false;
-                        iwe = waitFindWebElementByName_ToBeClickable("_IMG_檢索報表", 2);
-                        if (iwe != null)//   ?.Click();
-                        {//20240710 Copilot大菩薩：要在 Selenium 中使用鍵盤的 Shift 鍵，您可以使用 Actions 類別來模擬鍵盤和滑鼠的操作。以下是一個範例程式碼：
-                         // 建立一個新的 Actions 物件
-                         //ActiveForm1.TopMost = false;
-                            Actions action = new Actions(driver);
-                            // 按下 Shift 鍵，然後點擊元素，最後釋放 Shift 鍵
-                            action.KeyDown(OpenQA.Selenium.Keys.Shift).Click(iwe).KeyUp(OpenQA.Selenium.Keys.Shift).Build().Perform();
-                            Browser.BringToFront("chrome");
+                        if (iwe1 == null)
+                        {
+                            Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("請開啟《漢籍全文資料庫》網頁檢索介面，再開始操作");
+                            return true;
                         }
+
                     }
 
+                    iweKeywordInputBox.Clear();
+                    iweKeywordInputBox.SendKeys(keyword);
+
+                    //按下「搜尋」：
+                    //IWebElement iwe = waitFindWebElementBySelector_ToBeClickable("#frmTitle > table > tbody > tr:nth-child(2) > td > table > tbody > tr:nth-child(8) > td > input[type=IMAGE]:nth-child(1)");
+                    IWebElement iwe = waitFindWebElementByName_ToBeClickable("_IMG_搜尋", 2);
+                    if (iwe != null && iweKeywordInputBox.GetAttribute("value") == keyword)
+                    {
+                        //iwe.Submit();
+                        //iweKeywordInputBox.SendKeys(OpenQA.Selenium.Keys.Enter);
+                        iwe.Click();
+                        iwe = waitFindWebElementBySelector_ToBeClickable("body > form > table > tbody > tr:nth-child(2) > td:nth-child(3) > center > table > tbody > tr:nth-child(2) > td > font");
+                        if (iwe != null)
+                        {
+                            //if (iwe.GetAttribute("innerText") == "　抱歉，找不到您所查詢的資料")
+                            //{
+                            //    //Form1.playSound(Form1.soundLike.error, true);
+                            //    //ActiveForm1.AvailableInUseBothKeysMouse();
+                            //}
+                        }
+                        else
+                        {//檢索有結果：
+                            Form1.playSound(Form1.soundLike.info);
+                            returnValue = true;
+                            ActiveForm1.TopMost = false;
+                            iwe = waitFindWebElementByName_ToBeClickable("_IMG_檢索報表", 2);
+                            if (iwe != null)//   ?.Click();
+                            {//20240710 Copilot大菩薩：要在 Selenium 中使用鍵盤的 Shift 鍵，您可以使用 Actions 類別來模擬鍵盤和滑鼠的操作。以下是一個範例程式碼：
+                             // 建立一個新的 Actions 物件
+                             //ActiveForm1.TopMost = false;
+                                Actions action = new Actions(driver);
+                                // 按下 Shift 鍵，然後點擊元素，最後釋放 Shift 鍵
+                                action.KeyDown(OpenQA.Selenium.Keys.Shift).Click(iwe).KeyUp(OpenQA.Selenium.Keys.Shift).Build().Perform();
+                                //ActiveForm1.TopMost = false;//最後會有
+                                driver.SwitchTo().Window(driver.WindowHandles.Last());
+                                //Browser.BringToFront("chrome");//最後會有
+                            }
+                        }
+
+                    }
+                }
+                else//文本閱讀內的檢索
+                {
+                    //輸入查詢關鍵字
+                    iwe1.Clear();
+                    iwe1.SendKeys(keyword);
+
+                    //按下「查詢」按鈕
+                    iwe1 = waitFindWebElementBySelector_ToBeClickable("body > form > table > tbody > tr:nth-child(2) > td > table > tbody > tr > td.leftbg > table > tbody > tr:nth-child(1) > td > table > tbody > tr:nth-child(2) > td > input.s_btn.hjblock");
+                    while (iwe1 == null)
+                    {
+                        iwe1 = waitFindWebElementBySelector_ToBeClickable("body > form > table > tbody > tr:nth-child(2) > td > table > tbody > tr > td.leftbg > table > tbody > tr:nth-child(1) > td > table > tbody > tr:nth-child(2) > td > input.s_btn.hjblock", 0.3);
+                    }
+                    //Task.Run(() => { iwe1.Click(); });
+                    //20240714 Copilot大菩薩：Selenium 網頁操作中的等待問題
+                    try
+                    {
+                        driver.Manage().Timeouts().PageLoad = TimeSpan.FromSeconds(1); // 設定頁面載入超時時間為10秒
+                                                                                       //var element = driver.FindElement(By.CssSelector("your_css_selector"));
+                                                                                       //element.Click();
+                        iwe1.Click();
+                        Form1.playSound(Form1.soundLike.info);
+                        ActiveForm1.TopMost = false;
+                    }
+                    catch (WebDriverTimeoutException)
+                    {
+                        // 處理頁面未在指定時間內載入完成的情況
+                        // 在這裡不進行任何操作
+                        //Form1.playSound(Form1.soundLike.error);
+                    }
+
+                    // 繼續執行後續的程式碼
+
+
+                    //查詢結果
+                    iwe1 = waitFindWebElementBySelector_ToBeClickable("body > form > table > tbody > tr:nth-child(2) > td > table > tbody > tr > td.leftbg > table > tbody > tr:nth-child(1) > td > table > tbody > tr:nth-child(2) > td > div > span");
+                    //iwe1 = waitFindWebElementBySelector_ToBeClickable("body > form > table > tbody > tr:nth-child(2) > td > table > tbody > tr > td > table > tbody > tr:nth-child(2) > td > table > tbody > tr:nth-child(1) > td.seqno > a");
+                    while (iwe1 == null)
+                    {
+                        if (waitFindWebElementBySelector_ToBeClickable("body > form > table > tbody > tr:nth-child(2) > td > table > tbody > tr > td > table > tbody > tr:nth-child(2) > td > table > tbody > tr:nth-child(1) > td.seqno", 0.3) != null)
+                        {
+                            returnValue = true;
+                            break;
+                        }
+                        iwe1 = waitFindWebElementBySelector_ToBeClickable("body > form > table > tbody > tr:nth-child(2) > td > table > tbody > tr > td.leftbg > table > tbody > tr:nth-child(1) > td > table > tbody > tr:nth-child(2) > td > input.s_btn.hjblock", 0.3);
+                    }
+
+                    //if (iwe1 != null && waitFindWebElementBySelector_ToBeClickable("body > form > table > tbody > tr:nth-child(2) > td > table > tbody > tr > td > table > tbody > tr:nth-child(2) > td > table > tbody > tr:nth-child(1) > td.seqno", 0.3) == null)
+                    //{
+                    //    if (iwe1.GetAttribute("innerText") == "找不到您的檢索詞")
+                    //    //while (waitFindWebElementBySelector_ToBeClickable("body > form > table > tbody > tr:nth-child(2) > td > table > tbody > tr > td.leftbg > table > tbody > tr:nth-child(1) > td > table > tbody > tr:nth-child(2) > td > div > span")?.GetAttribute("innerText") == "找不到您的檢索詞"&& waitFindWebElementBySelector_ToBeClickable("body > form > table > tbody > tr:nth-child(2) > td > table > tbody > tr > td > table > tbody > tr:nth-child(2) > td > table > tbody > tr:nth-child(1) > td.seqno", 0.3) == null)
+                    //    {
+
+                    //    }
+                    //}
+
+                    //if (iwe1 == null)
+                    //{
+                    //    Form1.playSound(Form1.soundLike.error, true);
+                    //    ActiveForm1.AvailableInUseBothKeysMouse();
+
+                    //}
+                    //else
+                    //{
+                    //////if (returnValue)
+                    //////{
+                    //////    ActiveForm1.TopMost = false;
+                    //////    driver.SwitchTo().Window(driver.CurrentWindowHandle);
+                    //////    BringToFront("chrome");
+                    //////}
+                    //}
                 }
             }
-            else//文本閱讀內的檢索
+
+            if (returnValue)
             {
-                //輸入查詢關鍵字
-                iwe1.Clear();
-                iwe1.SendKeys(keyword);
-
-                //按下「查詢」按鈕
-                iwe1 = waitFindWebElementBySelector_ToBeClickable("body > form > table > tbody > tr:nth-child(2) > td > table > tbody > tr > td.leftbg > table > tbody > tr:nth-child(1) > td > table > tbody > tr:nth-child(2) > td > input.s_btn.hjblock");
-                while (iwe1 == null)
-                {
-                    iwe1 = waitFindWebElementBySelector_ToBeClickable("body > form > table > tbody > tr:nth-child(2) > td > table > tbody > tr > td.leftbg > table > tbody > tr:nth-child(1) > td > table > tbody > tr:nth-child(2) > td > input.s_btn.hjblock", 0.3);
-                }
-                //Task.Run(() => { iwe1.Click(); });
-                //20240714 Copilot大菩薩：Selenium 網頁操作中的等待問題
-                try
-                {
-                    driver.Manage().Timeouts().PageLoad = TimeSpan.FromSeconds(1); // 設定頁面載入超時時間為10秒
-                    //var element = driver.FindElement(By.CssSelector("your_css_selector"));
-                    //element.Click();
-                    iwe1.Click();
-                    Form1.playSound(Form1.soundLike.info);
-                    ActiveForm1.TopMost = false;
-                }
-                catch (WebDriverTimeoutException)
-                {
-                    // 處理頁面未在指定時間內載入完成的情況
-                    // 在這裡不進行任何操作
-                    Form1.playSound(Form1.soundLike.error);
-                }
-
-                // 繼續執行後續的程式碼
-
-
-                //查詢結果
-                iwe1 = waitFindWebElementBySelector_ToBeClickable("body > form > table > tbody > tr:nth-child(2) > td > table > tbody > tr > td.leftbg > table > tbody > tr:nth-child(1) > td > table > tbody > tr:nth-child(2) > td > div > span");
-                //iwe1 = waitFindWebElementBySelector_ToBeClickable("body > form > table > tbody > tr:nth-child(2) > td > table > tbody > tr > td > table > tbody > tr:nth-child(2) > td > table > tbody > tr:nth-child(1) > td.seqno > a");
-                while (iwe1 == null)
-                {
-                    if (waitFindWebElementBySelector_ToBeClickable("body > form > table > tbody > tr:nth-child(2) > td > table > tbody > tr > td > table > tbody > tr:nth-child(2) > td > table > tbody > tr:nth-child(1) > td.seqno", 0.3) != null)
-                    {
-                        returnValue = true;
-                        break;
-                    }
-                    iwe1 = waitFindWebElementBySelector_ToBeClickable("body > form > table > tbody > tr:nth-child(2) > td > table > tbody > tr > td.leftbg > table > tbody > tr:nth-child(1) > td > table > tbody > tr:nth-child(2) > td > input.s_btn.hjblock", 0.3);
-                }
-
-                //if (iwe1 != null && waitFindWebElementBySelector_ToBeClickable("body > form > table > tbody > tr:nth-child(2) > td > table > tbody > tr > td > table > tbody > tr:nth-child(2) > td > table > tbody > tr:nth-child(1) > td.seqno", 0.3) == null)
-                //{
-                //    if (iwe1.GetAttribute("innerText") == "找不到您的檢索詞")
-                //    //while (waitFindWebElementBySelector_ToBeClickable("body > form > table > tbody > tr:nth-child(2) > td > table > tbody > tr > td.leftbg > table > tbody > tr:nth-child(1) > td > table > tbody > tr:nth-child(2) > td > div > span")?.GetAttribute("innerText") == "找不到您的檢索詞"&& waitFindWebElementBySelector_ToBeClickable("body > form > table > tbody > tr:nth-child(2) > td > table > tbody > tr > td > table > tbody > tr:nth-child(2) > td > table > tbody > tr:nth-child(1) > td.seqno", 0.3) == null)
-                //    {
-
-                //    }
-                //}
-
-                //if (iwe1 == null)
-                //{
-                //    Form1.playSound(Form1.soundLike.error, true);
-                //    ActiveForm1.AvailableInUseBothKeysMouse();
-
-                //}
-                //else
-                //{
-                if (returnValue)
-                {
-                    ActiveForm1.TopMost = false;
-                    driver.SwitchTo().Window(driver.CurrentWindowHandle);
-                    BringToFront("chrome");
-                }
-                //}
+                ActiveForm1.TopMost = false;
+                driver.SwitchTo().Window(driver.CurrentWindowHandle);
+                BringToFront("chrome");
             }
 
             ListIndex_Hanchi_SearchingKeywordsYijing++;
@@ -7123,6 +7252,123 @@ internal static string getImageUrl() {
             //}
 
             return returnValue;
+        }
+
+        /// <summary>
+        /// 直接取代文字的編輯頁面
+        /// </summary>
+        internal static string DirectlyReplacingCharactersPageWindowHandle = string.Empty;
+        /// <summary>
+        /// 直接取代文字
+        /// </summary>
+        /// <param name="character">要直接被取代的單字（regexfrom）及取代成的單字（regexto）的字串陣列</param>
+        /// <returns>成功則傳回true</returns>
+        internal static bool DirectlyReplacingCharacters(StringInfo character)
+        {
+            try
+            {
+                if (LastValidWindow != driver.CurrentWindowHandle)
+                    driver.SwitchTo().Window(LastValidWindow);
+                //else
+                //    LastValidWindow = driver.CurrentWindowHandle;
+            }
+            catch (Exception)
+            {
+                driver.SwitchTo().Window(LastValidWindow);
+            }
+
+            string editUrl = string.Empty;
+            //找到「編輯」超連結
+            IWebElement iwe = waitFindWebElementBySelector_ToBeClickable("#content > div:nth-child(7) > div:nth-child(2) > a:nth-child(2)");
+            if (iwe == null)
+            {
+                Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("請開啟有效的圖文對照頁面");
+                driver.SwitchTo().Window(LastValidWindow);
+                return false;
+            }
+            else
+            {//取得「編輯」頁面的URL
+                editUrl = iwe.GetAttribute("href");
+            }
+
+            if (DirectlyReplacingCharactersPageWindowHandle == string.Empty)
+            {
+                foreach (var item in driver.WindowHandles)
+                {
+                    string url = driver.SwitchTo().Window(item).Url;
+                    //if (url.StartsWith("https://ctext.org/wiki.pl?") && url.Contains("&action=editchapter"))
+                    if (url == editUrl)
+                    {
+                        DirectlyReplacingCharactersPageWindowHandle = driver.CurrentWindowHandle; break;
+                    }
+                }
+            }
+            else//如果 DirectlyReplacingCharactersPageWindowHandle 非空值
+                if (!driver.WindowHandles.Contains(DirectlyReplacingCharactersPageWindowHandle))
+                DirectlyReplacingCharactersPageWindowHandle = string.Empty; //goto reOpenEdittab; }
+            reOpenEdittab:
+            //如果分頁中沒有開啟「編輯」頁面
+            if (DirectlyReplacingCharactersPageWindowHandle == string.Empty)
+            {
+
+                //開啟完整編輯頁面
+                openNewTabWindow();
+                driver.Navigate().GoToUrl(editUrl);
+
+                //取代區中的「名稱」欄名
+                //while (null == waitFindWebElementBySelector_ToBeClickable("#content > table.restable > tbody > tr > td > table > tbody > tr:nth-child(1) > th:nth-child(1)", 0.2)) { }
+                iwe = waitFindWebElementBySelector_ToBeClickable("#content > table.restable > tbody > tr > td > table > tbody > tr:nth-child(1) > th:nth-child(1)", 10);
+                if (iwe != null)
+                    DirectlyReplacingCharactersPageWindowHandle = driver.CurrentWindowHandle;
+                else
+                    return false;
+            }
+            else
+            {//如果現成的分頁有找到「編輯」頁面則切換到該頁面
+                try
+                {
+                    driver.SwitchTo().Window(DirectlyReplacingCharactersPageWindowHandle);
+                }
+                catch (Exception err)
+                {
+                    DirectlyReplacingCharactersPageWindowHandle = string.Empty;
+                    if (editUrl != string.Empty) goto reOpenEdittab;
+                    else
+                    { Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(err.Message); return false; }
+                }
+            }
+
+            iwe = waitFindWebElementBySelector_ToBeClickable("#data");
+            editUrl = iwe.Text.Replace(character.SubstringByTextElements(0, 1), character.SubstringByTextElements(1, 1));
+            try
+            {
+                Clipboard.SetText(editUrl);
+            }
+            catch (Exception)
+            {
+            }
+            iwe.Clear();
+            iwe.SendKeys(OpenQA.Selenium.Keys.Shift + OpenQA.Selenium.Keys.Insert);
+
+
+            //iwe = null;
+            //ReadOnlyCollection<IWebElement> iwes = driver.FindElements(By.ClassName("resrow"));
+            //foreach (var item in iwes)            
+            //{
+            //    string outerHTML = item.GetAttribute("outerHTML");
+            //    if(outerHTML== "<a href=\"#\" onclick=\"document.getElementById('regexfrom').value='"+ character.SubstringByTextElements(0, 1) 
+            //        + "'; document.getElementById('regexto').value='"+ character.SubstringByTextElements(1, 1) + 
+            //        "'; document.getElementById('regexname').value='"+ character.SubstringByTextElements(1, 1) + "'; applyregex(); return false;\">執行</a>")
+
+            //    //if (outerHTML.Length<220 && outerHTML.Contains(">執行<") && outerHTML.Contains("'regexfrom').value='" + character.SubstringByTextElements(0,1)) && outerHTML.Contains("'regexto').value='" + character.SubstringByTextElements(1,1)))
+            //    {
+            //        iwe = item;//取得要「執行」的元件
+            //        break;
+            //    }
+            //}
+            //if (iwe != null) iwe.Click();
+            driver.SwitchTo().Window(LastValidWindow);
+            return true;
         }
 
         /// <summary>
@@ -7172,7 +7418,14 @@ internal static string getImageUrl() {
                 if (ImproveGJcoolOCRMemoDoc.Content.Text.IndexOf(lnk + Environment.NewLine.Substring(0, 1)) == -1)
                 {
                     imporvement += ("\t" + lnk);
-                    ImproveGJcoolOCRMemoDoc.Range().InsertAfter(imporvement + Environment.NewLine);
+                    try
+                    {
+                        ImproveGJcoolOCRMemoDoc.Range().InsertAfter(imporvement + Environment.NewLine);
+                    }
+                    catch (Exception)
+                    {
+                        return;
+                    }
                     try
                     {
                         ImproveGJcoolOCRMemoDoc.ActiveWindow.ScrollIntoView(ImproveGJcoolOCRMemoDoc.Range(), false);
@@ -7232,7 +7485,14 @@ internal static string getImageUrl() {
             openNewTabWindow();
             driver.Navigate().GoToUrl(imageUrl);
             BringToFront("chrome");
-            driver.SwitchTo().Window(driver.CurrentWindowHandle);
+            try
+            {
+                driver.SwitchTo().Window(driver.CurrentWindowHandle);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
             //IWebElement iw = waitFindWebElementBySelector_ToBeClickable("body > img");
             //Cursor.Position = (Point)iw?.Location;
             ////if (iw != null)  clickCopybutton_GjcoolFastExperience(iw.Location); 
@@ -7287,6 +7547,8 @@ internal static string getImageUrl() {
             }
 
             driver.Close();
+            driver.SwitchTo().Window(LastValidWindow);//如果沒有切回關閉前的分頁，再打算開新分頁時Selenium就會出錯！20240720
+            
             ////等待書圖檔下載完成
             //DateTime dt = DateTime.Now;
             //while (!File.Exists(downloadImgFullName))

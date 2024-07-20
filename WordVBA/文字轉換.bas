@@ -69,12 +69,13 @@ Sub 異體字轉正() '20210228
 Dim cnt As New ADODB.Connection, rst As New ADODB.Recordset, rng As Range, a, docAs As String, x As String, rngCC As Integer, flaSel As Byte, flgsel, drv As String, db As New dBase, ur As UndoRecord
 'Alt+7
 If Selection.Type = wdSelectionIP Then
-    Set rng = ActiveDocument.Range
+    Set rng = Selection.Document.Range 'ActiveDocument.Range
     flgsel = wdFindContinue
 Else
     Set rng = Selection.Range
     flgsel = wdFindStop
 End If
+
 'Set ur = SystemSetup.stopUndo("異體字轉正")
 SystemSetup.stopUndo ur, "異體字轉正"
 'For Each a In rng.Characters
@@ -136,7 +137,7 @@ Else
     Set rng = Selection.Range
     flaSel = wdFindStop
 End If
-If VBA.InStr(Chr(13) & Chr(7) & Chr(8) & Chr(9) _
+If VBA.InStr(chr(13) & chr(7) & chr(8) & chr(9) _
         , rng) Then Exit Sub
 If Len(rng) > 2 Then MsgBox "非單字，請檢查！", vbExclamation: Exit Sub
 If rng = "" Then Exit Sub
@@ -249,7 +250,7 @@ For Each a In rng.Characters
     Loop
     If zy <> "" Then
         zy = 文字處理.國語辭典注音文字處理(zy)
-        zy = Left(zy, Len(zy) - 1)
+        zy = left(zy, Len(zy) - 1)
         zys = zys & " " & zy
         zy = ""
     End If
@@ -262,7 +263,7 @@ If ActiveDocument.path = "" Then
     rng.Text = zys
 Else
 '    ed = rng.End
-    rng.InsertAfter Chr(9) & zys
+    rng.InsertAfter chr(9) & zys
 '    rng.SetRange ed, rng.End
 End If
 With rngZhuYin
