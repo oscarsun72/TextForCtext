@@ -362,6 +362,20 @@ namespace TextForCtext
             IWebElement ie = Quickedit_data_textbox;
             if (ie != null)
             {
+                //[簡單修改模式]方塊若不存在
+                if (waitFindWebElementBySelector_ToBeClickable("#data") == null)
+                {
+                    //[簡單修改模式]超連結
+                    if (waitFindWebElementBySelector_ToBeClickable("#quickedit > a") != null)
+                    {
+                        //按下[簡單修改模式]超連結
+                        waitFindWebElementBySelector_ToBeClickable("#quickedit > a").Click();
+                    }
+                    else
+                        return string.Empty;
+                    quickedit_data_textbox = waitFindWebElementBySelector_ToBeClickable("#data");
+                    ie = Quickedit_data_textbox;
+                }
                 if (ie.Text != string.Empty)
                 {
                     ie.SendKeys(OpenQA.Selenium.Keys.Control + "a");//會移動視窗焦點到文字方塊 ie（Quickedit_data_textbox）中
@@ -7164,7 +7178,7 @@ internal static string getImageUrl() {
 
                             throw;
                         }
-                        
+
                         iwe = waitFindWebElementBySelector_ToBeClickable("body > form > table > tbody > tr:nth-child(2) > td:nth-child(3) > center > table > tbody > tr:nth-child(2) > td > font");
                         if (iwe != null)
                         {
@@ -7342,9 +7356,15 @@ internal static string getImageUrl() {
             IWebElement iwe = waitFindWebElementBySelector_ToBeClickable("#content > div:nth-child(7) > div:nth-child(2) > a:nth-child(2)");
             if (iwe == null)
             {
-                Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("請開啟有效的圖文對照頁面");
                 driver.SwitchTo().Window(LastValidWindow);
-                return false;
+                //找到「編輯」超連結
+                iwe = waitFindWebElementBySelector_ToBeClickable("#content > div:nth-child(7) > div:nth-child(2) > a:nth-child(2)");
+                if (iwe == null)
+                {
+                    Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("請開啟有效的圖文對照頁面");
+                    return false;
+                }
+                editUrl = iwe.GetAttribute("href");
             }
             else
             {//取得「編輯」頁面的URL

@@ -2634,6 +2634,7 @@ namespace WindowsFormsApp1
                     }
                     else
                         character = new StringInfo(textBox1.SelectedText);
+                    if (character.LengthInTextElements < 2) return;
                     //br.driver.SwitchTo().Window(br.driver.CurrentWindowHandle);
                     string lastValidWindow = br.LastValidWindow;
                     ResetLastValidWindow();
