@@ -488,7 +488,7 @@ Err1:
 End Sub
 
 '貼到古籍酷自動標點()
-Function grabGjCoolPunctResult(Text As String, Optional Background As Boolean) As String
+Function grabGjCoolPunctResult(Text As String, resultText As String, Optional Background As Boolean) As String
     Const url = "https://gj.cool/punct"
     Dim wdB As SeleniumBasic.IWebDriver, WBQuit As Boolean '=true 則可以關Chrome瀏覽器
     Dim textBox As SeleniumBasic.IWebElement, btn As SeleniumBasic.IWebElement, btn2 As SeleniumBasic.IWebElement, item As SeleniumBasic.IWebElement
@@ -555,7 +555,13 @@ Function grabGjCoolPunctResult(Text As String, Optional Background As Boolean) A
     'Set btn = wdB.FindElementByCssSelector("#main > div.my-4 > div.p-1.p-md-3.d-flex.justify-content-end > div.ms-2 > button")
     Set btn = wdB.FindElementByCssSelector("#main > div > div.p-1.p-md-3.d-flex.justify-content-end > div:nth-child(6) > button") '20240710
     '即便是有chr(13)&chr(10)以下這行仍會使分段符號消失,故若要保持段落，仍須「Chr(13) & Chr(10) & Chr(13) & Chr(10)」二組分段符號，不能只有一個
-    btn.Click
+    If btn Is Nothing Then Stop
+    DoEvents
+    SystemSetup.wait 0.6
+    'btn.Click
+    Dim k As New SeleniumBasic.keys
+    btn.SendKeys k.Enter
+    SystemSetup.playSound 1.469
     '等待標點完成
     'SystemSetup.Wait 3.6
     
@@ -580,7 +586,8 @@ Function grabGjCoolPunctResult(Text As String, Optional Background As Boolean) A
         If Now > WaitDt Then
             'Exit Do '超過指定時間後離開
             grabGjCoolPunctResult = ""
-            wdB.Quit
+            'wdB.Quit
+            wdB.Close
             SystemSetup.playSound 1.469
             Exit Function
         End If
@@ -597,6 +604,7 @@ Function grabGjCoolPunctResult(Text As String, Optional Background As Boolean) A
     'SystemSetup.SetClipboard textbox.text
     'grabGjCoolPunctResult = SystemSetup.GetClipboardText
     grabGjCoolPunctResult = textBox.Text
+    resultText = grabGjCoolPunctResult
     If WBQuit = False Then
         wdB.Close
     Else

@@ -255,7 +255,8 @@ namespace WindowsFormsApp1
             //new Task(Action ).Wait(4500);
             if (Name == "Form1" && (br.driver != null || browsrOPMode != BrowserOPMode.appActivateByName))
             {
-                if (MessageBox.Show("本軟件即將關閉，也會同時關閉由其開啟的Chrome瀏覽器，若有沒儲存的資訊，請先儲存再按「確定」鈕繼續；否則請按「取消」", "", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning) == DialogResult.Cancel) { e.Cancel = true; return; }
+                //if (MessageBox.Show("本軟件即將關閉，也會同時關閉由其開啟的Chrome瀏覽器，若有沒儲存的資訊，請先儲存再按「確定」鈕繼續；否則請按「取消」", "", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning) == DialogResult.Cancel) { e.Cancel = true; return; }
+                if (MessageBoxShowOKCancelExclamationDefaultDesktopOnly("本軟件即將關閉，也會同時關閉由其開啟的Chrome瀏覽器，若有沒儲存的資訊，請先儲存再按「確定」鈕繼續；否則請按「取消」") == DialogResult.Cancel) { e.Cancel = true; return; }
                 else
                 {
 

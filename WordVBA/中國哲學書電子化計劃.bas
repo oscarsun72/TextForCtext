@@ -1615,7 +1615,7 @@ Sub 清除文本頁中的編號儲存格(rng As Range)
         For Each c In t.Range.Cells
             c.Select
             cx = c.Range.Text
-            If VBA.IsNumeric(VBA.left(cx, 1)) And InStr(cx, ChrW(160) & ChrW(47)) > 0 Then
+            If VBA.IsNumeric(VBA.left(cx, 1)) And InStr(cx, ChrW(160) & ChrW(47)) > 0 And c.Range.InlineShapes.Count = 0 And Len(cx) < 50 Then
                 c.Delete
             End If
         Next c

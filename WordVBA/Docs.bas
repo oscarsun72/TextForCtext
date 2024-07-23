@@ -818,11 +818,11 @@ Sub mark易學關鍵字()
     Dim searchedTerm, e, ur As UndoRecord, d As Document, clipBTxt As String, flgPaste As Boolean, xd As String, dSource As Document
     Dim strAutoCorrection, endDocOld As Long, rng As Range
     Dim punc As New punctuation
+    SystemSetup.playSound 0.484
     strAutoCorrection = Array("，〉", "〉，", "〈、", "〈", "〈。", "〈", "。〉", "〉", "〈：", "〈", "：〉", "〉", "〈，", "〈", "、〉", "〉")
     If InStr(ActiveDocument.path, "易學雜著文本") = 0 Then
         If MsgBox("目前文件為" + ActiveDocument.Name + "是否繼續？", vbExclamation + vbOKCancel) = vbCancel Then Exit Sub
     End If
-    SystemSetup.playSound 0.484
     Set dSource = ActiveDocument: If Not dSource.Saved Then dSource.Save
     Set rng = dSource.Range
     With rng.Find
@@ -835,16 +835,16 @@ Sub mark易學關鍵字()
         End If
     End With
     'If Documents.Count = 0 Then Documents.Add
-    'If Documents.Count = 0 Then Docs.空白的新文件
-    Set d = Docs.空白的新文件(False)
+    If Documents.Count = 0 Then Set d = Docs.空白的新文件(True)
     If ClipBoardOp.Is_ClipboardContainCtext_Note_InlinecommentColor Then
+        Set d = Docs.空白的新文件(False)
         中國哲學書電子化計劃.只保留正文注文_且注文前後加括弧 d
-        Set d = ActiveDocument
+        'Set d = ActiveDocument
         On Error GoTo eH:
         DoEvents
         d.Range.Cut
+        d.Close wdDoNotSaveChanges
     End If
-    d.Close wdDoNotSaveChanges
     
     'Set d = ActiveDocument
     Set d = dSource
@@ -875,13 +875,16 @@ Sub mark易學關鍵字()
         e = e + 1
     Next e
     searchedTerm = Array("易", "卦", "爻", "周易", "易經", "系辭", "繫辭", "擊辭", "擊詞", "繫詞", "說卦", "序卦", _
-        "卦序", "敘卦", "雜卦", "文言", "乾坤", "無咎", ChrW(26080) & "咎", "天咎", "元亨", "利貞", "史記", "九五", _
-        "六二", "上九", "上六", "九二", "九三", "六四", "筮", "夬", "〈乾〉", "〈坤〉", "乾、坤", "〈乾、坤〉" _
-            , "象曰", "象日", "象云", "象傳", "彖", _
-            "艮", "頤", "坎", "中孚", "兌", "蠱", "姤", _
+        "卦序", "敘卦", "雜卦", "文言", "乾坤", "元亨", "利貞", "史記", _
+        "筮", "夬", "〈乾〉", "〈坤〉", "乾、坤", "〈乾、坤〉", "噬嗑", "賁", _
+        "九五", "六二", "上九", "上六", "九二", "九三", "六四", _
+        "初六", "六三", "用九", _
+            "象曰", "象日", "象云", "象傳", "彖", _
+            "艮", "頤", "坎", "中孚", "兌", "蠱", "姤", "巽", "剝", "遯", "大壯", "明夷", _
             "老陰", "老陽", "少陰", "少陽", _
-            "咸恒", "咸恆", _
+            "咎", "咸恒", "咸恆", _
         ChrW(26080) & ChrW(-10171) & ChrW(-8522))  ', "", "", "", "" )
+    '"無咎", ChrW(26080) & "咎", "天咎",
     
     'If Selection.Type = wdSelectionIP Then
         Rem 判斷是否已含有該文本
@@ -1061,7 +1064,7 @@ eH:
         Case 5825 '物件已被刪除。
             GoTo exitSub
         Case Else
-            MsgBox Err.Number + Err.Description
+            MsgBox Err.Number & Err.Description
             Resume
     End Select
 End Sub
@@ -1205,6 +1208,7 @@ End Sub
 
 Sub 中國哲學書電子化計劃_只保留正文注文_且注文前後加括弧_貼到古籍酷自動標點()
 Dim ur As UndoRecord, d As Document, x As String, i As Long
+SystemSetup.playSound 0.484
 If (ActiveDocument.path <> "" And Not ActiveDocument.Saved) Then ActiveDocument.Save
 'If Documents.Count = 0 Then
 '    Set d = Docs.空白的新文件()
