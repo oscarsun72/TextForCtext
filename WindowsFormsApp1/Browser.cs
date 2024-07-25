@@ -292,6 +292,42 @@ namespace TextForCtext
             }
         }
         /// <summary>
+        /// 取得CTP網頁中的「編輯」（Edit)控制項
+        /// </summary>
+        internal static IWebElement Edit_Linkbox
+        {
+            get
+            {
+                IWebElement iwe= null;
+                if (Form1.IsValidUrl＿keyDownCtrlAdd(ActiveForm1.textBox3Text))
+                {
+                    iwe = waitFindWebElementBySelector_ToBeClickable("#content > div:nth-child(7) > div:nth-child(2) > a:nth-child(2)");
+                    //Edit_Linkbox = waitFindWebElementByName_ToBeClickable("#content > div:nth-child(7) > div:nth-child(2) > a:nth-child(2)", WebDriverWaitTimeSpan);
+                }
+                else
+                    return null;
+                return iwe;
+            }
+        }
+        /// <summary>
+        /// 取得CTP網頁中的「參考上下頁」（ check the adjacent pages）控制項
+        /// </summary>
+        internal static IWebElement CheckAdjacentPages_Linkbox
+        {
+            //get { return quickedit_data_textbox == null ? waitFindWebElementByName_ToBeClickable("data", WebDriverWaitTimeSpan) : quickedit_data_textbox; }
+            get
+            {
+                IWebElement iwe = null;
+                if (Form1.IsValidUrl＿keyDownCtrlAdd(ActiveForm1.textBox3Text))
+                {
+                    iwe = waitFindWebElementBySelector_ToBeClickable("#editor > a:nth-child(13)");
+                }
+                else
+                    return null;
+                return iwe;
+            }
+        }
+        /// <summary>
         /// 自動全選[Quick edit]的內容，方便有時候須用剪下貼上者
         /// </summary>
         /// <returns>成功則傳回true</returns>
@@ -1801,11 +1837,12 @@ namespace TextForCtext
                             goto default;
                         break;
                     default:
-                        Console.WriteLine(ex.HResult + ex.Message);
+                        ////Console.WriteLine(ex.HResult + ex.Message);
                         try
                         {
                             var hs = driver.WindowHandles;
-                            driver.SwitchTo().Window(driver.WindowHandles.Last());
+                            //driver.SwitchTo().Window(driver.WindowHandles.Last());
+                            driver.SwitchTo().Window(LastValidWindow);
                             driver.SwitchTo().NewWindow(tabOrwindow);
                         }
                         catch (Exception ex1)
@@ -1823,8 +1860,14 @@ namespace TextForCtext
                                         RestartDriver();
                                     }
                                     else if (ex1.Message.StartsWith("no such window"))
-                                        //可能是按下擴充功能故 20231228
+                                    //可能是按下擴充功能故 20231228
+                                    {
                                         SendKeys.SendWait("{esc}");
+                                        driver.SwitchTo().Window(driver.WindowHandles.Last());
+                                        LastValidWindow = driver.WindowHandles.Last();
+                                        driver.SwitchTo().NewWindow(tabOrwindow);
+                                    }
+
                                     else
                                         goto default;
                                     break;
@@ -6965,7 +7008,7 @@ internal static string getImageUrl() {
         {
             if (driver == null) return true;
             List<string> keywords = new List<string> { "易", "卦", "爻", "繫詞", "繫辭", "文言", "乾坤","元亨","利貞", "咎"
-                , "夬", "頤","巽","坎","兌","小畜","大畜","歸妹","明夷","同人","大有","豫","蠱","噬嗑","賁","剝","大過","小過","遯","大壯","睽","蹇","姤","萃","艮","渙","中孚","既濟","未濟"
+                , "夬", "頤","巽","坎","兌","小畜","大畜","歸妹","明夷","同人","大有","豫","蠱","噬嗑","賁","剝","大過","小過","遯","大壯","睽","暌","蹇","姤","萃","艮","渙","中孚","既濟","未濟"
                 ,"咸恆","老陰", "老陽", "少陰", "少陽"
                 ,"无妄", "彖", "象曰", "象傳", "象日", "象云","小象", "筮"
             ,"初九","九二","九三","九四","九五","上九","初六","六二","六三","六四","六五","上六"
@@ -7339,6 +7382,9 @@ internal static string getImageUrl() {
         /// <returns>成功則傳回true</returns>
         internal static bool DirectlyReplacingCharacters(StringInfo character)
         {
+            if (character.LengthInTextElements != 2) { Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("指定的字元長度不對！請檢查"); return false; }
+            if (character.SubstringByTextElements(0, 1) == character.SubstringByTextElements(1, 1)) { Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("所指定取代的字元相同，請重設！"); return false; }
+
             try
             {
                 if (LastValidWindow != driver.CurrentWindowHandle)
@@ -7353,16 +7399,25 @@ internal static string getImageUrl() {
 
             string editUrl = string.Empty;
             //找到「編輯」超連結
-            IWebElement iwe = waitFindWebElementBySelector_ToBeClickable("#content > div:nth-child(7) > div:nth-child(2) > a:nth-child(2)");
+            IWebElement iwe = Edit_Linkbox;//waitFindWebElementBySelector_ToBeClickable("#content > div:nth-child(7) > div:nth-child(2) > a:nth-child(2)");
             if (iwe == null)
             {
+                //iwe = driver.FindElement(By.XPath("//*[@id=\"content\"]/div[4]/div[2]/a[2]"));
+                //iwe = driver.FindElement(By.XPath("/html/body/div[2]/div[4]/div[2]/a[2]"));
+
                 driver.SwitchTo().Window(LastValidWindow);
                 //找到「編輯」超連結
-                iwe = waitFindWebElementBySelector_ToBeClickable("#content > div:nth-child(7) > div:nth-child(2) > a:nth-child(2)");
+                iwe = Edit_Linkbox;//waitFindWebElementBySelector_ToBeClickable("#content > div:nth-child(7) > div:nth-child(2) > a:nth-child(2)");
                 if (iwe == null)
                 {
-                    Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("請開啟有效的圖文對照頁面");
-                    return false;
+                    driver.SwitchTo().Window(driver.WindowHandles.Last());
+                    iwe = Edit_Linkbox;//waitFindWebElementBySelector_ToBeClickable("#content > div:nth-child(7) > div:nth-child(2) > a:nth-child(2)");
+                    if (iwe == null)
+                    {
+
+                        Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("請開啟有效的圖文對照頁面");
+                        return false;
+                    }
                 }
                 editUrl = iwe.GetAttribute("href");
             }
@@ -7392,7 +7447,27 @@ internal static string getImageUrl() {
             {
 
                 //開啟完整編輯頁面
-                openNewTabWindow();
+                //openNewTabWindow();
+                try
+                {
+                    driver.SwitchTo().NewWindow(WindowType.Tab);
+                }
+                catch (Exception)
+                {
+                    driver.SwitchTo().Window(LastValidWindow);
+                    try
+                    {
+                        driver.SwitchTo().NewWindow(WindowType.Tab);
+
+                    }
+                    catch (Exception)
+                    {
+                        driver.SwitchTo().Window(driver.WindowHandles.Last());
+                        //LastValidWindow = driver.WindowHandles.Last();
+                        driver.SwitchTo().NewWindow(WindowType.Tab);
+                    }
+
+                }
                 driver.Navigate().GoToUrl(editUrl);
 
                 //取代區中的「名稱」欄名
@@ -7418,16 +7493,28 @@ internal static string getImageUrl() {
                 }
             }
 
+            //「內容:」欄位文字方塊控制項
             iwe = waitFindWebElementBySelector_ToBeClickable("#data");
-            editUrl = iwe.Text.Replace(character.SubstringByTextElements(0, 1), character.SubstringByTextElements(1, 1));
+            if (iwe == null) { DirectlyReplacingCharactersPageWindowHandle = string.Empty; goto reOpenEdittab; }
+            //複製要編輯的文本
+            iwe.SendKeys(OpenQA.Selenium.Keys.Control + "a");//直接用 iwe.Text讀取，若要取代多個便不行
+            iwe.SendKeys(OpenQA.Selenium.Keys.Control + "c");
+            if (iwe.Text.Length > 200000)
+                Thread.Sleep(200);
+            //執行逕行取代
+            editUrl = Clipboard.GetText().Replace(character.SubstringByTextElements(0, 1), character.SubstringByTextElements(1, 1));
             try
             {
                 Clipboard.SetText(editUrl);
+                if (iwe.Text.Length > 200000)
+                    Thread.Sleep(200);
             }
             catch (Exception)
             {
             }
+            //清除原文本
             iwe.Clear();
+            //貼上已編輯的文本
             iwe.SendKeys(OpenQA.Selenium.Keys.Shift + OpenQA.Selenium.Keys.Insert);
 
 
@@ -7482,6 +7569,7 @@ internal static string getImageUrl() {
                 {
                     Visible = true
                 };
+                wordapp.Activate();
                 //ImproveGJcoolOCRMemoDoc = wordapp.Documents.Open("C:\\Users\\oscar\\Dropbox\\《古籍酷》AI OCR 待改進者隨記 感恩感恩　讚歎讚歎　南無阿彌陀佛.docx");
                 ImproveGJcoolOCRMemoDoc = wordapp.Documents.Open(f);
                 //ImproveGJcoolOCRMemoDoc = wordapp.Documents.Open("C:\\Users\\oscar\\Dropbox\\《古籍酷》AI%20OCR%20待改進者隨記%20感恩感恩　讚歎讚歎　南無阿彌陀佛.docx");

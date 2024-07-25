@@ -1781,10 +1781,11 @@ namespace WindowsFormsApp1
             { e.Handled = true; notes_a_line_all(false, true); return; }
             //以上三種皆可Alt + Shift + s :  所有小注文都不換行。
 
-            //Ctrl + Alt + k ： 在完整編輯頁面中直接取代文字。請將被取代+取代成之二字前後並置，並將其選取後（或在被取代之文字前放置插入點）再按下此組合鍵以執行直接取代 20240718
+
             if (e.Control && e.Alt && e.KeyCode == Keys.K)// 20240718
-            {
+            {//Ctrl + Alt + k ： 在完整編輯頁面中直接取代文字。請將被取代+取代成之二字前後並置，並將其選取後（或在被取代之文字前放置插入點）再按下此組合鍵以執行直接取代 20240718
                 e.Handled = true;
+                playSound(soundLike.press, true);
                 StringInfo character = new StringInfo(string.Empty); int s = textBox1.SelectionStart, l = 1;
                 if (textBox1.SelectionLength == 0)
                 {
@@ -1809,6 +1810,7 @@ namespace WindowsFormsApp1
                     //清除前一個要被取代的單字
                     undoRecord(); PauseEvents();
                     textBox1.SelectedText = character.SubstringByTextElements(1, 1);
+                    textBox1.Text = textBox1.Text.Replace(character.SubstringByTextElements(0, 1), character.SubstringByTextElements(1, 1));
                     ResumeEvents();
                     textBox1.Select(s, 0);
                 }
@@ -2619,6 +2621,7 @@ namespace WindowsFormsApp1
                 if (e.KeyCode == Keys.E)
                 {// Alt + e ：在完整編輯頁面中直接取代文字。請將被取代+取代成之二字前後並置，並將其選取後（或在被取代之文字前放置插入點）再按下此組合鍵以執行直接取代 20240718
                     e.Handled = true;
+                    playSound(soundLike.press, true);
                     StringInfo character = new StringInfo(string.Empty); int s = textBox1.SelectionStart, l = 1;
                     if (textBox1.SelectionLength == 0)
                     {
@@ -2634,7 +2637,6 @@ namespace WindowsFormsApp1
                     }
                     else
                         character = new StringInfo(textBox1.SelectedText);
-                    if (character.LengthInTextElements < 2) return;
                     //br.driver.SwitchTo().Window(br.driver.CurrentWindowHandle);
                     string lastValidWindow = br.LastValidWindow;
                     ResetLastValidWindow();
@@ -2644,6 +2646,7 @@ namespace WindowsFormsApp1
                         //清除前一個要被取代的單字
                         undoRecord(); PauseEvents();
                         textBox1.SelectedText = character.SubstringByTextElements(1, 1);
+                        textBox1.Text = textBox1.Text.Replace(character.SubstringByTextElements(0, 1), character.SubstringByTextElements(1, 1));
                         ResumeEvents();
                         textBox1.Select(s, 0);
                     }
@@ -9367,7 +9370,7 @@ namespace WindowsFormsApp1
             br.driver = br.driver ?? br.DriverNew();
             //取得所有現行窗體（分頁頁籤）
             System.Collections.ObjectModel.ReadOnlyCollection<string> tabWindowHandles = new ReadOnlyCollection<string>(new List<string>());
-            string currentWin = "";
+            string currentWin = ""; bool Edited = false;
             try
             {
                 tabWindowHandles = br.driver.WindowHandles;
@@ -9405,7 +9408,7 @@ namespace WindowsFormsApp1
                 //20230103 目前所知也只能用以下的笨方法了，雖然土，但管用。∴就不必上一行多此一舉了。感恩感恩　南無阿彌陀佛
                 //檢查driver物件是否為空
 
-                #region 先檢查是否有已開啟的編輯頁尚未送出儲存(因為許多異體字須一次取代，往往會打開一個chapter單位來edit) 其網址有「&action=editchapter」關鍵字，如：https://ctext.org/wiki.pl?if=en&chapter=687756&action=editchapter#12450
+                #region 先檢查是否有已開啟的「編輯」頁尚未送出儲存(因為許多異體字須一次取代，往往會打開一個chapter單位來edit) 其網址有「&action=editchapter」關鍵字，如：https://ctext.org/wiki.pl?if=en&chapter=687756&action=editchapter#12450
                 //mark:在版本netframework-4.8 之前的環境，好像無效（在母校華岡學習雲測試後的結果，似並不會執行這個檢查，該機唯有4.6.1版）
                 bool waitUpdate = false; string waitTabWindowHandles = "";
                 Task wait = Task.Run(async () =>
@@ -9498,6 +9501,7 @@ namespace WindowsFormsApp1
                 //如果有編輯送出，待完成後關閉該分頁視窗
                 if (waitUpdate && waitTabWindowHandles != "")
                 {
+                    Edited = true;
                     br.driver.SwitchTo().Window(waitTabWindowHandles); br.driver.Close();
                     if (br.DirectlyReplacingCharactersPageWindowHandle != string.Empty)
                         br.DirectlyReplacingCharactersPageWindowHandle = string.Empty;//重設；
@@ -9518,6 +9522,9 @@ namespace WindowsFormsApp1
             //{//檢查textbox3的值與現用網頁相同否
             if (currentWin != br.driver.CurrentWindowHandle)
                 br.driver.SwitchTo().Window(currentWin);
+            //如果存在「參考上下頁」控制項，則須刷新，否則會被前後頁的舊資料所干擾
+            if (br.CheckAdjacentPages_Linkbox != null && Edited)
+                br.driver.Navigate().Refresh(); 
             Task wait1 = Task.Run(() =>
             {
                 chkUrlIsTextBox3Text(tabWindowHandles, textBox3.Text);

@@ -9,7 +9,9 @@
 
 其他最新進度，詳鄙人此帖： [transferkit IPFS 永遠保存的電子文獻-藏富天下 暨《中國哲學書電子化計劃》愚所輸入完竣之諸本-任真的網路書房-千慮一得齋OnLine-觀死書齋原著及電子化文獻(不屑智慧財產權)歡迎多利用共玉于成](https://oscarsun72.blogspot.com/2022/02/transferkit-ipfs.html) 
 
-- 本軟件架構為以下三種操作模式：
+20240725：配合運用賢超法師[《古籍酷》AI](https://gj.cool/)或[《看典古籍》](https://kandianguji.com/)OCR輸入，將事半功倍也。感恩感恩　讚歎讚歎　南無阿彌陀佛。目前鄙人主要以sl（詳下） 模式在操作，技術已趨成熟穩定可用。阿彌陀佛
+
+- 本軟件架構為以下三種操作模式（目前本人主要以sl模式在操作）：
   - 在textbox2輸入「ap,」「sl,」「sg,」，可切換瀏覽操作模式設定：
     - ap,=appActivateByName
     - sl,=seleniumNew
