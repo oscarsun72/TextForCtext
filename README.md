@@ -190,6 +190,8 @@ Alt + Shift + F1 ：切換 textbox1 之字型： 切換支援 CJK - Ext 擴充�
 
 Ctrl + Shift + t 同Chrome瀏覽器 --還原最近關閉的頁籤
 
+Ctrl + Shift + p ： 逐頁瀏覽肉眼檢查空白頁，以免白跑OCR 20240727 執行 CheckBlankPagesBeforeOCR
+
 
 ### 在 textBox1 中按下以下組合鍵：
 

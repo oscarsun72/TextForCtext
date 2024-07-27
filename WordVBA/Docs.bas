@@ -1284,47 +1284,27 @@ End Sub
 
 '先要複製到剪貼簿
 Function 貼到古籍酷自動標點() As Boolean
-Dim x As String, result As String, resumeTimer As Byte
-On Error GoTo Err1
-x = SystemSetup.GetClipboard
-x = Replace(x, chr(0), "")
-If x = "" Then x = Selection
-result = SeleniumOP.grabGjCoolPunctResult(x, result)
-If result = "" Or result = x Then
-    DoEvents
-    貼到古籍酷自動標點SendKeys
-Else
-    '寫到剪貼簿
-    SystemSetup.SetClipboard result
-    '完成放音效
-    SystemSetup.playSound 1.469
-    貼到古籍酷自動標點 = True
-End If
-
-Exit Function
+    Dim x As String, result As String, resumeTimer As Byte
+    On Error GoTo Err1
+    x = SystemSetup.GetClipboard
+    x = Replace(x, chr(0), "")
+    If x = "" Then x = Selection
+    result = SeleniumOP.grabGjCoolPunctResult(x, result)
+    If result = "" Or result = x Then
+        DoEvents
+        貼到古籍酷自動標點SendKeys
+    Else
+        '寫到剪貼簿
+        SystemSetup.SetClipboard result
+        '完成放音效
+        SystemSetup.playSound 1.469
+        貼到古籍酷自動標點 = True
+    End If
+    
+    Exit Function
 Err1:
-    Select Case Err.Number
-        Case 49 'DLL 呼叫規格錯誤
-            resumeTimer = resumeTimer + 1
-            If resumeTimer > 2 Then
-                MsgBox Err.Description, vbCritical
-                SystemSetup.killchromedriverFromHere
-            Else
-                Resume
-            End If
-        Case 5 'https://www.google.com/search?q=vba+Err.Number+5&oq=vba+Err.Number+5&aqs=chrome..69i57j0i10i30j0i30l2j0i5i30.4768j0j7&sourceid=chrome&ie=UTF-8
-            SystemSetup.wait 1.5
-            resumeTimer = resumeTimer + 1
-            If resumeTimer > 2 Then
-                MsgBox Err.Description, vbCritical
-                SystemSetup.killchromedriverFromHere
-            Else
-                Resume
-            End If
-        Case 13
-            If InStr(Err.Description, "型態不符合") Then
-                SystemSetup.killchromedriverFromHere
-'                Stop
+        Select Case Err.Number
+            Case 49 'DLL 呼叫規格錯誤
                 resumeTimer = resumeTimer + 1
                 If resumeTimer > 2 Then
                     MsgBox Err.Description, vbCritical
@@ -1332,16 +1312,8 @@ Err1:
                 Else
                     Resume
                 End If
-            Else
-                MsgBox Err.Description, vbCritical
-                Stop
-    '           Resume
-            End If
-        Case -2146233088
-            If InStr(Err.Description, "disconnected: not connected to DevTools") Then '(failed to check if window was closed: disconnected: not connected to DevTools)
-                                                                                        '(Session info: chrome=110.0.5481.178)
-                SystemSetup.killchromedriverFromHere
-'                Stop
+            Case 5 'https://www.google.com/search?q=vba+Err.Number+5&oq=vba+Err.Number+5&aqs=chrome..69i57j0i10i30j0i30l2j0i5i30.4768j0j7&sourceid=chrome&ie=UTF-8
+                SystemSetup.wait 1.5
                 resumeTimer = resumeTimer + 1
                 If resumeTimer > 2 Then
                     MsgBox Err.Description, vbCritical
@@ -1349,21 +1321,49 @@ Err1:
                 Else
                     Resume
                 End If
-
-            Else
-                MsgBox Err.Description, vbCritical
-                SystemSetup.killchromedriverFromHere
-    '           Resume
-            End If
-        Case Else
-            If InStr(Err.Description, "no such window") Then
-                If Not WD Is Nothing Then Resume
-            Else
-                MsgBox Err.Description, vbCritical
-                SystemSetup.killchromedriverFromHere
-    '           Resume
-            End If
-    End Select
+            Case 13
+                If InStr(Err.Description, "型態不符合") Then
+                    SystemSetup.killchromedriverFromHere
+    '                Stop
+                    resumeTimer = resumeTimer + 1
+                    If resumeTimer > 2 Then
+                        MsgBox Err.Description, vbCritical
+                        SystemSetup.killchromedriverFromHere
+                    Else
+                        Resume
+                    End If
+                Else
+                    MsgBox Err.Description, vbCritical
+                    Stop
+        '           Resume
+                End If
+            Case -2146233088
+                If InStr(Err.Description, "disconnected: not connected to DevTools") Then '(failed to check if window was closed: disconnected: not connected to DevTools)
+                                                                                            '(Session info: chrome=110.0.5481.178)
+                    SystemSetup.killchromedriverFromHere
+    '                Stop
+                    resumeTimer = resumeTimer + 1
+                    If resumeTimer > 2 Then
+                        MsgBox Err.Description, vbCritical
+                        SystemSetup.killchromedriverFromHere
+                    Else
+                        Resume
+                    End If
+    
+                Else
+                    MsgBox Err.Description, vbCritical
+                    SystemSetup.killchromedriverFromHere
+        '           Resume
+                End If
+            Case Else
+                If InStr(Err.Description, "no such window") Then
+                    If Not WD Is Nothing Then Resume
+                Else
+                    MsgBox Err.Description, vbCritical
+                    SystemSetup.killchromedriverFromHere
+        '           Resume
+                End If
+        End Select
 
 End Function
 Sub 貼到古籍酷自動標點SendKeys()

@@ -557,7 +557,8 @@ Function grabGjCoolPunctResult(Text As String, resultText As String, Optional Ba
     '即便是有chr(13)&chr(10)以下這行仍會使分段符號消失,故若要保持段落，仍須「Chr(13) & Chr(10) & Chr(13) & Chr(10)」二組分段符號，不能只有一個
     If btn Is Nothing Then Stop
     DoEvents
-    SystemSetup.wait 0.6
+    wdB.SwitchTo().Window (wdB.CurrentWindowHandle)
+    SystemSetup.wait 0.9
     'btn.Click
     Dim k As New SeleniumBasic.keys
     btn.SendKeys k.Enter
@@ -578,6 +579,15 @@ Function grabGjCoolPunctResult(Text As String, resultText As String, Optional Ba
         If VBA.DateDiff("s", chkTxtTime, VBA.Now) > 1.5 Then
             nx = textBox.Text
             SystemSetup.playSound 1
+            '檢查如果沒有按到「標點」按鈕，就再次按下 20240725
+            If wdB.FindElementByCssSelector("#waitingSpinner") Is Nothing Then
+                btn.SendKeys k.Enter
+            Else
+                If wdB.FindElementByCssSelector("#waitingSpinner").Displayed = False And nx = Text Then
+                    btn.SendKeys k.Enter
+                    SystemSetup.playSound 1.469
+                End If
+            End If
             chkTxtTime = Now
             'VBA.StrComp(text, nx) <> 0
             If nx <> Text Then Exit Do

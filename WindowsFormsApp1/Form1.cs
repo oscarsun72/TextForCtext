@@ -7546,6 +7546,18 @@ namespace WindowsFormsApp1
                 return;
 
             }
+            //Ctrl + Shift + p ： 逐頁瀏覽肉眼檢查空白頁，以免白跑OCR 20240727 執行 CheckBlankPagesBeforeOCR
+            if (e.Control && e.Shift && e.KeyCode == Keys.P)
+            {
+                e.Handled = true;
+                if (br.driver == null) return;
+                string url = br.driver.Url;
+                if (url != textBox3.Text) textBox3.Text = url;
+                string input = br.Div_generic_IncludePathAndEndPageNum.GetAttribute("textContent");//"線上圖書館 -> 松煙小錄 -> 松煙小錄三  /117 ";
+                int stopPageNum = ExtractNumberAfterSlash(input);
+                CheckBlankPagesBeforeOCR(url, int.Parse(br.Page_textbox.GetAttribute("defaultValue")), stopPageNum);
+                return;
+            }
 
             //Ctrl + Shift + F1：選取範圍前後加上{{}}並清除分行/段符號
             if (e.Control && e.Shift && e.KeyCode == Keys.F1)
@@ -8036,26 +8048,16 @@ namespace WindowsFormsApp1
                 if (e.KeyCode == Keys.F9)
                 {//Alt + F9 : 在《漢籍全文資料庫》檢索易學關鍵字
                     e.Handled = true;
-                    //if(keyinTextMode)keyinTextMode = false;
-                    //if(autoPasteFromSBCKwhether)autoPasteFromSBCKwhether    = false;
-                    //if (autoPastetoQuickEdit) autoPastetoQuickEdit = false;
-                    if (keyinTextMode) KeyinTextmodeSwitcher();
-                    playSound(soundLike.press, true);
-                    while (true)
-                    {
-                        if (TopMost) TopMost = false;
-                        if (br.Hanchi_SearchingKeywordsYijing()) break;
-                    }
+                    doHanchi_SearchingKeywordsYijing();
                     return;
                 }
 
                 if (e.KeyCode == Keys.Oemcomma)
                 {//Alt + , : 在《漢籍全文資料庫》檢索易學關鍵字
                     e.Handled = true;
-                    playSound(soundLike.press, true);
-                    while (true)
-                        if (br.Hanchi_SearchingKeywordsYijing()) break;
+                    doHanchi_SearchingKeywordsYijing();
                     return;
+
                 }
 
                 if (e.KeyCode == Keys.F12)
@@ -8145,6 +8147,21 @@ namespace WindowsFormsApp1
             }//以上 按下單一鍵
             #endregion
         }
+
+        private void doHanchi_SearchingKeywordsYijing()
+        {
+            //if(keyinTextMode)keyinTextMode = false;
+            //if(autoPasteFromSBCKwhether)autoPasteFromSBCKwhether    = false;
+            //if (autoPastetoQuickEdit) autoPastetoQuickEdit = false;
+            if (keyinTextMode) KeyinTextmodeSwitcher();
+            playSound(soundLike.press, true);
+            while (true)
+            {
+                if (TopMost) TopMost = false;
+                if (br.Hanchi_SearchingKeywordsYijing()) break;
+            }
+        }
+
         /// <summary>
         /// 手動輸入模式切換用 20240719
         /// </summary>
@@ -8224,7 +8241,7 @@ namespace WindowsFormsApp1
             if (!justDownloadImage)
             {
                 #region 檢查是否必要 20230804Bard大菩薩：https://g.co/bard/share/9130d688e253            
-                string quickedit_data_textboxTxt = br.Quickedit_data_textboxTxt;
+                string quickedit_data_textboxTxt = br.Quickedit_data_textbox?.Text;//br.Quickedit_data_textboxTxt;
                 //bool chk = false;
                 //if (quickedit_data_textboxTxt.Length > 1000)
                 //{
@@ -8250,8 +8267,10 @@ namespace WindowsFormsApp1
                         return false;
                     }
                 }
-                else if ((br.Quickedit_data_textbox == null ? 0 : (new StringInfo(br.Quickedit_data_textbox?.Text)?.LengthInTextElements)) < (normalLineParaLength == 0 ? 20 : normalLineParaLength)
-                    && quickedit_data_textboxTxt != "\t")// 「	」"\t"是新建的維基文本故 20240405
+                //else if ((br.Quickedit_data_textbox == null ? 0 : (new StringInfo(br.Quickedit_data_textbox?.Text)?.LengthInTextElements)) < (normalLineParaLength == 0 ? 20 : normalLineParaLength)
+                //    && quickedit_data_textboxTxt != "\t")// 「	」"\t"是新建的維基文本故 20240405
+                else if ((quickedit_data_textboxTxt == null ? 0 : (new StringInfo(quickedit_data_textboxTxt)?.LengthInTextElements)) < (normalLineParaLength == 0 ? 20 : normalLineParaLength)
+                    && quickedit_data_textboxTxt != "\t" && quickedit_data_textboxTxt != " ")// 「	」"\t"是新建的維基文本故 20240405 "\t"會被Text屬性轉換成 " "
                 {
                     OCRBreakSoundNotification();
                     if (DialogResult.Cancel == Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("目前頁面內容似乎太短了，確定還要交給OCR嗎？" +
@@ -8682,6 +8701,56 @@ namespace WindowsFormsApp1
         int waitTimeforappActivateByName = 680;//1100;                                               
 
         private string quickedit_data_textboxtxt = "";
+
+        /// <summary>
+        /// 取得給定字串「/」後方的數字
+        /// 20240727 Copilot大菩薩：C# 字串處理：取出「/」後的數字
+        /// </summary>
+        /// <param name="input">所給定的字串</param>
+        /// <returns></returns>
+        /// <exception cref="Exception">出錯時顯示</exception>
+        static int ExtractNumberAfterSlash(string input)
+        {
+            // 使用正則表達式找到「/」後的數字
+            Match match = Regex.Match(input, @"/(\d+)");
+            if (match.Success)
+            {
+                // 將數字部分轉換為 int 型別
+                return int.Parse(match.Groups[1].Value);
+            }
+            else
+            {
+                throw new Exception("未找到數字");
+            }
+        }
+
+        /// <summary>
+        /// 為了OCR進程，事前檢查空白頁。自動翻頁
+        /// Ctrl + Shift + p ： 逐頁瀏覽肉眼檢查空白頁，以免白跑OCR 20240727
+        /// 按下 Ctrl 鍵中止（有時要配合對Chrome瀏覽器或對表單按下滑鼠左鍵一下
+        /// 20240727 Copilot大菩薩：使用 Selenium 自動瀏覽並檢查空白頁面
+        /// </summary>
+        /// <param name="url">要開啟瀏覽的頁面網址</param>
+        /// <param name="startPageNum">啟始頁碼</param>
+        /// <param name="stopPageNum">結束頁碼</param>
+        /// <returns></returns>
+        internal static bool CheckBlankPagesBeforeOCR(string url, int startPageNum, int stopPageNum)
+        {
+            if (!Form1.IsValidUrl＿ImageTextComparisonPage(url)) return false;
+            if (br.driver == null) return false;
+            string baseUrl = url.Substring(0, url.IndexOf("&page="));
+            for (int i = startPageNum + 1; i <= stopPageNum; i++)
+            {
+                //https://ctext.org/library.pl?if=gb&file=150025&page=59
+                string pageUrl = $"{baseUrl}&page={i}";
+                br.driver.Navigate().GoToUrl(pageUrl);
+                //if (MessageBoxShowOKCancelExclamationDefaultDesktopOnly("繼續下一頁？") == DialogResult.Cancel) break;
+                if (ModifierKeys == Keys.Control) break;
+                //Thread.Sleep(300);
+                while (br.waitFindWebElementBySelector_ToBeClickable("#canvas > svg") == null) { }
+            }
+            return true;
+        }
         /// <summary>
         /// 到下一頁
         /// </summary>
@@ -9524,7 +9593,7 @@ namespace WindowsFormsApp1
                 br.driver.SwitchTo().Window(currentWin);
             //如果存在「參考上下頁」控制項，則須刷新，否則會被前後頁的舊資料所干擾
             if (br.CheckAdjacentPages_Linkbox != null && Edited)
-                br.driver.Navigate().Refresh(); 
+                br.driver.Navigate().Refresh();
             Task wait1 = Task.Run(() =>
             {
                 chkUrlIsTextBox3Text(tabWindowHandles, textBox3.Text);

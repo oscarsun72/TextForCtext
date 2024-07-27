@@ -298,7 +298,7 @@ namespace TextForCtext
         {
             get
             {
-                IWebElement iwe= null;
+                IWebElement iwe = null;
                 if (Form1.IsValidUrl＿keyDownCtrlAdd(ActiveForm1.textBox3Text))
                 {
                     iwe = waitFindWebElementBySelector_ToBeClickable("#content > div:nth-child(7) > div:nth-child(2) > a:nth-child(2)");
@@ -321,6 +321,42 @@ namespace TextForCtext
                 if (Form1.IsValidUrl＿keyDownCtrlAdd(ActiveForm1.textBox3Text))
                 {
                     iwe = waitFindWebElementBySelector_ToBeClickable("#editor > a:nth-child(13)");
+                }
+                else
+                    return null;
+                return iwe;
+            }
+        }
+        /// <summary>
+        /// 取得CTP網頁中的「顯示頁碼，可輸入頁碼的」（page）控制項
+        /// </summary>
+        internal static IWebElement Page_textbox
+        {
+            //get { return quickedit_data_textbox == null ? waitFindWebElementByName_ToBeClickable("data", WebDriverWaitTimeSpan) : quickedit_data_textbox; }
+            get
+            {
+                IWebElement iwe = null;
+                if (Form1.IsValidUrl＿ImageTextComparisonPage(ActiveForm1.textBox3Text))
+                {
+                    iwe = waitFindWebElementBySelector_ToBeClickable("#content > div:nth-child(3) > form > input[type=text]:nth-child(3)");
+                }
+                else
+                    return null;
+                return iwe;
+            }
+        }
+        /// <summary>
+        /// 取得CTP網頁中的「顯示頁碼資訊的條幅」（page）控制項（以取得該書的末頁）
+        /// </summary>
+        internal static IWebElement Div_generic_IncludePathAndEndPageNum
+        {
+            //get { return quickedit_data_textbox == null ? waitFindWebElementByName_ToBeClickable("data", WebDriverWaitTimeSpan) : quickedit_data_textbox; }
+            get
+            {
+                IWebElement iwe = null;
+                if (Form1.IsValidUrl＿ImageTextComparisonPage(ActiveForm1.textBox3Text))
+                {
+                    iwe = waitFindWebElementBySelector_ToBeClickable("#content > div:nth-child(3)");
                 }
                 else
                     return null;
@@ -1823,6 +1859,7 @@ namespace TextForCtext
                 //LastValidWindow = driver.CurrentWindowHandle;
                 Form1.ResetLastValidWindow();
                 driver.SwitchTo().NewWindow(tabOrwindow);
+
             }
             catch (Exception ex)
             {
@@ -1865,7 +1902,16 @@ namespace TextForCtext
                                         SendKeys.SendWait("{esc}");
                                         driver.SwitchTo().Window(driver.WindowHandles.Last());
                                         LastValidWindow = driver.WindowHandles.Last();
-                                        driver.SwitchTo().NewWindow(tabOrwindow);
+                                        try
+                                        {
+                                            driver.SwitchTo().NewWindow(tabOrwindow);
+                                        }
+                                        catch (Exception)
+                                        {
+                                            //Copilot大菩薩 20240727：
+                                            ((IJavaScriptExecutor)driver).ExecuteScript("window.open();");
+                                            driver.SwitchTo().Window(driver.WindowHandles.Last());
+                                        }
                                     }
 
                                     else
@@ -2377,7 +2423,11 @@ internal static string getImageUrl() {
                 iwe = waitFindWebElementBySelector_ToBeClickable("#image-input");
             }
             while (!iwe.GetAttribute("value").Contains("Ctext_Page_Image.png")) { }
-            Thread.Sleep(300);
+            //Thread.Sleep(300);
+
+            //「文本排版方向」點選「豎排」：
+            iwe = waitFindWebElementBySelector_ToBeClickable("#sp");
+            iwe.Click();
 
             dt = DateTime.Now;
             //按下「開始識別」按鈕：
@@ -2405,14 +2455,32 @@ internal static string getImageUrl() {
             }
 
             dt = DateTime.Now;
-            while (iwe.GetAttribute("textContent") == "识别结果")
+            try
             {
-                if (DateTime.Now.Subtract(dt).TotalSeconds > 20)
-                    if (Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("等候OCR結果逾時，是否繼續？") == DialogResult.Cancel) { StopOCR = true; return false; }
+                while (iwe.GetAttribute("textContent") == "识别结果")
+                {
+                    if (DateTime.Now.Subtract(dt).TotalSeconds > 20)
+                        if (Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("等候OCR結果逾時，是否繼續？") == DialogResult.Cancel) { StopOCR = true; return false; }
+                }
+            }
+            catch (Exception ex)
+            {
+                Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
+                StopOCR = true; return false;
             }
 
             //選取OCR結果
-            string ocrResult = iwe.GetAttribute("textContent");
+            string ocrResult = string.Empty;
+            try
+            {
+                ocrResult = iwe.GetAttribute("textContent");
+            }
+            catch (Exception ex)
+            {
+                Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
+                StopOCR = true; return false;
+            }
+
             if (ocrResult.IsNullOrEmpty()) { StopOCR = true; return false; }
             ocrResult = ocrResult.Replace("  ", Environment.NewLine);
 
@@ -3949,9 +4017,9 @@ internal static string getImageUrl() {
             {
                 StopOCR = true; return false;
             }
-
         }
 
+        
         /// <summary>
         /// 20240420
         /// </summary>
@@ -7052,7 +7120,7 @@ internal static string getImageUrl() {
                 //20240719 Copilot大菩薩：C# Windows.Forms List 新增多個元素：您好，如果您想要在程式進行中對 List<string> 新增多個元素，可以使用 AddRange 方法。這是一個範例：
                 //keywords.Add();
                 List<string> additionalKeywords = new List<string> { "无𡚶", "𧰼", "系辭", "擊詞", "擊辭", "繫驟",
-                    "乹","〈乾〉", "〈坤〉", "〈乾坤〉", "咸恒","剥","頥","㢲",
+                    "乹","〈乾〉", "〈坤〉", "〈乾坤〉", "咸恒","剥","頥","㢲","旣濟",
                     "少隂","太隂",
                 "𥘉九","𭃨九","𭃡九","𥘉六","𭃨六","𭃡六"};
                 keywords.AddRange(additionalKeywords);
@@ -7133,6 +7201,11 @@ internal static string getImageUrl() {
             }
             else
             {//如果檢索《漢籍全文資料庫》
+
+                //【檢索報表】標籤控制項(關閉開啟的分頁）
+                while (null != waitFindWebElementBySelector_ToBeClickable("body > form > table > tbody > tr:nth-child(2) > td:nth-child(1) > font > b > nobr"))
+                { driver.Close(); driver.SwitchTo().Window(driver.WindowHandles.Last()); }
+
 
                 string caption = string.Empty;// iwe1 == null ? "漢籍全文資料庫" : "漢籍全文文本閱讀";
                 //文本閱讀中的查詢輸入方塊 <input type="text" name="hanji/fld00.33.810" size="30" maxlength="200">
@@ -7248,6 +7321,72 @@ internal static string getImageUrl() {
                                 //ActiveForm1.TopMost = false;//最後會有
                                 //driver.SwitchTo().Window(driver.WindowHandles.Last());
                                 //Browser.BringToFront("chrome");//最後會有
+
+                                ActiveForm1.AvailableInUseBothKeysMouse();
+
+                                Thread.Sleep(300);//等待開新視窗開啟（實測290還不行，最快也要300微秒）20240726
+                                driver.SwitchTo().Window(driver.WindowHandles.Last());
+                                //「附註開啟」:「註」開展控制項
+                                iwe = waitFindWebElementBySelector_ToBeClickable("body > form > table > tbody > tr:nth-child(2) > td:nth-child(2) > input[type=IMAGE]:nth-child(1)", 5);
+                                if (iwe != null)
+                                {
+                                    if (iwe.GetAttribute("title") == "附註開啟")
+                                    //按下「附註開啟」以展開小註
+                                    {
+                                        iwe.Click();
+                                        Form1.playSound(Form1.soundLike.done);
+                                    }
+
+                                }
+                                //else
+                                //{//檢查「_IMG_附註關閉」是否已出現：
+                                //    if (null == waitFindWebElementBySelector_ToBeClickable("body > form > table > tbody > tr:nth-child(2) > td:nth-child(2) > input[type=IMAGE]:nth-child(1)")) 
+                                //        Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("請檢查附註是否已開啟！");
+                                //}
+                                //else
+                                //{
+                                //    try
+                                //    {
+                                //        //iwe = driver.FindElement(By.Name("_IMG_附註開啟"));
+                                //        //iwe = driver.FindElement(By.Name("附註開啟"));
+                                //        iwe = waitFindWebElementByName_ToBeClickable("_IMG_附註開啟", 2);
+                                //    }
+                                //    catch (Exception ex)
+                                //    {
+                                //        Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
+                                //    }
+                                //    if (iwe != null)
+                                //    {
+                                //        if (iwe.GetAttribute("title") == "附註開啟")
+                                //        //按下「附註開啟」以展開小註
+                                //        {
+                                //            iwe.Click();
+                                //            Form1.playSound(Form1.soundLike.done);
+                                //        }
+                                //    }
+                                //    else
+                                //    {
+                                //        try
+                                //        {
+                                //            iwe = driver.FindElement(By.XPath("/html/body/form/table/tbody/tr[2]/td[2]/input[1]"));
+                                //        }
+                                //        catch (Exception ex)
+                                //        {
+                                //            Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
+                                //        }
+                                //        if (iwe != null)
+                                //        {
+                                //            if (iwe.GetAttribute("title") == "附註開啟")
+                                //            //按下「附註開啟」以展開小註
+                                //            {
+                                //                iwe.Click();
+                                //                Form1.playSound(Form1.soundLike.done);
+                                //            }
+                                //        }
+
+                                //    }
+                                //}
+
                             }
                         }
 
@@ -7270,7 +7409,7 @@ internal static string getImageUrl() {
                     //開始檢索
                     try
                     {
-                        driver.Manage().Timeouts().PageLoad = TimeSpan.FromSeconds(1); // 設定頁面載入超時時間為10秒
+                        driver.Manage().Timeouts().PageLoad = TimeSpan.FromSeconds(2); // 設定頁面載入超時時間為10秒
                                                                                        //var element = driver.FindElement(By.CssSelector("your_css_selector"));
                                                                                        //element.Click();
                         try
@@ -7414,9 +7553,46 @@ internal static string getImageUrl() {
                     iwe = Edit_Linkbox;//waitFindWebElementBySelector_ToBeClickable("#content > div:nth-child(7) > div:nth-child(2) > a:nth-child(2)");
                     if (iwe == null)
                     {
+                        driver.SwitchTo().Window(driver.WindowHandles.LastOrDefault());
+                        iwe = Edit_Linkbox;//waitFindWebElementBySelector_ToBeClickable("#content > div:nth-child(7) > div:nth-child(2) > a:nth-child(2)");
+                        if (iwe == null)
+                        {
+                            string url = ActiveForm1.textBox3Text;
+                            if (Form1.IsValidUrl＿ImageTextComparisonPage(url))
+                            {
+                                foreach (var item in driver.WindowHandles)
+                                {
+                                    if (driver.Url == url)
+                                    {
+                                        iwe = Edit_Linkbox;//waitFindWebElementBySelector_ToBeClickable("#content > div:nth-child(7) > div:nth-child(2) > a:nth-child(2)");
+                                        if (iwe == null)
+                                        {
+                                            Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("請開啟有效的圖文對照頁面");
+                                            return false;
+                                        }
+                                        else
+                                            break;
+                                    }
+                                }
+                                iwe = Edit_Linkbox;//waitFindWebElementBySelector_ToBeClickable("#content > div:nth-child(7) > div:nth-child(2) > a:nth-child(2)");
+                                if (iwe == null)
+                                {
+                                    Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("請開啟有效的圖文對照頁面");
+                                    return false;
+                                }
 
-                        Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("請開啟有效的圖文對照頁面");
-                        return false;
+                            }
+                            else
+                            {
+                                iwe = Edit_Linkbox;//waitFindWebElementBySelector_ToBeClickable("#content > div:nth-child(7) > div:nth-child(2) > a:nth-child(2)");
+                                if (iwe == null)
+                                {
+                                    Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("請開啟有效的圖文對照頁面");
+                                    return false;
+                                }
+                            }
+
+                        }
                     }
                 }
                 editUrl = iwe.GetAttribute("href");
