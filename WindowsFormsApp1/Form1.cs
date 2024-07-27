@@ -8747,7 +8747,12 @@ namespace WindowsFormsApp1
                 //if (MessageBoxShowOKCancelExclamationDefaultDesktopOnly("繼續下一頁？") == DialogResult.Cancel) break;
                 if (ModifierKeys == Keys.Control) break;
                 //Thread.Sleep(300);
-                while (br.waitFindWebElementBySelector_ToBeClickable("#canvas > svg") == null) { }
+                //while (br.waitFindWebElementBySelector_ToBeClickable("#canvas > svg") == null) { }
+                while (br.Svg_image_PageImageFrame == null) { }
+                if (br.Div_generic_TextBoxFrame == null)
+                    if (MessageBoxShowOKCancelExclamationDefaultDesktopOnly("是否終止/中斷？") == DialogResult.Cancel)
+                        break;
+
             }
             return true;
         }

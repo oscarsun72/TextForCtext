@@ -364,6 +364,42 @@ namespace TextForCtext
             }
         }
         /// <summary>
+        /// 取得CTP網頁中的「文本框」（圖文對照的文框）控制項
+        /// </summary>
+        internal static IWebElement Div_generic_TextBoxFrame
+        {
+            //get { return quickedit_data_textbox == null ? waitFindWebElementByName_ToBeClickable("data", WebDriverWaitTimeSpan) : quickedit_data_textbox; }
+            get
+            {
+                IWebElement iwe = null;
+                if (Form1.IsValidUrl＿ImageTextComparisonPage(ActiveForm1.textBox3Text))
+                {
+                    iwe = waitFindWebElementBySelector_ToBeClickable("#content > div:nth-child(7) > div:nth-child(1)");
+                }
+                else
+                    return null;
+                return iwe;
+            }
+        }
+        /// <summary>
+        /// 取得CTP網頁中的「書圖框」（圖文對照的圖框.svg）控制項
+        /// </summary>
+        internal static IWebElement Svg_image_PageImageFrame
+        {
+            //get { return quickedit_data_textbox == null ? waitFindWebElementByName_ToBeClickable("data", WebDriverWaitTimeSpan) : quickedit_data_textbox; }
+            get
+            {
+                IWebElement iwe = null;
+                if (Form1.IsValidUrl＿ImageTextComparisonPage(ActiveForm1.textBox3Text))
+                {
+                    iwe = waitFindWebElementBySelector_ToBeClickable("#canvas > svg");
+                }
+                else
+                    return null;
+                return iwe;
+            }
+        }
+        /// <summary>
         /// 自動全選[Quick edit]的內容，方便有時候須用剪下貼上者
         /// </summary>
         /// <returns>成功則傳回true</returns>
@@ -4019,7 +4055,7 @@ internal static string getImageUrl() {
             }
         }
 
-        
+
         /// <summary>
         /// 20240420
         /// </summary>
