@@ -509,7 +509,7 @@ namespace TextForCtext
 
         internal static bool HasEditedWithPunctuationMarks(ref string text)
         {
-            if (text.Length == 0) return false;
+            if (string.IsNullOrEmpty(text)) return false;
             if (text.Length > 1000)
             {
                 Regex regex = new Regex(@"\，|\。|\？|\！|\〈|\〉|\《|\》|\：|\『|\』|\「|\」|\􏿽|、|●|□|■|·|\*\*|\{\{\{|\}\}\}|\||〇|◯|　}}|\*　");

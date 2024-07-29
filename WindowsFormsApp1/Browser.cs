@@ -1084,10 +1084,60 @@ namespace TextForCtext
             #region 檢查網址
             if (url.IndexOf("edit") == -1 && driver.Url.IndexOf("edit") == -1) return;
 
-            if (url != driver.Url && driver.Url.IndexOf(url.Replace("editor", "box")) == -1)
-                // 使用driver導航到給定的URL
-                driver.Navigate().GoToUrl(url);
-            //("https://ctext.org/library.pl?if=en&file=79166&page=85&editwiki=297821#editor");//("http://www.example.com");
+            if (url != driver.Url)
+            {
+                if (driver.Url.IndexOf(url.Replace("editor", "box")) == -1)
+                    //if (url != driver.Url && driver.Url.IndexOf(url.Replace("editor", "box")) == -1)
+                    // 使用driver導航到給定的URL
+                    driver.Navigate().GoToUrl(url);
+                //("https://ctext.org/library.pl?if=en&file=79166&page=85&editwiki=297821#editor");//("http://www.example.com");
+
+                //Uri uri=new  Uri(url);
+
+                string urlShort = url.EndsWith("#editor") ? url.Substring(0, url.IndexOf("#editor")) : url;
+                if (Form1.IsValidUrl＿keyDownCtrlAdd(url) && Form1.IsValidUrl＿keyDownCtrlAdd(driver.Url) == false)
+                {
+                    bool found = false;
+                    foreach (var item in driver.WindowHandles)
+                    {
+                        driver.SwitchTo().Window(item);
+                        if (driver.Url.StartsWith(urlShort))
+                        {
+                            if (Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("是否是這個頁面要進行輸入？") == DialogResult.OK) { found = true; break; }
+
+                        }
+                    }
+                    if (!found)
+                    {
+                        Form1.playSound(Form1.soundLike.error, true);
+                        return;
+                    }
+                }
+                else if (Form1.IsValidUrl＿keyDownCtrlAdd(url) && Form1.IsValidUrl＿keyDownCtrlAdd(driver.Url))
+                {
+                    if (!driver.Url.StartsWith(urlShort))
+                    {
+                        bool found = false;
+                        foreach (var item in driver.WindowHandles)
+                        {
+                            driver.SwitchTo().Window(item);
+                            if (driver.Url.StartsWith(urlShort))
+                            {
+                                if (Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("是否是這個頁面要進行輸入？") == DialogResult.OK) { found = true; break; }
+
+                            }
+                        }
+                        if (!found)
+                        {
+                            Form1.playSound(Form1.soundLike.error, true);
+                            return;
+                        }
+                    }
+                }
+                else
+                    Debugger.Break();
+            }
+
             #endregion
 
             #region 查找名稱為"data"的文字框(textbox)或ID為"quickedit"的元件，須要用到元件者均不宜另跑線程。這些名稱，都由按下 F12 或 Ctrl + shift + i 開啟開發者模式中「Elements」分頁頁籤中取得
@@ -1944,6 +1994,8 @@ namespace TextForCtext
                                         }
                                         catch (Exception)
                                         {
+                                            Form1.playSound(Form1.soundLike.error, true);
+                                            Form1.playSound(Form1.soundLike.warn, true);
                                             //Copilot大菩薩 20240727：
                                             ((IJavaScriptExecutor)driver).ExecuteScript("window.open();");
                                             driver.SwitchTo().Window(driver.WindowHandles.Last());
@@ -7613,8 +7665,27 @@ internal static string getImageUrl() {
                                 iwe = Edit_Linkbox;//waitFindWebElementBySelector_ToBeClickable("#content > div:nth-child(7) > div:nth-child(2) > a:nth-child(2)");
                                 if (iwe == null)
                                 {
-                                    Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("請開啟有效的圖文對照頁面");
-                                    return false;
+                                    bool found = false;
+                                    if (Form1.IsValidUrl＿ImageTextComparisonPage(ActiveForm1.textBox3Text))
+                                    {
+                                        foreach (var item in driver.WindowHandles)
+                                        {
+                                            driver.SwitchTo().Window(item);
+                                            if (driver.Url == ActiveForm1.textBox3Text) { found = true; break; }
+                                        }
+                                    }
+                                    if (!found)
+                                    {
+                                        Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("請開啟有效的圖文對照頁面");
+                                        return false;
+                                    }
+                                    iwe = Edit_Linkbox;//waitFindWebElementBySelector_ToBeClickable("#content > div:nth-child(7) > div:nth-child(2) > a:nth-child(2)");
+                                    if (iwe == null)
+                                    {
+                                        Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("請開啟有效的圖文對照頁面");
+                                        return false;
+                                    }
+
                                 }
 
                             }

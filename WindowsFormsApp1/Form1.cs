@@ -6184,8 +6184,50 @@ namespace WindowsFormsApp1
             int s = textBox1.SelectionStart, l = textBox1.SelectionLength; string x = textBox1.Text; //今定義再置前
             bool _eventabled = _eventsEnabled;
             if (TopMost) TopMost = false;
-            if (!string.IsNullOrEmpty(br.LastValidWindow)) br.driver.SwitchTo().Window(br.LastValidWindow);
 
+            string url = textBox3.Text, urlShort = url.Substring(0, url.IndexOf("#editor") == -1 ? url.Length : url.IndexOf("#editor")), urlDriver = string.Empty;
+            try
+            {
+                urlDriver = br.driver.Url;
+
+            }
+            catch (Exception)
+            {
+                try
+                {
+                    br.driver.SwitchTo().Window(br.LastValidWindow);
+                    urlDriver = br.driver.Url;
+                }
+                catch (Exception)
+                {
+                    ResetLastValidWindow();
+                    br.driver.SwitchTo().Window(br.LastValidWindow);
+                    urlDriver = br.driver.Url;
+                }
+            }
+            if (!urlDriver.StartsWith(urlShort))
+            {
+                bool found = false;
+                foreach (var item in br.driver.WindowHandles)
+                {
+                    br.driver.SwitchTo().Window(item);
+                    if (br.driver.Url.StartsWith(urlShort))
+                    {
+                        found = true; break;
+                    }
+                }
+                if (!found)
+                {
+                    if (!string.IsNullOrEmpty(br.LastValidWindow))
+                    {
+                        br.driver.SwitchTo().Window(br.LastValidWindow);
+                        if (br.driver.Url != textBox3.Text)
+                            textBox3.Text = br.driver.Url;
+                    }
+                }
+                else
+                    br.LastValidWindow = br.driver.CurrentWindowHandle;
+            }
             #region 在手動編輯模式下（尤其是需要OCR時）的前置檢查
             if (keyinTextMode)
             {//如果是在手動輸入模式下：
@@ -6447,7 +6489,7 @@ namespace WindowsFormsApp1
                     break;
                 case BrowserOPMode.seleniumNew://純Selenium模式（2）
                                                //終於找到bug了 nextPage()裡的textBox3.Text=url 設定太晚
-                    string url = textBox3.Text;
+                    if (url != textBox3.Text) url = textBox3.Text;
                     //if (url.IndexOf("#editor") == -1 && url.IndexOf("&page=") == -1 && url.IndexOf("ctext.org") == -1)
                     string driverUrl = "";
                     try
@@ -7552,6 +7594,21 @@ namespace WindowsFormsApp1
                 e.Handled = true;
                 if (br.driver == null) return;
                 string url = br.driver.Url;
+                //檢查是否是可操作的頁面（分頁）
+                if (!IsValidUrl＿ImageTextComparisonPage(url))
+                {
+                    foreach (var item in br.driver.WindowHandles)
+                    {
+                        br.driver.SwitchTo().Window(item);
+                        url = br.driver.Url;
+                        if (IsValidUrl＿ImageTextComparisonPage(url))
+                            if (MessageBoxShowOKCancelExclamationDefaultDesktopOnly("是否是這個頁面？") == DialogResult.OK) break;
+                    }
+                    if (!IsValidUrl＿ImageTextComparisonPage(url))
+                    {
+                        MessageBoxShowOKExclamationDefaultDesktopOnly("請開啟要瀏覽檢查的頁面？"); return;
+                    }
+                }
                 if (url != textBox3.Text) textBox3.Text = url;
                 string input = br.Div_generic_IncludePathAndEndPageNum.GetAttribute("textContent");//"線上圖書館 -> 松煙小錄 -> 松煙小錄三  /117 ";
                 int stopPageNum = ExtractNumberAfterSlash(input);
@@ -8750,7 +8807,7 @@ namespace WindowsFormsApp1
                 //while (br.waitFindWebElementBySelector_ToBeClickable("#canvas > svg") == null) { }
                 while (br.Svg_image_PageImageFrame == null) { }
                 if (br.Div_generic_TextBoxFrame == null)
-                    if (MessageBoxShowOKCancelExclamationDefaultDesktopOnly("是否終止/中斷？") == DialogResult.Cancel)
+                    if (MessageBoxShowOKCancelExclamationDefaultDesktopOnly("是否終止/中斷？") == DialogResult.OK)
                         break;
 
             }
