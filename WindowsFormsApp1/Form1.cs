@@ -7602,7 +7602,11 @@ namespace WindowsFormsApp1
             //Ctrl + Shift + o 執行《看典古籍》OCR API
             if (e.Control && e.Shift && e.KeyCode == Keys.O)
             {
-                PerformOCR();
+                //await PerformOCR();
+                e.Handled = true;
+                playSound(soundLike.press,true);
+                toOCR(br.OCRSiteTitle.KanDianGuJiAPI);
+                return;
             }
             //Ctrl + Shift + p ： 逐頁瀏覽肉眼檢查空白頁，以免白跑OCR 20240727 執行 CheckBlankPagesBeforeOCR
             if (e.Control && e.Shift && e.KeyCode == Keys.P)
@@ -8447,6 +8451,13 @@ namespace WindowsFormsApp1
 
                         throw;
                     }
+                    break;
+                case br.OCRSiteTitle.KanDianGuJiAPI:
+                    //20240730 Copilot大菩薩：如果您不希望在呼叫端使用 await，您可以使用 Task.Result 或 Task.GetAwaiter().GetResult() 來獲取 Task 的結果。這兩種方法都會阻塞當前線程，直到 Task 完成。以下是一個範例：
+                    //bool ocrResult = PerformOCR().GetAwaiter().GetResult();
+                    //或者
+                    ocrResult = PerformOCR();
+                    //請注意，這種方法會阻塞當前線程，直到 PerformOCR 方法完成。如果 PerformOCR 方法需要花費很長時間，這可能會導致您的應用程式暫時無響應。因此，雖然這種方法可以避免將呼叫端方法變為異步，但它可能會降低您的應用程式的響應性。
                     break;
                 default:
                     break;
@@ -12392,19 +12403,29 @@ namespace WindowsFormsApp1
         #endregion
 
         #region 《看典古籍》OCR API
-        private async void PerformOCR()
+        private bool PerformOCR()
         {
             //string imageUrl = br.GetImageUrl();
             //string result = await _ocrClient.GetOCRResult(imageUrl);
-            string imagePath = string.Empty, result=string.Empty;
-            if (DownloadImage(br.GetImageUrl(), out imagePath))
-                result = await _ocrClient.GetOCRResult(imagePath);
+            string imagePath = MydocumentsPathIncldBackSlash + "CtextTempFiles\\Ctext_Page_Image.png", result = string.Empty;
+            //if (DownloadImage(br.GetImageUrl(), out imagePath))
+            DateTime dt = DateTime.Now;
+            while (!File.Exists(imagePath))
+            {
+                if (DateTime.Now.Subtract(dt).TotalSeconds > 30)
+                    if (MessageBoxShowOKCancelExclamationDefaultDesktopOnly("書圖下載尚未完成，是否繼續？") == DialogResult.Cancel)
+                        return false;
+            }
+            result = _ocrClient.GetOCRResult(imagePath);
 
-
-            // 在這裡處理OCR結果
-            Console.WriteLine(result);
-            Clipboard.SetText(result);
-
+            //Clipboard.Clear();
+            if (!result.IsNullOrEmpty())
+                // 在這裡處理OCR結果
+                //Console.WriteLine(result);
+                Clipboard.SetText(result);
+            else
+                return false;
+            return true;
         }
         #endregion
 

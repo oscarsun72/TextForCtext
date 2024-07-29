@@ -128,7 +128,7 @@ namespace TextForCtext
         /// <summary>
         /// 儲存常用的網站名
         /// </summary>
-        internal enum OCRSiteTitle { GoogleKeep, GJcool, KanDianGuJi }
+        internal enum OCRSiteTitle { GoogleKeep, GJcool, KanDianGuJi, KanDianGuJiAPI }
         /* chatGPT大菩薩：C# Enum Values：
          你的程式碼是可以運作的。這樣的實作方式會使得程式碼更具有可維護性和可擴展性。在需要使用網址時，只需要通過enum來訪問對應的網址，而不需要直接使用網址字符串。當需要添加、修改或刪除網址時，只需要更新Dictionary中的對應鍵值對即可，而不需要修改程式碼中的enum。
         孫守真
