@@ -123,6 +123,8 @@ Ctrl + F2 切換語音操作（預設為非 Windows 語音辨識 *Windows Speech
 
 Ctrl + Alt + i 顯示IP現狀訊息方塊
 
+Ctrl + Shift + o 執行《看典古籍》OCR API
+
 Ctrl + Shift + w 關閉 Chrome 網頁視窗
 
 Ctrl + Shift + \ 切換抬頭平抬格式設定（bool TopLine）

@@ -38,6 +38,17 @@ namespace WindowsFormsApp1
 
     public partial class Form1 : Form
     {
+
+        /// <summary>
+        /// 20240729 Copilot大菩薩：使用《看典古籍》OCR API的C#示例:
+        /// 這行程式碼 `private readonly OCRClient _ocrClient = new OCRClient();` 是在類別的層級（class level）上定義的。這意味著 `_ocrClient` 是 `Form1` 類別的一個實例變數（instance variable），它的生命週期與 `Form1` 的實例相同。
+        /// 將 `_ocrClient` 定義為實例變數有以下幾個好處：
+        /// 1. **可重用性**：在 `Form1` 類別的任何方法中，都可以使用 `_ocrClient`。如果我們在方法內部創建 `OCRClient` 的實例，那麼只能在該方法中使用它。
+        ///2. **效能**：由於 `_ocrClient` 在 `Form1` 的生命週期內只被創建一次，所以可以節省創建新實例的開銷。如果我們在每次需要時都在方法內部創建新的 `OCRClient` 實例，可能會浪費資源。
+        ///3. **一致性**：如果 `OCRClient` 有任何狀態（state），那麼在 `Form1` 的生命週期內，這些狀態將保持一致。如果我們在每次需要時都在方法內部創建新的 `OCRClient` 實例，那麼每個實例都將有自己的狀態，可能會導致不一致。
+        ///希望這個解釋能幫助您理解！如果您有任何其他問題，請隨時向我提問。祝您一切順利！南無阿彌陀佛。
+        /// </summary>
+        private readonly OCRClient _ocrClient = new OCRClient();
         /// <summary>
         /// 操作過程中靜音
         /// </summary>
@@ -7588,6 +7599,11 @@ namespace WindowsFormsApp1
                 return;
 
             }
+            //Ctrl + Shift + o 執行《看典古籍》OCR API
+            if (e.Control && e.Shift && e.KeyCode == Keys.O)
+            {
+                PerformOCR();
+            }
             //Ctrl + Shift + p ： 逐頁瀏覽肉眼檢查空白頁，以免白跑OCR 20240727 執行 CheckBlankPagesBeforeOCR
             if (e.Control && e.Shift && e.KeyCode == Keys.P)
             {
@@ -12374,6 +12390,24 @@ namespace WindowsFormsApp1
         }
 
         #endregion
+
+        #region 《看典古籍》OCR API
+        private async void PerformOCR()
+        {
+            //string imageUrl = br.GetImageUrl();
+            //string result = await _ocrClient.GetOCRResult(imageUrl);
+            string imagePath = string.Empty, result=string.Empty;
+            if (DownloadImage(br.GetImageUrl(), out imagePath))
+                result = await _ocrClient.GetOCRResult(imagePath);
+
+
+            // 在這裡處理OCR結果
+            Console.WriteLine(result);
+            Clipboard.SetText(result);
+
+        }
+        #endregion
+
 
     }
 }

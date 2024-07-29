@@ -134,6 +134,7 @@
     <Compile Include="KeyboardInfo.cs" />
     <Compile Include="Mdb.cs" />
     <Compile Include="MouseOperations.cs" />
+    <Compile Include="OCRClient.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="Form1.resx">
