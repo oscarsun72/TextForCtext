@@ -20,6 +20,8 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using TextForCtext;
 using WebSocketSharp;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.Button;
+
 
 //using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 //引用adodb 要將其「內嵌 Interop 類型」（Embed Interop Type）屬性設為false（預設是true）才不會出現以下錯誤：  HResult=0x80131522  Message=無法從組件 載入類型 'ADODB.FieldsToInternalFieldsMarshaler'。
@@ -2718,6 +2720,38 @@ namespace WindowsFormsApp1
 
                         //Task.Run(() => { br.ImproveGJcoolOCRMemo(); });//因為即使開新執行緒，但仍是用同一個表單！
                         Task.Run(() => { br.ImproveGJcoolOCRMemo(txtbox1SelText, url); });
+                        try
+                        {
+                            Clipboard.SetText(textBox1.Text);//通常改正後是要再重標點，如書名等 20240306
+                        }
+                        catch (Exception)
+                        {
+                            playSound(soundLike.error);
+                        }
+                        AvailableInUseBothKeysMouse();
+                    }
+                    return;
+                }                                
+                if (e.KeyCode == Keys.N)
+                {//Alt + n : 將選取的字詞句及其網址位址送到以下檔案的末後
+                    //> C:\Users\oscar\Dropbox\《看典古籍》OCR 待改進者隨記 感恩感恩 讚歎讚歎 南無阿彌陀佛                    
+                    e.Handled = true;
+                    overtypeModeSelectedTextSetting(ref textBox1);
+                    if (textBox1.SelectionLength > 0)
+                    {
+                        string txtbox1SelText = textBox1.SelectedText;
+                        //if (Math.Abs(isChineseChar(txtbox1SelText, false)) != 1 && "■□◯".IndexOf(txtbox1SelText) == -1) return;
+                        if (!IsChineseString(txtbox1SelText) && "■□◯".IndexOf(txtbox1SelText) == -1) return;
+                        //playSound(soundLike.press, true);
+                        Color clr = BackColor;
+                        BackColor = Color.Aqua;
+                        Refresh();//沒有這行還不行！20240709
+                        Thread.Sleep(9);
+                        BackColor = clr;
+                        string url = textBox3.Text;
+
+                        //Task.Run(() => { br.ImproveGJcoolOCRMemo(); });//因為即使開新執行緒，但仍是用同一個表單！
+                        Task.Run(() => { br.ImproveGJcoolOCRMemo(txtbox1SelText, url,"《看典古籍》"); });
                         try
                         {
                             Clipboard.SetText(textBox1.Text);//通常改正後是要再重標點，如書名等 20240306

@@ -35,11 +35,19 @@ namespace TextForCtext
             string tokenPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "CtextTempFiles", "OCRAPItoken.txt");
             string token = File.ReadAllText(tokenPath).Trim();
 
+            //var json = JsonConvert.SerializeObject(new
+            //{
+            //    token = token,
+            //    email = "oscarsun72@hotmail.com",
+            //    image = base64Image
+            //});
+            //20240730 Copilot大菩薩：您的理解是正確的！如果《看典古籍》OCR API接受一個名為 version 的參數，並且您希望設置其值為 “beta”，您可以將其添加到您序列化為 JSON 的物件中，就像您所示範的那樣。以下是修改後的程式碼：
             var json = JsonConvert.SerializeObject(new
             {
                 token = token,
                 email = "oscarsun72@hotmail.com",
-                image = base64Image
+                image = base64Image,
+                version = "beta"
             });
             request.Content = new StringContent(json, Encoding.UTF8, "application/json");
 

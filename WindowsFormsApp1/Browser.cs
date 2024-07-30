@@ -7832,7 +7832,7 @@ internal static string getImageUrl() {
         /// 20240212大年初三
         /// </summary>
         /// <param name="imporvement">要改進的字詞句（textBox1中被選取的字串）</param>
-        internal static void ImproveGJcoolOCRMemo(string imporvement, string url)
+        internal static void ImproveGJcoolOCRMemo(string imporvement, string url, string preName = "《古籍酷》AI ")
         {
             //TextBox tb = null;
             //if (ActiveForm1.InvokeRequired)
@@ -7843,7 +7843,7 @@ internal static string getImageUrl() {
             //if (!ActiveForm1.Controls["textBox1"].Focused) return;
             //tb = ActiveForm1.Controls["textBox1"] as TextBox;
             //if (tb.SelectionLength == 0) return;
-            string f = Path.Combine(Mdb.DropBoxPathIncldBackSlash, "《古籍酷》AI OCR 待改進者隨記 感恩感恩　讚歎讚歎　南無阿彌陀佛.docx");
+            string f = Path.Combine(Mdb.DropBoxPathIncldBackSlash, preName + "OCR 待改進者隨記 感恩感恩　讚歎讚歎　南無阿彌陀佛.docx");
             if (!File.Exists(f)) return;
             retry:
             if (ImproveGJcoolOCRMemoDoc == null)
