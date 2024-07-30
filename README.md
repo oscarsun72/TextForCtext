@@ -123,6 +123,8 @@ Ctrl + F2 切換語音操作（預設為非 Windows 語音辨識 *Windows Speech
 
 Ctrl + Alt + i 顯示IP現狀訊息方塊
 
+Ctrl + Shift + o 執行《看典古籍》OCR API
+
 Ctrl + Shift + w 關閉 Chrome 網頁視窗
 
 Ctrl + Shift + \ 切換抬頭平抬格式設定（bool TopLine）
@@ -277,6 +279,9 @@ Alt + j : 鍵入換行分段符號（newline）（同 Ctrl + j 的系統預設�
 
 Alt + k : 將選取的字詞句及其網址位址送到以下檔案的末後
 > C:\Users\oscar\Dropbox\《古籍酷》AI%20OCR%20待改進者隨記%20感恩感恩　讚歎讚歎　南無阿彌陀佛.docx
+
+Alt + n : 將選取的字詞句及其網址位址送到以下檔案的末後
+> C:\Users\oscar\Dropbox\《看典古籍》OCR 待改進者隨記 感恩感恩　讚歎讚歎　南無阿彌陀佛
 
 Alt + l : 檢查/輸入抬頭平抬時的條件：執行topLineFactorIuput04condition()
 
@@ -468,6 +473,12 @@ Ctrl+ 滑鼠左鍵：清除框中所有文字
 - 輸入「x,y」（x、y 為整數以半形逗號間隔，如「835,711」；請打好後用複製貼上的方式來輸入），指定《古籍酷》首頁快速體驗OCR的複製按鈕位置 Copybutton_GjcoolFastExperience_Location的 X 與 Y值
 
 - 輸入「lx」重設《漢籍全文資料庫》檢索易學關鍵字清單之索引值為0 即 ListIndex_Hanchi_SearchingKeywordsYijing=0。 
+
+- 在textBox2中輸入開關切換要整頁貼上Quick edit [簡單修改模式]  並將下一頁直接送交去OCR的網站
+   - kd：《看典古籍》 （kandianguji)
+   - kapi：《看典古籍》api
+   - df ：default 古籍酷
+
 
 
 ### 在 textBox3 網址資訊專用方塊框：

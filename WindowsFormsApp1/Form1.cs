@@ -20,6 +20,8 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using TextForCtext;
 using WebSocketSharp;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.Button;
+
 
 //using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 //引用adodb 要將其「內嵌 Interop 類型」（Embed Interop Type）屬性設為false（預設是true）才不會出現以下錯誤：  HResult=0x80131522  Message=無法從組件 載入類型 'ADODB.FieldsToInternalFieldsMarshaler'。
@@ -38,6 +40,17 @@ namespace WindowsFormsApp1
 
     public partial class Form1 : Form
     {
+
+        /// <summary>
+        /// 20240729 Copilot大菩薩：使用《看典古籍》OCR API的C#示例:
+        /// 這行程式碼 `private readonly OCRClient _ocrClient = new OCRClient();` 是在類別的層級（class level）上定義的。這意味著 `_ocrClient` 是 `Form1` 類別的一個實例變數（instance variable），它的生命週期與 `Form1` 的實例相同。
+        /// 將 `_ocrClient` 定義為實例變數有以下幾個好處：
+        /// 1. **可重用性**：在 `Form1` 類別的任何方法中，都可以使用 `_ocrClient`。如果我們在方法內部創建 `OCRClient` 的實例，那麼只能在該方法中使用它。
+        ///2. **效能**：由於 `_ocrClient` 在 `Form1` 的生命週期內只被創建一次，所以可以節省創建新實例的開銷。如果我們在每次需要時都在方法內部創建新的 `OCRClient` 實例，可能會浪費資源。
+        ///3. **一致性**：如果 `OCRClient` 有任何狀態（state），那麼在 `Form1` 的生命週期內，這些狀態將保持一致。如果我們在每次需要時都在方法內部創建新的 `OCRClient` 實例，那麼每個實例都將有自己的狀態，可能會導致不一致。
+        ///希望這個解釋能幫助您理解！如果您有任何其他問題，請隨時向我提問。祝您一切順利！南無阿彌陀佛。
+        /// </summary>
+        private readonly OCRClient _ocrClient = new OCRClient();
         /// <summary>
         /// 操作過程中靜音
         /// </summary>
@@ -110,6 +123,13 @@ namespace WindowsFormsApp1
         /// 直接貼入OCR結果，先不管版面行款排版、及是否有編輯標記
         /// </summary>
         internal bool PasteOcrResultFisrtMode = false;
+        /// <summary>
+        /// 在textBox2中輸入開關切換要整頁貼上Quick edit [簡單修改模式]  並將下一頁直接送交去OCR的網站
+        /// kd：《看典古籍》 （kandianguji)
+        /// kapi：《看典古籍》api
+        /// df ：default 古籍酷
+        /// </summary>
+        internal br.OCRSiteTitle PagePast2OCRsite = br.OCRSiteTitle.GJcool;
         /// <summary>
         /// 指定是否要在OCR讀入後自動標識標題語法標記
         /// </summary>
@@ -2719,6 +2739,38 @@ namespace WindowsFormsApp1
                     }
                     return;
                 }
+                if (e.KeyCode == Keys.N)
+                {//Alt + n : 將選取的字詞句及其網址位址送到以下檔案的末後
+                    //> C:\Users\oscar\Dropbox\《看典古籍》OCR 待改進者隨記 感恩感恩 讚歎讚歎 南無阿彌陀佛                    
+                    e.Handled = true;
+                    overtypeModeSelectedTextSetting(ref textBox1);
+                    if (textBox1.SelectionLength > 0)
+                    {
+                        string txtbox1SelText = textBox1.SelectedText;
+                        //if (Math.Abs(isChineseChar(txtbox1SelText, false)) != 1 && "■□◯".IndexOf(txtbox1SelText) == -1) return;
+                        if (!IsChineseString(txtbox1SelText) && "■□◯".IndexOf(txtbox1SelText) == -1) return;
+                        //playSound(soundLike.press, true);
+                        Color clr = BackColor;
+                        BackColor = Color.Aqua;
+                        Refresh();//沒有這行還不行！20240709
+                        Thread.Sleep(9);
+                        BackColor = clr;
+                        string url = textBox3.Text;
+
+                        //Task.Run(() => { br.ImproveGJcoolOCRMemo(); });//因為即使開新執行緒，但仍是用同一個表單！
+                        Task.Run(() => { br.ImproveGJcoolOCRMemo(txtbox1SelText, url, "《看典古籍》"); });
+                        try
+                        {
+                            Clipboard.SetText(textBox1.Text);//通常改正後是要再重標點，如書名等 20240306
+                        }
+                        catch (Exception)
+                        {
+                            playSound(soundLike.error);
+                        }
+                        AvailableInUseBothKeysMouse();
+                    }
+                    return;
+                }
                 /* Alt + l : 檢查/輸入抬頭平抬時的條件：執行topLineFactorIuput0condition()
                  *     > 目前只支援新增 condition=0 的情形，故名為 0condition，即當後綴是什麼時，此行文字雖短，不是分段，乃是平抬 
                  *     >> 0=後綴；1=前綴；2=前後之前；3前後之後；4是前+後之詞彙；5非前+後之詞彙；6非後綴之詞彙；7非前綴之詞彙*/
@@ -3195,12 +3247,13 @@ namespace WindowsFormsApp1
         /// <summary>
         /// 記錄程式執行是否在 pagePaste2GjcoolOCR 方法套用的堆疊（stack）裡
         /// </summary>
-        internal bool PagePaste2GjcoolOCR_ing = false;
+        internal bool PagePaste2GjcoolOCR_ing = false;        
         /// <summary>
         /// Ctrl + Shift + Alt + + 或 Ctrl + Alt + Shift + + （數字鍵盤加號） ： 同上，唯先將textBox1全選後再執行貼入；即按下此組合鍵則會並不會受插入點所在位置處影響。並翻到下一頁直接將它送去《古籍酷》OCR
         /// 或只按下F8
         /// 整頁貼上Quick edit [簡單修改模式]  並將下一頁直接送交《古籍酷》OCR
         /// 若欲中斷、不交去《古籍酷》OCR則須按下Ctrl
+        /// 20240730 新增《看典古籍》OCR API 功能
         /// </summary>
         /// <returns>執行失敗傳回false</returns>
         private bool pagePaste2GjcoolOCR()
@@ -3228,7 +3281,8 @@ namespace WindowsFormsApp1
                 if (ModifierKeys != Keys.Control)
                 {
                     playSound(soundLike.press);
-                    if (toOCR(br.OCRSiteTitle.GJcool))
+                    //if (toOCR(br.OCRSiteTitle.GJcool))
+                    if (toOCR(PagePast2OCRsite))
                         returnValue = true;
                     else
                         if (!Visible) Visible = true;
@@ -7588,6 +7642,15 @@ namespace WindowsFormsApp1
                 return;
 
             }
+            //Ctrl + Shift + o 執行《看典古籍》OCR API
+            if (e.Control && e.Shift && e.KeyCode == Keys.O)
+            {
+                //await PerformOCR();
+                e.Handled = true;
+                playSound(soundLike.press, true);
+                toOCR(br.OCRSiteTitle.KanDianGuJiAPI);
+                return;
+            }
             //Ctrl + Shift + p ： 逐頁瀏覽肉眼檢查空白頁，以免白跑OCR 20240727 執行 CheckBlankPagesBeforeOCR
             if (e.Control && e.Shift && e.KeyCode == Keys.P)
             {
@@ -8431,6 +8494,13 @@ namespace WindowsFormsApp1
 
                         throw;
                     }
+                    break;
+                case br.OCRSiteTitle.KanDianGuJiAPI:
+                    //20240730 Copilot大菩薩：如果您不希望在呼叫端使用 await，您可以使用 Task.Result 或 Task.GetAwaiter().GetResult() 來獲取 Task 的結果。這兩種方法都會阻塞當前線程，直到 Task 完成。以下是一個範例：
+                    //bool ocrResult = PerformOCR().GetAwaiter().GetResult();
+                    //或者
+                    ocrResult = PerformOCR();
+                    //請注意，這種方法會阻塞當前線程，直到 PerformOCR 方法完成。如果 PerformOCR 方法需要花費很長時間，這可能會導致您的應用程式暫時無響應。因此，雖然這種方法可以避免將呼叫端方法變為異步，但它可能會降低您的應用程式的響應性。
                     break;
                 default:
                     break;
@@ -9651,8 +9721,8 @@ namespace WindowsFormsApp1
             }
             //else//不是在手動鍵入時
             //{//檢查textbox3的值與現用網頁相同否
-            if (currentWin != br.driver.CurrentWindowHandle)
-                br.driver.SwitchTo().Window(currentWin);
+            //if (currentWin != br.driver.CurrentWindowHandle)
+            br.driver.SwitchTo().Window(currentWin);
             //如果存在「參考上下頁」控制項，則須刷新，否則會被前後頁的舊資料所干擾
             if (br.CheckAdjacentPages_Linkbox != null && Edited)
                 br.driver.Navigate().Refresh();
@@ -10847,6 +10917,25 @@ namespace WindowsFormsApp1
                     PauseEvents();
                     textBox2.Text = "";
                     ResumeEvents(); return;
+                /// 在textBox2中輸入開關切換要整頁貼上Quick edit [簡單修改模式]  並將下一頁直接送交去OCR的網站
+                /// kd：《看典古籍》 （kandianguji)
+                /// kdapi：《看典古籍》api
+                /// df ：default 古籍酷
+                case "kd"://《看典古籍》OCR網頁
+                    PagePast2OCRsite = br.OCRSiteTitle.KanDianGuJi;
+                    PauseEvents();
+                    textBox2.Text = "";
+                    ResumeEvents(); return;
+                case "kapi"://《看典古籍》api
+                    PagePast2OCRsite = br.OCRSiteTitle.KanDianGuJiAPI;
+                    PauseEvents();
+                    textBox2.Text = "";
+                    ResumeEvents(); return;
+                case "df"://default 古籍酷
+                    PagePast2OCRsite = br.OCRSiteTitle.GJcool;
+                    PauseEvents();
+                    textBox2.Text = "";
+                    ResumeEvents(); return;
                 default:
                     break;
             }
@@ -10898,6 +10987,7 @@ namespace WindowsFormsApp1
                     goto ap;
                 case "sl,":
                 sl: browsrOPMode = BrowserOPMode.seleniumNew;
+                    PauseEvents();textBox2.Text = string.Empty;ResumeEvents();
                     //第一次開啟Chrome瀏覽器，或前有未關閉的瀏覽器時
                     if (br.driver == null)
                         br.driver = br.DriverNew();//不用Task.Run()包裹也成了
@@ -10932,9 +11022,9 @@ namespace WindowsFormsApp1
                                 throw;
                         }
                     }
-                    PauseEvents();
-                    textBox2.Text = "";
-                    ResumeEvents();
+                    //PauseEvents();
+                    //textBox2.Text = "";
+                    //ResumeEvents();
                     return;
                 case "br":
                     goto sl;
@@ -12374,6 +12464,34 @@ namespace WindowsFormsApp1
         }
 
         #endregion
+
+        #region 《看典古籍》OCR API
+        private bool PerformOCR()
+        {
+            //string imageUrl = br.GetImageUrl();
+            //string result = await _ocrClient.GetOCRResult(imageUrl);
+            string imagePath = MydocumentsPathIncldBackSlash + "CtextTempFiles\\Ctext_Page_Image.png", result = string.Empty;
+            //if (DownloadImage(br.GetImageUrl(), out imagePath))
+            DateTime dt = DateTime.Now;
+            while (!File.Exists(imagePath))
+            {
+                if (DateTime.Now.Subtract(dt).TotalSeconds > 30)
+                    if (MessageBoxShowOKCancelExclamationDefaultDesktopOnly("書圖下載尚未完成，是否繼續？") == DialogResult.Cancel)
+                        return false;
+            }
+            result = _ocrClient.GetOCRResult(imagePath);
+
+            //Clipboard.Clear();
+            if (!result.IsNullOrEmpty())
+                // 在這裡處理OCR結果
+                //Console.WriteLine(result);
+                Clipboard.SetText(result);
+            else
+                return false;
+            return true;
+        }
+        #endregion
+
 
     }
 }

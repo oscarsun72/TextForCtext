@@ -30,6 +30,7 @@ using WindowsFormsApp1;
 //using static System.Net.Mime.MediaTypeNames;
 using forms = System.Windows.Forms;
 using selm = OpenQA.Selenium;
+using ADODB;
 
 
 namespace TextForCtext
@@ -128,7 +129,7 @@ namespace TextForCtext
         /// <summary>
         /// 儲存常用的網站名
         /// </summary>
-        internal enum OCRSiteTitle { GoogleKeep, GJcool, KanDianGuJi }
+        internal enum OCRSiteTitle { GoogleKeep, GJcool, KanDianGuJi, KanDianGuJiAPI }
         /* chatGPT大菩薩：C# Enum Values：
          你的程式碼是可以運作的。這樣的實作方式會使得程式碼更具有可維護性和可擴展性。在需要使用網址時，只需要通過enum來訪問對應的網址，而不需要直接使用網址字符串。當需要添加、修改或刪除網址時，只需要更新Dictionary中的對應鍵值對即可，而不需要修改程式碼中的enum。
         孫守真
@@ -7832,7 +7833,7 @@ internal static string getImageUrl() {
         /// 20240212大年初三
         /// </summary>
         /// <param name="imporvement">要改進的字詞句（textBox1中被選取的字串）</param>
-        internal static void ImproveGJcoolOCRMemo(string imporvement, string url)
+        internal static void ImproveGJcoolOCRMemo(string imporvement, string url, string preName = "《古籍酷》AI ")
         {
             //TextBox tb = null;
             //if (ActiveForm1.InvokeRequired)
@@ -7843,7 +7844,7 @@ internal static string getImageUrl() {
             //if (!ActiveForm1.Controls["textBox1"].Focused) return;
             //tb = ActiveForm1.Controls["textBox1"] as TextBox;
             //if (tb.SelectionLength == 0) return;
-            string f = Path.Combine(Mdb.DropBoxPathIncldBackSlash, "《古籍酷》AI OCR 待改進者隨記 感恩感恩　讚歎讚歎　南無阿彌陀佛.docx");
+            string f = Path.Combine(Mdb.DropBoxPathIncldBackSlash, preName + "OCR 待改進者隨記 感恩感恩　讚歎讚歎　南無阿彌陀佛.docx");
             if (!File.Exists(f)) return;
             retry:
             if (ImproveGJcoolOCRMemoDoc == null)
@@ -7856,8 +7857,18 @@ internal static string getImageUrl() {
                 //ImproveGJcoolOCRMemoDoc = wordapp.Documents.Open("C:\\Users\\oscar\\Dropbox\\《古籍酷》AI OCR 待改進者隨記 感恩感恩　讚歎讚歎　南無阿彌陀佛.docx");
                 ImproveGJcoolOCRMemoDoc = wordapp.Documents.Open(f);
                 //ImproveGJcoolOCRMemoDoc = wordapp.Documents.Open("C:\\Users\\oscar\\Dropbox\\《古籍酷》AI%20OCR%20待改進者隨記%20感恩感恩　讚歎讚歎　南無阿彌陀佛.docx");
-                ImproveGJcoolOCRMemoDoc.ActiveWindow.Selection.EndKey(Microsoft.Office.Interop.Word.WdUnits.wdStory);
+                //ImproveGJcoolOCRMemoDoc.ActiveWindow.Selection.EndKey(Microsoft.Office.Interop.Word.WdUnits.wdStory);
             }
+            else
+            {
+                if (!ImproveGJcoolOCRMemoDoc.Name.StartsWith(preName))
+                {
+                    Microsoft.Office.Interop.Word.Application wordapp = ImproveGJcoolOCRMemoDoc.Application;
+                    ImproveGJcoolOCRMemoDoc.Close(Microsoft.Office.Interop.Word.WdSaveOptions.wdDoNotSaveChanges);
+                    ImproveGJcoolOCRMemoDoc = wordapp.Documents.Open(f);
+                }
+            }
+            ImproveGJcoolOCRMemoDoc.ActiveWindow.Selection.EndKey(Microsoft.Office.Interop.Word.WdUnits.wdStory);
             try
             {
                 string lnk = GetPageUrlKeywordLink(imporvement, url);
