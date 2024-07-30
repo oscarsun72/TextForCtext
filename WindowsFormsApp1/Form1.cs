@@ -124,6 +124,13 @@ namespace WindowsFormsApp1
         /// </summary>
         internal bool PasteOcrResultFisrtMode = false;
         /// <summary>
+        /// 在textBox2中輸入開關切換要整頁貼上Quick edit [簡單修改模式]  並將下一頁直接送交去OCR的網站
+        /// kd：《看典古籍》 （kandianguji)
+        /// kapi：《看典古籍》api
+        /// df ：default 古籍酷
+        /// </summary>
+        internal br.OCRSiteTitle PagePast2OCRsite = br.OCRSiteTitle.GJcool;
+        /// <summary>
         /// 指定是否要在OCR讀入後自動標識標題語法標記
         /// </summary>
         bool autoTitleMark_OCRTextMode = false;
@@ -2731,7 +2738,7 @@ namespace WindowsFormsApp1
                         AvailableInUseBothKeysMouse();
                     }
                     return;
-                }                                
+                }
                 if (e.KeyCode == Keys.N)
                 {//Alt + n : 將選取的字詞句及其網址位址送到以下檔案的末後
                     //> C:\Users\oscar\Dropbox\《看典古籍》OCR 待改進者隨記 感恩感恩 讚歎讚歎 南無阿彌陀佛                    
@@ -2751,7 +2758,7 @@ namespace WindowsFormsApp1
                         string url = textBox3.Text;
 
                         //Task.Run(() => { br.ImproveGJcoolOCRMemo(); });//因為即使開新執行緒，但仍是用同一個表單！
-                        Task.Run(() => { br.ImproveGJcoolOCRMemo(txtbox1SelText, url,"《看典古籍》"); });
+                        Task.Run(() => { br.ImproveGJcoolOCRMemo(txtbox1SelText, url, "《看典古籍》"); });
                         try
                         {
                             Clipboard.SetText(textBox1.Text);//通常改正後是要再重標點，如書名等 20240306
@@ -3240,12 +3247,13 @@ namespace WindowsFormsApp1
         /// <summary>
         /// 記錄程式執行是否在 pagePaste2GjcoolOCR 方法套用的堆疊（stack）裡
         /// </summary>
-        internal bool PagePaste2GjcoolOCR_ing = false;
+        internal bool PagePaste2GjcoolOCR_ing = false;        
         /// <summary>
         /// Ctrl + Shift + Alt + + 或 Ctrl + Alt + Shift + + （數字鍵盤加號） ： 同上，唯先將textBox1全選後再執行貼入；即按下此組合鍵則會並不會受插入點所在位置處影響。並翻到下一頁直接將它送去《古籍酷》OCR
         /// 或只按下F8
         /// 整頁貼上Quick edit [簡單修改模式]  並將下一頁直接送交《古籍酷》OCR
         /// 若欲中斷、不交去《古籍酷》OCR則須按下Ctrl
+        /// 20240730 新增《看典古籍》OCR API 功能
         /// </summary>
         /// <returns>執行失敗傳回false</returns>
         private bool pagePaste2GjcoolOCR()
@@ -3273,7 +3281,8 @@ namespace WindowsFormsApp1
                 if (ModifierKeys != Keys.Control)
                 {
                     playSound(soundLike.press);
-                    if (toOCR(br.OCRSiteTitle.GJcool))
+                    //if (toOCR(br.OCRSiteTitle.GJcool))
+                    if (toOCR(PagePast2OCRsite))
                         returnValue = true;
                     else
                         if (!Visible) Visible = true;
@@ -7638,7 +7647,7 @@ namespace WindowsFormsApp1
             {
                 //await PerformOCR();
                 e.Handled = true;
-                playSound(soundLike.press,true);
+                playSound(soundLike.press, true);
                 toOCR(br.OCRSiteTitle.KanDianGuJiAPI);
                 return;
             }
@@ -9712,8 +9721,8 @@ namespace WindowsFormsApp1
             }
             //else//不是在手動鍵入時
             //{//檢查textbox3的值與現用網頁相同否
-            if (currentWin != br.driver.CurrentWindowHandle)
-                br.driver.SwitchTo().Window(currentWin);
+            //if (currentWin != br.driver.CurrentWindowHandle)
+            br.driver.SwitchTo().Window(currentWin);
             //如果存在「參考上下頁」控制項，則須刷新，否則會被前後頁的舊資料所干擾
             if (br.CheckAdjacentPages_Linkbox != null && Edited)
                 br.driver.Navigate().Refresh();
@@ -10908,6 +10917,25 @@ namespace WindowsFormsApp1
                     PauseEvents();
                     textBox2.Text = "";
                     ResumeEvents(); return;
+                /// 在textBox2中輸入開關切換要整頁貼上Quick edit [簡單修改模式]  並將下一頁直接送交去OCR的網站
+                /// kd：《看典古籍》 （kandianguji)
+                /// kdapi：《看典古籍》api
+                /// df ：default 古籍酷
+                case "kd"://《看典古籍》OCR網頁
+                    PagePast2OCRsite = br.OCRSiteTitle.KanDianGuJi;
+                    PauseEvents();
+                    textBox2.Text = "";
+                    ResumeEvents(); return;
+                case "kapi"://《看典古籍》api
+                    PagePast2OCRsite = br.OCRSiteTitle.KanDianGuJiAPI;
+                    PauseEvents();
+                    textBox2.Text = "";
+                    ResumeEvents(); return;
+                case "df"://default 古籍酷
+                    PagePast2OCRsite = br.OCRSiteTitle.GJcool;
+                    PauseEvents();
+                    textBox2.Text = "";
+                    ResumeEvents(); return;
                 default:
                     break;
             }
@@ -10959,6 +10987,7 @@ namespace WindowsFormsApp1
                     goto ap;
                 case "sl,":
                 sl: browsrOPMode = BrowserOPMode.seleniumNew;
+                    PauseEvents();textBox2.Text = string.Empty;ResumeEvents();
                     //第一次開啟Chrome瀏覽器，或前有未關閉的瀏覽器時
                     if (br.driver == null)
                         br.driver = br.DriverNew();//不用Task.Run()包裹也成了
@@ -10993,9 +11022,9 @@ namespace WindowsFormsApp1
                                 throw;
                         }
                     }
-                    PauseEvents();
-                    textBox2.Text = "";
-                    ResumeEvents();
+                    //PauseEvents();
+                    //textBox2.Text = "";
+                    //ResumeEvents();
                     return;
                 case "br":
                     goto sl;

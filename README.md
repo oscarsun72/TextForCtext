@@ -474,6 +474,12 @@ Ctrl+ 滑鼠左鍵：清除框中所有文字
 
 - 輸入「lx」重設《漢籍全文資料庫》檢索易學關鍵字清單之索引值為0 即 ListIndex_Hanchi_SearchingKeywordsYijing=0。 
 
+- 在textBox2中輸入開關切換要整頁貼上Quick edit [簡單修改模式]  並將下一頁直接送交去OCR的網站
+   - kd：《看典古籍》 （kandianguji)
+   - kapi：《看典古籍》api
+   - df ：default 古籍酷
+
+
 
 ### 在 textBox3 網址資訊專用方塊框：
 - 拖曳網址在 textBox3 或 textBox1 上放開，則會讀入所拖曳的網址值給 textBox3

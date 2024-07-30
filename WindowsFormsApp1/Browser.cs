@@ -30,6 +30,7 @@ using WindowsFormsApp1;
 //using static System.Net.Mime.MediaTypeNames;
 using forms = System.Windows.Forms;
 using selm = OpenQA.Selenium;
+using ADODB;
 
 
 namespace TextForCtext
@@ -7856,8 +7857,18 @@ internal static string getImageUrl() {
                 //ImproveGJcoolOCRMemoDoc = wordapp.Documents.Open("C:\\Users\\oscar\\Dropbox\\《古籍酷》AI OCR 待改進者隨記 感恩感恩　讚歎讚歎　南無阿彌陀佛.docx");
                 ImproveGJcoolOCRMemoDoc = wordapp.Documents.Open(f);
                 //ImproveGJcoolOCRMemoDoc = wordapp.Documents.Open("C:\\Users\\oscar\\Dropbox\\《古籍酷》AI%20OCR%20待改進者隨記%20感恩感恩　讚歎讚歎　南無阿彌陀佛.docx");
-                ImproveGJcoolOCRMemoDoc.ActiveWindow.Selection.EndKey(Microsoft.Office.Interop.Word.WdUnits.wdStory);
+                //ImproveGJcoolOCRMemoDoc.ActiveWindow.Selection.EndKey(Microsoft.Office.Interop.Word.WdUnits.wdStory);
             }
+            else
+            {
+                if (!ImproveGJcoolOCRMemoDoc.Name.StartsWith(preName))
+                {
+                    Microsoft.Office.Interop.Word.Application wordapp = ImproveGJcoolOCRMemoDoc.Application;
+                    ImproveGJcoolOCRMemoDoc.Close(Microsoft.Office.Interop.Word.WdSaveOptions.wdDoNotSaveChanges);
+                    ImproveGJcoolOCRMemoDoc = wordapp.Documents.Open(f);
+                }
+            }
+            ImproveGJcoolOCRMemoDoc.ActiveWindow.Selection.EndKey(Microsoft.Office.Interop.Word.WdUnits.wdStory);
             try
             {
                 string lnk = GetPageUrlKeywordLink(imporvement, url);
