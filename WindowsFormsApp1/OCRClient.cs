@@ -7,6 +7,7 @@ using System.Net.Http;
 using Newtonsoft.Json;
 using System.IO;
 using Newtonsoft.Json.Linq;
+using System.Threading;
 
 namespace TextForCtext
 {
@@ -23,9 +24,36 @@ namespace TextForCtext
             _client = new HttpClient();
         }
 
-
+        /// <summary>
+        /// 取得《看典古籍》OCR API 執行的結果
+        /// </summary>
+        /// <param name="imagePath">本機圖檔全檔名</param>
+        /// <returns>回傳執行結果的字串</returns>
         public string GetOCRResult(string imagePath)
-        {
+        {//20240731 Copilot大菩薩：解決圖檔讀取問題的程式碼修改建議：看來這個錯誤是因為圖檔還未完全下載完成就被讀取了。您可以在讀取圖檔之前加入一個等待機制，確保圖檔已經完全下載。以下是修改後的程式碼：
+            // 等待圖檔完全下載
+            while (!File.Exists(imagePath))
+            {
+                Thread.Sleep(100); // 等待 100 毫秒
+            }
+
+            // 確保圖檔可以被讀取
+            bool fileReady = false;
+            while (!fileReady)
+            {
+                try
+                {
+                    using (FileStream stream = new FileStream(imagePath, FileMode.Open, FileAccess.Read))
+                    {
+                        fileReady = true;
+                    }
+                }
+                catch (IOException)
+                {
+                    Thread.Sleep(100); // 等待 100 毫秒
+                }
+            }
+
             var bytes = File.ReadAllBytes(imagePath);
             var base64Image = Convert.ToBase64String(bytes);
 
@@ -35,13 +63,6 @@ namespace TextForCtext
             string tokenPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "CtextTempFiles", "OCRAPItoken.txt");
             string token = File.ReadAllText(tokenPath).Trim();
 
-            //var json = JsonConvert.SerializeObject(new
-            //{
-            //    token = token,
-            //    email = "oscarsun72@hotmail.com",
-            //    image = base64Image
-            //});
-            //20240730 Copilot大菩薩：您的理解是正確的！如果《看典古籍》OCR API接受一個名為 version 的參數，並且您希望設置其值為 “beta”，您可以將其添加到您序列化為 JSON 的物件中，就像您所示範的那樣。以下是修改後的程式碼：
             var json = JsonConvert.SerializeObject(new
             {
                 token = token,
@@ -72,6 +93,7 @@ namespace TextForCtext
                 return null;
             }
         }
+
         /// <summary>
         /// 20240730 Copilot大菩薩： 在這個版本中，我們首先從 OCRAPItoken.txt 檔案中讀取 token，然後將其用於 API 請求。請注意，您需要將 OCRAPItoken.txt 檔案放在 C:\Users\oscar\Documents\CtextTempFiles 目錄下，並將您的 token 寫入該檔案。
         /// </summary>

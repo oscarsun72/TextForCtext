@@ -123,7 +123,7 @@ Ctrl + F2 切換語音操作（預設為非 Windows 語音辨識 *Windows Speech
 
 Ctrl + Alt + i 顯示IP現狀訊息方塊
 
-Ctrl + Shift + o 執行《看典古籍》OCR API
+Ctrl + Shift + o 執行《看典古籍》OCR API ，執行 GetOCRResult 方法。（須將token存成「OCRAPItoken.txt」檔置於「我的文件\\CtextTempFiles」下，並在程式碼中覆寫本人帳號/郵箱。）
 
 Ctrl + Shift + w 關閉 Chrome 網頁視窗
 
@@ -475,7 +475,7 @@ Ctrl+ 滑鼠左鍵：清除框中所有文字
 - 輸入「lx」重設《漢籍全文資料庫》檢索易學關鍵字清單之索引值為0 即 ListIndex_Hanchi_SearchingKeywordsYijing=0。 
 
 - 在textBox2中輸入開關切換要整頁貼上Quick edit [簡單修改模式]  並將下一頁直接送交去OCR的網站
-   - kd：《看典古籍》 （kandianguji)
+   - kd：《看典古籍》 （kandianguji）網頁
    - kapi：《看典古籍》api
    - df ：default 古籍酷
 

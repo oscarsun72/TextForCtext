@@ -1,4 +1,5 @@
 ﻿using Microsoft.Win32;
+using OpenQA.Selenium.DevTools.V124.Page;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -29,6 +30,7 @@ using static System.Windows.Forms.VisualStyles.VisualStyleElement.Button;
 using ado = ADODB;//https://docs.microsoft.com/zh-tw/dotnet/csharp/language-reference/keywords/using-directive
 using Application = System.Windows.Forms.Application;
 using br = TextForCtext.Browser;
+using Excel = Microsoft.Office.Interop.Excel;
 using Font = System.Drawing.Font;
 using Point = System.Drawing.Point;
 
@@ -50,7 +52,8 @@ namespace WindowsFormsApp1
         ///3. **一致性**：如果 `OCRClient` 有任何狀態（state），那麼在 `Form1` 的生命週期內，這些狀態將保持一致。如果我們在每次需要時都在方法內部創建新的 `OCRClient` 實例，那麼每個實例都將有自己的狀態，可能會導致不一致。
         ///希望這個解釋能幫助您理解！如果您有任何其他問題，請隨時向我提問。祝您一切順利！南無阿彌陀佛。
         /// </summary>
-        private readonly OCRClient _ocrClient = new OCRClient();
+        //private readonly OCRClient _ocrClient = new OCRClient();
+        private OCRClient _ocrClient = null;
         /// <summary>
         /// 操作過程中靜音
         /// </summary>
@@ -77,8 +80,8 @@ namespace WindowsFormsApp1
         /// CJK大字集字型集合（陣列。含CJK 擴充字集者）
         /// </summary>
         //string[] CJKBiggestSet = new string[]{ "HanaMinB", "KaiXinSongB", "TH-Tshyn-P1" };
-        string[] CJKBiggestSet = { "全宋體(等寬)", "新細明體-ExtB", "HanaMinB", "KaiXinSongB", "TH-Tshyn-P1", "HanaMinA", "Plangothic P1", "Plangothic P2" };
-        Color button2BackColorDefault;
+        readonly string[] CJKBiggestSet = { "全宋體(等寬)", "新細明體-ExtB", "HanaMinB", "KaiXinSongB", "TH-Tshyn-P1", "HanaMinA", "Plangothic P1", "Plangothic P2" };
+        readonly Color button2BackColorDefault;
 
         /// <summary>
         /// 在 Selenium連續輸入時是否為快捷模式，即不檢視貼上結果即進行至下一頁的動作
@@ -111,7 +114,7 @@ namespace WindowsFormsApp1
         bool keyinTextMode = false;
 
         /// <summary>
-        /// OCR輸入模式時為true
+        /// OCR輸入模式時為true（直接連續輸入OCR結果，先不校讀）
         /// </summary>
         bool ocrTextMode = false;
         /// <summary>
@@ -176,7 +179,7 @@ namespace WindowsFormsApp1
         /// <summary>
         /// 隱藏到系統列用物件
         /// </summary>
-        System.Windows.Forms.NotifyIcon ntfyICo;
+        readonly System.Windows.Forms.NotifyIcon ntfyICo;
 
         int thisHeight, thisWidth, thisLeft, thisTop;
         [DllImport("user32.dll")]
@@ -1306,29 +1309,112 @@ namespace WindowsFormsApp1
 
             #region 檢查無效的漢字字元
             int missWordPositon = xCopy.IndexOf(" ");
-            if (missWordPositon == -1) missWordPositon = xCopy.IndexOfAny("�".ToCharArray());
-            if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("□");
-            if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("◊");
-            if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("▫");
-            if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("စ");
-            if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("ခ");
-            if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("င");
-            if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("ဇ");
-            if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("ဌ");
-            if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("◍");
-            if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("ᗍ");
-            if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("Ⲳ");
-            if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("⛋");
-            if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("ဂ");
-            if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("ဃ");
-            if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("ဆ");
-            if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("ဈ");
-            if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("ဉ");
-            if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("▱");
-            if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("ꗍ");
-            //以下《國學大師》本《四庫全書》發生者
-            if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("/");
-            if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("B");
+        checkOthers:
+            if (missWordPositon == -1)
+            {//如果沒有半形空格
+                missWordPositon = xCopy.IndexOfAny("�".ToCharArray());
+                if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("□");
+                if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("◊");
+                if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("▫");
+                if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("စ");
+                if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("ခ");
+                if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("င");
+                if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("ဇ");
+                if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("ဌ");
+                if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("◍");
+                if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("ᗍ");
+                if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("Ⲳ");
+                if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("⛋");
+                if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("ဂ");
+                if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("ဃ");
+                if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("ဆ");
+                if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("ဈ");
+                if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("ဉ");
+                if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("▱");
+                if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("ꗍ");
+                //以下《國學大師》本《四庫全書》發生者
+                if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("B");
+                if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("/");
+                if (missWordPositon != -1)//檢查「/」
+                {//20240803 Copilot大菩薩：C# Windows.Forms 應用程式中檢測半形空格 ：因為在檢查斜線「/」後面不是接著下角括號「>」的情況下，我們需要確保每個匹配的結果都符合這個條件，所以使用了 matches 物件來進一步檢查。
+                 //而在檢查半形空格的情況下，正則表達式(?< ! [\w""'\\])\s(?![\w""'\\]) 已經包含了前後字符的條件，因此不需要進一步使用 matches 物件來檢查。
+                    string pattern = @"/(?!>)";
+                    MatchCollection matches = Regex.Matches(xCopy, pattern);
+                    if (matches.Count == 0) missWordPositon = -1;
+                    else missWordPositon = matches[0].Index;
+
+                    #region 另一種方式：
+                    /* 
+                     
+                    bool isValid = true;
+
+                    // 檢查後一個字符
+                    if (missWordPositon < xCopy.Length - 1)
+                    {
+                        char nextChar = xCopy[missWordPositon + 1];
+                        if (nextChar == '>')
+                        {
+                            isValid = false;
+                        }
+                    }
+
+                    if (isValid)
+                    {
+                        break;
+                    }
+
+                    missWordPositon = xCopy.IndexOf("/", missWordPositon + 1);
+                    */
+                    #endregion 
+
+                }
+            }
+            else//檢查半形空格" "
+            {//20240803 Copilot大菩薩：C# Windows.Forms 應用程式中檢測半形空格
+                //missWordPositon = xCopy.IndexOf(" ");
+                while (missWordPositon != -1)
+                {
+                    bool isValid = true;
+
+                    // 檢查前一個字符
+                    if (missWordPositon > 0)
+                    {
+                        char prevChar = xCopy[missWordPositon - 1];
+                        if ((prevChar >= '0' && prevChar <= '9') ||
+                            (prevChar >= 'A' && prevChar <= 'Z') ||
+                            (prevChar >= 'a' && prevChar <= 'z') ||
+                            prevChar == '"' || prevChar == '/')
+                        {
+                            isValid = false;
+                        }
+                    }
+
+                    // 檢查後一個字符
+                    if (missWordPositon < xCopy.Length - 1)
+                    {
+                        char nextChar = xCopy[missWordPositon + 1];
+                        if ((nextChar >= '0' && nextChar <= '9') ||
+                            (nextChar >= 'A' && nextChar <= 'Z') ||
+                            (nextChar >= 'a' && nextChar <= 'z') ||
+                            nextChar == '"' || nextChar == '/')
+                        {
+                            isValid = false;
+                        }
+                    }
+
+                    if (isValid)
+                    {
+                        break;
+                    }
+
+                    missWordPositon = xCopy.IndexOf(" ", missWordPositon + 1);
+                }
+
+                if (missWordPositon == -1)
+                {
+                    goto checkOthers;
+                }
+            }
             #endregion
 
             #region 檢查不當分段
@@ -1921,8 +2007,11 @@ namespace WindowsFormsApp1
                         {
                             if (br.driver != null)
                             {
-                                br.openNewTabWindow(OpenQA.Selenium.WindowType.Tab);
-                                br.driver.Navigate().GoToUrl("https://dict.revised.moe.edu.tw/search.jsp?md=1&word=" + x + "&qMd=0&qCol=1");
+                                Task.Run(() =>
+                                {
+                                    br.openNewTabWindow(OpenQA.Selenium.WindowType.Tab);
+                                    br.driver.Navigate().GoToUrl("https://dict.revised.moe.edu.tw/search.jsp?md=1&word=" + x + "&qMd=0&qCol=1");
+                                });
                             }
                             else
                                 if (MessageBoxShowOKCancelExclamationDefaultDesktopOnly("是否要執行【查詢網路辭典】？") == DialogResult.OK)
@@ -2726,7 +2815,7 @@ namespace WindowsFormsApp1
                         string url = textBox3.Text;
 
                         //Task.Run(() => { br.ImproveGJcoolOCRMemo(); });//因為即使開新執行緒，但仍是用同一個表單！
-                        Task.Run(() => { br.ImproveGJcoolOCRMemo(txtbox1SelText, url); });
+                        Task.Run(() => { br.ImproveGJcoolKandiangujiOCRMemo(txtbox1SelText, url); });
                         try
                         {
                             Clipboard.SetText(textBox1.Text);//通常改正後是要再重標點，如書名等 20240306
@@ -2758,7 +2847,7 @@ namespace WindowsFormsApp1
                         string url = textBox3.Text;
 
                         //Task.Run(() => { br.ImproveGJcoolOCRMemo(); });//因為即使開新執行緒，但仍是用同一個表單！
-                        Task.Run(() => { br.ImproveGJcoolOCRMemo(txtbox1SelText, url, "《看典古籍》"); });
+                        Task.Run(() => { br.ImproveGJcoolKandiangujiOCRMemo(txtbox1SelText, url, "《看典古籍》"); });
                         try
                         {
                             Clipboard.SetText(textBox1.Text);//通常改正後是要再重標點，如書名等 20240306
@@ -2858,8 +2947,11 @@ namespace WindowsFormsApp1
                     {
                         if (br.driver != null)
                         {
-                            br.openNewTabWindow(OpenQA.Selenium.WindowType.Tab);
-                            br.driver.Navigate().GoToUrl("https://zi.tools/zi/" + x);
+                            Task.Run(() =>
+                            {
+                                br.openNewTabWindow(OpenQA.Selenium.WindowType.Tab);
+                                br.driver.Navigate().GoToUrl("https://zi.tools/zi/" + x);
+                            });
                         }
                         else
                         {
@@ -3247,7 +3339,7 @@ namespace WindowsFormsApp1
         /// <summary>
         /// 記錄程式執行是否在 pagePaste2GjcoolOCR 方法套用的堆疊（stack）裡
         /// </summary>
-        internal bool PagePaste2GjcoolOCR_ing = false;        
+        internal bool PagePaste2GjcoolOCR_ing = false;
         /// <summary>
         /// Ctrl + Shift + Alt + + 或 Ctrl + Alt + Shift + + （數字鍵盤加號） ： 同上，唯先將textBox1全選後再執行貼入；即按下此組合鍵則會並不會受插入點所在位置處影響。並翻到下一頁直接將它送去《古籍酷》OCR
         /// 或只按下F8
@@ -6259,8 +6351,11 @@ namespace WindowsFormsApp1
                     urlDriver = br.driver.Url;
                 }
             }
+        reCheckUrl:
             if (!urlDriver.StartsWith(urlShort))
-            {
+            {//真的都是擴充功能Google翻譯在作怪！難怪害得 driver.Url 和 WindowHandles.Count 都無法取得正確值！
+                if (urlDriver == "chrome-extension://aapbdbdomjkkjkaonfhkkikfgjllcleb/offscreen.html") playSound(soundLike.exam, true);//Debugger.Break();
+                else if (urlDriver.StartsWith("chrome-extension://")) playSound(soundLike.exam, true);//Debugger.Break();
                 bool found = false;
                 foreach (var item in br.driver.WindowHandles)
                 {
@@ -6280,7 +6375,11 @@ namespace WindowsFormsApp1
                     }
                 }
                 else
+                {
                     br.LastValidWindow = br.driver.CurrentWindowHandle;
+                    urlDriver = br.driver.Url;
+                    if (!urlDriver.StartsWith(urlShort)) goto reCheckUrl;
+                }
             }
             #region 在手動編輯模式下（尤其是需要OCR時）的前置檢查
             if (keyinTextMode)
@@ -6548,7 +6647,28 @@ namespace WindowsFormsApp1
                     string driverUrl = "";
                     try
                     {
-                        driverUrl = br.driver.Url;
+                        driverUrl = br.driver.Url;//竟然是Google翻譯的擴充功能在作怪！難怪用selenium一直出錯 ：chrome-extension://aapbdbdomjkkjkaonfhkkikfgjllcleb/offscreen.html   https://www.facebook.com/oscarsun72/posts/pfbid02t9mQG6j2b5GFsbzoMiuUVWASczcPMLnvrGWPHnWQGeoaGo3x234PkymfPdMYSLj4l
+                                                  //https://sl.bing.net/cZ2i6BiKAmW
+                        if (driverUrl != urlDriver && new Uri(urlDriver).Authority == "ctext.org")
+                        {
+                            playSound(soundLike.warn, true);
+                            foreach (var item in br.driver.WindowHandles)
+                            {
+                                br.driver.SwitchTo().Window(item);
+                                if (br.driver.Url == urlDriver) { driverUrl = br.driver.Url; break; }
+                            }
+                        }
+                        else if (driverUrl != urlDriver && new Uri(driverUrl).Authority == "ctext.org")
+                        {
+                            playSound(soundLike.warn, true);
+                            urlDriver = driverUrl;
+                        }
+
+                        if (driverUrl != urlDriver)
+                        {
+                            Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("現行分頁似乎有問題！網址應該是：" + urlDriver);
+                            Debugger.Break();
+                        }
                     }
                     catch (Exception ex)
                     {
@@ -7591,7 +7711,7 @@ namespace WindowsFormsApp1
                     return;
                 }
                 if (e.KeyCode == Keys.Subtract)
-                {//按下 Ctrl + Shift + - ： 切換OCR輸入模式
+                {//按下 Ctrl + Shift + - (數字鍵盤） ： 切換OCR輸入模式（直接連續輸入）
                     e.Handled = true;
 
                     if (!_eventsEnabled) _eventsEnabled = true;
@@ -7605,9 +7725,28 @@ namespace WindowsFormsApp1
                     }
                     new SoundPlayer(@"C:\Windows\Media\Speech On.wav").Play();
                     //設定成手動OCR輸入模式，自動及全部覆蓋之貼上則設成false
-                    ocrTextMode = true; keyinTextMode = true; pasteAllOverWrite = false; autoPastetoQuickEdit = false;
+                    ocrTextMode = true; PasteOcrResultFisrtMode = true; keyinTextMode = true; pasteAllOverWrite = false; autoPastetoQuickEdit = false;
                     PagePaste2GjcoolOCR_ing = false;
-                    if (MessageBoxShowOKCancelExclamationDefaultDesktopOnly("是否要自動標識標題，在OCR識讀匯入後") == DialogResult.OK)
+
+                    string pagePast2OCRsiteName = string.Empty;
+                    switch (PagePast2OCRsite)
+                    {
+                        case br.OCRSiteTitle.GoogleKeep:
+                            pagePast2OCRsiteName = "Google Keep";
+                            break;
+                        case br.OCRSiteTitle.GJcool:
+                            pagePast2OCRsiteName = "《古籍酷》";
+                            break;
+                        case br.OCRSiteTitle.KanDianGuJi:
+                            pagePast2OCRsiteName = "《看典古籍》OCR網頁版";
+                            break;
+                        case br.OCRSiteTitle.KanDianGuJiAPI:
+                            pagePast2OCRsiteName = "《看典古籍》OCR API";
+                            break;
+                        default:
+                            break;
+                    }
+                    if (MessageBoxShowOKCancelExclamationDefaultDesktopOnly("是否要自動標識標題，在OCR識讀匯入後", pagePast2OCRsiteName + "──要送去OCR的網站") == DialogResult.OK)
                     {
                         autoTitleMark_OCRTextMode = true;
                         linesParasPerPage = countLinesPerPage(textBox1.Text);
@@ -7826,7 +7965,7 @@ namespace WindowsFormsApp1
 
 
                 if (e.KeyCode == Keys.K)
-                {//- Alt + Shift + k ：下載書圖並交給《看典古籍》OCR
+                {// Alt + Shift + k ：下載書圖並交給《看典古籍》OCR（網頁版）
                     e.Handled = true; Form1.playSound(Form1.soundLike.press, true);
                     TopMost = false;
                     OpenQA.Selenium.IWebElement iw = br.waitFindWebElementBySelector_ToBeClickable("#content");
@@ -8454,9 +8593,11 @@ namespace WindowsFormsApp1
             br.LastValidWindow = currentWindowHndl;//br.driver.CurrentWindowHandle;
             switch (ocrSiteTitle)
             {
+                //Google Keep
                 case br.OCRSiteTitle.GoogleKeep:
                     ocrResult = br.OCR_GoogleKeep(downloadImgFullName);
                     break;
+                //《古籍酷》
                 case br.OCRSiteTitle.GJcool:
                     br.ActiveForm1 = this;
                     br.ActiveForm1.TopMost = false;
@@ -8483,6 +8624,7 @@ namespace WindowsFormsApp1
                     //    }
                     //}
                     break;
+                //《看典古籍》網頁版
                 case br.OCRSiteTitle.KanDianGuJi:
                     try
                     {
@@ -8495,16 +8637,28 @@ namespace WindowsFormsApp1
                         throw;
                     }
                     break;
+                //《看典古籍》OCR API
                 case br.OCRSiteTitle.KanDianGuJiAPI:
                     //20240730 Copilot大菩薩：如果您不希望在呼叫端使用 await，您可以使用 Task.Result 或 Task.GetAwaiter().GetResult() 來獲取 Task 的結果。這兩種方法都會阻塞當前線程，直到 Task 完成。以下是一個範例：
                     //bool ocrResult = PerformOCR().GetAwaiter().GetResult();
                     //或者
+                    //因為沒有介面，只好用這樣來視覺化操作效果：
+                    if (!ocrTextMode)
+                    {
+                        PauseEvents();
+                        textBox1.Clear();
+                        ResumeEvents();
+                    }
                     ocrResult = PerformOCR();
+                    if (!ocrTextMode)
+                        Form1.playSound(Form1.soundLike.info, true);
                     //請注意，這種方法會阻塞當前線程，直到 PerformOCR 方法完成。如果 PerformOCR 方法需要花費很長時間，這可能會導致您的應用程式暫時無響應。因此，雖然這種方法可以避免將呼叫端方法變為異步，但它可能會降低您的應用程式的響應性。
                     break;
                 default:
                     break;
             }
+            br.driver?.SwitchTo().Window(currentWindowHndl);
+
             if (!ocrResult)
             {
                 MessageBox.Show("請重來一次；重新執行一次。感恩感恩　南無阿彌陀佛", "發生錯誤", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
@@ -8514,12 +8668,12 @@ namespace WindowsFormsApp1
                 {
                     bool eventenable = _eventsEnabled;
                     if (EventsEnabled) PauseEvents();
-                    br.driver?.SwitchTo().Window(currentWindowHndl);
+                    //br.driver?.SwitchTo().Window(currentWindowHndl);
                     if (Clipboard.GetText() != string.Empty)
                     {
                         playSound(soundLike.waiting);
                         AvailableInUseBothKeysMouse();
-                        SendKeys.Send("%{ins}");
+                        SendKeys.SendWait("%{ins}");
                         textBox1.Select(0, 0);
                     }
                     else
@@ -8551,7 +8705,8 @@ namespace WindowsFormsApp1
                 // 建立 Keys.Alt + Keys.Insert 的組合鍵
                 //Keys comboKey = Keys.Alt & Keys.Insert;//在 C# 中，要表示兩個按鍵的組合鍵，需要使用 "|" 運算子進行位元運算，而不是 "&" 或 "+" 運算子。 "|" 運算子可以將兩個按鍵的 KeyCode 合併成一個整數，表示按下這兩個按鍵的組合鍵。
                 //                                       // 使用 SendKeys 方法觸發按下組合鍵                
-                if (!PasteOcrResultFisrtMode || ocrSiteTitle == br.OCRSiteTitle.KanDianGuJi)
+                //if (!PasteOcrResultFisrtMode || ocrSiteTitle == br.OCRSiteTitle.KanDianGuJi)
+                if (!ocrTextMode || ocrSiteTitle == br.OCRSiteTitle.KanDianGuJi)
                 {
                     AvailableInUseBothKeysMouse();//Activate();
                     if (!textBox1.Focused) textBox1.Focus();
@@ -9554,6 +9709,45 @@ namespace WindowsFormsApp1
             //SetForegroundWindow(process.MainWindowHandle);
         }
 
+        /// <summary>
+        /// 要比較兩個 System.Collections.ObjectModel.ReadOnlyCollection<string> 物件是否相同（包括順序和內容），可以使用 LINQ 提供的 SequenceEqual 方法。這個方法會逐一比較兩個集合中的元素，確保它們的順序和內容完全一致。
+        /// 20240731 Copilot大菩薩：比較 ReadOnlyCollection<string> 物件
+        /// </summary>
+        /// <param name="ReadOnlyCollection1"></param>
+        /// <param name="ReadOnlyCollection2"></param>
+        /// <returns>若兩個集合完全相同（次序+內容）則傳回true，否則為false</returns>
+        public static bool CompareReadOnlyCollection<T>(ReadOnlyCollection<T> ReadOnlyCollection1, ReadOnlyCollection<T> ReadOnlyCollection2)
+        {
+            return ReadOnlyCollection1.SequenceEqual(ReadOnlyCollection2);
+        }
+        /// <summary>
+        /// 確定ReadOnlyCollection集合A是否包含B而B不包含A
+        /// 20240731 Copilot大菩薩：比較 ReadOnlyCollection<string> 物件
+        /// </summary>
+        /// <param name="ReadOnlyCollectionA">疑似較大的集合</param>
+        /// <param name="ReadOnlyCollectionB">疑似較小的集合</param>
+        /// <returns>如果A包含B而B不包含A則傳回true，否則為false</returns>
+        public static bool IsAContainBandBnotContainA_ReadOnlyCollection<T>(ReadOnlyCollection<T> ReadOnlyCollectionA, ReadOnlyCollection<T> ReadOnlyCollectionB)
+        {
+            // 你想要快速確定是否存在 tabWindowHandlesValid 中沒有但 tabWindowHandles 中卻有的元素，並回傳一個布林值（true 表示確實存在這樣的元素）。
+            // 你可以使用 LINQ 的 Any 方法來實現這個需求。以下是範例程式碼：
+            return ReadOnlyCollectionA.Any(handle => !ReadOnlyCollectionB.Contains(handle));
+        }
+        /// <summary>
+        /// 找出ReadOnlyCollection物件A有B沒有與B有A沒有的元素出來
+        /// </summary>
+        /// <param name="ReadOnlyCollectionA"></param>
+        /// <param name="ReadOnlyCollectionB"></param>
+        /// <returns></returns>
+        public static List<List<T>> FindNotInAorB_ReadOnlyCollection<T>(ReadOnlyCollection<T> ReadOnlyCollectionA, ReadOnlyCollection<T> ReadOnlyCollectionB)
+        {
+            //List<List<T>> list=new List<List<T>>();
+            // 找出 ReadOnlyCollectionA 中有但 ReadOnlyCollectionB 中沒有的元素
+            //var onlyInTabWindowHandles = ReadOnlyCollectionA.Except(ReadOnlyCollectionB).ToList();
+            // 找出 ReadOnlyCollectionB 中有但 ReadOnlyCollectionA 中沒有的元素
+            //var onlyInTabWindowHandlesValid = ReadOnlyCollectionB.Except(ReadOnlyCollectionA).ToList();            
+            return new List<List<T>> { ReadOnlyCollectionA.Except(ReadOnlyCollectionB).ToList(), ReadOnlyCollectionB.Except(ReadOnlyCollectionA).ToList() };
+        }
 
         /// <summary>
         /// for .BrowserOPMode.Selenium……    browsrOPMode!=BrowserOPMode.appActivateByName
@@ -9569,13 +9763,38 @@ namespace WindowsFormsApp1
             if (!IsValidUrl＿keyDownCtrlAdd(url)) return false;
 
             br.driver = br.driver ?? br.DriverNew();
+            //br.HideBrowserWindow(br.driver);
             //取得所有現行窗體（分頁頁籤）
-            System.Collections.ObjectModel.ReadOnlyCollection<string> tabWindowHandles = new ReadOnlyCollection<string>(new List<string>());
+            //System.Collections.ObjectModel.ReadOnlyCollection<string> tabWindowHandles = new ReadOnlyCollection<string>(new List<string>());
+            //System.Collections.ObjectModel.ReadOnlyCollection<string> tabWindowHandles = br.driver.WindowHandles;
+            //br.ConvertToReadOnlyCollection(br.GetValiOrdereddWindowHandles(br.driver));
+            //br.ConvertToReadOnlyCollection(br.GetValidWindowHandles(br.driver));
+            //br.ShowBrowserWindow(br.driver);
+            //br.driver.SwitchTo().Window(br.GetCurrentWindowHandle(br.driver));
+            //br.driver.SwitchTo().Window(br.driver.CurrentWindowHandle);
+            //br.driver.Navigate().Refresh();
+
+            //try
+            //{
+            //    if (!CompareReadOnlyCollection(tabWindowHandles, br.driver.WindowHandles))
+            //        Debugger.Break();
+            //}
+            //catch (Exception ex)
+            //{
+            //    MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
+            //    Debugger.Break();
+            //}
+            //檢查兩個視窗句柄集合是否相同
+
+            //if (tabWindowHandles.Count == 0) return false;
             string currentWin = ""; bool Edited = false;
             try
             {
-                tabWindowHandles = br.driver.WindowHandles;
-                currentWin = br.driver.CurrentWindowHandle;
+                //tabWindowHandles = br.driver.WindowHandles;
+                //currentWin = br.driver.CurrentWindowHandle;
+                string getCurrentWindowHandle = br.GetCurrentWindowHandle(br.driver);
+                if (getCurrentWindowHandle != null) currentWin = getCurrentWindowHandle;
+                else currentWin = br.GetValidWindowHandles(br.driver).Last();
             }
             catch (Exception ex)
             {
@@ -9584,7 +9803,8 @@ namespace WindowsFormsApp1
                     case -2146233088: //"An unknown exception was encountered sending an HTTP request to the remote WebDriver server for URL http://localhost:6763/session/b17084f4c8e209d232d5a9eb18cf181a/window/handles. The exception message was: 傳送要求時發生錯誤。"
                         br.driver.Quit();
                         br.driver = null; br.driver = br.DriverNew();
-                        tabWindowHandles = br.driver.WindowHandles;
+                        //tabWindowHandles = br.driver.WindowHandles;
+                        //tabWindowHandles = br.ConvertToReadOnlyCollection(br.GetValiOrdereddWindowHandles(br.driver));
                         break;
                     default:
                         throw;
@@ -9611,7 +9831,7 @@ namespace WindowsFormsApp1
 
                 #region 先檢查是否有已開啟的「編輯」頁尚未送出儲存(因為許多異體字須一次取代，往往會打開一個chapter單位來edit) 其網址有「&action=editchapter」關鍵字，如：https://ctext.org/wiki.pl?if=en&chapter=687756&action=editchapter#12450
                 //mark:在版本netframework-4.8 之前的環境，好像無效（在母校華岡學習雲測試後的結果，似並不會執行這個檢查，該機唯有4.6.1版）
-                bool waitUpdate = false; string waitTabWindowHandles = "";
+                bool waitUpdate = false; string waitTabWindowHandle = "";
                 Task wait = Task.Run(async () =>
                 {
                     string tabWin;
@@ -9627,9 +9847,14 @@ namespace WindowsFormsApp1
                      */
                     //因為多數情況皆是使用者在作用/使用中的的分頁為最後開啟的，故反向巡覽遍歷檢查，以省去不必要的查找（尤其在分頁很多的時候）
                     //且多在目前簡單編輯（Quick edit）分頁後，故只找到目前簡單編輯（Quick edit）分頁為止，以加速效率
-                    for (int i = tabWindowHandles.Count - 1; i > -1; i--)
+                    //for (int i = tabWindowHandles.Count - 1; i > -1; i--)
+                    for (int i = br.driver.WindowHandles.Count - 1; i > -1; i--)
+                    //for (int i = 0; i < tabWindowHandles.Count; i++)
                     {
-                        tabWin = tabWindowHandles[i];
+                        //int retry = 0;
+                        //reLoadWindowHandles:
+                        //tabWin = tabWindowHandles[i];
+                        tabWin = br.driver.WindowHandles[i];
                         //try
                         //{
                         //    currentWin = br.driver.CurrentWindowHandle;
@@ -9639,7 +9864,50 @@ namespace WindowsFormsApp1
                         //    Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.Message);
                         //    break;
                         //}
-                        if (tabWin == currentWin) break;
+                        if (tabWin == currentWin)
+                        {
+                            ////重新開啟分頁，以取得在分頁集合中最後一個位置（如果可以的話）20240731
+                            ////if (tabWindowHandles.Count > 1 && i < tabWindowHandles.Count - 1)
+                            //reLoadWindowHandles:
+                            //    int tabCount = br.driver.WindowHandles.Count;// DateTime dt = DateTime.Now;
+                            //    //while (tabCount > 1 && i < tabCount - 1 && tabCount == br.driver.WindowHandles.Count) { if (DateTime.Now.Subtract(dt).TotalSeconds > 20) { playSound(soundLike.over, true); break; } }
+                            //    //tabCount = br.driver.WindowHandles.Count;
+                            //    if (tabCount > 1 && i < tabCount - 1)
+                            //    {
+                            //        ////寫在這裡就太快，必須寫在後面
+                            //        //if (br.GetValidWindowHandles(br.driver).Count > 1 && waitUpdate == false && waitTabWindowHandle == ""
+                            //        //        && ocrTextMode == false)
+                            //        //{
+                            //        //    retry++;//重新取得 tabWin = br.driver.WindowHandles[i]; 才比較會載入新的WindowHandles數量
+                            //        //    if (retry == 1) { playSound(soundLike.over, true); goto reLoadWindowHandles; }
+                            //        //    retry = 0;
+                            //        //}
+
+                            //        if (waitUpdate && waitTabWindowHandle != "") br.driver.SwitchTo().Window(waitTabWindowHandle); br.driver.Close();
+
+                            //        //playSound(soundLike.warn, true);
+                            //        br.driver.SwitchTo().Window(tabWin);
+                            //        string url_Driver = br.driver.Url;
+                            //        //if (br.GetValidWindowHandles(br.driver).Count > 2&& !(waitUpdate && waitTabWindowHandle != ""))
+                            //        //莫名其妙，明明1個分類，都會平白成了2個！               
+                            //        //if (br.GetValidWindowHandles(br.driver).Count > 1 && !(waitUpdate && waitTabWindowHandle != ""))
+                            //        //這個 GetValidWindowHandles 方法完全沒有用，明明無中生有的分頁句柄也能切換過去而不出錯 20240802//恢復之前舊式的就好了！！
+                            //        if (br.GetValidWindowHandles(br.driver).Count > 1 && waitUpdate == false && waitTabWindowHandle == ""
+                            //                && ocrTextMode == false)
+                            //        {
+                            //            retry++;//重新取得 tabWin = br.driver.WindowHandles[i]; 才比較會載入新的WindowHandles數量（寫在這才能抓到新的視窗句柄集合）
+                            //            if (retry == 1) { playSound(soundLike.over, true); goto reLoadWindowHandles; }
+                            //            retry = 0;
+
+                            //            br.driver.Close();
+                            //            br.openNewTabWindow().Navigate().GoToUrl(url_Driver);
+                            //            currentWin = br.GetCurrentWindowHandle(br.driver);
+                            //        }
+                            //        else
+                            //            br.driver.SwitchTo().Window(br.GetCurrentWindowHandle(br.driver));
+                            //}
+                            break;
+                        }
                         //}
                         //foreach (string tabWin in tabWindowHandles)
                         //{
@@ -9656,7 +9924,7 @@ namespace WindowsFormsApp1
                         //if (br.driver.SwitchTo().Window(tabWin).Url.IndexOf("&action=editchapter") > -1)
                         if (chkWindows > -1)
                         {
-                            waitUpdate = true; waitTabWindowHandles = tabWin;
+                            waitUpdate = true; waitTabWindowHandle = tabWin;
                             OpenQA.Selenium.IWebElement commit = br.waitFindWebElementByName_ToBeClickable("commit", br.WebDriverWaitTimeSpan); //br.driver.FindElement(OpenQA.Selenium.By.Name("commit"));
                                                                                                                                                 //OpenQA.Selenium.Support.UI.WebDriverWait waitcommit = new OpenQA.Selenium.Support.UI.WebDriverWait(br.driver, TimeSpan.FromSeconds(2));
                                                                                                                                                 //waitcommit.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(commit));
@@ -9700,10 +9968,10 @@ namespace WindowsFormsApp1
                   await 是在宣告 async 的 Task.Run 裡 等待這個Run 方法裡的另一個Task.Run()方法完成 故此第二個Task.Run() 前面會冠上  await ；而 第一個Task.Run方法回傳的名為 wait 的Task型別變數，使用它的 .Wait() 方法來等待第一個（即最外層的） Task.Run()完成 這樣 程式在執行時才能確實等待最外圈的 Task.完成 而最外圈的 Task 也確實等到了 內圈有加 await 關鍵字的 Task 都完成了，才算完成 是這樣吧
                  */
                 //如果有編輯送出，待完成後關閉該分頁視窗
-                if (waitUpdate && waitTabWindowHandles != "")
+                if (waitUpdate && waitTabWindowHandle != "")
                 {
                     Edited = true;
-                    br.driver.SwitchTo().Window(waitTabWindowHandles); br.driver.Close();
+                    //br.driver.SwitchTo().Window(waitTabWindowHandle); br.driver.Close();
                     if (br.DirectlyReplacingCharactersPageWindowHandle != string.Empty)
                         br.DirectlyReplacingCharactersPageWindowHandle = string.Empty;//重設；
                     br.driver.SwitchTo().Window(currentWin);
@@ -9721,14 +9989,30 @@ namespace WindowsFormsApp1
             }
             //else//不是在手動鍵入時
             //{//檢查textbox3的值與現用網頁相同否
-            //if (currentWin != br.driver.CurrentWindowHandle)
+            //string newCurrentWin = br.GetCurrentWindowHandle(br.driver);
+            //if (newCurrentWin != null && br.IsWindowHandleValid(br.driver, newCurrentWin))
+            //{
+
+            //    if (currentWin != newCurrentWin)
+            //    {
+            //        if (br.GetValidWindowHandles(br.driver).Contains(currentWin))
+            //            br.driver.SwitchTo().Window(currentWin);
+            //        else
+            //            br.driver.SwitchTo().Window(newCurrentWin);
+            //    }
+            //}
+            //else
+            //{
+            // 當前視窗句柄無效
             br.driver.SwitchTo().Window(currentWin);
+            //}
             //如果存在「參考上下頁」控制項，則須刷新，否則會被前後頁的舊資料所干擾
             if (br.CheckAdjacentPages_Linkbox != null && Edited)
                 br.driver.Navigate().Refresh();
             Task wait1 = Task.Run(() =>
             {
-                chkUrlIsTextBox3Text(tabWindowHandles, textBox3.Text);
+                //chkUrlIsTextBox3Text(tabWindowHandles, textBox3.Text);
+                chkUrlIsTextBox3Text(br.driver.WindowHandles, textBox3.Text);
             });
             wait1.Wait();
             //}
@@ -9738,11 +10022,13 @@ namespace WindowsFormsApp1
             //br.在Chrome瀏覽器的Quick_edit文字框中輸入文字(br.driver, clear == br.chkClearQuickedit_data_textboxTxtStr ? clear : Clipboard.GetText(), url);
             string formalX = clear == br.chkClearQuickedit_data_textboxTxtStr ? clear : br.TextPatst2Quick_editBox;
             CnText.FormalizeText(ref formalX);
-            br.在Chrome瀏覽器的Quick_edit文字框中輸入文字(br.driver,
+            if (br.在Chrome瀏覽器的Quick_edit文字框中輸入文字(br.driver,
                 formalX
-                , url);
-            br.LastValidWindow = br.driver.CurrentWindowHandle;
-            return true;
+                , url))
+                //br.LastValidWindow = br.driver.CurrentWindowHandle;//在br.在Chrome瀏覽器的Quick_edit文字框中輸入文字()方法中已有
+                return true;
+            else
+                return false;
         }
 
         //檢查textbox3的Text值與現用網頁是否相同
@@ -10884,13 +11170,15 @@ namespace WindowsFormsApp1
                 #endregion
                 #region 《古籍酷》OCR批量處理。在textBox2中輸入bT以啟用，輸入bF以停用
                 case "bT":
-                    BatchProcessingGJcoolOCR = true; PasteOcrResultFisrtMode = true; ocrTextMode = true; PagePaste2GjcoolOCR_ing = false; _eventsEnabled = true;
+                    //BatchProcessingGJcoolOCR = true; PasteOcrResultFisrtMode = true; ocrTextMode = true; PagePaste2GjcoolOCR_ing = false; _eventsEnabled = true;
+                    BatchProcessingGJcoolOCR = true; PagePaste2GjcoolOCR_ing = false; _eventsEnabled = true;
                     br.OCR_wait_time_Top_Limit＿second = 60;
                     PauseEvents();
                     textBox2.Text = "";
                     ResumeEvents(); return;
                 case "bF":
-                    BatchProcessingGJcoolOCR = false; PasteOcrResultFisrtMode = false; ocrTextMode = false; PagePaste2GjcoolOCR_ing = false; _eventsEnabled = true;
+                    //BatchProcessingGJcoolOCR = false; PasteOcrResultFisrtMode = false; ocrTextMode = false; PagePaste2GjcoolOCR_ing = false; _eventsEnabled = true;
+                    BatchProcessingGJcoolOCR = false; PagePaste2GjcoolOCR_ing = false; _eventsEnabled = true;
                     br.OCR_wait_time_Top_Limit＿second = 15;
                     PauseEvents();
                     textBox2.Text = "";
@@ -10987,7 +11275,7 @@ namespace WindowsFormsApp1
                     goto ap;
                 case "sl,":
                 sl: browsrOPMode = BrowserOPMode.seleniumNew;
-                    PauseEvents();textBox2.Text = string.Empty;ResumeEvents();
+                    PauseEvents(); textBox2.Text = string.Empty; ResumeEvents();
                     //第一次開啟Chrome瀏覽器，或前有未關閉的瀏覽器時
                     if (br.driver == null)
                         br.driver = br.DriverNew();//不用Task.Run()包裹也成了
@@ -11329,7 +11617,11 @@ namespace WindowsFormsApp1
              * 在 C# 中，您可以使用正则表达式来删除给定字符串中的特定字符。以下是删除 punctuationsNum 字符串中的 "《" 和 "〈" 字符的示例代码：……
              * 在这里，我们使用 Regex.Replace 方法将匹配正则表达式模式 [《〈] 的所有字符替换为空字符串。此模式匹配任何包含 "《" 或 "〈" 的字符。
              * */
-            if (e.KeyChar == " ".ToCharArray()[0]) return;//半形空格可被輸入、被取代，而不能取代別人
+            //if (e.KeyChar == " ".ToCharArray()[0]) return;//半形空格可被輸入、被取代，而不能取代別人
+            //if (e.KeyChar == "/".ToCharArray()[0]) return;//半形空格可被輸入、被取代，而不能取代別人
+            //20240731 Copilot大菩薩 ： 簡化程式碼：您可以簡化這兩行檢查的程式碼如下：這樣可以達到相同的效果，並使程式碼更加簡潔明瞭。
+            if (e.KeyChar == ' ' || e.KeyChar == '/') return;
+
             string regexPattern = "[《〈」】〗]", omitSymbols = "●＝{}□■<>*〇◯○⿰⿱」』|" + Environment.NewLine;//輸入缺字構字式●＝＝、及注文標記符{{}}、及標題星號*時不取代
             checkkeyPressOverTyping_oscarsun72note_Inserting_switch2insertMode(e.KeyChar, regexPattern + omitSymbols);
             string w;//, punctuationsNumWithout前書名號與前篇名號 = Regex.Replace(Form1.punctuationsNum, regexPattern, ""); 
@@ -12473,12 +12765,15 @@ namespace WindowsFormsApp1
             string imagePath = MydocumentsPathIncldBackSlash + "CtextTempFiles\\Ctext_Page_Image.png", result = string.Empty;
             //if (DownloadImage(br.GetImageUrl(), out imagePath))
             DateTime dt = DateTime.Now;
+            if (TopMost) TopMost = false;
+            br.driver.SwitchTo().Window(br.GetCurrentWindowHandle(br.driver));
             while (!File.Exists(imagePath))
             {
-                if (DateTime.Now.Subtract(dt).TotalSeconds > 30)
+                if (DateTime.Now.Subtract(dt).TotalSeconds > 20)
                     if (MessageBoxShowOKCancelExclamationDefaultDesktopOnly("書圖下載尚未完成，是否繼續？") == DialogResult.Cancel)
                         return false;
             }
+            if (_ocrClient == null) _ocrClient = new OCRClient();
             result = _ocrClient.GetOCRResult(imagePath);
 
             //Clipboard.Clear();

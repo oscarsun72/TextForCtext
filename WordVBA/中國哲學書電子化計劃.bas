@@ -1048,6 +1048,7 @@ Sub search史記三家注()
 End Sub
 
 Sub search周易正義_阮元十三經注疏()
+    'Ctrl + Alt + =
     ActiveDocument.Hyperlinks.Add Selection.Range, Search(" https://ctext.org/wiki.pl?if=gb&res=315747&searchu=")
 End Sub
 

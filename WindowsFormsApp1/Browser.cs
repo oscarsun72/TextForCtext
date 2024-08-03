@@ -2,9 +2,10 @@
 using Newtonsoft.Json.Linq;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
+using OpenQA.Selenium.DevTools;
+using OpenQA.Selenium.Interactions;
 using OpenQA.Selenium.Remote;
 using OpenQA.Selenium.Support.UI;
-using OpenQA.Selenium.Interactions;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -15,12 +16,9 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Media;
-using System.Net.Http.Headers;
-
 //using System.Net;
 //using System.Net.NetworkInformation;
 using System.Runtime.InteropServices;
-using System.Security.Policy;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Automation;
@@ -30,7 +28,6 @@ using WindowsFormsApp1;
 //using static System.Net.Mime.MediaTypeNames;
 using forms = System.Windows.Forms;
 using selm = OpenQA.Selenium;
-using ADODB;
 
 
 namespace TextForCtext
@@ -272,6 +269,241 @@ namespace TextForCtext
             set => _lastValidWindowHandle = value;
         }
 
+
+        /// <summary>
+        /// 20240731 Copilot大菩薩：Selenium WebDriver 瀏覽器畫面閃爍問題解決方法
+        /// Unfortunately, Selenium WebDriver does not have a built-in feature like MS Word VBA’s ScreenUpdating = false to prevent the browser from updating the screen when switching windows. However, you can try a workaround by using JavaScript to minimize the visual impact. Here’s an example of how you might achieve this:
+        /// Hide the browser window before switching:        
+        /// </summary>
+        /// <param name="driver"></param>
+        public static void HideBrowserWindow(IWebDriver driver)
+        {
+            ((IJavaScriptExecutor)driver).ExecuteScript("document.body.style.visibility='hidden'");
+        }
+        /// <summary>
+        /// 20240731 Copilot大菩薩：Selenium WebDriver 瀏覽器畫面閃爍問題解決方法
+        /// Unfortunately, Selenium WebDriver does not have a built-in feature like MS Word VBA’s ScreenUpdating = false to prevent the browser from updating the screen when switching windows. However, you can try a workaround by using JavaScript to minimize the visual impact. Here’s an example of how you might achieve this:
+        /// Hide the browser window before switching:        
+        /// </summary>
+        /// <param name="driver"></param>
+        public static void ShowBrowserWindow(IWebDriver driver)
+        {
+            ((IJavaScriptExecutor)driver).ExecuteScript("document.body.style.visibility='visible'");
+        }
+
+        /// <summary>
+        /// 檢測視窗是否有效的方法
+        /// 20240730 Copilot大菩薩：C# Selenium 瀏覽器分頁次序
+        /// </summary>
+        /// <param name="driver"></param>
+        /// <param name="handle"></param>
+        /// <returns></returns>
+        public static bool IsWindowHandleValid(IWebDriver driver, string handle)
+        {
+            try
+            {//These methods should help reduce the flickering effect when switching windows. Please note that hiding or minimizing the browser window might affect the user experience, so use these methods with caution.
+                driver.SwitchTo().Window(handle);
+                return true;
+            }
+            catch (NoSuchWindowException)
+            {
+                return false;
+            }
+            catch (Exception ex)
+            {
+                //Console.WriteLine("發生錯誤: " + ex.Message);
+                Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + "發生錯誤: " + ex.Message);
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// 定期更新視窗句柄集合的方法
+        /// 20240730 Copilot大菩薩：C# Selenium 瀏覽器分頁次序
+        /// </summary>
+        /// <param name="driver"></param>
+        /// <returns>有效的視窗句柄清單</returns>
+        public static List<string> GetValidWindowHandles(IWebDriver driver)
+        {
+            string currentWindowsHandle = GetCurrentWindowHandle(driver);
+            var windowHandles = driver.WindowHandles;
+            var validWindowHandles = new List<string>();
+
+            foreach (var handle in windowHandles)
+            {
+                if (IsWindowHandleValid(driver, handle))
+                {
+                    validWindowHandles.Add(handle);
+                }
+            }
+            driver.SwitchTo().Window(currentWindowsHandle);
+            return validWindowHandles;
+        }
+        /// <summary>
+        /// 取得現行各分頁與視窗的有序的集合清單（失敗！！！！！）
+        /// 20240730 Copilot大菩薩：C# Selenium 瀏覽器分頁次序
+        /// </summary>
+        /// <param name="driver"></param>
+        /// <returns>現行各分頁與視窗的有序的集合清單</returns>
+        public static List<string> GetValiOrdereddWindowHandles(IWebDriver driver)
+        {
+            // 獲取所有有效的視窗句柄
+            var validWindowHandles = GetValidWindowHandles(driver);
+
+            // 使用 JavaScript 獲取每個分頁的 URL
+            var urls = new Dictionary<string, string>();
+            foreach (var handle in validWindowHandles)
+            {
+                driver.SwitchTo().Window(handle);
+                string url = driver.Url;
+                urls[handle] = url;
+            }
+
+            // 使用 JavaScript 獲取分頁順序
+            // 使用更穩健的 JavaScript 脚本来获取分頁順序
+            var orderedUrls = ((IJavaScriptExecutor)driver).ExecuteScript(@"
+        var iframes = document.querySelectorAll('iframe');
+        var urls = [];
+        for (var i = 0; i < iframes.length; i++) {
+            try {
+                urls.push(iframes[i].contentWindow.location.href);
+            } catch (error) {
+                console.error('Error getting iframe URL:', error);
+            }
+        }
+        return urls;
+    ") as List<object>;
+
+            // 檢查 orderedUrls 是否為 null
+            var orderedHandles = new List<string>();
+
+            if (orderedUrls == null)
+            {
+                Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("JavaScript 腳本未能正確返回分頁順序。");
+                return orderedHandles;
+            }
+
+            // 根據 URL 比對視窗句柄順序
+            foreach (var url in orderedUrls)
+            {
+                foreach (var kvp in urls)
+                {
+                    if (kvp.Value == url.ToString())
+                    {
+                        orderedHandles.Add(kvp.Key);
+                        break;
+                    }
+                }
+            }
+
+            return orderedHandles;
+        }
+
+
+
+
+        /// 將取得的 List<string>清單轉換成ReadOnlyCollection<string>集合
+        /// 20240730 Copilot大菩薩：Convert List of Window Handles to ReadOnlyCollection
+        /// </summary>
+        /// <param name="orderedHandles">要被轉換的清單變數</param>
+        /// <returns></returns>
+        public static ReadOnlyCollection<string> ConvertToReadOnlyCollection(List<string> orderedHandles)
+        {
+            return new ReadOnlyCollection<string>(orderedHandles);
+        }
+        /// <summary>
+        /// 取得指定視窗句柄在Chrome瀏覽器中的的序號
+        /// 20240730 Copilot大菩薩：C# Selenium 瀏覽器分頁次序
+        /// </summary>
+        /// <param name="driver"></param>
+        /// <param name="orderedHandles">現行有效依序的分頁或視窗句柄之集合清單</param>
+        /// <returns></returns>
+        public static int GetIndexofSpecificValidWindowHandle(IWebDriver driver, List<string> orderedHandles)
+        {
+            // 查找指定句柄在清單中的位置
+            string targetHandle = orderedHandles[1]; // 假設我們要查找第二個分頁的句柄
+            int index = orderedHandles.IndexOf(targetHandle);
+            //Console.WriteLine("指定句柄的位置: " + index);
+            return index;
+        }
+        /// <summary>
+        /// 獲取當前有效的視窗句柄之方法
+        /// 20240730 Copilot大菩薩：C# Selenium 瀏覽器分頁次序
+        /// </summary>
+        /// <param name="driver"></param>
+        /// <returns></returns>
+        public static string GetCurrentWindowHandle(IWebDriver driver)
+        {
+            try
+            {
+                string currentHandle = driver.CurrentWindowHandle;
+                if (driver.WindowHandles.Contains(currentHandle))
+                {
+                    return currentHandle;
+                }
+                else
+                {
+                    //throw new NoSuchWindowException("當前視窗句柄無效");
+                    //Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("當前視窗句柄無效");
+                    // 返回 null 而不是拋出異常
+                    return null;
+                }
+            }
+            catch (NoSuchWindowException)
+            {
+                //Console.WriteLine("當前視窗句柄無效");
+                Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("當前視窗句柄無效");
+                return null;
+            }
+            catch (Exception ex)
+            {
+                //Console.WriteLine("發生錯誤: " + ex.Message);
+                Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HelpLink + "發生錯誤: " + ex.Message);
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// 封裝視窗操作的方法，包含顯式等待
+        /// 20240730 Copilot大菩薩：C# Selenium 瀏覽器分頁次序
+        /// 定義了一個委派方法 PerformWindowOperation，這個方法接受三個參數：
+        /// </summary>
+        /// <param name="driver">WebDriver 物件</param>
+        /// <param name="handle">視窗句柄。</param>
+        /// <param name="operation">一個接受 IWebDriver 參數的操作（匿名方法）。</param>
+        public static void PerformWindowOperation(IWebDriver driver, string handle, Action<IWebDriver> operation)
+        {
+            if (IsWindowHandleValid(driver, handle))
+            {
+                try
+                {
+                    // 顯式等待，確保視窗已經完全加載
+                    WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
+                    wait.Until(drv => drv.SwitchTo().Window(handle) != null);
+
+                    operation(driver);
+                }
+                catch (WebDriverTimeoutException)
+                {
+                    //Console.WriteLine("視窗加載超時: " + handle);
+                    Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("視窗加載超時: " + handle);
+                }
+                catch (Exception ex)
+                {
+                    //Console.WriteLine("操作失敗: " + ex.Message);
+                    Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + "操作失敗: " + ex.Message);
+                }
+            }
+            else
+            {
+                //Console.WriteLine("視窗無效: " + handle);
+                Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("視窗無效: " + handle);
+            }
+        }
+
+        /// <summary>
+        /// 取得 driver 的 URL
+        /// </summary>
         internal static string GetDriverUrl
         {
             get
@@ -1080,10 +1312,21 @@ namespace TextForCtext
         /// <param name="driver">chromedriver</param>
         /// <param name="xIuput">要貼入的文本</param>
         /// <param name="url">要貼入的網頁網址</param>
-        internal static void 在Chrome瀏覽器的Quick_edit文字框中輸入文字(ChromeDriver driver, string xIuput, string url)
+        /// <returns>執行成功則回傳true</returns>
+        internal static bool 在Chrome瀏覽器的Quick_edit文字框中輸入文字(ChromeDriver driver, string xIuput, string url)
         {
             #region 檢查網址
-            if (url.IndexOf("edit") == -1 && driver.Url.IndexOf("edit") == -1) return;
+            Uri uri = new Uri(url);
+            if (uri.Authority != "ctext.org") { Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("想要輸入的網址並不是CTP網址"); return false; }
+            uri = new Uri(driver.Url);
+            if (uri.Authority != "ctext.org") { Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("目前 driver的網址並不是CTP網址"); return false; }
+
+            if (url.IndexOf("edit") == -1 && driver.Url.IndexOf("edit") == -1)
+            {
+                Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("網址中不包含「edit」");
+                return false;
+            }
+
 
             if (url != driver.Url)
             {
@@ -1111,7 +1354,7 @@ namespace TextForCtext
                     if (!found)
                     {
                         Form1.playSound(Form1.soundLike.error, true);
-                        return;
+                        return false;
                     }
                 }
                 else if (Form1.IsValidUrl＿keyDownCtrlAdd(url) && Form1.IsValidUrl＿keyDownCtrlAdd(driver.Url))
@@ -1131,7 +1374,7 @@ namespace TextForCtext
                         if (!found)
                         {
                             Form1.playSound(Form1.soundLike.error, true);
-                            return;
+                            return false;
                         }
                     }
                 }
@@ -1165,7 +1408,7 @@ namespace TextForCtext
                             {
                                 if (!url.EndsWith("#editor")) url = ActiveTabURL_Ctext_Edit_includingEditorStr;
                                 GoToUrlandActivate(url);
-                                return;
+                                return false;
                             }
                             //"no such element: Unable to locate element: {\"method\":\"css selector\",\"selector\":\"#quickedit\"}\n  (Session info: chrome=111.0.5563.147)"
                             else if (ex.Message.IndexOf("no such element: Unable to locate elementno") > -1)
@@ -1312,6 +1555,7 @@ namespace TextForCtext
                 Thread.Sleep(10);//等待 submit = waitFin……完成
                 driver.Close(); //需要重啟檢視時，只要開啟前一個被關掉的分頁頁籤即可（快速鍵時 Ctrl + Shift + t）
             }
+            return true;
         }
 
         static internal bool isAllinBmp(string xChk)
@@ -1945,7 +2189,7 @@ namespace TextForCtext
             {
                 //LastValidWindow = driver.CurrentWindowHandle;
                 Form1.ResetLastValidWindow();
-                driver.SwitchTo().NewWindow(tabOrwindow);
+                driver = (ChromeDriver)driver.SwitchTo().NewWindow(tabOrwindow);
 
             }
             catch (Exception ex)
@@ -2450,7 +2694,8 @@ internal static string getImageUrl() {
 
         }
         /// <summary>
-        /// 《看典古籍》OCR
+        /// 執行《看典古籍》OCR（網頁版）
+        /// Alt + Shift + k
         /// </summary>
         /// <param name="downloadImgFullName">書圖下載全檔名</param>
         /// <returns></returns>
@@ -2516,6 +2761,10 @@ internal static string getImageUrl() {
 
             //「文本排版方向」點選「豎排」：
             iwe = waitFindWebElementBySelector_ToBeClickable("#sp");
+            iwe.Click();
+
+            //點選「 语序优化beta版」核取方塊：（對於正文、夾注之次予至關重要）20240803
+            iwe = waitFindWebElementBySelector_ToBeClickable("#version_2");
             iwe.Click();
 
             dt = DateTime.Now;
@@ -7203,13 +7452,13 @@ internal static string getImageUrl() {
             }
 
             //異體字處理
-            if (title.EndsWith("中國哲學書電子化計劃"))
+            if (title.EndsWith("中國哲學書電子化計劃") || title.EndsWith("Chinese Text Project"))
             {
                 //新增List元素。因為《中國哲學書電子化計劃》異體字的支援機制沒有《漢籍全文資料庫》那麼好
                 //20240719 Copilot大菩薩：C# Windows.Forms List 新增多個元素：您好，如果您想要在程式進行中對 List<string> 新增多個元素，可以使用 AddRange 方法。這是一個範例：
                 //keywords.Add();
                 List<string> additionalKeywords = new List<string> { "无𡚶", "𧰼", "系辭", "擊詞", "擊辭", "繫驟",
-                    "乹","〈乾〉", "〈坤〉", "〈乾坤〉", "咸恒","剥","頥","㢲","旣濟",
+                    "乹","〈乾〉", "〈坤〉", "〈乾坤〉", "咸恒","剥","頥","㢲","旣濟","涣","兑",
                     "少隂","太隂",
                 "𥘉九","𭃨九","𭃡九","𥘉六","𭃨六","𭃡六"};
                 keywords.AddRange(additionalKeywords);
@@ -7223,7 +7472,7 @@ internal static string getImageUrl() {
             bool returnValue = false;
 
             //if (title.Contains("中國哲學書電子化計劃"))
-            if (title.EndsWith("中國哲學書電子化計劃"))
+            if (title.EndsWith("中國哲學書電子化計劃") || title.EndsWith("Chinese Text Project"))
             {
             //檢索方塊
             researchCtext:
@@ -7239,6 +7488,7 @@ internal static string getImageUrl() {
                     {
 
                     }
+                    //輸入檢索條件
                     //iwe.SendKeys(keyword);
                     iwe.SendKeys(OpenQA.Selenium.Keys.Shift + OpenQA.Selenium.Keys.Insert);
                     iwe.SendKeys(OpenQA.Selenium.Keys.Enter);
@@ -7252,12 +7502,28 @@ internal static string getImageUrl() {
                             driver.Navigate().Back();
                             returnValue = false;
                         }
-                        else
-                        { returnValue = true; Clipboard.SetText(keyword); ActiveForm1.KeyinTextmodeSwitcher(); }//ActiveForm1.HideToNICo(); }
+                        else//有結果
+                        {
+                            returnValue = true; Clipboard.SetText(keyword); ActiveForm1.KeyinTextmodeSwitcher();
+                            //有文本的文字框
+                            //Thread.Sleep(800);
+                            if (new StringInfo(keyword).LengthInTextElements > 1)
+                                FindPageAndPaste2Find(driver);
+                            else
+                                HighlightKeywords(keyword);
+                        }//ActiveForm1.HideToNICo(); }
 
                     }
-                    else
-                    { returnValue = true; Clipboard.SetText(keyword); ActiveForm1.KeyinTextmodeSwitcher(); }//ActiveForm1.HideToNICo(); }
+                    else//有結果
+                    {
+                        returnValue = true; Clipboard.SetText(keyword); ActiveForm1.KeyinTextmodeSwitcher();
+                        //有文本的文字框
+                        //Thread.Sleep(800);
+                        if (new StringInfo(keyword).LengthInTextElements > 1)
+                            FindPageAndPaste2Find(driver);
+                        else
+                            HighlightKeywords(keyword);
+                    }//ActiveForm1.HideToNICo(); }
                 }
                 else
                 {
@@ -7598,6 +7864,178 @@ internal static string getImageUrl() {
 
             return returnValue;
         }
+        /// <summary>
+        /// 在頁面按下Ctrl + f 後貼上剪貼簿內容來尋找
+        /// </summary>
+        /// <param name="driver"></param>
+        /// <returns></returns>
+        public static bool FindPageAndPaste2Find(WebDriver driver, bool paste2Find = true)
+        {
+            Form1.playSound(Form1.soundLike.over, true);
+            if (ActiveForm1.TopMost) ActiveForm1.TopMost = false;
+            driver.SwitchTo().Window(GetCurrentWindowHandle(driver));
+            SendKeys.SendWait("^f");
+            if (paste2Find)
+            {
+                // 等待尋找方塊出現
+                System.Threading.Thread.Sleep(200);
+                // 貼上剪貼簿內容
+                SendKeys.SendWait("+{insert}");
+            }
+            return true;
+        }
+        /// <summary>
+        /// 20240731 Copilot大菩薩：C# Windows.Forms Selenium 螢光色標記：您可以使用C# Windows.Forms和Selenium在Chrome瀏覽器中將指定的關鍵字標上螢光色。以下是一個簡單的範例，展示如何使用JavaScript來實現這個功能：
+        /// </summary>
+        /// <param name="keyword"></param>
+        /// <returns></returns>
+        public static bool HighlightKeywords_(string keyword)
+        {
+            string script = $@"
+                var keyword = '{keyword}';
+                var regex = new RegExp(keyword, 'gi');
+                document.body.innerHTML = document.body.innerHTML.replace(regex, function(matched) {{
+                    return '<span style=""background-color: yellow;"">' + matched + '</span>';
+                }});";//這段程式碼會在瀏覽器中將指定的關鍵字標上黃色的螢光色。您可以根據需要修改HighlightKeywords方法中的CSS樣式來改變螢光色的顏色。
+
+            driver.ExecuteScript(script);
+            return true;
+        }
+        /// <summary>
+        /// 只能標識網頁中的一個中文（尤其是表格中的）標上螢光色
+        /// 20240731 Copilot大菩薩：C# Windows.Forms Selenium 螢光色標記：您可以使用C# Windows.Forms和Selenium在Chrome瀏覽器中將指定的關鍵字標上螢光色。以下是一個簡單的範例，展示如何使用JavaScript來實現這個功能：
+        /// </summary>
+        /// <param name="keyword"></param>
+        /// <returns></returns>
+        public static bool HighlightKeywords(string keyword)
+        {//這段程式碼已經考慮到處理超過100個關鍵字的情況。它會一次處理100個節點，但會在所有節點處理完之前繼續進行。也就是說，如果頁面上有超過100個關鍵字，它會分批次處理，直到所有關鍵字都被標記。
+            string script = $@"
+                var keyword = '{keyword}';
+                var regex = new RegExp(keyword, 'gi');
+                var walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null, false);
+                var node;
+                var nodes = [];
+                while (node = walker.nextNode()) {{
+                    nodes.push(node);
+                }}
+                function highlightNodes(start, end) {{
+                    for (var i = start; i < end; i++) {{
+                        var node = nodes[i];
+                        var match = node.nodeValue.match(regex);
+                        if (match) {{
+                            var span = document.createElement('span');
+                            span.style.backgroundColor = 'yellow';
+                            span.textContent = match[0];
+                            var after = node.splitText(match.index);
+                            after.nodeValue = after.nodeValue.substring(match[0].length);
+                            node.parentNode.insertBefore(span, after);
+                        }}
+                    }}
+                }}
+                var batchSize = 100;
+                for (var i = 0; i < nodes.length; i += batchSize) {{
+                    highlightNodes(i, Math.min(i + batchSize, nodes.length));
+                }}
+            ";
+
+            driver.ExecuteScript(script);
+            return true;
+        }
+
+        /// <summary>
+        /// 20240731 Copilot大菩薩：C# Windows.Forms Selenium 螢光色標記
+        /// </summary>
+        /// <param name="keyword"></param>
+        /// <returns></returns>
+        public static bool HighlightKeywords_SingleCharacter(string keyword)
+        {//如果您希望進一步優化，可以考慮使用setTimeout來分批次處理，這樣可以避免一次性處理過多節點導致的性能問題。以下是改進的版本：
+         //這段程式碼使用setTimeout來分批次處理節點，每次處理100個節點，並在每批次之間等待50毫秒。這樣可以避免一次性處理過多節點導致的性能問題，同時確保所有關鍵字都能被標記。
+            string script = $@"
+        var keyword = '{keyword}';
+        var regex = new RegExp(keyword, 'gi');
+        var walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null, false);
+        var node;
+        var nodes = [];
+        while (node = walker.nextNode()) {{
+            nodes.push(node);
+        }}
+        function highlightNodes(start, end) {{
+            for (var i = start; i < end; i++) {{
+                var node = nodes[i];
+                var match;
+                while ((match = regex.exec(node.nodeValue)) !== null) {{
+                    var span = document.createElement('span');
+                    span.style.backgroundColor = 'yellow';
+                    span.textContent = match[0];
+                    var after = node.splitText(match.index);
+                    after.nodeValue = after.nodeValue.substring(match[0].length);
+                    node.parentNode.insertBefore(span, after);
+                    node = after;
+                }}
+            }}
+            if (end < nodes.length) {{
+                setTimeout(function() {{
+                    highlightNodes(end, Math.min(end + batchSize, nodes.length));
+                }}, 50);
+            }}
+        }}
+        var batchSize = 100;
+        highlightNodes(0, batchSize);
+    ";
+
+            driver.ExecuteScript(script);
+            return true;
+        }
+        public static bool HighlightKeywords_SingleCharacter1(string keyword)
+        {
+            string script = $@"
+                var keyword = '{keyword}';
+                var regex = new RegExp(keyword, 'g');
+                var walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null, false);
+                var node;
+                var nodes = [];
+                while (node = walker.nextNode()) {{
+                    nodes.push(node);
+                }}
+                function highlightNodes(start, end) {{
+                    for (var i = start; i < end; i++) {{
+                        var node = nodes[i];
+                        var match;
+                        var matches = [];
+                        while ((match = regex.exec(node.nodeValue)) !== null) {{
+                            matches.push(match);
+                        }}
+                        if (matches.length > 0) {{
+                            var parentNode = node.parentNode;
+                            var newNode = document.createDocumentFragment();
+                            var lastIndex = 0;
+                            for (var j = 0; j < matches.length; j++) {{
+                                match = matches[j];
+                                newNode.appendChild(document.createTextNode(node.nodeValue.substring(lastIndex, match.index)));
+                                var span = document.createElement('span');
+                                span.style.backgroundColor = 'yellow';
+                                span.textContent = match[0];
+                                newNode.appendChild(span);
+                                lastIndex = match.index + match[0].length;
+                            }}
+                            newNode.appendChild(document.createTextNode(node.nodeValue.substring(lastIndex)));
+                            parentNode.replaceChild(newNode, node);
+                        }}
+                    }}
+                    if (end < nodes.length) {{
+                        setTimeout(function() {{
+                            highlightNodes(end, Math.min(end + batchSize, nodes.length));
+                        }}, 50);
+                    }}
+                }}
+                var batchSize = 100;
+                highlightNodes(0, batchSize);
+                ";
+
+            driver.ExecuteScript(script);
+            return true;
+        }
+
 
         /// <summary>
         /// 直接取代文字的編輯頁面
@@ -7824,16 +8262,18 @@ internal static string getImageUrl() {
 
         /// <summary>
         /// C:\Users\oscar\Dropbox\《古籍酷》AI%20OCR%20待改進者隨記%20感恩感恩 讚歎讚歎 南無阿彌陀佛.docx
+        /// 
         /// </summary>
         internal static Microsoft.Office.Interop.Word.Document ImproveGJcoolOCRMemoDoc;
         /// <summary>
+        /// 《古籍酷》與《看典古籍》OCR未善之隨記
         /// 必須焦點在textBox1才行！！20240313
         /// Alt + k : 將選取的字詞句及其網址位址送到以下檔案的末後
         /// C:\Users\oscar\Dropbox\《古籍酷》AI%20OCR%20待改進者隨記%20感恩感恩 讚歎讚歎 南無阿彌陀佛.docx
         /// 20240212大年初三
         /// </summary>
         /// <param name="imporvement">要改進的字詞句（textBox1中被選取的字串）</param>
-        internal static void ImproveGJcoolOCRMemo(string imporvement, string url, string preName = "《古籍酷》AI ")
+        internal static void ImproveGJcoolKandiangujiOCRMemo(string imporvement, string url, string preName = "《古籍酷》AI ")
         {
             //TextBox tb = null;
             //if (ActiveForm1.InvokeRequired)
@@ -7861,7 +8301,17 @@ internal static string getImageUrl() {
             }
             else
             {
-                if (!ImproveGJcoolOCRMemoDoc.Name.StartsWith(preName))
+                string fn = string.Empty;
+                try
+                {
+                    fn = ImproveGJcoolOCRMemoDoc.Name;
+                }
+                catch (Exception)
+                {
+                    ImproveGJcoolOCRMemoDoc = null;
+                    goto retry;
+                }
+                if (!fn.StartsWith(preName))
                 {
                     Microsoft.Office.Interop.Word.Application wordapp = ImproveGJcoolOCRMemoDoc.Application;
                     ImproveGJcoolOCRMemoDoc.Close(Microsoft.Office.Interop.Word.WdSaveOptions.wdDoNotSaveChanges);
@@ -7905,6 +8355,8 @@ internal static string getImageUrl() {
                     //ImproveGJcoolOCRMemoDoc.Application.WindowState = Microsoft.Office.Interop.Word.WdWindowState.wdWindowStateMinimize;
                     Form1.playSound(Form1.soundLike.done, true);
                 }
+                else
+                    Form1.playSound(Form1.soundLike.info);
             }
             catch (Exception)
             {
@@ -8058,6 +8510,12 @@ internal static string getImageUrl() {
             }
         }
 
+
     }
+
 }
+
+
+
+
 
