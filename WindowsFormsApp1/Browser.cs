@@ -1651,7 +1651,10 @@ namespace TextForCtext
                     }
              */
         }
-
+        /// <summary>
+        /// 取得[簡單修改模式](quick edit)控制項
+        /// </summary>
+        /// <returns>傳回[簡單修改模式](quick edit)控制項</returns>
         internal static IWebElement GetQuickeditIWebElement()
         {
             if (driver == null) driver = DriverNew();

@@ -1338,11 +1338,12 @@ namespace WindowsFormsApp1
                 if (missWordPositon != -1)//檢查「/」
                 {//20240803 Copilot大菩薩：C# Windows.Forms 應用程式中檢測半形空格 ：因為在檢查斜線「/」後面不是接著下角括號「>」的情況下，我們需要確保每個匹配的結果都符合這個條件，所以使用了 matches 物件來進一步檢查。
                  //而在檢查半形空格的情況下，正則表達式(?< ! [\w""'\\])\s(?![\w""'\\]) 已經包含了前後字符的條件，因此不需要進一步使用 matches 物件來檢查。
-                    string pattern = @"/(?!>)";
-                    MatchCollection matches = Regex.Matches(xCopy, pattern);
-                    if (matches.Count == 0) missWordPositon = -1;
-                    else missWordPositon = matches[0].Index;
-
+                    string pattern = @"(?<!<)/(?!>)";//20240804 Copilot大菩薩：修正正則表達式問題：您可以使用以下的正則表達式來同時檢測「/」前面不是「<」且後面不是「>」的情況：https://sl.bing.net/hBPULfGmh0m
+                    MatchCollection matches = Regex.Matches(xCopy, pattern);//這裡的 (?<!<) 是一個負向前瞻，用來確保「/」前面不是「<」，而 (?!>) 是一個負向後瞻，用來確保「/」後面不是「>」。……在後瞻的語法中，所謂的「額外符號」就是指「<」這個符號。這個符號用來指明我們要檢查的字符是在目標字符的前面。
+                    if (matches.Count == 0)//如 <entity entityid="808941" type="work">括異志</entity>  https://ctext.org/library.pl?if=gb&file=234676&page=117&editwiki=186218#editor
+                        missWordPositon = -1;
+                    else
+                        missWordPositon = matches[0].Index;
                     #region 另一種方式：
                     /* 
                      
@@ -6331,11 +6332,17 @@ namespace WindowsFormsApp1
             bool _eventabled = _eventsEnabled;
             if (TopMost) TopMost = false;
 
+            reGetURL:
             string url = textBox3.Text, urlShort = url.Substring(0, url.IndexOf("#editor") == -1 ? url.Length : url.IndexOf("#editor")), urlDriver = string.Empty;
             try
             {
                 urlDriver = br.driver.Url;
-
+                if (!IsValidUrl＿keyDownCtrlAdd(url) && !IsValidUrl＿keyDownCtrlAdd(urlDriver)) { MessageBoxShowOKExclamationDefaultDesktopOnly("請檢查網址再重試！" + Environment.NewLine + "driver.Url= " + urlDriver + Environment.NewLine + "textBox3.Text= " + url); return false; }
+                if (urlDriver.StartsWith("https://ctext.org/library.pl?if=gb&file=") && br.isQuickEditUrl(urlDriver) == false)
+                {
+                    if (DialogResult.OK == MessageBoxShowOKCancelExclamationDefaultDesktopOnly("是否要開啟[簡單修改模式](quick edit)？"))
+                    { br.GetQuickeditIWebElement()?.Click(); textBox3.Text = br.driver.Url; goto reGetURL; }
+                }
             }
             catch (Exception)
             {
@@ -6356,29 +6363,39 @@ namespace WindowsFormsApp1
             {//真的都是擴充功能Google翻譯在作怪！難怪害得 driver.Url 和 WindowHandles.Count 都無法取得正確值！
                 if (urlDriver == "chrome-extension://aapbdbdomjkkjkaonfhkkikfgjllcleb/offscreen.html") playSound(soundLike.exam, true);//Debugger.Break();
                 else if (urlDriver.StartsWith("chrome-extension://")) playSound(soundLike.exam, true);//Debugger.Break();
-                bool found = false;
-                foreach (var item in br.driver.WindowHandles)
+                if (urlDriver.StartsWith("https://ctext.org/library.pl?if=gb&file=") && url.StartsWith("https://ctext.org/library.pl?if=gb&file=")
+                    && urlDriver.EndsWith("#editor") && url.EndsWith("#editor") && url == textBox3.Text)//string url = textBox3.Text 見前 20240803
                 {
-                    br.driver.SwitchTo().Window(item);
-                    if (br.driver.Url.StartsWith(urlShort))
-                    {
-                        found = true; break;
-                    }
-                }
-                if (!found)
-                {
-                    if (!string.IsNullOrEmpty(br.LastValidWindow))
-                    {
-                        br.driver.SwitchTo().Window(br.LastValidWindow);
-                        if (br.driver.Url != textBox3.Text)
-                            textBox3.Text = br.driver.Url;
-                    }
+                    playSound(soundLike.exam, true);
+                    textBox3.Text = urlDriver;
+                    url = urlDriver;
                 }
                 else
                 {
-                    br.LastValidWindow = br.driver.CurrentWindowHandle;
-                    urlDriver = br.driver.Url;
-                    if (!urlDriver.StartsWith(urlShort)) goto reCheckUrl;
+                    bool found = false;
+                    foreach (var item in br.driver.WindowHandles)
+                    {
+                        br.driver.SwitchTo().Window(item);
+                        if (br.driver.Url.StartsWith(urlShort))
+                        {
+                            found = true; break;
+                        }
+                    }
+                    if (!found)
+                    {
+                        if (!string.IsNullOrEmpty(br.LastValidWindow))
+                        {
+                            br.driver.SwitchTo().Window(br.LastValidWindow);
+                            if (br.driver.Url != textBox3.Text)
+                                textBox3.Text = br.driver.Url;
+                        }
+                    }
+                    else
+                    {
+                        br.LastValidWindow = br.driver.CurrentWindowHandle;
+                        urlDriver = br.driver.Url;
+                        if (!urlDriver.StartsWith(urlShort)) goto reCheckUrl;
+                    }
                 }
             }
             #region 在手動編輯模式下（尤其是需要OCR時）的前置檢查
@@ -6651,7 +6668,7 @@ namespace WindowsFormsApp1
                                                   //https://sl.bing.net/cZ2i6BiKAmW
                         if (driverUrl != urlDriver && new Uri(urlDriver).Authority == "ctext.org")
                         {
-                            playSound(soundLike.warn, true);
+                            playSound(soundLike.exam, true);
                             foreach (var item in br.driver.WindowHandles)
                             {
                                 br.driver.SwitchTo().Window(item);
@@ -6660,7 +6677,7 @@ namespace WindowsFormsApp1
                         }
                         else if (driverUrl != urlDriver && new Uri(driverUrl).Authority == "ctext.org")
                         {
-                            playSound(soundLike.warn, true);
+                            playSound(soundLike.exam, true);
                             urlDriver = driverUrl;
                         }
 
@@ -9971,7 +9988,7 @@ namespace WindowsFormsApp1
                 if (waitUpdate && waitTabWindowHandle != "")
                 {
                     Edited = true;
-                    //br.driver.SwitchTo().Window(waitTabWindowHandle); br.driver.Close();
+                    br.driver.SwitchTo().Window(waitTabWindowHandle); br.driver.Close();
                     if (br.DirectlyReplacingCharactersPageWindowHandle != string.Empty)
                         br.DirectlyReplacingCharactersPageWindowHandle = string.Empty;//重設；
                     br.driver.SwitchTo().Window(currentWin);

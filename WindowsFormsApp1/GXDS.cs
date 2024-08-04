@@ -21,7 +21,7 @@ namespace TextForCtext
         /// <summary>
         /// 在textBox2內輸入「nb,」可以切換 GXDS.SKQSnoteBlank 值以指定是否要檢查注文中因空白而誤標的情形
         /// </summary>
-        internal static bool SKQSnoteBlank=false;
+        internal static bool SKQSnoteBlank = false;
 
         /// <summary>
         /// = Environment.NewLine;
@@ -40,8 +40,8 @@ namespace TextForCtext
         /// <summary>
         /// =Form1.cs（主表單）； 不能被Dispose
         /// </summary>
-        Form1 frm1 = (Application.OpenForms.Count>0?
-            Application.OpenForms[0]:null) as Form1;
+        Form1 frm1 = (Application.OpenForms.Count > 0 ?
+            Application.OpenForms[0] : null) as Form1;
 
         /// <summary>
         /// 記下前一次操作的網頁頁面
@@ -173,12 +173,15 @@ namespace TextForCtext
 
             noteBeforeTitleSplitTwoLine(ref xForStandardize);
 
-            xForStandardize = "〖文淵|閣寶〗<p>\r\n*欽定四庫全書<p>" + xForStandardize.Substring(xForStandardize.IndexOf("《欽定四庫全書》") + "《欽定四庫全書》".Length);
+            //現在亦可用 https://www.kanripo.org/ 所收《四部叢刊》本，故加此條件判斷 20240804
+            int isSKQS = xForStandardize.IndexOf("《欽定四庫全書》");
+            if (isSKQS > -1)
+                xForStandardize = "〖文淵|閣寶〗<p>\r\n*欽定四庫全書<p>" + xForStandardize.Substring(isSKQS + "《欽定四庫全書》".Length);
 
             xForStandardize = xForStandardize.Replace("○", "◯");
             xForStandardize = xForStandardize.Replace("\r\n　\r\n　\r\n", "\r\n|\r\n|\r\n");
             xForStandardize = xForStandardize.Replace("|\r\n　\r\n|", "|\r\n|\r\n|");
-            
+
         }
         /// <summary>
         /// 標題/篇名標識。只要一行/段之前後均只是空行的話（跨行以上的不處理，手動自行處理）
@@ -354,7 +357,7 @@ namespace TextForCtext
                                     string ch = Regex.Replace(XBefrTitleLine, "[{{}}<p>]", "");
                                     foreach (var item in Form1.punctuationsNum)
                                     {
-                                        if (ch.IndexOf(item) > -1) ch = ch.Replace(item.ToString(), ""); 
+                                        if (ch.IndexOf(item) > -1) ch = ch.Replace(item.ToString(), "");
                                     }
                                     //不含標點符號與數字
                                     StringInfo CH = new StringInfo(ch);

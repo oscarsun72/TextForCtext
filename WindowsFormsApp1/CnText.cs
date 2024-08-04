@@ -557,6 +557,8 @@ namespace TextForCtext
         internal static void FormalizeText(ref string x)
         {
             if (x.Length == 0) return;
+            //有語法內容者不執行（暫時先這樣，不做細緻的區別）20240803
+            if (x.IndexOf("\" ") > -1 && x.IndexOf("=\"") > -1 && x.IndexOf(" />") > -1) return;
 
             #region narrow2WidePunctuationMarks 半形轉全形。置換為全形符號。
             //20230806Bing大菩薩：
