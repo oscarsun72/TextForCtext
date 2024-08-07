@@ -17,6 +17,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 //using Task = System.Threading.Tasks.Task;
 using System.Threading.Tasks;
+
 //using System.Windows;
 using System.Windows.Forms;
 using TextForCtext;
@@ -651,8 +652,15 @@ namespace WindowsFormsApp1
         /// <param name="modifierKeys">按下的控制鍵是Ctrl時才執行</param>
         void copyQuickeditLinkWhenKeyinMode(Keys modifierKeys)
         {
+            try
+            {
+                if (Clipboard.GetText().IndexOf("<scanbegin ") > -1) return;
+            }
+            catch (Exception)
+            {
+                return;
+            }
             //在規範編輯/修改模式中的文字時不處理
-            if (Clipboard.GetText().IndexOf("<scanbegin ") > -1) return;
             switch (modifierKeys)
             {
                 case Keys.Control:
@@ -707,7 +715,7 @@ namespace WindowsFormsApp1
 
         internal static void ResetLastValidWindow()
         {
-            string wh = string.Empty;
+            string wh;
             try
             {
                 wh = br.driver.CurrentWindowHandle;
@@ -920,7 +928,7 @@ namespace WindowsFormsApp1
 
                 }
             }
-            int lineLen = 0;//taked the normal Line and or Para Length
+            int lineLen;
             if (wordCntr == 0 && noteFlg)//純注文
                 lineLen = noteCtr;
             else
@@ -1029,7 +1037,7 @@ namespace WindowsFormsApp1
             if (s == "" || s == textBox1.SelectedText)
             { textBox2.BackColor = textBox2BackColorDefault; return; }
             //如何判斷字串是否代表數值 (c # 程式設計手冊):https://docs.microsoft.com/zh-tw/dotnet/csharp/programming-guide/strings/how-to-determine-whether-a-string-represents-a-numeric-value
-            int i = 0;
+            int i;
             bool result = int.TryParse(s, out i); //i now = textBox2.Text
             if (result && (processID == null || processID == ""))
             {
@@ -3593,7 +3601,7 @@ namespace WindowsFormsApp1
             if (xSel != string.Empty)
             {
                 e = xSel.LastIndexOf("􏿽");
-                e = e + "􏿽".Length;
+                e += "􏿽".Length;
                 //取得下一欄之前的字數
                 //if (wordCntBeforeNextColume == 0 && xSel != )
                 wordCntBeforeNextColume = new StringInfo(getLineTxtWithoutPunctuation(xSel.Substring(0, e), e)).LengthInTextElements;
@@ -3848,7 +3856,7 @@ namespace WindowsFormsApp1
                         sLine += 2;  //Environment.NewLine.Length;
                     }
                 }
-                s += iPara; iPara = 0;
+                s += iPara; //iPara = 0;
                 if (char.IsLowSurrogate(x.Substring(s, 1).ToCharArray()[0])) s++;
                 x = x.Substring(0, s) + "<p>" + Environment.NewLine + x.Substring(s);
                 s += 5;//"<p>" + Environment.NewLine
@@ -4224,7 +4232,7 @@ namespace WindowsFormsApp1
         private void keysSpacesBlank()
         {
             string x = textBox1.Text;
-            int s = textBox1.SelectionStart, l = textBox1.SelectionLength;
+            int s = textBox1.SelectionStart;//, l = textBox1.SelectionLength;
             string sTxt = textBox1.SelectedText;
             dontHide = true;
             if (sTxt != "")
@@ -4816,7 +4824,7 @@ namespace WindowsFormsApp1
                 int ns = s - n.Length;
                 textBox1.Select(ns, n.Length + px.Length);
                 textBox1.SelectedText = "{{" + px + "　　";
-                textBox1.SelectionStart = textBox1.SelectionStart + n.Length;
+                textBox1.SelectionStart += n.Length;
             }
         }
 
@@ -4855,7 +4863,7 @@ namespace WindowsFormsApp1
 
         private void deleteSpacePreParagraphs_ConvexRow()
         { //Shift + F7 每行凸排
-            int s = textBox1.SelectionStart, so = s, l = textBox1.SelectionLength, cntr = 0, i; dontHide = true; string x = textBox1.Text, selTxt;
+            int s = textBox1.SelectionStart, l = textBox1.SelectionLength, cntr = 0, i; dontHide = true; string x = textBox1.Text, selTxt;
             if (l == 0)
             {
                 if (s == 0 || s == textBox1.TextLength)
@@ -5266,7 +5274,7 @@ namespace WindowsFormsApp1
             x = x.Substring(0, textBox1.SelectionStart);
             xNext = xNext.Replace(Environment.NewLine, "");
             normalLineParaLength = 0;
-            x = x + xNext;
+            x += xNext;
             textBox1.Text = x;
             textBox1.SelectionStart = s;// textBox1.SelectionLength = 1;
             restoreCaretPosition(textBox1, s, 0);//textBox1.ScrollToCaret();
@@ -5849,7 +5857,7 @@ namespace WindowsFormsApp1
             //最後一行
             string lastLineText = getLineTxtWithoutPunctuation(textBox1.Text, s);
             if (new StringInfo(lastLineText).LengthInTextElements < wordsPerLinePara && lastLineText.IndexOf("<p>") == -1)
-                textBox1.Text = textBox1.Text + p;
+                textBox1.Text += p;
             stopUndoRec = false; ResumeEvents();
             replaceBlank_ifNOTTitleAndAfterparagraphMark();
             fillSpace_to_PinchNote_in_LineStart();
@@ -6340,7 +6348,15 @@ namespace WindowsFormsApp1
                 if (!IsValidUrl＿keyDownCtrlAdd(url) && !IsValidUrl＿keyDownCtrlAdd(urlDriver)) { MessageBoxShowOKExclamationDefaultDesktopOnly("請檢查網址再重試！" + Environment.NewLine + "driver.Url= " + urlDriver + Environment.NewLine + "textBox3.Text= " + url); return false; }
                 if (urlDriver.StartsWith("https://ctext.org/library.pl?if=gb&file=") && br.isQuickEditUrl(urlDriver) == false)
                 {
-                    if (DialogResult.OK == MessageBoxShowOKCancelExclamationDefaultDesktopOnly("是否要開啟[簡單修改模式](quick edit)？"))
+                    int boxTag = urlDriver.IndexOf("#box(");
+                    if (boxTag > -1)
+                    {
+                        playSound(soundLike.exam);
+                        urlDriver = urlDriver.Substring(0, boxTag) + "#editor";
+                        br.driver.Navigate().GoToUrl(urlDriver);
+                        goto reGetURL;
+                    }
+                    if (DialogResult.OK == MessageBoxShowOKCancelExclamationDefaultDesktopOnly("是否要開啟[簡單修改模式](quick edit)？" + Environment.NewLine + Environment.NewLine + "driver.Url= " + urlDriver))
                     { br.GetQuickeditIWebElement()?.Click(); textBox3.Text = br.driver.Url; goto reGetURL; }
                 }
             }
@@ -8690,12 +8706,12 @@ namespace WindowsFormsApp1
                     {
                         playSound(soundLike.waiting);
                         AvailableInUseBothKeysMouse();
-                        SendKeys.SendWait("%{ins}");
+                        SendKeys.SendWait("%{ins}");//Alt + Insert
                         textBox1.Select(0, 0);
                     }
                     else
                     {
-                        SendKeys.Send("%r");//關閉Chrome瀏覽器右邊所有分頁
+                        SendKeys.Send("%r");//Alt + r 關閉Chrome瀏覽器右邊所有分頁
                     }
 
                     _eventsEnabled = eventenable;
@@ -11984,7 +12000,26 @@ namespace WindowsFormsApp1
 
         private void textBox3_TextChanged(object sender, EventArgs e)
         {
+            if (!_eventsEnabled) return;
             string url = textBox3.Text;
+            //取代#box 為 #editor，如 https://ctext.org/library.pl?if=gb&file=185615&page=200&editwiki=2330034#box(428,674,2,4)
+            //if (url.IndexOf("#box(") > -1 && (url.IndexOf("&editwiki=") > -1)
+            if (url.IndexOf("#box(") > -1) Debugger.Break();
+            if (url.IndexOf("#box(") > url.IndexOf("&editwiki="))
+            {
+                PauseEvents();
+                url = url.Substring(0, url.IndexOf("#box(")) + "#editor";
+                textBox3.Text = url;
+                try
+                {
+                    if (br.driver?.Url.StartsWith(url.Substring(0, url.IndexOf("#box("))) == true) br.driver.Navigate().GoToUrl(url);
+                }
+                catch (Exception ex)
+                {
+                    Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
+                }
+                ResumeEvents();
+            }
             if (url.IndexOf("&page=") > -1)
             {//取得現前頁碼
                 int s = url.IndexOf("&page=") + "&page=".Length;
@@ -12782,7 +12817,8 @@ namespace WindowsFormsApp1
             string imagePath = MydocumentsPathIncldBackSlash + "CtextTempFiles\\Ctext_Page_Image.png", result = string.Empty;
             //if (DownloadImage(br.GetImageUrl(), out imagePath))
             DateTime dt = DateTime.Now;
-            if (TopMost) TopMost = false;
+            TopMost = false;
+            br.BringToFront("chrome");
             br.driver.SwitchTo().Window(br.GetCurrentWindowHandle(br.driver));
             while (!File.Exists(imagePath))
             {

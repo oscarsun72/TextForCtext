@@ -206,7 +206,7 @@ namespace TextForCtext
         {
             get
             {
-                if (driver == null) return string.Empty; ReadOnlyCollection<string> whs = null;
+                if (driver == null) return string.Empty; ReadOnlyCollection<string> whs;
                 try
                 {
                     whs = driver.WindowHandles;
@@ -531,7 +531,7 @@ namespace TextForCtext
         {
             get
             {
-                IWebElement iwe = null;
+                IWebElement iwe;
                 if (Form1.IsValidUrl＿keyDownCtrlAdd(ActiveForm1.textBox3Text))
                 {
                     iwe = waitFindWebElementBySelector_ToBeClickable("#content > div:nth-child(7) > div:nth-child(2) > a:nth-child(2)");
@@ -568,7 +568,7 @@ namespace TextForCtext
             //get { return quickedit_data_textbox == null ? waitFindWebElementByName_ToBeClickable("data", WebDriverWaitTimeSpan) : quickedit_data_textbox; }
             get
             {
-                IWebElement iwe = null;
+                IWebElement iwe;
                 if (Form1.IsValidUrl＿ImageTextComparisonPage(ActiveForm1.textBox3Text))
                 {
                     iwe = waitFindWebElementBySelector_ToBeClickable("#content > div:nth-child(3) > form > input[type=text]:nth-child(3)");
@@ -586,7 +586,7 @@ namespace TextForCtext
             //get { return quickedit_data_textbox == null ? waitFindWebElementByName_ToBeClickable("data", WebDriverWaitTimeSpan) : quickedit_data_textbox; }
             get
             {
-                IWebElement iwe = null;
+                IWebElement iwe;
                 if (Form1.IsValidUrl＿ImageTextComparisonPage(ActiveForm1.textBox3Text))
                 {
                     iwe = waitFindWebElementBySelector_ToBeClickable("#content > div:nth-child(3)");
@@ -1583,10 +1583,60 @@ namespace TextForCtext
                 string url = getUrlFirst_Ctext_Edit(ControlType.Edit).Trim();
                 if (url == "")
                 {
-                    if (Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("目前作用中的分頁並非有效的圖文對照頁面，是否要讓程式繼續比對？"
-                        , "ActiveTabURL_Ctext_Edit\n\r\n\rgetUrlFirst_Ctext_Edit=\"\"") == DialogResult.OK)
+                    string urlDriver = string.Empty;
+                    try
                     {
-                        url = getUrl(ControlType.Edit).Trim();
+                        urlDriver = driver.Url;
+                    }
+                    catch (Exception)
+                    {
+                        if (Form1.IsValidUrl＿keyDownCtrlAdd(ActiveForm1.textBox3Text))
+                        {
+                            //如：https://ctext.org/library.pl?if=en&file=38675&page=1&editwiki=573099#editor
+                            string shortUrl = ActiveForm1.textBox3Text.Substring(0, ActiveForm1.textBox3Text.IndexOf("#editor") == -1 ? ActiveForm1.textBox3Text.Length : ActiveForm1.textBox3Text.IndexOf("#editor"));
+                            foreach (var item in driver.WindowHandles)
+                            {
+                                driver.SwitchTo().Window(item);
+                                if (driver.Url.StartsWith(shortUrl)) break;
+                            }
+                        }
+                    }
+
+                    if (!Form1.IsValidUrl＿ImageTextComparisonPage(driver.Url))
+                    {
+                        foreach (var item in driver.WindowHandles)
+                        {
+                            driver.SwitchTo().Window(item);
+                            if (Form1.IsValidUrl＿ImageTextComparisonPage(driver.Url)) break;
+                        }
+                        if (!Form1.IsValidUrl＿ImageTextComparisonPage(driver.Url))
+                        {
+                            int windowsCount = 0;
+                            try
+                            {
+                                windowsCount = driver.WindowHandles.Count;
+                            }
+                            catch (Exception)
+                            {
+                                windowsCount = GetValidWindowHandles(driver).Count;
+                            }
+                            if (windowsCount > 1)
+                            {
+                                if (Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("目前作用中的分頁並非有效的圖文對照頁面，是否要讓程式繼續比對？"
+                                        , "ActiveTabURL_Ctext_Edit\n\r\n\rgetUrlFirst_Ctext_Edit=\"\"") == DialogResult.OK)
+                                    url = getUrl(ControlType.Edit).Trim();
+                            }
+                        }
+                        else
+                        {
+                            url = driver.Url;
+                            ActiveForm1.textBox3Text = url;
+                        }
+                    }
+                    else
+                    {
+                        url = driver.Url;
+                        ActiveForm1.textBox3Text = url;
                     }
                 }
                 if (url != "") url = url.StartsWith("https://") ? url : "https://" + url;
@@ -1670,8 +1720,6 @@ namespace TextForCtext
         /// <returns></returns>
         static string getUrlFirst_Ctext_Edit(ControlType controlType, bool endwithEditorStr = false)
         {
-
-            string url = "";
             try
             {
                 //Process[] procsBrowser = GetChromeProcessInstances;
@@ -1710,7 +1758,7 @@ namespace TextForCtext
 
                         if (elmUrlBar != null)
                         {
-                            url = ((ValuePattern)elmUrlBar.GetCurrentPattern(ValuePattern.Pattern)).Current.Value as string;
+                            string url = ((ValuePattern)elmUrlBar.GetCurrentPattern(ValuePattern.Pattern)).Current.Value as string;
                             //if ((url.StartsWith("http") || url.StartsWith("ctext")))
                             if (endwithEditorStr)
                             {
@@ -2381,7 +2429,7 @@ namespace TextForCtext
             // 取得元件 scancont 的圖片網址
             //IWebElement scancont = driver.FindElement(By.Id("content"));
             //IWebElement scancont = driver.FindElement(By.Id("scancont"));
-            string imageUrl = ""; IList<OpenQA.Selenium.IWebElement> imageElements = null;
+            string imageUrl = ""; IList<IWebElement> imageElements;
             try
             {
                 imageElements = driver.FindElements(By.TagName("img"));
@@ -2540,7 +2588,8 @@ internal static string getImageUrl() {
             string url = new Form1().textBox3Text;
             if (url == "") return url;
             int edit = url.IndexOf("&editwiki");
-            int page = 0; string urlSub = url;
+            int page;
+            string urlSub;
             if (edit > -1)
             {
                 urlSub = url.Substring(0, url.IndexOf("&page=") + "&page=".Length);
@@ -7423,7 +7472,7 @@ internal static string getImageUrl() {
             ,"初九","九二","九三","九四","九五","上九","初六","六二","六三","六四","六五","上六"
             ,"用九","用六"};
 
-            string title = "";
+            string title;
             try
             {
                 title = driver.Title;//避免誤關出錯
@@ -8359,7 +8408,7 @@ internal static string getImageUrl() {
                     Form1.playSound(Form1.soundLike.done, true);
                 }
                 else
-                    Form1.playSound(Form1.soundLike.info);
+                    Form1.playSound(Form1.soundLike.info, true);
             }
             catch (Exception)
             {

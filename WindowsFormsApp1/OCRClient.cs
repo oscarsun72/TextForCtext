@@ -8,6 +8,9 @@ using Newtonsoft.Json;
 using System.IO;
 using Newtonsoft.Json.Linq;
 using System.Threading;
+using System.Net.Http.Headers;
+using WindowsFormsApp1;
+using System.Windows.Forms;
 
 namespace TextForCtext
 {
@@ -18,10 +21,12 @@ namespace TextForCtext
     internal class OCRClient
     {
         private readonly HttpClient _client;
+        public Form1 ActiveForm1;
 
         public OCRClient()
         {
             _client = new HttpClient();
+            ActiveForm1 = Application.OpenForms[0] as Form1;
         }
 
         /// <summary>
@@ -31,12 +36,14 @@ namespace TextForCtext
         /// <returns>回傳執行結果的字串</returns>
         public string GetOCRResult(string imagePath)
         {//20240731 Copilot大菩薩：解決圖檔讀取問題的程式碼修改建議：看來這個錯誤是因為圖檔還未完全下載完成就被讀取了。您可以在讀取圖檔之前加入一個等待機制，確保圖檔已經完全下載。以下是修改後的程式碼：
-            // 等待圖檔完全下載
+         //int retryCntr = 0;
+         //retry:
+         // 等待圖檔完全下載            
             while (!File.Exists(imagePath))
             {
                 Thread.Sleep(100); // 等待 100 毫秒
             }
-
+            ActiveForm1.TopMost = false;
             // 確保圖檔可以被讀取
             bool fileReady = false;
             while (!fileReady)
@@ -57,23 +64,62 @@ namespace TextForCtext
             var bytes = File.ReadAllBytes(imagePath);
             var base64Image = Convert.ToBase64String(bytes);
 
-            var request = new HttpRequestMessage(HttpMethod.Post, "https://ocr.kandianguji.com/ocr_api");
+            var request = new HttpRequestMessage(HttpMethod.Post, "https://ocr.kandianguji.com/ocr_api");//https://images.kandianguji.com:14141/ocr_api
 
             // 讀取 token 和 email
             string tokenPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "CtextTempFiles", "OCRAPItoken.txt");
             string token = File.ReadAllText(tokenPath).Trim();
 
             var json = JsonConvert.SerializeObject(new
-            {
+            {//https://kandianguji.com/ocr_api_doc
                 token = token,
                 email = "oscarsun72@hotmail.com",
                 image = base64Image,
-                version = "beta"
+                version = "beta",//這是站長在微信跟我說的，相當於網頁版的「语序优化beta版」選項 https://kandianguji.com/ocr
+                det_mode = "sp"//det_mode：文字内容排版样式，目前有三种可选：auto（自动识别）、sp（竖向排版）、hp（横向排版）；字符串类型，默认值：auto
             });
             request.Content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            var response = _client.SendAsync(request).GetAwaiter().GetResult();
-
+            HttpResponseMessage response = null;
+            try
+            {//20240804 Copilot大菩薩： 使用 CancellationToken 設置程式超時機制：  https://sl.bing.net/jBHhw5kprxI
+             //您可以使用 CancellationToken 來設置一個超時機制，避免程式在 SendAsync 這一行卡住。以下是修改後的程式碼：
+             //這樣，當請求超過 10 秒未完成時，會自動取消請求並進行重試。希望這樣的修改能夠解決您的問題！如果還有其他問題，隨時告訴我哦！
+             //using (var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10))) // 設置 10 秒超時
+             //using (var cts = new CancellationTokenSource(TimeSpan.FromSeconds(40))) // 設置 40 秒超時
+             //{
+             //因為重送講求會被扣點數，先取消
+             //response = _client.SendAsync(request, cts.Token).GetAwaiter().GetResult();
+                response = _client.SendAsync(request).GetAwaiter().GetResult();
+                //}
+            }
+            catch (OperationCanceledException)
+            {
+                //Console.WriteLine("Request timed out.");
+                //if (retryCntr < 3)
+                //{
+                //    Thread.Sleep(1500);
+                //    retryCntr++;
+                //    Form1.playSound(Form1.soundLike.processing, true);                    
+                //    goto retry;
+                //}
+                //else
+                return null;
+            }
+            //catch (Exception ex)
+            catch (Exception)
+            {
+                //Console.WriteLine($"Error: {ex.Message}");
+                //if (retryCntr < 3)
+                //{
+                //    Thread.Sleep(1500);
+                //    retryCntr++;
+                //    Form1.playSound(Form1.soundLike.processing, true);
+                //    goto retry;
+                //}
+                //else
+                return null;
+            }
             if (response.IsSuccessStatusCode)
             {
                 var result = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
@@ -247,7 +293,7 @@ namespace TextForCtext
         {//public async Task<string> GetOCRResult(string imageUrl)
             var request = new HttpRequestMessage(HttpMethod.Post, "https://www.kandianguji.com/ocr_api");
             //request.Headers.Add("token", "您的token"); // 將 "您的token" 替換為您的實際token
-            request.Headers.Add("token", "***"); 
+            request.Headers.Add("token", "***");
             request.Headers.Add("email", "oscarsun72@hotmail.com"); // 將 "oscarsun72@hotmail.com" 替換為您的實際註冊郵箱
 
             request.Content = new StringContent($"{{\"url\":\"{imageUrl}\"}}", Encoding.UTF8, "application/json");
