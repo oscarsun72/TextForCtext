@@ -7453,6 +7453,164 @@ internal static string getImageUrl() {
             return url + "#" + w;//到VBA再轉碼，以便複製此字、不必再key也。況昨晚才經Bing大菩薩、StackOverflow AI大菩薩的加持，得以成功建置此生第1個 dll檔案，供Word VBA調用。感恩感恩　讚歎讚歎　南無阿彌陀佛
         }
 
+        /// <summary>
+        /// Alt + F10 ： 將textBox1中選取的文字送去《古籍酷》自動標點。若無選取則將整個textBox1的內容送去。20240808（臺灣父親節）
+        /// </summary>
+        /// <param name="x">要送去《古籍酷》自動標點的文本內容</param>
+        /// <returns>有誤則傳回false</returns>
+        internal static bool GjcoolPunct(ref string x)
+        {
+            if (driver == null) return false;
+            //LastValidWindow = GetCurrentWindowHandle(driver)??(IsWindowHandleValid(driver,driver.WindowHandles.Last())? driver.WindowHandles.Last(): driver.WindowHandles.First());
+            string lastWindowHandle = driver.WindowHandles.Last();
+            if (!IsWindowHandleValid(driver, lastWindowHandle))
+                Debugger.Break();
+            LastValidWindow = GetCurrentWindowHandle(driver) ?? lastWindowHandle;
+            openNewTabWindow();
+            driver.Navigate().GoToUrl("https://gj.cool/punct");
+            IWebElement iwe = waitFindWebElementBySelector_ToBeClickable("#PunctArea");
+            DateTime dt = DateTime.Now;
+            while (iwe == null)
+            {
+                iwe = waitFindWebElementBySelector_ToBeClickable("#PunctArea");
+                if (DateTime.Now.Subtract(dt).TotalSeconds > 10) if (Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("等待頁面開啟已逾時，是否繼續？") == DialogResult.Cancel) return false;
+            }
+        rePaste:
+            //將要標點的文本寫入剪貼簿：
+            try
+            {
+                Clipboard.SetText(x);
+            }
+            catch (Exception)
+            {
+            }
+            try
+            {
+                if (Clipboard.GetText() == string.Empty)
+                {
+                    Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("剪貼簿出錯！請重來"); return false;
+                }
+            }
+            catch (Exception)
+            {
+                Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("剪貼簿出錯！請重來");
+                return false;
+            }
+            //將要標點的文本貼到標點區：
+            iwe.SendKeys(OpenQA.Selenium.Keys.Shift + OpenQA.Selenium.Keys.Insert);
+            if (string.Empty == iwe.Text)
+            {
+                if (Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("貼上失誤，是否重試一次？") == DialogResult.OK) goto rePaste;
+            }
+            iwe = null;
+            //按下「標點」按鈕：
+            Thread.Sleep(640);//非得要等一會才能成功！
+            dt = DateTime.Now;
+            while (iwe == null)
+            {
+                iwe = waitFindWebElementBySelector_ToBeClickable("#main > div > div.p-1.p-md-3.d-flex.justify-content-end > div:nth-child(6) > button > i");
+                if (DateTime.Now.Subtract(dt).TotalSeconds > 8) if (Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("還沒找到「標點」按鈕，是否繼續？") == DialogResult.Cancel) return false;
+            }
+            iwe.Click();//Thread.Sleep(640);//非得要等一會才能成功！
+            //iwe.SendKeys(OpenQA.Selenium.Keys.Enter);//不能互動，會出現錯誤
+            iwe = waitFindWebElementBySelector_ToBeClickable("#PunctArea");
+            dt = DateTime.Now;
+            while (iwe.Text == x)
+            {
+
+                if (DateTime.Now.Subtract(dt).TotalSeconds > 25) if (Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("標點逾時，是否繼續？") == DialogResult.Cancel) return false;
+            }
+            x = iwe.Text;
+            //關閉https://gj.cool/punct頁面回到原來的頁面
+            driver.Close();
+            driver.SwitchTo().Window(LastValidWindow);
+            return true;
+        }
+        /// <summary>
+        /// Ctrl + F10： 將textBox1中選取的文字送去《古籍酷》舊版自動標點。若無選取則將整個textBox1的內容送去。（小於20字元不處理）20240808（臺灣父親節）
+        /// </summary>
+        /// <param name="x">要送去《古籍酷》舊版自動標點的文本內容</param>
+        /// <returns>有誤則傳回false</returns>
+        internal static bool GjcoolPunctOld(ref string x)
+        {
+            if (driver == null) return false;
+            LastValidWindow = GetCurrentWindowHandle(driver);
+            openNewTabWindow();
+            driver.Navigate().GoToUrl("https://old.gj.cool/gjcool/index");
+            //文本輸入框
+            IWebElement iwe = waitFindWebElementBySelector_ToBeClickable("#origin000");
+            DateTime dt = DateTime.Now;
+            while (iwe == null)
+            {
+                iwe = waitFindWebElementBySelector_ToBeClickable("#origin000");
+                if (DateTime.Now.Subtract(dt).TotalSeconds > 10) if (Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("等待頁面開啟已逾時，是否繼續？") == DialogResult.Cancel) return false;
+            }
+        rePaste:
+            //將要標點的文本寫入剪貼簿：
+            try
+            {
+                Clipboard.SetText(x);
+            }
+            catch (Exception)
+            {
+            }
+            try
+            {
+                if (Clipboard.GetText() == string.Empty)
+                {
+                    Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("剪貼簿出錯！請重來"); return false;
+                }
+            }
+            catch (Exception)
+            {
+                Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("剪貼簿出錯！請重來");
+                return false;
+            }
+            //將要標點的文本貼到標點區：
+            iwe.SendKeys(OpenQA.Selenium.Keys.Shift + OpenQA.Selenium.Keys.Insert);
+            if (string.Empty == iwe.GetAttribute("value"))
+            {
+                if (Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("貼上失誤，是否重試一次？") == DialogResult.OK) goto rePaste;
+            }
+            iwe = null;
+            //按下「標點」按鈕：
+            Thread.Sleep(640);//非得要等一會才能成功！
+            dt = DateTime.Now;
+            while (iwe == null)
+            {
+                iwe = waitFindWebElementBySelector_ToBeClickable("#processbtn");
+                if (DateTime.Now.Subtract(dt).TotalSeconds > 8) if (Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("還沒找到「標點」按鈕，是否繼續？") == DialogResult.Cancel) return false;
+            }
+            iwe.Click();//Thread.Sleep(640);//非得要等一會才能成功！
+            //iwe.SendKeys(OpenQA.Selenium.Keys.Enter);//不能互動，會出現錯誤
+            //標點結果文本框
+            while (null == waitFindWebElementBySelector_ToBeClickable("#result001")) { }
+            iwe = waitFindWebElementBySelector_ToBeClickable("#result001");
+            dt = DateTime.Now;
+            while (iwe.GetAttribute("textContent") == x || iwe.GetAttribute("textContent") == string.Empty)
+            {
+
+                if (DateTime.Now.Subtract(dt).TotalSeconds > 25) if (Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("標點逾時，是否繼續？") == DialogResult.Cancel) return false;
+            }
+            x = iwe.GetAttribute("textContent");
+            standardizedText(ref x);
+            
+            string standardizedText(ref string text)
+            {
+                //x = x.Substring(0, " ".Length) == " " ? x.Substring(" ".Length, x.Length - " ".Length) : x;
+                text = text.Substring(0, " ".Length) == " " ? text.Substring(" ".Length) : text;
+                text = text.Replace("　", string.Empty).Replace(" ", Environment.NewLine);
+                return text;
+            }
+
+            //關閉https://gj.cool/punct頁面回到原來的頁面
+            driver.Close();
+            driver.SwitchTo().Window(LastValidWindow);
+            return true;
+        }
+        /// <summary>
+        /// 作為「《漢籍全文資料庫》檢索易學關鍵字」的欲檢索關鍵字瀏覽清單索引（已檢索瀏覽之位置）記錄用。在textBox2中輸入「lx」（list index clear(x=叉=清除））以歸零
+        /// </summary>
         internal static int ListIndex_Hanchi_SearchingKeywordsYijing = 0;
 
         /// <summary>
@@ -7467,7 +7625,7 @@ internal static string getImageUrl() {
             if (driver == null) return true;
             List<string> keywords = new List<string> { "易", "卦", "爻", "繫詞", "繫辭", "文言", "乾坤","元亨","利貞", "咎"
                 , "夬", "頤","巽","坎","兌","小畜","大畜","歸妹","明夷","同人","大有","豫","蠱","噬嗑","賁","剝","大過","小過","遯","大壯","睽","暌","蹇","姤","萃","艮","渙","中孚","既濟","未濟"
-                ,"咸恆","老陰", "老陽", "少陰", "少陽"
+                ,"咸恆","老陰", "老陽", "少陰", "少陽","十翼"
                 ,"无妄", "彖", "象曰", "象傳", "象日", "象云","小象", "筮"
             ,"初九","九二","九三","九四","九五","上九","初六","六二","六三","六四","六五","上六"
             ,"用九","用六"};

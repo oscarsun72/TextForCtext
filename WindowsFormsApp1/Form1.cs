@@ -1,5 +1,4 @@
 ﻿using Microsoft.Win32;
-using OpenQA.Selenium.DevTools.V124.Page;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -9,8 +8,8 @@ using System.Drawing.Text;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Media;
+using System.Net.NetworkInformation;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -22,7 +21,6 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using TextForCtext;
 using WebSocketSharp;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.Button;
 
 
 //using static System.Windows.Forms.VisualStyles.VisualStyleElement;
@@ -31,7 +29,6 @@ using static System.Windows.Forms.VisualStyles.VisualStyleElement.Button;
 using ado = ADODB;//https://docs.microsoft.com/zh-tw/dotnet/csharp/language-reference/keywords/using-directive
 using Application = System.Windows.Forms.Application;
 using br = TextForCtext.Browser;
-using Excel = Microsoft.Office.Interop.Excel;
 using Font = System.Drawing.Font;
 using Point = System.Drawing.Point;
 
@@ -8096,6 +8093,13 @@ namespace WindowsFormsApp1
                     }
                     return;
                 }
+
+                if (e.KeyCode == Keys.F10)
+                {//Ctrl + F10： 將textBox1中選取的文字送去《古籍酷》舊版自動標點。若無選取則將整個textBox1的內容送去。（小於20字元不處理）20240808（臺灣父親節）
+                    e.Handled = true;
+                    toGjcoolPunct("https://old.gj.cool/gjcool/index");
+                    return;
+                }
                 if (e.KeyCode == Keys.F)
                 {
                     e.Handled = true;
@@ -8352,6 +8356,13 @@ namespace WindowsFormsApp1
 
                 }
 
+                if (e.KeyCode == Keys.F10)
+                {//Alt + F10 ： 將textBox1中選取的文字送去《古籍酷》自動標點。若無選取則將整個textBox1的內容送去。（小於20字元不處理）20240808（臺灣父親節）
+                    e.Handled = true;
+                    toGjcoolPunct("https://gj.cool/punct");
+                    return;
+                }
+
                 if (e.KeyCode == Keys.F12)
                 {
                     e.Handled = true;
@@ -8438,6 +8449,64 @@ namespace WindowsFormsApp1
 
             }//以上 按下單一鍵
             #endregion
+        }
+
+        /// <summary>
+        /// 送去《古籍酷》自動標點
+        /// </summary>
+        /// <param name="url">要送去的網站網址</param>
+        /// <returns>若失敗則回傳false</returns>
+        private bool toGjcoolPunct(string url)
+        {
+            string x = textBox1.SelectedText == string.Empty ? textBox1.Text : textBox1.SelectedText;
+            if (x == textBox1.Text) textBox1.SelectAll();
+            overtypeModeSelectedTextSetting(ref textBox1);
+            //最後不要選到分段符號及Xml標記
+            if (textBox1.SelectionLength > 2)
+            {
+                while (("<" + Environment.NewLine).Contains(textBox1.SelectedText.Substring(textBox1.SelectionLength - 1, 1)))
+                {
+                    textBox1.SelectionLength--;
+                    if (textBox1.SelectionLength - 1 < 0) break;
+                }
+            }
+
+            x = textBox1.SelectedText;
+            //小於20字元不處理
+            if (x.Length < 20) return false;
+            TopMost = false; int s = textBox1.SelectionStart;
+            //舊版會破壞"<p>"記號，故先予清除，之後可用軟件中標識<p>的功能補諸20240809(或有空時再學昨天恢復分段符號的方法 RestoreParagraphs ，只是這次不是分段符號，而是分段記號（<p>），或將之擴展為傳入指定字符作為引數）。
+            bool reMarkFlag = false;
+            if (url == "https://old.gj.cool/gjcool/index")
+            {
+                //記下最後是否是<p>，是的話最後補上
+                if (x.Length > 3 && x.Substring(x.Length - "<p>".Length) == "<p>") reMarkFlag = true;
+                x = x.Replace("<p>", string.Empty);
+            }
+            string originalText = CnText.RemoveBooksPunctuation(ref x);
+            CnText.FormalizeText(ref originalText);
+            switch (url)
+            {
+                case "https://old.gj.cool/gjcool/index":
+                    br.GjcoolPunctOld(ref x);//舊版不會去除分段符號
+                    break;
+                case "https://gj.cool/punct":
+                    br.GjcoolPunct(ref x);//新版會去除分段符號
+                    x = CnText.RestoreParagraphs(ref originalText, ref x);
+                    break;
+                default:
+                    break;
+            }
+            CnText.FormalizeText(ref x);
+            bool p = pasteAllOverWrite;
+            pasteAllOverWrite = true;//防止隱藏到系統任務列去
+            if (reMarkFlag) x += "<p>";
+            textBox1.SelectedText = CnText.BooksPunctuation(ref x, true);
+            pasteAllOverWrite = p;
+            //textBox1.SelectedText = x;
+            AvailableInUseBothKeysMouse();
+            textBox1.Select(s, 0);
+            return true;
         }
 
         private void doHanchi_SearchingKeywordsYijing()

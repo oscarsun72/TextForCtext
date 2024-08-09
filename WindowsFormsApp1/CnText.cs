@@ -209,9 +209,16 @@ namespace TextForCtext
         /// <returns>重新標好的文本</returns>
         internal static ref string RemarkBooksPunctuation(ref string clpTxt)
         {
-            Regex rx = new Regex("[《·》〈〉]");
-            clpTxt = rx.Replace(clpTxt, string.Empty);
+            clpTxt = RemoveBooksPunctuation(ref clpTxt);
             BooksPunctuation(ref clpTxt, true);
+            return ref clpTxt;
+        }
+
+        internal static ref string RemoveBooksPunctuation(ref string clpTxt)
+        {
+            //Regex rx = new Regex("[《·》〈〉]");
+            Regex rx = new Regex("[《·》〈〉：]");
+            clpTxt = rx.Replace(clpTxt, string.Empty);
             return ref clpTxt;
         }
 
@@ -575,7 +582,7 @@ namespace TextForCtext
                 //,"}}<p>\r\n{{"//像《札迻》就有此種格式，不能取代掉！ https://ctext.org/library.pl?if=en&file=36575&page=12&editwiki=800245#editor
                 ,"\r\n。<p>"
                 ,"！。<p>","？。<p>","+<p>","<p>+","：。<p>","。\r\n。"
-                ,"：。"};
+                ,"：。","\r\n，","\r\n。","\r\n、","\r\n？","\r\n」","「\r\n" ,"{{\r\n" ,"\r\n}}"};
 
             string[] replaceChar = { "！","、", "，", "；", "：", "·", "？", "：", "《", "》", "〈", "〉",
                 "。}}", "。}}}<p>", "。}}}<p>", "。}}<p>", "。}}<p>","。<p>","。<p>","<p>","<p>","　","　"
@@ -583,22 +590,31 @@ namespace TextForCtext
                 //,"}}\r\n{{"//像《札迻》就有此種格式，不能取代掉！ https://ctext.org/library.pl?if=en&file=36575&page=12&editwiki=800245#editor
                 ,"\r\n"
                 ,"！<p>","？<p>","<p>","<p>","：<p>","。\r\n"
-                ,"。"};
-            foreach (var item in replaceDChar)
+                ,"。","，\r\n","。\r\n","、\r\n","？\r\n","」\r\n","\r\n「" ,"\r\n{{", "}}\r\n"};
+            if (replaceDChar.Count() != replaceChar.Count()) Debugger.Break();//請檢查！！
+            for (int i = 0; i <replaceChar.Count(); i++)
             {
-                if (x.IndexOf(item) > -1)
-                {
-                    //if (MessageBox.Show("含半形標點，是否取代為全形？", "", MessageBoxButtons.OKCancel,
-                    //    MessageBoxIcon.Error) == DialogResult.OK)
-                    //{//直接將半形標點符號轉成全形
-                    for (int i = 0; i < replaceChar.Length; i++)
-                    {
-                        x = x.Replace(replaceDChar[i], replaceChar[i]);
-                    }
-                    //}
-                    break;
-                }
+                //if (replaceDChar[i] == "{{\r\n") Debugger.Break();
+                x = x.Replace(replaceDChar[i], replaceChar[i]);
             }
+
+            //以下舊式
+            //foreach (var item in replaceDChar)
+            //{
+            //    if (x.IndexOf(item) > -1)
+            //    {
+            //        //if (MessageBox.Show("含半形標點，是否取代為全形？", "", MessageBoxButtons.OKCancel,
+            //        //    MessageBoxIcon.Error) == DialogResult.OK)
+            //        //{//直接將半形標點符號轉成全形
+            //        for (int i = 0; i < replaceChar.Length; i++)
+            //        {
+            //            x = x.Replace(replaceDChar[i], replaceChar[i]);
+            //        }
+            //        //}
+            //        break;
+            //    }
+            //}
+
             //置換中文文本中的英文句號（小數點）
             CnText.PeriodsReplace_ChinesePunctuationMarks(ref x);
 
@@ -763,6 +779,160 @@ namespace TextForCtext
             string replacement = "{{$1}}";
             string result = Regex.Replace(text, pattern, replacement);
             if (result != text) { text = result; }
+        }
+
+        /// <summary>
+        /// 20240808（臺灣父親節）creedit with Copilot大菩薩：《古籍酷》自動標點完成的文本重新插入分段符號
+        /// </summary>
+        /// <param name="originalText"></param>
+        /// <param name="punctuatedText"></param>
+        /// <returns></returns>
+        public static string RestoreParagraphs(ref string originalText, ref string punctuatedText)
+        {
+
+            // Define a set of punctuation marks to ignore
+            HashSet<char> punctuationMarks = new HashSet<char> { '。', '，', '；', '：', '、', '？', '《', '》', '「', '」', '『', '』' };
+            /* `HashSet` 是 .NET 中的一種集合類別，它有一些特點使其在某些情況下非常有用。以下是 `HashSet` 的一些主要優點：
+                    1. **快速查找**：`HashSet` 使用哈希表來存儲元素，因此查找元素的時間複雜度為 O(1)，這意味著無論集合中有多少元素，查找速度都非常快。這在需要頻繁查找元素的情況下特別有用。
+                    2. **唯一性**：`HashSet` 保證集合中的每個元素都是唯一的。如果嘗試添加一個已經存在的元素，`HashSet` 不會添加重複的元素。
+                    3. **靈活性**：`HashSet` 支持標準的集合操作，如聯集、交集和差集，這使得它在處理集合操作時非常靈活。
+                    在您的情況下，使用 `HashSet` 來存儲標點符號集合的好處是可以快速查找和檢查某個字符是否是標點符號，從而提高程式的效率。
+                    如果您對 `HashSet` 有更多的興趣或有其他問題，請隨時告訴我。南無阿彌陀佛 🙏
+             */
+            // Function to remove punctuation marks from a string
+            string RemovePunctuation(string text)
+            {
+                var result = new List<char>();
+                foreach (var ch in text)
+                {
+                    if (!punctuationMarks.Contains(ch))
+                    {
+                        result.Add(ch);
+                    }
+                }
+                return new string(result.ToArray());
+            }
+
+            // Function to find the adjusted position in punctuatedText
+            int FindAdjustedPosition(string text, string original, int pos, string before, string after)
+            {
+                int offset1 = 0;
+                int adjustedPos = pos;
+                //while (adjustedPos < text.Length)
+                while ((adjustedPos + (before.Length + offset1)) < text.Length)
+                {
+                    // Process the 'before' part
+                    string subText = text.Substring(adjustedPos - (before.Length + offset1), before.Length + offset1);
+                    string subTextWithoutPunctuation = RemovePunctuation(subText);
+                    while (subTextWithoutPunctuation.Length < before.Length)
+                    {
+                        if ((adjustedPos + (before.Length + offset1)) < text.Length)
+                        {
+                            offset1++;
+                            subText = text.Substring(adjustedPos - (before.Length + offset1), before.Length + offset1);
+                            subTextWithoutPunctuation = RemovePunctuation(subText);
+                        }
+                        else
+                        {
+                            Debugger.Break();
+                            break;
+                        }
+                    }
+                    if (subTextWithoutPunctuation.Contains(before))
+                    {
+                        ////異常檢查（分段符號前文字）：
+                        //if (subTextWithoutPunctuation != before &&
+                        //    new StringInfo(subTextWithoutPunctuation).LengthInTextElements - 2 > new StringInfo(before).LengthInTextElements) Debugger.Break();
+                        //adjustedPos += subText.Length;
+                        //offset1 += subText.Length - before.Length;
+
+                        // Process the 'after' part
+                        int offset2 = 0;
+                        int afterAdjustedPos = adjustedPos;
+                        while (afterAdjustedPos + (after.Length + offset2) < text.Length)
+                        {
+                            string afterSubText = text.Substring(afterAdjustedPos, after.Length + offset2);
+                            string afterSubTextWithoutPunctuation = RemovePunctuation(afterSubText);
+                            while (afterSubTextWithoutPunctuation.Length < after.Length)
+                            {
+                                if (afterAdjustedPos + (after.Length + offset2) < text.Length)
+                                {
+                                    offset2++;
+                                    afterSubText = text.Substring(afterAdjustedPos, after.Length + offset2);
+                                    afterSubTextWithoutPunctuation = RemovePunctuation(afterSubText);
+                                }
+                            }
+                            if (afterSubTextWithoutPunctuation.Contains(after))
+                            {
+                                //異常檢查：
+                                if (afterSubTextWithoutPunctuation != after) Debugger.Break();
+                                return adjustedPos;
+                            }
+                            else
+                            {
+                                afterAdjustedPos++;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        adjustedPos++;
+                    }
+                }
+                return -1;
+            }
+
+            #region 先規範要操作的文本
+            //先清除標點完成的文本中可能含有的分段符號，以利後續的比對
+            punctuatedText = punctuatedText.Replace(Environment.NewLine, string.Empty);
+            //清除標題符號以利分段符號之比對搜尋
+            originalText = RemovePunctuation(originalText);
+            #endregion
+
+            // Step 1: Find the positions of the paragraph breaks in the original text
+            List<(int, string, string)> paragraphPositions = new List<(int, string, string)>();
+            string newLine = Environment.NewLine;
+            int index = 0;
+            while ((index = originalText.IndexOf(newLine, index)) != -1)
+            {
+                // Store the position and the surrounding text for comparison
+                int start = Math.Max(0, index - 5);
+                int end = Math.Min(originalText.Length, index + 5);
+                string before = originalText.Substring(start, index - start);
+                string after = originalText.Substring(index + newLine.Length, end - index - newLine.Length);
+
+                // Ensure 'before' and 'after' do not include newline characters
+                while (before.Contains('\r') || before.Contains('\n'))
+                {
+                    start++;
+                    before = originalText.Substring(start, index - start);
+                }
+                while (after.Contains('\r') || after.Contains('\n'))
+                {
+                    end--;
+                    after = originalText.Substring(index + newLine.Length, end - index - newLine.Length);
+                }
+
+                paragraphPositions.Add((index, before, after));
+                index += newLine.Length;
+            }
+
+
+            // Step 2: Insert paragraph breaks into the punctuated text
+            int offset = 0;
+            foreach (var (pos, before, after) in paragraphPositions)
+            {
+                int adjustedPos = FindAdjustedPosition(punctuatedText, originalText, pos + offset, before, after);
+                //int adjustedPos = FindAdjustedPosition(punctuatedText, originalText, pos + offset, before, after);
+                //因為在子函式方法中，若沒有找到時會將標點符號清除再與原未標點之文本作比對，若原文本已略有標點，則會干擾比對結果，不如兩造一律均清除，則簡單有效 20240808
+                if (adjustedPos != -1)
+                {
+                    punctuatedText = punctuatedText.Insert(adjustedPos, newLine);
+                    offset += newLine.Length;
+                }
+            }
+
+            return punctuatedText;
         }
     }
 }
