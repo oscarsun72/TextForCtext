@@ -108,7 +108,13 @@ reStart:
 Exit Sub
 ErrH:
 Select Case Err.Number
-
+    
+    Case -2146233079
+        If left(Err.Description, Len("session not created: Chrome failed to start: exited normally.")) = "session not created: Chrome failed to start: exited normally." Then
+            WD.Quit
+            killchromedriverFromHere
+            Exit Sub
+        End If
     Case -2146233088 '**'
         'Debug.Print Err.Description
         If InStr(Err.Description, "Chrome failed to start: exited normally.") Then
@@ -579,7 +585,7 @@ Function grabGjCoolPunctResult(Text As String, resultText As String, Optional Ba
         If VBA.DateDiff("s", chkTxtTime, VBA.Now) > 1.5 Then
             nx = textBox.Text
             SystemSetup.playSound 1
-            '檢查如果沒有按到「標點」按鈕，就再次按下 20240725
+            '檢查如果沒有按到「標點」按鈕，就再次按下 20240725 以出現等待圖示控制項為判斷
             If wdB.FindElementByCssSelector("#waitingSpinner") Is Nothing Then
                 btn.SendKeys k.Enter
             Else

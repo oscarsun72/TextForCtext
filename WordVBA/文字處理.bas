@@ -2970,6 +2970,7 @@ Select Case Err.Number
 End Select
 End Sub
 Sub 漢籍電子文獻資料庫文本整理_注文前後加括號() '最後執行 Docs.mark易學關鍵字
+    Rem Alt + Shift + `
     Dim rng As Range, ur As UndoRecord, d As Document, fontsize(1) As Single, fsz
     SystemSetup.stopUndo ur, "漢籍電子文獻資料庫文本整理_注文前後加括號"
     word.Application.ScreenUpdating = False

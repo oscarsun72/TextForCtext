@@ -19,12 +19,14 @@ using System.Media;
 //using System.Net;
 //using System.Net.NetworkInformation;
 using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Automation;
 using System.Windows.Forms;
 using WebSocketSharp;
 using WindowsFormsApp1;
+
 //using static System.Net.Mime.MediaTypeNames;
 using forms = System.Windows.Forms;
 using selm = OpenQA.Selenium;
@@ -524,6 +526,28 @@ namespace TextForCtext
                 }
             }
         }
+
+        /// <summary>
+        /// 取得[簡單修改模式](quick edit)控制項
+        /// </summary>
+        /// <returns>傳回[簡單修改模式](quick edit)控制項</returns>
+        internal static IWebElement QuickeditIWebElement
+        {
+            get
+            {
+                if (driver == null) driver = DriverNew();
+                IWebElement iwe = waitFindWebElementBySelector_ToBeClickable("#quickedit > a");
+                if (iwe != null)
+                {
+                    string iweText = iwe.GetAttribute("text");
+                    if (iweText != "簡單修改模式" && iweText != "Quick edit")
+                        Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("沒有找到正確的「簡單修改模式Quick edit」超連結控制項，請檢查！");
+                }
+                return iwe;
+            }
+        }
+
+
         /// <summary>
         /// 取得CTP網頁中的「編輯」（Edit)控制項
         /// </summary>
@@ -534,8 +558,28 @@ namespace TextForCtext
                 IWebElement iwe;
                 if (Form1.IsValidUrl＿keyDownCtrlAdd(ActiveForm1.textBox3Text))
                 {
+                    //會因位置而移動，如：Add to 學海蠡測 Add to 思舊錄 [文字版] [編輯] [簡單修改模式] [編輯指南] https://ctext.org/library.pl?if=gb&file=194081&page=75&editwiki=5083072#editor
+                    //故得逐一比對，目前應該只會有2種情形，當然也可能會不止如此
                     iwe = waitFindWebElementBySelector_ToBeClickable("#content > div:nth-child(7) > div:nth-child(2) > a:nth-child(2)");
-                    //Edit_Linkbox = waitFindWebElementByName_ToBeClickable("#content > div:nth-child(7) > div:nth-child(2) > a:nth-child(2)", WebDriverWaitTimeSpan);
+                    if (iwe != null)
+                    {
+                        string tx = iwe.GetAttribute("text");
+                        if (tx != "編輯" && tx != "Edit")
+                        {
+                            iwe = waitFindWebElementBySelector_ToBeClickable("#content > div:nth-child(7) > div:nth-child(2) > a:nth-child(4)");
+                            if (iwe != null)
+                                tx = iwe.GetAttribute("text");
+                            if (tx != "編輯" && tx != "Edit")
+                            {
+                                Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("未能找到正確的「編輯（Edit）」超連結控制項，請檢查！");
+                                return null;
+                            }
+                            else
+                                return iwe;
+
+                        }
+                        //Edit_Linkbox = waitFindWebElementByName_ToBeClickable("#content > div:nth-child(7) > div:nth-child(2) > a:nth-child(2)", WebDriverWaitTimeSpan);
+                    }
                 }
                 else
                     return null;
@@ -560,6 +604,43 @@ namespace TextForCtext
                 return iwe;
             }
         }
+        /// <summary>
+        /// 取得CTP網頁中的「上一頁」的編輯文字方塊
+        /// </summary>
+        internal static IWebElement CheckAdjacentPages_DataPrev
+        {
+            //get { return quickedit_data_textbox == null ? waitFindWebElementByName_ToBeClickable("data", WebDriverWaitTimeSpan) : quickedit_data_textbox; }
+            get
+            {
+                IWebElement iwe = null;
+                if (Form1.IsValidUrl＿keyDownCtrlAdd(ActiveForm1.textBox3Text))
+                {
+                    iwe = waitFindWebElementBySelector_ToBeClickable("#dataprev");
+                }
+                else
+                    return null;
+                return iwe;
+            }
+        }
+        /// <summary>
+        /// 取得CTP網頁中的「下一頁」的編輯文字方塊
+        /// </summary>
+        internal static IWebElement CheckAdjacentPages_DataNext
+        {
+            //get { return quickedit_data_textbox == null ? waitFindWebElementByName_ToBeClickable("data", WebDriverWaitTimeSpan) : quickedit_data_textbox; }
+            get
+            {
+                IWebElement iwe = null;
+                if (Form1.IsValidUrl＿keyDownCtrlAdd(ActiveForm1.textBox3Text))
+                {
+                    iwe = waitFindWebElementBySelector_ToBeClickable("#datanext");
+                }
+                else
+                    return null;
+                return iwe;
+            }
+        }
+
         /// <summary>
         /// 取得CTP網頁中的「顯示頁碼，可輸入頁碼的」（page）控制項
         /// </summary>
@@ -638,7 +719,7 @@ namespace TextForCtext
         /// <returns>成功則傳回true</returns>
         internal static bool SelectAllQuickedit_data_textboxContent()
         {
-            OpenQA.Selenium.IWebElement ie = Quickedit_data_textbox;//br.GetQuickeditIWebElement();
+            OpenQA.Selenium.IWebElement ie = Quickedit_data_textbox;//br.QuickeditIWebElement;
             if (ie != null)
             {
                 ie.SendKeys(OpenQA.Selenium.Keys.Control + "a");
@@ -646,8 +727,10 @@ namespace TextForCtext
             }
             return false;
         }
+
+
         /// <summary>
-        /// 取得[簡單修改模式]的文字方塊；若失敗則回傳null
+        /// 取得[簡單修改模式]的文字方塊（編輯區的文字方塊）；若失敗則回傳null        
         /// Get the textbox of [Quick edit] 
         /// </summary>
         internal static IWebElement Quickedit_data_textbox
@@ -665,6 +748,8 @@ namespace TextForCtext
             }
             private set { quickedit_data_textbox = value; }
         }
+
+
         /// <summary>
         /// 儲存[簡單修改模式]的文字方塊
         /// </summary>
@@ -1078,6 +1163,8 @@ namespace TextForCtext
                                 Console.WriteLine(ex.HResult + ex.Message);
                                 Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
                                 return null;
+                                //-2146233079session not created（重新安裝Chrome瀏覽器（免安裝版）即可解決）
+                                //from unknown error: cannot parse internal JSON template: Line: 1, column: 1, Unexpected token. (SessionNotCreated)
                             }
                         default:
                             Console.WriteLine(ex.HResult + ex.Message);
@@ -1484,6 +1571,7 @@ namespace TextForCtext
                                                                //actions.SendKeys(OpenQA.Selenium.Keys.Control + "v").Build().Perform();
                                                                //actions.SendKeys(OpenQA.Selenium.Keys.LeftShift + OpenQA.Selenium.Keys.Insert).Build().Perform();
             {
+                //Sendkeys(textbox, xIuput);
                 //while (!Form1.isClipBoardAvailable_Text()) { }
                 try
                 {
@@ -1497,7 +1585,8 @@ namespace TextForCtext
                     //Form1.playSound(Form1.soundLike.error, true);
                     //Clipboard.SetText(xIuput);
                 }
-                textbox.SendKeys(OpenQA.Selenium.Keys.LeftShift + OpenQA.Selenium.Keys.Insert);
+                //textbox.SendKeys(OpenQA.Selenium.Keys.LeftShift + OpenQA.Selenium.Keys.Insert);
+                textbox.SendKeys(OpenQA.Selenium.Keys.Shift + OpenQA.Selenium.Keys.Insert);
             }
             //SendKeys.Send("^v{tab}~");
             #endregion
@@ -1689,7 +1778,7 @@ namespace TextForCtext
         {
             string url = "";
             if (driver == null) driver = DriverNew();
-            IWebElement ie = GetQuickeditIWebElement();
+            IWebElement ie = QuickeditIWebElement;
             if (ie != null) url = ie.GetAttribute("href");
             return url;
             /*
@@ -1701,15 +1790,7 @@ namespace TextForCtext
                     }
              */
         }
-        /// <summary>
-        /// 取得[簡單修改模式](quick edit)控制項
-        /// </summary>
-        /// <returns>傳回[簡單修改模式](quick edit)控制項</returns>
-        internal static IWebElement GetQuickeditIWebElement()
-        {
-            if (driver == null) driver = DriverNew();
-            return waitFindWebElementBySelector_ToBeClickable("#quickedit > a");
-        }
+
 
         /// <summary>
         /// geturl 修改後的程式碼:20230308 creedit with NotionAI大菩薩
@@ -1785,7 +1866,13 @@ namespace TextForCtext
             return "";//url;
 
         }
-
+        /// <summary>
+        /// 取得Chrome瀏覽器現前作用中的《中國哲學書電子化計劃》頁面網址
+        /// </summary>
+        public static string GetChromeActiveUrl
+        {
+            get { return getUrlFirst_Ctext_Edit(ControlType.Edit).Trim(); }
+        }
         /// <summary>
         /// 取得Chrome瀏覽器現前網址（現行前景之分頁頁籤的網址）。結果竟然是我自己之前就實作過的，完全忘了！
         /// https://www.youtube.com/live/pT1xv4oly1o?feature=share
@@ -5549,7 +5636,7 @@ internal static string getImageUrl() {
             {
                 iwe = waitFindWebElementBySelector_ToBeClickable
                     //("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled", 0.2);
-                    ("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled", 5);
+                    ("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled", 10);
 
             }
             catch (Exception)
@@ -7461,6 +7548,10 @@ internal static string getImageUrl() {
         internal static bool GjcoolPunct(ref string x)
         {
             if (driver == null) return false;
+            if (x == string.Empty) return false;
+            //20240809 Copilot大菩薩：C# Windows.Forms 中判定文本是否只有英數字：這個正則表達式 ^[a-zA-Z0-9\s.,!?']+$ 會允許英文字母、數字、半形空格以及常見的標點符號（如句號、逗號、驚嘆號、問號和單引號）。
+            if (Regex.IsMatch(x, @"^[a-zA-Z0-9\s.,!?']+$")) return false;
+
             //LastValidWindow = GetCurrentWindowHandle(driver)??(IsWindowHandleValid(driver,driver.WindowHandles.Last())? driver.WindowHandles.Last(): driver.WindowHandles.First());
             string lastWindowHandle = driver.WindowHandles.Last();
             if (!IsWindowHandleValid(driver, lastWindowHandle))
@@ -7515,9 +7606,12 @@ internal static string getImageUrl() {
             //iwe.SendKeys(OpenQA.Selenium.Keys.Enter);//不能互動，會出現錯誤
             iwe = waitFindWebElementBySelector_ToBeClickable("#PunctArea");
             dt = DateTime.Now;
+            //等待OCR結果
             while (iwe.Text == x)
             {
-
+                //檢查如果沒有按到「標點」按鈕，就再次按下 20240811 以出現等待圖示控制項為判斷
+                if (waitFindWebElementBySelector_ToBeClickable("#waitingSpinner") == null)
+                    waitFindWebElementBySelector_ToBeClickable("#main > div > div.p-1.p-md-3.d-flex.justify-content-end > div:nth-child(6) > button > i").Clear();
                 if (DateTime.Now.Subtract(dt).TotalSeconds > 25) if (Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("標點逾時，是否繼續？") == DialogResult.Cancel) return false;
             }
             x = iwe.Text;
@@ -7594,7 +7688,7 @@ internal static string getImageUrl() {
             }
             x = iwe.GetAttribute("textContent");
             standardizedText(ref x);
-            
+
             string standardizedText(ref string text)
             {
                 //x = x.Substring(0, " ".Length) == " " ? x.Substring(" ".Length, x.Length - " ".Length) : x;
@@ -7623,12 +7717,6 @@ internal static string getImageUrl() {
         internal static bool Hanchi_SearchingKeywordsYijing()
         {
             if (driver == null) return true;
-            List<string> keywords = new List<string> { "易", "卦", "爻", "繫詞", "繫辭", "文言", "乾坤","元亨","利貞", "咎"
-                , "夬", "頤","巽","坎","兌","小畜","大畜","歸妹","明夷","同人","大有","豫","蠱","噬嗑","賁","剝","大過","小過","遯","大壯","睽","暌","蹇","姤","萃","艮","渙","中孚","既濟","未濟"
-                ,"咸恆","老陰", "老陽", "少陰", "少陽","十翼"
-                ,"无妄", "彖", "象曰", "象傳", "象日", "象云","小象", "筮"
-            ,"初九","九二","九三","九四","九五","上九","初六","六二","六三","六四","六五","上六"
-            ,"用九","用六"};
 
             string title;
             try
@@ -7648,7 +7736,7 @@ internal static string getImageUrl() {
                     title = string.Empty;
                     foreach (var item in driver.WindowHandles)
                     {
-                        if (driver.SwitchTo().Window(item).Url.StartsWith("https://ctext.org/wiki.pl?if=gb&res="))
+                        if (driver.SwitchTo().Window(item).Url.StartsWith("https://ctext.org/wiki.pl?if="))//https://ctext.org/wiki.pl?if=gb&res=、https://ctext.org/wiki.pl?if=en&res=
                         { title = driver.Title; break; }
 
                     }
@@ -7661,14 +7749,21 @@ internal static string getImageUrl() {
                 title = driver.Title;
             }
 
-            //異體字處理
+            List<string> keywords = new List<string> { "易", "卦", "爻", "繫詞", "繫辭", "文言", "乾坤","元亨","利貞", "咎"
+                , "夬", "頤","巽","坎","兌","小畜","大畜","歸妹","明夷","同人","大有","豫","蠱","噬嗑","賁","剝","大過","小過","遯","大壯","睽","暌","蹇","姤","萃","艮","渙","中孚","既濟","未濟"
+                ,"咸恆","老陰", "老陽", "少陰", "少陽","十翼"
+                ,"无妄", "彖", "象曰", "象傳", "象日", "象云","小象", "筮"
+            ,"初九","九二","九三","九四","九五","上九","初六","六二","六三","六四","六五","上六"
+            ,"用九","用六"};
+
+            //異體字處理（只用在《中國哲學書電子化計劃》，因為《漢籍全文資料庫》已俱。）
             if (title.EndsWith("中國哲學書電子化計劃") || title.EndsWith("Chinese Text Project"))
             {
                 //新增List元素。因為《中國哲學書電子化計劃》異體字的支援機制沒有《漢籍全文資料庫》那麼好
                 //20240719 Copilot大菩薩：C# Windows.Forms List 新增多個元素：您好，如果您想要在程式進行中對 List<string> 新增多個元素，可以使用 AddRange 方法。這是一個範例：
                 //keywords.Add();
                 List<string> additionalKeywords = new List<string> { "无𡚶", "𧰼", "系辭", "擊詞", "擊辭", "繫驟",
-                    "乹","〈乾〉", "〈坤〉", "〈乾坤〉", "咸恒","剥","頥","㢲","旣濟","涣","兑",
+                    "乹","〈乾〉", "〈坤〉", "〈乾坤〉", "咸恒","剥","頥","㢲","旣濟","涣","兑","〈泰〉","〈否〉","〈損〉","〈益〉","〈屯〉","〈豫〉","〈旡妄〉","〈復〉","〈震〉",
                     "少隂","太隂",
                 "𥘉九","𭃨九","𭃡九","𥘉六","𭃨六","𭃡六"};
                 keywords.AddRange(additionalKeywords);
@@ -7686,7 +7781,16 @@ internal static string getImageUrl() {
             {
             //檢索方塊
             researchCtext:
-                IWebElement iwe = waitFindWebElementBySelector_ToBeClickable("#content > div.wikibox > table > tbody > tr.mobilesearch > td > form > input[type=text]:nth-child(3)");
+                //桌面版和手機版的尋找方塊不同
+                //手機版
+                IWebElement iwe = waitFindWebElementBySelector_ToBeClickable("#deskimg");
+                if (iwe != null)
+                    iwe = waitFindWebElementBySelector_ToBeClickable("#content > div.wikibox > table > tbody > tr.mobilesearch > td > form > input[type=text]:nth-child(3)");
+                //桌面版
+                else if (waitFindWebElementBySelector_ToBeClickable("#mobimg") != null)
+                    iwe = waitFindWebElementBySelector_ToBeClickable("#searchform > input.searchbox");
+                else
+                    Debugger.Break();
                 if (iwe != null)
                 {
                     iwe.Clear();
@@ -8258,8 +8362,12 @@ internal static string getImageUrl() {
         /// <returns>成功則傳回true</returns>
         internal static bool DirectlyReplacingCharacters(StringInfo character)
         {
+            #region 防呆
+
             if (character.LengthInTextElements != 2) { Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("指定的字元長度不對！請檢查"); return false; }
             if (character.SubstringByTextElements(0, 1) == character.SubstringByTextElements(1, 1)) { Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("所指定取代的字元相同，請重設！"); return false; }
+
+            #endregion
 
             try
             {
@@ -8304,7 +8412,7 @@ internal static string getImageUrl() {
                                         iwe = Edit_Linkbox;//waitFindWebElementBySelector_ToBeClickable("#content > div:nth-child(7) > div:nth-child(2) > a:nth-child(2)");
                                         if (iwe == null)
                                         {
-                                            Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("請開啟有效的圖文對照頁面");
+                                            Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("請開啟有效的圖文對照頁面；若是新頁面，請先儲存，再執行此功能。");
                                             return false;
                                         }
                                         else
@@ -8362,7 +8470,16 @@ internal static string getImageUrl() {
             {
                 foreach (var item in driver.WindowHandles)
                 {
-                    string url = driver.SwitchTo().Window(item).Url;
+
+                    string url;
+                    try
+                    {
+                        url = driver.SwitchTo().Window(item).Url;
+                    }
+                    catch (Exception)
+                    {
+                        continue;
+                    }
                     //if (url.StartsWith("https://ctext.org/wiki.pl?") && url.Contains("&action=editchapter"))
                     if (url == editUrl)
                     {
@@ -8670,7 +8787,15 @@ internal static string getImageUrl() {
                 return false;
             }
 
-            driver.Close();
+            try
+            {
+                driver.Close();
+            }
+            catch (Exception)
+            {
+                driver.SwitchTo().Window(LastValidWindow);//如果沒有切回關閉前的分頁，再打算開新分頁時Selenium就會出錯！20240720
+                return false;
+            }
             driver.SwitchTo().Window(LastValidWindow);//如果沒有切回關閉前的分頁，再打算開新分頁時Selenium就會出錯！20240720
 
             ////等待書圖檔下載完成
@@ -8719,7 +8844,22 @@ internal static string getImageUrl() {
                 SetForegroundWindow(proc.MainWindowHandle);
             }
         }
+        /// <summary>
+        /// 使用 JavaScriptExecutor 輸入中文。作為Selenium 同名方法的替代性實驗方法
+        /// 20240811 Gemini大菩薩：CJKV 字集擴充現況：https://g.co/gemini/share/b6380ac335aa
+        /// https://g.co/gemini/share/3fdbf8b43c46
+        /// </summary>
+        /// <param name="element">要輸入文字的網頁元件</param>
+        /// <param name="text">要輸入的文字</param>
+        /// <returns></returns>
+        public static bool Sendkeys(IWebElement element, string text)
+        {
+            IJavaScriptExecutor js = (IJavaScriptExecutor)driver;
+            //string text = "你好，世界！";
+            js.ExecuteScript($"arguments[0].value = '{text}';", element);
 
+            return true;
+        }
 
     }
 

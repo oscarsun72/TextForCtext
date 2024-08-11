@@ -651,7 +651,19 @@ namespace WindowsFormsApp1
         {
             try
             {
-                if (Clipboard.GetText().IndexOf("<scanbegin ") > -1) return;
+                //如果是完整編輯頁面則逕予返回20240810
+                if (br.GetChromeActiveUrl.Contains("action=editchapter")) return;
+                //if (Clipboard.GetText().IndexOf("<scanbegin ") > -1) return;
+                if (Clipboard.GetText().IndexOf("<scanbegin ") > -1)
+                {
+                    if (keyinTextMode && !ocrTextMode)
+                    {
+                        //應該是在[新增單位]之後：
+                        Clipboard.Clear();
+                        if (IsValidUrl＿ImageTextComparisonPage(br.driver.Url))
+                            br.Page_textbox.SendKeys(OpenQA.Selenium.Keys.Enter);//br.driver.Navigate().Refresh();
+                    }
+                }
             }
             catch (Exception)
             {
@@ -2605,124 +2617,225 @@ namespace WindowsFormsApp1
                     return;
                 }
 
-                #region alt + 9 、alt + 0、alt + u、alt + y、alt + i                
-                if (e.KeyCode == Keys.D9 || e.KeyCode == Keys.D0 || e.KeyCode == Keys.U || e.KeyCode == Keys.Y || e.KeyCode == Keys.I)
-                {/* Alt + 9 : 鍵入 「 
-                  * Alt + 0 : 鍵入 『 
-                  * Alt + u : 鍵入 《 
-                  * Alt + y : 鍵入 〈 
-                  * Alt + i : 鍵入 》（如 MS Word 自動校正(如在「選項>印刷樣式」中的設定值)，會依前面的符號作結尾號（close），如前是「〈」，則轉為「〉」……）*/
+                #region alt + 9 、alt + 0、alt + u、alt + y、alt + i
+                //20240810 creedit with Copilot大菩薩：C# Windows.Forms 程式碼中的取代模式處理 https://sl.bing.net/jOCLQeh6cyi
+                if (e.Alt && (e.KeyCode == Keys.D9 || e.KeyCode == Keys.D0 || e.KeyCode == Keys.U || e.KeyCode == Keys.Y || e.KeyCode == Keys.I))
+                {
                     e.Handled = true;
-                    string insX = "", x = textBox1.Text;
-                    if (e.KeyCode == Keys.D9) { insX = "「"; goto insert; }
-                    if (e.KeyCode == Keys.D0) { insX = "『"; goto insert; }
-                    if (e.KeyCode == Keys.U) { insX = "《"; goto insert; }
-                    if (e.KeyCode == Keys.Y) { insX = "〈"; goto insert; }
-                    if (e.KeyCode == Keys.I)
+                    string insX = GetInsertSymbol(e.KeyCode);
+                    InsertSymbol(insX);
+                    return;
+                }
+
+                string GetInsertSymbol(Keys keyCode)
+                {
+                    switch (keyCode)
                     {
-                        int s = textBox1.SelectionStart;
-                        if (s > 0)
+                        case Keys.D9: return "「";
+                        case Keys.D0: return "『";
+                        case Keys.U: return "《";
+                        case Keys.Y: return "〈";
+                        case Keys.I: return GetClosingSymbol();
+                        default: return "》";
+                    }
+                }
+
+                string GetClosingSymbol()
+                {
+                    int s = textBox1.SelectionStart;
+                    if (s > 0)
+                    {
+                        string xPrevious = textBox1.Text.Substring(0, s);
+                        const string symbol = "{（〈《「『』」》〉）";
+                        string whatSymbolPrefix = "";
+                        string xChk = ""; bool chk = false; //bool closeFlag = false;
+                        for (int i = xPrevious.Length - 1; i > -1; i--)
                         {
-                            string xPrevious = x.Substring(0, s);
-                            const string symbol = "{（〈《「『』」》〉）";
-                            string whatSymbolPrefix = "";
-                            string xChk = ""; bool chk = false; bool closeFlag = false;
-                            for (int i = xPrevious.Length - 1; i > -1; i--)
+                            whatSymbolPrefix = xPrevious.Substring(i, 1);
+                            if (symbol.IndexOf(whatSymbolPrefix) > -1)
                             {
-                                whatSymbolPrefix = xPrevious.Substring(i, 1);
-                                if (symbol.IndexOf(whatSymbolPrefix) > -1)
-                                {
-                                    xChk = xPrevious.Substring(0, i + 1); chk = true;
-                                    break;
-                                }
+                                xChk = xPrevious.Substring(0, i + 1); chk = true;
+                                break;
                             }
-                            if (chk)//需要檢查誰沒配對
+                        }
+                        if (chk)
+                        {
+                            const string symbolPairChk = "（〈《「『）〉》」』";
+                            const string symbolPairChkClose = "）〉》」』";
+                            int sFirst = -1;
+                            List<string> sPairOpenFirst = new List<string>();
+                            for (int i = xChk.Length - 1; i > -1; i--)
                             {
-                                const string symbolPairChk = "（〈《「『）〉》」』";
-                                const string symbolPairChkClose = "）〉》」』";
-                                int sFirst = -1;
-                                List<string> sPairOpenFirst = new List<string>();
-                                for (int i = xChk.Length - 1; i > -1; i--)
+                                sFirst = symbolPairChk.IndexOf(xChk[i]);
+                                bool sPairOpenFirstContained = sPairOpenFirst.Contains(xChk[i].ToString());
+                                if (sFirst > -1 && !sPairOpenFirstContained)
                                 {
-                                    sFirst = symbolPairChk.IndexOf(xChk[i]);
-                                    bool sPairOpenFirstContained = sPairOpenFirst.Contains(xChk[i].ToString());
-                                    if (sFirst > -1 && !sPairOpenFirstContained)
+                                    string insX = symbolPairChk[sFirst].ToString();
+                                    if (symbolPairChkClose.IndexOf(xChk[i]) == -1)
                                     {
-                                        insX = symbolPairChk[sFirst].ToString();
-                                        if (symbolPairChkClose.IndexOf(xChk[i]) == -1)
-                                        {//如果是open 
-                                            if (sPairOpenFirst.Count == 0 ||
-                                                !sPairOpenFirst.Contains(xChk[i].ToString()))
-                                            {
-                                                insX = symbolPairChkClose[sFirst].ToString();
-                                                closeFlag = true;
-                                                break;
-                                            }
+                                        if (sPairOpenFirst.Count == 0 || !sPairOpenFirst.Contains(xChk[i].ToString()))
+                                        {
+                                            return symbolPairChkClose[sFirst].ToString();
                                         }
-                                        else
-                                        {//如果是close,取得其配對的 open
-                                            string sPOF = symbolPairChk[
-                                                symbolPairChkClose.IndexOf(insX)].ToString();
-                                            if (sPairOpenFirst.Count == 0 || !sPairOpenFirst.Contains(sPOF))
-                                            {
-                                                sPairOpenFirst.Add(sPOF);
-                                            }
-                                            continue;
-                                        }
-
                                     }
-
-                                }//end of for loop 
-                                if (!closeFlag)
-                                {
-                                    insX = "》";
+                                    else
+                                    {
+                                        string sPOF = symbolPairChk[symbolPairChkClose.IndexOf(insX)].ToString();
+                                        if (sPairOpenFirst.Count == 0 || sPairOpenFirst.Contains(sPOF))
+                                        {
+                                            sPairOpenFirst.Add(sPOF);
+                                        }
+                                        continue;
+                                    }
                                 }
                             }
-                            else
-                            {
-                                insX = "》";
-
-                            }
-
+                            return "》";
                         }
                         else
-                        {//pick up the close symbol according to the open one
-                            switch (insX)
-                            {
-                                case "{":
-                                    insX = "}}";
-                                    break;
-                                case "（":
-                                    insX = "）";
-                                    break;
-                                case "〈":
-                                    insX = "〉";
-                                    break;
-                                case "《":
-                                    insX = "》";
-                                    break;
-                                case "「":
-                                    insX = "」";
-                                    break;
-                                case "『":
-                                    insX = "』";
-                                    break;
-                                default:
-                                    insX = "》";
-                                    break;
-                            }
-
-
+                        {
+                            return "》";
                         }
                     }
                     else
                     {
-                        insX = "》";
+                        return "》";
                     }
-                insert:
-                    insertWords(insX, textBox1, x);
-                    return;
                 }
+
+                void InsertSymbol(string insX)
+                {
+                    string x = textBox1.Text;
+                    insertWords(insX, textBox1, x);
+                    //如果是」、「且後面是接著英文的雙引號 " 就直接蓋過去（直接取代掉） 20240810
+                    //if ("「」".IndexOf(insX) > -1 && textBox1.SelectionStart + 1 <= textBox1.TextLength && textBox1.Text.Substring(textBox1.SelectionStart, 1) == "\"")
+                    if (textBox1.SelectionStart + 1 <= textBox1.TextLength && "\"\'".IndexOf(textBox1.Text.Substring(textBox1.SelectionStart, 1)) > -1)
+                    {
+                        textBox1.Select(textBox1.SelectionStart, 1);
+                        textBox1.SelectedText = string.Empty;
+                    }
+                }
+
+                //if (e.KeyCode == Keys.D9 || e.KeyCode == Keys.D0 || e.KeyCode == Keys.U || e.KeyCode == Keys.Y || e.KeyCode == Keys.I)
+                //{/* Alt + 9 : 鍵入 「 
+                //  * Alt + 0 : 鍵入 『 
+                //  * Alt + u : 鍵入 《 
+                //  * Alt + y : 鍵入 〈 
+                //  * Alt + i : 鍵入 》（如 MS Word 自動校正(如在「選項>印刷樣式」中的設定值)，會依前面的符號作結尾號（close），如前是「〈」，則轉為「〉」……）*/
+                //    e.Handled = true;
+                //    string insX = "", x = textBox1.Text;
+                //    if (e.KeyCode == Keys.D9) { insX = "「"; goto insert; }
+                //    if (e.KeyCode == Keys.D0) { insX = "『"; goto insert; }
+                //    if (e.KeyCode == Keys.U) { insX = "《"; goto insert; }
+                //    if (e.KeyCode == Keys.Y) { insX = "〈"; goto insert; }
+                //    if (e.KeyCode == Keys.I)
+                //    {
+                //        int s = textBox1.SelectionStart;
+                //        if (s > 0)
+                //        {
+                //            string xPrevious = x.Substring(0, s);
+                //            const string symbol = "{（〈《「『』」》〉）";
+                //            string whatSymbolPrefix = "";
+                //            string xChk = ""; bool chk = false; bool closeFlag = false;
+                //            for (int i = xPrevious.Length - 1; i > -1; i--)
+                //            {
+                //                whatSymbolPrefix = xPrevious.Substring(i, 1);
+                //                if (symbol.IndexOf(whatSymbolPrefix) > -1)
+                //                {
+                //                    xChk = xPrevious.Substring(0, i + 1); chk = true;
+                //                    break;
+                //                }
+                //            }
+                //            if (chk)//需要檢查誰沒配對
+                //            {
+                //                const string symbolPairChk = "（〈《「『）〉》」』";
+                //                const string symbolPairChkClose = "）〉》」』";
+                //                int sFirst = -1;
+                //                List<string> sPairOpenFirst = new List<string>();
+                //                for (int i = xChk.Length - 1; i > -1; i--)
+                //                {
+                //                    sFirst = symbolPairChk.IndexOf(xChk[i]);
+                //                    bool sPairOpenFirstContained = sPairOpenFirst.Contains(xChk[i].ToString());
+                //                    if (sFirst > -1 && !sPairOpenFirstContained)
+                //                    {
+                //                        insX = symbolPairChk[sFirst].ToString();
+                //                        if (symbolPairChkClose.IndexOf(xChk[i]) == -1)
+                //                        {//如果是open 
+                //                            if (sPairOpenFirst.Count == 0 ||
+                //                                !sPairOpenFirst.Contains(xChk[i].ToString()))
+                //                            {
+                //                                insX = symbolPairChkClose[sFirst].ToString();
+                //                                closeFlag = true;
+                //                                break;
+                //                            }
+                //                        }
+                //                        else
+                //                        {//如果是close,取得其配對的 open
+                //                            string sPOF = symbolPairChk[
+                //                                symbolPairChkClose.IndexOf(insX)].ToString();
+                //                            if (sPairOpenFirst.Count == 0 || !sPairOpenFirst.Contains(sPOF))
+                //                            {
+                //                                sPairOpenFirst.Add(sPOF);
+                //                            }
+                //                            continue;
+                //                        }
+
+                //                    }
+
+                //                }//end of for loop 
+                //                if (!closeFlag)
+                //                {
+                //                    insX = "》";
+                //                }
+                //            }
+                //            else
+                //            {
+                //                insX = "》";
+
+                //            }
+
+                //        }
+                //        else
+                //        {//pick up the close symbol according to the open one
+                //            switch (insX)
+                //            {
+                //                case "{":
+                //                    insX = "}}";
+                //                    break;
+                //                case "（":
+                //                    insX = "）";
+                //                    break;
+                //                case "〈":
+                //                    insX = "〉";
+                //                    break;
+                //                case "《":
+                //                    insX = "》";
+                //                    break;
+                //                case "「":
+                //                    insX = "」";
+                //                    break;
+                //                case "『":
+                //                    insX = "』";
+                //                    break;
+                //                default:
+                //                    insX = "》";
+                //                    break;
+                //            }
+
+
+                //        }
+                //    }
+                //    else
+                //    {
+                //        insX = "》";
+                //    }
+                //insert:
+                //    insertWords(insX, textBox1, x);
+                //    //若是「、」則取代"
+                //    if ("「」".IndexOf(insX) > -1 && textBox1.SelectionStart + 1 <= textBox1.TextLength && textBox1.Text.Substring(textBox1.SelectionStart + 1, 1) == "\"")
+                //    { textBox1.Select(textBox1.SelectionStart + 1, 1); textBox1.SelectedText = string.Empty; }
+
+                //    return;
+                //}
                 #endregion
 
                 if (e.KeyCode == Keys.A)
@@ -6354,7 +6467,7 @@ namespace WindowsFormsApp1
                         goto reGetURL;
                     }
                     if (DialogResult.OK == MessageBoxShowOKCancelExclamationDefaultDesktopOnly("是否要開啟[簡單修改模式](quick edit)？" + Environment.NewLine + Environment.NewLine + "driver.Url= " + urlDriver))
-                    { br.GetQuickeditIWebElement()?.Click(); textBox3.Text = br.driver.Url; goto reGetURL; }
+                    { br.QuickeditIWebElement?.Click(); textBox3.Text = br.driver.Url; goto reGetURL; }
                 }
             }
             catch (Exception)
@@ -6731,7 +6844,7 @@ namespace WindowsFormsApp1
                                 if (DialogResult.OK == Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("是否要切換到「簡單修改模式」頁面以供輸入？"))
                                 {
                                     brdriverUrl = br.GetQuickeditUrl();
-                                    br.GetQuickeditIWebElement().Click();
+                                    br.QuickeditIWebElement.Click();
                                     if (!pasteToCtext(brdriverUrl, shiftKeyDownYet)) return false;
                                 }
                                 else
@@ -8414,9 +8527,10 @@ namespace WindowsFormsApp1
                     return;
                 }
                 if (e.KeyCode == Keys.Escape)
-                {
+                {//按下 Esc鍵
                     e.Handled = true;
-                    hideToNICo();
+                    if (!textBox4.Focused && !textBox2.Focused)
+                        hideToNICo();
                     return;
                     //if (textBox1.Text == "")
                     ////預設為最上層顯示，若textBox1值為空，則按下Esc鍵會隱藏到任務列中；點一下即恢復
@@ -8458,6 +8572,19 @@ namespace WindowsFormsApp1
         /// <returns>若失敗則回傳false</returns>
         private bool toGjcoolPunct(string url)
         {
+            #region 防呆
+            try
+            {
+                if (!IsValidUrl＿keyDownCtrlAdd(br.GetDriverUrl) || !IsValidUrl＿keyDownCtrlAdd(textBox3.Text))
+                    if (DialogResult.Cancel == MessageBoxShowOKCancelExclamationDefaultDesktopOnly("當前頁面似乎沒有自動標點的必要性，確定要送出？", "送交《古籍酷》自動標點", true, MessageBoxDefaultButton.Button2))
+                        return false;
+            }
+            catch (Exception ex)
+            {
+                MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
+            }
+            #endregion
+
             string x = textBox1.SelectedText == string.Empty ? textBox1.Text : textBox1.SelectedText;
             if (x == textBox1.Text) textBox1.SelectAll();
             overtypeModeSelectedTextSetting(ref textBox1);
@@ -8488,14 +8615,33 @@ namespace WindowsFormsApp1
             switch (url)
             {
                 case "https://old.gj.cool/gjcool/index":
-                    br.GjcoolPunctOld(ref x);//舊版不會去除分段符號
+                    x = x.Replace(Environment.NewLine, string.Empty);
+                    if (!br.GjcoolPunctOld(ref x)) return false;//舊版不會去除分段符號，但會在每段前誤加句號，故還是先清除分段符號再送去
                     break;
                 case "https://gj.cool/punct":
-                    br.GjcoolPunct(ref x);//新版會去除分段符號
-                    x = CnText.RestoreParagraphs(ref originalText, ref x);
+                    if (!br.GjcoolPunct(ref x)) return false;//新版會去除分段符號
                     break;
                 default:
                     break;
+            }
+            x = CnText.RestoreParagraphs(ref originalText, ref x);
+
+            try
+            {
+                br.driver.SwitchTo().Window(br.LastValidWindow);
+                if (br.driver.Url != textBox3.Text)
+                {
+                    foreach (var item in br.driver.WindowHandles)
+                    {
+                        br.driver.SwitchTo().Window(item);
+                        if (br.driver.Url == textBox3.Text) break;
+                    }
+                }
+                if (br.driver.Url != textBox3.Text) Debugger.Break();
+            }
+            catch (Exception ex)
+            {
+                Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
             }
             CnText.FormalizeText(ref x);
             bool p = pasteAllOverWrite;
@@ -8506,6 +8652,7 @@ namespace WindowsFormsApp1
             //textBox1.SelectedText = x;
             AvailableInUseBothKeysMouse();
             textBox1.Select(s, 0);
+
             return true;
         }
 
@@ -10110,7 +10257,51 @@ namespace WindowsFormsApp1
             //}
             //如果存在「參考上下頁」控制項，則須刷新，否則會被前後頁的舊資料所干擾
             if (br.CheckAdjacentPages_Linkbox != null && Edited)
-                br.driver.Navigate().Refresh();
+            { //要先記下可能有所編輯的前、後頁，否則一刷新就沒有了：
+                if (br.CheckAdjacentPages_DataPrev != null)
+                { //br.CheckAdjacentPages_Linkbox.Click();
+                    string prePageText = string.Empty, nextPageText = string.Empty; Clipboard.Clear();
+                    try
+                    {
+                        if (br.CheckAdjacentPages_DataPrev.Text != string.Empty)
+                        {
+                            br.CheckAdjacentPages_DataPrev.SendKeys(OpenQA.Selenium.Keys.Control + "ac");
+                            prePageText = Clipboard.GetText();
+                        }
+                        if (br.CheckAdjacentPages_DataNext.Text != string.Empty)
+                        {
+                            br.CheckAdjacentPages_DataNext.SendKeys(OpenQA.Selenium.Keys.Control + "ac");
+                            nextPageText = Clipboard.GetText();
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
+                    }
+                    br.driver.Navigate().Refresh();
+                    br.CheckAdjacentPages_Linkbox.Click();
+                    try
+                    {
+                        if (prePageText != string.Empty)
+                        {
+                            Clipboard.SetText(prePageText);
+                            br.CheckAdjacentPages_DataPrev.SendKeys(OpenQA.Selenium.Keys.Control + "av");
+                        }
+                        if (nextPageText != string.Empty)
+                        {
+                            Clipboard.SetText(nextPageText);
+                            br.CheckAdjacentPages_DataNext.SendKeys(OpenQA.Selenium.Keys.Control + "av");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
+                    }
+                }
+                else//br.CheckAdjacentPages_DataPrev == null
+                    br.driver.Navigate().Refresh();
+                playSound(soundLike.over, true);
+            }
             Task wait1 = Task.Run(() =>
             {
                 //chkUrlIsTextBox3Text(tabWindowHandles, textBox3.Text);
@@ -11724,7 +11915,7 @@ namespace WindowsFormsApp1
             //20240731 Copilot大菩薩 ： 簡化程式碼：您可以簡化這兩行檢查的程式碼如下：這樣可以達到相同的效果，並使程式碼更加簡潔明瞭。
             if (e.KeyChar == ' ' || e.KeyChar == '/') return;
 
-            string regexPattern = "[《〈」】〗]", omitSymbols = "●＝{}□■<>*〇◯○⿰⿱」』|" + Environment.NewLine;//輸入缺字構字式●＝＝、及注文標記符{{}}、及標題星號*時不取代
+            string regexPattern = "[《〈」】〗]", omitSymbols = "＝{}□■<>*〇◯○⿰⿱」』|" + Environment.NewLine;//輸入缺字構字式●＝＝、及注文標記符{{}}、及標題星號*時不取代
             checkkeyPressOverTyping_oscarsun72note_Inserting_switch2insertMode(e.KeyChar, regexPattern + omitSymbols);
             string w;//, punctuationsNumWithout前書名號與前篇名號 = Regex.Replace(Form1.punctuationsNum, regexPattern, ""); 
             if (!insertMode
@@ -11744,8 +11935,8 @@ namespace WindowsFormsApp1
                                                  //對標點符號punctuations所佔字位不取代
                     w = textBox1.SelectedText;
                     //標點符號不取代漢字，但可被取代
-                    if (punctuationsNum.IndexOf(e.KeyChar) > -1 &&
-                        punctuationsNum.IndexOf(textBox1.Text.Substring(textBox1.SelectionStart, 1)) == -1)
+                    if ((punctuationsNum + "●\"").IndexOf(e.KeyChar) > -1 &&
+                        (punctuationsNum + "●\"").IndexOf(textBox1.Text.Substring(textBox1.SelectionStart, 1)) == -1)
                         textBox1.SelectionLength = 0;
                     else if (char.IsSurrogate(w.ToCharArray()[0])) textBox1.SelectionLength = 2;
                 }
@@ -11767,9 +11958,9 @@ namespace WindowsFormsApp1
                 {
                     w = textBox1.Text.Substring(selStart, 1);//對標點符號punctuations所佔字位不取代
                     if (selStart + 1 > textBox1.TextLength ||
-                        (punctuationsNum.IndexOf(e.KeyChar) > -1 &&
+                        ((punctuationsNum + "●\"").IndexOf(e.KeyChar) > -1 &&
                         //標點符號不取代漢字，但可被取代
-                        punctuationsNum.IndexOf(textBox1.Text.Substring(textBox1.SelectionStart, 1)) == -1))
+                        (punctuationsNum + "●\"").IndexOf(textBox1.Text.Substring(textBox1.SelectionStart, 1)) == -1))
                         textBox1.Select(selStart, 0);
                     else
                     {
@@ -12073,7 +12264,22 @@ namespace WindowsFormsApp1
             string url = textBox3.Text;
             //取代#box 為 #editor，如 https://ctext.org/library.pl?if=gb&file=185615&page=200&editwiki=2330034#box(428,674,2,4)
             //if (url.IndexOf("#box(") > -1 && (url.IndexOf("&editwiki=") > -1)
-            if (url.IndexOf("#box(") > -1) Debugger.Break();
+            if (url.IndexOf("#box(") > -1) { playSound(soundLike.waiting, true); Debugger.Break(); }
+            if (url.IndexOf("#box(") > -1 && browsrOPMode != BrowserOPMode.appActivateByName)
+            {
+                try
+                {
+                    string ur = br.GetDriverUrl;
+                    if (ur.IndexOf("#box(") > -1)
+                        br.driver.Navigate().GoToUrl(ur.Substring(0, ur.IndexOf("#box(")));
+                }
+                catch (Exception ex)
+                {
+                    Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
+                }
+
+            }
+
             if (url.IndexOf("#box(") > url.IndexOf("&editwiki="))
             {
                 PauseEvents();
@@ -12081,7 +12287,8 @@ namespace WindowsFormsApp1
                 textBox3.Text = url;
                 try
                 {
-                    if (br.driver?.Url.StartsWith(url.Substring(0, url.IndexOf("#box("))) == true) br.driver.Navigate().GoToUrl(url);
+                    if (browsrOPMode != BrowserOPMode.appActivateByName)
+                        if (br.driver?.Url.StartsWith(url.Substring(0, url.IndexOf("#editor"))) == true) br.driver.Navigate().GoToUrl(url);
                 }
                 catch (Exception ex)
                 {
