@@ -582,7 +582,10 @@ namespace TextForCtext
                 //,"}}<p>\r\n{{"//像《札迻》就有此種格式，不能取代掉！ https://ctext.org/library.pl?if=en&file=36575&page=12&editwiki=800245#editor
                 ,"\r\n。<p>"
                 ,"！。<p>","？。<p>","+<p>","<p>+","：。<p>","。\r\n。"
-                ,"：。","\r\n，","\r\n。","\r\n、","\r\n？","\r\n」","「\r\n" ,"{{\r\n" ,"\r\n}}"};
+                ,"：。","\r\n，","\r\n。","\r\n、","\r\n？","\r\n」","「\r\n" ,"{{\r\n" ,"\r\n}}"
+                ,"􏿽？","􏿽。","，〉"//自動標點結果的訂正
+                ,"，。"
+            };
 
             string[] replaceChar = { "！","、", "，", "；", "：", "·", "？", "：", "《", "》", "〈", "〉",
                 "。}}", "。}}}<p>", "。}}}<p>", "。}}<p>", "。}}<p>","。<p>","。<p>","<p>","<p>","　","　"
@@ -590,7 +593,10 @@ namespace TextForCtext
                 //,"}}\r\n{{"//像《札迻》就有此種格式，不能取代掉！ https://ctext.org/library.pl?if=en&file=36575&page=12&editwiki=800245#editor
                 ,"\r\n"
                 ,"！<p>","？<p>","<p>","<p>","：<p>","。\r\n"
-                ,"。","，\r\n","。\r\n","、\r\n","？\r\n","」\r\n","\r\n「" ,"\r\n{{", "}}\r\n"};
+                ,"。","，\r\n","。\r\n","、\r\n","？\r\n","」\r\n","\r\n「" ,"\r\n{{", "}}\r\n"
+                ,"？􏿽","。􏿽","〉，"//自動標點結果的訂正
+                ,"。"
+            };
             if (replaceDChar.Count() != replaceChar.Count()) Debugger.Break();//請檢查！！
             for (int i = 0; i <replaceChar.Count(); i++)
             {

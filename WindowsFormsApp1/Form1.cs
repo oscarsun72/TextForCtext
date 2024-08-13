@@ -6437,6 +6437,65 @@ namespace WindowsFormsApp1
             return Regex.IsMatch(url, @"ctext\.org.*&file.*&page=");
         }
         /// <summary>
+        /// 將圖文對照網址修整、規範之
+        /// 20240813 creedit with Copilot大菩薩：改進C#程式碼：圖文對照網址修整：https://sl.bing.net/f2S0RcHJLyK
+        /// </summary>
+        /// <param name="url">要被修整、規範化的圖文對照網址</param>
+        /// <param name="editor">是否要在末尾改綴上"#editor"字串</param>
+        /// <param name="driverGoToUrl">是否要移至這個網址</param>
+        /// <returns>回傳修整過、規範的圖文對照網址</returns>
+        internal static string FixUrl＿ImageTextComparisonPage(string url, bool editor = false, bool driverGoToUrl = false)
+        {
+            #region 防呆
+            if (!IsValidUrl＿ImageTextComparisonPage(url) || browsrOPMode == BrowserOPMode.appActivateByName || br.driver == null) return null;
+            #endregion
+
+            // 使用正則表達式檢查和替換網址中的特定字串
+            url = System.Text.RegularExpressions.Regex.Replace(url, "#box\\(.*?\\)", editor ? "#editor" : string.Empty);
+
+            try
+            {
+                if (driverGoToUrl) br.driver.Navigate().GoToUrl(url);
+            }
+            catch (Exception ex)
+            {
+                // 記錄詳細的錯誤訊息
+                Form1.MessageBoxShowOKExclamationDefaultDesktopOnly($"Error: {ex.HResult} - {ex.Message}");
+            }
+
+            return url;
+        }
+        /* 使用正則表達式：可以使用正則表達式來檢查和替換網址中的特定字串，這樣會更靈活和高效。
+            簡化條件檢查：將防呆區塊的條件檢查合併成一行，讓程式碼更簡潔。
+            改進例外處理：在例外處理區塊中，記錄詳細的錯誤訊息，方便日後除錯。這樣的改進應該能讓程式碼更簡潔、更高效。……
+         */
+
+        //internal static string FixUrl＿ImageTextComparisonPage(string url, bool editor = false, bool driverGoToUrl = false)
+        //{
+        //    #region 防呆
+        //    if (!IsValidUrl＿ImageTextComparisonPage(url)) return null;
+        //    if (browsrOPMode == BrowserOPMode.appActivateByName) return null;
+        //    if (br.driver == null) return null;
+        //    #endregion
+
+        //    int boxTag = url.IndexOf("#box(");
+        //    if (boxTag > -1)
+        //    {
+        //        playSound(soundLike.exam);
+        //        url = url.Substring(0, boxTag) + (editor ? "#editor" : string.Empty);
+        //        try
+        //        {
+        //            if (driverGoToUrl) br.driver.Navigate().GoToUrl(url);
+
+        //        catch (Exception ex)
+        //        {
+        //            Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
+        //        }
+        //    }
+
+        //    return url;
+        //}
+        /// <summary>
         /// Ctrl + + （加號，含函數字鍵盤） 或 Ctrl + -（數字鍵盤）  或 Ctrl + 5 (數字鍵盤） 或 Alt + + ：
         /// 將插入點或選取文字（含）之前的文本剪下貼到 ctext 的[簡單修改模式]框中，並按下「保存編輯」鈕，且
         /// 在非自動連續輸入時于瀏覽器新頁籤（預設值，Selenium架構時不會）開啟下一頁準備編輯文本，並回到前一頁籤以供檢視所貼上之文本是否無誤。
@@ -6461,9 +6520,10 @@ namespace WindowsFormsApp1
                     int boxTag = urlDriver.IndexOf("#box(");
                     if (boxTag > -1)
                     {
-                        playSound(soundLike.exam);
-                        urlDriver = urlDriver.Substring(0, boxTag) + "#editor";
-                        br.driver.Navigate().GoToUrl(urlDriver);
+                        //playSound(soundLike.exam);
+                        //urlDriver = urlDriver.Substring(0, boxTag) + "#editor";
+                        urlDriver = FixUrl＿ImageTextComparisonPage(urlDriver, true, true);
+                        //br.driver.Navigate().GoToUrl(urlDriver);
                         goto reGetURL;
                     }
                     if (DialogResult.OK == MessageBoxShowOKCancelExclamationDefaultDesktopOnly("是否要開啟[簡單修改模式](quick edit)？" + Environment.NewLine + Environment.NewLine + "driver.Url= " + urlDriver))
@@ -8610,16 +8670,16 @@ namespace WindowsFormsApp1
                 if (x.Length > 3 && x.Substring(x.Length - "<p>".Length) == "<p>") reMarkFlag = true;
                 x = x.Replace("<p>", string.Empty);
             }
-            string originalText = CnText.RemoveBooksPunctuation(ref x);
-            CnText.FormalizeText(ref originalText);
+            CnText.FormalizeText(ref x);
+            string originalText = x;// CnText.RemoveBooksPunctuation(ref x);//有些是手動添加的書名號或篇名號，不宜逕削去 20240813 然《古籍酷》自動標點仍會先清除書名號，但篇名號不管
+            x = x.Replace(Environment.NewLine, string.Empty).Replace("·", string.Empty);
             switch (url)
             {
                 case "https://old.gj.cool/gjcool/index":
-                    x = x.Replace(Environment.NewLine, string.Empty);
                     if (!br.GjcoolPunctOld(ref x)) return false;//舊版不會去除分段符號，但會在每段前誤加句號，故還是先清除分段符號再送去
                     break;
                 case "https://gj.cool/punct":
-                    if (!br.GjcoolPunct(ref x)) return false;//新版會去除分段符號
+                    if (!br.GjcoolPunct(ref x)) return false;//新版會去除分段符號（但感覺有時會干擾，還不如先幫它清除分段符號試試。20240813
                     break;
                 default:
                     break;
@@ -8637,7 +8697,19 @@ namespace WindowsFormsApp1
                         if (br.driver.Url == textBox3.Text) break;
                     }
                 }
-                if (br.driver.Url != textBox3.Text) Debugger.Break();
+                if (br.driver.Url != textBox3.Text)
+                {
+                    //Debugger.Break();
+                    if (IsValidUrl＿keyDownCtrlAdd(br.driver.Url))
+                    {
+                        FixUrl＿ImageTextComparisonPage(br.driver.Url, true, true);
+                        //int boxPosition = br.driver.Url.IndexOf("#box(");
+                        //if (boxPosition > -1) br.driver.Navigate().GoToUrl(br.driver.Url.Substring(0, boxPosition) + "#editor");
+                        if (br.driver.Url != textBox3.Text)
+                            textBox3.Text = br.driver.Url;
+                    }
+                }
+
             }
             catch (Exception ex)
             {
@@ -12270,8 +12342,9 @@ namespace WindowsFormsApp1
                 try
                 {
                     string ur = br.GetDriverUrl;
-                    if (ur.IndexOf("#box(") > -1)
-                        br.driver.Navigate().GoToUrl(ur.Substring(0, ur.IndexOf("#box(")));
+                    //if (ur.IndexOf("#box(") > -1)
+                    //    br.driver.Navigate().GoToUrl(ur.Substring(0, ur.IndexOf("#box(")));
+                    FixUrl＿ImageTextComparisonPage(ur, false, true);
                 }
                 catch (Exception ex)
                 {
@@ -12283,7 +12356,8 @@ namespace WindowsFormsApp1
             if (url.IndexOf("#box(") > url.IndexOf("&editwiki="))
             {
                 PauseEvents();
-                url = url.Substring(0, url.IndexOf("#box(")) + "#editor";
+                //url = url.Substring(0, url.IndexOf("#box(")) + "#editor";
+                url = FixUrl＿ImageTextComparisonPage(url, true, false);
                 textBox3.Text = url;
                 try
                 {
@@ -12296,8 +12370,11 @@ namespace WindowsFormsApp1
                 }
                 ResumeEvents();
             }
+
+
+            //取得現前頁碼
             if (url.IndexOf("&page=") > -1)
-            {//取得現前頁碼
+            {
                 int s = url.IndexOf("&page=") + "&page=".Length;
                 _currentPageNum = url.Substring(s, url.IndexOf("&", s) > -1 ? url.IndexOf("&", s) - s : url.Length - s);
             }

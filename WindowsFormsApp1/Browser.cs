@@ -453,6 +453,29 @@ namespace TextForCtext
             }
             catch (NoSuchWindowException)
             {
+                try
+                {
+                    if (IsWindowHandleValid(driver, LastValidWindow))
+                    {
+                        driver.SwitchTo().Window(LastValidWindow);
+                        return LastValidWindow;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    try
+                    {
+                        if (IsWindowHandleValid(driver, driver.WindowHandles.Last()))
+                        {
+                            driver.SwitchTo().Window(driver.WindowHandles.Last());
+                            return driver.WindowHandles.Last();
+                        }
+                    }
+                    catch (Exception)
+                    {
+                        Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
+                    }
+                }
                 //Console.WriteLine("當前視窗句柄無效");
                 Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("當前視窗句柄無效");
                 return null;
@@ -519,7 +542,7 @@ namespace TextForCtext
                     switch (ex.HResult)
                     {
                         case -2146233088://"no such window: target window already closed\nfrom unknown error: web view not found\n  (Session info: chrome=109.0.5414.120)"
-                            return "";
+                            return driver.SwitchTo().Window(GetCurrentWindowHandle(driver)).Url;//"";
                         default:
                             throw;
                     }
@@ -5635,8 +5658,8 @@ internal static string getImageUrl() {
             try
             {
                 iwe = waitFindWebElementBySelector_ToBeClickable
-                    //("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled", 0.2);
-                    ("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled", 10);
+                //("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled", 0.2);
+                ("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled", 3.3);
 
             }
             catch (Exception)
@@ -7605,13 +7628,17 @@ internal static string getImageUrl() {
             iwe.Click();//Thread.Sleep(640);//非得要等一會才能成功！
             //iwe.SendKeys(OpenQA.Selenium.Keys.Enter);//不能互動，會出現錯誤
             iwe = waitFindWebElementBySelector_ToBeClickable("#PunctArea");
-            dt = DateTime.Now;
+            dt = DateTime.Now; bool reClickFlag = false;
             //等待OCR結果
             while (iwe.Text == x)
             {
                 //檢查如果沒有按到「標點」按鈕，就再次按下 20240811 以出現等待圖示控制項為判斷
-                if (waitFindWebElementBySelector_ToBeClickable("#waitingSpinner") == null)
-                    waitFindWebElementBySelector_ToBeClickable("#main > div > div.p-1.p-md-3.d-flex.justify-content-end > div:nth-child(6) > button > i").Clear();
+                if (waitFindWebElementBySelector_ToBeClickable("#waitingSpinner") == null && reClickFlag == false && iwe.Text == x)
+                {
+                    waitFindWebElementBySelector_ToBeClickable("#main > div > div.p-1.p-md-3.d-flex.justify-content-end > div:nth-child(6) > button > i").Click();
+                    Form1.playSound(Form1.soundLike.over, true);
+                    reClickFlag = true;
+                }
                 if (DateTime.Now.Subtract(dt).TotalSeconds > 25) if (Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("標點逾時，是否繼續？") == DialogResult.Cancel) return false;
             }
             x = iwe.Text;
