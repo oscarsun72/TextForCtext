@@ -584,6 +584,7 @@ namespace TextForCtext
                     //會因位置而移動，如：Add to 學海蠡測 Add to 思舊錄 [文字版] [編輯] [簡單修改模式] [編輯指南] https://ctext.org/library.pl?if=gb&file=194081&page=75&editwiki=5083072#editor
                     //故得逐一比對，目前應該只會有2種情形，當然也可能會不止如此
                     iwe = waitFindWebElementBySelector_ToBeClickable("#content > div:nth-child(7) > div:nth-child(2) > a:nth-child(2)");
+                reCheck:
                     if (iwe != null)
                     {
                         string tx = iwe.GetAttribute("text");
@@ -602,6 +603,11 @@ namespace TextForCtext
 
                         }
                         //Edit_Linkbox = waitFindWebElementByName_ToBeClickable("#content > div:nth-child(7) > div:nth-child(2) > a:nth-child(2)", WebDriverWaitTimeSpan);
+                    }
+                    else
+                    {
+                        iwe = waitFindWebElementBySelector_ToBeClickable("#content > div:nth-child(9) > div:nth-child(2) > a:nth-child(2)");
+                        if (iwe != null) goto reCheck;
                     }
                 }
                 else
@@ -676,6 +682,10 @@ namespace TextForCtext
                 if (Form1.IsValidUrl＿ImageTextComparisonPage(ActiveForm1.textBox3Text))
                 {
                     iwe = waitFindWebElementBySelector_ToBeClickable("#content > div:nth-child(3) > form > input[type=text]:nth-child(3)");
+                    if(iwe==null)
+                    {
+                        iwe = waitFindWebElementBySelector_ToBeClickable("#content > div:nth-child(5) > form");
+                    }
                 }
                 else
                     return null;
