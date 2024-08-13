@@ -678,7 +678,11 @@ namespace TextForCtext
             //get { return quickedit_data_textbox == null ? waitFindWebElementByName_ToBeClickable("data", WebDriverWaitTimeSpan) : quickedit_data_textbox; }
             get
             {
-                IWebElement iwe;
+                IWebElement iwe=null;
+                bool checkNamePorp()
+                {
+                    return iwe.GetAttribute("name") == "page";
+                }
                 if (Form1.IsValidUrl＿ImageTextComparisonPage(ActiveForm1.textBox3Text))
                 {
                     iwe = waitFindWebElementBySelector_ToBeClickable("#content > div:nth-child(3) > form > input[type=text]:nth-child(3)");
@@ -686,6 +690,7 @@ namespace TextForCtext
                     {
                         iwe = waitFindWebElementBySelector_ToBeClickable("#content > div:nth-child(5) > form");
                     }
+                    if (!checkNamePorp()) return null;
                 }
                 else
                     return null;
