@@ -11,7 +11,7 @@
 
 20240725：配合運用賢超法師[《古籍酷》AI](https://gj.cool/)或[《看典古籍》](https://kandianguji.com/)OCR輸入，將事半功倍也。感恩感恩　讚歎讚歎　南無阿彌陀佛。目前鄙人主要以sl（詳下） 模式在操作，技術已趨成熟穩定可用。阿彌陀佛
 
-\*作業環境、系統需求：**Windows**、Chrome 瀏覽器（Selenium：chromedriver） 
+\*作業環境、系統需求：**Windows**、.NET 4.7…、Chrome 瀏覽器（Selenium 模式才必要：chromedriver） 
  > **不保留任何權利**，歡迎改寫應用到麥金塔(Mac)或 Linux 等作業系統環境中運行
 
 - 本軟件架構為以下三種操作模式（目前本人主要以sl模式在操作）：
