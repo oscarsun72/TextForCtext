@@ -11,6 +11,9 @@
 
 20240725：配合運用賢超法師[《古籍酷》AI](https://gj.cool/)或[《看典古籍》](https://kandianguji.com/)OCR輸入，將事半功倍也。感恩感恩　讚歎讚歎　南無阿彌陀佛。目前鄙人主要以sl（詳下） 模式在操作，技術已趨成熟穩定可用。阿彌陀佛
 
+作業環境、系統需求：**Windows**、Chrome 瀏覽器（Selenium：chromedriver） 
+ > **不保留任何權利**，歡迎改寫應用到麥金塔(Mac)或 Linux 等作業系統環境中運行
+
 - 本軟件架構為以下三種操作模式（目前本人主要以sl模式在操作）：
   - 在textbox2輸入「ap,」「sl,」「sg,」，可切換瀏覽操作模式設定：
     - ap,=appActivateByName
@@ -89,7 +92,7 @@ F5 ：重新載入所儲存的文本
 
 Shift + F9 ：重啟小小輸入法
 
-Alt + F9 或 Alt + , : 在《漢籍全文資料庫》或《中國哲學書電子化計劃》中檢索《易》學關鍵字
+Alt + F9 或 Alt + , : 在《漢籍全文資料庫》或《中國哲學書電子化計劃》中**檢索《易》學關鍵字**
 
 Shift + F10 ： 執行 Word VBA Sub 巨集指令「中國哲學書電子化計劃_只保留正文注文_且注文前後加括弧_貼到古籍酷自動標點」
 
@@ -476,7 +479,7 @@ Ctrl+ 滑鼠左鍵：清除框中所有文字
 - 
 - 輸入「x,y」（x、y 為整數以半形逗號間隔，如「835,711」；請打好後用複製貼上的方式來輸入），指定《古籍酷》首頁快速體驗OCR的複製按鈕位置 Copybutton_GjcoolFastExperience_Location的 X 與 Y值
 
-- 輸入「lx」重設《漢籍全文資料庫》檢索易學關鍵字清單之索引值為0 即 ListIndex_Hanchi_SearchingKeywordsYijing=0。 
+- 輸入「lx」重設《漢籍全文資料庫》或《中國哲學書電子化計劃》**檢索易學關鍵字**清單之索引值為0 即 ListIndex_Hanchi_SearchingKeywordsYijing=0。 
 
 - 在textBox2中輸入開關切換要整頁貼上Quick edit [簡單修改模式]  並將下一頁直接送交去OCR的網站
    - kd：《看典古籍》 （kandianguji）網頁
