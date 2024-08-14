@@ -2001,7 +2001,8 @@ namespace WindowsFormsApp1
 
 
             #region 按下Ctrl鍵
-            if ((m & Keys.Control) == Keys.Control)
+            //if ((m & Keys.Control) == Keys.Control)
+            if (e.Control && !e.Shift && !e.Alt)
             {//按下Ctrl鍵
              //Ctrl + v
                 if (e.KeyCode == Keys.V) pasteAllOverWrite = false;

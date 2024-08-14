@@ -10,6 +10,7 @@
 其他最新進度，詳鄙人此帖： [transferkit IPFS 永遠保存的電子文獻-藏富天下 暨《中國哲學書電子化計劃》愚所輸入完竣之諸本-任真的網路書房-千慮一得齋OnLine-觀死書齋原著及電子化文獻(不屑智慧財產權)歡迎多利用共玉于成](https://oscarsun72.blogspot.com/2022/02/transferkit-ipfs.html) 
 
 20240725：配合運用賢超法師[《古籍酷》AI](https://gj.cool/)或[《看典古籍》](https://kandianguji.com/)OCR輸入，將事半功倍也。感恩感恩　讚歎讚歎　南無阿彌陀佛。目前鄙人主要以sl（詳下） 模式在操作，技術已趨成熟穩定可用。阿彌陀佛
+ > 因末學個人使用需要，故《古籍酷》OCR預設為批量授權帳號處理，若無批量授權，請在textBox2中輸入「bF」以關閉之，程式就會改用一般帳號來處理OCR程序（即每日贈予之1000點，約6次OCR額度者）。
 
 \*作業環境、系統需求：**Windows**、.NET 4.7…、Chrome 瀏覽器（Selenium 模式才必要：chromedriver） 
  > **不保留任何權利**，歡迎改寫應用到麥金塔(Mac)或 Linux 等作業系統環境中運行
@@ -37,7 +38,8 @@
 
 textBox1:文本框
 
-textBox2:尋找文本用、與設定配置指令用
+textBox2:尋找文本用、與設定配置指令用。
+> 若成功下達指令，所輸入之指令字符即會即刻消失。
 
 textBox3: URL瀏覽參照用（點一下，貼上要瀏覽的網址；在上滑駐滑鼠游標，則顯示提示文字，「現在在第x頁」，以供稽核）
 
@@ -201,7 +203,8 @@ Alt + Shift + F1 ：切換 textbox1 之字型： 切換支援 CJK - Ext 擴充�
 
 Ctrl + Shift + t 同Chrome瀏覽器 --還原最近關閉的頁籤
 
-Ctrl + Shift + p ： 逐頁瀏覽肉眼檢查空白頁，以免白跑OCR 20240727 執行 CheckBlankPagesBeforeOCR
+Ctrl + Shift + p ： 自動翻頁，逐頁瀏覽圖文對照的書圖頁面。要中止，則對本軟件介面或Chrome瀏覽器按住 Ctrl 同時按下滑鼠左鍵。
+>> 逐頁瀏覽肉眼檢查是否有空白頁，以免白跑OCR 20240727 執行 CheckBlankPagesBeforeOCR
 
 
 ### 在 textBox1 中按下以下組合鍵：
@@ -252,7 +255,8 @@ Ctrl + Alt + s : 標題下之小注文才不換行( 會與小小輸入法預設�
 
 Ctrl + Alt + k 或 Alt + e： 在完整編輯頁面中直接取代文字。請將被取代+取代成之二字前後並置，並將其選取後（或在被取代之文字前放置插入點）再按下此組合鍵以執行直接取代 20240718
 
-Ctrl + 7 ：如同鍵入「。}}」，於《周易正義》〈彖、象〉辭時適用
+Ctrl + 7 ：如同鍵入「。}}」。
+> 如於《周易正義》輸入〈彖、象〉辭時適用
 
 Ctrl + 8 ：如同鍵入「　」1個全形空格，且各個空格間有分段符
 
@@ -335,7 +339,8 @@ F3 ： 在textBox1 從插入點（游標所在處）開始尋找下一個符合�
 
 Shift + F3 ： 從插入點（游標所在處）開始在textBox1 尋找上一個符合所選取的字串；如果沒有選取，則以 textBox2 的字串為據
 
-F4 ： 重複輸入最後一個字
+F4 ： 重複輸入最後一個輸入的字（字碼）
+> 字元、字符，包括特殊字及指令
 
 Shift + F5 ： 在textBox1 回到上1次插入點（游標）所在處（且與最近「charIndexListSize」次瀏覽處作切換，如 MS Word）。charIndexListSize 目前=  3。
 
@@ -372,13 +377,16 @@ Ctrl + y ： 重做（即復原還原的動作），目前上限為50個記錄
 
 Ctrl + z ： 還原文本，目前上限為50個記錄
 
-Ctrl + F12 ：就 textBox1 所選之字串，執行「[查詢國語辭典.exe](https://github.com/oscarsun72/lookupChineseWords.git)」以查詢網路詞典
+Ctrl + F12 ：就 textBox1 所選之字串，查詢《教育部重編國語辭典修訂本》網路版 https://dict.revised.moe.edu.tw/
+ > 之前是執行「[查詢國語辭典.exe](https://github.com/oscarsun72/lookupChineseWords.git)」以查詢網路詞典
+
   > 若在非 appActivateByName 模式下，則但開啟一個分頁以查詢國語辭典耳。唯有在 drive 是 null 時才會執行上述之網路辭典查詢
 
 Alt + G ：就 textBox1 所選之字串，執行「[網路搜尋_元搜尋-同時搜多個引擎.exe](https://github.com/oscarsun72/SearchEnginesConsole.git)」以查詢 Google 等網站
   > 若在非 appActivateByName 模式下，則但開啟一個分頁以檢索Google大神耳。唯有在 drive 是 null 時才會執行上述之搜尋。
 
-Alt + z ：以所選之字（或插入點後之一字）檢索《字統網》等（或 執行【速檢網路字辭典.exe】）
+Alt + z ：以所選之字（或插入點後之一字）檢索《字統網》 https://zi.tools/
+  > 以前是執行【速檢網路字辭典.exe】
 
 Ctrl + + （加號，含函數字鍵盤） 或 Ctrl + -（數字鍵盤）  或 Ctrl + 5 (數字鍵盤） 或 Alt + + 或 Alt + a ：將插入點或選取文字（含）之前的文本剪下貼到 ctext 的[簡單修改模式]框中，並按下「保存編輯」鈕，且在[簡單修改模式]下于瀏覽器新頁籤開啟下一頁準備編輯文本，並回到前一頁籤以供檢視所貼上之文本是否無誤。
 
@@ -530,5 +538,8 @@ Ctrl+ 滑鼠左鍵：清除框中所有文字
 - [TextForCtext 輸入《中國哲學書電子化計劃》實境秀：善用賢超法師《古籍酷》AI服務OCR及自動標點功能，以清儒文廷式《純常子枝語》示範（操作環境配置）](https://youtube.com/live/wdr8JvSkkhI?feature=share)
 - [TextForCtext 輸入《中國哲學書電子化計劃》實境秀：善用賢超法師《古籍酷》AI服務OCR及自動標點功能，以清儒潘平格《潘子求仁錄輯要》示範](https://youtube.com/live/XKcWIo0vHfU?feature=share)
 - [TextForCtext 輸入《中國哲學書電子化計劃》實境秀：檢索《易》學關鍵字，善用賢超法師《古籍酷》自動標點，以清儒潘平格《潘子求仁錄輯要》示範](https://www.youtube.com/live/RLzG4AlPe8Q?si=QJVHlcObxOl0OgY2)
+- [TextForCtext 輸入《中國哲學書電子化計劃》重點實境秀：蒐集《易》學資料，檢索《易》學關鍵字，以本軟件作為中介工具、善用賢超法師《古籍酷》自動標點，以清儒潘平格《潘子求仁錄輯要》示範](https://youtube.com/live/TyiPkvdUzhg)
+- [TextForCtext 輸入《中國哲學書電子化計劃》實境秀：善用賢超法師《古籍酷AI》OCR與自動標點，以清儒文廷式《純常子枝語》示範](https://youtube.com/live/I2Djbck5R6Q?feature=share)
+- [以 TextForCtext 軟件善用賢超法師《古籍酷AI》自動標點功能簡要示範（以 kanripo.org 中資料為例） ](https://youtube.com/live/2dE0k3_nWi8?feature=share)
 - []()
 
