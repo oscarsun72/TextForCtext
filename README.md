@@ -541,5 +541,7 @@ Ctrl+ 滑鼠左鍵：清除框中所有文字
 - [TextForCtext 輸入《中國哲學書電子化計劃》重點實境秀：蒐集《易》學資料，檢索《易》學關鍵字，以本軟件作為中介工具、善用賢超法師《古籍酷》自動標點，以清儒潘平格《潘子求仁錄輯要》示範](https://youtube.com/live/TyiPkvdUzhg)
 - [TextForCtext 輸入《中國哲學書電子化計劃》實境秀：善用賢超法師《古籍酷AI》OCR與自動標點，以清儒文廷式《純常子枝語》示範](https://youtube.com/live/I2Djbck5R6Q?feature=share)
 - [以 TextForCtext 軟件善用賢超法師《古籍酷AI》自動標點功能簡要示範（以 kanripo.org 中資料為例）【Word VBA 運行環境的配置】](https://youtube.com/live/2dE0k3_nWi8?feature=share)
+- [以 TextForCtext 軟件善用賢超法師《古籍酷AI》自動標點功能簡要示範（以《維基文庫》所收《四庫全書》 為例）](https://youtube.com/live/BEsdf7HXREY?feature=share)
+- [TextForCtext 輸入《中國哲學書電子化計劃》：善用《看典古籍》OCR網頁版與API輸入，以清儒文廷式《純常子枝語》簡要示範](https://youtube.com/live/1xQDbnkxA1k?feature=share)
 - []()
 
