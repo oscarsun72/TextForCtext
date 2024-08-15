@@ -10,6 +10,7 @@ using WindowsFormsApp1;
 using System.Windows.Forms;
 using System.Diagnostics;
 using Microsoft.Office.Interop.Word;
+using static System.Net.Mime.MediaTypeNames;
 //using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 //using static System.Net.Mime.MediaTypeNames;
 //using System.Reflection;
@@ -576,29 +577,29 @@ namespace TextForCtext
             //x = Regex.Replace(x, pattern, evaluator).Replace("．", "。");
             #endregion
 
-            string[] replaceDChar = { "!","'", ",", ";", ":", "．", "?", "：：", "《《", "》》", "〈〈", "〉〉",
+            string[] replaceDChar = { "!","！！","'", ",", ";", ":", "．", "?", "：：","：\r\n：", "《《", "》》", "〈〈", "〉〉",
                 "。}}。}}", "。}}}。<p>", "}}}。<p>", "。}}。<p>", "}}。<p>",".<p>","·<p>" ,"<p>。<p>","<p>。","􏿽。<p>","　。<p>"
                 ,"。。", "，，", "@" 
                 //,"}}<p>\r\n{{"//像《札迻》就有此種格式，不能取代掉！ https://ctext.org/library.pl?if=en&file=36575&page=12&editwiki=800245#editor
                 ,"\r\n。<p>"
                 ,"！。<p>","？。<p>","+<p>","<p>+","：。<p>","。\r\n。"
                 ,"：。","\r\n，","\r\n。","\r\n、","\r\n？","\r\n」","「\r\n" ,"{{\r\n" ,"\r\n}}"
-                ,"􏿽？","􏿽。","，〉","。〉"//自動標點結果的訂正
+                ,"􏿽？","􏿽。","，〉","。〉","〈、","！，"//自動標點結果的訂正
                 ,"，。"
             };
 
-            string[] replaceChar = { "！","、", "，", "；", "：", "·", "？", "：", "《", "》", "〈", "〉",
+            string[] replaceChar = { "！","！","、", "，", "；", "：", "·", "？", "：","：\r\n", "《", "》", "〈", "〉",
                 "。}}", "。}}}<p>", "。}}}<p>", "。}}<p>", "。}}<p>","。<p>","。<p>","<p>","<p>","　","　"
                 , "。", "，", "●" 
                 //,"}}\r\n{{"//像《札迻》就有此種格式，不能取代掉！ https://ctext.org/library.pl?if=en&file=36575&page=12&editwiki=800245#editor
                 ,"\r\n"
                 ,"！<p>","？<p>","<p>","<p>","：<p>","。\r\n"
                 ,"。","，\r\n","。\r\n","、\r\n","？\r\n","」\r\n","\r\n「" ,"\r\n{{", "}}\r\n"
-                ,"？􏿽","。􏿽","〉，","〉。"//自動標點結果的訂正
+                ,"？􏿽","。􏿽","〉，","〉。","、〈","！"//自動標點結果的訂正
                 ,"。"
             };
             if (replaceDChar.Count() != replaceChar.Count()) Debugger.Break();//請檢查！！
-            for (int i = 0; i <replaceChar.Count(); i++)
+            for (int i = 0; i < replaceChar.Count(); i++)
             {
                 //if (replaceDChar[i] == "{{\r\n") Debugger.Break();
                 x = x.Replace(replaceDChar[i], replaceChar[i]);
@@ -639,6 +640,47 @@ namespace TextForCtext
 
             //RemoveInnerBraces(ref x);
 
+        }
+
+        /// <summary>
+        /// 檢查文本中是否包括書名（title）。如版心等內容。如果有則傳回所在位置。沒有或有錯誤則傳回-1
+        /// </summary>
+        /// <param name="xChecking">檢查的文本</param>
+        /// <returns>傳回出現的位置。沒有或有錯誤則傳回-1</returns>
+        internal static int HasPlatecenterTextIncluded(string xChecking)
+        {
+            string title = Browser.Title_Linkbox?.GetAttribute("textContent");
+            if (title == null)
+            {
+                Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("未能找到正確的「書名（title）」超連結控制項，請檢查！");
+                return -1;
+            }
+            int location = xChecking.IndexOf(title),
+                locationOriginal = location;
+            ; string rn = Environment.NewLine;//\r\n
+            while (location > -1)
+            {
+                //只有第一行/段或最後一行/段才符合所求
+                int rnLoaction = xChecking.LastIndexOf(rn, location);
+                if (rnLoaction == -1)//第一行/段
+                    return location;
+                rnLoaction = xChecking.IndexOf(rn, location);
+                if (rnLoaction == -1)//最後一行/段
+                    return location;
+                //也有可能是最後2段/行，因為頁碼或版心下方的文字，往往以類似小注的方式呈現，OCR結果常會因此而換行/段
+                else
+                {
+                    locationOriginal = location;
+                    location = rnLoaction;
+                    rnLoaction = xChecking.IndexOf(rn, location + 1);
+                    if (rnLoaction == -1)//最後二行/段
+                        return locationOriginal;
+                }
+                location = xChecking.IndexOf(title, location + 1);
+
+            }
+
+            return location;
         }
 
         /// <summary>
@@ -797,7 +839,7 @@ namespace TextForCtext
         {
 
             // Define a set of punctuation marks to ignore
-            HashSet<char> punctuationMarks = new HashSet<char> { '。', '，', '；', '：', '、', '？', '《', '》', '「', '」', '『', '』' };
+            HashSet<char> punctuationMarks = new HashSet<char> { '。', '，', '；', '：', '、', '？', '！', '《', '》', '「', '」', '『', '』' };
             /* `HashSet` 是 .NET 中的一種集合類別，它有一些特點使其在某些情況下非常有用。以下是 `HashSet` 的一些主要優點：
                     1. **快速查找**：`HashSet` 使用哈希表來存儲元素，因此查找元素的時間複雜度為 O(1)，這意味著無論集合中有多少元素，查找速度都非常快。這在需要頻繁查找元素的情況下特別有用。
                     2. **唯一性**：`HashSet` 保證集合中的每個元素都是唯一的。如果嘗試添加一個已經存在的元素，`HashSet` 不會添加重複的元素。

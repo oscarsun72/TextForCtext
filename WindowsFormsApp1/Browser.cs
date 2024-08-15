@@ -551,7 +551,7 @@ namespace TextForCtext
         }
 
         /// <summary>
-        /// 取得[簡單修改模式](quick edit)控制項
+        /// 取得[簡單修改模式](quick edit)超連結控制項（元件）
         /// </summary>
         /// <returns>傳回[簡單修改模式](quick edit)控制項</returns>
         internal static IWebElement QuickeditIWebElement
@@ -570,9 +570,43 @@ namespace TextForCtext
             }
         }
 
+        /// <summary>
+        /// 取得CTP網頁中的「書名」（title）控制項
+        /// <span itemprop="title">純常子枝語</span>
+        /// </summary>
+        internal static IWebElement Title_Linkbox
+        {
+            get
+            {
+                IWebElement iwe;
+                if (Form1.IsValidUrl＿keyDownCtrlAdd(ActiveForm1.textBox3Text))
+                {
+
+                    iwe = waitFindWebElementBySelector_ToBeClickable("#content > div:nth-child(3) > span:nth-child(2) > a > span");
+                    //reCheck:
+                    if (iwe != null)
+                    {
+                        string tx = iwe.GetAttribute("outerHTML");
+                        if (!tx.StartsWith("<span itemprop=\"title\">"))
+                        {
+                            Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("未能找到正確的「書名（title）」超連結控制項，請檢查！");
+                            return null;
+                        }
+                    }
+                    else
+                    {
+                        Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("未能找到正確的「書名（title）」超連結控制項，請檢查！");
+                        return null;
+                    }
+                }
+                else
+                    return null;
+                return iwe;
+            }
+        }
 
         /// <summary>
-        /// 取得CTP網頁中的「編輯」（Edit)控制項
+        /// 取得CTP網頁中的「編輯」（Edit）控制項
         /// </summary>
         internal static IWebElement Edit_Linkbox
         {
@@ -678,7 +712,7 @@ namespace TextForCtext
             //get { return quickedit_data_textbox == null ? waitFindWebElementByName_ToBeClickable("data", WebDriverWaitTimeSpan) : quickedit_data_textbox; }
             get
             {
-                IWebElement iwe=null;
+                IWebElement iwe = null;
                 bool checkNamePorp()
                 {
                     return iwe.GetAttribute("name") == "page";
@@ -686,7 +720,7 @@ namespace TextForCtext
                 if (Form1.IsValidUrl＿ImageTextComparisonPage(ActiveForm1.textBox3Text))
                 {
                     iwe = waitFindWebElementBySelector_ToBeClickable("#content > div:nth-child(3) > form > input[type=text]:nth-child(3)");
-                    if(iwe==null)
+                    if (iwe == null)
                     {
                         iwe = waitFindWebElementBySelector_ToBeClickable("#content > div:nth-child(5) > form");
                     }
@@ -1721,9 +1755,9 @@ namespace TextForCtext
                         {
                             //如：https://ctext.org/library.pl?if=en&file=38675&page=1&editwiki=573099#editor
                             string shortUrl = ActiveForm1.textBox3Text.Substring(0, ActiveForm1.textBox3Text.IndexOf("#editor") == -1 ? ActiveForm1.textBox3Text.Length : ActiveForm1.textBox3Text.IndexOf("#editor"));
-                            foreach (var item in driver.WindowHandles)
+                            for (int i = driver.WindowHandles.Count - 1; i > -1; i--)
                             {
-                                driver.SwitchTo().Window(item);
+                                driver.SwitchTo().Window(driver.WindowHandles[i]);
                                 if (driver.Url.StartsWith(shortUrl)) break;
                             }
                         }
@@ -1731,9 +1765,9 @@ namespace TextForCtext
 
                     if (!Form1.IsValidUrl＿ImageTextComparisonPage(driver.Url))
                     {
-                        foreach (var item in driver.WindowHandles)
+                        for (int i = driver.WindowHandles.Count - 1; i > -1; i--)
                         {
-                            driver.SwitchTo().Window(item);
+                            driver.SwitchTo().Window(driver.WindowHandles[i]);
                             if (Form1.IsValidUrl＿ImageTextComparisonPage(driver.Url)) break;
                         }
                         if (!Form1.IsValidUrl＿ImageTextComparisonPage(driver.Url))
@@ -2329,7 +2363,7 @@ namespace TextForCtext
                         return;
                         //throw;
                     }
-                Quickedit_data_textbox = waitFindWebElementByName_ToBeClickable("data", _webDriverWaitTimSpan, driver);
+                //Quickedit_data_textbox = waitFindWebElementByName_ToBeClickable("data", _webDriverWaitTimSpan, driver);
                 try
                 {
                     //.Text屬性會清除起首的全形空格！！20240313

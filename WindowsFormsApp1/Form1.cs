@@ -695,9 +695,9 @@ namespace WindowsFormsApp1
                                 {
                                     MessageBoxShowOKExclamationDefaultDesktopOnly("Chrome瀏覽器分頁頁籤進入休眠省電模式，請藉由激活（Activate）它將之喚醒。");
                                     br.LastValidWindow = br.driver.CurrentWindowHandle;
-                                    foreach (var item in br.driver.WindowHandles)
+                                    for (int i = br.driver.WindowHandles.Count - 1; i > -1; i--)
                                     {
-                                        br.driver.SwitchTo().Window(item);
+                                        br.driver.SwitchTo().Window(br.driver.WindowHandles[i]);
                                     }
                                     br.driver.SwitchTo().Window(br.LastValidWindow);
                                 }
@@ -2001,8 +2001,16 @@ namespace WindowsFormsApp1
 
 
             #region 按下Ctrl鍵
-            //if ((m & Keys.Control) == Keys.Control)
-            if (e.Control && !e.Shift && !e.Alt)
+            if ((m & Keys.Control) == Keys.Control)
+            //if (e.Control && !e.Shift && !e.Alt) //20240814
+            /* 這裡要參照，故不能這寫↑↑↑↑ 20240815
+             * if (e.KeyCode == Keys.D6)
+                    {
+                        if ((int)m == (int)Keys.Shift + (int)Keys.Control)
+                        {
+                            insX = "}}";
+                        }
+             */
             {//按下Ctrl鍵
              //Ctrl + v
                 if (e.KeyCode == Keys.V) pasteAllOverWrite = false;
@@ -2063,7 +2071,7 @@ namespace WindowsFormsApp1
                     return;
                     //}
                 }
-                if (e.KeyCode == Keys.Oem3)
+                if (e.KeyCode == Keys.Oem3 && !e.Shift)
                 {//` 或 Ctrl + ` ： 於插入點處起至「　」或「􏿽」或「|」或「<」或分段符號前止之文字加上黑括號【】//Print/SysRq 為OS鎖定不能用
                     e.Handled = true; preceded_followed_specify_symbols("【】"); return;
                 }
@@ -6507,6 +6515,7 @@ namespace WindowsFormsApp1
         private bool keyDownCtrlAdd(bool shiftKeyDownYet = false, string clear = "", bool notBooksPunctuation = false, bool pagePaste2GjcoolOCR = false)
         {
             int s = textBox1.SelectionStart, l = textBox1.SelectionLength; string x = textBox1.Text; //今定義再置前
+            int chkLoaction = 0;//檢查文本定位用
             bool _eventabled = _eventsEnabled;
             if (TopMost) TopMost = false;
 
@@ -6560,9 +6569,10 @@ namespace WindowsFormsApp1
                 else
                 {
                     bool found = false;
-                    foreach (var item in br.driver.WindowHandles)
+                    //foreach (var item in br.driver.WindowHandles)
+                    for (int i = br.driver.WindowHandles.Count - 1; i > -1; i--)
                     {
-                        br.driver.SwitchTo().Window(item);
+                        br.driver.SwitchTo().Window(br.driver.WindowHandles[i]);
                         if (br.driver.Url.StartsWith(urlShort))
                         {
                             found = true; break;
@@ -6598,13 +6608,39 @@ namespace WindowsFormsApp1
                         "忽略此訊息，改為【整面貼上】請按「取消」感恩感恩　南無阿彌陀佛", string.Empty, false)) { s = textBox1.TextLength; l = 0; pageTextEndPosition = s + l; }
                 }
 
+                //檢查版心內容是否闌入？
+                chkLoaction = CnText.HasPlatecenterTextIncluded(x);
+                if (chkLoaction > -1)
+                {
+                    int selStart = 0;
+                    if (chkLoaction == 0)
+                        selStart = chkLoaction;
+                    else
+                    {//if (chkLoaction > 0)
+                        selStart = x.LastIndexOf(Environment.NewLine, chkLoaction);
+                        if (selStart == -1)
+                            selStart = 0;
+                        //else //分段符號也可以刪掉，故也一併選取，不用避開
+                        //selStart += Environment.NewLine.Length;
+                    }
+                    int selEnd = selStart == 0 ? x.IndexOf(Environment.NewLine, chkLoaction) : x.Length;
+                    textBox1.Select(selStart, selStart == 0 ?
+                        (selEnd == -1 ? (x.Length - selStart) : (selEnd - selStart)) + Environment.NewLine.Length :
+                        (selEnd == -1 ? (x.Length - selStart) : (selEnd - selStart)));
+                    textBox1.ScrollToCaret();
+                    if (MessageBoxShowOKCancelExclamationDefaultDesktopOnly("【版心】內容似還殘留，確定送出？", "阿彌陀佛", true, MessageBoxDefaultButton.Button2) == DialogResult.Cancel)
+                    {
+                        //選取疑似版心內容段落（行）以供檢查或逕予刪除
+                        return false;
+                    }
+                }
 
                 if (!PasteOcrResultFisrtMode)
                 {//檢查查是否有編輯標記
                     CnText.FormalizeText(ref x);
                     if (!CnText.HasEditedWithPunctuationMarks(ref x))
                     {
-                        playSound(soundLike.warn);
+                        //playSound(soundLike.warn);
                         if (MessageBoxShowOKCancelExclamationDefaultDesktopOnly("尚未有以供程式判斷之編輯標記（標點符號及符號格式化字元等），是否確定送出？", string.Empty, true, MessageBoxDefaultButton.Button2) == DialogResult.Cancel) return false;
                     }
                 }
@@ -6856,9 +6892,9 @@ namespace WindowsFormsApp1
                         if (driverUrl != urlDriver && new Uri(urlDriver).Authority == "ctext.org")
                         {
                             playSound(soundLike.exam, true);
-                            foreach (var item in br.driver.WindowHandles)
+                            for (int i = br.driver.WindowHandles.Count - 1; i > -1; i--)
                             {
-                                br.driver.SwitchTo().Window(item);
+                                br.driver.SwitchTo().Window(br.driver.WindowHandles[i]);
                                 if (br.driver.Url == urlDriver) { driverUrl = br.driver.Url; break; }
                             }
                         }
@@ -8637,8 +8673,40 @@ namespace WindowsFormsApp1
             try
             {
                 if (!IsValidUrl＿keyDownCtrlAdd(br.GetDriverUrl) || !IsValidUrl＿keyDownCtrlAdd(textBox3.Text))
-                    if (DialogResult.Cancel == MessageBoxShowOKCancelExclamationDefaultDesktopOnly("當前頁面似乎沒有自動標點的必要性，確定要送出？", "送交《古籍酷》自動標點", true, MessageBoxDefaultButton.Button2))
-                        return false;
+                {
+                    bool found = false;
+                    if (!IsValidUrl＿keyDownCtrlAdd(br.GetDriverUrl) && IsValidUrl＿keyDownCtrlAdd(textBox3.Text))
+                    {
+                        for (int i = br.driver.WindowHandles.Count - 1; i > -1; i--)
+                        {
+                            br.driver.SwitchTo().Window(br.driver.WindowHandles[i]);
+                            if (br.driver.Url == textBox3.Text)
+                            { found = true; break; }
+                        }
+                        if (!found)
+                        {
+                            string preUrl = textBox3.Text.Substring(0, textBox3.Text.IndexOf("&editwiki="));
+                            for (int i = br.driver.WindowHandles.Count - 1; i > -1; i--)
+                            {
+                                br.driver.SwitchTo().Window(br.driver.WindowHandles[i]);
+                                if (br.driver.Url.StartsWith(preUrl))
+                                {
+                                    found = true;
+                                    if (MessageBoxShowOKCancelExclamationDefaultDesktopOnly("是否是這個頁面？" + Environment.NewLine + Environment.NewLine + "textBox3.Text=" + textBox3.Text) == DialogResult.OK)
+                                    {
+                                        br.QuickeditIWebElement.Click();
+                                    }
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    else if (IsValidUrl＿keyDownCtrlAdd(br.GetDriverUrl) || !IsValidUrl＿keyDownCtrlAdd(textBox3.Text))
+                        textBox3.Text = br.GetDriverUrl;
+                    if (!found)
+                        if (DialogResult.Cancel == MessageBoxShowOKCancelExclamationDefaultDesktopOnly("當前頁面似乎沒有自動標點的必要性，確定要送出？", "送交《古籍酷》自動標點", true, MessageBoxDefaultButton.Button2))
+                            return false;
+                }
             }
             catch (Exception ex)
             {
@@ -8647,19 +8715,21 @@ namespace WindowsFormsApp1
             #endregion
 
             string x = textBox1.SelectedText == string.Empty ? textBox1.Text : textBox1.SelectedText;
-            if (x == textBox1.Text) textBox1.SelectAll();
-            overtypeModeSelectedTextSetting(ref textBox1);
-            //最後不要選到分段符號及Xml標記
-            if (textBox1.SelectionLength > 2)
+            if (x == textBox1.Text) textBox1.Select(0, textBox1.TextLength);//textBox1.SelectionLength = textBox1.TextLength;//textBox1.SelectAll();//這個方法好像會失靈
+            else
             {
-                while (("<" + Environment.NewLine).Contains(textBox1.SelectedText.Substring(textBox1.SelectionLength - 1, 1)))
+                overtypeModeSelectedTextSetting(ref textBox1);
+                //最後不要選到分段符號及Xml標記
+                if (textBox1.SelectionLength > 2)
                 {
-                    textBox1.SelectionLength--;
-                    if (textBox1.SelectionLength - 1 < 0) break;
+                    while (("<" + Environment.NewLine).Contains(textBox1.SelectedText.Substring(textBox1.SelectionLength - 1, 1)))
+                    {
+                        textBox1.SelectionLength--;
+                        if (textBox1.SelectionLength - 1 < 0) break;
+                    }
                 }
+                x = textBox1.SelectedText;
             }
-
-            x = textBox1.SelectedText;
             //小於20字元不處理
             if (x.Length < 20) return false;
             TopMost = false; int s = textBox1.SelectionStart;
@@ -8673,7 +8743,8 @@ namespace WindowsFormsApp1
             }
             CnText.FormalizeText(ref x);
             string originalText = x;// CnText.RemoveBooksPunctuation(ref x);//有些是手動添加的書名號或篇名號，不宜逕削去 20240813 然《古籍酷》自動標點仍會先清除書名號，但篇名號不管
-            x = x.Replace(Environment.NewLine, string.Empty).Replace("·", string.Empty);
+            x = x.Replace(Environment.NewLine, string.Empty).Replace("·", string.Empty);//OCR回來後我這裡自動標點如「嗚呼」仍會標上驚嘆號，故交由 FormalizeText 來處理
+            //x = x.Replace(Environment.NewLine, string.Empty).Replace("·", string.Empty).Replace("！",string.Empty);
             switch (url)
             {
                 case "https://old.gj.cool/gjcool/index":
@@ -8685,6 +8756,7 @@ namespace WindowsFormsApp1
                 default:
                     break;
             }
+            //恢復段落符號
             x = CnText.RestoreParagraphs(ref originalText, ref x);
 
             try
@@ -8716,6 +8788,7 @@ namespace WindowsFormsApp1
             {
                 Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
             }
+            //OCR結果文本規範化
             CnText.FormalizeText(ref x);
             bool p = pasteAllOverWrite;
             pasteAllOverWrite = true;//防止隱藏到系統任務列去
@@ -8725,6 +8798,7 @@ namespace WindowsFormsApp1
             //textBox1.SelectedText = x;
             AvailableInUseBothKeysMouse();
             textBox1.Select(s, 0);
+            textBox1.ScrollToCaret();
 
             return true;
         }
