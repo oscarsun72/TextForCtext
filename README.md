@@ -1,6 +1,6 @@
 # TextForCtext
 
-為了[《中國哲學書電子化計劃》](https://ctext.org/)[（Chinese Text Project,簡稱ctext）](https://zh.wikipedia.org/wiki/%E4%B8%AD%E5%9C%8B%E5%93%B2%E5%AD%B8%E6%9B%B8%E9%9B%BB%E5%AD%90%E5%8C%96%E8%A8%88%E5%8A%83)輸入用
+為了[《中國哲學書電子化計劃》](https://ctext.org/)[（Chinese Text Project, 簡稱 CTP 或 ctext）](https://zh.wikipedia.org/wiki/%E4%B8%AD%E5%9C%8B%E5%93%B2%E5%AD%B8%E6%9B%B8%E9%9B%BB%E5%AD%90%E5%8C%96%E8%A8%88%E5%8A%83)輸入用
 
 尤其由[中研院史語所《漢籍電子文獻資料庫》](http://hanchi.ihp.sinica.edu.tw/ihp/hanji.htm)輸入《十三經注疏》、[《維基文庫》](https://zh.wikisource.org/zh-hant/)輸入《四部叢刊》本、[《國學大師》](http://www.guoxuedashi.net/)輸入《四庫全書》本諸書圖文對照時，輔助加速，避免人工之失誤。感恩感恩　南無阿彌陀佛
 
@@ -543,5 +543,6 @@ Ctrl+ 滑鼠左鍵：清除框中所有文字
 - [以 TextForCtext 軟件善用賢超法師《古籍酷AI》自動標點功能簡要示範（以 kanripo.org 中資料為例）【Word VBA 運行環境的配置】](https://youtube.com/live/2dE0k3_nWi8?feature=share)
 - [以 TextForCtext 軟件善用賢超法師《古籍酷AI》自動標點功能簡要示範（以《維基文庫》所收《四庫全書》 為例）](https://youtube.com/live/BEsdf7HXREY?feature=share)
 - [TextForCtext 輸入《中國哲學書電子化計劃》：善用《看典古籍》OCR網頁版與API輸入，以清儒文廷式《純常子枝語》簡要示範](https://youtube.com/live/1xQDbnkxA1k?feature=share)
+- [以TextForCtext 輸入《中國哲學書電子化計劃》：整理《看典古籍》OCR的結果，以清儒文廷式《純常子枝語》簡要示範](https://youtube.com/live/IK8Wns3UhJk?feature=share)
+- [TextForCtext 輸入《中國哲學書電子化計劃》：蒐集《易》學資料，檢索《易》學關鍵字，以本軟件作為介面、善用賢超法師《古籍酷》自動標點及Word VBA，以清儒潘平格《潘子求仁錄輯要》簡要示範](https://youtube.com/live/b1QtGT8bDD0?feature=share)
 - []()
-
