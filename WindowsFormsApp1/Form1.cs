@@ -21,6 +21,8 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using TextForCtext;
 using WebSocketSharp;
+using static TextForCtext.Browser;
+
 
 
 //using static System.Windows.Forms.VisualStyles.VisualStyleElement;
@@ -8010,6 +8012,12 @@ namespace WindowsFormsApp1
                     TopLine = !TopLine;
                     return;
                 }
+                if (e.KeyCode == Keys.Oem3)
+                {//Ctrl + Shift + ` 切換OBS開始串流和停止串流時（這是我於OBS所設定的快捷鍵，可同時觸發）
+                    e.Handled = true;
+                    YAKCSwitchr();
+                    return;
+                }
             }
 
             //Ctrl + Shift + t 同Chrome瀏覽器 --還原最近關閉的頁籤
@@ -8280,27 +8288,9 @@ namespace WindowsFormsApp1
 
                 // Ctrl + F2 切換語音操作（預設為非 Windows 語音辨識操作）識別用
                 if (e.KeyCode == Keys.F2)
-                {/*20230122癸卯年初一 chatGPT大菩薩：
-                  * 您的程式碼看起來很好，可以正常啟動 Windows 內建的語音辨識軟體。您使用了 Process.Start() 方法啟動 sapisvr.exe 程序，並使用了 -SpeechUX 參數來啟動語音辨識功能。
-                    在終止語音辨識軟體程序時，您使用了 killProcesses() 方法來釋放系統記憶體。這是正確的做法，因為當不再使用語音辨識時，終止程序可以釋放系統資源。
-                    還有一點要注意的是, Windows內建的語音辨識軟體路徑可能會因為不同版本或系統有所不同,因此您可能需要檢查並確保路徑是正確的。
-                  */
+                {
                     e.Handled = true;
-                    speechRecognitionOPmode = !speechRecognitionOPmode;
-                    string f = Environment.GetFolderPath(Environment.SpecialFolder.Windows) + "\\Speech\\Common\\sapisvr.exe";
-                    if (!File.Exists(f)) return;
-                    if (speechRecognitionOPmode)
-                    {
-                        new SoundPlayer(@"C:\Windows\Media\Speech On.wav").Play();
-                        //%windir%\\Speech\\Common\\sapisvr.exe -SpeechUX
-                        Process.Start(f, "-SpeechUX");
-                    }
-                    else
-                    {
-                        new SoundPlayer(@"C:\Windows\Media\Speech Off.wav").Play();
-                        //終止 語音辨識軟體 程序,釋放系統記憶體                        
-                        br.killProcesses(new string[] { "sapisvr" });
-                    }
+                    speechRecognitionOPSwitchr();
                     return;
                 }
 
@@ -8660,6 +8650,57 @@ namespace WindowsFormsApp1
 
             }//以上 按下單一鍵
             #endregion
+        }
+        /// <summary>
+        /// YAKC - Key-Mouse Click Visualizer 
+        /// OBS運行時才處理
+        /// </summary>
+        private void YAKCSwitchr()
+        {/* 20240816 
+          * https://obsproject.com/forum/resources/yakc-key-mouse-click-visualizer.1828/
+          * https://github.com/iammodev/YAKC?tab=readme-ov-file#usage
+                  */
+            Process[] p = Process.GetProcessesByName("obs64");
+            if (p.Count() == 0) return;
+            //string fn = "YAKC", f = "X:\\YAKC-win32-x64\\" + fn+ ".exe";
+            string fn = "YAKC", f = Path.Combine( "X:\\YAKC-win32-x64\\", fn)+ ".exe";
+            if (!File.Exists(f)) return;
+            p = Process.GetProcessesByName(fn);
+            if (p.Count() == 0)
+            {
+                Process.Start(f);
+            }
+            else
+            {
+                //終止程序,釋放系統記憶體                        
+                br.killProcesses(new string[] { fn });                
+            }
+        }
+        /// <summary>
+        /// 切換語音辨識功能
+        /// Ctrl + F2 切換語音操作（預設為非 Windows 語音辨識操作）識別用
+        /// </summary>
+        private void speechRecognitionOPSwitchr()
+        {/*20230122癸卯年初一 chatGPT大菩薩：
+                  * 您的程式碼看起來很好，可以正常啟動 Windows 內建的語音辨識軟體。您使用了 Process.Start() 方法啟動 sapisvr.exe 程序，並使用了 -SpeechUX 參數來啟動語音辨識功能。
+                    在終止語音辨識軟體程序時，您使用了 killProcesses() 方法來釋放系統記憶體。這是正確的做法，因為當不再使用語音辨識時，終止程序可以釋放系統資源。
+                    還有一點要注意的是, Windows內建的語音辨識軟體路徑可能會因為不同版本或系統有所不同,因此您可能需要檢查並確保路徑是正確的。
+                  */
+            speechRecognitionOPmode = !speechRecognitionOPmode;
+            string f = Environment.GetFolderPath(Environment.SpecialFolder.Windows) + "\\Speech\\Common\\sapisvr.exe";
+            if (!File.Exists(f)) return;
+            if (speechRecognitionOPmode)
+            {
+                new SoundPlayer(@"C:\Windows\Media\Speech On.wav").Play();
+                //%windir%\\Speech\\Common\\sapisvr.exe -SpeechUX
+                Process.Start(f, "-SpeechUX");
+            }
+            else
+            {
+                new SoundPlayer(@"C:\Windows\Media\Speech Off.wav").Play();
+                //終止 語音辨識軟體 程序,釋放系統記憶體                        
+                br.killProcesses(new string[] { "sapisvr" });
+            }
         }
 
         /// <summary>

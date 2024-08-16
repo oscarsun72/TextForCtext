@@ -132,6 +132,9 @@ Ctrl + w 關閉 Chrome 網頁頁籤
 
 Ctrl + F2 切換語音操作（預設為非 Windows 語音辨識 *Windows Speech Recognition* 操作）
 
+Ctrl + Shift + ` 切換OBS開始串流和停止串流時可處理的程序（這是我於OBS所設定的快捷鍵，可同時觸發）
+> 目前是執行 YAKCSwitchr()； YAKC 鍵盤、滑鼠點擊顯示器開關功能。開始串流時即開，關閉時即關閉
+
 Ctrl + Alt + i 顯示IP現狀訊息方塊
 
 Ctrl + Shift + o 執行《看典古籍》OCR API ，執行 GetOCRResult 方法。（須將token存成「OCRAPItoken.txt」檔置於「我的文件\\CtextTempFiles」下，並在程式碼中覆寫本人帳號/郵箱。）

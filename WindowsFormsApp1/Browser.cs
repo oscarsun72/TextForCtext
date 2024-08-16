@@ -2656,28 +2656,52 @@ internal static string getImageUrl() {
 */
 
         #region Ctext 三種網頁模式判斷
+        /// <summary>
+        /// 由Url判斷是否是[簡單修改模式][Quick edit] 
+        /// </summary>
+        /// <param name="url"></param>
+        /// <returns></returns>
         internal static bool isQuickEditUrl(string url)
         {
-            if (url != "" && url.Length >= "https://ctext.org/".Length
+            return url != "" && url.Length >= "https://ctext.org/".Length
                 && url.Substring(0, "https://ctext.org/".Length) == "https://ctext.org/" && url.IndexOf("edit") > -1
-                    && url.LastIndexOf("#editor") > -1 && url.Substring(url.LastIndexOf("#editor")) == "#editor") return true;
-            else
-                return false;
+                    && url.LastIndexOf("#editor") > -1 && url.Substring(url.LastIndexOf("#editor")) == "#editor";
+            //if (url != "" && url.Length >= "https://ctext.org/".Length
+            //    && url.Substring(0, "https://ctext.org/".Length) == "https://ctext.org/" && url.IndexOf("edit") > -1
+            //        && url.LastIndexOf("#editor") > -1 && url.Substring(url.LastIndexOf("#editor")) == "#editor") return true;
+            //else
+            //    return false;
         }
+        /// <summary>
+        /// 由Url判斷是否是[編輯]頁面（chapter=……&action=editchapter）
+        /// </summary>
+        /// <param name="url"></param>
+        /// <returns></returns>
         internal static bool isEditChapterUrl(string url)
         {
-            if (url != "" && url.Substring(0, "https://ctext.org/".Length) == "https://ctext.org/" &&
-                    url.LastIndexOf("&action = editchapter") > -1) return true;
+            return url != "" && url.Substring(0, "https://ctext.org/".Length) == "https://ctext.org/" &&
+                    url.LastIndexOf("&action = editchapter") > -1;
+            //if (url != "" && url.Substring(0, "https://ctext.org/".Length) == "https://ctext.org/" &&
+            //        url.LastIndexOf("&action = editchapter") > -1) return true;
 
-            else
-                return false;
+            //else
+            //return false;
         }
+        /// <summary>
+        /// 由Url判斷是否是瀏覽圖文對照頁面，非[簡單修改模式][Quick edit] 
+        /// </summary>
+        /// <param name="url"></param>
+        /// <returns></returns>
         internal static bool isFilePageView(string url)
         {
-            if (url != "" && url.Substring(0, "https://ctext.org/".Length) == "https://ctext.org/" &&
-                    url.IndexOf("edit") == -1) return true;
-            else
-                return false;
+            //if (url != "" && url.Substring(0, "https://ctext.org/".Length) == "https://ctext.org/" &&
+            //url.IndexOf("edit") == -1) return true;
+            return (url != "" && url.StartsWith("https://ctext.org/library.pl?") &&
+                            url.IndexOf("&file=") > -1 && url.IndexOf("&page=") > -1 &&
+                            url.IndexOf("edit") == -1);
+            //    return true;
+            //else
+            //    return false;
         }
         #endregion
 
@@ -2714,11 +2738,18 @@ internal static string getImageUrl() {
             Task.WaitAll();
             chromedriversPID.Clear();
         }
+        /// <summary>
+        /// 取得工作管理員中的chromedriver
+        /// </summary>
+        /// <returns></returns>
         internal static Process[] getChromedrivers()
         {
             return Process.GetProcessesByName("chromedriver");
         }
-
+        /// <summary>
+        /// 依工作管理員中的名稱，中止、清除此名稱的所有程序
+        /// </summary>
+        /// <param name="processName">要找的名稱（不含副檔名）</param>
         internal static void killProcesses(string[] processName)
         {
             foreach (var item in processName)
@@ -2739,8 +2770,11 @@ internal static string getImageUrl() {
                 }
             }
             Task.WaitAll();
+
         }
 
+        
+        
         string getUrl(forms.Keys eKeyCode)
         {
 
