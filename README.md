@@ -98,13 +98,13 @@ Alt + F9 或 Alt + , : 在《漢籍全文資料庫》或《中國哲學書電子
 
 Shift + F10 ： 執行 Word VBA Sub 巨集指令「中國哲學書電子化計劃_只保留正文注文_且注文前後加括弧_貼到古籍酷自動標點」
 
-Alt + F10 ： 將textBox1中選取的文字送去《古籍酷》自動標點。若無選取則將整個textBox1的內容送去。（小於20字元不處理）20240808（臺灣父親節）
+Alt + F10 、 Alt + F11 ： 將textBox1中選取的文字送去《古籍酷》自動標點。若無選取則將整個textBox1的內容送去。（小於20字元不處理）20240808（臺灣父親節）
 
-Ctrl + F10： 將textBox1中選取的文字送去《古籍酷》舊版自動標點。若無選取則將整個textBox1的內容送去。（小於20字元不處理）20240808（臺灣父親節）
+Ctrl + F10、 Ctrl + F11： 將textBox1中選取的文字送去《古籍酷》舊版自動標點。若無選取則將整個textBox1的內容送去。（小於20字元不處理）20240808（臺灣父親節）
 
 F12 ： 同 F8 或 Ctrl + Shift + Alt + + 或在非自動且手動輸入模式下，在textBox1 單獨按下數字鍵盤的「+」
 
-Alt + F12  ： 更新最後的備份頁文本
+Alt + shift + F12  ： 更新最後的備份頁文本
 
 Esc 則按下Esc鍵會隱藏到任務列（系統列）中；滑鼠在其 ico 圖示上滑過即恢復
 
@@ -383,6 +383,8 @@ Ctrl + z ： 還原文本，目前上限為50個記錄
 Ctrl + F12 ：就 textBox1 所選之字串，查詢《教育部重編國語辭典修訂本》網路版 https://dict.revised.moe.edu.tw/
  > 之前是執行「[查詢國語辭典.exe](https://github.com/oscarsun72/lookupChineseWords.git)」以查詢網路詞典
 
+Alt + F12 查找《異體字字典》。20240817
+
   > 若在非 appActivateByName 模式下，則但開啟一個分頁以查詢國語辭典耳。唯有在 drive 是 null 時才會執行上述之網路辭典查詢
 
 Alt + G ：就 textBox1 所選之字串，執行「[網路搜尋_元搜尋-同時搜多個引擎.exe](https://github.com/oscarsun72/SearchEnginesConsole.git)」以查詢 Google 等網站
@@ -553,4 +555,5 @@ Ctrl+ 滑鼠左鍵：清除框中所有文字
 - [TextForCtext 輸入《中國哲學書電子化計劃》：善用《看典古籍》OCR網頁版與API輸入，以清儒文廷式《純常子枝語》簡要示範](https://youtube.com/live/1xQDbnkxA1k?feature=share)
 - [以TextForCtext 輸入《中國哲學書電子化計劃》：整理《看典古籍》OCR的結果，以清儒文廷式《純常子枝語》簡要示範](https://youtube.com/live/IK8Wns3UhJk?feature=share)
 - [TextForCtext 輸入《中國哲學書電子化計劃》：蒐集《易》學資料，檢索《易》學關鍵字，以本軟件作為介面、善用賢超法師《古籍酷》自動標點及Word VBA，以清儒潘平格《潘子求仁錄輯要》簡要示範](https://youtube.com/live/b1QtGT8bDD0?feature=share)
+- [TextForCtext Word VBA環境配置及測試：以清儒潘平格《潘子求仁錄輯要》蒐集其中《易》學資料為簡要示範。《中國哲學書電子化計劃》、賢超法師《古籍酷》自動標點](https://youtube.com/live/zzPAmmw253E)
 - []()

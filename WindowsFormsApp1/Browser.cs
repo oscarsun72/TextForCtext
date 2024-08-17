@@ -19,9 +19,11 @@ using System.Media;
 //using System.Net;
 //using System.Net.NetworkInformation;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Web;
 using System.Windows.Automation;
 using System.Windows.Forms;
 using WebSocketSharp;
@@ -2773,8 +2775,8 @@ internal static string getImageUrl() {
 
         }
 
-        
-        
+
+
         string getUrl(forms.Keys eKeyCode)
         {
 
@@ -4748,6 +4750,7 @@ internal static string getImageUrl() {
             {
                 //等待「上傳完成」訊息方塊出現
                 iwe = waitFindWebElementBySelector_ToBeClickable("#swal2-title", 0.1);
+                dt = DateTime.Now;
                 while (iwe == null)
                 {
                     try
@@ -4759,6 +4762,9 @@ internal static string getImageUrl() {
                     {
                     }
                     iwe = waitFindWebElementBySelector_ToBeClickable("#swal2-title", 0.1);
+                    if (DateTime.Now.Subtract(dt).TotalSeconds > 8)
+                        if (Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("等候等待「上傳完成」訊息方塊出現、已逾時，要繼續嗎？") == DialogResult.Cancel)
+                        { StopOCR = true; return false; }
                 }
 
                 dt = DateTime.Now;
@@ -7738,7 +7744,15 @@ internal static string getImageUrl() {
         internal static bool GjcoolPunctOld(ref string x)
         {
             if (driver == null) return false;
-            LastValidWindow = GetCurrentWindowHandle(driver);
+            try
+            {
+                //LastValidWindow = GetCurrentWindowHandle(driver);
+                LastValidWindow = driver.CurrentWindowHandle;
+            }
+            catch (Exception ex)
+            {
+                Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message, "GjcoolPunctOld記下原來分頁視窗句柄");
+            }
             openNewTabWindow();
             driver.Navigate().GoToUrl("https://old.gj.cool/gjcool/index");
             //文本輸入框
@@ -8803,7 +8817,102 @@ internal static string getImageUrl() {
             //    });
             //}
         }
+        /// <summary>
+        /// 查找《字統網》https://zi.tools/
+        /// </summary>
+        /// <param name="x">要查找的單字</param>
+        /// <returns>執行無誤則傳回true</returns>
+        public static bool LookupZitools(string x)
+        {
+            StringInfo si = new StringInfo(x);
+            if (si.LengthInTextElements != 1) return false;
+            try
+            {
+                LastValidWindow = driver.CurrentWindowHandle;
+                openNewTabWindow(OpenQA.Selenium.WindowType.Tab);
+                driver.Navigate().GoToUrl("https://zi.tools/zi/" + x);
 
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+            return true;
+        }
+        /// <summary>
+        /// 查找《異體字字典》。最後會將結果網址複製到剪貼簿備用。如果有其他複製項目，可開啟剪貼簿檢視器 Win + v 以選用        
+        /// </summary>
+        /// <param name="x">要查找的單字</param>
+        /// <returns>傳回查詢字串及結果網址。執行有誤則二者均傳回null</returns>
+        public static (string urlSearch, string urlResult) LookupDictionary_of_ChineseCharacterVariants(string x)
+        {// 20240817 creedit with Gemini大菩薩：程式碼評析與改進建議 ： https://g.co/gemini/share/3f1f65fd36e0 (這個建議蠻好的，有空要再仔細看看。感恩感恩　讚歎讚歎　Gemini大菩薩　南無阿彌陀佛）
+            StringInfo si = new StringInfo(x);
+            if (si.LengthInTextElements != 1) return (null, null);
+            string url = "https://dict.variants.moe.edu.tw/search.jsp?QTP=0&WORD="
+                + EncodedStringURL(x)
+                 + "#searchL";
+        retry:
+            try
+            {
+                LastValidWindow = driver.CurrentWindowHandle;
+                openNewTabWindow(OpenQA.Selenium.WindowType.Tab);
+                driver.Navigate().GoToUrl(url);
+                //driver.Navigate().GoToUrl("https://dict.variants.moe.edu.tw/");
+                //Clipboard.SetText(x);
+                ////輸入「快速搜尋 ariaLabel 」方塊，再按下Enter鍵
+                //IWebElement iwe = waitFindWebElementBySelector_ToBeClickable("#header > div > flex > div:nth-child(3) > div.quick > form > input[type=text]:nth-child(2)");
+                //if (iwe == null) return null;
+                //iwe.SendKeys(OpenQA.Selenium.Keys.Shift + OpenQA.Selenium.Keys.Insert);
+                //iwe.SendKeys(OpenQA.Selenium.Keys.Enter);
+                ////網址中還是看得出指令的：https://dict.variants.moe.edu.tw/search.jsp?QTP=0&WORD=%F0%A4%94%AB#searchL 故今改成上式
+            }
+            catch (Exception ex)
+            {
+                if (ex.HResult == -2146233088)
+                {
+                    if (ex.Message.StartsWith("no such window: target window already closed"))
+                    {
+                        Form1.playSound(Form1.soundLike.error, true);
+                        if (IsWindowHandleValid(driver, LastValidWindow))
+                            driver.SwitchTo().Window(LastValidWindow);
+                        else
+                            Form1.ResetLastValidWindow();
+                        goto retry;
+                    }
+                    else
+                    {
+                        Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
+                    }
+                }
+                return (null, null);
+            }
+            string urlResult = null;
+            try
+            {
+                urlResult = driver.Url;
+                Clipboard.SetText(urlResult);
+            }
+            catch (Exception)
+            {
+            }
+            //return driver.Url;
+            return (url, urlResult);
+        }
+
+        /// <summary>
+        /// 0240817Gemini大菩薩：C# 字串網址編碼 https://g.co/gemini/share/e404139f0e17
+        /// </summary>
+        /// <param name="originalString"></param>
+        /// <returns></returns>
+        public static string EncodedStringURL(string originalString)
+        {
+            //string originalString = "這是一個包含中文和特殊符號的字串！&^%";
+            //string encodedString = HttpUtility.UrlEncode(originalString);
+            return HttpUtility.UrlEncode(originalString);
+
+            //Console.WriteLine("原始字串：{0}", originalString);
+            //    Console.WriteLine("編碼後字串：{0}", encodedString);
+        }
 
         /// <summary>
         /// 取得目前Chrome瀏覽器是否在最大化的狀態

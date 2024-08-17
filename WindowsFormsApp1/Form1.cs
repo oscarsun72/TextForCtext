@@ -282,6 +282,18 @@ namespace WindowsFormsApp1
                 if (MessageBoxShowOKCancelExclamationDefaultDesktopOnly("本軟件即將關閉，也會同時關閉由其開啟的Chrome瀏覽器，若有沒儲存的資訊，請先儲存再按「確定」鈕繼續；否則請按「取消」") == DialogResult.Cancel) { e.Cancel = true; return; }
                 else
                 {
+                    try
+                    {
+                        if (br.ImproveGJcoolOCRMemoDoc != null)
+                        {
+                            ImproveGJcoolOCRMemoDoc.Close(Microsoft.Office.Interop.Word.WdSaveOptions.wdDoNotSaveChanges);
+                            ImproveGJcoolOCRMemoDoc.Application.Quit();
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
+                    }
 
                     Task.Run(() =>
                     {
@@ -2576,6 +2588,13 @@ namespace WindowsFormsApp1
                     keySymbols("□");
                     return;
                 }
+                if (e.KeyCode == Keys.F12)
+                {//Alt + F12 查詢《異體字字典》
+                    e.Handled = true;
+                    var urls = LookupDictionary_of_ChineseCharacterVariants(SelectSingleCharacter());
+                    //Console.WriteLine(urls.urlSearch + Environment.NewLine + urls.urlResult);
+                    return;
+                }
                 if (e.KeyCode == Keys.Multiply)// Alt + *
                 {
                     e.Handled = true; 歐陽文忠公集_集古錄跋尾校語專用(); return;
@@ -3054,24 +3073,7 @@ namespace WindowsFormsApp1
                 if (e.KeyCode == Keys.Z)
                 {// Alt + z ：以所選之字（或插入點後之一字）檢索《字統網》等（或 執行【速檢網路字辭典.exe】）
                     e.Handled = true;
-                    string x;
-                    //選取單字
-                    if (textBox1.SelectionLength == 0 && textBox1.SelectionStart < textBox1.TextLength)
-                    {
-                        if (!insertMode)
-                        {
-                            overtypeModeSelectedTextSetting(ref textBox1);
-                        }
-                        else
-                        {
-                            x = textBox1.Text.Substring(textBox1.SelectionStart, 1);
-                            textBox1.SelectionLength = char.IsHighSurrogate(x.ToCharArray()[0]) ? 2 : 1;
-                        }
-                    }
-                    x = textBox1.SelectedText;
-                    x = x.EndsWith(Environment.NewLine) ? x.Substring(0, x.Length - 2) : x;
-                    x = x.EndsWith("\n") ? x.Substring(0, x.Length - 1) : x;
-                    Clipboard.SetText(x);
+                    string x = SelectSingleCharacter();
 
                     if (browsrOPMode != BrowserOPMode.appActivateByName)
                     {
@@ -3079,8 +3081,7 @@ namespace WindowsFormsApp1
                         {
                             Task.Run(() =>
                             {
-                                br.openNewTabWindow(OpenQA.Selenium.WindowType.Tab);
-                                br.driver.Navigate().GoToUrl("https://zi.tools/zi/" + x);
+                                if (!LookupZitools(x)) MessageBoxShowOKExclamationDefaultDesktopOnly("查找《字統網》發生錯誤，請重來一遍。感恩感恩　南無阿彌陀佛");
                             });
                         }
                         else
@@ -3433,6 +3434,34 @@ namespace WindowsFormsApp1
                 #endregion
             }
         }
+
+        /// <summary>
+        /// 在textBox1中選取單字
+        /// </summary>
+        /// <returns>傳回被選取的單字</returns>
+        internal string SelectSingleCharacter()
+        {
+            string x;
+            //選取單字
+            if (textBox1.SelectionLength == 0 && textBox1.SelectionStart < textBox1.TextLength)
+            {
+                if (!insertMode)
+                {
+                    overtypeModeSelectedTextSetting(ref textBox1);
+                }
+                else
+                {
+                    x = textBox1.Text.Substring(textBox1.SelectionStart, 1);
+                    textBox1.SelectionLength = char.IsHighSurrogate(x.ToCharArray()[0]) ? 2 : 1;
+                }
+            }
+            x = textBox1.SelectedText;
+            x = x.EndsWith(Environment.NewLine) ? x.Substring(0, x.Length - 2) : x;
+            x = x.EndsWith("\n") ? x.Substring(0, x.Length - 1) : x;
+            Clipboard.SetText(x);
+            return x;
+        }
+
 
         /// <summary>
         /// 在已經《古籍酷》OCR文本化後的資料，加以編輯再送出
@@ -8042,8 +8071,19 @@ namespace WindowsFormsApp1
             if (e.Control && e.Shift && e.KeyCode == Keys.P)
             {
                 e.Handled = true;
+                string url = string.Empty;
                 if (br.driver == null) return;
-                string url = br.driver.Url;
+                try
+                {
+                    url = br.driver.Url;
+                }
+                catch (Exception)
+                {
+                    //Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
+                    //return;
+                    if (br.IsWindowHandleValid(br.driver, br.LastValidWindow))
+                        br.driver.SwitchTo().Window(br.LastValidWindow);
+                }
                 //檢查是否是可操作的頁面（分頁）
                 if (!IsValidUrl＿ImageTextComparisonPage(url))
                 {
@@ -8279,6 +8319,14 @@ namespace WindowsFormsApp1
                     //AddVerticalTextBox();
                     return;
                 }
+
+                if (e.KeyCode == Keys.F12)
+                {//Alt + Shift + F12 ：
+                    e.Handled = true;
+                    BackupLastPageText(Clipboard.GetText(), true, true);// 更新最後的備份頁文本
+                    return;
+                }
+
             }
             #endregion
 
@@ -8296,6 +8344,12 @@ namespace WindowsFormsApp1
 
                 if (e.KeyCode == Keys.F10)
                 {//Ctrl + F10： 將textBox1中選取的文字送去《古籍酷》舊版自動標點。若無選取則將整個textBox1的內容送去。（小於20字元不處理）20240808（臺灣父親節）
+                    e.Handled = true;
+                    toGjcoolPunct("https://old.gj.cool/gjcool/index");
+                    return;
+                }
+                if (e.KeyCode == Keys.F11)
+                {//Ctrl + F11： 將textBox1中選取的文字送去《古籍酷》舊版自動標點。若無選取則將整個textBox1的內容送去。（小於20字元不處理）20240808（臺灣父親節）
                     e.Handled = true;
                     toGjcoolPunct("https://old.gj.cool/gjcool/index");
                     return;
@@ -8562,11 +8616,10 @@ namespace WindowsFormsApp1
                     toGjcoolPunct("https://gj.cool/punct");
                     return;
                 }
-
-                if (e.KeyCode == Keys.F12)
-                {
+                if (e.KeyCode == Keys.F11)
+                {//Alt + F11 ： 將textBox1中選取的文字送去《古籍酷》自動標點。若無選取則將整個textBox1的內容送去。（小於20字元不處理）20240808（臺灣父親節）
                     e.Handled = true;
-                    BackupLastPageText(Clipboard.GetText(), true, true);//Alt + F12  ： 更新最後的備份頁文本
+                    toGjcoolPunct("https://gj.cool/punct");
                     return;
                 }
 
@@ -8663,7 +8716,7 @@ namespace WindowsFormsApp1
             Process[] p = Process.GetProcessesByName("obs64");
             if (p.Count() == 0) return;
             //string fn = "YAKC", f = "X:\\YAKC-win32-x64\\" + fn+ ".exe";
-            string fn = "YAKC", f = Path.Combine( "X:\\YAKC-win32-x64\\", fn)+ ".exe";
+            string fn = "YAKC", f = Path.Combine("X:\\YAKC-win32-x64\\", fn) + ".exe";
             if (!File.Exists(f)) return;
             p = Process.GetProcessesByName(fn);
             if (p.Count() == 0)
@@ -8673,7 +8726,7 @@ namespace WindowsFormsApp1
             else
             {
                 //終止程序,釋放系統記憶體                        
-                br.killProcesses(new string[] { fn });                
+                br.killProcesses(new string[] { fn });
             }
         }
         /// <summary>
@@ -8755,8 +8808,8 @@ namespace WindowsFormsApp1
             }
             #endregion
 
-            string x = textBox1.SelectedText == string.Empty ? textBox1.Text : textBox1.SelectedText;
-            if (x == textBox1.Text) textBox1.Select(0, textBox1.TextLength);//textBox1.SelectionLength = textBox1.TextLength;//textBox1.SelectAll();//這個方法好像會失靈
+            string x = textBox1.SelectedText == string.Empty ? textBox1.Text : textBox1.SelectedText; bool selAll = false;
+            if (x == textBox1.Text) { textBox1.Select(0, textBox1.TextLength); selAll = true; }//textBox1.SelectionLength = textBox1.TextLength;//textBox1.SelectAll();//這個方法好像會失靈
             else
             {
                 overtypeModeSelectedTextSetting(ref textBox1);
@@ -8834,11 +8887,14 @@ namespace WindowsFormsApp1
             bool p = pasteAllOverWrite;
             pasteAllOverWrite = true;//防止隱藏到系統任務列去
             if (reMarkFlag) x += "<p>";
+            undoRecord();
             textBox1.SelectedText = CnText.BooksPunctuation(ref x, true);
+            undoRecord();
             pasteAllOverWrite = p;
             //textBox1.SelectedText = x;
             AvailableInUseBothKeysMouse();
-            textBox1.Select(s, 0);
+            if (!selAll) textBox1.Select(s, x.Length);
+            else textBox1.Select(0, 0);
             textBox1.ScrollToCaret();
 
             return true;
@@ -8983,6 +9039,7 @@ namespace WindowsFormsApp1
                 #endregion
             }
 
+            #region 記下送去OCR前的分頁
             string currentWindowHndl = string.Empty;
             try
             {
@@ -8992,6 +9049,9 @@ namespace WindowsFormsApp1
             {
                 currentWindowHndl = br.driver.WindowHandles.Last();
             }
+            br.LastValidWindow = currentWindowHndl;
+            #endregion
+
             //下載書圖
             string imgUrl = Clipboard.GetText(), downloadImgFullName; bool ocrResult = false;
             if (imgUrl.Length > 4
@@ -9025,9 +9085,10 @@ namespace WindowsFormsApp1
             ocrResult = false; TopMost = false;// Visible = false;//WindowState = FormWindowState.Minimized;
 
             #region toOCR
+            int windowsCount = driver.WindowHandles.Count;//作為判斷在執行OCR程序時有沒有新開的分頁視窗
             br.StopOCR = false;
-            //string currentWindowHndl = br.driver.CurrentWindowHandle;
-            br.LastValidWindow = currentWindowHndl;//br.driver.CurrentWindowHandle;
+            ////string currentWindowHndl = br.driver.CurrentWindowHandle;
+            //br.LastValidWindow = currentWindowHndl;//br.driver.CurrentWindowHandle;//改到前面
             switch (ocrSiteTitle)
             {
                 //Google Keep
@@ -9205,13 +9266,16 @@ namespace WindowsFormsApp1
                 bool chk = false;
                 try
                 {
-                    chk = (ModifierKeys != Keys.Control && br.driver.WindowHandles[br.driver.WindowHandles.Count - 1] != currentWindowHndl);
+                    chk = ModifierKeys != Keys.Control
+                        && br.driver.WindowHandles[br.driver.WindowHandles.Count - 1] != currentWindowHndl
+                        && windowsCount < driver.WindowHandles.Count;
                 }
                 catch (Exception)
                 {
                 }
                 if (chk)
                 {
+                    //按下Chrome瀏覽器快速鍵關閉右側分頁
                     SendKeys.Send("%r");//這是利用擴充功能設定的快速鍵：https://chrome.google.com/webstore/detail/shortkeys-custom-keyboard/logpjaacgmcbpdkdchjiaagddngobkck
                     Thread.Sleep(250);
                 }
@@ -10844,7 +10908,8 @@ namespace WindowsFormsApp1
             //MessageBox.Show("你的螢幕解析度是" + Size + "\n Width = " + Width + "\n Height = " + Height);
             //FormStartPosition 列舉:https://docs.microsoft.com/zh-tw/dotnet/api/system.windows.forms.formstartposition?view=netframework-4.7.2
             this.Location = new Point
-                (Width - this.Width, Height - this.Height - (int)(textBox1.Height / 3));
+                //(Width - this.Width, Height - this.Height - (int)(textBox1.Height / 3));
+                (Width - this.Width, Height / 9);
             textBox1ReSize();
             //this.PointToScreen();
         }
@@ -12442,7 +12507,8 @@ namespace WindowsFormsApp1
         private void textBox3_MouseMove(object sender, MouseEventArgs e)
         {
             if (_currentPageNum != "")
-                tooltipConstructor(sender, "現在在第" + _currentPageNum + "頁");
+                tooltipConstructor(sender, "現在在第" + _currentPageNum + "頁"
+                    + Environment.NewLine + Environment.NewLine + "textBox3.Text = " + textBox3Text);
         }
 
 
