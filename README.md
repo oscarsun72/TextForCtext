@@ -27,7 +27,7 @@
        > ★在全自動連續輸入模式下可配合 Windows 內建的語音辨識軟體 *Windows Speech Recognition* 完全不動手即可操作。快速鍵**Ctrl + F2**可切換此操作，並自動啟動軟體與結束）20230121 23:50壬寅年除夕夜
       - 第三種模式則是混搭前兩種， 或由selenium 取得現用的瀏覽器。來操作。。尚未實作。
   - 要切換三種模式。可在textbox2輸入以上指令。
-- [免安裝可執行檔TextForCtextPortable下載，解壓後點擊 TextForCtext.exe 檔案即可](https://github.com/oscarsun72/TextForCtext/blob/master/TextForCtextPortable.zip)：202301052034（2023/1/5 20:34)[直接下載](https://github.com/oscarsun72/TextForCtext/raw/master/TextForCtextPortable.zip)
+- [免安裝可執行檔TextForCtextPortable下載，解壓後點擊 TextForCtext.exe 檔案即可](https://github.com/oscarsun72/TextForCtext/blob/master/TextForCtextPortable.zip)：202301052034（2023/1/5 20:34)[直接下載](https://github.com/oscarsun72/TextForCtext/raw/master/TextForCtextPortable.zip)(20240817)
  > [chromedriver下載](https://googlechromelabs.github.io/chrome-for-testing/)（請選擇Windows版：win64或win32看您使用的Chrome瀏覽器是64位元版還是32位元版的，且和您所使用的Chrome瀏覽器版本號相同的版本下載）
  
  > 只要將其中的 chromedriver.exe 放於免安裝版的解壓目錄中（和TextForCtext.exe同一路徑）即可。
@@ -390,7 +390,7 @@ Alt + F12 查找《異體字字典》。20240817
 
   > 若在非 appActivateByName 模式下，則但開啟一個分頁以查詢國語辭典耳。唯有在 drive 是 null 時才會執行上述之網路辭典查詢
 
-Alt + G ：就 textBox1 所選之字串，執行「[網路搜尋_元搜尋-同時搜多個引擎.exe](https://github.com/oscarsun72/SearchEnginesConsole.git)」以查詢 Google 等網站
+Alt + g ：就 textBox1 所選之字串，執行「[網路搜尋_元搜尋-同時搜多個引擎.exe](https://github.com/oscarsun72/SearchEnginesConsole.git)」以查詢 Google 等網站
   > 若在非 appActivateByName 模式下，則但開啟一個分頁以檢索Google大神耳。唯有在 drive 是 null 時才會執行上述之搜尋。
 
 Alt + z ：以所選之字（或插入點後之一字）檢索《字統網》 https://zi.tools/
@@ -563,4 +563,5 @@ Ctrl+ 滑鼠左鍵：清除框中所有文字
 - [TextForCtext Word VBA環境配置及測試：以清儒潘平格《潘子求仁錄輯要》蒐集其中《易》學資料為簡要示範。《中國哲學書電子化計劃》、賢超法師《古籍酷》自動標點](https://youtube.com/live/zzPAmmw253E)
 - [TextForCtext 輸入《中國哲學書電子化計劃》實境秀：善用賢超法師《古籍酷》AI服務OCR（圖像數字化：標注平台、批量處理），以明儒胡震亨《讀書雜錄》示範。任真吟任真曲](https://youtube.com/live/SJmZmtqnSs0)
 - [以 TextForCtext 檢索《異體字字典》《國語辭典》及《字統網》。整理《古籍酷》OCR的結果，以輸入《中國哲學書電子化計劃》所收明儒胡震亨《讀書雜錄》重點演示](https://youtube.com/live/Kn51sJ2EhSQ?feature=share)
+- [TextForCtext 輸入《中國哲學書電子化計劃》：以賢超法師《古籍酷》OCR 標注平台輸入及整理，以清儒文廷式《純常子枝語》簡要示範](https://youtube.com/live/GM44KOQ54cE?feature=share)
 - []()
