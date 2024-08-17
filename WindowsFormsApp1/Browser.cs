@@ -8870,6 +8870,76 @@ internal static string getImageUrl() {
         }
 
         /// <summary>
+        /// 查找《漢語大詞典》。最後會將結果網址複製到剪貼簿備用。如果有其他複製項目，可開啟剪貼簿檢視器 Win + v 以選用        
+        /// </summary>
+        /// <param name="x">要查找的單字</param>
+        /// <returns>傳回結果網址。找不到或執行有誤傳回null</returns>
+        public static string LookupHYDCD(string x)
+        {// 20240817 creedit with Gemini大菩薩：程式碼評析與改進建議 ： https://g.co/gemini/share/3f1f65fd36e0 (這個建議蠻好的，有空要再仔細看看。感恩感恩　讚歎讚歎　Gemini大菩薩　南無阿彌陀佛）
+            StringInfo si = new StringInfo(x);
+            if (si.LengthInTextElements < 2) return null;
+            string url = "https://ivantsoi.myds.me/web/hydcd/search.html", urlResult = null;
+            IWebElement iwe;
+        retry:
+            try
+            {
+                LastValidWindow = driver.CurrentWindowHandle;
+                openNewTabWindow(OpenQA.Selenium.WindowType.Tab);
+                driver.Navigate().GoToUrl(url);
+                Clipboard.SetText(x);
+                //輸入「詞目」方塊（#SearchBox；name="T1"），再按下Enter鍵
+                iwe = waitFindWebElementBySelector_ToBeClickable("#SearchBox");
+                if (iwe == null) return null;
+                //Console.WriteLine(iwe.TagName + Environment.NewLine + iwe.Text + Environment.NewLine+ iwe.GetAttribute("value"));
+                iwe.SendKeys(OpenQA.Selenium.Keys.Shift + OpenQA.Selenium.Keys.Insert);
+                iwe.SendKeys(OpenQA.Selenium.Keys.Enter);
+                //找不到時
+                iwe = waitFindWebElementBySelector_ToBeClickable("#SearchResult");
+                if (iwe != null)
+                {
+                    Console.WriteLine(iwe.GetAttribute("textContent"));
+                    if (iwe.GetAttribute("textContent").StartsWith("抱歉，無此詞語。"))
+                        return null;
+                    else
+                        iwe.Click();
+                }
+                else
+                {
+                    iwe = waitFindWebElementBySelector_ToBeClickable("#SearchResult > p > a > font");//ex:守真
+                    //iwe = waitFindWebElementBySelector_ToBeClickable("#SearchResult > p > a");//ex:總第 4709 頁，第三卷第 1303 頁
+                    if (iwe != null)
+                    {
+                        iwe.Click();
+                    }
+                }
+                driver.SwitchTo().Window(driver.WindowHandles.Last());
+                urlResult = driver.Url;
+            }
+            catch (Exception ex)
+            {
+                if (ex.HResult == -2146233088)
+                {
+                    if (ex.Message.StartsWith("no such window: target window already closed"))
+                    {
+                        noSuchWindowErrHandler();
+                        //Form1.playSound(Form1.soundLike.error, true);
+                        //if (IsWindowHandleValid(driver, LastValidWindow))
+                        //    driver.SwitchTo().Window(LastValidWindow);
+                        //else
+                        //    Form1.ResetLastValidWindow();
+                        goto retry;
+                    }
+                    else
+                    {
+                        Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
+                    }
+                }
+                return null;
+            }
+            Clipboard.SetText(urlResult);
+            return urlResult;
+        }
+        /// <summary>
         /// 查找《異體字字典》。最後會將結果網址複製到剪貼簿備用。如果有其他複製項目，可開啟剪貼簿檢視器 Win + v 以選用        
         /// </summary>
         /// <param name="x">要查找的單字</param>
@@ -8926,7 +8996,7 @@ internal static string getImageUrl() {
                 if (iwe != null)
                 {
                     if (!iwe.GetAttribute("textContent").EndsWith("查詢結果：正文 0 字，附收字 0 字"))//[ 𪢨 ]， 查詢結果：正文 0 字，附收字 0 字
-                                                                                                //[ 襳 ]， 查詢結果：正文 2 字，附收字 0 字
+                                                                                         //[ 襳 ]， 查詢結果：正文 2 字，附收字 0 字
                     {
                         urlResult = driver.Url;
                         Clipboard.SetText(urlResult);

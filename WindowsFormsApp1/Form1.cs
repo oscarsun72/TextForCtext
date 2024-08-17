@@ -2036,9 +2036,10 @@ namespace WindowsFormsApp1
                     noteMark(); return;
                 }
                 if (e.KeyCode == Keys.F12)
-                {//Ctrl + F12
-                    overtypeModeSelectedTextSetting(ref textBox1);
-                    string x = textBox1.SelectedText;
+                {//Ctrl + F12 查詢國語辭典
+                    //overtypeModeSelectedTextSetting(ref textBox1);
+                    //string x = textBox1.SelectedText;
+                    string x = SelectSingleCharacter();
                     e.Handled = true;
                     if (x != "")
                     {
@@ -2050,7 +2051,8 @@ namespace WindowsFormsApp1
                             {
                                 //Task.Run(() =>
                                 //{
-                                if (LookupDictRevised(SelectSingleCharacter()).urlSearch == null)
+                                //if (LookupDictRevised(SelectSingleCharacter()).urlSearch == null)
+                                if (LookupDictRevised(x).urlSearch == null)
                                     MessageBoxShowOKExclamationDefaultDesktopOnly("發生錯誤，請重新查詢");
                                 //br.openNewTabWindow(OpenQA.Selenium.WindowType.Tab);
                                 //br.driver.Navigate().GoToUrl("https://dict.revised.moe.edu.tw/search.jsp?md=1&word=" + x + "&qMd=0&qCol=1");
@@ -2878,6 +2880,13 @@ namespace WindowsFormsApp1
                     keyDownCtrlAdd(false);// if (textBox1.Text != "") { pauseEvents(); textBox1.Text = ""; resumeEvents(); }
                     return;
                 }
+                if (e.KeyCode == Keys.C)
+                {//Alt + c ：以所選之詞（不能少於2字）檢索《漢語大詞典》 https://ivantsoi.myds.me/web/hydcd/search.html
+                    e.Handled = true;
+                    LookupHYDCD(textBox1.SelectedText);
+                    return;
+                }
+
                 if (e.KeyCode == Keys.E)
                 {// Alt + e ：在完整編輯頁面中直接取代文字。請將被取代+取代成之二字前後並置，並將其選取後（或在被取代之文字前放置插入點）再按下此組合鍵以執行直接取代 20240718
                     e.Handled = true;
