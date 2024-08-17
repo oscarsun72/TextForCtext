@@ -286,7 +286,7 @@ namespace WindowsFormsApp1
                     {
                         if (br.ImproveGJcoolOCRMemoDoc != null)
                         {
-                            ImproveGJcoolOCRMemoDoc.Close(Microsoft.Office.Interop.Word.WdSaveOptions.wdDoNotSaveChanges);
+                            //ImproveGJcoolOCRMemoDoc.Close(Microsoft.Office.Interop.Word.WdSaveOptions.wdDoNotSaveChanges);
                             ImproveGJcoolOCRMemoDoc.Application.Quit();
                         }
                     }
@@ -2048,11 +2048,13 @@ namespace WindowsFormsApp1
                         {
                             if (br.driver != null)
                             {
-                                Task.Run(() =>
-                                {
-                                    br.openNewTabWindow(OpenQA.Selenium.WindowType.Tab);
-                                    br.driver.Navigate().GoToUrl("https://dict.revised.moe.edu.tw/search.jsp?md=1&word=" + x + "&qMd=0&qCol=1");
-                                });
+                                //Task.Run(() =>
+                                //{
+                                if (LookupDictRevised(SelectSingleCharacter()).urlSearch == null)
+                                    MessageBoxShowOKExclamationDefaultDesktopOnly("發生錯誤，請重新查詢");
+                                //br.openNewTabWindow(OpenQA.Selenium.WindowType.Tab);
+                                //br.driver.Navigate().GoToUrl("https://dict.revised.moe.edu.tw/search.jsp?md=1&word=" + x + "&qMd=0&qCol=1");
+                                //});
                             }
                             else
                                 if (MessageBoxShowOKCancelExclamationDefaultDesktopOnly("是否要執行【查詢網路辭典】？") == DialogResult.OK)
@@ -3079,10 +3081,10 @@ namespace WindowsFormsApp1
                     {
                         if (br.driver != null)
                         {
-                            Task.Run(() =>
-                            {
-                                if (!LookupZitools(x)) MessageBoxShowOKExclamationDefaultDesktopOnly("查找《字統網》發生錯誤，請重來一遍。感恩感恩　南無阿彌陀佛");
-                            });
+                            //Task.Run(() =>
+                            //{
+                            if (!LookupZitools(x)) MessageBoxShowOKExclamationDefaultDesktopOnly("查找《字統網》發生錯誤，請重來一遍。感恩感恩　南無阿彌陀佛");
+                            //});
                         }
                         else
                         {

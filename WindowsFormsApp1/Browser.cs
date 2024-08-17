@@ -8745,6 +8745,7 @@ internal static string getImageUrl() {
                     Visible = true
                 };
                 wordapp.Activate();
+                ActiveForm1.AvailableInUseBothKeysMouse();
                 //ImproveGJcoolOCRMemoDoc = wordapp.Documents.Open("C:\\Users\\oscar\\Dropbox\\《古籍酷》AI OCR 待改進者隨記 感恩感恩　讚歎讚歎　南無阿彌陀佛.docx");
                 ImproveGJcoolOCRMemoDoc = wordapp.Documents.Open(f);
                 //ImproveGJcoolOCRMemoDoc = wordapp.Documents.Open("C:\\Users\\oscar\\Dropbox\\《古籍酷》AI%20OCR%20待改進者隨記%20感恩感恩　讚歎讚歎　南無阿彌陀佛.docx");
@@ -8817,6 +8818,21 @@ internal static string getImageUrl() {
             //    });
             //}
         }
+
+
+        /// <summary>
+        /// 作為Selenium發生"no such window: target window already closed"例外情形的處理函式
+        /// </summary>
+        internal static void noSuchWindowErrHandler()
+        {
+            Form1.playSound(Form1.soundLike.error, true);
+
+            if (IsWindowHandleValid(driver, LastValidWindow))
+                driver.SwitchTo().Window(LastValidWindow);
+            else
+                Form1.ResetLastValidWindow();
+        }
+
         /// <summary>
         /// 查找《字統網》https://zi.tools/
         /// </summary>
@@ -8826,6 +8842,7 @@ internal static string getImageUrl() {
         {
             StringInfo si = new StringInfo(x);
             if (si.LengthInTextElements != 1) return false;
+            retry:
             try
             {
                 LastValidWindow = driver.CurrentWindowHandle;
@@ -8833,12 +8850,25 @@ internal static string getImageUrl() {
                 driver.Navigate().GoToUrl("https://zi.tools/zi/" + x);
 
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                if (ex.HResult == -2146233088)
+                {
+                    if (ex.Message.StartsWith("no such window: target window already closed"))
+                    {
+                        noSuchWindowErrHandler();
+                        goto retry;
+                    }
+                    else
+                    {
+                        Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
+                    }
+                }
                 return false;
             }
             return true;
         }
+
         /// <summary>
         /// 查找《異體字字典》。最後會將結果網址複製到剪貼簿備用。如果有其他複製項目，可開啟剪貼簿檢視器 Win + v 以選用        
         /// </summary>
@@ -8851,6 +8881,7 @@ internal static string getImageUrl() {
             string url = "https://dict.variants.moe.edu.tw/search.jsp?QTP=0&WORD="
                 + EncodedStringURL(x)
                  + "#searchL";
+            IWebElement iwe;
         retry:
             try
             {
@@ -8860,7 +8891,7 @@ internal static string getImageUrl() {
                 //driver.Navigate().GoToUrl("https://dict.variants.moe.edu.tw/");
                 //Clipboard.SetText(x);
                 ////輸入「快速搜尋 ariaLabel 」方塊，再按下Enter鍵
-                //IWebElement iwe = waitFindWebElementBySelector_ToBeClickable("#header > div > flex > div:nth-child(3) > div.quick > form > input[type=text]:nth-child(2)");
+                //iwe = waitFindWebElementBySelector_ToBeClickable("#header > div > flex > div:nth-child(3) > div.quick > form > input[type=text]:nth-child(2)");
                 //if (iwe == null) return null;
                 //iwe.SendKeys(OpenQA.Selenium.Keys.Shift + OpenQA.Selenium.Keys.Insert);
                 //iwe.SendKeys(OpenQA.Selenium.Keys.Enter);
@@ -8872,11 +8903,12 @@ internal static string getImageUrl() {
                 {
                     if (ex.Message.StartsWith("no such window: target window already closed"))
                     {
-                        Form1.playSound(Form1.soundLike.error, true);
-                        if (IsWindowHandleValid(driver, LastValidWindow))
-                            driver.SwitchTo().Window(LastValidWindow);
-                        else
-                            Form1.ResetLastValidWindow();
+                        noSuchWindowErrHandler();
+                        //Form1.playSound(Form1.soundLike.error, true);
+                        //if (IsWindowHandleValid(driver, LastValidWindow))
+                        //    driver.SwitchTo().Window(LastValidWindow);
+                        //else
+                        //    Form1.ResetLastValidWindow();
                         goto retry;
                     }
                     else
@@ -8889,8 +8921,88 @@ internal static string getImageUrl() {
             string urlResult = null;
             try
             {
-                urlResult = driver.Url;
-                Clipboard.SetText(urlResult);
+                //查詢結果：正文 0 字，附收字 0 字
+                iwe = waitFindWebElementBySelector_ToBeClickable("body > main > div > flex > div:nth-child(1)");
+                if (iwe != null)
+                {
+                    if (!iwe.GetAttribute("textContent").EndsWith("查詢結果：正文 0 字，附收字 0 字"))//[ 𪢨 ]， 查詢結果：正文 0 字，附收字 0 字
+                                                                                                //[ 襳 ]， 查詢結果：正文 2 字，附收字 0 字
+                    {
+                        urlResult = driver.Url;
+                        Clipboard.SetText(urlResult);
+                    }
+                }
+                else
+                {
+                    urlResult = driver.Url;
+                    Clipboard.SetText(urlResult);
+                }
+            }
+            catch (Exception)
+            {
+            }
+            //return driver.Url;
+            return (url, urlResult);
+        }
+        /// <summary>
+        /// 查找《國語辭典》。最後會將結果網址複製到剪貼簿備用。如果有其他複製項目，可開啟剪貼簿檢視器 Win + v 以選用        
+        /// </summary>
+        /// <param name="x">要查找的字詞</param>
+        /// <returns>傳回查詢字串及結果網址。執行有誤則二者均傳回null</returns>
+        public static (string urlSearch, string urlResult) LookupDictRevised(string x)
+        {// 20240817 creedit with Gemini大菩薩：程式碼評析與改進建議 ： https://g.co/gemini/share/3f1f65fd36e0 (這個建議蠻好的，有空要再仔細看看。感恩感恩　讚歎讚歎　Gemini大菩薩　南無阿彌陀佛）
+            StringInfo si = new StringInfo(x);
+            if (si.LengthInTextElements < 1) return (null, null);
+            string url = "https://dict.revised.moe.edu.tw/search.jsp?md=1&word="
+                + EncodedStringURL(x)
+                + "&qMd=0&qCol=1";
+            IWebElement iwe;
+        retry:
+            try
+            {
+                LastValidWindow = driver.CurrentWindowHandle;
+                openNewTabWindow(OpenQA.Selenium.WindowType.Tab);
+                driver.Navigate().GoToUrl(url);
+                //driver.Navigate().GoToUrl("https://dict.variants.moe.edu.tw/");
+                //Clipboard.SetText(x);
+                ////輸入「快速搜尋 ariaLabel 」方塊，再按下Enter鍵
+                //iwe = waitFindWebElementBySelector_ToBeClickable("#header > div > flex > div:nth-child(3) > div.quick > form > input[type=text]:nth-child(2)");
+                //if (iwe == null) return null;
+                //iwe.SendKeys(OpenQA.Selenium.Keys.Shift + OpenQA.Selenium.Keys.Insert);
+                //iwe.SendKeys(OpenQA.Selenium.Keys.Enter);
+                ////網址中還是看得出指令的：https://dict.variants.moe.edu.tw/search.jsp?QTP=0&WORD=%F0%A4%94%AB#searchL 故今改成上式
+            }
+            catch (Exception ex)
+            {
+                if (ex.HResult == -2146233088)
+                {
+                    if (ex.Message.StartsWith("no such window: target window already closed"))
+                    {
+                        //Form1.playSound(Form1.soundLike.error, true);
+                        //if (IsWindowHandleValid(driver, LastValidWindow))
+                        //    driver.SwitchTo().Window(LastValidWindow);
+                        //else
+                        //    Form1.ResetLastValidWindow();
+                        noSuchWindowErrHandler();
+                        goto retry;
+                    }
+                    else
+                    {
+                        Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
+                    }
+                }
+                return (null, null);
+            }
+            string urlResult = null;
+            try
+            {
+                //查無資料
+                iwe = waitFindWebElementBySelector_ToBeClickable("#searchL > tbody > tr > td");
+                if (iwe == null)
+                {//if(iwe.GetAttribute("textContent") == "查無資料")
+                    urlResult = driver.Url;
+                    Clipboard.SetText(urlResult);
+                }
             }
             catch (Exception)
             {
