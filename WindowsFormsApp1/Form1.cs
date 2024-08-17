@@ -2883,6 +2883,7 @@ namespace WindowsFormsApp1
                 if (e.KeyCode == Keys.C)
                 {//Alt + c ：以所選之詞（不能少於2字）檢索《漢語大詞典》 https://ivantsoi.myds.me/web/hydcd/search.html
                     e.Handled = true;
+                    overtypeModeSelectedTextSetting(ref textBox1);
                     LookupHYDCD(textBox1.SelectedText);
                     return;
                 }
