@@ -580,17 +580,19 @@ namespace TextForCtext
         {
             get
             {
+                const string selector = "#content > div:nth-child(3) > span:nth-child(2) > a > span";//33位元免安裝版Chrome瀏覽器
+                const string selector1= "#content > div:nth-child(5) > span:nth-child(2) > a > span"; //64位元安裝版Chrome瀏覽器
                 IWebElement iwe;
                 if (Form1.IsValidUrl＿keyDownCtrlAdd(ActiveForm1.textBox3Text))
                 {
-                    iwe = waitFindWebElementBySelector_ToBeClickable("#content > div:nth-child(3) > span:nth-child(2) > a > span");
+                    iwe = waitFindWebElementBySelector_ToBeClickable(selector);
                 reCheck:
                     if (iwe != null)
                     {
                         string tx = iwe.GetAttribute("outerHTML");
                         if (!tx.StartsWith("<span itemprop=\"title\">"))
                         {
-                            iwe = waitFindWebElementBySelector_ToBeClickable("#content > div:nth-child(5) > span:nth-child(2) > a > span");
+                            iwe = waitFindWebElementBySelector_ToBeClickable(selector1);//64位元安裝版Chrome瀏覽器
                             if (iwe != null)
                             {
                                 tx = iwe.GetAttribute("outerHTML");
@@ -611,7 +613,7 @@ namespace TextForCtext
                     }
                     else
                     {
-                        iwe = waitFindWebElementBySelector_ToBeClickable("#content > div:nth-child(5) > span:nth-child(2) > a > span");
+                        iwe = waitFindWebElementBySelector_ToBeClickable(selector1);
                         if (iwe != null)
                             goto reCheck;
                         else
