@@ -584,7 +584,7 @@ namespace TextForCtext
                 ,"\r\n。<p>"
                 ,"！。<p>","？。<p>","+<p>","<p>+","：。<p>","。\r\n。"
                 ,"：。","\r\n，","\r\n。","\r\n、","\r\n？","\r\n」","「\r\n" ,"{{\r\n" ,"\r\n}}"
-                ,"􏿽？","􏿽。","，〉","。〉","〈、","！，"//自動標點結果的訂正
+                ,"􏿽？","􏿽。","，〉","。〉","〈、","！，","〈，"//自動標點結果的訂正
                 ,"，。"
             };
 
@@ -595,7 +595,7 @@ namespace TextForCtext
                 ,"\r\n"
                 ,"！<p>","？<p>","<p>","<p>","：<p>","。\r\n"
                 ,"。","，\r\n","。\r\n","、\r\n","？\r\n","」\r\n","\r\n「" ,"\r\n{{", "}}\r\n"
-                ,"？􏿽","。􏿽","〉，","〉。","、〈","！"//自動標點結果的訂正
+                ,"？􏿽","。􏿽","〉，","〉。","、〈","！","，〈"//自動標點結果的訂正
                 ,"。"
             };
             if (replaceDChar.Count() != replaceChar.Count()) Debugger.Break();//請檢查！！
@@ -652,7 +652,7 @@ namespace TextForCtext
             string title = Browser.Title_Linkbox?.GetAttribute("textContent");
             if (title == null)
             {
-                Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("未能找到正確的「書名（title）」超連結控制項，請檢查！");
+                Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("未能找到正確的「書名（title）」超連結控制項，請檢查！", "HasPlatecenterTextIncluded");
                 return -1;
             }
             int location = xChecking.IndexOf(title),

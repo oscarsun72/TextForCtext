@@ -8171,7 +8171,8 @@ namespace WindowsFormsApp1
 
             //Ctrl + Shift + n 或 Shift + F1 : 開新Form1 實例
             if (((m & Keys.Control) == Keys.Control && (m & Keys.Shift) == Keys.Shift && e.KeyCode == Keys.N)
-                || ((m & Keys.Shift) == Keys.Shift && e.KeyCode == Keys.F1))
+                //|| ((m & Keys.Shift) == Keys.Shift && e.KeyCode == Keys.F1))
+                || (e.Shift  && !e.Alt & e.Control && e.KeyCode == Keys.F1))
             {
                 e.Handled = true;
                 newForm1();

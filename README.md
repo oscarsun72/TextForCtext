@@ -571,4 +571,5 @@ Ctrl+ 滑鼠左鍵：清除框中所有文字
 - [TextForCtext 輸入《中國哲學書電子化計劃》：以賢超法師《古籍酷》OCR 標注平台輸入及整理，以清儒文廷式《純常子枝語》簡要示範](https://youtube.com/live/GM44KOQ54cE?feature=share)
 - [TextForCtext 輸入《中國哲學書電子化計劃》：以 VirtualBox 安裝 Windows10 虛擬電腦。以賢超法師《古籍酷》圖像數字化批量處理及《看典古籍》OCR《皇清經解》實境秀](https://youtube.com/live/vUKTJynVES4)
 - [TextForCtext 輸入《中國哲學書電子化計劃》：VirtualBox 安裝 Windows10 虛擬電腦、配置運行環境重點演示](https://youtube.com/live/S8IVAc7_VK8?feature=share)
+- [TextForCtext 輸入《中國哲學書電子化計劃》：VirtualBox Windows10 虛擬電腦配置 32位元 Word VBA 運行環境重點演示](https://youtube.com/live/GI1hfa9CPkc?feature=share)
 - []()
