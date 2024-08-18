@@ -584,7 +584,7 @@ namespace TextForCtext
                 if (Form1.IsValidUrl＿keyDownCtrlAdd(ActiveForm1.textBox3Text))
                 {
                     iwe = waitFindWebElementBySelector_ToBeClickable("#content > div:nth-child(3) > span:nth-child(2) > a > span");
-                    reCheck:
+                reCheck:
                     if (iwe != null)
                     {
                         string tx = iwe.GetAttribute("outerHTML");
@@ -592,9 +592,21 @@ namespace TextForCtext
                         {
                             iwe = waitFindWebElementBySelector_ToBeClickable("//#content > div:nth-child(5) > span:nth-child(2) > a > span");
                             if (iwe != null)
-                                if (!tx.StartsWith("<span itemprop=\"title\">"))                                
+                            {
+                                tx = iwe.GetAttribute("outerHTML");
+                                if (!tx.StartsWith("<span itemprop=\"title\">"))
+                                {
                                     Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("未能找到正確的「書名（title）」超連結控制項，請檢查！", "Title_Linkbox");
-                            return null;
+                                    return null;
+                                }
+                            }
+                            else
+                            {
+                                Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("未能找到正確的「書名（title）」超連結控制項，請檢查！", "Title_Linkbox");
+
+                                return null;
+                            }
+
                         }
                     }
                     else
@@ -9027,9 +9039,9 @@ internal static string getImageUrl() {
         /// <param name="x">要查找的字詞</param>
         /// <returns>傳回查詢字串及結果網址。執行有誤則二者均傳回null</returns>
         //public static (string urlSearch, string urlResult) LookupDictRevised(string x)
-        public static Tuple<string , string > LookupDictRevised(string x)
+        public static Tuple<string, string> LookupDictRevised(string x)
         {// 20240817 creedit with Gemini大菩薩：程式碼評析與改進建議 ： https://g.co/gemini/share/3f1f65fd36e0 (這個建議蠻好的，有空要再仔細看看。感恩感恩　讚歎讚歎　Gemini大菩薩　南無阿彌陀佛）
-            StringInfo si = new StringInfo(x);Tuple<string, string> tp = new Tuple<string, string>(null, null);
+            StringInfo si = new StringInfo(x); Tuple<string, string> tp = new Tuple<string, string>(null, null);
             if (si.LengthInTextElements < 1) return tp;
             string url = "https://dict.revised.moe.edu.tw/search.jsp?md=1&word="
                 + EncodedStringURL(x)
