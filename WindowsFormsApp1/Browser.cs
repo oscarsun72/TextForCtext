@@ -592,8 +592,8 @@ namespace TextForCtext
                         {
                             iwe = waitFindWebElementBySelector_ToBeClickable("//#content > div:nth-child(5) > span:nth-child(2) > a > span");
                             if (iwe != null)
-                                goto reCheck;
-                            Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("未能找到正確的「書名（title）」超連結控制項，請檢查！", "Title_Linkbox");
+                                if (!tx.StartsWith("<span itemprop=\"title\">"))                                
+                                    Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("未能找到正確的「書名（title）」超連結控制項，請檢查！", "Title_Linkbox");
                             return null;
                         }
                     }
