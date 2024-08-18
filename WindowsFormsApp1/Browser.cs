@@ -590,20 +590,19 @@ namespace TextForCtext
                         string tx = iwe.GetAttribute("outerHTML");
                         if (!tx.StartsWith("<span itemprop=\"title\">"))
                         {
-                            iwe = waitFindWebElementBySelector_ToBeClickable("//#content > div:nth-child(5) > span:nth-child(2) > a > span");
+                            iwe = waitFindWebElementBySelector_ToBeClickable("#content > div:nth-child(5) > span:nth-child(2) > a > span");
                             if (iwe != null)
                             {
                                 tx = iwe.GetAttribute("outerHTML");
                                 if (!tx.StartsWith("<span itemprop=\"title\">"))
                                 {
-                                    Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("未能找到正確的「書名（title）」超連結控制項，請檢查！", "Title_Linkbox");
+                                    Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("未能找到正確的「書名（title）」超連結控制項，請檢查！", "Title_Linkbox div:nth-child(5) !tx.StartsWith(\"<span itemprop=\\\"title\\\">\"))");
                                     return null;
                                 }
                             }
                             else
                             {
-                                Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("未能找到正確的「書名（title）」超連結控制項，請檢查！", "Title_Linkbox");
-
+                                Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("未能找到正確的「書名（title）」超連結控制項，請檢查！", "Title_Linkbox div:nth-child(5)=null");
                                 return null;
                             }
                         }
@@ -612,7 +611,7 @@ namespace TextForCtext
                     }
                     else
                     {
-                        iwe = waitFindWebElementBySelector_ToBeClickable("//#content > div:nth-child(5) > span:nth-child(2) > a > span");
+                        iwe = waitFindWebElementBySelector_ToBeClickable("#content > div:nth-child(5) > span:nth-child(2) > a > span");
                         if (iwe != null)
                             goto reCheck;
                         else
