@@ -2052,7 +2052,8 @@ namespace WindowsFormsApp1
                                 //Task.Run(() =>
                                 //{
                                 //if (LookupDictRevised(SelectSingleCharacter()).urlSearch == null)
-                                if (LookupDictRevised(x).urlSearch == null)
+                                //if (LookupDictRevised(x).urlSearch == null)
+                                if (LookupDictRevised(x).Item1 == null)
                                     MessageBoxShowOKExclamationDefaultDesktopOnly("發生錯誤，請重新查詢");
                                 //br.openNewTabWindow(OpenQA.Selenium.WindowType.Tab);
                                 //br.driver.Navigate().GoToUrl("https://dict.revised.moe.edu.tw/search.jsp?md=1&word=" + x + "&qMd=0&qCol=1");

@@ -530,9 +530,14 @@ Ctrl+ 滑鼠左鍵：清除框中所有文字
 - [《重編國語辭典修訂本》資料庫.mdb](https://www.dropbox.com/s/dxumn4awnx4e0o9/%E3%80%8A%E9%87%8D%E7%B7%A8%E5%9C%8B%E8%AA%9E%E8%BE%AD%E5%85%B8%E4%BF%AE%E8%A8%82%E6%9C%AC%E3%80%8B%E8%B3%87%E6%96%99%E5%BA%AB.mdb?dl=0)
 > 請將以上3檔均複製到 Dropbox 安裝目錄根目錄中，許多功能才能正常執行（若無安裝 Dropbox ，請自己在建立相關路徑，如末學登入Windows的帳號是「**oscar**」，路徑就是：C:\Users\**oscar**\Dropbox 。將以上路徑中的帳號換成您的應該就可以了）。
 ### Word VBA執行環境配置：
-將 WordVBA 路徑下的 [TextForCtextWordVBA.dotm](https://github.com/oscarsun72/TextForCtext/blob/master/WordVBA/TextForCtextWordVBA.dotm) 檔案，加入MS Word安裝路逕"%appdata%\Microsoft\Word\STARTUP"即可。
-> 相關用得上的 Word VBA 均配置好在這個範本檔案裡，
+- 安裝 MS Word 32位元
+- 在控制台→時鐘、語言和區域→「地區」方塊→「系統管理」頁籤下，「非unicode程式的語言」要「變更系統地區設定」為「中文（繁體，台灣）」
+- 將 WordVBA 路徑下的 [TextForCtextWordVBA.dotm](https://github.com/oscarsun72/TextForCtext/blob/master/WordVBA/TextForCtextWordVBA.dotm) 檔案，加入MS Word安裝路逕"%appdata%\Microsoft\Word\STARTUP"即可。
+> 相關用得上的 Word VBA 均配置好在這個範本檔案裡，其他設定，請看操作演示。
+
 > 在檔案總管的網址列輸入「%appdata%\Microsoft\Word\STARTUP」再按Enter鍵即可到達此路徑
+
+- 複製一份和本軟件所需相同的「chromedriver.exe」到「chrome.exe」的同一目錄（路徑）下
 
 ## 操作演示：
 - [我讀《墨子閒詁》文本整理圖文對照程式設計實境秀-自製 TextForCtext 小工具輔助由《漢籍電子文獻資料庫》輸入至《中國哲學書電子化計劃》](https://youtu.be/hnMFTpNfAWg)
@@ -564,4 +569,5 @@ Ctrl+ 滑鼠左鍵：清除框中所有文字
 - [TextForCtext 輸入《中國哲學書電子化計劃》實境秀：善用賢超法師《古籍酷》AI服務OCR（圖像數字化：標注平台、批量處理），以明儒胡震亨《讀書雜錄》示範。任真吟任真曲](https://youtube.com/live/SJmZmtqnSs0)
 - [以 TextForCtext 檢索《異體字字典》《國語辭典》及《字統網》。整理《古籍酷》OCR的結果，以輸入《中國哲學書電子化計劃》所收明儒胡震亨《讀書雜錄》重點演示](https://youtube.com/live/Kn51sJ2EhSQ?feature=share)
 - [TextForCtext 輸入《中國哲學書電子化計劃》：以賢超法師《古籍酷》OCR 標注平台輸入及整理，以清儒文廷式《純常子枝語》簡要示範](https://youtube.com/live/GM44KOQ54cE?feature=share)
+- [TextForCtext 輸入《中國哲學書電子化計劃》：以 VirtualBox 安裝 Windows10 虛擬電腦。以賢超法師《古籍酷》圖像數字化批量處理及《看典古籍》OCR《皇清經解》實境秀](https://youtube.com/live/vUKTJynVES4)
 - []()

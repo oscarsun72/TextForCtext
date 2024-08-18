@@ -583,9 +583,8 @@ namespace TextForCtext
                 IWebElement iwe;
                 if (Form1.IsValidUrl＿keyDownCtrlAdd(ActiveForm1.textBox3Text))
                 {
-
                     iwe = waitFindWebElementBySelector_ToBeClickable("#content > div:nth-child(3) > span:nth-child(2) > a > span");
-                    //reCheck:
+                    reCheck:
                     if (iwe != null)
                     {
                         string tx = iwe.GetAttribute("outerHTML");
@@ -597,6 +596,9 @@ namespace TextForCtext
                     }
                     else
                     {
+                        iwe = waitFindWebElementBySelector_ToBeClickable("//#content > div:nth-child(5) > span:nth-child(2) > a > span");
+                        if (iwe != null)
+                            goto reCheck;
                         Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("未能找到正確的「書名（title）」超連結控制項，請檢查！");
                         return null;
                     }
@@ -8745,7 +8747,7 @@ internal static string getImageUrl() {
                     Visible = true
                 };
                 wordapp.Activate();
-                ActiveForm1.AvailableInUseBothKeysMouse();
+                //ActiveForm1.AvailableInUseBothKeysMouse();//跨執行緒時會出錯（寫到呼叫端就好）
                 //ImproveGJcoolOCRMemoDoc = wordapp.Documents.Open("C:\\Users\\oscar\\Dropbox\\《古籍酷》AI OCR 待改進者隨記 感恩感恩　讚歎讚歎　南無阿彌陀佛.docx");
                 ImproveGJcoolOCRMemoDoc = wordapp.Documents.Open(f);
                 //ImproveGJcoolOCRMemoDoc = wordapp.Documents.Open("C:\\Users\\oscar\\Dropbox\\《古籍酷》AI%20OCR%20待改進者隨記%20感恩感恩　讚歎讚歎　南無阿彌陀佛.docx");
@@ -8944,10 +8946,12 @@ internal static string getImageUrl() {
         /// </summary>
         /// <param name="x">要查找的單字</param>
         /// <returns>傳回查詢字串及結果網址。執行有誤則二者均傳回null</returns>
-        public static (string urlSearch, string urlResult) LookupDictionary_of_ChineseCharacterVariants(string x)
+        //public static (string urlSearch, string urlResult) LookupDictionary_of_ChineseCharacterVariants(string x)
+        public static Tuple<string, string> LookupDictionary_of_ChineseCharacterVariants(string x)
         {// 20240817 creedit with Gemini大菩薩：程式碼評析與改進建議 ： https://g.co/gemini/share/3f1f65fd36e0 (這個建議蠻好的，有空要再仔細看看。感恩感恩　讚歎讚歎　Gemini大菩薩　南無阿彌陀佛）
             StringInfo si = new StringInfo(x);
-            if (si.LengthInTextElements != 1) return (null, null);
+            Tuple<string, string> tp = new Tuple<string, string>(null, null);
+            if (si.LengthInTextElements != 1) return tp;//(null, null);
             string url = "https://dict.variants.moe.edu.tw/search.jsp?QTP=0&WORD="
                 + EncodedStringURL(x)
                  + "#searchL";
@@ -8986,7 +8990,7 @@ internal static string getImageUrl() {
                         Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
                     }
                 }
-                return (null, null);
+                return tp;
             }
             string urlResult = null;
             try
@@ -9012,17 +9016,18 @@ internal static string getImageUrl() {
             {
             }
             //return driver.Url;
-            return (url, urlResult);
+            return new Tuple<string, string>(url, urlResult);
         }
         /// <summary>
         /// 查找《國語辭典》。最後會將結果網址複製到剪貼簿備用。如果有其他複製項目，可開啟剪貼簿檢視器 Win + v 以選用        
         /// </summary>
         /// <param name="x">要查找的字詞</param>
         /// <returns>傳回查詢字串及結果網址。執行有誤則二者均傳回null</returns>
-        public static (string urlSearch, string urlResult) LookupDictRevised(string x)
+        //public static (string urlSearch, string urlResult) LookupDictRevised(string x)
+        public static Tuple<string , string > LookupDictRevised(string x)
         {// 20240817 creedit with Gemini大菩薩：程式碼評析與改進建議 ： https://g.co/gemini/share/3f1f65fd36e0 (這個建議蠻好的，有空要再仔細看看。感恩感恩　讚歎讚歎　Gemini大菩薩　南無阿彌陀佛）
-            StringInfo si = new StringInfo(x);
-            if (si.LengthInTextElements < 1) return (null, null);
+            StringInfo si = new StringInfo(x);Tuple<string, string> tp = new Tuple<string, string>(null, null);
+            if (si.LengthInTextElements < 1) return tp;
             string url = "https://dict.revised.moe.edu.tw/search.jsp?md=1&word="
                 + EncodedStringURL(x)
                 + "&qMd=0&qCol=1";
@@ -9061,7 +9066,7 @@ internal static string getImageUrl() {
                         Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
                     }
                 }
-                return (null, null);
+                return tp;
             }
             string urlResult = null;
             try
@@ -9078,7 +9083,7 @@ internal static string getImageUrl() {
             {
             }
             //return driver.Url;
-            return (url, urlResult);
+            return new Tuple<string, string>(url, urlResult);
         }
 
         /// <summary>

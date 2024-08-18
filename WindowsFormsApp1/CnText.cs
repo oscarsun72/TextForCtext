@@ -938,7 +938,8 @@ namespace TextForCtext
             #endregion
 
             // Step 1: Find the positions of the paragraph breaks in the original text
-            List<(int, string, string)> paragraphPositions = new List<(int, string, string)>();
+            //List<(int, string, string)> paragraphPositions = new List<(int, string, string)>();
+            List<Tuple<int, string, string>> paragraphPositions = new List<Tuple<int, string, string>>();
             string newLine = Environment.NewLine;
             int index = 0;
             while ((index = originalText.IndexOf(newLine, index)) != -1)
@@ -961,16 +962,19 @@ namespace TextForCtext
                     after = originalText.Substring(index + newLine.Length, end - index - newLine.Length);
                 }
 
-                paragraphPositions.Add((index, before, after));
+                //paragraphPositions.Add((index, before, after));
+                paragraphPositions.Add(new Tuple<int,string,string>(index, before, after));
                 index += newLine.Length;
             }
 
 
             // Step 2: Insert paragraph breaks into the punctuated text
             int offset = 0;
-            foreach (var (pos, before, after) in paragraphPositions)
+            //foreach (var (pos, before, after) in paragraphPositions)
+            foreach (var tp in paragraphPositions)
             {
-                int adjustedPos = FindAdjustedPosition(punctuatedText, originalText, pos + offset, before, after);
+                //int adjustedPos = FindAdjustedPosition(punctuatedText, originalText, pos + offset, before, after);
+                int adjustedPos = FindAdjustedPosition(punctuatedText, originalText, tp.Item1 + offset, tp.Item2, tp.Item3);
                 //int adjustedPos = FindAdjustedPosition(punctuatedText, originalText, pos + offset, before, after);
                 //因為在子函式方法中，若沒有找到時會將標點符號清除再與原未標點之文本作比對，若原文本已略有標點，則會干擾比對結果，不如兩造一律均清除，則簡單有效 20240808
                 if (adjustedPos != -1)

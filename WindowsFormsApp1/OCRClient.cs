@@ -11,6 +11,7 @@ using System.Threading;
 using System.Net.Http.Headers;
 using WindowsFormsApp1;
 using System.Windows.Forms;
+using System.Net;
 
 namespace TextForCtext
 {
@@ -81,6 +82,19 @@ namespace TextForCtext
             request.Content = new StringContent(json, Encoding.UTF8, "application/json");
 
             HttpResponseMessage response = null;
+
+            //20240818:Copilot大菩薩：.NET Framework 版本之間的 SSL/TLS 支援差異:https://sl.bing.net/fV3va6ogkqi
+            //為什麼在執行這個行時，以 .NET Framework 4.7.2 建置的程式不會出錯，但用 .NET Framework 4.5.2 建置的卻會出現「WebException: 要求已經中止: 無法建立 SSL/TLS 的安全通道」的錯誤呢（詳後所附）
+            //  HResult=0x80131500
+            //  Message = 傳送要求時發生錯誤。
+            //response = _client.SendAsync(request).GetAwaiter().GetResult();
+            /*這個問題可能是由於 .NET Framework 版本之間的 SSL/TLS 支援差異所引起的。
+                .NET Framework 4.5.2 預設使用 TLS 1.0 和 TLS 1.1，這些版本已經被認為是不安全的12。而 .NET Framework 4.7.2 預設使用 TLS 1.2，並且允許使用 TLS 1.1 和 TLS 1.012。這意味著在 .NET Framework 4.7.2 中，應用程式可以自動使用更安全的 TLS 版本，從而避免了「無法建立 SSL/TLS 的安全通道」的錯誤。
+                要解決這個問題，您可以在 .NET Framework 4.5.2 中明確指定使用 TLS 1.2。您可以在程式碼中加入以下設定：
+             */
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+            // 這樣，您的應用程式將會使用 TLS 1.2 來建立安全通道。
+
             try
             {//20240804 Copilot大菩薩： 使用 CancellationToken 設置程式超時機制：  https://sl.bing.net/jBHhw5kprxI
              //您可以使用 CancellationToken 來設置一個超時機制，避免程式在 SendAsync 這一行卡住。以下是修改後的程式碼：
@@ -89,7 +103,8 @@ namespace TextForCtext
              //using (var cts = new CancellationTokenSource(TimeSpan.FromSeconds(40))) // 設置 40 秒超時
              //{
              //因為重送講求會被扣點數，先取消
-             //response = _client.SendAsync(request, cts.Token).GetAwaiter().GetResult();
+
+                //response = _client.SendAsync(request, cts.Token).GetAwaiter().GetResult();
                 response = _client.SendAsync(request).GetAwaiter().GetResult();
                 //}
             }
