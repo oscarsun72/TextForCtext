@@ -6678,6 +6678,7 @@ namespace WindowsFormsApp1
                         if (MessageBoxShowOKCancelExclamationDefaultDesktopOnly("【版心】內容似還殘留，確定送出？", "阿彌陀佛", true, MessageBoxDefaultButton.Button2) == DialogResult.Cancel)
                         {
                             AvailableInUseBothKeysMouse();
+                            TopMost = true;
                             //選取疑似版心內容段落（行）以供檢查或逕予刪除
                             return false;
                         }
