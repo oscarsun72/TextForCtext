@@ -1,4 +1,5 @@
-﻿using ado = ADODB;
+﻿using FuzzySharp;
+using ado = ADODB;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -140,7 +141,7 @@ namespace TextForCtext
         {
             //char[] punctuations = new char[] { '。', '，', '、', '；', '：', '？', '！' };
             //return Array.IndexOf(punctuations, text[0]) >= 0;
-            return ("{{}}<p>" + Form1.punctuationsNum).IndexOf(text) > -1;
+            return ("{{}}<p>" + Form1.PunctuationsNum).IndexOf(text) > -1;
         }
 
         /// <summary>
@@ -641,13 +642,115 @@ namespace TextForCtext
             //RemoveInnerBraces(ref x);
 
         }
+        /// <summary>
+        /// 移除文本中的標點符號和阿拉伯數字
+        /// 20240818 Copilot大菩薩：移除標點符號的C#函式方法：https://sl.bing.net/erpgod8B3LM
+        /// </summary>
+        /// <param name="input">要移除標點符號及數字的文本</param>
+        /// <returns>回傳移除後的結果</returns>
+        public static string RemovePunctuationsNum(string input)
+        {/*要寫一個將文本移除標點符號的函式方法，可以使用正則表達式來匹配並移除標點符號。以下是一個簡單且有效率的C#函式範例：
+          這個函式使用了Regex.Escape來處理標點符號字串中的特殊字符，並使用Regex.Replace來移除匹配的標點符號。*/
+            // 使用正則表達式匹配並移除標點符號
+            //string pattern = "[" + Regex.Escape(Form1.PunctuationsNum) + "]";
+            //return Regex.Replace(input, pattern, "");
+            // 手動處理特殊字符，確保正則表達式正確
+            string pattern = "[－.,;?@'\"。，；！？、—…:：《·》〈‧〉「」『』〖〗【】（）()\\[\\]〔〕［］0123456789-]";
+            //string pattern = @"[" + Form1.PunctuationsNum + "]";//一定要上面這樣才行
+            return Regex.Replace(input, pattern, "");
+        }
+        /// <summary>
+        /// 版心文字比對引入相似度方法。
+        /// 檢查文本中是否包括書名（title）。如版心等內容。如果有則傳回所在位置。沒有或有錯誤則傳回-1
+        /// 20240818：creedit with Copilot大菩薩：模糊比對與相似度比對的程式改寫：https://sl.bing.net/gnYNHR1sxRA
+        /// 這段程式碼使用 FuzzySharp 函式庫來計算書名與文本行之間的相似度。如果相似度達到或超過 80%，則傳回找到的文本起始位置。
+        /// </summary>
+        /// <param name="xChecking">檢查的文本</param>
+        /// <returns>傳回出現的位置。沒有或有錯誤則傳回-1</returns>
+        internal static int HasPlatecenterTextIncluded(string xChecking)
+        {
+            string title = Browser.Title_Linkbox?.GetAttribute("textContent");
+            if (title == null)
+            {
+                Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("未能找到正確的「書名（title）」超連結控制項，請檢查！", "HasPlatecenterTextIncluded");
+                return -1;
+            }
 
+            int location = -1;
+            double threshold = 0.36; // 相似度閾值            
+            string xCheckingWithoutPunct = RemovePunctuationsNum(xChecking).Replace("　", string.Empty)
+                .Replace("}", "").Replace("{", "");
+            string[] lines = xCheckingWithoutPunct.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
+
+            for (int i = 0; i < lines.Length; i++)
+            {
+                //double similarity = Fuzz.Ratio(title, lines[i].Replace("卷","")) / 100.0;
+                string pattern = "[" + Regex.Escape("卷上下卄一二三四五六七八九十卅卌<p>") + "]";
+                string line = Regex.Replace(lines[i], pattern, ""); 
+                double similarity = Fuzz.Ratio(title, line) / 100.0;
+                if (similarity >= threshold)
+                {
+                    location = xChecking.IndexOf(lines[i]);
+                    if (location == -1)
+                    {
+                        // 計算第 i 行在 xChecking 中的行頭位置
+                        location = 0;
+                        for (int j = 0; j < i; j++)
+                        {
+                            location = xChecking.IndexOf(Environment.NewLine, location)+Environment.NewLine.Length;
+                        }
+                    }
+                    break;
+                }
+            }
+
+            return location;
+        }
+        ///// <summary>
+        ///// 版心文字比對引入相似度方法。
+        ///// 檢查文本中是否包括書名（title）。如版心等內容。如果有則傳回所在位置。沒有或有錯誤則傳回-1
+        ///// 20240818：creedit with Copilot大菩薩：模糊比對與相似度比對的程式改寫：https://sl.bing.net/gnYNHR1sxRA
+        ///// 這段程式碼使用 FuzzySharp 函式庫來計算書名與文本行之間的相似度。如果相似度達到或超過 80%，則傳回找到的文本起始位置。
+        ///// </summary>
+        ///// <param name="xChecking">檢查的文本</param>
+        ///// <returns>傳回出現的位置。沒有或有錯誤則傳回-1</returns>
+        //internal static int HasPlatecenterTextIncluded(string xChecking)
+        //{/*要將您的程式碼增益為模糊比對與相似度比對，您可以使用一些字串相似度演算法，例如 Levenshtein 距離或 Cosine 相似度。以下是如何改寫您的程式碼以實現這一目標的範例：
+        //    引入模糊比對的函式庫，例如 FuzzySharp。
+        //    使用相似度演算法來計算文本與書名之間的相似度。
+        //    如果相似度達到 80%，則傳回找到的文本起始位置。
+        //    以下是改寫後的程式碼範例：*/
+        //    string title = Browser.Title_Linkbox?.GetAttribute("textContent");
+        //    if (title == null)
+        //    {
+        //        Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("未能找到正確的「書名（title）」超連結控制項，請檢查！", "HasPlatecenterTextIncluded");
+        //        return -1;
+        //    }
+
+        //    int location = -1;
+        //    double threshold = 0.36; // 相似度閾值            
+        //    string xCheckingWithoutPunct = RemovePunctuationsNum(xChecking).Replace("　",string.Empty)
+        //        .Replace("}","").Replace("{","");
+        //    string[] lines = xCheckingWithoutPunct.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
+
+        //    for (int i = 0; i < lines.Length; i++)
+        //    {
+        //        double similarity = Fuzz.Ratio(title, lines[i]) / 100.0;
+        //        if (similarity >= threshold)
+        //        {
+        //            location = xChecking.IndexOf(lines[i]);
+        //            break;
+        //        }
+        //    }
+
+        //    return location;
+        //}
         /// <summary>
         /// 檢查文本中是否包括書名（title）。如版心等內容。如果有則傳回所在位置。沒有或有錯誤則傳回-1
         /// </summary>
         /// <param name="xChecking">檢查的文本</param>
         /// <returns>傳回出現的位置。沒有或有錯誤則傳回-1</returns>
-        internal static int HasPlatecenterTextIncluded(string xChecking)
+        internal static int HasPlatecenterTextIncluded_exactly(string xChecking)
         {
             string title = Browser.Title_Linkbox?.GetAttribute("textContent");
             if (title == null)
@@ -963,7 +1066,7 @@ namespace TextForCtext
                 }
 
                 //paragraphPositions.Add((index, before, after));
-                paragraphPositions.Add(new Tuple<int,string,string>(index, before, after));
+                paragraphPositions.Add(new Tuple<int, string, string>(index, before, after));
                 index += newLine.Length;
             }
 

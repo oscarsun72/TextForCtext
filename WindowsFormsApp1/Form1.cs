@@ -1171,10 +1171,10 @@ namespace WindowsFormsApp1
             string returnTxt = getLineTxt(x, s);
             //https://useadrenaline.com/playground
             //20230115 adrenaline 大菩薩：
-            for (int i = 0; i < punctuationsNum.Length; i++)
+            for (int i = 0; i < PunctuationsNum.Length; i++)
             {
                 //returnTxt = returnTxt.Replace(punctuationsNum[i].ToString(), " ".ToCharArray()[0].ToString());
-                returnTxt = returnTxt.Replace(punctuationsNum[i].ToString(), string.Empty);
+                returnTxt = returnTxt.Replace(PunctuationsNum[i].ToString(), string.Empty);
             }
             return returnTxt.Replace("   ", " ").Replace("  ", " ");
 
@@ -4226,7 +4226,7 @@ namespace WindowsFormsApp1
                 }
                 for (i = 0; i + spaceCntr < xSelInfo.LengthInTextElements; i++)
                 {
-                    if (punctuationsNum.IndexOf(xSelInfo.SubstringByTextElements(i, 1)) == -1)
+                    if (PunctuationsNum.IndexOf(xSelInfo.SubstringByTextElements(i, 1)) == -1)
                         xSel += "　";
                 }
                 textBox1.Select(s, e - s);
@@ -5751,7 +5751,7 @@ namespace WindowsFormsApp1
 
             #region 標點符號不計
             //StringInfo seInfo = new StringInfo(se);
-            foreach (var item in punctuationsNum)
+            foreach (var item in PunctuationsNum)
             {
                 xLinePara = xLinePara.Replace(item.ToString(), "");
             }
@@ -6309,7 +6309,8 @@ namespace WindowsFormsApp1
         /// <summary>
         /// 標點符號和數字
         /// </summary>
-        public static readonly string punctuationsNum = ".,;?@'\"。，；！？、－-—…:：《·》〈‧〉「」『』〖〗【】（）()[]〔〕［］0123456789";
+        public static readonly string PunctuationsNum = "－.,;?@'\"。，；！？、—…:：《·》〈‧〉「」『』〖〗【】（）()[]〔〕［］0123456789-";
+        //public static readonly string punctuationsNum = ".,;?@'\"。，；！？、－-—…:：《·》〈‧〉「」『』〖〗【】（）()[]〔〕［］0123456789";
         /// <summary>
         /// 判斷中文字
         /// </summary>
@@ -6319,7 +6320,7 @@ namespace WindowsFormsApp1
         internal static int isChineseChar(string x, bool skipPunctuation)
         {
             //if (skipPunctuation) if (punctuationsNum.IndexOf(x, StringComparison.Ordinal) > -1) return -1;
-            if (skipPunctuation) if (punctuationsNum.Replace("《", "").IndexOf(x, StringComparison.Ordinal) > -1) return -1;//先拿掉「《」不計 20240315
+            if (skipPunctuation) if (PunctuationsNum.Replace("《", "").IndexOf(x, StringComparison.Ordinal) > -1) return -1;//先拿掉「《」不計 20240315
             const string cha = "�□▫စခငဇဌ◍ᗍⲲ⛋ဂဃဆဈဉ";
             string notChineseCharPriority = cha + "〇◯　 \r\n<>{}.,;?@●'\"。，；！？、－-《》〈〉「」『』〖〗【】（）()[]〔〕［］0123456789";
 
@@ -6652,30 +6653,33 @@ namespace WindowsFormsApp1
                         "忽略此訊息，改為【整面貼上】請按「取消」感恩感恩　南無阿彌陀佛", string.Empty, false)) { s = textBox1.TextLength; l = 0; pageTextEndPosition = s + l; }
                 }
 
-                //檢查版心內容是否闌入？
-                chkLoaction = CnText.HasPlatecenterTextIncluded(x);
-                if (chkLoaction > -1)
+                if (keyinTextMode && !OcrTextMode)
                 {
-                    int selStart = 0;
-                    if (chkLoaction == 0)
-                        selStart = chkLoaction;
-                    else
-                    {//if (chkLoaction > 0)
-                        selStart = x.LastIndexOf(Environment.NewLine, chkLoaction);
-                        if (selStart == -1)
-                            selStart = 0;
-                        //else //分段符號也可以刪掉，故也一併選取，不用避開
-                        //selStart += Environment.NewLine.Length;
-                    }
-                    int selEnd = selStart == 0 ? x.IndexOf(Environment.NewLine, chkLoaction) : x.Length;
-                    textBox1.Select(selStart, selStart == 0 ?
-                        (selEnd == -1 ? (x.Length - selStart) : (selEnd - selStart)) + Environment.NewLine.Length :
-                        (selEnd == -1 ? (x.Length - selStart) : (selEnd - selStart)));
-                    textBox1.ScrollToCaret();
-                    if (MessageBoxShowOKCancelExclamationDefaultDesktopOnly("【版心】內容似還殘留，確定送出？", "阿彌陀佛", true, MessageBoxDefaultButton.Button2) == DialogResult.Cancel)
+                    //檢查版心內容是否闌入？
+                    chkLoaction = CnText.HasPlatecenterTextIncluded(x);
+                    if (chkLoaction > -1)
                     {
-                        //選取疑似版心內容段落（行）以供檢查或逕予刪除
-                        return false;
+                        int selStart = 0;
+                        if (chkLoaction == 0)
+                            selStart = chkLoaction;
+                        else
+                        {//if (chkLoaction > 0)
+                            selStart = x.LastIndexOf(Environment.NewLine, chkLoaction);
+                            if (selStart == -1)
+                                selStart = 0;
+                            //else //分段符號也可以刪掉，故也一併選取，不用避開
+                            //selStart += Environment.NewLine.Length;
+                        }
+                        int selEnd = selStart == 0 ? x.IndexOf(Environment.NewLine, chkLoaction) : x.Length;
+                        textBox1.Select(selStart, selStart == 0 ?
+                            (selEnd == -1 ? (x.Length - selStart) : (selEnd - selStart)) + Environment.NewLine.Length :
+                            (selEnd == -1 ? (x.Length - selStart) : (selEnd - selStart)));
+                        textBox1.ScrollToCaret();
+                        if (MessageBoxShowOKCancelExclamationDefaultDesktopOnly("【版心】內容似還殘留，確定送出？", "阿彌陀佛", true, MessageBoxDefaultButton.Button2) == DialogResult.Cancel)
+                        {
+                            //選取疑似版心內容段落（行）以供檢查或逕予刪除
+                            return false;
+                        }
                     }
                 }
 
@@ -8172,7 +8176,7 @@ namespace WindowsFormsApp1
             //Ctrl + Shift + n 或 Shift + F1 : 開新Form1 實例
             if (((m & Keys.Control) == Keys.Control && (m & Keys.Shift) == Keys.Shift && e.KeyCode == Keys.N)
                 //|| ((m & Keys.Shift) == Keys.Shift && e.KeyCode == Keys.F1))
-                || (e.Shift  && !e.Alt & e.Control && e.KeyCode == Keys.F1))
+                || (e.Shift && !e.Alt & e.Control && e.KeyCode == Keys.F1))
             {
                 e.Handled = true;
                 newForm1();
@@ -12202,8 +12206,8 @@ namespace WindowsFormsApp1
                                                  //對標點符號punctuations所佔字位不取代
                     w = textBox1.SelectedText;
                     //標點符號不取代漢字，但可被取代
-                    if ((punctuationsNum + "●\"").IndexOf(e.KeyChar) > -1 &&
-                        (punctuationsNum + "●\"").IndexOf(textBox1.Text.Substring(textBox1.SelectionStart, 1)) == -1)
+                    if ((PunctuationsNum + "●\"").IndexOf(e.KeyChar) > -1 &&
+                        (PunctuationsNum + "●\"").IndexOf(textBox1.Text.Substring(textBox1.SelectionStart, 1)) == -1)
                         textBox1.SelectionLength = 0;
                     else if (char.IsSurrogate(w.ToCharArray()[0])) textBox1.SelectionLength = 2;
                 }
@@ -12225,9 +12229,9 @@ namespace WindowsFormsApp1
                 {
                     w = textBox1.Text.Substring(selStart, 1);//對標點符號punctuations所佔字位不取代
                     if (selStart + 1 > textBox1.TextLength ||
-                        ((punctuationsNum + "●\"").IndexOf(e.KeyChar) > -1 &&
+                        ((PunctuationsNum + "●\"").IndexOf(e.KeyChar) > -1 &&
                         //標點符號不取代漢字，但可被取代
-                        (punctuationsNum + "●\"").IndexOf(textBox1.Text.Substring(textBox1.SelectionStart, 1)) == -1))
+                        (PunctuationsNum + "●\"").IndexOf(textBox1.Text.Substring(textBox1.SelectionStart, 1)) == -1))
                         textBox1.Select(selStart, 0);
                     else
                     {

@@ -355,7 +355,7 @@ namespace TextForCtext
                                 {
                                     //忽略標點符號與數字
                                     string ch = Regex.Replace(XBefrTitleLine, "[{{}}<p>]", "");
-                                    foreach (var item in Form1.punctuationsNum)
+                                    foreach (var item in Form1.PunctuationsNum)
                                     {
                                         if (ch.IndexOf(item) > -1) ch = ch.Replace(item.ToString(), "");
                                     }
