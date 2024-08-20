@@ -292,7 +292,8 @@ namespace WindowsFormsApp1
                     }
                     catch (Exception ex)
                     {
-                        Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
+                        Console.WriteLine(ex.HResult + ex.Message);
+                        //Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
                     }
 
                     Task.Run(() =>
