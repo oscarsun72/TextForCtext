@@ -7089,7 +7089,7 @@ namespace WindowsFormsApp1
         /// </summary>
         internal void AvailableInUseBothKeysMouse()
         {
-            if (!Active) Activate();
+            //if (!Active) Activate();//下面bringBackMousePosFrmCenter方法中已調用此方法
             bringBackMousePosFrmCenter();
         }
 
