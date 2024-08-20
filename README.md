@@ -577,4 +577,5 @@ Ctrl+ 滑鼠左鍵：清除框中所有文字
 - [TextForCtext 輸入《中國哲學書電子化計劃》：VirtualBox 安裝 Windows10 虛擬電腦、配置運行環境重點演示](https://youtube.com/live/S8IVAc7_VK8?feature=share)
 - [TextForCtext 輸入《中國哲學書電子化計劃》：VirtualBox Windows10 虛擬電腦配置 32位元 Word VBA 運行環境重點演示。TextForCtext在新機運行成功](https://youtube.com/live/GI1hfa9CPkc?feature=share)
 - [檢查文本中是否闌入版心資訊，以便刪除：文本相似度比對，感恩Copilot大菩薩協作──以TextForCtext 善用《古籍酷》OCR輸入《中國哲學書電子化計劃》](https://youtube.com/live/b0AnDAKYQzA?feature=share)
+- [TextForCtext簡介展示：以TextForCtext 善用《古籍酷》《看典古籍》OCR暨自動標點《字統網》《異體字字典》《國語辭典》《漢語大詞典》等工具加速輸入《中國哲學書電子化計劃》](https://youtube.com/live/IUzAI5kXkuY?feature=share)
 - []()
