@@ -544,6 +544,7 @@ Ctrl+ 滑鼠左鍵：清除框中所有文字
 - 複製一份和本軟件所需相同的「chromedriver.exe」到「chrome.exe」的同一目錄（路徑）下
 
 ## 操作演示：
+- [TextForCtext簡介展示：以TextForCtext 善用《古籍酷》《看典古籍》OCR暨自動標點《字統網》《異體字字典》《國語辭典》《漢語大詞典》等工具加速輸入《中國哲學書電子化計劃》](https://youtube.com/live/IUzAI5kXkuY?feature=share)
 - [我讀《墨子閒詁》文本整理圖文對照程式設計實境秀-自製 TextForCtext 小工具輔助由《漢籍電子文獻資料庫》輸入至《中國哲學書電子化計劃》](https://youtu.be/hnMFTpNfAWg)
 - [《法苑珠林》圖文對照錄入實境秀-在《中國哲學書電子化計劃》網站](https://youtu.be/9D9pJKhKx7E)
 - [《臨川先生文集》圖文對照錄入實境秀-在《中國哲學書電子化計劃》網站](https://youtu.be/E7iNSZplEC8)
@@ -577,5 +578,4 @@ Ctrl+ 滑鼠左鍵：清除框中所有文字
 - [TextForCtext 輸入《中國哲學書電子化計劃》：VirtualBox 安裝 Windows10 虛擬電腦、配置運行環境重點演示](https://youtube.com/live/S8IVAc7_VK8?feature=share)
 - [TextForCtext 輸入《中國哲學書電子化計劃》：VirtualBox Windows10 虛擬電腦配置 32位元 Word VBA 運行環境重點演示。TextForCtext在新機運行成功](https://youtube.com/live/GI1hfa9CPkc?feature=share)
 - [檢查文本中是否闌入版心資訊，以便刪除：文本相似度比對，感恩Copilot大菩薩協作──以TextForCtext 善用《古籍酷》OCR輸入《中國哲學書電子化計劃》](https://youtube.com/live/b0AnDAKYQzA?feature=share)
-- [TextForCtext簡介展示：以TextForCtext 善用《古籍酷》《看典古籍》OCR暨自動標點《字統網》《異體字字典》《國語辭典》《漢語大詞典》等工具加速輸入《中國哲學書電子化計劃》](https://youtube.com/live/IUzAI5kXkuY?feature=share)
 - []()
