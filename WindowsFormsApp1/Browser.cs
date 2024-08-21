@@ -8895,8 +8895,14 @@ internal static string getImageUrl() {
                     Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HelpLink + ex.Message);
                 }
                 //點擊"Relatives 相關字" .查詢《字統網》多是為找系統有無該異體字，故今改寫為查詢後在頁面尋找「異寫字」的功能，以利跳到該區塊 20240819
-                IWebElement iwe = waitFindWebElementBySelector_ToBeClickable("#mainContent > span > div.content > div > div.sidebar_navigation > div > div:nth-child(11)");
-                iwe?.Click();
+                DateTime dt = DateTime.Now; IWebElement iwe = null;
+                while (true)
+                {
+                    iwe = waitFindWebElementBySelector_ToBeClickable("#mainContent > span > div.content > div > div.sidebar_navigation > div > div:nth-child(11)");
+                    if (iwe != null ||
+                        DateTime.Now.Subtract(dt).TotalSeconds > 10) break;
+                }
+                iwe.Click();
 
             }
             catch (Exception ex)
