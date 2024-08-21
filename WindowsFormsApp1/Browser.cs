@@ -8881,7 +8881,7 @@ internal static string getImageUrl() {
                     if (iwe != null ||
                         DateTime.Now.Subtract(dt).TotalSeconds > 10) break;
                 }
-                iwe.Click();
+                iwe?.Click();//當DateTime.Now.Subtract(dt).TotalSeconds > 10) break; 時需要 iwe? 會是null值
 
             }
             catch (Exception ex)
