@@ -325,6 +325,7 @@ namespace WindowsFormsApp1
                     //}
                     //br.killProcesses(new string[] { "chromedriver" });
                     br.killchromedriverFromHere();
+                    Thread.Sleep(850);
                     if (br.getChromedrivers().Length > 0)
                         if (MessageBox.Show("還有chromedriver.exe程序在運行，是否全部清除？", "chromedrivers still there"
                             , MessageBoxButtons.OKCancel, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly)
@@ -3108,6 +3109,7 @@ namespace WindowsFormsApp1
                     {
                         if (br.driver != null)
                         {
+                            TopMost = false;
                             Task.Run(() =>
                             {
                                 if (!LookupZitools(x)) MessageBoxShowOKExclamationDefaultDesktopOnly("查找《字統網》發生錯誤，請重來一遍。感恩感恩　南無阿彌陀佛");
