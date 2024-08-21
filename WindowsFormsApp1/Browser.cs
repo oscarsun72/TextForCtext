@@ -8901,7 +8901,9 @@ internal static string getImageUrl() {
                 return false;
             }
             try
-            {//焦點移到瀏覽器（離開預設的網址列）
+            {
+                ActiveForm1.TopMost = false;
+                //焦點移到瀏覽器（離開預設的網址列）
                 driver.SwitchTo().Window(driver.CurrentWindowHandle);
 
                 //// 使用 JavaScript 將焦點移到網頁本體 20240821 Copilot大菩薩：您說得對，JavaScript 無法控制到 Chrome 瀏覽器的外殼。可以嘗試使用 Actions 類來模擬按鍵操作，將焦點移到網頁本體。
