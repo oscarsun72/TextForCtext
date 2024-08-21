@@ -3084,6 +3084,20 @@ namespace WindowsFormsApp1
                     return;
                 }
 
+                if (e.KeyCode == Keys.X)
+                {//Alt + x ：以所選之字（不能不等於1字）檢索《康熙字典網上版 》 https://www.kangxizidian.com/
+                    e.Handled = true;
+                    string x = SelectSingleCharacter();
+                    if (browsrOPMode != BrowserOPMode.appActivateByName)
+                    {
+                        Task.Run(() =>
+                        {
+                            br.LookupKangxizidian(x);
+                        });
+                    }
+                    return;
+                }
+
                 if (e.KeyCode == Keys.Z)
                 {// Alt + z ：以所選之字（或插入點後之一字）檢索《字統網》等（或 執行【速檢網路字辭典.exe】）
                     e.Handled = true;
@@ -3093,10 +3107,10 @@ namespace WindowsFormsApp1
                     {
                         if (br.driver != null)
                         {
-                            //Task.Run(() =>
-                            //{
-                            if (!LookupZitools(x)) MessageBoxShowOKExclamationDefaultDesktopOnly("查找《字統網》發生錯誤，請重來一遍。感恩感恩　南無阿彌陀佛");
-                            //});
+                            Task.Run(() =>
+                            {
+                                if (!LookupZitools(x)) MessageBoxShowOKExclamationDefaultDesktopOnly("查找《字統網》發生錯誤，請重來一遍。感恩感恩　南無阿彌陀佛");
+                            });
                         }
                         else
                         {

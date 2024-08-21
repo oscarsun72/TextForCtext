@@ -581,7 +581,7 @@ namespace TextForCtext
             get
             {
                 const string selector = "#content > div:nth-child(3) > span:nth-child(2) > a > span";//33位元免安裝版Chrome瀏覽器
-                const string selector1= "#content > div:nth-child(5) > span:nth-child(2) > a > span"; //64位元安裝版Chrome瀏覽器
+                const string selector1 = "#content > div:nth-child(5) > span:nth-child(2) > a > span"; //64位元安裝版Chrome瀏覽器
                 IWebElement iwe;
                 if (Form1.IsValidUrl＿keyDownCtrlAdd(ActiveForm1.textBox3Text))
                 {
@@ -3549,6 +3549,8 @@ internal static string getImageUrl() {
         public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
         [DllImport("user32.dll")]
         public static extern bool SetForegroundWindow(IntPtr hWnd);
+        [DllImport("user32.dll")]
+        public static extern IntPtr GetForegroundWindow();
         [DllImport("user32.dll")]
         public static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
         private const int SW_RESTORE = 9;
@@ -8870,8 +8872,32 @@ internal static string getImageUrl() {
                 LastValidWindow = driver.CurrentWindowHandle;
                 openNewTabWindow(OpenQA.Selenium.WindowType.Tab);
                 driver.Navigate().GoToUrl("https://zi.tools/zi/" + x);
+                try
+                {//焦點移到瀏覽器（離開預設的網址列）
+                    driver.SwitchTo().Window(driver.CurrentWindowHandle);
+                    //// 使用 JavaScript 將焦點移到網頁本體 20240821 Copilot大菩薩：您說得對，JavaScript 無法控制到 Chrome 瀏覽器的外殼。可以嘗試使用 Actions 類來模擬按鍵操作，將焦點移到網頁本體。
+                    //((IJavaScriptExecutor)driver).ExecuteScript("window.focus();");
+                    // 使用 Actions 類將焦點移到網頁本體
+                    //Actions actions = new Actions(driver);
+                    //actions.SendKeys(OpenQA.Selenium.Keys.Escape).Perform();
+                    // 使用 SendKeys 將焦點移到網頁本體
+                    //SendKeys.SendWait("{esc}");
+                    //// 使用 Actions 類模擬滑鼠點擊操作
+                    //Actions actions = new Actions(driver);
+                    //actions.MoveToElement(driver.FindElement(By.TagName("body"))).Click().Perform();
+                    // 使用 Windows API 將焦點移到網頁本體 20240821:Selenium 網頁焦點問題解決方法:https://sl.bing.net/TU0iPVtD7k
+                    IntPtr hWnd = GetForegroundWindow();
+                    SetForegroundWindow(hWnd);
+                    SendKeys.SendWait("{esc}");
+                }
+                catch (Exception ex)
+                {
+                    Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HelpLink + ex.Message);
+                }
                 //點擊"Relatives 相關字" .查詢《字統網》多是為找系統有無該異體字，故今改寫為查詢後在頁面尋找「異寫字」的功能，以利跳到該區塊 20240819
-                waitFindWebElementBySelector_ToBeClickable("#mainContent > span > div.content > div > div.sidebar_navigation > div > div:nth-child(11)")?.Click();
+                IWebElement iwe = waitFindWebElementBySelector_ToBeClickable("#mainContent > span > div.content > div > div.sidebar_navigation > div > div:nth-child(11)");
+                iwe?.Click();
+
             }
             catch (Exception ex)
             {
@@ -9108,6 +9134,42 @@ internal static string getImageUrl() {
         }
 
         /// <summary>
+        /// 查找《康熙字典網上版》https://www.kangxizidian.com
+        /// </summary>
+        /// <param name="x">要查找的單字</param>
+        /// <returns>執行無誤則傳回true</returns>
+        public static bool LookupKangxizidian(string x)
+        {
+            StringInfo si = new StringInfo(x);
+            if (si.LengthInTextElements != 1) return false;
+            retry:
+            try
+            {
+                LastValidWindow = driver.CurrentWindowHandle;
+                openNewTabWindow(OpenQA.Selenium.WindowType.Tab);
+                driver.Navigate().GoToUrl("https://www.kangxizidian.com/search/index.php?stype=Word"
+                    + "&sword=" + x);// + "&detail=n" );
+            }
+            catch (Exception ex)
+            {
+                if (ex.HResult == -2146233088)
+                {
+                    if (ex.Message.StartsWith("no such window: target window already closed"))
+                    {
+                        noSuchWindowErrHandler();
+                        goto retry;
+                    }
+                    else
+                    {
+                        Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
+                    }
+                }
+                return false;
+            }
+            return true;
+        }
+
+        /// <summary>
         /// 0240817Gemini大菩薩：C# 字串網址編碼 https://g.co/gemini/share/e404139f0e17
         /// </summary>
         /// <param name="originalString"></param>
@@ -9271,6 +9333,9 @@ internal static string getImageUrl() {
                 SetForegroundWindow(proc.MainWindowHandle);
             }
         }
+
+
+
         /// <summary>
         /// 使用 JavaScriptExecutor 輸入中文。作為Selenium 同名方法的替代性實驗方法
         /// 20240811 Gemini大菩薩：CJKV 字集擴充現況：https://g.co/gemini/share/b6380ac335aa
