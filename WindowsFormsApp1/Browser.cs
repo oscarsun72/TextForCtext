@@ -8920,7 +8920,9 @@ internal static string getImageUrl() {
                 BringToFront("chrome");
                 IntPtr hWnd = GetForegroundWindow();
                 SetForegroundWindow(hWnd);
-                SendKeys.SendWait("{esc}");
+                //SendKeys.SendWait("{esc}");//會誤送到Form1主表單裡
+                SendKeys.SendWait("^{F6}");
+
             }
             catch (Exception ex)
             {
