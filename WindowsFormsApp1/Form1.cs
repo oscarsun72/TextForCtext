@@ -534,6 +534,7 @@ namespace WindowsFormsApp1
                                 }
                                 string text = br.CopyQuickedit_data_textboxText();//ie.Text ?? "";
                                 CnText.BooksPunctuation(ref text, false);
+                                undoRecord();
                                 textBox1.Text = text;
                                 if (Clipboard.GetText() != text && text != "")//CopyQuickedit_data_textboxText已用到等價 SetText 的方法了
                                     Clipboard.SetText(text);
@@ -11766,7 +11767,7 @@ namespace WindowsFormsApp1
                     ResumeEvents(); return;
                 #endregion
                 case "mt":
-                    Form1.MuteProcessing = true;
+                    Form1.MuteProcessing = !Form1.MuteProcessing ;
                     PauseEvents();
                     textBox2.Text = "";
                     ResumeEvents(); return;
@@ -12381,7 +12382,7 @@ namespace WindowsFormsApp1
                                 return;
                             nextPageStartTime = DateTime.Now;
                             if (br.waitFindWebElementBySelector_ToBeClickable("#canvas > svg > rect") != null)
-                                br.Input_picture();
+                                br.Input_picture(); //圖像的輔助輸入
                         }
                         //keyDownCtrlAdd(true);
                         //下一頁
@@ -12415,9 +12416,9 @@ namespace WindowsFormsApp1
                             //if (keyDownCtrlAdd(false)) if (textBox1.Text != "") { pauseEvents(); textBox1.Text = ""; resumeEvents(); }
                             keyDownCtrlAdd(false);
                         break;
-                    case MouseButtons.XButton1:
+                    case MouseButtons.XButton1://上一頁按鈕
                         break;
-                    case MouseButtons.XButton2:
+                    case MouseButtons.XButton2://下一頁按鈕
                         if (browsrOPMode != BrowserOPMode.appActivateByName)
                         {//過於頻繁會造成chromedriver反應不及而當掉
                          //timeDifference = DateTime.Now.Subtract(nextPageStartTime);

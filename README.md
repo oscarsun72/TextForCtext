@@ -498,6 +498,7 @@ Ctrl+ 滑鼠左鍵：清除框中所有文字
 - 輸入「bT」（batch processing true ）《古籍酷》OCR批量處理。輸入bT以啟用，輸入bF以停用 BatchProcessingGJcoolOCR=true
 - 輸入「bF」（batch processing false ）《古籍酷》OCR批量處理。輸入bT以啟用，輸入bF以停用 BatchProcessingGJcoolOCR=false
 - 輸入「mt」（Mute in Processing）則在操作過程中靜音-不撥放音效。MuteProcessing=true。20240315
+ > 今天改為切換式的、開關式的。 「mf」依然有效。20240821
 - 輸入「mf」（Mute in Processing=false）則在操作過程中撥放音效。MuteProcessing=false。20240315
 - 輸入「fm」（form move）切換設定-自動移動表單位置以迴避圖文對照頁面的文本區，以便檢校是否已經編輯過 autoTestPositionAvoidance=true 20240501
 - 

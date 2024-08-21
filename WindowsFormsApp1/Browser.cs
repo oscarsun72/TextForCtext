@@ -9313,7 +9313,8 @@ internal static string getImageUrl() {
         /// 在需要連續輸入截圖時 。按下Ctrl並按下滑鼠下一頁鍵時。今因《四庫全書》本《本草綱目》而設 20240510
         /// 須先畫出之截圖區域，然後按下Ctrl並按下滑鼠下一頁鍵時，會自動按下頁面中的[Input picture]連結並再按下 Replace page with this data 按鈕
         /// </summary>
-        internal static void Input_picture()
+        /// <returns>失敗則傳回false</returns>
+        internal static bool Input_picture()
         {
             //按下頁面中的[Input picture]連結
 
@@ -9323,10 +9324,21 @@ internal static string getImageUrl() {
                 iwe.Click();
                 //再按下 Replace page with this data 按鈕
                 iwe = waitFindWebElementBySelector_ToBeClickable("#pictureinput > input[type=submit]");
-                iwe?.Click();
+                if (iwe != null)
+                    iwe.Click();
+                else
+                {
+                    Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("頁面的【Replace page with this data 按鈕】沒找到。");
+                    return false;
+                }
+
             }
-
-
+            else
+            {
+                Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("頁面的【[Input picture]連結元件】沒找到。");
+                return false;
+            }
+            return true;
         }
 
         /// <summary>
