@@ -8872,14 +8872,7 @@ internal static string getImageUrl() {
                 LastValidWindow = driver.CurrentWindowHandle;
                 openNewTabWindow(OpenQA.Selenium.WindowType.Tab);
                 driver.Navigate().GoToUrl("https://zi.tools/zi/" + x);
-                try
-                {//焦點移到瀏覽器（離開預設的網址列）
-                    driver.SwitchTo().Window(driver.CurrentWindowHandle);                    
-                }
-                catch (Exception ex)
-                {
-                    Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HelpLink + ex.Message);
-                }
+
                 //點擊"Relatives 相關字" .查詢《字統網》多是為找系統有無該異體字，故今改寫為查詢後在頁面尋找「異寫字」的功能，以利跳到該區塊 20240819
                 DateTime dt = DateTime.Now; IWebElement iwe = null;
                 while (true)
@@ -8907,20 +8900,29 @@ internal static string getImageUrl() {
                 }
                 return false;
             }
-            //// 使用 JavaScript 將焦點移到網頁本體 20240821 Copilot大菩薩：您說得對，JavaScript 無法控制到 Chrome 瀏覽器的外殼。可以嘗試使用 Actions 類來模擬按鍵操作，將焦點移到網頁本體。
-            //((IJavaScriptExecutor)driver).ExecuteScript("window.focus();");
-            // 使用 Actions 類將焦點移到網頁本體
-            //Actions actions = new Actions(driver);
-            //actions.SendKeys(OpenQA.Selenium.Keys.Escape).Perform();
-            // 使用 SendKeys 將焦點移到網頁本體
-            //SendKeys.SendWait("{esc}");
-            //// 使用 Actions 類模擬滑鼠點擊操作
-            //Actions actions = new Actions(driver);
-            //actions.MoveToElement(driver.FindElement(By.TagName("body"))).Click().Perform();
-            // 使用 Windows API 將焦點移到網頁本體 20240821:Selenium 網頁焦點問題解決方法:https://sl.bing.net/TU0iPVtD7k
-            IntPtr hWnd = GetForegroundWindow();
-            SetForegroundWindow(hWnd);
-            SendKeys.SendWait("{esc}");
+            try
+            {//焦點移到瀏覽器（離開預設的網址列）
+                driver.SwitchTo().Window(driver.CurrentWindowHandle);
+
+                //// 使用 JavaScript 將焦點移到網頁本體 20240821 Copilot大菩薩：您說得對，JavaScript 無法控制到 Chrome 瀏覽器的外殼。可以嘗試使用 Actions 類來模擬按鍵操作，將焦點移到網頁本體。
+                //((IJavaScriptExecutor)driver).ExecuteScript("window.focus();");
+                // 使用 Actions 類將焦點移到網頁本體
+                //Actions actions = new Actions(driver);
+                //actions.SendKeys(OpenQA.Selenium.Keys.Escape).Perform();
+                // 使用 SendKeys 將焦點移到網頁本體
+                //SendKeys.SendWait("{esc}");
+                //// 使用 Actions 類模擬滑鼠點擊操作
+                //Actions actions = new Actions(driver);
+                //actions.MoveToElement(driver.FindElement(By.TagName("body"))).Click().Perform();
+                // 使用 Windows API 將焦點移到網頁本體 20240821:Selenium 網頁焦點問題解決方法:https://sl.bing.net/TU0iPVtD7k
+                IntPtr hWnd = GetForegroundWindow();
+                SetForegroundWindow(hWnd);
+                SendKeys.SendWait("{esc}");
+            }
+            catch (Exception ex)
+            {
+                Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HelpLink + ex.Message);
+            }
             return true;
         }
 
