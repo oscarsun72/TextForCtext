@@ -8917,6 +8917,7 @@ internal static string getImageUrl() {
                 //Actions actions = new Actions(driver);
                 //actions.MoveToElement(driver.FindElement(By.TagName("body"))).Click().Perform();
                 // 使用 Windows API 將焦點移到網頁本體 20240821:Selenium 網頁焦點問題解決方法:https://sl.bing.net/TU0iPVtD7k
+                BringToFront("chrome");
                 IntPtr hWnd = GetForegroundWindow();
                 SetForegroundWindow(hWnd);
                 SendKeys.SendWait("{esc}");
