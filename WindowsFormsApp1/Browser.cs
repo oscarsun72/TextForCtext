@@ -28,6 +28,8 @@ using System.Windows.Automation;
 using System.Windows.Forms;
 using WebSocketSharp;
 using WindowsFormsApp1;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.Button;
+
 
 //using static System.Net.Mime.MediaTypeNames;
 using forms = System.Windows.Forms;
@@ -1714,18 +1716,18 @@ namespace TextForCtext
                                                                                                                 //WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(3));
                                                                                                                 ////安裝了 Selenium.WebDriver 套件，才說沒有「ExpectedConditions」，然後照Visual Studio 2022的改正建議又用NuGet 安裝了 Selenium.Suport 套件，也自動「 using OpenQA.Selenium.Support.UI;」了，末學自己還用物件瀏覽器找過了 「OpenQA.Selenium.Support.UI」，可就是沒有「ExpectedConditions」靜態類別可用，即使官方文件也說有 ： https://www.selenium.dev/selenium/docs/api/dotnet/html/T_OpenQA_Selenium_Support_UI_ExpectedConditions.htm 20230109 未知何故 阿彌陀佛
                                                                                                                 //wait.Until(ExpectedConditions.ElementToBeClickable(submit));
-                                                                                                                /*chatGPT 您好，謝謝您將您的程式碼提供給我，我現在有更多的資訊可以幫助我了解您遇到的問題。按照您的程式碼，我可以確認您已經在您的項目中安裝了 Selenium.WebDriver 和 Selenium.Support NuGet 套件，並且在您的程式碼中使用了 using OpenQA.Selenium.Support.UI; 的聲明。
-                                                                                                                 * 然而，我注意到您正在使用 .NET Framework 4.8，而非 .NET Core。根據 Selenium 文件，ExpectedConditions 類別在 .NET Framework 中只支援 .NET Core。
-                                                                                                                 * 因此，如果您想在 .NET Framework 中使用 ExpectedConditions 類別，則您需要使用 .NET Core 來建立您的項目。如果您無法更改您的項目類型， 我現在繼續提供您有關解決方法的更多資訊。
-                                                                                                                 * 如果您無法更改您的項目類型，則可以使用不同的方法來等待網頁元素的出現。例如，您可以使用以下方法之一：
-                                                                                                                 * 使用 Thread.Sleep() 函式等待指定的時間。
-                                                                                                                 * 使用 while 迴圈和 DateTime.Now 來等待網頁元素的出現。
-                                                                                                                 * 使用 WebDriverWait 類別和 Until() 方法來等待網頁元素的出現。下面是使用第 3 種方法的示例程式碼：……
-                                                                                                                 * 末學我回：菩薩您的解答終於、應該是對的了 是 Core 有 而Framework 不支援 才對 否則真的不知道是何緣故了。感恩感恩　讚歎讚歎　南無阿彌陀佛
-                                                                                                                 * --然而--
-                                                                                                                 * 不用更改 我找到了 謝謝您的回答 以後再來請教您。我剛才成功解決的是，如下所述： 在Visual Studio 2022 中的NuGet 套件不要裝「SeleniumExtras.WaitHelpers」要裝「DotNetSeleniumExtras.WaitHelpers」就可以成功安裝，再用「using SeleniumExtras.WaitHelpers;」則「wait.Until(ExpectedConditions.ElementToBeClickable(submit));」這一行程式碼就不再出錯了，也沒有紅蚯蚓了。現在我已正常編譯，……感恩感恩　讚歎讚歎　南無阿彌陀佛
-                                                                                                                 */
-                                                                                                                // 在網頁元素載入完畢後，執行 Click 方法
+                    /*chatGPT 您好，謝謝您將您的程式碼提供給我，我現在有更多的資訊可以幫助我了解您遇到的問題。按照您的程式碼，我可以確認您已經在您的項目中安裝了 Selenium.WebDriver 和 Selenium.Support NuGet 套件，並且在您的程式碼中使用了 using OpenQA.Selenium.Support.UI; 的聲明。
+                     * 然而，我注意到您正在使用 .NET Framework 4.8，而非 .NET Core。根據 Selenium 文件，ExpectedConditions 類別在 .NET Framework 中只支援 .NET Core。
+                     * 因此，如果您想在 .NET Framework 中使用 ExpectedConditions 類別，則您需要使用 .NET Core 來建立您的項目。如果您無法更改您的項目類型， 我現在繼續提供您有關解決方法的更多資訊。
+                     * 如果您無法更改您的項目類型，則可以使用不同的方法來等待網頁元素的出現。例如，您可以使用以下方法之一：
+                     * 使用 Thread.Sleep() 函式等待指定的時間。
+                     * 使用 while 迴圈和 DateTime.Now 來等待網頁元素的出現。
+                     * 使用 WebDriverWait 類別和 Until() 方法來等待網頁元素的出現。下面是使用第 3 種方法的示例程式碼：……
+                     * 末學我回：菩薩您的解答終於、應該是對的了 是 Core 有 而Framework 不支援 才對 否則真的不知道是何緣故了。感恩感恩　讚歎讚歎　南無阿彌陀佛
+                     * --然而--
+                     * 不用更改 我找到了 謝謝您的回答 以後再來請教您。我剛才成功解決的是，如下所述： 在Visual Studio 2022 中的NuGet 套件不要裝「SeleniumExtras.WaitHelpers」要裝「DotNetSeleniumExtras.WaitHelpers」就可以成功安裝，再用「using SeleniumExtras.WaitHelpers;」則「wait.Until(ExpectedConditions.ElementToBeClickable(submit));」這一行程式碼就不再出錯了，也沒有紅蚯蚓了。現在我已正常編譯，……感恩感恩　讚歎讚歎　南無阿彌陀佛
+                     */
+                    // 在網頁元素載入完畢後，執行 Click 方法
                     if (submit != null)
                         submit.Click();
                     else
@@ -8760,8 +8762,11 @@ internal static string getImageUrl() {
             //tb = ActiveForm1.Controls["textBox1"] as TextBox;
             //if (tb.SelectionLength == 0) return;
             string f = Path.Combine(Mdb.DropBoxPathIncldBackSlash, preName + "OCR 待改進者隨記 感恩感恩　讚歎讚歎　南無阿彌陀佛.docx");
-            if (!File.Exists(f)) return;
-            retry:
+            if (!File.Exists(f))
+                if (!File.Exists(f = f.Replace("C:\\", "A:\\")))//A槽是我的虛擬機所設定者 20240822
+                    return;
+
+                retry:
             if (ImproveGJcoolOCRMemoDoc == null)
             {
                 Microsoft.Office.Interop.Word.Application wordapp = new Microsoft.Office.Interop.Word.Application
@@ -8874,13 +8879,14 @@ internal static string getImageUrl() {
                 driver.Navigate().GoToUrl("https://zi.tools/zi/" + x);
 
                 //點擊"Relatives 相關字" .查詢《字統網》多是為找系統有無該異體字，故今改寫為查詢後在頁面尋找「異寫字」的功能，以利跳到該區塊 20240819
-                DateTime dt = DateTime.Now; IWebElement iwe = null;
-                while (true)
-                {
-                    iwe = waitFindWebElementBySelector_ToBeClickable("#mainContent > span > div.content > div > div.sidebar_navigation > div > div:nth-child(11)");
-                    if (iwe != null ||
-                        DateTime.Now.Subtract(dt).TotalSeconds > 10) break;
-                }
+                //DateTime dt = DateTime.Now;
+                IWebElement iwe = null;
+                //while (true)
+                //{
+                iwe = waitFindWebElementBySelector_ToBeClickable("#mainContent > span > div.content > div > div.sidebar_navigation > div > div:nth-child(11)",4);
+                    //if (iwe != null ||
+                        //DateTime.Now.Subtract(dt).TotalSeconds > 10) break;
+                //}
                 iwe?.Click();//當DateTime.Now.Subtract(dt).TotalSeconds > 10) break; 時需要 iwe? 會是null值
 
             }
@@ -8892,6 +8898,11 @@ internal static string getImageUrl() {
                     {
                         noSuchWindowErrHandler();
                         goto retry;
+                    }
+                    else if (ex.Message.StartsWith("An unknown exception was encountered sending an HTTP request to the remote WebDriver server for URL "))
+                    {
+                        MessageBox.Show("請關閉Chrome瀏覽器，並用本程式重新啟動 Chrome瀏覽器", "", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
+                        return false;
                     }
                     else
                     {

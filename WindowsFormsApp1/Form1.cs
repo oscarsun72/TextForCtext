@@ -2486,7 +2486,7 @@ namespace WindowsFormsApp1
                             textBox1.Select(s, l);
                             textBox1.SelectedText = string.Empty;
                         }
-                        else if (s < x.Length - 1 && x.Substring(s, 2) == "􏿽")
+                        else if (s < x.Length - 1 && x.Substring(s, 2) == "􏿽")//2="􏿽".Length
                         {
                             while (textBox1.TextLength >= s + l + 2 && textBox1.Text.Substring(s + l, 2) == "􏿽")
                             {
@@ -2494,6 +2494,17 @@ namespace WindowsFormsApp1
                                 //textBox1.SelectedText = string.Empty;
                             }
                             textBox1.Select(s, l);
+                            textBox1.SelectedText = string.Empty;
+                        }
+                        //清除<p>
+                        else if (s < x.Length - 1 && x.Substring(s, 1) == "<")//"<".Length
+                        {
+                            while (textBox1.TextLength >= s + l + 1 && textBox1.Text.Substring(s + l, 1) != ">")//1=">".Length
+                            {
+                                textBox1.Select(s + l, 1); l += 1;
+                                //textBox1.SelectedText = string.Empty;
+                            }
+                            textBox1.Select(s, l + ">".Length);
                             textBox1.SelectedText = string.Empty;
                         }
                         else
@@ -11769,7 +11780,7 @@ namespace WindowsFormsApp1
                     ResumeEvents(); return;
                 #endregion
                 case "mt":
-                    Form1.MuteProcessing = !Form1.MuteProcessing ;
+                    Form1.MuteProcessing = !Form1.MuteProcessing;
                     PauseEvents();
                     textBox2.Text = "";
                     ResumeEvents(); return;

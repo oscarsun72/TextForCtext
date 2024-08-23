@@ -684,9 +684,17 @@ namespace TextForCtext
 
             for (int i = 0; i < lines.Length; i++)
             {
+                string line = lines[i];
+                //標題必非版心！
+                if (line.IndexOf("*") > -1
+                    || line.IndexOf("孫守真按") > -1//有按語則不用汰除 
+                    ||( i > 1 && i < lines.Length - 2))//版心不可能在中間啦
+                    continue;
+
+
                 //double similarity = Fuzz.Ratio(title, lines[i].Replace("卷","")) / 100.0;
                 string pattern = "[" + Regex.Escape("卷上下卄一二三四五六七八九十卅卌<p>") + "]";
-                string line = Regex.Replace(lines[i], pattern, ""); 
+                line = Regex.Replace(line, pattern, "");
                 double similarity = Fuzz.Ratio(title, line) / 100.0;
                 if (similarity >= threshold)
                 {
@@ -697,7 +705,7 @@ namespace TextForCtext
                         location = 0;
                         for (int j = 0; j < i; j++)
                         {
-                            location = xChecking.IndexOf(Environment.NewLine, location)+Environment.NewLine.Length;
+                            location = xChecking.IndexOf(Environment.NewLine, location) + Environment.NewLine.Length;
                         }
                     }
                     break;
@@ -705,8 +713,7 @@ namespace TextForCtext
             }
 
             return location;
-        }
-        ///// <summary>
+        }        ///// <summary>
         ///// 版心文字比對引入相似度方法。
         ///// 檢查文本中是否包括書名（title）。如版心等內容。如果有則傳回所在位置。沒有或有錯誤則傳回-1
         ///// 20240818：creedit with Copilot大菩薩：模糊比對與相似度比對的程式改寫：https://sl.bing.net/gnYNHR1sxRA
@@ -1038,6 +1045,8 @@ namespace TextForCtext
             punctuatedText = punctuatedText.Replace(Environment.NewLine, string.Empty);
             //清除標題符號以利分段符號之比對搜尋
             originalText = RemovePunctuation(originalText);
+            //清除縮排即凸排格式標記，即將分段符號前後的空格「　」均予清除
+            originalText = Regex.Replace(originalText, $@"\s*{Environment.NewLine}+\s*", Environment.NewLine);
             #endregion
 
             // Step 1: Find the positions of the paragraph breaks in the original text
