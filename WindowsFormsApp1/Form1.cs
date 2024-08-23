@@ -2496,7 +2496,7 @@ namespace WindowsFormsApp1
                             textBox1.Select(s, l);
                             textBox1.SelectedText = string.Empty;
                         }
-                        //清除<p>
+                        //清除<p> 及成對 < > 的一切語法
                         else if (s < x.Length - 1 && x.Substring(s, 1) == "<")//"<".Length
                         {
                             while (textBox1.TextLength >= s + l + 1 && textBox1.Text.Substring(s + l, 1) != ">")//1=">".Length
