@@ -5,16 +5,16 @@ Public chromedriversPID() As Long '儲存chromedriver程序ID的陣列
 Public chromedriversPIDcntr As Integer 'chromedriversPID的下標值
 Public ActiveXComponentsCanNotBeCreated As Boolean
 
-Sub tesSeleniumBasic() 'https://github.com/florentbr/SeleniumBasic
-'20230119 creedit chatGPT大菩薩
-
-    Dim driver As New Selenium.WebDriver
-    'driver.start "chrome", "https://www.google.com"
-    driver.SetBinary getChromePathIncludeBackslash
-    driver.start getChromePathIncludeBackslash + "chrome.exe", "https://www.google.com"
-    driver.Get "/"
-
-End Sub
+'Sub tesSeleniumBasic() 'https://github.com/florentbr/SeleniumBasic
+''20230119 creedit chatGPT大菩薩
+'
+'    Dim driver As New Selenium.WebDriver
+'    'driver.start "chrome", "https://www.google.com"
+'    driver.SetBinary getChromePathIncludeBackslash
+'    driver.start getChromePathIncludeBackslash + "chrome.exe", "https://www.google.com"
+'    driver.Get "/"
+'
+'End Sub
 
 Sub openNewTabWhenTabAlreadyExit(ByRef WD As SeleniumBasic.IWebDriver)
 Dim iw As Byte, ew, ii As Byte
@@ -55,7 +55,7 @@ Select Case Err.Number
 '           Resume
 End Select
 End Sub
-Sub openChrome(Optional url As String)
+Sub openChrome(Optional URL As String)
 reStart:
     'Dim WD As SeleniumBasic.IWebDriver
     On Error GoTo ErrH
@@ -102,7 +102,7 @@ reStart:
             chromedriversPIDcntr = chromedriversPIDcntr + 1
         End If
         openNewTabWhenTabAlreadyExit WD
-        WD.url = url
+        WD.URL = URL
     End If
     If ActiveXComponentsCanNotBeCreated Then ActiveXComponentsCanNotBeCreated = False
 Exit Sub
@@ -110,7 +110,7 @@ ErrH:
 Select Case Err.Number
     
     Case -2146233079
-        If left(Err.Description, Len("session not created: Chrome failed to start: exited normally.")) = "session not created: Chrome failed to start: exited normally." Then
+        If Left(Err.Description, Len("session not created: Chrome failed to start: exited normally.")) = "session not created: Chrome failed to start: exited normally." Then
             WD.Quit
             killchromedriverFromHere
             Exit Sub
@@ -150,7 +150,7 @@ End Select
 
 End Sub
 
-Function openChromeBackground(url As String) As SeleniumBasic.IWebDriver
+Function openChromeBackground(URL As String) As SeleniumBasic.IWebDriver
 reStart:
     'Dim WD As SeleniumBasic.IWebDriver
     On Error GoTo ErrH
@@ -203,7 +203,7 @@ reStart:
 '            chromedriversPIDcntr = chromedriversPIDcntr + 1
 '        End If
 
-        WD.url = url
+        WD.URL = URL
         Set openChromeBackground = WD
     
 Exit Function
@@ -244,13 +244,13 @@ End Function
 
 
 'https://www.cnblogs.com/ryueifu-VBA/p/13661128.html
-Sub Search(url As String, frmID As String, keywdID As String, btnID As String, Optional searchStr As String)
+Sub Search(URL As String, frmID As String, keywdID As String, btnID As String, Optional searchStr As String)
 On Error GoTo Err1
 'If searchStr = "" And Selection = "" Then Exit Sub
 If WD Is Nothing Then
-    openChrome (url)
+    openChrome (URL)
 End If
-    WD.url = url
+    WD.URL = URL
     Dim form As SeleniumBasic.IWebElement
     Dim keyword As SeleniumBasic.IWebElement
     Dim button As SeleniumBasic.IWebElement
@@ -298,11 +298,11 @@ End Sub
 Sub dictRevisedSearch(Optional searchStr As String)
 On Error GoTo Err1
 'If searchStr = "" And Selection = "" Then Exit Sub
-Const url As String = "https://dict.revised.moe.edu.tw/search.jsp?md=1"
+Const URL As String = "https://dict.revised.moe.edu.tw/search.jsp?md=1"
 If WD Is Nothing Then
-    openChrome (url)
+    openChrome (URL)
 End If
-    If WD.url <> url Then WD.url = url
+    If WD.URL <> URL Then WD.URL = URL
     Dim form As SeleniumBasic.IWebElement
     Dim keyword As SeleniumBasic.IWebElement
     Dim button As SeleniumBasic.IWebElement
@@ -337,10 +337,10 @@ End Sub
 Function grabDictRevisedUrl_OnlyOneResult(searchStr As String, Optional Background As Boolean) As String
 'If searchStr = "" And Selection = "" Then Exit Sub
 If searchStr = "" Then Exit Function
-If VBA.left(searchStr, 1) <> "=" Then searchStr = "=" + searchStr '精確搜尋字串指令
+If VBA.Left(searchStr, 1) <> "=" Then searchStr = "=" + searchStr '精確搜尋字串指令
 Const notFoundOrMultiKey As String = "&qMd=0&qCol=1" '查無資料或如果不止一條時，網址後綴都有此關鍵字
-Dim url As String, retryTime As Byte
-url = "https://dict.revised.moe.edu.tw/search.jsp?md=1"
+Dim URL As String, retryTime As Byte
+URL = "https://dict.revised.moe.edu.tw/search.jsp?md=1"
 
 On Error GoTo Err1
 
@@ -348,10 +348,10 @@ Dim wdB As SeleniumBasic.IWebDriver, WBQuit As Boolean '=true 則可以關Chrome瀏覽
 
 If Background Then
     WBQuit = True '因為在背景執行，預設要可以關
-    Set wdB = openChromeBackground(url)
+    Set wdB = openChromeBackground(URL)
     If wdB Is Nothing Then
         If WD Is Nothing Then
-            openChrome url
+            openChrome URL
         Else
             WBQuit = False
         End If
@@ -360,7 +360,7 @@ If Background Then
 Else
     WBQuit = False
         If WD Is Nothing Then
-            openChrome url
+            openChrome URL
         Else
             Set wdB = WD
         End If
@@ -369,14 +369,14 @@ Else
         End If
 End If
 retry:
-    If wdB.url <> url Then WD.Navigate.GoToUrl url ' wdB.url = url
+    If wdB.URL <> URL Then WD.Navigate.GoToUrl URL ' wdB.url = url
     Dim form As SeleniumBasic.IWebElement
     Dim keyword As SeleniumBasic.IWebElement
     Dim button As SeleniumBasic.IWebElement
     Set form = wdB.FindElementById("searchF")
     Set keyword = form.FindElementByName("word")
     Set button = form.FindElementByClassName("submit")
-    If keyword.Text <> searchStr Then
+    If keyword.text <> searchStr Then
         keyword.clear
         keyword.SendKeys searchStr
     End If
@@ -403,9 +403,9 @@ retry:
 '            Dim k As New SeleniumBasic.keys
 '            keyword.SendKeys k.Enter
     End If
-    url = wdB.url
-    If InStr(url, notFoundOrMultiKey) = 0 Then
-        grabDictRevisedUrl_OnlyOneResult = url '有找到則傳回網址
+    URL = wdB.URL
+    If InStr(URL, notFoundOrMultiKey) = 0 Then
+        grabDictRevisedUrl_OnlyOneResult = URL '有找到則傳回網址
     Else
         grabDictRevisedUrl_OnlyOneResult = "" '沒有找到傳回空字串
     End If
@@ -437,20 +437,20 @@ Err1:
         Case -2147467261 '並未將物件參考設定為物件的執行個體。
             Set WD = Nothing
             killchromedriverFromHere
-            openChrome url
+            openChrome URL
             Set wdB = WD
             WBQuit = True
             Resume
         Case -2146233088 'unknown error: ChromeDriver only supports characters in the BMP  (Session info: chrome=109.0.5414.75)
             If InStr(Err.Description, "/session timed out after 60 seconds.") Then
-                If WD Is Nothing Then openChrome (url)
+                If WD Is Nothing Then openChrome (URL)
                 Set wdB = WD
             ElseIf InStr(Err.Description, "no such window: target window already closed") Or InStr(Err.Description, "invalid session id") Then
-                WD.Quit: Set WD = Nothing: killchromedriverFromHere: openChrome (url)
+                WD.Quit: Set WD = Nothing: killchromedriverFromHere: openChrome (URL)
                 Set wdB = WD
             Else
                 'textbox.SendKeys key.LeftShift + key.Insert
-                WBQuit = pasteWhenOutBMP(wdB, url, "word", searchStr, keyword, Background)
+                WBQuit = pasteWhenOutBMP(wdB, URL, "word", searchStr, keyword, Background)
             End If
             Resume Next
         Case Else
@@ -494,8 +494,8 @@ Err1:
 End Sub
 
 '貼到古籍酷自動標點()
-Function grabGjCoolPunctResult(Text As String, resultText As String, Optional Background As Boolean) As String
-    Const url = "https://gj.cool/punct"
+Function grabGjCoolPunctResult(text As String, resultText As String, Optional Background As Boolean) As String
+    Const URL = "https://gj.cool/punct"
     Dim wdB As SeleniumBasic.IWebDriver, WBQuit As Boolean '=true 則可以關Chrome瀏覽器
     Dim textBox As SeleniumBasic.IWebElement, btn As SeleniumBasic.IWebElement, btn2 As SeleniumBasic.IWebElement, item As SeleniumBasic.IWebElement
     Dim timeOut As Byte '最多等 timeOut 秒
@@ -503,7 +503,7 @@ Function grabGjCoolPunctResult(Text As String, resultText As String, Optional Ba
     
     If Background Then
         Rem 隱藏
-        Set wdB = openChromeBackground(url)
+        Set wdB = openChromeBackground(URL)
         WBQuit = True '因為在背景執行，預設要可以關
         If wdB Is Nothing Then
             If WD Is Nothing Then openChrome ("https://gj.cool/punct")
@@ -515,16 +515,16 @@ Function grabGjCoolPunctResult(Text As String, resultText As String, Optional Ba
         Set wdB = WD
     End If
     If wdB Is Nothing Then Exit Function
-    If wdB.url <> url Then wdB.Navigate.GoToUrl url
+    If wdB.URL <> URL Then wdB.Navigate.GoToUrl URL
     
     '整理文本
-    Dim chkStr As String: chkStr = VBA.chr(13) & chr(10) & chr(7) & chr(9) & chr(8)
-    Text = VBA.Trim(Text)
-    Do While VBA.InStr(chkStr, VBA.left(Text, 1)) > 0
-        Text = Mid(Text, 2)
+    Dim chkStr As String: chkStr = VBA.Chr(13) & Chr(10) & Chr(7) & Chr(9) & Chr(8)
+    text = VBA.Trim(text)
+    Do While VBA.InStr(chkStr, VBA.Left(text, 1)) > 0
+        text = Mid(text, 2)
     Loop
-    Do While VBA.InStr(chkStr, VBA.right(Text, 1)) > 0
-        Text = left(Text, Len(Text) - 1)
+    Do While VBA.InStr(chkStr, VBA.right(text, 1)) > 0
+        text = Left(text, Len(text) - 1)
     Loop
     
     
@@ -537,19 +537,19 @@ Function grabGjCoolPunctResult(Text As String, resultText As String, Optional Ba
     'textbox.SendKeys VBA.KeyCodeConstants.vbKeyControl & VBA.KeyCodeConstants.vbKeyV
     
     '如果只有chr(13)而沒有chr(13)&chr(10)則這行會使分段符號消失；因為下面標點按鈕一按，仍會使一組分段符號消失，必須換成兩組，才能保留一組
-    If InStr(Text, chr(13) & chr(10)) = 0 And InStr(Text, chr(13)) > 0 Then Text = Replace(Text, chr(13), chr(13) & chr(10) & chr(13) & chr(10))
+    If InStr(text, Chr(13) & Chr(10)) = 0 And InStr(text, Chr(13)) > 0 Then text = Replace(text, Chr(13), Chr(13) & Chr(10) & Chr(13) & Chr(10))
     If Background Then
-        textBox.SendKeys Text 'SystemSetup.GetClipboardText
+        textBox.SendKeys text 'SystemSetup.GetClipboardText
     Else
-        SystemSetup.SetClipboard Text
+        SystemSetup.SetClipboard text
         textBox.SendKeys key.Control + "v"
     End If
     
     '貼上不成則退出
     Dim WaitDt As Date, chkTxtTime As Date, nx As String, xl As Integer
     
-    nx = textBox.Text
-    Text = nx
+    nx = textBox.text
+    text = nx
     SystemSetup.playSound 1.294
     If nx = "" Then
         grabGjCoolPunctResult = ""
@@ -572,31 +572,31 @@ Function grabGjCoolPunctResult(Text As String, resultText As String, Optional Ba
     '等待標點完成
     'SystemSetup.Wait 3.6
     
-    If VBA.Len(Text) < 3000 Then
+    If VBA.Len(text) < 3000 Then
         timeOut = 10
     Else
         timeOut = 20
     End If
     '最多等 timeOut 秒
     WaitDt = DateAdd("s", timeOut, Now()) '極限10秒
-    xl = VBA.Len(Text)
+    xl = VBA.Len(text)
     chkTxtTime = VBA.Now
     Do
         If VBA.DateDiff("s", chkTxtTime, VBA.Now) > 1.5 Then
-            nx = textBox.Text
+            nx = textBox.text
             SystemSetup.playSound 1
             '檢查如果沒有按到「標點」按鈕，就再次按下 20240725 以出現等待圖示控制項為判斷
             If wdB.FindElementByCssSelector("#waitingSpinner") Is Nothing Then
                 btn.SendKeys k.Enter
             Else
-                If wdB.FindElementByCssSelector("#waitingSpinner").Displayed = False And nx = Text Then
+                If wdB.FindElementByCssSelector("#waitingSpinner").Displayed = False And nx = text Then
                     btn.SendKeys k.Enter
                     SystemSetup.playSound 1.469
                 End If
             End If
             chkTxtTime = Now
             'VBA.StrComp(text, nx) <> 0
-            If nx <> Text Then Exit Do
+            If nx <> text Then Exit Do
             If InStr(nx, "，") > 0 And InStr(nx, "。") > 0 And Len(nx) > xl Then Exit Do
         End If
         If Now > WaitDt Then
@@ -619,7 +619,7 @@ Function grabGjCoolPunctResult(Text As String, resultText As String, Optional Ba
     'SystemSetup.Wait 0.3
     'SystemSetup.SetClipboard textbox.text
     'grabGjCoolPunctResult = SystemSetup.GetClipboardText
-    grabGjCoolPunctResult = textBox.Text
+    grabGjCoolPunctResult = textBox.text
     resultText = grabGjCoolPunctResult
     If WBQuit = False Then
         wdB.Close
@@ -636,7 +636,7 @@ Err1:
                 Resume
             Case 91 '沒有設定物件變數或 With 區塊變數
                     killchromedriverFromHere
-                    openChrome url
+                    openChrome URL
                     Set wdB = WD
                 Resume
             Case -2146233088 'unknown error: ChromeDriver only supports characters in the BMP  (Session info: chrome=109.0.5414.75)
@@ -646,16 +646,16 @@ Err1:
                 Rem textBox.SendKeys key.Control + "v"
                 Rem textBox.SendKeys key.LeftShift + key.Insert
                 If InStr(Err.Description, "ChromeDriver only supports characters in the BMP") Then
-                    WBQuit = pasteWhenOutBMP(wdB, url, "PunctArea", Text, textBox, Background)
+                    WBQuit = pasteWhenOutBMP(wdB, URL, "PunctArea", text, textBox, Background)
                     Resume Next
                 ElseIf InStr(Err.Description, "invalid session id") Or InStr(Err.Description, "A exception with a null response was thrown sending an HTTP request to the remote WebDriver server for URL http://localhost:4609/session/455865a54d3f64364cf76b41fe7953a3/url. The status of the exception was ConnectFailure, and the message was: 無法連接至遠端伺服器") Then 'Or InStr(Err.Description, "no such window: target window already closed") Then
                     killchromedriverFromHere
-                    openChrome url
+                    openChrome URL
                     Set wdB = WD: WBQuit = True
                     Resume
                 ElseIf InStr(Err.Description, "no such window: target window already closed") Then
                     openNewTabWhenTabAlreadyExit wdB
-                    wdB.Navigate.GoToUrl url
+                    wdB.Navigate.GoToUrl URL
                     Resume
                 Else
                     MsgBox Err.Number + Err.Description
@@ -664,7 +664,7 @@ Err1:
             Case -2147467261 '並未將物件參考設定為物件的執行個體。
                 If InStr(Err.Description, "並未將物件參考設定為物件的執行個體。") Then
                     killchromedriverFromHere 'WD.Quit: Set WD = Nothing:
-                     openChrome url
+                     openChrome URL
                     Set wdB = WD
                     Resume
                 Else
@@ -680,7 +680,7 @@ Err1:
     
 End Function
 
-Private Function pasteWhenOutBMP(ByRef iwd As SeleniumBasic.IWebDriver, url, textBoxToPastedID, pastedTxt As String, ByRef textBox As SeleniumBasic.IWebElement, Background As Boolean) As Boolean ''unknown error: ChromeDriver only supports characters in the BMP  (Session info: chrome=109.0.5414.75)
+Private Function pasteWhenOutBMP(ByRef iwd As SeleniumBasic.IWebDriver, URL, textBoxToPastedID, pastedTxt As String, ByRef textBox As SeleniumBasic.IWebElement, Background As Boolean) As Boolean ''unknown error: ChromeDriver only supports characters in the BMP  (Session info: chrome=109.0.5414.75)
 Rem creedit chatGPT大菩薩：您提到的確實是 Selenium 的 SendKeys 方法不能貼上 BMP 外的字的問題。
 On Error GoTo Err1
 Dim retryTimes As Byte
@@ -691,12 +691,12 @@ If Background Then iwd.Quit
 retry:
 If iwd Is Nothing Then
     If WD Is Nothing Then
-        openChrome (url)
+        openChrome (URL)
         pasteWhenOutBMP = True
     End If
     Set iwd = WD
 End If
-If iwd.url <> url Then iwd.Navigate.GoToUrl (url)
+If iwd.URL <> URL Then iwd.Navigate.GoToUrl (URL)
 Dim key As New SeleniumBasic.keys
 Set textBox = iwd.FindElementById(textBoxToPastedID)
 If textBox Is Nothing Then Set textBox = iwd.FindElementByName(textBoxToPastedID)
@@ -736,7 +736,7 @@ Err1:
             GoTo retry
         Case Else
             If WD Is Nothing Then
-                openChrome (url)
+                openChrome (URL)
                 pasteWhenOutBMP = True
                 Resume Next
             Else
