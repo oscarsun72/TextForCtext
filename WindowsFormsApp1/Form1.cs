@@ -6942,7 +6942,9 @@ namespace WindowsFormsApp1
             }
 
             //貼到 Ctext Quick edit 前的文本檢查
-            if (!newTextBox1(out s, out l, autoPastetoQuickEdit ? x : xCopy))
+            //if (!newTextBox1(out s, out l, autoPastetoQuickEdit ? x : xCopy))
+            //if (!newTextBox1(out s, out l,  x))// 只用 xCopy的話 如《漢籍全文資料庫》的《十三經注疏》輸入就會傳回false
+            if (!newTextBox1(out s, out l, autoPastetoQuickEdit ? x : (keyinTextMode ? xCopy : x)))
             {
                 if (s != 0 && l != 0 && textBox1.SelectionLength == 0)
                 {//若無選取，則將有問題的部分選取以供檢視
@@ -8432,7 +8434,7 @@ namespace WindowsFormsApp1
                 }
 
                 if (e.KeyCode == Keys.PageDown || e.KeyCode == Keys.PageUp)
-                {
+                {//Ctrl + PageDown Ctrl + PageUP
                     e.Handled = true;//取得或設定值，指出是否處理事件。https://docs.microsoft.com/zh-tw/dotnet/api/system.windows.forms.keyeventargs.handled?view=netframework-4.7.2&f1url=%3FappId%3DDev16IDEF1%26l%3DZH-TW%26k%3Dk(System.Windows.Forms.KeyEventArgs.Handled);k(TargetFrameworkMoniker-.NETFramework,Version%253Dv4.7.2);k(DevLang-csharp)%26rd%3Dtrue
                     nextPages(e.KeyCode, true);
                     if (autoPastetoQuickEdit) AvailableInUseBothKeysMouse();
@@ -8465,19 +8467,19 @@ namespace WindowsFormsApp1
 
 
                 if (e.KeyCode == Keys.D1)
-                {
+                {//Ctrl + 1 ：執行 Word VBA Sub 巨集指令「漢籍電子文獻資料庫文本整理_以轉貼到中國哲學書電子化計劃」【 附件即有 [Word VBA](https://github.com/oscarsun72/TextForCtext/tree/master/WordVBA) 相關模組 】
                     //現在少用，故以此機制防制：
                     if (DialogResult.OK == Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("執行「漢籍電子文獻資料庫文本整理_以轉貼到中國哲學書電子化計劃」？"))
                         runWordMacro("漢籍電子文獻資料庫文本整理_以轉貼到中國哲學書電子化計劃");
                     e.Handled = true; return;
                 }
                 if (e.KeyCode == Keys.D3)
-                {
+                {//Ctrl + 3 ：執行 Word VBA Sub 巨集指令「漢籍電子文獻資料庫文本整理_十三經注疏」
                     runWordMacro("漢籍電子文獻資料庫文本整理_十三經注疏");
                     e.Handled = true; return;
                 }
                 if (e.KeyCode == Keys.D4)
-                {
+                {//Ctrl + 4 ：執行 Word VBA Sub 巨集指令「維基文庫四部叢刊本轉來」
                     runWordMacro("維基文庫四部叢刊本轉來");
                     e.Handled = true; return;
                 }
@@ -9865,7 +9867,9 @@ namespace WindowsFormsApp1
                 Message=伺服器丟出一個例外。 (發生例外狀況於 HRESULT: 0x80010105 (RPC_E_SERVERFAULT))
                 Source=Microsoft.Office.Interop.Word
                     */
-                    throw;
+                    MessageBoxShowOKExclamationDefaultDesktopOnly(e.HResult + e.Message);
+                    goto finish;
+                    //throw;
                 }
             }
 
@@ -9924,7 +9928,7 @@ namespace WindowsFormsApp1
                 //throw;
             }
 
-            //finish:
+            finish:
             this.BackColor = C;
             show_nICo(ModifierKeys);
             normalLineParaLength = 0;
@@ -11373,7 +11377,13 @@ namespace WindowsFormsApp1
                 Task.WaitAll();
                 Application.DoEvents();
                 while (!isClipBoardAvailable_Text()) { }
-                clpTxt = Clipboard.GetText();
+                try
+                {
+                    clpTxt = Clipboard.GetText();
+                }
+                catch (Exception)
+                {
+                }
                 //throw;
             }
 
@@ -11598,8 +11608,13 @@ namespace WindowsFormsApp1
             catch (Exception)
             {
                 Task.WaitAll();
-                xClip = Clipboard.GetText() ?? "";
-                //throw;
+                try
+                {
+                    xClip = Clipboard.GetText() ?? "";
+                }
+                catch (Exception)
+                {
+                }
             }
             if ((xClip.IndexOf("MidleadingBot") > 0 || xClip.IndexOf("此頁面可能存在如下一些問題：") > -1 || xClip.IndexOf("Wmr-bot") > -1)
                     && textBox1.TextLength < 100)//xClip.Length > 500 )                

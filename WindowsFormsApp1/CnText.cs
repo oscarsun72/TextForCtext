@@ -577,23 +577,23 @@ namespace TextForCtext
             ////x= Regex.Replace(x, pattern, evaluator);
             //x = Regex.Replace(x, pattern, evaluator).Replace("．", "。");
             #endregion
-
-            string[] replaceDChar = { "!","！！","'", ",", ";", ":", "．", "?", "：：","：\r\n：", "《《", "》》", "〈〈", "〉〉",
-                "。}}。}}", "。}}}。<p>", "}}}。<p>", "。}}。<p>", "}}。<p>",".<p>","·<p>" ,"<p>。<p>","<p>。","􏿽。<p>","　。<p>"
+            
+            string[] replaceDChar = { "〇","!","！！","'", ",", ";", ":", "．", "?", "：：","：\r\n：", "《《", "》》", "〈〈", "〉〉",
+                "。}}<p>。}}","。}}。}}", "。}}}。<p>", "}}}。<p>", "。}}。<p>", "}}。<p>",".<p>","·<p>" ,"<p>。<p>","<p>。","􏿽。<p>","　。<p>"
                 ,"。。", "，，", "@" 
                 //,"}}<p>\r\n{{"//像《札迻》就有此種格式，不能取代掉！ https://ctext.org/library.pl?if=en&file=36575&page=12&editwiki=800245#editor
-                ,"\r\n。<p>"
+                ,"\r\n。<p>","\r\n〗","\r\n。}}","\r\n："
                 ,"！。<p>","？。<p>","+<p>","<p>+","：。<p>","。\r\n。"
                 ,"：。","\r\n，","\r\n。","\r\n、","\r\n？","\r\n」","「\r\n" ,"{{\r\n" ,"\r\n}}"
                 ,"􏿽？","􏿽。","，〉","。〉","〈、","！，","〈，"//自動標點結果的訂正
                 ,"，。"
             };
 
-            string[] replaceChar = { "！","！","、", "，", "；", "：", "·", "？", "：","：\r\n", "《", "》", "〈", "〉",
-                "。}}", "。}}}<p>", "。}}}<p>", "。}}<p>", "。}}<p>","。<p>","。<p>","<p>","<p>","　","　"
+            string[] replaceChar = { "◯","！","！","、", "，", "；", "：", "·", "？", "：","：\r\n", "《", "》", "〈", "〉",
+                "。}}","。}}", "。}}}<p>", "。}}}<p>", "。}}<p>", "。}}<p>","。<p>","。<p>","<p>","<p>","　","　"
                 , "。", "，", "●" 
                 //,"}}\r\n{{"//像《札迻》就有此種格式，不能取代掉！ https://ctext.org/library.pl?if=en&file=36575&page=12&editwiki=800245#editor
-                ,"\r\n"
+                ,"\r\n","〗\r\n","。}}\r\n","：\r\n"
                 ,"！<p>","？<p>","<p>","<p>","：<p>","。\r\n"
                 ,"。","，\r\n","。\r\n","、\r\n","？\r\n","」\r\n","\r\n「" ,"\r\n{{", "}}\r\n"
                 ,"？􏿽","。􏿽","〉，","〉。","、〈","！","，〈"//自動標點結果的訂正
@@ -688,7 +688,7 @@ namespace TextForCtext
                 //標題必非版心！
                 if (line.IndexOf("*") > -1
                     || line.IndexOf("孫守真按") > -1//有按語則不用汰除 
-                    ||( i > 1 && i < lines.Length - 2))//版心不可能在中間啦
+                    || (i > 1 && i < lines.Length - 2))//版心不可能在中間啦
                     continue;
 
 
@@ -696,7 +696,7 @@ namespace TextForCtext
                 string pattern = "[" + Regex.Escape("卷上下卄一二三四五六七八九十卅卌<p>") + "]";
                 line = Regex.Replace(line, pattern, "");
                 double similarity = Fuzz.Ratio(title, line) / 100.0;
-                if (similarity >= threshold)
+                if (similarity >= threshold && lines[i - 1] != "|")//前一段若為「|」通常是卷末題目
                 {
                     location = xChecking.IndexOf(lines[i]);
                     if (location == -1)
