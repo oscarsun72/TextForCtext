@@ -127,9 +127,9 @@ Alt + F1 ： 輸入墨丁、墨等、墨蓋、墨塊`■`
 
 Alt + F2 ： 輸入空圍`□`
 
-Ctrl + h ：取代文字
+Ctrl + h ：取代文字（仿同MS Word功能）
 
-Alt + e ：在文字版[View]編輯中，將該卷章節的內容全部取代：將插入點後第1個字取代為第2個*（第1個其後的）*字。在統改異體字時很有用。
+Alt + e ：在文字版[View]編輯[Edit][修改]中，將該卷章節的內容全部取代：將插入點後第1個字取代為第2個*（第1個其後的）*字。在統改異體字時很有用。（e=edit）
 
 Alt + Insert ：在textBox1清除原內容，貼上剪貼簿中的內容。若在手動輸入模式下會自動標上書名號、篇名號、及一些基本斷句標點符號。
 
@@ -229,16 +229,16 @@ Alt + v： 檢查[查字.mdb].[異體字反正]資料表中是否已有該字記
 
 Alt + t ： 檢查是否為標題篇名（在已有現成排版好的文本、自動輸入模式時常用）
 ### 備份還原
-Ctrl + z ：如同MS Word，還原textBox1中的文本。
+Ctrl + z ：如同MS Word，還原textBox1中的文本。（仿同MS Word功能）
 
 Ctrl + y ：如同MS Word，重做textBox1中的文本。（反還原）
 
-Ctrl + s ：將現前textBox1文本內容儲存至Dropbox根路徑下`cText.txt`檔案備份。
+Ctrl + s ：將現前textBox1文本內容儲存至Dropbox根路徑下`cText.txt`檔案備份。（仿同MS Word功能）
 
 F5 ： 提取讀入`cText.txt`檔案備份的內容至textBox1.
 
 ### 檢索尋找
-Ctrl + f ：尋找文字。
+Ctrl + f ：尋找文字。（仿同MS Word功能）
 
 F3 ：向前尋找文字。Shift + F3 ：向後尋找文字。
 
