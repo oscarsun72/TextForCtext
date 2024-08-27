@@ -194,6 +194,8 @@ Shift + F8 ：第一次使用可設定`自動標上篇名標題標記`的參數�
 數字鍵盤 5 ： `自動標上篇名標題標記`。此功能在開啟`OCR連續輸入模式`時，也會詢問是否要開啟，以便在輸入時順便標上標題標記，以免分段標記懸隔太遠，造成[查看歷史][History]的顯示負擔。
 
 Alt + 數字鍵盤 5 ： 清除所有與篇名標題標記有關的符號
+
+F6 ： 標題篇名降階。將 `*` 增1 成 `**` `***` ……。
 ##### 小注
 Ctrl + F1 ： 於選取前後加上`{{``}}`
 
@@ -506,7 +508,7 @@ Alt + l : 檢查/輸入抬頭平抬時的條件：執行topLineFactorIuput04cond
 
 **分段標記**
 
-Alt + p 或 Alt + ` : 鍵入 "\<p\>" + newline（分行分段符號）；若置於行/段之首，則會自動移至前一段末再執行
+Alt + p 或 Alt + \` : 鍵入 "\<p\>" + newline（分行分段符號）；若置於行/段之首，則會自動移至前一段末再執行
 
 Alt + Shift + p : 鍵入 "。\<p\>" + newline（句號+分行分段符號）；若置於行/段之首，則會自動移至前一段末再執行
 
@@ -558,7 +560,7 @@ Shift + F5 ： 在textBox1 回到上1次插入點（游標）所在處（且與�
 
 F6 : 標題降階（增加標題前之星號）[keysAsteriskPreTitle()]
 
-Alt + F6 或 Alt + F8 或 選取標題文字前之空格再按下 Alt + ` : run autoMarkTitles 自動標識標題（篇名）[autoMarkTitles()]
+Alt + F6 或 Alt + F8 或 選取標題文字前之空格再按下 Alt + \` : run autoMarkTitles 自動標識標題（篇名）[autoMarkTitles()]
 
 F7 ： 每行縮排，即每行/段前空一格；全部縮排的機會少，若要全部，則請將插入點放在全文前端或末尾
 
@@ -566,7 +568,7 @@ Shift + F7 : 每行凸排: deleteSpacePreParagraphs_ConvexRow()；全部凸排�
 
 Alt + F7 : 每行縮排一格後將其末誤標之\<p\>清除:keysSpacePreParagraphs_indent_ClearEnd＿P_Mark；全部縮排的機會少，若要全部，則請將插入點放在全文前端或末尾
 
-Alt + ` ： 加上篇名格式代碼
+Alt + \` ： 加上篇名格式代碼
 
 F8 或 F9 或 F12 或 Ctrl + Alt + + 或數字鍵盤「+」： 整頁貼上Quick edit [簡單修改模式]  並將下一頁直接送交《古籍酷》OCR// 原為加上篇名格式代碼
 > 在OCR模式時才會直接送交《古籍酷》OCR。非OCR模式時是送出資料到 Quick edit 並翻到下一頁（已OCR之文本將重新加書名號篇名號等標點。）
