@@ -95,6 +95,7 @@ button1 「分行分段」或「送出貼上」按鈕:
 
 ## 常用實用功能鍵彙總
 操作說明及詳情請詳後[快速鍵一覽](#快速鍵一覽)及[操作演示](#操作演示)
+> *本應用程式大量運用滑鼠上一頁、下一頁按鈕以進行操作，建議備妥五鍵滑鼠（5鍵滑鼠）*
 
 Alt + ↑ ↓ ← → ：移動操作表單介面視窗位置
 
@@ -130,31 +131,32 @@ Alt + Insert ：在textBox1貼上剪貼簿中的內容。若在手動輸入模�
 
 Ctrl + 數字鍵盤 - ：
 #### OCR相關
-Alt + Shift + o ：送去《古籍酷》OCR。（o=OCR）
+Alt + Shift + o ：送去《古籍酷》OCR（圖像數字化）。（o=OCR）
 
 Alt + Shift + k ：送去《看典古籍》OCR 網頁版。（k=看典古籍kandianguji）
 
 Ctrl + Shift + o ：使用《看典古籍》OCR API。（o=OCR）
 
-Ctrl + Shift + 數字鍵盤 - ：啟動OCR連續輸入模式。
+Ctrl + Shift + 數字鍵盤 - ：啟動`OCR連續輸入模式`。
 
-textBox2 中輸入 `oT` ：開始OCR輸入模式。（先略過一些文本、標點檢查程序）
+textBox2 中輸入 `oT` ：開始OCR輸入模式。（先略過一些文本、標點檢查程序。o=OCR,T=true）
 
-textBox2 中輸入 `oF` ：終止OCR輸入模式。
+textBox2 中輸入 `oF` ：終止OCR輸入模式。（o=OCR,F=false）
 
-textBox2 中輸入 `bT` ：啟動《古籍酷》OCR批量處理模式。
+textBox2 中輸入 `bT` ：啟動《古籍酷》OCR批量處理模式。（b=batch，T=true）
 
-textBox2 中輸入 `bF` ：終止《古籍酷》OCR批量處理模式。
+textBox2 中輸入 `bF` ：終止《古籍酷》OCR批量處理模式。（b=batch，F=false）
 
-textBox2 中輸入 `gjk` ：
+textBox2 中輸入 `gjk` ：指定用《古籍酷》OCR標注平台處理。（gjk=「古籍酷」漢語拼音gu-ji-ku）
 
-textBox2 中輸入 `kd` ：
+textBox2 中輸入 `kd` ：在OCR連續輸入模式下，指定用《看典古籍》網頁版OCR（kd=看典古籍kan-dianguji）
 
-textBox2 中輸入 `kapi` ：
+textBox2 中輸入 `kapi` ：在OCR連續輸入模式下，指定用《看典古籍》API OCR（k=看典古籍kandianguji，api=API）
 
-textBox2 中輸入 `df` ：
+textBox2 中輸入 `df` ：在OCR連續輸入模式下，指定用《古籍酷》OCR （要批量處理還是標注平台，參前詳後。df=default。OCR預設目的地平台。）
 
 Alt + d ：下載本頁書圖
+> OCR過程中程式會自行下載書圖，唯若翻至下一頁或上一頁，則會視如該圖處理完畢，逕行刪除。
 #### 加上標記
 ##### 段落
 Alt + p ：加上段落標記  `<p>`  並斷出新行、換行
