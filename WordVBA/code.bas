@@ -194,7 +194,7 @@ Public Function UrlEncode_Big5UnicodOLNLY(ByRef szString As String) As String '¥
     Case Else
     End Select
     Next iCount2
-    szTemp = "1110" & left$(szBin, 4) & "10" & Mid$(szBin, 5, 6) & "10" & right$(szBin, 6)
+    szTemp = "1110" & Left$(szBin, 4) & "10" & Mid$(szBin, 5, 6) & "10" & right$(szBin, 6)
     For iCount2 = 1 To 24
     If Mid$(szTemp, iCount2, 1) = "1" Then
     lResult = lResult + 1 * 2 ^ (24 - iCount2)
@@ -202,7 +202,7 @@ Public Function UrlEncode_Big5UnicodOLNLY(ByRef szString As String) As String '¥
     End If
     Next iCount2
     szTemp = Hex(lResult)
-    szCode = szCode & "%" & left$(szTemp, 2) & "%" & Mid$(szTemp, 3, 2) & "%" & right$(szTemp, 2)
+    szCode = szCode & "%" & Left$(szTemp, 2) & "%" & Mid$(szTemp, 3, 2) & "%" & right$(szTemp, 2)
     End If
     szBin = vbNullString
     lResult = 0
@@ -311,7 +311,7 @@ If Abs(a) < 128 Then
 
 sl = sl + 3
 
-URLDecode = URLDecode & chr(a)
+URLDecode = URLDecode & Chr(a)
 
 Else
 
@@ -349,7 +349,7 @@ sl = sl + 6
 
 End If
 
-URLDecode = URLDecode & chr(a)
+URLDecode = URLDecode & Chr(a)
 
 End Select
 
@@ -399,13 +399,13 @@ With ActiveDocument.Range.Find
     .Execute "", , , , , , , wdFindContinue, , "", wdReplaceAll
     .ClearFormatting
 End With
-If InStr(ActiveDocument.Range, "//") Or InStr(ActiveDocument.Range, chr(39)) > 0 Then
+If InStr(ActiveDocument.Range, "//") Or InStr(ActiveDocument.Range, Chr(39)) > 0 Then
     Dim p As Paragraph
     For Each p In ActiveDocument.Paragraphs
-        If InStr(p.Range, "//") > 0 Or InStr(1, p.Range, chr(39), vbTextCompare) > 0 Then p.Range.Delete
+        If InStr(p.Range, "//") > 0 Or InStr(1, p.Range, Chr(39), vbTextCompare) > 0 Then p.Range.Delete
     Next p
 End If
-ActiveDocument.Range = VBA.Replace(ActiveDocument.Range, chr(13) & chr(13), chr(13))
+ActiveDocument.Range = VBA.Replace(ActiveDocument.Range, Chr(13) & Chr(13), Chr(13))
 SystemSetup.contiUndo ur
 End Sub
 
@@ -413,12 +413,12 @@ Rem 20230215 chatGPT¤jµÐÂÄ¡G
 Rem ³o¬q¥N½X¤¤ªº IsChineseCharacter ¨ç¼Æ¥Î©ó§PÂ_³æ­Ó¦r²Å¬O§_¬OCJK©ÎCJKÂX®i¦r²Å¶°¤¤ªºº~¦r¡A¦Ó IsChineseString ¨ç¼Æ«h¥Î©ó§PÂ_¤@­Ó¦r²Å¦ê¬O§_¥þ³¡¥ÑCJK©ÎCJKÂX®i¦r²Å¶°¤¤ªºº~¦r²Õ¦¨¡C
 Rem ¦bVBA¤¤¡A§Ú­Ì¨Ï¥Î¤F AscW ¨ç¼Æ¨ÓÀò¨ú¦r²ÅªºUnicode½s½X­È¡CµM«á¡A§Ú­Ì´N¥i¥H¨Ï¥Î©MC#¤¤Ãþ¦üªº¤è¦¡¨Ó§PÂ_¦r²Å¬O§_ÄÝ©óCJK©ÎCJKÂX®i¦r²Å¶°¤¤ªºº~¦r¡C
 ' §PÂ_¤@­Ó¦r²Å¬O§_¬OCJK©ÎCJKÂX®i¦r²Å¶°¤¤ªºº~¦r
-Public Function IsChineseCharacter(c As String) As Boolean
+Public Function IsChineseCharacter(C As String) As Boolean
 '    chatGPT¤jµÐÂÄ¡G Unicode½d³ò: CJK¦r²Å¶°½d³ò¡G4E00¡V9FFF¡ACJKÂX®i¦r²Å¶°½d³ò¡G20000¡V2A6DF ®]¦u¯u«ö¡G³o¼Ë®Ú¥»¤£°÷¡A¥u¦³ CJK²Î¤@ªí·N²Å¸¹©MCJKÂX®iB
 '    Dim unicodeVal As Long
 '    unicodeVal = AscW(c)
 '    IsChineseCharacter = (unicodeVal >= &H4E00 And unicodeVal <= &H9FFF) Or (unicodeVal >= &H20000 And unicodeVal <= &H2A6DF)
-    IsChineseCharacter = IsCJK(c)(1)
+    IsChineseCharacter = IsCJK(C)(1)
 End Function
 
 ' §PÂ_¤@­Ó¦r²Å¦ê¬O§_¥þ³¡¥ÑCJK©ÎCJKÂX®i¦r²Å¶°¤¤ªºº~¦r²Õ¦¨
@@ -437,9 +437,9 @@ Rem 20240122 Bing¤jµÐÂÄ¡GExcel¤¤´£¨úsurrogate¦r¤¸
 Rem §Ú©ú¥Õ±zªº°ÝÃD¤F¡C¦b³B²z§t¦³¥N²z¹ïªº¦r¦ê®É¡A½T¹ê»Ý­n¯S§O¤p¤ß¡A¥HÁ×§K±N¥N²z¹ïªº¦r¤¸¿ù»~¦a¤Á³Î¶}¨Ó¡C¦bVBA¤¤¡A§Ú­Ì¥i¥H¨Ï¥Î¤@¨Ç¯S®íªº¤èªk¨Ó³B²z³oºØ±¡ªp¡C
 Rem ¤@ºØ¥i¯àªº¸Ñ¨M¤è®×¬O¨Ï¥Î¤@­Ó¦Û©w¸qªº¨ç¼Æ¨ÓÀË¬d¨C­Ó¦r¤¸¬O§_¬°¥N²z¹ïªº¤@³¡¤À¡C¥H¤U¬O¤@­Ó¥i¯àªº¹ê²{¡G
 Function IsSurrogatePair(str As String, pos As Integer) As Boolean
-    Dim c As Integer
-    c = AscW(Mid(str, pos, 1))
-    IsSurrogatePair = c >= &HD800 And c <= &HDFFF
+    Dim C As Integer
+    C = AscW(Mid(str, pos, 1))
+    IsSurrogatePair = C >= &HD800 And C <= &HDFFF
 End Function
 Rem ³o­Ó¨ç¼Æ·|ÀË¬d¦r¦ê¤¤«ü©w¦ì¸mªº¦r¤¸¬O§_¬°¥N²z¹ïªº¤@³¡¤À¡CµM«á¡A±z¥i¥H¦b³v¦r³B²z¦r¦ê®É¨Ï¥Î³o­Ó¨ç¼Æ¨Ó½T«O¤£·|±N¥N²z¹ïªº¦r¤¸¤Á³Î¶}¨Ó¡C
 Rem ½Ðª`·N¡A³o¥u¬O¤@ºØ¥i¯àªº¸Ñ¨M¤è®×¡A¨Ã¥B¥i¯à»Ý­n®Ú¾Ú±zªº¨ãÅé»Ý¨D¶i¦æ½Õ¾ã¡C§Æ±æ³o¹ï±z¦³©ÒÀ°§U¡I¦pªG±z¦³¨ä¥L°ÝÃD¡A½ÐÀH®É§i¶D§Ú¡C«nµLªüÀ±ªû¦ò¡C
@@ -483,21 +483,21 @@ Private Function CombineSurrogatePair(ByVal highSurrogate As String, ByVal lowSu
 End Function
 Rem ¨Ï¥Î³o­Ó¨ç¼Æ¡A±z¥i¥H³q¹L¦b´`Àô¤¤³B²z³æ­Ó¦r²Å¡A¨Ã¨Ï¥Î¤W­±ªº½d³ò¨Ó§PÂ_¦r²Å¬O§_¦bCJK¥þ¦r¶°½d³ò¤º¡C ¦pªG§ä¨ì¥N²z¦r²Å¡A«h¥i¥H¨Ï¥Î¸Ó¨ç¼Æ±N¨äÂà´«¬°Unicode¦r²Å¡C
 
-Function IsCJK(c As String) As Collection 'Boolean,CJKBlockName
+Function IsCJK(C As String) As Collection 'Boolean,CJKBlockName
     Dim code As Long, cjk As Boolean, cjkBlackName As CJKBlockName, result As New Collection
     Dim codeHex As String
 '    Dim code
     Rem chatGPT¤jµÐÂÄ¡G¬Oªº¡A±z»¡±o¨S¿ù¡C¦b VBA ¤¤¡A¨Ï¥Î AscW ¨ç¦¡¨ú±o Unicode ¦r¤¸ªº¾ã¼Æ­È®É¡A¦pªG¶Ç¤Jªº¦r¦ê¬O surrogate pair¡A¨º»ò¨ç¦¡¥u·|­pºâ pair ªº²Ä¤@­Ó¦r¤¸¡]§Y High surrogate¡^ªº­È¡C¦]¦¹¡A¥i¥Hª½±µ¨Ï¥Î AscW(c) ¨Ó­pºâ c ªº¾ã¼Æ­È¡A¦Ó¤£¥²¦A¨Ï¥Î Left ¨ç¦¡¨Ó¨ú±o²Ä¤@­Ó¦r¤¸¡C
     'code = AscW(Left(c, 1))
     'code = AscW(c)
-    If Len(c) = 1 Then
-        code = AscW(c) 'AscW_IncludeSurrogatePairUnicodecode(c)
+    If Len(C) = 1 Then
+        code = AscW(C) 'AscW_IncludeSurrogatePairUnicodecode(c)
         If code < 0 Then 'Bing¤jµÐÂÄ¡G±z¦n¡A³o¬OBing¡CÃö©ó±zªº°ÝÃD¡AAscW ¨ç¼Æ¦b VBA ¤¤¥Î©óÀò¨ú¦r²Åªº Unicode ½s½X¡CµM¦Ó¡A¹ï©ó¬Y¨Ç¦r²Å¡]¯S§O¬O¤@¨Ç¤¤¤å¦r²Å¡^¡AAscW ¥i¯à·|ªð¦^­t­È¡C³o¬O¦]¬° AscW ªð¦^ªº¬O¤@­Ó 16 ¦ìªº¦³²Å¸¹¾ã¼Æ¡A½d³ò¬O -32768 ¨ì 327671¡C·í¦r²Åªº Unicode ½s½X¶W¹L 32767 ®É¡AAscW ·|ªð¦^¤@­Ó­t¼Æ23¡C
                         '¸Ñ¨M³o­Ó°ÝÃDªº¤@ºØ¤èªk¬O¹ï AscW ªð¦^ªº­t­È¶i¦æ³B²z¡C¦pªG AscW ªð¦^¤@­Ó­t¼Æ¡A±z¥i¥H±N¸Ó¼Æ­È¥[¤W 65536 ¨ÓÀò±o¥¿½Tªº Unicode ½s½X23¡C¥H¤U¬O¤@­Ó­×§ï¹Lªº¨ç¼Æ¡G
             code = code + 65536
         End If
     Else
-        getCodePoint c, code
+        getCodePoint C, code
     End If
     Rem https://en.wikipedia.org/wiki/CJK_characters
     'CJK Unified Ideographs
@@ -613,7 +613,7 @@ Function AscW_IncludeSurrogatePairUnicodecode(ByVal str As String) As Long
 End Function
 Sub getCodePoint(character As String, codePoint As Long)
 ' Àò¨ú¦r²Å¦êªº high surrogate ©M low surrogate ªº AscW() ­È
-codePoint = ((CLng(AscW(left(character, 1))) - &HD800) * &H400) + (CLng(AscW(right(character, 1))) - &HDC00) + &H10000
+codePoint = ((CLng(AscW(Left(character, 1))) - &HD800) * &H400) + (CLng(AscW(right(character, 1))) - &HDC00) + &H10000
 Rem ¨S¦³¡uCLng¡vÂà«¬·|·¸¦ì¡A­YªÌ¦p isCJK_Ext()¨ç¦¡¤¤ªº¤è¦¡¡A¥H«¬§O¬° Long ªºÅÜ¼ÆÀx¦s¨ä­È¡A¥ç·|Áô§tÂà«¬
 End Sub
 
@@ -624,7 +624,7 @@ Dim highSurrogate As Long
 Dim lowSurrogate As Long
 
 ' Àò¨ú¦r²Å¦êªº high surrogate ©M low surrogate ªº AscW() ­È
-highSurrogate = AscW(left(str, 1))
+highSurrogate = AscW(Left(str, 1))
 lowSurrogate = AscW(right(str, 1))
 
 If (highSurrogate >= SurrogateCodePoint.HighStart And highSurrogate <= SurrogateCodePoint.HighEnd) _
@@ -669,7 +669,7 @@ Dim highSurrogate As Long
 Dim lowSurrogate As Long
 
 ' Àò¨ú¦r²Å¦êªº high surrogate ©M low surrogate ªº AscW() ­È
-highSurrogate = AscW(left(str, 1))
+highSurrogate = AscW(Left(str, 1))
 lowSurrogate = AscW(right(str, 1))
 
 If (highSurrogate >= &HD84D And highSurrogate <= &HDBFF) And (lowSurrogate >= &HDC00 And lowSurrogate <= &HDFFF) Then
@@ -706,15 +706,15 @@ Sub ConvertToUnicode_SelectionToggleCharacterCode() 'Ãþ¦ü¹ê§@ Selection.ToggleCh
     Dim selectedText As String
     Dim unicodeCode As Long
     
-    selectedText = Selection.Range.Text
+    selectedText = Selection.Range.text
     
     If Len(selectedText) = 1 Then
         unicodeCode = AscW(selectedText)
-        Selection.Range.Text = Hex(unicodeCode)
+        Selection.Range.text = Hex(unicodeCode)
     ElseIf Len(selectedText) = 2 Then
         unicodeCode = (AscW(Mid(selectedText, 1, 1)) - &HD800&) * &H400& + (AscW(Mid(selectedText, 2, 1)) - &HDC00&) + &H10000 '
         getCodePoint selectedText, unicodeCode
-        Selection.Range.Text = Hex(unicodeCode)
+        Selection.Range.text = Hex(unicodeCode)
     Else
         MsgBox "Invalid selection"
         Exit Sub
@@ -740,4 +740,175 @@ Function ConvertToUnicode(chartoConvert As String) As Long
     
 End Function
 
+Rem 20240826 Copilot¤jµÐÂÄ ¡G Word VBA ¨p¤H³y¦r½X°Ï¦r²Å·j´M ¡G https://sl.bing.net/hahIGJ4sxX2
+Rem BAD!
+Sub FindPrivateUseCharacters()
+    Dim rng As Range
+    Set rng = ActiveDocument.Content
+    With rng.Find
+        .ClearFormatting
+        .text = "[\uE000-\uF8FF]" ' ¨p¤H³y¦r½X°Ïªº½d³ò
+        .MatchWildcards = True
+        Do While .Execute(Forward:=True) = True
+            rng.Select
+            MsgBox "§ä¨ì¨p¤H³y¦r½X°Ïªº¦r²Å: " & rng.text
+            rng.Collapse Direction:=wdCollapseEnd
+        Loop
+    End With
+End Sub
 
+Rem 20240826 creedit_with_Copilot¤jµÐÂÄ¡G­n¹M¾ú³o¤T­Ó¨p¤H³y¦r½X°Ï¶ô¨ÓÀË¬d¬Y¤@¦r²Å¬O§_¬°¨p¤H³y¦r¡A¥i¥H¨Ï¥Î VBA ¨ÓÀË¬d¦r²Åªº Unicode ­È¬O§_¦b³o¨Ç°Ï¶ô½d³ò¤º¡C
+Rem ¡G Word VBA ¨p¤H³y¦r½X°Ï¦r²Å·j´M ¡G https://sl.bing.net/hahIGJ4sxX2
+'³o¬qµ{¦¡½X¥]§t¨â­Ó³¡¤À:
+'IsPrivateUseCharacter ¨ç¼Æ¡GÀË¬d¦r²Å¬O§_¦b¨p¤H³y¦r½X°Ï¶ô½d³ò¤º¡C
+'CheckPrivateUseCharacters ¤lµ{§Ç¡G¹M¾ú¤å¥ó¤¤ªº¨C­Ó¦r²Å¡A¨Ã¨Ï¥Î IsPrivateUseCharacter ¨ç¼ÆÀË¬d¬O§_¬°¨p¤H³y¦r½X°Ïªº¦r²Å¡C
+Function IsPrivateUseCharacter(ch As String) As Boolean
+    Dim codePoint As Long
+    codePoint = AscW(ch)
+    
+    If (codePoint >= &HE000 And codePoint <= &HF8FF) Or _
+       (codePoint >= &HF0000 And codePoint <= &HFFFFF) Or _
+       (codePoint >= &H100000 And codePoint <= &H10FFFF) Then
+        IsPrivateUseCharacter = True
+    Else
+        IsPrivateUseCharacter = False
+    End If
+End Function
+
+Sub CheckPrivateUseCharacters_Less10000()
+    Static notPrivateUseCharacters As String
+    Static rngCharactersCount As Long
+    Dim rng As Range
+    Dim ch As String, i As Long
+    If Selection.Type = wdSelectionIP _
+        Or Selection.Characters.Count = 1 Then '¦pªG¨S¿ï¨ú«h¥H´¡¤JÂI¥H«áªº¤å¥ó¤º®e
+        Set rng = ActiveDocument.Range(Selection.End, ActiveDocument.Content.End)
+    Else
+        Set rng = Selection.Range
+    End If
+    
+    If notPrivateUseCharacters = vbNullString Then notPrivateUseCharacters = Chr(13)
+    
+    If rngCharactersCount = 0 Then rngCharactersCount = rng.Characters.Count
+    
+    For i = 1 To rngCharactersCount
+        If i Mod 1000 = 0 Then SystemSetup.playSound 1
+        If i = 2000 Then Stop
+        ch = rng.Characters(i).text
+        If VBA.InStr(notPrivateUseCharacters, ch) = 0 Then
+            If IsPrivateUseCharacter(ch) Then
+                rng.Characters(i).Select
+    '            MsgBox "§ä¨ì¨p¤H³y¦r½X°Ïªº¦r²Å: " & ch
+                SystemSetup.playSound 2
+                Exit Sub
+            Else
+                notPrivateUseCharacters = notPrivateUseCharacters & ch
+                'rng.text = VBA.Replace(rng.text, ch, vbNullString)
+            End If
+        End If
+    Next i
+    SystemSetup.playSound 7
+End Sub
+
+Sub CheckPrivateUseCharacters_text()
+    Static processedCharacters As String
+    Dim privateUseCharacters As String
+    Dim i As Long, d As Document
+    Dim a As Range
+    Dim rng As Range
+    Dim ch As String
+    If Selection.Type = wdSelectionIP _
+        Or Selection.Characters.Count = 1 Then '¦pªG¨S¿ï¨ú«h¥H´¡¤JÂI¥H«áªº¤å¥ó¤º®e
+        Set rng = ActiveDocument.Range(Selection.End, ActiveDocument.Content.End)
+    Else
+        Set rng = Selection.Range
+    End If
+    
+    If processedCharacters = vbNullString Then
+        processedCharacters = Chr(13)
+    End If
+    
+reStart:
+    For Each a In rng.Characters
+        i = i + 1
+        If i Mod 10 = 0 Then
+            SystemSetup.playSound 1
+        End If
+        ch = a.text
+        If VBA.InStr(processedCharacters, ch) = 0 Then
+            If IsPrivateUseCharacter(ch) Then
+                'a.Select
+                privateUseCharacters = privateUseCharacters & ch
+                processedCharacters = processedCharacters & ch
+    '            MsgBox "§ä¨ì¨p¤H³y¦r½X°Ïªº¦r²Å: " & ch
+                SystemSetup.playSound 2
+                rng.text = VBA.Replace(rng.text, ch, vbNullString)
+                GoTo reStart
+'                Exit Sub
+            Else
+                processedCharacters = processedCharacters & ch
+                rng.text = VBA.Replace(rng.text, ch, vbNullString)
+                GoTo reStart
+            End If
+        Else
+            
+            rng.text = VBA.Replace(rng.text, ch, vbNullString)
+            GoTo reStart
+            
+        End If
+    
+    Next a
+    SystemSetup.playSound 7
+    processedCharacters = vbNullString
+    Set d = Documents.Add
+    d.Range.text = privateUseCharacters
+    d.SaveAs2 rng.Document.path & "\" & "PrivateUseCharacters" & ".docx"
+    rng.Document.Close wdDoNotSaveChanges
+End Sub
+
+
+Sub CheckPrivateUseCharacters()
+    Static processedCharacters As String
+    Dim privateUseCharacters As String
+    Dim i As Long, d As Document
+    Dim a As Range
+    Dim rng As Range
+    Dim ch As String
+    If Selection.Type = wdSelectionIP _
+        Or Selection.Characters.Count = 1 Then '¦pªG¨S¿ï¨ú«h¥H´¡¤JÂI¥H«áªº¤å¥ó¤º®e
+        Set rng = ActiveDocument.Range(Selection.End, ActiveDocument.Content.End)
+    Else
+        Set rng = Selection.Range
+    End If
+    
+    If processedCharacters = vbNullString Then
+        processedCharacters = Chr(13)
+    End If
+    
+    For Each a In rng.Characters
+        i = i + 1
+        If i Mod 100000 = 0 Then
+            SystemSetup.playSound 1
+        End If
+        ch = a.text
+        If VBA.InStr(processedCharacters, ch) = 0 Then
+            If IsPrivateUseCharacter(ch) Then
+                'a.Select
+                privateUseCharacters = privateUseCharacters & ch & vbTab & vbCr
+    '            MsgBox "§ä¨ì¨p¤H³y¦r½X°Ïªº¦r²Å: " & ch
+'                SystemSetup.playSound 2
+'                Exit Sub
+            End If
+            processedCharacters = processedCharacters & ch
+        End If
+    
+    Next a
+    SystemSetup.playSound 7
+    processedCharacters = vbNullString
+    Set d = Documents.Add
+    d.Range.text = privateUseCharacters
+    d.SaveAs2 rng.Document.path & "\" & "PrivateUseCharacters" & ".docx"
+'    rng.Document.Close wdDoNotSaveChanges
+    d.Activate
+    d.Application.Activate
+End Sub

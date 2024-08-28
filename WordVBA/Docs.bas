@@ -523,106 +523,114 @@ Next
 End Sub
 
 Sub 在本文件中尋找選取字串() 'Ctrl+Alt+Down 2020/10/4改用 Ctrl+Shift+PageDown
-'CheckSavedNoClear
-If ActiveDocument.path <> "" Then If ActiveDocument.Saved = False Then ActiveDocument.Save
-Dim ins(4) As Long, MnText As String, FnText As String, FdText As String, st As Long, ed As Long
-On Error GoTo errHH
-With Selection '快速鍵：Alt+Ctrl+Down
-'If Not .Text Like "" Then '快速鍵：Alt+Ctrl+Down
-If .Type = wdSelectionIP Then MsgBox "請選取想要尋找之文字", vbExclamation: Exit Sub
-If .Type = wdSelectionNormal Then ' <> wdNoSelection OR wdSelectionIP Then '不為插入點
-'    If InStr(ActiveDocument.Content, .Text) = InStrRev(ActiveDocument.Content, .Text) Then MsgBox "本文只有此處!", vbInformation: Exit Sub
-    FdText = 文字處理.trimStrForSearch(.text, Selection)
-    st = .start: ed = .End
-    .Collapse wdCollapseEnd
-    MnText = .Document.StoryRanges(wdMainTextStory) '變數化處理較快2003/4/8
-'    MnText = ActiveDocument.Range '2010/2/5
-    ins(1) = InStr(MnText, FdText)
-    ins(2) = InStrRev(MnText, FdText)
-    If .Document.Footnotes.Count > 0 Then '有註腳才檢查2003/4/3
-        FnText = .Document.StoryRanges(wdFootnotesStory)
-        ins(3) = InStr(FnText, FdText)
-        ins(4) = InStrRev(FnText, FdText)
-    End If
-    If ins(1) = ins(2) And ins(3) = ins(4) Then
-        If ins(1) <> 0 And .Information(wdInFootnote) Then
-            If MsgBox("註腳只有此處!　　正文還有.." & vbCr & vbCr & _
-                "要尋找嗎?", vbInformation + vbOKCancel, "尋找：「" & FdText & "」") = vbCancel Then
-                Exit Sub
-            Else
-'                FdText = .Text
-'                .Document.ActiveWindow.ActivePane.Previous.Activate
-'                .Document.Select '此法可將焦點轉移到正文
-                With .Document.Range.Find
-                    .text = FdText
-                    .Execute
-                    .Parent.Select
-                End With
-            End If
-        ElseIf ins(3) <> 0 And Not .Information(wdInFootnote) Then
-            If MsgBox("正文只有此處!　　註腳還有.." & vbCr & vbCr & _
-                "要繼續尋找嗎？", vbInformation + vbOKCancel, "尋找：「" & _
-                    FdText & "」") = vbCancel Then
-                Exit Sub
-            Else
-'                FdText = .Text
-                With .Document.ActiveWindow
-                    If .Panes.Count = 1 Then
-                        '開啟註腳視窗
-                        If .View.Type = wdNormalView Then _
-                           .View.SplitSpecial = wdPaneFootnotes
-                    Else
-                        .ActivePane.Next.Activate
-                    End If
-                    With .ActivePane.Selection.Find
-                        .text = FdText
-'                        .Forward = True
-                        .Wrap = wdFindContinue '要有這行才能正確尋找
-                        .Execute
-                    End With
-'                    .ScrollIntoView .ActivePane.Selection, True
-'                    .ActivePane.SmallScroll
-                End With
-            End If
-        ElseIf ins(1) = ins(2) And ins(3) <> 0 And ins(1) = 0 And ins(3) = ins(4) Then
-            MsgBox "本文只有此處!  正文無!", vbInformation, "尋找：「" & FdText & "」": Exit Sub
-        ElseIf ins(1) = ins(2) And ins(1) <> 0 And ins(3) = 0 And ins(3) = ins(4) Then
-            MsgBox "本文只有此處!  註腳無!", vbExclamation, "尋找：「" & FdText & "」"
-            .start = st
-            .End = ed
-            Exit Sub
+    'CheckSavedNoClear
+    If ActiveDocument.path <> "" Then If ActiveDocument.Saved = False Then ActiveDocument.Save
+    Dim ins(4) As Long, MnText As String, FnText As String, FdText As String, st As Long, ed As Long
+    On Error GoTo errHH
+    With Selection '快速鍵：Alt+Ctrl+Down
+    'If Not .Text Like "" Then '快速鍵：Alt+Ctrl+Down
+    If .Type = wdSelectionIP Then MsgBox "請選取想要尋找之文字", vbExclamation: Exit Sub
+    If .Type = wdSelectionNormal Then ' <> wdNoSelection OR wdSelectionIP Then '不為插入點
+    '    If InStr(ActiveDocument.Content, .Text) = InStrRev(ActiveDocument.Content, .Text) Then MsgBox "本文只有此處!", vbInformation: Exit Sub
+        FdText = 文字處理.trimStrForSearch(.text, Selection)
+        st = .start: ed = .End
+        .Collapse wdCollapseEnd
+        MnText = .Document.StoryRanges(wdMainTextStory) '變數化處理較快2003/4/8
+    '    MnText = ActiveDocument.Range '2010/2/5
+        ins(1) = InStr(MnText, FdText)
+        ins(2) = InStrRev(MnText, FdText)
+        
+         '有註腳才檢查2003/4/3
+        If .Document.Footnotes.Count > 0 Then
+            FnText = .Document.StoryRanges(wdFootnotesStory)
+            ins(3) = InStr(FnText, FdText)
+            ins(4) = InStrRev(FnText, FdText)
         End If
-    Else
-'        If ins(1) <> 0 Then
-'            ins(1) = wdMainTextStory
-'        Else
-'            ins(1) = wdFootnotesStory
-'        End If
-        If ins(3) = ins(4) And .Information(wdInFootnote) = True Then _
-            MsgBox "本文只有註腳此處有!", vbInformation, "尋找：「" & FdText & "」": Exit Sub
-'        With .Document.StoryRanges(ins(1)).Find
-        With .Find
-            .ClearFormatting
-            .Replacement.ClearFormatting '這也要清除才行
-            .Forward = True
-            .Wrap = wdFindAsk
-            .MatchCase = True
-            .text = FdText '.Parent.Text
-            .Execute
-'            .Parent.Select'用Range物件得用此方法才能改變選取
-        End With
+        
+        If ins(1) = ins(2) And ins(3) = ins(4) Then
+            If ins(1) <> 0 And .Information(wdInFootnote) Then
+                If MsgBox("註腳只有此處!　　正文還有.." & vbCr & vbCr & _
+                    "要尋找嗎?", vbInformation + vbOKCancel, "尋找：「" & FdText & "」") = vbCancel Then
+                    Exit Sub
+                Else
+    '                FdText = .Text
+    '                .Document.ActiveWindow.ActivePane.Previous.Activate
+    '                .Document.Select '此法可將焦點轉移到正文
+                    With .Document.Range.Find
+                        .ClearFormatting
+                        .ClearAllFuzzyOptions
+                        .text = FdText
+                        .Execute
+                        .Parent.Select
+                    End With
+                End If
+            ElseIf ins(3) <> 0 And Not .Information(wdInFootnote) Then
+                If MsgBox("正文只有此處!　　註腳還有.." & vbCr & vbCr & _
+                    "要繼續尋找嗎？", vbInformation + vbOKCancel, "尋找：「" & _
+                        FdText & "」") = vbCancel Then
+                    Exit Sub
+                Else
+    '                FdText = .Text
+                    With .Document.ActiveWindow
+                        If .Panes.Count = 1 Then
+                            '開啟註腳視窗
+                            If .View.Type = wdNormalView Then _
+                               .View.SplitSpecial = wdPaneFootnotes
+                        Else
+                            .ActivePane.Next.Activate
+                        End If
+                        With .ActivePane.Selection.Find
+                            .ClearFormatting
+                            .ClearAllFuzzyOptions
+                            .text = FdText
+                            .Forward = True
+                            .Wrap = wdFindContinue '要有這行才能正確尋找
+                            .Execute
+                        End With
+    '                    .ScrollIntoView .ActivePane.Selection, True
+    '                    .ActivePane.SmallScroll
+                    End With
+                End If
+            ElseIf ins(1) = ins(2) And ins(3) <> 0 And ins(1) = 0 And ins(3) = ins(4) Then
+                MsgBox "本文只有此處!  正文無!", vbInformation, "尋找：「" & FdText & "」": Exit Sub
+            ElseIf ins(1) = ins(2) And ins(1) <> 0 And ins(3) = 0 And ins(3) = ins(4) Then
+                MsgBox "本文只有此處!  註腳無!", vbExclamation, "尋找：「" & FdText & "」"
+                .start = st
+                .End = ed
+                Exit Sub
+            End If
+        Else
+    '        If ins(1) <> 0 Then
+    '            ins(1) = wdMainTextStory
+    '        Else
+    '            ins(1) = wdFootnotesStory
+    '        End If
+            If ins(3) = ins(4) And .Information(wdInFootnote) = True Then _
+                MsgBox "本文只有註腳此處有!", vbInformation, "尋找：「" & FdText & "」": Exit Sub
+    '        With .Document.StoryRanges(ins(1)).Find
+            With .Find
+                .ClearFormatting
+                .ClearAllFuzzyOptions
+                .Replacement.ClearFormatting '這也要清除才行
+                .Forward = True
+                .Wrap = wdFindAsk
+                .MatchCase = True
+                .text = FdText '.Parent.Text
+                .Execute
+    '            .Parent.Select'用Range物件得用此方法才能改變選取
+            End With
+        End If
     End If
-End If
-End With
-Exit Sub
+    End With
+    Exit Sub
 errHH:
-Select Case Err.Number
-    Case 7 '記憶體不足
-        ActiveDocument.ActiveWindow.Selection.Find.Execute Selection.text
-    Case Else
-        MsgBox Err.Number & Err.Description
-        Resume
-End Select
+    Select Case Err.Number
+        Case 7 '記憶體不足
+            ActiveDocument.ActiveWindow.Selection.Find.Execute Selection.text
+        Case Else
+            MsgBox Err.Number & Err.Description
+            Resume
+    End Select
 End Sub
 
 
@@ -1560,21 +1568,21 @@ End Sub
 
 Rem 20230224 chatGPT大菩薩或Bing in Skype 菩薩:
 Sub FindMissingCharacters() '這應該只是找文件中的字不能以新細明體、標楷體來顯示者
-    Dim doc As Document
-    Set doc = ActiveDocument
+    Dim Doc As Document
+    Set Doc = ActiveDocument
     
     '定義新細明體和標楷體字型的集合
     Dim nmf As Font
-    Set nmf = doc.Styles("Normal").Font
+    Set nmf = Doc.Styles("Normal").Font
     Dim kff As Font
-    Set kff = doc.Styles("段落").Font
+    Set kff = Doc.Styles("段落").Font
     
     Dim p As Paragraph
     Dim r As Range
     Dim C As Variant
     
     ' 遍歷文檔中的每個段落和字符
-    For Each p In doc.Paragraphs
+    For Each p In Doc.Paragraphs
         For Each r In p.Range.Characters
             
             ' 判斷字符是否在新細明體或標楷體字型中
