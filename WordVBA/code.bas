@@ -741,7 +741,7 @@ Function ConvertToUnicode(chartoConvert As String) As Long
 End Function
 
 Rem 20240826 Copilot大菩薩 ： Word VBA 私人造字碼區字符搜尋 ： https://sl.bing.net/hahIGJ4sxX2
-Rem BAD!
+Rem BAD!!!!不能用，要再改！
 Sub FindPrivateUseCharacters()
     Dim rng As Range
     Set rng = ActiveDocument.Content
@@ -809,7 +809,7 @@ Sub CheckPrivateUseCharacters_Less10000()
     Next i
     SystemSetup.playSound 7
 End Sub
-
+Rem 這是不保留已檢查過的字。文件大時一樣不適用
 Sub CheckPrivateUseCharacters_text()
     Static processedCharacters As String
     Dim privateUseCharacters As String
@@ -866,8 +866,49 @@ reStart:
     rng.Document.Close wdDoNotSaveChanges
 End Sub
 
-
+Rem 逐字瀏覽檢視所造字 20240829
 Sub CheckPrivateUseCharacters()
+    Static processedCharacters As String
+    Dim i As Long
+    Dim a As Range
+    Dim rng As Range
+    Dim ch As String
+    If Selection.Type = wdSelectionIP _
+        Or Selection.Characters.Count = 1 Then '如果沒選取則以插入點以後的文件內容
+        Set rng = ActiveDocument.Range(Selection.End, ActiveDocument.Content.End)
+    Else
+        Set rng = Selection.Range
+    End If
+    
+    If processedCharacters = vbNullString Then
+        processedCharacters = Chr(13)
+    End If
+    
+    For Each a In rng.Characters
+        i = i + 1
+        If i Mod 60000 = 0 Then
+            SystemSetup.playSound 1
+        End If
+        ch = a.text
+        If VBA.InStr(processedCharacters, ch) = 0 Then
+            If IsPrivateUseCharacter(ch) Then
+                a.Select
+                a.HighlightColorIndex = wdYellow
+                a.Document.ActiveWindow.ScrollIntoView a
+'                MsgBox "找到私人造字碼區的字符: " & ch
+                SystemSetup.playSound 1
+                Exit Sub
+            Else
+                processedCharacters = processedCharacters & ch
+            End If
+            
+        End If
+    
+    Next a
+    SystemSetup.playSound 7
+    processedCharacters = vbNullString
+End Sub
+Sub PrivateUseCharactersOutput()
     Static processedCharacters As String
     Dim privateUseCharacters As String
     Dim i As Long, d As Document
@@ -912,3 +953,4 @@ Sub CheckPrivateUseCharacters()
     d.Activate
     d.Application.Activate
 End Sub
+

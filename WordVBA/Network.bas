@@ -3,40 +3,40 @@ Option Explicit
 Dim DefaultBrowserNameAppActivate As String
 
 Sub 查詢國語辭典() '指定鍵:Ctrl+F12'2010/10/18修訂
-''    If ActiveDocument.Path <> "" Then ActiveDocument.Save '怕word當掉忘了儲存
-''    If GetUserAddress = True Then
-'''        MsgBox "成功的跟隨超連結。"
-''    Else
-''        MsgBox "無法跟隨超連結。"
-''    End If
-'    Selection.Copy
-'    Shell "W:\!! for hpr\VB\查詢國語辭典\查詢國語辭典\bin\Debug\查詢國語辭典.EXE"
-Const st As String = "C:\Program Files\孫守真\查詢國語辭典等\"
-Const f As String = "查詢國語辭典.EXE"
-Dim funame As String
-If Selection.Type = wdSelectionNormal Then
-    Selection.Copy
-    If Dir(st & f) <> "" Then
-        funame = st & f
-    ElseIf Dir("C:\Program Files (x86)\孫守真\查詢國語辭典等\" & f) <> "" Then
-        funame = "C:\Program Files (x86)\孫守真\查詢國語辭典等\" & f
-    ElseIf Dir("W:\!! for hpr\VB\查詢國語辭典\查詢國語辭典\bin\Debug\" & f) <> "" Then
-        funame = "W:\!! for hpr\VB\查詢國語辭典\查詢國語辭典\bin\Debug\" & f
-    ElseIf Dir("C:\查詢國語辭典\查詢國語辭典\bin\Debug\" & f) <> "" Then
-        funame = "C:\查詢國語辭典\查詢國語辭典\bin\Debug\" & f
-    ElseIf Dir(UserProfilePath & "Dropbox\VS\VB\查詢國語辭典\查詢國語辭典\bin\Debug\" & f) <> "" Then
-        funame = UserProfilePath & "Dropbox\VS\VB\查詢國語辭典\查詢國語辭典\bin\Debug\" & f
-    ElseIf Dir("A:\", vbVolume) <> "" Then
-        If Dir("A:\Users\oscar\Dropbox\VS\VB\查詢國語辭典\查詢國語辭典\bin\Debug\" & f) <> "" Then _
-        funame = "A:\Users\oscar\Dropbox\VS\VB\查詢國語辭典\查詢國語辭典\bin\Debug\" & f
-    ElseIf Dir(UserProfilePath & "Dropbox\VS\VB\查詢國語辭典\查詢國語辭典\bin\Debug\" & f) <> "" Then
-        funame = UserProfilePath & "Dropbox\VS\VB\查詢國語辭典\查詢國語辭典\bin\Debug\" & f
-    Else
-        Exit Sub
+    ''    If ActiveDocument.Path <> "" Then ActiveDocument.Save '怕word當掉忘了儲存
+    ''    If GetUserAddress = True Then
+    '''        MsgBox "成功的跟隨超連結。"
+    ''    Else
+    ''        MsgBox "無法跟隨超連結。"
+    ''    End If
+    '    Selection.Copy
+    '    Shell "W:\!! for hpr\VB\查詢國語辭典\查詢國語辭典\bin\Debug\查詢國語辭典.EXE"
+    Const st As String = "C:\Program Files\孫守真\查詢國語辭典等\"
+    Const f As String = "查詢國語辭典.EXE"
+    Dim funame As String
+    If Selection.Type = wdSelectionNormal Then
+        Selection.Copy
+        If Dir(st & f) <> "" Then
+            funame = st & f
+        ElseIf Dir("C:\Program Files (x86)\孫守真\查詢國語辭典等\" & f) <> "" Then
+            funame = "C:\Program Files (x86)\孫守真\查詢國語辭典等\" & f
+        ElseIf Dir("W:\!! for hpr\VB\查詢國語辭典\查詢國語辭典\bin\Debug\" & f) <> "" Then
+            funame = "W:\!! for hpr\VB\查詢國語辭典\查詢國語辭典\bin\Debug\" & f
+        ElseIf Dir("C:\查詢國語辭典\查詢國語辭典\bin\Debug\" & f) <> "" Then
+            funame = "C:\查詢國語辭典\查詢國語辭典\bin\Debug\" & f
+        ElseIf Dir(UserProfilePath & "Dropbox\VS\VB\查詢國語辭典\查詢國語辭典\bin\Debug\" & f) <> "" Then
+            funame = UserProfilePath & "Dropbox\VS\VB\查詢國語辭典\查詢國語辭典\bin\Debug\" & f
+        ElseIf Dir("A:\", vbVolume) <> "" Then
+            If Dir("A:\Users\oscar\Dropbox\VS\VB\查詢國語辭典\查詢國語辭典\bin\Debug\" & f) <> "" Then _
+            funame = "A:\Users\oscar\Dropbox\VS\VB\查詢國語辭典\查詢國語辭典\bin\Debug\" & f
+        ElseIf Dir(UserProfilePath & "Dropbox\VS\VB\查詢國語辭典\查詢國語辭典\bin\Debug\" & f) <> "" Then
+            funame = UserProfilePath & "Dropbox\VS\VB\查詢國語辭典\查詢國語辭典\bin\Debug\" & f
+        Else
+            Exit Sub
+        End If
+        Shell funame
     End If
-    Shell funame
-End If
-查國語辭典
+    查國語辭典
 End Sub
 
 Sub A速檢網路字辭典() '指定鍵:Alt+F12'2010/10/18修訂
@@ -70,22 +70,40 @@ End If
 End Sub
 
 Sub 查國語辭典()
-SeleniumOP.dictRevisedSearch VBA.Replace(Selection, chr(13), "")
+    SeleniumOP.dictRevisedSearch VBA.Replace(Selection, Chr(13), "")
 End Sub
 
 'Sub 擷取國語辭典詞條網址()
 'SeleniumOP.grabDictRevisedUrl VBA.Replace(Selection, Chr(13), "")
 'End Sub
-
-Sub 查百度()
-SeleniumOP.BaiduSearch Selection
+Sub 查Google()
+    Rem Alt + g
+    SeleniumOP.GoogleSearch Selection.text
 End Sub
-
+Sub 查百度()
+    SeleniumOP.BaiduSearch Selection
+End Sub
+Sub 查字統網()
+    Rem Alt + z
+    If Selection.Characters.Count > 1 Then
+        MsgBox "限查1字", vbError
+        Exit Sub
+    End If
+    SeleniumOP.LookupZitools Selection.text
+End Sub
+Sub 查異體字字典()
+    Rem Alt + F12
+    If Selection.Characters.Count > 1 Then
+        MsgBox "限查1字", vbError
+        Exit Sub
+    End If
+    SeleniumOP.LookupDictionary_of_ChineseCharacterVariants Selection.text
+End Sub
 
 Function GetUserAddress() As Boolean
     Dim x As String, a As Object 'Access.Application
     On Error GoTo Error_GetUserAddress
-    x = Selection.Text
+    x = Selection.text
     Set a = GetObject("D:\千慮一得齋\書籍資料\圖書管理.mdb") '2010/10/18修訂
     If x = "" Then x = InputBox("請輸入欲查詢的字串")
     x = a.Run("查詢字串轉換_國語會碼", x)
