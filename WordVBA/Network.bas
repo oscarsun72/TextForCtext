@@ -86,7 +86,7 @@ End Sub
 Sub 查字統網()
     Rem Alt + z
     If Selection.Characters.Count > 1 Then
-        MsgBox "限查1字", vbError
+        MsgBox "限查1字", vbExclamation ', vbError
         Exit Sub
     End If
     SeleniumOP.LookupZitools Selection.text
@@ -94,10 +94,34 @@ End Sub
 Sub 查異體字字典()
     Rem Alt + F12
     If Selection.Characters.Count > 1 Then
-        MsgBox "限查1字", vbError
+        MsgBox "限查1字", vbExclamation ', vbError
         Exit Sub
     End If
     SeleniumOP.LookupDictionary_of_ChineseCharacterVariants Selection.text
+End Sub
+Sub 查康熙字典網上版()
+    Rem Ctrl + Alt + x
+    If Selection.Characters.Count > 1 Then
+        MsgBox "限查1字", vbExclamation ', vbError
+        Exit Sub
+    End If
+    SeleniumOP.LookupKangxizidian Selection.text
+End Sub
+Sub 查國語辭典_到網頁去看()
+    Rem Ctrl + Alt + F12
+    SeleniumOP.LookupDictRevised Selection.text
+End Sub
+Sub 查漢語大詞典()
+    Rem Alt + c
+    If Selection.Characters.Count < 2 Then
+        MsgBox "要2字以上才能檢索！", vbExclamation ', vbError
+        Exit Sub
+    End If
+    SeleniumOP.LookupHYDCD Selection.text
+End Sub
+Sub 查國學大師()
+    Rem Ctrl + d + s ds（大師） 或 Alt + s （師）
+    SeleniumOP.LookupGXDS Selection.text
 End Sub
 
 Function GetUserAddress() As Boolean

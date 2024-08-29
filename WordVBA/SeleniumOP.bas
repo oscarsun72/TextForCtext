@@ -92,7 +92,8 @@ eH:
     '           Resume
     End Select
 End Function
-Sub openChrome(Optional URL As String)
+Rem 啟動Chrome瀏覽器或已啟動後開啟新分頁瀏覽。失敗時傳回false
+Function openChrome(Optional URL As String) As Boolean
 reStart:
         'Dim WD As SeleniumBasic.IWebDriver
         On Error GoTo ErrH
@@ -138,11 +139,17 @@ reStart:
                 chromedriversPID(chromedriversPIDcntr) = pid
                 chromedriversPIDcntr = chromedriversPIDcntr + 1
             End If
-'            WD.ExecuteScript "window.open('about:blank','_blank');" 'openNewTabWhenTabAlreadyExit WD
+            wd.ExecuteScript "window.open('about:blank','_blank');" 'openNewTabWhenTabAlreadyExit WD
+            wd.SwitchTo.Window WindowHandlesItem(WindowHandlesCount - 1)
+            wd.URL = URL
+        Else
+            wd.ExecuteScript "window.open('about:blank','_blank');" 'openNewTabWhenTabAlreadyExit WD
+            wd.SwitchTo.Window WindowHandlesItem(WindowHandlesCount - 1)
             wd.URL = URL
         End If
         If ActiveXComponentsCanNotBeCreated Then ActiveXComponentsCanNotBeCreated = False
-    Exit Sub
+        openChrome = True
+    Exit Function
 ErrH:
     Select Case Err.Number
         Case 49
@@ -155,8 +162,19 @@ ErrH:
         Case -2146233079
             If Left(Err.Description, Len("session not created: Chrome failed to start: exited normally.")) = "session not created: Chrome failed to start: exited normally." Then
                 wd.Quit
-                killchromedriverFromHere
-                Exit Sub
+                SystemSetup.killchromedriverFromHere
+                Set wd = Nothing
+                Stop
+                If MsgBox("須關閉Chrome瀏覽器再繼續！" & vbCr & vbCr & _
+                    vbTab & "是否要程式自動幫您關閉、啟動。感恩感恩　南無阿彌陀佛", vbCritical + vbOKCancel) _
+                        = vbOK Then
+                    SystemSetup.killProcessesByName "chrome.exe"
+                    GoTo reStart
+                Else
+                    openChrome = False
+                End If
+                
+                Exit Function
             End If
         Case -2146233088 '**'
             'Debug.Print Err.Description
@@ -179,19 +197,46 @@ ErrH:
                                                                                                     '(Session info: chrome=110.0.5481.178)
                 killchromedriverFromHere
                 GoTo reStart
+            ElseIf InStr(Err.Description, "no such window: target window already closed") Then 'no such window: target window already closed
+                                                                                                        'from unknown error: web view not found
+                                                                                                         ' (Session info: chrome=128.0.6613.85)
+'                Stop
+                wd.SwitchTo.Window WindowHandlesItem(WindowHandlesCount - 1)
+                Resume
+                '回到 wd.ExecuteScript "window.open('about:blank','_blank');" 'openNewTabWhenTabAlreadyExit WD
+                     'wd.SwitchTo.Window WindowHandlesItem(WindowHandlesCount - 1)
             Else
+                
                 MsgBox Err.Description, vbCritical
                 Stop
             End If
         Case 429 'ActiveX 元件無法產生物件'
             ActiveXComponentsCanNotBeCreated = True
-            Exit Sub
+            Exit Function
+        Case -2147467261
+            If InStr(Err.Description, "並未將物件參考設定為物件的執行個體。") Then
+                SystemSetup.killchromedriverFromHere
+                Set wd = Nothing
+                Stop
+                If MsgBox("須關閉Chrome瀏覽器再繼續！" & vbCr & vbCr & _
+                    vbTab & "是否要程式自動幫您關閉、啟動。感恩感恩　南無阿彌陀佛", vbCritical + vbOKCancel) _
+                        = vbOK Then
+                    SystemSetup.killProcessesByName "chrome.exe"
+                    GoTo reStart
+                Else
+                    openChrome = False
+                End If
+                Exit Function
+            Else
+                MsgBox Err.Description, vbCritical
+                Stop
+            End If
         Case Else
             MsgBox Err.Description, vbCritical
             Resume
     End Select
 
-End Sub
+End Function
 
 Function openChromeBackground(URL As String) As SeleniumBasic.IWebDriver
 reStart:
@@ -290,9 +335,9 @@ End Function
 Sub Search(URL As String, frmID As String, keywdID As String, btnID As String, Optional searchStr As String)
     On Error GoTo Err1
     'If searchStr = "" And Selection = "" Then Exit Sub
-    If wd Is Nothing Then
+    'If wd Is Nothing Then
         openChrome (URL)
-    End If
+    'End If
         wd.URL = URL
         Dim form As SeleniumBasic.IWebElement
         Dim keyword As SeleniumBasic.IWebElement
@@ -300,6 +345,7 @@ Sub Search(URL As String, frmID As String, keywdID As String, btnID As String, O
         Set form = wd.FindElementById(frmID)
         Set keyword = form.FindElementById(keywdID)
         Set button = form.FindElementById(btnID)
+        word.Application.WindowState = wdWindowStateMinimize
         If searchStr <> "" Then
             keyword.SendKeys searchStr
             '上一行輸入即檢索了，故可不必下一行;但若不想顯示下拉清單，且確定可顯示結果，則還是需要下一行
@@ -511,34 +557,44 @@ Function LookupZitools(x As String, Optional Variants As Boolean = False) As Boo
         LookupZitools = False
         Exit Function
     End If
-    If wd Is Nothing Then
-        openChrome ("https://zi.tools/zi/" + x)
-    Else
-        If Not openNewTabWhenTabAlreadyExit(wd) Then
-            openChrome "https://zi.tools/zi/" + x
-        Else
-            wd.Navigate.GoToUrl "https://zi.tools/zi/" + x
+    
+    If Not openChrome("https://zi.tools/zi/" + x) Then
+        If Not openChrome("https://zi.tools/zi/" + x) Then
+            Stop
         End If
     End If
+    word.Application.WindowState = wdWindowStateMinimize
     Dim iwe As SeleniumBasic.IWebElement
+    Rem 若須直接查看異體字
     If Variants Then
         Dim dt As Date
         dt = VBA.Now
         Do While iwe Is Nothing
             Set iwe = wd.FindElementByCssSelector("#mainContent > span > div.content > div > div.sidebar_navigation > div > div:nth-child(11)")
             If DateDiff("s", dt, VBA.Now) > 3 Then
-                Exit Do
+                Exit Do '找不到相關字的元件
             End If
         Loop
         If Not iwe Is Nothing Then iwe.Click
     End If
-'    word.Application.WindowState = wdWindowStateMinimize
+    
     wd.SwitchTo.Window (wd.CurrentWindowHandle)
-    AppActivate "chrome"
+'    AppActivate "chrome"
     LookupZitools = True
     Exit Function
 eH:
 Select Case Err.Number
+        Case -2146233088
+            If InStr(Err.Description, "disconnected: not connected to DevTools") Then 'disconnected: not connected to DevTools
+                                            '  (failed to check if window was closed: disconnected: not connected to DevTools)
+                                            '  (Session info: chrome=128.0.6613.85)
+                'Set wd = Nothing
+                SystemSetup.killchromedriverFromHere
+                Set wd = Nothing
+                Resume
+            Else
+                MsgBox Err.Number & Err.Description, vbExclamation
+            End If
         Case Else
             MsgBox "請關閉Chrome瀏覽器後再執行一次！" & vbCr & vbCr & Err.Number & Err.Description, vbExclamation
     End Select
@@ -547,16 +603,18 @@ Rem 查《異體字字典》：x 要查的字。傳回一個字串陣列，第1個元素是所查詢的字串，第2
 Function LookupDictionary_of_ChineseCharacterVariants(x As String) As String()
     On Error GoTo eH
     Dim result(1) As String '1=索引值上限（最大值）
+    LookupDictionary_of_ChineseCharacterVariants = result
     If Not code.IsChineseCharacter(x) Then
-        LookupDictionary_of_ChineseCharacterVariants = result
         Exit Function
     End If
-    If wd Is Nothing Then
+    SystemSetup.SetClipboard x
+'    If wd Is Nothing Then
         openChrome "https://dict.variants.moe.edu.tw/"
-    Else
-        openNewTabWhenTabAlreadyExit wd
-        wd.Navigate.GoToUrl "https://dict.variants.moe.edu.tw/"
-    End If
+'    Else
+'        openNewTabWhenTabAlreadyExit wd
+'        wd.Navigate.GoToUrl "https://dict.variants.moe.edu.tw/"
+'    End If
+
     Dim iwe As SeleniumBasic.IWebElement
     Dim dt As Date
     dt = VBA.Now
@@ -564,11 +622,16 @@ Function LookupDictionary_of_ChineseCharacterVariants(x As String) As String()
     Do While iwe Is Nothing
         Set iwe = wd.FindElementByCssSelector("#header > div > flex > div:nth-child(3) > div.quick > form > input[type=text]:nth-child(2)")
         If DateDiff("s", dt, VBA.Now) > 3 Then
-            Exit Do
+            Exit Function
         End If
     Loop
+    
+    word.Application.WindowState = wdWindowStateMinimize
+    wd.SwitchTo.Window (wd.CurrentWindowHandle)
+'    VBA.AppActivate "chrome"
+
+    
     If Not iwe Is Nothing Then
-        SystemSetup.SetClipboard x
         Dim keys As New SeleniumBasic.keys
         iwe.SendKeys keys.Shift + keys.Insert
         iwe.SendKeys keys.Enter
@@ -595,13 +658,293 @@ Function LookupDictionary_of_ChineseCharacterVariants(x As String) As String()
         End If
     End If
     
-'    word.Application.WindowState = wdWindowStateMinimize
-    wd.SwitchTo.Window (wd.CurrentWindowHandle)
-    AppActivate "chrome"
     LookupDictionary_of_ChineseCharacterVariants = result
     Exit Function
 eH:
 Select Case Err.Number
+        Case -2146233088
+            If InStr(Err.Description, "disconnected: not connected to DevTools") Then 'disconnected: not connected to DevTools
+                                            '  (failed to check if window was closed: disconnected: not connected to DevTools)
+                                            '  (Session info: chrome=128.0.6613.85)
+                'Set wd = Nothing
+                SystemSetup.killchromedriverFromHere
+                Set wd = Nothing
+                Resume
+            Else
+                MsgBox Err.Number & Err.Description, vbExclamation
+            End If
+        Case Else
+            MsgBox "請關閉Chrome瀏覽器後再執行一次！" & vbCr & vbCr & Err.Number & Err.Description, vbExclamation
+    End Select
+End Function
+Rem 查《國語辭典》：x 要查的字詞。傳回一個字串陣列，第1個元素是所查詢的字串，第2個元素是查詢結果網址。若沒找到，則傳回空字串 ""
+Function LookupDictRevised(x As String) As String()
+    On Error GoTo eH
+    Dim result(1) As String '1=索引值上限（最大值）
+    LookupDictRevised = result
+
+    If Not code.IsChineseString(x) Then
+        MsgBox "只能檢索中文。請檢查檢索字串，重新開始。", vbExclamation
+        Exit Function
+    End If
+    SystemSetup.SetClipboard x
+    
+    openChrome "https://dict.revised.moe.edu.tw/search.jsp?md=1"
+    
+    Dim iwe As SeleniumBasic.IWebElement
+    Dim dt As Date
+    dt = VBA.Now
+    '檢索輸入框
+    Do While iwe Is Nothing
+        Set iwe = wd.FindElementByCssSelector("#searchF > div.line > input[type=text]:nth-child(1)")
+        If DateDiff("s", dt, VBA.Now) > 3 Then
+            Exit Function
+        End If
+    Loop
+    
+    wd.SwitchTo.Window (wd.CurrentWindowHandle)
+    word.Application.WindowState = wdWindowStateMinimize
+'    VBA.AppActivate "chrome"
+
+    '找到檢索框之後
+    If Not iwe Is Nothing Then
+        Dim keys As New SeleniumBasic.keys
+        'iwe.SendKeys keys.Shift + keys.Insert
+        iwe.SendKeys keys.Control + "v"
+        iwe.SendKeys keys.Enter
+        '查詢結果訊息框，如 查無資料
+        Set iwe = wd.FindElementByCssSelector("#searchL > tbody > tr > td")
+        '查詢有結果時：
+        If iwe Is Nothing Then
+            result(0) = x
+            result(1) = wd.URL
+            SystemSetup.SetClipboard result(1)
+        End If
+    End If
+    LookupDictRevised = result
+    Exit Function
+eH:
+Select Case Err.Number
+        Case -2146233088
+            If InStr(Err.Description, "disconnected: not connected to DevTools") Then 'disconnected: not connected to DevTools
+                                            '  (failed to check if window was closed: disconnected: not connected to DevTools)
+                                            '  (Session info: chrome=128.0.6613.85)
+                'Set wd = Nothing
+                SystemSetup.killchromedriverFromHere
+                Set wd = Nothing
+                Resume
+            Else
+                MsgBox Err.Number & Err.Description, vbExclamation
+            End If
+        Case Else
+            MsgBox "請關閉Chrome瀏覽器後再執行一次！" & vbCr & vbCr & Err.Number & Err.Description, vbExclamation
+    End Select
+End Function
+Rem 查《漢語大詞典》：x 要查的字詞。傳回一個字串陣列，第1個元素是所查詢的字串，第2個元素是查詢結果網址。若沒找到，則傳回空字串 ""
+Function LookupHYDCD(x As String) As String()
+    On Error GoTo eH
+    Dim result(1) As String '1=索引值上限（最大值）
+    LookupHYDCD = result
+    If Not code.IsChineseString(x) Then
+        MsgBox "只能檢索中文。請檢查檢索字串，重新開始。", vbCritical
+        Exit Function
+    End If
+    SystemSetup.SetClipboard x
+    
+    If openChrome("https://ivantsoi.myds.me/web/hydcd/search.html") = False Then
+        openChrome ("https://ivantsoi.myds.me/web/hydcd/search.html")
+        
+    End If
+    Dim iwe As SeleniumBasic.IWebElement
+    Dim dt As Date
+    dt = VBA.Now
+    '檢索輸入框
+    Do While iwe Is Nothing
+        Set iwe = wd.FindElementByCssSelector("#SearchBox")
+        If DateDiff("s", dt, VBA.Now) > 3 Then
+            Exit Function
+        End If
+    Loop
+    
+    wd.SwitchTo.Window (wd.CurrentWindowHandle)
+    word.Application.WindowState = wdWindowStateMinimize
+'    VBA.AppActivate "chrome"
+
+    '找到檢索框之後
+    If Not iwe Is Nothing Then
+        Dim keys As New SeleniumBasic.keys
+        iwe.SendKeys keys.Shift + keys.Insert
+        'iwe.SendKeys keys.Control + "v"
+        iwe.SendKeys keys.Enter
+        '查詢結果訊息框，如 抱歉，無此詞語。
+                        '本掃描版詞典無法查詢簡體字，也無法定位到單字。
+                        '若要查單字，可查詢以該字開頭的詞語，再按「上一頁」直到該單字出現，
+                        '或使用下面支持單字查詢的《漢語大詞典》連結
+                        '或使用《漢語大字典》。
+        Set iwe = wd.FindElementByCssSelector("#SearchResult > font")
+        '查詢有結果時：
+        If iwe Is Nothing Then
+            '查詢結果的超連結框
+            Set iwe = wd.FindElementByCssSelector("#SearchResult > p > a > font")
+            If Not iwe Is Nothing Then
+                iwe.Click
+                result(0) = x
+                wd.SwitchTo.Window WindowHandlesItem(WindowHandlesCount - 1)
+                result(1) = wd.URL
+                SystemSetup.SetClipboard result(1)
+            Else
+                MsgBox "請檢查", vbCritical
+                Stop
+            End If
+        End If
+    End If
+    LookupHYDCD = result
+    Exit Function
+eH:
+Select Case Err.Number
+        Case -2146233088
+            If InStr(Err.Description, "disconnected: not connected to DevTools") Then 'disconnected: not connected to DevTools
+                                            '  (failed to check if window was closed: disconnected: not connected to DevTools)
+                                            '  (Session info: chrome=128.0.6613.85)
+                'Set wd = Nothing
+                SystemSetup.killchromedriverFromHere
+                Set wd = Nothing
+                Resume
+            Else
+                MsgBox Err.Number & Err.Description, vbExclamation
+            End If
+        Case Else
+            MsgBox "請關閉Chrome瀏覽器後再執行一次！" & vbCr & vbCr & Err.Number & Err.Description, vbExclamation
+    End Select
+End Function
+Rem 查《國學大師》：x 要查的字詞。傳回一個字串陣列，第1個元素是所查詢的字串，第2個元素是查詢結果網址。若沒找到，則傳回空字串 ""
+Function LookupGXDS(x As String) As String()
+    On Error GoTo eH
+    Dim result(1) As String '1=索引值上限（最大值）
+    LookupGXDS = result
+    If Not code.IsChineseString(x) Then
+        MsgBox "只能檢索中文。請檢查檢索字串，重新開始。", vbCritical
+        Exit Function
+    End If
+    SystemSetup.SetClipboard x
+    
+    If openChrome("https://www.guoxuedashi.net/zidian/bujian/") = False Then
+        If openChrome("https://www.guoxuedashi.net/zidian/bujian/") = False Then
+            Stop
+        End If
+    End If
+    Dim iwe As SeleniumBasic.IWebElement
+    Dim dt As Date
+    dt = VBA.Now
+    '檢索輸入框
+    Do While iwe Is Nothing
+        Set iwe = wd.FindElementByCssSelector("#sokeyzi")
+        If DateDiff("s", dt, VBA.Now) > 3 Then
+            Exit Function
+        End If
+    Loop
+    
+    wd.SwitchTo.Window (wd.CurrentWindowHandle)
+    word.Application.WindowState = wdWindowStateMinimize
+'    VBA.AppActivate "chrome"
+
+    '找到檢索框之後
+    If Not iwe Is Nothing Then
+        Dim keys As New SeleniumBasic.keys
+        iwe.SendKeys keys.Shift + keys.Insert
+        'iwe.SendKeys keys.Control + "v"
+        iwe.SendKeys keys.Enter
+        
+        '查詢結果訊息框，如 【精确】方式查……，推荐使用【模糊】或【詞首】方式查找。
+        Set iwe = wd.FindElementByCssSelector("body > div:nth-child(3) > div.info.l > div.info_content.zj.clearfix > div.info_txt2.clearfix")
+        '查詢有結果時：
+        If iwe Is Nothing Or VBA.InStr(iwe.text, "【精确】方式查") = 0 Then
+            result(0) = x
+            result(1) = wd.URL
+            SystemSetup.SetClipboard result(1)
+        End If
+    End If
+    LookupGXDS = result
+    Exit Function
+eH:
+Select Case Err.Number
+        Case -2146233088
+            If InStr(Err.Description, "disconnected: not connected to DevTools") Then 'disconnected: not connected to DevTools
+                                            '  (failed to check if window was closed: disconnected: not connected to DevTools)
+                                            '  (Session info: chrome=128.0.6613.85)
+                'Set wd = Nothing
+                SystemSetup.killchromedriverFromHere
+                Set wd = Nothing
+                Resume
+            Else
+                MsgBox Err.Number & Err.Description, vbExclamation
+            End If
+        Case Else
+            MsgBox "請關閉Chrome瀏覽器後再執行一次！" & vbCr & vbCr & Err.Number & Err.Description, vbExclamation
+    End Select
+End Function
+Rem 查《康熙字典網上版》：x 要查的字詞。傳回一個字串陣列，第1個元素是所查詢的字串，第2個元素是查詢結果網址。若沒找到，則傳回空字串 ""
+Function LookupKangxizidian(x As String) As String()
+    On Error GoTo eH
+    Dim result(1) As String '1=索引值上限（最大值）
+    LookupKangxizidian = result
+    If Not code.IsChineseCharacter(x) Then
+        Exit Function
+    End If
+    SystemSetup.SetClipboard x
+    
+    If Not openChrome("https://www.kangxizidian.com/search/index.php?stype=Word") Then
+        If Not openChrome("https://www.kangxizidian.com/search/index.php?stype=Word") Then
+            Stop
+        End If
+    End If
+    
+    Dim iwe As SeleniumBasic.IWebElement
+    Dim dt As Date
+    dt = VBA.Now
+    '檢索輸入框
+    Do While iwe Is Nothing
+        Set iwe = wd.FindElementByCssSelector("#cornermenubody1 > font18 > input[type=search]:nth-child(2)")
+        If DateDiff("s", dt, VBA.Now) > 3 Then
+            Exit Function
+        End If
+    Loop
+    
+    word.Application.WindowState = wdWindowStateMinimize
+    wd.SwitchTo.Window (wd.CurrentWindowHandle)
+'    VBA.AppActivate "chrome"
+
+    '找到檢索輸入框
+    If Not iwe Is Nothing Then
+        Dim keys As New SeleniumBasic.keys
+        iwe.Clear
+        iwe.SendKeys keys.Shift + keys.Insert
+        iwe.SendKeys keys.Enter
+        '查詢結果訊息框，如： 抱歉，查無資料……請重查！
+                                '或請查找以下其他字典:
+        Set iwe = wd.FindElementByCssSelector("body > center:nth-child(10) > center > table.td0 > tbody > tr > td.td1 > center > font22 > font > p:nth-child(1)")
+        If iwe Is Nothing Then
+            result(0) = x
+            result(1) = wd.URL
+            SystemSetup.SetClipboard result(1)
+        End If
+    End If
+    
+    LookupKangxizidian = result
+    Exit Function
+eH:
+Select Case Err.Number
+        Case -2146233088
+            If InStr(Err.Description, "disconnected: not connected to DevTools") Then 'disconnected: not connected to DevTools
+                                            '  (failed to check if window was closed: disconnected: not connected to DevTools)
+                                            '  (Session info: chrome=128.0.6613.85)
+                'Set wd = Nothing
+                SystemSetup.killchromedriverFromHere
+                Set wd = Nothing
+                Resume
+            Else
+                MsgBox Err.Number & Err.Description, vbExclamation
+            End If
         Case Else
             MsgBox "請關閉Chrome瀏覽器後再執行一次！" & vbCr & vbCr & Err.Number & Err.Description, vbExclamation
     End Select
@@ -610,9 +953,13 @@ End Function
 Sub GoogleSearch(Optional searchStr As String) '有空再完成
     On Error GoTo Err1
     If searchStr = "" And Selection = "" Then Exit Sub
+   
+    SystemSetup.SetClipboard searchStr
+    
     'Dim wd As SeleniumBasic.IWebDriver
     'Set wd = openChrome("https://www.baidu.com")
     openChrome "https://www.google.com"
+    word.Application.WindowState = wdWindowStateMinimize
     Dim iwe As SeleniumBasic.IWebElement
     Dim keys As New SeleniumBasic.keys
     Set iwe = wd.FindElementByCssSelector("#APjFqb")
@@ -639,8 +986,19 @@ Sub GoogleSearch(Optional searchStr As String) '有空再完成
     '    Exit Sub
 Err1:
         Select Case Err.Number
-            Case 49 'DLL 呼叫規格錯誤
-                Resume
+'            Case 49 'DLL 呼叫規格錯誤
+'                Resume
+            Case -2146233088
+                If InStr(Err.Description, "disconnected: not connected to DevTools") Then 'disconnected: not connected to DevTools
+                                                '  (failed to check if window was closed: disconnected: not connected to DevTools)
+                                                '  (Session info: chrome=128.0.6613.85)
+                    'Set wd = Nothing
+                    SystemSetup.killchromedriverFromHere
+                    Set wd = Nothing
+                    Resume
+                Else
+                    MsgBox Err.Number & Err.Description, vbExclamation
+                End If
             Case Else
                 MsgBox Err.Description, vbCritical
                 SystemSetup.killchromedriverFromHere
@@ -905,7 +1263,20 @@ Err1:
     End Select
 End Function
 
+Function WindowHandlesItem(index As Long) As String
+    Dim windowHandle, i As Long
+    For Each windowHandle In wd.WindowHandles
+        If i = index Then
+            WindowHandlesItem = windowHandle
+            Exit Function
+        End If
+        i = i + 1
+    Next
+End Function
 
+Public Property Get WindowHandlesCount() As Long
+    WindowHandlesCount = UBound(wd.WindowHandles) + 1
+End Property
 Public Property Get WindowHandles() As String()
 On Error GoTo eH:
 If Not wd Is Nothing Then WindowHandles = wd.WindowHandles

@@ -583,7 +583,7 @@ Rem 也可以使用 WMI 來結束運行中的chromedriver.exe
 '' 首先宣告一個 WMI 物件，並使用ExecQuery方法來查詢所有運行中的 chromedriver.exe 程序。然後使用迴圈將每個程序的Terminate方法執行，這樣就可以結束所有運行中的 chromedriver.exe 程序了。
 '' 您可以使用 Windows Task Manager 來查看哪些 chromedriver.exe 程序是由您的 VBA 程序啟動的。在 Task Manager 中，您可以看到每個運行中的程序的詳細資訊，包括程序的名稱、PID (?程 ID) 以及所屬應用程序。
 '' 您可以在VBA中使用 WMI 來查找所有運行中的 chromedriver.exe 程序，並查看它們的PID，然後判斷哪些是由您的 VBA 程序啟動的。
-Sub killProcessesByName(imageName As String, pid As Long)
+Sub killProcessesByNamePID(imageName As String, pid As Long)
     Dim objWMIService, objProcess, colProcess
     Set objWMIService = GetObject("winmgmts:" & "{impersonationLevel=impersonate}!\\.\root\cimv2")
     'Set colProcess = objWMIService.ExecQuery("Select * from Win32_Process Where Name = 'chromedriver.exe'")
@@ -595,14 +595,23 @@ Sub killProcessesByName(imageName As String, pid As Long)
         End If
     Next
 End Sub
+Sub killProcessesByName(imageName As String)
+    Dim objWMIService, objProcess, colProcess
+    Set objWMIService = GetObject("winmgmts:" & "{impersonationLevel=impersonate}!\\.\root\cimv2")
+    'Set colProcess = objWMIService.ExecQuery("Select * from Win32_Process Where Name = 'chromedriver.exe'")
+    Set colProcess = objWMIService.ExecQuery("Select * from Win32_Process Where Name = '" + imageName + "'")
+    For Each objProcess In colProcess
+        objProcess.Terminate
+    Next
+End Sub
 Sub killchromedriverFromHere()
     Dim objWMIService, objProcess, colProcess, pid
     If chromedriversPIDcntr = 0 Then
         ReDim chromedriversPID(0)
-        If Not SeleniumOP.WD Is Nothing Then
+        If Not SeleniumOP.wd Is Nothing Then
             On Error GoTo eH:
-            SeleniumOP.WD.Quit
-            Set SeleniumOP.WD = Nothing
+            SeleniumOP.wd.Quit
+            Set SeleniumOP.wd = Nothing
             Exit Sub
         End If
     End If
@@ -614,16 +623,16 @@ Sub killchromedriverFromHere()
         Next pid
     Next
     '重設儲存chromedriver程序ID的陣列
-    ReDim chromedriversPID(0): chromedriversPIDcntr = 0: Set SeleniumOP.WD = Nothing
+    ReDim chromedriversPID(0): chromedriversPIDcntr = 0: Set SeleniumOP.wd = Nothing
     
     Exit Sub
 eH:
     Select Case Err.Number
         Case -2147467261 '並未將物件參考設定為物件的執行個體。
-            Set SeleniumOP.WD = Nothing
+            Set SeleniumOP.wd = Nothing
             Resume Next
         Case Else
-            Set SeleniumOP.WD = Nothing
+            Set SeleniumOP.wd = Nothing
             MsgBox Err.Number + Err.Description
     End Select
     Rem 20230119 YouChat菩薩：

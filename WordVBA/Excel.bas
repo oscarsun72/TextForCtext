@@ -7,28 +7,104 @@ Dim App As Object, wb As Object, sht As Object   '¥ÎDim¤~¯à­ÝÅU«O¯d¨ä¥Í©R¶g´Á»P«
 'https://docs.microsoft.com/zh-tw/dotnet/visual-basic/programming-guide/language-features/early-late-binding/
 
 Property Get Application()
-'Stop
-'If VBA.IsEmpty(app) Then Class_Initialize
-If App Is Nothing Then Class_Initialize
-Set Application = App
+    'Stop
+    'If VBA.IsEmpty(app) Then Class_Initialize
+    If App Is Nothing Then Class_Initialize
+    Set Application = App
 End Property
 Property Set Application(appOrNothing)
-Set App = appOrNothing 'can't be Empty! because once the app was set to Application object it'll be object type no longer be a variant type. Only the variant type could be the value of Empty.
+    Set App = appOrNothing 'can't be Empty! because once the app was set to Application object it'll be object type no longer be a variant type. Only the variant type could be the value of Empty.
 End Property
 
 Property Get Workbook()
-Set Workbook = wb
+    Set Workbook = wb
 End Property
 Property Get Worksheet()
-Set Worksheet = sht
+    Set Worksheet = sht
 End Property
 
 Private Sub Class_Initialize()
-'Stop
-Set App = VBA.CreateObject("Excel.Application")
-App.UserControl = False 'for closing the app by user,this must be set to false or it will end until the word application close. https://docs.microsoft.com/zh-tw/office/vba/api/excel.application.usercontrol
-Set wb = App.workbooks.Add() 'https://docs.microsoft.com/zh-tw/office/vba/api/excel.workbooks.add
-Set sht = wb.sheets.Add()
+    'Stop
+    Set App = VBA.CreateObject("Excel.Application")
+    App.UserControl = False 'for closing the app by user,this must be set to false or it will end until the word application close. https://docs.microsoft.com/zh-tw/office/vba/api/excel.application.usercontrol
+    Set wb = App.workbooks.Add() 'https://docs.microsoft.com/zh-tw/office/vba/api/excel.workbooks.add
+    Set sht = wb.Sheets.Add()
+End Sub
+
+Sub FindPrivateUseCharactersInExcel()
+    Static xlApp As Object
+    Static xlBook As Object, w As String
+    Static xlSheet As Object, myExcelFileFullname As String
+    Dim foundCell As Object
+    'Static searchRange As Object
+'    Dim firstAddress As String
+    
+    w = Selection.text
+    'If Not code.IsPrivateUseCharacter(w) Then Exit Sub
+        
+    If Selection.Type = wdSelectionIP Then Selection.Characters(1).Copy
+'    Selection.Document.Save
+    
+    With Selection.Document
+        myExcelFileFullname = _
+            .Range(.Paragraphs(1).Range.Characters(1).start _
+                , _
+            .Paragraphs(1).Range.Characters( _
+            .Paragraphs(1).Range.Characters.Count - 1).End).text
+    End With
+    If myExcelFileFullname = "" Then Exit Sub
+    If myExcelFileFullname = Chr(13) Then Exit Sub
+    If VBA.Dir(myExcelFileFullname) = "" Then
+        MsgBox "©Ò«ü©wªº¥þÀÉ¦W¦³»~¡I", vbCritical
+        Exit Sub
+    End If
+    
+    
+    ' ¶}±ÒExcelÀ³¥Îµ{¦¡
+    'Set xlApp = CreateObject("Excel.Application")
+    If xlBook Is Nothing Then
+        Set xlBook = GetObject(myExcelFileFullname)
+        Set xlApp = xlBook.Application
+    
+        ' ¶}±Ò«ü©wªºExcelÀÉ®×
+        'Set xlBook = xlApp.Workbooks.Open("H:\§Úªº¶³ºÝµwºÐ\¶À¦Ñ®v»·ºÝ¤u§@\3µü¾Ç\¡­¡­@@µü¾ÇÃý«ß¸ê®Æ®w20240121@@¡´¡´.xlsm")
+        Set xlSheet = xlBook.Sheets(1) ' °²³]·j´M²Ä¤@­Ó¤u§@ªí
+    
+    End If
+    
+    If xlApp.Visible = False Then
+'        xlApp.Visible = True
+        xlApp.Windows(1).Visible = True
+    End If
+    
+    ' ¨Ï¥ÎFind¤èªk·j´M¯S©w¦r¤¸
+    'Set foundCell = xlSheet.Cells.Find(What:=w, LookIn:=xlValues, LookAt:=xlPart, SearchOrder:=xlByRows, SearchDirection:=xlNext, MatchCase:=False)
+    ' ³]©w·j´M½d³ò¬°G¡BH¡BI©MMÄæ
+    'Set searchRange = xlSheet.Range("G:G,H:H,I:I,M:M")
+    ' ¨Ï¥ÎFind¤èªk·j´M¯S©w¦r¤¸
+    'Set foundCell = searchRange.Find(What:=w, After:=xlSheet.Application.ActiveCell, LookIn:=xlValues, LookAt:=xlPart, SearchOrder:=xlByRows, SearchDirection:=xlNext, MatchCase:=False)
+'    Set foundCell = xlSheet.Application.ActiveCell.Find _
+        (What:=w, LookIn:=xlApp.XlFindLookIn.xlValues, _
+            LookAt:=xlApp.XlLookAt.xlPart, SearchOrder:=xlApp.XlSearchOrder.xlByRows _
+                , SearchDirection:=xlApp.XlSearchDirection.xlNext, MatchCase:=False)
+    Set foundCell = xlSheet.Application.ActiveCell.Find(What:=w, LookIn:=-4163, LookAt:=2, SearchOrder:=1, SearchDirection:=1, MatchCase:=False)
+    
+    If Not foundCell Is Nothing Then
+        foundCell.Select
+'        MsgBox "§ä¨ì¤F¦r¤¸ w¡I"
+    Else
+        MsgBox "¥¼§ä¨ì!"
+    End If
+    
+    AppActivate xlBook.Application.Caption
+'    ' Ãö³¬ExcelÀÉ®×
+'    xlBook.Close SaveChanges:=False
+'    xlApp.Quit
+    
+    ' ÄÀ©ñª«¥ó
+'    Set xlSheet = Nothing
+'    Set xlBook = Nothing
+'    Set xlApp = Nothing
 End Sub
 
 
