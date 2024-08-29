@@ -754,13 +754,15 @@ Ctrl+ 滑鼠左鍵：清除框中所有文字
 
 - 複製一份和本軟件所需相同的「chromedriver.exe」到「chrome.exe」的同一目錄（路徑）下
 
-- 可詳以下3片：
+- 可詳以下4片：
 
   [https://youtube.com/live/GI1hfa9CPkc?feature=share](https://youtube.com/live/GI1hfa9CPkc?feature=share)
 
   [https://youtube.com/live/zzPAmmw253E](https://youtube.com/live/zzPAmmw253E)
 
   [https://youtube.com/live/2dE0k3_nWi8?feature=share](https://youtube.com/live/2dE0k3_nWi8?feature=share)
+
+  [https://youtube.com/live/9PN1SyNuYR8?feature=share](https://youtube.com/live/9PN1SyNuYR8?feature=share)
 ## 操作演示：
 - [TextForCtext簡介展示：以TextForCtext 善用《古籍酷》《看典古籍》OCR暨自動標點《字統網》《異體字字典》《國語辭典》《漢語大詞典》等工具加速輸入《中國哲學書電子化計劃》](https://youtube.com/live/IUzAI5kXkuY?feature=share)
 - [我讀《墨子閒詁》文本整理圖文對照程式設計實境秀-自製 TextForCtext 小工具輔助由《漢籍電子文獻資料庫》輸入至《中國哲學書電子化計劃》](https://youtu.be/hnMFTpNfAWg)
@@ -798,6 +800,7 @@ Ctrl+ 滑鼠左鍵：清除框中所有文字
 - [檢查文本中是否闌入版心資訊，以便刪除：文本相似度比對，感恩Copilot大菩薩協作，《字統網》檢索演示，標書名號，音效調適─以TextForCtext 善用《古籍酷》OCR輸入《中國哲學書電子化計劃》](https://youtube.com/live/b0AnDAKYQzA?feature=share)
 - []()
 - **餘詳此播放清單：** [TextForCtext加速輸入《中國哲學書電子化計劃》(Chinese Text Project) ](https://youtube.com/playlist?list=PLxcUMvfqARSJtLJtRn76Cq4c6-A7WQXta&si=4ezG5WV3yR45UrL1)
+- [文史學者動起來翫程式文具 Word Excel PowerPoint Access VBA & C#](https://www.youtube.com/playlist?list=PLxcUMvfqARSKGnr151ke0j4RTqczZKRM3)
 - ### 開發秀：
 - [TextForCtext 開發檢索《康熙字典網上版》功能實境秀，應用之前的檢索《字統網》《異體字字典》《國語辭典》《漢語大詞典》函式方法](https://youtube.com/live/aFNWSxJi7cs?feature=share)
 - []()
