@@ -9610,6 +9610,8 @@ namespace WindowsFormsApp1
             if (url.IndexOf("&page=") == -1) return;
             int edit = url.IndexOf("&editwiki");
             int page = 0; string urlSub = url;
+            if (TopMost) TopMost = false;
+            if (Active && !ocrTextMode) br.BringToFront("chrome");
             if (edit > -1)
             {
                 urlSub = url.Substring(0, url.IndexOf("&page=") + "&page=".Length);
