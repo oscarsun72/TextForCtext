@@ -7010,7 +7010,9 @@ internal static string getImageUrl() {
                             string mark = info.StartsWith("识别失败") ? "●●●●●●●●●" :
                                 (info.StartsWith("System is busy") || info.StartsWith("ip address banned")) ? "★★★★★★★★★★★" + CurrentIP + "★★★★" : "●";
                             if (info.StartsWith("ip address banned")) Clipboard.SetText(CurrentIP);
-                            ds = MessageBox.Show("是否讓程式自動更換IP？", "●切換IP？" + mark + "『" + info + "』" + mark, MessageBoxButtons.OKCancel, MessageBoxIcon.None, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly); //Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("是否讓程式自動更換IP？", "●切換IP？")
+                            //現在有批量處理權限，此功能懸置，且VPN之IP多已遭《古籍酷》封鎖，故預設按鈕改為「取消」！20240831
+                            ds = MessageBox.Show("是否讓程式自動更換IP？", "●切換IP？" + mark + "『" + info + "』" + mark
+                                , MessageBoxButtons.OKCancel, MessageBoxIcon.None, MessageBoxDefaultButton.Button2, MessageBoxOptions.DefaultDesktopOnly); //Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("是否讓程式自動更換IP？", "●切換IP？")
                             if (DialogResult.OK == ds)
                             {//要自動切換IP時：
                              //driver.Close();//return以後也還會再執行一次哦！注意
@@ -7054,7 +7056,8 @@ internal static string getImageUrl() {
                                 }
                                 else
                                 {
-                                    if (MessageBox.Show("是否要切換成批量處理模式？", "", MessageBoxButtons.OKCancel, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly) == DialogResult.OK)
+                                    if (MessageBox.Show("是否要切換成批量處理模式？", "若按下【取消】，擬改用『標注平台』處理，請記得在textBox2下「gjk」指令以切換。感恩感恩　南無阿彌陀佛　讚美主", 
+                                        MessageBoxButtons.OKCancel, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly) == DialogResult.OK)
                                         Form1.BatchProcessingGJcoolOCR = true;
                                     else
                                         Form1.BatchProcessingGJcoolOCR = false;

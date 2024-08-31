@@ -577,7 +577,7 @@ namespace TextForCtext
             ////x= Regex.Replace(x, pattern, evaluator);
             //x = Regex.Replace(x, pattern, evaluator).Replace("．", "。");
             #endregion
-            
+
             string[] replaceDChar = { "〇","!","！！","'", ",", ";", ":", "．", "?", "：：","：\r\n：", "《《", "》》", "〈〈", "〉〉",
                 "。}}<p>。}}","。}}。}}", "。}}}。<p>", "}}}。<p>", "。}}。<p>", "}}。<p>",".<p>","·<p>" ,"<p>。<p>","<p>。","􏿽。<p>","　。<p>"
                 ,"。。", "，，", "@" 
@@ -696,7 +696,7 @@ namespace TextForCtext
                 string pattern = "[" + Regex.Escape("卷上下卄一二三四五六七八九十卅卌<p>") + "]";
                 line = Regex.Replace(line, pattern, "");
                 double similarity = Fuzz.Ratio(title, line) / 100.0;
-                if (similarity >= threshold && lines[i - 1] != "|")//前一段若為「|」通常是卷末題目
+                if (similarity >= threshold && i > 0 && lines[i - 1] != "|")//前一段若為「|」通常是卷末題目
                 {
                     location = xChecking.IndexOf(lines[i]);
                     if (location == -1)

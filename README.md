@@ -102,6 +102,7 @@ button1 「分行分段」或「送出貼上」按鈕:
 Alt + ↑ ↓ ← → ：移動操作表單介面視窗位置
 
 Ctrl + Shift + p ：從圖文對照目前頁面開始，開始自動往後翻頁瀏覽各頁面（如在翻書。多作為批量OCR或大量快速自動編輯的行前檢查用。p=page。）
+>若要煞車，請對Chrome瀏覽器或本操作介面按下`Ctrl + 滑鼠左鍵`
 
 Ctrl + Shift + 數字鍵盤 * ：啟動/關閉手動輸入模式。
 
@@ -137,7 +138,7 @@ F2 ：全選/取消全選textbox1內容，並將此內容複製到剪貼簿。
 
 數字鍵盤 + 或 F8 或 F9 或 F12：整頁（textBox1內容）送出至[簡單修改模式]（Quick edit）下的文字框中。
 
-Ctrl + 數字鍵盤 - ：重新指定插入點位置以送出文本。
+Ctrl + 數字鍵盤 `-` ：重新指定插入點位置以送出文本。
 
 Alt + a 或 Ctrl + 數字鍵盤 + ：若有指定插入點位置，則會根據所記憶的位置送出其前的文本。若其前無所指定，則以目前插入點位置之前的文本送出。
 
@@ -149,7 +150,8 @@ Alt + Shift + k ：送去《看典古籍》OCR 網頁版。（k=看典古籍kand
 
 Ctrl + Shift + o ：使用《看典古籍》OCR API。（o=OCR）
 
-Ctrl + Shift + 數字鍵盤 - ：啟動/關閉`OCR連續輸入模式`。
+Ctrl + Shift + 數字鍵盤 `-` ：啟動/關閉`OCR連續輸入模式`。
+> 若要煞車，請在OCR結果要讀回前按住`Ctrl`鍵
 
 textBox2 中輸入 `oT` ：開始OCR輸入模式。（先略過一些文本、標點檢查程序。o=OCR,T=true）
 
@@ -160,6 +162,7 @@ textBox2 中輸入 `bT` ：啟動《古籍酷》OCR批量處理模式。（b=bat
 textBox2 中輸入 `bF` ：終止《古籍酷》OCR批量處理模式。（b=batch，F=false）
 
 textBox2 中輸入 `gjk` ：指定用《古籍酷》OCR標注平台處理。（gjk=「古籍酷」漢語拼音gu-ji-ku）
+> 在首頁快速體驗Fast Experiece 額滿後，可以此指令切換回標注平台操作。
 
 textBox2 中輸入 `kd` ：在OCR連續輸入模式下，指定用《看典古籍》網頁版OCR（kd=看典古籍kan-dianguji）
 
@@ -181,7 +184,9 @@ Alt + p ：加上段落標記  `<p>`  （p=paragraph）
 Alt + Shift + p ：加上段落標記且前置句號  `。<p>`
 > 使用時的插入點位置及其作用同 Alt + p
 
-Scroll Lock 或 數字鍵盤 - 或 F10 ：自動加上段落標記`。<p>`
+Scroll Lock 或 數字鍵盤 `-` 或 F10 ：自動加上段落標記`。<p>`
+> 在`啟用抬頭平抬檢測模式`時，則於平抬前一行/段末加上換行標記 `|`
+
 ##### 換行折行
 Ctrl + Shift + \ ：啟動/關閉抬頭平抬檢測模式
 
@@ -209,9 +214,9 @@ Ctrl + Shift + 6 ： 輸入`}}`
 
 Ctrl + 7 ： 輸入`。}}`
 ### 加速清除
-Ctrl + Delete ：
+Ctrl + Delete ：可清除插入點後多餘的空格、空白與語法標記`< …… >` （含常見的 <p>）等
 
-Ctrl + Shift + Delete ：
+Ctrl + Shift + Delete ：詳後說明
 
 Alt + Delete : 刪除插入點後第一個分行分段
 
@@ -578,7 +583,9 @@ F8 或 F9 或 F12 或 Ctrl + Alt + + 或數字鍵盤「+」： 整頁貼上Quick
 Shift + F8 或 Alt + Shift + Pause ： 加上篇名格式代碼並前置N個全形空格.N，預設為2.且可在執行此項時，選取空格數以重設篇名前要空的格數
 
 Alt + Pause 或 當表單在Num Lock關閉時按下數字鍵盤的「5」 ： 自動判斷標題行，加上篇名格式代碼並前置N個全形空格.N，預設為2.且可在執行此項時，選取空格數以重設篇名前要空的格數
-    > 此法可與 Alt + t detectTitleYetWithoutPreSpace() 參互應用
+
+     此法可與 Alt + t detectTitleYetWithoutPreSpace() 參互應用
+     （數字鍵盤 5 、 5（數字鍵盤） 、 e.KeyCode == Keys.Clear）
 
 F11 : run replaceXdirrectly() 維基文庫等欲直接抽換之字
 
@@ -683,6 +690,7 @@ Ctrl+ 滑鼠左鍵：清除框中所有文字
 - Ctrl + + （加號，含函數字鍵盤） 或 Ctrl + -（數字鍵盤）  或 Ctrl + 5 (數字鍵盤） ：同 textBox1
 - 輸入末綴為「0」的數字可以設定開啟Chrome頁面的等待毫秒時間
 - 輸入前綴關鍵字「note:」，可以後綴之數字設定小注不換行的長度限制（byte : 0~255）
+> 例：「note:5」，則小於5字（4字）的小注不換行。此數最大255，最小0。預設為3。（即2字小注不換行。)
 - 輸入「msedge」「chrome」「brave」「vivaldi」，可以設定預設瀏覽器名稱
 - 輸入「ap,」（或 aa）「sl,」(或 br、bb、ss )「sg,」，可以切換瀏覽操作模式設定：
 

@@ -3655,12 +3655,12 @@ namespace WindowsFormsApp1
                 bringBackMousePosFrmCenter();
         }
         /// <summary>
-        /// Alt + Pause ： 自動判斷標題行（目前為少於12字），加上篇名格式代碼並前置2個全形空格
+        /// Alt + Pause 或 數字鍵盤 5： 自動判斷標題行（目前為少於12字），加上篇名格式代碼並前置2個全形空格
         /// 加上篇名格式代碼並前置N個全形空格.N，預設為2.且可在執行此項時，選取空格數以重設篇名前要空的格數
         /// 此法可與 Alt + t detectTitleYetWithoutPreSpace() 參互應用 20231018
         /// </summary>
         private void autoKeysTitleCodeAndPreWideSpace()
-        {
+        {   
             int wordCountLimit = 12;//少於12字才視標題
             //int wordCountLimit = 17;//少於17字才視標題
             if (wordCountLimit + 2 >= wordsPerLinePara) wordCountLimit = wordsPerLinePara - 2;//一般題目都是空二格故
@@ -3753,6 +3753,12 @@ namespace WindowsFormsApp1
                 }
             }
 
+            #region 最後檢查
+            if (textBox1.Text.IndexOf("}}。<p>\r\n{{") > -1)
+                if (MessageBoxShowOKCancelExclamationDefaultDesktopOnly("是否要清除注文間的段落符號？") == DialogResult.OK)
+                    textBox1.Text = textBox1.Text.Replace("}}。<p>\r\n{{", "}}\r\n{{");
+
+            #endregion
 
             //處理完畢，回到原來/開始執行時的位置（有時末尾有些不要的贅文，可從此處在送出時截斷）
             //再研究
@@ -8675,7 +8681,7 @@ namespace WindowsFormsApp1
                 }
 
                 if (e.KeyCode == Keys.Clear)
-                {// Alt + 5 （數字鍵盤）清除標題符碼標記
+                {// Alt + 5 （數字鍵盤 5）清除標題符碼標記
                     e.Handled = true;
                     clearTitleMarkCode();
                     return;
