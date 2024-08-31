@@ -3660,7 +3660,7 @@ namespace WindowsFormsApp1
         /// 此法可與 Alt + t detectTitleYetWithoutPreSpace() 參互應用 20231018
         /// </summary>
         private void autoKeysTitleCodeAndPreWideSpace()
-        {   
+        {
             int wordCountLimit = 12;//少於12字才視標題
             //int wordCountLimit = 17;//少於17字才視標題
             if (wordCountLimit + 2 >= wordsPerLinePara) wordCountLimit = wordsPerLinePara - 2;//一般題目都是空二格故
@@ -9934,7 +9934,7 @@ namespace WindowsFormsApp1
                 //throw;
             }
 
-            finish:
+        finish:
             this.BackColor = C;
             show_nICo(ModifierKeys);
             normalLineParaLength = 0;
@@ -12594,9 +12594,9 @@ namespace WindowsFormsApp1
                 try
                 {
                     string ur = br.GetDriverUrl;
-                    //if (ur.IndexOf("#box(") > -1)
-                    //    br.driver.Navigate().GoToUrl(ur.Substring(0, ur.IndexOf("#box(")));
-                    FixUrl＿ImageTextComparisonPage(ur, false, true);
+                    if (ur.IndexOf("#box(") > -1)
+                        //    br.driver.Navigate().GoToUrl(ur.Substring(0, ur.IndexOf("#box(")));
+                        br.driver.Url = FixUrl＿ImageTextComparisonPage(ur, false, true);
                 }
                 catch (Exception ex)
                 {

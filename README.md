@@ -19,6 +19,8 @@ Text for Ctext 是為了有效加速[《中國哲學書電子化計劃》](https
 \*作業環境、系統需求：**Windows**、.NET Framework 4.5.2 以上、Chrome 瀏覽器（Selenium 模式才必要：[chromedriver](https://developer.chrome.com/docs/chromedriver/downloads?hl=zh-tw)） 
  > **不保留任何權利**，歡迎改寫應用到麥金塔(Mac)或 Linux 等作業系統環境中運行
 
+    可安裝虛擬機在非 Windows 系統執行本軟件。詳見末所附諸演示，以 VirtualBox 為例。
+
 - 本軟件架構為以下三種操作模式（目前本人主要以sl模式在操作）：
   - 在textbox2輸入「ap,」「sl,」「sg,」，可切換瀏覽操作模式設定：
     - ap,=appActivateByName
@@ -282,6 +284,11 @@ Alt + c ：檢索《漢語大詞典》（c=ci，「詞」漢語拼音）
 Alt + F12 ：檢索《異體字字典》
 
 Ctrl + F12 ：檢索《國語辭典》
+### 運行環境
+- 在textBox2輸入「mt」（Mute in Processing）在操作過程中靜音-不撥放音效
+ > 此為切換式的、開關式的指令。即當播放音效時，會切換成不播放；當已靜音時，會恢復音效。
+- 在textBox2輸入「mf」（Mute in Processing=false）在操作過程中撥放音效
+- 輸入「fm」（form move）切換設定-自動移動表單位置以避開圖文對照頁面的文本區，以便檢閱編輯狀況
 ## 快速鍵一覽：
 
 ### 在表單（操作介面視窗）任何位置按下：
