@@ -1860,7 +1860,8 @@ namespace WindowsFormsApp1
                 if (e.KeyCode == Keys.Add || e.KeyCode == Keys.Oemplus || e.KeyCode == Keys.Subtract || e.KeyCode == Keys.NumPad5)
                 {// Ctrl + Shift + + 
                     e.Handled = true; bool thisTopMost = this.TopMost;
-                    this.TopMost = false;
+                    this.TopMost = false;                    
+                    if (!ocrTextMode) br.BringToFront("chrome");
                     string urlActive = br.ActiveTabURL_Ctext_Edit;
                     if (textBox3.Text == "" && IsValidUrl＿keyDownCtrlAdd(urlActive))
                     {
@@ -1872,7 +1873,8 @@ namespace WindowsFormsApp1
                     {
                         br.SwitchToCurrentForeActivateTab(ref textBox3, urlActive);
                     }
-                    if (this.TopMost) this.TopMost = false;
+                    this.TopMost = false;                    
+                    if (!ocrTextMode) br.BringToFront("chrome");
                     if (keyDownCtrlAdd(true))
                     {
                         //非最上層顯示以便檢視
@@ -2101,7 +2103,8 @@ namespace WindowsFormsApp1
                 if (e.KeyCode == Keys.Add || e.KeyCode == Keys.Oemplus || e.KeyCode == Keys.Subtract || e.KeyCode == Keys.NumPad5)
                 {//Ctrl + + Ctrl + -
                     e.Handled = true;
-                    TopMost = false;
+                    TopMost = false;                    
+                    if (!ocrTextMode) br.BringToFront("chrome");
                     if (e.KeyCode == Keys.Subtract)
                     {// Ctrl + -（數字鍵盤） 會重設以插入點位置為頁面結束位國
                         resetPageTextEndPositionPasteToCText();
@@ -3430,6 +3433,8 @@ namespace WindowsFormsApp1
 
                         PagePaste2GjcoolOCR_ing = true;
                         PressAddKeyMethodPaste2QuickEditBox();
+                        bringBackMousePosFrmCenter();
+                        //TopMost = true;
                         return;
                     }
 
@@ -3517,6 +3522,8 @@ namespace WindowsFormsApp1
             textBox1.SelectAll();
             //textBox1.Select(textBox1.TextLength, 0);
             string x = textBox1.Text;
+            TopMost = false;
+            if (!ocrTextMode) br.BringToFront("chrome");
             if (keyDownCtrlAdd(false))
             {
                 if (x != br.Quickedit_data_textboxTxt)
@@ -9609,9 +9616,7 @@ namespace WindowsFormsApp1
             if (url == "") return;
             if (url.IndexOf("&page=") == -1) return;
             int edit = url.IndexOf("&editwiki");
-            int page = 0; string urlSub = url;
-            TopMost = false;
-            if (!ocrTextMode) br.BringToFront("chrome");
+            int page = 0; string urlSub = url;            
             if (edit > -1)
             {
                 urlSub = url.Substring(0, url.IndexOf("&page=") + "&page=".Length);
@@ -11697,6 +11702,9 @@ namespace WindowsFormsApp1
         /// </summary>
         public bool EventsEnabled { get => _eventsEnabled; set => _eventsEnabled = value; }
         public int PreviousEditwikiID { get => previousEditwikiID; set => previousEditwikiID = value; }
+        /// <summary>
+        /// 是否為OCR連續自動輸入模式
+        /// </summary>
         public bool OcrTextMode { get => ocrTextMode; set => ocrTextMode = value; }
 
         internal void PauseEvents()
