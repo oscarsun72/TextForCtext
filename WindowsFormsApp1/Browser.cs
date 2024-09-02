@@ -5050,8 +5050,11 @@ internal static string getImageUrl() {
                     //Debugger.Break();
                     CnText.Spaces2Braces(ref ocrResult);
                 }
-                ocrResult = ocrResult.Replace("】【", string.Empty).Replace("【", "{{").Replace("】", "}}");
-                CnText.RemoveInnerBraces(ref ocrResult);
+                //ocrResult = ocrResult.Replace("】【", string.Empty).Replace("【", "{{").Replace("】", "}}");
+                //CnText.RemoveInnerBraces(ref ocrResult);
+                ocrResult = ocrResult.Replace("】【", string.Empty);
+                ocrResult = CnText.RemoveNestedBrackets(ocrResult);
+                ocrResult=ocrResult.Replace("【", "{{").Replace("】", "}}");
 
                 //Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("copy to clipboard!");
                 try
@@ -7924,7 +7927,7 @@ internal static string getImageUrl() {
 
             string keyword = keywords[ListIndex_Hanchi_SearchingKeywordsYijing]; Clipboard.SetText(keyword);
             ActiveForm1.PauseEvents();
-            ActiveForm1.textBox3Text = ListIndex_Hanchi_SearchingKeywordsYijing.ToString();
+            ActiveForm1.textBox4Text = ListIndex_Hanchi_SearchingKeywordsYijing.ToString();
             ActiveForm1.Controls["textBox1"].Text = keyword;
             ActiveForm1.ResumeEvents();
             bool returnValue = false;
@@ -8670,7 +8673,29 @@ internal static string getImageUrl() {
                     }
 
                 }
+                try { 
+                
                 driver.Navigate().GoToUrl(editUrl);
+                }
+                catch(Exception ex)
+                {
+                    switch (ex.HResult)
+                    {
+                        case -2146233088:
+                            if(ex.Message.StartsWith("The HTTP request to the remote WebDriver server for URL "))
+                            {
+                                Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("連線超時，請再重試。感恩感恩　南無阿彌陀佛");
+                            }
+                            else
+                            {
+                                Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
+                            }
+                            return false;
+                        default:
+                            Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
+                            return false;
+                    }
+                }
 
                 //取代區中的「名稱」欄名
                 //while (null == waitFindWebElementBySelector_ToBeClickable("#content > table.restable > tbody > tr > td > table > tbody > tr:nth-child(1) > th:nth-child(1)", 0.2)) { }

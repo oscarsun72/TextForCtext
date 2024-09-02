@@ -33,16 +33,22 @@ End Sub
 
 Sub FindPrivateUseCharactersInExcel()
     Static xlApp As Object
-    Static xlBook As Object, w As String
-    Static xlSheet As Object, myExcelFileFullname As String
-    Dim foundCell As Object
+    Static xlBook As Object
+    Static xlSheet As Object, myExcelFileFullnamePrevious
+    Dim foundCell As Object, w As String, myExcelFileFullname As String
+    On Error GoTo eH:
     'Static searchRange As Object
 '    Dim firstAddress As String
+    
     
     w = Selection.text
     'If Not code.IsPrivateUseCharacter(w) Then Exit Sub
         
-    If Selection.Type = wdSelectionIP Then Selection.Characters(1).Copy
+    If Selection.Type = wdSelectionIP Then
+        Selection.Characters(1).Copy
+    Else
+        Selection.Copy
+    End If
 '    Selection.Document.Save
     
     With Selection.Document
@@ -59,23 +65,47 @@ Sub FindPrivateUseCharactersInExcel()
         Exit Sub
     End If
     
+    SystemSetup.playSound 0.484
     
+openWorkBook:
     ' 開啟Excel應用程式
     'Set xlApp = CreateObject("Excel.Application")
     If xlBook Is Nothing Then
         Set xlBook = GetObject(myExcelFileFullname)
+        myExcelFileFullnamePrevious = myExcelFileFullname
         Set xlApp = xlBook.Application
+        xlApp.UserControl = True
     
         ' 開啟指定的Excel檔案
         'Set xlBook = xlApp.Workbooks.Open("H:\我的雲端硬碟\黃老師遠端工作\3詞學\＃＃@@詞學韻律資料庫20240121@@●●.xlsm")
         Set xlSheet = xlBook.Sheets(1) ' 假設搜尋第一個工作表
-    
+    Else
+        If myExcelFileFullnamePrevious <> myExcelFileFullname Then
+            xlBook.Close SaveChanges:=False
+            xlApp.Quit
+            Set xlBook = Nothing
+            GoTo openWorkBook
+        End If
+        
+        Debug.Print xlBook.path
+        
     End If
+    
+    SystemSetup.playSound 1
     
     If xlApp.Visible = False Then
-'        xlApp.Visible = True
-        xlApp.Windows(1).Visible = True
+        xlApp.Visible = True
+        xlBook.Activate
+        'xlSheet.Visible = True
+        DoEvents
     End If
+    DoEvents
+    If xlBook.Windows(1).Visible = False Then
+        xlBook.Windows(1).Visible = True
+'        xlApp.Windows(1).Visible = True
+        DoEvents
+    End If
+    
     
     ' 使用Find方法搜尋特定字元
     'Set foundCell = xlSheet.Cells.Find(What:=w, LookIn:=xlValues, LookAt:=xlPart, SearchOrder:=xlByRows, SearchDirection:=xlNext, MatchCase:=False)
@@ -93,7 +123,7 @@ Sub FindPrivateUseCharactersInExcel()
         foundCell.Select
 '        MsgBox "找到了字元 w！"
     Else
-        MsgBox "未找到!"
+        MsgBox "未找到!", vbExclamation
     End If
     
     AppActivate xlBook.Application.Caption
@@ -105,6 +135,42 @@ Sub FindPrivateUseCharactersInExcel()
 '    Set xlSheet = Nothing
 '    Set xlBook = Nothing
 '    Set xlApp = Nothing
+Exit Sub
+eH:
+    Select Case Err.Number
+        Case 7
+            If VBA.InStr(Err.Description, "記憶體不足") Then
+                Resume Next
+            Else
+                MsgBox Err.Number & Err.Description, vbCritical
+            End If
+        Case 9
+            If VBA.InStr(Err.Description, "陣列索引超出範圍") Then
+                DoEvents
+                SystemSetup.playSound 1
+                Resume
+            Else
+                MsgBox Err.Number & Err.Description, vbCritical
+            End If
+        Case 462
+            If VBA.InStr(Err.Description, "遠端伺服器不存在或無法使用") Then
+                DoEvents
+                SystemSetup.playSound 1
+                Set xlBook = Nothing
+                GoTo openWorkBook
+            Else
+                MsgBox Err.Number & Err.Description, vbCritical
+            End If
+        Case -2147417848
+            If VBA.InStr(Err.Description, "Automation 錯誤") Then
+                Set xlBook = Nothing
+                GoTo openWorkBook:
+            Else
+                MsgBox Err.Number & Err.Description, vbCritical
+            End If
+        Case Else
+            MsgBox Err.Number & Err.Description, vbCritical
+    End Select
 End Sub
 
 

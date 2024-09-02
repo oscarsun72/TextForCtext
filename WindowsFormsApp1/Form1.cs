@@ -153,6 +153,11 @@ namespace WindowsFormsApp1
             get { return textBox3.Text; }
             set { textBox3.Text = value; }
         }
+internal string textBox4Text
+        {
+            get { return textBox4.Text; }
+            set { textBox4.Text = value; }
+        }
         //取得輸入模式：手動或自動
         internal bool KeyinTextMode { get { return keyinTextMode; } }
 
@@ -484,7 +489,7 @@ namespace WindowsFormsApp1
         void show_nICo(Keys modifierKeys)
         {
 
-            this.Show();
+            this.Show();            
             if (ntfyICo.Visible) ntfyICo.Visible = false;
             this.WindowState = FormWindowState.Normal;
             this.Height = thisHeight;
@@ -553,6 +558,7 @@ namespace WindowsFormsApp1
                     else
                     { Process.Start(url); appActivateByName(); }
                     //Clipboard.Clear();
+                    bringBackMousePosFrmCenter();
                 }
                 //若此時按下 Shift 則不會取得文本而是逕行送去《古籍酷》OCR取回文本至textBox1以備用
                 else if ((modifierKeys == Keys.Shift || (ocrTextMode && modifierKeys != Keys.Control))
@@ -619,7 +625,7 @@ namespace WindowsFormsApp1
                 //按下Ctrl時，自動將Quick edit的連結複製到剪貼簿
                 if (keyinTextMode) copyQuickeditLinkWhenKeyinMode(modifierKeys);
                 //Form1.playSound(Form1.soundLike.exam);
-                show_nICo(modifierKeys);//this.Left + this.Width) show_nICo();
+                show_nICo(modifierKeys);//this.Left + this.Width) show_nICo();                
             }
             #endregion
 
@@ -730,11 +736,12 @@ namespace WindowsFormsApp1
                 case Keys.Shift:
                     //toOCR(br.OCRSiteTitle.GJcool);
                     copyQuickeditLinkWhenKeyinModeSub();
+                    ResetLastValidWindow();                    
                     break;
                 //自動擷取「簡單修改模式」（selector: # quickedit > a的連結)
                 case Keys.None:
                     copyQuickeditLinkWhenKeyinModeSub();
-                    ResetLastValidWindow();
+                    ResetLastValidWindow();                    
                     break;
             }
         }

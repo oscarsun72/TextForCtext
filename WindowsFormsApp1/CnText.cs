@@ -873,6 +873,23 @@ namespace TextForCtext
             //var rearranged = paragraphs.Select((p, i) => new { Paragraph = p, Index = i % 3 }).OrderBy(x => x.Index).Select(x => x.Paragraph);
             //text = string.Join(Environment.NewLine, rearranged);
         }
+
+        /// <summary>
+        /// 檢查文本中的成對「【」「】」符號，並清除其中的嵌套符號（【、】）。
+        /// 20240901 Copilot大菩薩：C# Windows.Forms中檢查並清除成對的「【」「】」符號：https://sl.bing.net/jZwKT5iL7gO
+        /// </summary>
+        /// <param name="input">要清除的字串</param>
+        /// <returns>傳回清除的值</returns>
+        public static string RemoveNestedBrackets(string input)
+        {
+            string pattern = @"【[^【】]*】";
+            return Regex.Replace(input, pattern, match =>
+            {
+                string content = match.Value;
+                content = Regex.Replace(content, @"[【】]", "");
+                return $"【{content}】";
+            });
+        }
         /// <summary>
         /// 這段程式碼會將 textBox1 中的文字中的內部花括號移除。例如，它會將 {{Copilot{{大菩薩}} 或 {{Copilot}}大菩薩}} 轉換為 {{Copilot大菩薩}}。
         /// 請注意，這個程式碼只會移除最內層的花括號。如果有多層花括號，您可能需要多次執行這個程式碼。
