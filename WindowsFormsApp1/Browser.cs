@@ -5045,16 +5045,28 @@ internal static string getImageUrl() {
                     }
                     StopOCR = true; return false;
                 }
+
+                
                 if (ocrResult.IndexOf(" ") > -1)
                 {
+                    #region 檢查覆查追查用，記下原來OCR傳回的樣子 20240902
+                    Console.WriteLine(ocrResult);
+                    #endregion
                     //Debugger.Break();
                     CnText.Spaces2Braces(ref ocrResult);
                 }
-                //ocrResult = ocrResult.Replace("】【", string.Empty).Replace("【", "{{").Replace("】", "}}");
-                //CnText.RemoveInnerBraces(ref ocrResult);
-                ocrResult = ocrResult.Replace("】【", string.Empty);
-                ocrResult = CnText.RemoveNestedBrackets(ocrResult);
-                ocrResult=ocrResult.Replace("【", "{{").Replace("】", "}}");
+                if (ocrResult.IndexOf("【") > -1)
+                {
+                    #region 檢查覆查追查用，記下原來OCR傳回的樣子 20240902
+                    Console.WriteLine(ocrResult);
+                    #endregion
+
+                    //ocrResult = ocrResult.Replace("】【", string.Empty).Replace("【", "{{").Replace("】", "}}");
+                    //CnText.RemoveInnerBraces(ref ocrResult);
+                    ocrResult = ocrResult.Replace("】【", string.Empty);
+                    ocrResult = CnText.RemoveNestedBrackets(ocrResult);
+                    ocrResult = ocrResult.Replace("【", "{{").Replace("】", "}}");
+                }
 
                 //Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("copy to clipboard!");
                 try
@@ -7059,7 +7071,7 @@ internal static string getImageUrl() {
                                 }
                                 else
                                 {
-                                    if (MessageBox.Show("是否要切換成批量處理模式？", "若按下【取消】，擬改用『標注平台』處理，請記得在textBox2下「gjk」指令以切換。感恩感恩　南無阿彌陀佛　讚美主", 
+                                    if (MessageBox.Show("是否要切換成批量處理模式？", "若按下【取消】，擬改用『標注平台』處理，請記得在textBox2下「gjk」指令以切換。感恩感恩　南無阿彌陀佛　讚美主",
                                         MessageBoxButtons.OKCancel, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly) == DialogResult.OK)
                                         Form1.BatchProcessingGJcoolOCR = true;
                                     else
@@ -8673,16 +8685,17 @@ internal static string getImageUrl() {
                     }
 
                 }
-                try { 
-                
-                driver.Navigate().GoToUrl(editUrl);
+                try
+                {
+
+                    driver.Navigate().GoToUrl(editUrl);
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     switch (ex.HResult)
                     {
                         case -2146233088:
-                            if(ex.Message.StartsWith("The HTTP request to the remote WebDriver server for URL "))
+                            if (ex.Message.StartsWith("The HTTP request to the remote WebDriver server for URL "))
                             {
                                 Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("連線超時，請再重試。感恩感恩　南無阿彌陀佛");
                             }
@@ -8911,9 +8924,9 @@ internal static string getImageUrl() {
                 IWebElement iwe = null;
                 //while (true)
                 //{
-                iwe = waitFindWebElementBySelector_ToBeClickable("#mainContent > span > div.content > div > div.sidebar_navigation > div > div:nth-child(11)",4);
-                    //if (iwe != null ||
-                        //DateTime.Now.Subtract(dt).TotalSeconds > 10) break;
+                iwe = waitFindWebElementBySelector_ToBeClickable("#mainContent > span > div.content > div > div.sidebar_navigation > div > div:nth-child(11)", 4);
+                //if (iwe != null ||
+                //DateTime.Now.Subtract(dt).TotalSeconds > 10) break;
                 //}
                 iwe?.Click();//當DateTime.Now.Subtract(dt).TotalSeconds > 10) break; 時需要 iwe? 會是null值
 

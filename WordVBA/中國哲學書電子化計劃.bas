@@ -1039,7 +1039,7 @@ Function Search(searchWhatsUrl As String) As String
     End If
     'Shell "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe https://ctext.org/wiki.pl?if=gb&res=384378&searchu=" & Selection.text
     'Shell Normal.SystemSetup.getChrome & searchWhatsUrl & Selection.Text
-    Shell Normal.Network.GetDefaultBrowserEXE & searchWhatsUrl & Selection.text
+    Shell TextForCtextWordVBA.Network.GetDefaultBrowserEXE & searchWhatsUrl & Selection.text
     Search = searchWhatsUrl & Selection.text
 End Function
 

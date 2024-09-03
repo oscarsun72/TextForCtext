@@ -174,7 +174,7 @@ End Select
 End Sub
 Sub 詞頻() '2002/11/10
 On Error GoTo 錯誤處理
-Dim WD, wrong As Long
+Dim wd, wrong As Long
 Dim wrongmark As Integer ', wdct As Long
 Dim StTime As Date, EndTime As Date
 Dim hfspace As Long
@@ -190,18 +190,18 @@ Set rst = db.OpenRecordset("詞頻表", dbOpenDynaset)
 If rst.RecordCount > 0 Then db.Execute "DELETE * FROM 詞頻表"
 StTime = Time
 With ActiveDocument
-    For Each WD In .words
+    For Each wd In .words
         wrong = wrong + 1 '檢視用!
 '        If wrong Mod 1000 = 0 Then Debug.Print wrong
 '        Debug.Print wd & vbCr & "--------"
-        If Len(WD) > 1 And right(WD, 1) = " " Then
+        If Len(wd) > 1 And right(wd, 1) = " " Then
             hfspace = hfspace + 1 '計次
             GoTo retry '字串右邊是半形空格時,AccessUpdate時會銷去,且於詞彙亦無意意,故不計!
         End If
-        rst.FindFirst "詞彙 like '" & WD & "'"
+        rst.FindFirst "詞彙 like '" & wd & "'"
         If rst.NoMatch Then
             rst.AddNew
-            rst("詞彙") = WD
+            rst("詞彙") = wd
 '            On Error GoTo 次數
             rst.Update
         Else
@@ -214,7 +214,7 @@ With ActiveDocument
 '        wdct = Selection.StoryLength
 '        instr(1+
 '        .Select
-retry:  Next WD
+retry:  Next wd
 End With
 EndTime = Time
 AppActivate "Microsoft word"
@@ -1773,7 +1773,7 @@ With d
     Next Char
 End With
 
-Dim doc As New Document, Xsort() As String, u As Long ', xTsort() As Integer, k As Long, so As Long, ww As String
+Dim Doc As New Document, Xsort() As String, u As Long ', xTsort() As Integer, k As Long, so As Long, ww As String
 'ReDim Xsort(i) As String ', xtsort(i) as Integer
 'ReDim Xsort(d.Characters.Count) As String
 If u = 0 Then u = 1 '若無執行「字頻加一:」副程序,若無超過1次的字頻，則　Xsort(xT(j - 1)) = Xsort(xT(j - 1)) & "、" & x(j - 1) & _
@@ -1792,7 +1792,7 @@ End With
 'U = UBound(Xsort)
 For j = u To 0 Step -1 '陣列排序'2010/10/29
     If Xsort(j) <> "" Then
-        With doc
+        With Doc
             If Len(.Range) = 1 Then '尚未輸入內容
                 .Range.InsertAfter "字頻 = " & j & "次：（" & Len(Replace(Xsort(j), "、", "")) & "字）"
                 .Range.Paragraphs(1).Range.Font.Size = 12
@@ -1824,15 +1824,15 @@ For j = u To 0 Step -1 '陣列排序'2010/10/29
     End If
 Next j
 
-With doc.Paragraphs(1).Range
+With Doc.Paragraphs(1).Range
      .InsertParagraphBefore
      .Font.NameAscii = "times new roman"
-    doc.Paragraphs(1).Range.InsertParagraphAfter
-    doc.Paragraphs(1).Range.InsertParagraphAfter
-    doc.Paragraphs(1).Range.InsertAfter "你提供的文本共使用了" & i & "個不同的字（傳統字與簡化字不予合併）"
+    Doc.Paragraphs(1).Range.InsertParagraphAfter
+    Doc.Paragraphs(1).Range.InsertParagraphAfter
+    Doc.Paragraphs(1).Range.InsertAfter "你提供的文本共使用了" & i & "個不同的字（傳統字與簡化字不予合併）"
 End With
 
-doc.ActiveWindow.Visible = True
+Doc.ActiveWindow.Visible = True
 '
 
 'U = UBound(xT)
@@ -1867,7 +1867,7 @@ MsgBox "完成！" & vbCr & vbCr & "費時" & Left(de - ds, 5) & "秒!"
 ExcelSheet.Application.Visible = True
 ExcelSheet.Application.UserControl = True
 ExcelSheet.SaveAs xlsp '"C:\Macros\守真TEST.XLS"
-doc.SaveAs Replace(xlsp, "XLS", "doc") '分大小寫
+Doc.SaveAs Replace(xlsp, "XLS", "doc") '分大小寫
 'Doc.SaveAs "c:\test1.doc"
 AppActivate "microsoft excel"
 Exit Sub
@@ -1893,7 +1893,7 @@ End Select
 End Sub
 
 Function lEnglish() '英文大寫字母
-Dim WD, wdct As Long, i As Byte
+Dim wd, wdct As Long, i As Byte
 For i = 65 To 90
     Debug.Print Chr(i) & vbCr
 Next
@@ -2068,30 +2068,30 @@ Next ch
 End Sub
 
 Sub 注腳符號置換() '2004/10/17
-Dim WD As Range 'As Range 'Words物件即表一個Range物件,見線上說明!
+Dim wd As Range 'As Range 'Words物件即表一個Range物件,見線上說明!
 'Dim i As Long ' Integer
 '要先執行全形轉半形,這樣words才能正確判斷為數字
 全形數字轉換成半形數字
 With Selection '原以整份文件(ActiveDocument),今但以選取範圍整理,但因更改值而影響,作廢!
     If .Type = wdSelectionIP Then .Document.Select '如果沒有選取範圍(為插入點)則處理整份文件
     If .Document.path = "" Then
-        For Each WD In .words
+        For Each wd In .words
             '要是數字且前後不能加﹝﹞或〔〕才執行！
-            If Not WD.text Like "﹝" And Not WD.text Like "〔" And Not WD Like "[[]" And Not WD Like "[]]" Then
-                If IsNumeric(WD) Then
-                    If WD.End = .Document.Content.StoryLength Or WD.start = 0 Then GoTo w '文件之首尾另外處理
-                    If Not WD.Previous Like "﹝" And Not WD.Previous Like "〔" And Not WD.Previous Like "[[]" _
-                        And Not WD.Next Like "﹞" And Not WD.Next Like "〕" And Not WD.Next Like "]" Then
-w:                      If WD <= 20 Then 'Arial Unicode MS[種類]裡"括號文數字"只有二十個!
-                            With WD
+            If Not wd.text Like "﹝" And Not wd.text Like "〔" And Not wd Like "[[]" And Not wd Like "[]]" Then
+                If IsNumeric(wd) Then
+                    If wd.End = .Document.Content.StoryLength Or wd.start = 0 Then GoTo w '文件之首尾另外處理
+                    If Not wd.Previous Like "﹝" And Not wd.Previous Like "〔" And Not wd.Previous Like "[[]" _
+                        And Not wd.Next Like "﹞" And Not wd.Next Like "〕" And Not wd.Next Like "]" Then
+w:                      If wd <= 20 Then 'Arial Unicode MS[種類]裡"括號文數字"只有二十個!
+                            With wd
                                 '選取會改變Selection的範圍,故今取消!
 '                                .Select 'Words物件即表一個Range物件,見線上說明!
                                 .Font.Name = "Arial Unicode MS"
-                                WD.text = ChrW((9312 - 1) + WD)
+                                wd.text = ChrW((9312 - 1) + wd)
                             End With
                         Else '超過20號的註腳時
-                            With WD
-                                .text = "﹝" & WD.text & "﹞" '加括號
+                            With wd
+                                .text = "﹝" & wd.text & "﹞" '加括號
                             End With
         '                    MsgBox "有超過20號的註腳,不能執行！", vbCritical
         '                    Do Until .Undo(i) = False '還原直至不能還原（還原所有動作）
@@ -2177,7 +2177,7 @@ If Selection.Type = wdSelectionIP Then Exit Sub
             AppActivate "microsoft excel"
             With e
                 '.ActiveWorkbook.Save
-                r = .ActiveCell.Row
+                r = .ActiveCell.row
                 For i = 1 To 7
                     If .Cells(r, i).Value <> "" Then
                         MsgBox "請到新記錄列！！", vbExclamation
@@ -2197,7 +2197,7 @@ If Selection.Type = wdSelectionIP Then Exit Sub
                     .Cells(r, 5) = 1
                 End If
                 .ActiveWorkbook.Save
-                .Cells(.ActiveCell.Row + 1, .ActiveCell.Column).Activate
+                .Cells(.ActiveCell.row + 1, .ActiveCell.Column).Activate
             End With
         End With
         游標所在位置書籤
@@ -2320,7 +2320,7 @@ With d
     Next Char
 End With
 
-Dim doc As New Document, Xsort() As String, u As Long ', xTsort() As Integer, k As Long, so As Long, ww As String
+Dim Doc As New Document, Xsort() As String, u As Long ', xTsort() As Integer, k As Long, so As Long, ww As String
 'ReDim Xsort(i) As String ', xtsort(i) as Integer
 'ReDim Xsort(d.Characters.Count) As String
 If u = 0 Then u = 1 '若無執行「字頻加一:」副程序,若無超過1次的字頻，則　Xsort(xT(j - 1)) = Xsort(xT(j - 1)) & "、" & x(j - 1) & _
@@ -2342,7 +2342,7 @@ End With
 'U = UBound(Xsort)
 For j = u To 0 Step -1 '陣列排序'2010/10/29
     If Xsort(j) <> "" Then
-        With doc
+        With Doc
             If Len(.Range) = 1 Then '尚未輸入內容
                 .Range.InsertAfter "字頻 = " & j & "次：（" & Len(Replace(Xsort(j), "、", "")) & "字）"
                 .Range.Paragraphs(1).Range.Font.Size = 12
@@ -2374,15 +2374,15 @@ For j = u To 0 Step -1 '陣列排序'2010/10/29
     End If
 Next j
 
-With doc.Paragraphs(1).Range
+With Doc.Paragraphs(1).Range
      .InsertParagraphBefore
      .Font.NameAscii = "times new roman"
-    doc.Paragraphs(1).Range.InsertParagraphAfter
-    doc.Paragraphs(1).Range.InsertParagraphAfter
-    doc.Paragraphs(1).Range.InsertAfter "你提供的文本共使用了" & i & "個不同的字（傳統字與簡化字不予合併）"
+    Doc.Paragraphs(1).Range.InsertParagraphAfter
+    Doc.Paragraphs(1).Range.InsertParagraphAfter
+    Doc.Paragraphs(1).Range.InsertAfter "你提供的文本共使用了" & i & "個不同的字（傳統字與簡化字不予合併）"
 End With
 
-doc.ActiveWindow.Visible = True
+Doc.ActiveWindow.Visible = True
 '
 
 'U = UBound(xT)
@@ -2418,7 +2418,7 @@ MsgBox "完成！" & vbCr & vbCr & "費時" & Left(de - ds, 5) & "秒!", vbInformation
 xlSheet.Application.Visible = True
 xlSheet.Application.UserControl = True
 xlSheet.SaveAs xlsp '"C:\Macros\守真TEST.XLS"
-doc.SaveAs Replace(xlsp, "XLS", "doc") '分大小寫
+Doc.SaveAs Replace(xlsp, "XLS", "doc") '分大小寫
 Set Excel.Application = Nothing
 Exit Sub
 字頻加一:
@@ -2447,8 +2447,8 @@ Select Case Err.Number
     '    End If
         'Doc.Application.ActiveWindow.View.ReadingLayout
         d.ActiveWindow.View.ReadingLayout = Not d.ActiveWindow.View.ReadingLayout
-        doc.ActiveWindow.View.ReadingLayout = False
-        doc.ActiveWindow.Visible = False
+        Doc.ActiveWindow.View.ReadingLayout = False
+        Doc.ActiveWindow.Visible = False
         ReadingLayoutB = True
         Resume
     Case Else
@@ -2543,13 +2543,13 @@ With d
     Next
 End With
 12
-Dim doc As New Document, Xsort() As String, u As Long ', xTsort() As Integer, k As Long, so As Long, ww As String
+Dim Doc As New Document, Xsort() As String, u As Long ', xTsort() As Integer, k As Long, so As Long, ww As String
 If u = 0 Then u = 1 '若無執行「詞頻加一:」副程序,若無超過1次的詞頻，則　Xsort(xT(j - 1)) = Xsort(xT(j - 1)) & "、" & x(j - 1) & _
                                 會出錯：陣列索引超出範圍 2015/11/5
 
 ReDim Xsort(u) As String
 Set xlApp = CreateObject("Excel.Application")
-Set xlBook = xlApp.workbooks.Add
+Set xlBook = xlApp.Workbooks.Add
 Set xlSheet = xlBook.Worksheets(1)
 With xlSheet.Application
     For j = 1 To i
@@ -2558,12 +2558,12 @@ With xlSheet.Application
         Xsort(xT(j - 1)) = Xsort(xT(j - 1)) & "、" & x(j - 1) 'Xsort(xT(j - 1)) & ww '陣列排序'2010/10/29
     Next j
 End With
-doc.ActiveWindow.Visible = False
+Doc.ActiveWindow.Visible = False
 If d.ActiveWindow.View.ReadingLayout Then ReadingLayoutB = True: d.ActiveWindow.View.ReadingLayout = Not d.ActiveWindow.View.ReadingLayout
 'U = UBound(Xsort)
 For j = u To 0 Step -1 '陣列排序'2010/10/29
     If Xsort(j) <> "" Then
-        With doc
+        With Doc
             If Len(.Range) = 1 Then '尚未輸入內容
                 .Range.InsertAfter "詞頻 = " & j & "次：（" & Len(Replace(Xsort(j), "、", "")) / ln & "個）"
                 .Range.Paragraphs(1).Range.Font.Size = 12
@@ -2595,18 +2595,18 @@ For j = u To 0 Step -1 '陣列排序'2010/10/29
     End If
 Next j
 
-With doc.Paragraphs(1).Range
+With Doc.Paragraphs(1).Range
      .InsertParagraphBefore
      .Font.NameAscii = "times new roman"
-    doc.Paragraphs(1).Range.InsertParagraphAfter
-    doc.Paragraphs(1).Range.InsertParagraphAfter
-    doc.Paragraphs(1).Range.InsertAfter "你提供的文本共使用了" & i & "個不同的詞彙（傳統字與簡化字不予合併）"
+    Doc.Paragraphs(1).Range.InsertParagraphAfter
+    Doc.Paragraphs(1).Range.InsertParagraphAfter
+    Doc.Paragraphs(1).Range.InsertAfter "你提供的文本共使用了" & i & "個不同的詞彙（傳統字與簡化字不予合併）"
 End With
 
-doc.ActiveWindow.Visible = True
+Doc.ActiveWindow.Visible = True
 
 de = VBA.Timer
-doc.SaveAs Replace(xlsp, "XLS", "doc") '分大小寫
+Doc.SaveAs Replace(xlsp, "XLS", "doc") '分大小寫
 If ReadingLayoutB Then d.ActiveWindow.View.ReadingLayout = Not d.ActiveWindow.View.ReadingLayout
 Set d = Nothing ' ActiveDocument.Close wdDoNotSaveChanges
 
@@ -2643,8 +2643,8 @@ Select Case Err.Number
     '    End If
         'Doc.Application.ActiveWindow.View.ReadingLayout
         d.ActiveWindow.View.ReadingLayout = False ' Not d.ActiveWindow.View.ReadingLayout
-        doc.ActiveWindow.View.ReadingLayout = False
-        doc.ActiveWindow.Visible = False
+        Doc.ActiveWindow.View.ReadingLayout = False
+        Doc.ActiveWindow.Visible = False
         ReadingLayoutB = True
         Resume
     
@@ -2937,7 +2937,7 @@ Sub 漢籍電子文獻資料庫文本整理_以轉貼到中國哲學書電子化計劃(Optional doNotCloseD
     If Not rng.Document Is ActiveDocument Then
         rng.Document.Activate '供給後面的函式用
     End If
-    漢籍電子文獻資料庫文本整理_注文前後加括號_old
+    漢籍電子文獻資料庫文本整理_注文前後加括號_origin
     '漢籍電子文獻資料庫文本整理_注文前後加括號
     For Each a In rng.Characters
             If a.Font.Size = 10 Then
@@ -2950,7 +2950,14 @@ Sub 漢籍電子文獻資料庫文本整理_以轉貼到中國哲學書電子化計劃(Optional doNotCloseD
 '    rng.Cut
     On Error GoTo eH:
 '    rng.PasteAndFormat wdFormatPlainText
-    rng.text = rng.text '《漢籍全文資料庫》改版後剪貼簿效能很差，造成程序當掉，改寫成這行後就解決了！可見問題出在剪貼簿，卻不是我寫的程式。感恩感恩　讚歎讚歎　南無阿彌陀佛 20240825
+    If rng.Find.Execute("/") Then Stop
+     
+     '《漢籍全文資料庫》改版後剪貼簿效能很差，造成程序當掉，改寫成這行後就解決了！可見問題出在剪貼簿，卻不是我寫的程式。感恩感恩　讚歎讚歎　南無阿彌陀佛 20240825
+    rng.text = VBA.Replace(VBA.Replace(rng.text, "(/)", vbNullString), "/", vbNullString)
+'    rng.text = VBA.Replace(rng.text, "(/)", vbNullString)
+'    rng.text = VBA.Replace(rng.text, "/", vbNullString)
+    
+    If rng.Find.Execute("/") Then Stop
     rng.Find.ClearFormatting
     For i = 0 To UBound(rp)
         If InStr(rng.text, rp(i)) > 0 Then
@@ -3044,7 +3051,7 @@ Sub 漢籍電子文獻資料庫文本整理_注文前後加括號() '最後執行 Docs.mark易學關鍵字(在
     word.Application.ScreenUpdating = True
 End Sub
 
-Sub 漢籍電子文獻資料庫文本整理_注文前後加括號_old()
+Sub 漢籍電子文獻資料庫文本整理_注文前後加括號_origin()
 'Sub 漢籍電子文獻資料庫文本整理_注文前後加括號()
     
     Dim rng As Range, fColor As Long, flg As Boolean, ur As UndoRecord

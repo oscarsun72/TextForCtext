@@ -949,6 +949,113 @@ Select Case Err.Number
             MsgBox "請關閉Chrome瀏覽器後再執行一次！" & vbCr & vbCr & Err.Number & Err.Description, vbExclamation
     End Select
 End Function
+Rem 查《白雲深處人家·說文解字·圖像查閱·藤花榭本》：x 要查的字。傳回一個字串陣列，第1個元素是所查詢的字串，第2個元素是查詢結果網址。若沒找到或找到多條，則傳回空字串
+Function LookupHomeinmistsShuowenImageAccess_VineyardHall(x As String) As String()
+    On Error GoTo eH
+    Dim result(1) As String '1=索引值上限（最大值）
+    LookupHomeinmistsShuowenImageAccess_VineyardHall = result
+    If Not code.IsChineseCharacter(x) Then
+        Exit Function
+    End If
+    SystemSetup.SetClipboard x
+    
+    If Not openChrome("https://homeinmists.ilotus.org/shuowen/find.php") Then
+        If Not openChrome("https://homeinmists.ilotus.org/shuowen/find.php") Then
+            Stop
+        End If
+    End If
+    
+    Dim iwe As SeleniumBasic.IWebElement
+    Dim dt As Date
+    dt = VBA.Now
+    '檢索輸入框
+    Do While iwe Is Nothing
+        Set iwe = wd.FindElementByCssSelector("#queryString1")
+        If DateDiff("s", dt, VBA.Now) > 5 Then
+            Exit Function
+        End If
+    Loop
+    
+'    GoSub iweNothingExitFunction:
+    
+    word.Application.WindowState = wdWindowStateMinimize
+    wd.SwitchTo.Window (wd.CurrentWindowHandle)
+'    VBA.AppActivate "chrome"
+
+    '找到檢索輸入框
+    Dim keys As New SeleniumBasic.keys
+    iwe.Clear
+    iwe.SendKeys keys.Shift + keys.Insert
+'        iwe.SendKeys keys.Enter'此處按Enter沒作用，須按檢索按鈕
+    '檢索按鈕
+    Set iwe = wd.FindElementByCssSelector("body > div.search-block > table > tbody > tr > td > input[type=button]")
+    GoSub iweNothingExitFunction:
+    iwe.Click
+    
+    '查詢結果訊息框，如：沒有找到。請重新檢索。不支持簡化漢字檢索。
+    Set iwe = wd.FindElementByCssSelector("#searchedResults")
+    GoSub iweNothingExitFunction:
+    If VBA.InStr(iwe.text, "沒有找到。請重新檢索。不支持簡化漢字檢索。") = 1 Then
+        Exit Function
+    End If
+            
+    '檢出 n 條
+'    Set iwe = wd.FindElementByCssSelector("#searchedResults > span")
+    Dim n As Byte '如：檢出 6 條
+    n = VBA.CByte(VBA.IIf(VBA.IsNumeric(VBA.Trim(VBA.Replace(VBA.Replace(iwe.text, "檢出", vbNullString), "條", vbNullString))), VBA.Trim(VBA.Replace(VBA.Replace(iwe.text, "檢出", vbNullString), "條", vbNullString)), "0"))
+    If n = 0 Then '網頁訊息有錯誤，須檢查(因為找不到時所顯示的是：「沒有找到。請重新檢索。不支持簡化漢字檢索。」
+        Exit Function
+    End If
+    '檢出結果只有一筆才自動開啟其結果連結，否則手動開啟
+    If n > 1 Then
+        result(0) = x
+        '藤花榭本的第2條
+        Set iwe = wd.FindElementByCssSelector("#searchTableOut > tr:nth-child(3) > td:nth-child(15)")
+        GoSub iweNothingExitFunction
+        
+        If iwe.text <> vbNullString Then
+            LookupHomeinmistsShuowenImageAccess_VineyardHall = result
+            Exit Function
+        End If
+    Else
+        result(0) = x
+    End If
+    
+    Set iwe = wd.FindElementByCssSelector("#searchTableOut > tr:nth-child(2) > td:nth-child(15) > a")
+    GoSub iweNothingExitFunction
+    
+    iwe.Click
+    wd.SwitchTo.Window WindowHandlesItem(WindowHandlesCount - 1)
+    
+    result(1) = wd.URL
+    SystemSetup.SetClipboard result(1)
+
+    LookupHomeinmistsShuowenImageAccess_VineyardHall = result
+    Exit Function
+    
+iweNothingExitFunction:
+    If iwe Is Nothing Then
+        LookupHomeinmistsShuowenImageAccess_VineyardHall = result
+        Exit Function
+    End If
+    Return
+eH:
+Select Case Err.Number
+        Case -2146233088
+            If InStr(Err.Description, "disconnected: not connected to DevTools") Then 'disconnected: not connected to DevTools
+                                            '  (failed to check if window was closed: disconnected: not connected to DevTools)
+                                            '  (Session info: chrome=128.0.6613.85)
+                'Set wd = Nothing
+                SystemSetup.killchromedriverFromHere
+                Set wd = Nothing
+                Resume
+            Else
+                MsgBox Err.Number & Err.Description, vbExclamation
+            End If
+        Case Else
+            MsgBox "請關閉Chrome瀏覽器後再執行一次！" & vbCr & vbCr & Err.Number & Err.Description, vbExclamation
+    End Select
+End Function
 
 Sub GoogleSearch(Optional searchStr As String) '有空再完成
     On Error GoTo Err1

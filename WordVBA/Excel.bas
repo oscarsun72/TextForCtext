@@ -5,6 +5,24 @@ Dim App As Object, wb As Object, sht As Object   '¥ÎDim¤~¯à­ÝÅU«O¯d¨ä¥Í©R¶g´Á»P«
 'https://dotblogs.com.tw/regionbbs/2016/10/13/concepts-in-late-binding
 'https://docs.microsoft.com/zh-tw/previous-versions/office/troubleshoot/office-developer/binding-type-available-to-automation-clients
 'https://docs.microsoft.com/zh-tw/dotnet/visual-basic/programming-guide/language-features/early-late-binding/
+Enum XlFindLookIn
+    xlComments = -4144
+    xlFormulas = -4123
+    xlValues = -4163
+End Enum
+Enum XlLookAt
+    xlPart = 2
+    xlWhole = 1
+End Enum
+Enum XlSearchOrder
+    xlByColumns = 2
+    xlByRows = 1
+End Enum
+Enum XlSearchDirection
+    xlNext = 1
+    xlPrevious = 2
+End Enum
+
 
 Property Get Application()
     'Stop
@@ -27,10 +45,11 @@ Private Sub Class_Initialize()
     'Stop
     Set App = VBA.CreateObject("Excel.Application")
     App.UserControl = False 'for closing the app by user,this must be set to false or it will end until the word application close. https://docs.microsoft.com/zh-tw/office/vba/api/excel.application.usercontrol
-    Set wb = App.workbooks.Add() 'https://docs.microsoft.com/zh-tw/office/vba/api/excel.workbooks.add
+    Set wb = App.Workbooks.Add() 'https://docs.microsoft.com/zh-tw/office/vba/api/excel.workbooks.add
     Set sht = wb.Sheets.Add()
 End Sub
-
+Rem ¦bExcelÀÉ®×¤¤§ä¨ì­n§äªº¤å¦r
+Rem ²{¥Î¤¤ªº¤å¥ó²Ä1¦æ«ü©wExcelÀÉ®×¥þÀÉ¦W
 Sub FindPrivateUseCharactersInExcel()
     Static xlApp As Object
     Static xlBook As Object
@@ -108,7 +127,7 @@ openWorkBook:
     
     
     ' ¨Ï¥ÎFind¤èªk·j´M¯S©w¦r¤¸
-    'Set foundCell = xlSheet.Cells.Find(What:=w, LookIn:=xlValues, LookAt:=xlPart, SearchOrder:=xlByRows, SearchDirection:=xlNext, MatchCase:=False)
+'    Set foundCell = xlSheet.Cells.Find(What:=w, LookIn:=xlValues, LookAt:=xlPart, SearchOrder:=xlByRows, SearchDirection:=xlNext, MatchCase:=False)
     ' ³]©w·j´M½d³ò¬°G¡BH¡BI©MMÄæ
     'Set searchRange = xlSheet.Range("G:G,H:H,I:I,M:M")
     ' ¨Ï¥ÎFind¤èªk·j´M¯S©w¦r¤¸
@@ -117,7 +136,7 @@ openWorkBook:
         (What:=w, LookIn:=xlApp.XlFindLookIn.xlValues, _
             LookAt:=xlApp.XlLookAt.xlPart, SearchOrder:=xlApp.XlSearchOrder.xlByRows _
                 , SearchDirection:=xlApp.XlSearchDirection.xlNext, MatchCase:=False)
-    Set foundCell = xlSheet.Application.ActiveCell.Find(What:=w, LookIn:=-4163, LookAt:=2, SearchOrder:=1, SearchDirection:=1, MatchCase:=False)
+    Set foundCell = xlSheet.Application.ActiveCell.Find(What:=w, LookIn:=xlValues, LookAt:=xlPart, SearchOrder:=xlByRows, SearchDirection:=xlNext, MatchCase:=False)
     
     If Not foundCell Is Nothing Then
         foundCell.Select
@@ -172,5 +191,86 @@ eH:
             MsgBox Err.Number & Err.Description, vbCritical
     End Select
 End Sub
-
+Rem 20240902 ¨ú¥N¨p¤H³y¦r¬°¨t²Î¥Î¦r creedit_with_Copilot¤jµÐÂÄ¡GExcel ¨p¤H³y¦r´À´«µ{¦¡¡Ghttps://sl.bing.net/cQSdvLaFCZo
+Rem ²{¥Î¤¤ªº¤å¥ó²Ä1¦æ«ü©wExcelÀÉ®×¥þÀÉ¦W
+Rem ²{¥Î¤¤ªº¤å¥ó²Ä¤@­Ó1ªí®æ¶·¬O¨p¤H³y¦r¡]²Ä1Äæ¡^»P¨t²Î¥Î¦r¡]²Ä2Äæ¡^ªº¹ï·Óªí
+Sub ReplacePrivateUseCharactersInExcel()
+    Dim xlApp As Object
+    Dim xlBook As Object
+    Dim xlSheet As Object
+    Dim privateUseChar As String
+    Dim replacementChar As String, myExcelFileFullname As String
+    Dim tb As Table
+    
+    
+    With Selection.Document
+        If .Tables.Count < 1 Then
+            MsgBox "²{¥Î¤¤ªº¤å¥ó²Ä¤@­Ó1ªí®æ¶·¬O¨p¤H³y¦r¡]²Ä1Äæ¡^»P¨t²Î¥Î¦r¡]²Ä2Äæ¡^ªº¹ï·Óªí", vbCritical
+            Exit Sub
+        Else
+            Set tb = .Tables(1)
+        End If
+        myExcelFileFullname = _
+            .Range(.Paragraphs(1).Range.Characters(1).start _
+                , _
+            .Paragraphs(1).Range.Characters( _
+            .Paragraphs(1).Range.Characters.Count - 1).End).text
+    End With
+    If myExcelFileFullname = "" Then Exit Sub
+    If myExcelFileFullname = Chr(13) Then Exit Sub
+    If VBA.Dir(myExcelFileFullname) = "" Then
+        MsgBox "©Ò«ü©wªº¥þÀÉ¦W¦³»~¡I", vbCritical
+        Exit Sub
+    End If
+    
+    SystemSetup.playSound 0.484
+    
+    ' ¶}±Ò Excel À³¥Îµ{¦¡
+'    Set xlApp = CreateObject("Excel.Application")
+    Set xlApp = Excel.Application
+    xlApp.UserControl = True
+    xlApp.Visible = True
+    
+    ' ¶}±Ò Excel ¤u§@Ã¯
+'    Set xlBook = xlApp.Workbooks.Open("C:\path\to\your\file.xlsx")
+    Set xlBook = xlApp.Workbooks.Open(myExcelFileFullname)
+    Set xlSheet = xlBook.Sheets(1) ' ®Ú¾Ú»Ý­n­×§ï¤u§@ªí¯Á¤Þ
+    
+    xlApp.DisplayAlerts = False
+    
+    Dim r As row, i As Long
+    For Each r In tb.Rows
+        i = i + 1
+        ' ³]©w¨p¤H³y¦r°Ïªº½d³ò
+        'privateUseChar = "[\uE000-\uF8FF]" ' ³o¬O¨p¤H³y¦r°Ïªº½d³ò
+        privateUseChar = r.Cells(1).Range.Characters(1).text
+        'replacementChar = "?" ' ´À´«¦r¤¸¡A¥i¥H®Ú¾Ú»Ý­n­×§ï
+        replacementChar = r.Cells(2).Range.Characters(1).text
+        If privateUseChar <> vbNullString And replacementChar <> vbNullString Then
+    
+            ' ¨Ï¥Î Replace ¤èªk´À´«¨p¤H³y¦r°Ïªº¦r¤¸
+            xlSheet.Cells.Replace What:=privateUseChar, Replacement:=replacementChar, LookAt:=xlPart, SearchOrder:=xlByRows, MatchCase:=False, SearchFormat:=False, ReplaceFormat:=False
+            
+            If i Mod 10 = 0 Then
+                'Beep
+                SystemSetup.playSound 1
+            End If
+            
+        End If
+    Next r
+    xlApp.DisplayAlerts = True
+    ' Àx¦s¨ÃÃö³¬¤u§@Ã¯
+    If MsgBox("¨p¤H³y¦r¤w´À´«§¹¦¨¡I¬O§_Àx¦s¡H", vbInformation + vbOKCancel) = vbOK Then
+        xlBook.Save
+    End If
+'    xlBook.Close
+'    xlApp.Quit
+'
+'    ' ÄÀ©ñª«¥ó
+'    Set xlSheet = Nothing
+'    Set xlBook = Nothing
+'    Set xlApp = Nothing
+    
+    
+End Sub
 

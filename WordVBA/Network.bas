@@ -81,6 +81,7 @@ Sub 查Google()
     SeleniumOP.GoogleSearch Selection.text
 End Sub
 Sub 查百度()
+    Rem Alt b
     SeleniumOP.BaiduSearch Selection
 End Sub
 Sub 查字統網()
@@ -120,9 +121,26 @@ Sub 查漢語大詞典()
     SeleniumOP.LookupHYDCD Selection.text
 End Sub
 Sub 查國學大師()
-    Rem Ctrl + d + s ds（大師） 或 Alt + s （師）
+    Rem Ctrl + d + s （ds：大師）
     SeleniumOP.LookupGXDS Selection.text
 End Sub
+Sub 查白雲深處人家說文解字圖像查閱_藤花榭本優先()
+    Rem  Alt + s （說文的說） Alt + j （解字的解）
+    If Selection.Characters.Count > 1 Then
+        MsgBox "限查1字", vbExclamation ', vbError
+        Exit Sub
+    End If
+    Dim ar 'As Variant
+    ar = SeleniumOP.LookupHomeinmistsShuowenImageAccess_VineyardHall(Selection.text)
+    If ar(0) = vbNullString Then
+        MsgBox "找不到，或網頁當了或改版了！", vbExclamation
+'    Else
+'        word.Application.Activate
+'        If ar(1) = "" Then MsgBox "找出結果不止1條，請手動自行操作！", vbInformation
+    End If
+End Sub
+
+
 
 Function GetUserAddress() As Boolean
     Dim x As String, a As Object 'Access.Application

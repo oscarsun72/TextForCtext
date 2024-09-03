@@ -11374,7 +11374,7 @@ internal string textBox4Text
             //}
 
             //最上層顯示
-            if (!this.TopMost && !PagePaste2GjcoolOCR_ing) this.TopMost = true;
+            if (!this.TopMost && keyinTextMode &&!ocrTextMode && !PagePaste2GjcoolOCR_ing ) this.TopMost = true;
             //if (!this.TopMost && !PagePaste2GjcoolOCR_ing || ModifierKeys != Keys.Control) this.TopMost = true;
 
             //不全部貼上取代原文字
@@ -11507,15 +11507,18 @@ internal string textBox4Text
                     //}
                     #endregion
 
+                    #region 表單最上層顯示且滑鼠鍵盤可用－－ 先取消這個，改由別處控制 20240902
                     if (!Active && !PagePaste2GjcoolOCR_ing)
-                    //if (!Active && !PagePaste2GjcoolOCR_ing&& ModifierKeys!=Keys.Control)
+                    ////if (!Active && !PagePaste2GjcoolOCR_ing&& ModifierKeys!=Keys.Control)
                     {
-                        PauseEvents();
-                        AvailableInUseBothKeysMouse();
-                        //表單最上層顯示
-                        if (!this.TopMost) this.TopMost = true;
-                        ResumeEvents();
+                        Debugger.Break();
+                    //    PauseEvents();
+                    //    AvailableInUseBothKeysMouse();
+                    //    //表單最上層顯示
+                    //    if (!this.TopMost) this.TopMost = true;
+                    //    ResumeEvents();
                     }
+                    #endregion
                     Clipboard.Clear();
                     return;
                 }

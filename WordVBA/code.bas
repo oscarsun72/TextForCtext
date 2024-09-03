@@ -908,6 +908,7 @@ Sub CheckPrivateUseCharacters()
     SystemSetup.playSound 7
     processedCharacters = vbNullString
 End Sub
+Rem 找出造字 - 找出使用中的文件裡的造字並匯出成新檔，檔名為"PrivateUseCharacters.docx"
 Sub PrivateUseCharactersOutput()
     Static processedCharacters As String
     Dim privateUseCharacters As String
@@ -915,6 +916,10 @@ Sub PrivateUseCharactersOutput()
     Dim a As Range
     Dim rng As Range
     Dim ch As String
+    If ActiveDocument.path = "" Then
+        MsgBox "請先儲存文件再繼續！", vbCritical
+        Exit Sub
+    End If
     If Selection.Type = wdSelectionIP _
         Or Selection.Characters.Count = 1 Then '如果沒選取則以插入點以後的文件內容
         Set rng = ActiveDocument.Range(Selection.End, ActiveDocument.Content.End)
@@ -948,7 +953,7 @@ Sub PrivateUseCharactersOutput()
     processedCharacters = vbNullString
     Set d = Documents.Add
     d.Range.text = privateUseCharacters
-    d.SaveAs2 rng.Document.path & "\" & "PrivateUseCharacters" & ".docx"
+    d.SaveAs2 rng.Document.path & "\" & "PrivateUseCharacters.docx"
 '    rng.Document.Close wdDoNotSaveChanges
     d.Activate
     d.Application.Activate
