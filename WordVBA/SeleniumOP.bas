@@ -217,7 +217,7 @@ ErrH:
             If InStr(Err.Description, "並未將物件參考設定為物件的執行個體。") Then
                 SystemSetup.killchromedriverFromHere
                 Set wd = Nothing
-                Stop
+'                Stop
                 If MsgBox("須關閉Chrome瀏覽器再繼續！" & vbCr & vbCr & _
                     vbTab & "是否要程式自動幫您關閉、啟動。感恩感恩　南無阿彌陀佛", vbCritical + vbOKCancel) _
                         = vbOK Then
@@ -952,8 +952,8 @@ End Function
 Rem 查《白雲深處人家·說文解字·圖像查閱·藤花榭本》：x 要查的字。傳回一個字串陣列，第1個元素是所查詢的字串，第2個元素是查詢結果網址。若沒找到或找到多條，則傳回空字串
 Function LookupHomeinmistsShuowenImageAccess_VineyardHall(x As String) As String()
     On Error GoTo eH
-    Dim result(1) As String '1=索引值上限（最大值）
-    LookupHomeinmistsShuowenImageAccess_VineyardHall = result
+    Dim result(1) As String '1=索引值上限（最大值）'預設值即是空陣列
+    LookupHomeinmistsShuowenImageAccess_VineyardHall = result '預設值是陣列宣告時配置的，可是尚未把此配置完成的實例陣列賦予或設定給本函式作為傳回值。故本行萬不可省略，除非呼叫端不需要傳回值供處理
     If Not code.IsChineseCharacter(x) Then
         Exit Function
     End If
@@ -1057,7 +1057,246 @@ Select Case Err.Number
     End Select
 End Function
 
-Sub GoogleSearch(Optional searchStr As String) '有空再完成
+Rem 查《白雲深處人家·說文解字·圖文檢索WFG版》：x 要查的字。若檢索有結果，則傳回true，若沒有，或失敗、故障，則傳回false 20240903
+Function LookupHomeinmistsShuowenImageTextSearchWFG_Interpretation(x As String) As Boolean
+    On Error GoTo eH
+    LookupHomeinmistsShuowenImageTextSearchWFG_Interpretation = False
+    If Not code.IsChineseString(x) Then
+        Exit Function
+    End If
+    SystemSetup.SetClipboard x '把檢索條件複製到剪貼簿以備用
+    
+    If Not openChrome("https://homeinmists.ilotus.org/shuowen/WFG2.php") Then
+        If Not openChrome("https://homeinmists.ilotus.org/shuowen/WFG2.php") Then
+            Stop
+        End If
+    End If
+    
+    Dim iwe As SeleniumBasic.IWebElement
+    Dim dt As Date
+    dt = VBA.Now
+    '檢索「解說」內容部分的輸入框
+    Do While iwe Is Nothing
+        Set iwe = wd.FindElementByCssSelector("#queryString2")
+        If DateDiff("s", dt, VBA.Now) > 5 Then
+            Exit Function
+        End If
+    Loop
+    
+    word.Application.WindowState = wdWindowStateMinimize
+    wd.SwitchTo.Window (wd.CurrentWindowHandle)
+'    VBA.AppActivate "chrome"
+
+    '找到檢索輸入框之後
+    Dim keys As New SeleniumBasic.keys
+    iwe.Clear
+    iwe.SendKeys keys.Shift + keys.Insert '貼上檢索內容 = x
+'        iwe.SendKeys keys.Enter'此處按Enter沒作用，須按檢索按鈕
+    '檢索按鈕
+    Set iwe = wd.FindElementByCssSelector("body > div.search-block > table > tbody > tr > td > input[type=button]:nth-child(4)")
+    GoSub iweNothingExitFunction:
+    iwe.Click
+    
+    '查詢結果訊息框，如：沒有找到。不支持簡化漢字檢索。
+    Set iwe = wd.FindElementByCssSelector("#searchedResults")
+    GoSub iweNothingExitFunction:
+    If VBA.InStr(iwe.text, "沒有找到。不支持簡化漢字檢索。") = 1 Then
+        Exit Function
+    End If
+    
+    LookupHomeinmistsShuowenImageTextSearchWFG_Interpretation = True
+    Exit Function
+    
+iweNothingExitFunction:
+    If iwe Is Nothing Then
+        Exit Function
+    End If
+    Return
+eH:
+Select Case Err.Number
+        Case -2146233088
+            If InStr(Err.Description, "disconnected: not connected to DevTools") Then 'disconnected: not connected to DevTools
+                                            '  (failed to check if window was closed: disconnected: not connected to DevTools)
+                                            '  (Session info: chrome=128.0.6613.85)
+                'Set wd = Nothing
+                SystemSetup.killchromedriverFromHere
+                Set wd = Nothing
+                Resume
+            Else
+                MsgBox Err.Number & Err.Description, vbExclamation
+            End If
+        Case Else
+            MsgBox "請關閉Chrome瀏覽器後再執行一次！" & vbCr & vbCr & Err.Number & Err.Description, vbExclamation
+    End Select
+End Function
+
+Rem 查《漢語多功能字庫》取回其《說文》「解釋」欄位的內容：x 要查的字。傳回一個字串陣列，第1個元素是《說文》「解釋」的內容字串，第2個元素是查詢結果網址。若沒找到，則傳回空字串
+Function LookupMultiFunctionChineseCharacterDatabase(x As String, Optional backgroundStartChrome As Boolean) As String()
+    On Error GoTo eH
+    Dim result(1) As String '1=索引值上限（最大值）
+    LookupMultiFunctionChineseCharacterDatabase = result
+    If Not code.IsChineseCharacter(x) Then
+        Exit Function
+    End If
+    SystemSetup.SetClipboard x
+    
+    If backgroundStartChrome Then
+        Set wd = openChromeBackground("https://humanum.arts.cuhk.edu.hk/Lexis/lexi-mf/")
+        If wd Is Nothing Then Exit Function
+    Else
+        If Not openChrome("https://humanum.arts.cuhk.edu.hk/Lexis/lexi-mf/") Then
+            If Not openChrome("https://humanum.arts.cuhk.edu.hk/Lexis/lexi-mf/") Then
+                Stop
+            End If
+        End If
+    End If
+    Dim iwe As SeleniumBasic.IWebElement
+    Dim dt As Date
+    dt = VBA.Now
+    '檢索輸入框
+    Do While iwe Is Nothing
+        Set iwe = wd.FindElementByCssSelector("#search_input")
+        If DateDiff("s", dt, VBA.Now) > 5 Then
+            If backgroundStartChrome Then wd.Quit
+            Exit Function
+        End If
+    Loop
+    
+    word.Application.WindowState = wdWindowStateMinimize
+    wd.SwitchTo.Window (wd.CurrentWindowHandle)
+'    VBA.AppActivate "chrome"
+
+    '找到檢索輸入框之後
+    Dim keys As New SeleniumBasic.keys
+    iwe.Clear
+    iwe.SendKeys keys.Shift + keys.Insert '貼上檢索條件
+    iwe.SendKeys keys.Enter
+    
+    '等待檢索結果
+    Set iwe = Nothing
+    '解釋內容的元件
+    Set iwe = wd.FindElementByCssSelector("#shuoWenTable > tbody > tr:nth-child(2) > td:nth-child(2)")
+    dt = VBA.Now
+    Do While iwe Is Nothing
+        Set iwe = wd.FindElementByCssSelector("#shuoWenTable > tbody > tr:nth-child(2) > td:nth-child(2)")
+        If DateDiff("s", dt, VBA.Now) > 1.5 Then
+            If backgroundStartChrome Then wd.Quit
+            Exit Function
+        End If
+    Loop
+    
+    result(0) = iwe.text
+    result(1) = wd.URL
+    LookupMultiFunctionChineseCharacterDatabase = result
+    If backgroundStartChrome Then wd.Quit
+    Exit Function
+    
+iweNothingExitFunction:
+    If iwe Is Nothing Then
+        LookupMultiFunctionChineseCharacterDatabase = result
+        If backgroundStartChrome Then wd.Quit
+        Exit Function
+    End If
+    Return
+eH:
+Select Case Err.Number
+        Case -2146233088
+            If InStr(Err.Description, "disconnected: not connected to DevTools") Then 'disconnected: not connected to DevTools
+                                            '  (failed to check if window was closed: disconnected: not connected to DevTools)
+                                            '  (Session info: chrome=128.0.6613.85)
+                'Set wd = Nothing
+                SystemSetup.killchromedriverFromHere
+                Set wd = Nothing
+                Resume
+            Else
+                MsgBox Err.Number & Err.Description, vbExclamation
+            End If
+        Case Else
+            MsgBox "請關閉Chrome瀏覽器後再執行一次！" & vbCr & vbCr & Err.Number & Err.Description, vbExclamation
+    End Select
+End Function
+
+Rem 查《說文解字》取回其《說文》「解釋」欄位的內容：x 要查的字。傳回一個字串陣列，第1個元素是《說文》「解釋」的內容字串，第2個元素是查詢結果網址。若沒找到，則傳回空字串陣列
+Function LookupShuowenOrg(x As String) As String()
+    On Error GoTo eH
+    Dim result(1) As String '1=索引值上限（最大值）
+    LookupShuowenOrg = result
+    If Not code.IsChineseCharacter(x) Then
+        Exit Function
+    End If
+    SystemSetup.SetClipboard x
+    
+    If Not openChrome("https://www.shuowen.org/") Then
+        If Not openChrome("https://www.shuowen.org/") Then
+            Stop
+        End If
+    End If
+    Dim iwe As SeleniumBasic.IWebElement
+    Dim dt As Date
+    dt = VBA.Now
+    '檢索輸入框
+    Do While iwe Is Nothing
+        Set iwe = wd.FindElementByCssSelector("#inputKaishu")
+        If DateDiff("s", dt, VBA.Now) > 5 Then
+            Exit Function
+        End If
+    Loop
+    
+    word.Application.WindowState = wdWindowStateMinimize
+    wd.SwitchTo.Window (wd.CurrentWindowHandle)
+'    VBA.AppActivate "chrome"
+
+    '找到檢索輸入框之後
+    Dim keys As New SeleniumBasic.keys
+    iwe.Clear
+    iwe.SendKeys keys.Shift + keys.Insert '貼上檢索條件
+    iwe.SendKeys keys.Enter
+    
+    '等待檢索結果
+    Set iwe = wd.FindElementByCssSelector("body > div.container.main > div > div.col-md-9.main-content.pull-right > table > tbody > tr > td")
+    If Not iwe Is Nothing Then
+        If iwe.text = "沒有記錄" Then
+            Exit Function
+        End If
+    End If
+    
+    Set iwe = wd.FindElementByCssSelector("body > div.container.main > div > div.col-md-9.main-content.pull-right > div.row.summary > div.col-md-9.pull-left.info-container > div.media.info-body > div.media-body")
+    GoSub iweNothingExitFunction
+    
+    result(0) = iwe.text
+    result(1) = wd.URL
+    LookupShuowenOrg = result
+    Exit Function
+    
+iweNothingExitFunction:
+    If iwe Is Nothing Then
+        LookupShuowenOrg = result
+        Exit Function
+    End If
+    Return
+eH:
+Select Case Err.Number
+        Case -2146233088
+            If InStr(Err.Description, "disconnected: not connected to DevTools") Then 'disconnected: not connected to DevTools
+                                            '  (failed to check if window was closed: disconnected: not connected to DevTools)
+                                            '  (Session info: chrome=128.0.6613.85)
+                'Set wd = Nothing
+                SystemSetup.killchromedriverFromHere
+                Set wd = Nothing
+                Resume
+            Else
+                MsgBox Err.Number & Err.Description, vbExclamation
+            End If
+        Case Else
+            MsgBox "請關閉Chrome瀏覽器後再執行一次！" & vbCr & vbCr & Err.Number & Err.Description, vbExclamation
+    End Select
+End Function
+
+
+
+Rem 檢索Google
+
+Sub GoogleSearch(Optional searchStr As String)
     On Error GoTo Err1
     If searchStr = "" And Selection = "" Then Exit Sub
    

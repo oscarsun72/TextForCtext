@@ -139,9 +139,108 @@ Sub 查白雲深處人家說文解字圖像查閱_藤花榭本優先()
 '        If ar(1) = "" Then MsgBox "找出結果不止1條，請手動自行操作！", vbInformation
     End If
 End Sub
-
-
-
+Sub 查白雲深處人家說文解字圖文檢索WFG版_解說檢索()
+    Rem  Alt + shift + s （說文的說） Alt + Shift + j （解字的解）
+    SeleniumOP.LookupHomeinmistsShuowenImageTextSearchWFG_Interpretation Selection.text
+End Sub
+Sub 查漢語多功能字庫並取回其說文解釋欄位之值插入至插入點位置()
+    Rem  Alt + n （n= 能 neng）
+    If Selection.Characters.Count > 1 Then
+        MsgBox "限查1字", vbExclamation ', vbError
+        Exit Sub
+    End If
+    Dim ar 'As Variant
+    ar = SeleniumOP.LookupMultiFunctionChineseCharacterDatabase(Selection.text)
+    If ar(0) = vbNullString Then
+        word.Application.Activate
+        MsgBox "找不到，或網頁當了或改版了！", vbExclamation
+        With Selection.Application
+            .Activate
+            With .ActiveWindow
+                If .WindowState = wdWindowStateMinimize Then
+                    .WindowState = wdWindowStateNormal
+                    .Activate
+                End If
+            End With
+        End With
+    Else
+        Dim ur As UndoRecord, fontsize As Single
+        SystemSetup.stopUndo ur, "查漢語多功能字庫並取回其說文解釋欄位之值插入至插入點位置"
+        With Selection
+            fontsize = VBA.IIf(.Font.Size = 9999999, 12, .Font.Size) - 4
+            If fontsize < 0 Then fontsize = 10
+            If .Type = wdSelectionIP Then
+                .Move
+            Else
+                .Collapse wdCollapseEnd
+            End If
+            .InsertAfter ar(0) & Chr(13)
+            .Collapse wdCollapseEnd
+            .Font.Size = fontsize
+            .InsertAfter ar(1)
+            SystemSetup.contiUndo ur
+            .Collapse wdCollapseStart
+            With .Application
+                .Activate
+                With .ActiveWindow
+                    If .WindowState = wdWindowStateMinimize Then
+                        .WindowState = wdWindowStateNormal
+                        .Activate
+                    End If
+                End With
+            End With
+        End With
+    End If
+End Sub
+Sub 查說文解字並取回其解釋欄位及網址值插入至插入點位置()
+    Rem  Alt + o （o= 說文解字 ShuoWen.ORG 的 O）
+    If Selection.Characters.Count > 1 Then
+        MsgBox "限查1字", vbExclamation ', vbError
+        Exit Sub
+    End If
+    Dim ar 'As Variant
+    ar = SeleniumOP.LookupShuowenOrg(Selection.text)
+    If ar(0) = vbNullString Then
+        word.Application.Activate
+        MsgBox "找不到，或網頁當了或改版了！", vbExclamation
+        With Selection.Application
+            .Activate
+            With .ActiveWindow
+                If .WindowState = wdWindowStateMinimize Then
+                    .WindowState = wdWindowStateNormal
+                    .Activate
+                End If
+            End With
+        End With
+    Else
+        Dim ur As UndoRecord, fontsize As Single
+        SystemSetup.stopUndo ur, "查說文解字並取回其解釋欄位及網址值插入至插入點位置"
+        With Selection
+            fontsize = VBA.IIf(.Font.Size = 9999999, 12, .Font.Size) - 4
+            If fontsize < 0 Then fontsize = 10
+            If .Type = wdSelectionIP Then
+                .Move
+            Else
+                .Collapse wdCollapseEnd
+            End If
+            .InsertAfter ar(0) & Chr(13)
+            .Collapse wdCollapseEnd
+            .Font.Size = fontsize
+            .InsertAfter ar(1)
+            SystemSetup.contiUndo ur
+            .Collapse wdCollapseStart
+            With .Application
+                .Activate
+                With .ActiveWindow
+                    If .WindowState = wdWindowStateMinimize Then
+                        .WindowState = wdWindowStateNormal
+                        .Activate
+                    End If
+                End With
+            End With
+        End With
+    End If
+End Sub
 Function GetUserAddress() As Boolean
     Dim x As String, a As Object 'Access.Application
     On Error GoTo Error_GetUserAddress

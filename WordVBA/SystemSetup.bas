@@ -597,12 +597,22 @@ Sub killProcessesByNamePID(imageName As String, pid As Long)
 End Sub
 Sub killProcessesByName(imageName As String)
     Dim objWMIService, objProcess, colProcess
+    On Error GoTo eH:
     Set objWMIService = GetObject("winmgmts:" & "{impersonationLevel=impersonate}!\\.\root\cimv2")
     'Set colProcess = objWMIService.ExecQuery("Select * from Win32_Process Where Name = 'chromedriver.exe'")
     Set colProcess = objWMIService.ExecQuery("Select * from Win32_Process Where Name = '" + imageName + "'")
     For Each objProcess In colProcess
         objProcess.Terminate
     Next
+Exit Sub
+eH:
+    Select Case Err.Number
+        Case -2147217406
+            If VBA.InStr(Err.Description, "§ä¤£¨ì ") Then
+            End If
+        Case Else
+            MsgBox Err.Number & Err.Description
+    End Select
 End Sub
 Sub killchromedriverFromHere()
     Dim objWMIService, objProcess, colProcess, pid

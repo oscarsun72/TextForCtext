@@ -1523,7 +1523,7 @@ With Selection '指定鍵：Alt+Ctrl+Up
                     End If
                     If ins(1) = ins(2) And ins(3) = ins(4) Then
                         d.Activate
-                        MsgBox "本文只有此處!", vbInformation ': Exit Sub
+                        ins(2) = -1 'ins(2) = -1MsgBox "本文只有此處!", vbInformation ': Exit Sub
                     End If
                     If ins(1) <> 0 Then
                         ins(1) = wdMainTextStory
@@ -1550,9 +1550,11 @@ With Selection '指定鍵：Alt+Ctrl+Up
 '                        With .Application.ActiveWindow
 '                            If .WindowState = wdWindowStateMinimize Then .WindowState = wdWindowStateMaximize
 '                        End With
-                        winNum = winINdex
-                        Exit Sub
+                        
                     End With
+                    If ins(2) = -1 Then MsgBox "本文只有此處!", vbInformation
+                    winNum = winINdex
+                    Exit Sub
                 End With
             End If
         Next d
@@ -2209,7 +2211,7 @@ Attribute a.VB_ProcData.VB_Invoke_Func = "Normal.NewMacros.巨集1"
 Dim i As Long
 If MsgBox("請先檢查出處是否已獨立成段落！", vbExclamation + vbOKCancel) = vbOK Then Exit Sub
 With Selection
-    If .Type = wdSelectionNormal Then .move wdLine, -1
+    If .Type = wdSelectionNormal Then .Move wdLine, -1
     For i = 1 To .Document.Paragraphs.Count
         Select Case .Paragraphs(1).Range.Font.Name
             Case "新細明體"

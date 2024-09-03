@@ -959,3 +959,22 @@ Sub PrivateUseCharactersOutput()
     d.Application.Activate
 End Sub
 
+Sub ReplacePrivateUserCharactersWithCJK()
+    Dim dReplaced As Document, dTable As Document, r As row
+    Dim wFind As String, wReplace As String, ur As UndoRecord
+    Set dReplaced = Documents("201010說文A造字") ' .docx")
+    Set dTable = Documents("文件3")
+    
+    SystemSetup.stopUndo ur, "ReplacePrivateUserCharactersWithCJK"
+    word.Application.ScreenUpdating = False
+    For Each r In dTable.Tables(1).Rows
+        wFind = r.Cells(1).Range.Characters(1).text
+        wReplace = r.Cells(2).Range.Characters(1).text
+        dReplaced.Range.Find.Execute wFind, , , , , , , wdFindContinue, _
+            , wReplace, wdReplaceAll
+    Next
+    SystemSetup.contiUndo ur
+    word.Application.ScreenUpdating = True
+    Set dReplaced = Nothing
+    Set dTable = Nothing
+End Sub
