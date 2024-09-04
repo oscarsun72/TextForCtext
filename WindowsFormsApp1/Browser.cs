@@ -5065,7 +5065,7 @@ internal static string getImageUrl() {
                     //CnText.RemoveInnerBraces(ref ocrResult);
                     ocrResult = ocrResult.Replace("】【", string.Empty);
                     ocrResult = CnText.RemoveNestedBrackets(ocrResult);
-                    ocrResult = ocrResult.Replace("【", "{{").Replace("】", "}}");
+                    ocrResult = ocrResult.Replace("【", "{{").Replace("】", "}}").Replace("{{}}",string.Empty);
                 }
 
                 //Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("copy to clipboard!");

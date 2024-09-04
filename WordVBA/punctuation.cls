@@ -141,7 +141,7 @@ Sub restoreOriginalTextPunctuations(ByRef OriginalText As String, ByRef RemovedP
             Else 's>1 即用以比對的字串開頭不完整的一個標點符號區段
                 If iCntcontextCollection > 1 Then
                     'If contextCollection.item(iCntcontextCollection)(0) = "六經言之者少" Then Stop 'just for check
-                    prefixRemovedPunctuationsText = left(RemovedPunctuationsText, s - 1) + contextCollection.item(iCntcontextCollection - 1)(1)
+                    prefixRemovedPunctuationsText = Left(RemovedPunctuationsText, s - 1) + contextCollection.item(iCntcontextCollection - 1)(1)
                     RemovedPunctuationsTextSubStr = VBA.Mid(RemovedPunctuationsText, Len(contextCollection.item(iCntcontextCollection)(0)) + s)
                 Else
                     Stop 'check
@@ -158,7 +158,7 @@ Sub restoreOriginalTextPunctuations(ByRef OriginalText As String, ByRef RemovedP
             ElseIf VBA.Replace(RemovedPunctuationsTextSubStr, Chr(13), "") = "" Then '只剩下分段符號
                 match = True
                 Exit For
-            ElseIf VBA.InStr(contextCollection.item(jCntcontextCollection)(0), RemovedPunctuationsTextSubStr) = 1 And VBA.StrComp(RemovedPunctuationsTextSubStr, left(contextCollection.item(jCntcontextCollection)(0), VBA.Len(RemovedPunctuationsTextSubStr))) = 0 Then '只剩下不完整的片段（即不到一個標點符號的長度）；即用來比對的字串不是完整的段落，只摘取前面隨意長度的部分來比對
+            ElseIf VBA.InStr(contextCollection.item(jCntcontextCollection)(0), RemovedPunctuationsTextSubStr) = 1 And VBA.StrComp(RemovedPunctuationsTextSubStr, Left(contextCollection.item(jCntcontextCollection)(0), VBA.Len(RemovedPunctuationsTextSubStr))) = 0 Then '只剩下不完整的片段（即不到一個標點符號的長度）；即用來比對的字串不是完整的段落，只摘取前面隨意長度的部分來比對
                 match = True
                 Exit For
             End If
@@ -183,3 +183,4 @@ Private Sub Class_Terminate()
     Set punctuation_Collection = Nothing
     Set punctuation_Dictionary = Nothing
 End Sub
+

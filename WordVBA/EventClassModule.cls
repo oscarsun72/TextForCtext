@@ -44,7 +44,7 @@ Private Sub app_Quit()
 End Sub
 
 
-Private Sub App_DocumentBeforeSave(ByVal doc As Document, SaveAsUI As Boolean, Cancel As Boolean)
+Private Sub App_DocumentBeforeSave(ByVal Doc As Document, SaveAsUI As Boolean, Cancel As Boolean)
     '隱藏字表
 End Sub
 
@@ -59,7 +59,7 @@ End Sub
 
 
 
-Private Sub App_WindowActivate(ByVal doc As Document, ByVal Wn As Window)
+Private Sub App_WindowActivate(ByVal Doc As Document, ByVal Wn As Window)
 ''If InStr(Doc.Name, "字表7") = 0 Then Wn.Visible = False
 ''    'Wn.WindowState = wdWindowStateMaximize
 ''    隱藏字表
@@ -73,10 +73,12 @@ Private Sub App_WindowActivate(ByVal doc As Document, ByVal Wn As Window)
 'End If
 End Sub
 
-Private Sub App_WindowDeactivate(ByVal doc As Document, ByVal Wn As Window) '寫在App_DocumentChange較有效!2010/10/20
+Private Sub App_WindowDeactivate(ByVal Doc As Document, ByVal Wn As Window) '寫在App_DocumentChange較有效!2010/10/20
 'Register_Event_Handler
 'If Documents.Count > 1 Then
 '    If InStr(Doc.Name, "字表7") Then Wn.Visible = False
 'End If
 隱藏字表
 End Sub
+
+

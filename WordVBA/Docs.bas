@@ -3,7 +3,10 @@ Option Explicit
 Public d字表 As Document, x As New EventClassModule   '這才是所謂的建立"新"的類別模組--實際上是建立對它的參照.'原照線上說明乃Dim也.
 'https://learn.microsoft.com/en-us/office/vba/word/concepts/objects-properties-methods/using-events-with-the-application-object-word
 Public Sub Register_Event_Handler() '使自設物件類別模組有效的登錄程序.見「使用 Application 物件 (Application Object) 的事件」
-    Set x.App = word.Application '此即使新建的物件與Word.Application物件作上關聯
+    If x Is Nothing Or Not x Is word.Application Then
+        SystemSetup.playSound 4
+        Set x.App = word.Application '此即使新建的物件與Word.Application物件作上關聯
+    End If
 End Sub
 
 Function 空白的新文件(Optional newDocVisible As Boolean = True) As Document '20210209
@@ -1055,7 +1058,7 @@ refres:
             '顯示新貼上的文本頂端
             rng.SetRange endDocOld, endDocOld
             Do Until rng.Font.ColorIndex = wdRed Or rng.End = d.Range.End - 1
-                rng.move
+                rng.Move
             Loop
             e = rng.End
             rng.SetRange endDocOld, e
@@ -1259,12 +1262,12 @@ If 貼到古籍酷自動標點() = True Then
     If Documents.Count > 0 Then
         If InStr(ActiveDocument.path, "已初步標點") > 0 Then
         On Error GoTo eH:
-            If Not SeleniumOP.WD Is Nothing Then
+            If Not SeleniumOP.wd Is Nothing Then
                 Dim ws() As String
                 ws = SeleniumOP.WindowHandles
                 If Not VBA.IsEmpty(ws) Then
-                    WD.SwitchTo.Window ws(UBound(ws))
-                    SeleniumOP.WD.Manage.Window.Minimize
+                    wd.SwitchTo.Window ws(UBound(ws))
+                    SeleniumOP.wd.Manage.Window.Minimize
                 End If
             End If
 mark:
@@ -1371,7 +1374,7 @@ Err1:
                 End If
             Case Else
                 If InStr(Err.Description, "no such window") Then
-                    If Not WD Is Nothing Then Resume
+                    If Not wd Is Nothing Then Resume
                 Else
                     MsgBox Err.Description, vbCritical
                     SystemSetup.killchromedriverFromHere

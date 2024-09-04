@@ -67,6 +67,9 @@ End Property
 Public Property Get WordTemplatesPathIncldBackSlash() As String
     WordTemplatesPathIncldBackSlash = UserProfilePathIncldBackSlash + "AppData\Roaming\Microsoft\Templates\"
 End Property
+Public Property Get WordStartupPathIncldBackSlash() As String
+    WordStartupPathIncldBackSlash = UserProfilePathIncldBackSlash + "AppData\Roaming\Microsoft\Word\STARTUP\"
+End Property
 Function ClipBoard_GetData()
 #If VBA7 Then
     'https://zhuanlan.zhihu.com/p/540531195
@@ -323,8 +326,7 @@ Function 取得桌面路徑() 'WshEnvironment.Item'2012/6/3
     'strDesktop = wshshell.RegRead("HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders\desktop")
     'http://www.accessoft.com/blog/article-show.asp?userid=32&Id=97
 End Function
-
-Function 取得使用者路徑_含反斜線() '2021/11/3
+Public Function 取得使用者路徑_含反斜線() '2021/11/3
     'https://www.796t.com/post/M2ExcmU=.html
     'https://stackoverflow.com/questions/42091960/userprofile-environ-on-vba
     Dim a As String
@@ -360,7 +362,7 @@ Sub 重啟小小輸入法() 'Alt+q
     Shell Replace(SystemSetup.取得桌面路徑, "Desktop", "Dropbox") & "\VS\bat\重啟小小輸入法.bat"
 End Sub
 
-Sub ShortcutKeys() '指定快速鍵
+Public Sub ShortcutKeys() '指定快速鍵
     Dim kb As KeyBinding, shortcutKeys貼上純文字 As Boolean, shortcutKeysEditCopy As Boolean
     For Each kb In KeyBindings
         If kb.KeyCode = BuildKeyCode(wdKeyShift, wdKeyInsert) And kb.Command = "Docs.貼上純文字" Then
@@ -541,14 +543,24 @@ Sub backupNormal_dotm() '自動備份Normal.dotm
     Dim source As String, destination As String
     source = SystemSetup.WordTemplatesPathIncldBackSlash + "Normal.dotm"
     destination = SystemSetup.DropBoxPathIncldBackSlash + "Normal.dotm"
-    
+    If VBA.Dir(destination) <> vbNullString Then GoSub backup:
+    source = SystemSetup.WordStartupPathIncldBackSlash + "TextForCtextWordVBA.dotm"
+    destination = SystemSetup.DropBoxPathIncldBackSlash + "TextForCtextWordVBA.dotm"
+    If VBA.Dir(destination) <> vbNullString Then GoSub backup:
+    Exit Sub
+
+backup:
     On Error GoTo eH
+        
+        Stop
+        
     With SystemSetup.FileSystemObject
         If (.getfile(source).DateLastModified > _
             .getfile(destination).DateLastModified) Then _
                 .CopyFile source, destination
-        End With
-    Exit Sub
+    End With
+    Return
+    
 eH:
     Select Case Err.Number
         Case 70

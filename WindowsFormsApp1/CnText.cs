@@ -606,6 +606,7 @@ namespace TextForCtext
                 x = x.Replace(replaceDChar[i], replaceChar[i]);
             }
 
+            
             //以下舊式
             //foreach (var item in replaceDChar)
             //{
@@ -639,8 +640,7 @@ namespace TextForCtext
              * 您需要在改變 pattern 變數的值之後，再次創建一個新的 Regex 物件。             
              */
 
-            //RemoveInnerBraces(ref x);
-
+            //RemoveInnerBraces(ref x);            
         }
         /// <summary>
         /// 移除文本中的標點符號和阿拉伯數字
@@ -1115,5 +1115,6 @@ namespace TextForCtext
 
             return punctuatedText;
         }
+
     }
 }

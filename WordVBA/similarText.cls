@@ -14,7 +14,7 @@ Dim similarWithTextCopy As String '用來比較的文本的副本（用來比對的來源）
 Dim SimilarityResult As New Scripting.Dictionary '<相似度名,相似度>
 Dim currentProcedureName As String '正在執行的程序名稱
 Dim ProceduresNameAliasPair As New Scripting.Dictionary '記下所有執行過的程序名稱及其別名<currentProcedureName,procedureNameAlias>
-Private Function Initialize(ByVal text1, ByVal text2) As similartext
+Private Function Initialize(ByVal text1, ByVal text2) As similarText
 If s1 = text1 And s2 = text2 Then Exit Function
 Dim w, str1, str2
 If s1 <> text1 Then
@@ -524,3 +524,4 @@ similarWithTextCopy = Empty
 Set ProceduresNameAliasPair = Nothing
 currentProcedureName = Empty
 End Sub
+

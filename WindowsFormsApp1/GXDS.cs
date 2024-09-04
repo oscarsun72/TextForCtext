@@ -192,7 +192,7 @@ namespace TextForCtext
             int s = xForMark.IndexOf(Environment.NewLine);
             while (s > -1)
             {//只要一行/段之前後均只是空行的話（跨行以上的不處理，手動自行處理）
-                string tx = Form1.getLineTxt(xForMark, s, out int sLineStart, out int sLineLen);
+                string tx = Form1.GetLineTxt(xForMark, s, out int sLineStart, out int sLineLen);
                 //如果後一行/段是空行段
                 if (xForMark.Length >= s + newLineLen * 2 && xForMark.Substring(s + newLineLen, newLineLen) == newLine)
                 {
@@ -336,14 +336,14 @@ namespace TextForCtext
             while (s > -1)
             {
                 //本行如果是標題
-                if (Form1.getLineTxt(xOp, s).IndexOf("*") > -1)
+                if (Form1.GetLineTxt(xOp, s).IndexOf("*") > -1)
                 {
                     if (s - 1 > 0)
                     {
                         int preS = xOp.LastIndexOf(newLine, s - 1);
                         if (preS > 0)
                         {
-                            string XBefrTitleLine = Form1.getLineTxt(xOp, preS, out int plineS, out int plineL);
+                            string XBefrTitleLine = Form1.GetLineTxt(xOp, preS, out int plineS, out int plineL);
                             int XBefrTitleLineLen = XBefrTitleLine.Length;
                             //如果標題前一行/段是純小注文
                             if (XBefrTitleLineLen - 5 > 0)

@@ -133,6 +133,7 @@ reStart:
                 '.DebuggerAddress = "127.0.0.1:9999" '不要与其他几個混用
             End With
             wd.New_ChromeDriver Service:=Service, Options:=Options
+            Docs.Register_Event_Handler '為清除chromedriver作準備
             pid = Service.ProcessId 'Chrome瀏覽器沒有開成功就會是0
             If pid <> 0 Then
                 ReDim Preserve chromedriversPID(chromedriversPIDcntr)

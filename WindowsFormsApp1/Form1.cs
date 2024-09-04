@@ -153,7 +153,7 @@ namespace WindowsFormsApp1
             get { return textBox3.Text; }
             set { textBox3.Text = value; }
         }
-internal string textBox4Text
+        internal string textBox4Text
         {
             get { return textBox4.Text; }
             set { textBox4.Text = value; }
@@ -489,7 +489,7 @@ internal string textBox4Text
         void show_nICo(Keys modifierKeys)
         {
 
-            this.Show();            
+            this.Show();
             if (ntfyICo.Visible) ntfyICo.Visible = false;
             this.WindowState = FormWindowState.Normal;
             this.Height = thisHeight;
@@ -542,6 +542,9 @@ internal string textBox4Text
                                 CnText.BooksPunctuation(ref text, false);
                                 undoRecord();
                                 textBox1.Text = text;
+                                clearBracketsInsidePairsBrackets();
+
+
                                 if (Clipboard.GetText() != text && text != "")//CopyQuickedit_data_textboxText已用到等價 SetText 的方法了
                                     Clipboard.SetText(text);
                             }
@@ -736,12 +739,12 @@ internal string textBox4Text
                 case Keys.Shift:
                     //toOCR(br.OCRSiteTitle.GJcool);
                     copyQuickeditLinkWhenKeyinModeSub();
-                    ResetLastValidWindow();                    
+                    ResetLastValidWindow();
                     break;
                 //自動擷取「簡單修改模式」（selector: # quickedit > a的連結)
                 case Keys.None:
                     copyQuickeditLinkWhenKeyinModeSub();
-                    ResetLastValidWindow();                    
+                    ResetLastValidWindow();
                     break;
             }
         }
@@ -1140,7 +1143,7 @@ internal string textBox4Text
         /// <param name="x">要處理的文本</param>
         /// <param name="s">插入點位置</param>
         /// <returns></returns>
-        internal static string getLineTxt(string x, int s)
+        internal static string GetLineTxt(string x, int s)
         {
             if (s < 0 || string.IsNullOrEmpty(x)) return "";
             int preP = x.LastIndexOf(Environment.NewLine, s), p = x.IndexOf(Environment.NewLine, s);
@@ -1158,7 +1161,7 @@ internal string textBox4Text
         /// <param name="lineS">本行的起始位置</param>
         /// <param name="lineL">本行的長度</param>
         /// <returns></returns>
-        internal static string getLineTxt(string x, int s, out int lineS, out int lineL)
+        internal static string GetLineTxt(string x, int s, out int lineS, out int lineL)
         {
             if (s < 0 || string.IsNullOrEmpty(x)) { lineS = 0; lineL = 0; return ""; }
             int preP = x.LastIndexOf(Environment.NewLine, s), p = x.IndexOf(Environment.NewLine, s);
@@ -1175,10 +1178,10 @@ internal string textBox4Text
         /// <param name="x">要處理的文本</param>
         /// <param name="s">插入點位置</param>
         /// <returns></returns>
-        internal static string getLineTxtWithoutPunctuation(string x, int s)
+        internal static string GetLineTxtWithoutPunctuation(string x, int s)
         {
             if (s < 0 || string.IsNullOrEmpty(x)) return "";
-            string returnTxt = getLineTxt(x, s);
+            string returnTxt = GetLineTxt(x, s);
             //https://useadrenaline.com/playground
             //20230115 adrenaline 大菩薩：
             for (int i = 0; i < PunctuationsNum.Length; i++)
@@ -1193,6 +1196,22 @@ internal string textBox4Text
             //    returnTxt.Replace(punctuations[i], "".ToCharArray()[0]);
             //}
             //return returnTxt;
+        }
+        /// <summary>
+        /// 取得插入點下一行/段的文字
+        /// </summary>
+        /// <param name="x">要找的全域文字</param>
+        /// <param name="s">插入點所在位置</param>
+        /// <returns></returns>
+        internal static string GetNextLineTxt(string x, int s)
+        {
+            if (s < 0 || string.IsNullOrEmpty(x)) return "";
+            int p = x.IndexOf(Environment.NewLine, s);
+            if (p == -1) return string.Empty;
+            p += Environment.NewLine.Length;
+            int nextP = x.IndexOf(Environment.NewLine, p);
+            if (nextP == -1) nextP = x.Length;
+            return x.Substring(p, nextP - p);
         }
 
         bool chkPTitleNotEnd = false;//為檢查不當分段設置的，以判斷前一頁末是否不含標明尾，其尾卻在此頁前，以便略過檢查
@@ -1486,7 +1505,7 @@ internal string textBox4Text
                 {//標題*與<p>在同一行，長度沒跨行
                     int pre = prePPos > -1 ? prePPos + 2 : 0;
                     if (pre < asteriskPos && chkP - "<p>".Length + Environment.NewLine.Length > asteriskPos &&
-                        getLineTxt(xCopy, chkP - ("<p>".Length + Environment.NewLine.Length)).IndexOf(Environment.NewLine) == -1)
+                        GetLineTxt(xCopy, chkP - ("<p>".Length + Environment.NewLine.Length)).IndexOf(Environment.NewLine) == -1)
                         //xCopy.Substring(pre, chkP - ("<p>".Length + Environment.NewLine.Length) - pre).IndexOf(Environment.NewLine) == -1)
 
                         chkP = -1;
@@ -1506,7 +1525,7 @@ internal string textBox4Text
                         if ("　􏿽".IndexOf(xCopy.Substring(prePPos + 2, 1)) > -1 &&
                             x.Substring(prePPos + 2, chkP - (prePPos + 2)).IndexOf("*") == -1 &&//前一行不是標題
                             "　􏿽".IndexOf(xCopy.Substring(x.LastIndexOf(Environment.NewLine, prePPos) + 2, 1)) > -1 &&
-                            getLineTxt(xCopy, prePPos).IndexOf("*") == -1 &&//前二行不是標題
+                            GetLineTxt(xCopy, prePPos).IndexOf("*") == -1 &&//前二行不是標題
                             "　􏿽".IndexOf(x.Substring(x.IndexOf(Environment.NewLine, chkP) + 2, 1)) == -1)
                         {
                             chkP = -1;
@@ -1522,11 +1541,11 @@ internal string textBox4Text
                 }
                 if (chkP > -1)
                 {//如果是單行標題
-                    if (getLineTxt(xCopy, chkP - ("<p>".Length + Environment.NewLine.Length)).IndexOf("*") > -1) chkP = -1;
+                    if (GetLineTxt(xCopy, chkP - ("<p>".Length + Environment.NewLine.Length)).IndexOf("*") > -1) chkP = -1;
                 }
                 if (chkP > -1)
                 {//過短的行略過不檢查
-                    if (Math.Abs(countWordsLenPerLinePara(getLineTxt(xCopy, chkP - ("<p>".Length + Environment.NewLine.Length)).Replace("<p", ""))
+                    if (Math.Abs(countWordsLenPerLinePara(GetLineTxt(xCopy, chkP - ("<p>".Length + Environment.NewLine.Length)).Replace("<p", ""))
                         - normalLineParaLength) > 3)
                     {
                         chkP = -1;
@@ -1867,7 +1886,7 @@ internal string textBox4Text
                 if (e.KeyCode == Keys.Add || e.KeyCode == Keys.Oemplus || e.KeyCode == Keys.Subtract || e.KeyCode == Keys.NumPad5)
                 {// Ctrl + Shift + + 
                     e.Handled = true; bool thisTopMost = this.TopMost;
-                    this.TopMost = false;                    
+                    this.TopMost = false;
                     if (!ocrTextMode) br.BringToFront("chrome");
                     string urlActive = br.ActiveTabURL_Ctext_Edit;
                     if (textBox3.Text == "" && IsValidUrl＿keyDownCtrlAdd(urlActive))
@@ -1880,7 +1899,7 @@ internal string textBox4Text
                     {
                         br.SwitchToCurrentForeActivateTab(ref textBox3, urlActive);
                     }
-                    this.TopMost = false;                    
+                    this.TopMost = false;
                     if (!ocrTextMode) br.BringToFront("chrome");
                     if (keyDownCtrlAdd(true))
                     {
@@ -2110,7 +2129,7 @@ internal string textBox4Text
                 if (e.KeyCode == Keys.Add || e.KeyCode == Keys.Oemplus || e.KeyCode == Keys.Subtract || e.KeyCode == Keys.NumPad5)
                 {//Ctrl + + Ctrl + -
                     e.Handled = true;
-                    TopMost = false;                    
+                    TopMost = false;
                     if (!ocrTextMode) br.BringToFront("chrome");
                     if (e.KeyCode == Keys.Subtract)
                     {// Ctrl + -（數字鍵盤） 會重設以插入點位置為頁面結束位國
@@ -3207,6 +3226,9 @@ internal string textBox4Text
                     {
                         bool gjcoolocrResultManual = clpTxt.IndexOf(Environment.NewLine + Environment.NewLine) > -1;
                         if (gjcoolocrResultManual) clpTxt = clpTxt.Replace(Environment.NewLine + Environment.NewLine, Environment.NewLine);
+                        textBox1.Text = clpTxt;
+                        clearBracketsInsidePairsBrackets();
+                        clpTxt = textBox1.Text;
                         textBox1.Text = CnText.BooksPunctuation(ref clpTxt, true);
                         if (gjcoolocrResultManual)
                         {
@@ -3528,20 +3550,23 @@ internal string textBox4Text
             pageTextEndPosition = 0; pageEndText10 = "";
             textBox1.SelectAll();
             //textBox1.Select(textBox1.TextLength, 0);
-            string x = textBox1.Text;
+
             TopMost = false;
             if (!ocrTextMode) br.BringToFront("chrome");
-            if (keyDownCtrlAdd(false))
+            if (keyDownCtrlAdd(false, "", true))
             {
-                if (x != br.Quickedit_data_textboxTxt)
-                {
-                    playSound(soundLike.exam);
-                    x = br.Quickedit_data_textboxTxt;
-                }
-                //非同步整理OCR文本時，這行就很需要：
+                //if (x != br.Quickedit_data_textboxTxt)
+                //{
+                //    playSound(soundLike.exam);
+                //    x = br.Quickedit_data_textboxTxt;
+                //}
+                string x = textBox1.Text;
+                //非同步整理OCR文本時，這行就很需要：（因為查字資料庫的標書名號資料表可能不同步。）
                 if (x.IndexOf("，") == -1 && x.IndexOf("。") == -1
                     && (x.IndexOf("《") > -1 || x.IndexOf("〈") > -1 || x.IndexOf("：") > -1))
                     textBox1.Text = CnText.RemarkBooksPunctuation(ref x);
+                else
+                    textBox1.Text = CnText.BooksPunctuation(ref x);
                 //將頁面移至頂端，以便校對輸入時檢視
                 if (br.driver.Url != textBox3.Text)
                     br.GoToUrlandActivate(br.driver.Url, true);
@@ -3690,7 +3715,7 @@ internal string textBox4Text
             }
             int s = x.IndexOf(Environment.NewLine), lenLine = 0, lenLineNext = 0;
             //取得正常行/段字數
-            if (wordsPerLinePara < 1) wordsPerLinePara = countWordsLenPerLinePara(getLineTxtWithoutPunctuation(x, s));
+            if (wordsPerLinePara < 1) wordsPerLinePara = countWordsLenPerLinePara(GetLineTxtWithoutPunctuation(x, s));
             while (s > -1)
             {
                 //StringInfo si = new StringInfo(getLineTxtWithoutPunctuation(x, s));                
@@ -3698,13 +3723,13 @@ internal string textBox4Text
                 //if (si.String == "岳武穆遺詩") Debugger.Break();//just for check
 
                 //lenLine = si.LengthInTextElements;
-                lenLine = countWordsLenPerLinePara(getLineTxtWithoutPunctuation(x, s));
+                lenLine = countWordsLenPerLinePara(GetLineTxtWithoutPunctuation(x, s));
                 int sNext = x.IndexOf(Environment.NewLine, s + 1), previousLineLen = 0;
                 if (sNext > -1)
                 {
                     //StringInfo siNext = new StringInfo(getLineTxtWithoutPunctuation(x, sNext));
                     //lenLineNext = siNext.LengthInTextElements;
-                    lenLineNext = countWordsLenPerLinePara(getLineTxtWithoutPunctuation(x, sNext));
+                    lenLineNext = countWordsLenPerLinePara(GetLineTxtWithoutPunctuation(x, sNext));
                 }
                 else
                 {
@@ -3718,7 +3743,7 @@ internal string textBox4Text
                 //if (si.String == "我今弔死三清殿知道來年荒不荒至今") Debugger.Break();//just for check
 
                 //所在段落小於正常行長，且後面的行長須等於或大於正常行長、或是不存在後面的行/段
-                if (lenLine > 0 && lenLine < wordCountLimit && !getLineTxt(x, s).EndsWith("<p>"))
+                if (lenLine > 0 && lenLine < wordCountLimit && !GetLineTxt(x, s).EndsWith("<p>"))
                 //if (lenLine > 0)
                 {
                     //if (lenLine < wordCountLimit)
@@ -3767,11 +3792,13 @@ internal string textBox4Text
                 }
             }
 
-            #region 最後檢查
-            if (textBox1.Text.IndexOf("}}。<p>\r\n{{") > -1)
-                if (MessageBoxShowOKCancelExclamationDefaultDesktopOnly("是否要清除注文間的段落符號？") == DialogResult.OK)
-                    textBox1.Text = textBox1.Text.Replace("}}。<p>\r\n{{", "}}\r\n{{");
-
+            #region 最後檢查            
+            clearParagraphMarkersBetweenPairsBrackets();
+            x = textBox1.Text;//使用不再使用的變數
+            CnText.FormalizeText(ref x);
+            textBox1.Text = x;
+            clearParagraphMarkersInsidePairsBrackets();
+            movePeriodsToFrontofBlank();
             #endregion
 
             //處理完畢，回到原來/開始執行時的位置（有時末尾有些不要的贅文，可從此處在送出時截斷）
@@ -3816,7 +3843,7 @@ internal string textBox4Text
                 e += "􏿽".Length;
                 //取得下一欄之前的字數
                 //if (wordCntBeforeNextColume == 0 && xSel != )
-                wordCntBeforeNextColume = new StringInfo(getLineTxtWithoutPunctuation(xSel.Substring(0, e), e)).LengthInTextElements;
+                wordCntBeforeNextColume = new StringInfo(GetLineTxtWithoutPunctuation(xSel.Substring(0, e), e)).LengthInTextElements;
                 if (e == -1) return;
             }
             int s = xSel == string.Empty ? 0 : x.IndexOf(Environment.NewLine, xSel == string.Empty ? 0 : textBox1.SelectionStart)
@@ -3844,13 +3871,13 @@ internal string textBox4Text
                 //清除段落（下一個行/段併到上一個）
                 if (x.IndexOf(Environment.NewLine, s) < 0) break;
                 //如果行末是<p>（不含分行/段符號）則停止處理
-                if (getLineTxt(x, s).EndsWith("<p>")) break;
+                if (GetLineTxt(x, s).EndsWith("<p>")) break;
                 textBox1.Select(x.IndexOf(Environment.NewLine, s), Environment.NewLine.Length);
                 textBox1.SelectedText = string.Empty;
                 x = textBox1.Text;
-                string xLine = getLineTxt(x, s);
+                string xLine = GetLineTxt(x, s);
                 int xLineLen = xLine.Length; e = xLine.LastIndexOf("􏿽") + "􏿽".Length;
-                while (new StringInfo(getLineTxtWithoutPunctuation(xLine.Substring(0, e), e)).LengthInTextElements < wordCntBeforeNextColume)
+                while (new StringInfo(GetLineTxtWithoutPunctuation(xLine.Substring(0, e), e)).LengthInTextElements < wordCntBeforeNextColume)
                 {
                     xLine = xLine.Substring(0, e) + "􏿽" + xLine.Substring(e);
                     e = xLine.LastIndexOf("􏿽") + "􏿽".Length;
@@ -4170,7 +4197,7 @@ internal string textBox4Text
                     || (textBox1.Text.LastIndexOf(Environment.NewLine, i) < textBox1.Text.LastIndexOf("{{", i)))
                 {
                     if (onlyUnderTitle)
-                    { if (getLineTxt(textBox1.Text, i).IndexOf("*") == -1) goto omit; }
+                    { if (GetLineTxt(textBox1.Text, i).IndexOf("*") == -1) goto omit; }
 
                     textBox1.Select(i, 0);
                     space = notes_a_line(false, ctrl);
@@ -4409,7 +4436,7 @@ internal string textBox4Text
                             && x.LastIndexOf(Environment.NewLine, x.LastIndexOf(Environment.NewLine, i)) > 0
                             && x.Substring(x.LastIndexOf(Environment.NewLine, x.LastIndexOf(Environment.NewLine, i)) + Environment.NewLine.Length, 1) != "　")
                         {
-                            string xLine = getLineTxt(x, i);
+                            string xLine = GetLineTxt(x, i);
                             #region 偵錯檢查用
                             //if (xLine.IndexOf("明後世猶或")>-1)
                             //{
@@ -4595,10 +4622,10 @@ internal string textBox4Text
                 {
                     textBox1.Select(s, 1); break;
                 }
-                string currentLineTxt = getLineTxtWithoutPunctuation(textBox1.Text, s);
+                string currentLineTxt = GetLineTxtWithoutPunctuation(textBox1.Text, s);
                 int lenCurrentLine = new StringInfo(currentLineTxt).LengthInTextElements;//行長度
                 p = textBox1.Text.IndexOf(Environment.NewLine, s);
-                string nextLineTxt = getLineTxtWithoutPunctuation(textBox1.Text, p + newLineTag.Length);
+                string nextLineTxt = GetLineTxtWithoutPunctuation(textBox1.Text, p + newLineTag.Length);
                 int nextLineTxtLength = new StringInfo(nextLineTxt).LengthInTextElements;
                 if (currentLineTxt.IndexOf("*") > -1 || currentLineTxt == "")
                 {
@@ -4619,7 +4646,7 @@ internal string textBox4Text
                             if (currentLineTxt.IndexOf("{") > -1)
                             {
                                 //在有{{}}且末綴<p>的情況下，keysTitleCode();會出錯，但清掉<p>尾綴即可
-                                getLineTxt(textBox1.Text, s, out int linStart, out int lineLength);
+                                GetLineTxt(textBox1.Text, s, out int linStart, out int lineLength);
                                 textBox1.Select(linStart, lineLength);
                                 textBox1.SelectedText = textBox1.SelectedText.Replace("<p>", "");
                                 textBox1.Select(linStart + 1, 0);
@@ -4670,7 +4697,7 @@ internal string textBox4Text
                                                                                                           //,"{{佚}}" 後面不會有內容的，所以不太可能長度等於正文正常長度，應該是接下一個標題
                                 {
                                     //在有{{}}且末綴<p>的情況下，keysTitleCode();會出錯，但清掉<p>尾綴即可
-                                    getLineTxt(textBox1.Text, s, out int linStart, out int lineLength);
+                                    GetLineTxt(textBox1.Text, s, out int linStart, out int lineLength);
                                     textBox1.Select(linStart, lineLength);
                                     textBox1.SelectedText = textBox1.SelectedText.Replace("<p>", "");
                                     textBox1.Select(linStart + 1, 0);
@@ -5917,6 +5944,7 @@ internal string textBox4Text
             if (se.Replace("●", "") == "") textBox1.Text = textBox1.Text.Substring(e + 2);//●●●●●●●●乃作為權訂每行字數之參考，故可刪去
                                                                                           //if (countWordsLenPerLinePara(se) == wordsPerLinePara && se.Replace("●", "") == "") textBox1.Text = textBox1.Text.Substring(e + 2);
             undoRecord(); stopUndoRec = true; PauseEvents();
+            //string p = "<p>";
             string p = keyinTextMode ? "。<p>" : "<p>";
             if (wordsPerLinePara == -1)
             {
@@ -6067,7 +6095,7 @@ internal string textBox4Text
                 }
             }
             //最後一行
-            string lastLineText = getLineTxtWithoutPunctuation(textBox1.Text, s);
+            string lastLineText = GetLineTxtWithoutPunctuation(textBox1.Text, s);
             if (new StringInfo(lastLineText).LengthInTextElements < wordsPerLinePara && lastLineText.IndexOf("<p>") == -1)
                 textBox1.Text += p;
             stopUndoRec = false; ResumeEvents();
@@ -6082,7 +6110,7 @@ internal string textBox4Text
             if (textBox1.TextLength > 1
                 && textBox1.Text.Substring(textBox1.TextLength - Environment.NewLine.Length, Environment.NewLine.Length) != Environment.NewLine)
             {
-                se = getLineTxtWithoutPunctuation(textBox1.Text, textBox1.Text.LastIndexOf(Environment.NewLine)
+                se = GetLineTxtWithoutPunctuation(textBox1.Text, textBox1.Text.LastIndexOf(Environment.NewLine)
                     + Environment.NewLine.Length);
 
                 //if (se.IndexOf("跡驗父故邪夏侯方") > -1)//just for test
@@ -6115,12 +6143,12 @@ internal string textBox4Text
             if (topLine) { rst.Close(); cnt.Close(); rst = null; cnt = null; }
             if (keyinTextMode)
             {
-                stopUndoRec = true; PauseEvents();
-                //textBox1.Text = textBox1.Text.Replace("。<p>\r\n{{", "\r\n{{");//此不宜逕行取代，參見《札迻》版式，故今以下式取代，半自動手動校勘 20231114 感恩感恩　讚歎讚歎　南無阿彌陀佛
-                if (textBox1.Text.IndexOf("}}。<p>\r\n{{") > -1)
-                    if (MessageBoxShowOKCancelExclamationDefaultDesktopOnly("是否要清除注文間的段落符號？") == DialogResult.OK)
-                        textBox1.Text = textBox1.Text.Replace("}}。<p>\r\n{{", "}}\r\n{{");
-                stopUndoRec = false; ResumeEvents();
+                clearParagraphMarkersBetweenPairsBrackets();
+                clearParagraphMarkersInsidePairsBrackets();
+                lastLineText = textBox1.Text;//借用此變數
+                CnText.FormalizeText(ref lastLineText);
+                textBox1.Text = lastLineText;
+                movePeriodsToFrontofBlank();
                 textBox1.Select(textBox1.TextLength, 0);
             }
             else
@@ -6128,6 +6156,264 @@ internal string textBox4Text
             textBox1.ScrollToCaret();
             TopMost = topmost; stopUndoRec = false; ResumeEvents();
         }
+        /// <summary>
+        /// 清除成對的大括號間的分段標記
+        /// 小注間的分段標記檢查與清除
+        /// </summary>
+        private void clearParagraphMarkersBetweenPairsBrackets()
+        {
+            stopUndoRec = true; PauseEvents();
+            string x = textBox1.Text; int ip = -1;
+            //要檢查的字串
+            string[] paragraphMarkIn = { "}}。<p>\r\n{{", "}}<p>\r\n{{" };
+            foreach (var item in paragraphMarkIn)
+            {
+                int s = ip + 1; ip = textBox1.Text.IndexOf(item, s); if (ip == -1) continue;
+                string nextLineTxt = GetNextLineTxt(x, ip);
+                //textBox1.Text = textBox1.Text.Replace("。<p>\r\n{{", "\r\n{{");//此不宜逕行取代，參見《札迻》版式，故今以下式取代，半自動手動校勘 20231114 感恩感恩　讚歎讚歎　南無阿彌陀佛
+                while (ip > -1)
+                {
+                    //下一行若是如「{{九百五十三}}湯浚對鬯酒」則不清除
+                    int noteMarkClosePos = nextLineTxt.IndexOf("}}");//小注結束標記的位置
+                    if (noteMarkClosePos > -1 &&
+                        ((noteMarkClosePos == nextLineTxt.Length - 2)//2="}}".Length
+                        ||//「}}」後不是中文且不是Surrogate字符
+                        (noteMarkClosePos + 2 < nextLineTxt.Length
+                            && !IsCJKorSurrogate(nextLineTxt.Substring(noteMarkClosePos + 2, 1)))))
+                    //(char.IsHighSurrogate(nextLineTxt.Substring(noteMarkClosePos + 2, 1).ToCharArray()[0])||
+                    //IsChineseString(nextLineTxt.Substring(noteMarkClosePos+2,1))))))
+                    {
+                        textBox1.Select(ip, item.Length);
+                        if (MessageBoxShowOKCancelExclamationDefaultDesktopOnly("是否要清除注文間的段落符號？") == DialogResult.OK)
+                            textBox1.SelectedText = "}}\r\n{{";
+                        //textBox1.Text = textBox1.Text.Replace("}}。<p>\r\n{{", "}}\r\n{{");
+                    }
+                    ip = textBox1.Text.IndexOf(item, ip + 1);
+                }
+
+            }
+            stopUndoRec = false; ResumeEvents();
+        }
+        /// <summary>
+        /// 清除注腳間「{{」與「}}」間的分段標記<p>
+        /// 小注間的分段標記檢查與清除
+        /// 20240904 creedit_with_Copilot大菩薩：C# Windows.Forms 中檢查並清除大括號內的 `<p>` 標籤：https://sl.bing.net/dc0DoIfOFSm
+        /// </summary>
+        private void clearParagraphMarkersInsidePairsBrackets()
+        {
+            string x = textBox1.Text;
+            while (isParagraphMarkersInsidePairsBrackets())
+            {
+                if (x == textBox1.Text) break;
+            }
+        }
+        /// <summary>
+        /// 判斷注腳間「{{」與「}}」間是否有分段標記<p>        
+        /// 20240904 creedit_with_Copilot大菩薩：C# Windows.Forms 中檢查並清除大括號內的 `<p>` 標籤：https://sl.bing.net/dc0DoIfOFSm
+        /// </summary>
+        private bool isParagraphMarkersInsidePairsBrackets()
+        {//這段程式碼會在textBox1中檢查大括號內是否有<p>標籤，並在找到後選取該部分，提示使用者是否要清除。如果使用者選擇清除，則會移除<p>標籤。
+
+
+            string input = textBox1.Text;
+            string[] checkStr = { @"\{[^{}]*<p>[^{}]*\}", @"\{[^{}]*。<p>[^{}]*\}" };
+            //string pattern = @"\{[^{}]*<p>[^{}]*\}";
+            foreach (var item in checkStr)
+            {
+                string pattern = item;
+                Match match = Regex.Match(input, pattern);
+
+                if (match.Success)
+                {
+                    string marker = item.Substring(item.IndexOf("*") + 1, item.IndexOf(">") - item.IndexOf("*"));
+                    //textBox1.Select(match.Index, match.Length);
+                    textBox1.Select(textBox1.Text.IndexOf(marker, match.Index), marker.Length);
+                    DialogResult result = MessageBox.Show("發現小注間有<p>標籤，是否清除？", "確認", MessageBoxButtons.YesNo);
+
+                    if (result == DialogResult.Yes)
+                    {
+                        stopUndoRec = true; PauseEvents();
+
+                        //string textBox1SelectedText = textBox1.SelectedText;
+                        //textBox1.SelectedText = string.Empty;
+                        //textBox1.Text = Regex.Replace(input, pattern, m => m.Value.Replace("<p>", ""));
+                        //textBox1.SelectedText = Regex.Replace(textBox1SelectedText, pattern, m => m.Value.Replace("<p>", ""));
+                        textBox1.SelectedText = string.Empty;//清除 <p>
+                        //將接續的空白「􏿽」轉成空格「　」
+                        if (textBox1.SelectionStart < textBox1.TextLength - 4)
+                        {
+                            //如果插入點後是分段/行符號
+                            if (textBox1.Text.Substring(textBox1.SelectionStart, Environment.NewLine.Length) == Environment.NewLine)
+                            {
+                                textBox1.SelectionStart += Environment.NewLine.Length;
+                                while (textBox1.Text.Substring(textBox1.SelectionStart, 2) == "􏿽")
+                                {
+                                    textBox1.Select(textBox1.SelectionStart, 2);
+                                    textBox1.SelectedText = "　";
+                                }
+                            }
+                        }
+
+                        stopUndoRec = false; ResumeEvents();
+                    }
+                    return true;
+                }
+                //else
+                //{
+                //    //MessageBox.Show("未發現<p>標籤。");
+                //    return false;
+                //}
+            }
+            return false;
+        }
+        /// <summary>
+        /// 清除大括號間的下大括號
+        /// </summary>
+        void clearCloseBracketsInsidePairsBrackets()
+        {
+            TextBox tb = textBox1;
+            if (tb.Text.IndexOf("{") == -1 || tb.Text.IndexOf("}") == -1) return;
+            int openP = tb.Text.IndexOf("{{");
+            int p = tb.Text.IndexOf("}}");
+            int nextopenP = tb.Text.IndexOf("{{", openP + 2);//2="{{".Length
+            if (nextopenP == -1) return;
+            int closeP = tb.Text.LastIndexOf("}}", nextopenP);
+            while (closeP > -1)
+            {
+
+                if (p < closeP)
+                {
+                    stopUndoRec = true; PauseEvents();
+                    tb.Select(p, 2);//2="}}".Length
+                    tb.SelectedText = string.Empty;
+                    stopUndoRec = false; ResumeEvents();
+                }
+                if (nextopenP == -1) break;
+                openP = nextopenP;
+                p = tb.Text.IndexOf("}}", openP);
+                if (p == -1) break;
+                nextopenP = tb.Text.IndexOf("{{", openP + 2);//2="{{".Length
+                if (nextopenP == -1) //break;
+                    closeP = tb.Text.LastIndexOf("}}", tb.TextLength);
+                else
+                    closeP = tb.Text.LastIndexOf("}}", nextopenP);
+                //Console.WriteLine(tb.Text.Substring(openP, nextopenP - openP));
+                //Console.WriteLine(tb.Text.Substring(openP, p - openP));
+                //Console.WriteLine(tb.Text.Substring(openP, closeP - openP));
+            }
+        }
+        /// <summary>
+        /// 清除大括號間的下大括號
+        /// </summary>
+        void clearBracketsInsidePairsBrackets()
+        {
+            TextBox tb = textBox1;
+            if (tb.Text.IndexOf("{{") == -1 || tb.Text.IndexOf("}}") == -1) return;
+            int s = 0;
+            //先看第一個出現的是不是上大括號            
+            if (tb.Text.IndexOf("}}") > -1 && tb.Text.IndexOf("{{") > tb.Text.IndexOf("}}"))
+                s = tb.Text.IndexOf("}}");
+            int openP = tb.Text.IndexOf("{{", s);
+            int closeP = tb.Text.IndexOf("}}", s + 2);
+            int nextopenP = tb.Text.IndexOf("{{", openP + 2);//2="{{".Length
+            int nextcloseP = 0;
+            while (nextopenP > -1 && nextopenP > -1)
+            {
+                string stringBrackets =
+                    tb.Text.Substring(openP + 2, closeP - openP - 2);
+                if (stringBrackets.IndexOf("{{") > -1)
+                {
+                    tb.Select(nextopenP, 2);
+                    stopUndoRec = true; PauseEvents();
+                    tb.SelectedText = string.Empty;
+                    stopUndoRec = false; ResumeEvents();
+                }
+                nextopenP = tb.Text.IndexOf("{{", openP + 2);
+                if (nextopenP == -1)
+                {
+                    nextcloseP = tb.Text.IndexOf("}}", closeP + 2);
+                    while (nextcloseP > -1)
+                    {
+                        tb.Select(nextcloseP, 2);
+                        stopUndoRec = true; PauseEvents();
+                        tb.SelectedText = string.Empty;
+                        stopUndoRec = false; ResumeEvents();
+                        nextcloseP = tb.Text.IndexOf("}}", closeP + 2);
+                    }
+                    break;
+                }
+                closeP = tb.Text.IndexOf("}}", openP);
+                nextcloseP = tb.Text.IndexOf("}}", closeP + 2);
+                if (nextcloseP == -1)
+                {
+                    nextopenP = tb.Text.IndexOf("{{", nextopenP + 2);
+                    while (nextopenP > -1)
+                    {
+                        tb.Select(nextopenP, 2);
+                        stopUndoRec = true; PauseEvents();
+                        tb.SelectedText = string.Empty;
+                        stopUndoRec = false; ResumeEvents();
+                        nextopenP = tb.Text.IndexOf("{{", closeP + 2);
+                    }
+                    break;
+                }
+                if (nextcloseP < nextopenP)
+                {
+                    stringBrackets = tb.Text.Substring(openP + 2, nextcloseP - openP - 2);
+                    if (stringBrackets.IndexOf("}}") > -1)
+                    {
+                        tb.Select(closeP, 2);
+                        stopUndoRec = true; PauseEvents();
+                        tb.SelectedText = string.Empty;
+                        stopUndoRec = false; ResumeEvents();
+                    }
+                }
+                if (openP + 2 > tb.TextLength) break;
+                openP = tb.Text.IndexOf("{{", openP + 2);
+                closeP = tb.Text.IndexOf("}}", openP);
+                nextopenP = tb.Text.IndexOf("{{", openP + 2);
+                nextcloseP = tb.Text.IndexOf("}}", closeP + 2);
+                stringBrackets =
+                    tb.Text.Substring(openP + 2, closeP - openP - 2);
+                while (nextcloseP > -1 && nextopenP == -1)
+                {//先清掉最後多餘的下大括弧，而不是清掉其中間的下大括號 20240904
+                    tb.Select(nextcloseP, 2);
+                    stopUndoRec = true; PauseEvents();
+                    tb.SelectedText = string.Empty;
+                    stopUndoRec = false; ResumeEvents();
+                    nextcloseP = tb.Text.IndexOf("}}", closeP + 2);
+                }
+            }
+        }
+
+        #region 將空格後的句號（如「　。」）置於所有空格前
+        /// <summary>
+        /// 將全形空格後的句號（如「　。」）置於所有空格前 20240904
+        /// </summary>
+        void movePeriodsToFrontofBlank()
+        {
+            string x = textBox1.Text;
+            int p = x.IndexOf("　。");
+            if (p == -1) return;
+            int s = 1;
+            while (p > -1)
+            {
+                //移動到非全形空格時
+                while (p - 1 > -1 && textBox1.Text.Substring(p - s, 1) == "　")
+                { s++; }
+
+                stopUndoRec = true; PauseEvents();
+
+                textBox1.Select(p - s + 1, p + 2 - (p - s + 1));//2="　。".Length
+                textBox1.SelectedText = "。" + textBox1.SelectedText.Substring(1, textBox1.SelectionLength - 2) + "　";
+
+                stopUndoRec = false; ResumeEvents();
+
+                p = textBox1.Text.IndexOf("　。");
+            }
+        }
+        #endregion
+
 
         /// <summary>
         /// 軟體操作時提醒之系統音效參照
@@ -6470,7 +6756,16 @@ internal string textBox4Text
             }
             return true;
         }
-
+        /// <summary>
+        /// 是否是中文或surrogate
+        /// </summary>
+        /// <param name="xCheck"></param>
+        /// <returns></returns>
+        public static bool IsCJKorSurrogate(string xCheck)
+        {
+            return char.IsSurrogate(xCheck.ToCharArray()[0]) ||
+                        IsChineseString(xCheck);
+        }
 
         /// <summary>
         /// C#中文字轉換Unicode(\u ):http://trufflepenne.blogspot.com/2013/03/cunicode.html
@@ -6699,7 +6994,12 @@ internal string textBox4Text
                 {
                     if (DialogResult.Cancel == Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly(
                         "插入點位置似有誤，請「確定」從此處之前的才貼上？\n\r\n\r" +
-                        "忽略此訊息，改為【整面貼上】請按「取消」感恩感恩　南無阿彌陀佛", string.Empty, false)) { s = textBox1.TextLength; l = 0; pageTextEndPosition = s + l; }
+                        "忽略此訊息，改為【整面貼上】請按「取消」感恩感恩　南無阿彌陀佛", string.Empty, false))
+                    {
+                        textBox1.DeselectAll();
+                        textBox1.SelectionStart = textBox1.TextLength;
+                        s = textBox1.SelectionStart; l = 0; pageTextEndPosition = s + l;
+                    }
                 }
 
                 if (keyinTextMode && !OcrTextMode)
@@ -8457,7 +8757,8 @@ internal string textBox4Text
                 {//Ctrl + PageDown Ctrl + PageUP
                     e.Handled = true;//取得或設定值，指出是否處理事件。https://docs.microsoft.com/zh-tw/dotnet/api/system.windows.forms.keyeventargs.handled?view=netframework-4.7.2&f1url=%3FappId%3DDev16IDEF1%26l%3DZH-TW%26k%3Dk(System.Windows.Forms.KeyEventArgs.Handled);k(TargetFrameworkMoniker-.NETFramework,Version%253Dv4.7.2);k(DevLang-csharp)%26rd%3Dtrue
                     nextPages(e.KeyCode, true);
-                    if (autoPastetoQuickEdit) AvailableInUseBothKeysMouse();
+                    //if (autoPastetoQuickEdit) AvailableInUseBothKeysMouse();
+                    AvailableInUseBothKeysMouse();
                     return;
                 }
                 if (e.KeyCode == Keys.Left || e.KeyCode == Keys.Right)
@@ -9623,7 +9924,7 @@ internal string textBox4Text
             if (url == "") return;
             if (url.IndexOf("&page=") == -1) return;
             int edit = url.IndexOf("&editwiki");
-            int page = 0; string urlSub = url;            
+            int page = 0; string urlSub = url;
             if (edit > -1)
             {
                 urlSub = url.Substring(0, url.IndexOf("&page=") + "&page=".Length);
@@ -9804,8 +10105,13 @@ internal string textBox4Text
                         string chkX = string.Empty;
                         if (nextpagetextBox1Text_Default != string.Empty)
                         {
-                            chkX = CnText.BooksPunctuation(ref nextpagetextBox1Text_Default, false);
+                            textBox1.Text = nextpagetextBox1Text_Default;
+                            clearBracketsInsidePairsBrackets();
+                            nextpagetextBox1Text_Default = textBox1.Text;
+                            if (!notBooksPunctuation)
+                                chkX = CnText.BooksPunctuation(ref nextpagetextBox1Text_Default, false);
                             textBox1.Text = notBooksPunctuation ? nextpagetextBox1Text_Default : chkX;
+
                         }
                         #region 如果已經編輯，則將Form1移至旁邊
                         if (!ocrTextMode && keyinTextMode && autoTestPositionAvoidance)
@@ -9854,7 +10160,9 @@ internal string textBox4Text
             }
             #endregion
 
-            if (stayInHere && !pagePaste2GjcoolOCR) AvailableInUseBothKeysMouse();//this.Activate();
+            /////////////這先取消，交由呼叫端處理 20240904
+            //if (stayInHere && !pagePaste2GjcoolOCR) AvailableInUseBothKeysMouse();//this.Activate();
+
         }
 
         private void runWordMacro(string runName)
@@ -11374,7 +11682,7 @@ internal string textBox4Text
             //}
 
             //最上層顯示
-            if (!this.TopMost && keyinTextMode &&!ocrTextMode && !PagePaste2GjcoolOCR_ing ) this.TopMost = true;
+            if (!this.TopMost && keyinTextMode && !ocrTextMode && !PagePaste2GjcoolOCR_ing) this.TopMost = true;
             //if (!this.TopMost && !PagePaste2GjcoolOCR_ing || ModifierKeys != Keys.Control) this.TopMost = true;
 
             //不全部貼上取代原文字
@@ -11508,21 +11816,23 @@ internal string textBox4Text
                     #endregion
 
                     #region 表單最上層顯示且滑鼠鍵盤可用－－ 先取消這個，改由別處控制 20240902
-                    if (!Active && !PagePaste2GjcoolOCR_ing)
-                    ////if (!Active && !PagePaste2GjcoolOCR_ing&& ModifierKeys!=Keys.Control)
-                    {
-                        Debugger.Break();
-                    //    PauseEvents();
-                    //    AvailableInUseBothKeysMouse();
-                    //    //表單最上層顯示
-                    //    if (!this.TopMost) this.TopMost = true;
-                    //    ResumeEvents();
-                    }
+                    //if (!Active && !PagePaste2GjcoolOCR_ing)
+                    //////if (!Active && !PagePaste2GjcoolOCR_ing&& ModifierKeys!=Keys.Control)
+                    //{
+                    //    Debugger.Break();
+                    //    //    PauseEvents();
+                    //    //    AvailableInUseBothKeysMouse();
+                    //    //    //表單最上層顯示
+                    //    //    if (!this.TopMost) this.TopMost = true;
+                    //    //    ResumeEvents();
+                    //}
                     #endregion
+
                     Clipboard.Clear();
                     return;
                 }
                 #endregion//如果剪貼簿裡是網址內容的話
+
             }//以上處置鍵入模式（keyinText=true）
             #endregion
 

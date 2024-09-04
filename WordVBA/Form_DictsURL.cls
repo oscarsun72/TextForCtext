@@ -5,7 +5,7 @@ END
 Attribute VB_Name = "Form_DictsURL"
 Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
-Attribute VB_PredeclaredId = True
+Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
 Option Explicit
 Dim dbFullName As String, cnt As New ADODB.Connection
@@ -42,7 +42,7 @@ reZY:
                 GoTo reZY
             End If
         Else
-            If Not 文字處理.is注音符號(Right(ZhuYin, 1)) Then
+            If Not 文字處理.is注音符號(right(ZhuYin, 1)) Then
                 If MsgBox("Check ZhuYin(注音) to reInput ?", vbOKCancel, "注音") = vbOK Then
                     GoTo reZY
                 Else
@@ -100,7 +100,7 @@ End Function
 
 Sub Word_AfterUpdate(words As String)
 Dim dictID, rst As New ADODB.Recordset, w As String, URL As String, u As String, lnks As New Links
-If words = "" Then words = Selection.Text
+If words = "" Then words = Selection.text
 If words = "" Then Exit Sub
 w = words
 dictID = InputBox("plz  input the Dictionary ID!" & vbCr & vbLf & "國語辭典=1" & vbCr & vbLf & "異體字字典=2" _
@@ -173,3 +173,5 @@ End Sub
 '    get1URLfor1 = u
 'End If
 'End Function
+
+

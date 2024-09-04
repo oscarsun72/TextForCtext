@@ -7,6 +7,7 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
+
 Option Explicit
 Const cntStr As String = "Provider=Microsoft.ACE.OLEDB.12.0;Data Source="
 
@@ -39,9 +40,9 @@ End Sub
 Sub dict加注音(x As String, dictID As Byte)
 Dim cnt As New ADODB.Connection, rst As New ADODB.Recordset, w As String, zy As String, ay
 If VBA.InStr(x, Chr(9)) Then
-    ay = VBA.split(x, Chr(9))
+    ay = VBA.Split(x, Chr(9))
 ElseIf VBA.InStr(x, "（") Then
-    ay = VBA.split(x, "（")
+    ay = VBA.Split(x, "（")
 Else
     Exit Sub
 End If
@@ -64,11 +65,11 @@ End Sub
 
 Sub 國語辭典網址及ID尚缺者列出()
 Dim rng As word.Range, a, x As String, cnt As New ADODB.Connection, rst As New ADODB.Recordset, ws As String
-If selection.Type = wdSelectionIP Then
+If Selection.Type = wdSelectionIP Then
     Set rng = ActiveDocument.Range
     rng.Find.Execute Chr(13), , , , , , , wdFindContinue, , "", wdReplaceAll
 Else
-    Set rng = selection.Range
+    Set rng = Selection.Range
 End If
 cnt_重編國語辭典修訂本_資料庫 cnt
 For Each a In rng.Characters
@@ -106,7 +107,7 @@ End Function
 
 Sub setWordControlValue(w As String)
 Const cz As String = "查字forinput - [dictsurl]"
-On Error GoTo eh
+On Error GoTo eH
 If Not SystemSetup.appActivatedYet("msaccess") Then Exit Sub
 'If Not word.Tasks.Exists(cz) Then Exit Sub ' 用 word.Tasks 有時會當掉
 If w = "" Then Exit Sub
@@ -124,7 +125,7 @@ With Me.ctl("word")
     End If
 End With
 Exit Sub
-eh:
+eH:
 Select Case Err.Number
     Case 5 '程序呼叫或引數不正確
     Case Else
@@ -133,15 +134,15 @@ Select Case Err.Number
 End Select
 End Sub
 
-Sub setURLControlValue(url As String)
+Sub setURLControlValue(URL As String)
 Dim lnk As New Links
 If Not SystemSetup.appActivatedYet("msaccess") Then Exit Sub
 If Not word.Tasks.Exists("查字forinput - [dictsurl]") Then Exit Sub
-If Not lnk.checkURL_single(url) Then Exit Sub
+If Not lnk.checkURL_single(URL) Then Exit Sub
 
 On Error Resume Next
-Me.ctl("Text8").Value = url
-Me.ctl("url").Value = url
+Me.ctl("Text8").Value = URL
+Me.ctl("url").Value = URL
 
 End Sub
 Sub setDictControlValue(dictID As Byte)
@@ -166,7 +167,7 @@ Public Function FieldExists(rs As ADODB.Recordset, fieldName As String) As Boole
 'https://www.tek-tips.com/viewthread.cfm?qid=1283403
     Dim fd                          As ADODB.Field
     On Error Resume Next
-    Err.clear
+    Err.Clear
     ' This field DOES NOT EXIST
     Set fd = rs.Fields("fieldName")
     If Err.Number <> 0 Then
@@ -178,3 +179,4 @@ Public Function FieldExists(rs As ADODB.Recordset, fieldName As String) As Boole
     End If
     Set fd = Nothing
 End Function
+

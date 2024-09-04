@@ -16,7 +16,7 @@ Dim msdo As New MSForms.DataObject, sty As word.Style
 Dim haveZhuYin As Boolean
 If Selection.Type = wdSelectionIP Then Selection.MoveRight wdCharacter, 1, wdExtend
 Set rng = Selection.Range
-x = Selection.Text
+x = Selection.text
 1
 frmDict.getDictRecS CStr(x), rst, dictID
 'frmDict.getDictHydzdRecS CStr(x), rst
@@ -147,7 +147,7 @@ Function trimLinks(lnk As String)
 Dim ay, e
 ay = Array(Chr(9))
 lnk = VBA.Trim(lnk)
-If VBA.Left(lnk, 1) = "#" And VBA.Right(lnk, 1) = "#" Then lnk = Mid(lnk, 2, Len(lnk) - 2)
+If VBA.Left(lnk, 1) = "#" And VBA.right(lnk, 1) = "#" Then lnk = Mid(lnk, 2, Len(lnk) - 2)
 For Each e In ay
     lnk = VBA.Replace(lnk, e, "")
 Next e
@@ -266,7 +266,7 @@ SystemSetup.playSound 2
 End Function
 
 Function updateURL國語辭典(d As word.Document)
-On Error GoTo eh
+On Error GoTo eH
 Dim db As New dBase, cnt As New ADODB.Connection, lnk As String, hplnk As word.Hyperlink, rst As New ADODB.Recordset
 Dim id As Long, chm As String, w As String
 'Set d = ActiveDocument
@@ -314,11 +314,11 @@ For Each hplnk In d.Hyperlinks
                 End If
                 chm = Me.trimLinks(chm)
                 If Me.checkURL_single(chm) Then
-                    If Me.chkLinks_http_Dicts_toAddZhuYin(chm, w, 1, id, Selection.Text) Then
+                    If Me.chkLinks_http_Dicts_toAddZhuYin(chm, w, 1, id, Selection.text) Then
 2
                         rst.Close
                          rst.Open "select url,urlv5,id,注音一式,字詞名 from " & db.重編國語辭典修訂本_資料庫_總表Name & _
-                            " where strcomp(字詞名,""" & w & """)=0 and strcomp(注音一式 ,""" & VBA.StrConv(VBA.Replace(Selection.Text, ChrW(20008), "ㄧ"), vbWide) & """)=0", cnt, adOpenKeyset, adLockOptimistic
+                            " where strcomp(字詞名,""" & w & """)=0 and strcomp(注音一式 ,""" & VBA.StrConv(VBA.Replace(Selection.text, ChrW(20008), "ㄧ"), vbWide) & """)=0", cnt, adOpenKeyset, adLockOptimistic
                         If rst.RecordCount = 1 Then
                             If VBA.IsNull(rst.Fields(0).Value) Then rst.Fields(0).Value = chm
                             If VBA.IsNull(rst.Fields(1).Value) Then rst.Fields(1).Value = lnk
@@ -350,7 +350,7 @@ If cnt.State <> adStateClosed Then cnt.Close
 Set rst = Nothing: Set cnt = Nothing
 SystemSetup.playSound 2
 Exit Function
-eh:
+eH:
 Select Case Err.Number
     Case Else
         MsgBox Err.Number & Err.Description
@@ -374,4 +374,6 @@ Next lnk
 Set d = Nothing: Set lnk = Nothing
 SystemSetup.playSound 2
 End Sub
+
+
 
