@@ -542,7 +542,8 @@ namespace WindowsFormsApp1
                                 CnText.BooksPunctuation(ref text, false);
                                 undoRecord();
                                 textBox1.Text = text;
-                                clearBracketsInsidePairsBrackets();
+                                if (!OcrTextMode)
+                                    clearBracketsInsidePairsBrackets();
 
 
                                 if (Clipboard.GetText() != text && text != "")//CopyQuickedit_data_textboxText已用到等價 SetText 的方法了
@@ -3226,10 +3227,13 @@ namespace WindowsFormsApp1
                     {
                         bool gjcoolocrResultManual = clpTxt.IndexOf(Environment.NewLine + Environment.NewLine) > -1;
                         if (gjcoolocrResultManual) clpTxt = clpTxt.Replace(Environment.NewLine + Environment.NewLine, Environment.NewLine);
-                        textBox1.Text = clpTxt;
-                        clearBracketsInsidePairsBrackets();
-                        clpTxt = textBox1.Text;
-                        textBox1.Text = CnText.BooksPunctuation(ref clpTxt, true);
+                        if (!ocrTextMode)
+                        {
+                            textBox1.Text = clpTxt;
+                            clearBracketsInsidePairsBrackets();
+                            clpTxt = textBox1.Text;
+                            textBox1.Text = CnText.BooksPunctuation(ref clpTxt, true);
+                        }
                         if (gjcoolocrResultManual)
                         {
                             if (br.driver != null)
@@ -10105,9 +10109,12 @@ namespace WindowsFormsApp1
                         string chkX = string.Empty;
                         if (nextpagetextBox1Text_Default != string.Empty)
                         {
-                            textBox1.Text = nextpagetextBox1Text_Default;
-                            clearBracketsInsidePairsBrackets();
-                            nextpagetextBox1Text_Default = textBox1.Text;
+                            if (!ocrTextMode)
+                            {
+                                textBox1.Text = nextpagetextBox1Text_Default;
+                                clearBracketsInsidePairsBrackets();
+                                nextpagetextBox1Text_Default = textBox1.Text;
+                            }
                             if (!notBooksPunctuation)
                                 chkX = CnText.BooksPunctuation(ref nextpagetextBox1Text_Default, false);
                             textBox1.Text = notBooksPunctuation ? nextpagetextBox1Text_Default : chkX;
