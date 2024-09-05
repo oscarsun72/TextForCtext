@@ -703,6 +703,11 @@ Sub killchromedrivers()
     Next
 End Sub
 
+Property Get Chromedrivers()
+    Dim objWMIService, objProcess
+    Set objWMIService = GetObject("winmgmts:" & "{impersonationLevel=impersonate}!\\.\root\cimv2")
+    Set Chromedrivers = objWMIService.ExecQuery("Select * from Win32_Process Where Name = 'chromedriver.exe'")
+End Property
 
 Rem VBA 取得系統環境變數及特殊資料夾路徑 如C#中的 Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) 回傳值
 Rem 中可以使用 Environ 函數來取得系統環境變數的值。例如，要取得本機應用程式資料路徑，可以使用下面的程式碼: localAppData = Environ("LOCALAPPDATA")

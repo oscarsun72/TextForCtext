@@ -35,12 +35,22 @@ Private Sub app_Quit()
 
     '自動備份Normal.dotm
     SystemSetup.backupNormal_dotm
-        
+    Stop
     
     '清除Word Selenium所開啟的chromedriver
     '20230119 chatGPT菩薩：VBA  如何結束 MS word 時處理程序呢：
     'https://learn.microsoft.com/zh-tw/office/vba/word/concepts/objects-properties-methods/using-events-with-the-application-object-word
     SystemSetup.killchromedriverFromHere
+    Dim dt As Date
+    dt = VBA.Now
+    Do While DateDiff("s", dt, VBA.Now) < 1
+        DoEvents
+    Loop
+    If Chromedrivers.Count > 0 Then
+        If MsgBox("是否要清除剩下的chromedriver？", vbOKCancel) = vbOK Then
+            killchromedrivers
+        End If
+    End If
 End Sub
 
 

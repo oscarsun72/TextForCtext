@@ -1967,7 +1967,14 @@ Select Case Err.Number
 End Select
 End Function
 
-
+Sub ResetSelectionAvoidSymbols()
+    Do While Selection.Characters(Selection.Characters.Count) = Chr(13)
+        Selection.MoveLeft wdCharacter, 1, wdExtend
+    Loop
+    Do While Selection.Characters(1) = Chr(13)
+        Selection.SetRange Selection.start + 1, Selection.End
+    Loop
+End Sub
 'Function Symbol() '標點符號表
 'Dim f As Variant
 'f = Array("。", "」", Chr(-24152), "：", "，", "；", _
@@ -3062,7 +3069,7 @@ Sub 漢籍電子文獻資料庫文本整理_注文前後加括號_origin()
     fColor = rng.Font.Color
     Do While rng.End < rng.Document.Range.End - 1
     
-        rng.move wdCharacter, 1
+        rng.Move wdCharacter, 1
         
         If rng.Font.Color = 204 And rng.Font.Size = 11 Then
             rng.Delete
@@ -3094,7 +3101,7 @@ Set slRng = Selection.Range
 For Each a In slRng.Characters
     If a Like "[。，；？！「」『』]" Then
         a.Select
-        Selection.move
+        Selection.Move
         Selection.TypeText Chr(11)
     End If
 Next a
@@ -3776,7 +3783,7 @@ Sub 國語辭典網址及ID尚缺者填入()
 Dim i As Long
 ActiveDocument.Range.Find.Execute Chr(13), , , , , , , wdFindContinue, , "", wdReplaceAll
 Do Until Selection.End = ActiveDocument.Range.End - 1
-    Selection.move
+    Selection.Move
     If Selection.Previous <> ChrW(20008) And Selection.Hyperlinks.Count = 0 Then
         生難字加上國語辭典注音
         ActiveWindow.ScrollIntoView Selection, False

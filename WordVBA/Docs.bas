@@ -3,7 +3,7 @@ Option Explicit
 Public d字表 As Document, x As New EventClassModule   '這才是所謂的建立"新"的類別模組--實際上是建立對它的參照.'原照線上說明乃Dim也.
 'https://learn.microsoft.com/en-us/office/vba/word/concepts/objects-properties-methods/using-events-with-the-application-object-word
 Public Sub Register_Event_Handler() '使自設物件類別模組有效的登錄程序.見「使用 Application 物件 (Application Object) 的事件」
-    If x Is Nothing Or Not x Is word.Application Then
+    If x Is Nothing Or Not x.App Is word.Application Then
         SystemSetup.playSound 4
         Set x.App = word.Application '此即使新建的物件與Word.Application物件作上關聯
     End If

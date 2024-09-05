@@ -110,6 +110,7 @@ Sub 查康熙字典網上版()
 End Sub
 Sub 查國語辭典_到網頁去看()
     Rem Ctrl + Alt + F12
+    ResetSelectionAvoidSymbols
     SeleniumOP.LookupDictRevised Selection.text
 End Sub
 Sub 查漢語大詞典()
@@ -118,10 +119,12 @@ Sub 查漢語大詞典()
         MsgBox "要2字以上才能檢索！", vbExclamation ', vbError
         Exit Sub
     End If
+    ResetSelectionAvoidSymbols
     SeleniumOP.LookupHYDCD Selection.text
 End Sub
 Sub 查國學大師()
     Rem Ctrl + d + s （ds：大師）
+    ResetSelectionAvoidSymbols
     SeleniumOP.LookupGXDS Selection.text
 End Sub
 Sub 查白雲深處人家說文解字圖像查閱_藤花榭本優先()
@@ -141,6 +144,7 @@ Sub 查白雲深處人家說文解字圖像查閱_藤花榭本優先()
 End Sub
 Sub 查白雲深處人家說文解字圖文檢索WFG版_解說檢索()
     Rem  Alt + shift + s （說文的說） Alt + Shift + j （解字的解）
+    ResetSelectionAvoidSymbols
     SeleniumOP.LookupHomeinmistsShuowenImageTextSearchWFG_Interpretation Selection.text
 End Sub
 Sub 查漢語多功能字庫並取回其說文解釋欄位之值插入至插入點位置()
