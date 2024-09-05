@@ -5809,6 +5809,7 @@ namespace WindowsFormsApp1
         }
         /// <summary>
         /// 計算單行/段的字數
+        /// 待除錯，可以此頁內容檢測（當已標記時再執行此函式會誤改動 20240905 https://ctext.org/library.pl?if=en&file=36096&page=99&editwiki=644293#editor
         /// </summary>
         /// <param name="xLinePara">要計算的行/段的文字字串</param>
         /// <returns></returns>

@@ -47,7 +47,7 @@ Private Sub app_Quit()
         DoEvents
     Loop
     If Chromedrivers.Count > 0 Then
-        If MsgBox("是否要清除剩下的chromedriver？", vbOKCancel) = vbOK Then
+        If MsgBox("是否要清除剩下的chromedriver？", vbOKCancel + vbExclamation) = vbOK Then
             killchromedrivers
         End If
     End If
