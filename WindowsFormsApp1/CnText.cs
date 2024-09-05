@@ -696,9 +696,12 @@ namespace TextForCtext
                 string pattern = "[" + Regex.Escape("卷上下卄一二三四五六七八九十卅卌<p>") + "]";
                 line = Regex.Replace(line, pattern, "");
                 double similarity = Fuzz.Ratio(title, line) / 100.0;
-                if (similarity >= threshold && i > 0 && lines[i - 1] != "|")//前一段若為「|」通常是卷末題目
+                if (similarity >= threshold )
                 {
-                    location = xChecking.IndexOf(lines[i]);
+                    //前一段若為「|」通常是卷末題目
+                    if (i > lines.Length - 2 && lines[i - 1] == "|") continue; 
+
+                        location = xChecking.IndexOf(lines[i]);
                     if (location == -1)
                     {
                         // 計算第 i 行在 xChecking 中的行頭位置
@@ -830,6 +833,12 @@ namespace TextForCtext
             text = text.Replace("{{{{", "{{").Replace("}}}}", "}}").Replace("{{{", "{{{{{").Replace("}}}", "}}}}}");
             Regex rgx = new Regex(pattern);
             text = rgx.Replace(text, replacement);
+
+            #region 全注文標記之處理
+            text = text.Replace("}}" + Environment.NewLine+ "{{",Environment.NewLine);
+
+            #endregion
+
             return text;
 
             //string pattern = "(?<=^|[^{]){{4}(?=[^}]|$)|(?<=^|[^}])}}(?=[^}])(?<=[^}])(?<=[^}])(?<=[^}])(?=[^}]|$)";

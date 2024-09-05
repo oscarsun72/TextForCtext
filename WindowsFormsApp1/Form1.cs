@@ -21,6 +21,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using TextForCtext;
 using WebSocketSharp;
+using static System.Net.Mime.MediaTypeNames;
 using static TextForCtext.Browser;
 
 
@@ -1118,7 +1119,9 @@ namespace WindowsFormsApp1
             }
             //textBox2.BackColor = textBox2BackColorDefault;
         }
-
+        /// <summary>
+        /// 標上小注標記{{……}} 20240905修訂
+        /// </summary>
         void noteMark()//Ctrl + F1 ：選取範圍前後加上{{}}
         {
             if (insertMode && textBox1.SelectionLength > 0 || !insertMode)
@@ -1131,8 +1134,30 @@ namespace WindowsFormsApp1
                 //textBox1.SelectedText = ("{{" + x + "}}").Replace(Environment.NewLine, "}}" + Environment.NewLine + "{{")
                 //    .Replace("{{{{", "{{").Replace("}}}}", "}}");
                 x = ("{{" + x + "}}").Replace(Environment.NewLine, "}}" + Environment.NewLine + "{{");
+
                 CnText.CurlybracesFormalizer(ref x);
+
+                #region 全注文標記之處理
+                int s = textBox1.SelectionStart,
+                    openBrace = textBox1.Text.LastIndexOf("{{", s), closeBrace = textBox1.Text.LastIndexOf("}}", s),
+                    paraMark = textBox1.Text.LastIndexOf("<p>", s);
+                //檢查前面是否下大括號在上大括弧前或沒有下大括號存在,有則清除前端的「{{」
+                if (s > "{{".Length
+                    && ((closeBrace == -1 && openBrace != -1) || (openBrace == -1 && closeBrace != -1))
+                    || (closeBrace < openBrace
+                        && (paraMark == -1 || paraMark < openBrace)))
+                    x = x.Substring("{{".Length);
+                //若前一行段末為下大括弧，則予清理
+                if (s > "}}".Length + Environment.NewLine.Length
+                    && textBox1.Text.Substring(s - 4, 4) == "}}" + Environment.NewLine)
+                {
+                    textBox1.Select(textBox1.SelectionStart - 4, textBox1.SelectionLength + 4);
+                    x = string.Empty + Environment.NewLine + x.Substring("{{".Length);
+                }
+                #endregion
+
                 textBox1.SelectedText = x;
+
                 if (!Active) bringBackMousePosFrmCenter();
                 stopUndoRec = false; ResumeEvents();
             }
@@ -3230,7 +3255,7 @@ namespace WindowsFormsApp1
                         if (!ocrTextMode)
                         {
                             textBox1.Text = clpTxt;
-                            clearBracketsInsidePairsBrackets();
+                            //clearBracketsInsidePairsBrackets();
                             clpTxt = textBox1.Text;
                             textBox1.Text = CnText.BooksPunctuation(ref clpTxt, true);
                         }
@@ -6182,9 +6207,10 @@ namespace WindowsFormsApp1
                     int noteMarkClosePos = nextLineTxt.IndexOf("}}");//小注結束標記的位置
                     if (noteMarkClosePos > -1 &&
                         ((noteMarkClosePos == nextLineTxt.Length - 2)//2="}}".Length
-                        ||//「}}」後不是中文且不是Surrogate字符
+                        ||//「}}」後不是中文、不是Surrogate字符、且不是標點符號
                         (noteMarkClosePos + 2 < nextLineTxt.Length
-                            && !IsCJKorSurrogate(nextLineTxt.Substring(noteMarkClosePos + 2, 1)))))
+                            && !IsCJKorSurrogate(nextLineTxt.Substring(noteMarkClosePos + 2, 1))
+                            && PunctuationsNum.IndexOf(nextLineTxt.Substring(noteMarkClosePos + 2, 1)) == -1)))
                     //(char.IsHighSurrogate(nextLineTxt.Substring(noteMarkClosePos + 2, 1).ToCharArray()[0])||
                     //IsChineseString(nextLineTxt.Substring(noteMarkClosePos+2,1))))))
                     {
@@ -6210,6 +6236,7 @@ namespace WindowsFormsApp1
             while (isParagraphMarkersInsidePairsBrackets())
             {
                 if (x == textBox1.Text) break;
+                x = textBox1.Text;
             }
         }
         /// <summary>
@@ -6221,7 +6248,7 @@ namespace WindowsFormsApp1
 
 
             string input = textBox1.Text;
-            string[] checkStr = { @"\{[^{}]*<p>[^{}]*\}", @"\{[^{}]*。<p>[^{}]*\}" };
+            string[] checkStr = { @"\{[^{}]*。<p>[^{}]*\}", @"\{[^{}]*<p>[^{}]*\}" };
             //string pattern = @"\{[^{}]*<p>[^{}]*\}";
             foreach (var item in checkStr)
             {
@@ -6233,8 +6260,8 @@ namespace WindowsFormsApp1
                     string marker = item.Substring(item.IndexOf("*") + 1, item.IndexOf(">") - item.IndexOf("*"));
                     //textBox1.Select(match.Index, match.Length);
                     textBox1.Select(textBox1.Text.IndexOf(marker, match.Index), marker.Length);
-                    DialogResult result = MessageBox.Show("發現小注間有<p>標籤，是否清除？", "確認", MessageBoxButtons.YesNo);
-
+                    DialogResult result = MessageBox.Show("發現小注間有<p>標籤，是否清除？", "確認", MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
+                    AvailableInUseBothKeysMouse();
                     if (result == DialogResult.Yes)
                     {
                         stopUndoRec = true; PauseEvents();
@@ -6324,14 +6351,24 @@ namespace WindowsFormsApp1
             int nextcloseP = 0;
             while (nextopenP > -1 && nextopenP > -1)
             {
+                if (closeP < openP)
+                {
+                    tb.Select(closeP, openP);
+                    MessageBoxShowOKExclamationDefaultDesktopOnly("大括號錯亂處請先清理！");
+                    break;
+                }
                 string stringBrackets =
                     tb.Text.Substring(openP + 2, closeP - openP - 2);
+                if (stringBrackets.StartsWith("{")) continue;//{{{……}}} 不處理
                 if (stringBrackets.IndexOf("{{") > -1)
                 {
                     tb.Select(nextopenP, 2);
-                    stopUndoRec = true; PauseEvents();
-                    tb.SelectedText = string.Empty;
-                    stopUndoRec = false; ResumeEvents();
+                    if (tb.Text.Substring(tb.SelectionStart + tb.SelectionLength, 1) != "{")//{{{……}}} 不處理
+                    {
+                        stopUndoRec = true; PauseEvents();
+                        tb.SelectedText = string.Empty;
+                        stopUndoRec = false; ResumeEvents();
+                    }
                 }
                 nextopenP = tb.Text.IndexOf("{{", openP + 2);
                 if (nextopenP == -1)
@@ -6340,10 +6377,15 @@ namespace WindowsFormsApp1
                     while (nextcloseP > -1)
                     {
                         tb.Select(nextcloseP, 2);
-                        stopUndoRec = true; PauseEvents();
-                        tb.SelectedText = string.Empty;
-                        stopUndoRec = false; ResumeEvents();
-                        nextcloseP = tb.Text.IndexOf("}}", closeP + 2);
+                        if (tb.Text.Substring(tb.SelectionStart + tb.SelectionLength, 1) != "}")
+                        {
+                            stopUndoRec = true; PauseEvents();
+                            tb.SelectedText = string.Empty;
+                            stopUndoRec = false; ResumeEvents();
+                            nextcloseP = tb.Text.IndexOf("}}", closeP + 2);
+                        }
+                        else
+                            nextcloseP = tb.Text.IndexOf("}}", nextcloseP + 2);
                     }
                     break;
                 }
@@ -6355,10 +6397,15 @@ namespace WindowsFormsApp1
                     while (nextopenP > -1)
                     {
                         tb.Select(nextopenP, 2);
-                        stopUndoRec = true; PauseEvents();
-                        tb.SelectedText = string.Empty;
-                        stopUndoRec = false; ResumeEvents();
-                        nextopenP = tb.Text.IndexOf("{{", closeP + 2);
+                        if (tb.Text.Substring(tb.SelectionStart + tb.SelectionLength, 1) != "{")
+                        {
+                            stopUndoRec = true; PauseEvents();
+                            tb.SelectedText = string.Empty;
+                            stopUndoRec = false; ResumeEvents();
+                            nextopenP = tb.Text.IndexOf("{{", closeP + 2);
+                        }
+                        else
+                            nextopenP = tb.Text.IndexOf("{{", nextopenP + 2);
                     }
                     break;
                 }
@@ -6368,9 +6415,12 @@ namespace WindowsFormsApp1
                     if (stringBrackets.IndexOf("}}") > -1)
                     {
                         tb.Select(closeP, 2);
-                        stopUndoRec = true; PauseEvents();
-                        tb.SelectedText = string.Empty;
-                        stopUndoRec = false; ResumeEvents();
+                        if (tb.Text.Substring(tb.SelectionStart + tb.SelectionLength, 1) != "}")
+                        {
+                            stopUndoRec = true; PauseEvents();
+                            tb.SelectedText = string.Empty;
+                            stopUndoRec = false; ResumeEvents();
+                        }
                     }
                 }
                 if (openP + 2 > tb.TextLength) break;
@@ -6380,13 +6430,19 @@ namespace WindowsFormsApp1
                 nextcloseP = tb.Text.IndexOf("}}", closeP + 2);
                 stringBrackets =
                     tb.Text.Substring(openP + 2, closeP - openP - 2);
+                if (stringBrackets.StartsWith("{")) continue;//{{{……}}} 不處理
                 while (nextcloseP > -1 && nextopenP == -1)
                 {//先清掉最後多餘的下大括弧，而不是清掉其中間的下大括號 20240904
                     tb.Select(nextcloseP, 2);
-                    stopUndoRec = true; PauseEvents();
-                    tb.SelectedText = string.Empty;
-                    stopUndoRec = false; ResumeEvents();
-                    nextcloseP = tb.Text.IndexOf("}}", closeP + 2);
+                    if (tb.Text.Substring(tb.SelectionStart + tb.SelectionLength, 1) != "}")
+                    {
+                        stopUndoRec = true; PauseEvents();
+                        tb.SelectedText = string.Empty;
+                        stopUndoRec = false; ResumeEvents();
+                        nextcloseP = tb.Text.IndexOf("}}", closeP + 2);
+                    }
+                    else
+                        nextcloseP = tb.Text.IndexOf("}}", nextcloseP + 2);
                 }
             }
         }
