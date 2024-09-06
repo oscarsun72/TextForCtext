@@ -1229,7 +1229,7 @@ namespace WindowsFormsApp1
         /// <param name="x">要找的全域文字</param>
         /// <param name="s">插入點所在位置</param>
         /// <returns></returns>
-        internal static string GetNextLineTxt(string x, int s)
+        internal static string GetNextLineTxtIncludingMarkers(string x, int s)
         {
             if (s < 0 || string.IsNullOrEmpty(x)) return "";
             int p = x.IndexOf(Environment.NewLine, s);
@@ -4417,7 +4417,12 @@ namespace WindowsFormsApp1
             //return textBox1.SelectedText;
 
         }
-
+        /// <summary>
+        /// 在指定文本中計算某單字出現的次數
+        /// </summary>
+        /// <param name="whatWord"></param>
+        /// <param name="domain"></param>
+        /// <returns></returns>
         int countWordsinDomain(string whatWord, string domain)
         {
             StringInfo dw = new StringInfo(domain); int cntr = 0;
@@ -5956,7 +5961,9 @@ namespace WindowsFormsApp1
                 if (eventEnabled)
                     ResumeEvents();
             }
+
             replaceXdirrectly();
+
             int s = 0, l, e = textBox1.Text.IndexOf(Environment.NewLine); if (e < 0) return;
             PauseEvents();
             int rs = textBox1.SelectionStart, rl = textBox1.SelectionLength;
@@ -5974,8 +5981,10 @@ namespace WindowsFormsApp1
             if (se.Replace("●", "") == "") textBox1.Text = textBox1.Text.Substring(e + 2);//●●●●●●●●乃作為權訂每行字數之參考，故可刪去
                                                                                           //if (countWordsLenPerLinePara(se) == wordsPerLinePara && se.Replace("●", "") == "") textBox1.Text = textBox1.Text.Substring(e + 2);
             undoRecord(); stopUndoRec = true; PauseEvents();
+
             //string p = "<p>";
-            string p = keyinTextMode ? "。<p>" : "<p>";
+            string p = keyinTextMode && !ocrTextMode ? "。<p>" : "<p>";
+
             if (wordsPerLinePara == -1)
             {
                 wordsPerLinePara = l;
@@ -6171,7 +6180,8 @@ namespace WindowsFormsApp1
 
             playSound(soundLike.over);
             if (topLine) { rst.Close(); cnt.Close(); rst = null; cnt = null; }
-            if (keyinTextMode)
+            //if (keyinTextMode)
+            if (!ocrTextMode)
             {
                 clearParagraphMarkersBetweenPairsBrackets();
                 clearParagraphMarkersInsidePairsBrackets();
@@ -6199,18 +6209,52 @@ namespace WindowsFormsApp1
             foreach (var item in paragraphMarkIn)
             {
                 int s = ip + 1; ip = textBox1.Text.IndexOf(item, s); if (ip == -1) continue;
-                string nextLineTxt = GetNextLineTxt(x, ip);
+                string nextLineTxt = GetNextLineTxtIncludingMarkers(x, ip);
                 //textBox1.Text = textBox1.Text.Replace("。<p>\r\n{{", "\r\n{{");//此不宜逕行取代，參見《札迻》版式，故今以下式取代，半自動手動校勘 20231114 感恩感恩　讚歎讚歎　南無阿彌陀佛
+
+                //參閱 paragraphMarkAccordingFirstOne 的這行 ：
+                //string p = keyinTextMode && !ocrTextMode ? "。<p>" : "<p>"; 
+                //兩邊當同步
+                string punctuation = (keyinTextMode && !ocrTextMode) ?PunctuationsNum.Replace("。",string.Empty): PunctuationsNum;
+
                 while (ip > -1)
                 {
                     //下一行若是如「{{九百五十三}}湯浚對鬯酒」則不清除
                     int noteMarkClosePos = nextLineTxt.IndexOf("}}");//小注結束標記的位置
-                    if (noteMarkClosePos > -1 &&
-                        ((noteMarkClosePos == nextLineTxt.Length - 2)//2="}}".Length
+                    //Debugger.Break();
+                    if (noteMarkClosePos > -1 &&//如下
+                        ((noteMarkClosePos == nextLineTxt.Length - 2)// 2 = "}}".Length
+                        
                         ||//「}}」後不是中文、不是Surrogate字符、且不是標點符號
-                        (noteMarkClosePos + 2 < nextLineTxt.Length
-                            && !IsCJKorSurrogate(nextLineTxt.Substring(noteMarkClosePos + 2, 1))
-                            && PunctuationsNum.IndexOf(nextLineTxt.Substring(noteMarkClosePos + 2, 1)) == -1)))
+                        
+                        (noteMarkClosePos + 2 < nextLineTxt.Length//下一行下大括號位置如果不是行末
+                            &&
+                            /*1.：下一段全是注文，但尾端有「<p>」標記，如：       ……}}<p>
+                                                                        {{卷上}}<p> 
+                                                                即下一行的尾端一定是「}}<p>」*/
+                            (
+                                (nextLineTxt.Length > 5 && nextLineTxt.Substring(nextLineTxt.Length - 5) == "}}<p>")// 5 = ""}}<p>"".Length
+
+                            ||/* 2:             }}<p>
+                                            {{卷上}}君臣取象…… 
+                                            通常正常長度時自動標上段落標記的 paragraphMarkAccordingFirstOne 方法是不會在「}}」後標上「<p>」 
+                                            然非正常長度、每行長度不一或常變化時，則例外，須另想辦法或人工處理 20240906 */
+
+                                (!IsCJKorSurrogate(nextLineTxt.Substring(noteMarkClosePos + 2, 1))//下大括號後的第1個字不是中文或 surrogate
+                                                                                                  //而且下大括弧後的第1個字如果是中文，且長度要小於4（個字）
+                                    || (IsCJKorSurrogate(nextLineTxt.Substring(noteMarkClosePos + 2, 1)) && new StringInfo(CnText.RemovePunctuationsNum(nextLineTxt.Substring(noteMarkClosePos + 2)).Replace("<p>", string.Empty).Replace("|", string.Empty)).LengthInTextElements < 4)
+                                )
+                            )
+                            
+                            && punctuation.IndexOf(nextLineTxt.Substring(noteMarkClosePos + 2, 1)) == -1
+
+
+                         )
+                         )
+                        )
+                    //如果需要略過}}後是句號的判斷，如 「……}}。<p>」，則可用以下此行替換上行
+                    //&& PunctuationsNum.Replace("。", string.Empty).IndexOf(nextLineTxt.Substring(noteMarkClosePos + 2, 1)) == -1)))))
+
                     //(char.IsHighSurrogate(nextLineTxt.Substring(noteMarkClosePos + 2, 1).ToCharArray()[0])||
                     //IsChineseString(nextLineTxt.Substring(noteMarkClosePos+2,1))))))
                     {
@@ -6433,8 +6477,8 @@ namespace WindowsFormsApp1
                 if (stringBrackets.StartsWith("{")) continue;//{{{……}}} 不處理
                 while (nextcloseP > -1 && nextopenP == -1)
                 {//先清掉最後多餘的下大括弧，而不是清掉其中間的下大括號 20240904
-                    tb.Select(nextcloseP, 2);
-                    if (tb.Text.Substring(tb.SelectionStart + tb.SelectionLength, 1) != "}")
+                    tb.Select(nextcloseP, 2);//2 = "}}".Length
+                    if (nextcloseP + 2 == tb.TextLength || tb.Text.Substring(tb.SelectionStart + tb.SelectionLength, 1) != "}")
                     {
                         stopUndoRec = true; PauseEvents();
                         tb.SelectedText = string.Empty;
