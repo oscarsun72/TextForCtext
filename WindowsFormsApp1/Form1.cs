@@ -6215,7 +6215,7 @@ namespace WindowsFormsApp1
                 //參閱 paragraphMarkAccordingFirstOne 的這行 ：
                 //string p = keyinTextMode && !ocrTextMode ? "。<p>" : "<p>"; 
                 //兩邊當同步
-                string punctuation = (keyinTextMode && !ocrTextMode) ?PunctuationsNum.Replace("。",string.Empty): PunctuationsNum;
+                string punctuation = (keyinTextMode && !ocrTextMode) ? PunctuationsNum.Replace("。", string.Empty) : PunctuationsNum;
 
                 while (ip > -1)
                 {
@@ -6224,9 +6224,9 @@ namespace WindowsFormsApp1
                     //Debugger.Break();
                     if (noteMarkClosePos > -1 &&//如下
                         ((noteMarkClosePos == nextLineTxt.Length - 2)// 2 = "}}".Length
-                        
+
                         ||//「}}」後不是中文、不是Surrogate字符、且不是標點符號
-                        
+
                         (noteMarkClosePos + 2 < nextLineTxt.Length//下一行下大括號位置如果不是行末
                             &&
                             /*1.：下一段全是注文，但尾端有「<p>」標記，如：       ……}}<p>
@@ -6245,7 +6245,7 @@ namespace WindowsFormsApp1
                                     || (IsCJKorSurrogate(nextLineTxt.Substring(noteMarkClosePos + 2, 1)) && new StringInfo(CnText.RemovePunctuationsNum(nextLineTxt.Substring(noteMarkClosePos + 2)).Replace("<p>", string.Empty).Replace("|", string.Empty)).LengthInTextElements < 4)
                                 )
                             )
-                            
+
                             && punctuation.IndexOf(nextLineTxt.Substring(noteMarkClosePos + 2, 1)) == -1
 
 
@@ -6403,7 +6403,15 @@ namespace WindowsFormsApp1
                 }
                 string stringBrackets =
                     tb.Text.Substring(openP + 2, closeP - openP - 2);
-                if (stringBrackets.StartsWith("{")) continue;//{{{……}}} 不處理
+                if (stringBrackets.StartsWith("{"))
+                {
+                    openP = tb.Text.IndexOf("{{", openP + 2);
+                    closeP = tb.Text.IndexOf("}}", openP);
+                    nextopenP = tb.Text.IndexOf("{{", openP + 2);
+                    nextcloseP = tb.Text.IndexOf("}}", closeP + 2);
+                    continue;//{{{……}}} 不處理
+                }
+
                 if (stringBrackets.IndexOf("{{") > -1)
                 {
                     tb.Select(nextopenP, 2);
@@ -6523,7 +6531,7 @@ namespace WindowsFormsApp1
         /// <summary>
         /// 軟體操作時提醒之系統音效參照
         /// </summary>
-        public enum soundLike { none, over, done, stop, info, error, warn, exam, processing, press, waiting }
+        public enum soundLike { none, over, done, stop, info, error, warn, exam, processing, press, waiting , finish }
         /// <summary>
         /// 播放指定音效
         /// </summary>
@@ -6564,6 +6572,9 @@ namespace WindowsFormsApp1
                     break;
                 case soundLike.waiting:
                     wav = "Ring10";
+                    break;
+                case soundLike.finish:
+                    wav = "Ring03";
                     break;
                 default:
                     break;
@@ -9387,7 +9398,7 @@ namespace WindowsFormsApp1
             while (true)
             {
                 if (TopMost) TopMost = false;
-                if (br.Hanchi_SearchingKeywordsYijing()) break;
+                if (br.Hanchi_CTP_SearchingKeywordsYijing()) break;
             }
         }
 

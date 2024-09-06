@@ -278,7 +278,7 @@ End Sub
 
 Sub 貼上引文() '將已複製到剪貼簿的內容貼成引文
     Dim s As Long, e As Long, r  As Range
-    If Selection.Type = wdSelectionNormal And right(Selection, 1) Like Chr(13) Then _
+    If Selection.Type = wdSelectionNormal And Right(Selection, 1) Like Chr(13) Then _
                 Selection.MoveLeft wdCharacter, 1, wdExtend '不要包含分段符號!
     If Selection.Style <> "引文" Then Selection.Style = "引文" '如果不是引文樣式時,則改成引文樣式
     s = Selection.start '記下起始位置
@@ -892,7 +892,7 @@ Sub mark易學關鍵字()
         "河圖", "洛書", "太極", "無極", _
             "象曰", "象日", "象云", "象傳", "彖", _
             "艮", "頤", "坎", "中孚", "兌", "蠱", "姤", "巽", "剝", "遯", "大壯", "明夷", "小畜", "大畜", "睽", "暌", "歸妹", "小過", "大有", "大過", "〈泰〉", "〈否〉", "〈損〉", "〈益〉", "〈屯〉", "〈豫〉", "〈旡妄〉", "〈復〉", "〈震〉", _
-            "老陰", "老陽", "少陰", "少陽", _
+            "老陰", "老陽", "少陰", "少陽", "繇辭", "繇詞", _
             "咎", "咸恒", "咸恆", _
         ChrW(26080) & ChrW(-10171) & ChrW(-8522))  ', "", "", "", "" )
         '"無咎", ChrW(26080) & "咎", "天咎",
@@ -998,6 +998,7 @@ pasteAnyway:
         End If
     '    xd = d.Range.text
         Dim rngMark As Range
+        word.Options.DefaultHighlightColorIndex = wdYellow
         For Each e In searchedTerm
             Set rngMark = d.Range(IIf(endDocOld >= d.Range.End, d.Range.End - 1, endDocOld), d.Range.End)
             xd = rngMark.text
@@ -1445,7 +1446,7 @@ Sub ChangeFontOfSurrogatePairs_ActiveDocument(fontName As String, Optional whatC
                 If i < ActiveDocument.Range.End Then
                     C = C & ActiveDocument.Range(i, i).text        ' The combined character
                 End If
-                If AscW(right(C, 1)) >= &HDC00 And AscW(right(C, 1)) <= &HDFFF Then
+                If AscW(Right(C, 1)) >= &HDC00 And AscW(Right(C, 1)) <= &HDFFF Then
                     ' Check if the combined character is in CJK extension B or later
                     'If AscW(Left(c, 1)) >= &HD840 Then
                     If AscW(Left(C, 1)) >= SurrogateCodePoint.HighStart Then '前導代理 (lead surrogates)，介於 D800 至 DBFF 之間，第二個被稱為 後尾代理 (trail surrogates)，介於 DC00 至 DFFF 之間
@@ -1503,7 +1504,7 @@ Sub ChangeFontOfSurrogatePairs_Range(fontName As String, rngtoChange As Range, O
 '                    'c = c & ActiveDocument.Range(i, i).text        ' The combined character
 '                    c = c & Mid(rngtoChange, i, 1).text        ' The combined character
 '                End If
-                If AscW(right(C, 1)) >= &HDC00 And AscW(right(C, 1)) <= &HDFFF Then
+                If AscW(Right(C, 1)) >= &HDC00 And AscW(Right(C, 1)) <= &HDFFF Then
                     ' Check if the combined character is in CJK extension B or later
                     'If AscW(Left(c, 1)) >= &HD840 Then
                     If AscW(Left(C, 1)) >= SurrogateCodePoint.HighStart Then '前導代理 (lead surrogates)，介於 D800 至 DBFF 之間，第二個被稱為 後尾代理 (trail surrogates)，介於 DC00 至 DFFF 之間

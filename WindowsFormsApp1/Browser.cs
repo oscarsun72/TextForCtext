@@ -1729,7 +1729,13 @@ namespace TextForCtext
                      */
                     // 在網頁元素載入完畢後，執行 Click 方法
                     if (submit != null)
-                        submit.Click();
+                        try
+                        {
+                            submit.Click();
+                        }
+                        catch (Exception)
+                        {
+                        }
                     else
                         Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("請手動檢查資料是否有正確送出。");
                     //throw;
@@ -5046,7 +5052,7 @@ internal static string getImageUrl() {
                     StopOCR = true; return false;
                 }
 
-                
+
                 if (ocrResult.IndexOf(" ") > -1)
                 {
                     #region 檢查覆查追查用，記下原來OCR傳回的樣子 20240902
@@ -5065,7 +5071,7 @@ internal static string getImageUrl() {
                     //CnText.RemoveInnerBraces(ref ocrResult);
                     ocrResult = ocrResult.Replace("】【", string.Empty);
                     ocrResult = CnText.RemoveNestedBrackets(ocrResult);
-                    ocrResult = ocrResult.Replace("【", "{{").Replace("】", "}}").Replace("{{}}",string.Empty);
+                    ocrResult = ocrResult.Replace("【", "{{").Replace("】", "}}").Replace("{{}}", string.Empty);
                 }
 
                 //Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("copy to clipboard!");
@@ -7876,13 +7882,13 @@ internal static string getImageUrl() {
         internal static int ListIndex_Hanchi_SearchingKeywordsYijing = 0;
 
         /// <summary>
-        /// 《漢籍全文資料庫》檢索易學關鍵字
+        /// 在《漢籍全文資料庫》及《中國哲學書電子化計劃》檢索易學關鍵字
         /// 【進階檢索】中指定書名請自行輸入
         /// 在textBox2中輸入「lx」重設《漢籍全文資料庫》檢索易學關鍵字清單之索引值為0 即 ListIndex_Hanchi_SearchingKeywordsYijing=0。 
         /// textBox3.Text 會顯示關鍵字清單的索引值（從0開始）        
-        /// <returns>檢索有結果、或關鍵字清單找完一遍了、或失敗則傳回則傳回true（以供呼叫端判斷是否停止繼續呼叫） 若檢索成功但沒結果，則傳回false </returns>
+        /// <returns>檢索有結果、或關鍵字清單找完一遍了、或失敗則傳回true（以供呼叫端判斷是否停止繼續呼叫） 若檢索成功但沒結果，則傳回false </returns>
         /// </summary>
-        internal static bool Hanchi_SearchingKeywordsYijing()
+        internal static bool Hanchi_CTP_SearchingKeywordsYijing()
         {
             if (driver == null) return true;
 
@@ -7922,7 +7928,7 @@ internal static string getImageUrl() {
                 ,"咸恆","老陰", "老陽", "少陰", "少陽","十翼"
                 ,"无妄", "彖", "象曰", "象傳", "象日", "象云","小象", "筮"
             ,"初九","九二","九三","九四","九五","上九","初六","六二","六三","六四","六五","上六"
-            ,"用九","用六"};
+            ,"用九","用六", "繇辭","繇詞"};
 
             //異體字處理（只用在《中國哲學書電子化計劃》，因為《漢籍全文資料庫》已俱。）
             if (title.EndsWith("中國哲學書電子化計劃") || title.EndsWith("Chinese Text Project"))
@@ -8257,7 +8263,7 @@ internal static string getImageUrl() {
                         {
                             throw;
                         }
-                        Form1.playSound(Form1.soundLike.info);
+                        //Form1.playSound(Form1.soundLike.info);
                         ActiveForm1.TopMost = false;
                     }
                     catch (WebDriverTimeoutException)
@@ -8282,6 +8288,7 @@ internal static string getImageUrl() {
                         {
                             iwe1 = waitFindWebElementBySelector_ToBeClickable("body > form > table > tbody > tr:nth-child(2) > td > table > tbody > tr > td > table > tbody > tr:nth-child(2) > td > table > tbody > tr:nth-child(1) > td.seqno");
                             returnValue = true;
+                            Form1.playSound(Form1.soundLike.info);
                             break;
                         }
                         iwe1 = waitFindWebElementBySelector_ToBeClickable("body > form > table > tbody > tr:nth-child(2) > td > table > tbody > tr > td.leftbg > table > tbody > tr:nth-child(1) > td > table > tbody > tr:nth-child(2) > td > input.s_btn.hjblock", 0.3);
@@ -8327,7 +8334,7 @@ internal static string getImageUrl() {
             if (ListIndex_Hanchi_SearchingKeywordsYijing > keywords.Count - 1)
             {
                 ListIndex_Hanchi_SearchingKeywordsYijing = 0;
-                Form1.playSound(Form1.soundLike.warn, true);
+                Form1.playSound(Form1.soundLike.finish, true);
                 returnValue = true;
             }
 
@@ -8344,6 +8351,7 @@ internal static string getImageUrl() {
             //    //SendKeys.Send("{esc}");
             //}
 
+            //檢索結束
             return returnValue;
         }
         /// <summary>
