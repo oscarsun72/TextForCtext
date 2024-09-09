@@ -11,12 +11,13 @@ End Sub
 
 Function 空白的新文件(Optional newDocVisible As Boolean = True) As Document '20210209
     Dim a As Document, flg As Boolean
+    word.Application.ScreenUpdating = False
     If Documents.Count = 0 Then GoTo a:
-    If ActiveDocument.Characters.Count = 1 Then
+    If ActiveDocument.Characters.Count = 1 And VBA.InStr(ActiveDocument.Name, "dotm") = 0 Then
         Set a = ActiveDocument
     ElseIf ActiveDocument.Characters.Count > 1 Then
         For Each a In Documents
-            If a.path = "" Or a.Characters.Count = 1 Then
+            If (a.path = "" Or a.Characters.Count = 1) And VBA.InStr(a.Name, "dotm") = 0 Then
     '            a.Range.Paste'原來都有貼上，現在不要，單純找+開新文件就好
     '            a.Activate
     '            a.ActiveWindow.Activate
@@ -819,30 +820,37 @@ Sub DocBackgroundFillColor() '頁面色彩
 End Sub
 
 Sub 內文前空二格() 'Alt+n
-With Selection.ParagraphFormat
-    .Style = "內文"
-    .CharacterUnitFirstLineIndent = 2
-End With
+    With Selection.ParagraphFormat
+        .Style = "內文"
+        .CharacterUnitFirstLineIndent = 2
+    End With
 End Sub
-
-Sub mark易學關鍵字()
-    Dim searchedTerm, e, ur As UndoRecord, d As Document, clipBTxt As String, flgPaste As Boolean, xd As String, dSource As Document
-    Dim strAutoCorrection, endDocOld As Long, rng As Range
+Sub 易學關鍵字()
+    ' Alt + `
+    mark易學關鍵字
+End Sub
+Rem 執行完成才傳回true，否則為false
+Function mark易學關鍵字(Optional pasteRange As Range, Optional doNotMark As Boolean) As Boolean
+    ' Alt + `
+    Dim searchedTerm, e, ur As UndoRecord, d As Document, clipBTxt As String, flgPaste As Boolean, dSource As Document
+    Dim strAutoCorrection, endDocOld As Long, rng As Range, returnVaule As Boolean
     Dim punc As New punctuation
     SystemSetup.playSound 0.484
     strAutoCorrection = Array("，〉", "〉，", "〈、", "〈", "〈。", "〈", "。〉", "〉", "〈：", "〈", "：〉", "〉", "〈，", "〈", "、〉", "〉")
     If InStr(ActiveDocument.path, "易學雜著文本") = 0 Then
-        If MsgBox("目前文件為" + ActiveDocument.Name + "是否繼續？", vbExclamation + vbOKCancel) = vbCancel Then Exit Sub
+        If MsgBox("目前文件為" + ActiveDocument.Name + "是否繼續？", vbExclamation + vbOKCancel) = vbCancel Then Exit Function
     End If
     Set dSource = ActiveDocument: If Not dSource.Saved Then dSource.Save
     Set rng = dSource.Range
     With rng.Find
         .ClearAllFuzzyOptions
         .ClearFormatting
-        If .Execute(VBA.Trim(VBA.Left(SystemSetup.GetClipboard, 255)), , , , , , True, wdFindContinue) Then
+        '255是上限，但也可能包含了標點斷句異文而導致文本有異不能比對，還不如縮減到可以識別的長度即可
+        'If .Execute(VBA.Trim(VBA.Left(SystemSetup.GetClipboard, 255)), , , , , , True, wdFindContinue) Then
+        If .Execute(VBA.Trim(VBA.Left(SystemSetup.GetClipboard, 25)), , , , , , True, wdFindContinue) Then
             rng.Select
             rng.Document.ActiveWindow.ScrollIntoView rng, True
-            Exit Sub
+            Exit Function
         End If
     End With
     'If Documents.Count = 0 Then Documents.Add
@@ -885,17 +893,7 @@ Sub mark易學關鍵字()
         clipBTxt = Replace(clipBTxt, strAutoCorrection(e), strAutoCorrection(e + 1))
         e = e + 1
     Next e
-    searchedTerm = Array("易", "卦", "爻", "周易", "易經", "系辭", "繫辭", "擊辭", "擊詞", "繫詞", "說卦", "序卦", _
-        "卦序", "敘卦", "雜卦", "文言", "乾坤", "元亨", "利貞", "史記", _
-        "筮", "夬", "〈乾〉", "〈坤〉", "乾、坤", "〈乾、坤〉", "噬嗑", "賁", ChrW(20089), "既濟", ChrW(26083) & "濟", "未濟", "十翼", _
-        "九五", "六二", "上九", "上六", "九二", "九三", "六四", "初六", "六三", "用九", _
-        "河圖", "洛書", "太極", "無極", _
-            "象曰", "象日", "象云", "象傳", "彖", _
-            "艮", "頤", "坎", "中孚", "兌", "蠱", "姤", "巽", "剝", "遯", "大壯", "明夷", "小畜", "大畜", "睽", "暌", "歸妹", "小過", "大有", "大過", "〈泰〉", "〈否〉", "〈損〉", "〈益〉", "〈屯〉", "〈豫〉", "〈旡妄〉", "〈復〉", "〈震〉", _
-            "老陰", "老陽", "少陰", "少陽", "繇辭", "繇詞", _
-            "咎", "咸恒", "咸恆", _
-        ChrW(26080) & ChrW(-10171) & ChrW(-8522))  ', "", "", "", "" )
-        '"無咎", ChrW(26080) & "咎", "天咎",
+    searchedTerm = Keywords.易學KeywordsToMark
         
     'If Selection.Type = wdSelectionIP Then
         Rem 判斷是否已含有該文本
@@ -906,8 +904,9 @@ Sub mark易學關鍵字()
             Set similarCompare = Docs.similarTextCheckInSpecificDocument(d, clipBTxt)
             If similarCompare.item(1) Then
                 If MsgBox("文本相似度為 " & vbCr & similarCompare.item(3) _
-                    & vbCr & VBA.vbTab & "相似段落為：" & VBA.IIf(VBA.Len(similarCompare.item(2)) > 255, VBA.Left(similarCompare.item(2), 255) & "……", similarCompare.item(2)) _
-                    & vbCr & vbCr & "按下「確定」將會選取類似段落，請自行檢查是否仍要再貼入" & vbCr & vbCr & "按下「取消」則忽略檢查，將繼續執行", vbExclamation + vbOKCancel, "要貼入的文本在原文件中有類似的段落!!!") = vbOK Then
+                    & VBA.vbCr & vbCr & VBA.vbTab & "相似段落為：" & VBA.vbCr & VBA.vbCr & VBA.IIf(VBA.Len(similarCompare.item(2)) > 255, VBA.Left(similarCompare.item(2), 255) & "……", similarCompare.item(2)) & vbCr & vbCr & vbCr & _
+                    "按下「確定」將會選取類似段落，請自行檢查是否仍要再貼入" & vbCr & vbCr & "按下「取消」則忽略檢查，將繼續執行", vbExclamation + vbOKCancel, "要貼入的文本在原文件中有類似的段落!!!") _
+                        = vbOK Then
                     Set rng = d.Range
                     If rng.Find.Execute(VBA.Left(similarCompare.item(2), 255), , , , , , , wdFindContinue) Then
                         If VBA.Len(similarCompare.item(2)) > 255 Then
@@ -951,17 +950,23 @@ pasteAnyway:
                 If Selection.Document.FullName <> d.FullName Then
                     Stop
                 End If
-                Selection.EndKey wdStory
-                Selection.InsertParagraphAfter
-    '            Selection.InsertParagraphAfter
+                
+                On Error GoTo eH
+                If pasteRange Is Nothing Then
+                    Selection.EndKey wdStory
+                    Selection.InsertParagraphAfter
+        '            Selection.InsertParagraphAfter
+                Else
+                    pasteRange.Select
+                End If
                 Selection.Collapse wdCollapseEnd
                 Selection.TypeText clipBTxt
                 'SystemSetup.SetClipboard clipBTxt
-                On Error GoTo eH
                 'Docs.貼上純文字
-                
-                Selection.InsertParagraphAfter: Selection.InsertParagraphAfter: Selection.InsertParagraphAfter
-                Selection.Collapse wdCollapseEnd
+                If pasteRange Is Nothing Then
+                    Selection.InsertParagraphAfter: Selection.InsertParagraphAfter: Selection.InsertParagraphAfter
+                    Selection.Collapse wdCollapseEnd
+                End If
                 ActiveWindow.ScrollIntoView Selection
             Else
                 Dim noneYijingKeyword As Boolean
@@ -987,8 +992,8 @@ pasteAnyway:
     
         End If
     'End If
+    
     If flgPaste Then
-        Rem 標識關鍵字
         word.Application.ScreenUpdating = False
         If d.path <> "" Then
             If InStr(ActiveDocument.path, "易學雜著文本") = 0 Then
@@ -996,27 +1001,19 @@ pasteAnyway:
             End If
             If Not d.Saved Then d.Save
         End If
-    '    xd = d.Range.text
-        Dim rngMark As Range
-        word.Options.DefaultHighlightColorIndex = wdYellow
-        For Each e In searchedTerm
+        
+        Rem 標識關鍵字
+        If Not doNotMark Then
+        '    xd = d.Range.text
+            Dim rngMark As Range
+            
             Set rngMark = d.Range(IIf(endDocOld >= d.Range.End, d.Range.End - 1, endDocOld), d.Range.End)
-            xd = rngMark.text
-            If InStr(xd, e) > 0 Then
-    '            With d.Range.Find
-                With rngMark.Find
-                    .ClearFormatting
-                    .text = e
-                    With .Replacement
-                        .text = e
-                        .Font.ColorIndex = wdRed
-                        .Highlight = True
-                    End With
-                    '.Execute , , , , , , True, wdFindContinue, , , wdReplaceAll
-                    .Execute , , , , , , True, wdFindStop, , , Replace:=wdReplaceAll
-                End With
-            End If
-        Next e
+            
+            marking易學關鍵字 rngMark, searchedTerm, word.wdYellow
+            
+        End If
+        Rem 以上標識關鍵字
+        
         GoSub refres
         SystemSetup.playSound 1.921
         Rem https://en.wikipedia.org/wiki/CJK_Unified_Ideographs
@@ -1031,11 +1028,15 @@ pasteAnyway:
         'HanaMinB還不支援G以後的
         Docs.ChangeFontOfSurrogatePairs_Range "HanaMinB", rngChangeFontName, CJK_Unified_Ideographs_Extension_E
         Docs.ChangeFontOfSurrogatePairs_Range "HanaMinB", rngChangeFontName, CJK_Unified_Ideographs_Extension_F
+        returnVaule = True
     Else '文件內已有內容時
         GoSub refres
         SystemSetup.playSound 1.294
         If noneYijingKeyword Then
-            If MsgBox("要貼上的文本並不含有易學關鍵字哦！" + vbCr + vbCr + "請再檢查所複製到剪貼簿的內容是否正確。感恩感恩　南無阿彌陀佛○是否仍要貼上？" + vbCr + vbCr + clipBTxt, vbOKCancel + vbExclamation + vbDefaultButton2) = vbOK Then
+            If MsgBox("要貼上的文本並不含有易學關鍵字哦！" + vbCr + vbCr + _
+                "請再檢查所複製到剪貼簿的內容是否正確。感恩感恩　南無阿彌陀佛" & _
+                "○是否仍要貼上？" + vbCr + vbCr + clipBTxt, vbOKCancel + vbExclamation + vbDefaultButton2) _
+                = vbOK Then
                 noneYijingKeyword = False
                 GoTo pasteAnyway
             End If
@@ -1047,7 +1048,8 @@ exitSub:
     Set ur = Nothing
     'word.Application.ScreenUpdating = True
     'word.Application.ScreenRefresh
-    Exit Sub
+    mark易學關鍵字 = returnVaule
+    Exit Function
     
     
 refres:
@@ -1079,9 +1081,38 @@ eH:
             MsgBox Err.Number & Err.Description
             Resume
     End Select
+End Function
+Rem rng 要處理的範圍 ,arr 要處理的關鍵字 （預設為字串陣列）
+Sub marking易學關鍵字(rng As Range, arr As Variant, Optional defaultHighlightColorIndex As word.WdColorIndex = word.wdYellow, Optional fontColor As word.WdColorIndex = word.wdRed)
+    Dim xd As String, e
+    word.Options.defaultHighlightColorIndex = defaultHighlightColorIndex
+    xd = rng.text
+    With rng.Find
+        .ClearFormatting
+        .ClearAllFuzzyOptions
+        .ClearHitHighlight
+        With .Replacement
+            .Font.ColorIndex = fontColor 'wdRed
+            .Highlight = True
+        End With
+        For Each e In arr
+            If InStr(xd, e) > 0 Then
+    '            With d.Range.Find
+                    '.Execute , , , , , , True, wdFindContinue, , , wdReplaceAll
+                    .Execute e, , , , , , True, wdFindStop, True, e, Replace:=wdReplaceAll
+            End If
+        Next e
+    End With
 End Sub
-
-
+Rem 整個文件重新標識易學關鍵字
+Sub mark易學關鍵字Doc()
+    Dim ur As word.UndoRecord
+    SystemSetup.playSound 0.484
+    SystemSetup.stopUndo ur, "mark易學關鍵字Doc"
+    marking易學關鍵字 ActiveDocument.Range, Keywords.易學KeywordsToMark, word.wdYellow
+    SystemSetup.contiUndo ur
+    SystemSetup.playSound 2
+End Sub
 
 Rem 判斷剪貼簿裡的純文字(或指定的文字)內容是否在文件中已存在
 Function isDocumentContainClipboardText_IgnorePunctuation(d As Document, Optional chkClipboardText As String) As Boolean
@@ -1220,84 +1251,93 @@ Else
     MsgBox "請手動插入！", vbExclamation
 End If
 End Sub
-
+Rem 有選取時，即以選取的文字處理
 Sub 中國哲學書電子化計劃_只保留正文注文_且注文前後加括弧_貼到古籍酷自動標點()
-Dim ur As UndoRecord, d As Document, x As String, i As Long
-SystemSetup.playSound 0.484
-If (ActiveDocument.path <> "" And Not ActiveDocument.Saved) Then ActiveDocument.Save
-'If Documents.Count = 0 Then
-'    Set d = Docs.空白的新文件()
-'Else
-'    Set d = ActiveDocument
-'End If
-Set d = Docs.空白的新文件()
-word.Application.ScreenUpdating = False
-VBA.DoEvents
-中國哲學書電子化計劃.只保留正文注文_且注文前後加括弧 d
-
-If d.path <> "" Then
-    MsgBox "本文檔已儲存，不能操作！", vbCritical
-    Exit Sub
-End If
-If Len(d.Range) = 1 Then Exit Sub '空白文件不處理
-
-'以下2行已不必，待觀察 20240716
-'先要複製到剪貼簿,純文字操作即可
-'d.Range.Cut
-
-x = 文字處理.trimStrForSearch_PlainText(d.Range.text)
-x = 漢籍電子文獻資料庫.CleanTextPicPageMark(x)
-SystemSetup.SetClipboard VBA.Replace(x, "·", "") '以《古籍酷》自動標點不會清除「·」，造成書名號標點機制不正確，故於此先清除之。
-DoEvents
-'If d.path = "" Then '前已作判斷 If d.path <> "" Then Exit Sub
-d.Close wdDoNotSaveChanges
-
-Rem 這行要寫在不用的文件關閉後才有效，蓋其與文件併走也（雖UndoRecord為Application的屬性，但在文件被關閉時，其所載之復原記錄也會隨之清除，故須寫在文件關閉後才有效）
-SystemSetup.stopUndo ur, "中國哲學書電子化計劃_註文前後加括弧_貼到古籍酷自動標點"
-
-'將剪貼簿中的文本內容，送交古籍酷自動標點
-If 貼到古籍酷自動標點() = True Then
-    If Documents.Count = 0 Then GoTo exitSub
-    ActiveDocument.Application.Activate
-    '自動執行易學關鍵字標識
-    If Documents.Count > 0 Then
-        If InStr(ActiveDocument.path, "已初步標點") > 0 Then
-        On Error GoTo eH:
-            If Not SeleniumOP.wd Is Nothing Then
-                Dim ws() As String
-                ws = SeleniumOP.WindowHandles
-                If Not VBA.IsEmpty(ws) Then
-                    wd.SwitchTo.Window ws(UBound(ws))
-                    SeleniumOP.wd.Manage.Window.Minimize
+    Dim ur As UndoRecord, d As Document, x As String, i As Long
+    Dim SelectionRange As Range
+    SystemSetup.playSound 0.484
+    If (ActiveDocument.path <> "" And Not ActiveDocument.Saved) Then ActiveDocument.Save
+    
+    Rem 這行要寫在不用的文件關閉後才有效，蓋其與文件併走也（雖UndoRecord為Application的屬性，但在文件被關閉時，其所載之復原記錄也會隨之清除，故須寫在文件關閉後才有效）
+    SystemSetup.stopUndo ur, "中國哲學書電子化計劃_註文前後加括弧_貼到古籍酷自動標點"
+    
+    If Selection.Type = wdSelectionNormal Then
+        Selection.Cut
+        Set SelectionRange = Selection.Range
+    End If
+    'If Documents.Count = 0 Then
+    '    Set d = Docs.空白的新文件()
+    'Else
+    '    Set d = ActiveDocument
+    'End If
+    word.Application.ScreenUpdating = False
+    Set d = Docs.空白的新文件()
+    VBA.DoEvents
+    中國哲學書電子化計劃.只保留正文注文_且注文前後加括弧 d
+    
+    If d.path <> "" Then
+        MsgBox "本文檔已儲存，不能操作！", vbCritical
+        Exit Sub
+    End If
+    If Len(d.Range) = 1 Then Exit Sub '空白文件不處理
+    
+    '以下2行已不必，待觀察 20240716
+    '先要複製到剪貼簿,純文字操作即可
+    'd.Range.Cut
+    
+    x = 文字處理.trimStrForSearch_PlainText(d.Range.text)
+    x = 漢籍電子文獻資料庫.CleanTextPicPageMark(x)
+    SystemSetup.SetClipboard VBA.Replace(x, "·", "") '以《古籍酷》自動標點不會清除「·」，造成書名號標點機制不正確，故於此先清除之。
+    DoEvents
+    'If d.path = "" Then '前已作判斷 If d.path <> "" Then Exit Sub
+    d.Close wdDoNotSaveChanges
+    
+    Rem 這行要寫在不用的文件關閉後才有效，蓋其與文件併走也（雖UndoRecord為Application的屬性，但在文件被關閉時，其所載之復原記錄也會隨之清除，故須寫在文件關閉後才有效）
+    Rem SystemSetup.stopUndo ur, "中國哲學書電子化計劃_註文前後加括弧_貼到古籍酷自動標點"
+    
+    '將剪貼簿中的文本內容，送交古籍酷自動標點
+    If 貼到古籍酷自動標點() = True Then
+        If Documents.Count = 0 Then GoTo exitSub
+        ActiveDocument.Application.Activate
+        '自動執行易學關鍵字標識
+        If Documents.Count > 0 Then
+            If InStr(ActiveDocument.path, "已初步標點") > 0 Then
+            On Error GoTo eH:
+                If Not SeleniumOP.wd Is Nothing Then
+                    Dim ws() As String
+                    ws = SeleniumOP.WindowHandles
+                    If Not VBA.IsEmpty(ws) Then
+                        wd.SwitchTo.Window ws(UBound(ws))
+                        SeleniumOP.wd.Manage.Window.Minimize
+                    End If
                 End If
-            End If
 mark:
-            ActiveDocument.Application.Activate
-            mark易學關鍵字
+                ActiveDocument.Application.Activate
+                mark易學關鍵字 SelectionRange
+            End If
         End If
     End If
-End If
 exitSub:
-SystemSetup.contiUndo ur
-word.Application.ScreenUpdating = True
-Exit Sub
+    SystemSetup.contiUndo ur
+    word.Application.ScreenUpdating = True
+    Exit Sub
 eH:
-    Select Case Err.Number
-        Case 9
-            If InStr(Err.Description, "陣列索引超出範圍") Then
-                GoTo mark
-            Else
-                GoTo msg:
-            End If
-        Case -2146233088 'unknown error: unhandled inspector error: {"code":-32000,"message":"Browser window not found"}
-                          '(Session info: chrome=126.0.6478.127)
-            If VBA.InStr(Err.Description, "unknown error: unhandled inspector error:") > 0 Then
-                GoTo mark
-            End If
-        Case Else
+        Select Case Err.Number
+            Case 9
+                If InStr(Err.Description, "陣列索引超出範圍") Then
+                    GoTo mark
+                Else
+                    GoTo msg:
+                End If
+            Case -2146233088 'unknown error: unhandled inspector error: {"code":-32000,"message":"Browser window not found"}
+                              '(Session info: chrome=126.0.6478.127)
+                If VBA.InStr(Err.Description, "unknown error: unhandled inspector error:") > 0 Then
+                    GoTo mark
+                End If
+            Case Else
 msg:
-            MsgBox Err.Number & Err.Description
-    End Select
+                MsgBox Err.Number & Err.Description
+        End Select
 End Sub
 
 '先要複製到剪貼簿

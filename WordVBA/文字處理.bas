@@ -25,1946 +25,1946 @@ End Property
 
 
 Function isNum(x As String) As Boolean
-If Len(x) > 1 Then Exit Function
-x = StrConv(x, vbNarrow)
-If x Like "[0-9]" Then isNum = True
+    If Len(x) > 1 Then Exit Function
+    x = StrConv(x, vbNarrow)
+    If x Like "[0-9]" Then isNum = True
 End Function
 Function isLetter(x As String) As Boolean
-If Len(x) > 1 Then Exit Function
-x = StrConv(x, vbNarrow)
-If x Like "[a-z]" Then isLetter = True
+    If Len(x) > 1 Then Exit Function
+    x = StrConv(x, vbNarrow)
+    If x Like "[a-z]" Then isLetter = True
 End Function
 
 Sub 字頻() '2002/11/10要Sub才能在Word中執行!
-On Error GoTo 錯誤處理
-Dim ch, wrong As Long
-'Dim chct As Long
-Dim StTime As Date, EndTime As Date
-'Dim x As Long, firstword As String '亂碼檢查!2002/11/13
-Options.SaveInterval = 0 '取消自動儲存
-Set d = CreateObject("access.application")
-d.UserControl = True
-d.OpenCurrentDatabase "d:\千慮一得齋\書籍資料\詞頻.mdb", False
-d.docmd.SelectObject blog.myaccess.acTable, "字頻表", True
-'d.Visible = True '檢查用
-Set db = d.CurrentDb '一定要加〝d〞!!寫成以下亦可!
-'以上可併成下二式即可!但不會顯示在營幕上,只能作幕後計算用!(見OpenCurrentDatabase的線上說明)
-'Set db = d.DBEngine.OpenDatabase("d:\千慮一得齋\書籍資料\詞頻.mdb")
-'Set db = d.DBEngine.Workspaces(0).OpenDatabase("d:\千慮一得齋\書籍資料\詞頻.mdb")
-Set rst = db.OpenRecordset("字頻表", dbOpenDynaset)
-If rst.RecordCount > 0 Then '要獲得全部的筆數須用MoveLast但此只需判斷有沒有原先的記錄即可!
-'rst打開以後只會取得第一筆記錄!
-'    db.Execute "DELETE 字頻表.* FROM 字頻表"
-    db.Execute "DELETE * FROM 字頻表"
-End If
-StTime = Time
-With ActiveDocument
-    For Each ch In .Characters '有亂碼字時ch會傳回"?"變成了運算用符號
-        wrong = wrong + 1 '檢視用!
-'        If wrong = 373 Then MsgBox "Check!!" '檢查用!
-        If wrong Mod 27250 = 0 Then 'If wrong Mod 29688 = 0 Then '到29688時會產生OLE沒有回應的錯誤,故在此歇會兒
-            MsgBox "因系統負荷達到極限,請務必切換至Access打開資料表後關閉,再回來按下確定按鈕繼續!!" _
-                , vbExclamation, "★系統重要資訊★"
-'        ElseIf wrong = 49761 Then
-'            MsgBox "請檢查!!"
-        End If
-'        If wrong Mod 1000 = 0 Then Debug.Print wrong
-'        Debug.Print ch & vbCr & "--------"
-        '換行字元、復位字元不計!
-'        If Right(ch, 1) <> Chr(10) Or Left(ch, 1) <> Chr(13) Then
-        Select Case Asc(ch)
-            Case Is <> 13, 10
-        With rst
-11          .FindFirst "字彙 like '" & ch & "'"
-12          If .NoMatch Then
-                .AddNew
-                rst("字彙") = ch
-                rst("次數") = 1
-                rst("Asc") = Asc(ch)
-                rst("AscW") = AscW(ch)
-    '            On Error GoTo 次數
-                .Update
-            Else '當有亂碼字時,會成為比較運算元"?"(Asc(ch)=63),則可能在文件中第一次出現的字會誤增次數
-                '此外如"鶴"字等(在Word中插入→符號內最後一些)字,亦會與同形字同字元碼(Asc), _
-                但在符號表中卻有不同位置,代表不同字!在統計時,系統亦會誤算在一起! _
-                這點還須要克服!2002/11/13測試時,有時又會分開!(但Asc則相同!)
-'                If .AbsolutePosition < 1 And ch Like "?" And Not rst("字彙") = "?" Then
-'                    'If x = 1 Then MsgBox "有亂碼字,次數將加入第一個出現的字中!!"
-'                    MsgBox "有亂碼字,次數將加入第一個出現的字中!!"
-'                    AppActivate "Microsoft Word"
-'                    Selection.Collapse
-'                    Selection.SetRange wrong + ActiveDocument.Paragraphs.Count / 2, wrong + 1 '將該亂碼字選取
-'                    x = x + 1
-'                End If
-                .edit
-                rst("次數") = rst("次數") + 1
-                .Update
+    On Error GoTo 錯誤處理
+    Dim ch, wrong As Long
+    'Dim chct As Long
+    Dim StTime As Date, EndTime As Date
+    'Dim x As Long, firstword As String '亂碼檢查!2002/11/13
+    Options.SaveInterval = 0 '取消自動儲存
+    Set d = CreateObject("access.application")
+    d.UserControl = True
+    d.OpenCurrentDatabase "d:\千慮一得齋\書籍資料\詞頻.mdb", False
+    d.docmd.SelectObject blog.myaccess.acTable, "字頻表", True
+    'd.Visible = True '檢查用
+    Set db = d.CurrentDb '一定要加〝d〞!!寫成以下亦可!
+    '以上可併成下二式即可!但不會顯示在營幕上,只能作幕後計算用!(見OpenCurrentDatabase的線上說明)
+    'Set db = d.DBEngine.OpenDatabase("d:\千慮一得齋\書籍資料\詞頻.mdb")
+    'Set db = d.DBEngine.Workspaces(0).OpenDatabase("d:\千慮一得齋\書籍資料\詞頻.mdb")
+    Set rst = db.OpenRecordset("字頻表", dbOpenDynaset)
+    If rst.RecordCount > 0 Then '要獲得全部的筆數須用MoveLast但此只需判斷有沒有原先的記錄即可!
+    'rst打開以後只會取得第一筆記錄!
+    '    db.Execute "DELETE 字頻表.* FROM 字頻表"
+        db.Execute "DELETE * FROM 字頻表"
+    End If
+    StTime = Time
+    With ActiveDocument
+        For Each ch In .Characters '有亂碼字時ch會傳回"?"變成了運算用符號
+            wrong = wrong + 1 '檢視用!
+    '        If wrong = 373 Then MsgBox "Check!!" '檢查用!
+            If wrong Mod 27250 = 0 Then 'If wrong Mod 29688 = 0 Then '到29688時會產生OLE沒有回應的錯誤,故在此歇會兒
+                MsgBox "因系統負荷達到極限,請務必切換至Access打開資料表後關閉,再回來按下確定按鈕繼續!!" _
+                    , vbExclamation, "★系統重要資訊★"
+    '        ElseIf wrong = 49761 Then
+    '            MsgBox "請檢查!!"
             End If
-        End With
-        End Select
-'        chct = .Characters.Count
-'        chct = Selection.StoryLength
-'        instr(1+
-'        .Select
-retry:  Next ch
-'    rst.Requery
-'    rst.MoveFirst
-'    If x > 0 Then
-'        firstword = "◎◎亂碼字加入第一字:「" & rst("字彙") & "」中共有" & x & "次!!"
-'    Else
-'        firstword = "★放心吧!亂碼字亦統計正確!!★"
-'    End If
+    '        If wrong Mod 1000 = 0 Then Debug.Print wrong
+    '        Debug.Print ch & vbCr & "--------"
+            '換行字元、復位字元不計!
+    '        If Right(ch, 1) <> Chr(10) Or Left(ch, 1) <> Chr(13) Then
+            Select Case Asc(ch)
+                Case Is <> 13, 10
+            With rst
+11              .FindFirst "字彙 like '" & ch & "'"
+12              If .NoMatch Then
+                    .AddNew
+                    rst("字彙") = ch
+                    rst("次數") = 1
+                    rst("Asc") = Asc(ch)
+                    rst("AscW") = AscW(ch)
+        '            On Error GoTo 次數
+                    .Update
+                Else '當有亂碼字時,會成為比較運算元"?"(Asc(ch)=63),則可能在文件中第一次出現的字會誤增次數
+                    '此外如"鶴"字等(在Word中插入→符號內最後一些)字,亦會與同形字同字元碼(Asc), _
+                    但在符號表中卻有不同位置,代表不同字!在統計時,系統亦會誤算在一起! _
+                    這點還須要克服!2002/11/13測試時,有時又會分開!(但Asc則相同!)
+    '                If .AbsolutePosition < 1 And ch Like "?" And Not rst("字彙") = "?" Then
+    '                    'If x = 1 Then MsgBox "有亂碼字,次數將加入第一個出現的字中!!"
+    '                    MsgBox "有亂碼字,次數將加入第一個出現的字中!!"
+    '                    AppActivate "Microsoft Word"
+    '                    Selection.Collapse
+    '                    Selection.SetRange wrong + ActiveDocument.Paragraphs.Count / 2, wrong + 1 '將該亂碼字選取
+    '                    x = x + 1
+    '                End If
+                    .edit
+                    rst("次數") = rst("次數") + 1
+                    .Update
+                End If
+            End With
+            End Select
+    '        chct = .Characters.Count
+    '        chct = Selection.StoryLength
+    '        instr(1+
+    '        .Select
+retry:      Next ch
+    '    rst.Requery
+    '    rst.MoveFirst
+    '    If x > 0 Then
+    '        firstword = "◎◎亂碼字加入第一字:「" & rst("字彙") & "」中共有" & x & "次!!"
+    '    Else
+    '        firstword = "★放心吧!亂碼字亦統計正確!!★"
+    '    End If
+        EndTime = Time
+        AppActivate "Microsoft word"
+        MsgBox "統計完成!!" & vbCr & "(※共執行了" & wrong & "次的檢查※)" _
+            & vbCr & "※耗時:" & Format(EndTime - StTime, "n分s秒") & "※" _
+            & vbCr & "字元數=" & .Characters.Count & vbCr '_
+    '        & firstword
+    '    MsgBox "統計完成!!" & vbCr & "(※共執行了" & wrong & "次的檢查※)" _
+    '        & vbCr & "※耗時:" & DateDiff("n", StTime, EndTime) & "分鐘※" _
+    '        & vbCr & "字元數=" & .Characters.Count
+    End With
+    If MsgBox("要即刻檢視結果嗎?", vbYesNo + vbQuestion) = vbYes Then
+    '    Set d = GetObject("d:\千慮一得齋\書籍資料\詞頻.mdb")
+        AppActivate "Microsoft access"
+    End If
+    d.docmd.OpenTable "字頻表", , d.acReadOnly
+    d.docmd.Maximize
+    rst.Close: db.Close: Set d = Nothing
+    Options.SaveInterval = 10 '恢復自動儲存
+    End '用Exit Sub無法每次關閉Access
+錯誤處理:
+    Select Case Err.Number
+        Case Is = 91, 3078 '參照不到DataBase內物件時
+            MsgBox "請再按一次!", vbCritical
+            'access.Application.Quit
+            d.Quit
+            End
+    '        d.CurrentDb.Close
+    '        Set db = DBEngine.Workspaces(0).OpenDatabase("d:\千慮一得齋\書籍資料\詞頻.mdb")
+    ''        Debug.Print Err.Description '檢查用!
+    '        Resume
+    '    Case Is = 3163 '換行字元、復位字元不計!
+    '        If Right(ch, 1) = Chr(10) Then
+    '            ch = Left(ch, Len(ch) - 1)
+    '        ElseIf Left(ch, 1) = Chr(13) Then
+    '            ch = Right(ch, Len(ch) - 1) '或If Asc(ch)=13
+    '        End If
+    '        Resume 11
+        Case Is = 93 '為[]等運算式特殊字元所設之比較式
+            rst.FindFirst "asc(字彙) = " & Asc(ch)
+            Resume 12
+    '    Case Is = -2147023170
+    '        MsgBox Err.Number & ":" & Err.Description
+    '        MsgBox Err.LastDllError & "." & Err.Source
+    '        Set d = CreateObject("access.application")
+    '        d.OpenCurrentDatabase "d:\千慮一得齋\書籍資料\詞頻.mdb", False
+    '        d.UserControl = True
+    '        Resume
+    '    Case Is = 462 '"遠端伺服器不存在或無法使用"
+    '        'd.OpenCurrentDatabase "d:\千慮一得齋\書籍資料\詞頻.mdb", False
+    ''        Set d = GetObject("d:\千慮一得齋\書籍資料\詞頻.mdb")
+    '        Set db = d.CurrentDb
+    '        Set rst = db.OpenRecordset("詞頻表", dbOpenDynaset)
+    '        Resume
+        Case Else
+            MsgBox Err.Number & ":" & Err.Description, vbExclamation
+            Resume
+    End Select
+End Sub
+Sub 詞頻() '2002/11/10
+    On Error GoTo 錯誤處理
+    Dim wd, wrong As Long
+    Dim wrongmark As Integer ', wdct As Long
+    Dim StTime As Date, EndTime As Date
+    Dim hfspace As Long
+    Options.SaveInterval = 0 '取消自動儲存
+    Set d = CreateObject("access.application")
+    d.UserControl = True '如果為False則db.close會關閉資料庫!
+    'd.UserControl = False
+    d.OpenCurrentDatabase "d:\千慮一得齋\書籍資料\詞頻.mdb", False
+    d.docmd.SelectObject d.acTable, "詞頻表", True
+    'd.Visible = True '檢查用UserControl=True則有此反會致誤!
+    Set db = d.CurrentDb
+    Set rst = db.OpenRecordset("詞頻表", dbOpenDynaset)
+    If rst.RecordCount > 0 Then db.Execute "DELETE * FROM 詞頻表"
+    StTime = Time
+    With ActiveDocument
+        For Each wd In .words
+            wrong = wrong + 1 '檢視用!
+    '        If wrong Mod 1000 = 0 Then Debug.Print wrong
+    '        Debug.Print wd & vbCr & "--------"
+            If Len(wd) > 1 And Right(wd, 1) = " " Then
+                hfspace = hfspace + 1 '計次
+                GoTo retry '字串右邊是半形空格時,AccessUpdate時會銷去,且於詞彙亦無意意,故不計!
+            End If
+            rst.FindFirst "詞彙 like '" & wd & "'"
+            If rst.NoMatch Then
+                rst.AddNew
+                rst("詞彙") = wd
+    '            On Error GoTo 次數
+                rst.Update
+            Else
+                rst.edit
+                rst("次數") = rst("次數") + 1
+                rst.Update
+            End If
+    '        wrong = 1
+    '        wdct = .Words.Count
+    '        wdct = Selection.StoryLength
+    '        instr(1+
+    '        .Select
+retry:      Next wd
+    End With
     EndTime = Time
     AppActivate "Microsoft word"
     MsgBox "統計完成!!" & vbCr & "(※共執行了" & wrong & "次的檢查※)" _
-        & vbCr & "※耗時:" & Format(EndTime - StTime, "n分s秒") & "※" _
-        & vbCr & "字元數=" & .Characters.Count & vbCr '_
-'        & firstword
-'    MsgBox "統計完成!!" & vbCr & "(※共執行了" & wrong & "次的檢查※)" _
-'        & vbCr & "※耗時:" & DateDiff("n", StTime, EndTime) & "分鐘※" _
-'        & vbCr & "字元數=" & .Characters.Count
-End With
-If MsgBox("要即刻檢視結果嗎?", vbYesNo + vbQuestion) = vbYes Then
-'    Set d = GetObject("d:\千慮一得齋\書籍資料\詞頻.mdb")
-    AppActivate "Microsoft access"
-End If
-d.docmd.OpenTable "字頻表", , d.acReadOnly
-d.docmd.Maximize
-rst.Close: db.Close: Set d = Nothing
-Options.SaveInterval = 10 '恢復自動儲存
-End '用Exit Sub無法每次關閉Access
+        & "詞彙右邊半形空格凡" & hfspace & "次,忽略不計!" _
+        & vbCr & "※耗時:" & Format(EndTime - StTime, "n分s秒") & "※"
+    If MsgBox("要即刻檢視結果嗎?", vbYesNo + vbQuestion) = vbYes Then
+    '    Set d = GetObject("d:\千慮一得齋\書籍資料\詞頻.mdb")
+        AppActivate "Microsoft access"
+    End If
+    d.docmd.OpenTable "詞頻表", , d.acReadOnly
+    d.docmd.Maximize
+    rst.Close: db.Close: Set d = Nothing
+    Options.SaveInterval = 10 '恢復自動儲存
+    End
 錯誤處理:
-Select Case Err.Number
-    Case Is = 91, 3078 '參照不到DataBase內物件時
-        MsgBox "請再按一次!", vbCritical
-        'access.Application.Quit
-        d.Quit
-        End
-'        d.CurrentDb.Close
-'        Set db = DBEngine.Workspaces(0).OpenDatabase("d:\千慮一得齋\書籍資料\詞頻.mdb")
-''        Debug.Print Err.Description '檢查用!
-'        Resume
-'    Case Is = 3163 '換行字元、復位字元不計!
-'        If Right(ch, 1) = Chr(10) Then
-'            ch = Left(ch, Len(ch) - 1)
-'        ElseIf Left(ch, 1) = Chr(13) Then
-'            ch = Right(ch, Len(ch) - 1) '或If Asc(ch)=13
-'        End If
-'        Resume 11
-    Case Is = 93 '為[]等運算式特殊字元所設之比較式
-        rst.FindFirst "asc(字彙) = " & Asc(ch)
-        Resume 12
-'    Case Is = -2147023170
-'        MsgBox Err.Number & ":" & Err.Description
-'        MsgBox Err.LastDllError & "." & Err.Source
-'        Set d = CreateObject("access.application")
-'        d.OpenCurrentDatabase "d:\千慮一得齋\書籍資料\詞頻.mdb", False
-'        d.UserControl = True
-'        Resume
-'    Case Is = 462 '"遠端伺服器不存在或無法使用"
-'        'd.OpenCurrentDatabase "d:\千慮一得齋\書籍資料\詞頻.mdb", False
-''        Set d = GetObject("d:\千慮一得齋\書籍資料\詞頻.mdb")
-'        Set db = d.CurrentDb
-'        Set rst = db.OpenRecordset("詞頻表", dbOpenDynaset)
-'        Resume
-    Case Else
-        MsgBox Err.Number & ":" & Err.Description, vbExclamation
-        Resume
-End Select
-End Sub
-Sub 詞頻() '2002/11/10
-On Error GoTo 錯誤處理
-Dim wd, wrong As Long
-Dim wrongmark As Integer ', wdct As Long
-Dim StTime As Date, EndTime As Date
-Dim hfspace As Long
-Options.SaveInterval = 0 '取消自動儲存
-Set d = CreateObject("access.application")
-d.UserControl = True '如果為False則db.close會關閉資料庫!
-'d.UserControl = False
-d.OpenCurrentDatabase "d:\千慮一得齋\書籍資料\詞頻.mdb", False
-d.docmd.SelectObject d.acTable, "詞頻表", True
-'d.Visible = True '檢查用UserControl=True則有此反會致誤!
-Set db = d.CurrentDb
-Set rst = db.OpenRecordset("詞頻表", dbOpenDynaset)
-If rst.RecordCount > 0 Then db.Execute "DELETE * FROM 詞頻表"
-StTime = Time
-With ActiveDocument
-    For Each wd In .words
-        wrong = wrong + 1 '檢視用!
-'        If wrong Mod 1000 = 0 Then Debug.Print wrong
-'        Debug.Print wd & vbCr & "--------"
-        If Len(wd) > 1 And right(wd, 1) = " " Then
-            hfspace = hfspace + 1 '計次
-            GoTo retry '字串右邊是半形空格時,AccessUpdate時會銷去,且於詞彙亦無意意,故不計!
-        End If
-        rst.FindFirst "詞彙 like '" & wd & "'"
-        If rst.NoMatch Then
-            rst.AddNew
-            rst("詞彙") = wd
-'            On Error GoTo 次數
-            rst.Update
-        Else
-            rst.edit
-            rst("次數") = rst("次數") + 1
-            rst.Update
-        End If
-'        wrong = 1
-'        wdct = .Words.Count
-'        wdct = Selection.StoryLength
-'        instr(1+
-'        .Select
-retry:  Next wd
-End With
-EndTime = Time
-AppActivate "Microsoft word"
-MsgBox "統計完成!!" & vbCr & "(※共執行了" & wrong & "次的檢查※)" _
-    & "詞彙右邊半形空格凡" & hfspace & "次,忽略不計!" _
-    & vbCr & "※耗時:" & Format(EndTime - StTime, "n分s秒") & "※"
-If MsgBox("要即刻檢視結果嗎?", vbYesNo + vbQuestion) = vbYes Then
-'    Set d = GetObject("d:\千慮一得齋\書籍資料\詞頻.mdb")
-    AppActivate "Microsoft access"
-End If
-d.docmd.OpenTable "詞頻表", , d.acReadOnly
-d.docmd.Maximize
-rst.Close: db.Close: Set d = Nothing
-Options.SaveInterval = 10 '恢復自動儲存
-End
-錯誤處理:
-Select Case Err.Number '主索引值重複
-    Case Is = 91, 3078
-        MsgBox "請再按一次!", vbCritical
-        'access.Application.Quit
-        d.Quit
-        End
-    Case Else
-        MsgBox Err.Number & ":" & Err.Description, vbExclamation
-        Resume
-End Select
-'次數:
-'    wrongmark = Err.Number
-''    Err.Description = wd
-'    If wrongmark = 3022 Then '重複了
-''        wrong = wrong + 1
-''        rst.Seek "=", "詞彙"
-'        rst.FindFirst "詞彙 like '" & wd & "'"
-'        rst.Edit
-'        rst("次數") = rst("次數") + 1
-'        rst.Update
-'        Resume retry
-'    Else
-'        MsgBox "有錯誤,請檢查!!" & Err.Description, vbExclamation
-'    End If
+    Select Case Err.Number '主索引值重複
+        Case Is = 91, 3078
+            MsgBox "請再按一次!", vbCritical
+            'access.Application.Quit
+            d.Quit
+            End
+        Case Else
+            MsgBox Err.Number & ":" & Err.Description, vbExclamation
+            Resume
+    End Select
+    '次數:
+    '    wrongmark = Err.Number
+    ''    Err.Description = wd
+    '    If wrongmark = 3022 Then '重複了
+    ''        wrong = wrong + 1
+    ''        rst.Seek "=", "詞彙"
+    '        rst.FindFirst "詞彙 like '" & wd & "'"
+    '        rst.Edit
+    '        rst("次數") = rst("次數") + 1
+    '        rst.Update
+    '        Resume retry
+    '    Else
+    '        MsgBox "有錯誤,請檢查!!" & Err.Description, vbExclamation
+    '    End If
 End Sub
 Sub 進階詞頻() '2002/11/10要Sub才能在Word中執行!'2005/4/21此法在跑大檔案時太沒效率了!!跑了3天3夜300頁的文件檔取1-3字詞跑不完!
-On Error GoTo 錯誤處理
-Dim wrong As Long, phra As Long, phras As String, phralh As Byte
-Dim StTime As Date, EndTime As Date
-Dim hfspace As Long
-Dim length As Byte 'As String
-Dim Dw As String, dwL As Long
-length = InputBox("請指定分析詞彙之上限,最多五個字", , "5")
-If length = "" Or Not IsNumeric(length) Then End
-If CByte(length) < 1 Or CByte(length) > 5 Then End
-Options.SaveInterval = 0 '取消自動儲存
-StTime = Time
-Set d = CreateObject("access.application")
-'或Set d = CreateObject("Access.Application.9")
-d.UserControl = True
-d.OpenCurrentDatabase "d:\千慮一得齋\書籍資料\詞頻.mdb", False
-d.docmd.SelectObject d.acTable, "詞頻表", True
-'d.Visible = True '檢查用
-Set db = d.CurrentDb
-Set rst = db.OpenRecordset("詞頻表", dbOpenDynaset)
-If rst.RecordCount > 0 Then '要獲得全部的筆數須用MoveLast但此只需判斷有沒有原先的記錄即可!
-'rst打開以後只會取得第一筆記錄!
-'    db.Execute "DELETE 字頻表.* FROM 字頻表"
-    db.Execute "DELETE * FROM 詞頻表"
-End If
-'With ActiveDocument
-With ActiveDocument
-    Dw = .Content '文件內容
-    dwL = Len(Dw) '文件長度
-    .Close
-End With
-    For phralh = 1 To length 'CByte(length)
-'    For phralh = 1 To 5 '暫定最長為5個字構成的詞(仍可改作變數)
-        For phra = 1 To dwL '.Characters.Count
-            Select Case phralh
+    On Error GoTo 錯誤處理
+    Dim wrong As Long, phra As Long, phras As String, phralh As Byte
+    Dim StTime As Date, EndTime As Date
+    Dim hfspace As Long
+    Dim length As Byte 'As String
+    Dim Dw As String, dwL As Long
+    length = InputBox("請指定分析詞彙之上限,最多五個字", , "5")
+    If length = "" Or Not IsNumeric(length) Then End
+    If CByte(length) < 1 Or CByte(length) > 5 Then End
+    Options.SaveInterval = 0 '取消自動儲存
+    StTime = Time
+    Set d = CreateObject("access.application")
+    '或Set d = CreateObject("Access.Application.9")
+    d.UserControl = True
+    d.OpenCurrentDatabase "d:\千慮一得齋\書籍資料\詞頻.mdb", False
+    d.docmd.SelectObject d.acTable, "詞頻表", True
+    'd.Visible = True '檢查用
+    Set db = d.CurrentDb
+    Set rst = db.OpenRecordset("詞頻表", dbOpenDynaset)
+    If rst.RecordCount > 0 Then '要獲得全部的筆數須用MoveLast但此只需判斷有沒有原先的記錄即可!
+    'rst打開以後只會取得第一筆記錄!
+    '    db.Execute "DELETE 字頻表.* FROM 字頻表"
+        db.Execute "DELETE * FROM 詞頻表"
+    End If
+    'With ActiveDocument
+    With ActiveDocument
+        Dw = .Content '文件內容
+        dwL = Len(Dw) '文件長度
+        .Close
+    End With
+        For phralh = 1 To length 'CByte(length)
+    '    For phralh = 1 To 5 '暫定最長為5個字構成的詞(仍可改作變數)
+            For phra = 1 To dwL '.Characters.Count
+                Select Case phralh
+                    Case Is = 1
+                        If Err.LastDllError <> 0 Then
+                            MsgBox Err.LastDllError & ":" & Err.Description & "Err.Number:" & Err.Number
+                            GoTo 錯誤處理
+                        End If
+    '                    phras = .Characters(phra)'此法太慢!
+                        phras = Mid(Dw, phra, 1)
+                    Case Is = 2
+                        If Err.LastDllError <> 0 Then
+                            MsgBox Err.LastDllError & ":" & Err.Description & "Err.Number:" & Err.Number
+                            GoTo 錯誤處理
+                        End If
+    '                    If phra + 1 <= .Characters.Count Then _
+                        phras = .Characters(phra) & .Characters(phra + 1)
+                        If phra + 1 <= dwL Then phras = Mid(Dw, phra, 2)
+                    Case Is = 3
+                        If Err.LastDllError <> 0 Then
+                            MsgBox Err.LastDllError & ":" & Err.Description & "Err.Number:" & Err.Number
+                            GoTo 錯誤處理
+                        End If
+    '                    If phra + 2 <= .Characters.Count Then _
+                        phras = .Characters(phra) & .Characters(phra + 1) & _
+                                .Characters(phra + 2)
+                        If phra + 2 <= dwL Then phras = Mid(Dw, phra, 3)
+                    Case Is = 4
+                        On Error GoTo 錯誤處理
+                        If Err.LastDllError <> 0 Then
+                            MsgBox Err.LastDllError & ":" & Err.Description & "Err.Number:" & Err.Number
+                            GoTo 錯誤處理
+                        End If
+    '                    If phra + 3 <= .Characters.Count Then _
+                        phras = .Characters(phra) & .Characters(phra + 1) & _
+                                .Characters(phra + 2) & .Characters(phra + 3)
+                        If phra + 3 <= dwL Then phras = Mid(Dw, phra, 3)
+                    Case Is = 5
+                        On Error GoTo 錯誤處理
+                        If Err.LastDllError <> 0 Then
+                            MsgBox Err.LastDllError & ":" & Err.Description & "Err.Number:" & Err.Number
+                            GoTo 錯誤處理
+                        End If
+    '                    If phra + 4 <= .Characters.Count Then _
+                        phras = .Characters(phra) & .Characters(phra + 1) & _
+                                .Characters(phra + 2) & .Characters(phra + 3) & _
+                                .Characters(phra + 4)
+                        If phra + 4 <= dwL Then phras = Mid(Dw, phra, 3)
+                End Select
+                If Len(phras) > 1 And Right(phras, 1) = " " Then
+                    hfspace = hfspace + 1 '計次
+                    GoTo 11 '字串右邊是半形空格時,AccessUpdate時會銷去,且於詞彙亦無意意,故不計!
+                End If
+                '直接進入下一個字串比對
+                wrong = wrong + 1 '檢視用!
+                If wrong Mod 29688 = 0 Then '到29688時會產生OLE沒有回應的錯誤,故在此歇會兒
+                    DoEvents 'MsgBox "請檢查!!"
+        '        ElseIf wrong = 49761 Then
+        '            MsgBox "請檢查!!"
+                End If
+    '            if rst Set rst = CurrentDb.OpenRecordset("SELECT  詞頻表.* FROM 詞頻表 WHERE (((詞頻表.詞彙) like '" & phras & "'));")
+                With rst
+    '                If .RecordCount = 0 Then
+                    .FindFirst "詞彙 like '" & phras & "'"
+                    If .NoMatch Then
+    '                    .MoveLast
+                        .AddNew
+                        rst("詞彙") = phras
+    '                    rst("次數") = 1'預設值已為1
+                        On Error GoTo 錯誤處理
+                        .Update 'dbUpdateBatch, True
+                    Else
+1                       .edit
+                        rst("次數") = rst("次數") + 1
+                        .Update
+                    End If
+    '                .Close
+                End With
+11          Next phra
+2       Next phralh
+        EndTime = Time
+        AppActivate "Microsoft word"
+        MsgBox "統計完成!!" & vbCr & "(※共執行了" & wrong & "次的檢查※)" _
+            & "詞彙右邊半形空格凡" & hfspace & "次,忽略不計!" _
+            & vbCr & "※耗時:" & Format(EndTime - StTime, "n分s秒") & "※" _
+            & vbCr & "字元數=" & dwL '.Characters.Count
+    'End With
+    'd.Visible = True
+    If MsgBox("要即刻檢視結果嗎?", vbYesNo + vbQuestion) = vbYes Then
+    '    Set d = GetObject("d:\千慮一得齋\書籍資料\詞頻.mdb")
+        AppActivate "Microsoft access"
+    End If
+    d.docmd.OpenTable "詞頻表", , d.acReadOnly
+    d.docmd.Maximize
+    rst.Close: db.Close: Set d = Nothing
+    Options.SaveInterval = 10 '恢復自動儲存
+    End '用Exit Sub無法每次關閉Access'2002/11/15
+錯誤處理:
+    Select Case Err.Number '主索引值重複
+        Case Is = 3022
+            rst.Requery
+            rst.FindFirst "詞彙 like '" & Trim(phras) & "'"
+            GoTo 1
+        Case Is = 5941 '集合中的成員不存在(指超過文件長度!)
+            GoTo 2
+        Case Is = 91, 3078
+            MsgBox "請再按一次!", vbCritical
+            'access.Application.Quit
+            d.Quit
+            End
+        Case Else
+            MsgBox Err.Number & ":" & Err.Description, vbExclamation
+            Resume
+    End Select
+End Sub
+Sub 進階詞頻1() '2002/11/15要Sub才能在Word中執行!
+    On Error GoTo 錯誤處理
+    Dim wrong As Long, phra As Long, phras As String, phralh As Byte
+    Dim StTime As Date, EndTime As Date
+    Dim hfspace As Long
+    Dim length As String
+    Dim i As Byte, j As Byte
+    length = InputBox("請指定分析詞彙之上限,最多255個字", , "5")
+    If length = "" Or Not IsNumeric(length) Then End
+    If CByte(length) < 1 Or CByte(length) > 255 Then End
+    Options.SaveInterval = 0 '取消自動儲存
+    StTime = Time
+    Set d = CreateObject("access.application")
+    '或Set d = CreateObject("Access.Application.9")
+    d.UserControl = True
+    d.OpenCurrentDatabase "d:\千慮一得齋\書籍資料\詞頻.mdb", False
+    d.docmd.SelectObject d.acTable, "詞頻表", True
+    'd.Visible = True '檢查用
+    Set db = d.CurrentDb
+    Set rst = db.OpenRecordset("詞頻表", dbOpenDynaset)
+    If rst.RecordCount > 0 Then '要獲得全部的筆數須用MoveLast但此只需判斷有沒有原先的記錄即可!
+    'rst打開以後只會取得第一筆記錄!
+    '    db.Execute "DELETE 字頻表.* FROM 字頻表"
+        db.Execute "DELETE * FROM 詞頻表"
+    End If
+    j = CByte(length)
+    With ActiveDocument
+        For phralh = 1 To j
+    '    原暫定最長為5個字構成的詞,今改作變數j,則限於Byte大小耳!
+            For phra = 1 To .Characters.Count
+                If phra + (phralh - 1) <= .Characters.Count Then
+                    phras = ""
+                    For i = 0 To phralh - 1
+                        phras = phras & .Characters(phra + i)
+                    Next i
+                End If
+                If Len(phras) > 1 And Right(phras, 1) = " " Then
+                    hfspace = hfspace + 1 '計次
+                    GoTo 11 '字串右邊是半形空格時,AccessUpdate時會銷去,且於詞彙亦無意意,故不計!
+                End If
+                '直接進入下一個字串比對
+                wrong = wrong + 1 '檢視用!
+                If wrong Mod 29688 = 0 Then '到29688時會產生OLE沒有回應的錯誤,故在此歇會兒
+                    MsgBox "請檢查!!"
+        '        ElseIf wrong = 49761 Then
+        '            MsgBox "請檢查!!"
+                End If
+                With rst
+                    .FindFirst "詞彙 like '" & phras & "'"
+                    If .NoMatch Then
+        '                .MoveLast
+                        .AddNew
+                        rst("詞彙") = phras
+                        rst("次數") = 1
+                        On Error GoTo 錯誤處理
+                        .Update 'dbUpdateBatch, True
+                    Else
+1                       .edit
+                        rst("次數") = rst("次數") + 1
+                        .Update
+                    End If
+                End With
+11          Next phra
+2       Next phralh
+        EndTime = Time
+        AppActivate "Microsoft word"
+        MsgBox "統計完成!!" & vbCr & "(※共執行了" & wrong & "次的檢查※)" _
+            & "詞彙右邊半形空格凡" & hfspace & "次,忽略不計!" _
+            & vbCr & "※耗時:" & Format(EndTime - StTime, "n分s秒") & "※" _
+            & vbCr & "字元數=" & .Characters.Count
+    End With
+    'd.Visible = True
+    If MsgBox("要即刻檢視結果嗎?", vbYesNo + vbQuestion) = vbYes Then
+    '    Set d = GetObject("d:\千慮一得齋\書籍資料\詞頻.mdb")
+        AppActivate "Microsoft access"
+    End If
+    d.docmd.OpenTable "詞頻表", , d.acReadOnly
+    d.docmd.Maximize
+    rst.Close: db.Close: Set d = Nothing
+    Options.SaveInterval = 10 '恢復自動儲存
+    End '用Exit Sub無法每次關閉Access
+錯誤處理:
+    Select Case Err.Number '主索引值重複
+        Case Is = 3022
+            rst.Requery
+            rst.FindFirst "詞彙 like '" & Trim(phras) & "'"
+            GoTo 1
+        Case Is = 5941 '集合中的成員不存在(指超過文件長度!)
+            GoTo 2
+        Case Is = 91, 3078
+            MsgBox "請再按一次!", vbCritical
+            'access.Application.Quit
+            d.Quit
+            End
+        Case Else
+            MsgBox Err.Number & ":" & Err.Description, vbExclamation
+            Resume
+    End Select
+End Sub
+Sub 指定字數詞頻() '2002/11/11
+    On Error GoTo 錯誤處理
+    Dim wrong As Long, phra As Long, phras As String, phralh As String
+    Dim StTime As Date, EndTime As Date
+    Dim hfspace As Long
+    phralh = InputBox("請用阿拉伯數字指定詞的組成字數,最多字數為「11」!", "指定詞彙字數", "2")
+    If phralh = "" Or Not IsNumeric(phralh) Then Exit Sub
+    If CByte(phralh) > 11 Or CByte(phralh) < 1 Then Exit Sub
+    Options.SaveInterval = 0 '取消自動儲存
+    Set d = CreateObject("access.application")
+    d.UserControl = True
+    d.OpenCurrentDatabase "d:\千慮一得齋\書籍資料\詞頻.mdb", False
+    d.docmd.SelectObject d.acTable, "詞頻表", True
+    'd.Visible = True '檢查用
+    Set db = d.CurrentDb
+    Set rst = db.OpenRecordset("詞頻表", dbOpenDynaset)
+    If rst.RecordCount > 0 Then '要獲得全部的筆數須用MoveLast但此只需判斷有沒有原先的記錄即可!
+    'rst打開以後只會取得第一筆記錄!
+    '    db.Execute "DELETE 字頻表.* FROM 字頻表"
+        db.Execute "DELETE * FROM 詞頻表"
+    End If
+    StTime = Time
+    With ActiveDocument
+        For phra = 1 To .Characters.Count
+            Select Case CByte(phralh)
                 Case Is = 1
-                    If Err.LastDllError <> 0 Then
-                        MsgBox Err.LastDllError & ":" & Err.Description & "Err.Number:" & Err.Number
-                        GoTo 錯誤處理
-                    End If
-'                    phras = .Characters(phra)'此法太慢!
-                    phras = Mid(Dw, phra, 1)
+                    phras = .Characters(phra)
                 Case Is = 2
-                    If Err.LastDllError <> 0 Then
-                        MsgBox Err.LastDllError & ":" & Err.Description & "Err.Number:" & Err.Number
-                        GoTo 錯誤處理
-                    End If
-'                    If phra + 1 <= .Characters.Count Then _
+                    If phra + 1 <= .Characters.Count Then _
                     phras = .Characters(phra) & .Characters(phra + 1)
-                    If phra + 1 <= dwL Then phras = Mid(Dw, phra, 2)
                 Case Is = 3
-                    If Err.LastDllError <> 0 Then
-                        MsgBox Err.LastDllError & ":" & Err.Description & "Err.Number:" & Err.Number
-                        GoTo 錯誤處理
-                    End If
-'                    If phra + 2 <= .Characters.Count Then _
+                    If phra + 2 <= .Characters.Count Then _
                     phras = .Characters(phra) & .Characters(phra + 1) & _
                             .Characters(phra + 2)
-                    If phra + 2 <= dwL Then phras = Mid(Dw, phra, 3)
                 Case Is = 4
-                    On Error GoTo 錯誤處理
-                    If Err.LastDllError <> 0 Then
-                        MsgBox Err.LastDllError & ":" & Err.Description & "Err.Number:" & Err.Number
-                        GoTo 錯誤處理
-                    End If
-'                    If phra + 3 <= .Characters.Count Then _
+                    If phra + 3 <= .Characters.Count Then _
                     phras = .Characters(phra) & .Characters(phra + 1) & _
                             .Characters(phra + 2) & .Characters(phra + 3)
-                    If phra + 3 <= dwL Then phras = Mid(Dw, phra, 3)
                 Case Is = 5
-                    On Error GoTo 錯誤處理
-                    If Err.LastDllError <> 0 Then
-                        MsgBox Err.LastDllError & ":" & Err.Description & "Err.Number:" & Err.Number
-                        GoTo 錯誤處理
-                    End If
-'                    If phra + 4 <= .Characters.Count Then _
+                    If phra + 4 <= .Characters.Count Then _
                     phras = .Characters(phra) & .Characters(phra + 1) & _
                             .Characters(phra + 2) & .Characters(phra + 3) & _
                             .Characters(phra + 4)
-                    If phra + 4 <= dwL Then phras = Mid(Dw, phra, 3)
+                Case Is = 6
+                    If phra + 5 <= .Characters.Count Then _
+                    phras = .Characters(phra) & .Characters(phra + 1) & _
+                            .Characters(phra + 2) & .Characters(phra + 3) & _
+                            .Characters(phra + 4) & .Characters(phra + 5)
+                Case Is = 7
+                    If phra + 6 <= .Characters.Count Then _
+                    phras = .Characters(phra) & .Characters(phra + 1) & _
+                            .Characters(phra + 2) & .Characters(phra + 3) & _
+                            .Characters(phra + 4) & .Characters(phra + 5) & _
+                            .Characters(phra + 6)
+                Case Is = 8
+                    If phra + 7 <= .Characters.Count Then _
+                    phras = .Characters(phra) & .Characters(phra + 1) & _
+                            .Characters(phra + 2) & .Characters(phra + 3) & _
+                            .Characters(phra + 4) & .Characters(phra + 5) & _
+                            .Characters(phra + 6) & .Characters(phra + 7)
+                Case Is = 9
+                    If phra + 8 <= .Characters.Count Then _
+                    phras = .Characters(phra) & .Characters(phra + 1) & _
+                            .Characters(phra + 2) & .Characters(phra + 3) & _
+                            .Characters(phra + 4) & .Characters(phra + 5) & _
+                            .Characters(phra + 6) & .Characters(phra + 7) & _
+                            .Characters(phra + 8)
+                Case Is = 10
+                    If phra + 9 <= .Characters.Count Then _
+                    phras = .Characters(phra) & .Characters(phra + 1) & _
+                            .Characters(phra + 2) & .Characters(phra + 3) & _
+                            .Characters(phra + 4) & .Characters(phra + 5) & _
+                            .Characters(phra + 6) & .Characters(phra + 7) & _
+                            .Characters(phra + 8) & .Characters(phra + 9)
+                Case Is = 11
+                    If phra + 10 <= .Characters.Count Then _
+                    phras = .Characters(phra) & .Characters(phra + 1) & _
+                            .Characters(phra + 2) & .Characters(phra + 3) & _
+                            .Characters(phra + 4) & .Characters(phra + 5) & _
+                            .Characters(phra + 6) & .Characters(phra + 7) & _
+                            .Characters(phra + 8) & .Characters(phra + 9) & _
+                            .Characters(phra + 10)
             End Select
-            If Len(phras) > 1 And right(phras, 1) = " " Then
+            If Len(phras) > 1 And Right(phras, 1) = " " Then
                 hfspace = hfspace + 1 '計次
                 GoTo 11 '字串右邊是半形空格時,AccessUpdate時會銷去,且於詞彙亦無意意,故不計!
             End If
             '直接進入下一個字串比對
             wrong = wrong + 1 '檢視用!
-            If wrong Mod 29688 = 0 Then '到29688時會產生OLE沒有回應的錯誤,故在此歇會兒
-                DoEvents 'MsgBox "請檢查!!"
-    '        ElseIf wrong = 49761 Then
+    '        If wrong Mod 29688 = 0 Then '到29688時會產生OLE沒有回應的錯誤,故在此歇會兒
     '            MsgBox "請檢查!!"
-            End If
-'            if rst Set rst = CurrentDb.OpenRecordset("SELECT  詞頻表.* FROM 詞頻表 WHERE (((詞頻表.詞彙) like '" & phras & "'));")
+    ''        ElseIf wrong = 49761 Then
+    ''            MsgBox "請檢查!!"
+    '        End If
             With rst
-'                If .RecordCount = 0 Then
                 .FindFirst "詞彙 like '" & phras & "'"
                 If .NoMatch Then
-'                    .MoveLast
                     .AddNew
                     rst("詞彙") = phras
-'                    rst("次數") = 1'預設值已為1
-                    On Error GoTo 錯誤處理
+    '                rst("次數") = 1'預設值已定為1
                     .Update 'dbUpdateBatch, True
                 Else
-1                   .edit
+                    .edit
                     rst("次數") = rst("次數") + 1
                     .Update
                 End If
-'                .Close
             End With
 11      Next phra
-2   Next phralh
-    EndTime = Time
-    AppActivate "Microsoft word"
-    MsgBox "統計完成!!" & vbCr & "(※共執行了" & wrong & "次的檢查※)" _
-        & "詞彙右邊半形空格凡" & hfspace & "次,忽略不計!" _
-        & vbCr & "※耗時:" & Format(EndTime - StTime, "n分s秒") & "※" _
-        & vbCr & "字元數=" & dwL '.Characters.Count
-'End With
-'d.Visible = True
-If MsgBox("要即刻檢視結果嗎?", vbYesNo + vbQuestion) = vbYes Then
-'    Set d = GetObject("d:\千慮一得齋\書籍資料\詞頻.mdb")
-    AppActivate "Microsoft access"
-End If
-d.docmd.OpenTable "詞頻表", , d.acReadOnly
-d.docmd.Maximize
-rst.Close: db.Close: Set d = Nothing
-Options.SaveInterval = 10 '恢復自動儲存
-End '用Exit Sub無法每次關閉Access'2002/11/15
+        EndTime = Time
+        AppActivate "Microsoft word"
+        MsgBox "統計完成!!" & vbCr & "(※共執行了" & wrong & "次的檢查※)" _
+            & "詞彙右邊半形空格凡" & hfspace & "次,忽略不計!" _
+            & vbCr & "※耗時:" & Format(EndTime - StTime, "n分s秒") & "※" _
+            & vbCr & "字元數=" & .Characters.Count
+    End With
+    If MsgBox("要即刻檢視結果嗎?", vbYesNo + vbQuestion) = vbYes Then
+    '    Set d = GetObject("d:\千慮一得齋\書籍資料\詞頻.mdb")
+        AppActivate "Microsoft access"
+        d.docmd.OpenTable "詞頻表", , d.acReadOnly
+        d.docmd.Maximize
+    End If
+    d.docmd.OpenTable "詞頻表", , d.acReadOnly
+    d.docmd.Maximize
+    rst.Close: db.Close: Set d = Nothing
+    Options.SaveInterval = 10 '恢復自動儲存
+    End '用Exit Sub無法每次關閉Access
 錯誤處理:
-Select Case Err.Number '主索引值重複
-    Case Is = 3022
-        rst.Requery
-        rst.FindFirst "詞彙 like '" & Trim(phras) & "'"
-        GoTo 1
-    Case Is = 5941 '集合中的成員不存在(指超過文件長度!)
-        GoTo 2
-    Case Is = 91, 3078
-        MsgBox "請再按一次!", vbCritical
-        'access.Application.Quit
-        d.Quit
-        End
-    Case Else
-        MsgBox Err.Number & ":" & Err.Description, vbExclamation
-        Resume
-End Select
+    Select Case Err.Number '主索引值重複
+        Case Is = 91, 3078
+            MsgBox "請再按一次!", vbCritical
+            'access.Application.Quit
+            d.Quit
+            End
+        Case Else
+            MsgBox Err.Number & ":" & Err.Description, vbExclamation
+            Resume
+    End Select
 End Sub
-Sub 進階詞頻1() '2002/11/15要Sub才能在Word中執行!
-On Error GoTo 錯誤處理
-Dim wrong As Long, phra As Long, phras As String, phralh As Byte
-Dim StTime As Date, EndTime As Date
-Dim hfspace As Long
-Dim length As String
-Dim i As Byte, j As Byte
-length = InputBox("請指定分析詞彙之上限,最多255個字", , "5")
-If length = "" Or Not IsNumeric(length) Then End
-If CByte(length) < 1 Or CByte(length) > 255 Then End
-Options.SaveInterval = 0 '取消自動儲存
-StTime = Time
-Set d = CreateObject("access.application")
-'或Set d = CreateObject("Access.Application.9")
-d.UserControl = True
-d.OpenCurrentDatabase "d:\千慮一得齋\書籍資料\詞頻.mdb", False
-d.docmd.SelectObject d.acTable, "詞頻表", True
-'d.Visible = True '檢查用
-Set db = d.CurrentDb
-Set rst = db.OpenRecordset("詞頻表", dbOpenDynaset)
-If rst.RecordCount > 0 Then '要獲得全部的筆數須用MoveLast但此只需判斷有沒有原先的記錄即可!
-'rst打開以後只會取得第一筆記錄!
-'    db.Execute "DELETE 字頻表.* FROM 字頻表"
-    db.Execute "DELETE * FROM 詞頻表"
-End If
-j = CByte(length)
-With ActiveDocument
-    For phralh = 1 To j
-'    原暫定最長為5個字構成的詞,今改作變數j,則限於Byte大小耳!
+Sub 指定11字數詞頻()     '2002/11/15'以此為例,可作為預先限定字數的各個程序(本例為11個字的查詢)
+    On Error GoTo 錯誤處理
+    Dim wrong As Long, phra As Long, phras As String, phralh As String
+    Dim StTime As Date, EndTime As Date
+    Dim hfspace As Long
+    'phralh = InputBox("請用阿拉伯數字指定詞的組成字數,最多字數為「11」!", "指定詞彙字數", "2")
+    'If phralh = "" Or Not IsNumeric(phralh) Then Exit Sub
+    'If CByte(phralh) > 11 Or CByte(phralh) < 1 Then Exit Sub
+    Options.SaveInterval = 0 '取消自動儲存
+    Set d = CreateObject("access.application")
+    d.UserControl = True
+    d.OpenCurrentDatabase "d:\千慮一得齋\書籍資料\詞頻.mdb", False
+    d.docmd.SelectObject d.acTable, "詞頻表", True
+    'd.Visible = True '檢查用
+    Set db = d.CurrentDb
+    Set rst = db.OpenRecordset("詞頻表", dbOpenDynaset)
+    If rst.RecordCount > 0 Then '要獲得全部的筆數須用MoveLast但此只需判斷有沒有原先的記錄即可!
+    'rst打開以後只會取得第一筆記錄!
+    '    db.Execute "DELETE 字頻表.* FROM 字頻表"
+        db.Execute "DELETE * FROM 詞頻表"
+    End If
+    StTime = Time
+    With ActiveDocument
         For phra = 1 To .Characters.Count
-            If phra + (phralh - 1) <= .Characters.Count Then
-                phras = ""
-                For i = 0 To phralh - 1
-                    phras = phras & .Characters(phra + i)
-                Next i
-            End If
-            If Len(phras) > 1 And right(phras, 1) = " " Then
-                hfspace = hfspace + 1 '計次
-                GoTo 11 '字串右邊是半形空格時,AccessUpdate時會銷去,且於詞彙亦無意意,故不計!
-            End If
-            '直接進入下一個字串比對
-            wrong = wrong + 1 '檢視用!
-            If wrong Mod 29688 = 0 Then '到29688時會產生OLE沒有回應的錯誤,故在此歇會兒
-                MsgBox "請檢查!!"
-    '        ElseIf wrong = 49761 Then
-    '            MsgBox "請檢查!!"
-            End If
-            With rst
-                .FindFirst "詞彙 like '" & phras & "'"
-                If .NoMatch Then
-    '                .MoveLast
-                    .AddNew
-                    rst("詞彙") = phras
-                    rst("次數") = 1
-                    On Error GoTo 錯誤處理
-                    .Update 'dbUpdateBatch, True
-                Else
-1                   .edit
-                    rst("次數") = rst("次數") + 1
-                    .Update
-                End If
-            End With
-11      Next phra
-2   Next phralh
-    EndTime = Time
-    AppActivate "Microsoft word"
-    MsgBox "統計完成!!" & vbCr & "(※共執行了" & wrong & "次的檢查※)" _
-        & "詞彙右邊半形空格凡" & hfspace & "次,忽略不計!" _
-        & vbCr & "※耗時:" & Format(EndTime - StTime, "n分s秒") & "※" _
-        & vbCr & "字元數=" & .Characters.Count
-End With
-'d.Visible = True
-If MsgBox("要即刻檢視結果嗎?", vbYesNo + vbQuestion) = vbYes Then
-'    Set d = GetObject("d:\千慮一得齋\書籍資料\詞頻.mdb")
-    AppActivate "Microsoft access"
-End If
-d.docmd.OpenTable "詞頻表", , d.acReadOnly
-d.docmd.Maximize
-rst.Close: db.Close: Set d = Nothing
-Options.SaveInterval = 10 '恢復自動儲存
-End '用Exit Sub無法每次關閉Access
-錯誤處理:
-Select Case Err.Number '主索引值重複
-    Case Is = 3022
-        rst.Requery
-        rst.FindFirst "詞彙 like '" & Trim(phras) & "'"
-        GoTo 1
-    Case Is = 5941 '集合中的成員不存在(指超過文件長度!)
-        GoTo 2
-    Case Is = 91, 3078
-        MsgBox "請再按一次!", vbCritical
-        'access.Application.Quit
-        d.Quit
-        End
-    Case Else
-        MsgBox Err.Number & ":" & Err.Description, vbExclamation
-        Resume
-End Select
-End Sub
-Sub 指定字數詞頻() '2002/11/11
-On Error GoTo 錯誤處理
-Dim wrong As Long, phra As Long, phras As String, phralh As String
-Dim StTime As Date, EndTime As Date
-Dim hfspace As Long
-phralh = InputBox("請用阿拉伯數字指定詞的組成字數,最多字數為「11」!", "指定詞彙字數", "2")
-If phralh = "" Or Not IsNumeric(phralh) Then Exit Sub
-If CByte(phralh) > 11 Or CByte(phralh) < 1 Then Exit Sub
-Options.SaveInterval = 0 '取消自動儲存
-Set d = CreateObject("access.application")
-d.UserControl = True
-d.OpenCurrentDatabase "d:\千慮一得齋\書籍資料\詞頻.mdb", False
-d.docmd.SelectObject d.acTable, "詞頻表", True
-'d.Visible = True '檢查用
-Set db = d.CurrentDb
-Set rst = db.OpenRecordset("詞頻表", dbOpenDynaset)
-If rst.RecordCount > 0 Then '要獲得全部的筆數須用MoveLast但此只需判斷有沒有原先的記錄即可!
-'rst打開以後只會取得第一筆記錄!
-'    db.Execute "DELETE 字頻表.* FROM 字頻表"
-    db.Execute "DELETE * FROM 詞頻表"
-End If
-StTime = Time
-With ActiveDocument
-    For phra = 1 To .Characters.Count
-        Select Case CByte(phralh)
-            Case Is = 1
-                phras = .Characters(phra)
-            Case Is = 2
-                If phra + 1 <= .Characters.Count Then _
-                phras = .Characters(phra) & .Characters(phra + 1)
-            Case Is = 3
-                If phra + 2 <= .Characters.Count Then _
-                phras = .Characters(phra) & .Characters(phra + 1) & _
-                        .Characters(phra + 2)
-            Case Is = 4
-                If phra + 3 <= .Characters.Count Then _
-                phras = .Characters(phra) & .Characters(phra + 1) & _
-                        .Characters(phra + 2) & .Characters(phra + 3)
-            Case Is = 5
-                If phra + 4 <= .Characters.Count Then _
-                phras = .Characters(phra) & .Characters(phra + 1) & _
-                        .Characters(phra + 2) & .Characters(phra + 3) & _
-                        .Characters(phra + 4)
-            Case Is = 6
-                If phra + 5 <= .Characters.Count Then _
-                phras = .Characters(phra) & .Characters(phra + 1) & _
-                        .Characters(phra + 2) & .Characters(phra + 3) & _
-                        .Characters(phra + 4) & .Characters(phra + 5)
-            Case Is = 7
-                If phra + 6 <= .Characters.Count Then _
-                phras = .Characters(phra) & .Characters(phra + 1) & _
-                        .Characters(phra + 2) & .Characters(phra + 3) & _
-                        .Characters(phra + 4) & .Characters(phra + 5) & _
-                        .Characters(phra + 6)
-            Case Is = 8
-                If phra + 7 <= .Characters.Count Then _
-                phras = .Characters(phra) & .Characters(phra + 1) & _
-                        .Characters(phra + 2) & .Characters(phra + 3) & _
-                        .Characters(phra + 4) & .Characters(phra + 5) & _
-                        .Characters(phra + 6) & .Characters(phra + 7)
-            Case Is = 9
-                If phra + 8 <= .Characters.Count Then _
-                phras = .Characters(phra) & .Characters(phra + 1) & _
-                        .Characters(phra + 2) & .Characters(phra + 3) & _
-                        .Characters(phra + 4) & .Characters(phra + 5) & _
-                        .Characters(phra + 6) & .Characters(phra + 7) & _
-                        .Characters(phra + 8)
-            Case Is = 10
-                If phra + 9 <= .Characters.Count Then _
-                phras = .Characters(phra) & .Characters(phra + 1) & _
-                        .Characters(phra + 2) & .Characters(phra + 3) & _
-                        .Characters(phra + 4) & .Characters(phra + 5) & _
-                        .Characters(phra + 6) & .Characters(phra + 7) & _
-                        .Characters(phra + 8) & .Characters(phra + 9)
-            Case Is = 11
-                If phra + 10 <= .Characters.Count Then _
+            If phra + 10 <= .Characters.Count Then _
                 phras = .Characters(phra) & .Characters(phra + 1) & _
                         .Characters(phra + 2) & .Characters(phra + 3) & _
                         .Characters(phra + 4) & .Characters(phra + 5) & _
                         .Characters(phra + 6) & .Characters(phra + 7) & _
                         .Characters(phra + 8) & .Characters(phra + 9) & _
                         .Characters(phra + 10)
-        End Select
-        If Len(phras) > 1 And right(phras, 1) = " " Then
-            hfspace = hfspace + 1 '計次
-            GoTo 11 '字串右邊是半形空格時,AccessUpdate時會銷去,且於詞彙亦無意意,故不計!
-        End If
-        '直接進入下一個字串比對
-        wrong = wrong + 1 '檢視用!
-'        If wrong Mod 29688 = 0 Then '到29688時會產生OLE沒有回應的錯誤,故在此歇會兒
-'            MsgBox "請檢查!!"
-''        ElseIf wrong = 49761 Then
-''            MsgBox "請檢查!!"
-'        End If
-        With rst
-            .FindFirst "詞彙 like '" & phras & "'"
-            If .NoMatch Then
-                .AddNew
-                rst("詞彙") = phras
-'                rst("次數") = 1'預設值已定為1
-                .Update 'dbUpdateBatch, True
-            Else
-                .edit
-                rst("次數") = rst("次數") + 1
-                .Update
+            If Len(phras) > 1 And Right(phras, 1) = " " Then
+                hfspace = hfspace + 1 '計次
+                GoTo 11 '字串右邊是半形空格時,AccessUpdate時會銷去,且於詞彙亦無意意,故不計!
             End If
-        End With
-11  Next phra
-    EndTime = Time
-    AppActivate "Microsoft word"
-    MsgBox "統計完成!!" & vbCr & "(※共執行了" & wrong & "次的檢查※)" _
-        & "詞彙右邊半形空格凡" & hfspace & "次,忽略不計!" _
-        & vbCr & "※耗時:" & Format(EndTime - StTime, "n分s秒") & "※" _
-        & vbCr & "字元數=" & .Characters.Count
-End With
-If MsgBox("要即刻檢視結果嗎?", vbYesNo + vbQuestion) = vbYes Then
-'    Set d = GetObject("d:\千慮一得齋\書籍資料\詞頻.mdb")
-    AppActivate "Microsoft access"
+            '直接進入下一個字串比對
+            wrong = wrong + 1 '檢視用!
+    '        If wrong Mod 29688 = 0 Then '到29688時會產生OLE沒有回應的錯誤,故在此歇會兒
+    '            MsgBox "請檢查!!"
+    ''        ElseIf wrong = 49761 Then
+    ''            MsgBox "請檢查!!"
+    '        End If
+            With rst
+                .FindFirst "詞彙 like '" & phras & "'"
+                If .NoMatch Then
+                    .AddNew
+                    rst("詞彙") = phras
+    '                rst("次數") = 1'預設值已定為1
+                    .Update 'dbUpdateBatch, True
+                Else
+                    .edit
+                    rst("次數") = rst("次數") + 1
+                    .Update
+                End If
+            End With
+11      Next phra
+        EndTime = Time
+        AppActivate "Microsoft word"
+        MsgBox "統計完成!!" & vbCr & "(※共執行了" & wrong & "次的檢查※)" _
+            & "詞彙右邊半形空格凡" & hfspace & "次,忽略不計!" _
+            & vbCr & "※耗時:" & Format(EndTime - StTime, "n分s秒") & "※" _
+            & vbCr & "字元數=" & .Characters.Count
+    End With
+    If MsgBox("要即刻檢視結果嗎?", vbYesNo + vbQuestion) = vbYes Then
+    '    Set d = GetObject("d:\千慮一得齋\書籍資料\詞頻.mdb")
+        AppActivate "Microsoft access"
+        d.docmd.OpenTable "詞頻表", , d.acReadOnly
+        d.docmd.Maximize
+    End If
     d.docmd.OpenTable "詞頻表", , d.acReadOnly
     d.docmd.Maximize
-End If
-d.docmd.OpenTable "詞頻表", , d.acReadOnly
-d.docmd.Maximize
-rst.Close: db.Close: Set d = Nothing
-Options.SaveInterval = 10 '恢復自動儲存
-End '用Exit Sub無法每次關閉Access
+    rst.Close: db.Close: Set d = Nothing
+    Options.SaveInterval = 10 '恢復自動儲存
+    End '用Exit Sub無法每次關閉Access
 錯誤處理:
-Select Case Err.Number '主索引值重複
-    Case Is = 91, 3078
-        MsgBox "請再按一次!", vbCritical
-        'access.Application.Quit
-        d.Quit
-        End
-    Case Else
-        MsgBox Err.Number & ":" & Err.Description, vbExclamation
-        Resume
-End Select
-End Sub
-Sub 指定11字數詞頻()     '2002/11/15'以此為例,可作為預先限定字數的各個程序(本例為11個字的查詢)
-On Error GoTo 錯誤處理
-Dim wrong As Long, phra As Long, phras As String, phralh As String
-Dim StTime As Date, EndTime As Date
-Dim hfspace As Long
-'phralh = InputBox("請用阿拉伯數字指定詞的組成字數,最多字數為「11」!", "指定詞彙字數", "2")
-'If phralh = "" Or Not IsNumeric(phralh) Then Exit Sub
-'If CByte(phralh) > 11 Or CByte(phralh) < 1 Then Exit Sub
-Options.SaveInterval = 0 '取消自動儲存
-Set d = CreateObject("access.application")
-d.UserControl = True
-d.OpenCurrentDatabase "d:\千慮一得齋\書籍資料\詞頻.mdb", False
-d.docmd.SelectObject d.acTable, "詞頻表", True
-'d.Visible = True '檢查用
-Set db = d.CurrentDb
-Set rst = db.OpenRecordset("詞頻表", dbOpenDynaset)
-If rst.RecordCount > 0 Then '要獲得全部的筆數須用MoveLast但此只需判斷有沒有原先的記錄即可!
-'rst打開以後只會取得第一筆記錄!
-'    db.Execute "DELETE 字頻表.* FROM 字頻表"
-    db.Execute "DELETE * FROM 詞頻表"
-End If
-StTime = Time
-With ActiveDocument
-    For phra = 1 To .Characters.Count
-        If phra + 10 <= .Characters.Count Then _
-            phras = .Characters(phra) & .Characters(phra + 1) & _
-                    .Characters(phra + 2) & .Characters(phra + 3) & _
-                    .Characters(phra + 4) & .Characters(phra + 5) & _
-                    .Characters(phra + 6) & .Characters(phra + 7) & _
-                    .Characters(phra + 8) & .Characters(phra + 9) & _
-                    .Characters(phra + 10)
-        If Len(phras) > 1 And right(phras, 1) = " " Then
-            hfspace = hfspace + 1 '計次
-            GoTo 11 '字串右邊是半形空格時,AccessUpdate時會銷去,且於詞彙亦無意意,故不計!
-        End If
-        '直接進入下一個字串比對
-        wrong = wrong + 1 '檢視用!
-'        If wrong Mod 29688 = 0 Then '到29688時會產生OLE沒有回應的錯誤,故在此歇會兒
-'            MsgBox "請檢查!!"
-''        ElseIf wrong = 49761 Then
-''            MsgBox "請檢查!!"
-'        End If
-        With rst
-            .FindFirst "詞彙 like '" & phras & "'"
-            If .NoMatch Then
-                .AddNew
-                rst("詞彙") = phras
-'                rst("次數") = 1'預設值已定為1
-                .Update 'dbUpdateBatch, True
-            Else
-                .edit
-                rst("次數") = rst("次數") + 1
-                .Update
-            End If
-        End With
-11  Next phra
-    EndTime = Time
-    AppActivate "Microsoft word"
-    MsgBox "統計完成!!" & vbCr & "(※共執行了" & wrong & "次的檢查※)" _
-        & "詞彙右邊半形空格凡" & hfspace & "次,忽略不計!" _
-        & vbCr & "※耗時:" & Format(EndTime - StTime, "n分s秒") & "※" _
-        & vbCr & "字元數=" & .Characters.Count
-End With
-If MsgBox("要即刻檢視結果嗎?", vbYesNo + vbQuestion) = vbYes Then
-'    Set d = GetObject("d:\千慮一得齋\書籍資料\詞頻.mdb")
-    AppActivate "Microsoft access"
-    d.docmd.OpenTable "詞頻表", , d.acReadOnly
-    d.docmd.Maximize
-End If
-d.docmd.OpenTable "詞頻表", , d.acReadOnly
-d.docmd.Maximize
-rst.Close: db.Close: Set d = Nothing
-Options.SaveInterval = 10 '恢復自動儲存
-End '用Exit Sub無法每次關閉Access
-錯誤處理:
-Select Case Err.Number '主索引值重複
-    Case Is = 91, 3078
-        MsgBox "請再按一次!", vbCritical
-        'access.Application.Quit
-        d.Quit
-        End
-    Case Else
-        MsgBox Err.Number & ":" & Err.Description, vbExclamation
-        Resume
-End Select
+    Select Case Err.Number '主索引值重複
+        Case Is = 91, 3078
+            MsgBox "請再按一次!", vbCritical
+            'access.Application.Quit
+            d.Quit
+            End
+        Case Else
+            MsgBox Err.Number & ":" & Err.Description, vbExclamation
+            Resume
+    End Select
 End Sub
 Sub 指定10字數詞頻() '2002/11/15
-On Error GoTo 錯誤處理
-Dim wrong As Long, phra As Long, phras As String, phralh As String
-Dim StTime As Date, EndTime As Date
-Dim hfspace As Long
-Options.SaveInterval = 0 '取消自動儲存
-Set d = CreateObject("access.application")
-d.UserControl = True
-d.OpenCurrentDatabase "d:\千慮一得齋\書籍資料\詞頻.mdb", False
-d.docmd.SelectObject d.acTable, "詞頻表", True
-'d.Visible = True '檢查用
-Set db = d.CurrentDb
-Set rst = db.OpenRecordset("詞頻表", dbOpenDynaset)
-If rst.RecordCount > 0 Then '要獲得全部的筆數須用MoveLast但此只需判斷有沒有原先的記錄即可!
-'rst打開以後只會取得第一筆記錄!
-'    db.Execute "DELETE 字頻表.* FROM 字頻表"
-    db.Execute "DELETE * FROM 詞頻表"
-End If
-StTime = Time
-With ActiveDocument
-    For phra = 1 To .Characters.Count
-        If phra + 9 <= .Characters.Count Then _
-            phras = .Characters(phra) & .Characters(phra + 1) & _
-                    .Characters(phra + 2) & .Characters(phra + 3) & _
-                    .Characters(phra + 4) & .Characters(phra + 5) & _
-                    .Characters(phra + 6) & .Characters(phra + 7) & _
-                    .Characters(phra + 8) & .Characters(phra + 9)
-        If Len(phras) > 1 And right(phras, 1) = " " Then
-            hfspace = hfspace + 1 '計次
-            GoTo 11 '字串右邊是半形空格時,AccessUpdate時會銷去,且於詞彙亦無意意,故不計!
-        End If
-        '直接進入下一個字串比對
-        wrong = wrong + 1 '檢視用!
-'        If wrong Mod 29688 = 0 Then '到29688時會產生OLE沒有回應的錯誤,故在此歇會兒
-'            MsgBox "請檢查!!"
-''        ElseIf wrong = 49761 Then
-''            MsgBox "請檢查!!"
-'        End If
-        With rst
-            .FindFirst "詞彙 like '" & phras & "'"
-            If .NoMatch Then
-                .AddNew
-                rst("詞彙") = phras
-'                rst("次數") = 1'預設值已定為1
-                .Update 'dbUpdateBatch, True
-            Else
-                .edit
-                rst("次數") = rst("次數") + 1
-                .Update
+    On Error GoTo 錯誤處理
+    Dim wrong As Long, phra As Long, phras As String, phralh As String
+    Dim StTime As Date, EndTime As Date
+    Dim hfspace As Long
+    Options.SaveInterval = 0 '取消自動儲存
+    Set d = CreateObject("access.application")
+    d.UserControl = True
+    d.OpenCurrentDatabase "d:\千慮一得齋\書籍資料\詞頻.mdb", False
+    d.docmd.SelectObject d.acTable, "詞頻表", True
+    'd.Visible = True '檢查用
+    Set db = d.CurrentDb
+    Set rst = db.OpenRecordset("詞頻表", dbOpenDynaset)
+    If rst.RecordCount > 0 Then '要獲得全部的筆數須用MoveLast但此只需判斷有沒有原先的記錄即可!
+    'rst打開以後只會取得第一筆記錄!
+    '    db.Execute "DELETE 字頻表.* FROM 字頻表"
+        db.Execute "DELETE * FROM 詞頻表"
+    End If
+    StTime = Time
+    With ActiveDocument
+        For phra = 1 To .Characters.Count
+            If phra + 9 <= .Characters.Count Then _
+                phras = .Characters(phra) & .Characters(phra + 1) & _
+                        .Characters(phra + 2) & .Characters(phra + 3) & _
+                        .Characters(phra + 4) & .Characters(phra + 5) & _
+                        .Characters(phra + 6) & .Characters(phra + 7) & _
+                        .Characters(phra + 8) & .Characters(phra + 9)
+            If Len(phras) > 1 And Right(phras, 1) = " " Then
+                hfspace = hfspace + 1 '計次
+                GoTo 11 '字串右邊是半形空格時,AccessUpdate時會銷去,且於詞彙亦無意意,故不計!
             End If
-        End With
-11  Next phra
-    EndTime = Time
-    AppActivate "Microsoft word"
-    MsgBox "統計完成!!" & vbCr & "(※共執行了" & wrong & "次的檢查※)" _
-        & "詞彙右邊半形空格凡" & hfspace & "次,忽略不計!" _
-        & vbCr & "※耗時:" & Format(EndTime - StTime, "n分s秒") & "※" _
-        & vbCr & "字元數=" & .Characters.Count
-End With
-If MsgBox("要即刻檢視結果嗎?", vbYesNo + vbQuestion) = vbYes Then
-'    Set d = GetObject("d:\千慮一得齋\書籍資料\詞頻.mdb")
-    AppActivate "Microsoft access"
+            '直接進入下一個字串比對
+            wrong = wrong + 1 '檢視用!
+    '        If wrong Mod 29688 = 0 Then '到29688時會產生OLE沒有回應的錯誤,故在此歇會兒
+    '            MsgBox "請檢查!!"
+    ''        ElseIf wrong = 49761 Then
+    ''            MsgBox "請檢查!!"
+    '        End If
+            With rst
+                .FindFirst "詞彙 like '" & phras & "'"
+                If .NoMatch Then
+                    .AddNew
+                    rst("詞彙") = phras
+    '                rst("次數") = 1'預設值已定為1
+                    .Update 'dbUpdateBatch, True
+                Else
+                    .edit
+                    rst("次數") = rst("次數") + 1
+                    .Update
+                End If
+            End With
+11      Next phra
+        EndTime = Time
+        AppActivate "Microsoft word"
+        MsgBox "統計完成!!" & vbCr & "(※共執行了" & wrong & "次的檢查※)" _
+            & "詞彙右邊半形空格凡" & hfspace & "次,忽略不計!" _
+            & vbCr & "※耗時:" & Format(EndTime - StTime, "n分s秒") & "※" _
+            & vbCr & "字元數=" & .Characters.Count
+    End With
+    If MsgBox("要即刻檢視結果嗎?", vbYesNo + vbQuestion) = vbYes Then
+    '    Set d = GetObject("d:\千慮一得齋\書籍資料\詞頻.mdb")
+        AppActivate "Microsoft access"
+        d.docmd.OpenTable "詞頻表", , d.acReadOnly
+        d.docmd.Maximize
+    End If
     d.docmd.OpenTable "詞頻表", , d.acReadOnly
     d.docmd.Maximize
-End If
-d.docmd.OpenTable "詞頻表", , d.acReadOnly
-d.docmd.Maximize
-rst.Close: db.Close: Set d = Nothing
-Options.SaveInterval = 10 '恢復自動儲存
-End '用Exit Sub無法每次關閉Access
+    rst.Close: db.Close: Set d = Nothing
+    Options.SaveInterval = 10 '恢復自動儲存
+    End '用Exit Sub無法每次關閉Access
 錯誤處理:
-Select Case Err.Number '主索引值重複
-    Case Is = 91, 3078
-        MsgBox "請再按一次!", vbCritical
-        'access.Application.Quit
-        d.Quit
-        End
-    Case Else
-        MsgBox Err.Number & ":" & Err.Description, vbExclamation
-        Resume
-End Select
+    Select Case Err.Number '主索引值重複
+        Case Is = 91, 3078
+            MsgBox "請再按一次!", vbCritical
+            'access.Application.Quit
+            d.Quit
+            End
+        Case Else
+            MsgBox Err.Number & ":" & Err.Description, vbExclamation
+            Resume
+    End Select
 End Sub
 
 Sub 指定9字數詞頻()  '2002/11/15
-On Error GoTo 錯誤處理
-Dim wrong As Long, phra As Long, phras As String, phralh As String
-Dim StTime As Date, EndTime As Date
-Dim hfspace As Long
-Options.SaveInterval = 0 '取消自動儲存
-Set d = CreateObject("access.application")
-d.UserControl = True
-d.OpenCurrentDatabase "d:\千慮一得齋\書籍資料\詞頻.mdb", False
-d.docmd.SelectObject d.acTable, "詞頻表", True
-'d.Visible = True '檢查用
-Set db = d.CurrentDb
-Set rst = db.OpenRecordset("詞頻表", dbOpenDynaset)
-If rst.RecordCount > 0 Then '要獲得全部的筆數須用MoveLast但此只需判斷有沒有原先的記錄即可!
-'rst打開以後只會取得第一筆記錄!
-'    db.Execute "DELETE 字頻表.* FROM 字頻表"
-    db.Execute "DELETE * FROM 詞頻表"
-End If
-StTime = Time
-With ActiveDocument
-    For phra = 1 To .Characters.Count
-        If phra + 8 <= .Characters.Count Then _
-            phras = .Characters(phra) & .Characters(phra + 1) & _
-                    .Characters(phra + 2) & .Characters(phra + 3) & _
-                    .Characters(phra + 4) & .Characters(phra + 5) & _
-                    .Characters(phra + 6) & .Characters(phra + 7) & _
-                    .Characters(phra + 8)
-        If Len(phras) > 1 And right(phras, 1) = " " Then
-            hfspace = hfspace + 1 '計次
-            GoTo 11 '字串右邊是半形空格時,AccessUpdate時會銷去,且於詞彙亦無意意,故不計!
-        End If
-        '直接進入下一個字串比對
-        wrong = wrong + 1 '檢視用!
-'        If wrong Mod 29688 = 0 Then '到29688時會產生OLE沒有回應的錯誤,故在此歇會兒
-'            MsgBox "請檢查!!"
-''        ElseIf wrong = 49761 Then
-''            MsgBox "請檢查!!"
-'        End If
-        With rst
-            .FindFirst "詞彙 like '" & phras & "'"
-            If .NoMatch Then
-                .AddNew
-                rst("詞彙") = phras
-'                rst("次數") = 1'預設值已定為1
-                .Update 'dbUpdateBatch, True
-            Else
-                .edit
-                rst("次數") = rst("次數") + 1
-                .Update
+    On Error GoTo 錯誤處理
+    Dim wrong As Long, phra As Long, phras As String, phralh As String
+    Dim StTime As Date, EndTime As Date
+    Dim hfspace As Long
+    Options.SaveInterval = 0 '取消自動儲存
+    Set d = CreateObject("access.application")
+    d.UserControl = True
+    d.OpenCurrentDatabase "d:\千慮一得齋\書籍資料\詞頻.mdb", False
+    d.docmd.SelectObject d.acTable, "詞頻表", True
+    'd.Visible = True '檢查用
+    Set db = d.CurrentDb
+    Set rst = db.OpenRecordset("詞頻表", dbOpenDynaset)
+    If rst.RecordCount > 0 Then '要獲得全部的筆數須用MoveLast但此只需判斷有沒有原先的記錄即可!
+    'rst打開以後只會取得第一筆記錄!
+    '    db.Execute "DELETE 字頻表.* FROM 字頻表"
+        db.Execute "DELETE * FROM 詞頻表"
+    End If
+    StTime = Time
+    With ActiveDocument
+        For phra = 1 To .Characters.Count
+            If phra + 8 <= .Characters.Count Then _
+                phras = .Characters(phra) & .Characters(phra + 1) & _
+                        .Characters(phra + 2) & .Characters(phra + 3) & _
+                        .Characters(phra + 4) & .Characters(phra + 5) & _
+                        .Characters(phra + 6) & .Characters(phra + 7) & _
+                        .Characters(phra + 8)
+            If Len(phras) > 1 And Right(phras, 1) = " " Then
+                hfspace = hfspace + 1 '計次
+                GoTo 11 '字串右邊是半形空格時,AccessUpdate時會銷去,且於詞彙亦無意意,故不計!
             End If
-        End With
-11  Next phra
-    EndTime = Time
-    AppActivate "Microsoft word"
-    MsgBox "統計完成!!" & vbCr & "(※共執行了" & wrong & "次的檢查※)" _
-        & "詞彙右邊半形空格凡" & hfspace & "次,忽略不計!" _
-        & vbCr & "※耗時:" & Format(EndTime - StTime, "n分s秒") & "※" _
-        & vbCr & "字元數=" & .Characters.Count
-End With
-If MsgBox("要即刻檢視結果嗎?", vbYesNo + vbQuestion) = vbYes Then
-'    Set d = GetObject("d:\千慮一得齋\書籍資料\詞頻.mdb")
-    AppActivate "Microsoft access"
+            '直接進入下一個字串比對
+            wrong = wrong + 1 '檢視用!
+    '        If wrong Mod 29688 = 0 Then '到29688時會產生OLE沒有回應的錯誤,故在此歇會兒
+    '            MsgBox "請檢查!!"
+    ''        ElseIf wrong = 49761 Then
+    ''            MsgBox "請檢查!!"
+    '        End If
+            With rst
+                .FindFirst "詞彙 like '" & phras & "'"
+                If .NoMatch Then
+                    .AddNew
+                    rst("詞彙") = phras
+    '                rst("次數") = 1'預設值已定為1
+                    .Update 'dbUpdateBatch, True
+                Else
+                    .edit
+                    rst("次數") = rst("次數") + 1
+                    .Update
+                End If
+            End With
+11      Next phra
+        EndTime = Time
+        AppActivate "Microsoft word"
+        MsgBox "統計完成!!" & vbCr & "(※共執行了" & wrong & "次的檢查※)" _
+            & "詞彙右邊半形空格凡" & hfspace & "次,忽略不計!" _
+            & vbCr & "※耗時:" & Format(EndTime - StTime, "n分s秒") & "※" _
+            & vbCr & "字元數=" & .Characters.Count
+    End With
+    If MsgBox("要即刻檢視結果嗎?", vbYesNo + vbQuestion) = vbYes Then
+    '    Set d = GetObject("d:\千慮一得齋\書籍資料\詞頻.mdb")
+        AppActivate "Microsoft access"
+        d.docmd.OpenTable "詞頻表", , d.acReadOnly
+        d.docmd.Maximize
+    End If
     d.docmd.OpenTable "詞頻表", , d.acReadOnly
     d.docmd.Maximize
-End If
-d.docmd.OpenTable "詞頻表", , d.acReadOnly
-d.docmd.Maximize
-rst.Close: db.Close: Set d = Nothing
-Options.SaveInterval = 10 '恢復自動儲存
-End '用Exit Sub無法每次關閉Access
+    rst.Close: db.Close: Set d = Nothing
+    Options.SaveInterval = 10 '恢復自動儲存
+    End '用Exit Sub無法每次關閉Access
 錯誤處理:
-Select Case Err.Number '主索引值重複
-    Case Is = 91, 3078
-        MsgBox "請再按一次!", vbCritical
-        'access.Application.Quit
-        d.Quit
-        End
-    Case Else
-        MsgBox Err.Number & ":" & Err.Description, vbExclamation
-        Resume
-End Select
+    Select Case Err.Number '主索引值重複
+        Case Is = 91, 3078
+            MsgBox "請再按一次!", vbCritical
+            'access.Application.Quit
+            d.Quit
+            End
+        Case Else
+            MsgBox Err.Number & ":" & Err.Description, vbExclamation
+            Resume
+    End Select
 End Sub
 
 
 Sub 指定8字數詞頻()   '2002/11/15
-On Error GoTo 錯誤處理
-Dim wrong As Long, phra As Long, phras As String, phralh As String
-Dim StTime As Date, EndTime As Date
-Dim hfspace As Long
-Options.SaveInterval = 0 '取消自動儲存
-Set d = CreateObject("access.application")
-d.UserControl = True
-d.OpenCurrentDatabase "d:\千慮一得齋\書籍資料\詞頻.mdb", False
-d.docmd.SelectObject d.acTable, "詞頻表", True
-'d.Visible = True '檢查用
-Set db = d.CurrentDb
-Set rst = db.OpenRecordset("詞頻表", dbOpenDynaset)
-If rst.RecordCount > 0 Then '要獲得全部的筆數須用MoveLast但此只需判斷有沒有原先的記錄即可!
-'rst打開以後只會取得第一筆記錄!
-'    db.Execute "DELETE 字頻表.* FROM 字頻表"
-    db.Execute "DELETE * FROM 詞頻表"
-End If
-StTime = Time
-With ActiveDocument
-    For phra = 1 To .Characters.Count
-        If phra + 7 <= .Characters.Count Then _
-            phras = .Characters(phra) & .Characters(phra + 1) & _
-                    .Characters(phra + 2) & .Characters(phra + 3) & _
-                    .Characters(phra + 4) & .Characters(phra + 5) & _
-                    .Characters(phra + 6) & .Characters(phra + 7)
-        If Len(phras) > 1 And right(phras, 1) = " " Then
-            hfspace = hfspace + 1 '計次
-            GoTo 11 '字串右邊是半形空格時,AccessUpdate時會銷去,且於詞彙亦無意意,故不計!
-        End If
-        '直接進入下一個字串比對
-        wrong = wrong + 1 '檢視用!
-'        If wrong Mod 29688 = 0 Then '到29688時會產生OLE沒有回應的錯誤,故在此歇會兒
-'            MsgBox "請檢查!!"
-''        ElseIf wrong = 49761 Then
-''            MsgBox "請檢查!!"
-'        End If
-        With rst
-            .FindFirst "詞彙 like '" & phras & "'"
-            If .NoMatch Then
-                .AddNew
-                rst("詞彙") = phras
-'                rst("次數") = 1'預設值已定為1
-                .Update 'dbUpdateBatch, True
-            Else
-                .edit
-                rst("次數") = rst("次數") + 1
-                .Update
+    On Error GoTo 錯誤處理
+    Dim wrong As Long, phra As Long, phras As String, phralh As String
+    Dim StTime As Date, EndTime As Date
+    Dim hfspace As Long
+    Options.SaveInterval = 0 '取消自動儲存
+    Set d = CreateObject("access.application")
+    d.UserControl = True
+    d.OpenCurrentDatabase "d:\千慮一得齋\書籍資料\詞頻.mdb", False
+    d.docmd.SelectObject d.acTable, "詞頻表", True
+    'd.Visible = True '檢查用
+    Set db = d.CurrentDb
+    Set rst = db.OpenRecordset("詞頻表", dbOpenDynaset)
+    If rst.RecordCount > 0 Then '要獲得全部的筆數須用MoveLast但此只需判斷有沒有原先的記錄即可!
+    'rst打開以後只會取得第一筆記錄!
+    '    db.Execute "DELETE 字頻表.* FROM 字頻表"
+        db.Execute "DELETE * FROM 詞頻表"
+    End If
+    StTime = Time
+    With ActiveDocument
+        For phra = 1 To .Characters.Count
+            If phra + 7 <= .Characters.Count Then _
+                phras = .Characters(phra) & .Characters(phra + 1) & _
+                        .Characters(phra + 2) & .Characters(phra + 3) & _
+                        .Characters(phra + 4) & .Characters(phra + 5) & _
+                        .Characters(phra + 6) & .Characters(phra + 7)
+            If Len(phras) > 1 And Right(phras, 1) = " " Then
+                hfspace = hfspace + 1 '計次
+                GoTo 11 '字串右邊是半形空格時,AccessUpdate時會銷去,且於詞彙亦無意意,故不計!
             End If
-        End With
-11  Next phra
-    EndTime = Time
-    AppActivate "Microsoft word"
-    MsgBox "統計完成!!" & vbCr & "(※共執行了" & wrong & "次的檢查※)" _
-        & "詞彙右邊半形空格凡" & hfspace & "次,忽略不計!" _
-        & vbCr & "※耗時:" & Format(EndTime - StTime, "n分s秒") & "※" _
-        & vbCr & "字元數=" & .Characters.Count
-End With
-If MsgBox("要即刻檢視結果嗎?", vbYesNo + vbQuestion) = vbYes Then
-'    Set d = GetObject("d:\千慮一得齋\書籍資料\詞頻.mdb")
-    AppActivate "Microsoft access"
+            '直接進入下一個字串比對
+            wrong = wrong + 1 '檢視用!
+    '        If wrong Mod 29688 = 0 Then '到29688時會產生OLE沒有回應的錯誤,故在此歇會兒
+    '            MsgBox "請檢查!!"
+    ''        ElseIf wrong = 49761 Then
+    ''            MsgBox "請檢查!!"
+    '        End If
+            With rst
+                .FindFirst "詞彙 like '" & phras & "'"
+                If .NoMatch Then
+                    .AddNew
+                    rst("詞彙") = phras
+    '                rst("次數") = 1'預設值已定為1
+                    .Update 'dbUpdateBatch, True
+                Else
+                    .edit
+                    rst("次數") = rst("次數") + 1
+                    .Update
+                End If
+            End With
+11      Next phra
+        EndTime = Time
+        AppActivate "Microsoft word"
+        MsgBox "統計完成!!" & vbCr & "(※共執行了" & wrong & "次的檢查※)" _
+            & "詞彙右邊半形空格凡" & hfspace & "次,忽略不計!" _
+            & vbCr & "※耗時:" & Format(EndTime - StTime, "n分s秒") & "※" _
+            & vbCr & "字元數=" & .Characters.Count
+    End With
+    If MsgBox("要即刻檢視結果嗎?", vbYesNo + vbQuestion) = vbYes Then
+    '    Set d = GetObject("d:\千慮一得齋\書籍資料\詞頻.mdb")
+        AppActivate "Microsoft access"
+        d.docmd.OpenTable "詞頻表", , d.acReadOnly
+        d.docmd.Maximize
+    End If
     d.docmd.OpenTable "詞頻表", , d.acReadOnly
     d.docmd.Maximize
-End If
-d.docmd.OpenTable "詞頻表", , d.acReadOnly
-d.docmd.Maximize
-rst.Close: db.Close: Set d = Nothing
-Options.SaveInterval = 10 '恢復自動儲存
-End '用Exit Sub無法每次關閉Access
+    rst.Close: db.Close: Set d = Nothing
+    Options.SaveInterval = 10 '恢復自動儲存
+    End '用Exit Sub無法每次關閉Access
 錯誤處理:
-Select Case Err.Number '主索引值重複
-    Case Is = 91, 3078
-        MsgBox "請再按一次!", vbCritical
-        'access.Application.Quit
-        d.Quit
-        End
-    Case Else
-        MsgBox Err.Number & ":" & Err.Description, vbExclamation
-        Resume
-End Select
+    Select Case Err.Number '主索引值重複
+        Case Is = 91, 3078
+            MsgBox "請再按一次!", vbCritical
+            'access.Application.Quit
+            d.Quit
+            End
+        Case Else
+            MsgBox Err.Number & ":" & Err.Description, vbExclamation
+            Resume
+    End Select
 End Sub
 
 Sub 指定6字數詞頻()    '2002/11/15
-On Error GoTo 錯誤處理
-Dim wrong As Long, phra As Long, phras As String, phralh As String
-Dim StTime As Date, EndTime As Date
-Dim hfspace As Long
-Options.SaveInterval = 0 '取消自動儲存
-Set d = CreateObject("access.application")
-d.UserControl = True
-d.OpenCurrentDatabase "d:\千慮一得齋\書籍資料\詞頻.mdb", False
-d.docmd.SelectObject d.acTable, "詞頻表", True
-'d.Visible = True '檢查用
-Set db = d.CurrentDb
-Set rst = db.OpenRecordset("詞頻表", dbOpenDynaset)
-If rst.RecordCount > 0 Then '要獲得全部的筆數須用MoveLast但此只需判斷有沒有原先的記錄即可!
-'rst打開以後只會取得第一筆記錄!
-'    db.Execute "DELETE 字頻表.* FROM 字頻表"
-    db.Execute "DELETE * FROM 詞頻表"
-End If
-StTime = Time
-With ActiveDocument
-    For phra = 1 To .Characters.Count
-        If phra + 5 <= .Characters.Count Then _
-            phras = .Characters(phra) & .Characters(phra + 1) & _
-                    .Characters(phra + 2) & .Characters(phra + 3) & _
-                    .Characters(phra + 4) & .Characters(phra + 5)
-        If Len(phras) > 1 And right(phras, 1) = " " Then
-            hfspace = hfspace + 1 '計次
-            GoTo 11 '字串右邊是半形空格時,AccessUpdate時會銷去,且於詞彙亦無意意,故不計!
-        End If
-        '直接進入下一個字串比對
-        wrong = wrong + 1 '檢視用!
-'        If wrong Mod 29688 = 0 Then '到29688時會產生OLE沒有回應的錯誤,故在此歇會兒
-'            MsgBox "請檢查!!"
-''        ElseIf wrong = 49761 Then
-''            MsgBox "請檢查!!"
-'        End If
-        With rst
-            .FindFirst "詞彙 like '" & phras & "'"
-            If .NoMatch Then
-                .AddNew
-                rst("詞彙") = phras
-'                rst("次數") = 1'預設值已定為1
-                .Update 'dbUpdateBatch, True
-            Else
-                .edit
-                rst("次數") = rst("次數") + 1
-                .Update
+    On Error GoTo 錯誤處理
+    Dim wrong As Long, phra As Long, phras As String, phralh As String
+    Dim StTime As Date, EndTime As Date
+    Dim hfspace As Long
+    Options.SaveInterval = 0 '取消自動儲存
+    Set d = CreateObject("access.application")
+    d.UserControl = True
+    d.OpenCurrentDatabase "d:\千慮一得齋\書籍資料\詞頻.mdb", False
+    d.docmd.SelectObject d.acTable, "詞頻表", True
+    'd.Visible = True '檢查用
+    Set db = d.CurrentDb
+    Set rst = db.OpenRecordset("詞頻表", dbOpenDynaset)
+    If rst.RecordCount > 0 Then '要獲得全部的筆數須用MoveLast但此只需判斷有沒有原先的記錄即可!
+    'rst打開以後只會取得第一筆記錄!
+    '    db.Execute "DELETE 字頻表.* FROM 字頻表"
+        db.Execute "DELETE * FROM 詞頻表"
+    End If
+    StTime = Time
+    With ActiveDocument
+        For phra = 1 To .Characters.Count
+            If phra + 5 <= .Characters.Count Then _
+                phras = .Characters(phra) & .Characters(phra + 1) & _
+                        .Characters(phra + 2) & .Characters(phra + 3) & _
+                        .Characters(phra + 4) & .Characters(phra + 5)
+            If Len(phras) > 1 And Right(phras, 1) = " " Then
+                hfspace = hfspace + 1 '計次
+                GoTo 11 '字串右邊是半形空格時,AccessUpdate時會銷去,且於詞彙亦無意意,故不計!
             End If
-        End With
-11  Next phra
-    EndTime = Time
-    AppActivate "Microsoft word"
-    MsgBox "統計完成!!" & vbCr & "(※共執行了" & wrong & "次的檢查※)" _
-        & "詞彙右邊半形空格凡" & hfspace & "次,忽略不計!" _
-        & vbCr & "※耗時:" & Format(EndTime - StTime, "n分s秒") & "※" _
-        & vbCr & "字元數=" & .Characters.Count
-End With
-If MsgBox("要即刻檢視結果嗎?", vbYesNo + vbQuestion) = vbYes Then
-'    Set d = GetObject("d:\千慮一得齋\書籍資料\詞頻.mdb")
-    AppActivate "Microsoft access"
+            '直接進入下一個字串比對
+            wrong = wrong + 1 '檢視用!
+    '        If wrong Mod 29688 = 0 Then '到29688時會產生OLE沒有回應的錯誤,故在此歇會兒
+    '            MsgBox "請檢查!!"
+    ''        ElseIf wrong = 49761 Then
+    ''            MsgBox "請檢查!!"
+    '        End If
+            With rst
+                .FindFirst "詞彙 like '" & phras & "'"
+                If .NoMatch Then
+                    .AddNew
+                    rst("詞彙") = phras
+    '                rst("次數") = 1'預設值已定為1
+                    .Update 'dbUpdateBatch, True
+                Else
+                    .edit
+                    rst("次數") = rst("次數") + 1
+                    .Update
+                End If
+            End With
+11      Next phra
+        EndTime = Time
+        AppActivate "Microsoft word"
+        MsgBox "統計完成!!" & vbCr & "(※共執行了" & wrong & "次的檢查※)" _
+            & "詞彙右邊半形空格凡" & hfspace & "次,忽略不計!" _
+            & vbCr & "※耗時:" & Format(EndTime - StTime, "n分s秒") & "※" _
+            & vbCr & "字元數=" & .Characters.Count
+    End With
+    If MsgBox("要即刻檢視結果嗎?", vbYesNo + vbQuestion) = vbYes Then
+    '    Set d = GetObject("d:\千慮一得齋\書籍資料\詞頻.mdb")
+        AppActivate "Microsoft access"
+        d.docmd.OpenTable "詞頻表", , d.acReadOnly
+        d.docmd.Maximize
+    End If
     d.docmd.OpenTable "詞頻表", , d.acReadOnly
     d.docmd.Maximize
-End If
-d.docmd.OpenTable "詞頻表", , d.acReadOnly
-d.docmd.Maximize
-rst.Close: db.Close: Set d = Nothing
-Options.SaveInterval = 10 '恢復自動儲存
-End '用Exit Sub無法每次關閉Access
+    rst.Close: db.Close: Set d = Nothing
+    Options.SaveInterval = 10 '恢復自動儲存
+    End '用Exit Sub無法每次關閉Access
 錯誤處理:
-Select Case Err.Number '主索引值重複
-    Case Is = 91, 3078
-        MsgBox "請再按一次!", vbCritical
-        'access.Application.Quit
-        d.Quit
-        End
-    Case Else
-        MsgBox Err.Number & ":" & Err.Description, vbExclamation
-        Resume
-End Select
+    Select Case Err.Number '主索引值重複
+        Case Is = 91, 3078
+            MsgBox "請再按一次!", vbCritical
+            'access.Application.Quit
+            d.Quit
+            End
+        Case Else
+            MsgBox Err.Number & ":" & Err.Description, vbExclamation
+            Resume
+    End Select
 End Sub
 
 Sub 指定5字數詞頻()     '2002/11/15
-On Error GoTo 錯誤處理
-Dim wrong As Long, phra As Long, phras As String, phralh As String
-Dim StTime As Date, EndTime As Date
-Dim hfspace As Long
-Options.SaveInterval = 0 '取消自動儲存
-Set d = CreateObject("access.application")
-d.UserControl = True
-d.OpenCurrentDatabase "d:\千慮一得齋\書籍資料\詞頻.mdb", False
-d.docmd.SelectObject d.acTable, "詞頻表", True
-'d.Visible = True '檢查用
-Set db = d.CurrentDb
-Set rst = db.OpenRecordset("詞頻表", dbOpenDynaset)
-If rst.RecordCount > 0 Then '要獲得全部的筆數須用MoveLast但此只需判斷有沒有原先的記錄即可!
-'rst打開以後只會取得第一筆記錄!
-'    db.Execute "DELETE 字頻表.* FROM 字頻表"
-    db.Execute "DELETE * FROM 詞頻表"
-End If
-StTime = Time
-With ActiveDocument
-    For phra = 1 To .Characters.Count
-        If phra + 4 <= .Characters.Count Then _
-            phras = .Characters(phra) & .Characters(phra + 1) & _
-                    .Characters(phra + 2) & .Characters(phra + 3) & _
-                    .Characters(phra + 4)
-        If Len(phras) > 1 And right(phras, 1) = " " Then
-            hfspace = hfspace + 1 '計次
-            GoTo 11 '字串右邊是半形空格時,AccessUpdate時會銷去,且於詞彙亦無意意,故不計!
-        End If
-        '直接進入下一個字串比對
-        wrong = wrong + 1 '檢視用!
-'        If wrong Mod 29688 = 0 Then '到29688時會產生OLE沒有回應的錯誤,故在此歇會兒
-'            MsgBox "請檢查!!"
-''        ElseIf wrong = 49761 Then
-''            MsgBox "請檢查!!"
-'        End If
-        With rst
-            .FindFirst "詞彙 like '" & phras & "'"
-            If .NoMatch Then
-                .AddNew
-                rst("詞彙") = phras
-'                rst("次數") = 1'預設值已定為1
-                .Update 'dbUpdateBatch, True
-            Else
-                .edit
-                rst("次數") = rst("次數") + 1
-                .Update
+    On Error GoTo 錯誤處理
+    Dim wrong As Long, phra As Long, phras As String, phralh As String
+    Dim StTime As Date, EndTime As Date
+    Dim hfspace As Long
+    Options.SaveInterval = 0 '取消自動儲存
+    Set d = CreateObject("access.application")
+    d.UserControl = True
+    d.OpenCurrentDatabase "d:\千慮一得齋\書籍資料\詞頻.mdb", False
+    d.docmd.SelectObject d.acTable, "詞頻表", True
+    'd.Visible = True '檢查用
+    Set db = d.CurrentDb
+    Set rst = db.OpenRecordset("詞頻表", dbOpenDynaset)
+    If rst.RecordCount > 0 Then '要獲得全部的筆數須用MoveLast但此只需判斷有沒有原先的記錄即可!
+    'rst打開以後只會取得第一筆記錄!
+    '    db.Execute "DELETE 字頻表.* FROM 字頻表"
+        db.Execute "DELETE * FROM 詞頻表"
+    End If
+    StTime = Time
+    With ActiveDocument
+        For phra = 1 To .Characters.Count
+            If phra + 4 <= .Characters.Count Then _
+                phras = .Characters(phra) & .Characters(phra + 1) & _
+                        .Characters(phra + 2) & .Characters(phra + 3) & _
+                        .Characters(phra + 4)
+            If Len(phras) > 1 And Right(phras, 1) = " " Then
+                hfspace = hfspace + 1 '計次
+                GoTo 11 '字串右邊是半形空格時,AccessUpdate時會銷去,且於詞彙亦無意意,故不計!
             End If
-        End With
-11  Next phra
-    EndTime = Time
-    AppActivate "Microsoft word"
-    MsgBox "統計完成!!" & vbCr & "(※共執行了" & wrong & "次的檢查※)" _
-        & "詞彙右邊半形空格凡" & hfspace & "次,忽略不計!" _
-        & vbCr & "※耗時:" & Format(EndTime - StTime, "n分s秒") & "※" _
-        & vbCr & "字元數=" & .Characters.Count
-End With
-If MsgBox("要即刻檢視結果嗎?", vbYesNo + vbQuestion) = vbYes Then
-'    Set d = GetObject("d:\千慮一得齋\書籍資料\詞頻.mdb")
-    AppActivate "Microsoft access"
+            '直接進入下一個字串比對
+            wrong = wrong + 1 '檢視用!
+    '        If wrong Mod 29688 = 0 Then '到29688時會產生OLE沒有回應的錯誤,故在此歇會兒
+    '            MsgBox "請檢查!!"
+    ''        ElseIf wrong = 49761 Then
+    ''            MsgBox "請檢查!!"
+    '        End If
+            With rst
+                .FindFirst "詞彙 like '" & phras & "'"
+                If .NoMatch Then
+                    .AddNew
+                    rst("詞彙") = phras
+    '                rst("次數") = 1'預設值已定為1
+                    .Update 'dbUpdateBatch, True
+                Else
+                    .edit
+                    rst("次數") = rst("次數") + 1
+                    .Update
+                End If
+            End With
+11      Next phra
+        EndTime = Time
+        AppActivate "Microsoft word"
+        MsgBox "統計完成!!" & vbCr & "(※共執行了" & wrong & "次的檢查※)" _
+            & "詞彙右邊半形空格凡" & hfspace & "次,忽略不計!" _
+            & vbCr & "※耗時:" & Format(EndTime - StTime, "n分s秒") & "※" _
+            & vbCr & "字元數=" & .Characters.Count
+    End With
+    If MsgBox("要即刻檢視結果嗎?", vbYesNo + vbQuestion) = vbYes Then
+    '    Set d = GetObject("d:\千慮一得齋\書籍資料\詞頻.mdb")
+        AppActivate "Microsoft access"
+        d.docmd.OpenTable "詞頻表", , d.acReadOnly
+        d.docmd.Maximize
+    End If
     d.docmd.OpenTable "詞頻表", , d.acReadOnly
     d.docmd.Maximize
-End If
-d.docmd.OpenTable "詞頻表", , d.acReadOnly
-d.docmd.Maximize
-rst.Close: db.Close: Set d = Nothing
-Options.SaveInterval = 10 '恢復自動儲存
-End '用Exit Sub無法每次關閉Access
+    rst.Close: db.Close: Set d = Nothing
+    Options.SaveInterval = 10 '恢復自動儲存
+    End '用Exit Sub無法每次關閉Access
 錯誤處理:
-Select Case Err.Number '主索引值重複
-    Case Is = 91, 3078
-        MsgBox "請再按一次!", vbCritical
-        'access.Application.Quit
-        d.Quit
-        End
-    Case Else
-        MsgBox Err.Number & ":" & Err.Description, vbExclamation
-        Resume
-End Select
+    Select Case Err.Number '主索引值重複
+        Case Is = 91, 3078
+            MsgBox "請再按一次!", vbCritical
+            'access.Application.Quit
+            d.Quit
+            End
+        Case Else
+            MsgBox Err.Number & ":" & Err.Description, vbExclamation
+            Resume
+    End Select
 End Sub
 Sub 指定4字數詞頻()       '2002/11/15
-On Error GoTo 錯誤處理
-Dim wrong As Long, phra As Long, phras As String, phralh As String
-Dim StTime As Date, EndTime As Date
-Dim hfspace As Long
-Options.SaveInterval = 0 '取消自動儲存
-Set d = CreateObject("access.application")
-d.UserControl = True
-d.OpenCurrentDatabase "d:\千慮一得齋\書籍資料\詞頻.mdb", False
-d.docmd.SelectObject d.acTable, "詞頻表", True
-'d.Visible = True '檢查用
-Set db = d.CurrentDb
-Set rst = db.OpenRecordset("詞頻表", dbOpenDynaset)
-If rst.RecordCount > 0 Then '要獲得全部的筆數須用MoveLast但此只需判斷有沒有原先的記錄即可!
-'rst打開以後只會取得第一筆記錄!
-'    db.Execute "DELETE 字頻表.* FROM 字頻表"
-    db.Execute "DELETE * FROM 詞頻表"
-End If
-StTime = Time
-With ActiveDocument
-    For phra = 1 To .Characters.Count
-        If phra + 3 <= .Characters.Count Then _
-            phras = .Characters(phra) & .Characters(phra + 1) & _
-                    .Characters(phra + 2) & .Characters(phra + 3)
-        If Len(phras) > 1 And right(phras, 1) = " " Then
-            hfspace = hfspace + 1 '計次
-            GoTo 11 '字串右邊是半形空格時,AccessUpdate時會銷去,且於詞彙亦無意意,故不計!
-        End If
-        '直接進入下一個字串比對
-        wrong = wrong + 1 '檢視用!
-'        If wrong Mod 29688 = 0 Then '到29688時會產生OLE沒有回應的錯誤,故在此歇會兒
-'            MsgBox "請檢查!!"
-''        ElseIf wrong = 49761 Then
-''            MsgBox "請檢查!!"
-'        End If
-        With rst
-            .FindFirst "詞彙 like '" & phras & "'"
-            If .NoMatch Then
-                .AddNew
-                rst("詞彙") = phras
-'                rst("次數") = 1'預設值已定為1
-                .Update 'dbUpdateBatch, True
-            Else
-                .edit
-                rst("次數") = rst("次數") + 1
-                .Update
+    On Error GoTo 錯誤處理
+    Dim wrong As Long, phra As Long, phras As String, phralh As String
+    Dim StTime As Date, EndTime As Date
+    Dim hfspace As Long
+    Options.SaveInterval = 0 '取消自動儲存
+    Set d = CreateObject("access.application")
+    d.UserControl = True
+    d.OpenCurrentDatabase "d:\千慮一得齋\書籍資料\詞頻.mdb", False
+    d.docmd.SelectObject d.acTable, "詞頻表", True
+    'd.Visible = True '檢查用
+    Set db = d.CurrentDb
+    Set rst = db.OpenRecordset("詞頻表", dbOpenDynaset)
+    If rst.RecordCount > 0 Then '要獲得全部的筆數須用MoveLast但此只需判斷有沒有原先的記錄即可!
+    'rst打開以後只會取得第一筆記錄!
+    '    db.Execute "DELETE 字頻表.* FROM 字頻表"
+        db.Execute "DELETE * FROM 詞頻表"
+    End If
+    StTime = Time
+    With ActiveDocument
+        For phra = 1 To .Characters.Count
+            If phra + 3 <= .Characters.Count Then _
+                phras = .Characters(phra) & .Characters(phra + 1) & _
+                        .Characters(phra + 2) & .Characters(phra + 3)
+            If Len(phras) > 1 And Right(phras, 1) = " " Then
+                hfspace = hfspace + 1 '計次
+                GoTo 11 '字串右邊是半形空格時,AccessUpdate時會銷去,且於詞彙亦無意意,故不計!
             End If
-        End With
-11  Next phra
-    EndTime = Time
-    AppActivate "Microsoft word"
-    MsgBox "統計完成!!" & vbCr & "(※共執行了" & wrong & "次的檢查※)" _
-        & "詞彙右邊半形空格凡" & hfspace & "次,忽略不計!" _
-        & vbCr & "※耗時:" & Format(EndTime - StTime, "n分s秒") & "※" _
-        & vbCr & "字元數=" & .Characters.Count
-End With
-If MsgBox("要即刻檢視結果嗎?", vbYesNo + vbQuestion) = vbYes Then
-'    Set d = GetObject("d:\千慮一得齋\書籍資料\詞頻.mdb")
-    AppActivate "Microsoft access"
+            '直接進入下一個字串比對
+            wrong = wrong + 1 '檢視用!
+    '        If wrong Mod 29688 = 0 Then '到29688時會產生OLE沒有回應的錯誤,故在此歇會兒
+    '            MsgBox "請檢查!!"
+    ''        ElseIf wrong = 49761 Then
+    ''            MsgBox "請檢查!!"
+    '        End If
+            With rst
+                .FindFirst "詞彙 like '" & phras & "'"
+                If .NoMatch Then
+                    .AddNew
+                    rst("詞彙") = phras
+    '                rst("次數") = 1'預設值已定為1
+                    .Update 'dbUpdateBatch, True
+                Else
+                    .edit
+                    rst("次數") = rst("次數") + 1
+                    .Update
+                End If
+            End With
+11      Next phra
+        EndTime = Time
+        AppActivate "Microsoft word"
+        MsgBox "統計完成!!" & vbCr & "(※共執行了" & wrong & "次的檢查※)" _
+            & "詞彙右邊半形空格凡" & hfspace & "次,忽略不計!" _
+            & vbCr & "※耗時:" & Format(EndTime - StTime, "n分s秒") & "※" _
+            & vbCr & "字元數=" & .Characters.Count
+    End With
+    If MsgBox("要即刻檢視結果嗎?", vbYesNo + vbQuestion) = vbYes Then
+    '    Set d = GetObject("d:\千慮一得齋\書籍資料\詞頻.mdb")
+        AppActivate "Microsoft access"
+        d.docmd.OpenTable "詞頻表", , d.acReadOnly
+        d.docmd.Maximize
+    End If
     d.docmd.OpenTable "詞頻表", , d.acReadOnly
     d.docmd.Maximize
-End If
-d.docmd.OpenTable "詞頻表", , d.acReadOnly
-d.docmd.Maximize
-rst.Close: db.Close: Set d = Nothing
-Options.SaveInterval = 10 '恢復自動儲存
-End '用Exit Sub無法每次關閉Access
+    rst.Close: db.Close: Set d = Nothing
+    Options.SaveInterval = 10 '恢復自動儲存
+    End '用Exit Sub無法每次關閉Access
 錯誤處理:
-Select Case Err.Number '主索引值重複
-    Case Is = 91, 3078
-        MsgBox "請再按一次!", vbCritical
-        'access.Application.Quit
-        d.Quit
-        End
-    Case Else
-        MsgBox Err.Number & ":" & Err.Description, vbExclamation
-        Resume
-End Select
+    Select Case Err.Number '主索引值重複
+        Case Is = 91, 3078
+            MsgBox "請再按一次!", vbCritical
+            'access.Application.Quit
+            d.Quit
+            End
+        Case Else
+            MsgBox Err.Number & ":" & Err.Description, vbExclamation
+            Resume
+    End Select
 End Sub
 
 Sub 指定3字數詞頻()      '2002/11/15
-On Error GoTo 錯誤處理
-Dim wrong As Long, phra As Long, phras As String, phralh As String
-Dim StTime As Date, EndTime As Date
-Dim hfspace As Long
-Options.SaveInterval = 0 '取消自動儲存
-Set d = CreateObject("access.application")
-d.UserControl = True
-d.OpenCurrentDatabase "d:\千慮一得齋\書籍資料\詞頻.mdb", False
-d.docmd.SelectObject d.acTable, "詞頻表", True
-'d.Visible = True '檢查用
-Set db = d.CurrentDb
-Set rst = db.OpenRecordset("詞頻表", dbOpenDynaset)
-If rst.RecordCount > 0 Then '要獲得全部的筆數須用MoveLast但此只需判斷有沒有原先的記錄即可!
-'rst打開以後只會取得第一筆記錄!
-'    db.Execute "DELETE 字頻表.* FROM 字頻表"
-    db.Execute "DELETE * FROM 詞頻表"
-End If
-StTime = Time
-With ActiveDocument
-    For phra = 1 To .Characters.Count
-        If phra + 2 <= .Characters.Count Then _
-            phras = .Characters(phra) & .Characters(phra + 1) & _
-                    .Characters(phra + 2)
-        If Len(phras) > 1 And right(phras, 1) = " " Then
-            hfspace = hfspace + 1 '計次
-            GoTo 11 '字串右邊是半形空格時,AccessUpdate時會銷去,且於詞彙亦無意意,故不計!
-        End If
-        '直接進入下一個字串比對
-        wrong = wrong + 1 '檢視用!
-'        If wrong Mod 29688 = 0 Then '到29688時會產生OLE沒有回應的錯誤,故在此歇會兒
-'            MsgBox "請檢查!!"
-''        ElseIf wrong = 49761 Then
-''            MsgBox "請檢查!!"
-'        End If
-        With rst
-            .FindFirst "詞彙 like '" & phras & "'"
-            If .NoMatch Then
-                .AddNew
-                rst("詞彙") = phras
-'                rst("次數") = 1'預設值已定為1
-                .Update 'dbUpdateBatch, True
-            Else
-                .edit
-                rst("次數") = rst("次數") + 1
-                .Update
+    On Error GoTo 錯誤處理
+    Dim wrong As Long, phra As Long, phras As String, phralh As String
+    Dim StTime As Date, EndTime As Date
+    Dim hfspace As Long
+    Options.SaveInterval = 0 '取消自動儲存
+    Set d = CreateObject("access.application")
+    d.UserControl = True
+    d.OpenCurrentDatabase "d:\千慮一得齋\書籍資料\詞頻.mdb", False
+    d.docmd.SelectObject d.acTable, "詞頻表", True
+    'd.Visible = True '檢查用
+    Set db = d.CurrentDb
+    Set rst = db.OpenRecordset("詞頻表", dbOpenDynaset)
+    If rst.RecordCount > 0 Then '要獲得全部的筆數須用MoveLast但此只需判斷有沒有原先的記錄即可!
+    'rst打開以後只會取得第一筆記錄!
+    '    db.Execute "DELETE 字頻表.* FROM 字頻表"
+        db.Execute "DELETE * FROM 詞頻表"
+    End If
+    StTime = Time
+    With ActiveDocument
+        For phra = 1 To .Characters.Count
+            If phra + 2 <= .Characters.Count Then _
+                phras = .Characters(phra) & .Characters(phra + 1) & _
+                        .Characters(phra + 2)
+            If Len(phras) > 1 And Right(phras, 1) = " " Then
+                hfspace = hfspace + 1 '計次
+                GoTo 11 '字串右邊是半形空格時,AccessUpdate時會銷去,且於詞彙亦無意意,故不計!
             End If
-        End With
-11  Next phra
-    EndTime = Time
-    AppActivate "Microsoft word"
-    MsgBox "統計完成!!" & vbCr & "(※共執行了" & wrong & "次的檢查※)" _
-        & "詞彙右邊半形空格凡" & hfspace & "次,忽略不計!" _
-        & vbCr & "※耗時:" & Format(EndTime - StTime, "n分s秒") & "※" _
-        & vbCr & "字元數=" & .Characters.Count
-End With
-If MsgBox("要即刻檢視結果嗎?", vbYesNo + vbQuestion) = vbYes Then
-'    Set d = GetObject("d:\千慮一得齋\書籍資料\詞頻.mdb")
-    AppActivate "Microsoft access"
+            '直接進入下一個字串比對
+            wrong = wrong + 1 '檢視用!
+    '        If wrong Mod 29688 = 0 Then '到29688時會產生OLE沒有回應的錯誤,故在此歇會兒
+    '            MsgBox "請檢查!!"
+    ''        ElseIf wrong = 49761 Then
+    ''            MsgBox "請檢查!!"
+    '        End If
+            With rst
+                .FindFirst "詞彙 like '" & phras & "'"
+                If .NoMatch Then
+                    .AddNew
+                    rst("詞彙") = phras
+    '                rst("次數") = 1'預設值已定為1
+                    .Update 'dbUpdateBatch, True
+                Else
+                    .edit
+                    rst("次數") = rst("次數") + 1
+                    .Update
+                End If
+            End With
+11      Next phra
+        EndTime = Time
+        AppActivate "Microsoft word"
+        MsgBox "統計完成!!" & vbCr & "(※共執行了" & wrong & "次的檢查※)" _
+            & "詞彙右邊半形空格凡" & hfspace & "次,忽略不計!" _
+            & vbCr & "※耗時:" & Format(EndTime - StTime, "n分s秒") & "※" _
+            & vbCr & "字元數=" & .Characters.Count
+    End With
+    If MsgBox("要即刻檢視結果嗎?", vbYesNo + vbQuestion) = vbYes Then
+    '    Set d = GetObject("d:\千慮一得齋\書籍資料\詞頻.mdb")
+        AppActivate "Microsoft access"
+        d.docmd.OpenTable "詞頻表", , d.acReadOnly
+        d.docmd.Maximize
+    End If
     d.docmd.OpenTable "詞頻表", , d.acReadOnly
     d.docmd.Maximize
-End If
-d.docmd.OpenTable "詞頻表", , d.acReadOnly
-d.docmd.Maximize
-rst.Close: db.Close: Set d = Nothing
-Options.SaveInterval = 10 '恢復自動儲存
-End '用Exit Sub無法每次關閉Access
+    rst.Close: db.Close: Set d = Nothing
+    Options.SaveInterval = 10 '恢復自動儲存
+    End '用Exit Sub無法每次關閉Access
 錯誤處理:
-Select Case Err.Number '主索引值重複
-    Case Is = 91, 3078
-        MsgBox "請再按一次!", vbCritical
-        'access.Application.Quit
-        d.Quit
-        End
-    Case Else
-        MsgBox Err.Number & ":" & Err.Description, vbExclamation
-        Resume
-End Select
+    Select Case Err.Number '主索引值重複
+        Case Is = 91, 3078
+            MsgBox "請再按一次!", vbCritical
+            'access.Application.Quit
+            d.Quit
+            End
+        Case Else
+            MsgBox Err.Number & ":" & Err.Description, vbExclamation
+            Resume
+    End Select
 End Sub
 
 Sub 指定2字數詞頻()       '2002/11/15
-On Error GoTo 錯誤處理
-Dim wrong As Long, phra As Long, phras As String, phralh As String
-Dim StTime As Date, EndTime As Date
-Dim hfspace As Long
-Options.SaveInterval = 0 '取消自動儲存
-Set d = CreateObject("access.application")
-d.UserControl = True
-d.OpenCurrentDatabase "d:\千慮一得齋\書籍資料\詞頻.mdb", False
-d.docmd.SelectObject d.acTable, "詞頻表", True
-'d.Visible = True '檢查用
-Set db = d.CurrentDb
-Set rst = db.OpenRecordset("詞頻表", dbOpenDynaset)
-If rst.RecordCount > 0 Then '要獲得全部的筆數須用MoveLast但此只需判斷有沒有原先的記錄即可!
-'rst打開以後只會取得第一筆記錄!
-'    db.Execute "DELETE 字頻表.* FROM 字頻表"
-    db.Execute "DELETE * FROM 詞頻表"
-End If
-StTime = Time
-With ActiveDocument
-    For phra = 1 To .Characters.Count
-        If phra + 1 <= .Characters.Count Then _
-            phras = .Characters(phra) & .Characters(phra + 1)
-        If Len(phras) > 1 And right(phras, 1) = " " Then
-            hfspace = hfspace + 1 '計次
-            GoTo 11 '字串右邊是半形空格時,AccessUpdate時會銷去,且於詞彙亦無意意,故不計!
-        End If
-        '直接進入下一個字串比對
-        wrong = wrong + 1 '檢視用!
-'        If wrong Mod 29688 = 0 Then '到29688時會產生OLE沒有回應的錯誤,故在此歇會兒
-'            MsgBox "請檢查!!"
-''        ElseIf wrong = 49761 Then
-''            MsgBox "請檢查!!"
-'        End If
-        With rst
-            .FindFirst "詞彙 like '" & phras & "'"
-            If .NoMatch Then
-                .AddNew
-                rst("詞彙") = phras
-'                rst("次數") = 1'預設值已定為1
-                .Update 'dbUpdateBatch, True
-            Else
-                .edit
-                rst("次數") = rst("次數") + 1
-                .Update
+    On Error GoTo 錯誤處理
+    Dim wrong As Long, phra As Long, phras As String, phralh As String
+    Dim StTime As Date, EndTime As Date
+    Dim hfspace As Long
+    Options.SaveInterval = 0 '取消自動儲存
+    Set d = CreateObject("access.application")
+    d.UserControl = True
+    d.OpenCurrentDatabase "d:\千慮一得齋\書籍資料\詞頻.mdb", False
+    d.docmd.SelectObject d.acTable, "詞頻表", True
+    'd.Visible = True '檢查用
+    Set db = d.CurrentDb
+    Set rst = db.OpenRecordset("詞頻表", dbOpenDynaset)
+    If rst.RecordCount > 0 Then '要獲得全部的筆數須用MoveLast但此只需判斷有沒有原先的記錄即可!
+    'rst打開以後只會取得第一筆記錄!
+    '    db.Execute "DELETE 字頻表.* FROM 字頻表"
+        db.Execute "DELETE * FROM 詞頻表"
+    End If
+    StTime = Time
+    With ActiveDocument
+        For phra = 1 To .Characters.Count
+            If phra + 1 <= .Characters.Count Then _
+                phras = .Characters(phra) & .Characters(phra + 1)
+            If Len(phras) > 1 And Right(phras, 1) = " " Then
+                hfspace = hfspace + 1 '計次
+                GoTo 11 '字串右邊是半形空格時,AccessUpdate時會銷去,且於詞彙亦無意意,故不計!
             End If
-        End With
-11  Next phra
-    EndTime = Time
-    AppActivate "Microsoft word"
-    MsgBox "統計完成!!" & vbCr & "(※共執行了" & wrong & "次的檢查※)" _
-        & "詞彙右邊半形空格凡" & hfspace & "次,忽略不計!" _
-        & vbCr & "※耗時:" & Format(EndTime - StTime, "n分s秒") & "※" _
-        & vbCr & "字元數=" & .Characters.Count
-End With
-If MsgBox("要即刻檢視結果嗎?", vbYesNo + vbQuestion) = vbYes Then
-'    Set d = GetObject("d:\千慮一得齋\書籍資料\詞頻.mdb")
-    AppActivate "Microsoft access"
+            '直接進入下一個字串比對
+            wrong = wrong + 1 '檢視用!
+    '        If wrong Mod 29688 = 0 Then '到29688時會產生OLE沒有回應的錯誤,故在此歇會兒
+    '            MsgBox "請檢查!!"
+    ''        ElseIf wrong = 49761 Then
+    ''            MsgBox "請檢查!!"
+    '        End If
+            With rst
+                .FindFirst "詞彙 like '" & phras & "'"
+                If .NoMatch Then
+                    .AddNew
+                    rst("詞彙") = phras
+    '                rst("次數") = 1'預設值已定為1
+                    .Update 'dbUpdateBatch, True
+                Else
+                    .edit
+                    rst("次數") = rst("次數") + 1
+                    .Update
+                End If
+            End With
+11      Next phra
+        EndTime = Time
+        AppActivate "Microsoft word"
+        MsgBox "統計完成!!" & vbCr & "(※共執行了" & wrong & "次的檢查※)" _
+            & "詞彙右邊半形空格凡" & hfspace & "次,忽略不計!" _
+            & vbCr & "※耗時:" & Format(EndTime - StTime, "n分s秒") & "※" _
+            & vbCr & "字元數=" & .Characters.Count
+    End With
+    If MsgBox("要即刻檢視結果嗎?", vbYesNo + vbQuestion) = vbYes Then
+    '    Set d = GetObject("d:\千慮一得齋\書籍資料\詞頻.mdb")
+        AppActivate "Microsoft access"
+        d.docmd.OpenTable "詞頻表", , d.acReadOnly
+        d.docmd.Maximize
+    End If
     d.docmd.OpenTable "詞頻表", , d.acReadOnly
     d.docmd.Maximize
-End If
-d.docmd.OpenTable "詞頻表", , d.acReadOnly
-d.docmd.Maximize
-rst.Close: db.Close: Set d = Nothing
-Options.SaveInterval = 10 '恢復自動儲存
-End '用Exit Sub無法每次關閉Access
+    rst.Close: db.Close: Set d = Nothing
+    Options.SaveInterval = 10 '恢復自動儲存
+    End '用Exit Sub無法每次關閉Access
 錯誤處理:
-Select Case Err.Number '主索引值重複
-    Case Is = 91, 3078
-        MsgBox "請再按一次!", vbCritical
-        'access.Application.Quit
-        d.Quit
-        End
-    Case Else
-        MsgBox Err.Number & ":" & Err.Description, vbExclamation
-        Resume
-End Select
+    Select Case Err.Number '主索引值重複
+        Case Is = 91, 3078
+            MsgBox "請再按一次!", vbCritical
+            'access.Application.Quit
+            d.Quit
+            End
+        Case Else
+            MsgBox Err.Number & ":" & Err.Description, vbExclamation
+            Resume
+    End Select
 End Sub
 
 Sub 指定1字數詞頻()        '2002/11/15
-On Error GoTo 錯誤處理
-Dim wrong As Long, phra As Long, phras As String, phralh As String
-Dim StTime As Date, EndTime As Date
-Dim hfspace As Long
-Options.SaveInterval = 0 '取消自動儲存
-Set d = CreateObject("access.application")
-d.UserControl = True
-d.OpenCurrentDatabase "d:\千慮一得齋\書籍資料\詞頻.mdb", False
-d.docmd.SelectObject d.acTable, "詞頻表", True
-'d.Visible = True '檢查用
-Set db = d.CurrentDb
-Set rst = db.OpenRecordset("詞頻表", dbOpenDynaset)
-If rst.RecordCount > 0 Then '要獲得全部的筆數須用MoveLast但此只需判斷有沒有原先的記錄即可!
-'rst打開以後只會取得第一筆記錄!
-'    db.Execute "DELETE 字頻表.* FROM 字頻表"
-    db.Execute "DELETE * FROM 詞頻表"
-End If
-StTime = Time
-With ActiveDocument
-    For phra = 1 To .Characters.Count
-            phras = .Characters(phra)
-        If Len(phras) > 1 And right(phras, 1) = " " Then
-            hfspace = hfspace + 1 '計次
-            GoTo 11 '字串右邊是半形空格時,AccessUpdate時會銷去,且於詞彙亦無意意,故不計!
-        End If
-        '直接進入下一個字串比對
-        wrong = wrong + 1 '檢視用!
-'        If wrong Mod 29688 = 0 Then '到29688時會產生OLE沒有回應的錯誤,故在此歇會兒
-'            MsgBox "請檢查!!"
-''        ElseIf wrong = 49761 Then
-''            MsgBox "請檢查!!"
-'        End If
-        With rst
-            .FindFirst "詞彙 like '" & phras & "'"
-            If .NoMatch Then
-                .AddNew
-                rst("詞彙") = phras
-'                rst("次數") = 1'預設值已定為1
-                .Update 'dbUpdateBatch, True
-            Else
-                .edit
-                rst("次數") = rst("次數") + 1
-                .Update
+    On Error GoTo 錯誤處理
+    Dim wrong As Long, phra As Long, phras As String, phralh As String
+    Dim StTime As Date, EndTime As Date
+    Dim hfspace As Long
+    Options.SaveInterval = 0 '取消自動儲存
+    Set d = CreateObject("access.application")
+    d.UserControl = True
+    d.OpenCurrentDatabase "d:\千慮一得齋\書籍資料\詞頻.mdb", False
+    d.docmd.SelectObject d.acTable, "詞頻表", True
+    'd.Visible = True '檢查用
+    Set db = d.CurrentDb
+    Set rst = db.OpenRecordset("詞頻表", dbOpenDynaset)
+    If rst.RecordCount > 0 Then '要獲得全部的筆數須用MoveLast但此只需判斷有沒有原先的記錄即可!
+    'rst打開以後只會取得第一筆記錄!
+    '    db.Execute "DELETE 字頻表.* FROM 字頻表"
+        db.Execute "DELETE * FROM 詞頻表"
+    End If
+    StTime = Time
+    With ActiveDocument
+        For phra = 1 To .Characters.Count
+                phras = .Characters(phra)
+            If Len(phras) > 1 And Right(phras, 1) = " " Then
+                hfspace = hfspace + 1 '計次
+                GoTo 11 '字串右邊是半形空格時,AccessUpdate時會銷去,且於詞彙亦無意意,故不計!
             End If
-        End With
-11  Next phra
-    EndTime = Time
-    AppActivate "Microsoft word"
-    MsgBox "統計完成!!" & vbCr & "(※共執行了" & wrong & "次的檢查※)" _
-        & "詞彙右邊半形空格凡" & hfspace & "次,忽略不計!" _
-        & vbCr & "※耗時:" & Format(EndTime - StTime, "n分s秒") & "※" _
-        & vbCr & "字元數=" & .Characters.Count
-End With
-If MsgBox("要即刻檢視結果嗎?", vbYesNo + vbQuestion) = vbYes Then
-'    Set d = GetObject("d:\千慮一得齋\書籍資料\詞頻.mdb")
-    AppActivate "Microsoft access"
+            '直接進入下一個字串比對
+            wrong = wrong + 1 '檢視用!
+    '        If wrong Mod 29688 = 0 Then '到29688時會產生OLE沒有回應的錯誤,故在此歇會兒
+    '            MsgBox "請檢查!!"
+    ''        ElseIf wrong = 49761 Then
+    ''            MsgBox "請檢查!!"
+    '        End If
+            With rst
+                .FindFirst "詞彙 like '" & phras & "'"
+                If .NoMatch Then
+                    .AddNew
+                    rst("詞彙") = phras
+    '                rst("次數") = 1'預設值已定為1
+                    .Update 'dbUpdateBatch, True
+                Else
+                    .edit
+                    rst("次數") = rst("次數") + 1
+                    .Update
+                End If
+            End With
+11      Next phra
+        EndTime = Time
+        AppActivate "Microsoft word"
+        MsgBox "統計完成!!" & vbCr & "(※共執行了" & wrong & "次的檢查※)" _
+            & "詞彙右邊半形空格凡" & hfspace & "次,忽略不計!" _
+            & vbCr & "※耗時:" & Format(EndTime - StTime, "n分s秒") & "※" _
+            & vbCr & "字元數=" & .Characters.Count
+    End With
+    If MsgBox("要即刻檢視結果嗎?", vbYesNo + vbQuestion) = vbYes Then
+    '    Set d = GetObject("d:\千慮一得齋\書籍資料\詞頻.mdb")
+        AppActivate "Microsoft access"
+        d.docmd.OpenTable "詞頻表", , d.acReadOnly
+        d.docmd.Maximize
+    End If
     d.docmd.OpenTable "詞頻表", , d.acReadOnly
     d.docmd.Maximize
-End If
-d.docmd.OpenTable "詞頻表", , d.acReadOnly
-d.docmd.Maximize
-rst.Close: db.Close: Set d = Nothing
-Options.SaveInterval = 10 '恢復自動儲存
-End '用Exit Sub無法每次關閉Access
+    rst.Close: db.Close: Set d = Nothing
+    Options.SaveInterval = 10 '恢復自動儲存
+    End '用Exit Sub無法每次關閉Access
 錯誤處理:
-Select Case Err.Number '主索引值重複
-    Case Is = 91, 3078
-        MsgBox "請再按一次!", vbCritical
-        'access.Application.Quit
-        d.Quit
-        End
-    Case Else
-        MsgBox Err.Number & ":" & Err.Description, vbExclamation
-        Resume
-End Select
+    Select Case Err.Number '主索引值重複
+        Case Is = 91, 3078
+            MsgBox "請再按一次!", vbCritical
+            'access.Application.Quit
+            d.Quit
+            End
+        Case Else
+            MsgBox Err.Number & ":" & Err.Description, vbExclamation
+            Resume
+    End Select
 End Sub
 
 Sub 指定7字數詞頻()      '2002/11/15'以此為例,可作為預先限定字數的各個程序(本例為7個字的查詢)
-On Error GoTo 錯誤處理
-Dim wrong As Long, phra As Long, phras As String, phralh As String
-Dim StTime As Date, EndTime As Date
-Dim hfspace As Long
-'phralh = InputBox("請用阿拉伯數字指定詞的組成字數,最多字數為「11」!", "指定詞彙字數", "2")
-'If phralh = "" Or Not IsNumeric(phralh) Then Exit Sub
-'If CByte(phralh) > 11 Or CByte(phralh) < 1 Then Exit Sub
-Options.SaveInterval = 0 '取消自動儲存
-Set d = CreateObject("access.application")
-d.UserControl = True
-d.OpenCurrentDatabase "d:\千慮一得齋\書籍資料\詞頻.mdb", False
-d.docmd.SelectObject d.acTable, "詞頻表", True
-'d.Visible = True '檢查用
-Set db = d.CurrentDb
-Set rst = db.OpenRecordset("詞頻表", dbOpenDynaset)
-If rst.RecordCount > 0 Then '要獲得全部的筆數須用MoveLast但此只需判斷有沒有原先的記錄即可!
-'rst打開以後只會取得第一筆記錄!
-'    db.Execute "DELETE 字頻表.* FROM 字頻表"
-    db.Execute "DELETE * FROM 詞頻表"
-End If
-StTime = Time
-With ActiveDocument
-    For phra = 1 To .Characters.Count
-        If phra + 6 <= .Characters.Count Then _
-            phras = .Characters(phra) & .Characters(phra + 1) & _
-                    .Characters(phra + 2) & .Characters(phra + 3) & _
-                    .Characters(phra + 4) & .Characters(phra + 5) & _
-                    .Characters(phra + 6)
-        If Len(phras) > 1 And right(phras, 1) = " " Then
-            hfspace = hfspace + 1 '計次
-            GoTo 11 '字串右邊是半形空格時,AccessUpdate時會銷去,且於詞彙亦無意意,故不計!
-        End If
-        '直接進入下一個字串比對
-        wrong = wrong + 1 '檢視用!
-'        If wrong Mod 29688 = 0 Then '到29688時會產生OLE沒有回應的錯誤,故在此歇會兒
-'            MsgBox "請檢查!!"
-''        ElseIf wrong = 49761 Then
-''            MsgBox "請檢查!!"
-'        End If
-        With rst
-            .FindFirst "詞彙 like '" & phras & "'"
-            If .NoMatch Then
-                .AddNew
-                rst("詞彙") = phras
-'                rst("次數") = 1'預設值已定為1
-                .Update 'dbUpdateBatch, True
-            Else
-                .edit
-                rst("次數") = rst("次數") + 1
-                .Update
+    On Error GoTo 錯誤處理
+    Dim wrong As Long, phra As Long, phras As String, phralh As String
+    Dim StTime As Date, EndTime As Date
+    Dim hfspace As Long
+    'phralh = InputBox("請用阿拉伯數字指定詞的組成字數,最多字數為「11」!", "指定詞彙字數", "2")
+    'If phralh = "" Or Not IsNumeric(phralh) Then Exit Sub
+    'If CByte(phralh) > 11 Or CByte(phralh) < 1 Then Exit Sub
+    Options.SaveInterval = 0 '取消自動儲存
+    Set d = CreateObject("access.application")
+    d.UserControl = True
+    d.OpenCurrentDatabase "d:\千慮一得齋\書籍資料\詞頻.mdb", False
+    d.docmd.SelectObject d.acTable, "詞頻表", True
+    'd.Visible = True '檢查用
+    Set db = d.CurrentDb
+    Set rst = db.OpenRecordset("詞頻表", dbOpenDynaset)
+    If rst.RecordCount > 0 Then '要獲得全部的筆數須用MoveLast但此只需判斷有沒有原先的記錄即可!
+    'rst打開以後只會取得第一筆記錄!
+    '    db.Execute "DELETE 字頻表.* FROM 字頻表"
+        db.Execute "DELETE * FROM 詞頻表"
+    End If
+    StTime = Time
+    With ActiveDocument
+        For phra = 1 To .Characters.Count
+            If phra + 6 <= .Characters.Count Then _
+                phras = .Characters(phra) & .Characters(phra + 1) & _
+                        .Characters(phra + 2) & .Characters(phra + 3) & _
+                        .Characters(phra + 4) & .Characters(phra + 5) & _
+                        .Characters(phra + 6)
+            If Len(phras) > 1 And Right(phras, 1) = " " Then
+                hfspace = hfspace + 1 '計次
+                GoTo 11 '字串右邊是半形空格時,AccessUpdate時會銷去,且於詞彙亦無意意,故不計!
             End If
-        End With
-11  Next phra
-    EndTime = Time
-    AppActivate "Microsoft word"
-    MsgBox "統計完成!!" & vbCr & "(※共執行了" & wrong & "次的檢查※)" _
-        & "詞彙右邊半形空格凡" & hfspace & "次,忽略不計!" _
-        & vbCr & "※耗時:" & Format(EndTime - StTime, "n分s秒") & "※" _
-        & vbCr & "字元數=" & .Characters.Count
-End With
-If MsgBox("要即刻檢視結果嗎?", vbYesNo + vbQuestion) = vbYes Then
-'    Set d = GetObject("d:\千慮一得齋\書籍資料\詞頻.mdb")
-    AppActivate "Microsoft access"
+            '直接進入下一個字串比對
+            wrong = wrong + 1 '檢視用!
+    '        If wrong Mod 29688 = 0 Then '到29688時會產生OLE沒有回應的錯誤,故在此歇會兒
+    '            MsgBox "請檢查!!"
+    ''        ElseIf wrong = 49761 Then
+    ''            MsgBox "請檢查!!"
+    '        End If
+            With rst
+                .FindFirst "詞彙 like '" & phras & "'"
+                If .NoMatch Then
+                    .AddNew
+                    rst("詞彙") = phras
+    '                rst("次數") = 1'預設值已定為1
+                    .Update 'dbUpdateBatch, True
+                Else
+                    .edit
+                    rst("次數") = rst("次數") + 1
+                    .Update
+                End If
+            End With
+11      Next phra
+        EndTime = Time
+        AppActivate "Microsoft word"
+        MsgBox "統計完成!!" & vbCr & "(※共執行了" & wrong & "次的檢查※)" _
+            & "詞彙右邊半形空格凡" & hfspace & "次,忽略不計!" _
+            & vbCr & "※耗時:" & Format(EndTime - StTime, "n分s秒") & "※" _
+            & vbCr & "字元數=" & .Characters.Count
+    End With
+    If MsgBox("要即刻檢視結果嗎?", vbYesNo + vbQuestion) = vbYes Then
+    '    Set d = GetObject("d:\千慮一得齋\書籍資料\詞頻.mdb")
+        AppActivate "Microsoft access"
+        d.docmd.OpenTable "詞頻表", , d.acReadOnly
+        d.docmd.Maximize
+    End If
     d.docmd.OpenTable "詞頻表", , d.acReadOnly
     d.docmd.Maximize
-End If
-d.docmd.OpenTable "詞頻表", , d.acReadOnly
-d.docmd.Maximize
-rst.Close: db.Close: Set d = Nothing
-Options.SaveInterval = 10 '恢復自動儲存
-End '用Exit Sub無法每次關閉Access
+    rst.Close: db.Close: Set d = Nothing
+    Options.SaveInterval = 10 '恢復自動儲存
+    End '用Exit Sub無法每次關閉Access
 錯誤處理:
-Select Case Err.Number '主索引值重複
-    Case Is = 91, 3078
-        MsgBox "請再按一次!", vbCritical
-        'access.Application.Quit
-        d.Quit
-        End
-    Case Else
-        MsgBox Err.Number & ":" & Err.Description, vbExclamation
-        Resume
-End Select
+    Select Case Err.Number '主索引值重複
+        Case Is = 91, 3078
+            MsgBox "請再按一次!", vbCritical
+            'access.Application.Quit
+            d.Quit
+            End
+        Case Else
+            MsgBox Err.Number & ":" & Err.Description, vbExclamation
+            Resume
+    End Select
 End Sub
 Sub 指定字數詞頻1() '2002/11/15'效能較慢!
-On Error GoTo 錯誤處理
-Dim wrong As Long, phra As Long, phras, phralh As String
-Dim StTime As Date, EndTime As Date
-Dim hfspace As Long
-Dim a1, i As Byte, j As Byte
-phralh = InputBox("請用阿拉伯數字指定詞的組成字數,最多字數為「255」!", "指定詞彙字數", "2")
-If phralh = "" Or Not IsNumeric(phralh) Then Exit Sub
-If CByte(phralh) > 255 Or CByte(phralh) < 1 Then Exit Sub
-Options.SaveInterval = 0 '取消自動儲存
-Set d = CreateObject("access.application")
-d.UserControl = True
-d.OpenCurrentDatabase "d:\千慮一得齋\書籍資料\詞頻.mdb", False
-d.docmd.SelectObject d.acTable, "詞頻表", True
-'d.Visible = True '檢查用
-Set db = d.CurrentDb
-Set rst = db.OpenRecordset("詞頻表", dbOpenDynaset)
-If rst.RecordCount > 0 Then '要獲得全部的筆數須用MoveLast但此只需判斷有沒有原先的記錄即可!
-'rst打開以後只會取得第一筆記錄!
-'    db.Execute "DELETE 字頻表.* FROM 字頻表"
-    db.Execute "DELETE * FROM 詞頻表"
-End If
-StTime = Time
-With ActiveDocument
-    For phra = 1 To .Characters.Count
-        j = CByte(phralh)
-        ReDim a1(1 To j) As String
-        If j > 1 Then
-            If phra + (phralh - 1) <= .Characters.Count Then
-                For j = 1 To j
-                    For i = 0 To j - 1
-                            a1(j) = a1(j) & .Characters(phra + i)
-                    Next i
-    '                    Debug.Print a1(j)
-                Next j
-                phras = a1(j - 1)
-            End If
-        Else
-            phras = .Characters(phra)
-        End If
-        If Len(phras) > 1 And right(phras, 1) = " " Then
-            hfspace = hfspace + 1 '計次
-            GoTo 11 '字串右邊是半形空格時,AccessUpdate時會銷去,且於詞彙亦無意意,故不計!
-        End If
-        '直接進入下一個字串比對
-        wrong = wrong + 1 '檢視用!
-'        If wrong Mod 29688 = 0 Then '到29688時會產生OLE沒有回應的錯誤,故在此歇會兒
-'            MsgBox "請檢查!!"
-''        ElseIf wrong = 49761 Then
-''            MsgBox "請檢查!!"
-'        End If
-        With rst
-            .FindFirst "詞彙 like '" & phras & "'"
-            If .NoMatch Then
-                .AddNew
-                rst("詞彙") = phras
-'                rst("次數") = 1'預設值已定為1
-                .Update 'dbUpdateBatch, True
+    On Error GoTo 錯誤處理
+    Dim wrong As Long, phra As Long, phras, phralh As String
+    Dim StTime As Date, EndTime As Date
+    Dim hfspace As Long
+    Dim a1, i As Byte, j As Byte
+    phralh = InputBox("請用阿拉伯數字指定詞的組成字數,最多字數為「255」!", "指定詞彙字數", "2")
+    If phralh = "" Or Not IsNumeric(phralh) Then Exit Sub
+    If CByte(phralh) > 255 Or CByte(phralh) < 1 Then Exit Sub
+    Options.SaveInterval = 0 '取消自動儲存
+    Set d = CreateObject("access.application")
+    d.UserControl = True
+    d.OpenCurrentDatabase "d:\千慮一得齋\書籍資料\詞頻.mdb", False
+    d.docmd.SelectObject d.acTable, "詞頻表", True
+    'd.Visible = True '檢查用
+    Set db = d.CurrentDb
+    Set rst = db.OpenRecordset("詞頻表", dbOpenDynaset)
+    If rst.RecordCount > 0 Then '要獲得全部的筆數須用MoveLast但此只需判斷有沒有原先的記錄即可!
+    'rst打開以後只會取得第一筆記錄!
+    '    db.Execute "DELETE 字頻表.* FROM 字頻表"
+        db.Execute "DELETE * FROM 詞頻表"
+    End If
+    StTime = Time
+    With ActiveDocument
+        For phra = 1 To .Characters.Count
+            j = CByte(phralh)
+            ReDim a1(1 To j) As String
+            If j > 1 Then
+                If phra + (phralh - 1) <= .Characters.Count Then
+                    For j = 1 To j
+                        For i = 0 To j - 1
+                                a1(j) = a1(j) & .Characters(phra + i)
+                        Next i
+        '                    Debug.Print a1(j)
+                    Next j
+                    phras = a1(j - 1)
+                End If
             Else
-                .edit
-                rst("次數") = rst("次數") + 1
-                .Update
+                phras = .Characters(phra)
             End If
-        End With
-11  Next phra
-    EndTime = Time
-    AppActivate "Microsoft word"
-    MsgBox "統計完成!!" & vbCr & "(※共執行了" & wrong & "次的檢查※)" _
-        & "詞彙右邊半形空格凡" & hfspace & "次,忽略不計!" _
-        & vbCr & "※耗時:" & Format(EndTime - StTime, "n分s秒") & "※" _
-        & vbCr & "字元數=" & .Characters.Count
-End With
-If MsgBox("要即刻檢視結果嗎?", vbYesNo + vbQuestion) = vbYes Then
-'    Set d = GetObject("d:\千慮一得齋\書籍資料\詞頻.mdb")
-    AppActivate "Microsoft access"
+            If Len(phras) > 1 And Right(phras, 1) = " " Then
+                hfspace = hfspace + 1 '計次
+                GoTo 11 '字串右邊是半形空格時,AccessUpdate時會銷去,且於詞彙亦無意意,故不計!
+            End If
+            '直接進入下一個字串比對
+            wrong = wrong + 1 '檢視用!
+    '        If wrong Mod 29688 = 0 Then '到29688時會產生OLE沒有回應的錯誤,故在此歇會兒
+    '            MsgBox "請檢查!!"
+    ''        ElseIf wrong = 49761 Then
+    ''            MsgBox "請檢查!!"
+    '        End If
+            With rst
+                .FindFirst "詞彙 like '" & phras & "'"
+                If .NoMatch Then
+                    .AddNew
+                    rst("詞彙") = phras
+    '                rst("次數") = 1'預設值已定為1
+                    .Update 'dbUpdateBatch, True
+                Else
+                    .edit
+                    rst("次數") = rst("次數") + 1
+                    .Update
+                End If
+            End With
+11      Next phra
+        EndTime = Time
+        AppActivate "Microsoft word"
+        MsgBox "統計完成!!" & vbCr & "(※共執行了" & wrong & "次的檢查※)" _
+            & "詞彙右邊半形空格凡" & hfspace & "次,忽略不計!" _
+            & vbCr & "※耗時:" & Format(EndTime - StTime, "n分s秒") & "※" _
+            & vbCr & "字元數=" & .Characters.Count
+    End With
+    If MsgBox("要即刻檢視結果嗎?", vbYesNo + vbQuestion) = vbYes Then
+    '    Set d = GetObject("d:\千慮一得齋\書籍資料\詞頻.mdb")
+        AppActivate "Microsoft access"
+        d.docmd.OpenTable "詞頻表", , d.acReadOnly
+        d.docmd.Maximize
+    End If
     d.docmd.OpenTable "詞頻表", , d.acReadOnly
     d.docmd.Maximize
-End If
-d.docmd.OpenTable "詞頻表", , d.acReadOnly
-d.docmd.Maximize
-rst.Close: db.Close: Set d = Nothing
-Options.SaveInterval = 10 '恢復自動儲存
-End '用Exit Sub無法每次關閉Access
+    rst.Close: db.Close: Set d = Nothing
+    Options.SaveInterval = 10 '恢復自動儲存
+    End '用Exit Sub無法每次關閉Access
 錯誤處理:
-Select Case Err.Number '主索引值重複
-    Case Is = 91, 3078
-        MsgBox "請再按一次!", vbCritical
-        'access.Application.Quit
-        d.Quit
-        End
-    Case Else
-        MsgBox Err.Number & ":" & Err.Description, vbExclamation
-        Resume
-End Select
+    Select Case Err.Number '主索引值重複
+        Case Is = 91, 3078
+            MsgBox "請再按一次!", vbCritical
+            'access.Application.Quit
+            d.Quit
+            End
+        Case Else
+            MsgBox Err.Number & ":" & Err.Description, vbExclamation
+            Resume
+    End Select
 End Sub
 Sub 指定字數詞頻2() '2002/11/15效能與原設計差不多,但可變數化!
-On Error GoTo 錯誤處理
-Dim wrong As Long, phra As Long, phras, phralh As String
-Dim StTime As Date, EndTime As Date
-Dim hfspace As Long
-Dim i As Byte, j As Byte
-phralh = InputBox("請用阿拉伯數字指定詞的組成字數,最多字數為「255」!", "指定詞彙字數", "2")
-If phralh = "" Or Not IsNumeric(phralh) Then Exit Sub
-If CByte(phralh) > 255 Or CByte(phralh) < 1 Then Exit Sub
-Options.SaveInterval = 0 '取消自動儲存
-Set d = CreateObject("access.application")
-d.UserControl = True
-d.OpenCurrentDatabase "d:\千慮一得齋\書籍資料\詞頻.mdb", False
-d.docmd.SelectObject d.acTable, "詞頻表", True
-'d.Visible = True '檢查用
-Set db = d.CurrentDb
-Set rst = db.OpenRecordset("詞頻表", dbOpenDynaset)
-If rst.RecordCount > 0 Then '要獲得全部的筆數須用MoveLast但此只需判斷有沒有原先的記錄即可!
-'rst打開以後只會取得第一筆記錄!
-'    db.Execute "DELETE 字頻表.* FROM 字頻表"
-    db.Execute "DELETE * FROM 詞頻表"
-End If
-StTime = Time
-j = CByte(phralh)
-With ActiveDocument
-    For phra = 1 To .Characters.Count
-'        If j > 1 Then'即使是單字也不須分別處理了!!
-            If phra + (phralh - 1) <= .Characters.Count Then
-                phras = ""
-                For i = 0 To j - 1
-                    phras = phras & .Characters(phra + i)
-                Next i
+    On Error GoTo 錯誤處理
+    Dim wrong As Long, phra As Long, phras, phralh As String
+    Dim StTime As Date, EndTime As Date
+    Dim hfspace As Long
+    Dim i As Byte, j As Byte
+    phralh = InputBox("請用阿拉伯數字指定詞的組成字數,最多字數為「255」!", "指定詞彙字數", "2")
+    If phralh = "" Or Not IsNumeric(phralh) Then Exit Sub
+    If CByte(phralh) > 255 Or CByte(phralh) < 1 Then Exit Sub
+    Options.SaveInterval = 0 '取消自動儲存
+    Set d = CreateObject("access.application")
+    d.UserControl = True
+    d.OpenCurrentDatabase "d:\千慮一得齋\書籍資料\詞頻.mdb", False
+    d.docmd.SelectObject d.acTable, "詞頻表", True
+    'd.Visible = True '檢查用
+    Set db = d.CurrentDb
+    Set rst = db.OpenRecordset("詞頻表", dbOpenDynaset)
+    If rst.RecordCount > 0 Then '要獲得全部的筆數須用MoveLast但此只需判斷有沒有原先的記錄即可!
+    'rst打開以後只會取得第一筆記錄!
+    '    db.Execute "DELETE 字頻表.* FROM 字頻表"
+        db.Execute "DELETE * FROM 詞頻表"
+    End If
+    StTime = Time
+    j = CByte(phralh)
+    With ActiveDocument
+        For phra = 1 To .Characters.Count
+    '        If j > 1 Then'即使是單字也不須分別處理了!!
+                If phra + (phralh - 1) <= .Characters.Count Then
+                    phras = ""
+                    For i = 0 To j - 1
+                        phras = phras & .Characters(phra + i)
+                    Next i
+                End If
+    '        Else
+    '            phras = .Characters(phra)
+    '        End If
+            If Len(phras) > 1 And Right(phras, 1) = " " Then
+                hfspace = hfspace + 1 '計次
+                GoTo 11 '字串右邊是半形空格時,AccessUpdate時會銷去,且於詞彙亦無意意,故不計!
             End If
-'        Else
-'            phras = .Characters(phra)
-'        End If
-        If Len(phras) > 1 And right(phras, 1) = " " Then
-            hfspace = hfspace + 1 '計次
-            GoTo 11 '字串右邊是半形空格時,AccessUpdate時會銷去,且於詞彙亦無意意,故不計!
-        End If
-        '直接進入下一個字串比對
-        wrong = wrong + 1 '檢視用!
-'        If wrong Mod 29688 = 0 Then '到29688時會產生OLE沒有回應的錯誤,故在此歇會兒
-'            MsgBox "請檢查!!"
-''        ElseIf wrong = 49761 Then
-''            MsgBox "請檢查!!"
-'        End If
-        With rst
-            .FindFirst "詞彙 like '" & phras & "'"
-            If .NoMatch Then
-                .AddNew
-                rst("詞彙") = phras
-'                rst("次數") = 1'預設值已定為1
-                .Update 'dbUpdateBatch, True
-            Else
-                .edit
-                rst("次數") = rst("次數") + 1
-                .Update
-            End If
-        End With
-11  Next phra
-    EndTime = Time
-    AppActivate "Microsoft word"
-    MsgBox "統計完成!!" & vbCr & "(※共執行了" & wrong & "次的檢查※)" _
-        & "詞彙右邊半形空格凡" & hfspace & "次,忽略不計!" _
-        & vbCr & "※耗時:" & Format(EndTime - StTime, "n分s秒") & "※" _
-        & vbCr & "字元數=" & .Characters.Count
-End With
-If MsgBox("要即刻檢視結果嗎?", vbYesNo + vbQuestion) = vbYes Then
-'    Set d = GetObject("d:\千慮一得齋\書籍資料\詞頻.mdb")
-    AppActivate "Microsoft access"
+            '直接進入下一個字串比對
+            wrong = wrong + 1 '檢視用!
+    '        If wrong Mod 29688 = 0 Then '到29688時會產生OLE沒有回應的錯誤,故在此歇會兒
+    '            MsgBox "請檢查!!"
+    ''        ElseIf wrong = 49761 Then
+    ''            MsgBox "請檢查!!"
+    '        End If
+            With rst
+                .FindFirst "詞彙 like '" & phras & "'"
+                If .NoMatch Then
+                    .AddNew
+                    rst("詞彙") = phras
+    '                rst("次數") = 1'預設值已定為1
+                    .Update 'dbUpdateBatch, True
+                Else
+                    .edit
+                    rst("次數") = rst("次數") + 1
+                    .Update
+                End If
+            End With
+11      Next phra
+        EndTime = Time
+        AppActivate "Microsoft word"
+        MsgBox "統計完成!!" & vbCr & "(※共執行了" & wrong & "次的檢查※)" _
+            & "詞彙右邊半形空格凡" & hfspace & "次,忽略不計!" _
+            & vbCr & "※耗時:" & Format(EndTime - StTime, "n分s秒") & "※" _
+            & vbCr & "字元數=" & .Characters.Count
+    End With
+    If MsgBox("要即刻檢視結果嗎?", vbYesNo + vbQuestion) = vbYes Then
+    '    Set d = GetObject("d:\千慮一得齋\書籍資料\詞頻.mdb")
+        AppActivate "Microsoft access"
+        d.docmd.OpenTable "詞頻表", , d.acReadOnly
+        d.docmd.Maximize
+    End If
     d.docmd.OpenTable "詞頻表", , d.acReadOnly
     d.docmd.Maximize
-End If
-d.docmd.OpenTable "詞頻表", , d.acReadOnly
-d.docmd.Maximize
-rst.Close: db.Close: Set d = Nothing
-Options.SaveInterval = 10 '恢復自動儲存
-End '用Exit Sub無法每次關閉Access
+    rst.Close: db.Close: Set d = Nothing
+    Options.SaveInterval = 10 '恢復自動儲存
+    End '用Exit Sub無法每次關閉Access
 錯誤處理:
-Select Case Err.Number '主索引值重複
-    Case Is = 91, 3078
-        MsgBox "請再按一次!", vbCritical
-        'access.Application.Quit
-        d.Quit
-        End
-    Case Else
-        MsgBox Err.Number & ":" & Err.Description, vbExclamation
-        Resume
-End Select
+    Select Case Err.Number '主索引值重複
+        Case Is = 91, 3078
+            MsgBox "請再按一次!", vbCritical
+            'access.Application.Quit
+            d.Quit
+            End
+        Case Else
+            MsgBox Err.Number & ":" & Err.Description, vbExclamation
+            Resume
+    End Select
 End Sub
 
 Sub 文件字頻_old()
-Dim DR As Range, d As Document, Char, charText As String, preChar As String _
-    , x() As String, xT() As Long, i As Long, j As Long, ExcelSheet  As Object, _
-    ds As Date, de As Date '
-Static xlsp As String
-On Error GoTo ErrH:
-'xlsp = "C:\Documents and Settings\Superwings\桌面\"
-Set d = ActiveDocument
-xlsp = 取得桌面路徑 & "\" 'GetDeskDir() & "\"
-If Dir(xlsp) = "" Then xlsp = 取得桌面路徑 'GetDeskDir ' "C:\Users\Wong\Desktop\" '& Replace(ActiveDocument.Name, ".doc", "") & "字頻.XLS"
-'If Dir(xlsp) = "" Then xlsp = "C:\Documents and Settings\Superwings\桌面\" & Replace(ActiveDocument.Name, ".doc", "") & "字頻.XLS"
-'xlsp = "C:\Documents and Settings\Superwings\桌面\" & Replace(ActiveDocument.Name, ".doc", "") & "字頻.XLS"
-xlsp = InputBox("請輸入存檔路徑及檔名(全檔名,含副檔名)!" & vbCr & vbCr & _
-        "預設將以此word文件檔名 + ""字頻.XLSX""字綴,存於桌面上", "字頻調查", xlsp & Replace(ActiveDocument.Name, ".doc", "") & "字頻" & StrConv(Time, vbWide) & ".XLSX")
-If xlsp = "" Then Exit Sub
-
-ds = VBA.Timer
-
-With d
-    For Each Char In d.Characters
-        charText = Char
-        If Not charText = Chr(13) And charText <> "-" And Not charText Like "[a-zA-Z0-9０-９]" Then
-            'If Not charText Like "[a-z1-9]" & Chr(-24153) & Chr(-24152) & " 　、'""「」『』（）－？！]" Then
-'            If InStr(Chr(-24153) & Chr(-24152) & Chr(2) & "‧[]〔〕﹝﹞…；,，.。． 　、'""‘’`\{}｛｝「」『』（）《》〈〉－？！]", charText) = 0 Then
-            If InStr(ChrW(-24153) & ChrW(-24152) & Chr(2) & "‧[]〔〕﹝﹞…；,，.。． 　、'""‘’`\{}｛｝「」『』（）《》〈〉－？！]", charText) = 0 Then
-            'chr(2)可能是註腳標記
-                If preChar <> charText Then
-                    'If UBound(X) > 0 Then
-                        If preChar = "" Then 'If IsEmpty(X) Then'如果是一開始
-                            GoTo 1
-                        ElseIf UBound(Filter(x, charText)) Then ' <> charText Then  '如果尚無此字
-1                           ReDim Preserve x(i)
-                            ReDim Preserve xT(i)
-                            x(i) = charText
-                            xT(i) = xT(i) + 1
-                            i = i + 1
-                        Else
-                            GoSub 字頻加一
-                        End If
-                    'End If
-                Else
-                    GoSub 字頻加一
+    Dim DR As Range, d As Document, Char, charText As String, preChar As String _
+        , x() As String, xT() As Long, i As Long, j As Long, ExcelSheet  As Object, _
+        ds As Date, de As Date '
+    Static xlsp As String
+    On Error GoTo ErrH:
+    'xlsp = "C:\Documents and Settings\Superwings\桌面\"
+    Set d = ActiveDocument
+    xlsp = 取得桌面路徑 & "\" 'GetDeskDir() & "\"
+    If Dir(xlsp) = "" Then xlsp = 取得桌面路徑 'GetDeskDir ' "C:\Users\Wong\Desktop\" '& Replace(ActiveDocument.Name, ".doc", "") & "字頻.XLS"
+    'If Dir(xlsp) = "" Then xlsp = "C:\Documents and Settings\Superwings\桌面\" & Replace(ActiveDocument.Name, ".doc", "") & "字頻.XLS"
+    'xlsp = "C:\Documents and Settings\Superwings\桌面\" & Replace(ActiveDocument.Name, ".doc", "") & "字頻.XLS"
+    xlsp = InputBox("請輸入存檔路徑及檔名(全檔名,含副檔名)!" & vbCr & vbCr & _
+            "預設將以此word文件檔名 + ""字頻.XLSX""字綴,存於桌面上", "字頻調查", xlsp & Replace(ActiveDocument.Name, ".doc", "") & "字頻" & StrConv(Time, vbWide) & ".XLSX")
+    If xlsp = "" Then Exit Sub
+    
+    ds = VBA.Timer
+    
+    With d
+        For Each Char In d.Characters
+            charText = Char
+            If Not charText = Chr(13) And charText <> "-" And Not charText Like "[a-zA-Z0-9０-９]" Then
+                'If Not charText Like "[a-z1-9]" & Chr(-24153) & Chr(-24152) & " 　、'""「」『』（）－？！]" Then
+    '            If InStr(Chr(-24153) & Chr(-24152) & Chr(2) & "‧[]〔〕﹝﹞…；,，.。． 　、'""‘’`\{}｛｝「」『』（）《》〈〉－？！]", charText) = 0 Then
+                If InStr(ChrW(-24153) & ChrW(-24152) & Chr(2) & "‧[]〔〕﹝﹞…；,，.。． 　、'""‘’`\{}｛｝「」『』（）《》〈〉－？！]", charText) = 0 Then
+                'chr(2)可能是註腳標記
+                    If preChar <> charText Then
+                        'If UBound(X) > 0 Then
+                            If preChar = "" Then 'If IsEmpty(X) Then'如果是一開始
+                                GoTo 1
+                            ElseIf UBound(Filter(x, charText)) Then ' <> charText Then  '如果尚無此字
+1                               ReDim Preserve x(i)
+                                ReDim Preserve xT(i)
+                                x(i) = charText
+                                xT(i) = xT(i) + 1
+                                i = i + 1
+                            Else
+                                GoSub 字頻加一
+                            End If
+                        'End If
+                    Else
+                        GoSub 字頻加一
+                    End If
+                    preChar = Char
                 End If
-                preChar = Char
             End If
-        End If
-    Next Char
-End With
-
-Dim Doc As New Document, Xsort() As String, u As Long ', xTsort() As Integer, k As Long, so As Long, ww As String
-'ReDim Xsort(i) As String ', xtsort(i) as Integer
-'ReDim Xsort(d.Characters.Count) As String
-If u = 0 Then u = 1 '若無執行「字頻加一:」副程序,若無超過1次的字頻，則　Xsort(xT(j - 1)) = Xsort(xT(j - 1)) & "、" & x(j - 1) & _
-                                會出錯：陣列索引超出範圍 2015/11/5
-
-ReDim Xsort(u) As String
-Set ExcelSheet = CreateObject("Excel.Sheet")
-With ExcelSheet.Application
-    For j = 1 To i
-        .Cells(j, 1) = x(j - 1)
-        .Cells(j, 2) = xT(j - 1)
-        Xsort(xT(j - 1)) = Xsort(xT(j - 1)) & "、" & x(j - 1) 'Xsort(xT(j - 1)) & ww '陣列排序'2010/10/29
-    Next j
-End With
-'Doc.ActiveWindow.Visible = False
-'U = UBound(Xsort)
-For j = u To 0 Step -1 '陣列排序'2010/10/29
-    If Xsort(j) <> "" Then
-        With Doc
-            If Len(.Range) = 1 Then '尚未輸入內容
-                .Range.InsertAfter "字頻 = " & j & "次：（" & Len(Replace(Xsort(j), "、", "")) & "字）"
-                .Range.Paragraphs(1).Range.Font.Size = 12
-                .Range.Paragraphs(.Paragraphs.Count).Range.Font.Name = "新細明體"
-                .Range.Paragraphs(.Paragraphs.Count).Range.Font.NameAscii = "Times New Roman"
-                '.Range.Paragraphs(1).Range.Font.Bold = True
-            Else
+        Next Char
+    End With
+    
+    Dim Doc As New Document, Xsort() As String, u As Long ', xTsort() As Integer, k As Long, so As Long, ww As String
+    'ReDim Xsort(i) As String ', xtsort(i) as Integer
+    'ReDim Xsort(d.Characters.Count) As String
+    If u = 0 Then u = 1 '若無執行「字頻加一:」副程序,若無超過1次的字頻，則　Xsort(xT(j - 1)) = Xsort(xT(j - 1)) & "、" & x(j - 1) & _
+                                    會出錯：陣列索引超出範圍 2015/11/5
+    
+    ReDim Xsort(u) As String
+    Set ExcelSheet = CreateObject("Excel.Sheet")
+    With ExcelSheet.Application
+        For j = 1 To i
+            .Cells(j, 1) = x(j - 1)
+            .Cells(j, 2) = xT(j - 1)
+            Xsort(xT(j - 1)) = Xsort(xT(j - 1)) & "、" & x(j - 1) 'Xsort(xT(j - 1)) & ww '陣列排序'2010/10/29
+        Next j
+    End With
+    'Doc.ActiveWindow.Visible = False
+    'U = UBound(Xsort)
+    For j = u To 0 Step -1 '陣列排序'2010/10/29
+        If Xsort(j) <> "" Then
+            With Doc
+                If Len(.Range) = 1 Then '尚未輸入內容
+                    .Range.InsertAfter "字頻 = " & j & "次：（" & Len(Replace(Xsort(j), "、", "")) & "字）"
+                    .Range.Paragraphs(1).Range.Font.Size = 12
+                    .Range.Paragraphs(.Paragraphs.Count).Range.Font.Name = "新細明體"
+                    .Range.Paragraphs(.Paragraphs.Count).Range.Font.NameAscii = "Times New Roman"
+                    '.Range.Paragraphs(1).Range.Font.Bold = True
+                Else
+                    .Range.InsertParagraphAfter
+                    .ActiveWindow.Selection.Range.Collapse Direction:=wdCollapseEnd
+                    .Range.InsertAfter "字頻 = " & j & "次：（" & Len(Replace(Xsort(j), "、", "")) & "字）"
+                    .Range.Paragraphs(.Paragraphs.Count).Range.Font.Size = 12
+                    '.Range.Paragraphs(.Paragraphs.Count).Range.Bold = True
+                    .Range.Paragraphs(.Paragraphs.Count).Range.Font.Name = "新細明體"
+                    .Range.Paragraphs(.Paragraphs.Count).Range.Font.NameAscii = "Times New Roman"
+                End If
                 .Range.InsertParagraphAfter
                 .ActiveWindow.Selection.Range.Collapse Direction:=wdCollapseEnd
-                .Range.InsertAfter "字頻 = " & j & "次：（" & Len(Replace(Xsort(j), "、", "")) & "字）"
                 .Range.Paragraphs(.Paragraphs.Count).Range.Font.Size = 12
-                '.Range.Paragraphs(.Paragraphs.Count).Range.Bold = True
-                .Range.Paragraphs(.Paragraphs.Count).Range.Font.Name = "新細明體"
-                .Range.Paragraphs(.Paragraphs.Count).Range.Font.NameAscii = "Times New Roman"
-            End If
-            .Range.InsertParagraphAfter
-            .ActiveWindow.Selection.Range.Collapse Direction:=wdCollapseEnd
-            .Range.Paragraphs(.Paragraphs.Count).Range.Font.Size = 12
-'            .Range.Paragraphs(.Paragraphs.Count).Range.Bold = False
-            .Range.InsertAfter Replace(Xsort(j), "、", Chr(9), 1, 1) 'chr(9)為定位字元(Tab鍵值)
-            .Range.InsertParagraphAfter
-            If InStr(.Range.Paragraphs(.Paragraphs.Count).Range, "字頻") = 0 Then
-                .Range.Paragraphs(.Paragraphs.Count - 1).Range.Font.Name = "標楷體"
-            Else
-                .Range.Paragraphs(.Paragraphs.Count).Range.Font.Name = "新細明體"
-                .Range.Paragraphs(.Paragraphs.Count).Range.Font.NameAscii = "Times New Roman"
-            End If
-        End With
-    End If
-Next j
-
-With Doc.Paragraphs(1).Range
-     .InsertParagraphBefore
-     .Font.NameAscii = "times new roman"
-    Doc.Paragraphs(1).Range.InsertParagraphAfter
-    Doc.Paragraphs(1).Range.InsertParagraphAfter
-    Doc.Paragraphs(1).Range.InsertAfter "你提供的文本共使用了" & i & "個不同的字（傳統字與簡化字不予合併）"
-End With
-
-Doc.ActiveWindow.Visible = True
-'
-
-'U = UBound(xT)
-'ReDim Xsort(U) As String, xTsort(U) As Long
-'
-'i = d.Characters
-'For j = 1 To i '用數字相比
-'    For k = 0 To U 'xT陣列中每個元素都與j比
-'        If xT(k) = j Then
-'            Xsort(so) = x(k)
-'            xTsort(so) = xT(k)
-'            so = so + 1
-'        End If
-'    Next k
-'Next j
-
-'With doc
-'    .Range.InsertAfter "字頻=0001"
-'    .Range.InsertParagraphAfter
-'End With
-
-
-' Cells.Select
-'    Selection.Sort Key1:=Range("B1"), Order1:=xlDescending, Header:=xlGuess, _
-'        OrderCustom:=1, MatchCase:=False, Orientation:=xlTopToBottom
-
-
-'Set ExcelSheet = Nothing'此行會使消失
-'Set d = Nothing
-de = VBA.Timer
-MsgBox "完成！" & vbCr & vbCr & "費時" & Left(de - ds, 5) & "秒!"
-ExcelSheet.Application.Visible = True
-ExcelSheet.Application.UserControl = True
-ExcelSheet.SaveAs xlsp '"C:\Macros\守真TEST.XLS"
-Doc.SaveAs Replace(xlsp, "XLS", "doc") '分大小寫
-'Doc.SaveAs "c:\test1.doc"
-AppActivate "microsoft excel"
-Exit Sub
-字頻加一:
-For j = 0 To UBound(x)
-    If x(j) = charText Then
-        xT(j) = xT(j) + 1
-        If u < xT(j) Then u = xT(j) '記下最高字頻,以便排序(將欲排序之陣列最高元素值設為此,則不會超出陣列.
-        '多此一行因為要重複判斷計算好幾次,故效能不增反減''效能還是差不多啦.
-        Exit For
-    End If
-Next j
-
-Return
-ErrH:
-Select Case Err.Number
-    Case Else
-        MsgBox Err.Number & Err.Description, vbCritical 'STOP: Resume
-'        Resume
-        End
+    '            .Range.Paragraphs(.Paragraphs.Count).Range.Bold = False
+                .Range.InsertAfter Replace(Xsort(j), "、", Chr(9), 1, 1) 'chr(9)為定位字元(Tab鍵值)
+                .Range.InsertParagraphAfter
+                If InStr(.Range.Paragraphs(.Paragraphs.Count).Range, "字頻") = 0 Then
+                    .Range.Paragraphs(.Paragraphs.Count - 1).Range.Font.Name = "標楷體"
+                Else
+                    .Range.Paragraphs(.Paragraphs.Count).Range.Font.Name = "新細明體"
+                    .Range.Paragraphs(.Paragraphs.Count).Range.Font.NameAscii = "Times New Roman"
+                End If
+            End With
+        End If
+    Next j
     
-End Select
+    With Doc.Paragraphs(1).Range
+         .InsertParagraphBefore
+         .Font.NameAscii = "times new roman"
+        Doc.Paragraphs(1).Range.InsertParagraphAfter
+        Doc.Paragraphs(1).Range.InsertParagraphAfter
+        Doc.Paragraphs(1).Range.InsertAfter "你提供的文本共使用了" & i & "個不同的字（傳統字與簡化字不予合併）"
+    End With
+    
+    Doc.ActiveWindow.Visible = True
+    '
+    
+    'U = UBound(xT)
+    'ReDim Xsort(U) As String, xTsort(U) As Long
+    '
+    'i = d.Characters
+    'For j = 1 To i '用數字相比
+    '    For k = 0 To U 'xT陣列中每個元素都與j比
+    '        If xT(k) = j Then
+    '            Xsort(so) = x(k)
+    '            xTsort(so) = xT(k)
+    '            so = so + 1
+    '        End If
+    '    Next k
+    'Next j
+    
+    'With doc
+    '    .Range.InsertAfter "字頻=0001"
+    '    .Range.InsertParagraphAfter
+    'End With
+    
+    
+    ' Cells.Select
+    '    Selection.Sort Key1:=Range("B1"), Order1:=xlDescending, Header:=xlGuess, _
+    '        OrderCustom:=1, MatchCase:=False, Orientation:=xlTopToBottom
+    
+    
+    'Set ExcelSheet = Nothing'此行會使消失
+    'Set d = Nothing
+    de = VBA.Timer
+    MsgBox "完成！" & vbCr & vbCr & "費時" & Left(de - ds, 5) & "秒!"
+    ExcelSheet.Application.Visible = True
+    ExcelSheet.Application.UserControl = True
+    ExcelSheet.SaveAs xlsp '"C:\Macros\守真TEST.XLS"
+    Doc.SaveAs Replace(xlsp, "XLS", "doc") '分大小寫
+    'Doc.SaveAs "c:\test1.doc"
+    AppActivate "microsoft excel"
+    Exit Sub
+字頻加一:
+    For j = 0 To UBound(x)
+        If x(j) = charText Then
+            xT(j) = xT(j) + 1
+            If u < xT(j) Then u = xT(j) '記下最高字頻,以便排序(將欲排序之陣列最高元素值設為此,則不會超出陣列.
+            '多此一行因為要重複判斷計算好幾次,故效能不增反減''效能還是差不多啦.
+            Exit For
+        End If
+    Next j
+    
+    Return
+ErrH:
+    Select Case Err.Number
+        Case Else
+            MsgBox Err.Number & Err.Description, vbCritical 'STOP: Resume
+    '        Resume
+            End
+        
+    End Select
 End Sub
 
-Function lEnglish() '英文大寫字母
-Dim wd, wdct As Long, i As Byte
-For i = 65 To 90
-    Debug.Print Chr(i) & vbCr
-Next
+Function UppercaeEnglishLetter() '英文大寫字母
+    Dim wd, wdct As Long, i As Byte
+    For i = 65 To 90
+        Debug.Print Chr(i) & vbCr
+    Next
 End Function
-Function sEnglish() '英文小寫字母
-Dim i As Byte
-For i = 97 To 122
-    Debug.Print Chr(i) & vbCr
-Next
+Function LowercaseEnglishLetter() '英文小寫字母
+    Dim i As Byte
+    For i = 97 To 122
+        Debug.Print Chr(i) & vbCr
+    Next
 End Function
 
 Function trimStrForSearch_PlainText(x As String) As String
-Rem 20230128 癸卯年初七 孫守真×chatGPT大菩薩：VBA Overload Functionality：
-'chatGPT大菩薩新年吉祥： 想請問 VBA 是不是不能像 C# 一樣函式方法可以 多載、重載（overload）？
-'VBA (Visual Basic for Applications) 是一種微軟的程式語言，主要用於自動化 Microsoft Office 應用程式中。VBA 不支援函式的多載和重載。這意味著，您不能在 VBA 中定義具有相同名稱但參數不同的多個函式。
-
-Dim ayToTrim As Variant, a As Variant
-On Error GoTo eH
-ayToTrim = Array(Chr(13), Chr(9), Chr(10), Chr(11), Chr(13) & Chr(7), Chr(13) & Chr(10))
-x = VBA.Trim(x)
-For Each a In ayToTrim
-    'x = VBA.Replace(x, a, "")
-    Do While VBA.Left(x, Len(a)) = a
-        x = VBA.Mid(x, Len(a) + 1)
-    Loop
-    Do While VBA.right(x, Len(a)) = a
-        x = VBA.Mid(x, 1, Len(x) - Len(a))
-    Loop
-Next a
-trimStrForSearch_PlainText = x
-Exit Function
+    Rem 20230128 癸卯年初七 孫守真×chatGPT大菩薩：VBA Overload Functionality：
+    'chatGPT大菩薩新年吉祥： 想請問 VBA 是不是不能像 C# 一樣函式方法可以 多載、重載（overload）？
+    'VBA (Visual Basic for Applications) 是一種微軟的程式語言，主要用於自動化 Microsoft Office 應用程式中。VBA 不支援函式的多載和重載。這意味著，您不能在 VBA 中定義具有相同名稱但參數不同的多個函式。
+    
+    Dim ayToTrim As Variant, a As Variant
+    On Error GoTo eH
+    ayToTrim = Array(Chr(13), Chr(9), Chr(10), Chr(11), Chr(13) & Chr(7), Chr(13) & Chr(10))
+    x = VBA.Trim(x)
+    For Each a In ayToTrim
+        'x = VBA.Replace(x, a, "")
+        Do While VBA.Left(x, Len(a)) = a
+            x = VBA.Mid(x, Len(a) + 1)
+        Loop
+        Do While VBA.Right(x, Len(a)) = a
+            x = VBA.Mid(x, 1, Len(x) - Len(a))
+        Loop
+    Next a
+    trimStrForSearch_PlainText = x
+    Exit Function
 eH:
-Select Case Err.Number
-    Case Else
-        MsgBox Err.Number & Err.Description
-'        Resume
-End Select
+    Select Case Err.Number
+        Case Else
+            MsgBox Err.Number & Err.Description
+    '        Resume
+    End Select
 End Function
 
 Function trimStrForSearch(x As String, sl As word.Selection) As String
-'https://docs.microsoft.com/zh-tw/dotnet/visual-basic/programming-guide/language-features/procedures/passing-arguments-by-value-and-by-reference
-Dim ayToTrim As Variant, a As Variant, rng As Range, slTxtR As String
-On Error GoTo eH
-slTxtR = sl.Characters(sl.Characters.Count)
-ayToTrim = Array(Chr(13), Chr(9), Chr(10), Chr(11), Chr(13) & Chr(7), Chr(13) & Chr(10))
-x = VBA.Trim(x)
-For Each a In ayToTrim
-    'x = VBA.Replace(x, a, "")
-    Do While VBA.Left(x, Len(a)) = a
-        x = VBA.Mid(x, Len(a))
-    Loop
-    Do While VBA.right(x, Len(a)) = a
-        x = VBA.Mid(x, 1, Len(x) - Len(a))
-    Loop
-Next a
-trimStrForSearch = x
-If sl.Type <> wdSelectionIP Then
-    If UBound(VBA.Strings.Filter(ayToTrim, slTxtR)) > -1 Then
-    'If sl.Characters(sl.Characters.Count) = Chr(13) Then
-        Set rng = sl.Range
-        rng.SetRange sl.start, sl.End - Len(slTxtR)
-        rng.Select
+    'https://docs.microsoft.com/zh-tw/dotnet/visual-basic/programming-guide/language-features/procedures/passing-arguments-by-value-and-by-reference
+    Dim ayToTrim As Variant, a As Variant, rng As Range, slTxtR As String
+    On Error GoTo eH
+    slTxtR = sl.Characters(sl.Characters.Count)
+    ayToTrim = Array(Chr(13), Chr(9), Chr(10), Chr(11), Chr(13) & Chr(7), Chr(13) & Chr(10))
+    x = VBA.Trim(x)
+    For Each a In ayToTrim
+        'x = VBA.Replace(x, a, "")
+        Do While VBA.Left(x, Len(a)) = a
+            x = VBA.Mid(x, Len(a))
+        Loop
+        Do While VBA.Right(x, Len(a)) = a
+            x = VBA.Mid(x, 1, Len(x) - Len(a))
+        Loop
+    Next a
+    trimStrForSearch = x
+    If sl.Type <> wdSelectionIP Then
+        If UBound(VBA.Strings.Filter(ayToTrim, slTxtR)) > -1 Then
+        'If sl.Characters(sl.Characters.Count) = Chr(13) Then
+            Set rng = sl.Range
+            rng.SetRange sl.start, sl.End - Len(slTxtR)
+            rng.Select
+        End If
     End If
-End If
-Exit Function
+    Exit Function
 eH:
-Select Case Err.Number
-    Case Else
-        MsgBox Err.Number & Err.Description
-'        Resume
-End Select
+    Select Case Err.Number
+        Case Else
+            MsgBox Err.Number & Err.Description
+    '        Resume
+    End Select
 End Function
 
 Sub ResetSelectionAvoidSymbols()
@@ -1983,11 +1983,11 @@ End Sub
 '                                'Chr(-24152)是「”」,由Asc函數在選取(.SelText)「”」時取得;Chr(34):「"」
 'End Function
 Function isSymbol(ByVal a As String) As Boolean
-Dim f As String
-f = punctuationStr
-If InStr(1, f, a, vbTextCompare) Then
-    isSymbol = True
-End If
+    Dim f As String
+    f = PunctuationString
+    If InStr(1, f, a, vbTextCompare) Then
+        isSymbol = True
+    End If
 End Function
 
 Sub 清除選取處的所有符號() '由圖書管理symbles模組清除標點符號改編'包括註腳、數字
@@ -2994,15 +2994,33 @@ End Sub
 Sub 漢籍電子文獻資料庫文本整理_注文前後加括號() '最後執行 Docs.mark易學關鍵字(在「易學雜著文本」路徑下時）
     Rem Alt + Shift + `
     Dim rng As Range, ur As UndoRecord, d As Document, fontsize(1) As Single, fsz
-    SystemSetup.stopUndo ur, "漢籍電子文獻資料庫文本整理_注文前後加括號"
-    word.Application.ScreenUpdating = False
-    Set d = ActiveDocument
+    SystemSetup.playSound 0.484
+    Set d = ActiveDocument '記下現用文件（要貼上結果的目的地文件）
     Set rng = d.Range
     
+    '先檢查剪貼簿裡前25字元，若文件中有，就先選取
+    With rng.Find
+        .ClearAllFuzzyOptions
+        .ClearFormatting
+        '255是上限，但也可能包含了標點斷句異文而導致文本有異不能比對，還不如縮減到可以識別的長度即可
+        'If .Execute(VBA.Trim(VBA.Left(SystemSetup.GetClipboard, 255)), , , , , , True, wdFindContinue) Then
+        If .Execute(VBA.Trim(VBA.Left(SystemSetup.GetClipboard, 25)), , , , , , True, wdFindContinue) Then
+            rng.Select
+            rng.Document.ActiveWindow.ScrollIntoView rng, True
+            SystemSetup.playSound 2
+            Exit Sub
+        End If
+    End With
+    '前25字元檢查通過再繼續
+        
+    SystemSetup.stopUndo ur, "漢籍電子文獻資料庫文本整理_注文前後加括號"
+    word.Application.ScreenUpdating = False
+   
+    'rng.Document 要處理《漢籍全文資料庫》文本的文件
     If rng.Document.path = "" Then
         If rng.text = "" Then rng.Paste
     Else
-        Set rng = Docs.空白的新文件.Range
+        Set rng = Docs.空白的新文件(False).Range 'False： 不顯示新文件
     End If
     
     rng.Paste
@@ -3021,6 +3039,8 @@ Sub 漢籍電子文獻資料庫文本整理_注文前後加括號() '最後執行 Docs.mark易學關鍵字(在
             End If
             rng.text = "（" & rng.text & "）"
         Loop
+        'rng 位置已移動，在找下一個條件前須恢復
+        Set rng = rng.Document.Range
     Next fsz
             
     rng.Find.ClearFormatting
@@ -3035,8 +3055,14 @@ Sub 漢籍電子文獻資料庫文本整理_注文前後加括號() '最後執行 Docs.mark易學關鍵字(在
     
     SystemSetup.contiUndo ur
         
-    DoEvents
+    '複製整理好的結果，準備送交mark易學關鍵字比對
     rng.Document.Range.Copy
+    Dim dt As Date
+    dt = VBA.Now '剪貼簿似乎會反應不過來，故須等等
+    Do While DateDiff("s", dt, VBA.Now) < 2
+        DoEvents
+    Loop
+    
     
     Dim yi As Boolean
     If VBA.InStr(d.path, "易學雜著文本") Then yi = True
@@ -3044,13 +3070,45 @@ Sub 漢籍電子文獻資料庫文本整理_注文前後加括號() '最後執行 Docs.mark易學關鍵字(在
         DoEvents
         d.Activate
         DoEvents
-        Docs.mark易學關鍵字
-        If rng.Document.path = vbNullString Then
-            rng.Document.Close wdDoNotSaveChanges
+        
+        Dim dx As String, punct, ePunct, hasPunct As Boolean
+        dx = rng.Document.Range.text
+        punct = Array("。", "，", "、", "；", "「」", "『』", "！", "？")
+        For Each ePunct In punct
+            If VBA.InStr(dx, ePunct) Then
+                hasPunct = True
+                Exit For
+            End If
+        Next ePunct
+        
+        Dim pasteAddedRange As Range
+        Set pasteAddedRange = d.Range
+        pasteAddedRange.start = d.Range.End
+        '汰重貼上內容部分由 mark易學關鍵字 負責，標識關鍵字則交由送交自動標點內含的呼叫 mark易學關鍵字 來處理
+        If hasPunct Then
+            Docs.mark易學關鍵字 Nothing, False
+            
+            If rng.Document.path = vbNullString Then
+                rng.Document.Close wdDoNotSaveChanges
+            Else
+                DoEvents
+                d.Activate
+            End If
+            
         Else
-            DoEvents
-            d.Activate
+            If Docs.mark易學關鍵字(Nothing, hasPunct) Then
+            '貼上之後由其貼到文件末端、又預留一些分段符號此一特徵，可以抓到貼上的Range
+                pasteAddedRange.End = d.Range.End
+                pasteAddedRange.Select '因為送交自動標點程序內有 Selection.Cut
+                '以下程序內已有 mark易學關鍵字 故
+                Docs.中國哲學書電子化計劃_只保留正文注文_且注文前後加括弧_貼到古籍酷自動標點
+                pasteAddedRange.InsertParagraphAfter
+                pasteAddedRange.InsertParagraphAfter
+                pasteAddedRange.InsertParagraphAfter
+                pasteAddedRange.InsertParagraphAfter
+            End If
         End If
+
     Else
         DoEvents
         rng.Document.Activate
@@ -3623,7 +3681,10 @@ Sub 書名號篇名號標注()
     '                InStr("《〈·‧", IIf(rngF.Characters(1).Previous Is Nothing, "", rngF.Characters(1).Previous)) = 0 Then
                     If 書名號篇名號標注PreExamOK(d, title, rngF.start) Then
                         If VBA.IsNull(rst("取代為").Value) Then
-                            rngF.text = "〈" & title & "〉"
+                        Rem 怎麼寫都會影響原來文字格式，故只能用前後插入的方式了
+                            rngF.InsertBefore "〈"
+                            rngF.InsertAfter "〉"
+                            'rngF.text = "〈" & title & "〉"
                                       'd.Range.Find.Execute title, , , , , , True, wdFindContinue, , "〈" & title & "〉", wdReplaceAll
                         Else
                             rngF.text = rst("取代為").Value
@@ -3662,7 +3723,7 @@ bookmarks:
     Do Until rst.EOF
         title = rst("書名").Value
         
-    '    If title = "資治通鑑" Then Stop
+'        If title = "周易" Then Stop 'just for test
         
         If VBA.InStr(dx, title) Then 'if found
             Do While rngF.Find.Execute(title, , , , , , True, wdFindStop)
@@ -3670,12 +3731,30 @@ bookmarks:
     '                InStr("《〈·‧", IIf(rngF.Characters(1).Previous Is Nothing, "", rngF.Characters(1).Previous)) = 0 Then
                     If 書名號篇名號標注PreExamOK(d, title, rngF.start) Then
                         
-'                        If title = "資治通鑑" Then Stop 'just for test
+''                        If title = "資治通鑑" Then Stop 'just for test
+'                        'just for test
+'                        If title = "周易" And rngF.Previous.text = "義" Then 'just for test
+'                            rngF.Select
+'                            Stop
+'                        End If
                         
+'                        Dim rngfFormattedText As Range
+'                        Set rngfFormattedText = rngF.FormattedText.Duplicate '記下原來格式
                         If VBA.IsNull(rst("取代為").Value) Then
-                            rngF.text = "《" & title & "》"
+                            Rem 怎麼寫都會影響原來文字格式，故只能用前後插入的方式了
+                            rngF.InsertBefore "《"
+                            rngF.InsertAfter "》"
+                            'rngF.text = "《" & title & "》"
+                            
+                            'rngF.Find.Execute rngF.text, , , , , , , , , "《" & title & "》", wdReplaceOne
+                            
+'                            rngF.FormattedText.text = "《" & title & "》"
+
+'                            rngF.FormattedText = rngfFormattedText '恢復原來格式
+
                 '            d.Range.Find.Execute title, , , , , , True, wdFindContinue, , "《" & title & "》", wdReplaceAll
                         Else
+                            Rem 勢必影響原來的文字格式了
                             rngF.text = rst("取代為").Value
                 '            d.Range.Find.Execute title, , , , , , True, wdFindContinue, , rst("取代為").Value, wdReplaceAll
                         End If

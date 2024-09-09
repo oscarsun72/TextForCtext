@@ -6531,7 +6531,7 @@ namespace WindowsFormsApp1
         /// <summary>
         /// 軟體操作時提醒之系統音效參照
         /// </summary>
-        public enum soundLike { none, over, done, stop, info, error, warn, exam, processing, press, waiting , finish }
+        public enum soundLike { none, over, done, stop, info, error, warn, exam, processing, press, waiting, finish }
         /// <summary>
         /// 播放指定音效
         /// </summary>
@@ -9077,6 +9077,13 @@ namespace WindowsFormsApp1
                     return;
                 }
 
+                if (e.KeyCode == Keys.F5)
+                {//Alt + F5 : 在《漢籍全文資料庫》或 CTP 檢索易學關鍵字
+                    e.Handled = true;
+                    doHanchi_SearchingKeywordsYijing();
+                    return;
+                }
+
                 if (e.KeyCode == Keys.F6 || e.KeyCode == Keys.F8)
                 {//Alt + F6、Alt + F8 : run autoMarkTitles 自動標識標題（篇名）
                     e.Handled = true;
@@ -9084,7 +9091,7 @@ namespace WindowsFormsApp1
                 }
 
                 if (e.KeyCode == Keys.F9)
-                {//Alt + F9 : 在《漢籍全文資料庫》檢索易學關鍵字
+                {//Alt + F9 : 在《漢籍全文資料庫》或 CTP 檢索易學關鍵字
                     e.Handled = true;
                     doHanchi_SearchingKeywordsYijing();
                     return;
@@ -9313,7 +9320,9 @@ namespace WindowsFormsApp1
                 x = textBox1.SelectedText;
             }
             //小於20字元不處理
-            if (x.Length < 20) return false;
+            if (new StringInfo(CnText.RemovePunctuationsNum(x)).LengthInTextElements < 20)
+                if (DialogResult.Cancel == MessageBoxShowOKCancelExclamationDefaultDesktopOnly("字數太少！碇定要送去《古籍酷》自動標點？", "《古籍酷》自動標點", true, MessageBoxDefaultButton.Button2))
+                    return false;
             TopMost = false; int s = textBox1.SelectionStart;
             //舊版會破壞"<p>"記號，故先予清除，之後可用軟件中標識<p>的功能補諸20240809(或有空時再學昨天恢復分段符號的方法 RestoreParagraphs ，只是這次不是分段符號，而是分段記號（<p>），或將之擴展為傳入指定字符作為引數）。
             bool reMarkFlag = false;

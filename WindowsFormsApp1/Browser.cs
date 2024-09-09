@@ -1302,7 +1302,28 @@ namespace TextForCtext
                 //到指定網頁
                 string url = ActiveForm1.Controls["textBox3"].Text != "" ? ActiveForm1.Controls["textBox3"].Text : "https://ctext.org/account.pl?if=en";
                 if (url.StartsWith("http"))
-                    cDrv.Navigate().GoToUrl(url);
+                    try
+                    {
+                        cDrv.Navigate().GoToUrl(url);
+                    }
+                    catch (Exception ex)
+                    {
+                        switch (ex.HResult)
+                        {
+                            case -2146233088:
+                                if (ex.Message.IndexOf("no such window: target window already closed") > -1)//"no such window: target window already closed\nfrom unknown error: web view not found\n  (Session info: chrome=110.0.5481.178)"
+                                {
+                                    NoSuchWindowErrHandler();
+                                }
+                                else
+                                    Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
+                                break;
+                            default:
+                                Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
+                                break;
+                        }
+                        throw;
+                    }
 
                 if (!chromedriversPID.Contains(driverService.ProcessId)) chromedriversPID.Add(driverService.ProcessId);
                 //配置quickedit_data_textbox以備用
@@ -7897,38 +7918,49 @@ internal static string getImageUrl() {
             {
                 title = driver.Title;//避免誤關出錯
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                //《漢籍全文資料庫》網頁介面
-                foreach (var item in driver.WindowHandles)
+                switch (ex.HResult)
                 {
-                    driver.SwitchTo().Window(item);
-                    if (driver.Title.Contains("漢籍全文")) break;
-                }
-                if (!driver.Title.Contains("漢籍全文"))
-                {
-                    title = string.Empty;
-                    foreach (var item in driver.WindowHandles)
-                    {
-                        if (driver.SwitchTo().Window(item).Url.StartsWith("https://ctext.org/wiki.pl?if="))//https://ctext.org/wiki.pl?if=gb&res=、https://ctext.org/wiki.pl?if=en&res=
-                        { title = driver.Title; break; }
+                    case -2146233088:
+                        if (ex.Message.StartsWith("no such window: target window already closed"))
+                            Browser.NoSuchWindowErrHandler();
+                        break;
+                    default:
 
-                    }
-                    if (title == string.Empty)
-                    {
-                        Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("請開啟《漢籍全文資料庫》網頁檢索介面，再開始操作");
-                        return true;
-                    }
+                        //《漢籍全文資料庫》網頁介面
+                        foreach (var item in driver.WindowHandles)
+                        {
+                            driver.SwitchTo().Window(item);
+                            if (driver.Title.Contains("漢籍全文")) break;
+                        }
+                        if (!driver.Title.Contains("漢籍全文"))
+                        {
+                            title = string.Empty;
+                            foreach (var item in driver.WindowHandles)
+                            {
+                                if (driver.SwitchTo().Window(item).Url.StartsWith("https://ctext.org/wiki.pl?if="))//https://ctext.org/wiki.pl?if=gb&res=、https://ctext.org/wiki.pl?if=en&res=
+                                { title = driver.Title; break; }
+
+                            }
+                            if (title == string.Empty)
+                            {
+                                Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("請開啟《漢籍全文資料庫》網頁檢索介面，再開始操作");
+                                return true;
+                            }
+                        }
+                        break;
                 }
                 title = driver.Title;
             }
 
-            List<string> keywords = new List<string> { "易", "卦", "爻", "繫詞", "繫辭", "文言", "乾坤","元亨","利貞", "咎"
-                , "夬", "頤","巽","坎","兌","小畜","大畜","歸妹","明夷","同人","大有","豫","蠱","噬嗑","賁","剝","大過","小過","遯","大壯","睽","暌","蹇","姤","萃","艮","渙","中孚","既濟","未濟"
-                ,"咸恆","老陰", "老陽", "少陰", "少陽","十翼"
-                ,"无妄", "彖", "象曰", "象傳", "象日", "象云","小象", "筮"
-            ,"初九","九二","九三","九四","九五","上九","初六","六二","六三","六四","六五","上六"
-            ,"用九","用六", "繇辭","繇詞"};
+            List<string> keywords = new List<string> { "易", "卦", "爻", "繫詞", "繫辭", "文言", "乾坤","元亨","利貞", "咎",
+                 "夬", "頤","巽","坎","兌","小畜","大畜","歸妹","明夷","同人","大有","豫","蠱","噬嗑","賁","剝","大過","小過","遯","大壯","睽","暌","蹇","姤","萃","艮","渙","中孚","既濟","未濟",
+                "咸恆","老陰", "老陽", "少陰", "少陽","十翼",
+                "无妄", "彖", "象曰", "象傳", "象日", "象云","小象", "筮",
+                "初九","九二","九三","九四","九五","上九","初六","六二","六三","六四","六五","上六","用九","用六", "繇辭","繇詞",
+                "隨時之義","庖有魚","包有魚",
+                "伏羲","伏𦏁","庖𦏁","宓𦏁","伏犧","庖犧"};
 
             //異體字處理（只用在《中國哲學書電子化計劃》，因為《漢籍全文資料庫》已俱。）
             if (title.EndsWith("中國哲學書電子化計劃") || title.EndsWith("Chinese Text Project"))
@@ -7937,7 +7969,8 @@ internal static string getImageUrl() {
                 //20240719 Copilot大菩薩：C# Windows.Forms List 新增多個元素：您好，如果您想要在程式進行中對 List<string> 新增多個元素，可以使用 AddRange 方法。這是一個範例：
                 //keywords.Add();
                 List<string> additionalKeywords = new List<string> { "无𡚶", "𧰼", "系辭", "擊詞", "擊辭", "繫驟",
-                    "乹","〈乾〉", "〈坤〉", "〈乾坤〉", "咸恒","剥","頥","㢲","旣濟","涣","兑","〈泰〉","〈否〉","〈損〉","〈益〉","〈屯〉","〈豫〉","〈旡妄〉","〈復〉","〈震〉",
+                    "乹","〈乾〉", "〈坤〉", "〈乾坤〉", "咸恒","剥","頥","㢲","旣濟","涣","兑","大壮",
+                    "〈泰〉","〈否〉","〈損〉","〈益〉","〈屯〉","〈豫〉","〈旡妄〉","〈復〉","〈震〉",
                     "少隂","太隂",
                 "𥘉九","𭃨九","𭃡九","𥘉六","𭃨六","𭃡六"};
                 keywords.AddRange(additionalKeywords);
@@ -7977,8 +8010,28 @@ internal static string getImageUrl() {
 
                     }
                     //輸入檢索條件
-                    //iwe.SendKeys(keyword);
-                    iwe.SendKeys(OpenQA.Selenium.Keys.Shift + OpenQA.Selenium.Keys.Insert);
+                    try
+                    {
+                        iwe.SendKeys(keyword);
+                    }
+                    catch (Exception ex)
+                    {
+                        switch (ex.HResult)
+                        {
+                            case -2146233088:
+                                if (ex.Message.StartsWith("unknown error: ChromeDriver only supports characters in the BMP"))
+                                {
+                                    //iwe.SendKeys(OpenQA.Selenium.Keys.Shift + OpenQA.Selenium.Keys.Insert);
+                                    ChromeDriverOnlySupportsCharactersBMP(iwe, keyword);
+                                }
+                                else
+                                    Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ":" + ex.Message);
+                                break;
+                            default:
+                                Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ":" + ex.Message);
+                                break;
+                        }
+                    }
                     iwe.SendKeys(OpenQA.Selenium.Keys.Enter);
 
                     //Total 0
@@ -8119,7 +8172,27 @@ internal static string getImageUrl() {
                     }
 
                     iweKeywordInputBox.Clear();
-                    iweKeywordInputBox.SendKeys(keyword);
+                    try
+                    {
+                        iweKeywordInputBox.SendKeys(keyword);
+                    }
+                    catch (Exception ex)
+                    {
+                        switch (ex.HResult)
+                        {
+                            case -2146233088:
+                                if (ex.Message.StartsWith("unknown error: ChromeDriver only supports characters in the BMP"))
+                                {
+                                    ChromeDriverOnlySupportsCharactersBMP(iweKeywordInputBox, keyword);
+                                }
+                                else
+                                    Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ":" + ex.Message);
+                                break;
+                            default:
+                                Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ":" + ex.Message);
+                                break;
+                        }
+                    }
 
                     //按下「搜尋」：
                     //IWebElement iwe = waitFindWebElementBySelector_ToBeClickable("#frmTitle > table > tbody > tr:nth-child(2) > td > table > tbody > tr:nth-child(8) > td > input[type=IMAGE]:nth-child(1)");
@@ -8177,7 +8250,7 @@ internal static string getImageUrl() {
                                     //按下「附註開啟」以展開小註
                                     {
                                         iwe.Click();
-                                        Form1.playSound(Form1.soundLike.done);
+                                        Form1.playSound(Form1.soundLike.done, true);
                                     }
 
                                 }
@@ -8239,7 +8312,29 @@ internal static string getImageUrl() {
                 {
                     //輸入查詢關鍵字
                     iwe1.Clear();
-                    iwe1.SendKeys(keyword);
+
+                    try
+                    {
+                        iwe1.SendKeys(keyword);
+                    }
+                    catch (Exception ex)
+                    {
+                        switch (ex.HResult)
+                        {
+                            case -2146233088:
+                                if (ex.Message.StartsWith("unknown error: ChromeDriver only supports characters in the BMP"))
+                                {
+                                    ChromeDriverOnlySupportsCharactersBMP(iwe1, keyword);
+                                }
+                                else
+                                    Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ":" + ex.Message);
+                                break;
+                            default:
+                                Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ":" + ex.Message);
+                                break;
+                        }
+                    }
+
 
                     //按下「查詢」按鈕
                     iwe1 = waitFindWebElementBySelector_ToBeClickable("body > form > table > tbody > tr:nth-child(2) > td > table > tbody > tr > td.leftbg > table > tbody > tr:nth-child(1) > td > table > tbody > tr:nth-child(2) > td > input.s_btn.hjblock");
@@ -8288,7 +8383,7 @@ internal static string getImageUrl() {
                         {
                             iwe1 = waitFindWebElementBySelector_ToBeClickable("body > form > table > tbody > tr:nth-child(2) > td > table > tbody > tr > td > table > tbody > tr:nth-child(2) > td > table > tbody > tr:nth-child(1) > td.seqno");
                             returnValue = true;
-                            Form1.playSound(Form1.soundLike.info);
+                            Form1.playSound(Form1.soundLike.info, true);//靜音模式時仍播出
                             break;
                         }
                         iwe1 = waitFindWebElementBySelector_ToBeClickable("body > form > table > tbody > tr:nth-child(2) > td > table > tbody > tr > td.leftbg > table > tbody > tr:nth-child(1) > td > table > tbody > tr:nth-child(2) > td > input.s_btn.hjblock", 0.3);
@@ -8330,13 +8425,15 @@ internal static string getImageUrl() {
             //    BringToFront("chrome");
             //}
 
+            #region 單個關鍵字查詢結束
             ListIndex_Hanchi_SearchingKeywordsYijing++;
             if (ListIndex_Hanchi_SearchingKeywordsYijing > keywords.Count - 1)
             {
                 ListIndex_Hanchi_SearchingKeywordsYijing = 0;
-                Form1.playSound(Form1.soundLike.finish, true);
+                Form1.playSound(Form1.soundLike.finish, true);//靜音模式時仍播出
                 returnValue = true;
             }
+            #endregion//單個關鍵字查詢結束
 
             ////（還似不行！故還原）前已由Copilot大菩薩提供 Timeouts 方法及相關類別解決了。感恩感恩　讚歎讚歎　Copilot大菩薩　南無阿彌陀佛
             //if (!returnValue && caption == "漢籍全文文本閱讀")//因為網頁完全開啟會等很久
@@ -8901,14 +8998,56 @@ internal static string getImageUrl() {
         /// <summary>
         /// 作為Selenium發生"no such window: target window already closed"例外情形的處理函式
         /// </summary>
-        internal static void noSuchWindowErrHandler()
+        internal static void NoSuchWindowErrHandler()
         {
             Form1.playSound(Form1.soundLike.error, true);
 
             if (IsWindowHandleValid(driver, LastValidWindow))
                 driver.SwitchTo().Window(LastValidWindow);
             else
-                Form1.ResetLastValidWindow();
+                try
+                {
+                    Form1.ResetLastValidWindow();
+                }
+                catch (Exception)
+                {
+                    try
+                    {
+                        driver.SwitchTo().NewWindow(WindowType.Tab);
+                    }
+                    catch (Exception ex)
+                    {
+                        try
+                        {
+                            Debugger.Break();
+                            killchromedriverFromHere();
+                            killProcesses(new string[] { "chrome" });
+                            driver = DriverNew();
+
+                        }
+                        catch (Exception)
+                        {
+                            Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
+                            throw;
+                        }
+                    }
+
+                }
+        }
+
+        /// <summary>
+        /// /// 作為Selenium發生"ChromeDriver only supports characters in the BMP"例外情形的處理函式
+        /// -2146233088: ChromeDriver only supports characters in the BMP
+        /// </summary>
+        /// <param name="iwe">要操作的網頁元件</param>
+        /// <param name="clipboardSetText">要貼上的文字（原本Sendkeys要送的按鍵）</param>
+        internal static void ChromeDriverOnlySupportsCharactersBMP(IWebElement iwe, string clipboardSetText)
+        {
+            //Form1.playSound(Form1.soundLike.error, true);
+            if (clipboardSetText == string.Empty) return;
+            Clipboard.SetText(clipboardSetText);
+            iwe.SendKeys(OpenQA.Selenium.Keys.Shift + OpenQA.Selenium.Keys.Insert);//改成貼上
+
         }
 
         /// <summary>
@@ -8945,7 +9084,7 @@ internal static string getImageUrl() {
                 {
                     if (ex.Message.StartsWith("no such window: target window already closed"))
                     {
-                        noSuchWindowErrHandler();
+                        NoSuchWindowErrHandler();
                         goto retry;
                     }
                     else if (ex.Message.StartsWith("An unknown exception was encountered sending an HTTP request to the remote WebDriver server for URL "))
@@ -9053,7 +9192,7 @@ internal static string getImageUrl() {
                 {
                     if (ex.Message.StartsWith("no such window: target window already closed"))
                     {
-                        noSuchWindowErrHandler();
+                        NoSuchWindowErrHandler();
                         //Form1.playSound(Form1.soundLike.error, true);
                         //if (IsWindowHandleValid(driver, LastValidWindow))
                         //    driver.SwitchTo().Window(LastValidWindow);
@@ -9107,7 +9246,7 @@ internal static string getImageUrl() {
                 {
                     if (ex.Message.StartsWith("no such window: target window already closed"))
                     {
-                        noSuchWindowErrHandler();
+                        NoSuchWindowErrHandler();
                         //Form1.playSound(Form1.soundLike.error, true);
                         //if (IsWindowHandleValid(driver, LastValidWindow))
                         //    driver.SwitchTo().Window(LastValidWindow);
@@ -9188,7 +9327,7 @@ internal static string getImageUrl() {
                         //    driver.SwitchTo().Window(LastValidWindow);
                         //else
                         //    Form1.ResetLastValidWindow();
-                        noSuchWindowErrHandler();
+                        NoSuchWindowErrHandler();
                         goto retry;
                     }
                     else
@@ -9239,7 +9378,7 @@ internal static string getImageUrl() {
                 {
                     if (ex.Message.StartsWith("no such window: target window already closed"))
                     {
-                        noSuchWindowErrHandler();
+                        NoSuchWindowErrHandler();
                         goto retry;
                     }
                     else
@@ -9296,7 +9435,32 @@ internal static string getImageUrl() {
         {
             //var driver = new ChromeDriver();
             openNewTabWindow();
-            driver.Navigate().GoToUrl(imageUrl);
+        reGoto:
+            try
+            {
+                driver.Navigate().GoToUrl(imageUrl);
+            }
+            catch (Exception ex)
+            {
+                switch (ex.HResult)
+                {
+                    case -2146233088://The HTTP request to the remote WebDriver server for URL http://localhost:5908/session/0b71d83809d531eca84ae9d77e0b4888/url timed out after 30.5 seconds.
+                        if (ex.Message.EndsWith(" timed out after 30.5 seconds."))
+                        {
+                            Thread.Sleep(1500);
+                            if (Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("下載書圖的網頁有問題，是否繼續？" +
+                                Environment.NewLine + Environment.NewLine +"請確認網頁沒問題再按確定，否則請按取消。感恩感恩　南無阿彌陀佛") == DialogResult.Cancel)
+                                return false;
+                            goto reGoto;
+                        }
+                        else
+                            Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
+                            break;
+                    default:
+                        Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);                        
+                        return false;
+                }
+            }
             BringToFront("chrome");
             try
             {

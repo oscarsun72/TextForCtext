@@ -606,7 +606,7 @@ namespace TextForCtext
                 x = x.Replace(replaceDChar[i], replaceChar[i]);
             }
 
-            
+
             //以下舊式
             //foreach (var item in replaceDChar)
             //{
@@ -696,12 +696,12 @@ namespace TextForCtext
                 string pattern = "[" + Regex.Escape("卷上下卄一二三四五六七八九十卅卌<p>") + "]";
                 line = Regex.Replace(line, pattern, "");
                 double similarity = Fuzz.Ratio(title, line) / 100.0;
-                if (similarity >= threshold )
+                if (similarity >= threshold)
                 {
                     //前一段若為「|」通常是卷末題目
-                    if (i > lines.Length - 2 && lines[i - 1] == "|") continue; 
+                    if (i > lines.Length - 2 && lines[i - 1] == "|") continue;
 
-                        location = xChecking.IndexOf(lines[i]);
+                    location = xChecking.IndexOf(lines[i]);
                     if (location == -1)
                     {
                         // 計算第 i 行在 xChecking 中的行頭位置
@@ -835,7 +835,7 @@ namespace TextForCtext
             text = rgx.Replace(text, replacement);
 
             #region 全注文標記之處理
-            text = text.Replace("}}" + Environment.NewLine+ "{{",Environment.NewLine);
+            text = text.Replace("}}" + Environment.NewLine + "{{", Environment.NewLine);
 
             #endregion
 
@@ -891,7 +891,10 @@ namespace TextForCtext
         /// <returns>傳回清除的值</returns>
         public static string RemoveNestedBrackets(string input)
         {
-            string pattern = @"【[^【】]*】";
+            string pattern = @"[【】]";
+            Regex regex = new Regex(pattern);
+            if(!regex.IsMatch(input)) return input;            
+            pattern = @"【[^【】]*】";
             return Regex.Replace(input, pattern, match =>
             {
                 string content = match.Value;
@@ -959,6 +962,8 @@ namespace TextForCtext
         /// <param name="text"></param>
         public static void Spaces2Braces(ref string text)
         {///這段程式碼使用了正則表達式（Regular Expression）來找出文本中成對一組的半形空格「 」，並將其替換為成對一組的雙大括弧「{{}}」。請將 “您的文本” 替換為您要處理的文本。
+            //20240908 Copilot大菩薩：要在 C# 中快速且簡單地計算字串中半形空格的數量，可以使用 Count 方法。……這段程式碼使用了 System.Linq 命名空間中的 Count 擴充方法來計算字串中所有半形空格的數量。
+            if (text.Count(c => c == ' ') < 2) return;
             string pattern = " ([^ ]*) ";
             string replacement = "{{$1}}";
             string result = Regex.Replace(text, pattern, replacement);
