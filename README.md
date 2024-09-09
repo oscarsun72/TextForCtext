@@ -304,7 +304,7 @@ Ctrl + F12 ：檢索《國語辭典》
 - Alt + n ： **單字**檢索《漢語多功能字庫》並取回其說文解釋欄位之值插入至插入點位置。 （n= 能 neng）
 - Alt + o ： **單字**檢索[《說文解字》網站](https://www.shuowen.org/)並取回其解釋欄位及網址值插入至插入點位置。 （o= 說文解字 ShuoWen.ORG 的 O）
 - Ctrl + Alt + x ： **單字**檢索《康熙字典網上版》（x = xi 熙）
-- Rem Ctrl + d + s ：檢索《國學大師》（ds：大師 da-shi 的 d、s）
+- Ctrl + d + s （按住 Ctrl 依序按d、s） ：檢索《國學大師》（ds：大師 da-shi 的 d、s）
 - Alt + g ： 以選取文字檢索Google
 - Alt + b ： 以選取文字檢索百度（百度 baidu 的 b ）
 - 
