@@ -784,6 +784,8 @@ Ctrl+ 滑鼠左鍵：清除框中所有文字
 > 請將以上3檔均複製到 Dropbox 安裝目錄根目錄中，許多功能才能正常執行（若無安裝 Dropbox ，請自己在建立相關路徑，如末學登入Windows的帳號是「**oscar**」，路徑就是：C:\Users\**oscar**\Dropbox 。將以上路徑中的帳號換成您的應該就可以了）。
 ### Word VBA執行環境配置：
 - 安裝 MS Word 32位元
+ > 末學沒有64位元的 Word 供檢測，唯　恩師黃沛榮先生似乎是裝64位元的，有機會才會在他的機上檢測。見諒。若有　賢友願提供 64位元版以供檢測，亦歡迎。感恩感恩　南無阿彌陀佛
+
 - 在控制台→時鐘、語言和區域→「地區」方塊→「系統管理」頁籤下，「非unicode程式的語言」要「變更系統地區設定」為「中文（繁體，台灣）」
 - 將 [TextForCtextPortable.zip](https://github.com/oscarsun72/TextForCtext/raw/master/TextForCtextPortable.zip) 解壓目錄下的 WordVBASeleniumTLB 資料夾中的 TextForCtextWordVBA.dotm 檔案，加入MS Word安裝路逕"%appdata%\Microsoft\Word\STARTUP"即可。
 > 相關用得上的 Word VBA 均配置好在這個範本檔案裡，其他設定，請看操作演示。
