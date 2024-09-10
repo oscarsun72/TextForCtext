@@ -5784,7 +5784,7 @@ internal static string getImageUrl() {
             Clipboard.SetText(downloadImgFullName);
 
             //等待選取檔案對話框開啟
-            Thread.Sleep(800 + (
+            Thread.Sleep(1600 + (
                 800 + Extend_the_wait_time_for_the_Open_Old_File_dialog_box_to_appear_Millisecond < 0 ? 0 : Extend_the_wait_time_for_the_Open_Old_File_dialog_box_to_appear_Millisecond));//最小值（須在重開機後或系統最小負載時）（連「開啟」舊檔之視窗也看不見，即可完成）
             //Thread.Sleep(1200);
             //Thread.Sleep(500);            
@@ -6665,7 +6665,7 @@ internal static string getImageUrl() {
             iwe.Click();
 
             //等待「開啟」檔案對話框開啟
-            Thread.Sleep(800 + (
+            Thread.Sleep(1600 + (
                 800 + Extend_the_wait_time_for_the_Open_Old_File_dialog_box_to_appear_Millisecond < 0 ? 0 :
                 Extend_the_wait_time_for_the_Open_Old_File_dialog_box_to_appear_Millisecond));//最小值（須在重開機後或系統最小負載時）（連「開啟」舊檔之視窗也看不見，即可完成）
                                                                                               //Thread.Sleep(1200);
