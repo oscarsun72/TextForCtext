@@ -308,7 +308,7 @@ Ctrl + F12 ：檢索《國語辭典》
 - Ctrl + d + s （按住 Ctrl 依序按d、s） ：檢索《國學大師》（ds：大師 da-shi 的 d、s）
 - Alt + g ： 以選取文字檢索Google
 - Alt + b ： 以選取文字檢索百度（百度 baidu 的 b ）
-- Alt + shift + , 即 ' Alt + < 或 Ctrl + Alt + F9 或 Ctrl + Alt + F5 同在TextForCtext 的 Alt + , 與 Alt + F9 與 Alt + F5。《漢籍全文資料庫》或《中國哲學書電子化計劃》檢索《易》學關鍵字。蓋藉由本軟件介面作中介爾。
+- Alt + shift + , 即 ' Alt + < 或 Ctrl + Alt + F9 或 Alt + shift + F5 同在TextForCtext 的 Alt + , 與 Alt + F9 與 Alt + F5。《漢籍全文資料庫》或《中國哲學書電子化計劃》檢索《易》學關鍵字。蓋藉由本軟件介面作中介爾。
 - Alt + \` ： 貼上複製之內容時檢查是否已經錄入，在注文前後加上圓括弧，並標識《易》學關鍵字
 - Alt + Shift + \` ： 貼上複製自《漢籍全文資料庫》之內容時檢查是否已經錄入，在注文前後加上圓括弧，並標識《易》學關鍵字
 - Alt + 1 ： 貼上複製自《中國哲學書電子化計劃》（CTP）的文字版之內容並在注文前後加上圓括弧。
