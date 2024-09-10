@@ -15,86 +15,86 @@ Dim SimilarityResult As New Scripting.Dictionary '<相似度名,相似度>
 Dim currentProcedureName As String '正在執行的程序名稱
 Dim ProceduresNameAliasPair As New Scripting.Dictionary '記下所有執行過的程序名稱及其別名<currentProcedureName,procedureNameAlias>
 Private Function Initialize(ByVal text1, ByVal text2) As similarText
-If s1 = text1 And s2 = text2 Then Exit Function
-Dim w, str1, str2
-If s1 <> text1 Then
-    If dict1.Count > 0 Then dict1.RemoveAll
-    s1 = text1
-    If VBA.VarType(s1) = vbString Then
-        Rem 對於surrogate 已修正，待測試，觀察中 20230227
-        str1 = 文字處理.SplitWithoutDelimiter_StringToStringArray((s1)) '強制以傳值方式傳遞引數 https://learn.microsoft.com/zh-tw/dotnet/visual-basic/programming-guide/language-features/procedures/how-to-force-an-argument-to-be-passed-by-value
-    Else
-        str1 = s1
-    End If
-    For Each w In str1
-        If Not dict1.Exists(w) Then
-            dict1.Add w, 1
+    If s1 = text1 And s2 = text2 Then Exit Function
+    Dim w, str1, str2
+    If s1 <> text1 Then
+        If dict1.Count > 0 Then dict1.RemoveAll
+        s1 = text1
+        If VBA.VarType(s1) = vbString Then
+            Rem 對於surrogate 已修正，待測試，觀察中 20230227
+            str1 = 文字處理.SplitWithoutDelimiter_StringToStringArray((s1)) '強制以傳值方式傳遞引數 https://learn.microsoft.com/zh-tw/dotnet/visual-basic/programming-guide/language-features/procedures/how-to-force-an-argument-to-be-passed-by-value
         Else
-            dict1.item(w) = dict1.item(w) + 1
+            str1 = s1
         End If
-    Next w
-End If
-If s2 <> text2 Then
-    If dict2.Count > 0 Then dict2.RemoveAll
-    s2 = text2
-    If VBA.VarType(s2) = vbString Then
-        str2 = 文字處理.SplitWithoutDelimiter_StringToStringArray((s2))
-    Else
-        str2 = s2
+        For Each w In str1
+            If Not dict1.Exists(w) Then
+                dict1.Add w, 1
+            Else
+                dict1.item(w) = dict1.item(w) + 1
+            End If
+        Next w
     End If
-    For Each w In str2
-        If Not dict2.Exists(w) Then
-            dict2.Add w, 1
+    If s2 <> text2 Then
+        If dict2.Count > 0 Then dict2.RemoveAll
+        s2 = text2
+        If VBA.VarType(s2) = vbString Then
+            str2 = 文字處理.SplitWithoutDelimiter_StringToStringArray((s2))
         Else
-            dict2.item(w) = dict2.item(w) + 1
+            str2 = s2
         End If
-    Next w
-End If
+        For Each w In str2
+            If Not dict2.Exists(w) Then
+                dict2.Add w, 1
+            Else
+                dict2.item(w) = dict2.item(w) + 1
+            End If
+        Next w
+    End If
 End Function
 '判斷文本間是否相似
 Function Similarity(ByVal text1, ByVal text2) As Boolean 'text1 被比對者 text2 拿來比對者
-If IsEmpty(text2) Or IsEmpty(text1) Then Exit Function
-If SimilarityResult.Count > 0 Then SimilarityResult.RemoveAll
-similarWithTextCopy = text2
-Initialize text1, text2
-If Me.CompareDictionaries(dict1, dict2) Then
-    Similarity = True
-ElseIf Me.CompareDictionarySimilarity(dict1, dict2) > 0.8 Then
-    Similarity = True
-ElseIf jaccard_Similarity() > 0.8 Then
-    Similarity = True
-ElseIf cosine_Similarity() > 0.92 Then 'cosine餘弦方法好像在文字多時會失誤，待觀察！ 感恩感恩　南無阿彌陀佛 20230227
-    Similarity = True
-End If
-If Similarity Then
-    similarTextCopy = text1
-Else
-    similarTextCopy = ""
-End If
+    If IsEmpty(text2) Or IsEmpty(text1) Then Exit Function
+    If SimilarityResult.Count > 0 Then SimilarityResult.RemoveAll
+    similarWithTextCopy = text2
+    Initialize text1, text2
+    If Me.CompareDictionaries(dict1, dict2) Then
+        Similarity = True
+    ElseIf Me.CompareDictionarySimilarity(dict1, dict2) > 0.8 Then
+        Similarity = True
+    ElseIf jaccard_Similarity() > 0.8 Then
+        Similarity = True
+    ElseIf cosine_Similarity() > 0.92 Then 'cosine餘弦方法好像在文字多時會失誤，待觀察！ 感恩感恩　南無阿彌陀佛 20230227
+        Similarity = True
+    End If
+    If Similarity Then
+        similarTextCopy = text1
+    Else
+        similarTextCopy = ""
+    End If
 End Function
 
 '回傳文本間相似的百分比
 Function SimilarityPercent(ByVal text1, ByVal text2) As Variant 'text1 被比對者 text2 拿來比對者
-If IsEmpty(text2) Or IsEmpty(text1) Then Exit Function
-If SimilarityResult.Count > 0 Then SimilarityResult.RemoveAll
-similarWithTextCopy = text2
-Dim sim As Double
-Initialize text1, text2
-If Me.CompareDictionaries(dict1, dict2) Then
-    sim = 1
-Else
-    sim = (Me.CompareDictionarySimilarity(dict1, dict2) + cosine_Similarity() + jaccard_Similarity()) / 3
-End If
-Rem chatGPT大菩薩：在 SimilarityPercent 函數中，應使用 Round 函數的第二個參數，以指定小數點後保留的位數。例如，要保留一位小數，可以使用 VBA.Round(sim * 100, 1)。
-SimilarityPercent = VBA.Round(sim * 100, 2)
+    If IsEmpty(text2) Or IsEmpty(text1) Then Exit Function
+    If SimilarityResult.Count > 0 Then SimilarityResult.RemoveAll
+    similarWithTextCopy = text2
+    Dim sim As Double
+    Initialize text1, text2
+    If Me.CompareDictionaries(dict1, dict2) Then
+        sim = 1
+    Else
+        sim = (Me.CompareDictionarySimilarity(dict1, dict2) + cosine_Similarity() + jaccard_Similarity()) / 3
+    End If
+    Rem chatGPT大菩薩：在 SimilarityPercent 函數中，應使用 Round 函數的第二個參數，以指定小數點後保留的位數。例如，要保留一位小數，可以使用 VBA.Round(sim * 100, 1)。
+    SimilarityPercent = VBA.Round(sim * 100, 2)
 End Function
 Rem 20230222 creedit with chatGPT大菩薩：比較 Dictionary 對象：
 Rem 在 VBA 中，比較兩個 Dictionary 對象的相似度或完全相同，需要分別比較它們的鍵和值。以下是一些比較方法：
 Rem 1.  比較兩個 Dictionary 是否完全相同:
 'Function CompareDictionaries(ByVal dict1 As Object, ByVal dict2 As Object) As Boolean
 Function CompareDictionaries(ByVal dict1 As Scripting.Dictionary, ByVal dict2 As Scripting.Dictionary) As Boolean
-currentProcedureName = "CompareDictionaries"
-ProceduresNameAliasPair(currentProcedureName) = "用字相似度"
+    currentProcedureName = "CompareDictionaries"
+    ProceduresNameAliasPair(currentProcedureName) = "用字相似度"
     If dict1.Count = 0 Or dict2.Count = 0 Then Exit Function
     If dict1.Count <> dict2.Count Then
         CompareDictionaries = False
@@ -286,30 +286,30 @@ Function JaccardSimilarity(s1 As Variant, s2 As Variant) As Double
 End Function
 
 Private Function cosine_Similarity() As Double
-If dict1.Count = 0 Or dict2.Count = 0 Then Exit Function
-currentProcedureName = "cosine_Similarity"
-ProceduresNameAliasPair(currentProcedureName) = "餘弦相似度"
-'Private Function Cosine_Similarity(s1 As Variant, s2 As Variant) As Double
-'    Dim dict1 As Object, dict2 As Object
-'    Set dict1 = CreateObject("Scripting.Dictionary")
-'    Set dict2 = CreateObject("Scripting.Dictionary")
-'
-'    Dim w As Variant
-'    For Each w In s1
-'        If Not dict1.Exists(w) Then
-'            dict1.Add w, 1
-'        Else
-'            dict1.item(w) = dict1.item(w) + 1
-'        End If
-'    Next w
-'
-'    For Each w In s2
-'        If Not dict2.Exists(w) Then
-'            dict2.Add w, 1
-'        Else
-'            dict2.item(w) = dict2.item(w) + 1
-'        End If
-'    Next w
+    If dict1.Count = 0 Or dict2.Count = 0 Then Exit Function
+    currentProcedureName = "cosine_Similarity"
+    ProceduresNameAliasPair(currentProcedureName) = "餘弦相似度"
+    'Private Function Cosine_Similarity(s1 As Variant, s2 As Variant) As Double
+    '    Dim dict1 As Object, dict2 As Object
+    '    Set dict1 = CreateObject("Scripting.Dictionary")
+    '    Set dict2 = CreateObject("Scripting.Dictionary")
+    '
+    '    Dim w As Variant
+    '    For Each w In s1
+    '        If Not dict1.Exists(w) Then
+    '            dict1.Add w, 1
+    '        Else
+    '            dict1.item(w) = dict1.item(w) + 1
+    '        End If
+    '    Next w
+    '
+    '    For Each w In s2
+    '        If Not dict2.Exists(w) Then
+    '            dict2.Add w, 1
+    '        Else
+    '            dict2.item(w) = dict2.item(w) + 1
+    '        End If
+    '    Next w
     
     Dim dotProduct As Double, mag1 As Double, mag2 As Double, word As Variant
     For Each word In dict1
@@ -334,27 +334,27 @@ ProceduresNameAliasPair(currentProcedureName) = "餘弦相似度"
     End If
 End Function
 Private Function jaccard_Similarity() As Double
-If dict1.Count = 0 Or dict2.Count = 0 Then Exit Function
-currentProcedureName = "jaccard_Similarity"
-ProceduresNameAliasPair(currentProcedureName) = "jaccard相似度"
-'Private Function jaccard_Similarity(s1 As Variant, s2 As Variant) As Double
-'    Dim dict1 As Object, dict2 As Object
-'    Set dict1 = CreateObject("Scripting.Dictionary")
-'    Set dict2 = CreateObject("Scripting.Dictionary")
-'
-'    Dim w As Variant
-'    For Each w In s1
-'        If Not dict1.Exists(w) Then
-'            dict1.Add w, 1
-'        End If
-'    Next w
-'
-'    For Each w In s2
-'        If Not dict2.Exists(w) Then
-'            dict2.Add w, 1
-'        End If
-'    Next w
-'
+    If dict1.Count = 0 Or dict2.Count = 0 Then Exit Function
+    currentProcedureName = "jaccard_Similarity"
+    ProceduresNameAliasPair(currentProcedureName) = "jaccard相似度"
+    'Private Function jaccard_Similarity(s1 As Variant, s2 As Variant) As Double
+    '    Dim dict1 As Object, dict2 As Object
+    '    Set dict1 = CreateObject("Scripting.Dictionary")
+    '    Set dict2 = CreateObject("Scripting.Dictionary")
+    '
+    '    Dim w As Variant
+    '    For Each w In s1
+    '        If Not dict1.Exists(w) Then
+    '            dict1.Add w, 1
+    '        End If
+    '    Next w
+    '
+    '    For Each w In s2
+    '        If Not dict2.Exists(w) Then
+    '            dict2.Add w, 1
+    '        End If
+    '    Next w
+    '
     Dim intersection As Double, union As Double, word As Variant
     For Each word In dict1
         If dict2.Exists(word) Then
@@ -387,11 +387,11 @@ Public Property Get SimilarityResults() As Scripting.Dictionary
 End Property
 
 Public Property Get SimilarityResultsString() As String
-Dim resultStr As String, key
-For Each key In SimilarityResult.keys
-    resultStr = resultStr & key & space(2) & VBA.vbTab & VBA.CStr(VBA.Round(SimilarityResult(key), 2) * 100) & "％" & vbCr
-Next key
-If resultStr <> "" Then SimilarityResultsString = VBA.Left(resultStr, Len(resultStr) - Len(vbCr))
+    Dim resultStr As String, key
+    For Each key In SimilarityResult.keys
+        resultStr = resultStr & key & space(2) & VBA.vbTab & VBA.CStr(VBA.Round(SimilarityResult(key), 2) * 100) & "％" & vbCr
+    Next key
+    If resultStr <> "" Then SimilarityResultsString = VBA.Left(resultStr, Len(resultStr) - Len(vbCr))
 End Property
 
 
@@ -515,13 +515,13 @@ Rem end 以上尚待處理：https://blog.csdn.net/dyfgs/article/details/7177088 感恩感
 
 
 Private Sub Class_Terminate()
-Set SimilarityResult = Nothing
-Set dict1 = Nothing
-Set dict2 = Nothing
-s1 = Empty: s2 = Empty
-similarTextCopy = Empty
-similarWithTextCopy = Empty
-Set ProceduresNameAliasPair = Nothing
-currentProcedureName = Empty
+    Set SimilarityResult = Nothing
+    Set dict1 = Nothing
+    Set dict2 = Nothing
+    s1 = Empty: s2 = Empty
+    similarTextCopy = Empty
+    similarWithTextCopy = Empty
+    Set ProceduresNameAliasPair = Nothing
+    currentProcedureName = Empty
 End Sub
 

@@ -3099,9 +3099,9 @@ Sub 漢籍電子文獻資料庫文本整理_注文前後加括號() '最後執行 Docs.mark易學關鍵字(在
             End If
         Next ePunct
         
-        Dim pasteAddedRange As Range
-        Set pasteAddedRange = d.Range
-        pasteAddedRange.start = d.Range.End
+        Dim pasteAppendedRange As Range
+        Set pasteAppendedRange = d.Range
+        pasteAppendedRange.start = d.Range.End
         '汰重貼上內容部分由 mark易學關鍵字 負責，標識關鍵字則交由送交自動標點內含的呼叫 mark易學關鍵字 來處理
         If hasPunct Then
             Docs.mark易學關鍵字 Nothing, False
@@ -3116,14 +3116,32 @@ Sub 漢籍電子文獻資料庫文本整理_注文前後加括號() '最後執行 Docs.mark易學關鍵字(在
         Else
             If Docs.mark易學關鍵字(Nothing, hasPunct) Then
             '貼上之後由其貼到文件末端、又預留一些分段符號此一特徵，可以抓到貼上的Range
-                pasteAddedRange.End = d.Range.End
-                pasteAddedRange.Select '因為送交自動標點程序內有 Selection.Cut
+                pasteAppendedRange.End = d.Range.End
+                pasteAppendedRange.Select '因為送交自動標點程序內有 Selection.Cut
                 '以下程序內已有 mark易學關鍵字 故
-                Docs.中國哲學書電子化計劃_只保留正文注文_且注文前後加括弧_貼到古籍酷自動標點
-                pasteAddedRange.InsertParagraphAfter
-                pasteAddedRange.InsertParagraphAfter
-                pasteAddedRange.InsertParagraphAfter
-                pasteAddedRange.InsertParagraphAfter
+                If TextForCtext.TextForCtextExist Then
+                    pasteAppendedRange.Cut
+                    DoEvents
+                    'SystemSetup.wait
+                    If TextForCtext.GjcoolPunct() Then
+                        '因為在文件的最末端
+                        pasteAppendedRange.SetRange pasteAppendedRange.End - 1, pasteAppendedRange.End - 1
+                        pasteAppendedRange.text = ClipBoardObject.GetClipboard 'ClipBoardObject.GetClipboard
+                        DoEvents
+                        SystemSetup.wait 0.1
+                        Docs.marking易學關鍵字 pasteAppendedRange, Keywords.易學KeywordsToMark
+                        SystemSetup.playSound 2
+                    Else
+                        MsgBox "發生錯誤，請重試！", vbCritical
+                        GoTo finish
+                    End If
+                Else
+                    Docs.中國哲學書電子化計劃_只保留正文注文_且注文前後加括弧_貼到古籍酷自動標點
+                End If
+                pasteAppendedRange.InsertParagraphAfter
+                pasteAppendedRange.InsertParagraphAfter
+                pasteAppendedRange.InsertParagraphAfter
+                pasteAppendedRange.InsertParagraphAfter
             End If
         End If
 
@@ -3131,7 +3149,10 @@ Sub 漢籍電子文獻資料庫文本整理_注文前後加括號() '最後執行 Docs.mark易學關鍵字(在
         DoEvents
         rng.Document.Activate
     End If
+finish:
     word.Application.ScreenUpdating = True
+    word.Application.Activate
+'    AppActivate word.ActiveDocument.ActiveWindow.Caption
 End Sub
 
 Sub 漢籍電子文獻資料庫文本整理_注文前後加括號_origin()

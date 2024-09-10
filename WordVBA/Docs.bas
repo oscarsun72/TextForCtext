@@ -903,6 +903,8 @@ Function mark易學關鍵字(Optional pasteRange As Range, Optional doNotMark As Bool
             Dim similarCompare As New Collection
             Set similarCompare = Docs.similarTextCheckInSpecificDocument(d, clipBTxt)
             If similarCompare.item(1) Then
+                word.Application.Activate
+'                AppActivate word.ActiveWindow.Caption
                 If MsgBox("文本相似度為 " & vbCr & similarCompare.item(3) _
                     & VBA.vbCr & vbCr & VBA.vbTab & "相似段落為：" & VBA.vbCr & VBA.vbCr & VBA.IIf(VBA.Len(similarCompare.item(2)) > 255, VBA.Left(similarCompare.item(2), 255) & "……", similarCompare.item(2)) & vbCr & vbCr & vbCr & _
                     "按下「確定」將會選取類似段落，請自行檢查是否仍要再貼入" & vbCr & vbCr & "按下「取消」則忽略檢查，將繼續執行", vbExclamation + vbOKCancel, "要貼入的文本在原文件中有類似的段落!!!") _
@@ -1069,6 +1071,19 @@ refres:
             rng.SetRange endDocOld - Len(sx), endDocOld
         End If
         rng.Select
+        Dim cntr As Byte
+
+        '如果選取範圍是文件末端，顯係沒找到，故以剪貼簿內前25字再找一次
+
+        If rng.End = rng.Document.Range.End Then
+
+            ClipBoardObject.SetClipboard VBA.Left(ClipBoardObject.GetClipboard, 25)
+
+            If cntr < 2 Then mark易學關鍵字
+
+            cntr = cntr + 1
+
+        End If
     '    word.Application.ScreenRefresh
         ActiveWindow.ScrollIntoView Selection.Characters(1) ', False
     Return
@@ -1145,7 +1160,10 @@ textClearPunctuation = text
 '清除標點符號
 punc.clearPunctuations textClearPunctuation: punc.clearPunctuations dClearPunctuation
 dCleanParagraphs = VBA.Split(dClearPunctuation, Chr(13))
+Dim cntr As Long
 For Each e In dCleanParagraphs
+    cntr = cntr + 1
+    If cntr Mod 20 = 0 Then SystemSetup.playSound 1
     If e <> "" Then
 '        If e = "易" Then Stop
         If similarText.Similarity(e, textClearPunctuation) Then

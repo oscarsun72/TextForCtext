@@ -1,6 +1,12 @@
 Attribute VB_Name = "ClipBoardObject"
 Option Explicit
-
+Rem creedit_with_Copilot大菩薩 20240910
+Rem https://www.facebook.com/oscarsun72/posts/pfbid02fCK6wJNrTJSo2Br4zKFrTxWoGd3pYdQhC1D3cxrHKFB7sVoV6LSL1XusVs45Q7EQl
+Rem https://www.facebook.com/oscarsun72/posts/pfbid02VYcQ4dMtZVZNcuiA3AAykxyj9pnspALVa6f7mf3CcP7Y44LE6NZMiGsj7R9TRJMwl
+Rem 註解解說：
+'SetClipboard：設置剪貼簿內容。使用 OpenClipboard 打開剪貼簿，EmptyClipboard 清空剪貼簿，然後使用 GlobalAlloc 分配內存，GlobalLock 鎖定內存，lstrcpy 複製字符串，最後使用 SetClipboardData 設置剪貼簿內容，並使用 CloseClipboard 關閉剪貼簿。
+'GetClipboard：讀取剪貼簿內容。使用 OpenClipboard 打開剪貼簿，檢查是否有可用的剪貼簿格式，然後使用 GetClipboardData 獲取剪貼簿數據，使用 GlobalLock 鎖定內存，lstrcpy 複製字符串，最後使用 CloseClipboard 關閉剪貼簿。
+'ClearClipboard：清空剪貼簿。使用 OpenClipboard 打開剪貼簿，EmptyClipboard 清空剪貼簿，並使用 CloseClipboard 關閉剪貼簿。
 #If VBA7 Then
     #If Win64 Then
         ' 64位元環境
@@ -66,13 +72,14 @@ Public Function GetClipboard() As String
             iLock = GlobalLock(iStrPtr)
             iLen = GlobalSize(iStrPtr)
             sUniText = String$(iLen \ 2& - 1&, vbNullChar)
-            RtlMoveMemory StrPtr(sUniText), iLock, iLen
+            RtlMoveMemory ByVal StrPtr(sUniText), ByVal iLock, iLen - 2
             GlobalUnlock iStrPtr
         End If
         GetClipboard = sUniText
     End If
     CloseClipboard
 End Function
+
 
 
 ' 清空剪貼簿

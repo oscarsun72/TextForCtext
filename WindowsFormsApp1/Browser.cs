@@ -7799,6 +7799,11 @@ internal static string getImageUrl() {
                     Form1.playSound(Form1.soundLike.over, true);
                     reClickFlag = true;
                 }
+                //reach traffic limit. wait 1.2 hours
+                if (waitFindWebElementBySelector_ToBeClickable("#main > div:nth-child(1)") != null)
+                    if (waitFindWebElementBySelector_ToBeClickable("#main > div:nth-child(1)").GetAttribute("textContent").StartsWith("reach traffic limit. wait "))
+                    { Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("超過額度！"); return false; }
+
                 if (DateTime.Now.Subtract(dt).TotalSeconds > 25) if (Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("標點逾時，是否繼續？") == DialogResult.Cancel) return false;
             }
             x = iwe.Text;

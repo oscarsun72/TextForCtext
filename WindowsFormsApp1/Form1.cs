@@ -8689,6 +8689,20 @@ namespace WindowsFormsApp1
                     textBox1.Text = x;
                     return;
                 }
+                if (e.KeyCode == Keys.F10)
+                {//Ctrl + Alt + f10： 將textBox1中選取的文字送去《古籍酷》自動標點。若無選取則將整個textBox1的內容送去。（略去其他檢查，唯小於20字元不處理）20240910
+                    if (browsrOPMode != BrowserOPMode.seleniumNew)
+                    {
+                        Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("請先以Selenium模式啟動Chrome瀏覽器（在textBox2中輸入「br」或「bb」就可以了），再繼續。");
+                        return;
+                    }
+                    e.Handled = true; Form1.playSound(Form1.soundLike.press);
+                    undoRecord(); PauseEvents();
+                    if (!textBox1.Focused) textBox1.Focus();
+                    this.toGjcoolPunct("https://gj.cool/punct", true, true);
+                    ResumeEvents();
+                    return;
+                }
 
             }
 
@@ -8831,12 +8845,22 @@ namespace WindowsFormsApp1
 
                 if (e.KeyCode == Keys.F10)
                 {//Ctrl + F10： 將textBox1中選取的文字送去《古籍酷》舊版自動標點。若無選取則將整個textBox1的內容送去。（小於20字元不處理）20240808（臺灣父親節）
+                    if (browsrOPMode != BrowserOPMode.seleniumNew)
+                    {
+                        Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("請先以Selenium模式啟動Chrome瀏覽器（在textBox2中輸入「br」或「bb」就可以了），再繼續。");
+                        return;
+                    }
                     e.Handled = true;
                     toGjcoolPunct("https://old.gj.cool/gjcool/index");
                     return;
                 }
                 if (e.KeyCode == Keys.F11)
                 {//Ctrl + F11： 將textBox1中選取的文字送去《古籍酷》舊版自動標點。若無選取則將整個textBox1的內容送去。（小於20字元不處理）20240808（臺灣父親節）
+                    if (browsrOPMode != BrowserOPMode.seleniumNew)
+                    {
+                        Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("請先以Selenium模式啟動Chrome瀏覽器（在textBox2中輸入「br」或「bb」就可以了），再繼續。");
+                        return;
+                    }
                     e.Handled = true;
                     toGjcoolPunct("https://old.gj.cool/gjcool/index");
                     return;
@@ -9099,6 +9123,11 @@ namespace WindowsFormsApp1
 
                 if (e.KeyCode == Keys.Oemcomma)
                 {//Alt + , : 在《漢籍全文資料庫》檢索易學關鍵字
+                    if (browsrOPMode != BrowserOPMode.seleniumNew)
+                    {
+                        Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("請先以Selenium模式啟動Chrome瀏覽器（在textBox2中輸入「br」或「bb」就可以了），再繼續。");
+                        return;
+                    }
                     e.Handled = true;
                     doHanchi_SearchingKeywordsYijing();
                     return;
@@ -9107,12 +9136,22 @@ namespace WindowsFormsApp1
 
                 if (e.KeyCode == Keys.F10)
                 {//Alt + F10 ： 將textBox1中選取的文字送去《古籍酷》自動標點。若無選取則將整個textBox1的內容送去。（小於20字元不處理）20240808（臺灣父親節）
+                    if (browsrOPMode != BrowserOPMode.seleniumNew)
+                    {
+                        Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("請先以Selenium模式啟動Chrome瀏覽器（在textBox2中輸入「br」或「bb」就可以了），再繼續。");
+                        return;
+                    }
                     e.Handled = true;
                     toGjcoolPunct("https://gj.cool/punct");
                     return;
                 }
                 if (e.KeyCode == Keys.F11)
                 {//Alt + F11 ： 將textBox1中選取的文字送去《古籍酷》自動標點。若無選取則將整個textBox1的內容送去。（小於20字元不處理）20240808（臺灣父親節）
+                    if (browsrOPMode != BrowserOPMode.seleniumNew)
+                    {
+                        Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("請先以Selenium模式啟動Chrome瀏覽器（在textBox2中輸入「br」或「bb」就可以了），再繼續。");
+                        return;
+                    }
                     e.Handled = true;
                     toGjcoolPunct("https://gj.cool/punct");
                     return;
@@ -9255,53 +9294,58 @@ namespace WindowsFormsApp1
         /// 送去《古籍酷》自動標點
         /// </summary>
         /// <param name="url">要送去的網站網址</param>
+        /// <param name="copyResult">是否要複製自動標點的結果</param>
+        /// <param name="omitExam">是否要略過除了短於20字的檢查、防呆</param>
         /// <returns>若失敗則回傳false</returns>
-        private bool toGjcoolPunct(string url)
+        private bool toGjcoolPunct(string url, bool copyResult = false, bool omitExam = false)
         {
             #region 防呆
-            try
+            if (!omitExam)
             {
-                if (!IsValidUrl＿keyDownCtrlAdd(br.GetDriverUrl) || !IsValidUrl＿keyDownCtrlAdd(textBox3.Text))
+                try
                 {
-                    bool found = false;
-                    if (!IsValidUrl＿keyDownCtrlAdd(br.GetDriverUrl) && IsValidUrl＿keyDownCtrlAdd(textBox3.Text))
+                    if (!IsValidUrl＿keyDownCtrlAdd(br.GetDriverUrl) || !IsValidUrl＿keyDownCtrlAdd(textBox3.Text))
                     {
-                        for (int i = br.driver.WindowHandles.Count - 1; i > -1; i--)
+                        bool found = false;
+                        if (!IsValidUrl＿keyDownCtrlAdd(br.GetDriverUrl) && IsValidUrl＿keyDownCtrlAdd(textBox3.Text))
                         {
-                            br.driver.SwitchTo().Window(br.driver.WindowHandles[i]);
-                            if (br.driver.Url == textBox3.Text)
-                            { found = true; break; }
-                        }
-                        if (!found)
-                        {
-                            string preUrl = textBox3.Text.Substring(0, textBox3.Text.IndexOf("&editwiki="));
                             for (int i = br.driver.WindowHandles.Count - 1; i > -1; i--)
                             {
                                 br.driver.SwitchTo().Window(br.driver.WindowHandles[i]);
-                                if (br.driver.Url.StartsWith(preUrl))
+                                if (br.driver.Url == textBox3.Text)
+                                { found = true; break; }
+                            }
+                            if (!found)
+                            {
+                                string preUrl = textBox3.Text.Substring(0, textBox3.Text.IndexOf("&editwiki="));
+                                for (int i = br.driver.WindowHandles.Count - 1; i > -1; i--)
                                 {
-                                    found = true;
-                                    if (MessageBoxShowOKCancelExclamationDefaultDesktopOnly("是否是這個頁面？" + Environment.NewLine + Environment.NewLine + "textBox3.Text=" + textBox3.Text) == DialogResult.OK)
+                                    br.driver.SwitchTo().Window(br.driver.WindowHandles[i]);
+                                    if (br.driver.Url.StartsWith(preUrl))
                                     {
-                                        br.QuickeditIWebElement.Click();
+                                        found = true;
+                                        if (MessageBoxShowOKCancelExclamationDefaultDesktopOnly("是否是這個頁面？" + Environment.NewLine + Environment.NewLine + "textBox3.Text=" + textBox3.Text) == DialogResult.OK)
+                                        {
+                                            br.QuickeditIWebElement.Click();
+                                        }
+                                        break;
                                     }
-                                    break;
                                 }
                             }
                         }
+                        else if (IsValidUrl＿keyDownCtrlAdd(br.GetDriverUrl) || !IsValidUrl＿keyDownCtrlAdd(textBox3.Text))
+                            textBox3.Text = br.GetDriverUrl;
+                        if (!found)
+                            if (DialogResult.Cancel == MessageBoxShowOKCancelExclamationDefaultDesktopOnly("當前頁面似乎沒有自動標點的必要性，確定要送出？", "送交《古籍酷》自動標點", true, MessageBoxDefaultButton.Button2))
+                                return false;
                     }
-                    else if (IsValidUrl＿keyDownCtrlAdd(br.GetDriverUrl) || !IsValidUrl＿keyDownCtrlAdd(textBox3.Text))
-                        textBox3.Text = br.GetDriverUrl;
-                    if (!found)
-                        if (DialogResult.Cancel == MessageBoxShowOKCancelExclamationDefaultDesktopOnly("當前頁面似乎沒有自動標點的必要性，確定要送出？", "送交《古籍酷》自動標點", true, MessageBoxDefaultButton.Button2))
-                            return false;
+                }
+                catch (Exception ex)
+                {
+                    MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
                 }
             }
-            catch (Exception ex)
-            {
-                MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
-            }
-            #endregion
+            #endregion//以上防呆
 
             string x = textBox1.SelectedText == string.Empty ? textBox1.Text : textBox1.SelectedText; bool selAll = false;
             if (x == textBox1.Text) { textBox1.Select(0, textBox1.TextLength); selAll = true; }//textBox1.SelectionLength = textBox1.TextLength;//textBox1.SelectAll();//這個方法好像會失靈
@@ -9348,7 +9392,7 @@ namespace WindowsFormsApp1
                     break;
             }
             //恢復段落符號
-            x = CnText.RestoreParagraphs(ref originalText, ref x);
+            if (!omitExam) x = CnText.RestoreParagraphs(ref originalText, ref x);
 
             try
             {
@@ -9393,6 +9437,19 @@ namespace WindowsFormsApp1
             if (!selAll) textBox1.Select(s, x.Length);
             else textBox1.Select(0, 0);
             textBox1.ScrollToCaret();
+            if (copyResult)
+            {
+                if (textBox1.SelectionLength == 0)
+                    try
+                    {
+                        Clipboard.SetText(textBox1.Text);
+                    }
+                    catch (Exception)
+                    {
+                    }
+                else
+                    textBox1.Copy();
+            }
 
             return true;
         }
