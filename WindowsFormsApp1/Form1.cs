@@ -2253,6 +2253,7 @@ namespace WindowsFormsApp1
                 //Ctrl + c ：若無選取，則複製textBox1內的內容
                 if (e.KeyCode == Keys.C)
                 {
+                    if (textBox1.Text == string.Empty) return;
                     e.Handled = true;
                     Clipboard.SetText(textBox1.Text);
                     return;
@@ -12279,6 +12280,18 @@ namespace WindowsFormsApp1
                 PauseEvents();
                 textBox2.Text = "";
                 ResumeEvents(); return;
+            }
+            #endregion
+
+            #region 重設《易》學清單起始索引值
+            if (x.StartsWith("lx") && x.Length > 2)
+            {//輸入「lx9」，即重設《漢籍全文資料庫》檢索易學關鍵字清單之起始索引值為9 即 ListIndex_Hanchi_SearchingKeywordsYijing=9。 
+
+                if (Int32.TryParse(x.Substring("lx".Length), out br.ListIndex_Hanchi_SearchingKeywordsYijing))
+                PauseEvents();
+                textBox2.Text = "";
+                ResumeEvents(); return;
+
             }
             #endregion
 

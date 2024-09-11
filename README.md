@@ -760,7 +760,11 @@ Ctrl+ 滑鼠左鍵：清除框中所有文字
 
 - 輸入「lx」重設《漢籍全文資料庫》或《中國哲學書電子化計劃》**檢索易學關鍵字**清單之索引值為0 即 ListIndex_Hanchi_SearchingKeywordsYijing=0。 
 
--     l : list 的 l；x : index 的 x
+    l : list 的 l；x : index 的 x
+
+- 輸入「lx」+數字，即可重設《漢籍全文資料庫》與CTP 檢索《易》學關鍵字清單之起始索引值。
+
+ > 如輸入「lx9」，即重設《漢籍全文資料庫》檢索易學關鍵字清單之起始索引值為9 即 ListIndex_Hanchi_SearchingKeywordsYijing=9。 
 
 - 在textBox2中輸入開關切換要整頁貼上Quick edit [簡單修改模式]  並將下一頁直接送交去OCR的網站
    - kd：《看典古籍》 （kandianguji）網頁

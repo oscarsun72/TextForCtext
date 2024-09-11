@@ -7639,7 +7639,21 @@ internal static string getImageUrl() {
 
                 string preferencesText = File.ReadAllText(preferencesFile);
                 JObject preferencesJson = JObject.Parse(preferencesText);
-                downloadDirectory_Chrome = preferencesJson["download"]["default_directory"].ToString();
+
+                //20240911 Copilot大菩薩： 處理 Chrome 下載目錄的例外情形: https://sl.bing.net/kX4BWlGiCSi
+                /*這個例外情形「並未將物件參考設定為物件的執行個體」通常是因為 preferencesJson["download"]["default_directory"] 的值為 null。這可能是因為 preferencesJson["download"] 或 preferencesJson["download"]["default_directory"] 不存在於 JSON 文件中。
+                    你可以在存取這些值之前，先檢查它們是否存在。以下是修改後的程式碼：
+                 */
+                if (preferencesJson["download"] != null && preferencesJson["download"]["default_directory"] != null)
+                {
+                    downloadDirectory_Chrome = preferencesJson["download"]["default_directory"].ToString();
+                }
+                else
+                {
+                    // 處理找不到下載目錄的情況
+                    Console.WriteLine("無法找到下載目錄設定。");
+                }
+                //downloadDirectory_Chrome = preferencesJson["download"]["default_directory"].ToString();
                 /* YouChat大菩薩：在这个示例中，我们首先获取当前用户的主文件夹，然后使用 Path.Combine 方法创建一个路径字符串，以便打开 Chrome 用户数据目录。然后，我们查找名为 Preferences 的文件，它包含 Chrome 首选项的 JSON 格式。我们使用 JObject.Parse 方法将 Preferences 文件的内容解析为 JSON 格式，然后查找下载目录的默认路径。最后，我们输出下载目录的值。 请注意，下载目录设置可能存在多个偏好文件，因此您可能需要查找适用于您的系统和 Chrome 版本的正确偏好文件。此外，这种方法依赖于 Chrome 的偏好文件格式，因此可能会因 Chrome 的更新而改变。 如果您想在下载文件时将文件保存到自定义目录中，建议使用我在前一个回答中提供的示例代码。
                  * 用這個 JObject 物件有什麼先決條件吧 必須裝載什麼組件或套件呢 YouChat大菩薩：
                     JObject is a class in the Newtonsoft.Json.Linq namespace that is used to represent a JSON object in C#.
@@ -7930,6 +7944,13 @@ internal static string getImageUrl() {
                     case -2146233088:
                         if (ex.Message.StartsWith("no such window: target window already closed"))
                             Browser.NoSuchWindowErrHandler();
+                        else if (ex.Message.IndexOf("from no such execution context: frame does not have execution context")>-1)
+                        {
+                            if (IsWindowHandleValid(driver, LastValidWindow))
+                                driver.SwitchTo().Window(LastValidWindow);
+                            else
+                                driver.SwitchTo().Window(driver.WindowHandles.Last());
+                        }
                         break;
                     default:
 
@@ -7981,6 +8002,8 @@ internal static string getImageUrl() {
                 keywords.AddRange(additionalKeywords);
             }
 
+            if (ListIndex_Hanchi_SearchingKeywordsYijing < 0) ListIndex_Hanchi_SearchingKeywordsYijing = 0;
+            if (ListIndex_Hanchi_SearchingKeywordsYijing > keywords.Count - 1) ListIndex_Hanchi_SearchingKeywordsYijing = keywords.Count - 1;
             string keyword = keywords[ListIndex_Hanchi_SearchingKeywordsYijing]; Clipboard.SetText(keyword);
             ActiveForm1.PauseEvents();
             ActiveForm1.textBox4Text = ListIndex_Hanchi_SearchingKeywordsYijing.ToString();
@@ -9454,15 +9477,15 @@ internal static string getImageUrl() {
                         {
                             Thread.Sleep(1500);
                             if (Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("下載書圖的網頁有問題，是否繼續？" +
-                                Environment.NewLine + Environment.NewLine +"請確認網頁沒問題再按確定，否則請按取消。感恩感恩　南無阿彌陀佛") == DialogResult.Cancel)
+                                Environment.NewLine + Environment.NewLine + "請確認網頁沒問題再按確定，否則請按取消。感恩感恩　南無阿彌陀佛") == DialogResult.Cancel)
                                 return false;
                             goto reGoto;
                         }
                         else
                             Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
-                            break;
+                        break;
                     default:
-                        Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);                        
+                        Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
                         return false;
                 }
             }

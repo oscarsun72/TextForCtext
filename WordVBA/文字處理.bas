@@ -3132,6 +3132,7 @@ Sub 漢籍電子文獻資料庫文本整理_注文前後加括號() '最後執行 Docs.mark易學關鍵字(在
                         Docs.marking易學關鍵字 pasteAppendedRange, Keywords.易學KeywordsToMark
                         SystemSetup.playSound 2
                     Else
+                        word.Application.Activate
                         MsgBox "發生錯誤，請重試！", vbCritical
                         GoTo finish
                     End If
