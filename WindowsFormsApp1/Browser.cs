@@ -185,20 +185,21 @@ namespace TextForCtext
         //}
 
 
-        //static selm.IWebDriver driverNew()
-        //實測後發現：CurrentWindowHandle並不能取得瀏覽器現正作用中的分頁視窗，只能取得創建 ChromeDriver 物件時的最初及switch 方法執行後切換的分頁視窗 20230103 阿彌陀佛
-        /// <summary>
-        /// 記下啟動Selenium chromedriver時的第一個WindowHandle
-        /// </summary>
-        static string originalWindow;
-        internal static string getOriginalWindow
-        {
-            get
-            {
-                return originalWindow;
-            }
+        ////static selm.IWebDriver driverNew()
+        ////實測後發現：CurrentWindowHandle並不能取得瀏覽器現正作用中的分頁視窗，只能取得創建 ChromeDriver 物件時的最初及switch 方法執行後切換的分頁視窗 20230103 阿彌陀佛
+        ///// <summary>
+        ///// 記下啟動Selenium chromedriver時的第一個WindowHandle
+        ///// </summary>
+        //static string originalWindow;//20240911作廢
+        //internal static string getOriginalWindow
+        //{
+        //    get
+        //    {
+        //        return originalWindow;
+        //    }
 
-        }
+        //}
+
         /// <summary>
         /// 記下操作時最後一個有效的WindowHandle        
         /// </summary>
@@ -1273,7 +1274,7 @@ namespace TextForCtext
                 #endregion
 
                 #region 成功開啟Chrome瀏覽器後
-                originalWindow = cDrv.CurrentWindowHandle; LastValidWindow = originalWindow;
+                //originalWindow = cDrv.CurrentWindowHandle; LastValidWindow = originalWindow;
                 //string chrome_path = Form1.getDefaultBrowserEXE();
                 //if (chrome_path.IndexOf(@"C:\") == -1)
                 //{
@@ -7651,7 +7652,11 @@ internal static string getImageUrl() {
                 else
                 {
                     // 處理找不到下載目錄的情況
-                    Console.WriteLine("無法找到下載目錄設定。");
+                    //Console.WriteLine("無法找到下載目錄設定。");
+                    if (Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("無法找到下載目錄設定。是否要設定為作業系統下載目錄？") == DialogResult.OK)
+                        downloadDirectory_Chrome = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + "\\Downloads";
+                    else
+                        Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("請　賢友菩薩在textBox2中輸入下載目錄之路徑。設定正確，其文字即會消失。感恩感恩　讚歎讚歎　南無阿彌陀佛");
                 }
                 //downloadDirectory_Chrome = preferencesJson["download"]["default_directory"].ToString();
                 /* YouChat大菩薩：在这个示例中，我们首先获取当前用户的主文件夹，然后使用 Path.Combine 方法创建一个路径字符串，以便打开 Chrome 用户数据目录。然后，我们查找名为 Preferences 的文件，它包含 Chrome 首选项的 JSON 格式。我们使用 JObject.Parse 方法将 Preferences 文件的内容解析为 JSON 格式，然后查找下载目录的默认路径。最后，我们输出下载目录的值。 请注意，下载目录设置可能存在多个偏好文件，因此您可能需要查找适用于您的系统和 Chrome 版本的正确偏好文件。此外，这种方法依赖于 Chrome 的偏好文件格式，因此可能会因 Chrome 的更新而改变。 如果您想在下载文件时将文件保存到自定义目录中，建议使用我在前一个回答中提供的示例代码。
@@ -7944,7 +7949,7 @@ internal static string getImageUrl() {
                     case -2146233088:
                         if (ex.Message.StartsWith("no such window: target window already closed"))
                             Browser.NoSuchWindowErrHandler();
-                        else if (ex.Message.IndexOf("from no such execution context: frame does not have execution context")>-1)
+                        else if (ex.Message.IndexOf("from no such execution context: frame does not have execution context") > -1)
                         {
                             if (IsWindowHandleValid(driver, LastValidWindow))
                                 driver.SwitchTo().Window(LastValidWindow);

@@ -2962,6 +2962,7 @@ namespace WindowsFormsApp1
                 if (e.KeyCode == Keys.E)
                 {// Alt + e ：在完整編輯頁面中直接取代文字。請將被取代+取代成之二字前後並置，並將其選取後（或在被取代之文字前放置插入點）再按下此組合鍵以執行直接取代 20240718
                     e.Handled = true;
+                    bool overTypeMode = !insertMode;
                     playSound(soundLike.press, true);
                     StringInfo character = new StringInfo(string.Empty); int s = textBox1.SelectionStart, l = 1;
                     if (textBox1.SelectionLength == 0)
@@ -2990,6 +2991,7 @@ namespace WindowsFormsApp1
                         textBox1.Text = textBox1.Text.Replace(character.SubstringByTextElements(0, 1), character.SubstringByTextElements(1, 1));
                         ResumeEvents();
                         textBox1.Select(s, 0);
+                        if (overTypeMode) insertMode = !overTypeMode;
                     }
                     return;
                 }
