@@ -245,6 +245,11 @@ Sub 查說文解字並取回其解釋欄位及網址值插入至插入點位置()
         End With
     End If
 End Sub
+Sub 送交古籍酷自動標點()
+    'Alt + F10
+    TextForCtext.GjcoolPunct
+End Sub
+
 Function GetUserAddress() As Boolean
     Dim x As String, a As Object 'Access.Application
     On Error GoTo Error_GetUserAddress

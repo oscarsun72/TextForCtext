@@ -87,7 +87,7 @@ Function Is_ClipboardContainCtext_Note_InlinecommentColor() As Boolean
     ' 檢查字型顏色是否為綠色34816 和湛藍色8912896的字
     With TextRange.Find
         .ClearFormatting
-        .Text = vbNullString
+        .text = vbNullString
         .Font.Color = 8912896
         .Forward = True
         .Wrap = wdFindContinue
@@ -122,7 +122,8 @@ eH:
             MsgBox Err.Description '此方法或屬性無法使用，因為[剪貼簿] 是空的或無效的。
             GoTo exitFunction
         Case Else
-            MsgBox Err.Number + Err.Description
+            MsgBox Err.Number & Err.Description
+            'Resume
     End Select
 End Function
 

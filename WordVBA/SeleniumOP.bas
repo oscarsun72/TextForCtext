@@ -1305,7 +1305,7 @@ Sub GoogleSearch(Optional searchStr As String)
     
     'Dim wd As SeleniumBasic.IWebDriver
     'Set wd = openChrome("https://www.baidu.com")
-    openChrome "https://www.google.com"
+    If Not openChrome("https://www.google.com") Then Exit Sub
     word.Application.WindowState = wdWindowStateMinimize
     Dim iwe As SeleniumBasic.IWebElement
     Dim keys As New SeleniumBasic.keys

@@ -532,38 +532,47 @@ namespace WindowsFormsApp1
                                 toOCR(br.OCRSiteTitle.GJcool);
                             else
                             {
-                                //OpenQA.Selenium.IWebElement ie = br.Quickedit_data_textbox;//.waitFindWebElementByName_ToBeClickable("data", br.WebDriverWaitTimeSpan);
-                                if (keyinTextMode)
-                                {
-                                    //全選文字方塊內容以備貼入
-                                    //ie.SendKeys(OpenQA.Selenium.Keys.Control + "a");
-                                    br.SelectAllQuickedit_data_textboxContent();
-                                }
-                                string text = br.CopyQuickedit_data_textboxText();//ie.Text ?? "";
+                                //if (keyinTextMode)
+                                //{
+                                //全選文字方塊內容以備貼入
+                                //ie.SendKeys(OpenQA.Selenium.Keys.Control + "a");
+                                //br.SelectAllQuickedit_data_textboxContent();//20240913作廢（現已可以由value屬性設定了，儘量不用剪貼簿！）
+                                //}
+                                //string text = br.CopyQuickedit_data_textboxText();
+                                string text = br.Quickedit_data_textboxTxt;
                                 CnText.BooksPunctuation(ref text, false);
                                 undoRecord();
                                 textBox1.Text = text;
-                                if (!OcrTextMode)
-                                    clearBracketsInsidePairsBrackets();
+                                //if (!OcrTextMode)
+                                //clearBracketsInsidePairsBrackets();
 
 
-                                if (Clipboard.GetText() != text && text != "")//CopyQuickedit_data_textboxText已用到等價 SetText 的方法了
-                                    Clipboard.SetText(text);
+                                //20240913先作廢看看
+                                //if (Clipboard.GetText() != text && text != "")//CopyQuickedit_data_textboxText已用到等價 SetText 的方法了
+                                //    Clipboard.SetText(text);
                             }
-                            if (!Active)
-                            {
-                                AvailableInUseBothKeysMouse();
-                            }
+
+                            //改到後面呼叫
+                            //if (!Active)
+                            //{
+                            //    AvailableInUseBothKeysMouse();
+                            //}
+
                             //避免剪貼簿內還殘留上一次用過的網址
                             xClp = Clipboard.GetText();
                             if (xClp.IndexOf("edit") > -1 && xClp.IndexOf("&page") > -1) Clipboard.Clear();
                         }
 
                     }
-                    else
+                    else//if (browsrOPMode == BrowserOPMode.appActivateByName)
                     { Process.Start(url); appActivateByName(); }
                     //Clipboard.Clear();
-                    bringBackMousePosFrmCenter();
+
+                    //bringBackMousePosFrmCenter();
+                    if (!Active)
+                    {
+                        AvailableInUseBothKeysMouse();
+                    }
                 }
                 //若此時按下 Shift 則不會取得文本而是逕行送去《古籍酷》OCR取回文本至textBox1以備用
                 else if ((modifierKeys == Keys.Shift || (ocrTextMode && modifierKeys != Keys.Control))
@@ -1666,7 +1675,7 @@ namespace WindowsFormsApp1
                     {
                         textBox1.Select(chkP - (+"<p>".Length + Environment.NewLine.Length), 3);
                         textBox1.ScrollToCaret();
-                        Clipboard.SetText("　");//準備空格以填補缺額
+                        Clipboard.SetText("　");//準備空格以填補缺額 20240913 擬作廢，蓋已有 Alt + 2 方便輸入空格了
                         return false;
                     }
                 }
@@ -1721,6 +1730,7 @@ namespace WindowsFormsApp1
             }
             #endregion
 
+            /* 20240913作廢
             DateTime dt = DateTime.Now;
             while (!isClipBoardAvailable_Text()) { if (DateTime.Now.Subtract(dt).TotalSeconds > 2) break; }
             try
@@ -1733,6 +1743,8 @@ namespace WindowsFormsApp1
                 //playSound(soundLike.error);
                 //Clipboard.SetText(xCopy);
             }
+            */
+
             br.TextPatst2Quick_editBox = xCopy;
 
             BackupLastPageText(xCopy, false, false);
@@ -2096,7 +2108,11 @@ namespace WindowsFormsApp1
                 {//Ctrl + F12 查詢國語辭典
                     //overtypeModeSelectedTextSetting(ref textBox1);
                     //string x = textBox1.SelectedText;
-                    string x = SelectSingleCharacter();
+                    string x;
+                    if (textBox1.SelectionLength == 0)
+                        x = SelectSingleCharacter();
+                    else
+                        x = overtypeModeSelectedTextSetting(ref textBox1);
                     e.Handled = true;
                     if (x != "")
                     {
@@ -3034,7 +3050,15 @@ namespace WindowsFormsApp1
                 {//Alt + k : 將選取的字詞句及其網址位址送到以下檔案的末後
                     // C:\Users\oscar\Dropbox\《古籍酷》AI%20OCR%20待改進者隨記%20感恩感恩 讚歎讚歎 南無阿彌陀佛.docx
                     e.Handled = true;
-                    overtypeModeSelectedTextSetting(ref textBox1);
+                    if (insertMode && textBox1.SelectionLength == 0)
+                    {
+                        if (char.IsHighSurrogate(textBox1.Text.Substring(textBox1.SelectionStart, 1).ToCharArray()[0]))
+                            textBox1.SelectionLength = 2;
+                        else
+                            textBox1.SelectionLength = 1;
+                    }
+                    else
+                        overtypeModeSelectedTextSetting(ref textBox1);
                     if (textBox1.SelectionLength > 0)
                     {
                         string txtbox1SelText = textBox1.SelectedText;
@@ -3580,11 +3604,14 @@ namespace WindowsFormsApp1
             #region 與 Ctrl + Alt + + 同
             //PauseEvents();
             pageTextEndPosition = 0; pageEndText10 = "";
+        reSelect:
             textBox1.SelectAll();
             //textBox1.Select(textBox1.TextLength, 0);
 
             TopMost = false;
             if (!ocrTextMode) br.BringToFront("chrome");
+            if (textBox1.SelectionLength < textBox1.TextLength)
+                goto reSelect;
             if (keyDownCtrlAdd(false, "", true))
             {
                 //if (x != br.Quickedit_data_textboxTxt)
@@ -4138,7 +4165,9 @@ namespace WindowsFormsApp1
             textBox1.Text = xSl + "<p>" + Environment.NewLine + x;
             stopUndoRec = false;
         }
-
+        /// <summary>
+        /// 清除插入點之前的所有空格「　」、空白「􏿽」、「<p>」、「}}」
+        /// </summary>
         private void 清除插入點之前的所有空格()
         {//Ctrl + Backspace,若插入點前為「<p>」則一併清除
          //throw new NotImplementedException();
@@ -4146,6 +4175,10 @@ namespace WindowsFormsApp1
             if (s > 3 && x.Substring(s - 3, 3) == "<p>")
             {
                 textBox1.Select(s - 3, 3);
+            }
+            else if (s > 2 && x.Substring(s - 2, 2) == "}}")
+            {
+                textBox1.Select(s - 2, 2);//2="}}".Length
             }
             else
             {
@@ -4157,7 +4190,7 @@ namespace WindowsFormsApp1
             }
             undoRecord();
             stopUndoRec = true;
-            textBox1.SelectedText = "";
+            textBox1.SelectedText = string.Empty;
             stopUndoRec = false;
         }
 
@@ -4422,15 +4455,17 @@ namespace WindowsFormsApp1
         }
         /// <summary>
         /// 在指定文本中計算某單字出現的次數
+        /// 若是要找分段符號 Environment.NewLine，則只需輸入 \r 或 \n 來查找計算即可
         /// </summary>
         /// <param name="whatWord"></param>
         /// <param name="domain"></param>
         /// <returns></returns>
-        int countWordsinDomain(string whatWord, string domain)
+        public static int CountWordsinDomain(string whatWord, string domain)
         {
             StringInfo dw = new StringInfo(domain); int cntr = 0;
             for (int i = 0; i < dw.LengthInTextElements; i++)
             {
+                // SubstringByTextElements方法於分段符號或切成 \r \n 兩個部分
                 if (dw.SubstringByTextElements(i, 1) == whatWord)
                 {
                     cntr++;
@@ -6307,7 +6342,11 @@ namespace WindowsFormsApp1
                     string marker = item.Substring(item.IndexOf("*") + 1, item.IndexOf(">") - item.IndexOf("*"));
                     //textBox1.Select(match.Index, match.Length);
                     textBox1.Select(textBox1.Text.IndexOf(marker, match.Index), marker.Length);
-                    DialogResult result = MessageBox.Show("發現小注間有<p>標籤，是否清除？", "確認", MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
+                    DialogResult result;
+                    if (!ocrTextMode)
+                        result = MessageBox.Show("發現小注間有<p>標籤，是否清除？", "確認", MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
+                    else
+                        result = DialogResult.Yes;
                     AvailableInUseBothKeysMouse();
                     if (result == DialogResult.Yes)
                     {
@@ -6383,6 +6422,7 @@ namespace WindowsFormsApp1
         }
         /// <summary>
         /// 清除大括號間的下大括號
+        /// 此法已臻完善，唯讀入《古籍酷》OCR批量處理文本之方法已得改善，當不會再出現如此情況，故今先束之高閣，以待有需時再調用 20240913
         /// </summary>
         void clearBracketsInsidePairsBrackets()
         {
@@ -7462,7 +7502,7 @@ namespace WindowsFormsApp1
                                 {
                                     brdriverUrl = br.GetQuickeditUrl();
                                     br.QuickeditIWebElement.Click();
-                                    if (!pasteToCtext(brdriverUrl, shiftKeyDownYet)) return false;
+                                    if (!inputToCtext(brdriverUrl, shiftKeyDownYet)) return false;
                                 }
                                 else
                                     return false;
@@ -7472,10 +7512,10 @@ namespace WindowsFormsApp1
                         }
                         else
                             //pasteToCtext(br.driver.Url, shiftKeyDownYet);
-                            if (!pasteToCtext(brdriverUrl, shiftKeyDownYet)) return false;
+                            if (!inputToCtext(brdriverUrl, shiftKeyDownYet)) return false;
                     }
                     else
-                        if (!pasteToCtext(textBox3.Text, shiftKeyDownYet)) return false;//string currentUrl = br.driver.Url;
+                        if (!inputToCtext(textBox3.Text, shiftKeyDownYet)) return false;//string currentUrl = br.driver.Url;
                                                                                         //pasteToCtext(currentUrl);//故改用 br.……
                     break;
                 case BrowserOPMode.seleniumGet://Selenium配合Windows API模式（1+2）或純不用Selenium模式
@@ -8232,7 +8272,7 @@ namespace WindowsFormsApp1
                                         {
 
                                             #region 以下是據方法函式「keyDownCtrlAdd(bool shiftKeyDownYet = false)」而來
-                                            pasteToCtext(textBox3.Text, false, br.chkClearQuickedit_data_textboxTxtStr);
+                                            inputToCtext(textBox3.Text, false, br.chkClearQuickedit_data_textboxTxtStr);
                                             //if (!textBox1.Enabled) { textBox1.Enabled = true; textBox1.Focus(); }
                                             //Task.WaitAll(); Thread.Sleep(500);
                                             nextPages(Keys.PageDown, false);
@@ -8467,7 +8507,7 @@ namespace WindowsFormsApp1
                 if (e.KeyCode == Keys.Multiply)
                 {
                     e.Handled = true;
-                    KeyinTextmodeSwitcher();
+                    KeyinTextmodeSwitcher(true);
                     return;
                 }
                 if (e.KeyCode == Keys.Subtract)
@@ -9373,6 +9413,7 @@ namespace WindowsFormsApp1
             TopMost = false; int s = textBox1.SelectionStart;
             //舊版會破壞"<p>"記號，故先予清除，之後可用軟件中標識<p>的功能補諸20240809(或有空時再學昨天恢復分段符號的方法 RestoreParagraphs ，只是這次不是分段符號，而是分段記號（<p>），或將之擴展為傳入指定字符作為引數）。
             bool reMarkFlag = false;
+            saveText();
             if (url == "https://old.gj.cool/gjcool/index")
             {
                 //記下最後是否是<p>，是的話最後補上
@@ -9380,8 +9421,10 @@ namespace WindowsFormsApp1
                 x = x.Replace("<p>", string.Empty);
             }
             CnText.FormalizeText(ref x);
-            string originalText = x;// CnText.RemoveBooksPunctuation(ref x);//有些是手動添加的書名號或篇名號，不宜逕削去 20240813 然《古籍酷》自動標點仍會先清除書名號，但篇名號不管
-            x = x.Replace(Environment.NewLine, string.Empty).Replace("·", string.Empty);//OCR回來後我這裡自動標點如「嗚呼」仍會標上驚嘆號，故交由 FormalizeText 來處理
+            CnText.RemoveBooksPunctuation(ref x);//有些是手動添加的書名號或篇名號，不宜逕削去 20240813 然《古籍酷》自動標點仍會先清除書名號，但篇名號不管。20240911 今仍清除篇名號，以免橫生枝節
+            string originalText = x;// 
+            //x = x.Replace(Environment.NewLine, string.Empty).Replace("·", string.Empty);//OCR回來後我這裡自動標點如「嗚呼」仍會標上驚嘆號，故交由 FormalizeText 來處理
+            x = x.Replace(Environment.NewLine, string.Empty);//.Replace("·", string.Empty);音節號已於 RemoveBooksPunctuation 中清除
             //x = x.Replace(Environment.NewLine, string.Empty).Replace("·", string.Empty).Replace("！",string.Empty);
             switch (url)
             {
@@ -9462,7 +9505,7 @@ namespace WindowsFormsApp1
             //if(keyinTextMode)keyinTextMode = false;
             //if(autoPasteFromSBCKwhether)autoPasteFromSBCKwhether    = false;
             //if (autoPastetoQuickEdit) autoPastetoQuickEdit = false;
-            if (keyinTextMode) KeyinTextmodeSwitcher();
+            if (keyinTextMode) KeyinTextmodeSwitcher(false);
             playSound(soundLike.press, true);
             while (true)
             {
@@ -9474,16 +9517,18 @@ namespace WindowsFormsApp1
         /// <summary>
         /// 手動輸入模式切換用 20240719
         /// </summary>
-        internal void KeyinTextmodeSwitcher()
+        internal void KeyinTextmodeSwitcher(bool soundplay = true)
         {
             //重設欄位變量，以免OCR快速鍵失效
             PagePaste2GjcoolOCR_ing = false;
             if (keyinTextMode)
             {
-                new SoundPlayer(@"C:\Windows\Media\Speech Off.wav").Play();
+                if (soundplay)
+                    new SoundPlayer(@"C:\Windows\Media\Speech Off.wav").Play();
                 keyinTextMode = false; return;
             }
-            new SoundPlayer(@"C:\Windows\Media\Speech On.wav").Play();
+            if (soundplay)
+                new SoundPlayer(@"C:\Windows\Media\Speech On.wav").Play();
             //設定成手動，自動及全部覆蓋之貼上則設成false
             keyinTextMode = true; pasteAllOverWrite = false; autoPastetoQuickEdit = false;
             button1.Text = "分行分段";
@@ -10230,41 +10275,45 @@ namespace WindowsFormsApp1
                         case BrowserOPMode.seleniumNew:
                             if (modifierKeys == Keys.None && !pagePaste2GjcoolOCR)
                             {
-                                int retrytimes = 0;
-                            retry:
-                                br.driver = br.driver ?? br.DriverNew();
-                                try
-                                {//這裡需要參照元件來操作就不宜跑線程了！故此區塊最後的剪貼簿，要求須是單線程者，蓋因剪貼簿須獨占式使用故也20230111                                
-                                 //quick_edit_box = br.waitFindWebElementByName_ToBeClickable("data", br.WebDriverWaitTimeSpan);//br.driver.FindElement(OpenQA.Selenium.By.Name("data"));
-                                 //                                                                                             ////chatGPT：
-                                 //                                                                                             //// 等待網頁元素出現，最多等待 2 秒
-                                 //                                                                                             //OpenQA.Selenium.Support.UI.WebDriverWait wait =
-                                 //                                                                                             //    new OpenQA.Selenium.Support.UI.WebDriverWait
-                                 //                                                                                             //    (br.driver, TimeSpan.FromSeconds(2));
-                                 //                                                                                             ////安裝了 Selenium.WebDriver 套件，才說沒有「ExpectedConditions」，然後照Visual Studio 2022的改正建議又用NuGet 安裝了 Selenium.Suport 套件，也自動「 using OpenQA.Selenium.Support.UI;」了，末學自己還用物件瀏覽器找過了 「OpenQA.Selenium.Support.UI」，可就是沒有「ExpectedConditions」靜態類別可用，即使官方文件也說有 ： https://www.selenium.dev/selenium/docs/api/dotnet/html/T_OpenQA_Selenium_Support_UI_ExpectedConditions.htm 20230109 未知何故 阿彌陀佛
-                                 //                                                                                             //wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(quick_edit_box));
+                                // 20240913 今因發現可由元件的「value、textContent……」等 Property 取得正確的文本內容，以下就先作廢了
 
-                                    ////// 在網頁元素載入完畢後才能讀取其.Text屬性值，存入剪貼簿,前置空格會被削去，當是Selenium實作時的問題。
-                                    ////string xq = quick_edit_box.Text;
-                                    ////Clipboard.SetText(xq);
-                                    //if (quick_edit_box != null)
-                                    //{
-                                    //    //用Text屬性（quick_edit_box.Text）取得的值若前有全形空格會被清除
-                                    //    quick_edit_box.SendKeys(OpenQA.Selenium.Keys.LeftControl + "a");
-                                    //    quick_edit_box.SendKeys(OpenQA.Selenium.Keys.LeftControl + "c");
-                                    //}
-                                    //////Task.Delay(-1);
-                                    ////Clipboard.SetText(quick_edit_box.Text);
-                                    br.CopyQuickedit_data_textboxText();
-                                }
-                                catch (Exception)
-                                {
-                                    if (retrytimes < 2)
-                                    {
-                                        Task.Delay(1200); retrytimes++; goto retry;
-                                    }
-                                    //throw;
-                                }
+                                //    int retrytimes = 0;
+                                //retry:
+                                if (br.driver == null) Debugger.Break();
+                                //br.driver = br.driver ?? br.DriverNew();
+
+                                //    try
+                                //    {//這裡需要參照元件來操作就不宜跑線程了！故此區塊最後的剪貼簿，要求須是單線程者，蓋因剪貼簿須獨占式使用故也20230111                                
+                                //     //quick_edit_box = br.waitFindWebElementByName_ToBeClickable("data", br.WebDriverWaitTimeSpan);//br.driver.FindElement(OpenQA.Selenium.By.Name("data"));
+                                //     //                                                                                             ////chatGPT：
+                                //     //                                                                                             //// 等待網頁元素出現，最多等待 2 秒
+                                //     //                                                                                             //OpenQA.Selenium.Support.UI.WebDriverWait wait =
+                                //     //                                                                                             //    new OpenQA.Selenium.Support.UI.WebDriverWait
+                                //     //                                                                                             //    (br.driver, TimeSpan.FromSeconds(2));
+                                //     //                                                                                             ////安裝了 Selenium.WebDriver 套件，才說沒有「ExpectedConditions」，然後照Visual Studio 2022的改正建議又用NuGet 安裝了 Selenium.Suport 套件，也自動「 using OpenQA.Selenium.Support.UI;」了，末學自己還用物件瀏覽器找過了 「OpenQA.Selenium.Support.UI」，可就是沒有「ExpectedConditions」靜態類別可用，即使官方文件也說有 ： https://www.selenium.dev/selenium/docs/api/dotnet/html/T_OpenQA_Selenium_Support_UI_ExpectedConditions.htm 20230109 未知何故 阿彌陀佛
+                                //     //                                                                                             //wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(quick_edit_box));
+
+                                //        ////// 在網頁元素載入完畢後才能讀取其.Text屬性值，存入剪貼簿,前置空格會被削去，當是Selenium實作時的問題。
+                                //        ////string xq = quick_edit_box.Text;
+                                //        ////Clipboard.SetText(xq);
+                                //        //if (quick_edit_box != null)
+                                //        //{
+                                //        //    //用Text屬性（quick_edit_box.Text）取得的值若前有全形空格會被清除
+                                //        //    quick_edit_box.SendKeys(OpenQA.Selenium.Keys.LeftControl + "a");
+                                //        //    quick_edit_box.SendKeys(OpenQA.Selenium.Keys.LeftControl + "c");
+                                //        //}
+                                //        //////Task.Delay(-1);
+                                //        ////Clipboard.SetText(quick_edit_box.Text);
+                                //        br.CopyQuickedit_data_textboxText();
+                                //    }
+                                //    catch (Exception)
+                                //    {
+                                //        if (retrytimes < 2)
+                                //        {
+                                //            Task.Delay(1200); retrytimes++; goto retry;
+                                //        }
+                                //        //throw;
+                                //    }
                             }
                             else if (modifierKeys == Keys.Shift && !pagePaste2GjcoolOCR && !PagePaste2GjcoolOCR_ing)
                             {
@@ -10284,7 +10333,8 @@ namespace WindowsFormsApp1
                         Task.WaitAll();
                         Application.DoEvents();
                         //設定textbox1的內容以備編輯
-                        string nextpagetextBox1Text_Default = Clipboard.GetText();
+                        //string nextpagetextBox1Text_Default = Clipboard.GetText();
+                        string nextpagetextBox1Text_Default = br.Quickedit_data_textboxTxt;
                         //textBox1.Text = CnText.BooksPunctuation(ref nextpagetextBox1Text_Default, false);// + Environment.NewLine + Environment.NewLine + Environment.NewLine + textBox1.Text;                    
 
                         string chkX = string.Empty;
@@ -10293,8 +10343,8 @@ namespace WindowsFormsApp1
                             if (!ocrTextMode)
                             {
                                 textBox1.Text = nextpagetextBox1Text_Default;
-                                clearBracketsInsidePairsBrackets();
-                                nextpagetextBox1Text_Default = textBox1.Text;
+                                //clearBracketsInsidePairsBrackets();
+                                //nextpagetextBox1Text_Default = textBox1.Text;
                             }
                             if (!notBooksPunctuation)
                                 chkX = CnText.BooksPunctuation(ref nextpagetextBox1Text_Default, false);
@@ -10825,7 +10875,7 @@ namespace WindowsFormsApp1
         /// <param name="url">url to paste to</param>
         /// <param name="clear">whether clear the texts in quick edit box ;optional. if yes then set this param value to 「chkClearQuickedit_data_textboxTxtStr」 </param>
         /// <returns>執行不成功則傳回false</returns>
-        private bool pasteToCtext(string url, bool statyhere = false, string clear = "")
+        private bool inputToCtext(string url, bool statyhere = false, string clear = "")
         {
             //if (!(url.IndexOf("&file=") > -1 && url.IndexOf("&page=") > -1 && url.IndexOf("&editwiki=") > -1 && url.EndsWith("#editor"))) return false;
             //也有可能是這種網址：https://ctext.org/library.pl?if=gb&file=34195&page=142&editwiki=826120#box(140,120,2,0)
@@ -11081,18 +11131,20 @@ namespace WindowsFormsApp1
             { //要先記下可能有所編輯的前、後頁，否則一刷新就沒有了：
                 if (br.CheckAdjacentPages_DataPrev != null)
                 { //br.CheckAdjacentPages_Linkbox.Click();
-                    string prePageText = string.Empty, nextPageText = string.Empty; Clipboard.Clear();
+                    string prePageText = string.Empty, nextPageText = string.Empty; //Clipboard.Clear(); 20240913作廢
                     try
                     {
                         if (br.CheckAdjacentPages_DataPrev.Text != string.Empty)
                         {
-                            br.CheckAdjacentPages_DataPrev.SendKeys(OpenQA.Selenium.Keys.Control + "ac");
-                            prePageText = Clipboard.GetText();
+                            //br.CheckAdjacentPages_DataPrev.SendKeys(OpenQA.Selenium.Keys.Control + "ac");20240913作廢
+                            //prePageText = Clipboard.GetText();
+                            prePageText = br.CheckAdjacentPages_DataPrev.GetAttribute("value");
                         }
                         if (br.CheckAdjacentPages_DataNext.Text != string.Empty)
                         {
-                            br.CheckAdjacentPages_DataNext.SendKeys(OpenQA.Selenium.Keys.Control + "ac");
-                            nextPageText = Clipboard.GetText();
+                            //br.CheckAdjacentPages_DataNext.SendKeys(OpenQA.Selenium.Keys.Control + "ac");20240913作廢
+                            //nextPageText = Clipboard.GetText();
+                            nextPageText = br.CheckAdjacentPages_DataNext.GetAttribute("value");
                         }
                     }
                     catch (Exception ex)
@@ -11105,13 +11157,15 @@ namespace WindowsFormsApp1
                     {
                         if (prePageText != string.Empty)
                         {
-                            Clipboard.SetText(prePageText);
-                            br.CheckAdjacentPages_DataPrev.SendKeys(OpenQA.Selenium.Keys.Control + "av");
+                            //Clipboard.SetText(prePageText);
+                            //br.CheckAdjacentPages_DataPrev.SendKeys(OpenQA.Selenium.Keys.Control + "av");//20240913作廢
+                            br.SetIWebElementValueProperty(br.CheckAdjacentPages_DataPrev, prePageText);
                         }
                         if (nextPageText != string.Empty)
                         {
-                            Clipboard.SetText(nextPageText);
-                            br.CheckAdjacentPages_DataNext.SendKeys(OpenQA.Selenium.Keys.Control + "av");
+                            //Clipboard.SetText(nextPageText);
+                            //br.CheckAdjacentPages_DataNext.SendKeys(OpenQA.Selenium.Keys.Control + "av");//20240913作廢
+                            br.SetIWebElementValueProperty(br.CheckAdjacentPages_DataNext, nextPageText);
                         }
                     }
                     catch (Exception ex)
@@ -11335,6 +11389,7 @@ namespace WindowsFormsApp1
             undoRecord();
 
             stopUndoRec = false;
+            playSound(soundLike.done, true);//若有取代則播音效，否則有些字筆畫太似，不放大不知道有沒有一致，取代了沒 20240913
         }
 
         List<string> replaceWordList = new List<string>();
@@ -11849,17 +11904,19 @@ namespace WindowsFormsApp1
 
         {//此中斷點專為偵錯測試用 感恩感恩　南無阿彌陀佛 20230314
 
-            #region forDebugTest權作測試偵錯用20230310
-            //br.OCR_GJcool_FastExperience(@"C:\Users\oscar\Dropbox\Ctext_Page_Image.png");
+            #region forDebugTest權作測試偵錯用20230310            
+            //br.SetQuickedit_data_textboxTxt(textBox1.Text);
             //string x = Clipboard.GetText();
+            //x = CnText.RemoveNestedBrackets(x);
+            //Console.WriteLine(x);//在「即時運算視窗」寫出訊息
+
             //CnText.ClearLettersAndDigits(ref x);
             //CnText.ClearLettersAndDigits_UseUnicodeCategory(ref x);
             //CnText.ClearOthers_ExceptUnicodeCharacters(ref x);
-            //Console.WriteLine(x);//在「即時運算視窗」寫出訊息
             //keyinNotepadPlusplus("","南無阿彌陀佛");
             #endregion
 
-            if (!EventsEnabled) return;
+            if (!_eventsEnabled) return;
 
             //Keys modifierKey = ModifierKeys;
             ////直接針對目前的分頁開啟古籍酷OCR//20240328暫取消
@@ -12290,7 +12347,7 @@ namespace WindowsFormsApp1
             {//輸入「lx9」，即重設《漢籍全文資料庫》檢索易學關鍵字清單之起始索引值為9 即 ListIndex_Hanchi_SearchingKeywordsYijing=9。 
 
                 if (Int32.TryParse(x.Substring("lx".Length), out br.ListIndex_Hanchi_SearchingKeywordsYijing))
-                PauseEvents();
+                    PauseEvents();
                 textBox2.Text = "";
                 ResumeEvents(); return;
 
@@ -12934,8 +12991,21 @@ namespace WindowsFormsApp1
                             nextPageStartTime = DateTime.Now;
                         }
                         nextPages(Keys.PageUp, false);
-                        if (autoPastetoQuickEdit || keyinTextMode) AvailableInUseBothKeysMouse();
                         //上一頁
+                        if (autoPastetoQuickEdit || keyinTextMode) AvailableInUseBothKeysMouse();
+                        #region 檢查textBox1的Text值                        
+                        if (keyinTextMode && browsrOPMode == BrowserOPMode.seleniumNew)
+                        {
+                            int cntr = 0;
+                            while (textBox1.Text != br.Quickedit_data_textboxTxt)
+                            {
+                                playSound(soundLike.info);
+                                textBox1.Text = br.Quickedit_data_textboxTxt;
+                                if (cntr > 2) Debugger.Break();
+                                cntr++;
+                            }
+                        }
+                        #endregion                        
                         //keyDownCtrlAdd(false);
                         break;
                     case MouseButtons.XButton2:

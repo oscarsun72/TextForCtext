@@ -27,25 +27,50 @@ Sub Hanchi_CTP_SearchingKeywordsYijing()
 
     If Not examToRun Then Exit Sub
     
+    On Error GoTo eH:
     AppActivate tx
     DoEvents
     SendKeys "%{F9}"
     DoEvents
+    Exit Sub
+eH:
+    Select Case Err.Number
+        Case 5 '程序呼叫或引數不正確
+            If vbOK = MsgBox("請恢復TextForCtext的視窗再按確定繼續", vbOKCancel + vbExclamation) Then
+                Resume
+            End If
+        Case Else
+            MsgBox Err.Number + Err.Description
+    End Select
 End Sub
 Rem 送交《古籍酷》自動標點。先複製好是要處理的純文字。將結果讀回至剪貼簿中
 Function GjcoolPunct() As Boolean
     
     If Not examToRun Then Exit Function
     
+    On Error GoTo eH:
     AppActivate tx
     DoEvents
+    SystemSetup.wait 0.05
     SendKeys "^a"
+    DoEvents
+    SystemSetup.wait 0.02
+    SendKeys "{delete}"
     DoEvents
     AppActivate tx
     SystemSetup.wait 0.1
     DoEvents
-    SendKeys "+{INSERT}"
+    
+    Rem 貼上
+    'SendKeys "+{INSERT}"'因為TextForCtext裡 textBox1_TextChanged 有如下式子，所以不能按下 shift，故改用 ctrl+v
+                                    ' ……   {//在手動輸入模式下
+                                    '    if (mk != Keys.None)
+                                    '    {//可能按下Shift+Delete 剪下textBox1的內容時
+                                    '        hideToNICo(); ……
+    SendKeys "^v" 'Ctrl + v
     DoEvents
+    
+    
     AppActivate tx
     DoEvents
     SendKeys "^%{F10}"
@@ -90,5 +115,16 @@ puncted:
         End If
     Next i
 Return
+
+eH:
+    Select Case Err.Number
+        Case 5 '程序呼叫或引數不正確
+            If vbOK = MsgBox("請恢復TextForCtext的視窗再按確定繼續", vbOKCancel + vbExclamation) Then
+                Resume
+            End If
+        Case Else
+            MsgBox Err.Number + Err.Description
+    End Select
+    
 End Function
 

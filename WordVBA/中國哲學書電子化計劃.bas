@@ -151,9 +151,9 @@ code:
     rng.SetRange rng.start, rng.start
     'rng.MoveStartUntil ">"
     Do Until rng.Next.text = "<"
-        rng.move wdCharacter, -1
+        rng.Move wdCharacter, -1
     Loop
-    rng.move
+    rng.Move
     rng.text = rng.text + Chr(13) + Chr(13)
     rng.SetRange s, d.Range.End
     Return
@@ -247,18 +247,18 @@ Do While rng.Find.Execute("*")
                     rng.Delete
                     Do Until rngP.Next = "<"
                         If rngP.start = 0 Then GoTo NextOne
-                        rngP.move wdCharacter, -1
+                        rngP.Move wdCharacter, -1
                     Loop
                     '檢查是否正在跨頁處 20230811
                     If d.Range(rngP.start, rngP.start + 11) = "><scanbegin" Then
-                        rngP.move Count:=-1
+                        rngP.Move Count:=-1
                         Do Until rngP.Next = "<"
                             If rngP.start = 0 Then GoTo NextOne
-                            rngP.move wdCharacter, -1
+                            rngP.Move wdCharacter, -1
                         Loop
                     End If
                     '以上 檢查是否正在跨頁處 20230811
-                    rngP.move
+                    rngP.Move
                     rngP.InsertAfter Chr(13) & Chr(13)
                 End If
             End If
@@ -454,7 +454,7 @@ Do While rng.Find.Execute("^p")
     For i = 4 To 2 Step -1
         a.SetRange rng.End, rng.End + i
 '        a.Select
-        If right(a, 1) = y Then
+        If Right(a, 1) = y Then
             If a.Previous.Previous <> ">" Then
                 For yi = 1 To 99
                     yStr = 文字轉換.數字轉漢字2位數(yi) + y
@@ -497,7 +497,7 @@ For i = 0 To UBound(a) - 1
 Next i
 For Each p In d.Range.Paragraphs
     xP = p.Range
-    If Left(xP, 2) = "{{" And right(xP, 3) = "}}" & Chr(13) Then
+    If Left(xP, 2) = "{{" And Right(xP, 3) = "}}" & Chr(13) Then
         xP = Mid(p.Range, 3, Len(xP) - 5)
         If InStr(xP, "{{") = 0 And InStr(xP, "}}") = 0 Then
             acP = p.Range.Characters.Count - 1
@@ -517,7 +517,7 @@ For Each p In d.Range.Paragraphs
         End If
     ElseIf Left(xP, 1) = "　" Then '前有空格的
         i = InStr(xP, "{{")
-        If i > 0 And right(xP, 3) = "}}" & Chr(13) Then
+        If i > 0 And Right(xP, 3) = "}}" & Chr(13) Then
             space = Mid(xP, 1, i - 1)
             If Replace(space, "　", "") = "" Then
                 xP = Mid(xP, i + 2, Len(xP) - 3 - (i + 2))
@@ -705,7 +705,7 @@ For Each p In d.Paragraphs
         Selection.MoveRight wdCharacter, 1, wdExtend
         Selection.TypeText "〉}}}" '將注腳編號〔一〕的右邊〕改成}}}
         px = p.Range.text
-        If InStr(right(px, 4), "<p>") Then
+        If InStr(Right(px, 4), "<p>") Then
             e = p.Range.Characters(p.Range.Characters.Count - 4).End
         Else
             e = p.Range.Characters(p.Range.Characters.Count - 1).End
@@ -720,7 +720,7 @@ For Each p In d.Paragraphs
             rng.MoveEndUntil "〔"
             If rng.Characters(rng.Characters.Count) <> "）" Then  ' if not correction
                 rng.Collapse wdCollapseEnd
-                rng.move , 1
+                rng.Move , 1
                 rng.MoveEnd wdCharacter, 1
                 If rng.text Like "[一二三四五六七八九]" Then  ' is footnote No.
                     e = rng.start
@@ -858,7 +858,7 @@ For Each p In d.Paragraphs
         Selection.MoveRight wdCharacter, 1, wdExtend
         Selection.TypeText "〉}}}" '將注腳編號〔一〕的右邊〕改成}}}
         px = p.Range.text
-        If InStr(right(px, 4), "<p>") Then
+        If InStr(Right(px, 4), "<p>") Then
             e = p.Range.Characters(p.Range.Characters.Count - 4).End
         Else
             e = p.Range.Characters(p.Range.Characters.Count - 1).End
@@ -873,7 +873,7 @@ For Each p In d.Paragraphs
             rng.MoveEndUntil "〔"
             If rng.Characters(rng.Characters.Count) <> "）" Then  ' if not correction
                 rng.Collapse wdCollapseEnd
-                rng.move , 1
+                rng.Move , 1
                 rng.MoveEnd wdCharacter, 1
                 If rng.text Like "[一二三四五六七八九]" Then  ' is footnote No.
                     e = rng.start
@@ -964,7 +964,7 @@ Set rng = Selection.Range
 For Each p In d.Paragraphs
     px = p.Range.text
     If Left(p.Range.text, 7) = "{{" & ChrW(-9217) & ChrW(-8195) & "{{{" Then
-        If InStr(right(px, 4), "<p>") Then
+        If InStr(Right(px, 4), "<p>") Then
             e = p.Range.Characters(p.Range.Characters.Count - 4).End
         Else
             e = p.Range.Characters(p.Range.Characters.Count - 1).End
@@ -1226,7 +1226,7 @@ Sub 本草綱目縮排1格雙行小注格式_四庫全書_國學大師()
     SystemSetup.stopUndo ur, "本草綱目縮排一格雙行小注格式_四庫全書_國學大師"
     For Each p In d.Paragraphs
         px = p.Range.text
-        If (VBA.Left(px, 3) = "　{{" Or VBA.Left(px, 3) = "{{　") And VBA.right(px, 3) = "}}" & Chr(13) Then
+        If (VBA.Left(px, 3) = "　{{" Or VBA.Left(px, 3) = "{{　") And VBA.Right(px, 3) = "}}" & Chr(13) Then
             rng.SetRange p.Range.start + 3, p.Range.End - 3
             If VBA.InStr(rng.text, "}") = 0 Then
                 If rng.Characters.Count > 1 Then
@@ -1235,7 +1235,7 @@ Sub 本草綱目縮排1格雙行小注格式_四庫全書_國學大師()
                     rng.Characters(1).InsertAfter Chr(13) & "　"
                 End If
             End If
-        ElseIf VBA.Left(px, 3) = "{{　" And VBA.right(px, 6) = "}}<p>" & Chr(13) Then
+        ElseIf VBA.Left(px, 3) = "{{　" And VBA.Right(px, 6) = "}}<p>" & Chr(13) Then
             rng.SetRange p.Range.start + 3, p.Range.End - 6
             If VBA.InStr(rng.text, "}") = 0 Then
                 If InStr(rng.text, "　") Then
@@ -1263,8 +1263,8 @@ Sub 補括弧()
     Set d = ActiveDocument: SystemSetup.stopUndo ur, "補括弧"
     Set rng = d.Range
     For Each p In d.Paragraphs
-        If VBA.Left(p.Range.text, 2) = "{{" And VBA.right(p.Range.text, 3) <> "}}" & Chr(13) Then
-            If VBA.right(p.Next.Range.text, 3) = "}}" & Chr(13) Then
+        If VBA.Left(p.Range.text, 2) = "{{" And VBA.Right(p.Range.text, 3) <> "}}" & Chr(13) Then
+            If VBA.Right(p.Next.Range.text, 3) = "}}" & Chr(13) Then
                 rng.SetRange p.Range.start, p.Range.End - 1
                 rng.text = VBA.Left(p.Range.text, VBA.Len(p.Range.text) - 1) & "}}"
                 p.Next.Range.text = "{{" & p.Next.Range.text
@@ -1566,7 +1566,7 @@ With Selection
     .MoveLeft wdCharacter, Len(cde)
     .MoveRight wdCharacter, Len(cde) - 1, wdExtend
     .Range.HighlightColorIndex = wdYellow
-    .move , 2
+    .Move , 2
     .InsertParagraphAfter
     .InsertParagraphAfter
     .Collapse
@@ -1583,30 +1583,43 @@ Sub 只保留正文注文_且注文前後加括弧(d As Document)
     'If Selection.Type = wdSelectionIP Then ActiveDocument.Select
 '    Set slRng = Selection.Range
     Set slRng = d.Range
-    清除文本頁中的編號儲存格 slRng
-    中國哲學書電子化計劃_表格轉文字 slRng
-    Dim ay, e
-    ay = Array(254, 8912896)
-    With d.Range.Find
-        .ClearFormatting
-    End With
-    For Each e In ay
-        With d.Range.Find
-            .Font.Color = e
-            .Execute "", , , , , , True, wdFindContinue, , "", wdReplaceAll
-        End With
-    Next e
-    Set slRng = d.Range
-    With slRng.Find
-        .ClearFormatting
-        .Font.Color = 34816
-    End With
-    Do While slRng.Find.Execute(, , , , , , True, wdFindStop)
-        If InStr(Chr(13) & Chr(11) & Chr(7) & Chr(8) & Chr(9) & Chr(10), slRng) = 0 Then
-        slRng.text = "（" + slRng.text + "）"
-        'slRng.SetRange slRng.End, d.Range.End
+    '圖文對照，Quict edit，單頁頁面 20240912
+    If InStr(slRng.text, "<p>") Or (InStr(slRng.text, "{") And InStr(slRng.text, "}")) Then
+        If InStr(slRng.text, "{{{") Then
+            slRng.Find.ClearAllFuzzyOptions: slRng.Find.ClearFormatting
+            slRng.Find.Execute "{{{*}}}", , , True, , , True, wdFindContinue, , vbNullString, wdReplaceAll
         End If
-    Loop
+        slRng.Find.ClearAllFuzzyOptions: slRng.Find.ClearFormatting
+        slRng.Find.Execute "^p", , , , , , , , , vbNullString, wdReplaceAll
+        slRng.Find.Execute "<p>", , , , , , , , , vbNullString, wdReplaceAll
+        slRng.Find.Execute "{{", , , , , , , , , "（", wdReplaceAll
+        slRng.Find.Execute "}}", , , , , , , , , "）", wdReplaceAll
+    Else 'Edit、View，篇章節單位頁面
+        清除文本頁中的編號儲存格 slRng
+        中國哲學書電子化計劃_表格轉文字 slRng
+        Dim ay, e
+        ay = Array(254, 8912896)
+        With d.Range.Find
+            .ClearFormatting
+        End With
+        For Each e In ay
+            With d.Range.Find
+                .Font.Color = e
+                .Execute "", , , , , , True, wdFindContinue, , "", wdReplaceAll
+            End With
+        Next e
+        Set slRng = d.Range
+        With slRng.Find
+            .ClearFormatting
+            .Font.Color = 34816
+        End With
+        Do While slRng.Find.Execute(, , , , , , True, wdFindStop)
+            If InStr(Chr(13) & Chr(11) & Chr(7) & Chr(8) & Chr(9) & Chr(10), slRng) = 0 Then
+            slRng.text = "（" + slRng.text + "）"
+            'slRng.SetRange slRng.End, d.Range.End
+            End If
+        Loop
+    End If
     SystemSetup.contiUndo ur
 End Sub
 
@@ -1690,7 +1703,7 @@ If rst.RecordCount = 0 Then
         rng.Characters(1).Delete
     Else
         MsgBox "plz input the replace word next the one"
-        Selection.move
+        Selection.Move
     End If
 Else
     If rng.Characters.Count = 2 Then If rng.Characters(2) = rst.Fields(1).Value Then rng.Characters(2).Delete
@@ -1736,7 +1749,7 @@ reFind:
             rngMark.SetRange rng.start - 1, rng.start
             'rngMark.MoveStartUntil "<"
             Do Until DoctoMarked.Range(rngMark.start, rngMark.start + 1) = "<"
-                rngMark.move wdCharacter, -1
+                rngMark.Move wdCharacter, -1
             Loop
             rngMark.SetRange rngMark.start, rng.start
             If Left(rngMark.text, 8) <> "<entity " Then

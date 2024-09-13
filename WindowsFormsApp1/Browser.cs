@@ -684,7 +684,7 @@ namespace TextForCtext
             //get { return quickedit_data_textbox == null ? waitFindWebElementByName_ToBeClickable("data", WebDriverWaitTimeSpan) : quickedit_data_textbox; }
             get
             {
-                IWebElement iwe = null;
+                IWebElement iwe;
                 if (Form1.IsValidUrl＿keyDownCtrlAdd(ActiveForm1.textBox3Text))
                 {
                     iwe = waitFindWebElementBySelector_ToBeClickable("#editor > a:nth-child(13)");
@@ -702,7 +702,7 @@ namespace TextForCtext
             //get { return quickedit_data_textbox == null ? waitFindWebElementByName_ToBeClickable("data", WebDriverWaitTimeSpan) : quickedit_data_textbox; }
             get
             {
-                IWebElement iwe = null;
+                IWebElement iwe;
                 if (Form1.IsValidUrl＿keyDownCtrlAdd(ActiveForm1.textBox3Text))
                 {
                     iwe = waitFindWebElementBySelector_ToBeClickable("#dataprev");
@@ -720,7 +720,7 @@ namespace TextForCtext
             //get { return quickedit_data_textbox == null ? waitFindWebElementByName_ToBeClickable("data", WebDriverWaitTimeSpan) : quickedit_data_textbox; }
             get
             {
-                IWebElement iwe = null;
+                IWebElement iwe;
                 if (Form1.IsValidUrl＿keyDownCtrlAdd(ActiveForm1.textBox3Text))
                 {
                     iwe = waitFindWebElementBySelector_ToBeClickable("#datanext");
@@ -739,7 +739,7 @@ namespace TextForCtext
             //get { return quickedit_data_textbox == null ? waitFindWebElementByName_ToBeClickable("data", WebDriverWaitTimeSpan) : quickedit_data_textbox; }
             get
             {
-                IWebElement iwe = null;
+                IWebElement iwe;
                 bool checkNamePorp()
                 {
                     return iwe.GetAttribute("name") == "page";
@@ -784,7 +784,7 @@ namespace TextForCtext
             //get { return quickedit_data_textbox == null ? waitFindWebElementByName_ToBeClickable("data", WebDriverWaitTimeSpan) : quickedit_data_textbox; }
             get
             {
-                IWebElement iwe = null;
+                IWebElement iwe;
                 if (Form1.IsValidUrl＿ImageTextComparisonPage(ActiveForm1.textBox3Text))
                 {
                     iwe = waitFindWebElementBySelector_ToBeClickable("#content > div:nth-child(7) > div:nth-child(1)");
@@ -802,7 +802,7 @@ namespace TextForCtext
             //get { return quickedit_data_textbox == null ? waitFindWebElementByName_ToBeClickable("data", WebDriverWaitTimeSpan) : quickedit_data_textbox; }
             get
             {
-                IWebElement iwe = null;
+                IWebElement iwe;
                 if (Form1.IsValidUrl＿ImageTextComparisonPage(ActiveForm1.textBox3Text))
                 {
                     iwe = waitFindWebElementBySelector_ToBeClickable("#canvas > svg");
@@ -858,6 +858,7 @@ namespace TextForCtext
 
         /// <summary>
         /// 取得[簡單修改模式]的文字；若失敗則回傳空字串
+        /// 原來取該元件的「value」Property就可以了20240913
         /// </summary>
         internal static string Quickedit_data_textboxTxt
         {
@@ -867,19 +868,79 @@ namespace TextForCtext
                 IWebElement ie = Quickedit_data_textbox;
                 if (ie != null)
                 {
+                    //20240913 原來取該元件的「value、textContent……」等 Property 就可以了！
                     //.Text屬性會清除起首的全形空格！！20240313
                     //if (quickedit_data_textboxTxt != Quickedit_data_textbox.Text) quickedit_data_textboxTxt = quickedit_data_textbox.Text;                    
-                    string quickedit_data_textbox_Txt = CopyQuickedit_data_textboxText();
-                    if (quickedit_data_textboxTxt != quickedit_data_textbox_Txt) quickedit_data_textboxTxt = quickedit_data_textbox_Txt;
-                    return quickedit_data_textboxTxt;
+                    //string quickedit_data_textbox_Txt = CopyQuickedit_data_textboxText();                    
+                    //if (quickedit_data_textboxTxt != quickedit_data_textbox_Txt) quickedit_data_textboxTxt = quickedit_data_textbox_Txt;
+                    //return quickedit_data_textboxTxt;
+                    return ie.GetAttribute("value");
                 }
                 else
                     return string.Empty;
             }
         }
         /// <summary>
+        /// 設定Quickedit_data_textbox的value屬性值  20240913
+        /// creedit_with_Copilot大菩薩：C# Selenium 屬性設定方法： https://sl.bing.net/jv1AQReen36
+        /// </summary>
+        /// <param name="txt">要設定的值</param>
+        /// <returns>若失敗則傳回false</returns>
+        internal static bool SetQuickedit_data_textboxTxt(string txt)
+        {
+            if (!Form1.IsValidUrl＿keyDownCtrlAdd(ActiveForm1.textBox3Text)) return false;
+            IWebElement ie = Quickedit_data_textbox;
+            if (ie != null)
+            {
+                if (SetIWebElementValueProperty(ie, txt))
+                    return true;
+                else
+                    return false;
+            }
+            else
+                return false;
+
+        }
+        /// <summary>
+        /// 設定元件 IWebElement的value屬性值  20240913
+        /// creedit_with_Copilot大菩薩：C# Selenium 屬性設定方法： https://sl.bing.net/jv1AQReen36
+        /// </summary>
+        /// <param name="txt">要設定的值</param>
+        /// <returns>若失敗則傳回false</returns>
+        internal static bool SetIWebElementValueProperty(IWebElement iwe, string txt)
+        {/* 其餘諸如 屬性 defaultValue、innerHTML、textContent 
+          * ((IJavaScriptExecutor)driver).ExecuteScript("arguments[0].defaultValue = arguments[1];", ie, txt);
+            ((IJavaScriptExecutor)driver).ExecuteScript("arguments[0].innerHTML = arguments[1];", ie, txt);
+            ((IJavaScriptExecutor)driver).ExecuteScript("arguments[0].textContent = arguments[1];", ie, txt);
+            https://sl.bing.net/ggwydu064om
+          */
+            if (iwe != null)
+            {
+                //// 假設您已經初始化了 WebDriver
+                //IWebDriver driver = new ChromeDriver();
+
+                //// 找到您想要設定屬性的元素
+                //IWebElement element = driver.FindElement(By.Id("elementId"));
+
+                // 使用 ExecuteScript 方法來設定屬性值
+                //((IJavaScriptExecutor)driver).ExecuteScript("arguments[0].setAttribute('attributeName', 'attributeValue')", element);
+                //((IJavaScriptExecutor)driver).ExecuteScript("arguments[0].setAttribute('value', '" + txt + "')", ie);
+                //((IJavaScriptExecutor)driver).ExecuteScript("arguments[0].setAttribute('defaultValue', 'test')", ie);
+                ((IJavaScriptExecutor)driver).ExecuteScript("arguments[0].value = arguments[1];", iwe, txt);
+                /*這是因為 value 屬性在 JavaScript 中是動態的，當您使用 arguments[0].value = arguments[1]; 設定值時，它會改變元素的顯示值，但不會改變元素的 HTML 屬性值。
+                    如果您希望在開發人員工具中也看到 value 屬性值的改變，可以使用 setAttribute 方法來同步更新：*/
+                //((IJavaScriptExecutor)driver).ExecuteScript("arguments[0].setAttribute('value', arguments[1]);", iwe, txt);//現在不需要在開發窗格中顯示，故省略
+                // 這樣，您就可以在開發人員工具中看到 value 屬性值的變化了。
+
+                return true;
+            }
+            else
+                return false;
+        }
+        /// <summary>
         /// 當Quickedit_data_textbox的內容是以全形空格開頭的會被清除，類似Trim的功能，故須用複製文本的方式取得正確的值
         /// 解決Selenium在[簡單修改模式]文字方塊內容若以全形空格為開頭的，會被截去的方案 20230829        /// 
+        /// 原來取該元件的「value」Property就可以了 20240913
         /// </summary>
         /// <returns>回傳所複製的Quickedit_data_textbox文本</returns>
         internal static string CopyQuickedit_data_textboxText()
@@ -1517,10 +1578,10 @@ namespace TextForCtext
         /// 在Chrome瀏覽器的文字框(ctext.org 的 Quick edit ）中輸入文字,creedit//若 xIuput= " "則清除而不輸入
         /// </summary>
         /// <param name="driver">chromedriver</param>
-        /// <param name="xIuput">要貼入的文本</param>
+        /// <param name="xInput">要貼入的文本</param>
         /// <param name="url">要貼入的網頁網址</param>
         /// <returns>執行成功則回傳true</returns>
-        internal static bool 在Chrome瀏覽器的Quick_edit文字框中輸入文字(ChromeDriver driver, string xIuput, string url)
+        internal static bool 在Chrome瀏覽器的Quick_edit文字框中輸入文字(ChromeDriver driver, string xInput, string url)
         {
             #region 檢查網址
             Uri uri = new Uri(url);
@@ -1644,12 +1705,12 @@ namespace TextForCtext
 
             #endregion
 
-            //清除原來文字，準備貼上新的
-            textbox.Clear();
+            ////清除原來文字，準備貼上新的
+            //textbox.Clear();//20240913作廢
 
             #region paste to textbox
             // 在文字框中輸入文字
-            //textbox.SendKeys(@xIuput); //("Hello, World!");
+            //textbox.SendKeys(@xInput); //("Hello, World!");
             /*
              chatGPT ：
                 "ChromeDriver only supports characters in the BMP" 這個訊息的意思是，ChromeDriver 只支援 Unicode 基本多文種平面 (BMP) 中的字元。
@@ -1659,17 +1720,19 @@ namespace TextForCtext
                 ChromeDriver 是一個 Web 自動化工具，它可以自動控制 Google Chrome 瀏覽器，執行各種測試和任務。這個訊息表示，當你在使用 ChromeDriver 時，只能輸入 BMP 中的字元。如果你想要輸入其他的字元 (比如許多亞洲語言中使用的字元)，可能會遇到問題。
              */
             //檢查是否都在BMP內
-            //if (isAllinBmp(xIuput))
+            //if (isAllinBmp(xInput))
             //{
-            //textbox.SendKeys(stringtoEscape_sequences_for_Unicode_character_sets(xIuput));//(Keys.Control + "v");            
-            //textbox.SendKeys(xIuput);
+            //textbox.SendKeys(stringtoEscape_sequences_for_Unicode_character_sets(xInput));//(Keys.Control + "v");            
+            //textbox.SendKeys(xInput);
             //}
             //若含BMP外的字則用系統貼上的方法
             //else//今一律用貼上省事便捷 20230102
             //{
 
-            //文字框取得焦點
-            textbox.Click();
+            ////文字框取得焦點
+            //textbox.Click(); //20240913取消
+
+
             //chrome取得焦點
             //Form1 f = new Form1();
             //f.appActivateByName();
@@ -1681,9 +1744,9 @@ namespace TextForCtext
             //driver.Manage().Window.Position = new Point(0, 0);
             #endregion
 
-
+            bool submitting = false;
             //清除內容不輸入(前已有textbox.Clear();）
-            if (xIuput != chkClearQuickedit_data_textboxTxtStr)//" ")// "\t")//是否清除當前頁面中的內容？（其實是有由tab鍵所按下的值)
+            if (xInput != chkClearQuickedit_data_textboxTxtStr)//" ")// "\t")//是否清除當前頁面中的內容？（其實是有由tab鍵所按下的值)
                                                                // 建立 Actions 物件
                                                                //Actions actions = new Actions(driver);//creedit
                                                                // 貼上剪貼簿中的文字
@@ -1691,11 +1754,17 @@ namespace TextForCtext
                                                                //actions.SendKeys(OpenQA.Selenium.Keys.Control + "v").Build().Perform();
                                                                //actions.SendKeys(OpenQA.Selenium.Keys.LeftShift + OpenQA.Selenium.Keys.Insert).Build().Perform();
             {
-                //Sendkeys(textbox, xIuput);
+                if (quickedit_data_textboxTxt != xInput)
+                    if (!SetQuickedit_data_textboxTxt(xInput)) Debugger.Break();
+                    else
+                        submitting = true;
+                //20240913 改寫：以下作廢
+                /*
+                //Sendkeys(textbox, xInput);
                 //while (!Form1.isClipBoardAvailable_Text()) { }
                 try
                 {
-                    Clipboard.SetText(xIuput);
+                    Clipboard.SetText(xInput);
                 }
                 catch (Exception)
                 {
@@ -1703,73 +1772,83 @@ namespace TextForCtext
                     //Clipboard.Clear();
                     //Clipboard.SetText("x");
                     //Form1.playSound(Form1.soundLike.error, true);
-                    //Clipboard.SetText(xIuput);
+                    //Clipboard.SetText(xInput);
                 }
                 //textbox.SendKeys(OpenQA.Selenium.Keys.LeftShift + OpenQA.Selenium.Keys.Insert);
-                textbox.SendKeys(OpenQA.Selenium.Keys.Shift + OpenQA.Selenium.Keys.Insert);
+                textbox.SendKeys(OpenQA.Selenium.Keys.Shift + OpenQA.Selenium.Keys.Insert);*/
             }
             //SendKeys.Send("^v{tab}~");
             #endregion
             //}
             //Task.WaitAll();
             //System.Windows.Forms.Application.DoEvents();
-            //送出
-            //selm.IWebElement submit = driver.FindElement(selm.By.Id("savechangesbutton"));//("textbox"));
-            selm.IWebElement submit = waitFindWebElementById_ToBeClickable("savechangesbutton", _webDriverWaitTimSpan);
-            /* creedit 我問：在C#  用selenium 控制 chrome 瀏覽器時，怎麼樣才能不必等待網頁作出回應即續編處理按下來的程式碼 。如，以下程式碼，請問，如何在按下 submit.Click(); 後不必等這個動作完成或作出回應，即能繼續執行之後的程式碼呢 感恩感恩　南無阿彌陀佛
-                        chatGPT他答：你可以將 submit.Click(); 放在一個 Task 中去執行，並立即返回。
-             */
-            if (submit == null)
+
+            //內容經過編輯才送出，否則直接翻到下一頁或停留在此頁
+            if (submitting)
             {
-                Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("請檢查頁面中的 Quict edit 是否可用，再按下確定繼續！");
-                submit = waitFindWebElementById_ToBeClickable("savechangesbutton", _webDriverWaitTimSpan);
-            }
-            LastValidWindow = driver.CurrentWindowHandle;
-            Task.Run(() =>//接下來不用理會，也沒有元件要操作、沒有訊息要回應，就可以給另一個線程去處理了。
-            {
-                try
+                #region 送出
+
+
+                //selm.IWebElement submit = driver.FindElement(selm.By.Id("savechangesbutton"));//("textbox"));
+                selm.IWebElement submit = waitFindWebElementById_ToBeClickable("savechangesbutton", _webDriverWaitTimSpan);
+                /* creedit 我問：在C#  用selenium 控制 chrome 瀏覽器時，怎麼樣才能不必等待網頁作出回應即續編處理按下來的程式碼 。如，以下程式碼，請問，如何在按下 submit.Click(); 後不必等這個動作完成或作出回應，即能繼續執行之後的程式碼呢 感恩感恩　南無阿彌陀佛
+                            chatGPT他答：你可以將 submit.Click(); 放在一個 Task 中去執行，並立即返回。
+                 */
+                if (submit == null)
                 {
-                    submit.Click();
+                    Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("請檢查頁面中的 Quict edit 是否可用，再按下確定繼續！");
+                    submit = waitFindWebElementById_ToBeClickable("savechangesbutton", _webDriverWaitTimSpan);
                 }
-                catch (Exception)
-                {//chatGPT：
-                 // 等待網頁元素出現，最多等待 3 秒//應該不用這個，因為會貼上時，不太可能「savechangesbutton」按鈕還沒出現，除非網頁載入不完整……
-                    submit = waitFindWebElementById_ToBeClickable("savechangesbutton", _webDriverWaitTimSpan);  //driver.FindElement(selm.By.Id("savechangesbutton"));
-                                                                                                                //WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(3));
-                                                                                                                ////安裝了 Selenium.WebDriver 套件，才說沒有「ExpectedConditions」，然後照Visual Studio 2022的改正建議又用NuGet 安裝了 Selenium.Suport 套件，也自動「 using OpenQA.Selenium.Support.UI;」了，末學自己還用物件瀏覽器找過了 「OpenQA.Selenium.Support.UI」，可就是沒有「ExpectedConditions」靜態類別可用，即使官方文件也說有 ： https://www.selenium.dev/selenium/docs/api/dotnet/html/T_OpenQA_Selenium_Support_UI_ExpectedConditions.htm 20230109 未知何故 阿彌陀佛
-                                                                                                                //wait.Until(ExpectedConditions.ElementToBeClickable(submit));
-                    /*chatGPT 您好，謝謝您將您的程式碼提供給我，我現在有更多的資訊可以幫助我了解您遇到的問題。按照您的程式碼，我可以確認您已經在您的項目中安裝了 Selenium.WebDriver 和 Selenium.Support NuGet 套件，並且在您的程式碼中使用了 using OpenQA.Selenium.Support.UI; 的聲明。
-                     * 然而，我注意到您正在使用 .NET Framework 4.8，而非 .NET Core。根據 Selenium 文件，ExpectedConditions 類別在 .NET Framework 中只支援 .NET Core。
-                     * 因此，如果您想在 .NET Framework 中使用 ExpectedConditions 類別，則您需要使用 .NET Core 來建立您的項目。如果您無法更改您的項目類型， 我現在繼續提供您有關解決方法的更多資訊。
-                     * 如果您無法更改您的項目類型，則可以使用不同的方法來等待網頁元素的出現。例如，您可以使用以下方法之一：
-                     * 使用 Thread.Sleep() 函式等待指定的時間。
-                     * 使用 while 迴圈和 DateTime.Now 來等待網頁元素的出現。
-                     * 使用 WebDriverWait 類別和 Until() 方法來等待網頁元素的出現。下面是使用第 3 種方法的示例程式碼：……
-                     * 末學我回：菩薩您的解答終於、應該是對的了 是 Core 有 而Framework 不支援 才對 否則真的不知道是何緣故了。感恩感恩　讚歎讚歎　南無阿彌陀佛
-                     * --然而--
-                     * 不用更改 我找到了 謝謝您的回答 以後再來請教您。我剛才成功解決的是，如下所述： 在Visual Studio 2022 中的NuGet 套件不要裝「SeleniumExtras.WaitHelpers」要裝「DotNetSeleniumExtras.WaitHelpers」就可以成功安裝，再用「using SeleniumExtras.WaitHelpers;」則「wait.Until(ExpectedConditions.ElementToBeClickable(submit));」這一行程式碼就不再出錯了，也沒有紅蚯蚓了。現在我已正常編譯，……感恩感恩　讚歎讚歎　南無阿彌陀佛
-                     */
-                    // 在網頁元素載入完畢後，執行 Click 方法
-                    if (submit != null)
-                        try
-                        {
-                            submit.Click();
-                        }
-                        catch (Exception)
-                        {
-                        }
-                    else
-                        Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("請手動檢查資料是否有正確送出。");
-                    //throw;
+                LastValidWindow = driver.CurrentWindowHandle;
+                Task.Run(() =>//接下來不用理會，也沒有元件要操作、沒有訊息要回應，就可以給另一個線程去處理了。
+                {
+                    try
+                    {
+                        submit.Click();//按下 Save changes button（「保存編輯」按鈕）
+                    }
+                    catch (Exception)
+                    {//chatGPT：
+                     // 等待網頁元素出現，最多等待 3 秒//應該不用這個，因為會貼上時，不太可能「savechangesbutton」按鈕還沒出現，除非網頁載入不完整……
+                        submit = waitFindWebElementById_ToBeClickable("savechangesbutton", _webDriverWaitTimSpan);  //driver.FindElement(selm.By.Id("savechangesbutton"));
+                                                                                                                    //WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(3));
+                                                                                                                    ////安裝了 Selenium.WebDriver 套件，才說沒有「ExpectedConditions」，然後照Visual Studio 2022的改正建議又用NuGet 安裝了 Selenium.Suport 套件，也自動「 using OpenQA.Selenium.Support.UI;」了，末學自己還用物件瀏覽器找過了 「OpenQA.Selenium.Support.UI」，可就是沒有「ExpectedConditions」靜態類別可用，即使官方文件也說有 ： https://www.selenium.dev/selenium/docs/api/dotnet/html/T_OpenQA_Selenium_Support_UI_ExpectedConditions.htm 20230109 未知何故 阿彌陀佛
+                                                                                                                    //wait.Until(ExpectedConditions.ElementToBeClickable(submit));
+                        /*chatGPT 您好，謝謝您將您的程式碼提供給我，我現在有更多的資訊可以幫助我了解您遇到的問題。按照您的程式碼，我可以確認您已經在您的項目中安裝了 Selenium.WebDriver 和 Selenium.Support NuGet 套件，並且在您的程式碼中使用了 using OpenQA.Selenium.Support.UI; 的聲明。
+                         * 然而，我注意到您正在使用 .NET Framework 4.8，而非 .NET Core。根據 Selenium 文件，ExpectedConditions 類別在 .NET Framework 中只支援 .NET Core。
+                         * 因此，如果您想在 .NET Framework 中使用 ExpectedConditions 類別，則您需要使用 .NET Core 來建立您的項目。如果您無法更改您的項目類型， 我現在繼續提供您有關解決方法的更多資訊。
+                         * 如果您無法更改您的項目類型，則可以使用不同的方法來等待網頁元素的出現。例如，您可以使用以下方法之一：
+                         * 使用 Thread.Sleep() 函式等待指定的時間。
+                         * 使用 while 迴圈和 DateTime.Now 來等待網頁元素的出現。
+                         * 使用 WebDriverWait 類別和 Until() 方法來等待網頁元素的出現。下面是使用第 3 種方法的示例程式碼：……
+                         * 末學我回：菩薩您的解答終於、應該是對的了 是 Core 有 而Framework 不支援 才對 否則真的不知道是何緣故了。感恩感恩　讚歎讚歎　南無阿彌陀佛
+                         * --然而--
+                         * 不用更改 我找到了 謝謝您的回答 以後再來請教您。我剛才成功解決的是，如下所述： 在Visual Studio 2022 中的NuGet 套件不要裝「SeleniumExtras.WaitHelpers」要裝「DotNetSeleniumExtras.WaitHelpers」就可以成功安裝，再用「using SeleniumExtras.WaitHelpers;」則「wait.Until(ExpectedConditions.ElementToBeClickable(submit));」這一行程式碼就不再出錯了，也沒有紅蚯蚓了。現在我已正常編譯，……感恩感恩　讚歎讚歎　南無阿彌陀佛
+                         */
+                        // 在網頁元素載入完畢後，執行 Click 方法
+                        if (submit != null)
+                            try
+                            {
+                                submit.Click();
+                            }
+                            catch (Exception)
+                            {
+                            }
+                        else
+                            Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("請手動檢查資料是否有正確送出。");
+                        //throw;
+                    }
+                });
+                //加速連續性輸入（不必檢視貼入的文本時，很有效）
+                //if (ActiveForm1.AutoPasteToCtext && Form1.FastMode)
+                if (ActiveForm1.AutoPasteToCtext && Form1.FastMode && Form1.browsrOPMode == Form1.BrowserOPMode.appActivateByName)
+                {
+                    Thread.Sleep(10);//等待 submit = waitFin……完成
+                    driver.Close(); //需要重啟檢視時，只要開啟前一個被關掉的分頁頁籤即可（快速鍵時 Ctrl + Shift + t）
                 }
-            });
-            //加速連續性輸入（不必檢視貼入的文本時，很有效）
-            //if (ActiveForm1.AutoPasteToCtext && Form1.FastMode)
-            if (ActiveForm1.AutoPasteToCtext && Form1.FastMode && Form1.browsrOPMode == Form1.BrowserOPMode.appActivateByName)
-            {
-                Thread.Sleep(10);//等待 submit = waitFin……完成
-                driver.Close(); //需要重啟檢視時，只要開啟前一個被關掉的分頁頁籤即可（快速鍵時 Ctrl + Shift + t）
+                #endregion
             }
+            else
+                Form1.playSound(Form1.soundLike.over, true);
             return true;
         }
 
@@ -7985,12 +8064,13 @@ internal static string getImageUrl() {
                 title = driver.Title;
             }
 
-            List<string> keywords = new List<string> { "易", "卦", "爻", "繫詞", "繫辭", "文言", "乾坤","元亨","利貞", "咎",
-                 "夬", "頤","巽","坎","兌","小畜","大畜","歸妹","明夷","同人","大有","豫","蠱","噬嗑","賁","剝","大過","小過","遯","大壯","睽","暌","蹇","姤","萃","艮","渙","中孚","既濟","未濟",
+            List<string> keywords = new List<string> { "易", "五經", "七經", "十三經", "卦", "爻", "繫詞", "繫辭", "文言", "乾坤","元亨","利貞", "咎",
+                 "夬", "頤","巽","坎","兌","小畜","大畜","歸妹","明夷","明𡗝","同人","大有","豫","蠱","噬嗑","賁","剝","大過","小過","遯","大壯","睽","暌","蹇","姤","萃","艮","渙","中孚","既濟","未濟",
                 "咸恆","老陰", "老陽", "少陰", "少陽","十翼",
                 "无妄", "彖", "象曰", "象傳", "象日", "象云","小象", "筮",
                 "初九","九二","九三","九四","九五","上九","初六","六二","六三","六四","六五","上六","用九","用六", "繇辭","繇詞",
-                "隨時之義","庖有魚","包有魚",
+                "隨時之義","庖有魚","包有魚","精義入神","豶豕","童牛","承之羞","雷在天上","錫馬", "蕃庶","晝日","三接","懲忿","窒欲","敬以直內","義以方外","迷後得主","利西南","品物咸章","天下大行","益動而", "日進無疆","頻巽","豚魚","頻復", "懲窒","閑邪","存誠","乾乾","悔吝","憧憧", "類萬物","柔順利貞","比之匪人","貞厲","履貞","履道坦坦","貞吉","悔亡","時義","健順",
+                "象義",
                 "伏羲","伏𦏁","庖𦏁","宓𦏁","伏犧","庖犧"};
 
             //異體字處理（只用在《中國哲學書電子化計劃》，因為《漢籍全文資料庫》已俱。）
@@ -8003,7 +8083,8 @@ internal static string getImageUrl() {
                     "乹","〈乾〉", "〈坤〉", "〈乾坤〉", "咸恒","剥","頥","㢲","旣濟","涣","兑","大壮",
                     "〈泰〉","〈否〉","〈損〉","〈益〉","〈屯〉","〈豫〉","〈旡妄〉","〈復〉","〈震〉",
                     "少隂","太隂",
-                "𥘉九","𭃨九","𭃡九","𥘉六","𭃨六","𭃡六"};
+                "𥘉九","𭃨九","𭃡九","𥘉六","𭃨六","𭃡六",
+                "悔亾","悔兦"};
                 keywords.AddRange(additionalKeywords);
             }
 
@@ -8465,8 +8546,11 @@ internal static string getImageUrl() {
                 ListIndex_Hanchi_SearchingKeywordsYijing = 0;
                 Form1.playSound(Form1.soundLike.finish, true);//靜音模式時仍播出
                 returnValue = true;
+                if (ActiveForm1.KeyinTextMode == false) ActiveForm1.KeyinTextmodeSwitcher(false);
             }
             #endregion//單個關鍵字查詢結束
+
+            else if (returnValue && ActiveForm1.KeyinTextMode == false) ActiveForm1.KeyinTextmodeSwitcher();//20240912
 
             ////（還似不行！故還原）前已由Copilot大菩薩提供 Timeouts 方法及相關類別解決了。感恩感恩　讚歎讚歎　Copilot大菩薩　南無阿彌陀佛
             //if (!returnValue && caption == "漢籍全文文本閱讀")//因為網頁完全開啟會等很久
@@ -8874,12 +8958,17 @@ internal static string getImageUrl() {
             //「內容:」欄位文字方塊控制項
             iwe = waitFindWebElementBySelector_ToBeClickable("#data");
             if (iwe == null) { DirectlyReplacingCharactersPageWindowHandle = string.Empty; goto reOpenEdittab; }
+
+            #region 輸入取代後的值
+
+            if (!SetIWebElementValueProperty(iwe, iwe.GetAttribute("value").Replace(character.SubstringByTextElements(0, 1), character.SubstringByTextElements(1, 1)))) Debugger.Break();
+            /* 20240913 作廢
             //複製要編輯的文本
             iwe.SendKeys(OpenQA.Selenium.Keys.Control + "a");//直接用 iwe.Text讀取，若要取代多個便不行
             iwe.SendKeys(OpenQA.Selenium.Keys.Control + "c");
             if (iwe.Text.Length > 200000)
                 Thread.Sleep(200);
-            //執行逕行取代
+            //借用變數，執行逕行取代
             editUrl = Clipboard.GetText().Replace(character.SubstringByTextElements(0, 1), character.SubstringByTextElements(1, 1));
             try
             {
@@ -8894,6 +8983,9 @@ internal static string getImageUrl() {
             iwe.Clear();
             //貼上已編輯的文本
             iwe.SendKeys(OpenQA.Selenium.Keys.Shift + OpenQA.Selenium.Keys.Insert);
+            */
+            #endregion
+
 
 
             //iwe = null;

@@ -3039,6 +3039,13 @@ Sub 漢籍電子文獻資料庫文本整理_注文前後加括號() '最後執行 Docs.mark易學關鍵字(在
             If rng.Characters(1) = "（" Then
                 Exit Do
             End If
+            If rng.End = rng.Document.Range.End Then rng.End = rng.End - 1
+            Do While rng.Characters(rng.Characters.Count) = Chr(13)
+                rng.End = rng.End - 1
+            Loop
+            Do While rng.Characters(1) = Chr(13) & Chr(7)
+                rng.start = rng.start + 1
+            Loop
             rng.text = "（" & rng.text & "）"
         Loop
         'rng 位置已移動，在找下一個條件前須恢復

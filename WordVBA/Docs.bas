@@ -1071,7 +1071,7 @@ refres:
             rng.SetRange endDocOld - Len(sx), endDocOld
         End If
         rng.Select
-        Dim cntr As Byte
+        Static cntr  As Byte
 
         '如果選取範圍是文件末端，顯係沒找到，故以剪貼簿內前25字再找一次
 
@@ -1079,9 +1079,12 @@ refres:
 
             ClipBoardObject.SetClipboard VBA.Left(ClipBoardObject.GetClipboard, 25)
 
-            If cntr < 2 Then mark易學關鍵字
-
-            cntr = cntr + 1
+            If cntr < 2 Then
+                cntr = cntr + 1
+                mark易學關鍵字
+            Else
+                cntr = 0
+            End If
 
         End If
     '    word.Application.ScreenRefresh

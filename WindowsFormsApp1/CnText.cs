@@ -699,7 +699,9 @@ namespace TextForCtext
                 if (similarity >= threshold)
                 {
                     //前一段若為「|」通常是卷末題目
-                    if (i > lines.Length - 2 && lines[i - 1] == "|") continue;
+                    if (i > lines.Length - 2 && 
+                        ("|" + Environment.NewLine).IndexOf(lines[i - 1]) > -1) //也分段/行符號可能還未自動轉換成「|」
+                            continue;
 
                     location = xChecking.IndexOf(lines[i]);
                     if (location == -1)
@@ -883,17 +885,70 @@ namespace TextForCtext
             //text = string.Join(Environment.NewLine, rearranged);
         }
 
+
         /// <summary>
         /// 檢查文本中的成對「【」「】」符號，並清除其中的嵌套符號（【、】）。
+        /// 20240911 Copilot大菩薩不行了 還是我自己寫：https://sl.bing.net/coDbtujzqjk 改良後的「【」和「】」符號處理程式碼
+        /// </summary>
+        /// <param name="input">要清除的字串</param>
+        /// <returns>傳回清除後的值</returns>
+        public static string RemoveNestedBrackets(string input)
+        {
+            if (string.IsNullOrEmpty(input)) return input;
+            string result = @"[【】]";
+            Regex regex = new Regex(result);
+            if (!regex.IsMatch(input)) return input;
+            result = input;
+            int posOpenBoldSquareBracket = result.IndexOf("【", 0);
+            int posCloseBoldSquareBracket = result.IndexOf("】", posOpenBoldSquareBracket);
+            int nextOpenBoldSquareBracket = result.IndexOf("【", posOpenBoldSquareBracket + 1);
+            int nextCloseBoldSquareBracket = result.IndexOf("】", posCloseBoldSquareBracket + 1);
+            while (nextCloseBoldSquareBracket > -1 || nextOpenBoldSquareBracket > -1)
+            {
+                //如果下括號在括號之間
+                if ((nextCloseBoldSquareBracket > -1 && nextOpenBoldSquareBracket > nextCloseBoldSquareBracket)
+                    || (nextOpenBoldSquareBracket == -1 && nextCloseBoldSquareBracket > posCloseBoldSquareBracket))
+                {
+                    string str = result.Substring(posOpenBoldSquareBracket + 1, nextCloseBoldSquareBracket - posOpenBoldSquareBracket - 1);//1="【".Length
+                    if (str.IndexOf("】") + posOpenBoldSquareBracket + 1 == posCloseBoldSquareBracket)
+                        result = result.Substring(0, posCloseBoldSquareBracket) + result.Substring(posCloseBoldSquareBracket + 1);
+                }
+                //如果上括號在括號之間
+                else if ((nextOpenBoldSquareBracket > -1 && nextOpenBoldSquareBracket < posCloseBoldSquareBracket)
+                    || (nextCloseBoldSquareBracket == -1 && nextOpenBoldSquareBracket < posCloseBoldSquareBracket))
+                {
+                    string str = result.Substring(posOpenBoldSquareBracket + 1, posCloseBoldSquareBracket - posOpenBoldSquareBracket - 1);//1="【".Length
+                    if (str.IndexOf("【") + posOpenBoldSquareBracket + 1 == nextOpenBoldSquareBracket)
+                        result = result.Substring(0, nextOpenBoldSquareBracket) + result.Substring(nextOpenBoldSquareBracket + 1);
+                }
+                posOpenBoldSquareBracket = result.IndexOf("【", posOpenBoldSquareBracket + 1);
+                if (posOpenBoldSquareBracket == -1) break;
+                posCloseBoldSquareBracket = result.IndexOf("】", posOpenBoldSquareBracket);
+                if (posCloseBoldSquareBracket == -1) break;
+                nextOpenBoldSquareBracket = result.IndexOf("【", posOpenBoldSquareBracket + 1);
+                nextCloseBoldSquareBracket = result.IndexOf("】", posCloseBoldSquareBracket + 1);
+
+            }
+            if (input != result)
+            {
+                Form1.playSound(Form1.soundLike.waiting, true);
+                Debugger.Break();
+            }
+            return result;
+        }
+
+
+        /// <summary>
+        /// 沒作用！檢查文本中的成對「【」「】」符號，並清除其中的嵌套符號（【、】）。
         /// 20240901 Copilot大菩薩：C# Windows.Forms中檢查並清除成對的「【」「】」符號：https://sl.bing.net/jZwKT5iL7gO
         /// </summary>
         /// <param name="input">要清除的字串</param>
         /// <returns>傳回清除的值</returns>
-        public static string RemoveNestedBrackets(string input)
+        public static string RemoveNestedBrackets_BAD(string input)
         {
             string pattern = @"[【】]";
             Regex regex = new Regex(pattern);
-            if(!regex.IsMatch(input)) return input;            
+            if (!regex.IsMatch(input)) return input;
             pattern = @"【[^【】]*】";
             return Regex.Replace(input, pattern, match =>
             {
@@ -1003,19 +1058,22 @@ namespace TextForCtext
             }
 
             // Function to find the adjusted position in punctuatedText
-            int FindAdjustedPosition(string text, string original, int pos, string before, string after)
+            //int FindAdjustedPosition(string text, string original, int pos, string before, string after)
+            int FindAdjustedPosition(string text, int pos, string before, string after)
             {
                 int offset1 = 0;
-                int adjustedPos = pos;
-                //while (adjustedPos < text.Length)
-                while ((adjustedPos + (before.Length + offset1)) < text.Length)
+                int adjustedPos = pos;//原來分段符號所在位置
+                while (adjustedPos < text.Length)
+                //while (adjustedPos + offset1 < text.Length)
+                //while ((adjustedPos + (before.Length + offset1)) < text.Length)
                 {
                     // Process the 'before' part
                     string subText = text.Substring(adjustedPos - (before.Length + offset1), before.Length + offset1);
                     string subTextWithoutPunctuation = RemovePunctuation(subText);
                     while (subTextWithoutPunctuation.Length < before.Length)
                     {
-                        if ((adjustedPos + (before.Length + offset1)) < text.Length)
+                        //if ((adjustedPos + (before.Length + offset1)) < text.Length)
+                        if (adjustedPos + after.Length + offset1 < text.Length)
                         {
                             offset1++;
                             subText = text.Substring(adjustedPos - (before.Length + offset1), before.Length + offset1);
@@ -1043,6 +1101,7 @@ namespace TextForCtext
                             string afterSubText = text.Substring(afterAdjustedPos, after.Length + offset2);
                             string afterSubTextWithoutPunctuation = RemovePunctuation(afterSubText);
                             while (afterSubTextWithoutPunctuation.Length < after.Length)
+                            //while (afterSubTextWithoutPunctuation.Length <= after.Length)
                             {
                                 if (afterAdjustedPos + (after.Length + offset2) < text.Length)
                                 {
@@ -1074,7 +1133,7 @@ namespace TextForCtext
             #region 先規範要操作的文本
             //先清除標點完成的文本中可能含有的分段符號，以利後續的比對
             punctuatedText = punctuatedText.Replace(Environment.NewLine, string.Empty);
-            //清除標題符號以利分段符號之比對搜尋
+            //清除標點符號以利分段符號之比對搜尋
             originalText = RemovePunctuation(originalText);
             //清除縮排即凸排格式標記，即將分段符號前後的空格「　」均予清除
             originalText = Regex.Replace(originalText, $@"\s*{Environment.NewLine}+\s*", Environment.NewLine);
@@ -1117,7 +1176,8 @@ namespace TextForCtext
             foreach (var tp in paragraphPositions)
             {
                 //int adjustedPos = FindAdjustedPosition(punctuatedText, originalText, pos + offset, before, after);
-                int adjustedPos = FindAdjustedPosition(punctuatedText, originalText, tp.Item1 + offset, tp.Item2, tp.Item3);
+                //int adjustedPos = FindAdjustedPosition(punctuatedText, originalText, tp.Item1 + offset, tp.Item2, tp.Item3);
+                int adjustedPos = FindAdjustedPosition(punctuatedText, tp.Item1 + offset, tp.Item2, tp.Item3);
                 //int adjustedPos = FindAdjustedPosition(punctuatedText, originalText, pos + offset, before, after);
                 //因為在子函式方法中，若沒有找到時會將標點符號清除再與原未標點之文本作比對，若原文本已略有標點，則會干擾比對結果，不如兩造一律均清除，則簡單有效 20240808
                 if (adjustedPos != -1)
@@ -1127,6 +1187,9 @@ namespace TextForCtext
                 }
             }
 
+            if (Form1.CountWordsinDomain("\r", originalText)
+                != Form1.CountWordsinDomain("\n", punctuatedText))
+                Debugger.Break();
             return punctuatedText;
         }
 
