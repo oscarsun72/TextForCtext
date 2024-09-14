@@ -1,4 +1,5 @@
-﻿using Microsoft.Win32;
+﻿// 為WordVBA做API等事宜  https://sl.bing.net/fljln2wR7mK 感恩感恩　Copilot大菩薩 南無阿彌陀佛 20240914
+using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -569,10 +570,10 @@ namespace WindowsFormsApp1
                     //Clipboard.Clear();
 
                     //bringBackMousePosFrmCenter();
-                    if (!Active)
-                    {
-                        AvailableInUseBothKeysMouse();
-                    }
+                    //if (!Active)
+                    //{
+                    AvailableInUseBothKeysMouse();
+                    //}
                 }
                 //若此時按下 Shift 則不會取得文本而是逕行送去《古籍酷》OCR取回文本至textBox1以備用
                 else if ((modifierKeys == Keys.Shift || (ocrTextMode && modifierKeys != Keys.Control))
@@ -3172,7 +3173,7 @@ namespace WindowsFormsApp1
                             Form1.playSound(soundLike.info);
                             this.BackColor = Color.Tomato;
                             this.Refresh();
-                            Thread.Sleep(20);
+                            Thread.Sleep(35);
                             this.BackColor = this.FormBackColorDefault;
                         }
 
@@ -9390,8 +9391,15 @@ namespace WindowsFormsApp1
             }
             #endregion//以上防呆
 
+            #region 設定或取得選取文字（要處理的部分）--原理是處理選取的部分，若無選取，則處理整個textBox1內容 20240914
             string x = textBox1.SelectedText == string.Empty ? textBox1.Text : textBox1.SelectedText; bool selAll = false;
-            if (x == textBox1.Text) { textBox1.Select(0, textBox1.TextLength); selAll = true; }//textBox1.SelectionLength = textBox1.TextLength;//textBox1.SelectAll();//這個方法好像會失靈
+            if (x == textBox1.Text)
+            {
+                //textBox1.Select(0, textBox1.TextLength); 
+                //textBox1.Clear();
+                textBox1.SelectAll();
+                selAll = true;
+            }//textBox1.SelectionLength = textBox1.TextLength;//textBox1.SelectAll();//這個方法好像會失靈（應該不會，是自己在設定 SelectionSart SelectionLength 時有問題，或VisualStudio當掉了，重啟即可。）
             else
             {
                 overtypeModeSelectedTextSetting(ref textBox1);
@@ -9406,11 +9414,13 @@ namespace WindowsFormsApp1
                 }
                 x = textBox1.SelectedText;
             }
+            #endregion
+
             //小於20字元不處理
             if (new StringInfo(CnText.RemovePunctuationsNum(x)).LengthInTextElements < 20)
                 if (DialogResult.Cancel == MessageBoxShowOKCancelExclamationDefaultDesktopOnly("字數太少！碇定要送去《古籍酷》自動標點？", "《古籍酷》自動標點", true, MessageBoxDefaultButton.Button2))
                     return false;
-            TopMost = false; int s = textBox1.SelectionStart;
+            TopMost = false; int s = textBox1.SelectionStart;//,l=textBox1.SelectionLength;
             //舊版會破壞"<p>"記號，故先予清除，之後可用軟件中標識<p>的功能補諸20240809(或有空時再學昨天恢復分段符號的方法 RestoreParagraphs ，只是這次不是分段符號，而是分段記號（<p>），或將之擴展為傳入指定字符作為引數）。
             bool reMarkFlag = false;
             saveText();
@@ -9437,6 +9447,11 @@ namespace WindowsFormsApp1
                 default:
                     break;
             }
+
+
+            //textBox1.SelectedText = x;//先作個備份（還原）記錄，以防萬一 20240914 作為下面 RestoreParagraphs 方法除錯用，因其中已有 Debugger.Break(); 故今省略
+            //textBox1.Select(s, l);
+
             //恢復段落符號
             if (!omitExam) x = CnText.RestoreParagraphs(ref originalText, ref x);
 
@@ -9509,7 +9524,7 @@ namespace WindowsFormsApp1
             playSound(soundLike.press, true);
             while (true)
             {
-                if (TopMost) TopMost = false;
+                TopMost = false;
                 if (br.Hanchi_CTP_SearchingKeywordsYijing()) break;
             }
         }

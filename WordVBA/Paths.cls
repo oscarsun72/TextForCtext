@@ -80,7 +80,7 @@ End Sub
 
 Function CombineFullName(folderPath As String, fileName As String) As String
 Dim fullPath As String, fs, f
-If right(folderPath, 1) = "\" Then
+If VBA.Right(folderPath, 1) = "\" Then
     fullPath = folderPath + fileName
 Else
     fullPath = folderPath + "\" + fileName

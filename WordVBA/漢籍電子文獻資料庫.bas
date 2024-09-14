@@ -77,9 +77,9 @@ Sub 漢籍電子文獻資料庫文本整理_十三經注疏()
 End Sub
 Sub 漢籍電子文獻資料庫文本整理_十三經注疏_sub()
     Dim d As Document, a, i As Integer, ub As Integer
-    a = Array("^p" & ChrW(12310) & "疏" & ChrW(12311), ChrW(12310) & "疏" & ChrW(12311) & "{{", _
-        "．", "", "釋曰", "《釋》曰：", "正義曰", "《正義》曰：", "○", ChrW(12295), "^p彖曰", "<p>〈彖〉曰：", "^p象曰", "<p>〈象〉曰：", _
-        "^p", "}}<p>^p", "^p" & ChrW(12295), "}}<p>" & ChrW(12295), ChrW(12295) & "^p", ChrW(12295) & "}}<p>", _
+    a = Array("^p" & VBA.ChrW(12310) & "疏" & VBA.ChrW(12311), VBA.ChrW(12310) & "疏" & VBA.ChrW(12311) & "{{", _
+        "．", "", "釋曰", "《釋》曰：", "正義曰", "《正義》曰：", "○", VBA.ChrW(12295), "^p彖曰", "<p>〈彖〉曰：", "^p象曰", "<p>〈象〉曰：", _
+        "^p", "}}<p>^p", "^p" & VBA.ChrW(12295), "}}<p>" & VBA.ChrW(12295), VBA.ChrW(12295) & "^p", VBA.ChrW(12295) & "}}<p>", _
         "}}", "。}}", "。}}<p>^p。}}<p>", "。}}<p>", "。}}<p>。}}<p>", "。}}<p>", "{{注。}}", "○《注》：")
     ub = UBound(a) - 1
     Set d = ActiveDocument
@@ -117,7 +117,7 @@ Sub get阮元挍勘記()
                 End If
             Else
                 If a.Next.Font.Size > 7.5 Or a.Next.Font.Color <> 255 Then
-                    x = x & a & "}}<p>" & Chr(13) & Chr(10)
+                    x = x & a & "}}<p>" & VBA.Chr(13) & VBA.Chr(10)
                 Else
                     x = x & a
                 End If
@@ -142,7 +142,7 @@ Rem 20230610 YouChat大菩薩：https://you.com/search?q=%E6%89%80%E4%BB%A5+Python%E
 '  Set re = CreateObject("vbscript.regexp")
 '  re.Pattern = "\d+-\d+\s*【圖】?\s*"
 '  re.Global = True
-'  'cleanedText = VBA.Replace(re.Replace(text, vbNullString), Chr(13), vbNullString)
+'  'cleanedText = VBA.Replace(re.Replace(text, vbNullString), vba.Chr(13), vbNullString)
 '  cleanedText = re.Replace(text, vbNullString)
 '  CleanTextPicPageMark = cleanedText
 '  Debug.Print cleanedText

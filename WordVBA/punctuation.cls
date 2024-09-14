@@ -25,7 +25,7 @@ Sub CreatePunctuationMap()
     Dim i As Long
     For i = 1 To Len(text)
         Dim C As String
-        C = Mid(text, i, 1)
+        C = VBA.Mid(text, i, 1)
         If C Like "[!A-Za-z0-9 ]" Then
             map.Add i, C
         End If
@@ -46,8 +46,8 @@ Function CreateContextPunctuationCollection(x As String) As Collection
     Set dict = PunctuationDictionary
     xLen = VBA.Len(x)
     For i = 1 To xLen
-        a = Mid(x, i, 1)
-        If dict.Exists(a) Or a = Chr(13) Then '以標點符號及分段為斷句處，加入集合中成為元素
+        a = VBA.Mid(x, i, 1)
+        If dict.Exists(a) Or a = VBA.Chr(13) Then '以標點符號及分段為斷句處，加入集合中成為元素
             ReDim pare(1) As String '以元素為2個的陣列儲存原文訊息
             pare(0) = text '記文文字片段
             pare(1) = a '記下文字片段後的標點符號
@@ -69,7 +69,7 @@ Property Get PunctuationArray()
         lenpunctuationStr = Len(punctuationStr)
         ReDim punc(lenpunctuationStr - 1) As String
         For i = 1 To lenpunctuationStr
-             punc(i - 1) = Mid(punctuationStr, i, 1)
+             punc(i - 1) = VBA.Mid(punctuationStr, i, 1)
         Next i
         'PunctuationArray = VBA.Split(punctuationStr)
         punctuation_Array = punc
@@ -141,31 +141,31 @@ Sub restoreOriginalTextPunctuations(ByRef OriginalText As String, ByRef RemovedP
             Else 's>1 即用以比對的字串開頭不完整的一個標點符號區段
                 If iCntcontextCollection > 1 Then
                     'If contextCollection.item(iCntcontextCollection)(0) = "六經言之者少" Then Stop 'just for check
-                    prefixRemovedPunctuationsText = Left(RemovedPunctuationsText, s - 1) + contextCollection.item(iCntcontextCollection - 1)(1)
+                    prefixRemovedPunctuationsText = VBA.Left(RemovedPunctuationsText, s - 1) + contextCollection.item(iCntcontextCollection - 1)(1)
                     RemovedPunctuationsTextSubStr = VBA.Mid(RemovedPunctuationsText, Len(contextCollection.item(iCntcontextCollection)(0)) + s)
                 Else
                     Stop 'check
                 End If
             End If
             Do While VBA.InStr(RemovedPunctuationsTextSubStr, contextCollection.item(jCntcontextCollection)(0)) = 1 And RemovedPunctuationsTextSubStr <> ""
-                RemovedPunctuationsTextSubStr = Mid(RemovedPunctuationsTextSubStr, Len(contextCollection.item(jCntcontextCollection)(0)) + 1)
+                RemovedPunctuationsTextSubStr = VBA.Mid(RemovedPunctuationsTextSubStr, Len(contextCollection.item(jCntcontextCollection)(0)) + 1)
                 jCntcontextCollection = jCntcontextCollection + 1
                 If jCntcontextCollection > contextCollection.Count Then Exit Do
             Loop
             If RemovedPunctuationsTextSubStr = "" Then '比對吻合，離開迴圈，取得含標點符號之原文片段
                 match = True
                 Exit For
-            ElseIf VBA.Replace(RemovedPunctuationsTextSubStr, Chr(13), "") = "" Then '只剩下分段符號
+            ElseIf VBA.Replace(RemovedPunctuationsTextSubStr, VBA.Chr(13), "") = "" Then '只剩下分段符號
                 match = True
                 Exit For
-            ElseIf VBA.InStr(contextCollection.item(jCntcontextCollection)(0), RemovedPunctuationsTextSubStr) = 1 And VBA.StrComp(RemovedPunctuationsTextSubStr, Left(contextCollection.item(jCntcontextCollection)(0), VBA.Len(RemovedPunctuationsTextSubStr))) = 0 Then '只剩下不完整的片段（即不到一個標點符號的長度）；即用來比對的字串不是完整的段落，只摘取前面隨意長度的部分來比對
+            ElseIf VBA.InStr(contextCollection.item(jCntcontextCollection)(0), RemovedPunctuationsTextSubStr) = 1 And VBA.StrComp(RemovedPunctuationsTextSubStr, VBA.Left(contextCollection.item(jCntcontextCollection)(0), VBA.Len(RemovedPunctuationsTextSubStr))) = 0 Then '只剩下不完整的片段（即不到一個標點符號的長度）；即用來比對的字串不是完整的段落，只摘取前面隨意長度的部分來比對
                 match = True
                 Exit For
             End If
         End If
     Next iCntcontextCollection
     '取得含標點符號之原文片段
-    'If RemovedPunctuationsTextSubStr = "" Or VBA.Replace(RemovedPunctuationsTextSubStr, Chr(13), "") = "" Then
+    'If RemovedPunctuationsTextSubStr = "" Or VBA.Replace(RemovedPunctuationsTextSubStr, vba.Chr(13), "") = "" Then
     If match Then
         RemovedPunctuationsText = ""
         For iCntcontextCollection = iCntcontextCollection To jCntcontextCollection - 1

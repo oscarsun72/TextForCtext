@@ -16,7 +16,7 @@ Public Static Property Get PunctuationString() As String
 If punctuationStr = "" Then _
     punctuationStr = "¡]¡^¡C¡u¡v¡y¡z[]¡i¡j¡e¡f¡m¡n¡q¡r-¡Ð"",  ¡G¡A¡F¡I¡H?" _
         & "¡B. :,;" _
-        & "¡K¡K...!()-¡P¡E" & Chr(34) & Chr(-24153) & Chr(-24152) & Chr(-24155) & Chr(-24154) & ChrW(8218) '34¡GÂù¤Þ¸¹¡C¤j³°¼ÐÂI²Å¸¹¤W¤UÂù¤Þ¸¹¡B¤W¤U³æ¤Þ¼Æ¡B³r¸¹
+        & "¡K¡K...!()-¡P¡E" & VBA.Chr(34) & VBA.Chr(-24153) & VBA.Chr(-24152) & VBA.Chr(-24155) & VBA.Chr(-24154) & VBA.ChrW(8218) '34¡GÂù¤Þ¸¹¡C¤j³°¼ÐÂI²Å¸¹¤W¤UÂù¤Þ¸¹¡B¤W¤U³æ¤Þ¼Æ¡B³r¸¹
 PunctuationString = punctuationStr
 End Property
 'Public Static Property Let Punctionn(ByVal vNewValue As Variant)
@@ -26,12 +26,12 @@ End Property
 
 Function isNum(x As String) As Boolean
     If Len(x) > 1 Then Exit Function
-    x = StrConv(x, vbNarrow)
+    x = VBA.StrConv(x, vbNarrow)
     If x Like "[0-9]" Then isNum = True
 End Function
 Function isLetter(x As String) As Boolean
     If Len(x) > 1 Then Exit Function
-    x = StrConv(x, vbNarrow)
+    x = VBA.StrConv(x, vbNarrow)
     If x Like "[a-z]" Then isLetter = True
 End Function
 
@@ -71,7 +71,7 @@ Sub ¦rÀW() '2002/11/10­nSub¤~¯à¦bWord¤¤°õ¦æ!
     '        If wrong Mod 1000 = 0 Then Debug.Print wrong
     '        Debug.Print ch & vbCr & "--------"
             '´«¦æ¦r¤¸¡B´_¦ì¦r¤¸¤£­p!
-    '        If Right(ch, 1) <> Chr(10) Or Left(ch, 1) <> Chr(13) Then
+    '        If VBA.Right(ch, 1) <> vba.Chr(10) Or vba.Left(ch, 1) <> vba.Chr(13) Then
             Select Case Asc(ch)
                 Case Is <> 13, 10
             With rst
@@ -145,10 +145,10 @@ retry:      Next ch
     ''        Debug.Print Err.Description 'ÀË¬d¥Î!
     '        Resume
     '    Case Is = 3163 '´«¦æ¦r¤¸¡B´_¦ì¦r¤¸¤£­p!
-    '        If Right(ch, 1) = Chr(10) Then
-    '            ch = Left(ch, Len(ch) - 1)
-    '        ElseIf Left(ch, 1) = Chr(13) Then
-    '            ch = Right(ch, Len(ch) - 1) '©ÎIf Asc(ch)=13
+    '        If VBA.Right(ch, 1) = vba.Chr(10) Then
+    '            ch = vba.Left(ch, Len(ch) - 1)
+    '        ElseIf vba.Left(ch, 1) = vba.Chr(13) Then
+    '            ch = VBA.Right(ch, Len(ch) - 1) '©ÎIf Asc(ch)=13
     '        End If
     '        Resume 11
         Case Is = 93 '¬°[]µ¥¹Bºâ¦¡¯S®í¦r¤¸©Ò³]¤§¤ñ¸û¦¡
@@ -194,7 +194,7 @@ Sub µüÀW() '2002/11/10
             wrong = wrong + 1 'ÀËµø¥Î!
     '        If wrong Mod 1000 = 0 Then Debug.Print wrong
     '        Debug.Print wd & vbCr & "--------"
-            If Len(wd) > 1 And Right(wd, 1) = " " Then
+            If Len(wd) > 1 And VBA.Right(wd, 1) = " " Then
                 hfspace = hfspace + 1 '­p¦¸
                 GoTo retry '¦r¦ê¥kÃä¬O¥b§ÎªÅ®æ®É,AccessUpdate®É·|¾P¥h,¥B©óµü·J¥çµL·N·N,¬G¤£­p!
             End If
@@ -297,7 +297,7 @@ Sub ¶i¶¥µüÀW() '2002/11/10­nSub¤~¯à¦bWord¤¤°õ¦æ!'2005/4/21¦¹ªk¦b¶]¤jÀÉ®×®É¤Ó¨S®Ä
                             GoTo ¿ù»~³B²z
                         End If
     '                    phras = .Characters(phra)'¦¹ªk¤ÓºC!
-                        phras = Mid(Dw, phra, 1)
+                        phras = VBA.Mid(Dw, phra, 1)
                     Case Is = 2
                         If Err.LastDllError <> 0 Then
                             MsgBox Err.LastDllError & ":" & Err.Description & "Err.Number:" & Err.Number
@@ -305,7 +305,7 @@ Sub ¶i¶¥µüÀW() '2002/11/10­nSub¤~¯à¦bWord¤¤°õ¦æ!'2005/4/21¦¹ªk¦b¶]¤jÀÉ®×®É¤Ó¨S®Ä
                         End If
     '                    If phra + 1 <= .Characters.Count Then _
                         phras = .Characters(phra) & .Characters(phra + 1)
-                        If phra + 1 <= dwL Then phras = Mid(Dw, phra, 2)
+                        If phra + 1 <= dwL Then phras = VBA.Mid(Dw, phra, 2)
                     Case Is = 3
                         If Err.LastDllError <> 0 Then
                             MsgBox Err.LastDllError & ":" & Err.Description & "Err.Number:" & Err.Number
@@ -314,7 +314,7 @@ Sub ¶i¶¥µüÀW() '2002/11/10­nSub¤~¯à¦bWord¤¤°õ¦æ!'2005/4/21¦¹ªk¦b¶]¤jÀÉ®×®É¤Ó¨S®Ä
     '                    If phra + 2 <= .Characters.Count Then _
                         phras = .Characters(phra) & .Characters(phra + 1) & _
                                 .Characters(phra + 2)
-                        If phra + 2 <= dwL Then phras = Mid(Dw, phra, 3)
+                        If phra + 2 <= dwL Then phras = VBA.Mid(Dw, phra, 3)
                     Case Is = 4
                         On Error GoTo ¿ù»~³B²z
                         If Err.LastDllError <> 0 Then
@@ -324,7 +324,7 @@ Sub ¶i¶¥µüÀW() '2002/11/10­nSub¤~¯à¦bWord¤¤°õ¦æ!'2005/4/21¦¹ªk¦b¶]¤jÀÉ®×®É¤Ó¨S®Ä
     '                    If phra + 3 <= .Characters.Count Then _
                         phras = .Characters(phra) & .Characters(phra + 1) & _
                                 .Characters(phra + 2) & .Characters(phra + 3)
-                        If phra + 3 <= dwL Then phras = Mid(Dw, phra, 3)
+                        If phra + 3 <= dwL Then phras = VBA.Mid(Dw, phra, 3)
                     Case Is = 5
                         On Error GoTo ¿ù»~³B²z
                         If Err.LastDllError <> 0 Then
@@ -335,9 +335,9 @@ Sub ¶i¶¥µüÀW() '2002/11/10­nSub¤~¯à¦bWord¤¤°õ¦æ!'2005/4/21¦¹ªk¦b¶]¤jÀÉ®×®É¤Ó¨S®Ä
                         phras = .Characters(phra) & .Characters(phra + 1) & _
                                 .Characters(phra + 2) & .Characters(phra + 3) & _
                                 .Characters(phra + 4)
-                        If phra + 4 <= dwL Then phras = Mid(Dw, phra, 3)
+                        If phra + 4 <= dwL Then phras = VBA.Mid(Dw, phra, 3)
                 End Select
-                If Len(phras) > 1 And Right(phras, 1) = " " Then
+                If Len(phras) > 1 And VBA.Right(phras, 1) = " " Then
                     hfspace = hfspace + 1 '­p¦¸
                     GoTo 11 '¦r¦ê¥kÃä¬O¥b§ÎªÅ®æ®É,AccessUpdate®É·|¾P¥h,¥B©óµü·J¥çµL·N·N,¬G¤£­p!
                 End If
@@ -439,7 +439,7 @@ Sub ¶i¶¥µüÀW1() '2002/11/15­nSub¤~¯à¦bWord¤¤°õ¦æ!
                         phras = phras & .Characters(phra + i)
                     Next i
                 End If
-                If Len(phras) > 1 And Right(phras, 1) = " " Then
+                If Len(phras) > 1 And VBA.Right(phras, 1) = " " Then
                     hfspace = hfspace + 1 '­p¦¸
                     GoTo 11 '¦r¦ê¥kÃä¬O¥b§ÎªÅ®æ®É,AccessUpdate®É·|¾P¥h,¥B©óµü·J¥çµL·N·N,¬G¤£­p!
                 End If
@@ -585,7 +585,7 @@ Sub «ü©w¦r¼ÆµüÀW() '2002/11/11
                             .Characters(phra + 8) & .Characters(phra + 9) & _
                             .Characters(phra + 10)
             End Select
-            If Len(phras) > 1 And Right(phras, 1) = " " Then
+            If Len(phras) > 1 And VBA.Right(phras, 1) = " " Then
                 hfspace = hfspace + 1 '­p¦¸
                 GoTo 11 '¦r¦ê¥kÃä¬O¥b§ÎªÅ®æ®É,AccessUpdate®É·|¾P¥h,¥B©óµü·J¥çµL·N·N,¬G¤£­p!
             End If
@@ -671,7 +671,7 @@ Sub «ü©w11¦r¼ÆµüÀW()     '2002/11/15'¥H¦¹¬°¨Ò,¥i§@¬°¹w¥ý­­©w¦r¼Æªº¦U­Óµ{§Ç(¥»¨Ò¬
                         .Characters(phra + 6) & .Characters(phra + 7) & _
                         .Characters(phra + 8) & .Characters(phra + 9) & _
                         .Characters(phra + 10)
-            If Len(phras) > 1 And Right(phras, 1) = " " Then
+            If Len(phras) > 1 And VBA.Right(phras, 1) = " " Then
                 hfspace = hfspace + 1 '­p¦¸
                 GoTo 11 '¦r¦ê¥kÃä¬O¥b§ÎªÅ®æ®É,AccessUpdate®É·|¾P¥h,¥B©óµü·J¥çµL·N·N,¬G¤£­p!
             End If
@@ -753,7 +753,7 @@ Sub «ü©w10¦r¼ÆµüÀW() '2002/11/15
                         .Characters(phra + 4) & .Characters(phra + 5) & _
                         .Characters(phra + 6) & .Characters(phra + 7) & _
                         .Characters(phra + 8) & .Characters(phra + 9)
-            If Len(phras) > 1 And Right(phras, 1) = " " Then
+            If Len(phras) > 1 And VBA.Right(phras, 1) = " " Then
                 hfspace = hfspace + 1 '­p¦¸
                 GoTo 11 '¦r¦ê¥kÃä¬O¥b§ÎªÅ®æ®É,AccessUpdate®É·|¾P¥h,¥B©óµü·J¥çµL·N·N,¬G¤£­p!
             End If
@@ -836,7 +836,7 @@ Sub «ü©w9¦r¼ÆµüÀW()  '2002/11/15
                         .Characters(phra + 4) & .Characters(phra + 5) & _
                         .Characters(phra + 6) & .Characters(phra + 7) & _
                         .Characters(phra + 8)
-            If Len(phras) > 1 And Right(phras, 1) = " " Then
+            If Len(phras) > 1 And VBA.Right(phras, 1) = " " Then
                 hfspace = hfspace + 1 '­p¦¸
                 GoTo 11 '¦r¦ê¥kÃä¬O¥b§ÎªÅ®æ®É,AccessUpdate®É·|¾P¥h,¥B©óµü·J¥çµL·N·N,¬G¤£­p!
             End If
@@ -919,7 +919,7 @@ Sub «ü©w8¦r¼ÆµüÀW()   '2002/11/15
                         .Characters(phra + 2) & .Characters(phra + 3) & _
                         .Characters(phra + 4) & .Characters(phra + 5) & _
                         .Characters(phra + 6) & .Characters(phra + 7)
-            If Len(phras) > 1 And Right(phras, 1) = " " Then
+            If Len(phras) > 1 And VBA.Right(phras, 1) = " " Then
                 hfspace = hfspace + 1 '­p¦¸
                 GoTo 11 '¦r¦ê¥kÃä¬O¥b§ÎªÅ®æ®É,AccessUpdate®É·|¾P¥h,¥B©óµü·J¥çµL·N·N,¬G¤£­p!
             End If
@@ -1000,7 +1000,7 @@ Sub «ü©w6¦r¼ÆµüÀW()    '2002/11/15
                 phras = .Characters(phra) & .Characters(phra + 1) & _
                         .Characters(phra + 2) & .Characters(phra + 3) & _
                         .Characters(phra + 4) & .Characters(phra + 5)
-            If Len(phras) > 1 And Right(phras, 1) = " " Then
+            If Len(phras) > 1 And VBA.Right(phras, 1) = " " Then
                 hfspace = hfspace + 1 '­p¦¸
                 GoTo 11 '¦r¦ê¥kÃä¬O¥b§ÎªÅ®æ®É,AccessUpdate®É·|¾P¥h,¥B©óµü·J¥çµL·N·N,¬G¤£­p!
             End If
@@ -1081,7 +1081,7 @@ Sub «ü©w5¦r¼ÆµüÀW()     '2002/11/15
                 phras = .Characters(phra) & .Characters(phra + 1) & _
                         .Characters(phra + 2) & .Characters(phra + 3) & _
                         .Characters(phra + 4)
-            If Len(phras) > 1 And Right(phras, 1) = " " Then
+            If Len(phras) > 1 And VBA.Right(phras, 1) = " " Then
                 hfspace = hfspace + 1 '­p¦¸
                 GoTo 11 '¦r¦ê¥kÃä¬O¥b§ÎªÅ®æ®É,AccessUpdate®É·|¾P¥h,¥B©óµü·J¥çµL·N·N,¬G¤£­p!
             End If
@@ -1160,7 +1160,7 @@ Sub «ü©w4¦r¼ÆµüÀW()       '2002/11/15
             If phra + 3 <= .Characters.Count Then _
                 phras = .Characters(phra) & .Characters(phra + 1) & _
                         .Characters(phra + 2) & .Characters(phra + 3)
-            If Len(phras) > 1 And Right(phras, 1) = " " Then
+            If Len(phras) > 1 And VBA.Right(phras, 1) = " " Then
                 hfspace = hfspace + 1 '­p¦¸
                 GoTo 11 '¦r¦ê¥kÃä¬O¥b§ÎªÅ®æ®É,AccessUpdate®É·|¾P¥h,¥B©óµü·J¥çµL·N·N,¬G¤£­p!
             End If
@@ -1240,7 +1240,7 @@ Sub «ü©w3¦r¼ÆµüÀW()      '2002/11/15
             If phra + 2 <= .Characters.Count Then _
                 phras = .Characters(phra) & .Characters(phra + 1) & _
                         .Characters(phra + 2)
-            If Len(phras) > 1 And Right(phras, 1) = " " Then
+            If Len(phras) > 1 And VBA.Right(phras, 1) = " " Then
                 hfspace = hfspace + 1 '­p¦¸
                 GoTo 11 '¦r¦ê¥kÃä¬O¥b§ÎªÅ®æ®É,AccessUpdate®É·|¾P¥h,¥B©óµü·J¥çµL·N·N,¬G¤£­p!
             End If
@@ -1319,7 +1319,7 @@ Sub «ü©w2¦r¼ÆµüÀW()       '2002/11/15
         For phra = 1 To .Characters.Count
             If phra + 1 <= .Characters.Count Then _
                 phras = .Characters(phra) & .Characters(phra + 1)
-            If Len(phras) > 1 And Right(phras, 1) = " " Then
+            If Len(phras) > 1 And VBA.Right(phras, 1) = " " Then
                 hfspace = hfspace + 1 '­p¦¸
                 GoTo 11 '¦r¦ê¥kÃä¬O¥b§ÎªÅ®æ®É,AccessUpdate®É·|¾P¥h,¥B©óµü·J¥çµL·N·N,¬G¤£­p!
             End If
@@ -1397,7 +1397,7 @@ Sub «ü©w1¦r¼ÆµüÀW()        '2002/11/15
     With ActiveDocument
         For phra = 1 To .Characters.Count
                 phras = .Characters(phra)
-            If Len(phras) > 1 And Right(phras, 1) = " " Then
+            If Len(phras) > 1 And VBA.Right(phras, 1) = " " Then
                 hfspace = hfspace + 1 '­p¦¸
                 GoTo 11 '¦r¦ê¥kÃä¬O¥b§ÎªÅ®æ®É,AccessUpdate®É·|¾P¥h,¥B©óµü·J¥çµL·N·N,¬G¤£­p!
             End If
@@ -1482,7 +1482,7 @@ Sub «ü©w7¦r¼ÆµüÀW()      '2002/11/15'¥H¦¹¬°¨Ò,¥i§@¬°¹w¥ý­­©w¦r¼Æªº¦U­Óµ{§Ç(¥»¨Ò¬
                         .Characters(phra + 2) & .Characters(phra + 3) & _
                         .Characters(phra + 4) & .Characters(phra + 5) & _
                         .Characters(phra + 6)
-            If Len(phras) > 1 And Right(phras, 1) = " " Then
+            If Len(phras) > 1 And VBA.Right(phras, 1) = " " Then
                 hfspace = hfspace + 1 '­p¦¸
                 GoTo 11 '¦r¦ê¥kÃä¬O¥b§ÎªÅ®æ®É,AccessUpdate®É·|¾P¥h,¥B©óµü·J¥çµL·N·N,¬G¤£­p!
             End If
@@ -1577,7 +1577,7 @@ Sub «ü©w¦r¼ÆµüÀW1() '2002/11/15'®Ä¯à¸ûºC!
             Else
                 phras = .Characters(phra)
             End If
-            If Len(phras) > 1 And Right(phras, 1) = " " Then
+            If Len(phras) > 1 And VBA.Right(phras, 1) = " " Then
                 hfspace = hfspace + 1 '­p¦¸
                 GoTo 11 '¦r¦ê¥kÃä¬O¥b§ÎªÅ®æ®É,AccessUpdate®É·|¾P¥h,¥B©óµü·J¥çµL·N·N,¬G¤£­p!
             End If
@@ -1668,7 +1668,7 @@ Sub «ü©w¦r¼ÆµüÀW2() '2002/11/15®Ä¯à»P­ì³]­p®t¤£¦h,¦ý¥iÅÜ¼Æ¤Æ!
     '        Else
     '            phras = .Characters(phra)
     '        End If
-            If Len(phras) > 1 And Right(phras, 1) = " " Then
+            If Len(phras) > 1 And VBA.Right(phras, 1) = " " Then
                 hfspace = hfspace + 1 '­p¦¸
                 GoTo 11 '¦r¦ê¥kÃä¬O¥b§ÎªÅ®æ®É,AccessUpdate®É·|¾P¥h,¥B©óµü·J¥çµL·N·N,¬G¤£­p!
             End If
@@ -1737,7 +1737,7 @@ Sub ¤å¥ó¦rÀW_old()
     'If Dir(xlsp) = "" Then xlsp = "C:\Documents and Settings\Superwings\®à­±\" & Replace(ActiveDocument.Name, ".doc", "") & "¦rÀW.XLS"
     'xlsp = "C:\Documents and Settings\Superwings\®à­±\" & Replace(ActiveDocument.Name, ".doc", "") & "¦rÀW.XLS"
     xlsp = InputBox("½Ð¿é¤J¦sÀÉ¸ô®|¤ÎÀÉ¦W(¥þÀÉ¦W,§t°ÆÀÉ¦W)!" & vbCr & vbCr & _
-            "¹w³]±N¥H¦¹word¤å¥óÀÉ¦W + ""¦rÀW.XLSX""¦rºó,¦s©ó®à­±¤W", "¦rÀW½Õ¬d", xlsp & Replace(ActiveDocument.Name, ".doc", "") & "¦rÀW" & StrConv(Time, vbWide) & ".XLSX")
+            "¹w³]±N¥H¦¹word¤å¥óÀÉ¦W + ""¦rÀW.XLSX""¦rºó,¦s©ó®à­±¤W", "¦rÀW½Õ¬d", xlsp & Replace(ActiveDocument.Name, ".doc", "") & "¦rÀW" & VBA.StrConv(Time, vbWide) & ".XLSX")
     If xlsp = "" Then Exit Sub
     
     ds = VBA.Timer
@@ -1745,11 +1745,11 @@ Sub ¤å¥ó¦rÀW_old()
     With d
         For Each Char In d.Characters
             charText = Char
-            If Not charText = Chr(13) And charText <> "-" And Not charText Like "[a-zA-Z0-9¢¯-¢¸]" Then
-                'If Not charText Like "[a-z1-9]" & Chr(-24153) & Chr(-24152) & " ¡@¡B'""¡u¡v¡y¡z¡]¡^¡Ð¡H¡I]" Then
-    '            If InStr(Chr(-24153) & Chr(-24152) & Chr(2) & "¡E[]¡e¡f¡£¡¤¡K¡F,¡A.¡C¡D ¡@¡B'""¡¥¡¦`\{}¡a¡b¡u¡v¡y¡z¡]¡^¡m¡n¡q¡r¡Ð¡H¡I]", charText) = 0 Then
-                If InStr(ChrW(-24153) & ChrW(-24152) & Chr(2) & "¡E[]¡e¡f¡£¡¤¡K¡F,¡A.¡C¡D ¡@¡B'""¡¥¡¦`\{}¡a¡b¡u¡v¡y¡z¡]¡^¡m¡n¡q¡r¡Ð¡H¡I]", charText) = 0 Then
-                'chr(2)¥i¯à¬Oµù¸}¼Ð°O
+            If Not charText = VBA.Chr(13) And charText <> "-" And Not charText Like "[a-zA-Z0-9¢¯-¢¸]" Then
+                'If Not charText Like "[a-z1-9]" & VBA.Chr(-24153) & VBA.Chr(-24152) & " ¡@¡B'""¡u¡v¡y¡z¡]¡^¡Ð¡H¡I]" Then
+    '            If InStr(VBA.Chr(-24153) & VBA.Chr(-24152) & vba.Chr(2) & "¡E[]¡e¡f¡£¡¤¡K¡F,¡A.¡C¡D ¡@¡B'""¡¥¡¦`\{}¡a¡b¡u¡v¡y¡z¡]¡^¡m¡n¡q¡r¡Ð¡H¡I]", charText) = 0 Then
+                If InStr(VBA.ChrW(-24153) & VBA.ChrW(-24152) & VBA.Chr(2) & "¡E[]¡e¡f¡£¡¤¡K¡F,¡A.¡C¡D ¡@¡B'""¡¥¡¦`\{}¡a¡b¡u¡v¡y¡z¡]¡^¡m¡n¡q¡r¡Ð¡H¡I]", charText) = 0 Then
+                'vba.Chr(2)¥i¯à¬Oµù¸}¼Ð°O
                     If preChar <> charText Then
                         'If UBound(X) > 0 Then
                             If preChar = "" Then 'If IsEmpty(X) Then'¦pªG¬O¤@¶}©l
@@ -1812,7 +1812,7 @@ Sub ¤å¥ó¦rÀW_old()
                 .ActiveWindow.Selection.Range.Collapse Direction:=wdCollapseEnd
                 .Range.Paragraphs(.Paragraphs.Count).Range.Font.Size = 12
     '            .Range.Paragraphs(.Paragraphs.Count).Range.Bold = False
-                .Range.InsertAfter Replace(Xsort(j), "¡B", Chr(9), 1, 1) 'chr(9)¬°©w¦ì¦r¤¸(TabÁä­È)
+                .Range.InsertAfter Replace(Xsort(j), "¡B", VBA.Chr(9), 1, 1) 'vba.Chr(9)¬°©w¦ì¦r¤¸(TabÁä­È)
                 .Range.InsertParagraphAfter
                 If InStr(.Range.Paragraphs(.Paragraphs.Count).Range, "¦rÀW") = 0 Then
                     .Range.Paragraphs(.Paragraphs.Count - 1).Range.Font.Name = "¼Ð·¢Åé"
@@ -1863,7 +1863,7 @@ Sub ¤å¥ó¦rÀW_old()
     'Set ExcelSheet = Nothing'¦¹¦æ·|¨Ï®ø¥¢
     'Set d = Nothing
     de = VBA.Timer
-    MsgBox "§¹¦¨¡I" & vbCr & vbCr & "¶O®É" & Left(de - ds, 5) & "¬í!"
+    MsgBox "§¹¦¨¡I" & vbCr & vbCr & "¶O®É" & VBA.Left(de - ds, 5) & "¬í!"
     ExcelSheet.Application.Visible = True
     ExcelSheet.Application.UserControl = True
     ExcelSheet.SaveAs xlsp '"C:\Macros\¦u¯uTEST.XLS"
@@ -1895,13 +1895,13 @@ End Sub
 Function UppercaeEnglishLetter() '­^¤å¤j¼g¦r¥À
     Dim wd, wdct As Long, i As Byte
     For i = 65 To 90
-        Debug.Print Chr(i) & vbCr
+        Debug.Print VBA.Chr(i) & vbCr
     Next
 End Function
 Function LowercaseEnglishLetter() '­^¤å¤p¼g¦r¥À
     Dim i As Byte
     For i = 97 To 122
-        Debug.Print Chr(i) & vbCr
+        Debug.Print VBA.Chr(i) & vbCr
     Next
 End Function
 
@@ -1912,7 +1912,7 @@ Function trimStrForSearch_PlainText(x As String) As String
     
     Dim ayToTrim As Variant, a As Variant
     On Error GoTo eH
-    ayToTrim = Array(Chr(13), Chr(9), Chr(10), Chr(11), Chr(13) & Chr(7), Chr(13) & Chr(10))
+    ayToTrim = Array(VBA.Chr(13), VBA.Chr(9), VBA.Chr(10), VBA.Chr(11), VBA.Chr(13) & VBA.Chr(7), VBA.Chr(13) & VBA.Chr(10))
     x = VBA.Trim(x)
     For Each a In ayToTrim
         'x = VBA.Replace(x, a, "")
@@ -1938,7 +1938,7 @@ Function trimStrForSearch(x As String, sl As word.Selection) As String
     Dim ayToTrim As Variant, a As Variant, rng As Range, slTxtR As String
     On Error GoTo eH
     slTxtR = sl.Characters(sl.Characters.Count)
-    ayToTrim = Array(Chr(13), Chr(9), Chr(10), Chr(11), Chr(13) & Chr(7), Chr(13) & Chr(10))
+    ayToTrim = Array(VBA.Chr(13), VBA.Chr(9), VBA.Chr(10), VBA.Chr(11), VBA.Chr(13) & VBA.Chr(7), VBA.Chr(13) & VBA.Chr(10))
     x = VBA.Trim(x)
     For Each a In ayToTrim
         'x = VBA.Replace(x, a, "")
@@ -1952,7 +1952,7 @@ Function trimStrForSearch(x As String, sl As word.Selection) As String
     trimStrForSearch = x
     If sl.Type <> wdSelectionIP Then
         If UBound(VBA.Strings.Filter(ayToTrim, slTxtR)) > -1 Then
-        'If sl.Characters(sl.Characters.Count) = Chr(13) Then
+        'If sl.Characters(sl.Characters.Count) = vba.Chr(13) Then
             Set rng = sl.Range
             rng.SetRange sl.start, sl.End - Len(slTxtR)
             rng.Select
@@ -1968,19 +1968,19 @@ eH:
 End Function
 
 Sub ResetSelectionAvoidSymbols()
-    Do While Selection.Characters(Selection.Characters.Count) = Chr(13)
+    Do While Selection.Characters(Selection.Characters.Count) = VBA.Chr(13)
         Selection.MoveLeft wdCharacter, 1, wdExtend
     Loop
-    Do While Selection.Characters(1) = Chr(13)
+    Do While Selection.Characters(1) = VBA.Chr(13)
         Selection.SetRange Selection.start + 1, Selection.End
     Loop
 End Sub
 'Function Symbol() '¼ÐÂI²Å¸¹ªí
 'Dim f As Variant
-'f = Array("¡C", "¡v", Chr(-24152), "¡G", "¡A", "¡F", _
-'    "¡B", "¡u", ".", Chr(34), ":", ",", ";", _
+'f = Array("¡C", "¡v", VBA.Chr(-24152), "¡G", "¡A", "¡F", _
+'    "¡B", "¡u", ".", vba.Chr(34), ":", ",", ";", _
 '    "¡K¡K", "...", "¡^", ")", "-")  '¥ý³]©w¼ÐÂI²Å¸¹°}¦C¥H³Æ¥Î
-'                                'Chr(-24152)¬O¡u¡¨¡v,¥ÑAsc¨ç¼Æ¦b¿ï¨ú(.SelText)¡u¡¨¡v®É¨ú±o;Chr(34):¡u"¡v
+'                                'VBA.Chr(-24152)¬O¡u¡¨¡v,¥ÑAsc¨ç¼Æ¦b¿ï¨ú(.SelText)¡u¡¨¡v®É¨ú±o;vba.Chr(34):¡u"¡v
 'End Function
 Function isSymbol(ByVal a As String) As Boolean
     Dim f As String
@@ -1994,14 +1994,14 @@ Sub ²M°£¿ï¨ú³Bªº©Ò¦³²Å¸¹() '¥Ñ¹Ï®ÑºÞ²zsymbles¼Ò²Õ²M°£¼ÐÂI²Å¸¹§ï½s'¥]¬Aµù¸}¡B¼Æ¦r
 'Dim F, a As String, i As Integer
 Dim f, i As Integer, ur As UndoRecord
 SystemSetup.stopUndo ur, "²M°£¿ï¨ú³Bªº©Ò¦³²Å¸¹"
-f = Array("-", "¡P", "¡E", "¡C", "¡v", Chr(-24152), "¡G", "¡A", "¡F", _
-    "¡B", "¡u", ".", Chr(34), ":", ",", ";", _
+f = Array("-", "¡P", "¡E", "¡C", "¡v", VBA.Chr(-24152), "¡G", "¡A", "¡F", _
+    "¡B", "¡u", ".", VBA.Chr(34), ":", ",", ";", _
     "¡K¡K", "...", "¡D", "¡i", "¡j", " ", "¡m", "¡n", "¡q", "¡r", "¡H" _
     , "¡I", "¡£", "¡¤", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0" _
-    , "¡y", "¡z", Chr(13), ChrW(9312), ChrW(9313), ChrW(9314), ChrW(9315), ChrW(9316) _
-    , ChrW(9317), ChrW(9318), ChrW(9319), ChrW(9320), ChrW(9321), ChrW(9322), ChrW(9323) _
-    , ChrW(9324), ChrW(9325), ChrW(9326), ChrW(9327), ChrW(9328), ChrW(9329), ChrW(9330) _
-    , ChrW(9331), ChrW(8221), """") '¥ý³]©w¼ÐÂI²Å¸¹°}¦C¥H³Æ¥Î
+    , "¡y", "¡z", VBA.Chr(13), VBA.ChrW(9312), VBA.ChrW(9313), VBA.ChrW(9314), VBA.ChrW(9315), VBA.ChrW(9316) _
+    , VBA.ChrW(9317), VBA.ChrW(9318), VBA.ChrW(9319), VBA.ChrW(9320), VBA.ChrW(9321), VBA.ChrW(9322), VBA.ChrW(9323) _
+    , VBA.ChrW(9324), VBA.ChrW(9325), VBA.ChrW(9326), VBA.ChrW(9327), VBA.ChrW(9328), VBA.ChrW(9329), VBA.ChrW(9330) _
+    , VBA.ChrW(9331), VBA.ChrW(8221), """") '¥ý³]©w¼ÐÂI²Å¸¹°}¦C¥H³Æ¥Î
     '¥þ§Î¶ê¬A©·¼È¤£¨ú¥N¡I
     'a = ActiveDocument.Content
 '    Set a = ActiveDocument.Range.FormattedText '¥]§t®æ¦¡¤Æªº¸ê°T
@@ -2020,7 +2020,7 @@ Dim f As String
 On Error GoTo eH
 If Len(a) > 1 Then Exit Function
 f = "£t£u£v£w£x£y£z£{£|£}£~£¡£¢£££¤£¥£¦£§£¨£©£ª£¸£¹£º£«£¬£­£®£¯£°£±£²£³£´£µ£¶£·£½  £¾  £¿  £»"
-If a = ChrW(20008) Then
+If a = VBA.ChrW(20008) Then
     If Not rng Is Nothing Then
         If rng.start = 0 Then
             If InStr(f, rng.Next.Characters(1)) Then
@@ -2094,7 +2094,7 @@ w:                      If wd <= 20 Then 'Arial Unicode MS[ºØÃþ]¸Ì"¬A¸¹¤å¼Æ¦r"¥u
                                 '¿ï¨ú·|§ïÅÜSelectionªº½d³ò,¬G¤µ¨ú®ø!
 '                                .Select 'Wordsª«¥ó§Yªí¤@­ÓRangeª«¥ó,¨£½u¤W»¡©ú!
                                 .Font.Name = "Arial Unicode MS"
-                                wd.text = ChrW((9312 - 1) + wd)
+                                wd.text = VBA.ChrW((9312 - 1) + wd)
                             End With
                         Else '¶W¹L20¸¹ªºµù¸}®É
                             With wd
@@ -2135,7 +2135,7 @@ End Sub
 
 Sub ¥þ§ÎÂà¥b§Î()
 With Selection
-    .Range = StrConv(.Range, vbNarrow)
+    .Range = VBA.StrConv(.Range, vbNarrow)
 End With
 End Sub
 Sub ¶ê¬A¸¹§ï½g¦W¸¹()
@@ -2264,7 +2264,7 @@ With ActiveDocument.Range.Find
         '.Text = a(i)
          '.Replacement.Text = b(i)
          .ClearFormatting
-         .Execute Chr(a(i)), , , , , , , , , b(i), wdReplaceAll
+         .Execute VBA.Chr(a(i)), , , , , , , , , b(i), wdReplaceAll
     Next i
 End With
 End Sub
@@ -2291,7 +2291,7 @@ If Dir(xlsp) = "" Then xlsp = ¨ú±o®à­±¸ô®| 'GetDeskDir ' "C:\Users\Wong\Desktop\
 'If Dir(xlsp) = "" Then xlsp = "C:\Documents and Settings\Superwings\®à­±\" & Replace(ActiveDocument.Name, ".doc", "") & "¦rÀW.XLS"
 'xlsp = "C:\Documents and Settings\Superwings\®à­±\" & Replace(ActiveDocument.Name, ".doc", "") & "¦rÀW.XLS"
 xlsp = InputBox("½Ð¿é¤J¦sÀÉ¸ô®|¤ÎÀÉ¦W(¥þÀÉ¦W,§t°ÆÀÉ¦W)!" & vbCr & vbCr & _
-        "¹w³]±N¥H¦¹word¤å¥óÀÉ¦W + ""¦rÀW.XLSX""¦rºó,¦s©ó®à­±¤W", "¦rÀW½Õ¬d", xlsp & Replace(ActiveDocument.Name, ".doc", "") & "¦rÀW" & StrConv(Time, vbWide) & ".XLSX")
+        "¹w³]±N¥H¦¹word¤å¥óÀÉ¦W + ""¦rÀW.XLSX""¦rºó,¦s©ó®à­±¤W", "¦rÀW½Õ¬d", xlsp & Replace(ActiveDocument.Name, ".doc", "") & "¦rÀW" & VBA.StrConv(Time, vbWide) & ".XLSX")
 If xlsp = "" Then Exit Sub
 
 ds = VBA.Timer
@@ -2299,11 +2299,11 @@ ds = VBA.Timer
 With d
     For Each Char In d.Characters
         charText = Char
-        If InStr("()¡G>" & Chr(13) & Chr(9) & Chr(10) & Chr(11) & ChrW(12), charText) = 0 And charText <> "-" And Not charText Like "[a-zA-Z0-9¢¯-¢¸]" Then
-            'If Not charText Like "[a-z1-9]" & Chr(-24153) & Chr(-24152) & " ¡@¡B'""¡u¡v¡y¡z¡]¡^¡Ð¡H¡I]" Then
-'            If InStr(Chr(-24153) & Chr(-24152) & Chr(2) & "¡E[]¡e¡f¡£¡¤¡K¡F,¡A.¡C¡D ¡@¡B'""¡¥¡¦`\{}¡a¡b¡u¡v¡y¡z¡]¡^¡m¡n¡q¡r¡Ð¡H¡I]", charText) = 0 Then
-            If InStr(ChrW(9312) & ChrW(-24153) & ChrW(-24152) & Chr(2) & "¡E[]¡e¡f¡£¡¤¡K¡F,¡A.¡C¡D ¡@¡B'""¡¥¡¦`\{}¡a¡b¡u¡v¡y¡z¡]¡^¡m¡n¡q¡r¡Ð¡H¡I]¡¾¡¼¡j¡i~/¡_¡X" & Chr(-24152) & Chr(-24153), charText) = 0 Then
-            'chr(2)¥i¯à¬Oµù¸}¼Ð°O
+        If InStr("()¡G>" & VBA.Chr(13) & VBA.Chr(9) & VBA.Chr(10) & VBA.Chr(11) & VBA.ChrW(12), charText) = 0 And charText <> "-" And Not charText Like "[a-zA-Z0-9¢¯-¢¸]" Then
+            'If Not charText Like "[a-z1-9]" & VBA.Chr(-24153) & VBA.Chr(-24152) & " ¡@¡B'""¡u¡v¡y¡z¡]¡^¡Ð¡H¡I]" Then
+'            If InStr(VBA.Chr(-24153) & VBA.Chr(-24152) & vba.Chr(2) & "¡E[]¡e¡f¡£¡¤¡K¡F,¡A.¡C¡D ¡@¡B'""¡¥¡¦`\{}¡a¡b¡u¡v¡y¡z¡]¡^¡m¡n¡q¡r¡Ð¡H¡I]", charText) = 0 Then
+            If InStr(VBA.ChrW(9312) & VBA.ChrW(-24153) & VBA.ChrW(-24152) & VBA.Chr(2) & "¡E[]¡e¡f¡£¡¤¡K¡F,¡A.¡C¡D ¡@¡B'""¡¥¡¦`\{}¡a¡b¡u¡v¡y¡z¡]¡^¡m¡n¡q¡r¡Ð¡H¡I]¡¾¡¼¡j¡i~/¡_¡X" & VBA.Chr(-24152) & VBA.Chr(-24153), charText) = 0 Then
+            'vba.Chr(2)¥i¯à¬Oµù¸}¼Ð°O
                 If preChar <> charText Then
                     'If UBound(X) > 0 Then
                         If preChar = "" Then 'If IsEmpty(X) Then'¦pªG¬O¤@¶}©l
@@ -2369,7 +2369,7 @@ For j = u To 0 Step -1 '°}¦C±Æ§Ç'2010/10/29
             .ActiveWindow.Selection.Range.Collapse Direction:=wdCollapseEnd
             .Range.Paragraphs(.Paragraphs.Count).Range.Font.Size = 12
 '            .Range.Paragraphs(.Paragraphs.Count).Range.Bold = False
-            .Range.InsertAfter Replace(Xsort(j), "¡B", Chr(9), 1, 1) 'chr(9)¬°©w¦ì¦r¤¸(TabÁä­È)
+            .Range.InsertAfter Replace(Xsort(j), "¡B", VBA.Chr(9), 1, 1) 'vba.Chr(9)¬°©w¦ì¦r¤¸(TabÁä­È)
             .Range.InsertParagraphAfter
             If InStr(.Range.Paragraphs(.Paragraphs.Count).Range, "¦rÀW") = 0 Then
                 .Range.Paragraphs(.Paragraphs.Count - 1).Range.Font.Name = "¼Ð·¢Åé"
@@ -2421,7 +2421,7 @@ Doc.ActiveWindow.Visible = True
 'Set d = Nothing
 de = VBA.Timer
 If ReadingLayoutB Then d.ActiveWindow.View.ReadingLayout = Not d.ActiveWindow.View.ReadingLayout
-MsgBox "§¹¦¨¡I" & vbCr & vbCr & "¶O®É" & Left(de - ds, 5) & "¬í!", vbInformation
+MsgBox "§¹¦¨¡I" & vbCr & vbCr & "¶O®É" & VBA.Left(de - ds, 5) & "¬í!", vbInformation
 xlSheet.Application.Visible = True
 xlSheet.Application.UserControl = True
 xlSheet.SaveAs xlsp '"C:\Macros\¦u¯uTEST.XLS"
@@ -2483,11 +2483,11 @@ Set d = ActiveDocument
 'If xlsp = "" Then xlsp = ¨ú±o®à­±¸ô®| & "\" 'GetDeskDir() & "\"
 'If Dir(xlsp) = "" Then xlsp = ¨ú±o®à­±¸ô®| 'GetDeskDir
 'xlsp = InputBox("½Ð¿é¤J¦sÀÉ¸ô®|¤ÎÀÉ¦W(¥þÀÉ¦W,§t°ÆÀÉ¦W)!" & vbCr & vbCr & _
-        "¹w³]±N¥H¦¹word¤å¥óÀÉ¦W + ""µüÀW.XLSX""¦rºó,¦s©ó®à­±¤W", "µüÀW½Õ¬d", xlsp & Replace(d.Name, ".doc", "") & "µüÀW" & StrConv(Time, vbWide) & ".XLSX")
+        "¹w³]±N¥H¦¹word¤å¥óÀÉ¦W + ""µüÀW.XLSX""¦rºó,¦s©ó®à­±¤W", "µüÀW½Õ¬d", xlsp & Replace(d.Name, ".doc", "") & "µüÀW" & VBA.StrConv(Time, vbWide) & ".XLSX")
 'If xlsp = "" Then Exit Sub
-xlsp = ¨ú±o®à­±¸ô®| & "\" & Replace(d.Name, ".doc", "") & "_µüÀW" & StrConv(Time, vbWide) & ".XLSX"
+xlsp = ¨ú±o®à­±¸ô®| & "\" & Replace(d.Name, ".doc", "") & "_µüÀW" & VBA.StrConv(Time, vbWide) & ".XLSX"
 If ln = "" Then ln = 1
-ln = InputBox("½Ð«ü©wµü·Jªø«×" & vbCr & vbCr & "ÀÉ®×·|¦s¦b®à­±¤W¦W¬°:" & vbCr & vbCr & Replace(d.Name, ".doc", "") & "_µüÀW" & StrConv(Time, vbWide) & ".XLSX" & _
+ln = InputBox("½Ð«ü©wµü·Jªø«×" & vbCr & vbCr & "ÀÉ®×·|¦s¦b®à­±¤W¦W¬°:" & vbCr & vbCr & Replace(d.Name, ".doc", "") & "_µüÀW" & VBA.StrConv(Time, vbWide) & ".XLSX" & _
                 vbCr & vbCr & "ªºÀÉ®×", , ln + 1)
 If ln = "" Then Exit Sub
 If Not IsNumeric(ln) Then Exit Sub
@@ -2521,12 +2521,12 @@ With d
                 charText = Char & Char.Next & Char.Next.Next & Char.Next.Next.Next & Char.Next.Next.Next.Next & Char.Next.Next.Next.Next.Next & Char.Next.Next.Next.Next.Next.Next & Char.Next.Next.Next.Next.Next.Next.Next & Char.Next.Next.Next.Next.Next.Next.Next.Next & Char.Next.Next.Next.Next.Next.Next.Next.Next.Next & Char.Next.Next.Next.Next.Next.Next.Next.Next.Next.Next
         End Select
         If Not charText Like "*[-'¡@ ¡C¡A¡B¡F¡G¡H:,;,¡q¡r¡m¡n ''¡u¡v¡y¡z¡]¡^¡¾¡µ¡H¡I¡]¡^¡i¡j¡X""()<>" _
-            & ChrW(9312) & Chr(-24153) & Chr(-24152) & ChrW(8218) & Chr(13) & Chr(10) & Chr(11) & ChrW(12) & Chr(63) & Chr(9) & Chr(-24152) & Chr(-24153) & "¡¾¡¼¡j¡i~/¡_¡X]*" _
-            And Not charText Like "*[a-zA-Z0-9¢¯-¢¸]*" And InStr(charText, ChrW(-243)) = 0 And InStr(charText, Chr(91)) = 0 And InStr(charText, Chr(93)) = 0 Then
-            'If Not charText Like "[a-z1-9]" & Chr(-24153) & Chr(-24152) & " ¡@¡B'""¡u¡v¡y¡z¡]¡^¡Ð¡H¡I]" Then
-'            If InStr(Chr(-24153) & Chr(-24152) & Chr(2) & "¡E[]¡e¡f¡£¡¤¡K¡F,¡A.¡C¡D ¡@¡B'""¡¥¡¦`\{}¡a¡b¡u¡v¡y¡z¡]¡^¡m¡n¡q¡r¡Ð¡H¡I]", charText) = 0 Then
-            If Not charText Like "*[" & ChrW(-24153) & ChrW(-24152) & Chr(2) & "¡E[]¡e¡f¡£¡¤¡K¡F,¡A.¡C¡D ¡@¡B'""¡¥¡¦`\{}¡a¡b¡u¡v¡y¡z¡]¡^¡m¡n¡q¡r¡Ð¡H¡I¡¥¡a¡b]*" Then
-            'chr(2)¥i¯à¬Oµù¸}¼Ð°O
+            & VBA.ChrW(9312) & VBA.Chr(-24153) & VBA.Chr(-24152) & VBA.ChrW(8218) & VBA.Chr(13) & VBA.Chr(10) & VBA.Chr(11) & VBA.ChrW(12) & VBA.Chr(63) & VBA.Chr(9) & VBA.Chr(-24152) & VBA.Chr(-24153) & "¡¾¡¼¡j¡i~/¡_¡X]*" _
+            And Not charText Like "*[a-zA-Z0-9¢¯-¢¸]*" And InStr(charText, VBA.ChrW(-243)) = 0 And InStr(charText, VBA.Chr(91)) = 0 And InStr(charText, VBA.Chr(93)) = 0 Then
+            'If Not charText Like "[a-z1-9]" & VBA.Chr(-24153) & VBA.Chr(-24152) & " ¡@¡B'""¡u¡v¡y¡z¡]¡^¡Ð¡H¡I]" Then
+'            If InStr(VBA.Chr(-24153) & VBA.Chr(-24152) & vba.Chr(2) & "¡E[]¡e¡f¡£¡¤¡K¡F,¡A.¡C¡D ¡@¡B'""¡¥¡¦`\{}¡a¡b¡u¡v¡y¡z¡]¡^¡m¡n¡q¡r¡Ð¡H¡I]", charText) = 0 Then
+            If Not charText Like "*[" & VBA.ChrW(-24153) & VBA.ChrW(-24152) & VBA.Chr(2) & "¡E[]¡e¡f¡£¡¤¡K¡F,¡A.¡C¡D ¡@¡B'""¡¥¡¦`\{}¡a¡b¡u¡v¡y¡z¡]¡^¡m¡n¡q¡r¡Ð¡H¡I¡¥¡a¡b]*" Then
+            'vba.Chr(2)¥i¯à¬Oµù¸}¼Ð°O
                 If preChar <> charText Then
                     'If UBound(X) > 0 Then
                         If preChar = "" Then 'If IsEmpty(X) Then'¦pªG¬O¤@¶}©l
@@ -2590,7 +2590,7 @@ For j = u To 0 Step -1 '°}¦C±Æ§Ç'2010/10/29
             .ActiveWindow.Selection.Range.Collapse Direction:=wdCollapseEnd
             .Range.Paragraphs(.Paragraphs.Count).Range.Font.Size = 12
 '            .Range.Paragraphs(.Paragraphs.Count).Range.Bold = False
-            .Range.InsertAfter Replace(Xsort(j), "¡B", Chr(9), 1, 1) 'chr(9)¬°©w¦ì¦r¤¸(TabÁä­È)
+            .Range.InsertAfter Replace(Xsort(j), "¡B", VBA.Chr(9), 1, 1) 'vba.Chr(9)¬°©w¦ì¦r¤¸(TabÁä­È)
             .Range.InsertParagraphAfter
             If InStr(.Range.Paragraphs(.Paragraphs.Count).Range, "µüÀW") = 0 Then
                 .Range.Paragraphs(.Paragraphs.Count - 1).Range.Font.Name = "¼Ð·¢Åé"
@@ -2619,7 +2619,7 @@ Set d = Nothing ' ActiveDocument.Close wdDoNotSaveChanges
 
 Debug.Print Now
 
-MsgBox "§¹¦¨¡I" & vbCr & vbCr & "¶O®É" & Left(de - ds, 5) & "¬í!", vbInformation
+MsgBox "§¹¦¨¡I" & vbCr & vbCr & "¶O®É" & VBA.Left(de - ds, 5) & "¬í!", vbInformation
 xlSheet.Application.Visible = True
 xlSheet.Application.UserControl = True
 xlSheet.SaveAs xlsp
@@ -2674,7 +2674,7 @@ Do
     Selection.Find.Execute "¡q", , , , , , True, wdFindAsk
     Set rng = Selection.Range
     rng.MoveEndUntil "¡r"
-    trm = Mid(rng, 2)
+    trm = VBA.Mid(rng, 2)
     
     For Each e In x()
         If StrComp(e, trm) = 0 Then GoTo 1
@@ -2708,7 +2708,7 @@ s = -1
 For Each a In ActiveDocument.Characters
     If a.Font.Name = "Times New Roman" Then
         If s = -1 Then s = a.start
-        If a = Chr(13) Then GoTo 1
+        If a = VBA.Chr(13) Then GoTo 1
     Else
 1       If s > -1 Then
             e = a.Previous.End
@@ -2774,7 +2774,7 @@ Select Case Err.Number
 '            ci = ci + 1
 '            If ci Mod 3 = 2 Then
                 'If VBA.IsNumeric(VBA.Left(c.Range.text, VBA.InStr(c.Range.text, "?") - 1)) Then
-                If VBA.InStr(C.Range.text, ChrW(160) & ChrW(47)) > 0 Then
+                If VBA.InStr(C.Range.text, VBA.ChrW(160) & VBA.ChrW(47)) > 0 Then
 '                    word.Application.DisplayAlerts = False
                     C.Delete  '§R°£½s¸¹¤§Àx¦s®æ
                 End If
@@ -2880,7 +2880,7 @@ p:              If flg = False Then
 b:
     '                a.Select
     '                Selection.Range.InsertBefore "¡^"
-                    If a.Previous = Chr(13) Then
+                    If a.Previous = VBA.Chr(13) Then
                         a.Previous.Previous.Select
                     Else
                         a.Previous.Select
@@ -2907,8 +2907,8 @@ b:
     Selection.EndKey wdStory
     Do
        Selection.MoveLeft
-       If Selection = Chr(13) Then Selection.Delete
-    Loop While Selection = Chr(13)
+       If Selection = VBA.Chr(13) Then Selection.Delete
+    Loop While Selection = VBA.Chr(13)
     'MsgBox "done!", vbInformation
     If Not ActiveDocument Is d Then d.Activate
     SystemSetup.contiUndo ur
@@ -2920,23 +2920,23 @@ Sub º~Äy¹q¤l¤åÄm¸ê®Æ®w¤å¥»¾ã²z_¥HÂà¶K¨ì¤¤°ê­õ¾Ç®Ñ¹q¤l¤Æ­p¹º(Optional doNotCloseD
     SystemSetup.stopUndo ur, "º~Äy¹q¤l¤åÄm¸ê®Æ®w¤å¥»¾ã²z_¥HÂà¶K¨ì¤¤°ê­õ¾Ç®Ñ¹q¤l¤Æ­p¹º"
     If Documents.Count = 0 Then Documents.Add
     Set d = ActiveDocument
-    If (d.path <> "" Or d.Content.text <> Chr(13)) And openNewDoc Then
+    If (d.path <> "" Or d.Content.text <> VBA.Chr(13)) And openNewDoc Then
         Set d = Documents.Add()
         'Exit Sub
     End If
-    rp = Array("(", "{{", ")", "}}", ChrW(160), "", "¡i¹Ï¡j", "", _
+    rp = Array("(", "{{", ")", "}}", VBA.ChrW(160), "", "¡i¹Ï¡j", "", _
          "^p^p", "^p", _
-         ChrW(13) & ChrW(45) & ChrW(13) & ChrW(13) & ChrW(11), "^p", _
-         ChrW(13) & ChrW(45) & ChrW(13), "^p", "{{ }}", "", "[", ChrW(12310), _
-         "]", ChrW(12311), " ", "", "¡³", ChrW(12295), _
-         "^p" & ChrW(12310) & "²¨" & ChrW(12311), ChrW(12310) & "²¨" & ChrW(12311) & "{{", _
-         "}}" & Chr(13) & "^#" & Chr(13) & "{{", "", _
-         "¡D¡D¡D¡D¡D¡D¡D¡D¡D¡D¡D¡D¡D¡D¡D¡D¡D¡D" & Chr(13), "", _
-         Chr(13) & "^#" & Chr(13), "", _
-         "}}" & Chr(13) & "^#" & Chr(13), "}}", _
-         "}}" & Chr(13) & "{{", "", _
+         VBA.ChrW(13) & VBA.ChrW(45) & VBA.ChrW(13) & VBA.ChrW(13) & VBA.ChrW(11), "^p", _
+         VBA.ChrW(13) & VBA.ChrW(45) & VBA.ChrW(13), "^p", "{{ }}", "", "[", VBA.ChrW(12310), _
+         "]", VBA.ChrW(12311), " ", "", "¡³", VBA.ChrW(12295), _
+         "^p" & VBA.ChrW(12310) & "²¨" & VBA.ChrW(12311), VBA.ChrW(12310) & "²¨" & VBA.ChrW(12311) & "{{", _
+         "}}" & VBA.Chr(13) & "^#" & VBA.Chr(13) & "{{", "", _
+         "¡D¡D¡D¡D¡D¡D¡D¡D¡D¡D¡D¡D¡D¡D¡D¡D¡D¡D" & VBA.Chr(13), "", _
+         VBA.Chr(13) & "^#" & VBA.Chr(13), "", _
+         "}}" & VBA.Chr(13) & "^#" & VBA.Chr(13), "}}", _
+         "}}" & VBA.Chr(13) & "{{", "", _
          "-", "", "^#", "", "¡C¡C", "¡C") ', "¡C}}<p>¡C}}<p>", "¡C}}<p>")
-         '­ì¨Ó¡uChrW(13) & ChrW(45) & ChrW(13) & ChrW(13) & ChrW(11)¡v¬O¨ä¤¤¦³ªí®æ°Ú
+         '­ì¨Ó¡uvba.Chrw(13) & vba.Chrw(45) & vba.Chrw(13) & vba.Chrw(13) & vba.Chrw(11)¡v¬O¨ä¤¤¦³ªí®æ°Ú
     Set rng = d.Range
     If rng.Characters.Count = 1 Then '¤å¥óµL¤º®e®É¤~¶K¤W
         rng.Paste '¡mº~Äy¥þ¤å¸ê®Æ®w¡n§ïª©«á°Å¶KÃ¯®Ä¯à«Ü®t¡A­n¾¨¶qÁ×§K ·P®¦·P®¦¡@Æg¼ÛÆg¼Û¡@«nµLªüÀ±ªû¦ò 20240825
@@ -3040,10 +3040,10 @@ Sub º~Äy¹q¤l¤åÄm¸ê®Æ®w¤å¥»¾ã²z_ª`¤å«e«á¥[¬A¸¹() '³Ì«á°õ¦æ Docs.mark©ö¾ÇÃöÁä¦r(¦b
                 Exit Do
             End If
             If rng.End = rng.Document.Range.End Then rng.End = rng.End - 1
-            Do While rng.Characters(rng.Characters.Count) = Chr(13)
+            Do While rng.Characters(rng.Characters.Count) = VBA.Chr(13)
                 rng.End = rng.End - 1
             Loop
-            Do While rng.Characters(1) = Chr(13) & Chr(7)
+            Do While rng.Characters(1) = VBA.Chr(13) & VBA.Chr(7)
                 rng.start = rng.start + 1
             Loop
             rng.text = "¡]" & rng.text & "¡^"
@@ -3064,7 +3064,7 @@ Sub º~Äy¹q¤l¤åÄm¸ê®Æ®w¤å¥»¾ã²z_ª`¤å«e«á¥[¬A¸¹() '³Ì«á°õ¦æ Docs.mark©ö¾ÇÃöÁä¦r(¦b
     Dim str_to_clear() As String
     ReDim str_to_clear(2)
     str_to_clear(0) = "¡^¡]"
-    str_to_clear(1) = "¡i¹Ï¡j" & Chr(11) ' ^l
+    str_to_clear(1) = "¡i¹Ï¡j" & VBA.Chr(11) ' ^l
     str_to_clear(2) = "¡i¹Ï¡j"
     Set rng = rng.Document.Range
     rng.Find.ClearFormatting
@@ -3207,7 +3207,7 @@ For Each a In slRng.Characters
     If a Like "[¡C¡A¡F¡H¡I¡u¡v¡y¡z]" Then
         a.Select
         Selection.Move
-        Selection.TypeText Chr(11)
+        Selection.TypeText VBA.Chr(11)
     End If
 Next a
 End Sub
@@ -3243,7 +3243,7 @@ End Sub
 
 Function °ê»yÃã¨åª`­µ¤å¦r³B²z(x As String)
 Dim ay, i As Byte
-ay = Array("£¸", ChrW(20008), "¡@", " ", "¡]¤S­µ¡^", "¤S­µ ", "¡]Åª­µ¡^", "Åª­µ ", "¡]»y­µ¡^", "»y­µ ", _
+ay = Array("£¸", VBA.ChrW(20008), "¡@", " ", "¡]¤S­µ¡^", "¤S­µ ", "¡]Åª­µ¡^", "Åª­µ ", "¡]»y­µ¡^", "»y­µ ", _
         "(¤@)", "", "(¤G)", "", "(¤T)", "", "(¥|)", "", "(¤­)", "", "(¤»)", "", "¡^", "", "¡]", "")
 For i = 0 To UBound(ay)
     x = Replace(x, ay(i), ay(i + 1))
@@ -3287,7 +3287,7 @@ If chromePath = "" Then
 End If
 
 'Dim ay, i As Byte
-'ay = Array("£¸", ChrW(20008), "¡@", " ", "¡]¤S­µ¡^", "¤S­µ ", "¡]Åª­µ¡^", "Åª­µ ", "¡]»y­µ¡^", "»y­µ ", _
+'ay = Array("£¸", vba.Chrw(20008), "¡@", " ", "¡]¤S­µ¡^", "¤S­µ ", "¡]Åª­µ¡^", "Åª­µ ", "¡]»y­µ¡^", "»y­µ ", _
 '        "(¤@)", "", "(¤G)", "", "(¤T)", "", "(¥|)", "", "(¤­)", "", "(¤»)", "", "¡^", "", "¡]", "")
 
     cnt.Open "Provider=Microsoft.ACE.OLEDB.12.0;Data Source=" & cntStr
@@ -3401,7 +3401,7 @@ Return
 
 typeTexts:
         If x = "" Or VBA.IsNull(x) Then GoTo 2
-'        X = Mid(X, 1, Len(X) - 1)
+'        X = VBA.Mid(X, 1, Len(X) - 1)
         x = °ê»yÃã¨åª`­µ¤å¦r³B²z(CStr(x))
 '        If sT <> wdSelectionIP Then
 '            rng.SetRange Selection.End, Selection.End
@@ -3472,7 +3472,7 @@ rePt:
                 repeated = True
             End If
             If x = "" Then GoTo endS
-            If Left(x, 4) <> "http" Then GoTo rePt
+            If VBA.Left(x, 4) <> "http" Then GoTo rePt
             x = lnks.trimLinks_http_Dicts_toAddZhuYin_RevisedMoeEdu(CStr(x), rst.Fields(0))
             URL = VBA.CStr(x)
             If lnks.chkLinks_http_Dicts_toAddZhuYin(URL, words, 1, id, rst.Fields(0)) Then
@@ -3829,7 +3829,7 @@ End Sub
 Sub ¤À¦æ¤À¬q_®Ú¾Ú²Ä1¦æªº¦r¼Æªø«×¨Ó§@¤Á³Î()
 Dim wordCount As Byte, d As Document, rng As Range, i As Integer, dx As String, a, p As Paragraph, j As Byte, wl
 Dim omitStr As String
-omitStr = "{}<p>¡m¡n¡q¡r¡G¡A¡C¡u¡v¡y¡z¡@¡P0123456789-" & ChrW(8231) & ChrW(183) & Chr(13)
+omitStr = "{}<p>¡m¡n¡q¡r¡G¡A¡C¡u¡v¡y¡z¡@¡P0123456789-" & VBA.ChrW(8231) & VBA.ChrW(183) & VBA.Chr(13)
 If word.Documents.Count = 0 Then
     Set d = Documents.Add()
 ElseIf ActiveDocument.path <> "" Then
@@ -3845,8 +3845,8 @@ For Each a In p.Range.Characters
     If InStr(omitStr, a) = 0 Then wordCount = wordCount + 1
 Next a
 dx = rng.text
-wl = InStr(dx, Chr(13))
-rng.text = Left(dx, wl) & Replace(dx, Chr(13), "", wl)
+wl = InStr(dx, VBA.Chr(13))
+rng.text = VBA.Left(dx, wl) & Replace(dx, VBA.Chr(13), "", wl)
 
 i = 1
 Do Until rng.Paragraphs(rng.Paragraphs.Count).Range.Characters.Count < wordCount
@@ -3856,12 +3856,12 @@ Do Until rng.Paragraphs(rng.Paragraphs.Count).Range.Characters.Count < wordCount
     For Each a In p.Range.Characters
         If InStr(omitStr, a) = 0 Then j = j + 1
         If j = wordCount Then
-            a.InsertAfter Chr(13)
+            a.InsertAfter VBA.Chr(13)
             j = 0
             Exit For
         End If
     Next a
-'    rng.Paragraphs(i).Range.Characters(wordCount).InsertAfter Chr(13)
+'    rng.Paragraphs(i).Range.Characters(wordCount).InsertAfter vba.Chr(13)
 Loop
 rng.Cut
 rng.Document.Close wdDoNotSaveChanges
@@ -3876,15 +3876,15 @@ Sub replaceWithNextChararcter() 'Alt+Shift+h
 Dim s As Integer, chars 'As Characters
 Dim f As String, r As String
 Set chars = Selection.Characters
-If chars.Count < 2 And InStr(Selection, Chr(9)) = 0 Then Exit Sub
+If chars.Count < 2 And InStr(Selection, VBA.Chr(9)) = 0 Then Exit Sub
 If chars.Count > 2 Then
-    s = InStr(Selection, Chr(9))
+    s = InStr(Selection, VBA.Chr(9))
     If s > 0 Then
-        If InStr(Mid(Selection.text, s + 1), Chr(9)) = 0 Then
-            chars = VBA.Split(Selection.text, Chr(9))
-            Selection.text = Left(Selection.text, s - 1)
+        If InStr(VBA.Mid(Selection.text, s + 1), VBA.Chr(9)) = 0 Then
+            chars = VBA.Split(Selection.text, VBA.Chr(9))
+            Selection.text = VBA.Left(Selection.text, s - 1)
             s = 0
-            f = chars(s): r = chars(s + 1) 'VBA.IIf(chars(s + 1) = Chr(9), "", chars(s + 1))
+            f = chars(s): r = chars(s + 1) 'VBA.IIf(chars(s + 1) = vba.Chr(9), "", chars(s + 1))
         Else
             Exit Sub
         End If
@@ -3894,7 +3894,7 @@ If chars.Count > 2 Then
 Else
     s = 1
     f = chars(s)
-    r = VBA.IIf(chars(s + 1) = Chr(9), "", chars(s + 1))
+    r = VBA.IIf(chars(s + 1) = VBA.Chr(9), "", chars(s + 1))
     Selection.Characters(s + 1) = ""
 End If
 Selection.Find.Execute f, , , , , , True, wdFindContinue, , r, wdReplaceAll
@@ -3907,10 +3907,10 @@ SystemSetup.playSound 12
 End Sub
 Sub °ê»yÃã¨åºô§}¤ÎID©|¯ÊªÌ¶ñ¤J()
 Dim i As Long
-ActiveDocument.Range.Find.Execute Chr(13), , , , , , , wdFindContinue, , "", wdReplaceAll
+ActiveDocument.Range.Find.Execute VBA.Chr(13), , , , , , , wdFindContinue, , "", wdReplaceAll
 Do Until Selection.End = ActiveDocument.Range.End - 1
     Selection.Move
-    If Selection.Previous <> ChrW(20008) And Selection.Hyperlinks.Count = 0 Then
+    If Selection.Previous <> VBA.ChrW(20008) And Selection.Hyperlinks.Count = 0 Then
         ¥ÍÃø¦r¥[¤W°ê»yÃã¨åª`­µ
         ActiveWindow.ScrollIntoView Selection, False
         i = i + 1
@@ -3928,7 +3928,7 @@ Public Function FullOrHalf(ByVal str As String) As Integer
         FullOrHalf = -1
         Exit Function
     End If
-    strLocal = StrConv(str, vbFromUnicode)
+    strLocal = VBA.StrConv(str, vbFromUnicode)
     If Len(str) * 2 = LenB(strLocal) Then
         FullOrHalf = 2 ' wide
     ElseIf Len(str) = LenB(strLocal) Then
@@ -3959,10 +3959,10 @@ lenStr = VBA.Len(str)
 
 ' ±N¦r¦êÂà´«¬°°}¦C
 For i = 1 To lenStr
-    ch = Mid(str, i, 1)
+    ch = VBA.Mid(str, i, 1)
     eCount = eCount + 1
     If code.IsHighSurrogate(ch) Then
-        ch = Mid(str, i, 2): i = i + 1
+        ch = VBA.Mid(str, i, 2): i = i + 1
     End If
     ReDim Preserve arr(eCount - 1) ' ½Õ¾ã°}¦C¤j¤p¡A¨Ï¨ä»P¦r¦êªø«×¬Û¦P
     arr(eCount - 1) = ch

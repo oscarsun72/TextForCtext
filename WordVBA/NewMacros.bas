@@ -22,7 +22,7 @@ With ActiveDocument '是舊檔案（文件）才檢查
 '                        If InStr(1, .Name, "Edit_", vbTextCompare) > 0 Then
 '                            '如果是兩天前的
 '                            Do While InStr(1, bk, "Edit_", vbTextCompare) > 0 And _
-'                                    CDate(Replace(Mid(bk, 6, 10), "_", "/")) <= Date - 2
+'                                    CDate(Replace(VBA.Mid(bk, 6, 10), "_", "/")) <= Date - 2
 '                                bk.Delete '殺掉以後索引值會向前遞補
 '                                Set bk = ActiveDocument.Bookmarks(bkIdx)
 '                            Loop
@@ -415,7 +415,7 @@ On Error GoTo ErrH
 HideWebBar
 
     With ActiveDocument.bookmarks
-        .Add Range:=Selection.Range, Name:="游標_" & Replace(Replace(Replace(Left(ActiveDocument.Name, Len(ActiveDocument.Name) - 4), "-", "_"), "(", "（"), ")", "）") '以因應主控文件模式之多重子文件(要扣除副檔名)2003/3/16
+        .Add Range:=Selection.Range, Name:="游標_" & Replace(Replace(Replace(VBA.Left(ActiveDocument.Name, Len(ActiveDocument.Name) - 4), "-", "_"), "(", "（"), ")", "）") '以因應主控文件模式之多重子文件(要扣除副檔名)2003/3/16
         .DefaultSorting = wdSortByName
         .ShowHidden = False
     End With
@@ -438,7 +438,7 @@ End Sub
 Sub 編輯處書籤()
 ' 2003/3/10--剛好距草創時屆一年矣！
     With ActiveDocument.bookmarks
-        .Add Range:=Selection.Range, Name:="游標１_" & Replace(Replace(Replace(Left(ActiveDocument.Name, Len(ActiveDocument.Name) - 4), "-", "_"), "(", "（"), ")", "）")
+        .Add Range:=Selection.Range, Name:="游標１_" & Replace(Replace(Replace(VBA.Left(ActiveDocument.Name, Len(ActiveDocument.Name) - 4), "-", "_"), "(", "（"), ")", "）")
         .DefaultSorting = wdSortByName
         .ShowHidden = False
     End With
@@ -455,10 +455,10 @@ Attribute 到上一次停佇之游標處.VB_ProcData.VB_Invoke_Func = "Normal.NewMacros.到
 CheckSaved
 HideWebBar
 'On Error GoTo Ftnote
-'    Selection.GoTo What:=wdGoToBookmark, Name:="游標_" & Left(ActiveDocument.Name, Len(ActiveDocument.Name) - 4)
+'    Selection.GoTo What:=wdGoToBookmark, Name:="游標_" & vba.Left(ActiveDocument.Name, Len(ActiveDocument.Name) - 4)
     With ActiveDocument.bookmarks
         '如此寫便不須有錯誤處理函式了
-        .item("游標_" & Replace(Replace(Replace(Left(ActiveDocument.Name, Len(ActiveDocument.Name) - 4), "-", "_"), "(", "（"), ")", "）")).Select
+        .item("游標_" & Replace(Replace(Replace(VBA.Left(ActiveDocument.Name, Len(ActiveDocument.Name) - 4), "-", "_"), "(", "（"), ")", "）")).Select
         .DefaultSorting = wdSortByName
         .ShowHidden = False
     End With
@@ -498,10 +498,10 @@ End Sub
 Sub 到編輯處_游標1()
 CheckSaved
 'On Error GoTo Ftnote
-'    Selection.GoTo What:=wdGoToBookmark, Name:="游標１_" & Left(ActiveDocument.Name, Len(ActiveDocument.Name) - 4)
+'    Selection.GoTo What:=wdGoToBookmark, Name:="游標１_" & vba.Left(ActiveDocument.Name, Len(ActiveDocument.Name) - 4)
     With ActiveDocument.bookmarks
         '如此寫便不須有錯誤處理函式了
-        .item("游標１_" & Replace(Replace(Replace(Left(ActiveDocument.Name, Len(ActiveDocument.Name) - 4), "-", "_"), "(", "（"), ")", "）")).Select
+        .item("游標１_" & Replace(Replace(Replace(VBA.Left(ActiveDocument.Name, Len(ActiveDocument.Name) - 4), "-", "_"), "(", "（"), ")", "）")).Select
         .DefaultSorting = wdSortByName
         .ShowHidden = False
     End With
@@ -541,8 +541,8 @@ End Sub
 Sub QuitClose()
 If Documents.Count = 0 Then word.Application.Quit wdDoNotSaveChanges: Exit Sub
 With ActiveDocument '2003/3/25改良
-If Left(.Name, 2) = "文件" And _
-    IsNumeric(Mid(.Name, 3)) And _
+If VBA.Left(.Name, 2) = "文件" And _
+    IsNumeric(VBA.Mid(.Name, 3)) And _
         .AttachedTemplate.Name = "Normal.dot" Then
         If .Windows.Count = 1 Then
             DonotSave = True
@@ -593,13 +593,13 @@ With Selection
 If .Type = wdSelectionIP Then MsgBox "請選取想要尋找之文字", vbExclamation: Exit Sub
 If .Type = wdSelectionNormal Then ' <> wdNoSelection OR wdSelectionIP Then '不為插入點
 'If .Text <> "" Then
-    If VBA.right(.Range, 1) Like Chr(13) Then
-        Mystr = Mid(.Range, 1, Len(.Range) - 1)
+    If VBA.Right(.Range, 1) Like VBA.Chr(13) Then
+        Mystr = VBA.Mid(.Range, 1, Len(.Range) - 1)
     Else
         Mystr = .Range
     End If
-    Mystr = Replace(Mystr, Chr(13), Chr(13) & Chr(10)) '.Text'因為Access與Word換行所存的值不同!
-    Mystr = Replace(Mystr, Chr(11), Chr(13) & Chr(10)) '.Text'因為Access與Word換行所存的值不同!
+    Mystr = Replace(Mystr, VBA.Chr(13), VBA.Chr(13) & VBA.Chr(10)) '.Text'因為Access與Word換行所存的值不同!
+    Mystr = Replace(Mystr, VBA.Chr(11), VBA.Chr(13) & VBA.Chr(10)) '.Text'因為Access與Word換行所存的值不同!
 '    .Font.Color = wdColorRed
 '    .Collapse wdCollapseEnd
     On Error GoTo 備註
@@ -806,7 +806,7 @@ If .Type = wdSelectionNormal Then ' <> wdNoSelection OR wdSelectionIP Then '不為
     .Find.ClearFormatting
     .Find.Replacement.Font.Color = wdColorRed
     .Find.Replacement.Font.Bold = True
-    .Find.Execute FindText:=.text, MatchCase:=True, Replace:=wdReplaceAll, Replacewith:=.text, Wrap:=wdFindContinue
+    .Find.Execute findtext:=.text, MatchCase:=True, Replace:=wdReplaceAll, Replacewith:=.text, Wrap:=wdFindContinue
     '一定要有Wrap:=wdFindContinue否則單向找尋時,預設值為Wrap:=wdFindStop
 End If
 End With
@@ -852,7 +852,7 @@ If .Type = wdSelectionNormal Then ' <> wdNoSelection OR wdSelectionIP Then '不為
     .Find.Replacement.Font.Subscript = .Font.Subscript
     .Find.Replacement.Font.Superscript = .Font.Superscript
     .Find.Replacement.Font.UnderlineColor = .Font.UnderlineColor
-    .Find.Execute FindText:=.text, MatchCase:=True, Replace:=wdReplaceAll, Replacewith:=.text, Wrap:=wdFindContinue
+    .Find.Execute findtext:=.text, MatchCase:=True, Replace:=wdReplaceAll, Replacewith:=.text, Wrap:=wdFindContinue
     '一定要有Wrap:=wdFindContinue否則單向找尋時,預設值為Wrap:=wdFindStop
 End If
 End With
@@ -902,8 +902,8 @@ If .Type = wdSelectionIP Then MsgBox "請選取想要尋找之文字", vbExclamation: Exit
 If .Type = wdSelectionNormal Then ' <> wdNoSelection OR wdSelectionIP Then '不為插入點
 'If SearchedText <> "" Then
 '    SearchedText = .Text'今改以下式:2004/11/11
-    SearchedText = Replace(.Range, Chr(13), Chr(13) & Chr(10)) '.Text'因為Access與Word換行所存的值不同!
-    SearchedText = Replace(SearchedText, Chr(11), Chr(13) & Chr(10)) '.Text'因為Access與Word換行所存的值不同!
+    SearchedText = Replace(.Range, VBA.Chr(13), VBA.Chr(13) & VBA.Chr(10)) '.Text'因為Access與Word換行所存的值不同!
+    SearchedText = Replace(SearchedText, VBA.Chr(11), VBA.Chr(13) & VBA.Chr(10)) '.Text'因為Access與Word換行所存的值不同!
     Dim Access As Object
     Set Access = CreateObject("access.application")
 '    '以上一行及原來下面的一行.OpenCurrentDatabase可以改成如下一行,蓋如下一行只會開啟一個Access(不管執行幾次); _
@@ -973,15 +973,15 @@ errs:
                 For Each subdoc In ActiveDocument.Subdocuments
                     If subdoc.Locked Then
                         If InStr(subdoc.Name, "自動回復") Then
-                            Documents(Mid(subdoc.Name, 7, Len(subdoc.Name) - 10)).Activate
+                            Documents(VBA.Mid(subdoc.Name, 7, Len(subdoc.Name) - 10)).Activate
 '                            subdoc.Locked = False
 '                        Else
 '                            If MsgBox("子文件已開啟,請先關閉子文件,再操作!", vbExclamation + vbOKCancel) = vbOK Then
-'                            Documents(Mid(subdoc.Name, 7, Len(subdoc.Name) - 10)).Close
+'                            Documents(VBA.Mid(subdoc.Name, 7, Len(subdoc.Name) - 10)).Close
 '                            End If
                         Else
                             For Each wins In Windows
-                                If wins.Caption = Left(subdoc.Name, Len(subdoc.Name) - 4) Then
+                                If wins.Caption = VBA.Left(subdoc.Name, Len(subdoc.Name) - 4) Then
                                     Documents(subdoc.Name).Activate
                                 Else
                                     subdoc.Locked = False
@@ -1085,13 +1085,10 @@ Select Case Err.Number
 End Select
 End Sub
 
-Public Sub 刪除已閱札記()
+Public Sub 刪除選中的文字()
 '指定鍵：Ctrl+Shift+Del'或刪除文件內所有選取範圍的文字
 With Selection '如果沒選取則先選取
-    If Not .Type = wdSelectionNormal Then
-        .HomeKey unit:=wdStory, Extend:=wdExtend
-        .Delete
-    Else
+    If .Type = wdSelectionNormal Then
         ActiveDocument.Range.Find.Execute Selection.text, , , , , , True, wdFindContinue, , "", wdReplaceAll
     End If
 End With
@@ -1172,9 +1169,9 @@ End Sub
 Public Sub 清除分行符號()
 '2003/4/3指定鍵:Shift+Backspace
 Dim rp As String, p(2) As String, i As Byte
-p(1) = Chr(10): p(2) = Chr(13)
+p(1) = VBA.Chr(10): p(2) = VBA.Chr(13)
 With Selection '.Find '如此才不會更改字形格式！
-    If VBA.right(.Range, 1) Like p(1) Or VBA.right(.Range, 1) Like p(2) Then .MoveLeft wdCharacter, 1, wdExtend
+    If VBA.Right(.Range, 1) Like p(1) Or VBA.Right(.Range, 1) Like p(2) Then .MoveLeft wdCharacter, 1, wdExtend
 ''        .Range.Select(.Range.Words.Count=
 '    .ClearFormatting
     rp = .Range
@@ -1192,7 +1189,7 @@ Public Sub 轉換分行符號為手動分行符號()
 '2003/3/25
 With Selection.Find '如此才不會更改字形格式！
     .ClearFormatting
-    .Execute FindText:="^p", Replacewith:="^l", Wrap:=wdFindContinue, Replace:=wdReplaceAll
+    .Execute findtext:="^p", Replacewith:="^l", Wrap:=wdFindContinue, Replace:=wdReplaceAll
 '    .ClearFormatting
 End With
 '2003/3/23
@@ -1200,12 +1197,12 @@ End With
 's = Selection.Information(wdActiveEndSectionNumber) '傳回所在之末節數！
 'With ActiveDocument.Sections(s) '處理所在之節中的分行
 '    If IsNumeric(.Range.Paragraphs(1).Range.Text) Then p = 1 '判斷首段是否為數字
-'    InStrs = InStr(.Range.Text, Chr(13)): InStrRevs = InStrRev(.Range.Text, Chr(13))
+'    InStrs = InStr(.Range.Text, vba.Chr(13)): InStrRevs = InStrRev(.Range.Text, vba.Chr(13))
 '    If InStrs = InStrRevs And InStrs <> 0 Then _
 '    If MsgBox("本節只有一個分行符號! 是否要取代？", vbInformation + vbYesNo) = vbNo Then .Range.Words(.Range.Words.Count).Select: Exit Sub
 '    For i = .Range.Paragraphs.Count - 1 To 1 + p Step -1 '第一段若為頁碼則不要,最末一段分節符號取代後，成了分頁符號，故亦不要！
 '        With .Range.Paragraphs(i)  '快速鍵：
-'            .Range.Text = Replace(.Range.Text, Chr(13), Chr(11)) '轉換分行符號為手動分行符號
+'            .Range.Text = Replace(.Range.Text, vba.Chr(13), vba.Chr(11)) '轉換分行符號為手動分行符號
 '        '    .Find.ClearFormatting
 '        '    .Find.Replacement.ClearFormatting
 '        '    .Find.Execute findtext:=.Text, MatchCase:=False, Replace:=wdReplaceAll, replacewith:=.Text, Wrap:=wdFindContinue
@@ -1229,7 +1226,7 @@ With ActiveDocument
                 dt = "Edit_" & Format(Now(), "yyyy_mm_dd")
                 dtbefore = 0
             Case vbNo
-Again:          dtbeforeStr = InputBox("要看" & Chr(-24153) & "幾" & Chr(-24152) & _
+Again:          dtbeforeStr = InputBox("要看" & VBA.Chr(-24153) & "幾" & VBA.Chr(-24152) & _
                         "天以前的編輯處?", "瀏覽編輯處書籤", "1")
                 If Not IsNumeric(dtbeforeStr) Then
                     If Not dtbeforeStr Like "" Then
@@ -1288,9 +1285,9 @@ e:          .bookmarks(ps - 1).Select '選取（到）最後一個檢視的書籤
                 End If
                 Do
                     Set a = a.Previous
-                   If Left(a.Style, 2) = "標題" Then _
+                   If VBA.Left(a.Style, 2) = "標題" Then _
                     Exit Do
-                Loop 'a.Range會包括段落字元,要去除可用：Left(a.Range, Len(a.Range) - 1)
+                Loop 'a.Range會包括段落字元,要去除可用：vba.Left(a.Range, Len(a.Range) - 1)
             End With
             Select Case MsgBox("要重新開始請按〔否〕!" & vbCr & vbCr & _
                 "目前標題為：" & a.Range & _
@@ -1360,11 +1357,11 @@ With ActiveDocument
                 Select Case Selection.Style
                     Case "標題 1", "標題 2", "標題 3", "標題 4", "標題 5", "標題 6" _
                         , "標題 7", "標題 8", "標題 9"
-                        'wdStyleHeader  'Left(Selection.Style, 2) = "標題" '如果是標題
+                        'wdStyleHeader  'vba.Left(Selection.Style, 2) = "標題" '如果是標題
 '                        CrossReferenceID = .ActiveWindow.Selection.HeaderFooter .Footnotes (1).Index
                         CrossReference = .GetCrossReferenceItems(wdRefTypeHeading)
                         For i = 1 To UBound(CrossReference)
-'                            If Trim(Left(CrossReference(i), Len(CrossReferenceID))) _
+'                            If Trim(vba.Left(CrossReference(i), Len(CrossReferenceID))) _
                                 = CrossReferenceID Then
                             If Trim(CrossReference(i)) Like Selection Then
                                 If MsgBox("要插入註腳所在之「頁碼」而非「標題文字」，" _
@@ -1396,7 +1393,7 @@ With ActiveDocument
                         CrossReferenceID = .ActiveWindow.Selection.Range.Footnotes(1).index
                         CrossReference = .GetCrossReferenceItems(wdRefTypeFootnote)
                         For i = 1 To UBound(CrossReference)
-                            If Trim(Left(CrossReference(i), Len(CrossReferenceID))) _
+                            If Trim(VBA.Left(CrossReference(i), Len(CrossReferenceID))) _
                                 = CrossReferenceID Then
                                 If MsgBox("要插入註腳所在之「頁碼」而非「註腳編號」，" _
                                         & "請按〔取消〕", vbQuestion + vbOKCancel, "插入註腳:" & _
@@ -1686,13 +1683,13 @@ Public Sub 比對選取文字()  '2003/4/4(不包括任一符號)
 '指定鍵: Atl+Ctrl+Shift+Up(↑)
 CheckSavedNoClear
 '字元表：between -24667 and 19968
-'Selection = ChrW(字元表)
+'Selection = vba.Chrw(字元表)
 Dim r As String, ins(4) As Long, f, i As Long, rCompMain As String, rCompFootnote As String, R1 As String
-f = Array("。", "」", Chr(-24152), "：", "，", "；", _
-    "、", "「", ".", Chr(34), ":", ",", ";", _
+f = Array("。", "」", VBA.Chr(-24152), "：", "，", "；", _
+    "、", "「", ".", VBA.Chr(34), ":", ",", ";", _
             "……", "...", "）", ")", "-", "．", "『", "』" _
             , "《", "》", "〉", "〈", "（", "）", "--", _
-            ChrW(8212), "－", "？", ChrW(2), Chr(13), Chr(10), Chr(8), Chr(9), _
+            VBA.ChrW(8212), "－", "？", VBA.ChrW(2), VBA.Chr(13), VBA.Chr(10), VBA.Chr(8), VBA.Chr(9), _
             "　", " ")
             'ChrW (2)為註腳符號
 With Selection '指定鍵：Alt+Ctrl+Up
@@ -1746,14 +1743,14 @@ With Selection '指定鍵：Alt+Ctrl+Up
 '            rCompFootnote = Empty '用不著的字串變數歸零
             rCompMain = r '重新使用字串變數
             For i = 1 To Len(rCompMain)
-                If InStr(.StoryRanges(ins(1)), Left(rCompMain, i)) = 0 Then Exit For
+                If InStr(.StoryRanges(ins(1)), VBA.Left(rCompMain, i)) = 0 Then Exit For
             Next i
             rCompFootnote = rCompMain '重新使用字串變數
-            rCompMain = Left(rCompMain, i - 1)
+            rCompMain = VBA.Left(rCompMain, i - 1)
             For i = 1 To Len(rCompFootnote)
-                If InStrRev(.StoryRanges(ins(1)), right(rCompFootnote, i), -1, vbTextCompare) = 0 Then Exit For
+                If InStrRev(.StoryRanges(ins(1)), VBA.Right(rCompFootnote, i), -1, vbTextCompare) = 0 Then Exit For
             Next i
-            rCompFootnote = right(rCompFootnote, i - 1)
+            rCompFootnote = VBA.Right(rCompFootnote, i - 1)
             R1 = rCompMain
             Beep
             ins(2) = 1: ins(3) = 0 '重新使用變數
@@ -1772,7 +1769,7 @@ With Selection '指定鍵：Alt+Ctrl+Up
                 Else
                     rCompMain = Selection.Range
                 End If
-'                If Right(rCompMain, Len(r)) Like "雅，則" Then Stop
+'                If VBA.Right(rCompMain, Len(r)) Like "雅，則" Then Stop
                 If Len(rCompMain) >= Len(r) And _
                 InStrRev(rCompMain, rCompFootnote) = 0 Then
 '                    ins(3) = ins(3) + 1 '當縮短一單位長度沒有時，則復原原長度（表示最後符合者，即減一長度前的字串矣）
@@ -1780,15 +1777,15 @@ With Selection '指定鍵：Alt+Ctrl+Up
                     Exit For
                 End If
 '                ins(3) = ins(3) - 1 '縮短一單位長度再找
-                If InStr(right(rCompMain, Len(rCompMain) - Len(R1)), R1) > 0 Then
-                    ins(2) = InStr(right(rCompMain, Len(rCompMain) - Len(R1)), R1) - 1 + Len(R1) + ins(2) '縮短一單位長度再找
+                If InStr(VBA.Right(rCompMain, Len(rCompMain) - Len(R1)), R1) > 0 Then
+                    ins(2) = InStr(VBA.Right(rCompMain, Len(rCompMain) - Len(R1)), R1) - 1 + Len(R1) + ins(2) '縮短一單位長度再找
 '                Else
 '                    Exit For
                 End If
                 Selection.SetRange start:=ins(2), End:=ins(3)
                 .ActiveWindow.ScrollIntoView Selection.Range, True '顯示選取範圍
-                If InStrRev(Left(rCompMain, Len(rCompMain) - Len(rCompFootnote)), rCompFootnote, -1, vbTextCompare) > 0 Then
-                    ins(3) = InStrRev(Left(rCompMain, Len(rCompMain) - Len(rCompFootnote)), rCompFootnote, -1, vbTextCompare) - 1 + Len(rCompFootnote) + ins(2) '縮短一單位長度再找
+                If InStrRev(VBA.Left(rCompMain, Len(rCompMain) - Len(rCompFootnote)), rCompFootnote, -1, vbTextCompare) > 0 Then
+                    ins(3) = InStrRev(VBA.Left(rCompMain, Len(rCompMain) - Len(rCompFootnote)), rCompFootnote, -1, vbTextCompare) - 1 + Len(rCompFootnote) + ins(2) '縮短一單位長度再找
 '                Else
 '                    Exit For
                 End If
@@ -1847,14 +1844,14 @@ Public Sub 比對選取文字1() '2003/4/4(不包括任一符號)
 '指定鍵: Atl+Ctrl+Shift+Up(↑)
 CheckSavedNoClear
 '字元表：between -24667 and 19968
-'Selection = ChrW(字元表)
+'Selection = vba.Chrw(字元表)
 Dim r As String, ins(4) As Long, f
 Dim rLeft As String, rRight As String, rComp As String, i As Long, rCompMain As String, rCompFootnote As String
-f = Array("。", "」", Chr(-24152), "：", "，", "；", _
-    "、", "「", ".", Chr(34), ":", ",", ";", _
+f = Array("。", "」", VBA.Chr(-24152), "：", "，", "；", _
+    "、", "「", ".", VBA.Chr(34), ":", ",", ";", _
             "……", "...", "）", ")", "-", "．", "『", "』" _
             , "《", "》", "〉", "〈", "（", "）", "--", _
-            ChrW(8212), "－", "？", ChrW(2), Chr(13), Chr(10), Chr(8), Chr(9), _
+            VBA.ChrW(8212), "－", "？", VBA.ChrW(2), VBA.Chr(13), VBA.Chr(10), VBA.Chr(8), VBA.Chr(9), _
             "　", " ")
             'ChrW (2)為註腳符號
 With Selection '指定鍵：Alt+Ctrl+Up
@@ -1911,26 +1908,26 @@ With Selection '指定鍵：Alt+Ctrl+Up
 '            rCompFootnote = Empty '用不著的字串變數歸零
             '由左方取得第一個吻合正文的詞
             For i = 1 To Len(r)
-                If InStr(rComp, Left(r, i)) = 0 Then Exit For
+                If InStr(rComp, VBA.Left(r, i)) = 0 Then Exit For
             Next i
-            rLeft = Left(r, i - 1)
+            rLeft = VBA.Left(r, i - 1)
             '由右方取得第一個吻合正文的詞
             For i = 1 To Len(r)
-                If InStrRev(rComp, right(r, i), -1, vbTextCompare) = 0 Then Exit For
+                If InStrRev(rComp, VBA.Right(r, i), -1, vbTextCompare) = 0 Then Exit For
             Next i
-            rRight = right(r, i - 1)
+            rRight = VBA.Right(r, i - 1)
 
             ins(2) = InStr(rComp, rLeft) '- 1
             ins(3) = InStrRev(rComp, rRight, -1, vbTextCompare) + Len(rRight) '- 1
 '            Selection.SetRange ins(2), ins(3)
-'            rComp = Mid(rComp, ins(2), ins(3) - ins(2))
+'            rComp = VBA.Mid(rComp, ins(2), ins(3) - ins(2))
             For i = ins(2) To ins(3) Step 1
 '                Application.System
 '                r = Selection.Range
-'                If Right(r, Len(r)) Like "雅，則" Then Stop
+'                If VBA.Right(r, Len(r)) Like "雅，則" Then Stop
                 ins(2) = ins(2) + 1
-                If InStr(right(rComp, Len(rComp) - Len(rRight)), rRight) > 0 Then _
-                    ins(2) = InStr(right(rComp, Len(rComp) - Len(rRight)), rRight) - 1 + Len(rRight) + ins(2) '縮短一單位長度再找
+                If InStr(VBA.Right(rComp, Len(rComp) - Len(rRight)), rRight) > 0 Then _
+                    ins(2) = InStr(VBA.Right(rComp, Len(rComp) - Len(rRight)), rRight) - 1 + Len(rRight) + ins(2) '縮短一單位長度再找
                 If Len(rComp) >= Len(r) Then
 '                 InStrRev(rComp, rRight) = 0
 '                    ins(3) = ins(3) + 1 '當縮短一單位長度沒有時，則復原原長度（表示最後符合者，即減一長度前的字串矣）
@@ -1938,15 +1935,15 @@ With Selection '指定鍵：Alt+Ctrl+Up
                     Exit For
                 End If
 '                ins(3) = ins(3) - 1 '縮短一單位長度再找
-                If InStr(right(rComp, Len(rComp) - Len(rRight)), rRight) > 0 Then
-                    ins(2) = InStr(right(rComp, Len(rComp) - Len(rRight)), rRight) - 1 + Len(rRight) + ins(2) '縮短一單位長度再找
+                If InStr(VBA.Right(rComp, Len(rComp) - Len(rRight)), rRight) > 0 Then
+                    ins(2) = InStr(VBA.Right(rComp, Len(rComp) - Len(rRight)), rRight) - 1 + Len(rRight) + ins(2) '縮短一單位長度再找
 '                Else
 '                    Exit For
                 End If
                 Selection.SetRange start:=ins(2), End:=ins(3)
                 .ActiveWindow.ScrollIntoView Selection.Range, True '顯示選取範圍
-                If InStrRev(Left(rComp, Len(rComp) - Len(rRight)), rRight, -1, vbTextCompare) > 0 Then
-                    ins(3) = InStrRev(Left(rComp, Len(rComp) - Len(rRight)), rRight, -1, vbTextCompare) - 1 + Len(rRight) + ins(2) '縮短一單位長度再找
+                If InStrRev(VBA.Left(rComp, Len(rComp) - Len(rRight)), rRight, -1, vbTextCompare) > 0 Then
+                    ins(3) = InStrRev(VBA.Left(rComp, Len(rComp) - Len(rRight)), rRight, -1, vbTextCompare) - 1 + Len(rRight) + ins(2) '縮短一單位長度再找
 '                Else
 '                    Exit For
                 End If
@@ -2011,9 +2008,9 @@ With Selection
             .text = CStr(r)
             .Execute Forward:=True, Wrap:=wdFindContinue ', Wrap:=wdFindAsk
         End With
-        If .Range = r And Not .Document.Range(.start - 1, .start) Like Chr(13) _
+        If .Range = r And Not .Document.Range(.start - 1, .start) Like VBA.Chr(13) _
             And .Document.Range(.End, .End + 1) Like "." Then
-            .Range = Chr(13) & r
+            .Range = VBA.Chr(13) & r
             .MoveRight
             '要轉成字串，所得長度方為字串長度，數字者，Len()則得半長爾
             .SetRange .start, End:=.start + Len(CStr(r))
@@ -2041,12 +2038,12 @@ With Selection
                 .text = r
                 .Execute Forward:=True, Wrap:=wdFindContinue ' Wrap:=wdFindAsk
             End With
-            If .Document.Range(.start - 1, .start) Like Chr(13) Or p2 >= p1 Then
+            If .Document.Range(.start - 1, .start) Like VBA.Chr(13) Or p2 >= p1 Then
                 MsgBox "已完成" & C & "次替換！", vbInformation
                 Exit Do
             End If
             If .Range = r And .Document.Range(.End, .End + 1) Like "." Then
-                .Range = Chr(13) & r
+                .Range = VBA.Chr(13) & r
                 C = C + 1
                 p2 = .start
                 .MoveRight
@@ -2078,8 +2075,8 @@ With Selection
             End With
             C = C + 1
             If R1 = CInt(.Range) And _
-                (Not .Document.Range(.start - 1, .start) Like Chr(10) _
-                    Or Not .Document.Range(.start - 1, .start) Like Chr(13)) _
+                (Not .Document.Range(.start - 1, .start) Like VBA.Chr(10) _
+                    Or Not .Document.Range(.start - 1, .start) Like VBA.Chr(13)) _
                     And .Document.Range(.End, .End + 1) Like "." Then
 Out:            MsgBox "已檢查" & C & "次！", vbExclamation
                 Exit Do
@@ -2100,7 +2097,7 @@ With Selection
     If .End >= d Then
         If MsgBox("要從頭開始嗎？", vbQuestion + vbOKCancel) = vbOK Then
            .HomeKey wdStory, wdMove
-            If .text Like Chr(13) Then .Delete
+            If .text Like VBA.Chr(13) Then .Delete
         Else
             Exit Sub
         End If
@@ -2108,7 +2105,7 @@ With Selection
     If .Type <> wdSelectionIP Then .MoveRight '有選取範圍時會取代掉選取範圍, 故須先檢查!
     Do
         .Find.ClearFormatting
-        .Find.Execute FindText:="^p", Forward:=True
+        .Find.Execute findtext:="^p", Forward:=True
         C = C + 1
         a = .Range.Previous '此法較快
 '        a = .Document.Range(.Start - 1, .Start)
@@ -2131,8 +2128,8 @@ With Selection
             .Document.ActiveWindow.ScrollIntoView Selection.Range, True
             If StepByStep = vbNo Then
 '                If Len(.Paragraphs(1).Range) > 28 And _
-                    Left(VBA.Right(.Paragraphs(1).Range, 3), 1) <> "。" And _
-                    Left(VBA.Right(.Paragraphs(1).Range, 4), 2) <> "。」" Then      '如此多字數而段行者才處理,否則太繁複了!(連標題等也算入,就太瑣碎了!)2003/11/30
+                    vba.Left(VBA.Right(.Paragraphs(1).Range, 3), 1) <> "。" And _
+                    vba.Left(VBA.Right(.Paragraphs(1).Range, 4), 2) <> "。」" Then      '如此多字數而段行者才處理,否則太繁複了!(連標題等也算入,就太瑣碎了!)2003/11/30
                '以樂府詩集之格式等，暫加如此IF條件式！2003/11/30
 '                If Len(.Paragraphs(1).Range) < 40 Then
 '                    If MsgBox("要清除嗎?", vbQuestion + vbOKCancel) = vbOK Then .Range = ""
@@ -2142,9 +2139,9 @@ With Selection
                 p = p + 1
 '                End If
             Else '>28,以樂府詩集之格式等，暫加如此IF條件式！2003/11/30
-                If Len(.Paragraphs(1).Range) > 36 And Left(VBA.right(.Paragraphs(1).Range, 3), 1) <> "。" _
-                        And Left(VBA.right(.Paragraphs(1).Range, 3), 1) <> "﹂" _
-                        And Left(VBA.right(.Paragraphs(1).Range, 3), 1) <> "」" _
+                If Len(.Paragraphs(1).Range) > 36 And VBA.Left(VBA.Right(.Paragraphs(1).Range, 3), 1) <> "。" _
+                        And VBA.Left(VBA.Right(.Paragraphs(1).Range, 3), 1) <> "﹂" _
+                        And VBA.Left(VBA.Right(.Paragraphs(1).Range, 3), 1) <> "」" _
                         Then '如此多字數而段行者才處理,否則太繁複了!(連標題等也算入,就太瑣碎了!)2003/11/30
                     Select Case MsgBox("要清除嗎?" & vbCr & vbCr & "要終止請按〔否〕！" _
                         , vbYesNoCancel + vbQuestion)
@@ -2153,7 +2150,7 @@ With Selection
                             p = p + 1
                         Case vbCancel
                             If StepByStep = vbYes Then
-                                .Range = Chr(13) & .Range '插入新段落以區隔開來!
+                                .Range = VBA.Chr(13) & .Range '插入新段落以區隔開來!
                                 p = p + 1
                             ElseIf StepByStep = NoArrange Then '不處理
                             Else
@@ -2165,7 +2162,7 @@ With Selection
                 End If
             End If
 '            p = p + 1
-            d = d - 2 '消除換行符號(chr(13)會併復位符號(Chr(10)也取消掉,故須減二
+            d = d - 2 '消除換行符號(vba.Chr(13)會併復位符號(vba.Chr(10)也取消掉,故須減二
         End If
     Loop
     MsgBox "完成" & C & "次檢查，" & p & "次置換！", vbInformation
@@ -2193,7 +2190,7 @@ With Selection
     If .Document.path <> "" Then MsgBox "此文件不能操作", vbExclamation: Exit Sub
     For Each a In .Document.Paragraphs
         If Len(a.Range) > 2 Then
-            If IsNumeric(Mid(a.Range, 2, Len(a.Range) - 4)) Then
+            If IsNumeric(VBA.Mid(a.Range, 2, Len(a.Range) - 4)) Then
                 a.Range.Delete
             End If
         End If
@@ -2216,9 +2213,9 @@ With Selection
         Select Case .Paragraphs(1).Range.Font.Name
             Case "新細明體"
 1               .MoveDown wdParagraph, 1, wdExtend
-                If IsNumeric(Left(LTrim(.Paragraphs(1).Range), 1)) And (InStr(1, .Sections(1).Range, _
-                    Left(LTrim(.Paragraphs(1).Range), 1), vbBinaryCompare) < InStrRev(.Sections(1).Range, _
-                    Left(LTrim(.Paragraphs(1).Range), 1), , vbBinaryCompare)) Then
+                If IsNumeric(VBA.Left(LTrim(.Paragraphs(1).Range), 1)) And (InStr(1, .Sections(1).Range, _
+                    VBA.Left(LTrim(.Paragraphs(1).Range), 1), vbBinaryCompare) < InStrRev(.Sections(1).Range, _
+                    VBA.Left(LTrim(.Paragraphs(1).Range), 1), , vbBinaryCompare)) Then
                     '要避免原文註腳被刪!
                     GoTo 2
                 End If
@@ -2230,13 +2227,13 @@ With Selection
                             And (InStr(1, .Sections(1).Range, _
                             .Paragraphs(1).Range.Words(1), vbBinaryCompare) = InStrRev(.Sections(1).Range, _
                             .Paragraphs(1).Range.Words(1), , vbBinaryCompare)) Then
-                        If IsNumeric(Left(LTrim(.Paragraphs(1).Range), 1)) _
+                        If IsNumeric(VBA.Left(LTrim(.Paragraphs(1).Range), 1)) _
                             And (InStr(1, .Sections(1).Range, _
-                            Left(LTrim(.Paragraphs(1).Range), 1), vbBinaryCompare) = InStrRev(.Sections(1).Range, _
-                            Left(LTrim(.Paragraphs(1).Range), 1), , vbBinaryCompare)) Then
+                            VBA.Left(LTrim(.Paragraphs(1).Range), 1), vbBinaryCompare) = InStrRev(.Sections(1).Range, _
+                            VBA.Left(LTrim(.Paragraphs(1).Range), 1), , vbBinaryCompare)) Then
                             '要原文註腳刪光後清除分隔線!(有時註腳編號前會空一格,故改上式）
                             .Paragraphs(1).Range.Delete
-                            If Not IsNumeric(Left(LTrim(.Paragraphs(1).Range), 1)) And InStr(.Paragraphs(1).Previous.Range, "---") Then
+                            If Not IsNumeric(VBA.Left(LTrim(.Paragraphs(1).Range), 1)) And InStr(.Paragraphs(1).Previous.Range, "---") Then
                                 .Paragraphs(1).Previous.Range.Delete
                             End If
                         Else
@@ -2262,7 +2259,7 @@ With Selection
 End With
 End Sub
 Sub a1()
-Selection.Range.Find.Execute "為", , , , , , , , , ChrW(29234), wdReplaceAll
+Selection.Range.Find.Execute "為", , , , , , , , , VBA.ChrW(29234), wdReplaceAll
 End Sub
 
 Sub 清除頁碼標記()
@@ -2525,9 +2522,9 @@ Attribute 巨集8.VB_ProcData.VB_Invoke_Func = "Normal.NewMacros.巨集8"
 '    Selection.Range.Hyperlinks(1).Range.Fields(1).Result.Select
 '    Selection.Range.Hyperlinks(1).Delete
 '     ActiveDocument.Hyperlinks.Add Anchor:=Selection.Range, Address:="", _
-        SubAddress:="_鳴金收兵（ㄇ" & ChrW(20008) & "ㄥˊ_ㄐ" & ChrW(20008) & "ㄣ_ㄕㄡ"
+        SubAddress:="_鳴金收兵（ㄇ" & vba.Chrw(20008) & "ㄥˊ_ㄐ" & vba.Chrw(20008) & "ㄣ_ㄕㄡ"
     ActiveDocument.Hyperlinks.Add Anchor:=Selection.Range, Address:="", _
-        SubAddress:="鳴金收兵（ㄇ" & ChrW(20008) & "ㄥˊ_ㄐ" & ChrW(20008) & "ㄣ_ㄕㄡ_ㄅ" & ChrW(20008) & "ㄥ）"
+        SubAddress:="鳴金收兵（ㄇ" & VBA.ChrW(20008) & "ㄥˊ_ㄐ" & VBA.ChrW(20008) & "ㄣ_ㄕㄡ_ㄅ" & VBA.ChrW(20008) & "ㄥ）"
         
 '    ActiveDocument.Hyperlinks.Add Anchor:=Selection.Range, Address:="", _
         SubAddress:="鳴金收兵"

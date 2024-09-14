@@ -84,11 +84,11 @@ Return
 
 typeTexts:
         Dim ay, i As Byte
-        ay = Array("ㄧ", ChrW(20008), "　", " ", "（又音）", "又音 ", "（讀音）", "讀音 ", "（語音）", "語音 ", _
+        ay = Array("ㄧ", VBA.ChrW(20008), "　", " ", "（又音）", "又音 ", "（讀音）", "讀音 ", "（語音）", "語音 ", _
             "(一)", "", "(二)", "", "(三)", "", "(四)", "", "(五)", "", "(六)", "", "）", "", "（", "")
 
         If x = "" Then Return 'Exit Sub
-'        X = Mid(X, 1, Len(X) - 1)
+'        X = VBA.Mid(X, 1, Len(X) - 1)
         For i = 0 To UBound(ay)
             x = Replace(x, ay(i), ay(i + 1))
             i = i + 1
@@ -112,7 +112,7 @@ typeTexts:
 '            If rst.RecordCount = 1 Then AppActivateDefaultBrowser 'https://docs.microsoft.com/zh-tw/sql/ado/reference/ado-api/absoluteposition-property-ado?view=sql-server-ver15
 '            x = InputBox("plz putin the url", , IIf(VBA.IsNull(rst.Fields(0).Value), "", rst.Fields(0).Value)) 'frmDict.add1URLTo1國語辭典(words)
 '            If x = "" Then GoTo endS
-'            If Left(x, 4) <> "http" Then GoTo rePt
+'            If vba.Left(x, 4) <> "http" Then GoTo rePt
 '            rst.Fields(2).Value = x
 '            rst.Update
 '        End If
@@ -145,9 +145,9 @@ End Sub
 
 Function trimLinks(lnk As String)
 Dim ay, e
-ay = Array(Chr(9))
+ay = Array(VBA.Chr(9))
 lnk = VBA.Trim(lnk)
-If VBA.Left(lnk, 1) = "#" And VBA.right(lnk, 1) = "#" Then lnk = Mid(lnk, 2, Len(lnk) - 2)
+If VBA.Left(lnk, 1) = "#" And VBA.Right(lnk, 1) = "#" Then lnk = VBA.Mid(lnk, 2, Len(lnk) - 2)
 For Each e In ay
     lnk = VBA.Replace(lnk, e, "")
 Next e
@@ -161,7 +161,7 @@ urlO = URL
 s = InStr(urlO, ordr)
 ay = Array("&", "#")
     For Each e In ay
-        If InStr(URL, e) Then URL = Left(URL, InStr(URL, e) - 1)
+        If InStr(URL, e) Then URL = VBA.Left(URL, InStr(URL, e) - 1)
     Next
 trimLinks_http_Dicts_toAddZhuYin_RevisedMoeEdu = URL
 
@@ -176,7 +176,7 @@ If Not IsNull(ZhuYin) Then
         Beep
     Else
         If s > 0 Then
-            trimLinks_http_Dicts_toAddZhuYin_RevisedMoeEdu = URL & Mid(urlO, s)
+            trimLinks_http_Dicts_toAddZhuYin_RevisedMoeEdu = URL & VBA.Mid(urlO, s)
         Else
             trimLinks_http_Dicts_toAddZhuYin_RevisedMoeEdu = URL
         End If
@@ -206,7 +206,7 @@ chkUrl:
                     & "或檢查《國語辭典》的網址是否有誤。是否是以" & vbCr & vbCr & _
                     "「http://dict.revised.moe.edu.tw/cgi-bin/cbdic/gsweb.cgi?o=dcbdic&searchid=」開頭的網址", , dictID)
             If dictIDcrct = "" Then Exit Function
-            If Left(dictIDcrct, 4) = "http" Then
+            If VBA.Left(dictIDcrct, 4) = "http" Then
                 URL = dictIDcrct
                 rstUrl.Close
                 trimLinks_http_Dicts_toAddZhuYin_RevisedMoeEdu URL, ZhuYin
@@ -221,12 +221,12 @@ chkUrl:
             chkLinks_http_Dicts_toAddZhuYin = True
             If dictID = 1 Then
                 dictIDcrct = URL
-                If InStr(dictIDcrct, "&") Then dictIDcrct = Left(dictIDcrct, InStr(dictIDcrct, "&") - 1)
-                If InStr(dictIDcrct, "#") Then dictIDcrct = Left(dictIDcrct, InStr(dictIDcrct, "#") - 1)
+                If InStr(dictIDcrct, "&") Then dictIDcrct = VBA.Left(dictIDcrct, InStr(dictIDcrct, "&") - 1)
+                If InStr(dictIDcrct, "#") Then dictIDcrct = VBA.Left(dictIDcrct, InStr(dictIDcrct, "#") - 1)
                 If rstUrl.State <> adStateClosed Then rstUrl.Close
                 If cnt.State <> adStateClosed Then cnt.Close
                 db.cnt_重編國語辭典修訂本_資料庫 cnt
-                id = CLng(Mid(dictIDcrct, InStr(dictIDcrct, "ID=") + 3))
+                id = CLng(VBA.Mid(dictIDcrct, InStr(dictIDcrct, "ID=") + 3))
                 rstUrl.Open "select * from " & db.重編國語辭典修訂本_資料庫_總表Name & " where ID=" & id, cnt, adOpenKeyset
                 If rstUrl.RecordCount > 0 Then
                     chkLinks_http_Dicts_toAddZhuYin = False
@@ -246,7 +246,7 @@ End Function
 
 Function checkURL_single(URL As String) As Boolean
 Dim u As String
-If Left(URL, 4) <> "http" Then Exit Function
+If VBA.Left(URL, 4) <> "http" Then Exit Function
 If VBA.InStr(URL, " ") Then Exit Function
 If URL = "" Then Exit Function
 u = VBA.Replace(URL, "http", "", 1, 1)
@@ -298,14 +298,14 @@ For Each hplnk In d.Hyperlinks
                 'SystemSetup.playSound 12
                 'MsgBox "not found!", vbExclamation
                 Beep
-                id = VBA.CLng(Mid(lnk, VBA.InStrRev(lnk, "=") + 2))
+                id = VBA.CLng(VBA.Mid(lnk, VBA.InStrRev(lnk, "=") + 2))
                 chm = SystemSetup.getChrome()
                 Shell chm & " "
                 Shell chm & " https://dict.revised.moe.edu.tw/dictView.jsp?ID=" & id
                 'Stop
                 chm = "https://dict.revised.moe.edu.tw/dictView.jsp?ID=" & id 'InputBox("url plz")
                 If chm = "" Then GoTo endS
-                w = VBA.Replace(VBA.Trim(InputBox("Words plz")), Chr(9), "")
+                w = VBA.Replace(VBA.Trim(InputBox("Words plz")), VBA.Chr(9), "")
                 If w = "" Then GoTo endS
                 If VBA.InStr(w, "?") > 0 Then
                     SystemSetup.playSound 3
@@ -318,7 +318,7 @@ For Each hplnk In d.Hyperlinks
 2
                         rst.Close
                          rst.Open "select url,urlv5,id,注音一式,字詞名 from " & db.重編國語辭典修訂本_資料庫_總表Name & _
-                            " where strcomp(字詞名,""" & w & """)=0 and strcomp(注音一式 ,""" & VBA.StrConv(VBA.Replace(Selection.text, ChrW(20008), "ㄧ"), vbWide) & """)=0", cnt, adOpenKeyset, adLockOptimistic
+                            " where strcomp(字詞名,""" & w & """)=0 and strcomp(注音一式 ,""" & VBA.StrConv(VBA.Replace(Selection.text, VBA.ChrW(20008), "ㄧ"), vbWide) & """)=0", cnt, adOpenKeyset, adLockOptimistic
                         If rst.RecordCount = 1 Then
                             If VBA.IsNull(rst.Fields(0).Value) Then rst.Fields(0).Value = chm
                             If VBA.IsNull(rst.Fields(1).Value) Then rst.Fields(1).Value = lnk

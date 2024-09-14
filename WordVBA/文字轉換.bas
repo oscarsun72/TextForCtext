@@ -106,8 +106,8 @@ For Each a In rng.Characters
         If rst.RecordCount > 0 Then
             x = 異體字轉正_取得取代資料(rst)
             With rng.Find
-                .Text = a 'rst.Fields("異體字")
-                .Replacement.Text = x 'rst.Fields("正字")
+                .text = a 'rst.Fields("異體字")
+                .Replacement.text = x 'rst.Fields("正字")
                 .Execute , , , , , , True, flaSel, , , wdReplaceAll
             End With
         End If
@@ -137,7 +137,7 @@ Else
     Set rng = Selection.Range
     flaSel = wdFindStop
 End If
-If VBA.InStr(chr(13) & chr(7) & chr(8) & chr(9) _
+If VBA.InStr(VBA.Chr(13) & VBA.Chr(7) & VBA.Chr(8) & VBA.Chr(9) _
         , rng) Then Exit Sub
 If Len(rng) > 2 Then MsgBox "非單字，請檢查！", vbExclamation: Exit Sub
 If rng = "" Then Exit Sub
@@ -151,7 +151,7 @@ If x = "" Then Exit Sub
 If x Like "*[a-z0-9A-Z]*" Then MsgBox "非中文，請檢查！", vbExclamation:        Exit Sub
 If StrComp(x, rng) = 0 Then MsgBox "與要轉換之字相同，請檢查！", vbExclamation: Exit Sub
 x = VBA.Trim(x)
-rngx = VBA.Trim(rng.Text)
+rngx = VBA.Trim(rng.text)
 If MsgBox("是否兼正字？", vbQuestion + vbOKCancel + vbDefaultButton2) = vbOK Then bz = True
 'If VBA.Dir("H:\", vbVolume) = "" Then
 '    drv = "D:\千慮一得齋\"
@@ -250,20 +250,20 @@ For Each a In rng.Characters
     Loop
     If zy <> "" Then
         zy = 文字處理.國語辭典注音文字處理(zy)
-        zy = left(zy, Len(zy) - 1)
+        zy = VBA.Left(zy, Len(zy) - 1)
         zys = zys & " " & zy
         zy = ""
     End If
     rst.Close
 Next a
-zys = Mid(zys, 2)
+zys = VBA.Mid(zys, 2)
 'Set ur = SystemSetup.stopUndo()
 SystemSetup.stopUndo ur
 If ActiveDocument.path = "" Then
-    rng.Text = zys
+    rng.text = zys
 Else
 '    ed = rng.End
-    rng.InsertAfter chr(9) & zys
+    rng.InsertAfter VBA.Chr(9) & zys
 '    rng.SetRange ed, rng.End
 End If
 With rngZhuYin

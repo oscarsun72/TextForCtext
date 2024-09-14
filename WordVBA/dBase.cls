@@ -39,8 +39,8 @@ dict加注音 x, 4
 End Sub
 Sub dict加注音(x As String, dictID As Byte)
 Dim cnt As New ADODB.Connection, rst As New ADODB.Recordset, w As String, zy As String, ay
-If VBA.InStr(x, Chr(9)) Then
-    ay = VBA.Split(x, Chr(9))
+If VBA.InStr(x, VBA.Chr(9)) Then
+    ay = VBA.Split(x, VBA.Chr(9))
 ElseIf VBA.InStr(x, "（") Then
     ay = VBA.Split(x, "（")
 Else
@@ -67,7 +67,7 @@ Sub 國語辭典網址及ID尚缺者列出()
 Dim rng As word.Range, a, x As String, cnt As New ADODB.Connection, rst As New ADODB.Recordset, ws As String
 If Selection.Type = wdSelectionIP Then
     Set rng = ActiveDocument.Range
-    rng.Find.Execute Chr(13), , , , , , , wdFindContinue, , "", wdReplaceAll
+    rng.Find.Execute VBA.Chr(13), , , , , , , wdFindContinue, , "", wdReplaceAll
 Else
     Set rng = Selection.Range
 End If

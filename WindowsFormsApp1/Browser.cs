@@ -909,9 +909,9 @@ namespace TextForCtext
         /// <returns>若失敗則傳回false</returns>
         internal static bool SetIWebElementValueProperty(IWebElement iwe, string txt)
         {/* 其餘諸如 屬性 defaultValue、innerHTML、textContent 
-          * ((IJavaScriptExecutor)driver).ExecuteScript("arguments[0].defaultValue = arguments[1];", ie, txt);
-            ((IJavaScriptExecutor)driver).ExecuteScript("arguments[0].innerHTML = arguments[1];", ie, txt);
-            ((IJavaScriptExecutor)driver).ExecuteScript("arguments[0].textContent = arguments[1];", ie, txt);
+          * ((IJavaScriptExecutor)driver).ExecuteScript("arguments[0].defaultValue = arguments[1];", iwe, txt);
+            ((IJavaScriptExecutor)driver).ExecuteScript("arguments[0].innerHTML = arguments[1];", iwe, txt);
+            ((IJavaScriptExecutor)driver).ExecuteScript("arguments[0].textContent = arguments[1];", iwe, txt);
             https://sl.bing.net/ggwydu064om
           */
             if (iwe != null)
@@ -927,6 +927,31 @@ namespace TextForCtext
                 //((IJavaScriptExecutor)driver).ExecuteScript("arguments[0].setAttribute('value', '" + txt + "')", ie);
                 //((IJavaScriptExecutor)driver).ExecuteScript("arguments[0].setAttribute('defaultValue', 'test')", ie);
                 ((IJavaScriptExecutor)driver).ExecuteScript("arguments[0].value = arguments[1];", iwe, txt);
+                /*這是因為 value 屬性在 JavaScript 中是動態的，當您使用 arguments[0].value = arguments[1]; 設定值時，它會改變元素的顯示值，但不會改變元素的 HTML 屬性值。
+                    如果您希望在開發人員工具中也看到 value 屬性值的改變，可以使用 setAttribute 方法來同步更新：*/
+                //((IJavaScriptExecutor)driver).ExecuteScript("arguments[0].setAttribute('value', arguments[1]);", iwe, txt);//現在不需要在開發窗格中顯示，故省略
+                // 這樣，您就可以在開發人員工具中看到 value 屬性值的變化了。
+
+                return true;
+            }
+            else
+                return false;
+        }
+        /// <summary>
+        /// 設定元件 IWebElement的textContent屬性值  20240914
+        /// creedit_with_Copilot大菩薩：C# Selenium 屬性設定方法： https://sl.bing.net/jv1AQReen36
+        /// </summary>
+        /// <param name="txt">要設定的值</param>
+        /// <returns>若失敗則傳回false</returns>
+        internal static bool SetIWebElement_textContent_Property(IWebElement iwe, string txt)
+        {/* 其餘諸如 屬性 defaultValue、innerHTML、textContent 
+          * ((IJavaScriptExecutor)driver).ExecuteScript("arguments[0].defaultValue = arguments[1];", iwe, txt);
+            ((IJavaScriptExecutor)driver).ExecuteScript("arguments[0].innerHTML = arguments[1];", iwe, txt);
+            https://sl.bing.net/ggwydu064om
+          */
+            if (iwe != null)
+            {
+                ((IJavaScriptExecutor)driver).ExecuteScript("arguments[0].textContent = arguments[1];", iwe, txt);
                 /*這是因為 value 屬性在 JavaScript 中是動態的，當您使用 arguments[0].value = arguments[1]; 設定值時，它會改變元素的顯示值，但不會改變元素的 HTML 屬性值。
                     如果您希望在開發人員工具中也看到 value 屬性值的改變，可以使用 setAttribute 方法來同步更新：*/
                 //((IJavaScriptExecutor)driver).ExecuteScript("arguments[0].setAttribute('value', arguments[1]);", iwe, txt);//現在不需要在開發窗格中顯示，故省略
@@ -7732,10 +7757,10 @@ internal static string getImageUrl() {
                 {
                     // 處理找不到下載目錄的情況
                     //Console.WriteLine("無法找到下載目錄設定。");
-                    if (Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("無法找到下載目錄設定。是否要設定為作業系統下載目錄？") == DialogResult.OK)
+                    if (MessageBox.Show("無法找到下載目錄設定。是否要設定為作業系統下載目錄？","",MessageBoxButtons.OKCancel,MessageBoxIcon.Exclamation,MessageBoxDefaultButton.Button1,MessageBoxOptions.DefaultDesktopOnly) == DialogResult.OK)
                         downloadDirectory_Chrome = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + "\\Downloads";
                     else
-                        Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("請　賢友菩薩在textBox2中輸入下載目錄之路徑。設定正確，其文字即會消失。感恩感恩　讚歎讚歎　南無阿彌陀佛");
+                        MessageBox.Show("請　賢友菩薩在textBox2中輸入下載目錄之路徑。設定正確，其文字即會消失。感恩感恩　讚歎讚歎　南無阿彌陀佛","", MessageBoxButtons.OK, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
                 }
                 //downloadDirectory_Chrome = preferencesJson["download"]["default_directory"].ToString();
                 /* YouChat大菩薩：在这个示例中，我们首先获取当前用户的主文件夹，然后使用 Path.Combine 方法创建一个路径字符串，以便打开 Chrome 用户数据目录。然后，我们查找名为 Preferences 的文件，它包含 Chrome 首选项的 JSON 格式。我们使用 JObject.Parse 方法将 Preferences 文件的内容解析为 JSON 格式，然后查找下载目录的默认路径。最后，我们输出下载目录的值。 请注意，下载目录设置可能存在多个偏好文件，因此您可能需要查找适用于您的系统和 Chrome 版本的正确偏好文件。此外，这种方法依赖于 Chrome 的偏好文件格式，因此可能会因 Chrome 的更新而改变。 如果您想在下载文件时将文件保存到自定义目录中，建议使用我在前一个回答中提供的示例代码。
@@ -7847,33 +7872,36 @@ internal static string getImageUrl() {
                 iwe = waitFindWebElementBySelector_ToBeClickable("#PunctArea");
                 if (DateTime.Now.Subtract(dt).TotalSeconds > 10) if (Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("等待頁面開啟已逾時，是否繼續？") == DialogResult.Cancel) return false;
             }
-        rePaste:
-            //將要標點的文本寫入剪貼簿：
-            try
-            {
-                Clipboard.SetText(x);
-            }
-            catch (Exception)
-            {
-            }
-            try
-            {
-                if (Clipboard.GetText() == string.Empty)
-                {
-                    Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("剪貼簿出錯！請重來"); return false;
-                }
-            }
-            catch (Exception)
-            {
-                Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("剪貼簿出錯！請重來");
-                return false;
-            }
-            //將要標點的文本貼到標點區：
-            iwe.SendKeys(OpenQA.Selenium.Keys.Shift + OpenQA.Selenium.Keys.Insert);
-            if (string.Empty == iwe.Text)
-            {
-                if (Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("貼上失誤，是否重試一次？") == DialogResult.OK) goto rePaste;
-            }
+            SetIWebElement_textContent_Property(iwe, x);
+            //rePaste:20240914作廢
+            ////將要標點的文本寫入剪貼簿：
+            //try
+            //{
+            //    Clipboard.SetText(x);
+            //}
+            //catch (Exception)
+            //{
+            //}
+            //try
+            //{
+            //    if (Clipboard.GetText() == string.Empty)
+            //    {
+            //        Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("剪貼簿出錯！請重來"); return false;
+            //    }
+            //}
+            //catch (Exception)
+            //{
+            //    Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("剪貼簿出錯！請重來");
+            //    return false;
+            //}
+            ////將要標點的文本貼到標點區：
+            //iwe.SendKeys(OpenQA.Selenium.Keys.Shift + OpenQA.Selenium.Keys.Insert);
+            //if (string.Empty == iwe.Text)
+            //{
+            //    if (Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("貼上失誤，是否重試一次？") == DialogResult.OK) goto rePaste;
+            //}
+
+
             iwe = null;
             //按下「標點」按鈕：
             Thread.Sleep(640);//非得要等一會才能成功！
@@ -7937,33 +7965,36 @@ internal static string getImageUrl() {
                 iwe = waitFindWebElementBySelector_ToBeClickable("#origin000");
                 if (DateTime.Now.Subtract(dt).TotalSeconds > 10) if (Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("等待頁面開啟已逾時，是否繼續？") == DialogResult.Cancel) return false;
             }
-        rePaste:
-            //將要標點的文本寫入剪貼簿：
-            try
-            {
-                Clipboard.SetText(x);
-            }
-            catch (Exception)
-            {
-            }
-            try
-            {
-                if (Clipboard.GetText() == string.Empty)
-                {
-                    Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("剪貼簿出錯！請重來"); return false;
-                }
-            }
-            catch (Exception)
-            {
-                Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("剪貼簿出錯！請重來");
-                return false;
-            }
-            //將要標點的文本貼到標點區：
-            iwe.SendKeys(OpenQA.Selenium.Keys.Shift + OpenQA.Selenium.Keys.Insert);
-            if (string.Empty == iwe.GetAttribute("value"))
-            {
-                if (Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("貼上失誤，是否重試一次？") == DialogResult.OK) goto rePaste;
-            }
+            SetIWebElementValueProperty(iwe, x);
+            //rePaste:
+            ////將要標點的文本寫入剪貼簿：20240914作廢
+            //try
+            //{
+            //    Clipboard.SetText(x);
+            //}
+            //catch (Exception)
+            //{
+            //}
+            //try
+            //{
+            //    if (Clipboard.GetText() == string.Empty)
+            //    {
+            //        Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("剪貼簿出錯！請重來"); return false;
+            //    }
+            //}
+            //catch (Exception)
+            //{
+            //    Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("剪貼簿出錯！請重來");
+            //    return false;
+            //}
+            ////將要標點的文本貼到標點區：
+            //iwe.SendKeys(OpenQA.Selenium.Keys.Shift + OpenQA.Selenium.Keys.Insert);
+            //if (string.Empty == iwe.GetAttribute("value"))
+            //{
+            //    if (Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("貼上失誤，是否重試一次？") == DialogResult.OK) goto rePaste;
+            //}
+
+
             iwe = null;
             //按下「標點」按鈕：
             Thread.Sleep(640);//非得要等一會才能成功！
@@ -8019,6 +8050,7 @@ internal static string getImageUrl() {
             string title;
             try
             {
+                driver.SwitchTo().Window(driver.CurrentWindowHandle);
                 title = driver.Title;//避免誤關出錯
             }
             catch (Exception ex)
@@ -8114,38 +8146,42 @@ internal static string getImageUrl() {
                     Debugger.Break();
                 if (iwe != null)
                 {
-                    iwe.Clear();
-                    try
-                    {
-                        Clipboard.SetText(keyword);
-                    }
-                    catch (Exception)
-                    {
-
-                    }
                     //輸入檢索條件
-                    try
-                    {
-                        iwe.SendKeys(keyword);
-                    }
-                    catch (Exception ex)
-                    {
-                        switch (ex.HResult)
-                        {
-                            case -2146233088:
-                                if (ex.Message.StartsWith("unknown error: ChromeDriver only supports characters in the BMP"))
-                                {
-                                    //iwe.SendKeys(OpenQA.Selenium.Keys.Shift + OpenQA.Selenium.Keys.Insert);
-                                    ChromeDriverOnlySupportsCharactersBMP(iwe, keyword);
-                                }
-                                else
-                                    Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ":" + ex.Message);
-                                break;
-                            default:
-                                Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ":" + ex.Message);
-                                break;
-                        }
-                    }
+                    SetIWebElementValueProperty(iwe, keyword);
+                    //以下作廢 20240913
+                    //iwe.Clear();
+                    //try
+                    //{
+                    //    Clipboard.SetText(keyword);
+                    //}
+                    //catch (Exception)
+                    //{
+
+                    //}
+                    //輸入檢索條件
+
+                    //try
+                    //{
+                    //    iwe.SendKeys(keyword);
+                    //}
+                    //catch (Exception ex)
+                    //{
+                    //    switch (ex.HResult)
+                    //    {
+                    //        case -2146233088:
+                    //            if (ex.Message.StartsWith("unknown error: ChromeDriver only supports characters in the BMP"))
+                    //            {
+                    //                //iwe.SendKeys(OpenQA.Selenium.Keys.Shift + OpenQA.Selenium.Keys.Insert);
+                    //                ChromeDriverOnlySupportsCharactersBMP(iwe, keyword);
+                    //            }
+                    //            else
+                    //                Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ":" + ex.Message);
+                    //            break;
+                    //        default:
+                    //            Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ":" + ex.Message);
+                    //            break;
+                    //    }
+                    //}
                     iwe.SendKeys(OpenQA.Selenium.Keys.Enter);
 
                     //Total 0
@@ -8163,7 +8199,7 @@ internal static string getImageUrl() {
                             //有文本的文字框
                             //Thread.Sleep(800);
                             if (new StringInfo(keyword).LengthInTextElements > 1)
-                                FindPageAndPaste2Find(driver);
+                                FindPageAndPaste2Find(driver,keyword);
                             else
                                 HighlightKeywords(keyword);
                         }//ActiveForm1.HideToNICo(); }
@@ -8175,7 +8211,7 @@ internal static string getImageUrl() {
                         //有文本的文字框
                         //Thread.Sleep(800);
                         if (new StringInfo(keyword).LengthInTextElements > 1)
-                            FindPageAndPaste2Find(driver);
+                            FindPageAndPaste2Find(driver,keyword);
                         else
                             HighlightKeywords(keyword);
                     }//ActiveForm1.HideToNICo(); }
@@ -8285,28 +8321,29 @@ internal static string getImageUrl() {
 
                     }
 
-                    iweKeywordInputBox.Clear();
-                    try
-                    {
-                        iweKeywordInputBox.SendKeys(keyword);
-                    }
-                    catch (Exception ex)
-                    {
-                        switch (ex.HResult)
-                        {
-                            case -2146233088:
-                                if (ex.Message.StartsWith("unknown error: ChromeDriver only supports characters in the BMP"))
-                                {
-                                    ChromeDriverOnlySupportsCharactersBMP(iweKeywordInputBox, keyword);
-                                }
-                                else
-                                    Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ":" + ex.Message);
-                                break;
-                            default:
-                                Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ":" + ex.Message);
-                                break;
-                        }
-                    }
+                    SetIWebElementValueProperty(iweKeywordInputBox, keyword);
+                    //iweKeywordInputBox.Clear();
+                    //try
+                    //{
+                    //    iweKeywordInputBox.SendKeys(keyword);
+                    //}
+                    //catch (Exception ex)
+                    //{
+                    //    switch (ex.HResult)
+                    //    {
+                    //        case -2146233088:
+                    //            if (ex.Message.StartsWith("unknown error: ChromeDriver only supports characters in the BMP"))
+                    //            {
+                    //                ChromeDriverOnlySupportsCharactersBMP(iweKeywordInputBox, keyword);
+                    //            }
+                    //            else
+                    //                Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ":" + ex.Message);
+                    //            break;
+                    //        default:
+                    //            Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ":" + ex.Message);
+                    //            break;
+                    //    }
+                    //}
 
                     //按下「搜尋」：
                     //IWebElement iwe = waitFindWebElementBySelector_ToBeClickable("#frmTitle > table > tbody > tr:nth-child(2) > td > table > tbody > tr:nth-child(8) > td > input[type=IMAGE]:nth-child(1)");
@@ -8425,29 +8462,30 @@ internal static string getImageUrl() {
                 else//文本閱讀內的檢索（《漢籍全文資料庫》）
                 {
                     //輸入查詢關鍵字
-                    iwe1.Clear();
+                    SetIWebElementValueProperty(iwe1, keyword);
+                    //iwe1.Clear();
 
-                    try
-                    {
-                        iwe1.SendKeys(keyword);
-                    }
-                    catch (Exception ex)
-                    {
-                        switch (ex.HResult)
-                        {
-                            case -2146233088:
-                                if (ex.Message.StartsWith("unknown error: ChromeDriver only supports characters in the BMP"))
-                                {
-                                    ChromeDriverOnlySupportsCharactersBMP(iwe1, keyword);
-                                }
-                                else
-                                    Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ":" + ex.Message);
-                                break;
-                            default:
-                                Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ":" + ex.Message);
-                                break;
-                        }
-                    }
+                    //try
+                    //{
+                    //    iwe1.SendKeys(keyword);
+                    //}
+                    //catch (Exception ex)
+                    //{
+                    //    switch (ex.HResult)
+                    //    {
+                    //        case -2146233088:
+                    //            if (ex.Message.StartsWith("unknown error: ChromeDriver only supports characters in the BMP"))
+                    //            {
+                    //                ChromeDriverOnlySupportsCharactersBMP(iwe1, keyword);
+                    //            }
+                    //            else
+                    //                Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ":" + ex.Message);
+                    //            break;
+                    //        default:
+                    //            Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ":" + ex.Message);
+                    //            break;
+                    //    }
+                    //}
 
 
                     //按下「查詢」按鈕
@@ -8573,14 +8611,17 @@ internal static string getImageUrl() {
         /// </summary>
         /// <param name="driver"></param>
         /// <returns></returns>
-        public static bool FindPageAndPaste2Find(WebDriver driver, bool paste2Find = true)
+        public static bool FindPageAndPaste2Find(WebDriver driver,string pasteTxt, bool paste2Find = true)
         {
             Form1.playSound(Form1.soundLike.over, true);
-            if (ActiveForm1.TopMost) ActiveForm1.TopMost = false;
-            driver.SwitchTo().Window(GetCurrentWindowHandle(driver));
-            SendKeys.SendWait("^f");
+            ActiveForm1.TopMost = false;
+            //driver.SwitchTo().Window(GetCurrentWindowHandle(driver));
+            driver.SwitchTo().Window(driver.CurrentWindowHandle);
+            if (ActiveForm1.Active) Debugger.Break();
+            SendKeys.SendWait("^f");//打開Chrome瀏覽器網頁上的「搜尋本頁內容」方塊
             if (paste2Find)
             {
+                Clipboard.SetText(pasteTxt);
                 // 等待尋找方塊出現
                 System.Threading.Thread.Sleep(200);
                 // 貼上剪貼簿內容

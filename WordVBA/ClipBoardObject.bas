@@ -71,7 +71,7 @@ Public Function GetClipboard() As String
         If iStrPtr Then
             iLock = GlobalLock(iStrPtr)
             iLen = GlobalSize(iStrPtr)
-            sUniText = String$(iLen \ 2& - 1&, vbNullChar)
+            sUniText = VBA.String$(iLen \ 2& - 1&, vbNullChar)
             RtlMoveMemory ByVal StrPtr(sUniText), ByVal iLock, iLen - 2
             GlobalUnlock iStrPtr
         End If

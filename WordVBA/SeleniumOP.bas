@@ -161,7 +161,7 @@ ErrH:
                 Resume
             End If
         Case -2146233079
-            If Left(Err.Description, Len("session not created: Chrome failed to start: exited normally.")) = "session not created: Chrome failed to start: exited normally." Then
+            If VBA.Left(Err.Description, Len("session not created: Chrome failed to start: exited normally.")) = "session not created: Chrome failed to start: exited normally." Then
                 wd.Quit
                 SystemSetup.killchromedriverFromHere
                 Set wd = Nothing
@@ -466,10 +466,13 @@ retry:
         Set form = wdB.FindElementById("searchF")
         Set keyword = form.FindElementByName("word")
         Set button = form.FindElementByClassName("submit")
-        If keyword.text <> searchStr Then
-            keyword.Clear
-            keyword.SendKeys searchStr
-        End If
+        
+        SetIWebElementValueProperty keyword, searchStr
+'        If keyword.text <> searchStr Then 20240914作廢
+'            keyword.Clear
+'            keyword.SendKeys searchStr
+'        End If
+        
         Rem 在 headless 參數設定下開啟的Chrome瀏覽器，是無法使用系統貼上功能的
         Rem Dim key As New SeleniumBasic.keys
         Rem     keyword.SendKeys key.Control + "v"
@@ -1379,32 +1382,37 @@ Function grabGjCoolPunctResult(text As String, resultText As String, Optional Ba
     If wdB.URL <> URL Then wdB.Navigate.GoToUrl URL
     
     '整理文本
-    Dim chkStr As String: chkStr = VBA.Chr(13) & Chr(10) & Chr(7) & Chr(9) & Chr(8)
+    Dim chkStr As String: chkStr = VBA.Chr(13) & VBA.Chr(10) & VBA.Chr(7) & VBA.Chr(9) & VBA.Chr(8)
     text = VBA.Trim(text)
     Do While VBA.InStr(chkStr, VBA.Left(text, 1)) > 0
-        text = Mid(text, 2)
+        text = VBA.Mid(text, 2)
     Loop
     Do While VBA.InStr(chkStr, VBA.Right(text, 1)) > 0
-        text = Left(text, Len(text) - 1)
+        text = VBA.Left(text, Len(text) - 1)
     Loop
     
     
     '貼上文本
     Set textBox = wdB.FindElementById("PunctArea")
     Dim key As New SeleniumBasic.keys
-    textBox.Click
-    textBox.Clear
+
+'    textBox.Click 20240914作廢
+'    textBox.Clear
+
     'textbox.SendKeys key.LeftShift + key.Insert
     'textbox.SendKeys VBA.KeyCodeConstants.vbKeyControl & VBA.KeyCodeConstants.vbKeyV
     
-    '如果只有chr(13)而沒有chr(13)&chr(10)則這行會使分段符號消失；因為下面標點按鈕一按，仍會使一組分段符號消失，必須換成兩組，才能保留一組
-    If InStr(text, Chr(13) & Chr(10)) = 0 And InStr(text, Chr(13)) > 0 Then text = Replace(text, Chr(13), Chr(13) & Chr(10) & Chr(13) & Chr(10))
-    If Background Then
-        textBox.SendKeys text 'SystemSetup.GetClipboardText
-    Else
-        ClipBoardObject.SetClipboard text
-        textBox.SendKeys key.Control + "v"
-    End If
+    '如果只有vba.Chr(13)而沒有vba.Chr(13)&vba.Chr(10)則這行會使分段符號消失；因為下面標點按鈕一按，仍會使一組分段符號消失，必須換成兩組，才能保留一組
+    If InStr(text, VBA.Chr(13) & VBA.Chr(10)) = 0 And InStr(text, VBA.Chr(13)) > 0 Then text = Replace(text, VBA.Chr(13), VBA.Chr(13) & VBA.Chr(10) & VBA.Chr(13) & VBA.Chr(10))
+    
+    SetIWebElement_textContent_Property textBox, text
+'    If Background Then 20240914作廢
+'        textBox.SendKeys text 'SystemSetup.GetClipboardText
+'
+'    Else
+'        ClipBoardObject.SetClipboard text
+'        textBox.SendKeys key.Control + "v"
+'    End If
     
     '貼上不成則退出
     Dim WaitDt As Date, chkTxtTime As Date, nx As String, xl As Integer
@@ -1421,7 +1429,7 @@ Function grabGjCoolPunctResult(text As String, resultText As String, Optional Ba
     '標點
     'Set btn = wdB.FindElementByCssSelector("#main > div.my-4 > div.p-1.p-md-3.d-flex.justify-content-end > div.ms-2 > button")
     Set btn = wdB.FindElementByCssSelector("#main > div > div.p-1.p-md-3.d-flex.justify-content-end > div:nth-child(6) > button") '20240710
-    '即便是有chr(13)&chr(10)以下這行仍會使分段符號消失,故若要保持段落，仍須「Chr(13) & Chr(10) & Chr(13) & Chr(10)」二組分段符號，不能只有一個
+    '即便是有vba.Chr(13)&vba.Chr(10)以下這行仍會使分段符號消失,故若要保持段落，仍須「vba.Chr(13) & vba.Chr(10) & vba.Chr(13) & vba.Chr(10)」二組分段符號，不能只有一個
     If btn Is Nothing Then Stop
     DoEvents
     wdB.SwitchTo().Window (wdB.CurrentWindowHandle)
@@ -1540,6 +1548,25 @@ Err1:
         End Select
     
 End Function
+Rem 20240914 creedit_with_Copilot大菩薩：https://sl.bing.net/gCpH6nC61Cu
+' 設定元件 IWebElement的value屬性值  20240913
+Private Function SetIWebElementValueProperty(iwe As IWebElement, txt As String) As Boolean
+    If Not iwe Is Nothing Then
+        'driver.ExecuteScript "arguments[0].value = arguments[1];", element, valueToSet
+        wd.ExecuteScript "arguments[0].value = arguments[1];", iwe, txt
+        SetIWebElementValueProperty = True
+    End If
+End Function
+Rem 20240914 creedit_with_Copilot大菩薩：https://sl.bing.net/gCpH6nC61Cu
+' 設定元件 IWebElement的value屬性值  20240913
+Private Function SetIWebElement_textContent_Property(iwe As IWebElement, txt As String) As Boolean
+    If Not iwe Is Nothing Then
+        'driver.ExecuteScript "arguments[0].value = arguments[1];", element, valueToSet
+        wd.ExecuteScript "arguments[0].textContent = arguments[1];", iwe, txt
+        SetIWebElement_textContent_Property = True
+    End If
+End Function
+
 
 Private Function pasteWhenOutBMP(ByRef iwd As SeleniumBasic.IWebDriver, URL, textBoxToPastedID, pastedTxt As String, ByRef textBox As SeleniumBasic.IWebElement, Background As Boolean) As Boolean ''unknown error: ChromeDriver only supports characters in the BMP  (Session info: chrome=109.0.5414.75)
 Rem creedit chatGPT大菩薩：您提到的確實是 Selenium 的 SendKeys 方法不能貼上 BMP 外的字的問題。

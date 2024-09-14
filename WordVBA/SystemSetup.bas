@@ -4,7 +4,7 @@ Public FsO As Object, UserProfilePath As String
 Public Declare PtrSafe Function sndPlaySound32 Lib "winmm.dll" Alias "sndPlaySoundA" (ByVal lpszSoundName As String, ByVal uFlags As Long) As Long
 '
 'https://msdn.microsoft.com/zh-tw/library/office/ff192913.aspx
-Private Declare PtrSafe Function OpenClipboard Lib "user32.dll" (ByVal hWnd As Long) As Long
+Private Declare PtrSafe Function OpenClipboard Lib "user32.dll" (ByVal hwnd As Long) As Long
 Private Declare PtrSafe Function EmptyClipboard Lib "user32.dll" () As Long
 Private Declare PtrSafe Function CloseClipboard Lib "user32.dll" () As Long
 Private Declare PtrSafe Function IsClipboardFormatAvailable Lib "user32.dll" (ByVal wFormat As Long) As Long
@@ -17,15 +17,15 @@ Private Declare PtrSafe Function GlobalSize Lib "kernel32" (ByVal hMem As Long) 
 Private Declare PtrSafe Function lstrcpy Lib "kernel32.dll" Alias "lstrcpyW" (ByVal lpString1 As Long, ByVal lpString2 As Long) As Long
 
 Public Declare PtrSafe Function ShellExecute Lib "shell32.dll" Alias "ShellExecuteA" _
-    (ByVal hWnd As Long, ByVal lpOperation As String, ByVal lpFile As String, _
+    (ByVal hwnd As Long, ByVal lpOperation As String, ByVal lpFile As String, _
   ByVal lpParameters As String, ByVal lpDirectory As String, _
   ByVal nShowCmd As Long) As Long 'https://www.mrexcel.com/board/threads/vba-api-call-issues-with-show-window-activation.920147/
 Public Declare PtrSafe Function ShowWindow Lib "user32" _
-  (ByVal hWnd As Long, ByVal nCmdSHow As Long) As Long
+  (ByVal hwnd As Long, ByVal nCmdSHow As Long) As Long
 Public Declare PtrSafe Function FindWindow Lib "user32" Alias "FindWindowA" _
   (ByVal lpClassName As String, ByVal lpWindowName As String) As Long
   
-Public Declare PtrSafe Function SetForegroundWindow Lib "user32" (ByVal hWnd As Long) As Boolean
+Public Declare PtrSafe Function SetForegroundWindow Lib "user32" (ByVal hwnd As Long) As Boolean
   
   
   
@@ -108,12 +108,12 @@ Function ClipBoard_GetData()
    lpClipMemory = GlobalLock(hClipMemory)
 
    If Not IsNull(lpClipMemory) Then
-      MyString = space$(MAXSIZE)
+      MyString = VBA.space$(MAXSIZE)
       RetVal = lstrcpy(MyString, lpClipMemory)
       RetVal = GlobalUnlock(hClipMemory)
 
       ' Peel off the null terminating character.
-      MyString = Mid(MyString, 1, InStr(1, MyString, Chr$(0), 0) - 1)
+      MyString = VBA.Mid(MyString, 1, InStr(1, MyString, VBA.Chr$(0), 0) - 1)
    Else
       MsgBox "Could not lock memory to copy string from."
    End If
@@ -182,7 +182,7 @@ Public Function GetClipboard() As String
         If iStrPtr Then
             iLock = GlobalLock(iStrPtr)
             iLen = GlobalSize(iStrPtr)
-            sUniText = String$(iLen \ 2& - 1&, vbNullChar)
+            sUniText = VBA.String$(iLen \ 2& - 1&, vbNullChar)
             lstrcpy CLng(StrPtr(sUniText)), iLock 'http://forum.slime.com.tw/thread152795.html
             GlobalUnlock iStrPtr
         End If
@@ -401,7 +401,7 @@ Rem 20230314 VBA Environ¨ç¦¡¥i¥H¨ú±oWindowsªº Media(¹w³]¦bC:\Windows\Media)¸ô®|¶
 Rem The YouChat¤jµÐÂÄ ¡GVBA Environ function returns the value of a Windows environment variable. In order to retrieve the path of the Windows Media directory (which is located by default in "C:\Windows\Media"), you can use the Environ function along with the relevant environment variable. Here is an example VBA code that retrieves the path of the Windows Media directory using the Environ function:
 Function getWinMediaPath() As String
     Dim mediaPath As String, path As New Paths
-    mediaPath = path.CombineFullName(Environ("windir"), "\Media\")
+    mediaPath = path.CombineFullName(VBA.Environ("windir"), "\Media\")
     Set path = Nothing
     getWinMediaPath = mediaPath
     Rem In this code, the windir environment variable is used to retrieve the path of the Windows directory (usually "C:\Windows"), and then the "Media" subdirectory is appended to that path using the "&" operator. The resulting mediaPath variable will contain a string representing the path to the Windows Media directory.
@@ -478,7 +478,7 @@ End Sub
 
 Public Function appActivatedYet(exeName As String) As Boolean
     On Error GoTo eH:
-      exeName = exeName & ".exe": exeName = StrConv(exeName, vbUpperCase)
+      exeName = exeName & ".exe": exeName = VBA.StrConv(exeName, vbUpperCase)
         'https://stackoverflow.com/questions/44075292/determine-process-id-with-vba
         'https://stackoverflow.com/questions/26277214/vba-getting-program-names-and-task-id-of-running-processes
         Dim objServices As Object, objProcessSet As Object, Process As Object
@@ -525,7 +525,7 @@ Sub wait(sec As Single)
     Dim WaitDt As Date
     WaitDt = DateAdd("s", sec, Now())
     Do While Now < WaitDt
-     Loop
+    Loop
 End Sub
 
 Sub appActivateChrome()
@@ -540,13 +540,13 @@ End Sub
 
 Sub backupNormal_dotm() '¦Û°Ê³Æ¥÷Normal.dotm
     'If ActiveDocument.path = "" Then Exit Sub
-    Dim source As String, destination As String
-    source = SystemSetup.WordTemplatesPathIncldBackSlash + "Normal.dotm"
-    destination = SystemSetup.DropBoxPathIncldBackSlash + "Normal.dotm"
-    If VBA.Dir(destination) <> vbNullString Then GoSub backup:
-    source = SystemSetup.WordStartupPathIncldBackSlash + "TextForCtextWordVBA.dotm"
-    destination = SystemSetup.DropBoxPathIncldBackSlash + "TextForCtextWordVBA.dotm"
-    If VBA.Dir(destination) <> vbNullString Then GoSub backup:
+    Dim Source As String, Destination As String
+    Source = SystemSetup.WordTemplatesPathIncldBackSlash + "Normal.dotm"
+    Destination = SystemSetup.DropBoxPathIncldBackSlash + "Normal.dotm"
+    If VBA.Dir(Destination) <> vbNullString Then GoSub backup:
+    Source = SystemSetup.WordStartupPathIncldBackSlash + "TextForCtextWordVBA.dotm"
+    Destination = SystemSetup.DropBoxPathIncldBackSlash + "TextForCtextWordVBA.dotm"
+    If VBA.Dir(Destination) <> vbNullString Then GoSub backup:
     Exit Sub
 
 backup:
@@ -555,9 +555,9 @@ backup:
         Stop
         
     With SystemSetup.FileSystemObject
-        If (.getfile(source).DateLastModified > _
-            .getfile(destination).DateLastModified) Then _
-                .CopyFile source, destination
+        If (.getfile(Source).DateLastModified > _
+            .getfile(Destination).DateLastModified) Then _
+                .CopyFile Source, Destination
     End With
     Return
     
@@ -710,9 +710,9 @@ Property Get Chromedrivers()
 End Property
 
 Rem VBA ¨ú±o¨t²ÎÀô¹ÒÅÜ¼Æ¤Î¯S®í¸ê®Æ§¨¸ô®| ¦pC#¤¤ªº Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) ¦^¶Ç­È
-Rem ¤¤¥i¥H¨Ï¥Î Environ ¨ç¼Æ¨Ó¨ú±o¨t²ÎÀô¹ÒÅÜ¼Æªº­È¡C¨Ò¦p¡A­n¨ú±o¥»¾÷À³¥Îµ{¦¡¸ê®Æ¸ô®|¡A¥i¥H¨Ï¥Î¤U­±ªºµ{¦¡½X: localAppData = Environ("LOCALAPPDATA")
+Rem ¤¤¥i¥H¨Ï¥Î Environ ¨ç¼Æ¨Ó¨ú±o¨t²ÎÀô¹ÒÅÜ¼Æªº­È¡C¨Ò¦p¡A­n¨ú±o¥»¾÷À³¥Îµ{¦¡¸ê®Æ¸ô®|¡A¥i¥H¨Ï¥Î¤U­±ªºµ{¦¡½X: localAppData = VBA.Environ("LOCALAPPDATA")
 '' ¦pªG­n¨ú±o¨ä¥L¯S®í¸ê®Æ§¨ªº¸ô®| , ¥i¥H¨Ï¥Î¤U­±ªºµ{¦¡½X:
-'' desktop = Environ("USERPROFILE") & "\Desktop"
+'' desktop = VBA.Environ("USERPROFILE") & "\Desktop"
 '' ¥i¥Îªº¯S®í¸ê®Æ§¨¸ô®|¥i¥H¦bMSDN¤W§ä¨ì¡C
 
 

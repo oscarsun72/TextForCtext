@@ -45,22 +45,22 @@ SystemSetup.stopUndo ur, "·s­¶­±"
 Set d = ActiveDocument
 If d.path <> "" Then Exit Sub
 Set rng = d.Range
-start = CInt(Replace(rng.Paragraphs(1).Range, Chr(13), ""))
-e = CInt(Replace(rng.Paragraphs(2).Range, Chr(13), ""))
-fileID = CLng(Replace(rng.Paragraphs(3).Range, Chr(13), ""))
+start = CInt(Replace(rng.Paragraphs(1).Range, VBA.Chr(13), ""))
+e = CInt(Replace(rng.Paragraphs(2).Range, VBA.Chr(13), ""))
+fileID = CLng(Replace(rng.Paragraphs(3).Range, VBA.Chr(13), ""))
 For i = start To e
     If i = 1 Then
-        x = x & "<scanbegin file=""" & fileID & """ page=""" & i & """ />¡´" & Chr(9) & "<scanend file=""" & fileID & """ page=""" & i & """ />"
+        x = x & "<scanbegin file=""" & fileID & """ page=""" & i & """ />¡´" & VBA.Chr(9) & "<scanend file=""" & fileID & """ page=""" & i & """ />"
     Else
-        x = x & "<scanbegin file=""" & fileID & """ page=""" & i & """ />" & Chr(9) & "<scanend file=""" & fileID & """ page=""" & i & """ />" '­Y¤¤¶¡¨S¦³¥ô¦ó¤º®e¡A­¶­±³Ì«á«K¤£¯à¦¨¤@¬q¸¨¡C­Y­è¦n¤@­Ó¬q¸¨¡A·|»P¤U¤@­¶ÂH¦X¦b¤@°_
+        x = x & "<scanbegin file=""" & fileID & """ page=""" & i & """ />" & VBA.Chr(9) & "<scanend file=""" & fileID & """ page=""" & i & """ />" '­Y¤¤¶¡¨S¦³¥ô¦ó¤º®e¡A­¶­±³Ì«á«K¤£¯à¦¨¤@¬q¸¨¡C­Y­è¦n¤@­Ó¬q¸¨¡A·|»P¤U¤@­¶ÂH¦X¦b¤@°_
     End If
 Next i
 
-rng.Paragraphs(3).Range = CLng(Replace(rng.Paragraphs(3).Range, Chr(13), "")) + 1
+rng.Paragraphs(3).Range = CLng(Replace(rng.Paragraphs(3).Range, VBA.Chr(13), "")) + 1
 'For Each e In Selection.Value
 '    x = x & e
 'Next e
-''x = Replace(x, Chr(13), "")
+''x = Replace(x, vba.Chr(13), "")
 'data.SetText Replace(x, "/>", "/>¡´", 1, 1)
 'data.PutInClipboard
 'SystemSetup.SetClipboard x
@@ -83,10 +83,10 @@ xd = SystemSetup.GetClipboardText
 If InStr(xd, "page=""1""") = 0 Then
     Dim bID As String, s As Byte, pge As String
     s = InStr(xd, "page=""")
-    pge = Mid(xd, s + Len("page="""), InStr(s + Len("page="""), xd, """") - s - Len("page="""))
+    pge = VBA.Mid(xd, s + Len("page="""), InStr(s + Len("page="""), xd, """") - s - Len("page="""))
     If CInt(pge) < 10 Then
         s = InStr(xd, """")
-        bID = Mid(xd, s + 1, InStr(s + 1, xd, """") - s - 1)
+        bID = VBA.Mid(xd, s + 1, InStr(s + 1, xd, """") - s - 1)
         xd = "<scanbegin file=""" & bID & """ page=""1"" />¡´<scanend file=""" & bID & """ page=""1"" />" + xd
         SystemSetup.ClipboardPutIn xd
     End If
@@ -101,7 +101,7 @@ Do Until s = 0
     e = InStr(s, xd, ">")
     s = InStr(e, xd, "<scanbegin ")
     If s - e > 1 Then
-        xd = Mid(xd, 1, e) + Mid(xd, s)
+        xd = VBA.Mid(xd, 1, e) + VBA.Mid(xd, s)
     End If
     s = InStr(e, xd, "<scanend ")
 Loop
@@ -154,7 +154,7 @@ code:
         rng.Move wdCharacter, -1
     Loop
     rng.Move
-    rng.text = rng.text + Chr(13) + Chr(13)
+    rng.text = rng.text + VBA.Chr(13) + VBA.Chr(13)
     rng.SetRange s, d.Range.End
     Return
 End Sub
@@ -176,7 +176,7 @@ Do While rng.Find.Execute("<scanbegin ") '<scanbegin file="80564" page="13" y="4
     rng.MoveEnd
 '    rng.Select
     rng.SetRange rng.End, rng.End + 2
-    If rng.text = Chr(13) & Chr(13) Then
+    If rng.text = VBA.Chr(13) & VBA.Chr(13) Then
 '        rng.Select
         e = rng.End
         rng.Delete
@@ -196,7 +196,7 @@ Do While rng.Find.Execute("<scanend file=") ', , , , , , True, wdFindStop)
     rng.MoveEnd
 '    rng.Select
     rng.SetRange rng.End, rng.End + 2
-    If rng.text = Chr(13) & Chr(13) Then
+    If rng.text = VBA.Chr(13) & VBA.Chr(13) Then
 '        e = rng.End
 '        rng.Select
         rng.Cut
@@ -236,9 +236,9 @@ rng.Find.ClearFormatting
 Do While rng.Find.Execute("*")
     e = rng.End
     If rng.start > 0 Then
-        If rng.Previous = Chr(13) Then
+        If rng.Previous = VBA.Chr(13) Then
             Set rng = rng.Previous
-            If rng.Previous = Chr(13) Then
+            If rng.Previous = VBA.Chr(13) Then
                 Set rng = rng.Previous
                 If rng.Previous = ">" Then
                     rng.SetRange rng.start, e - 1
@@ -259,7 +259,7 @@ Do While rng.Find.Execute("*")
                     End If
                     '¥H¤W ÀË¬d¬O§_¥¿¦b¸ó­¶³B 20230811
                     rngP.Move
-                    rngP.InsertAfter Chr(13) & Chr(13)
+                    rngP.InsertAfter VBA.Chr(13) & VBA.Chr(13)
                 End If
             End If
         End If
@@ -327,7 +327,7 @@ DoEvents
 Set rng = d.Range: Set rngDel = rng
 rng.Find.ClearFormatting
 SystemSetup.stopUndo ur, "ª÷¥Û¿ý_¥|³¡ÂO¥Z_ºû°ò¤å®w¥»"
-Do While rng.Find.Execute("}}|" & Chr(13) & "{{", , , , , , True, wdFindStop)
+Do While rng.Find.Execute("}}|" & VBA.Chr(13) & "{{", , , , , , True, wdFindStop)
     s = rng.start - 1: e = rng.start
     Do Until d.Range(s, e) <> "¡@" '²M°£¨ä«eªÅ®æ
         s = s - 1: e = e - 1
@@ -335,11 +335,11 @@ Do While rng.Find.Execute("}}|" & Chr(13) & "{{", , , , , , True, wdFindStop)
     rngDel.SetRange s + 1, rng.start
     'rngDel.Select
     If rngDel.text <> "" Then If Replace(rngDel, "¡@", "") = "" Then rngDel.Delete
-    rng.SetRange s + Len("}}|" & Chr(13) & "{{"), d.Range.End
+    rng.SetRange s + Len("}}|" & VBA.Chr(13) & "{{"), d.Range.End
     
     'Set rng = d.Range
 Loop
-d.Range.text = Replace(Replace(d.Range.text, "|" & Chr(13) & "¡@", ""), "}}|" & Chr(13) & "{{", Chr(13))
+d.Range.text = Replace(Replace(d.Range.text, "|" & VBA.Chr(13) & "¡@", ""), "}}|" & VBA.Chr(13) & "{{", VBA.Chr(13))
 d.Range.Copy
 SystemSetup.contiUndo ur
 SystemSetup.playSound 2
@@ -356,7 +356,7 @@ Set p = Selection.Paragraphs(1)
 cntr = p.Range.Characters.Count - 1
 For i = 1 To cntr
     Set a = p.Range.Characters(i)
-    If a.text <> Chr(13) Then a.text = "¡´"
+    If a.text <> VBA.Chr(13) Then a.text = "¡´"
 Next i
 p.Range.Cut
 SystemSetup.contiUndo ur
@@ -364,14 +364,14 @@ Set ur = Nothing
 End Sub
 Sub ²M°£©Ò¦³²Å¸¹_¤À¬qª`¤å²Å¸¹¨Ò¥~()
 Dim f, i As Integer
-f = Array("¡C", "¡v", Chr(-24152), "¡G", "¡A", "¡F", _
-    "¡B", "¡u", ".", Chr(34), ":", ",", ";", _
+f = Array("¡C", "¡v", VBA.Chr(-24152), "¡G", "¡A", "¡F", _
+    "¡B", "¡u", ".", VBA.Chr(34), ":", ",", ";", _
     "¡K¡K", "...", "¡D", "¡i", "¡j", " ", "¡m", "¡n", "¡q", "¡r", "¡H" _
     , "¡I", "¡£", "¡¤", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0" _
-    , "¡y", "¡z", ChrW(9312), ChrW(9313), ChrW(9314), ChrW(9315), ChrW(9316) _
-    , ChrW(9317), ChrW(9318), ChrW(9319), ChrW(9320), ChrW(9321), ChrW(9322), ChrW(9323) _
-    , ChrW(9324), ChrW(9325), ChrW(9326), ChrW(9327), ChrW(9328), ChrW(9329), ChrW(9330) _
-    , ChrW(9331), ChrW(8221), """") '¥ý³]©w¼ÐÂI²Å¸¹°}¦C¥H³Æ¥Î
+    , "¡y", "¡z", VBA.ChrW(9312), VBA.ChrW(9313), VBA.ChrW(9314), VBA.ChrW(9315), VBA.ChrW(9316) _
+    , VBA.ChrW(9317), VBA.ChrW(9318), VBA.ChrW(9319), VBA.ChrW(9320), VBA.ChrW(9321), VBA.ChrW(9322), VBA.ChrW(9323) _
+    , VBA.ChrW(9324), VBA.ChrW(9325), VBA.ChrW(9326), VBA.ChrW(9327), VBA.ChrW(9328), VBA.ChrW(9329), VBA.ChrW(9330) _
+    , VBA.ChrW(9331), VBA.ChrW(8221), """") '¥ý³]©w¼ÐÂI²Å¸¹°}¦C¥H³Æ¥Î
     '¥þ§Î¶ê¬A©·¼È¤£¨ú¥N¡I
     For i = 0 To UBound(f)
         ActiveDocument.Range.Find.Execute f(i), True, , , , , , wdFindContinue, True, "", wdReplaceAll
@@ -429,7 +429,7 @@ For Each a In d.Characters
                 
                     rng.SetRange s, e
                     'rng.Select
-                    rng.text = Replace(rng.text, "¡@", ChrW(-9217) & ChrW(-8195))
+                    rng.text = Replace(rng.text, "¡@", VBA.ChrW(-9217) & VBA.ChrW(-8195))
                     Set a = rng.Characters(rng.Characters.Count)
                 End If
             End If
@@ -454,7 +454,7 @@ Do While rng.Find.Execute("^p")
     For i = 4 To 2 Step -1
         a.SetRange rng.End, rng.End + i
 '        a.Select
-        If Right(a, 1) = y Then
+        If VBA.Right(a, 1) = y Then
             If a.Previous.Previous <> ">" Then
                 For yi = 1 To 99
                     yStr = ¤å¦rÂà´«.¼Æ¦rÂàº~¦r2¦ì¼Æ(yi) + y
@@ -479,11 +479,11 @@ End Sub
 Sub ºû°ò¤å®w¥|³¡ÂO¥Z¥»Âà¨Ó()
 Dim d As Document, a, i, p As Paragraph, xP As String, acP As Integer, space As String, rng As Range
 On Error GoTo eH
-a = Array(ChrW(12296), "{{", ChrW(12297), "}}", "¡q", "{{", "¡r", "}}", _
-    "¡³", ChrW(12295))
+a = Array(VBA.ChrW(12296), "{{", VBA.ChrW(12297), "}}", "¡q", "{{", "¡r", "}}", _
+    "¡³", VBA.ChrW(12295))
 '¡m®eÂN¤Tµ§¡nµ¥¤pª`§@¥¿¤å¬Ùª©­±ªÌ https://ctext.org/library.pl?if=gb&file=89545&page=24
 'a = Array("¡q", "", "¡r", "", _
-    "¡³", ChrW(12295))
+    "¡³", vba.Chrw(12295))
 
 
 Set d = Documents.Add()
@@ -497,8 +497,8 @@ For i = 0 To UBound(a) - 1
 Next i
 For Each p In d.Range.Paragraphs
     xP = p.Range
-    If Left(xP, 2) = "{{" And Right(xP, 3) = "}}" & Chr(13) Then
-        xP = Mid(p.Range, 3, Len(xP) - 5)
+    If VBA.Left(xP, 2) = "{{" And VBA.Right(xP, 3) = "}}" & VBA.Chr(13) Then
+        xP = VBA.Mid(p.Range, 3, Len(xP) - 5)
         If InStr(xP, "{{") = 0 And InStr(xP, "}}") = 0 Then
             acP = p.Range.Characters.Count - 1
             If acP Mod 2 = 0 Then
@@ -515,12 +515,12 @@ For Each p In d.Range.Paragraphs
                 p.Range.Characters(acP).InsertParagraphAfter
             End If
         End If
-    ElseIf Left(xP, 1) = "¡@" Then '«e¦³ªÅ®æªº
+    ElseIf VBA.Left(xP, 1) = "¡@" Then '«e¦³ªÅ®æªº
         i = InStr(xP, "{{")
-        If i > 0 And Right(xP, 3) = "}}" & Chr(13) Then
-            space = Mid(xP, 1, i - 1)
+        If i > 0 And VBA.Right(xP, 3) = "}}" & VBA.Chr(13) Then
+            space = VBA.Mid(xP, 1, i - 1)
             If Replace(space, "¡@", "") = "" Then
-                xP = Mid(xP, i + 2, Len(xP) - 3 - (i + 2))
+                xP = VBA.Mid(xP, i + 2, Len(xP) - 3 - (i + 2))
                 If InStr(xP, "{{") = 0 And InStr(xP, "}}") = 0 Then
                     Set rng = p.Range
                     rng.SetRange rng.Characters(1).start, rng.Characters(i + 1).End
@@ -532,12 +532,12 @@ For Each p In d.Range.Paragraphs
                         acP = CInt((acP + 1) / 2) + Len(space) + 1
                     End If
                     If p.Range.Characters(acP).InlineShapes.Count = 0 Then
-                        p.Range.Characters(acP).InsertBefore Chr(13) & space
+                        p.Range.Characters(acP).InsertBefore VBA.Chr(13) & space
                     Else
                         p.Range.Characters(acP).Select
                         Selection.Delete
                         Selection.TypeText " "
-                        p.Range.Characters(acP).InsertBefore Chr(13) & space
+                        p.Range.Characters(acP).InsertBefore VBA.Chr(13) & space
                     End If
                     
                 End If
@@ -565,7 +565,7 @@ Sub ºû°ò¤å®w¥|³¡ÂO¥Z¥»Âà¨Ó_early()
 Dim d As Document, a, i
 
 a = Array("^p^p", "@", "¡q", "{{", "¡r", "}}", "^p", "", "}}{{", "^p", "@", "^p", _
-    "¡³", ChrW(12295))
+    "¡³", VBA.ChrW(12295))
 Set d = Documents.Add()
 d.Range.Paste
 ºû°ò¤å®w³y¦r¹Ï¨ú¥N¬°¤å¦r d.Range
@@ -583,14 +583,14 @@ Sub searchuCtext()
 ' Alt+,
 SystemSetup.playSound 0.484
 Select Case Selection.text
-    Case "", Chr(13), Chr(9), Chr(7), Chr(10), " ", "¡@"
+    Case "", VBA.Chr(13), VBA.Chr(9), VBA.Chr(7), VBA.Chr(10), " ", "¡@"
         MsgBox "no selected text for search !", vbCritical: Exit Sub
 End Select
 Static bookID
 Dim searchedTerm, e, addressHyper As String, bID As String, cndn As String
 'Const site As String = "https://ctext.org/wiki.pl?if=gb&res="
 Const site As String = "https://ctext.org/wiki.pl?if=gb"
-bID = Left(ActiveDocument.Paragraphs(1).Range, Len(ActiveDocument.Paragraphs(1).Range) - 1)
+bID = VBA.Left(ActiveDocument.Paragraphs(1).Range, Len(ActiveDocument.Paragraphs(1).Range) - 1)
 If Not VBA.IsNumeric(bID) Then
     If InStr(bID, site) = 0 Then
         bookID = InputBox("plz input the book id ", , bookID)
@@ -609,16 +609,16 @@ If InStr(bookID, "https") > 0 Then
     Else
         MsgBox "error . not the proper bookID ref ", vbCritical: Exit Sub
     End If
-    bookID = Mid(bookID, InStr(bookID, cndn) + Len(cndn))
+    bookID = VBA.Mid(bookID, InStr(bookID, cndn) + Len(cndn))
     If Not VBA.IsNumeric(bookID) Then
-        bookID = Mid(bookID, 0, InStr(bookID, "&searchu"))
+        bookID = VBA.Mid(bookID, 0, InStr(bookID, "&searchu"))
     End If
 End If
 If Not VBA.IsNumeric(bookID) Then
     MsgBox "error . not the proper bookID ref ", vbCritical: Exit Sub
 End If
 e = Selection.text
-'searchedTerm = 'Array("¨ö", "¤ø", "©P©ö", "©ö¸g", "¨tÃã", "Ã´Ãã", "À»Ãã", "»¡¨ö", "§Ç¨ö", "¨ö§Ç", "±Ô¨ö", "Âø¨ö", "¤å¨¥", "°®©[", "µL©S", ChrW(26080) & "©S", "¤Ñ©S", "¤¸¦ë", "§Q­s", "©ö") ', "", "", "", "")
+'searchedTerm = 'Array("¨ö", "¤ø", "©P©ö", "©ö¸g", "¨tÃã", "Ã´Ãã", "À»Ãã", "»¡¨ö", "§Ç¨ö", "¨ö§Ç", "±Ô¨ö", "Âø¨ö", "¤å¨¥", "°®©[", "µL©S", vba.Chrw(26080) & "©S", "¤Ñ©S", "¤¸¦ë", "§Q­s", "©ö") ', "", "", "", "")
 ''https://ctext.org/wiki.pl?if=gb&res=757381&searchu=%E5%8D%A6
 'For Each e In searchedTerm
     addressHyper = addressHyper + " " + site + cndn + bookID + "&searchu=" + e
@@ -632,29 +632,29 @@ Sub ¥v°O¤T®aª`()
 '±q2858­¶°_¡A20210920:0817¤§«á¡A§ï¥Î»O®v¤jªþ¤¤¦P¾Ç§d«íª@¥ý¥Í¡m¤¤µØ¤å¤Æºô¡n©Ò¿ý¤¤¬ã°|¡mÃv¨å¡nªì¥»¡AÁö©Î¤´¥¼ºë¡AµM¦Ü¤Ö§K¦³Â²¤Æ¦rÂà´«³_µ~©Î³y¦r¶Ã½X¤§§xÂZ¡A­ì¤å¦rÀÉ±ó¸m¡C®Ú¾Úªì§@¤ñ¹ï¡A®æ¦¡§¹¥þ¤@¼Ë¡I®Ú¥»´N¬O±q³o¸Ì¥X¨Óªº¡A¦AÂàÂ²¤Æ¦r¡A¦A¤S¤Ï¥¿¡A³y¦¨¤§¯¿¶Ã¡C®¬·íªì¨S·Q¨ì¥Î¦¹¥»¤]¡CªüÀ±ªû¦ò¡C¦ò§Ì¤l®]¦u¯u¥ô¯u¨jÂÔÃÑ©ó2021¦~9¤ë20¤é
 Dim d As Document, a, i, p As Paragraph, px As String, rng As Range, e As Long, pRng As Range, pa
 'Const corTxt As String = "¡×¸ÔÂI®Õ¥»®Õ°É°O¡×"'¸Óºô¯¸¹Ï¤å¹ï·Ó±Æª©¥\¯à¥¼¯à°t¦X¡A¬G¤µ¤£±Ä¥Î¡C¨ä®æ¦¡¥u¹ï¤å¥»ª©¦³®Ä¡Chttps://ctext.org/instructions/wiki-formatting/zh
-'a = Array(" ", "", "¡@¡@","","¡@", ChrW(-9217) & ChrW(-8195), "^p", "<p>^p",
-'a = Array(" ", "", "¡@¡@", "", "^p^p", "<p>^p" & ChrW(-9217) & ChrW(-8195) & ChrW(-9217) & ChrW(-8195),
+'a = Array(" ", "", "¡@¡@","","¡@", vba.Chrw(-9217) & vba.Chrw(-8195), "^p", "<p>^p",
+'a = Array(" ", "", "¡@¡@", "", "^p^p", "<p>^p" & vba.Chrw(-9217) & vba.Chrw(-8195) & vba.Chrw(-9217) & vba.Chrw(-8195),
 a = Array("¡@¡@", "", "^p", "^p^p", "^p^p^p", "^p^p", "¡u^p^p", "¡u", "¡y^p^p", "¡y", "¡e^p^p", "¡e", "¡]^p^p", "¡]", _
-    "^p^p", "<p>^p" & ChrW(-9217) & ChrW(-8195) & ChrW(-9217) & ChrW(-8195), _
-    "^p" & ChrW(-9217) & ChrW(-8195) & ChrW(-9217) & ChrW(-8195) & "¡e", _
-    "^p{{" & ChrW(-9217) & ChrW(-8195) & "{{{¡q", _
-    "¡u<p>^p" & ChrW(-9217) & ChrW(-8195) & ChrW(-9217) & ChrW(-8195), "¡u", _
-    "¡e<p>^p" & ChrW(-9217) & ChrW(-8195) & ChrW(-9217) & ChrW(-8195), "¡e", _
-    "¡y<p>^p" & ChrW(-9217) & ChrW(-8195) & ChrW(-9217) & ChrW(-8195), "¡y", _
-    "¡]<p>^p" & ChrW(-9217) & ChrW(-8195) & ChrW(-9217) & ChrW(-8195), "¡]", _
+    "^p^p", "<p>^p" & VBA.ChrW(-9217) & VBA.ChrW(-8195) & VBA.ChrW(-9217) & VBA.ChrW(-8195), _
+    "^p" & VBA.ChrW(-9217) & VBA.ChrW(-8195) & VBA.ChrW(-9217) & VBA.ChrW(-8195) & "¡e", _
+    "^p{{" & VBA.ChrW(-9217) & VBA.ChrW(-8195) & "{{{¡q", _
+    "¡u<p>^p" & VBA.ChrW(-9217) & VBA.ChrW(-8195) & VBA.ChrW(-9217) & VBA.ChrW(-8195), "¡u", _
+    "¡e<p>^p" & VBA.ChrW(-9217) & VBA.ChrW(-8195) & VBA.ChrW(-9217) & VBA.ChrW(-8195), "¡e", _
+    "¡y<p>^p" & VBA.ChrW(-9217) & VBA.ChrW(-8195) & VBA.ChrW(-9217) & VBA.ChrW(-8195), "¡y", _
+    "¡]<p>^p" & VBA.ChrW(-9217) & VBA.ChrW(-8195) & VBA.ChrW(-9217) & VBA.ChrW(-8195), "¡]", _
     "¶°¸Ñ", "¡m¶°¸Ñ¡n¡G", "¯ÁÁô", "¡m¯ÁÁô¡n¡G", "¡i¡m¯ÁÁô¡n¡G­zÃÙ¡j", "¡i¡m¯ÁÁô¡n­zÃÙ¡j¡G", "¥¿¸q", "¡m¥¿¸q¡n¡G", _
     "¤E¦{®q", "¤E¦{", "»ô·]", "»ôµC", "·]¤ý", "µC¤ý", "¦wÍù¤ý", "¦wÂç¤ý", _
-    "¶ï", "­à", "ºF", ChrW(24921), "±Ò", ChrW(21843), _
-     ChrW(-30641), ChrW(-25066), _
-     "¸s", ChrW(32675), "§Y", ChrW(21373), "²³", ChrW(-30650), _
-     "¬J", ChrW(26083), "·§", ChrW(27114), "µ@", ChrW(28433), _
-     "½Ã", ChrW(-30626), _
-     "¯u", ChrW(30494), "¶ñ", ChrW(22625), "²M", ChrW(28152), "«C", ChrW(-26799), "±Ð", ChrW(25934), _
-    "¶m", ChrW(-28395), "Âí", ChrW(-27731), "·V", ChrW(24892), _
-    "¦}", ChrW(24183), "«Ì", ChrW(23643), "¯ð", ChrW(-31930), "¨·", ChrW(-28471), "Ó@", ChrW(31571), _
-    "²p", ChrW(29314), "°«", ChrW(-25811), "ºø", ChrW(32220), _
-    "¥T", ChrW(20868), "¸}", ChrW(-32486), _
-    ChrW(25995), ChrW(-24956))
+    "¶ï", "­à", "ºF", VBA.ChrW(24921), "±Ò", VBA.ChrW(21843), _
+     VBA.ChrW(-30641), VBA.ChrW(-25066), _
+     "¸s", VBA.ChrW(32675), "§Y", VBA.ChrW(21373), "²³", VBA.ChrW(-30650), _
+     "¬J", VBA.ChrW(26083), "·§", VBA.ChrW(27114), "µ@", VBA.ChrW(28433), _
+     "½Ã", VBA.ChrW(-30626), _
+     "¯u", VBA.ChrW(30494), "¶ñ", VBA.ChrW(22625), "²M", VBA.ChrW(28152), "«C", VBA.ChrW(-26799), "±Ð", VBA.ChrW(25934), _
+    "¶m", VBA.ChrW(-28395), "Âí", VBA.ChrW(-27731), "·V", VBA.ChrW(24892), _
+    "¦}", VBA.ChrW(24183), "«Ì", VBA.ChrW(23643), "¯ð", VBA.ChrW(-31930), "¨·", VBA.ChrW(-28471), "Ó@", VBA.ChrW(31571), _
+    "²p", VBA.ChrW(29314), "°«", VBA.ChrW(-25811), "ºø", VBA.ChrW(32220), _
+    "¥T", VBA.ChrW(20868), "¸}", VBA.ChrW(-32486), _
+    VBA.ChrW(25995), VBA.ChrW(-24956))
 Set d = Documents.Add()
 d.Range.Paste
 ºû°ò¤å®w³y¦r¹Ï¨ú¥N¬°¤å¦r d.Range
@@ -664,8 +664,8 @@ d.Range.text = VBA.Replace(d.Range.text, " ", "")
 For i = 0 To UBound(a) - 1
     If a(i) = "^p^p^p" Then
         px = d.Range.text
-        Do While InStr(px, Chr(13) & Chr(13) & Chr(13))
-            px = Replace(px, Chr(13) & Chr(13) & Chr(13), Chr(13) & Chr(13))
+        Do While InStr(px, VBA.Chr(13) & VBA.Chr(13) & VBA.Chr(13))
+            px = Replace(px, VBA.Chr(13) & VBA.Chr(13) & VBA.Chr(13), VBA.Chr(13) & VBA.Chr(13))
         Loop
         d.Range.text = px
         'Set rng = d.Range
@@ -681,7 +681,7 @@ Next i
 Set rng = Selection.Range
 For Each p In d.Paragraphs
     px = p.Range.text
-    If Left(px, 7) = "{{" & ChrW(-9217) & ChrW(-8195) & "{{{" Then 'ª`¸}¬q¸¨
+    If VBA.Left(px, 7) = "{{" & VBA.ChrW(-9217) & VBA.ChrW(-8195) & "{{{" Then 'ª`¸}¬q¸¨
         e = p.Range.Characters(1).End
         rng.SetRange e, e
         rng.MoveEndUntil "¡f"
@@ -689,10 +689,10 @@ For Each p In d.Paragraphs
         If InStr(p.Range.text, "¡@") Then
             For Each pa In p.Range.Characters
                 If pa = "¡@" Then
-                    pa.text = ChrW(-9217) & ChrW(-8195)
+                    pa.text = VBA.ChrW(-9217) & VBA.ChrW(-8195)
                 End If
             Next
-'            p.Range.text = VBA.Replace(p.Range.text, "¡@", ChrW(-9217) & ChrW(-8195))
+'            p.Range.text = VBA.Replace(p.Range.text, "¡@", vba.Chrw(-9217) & vba.Chrw(-8195))
 '            'replace the text of paragraph the paragraph will be move to next one
 '            Set p = p.Previous
 '            e = p.Range.Characters(1).End
@@ -705,7 +705,7 @@ For Each p In d.Paragraphs
         Selection.MoveRight wdCharacter, 1, wdExtend
         Selection.TypeText "¡r}}}" '±Nª`¸}½s¸¹¡e¤@¡fªº¥kÃä¡f§ï¦¨}}}
         px = p.Range.text
-        If InStr(Right(px, 4), "<p>") Then
+        If InStr(VBA.Right(px, 4), "<p>") Then
             e = p.Range.Characters(p.Range.Characters.Count - 4).End
         Else
             e = p.Range.Characters(p.Range.Characters.Count - 1).End
@@ -751,7 +751,7 @@ For Each p In d.Paragraphs
             
         Loop
     End If
-    If VBA.Left(p.Range.text, 9) = ChrW(-9217) & ChrW(-8195) & ChrW(-9217) & ChrW(-8195) & "¡i¡m¯ÁÁô¡n" Then
+    If VBA.Left(p.Range.text, 9) = VBA.ChrW(-9217) & VBA.ChrW(-8195) & VBA.ChrW(-9217) & VBA.ChrW(-8195) & "¡i¡m¯ÁÁô¡n" Then
         Set rng = p.Range
         p.Range.Characters(1).Delete
         rng.SetRange p.Range.start, p.Range.start
@@ -766,10 +766,10 @@ For Each p In d.Paragraphs
             rng.SetRange p.Range.start, p.Range.start
             rng.InsertAfter "*"
             For Each pa In p.Range.Characters
-                    If pa Like "[¡q¡m¡n¡r]" Or StrComp(pa, ChrW(-9217) & ChrW(-8195)) = 0 Then pa.Delete
+                    If pa Like "[¡q¡m¡n¡r]" Or StrComp(pa, VBA.ChrW(-9217) & VBA.ChrW(-8195)) = 0 Then pa.Delete
             Next pa
             '¥H¤U¤è¦¡·|³y¦¨p ­È³Q³]©w¬°¤U¤@­Ó¬q¸¨
-'            p.Range.text = VBA.Replace(p.Range.text, ChrW(-9217) & ChrW(-8195) & ChrW(-9217) & ChrW(-8195), "")
+'            p.Range.text = VBA.Replace(p.Range.text, vba.Chrw(-9217) & vba.Chrw(-8195) & vba.Chrw(-9217) & vba.Chrw(-8195), "")
 '            p.Range.text = VBA.Replace(VBA.Replace(p.Range.text, "¡m", ""), "¡n", "")
         End If
     End If
@@ -780,10 +780,10 @@ For Each p In d.Paragraphs
             rng.SetRange p.Range.start, p.Range.start
             rng.InsertAfter "¡@*"
             For Each pa In p.Range.Characters
-                If pa Like "[¡q¡m¡n¡r]" Or StrComp(pa, ChrW(-9217) & ChrW(-8195)) = 0 Then pa.Delete
+                If pa Like "[¡q¡m¡n¡r]" Or StrComp(pa, VBA.ChrW(-9217) & VBA.ChrW(-8195)) = 0 Then pa.Delete
             Next pa
    
-'            p.Range.text = VBA.Replace(p.Range.text, ChrW(-9217) & ChrW(-8195) & ChrW(-9217) & ChrW(-8195), "¡@*")
+'            p.Range.text = VBA.Replace(p.Range.text, vba.Chrw(-9217) & vba.Chrw(-8195) & vba.Chrw(-9217) & vba.Chrw(-8195), "¡@*")
 '            p.Range.text = VBA.Replace(VBA.Replace(p.Range.text, "¡q", ""), "¡r", "")
         End If
     End If
@@ -802,7 +802,7 @@ If VBA.InStr(d.Paragraphs(2).Range.text, "²Ä") And InStr(d.Paragraphs(2).Range.t
 '    rng.InsertAfter "¡@*"
 ''    rng.SetRange p.Range.Characters(p.Range.Characters.Count - 1).End, p.Range.Characters(p.Range.Characters.Count - 1).End
 ''    rng.InsertAfter "<p>"
-    p.Range.text = VBA.Replace(p.Range.text, ChrW(-9217) & ChrW(-8195) & ChrW(-9217) & ChrW(-8195), "¡@*")
+    p.Range.text = VBA.Replace(p.Range.text, VBA.ChrW(-9217) & VBA.ChrW(-8195) & VBA.ChrW(-9217) & VBA.ChrW(-8195), "¡@*")
     Set p = d.Paragraphs(2)
     p.Range.text = VBA.Replace(VBA.Replace(p.Range.text, "¡q", ""), "¡r", "")
 End If
@@ -824,20 +824,20 @@ Sub ¥v°O¤T®aª`2old()
 '±q2858­¶°_¡A20210920:0817¤§«á¡A§ï¥Î»O®v¤jªþ¤¤¦P¾Ç§d«íª@¥ý¥Í¡m¤¤µØ¤å¤Æºô¡n©Ò¿ý¤¤¬ã°|¡mÃv¨å¡nªì¥»¡AÁö©Î¤´¥¼ºë¡AµM¦Ü¤Ö§K¦³Â²¤Æ¦rÂà´«³_µ~©Î³y¦r¶Ã½X¤§§xÂZ¡A­ì¤å¦rÀÉ±ó¸m¡C®Ú¾Úªì§@¤ñ¹ï¡A®æ¦¡§¹¥þ¤@¼Ë¡I®Ú¥»´N¬O±q³o¸Ì¥X¨Óªº¡A¦AÂàÂ²¤Æ¦r¡A¦A¤S¤Ï¥¿¡A³y¦¨¤§¯¿¶Ã¡C®¬·íªì¨S·Q¨ì¥Î¦¹¥»¤]¡CªüÀ±ªû¦ò¡C¦ò§Ì¤l®]¦u¯u¥ô¯u¨jÂÔÃÑ©ó2021¦~9¤ë20¤é
 Dim d As Document, a, i, p As Paragraph, px As String, rng As Range, e As Long, pRng As Range
 'Const corTxt As String = "¡×¸ÔÂI®Õ¥»®Õ°É°O¡×"'¸Óºô¯¸¹Ï¤å¹ï·Ó±Æª©¥\¯à¥¼¯à°t¦X¡A¬G¤µ¤£±Ä¥Î¡C¨ä®æ¦¡¥u¹ï¤å¥»ª©¦³®Ä¡Chttps://ctext.org/instructions/wiki-formatting/zh
-a = Array("^p^p", "<p>^p" & ChrW(-9217) & ChrW(-8195) & ChrW(-9217) & ChrW(-8195), _
-    "^p" & ChrW(-9217) & ChrW(-8195) & ChrW(-9217) & ChrW(-8195) & "¡e", _
-    "^p{{" & ChrW(-9217) & ChrW(-8195) & "{{{¡q", _
-    "¡u<p>^p" & ChrW(-9217) & ChrW(-8195) & ChrW(-9217) & ChrW(-8195), "¡u", _
-    "¡e<p>^p" & ChrW(-9217) & ChrW(-8195) & ChrW(-9217) & ChrW(-8195), "¡e", _
-    "¡y<p>^p" & ChrW(-9217) & ChrW(-8195) & ChrW(-9217) & ChrW(-8195), "¡y", _
-    "¡]<p>^p" & ChrW(-9217) & ChrW(-8195) & ChrW(-9217) & ChrW(-8195), "¡]", _
+a = Array("^p^p", "<p>^p" & VBA.ChrW(-9217) & VBA.ChrW(-8195) & VBA.ChrW(-9217) & VBA.ChrW(-8195), _
+    "^p" & VBA.ChrW(-9217) & VBA.ChrW(-8195) & VBA.ChrW(-9217) & VBA.ChrW(-8195) & "¡e", _
+    "^p{{" & VBA.ChrW(-9217) & VBA.ChrW(-8195) & "{{{¡q", _
+    "¡u<p>^p" & VBA.ChrW(-9217) & VBA.ChrW(-8195) & VBA.ChrW(-9217) & VBA.ChrW(-8195), "¡u", _
+    "¡e<p>^p" & VBA.ChrW(-9217) & VBA.ChrW(-8195) & VBA.ChrW(-9217) & VBA.ChrW(-8195), "¡e", _
+    "¡y<p>^p" & VBA.ChrW(-9217) & VBA.ChrW(-8195) & VBA.ChrW(-9217) & VBA.ChrW(-8195), "¡y", _
+    "¡]<p>^p" & VBA.ChrW(-9217) & VBA.ChrW(-8195) & VBA.ChrW(-9217) & VBA.ChrW(-8195), "¡]", _
     "¶°¸Ñ", "¡m¶°¸Ñ¡n¡G", "¯ÁÁô", "¡m¯ÁÁô¡n¡G", "¡i¡m¯ÁÁô¡n¡G­zÃÙ¡j", "¡i¡m¯ÁÁô¡n­zÃÙ¡j¡G", "¥¿¸q", "¡m¥¿¸q¡n¡G", _
     "¤E¦{®q", "¤E¦{", "»ô·]", "»ôµC", "·]¤ý", "µC¤ý", "¦wÍù¤ý", "¦wÂç¤ý", _
     "¶ï", "­à", _
-     "¸s", ChrW(32675), "§Y", ChrW(21373), "²³", ChrW(-30650), "¬J", ChrW(26083), "½Ã", ChrW(-30626), _
-     "¯u", ChrW(30494), "¶ñ", ChrW(22625), "²M", ChrW(28152), "«C", ChrW(-26799), "±Ð", ChrW(25934), _
-    "¶m", ChrW(-28395), "Âí", ChrW(-27731), "·V", ChrW(24892), "«Ì", ChrW(23643), "·§", ChrW(27114), _
-    "¯ð", ChrW(-31930), "¨·", ChrW(-28471))
+     "¸s", VBA.ChrW(32675), "§Y", VBA.ChrW(21373), "²³", VBA.ChrW(-30650), "¬J", VBA.ChrW(26083), "½Ã", VBA.ChrW(-30626), _
+     "¯u", VBA.ChrW(30494), "¶ñ", VBA.ChrW(22625), "²M", VBA.ChrW(28152), "«C", VBA.ChrW(-26799), "±Ð", VBA.ChrW(25934), _
+    "¶m", VBA.ChrW(-28395), "Âí", VBA.ChrW(-27731), "·V", VBA.ChrW(24892), "«Ì", VBA.ChrW(23643), "·§", VBA.ChrW(27114), _
+    "¯ð", VBA.ChrW(-31930), "¨·", VBA.ChrW(-28471))
 Set d = Documents.Add()
 d.Range.Paste
 For i = 0 To UBound(a) - 1
@@ -848,7 +848,7 @@ Next i
 Set rng = Selection.Range
 For Each p In d.Paragraphs
     px = p.Range.text
-    If Left(px, 7) = "{{" & ChrW(-9217) & ChrW(-8195) & "{{{" Then 'ª`¸}¬q¸¨
+    If VBA.Left(px, 7) = "{{" & VBA.ChrW(-9217) & VBA.ChrW(-8195) & "{{{" Then 'ª`¸}¬q¸¨
         e = p.Range.Characters(1).End
         rng.SetRange e, e
         rng.MoveEndUntil "¡f"
@@ -858,7 +858,7 @@ For Each p In d.Paragraphs
         Selection.MoveRight wdCharacter, 1, wdExtend
         Selection.TypeText "¡r}}}" '±Nª`¸}½s¸¹¡e¤@¡fªº¥kÃä¡f§ï¦¨}}}
         px = p.Range.text
-        If InStr(Right(px, 4), "<p>") Then
+        If InStr(VBA.Right(px, 4), "<p>") Then
             e = p.Range.Characters(p.Range.Characters.Count - 4).End
         Else
             e = p.Range.Characters(p.Range.Characters.Count - 1).End
@@ -904,7 +904,7 @@ For Each p In d.Paragraphs
             
         Loop
     End If
-    If VBA.Left(p.Range.text, 9) = ChrW(-9217) & ChrW(-8195) & ChrW(-9217) & ChrW(-8195) & "¡i¡m¯ÁÁô¡n" Then
+    If VBA.Left(p.Range.text, 9) = VBA.ChrW(-9217) & VBA.ChrW(-8195) & VBA.ChrW(-9217) & VBA.ChrW(-8195) & "¡i¡m¯ÁÁô¡n" Then
         Set rng = p.Range
         p.Range.Characters(1).Delete
         rng.SetRange p.Range.start, p.Range.start
@@ -945,10 +945,10 @@ End Sub
 
 Sub ¥v°O¤T®aª`1old()
 Dim d As Document, a, i, p As Paragraph, px As String, rng As Range, e As Long
-a = Array("<p>{{{", "<p>^p{{" & ChrW(-9217) & ChrW(-8195) & "{{{", _
-        "<p>", "<p>^p" & ChrW(-9217) & ChrW(-8195) & ChrW(-9217) & ChrW(-8195), _
-        ChrW(-9217) & ChrW(-8195) & ChrW(-9217) & ChrW(-8195) & "^p{{" & ChrW(-9217) & ChrW(-8195), _
-        "{{" & ChrW(-9217) & ChrW(-8195))
+a = Array("<p>{{{", "<p>^p{{" & VBA.ChrW(-9217) & VBA.ChrW(-8195) & "{{{", _
+        "<p>", "<p>^p" & VBA.ChrW(-9217) & VBA.ChrW(-8195) & VBA.ChrW(-9217) & VBA.ChrW(-8195), _
+        VBA.ChrW(-9217) & VBA.ChrW(-8195) & VBA.ChrW(-9217) & VBA.ChrW(-8195) & "^p{{" & VBA.ChrW(-9217) & VBA.ChrW(-8195), _
+        "{{" & VBA.ChrW(-9217) & VBA.ChrW(-8195))
 Set d = Documents.Add()
 d.Range.Paste
 For i = 0 To UBound(a) - 1
@@ -963,8 +963,8 @@ d.Range.Find.Execute "¡r¡r", , , , , , True, wdFindContinue, , "¡r", wdReplaceAl
 Set rng = Selection.Range
 For Each p In d.Paragraphs
     px = p.Range.text
-    If Left(p.Range.text, 7) = "{{" & ChrW(-9217) & ChrW(-8195) & "{{{" Then
-        If InStr(Right(px, 4), "<p>") Then
+    If VBA.Left(p.Range.text, 7) = "{{" & VBA.ChrW(-9217) & VBA.ChrW(-8195) & "{{{" Then
+        If InStr(VBA.Right(px, 4), "<p>") Then
             e = p.Range.Characters(p.Range.Characters.Count - 4).End
         Else
             e = p.Range.Characters(p.Range.Characters.Count - 1).End
@@ -1020,7 +1020,7 @@ With rng.Find
         rngLast.SetRange e - 1, e
         rngLast.InsertAfter "}}"
         rngLast.SetRange s, s
-        rngLast.InsertBefore "{{" & ChrW(-9217) & ChrW(-8195)
+        rngLast.InsertBefore "{{" & VBA.ChrW(-9217) & VBA.ChrW(-8195)
 '        rng.SetRange rng.End + 222, d.Range.End
         
     Loop 'Until InStr(rng, "{{")
@@ -1071,7 +1071,7 @@ Sub ¾Ô°êµ¦_¥|³¡ÂO¥Z_ºû°ò¤å®w¥»() '¡m¾Ô°êµ¦¡n®æ¦¡ªÌ¬Ò¾A¥Î¡]§Y¥D¤å­º¦æ³»®æ¡A¦Ó¨ä¾l
 'https://ctext.org/library.pl?if=gb&res=77385
 Dim a, rng As Range, rngDoc As Range, p As Paragraph, i As Long, rngCnt As Integer, ok As Boolean
 Dim omits As String
-omits = "¡m¡n¡q¡r¡u¡v¡y¡z¡P" & Chr(13)
+omits = "¡m¡n¡q¡r¡u¡v¡y¡z¡P" & VBA.Chr(13)
 Set rngDoc = Documents.Add.Range
 re:
 rngDoc.Paste
@@ -1083,7 +1083,7 @@ Next p
 For Each a In rngDoc.Characters
     If Not a.Next Is Nothing And Not a.Previous Is Nothing Then
         If a = "¡@" And a.Next <> "¡@" And a.Previous <> "¡@" Then
-            If a.Previous <> Chr(13) Then a.InsertBefore Chr(13)
+            If a.Previous <> VBA.Chr(13) Then a.InsertBefore VBA.Chr(13)
             Set a = a.Next
         End If
     End If
@@ -1097,7 +1097,7 @@ For Each p In rngDoc.Paragraphs
             For Each a In rng.Characters
                i = i + 1
                If rng.Characters(i) = "}" Then Exit For
-               If rng.Characters(i) = Chr(13) Then
+               If rng.Characters(i) = VBA.Chr(13) Then
                     i = 0
                     Exit For
                End If
@@ -1106,7 +1106,7 @@ For Each p In rngDoc.Paragraphs
             For Each a In rng.Characters
                i = i + 1
                If rng.Characters(i) = "}" Then Exit For
-               If rng.Characters(i) = Chr(13) Or rng.Characters(i) = "{" Then
+               If rng.Characters(i) = VBA.Chr(13) Or rng.Characters(i) = "{" Then
                     i = 0
                     Exit For
                End If
@@ -1156,9 +1156,9 @@ For Each p In rngDoc.Paragraphs
 Next
 If ok Then
     For Each p In rngDoc.Paragraphs
-        If Left(p.Range.text, 3) = "{{¡@" And p.Range.Characters(p.Range.Characters.Count - 1) = "}" Then
+        If VBA.Left(p.Range.text, 3) = "{{¡@" And p.Range.Characters(p.Range.Characters.Count - 1) = "}" Then
             a = p.Range.text
-            a = Mid(a, 4, Len(a) - 6)
+            a = VBA.Mid(a, 4, Len(a) - 6)
             If InStr(a, "¡@") > 0 And InStr(a, "{") = 0 And InStr(a, "}") = 0 Then
                 rngCnt = p.Range.Characters.Count
                 For i = 4 To rngCnt
@@ -1173,8 +1173,8 @@ If ok Then
     Next p
     '¥H¤U3¦æ¡m¾Ô°êµ¦¡n¥»¨­¤~»Ý­n
 '    rngDoc.Find.Execute "¥¿¤ê", , , , , , , wdFindContinue, , "¡i¥¿¤ê¡j", wdReplaceAll
-'    rngDoc.Find.Execute ChrW(-10155) & ChrW(-8585) & "¤ê", , , , , , , wdFindContinue, , "¡i" & ChrW(-10155) & ChrW(-8585) & "¤ê¡j", wdReplaceAll
-'    rngDoc.Find.Execute "¸É¤ê", , , , , , , wdFindContinue, , "¡i" & ChrW(-10155) & ChrW(-8585) & "¤ê¡j", wdReplaceAll
+'    rngDoc.Find.Execute vba.Chrw(-10155) & vba.Chrw(-8585) & "¤ê", , , , , , , wdFindContinue, , "¡i" & vba.Chrw(-10155) & vba.Chrw(-8585) & "¤ê¡j", wdReplaceAll
+'    rngDoc.Find.Execute "¸É¤ê", , , , , , , wdFindContinue, , "¡i" & vba.Chrw(-10155) & vba.Chrw(-8585) & "¤ê¡j", wdReplaceAll
 End If
 If ok Then ¤å¦r³B²z.®Ñ¦W¸¹½g¦W¸¹¼Ðª`
 rngDoc.Cut
@@ -1199,18 +1199,18 @@ Sub ·¡Ãã¶°ª`ÁY±ÆN®æÂù¦æ¤pª`®æ¦¡_¥|®w¥þ®Ñ_°ê¾Ç¤j®v()
     SystemSetup.stopUndo ur, "·¡Ãã¶°ª`ÁY±ÆN®æÂù¦æ¤pª`®æ¦¡_¥|®w¥þ®Ñ_°ê¾Ç¤j®v"
     For Each p In d.Paragraphs
         px = p.Range.text
-        s = VBA.InStr(px, "{{"): e = VBA.InStr(px, "}}" & Chr(13))
-        If e > 0 Then sx = Mid(px, s + 2, e - s - 2)
+        s = VBA.InStr(px, "{{"): e = VBA.InStr(px, "}}" & VBA.Chr(13))
+        If e > 0 Then sx = VBA.Mid(px, s + 2, e - s - 2)
         If e > 0 And s > 0 And VBA.InStr(sx, "{{") = 0 And VBA.InStr(sx, "}}") = 0 Then '«e«á¦³{{}}¡A¦ý¨Ç¤¤¶¡¤£¯à¦A¦³{{}}
             If s = 1 Then '¦pªG«eµLÁY±Æ
                 rng.SetRange p.Range.start + 2, p.Range.End - 3
-                rng.Characters(Int(rng.Characters.Count / 2)).InsertAfter Chr(13)
+                rng.Characters(Int(rng.Characters.Count / 2)).InsertAfter VBA.Chr(13)
             Else
                 If VBA.InStr(px, "¡@{{") > 0 Then
-                    sx = Mid(px, 1, s - 1)
+                    sx = VBA.Mid(px, 1, s - 1)
                     If Replace(sx, "¡@", vbNullString) = vbNullString Then '¦p«e«eºó³£¬O¥þ§ÎªÅ®æ¡F§YÁY±Æ
                         rng.SetRange p.Range.start + VBA.Len(sx) + 2, p.Range.End - 3
-                        rng.Characters(Int(rng.Characters.Count / 2)).InsertAfter Chr(13) & Mid(px, 1, s - 1)
+                        rng.Characters(Int(rng.Characters.Count / 2)).InsertAfter VBA.Chr(13) & VBA.Mid(px, 1, s - 1)
                     End If
                 End If
             End If
@@ -1226,30 +1226,30 @@ Sub ¥»¯óºõ¥ØÁY±Æ1®æÂù¦æ¤pª`®æ¦¡_¥|®w¥þ®Ñ_°ê¾Ç¤j®v()
     SystemSetup.stopUndo ur, "¥»¯óºõ¥ØÁY±Æ¤@®æÂù¦æ¤pª`®æ¦¡_¥|®w¥þ®Ñ_°ê¾Ç¤j®v"
     For Each p In d.Paragraphs
         px = p.Range.text
-        If (VBA.Left(px, 3) = "¡@{{" Or VBA.Left(px, 3) = "{{¡@") And VBA.Right(px, 3) = "}}" & Chr(13) Then
+        If (VBA.Left(px, 3) = "¡@{{" Or VBA.Left(px, 3) = "{{¡@") And VBA.Right(px, 3) = "}}" & VBA.Chr(13) Then
             rng.SetRange p.Range.start + 3, p.Range.End - 3
             If VBA.InStr(rng.text, "}") = 0 Then
                 If rng.Characters.Count > 1 Then
-                    rng.Characters(Int(rng.Characters.Count / 2)).InsertAfter Chr(13) & "¡@"
+                    rng.Characters(Int(rng.Characters.Count / 2)).InsertAfter VBA.Chr(13) & "¡@"
                 Else
-                    rng.Characters(1).InsertAfter Chr(13) & "¡@"
+                    rng.Characters(1).InsertAfter VBA.Chr(13) & "¡@"
                 End If
             End If
-        ElseIf VBA.Left(px, 3) = "{{¡@" And VBA.Right(px, 6) = "}}<p>" & Chr(13) Then
+        ElseIf VBA.Left(px, 3) = "{{¡@" And VBA.Right(px, 6) = "}}<p>" & VBA.Chr(13) Then
             rng.SetRange p.Range.start + 3, p.Range.End - 6
             If VBA.InStr(rng.text, "}") = 0 Then
                 If InStr(rng.text, "¡@") Then
                     For Each a In rng.Characters
                         If a.text = "¡@" Then
-                            a.InsertBefore Chr(13)
+                            a.InsertBefore VBA.Chr(13)
                         End If
                     Next a
                 Else
                     If rng.Characters.Count > 1 Then
                         'Skype Copilot¤jµÐÂÄ 20240519
-                        rng.Characters(-Int(-(rng.Characters.Count / 2))).InsertAfter Chr(13) & "¡@"
+                        rng.Characters(-Int(-(rng.Characters.Count / 2))).InsertAfter VBA.Chr(13) & "¡@"
                     Else
-                        rng.Characters(1).InsertAfter Chr(13) & "¡@"
+                        rng.Characters(1).InsertAfter VBA.Chr(13) & "¡@"
                     End If
                 End If
             End If
@@ -1263,8 +1263,8 @@ Sub ¸É¬A©·()
     Set d = ActiveDocument: SystemSetup.stopUndo ur, "¸É¬A©·"
     Set rng = d.Range
     For Each p In d.Paragraphs
-        If VBA.Left(p.Range.text, 2) = "{{" And VBA.Right(p.Range.text, 3) <> "}}" & Chr(13) Then
-            If VBA.Right(p.Next.Range.text, 3) = "}}" & Chr(13) Then
+        If VBA.Left(p.Range.text, 2) = "{{" And VBA.Right(p.Range.text, 3) <> "}}" & VBA.Chr(13) Then
+            If VBA.Right(p.Next.Range.text, 3) = "}}" & VBA.Chr(13) Then
                 rng.SetRange p.Range.start, p.Range.End - 1
                 rng.text = VBA.Left(p.Range.text, VBA.Len(p.Range.text) - 1) & "}}"
                 p.Next.Range.text = "{{" & p.Next.Range.text
@@ -1296,14 +1296,14 @@ For Each inlnsp In rng.InlineShapes
             aLtTxt = "³õ"
         ElseIf aLtTxt Like "?????¥Ý -- Ä¬" Then
             aLtTxt = "Ä¬"
-        ElseIf aLtTxt Like ChrW(12272) & ChrW(-10155) & ChrW(-8696) & ChrW(31860) Then
+        ElseIf aLtTxt Like VBA.ChrW(12272) & VBA.ChrW(-10155) & VBA.ChrW(-8696) & VBA.ChrW(31860) Then
             aLtTxt = "Áõ"
         ElseIf aLtTxt Like "Ås¡]?¤}¤ö¡^-- ©·²ö¤£§ë" Then
             aLtTxt = "©·"
         ElseIf aLtTxt Like "?¤g? -- Ëü" Then
             aLtTxt = "Ëü"
-        ElseIf aLtTxt Like "????¤f?¤í -- " & ChrW(-10111) & ChrW(-8620) Then
-            aLtTxt = ChrW(-10111) & ChrW(-8620)
+        ElseIf aLtTxt Like "????¤f?¤í -- " & VBA.ChrW(-10111) & VBA.ChrW(-8620) Then
+            aLtTxt = VBA.ChrW(-10111) & VBA.ChrW(-8620)
         ElseIf aLtTxt Like "???? -- Äe" Then
             aLtTxt = "Äe"
         ElseIf aLtTxt Like "?????? -- Ùd" Then
@@ -1323,7 +1323,7 @@ For Each inlnsp In rng.InlineShapes
         ElseIf aLtTxt Like "??¤D??¥× -- ¬Õ" Then
             aLtTxt = "¬Õ"
         ElseIf aLtTxt Like "­î -- ªØ ?" Then
-            aLtTxt = ChrW(-10114) & ChrW(-9161)
+            aLtTxt = VBA.ChrW(-10114) & VBA.ChrW(-9161)
         ElseIf aLtTxt Like "ÙE --¡]¡yÎï¡z¤W¡y¥¹¡z¤§¡y¤é¡z»P¡y¤@¡z¬Û³s¡^" Then
             aLtTxt = "ÙE"
         ElseIf aLtTxt Like "³õ --¡]¡yÎï¡z¤W¡y¥¹¡z¤§¡y¤é¡z»P¡y¤@¡z¬Û³s¡^" Then
@@ -1334,25 +1334,25 @@ For Each inlnsp In rng.InlineShapes
             aLtTxt = "·Õ"
         ElseIf aLtTxt Like "¿ü --¡]¥k¤W¡y¤é¡z¦r¤U¤@?ªø¥X¡AÃþ¦ü¡y¥¹¡z¦rªº¡y¤é¡z»P¡y¤@¡z¬Û³s¡^" Then
             aLtTxt = "¿ü"
-        ElseIf aLtTxt Like ChrW(24298) & "¡]" & ChrW(8220) & ChrW(13357) & ChrW(8221) & "´«¬°" & ChrW(8220) & "­±" & ChrW(8221) & "¡^" Then
+        ElseIf aLtTxt Like VBA.ChrW(24298) & "¡]" & VBA.ChrW(8220) & VBA.ChrW(13357) & VBA.ChrW(8221) & "´«¬°" & VBA.ChrW(8220) & "­±" & VBA.ChrW(8221) & "¡^" Then
             aLtTxt = "éo"
-        ElseIf aLtTxt Like ChrW(12273) & ChrW(11966) & ChrW(30464) Then
+        ElseIf aLtTxt Like VBA.ChrW(12273) & VBA.ChrW(11966) & VBA.ChrW(30464) Then
             aLtTxt = "µÞ"
         ElseIf aLtTxt Like "?ÉL? -- «Þ" Then
             aLtTxt = "«Þ"
-        ElseIf aLtTxt Like ChrW(12272) & ChrW(-10145) & ChrW(-8265) & "ÅÜ" Then
+        ElseIf aLtTxt Like VBA.ChrW(12272) & VBA.ChrW(-10145) & VBA.ChrW(-8265) & "ÅÜ" Then
             aLtTxt = "¡´¡×" & aLtTxt & "¡×"
         ElseIf aLtTxt Like "? -- or ?? ?" Then
-            aLtTxt = ChrW(-32119)
+            aLtTxt = VBA.ChrW(-32119)
         ElseIf aLtTxt Like "»´" Then
-            aLtTxt = ChrW(18518)
+            aLtTxt = VBA.ChrW(18518)
         ElseIf aLtTxt Like "¯à" Then
-            aLtTxt = ChrW(17403)
-        ElseIf aLtTxt Like ChrW(12272) & ChrW(-10145) & ChrW(-8265) & ChrW(25908) Then
-            aLtTxt = ChrW(-10109) & ChrW(-8699)
-        ElseIf aLtTxt Like "??¤K -- " & ChrW(-10170) & ChrW(-8693) Then
-            aLtTxt = ChrW(-10124) & ChrW(-9097)
-        ElseIf aLtTxt Like ChrW(12282) & ChrW(-28746) & "°Ó" Then
+            aLtTxt = VBA.ChrW(17403)
+        ElseIf aLtTxt Like VBA.ChrW(12272) & VBA.ChrW(-10145) & VBA.ChrW(-8265) & VBA.ChrW(25908) Then
+            aLtTxt = VBA.ChrW(-10109) & VBA.ChrW(-8699)
+        ElseIf aLtTxt Like "??¤K -- " & VBA.ChrW(-10170) & VBA.ChrW(-8693) Then
+            aLtTxt = VBA.ChrW(-10124) & VBA.ChrW(-9097)
+        ElseIf aLtTxt Like VBA.ChrW(12282) & VBA.ChrW(-28746) & "°Ó" Then
             aLtTxt = "¾A"
         ElseIf aLtTxt Like "??¡H -- ª°" Then
             aLtTxt = "ª°"
@@ -1360,27 +1360,27 @@ For Each inlnsp In rng.InlineShapes
             aLtTxt = "´Ý"
         ElseIf aLtTxt Like "?????¤Ç -- Ä~" Then
             aLtTxt = "Ä~"
-        ElseIf aLtTxt Like "???¤\ -- " & ChrW(31762) Then
+        ElseIf aLtTxt Like "???¤\ -- " & VBA.ChrW(31762) Then
             aLtTxt = "¿y"
         ElseIf aLtTxt Like "????¤Z -- Øô" Then
             aLtTxt = "Øô"
         ElseIf aLtTxt Like "?³Â¤î -- ?" Then
             aLtTxt = "¾ú"
-        ElseIf aLtTxt Like ChrW(12282) & ChrW(-28746) & ChrW(17807) Then
+        ElseIf aLtTxt Like VBA.ChrW(12282) & VBA.ChrW(-28746) & VBA.ChrW(17807) Then
             aLtTxt = "ÁØ"
         ElseIf aLtTxt Like "?¦Ü¤ä -- ??" Then
             aLtTxt = "­P"
         ElseIf aLtTxt Like "¡]???¤k¡^" Then
             aLtTxt = "Üü"
         ElseIf aLtTxt Like "¡]???¤O¡^" Then
-            aLtTxt = ChrW(-10174) & ChrW(-9072)
+            aLtTxt = VBA.ChrW(-10174) & VBA.ChrW(-9072)
         ElseIf aLtTxt Like "??? -- ¾Ó" Then
             aLtTxt = "¾Ó"
         ElseIf aLtTxt Like "¡]???¡^-- ³¦" Then
             aLtTxt = "³¦"
         ElseIf aLtTxt Like "?¥Ø¥ü -- ®Ð" Then
             aLtTxt = "®Ð"
-        ElseIf aLtTxt Like "???? -- " & ChrW(-10161) & ChrW(-8272) Then
+        ElseIf aLtTxt Like "???? -- " & VBA.ChrW(-10161) & VBA.ChrW(-8272) Then
             aLtTxt = "º£"
         ElseIf aLtTxt Like "?¤f? -- éA" Then
             aLtTxt = "éA"
@@ -1389,31 +1389,31 @@ For Each inlnsp In rng.InlineShapes
         ElseIf aLtTxt Like "???? -- «ü" Then
             aLtTxt = "«ü"
         ElseIf aLtTxt Like "?¦j?? -- ²}" Then
-            aLtTxt = ChrW(-10158) & ChrW(-8444)
+            aLtTxt = VBA.ChrW(-10158) & VBA.ChrW(-8444)
         ElseIf aLtTxt Like "*page2700-20px-SKQSfont.pdf.jpg*" Then
             aLtTxt = "¼@"
-        ElseIf aLtTxt Like ChrW(12273) & ChrW(11966) & ChrW(12272) & ChrW(27701) & ChrW(20158) Then
-            aLtTxt = ChrW(-10161) & ChrW(-8915)
+        ElseIf aLtTxt Like VBA.ChrW(12273) & VBA.ChrW(11966) & VBA.ChrW(12272) & VBA.ChrW(27701) & VBA.ChrW(20158) Then
+            aLtTxt = VBA.ChrW(-10161) & VBA.ChrW(-8915)
         ElseIf aLtTxt Like "???¤î¦Û¤P?¤I? -- ÄÜ" Then
             aLtTxt = "ÄÜ"
         ElseIf aLtTxt Like "?¥Þ¤§ -- Òö" Then
             aLtTxt = "Òö"
-        ElseIf aLtTxt Like ChrW(12272) & "¥Ø" & ChrW(-10170) & ChrW(-8693) Then
-            aLtTxt = ChrW(-10121) & ChrW(-8228)
+        ElseIf aLtTxt Like VBA.ChrW(12272) & "¥Ø" & VBA.ChrW(-10170) & VBA.ChrW(-8693) Then
+            aLtTxt = VBA.ChrW(-10121) & VBA.ChrW(-8228)
         ElseIf aLtTxt Like "??? -- ¼í" Then
             aLtTxt = "¼í"
         ElseIf aLtTxt Like "??? -- ÀS" Then
             aLtTxt = "ÀS"
-        ElseIf aLtTxt Like "??¦V -- " & ChrW(-28664) Then
+        ElseIf aLtTxt Like "??¦V -- " & VBA.ChrW(-28664) Then
             aLtTxt = "­~"
-        ElseIf aLtTxt Like "?¤éàï -- " & ChrW(-24830) Then
-            aLtTxt = ChrW(-24830)
+        ElseIf aLtTxt Like "?¤éàï -- " & VBA.ChrW(-24830) Then
+            aLtTxt = VBA.ChrW(-24830)
         ElseIf aLtTxt Like "???????¤Í-- ÂZ" Then
             aLtTxt = "ÂZ"
         ElseIf aLtTxt Like "??? -- Äî" Then
             aLtTxt = "Äî"
         ElseIf aLtTxt Like "¡]?¦å?¡^" Then
-            aLtTxt = ChrW(-30654)
+            aLtTxt = VBA.ChrW(-30654)
         ElseIf aLtTxt Like "SKchar" Then
             GoTo nxt
 '            aLtTxt = "¯e,Àu,ç~,¬T,®V,Àj,®|,±ê,¦º¡]2DB7E¡^,°­,Äé,öð,Æ|,·¶,ës,Óp"'¾l¸Ô ¬d¦r.mdb
@@ -1422,7 +1422,7 @@ For Each inlnsp In rng.InlineShapes
 '            aLtTxt = "Äñ¡]7E92¡^,¤¡,"'¾l¸Ô ¬d¦r.mdb
         Else
             Select Case aLtTxt
-                Case ChrW(12280) & ChrW(30098) & ChrW(-28523)
+                Case VBA.ChrW(12280) & VBA.ChrW(30098) & VBA.ChrW(-28523)
                     aLtTxt = "¡´¡×" & aLtTxt & "¡×"
                     '¯Ê¦r«hª½±µ´¡¤J¦r¹Ï´À¥N¤å¦r
                     GoTo replaceIt
@@ -1497,8 +1497,8 @@ Loop
 With rng.Document
 '    With .Range.Find
 '        .ClearFormatting
-'        .Text = ChrW(9675)
-'        .Replacement.Text = ChrW(12295)
+'        .Text = vba.Chrw(9675)
+'        .Replacement.Text = vba.Chrw(12295)
 '        .Execute , , , , , , True, wdFindContinue, , , wdReplaceAll
 '    End With
     '.Range.Cut
@@ -1520,7 +1520,7 @@ rst.Open "SELECT ½g.½g¦W, ¥¾.¥¾°O, ®Ñ.®Ñ¦W, ½g.¨÷, ½g.­¶, ½g.¥½­¶, ¥¾.½gID, ¥¾.­
 Do Until rst.EOF
     title = rst.Fields(0).Value
     If preTitle <> title Then
-        exportStr = exportStr & Chr(13) & "*" & title & Chr(13)
+        exportStr = exportStr & VBA.Chr(13) & "*" & title & VBA.Chr(13)
     End If
     preTitle = title
     exportStr = exportStr & rst.Fields(1).Value
@@ -1555,12 +1555,12 @@ Const keys As String = "&searchu=" 'Alt + j
 Dim rng As Range, lnk As String, cde As String, s As Long, d As Document, ur As UndoRecord
 Set rng = Selection.Range: Set d = ActiveDocument
 lnk = SystemSetup.GetClipboardText
-cde = Mid(lnk, InStr(lnk, keys) + Len(keys))
+cde = VBA.Mid(lnk, InStr(lnk, keys) + Len(keys))
 cde = code.URLDecode(cde)
 s = Selection.start
 SystemSetup.stopUndo ur, "´¡¤J¶W³sµ²_±NÅã¥Ü¤§½s½X§ï¬°¤¤¤å"
 With Selection
-    .Hyperlinks.Add Selection.Range, lnk, , , Left(lnk, InStr(lnk, keys) + Len(keys) - 1) + cde
+    .Hyperlinks.Add Selection.Range, lnk, , , VBA.Left(lnk, InStr(lnk, keys) + Len(keys) - 1) + cde
     'd.Range(Selection.End, Selection.End + Len(cde)).Select
     'Selection.Collapse
     .MoveLeft wdCharacter, Len(cde)
@@ -1614,7 +1614,7 @@ Sub ¥u«O¯d¥¿¤åª`¤å_¥Bª`¤å«e«á¥[¬A©·(d As Document)
             .Font.Color = 34816
         End With
         Do While slRng.Find.Execute(, , , , , , True, wdFindStop)
-            If InStr(Chr(13) & Chr(11) & Chr(7) & Chr(8) & Chr(9) & Chr(10), slRng) = 0 Then
+            If InStr(VBA.Chr(13) & VBA.Chr(11) & VBA.Chr(7) & VBA.Chr(8) & VBA.Chr(9) & VBA.Chr(10), slRng) = 0 Then
             slRng.text = "¡]" + slRng.text + "¡^"
             'slRng.SetRange slRng.End, d.Range.End
             End If
@@ -1752,7 +1752,7 @@ reFind:
                 rngMark.Move wdCharacter, -1
             Loop
             rngMark.SetRange rngMark.start, rng.start
-            If Left(rngMark.text, 8) <> "<entity " Then
+            If VBA.Left(rngMark.text, 8) <> "<entity " Then
                 GoSub mark
             Else
                 rng.SetRange rng.End, DoctoMarked.Range.End
@@ -1840,9 +1840,9 @@ Sub EditModeMakeup_changeFile_Page() '¦Pª©¥»¤å¥»±a¤J¸m´«file id ©M ­¶¼Æ
     Set d = ActiveDocument
     
     '¤å¥ó«e3¬q¤À§O¬O¥H¤U¸ê°T,°õ¦æ§¹·|²M°£
-    'If Not VBA.IsNumeric(VBA.Replace(d.Range.Paragraphs(1).Range.text, Chr(13), "")) then
-    If Replace(d.Paragraphs(1).Range + d.Paragraphs(2).Range + d.Paragraphs(3).Range, Chr(13), "") = "" _
-        Or Not IsNumeric(Replace(d.Paragraphs(1).Range + d.Paragraphs(2).Range + d.Paragraphs(3).Range, Chr(13), "")) Then
+    'If Not VBA.IsNumeric(VBA.Replace(d.Range.Paragraphs(1).Range.text, vba.Chr(13), "")) then
+    If Replace(d.Paragraphs(1).Range + d.Paragraphs(2).Range + d.Paragraphs(3).Range, VBA.Chr(13), "") = "" _
+        Or Not IsNumeric(Replace(d.Paragraphs(1).Range + d.Paragraphs(2).Range + d.Paragraphs(3).Range, VBA.Chr(13), "")) Then
         MsgBox "½Ð¦b¤å¥ó«e3¬q¤À§O¬O¥H¤U¸ê°T¡]¬Ò¬O¼Æ¦r¡^,°õ¦æ§¹·|²M°£" & vbCr & vbCr & _
             "1. ­¶¼Æ®t(¨Ó·½-(´î¥h)¥Øªº¡^¡CµL­¶®t«h¬°0¡A¬Ù²¤«h¹w³]¬°0" & vbCr & _
             "2. ¥Øªºªº file number¡C­n¸m´«¦¨ªº¡F¤£¨ú¥N«h¬°0¡A¬Ù²¤«h¹w³]¬°0" & vbCr & _
@@ -1850,15 +1850,15 @@ Sub EditModeMakeup_changeFile_Page() '¦Pª©¥»¤å¥»±a¤J¸m´«file id ©M ­¶¼Æ
         Exit Sub
     End If
     Dim differPageNum  As Integer '­¶¼Æ®t(¨Ó·½-(´î¥h)¥Øªº¡^
-    differPageNum = VBA.IIf(d.Paragraphs(1).Range.Characters.Count = 1, 0, VBA.Replace(d.Paragraphs(1).Range.text, Chr(13), "")) '­¶¼Æ®t(¨Ó·½-(´î¥h)¥Øªº¡^
+    differPageNum = VBA.IIf(d.Paragraphs(1).Range.Characters.Count = 1, 0, VBA.Replace(d.Paragraphs(1).Range.text, VBA.Chr(13), "")) '­¶¼Æ®t(¨Ó·½-(´î¥h)¥Øªº¡^
     Dim file
-    file = VBA.Replace(d.Paragraphs(2).Range.text, Chr(13), "") ' ¥Øªº¡C¤£¨ú¥N«h¬°0
+    file = VBA.Replace(d.Paragraphs(2).Range.text, VBA.Chr(13), "") ' ¥Øªº¡C¤£¨ú¥N«h¬°0
     If file = "" Then file = 0
     Dim fileFrom As String
-    fileFrom = VBA.Replace(d.Paragraphs(3).Range.text, Chr(13), "") ' '¨Ó·½
+    fileFrom = VBA.Replace(d.Paragraphs(3).Range.text, VBA.Chr(13), "") ' '¨Ó·½
     If fileFrom = "" Then
         Dim s As String: s = VBA.InStr(d.Range.text, "<scanbegin file="): s = s + VBA.Len("<scanbegin file=")
-        fileFrom = Mid(d.Range.text, s + 1, InStr(s + 1, d.Range.text, """") - s - 1)
+        fileFrom = VBA.Mid(d.Range.text, s + 1, InStr(s + 1, d.Range.text, """") - s - 1)
     End If
     Set rng = d.Range
     'Set ur = SystemSetup.stopUndo("EditMakeupCtext")
@@ -1887,7 +1887,7 @@ End Sub
 
 Sub tempReplaceTxtforCtextEdit()
 Dim a, d As Document, i As Integer, x As String
-a = Array("{{¡]", "{{", "¡^}}", "}}", "¡]", "{{", "¡^", "}}", "¡³", ChrW(12295))
+a = Array("{{¡]", "{{", "¡^}}", "}}", "¡]", "{{", "¡^", "}}", "¡³", VBA.ChrW(12295))
 Set d = Documents.Add
 d.Range.Paste
 x = d.Range
@@ -1905,7 +1905,7 @@ End Sub
 
 Sub tempReplaceTxtforCtext() 'for Quick edit only
 Dim a, d As Document, i As Integer
-a = Array("{{¡]", "{{", "¡^}}", "}}", "¡]", "{{", "¡^", "}}", "¡³", ChrW(12295))
+a = Array("{{¡]", "{{", "¡^}}", "}}", "¡]", "{{", "¡^", "}}", "¡³", VBA.ChrW(12295))
 Set d = Documents.Add
 d.Range.Paste
 For i = 0 To UBound(a)

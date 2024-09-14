@@ -28,13 +28,13 @@ Shell SystemSetup.getChrome() & " https://dict.variants.moe.edu.tw/variants/rbt/
     AppActivateDefaultBrowser
     URL = InputBox("plz  input the URL!")
     If URL = "" Then Exit Function
-    If Left(URL, 4) <> "http" Then GoTo 1
+    If VBA.Left(URL, 4) <> "http" Then GoTo 1
     URL = lnks.trimLinks(URL)
         Dim ZhuYin
 rep:
         AppActivateDefaultBrowser
 reZY:
-        ZhuYin = VBA.Replace(VBA.Trim(InputBox("plz input ZhuYin")), Chr(9), "")
+        ZhuYin = VBA.Replace(VBA.Trim(InputBox("plz input ZhuYin")), VBA.Chr(9), "")
         If ZhuYin = "" Then
             If MsgBox("none of  ZhuYin(注音) input , sure to leave?", vbOKCancel + vbDefaultButton2, "注音") = vbOK Then
                 Exit Function
@@ -42,7 +42,7 @@ reZY:
                 GoTo reZY
             End If
         Else
-            If Not 文字處理.is注音符號(right(ZhuYin, 1)) Then
+            If Not 文字處理.is注音符號(VBA.Right(ZhuYin, 1)) Then
                 If MsgBox("Check ZhuYin(注音) to reInput ?", vbOKCancel, "注音") = vbOK Then
                     GoTo reZY
                 Else
@@ -63,7 +63,7 @@ End Function
 '1
 '    URL = InputBox("plz  input the URL!")
 '    If URL = "" Then Exit Function
-'    If Left(URL, 4) <> "http" Then GoTo 1
+'    If vba.Left(URL, 4) <> "http" Then GoTo 1
 'addNewRecords URL, words, 1, rst
 'add1URLTo1國語辭典 = URL
 'rst.Close
@@ -83,7 +83,7 @@ Shell SystemSetup.getChrome() & " " & lnks.trimLinks(URL)
     AppActivateDefaultBrowser
     URL = InputBox("plz  input the URL!")
     If URL = "" Then AppActivate word.ActiveDocument.ActiveWindow.Caption & " - word": Exit Function
-    If Left(URL, 4) <> "http" Then GoTo 1
+    If VBA.Left(URL, 4) <> "http" Then GoTo 1
     URL = lnks.trimLinks(URL)
 '        Dim zhuYin
 'rep:
@@ -124,7 +124,7 @@ Else
     AppActivateDefaultBrowser
     URL = InputBox("plz  input the URL!")
     If URL = "" Then rst.Close: Exit Sub
-    If Left(URL, 4) <> "http" Then GoTo 1
+    If VBA.Left(URL, 4) <> "http" Then GoTo 1
     dictID = CLng(InputBox("plz  input the Dictionary ID!" & vbCr & vbLf & "國語辭典=1" & vbCr & vbLf & "異體字字典=2" _
         & vbCr & vbLf & "漢語大字典=3" & vbCr & vbLf & "漢語大詞典=4", , 1))
     URL = lnks.trimLinks(URL)
@@ -169,7 +169,7 @@ End Sub
 '             , cnt, adOpenKeyset, adLockOptimistic
 'If rst.RecordCount > 0 Then
 '    u = rst.Fields(0).Value
-'    If Left(u, 1) = "#" Then u = Mid(u, 2, Len(u) - 2)
+'    If vba.Left(u, 1) = "#" Then u = VBA.Mid(u, 2, Len(u) - 2)
 '    get1URLfor1 = u
 'End If
 'End Function

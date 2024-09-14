@@ -194,7 +194,7 @@ Public Function UrlEncode_Big5UnicodOLNLY(ByRef szString As String) As String '¥
     Case Else
     End Select
     Next iCount2
-    szTemp = "1110" & Left$(szBin, 4) & "10" & Mid$(szBin, 5, 6) & "10" & right$(szBin, 6)
+    szTemp = "1110" & Left$(szBin, 4) & "10" & Mid$(szBin, 5, 6) & "10" & Right$(szBin, 6)
     For iCount2 = 1 To 24
     If Mid$(szTemp, iCount2, 1) = "1" Then
     lResult = lResult + 1 * 2 ^ (24 - iCount2)
@@ -202,7 +202,7 @@ Public Function UrlEncode_Big5UnicodOLNLY(ByRef szString As String) As String '¥
     End If
     Next iCount2
     szTemp = Hex(lResult)
-    szCode = szCode & "%" & Left$(szTemp, 2) & "%" & Mid$(szTemp, 3, 2) & "%" & right$(szTemp, 2)
+    szCode = szCode & "%" & Left$(szTemp, 2) & "%" & Mid$(szTemp, 3, 2) & "%" & Right$(szTemp, 2)
     End If
     szBin = vbNullString
     lResult = 0
@@ -283,7 +283,7 @@ Do While sl > 0
 
 If (tl = 1 And sl <> 1) Or tl < sl Then
 
-URLDecode = URLDecode & Mid(strIn, tl, sl - tl)
+URLDecode = URLDecode & VBA.Mid(strIn, tl, sl - tl)
 
 End If
 
@@ -291,19 +291,19 @@ Dim hh, hi, hl
 
 Dim a
 
-Select Case UCase(Mid(strIn, sl + kl, 1))
+Select Case UCase(VBA.Mid(strIn, sl + kl, 1))
 
 Case "U" 'Unicode URLEncode
 
-a = Mid(strIn, sl + kl + 1, 4)
+a = VBA.Mid(strIn, sl + kl + 1, 4)
 
-URLDecode = URLDecode & ChrW("&H" & a)
+URLDecode = URLDecode & VBA.ChrW("&H" & a)
 
 sl = sl + 6
 
 Case "E" 'UTF-8 URLEncode
 
-hh = Mid(strIn, sl + kl, 2)
+hh = VBA.Mid(strIn, sl + kl, 2)
 
 a = Int("&H" & hh) 'ascii?
 
@@ -311,19 +311,19 @@ If Abs(a) < 128 Then
 
 sl = sl + 3
 
-URLDecode = URLDecode & Chr(a)
+URLDecode = URLDecode & VBA.Chr(a)
 
 Else
 
-hi = Mid(strIn, sl + 3 + kl, 2)
+hi = VBA.Mid(strIn, sl + 3 + kl, 2)
 
-hl = Mid(strIn, sl + 6 + kl, 2)
+hl = VBA.Mid(strIn, sl + 6 + kl, 2)
 
 a = ("&H" & hh And &HF) * 2 ^ 12 Or ("&H" & hi And &H3F) * 2 ^ 6 Or ("&H" & hl And &H3F)
 
 If a < 0 Then a = a + 65536
 
-URLDecode = URLDecode & ChrW(a)
+URLDecode = URLDecode & VBA.ChrW(a)
 
 sl = sl + 9
 
@@ -331,7 +331,7 @@ End If
 
 Case Else 'Asc URLEncode
 
-hh = Mid(strIn, sl + kl, 2) '°ª¦ì
+hh = VBA.Mid(strIn, sl + kl, 2) '°ª¦ì
 
 a = Int("&H" & hh) 'ascii?
 
@@ -341,7 +341,7 @@ sl = sl + 3
 
 Else
 
-hi = Mid(strIn, sl + 3 + kl, 2) '§C¦ì
+hi = VBA.Mid(strIn, sl + 3 + kl, 2) '§C¦ì
 
 a = Int("&H" & hh & hi) '«Dascii?
 
@@ -349,7 +349,7 @@ sl = sl + 6
 
 End If
 
-URLDecode = URLDecode & Chr(a)
+URLDecode = URLDecode & VBA.Chr(a)
 
 End Select
 
@@ -359,7 +359,7 @@ sl = InStr(sl, strIn, key, 1)
 
 Loop
 
-URLDecode = URLDecode & Mid(strIn, tl)
+URLDecode = URLDecode & VBA.Mid(strIn, tl)
 
 End Function
 
@@ -399,13 +399,13 @@ With ActiveDocument.Range.Find
     .Execute "", , , , , , , wdFindContinue, , "", wdReplaceAll
     .ClearFormatting
 End With
-If InStr(ActiveDocument.Range, "//") Or InStr(ActiveDocument.Range, Chr(39)) > 0 Then
+If InStr(ActiveDocument.Range, "//") Or InStr(ActiveDocument.Range, VBA.Chr(39)) > 0 Then
     Dim p As Paragraph
     For Each p In ActiveDocument.Paragraphs
-        If InStr(p.Range, "//") > 0 Or InStr(1, p.Range, Chr(39), vbTextCompare) > 0 Then p.Range.Delete
+        If InStr(p.Range, "//") > 0 Or InStr(1, p.Range, VBA.Chr(39), vbTextCompare) > 0 Then p.Range.Delete
     Next p
 End If
-ActiveDocument.Range = VBA.Replace(ActiveDocument.Range, Chr(13) & Chr(13), Chr(13))
+ActiveDocument.Range = VBA.Replace(ActiveDocument.Range, VBA.Chr(13) & VBA.Chr(13), VBA.Chr(13))
 SystemSetup.contiUndo ur
 End Sub
 
@@ -425,7 +425,7 @@ End Function
 Public Function IsChineseString(s As String) As Boolean
     Dim i As Long
     For i = 1 To Len(s)
-        If Not IsChineseCharacter(Mid(s, i, 1)) Then
+        If Not IsChineseCharacter(VBA.Mid(s, i, 1)) Then
             IsChineseString = False
             Exit Function
         End If
@@ -438,7 +438,7 @@ Rem §Ú©ú¥Õ±zªº°ÝÃD¤F¡C¦b³B²z§t¦³¥N²z¹ïªº¦r¦ê®É¡A½T¹ê»Ý­n¯S§O¤p¤ß¡A¥HÁ×§K±N¥N²z¹ï
 Rem ¤@ºØ¥i¯àªº¸Ñ¨M¤è®×¬O¨Ï¥Î¤@­Ó¦Û©w¸qªº¨ç¼Æ¨ÓÀË¬d¨C­Ó¦r¤¸¬O§_¬°¥N²z¹ïªº¤@³¡¤À¡C¥H¤U¬O¤@­Ó¥i¯àªº¹ê²{¡G
 Function IsSurrogatePair(str As String, pos As Integer) As Boolean
     Dim C As Integer
-    C = AscW(Mid(str, pos, 1))
+    C = AscW(VBA.Mid(str, pos, 1))
     IsSurrogatePair = C >= &HD800 And C <= &HDFFF
 End Function
 Rem ³o­Ó¨ç¼Æ·|ÀË¬d¦r¦ê¤¤«ü©w¦ì¸mªº¦r¤¸¬O§_¬°¥N²z¹ïªº¤@³¡¤À¡CµM«á¡A±z¥i¥H¦b³v¦r³B²z¦r¦ê®É¨Ï¥Î³o­Ó¨ç¼Æ¨Ó½T«O¤£·|±N¥N²z¹ïªº¦r¤¸¤Á³Î¶}¨Ó¡C
@@ -479,7 +479,7 @@ End Function
 Rem 20230224 chatGPT¤jµÐÂÄ¡G¹ï©ósurrogate pair¦r²Å¡AÀ³¸Ó¨Ï¥ÎUnicode¼Ð·Ç¤¤©Ò­zªº¤èªk±N¨äÂà´«¬°³æ­Ó¥N²z¦r²Å¡C¨ãÅé¨Ó»¡¡A±N¥N²z¹ï¡]surrogate pair¡^ªº¨â­Ó¤¸¯À¤À§OºÙ¬°high surrogate©Mlow surrogate¡C
 Rem ¥H¤U¬O±N¥N²z¹ïÂà´«¬°¥N²z¦r²Åªº¤èªk:
 Private Function CombineSurrogatePair(ByVal highSurrogate As String, ByVal lowSurrogate As String) As String
-    CombineSurrogatePair = ChrW((AscW(highSurrogate) - &HD800&) * &H400& + (AscW(lowSurrogate) - &HDC00&) + &H10000)
+    CombineSurrogatePair = VBA.ChrW((AscW(highSurrogate) - &HD800&) * &H400& + (AscW(lowSurrogate) - &HDC00&) + &H10000)
 End Function
 Rem ¨Ï¥Î³o­Ó¨ç¼Æ¡A±z¥i¥H³q¹L¦b´`Àô¤¤³B²z³æ­Ó¦r²Å¡A¨Ã¨Ï¥Î¤W­±ªº½d³ò¨Ó§PÂ_¦r²Å¬O§_¦bCJK¥þ¦r¶°½d³ò¤º¡C ¦pªG§ä¨ì¥N²z¦r²Å¡A«h¥i¥H¨Ï¥Î¸Ó¨ç¼Æ±N¨äÂà´«¬°Unicode¦r²Å¡C
 
@@ -488,7 +488,7 @@ Function IsCJK(C As String) As Collection 'Boolean,CJKBlockName
     Dim codeHex As String
 '    Dim code
     Rem chatGPT¤jµÐÂÄ¡G¬Oªº¡A±z»¡±o¨S¿ù¡C¦b VBA ¤¤¡A¨Ï¥Î AscW ¨ç¦¡¨ú±o Unicode ¦r¤¸ªº¾ã¼Æ­È®É¡A¦pªG¶Ç¤Jªº¦r¦ê¬O surrogate pair¡A¨º»ò¨ç¦¡¥u·|­pºâ pair ªº²Ä¤@­Ó¦r¤¸¡]§Y High surrogate¡^ªº­È¡C¦]¦¹¡A¥i¥Hª½±µ¨Ï¥Î AscW(c) ¨Ó­pºâ c ªº¾ã¼Æ­È¡A¦Ó¤£¥²¦A¨Ï¥Î Left ¨ç¦¡¨Ó¨ú±o²Ä¤@­Ó¦r¤¸¡C
-    'code = AscW(Left(c, 1))
+    'code = AscW(vba.Left(c, 1))
     'code = AscW(c)
     If Len(C) = 1 Then
         code = AscW(C) 'AscW_IncludeSurrogatePairUnicodecode(c)
@@ -596,16 +596,16 @@ Rem CJKÂX®iF¡G2CEB0¡]235520¡^¨ì2EBEF¡]303231¡^
 Rem Ãö©ó &H9FFF Âà¦¨­t¼Æªº°ÝÃD¡A¬O¦]¬°¦bVBA¤¤¡A¾ã¼ÆÃþ«¬ªº³Ì°ª¦ì¬°²Å¸¹¦ì¡A¦pªG³Ì°ª¦ì¬°1¡A«hªí¥Ü­t¼Æ¡C¦]¦¹¡A&H9FFF ±N³Q·í§@­t¼Æ³B²z¡A¨ä¹ê»Ú­È¬° -24577¡C
 End Function
 Function HextoLng(hexValue As String) As Long
-    'HextoLng = CLng(hexValue) And &HFFFF 'Val("&H" & Right("0000" & hexValue, 4))
+    'HextoLng = CLng(hexValue) And &HFFFF 'Val("&H" & VBA.Right("0000" & hexValue, 4))
     HextoLng = CLng(hexValue)
 End Function
 
 Function AscW_IncludeSurrogatePairUnicodecode(ByVal str As String) As Long
     Dim utf16 As String
-    utf16 = StrConv(str, vbUnicode)
+    utf16 = VBA.StrConv(str, vbUnicode)
     Dim code As Long
     If Len(utf16) = 2 Then ' surrogate pair
-        code = (CLng(AscW(Mid(utf16, 1, 1))) - &HD800&) * &H400& + (CLng(AscW(Mid(utf16, 2, 1))) - &HDC00&) + &H10000
+        code = (CLng(AscW(VBA.Mid(utf16, 1, 1))) - &HD800&) * &H400& + (CLng(AscW(VBA.Mid(utf16, 2, 1))) - &HDC00&) + &H10000
     Else
         code = AscW(utf16)
     End If
@@ -613,7 +613,7 @@ Function AscW_IncludeSurrogatePairUnicodecode(ByVal str As String) As Long
 End Function
 Sub getCodePoint(character As String, codePoint As Long)
 ' Àò¨ú¦r²Å¦êªº high surrogate ©M low surrogate ªº AscW() ­È
-codePoint = ((CLng(AscW(Left(character, 1))) - &HD800) * &H400) + (CLng(AscW(right(character, 1))) - &HDC00) + &H10000
+codePoint = ((CLng(AscW(VBA.Left(character, 1))) - &HD800) * &H400) + (CLng(AscW(VBA.Right(character, 1))) - &HDC00) + &H10000
 Rem ¨S¦³¡uCLng¡vÂà«¬·|·¸¦ì¡A­YªÌ¦p isCJK_Ext()¨ç¦¡¤¤ªº¤è¦¡¡A¥H«¬§O¬° Long ªºÅÜ¼ÆÀx¦s¨ä­È¡A¥ç·|Áô§tÂà«¬
 End Sub
 
@@ -624,8 +624,8 @@ Dim highSurrogate As Long
 Dim lowSurrogate As Long
 
 ' Àò¨ú¦r²Å¦êªº high surrogate ©M low surrogate ªº AscW() ­È
-highSurrogate = AscW(Left(str, 1))
-lowSurrogate = AscW(right(str, 1))
+highSurrogate = AscW(VBA.Left(str, 1))
+lowSurrogate = AscW(VBA.Right(str, 1))
 
 If (highSurrogate >= SurrogateCodePoint.HighStart And highSurrogate <= SurrogateCodePoint.HighEnd) _
     And (lowSurrogate >= SurrogateCodePoint.LowStart And lowSurrogate <= SurrogateCodePoint.LowEnd) Then
@@ -669,8 +669,8 @@ Dim highSurrogate As Long
 Dim lowSurrogate As Long
 
 ' Àò¨ú¦r²Å¦êªº high surrogate ©M low surrogate ªº AscW() ­È
-highSurrogate = AscW(Left(str, 1))
-lowSurrogate = AscW(right(str, 1))
+highSurrogate = AscW(VBA.Left(str, 1))
+lowSurrogate = AscW(VBA.Right(str, 1))
 
 If (highSurrogate >= &HD84D And highSurrogate <= &HDBFF) And (lowSurrogate >= &HDC00 And lowSurrogate <= &HDFFF) Then
     ' ­pºâ¦r²Åªº½XÂI­È
@@ -700,7 +700,7 @@ End Function
 
 
 Rem chatGPT¤jµÐÂÄ:WordVBA¯Ê¦rÅã¥Ü:¦b Word ¤¤¡A«ö¤U Alt + X Áä¥i¥H±N©Ò¿ï¤å¦rÂà´«¬°¨ä¹ïÀ³ªº Unicode ½XÂI¡A³o­Ó¥\¯àºÙ¬° Unicode ¦r²Å¿é¤J¡C
-Rem ¦b VBA ¤¤¡A¥i¥H¨Ï¥Î Selection.Range.Text ©Î Range.Text ÄÝ©Ê¨ÓÀò¨ú©Ò¿ï¤å¦r©Î½d³òªº¤º®e¡AµM«á¨Ï¥Î Selection.Range.Text = ChrW(unicode_code) ©Î Range.Text = ChrW(unicode_code) ¨Ó±N¨äÂà´«¬° Unicode ½XÂI©Ò¹ïÀ³ªº¦r²Å¡C
+Rem ¦b VBA ¤¤¡A¥i¥H¨Ï¥Î Selection.Range.Text ©Î Range.Text ÄÝ©Ê¨ÓÀò¨ú©Ò¿ï¤å¦r©Î½d³òªº¤º®e¡AµM«á¨Ï¥Î Selection.Range.Text = vba.Chrw(unicode_code) ©Î Range.Text = vba.Chrw(unicode_code) ¨Ó±N¨äÂà´«¬° Unicode ½XÂI©Ò¹ïÀ³ªº¦r²Å¡C
 Rem ¥H¤U¬O¤@­Ó¥Ü¨Ò¡A®i¥Ü¤F¦p¦ó¨Ï¥Î VBA ¦b Word ¤¤±N¿ï©w½d³òªº¤º®eÂà´«¬°¨ä Unicode ½XÂI¡G
 Sub ConvertToUnicode_SelectionToggleCharacterCode() 'Ãþ¦ü¹ê§@ Selection.ToggleCharacterCode ¤èªk
     Dim selectedText As String
@@ -712,7 +712,7 @@ Sub ConvertToUnicode_SelectionToggleCharacterCode() 'Ãþ¦ü¹ê§@ Selection.ToggleCh
         unicodeCode = AscW(selectedText)
         Selection.Range.text = Hex(unicodeCode)
     ElseIf Len(selectedText) = 2 Then
-        unicodeCode = (AscW(Mid(selectedText, 1, 1)) - &HD800&) * &H400& + (AscW(Mid(selectedText, 2, 1)) - &HDC00&) + &H10000 '
+        unicodeCode = (AscW(VBA.Mid(selectedText, 1, 1)) - &HD800&) * &H400& + (AscW(VBA.Mid(selectedText, 2, 1)) - &HDC00&) + &H10000 '
         getCodePoint selectedText, unicodeCode
         Selection.Range.text = Hex(unicodeCode)
     Else
@@ -720,7 +720,7 @@ Sub ConvertToUnicode_SelectionToggleCharacterCode() 'Ãþ¦ü¹ê§@ Selection.ToggleCh
         Exit Sub
     End If
     
-'    Selection.Range.text = ChrW(unicodeCode)
+'    Selection.Range.text = vba.Chrw(unicodeCode)
     Rem chatGPTµÐÂÄ¡Gª`·N¡A¦b³B²z surrogate pair ®É¡A»Ý­n±N¨â­Ó¥N²z¹ïªº Unicode ½XÂIÂà´«¬°¹ê»Úªº Unicode ½XÂI¡C¤W­z¥Ü¨Ò¤¤ªº¥N½X´N¬O±N surrogate pair Âà´«¬°¹ê»Úªº Unicode ½XÂIªº½d¨Ò¡C
 End Sub
 Rem creedit with chatGPT¤jµÐÂÄ¡G
@@ -729,8 +729,8 @@ Function ConvertToUnicode(chartoConvert As String) As Long
     If Len(chartoConvert) = 1 Then
         unicodeCode = AscW(chartoConvert)
     ElseIf Len(chartoConvert) = 2 Then
-        'unicodeCode = (CLng(AscW(Mid(chartoConvert, 1, 1))) - &HD800&) * &H400& + (CLng(AscW(Mid(chartoConvert, 2, 1))) - &HDC00&) + &H10000
-        'unicodeCode = ((CLng(AscW(Mid(chartoConvert, 1, 1))) - &HD800)) * &H400 + (CLng(AscW(Mid(chartoConvert, 2, 1))) - &HDC00) + &H10000
+        'unicodeCode = (CLng(AscW(VBA.Mid(chartoConvert, 1, 1))) - &HD800&) * &H400& + (CLng(AscW(VBA.Mid(chartoConvert, 2, 1))) - &HDC00&) + &H10000
+        'unicodeCode = ((CLng(AscW(VBA.Mid(chartoConvert, 1, 1))) - &HD800)) * &H400 + (CLng(AscW(VBA.Mid(chartoConvert, 2, 1))) - &HDC00) + &H10000
         getCodePoint chartoConvert, unicodeCode
     Else
         MsgBox "Invalid character"
@@ -787,7 +787,7 @@ Sub CheckPrivateUseCharacters_Less10000()
         Set rng = Selection.Range
     End If
     
-    If notPrivateUseCharacters = vbNullString Then notPrivateUseCharacters = Chr(13)
+    If notPrivateUseCharacters = vbNullString Then notPrivateUseCharacters = VBA.Chr(13)
     
     If rngCharactersCount = 0 Then rngCharactersCount = rng.Characters.Count
     
@@ -825,7 +825,7 @@ Sub CheckPrivateUseCharacters_text()
     End If
     
     If processedCharacters = vbNullString Then
-        processedCharacters = Chr(13)
+        processedCharacters = VBA.Chr(13)
     End If
     
 reStart:
@@ -881,7 +881,7 @@ Sub CheckPrivateUseCharacters()
     End If
     
     If processedCharacters = vbNullString Then
-        processedCharacters = Chr(13)
+        processedCharacters = VBA.Chr(13)
     End If
     
     For Each a In rng.Characters
@@ -928,7 +928,7 @@ Sub PrivateUseCharactersOutput()
     End If
     
     If processedCharacters = vbNullString Then
-        processedCharacters = Chr(13)
+        processedCharacters = VBA.Chr(13)
     End If
     
     For Each a In rng.Characters

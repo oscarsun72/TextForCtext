@@ -78,7 +78,7 @@ Sub FindPrivateUseCharactersInExcel()
             .Paragraphs(1).Range.Characters.Count - 1).End).text
     End With
     If myExcelFileFullname = "" Then Exit Sub
-    If myExcelFileFullname = Chr(13) Then Exit Sub
+    If myExcelFileFullname = VBA.Chr(13) Then Exit Sub
     If VBA.Dir(myExcelFileFullname) = "" Then
         MsgBox "所指定的全檔名有誤！", vbCritical
         Exit Sub
@@ -217,7 +217,7 @@ Sub ReplacePrivateUseCharactersInExcel()
             .Paragraphs(1).Range.Characters.Count - 1).End).text
     End With
     If myExcelFileFullname = "" Then Exit Sub
-    If myExcelFileFullname = Chr(13) Then Exit Sub
+    If myExcelFileFullname = VBA.Chr(13) Then Exit Sub
     If VBA.Dir(myExcelFileFullname) = "" Then
         MsgBox "所指定的全檔名有誤！", vbCritical
         Exit Sub

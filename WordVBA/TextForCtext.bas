@@ -109,7 +109,7 @@ puncted:
     
     punctuation = "¡C¡A"
     For i = 1 To Len(punctuation)
-        If InStr(ClipBoardObject.GetClipboard, Mid(punctuation, i, 1)) > 0 Then
+        If InStr(ClipBoardObject.GetClipboard, VBA.Mid(punctuation, i, 1)) > 0 Then
             containsPunctuation = True
             Exit For
         End If

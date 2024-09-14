@@ -70,11 +70,11 @@ End If
 End Sub
 
 Sub 查國語辭典()
-    SeleniumOP.dictRevisedSearch VBA.Replace(Selection, Chr(13), "")
+    SeleniumOP.dictRevisedSearch VBA.Replace(Selection, VBA.Chr(13), "")
 End Sub
 
 'Sub 擷取國語辭典詞條網址()
-'SeleniumOP.grabDictRevisedUrl VBA.Replace(Selection, Chr(13), "")
+'SeleniumOP.grabDictRevisedUrl VBA.Replace(Selection, vba.Chr(13), "")
 'End Sub
 Sub 查Google()
     Rem Alt + g
@@ -178,7 +178,7 @@ Sub 查漢語多功能字庫並取回其說文解釋欄位之值插入至插入點位置()
             Else
                 .Collapse wdCollapseEnd
             End If
-            .InsertAfter ar(0) & Chr(13)
+            .InsertAfter ar(0) & VBA.Chr(13)
             .Collapse wdCollapseEnd
             .Font.Size = fontsize
             .InsertAfter ar(1)
@@ -227,7 +227,7 @@ Sub 查說文解字並取回其解釋欄位及網址值插入至插入點位置()
             Else
                 .Collapse wdCollapseEnd
             End If
-            .InsertAfter ar(0) & Chr(13)
+            .InsertAfter ar(0) & VBA.Chr(13)
             .Collapse wdCollapseEnd
             .Font.Size = fontsize
             .InsertAfter ar(1)
@@ -247,6 +247,11 @@ Sub 查說文解字並取回其解釋欄位及網址值插入至插入點位置()
 End Sub
 Sub 送交古籍酷自動標點()
     'Alt + F10
+    If Selection.Characters.Count < 10 Then
+        MsgBox "字數太少，有必要嗎？請至少大於10字", vbExclamation
+        Exit Sub
+    End If
+    Selection.Copy
     TextForCtext.GjcoolPunct
 End Sub
 
@@ -336,7 +341,7 @@ Select Case deflBrowser
         '取得註冊表中的值
         deflBrowser = objShell.RegRead _
                 ("HKCR\http\shell\open\command\")
-        GetDefaultBrowserEXE = Mid(deflBrowser, 2, InStr(deflBrowser, ".exe") + Len(".exe") - 2)
+        GetDefaultBrowserEXE = VBA.Mid(deflBrowser, 2, InStr(deflBrowser, ".exe") + Len(".exe") - 2)
 
 End Select
     
@@ -346,7 +351,7 @@ End Function
 Function getDefaultBrowserFullname()
 Dim appFullname As String
 appFullname = GetDefaultBrowserEXE
-'appFullname = Mid(appFullname, 2, InStr(appFullname, ".exe") + Len(".exe") - 2)
+'appFullname = VBA.Mid(appFullname, 2, InStr(appFullname, ".exe") + Len(".exe") - 2)
 getDefaultBrowserFullname = appFullname
 'DefaultBrowserNameAppActivate = VBA.Replace(VBA.Mid(appFullname, InStrRev(appFullname, "\") + 1), ".exe", "")
 End Function
@@ -356,7 +361,7 @@ Function getDefaultBrowserNameAppActivate() As String
 Dim objShell, ProgID As String: Set objShell = CreateObject("WScript.Shell")
 ProgID = objShell.RegRead _
             ("HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\Shell\Associations\UrlAssociations\http\UserChoice\ProgID")
-ProgID = Mid(ProgID, 1, IIf(InStr(ProgID, ".") = 0, Len(ProgID), InStr(ProgID, ".") - 1))
+ProgID = VBA.Mid(ProgID, 1, IIf(InStr(ProgID, ".") = 0, Len(ProgID), InStr(ProgID, ".") - 1))
 Select Case ProgID
     Case "IE.HTTP":
         DefaultBrowserNameAppActivate = "iexplore"

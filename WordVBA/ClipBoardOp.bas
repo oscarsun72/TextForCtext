@@ -63,7 +63,7 @@ End If
 Dim hClipboardData As Long
 hClipboardData = GetClipboardData(CF_HTML)
 Dim strHTML As String
-strHTML = StrConv(hClipboardData, vbUnicode)
+strHTML = VBA.StrConv(hClipboardData, vbUnicode)
 ClipboardGetHTML = strHTML
 End Function
 
@@ -80,6 +80,12 @@ Function Is_ClipboardContainCtext_Note_InlinecommentColor() As Boolean
     Set TextRange = d.Range
     On Error GoTo eH
     TextRange.Paste
+    
+    If InStr(TextRange.text, "{") Or InStr(TextRange.text, "<") Then
+        Is_ClipboardContainCtext_Note_InlinecommentColor = True
+        GoTo exitFunction
+    End If
+    
     If (TextRange.Tables.Count > 0) Then
         中國哲學書電子化計劃.清除文本頁中的編號儲存格 TextRange
         TextRange.Copy

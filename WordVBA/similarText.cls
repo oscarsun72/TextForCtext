@@ -432,7 +432,7 @@ Rem(unfinished)
 '
 'For i = 1 To len_s1
 'For j = 1 To len_s2
-'If Mid(s1, i, 1) = Mid(s2, j, 1) Then 'if the characters are equal, no cost is needed
+'If VBA.Mid(s1, i, 1) = VBA.Mid(s2, j, 1) Then 'if the characters are equal, no cost is needed
 'cost = 0
 'Else
 'cost = 1 'otherwise, a substitution cost is needed
@@ -485,9 +485,9 @@ ReDim d(n + 1, m + 1) As Variant
         d(0, j) = j
     Next j
     For i = 1 To n
-        ch1 = Mid(str1, i, 1)
+        ch1 = VBA.Mid(str1, i, 1)
         For j = 1 To m
-            ch2 = Mid(str2, j, 1)
+            ch2 = VBA.Mid(str2, j, 1)
             If (ch1 = ch2) Then
             temp = 0
             Else

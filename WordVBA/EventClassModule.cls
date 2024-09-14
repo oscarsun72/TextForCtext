@@ -73,11 +73,11 @@ Private Sub App_WindowActivate(ByVal Doc As Document, ByVal Wn As Window)
 ''If InStr(Doc.Name, "字表7") = 0 Then Wn.Visible = False
 ''    'Wn.WindowState = wdWindowStateMaximize
 ''    隱藏字表
-'If VBA.Left(Wn.Caption, 2) = "排印" And VBA.IsNumeric(Mid(Wn.Caption, 3, 4)) Then
-'    If Tasks.Exists(Mid(Wn.Caption, 3) & ".pdf") Then
-'       Tasks(Mid(Wn.Caption, 3) & ".pdf").Activate
+'If VBA.Left(Wn.Caption, 2) = "排印" And VBA.IsNumeric(VBA.Mid(Wn.Caption, 3, 4)) Then
+'    If Tasks.Exists(VBA.Mid(Wn.Caption, 3) & ".pdf") Then
+'       Tasks(VBA.Mid(Wn.Caption, 3) & ".pdf").Activate
 ''    If Tasks("Adobe Reader").Exists Then
-''       Tasks(Mid(Wn.Caption, 3, 4) & "*pdf*").Activate
+''       Tasks(VBA.Mid(Wn.Caption, 3, 4) & "*pdf*").Activate
 '       Tasks(Wn.Caption & " - Microsoft Word").Activate
 '    End If
 'End If
