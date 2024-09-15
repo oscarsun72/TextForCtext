@@ -57,7 +57,7 @@ Sub ¦rÀW() '2002/11/10­nSub¤~¯à¦bWord¤¤°õ¦æ!
     '    db.Execute "DELETE ¦rÀWªí.* FROM ¦rÀWªí"
         db.Execute "DELETE * FROM ¦rÀWªí"
     End If
-    StTime = Time
+    StTime = VBA.Time
     With ActiveDocument
         For Each ch In .Characters '¦³¶Ã½X¦r®Éch·|¶Ç¦^"?"ÅÜ¦¨¤F¹Bºâ¥Î²Å¸¹
             wrong = wrong + 1 'ÀËµø¥Î!
@@ -114,7 +114,7 @@ retry:      Next ch
     '    Else
     '        firstword = "¡¹©ñ¤ß§a!¶Ã½X¦r¥ç²Î­p¥¿½T!!¡¹"
     '    End If
-        EndTime = Time
+        EndTime = VBA.Time
         AppActivate "Microsoft word"
         MsgBox "²Î­p§¹¦¨!!" & vbCr & "(¡°¦@°õ¦æ¤F" & wrong & "¦¸ªºÀË¬d¡°)" _
             & vbCr & "¡°¯Ó®É:" & Format(EndTime - StTime, "n¤Às¬í") & "¡°" _
@@ -188,7 +188,7 @@ Sub µüÀW() '2002/11/10
     Set db = d.CurrentDb
     Set rst = db.OpenRecordset("µüÀWªí", dbOpenDynaset)
     If rst.RecordCount > 0 Then db.Execute "DELETE * FROM µüÀWªí"
-    StTime = Time
+    StTime = VBA.Time
     With ActiveDocument
         For Each wd In .words
             wrong = wrong + 1 'ÀËµø¥Î!
@@ -216,7 +216,7 @@ Sub µüÀW() '2002/11/10
     '        .Select
 retry:      Next wd
     End With
-    EndTime = Time
+    EndTime = VBA.Time
     AppActivate "Microsoft word"
     MsgBox "²Î­p§¹¦¨!!" & vbCr & "(¡°¦@°õ¦æ¤F" & wrong & "¦¸ªºÀË¬d¡°)" _
         & "µü·J¥kÃä¥b§ÎªÅ®æ¤Z" & hfspace & "¦¸,©¿²¤¤£­p!" _
@@ -267,7 +267,7 @@ Sub ¶i¶¥µüÀW() '2002/11/10­nSub¤~¯à¦bWord¤¤°õ¦æ!'2005/4/21¦¹ªk¦b¶]¤jÀÉ®×®É¤Ó¨S®Ä
     If Length = "" Or Not IsNumeric(Length) Then End
     If CByte(Length) < 1 Or CByte(Length) > 5 Then End
     Options.SaveInterval = 0 '¨ú®ø¦Û°ÊÀx¦s
-    StTime = Time
+    StTime = VBA.Time
     Set d = CreateObject("access.application")
     '©ÎSet d = CreateObject("Access.Application.9")
     d.UserControl = True
@@ -368,7 +368,7 @@ Sub ¶i¶¥µüÀW() '2002/11/10­nSub¤~¯à¦bWord¤¤°õ¦æ!'2005/4/21¦¹ªk¦b¶]¤jÀÉ®×®É¤Ó¨S®Ä
                 End With
 11          Next phra
 2       Next phralh
-        EndTime = Time
+        EndTime = VBA.Time
         AppActivate "Microsoft word"
         MsgBox "²Î­p§¹¦¨!!" & vbCr & "(¡°¦@°õ¦æ¤F" & wrong & "¦¸ªºÀË¬d¡°)" _
             & "µü·J¥kÃä¥b§ÎªÅ®æ¤Z" & hfspace & "¦¸,©¿²¤¤£­p!" _
@@ -414,7 +414,7 @@ Sub ¶i¶¥µüÀW1() '2002/11/15­nSub¤~¯à¦bWord¤¤°õ¦æ!
     If Length = "" Or Not IsNumeric(Length) Then End
     If CByte(Length) < 1 Or CByte(Length) > 255 Then End
     Options.SaveInterval = 0 '¨ú®ø¦Û°ÊÀx¦s
-    StTime = Time
+    StTime = VBA.Time
     Set d = CreateObject("access.application")
     '©ÎSet d = CreateObject("Access.Application.9")
     d.UserControl = True
@@ -467,7 +467,7 @@ Sub ¶i¶¥µüÀW1() '2002/11/15­nSub¤~¯à¦bWord¤¤°õ¦æ!
                 End With
 11          Next phra
 2       Next phralh
-        EndTime = Time
+        EndTime = VBA.Time
         AppActivate "Microsoft word"
         MsgBox "²Î­p§¹¦¨!!" & vbCr & "(¡°¦@°õ¦æ¤F" & wrong & "¦¸ªºÀË¬d¡°)" _
             & "µü·J¥kÃä¥b§ÎªÅ®æ¤Z" & hfspace & "¦¸,©¿²¤¤£­p!" _
@@ -523,7 +523,7 @@ Sub «ü©w¦r¼ÆµüÀW() '2002/11/11
     '    db.Execute "DELETE ¦rÀWªí.* FROM ¦rÀWªí"
         db.Execute "DELETE * FROM µüÀWªí"
     End If
-    StTime = Time
+    StTime = VBA.Time
     With ActiveDocument
         For phra = 1 To .Characters.Count
             Select Case CByte(phralh)
@@ -610,7 +610,7 @@ Sub «ü©w¦r¼ÆµüÀW() '2002/11/11
                 End If
             End With
 11      Next phra
-        EndTime = Time
+        EndTime = VBA.Time
         AppActivate "Microsoft word"
         MsgBox "²Î­p§¹¦¨!!" & vbCr & "(¡°¦@°õ¦æ¤F" & wrong & "¦¸ªºÀË¬d¡°)" _
             & "µü·J¥kÃä¥b§ÎªÅ®æ¤Z" & hfspace & "¦¸,©¿²¤¤£­p!" _
@@ -661,7 +661,7 @@ Sub «ü©w11¦r¼ÆµüÀW()     '2002/11/15'¥H¦¹¬°¨Ò,¥i§@¬°¹w¥ý­­©w¦r¼Æªº¦U­Óµ{§Ç(¥»¨Ò¬
     '    db.Execute "DELETE ¦rÀWªí.* FROM ¦rÀWªí"
         db.Execute "DELETE * FROM µüÀWªí"
     End If
-    StTime = Time
+    StTime = VBA.Time
     With ActiveDocument
         For phra = 1 To .Characters.Count
             If phra + 10 <= .Characters.Count Then _
@@ -696,7 +696,7 @@ Sub «ü©w11¦r¼ÆµüÀW()     '2002/11/15'¥H¦¹¬°¨Ò,¥i§@¬°¹w¥ý­­©w¦r¼Æªº¦U­Óµ{§Ç(¥»¨Ò¬
                 End If
             End With
 11      Next phra
-        EndTime = Time
+        EndTime = VBA.Time
         AppActivate "Microsoft word"
         MsgBox "²Î­p§¹¦¨!!" & vbCr & "(¡°¦@°õ¦æ¤F" & wrong & "¦¸ªºÀË¬d¡°)" _
             & "µü·J¥kÃä¥b§ÎªÅ®æ¤Z" & hfspace & "¦¸,©¿²¤¤£­p!" _
@@ -744,7 +744,7 @@ Sub «ü©w10¦r¼ÆµüÀW() '2002/11/15
     '    db.Execute "DELETE ¦rÀWªí.* FROM ¦rÀWªí"
         db.Execute "DELETE * FROM µüÀWªí"
     End If
-    StTime = Time
+    StTime = VBA.Time
     With ActiveDocument
         For phra = 1 To .Characters.Count
             If phra + 9 <= .Characters.Count Then _
@@ -778,7 +778,7 @@ Sub «ü©w10¦r¼ÆµüÀW() '2002/11/15
                 End If
             End With
 11      Next phra
-        EndTime = Time
+        EndTime = VBA.Time
         AppActivate "Microsoft word"
         MsgBox "²Î­p§¹¦¨!!" & vbCr & "(¡°¦@°õ¦æ¤F" & wrong & "¦¸ªºÀË¬d¡°)" _
             & "µü·J¥kÃä¥b§ÎªÅ®æ¤Z" & hfspace & "¦¸,©¿²¤¤£­p!" _
@@ -827,7 +827,7 @@ Sub «ü©w9¦r¼ÆµüÀW()  '2002/11/15
     '    db.Execute "DELETE ¦rÀWªí.* FROM ¦rÀWªí"
         db.Execute "DELETE * FROM µüÀWªí"
     End If
-    StTime = Time
+    StTime = VBA.Time
     With ActiveDocument
         For phra = 1 To .Characters.Count
             If phra + 8 <= .Characters.Count Then _
@@ -861,7 +861,7 @@ Sub «ü©w9¦r¼ÆµüÀW()  '2002/11/15
                 End If
             End With
 11      Next phra
-        EndTime = Time
+        EndTime = VBA.Time
         AppActivate "Microsoft word"
         MsgBox "²Î­p§¹¦¨!!" & vbCr & "(¡°¦@°õ¦æ¤F" & wrong & "¦¸ªºÀË¬d¡°)" _
             & "µü·J¥kÃä¥b§ÎªÅ®æ¤Z" & hfspace & "¦¸,©¿²¤¤£­p!" _
@@ -911,7 +911,7 @@ Sub «ü©w8¦r¼ÆµüÀW()   '2002/11/15
     '    db.Execute "DELETE ¦rÀWªí.* FROM ¦rÀWªí"
         db.Execute "DELETE * FROM µüÀWªí"
     End If
-    StTime = Time
+    StTime = VBA.Time
     With ActiveDocument
         For phra = 1 To .Characters.Count
             If phra + 7 <= .Characters.Count Then _
@@ -944,7 +944,7 @@ Sub «ü©w8¦r¼ÆµüÀW()   '2002/11/15
                 End If
             End With
 11      Next phra
-        EndTime = Time
+        EndTime = VBA.Time
         AppActivate "Microsoft word"
         MsgBox "²Î­p§¹¦¨!!" & vbCr & "(¡°¦@°õ¦æ¤F" & wrong & "¦¸ªºÀË¬d¡°)" _
             & "µü·J¥kÃä¥b§ÎªÅ®æ¤Z" & hfspace & "¦¸,©¿²¤¤£­p!" _
@@ -993,7 +993,7 @@ Sub «ü©w6¦r¼ÆµüÀW()    '2002/11/15
     '    db.Execute "DELETE ¦rÀWªí.* FROM ¦rÀWªí"
         db.Execute "DELETE * FROM µüÀWªí"
     End If
-    StTime = Time
+    StTime = VBA.Time
     With ActiveDocument
         For phra = 1 To .Characters.Count
             If phra + 5 <= .Characters.Count Then _
@@ -1025,7 +1025,7 @@ Sub «ü©w6¦r¼ÆµüÀW()    '2002/11/15
                 End If
             End With
 11      Next phra
-        EndTime = Time
+        EndTime = VBA.Time
         AppActivate "Microsoft word"
         MsgBox "²Î­p§¹¦¨!!" & vbCr & "(¡°¦@°õ¦æ¤F" & wrong & "¦¸ªºÀË¬d¡°)" _
             & "µü·J¥kÃä¥b§ÎªÅ®æ¤Z" & hfspace & "¦¸,©¿²¤¤£­p!" _
@@ -1074,7 +1074,7 @@ Sub «ü©w5¦r¼ÆµüÀW()     '2002/11/15
     '    db.Execute "DELETE ¦rÀWªí.* FROM ¦rÀWªí"
         db.Execute "DELETE * FROM µüÀWªí"
     End If
-    StTime = Time
+    StTime = VBA.Time
     With ActiveDocument
         For phra = 1 To .Characters.Count
             If phra + 4 <= .Characters.Count Then _
@@ -1106,7 +1106,7 @@ Sub «ü©w5¦r¼ÆµüÀW()     '2002/11/15
                 End If
             End With
 11      Next phra
-        EndTime = Time
+        EndTime = VBA.Time
         AppActivate "Microsoft word"
         MsgBox "²Î­p§¹¦¨!!" & vbCr & "(¡°¦@°õ¦æ¤F" & wrong & "¦¸ªºÀË¬d¡°)" _
             & "µü·J¥kÃä¥b§ÎªÅ®æ¤Z" & hfspace & "¦¸,©¿²¤¤£­p!" _
@@ -1154,7 +1154,7 @@ Sub «ü©w4¦r¼ÆµüÀW()       '2002/11/15
     '    db.Execute "DELETE ¦rÀWªí.* FROM ¦rÀWªí"
         db.Execute "DELETE * FROM µüÀWªí"
     End If
-    StTime = Time
+    StTime = VBA.Time
     With ActiveDocument
         For phra = 1 To .Characters.Count
             If phra + 3 <= .Characters.Count Then _
@@ -1185,7 +1185,7 @@ Sub «ü©w4¦r¼ÆµüÀW()       '2002/11/15
                 End If
             End With
 11      Next phra
-        EndTime = Time
+        EndTime = VBA.Time
         AppActivate "Microsoft word"
         MsgBox "²Î­p§¹¦¨!!" & vbCr & "(¡°¦@°õ¦æ¤F" & wrong & "¦¸ªºÀË¬d¡°)" _
             & "µü·J¥kÃä¥b§ÎªÅ®æ¤Z" & hfspace & "¦¸,©¿²¤¤£­p!" _
@@ -1234,7 +1234,7 @@ Sub «ü©w3¦r¼ÆµüÀW()      '2002/11/15
     '    db.Execute "DELETE ¦rÀWªí.* FROM ¦rÀWªí"
         db.Execute "DELETE * FROM µüÀWªí"
     End If
-    StTime = Time
+    StTime = VBA.Time
     With ActiveDocument
         For phra = 1 To .Characters.Count
             If phra + 2 <= .Characters.Count Then _
@@ -1265,7 +1265,7 @@ Sub «ü©w3¦r¼ÆµüÀW()      '2002/11/15
                 End If
             End With
 11      Next phra
-        EndTime = Time
+        EndTime = VBA.Time
         AppActivate "Microsoft word"
         MsgBox "²Î­p§¹¦¨!!" & vbCr & "(¡°¦@°õ¦æ¤F" & wrong & "¦¸ªºÀË¬d¡°)" _
             & "µü·J¥kÃä¥b§ÎªÅ®æ¤Z" & hfspace & "¦¸,©¿²¤¤£­p!" _
@@ -1314,7 +1314,7 @@ Sub «ü©w2¦r¼ÆµüÀW()       '2002/11/15
     '    db.Execute "DELETE ¦rÀWªí.* FROM ¦rÀWªí"
         db.Execute "DELETE * FROM µüÀWªí"
     End If
-    StTime = Time
+    StTime = VBA.Time
     With ActiveDocument
         For phra = 1 To .Characters.Count
             If phra + 1 <= .Characters.Count Then _
@@ -1344,7 +1344,7 @@ Sub «ü©w2¦r¼ÆµüÀW()       '2002/11/15
                 End If
             End With
 11      Next phra
-        EndTime = Time
+        EndTime = VBA.Time
         AppActivate "Microsoft word"
         MsgBox "²Î­p§¹¦¨!!" & vbCr & "(¡°¦@°õ¦æ¤F" & wrong & "¦¸ªºÀË¬d¡°)" _
             & "µü·J¥kÃä¥b§ÎªÅ®æ¤Z" & hfspace & "¦¸,©¿²¤¤£­p!" _
@@ -1393,7 +1393,7 @@ Sub «ü©w1¦r¼ÆµüÀW()        '2002/11/15
     '    db.Execute "DELETE ¦rÀWªí.* FROM ¦rÀWªí"
         db.Execute "DELETE * FROM µüÀWªí"
     End If
-    StTime = Time
+    StTime = VBA.Time
     With ActiveDocument
         For phra = 1 To .Characters.Count
                 phras = .Characters(phra)
@@ -1422,7 +1422,7 @@ Sub «ü©w1¦r¼ÆµüÀW()        '2002/11/15
                 End If
             End With
 11      Next phra
-        EndTime = Time
+        EndTime = VBA.Time
         AppActivate "Microsoft word"
         MsgBox "²Î­p§¹¦¨!!" & vbCr & "(¡°¦@°õ¦æ¤F" & wrong & "¦¸ªºÀË¬d¡°)" _
             & "µü·J¥kÃä¥b§ÎªÅ®æ¤Z" & hfspace & "¦¸,©¿²¤¤£­p!" _
@@ -1474,7 +1474,7 @@ Sub «ü©w7¦r¼ÆµüÀW()      '2002/11/15'¥H¦¹¬°¨Ò,¥i§@¬°¹w¥ý­­©w¦r¼Æªº¦U­Óµ{§Ç(¥»¨Ò¬
     '    db.Execute "DELETE ¦rÀWªí.* FROM ¦rÀWªí"
         db.Execute "DELETE * FROM µüÀWªí"
     End If
-    StTime = Time
+    StTime = VBA.Time
     With ActiveDocument
         For phra = 1 To .Characters.Count
             If phra + 6 <= .Characters.Count Then _
@@ -1507,7 +1507,7 @@ Sub «ü©w7¦r¼ÆµüÀW()      '2002/11/15'¥H¦¹¬°¨Ò,¥i§@¬°¹w¥ý­­©w¦r¼Æªº¦U­Óµ{§Ç(¥»¨Ò¬
                 End If
             End With
 11      Next phra
-        EndTime = Time
+        EndTime = VBA.Time
         AppActivate "Microsoft word"
         MsgBox "²Î­p§¹¦¨!!" & vbCr & "(¡°¦@°õ¦æ¤F" & wrong & "¦¸ªºÀË¬d¡°)" _
             & "µü·J¥kÃä¥b§ÎªÅ®æ¤Z" & hfspace & "¦¸,©¿²¤¤£­p!" _
@@ -1559,7 +1559,7 @@ Sub «ü©w¦r¼ÆµüÀW1() '2002/11/15'®Ä¯à¸ûºC!
     '    db.Execute "DELETE ¦rÀWªí.* FROM ¦rÀWªí"
         db.Execute "DELETE * FROM µüÀWªí"
     End If
-    StTime = Time
+    StTime = VBA.Time
     With ActiveDocument
         For phra = 1 To .Characters.Count
             j = CByte(phralh)
@@ -1602,7 +1602,7 @@ Sub «ü©w¦r¼ÆµüÀW1() '2002/11/15'®Ä¯à¸ûºC!
                 End If
             End With
 11      Next phra
-        EndTime = Time
+        EndTime = VBA.Time
         AppActivate "Microsoft word"
         MsgBox "²Î­p§¹¦¨!!" & vbCr & "(¡°¦@°õ¦æ¤F" & wrong & "¦¸ªºÀË¬d¡°)" _
             & "µü·J¥kÃä¥b§ÎªÅ®æ¤Z" & hfspace & "¦¸,©¿²¤¤£­p!" _
@@ -1654,7 +1654,7 @@ Sub «ü©w¦r¼ÆµüÀW2() '2002/11/15®Ä¯à»P­ì³]­p®t¤£¦h,¦ý¥iÅÜ¼Æ¤Æ!
     '    db.Execute "DELETE ¦rÀWªí.* FROM ¦rÀWªí"
         db.Execute "DELETE * FROM µüÀWªí"
     End If
-    StTime = Time
+    StTime = VBA.Time
     j = CByte(phralh)
     With ActiveDocument
         For phra = 1 To .Characters.Count
@@ -1693,7 +1693,7 @@ Sub «ü©w¦r¼ÆµüÀW2() '2002/11/15®Ä¯à»P­ì³]­p®t¤£¦h,¦ý¥iÅÜ¼Æ¤Æ!
                 End If
             End With
 11      Next phra
-        EndTime = Time
+        EndTime = VBA.Time
         AppActivate "Microsoft word"
         MsgBox "²Î­p§¹¦¨!!" & vbCr & "(¡°¦@°õ¦æ¤F" & wrong & "¦¸ªºÀË¬d¡°)" _
             & "µü·J¥kÃä¥b§ÎªÅ®æ¤Z" & hfspace & "¦¸,©¿²¤¤£­p!" _
@@ -1737,7 +1737,7 @@ Sub ¤å¥ó¦rÀW_old()
     'If Dir(xlsp) = "" Then xlsp = "C:\Documents and Settings\Superwings\®à­±\" & Replace(ActiveDocument.Name, ".doc", "") & "¦rÀW.XLS"
     'xlsp = "C:\Documents and Settings\Superwings\®à­±\" & Replace(ActiveDocument.Name, ".doc", "") & "¦rÀW.XLS"
     xlsp = InputBox("½Ð¿é¤J¦sÀÉ¸ô®|¤ÎÀÉ¦W(¥þÀÉ¦W,§t°ÆÀÉ¦W)!" & vbCr & vbCr & _
-            "¹w³]±N¥H¦¹word¤å¥óÀÉ¦W + ""¦rÀW.XLSX""¦rºó,¦s©ó®à­±¤W", "¦rÀW½Õ¬d", xlsp & Replace(ActiveDocument.Name, ".doc", "") & "¦rÀW" & VBA.StrConv(Time, vbWide) & ".XLSX")
+            "¹w³]±N¥H¦¹word¤å¥óÀÉ¦W + ""¦rÀW.XLSX""¦rºó,¦s©ó®à­±¤W", "¦rÀW½Õ¬d", xlsp & Replace(ActiveDocument.Name, ".doc", "") & "¦rÀW" & VBA.StrConv(VBA.Time, vbWide) & ".XLSX")
     If xlsp = "" Then Exit Sub
     
     ds = VBA.Timer
@@ -2291,7 +2291,7 @@ If Dir(xlsp) = "" Then xlsp = ¨ú±o®à­±¸ô®| 'GetDeskDir ' "C:\Users\Wong\Desktop\
 'If Dir(xlsp) = "" Then xlsp = "C:\Documents and Settings\Superwings\®à­±\" & Replace(ActiveDocument.Name, ".doc", "") & "¦rÀW.XLS"
 'xlsp = "C:\Documents and Settings\Superwings\®à­±\" & Replace(ActiveDocument.Name, ".doc", "") & "¦rÀW.XLS"
 xlsp = InputBox("½Ð¿é¤J¦sÀÉ¸ô®|¤ÎÀÉ¦W(¥þÀÉ¦W,§t°ÆÀÉ¦W)!" & vbCr & vbCr & _
-        "¹w³]±N¥H¦¹word¤å¥óÀÉ¦W + ""¦rÀW.XLSX""¦rºó,¦s©ó®à­±¤W", "¦rÀW½Õ¬d", xlsp & Replace(ActiveDocument.Name, ".doc", "") & "¦rÀW" & VBA.StrConv(Time, vbWide) & ".XLSX")
+        "¹w³]±N¥H¦¹word¤å¥óÀÉ¦W + ""¦rÀW.XLSX""¦rºó,¦s©ó®à­±¤W", "¦rÀW½Õ¬d", xlsp & Replace(ActiveDocument.Name, ".doc", "") & "¦rÀW" & VBA.StrConv(VBA.Time, vbWide) & ".XLSX")
 If xlsp = "" Then Exit Sub
 
 ds = VBA.Timer
@@ -2483,11 +2483,11 @@ Set d = ActiveDocument
 'If xlsp = "" Then xlsp = ¨ú±o®à­±¸ô®| & "\" 'GetDeskDir() & "\"
 'If Dir(xlsp) = "" Then xlsp = ¨ú±o®à­±¸ô®| 'GetDeskDir
 'xlsp = InputBox("½Ð¿é¤J¦sÀÉ¸ô®|¤ÎÀÉ¦W(¥þÀÉ¦W,§t°ÆÀÉ¦W)!" & vbCr & vbCr & _
-        "¹w³]±N¥H¦¹word¤å¥óÀÉ¦W + ""µüÀW.XLSX""¦rºó,¦s©ó®à­±¤W", "µüÀW½Õ¬d", xlsp & Replace(d.Name, ".doc", "") & "µüÀW" & VBA.StrConv(Time, vbWide) & ".XLSX")
+        "¹w³]±N¥H¦¹word¤å¥óÀÉ¦W + ""µüÀW.XLSX""¦rºó,¦s©ó®à­±¤W", "µüÀW½Õ¬d", xlsp & Replace(d.Name, ".doc", "") & "µüÀW" & VBA.StrConv(VBA.Time, vbWide) & ".XLSX")
 'If xlsp = "" Then Exit Sub
-xlsp = ¨ú±o®à­±¸ô®| & "\" & Replace(d.Name, ".doc", "") & "_µüÀW" & VBA.StrConv(Time, vbWide) & ".XLSX"
+xlsp = ¨ú±o®à­±¸ô®| & "\" & Replace(d.Name, ".doc", "") & "_µüÀW" & VBA.StrConv(VBA.Time, vbWide) & ".XLSX"
 If ln = "" Then ln = 1
-ln = InputBox("½Ð«ü©wµü·Jªø«×" & vbCr & vbCr & "ÀÉ®×·|¦s¦b®à­±¤W¦W¬°:" & vbCr & vbCr & Replace(d.Name, ".doc", "") & "_µüÀW" & VBA.StrConv(Time, vbWide) & ".XLSX" & _
+ln = InputBox("½Ð«ü©wµü·Jªø«×" & vbCr & vbCr & "ÀÉ®×·|¦s¦b®à­±¤W¦W¬°:" & vbCr & vbCr & Replace(d.Name, ".doc", "") & "_µüÀW" & VBA.StrConv(VBA.Time, vbWide) & ".XLSX" & _
                 vbCr & vbCr & "ªºÀÉ®×", , ln + 1)
 If ln = "" Then Exit Sub
 If Not IsNumeric(ln) Then Exit Sub

@@ -59,9 +59,9 @@ Function Similarity(ByVal text1, ByVal text2) As Boolean 'text1 ³Q¤ñ¹ïªÌ text2 ®
     Initialize text1, text2
     If Me.CompareDictionaries(dict1, dict2) Then
         Similarity = True
-    ElseIf Me.CompareDictionarySimilarity(dict1, dict2) > 0.8 Then
+    ElseIf Me.CompareDictionarySimilarity(dict1, dict2) > 0.75 Then '0.8
         Similarity = True
-    ElseIf jaccard_Similarity() > 0.8 Then
+    ElseIf jaccard_Similarity() > 0.75 Then ' 0.8
         Similarity = True
     ElseIf cosine_Similarity() > 0.92 Then 'cosine¾l©¶¤èªk¦n¹³¦b¤å¦r¦h®É·|¥¢»~¡A«ÝÆ[¹î¡I ·P®¦·P®¦¡@«nµLªüÀ±ªû¦ò 20230227
         Similarity = True

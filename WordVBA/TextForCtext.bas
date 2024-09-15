@@ -24,6 +24,7 @@ Sub Hanchi_CTP_SearchingKeywordsYijing()
 ' Alt + <
 ' Alt + shift + F5
 ' Ctrl + Alt + F9
+    SystemSetup.playSound 0.484
 
     If Not examToRun Then Exit Sub
     

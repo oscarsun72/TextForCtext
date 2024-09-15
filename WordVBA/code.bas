@@ -483,6 +483,15 @@ Private Function CombineSurrogatePair(ByVal highSurrogate As String, ByVal lowSu
 End Function
 Rem ㄏノ硂ㄧ计眤硄筁碻吏い矪瞶虫才ㄏノ絛瞅ㄓ耞才琌CJK栋絛瞅ず 狦т瞶才玥ㄏノ赣ㄧ计盢ㄤ锣传Unicode才
 
+Rem 璸衡x计
+Function CharactersCount(x As String) As Long
+    Dim i As Long, cntr As Long
+    For i = 1 To VBA.Len(x)
+        If Not IsLowSurrogate(VBA.Mid(x, i, 1)) Then cntr = cntr + 1
+    Next i
+    CharactersCount = cntr
+End Function
+
 Function IsCJK(C As String) As Collection 'Boolean,CJKBlockName
     Dim code As Long, cjk As Boolean, cjkBlackName As CJKBlockName, result As New Collection
     Dim codeHex As String

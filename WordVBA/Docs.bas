@@ -1105,10 +1105,22 @@ eH:
     End Select
 End Function
 Rem rng 要處理的範圍 ,arr 要處理的關鍵字 （預設為字串陣列）
-Sub marking易學關鍵字(rng As Range, arr As Variant, Optional defaultHighlightColorIndex As word.WdColorIndex = word.wdYellow, Optional fontColor As word.WdColorIndex = word.wdRed)
-    Dim xd As String, e
+Sub marking易學關鍵字(rng As Range, arr As Variant, Optional defaultHighlightColorIndex As word.WdColorIndex = word.wdYellow, _
+        Optional fontColor As word.WdColorIndex = word.wdRed, Optional allDoc As Boolean = False)
+    
+    Dim xd As String, e, eArrKey, arrKey, startRng As Long, endRng As Long ', dict As Scripting.Dictionary
+    Dim examOK As Boolean, rngExam As Range, processCntr As Long, dictCoordinatesPhrase As New Scripting.Dictionary, key, isInPhrasesAvoid As Boolean, isFollowedAvoid As Boolean, isPrecededAvoid As Boolean
+
+    On Error GoTo eH
     word.Options.defaultHighlightColorIndex = defaultHighlightColorIndex
+    examOK = True
+    If allDoc Then Set rng = rng.Document.Range
+    startRng = rng.start
+    endRng = rng.End
+    Set rngExam = rng.Document.Range
+
     xd = rng.text
+
     With rng.Find
         .ClearFormatting
         .ClearAllFuzzyOptions
@@ -1117,23 +1129,183 @@ Sub marking易學關鍵字(rng As Range, arr As Variant, Optional defaultHighlightCol
             .Font.ColorIndex = fontColor 'wdRed
             .Highlight = True
         End With
-        For Each e In arr
+        For Each e In arr '遍歷每個要標識的關鍵字
             If InStr(xd, e) > 0 Then
-    '            With d.Range.Find
-                    '.Execute , , , , , , True, wdFindContinue, , , wdReplaceAll
+                rng.SetRange startRng, endRng
+                'If e = "豫" Then
+                isFollowedAvoid = Keywords.易學KeywordsToMark_ExamFollowedAvoid.Exists(e)
+                isPrecededAvoid = Keywords.易學KeywordsToMark_ExamPrecededAvoid.Exists(e)
+                isInPhrasesAvoid = Keywords.易學KeywordsToMark_ExamInPhraseAvoid.Exists(e)
+                If isFollowedAvoid Or isPrecededAvoid Or isInPhrasesAvoid Then
+                    '若有內嵌於的片語語詞（包含關鍵的片語語句）需查驗的話，就先記下要比對的位置集合
+                    If isInPhrasesAvoid Then
+                        arrKey = Keywords.易學KeywordsToMark_ExamInPhraseAvoid(e)
+                        For Each eArrKey In arrKey '遍歷每個該避開的詞語，蒐集其在文件中的所在位置，以供後續比對
+                            'Set rngExam = rngExam.Document.Range '弄錯了，已有allDoc參數控制是否操作整份文件
+                            rngExam.SetRange startRng, endRng '不需處理整份文件，就只就操作範圍內處置就可。感恩感恩　讚歎讚歎　南無阿彌陀佛 20240915
+                            With rngExam.Find
+                                Do While .Execute(eArrKey, , , , , , True, wdFindStop)
+                                    '記下含有目前關鍵字的詞語片語語彙片段在範圍中的位置
+                                    dictCoordinatesPhrase.Add rngExam.start, rngExam.End
+                                Loop
+                            End With
+                        Next eArrKey
+                        '後、前、中三關都檢驗合格了
+                    End If
+                    
+                    Do While .Execute(e, , , , , , True, wdFindStop, True) '在範圍中尋遍關鍵字出現的位置
+                        examOK = True '歸零
+                        
+'                        rng.Select '偵錯用
+                        
+                        If Not rng.Next Is Nothing Then
+                            If rng.Next.Characters.Count > 0 Then
+                                '後綴檢查
+                                'If UBound(VBA.Filter(Keywords.易學KeywordsToMark_ExamFollowedAvoid(e), rng.Next.Characters(1).text)) < 0 Then
+                                If Keywords.易學KeywordsToMark_ExamFollowedAvoid.Exists(e) Then
+                                    arrKey = Keywords.易學KeywordsToMark_ExamFollowedAvoid(e)
+                                    For Each eArrKey In arrKey
+                                        If rng.End + VBA.Len(eArrKey) <= endRng Then '這樣的寫法，如果內含超連結等功能變數，恐怕就會失誤了！
+                                            rngExam.SetRange rng.End, rng.End + VBA.Len(eArrKey)
+                                            If VBA.StrComp(rngExam.text, eArrKey) = 0 Then '找到要避開的關鍵字
+                                                examOK = False '檢測不通過
+                                                Exit For
+                                            End If
+                                        End If
+                                    Next eArrKey
+                                End If
+                                If examOK Then
+checkPrevious:
+                                    If Not rng.Previous Is Nothing Then
+                                        '前綴檢查
+                                        If rng.Previous.Characters.Count > 0 Then
+                                            'If UBound(VBA.Filter(Keywords.易學KeywordsToMark_ExamPrecededAvoid(e), rng.Previous.Characters(rng.Previous.Characters.Count).text)) < 0 Then
+                                            If Keywords.易學KeywordsToMark_ExamPrecededAvoid.Exists(e) Then
+                                                arrKey = Keywords.易學KeywordsToMark_ExamPrecededAvoid(e)
+                                                For Each eArrKey In arrKey
+                                                    If rng.start - VBA.Len(eArrKey) > -1 Then '這樣的寫法，如果內含超連結等功能變數，恐怕就會失誤了！
+                                                        rngExam.SetRange rng.start - VBA.Len(eArrKey), rng.start
+                                                        If VBA.StrComp(rngExam.text, eArrKey) = 0 Then '找到要避開的關鍵字
+                                                            examOK = False '檢測不通過
+                                                            Exit For
+                                                        End If
+                                                    End If
+                                                Next eArrKey
+                                            End If
+                                            If examOK Then
+checkPhrases:                                   '內嵌於檢查：關鍵字含在該避免的片語詞句檢查
+                                                If Keywords.易學KeywordsToMark_ExamInPhraseAvoid.Exists(e) Then
+                                                    For Each key In dictCoordinatesPhrase
+                                                     '遍歷每個該避開的詞語片語座標
+                                                        '若目前關鍵字內含於要避開的詞語片語語彙片段
+                                                        If rng.start >= key And rng.End <= dictCoordinatesPhrase(key) Then
+
+'                                                            rng.Select 'just for test
+
+                                                            examOK = False '檢測不通過
+                                                            Exit For
+                                                        End If
+                                                    Next key
+
+'                                                    arrKey = Keywords.易學KeywordsToMark_ExamInPhraseAvoid(e)
+'                                                    For Each eArrKey In arrKey '遍歷每個該避開的詞語，當先蒐集其位置在文件中所在位置，以供後續比對
+'                                                        Set rngExam = rngExam.Document.Range
+'                                                        With rngExam.Find
+'                                                            Do While .Execute(eArrKey, , , , , , True, wdFindStop)
+'                                                                '目前關鍵字內含於要避開的詞語片語語彙片段
+'                                                                If rng.start >= rngExam.start And rng.End <= rngExam.End Then
+'
+''                                                                    rng.Select 'just for test
+'
+'                                                                    examOK = False '檢測不通過
+'                                                                    Exit For
+'                                                                End If
+'                                                            Loop
+'                                                        End With
+'                                                    Next eArrKey
+                                                    
+                                                End If
+                                                '後、前、中三關都檢驗合格了
+                                                If examOK Then '合格才標識
+                                                    With rng
+                                                        processCntr = processCntr + 1
+                                                        If processCntr Mod 100 = 0 Then SystemSetup.playSound 1 '播放音效以免誤以為當了
+                                                        .HighlightColorIndex = defaultHighlightColorIndex
+                                                        .Font.ColorIndex = fontColor
+                                                    End With
+                                                Else '片語詞句檢查未過
+                                                    If rng.HighlightColorIndex = defaultHighlightColorIndex Then
+                                                        With rng
+'                                                            .Select 'just for test
+                                                            
+                                                            .HighlightColorIndex = wdNoHighlight
+                                                            .Font.ColorIndex = wdAuto
+                                                        End With
+                                                    End If
+                                                End If
+                                            Else '前綴檢查未過
+                                                'If allDoc Then
+                                                If rng.HighlightColorIndex = defaultHighlightColorIndex Then
+                                                    With rng
+                                                        .HighlightColorIndex = wdNoHighlight
+                                                        .Font.ColorIndex = wdAuto
+                                                    End With
+                                                End If
+                                            End If
+                                        End If
+                                    Else '如果前也無後也無
+                                        GoTo checkPhrases:
+                                    End If
+                                Else '後綴檢查未過
+                                    'If allDoc Then
+                                    If rng.HighlightColorIndex = defaultHighlightColorIndex Then
+                                        With rng
+                                            .HighlightColorIndex = wdNoHighlight
+                                            .Font.ColorIndex = wdAuto
+                                        End With
+                                    End If
+                                End If
+                            End If
+                        Else '如果沒有下文
+                            GoTo checkPrevious
+                        End If
+                    Loop 'Do While .Execute(e, , , , , , True, wdFindStop, True) '在範圍中尋遍關鍵字出現的位置
+
+                    dictCoordinatesPhrase.RemoveAll '歸零供下一個關鍵字使用
+                        'If Keywords.易學KeywordsToMark_ExamInPhraseAvoid.Exists(e) Then
+                         '       ……
+                          '          dictCoordinatesPhrase.Add rngExam.start, rngExam.End
+                          
+                Else '不用檢查直接取代（逕行標識）者
                     .Execute e, , , , , , True, wdFindStop, True, e, Replace:=wdReplaceAll
+                End If
             End If
-        Next e
+        Next e '下一個打算要標識的關鍵字
     End With
+
+finish:
+    rng.SetRange startRng, endRng '設回原來的樣子才不會改變，於呼叫端才不會出錯
+    Set dictCoordinatesPhrase = Nothing
+    
+    Exit Sub
+eH:
+    Select Case Err.Number
+        Case Else
+            MsgBox Err.Number & Err.Description
+            Debug.Print Err.Number & Err.Description
+            Resume
+    End Select
 End Sub
 Rem 整個文件重新標識易學關鍵字
 Sub mark易學關鍵字Doc()
     Dim ur As word.UndoRecord
     SystemSetup.playSound 0.484
     SystemSetup.stopUndo ur, "mark易學關鍵字Doc"
+    word.Application.ScreenUpdating = False
     marking易學關鍵字 ActiveDocument.Range, Keywords.易學KeywordsToMark, word.wdYellow
     SystemSetup.contiUndo ur
     SystemSetup.playSound 2
+    word.Application.ScreenUpdating = True
 End Sub
 
 Rem 判斷剪貼簿裡的純文字(或指定的文字)內容是否在文件中已存在

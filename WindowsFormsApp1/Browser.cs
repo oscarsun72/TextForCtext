@@ -8101,7 +8101,7 @@ internal static string getImageUrl() {
                 "咸恆","老陰", "老陽", "少陰", "少陽","十翼",
                 "无妄", "彖", "象曰", "象傳", "象日", "象云","小象", "筮",
                 "初九","九二","九三","九四","九五","上九","初六","六二","六三","六四","六五","上六","用九","用六", "繇辭","繇詞",
-                "隨時之義","庖有魚","包有魚","精義入神","豶豕","童牛","承之羞","雷在天上","錫馬", "蕃庶","晝日","三接","懲忿","窒欲","敬以直內","義以方外","迷後得主","利西南","品物咸章","天下大行","益動而", "日進無疆","頻巽","豚魚","頻復", "懲窒","閑邪","存誠","乾乾","悔吝","憧憧", "類萬物","柔順利貞","比之匪人","貞厲","履貞","履道坦坦","貞吉","悔亡","時義","健順",
+                "隨時之義","庖有魚","包有魚","精義入神","豶豕","童牛","承之羞","雷在天上","錫馬", "蕃庶","晝日","三接","懲忿","窒欲","敬以直內","義以方外","迷後得主","利西南","品物咸章","天下大行","益動而", "日進無疆","頻巽","豚魚","頻復", "懲窒","閑邪","存誠","乾乾","悔吝","憧憧", "類萬物","柔順利貞","比之匪人","貞厲","履貞","履道坦坦","貞吉","悔亡","時義","健順", "內健而外順", "內健外順", "外順而內健", "外順內健","敦復","直方","開物成務","窮神知化", "夕惕","惕若","研幾極深","極深研幾","一陰一陽",
                 "象義",
                 "伏羲","伏𦏁","庖𦏁","宓𦏁","伏犧","庖犧"};
 
@@ -8122,14 +8122,14 @@ internal static string getImageUrl() {
 
             if (ListIndex_Hanchi_SearchingKeywordsYijing < 0) ListIndex_Hanchi_SearchingKeywordsYijing = 0;
             if (ListIndex_Hanchi_SearchingKeywordsYijing > keywords.Count - 1) ListIndex_Hanchi_SearchingKeywordsYijing = keywords.Count - 1;
-            string keyword = keywords[ListIndex_Hanchi_SearchingKeywordsYijing]; Clipboard.SetText(keyword);
+            string keyword = keywords[ListIndex_Hanchi_SearchingKeywordsYijing]; //Clipboard.SetText(keyword);20240914作廢
             ActiveForm1.PauseEvents();
             ActiveForm1.textBox4Text = ListIndex_Hanchi_SearchingKeywordsYijing.ToString();
             ActiveForm1.Controls["textBox1"].Text = keyword;
             ActiveForm1.ResumeEvents();
             bool returnValue = false;
 
-            //if (title.Contains("中國哲學書電子化計劃"))
+            //if (title.Contains("中國哲學書電子化計劃")) 即CTP
             if (title.EndsWith("中國哲學書電子化計劃") || title.EndsWith("Chinese Text Project"))
             {
             //檢索方塊
@@ -8193,7 +8193,7 @@ internal static string getImageUrl() {
                             driver.Navigate().Back();
                             returnValue = false;
                         }
-                        else//有結果
+                        else//有結果-中國哲學書電子化計劃
                         {
                             returnValue = true; Clipboard.SetText(keyword); ActiveForm1.KeyinTextmodeSwitcher();
                             //有文本的文字框
@@ -8205,7 +8205,7 @@ internal static string getImageUrl() {
                         }//ActiveForm1.HideToNICo(); }
 
                     }
-                    else//有結果
+                    else//有結果-中國哲學書電子化計劃
                     {
                         returnValue = true; Clipboard.SetText(keyword); ActiveForm1.KeyinTextmodeSwitcher();
                         //有文本的文字框
@@ -8371,9 +8371,9 @@ internal static string getImageUrl() {
                             //    //ActiveForm1.AvailableInUseBothKeysMouse();
                             //}
                         }
-                        //找到了
+                        //找到了-《漢籍全文資料庫》
                         else
-                        {//檢索有結果：
+                        {//檢索有結果：《漢籍全文資料庫》
                             Form1.playSound(Form1.soundLike.info);
                             returnValue = true;
                             ActiveForm1.TopMost = false;
@@ -8389,7 +8389,8 @@ internal static string getImageUrl() {
                                 //driver.SwitchTo().Window(driver.WindowHandles.Last());
                                 //Browser.BringToFront("chrome");//最後會有
 
-                                ActiveForm1.AvailableInUseBothKeysMouse();
+                                //ActiveForm1.AvailableInUseBothKeysMouse();
+                                //ActiveForm1.TopMost = false;
 
                                 Thread.Sleep(300);//等待開新視窗開啟（實測290還不行，最快也要300微秒）20240726
                                 driver.SwitchTo().Window(driver.WindowHandles.Last());
@@ -8405,6 +8406,8 @@ internal static string getImageUrl() {
                                     }
 
                                 }
+                                FindPageAndPaste2Find(driver, keyword);
+
                                 //else
                                 //{//檢查「_IMG_附註關閉」是否已出現：
                                 //    if (null == waitFindWebElementBySelector_ToBeClickable("body > form > table > tbody > tr:nth-child(2) > td:nth-child(2) > input[type=IMAGE]:nth-child(1)")) 
@@ -8523,7 +8526,7 @@ internal static string getImageUrl() {
                     // 繼續執行後續的程式碼
 
 
-                    //查詢結果
+                    //查詢結果      -文本閱讀內的檢索（《漢籍全文資料庫》
                     //查詢結果編號「1」
                     //iwe1 = waitFindWebElementBySelector_ToBeClickable("body > form > table > tbody > tr:nth-child(2) > td > table > tbody > tr > td > table > tbody > tr:nth-child(2) > td > table > tbody > tr:nth-child(1) > td.seqno > a");
                     iwe1 = waitFindWebElementBySelector_ToBeClickable("body > form > table > tbody > tr:nth-child(2) > td > table > tbody > tr > td.leftbg > table > tbody > tr:nth-child(1) > td > table > tbody > tr:nth-child(2) > td > div > span");
@@ -8562,8 +8565,9 @@ internal static string getImageUrl() {
                         {
                             ActiveForm1.TopMost = false;
                             driver.SwitchTo().Window(driver.CurrentWindowHandle);
-
                             //BringToFront("chrome");
+                            //FindPageAndPaste2Find(driver, keyword);//因為是一行行條件式的，所以比較不需要找頁面中關鍵字所在 20240914
+
                         }
                     }
                 }
