@@ -3053,10 +3053,7 @@ namespace WindowsFormsApp1
                     e.Handled = true;
                     if (insertMode && textBox1.SelectionLength == 0)
                     {
-                        if (char.IsHighSurrogate(textBox1.Text.Substring(textBox1.SelectionStart, 1).ToCharArray()[0]))
-                            textBox1.SelectionLength = 2;
-                        else
-                            textBox1.SelectionLength = 1;
+                        SelectOneCharacter();
                     }
                     else
                         overtypeModeSelectedTextSetting(ref textBox1);
@@ -3091,7 +3088,12 @@ namespace WindowsFormsApp1
                 {//Alt + n : 將選取的字詞句及其網址位址送到以下檔案的末後
                     //> C:\Users\oscar\Dropbox\《看典古籍》OCR 待改進者隨記 感恩感恩 讚歎讚歎 南無阿彌陀佛                    
                     e.Handled = true;
-                    overtypeModeSelectedTextSetting(ref textBox1);
+                    if (insertMode && textBox1.SelectionLength == 0)
+                    {
+                        SelectOneCharacter();
+                    }
+                    else
+                        overtypeModeSelectedTextSetting(ref textBox1);
                     if (textBox1.SelectionLength > 0)
                     {
                         string txtbox1SelText = textBox1.SelectedText;
@@ -3566,6 +3568,16 @@ namespace WindowsFormsApp1
                 //以上按下單一鍵
                 #endregion
             }
+        }
+        /// <summary>
+        /// 在textBox1選取1個字
+        /// </summary>
+        internal void SelectOneCharacter()
+        {
+            if (char.IsHighSurrogate(textBox1.Text.Substring(textBox1.SelectionStart, 1).ToCharArray()[0]))
+                textBox1.SelectionLength = 2;
+            else
+                textBox1.SelectionLength = 1;
         }
 
         /// <summary>

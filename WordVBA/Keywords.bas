@@ -2,7 +2,14 @@ Attribute VB_Name = "Keywords"
 Option Explicit
 Rem 任何關鍵字檢索、標識相關之屬性、參照記錄
 
-Property Get 易學KeywordsToMark() As Variant
+Rem 用以檢查是否為易學範圍之內容用
+Property Get 易學KeywordsToCheck() As Variant 'string()
+    易學KeywordsToCheck = Array(VBA.ChrW(-10119), VBA.ChrW(-8742), VBA.ChrW(-30233), VBA.ChrW(-10164), VBA.ChrW(-8698), VBA.ChrW(-31827), VBA.ChrW(-10132), VBA.ChrW(-8313), VBA.ChrW(20810), VBA.ChrW(-10167), VBA.ChrW(-8698), VBA.ChrW(-26587), VBA.ChrW(21093), VBA.ChrW(14615), VBA.ChrW(20089), VBA.ChrW(26080), "妄", VBA.ChrW(26083), "濟" _
+        , "遘", "遁", VBA.ChrW(20089), "离", "乾", "小畜", "履", "臨", "觀", "大過", "坤", "泰", "否", "噬嗑", "賁", "坎", "屯", "蒙", "同人", "大有", "剝", "復", "離", "需", "訟", "謙", "豫", "無妄", "大畜", "師", "比", "隨", "蠱", "頤", "咸", "恒", "損", "益", "震", "艮", "中孚", "遯", "大壯", "夬", "姤", "漸", "歸妹", "小過", "晉", "明夷", "萃", "升", "豐", "旅", "既濟", "未濟", "家人", "睽", "困", "井", "巽", "兌", "蹇", "解", "革", "鼎", "渙", "節", "太極", "陰陽", "兩儀", "象", "彖", _
+        "老陰", "老陽", "少陰", "少陽")
+End Property
+Rem 用以標識易學關鍵字用
+Property Get 易學KeywordsToMark() As Variant 'string()
     易學KeywordsToMark = Array("易", "周易", "易經", "大易", "五經", "七經", "十三經", _
         "卦", "節卦", "離卦", _
         "爻", _
@@ -29,13 +36,14 @@ Property Get 易學KeywordsToMark_ExamPrecededAvoid() As Scripting.Dictionary
     
     Dim dict As New Scripting.Dictionary, cln As New VBA.Collection
     ' 添加資料到字典 creedit_with_Copilot大菩薩：https://sl.bing.net/goDF239cQVw
-    dict.Add "易", Array("移", "有不善未嘗不知", "勢固", "立門戶也", "立門" & ChrW(25143) & "也", "聽之者", "誠不為", "可", "人欲", "市", "輒", ChrW(-28903), "遽", "過於和", "平心", "尤", "容", "未", "不", "極", "甚", "貿", "交", "物", "變", "或可", "鄙", "博", "辟", "平", "慢", "俗", "坦", "難", "脫", "流", "樂", "革", "更", "簡", "白居", "居", "淺", "輕", "險", "相", "難行", "世", "易", "所")
+    dict.Add "易", Array("移", "捷最", "有不善未嘗不知", "勢固", "立門戶也", "立門" & ChrW(25143) & "也", "聽之者", "誠不為", "可", "人欲", "市", "輒", ChrW(-28903), "遽", "過於和", "平心", "尤", "容", "未", "不", "極", "甚", "貿", "交", "物", "變", "或可", "鄙", "博", "辟", "平", "慢", "俗", "坦", "難", "脫", "流", "樂", "革", "更", "簡", "白居", "居", "淺", "輕", "險", "相", "難行", "世", "易", "所")
     dict.Add "乾", Array("白", "豆", "面自", "擰", "餅", "未", "晾", "肉", "蘿蔔", "葡萄", "龍眼", "口", "枯", "烘", "晒", "曬", "筍", "外強中")
     dict.Add "豫", Array("防患於", "暇", "厎", "底", "不", "劉", "猶", "逸", VBA.ChrW(-10143) & VBA.ChrW(-8996))
     dict.Add "剝", Array("刻", "為之解")
     dict.Add "頤", Array("周敦", "程", "朵")
     dict.Add "大過", Array("可過")
     dict.Add "咎", Array("引", "何", "專")
+    dict.Add "賁", Array("諸葛")
     dict.Add "貞吉", Array("曹")
     dict.Add "易簡", Array("蘇")
     dict.Add "易" & VBA.ChrW(-10153) & VBA.ChrW(-9007), Array("蘇")
@@ -47,15 +55,17 @@ End Property
 Rem 某關鍵字的後面不能是 20240914
 Property Get 易學KeywordsToMark_ExamFollowedAvoid() As Scripting.Dictionary
     Dim dict As New Scripting.Dictionary
-    dict.Add "易", Array("得汩沒", "安居士", "得鹵", "言則難", "搖而難", "昏而難", "下手", "萌", "慢", "得消散", "見者", "厭", "出議論", "差", "陷", "退之節", "看", "積", "忘", "物", "易", "俗", "卜生", "堂", "科", "開罐", "筋", "姓", "玄光", "知由單", "幟", "轍", "手", "守", "水", "州", "順鼎", "如反", "如翻", "如拾", "容", "熔", "子而", "簀", "牙")
+    dict.Add "易", Array("得汩沒", "安居士", "得鹵", "言則難", "搖而難", "昏而難", "下手", "萌", "慢", "得消散", "見者", "厭", "出議論", "差", "陷", "退之節", "看", "積", "忘", "物", "易", "俗", "卜生", "堂", "科", "開罐", "筋", "姓", "玄光", "知由單", "幟", "轍", "手", "守", "水", "州", "順鼎", "如反", "如翻", "如拾", "容", "熔", "子而", "簀", "牙", "肩輿", "事爾")
     dict.Add "卦", Array("陣", "橋", "建築")
     dict.Add "筮", Array("仕")
-    dict.Add "乾", Array("枯", "淨")
+    dict.Add "乾", Array("枯", "淨", _
+        "道初", "道元年")
     dict.Add "豫", Array("先要", _
         "知", "讓", "劇", "備", VBA.ChrW(20675), "防", "州", "章", "聞")
     dict.Add "剝", Array("削", "民")
     dict.Add "煥", Array("然", "散")
     dict.Add "頤", Array("和園")
+    dict.Add "萃", Array("此書")
     dict.Add "巽", Array("懦")
     dict.Add VBA.ChrW(14514), Array("懦")
     dict.Add "大過", Array("人者")
@@ -75,12 +85,13 @@ Property Get 易學KeywordsToMark_ExamInPhraseAvoid() As Scripting.Dictionary
         "以易心", "以易處之", _
         "而易陵", "儉則易足", "者易犯", "狹則易足", "智易窮", "何以易窮", "無以易此", "更有易見者", _
         "至易事", "敢易也", _
-        "疾易作", "病易除", "人易從", "易放而難操", "錢差易 ", "言易墜", "所以易放", "者易直", "是易言也", _
+        "疾易作", "病易除", "人易從", "易放而難操", "錢差易 ", "言易墜", "所以易放", "者易直", "是易言也", "須易之", _
         "則易使", _
         "則易入於", _
         "非易事", _
         "豈易說")
     dict.Add "卦", Array("八卦山")
+    dict.Add "乾", Array("大乾廟")
     dict.Add "剝", Array("解剝而發明")
     dict.Add "豫", Array("人豫知")
     dict.Add "頤", Array("翁頤昌")
@@ -88,6 +99,7 @@ Property Get 易學KeywordsToMark_ExamInPhraseAvoid() As Scripting.Dictionary
     dict.Add "無妄", Array("人無妄取", "物無妄費")
     dict.Add VBA.ChrW(26080) & "妄", Array("人" & VBA.ChrW(26080) & "妄取", "物" & VBA.ChrW(26080) & "妄費")
     dict.Add VBA.ChrW(26080) & VBA.ChrW(-10171) & VBA.ChrW(-8522), Array("人" & VBA.ChrW(26080) & VBA.ChrW(-10171) & VBA.ChrW(-8522) & "取", "物" & VBA.ChrW(26080) & VBA.ChrW(-10171) & VBA.ChrW(-8522) & "費")
+    dict.Add "初九", Array("虞初九百")
         
     Set 易學KeywordsToMark_ExamInPhraseAvoid = dict
 

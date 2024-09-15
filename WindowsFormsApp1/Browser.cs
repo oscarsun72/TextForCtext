@@ -9115,6 +9115,9 @@ internal static string getImageUrl() {
                     ImproveGJcoolOCRMemoDoc = wordapp.Documents.Open(f);
                 }
             }
+            //-2146823683：此方法或屬性無法使用，因為此命令無法在閱讀中使用。
+            if (ImproveGJcoolOCRMemoDoc.ActiveWindow.View.ReadingLayout)//若是閱讀模式
+                ImproveGJcoolOCRMemoDoc.ActiveWindow.View.ReadingLayout=false;
             ImproveGJcoolOCRMemoDoc.ActiveWindow.Selection.EndKey(Microsoft.Office.Interop.Word.WdUnits.wdStory);
             try
             {
