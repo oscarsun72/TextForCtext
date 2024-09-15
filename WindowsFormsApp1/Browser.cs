@@ -7757,10 +7757,10 @@ internal static string getImageUrl() {
                 {
                     // 處理找不到下載目錄的情況
                     //Console.WriteLine("無法找到下載目錄設定。");
-                    if (MessageBox.Show("無法找到下載目錄設定。是否要設定為作業系統下載目錄？","",MessageBoxButtons.OKCancel,MessageBoxIcon.Exclamation,MessageBoxDefaultButton.Button1,MessageBoxOptions.DefaultDesktopOnly) == DialogResult.OK)
+                    if (MessageBox.Show("無法找到下載目錄設定。是否要設定為作業系統下載目錄？", "", MessageBoxButtons.OKCancel, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly) == DialogResult.OK)
                         downloadDirectory_Chrome = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + "\\Downloads";
                     else
-                        MessageBox.Show("請　賢友菩薩在textBox2中輸入下載目錄之路徑。設定正確，其文字即會消失。感恩感恩　讚歎讚歎　南無阿彌陀佛","", MessageBoxButtons.OK, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
+                        MessageBox.Show("請　賢友菩薩在textBox2中輸入下載目錄之路徑。設定正確，其文字即會消失。感恩感恩　讚歎讚歎　南無阿彌陀佛", "", MessageBoxButtons.OK, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
                 }
                 //downloadDirectory_Chrome = preferencesJson["download"]["default_directory"].ToString();
                 /* YouChat大菩薩：在这个示例中，我们首先获取当前用户的主文件夹，然后使用 Path.Combine 方法创建一个路径字符串，以便打开 Chrome 用户数据目录。然后，我们查找名为 Preferences 的文件，它包含 Chrome 首选项的 JSON 格式。我们使用 JObject.Parse 方法将 Preferences 文件的内容解析为 JSON 格式，然后查找下载目录的默认路径。最后，我们输出下载目录的值。 请注意，下载目录设置可能存在多个偏好文件，因此您可能需要查找适用于您的系统和 Chrome 版本的正确偏好文件。此外，这种方法依赖于 Chrome 的偏好文件格式，因此可能会因 Chrome 的更新而改变。 如果您想在下载文件时将文件保存到自定义目录中，建议使用我在前一个回答中提供的示例代码。
@@ -8050,7 +8050,8 @@ internal static string getImageUrl() {
             string title;
             try
             {
-                driver.SwitchTo().Window(driver.CurrentWindowHandle);
+                //不要切到Chrome瀏覽器！可以在等結果的時候做別的工作。20240915
+                //driver.SwitchTo().Window(driver.CurrentWindowHandle);
                 title = driver.Title;//避免誤關出錯
             }
             catch (Exception ex)
@@ -8096,7 +8097,7 @@ internal static string getImageUrl() {
                 title = driver.Title;
             }
 
-            List<string> keywords = new List<string> { "易", "五經", "七經", "十三經", "卦", "爻", "繫詞", "繫辭", "文言", "乾坤","元亨","利貞", "咎",
+            List<string> keywords = new List<string> { "易", "五經", "六經","七經", "十三經", "卦", "爻", "繫詞", "繫辭", "文言", "乾坤","元亨","利貞", "咎",
                  "夬", "頤","巽","坎","兌","小畜","大畜","歸妹","明夷","明𡗝","同人","大有","豫","蠱","噬嗑","賁","剝","大過","小過","遯","大壯","睽","暌","蹇","姤","萃","艮","渙","中孚","既濟","未濟",
                 "咸恆","老陰", "老陽", "少陰", "少陽","十翼",
                 "无妄", "彖", "象曰", "象傳", "象日", "象云","小象", "筮",
@@ -8199,7 +8200,7 @@ internal static string getImageUrl() {
                             //有文本的文字框
                             //Thread.Sleep(800);
                             if (new StringInfo(keyword).LengthInTextElements > 1)
-                                FindPageAndPaste2Find(driver,keyword);
+                                FindPageAndPaste2Find(driver, keyword);
                             else
                                 HighlightKeywords(keyword);
                         }//ActiveForm1.HideToNICo(); }
@@ -8211,7 +8212,7 @@ internal static string getImageUrl() {
                         //有文本的文字框
                         //Thread.Sleep(800);
                         if (new StringInfo(keyword).LengthInTextElements > 1)
-                            FindPageAndPaste2Find(driver,keyword);
+                            FindPageAndPaste2Find(driver, keyword);
                         else
                             HighlightKeywords(keyword);
                     }//ActiveForm1.HideToNICo(); }
@@ -8615,7 +8616,7 @@ internal static string getImageUrl() {
         /// </summary>
         /// <param name="driver"></param>
         /// <returns></returns>
-        public static bool FindPageAndPaste2Find(WebDriver driver,string pasteTxt, bool paste2Find = true)
+        public static bool FindPageAndPaste2Find(WebDriver driver, string pasteTxt, bool paste2Find = true)
         {
             Form1.playSound(Form1.soundLike.over, true);
             ActiveForm1.TopMost = false;
@@ -9117,7 +9118,7 @@ internal static string getImageUrl() {
             }
             //-2146823683：此方法或屬性無法使用，因為此命令無法在閱讀中使用。
             if (ImproveGJcoolOCRMemoDoc.ActiveWindow.View.ReadingLayout)//若是閱讀模式
-                ImproveGJcoolOCRMemoDoc.ActiveWindow.View.ReadingLayout=false;
+                ImproveGJcoolOCRMemoDoc.ActiveWindow.View.ReadingLayout = false;
             ImproveGJcoolOCRMemoDoc.ActiveWindow.Selection.EndKey(Microsoft.Office.Interop.Word.WdUnits.wdStory);
             try
             {
