@@ -1232,7 +1232,7 @@ checkPhrases:                                   '¤º´O©óÀË¬d¡GÃöÁä¦r§t¦b¸ÓÁ×§Kªº¤
                                                 If examOK Then '¦X®æ¤~¼ÐÃÑ
                                                     With rng
                                                         processCntr = processCntr + 1
-                                                        If processCntr Mod 55 = 0 Then SystemSetup.playSound 1 '¼½©ñ­µ®Ä¥H§K»~¥H¬°·í¤F
+                                                        If processCntr Mod 35 = 0 Then SystemSetup.playSound 1 '¼½©ñ­µ®Ä¥H§K»~¥H¬°·í¤F
                                                         Rem ¦¹ÀÉ¥i¨Ñ®Ä¯à´ú¸Õ¡A¶]°_¨Ó¤£ª¾¦ó¬G¯S§O¤[¡I file:///H:\§Úªº¶³ºÝµwºÐ\¶À¦Ñ®v»·ºÝ¤u§@\1©ö¾ÇÂøµÛ¤å¥»\«D²M¤H¤wªì¨B¼ÐÂI\¦ó¨}«T¢I¥|¤ÍÂNÂO»¡.docx
                                                         
                                                         .HighlightColorIndex = defaultHighlightColorIndex

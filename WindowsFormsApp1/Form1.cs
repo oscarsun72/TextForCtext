@@ -160,6 +160,11 @@ namespace WindowsFormsApp1
             get { return textBox4.Text; }
             set { textBox4.Text = value; }
         }
+        internal Font textBox4Font
+        {
+            get { return textBox4.Font; }
+            set { textBox4.Font= value; }
+        }
         //取得輸入模式：手動或自動
         internal bool KeyinTextMode { get { return keyinTextMode; } }
 

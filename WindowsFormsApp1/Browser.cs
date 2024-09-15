@@ -8097,12 +8097,12 @@ internal static string getImageUrl() {
                 title = driver.Title;
             }
 
-            List<string> keywords = new List<string> { "易", "五經", "六經","七經", "十三經", "卦", "爻", "繫詞", "繫辭", "文言", "乾坤","元亨","利貞", "咎",
+            List<string> keywords = new List<string> { "易", "五經", "六經","七經", "十三經","蓍", "卦", "爻", "繫詞", "繫辭", "文言", "乾坤","元亨","利貞", "咎",
                  "夬", "頤","巽","坎","兌","小畜","大畜","歸妹","明夷","明𡗝","同人","大有","豫","蠱","噬嗑","賁","剝","大過","小過","遯","大壯","睽","暌","蹇","姤","萃","艮","渙","中孚","既濟","未濟",
                 "咸恆","老陰", "老陽", "少陰", "少陽","十翼",
                 "无妄", "彖", "象曰", "象傳", "象日", "象云","小象", "筮",
                 "初九","九二","九三","九四","九五","上九","初六","六二","六三","六四","六五","上六","用九","用六", "繇辭","繇詞",
-                "隨時之義","庖有魚","包有魚","精義入神","豶豕","童牛","承之羞","雷在天上","錫馬", "蕃庶","晝日","三接","懲忿","窒欲","敬以直內","義以方外","迷後得主","利西南","品物咸章","天下大行","益動而", "日進無疆","頻巽","豚魚","頻復", "懲窒","閑邪","存誠","乾乾","悔吝","憧憧", "類萬物","柔順利貞","比之匪人","貞厲","履貞","履道坦坦","貞吉","悔亡","時義","健順", "內健而外順", "內健外順", "外順而內健", "外順內健","敦復","直方","開物成務","窮神知化", "夕惕","惕若","研幾極深","極深研幾","一陰一陽",
+                "隨時之義","庖有魚","包有魚","精義入神","豶豕","童牛","承之羞","雷在天上","錫馬", "蕃庶","晝日","三接","懲忿","窒欲","敬以直內","義以方外","迷後得主","利西南","品物咸章","天下大行","益動而", "日進無疆","頻巽","豚魚","頻復", "懲窒","閑邪","存誠","乾乾","悔吝","憧憧", "類萬物","柔順利貞","比之匪人","貞厲","履貞","履道坦坦","貞吉","悔亡","時義","健順", "內健而外順", "內健外順", "外順而內健", "外順內健","敦復","直方","開物成務","窮神知化", "夕惕","惕若","研幾極深","極深研幾","一陰一陽","允升","木上有水","勞民勸相","索而得",
                 "象義",
                 "伏羲","伏𦏁","庖𦏁","宓𦏁","伏犧","庖犧"};
 
@@ -8125,7 +8125,10 @@ internal static string getImageUrl() {
             if (ListIndex_Hanchi_SearchingKeywordsYijing > keywords.Count - 1) ListIndex_Hanchi_SearchingKeywordsYijing = keywords.Count - 1;
             string keyword = keywords[ListIndex_Hanchi_SearchingKeywordsYijing]; //Clipboard.SetText(keyword);20240914作廢
             ActiveForm1.PauseEvents();
-            ActiveForm1.textBox4Text = ListIndex_Hanchi_SearchingKeywordsYijing.ToString();
+            string indexStr = ListIndex_Hanchi_SearchingKeywordsYijing.ToString();
+            ActiveForm1.textBox4Text = indexStr;
+            if (indexStr.Length > 2) if (ActiveForm1.textBox4Font.Size > 12)
+                    ActiveForm1.textBox4Font = new Font(ActiveForm1.textBox4Font.FontFamily, 12);
             ActiveForm1.Controls["textBox1"].Text = keyword;
             ActiveForm1.ResumeEvents();
             bool returnValue = false;
@@ -8589,6 +8592,8 @@ internal static string getImageUrl() {
                 ListIndex_Hanchi_SearchingKeywordsYijing = 0;
                 Form1.playSound(Form1.soundLike.finish, true);//靜音模式時仍播出
                 returnValue = true;
+                if (ActiveForm1.textBox4Font.Size < 20.25)
+                        ActiveForm1.textBox4Font = new Font(ActiveForm1.textBox4Font.FontFamily,(float) 20.25);
                 if (ActiveForm1.KeyinTextMode == false) ActiveForm1.KeyinTextmodeSwitcher(false);
             }
             #endregion//單個關鍵字查詢結束
