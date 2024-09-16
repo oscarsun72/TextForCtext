@@ -611,7 +611,7 @@ Function LookupDictionary_of_ChineseCharacterVariants(x As String) As String()
     If Not code.IsChineseCharacter(x) Then
         Exit Function
     End If
-    ClipBoardObject.SetClipboard x
+    SystemSetup.SetClipboard x
 '    If wd Is Nothing Then
         openChrome "https://dict.variants.moe.edu.tw/"
 '    Else
@@ -648,7 +648,7 @@ Function LookupDictionary_of_ChineseCharacterVariants(x As String) As String()
             If zhengWen <> "0" Or iwe.text <> 0 Then
                 result(0) = x
                 result(1) = wd.URL
-                ClipBoardObject.SetClipboard result(1)
+                SystemSetup.SetClipboard result(1)
             End If
         Else
             '如果直接顯示該字頁面，非查詢結果頁，如： https://dict.variants.moe.edu.tw/dictView.jsp?ID=5565
@@ -657,7 +657,7 @@ Function LookupDictionary_of_ChineseCharacterVariants(x As String) As String()
             If iwe Is Nothing = False Then
                 result(0) = x
                 result(1) = wd.URL
-                ClipBoardObject.SetClipboard result(1)
+                SystemSetup.SetClipboard result(1)
             End If
         End If
     End If
@@ -691,7 +691,7 @@ Function LookupDictRevised(x As String) As String()
         MsgBox "只能檢索中文。請檢查檢索字串，重新開始。", vbExclamation
         Exit Function
     End If
-    ClipBoardObject.SetClipboard x
+    SystemSetup.SetClipboard x
     
     openChrome "https://dict.revised.moe.edu.tw/search.jsp?md=1"
     
@@ -722,7 +722,7 @@ Function LookupDictRevised(x As String) As String()
         If iwe Is Nothing Then
             result(0) = x
             result(1) = wd.URL
-            ClipBoardObject.SetClipboard result(1)
+            SystemSetup.SetClipboard result(1)
         End If
     End If
     LookupDictRevised = result
@@ -753,7 +753,7 @@ Function LookupHYDCD(x As String) As String()
         MsgBox "只能檢索中文。請檢查檢索字串，重新開始。", vbCritical
         Exit Function
     End If
-    ClipBoardObject.SetClipboard x
+    SystemSetup.SetClipboard x
     
     If openChrome("https://ivantsoi.myds.me/web/hydcd/search.html") = False Then
         openChrome ("https://ivantsoi.myds.me/web/hydcd/search.html")
@@ -795,7 +795,7 @@ Function LookupHYDCD(x As String) As String()
                 result(0) = x
                 wd.SwitchTo.Window WindowHandlesItem(WindowHandlesCount - 1)
                 result(1) = wd.URL
-                ClipBoardObject.SetClipboard result(1)
+                SystemSetup.SetClipboard result(1)
             Else
                 MsgBox "請檢查", vbCritical
                 Stop
@@ -830,7 +830,7 @@ Function LookupGXDS(x As String) As String()
         MsgBox "只能檢索中文。請檢查檢索字串，重新開始。", vbCritical
         Exit Function
     End If
-    ClipBoardObject.SetClipboard x
+    SystemSetup.SetClipboard x
     
     If openChrome("https://www.guoxuedashi.net/zidian/bujian/") = False Then
         If openChrome("https://www.guoxuedashi.net/zidian/bujian/") = False Then
@@ -865,7 +865,7 @@ Function LookupGXDS(x As String) As String()
         If iwe Is Nothing Or VBA.InStr(iwe.text, "【精确】方式查") = 0 Then
             result(0) = x
             result(1) = wd.URL
-            ClipBoardObject.SetClipboard result(1)
+            SystemSetup.SetClipboard result(1)
         End If
     End If
     LookupGXDS = result
@@ -895,7 +895,7 @@ Function LookupKangxizidian(x As String) As String()
     If Not code.IsChineseCharacter(x) Then
         Exit Function
     End If
-    ClipBoardObject.SetClipboard x
+    SystemSetup.SetClipboard x
     
     If Not openChrome("https://www.kangxizidian.com/search/index.php?stype=Word") Then
         If Not openChrome("https://www.kangxizidian.com/search/index.php?stype=Word") Then
@@ -930,7 +930,7 @@ Function LookupKangxizidian(x As String) As String()
         If iwe Is Nothing Then
             result(0) = x
             result(1) = wd.URL
-            ClipBoardObject.SetClipboard result(1)
+            SystemSetup.SetClipboard result(1)
         End If
     End If
     
@@ -961,7 +961,7 @@ Function LookupHomeinmistsShuowenImageAccess_VineyardHall(x As String) As String
     If Not code.IsChineseCharacter(x) Then
         Exit Function
     End If
-    ClipBoardObject.SetClipboard x
+    SystemSetup.SetClipboard x
     
     If Not openChrome("https://homeinmists.ilotus.org/shuowen/find.php") Then
         If Not openChrome("https://homeinmists.ilotus.org/shuowen/find.php") Then
@@ -1032,7 +1032,7 @@ Function LookupHomeinmistsShuowenImageAccess_VineyardHall(x As String) As String
     wd.SwitchTo.Window WindowHandlesItem(WindowHandlesCount - 1)
     
     result(1) = wd.URL
-    ClipBoardObject.SetClipboard result(1)
+    SystemSetup.SetClipboard result(1)
 
     LookupHomeinmistsShuowenImageAccess_VineyardHall = result
     Exit Function
@@ -1068,7 +1068,7 @@ Function LookupHomeinmistsShuowenImageTextSearchWFG_Interpretation(x As String) 
     If Not code.IsChineseString(x) Then
         Exit Function
     End If
-    ClipBoardObject.SetClipboard x '把檢索條件複製到剪貼簿以備用
+    SystemSetup.SetClipboard x '把檢索條件複製到剪貼簿以備用
     
     If Not openChrome("https://homeinmists.ilotus.org/shuowen/WFG2.php") Then
         If Not openChrome("https://homeinmists.ilotus.org/shuowen/WFG2.php") Then
@@ -1142,7 +1142,7 @@ Function LookupMultiFunctionChineseCharacterDatabase(x As String, Optional backg
     If Not code.IsChineseCharacter(x) Then
         Exit Function
     End If
-    ClipBoardObject.SetClipboard x
+    SystemSetup.SetClipboard x
     
     If backgroundStartChrome Then
         Set wd = openChromeBackground("https://humanum.arts.cuhk.edu.hk/Lexis/lexi-mf/")
@@ -1228,7 +1228,7 @@ Function LookupShuowenOrg(x As String) As String()
     If Not code.IsChineseCharacter(x) Then
         Exit Function
     End If
-    ClipBoardObject.SetClipboard x
+    SystemSetup.SetClipboard x
     
     If Not openChrome("https://www.shuowen.org/") Then
         If Not openChrome("https://www.shuowen.org/") Then
@@ -1296,7 +1296,132 @@ Select Case Err.Number
     End Select
 End Function
 
+Rem 查《異體字字典》取回其「說文釋形」欄位的內容：x 要查的字。傳回一個字串陣列，第1個元素是「說文釋形」的內容字串，第2個元素是查詢結果網址。若沒找到，則傳回空字串陣列 20240916
+Function LookupDictionary_of_ChineseCharacterVariants_RetrieveShuoWenData(x As String) As String()
+    On Error GoTo eH
+    Dim result(1) As String '1=索引值上限（最大值）
+    LookupDictionary_of_ChineseCharacterVariants_RetrieveShuoWenData = result
+    If Not code.IsChineseCharacter(x) Then
+        Exit Function
+    End If
+    SystemSetup.SetClipboard x
+    
+    If Not openChrome("https://dict.variants.moe.edu.tw/") Then
+        If Not openChrome("https://dict.variants.moe.edu.tw/") Then
+            Stop
+        End If
+    End If
+    Dim iwe As SeleniumBasic.IWebElement
+    Dim dt As Date
+    dt = VBA.Now
+    '查詢輸入框
+    Do While iwe Is Nothing
+        Set iwe = wd.FindElementByCssSelector("#header > div > flex > div:nth-child(3) > div.quick > form > input[type=text]:nth-child(2)")
+        If DateDiff("s", dt, VBA.Now) > 5 Then
+            Exit Function
+        End If
+    Loop
+    
+    word.Application.WindowState = wdWindowStateMinimize
+    wd.SwitchTo.Window (wd.CurrentWindowHandle)
+'    VBA.AppActivate "chrome"
 
+    '找到查詢輸入框之後
+    Dim keys As New SeleniumBasic.keys
+    iwe.Clear
+    iwe.SendKeys keys.Shift + keys.Insert '貼上檢索條件
+    iwe.SendKeys keys.Enter
+    
+    '查詢結果訊息框，如【[ 孫 ]， 查詢結果：正文 1 字，附收字 3 字 】中的「1」這個元件，以此元件來判斷
+    Set iwe = wd.FindElementByCssSelector("body > main > div > flex > div:nth-child(1) > red:nth-child(1)")
+    Rem 找出來的結果頁面有二：一是列出正文、附收字各字列表的網頁，二是直接進以該字為字頭的網頁
+    If Not iwe Is Nothing Then
+        Dim zhengWen As String
+        zhengWen = iwe.text '前例的「1」
+        '前例的「3」
+        Set iwe = wd.FindElementByCssSelector("body > main > div > flex > div:nth-child(1) > red:nth-child(2)")
+        If zhengWen <> "0" Or iwe.text <> "0" Then
+            '列出正文、附收字各字列表的網頁
+            Set iwe = wd.FindElementByCssSelector("#searchL > a")
+            If Not iwe Is Nothing Then
+                If VBA.InStr(iwe.GetAttribute("outerHTML"), " data-tp=") = 0 Then
+                GoTo plural
+                Else
+                    Do Until VBA.InStr(iwe.GetAttribute("outerHTML"), " data-tp=""正"" ")
+                    Loop
+                End If
+            Else
+plural: '當查詢結果不止一個「字」時，如「去廾」字
+'                Stop
+                
+                Dim ai As Byte
+                ai = 2 '#searchL > a:nth-child(4)'#searchL > a:nth-child(3)'#searchL > a:nth-child(2)
+                Set iwe = wd.FindElementByCssSelector("#searchL > a:nth-child(" & ai & ")")
+                Do Until VBA.InStr(iwe.GetAttribute("outerHTML"), " data-tp=""正"" ")
+                    ai = ai + 1
+                    Set iwe = wd.FindElementByCssSelector("#searchL > a:nth-child(" & ai & ")")
+                Loop
+            End If
+            iwe.Click
+            '說文釋形
+            Set iwe = wd.FindElementByCssSelector("#view > tbody > tr:nth-child(2) > td")
+            GoSub iweNothingExitFunction
+            result(0) = iwe.GetAttribute("textContent")
+            result(1) = wd.URL
+            SystemSetup.SetClipboard result(1)
+        End If
+    Else
+        '如果直接顯示該字頁面，非查詢結果頁，如： https://dict.variants.moe.edu.tw/dictView.jsp?ID=5565
+        '字頭元件
+        Set iwe = wd.FindElementByCssSelector("#header > section > h2 > span > a")
+        If iwe Is Nothing = False Then
+            '說文釋形
+            Set iwe = wd.FindElementByCssSelector("#view > tbody > tr:nth-child(2) > td")
+            GoSub iweNothingExitFunction
+            result(0) = iwe.GetAttribute("textContent")
+            result(1) = wd.URL
+            SystemSetup.SetClipboard result(1)
+        End If
+    End If
+''''    '等待檢索結果
+''''    Set iwe = wd.FindElementByCssSelector("body > div.container.main > div > div.col-md-9.main-content.pull-right > table > tbody > tr > td")
+''''    If Not iwe Is Nothing Then
+''''        If iwe.text = "沒有記錄" Then
+''''            Exit Function
+''''        End If
+''''    End If
+''''
+''''    Set iwe = wd.FindElementByCssSelector("body > div.container.main > div > div.col-md-9.main-content.pull-right > div.row.summary > div.col-md-9.pull-left.info-container > div.media.info-body > div.media-body")
+''''    GoSub iweNothingExitFunction
+''''
+''''    result(0) = iwe.text
+''''    result(1) = wd.URL
+    LookupDictionary_of_ChineseCharacterVariants_RetrieveShuoWenData = result
+    Exit Function
+    
+iweNothingExitFunction:
+    If iwe Is Nothing Then
+        LookupDictionary_of_ChineseCharacterVariants_RetrieveShuoWenData = result
+        Exit Function
+    End If
+    Return
+eH:
+Select Case Err.Number
+        Case -2146233088
+            If InStr(Err.Description, "disconnected: not connected to DevTools") Then 'disconnected: not connected to DevTools
+                                            '  (failed to check if window was closed: disconnected: not connected to DevTools)
+                                            '  (Session info: chrome=128.0.6613.85)
+                'Set wd = Nothing
+                SystemSetup.killchromedriverFromHere
+                Set wd = Nothing
+                Resume
+            Else
+                MsgBox Err.Number & Err.Description, vbExclamation
+            End If
+        Case Else
+            MsgBox "請關閉Chrome瀏覽器後再執行一次！" & vbCr & vbCr & Err.Number & Err.Description, vbExclamation
+    End Select
+End Function
 
 Rem 檢索Google
 
@@ -1304,7 +1429,7 @@ Sub GoogleSearch(Optional searchStr As String)
     On Error GoTo Err1
     If searchStr = "" And Selection = "" Then Exit Sub
    
-    ClipBoardObject.SetClipboard searchStr
+    SystemSetup.SetClipboard searchStr
     
     'Dim wd As SeleniumBasic.IWebDriver
     'Set wd = openChrome("https://www.baidu.com")
@@ -1315,7 +1440,7 @@ Sub GoogleSearch(Optional searchStr As String)
     Set iwe = wd.FindElementByCssSelector("#APjFqb")
     If Not iwe Is Nothing Then
         iwe.Clear
-        ClipBoardObject.SetClipboard searchStr
+        SystemSetup.SetClipboard searchStr
         iwe.SendKeys keys.Shift + keys.Insert
         iwe.SendKeys keys.Enter
     End If
@@ -1410,7 +1535,7 @@ Function grabGjCoolPunctResult(text As String, resultText As String, Optional Ba
 '        textBox.SendKeys text 'SystemSetup.GetClipboardText
 '
 '    Else
-'        ClipBoardObject.SetClipboard text
+'        systemsetup.SetClipboard text
 '        textBox.SendKeys key.Control + "v"
 '    End If
     
@@ -1486,7 +1611,7 @@ Function grabGjCoolPunctResult(text As String, resultText As String, Optional Ba
     '
     ''讀取剪貼簿作為回傳值
     'SystemSetup.Wait 0.3
-    'clipboardobject.SetClipboard textbox.text
+    'systemsetup.SetClipboard textbox.text
     'grabGjCoolPunctResult = SystemSetup.GetClipboardText
     grabGjCoolPunctResult = textBox.text
     resultText = grabGjCoolPunctResult
@@ -1510,7 +1635,7 @@ Err1:
                 Resume
             Case -2146233088 'unknown error: ChromeDriver only supports characters in the BMP  (Session info: chrome=109.0.5414.75)
                 Rem 完全無作用
-                Rem clipboardobject.SetClipboard text
+                Rem systemsetup.SetClipboard text
                 Rem SystemSetup.Wait 0.3
                 Rem textBox.SendKeys key.Control + "v"
                 Rem textBox.SendKeys key.LeftShift + key.Insert
@@ -1573,7 +1698,7 @@ Rem creedit chatGPT大菩薩：您提到的確實是 Selenium 的 SendKeys 方法不能貼上 BMP 
 On Error GoTo Err1
 Dim retryTimes As Byte
 DoEvents
-'clipboardobject.SetClipboard pastedTxt
+'systemsetup.SetClipboard pastedTxt
 'SystemSetup.Wait 0.2
 If Background Then iwd.Quit
 retry:

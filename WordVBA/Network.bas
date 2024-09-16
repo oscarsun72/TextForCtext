@@ -178,10 +178,15 @@ Sub 查漢語多功能字庫並取回其說文解釋欄位之值插入至插入點位置()
             Else
                 .Collapse wdCollapseEnd
             End If
-            .InsertAfter ar(0) & VBA.Chr(13)
+            '插入取回的《說文》內容
+            .TypeText "，《說文》云："
+            .InsertAfter ar(0) & VBA.Chr(13) 'ar(0)=《說文》內容
             .Collapse wdCollapseEnd
+            If Selection.End = Selection.Document.Range.End - 1 Then
+                Selection.Document.Range.InsertParagraphAfter
+            End If
             .Font.Size = fontsize
-            .InsertAfter ar(1)
+            .InsertAfter ar(1) '植入網址
             SystemSetup.contiUndo ur
             .Collapse wdCollapseStart
             With .Application
@@ -227,10 +232,70 @@ Sub 查說文解字並取回其解釋欄位及網址值插入至插入點位置()
             Else
                 .Collapse wdCollapseEnd
             End If
-            .InsertAfter ar(0) & VBA.Chr(13)
+            .TypeText "，《說文》云："
+            .InsertAfter ar(0) & VBA.Chr(13) 'ar(0)=《說文》內容
             .Collapse wdCollapseEnd
+            If Selection.End = Selection.Document.Range.End - 1 Then
+                Selection.Document.Range.InsertParagraphAfter
+            End If
             .Font.Size = fontsize
-            .InsertAfter ar(1)
+            .InsertAfter ar(1) '插入網址
+            SystemSetup.contiUndo ur
+            .Collapse wdCollapseStart
+            With .Application
+                .Activate
+                With .ActiveWindow
+                    If .WindowState = wdWindowStateMinimize Then
+                        .WindowState = wdWindowStateNormal
+                        .Activate
+                    End If
+                End With
+            End With
+        End With
+    End If
+End Sub
+Sub 查異體字字典並取回其說文釋形欄位及網址值插入至插入點位置()
+    Rem  Alt + v （v= 異體字 variants 的 v）
+    If Selection.Characters.Count > 1 Then
+        MsgBox "限查1字", vbExclamation ', vbError
+        Exit Sub
+    End If
+    Dim ar As Variant, x As String
+    x = Selection.text
+    ar = SeleniumOP.LookupDictionary_of_ChineseCharacterVariants_RetrieveShuoWenData(x)
+    If ar(0) = vbNullString Then
+        word.Application.Activate
+        MsgBox "找不到，或網頁當了或改版了！", vbExclamation
+        With Selection.Application
+            .Activate
+            With .ActiveWindow
+                If .WindowState = wdWindowStateMinimize Then
+                    .WindowState = wdWindowStateNormal
+                    .Activate
+                End If
+            End With
+        End With
+    Else
+        Dim ur As UndoRecord, fontsize As Single
+        SystemSetup.stopUndo ur, "查異體字字典並取回其說文釋形欄位及網址值插入至插入點位置"
+        With Selection
+            fontsize = VBA.IIf(.Font.Size = 9999999, 12, .Font.Size) - 4
+            If fontsize < 0 Then fontsize = 10
+            If .Type = wdSelectionIP Then
+                .Move
+            Else
+                .Collapse wdCollapseEnd
+            End If
+            .TypeText "，《說文》：" & VBA.Chr(13)
+            Dim shuoWen As String
+            shuoWen = VBA.Replace(VBA.Replace(ar(0), "：，", "：" & x & "，"), "段注本：", VBA.Chr(13) & "段注本：")
+            .InsertAfter shuoWen & VBA.Chr(13)  'ar(0)=《說文》內容
+            .Collapse wdCollapseEnd
+            If Selection.End = Selection.Document.Range.End - 1 Then
+                Selection.Document.Range.InsertParagraphAfter
+            End If
+            .Font.Size = fontsize
+            .InsertAfter ar(1) '插入網址
             SystemSetup.contiUndo ur
             .Collapse wdCollapseStart
             With .Application

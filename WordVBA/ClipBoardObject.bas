@@ -10,7 +10,7 @@ Rem 註解解說：
 #If VBA7 Then
     #If Win64 Then
         ' 64位元環境
-        Public Declare PtrSafe Function OpenClipboard Lib "user32" (ByVal hwnd As LongPtr) As Long
+        Public Declare PtrSafe Function OpenClipboard Lib "user32" (ByVal hWnd As LongPtr) As Long
         Public Declare PtrSafe Function EmptyClipboard Lib "user32" () As Long
         Public Declare PtrSafe Function CloseClipboard Lib "user32" () As Long
         Public Declare PtrSafe Function SetClipboardData Lib "user32" (ByVal uFormat As Long, ByVal hMem As LongPtr) As LongPtr
@@ -23,7 +23,7 @@ Rem 註解解說：
         Public Declare PtrSafe Sub RtlMoveMemory Lib "kernel32" (ByVal Destination As LongPtr, ByVal Source As LongPtr, ByVal Length As LongPtr)
     #Else
         ' 32位元環境
-        Public Declare Function OpenClipboard Lib "user32" (ByVal hwnd As Long) As Long
+        Public Declare Function OpenClipboard Lib "user32" (ByVal hWnd As Long) As Long
         Public Declare Function EmptyClipboard Lib "user32" () As Long
         Public Declare Function CloseClipboard Lib "user32" () As Long
         Public Declare Function SetClipboardData Lib "user32" (ByVal uFormat As Long, ByVal hMem As Long) As Long
