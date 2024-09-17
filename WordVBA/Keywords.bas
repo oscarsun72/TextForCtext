@@ -9,7 +9,7 @@ Property Get 易學KeywordsToCheck() As Variant 'string()
         "老陰", "老陽", "少陰", "少陽", "蓍")
 End Property
 Rem 用以標識易學關鍵字用
-Property Get 易學KeywordsToMark() As Variant 'string()
+Property Get 易學KeywordsToMark() As Variant 'string()因為 Array Returns a Variant containing an array,所以不能寫成 as string()
     易學KeywordsToMark = Array("易", "周易", "易經", "大易", "五經", "六經", "七經", "十三經", "蓍", _
         "卦", "節卦", "離卦", _
         "爻", _

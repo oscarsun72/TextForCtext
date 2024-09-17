@@ -167,7 +167,7 @@ Sub 查漢語多功能字庫並取回其說文解釋欄位之值插入至插入點位置()
                 End If
             End With
         End With
-    Else
+    Else 'ar(0)不為空時
         Dim ur As UndoRecord, fontsize As Single
         SystemSetup.stopUndo ur, "查漢語多功能字庫並取回其說文解釋欄位之值插入至插入點位置"
         With Selection
@@ -179,8 +179,8 @@ Sub 查漢語多功能字庫並取回其說文解釋欄位之值插入至插入點位置()
                 .Collapse wdCollapseEnd
             End If
             '插入取回的《說文》內容
-            .TypeText "，《說文》云："
-            .InsertAfter ar(0) & VBA.Chr(13) 'ar(0)=《說文》內容
+            .TypeText "，《說文》云：「"
+            .InsertAfter ar(0) & "」" & VBA.Chr(13) 'ar(0)=《說文》內容
             .Collapse wdCollapseEnd
             If Selection.End = Selection.Document.Range.End - 1 Then
                 Selection.Document.Range.InsertParagraphAfter
@@ -221,7 +221,60 @@ Sub 查說文解字並取回其解釋欄位及網址值插入至插入點位置()
                 End If
             End With
         End With
-    Else
+    Else 'ar(0)不為空時
+        Dim ur As UndoRecord, fontsize As Single
+        SystemSetup.stopUndo ur, "查說文解字並取回其解釋欄位及網址值插入至插入點位置"
+        With Selection
+            fontsize = VBA.IIf(.Font.Size = 9999999, 12, .Font.Size) - 4
+            If fontsize < 0 Then fontsize = 10
+            If .Type = wdSelectionIP Then
+                .Move
+            Else
+                .Collapse wdCollapseEnd
+            End If
+            .TypeText "，《說文》云：「"
+            .InsertAfter ar(0) & "」" & VBA.Chr(13) 'ar(0)=《說文》內容
+            .Collapse wdCollapseEnd
+            If Selection.End = Selection.Document.Range.End - 1 Then
+                Selection.Document.Range.InsertParagraphAfter
+            End If
+            .Font.Size = fontsize
+            .InsertAfter ar(1) '插入網址
+            SystemSetup.contiUndo ur
+            .Collapse wdCollapseStart
+            With .Application
+                .Activate
+                With .ActiveWindow
+                    If .WindowState = wdWindowStateMinimize Then
+                        .WindowState = wdWindowStateNormal
+                        .Activate
+                    End If
+                End With
+            End With
+        End With
+    End If
+End Sub
+Sub 查說文解字並取回其解釋欄位段注及網址值插入至插入點位置()
+    Rem  Ctrl+ Shift + Alt + o （o= 說文解字 ShuoWen.ORG 的 O）
+    If Selection.Characters.Count > 1 Then
+        MsgBox "限查1字", vbExclamation ', vbError
+        Exit Sub
+    End If
+    Dim ar 'As Variant
+    ar = SeleniumOP.LookupShuowenOrg(Selection.text, True)
+    If ar(0) = vbNullString Then
+        word.Application.Activate
+        MsgBox "找不到，或網頁當了或改版了！", vbExclamation
+        With Selection.Application
+            .Activate
+            With .ActiveWindow
+                If .WindowState = wdWindowStateMinimize Then
+                    .WindowState = wdWindowStateNormal
+                    .Activate
+                End If
+            End With
+        End With
+    Else 'ar(0)不為空時
         Dim ur As UndoRecord, fontsize As Single
         SystemSetup.stopUndo ur, "查說文解字並取回其解釋欄位及網址值插入至插入點位置"
         With Selection
@@ -235,9 +288,37 @@ Sub 查說文解字並取回其解釋欄位及網址值插入至插入點位置()
             .TypeText "，《說文》云："
             .InsertAfter ar(0) & VBA.Chr(13) 'ar(0)=《說文》內容
             .Collapse wdCollapseEnd
+            '插入段注內容
+            .InsertAfter "段注本：" & VBA.IIf(VBA.Asc(VBA.Left(ar(2), 1)) = 13, vbNullString, VBA.Chr(13)) & ar(2) & VBA.Chr(13)
             If Selection.End = Selection.Document.Range.End - 1 Then
                 Selection.Document.Range.InsertParagraphAfter
             End If
+            Dim p As Paragraph, s As Byte, sDuan As Byte
+            s = VBA.Len("                                ") '段注本的說文
+            sDuan = VBA.Len("                ") '段注本的段注文
+reCheck:
+            For Each p In .Paragraphs
+                If VBA.InStr(p.Range.text, "清代 段玉裁《說文解字注》") Then
+                    p.Range.Delete
+                    GoTo reCheck:
+                ElseIf VBA.Replace(p.Range.text, " ", "") = Chr(13) Then
+                    p.Range.Delete
+                    GoTo reCheck:
+                ElseIf VBA.Left(p.Range.text, s) = VBA.space(s) Then '段注本的說文
+                    p.Range.text = Mid(p.Range.text, s + 1)
+                ElseIf VBA.Left(p.Range.text, sDuan) = VBA.space(sDuan) Then '段注本的段注文
+                    With p.Range
+                        .text = Mid(p.Range.text, sDuan + 1)
+                        With .Font
+                            .Size = fontsize + 2
+                            .ColorIndex = 11 '.Font.Color= 34816
+                        End With
+                    End With
+                End If
+            Next p
+            .Collapse wdCollapseEnd
+            
+            '網址格式設定
             .Font.Size = fontsize
             .InsertAfter ar(1) '插入網址
             SystemSetup.contiUndo ur
@@ -262,7 +343,9 @@ Sub 查異體字字典並取回其說文釋形欄位及網址值插入至插入點位置()
     End If
     Dim ar As Variant, x As String
     x = Selection.text
+    
     ar = SeleniumOP.LookupDictionary_of_ChineseCharacterVariants_RetrieveShuoWenData(x)
+    
     If ar(0) = vbNullString Then
         word.Application.Activate
         MsgBox "找不到，或網頁當了或改版了！", vbExclamation
@@ -275,7 +358,7 @@ Sub 查異體字字典並取回其說文釋形欄位及網址值插入至插入點位置()
                 End If
             End With
         End With
-    Else
+    Else '如果ar(0)非空字串（空值）
         Dim ur As UndoRecord, fontsize As Single
         SystemSetup.stopUndo ur, "查異體字字典並取回其說文釋形欄位及網址值插入至插入點位置"
         With Selection
@@ -286,11 +369,26 @@ Sub 查異體字字典並取回其說文釋形欄位及網址值插入至插入點位置()
             Else
                 .Collapse wdCollapseEnd
             End If
-            .TypeText "，《說文》：" & VBA.Chr(13)
+            Dim s As Byte
+            s = VBA.InStr(ar(0), "《說文》不錄。")
+            If s = 0 Then
+                If ar(0) = "說文釋形沒有資料！" Then
+                    .TypeText VBA.Chr(13)
+                Else
+                    .TypeText "，《說文》：" & VBA.Chr(13)
+                End If
+            Else
+                 .TypeText "，" & VBA.Mid(ar(0), s) & VBA.Chr(13)
+            End If
             Dim shuoWen As String
             shuoWen = VBA.Replace(VBA.Replace(ar(0), "：，", "：" & x & "，"), "段注本：", VBA.Chr(13) & "段注本：")
-            .InsertAfter shuoWen & VBA.Chr(13)  'ar(0)=《說文》內容
-            .Collapse wdCollapseEnd
+            If VBA.Left(shuoWen, 1) = "，" Then
+                shuoWen = x & shuoWen
+            End If
+            If s = 0 And ar(0) <> "說文釋形沒有資料！" Then
+                .InsertAfter shuoWen & VBA.Chr(13)  'ar(0)=《說文》內容
+                .Collapse wdCollapseEnd
+            End If
             If Selection.End = Selection.Document.Range.End - 1 Then
                 Selection.Document.Range.InsertParagraphAfter
             End If

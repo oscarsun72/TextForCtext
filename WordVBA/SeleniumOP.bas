@@ -1220,11 +1220,11 @@ Select Case Err.Number
     End Select
 End Function
 
-Rem 查《說文解字》取回其《說文》「解釋」欄位的內容：x 要查的字。傳回一個字串陣列，第1個元素是《說文》「解釋」的內容字串，第2個元素是查詢結果網址。若沒找到，則傳回空字串陣列
-Function LookupShuowenOrg(x As String) As String()
+Rem 查《說文解字》取回其《說文》「解釋」欄位的內容：x 要查的字,includingDuan 是否也傳回段注內容。傳回一個字串陣列，第1個元素是《說文》（大徐本）「解釋」的內容字串，第2個元素是查詢結果網址，第3個則是段注之內容。若沒找到，則傳回空字串陣列
+Function LookupShuowenOrg(x As String, Optional includingDuan As Boolean) As String()
     On Error GoTo eH
-    Dim result(1) As String '1=索引值上限（最大值）
-    LookupShuowenOrg = result
+    Dim result(2) As String '2=索引值上限（最大值 = UBound 傳回值）
+    LookupShuowenOrg = result '先設定好要傳回的字串陣列，當沒賦予值時就是傳回空字串的陣列
     If Not code.IsChineseCharacter(x) Then
         Exit Function
     End If
@@ -1263,12 +1263,30 @@ Function LookupShuowenOrg(x As String) As String()
             Exit Function
         End If
     End If
-    
+    '釋文欄的內容
     Set iwe = wd.FindElementByCssSelector("body > div.container.main > div > div.col-md-9.main-content.pull-right > div.row.summary > div.col-md-9.pull-left.info-container > div.media.info-body > div.media-body")
     GoSub iweNothingExitFunction
-    
     result(0) = iwe.text
     result(1) = wd.URL
+    '取得段注本內容
+    If includingDuan Then
+        Dim i As Byte
+        i = 1
+        'Dim duanCommentary As String
+        '取得段注本內容框的元件
+        Set iwe = wd.FindElementByCssSelector("body > div.container.main > div > div.col-md-9.main-content.pull-right > div:nth-child(" & i & ") > div")
+        Do
+            If i > 30 Then Exit Do
+            If Not iwe Is Nothing Then
+                If VBA.InStr(iwe.GetAttribute("textContent"), "清代 段玉裁《說文解字注》") Then Exit Do
+            End If
+            Set iwe = wd.FindElementByCssSelector("body > div.container.main > div > div.col-md-9.main-content.pull-right > div:nth-child(" & i & ") > div")
+            i = i + 1
+        Loop
+        GoSub iweNothingExitFunction
+        result(2) = iwe.GetAttribute("textContent") '=duanCommentary
+    End If
+    
     LookupShuowenOrg = result
     Exit Function
     
@@ -1363,7 +1381,16 @@ plural: '當查詢結果不止一個「字」時，如「去廾」字
                 Loop
             End If
             iwe.Click
-            '說文釋形
+            '先檢查 說文釋形 儲存格 內的文字是否是「說文釋形」
+            Set iwe = wd.FindElementByCssSelector("#view > tbody > tr:nth-child(2) > th")
+            GoSub iweNothingExitFunction
+            If iwe.GetAttribute("textContent") <> "說文釋形" Then
+                Set iwe = Nothing
+                result(0) = "說文釋形沒有資料！"
+                result(1) = wd.URL
+                GoSub iweNothingExitFunction
+            End If
+            '說文釋形 儲存格元件右邊的儲存格
             Set iwe = wd.FindElementByCssSelector("#view > tbody > tr:nth-child(2) > td")
             GoSub iweNothingExitFunction
             result(0) = iwe.GetAttribute("textContent")
@@ -1375,7 +1402,17 @@ plural: '當查詢結果不止一個「字」時，如「去廾」字
         '字頭元件
         Set iwe = wd.FindElementByCssSelector("#header > section > h2 > span > a")
         If iwe Is Nothing = False Then
-            '說文釋形
+        
+            '先檢查 說文釋形 儲存格 內的文字是否是「說文釋形」
+            Set iwe = wd.FindElementByCssSelector("#view > tbody > tr:nth-child(2) > th")
+            GoSub iweNothingExitFunction
+            If iwe.GetAttribute("textContent") <> "說文釋形" Then
+                Set iwe = Nothing
+                result(0) = "說文釋形沒有資料！"
+                result(1) = wd.URL
+                GoSub iweNothingExitFunction
+            End If
+            '說文釋形 儲存格元件右邊的儲存格
             Set iwe = wd.FindElementByCssSelector("#view > tbody > tr:nth-child(2) > td")
             GoSub iweNothingExitFunction
             result(0) = iwe.GetAttribute("textContent")

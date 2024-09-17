@@ -308,6 +308,7 @@ Ctrl + F12 ：檢索《國語辭典》
 - Alt + v ： **單字**檢索《異體字字典》並讀入其《說文》及網址資料以便引文。
 - Alt + n ： **單字**檢索《漢語多功能字庫》並取回其說文解釋欄位之值插入至插入點位置。 （n= 能 neng）
 - Alt + o ： **單字**檢索[《說文解字》網站](https://www.shuowen.org/)並取回其解釋欄位及網址值插入至插入點位置。 （o= 說文解字 ShuoWen.ORG 的 O）
+- Ctrl + Alt + Shift + o ： **單字**檢索[《說文解字》網站](https://www.shuowen.org/)並取回其解釋欄位及段注本內容與網址值插入至插入點位置，並予以適當的格式化。 （o= 說文解字 ShuoWen.ORG 的 O）
 - Ctrl + Alt + x ： **單字**檢索《康熙字典網上版》（x = xi 熙）
 - Ctrl + d + s （按住 Ctrl 依序按d、s） ：檢索《國學大師》（ds：大師 da-shi 的 d、s）
 - Alt + g ： 以選取文字檢索Google
