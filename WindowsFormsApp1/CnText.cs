@@ -12,6 +12,7 @@ using System.Windows.Forms;
 using System.Diagnostics;
 using Microsoft.Office.Interop.Word;
 using static System.Net.Mime.MediaTypeNames;
+using OpenQA.Selenium.DevTools.V125.Runtime;
 //using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 //using static System.Net.Mime.MediaTypeNames;
 //using System.Reflection;
@@ -699,9 +700,9 @@ namespace TextForCtext
                 if (similarity >= threshold)
                 {
                     //前一段若為「|」通常是卷末題目
-                    if (i > lines.Length - 2 && 
+                    if (i > lines.Length - 2 &&
                         ("|" + Environment.NewLine).IndexOf(lines[i - 1]) > -1) //也分段/行符號可能還未自動轉換成「|」
-                            continue;
+                        continue;
 
                     location = xChecking.IndexOf(lines[i]);
                     if (location == -1)
@@ -1031,7 +1032,8 @@ namespace TextForCtext
         /// <param name="originalText"></param>
         /// <param name="punctuatedText"></param>
         /// <returns></returns>
-        public static string RestoreParagraphs(ref string originalText, ref string punctuatedText)
+        public static string RestoreParagraphs(string originalText,ref string punctuatedText)
+        //public static string RestoreParagraphs(ref string originalText, ref string punctuatedText)
         {
 
             // Define a set of punctuation marks to ignore
@@ -1082,7 +1084,11 @@ namespace TextForCtext
                         else
                         {
                             Debugger.Break();
-                            break;
+                            //text=RemovePunctuation(text);
+                            adjustedPos = (before.Length + offset1 + 1);
+                            Form1.playSound(Form1.soundLike.error);
+                            //return -1;
+                            //break;
                         }
                     }
                     if (subTextWithoutPunctuation.Contains(before))
@@ -1135,7 +1141,7 @@ namespace TextForCtext
             punctuatedText = punctuatedText.Replace(Environment.NewLine, string.Empty);
             //清除標點符號以利分段符號之比對搜尋
             originalText = RemovePunctuation(originalText);
-            //清除縮排即凸排格式標記，即將分段符號前後的空格「　」均予清除
+            //清除縮排即凸排格式標記，即將分段符號前後的空格「　」均予清除//當寫在送去自動標點前！！20240918//發現問題出在使用了 .Text屬性值 故先還原再觀察
             originalText = Regex.Replace(originalText, $@"\s*{Environment.NewLine}+\s*", Environment.NewLine);
             #endregion
 
@@ -1151,6 +1157,21 @@ namespace TextForCtext
                 int end = Math.Min(originalText.Length, index + 5);
                 string before = originalText.Substring(start, index - start);
                 string after = originalText.Substring(index + newLine.Length, end - index - newLine.Length);
+
+                //if (char.IsHighSurrogate(before.LastOrDefault()))
+                //    before = originalText.Substring(start, index - start + 1);
+                if (char.IsLowSurrogate(before.FirstOrDefault()))
+                {
+                    Debugger.Break();
+                    before = originalText.Substring(start - 1, index - start);
+                }
+                if (char.IsHighSurrogate(after.LastOrDefault()))
+                {
+                    Debugger.Break();
+                    after = originalText.Substring(index + newLine.Length, end - index - newLine.Length + 1);
+                }
+                //if (char.IsLowSurrogate(after.FirstOrDefault()))
+                //    after = originalText.Substring(index + newLine.Length, end - index - newLine.Length);
 
                 // Ensure 'before' and 'after' do not include newline characters
                 while (before.Contains('\r') || before.Contains('\n'))

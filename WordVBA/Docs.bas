@@ -1009,7 +1009,7 @@ pasteAnyway:
             
             Set rngMark = d.Range(IIf(endDocOld >= d.Range.End, d.Range.End - 1, endDocOld), d.Range.End)
             
-            marking©ö¾ÇÃöÁä¦r rngMark, searchedTerm, word.wdYellow
+            marking©ö¾ÇÃöÁä¦r rngMark, searchedTerm, word.wdYellow, wdRed, False
             
         End If
         Rem ¥H¤W¼ÐÃÑÃöÁä¦r
@@ -1075,7 +1075,7 @@ refres:
 
         If rng.End = rng.Document.Range.End Then
 
-            ClipBoardObject.SetClipboard VBA.Left(ClipBoardObject.GetClipboard, 25)
+            SystemSetup.SetClipboard VBA.Left(SystemSetup.GetClipboard, 25)
 
             If cntr < 2 Then
                 cntr = cntr + 1
@@ -1128,7 +1128,11 @@ Sub marking©ö¾ÇÃöÁä¦r(rng As Range, arr As Variant, Optional defaultHighlightCol
             .Highlight = True
         End With
         For Each e In arr '¹M¾ú¨C­Ó­n¼ÐÃÑªºÃöÁä¦r
-            If InStr(xd, e) > 0 Then
+        
+'            If e = "°®ª¾¤j©l" Then Stop 'just for test
+            
+            If InStr(xd, e) > 0 Then '¦b¦³¶W³sµ²µ¥¥\¯àÅÜ¼Æ¡BÁôÂÃ¤å¦r®É¥i¯à·|miss¡A¤µ´ú¸Õ¨Ã¤£·|¡A«Ý¦A´ú¸Õ¡C
+            
                 rng.SetRange startRng, endRng
                 'If e = "¿Ý" Then
                 isFollowedAvoid = Keywords.©ö¾ÇKeywordsToMark_ExamFollowedAvoid.Exists(e)
@@ -1284,7 +1288,17 @@ checkPhrases:                                   '¤º´O©óÀË¬d¡GÃöÁä¦r§t¦b¸ÓÁ×§Kªº¤
                           '          dictCoordinatesPhrase.Add rngExam.start, rngExam.End
                           
                 Else '¤£¥ÎÀË¬dª½±µ¨ú¥N¡]³w¦æ¼ÐÃÑ¡^ªÌ
-                    .Execute e, , , , , , True, wdFindStop, True, e, Replace:=wdReplaceAll
+                    Do While .Execute(e, , , , , , True, wdFindStop, True) '¦¹®Ä¯à¤]¤£·|¤ñ wdReplaceAll ¤Þ¼ÆªÌºC¡A¥i¨£¨ä¤º·í¥ç«Y¥ÎÃþ¦ü¤§°j°é¹ê§@ªÌ¤] 20240919 ·P®¦·P®¦¡@Æg¼ÛÆg¼Û¡@«nµLªüÀ±ªû¦ò
+'                        .Parent.HighlightColorIndex = defaultHighlightColorIndex
+'                        .Parent.Font.ColorIndex = fontColor
+                        Rem ­Y¼g¦¨¥H¤U·|¦³49DLL©I¥s³W®æ¿ù»~¡A³o¦¸­«¼g¤S¤£·|¤F¡A¥i¨£¬O VBE½sÄ¶¾¹¬G»Ù 20240920
+                        With rng
+                            .HighlightColorIndex = defaultHighlightColorIndex
+                            .Font.ColorIndex = fontColor
+                        End With
+                    Loop
+'                    .Execute e, , , , , , True, wdFindStop, True, e, Replace:=wdReplaceAll '¦b§t¦³¶W³sµ²µ¥®æ¦¡¤Æ¤å¦r®É·|¥¢ÆF
+                    'rng.SetRange startRng, endRng'«e¤w¦³
                 End If
             End If
         Next e '¤U¤@­Ó¥´ºâ­n¼ÐÃÑªºÃöÁä¦r

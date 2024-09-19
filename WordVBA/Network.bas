@@ -288,35 +288,38 @@ Sub 查說文解字並取回其解釋欄位段注及網址值插入至插入點位置()
             .TypeText "，《說文》云："
             .InsertAfter ar(0) & VBA.Chr(13) 'ar(0)=《說文》內容
             .Collapse wdCollapseEnd
-            '插入段注內容
-            .InsertAfter "段注本：" & VBA.IIf(VBA.Asc(VBA.Left(ar(2), 1)) = 13, vbNullString, VBA.Chr(13)) & ar(2) & VBA.Chr(13)
             If Selection.End = Selection.Document.Range.End - 1 Then
                 Selection.Document.Range.InsertParagraphAfter
             End If
-            Dim p As Paragraph, s As Byte, sDuan As Byte
-            s = VBA.Len("                                ") '段注本的說文
-            sDuan = VBA.Len("                ") '段注本的段注文
+            If ar(2) <> vbNullString Then
+                '插入段注內容
+                .InsertAfter "段注本：" & VBA.IIf(VBA.Asc(VBA.Left(ar(2), 1)) = 13, vbNullString, VBA.Chr(13)) & ar(2) & VBA.Chr(13)
+                Dim p As Paragraph, s As Byte, sDuan As Byte
+                s = VBA.Len("                                ") '段注本的說文
+                sDuan = VBA.Len("                ") '段注本的段注文
+                .Paragraphs(1).Range.Font.Bold = True '粗體： "段注本："
 reCheck:
-            For Each p In .Paragraphs
-                If VBA.InStr(p.Range.text, "清代 段玉裁《說文解字注》") Then
-                    p.Range.Delete
-                    GoTo reCheck:
-                ElseIf VBA.Replace(p.Range.text, " ", "") = Chr(13) Then
-                    p.Range.Delete
-                    GoTo reCheck:
-                ElseIf VBA.Left(p.Range.text, s) = VBA.space(s) Then '段注本的說文
-                    p.Range.text = Mid(p.Range.text, s + 1)
-                ElseIf VBA.Left(p.Range.text, sDuan) = VBA.space(sDuan) Then '段注本的段注文
-                    With p.Range
-                        .text = Mid(p.Range.text, sDuan + 1)
-                        With .Font
-                            .Size = fontsize + 2
-                            .ColorIndex = 11 '.Font.Color= 34816
+                For Each p In .Paragraphs
+                    If VBA.InStr(p.Range.text, "清代 段玉裁《說文解字注》") Then
+                        p.Range.Delete
+                        GoTo reCheck:
+                    ElseIf VBA.Replace(p.Range.text, " ", "") = Chr(13) Then
+                        p.Range.Delete
+                        GoTo reCheck:
+                    ElseIf VBA.Left(p.Range.text, s) = VBA.space(s) Then '段注本的說文
+                        p.Range.text = Mid(p.Range.text, s + 1)
+                    ElseIf VBA.Left(p.Range.text, sDuan) = VBA.space(sDuan) Then '段注本的段注文
+                        With p.Range
+                            .text = Mid(p.Range.text, sDuan + 1)
+                            With .Font
+                                .Size = fontsize + 2
+                                .ColorIndex = 11 '.Font.Color= 34816
+                            End With
                         End With
-                    End With
-                End If
-            Next p
-            .Collapse wdCollapseEnd
+                    End If
+                Next p
+                .Collapse wdCollapseEnd
+            End If
             
             '網址格式設定
             .Font.Size = fontsize

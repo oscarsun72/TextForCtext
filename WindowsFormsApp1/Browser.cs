@@ -7,6 +7,7 @@ using OpenQA.Selenium.Interactions;
 using OpenQA.Selenium.Remote;
 using OpenQA.Selenium.Support.UI;
 using System;
+using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -1415,7 +1416,8 @@ namespace TextForCtext
                 if (!chromedriversPID.Contains(driverService.ProcessId)) chromedriversPID.Add(driverService.ProcessId);
                 //配置quickedit_data_textbox以備用
                 driver = cDrv;// quickedit_data_textboxSetting 方法堆疊（stack）中要用到driver參考
-                quickedit_data_textboxSetting(url, null, cDrv);
+                if (Form1.IsValidUrl＿ImageTextComparisonPage(url))
+                    quickedit_data_textboxSetting(url, null, cDrv);
                 //IWebElement clk  = cDrv.FindElement(selm.By.Id("logininfo")); clk.Click();
                 //cDrv.FindElement(selm.By.Id("logininfo")).Click();
                 /*202301050214 因為以下這行設定成功，可以用平常的Chrome來操作了，就不必再登入安裝（如擴充功能）匯入（如書籤）什麼的了 感恩感恩　讚歎讚歎　南無阿彌陀佛
@@ -1434,7 +1436,7 @@ namespace TextForCtext
                             driver = driver ?? cDrv;
                             try
                             {
-                                ActiveForm1.Controls["textBox1"].Text = waitFindWebElementByName_ToBeClickable("data", _webDriverWaitTimSpan)?.Text;
+                                ActiveForm1.Controls["textBox1"].Text = quickedit_data_textboxTxt;//waitFindWebElementByName_ToBeClickable("data", _webDriverWaitTimSpan)?.Text;//.Text屬性會Trim前空格
                             }
                             catch (Exception)
                             {
@@ -1733,7 +1735,7 @@ namespace TextForCtext
             ////清除原來文字，準備貼上新的
             //textbox.Clear();//20240913作廢
 
-            #region paste to textbox
+            #region input to textbox（old : paste to textbox）
             // 在文字框中輸入文字
             //textbox.SendKeys(@xInput); //("Hello, World!");
             /*
@@ -1873,7 +1875,7 @@ namespace TextForCtext
                 #endregion
             }
             else
-                Form1.playSound(Form1.soundLike.over, true);
+                Form1.playSound(Form1.soundLike.notify, true);
             return true;
         }
 
@@ -2378,10 +2380,23 @@ namespace TextForCtext
             {
                 switch (ex.HResult)
                 {
-                    case -2146233088://"The HTTP request to the remote WebDriver server for URL http://localhost:4144/session/a5d7705c0a6199c76529de0e157667f9/window/handles timed out after 8.5 seconds."
-                        killProcesses(new string[] { "chromedriver" });//手動關閉由Selenium啟動的Chrome瀏覽器須由此才能清除
-                        driver = null;
-                        driver = DriverNew();
+                    case -2146233088:
+                        if (ex.Message.StartsWith("The HTTP request to the remote WebDriver server for URL")
+                            //"The HTTP request to the remote WebDriver server for URL http://localhost:4144/session/a5d7705c0a6199c76529de0e157667f9/window/handles timed out after 8.5 seconds."
+                            || ex.Message.StartsWith("disconnected: not connected to DevTools"))//"disconnected: not connected to DevTools\n  (failed to check if window was closed: disconnected: not connected to DevTools)\n  (Session info: chrome=128.0.6613.138)"
+
+                        {
+                            killProcesses(new string[] { "chromedriver" });//手動關閉由Selenium啟動的Chrome瀏覽器須由此才能清除
+                            driver = null;
+                            driver = DriverNew();
+                            tabCount = driver.WindowHandles.Count;
+                        }
+                        else
+                        {
+                            Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
+                            Console.WriteLine(ex.HResult + ex.Message);
+                            Debugger.Break();
+                        }
                         break;
                     default:
                         throw;
@@ -2420,7 +2435,9 @@ namespace TextForCtext
             //throw;
             try
             {
-                driver.Navigate().GoToUrl(url); LastValidWindow = driver.CurrentWindowHandle;
+                if (driver.Url != url)
+                    driver.Navigate().GoToUrl(url);
+                LastValidWindow = driver.CurrentWindowHandle;
                 //activate and move to most front of desktop
                 //driver.SwitchTo().Window(driver.CurrentWindowHandle;
                 if (frmKeyinTextModeTopWindow) WindowsScrolltoTop();//將分頁視窗頁面捲到頂端
@@ -5885,8 +5902,14 @@ internal static string getImageUrl() {
             {
                 if (DateTime.Now.Subtract(ddt).TotalSeconds > 38) { StopOCR = true; return false; }
             }
+            try
+            {
+                Clipboard.SetText(downloadImgFullName);
+            }
+            catch (Exception)
+            {
+            }
 
-            Clipboard.SetText(downloadImgFullName);
 
             //等待選取檔案對話框開啟
             Thread.Sleep(1600 + (
@@ -7916,7 +7939,8 @@ internal static string getImageUrl() {
             iwe = waitFindWebElementBySelector_ToBeClickable("#PunctArea");
             dt = DateTime.Now; bool reClickFlag = false;
             //等待OCR結果
-            while (iwe.Text == x)
+            //while (iwe.Text == x)//.Text屬性傳回的會是經過trim的，故若開頭是全形空格，則一下子就會誤判成已經標點過（文本經改過）的了
+            while (iwe.GetAttribute("textContent") == x)//.Text屬性傳回的會是經過trim的，故若開頭是全形空格，則一下子就會誤判成已經標點過（文本經改過）的了
             {
                 //檢查如果沒有按到「標點」按鈕，就再次按下 20240811 以出現等待圖示控制項為判斷
                 if (waitFindWebElementBySelector_ToBeClickable("#waitingSpinner") == null && reClickFlag == false && iwe.Text == x)
@@ -7932,7 +7956,8 @@ internal static string getImageUrl() {
 
                 if (DateTime.Now.Subtract(dt).TotalSeconds > 25) if (Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("標點逾時，是否繼續？") == DialogResult.Cancel) return false;
             }
-            x = iwe.Text;
+            //x = iwe.Text;//.Text屬性傳回的會是經過trim的
+            x = iwe.GetAttribute("textContent");
             //關閉https://gj.cool/punct頁面回到原來的頁面
             driver.Close();
             driver.SwitchTo().Window(LastValidWindow);
@@ -8067,6 +8092,7 @@ internal static string getImageUrl() {
                                 driver.SwitchTo().Window(LastValidWindow);
                             else
                                 driver.SwitchTo().Window(driver.WindowHandles.Last());
+                            goto default;
                         }
                         break;
                     default:
@@ -8075,15 +8101,53 @@ internal static string getImageUrl() {
                         foreach (var item in driver.WindowHandles)
                         {
                             driver.SwitchTo().Window(item);
-                            if (driver.Title.Contains("漢籍全文")) break;
+                            try
+                            {
+                                if (driver.Title.Contains("漢籍全文")) break;
+                            }
+                            catch (Exception exx)
+                            {
+                                switch (exx.HResult)
+                                {
+                                    case -2146233088:
+                                        if (exx.Message.StartsWith("unknown error\nfrom no such execution context:"))//unknown error
+                                                                                                                       //from no such execution context: frame does not have execution context
+                                                                                                                       //  (Session info: chrome = 128.0.6613.138)
+                                            continue;
+                                        break;
+                                    default:
+                                        Console.WriteLine(exx.HResult + exx.Message);
+                                        Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(exx.HResult + exx.Message);
+                                        break;
+                                }
+                            }
                         }
                         if (!driver.Title.Contains("漢籍全文"))
                         {
                             title = string.Empty;
                             foreach (var item in driver.WindowHandles)
                             {
-                                if (driver.SwitchTo().Window(item).Url.StartsWith("https://ctext.org/wiki.pl?if="))//https://ctext.org/wiki.pl?if=gb&res=、https://ctext.org/wiki.pl?if=en&res=
-                                { title = driver.Title; break; }
+                                try
+                                {
+                                    if (driver.SwitchTo().Window(item).Url.StartsWith("https://ctext.org/wiki.pl?if="))//https://ctext.org/wiki.pl?if=gb&res=、https://ctext.org/wiki.pl?if=en&res=
+                                    { title = driver.Title; break; }
+                                }
+                                catch (Exception exx)
+                                {
+                                    switch (exx.HResult)
+                                    {
+                                        case -2146233088:
+                                            if (exx.Message.StartsWith("unknown error\nfrom no such execution context:"))//unknown error
+                                                                                                                           //from no such execution context: frame does not have execution context
+                                                                                                                           //  (Session info: chrome = 128.0.6613.138)
+                                                continue;
+                                            break;
+                                        default:
+                                            Console.WriteLine(exx.HResult + exx.Message);
+                                            Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(exx.HResult + exx.Message);
+                                            break;
+                                    }
+                                }
 
                             }
                             if (title == string.Empty)
@@ -8098,11 +8162,11 @@ internal static string getImageUrl() {
             }
 
             List<string> keywords = new List<string> { "易", "五經", "六經","七經", "十三經","蓍", "卦", "爻", "繫詞", "繫辭", "文言", "乾坤","元亨","利貞", "咎",
-                 "夬", "頤","巽","坎","兌","小畜","大畜","歸妹","明夷","明𡗝","同人","大有","豫","蠱","噬嗑","賁","剝","大過","小過","遯","大壯","睽","暌","蹇","姤","萃","艮","渙","中孚","既濟","未濟",
-                "咸恆","老陰", "老陽", "少陰", "少陽","十翼",
+                 "夬", "頤","巽","坎","兌","小畜","大畜","歸妹","明夷","明𡗝","同人于宗","同人","大有","豫","蠱","噬嗑","〈需〉","賁於外","外賁","內賁","賁","剝","大過","小過","遯世無悶","遯","大壯","睽","暌","蹇","姤","萃","艮其背", "乾知大始","乾以易知","坤作成物","坤以簡能" ,"艮","渙","中孚","既濟","未濟",
+                "咸恆","老陰", "老陽", "少陰", "少陽","十翼","四象","兩儀",
                 "无妄", "彖", "象曰", "象傳", "象日", "象云","小象", "筮",
                 "初九","九二","九三","九四","九五","上九","初六","六二","六三","六四","六五","上六","用九","用六", "繇辭","繇詞",
-                "隨時之義","庖有魚","包有魚","精義入神","豶豕","童牛","承之羞","雷在天上","錫馬", "蕃庶","晝日","三接","懲忿","窒欲","敬以直內","義以方外","迷後得主","利西南","品物咸章","天下大行","益動而", "日進無疆","頻巽","豚魚","頻復", "懲窒","閑邪","存誠","乾乾","悔吝","憧憧", "類萬物","柔順利貞","比之匪人","貞厲","履貞","履道坦坦","貞吉","悔亡","時義","健順", "內健而外順", "內健外順", "外順而內健", "外順內健","敦復","直方","開物成務","窮神知化", "夕惕","惕若","研幾極深","極深研幾","一陰一陽","允升","木上有水","勞民勸相","索而得",
+                "隨時之義","庖有魚","包有魚","精義入神","豶豕","童牛","承之羞","雷在天上","錫馬", "蕃庶","晝日","三接","懲忿","窒欲","敬以直內","義以方外","迷後得主","利西南","品物咸章","天下大行","益動而", "日進無疆","頻巽","豚魚","頻復", "懲窒","閑邪","存誠","乾乾","悔吝","憧憧", "類萬物","柔順利貞","比之匪人","貞厲","履貞","履道坦坦","貞吉","悔亡","時義","健順", "內健而外順", "內健外順", "外順而內健", "外順內健","敦復","直方","開物成務","窮神知化", "夕惕","惕若","研幾極深","極深研幾","一陰一陽","允升","木上有水","勞民勸相","索而得","我有好爵","言有序","有聖人之道四","長子帥師","弟子輿尸","無悶","日用而不知","之道鮮","原始反終", "寂然不動", "感而遂通","朋從", "朋盍", "容民畜眾","有過則改","見善則遷",
                 "象義",
                 "伏羲","伏𦏁","庖𦏁","宓𦏁","伏犧","庖犧"};
 
@@ -8117,7 +8181,7 @@ internal static string getImageUrl() {
                     "〈泰〉","〈否〉","〈損〉","〈益〉","〈屯〉","〈豫〉","〈旡妄〉","〈復〉","〈震〉",
                     "少隂","太隂",
                 "𥘉九","𭃨九","𭃡九","𥘉六","𭃨六","𭃡六",
-                "悔亾","悔兦"};
+                "悔亾","悔兦","无悶","遯世无悶","容民畜衆"};
                 keywords.AddRange(additionalKeywords);
             }
 
@@ -8128,7 +8192,7 @@ internal static string getImageUrl() {
             string indexStr = ListIndex_Hanchi_SearchingKeywordsYijing.ToString();
             ActiveForm1.textBox4Text = indexStr;
             if (indexStr.Length > 2) if (ActiveForm1.textBox4Font.Size > 12)
-                    ActiveForm1.textBox4Font = new Font(ActiveForm1.textBox4Font.FontFamily, 12);
+                { ActiveForm1.textBox4Font = new Font(ActiveForm1.textBox4Font.FontFamily, 12); ActiveForm1.Refresh(); }
             ActiveForm1.Controls["textBox1"].Text = keyword;
             ActiveForm1.ResumeEvents();
             bool returnValue = false;
@@ -8380,12 +8444,10 @@ internal static string getImageUrl() {
                         {//檢索有結果：《漢籍全文資料庫》
                             Form1.playSound(Form1.soundLike.info);
                             returnValue = true;
-                            ActiveForm1.TopMost = false;
                             iwe = waitFindWebElementByName_ToBeClickable("_IMG_檢索報表", 2);
                             if (iwe != null)//   ?.Click();
                             {//20240710 Copilot大菩薩：要在 Selenium 中使用鍵盤的 Shift 鍵，您可以使用 Actions 類別來模擬鍵盤和滑鼠的操作。以下是一個範例程式碼：
-                             // 建立一個新的 Actions 物件
-                                ActiveForm1.TopMost = false;
+                             // 建立一個新的 Actions 物件                                
                                 Actions action = new Actions(driver);
                                 // 按下 Shift 鍵，然後點擊元素，最後釋放 Shift 鍵
                                 action.KeyDown(OpenQA.Selenium.Keys.Shift).Click(iwe).KeyUp(OpenQA.Selenium.Keys.Shift).Build().Perform();
@@ -8393,6 +8455,7 @@ internal static string getImageUrl() {
                                 //driver.SwitchTo().Window(driver.WindowHandles.Last());
                                 //Browser.BringToFront("chrome");//最後會有
 
+                                ActiveForm1.Activate(); ActiveForm1.TopMost = false;
                                 //ActiveForm1.AvailableInUseBothKeysMouse();
                                 //ActiveForm1.TopMost = false;
 
@@ -8593,7 +8656,7 @@ internal static string getImageUrl() {
                 Form1.playSound(Form1.soundLike.finish, true);//靜音模式時仍播出
                 returnValue = true;
                 if (ActiveForm1.textBox4Font.Size < 20.25)
-                        ActiveForm1.textBox4Font = new Font(ActiveForm1.textBox4Font.FontFamily,(float) 20.25);
+                    ActiveForm1.textBox4Font = new Font(ActiveForm1.textBox4Font.FontFamily, (float)20.25);
                 if (ActiveForm1.KeyinTextMode == false) ActiveForm1.KeyinTextmodeSwitcher(false);
             }
             #endregion//單個關鍵字查詢結束
@@ -8631,7 +8694,13 @@ internal static string getImageUrl() {
             SendKeys.SendWait("^f");//打開Chrome瀏覽器網頁上的「搜尋本頁內容」方塊
             if (paste2Find)
             {
-                Clipboard.SetText(pasteTxt);
+                try
+                {
+                    Clipboard.SetText(pasteTxt);
+                }
+                catch (Exception)
+                {
+                }
                 // 等待尋找方塊出現
                 System.Threading.Thread.Sleep(200);
                 // 貼上剪貼簿內容

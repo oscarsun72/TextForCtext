@@ -3113,6 +3113,8 @@ Sub 漢籍電子文獻資料庫文本整理_注文前後加括號() '最後執行 Docs.mark易學關鍵字(在
         If hasPunct Then
             Docs.mark易學關鍵字 Nothing, False
             
+            GoSub chkRng
+            
             If rng.Document.path = vbNullString Then
                 rng.Document.Close wdDoNotSaveChanges
             Else
@@ -3133,7 +3135,7 @@ Sub 漢籍電子文獻資料庫文本整理_注文前後加括號() '最後執行 Docs.mark易學關鍵字(在
                     If TextForCtext.GjcoolPunct() Then
                         '因為在文件的最末端
                         pasteAppendedRange.SetRange pasteAppendedRange.End - 1, pasteAppendedRange.End - 1
-                        pasteAppendedRange.text = ClipBoardObject.GetClipboard 'ClipBoardObject.GetClipboard
+                        pasteAppendedRange.text = SystemSetup.GetClipboard
                         DoEvents
                         SystemSetup.wait 0.1
                         Docs.marking易學關鍵字 pasteAppendedRange, Keywords.易學KeywordsToMark
@@ -3161,6 +3163,21 @@ finish:
     word.Application.ScreenUpdating = True
     word.Application.Activate
 '    AppActivate word.ActiveDocument.ActiveWindow.Caption
+Exit Sub
+
+chkRng:
+    'creedit_with_Copilot大菩薩：20240918 https://sl.bing.net/btKqsDvwrD2
+    Dim r As Range
+    On Error Resume Next
+    Set r = rng
+    On Error GoTo 0
+
+    If r Is Nothing Then
+        '已被刪除或不存在。
+    Else
+        '存在。
+    End If
+    GoTo finish 'Return
 End Sub
 
 Sub 漢籍電子文獻資料庫文本整理_注文前後加括號_origin()

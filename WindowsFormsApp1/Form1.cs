@@ -12,6 +12,7 @@ using System.Linq;
 using System.Media;
 using System.Net.NetworkInformation;
 using System.Runtime.InteropServices;
+using System.Security.Policy;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -163,7 +164,7 @@ namespace WindowsFormsApp1
         internal Font textBox4Font
         {
             get { return textBox4.Font; }
-            set { textBox4.Font= value; }
+            set { textBox4.Font = value; }
         }
         //取得輸入模式：手動或自動
         internal bool KeyinTextMode { get { return keyinTextMode; } }
@@ -704,7 +705,15 @@ namespace WindowsFormsApp1
                         //應該是在[新增單位]之後：
                         Clipboard.Clear();
                         if (IsValidUrl＿ImageTextComparisonPage(br.driver.Url))
-                            br.Page_textbox.SendKeys(OpenQA.Selenium.Keys.Enter);//br.driver.Navigate().Refresh();
+                        {
+                            if (null == br.Page_textbox)//br.driver.Navigate().Refresh();
+                            {
+                                MessageBoxShowOKExclamationDefaultDesktopOnly("請檢查textBox3中的網址值");
+                                return;
+                            }
+                            else
+                                br.Page_textbox.SendKeys(OpenQA.Selenium.Keys.Enter);
+                        }
                     }
                 }
             }
@@ -1811,7 +1820,9 @@ namespace WindowsFormsApp1
             }
             #endregion//清除空行
 
+            PauseEvents();//20240919所增，避免誤觸 textBox1_TextChanged事件程序中的 hideToNICo();方法
             textBox1.Text = x;
+            ResumeEvents();
             textBox1.SelectionStart = 0; textBox1.SelectionLength = 0;
             textBox1.ScrollToCaret();
             return true;
@@ -6592,7 +6603,11 @@ namespace WindowsFormsApp1
         /// <summary>
         /// 軟體操作時提醒之系統音效參照
         /// </summary>
-        public enum soundLike { none, over, done, stop, info, error, warn, exam, processing, press, waiting, finish }
+        public enum soundLike
+        {
+            none, over, done, stop, info, error, warn, exam, processing, press, waiting, finish,
+            notify
+        }
         /// <summary>
         /// 播放指定音效
         /// </summary>
@@ -6636,6 +6651,11 @@ namespace WindowsFormsApp1
                     break;
                 case soundLike.finish:
                     wav = "Ring03";
+                    break;
+                case soundLike.notify:
+                    //wav = "Windows Unlock";
+                    wav = "Windows Shutdown";//Windows 關機
+                    //wav = "Windows Information Bar";//Windows 資訊列
                     break;
                 default:
                     break;
@@ -7004,6 +7024,7 @@ namespace WindowsFormsApp1
         }
         /// <summary>
         /// 檢查是否是瀏覽圖文對照之頁面
+        /// 可與 isQuickEditUrl 方法互參用
         /// </summary>
         /// <param name="url">要檢查的網址字串值</param>
         /// <returns></returns>
@@ -9449,6 +9470,10 @@ namespace WindowsFormsApp1
             }
             CnText.FormalizeText(ref x);
             CnText.RemoveBooksPunctuation(ref x);//有些是手動添加的書名號或篇名號，不宜逕削去 20240813 然《古籍酷》自動標點仍會先清除書名號，但篇名號不管。20240911 今仍清除篇名號，以免橫生枝節
+
+            //清除縮排即凸排格式標記，即將分段符號前後的空格「　」均予清除
+            //x = Regex.Replace(x, $@"\s*{Environment.NewLine}+\s*", Environment.NewLine);//發現問題出在使用了 .Text屬性值作判斷故自動標點之方法過早結束迴圈，故今先還原，再觀察 20240918
+
             string originalText = x;// 
             //x = x.Replace(Environment.NewLine, string.Empty).Replace("·", string.Empty);//OCR回來後我這裡自動標點如「嗚呼」仍會標上驚嘆號，故交由 FormalizeText 來處理
             x = x.Replace(Environment.NewLine, string.Empty);//.Replace("·", string.Empty);音節號已於 RemoveBooksPunctuation 中清除
@@ -9465,71 +9490,79 @@ namespace WindowsFormsApp1
                     break;
             }
 
-
             //textBox1.SelectedText = x;//先作個備份（還原）記錄，以防萬一 20240914 作為下面 RestoreParagraphs 方法除錯用，因其中已有 Debugger.Break(); 故今省略
             //textBox1.Select(s, l);
 
+            if (originalText != x //如果傳回的值與原來已有不同（即當標點過了）
+                && !originalText.Contains(x)
+                && !originalText.Replace(Environment.NewLine, string.Empty).Contains(x))
             //恢復段落符號
-            if (!omitExam) x = CnText.RestoreParagraphs(ref originalText, ref x);
-
-            try
+            //if (!omitExam) x = CnText.RestoreParagraphs(ref originalText, ref x);
             {
-                br.driver.SwitchTo().Window(br.LastValidWindow);
-                if (br.driver.Url != textBox3.Text)
+                if (!omitExam) x = CnText.RestoreParagraphs(originalText, ref x);
+                try
                 {
-                    foreach (var item in br.driver.WindowHandles)
+                    br.driver.SwitchTo().Window(br.LastValidWindow);
+                    if (br.driver.Url != textBox3.Text)
                     {
-                        br.driver.SwitchTo().Window(item);
-                        if (br.driver.Url == textBox3.Text) break;
+                        foreach (var item in br.driver.WindowHandles)
+                        {
+                            br.driver.SwitchTo().Window(item);
+                            if (br.driver.Url == textBox3.Text) break;
+                        }
                     }
+                    if (br.driver.Url != textBox3.Text)
+                    {
+                        //Debugger.Break();
+                        if (IsValidUrl＿keyDownCtrlAdd(br.driver.Url))
+                        {
+                            FixUrl＿ImageTextComparisonPage(br.driver.Url, true, true);
+                            //int boxPosition = br.driver.Url.IndexOf("#box(");
+                            //if (boxPosition > -1) br.driver.Navigate().GoToUrl(br.driver.Url.Substring(0, boxPosition) + "#editor");
+                            if (br.driver.Url != textBox3.Text)
+                                textBox3.Text = br.driver.Url;
+                        }
+                    }
+
                 }
-                if (br.driver.Url != textBox3.Text)
+                catch (Exception ex)
                 {
-                    //Debugger.Break();
-                    if (IsValidUrl＿keyDownCtrlAdd(br.driver.Url))
-                    {
-                        FixUrl＿ImageTextComparisonPage(br.driver.Url, true, true);
-                        //int boxPosition = br.driver.Url.IndexOf("#box(");
-                        //if (boxPosition > -1) br.driver.Navigate().GoToUrl(br.driver.Url.Substring(0, boxPosition) + "#editor");
-                        if (br.driver.Url != textBox3.Text)
-                            textBox3.Text = br.driver.Url;
-                    }
+                    Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
                 }
-
+                //OCR結果文本規範化
+                CnText.FormalizeText(ref x);
+                bool p = pasteAllOverWrite;
+                pasteAllOverWrite = true;//防止隱藏到系統任務列去
+                if (reMarkFlag) x += "<p>";
+                undoRecord();
+                textBox1.SelectedText = CnText.BooksPunctuation(ref x, true);
+                undoRecord();
+                pasteAllOverWrite = p;
+                //textBox1.SelectedText = x;
+                AvailableInUseBothKeysMouse();
+                if (!selAll) textBox1.Select(s, x.Length);
+                else textBox1.Select(0, 0);
+                textBox1.ScrollToCaret();
+                if (copyResult)
+                {
+                    if (textBox1.SelectionLength == 0)
+                        try
+                        {
+                            Clipboard.SetText(textBox1.Text);
+                        }
+                        catch (Exception)
+                        {
+                        }
+                    else
+                        textBox1.Copy();
+                }
+                return true;
             }
-            catch (Exception ex)
+            else
             {
-                Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
+                MessageBoxShowOKExclamationDefaultDesktopOnly("沒有標點，請檢查後重試，或送去舊站看看。感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主");
+                return false;
             }
-            //OCR結果文本規範化
-            CnText.FormalizeText(ref x);
-            bool p = pasteAllOverWrite;
-            pasteAllOverWrite = true;//防止隱藏到系統任務列去
-            if (reMarkFlag) x += "<p>";
-            undoRecord();
-            textBox1.SelectedText = CnText.BooksPunctuation(ref x, true);
-            undoRecord();
-            pasteAllOverWrite = p;
-            //textBox1.SelectedText = x;
-            AvailableInUseBothKeysMouse();
-            if (!selAll) textBox1.Select(s, x.Length);
-            else textBox1.Select(0, 0);
-            textBox1.ScrollToCaret();
-            if (copyResult)
-            {
-                if (textBox1.SelectionLength == 0)
-                    try
-                    {
-                        Clipboard.SetText(textBox1.Text);
-                    }
-                    catch (Exception)
-                    {
-                    }
-                else
-                    textBox1.Copy();
-            }
-
-            return true;
         }
 
         private void doHanchi_SearchingKeywordsYijing()
@@ -11421,7 +11454,7 @@ namespace WindowsFormsApp1
             undoRecord();
 
             stopUndoRec = false;
-            playSound(soundLike.done, true);//若有取代則播音效，否則有些字筆畫太似，不放大不知道有沒有一致，取代了沒 20240913
+            playSound(soundLike.notify, true);//若有取代則播音效，否則有些字筆畫太似，不放大不知道有沒有一致，取代了沒 20240913
         }
 
         List<string> replaceWordList = new List<string>();
@@ -12538,8 +12571,11 @@ namespace WindowsFormsApp1
                     {
                         switch (ex.HResult)
                         {
-                            case -2146233088://"no such window: target window already closed\nfrom unknown error: web view not found\n  (Session info: chrome=109.0.5414.75)"
-                                br.GoToUrlandActivate(textBox3.Text, keyinTextMode);
+                            case -2146233088:
+                                if (ex.Message.StartsWith("no such window: target window already closed"))//"no such window: target window already closed\nfrom unknown error: web view not found\n  (Session info: chrome=109.0.5414.75)"
+                                    br.GoToUrlandActivate(textBox3.Text, keyinTextMode);
+                                else
+                                    Debugger.Break();
                                 break;
                             default:
                                 throw;
@@ -13210,6 +13246,7 @@ namespace WindowsFormsApp1
         {
             if (_currentPageNum != "")
                 tooltipConstructor(sender, "現在在第" + _currentPageNum + "頁"
+                    + Environment.NewLine + Environment.NewLine + "file= " + GetBookID_fromUrl(textBox3.Text)
                     + Environment.NewLine + Environment.NewLine + "textBox3.Text = " + textBox3Text);
         }
 
@@ -13218,24 +13255,34 @@ namespace WindowsFormsApp1
         {
             if (!_eventsEnabled) return;
             string url = textBox3.Text;
-            //取代#box 為 #editor，如 https://ctext.org/library.pl?if=gb&file=185615&page=200&editwiki=2330034#box(428,674,2,4)
-            //if (url.IndexOf("#box(") > -1 && (url.IndexOf("&editwiki=") > -1)
-            if (url.IndexOf("#box(") > -1) { playSound(soundLike.waiting, true); Debugger.Break(); }
-            if (url.IndexOf("#box(") > -1 && browsrOPMode != BrowserOPMode.appActivateByName)
-            {
-                try
-                {
-                    string ur = br.GetDriverUrl;
-                    if (ur.IndexOf("#box(") > -1)
-                        //    br.driver.Navigate().GoToUrl(ur.Substring(0, ur.IndexOf("#box(")));
-                        br.driver.Url = FixUrl＿ImageTextComparisonPage(ur, false, true);
-                }
-                catch (Exception ex)
-                {
-                    Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
-                }
 
+            #region 取代#box 為 #editor，如 https://ctext.org/library.pl?if=gb&file=185615&page=200&editwiki=2330034#box(428,674,2,4)
+
+            //if (url.IndexOf("#box(") > -1 && (url.IndexOf("&editwiki=") > -1)
+            if (url.IndexOf("#box(") > -1)
+            {
+                playSound(soundLike.waiting, true);
+                if (MessageBoxShowOKCancelExclamationDefaultDesktopOnly("是否要偵錯？") == DialogResult.OK)
+                    Debugger.Break();
+                else
+                {
+                    if (browsrOPMode != BrowserOPMode.appActivateByName)
+                    {
+                        try
+                        {
+                            string ur = br.GetDriverUrl;
+                            if (ur.IndexOf("#box(") > -1)
+                                //    br.driver.Navigate().GoToUrl(ur.Substring(0, ur.IndexOf("#box(")));
+                                br.driver.Url = FixUrl＿ImageTextComparisonPage(ur, false, true);
+                        }
+                        catch (Exception ex)
+                        {
+                            Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
+                        }
+                    }
+                }
             }
+
 
             if (url.IndexOf("#box(") > url.IndexOf("&editwiki="))
             {
@@ -13255,14 +13302,17 @@ namespace WindowsFormsApp1
                 ResumeEvents();
             }
 
+            #endregion
 
-            //取得現前頁碼
+            #region 取得現前頁碼
             if (url.IndexOf("&page=") > -1)
             {
                 int s = url.IndexOf("&page=") + "&page=".Length;
                 _currentPageNum = url.Substring(s, url.IndexOf("&", s) > -1 ? url.IndexOf("&", s) - s : url.Length - s);
             }
             else _currentPageNum = "";
+            #endregion
+
             //mainFromTextBox3Text = textBox3.Text;
             string oldValue = (string)textBox3.Tag;//chatGPT 20230108
 
