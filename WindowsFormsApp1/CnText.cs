@@ -1025,16 +1025,64 @@ namespace TextForCtext
             string result = Regex.Replace(text, pattern, replacement);
             if (result != text) { text = result; }
         }
+        /// <summary>
+        /// 縮排字級計算：計算分段符號後的全形空格數量
+        /// 20240920 creedit_with_Copilot大菩薩：計算段落符號後的全形空格數量：https://sl.bing.net/f3ufxPqngjc
+        /// </summary>
+        /// <param name="strToCount">要計算的文本</param>
+        /// <returns></returns>
+        public static int IndentCounter(string strToCount)
+        {
+            int count = 0;
+            //string pattern = @"\r\n　"; // 使用正則表達式匹配 "\r\n" 後面接的全形空格
+            string pattern = Environment.NewLine + @"　"; // 使用正則表達式匹配 "\r\n" 後面接的全形空格
+            foreach (Match match in Regex.Matches(strToCount, pattern))
+            {
+                count++;
+            }
+            return count;
+        }
+        /// <summary>
+        /// 縮排字級計算：計算分段符號後的全形空格數量
+        /// 20240920 creedit_with_Copilot大菩薩：計算段落符號後的全形空格數量：https://sl.bing.net/f3ufxPqngjc
+        /// </summary>
+        /// <param name="strToCount">要計算的文本</param>
+        /// <param name="count"></param>
+        /// <returns>傳回與縮排等量的全形空格字串</returns>
+        public static string IndentCounter(string strToCount, out int count)
+        {
+            count = 0;
+            int s = strToCount.IndexOf(Environment.NewLine);
+            if (s == -1) return string.Empty;
+            s += Environment.NewLine.Length;
+            if (s + 1 >= strToCount.Length) return string.Empty;
+            while (s + 1 < strToCount.Length && strToCount.Substring(s + count, 1) == "　")
+                count++;
+            return new string('　', count); // 根據計算出的全形空格數量生成等長的空格字串
+                                           //int spaceCount = 0;
+                                           //string pattern = @"\r\n　"; // 使用正則表達式匹配 "\r\n" 後面接的全形空格
+                                           //string pattern = Environment.NewLine + @"　"; // 使用正則表達式匹配 "\r\n" 後面接的全形空格
+                                           //foreach (Match match in Regex.Matches(strToCount, pattern))
+                                           //{
+                                           //    count++;
+                                           //    spaceCount += match.Value.Length - 2; // 減去 "\r\n" 的長度，只計算全形空格的數量
+                                           //}            
+                                           //return new string('　', spaceCount); // 根據計算出的全形空格數量生成等長的空格字串
+
+        }
+
 
         /// <summary>
         /// 20240808（臺灣父親節）creedit with Copilot大菩薩：《古籍酷》自動標點完成的文本重新插入分段符號
         /// </summary>
         /// <param name="originalText"></param>
-        /// <param name="punctuatedText"></param>
+        /// <param name="punctuatedText"></param>        
         /// <returns></returns>
-        public static string RestoreParagraphs(string originalText,ref string punctuatedText)
+        public static string RestoreParagraphs(string originalText, ref string punctuatedText)
         //public static string RestoreParagraphs(ref string originalText, ref string punctuatedText)
         {
+            //記下縮排的字數
+            int indentCount = 0; string indentStr = IndentCounter(originalText, out indentCount);
 
             // Define a set of punctuation marks to ignore
             HashSet<char> punctuationMarks = new HashSet<char> { '。', '，', '；', '：', '、', '？', '！', '《', '》', '「', '」', '『', '』' };
@@ -1119,7 +1167,8 @@ namespace TextForCtext
                             if (afterSubTextWithoutPunctuation.Contains(after))
                             {
                                 //異常檢查：
-                                if (afterSubTextWithoutPunctuation != after) Debugger.Break();
+                                if (afterSubTextWithoutPunctuation != after)
+                                    if (!afterSubTextWithoutPunctuation.EndsWith(after)) Debugger.Break();
                                 return adjustedPos;
                             }
                             else
@@ -1158,20 +1207,25 @@ namespace TextForCtext
                 string before = originalText.Substring(start, index - start);
                 string after = originalText.Substring(index + newLine.Length, end - index - newLine.Length);
 
-                //if (char.IsHighSurrogate(before.LastOrDefault()))
-                //    before = originalText.Substring(start, index - start + 1);
-                if (char.IsLowSurrogate(before.FirstOrDefault()))
-                {
-                    Debugger.Break();
-                    before = originalText.Substring(start - 1, index - start);
-                }
-                if (char.IsHighSurrogate(after.LastOrDefault()))
-                {
-                    Debugger.Break();
-                    after = originalText.Substring(index + newLine.Length, end - index - newLine.Length + 1);
-                }
-                //if (char.IsLowSurrogate(after.FirstOrDefault()))
-                //    after = originalText.Substring(index + newLine.Length, end - index - newLine.Length);
+                #region  surrogate判斷調適：會干擾後面的判斷，須再審測（已經測試，不可用！）20240920
+
+
+                ////if (char.IsHighSurrogate(before.LastOrDefault()))
+                ////    before = originalText.Substring(start, index - start + 1);
+                //if (char.IsLowSurrogate(before.FirstOrDefault()))
+                //{
+                //    Debugger.Break();
+                //    before = originalText.Substring(start - 1, index - start);
+                //}
+                //if (char.IsHighSurrogate(after.LastOrDefault()))
+                //{
+                //    Debugger.Break();
+                //    after = originalText.Substring(index + newLine.Length, end - index - newLine.Length + 1);
+                //}
+                ////if (char.IsLowSurrogate(after.FirstOrDefault()))
+                ////    after = originalText.Substring(index + newLine.Length, end - index - newLine.Length);
+
+                #endregion
 
                 // Ensure 'before' and 'after' do not include newline characters
                 while (before.Contains('\r') || before.Contains('\n'))
@@ -1203,14 +1257,39 @@ namespace TextForCtext
                 //因為在子函式方法中，若沒有找到時會將標點符號清除再與原未標點之文本作比對，若原文本已略有標點，則會干擾比對結果，不如兩造一律均清除，則簡單有效 20240808
                 if (adjustedPos != -1)
                 {
-                    punctuatedText = punctuatedText.Insert(adjustedPos, newLine);
-                    offset += newLine.Length;
+                    //punctuatedText = punctuatedText.Insert(adjustedPos, newLine);
+                    //offset += newLine.Length;
+                    //以下改在迴圈後再處理--仍在這裡試看看：成功了！20240920
+                    punctuatedText = punctuatedText.Insert(
+                        punctuationMarks.Contains(punctuatedText[adjustedPos]) ?
+                        ++adjustedPos : adjustedPos
+                                                        , newLine + indentStr);
+                    offset += newLine.Length + indentCount;
+
                 }
             }
 
             if (Form1.CountWordsinDomain("\r", originalText)
                 != Form1.CountWordsinDomain("\n", punctuatedText))
                 Debugger.Break();
+
+            //if (indentCount > 0)
+            //{
+            //    FormalizeText(ref punctuatedText);
+            //    punctuatedText = punctuatedText.Replace(Environment.NewLine, Environment.NewLine + indentStr);
+            //}
+
+            if (punctuatedText.IndexOf("􏿽：") > -1) punctuatedText = punctuatedText.Replace("􏿽：", "􏿽");//《古籍酷》自動標點的問題 20240920
+            if (originalText.StartsWith("　") && !punctuatedText.StartsWith("　"))
+            {
+                int s = 0;
+                while (s < originalText.Length && originalText.Substring(s, 1) == "　")
+                {
+                    s++;
+                }
+                punctuatedText = originalText.Substring(0, s) + punctuatedText;//亦《古籍酷》自動標點的問題 20240920
+            }
+
             return punctuatedText;
         }
 

@@ -263,7 +263,7 @@ Sub ª`¸}²Å¸¹() 'ª`ÄÀ²Å¸¹¡BµùÄÀ²Å¸¹¡Bµù¸}²Å¸¹
 Dim i As Integer
 For i = 9312 To 9331
     With Selection.Range.Find
-        .Replacement.Font.Name = "Arial Unicode MS"
+        .Replacement.font.Name = "Arial Unicode MS"
         .Execute VBA.ChrW(i), , , , , , , wdFindContinue, , VBA.ChrW(i), wdReplaceAll
     End With
 Next i
@@ -494,12 +494,12 @@ With ActiveDocument
 '
     Do Until Selection.End = e - 1
         Selection.MoveRight
-            If Selection.Next.Font.Size > 12 Then '¥Ø¿ý¹w³]¬°12¦r§Î
+            If Selection.Next.font.Size > 12 Then '¥Ø¿ý¹w³]¬°12¦r§Î
                 Selection.MoveRight
-                Do Until Selection.Next.Font.Size = 12
+                Do Until Selection.Next.font.Size = 12
                     Selection.MoveRight , , wdExtend
                 Loop
-                If MsgBox("¬O§_­nÁY¤p¬°10¸¹¦r?", vbQuestion + vbOKCancel) = vbOK Then Selection.Font.Size = 10
+                If MsgBox("¬O§_­nÁY¤p¬°10¸¹¦r?", vbQuestion + vbOKCancel) = vbOK Then Selection.font.Size = 10
         End If
     Loop
 End With
@@ -656,12 +656,12 @@ Const x As String = "ahysy ©ö©ó"
 For Each p In d.Paragraphs
     If InStr(p.Range, x) Then flg = True
     If Not flg Then
-        p.Range.Font.Hidden = True
+        p.Range.font.Hidden = True
     Else
         prngTxt = p.Range.text
         s = InStr(prngTxt, " ")
         If VBA.Len(VBA.Mid(prngTxt, s + 1)) < 5 Then
-            p.Range.Font.Hidden = True
+            p.Range.font.Hidden = True
         End If
     End If
 Next p
@@ -675,7 +675,7 @@ Dim d As Document
 Set d = ActiveDocument
 Dim p As Paragraph, s As Byte, prngTxt As String, msgResult As Integer
 For Each p In d.Paragraphs
-    If Not p.Range.Font.Hidden Then
+    If Not p.Range.font.Hidden Then
         prngTxt = p.Range.text
         s = InStr(prngTxt, VBA.Chr(32))
         If VBA.Len(VBA.Mid(prngTxt, s + 1)) > 4 Then
@@ -719,7 +719,7 @@ If Not Selection.Range.TextRetrievalMode.IncludeHiddenText Then
 Else
     Set pSelRng = Selection.Range
     For Each p In pSelRng.Paragraphs
-        If Not p.Range.Font.Hidden Then 'prepare to delete
+        If Not p.Range.font.Hidden Then 'prepare to delete
             'p.Range.Cut
             x = p.Range.text
             p.Range.Delete
@@ -761,7 +761,7 @@ Next myStyle
 If Not doNotAdd Then
     Set myStyle = d.Styles.Add(styleHprAn, wdStyleTypeCharacter)
     With myStyle
-        With .Font
+        With .font
             .NameFarEast = "¼Ð·¢Åé"
             .Color = 12611584
             .Size = 11
@@ -780,7 +780,7 @@ If Not doNotAdd Then
     Set myStyle = d.Styles.Add(styleShengDiao, wdStyleTypeCharacter) 'https://docs.microsoft.com/zh-tw/office/vba/api/word.wdstyletype
     With myStyle
         .BaseStyle = d.Styles(styleHprAn)
-        With .Font
+        With .font
             .NameFarEast = "¼Ð·¢Åé"
             .Name = "¼Ð·¢Åé"
             .position = 3
@@ -1022,13 +1022,33 @@ pasteAnyway:
     '    Docs.ChangeFontOfSurrogatePairs_Range "HanaMinA", d.Range(selection.Paragraphs(1).Range.start, d.Range.End), CJK_Compatibility_Ideographs
         'https://en.wikipedia.org/wiki/CJK_Compatibility_Ideographs_Supplement
         Dim rngChangeFontName As Range
-        Set rngChangeFontName = d.Range(Selection.Paragraphs(1).Range.start, d.Range.End)
-        Docs.ChangeFontOfSurrogatePairs_Range "HanaMinA", rngChangeFontName, CJK_Compatibility_Ideographs_Supplement
+        'Set rngChangeFontName = d.Range(Selection.Paragraphs(1).Range.start, d.Range.End)
+        Set rngChangeFontName = d.Range(rngMark.start, d.Range.End)
+        Dim fontName As String '20240920 creedit_with_Copilot¤jµÐÂÄ:https://sl.bing.net/9KC0PtODtI
+        fontName = "¥þ§ºÅé-2"
+        If Fonts.IsFontInstalled(fontName) Then
+            'MsgBox fontName & " ¤w¦w¸Ë¦b¨t²Î¤¤¡C"
+        Else    'MsgBox fontName & " ¥¼¦w¸Ë¦b¨t²Î¤¤¡C"
+            fontName = "HanaMinA"
+            If Fonts.IsFontInstalled("HanaMinA") Then
+            ElseIf Fonts.IsFontInstalled("TH-Tshyn-P2") Then
+                fontName = "TH-Tshyn-P2"
+            Else
+                fontName = vbNullString
+            End If
+        End If
+        If Not fontName = vbNullString Then
+            'Docs.ChangeFontOfSurrogatePairs_Range "HanaMinA", rngChangeFontName, CJK_Compatibility_Ideographs_Supplement
+            Docs.ChangeFontOfSurrogatePairs_Range fontName, rngChangeFontName, CJK_Compatibility_Ideographs_Supplement
+        End If
+        
         Rem ÂX¥R¦r¶°
         'HanaMinBÁÙ¤£¤ä´©G¥H«áªº
-        Docs.ChangeFontOfSurrogatePairs_Range "HanaMinB", rngChangeFontName, CJK_Unified_Ideographs_Extension_E
-        Docs.ChangeFontOfSurrogatePairs_Range "HanaMinB", rngChangeFontName, CJK_Unified_Ideographs_Extension_F
+        fontName = "HanaMinB"
+        Docs.ChangeFontOfSurrogatePairs_Range fontName, rngChangeFontName, CJK_Unified_Ideographs_Extension_E
+        Docs.ChangeFontOfSurrogatePairs_Range fontName, rngChangeFontName, CJK_Unified_Ideographs_Extension_F
         returnVaule = True
+        
     Else '¤å¥ó¤º¤w¦³¤º®e®É
         GoSub refres
         SystemSetup.playSound 1.294
@@ -1060,7 +1080,7 @@ refres:
             'If flgPaste Then'´ú¸ÕµLÃª«á¥i§R¦¹¦æ
             'Åã¥Ü·s¶K¤Wªº¤å¥»³»ºÝ
             rng.SetRange endDocOld, endDocOld
-            Do Until rng.Font.ColorIndex = wdRed Or rng.End = d.Range.End - 1
+            Do Until rng.font.ColorIndex = wdRed Or rng.End = d.Range.End - 1
                 rng.Move
             Loop
             e = rng.End
@@ -1123,10 +1143,10 @@ Sub marking©ö¾ÇÃöÁä¦r(rng As Range, arr As Variant, Optional defaultHighlightCol
         .ClearFormatting
         .ClearAllFuzzyOptions
         .ClearHitHighlight
-        With .Replacement
-            .Font.ColorIndex = fontColor 'wdRed
-            .Highlight = True
-        End With
+'        With .Replacement '²{¦b¤£¥Î wdReplaceAll ¤Þ¼Æªº¤èªk¤F
+'            .font.ColorIndex = fontColor 'wdRed
+'            .Highlight = True
+'        End With
         For Each e In arr '¹M¾ú¨C­Ó­n¼ÐÃÑªºÃöÁä¦r
         
 '            If e = "°®ª¾¤j©l" Then Stop 'just for test
@@ -1240,7 +1260,7 @@ checkPhrases:                                   '¤º´O©óÀË¬d¡GÃöÁä¦r§t¦b¸ÓÁ×§Kªº¤
                                                         Rem ¦¹ÀÉ¥i¨Ñ®Ä¯à´ú¸Õ¡A¶]°_¨Ó¤£ª¾¦ó¬G¯S§O¤[¡I file:///H:\§Úªº¶³ºÝµwºÐ\¶À¦Ñ®v»·ºÝ¤u§@\1©ö¾ÇÂøµÛ¤å¥»\«D²M¤H¤wªì¨B¼ÐÂI\¦ó¨}«T¢I¥|¤ÍÂNÂO»¡.docx
                                                         
                                                         .HighlightColorIndex = defaultHighlightColorIndex
-                                                        .Font.ColorIndex = fontColor
+                                                        If .font.ColorIndex = wdAuto Then .font.ColorIndex = fontColor
                                                     End With
                                                 Else '¤ù»yµü¥yÀË¬d¥¼¹L
                                                     If rng.HighlightColorIndex = defaultHighlightColorIndex Then
@@ -1248,7 +1268,7 @@ checkPhrases:                                   '¤º´O©óÀË¬d¡GÃöÁä¦r§t¦b¸ÓÁ×§Kªº¤
 '                                                            .Select 'just for test
                                                             
                                                             .HighlightColorIndex = wdNoHighlight
-                                                            .Font.ColorIndex = wdAuto
+                                                            .font.ColorIndex = wdAuto
                                                         End With
                                                     End If
                                                 End If
@@ -1257,7 +1277,7 @@ checkPhrases:                                   '¤º´O©óÀË¬d¡GÃöÁä¦r§t¦b¸ÓÁ×§Kªº¤
                                                 If rng.HighlightColorIndex = defaultHighlightColorIndex Then
                                                     With rng
                                                         .HighlightColorIndex = wdNoHighlight
-                                                        .Font.ColorIndex = wdAuto
+                                                        .font.ColorIndex = wdAuto
                                                     End With
                                                 End If
                                             End If
@@ -1270,7 +1290,7 @@ checkPhrases:                                   '¤º´O©óÀË¬d¡GÃöÁä¦r§t¦b¸ÓÁ×§Kªº¤
                                     If rng.HighlightColorIndex = defaultHighlightColorIndex Then
                                         With rng
                                             .HighlightColorIndex = wdNoHighlight
-                                            .Font.ColorIndex = wdAuto
+                                            .font.ColorIndex = wdAuto
                                         End With
                                     End If
                                 End If
@@ -1294,7 +1314,7 @@ checkPhrases:                                   '¤º´O©óÀË¬d¡GÃöÁä¦r§t¦b¸ÓÁ×§Kªº¤
                         Rem ­Y¼g¦¨¥H¤U·|¦³49DLL©I¥s³W®æ¿ù»~¡A³o¦¸­«¼g¤S¤£·|¤F¡A¥i¨£¬O VBE½sÄ¶¾¹¬G»Ù 20240920
                         With rng
                             .HighlightColorIndex = defaultHighlightColorIndex
-                            .Font.ColorIndex = fontColor
+                            If .font.ColorIndex = wdAuto Then .font.ColorIndex = fontColor
                         End With
                     Loop
 '                    .Execute e, , , , , , True, wdFindStop, True, e, Replace:=wdReplaceAll '¦b§t¦³¶W³sµ²µ¥®æ¦¡¤Æ¤å¦r®É·|¥¢ÆF
@@ -1414,7 +1434,7 @@ pc = d2.Paragraphs.Count
 If pi = 0 Then pi = 1
 For pi = pi To pc
     Set p = d2.Paragraphs(pi)
-    If p.Range.Font.NameFarEast <> "¼Ð·¢Åé" And p.Range.HighlightColorIndex = 0 Then
+    If p.Range.font.NameFarEast <> "¼Ð·¢Åé" And p.Range.HighlightColorIndex = 0 Then
         px = p.Range
         x = VBA.Trim(VBA.Left(px, Len(px) - 1)) '¥h±¼¤À¬q²Å¸¹
         If Len(x) > 2 Then
@@ -1751,7 +1771,7 @@ Sub ChangeFontOfSurrogatePairs_ActiveDocument(fontName As String, Optional whatC
                             ' Change the font name to HanaMinB
                             ' Change the font name to fontName
                         End Select
-                        If change Then rng.Font.Name = fontName '"HanaMinB"
+                        If change Then rng.font.Name = fontName '"HanaMinB"
                     End If
                 End If
             End If
@@ -1819,7 +1839,7 @@ Sub ChangeFontOfSurrogatePairs_Range(fontName As String, rngtoChange As Range, O
                             ' Change the font name to HanaMinB
                             ' Change the font name to fontName
                         End Select
-                        If change Then rng.Font.Name = fontName '"HanaMinB"
+                        If change Then rng.font.Name = fontName '"HanaMinB"
                     End If
                 End If
 '            End If
@@ -1830,7 +1850,7 @@ End Sub
 Sub ChangeCharacterFontName(character As String, fontName As String, d As Document, Optional fontNameFarEast As String)
 With d.Range
     With .Find
-        With .Replacement.Font
+        With .Replacement.font
             .Name = fontName
             .NameFarEast = fontNameFarEast
         End With
@@ -1842,8 +1862,8 @@ End Sub
 Sub ChangeCharacterFontNameAccordingSelection()
 Dim fontName As String, fontNameFarEast As String
 With Selection
-    fontName = .Font.Name
-    fontNameFarEast = .Font.NameFarEast
+    fontName = .font.Name
+    fontNameFarEast = .font.NameFarEast
     ChangeCharacterFontName .text, fontName, .Document, fontNameFarEast
 End With
 End Sub
@@ -1854,10 +1874,10 @@ Sub FindMissingCharacters() '³oÀ³¸Ó¥u¬O§ä¤å¥ó¤¤ªº¦r¤£¯à¥H·s²Ó©úÅé¡B¼Ð·¢Åé¨ÓÅã¥Üª
     Set Doc = ActiveDocument
     
     '©w¸q·s²Ó©úÅé©M¼Ð·¢Åé¦r«¬ªº¶°¦X
-    Dim nmf As Font
-    Set nmf = Doc.Styles("Normal").Font
-    Dim kff As Font
-    Set kff = Doc.Styles("¬q¸¨").Font
+    Dim nmf As font
+    Set nmf = Doc.Styles("Normal").font
+    Dim kff As font
+    Set kff = Doc.Styles("¬q¸¨").font
     
     Dim p As Paragraph
     Dim r As Range
@@ -1878,9 +1898,9 @@ Sub FindMissingCharacters() '³oÀ³¸Ó¥u¬O§ä¤å¥ó¤¤ªº¦r¤£¯à¥H·s²Ó©úÅé¡B¼Ð·¢Åé¨ÓÅã¥Üª
                     Or (AscW(VBA.Left(C, 1)) >= &H2B820 And AscW(VBA.Left(C, 1)) <= &H2CEAF) _
                     Or (AscW(VBA.Left(C, 1)) >= &HF900 And AscW(VBA.Left(C, 1)) <= &HFAFF) _
                     Or (AscW(VBA.Left(C, 1)) >= &H2F800 And AscW(VBA.Left(C, 1)) <= &H2FA1F) Then '³o¸Ì¨S¨ú½XÂI¡A¥²©w¦³»~¡A«Ý§ï¼g¡I¡I¡I¡I¡I¡I¡I¡I
-                    If Not r.Font.Name = nmf.Name And Not r.Font.Name = kff.Name Then '¹B¥Î¤§­ì²z¦b¦¹¦æ¡I¡I¡I¡I
+                    If Not r.font.Name = nmf.Name And Not r.font.Name = kff.Name Then '¹B¥Î¤§­ì²z¦b¦¹¦æ¡I¡I¡I¡I
                         ' ¦pªG¦r²Å¤£¦b·s²Ó©úÅé©Î¼Ð·¢Åé¦r«¬¤¤¡A«h±N¨ä¦rÅé§ó§ï¬°HanaMinB
-                        r.Font.Name = "HanaMinB"
+                        r.font.Name = "HanaMinB"
                     End If
                 End If
             End If

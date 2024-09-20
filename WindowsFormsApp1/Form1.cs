@@ -67,6 +67,7 @@ namespace WindowsFormsApp1
         internal string dropBoxPathIncldBackSlash;
         internal string MydocumentsPathIncldBackSlash;
         readonly System.Drawing.Point textBox4Location; readonly Size textBox4Size;
+        readonly System.Drawing.Font textBox4FontDefault;
         private readonly Color textBox2BackColorDefault;
         private readonly Color FormBackColorDefault;
         readonly Size textBox1SizeToForm;
@@ -207,6 +208,7 @@ namespace WindowsFormsApp1
             textBox1FontDefaultSize = textBox1.Font.Size;
             textBox4Location = textBox4.Location;
             textBox4Size = textBox4.Size;
+            textBox4FontDefault = textBox4.Font;
             textBox1SizeToForm = new Size(this.Width - textBox1.Width, this.Height - textBox1.Height);
             MydocumentsPathIncldBackSlash = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\";
             dropBoxPathIncldBackSlash = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + @"\Dropbox\";
@@ -1983,11 +1985,99 @@ namespace WindowsFormsApp1
 
 
             #region 同時按下 Ctrl + Alt
+
+            if (e.Control && e.Alt)
+            {
+                if (e.KeyCode == Keys.Oemplus)
+                {
+                    //Ctrl + Alt + = : 以選取文字檢索CTP中阮元刻《十三經注疏》本《周易正義》。便於擷取《易》學資料用。20240920
+                    //if (textBox1.SelectionLength == 0) return;
+                    e.Handled = true;
+                    overtypeModeSelectedTextSetting(ref textBox1);
+                    string url = "https://ctext.org/wiki.pl?if=gb&res=315747&searchu=" + textBox1.SelectedText;
+                    textBox1.Copy();
+                    switch (browsrOPMode)
+                    {
+                        case BrowserOPMode.appActivateByName:
+                            Process.Start(url);
+                            break;
+                        case BrowserOPMode.seleniumNew:
+                            br.LastValidWindow = driver.CurrentWindowHandle;
+                            br.openNewTabWindow();
+                            br.GoToUrlandActivate(url);
+                            break;
+                        case BrowserOPMode.seleniumGet:
+                            break;
+                        default:
+                            break;
+                    }
+                    return;
+                }
+
+                #region Ctrl + Alt + pageup Ctrl + Alt + pagedown                
+                if (e.KeyCode == Keys.PageUp || e.KeyCode == Keys.PageDown)
+                {//Ctrl + Alt + pageup : 在新的分頁開啟CTP圖文對照前一頁以供檢視 20240920
+                    //Ctrl + Alt + pagedown : 在新的分頁開啟CTP圖文對照下一頁以供檢視
+                    if (browsrOPMode != BrowserOPMode.seleniumNew) return;
+                    string url = null;
+                    try
+                    {
+                        url = br.driver.Url;
+                    }
+                    catch (Exception ex)
+                    {
+                        switch (ex.HResult)
+                        {
+                            case -2146233088:
+                                if (ex.Message.StartsWith("no such window: target window already closed"))//no such window: target window already closed
+                                                                                                          //from unknown error: web view not found
+                                                                                                          //  (Session info: chrome = 129.0.6668.59)
+                                    try
+                                    {
+                                        br.driver.SwitchTo().Window(br.LastValidWindow);
+                                        url = br.driver.Url;
+                                    }
+                                    catch (Exception exx)
+                                    {
+                                        Console.WriteLine(exx.HResult + exx.Message);
+                                        Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(exx.HResult + exx.Message);
+                                        return;
+                                    }
+                                break;
+                            default:
+                                Console.WriteLine(ex.HResult + ex.Message);
+                                Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
+                                return;
+                        }
+
+                    }
+                    if (url == null) return;
+                    if (!IsValidUrl＿ImageTextComparisonPage(url)) return;
+
+                    e.Handled = true;
+                    int page = GetPageNumFromUrl(url);
+                    if (e.KeyCode == Keys.PageUp)
+                        page--;
+                    else
+                        page++;
+                    url = br.ChangePageParameter(url, page);
+                    br.LastValidWindow = br.driver.CurrentWindowHandle;
+                    br.openNewTabWindow();
+                    br.GoToUrlandActivate(url, true);
+                    return;
+
+                }//以上 Ctrl + Alt + pageup : 在新的分頁開啟CTP圖文對照前一頁以供檢視 20240920
+                //Ctrl + Alt + pagedown : 在新的分頁開啟CTP圖文對照下一頁以供檢視
+                #endregion
+
+            }
+
             if ((m & Keys.Control) == Keys.Control
                 && (m & Keys.Alt) == Keys.Alt)//https://zhidao.baidu.com/question/628222381668604284.html
             {//https://bbs.csdn.net/topics/350010591                
                 if (e.KeyCode == Keys.G || e.KeyCode == Keys.Packet)
                 { e.Handled = true; return; }
+
             }
 
             //Alt + Shift + s :  所有小注文都不換行。這個和我所使用的小小輸入法繁簡轉換快捷鍵有衝突，故須先停用小小輸入法才有作用。感恩感恩　南無阿彌陀佛
@@ -2002,6 +2092,7 @@ namespace WindowsFormsApp1
             { e.Handled = true; notes_a_line_all(false, true); return; }
             */
             if (e.Control && e.Alt && e.KeyCode == Keys.S)//chatGPT 202230107
+                                                          //ctrl + alt + s 標題下之小注文才不換行( 會與小小輸入法預設的繁簡轉換鍵衝突，使用時請先關閉輸入法。其他快捷鍵若無作用，也多係因有較其優先之如此系統快速鍵已指定的緣故) 20230108
             { e.Handled = true; notes_a_line_all(false, true); return; }
             //以上三種皆可Alt + Shift + s :  所有小注文都不換行。
 
@@ -8670,7 +8761,7 @@ namespace WindowsFormsApp1
                 if (url != textBox3.Text) textBox3.Text = url;
                 string input = br.Div_generic_IncludePathAndEndPageNum.GetAttribute("textContent");//"線上圖書館 -> 松煙小錄 -> 松煙小錄三  /117 ";
                 int stopPageNum = ExtractNumberAfterSlash(input);
-                CheckBlankPagesBeforeOCR(url, int.Parse(br.Page_textbox.GetAttribute("defaultValue")), stopPageNum);
+                CheckBlankPagesBeforeOCR_NextPage(url, int.Parse(br.Page_textbox.GetAttribute("defaultValue")), stopPageNum);
                 return;
             }
 
@@ -9624,7 +9715,7 @@ namespace WindowsFormsApp1
 
             TopMost = false;
 
-            br.ActiveForm1 = this;
+            //br.ActiveForm1 = this;
 
             try
             {
@@ -9764,8 +9855,10 @@ namespace WindowsFormsApp1
                     break;
                 //《古籍酷》
                 case br.OCRSiteTitle.GJcool:
-                    br.ActiveForm1 = this;
-                    br.ActiveForm1.TopMost = false;
+                    //br.ActiveForm1 = this;
+                    //br.ActiveForm1.TopMost = false;
+                    //br.ActiveForm1 = this;
+                    TopMost = false;
                     //try
                     //{
                     br.driver.SwitchTo().Window(currentWindowHndl);
@@ -10184,7 +10277,7 @@ namespace WindowsFormsApp1
         /// <param name="startPageNum">啟始頁碼</param>
         /// <param name="stopPageNum">結束頁碼</param>
         /// <returns></returns>
-        internal static bool CheckBlankPagesBeforeOCR(string url, int startPageNum, int stopPageNum)
+        internal static bool CheckBlankPagesBeforeOCR_NextPage(string url, int startPageNum, int stopPageNum)
         {
             if (!Form1.IsValidUrl＿ImageTextComparisonPage(url)) return false;
             if (br.driver == null) return false;
@@ -11643,9 +11736,12 @@ namespace WindowsFormsApp1
         private void textBox4SizeLarger()
         {
             textBox4.Location = new Point(button1.Location.X, textBox4Location.Y);
-            textBox4.Size = new Size(textBox2.Size.Width + textBox2.Size.Width +
-                                        textBox3.Width + textBox4Size.Width, textBox4Size.Height);
+            int width = textBox2.Size.Width + textBox2.Size.Width + textBox3.Width + textBox4Size.Width;
+            textBox4.Size = new Size(
+                (width < (Width - width - 50)) ? (Width - 50) : width
+                    , textBox4Size.Height);
             textBox4.ScrollBars = ScrollBars.Horizontal;
+            if (textBox4.Font != textBox4FontDefault) textBox4.Font = textBox4FontDefault;
         }
 
         private void textBox4_KeyDown(object sender, KeyEventArgs e)

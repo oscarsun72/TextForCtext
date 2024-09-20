@@ -387,6 +387,10 @@ Ctrl + Shift + ` 切換OBS開始串流和停止串流時可處理的程序（這
 
 Ctrl + Alt + i 顯示IP現狀訊息方塊
 
+Ctrl + Alt + pageup : 在新的分頁開啟CTP圖文對照前一頁以供檢視 20240920
+
+Ctrl + Alt + pagedown : 在新的分頁開啟CTP圖文對照下一頁以供檢視
+
 Ctrl + Shift + o 執行《看典古籍》OCR API ，執行 GetOCRResult 方法。（須將token存成「OCRAPItoken.txt」檔置於「我的文件\\CtextTempFiles」下，並在程式碼中覆寫本人帳號/郵箱。）
 
 Ctrl + Shift + w 關閉 Chrome 網頁視窗
@@ -711,11 +715,16 @@ Ctrl + Delete ： 將插入點所在位置之後的文字一律清除(Ctrl + z �
 
 Alt + 滑鼠左鍵 ： 更新最後的備份頁文本
 
-Ctrl+ 滑鼠左鍵：在插入點後分行分段（原為切換RichTextBox用）
+Ctrl + 滑鼠左鍵：在插入點後分行分段（原為切換RichTextBox用）
 
-Ctrl+ 滑鼠右鍵：切換RichTextBox用
+Ctrl + 滑鼠右鍵：切換RichTextBox用
 
-Ctrl+ Alt + 滑鼠左鍵：將插入點後的分行分段清除
+Ctrl + Alt + 滑鼠左鍵：將插入點後的分行分段清除
+
+Ctrl + Alt + = : 以選取文字檢索CTP中阮元刻《十三經注疏》本《周易正義》。便於擷取《易》學資料用。20240920
+> 選取字串將複製至剪貼簿備用。
+
+> https://ctext.org/library.pl?if=gb&res=83519&by_collection=127
 
 滑鼠點二下，執行 Ctrl + + , 將插入點所在之前的文本貼到 Ctext 網頁 [簡單修改模式] 文字方塊中，並會重設以插入點位置為頁面結束位國（同Ctrl + -（數字鍵盤））
 
