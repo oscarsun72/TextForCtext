@@ -1006,8 +1006,8 @@ Dim d As Document, rng As Range, rngLast As Range, s As Long, e As Long
 Set d = ActiveDocument
 Set rng = d.Range: Set rngLast = rng
 With rng.Find
-    .Font.Color = 10092543
-    .Font.Size = 10
+    .font.Color = 10092543
+    .font.Size = 10
     .Forward = True
     Do
         .Execute , , , , , , , wdFindStop
@@ -1031,16 +1031,17 @@ End Sub
 
 Rem 回傳網址
 Function Search(searchWhatsUrl As String) As String
-    Dim d As Document
+    Dim d As Document, encode As String
     Set d = ActiveDocument
     If d.path <> "" Then If d.Saved = False Then d.Save
     If Selection.Type = wdSelectionNormal Then
         Selection.Copy
     End If
+    encode = code.UrlEncode(Selection.text)
     'Shell "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe https://ctext.org/wiki.pl?if=gb&res=384378&searchu=" & Selection.text
     'Shell Normal.SystemSetup.getChrome & searchWhatsUrl & Selection.Text
-    Shell TextForCtextWordVBA.Network.GetDefaultBrowserEXE & searchWhatsUrl & Selection.text
-    Search = searchWhatsUrl & Selection.text
+    Shell TextForCtextWordVBA.Network.GetDefaultBrowserEXE & searchWhatsUrl & encode
+    Search = searchWhatsUrl & encode
 End Function
 
 Sub search史記三家注()
@@ -1049,7 +1050,9 @@ End Sub
 
 Sub search周易正義_阮元十三經注疏()
     'Ctrl + Alt + =
-    ActiveDocument.Hyperlinks.Add Selection.Range, Search(" https://ctext.org/wiki.pl?if=gb&res=315747&searchu=")
+    Dim url As String
+    url = 中國哲學書電子化計劃.Search(" https://ctext.org/wiki.pl?if=gb&res=315747&searchu=")
+    ActiveDocument.Hyperlinks.Add Selection.Range, url
 End Sub
 
 
@@ -1483,10 +1486,10 @@ Do While rng.Find.Execute("[[]", , , , , , True, wdFindContinue)
 Loop
 Set rng = rng.Document.Range
 rng.Find.Execute "^p^p", , , , , , , wdFindContinue, , "^p", wdReplaceAll
-rng.Find.Font.Color = 16711935
+rng.Find.font.Color = 16711935
 Do While rng.Find.Execute("", , , False, , , True, wdFindStop)
     Set noteRng = rng
-    Do While noteRng.Next.Font.Color = 16711935
+    Do While noteRng.Next.font.Color = 16711935
         noteRng.SetRange noteRng.start, noteRng.Next.End
     Loop
     noteRng.text = "{{" & Replace(noteRng, "/", "") & "}}"
@@ -1604,14 +1607,14 @@ Sub 只保留正文注文_且注文前後加括弧(d As Document)
         End With
         For Each e In ay
             With d.Range.Find
-                .Font.Color = e
+                .font.Color = e
                 .Execute "", , , , , , True, wdFindContinue, , "", wdReplaceAll
             End With
         Next e
         Set slRng = d.Range
         With slRng.Find
             .ClearFormatting
-            .Font.Color = 34816
+            .font.Color = 34816
         End With
         Do While slRng.Find.Execute(, , , , , , True, wdFindStop)
             If InStr(VBA.Chr(13) & VBA.Chr(11) & VBA.Chr(7) & VBA.Chr(8) & VBA.Chr(9) & VBA.Chr(10), slRng) = 0 Then
@@ -1797,7 +1800,7 @@ Sub checkEditingOfPreviousVersion()
 fontColor:
     
         rng.Find.ClearFormatting
-        rng.Find.Font.Color = 8912896 '{{{}}}語法下的文字
+        rng.Find.font.Color = 8912896 '{{{}}}語法下的文字
         rng.Find.Replacement.ClearFormatting
         With rng.Find
             .text = ""

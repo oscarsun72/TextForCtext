@@ -10736,6 +10736,9 @@ namespace WindowsFormsApp1
                 //File.WriteAllText(f, str1, Encoding.UTF8);
                 //throw;
                 Console.WriteLine(ex.HResult + ":" + ex.Message);
+
+                Debugger.Break();//這裡待除錯！！20240921 應該是由於在分段/行時切到了surrogate的字
+                
                 Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
                 return;
             }
@@ -11958,7 +11961,8 @@ namespace WindowsFormsApp1
                 {//在手動輸入模式下
                     if (mk != Keys.None)
                     {//可能按下Shift+Delete 剪下textBox1的內容時
-                        hideToNICo();
+                        if (mk == Keys.ShiftKey)//20240920 Copilot大菩薩：全域鍵盤掛鉤在 C# Windows.Forms 中的使用：
+                            hideToNICo();//https://sl.bing.net/f5zjhC1h9DU
                         //,通常是要準備貼上的，所以就要將目前在用的瀏覽器置前，確保它取得焦點，否則有時系統焦點會或交給工作列                        
                         if (browsrOPMode == BrowserOPMode.appActivateByName)
                         {

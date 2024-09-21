@@ -1257,13 +1257,17 @@ namespace TextForCtext
                 //因為在子函式方法中，若沒有找到時會將標點符號清除再與原未標點之文本作比對，若原文本已略有標點，則會干擾比對結果，不如兩造一律均清除，則簡單有效 20240808
                 if (adjustedPos != -1)
                 {
+                    
                     //punctuatedText = punctuatedText.Insert(adjustedPos, newLine);
                     //offset += newLine.Length;
-                    //以下改在迴圈後再處理--仍在這裡試看看：成功了！20240920
+                    //以下改在迴圈後再處理--仍在這裡試看看：成功了！20240920                    
                     punctuatedText = punctuatedText.Insert(
                         punctuationMarks.Contains(punctuatedText[adjustedPos]) ?
                         ++adjustedPos : adjustedPos
-                                                        , newLine + indentStr);
+                                            , newLine + //若分段符號後起首是「􏿽」，如 ： 􏿽人之多事，私欲使然也。無欲則無事矣。<p>
+                                                                                 // 􏿽欲者，無涯之物也。原其端則一𫝹，要其極則無
+                                                        // 則非縮排
+                                            ((indentCount > 0 && punctuatedText[adjustedPos] == "􏿽"[0])?string.Empty:indentStr));
                     offset += newLine.Length + indentCount;
 
                 }
