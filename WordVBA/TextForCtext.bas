@@ -20,10 +20,10 @@ Private Function examToRun() As Boolean
 End Function
 
 Sub Hanchi_CTP_SearchingKeywordsYijing()
-' Alt + shift + ,
-' Alt + <
-' Alt + shift + F5
-' Ctrl + Alt + F9
+    ' Alt + shift + ,
+    ' Alt + ,
+    ' Alt + shift + F5
+    ' Ctrl + Alt + F9
     SystemSetup.playSound 0.484
 
     If Not examToRun Then Exit Sub
@@ -110,7 +110,7 @@ puncted:
     
     punctuation = "¡C¡A"
     For i = 1 To Len(punctuation)
-        If InStr(ClipBoardObject.GetClipboard, VBA.Mid(punctuation, i, 1)) > 0 Then
+        If InStr(SystemSetup.GetClipboard, VBA.Mid(punctuation, i, 1)) > 0 Then
             containsPunctuation = True
             Exit For
         End If

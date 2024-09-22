@@ -580,52 +580,53 @@ Beep
 End Sub
 
 Sub searchuCtext()
-' Alt+,
-SystemSetup.playSound 0.484
-Select Case Selection.text
-    Case "", VBA.Chr(13), VBA.Chr(9), VBA.Chr(7), VBA.Chr(10), " ", "　"
-        MsgBox "no selected text for search !", vbCritical: Exit Sub
-End Select
-Static bookID
-Dim searchedTerm, e, addressHyper As String, bID As String, cndn As String
-'Const site As String = "https://ctext.org/wiki.pl?if=gb&res="
-Const site As String = "https://ctext.org/wiki.pl?if=gb"
-bID = VBA.Left(ActiveDocument.Paragraphs(1).Range, Len(ActiveDocument.Paragraphs(1).Range) - 1)
-If Not VBA.IsNumeric(bID) Then
-    If InStr(bID, site) = 0 Then
-        bookID = InputBox("plz input the book id ", , bookID)
+    ' Alt + Shift + ,
+    ' Alt + <
+    SystemSetup.playSound 0.484
+    Select Case Selection.text
+        Case "", VBA.Chr(13), VBA.Chr(9), VBA.Chr(7), VBA.Chr(10), " ", "　"
+            MsgBox "no selected text for search !", vbCritical: Exit Sub
+    End Select
+    Static bookID
+    Dim searchedTerm, e, addressHyper As String, bID As String, cndn As String
+    'Const site As String = "https://ctext.org/wiki.pl?if=gb&res="
+    Const site As String = "https://ctext.org/wiki.pl?if=gb"
+    bID = VBA.Left(ActiveDocument.Paragraphs(1).Range, Len(ActiveDocument.Paragraphs(1).Range) - 1)
+    If Not VBA.IsNumeric(bID) Then
+        If InStr(bID, site) = 0 Then
+            bookID = InputBox("plz input the book id ", , bookID)
+        Else
+            bookID = bID
+        End If
     Else
         bookID = bID
     End If
-Else
-    bookID = bID
-End If
-If InStr(bookID, "https") > 0 Then
-    If InStr(bookID, "&res=") = 0 And InStr(bookID, "&chapter=") = 0 Then MsgBox "error . not the proper bookID ref ", vbCritical: Exit Sub
-    If InStr(bookID, "&res=") > 0 Then
-        cndn = "&res="
-    ElseIf InStr(bookID, "&chapter=") > 0 Then
-        cndn = "&chapter="
-    Else
+    If InStr(bookID, "https") > 0 Then
+        If InStr(bookID, "&res=") = 0 And InStr(bookID, "&chapter=") = 0 Then MsgBox "error . not the proper bookID ref ", vbCritical: Exit Sub
+        If InStr(bookID, "&res=") > 0 Then
+            cndn = "&res="
+        ElseIf InStr(bookID, "&chapter=") > 0 Then
+            cndn = "&chapter="
+        Else
+            MsgBox "error . not the proper bookID ref ", vbCritical: Exit Sub
+        End If
+        bookID = VBA.Mid(bookID, InStr(bookID, cndn) + Len(cndn))
+        If Not VBA.IsNumeric(bookID) Then
+            bookID = VBA.Mid(bookID, 0, InStr(bookID, "&searchu"))
+        End If
+    End If
+    If Not VBA.IsNumeric(bookID) Then
         MsgBox "error . not the proper bookID ref ", vbCritical: Exit Sub
     End If
-    bookID = VBA.Mid(bookID, InStr(bookID, cndn) + Len(cndn))
-    If Not VBA.IsNumeric(bookID) Then
-        bookID = VBA.Mid(bookID, 0, InStr(bookID, "&searchu"))
-    End If
-End If
-If Not VBA.IsNumeric(bookID) Then
-    MsgBox "error . not the proper bookID ref ", vbCritical: Exit Sub
-End If
-e = Selection.text
-'searchedTerm = 'Array("卦", "爻", "周易", "易經", "系辭", "繫辭", "擊辭", "說卦", "序卦", "卦序", "敘卦", "雜卦", "文言", "乾坤", "無咎", vba.Chrw(26080) & "咎", "天咎", "元亨", "利貞", "易") ', "", "", "", "")
-''https://ctext.org/wiki.pl?if=gb&res=757381&searchu=%E5%8D%A6
-'For Each e In searchedTerm
-    addressHyper = addressHyper + " " + site + cndn + bookID + "&searchu=" + e
-'Next e
-Shell Network.getDefaultBrowserFullname + addressHyper
-
-Selection.Hyperlinks.Add Selection.Range, addressHyper
+    e = Selection.text
+    'searchedTerm = 'Array("卦", "爻", "周易", "易經", "系辭", "繫辭", "擊辭", "說卦", "序卦", "卦序", "敘卦", "雜卦", "文言", "乾坤", "無咎", vba.Chrw(26080) & "咎", "天咎", "元亨", "利貞", "易") ', "", "", "", "")
+    ''https://ctext.org/wiki.pl?if=gb&res=757381&searchu=%E5%8D%A6
+    'For Each e In searchedTerm
+        addressHyper = addressHyper + " " + site + cndn + bookID + "&searchu=" + e
+    'Next e
+    Shell Network.getDefaultBrowserFullname + addressHyper
+    
+    Selection.Hyperlinks.Add Selection.Range, addressHyper
 End Sub
 
 Sub 史記三家注()

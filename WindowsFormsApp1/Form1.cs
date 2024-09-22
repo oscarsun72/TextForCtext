@@ -2002,7 +2002,7 @@ namespace WindowsFormsApp1
                             Process.Start(url);
                             break;
                         case BrowserOPMode.seleniumNew:
-                            br.LastValidWindow = driver.CurrentWindowHandle;
+                            br.LastValidWindow = br.GetCurrentWindowHandle(driver);
                             br.openNewTabWindow();
                             br.GoToUrlandActivate(url);
                             break;
@@ -10738,7 +10738,7 @@ namespace WindowsFormsApp1
                 Console.WriteLine(ex.HResult + ":" + ex.Message);
 
                 Debugger.Break();//這裡待除錯！！20240921 應該是由於在分段/行時切到了surrogate的字
-                
+
                 Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
                 return;
             }

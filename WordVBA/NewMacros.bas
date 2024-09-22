@@ -799,13 +799,13 @@ If .Type = wdSelectionIP Then MsgBox "請選取想要尋找之文字", vbExclamation: Exit
 If .Type = wdSelectionNormal Then ' <> wdNoSelection OR wdSelectionIP Then '不為插入點
     If InStr(ActiveDocument.Content, .text) = InStrRev(ActiveDocument.Content, .text) Then
         MsgBox "本文只有此處!", vbInformation
-        .Font.Color = wdColorRed
-        .Font.Bold = True
+        .font.Color = wdColorRed
+        .font.Bold = True
         Exit Sub
     End If
     .Find.ClearFormatting
-    .Find.Replacement.Font.Color = wdColorRed
-    .Find.Replacement.Font.Bold = True
+    .Find.Replacement.font.Color = wdColorRed
+    .Find.Replacement.font.Bold = True
     .Find.Execute findtext:=.text, MatchCase:=True, Replace:=wdReplaceAll, Replacewith:=.text, Wrap:=wdFindContinue
     '一定要有Wrap:=wdFindContinue否則單向找尋時,預設值為Wrap:=wdFindStop
 End If
@@ -813,7 +813,7 @@ End With
 End Sub
 Sub 在本文件中取代選取字串格式()
 With Selection '快速鍵：
-If .Font.Color = wdColorAutomatic Or .Font.Color = wdColorBlack Then _
+If .font.Color = wdColorAutomatic Or .font.Color = wdColorBlack Then _
     If MsgBox("請先指定字形色彩!" & vbCr & _
         "若要保留黑字請按〔取消〕", vbExclamation + vbOKCancel) = vbOK Then Exit Sub
 If .Type = wdSelectionIP Then MsgBox "請選取想要尋找之文字", vbExclamation: Exit Sub
@@ -825,33 +825,33 @@ If .Type = wdSelectionNormal Then ' <> wdNoSelection OR wdSelectionIP Then '不為
 '    Set aFont = .Words.First.Font.Duplicate
 '    .Find.Replacement.Font = aFont
     
-    .Find.Replacement.Font.Color = .Font.Color
-    .Find.Replacement.Font.Bold = .Font.Bold
-    .Find.Replacement.Font.Italic = .Font.Italic
-    .Find.Replacement.Font.Size = .Font.Size
-    .Find.Replacement.Font.Name = .Font.Name
-    .Find.Replacement.Font.NameAscii = .Font.NameAscii
-    .Find.Replacement.Font.Underline = .Font.Underline
-    .Find.Replacement.Font.Borders = .Font.Borders
-    .Find.Replacement.Font.Outline = .Font.Outline
-    .Find.Replacement.Font.position = .Font.position
-    .Find.Replacement.Font.Animation = .Font.Animation
-    .Find.Replacement.Font.Spacing = .Font.Spacing
-    .Find.Replacement.Font.EmphasisMark = .Font.EmphasisMark
-    .Find.Replacement.Font.Emboss = .Font.Emboss
-    .Find.Replacement.Font.Engrave = .Font.Engrave
-    .Find.Replacement.Font.Hidden = .Font.Hidden
-    .Find.Replacement.Font.ItalicBi = .Font.ItalicBi
-    .Find.Replacement.Font.Kerning = .Font.Kerning
-    .Find.Replacement.Font.NameFarEast = .Font.NameFarEast
-    .Find.Replacement.Font.NameOther = .Font.NameOther
-    .Find.Replacement.Font.Scaling = .Font.Scaling
+    .Find.Replacement.font.Color = .font.Color
+    .Find.Replacement.font.Bold = .font.Bold
+    .Find.Replacement.font.Italic = .font.Italic
+    .Find.Replacement.font.Size = .font.Size
+    .Find.Replacement.font.Name = .font.Name
+    .Find.Replacement.font.NameAscii = .font.NameAscii
+    .Find.Replacement.font.Underline = .font.Underline
+    .Find.Replacement.font.Borders = .font.Borders
+    .Find.Replacement.font.Outline = .font.Outline
+    .Find.Replacement.font.position = .font.position
+    .Find.Replacement.font.Animation = .font.Animation
+    .Find.Replacement.font.Spacing = .font.Spacing
+    .Find.Replacement.font.EmphasisMark = .font.EmphasisMark
+    .Find.Replacement.font.Emboss = .font.Emboss
+    .Find.Replacement.font.Engrave = .font.Engrave
+    .Find.Replacement.font.Hidden = .font.Hidden
+    .Find.Replacement.font.ItalicBi = .font.ItalicBi
+    .Find.Replacement.font.Kerning = .font.Kerning
+    .Find.Replacement.font.NameFarEast = .font.NameFarEast
+    .Find.Replacement.font.NameOther = .font.NameOther
+    .Find.Replacement.font.Scaling = .font.Scaling
 '    .Find.Replacement.Font.Shading = .Font.Shading
-    .Find.Replacement.Font.Shadow = .Font.Shadow
-    .Find.Replacement.Font.SizeBi = .Font.SizeBi
-    .Find.Replacement.Font.Subscript = .Font.Subscript
-    .Find.Replacement.Font.Superscript = .Font.Superscript
-    .Find.Replacement.Font.UnderlineColor = .Font.UnderlineColor
+    .Find.Replacement.font.Shadow = .font.Shadow
+    .Find.Replacement.font.SizeBi = .font.SizeBi
+    .Find.Replacement.font.Subscript = .font.Subscript
+    .Find.Replacement.font.Superscript = .font.Superscript
+    .Find.Replacement.font.UnderlineColor = .font.UnderlineColor
     .Find.Execute findtext:=.text, MatchCase:=True, Replace:=wdReplaceAll, Replacewith:=.text, Wrap:=wdFindContinue
     '一定要有Wrap:=wdFindContinue否則單向找尋時,預設值為Wrap:=wdFindStop
 End If
@@ -875,11 +875,11 @@ Static fontName As String
 
 CheckSaved
 
-If Selection.Font.Name <> "華康儷粗黑" Then
-    fontName = Selection.Font.Name
-    Selection.Font.Name = "華康儷粗黑"
+If Selection.font.Name <> "華康儷粗黑" Then
+    fontName = Selection.font.Name
+    Selection.font.Name = "華康儷粗黑"
 Else '復原為原先字形2003/1/11(或按指定鍵:Ctrl+Spacebar--見線上說明)2003/1/12
-    Selection.Font.Name = fontName
+    Selection.font.Name = fontName
 End If
 End Sub
 
@@ -1086,12 +1086,19 @@ End Select
 End Sub
 
 Public Sub 刪除選中的文字()
-'指定鍵：Ctrl+Shift+Del'或刪除文件內所有選取範圍的文字
-With Selection '如果沒選取則先選取
-    If .Type = wdSelectionNormal Then
-        ActiveDocument.Range.Find.Execute Selection.text, , , , , , True, wdFindContinue, , "", wdReplaceAll
-    End If
-End With
+    '指定鍵：Ctrl + Shift + Del'或刪除文件內所有選取範圍的文字
+    Dim ur As UndoRecord
+    SystemSetup.stopUndo ur, "刪除選中的文字"
+    With Selection '如果沒選取則先選取
+        If .Type = wdSelectionNormal Then
+            With ActiveDocument.Range.Find
+                .ClearFormatting
+                .MatchByte = True ' 區分全形半形 '20240922 Copilot大菩薩完全在狀況外： https://sl.bing.net/gK7TYZVqIbQ
+                .Execute Selection.text, , , , , , True, wdFindContinue, , vbNullString, wdReplaceAll
+            End With
+        End If
+    End With
+    SystemSetup.contiUndo ur
 End Sub
 
 Public Sub 剪下以貼上札記()
@@ -2210,7 +2217,7 @@ If MsgBox("請先檢查出處是否已獨立成段落！", vbExclamation + vbOKCancel) = vbOK T
 With Selection
     If .Type = wdSelectionNormal Then .Move wdLine, -1
     For i = 1 To .Document.Paragraphs.Count
-        Select Case .Paragraphs(1).Range.Font.Name
+        Select Case .Paragraphs(1).Range.font.Name
             Case "新細明體"
 1               .MoveDown wdParagraph, 1, wdExtend
                 If IsNumeric(VBA.Left(LTrim(.Paragraphs(1).Range), 1)) And (InStr(1, .Sections(1).Range, _
@@ -2333,7 +2340,7 @@ Attribute 校槁列印.VB_ProcData.VB_Invoke_Func = "Normal.NewMacros.校槁列印"
         .BaseStyle = ""
         .NextParagraphStyle = "內文"
     End With
-    With ActiveDocument.Styles("內文").Font
+    With ActiveDocument.Styles("內文").font
         .NameFarEast = "標楷體"
         .NameAscii = "Times New Roman"
         .NameOther = "Times New Roman"

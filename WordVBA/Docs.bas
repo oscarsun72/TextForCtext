@@ -1122,10 +1122,137 @@ eH:
             Resume
     End Select
 End Function
+Rem 根據選取文字高亮文件中所有此文字出現的部分，所高亮者並不隨文件儲存，僅作顯示爾 20240922
+Sub HitHighlightBySelecton()
+    If Selection.Type = wdSelectionIP Then Exit Sub
+    Dim rng As Range
+    Set rng = Selection.Document.Range
+    rng.Find.HitHighlight Selection.text, wdColorYellow
+    Debug.Print rng.start; rng.End; rng.Document.Range.start; rng.Document.Range.End
+End Sub
+
+Rem 20240922 Copilot大菩薩根據我的改良，試試 https://sl.bing.net/dtWVmyauIFw https://sl.bing.net/glAQGL0KKCO
+Rem 邏輯錯誤，完全不行！
+Sub marking易學關鍵字_BAD_Copilot大菩薩(rng As Range, arr As Variant, Optional defaultHighlightColorIndex As word.WdColorIndex = word.wdYellow, _
+        Optional fontColor As word.WdColorIndex = word.wdRed, Optional allDoc As Boolean = False)
+    
+    Dim regex As Object, matches As Object, match As Object
+    Dim startRng As Long, endRng As Long
+    Dim e As Variant
+    Dim examOK As Boolean, rngExam As Range
+    Dim isInPhrasesAvoid As Boolean, isFollowedAvoid As Boolean, isPrecededAvoid As Boolean
+    Dim dictCoordinatesPhrase As New Scripting.Dictionary, key
+    
+    On Error GoTo eH
+    word.Options.defaultHighlightColorIndex = defaultHighlightColorIndex
+    If allDoc Then Set rng = rng.Document.Range
+    startRng = rng.start
+    endRng = rng.End
+    Set rngExam = rng.Document.Range
+    
+    ' 建立正則表達式對象
+    Set regex = CreateObject("VBScript.RegExp")
+    regex.Global = True
+    
+    For Each e In arr
+        'Copilot大菩薩：這樣的正則表達式模式確保了我們只匹配整個單詞 e，而不是單詞的一部分。例如，如果 e 是 “word”，這個模式會匹配 “word”，但不會匹配 “wording” 或 “sword”。
+        'regex.Pattern = "\b" & e & "\b" 'Copilot大菩薩：b 在正則表達式中代表的是「單詞邊界」（word boundary），可以理解為「bound」的縮寫。它用來匹配單詞的開始或結束位置，確保我們只匹配整個單詞而不是單詞的一部分。 https://sl.bing.net/kIwNUNbDloO
+        regex.Pattern = "." & e & "."
+        Set matches = regex.Execute(rng.text)
+        If matches.Count > 0 Then Stop
+        For Each match In matches
+            examOK = True
+            rng.SetRange startRng + match.FirstIndex, startRng + match.FirstIndex + Len(match.Value)
+            
+            ' 檢查是否需要前後文檢查
+            isFollowedAvoid = Keywords.易學KeywordsToMark_ExamFollowedAvoid.Exists(e)
+            isPrecededAvoid = Keywords.易學KeywordsToMark_ExamPrecededAvoid.Exists(e)
+            isInPhrasesAvoid = Keywords.易學KeywordsToMark_ExamInPhraseAvoid.Exists(e)
+            
+            If isFollowedAvoid Or isPrecededAvoid Or isInPhrasesAvoid Then
+                ' 後綴檢查
+                If Not rng.Next Is Nothing And rng.Next.Characters.Count > 0 Then
+                    If isFollowedAvoid Then
+                        For Each key In Keywords.易學KeywordsToMark_ExamFollowedAvoid(e)
+                            If rng.End + Len(key) <= endRng Then
+                                rngExam.SetRange rng.End, rng.End + Len(key)
+                                If StrComp(rngExam.text, key) = 0 Then
+                                    examOK = False
+                                    Exit For
+                                End If
+                            End If
+                        Next key
+                    End If
+                End If
+                
+                ' 前綴檢查
+                If examOK And Not rng.Previous Is Nothing And rng.Previous.Characters.Count > 0 Then
+                    If isPrecededAvoid Then
+                        For Each key In Keywords.易學KeywordsToMark_ExamPrecededAvoid(e)
+                            If rng.start - Len(key) > -1 Then
+                                rngExam.SetRange rng.start - Len(key), rng.start
+                                If StrComp(rngExam.text, key) = 0 Then
+                                    examOK = False
+                                    Exit For
+                                End If
+                            End If
+                        Next key
+                    End If
+                End If
+                
+                ' 內嵌於檢查
+                If examOK And isInPhrasesAvoid Then
+                    If dictCoordinatesPhrase.Count = 0 Then
+                        For Each key In Keywords.易學KeywordsToMark_ExamInPhraseAvoid(e)
+                            rngExam.SetRange startRng, endRng
+                            Do While rngExam.Find.Execute(key, , , , , , True, wdFindStop)
+                                dictCoordinatesPhrase.Add rngExam.start, rngExam.End
+                            Loop
+                        Next key
+                    End If
+                    
+                    For Each key In dictCoordinatesPhrase
+                        If rng.start >= key And rng.End <= dictCoordinatesPhrase(key) Then
+                            examOK = False
+                            Exit For
+                        End If
+                    Next key
+                End If
+            End If
+            
+            ' 標識關鍵字
+            If examOK Then
+                With rng
+                    .HighlightColorIndex = defaultHighlightColorIndex
+                    If .font.ColorIndex = wdAuto Then .font.ColorIndex = fontColor
+                End With
+            Else
+                ' 不需要前後文檢查的情形
+                Do While regex.Execute(e, , , , , , True, wdFindStop, True)
+                    With rng
+                        .HighlightColorIndex = defaultHighlightColorIndex
+                        If .font.ColorIndex = wdAuto Then .font.ColorIndex = fontColor
+                    End With
+                Loop
+            End If
+        Next match
+        
+        If dictCoordinatesPhrase.Count > 0 Then dictCoordinatesPhrase.RemoveAll
+    Next e
+
+finish:
+    rng.SetRange startRng, endRng
+    Exit Sub
+
+eH:
+    MsgBox Err.Number & Err.Description
+    Resume finish
+End Sub
+
 Rem rng 要處理的範圍 ,arr 要處理的關鍵字 （預設為字串陣列）
 Sub marking易學關鍵字(rng As Range, arr As Variant, Optional defaultHighlightColorIndex As word.WdColorIndex = word.wdYellow, _
         Optional fontColor As word.WdColorIndex = word.wdRed, Optional allDoc As Boolean = False)
-    
+    '優化的建議：Copilot大菩薩 20240922 Word VBA 中的 Find 物件屬性： https://sl.bing.net/fMV3NYyXdLg https://sl.bing.net/kosqk2rrnFc
     Dim xd As String, e, eArrKey, arrKey, startRng As Long, endRng As Long ', dict As Scripting.Dictionary
     Dim examOK As Boolean, rngExam As Range, processCntr As Long, dictCoordinatesPhrase As New Scripting.Dictionary, key, isInPhrasesAvoid As Boolean, isFollowedAvoid As Boolean, isPrecededAvoid As Boolean
 
@@ -1141,8 +1268,8 @@ Sub marking易學關鍵字(rng As Range, arr As Variant, Optional defaultHighlightCol
 
     With rng.Find
         .ClearFormatting
-        .ClearAllFuzzyOptions
-        .ClearHitHighlight
+'        .HitHighlight
+        
 '        With .Replacement '現在不用 wdReplaceAll 引數的方法了
 '            .font.ColorIndex = fontColor 'wdRed
 '            .Highlight = True
