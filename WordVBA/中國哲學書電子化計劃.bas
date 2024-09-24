@@ -71,26 +71,26 @@ If SystemSetup.GetClipboardText <> x Then
     rng.InsertAfter x
     rng.Cut
 End If
-rng.Document.ActiveWindow.WindowState = wdWindowStateMinimize
+rng.Document.ActiveWindow.windowState = wdWindowStateMinimize
 DoEvents
 Network.AppActivateDefaultBrowser
 SendKeys "^v"
 SystemSetup.contiUndo ur
 End Sub
 Sub setPage1Code() '(ByRef d As Document)
-Dim xd As String
-xd = SystemSetup.GetClipboardText
-If InStr(xd, "page=""1""") = 0 Then
-    Dim bID As String, s As Byte, pge As String
-    s = InStr(xd, "page=""")
-    pge = VBA.Mid(xd, s + Len("page="""), InStr(s + Len("page="""), xd, """") - s - Len("page="""))
-    If CInt(pge) < 10 Then
-        s = InStr(xd, """")
-        bID = VBA.Mid(xd, s + 1, InStr(s + 1, xd, """") - s - 1)
-        xd = "<scanbegin file=""" & bID & """ page=""1"" />●<scanend file=""" & bID & """ page=""1"" />" + xd
-        SystemSetup.ClipboardPutIn xd
+    Dim xd As String
+    xd = SystemSetup.GetClipboardText
+    If InStr(xd, "page=""1""") = 0 Then
+        Dim bID As String, s As Byte, pge As String
+        s = InStr(xd, "page=""")
+        pge = VBA.Mid(xd, s + Len("page="""), InStr(s + Len("page="""), xd, """") - s - Len("page="""))
+        If CInt(pge) < 10 Then
+            s = InStr(xd, """")
+            bID = VBA.Mid(xd, s + 1, InStr(s + 1, xd, """") - s - 1)
+            xd = "<scanbegin file=""" & bID & """ page=""1"" />●<scanend file=""" & bID & """ page=""1"" />" + xd
+            SystemSetup.ClipboardPutIn xd
+        End If
     End If
-End If
 End Sub
 
 Sub clearRedundantCode()
@@ -160,126 +160,126 @@ code:
 End Sub
 
 Sub 清除頁前的分段符號()
-Dim d As Document, rng As Range, e As Long, s As Long, xd As String
-Set d = Documents.Add
-DoEvents
-'If (MsgBox("add page 1 code?", vbExclamation + vbOKCancel) = vbOK) Then setPage1Code
-中國哲學書電子化計劃.setPage1Code:  clearRedundantCode
-將星號前的分段符號移置前段之末 d
-DoEvents
-Set rng = d.Range
-'d.ActiveWindow.Visible = True
-'rng.Paste
-rng.Find.ClearFormatting
-Do While rng.Find.Execute("<scanbegin ") '<scanbegin file="80564" page="13" y="4" />
-    rng.MoveEndUntil ">"
-    rng.MoveEnd
-'    rng.Select
-    rng.SetRange rng.End, rng.End + 2
-    If rng.text = VBA.Chr(13) & VBA.Chr(13) Then
-'        rng.Select
-        e = rng.End
-        rng.Delete
-        Set rng = d.Range(e, d.Range.End)
-    Else
-    rng.SetRange rng.End, d.Range.End
-    End If
-Loop
-
-playSound 1
-
-Set rng = d.Range
-rng.Find.ClearFormatting
-Do While rng.Find.Execute("<scanend file=") ', , , , , , True, wdFindStop)
-    s = rng.start
-    rng.MoveEndUntil ">"
-    rng.MoveEnd
-'    rng.Select
-    rng.SetRange rng.End, rng.End + 2
-    If rng.text = VBA.Chr(13) & VBA.Chr(13) Then
-'        e = rng.End
-'        rng.Select
-        rng.Cut
-        rng.SetRange s, s
-        rng.Paste
-        Set rng = d.Range(e, d.Range.End)
-    Else
+    Dim d As Document, rng As Range, e As Long, s As Long, xd As String
+    Set d = Documents.Add
+    DoEvents
+    'If (MsgBox("add page 1 code?", vbExclamation + vbOKCancel) = vbOK) Then setPage1Code
+    中國哲學書電子化計劃.setPage1Code:  clearRedundantCode
+    將星號前的分段符號移置前段之末 d
+    DoEvents
+    Set rng = d.Range
+    'd.ActiveWindow.Visible = True
+    'rng.Paste
+    rng.Find.ClearFormatting
+    Do While rng.Find.Execute("<scanbegin ") '<scanbegin file="80564" page="13" y="4" />
+        rng.MoveEndUntil ">"
+        rng.MoveEnd
+    '    rng.Select
+        rng.SetRange rng.End, rng.End + 2
+        If rng.text = VBA.Chr(13) & VBA.Chr(13) Then
+    '        rng.Select
+            e = rng.End
+            rng.Delete
+            Set rng = d.Range(e, d.Range.End)
+        Else
         rng.SetRange rng.End, d.Range.End
-    End If
-Loop
-
-
-DoEvents
-xd = d.Range.text
-'If d.Characters.Count < 50000 Then ' 147686
-'    d.Range.Cut '原來是Word的 cut 到剪貼簿裡有問題
-'Else
-    'SystemSetup.SetClipboard d.Range.Text
-    SystemSetup.ClipboardPutIn xd
-'End If
-DoEvents
-playSound 1, 0
-DoEvents
-pastetoEditBox "將星號前的分段符號移置前段之末 & 清除頁前的分段符號"
-d.Close wdDoNotSaveChanges
+        End If
+    Loop
+    
+    playSound 1
+    
+    Set rng = d.Range
+    rng.Find.ClearFormatting
+    Do While rng.Find.Execute("<scanend file=") ', , , , , , True, wdFindStop)
+        s = rng.start
+        rng.MoveEndUntil ">"
+        rng.MoveEnd
+    '    rng.Select
+        rng.SetRange rng.End, rng.End + 2
+        If rng.text = VBA.Chr(13) & VBA.Chr(13) Then
+    '        e = rng.End
+    '        rng.Select
+            rng.Cut
+            rng.SetRange s, s
+            rng.Paste
+            Set rng = d.Range(e, d.Range.End)
+        Else
+            rng.SetRange rng.End, d.Range.End
+        End If
+    Loop
+    
+    
+    DoEvents
+    xd = d.Range.text
+    'If d.Characters.Count < 50000 Then ' 147686
+    '    d.Range.Cut '原來是Word的 cut 到剪貼簿裡有問題
+    'Else
+        'SystemSetup.SetClipboard d.Range.Text
+        SystemSetup.ClipboardPutIn xd
+    'End If
+    DoEvents
+    playSound 1, 0
+    DoEvents
+    pastetoEditBox "將星號前的分段符號移置前段之末 & 清除頁前的分段符號"
+    d.Close wdDoNotSaveChanges
 
 End Sub
 
 Sub 將星號前的分段符號移置前段之末(ByRef d As Document) '20220522
-Dim rng As Range, e As Long, s As Long, rngP As Range
-'d As Document,Set d = Documents.Add
-Set rng = d.Range
-DoEvents
-On Error GoTo eH
-rng.Paste
-rng.Find.ClearFormatting
-Do While rng.Find.Execute("*")
-    e = rng.End
-    If rng.start > 0 Then
-        If rng.Previous = VBA.Chr(13) Then
-            Set rng = rng.Previous
+    Dim rng As Range, e As Long, s As Long, rngP As Range
+    'd As Document,Set d = Documents.Add
+    Set rng = d.Range
+    DoEvents
+    On Error GoTo eH
+    rng.Paste
+    rng.Find.ClearFormatting
+    Do While rng.Find.Execute("*")
+        e = rng.End
+        If rng.start > 0 Then
             If rng.Previous = VBA.Chr(13) Then
                 Set rng = rng.Previous
-                If rng.Previous = ">" Then
-                    rng.SetRange rng.start, e - 1
-                    s = rng.start
-                    Set rngP = d.Range(s, s)
-                    rng.Delete
-                    Do Until rngP.Next = "<"
-                        If rngP.start = 0 Then GoTo NextOne
-                        rngP.Move wdCharacter, -1
-                    Loop
-                    '檢查是否正在跨頁處 20230811
-                    If d.Range(rngP.start, rngP.start + 11) = "><scanbegin" Then
-                        rngP.Move Count:=-1
+                If rng.Previous = VBA.Chr(13) Then
+                    Set rng = rng.Previous
+                    If rng.Previous = ">" Then
+                        rng.SetRange rng.start, e - 1
+                        s = rng.start
+                        Set rngP = d.Range(s, s)
+                        rng.Delete
                         Do Until rngP.Next = "<"
                             If rngP.start = 0 Then GoTo NextOne
                             rngP.Move wdCharacter, -1
                         Loop
+                        '檢查是否正在跨頁處 20230811
+                        If d.Range(rngP.start, rngP.start + 11) = "><scanbegin" Then
+                            rngP.Move Count:=-1
+                            Do Until rngP.Next = "<"
+                                If rngP.start = 0 Then GoTo NextOne
+                                rngP.Move wdCharacter, -1
+                            Loop
+                        End If
+                        '以上 檢查是否正在跨頁處 20230811
+                        rngP.Move
+                        rngP.InsertAfter VBA.Chr(13) & VBA.Chr(13)
                     End If
-                    '以上 檢查是否正在跨頁處 20230811
-                    rngP.Move
-                    rngP.InsertAfter VBA.Chr(13) & VBA.Chr(13)
                 End If
             End If
         End If
-    End If
 NextOne:
-    Set rng = d.Range(e, d.Range.End)
-Loop
-'d.Range.Cut
-'d.Close wdDoNotSaveChanges
-playSound 1
-'pastetoEditBox "將星號前的分段符號移置前段之末"
-Exit Sub
+        Set rng = d.Range(e, d.Range.End)
+    Loop
+    'd.Range.Cut
+    'd.Close wdDoNotSaveChanges
+    playSound 1
+    'pastetoEditBox "將星號前的分段符號移置前段之末"
+    Exit Sub
 eH:
-Select Case Err.Number
-    Case 4605, 13 '此方法或屬性無法使用，因為[剪貼簿] 是空的或無效的。
-        SystemSetup.wait 0.8
-        Resume
-    Case Else
-        MsgBox Err.Number + Err.Description
- End Select
+    Select Case Err.Number
+        Case 4605, 13 '此方法或屬性無法使用，因為[剪貼簿] 是空的或無效的。
+            SystemSetup.wait 0.8
+            Resume
+        Case Else
+            MsgBox Err.Number + Err.Description
+     End Select
 End Sub
 
 Sub 將每頁間的分段符號清除()
@@ -298,7 +298,7 @@ Loop
 End Sub
 
 Sub pastetoEditBox(Description_from_ClipBoard As String)
-word.Application.WindowState = wdWindowStateMinimize
+word.Application.windowState = wdWindowStateMinimize
 'MsgBox "ready to paste", vbInformation
 AppActivateDefaultBrowser
 DoEvents
@@ -343,7 +343,7 @@ d.Range.text = Replace(Replace(d.Range.text, "|" & VBA.Chr(13) & "　", ""), "}}|
 d.Range.Copy
 SystemSetup.contiUndo ur
 SystemSetup.playSound 2
-word.Application.WindowState = wdWindowStateMinimize
+word.Application.windowState = wdWindowStateMinimize
 On Error Resume Next
 AppActivate "TextForCtext", True
 End Sub
@@ -819,7 +819,7 @@ End If
 d.Range.Cut
 d.Close wdDoNotSaveChanges
 Beep
-word.Application.ActiveWindow.WindowState = wdWindowStateMinimize
+word.Application.ActiveWindow.windowState = wdWindowStateMinimize
 End Sub
 Sub 史記三家注2old()
 '從2858頁起，20210920:0817之後，改用臺師大附中同學吳恆昇先生《中華文化網》所錄中研院《瀚典》初本，雖或仍未精，然至少免有簡化字轉換訛窘或造字亂碼之困擾，原文字檔棄置。根據初作比對，格式完全一樣！根本就是從這裡出來的，再轉簡化字，再又反正，造成之紊亂。悔當初沒想到用此本也。阿彌陀佛。佛弟子孫守真任真甫謹識於2021年9月20日
@@ -1068,7 +1068,7 @@ With t
 End With
 d.Range.Cut
 d.Close wdDoNotSaveChanges
-If word.Application.Windows.Count > 0 Then word.Application.ActiveWindow.WindowState = wdWindowStateMinimize
+If word.Application.Windows.Count > 0 Then word.Application.ActiveWindow.windowState = wdWindowStateMinimize
 End Sub
 
 Sub 戰國策_四部叢刊_維基文庫本() '《戰國策》格式者皆適用（即主文首行頂格，而其餘內容降一格者）
@@ -1917,7 +1917,7 @@ For i = 0 To UBound(a)
     i = i + 1
 Next i
 d.Range.Cut
-d.Application.WindowState = wdWindowStateMinimize
+d.Application.windowState = wdWindowStateMinimize
 d.Close wdDoNotSaveChanges
 AppActivateDefaultBrowser
 SendKeys "^v"

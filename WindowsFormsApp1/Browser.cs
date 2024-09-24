@@ -4938,8 +4938,14 @@ internal static string getImageUrl() {
                     }
                     iwe = waitFindWebElementBySelector_ToBeClickable("#swal2-title", 0.1);
                     if (DateTime.Now.Subtract(dt).TotalSeconds > 8)
-                        if (Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("等候等待「上傳完成」訊息方塊出現、已逾時，要繼續嗎？") == DialogResult.Cancel)
+                        if (Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("等待「上傳完成」訊息方塊出現、已逾時，要繼續嗎？") == DialogResult.Cancel)
                         { StopOCR = true; return false; }
+                        else
+                        {
+                            ActiveForm1.TopMost = false;
+                            driver.SwitchTo().Window(driver.CurrentWindowHandle);
+                            BringToFront("chrome");
+                        }
                 }
 
                 dt = DateTime.Now;
@@ -4949,6 +4955,12 @@ internal static string getImageUrl() {
                     if (DateTime.Now.Subtract(dt).TotalSeconds > 68)
                         if (Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("等候上傳完成已逾時，要繼續嗎？") == DialogResult.Cancel)
                         { StopOCR = true; return false; }
+                        else
+                        {
+                            ActiveForm1.TopMost = false;
+                            driver.SwitchTo().Window(driver.CurrentWindowHandle);
+                            BringToFront("chrome");
+                        }
                 }
                 //按下「上傳完成」按鈕
                 iwe = waitFindWebElementBySelector_ToBeClickable("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled", 0.1);
@@ -5029,6 +5041,12 @@ internal static string getImageUrl() {
                 {
                     if (DateTime.Now.Subtract(dt).TotalSeconds > 10)
                         if (DialogResult.Cancel == Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("勾選檔案準備OCR作業逾時，是否繼續？")) { StopOCR = true; return false; }
+                        else
+                        {
+                            ActiveForm1.TopMost = false;
+                            driver.SwitchTo().Window(driver.CurrentWindowHandle);
+                            BringToFront("chrome");
+                        }
                     iwe.Click();
                 }
 
@@ -5083,6 +5101,12 @@ internal static string getImageUrl() {
                 {
                     if (DateTime.Now.Subtract(dt).TotalSeconds > 45)
                         if (Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("等待OCR完成已逾時，是否繼續？") == DialogResult.Cancel) { StopOCR = true; return false; }
+                        else
+                        {
+                            ActiveForm1.TopMost = false;
+                            driver.SwitchTo().Window(driver.CurrentWindowHandle);
+                            BringToFront("chrome");
+                        }
                 }
                 //按下「OCR完成 OK」按鈕
                 iwe = waitFindWebElementBySelector_ToBeClickable("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled", 0.1);
@@ -5315,6 +5339,12 @@ internal static string getImageUrl() {
                 if (DateTime.Now.Subtract(dt).TotalSeconds > 10)
                 {
                     if (DialogResult.Cancel == Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("等待刪除完成訊息逾時，是否繼續？")) { StopOCR = true; return false; }
+                    else
+                    {
+                        ActiveForm1.TopMost = false;
+                        driver.SwitchTo().Window(driver.CurrentWindowHandle);
+                        BringToFront("chrome");
+                    }
                 }
 
                 iwe = waitFindWebElementBySelector_ToBeClickable("#swal2-title", 0.02);
@@ -8205,12 +8235,12 @@ internal static string getImageUrl() {
             }
 
             List<string> keywords = new List<string> { "易", "五經", "六經","七經", "十三經","蓍", "卦", "爻", "繫詞", "繫辭", "文言", "乾坤","元亨","利貞", "咎",
-                 "夬", "頤","巽","坎","兌","小畜","大畜","歸妹","明夷","明𡗝","同人于宗","同人","大有","豫","蠱","噬嗑","〈需〉","〈屯","蒙〉","𫎇〉","賁於外","外賁","內賁","賁","剝","大過","小過","遯世無悶","遯","大壯","睽","暌","蹇","姤","萃","艮其背", "乾知大始","乾以易知","坤作成物","坤以簡能" ,"艮","渙","中孚","既濟","未濟",
+                 "夬", "頤","巽","坎","兌","小畜","大畜","歸妹","明夷","明𡗝","同人于宗","同人","大有","豫大","豫","蠱","噬嗑","〈需〉","〈屯","蒙〉","𫎇〉","賁於外","外賁","內賁","賁","剝","大過","小過","遯世無悶","遯","大壯","睽","暌","蹇","姤","萃","艮其背", "乾知大始","乾以易知","坤作成物","坤以簡能" ,"艮","渙","中孚","既濟","未濟",
                 "咸恆","老陰", "老陽", "少陰", "少陽","十翼","四象","兩儀",
                 "无妄", "彖", "象曰", "象傳", "象日", "象云","小象","象文", "筮",// 不支援標點檢索，如「, "象："」
                 "初九","九二","九三","九四","九五","上九","初六","六二","六三","六四","六五","上六","用九","用六", "繇辭","繇詞",
                 "隨時之義","庖有魚","包有魚","精義入神","豶豕","童牛","承之羞","雷在天上","錫馬", "蕃庶","晝日","三接","懲忿","窒欲","敬以直內","義以方外","迷後得主","利西南","品物咸章","天下大行","益動而", "日進無疆","頻巽","豚魚","頻復", "懲窒","閑邪","存誠","乾乾","悔吝","憧憧", "類萬物","柔順利貞","比之匪人","貞厲","履貞","履道坦坦","貞吉","悔亡","時義","健順", "內健而外順", "內健外順", "外順而內健", "外順內健","敦復","直方","開物成務","窮神知化", "夕惕","惕若","研幾極深","極深研幾","一陰一陽","允升","木上有水","勞民勸相","索而得","我有好爵","言有序","有聖人之道四","長子帥師","弟子輿尸","無悶","日用而不知","之道鮮","原始反終", "寂然不動", "感而遂通","朋從", "朋盍", "容民畜眾","有過則改","見善則遷","養正","養賢","知臨","臨大君", "默而成之","黙而成之","不言而信", "存乎德行","通天下之志","履正", "繼之者善", "仁者見之", "知者見之", "智者見之","屯其膏",
-                "象義","大貞","小貞", "帝出乎震","帝出於震","帝出于震","與時偕行","盈虛",
+                "象義","大貞","小貞", "帝出乎震","帝出於震","帝出于震","與時偕行","盈虛","豐亨",
                 "伏羲","庖羲","庖𦏁","宓𦏁","宓羲","宓犧","伏犧","庖犧"};
 
             //異體字處理（只用在《中國哲學書電子化計劃》，因為《漢籍全文資料庫》已俱。）

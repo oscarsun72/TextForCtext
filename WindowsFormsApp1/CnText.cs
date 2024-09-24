@@ -516,13 +516,17 @@ namespace TextForCtext
             該詞匹配任何前後包含字母或數字的字串中的小數點。replace方法在這種情況下會使用中文句號替換它們。
              */
         }
-
+        /// <summary>
+        /// 判斷是否已經人工手動編輯了
+        /// </summary>
+        /// <param name="text">要檢查的文本</param>
+        /// <returns>若有人工手動編輯過的記號，則傳回true</returns>
         internal static bool HasEditedWithPunctuationMarks(ref string text)
         {
             if (string.IsNullOrEmpty(text)) return false;
             if (text.Length > 1000)
             {
-                Regex regex = new Regex(@"\，|\。|\？|\！|\〈|\〉|\《|\》|\：|\『|\』|\「|\」|\􏿽|、|●|□|■|·|\*\*|\{\{\{|\}\}\}|\||〇|◯|　}}|\*　");
+                Regex regex = new Regex(@"\，|\。|\？|\！|\〈|\〉|\《|\》|\：|\『|\』|\〖|\〗|\「|\」|\􏿽|、|●|□|■|·|\*\*|\{\{\{|\}\}\}|\||〇|◯|　}}|\*　");
                 Match match = regex.Match(text);
                 return match.Success;
             }
@@ -530,7 +534,7 @@ namespace TextForCtext
             {
                 return (text.Contains("，") || text.Contains("。") || text.Contains("：") || text.Contains("􏿽")
                     || text.Contains("！") || text.Contains("？") || text.Contains("《") || text.Contains("〈")
-                    || text.Contains("『") || text.Contains("』")
+                    || text.Contains("『") || text.Contains("』")|| text.Contains("〖") || text.Contains("〗")
                     || text.Contains("「") || text.Contains("」")
                     || text.Contains("》") || text.Contains("〉")
                     || text.Contains("□") || text.Contains("■")
