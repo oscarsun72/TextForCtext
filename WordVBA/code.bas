@@ -395,7 +395,7 @@ Dim ur As UndoRecord
 SystemSetup.stopUndo ur, "清除所有程式碼註解"
 With ActiveDocument.Range.Find
     .ClearFormatting
-    .Font.ColorIndex = 11
+    .font.ColorIndex = 11
     .Execute "", , , , , , , wdFindContinue, , "", wdReplaceAll
     .ClearFormatting
 End With
@@ -917,7 +917,7 @@ Sub CheckPrivateUseCharacters()
     SystemSetup.playSound 7
     processedCharacters = vbNullString
 End Sub
-Rem 找出造字 - 找出使用中的文件裡的造字並匯出成新檔，檔名為"PrivateUseCharacters.docx"
+Rem 找出造字 - 找出使用中的文件裡的造字並匯出成新檔，檔名為 原檔名+"PrivateUseCharacters.docx"
 Sub PrivateUseCharactersOutput()
     Static processedCharacters As String
     Dim privateUseCharacters As String
@@ -960,12 +960,17 @@ Sub PrivateUseCharactersOutput()
     Next a
     SystemSetup.playSound 7
     processedCharacters = vbNullString
-    Set d = Documents.Add
-    d.Range.text = privateUseCharacters
-    d.SaveAs2 rng.Document.path & "\" & "PrivateUseCharacters.docx"
-'    rng.Document.Close wdDoNotSaveChanges
-    d.Activate
-    d.Application.Activate
+    If privateUseCharacters <> vbNullString Then
+        Set d = Documents.Add
+        d.Range.text = privateUseCharacters
+        d.SaveAs2 rng.Document.path & "\" & VBA.Left(rng.Document.Name, VBA.InStr(rng.Document.Name, ".") - 1) & "PrivateUseCharacters.docx"
+    '    rng.Document.Close wdDoNotSaveChanges
+        d.Activate
+        d.Application.Activate
+    Else
+        MsgBox rng.Document.Name & "文件中並沒有造字！", vbInformation
+        rng.Document.Application.Activate
+    End If
 End Sub
 
 Sub ReplacePrivateUserCharactersWithCJK()

@@ -1253,7 +1253,7 @@ Rem rng ­n³B²zªº½d³ò ,arr ­n³B²zªºÃöÁä¦r ¡]¹w³]¬°¦r¦ê°}¦C¡^
 Sub marking©ö¾ÇÃöÁä¦r(rng As Range, arr As Variant, Optional defaultHighlightColorIndex As word.WdColorIndex = word.wdYellow, _
         Optional fontColor As word.WdColorIndex = word.wdRed, Optional allDoc As Boolean = False)
     'Àu¤Æªº«ØÄ³¡GCopilot¤jµÐÂÄ 20240922 Word VBA ¤¤ªº Find ª«¥óÄÝ©Ê¡G https://sl.bing.net/fMV3NYyXdLg https://sl.bing.net/kosqk2rrnFc
-    Dim xd As String, e, eArrKey, arrKey, startRng As Long, endRng As Long ', dict As Scripting.Dictionary
+    Dim xd As String, a As Range, e, eArrKey, arrKey, startRng As Long, endRng As Long ', dict As Scripting.Dictionary
     Dim examOK As Boolean, rngExam As Range, processCntr As Long, dictCoordinatesPhrase As New Scripting.Dictionary, key, isInPhrasesAvoid As Boolean, isFollowedAvoid As Boolean, isPrecededAvoid As Boolean
 
     On Error GoTo eH
@@ -1276,7 +1276,7 @@ Sub marking©ö¾ÇÃöÁä¦r(rng As Range, arr As Variant, Optional defaultHighlightCol
 '        End With
         For Each e In arr '¹M¾ú¨C­Ó­n¼ÐÃÑªºÃöÁä¦r
         
-'            If e = "°®ª¾¤j©l" Then Stop 'just for test
+'            If e = "°®" Then Stop 'just for test
             
             If InStr(xd, e) > 0 Then '¦b¦³¶W³sµ²µ¥¥\¯àÅÜ¼Æ¡BÁôÂÃ¤å¦r®É¥i¯à·|miss¡A¤µ´ú¸Õ¨Ã¤£·|¡A«Ý¦A´ú¸Õ¡C
             
@@ -1310,6 +1310,9 @@ Sub marking©ö¾ÇÃöÁä¦r(rng As Range, arr As Variant, Optional defaultHighlightCol
                         If Not rng.Next Is Nothing Then
                             If rng.Next.Characters.Count > 0 Then
                                 '«áºóÀË¬d
+                                
+                                'If rng.Document.Range(rng.End, rng.End + 4).text = "©[¤§²M®ð" Then Stop 'just for test
+                                
                                 'If UBound(VBA.Filter(Keywords.©ö¾ÇKeywordsToMark_ExamFollowedAvoid(e), rng.Next.Characters(1).text)) < 0 Then
                                 If isFollowedAvoid Then
                                     arrKey = Keywords.©ö¾ÇKeywordsToMark_ExamFollowedAvoid(e)
@@ -1387,7 +1390,9 @@ checkPhrases:                                   '¤º´O©óÀË¬d¡GÃöÁä¦r§t¦b¸ÓÁ×§Kªº¤
                                                         Rem ¦¹ÀÉ¥i¨Ñ®Ä¯à´ú¸Õ¡A¶]°_¨Ó¤£ª¾¦ó¬G¯S§O¤[¡I file:///H:\§Úªº¶³ºÝµwºÐ\¶À¦Ñ®v»·ºÝ¤u§@\1©ö¾ÇÂøµÛ¤å¥»\«D²M¤H¤wªì¨B¼ÐÂI\¦ó¨}«T¢I¥|¤ÍÂNÂO»¡.docx
                                                         
                                                         .HighlightColorIndex = defaultHighlightColorIndex
-                                                        If .font.ColorIndex = wdAuto Then .font.ColorIndex = fontColor
+                                                        For Each a In rng.Characters
+                                                            If .font.ColorIndex = wdAuto Then .font.ColorIndex = fontColor
+                                                        Next a
                                                     End With
                                                 Else '¤ù»yµü¥yÀË¬d¥¼¹L
                                                     If rng.HighlightColorIndex = defaultHighlightColorIndex Then
@@ -1441,7 +1446,9 @@ checkPhrases:                                   '¤º´O©óÀË¬d¡GÃöÁä¦r§t¦b¸ÓÁ×§Kªº¤
                         Rem ­Y¼g¦¨¥H¤U·|¦³49DLL©I¥s³W®æ¿ù»~¡A³o¦¸­«¼g¤S¤£·|¤F¡A¥i¨£¬O VBE½sÄ¶¾¹¬G»Ù 20240920
                         With rng
                             .HighlightColorIndex = defaultHighlightColorIndex
-                            If .font.ColorIndex = wdAuto Then .font.ColorIndex = fontColor
+                            For Each a In rng.Characters
+                                If .font.ColorIndex = wdAuto Then .font.ColorIndex = fontColor
+                            Next a
                         End With
                     Loop
 '                    .Execute e, , , , , , True, wdFindStop, True, e, Replace:=wdReplaceAll '¦b§t¦³¶W³sµ²µ¥®æ¦¡¤Æ¤å¦r®É·|¥¢ÆF

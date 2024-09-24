@@ -1795,30 +1795,30 @@ Sub ¤å¥ó¦rÀW_old()
             With Doc
                 If Len(.Range) = 1 Then '©|¥¼¿é¤J¤º®e
                     .Range.InsertAfter "¦rÀW = " & j & "¦¸¡G¡]" & Len(Replace(Xsort(j), "¡B", "")) & "¦r¡^"
-                    .Range.Paragraphs(1).Range.Font.Size = 12
-                    .Range.Paragraphs(.Paragraphs.Count).Range.Font.Name = "·s²Ó©úÅé"
-                    .Range.Paragraphs(.Paragraphs.Count).Range.Font.NameAscii = "Times New Roman"
+                    .Range.Paragraphs(1).Range.font.Size = 12
+                    .Range.Paragraphs(.Paragraphs.Count).Range.font.Name = "·s²Ó©úÅé"
+                    .Range.Paragraphs(.Paragraphs.Count).Range.font.NameAscii = "Times New Roman"
                     '.Range.Paragraphs(1).Range.Font.Bold = True
                 Else
                     .Range.InsertParagraphAfter
                     .ActiveWindow.Selection.Range.Collapse Direction:=wdCollapseEnd
                     .Range.InsertAfter "¦rÀW = " & j & "¦¸¡G¡]" & Len(Replace(Xsort(j), "¡B", "")) & "¦r¡^"
-                    .Range.Paragraphs(.Paragraphs.Count).Range.Font.Size = 12
+                    .Range.Paragraphs(.Paragraphs.Count).Range.font.Size = 12
                     '.Range.Paragraphs(.Paragraphs.Count).Range.Bold = True
-                    .Range.Paragraphs(.Paragraphs.Count).Range.Font.Name = "·s²Ó©úÅé"
-                    .Range.Paragraphs(.Paragraphs.Count).Range.Font.NameAscii = "Times New Roman"
+                    .Range.Paragraphs(.Paragraphs.Count).Range.font.Name = "·s²Ó©úÅé"
+                    .Range.Paragraphs(.Paragraphs.Count).Range.font.NameAscii = "Times New Roman"
                 End If
                 .Range.InsertParagraphAfter
                 .ActiveWindow.Selection.Range.Collapse Direction:=wdCollapseEnd
-                .Range.Paragraphs(.Paragraphs.Count).Range.Font.Size = 12
+                .Range.Paragraphs(.Paragraphs.Count).Range.font.Size = 12
     '            .Range.Paragraphs(.Paragraphs.Count).Range.Bold = False
                 .Range.InsertAfter Replace(Xsort(j), "¡B", VBA.Chr(9), 1, 1) 'vba.Chr(9)¬°©w¦ì¦r¤¸(TabÁä­È)
                 .Range.InsertParagraphAfter
                 If InStr(.Range.Paragraphs(.Paragraphs.Count).Range, "¦rÀW") = 0 Then
-                    .Range.Paragraphs(.Paragraphs.Count - 1).Range.Font.Name = "¼Ð·¢Åé"
+                    .Range.Paragraphs(.Paragraphs.Count - 1).Range.font.Name = "¼Ð·¢Åé"
                 Else
-                    .Range.Paragraphs(.Paragraphs.Count).Range.Font.Name = "·s²Ó©úÅé"
-                    .Range.Paragraphs(.Paragraphs.Count).Range.Font.NameAscii = "Times New Roman"
+                    .Range.Paragraphs(.Paragraphs.Count).Range.font.Name = "·s²Ó©úÅé"
+                    .Range.Paragraphs(.Paragraphs.Count).Range.font.NameAscii = "Times New Roman"
                 End If
             End With
         End If
@@ -1826,7 +1826,7 @@ Sub ¤å¥ó¦rÀW_old()
     
     With Doc.Paragraphs(1).Range
          .InsertParagraphBefore
-         .Font.NameAscii = "times new roman"
+         .font.NameAscii = "times new roman"
         Doc.Paragraphs(1).Range.InsertParagraphAfter
         Doc.Paragraphs(1).Range.InsertParagraphAfter
         Doc.Paragraphs(1).Range.InsertAfter "§A´£¨Ñªº¤å¥»¦@¨Ï¥Î¤F" & i & "­Ó¤£¦Pªº¦r¡]¶Ç²Î¦r»PÂ²¤Æ¦r¤£¤©¦X¨Ö¡^"
@@ -1968,10 +1968,16 @@ eH:
 End Function
 
 Sub ResetSelectionAvoidSymbols()
-    Do While Selection.Characters(Selection.Characters.Count) = VBA.Chr(13)
-        Selection.MoveLeft wdCharacter, 1, wdExtend
+    Dim rng As Range
+    Set rng = Selection.Range.Duplicate
+    'Do While Selection.Characters(Selection.Characters.Count) = VBA.Chr(13)
+    Do While rng.Characters(rng.Characters.Count) = VBA.Chr(13)
+        rng.SetRange rng.start, rng.End - 1
+        'Selection.MoveLeft wdCharacter, 1, wdExtend'¿ï¨ú°_¨´¤è¦V¤£¦P·|¦³¼vÅT 20240924
     Loop
+    rng.Select
     Do While Selection.Characters(1) = VBA.Chr(13)
+    'Do While rng.Characters(1) = VBA.Chr(13)
         Selection.SetRange Selection.start + 1, Selection.End
     Loop
 End Sub
@@ -2069,7 +2075,7 @@ For Each ch In ActiveDocument.Characters
 '    If AscW(ch) < -1491 Or AscW(ch) > 19968 Then
     If Asc(ch) < -24256 Or (0 > Asc(ch) And Asc(ch) >= -1468) Then
         ch.Select
-        ch.Font.Name = "EUDC"
+        ch.font.Name = "EUDC"
     End If
 Next ch
 End Sub
@@ -2093,7 +2099,7 @@ w:                      If wd <= 20 Then 'Arial Unicode MS[ºØÃþ]¸Ì"¬A¸¹¤å¼Æ¦r"¥u
                             With wd
                                 '¿ï¨ú·|§ïÅÜSelectionªº½d³ò,¬G¤µ¨ú®ø!
 '                                .Select 'Wordsª«¥ó§Yªí¤@­ÓRangeª«¥ó,¨£½u¤W»¡©ú!
-                                .Font.Name = "Arial Unicode MS"
+                                .font.Name = "Arial Unicode MS"
                                 wd.text = VBA.ChrW((9312 - 1) + wd)
                             End With
                         Else '¶W¹L20¸¹ªºµù¸}®É
@@ -2155,7 +2161,7 @@ Register_Event_Handler
 '    Selection.MoveLeft Unit:=wdCharacter, Count:=1
 '    Selection.MoveLeft Unit:=wdCharacter, Count:=2, Extend:=wdExtend
 If Selection.Type = wdSelectionIP Then Exit Sub
-    With Selection.Font.Shading
+    With Selection.font.Shading
         If InStr(ActiveDocument.Name, "±Æ¦L") Then
             .Parent.Color = wdColorRed
             .Texture = wdTextureNone
@@ -2195,7 +2201,7 @@ If Selection.Type = wdSelectionIP Then Exit Sub
                 DoEvents
                 .activesheet.Paste
                 .Cells(r, 2).Value = Selection
-                .Cells(r, 2).Font.Color = wdColorRed
+                .Cells(r, 2).font.Color = wdColorRed
                 If Not Selection Like "*[óòñõôöø÷ùûúüýþ¡¸¡¹¡U¡@]*" Then
                     .Cells(r, 5) = Len(Selection)
                 ElseIf Selection Like "*¡@*" Then
@@ -2237,7 +2243,7 @@ With Selection
         'Application.Browser.Next
         .TypeText text:="["
         .MoveLeft unit:=wdCharacter, Count:=1, Extend:=wdExtend
-        .Font.Superscript = wdToggle
+        .font.Superscript = wdToggle
 '        Selection.Copy
 '        Selection.MoveRight Unit:=wdCharacter, Count:=3
 '        Selection.MoveLeft Unit:=wdCharacter, Count:=1
@@ -2352,30 +2358,30 @@ For j = u To 0 Step -1 '°}¦C±Æ§Ç'2010/10/29
         With Doc
             If Len(.Range) = 1 Then '©|¥¼¿é¤J¤º®e
                 .Range.InsertAfter "¦rÀW = " & j & "¦¸¡G¡]" & Len(Replace(Xsort(j), "¡B", "")) & "¦r¡^"
-                .Range.Paragraphs(1).Range.Font.Size = 12
-                .Range.Paragraphs(.Paragraphs.Count).Range.Font.Name = "·s²Ó©úÅé"
-                .Range.Paragraphs(.Paragraphs.Count).Range.Font.NameAscii = "Times New Roman"
+                .Range.Paragraphs(1).Range.font.Size = 12
+                .Range.Paragraphs(.Paragraphs.Count).Range.font.Name = "·s²Ó©úÅé"
+                .Range.Paragraphs(.Paragraphs.Count).Range.font.NameAscii = "Times New Roman"
                 '.Range.Paragraphs(1).Range.Font.Bold = True
             Else
                 .Range.InsertParagraphAfter
                 .ActiveWindow.Selection.Range.Collapse Direction:=wdCollapseEnd
                 .Range.InsertAfter "¦rÀW = " & j & "¦¸¡G¡]" & Len(Replace(Xsort(j), "¡B", "")) & "¦r¡^"
-                .Range.Paragraphs(.Paragraphs.Count).Range.Font.Size = 12
+                .Range.Paragraphs(.Paragraphs.Count).Range.font.Size = 12
                 '.Range.Paragraphs(.Paragraphs.Count).Range.Bold = True
-                .Range.Paragraphs(.Paragraphs.Count).Range.Font.Name = "·s²Ó©úÅé"
-                .Range.Paragraphs(.Paragraphs.Count).Range.Font.NameAscii = "Times New Roman"
+                .Range.Paragraphs(.Paragraphs.Count).Range.font.Name = "·s²Ó©úÅé"
+                .Range.Paragraphs(.Paragraphs.Count).Range.font.NameAscii = "Times New Roman"
             End If
             .Range.InsertParagraphAfter
             .ActiveWindow.Selection.Range.Collapse Direction:=wdCollapseEnd
-            .Range.Paragraphs(.Paragraphs.Count).Range.Font.Size = 12
+            .Range.Paragraphs(.Paragraphs.Count).Range.font.Size = 12
 '            .Range.Paragraphs(.Paragraphs.Count).Range.Bold = False
             .Range.InsertAfter Replace(Xsort(j), "¡B", VBA.Chr(9), 1, 1) 'vba.Chr(9)¬°©w¦ì¦r¤¸(TabÁä­È)
             .Range.InsertParagraphAfter
             If InStr(.Range.Paragraphs(.Paragraphs.Count).Range, "¦rÀW") = 0 Then
-                .Range.Paragraphs(.Paragraphs.Count - 1).Range.Font.Name = "¼Ð·¢Åé"
+                .Range.Paragraphs(.Paragraphs.Count - 1).Range.font.Name = "¼Ð·¢Åé"
             Else
-                .Range.Paragraphs(.Paragraphs.Count).Range.Font.Name = "·s²Ó©úÅé"
-                .Range.Paragraphs(.Paragraphs.Count).Range.Font.NameAscii = "Times New Roman"
+                .Range.Paragraphs(.Paragraphs.Count).Range.font.Name = "·s²Ó©úÅé"
+                .Range.Paragraphs(.Paragraphs.Count).Range.font.NameAscii = "Times New Roman"
             End If
         End With
     End If
@@ -2383,7 +2389,7 @@ Next j
 
 With Doc.Paragraphs(1).Range
      .InsertParagraphBefore
-     .Font.NameAscii = "times new roman"
+     .font.NameAscii = "times new roman"
     Doc.Paragraphs(1).Range.InsertParagraphAfter
     Doc.Paragraphs(1).Range.InsertParagraphAfter
     Doc.Paragraphs(1).Range.InsertAfter "§A´£¨Ñªº¤å¥»¦@¨Ï¥Î¤F" & i & "­Ó¤£¦Pªº¦r¡]¶Ç²Î¦r»PÂ²¤Æ¦r¤£¤©¦X¨Ö¡^"
@@ -2573,30 +2579,30 @@ For j = u To 0 Step -1 '°}¦C±Æ§Ç'2010/10/29
         With Doc
             If Len(.Range) = 1 Then '©|¥¼¿é¤J¤º®e
                 .Range.InsertAfter "µüÀW = " & j & "¦¸¡G¡]" & Len(Replace(Xsort(j), "¡B", "")) / ln & "­Ó¡^"
-                .Range.Paragraphs(1).Range.Font.Size = 12
-                .Range.Paragraphs(.Paragraphs.Count).Range.Font.Name = "·s²Ó©úÅé"
-                .Range.Paragraphs(.Paragraphs.Count).Range.Font.NameAscii = "Times New Roman"
+                .Range.Paragraphs(1).Range.font.Size = 12
+                .Range.Paragraphs(.Paragraphs.Count).Range.font.Name = "·s²Ó©úÅé"
+                .Range.Paragraphs(.Paragraphs.Count).Range.font.NameAscii = "Times New Roman"
                 '.Range.Paragraphs(1).Range.Font.Bold = True
             Else
                 .Range.InsertParagraphAfter
                 .ActiveWindow.Selection.Range.Collapse Direction:=wdCollapseEnd
                 .Range.InsertAfter "µüÀW = " & j & "¦¸¡G¡]" & Len(Replace(Xsort(j), "¡B", "")) / ln & "­Ó¡^"
-                .Range.Paragraphs(.Paragraphs.Count).Range.Font.Size = 12
+                .Range.Paragraphs(.Paragraphs.Count).Range.font.Size = 12
                 '.Range.Paragraphs(.Paragraphs.Count).Range.Bold = True
-                .Range.Paragraphs(.Paragraphs.Count).Range.Font.Name = "·s²Ó©úÅé"
-                .Range.Paragraphs(.Paragraphs.Count).Range.Font.NameAscii = "Times New Roman"
+                .Range.Paragraphs(.Paragraphs.Count).Range.font.Name = "·s²Ó©úÅé"
+                .Range.Paragraphs(.Paragraphs.Count).Range.font.NameAscii = "Times New Roman"
             End If
             .Range.InsertParagraphAfter
             .ActiveWindow.Selection.Range.Collapse Direction:=wdCollapseEnd
-            .Range.Paragraphs(.Paragraphs.Count).Range.Font.Size = 12
+            .Range.Paragraphs(.Paragraphs.Count).Range.font.Size = 12
 '            .Range.Paragraphs(.Paragraphs.Count).Range.Bold = False
             .Range.InsertAfter Replace(Xsort(j), "¡B", VBA.Chr(9), 1, 1) 'vba.Chr(9)¬°©w¦ì¦r¤¸(TabÁä­È)
             .Range.InsertParagraphAfter
             If InStr(.Range.Paragraphs(.Paragraphs.Count).Range, "µüÀW") = 0 Then
-                .Range.Paragraphs(.Paragraphs.Count - 1).Range.Font.Name = "¼Ð·¢Åé"
+                .Range.Paragraphs(.Paragraphs.Count - 1).Range.font.Name = "¼Ð·¢Åé"
             Else
-                .Range.Paragraphs(.Paragraphs.Count).Range.Font.Name = "·s²Ó©úÅé"
-                .Range.Paragraphs(.Paragraphs.Count).Range.Font.NameAscii = "Times New Roman"
+                .Range.Paragraphs(.Paragraphs.Count).Range.font.Name = "·s²Ó©úÅé"
+                .Range.Paragraphs(.Paragraphs.Count).Range.font.NameAscii = "Times New Roman"
             End If
         End With
     End If
@@ -2604,7 +2610,7 @@ Next j
 
 With Doc.Paragraphs(1).Range
      .InsertParagraphBefore
-     .Font.NameAscii = "times new roman"
+     .font.NameAscii = "times new roman"
     Doc.Paragraphs(1).Range.InsertParagraphAfter
     Doc.Paragraphs(1).Range.InsertParagraphAfter
     Doc.Paragraphs(1).Range.InsertAfter "§A´£¨Ñªº¤å¥»¦@¨Ï¥Î¤F" & i & "­Ó¤£¦Pªºµü·J¡]¶Ç²Î¦r»PÂ²¤Æ¦r¤£¤©¦X¨Ö¡^"
@@ -2706,7 +2712,7 @@ Set myRng = ActiveDocument.Range
 Set chRng = ActiveDocument.Range
 s = -1
 For Each a In ActiveDocument.Characters
-    If a.Font.Name = "Times New Roman" Then
+    If a.font.Name = "Times New Roman" Then
         If s = -1 Then s = a.start
         If a = VBA.Chr(13) Then GoTo 1
     Else
@@ -2792,11 +2798,11 @@ Dim slRng As Range, a
 Set slRng = Selection.Range
 ¤¤°ê­õ¾Ç®Ñ¹q¤l¤Æ­p¹º_ªí®æÂà¤å¦r slRng
 For Each a In slRng.Characters
-    Select Case a.Font.Color
+    Select Case a.font.Color
         Case 34816, 8912896
-            a.Font.Size = 14
+            a.font.Size = 14
         Case 0
-            a.Font.Size = 30
+            a.font.Size = 30
     End Select
 Next a
 End Sub
@@ -2811,12 +2817,12 @@ If d.ActiveWindow.Selection.Type = wdSelectionIP Then d.Select
 Set slRng = d.ActiveWindow.Selection.Range
 ¤¤°ê­õ¾Ç®Ñ¹q¤l¤Æ­p¹º_ªí®æÂà¤å¦r slRng
 For Each a In slRng.Characters
-    Select Case a.Font.Color
+    Select Case a.font.Color
         Case 34816, 8912896
-            If a.Font.Size <> 12 Then Stop
+            If a.font.Size <> 12 Then Stop
             a.Delete
         Case 254
-            If a.Font.Size = 9 Then a.Delete
+            If a.font.Size = 9 Then a.Delete
     End Select
 Next a
 If MsgBox("¬O§_¨ú¥N²§Åé¦r¡H", vbOKCancel) = vbOK Then ¤å¦rÂà´«.²§Åé¦rÂà¥¿
@@ -2840,39 +2846,39 @@ Sub ¤¤°ê­õ¾Ç®Ñ¹q¤l¤Æ­p¹º_µù¤å«e«á¥[¬A©·()
         If VBA.Left(a.Range, 3) = "[²¨]" Then
             slRng.SetRange a.Range.Characters(4).start _
                 , a.Range.End
-            slRng.Font.Size = 7.5
+            slRng.font.Size = 7.5
         End If
     Next a
     If Selection.Type = wdSelectionIP Then ActiveDocument.Select
     Set slRng = Selection.Range
     For Each a In slRng.Characters
-        Select Case a.Font.Color
+        Select Case a.font.Color
             Case 34816, 8912896, 15776152 '34816:ºñ¦â¤pª`
 p:              If flg = False Then
                     a.Select
                     Selection.Range.InsertBefore "¡]"
                     Selection.Range.SetRange Selection.start, Selection.start + 1
-                    Selection.Range.Font.Size = a.Characters(2).Font.Size
-                    Selection.Range.Font.Color = a.Characters(2).Font.Color
+                    Selection.Range.font.Size = a.Characters(2).font.Size
+                    Selection.Range.font.Color = a.Characters(2).font.Color
     '                a.Font.Size = a.Next.Font.Size
     '                a.Font.Color = a.Next.Font.Color
                     flg = True
                 Else
-                    If a.Font.Color = 8912896 And a.Previous.Font.Color = 34816 Then '8912896ÂÅ¦r¤pª`
+                    If a.font.Color = 8912896 And a.Previous.font.Color = 34816 Then '8912896ÂÅ¦r¤pª`
                         a.InsertBefore "¡^¡]"
                         a.SetRange a.start, a.start + 2
-                        a.Font.Size = a.Characters(2).Next.Font.Size
-                        a.Font.Color = a.Characters(2).Next.Font.Color
+                        a.font.Size = a.Characters(2).Next.font.Size
+                        a.font.Color = a.Characters(2).Next.font.Color
     '                    a.Characters(1).Font.Color = a.Characters(1).Previous.Font.Color
                     End If
                 End If
     '        Case 8912896 '8912896ÂÅ¦r¤pª`
                 
             Case 0, 15595002, 15649962
-                If a.Font.Color = 0 Then 'black'º~Äy¹q¤l¤åÄm¸ê®Æ®w
-                    If a.Font.Size = 7.5 And Not flg Then
+                If a.font.Color = 0 Then 'black'º~Äy¹q¤l¤åÄm¸ê®Æ®w
+                    If a.font.Size = 7.5 And Not flg Then
                         GoTo p
-                    ElseIf a.Font.Size > 7.5 And flg Then
+                    ElseIf a.font.Size > 7.5 And flg Then
                         GoTo b
                     End If
                 'End If
@@ -2889,13 +2895,13 @@ b:
                     flg = False
                 End If
             Case -16777216 'black'º~Äy¹q¤l¤åÄm¸ê®Æ®w
-                If a.Font.Size = 7.5 And Not flg Then
+                If a.font.Size = 7.5 And Not flg Then
                     GoTo p
-                ElseIf a.Font.Size > 7.5 And flg Then
+                ElseIf a.font.Size > 7.5 And flg Then
                     GoTo b
                 End If
             Case 255 'red'º~Äy¹q¤l¤åÄm¸ê®Æ®w
-                Select Case a.Font.Size
+                Select Case a.font.Size
                     Case 7.5, 10
                         a.Delete
                 End Select
@@ -2947,8 +2953,8 @@ Sub º~Äy¹q¤l¤åÄm¸ê®Æ®w¤å¥»¾ã²z_¥HÂà¶K¨ì¤¤°ê­õ¾Ç®Ñ¹q¤l¤Æ­p¹º(Optional doNotCloseD
     º~Äy¹q¤l¤åÄm¸ê®Æ®w¤å¥»¾ã²z_ª`¤å«e«á¥[¬A¸¹_origin
     'º~Äy¹q¤l¤åÄm¸ê®Æ®w¤å¥»¾ã²z_ª`¤å«e«á¥[¬A¸¹
     For Each a In rng.Characters
-            If a.Font.Size = 10 Then
-            Select Case a.Font.Color
+            If a.font.Size = 10 Then
+            Select Case a.font.Color
                 Case 255, 9915136
                     a.Delete
             End Select
@@ -3030,12 +3036,12 @@ Sub º~Äy¹q¤l¤åÄm¸ê®Æ®w¤å¥»¾ã²z_ª`¤å«e«á¥[¬A¸¹() '³Ì«á°õ¦æ Docs.mark©ö¾ÇÃöÁä¦r(¦b
     For Each fsz In fontsize
         With rng.Find
             .ClearFormatting
-            .Font.Size = fsz
+            .font.Size = fsz
             .Forward = True
             .Wrap = wdFindStop
         End With
         Do While rng.Find.Execute()
-            If rng.Font.Size <> fsz Then Exit Do
+            If rng.font.Size <> fsz Then Exit Do
             If rng.Characters(1) = "¡]" Then
                 Exit Do
             End If
@@ -3188,27 +3194,27 @@ Sub º~Äy¹q¤l¤åÄm¸ê®Æ®w¤å¥»¾ã²z_ª`¤å«e«á¥[¬A¸¹_origin()
       
     Set rng = ActiveDocument.Range
     rng.Collapse wdCollapseStart
-    fColor = rng.Font.Color
+    fColor = rng.font.Color
     Do While rng.End < rng.Document.Range.End - 1
     
         rng.Move wdCharacter, 1
         
-        If rng.Font.Color = 204 And rng.Font.Size = 11 Then
+        If rng.font.Color = 204 And rng.font.Size = 11 Then
             rng.Delete
-        ElseIf rng.Font.Color = 0 And rng.Font.Size = 7.5 Then
+        ElseIf rng.font.Color = 0 And rng.font.Size = 7.5 Then
             GoTo mark
-        ElseIf (rng.Font.Color <> fColor Or rng.Font.Size = fSize) And _
-                    (rng.Font.Color <> 234 And rng.Font.Bold = False) Then '¬õ¦r+²ÊÅé¬°ÀË¯Áµ²ªG
+        ElseIf (rng.font.Color <> fColor Or rng.font.Size = fSize) And _
+                    (rng.font.Color <> 234 And rng.font.Bold = False) Then '¬õ¦r+²ÊÅé¬°ÀË¯Áµ²ªG
 mark:
             If flg = False Then
-                If rng.Font.Color <> -16777216 Then
+                If rng.font.Color <> -16777216 Then
                     rng.InsertBefore "("
-                    rng.Characters(1).Font.Color = rng.Next.Next.Font.Color
-                    rng.Characters(1).Font.Size = rng.Next.Next.Font.Size
+                    rng.Characters(1).font.Color = rng.Next.Next.font.Color
+                    rng.Characters(1).font.Size = rng.Next.Next.font.Size
                     flg = True
                 End If
             End If
-        ElseIf rng.Font.Color = fColor And flg = True Then
+        ElseIf rng.font.Color = fColor And flg = True Then
             rng.Previous.InsertAfter ")"
             flg = False
         End If
@@ -3270,7 +3276,7 @@ Next i
 End Function
 Sub ¥ÍÃø¦r¥[¤W°ê»yÃã¨åª`­µ()
 Dim rng As Range, x, rst As New ADODB.Recordset, st As WdSelectionType, words As String
-Dim cnt As New ADODB.Connection, id As Long, sty As word.Style, URL As String
+Dim cnt As New ADODB.Connection, id As Long, sty As word.Style, url As String
 Dim frmDict As New Form_DictsURL, lnks As New Links, db As New dBase ', frm As New MSForms.DataObject
 Static cntStr As String, chromePath As String
 st = Selection.Type
@@ -3429,7 +3435,7 @@ typeTexts:
             If InStr("£½£¾£¿", x) Then
                 x.Style = "Án½Õ"
             ElseIf InStr("£»", x) Then
-                x.Font.Name = "¼Ð·¢Åé"
+                x.font.Name = "¼Ð·¢Åé"
             End If
         Next x
         x = rst.Fields(2).Value 'URL  'frmDict.get1URLfor1(words)
@@ -3491,9 +3497,9 @@ rePt:
             If x = "" Then GoTo endS
             If VBA.Left(x, 4) <> "http" Then GoTo rePt
             x = lnks.trimLinks_http_Dicts_toAddZhuYin_RevisedMoeEdu(CStr(x), rst.Fields(0))
-            URL = VBA.CStr(x)
-            If lnks.chkLinks_http_Dicts_toAddZhuYin(URL, words, 1, id, rst.Fields(0)) Then
-                x = URL
+            url = VBA.CStr(x)
+            If lnks.chkLinks_http_Dicts_toAddZhuYin(url, words, 1, id, rst.Fields(0)) Then
+                x = url
                 rst.Fields(2).Value = x
                 If id <> 0 Then
                     rst.Fields("ID") = id
@@ -3563,9 +3569,9 @@ Dim cnt As New ADODB.Connection, rst As New ADODB.Recordset
 Dim cntStr As String, d As Document, dx As String, w As String, rw As String
 Dim db As New dBase
 db.cnt¬d¦r cnt
-Dim regEx As Object
+Dim regex As Object
 'Dim regEx As New RegExp
-    Set regEx = CreateObject("VBScript.RegExp")
+    Set regex = CreateObject("VBScript.RegExp")
 Dim replacedText As String
 Set d = ActiveDocument: dx = d.Range.text
 rst.Open "select * from ¼ÐÂI²Å¸¹_®Ñ¦W¸¹_¦Û°Ê¥[¤W¥Î order by ±Æ§Ç", cnt, adOpenForwardOnly, adLockReadOnly
@@ -3577,7 +3583,7 @@ Do Until rst.EOF
         Else
             rw = rst("¨ú¥N¬°").Value
         End If
-        With regEx
+        With regex
             '.Pattern = "(?<!¡m)(?<!¡q)(?<![\\p{P}&&[^¡n¡r]]+)" + regEx.Escape(w) + "(?!¡n)(?!¡r)"
             .Pattern = "(?<!¡m)(?<!¡q)(?<![\\p{P}&&[^¡n¡r]]+)" + Replace(Replace(w, "\", "\\"), ".", "\.") + "(?!¡n)(?!¡r)"
             Rem ¦b Word VBA ¤¤¡ARegExp ª«¥óªº Escape ¤èªk¬O¤£³Q¤ä´©ªº¡C©Ò¥H±z»Ý­n§â³o­Ó¤èªk§ï¦¨¨Ï¥Î Replace ¤èªk±N¯S®í¦r²ÅÂà´«¬°¥¿«hªí¹F¦¡ªºÂà¸q¦r²Å¡C
@@ -3586,7 +3592,7 @@ Do Until rst.EOF
             Rem ¨Ò¦p¡A¦pªG w ¬° test*¡A«h regEx.Escape(w) ·|¦^¶Ç test\*¡A³o¼Ë¥¿«hªí¹F¦¡¤ÞÀº´N·|§â * µø¬°¤@¯ë¦r¤¸¡A¦Ó¤£¬O¥¿«hªí¹F¦¡¤¤ªº¶qµü
             .Global = True
         End With
-        dx = regEx.Replace(dx, rw)
+        dx = regex.Replace(dx, rw)
     End If
     rst.MoveNext
 Loop
@@ -3885,7 +3891,7 @@ rng.Document.Close wdDoNotSaveChanges
 If word.Documents.Count = 0 Then
     word.Application.Quit
 Else
-    word.ActiveWindow.WindowState = wdWindowStateMinimize
+    word.ActiveWindow.windowState = wdWindowStateMinimize
 End If
 Beep
 End Sub

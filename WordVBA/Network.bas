@@ -110,7 +110,7 @@ Sub 查康熙字典網上版()
 End Sub
 Sub 查國語辭典_到網頁去看()
     Rem Ctrl + Alt + F12
-    ResetSelectionAvoidSymbols
+    文字處理.ResetSelectionAvoidSymbols
     SeleniumOP.LookupDictRevised Selection.text
 End Sub
 Sub 查漢語大詞典()
@@ -119,12 +119,12 @@ Sub 查漢語大詞典()
         MsgBox "要2字以上才能檢索！", vbExclamation ', vbError
         Exit Sub
     End If
-    ResetSelectionAvoidSymbols
+    文字處理.ResetSelectionAvoidSymbols
     SeleniumOP.LookupHYDCD Selection.text
 End Sub
 Sub 查國學大師()
     Rem Ctrl + d + s （ds：大師）
-    ResetSelectionAvoidSymbols
+    文字處理.ResetSelectionAvoidSymbols
     SeleniumOP.LookupGXDS Selection.text
 End Sub
 Sub 查白雲深處人家說文解字圖像查閱_藤花榭本優先()
@@ -144,7 +144,7 @@ Sub 查白雲深處人家說文解字圖像查閱_藤花榭本優先()
 End Sub
 Sub 查白雲深處人家說文解字圖文檢索WFG版_解說檢索()
     Rem  Alt + shift + s （說文的說） Alt + Shift + j （解字的解）
-    ResetSelectionAvoidSymbols
+    文字處理.ResetSelectionAvoidSymbols
     SeleniumOP.LookupHomeinmistsShuowenImageTextSearchWFG_Interpretation Selection.text
 End Sub
 Sub 查漢語多功能字庫並取回其說文解釋欄位之值插入至插入點位置()
@@ -154,6 +154,8 @@ Sub 查漢語多功能字庫並取回其說文解釋欄位之值插入至插入點位置()
         Exit Sub
     End If
     Dim ar 'As Variant
+    Dim windowState As word.WdWindowState     '記下原來的視窗模式
+    windowState = word.Application.windowState '記下原來的視窗模式
     ar = SeleniumOP.LookupMultiFunctionChineseCharacterDatabase(Selection.text)
     If ar(0) = vbNullString Then
         word.Application.Activate
@@ -161,8 +163,8 @@ Sub 查漢語多功能字庫並取回其說文解釋欄位之值插入至插入點位置()
         With Selection.Application
             .Activate
             With .ActiveWindow
-                If .WindowState = wdWindowStateMinimize Then
-                    .WindowState = wdWindowStateNormal
+                If .windowState = wdWindowStateMinimize Then
+                    .windowState = windowState
                     .Activate
                 End If
             End With
@@ -171,7 +173,7 @@ Sub 查漢語多功能字庫並取回其說文解釋欄位之值插入至插入點位置()
         Dim ur As UndoRecord, fontsize As Single
         SystemSetup.stopUndo ur, "查漢語多功能字庫並取回其說文解釋欄位之值插入至插入點位置"
         With Selection
-            fontsize = VBA.IIf(.Font.Size = 9999999, 12, .Font.Size) - 4
+            fontsize = VBA.IIf(.font.Size = 9999999, 12, .font.Size) - 4
             If fontsize < 0 Then fontsize = 10
             If .Type = wdSelectionIP Then
                 .Move
@@ -185,15 +187,15 @@ Sub 查漢語多功能字庫並取回其說文解釋欄位之值插入至插入點位置()
             If Selection.End = Selection.Document.Range.End - 1 Then
                 Selection.Document.Range.InsertParagraphAfter
             End If
-            .Font.Size = fontsize
+            .font.Size = fontsize
             .InsertAfter ar(1) '植入網址
             SystemSetup.contiUndo ur
             .Collapse wdCollapseStart
             With .Application
                 .Activate
                 With .ActiveWindow
-                    If .WindowState = wdWindowStateMinimize Then
-                        .WindowState = wdWindowStateNormal
+                    If .windowState = wdWindowStateMinimize Then
+                        .windowState = windowState
                         .Activate
                     End If
                 End With
@@ -208,6 +210,8 @@ Sub 查說文解字並取回其解釋欄位及網址值插入至插入點位置()
         Exit Sub
     End If
     Dim ar 'As Variant
+    Dim windowState As word.WdWindowState      '記下原來的視窗模式
+    windowState = word.Application.windowState '記下原來的視窗模式
     ar = SeleniumOP.LookupShuowenOrg(Selection.text)
     If ar(0) = vbNullString Then
         word.Application.Activate
@@ -215,8 +219,8 @@ Sub 查說文解字並取回其解釋欄位及網址值插入至插入點位置()
         With Selection.Application
             .Activate
             With .ActiveWindow
-                If .WindowState = wdWindowStateMinimize Then
-                    .WindowState = wdWindowStateNormal
+                If .windowState = wdWindowStateMinimize Then
+                    .windowState = windowState
                     .Activate
                 End If
             End With
@@ -225,7 +229,7 @@ Sub 查說文解字並取回其解釋欄位及網址值插入至插入點位置()
         Dim ur As UndoRecord, fontsize As Single
         SystemSetup.stopUndo ur, "查說文解字並取回其解釋欄位及網址值插入至插入點位置"
         With Selection
-            fontsize = VBA.IIf(.Font.Size = 9999999, 12, .Font.Size) - 4
+            fontsize = VBA.IIf(.font.Size = 9999999, 12, .font.Size) - 4
             If fontsize < 0 Then fontsize = 10
             If .Type = wdSelectionIP Then
                 .Move
@@ -238,15 +242,15 @@ Sub 查說文解字並取回其解釋欄位及網址值插入至插入點位置()
             If Selection.End = Selection.Document.Range.End - 1 Then
                 Selection.Document.Range.InsertParagraphAfter
             End If
-            .Font.Size = fontsize
+            .font.Size = fontsize
             .InsertAfter ar(1) '插入網址
             SystemSetup.contiUndo ur
             .Collapse wdCollapseStart
             With .Application
                 .Activate
                 With .ActiveWindow
-                    If .WindowState = wdWindowStateMinimize Then
-                        .WindowState = wdWindowStateNormal
+                    If .windowState = wdWindowStateMinimize Then
+                        .windowState = windowState
                         .Activate
                     End If
                 End With
@@ -261,6 +265,8 @@ Sub 查說文解字並取回其解釋欄位段注及網址值插入至插入點位置()
         Exit Sub
     End If
     Dim ar 'As Variant
+    Dim windowState As word.WdWindowState      '記下原來的視窗模式
+    windowState = word.Application.windowState '記下原來的視窗模式
     ar = SeleniumOP.LookupShuowenOrg(Selection.text, True)
     If ar(0) = vbNullString Then
         word.Application.Activate
@@ -268,8 +274,8 @@ Sub 查說文解字並取回其解釋欄位段注及網址值插入至插入點位置()
         With Selection.Application
             .Activate
             With .ActiveWindow
-                If .WindowState = wdWindowStateMinimize Then
-                    .WindowState = wdWindowStateNormal
+                If .windowState = wdWindowStateMinimize Then
+                    .windowState = windowState
                     .Activate
                 End If
             End With
@@ -278,7 +284,7 @@ Sub 查說文解字並取回其解釋欄位段注及網址值插入至插入點位置()
         Dim ur As UndoRecord, fontsize As Single
         SystemSetup.stopUndo ur, "查說文解字並取回其解釋欄位及網址值插入至插入點位置"
         With Selection
-            fontsize = VBA.IIf(.Font.Size = 9999999, 12, .Font.Size) - 4
+            fontsize = VBA.IIf(.font.Size = 9999999, 12, .font.Size) - 4
             If fontsize < 0 Then fontsize = 10
             If .Type = wdSelectionIP Then
                 .Move
@@ -297,7 +303,7 @@ Sub 查說文解字並取回其解釋欄位段注及網址值插入至插入點位置()
                 Dim p As Paragraph, s As Byte, sDuan As Byte
                 s = VBA.Len("                                ") '段注本的說文
                 sDuan = VBA.Len("                ") '段注本的段注文
-                .Paragraphs(1).Range.Font.Bold = True '粗體： "段注本："
+                .Paragraphs(1).Range.font.Bold = True '粗體： "段注本："
 reCheck:
                 For Each p In .Paragraphs
                     If VBA.InStr(p.Range.text, "清代 段玉裁《說文解字注》") Then
@@ -311,7 +317,7 @@ reCheck:
                     ElseIf VBA.Left(p.Range.text, sDuan) = VBA.space(sDuan) Then '段注本的段注文
                         With p.Range
                             .text = Mid(p.Range.text, sDuan + 1)
-                            With .Font
+                            With .font
                                 .Size = fontsize + 2
                                 .ColorIndex = 11 '.Font.Color= 34816
                             End With
@@ -322,15 +328,15 @@ reCheck:
             End If
             
             '網址格式設定
-            .Font.Size = fontsize
+            .font.Size = fontsize
             .InsertAfter ar(1) '插入網址
             SystemSetup.contiUndo ur
             .Collapse wdCollapseStart
             With .Application
                 .Activate
                 With .ActiveWindow
-                    If .WindowState = wdWindowStateMinimize Then
-                        .WindowState = wdWindowStateNormal
+                    If .windowState = wdWindowStateMinimize Then
+                        .windowState = windowState
                         .Activate
                     End If
                 End With
@@ -344,9 +350,11 @@ Sub 查異體字字典並取回其說文釋形欄位及網址值插入至插入點位置()
         MsgBox "限查1字", vbExclamation ', vbError
         Exit Sub
     End If
-    Dim ar As Variant, x As String
+    Dim ar As Variant, x As String, windowState As word.WdWindowState     '記下原來的視窗模式
+
     x = Selection.text
-    
+    windowState = word.Application.windowState '記下原來的視窗模式
+
     ar = SeleniumOP.LookupDictionary_of_ChineseCharacterVariants_RetrieveShuoWenData(x)
     
     If ar(0) = vbNullString Then
@@ -355,8 +363,8 @@ Sub 查異體字字典並取回其說文釋形欄位及網址值插入至插入點位置()
         With Selection.Application
             .Activate
             With .ActiveWindow
-                If .WindowState = wdWindowStateMinimize Then
-                    .WindowState = wdWindowStateNormal
+                If .windowState = wdWindowStateMinimize Then
+                    .windowState = windowState
                     .Activate
                 End If
             End With
@@ -365,7 +373,7 @@ Sub 查異體字字典並取回其說文釋形欄位及網址值插入至插入點位置()
         Dim ur As UndoRecord, fontsize As Single
         SystemSetup.stopUndo ur, "查異體字字典並取回其說文釋形欄位及網址值插入至插入點位置"
         With Selection
-            fontsize = VBA.IIf(.Font.Size = 9999999, 12, .Font.Size) - 4
+            fontsize = VBA.IIf(.font.Size = 9999999, 12, .font.Size) - 4
             If fontsize < 0 Then fontsize = 10
             If .Type = wdSelectionIP Then
                 .Move
@@ -395,15 +403,15 @@ Sub 查異體字字典並取回其說文釋形欄位及網址值插入至插入點位置()
             If Selection.End = Selection.Document.Range.End - 1 Then
                 Selection.Document.Range.InsertParagraphAfter
             End If
-            .Font.Size = fontsize
+            .font.Size = fontsize
             .InsertAfter ar(1) '插入網址
             SystemSetup.contiUndo ur
             .Collapse wdCollapseStart
             With .Application
                 .Activate
                 With .ActiveWindow
-                    If .WindowState = wdWindowStateMinimize Then
-                        .WindowState = wdWindowStateNormal
+                    If .windowState = wdWindowStateMinimize Then
+                        .windowState = windowState
                         .Activate
                     End If
                 End With
