@@ -3032,6 +3032,7 @@ Sub 漢籍電子文獻資料庫文本整理_注文前後加括號() '最後執行 Docs.mark易學關鍵字(在
     rng.Paste
     '清除半形空格
     If VBA.InStr(rng.text, " ") Then rng.Find.Execute " ", , , , , , , wdFindContinue, , vbNullString, wdReplaceAll
+    '注文前、後加（、）
     fontsize(0) = 10: fontsize(1) = 7.5
     For Each fsz In fontsize
         With rng.Find

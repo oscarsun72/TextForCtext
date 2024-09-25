@@ -1449,6 +1449,8 @@ checkPhrases:                                   '¤º´O©óÀË¬d¡GÃöÁä¦r§t¦b¸ÓÁ×§Kªº¤
                             For Each a In rng.Characters
                                 If .font.ColorIndex = wdAuto Then .font.ColorIndex = fontColor
                             Next a
+                            processCntr = processCntr + 1
+                            If processCntr Mod 35 = 0 Then SystemSetup.playSound 1 '¼½©ñ­µ®Ä¥H§K»~¥H¬°·í¤F
                         End With
                     Loop
 '                    .Execute e, , , , , , True, wdFindStop, True, e, Replace:=wdReplaceAll '¦b§t¦³¶W³sµ²µ¥®æ¦¡¤Æ¤å¦r®É·|¥¢ÆF

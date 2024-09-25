@@ -17,6 +17,8 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Media;
+using System.Net.Http.Headers;
+
 //using System.Net;
 //using System.Net.NetworkInformation;
 using System.Runtime.InteropServices;
@@ -7917,7 +7919,33 @@ internal static string getImageUrl() {
                 Debugger.Break();
             LastValidWindow = GetCurrentWindowHandle(driver) ?? lastWindowHandle;
             openNewTabWindow();
-            driver.Navigate().GoToUrl("https://gj.cool/punct");
+            int retryCntr = 0;
+        retry:
+            try
+            {
+                driver.Navigate().GoToUrl("https://gj.cool/punct");
+            }
+            catch (Exception ex)
+            {
+                switch (ex.HResult)
+                {
+                    case -2146233088:
+                        if (ex.Message.StartsWith("timeout: Timed out receiving message from renderer:"))//timeout: Timed out receiving message from renderer: -0.014
+                                                                                                         //(Session info: chrome = 129.0.6668.59)
+                        {
+                            retryCntr++;
+                            if (retryCntr > 5)
+                            {
+                                Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("無法開啟《古籍酷》自動標點網頁，請檢查後再重試。感恩感恩　南無阿彌陀佛");
+                                return false;
+                            }
+                            goto retry;
+                        }
+                        break;
+                    default:
+                        break;
+                }
+            }
             IWebElement iwe = waitFindWebElementBySelector_ToBeClickable("#PunctArea");
             DateTime dt = DateTime.Now;
             while (iwe == null)
@@ -8236,8 +8264,8 @@ internal static string getImageUrl() {
 
             List<string> keywords = new List<string> { "易", "五經", "六經","七經", "十三經","蓍", "卦", "爻", "繫詞", "繫辭", "文言", "乾坤","元亨","利貞", "咎",
                  "夬", "頤","巽","坎","兌","小畜","大畜","歸妹","明夷","明𡗝","同人于宗","同人","大有","豫大","豫","蠱","噬嗑","〈需〉","〈屯","蒙〉","𫎇〉","賁於外","外賁","內賁","賁","剝","大過","小過","遯世無悶","遯","大壯","睽","暌","蹇","姤","萃","艮其背", "乾知大始","乾以易知","坤作成物","坤以簡能" ,"艮","渙","中孚","既濟","未濟",
-                "咸恆","老陰", "老陽", "少陰", "少陽","十翼","四象","兩儀",
-                "无妄", "彖", "象曰", "象傳", "象日", "象云","小象","象文", "筮",// 不支援標點檢索，如「, "象："」
+                "咸恆","老陰", "老陽", "少陰", "少陽","十翼","四象","兩儀","大衍",
+                "无妄", "彖", "象曰", "象傳", "象日", "象云","小象","象文", "筮", // 不支援標點檢索，如「, "象："」
                 "初九","九二","九三","九四","九五","上九","初六","六二","六三","六四","六五","上六","用九","用六", "繇辭","繇詞",
                 "隨時之義","庖有魚","包有魚","精義入神","豶豕","童牛","承之羞","雷在天上","錫馬", "蕃庶","晝日","三接","懲忿","窒欲","敬以直內","義以方外","迷後得主","利西南","品物咸章","天下大行","益動而", "日進無疆","頻巽","豚魚","頻復", "懲窒","閑邪","存誠","乾乾","悔吝","憧憧", "類萬物","柔順利貞","比之匪人","貞厲","履貞","履道坦坦","貞吉","悔亡","時義","健順", "內健而外順", "內健外順", "外順而內健", "外順內健","敦復","直方","開物成務","窮神知化", "夕惕","惕若","研幾極深","極深研幾","一陰一陽","允升","木上有水","勞民勸相","索而得","我有好爵","言有序","有聖人之道四","長子帥師","弟子輿尸","無悶","日用而不知","之道鮮","原始反終", "寂然不動", "感而遂通","朋從", "朋盍", "容民畜眾","有過則改","見善則遷","養正","養賢","知臨","臨大君", "默而成之","黙而成之","不言而信", "存乎德行","通天下之志","履正", "繼之者善", "仁者見之", "知者見之", "智者見之","屯其膏",
                 "象義","大貞","小貞", "帝出乎震","帝出於震","帝出于震","與時偕行","盈虛","豐亨",
@@ -9251,6 +9279,7 @@ internal static string getImageUrl() {
                         ActiveForm1.AvailableInUseBothKeysMouse();
                     });
                 }
+                wordapp.WindowState = Microsoft.Office.Interop.Word.WdWindowState.wdWindowStateMinimize;
                 //ImproveGJcoolOCRMemoDoc = wordapp.Documents.Open("C:\\Users\\oscar\\Dropbox\\《古籍酷》AI OCR 待改進者隨記 感恩感恩　讚歎讚歎　南無阿彌陀佛.docx");
                 ImproveGJcoolOCRMemoDoc = wordapp.Documents.Open(f);
                 //ImproveGJcoolOCRMemoDoc = wordapp.Documents.Open("C:\\Users\\oscar\\Dropbox\\《古籍酷》AI%20OCR%20待改進者隨記%20感恩感恩　讚歎讚歎　南無阿彌陀佛.docx");

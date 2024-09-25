@@ -421,12 +421,18 @@ Sub 查異體字字典並取回其說文釋形欄位及網址值插入至插入點位置()
 End Sub
 Sub 送交古籍酷自動標點()
     'Alt + F10
+    Dim ur As UndoRecord
     If Selection.Characters.Count < 10 Then
         MsgBox "字數太少，有必要嗎？請至少大於10字", vbExclamation
         Exit Sub
     End If
     Selection.Copy
     TextForCtext.GjcoolPunct
+    Selection.Document.Activate
+    Selection.Document.Application.Activate
+    SystemSetup.stopUndo ur, "送交古籍酷自動標點"
+    Selection.text = SystemSetup.GetClipboardText
+    SystemSetup.contiUndo ur
 End Sub
 
 Function GetUserAddress() As Boolean
