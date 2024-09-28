@@ -886,7 +886,9 @@ Function mark©ö¾ÇÃöÁä¦r(Optional pasteRange As Range, Optional doNotMark As Bool
     '    End If
     
     Rem ±N°Å¶KÃ¯¤ºÀÀ¥[¤Jªº¤å¥»³W½d¤Æ
-    clipBTxt = Replace(Replace(Replace(Replace(Replace(VBA.Trim(SystemSetup.GetClipboardText), VBA.Chr(13) + VBA.Chr(10) + "ªÅ¥y¤l" + VBA.Chr(13) + VBA.Chr(10), VBA.Chr(13) + VBA.Chr(10) + VBA.Chr(13) + VBA.Chr(10)), VBA.Chr(9), ""), "¡D¡@", ""), "¡@¡D", ""), " ", vbNullString)
+    '"¡D¡@", ""), "¡@¡D"¬°¦U¤j¬q¸¨¬É®æ¡A¤£©y²M°£¡A¦b¦¨¨÷©Î¤j§å½Æ»s®É¡A«Ü­«­n¡A§K±o¦U¤j¬q¸¨¤å¥»³£³s¦b¤@°_¤F 20240925
+    'clipBTxt = Replace(Replace(Replace(Replace(Replace(VBA.Trim(SystemSetup.GetClipboardText), VBA.Chr(13) + VBA.Chr(10) + "ªÅ¥y¤l" + VBA.Chr(13) + VBA.Chr(10), VBA.Chr(13) + VBA.Chr(10) + VBA.Chr(13) + VBA.Chr(10)), VBA.Chr(9), ""), "¡D¡@", ""), "¡@¡D", ""), " ", vbNullString)
+    clipBTxt = Replace(Replace(Replace(VBA.Trim(SystemSetup.GetClipboardText), VBA.Chr(13) + VBA.Chr(10) + "ªÅ¥y¤l" + VBA.Chr(13) + VBA.Chr(10), VBA.Chr(13) + VBA.Chr(10) + VBA.Chr(13) + VBA.Chr(10)), VBA.Chr(9), ""), " ", vbNullString)
     clipBTxt = ¤å¦r³B²z.trimStrForSearch_PlainText(clipBTxt)
     clipBTxt = º~Äy¹q¤l¤åÄm¸ê®Æ®w.CleanTextPicPageMark(clipBTxt)
     For e = 0 To UBound(strAutoCorrection)
@@ -1276,7 +1278,7 @@ Sub marking©ö¾ÇÃöÁä¦r(rng As Range, arr As Variant, Optional defaultHighlightCol
 '        End With
         For Each e In arr '¹M¾ú¨C­Ó­n¼ĞÃÑªºÃöÁä¦r
         
-'            If e = "°®" Then Stop 'just for test
+'            If e = "Á{¨ö" Then Stop 'just for test
             
             If InStr(xd, e) > 0 Then '¦b¦³¶W³sµ²µ¥¥\¯àÅÜ¼Æ¡BÁôÂÃ¤å¦r®É¥i¯à·|miss¡A¤µ´ú¸Õ¨Ã¤£·|¡A«İ¦A´ú¸Õ¡C
             
@@ -1305,7 +1307,7 @@ Sub marking©ö¾ÇÃöÁä¦r(rng As Range, arr As Variant, Optional defaultHighlightCol
                     Do While .Execute(e, , , , , , True, wdFindStop, True) '¦b½d³ò¤¤´M¹MÃöÁä¦r¥X²{ªº¦ì¸m
                         examOK = True 'Âk¹s
                         
-'                        rng.Select '°»¿ù¥Î
+                        'rng.Select '°»¿ù¥Î
                         
                         If Not rng.Next Is Nothing Then
                             If rng.Next.Characters.Count > 0 Then
@@ -1357,7 +1359,7 @@ checkPhrases:                                   '¤º´O©óÀË¬d¡GÃöÁä¦r§t¦b¸ÓÁ×§Kªº¤
                                                         '­Y¥Ø«eÃöÁä¦r¤º§t©ó­nÁ×¶}ªºµü»y¤ù»y»y·J¤ù¬q
                                                         If rng.start >= key And rng.End <= dictCoordinatesPhrase(key) Then
 
-'                                                            rng.Select 'just for test
+                                                            'rng.Select 'just for test
 
                                                             examOK = False 'ÀË´ú¤£³q¹L
                                                             Exit For
@@ -1391,13 +1393,13 @@ checkPhrases:                                   '¤º´O©óÀË¬d¡GÃöÁä¦r§t¦b¸ÓÁ×§Kªº¤
                                                         
                                                         .HighlightColorIndex = defaultHighlightColorIndex
                                                         For Each a In rng.Characters
-                                                            If .font.ColorIndex = wdAuto Then .font.ColorIndex = fontColor
+                                                            If a.font.ColorIndex = wdAuto Then a.font.ColorIndex = fontColor
                                                         Next a
                                                     End With
                                                 Else '¤ù»yµü¥yÀË¬d¥¼¹L
                                                     If rng.HighlightColorIndex = defaultHighlightColorIndex Then
                                                         With rng
-'                                                            .Select 'just for test
+                                                            '.Select 'just for test
                                                             
                                                             .HighlightColorIndex = wdNoHighlight
                                                             .font.ColorIndex = wdAuto
@@ -1447,7 +1449,7 @@ checkPhrases:                                   '¤º´O©óÀË¬d¡GÃöÁä¦r§t¦b¸ÓÁ×§Kªº¤
                         With rng
                             .HighlightColorIndex = defaultHighlightColorIndex
                             For Each a In rng.Characters
-                                If .font.ColorIndex = wdAuto Then .font.ColorIndex = fontColor
+                                If a.font.ColorIndex = wdAuto Then a.font.ColorIndex = fontColor
                             Next a
                             processCntr = processCntr + 1
                             If processCntr Mod 35 = 0 Then SystemSetup.playSound 1 '¼½©ñ­µ®Ä¥H§K»~¥H¬°·í¤F

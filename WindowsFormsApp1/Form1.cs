@@ -5291,9 +5291,11 @@ namespace WindowsFormsApp1
             }
             textBox1.Select(s, l);
         }
-
+        /// <summary>
+        /// Shift + F7 每行凸排
+        /// </summary>
         private void deleteSpacePreParagraphs_ConvexRow()
-        { //Shift + F7 每行凸排
+        { 
             int s = textBox1.SelectionStart, l = textBox1.SelectionLength, cntr = 0, i; dontHide = true; string x = textBox1.Text, selTxt;
             if (l == 0)
             {
@@ -5346,13 +5348,17 @@ namespace WindowsFormsApp1
                 textBox1.Select(s, l);
                 textBox1.SelectedText = textBox1.SelectedText.Replace(Environment.NewLine + "　", Environment.NewLine);
             }
-            if (s == 0)
-            {
-                if ("　".IndexOf(textBox1.Text.Substring(0, 1)) > -1)
-                    textBox1.Text = textBox1.Text.Substring(1);
-                else if ("􏿽".IndexOf(textBox1.Text.Substring(0, "􏿽".Length)) > -1)
-                    textBox1.Text = textBox1.Text.Substring("􏿽".Length);
-            }
+
+            ////自取消再觀察！ 20240927
+            //if (s == 0)
+            //{
+            //    if ("　".IndexOf(textBox1.Text.Substring(0, 1)) > -1)
+            //        textBox1.Text = textBox1.Text.Substring(1);
+            //    else if ("􏿽".IndexOf(textBox1.Text.Substring(0, "􏿽".Length)) > -1)
+            //        textBox1.Text = textBox1.Text.Substring("􏿽".Length);
+            //}//以上自取消再觀察！ 20240927
+
+
             textBox1.Select(s, l - cntr);
             stopUndoRec = false;
             dontHide = false;
@@ -9515,6 +9521,20 @@ namespace WindowsFormsApp1
                 }
                 catch (Exception ex)
                 {
+                    switch (ex.HResult)
+                    {
+                        case -2146233088:
+                            if (ex.Message.StartsWith("An unknown exception was encountered sending an HTTP request to the remote WebDriver server for URL "))//An unknown exception was encountered sending an HTTP request to the remote WebDriver server for URL http://localhost:6439/session/91263fbb95d208679da86ed250a23ed8/window. The exception message was: 傳送要求時發生錯誤。
+                                return false;
+                            else
+                            {
+                                Console.WriteLine(ex.HResult + ex.Message);
+                                MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
+                            }
+                            break;
+                        default:
+                            break;
+                    }
                     MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
                 }
             }
@@ -9663,6 +9683,44 @@ namespace WindowsFormsApp1
             //if (autoPastetoQuickEdit) autoPastetoQuickEdit = false;
             if (keyinTextMode) KeyinTextmodeSwitcher(false);
             playSound(soundLike.press, true);
+
+            #region 關閉《漢籍全文資料庫》開啟的頁面20240926
+            for (int i = br.driver.WindowHandles.Count - 1; i > -1; i--)
+            {
+                br.driver.SwitchTo().Window(driver.WindowHandles[i]);
+                //如果「回查詢結果」元件存在的話//文本閱讀內的檢索（《漢籍全文資料庫》），如果有開啟「回查詢結果」的頁面，則關閉20240926
+                if (br.waitFindWebElementBySelector_ToBeClickable("body > form > table > tbody > tr:nth-child(2) > td > table > tbody > tr:nth-child(1) > td > table > tbody > tr > td.btn62 > a")?.GetAttribute("text") == "回查詢結果")
+                {//如果不能返回上一頁，即開啟新分頁者，即予關閉。
+                    if (!br.CanGoBack())
+                    {
+                        br.driver.Close();
+                        br.driver.SwitchTo().Window(br.driver.WindowHandles.Last());
+                    }
+                    //else
+                    //    br.driver.Navigate().Back();//CanGoBack()裡頭已有！ 20240926
+                    if (br.driver.Title.Contains("漢籍全文文本閱讀"))
+                    {
+                        while (br.waitFindWebElementBySelector_ToBeClickable("body > form > table > tbody > tr:nth-child(2) > td > table > tbody > tr > td > table > tbody > tr:nth-child(1) > td.btn62 > a")?.GetAttribute("text") == "回瀏覽")
+                        { br.driver.Navigate().Back(); }
+                        break;
+                    }
+                    //break;//如果有開啟多個
+                }
+                //《漢籍全文資料庫》【檢索報表】標籤控制項(關閉開啟的分頁）
+                else if (waitFindWebElementBySelector_ToBeClickable("body > form > table > tbody > tr:nth-child(2) > td:nth-child(1) > font > b > nobr")?.GetAttribute("textContent") == "【檢索報表】")
+                //while (null != waitFindWebElementBySelector_ToBeClickable("body > form > table > tbody > tr:nth-child(2) > td:nth-child(1) > font > b > nobr"))
+                {
+                    driver.Close(); driver.SwitchTo().Window(driver.WindowHandles.Last());
+                    if (br.driver.Title.Contains("漢籍全文資料庫"))
+                    {
+                        //搜尋按鈕
+                        if (br.waitFindWebElementBySelector_ToBeClickable("#frmTitle > table > tbody > tr:nth-child(2) > td > table > tbody > tr:nth-child(8) > td > input[type=IMAGE]:nth-child(2)")?.GetAttribute("title") == "搜尋")
+                            break;
+                    }
+                }
+            }
+            #endregion// 關閉《漢籍全文資料庫》開啟的頁面20240926
+
             while (true)
             {
                 TopMost = false;
@@ -11955,9 +12013,10 @@ namespace WindowsFormsApp1
             undoTextValueChanged(selStart, selLength);
             if (textBox1.Text == "" && !pasteAllOverWrite)
             {
-                if (!keyinTextMode)//非手動輸入時
-                    hideToNICo();
-                else
+                /*if (!keyinTextMode)*///非手動輸入時
+                                       //hideToNICo();//20240926取消此功能，以罕用故（要隱藏到系統列任務列可以用Esc鍵或滑鼠中鍵）
+                                       //else
+                if (keyinTextMode)
                 {//在手動輸入模式下
                     if (mk != Keys.None)
                     {//可能按下Shift+Delete 剪下textBox1的內容時

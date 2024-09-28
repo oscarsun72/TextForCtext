@@ -748,7 +748,86 @@ Function ConvertToUnicode(chartoConvert As String) As Long
     ConvertToUnicode = unicodeCode
     
 End Function
+Rem 判斷是否是Big5碼 20240926 creedit_with_Copilot大菩薩 ：Word VBA 判斷 Big5 程式：https://sl.bing.net/cAEk03kEN4e
+Function IsBig5(text As String) As Boolean
+    Dim stream As Object
+    Dim encodedText As String
+    
+    On Error GoTo ErrorHandler
+    
+    Set stream = CreateObject("ADODB.Stream") '這個函數使用ADODB.Stream來將字串轉換為Big5編碼，然後檢查轉換後的字串是否與原始字串相同。如果相同，則表示該字串是Big5碼。
+    stream.Type = 2 ' Text
+    stream.Mode = 3 ' Read/Write
+    stream.Charset = "big5"
+    stream.Open
+    stream.WriteText text
+    stream.position = 0
+    encodedText = stream.ReadText(-1)
+    
+    IsBig5 = (encodedText = text)
+    
+    stream.Close
+    Set stream = Nothing
+    Exit Function
+    
+ErrorHandler:
+    IsBig5 = False
+    If Not stream Is Nothing Then
+        stream.Close
+        Set stream = Nothing
+    End If
+End Function
 
+
+
+Rem 選取文字轉成ChrW表示式 20240926
+Function ConvertToChrwCode() As String
+    Dim i As Byte, rng As Range, a As Range, resultA As String, result As String, big5Flag As Boolean, quoteMark As String, big5FlagPrevisou As Boolean
+    Dim ur As UndoRecord, combination As String
+    Set rng = Selection.Range
+    For Each a In rng.Characters
+        If big5FlagPrevisou Then
+            quoteMark = vbNullString
+        Else
+            quoteMark = """"
+        End If
+        big5Flag = IsBig5(a.text)
+        If Not big5Flag Then
+            If big5FlagPrevisou Then
+                quoteMark = """"
+            Else
+                quoteMark = vbNullString
+            End If
+            For i = 1 To VBA.Len(a)
+                resultA = resultA & "VBA.ChrW(" & VBA.AscW(VBA.Mid(a.text, i, 1)) & ")" & " & "
+            Next i
+            If result = vbNullString Then
+                combination = vbNullString
+            Else
+                combination = " & "
+            End If
+            result = result & quoteMark & combination & resultA
+        Else '是Big5的字
+            If result = vbNullString Then quoteMark = """"
+            If big5FlagPrevisou = False Then
+                result = result & """" & a.text
+            Else
+                result = quoteMark & result & a.text
+            End If
+        End If
+        resultA = vbNullString
+        big5FlagPrevisou = big5Flag
+    Next a
+    
+    If big5FlagPrevisou Then result = result & """"
+    If VBA.Right(result, 3) = " & " Then result = VBA.Left(result, VBA.Len(result) - 3)
+    
+    SystemSetup.stopUndo ur, "ConvertToChrwCode"
+    rng.text = result
+    rng.Copy
+    ConvertToChrwCode = result
+    SystemSetup.contiUndo ur
+End Function
 Rem 20240826 Copilot大菩薩 ： Word VBA 私人造字碼區字符搜尋 ： https://sl.bing.net/hahIGJ4sxX2
 Rem BAD!!!!不能用，要再改！
 Sub FindPrivateUseCharacters()

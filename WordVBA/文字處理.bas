@@ -3030,6 +3030,9 @@ Sub 漢籍電子文獻資料庫文本整理_注文前後加括號() '最後執行 Docs.mark易學關鍵字(在
     End If
     
     rng.Paste
+    
+'    If VBA.InStr(rng.text, "．　．　．　．　．　．　．　．　．　．　．　．　．　．　．　．　．　．") Then Stop 'just for test
+    
     '清除半形空格
     If VBA.InStr(rng.text, " ") Then rng.Find.Execute " ", , , , , , , wdFindContinue, , vbNullString, wdReplaceAll
     '注文前、後加（、）
