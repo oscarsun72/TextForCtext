@@ -4,7 +4,7 @@ Public FsO As Object, UserProfilePath As String
 Public Declare PtrSafe Function sndPlaySound32 Lib "winmm.dll" Alias "sndPlaySoundA" (ByVal lpszSoundName As String, ByVal uFlags As Long) As Long
 '
 'https://msdn.microsoft.com/zh-tw/library/office/ff192913.aspx
-Private Declare PtrSafe Function OpenClipboard Lib "user32.dll" (ByVal hwnd As Long) As Long
+Private Declare PtrSafe Function OpenClipboard Lib "user32.dll" (ByVal hWnd As Long) As Long
 Private Declare PtrSafe Function EmptyClipboard Lib "user32.dll" () As Long
 Private Declare PtrSafe Function CloseClipboard Lib "user32.dll" () As Long
 Private Declare PtrSafe Function IsClipboardFormatAvailable Lib "user32.dll" (ByVal wFormat As Long) As Long
@@ -17,15 +17,15 @@ Private Declare PtrSafe Function GlobalSize Lib "kernel32" (ByVal hMem As Long) 
 Private Declare PtrSafe Function lstrcpy Lib "kernel32.dll" Alias "lstrcpyW" (ByVal lpString1 As Long, ByVal lpString2 As Long) As Long
 
 Public Declare PtrSafe Function ShellExecute Lib "shell32.dll" Alias "ShellExecuteA" _
-    (ByVal hwnd As Long, ByVal lpOperation As String, ByVal lpFile As String, _
+    (ByVal hWnd As Long, ByVal lpOperation As String, ByVal lpFile As String, _
   ByVal lpParameters As String, ByVal lpDirectory As String, _
   ByVal nShowCmd As Long) As Long 'https://www.mrexcel.com/board/threads/vba-api-call-issues-with-show-window-activation.920147/
 Public Declare PtrSafe Function ShowWindow Lib "user32" _
-  (ByVal hwnd As Long, ByVal nCmdSHow As Long) As Long
+  (ByVal hWnd As Long, ByVal nCmdSHow As Long) As Long
 Public Declare PtrSafe Function FindWindow Lib "user32" Alias "FindWindowA" _
   (ByVal lpClassName As String, ByVal lpWindowName As String) As Long
   
-Public Declare PtrSafe Function SetForegroundWindow Lib "user32" (ByVal hwnd As Long) As Boolean
+Public Declare PtrSafe Function SetForegroundWindow Lib "user32" (ByVal hWnd As Long) As Boolean
   
   
   
@@ -355,7 +355,7 @@ End Function
 Sub insertNowTime()
     With Selection.Range 'Alt+t
         .InsertAfter Now
-        .Font.Subscript = True
+        .font.Subscript = True
     End With
 End Sub
 Sub 重啟小小輸入法() 'Alt+q
@@ -437,6 +437,10 @@ Sub playSound(longShort As Single, Optional waittoPlay As Byte = 1) 'Public Decl
     End Select
     Set path = Nothing
 End Sub
+Rem 20240928 creedit_with_Copilot大菩薩 ： Word VBA 開啟指定路徑的檔案總管 ：https://sl.bing.net/rD1bSeOTPE
+Sub OpenExplorerAtPath(folderPath As String)
+    VBA.Interaction.Shell "explorer.exe " & folderPath, vbNormalFocus
+End Sub
 
 Property Get getChromePathIncludeBackslash() As String
     Dim chromeFullname As String
@@ -449,7 +453,15 @@ Function getChrome() As String
     Dim chromePath As String
     If FsO Is Nothing Then Set FsO = CreateObject("scripting.filesystemobject")
     If FsO.fileexists("W:\PortableApps\PortableApps\GoogleChromePortable\GoogleChromePortable.exe") Then '用這個才不會和 Selenium 打架
-        chromePath = "W:\PortableApps\PortableApps\GoogleChromePortable\GoogleChromePortable.exe"
+        If VBA.Dir("a:", vbVolume) = "" Then '我虛擬電腦才有A槽 20240928
+            chromePath = "W:\PortableApps\PortableApps\GoogleChromePortable\GoogleChromePortable.exe"
+        Else
+            If Dir("C:\Program Files (x86)\Google\Chrome\Application\chrome.exe") <> "" Then
+                chromePath = "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe"
+            ElseIf FsO.fileexists("C:\Program Files\Google\Chrome\Application\chrome.exe") Then
+                chromePath = "C:\Program Files\Google\Chrome\Application\chrome.exe"
+            End If
+        End If
     ElseIf FsO.fileexists("W:\PortableApps\PortableApps\GoogleChromePortable\App\Chrome-bin\chrome.exe") Then
         chromePath = "W:\PortableApps\PortableApps\GoogleChromePortable\App\Chrome-bin\chrome.exe"
     ElseIf Dir("C:\Program Files (x86)\Google\Chrome\Application\chrome.exe") <> "" Then

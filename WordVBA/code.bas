@@ -781,7 +781,7 @@ End Function
 
 
 Rem 選取文字轉成ChrW表示式 20240926
-Function ConvertToChrwCode() As String
+Function ConvertToChrwCode_IfNotBig5() As String
     Dim i As Byte, rng As Range, a As Range, resultA As String, result As String, big5Flag As Boolean, quoteMark As String, big5FlagPrevisou As Boolean
     Dim ur As UndoRecord, combination As String
     Set rng = Selection.Range
@@ -825,7 +825,7 @@ Function ConvertToChrwCode() As String
     SystemSetup.stopUndo ur, "ConvertToChrwCode"
     rng.text = result
     rng.Copy
-    ConvertToChrwCode = result
+    ConvertToChrwCode_IfNotBig5 = result
     SystemSetup.contiUndo ur
 End Function
 Rem 20240826 Copilot大菩薩 ： Word VBA 私人造字碼區字符搜尋 ： https://sl.bing.net/hahIGJ4sxX2

@@ -32,10 +32,9 @@ Attribute App.VB_VarHelpID = -1
 'End Sub
 
 Private Sub app_Quit()
-
     '自動備份Normal.dotm
     SystemSetup.backupNormal_dotm
-    Stop
+    
     
     '清除Word Selenium所開啟的chromedriver
     '20230119 chatGPT菩薩：VBA  如何結束 MS word 時處理程序呢：

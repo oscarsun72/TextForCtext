@@ -31,6 +31,7 @@ reOpenChrome:
           Next ew
           wd.SwitchTo().Window (ew)
     End If
+    openNewTabWhenTabAlreadyExit = True
     Exit Function
 eH:
     Select Case Err.Number
@@ -221,6 +222,12 @@ ErrH:
                 Set SeleniumOP.wd = Nothing
                 Stop 'just for test 20240924
                 Resume
+            ElseIf InStr(Err.Description, "chromedriver.exe does not exist") Then 'The file C:\Program Files\Google\Chrome\Application\chromedriver.exe does not exist. The driver can be downloaded at http://chromedriver.storage.googleapis.com/index.html
+                Set wd = Nothing
+                MsgBox "請在「" & getChromePathIncludeBackslash & "」路徑下複製chromedriver.exe檔案再繼續！", vbCritical
+                openChrome = False
+                SystemSetup.OpenExplorerAtPath getChromePathIncludeBackslash
+                Exit Function
             Else
                 
                 MsgBox Err.Description, vbCritical
@@ -1287,17 +1294,55 @@ Function LookupShuowenOrg(x As String, Optional includingDuan As Boolean) As Str
             Set iwe = wd.FindElementByCssSelector("body > div.container.main > div > div.col-md-9.main-content.pull-right > div.row.paginator > div.col-md-4.info")
             GoSub iweNothingExitFunction
             'If iwe.Name = "楷書" Then
+            Dim msg As String
             msg = iwe.GetAttribute("textContent")
             If VBA.IsNumeric(VBA.Left(msg, 1)) Then '檢索結果訊息框第1個字是數字
                 '通常可能會以檢索結果清單中的第1筆為是，如「征」的結果第2個字「徵」，當係簡化字故
+                '今擴充為讓使用者輸入整數以指示要讀入的列，只要預設值為 1 即有等效的效果 20240928 creedit_with_Copilot大菩薩
+                Dim tb As SeleniumBasic.IWebElement
+                Set tb = wd.FindElementByCssSelector("body > div.container.main > div > div.col-md-9.main-content.pull-right > table")
+
+                Dim rows 'WebElements
+                'Dim rows As SeleniumBasic.IWebElement
+                rows = tb.FindElementsByTagName("tr")
+                
+                Dim cells 'IWebElements
+                Dim r 'As Integer
+'                For r = 1 To rows.Count
+'                    Set cell = rows.item(i).FindElementByTag("td")
+'                    Debug.Print cell.text
+'                Next i
+
                 word.Application.Activate
-                If VBA.vbOK = MsgBox(msg + vbCr + vbCr + "檢索結果不止一筆，是否要插入第一筆的說文資料？", vbExclamation + vbOKCancel) Then
-                    '檢索結果清單中第1筆的楷書欄位值--即字頭
-                    Set iwe = wd.FindElementByCssSelector("body > div.container.main > div > div.col-md-9.main-content.pull-right > table > tbody > tr:nth-child(1) > td:nth-child(1) > a")
-                    GoSub iweNothingExitFunction
-                    iwe.Click
-                Else
+'                If VBA.vbOK = MsgBox(msg + vbCr + vbCr + "檢索結果不止一筆，是否要插入第一筆的說文資料？", vbExclamation + vbOKCancel) Then
+'                    '檢索結果清單中第1筆的楷書欄位值--即字頭
+'                    Set iwe = wd.FindElementByCssSelector("body > div.container.main > div > div.col-md-9.main-content.pull-right > table > tbody > tr:nth-child(1) > td:nth-child(1) > a")
+'                    GoSub iweNothingExitFunction
+'                    iwe.Click
+'                Else
+'                    Exit Function
+'                End If
+reInput:
+                r = VBA.InputBox(msg + vbCr + vbCr + _
+                    "檢索結果不止一筆，請輸入要插入第幾筆的說文資料？（正整數）", "請確認要讀入第幾筆的《說文》內容。預設值為 1 ", "1")
+                If VBA.IsNumeric(r) = False Then
                     Exit Function
+                ElseIf r > UBound(rows) Or r < 0 Then
+                    If VBA.vbOK = MsgBox("輸入的數字不對，是否要重新輸入？", vbExclamation + vbOKCancel) Then
+                        GoTo reInput
+                    Else
+                        Exit Function
+                    End If
+                Else
+                    cells = rows(r).FindElementsByTagName("td")
+                    Set iwe = cells(0)
+                    GoSub iweNothingExitFunction
+                    'iwe.Click '無作用（抓到的，似只是結果值元件，不是真正網頁上的元件）
+                    Dim outerHTML As String
+                    outerHTML = iwe.GetAttribute("outerHTML")
+                    If openNewTabWhenTabAlreadyExit(wd) Then
+                        wd.Navigate.GoToUrl "https://www.shuowen.org" & VBA.Mid(outerHTML, VBA.InStr(outerHTML, "/"), VBA.InStr(outerHTML, " title=") - 1 - VBA.InStr(outerHTML, "/"))
+                    End If
                 End If
             End If
         End If
@@ -1341,10 +1386,13 @@ Select Case Err.Number
             If InStr(Err.Description, "disconnected: not connected to DevTools") Then 'disconnected: not connected to DevTools
                                             '  (failed to check if window was closed: disconnected: not connected to DevTools)
                                             '  (Session info: chrome=128.0.6613.85)
-                'Set wd = Nothing
                 SystemSetup.killchromedriverFromHere
                 Set wd = Nothing
                 Resume
+            ElseIf InStr(Err.Description, "chromedriver.exe does not exist") Then 'The file C:\Program Files\Google\Chrome\Application\chromedriver.exe does not exist. The driver can be downloaded at http://chromedriver.storage.googleapis.com/index.html
+                Set wd = Nothing
+                MsgBox "請在「" & getChromePathIncludeBackslash & "」路徑下複製chromedriver.exe檔案再繼續！", vbCritical
+                SystemSetup.OpenExplorerAtPath getChromePathIncludeBackslash
             Else
                 MsgBox Err.Number & Err.Description, vbExclamation
             End If

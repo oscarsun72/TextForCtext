@@ -336,8 +336,10 @@ reCheck:
                 .Activate
                 With .ActiveWindow
                     If .windowState = wdWindowStateMinimize Then
+                        VBA.Interaction.DoEvents
                         .windowState = windowState
                         .Activate
+                        VBA.Interaction.DoEvents
                     End If
                 End With
             End With
@@ -411,8 +413,10 @@ Sub 查異體字字典並取回其說文釋形欄位及網址值插入至插入點位置()
                 .Activate
                 With .ActiveWindow
                     If .windowState = wdWindowStateMinimize Then
+                        VBA.Interaction.DoEvents
                         .windowState = windowState
                         .Activate
+                        VBA.Interaction.DoEvents
                     End If
                 End With
             End With
