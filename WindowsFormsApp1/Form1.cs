@@ -2743,22 +2743,22 @@ namespace WindowsFormsApp1
                 }//以上 Shift + F7
 
                 if (e.KeyCode == Keys.F8)//20230929實歲五十一之生日
-                {
+                {//Shift + F8
                     e.Handled = true;
                     string x = textBox1.Text; int s = textBox1.SelectionStart, p = x.IndexOf(Environment.NewLine, s) == -1 ? x.Length : x.IndexOf(Environment.NewLine, s),
                         preP = x.LastIndexOf(Environment.NewLine, s) == -1 ? 0 : x.LastIndexOf(Environment.NewLine, s);
+                    undoRecord(); PauseEvents(); stopUndoRec = true;
                     if (preP < p)
                     {
                         p = x.IndexOf("。<p>", preP, p - preP);
                         if (p > -1)
                         {//清除「。<p>」中的句號 20231119
-                            undoRecord(); PauseEvents();
                             textBox1.Text = x.Substring(0, p) + x.Substring(p + "。".Length);
                             textBox1.Select(s, 0); textBox1.ScrollToCaret();
-                            ResumeEvents();
                         }
                     }
                     keysTitleCodeAndPreWideSpace();
+                    ResumeEvents(); stopUndoRec = false;
                     Clipboard.SetText(textBox1.Text);//通常標識後是要再重標點，如書名等 20240306
                     return;
                 }//以上 Shift + F8
@@ -3598,8 +3598,8 @@ namespace WindowsFormsApp1
                         if (iw != null) // clickCopybutton_GjcoolFastExperience(iw.Location); 
                             Cursor.Position = (Point)iw.Location;
 
-                        rep:
-                        if (pagePaste2GjcoolOCR() && PasteOcrResultFisrtMode && ModifierKeys != Keys.Control)
+                        rep://OCR連續輸入
+                        if (pagePaste2GjcoolOCR() && PasteOcrResultFisrtMode && ModifierKeys != Keys.Control && !br.confirm_that_you_are_human)
                             goto rep;
 
                         //if (!pagePaste2GjcoolOCR())//因為失敗的結果非唯一，故改寫在方法之中
@@ -3859,7 +3859,7 @@ namespace WindowsFormsApp1
                     spaceStrBreforeTitle += "　";
                 }
             }
-            stopUndoRec = true; if (EventsEnabled) undoRecord();
+            if (!stopUndoRec) stopUndoRec = true; if (EventsEnabled) undoRecord();
             keysTitleCode();
             if (textBox1.SelectionStart > 1 && textBox1.Text.Substring(textBox1.SelectionStart - 2, 2) == Environment.NewLine)
                 textBox1.Select(textBox1.SelectionStart - 2, 0);
@@ -5295,7 +5295,7 @@ namespace WindowsFormsApp1
         /// Shift + F7 每行凸排
         /// </summary>
         private void deleteSpacePreParagraphs_ConvexRow()
-        { 
+        {
             int s = textBox1.SelectionStart, l = textBox1.SelectionLength, cntr = 0, i; dontHide = true; string x = textBox1.Text, selTxt;
             if (l == 0)
             {
@@ -5631,10 +5631,10 @@ namespace WindowsFormsApp1
         /// </summary>
         private void clearSeltxt()
         {
-            undoRecord();
             caretPositionRecord();
             string xClear = textBox1.SelectedText, x = textBox1.Text;
             int s = textBox1.SelectionStart;
+            undoRecord();
             if (xClear == "")
             {
                 if (CnText.ClearHasEditedWithPunctuationMarks(ref x))
@@ -5666,11 +5666,11 @@ namespace WindowsFormsApp1
                     textBox1.Text = x.Replace(xClear, "");
                 if (index > -1) s = -(xLen - textBox1.TextLength);
             }
+            undoRecord();
             caretPositionRecall();
             if (s > 0) restoreCaretPosition(textBox1, s, 0);
             //textBox1.SelectionStart = selStart;
             //textBox1.ScrollToCaret();
-            undoRecord();
         }
 
         private void keyDownCtrlAltUpDown(KeyEventArgs e)
@@ -5739,7 +5739,8 @@ namespace WindowsFormsApp1
             }
             if (undoTextBox1Text.Count - undoTimes - 1 > -1)
             {
-                string x = undoTextBox1Text[undoTextBox1Text.Count - ++undoTimes];
+                //string x = undoTextBox1Text[undoTextBox1Text.Count - ++undoTimes];
+                string x = undoTextBox1Text[undoTextBox1Text.Count - 1 - ++undoTimes];//20241001
                 while (x == "")
                 {
                     if (undoTextBox1Text.Count - undoTimes - 1 < 0) break;
@@ -7158,6 +7159,7 @@ namespace WindowsFormsApp1
 
             return url;
         }
+
         /* 使用正則表達式：可以使用正則表達式來檢查和替換網址中的特定字串，這樣會更靈活和高效。
             簡化條件檢查：將防呆區塊的條件檢查合併成一行，讓程式碼更簡潔。
             改進例外處理：在例外處理區塊中，記錄詳細的錯誤訊息，方便日後除錯。這樣的改進應該能讓程式碼更簡潔、更高效。……
@@ -9580,7 +9582,17 @@ namespace WindowsFormsApp1
                 x = x.Replace("<p>", string.Empty);
             }
             CnText.FormalizeText(ref x);
-            CnText.RemoveBooksPunctuation(ref x);//有些是手動添加的書名號或篇名號，不宜逕削去 20240813 然《古籍酷》自動標點仍會先清除書名號，但篇名號不管。20240911 今仍清除篇名號，以免橫生枝節
+            //CnText.RemoveBooksPunctuation(ref x);//有些是手動添加的書名號或篇名號，不宜逕削去 20240813 然《古籍酷》自動標點仍會先清除書名號，但篇名號不管。20240911 今仍清除篇名號，以免橫生枝節
+            x = x.Replace("《", "［").Replace("》", "］");//書名號亦會被自動標點清除故,以備還原 20241001
+            x = x.Replace("「", "〔").Replace("」", "〕");//引號亦會被自動標點清除故,以備還原 20241001
+
+            const string symbolToReplaceWithFullWidthSpace = "◎";
+            if (!omitExam)
+            {
+                CnText.ReplaceFullWidthSpace(ref x, symbolToReplaceWithFullWidthSpace);
+            }
+            else
+                x = x.Replace(Environment.NewLine, Environment.NewLine + Environment.NewLine + Environment.NewLine + Environment.NewLine); //WordVBA處理《漢籍全文資料庫》送交《古籍酷》標點單個分段符號會被清除故 20241001
 
             //清除縮排即凸排格式標記，即將分段符號前後的空格「　」均予清除
             //x = Regex.Replace(x, $@"\s*{Environment.NewLine}+\s*", Environment.NewLine);//發現問題出在使用了 .Text屬性值作判斷故自動標點之方法過早結束迴圈，故今先還原，再觀察 20240918
@@ -9610,7 +9622,13 @@ namespace WindowsFormsApp1
             //恢復段落符號
             //if (!omitExam) x = CnText.RestoreParagraphs(ref originalText, ref x);
             {
-                if (!omitExam) x = CnText.RestoreParagraphs(originalText, ref x);
+                x = CnText.RestoreParagraphs(originalText, ref x);//有時《漢籍全文資料庫》亦會不止有一段文字而已，故須保留/還原分段符號
+                if (!omitExam)
+                {
+                    x = x.Replace(symbolToReplaceWithFullWidthSpace, "　");//將 ReplaceFullWidthSpace()所置換的全形空格還原
+                }
+                x = x.Replace("［", "《").Replace("］", "》");//書名號亦會被自動標點清除故
+                x = x.Replace("〔", "「").Replace("〕", "」");//引號亦會被自動標點清除故,以還原 20241001
                 try
                 {
                     br.driver.SwitchTo().Window(br.LastValidWindow);
@@ -9645,15 +9663,17 @@ namespace WindowsFormsApp1
                 bool p = pasteAllOverWrite;
                 pasteAllOverWrite = true;//防止隱藏到系統任務列去
                 if (reMarkFlag) x += "<p>";
-                undoRecord();
+                undoRecord(); stopUndoRec = true; PauseEvents();
                 textBox1.SelectedText = CnText.BooksPunctuation(ref x, true);
-                undoRecord();
+
                 pasteAllOverWrite = p;
                 //textBox1.SelectedText = x;
                 AvailableInUseBothKeysMouse();
                 if (!selAll) textBox1.Select(s, x.Length);
                 else textBox1.Select(0, 0);
                 textBox1.ScrollToCaret();
+                stopUndoRec = false; ResumeEvents();
+                undoRecord();
                 if (copyResult)
                 {
                     if (textBox1.SelectionLength == 0)
@@ -11267,8 +11287,10 @@ namespace WindowsFormsApp1
                             OpenQA.Selenium.IWebElement commit = br.waitFindWebElementByName_ToBeClickable("commit", br.WebDriverWaitTimeSpan); //br.driver.FindElement(OpenQA.Selenium.By.Name("commit"));
                                                                                                                                                 //OpenQA.Selenium.Support.UI.WebDriverWait waitcommit = new OpenQA.Selenium.Support.UI.WebDriverWait(br.driver, TimeSpan.FromSeconds(2));
                                                                                                                                                 //waitcommit.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(commit));
+                            string xInput = br.Textarea_data_Edit_textbox.GetAttribute("value"), urlEdit = driver.Url;
                             await Task.Run(() =>
                             { //送出後也不必等待，也沒有其他須用到的元件，故可交給作業系統開個新線程去跑就好，但因為editchapter上傳儲存時常較Quit edit費時，故保險起見，還是在後加個Task.delay一下比較好
+                            reCommit:
                                 try
                                 {
                                     commit.Click();
@@ -11288,6 +11310,48 @@ namespace WindowsFormsApp1
                                             throw;
                                     }
                                 }
+
+                                #region 送出後檢查是否是「Please confirm that you are human! 敬請輸入認證圖案」頁面 網址列：https://ctext.org/wiki.pl
+                                if (br.IsConfirmHumanPage())
+                                {
+                                    try
+                                    {
+                                        Clipboard.SetText(xInput);//複製到剪貼簿備用
+                                    }
+                                    catch (Exception)
+                                    {
+                                    }
+
+                                    //點選輸入框
+                                    OpenQA.Selenium.IWebElement iweConfirm = waitFindWebElementBySelector_ToBeClickable("#content3 > form > table > tbody > tr:nth-child(2) > td:nth-child(2) > input[type=text]");
+                                    if (iweConfirm == null) driver.Navigate().Back();//因非同步，若已翻到下一頁
+                                    iweConfirm = waitFindWebElementBySelector_ToBeClickable("#content3 > form > table > tbody > tr:nth-child(2) > td:nth-child(2) > input[type=text]");
+                                    if (iweConfirm == null)
+                                        Debugger.Break();
+                                    else
+                                        iweConfirm.Click();
+                                    if (DialogResult.Cancel ==
+                                        Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("Please confirm that you are human! 敬請輸入認證圖案"
+                                        + Environment.NewLine + Environment.NewLine + "請輸入完畢後再按「確定」！"))
+                                    {
+                                        Debugger.Break();
+                                    }
+                                    driver.Navigate().Back();
+                                    while (driver.Url == "https://ctext.org/wiki.pl")
+                                    {
+                                        driver.Navigate().Back();
+                                    }
+                                    if (driver.Url != urlEdit)
+                                        Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("網址並非 " + urlEdit + " 請檢查後再按下確定");
+                                    if (driver.Url == url)
+                                    {
+                                        br.SetIWebElementValueProperty(br.Textarea_data_Edit_textbox, xInput);
+                                        goto reCommit;//commit.Click();
+                                    }
+                                    else Debugger.Break();
+                                }
+                                #endregion //送出後檢查是否是「Please confirm that you are human! 敬請輸入認證圖案」頁面 網址列：https://ctext.org/wiki.pl
+
                             });//只要有找到，都按下送出，反正若沒修改，也沒有任何影響202301112128
 
                         }
@@ -13146,9 +13210,17 @@ namespace WindowsFormsApp1
             selStart = textBox1.SelectionStart; selLength = textBox1.SelectionLength;
 
             if (undoText == string.Empty)
-                undoTextBox1Text.Add(textBox1.Text);
+            {
+                if (undoTextBox1Text.Count == 0 || textBox1.Text != undoTextBox1Text.Last())
+                    undoTextBox1Text.Add(textBox1.Text);
+            }
+
             else
-                undoTextBox1Text.Add(undoText);
+            {
+                if (undoTextBox1Text.Count == 0 ||undoText != undoTextBox1Text.Last())
+                    undoTextBox1Text.Add(undoText);
+            }
+
             if (undoTimes != 0) undoTimes = 0;
             if (undoTextBox1Text.Count > 50)//還原上限定為50個
             {

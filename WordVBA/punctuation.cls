@@ -48,8 +48,11 @@ Function CreateContextPunctuationCollection(x As String) As Collection
     For i = 1 To xLen
         a = VBA.Mid(x, i, 1)
         If dict.Exists(a) Or a = VBA.Chr(13) Then '以標點符號及分段為斷句處，加入集合中成為元素
+            
+'            If a = VBA.Chr(13) Then Stop 'just for test
+
             ReDim pare(1) As String '以元素為2個的陣列儲存原文訊息
-            pare(0) = text '記文文字片段
+            pare(0) = text '記下文字片段
             pare(1) = a '記下文字片段後的標點符號
             contextCollection.Add pare
             text = ""
@@ -108,7 +111,7 @@ Sub clearPunctuations(ByRef x As String)
     Dim punc, e
     punc = PunctuationArray
     For Each e In punc
-        If InStr(x, e) Then x = VBA.Replace(x, e, "")
+        If InStr(x, e) Then x = VBA.Replace(x, e, vbNullString)
     Next e
 End Sub
 

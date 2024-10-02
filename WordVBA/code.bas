@@ -761,7 +761,7 @@ Function IsBig5(text As String) As Boolean
     stream.Charset = "big5"
     stream.Open
     stream.WriteText text
-    stream.position = 0
+    stream.Position = 0
     encodedText = stream.ReadText(-1)
     
     IsBig5 = (encodedText = text)
@@ -804,7 +804,11 @@ Function ConvertToChrwCode_IfNotBig5() As String
             If result = vbNullString Then
                 combination = vbNullString
             Else
-                combination = " & "
+                If big5FlagPrevisou Then
+                    combination = " & "
+                Else
+                    combination = vbNullString
+                End If
             End If
             result = result & quoteMark & combination & resultA
         Else '¬OBig5ªº¦r
@@ -1060,9 +1064,9 @@ Sub ReplacePrivateUserCharactersWithCJK()
     
     SystemSetup.stopUndo ur, "ReplacePrivateUserCharactersWithCJK"
     word.Application.ScreenUpdating = False
-    For Each r In dTable.Tables(1).Rows
-        wFind = r.Cells(1).Range.Characters(1).text
-        wReplace = r.Cells(2).Range.Characters(1).text
+    For Each r In dTable.Tables(1).rows
+        wFind = r.cells(1).Range.Characters(1).text
+        wReplace = r.cells(2).Range.Characters(1).text
         dReplaced.Range.Find.Execute wFind, , , , , , , wdFindContinue, _
             , wReplace, wdReplaceAll
     Next

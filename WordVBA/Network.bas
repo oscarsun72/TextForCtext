@@ -15,6 +15,7 @@ Sub 查詢國語辭典() '指定鍵:Ctrl+F12'2010/10/18修訂
     Const f As String = "查詢國語辭典.EXE"
     Dim funame As String
     If Selection.Type = wdSelectionNormal Then
+        文字處理.ResetSelectionAvoidSymbols
         Selection.Copy
         If Dir(st & f) <> "" Then
             funame = st & f
@@ -44,6 +45,7 @@ Const f As String = "速檢網路字辭典.EXE"
 Const st As String = "C:\Program Files\孫守真\速檢網路字辭典\"
 Dim funame As String
 If Selection.Type = wdSelectionNormal Then
+    文字處理.ResetSelectionAvoidSymbols
     Selection.Copy
     If Dir(st & f) <> "" Then
         funame = st & f
@@ -70,6 +72,7 @@ End If
 End Sub
 
 Sub 查國語辭典()
+    文字處理.ResetSelectionAvoidSymbols
     SeleniumOP.dictRevisedSearch VBA.Replace(Selection, VBA.Chr(13), "")
 End Sub
 
@@ -78,14 +81,17 @@ End Sub
 'End Sub
 Sub 查Google()
     Rem Alt + g
+    文字處理.ResetSelectionAvoidSymbols
     SeleniumOP.GoogleSearch Selection.text
 End Sub
 Sub 查百度()
     Rem Alt b
-    SeleniumOP.BaiduSearch Selection
+    文字處理.ResetSelectionAvoidSymbols
+    SeleniumOP.BaiduSearch Selection.text
 End Sub
 Sub 查字統網()
     Rem Alt + z
+    文字處理.ResetSelectionAvoidSymbols
     If Selection.Characters.Count > 1 Then
         MsgBox "限查1字", vbExclamation ', vbError
         Exit Sub
@@ -94,6 +100,7 @@ Sub 查字統網()
 End Sub
 Sub 查異體字字典()
     Rem Alt + F12
+    文字處理.ResetSelectionAvoidSymbols
     If Selection.Characters.Count > 1 Then
         MsgBox "限查1字", vbExclamation ', vbError
         Exit Sub
@@ -102,6 +109,7 @@ Sub 查異體字字典()
 End Sub
 Sub 查康熙字典網上版()
     Rem Ctrl + Alt + x
+    文字處理.ResetSelectionAvoidSymbols
     If Selection.Characters.Count > 1 Then
         MsgBox "限查1字", vbExclamation ', vbError
         Exit Sub
@@ -115,11 +123,11 @@ Sub 查國語辭典_到網頁去看()
 End Sub
 Sub 查漢語大詞典()
     Rem Alt + c
+    文字處理.ResetSelectionAvoidSymbols
     If Selection.Characters.Count < 2 Then
         MsgBox "要2字以上才能檢索！", vbExclamation ', vbError
         Exit Sub
     End If
-    文字處理.ResetSelectionAvoidSymbols
     SeleniumOP.LookupHYDCD Selection.text
 End Sub
 Sub 查國學大師()
@@ -129,6 +137,7 @@ Sub 查國學大師()
 End Sub
 Sub 查白雲深處人家說文解字圖像查閱_藤花榭本優先()
     Rem  Alt + s （說文的說） Alt + j （解字的解）
+    文字處理.ResetSelectionAvoidSymbols
     If Selection.Characters.Count > 1 Then
         MsgBox "限查1字", vbExclamation ', vbError
         Exit Sub
@@ -149,6 +158,7 @@ Sub 查白雲深處人家說文解字圖文檢索WFG版_解說檢索()
 End Sub
 Sub 查漢語多功能字庫並取回其說文解釋欄位之值插入至插入點位置()
     Rem  Alt + n （n= 能 neng）
+    文字處理.ResetSelectionAvoidSymbols
     If Selection.Characters.Count > 1 Then
         MsgBox "限查1字", vbExclamation ', vbError
         Exit Sub
@@ -205,6 +215,7 @@ Sub 查漢語多功能字庫並取回其說文解釋欄位之值插入至插入點位置()
 End Sub
 Sub 查說文解字並取回其解釋欄位及網址值插入至插入點位置()
     Rem  Alt + o （o= 說文解字 ShuoWen.ORG 的 O）
+    文字處理.ResetSelectionAvoidSymbols
     If Selection.Characters.Count > 1 Then
         MsgBox "限查1字", vbExclamation ', vbError
         Exit Sub
@@ -260,6 +271,7 @@ Sub 查說文解字並取回其解釋欄位及網址值插入至插入點位置()
 End Sub
 Sub 查說文解字並取回其解釋欄位段注及網址值插入至插入點位置()
     Rem  Ctrl+ Shift + Alt + o （o= 說文解字 ShuoWen.ORG 的 O）
+    文字處理.ResetSelectionAvoidSymbols
     If Selection.Characters.Count > 1 Then
         MsgBox "限查1字", vbExclamation ', vbError
         Exit Sub
@@ -309,14 +321,14 @@ reCheck:
                     If VBA.InStr(p.Range.text, "清代 段玉裁《說文解字注》") Then
                         p.Range.Delete
                         GoTo reCheck:
-                    ElseIf VBA.Replace(p.Range.text, " ", "") = Chr(13) Then
+                    ElseIf VBA.Replace(p.Range.text, " ", "") = VBA.Chr(13) Then
                         p.Range.Delete
                         GoTo reCheck:
                     ElseIf VBA.Left(p.Range.text, s) = VBA.space(s) Then '段注本的說文
-                        p.Range.text = Mid(p.Range.text, s + 1)
+                        p.Range.text = VBA.Mid(p.Range.text, s + 1)
                     ElseIf VBA.Left(p.Range.text, sDuan) = VBA.space(sDuan) Then '段注本的段注文
                         With p.Range
-                            .text = Mid(p.Range.text, sDuan + 1)
+                            .text = VBA.Mid(p.Range.text, sDuan + 1)
                             With .font
                                 .Size = fontsize + 2
                                 .ColorIndex = 11 '.Font.Color= 34816
@@ -348,6 +360,7 @@ reCheck:
 End Sub
 Sub 查異體字字典並取回其說文釋形欄位及網址值插入至插入點位置()
     Rem  Alt + v （v= 異體字 variants 的 v）
+    文字處理.ResetSelectionAvoidSymbols
     If Selection.Characters.Count > 1 Then
         MsgBox "限查1字", vbExclamation ', vbError
         Exit Sub
@@ -434,11 +447,79 @@ Sub 送交古籍酷自動標點()
     TextForCtext.GjcoolPunct
     Selection.Document.Activate
     Selection.Document.Application.Activate
-    SystemSetup.stopUndo ur, "送交古籍酷自動標點"
+    SystemSetup.stopUndo ur, "送交《古籍酷》自動標點"
     Selection.text = SystemSetup.GetClipboardText
     SystemSetup.contiUndo ur
 End Sub
-
+Sub 讀入古籍酷自動標點結果()
+    'Ctrl + Alt + F10
+    Dim ur As UndoRecord, result As String
+    文字處理.ResetSelectionAvoidSymbols
+    If Selection.Characters.Count < 10 Then
+        MsgBox "字數太少，有必要嗎？請至少大於10字", vbExclamation
+        Exit Sub
+    End If
+    Const ignoreMarker = "《》〈〉「」『』" '書名號、篇名號、引號不處理（由前面的程式碼處理）
+    result = Selection.text
+    Rem 書名號、引號之處理
+    result = VBA.Replace(VBA.Replace(result, "《", "〔"), "》", "〕") '書名號亦會被自動標點清除故,以備還原 20241001
+    result = VBA.Replace(VBA.Replace(result, "「", "〔"), "」", "〕") '引號亦會被自動標點清除故,以備還原 20241001
+    SeleniumOP.grabGjCoolPunctResult result, result
+    Selection.Document.Activate
+    Selection.Document.Application.Activate
+    Rem 書名號、引號之處理
+    result = VBA.Replace(VBA.Replace(result, "〔", "《"), "〕", "》") '書名號亦會被自動標點清除故,以備還原 20241001
+    result = VBA.Replace(VBA.Replace(result, "〔", "「"), "〕", "」") '引號亦會被自動標點清除故,以備還原 20241001
+    result = VBA.Replace(result, VBA.Chr(13) & VBA.Chr(10), VBA.Chr(13)) '讀回來的自動標點結果會將chr(13)轉成VBA.Chr(13) & VBA.Chr(10)
+    SystemSetup.stopUndo ur, "讀入《古籍酷》自動標點結果"
+    Rem Selection.text = result'純文字處理
+    Dim puncts As New punctuation, cln As New VBA.Collection, e, rng As Range '適應於格式化文字
+    Set cln = puncts.CreateContextPunctuationCollection(result)
+    Rem 清除原來的標點符號，以利比對與插入
+    For Each e In Selection.Characters
+        'If e = "。" Then Stop 'just for test
+        If VBA.InStr(ignoreMarker, e.text) = 0 Then '書名號、引號不處理（由前面的程式碼處理）
+            If puncts.PunctuationDictionary.Exists(e.text) Then
+                e.text = vbNullString
+            End If
+        End If
+    Next e
+    Set rng = Selection.Document.Range(Selection.start, Selection.End)
+    rng.Find.ClearAllFuzzyOptions: rng.Find.ClearFormatting
+    For Each e In cln
+'        If e(1) = Chr(13) Then Stop 'just for test
+        If e(0) <> vbNullString Then
+            If rng.Find.Execute(e(0), , , , , , True, wdFindStop) = False Then
+                If rng.text = e(0) Then '最後一個
+                    If VBA.InStr(ignoreMarker, e(1)) = 0 Then '書名號、引號不處理（由前面的程式碼處理）
+                        rng.InsertAfter e(1)
+                    End If
+'                Else
+'                    Stop 'just for test
+                End If
+            Else
+                If VBA.InStr(ignoreMarker, e(1)) = 0 Then '書名號、引號不處理（由前面的程式碼處理）
+                    rng.InsertAfter e(1)
+                Else
+                    rng.SetRange rng.start, rng.End + 1
+                End If
+            End If
+        Else
+            If VBA.InStr(ignoreMarker & VBA.Chr(13), e(1)) = 0 Then '書名號、引號不處理（由前面的程式碼處理）
+                rng.Collapse wdCollapseStart
+                rng.InsertAfter e(1)
+            Else
+                rng.SetRange rng.start, rng.start + 1
+            End If
+        End If
+        If rng.End <= Selection.End Then '最後一個
+            Set rng = Selection.Document.Range(rng.End, Selection.End)
+        Else
+            Selection.End = rng.End
+        End If
+    Next e
+    SystemSetup.contiUndo ur
+End Sub
 Function GetUserAddress() As Boolean
     Dim x As String, a As Object 'Access.Application
     On Error GoTo Error_GetUserAddress

@@ -850,6 +850,25 @@ namespace TextForCtext
             }
             private set { quickedit_data_textbox = value; }
         }
+        /// <summary>
+        /// 取得[編輯]的文字方塊（編輯區的文字方塊）；若失敗則回傳null 20240929 于52生日
+        /// Get the textbox of [edit] 
+        /// </summary>
+        internal static IWebElement Textarea_data_Edit_textbox
+        {
+            //get { return quickedit_data_textbox == null ? waitFindWebElementByName_ToBeClickable("data", WebDriverWaitTimeSpan) : quickedit_data_textbox; }
+            get
+            {
+
+                if (driver.Url.IndexOf("&action=editchapter#") > -1)
+                {
+                    return waitFindWebElementBySelector_ToBeClickable("#data", WebDriverWaitTimeSpan);
+                }
+                else
+                    return null;
+            }
+            //private set { Textarea_data_Edit_textbox = value; }
+        }
 
 
         /// <summary>
@@ -1260,7 +1279,7 @@ namespace TextForCtext
                         case -2146233088://"unknown error: Chrome failed to start: exited normally.\n  (unknown error: DevToolsActivePort file doesn't exist)\n  (The process started from chrome location W:\\PortableApps\\PortableApps\\GoogleChromePortable\\App\\Chrome-bin\\chrome.exe is no longer running, so ChromeDriver is assuming that Chrome has crashed.)"
                                          //options.AddArgument("--headless");//唯有此行有效，但不顯示實體，即看不到Chrome瀏覽器，無法手動操作及監控，故今只能以關閉先前已開啟的瀏覽器暫行了 20230109
                                          //options.AddArgument("--ignore-certificate-errors");
-                                         //options.AddArgument("--remote-debugging-port=9222");                            
+                                         //options.AddArgument("--remote-debugging-port=9222");//chrome://inspect/#devices 20241002 Copilot大菩薩：Word VBA 中的 Selenium 操作： https://sl.bing.net/BkGRjHWbCe
                                          //options.AddArgument("--no-sandbox");
                                          //options.AddUserProfilePreference("profile.managed_default_content_settings.popups", 0);
                                          //options.AddArgument("--window-size=1920,1080");
@@ -1395,6 +1414,7 @@ namespace TextForCtext
                     try
                     {
                         cDrv.Navigate().GoToUrl(url);
+                        cDrv.SwitchTo().Window(cDrv.CurrentWindowHandle);
                     }
                     catch (Exception ex)
                     {
@@ -1597,12 +1617,16 @@ namespace TextForCtext
             //options.AddArgument( "--disable-features=VizDisplayCompositor" );
             #endregion
 
+            #region 遠程調試端口的設定 20241002 chrome://version/
+            options.AddArgument("--remote-debugging-port=9222");//chrome://inspect/#devices 20241002 Copilot大菩薩：Word VBA 中的 Selenium 操作： https://sl.bing.net/BkGRjHWbCe
+            #endregion
             return options;
         }
         /// <summary>
         /// 指定要清除quick edit box 內容的引數值 "\t"（其實是有由tab鍵所按下的值，或其他亂碼字），此與 Word VBA 中國哲學書電子化計劃.新頁面 為速新章節單位的配置有關 碼詳：https://github.com/oscarsun72/TextForCtext/blob/f75b5da5a5e6eca69baaae0b98ed2d6c286a3aab/WordVBA/%E4%B8%AD%E5%9C%8B%E5%93%B2%E5%AD%B8%E6%9B%B8%E9%9B%BB%E5%AD%90%E5%8C%96%E8%A8%88%E5%8A%83.bas#L32
         /// </summary>
         internal static readonly string chkClearQuickedit_data_textboxTxtStr = " ";
+        internal static bool confirm_that_you_are_human = false;
         /// <summary>
         /// 在Chrome瀏覽器的文字框(ctext.org 的 Quick edit ）中輸入文字,creedit//若 xIuput= " "則清除而不輸入
         /// </summary>
@@ -1831,6 +1855,7 @@ namespace TextForCtext
                 LastValidWindow = driver.CurrentWindowHandle;
                 Task.Run(() =>//接下來不用理會，也沒有元件要操作、沒有訊息要回應，就可以給另一個線程去處理了。
                 {
+                reSubmit:
                     try
                     {
                         submit.Click();//按下 Save changes button（「保存編輯」按鈕）
@@ -1866,6 +1891,48 @@ namespace TextForCtext
                             Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("請手動檢查資料是否有正確送出。");
                         //throw;
                     }
+                    #region 送出後檢查是否是「Please confirm that you are human! 敬請輸入認證圖案」頁面 網址列：https://ctext.org/wiki.pl
+                    if (IsConfirmHumanPage())
+                    {
+                        try
+                        {
+                            Clipboard.SetText(xInput);//複製到剪貼簿備用
+                        }
+                        catch (Exception)
+                        {
+                        }
+
+                        //點選輸入框
+                        //waitFindWebElementBySelector_ToBeClickable("#content3 > form > table > tbody > tr:nth-child(2) > td:nth-child(2) > input[type=text]")?.Click();
+                        IWebElement iweConfirm = waitFindWebElementBySelector_ToBeClickable("#content3 > form > table > tbody > tr:nth-child(2) > td:nth-child(2) > input[type=text]");
+                        if (iweConfirm == null) driver.Navigate().Back();//因非同步，若已翻到下一頁
+                        iweConfirm = waitFindWebElementBySelector_ToBeClickable("#content3 > form > table > tbody > tr:nth-child(2) > td:nth-child(2) > input[type=text]");
+                        if (iweConfirm == null)
+                            Debugger.Break();
+                        else
+                            iweConfirm.Click();
+                        if (DialogResult.Cancel ==
+                            Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("Please confirm that you are human! 敬請輸入認證圖案"
+                            + Environment.NewLine + Environment.NewLine + "請輸入完畢後再按「確定」！"))
+                        {
+                            Debugger.Break();
+                        }
+                        driver.Navigate().Back();
+                        while (driver.Url == "https://ctext.org/wiki.pl")
+                        {
+                            driver.Navigate().Back();
+                        }
+                        if (driver.Url != url)
+                            Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("網址並非 " + url + " 請檢查後再按下確定");
+                        if (driver.Url == url)
+                        {
+                            SetQuickedit_data_textboxTxt(xInput);
+                            goto reSubmit;
+                        }
+
+                        else Debugger.Break();
+                    }
+                    #endregion
                 });
                 //加速連續性輸入（不必檢視貼入的文本時，很有效）
                 //if (ActiveForm1.AutoPasteToCtext && Form1.FastMode)
@@ -7992,7 +8059,7 @@ internal static string getImageUrl() {
                 iwe = waitFindWebElementBySelector_ToBeClickable("#main > div > div.p-1.p-md-3.d-flex.justify-content-end > div:nth-child(6) > button > i");
                 if (DateTime.Now.Subtract(dt).TotalSeconds > 8) if (Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("還沒找到「標點」按鈕，是否繼續？") == DialogResult.Cancel) return false;
             }
-            iwe.Click();//Thread.Sleep(640);//非得要等一會才能成功！
+            iwe.Click();//Thread.Sleep(640);//非得要等一會才能成功！//自動標點會清除全形空格
             //iwe.SendKeys(OpenQA.Selenium.Keys.Enter);//不能互動，會出現錯誤
             iwe = waitFindWebElementBySelector_ToBeClickable("#PunctArea");
             dt = DateTime.Now; bool reClickFlag = false;
@@ -8295,8 +8362,8 @@ internal static string getImageUrl() {
                 "初九","九二","九三","九四","九五","上九","初六","六二","六三","六四","六五","上六","用九","用六", "繇辭","繇詞",
                 "隨時之義","庖有魚","包有魚","精義入神","豶豕","童牛","承之羞","雷在天上","錫馬", "蕃庶","晝日","三接","懲忿","窒欲","敬以直內","義以方外","迷後得主","利西南","品物咸章","天下大行","益動而", "日進無疆","頻巽","豚魚","頻復", "懲窒","閑邪","存誠","乾乾","悔吝","憧憧", "類萬物","柔順利貞","比之匪人","貞厲","履貞","履道坦坦","貞吉","悔亡","時義","健順", "內健而外順", "內健外順", "外順而內健", "外順內健","敦復","直方","開物成務","窮神知化", "夕惕","惕若","研幾極深","極深研幾","一陰一陽","允升","木上有水","勞民勸相","索而得","我有好爵","言有序","有聖人之道四","長子帥師","弟子輿尸","無悶","日用而不知","之道鮮","原始反終", "寂然不動", "感而遂通","朋從", "朋盍", "容民畜眾","有過則改","見善則遷","養正","養賢","知臨","臨大君", "默而成之","黙而成之","不言而信", "存乎德行","通天下之志","履正", "繼之者善", "仁者見之", "知者見之", "智者見之","屯其膏", "貞不字",
                 "象義","大貞","小貞", "帝出乎震","帝出於震","帝出于震","與時偕行","盈虛","豐亨","天在山中", "多識前言往行", "蹇蹇", "匪躬","洗心","龍德","慎言語","節飲食",
-                "終難","咸之九五","賁於丘園","賁于丘園","賁於邱園","賁于邱園", "束帛戔戔", "損下以益上", "損下益上", "損下而益上", "貳用缶","納約自牖","利見大人", "何思何慮","同歸而殊塗","一致而百慮", "同歸殊塗","一致百慮",
-                "精氣為物","游魂為變","遊䰟為變","游䰟為變",
+                "終難","咸之九五","賁於丘園","賁于丘園","賁於邱園","賁于邱園", "束帛戔戔", "損下以益上", "損下益上", "損下而益上", "貳用缶","納約自牖","利見大人", "何思何慮","同歸而殊塗","一致而百慮", "同歸殊塗","一致百慮","先天後天",
+                "精氣為物","游魂為變","遊䰟為變","游䰟為變", "漣如","焚如","知幾其神","禴祭", "東鄰殺牛","朋亡", "渙其群","有子考","甲三日","庚三日","不易乎世","不成乎名","天一地二","者其辭","升其高陵","天道虧盈","鞏用", "祗悔", "祇悔","秖悔","秪悔","履霜","蒞眾",
                 "伏羲","庖羲","庖𦏁","宓𦏁","宓羲","宓犧","伏犧","庖犧"};
 
             //異體字處理（只用在《中國哲學書電子化計劃》，因為《漢籍全文資料庫》已俱。）
@@ -8310,7 +8377,8 @@ internal static string getImageUrl() {
                     "〈泰〉","〈否〉","〈損〉","〈益〉","〈屯〉","〈豫〉","〈旡妄〉","〈復〉","〈震〉",
                     "少隂","太隂",
                 "𥘉九","𭃨九","𭃡九","𥘉六","𭃨六","𭃡六",
-                "悔亾","悔兦","无悶","遯世无悶","容民畜衆","盈虚","盈𮓡","盈虗","匪躳","愼言語","賁於𠀉園", "賁于𠀉園","賁於𠀌園", "賁于𠀌園","賁於𨚑園", "賁于𨚑園", "𩔖萬物", "𩔗萬物",
+                "悔亾","悔兦","无悶","遯世无悶","容民畜衆","盈虚","盈𮓡","盈虗","匪躳","愼言語","賁於𠀉園", "賁于𠀉園","賁於𠀌園", "賁于𠀌園","賁於𨚑園", "賁于𨚑園", "𩔖萬物", "𩔗萬物","東隣殺牛","禴𥙊","禴𫞴","涣其群","渙其羣","涣其羣",
+                "有子攷","不易乎卋","不易乎丗","升其髙陵","蒞衆","莅眾","莅衆",
                 "伏𦏁"};
                 keywords.AddRange(additionalKeywords);
             }
@@ -8425,6 +8493,30 @@ internal static string getImageUrl() {
                     while (null == waitFindWebElementBySelector_ToBeClickable("#content > div.wikibox > table > tbody > tr.mobilesearch > td > form > input[type=text]:nth-child(3)"))
                     {
                         driver.Navigate().Back();
+                        #region 送出後檢查是否是「Please confirm that you are human! 敬請輸入認證圖案」頁面 網址列：https://ctext.org/wiki.pl
+                        if (IsConfirmHumanPage())
+                        {
+                            //點選輸入框
+                            OpenQA.Selenium.IWebElement iweConfirm = waitFindWebElementBySelector_ToBeClickable("#content3 > form > table > tbody > tr:nth-child(2) > td:nth-child(2) > input[type=text]");
+                            if (iweConfirm == null) driver.Navigate().Back();//因非同步，若已翻到下一頁
+                            iweConfirm = waitFindWebElementBySelector_ToBeClickable("#content3 > form > table > tbody > tr:nth-child(2) > td:nth-child(2) > input[type=text]");
+                            if (iweConfirm == null)
+                                Debugger.Break();
+                            else
+                                iweConfirm.Click();
+                            if (DialogResult.Cancel ==
+                                Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("Please confirm that you are human! 敬請輸入認證圖案"
+                                + Environment.NewLine + Environment.NewLine + "請輸入完畢後再按「確定」！"))
+                            {
+                                Debugger.Break();
+                            }
+                            driver.Navigate().Back();
+                            while (driver.Url == "https://ctext.org/wiki.pl")
+                            {
+                                driver.Navigate().Back();
+                            }
+                        }
+                        #endregion //送出後檢查是否是「Please confirm that you are human! 敬請輸入認證圖案」頁面 網址列：https://ctext.org/wiki.pl
                         if (url == driver.Url) //沒有上一頁了
                         {
                             returnValue = true;
@@ -8674,7 +8766,7 @@ internal static string getImageUrl() {
                 else//文本閱讀內的檢索（《漢籍全文資料庫》）
                 {
 
-                //reClick:
+                    //reClick:
                     //輸入查詢關鍵字
                     SetIWebElementValueProperty(iwe1, keyword);
                     iwe1.SendKeys(OpenQA.Selenium.Keys.Enter);
@@ -9250,7 +9342,7 @@ internal static string getImageUrl() {
             }
 
             //「內容:」欄位文字方塊控制項
-            iwe = waitFindWebElementBySelector_ToBeClickable("#data");
+            iwe = Textarea_data_Edit_textbox;//waitFindWebElementBySelector_ToBeClickable("#data");
             if (iwe == null) { DirectlyReplacingCharactersPageWindowHandle = string.Empty; goto reOpenEdittab; }
 
             #region 輸入取代後的值
@@ -9339,6 +9431,7 @@ internal static string getImageUrl() {
                     Visible = true
                 };
                 wordapp.Activate();
+                wordapp.WindowState = Microsoft.Office.Interop.Word.WdWindowState.wdWindowStateMinimize;
                 //ActiveForm1.AvailableInUseBothKeysMouse();//跨執行緒時會出錯（寫到呼叫端就好）
                 if (ActiveForm1.InvokeRequired)
                 {
@@ -9347,7 +9440,6 @@ internal static string getImageUrl() {
                         ActiveForm1.AvailableInUseBothKeysMouse();
                     });
                 }
-                wordapp.WindowState = Microsoft.Office.Interop.Word.WdWindowState.wdWindowStateMinimize;
                 //ImproveGJcoolOCRMemoDoc = wordapp.Documents.Open("C:\\Users\\oscar\\Dropbox\\《古籍酷》AI OCR 待改進者隨記 感恩感恩　讚歎讚歎　南無阿彌陀佛.docx");
                 ImproveGJcoolOCRMemoDoc = wordapp.Documents.Open(f);
                 //ImproveGJcoolOCRMemoDoc = wordapp.Documents.Open("C:\\Users\\oscar\\Dropbox\\《古籍酷》AI%20OCR%20待改進者隨記%20感恩感恩　讚歎讚歎　南無阿彌陀佛.docx");
@@ -10042,6 +10134,22 @@ internal static string getImageUrl() {
             return true;
         }
 
+        /// <summary>
+        /// 檢查是否是「Please confirm that you are human! 敬請輸入認證圖案」頁面 網址列：https://ctext.org/wiki.pl 20240929 52生日
+        /// <returns></returns>
+        internal static bool IsConfirmHumanPage()
+        {
+            if (driver.Url == "https://ctext.org/wiki.pl")
+            {
+                confirm_that_you_are_human = true;
+                if (waitFindWebElementBySelector_ToBeClickable("#content > font")?.GetAttribute("textContent") == "Please confirm that you are human! 敬請輸入認證圖案")
+                    return true;
+                else
+                    return false;
+            }
+            else
+                return false;
+        }
     }
 
 }

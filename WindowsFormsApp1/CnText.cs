@@ -534,7 +534,7 @@ namespace TextForCtext
             {
                 return (text.Contains("，") || text.Contains("。") || text.Contains("：") || text.Contains("􏿽")
                     || text.Contains("！") || text.Contains("？") || text.Contains("《") || text.Contains("〈")
-                    || text.Contains("『") || text.Contains("』")|| text.Contains("〖") || text.Contains("〗")
+                    || text.Contains("『") || text.Contains("』") || text.Contains("〖") || text.Contains("〗")
                     || text.Contains("「") || text.Contains("」")
                     || text.Contains("》") || text.Contains("〉")
                     || text.Contains("□") || text.Contains("■")
@@ -583,7 +583,7 @@ namespace TextForCtext
             //x = Regex.Replace(x, pattern, evaluator).Replace("．", "。");
             #endregion
 
-            string[] replaceDChar = { "〇","!","！！","'", ",", ";", ":", "．", "?", "：：","：\r\n：", "《《", "》》", "〈〈", "〉〉",
+            string[] replaceDChar = { "＠","〇","!","！！","'", ",", ";", ":", "．", "?", "：：","：\r\n：", "《《", "》》", "〈〈", "〉〉",
                 "。}}<p>。}}","。}}。}}", "。}}}。<p>", "}}}。<p>", "。}}。<p>", "}}。<p>",".<p>","·<p>" ,"<p>。<p>","<p>。","􏿽。<p>","　。<p>"
                 ,"。。", "，，", "@" 
                 //,"}}<p>\r\n{{"//像《札迻》就有此種格式，不能取代掉！ https://ctext.org/library.pl?if=en&file=36575&page=12&editwiki=800245#editor
@@ -595,7 +595,7 @@ namespace TextForCtext
                 ,"，。"
             };
 
-            string[] replaceChar = { "◯","！","！","、", "，", "；", "：", "·", "？", "：","：\r\n", "《", "》", "〈", "〉",
+            string[] replaceChar = { string.Empty,"◯","！","！","、", "，", "；", "：", "·", "？", "：","：\r\n", "《", "》", "〈", "〉",
                 "。}}","。}}", "。}}}<p>", "。}}}<p>", "。}}<p>", "。}}<p>","。<p>","。<p>","<p>","<p>","　","　"
                 , "。", "，", "●" 
                 //,"}}\r\n{{"//像《札迻》就有此種格式，不能取代掉！ https://ctext.org/library.pl?if=en&file=36575&page=12&editwiki=800245#editor
@@ -692,8 +692,8 @@ namespace TextForCtext
             for (int i = 0; i < lines.Length; i++)
             {
                 string line = lines[i];
-                //標題必非版心！
-                if (line.IndexOf("*") > -1
+                //標題必非版心！//行數太少也不必檢查
+                if (lines.Length < 3 || line.IndexOf("*") > -1
                     || line.IndexOf("孫守真按") > -1//有按語則不用汰除 
                     || (i > 1 && i < lines.Length - 2))//版心不可能在中間啦
                     continue;
@@ -1196,8 +1196,10 @@ namespace TextForCtext
             punctuatedText = punctuatedText.Replace(Environment.NewLine, string.Empty);
             //清除標點符號以利分段符號之比對搜尋
             originalText = RemovePunctuation(originalText);
-            //清除縮排即凸排格式標記，即將分段符號前後的空格「　」均予清除//當寫在送去自動標點前！！20240918//發現問題出在使用了 .Text屬性值 故先還原再觀察
-            originalText = Regex.Replace(originalText, $@"\s*{Environment.NewLine}+\s*", Environment.NewLine);
+            ////清除縮排即凸排格式標記，即將分段符號前後的空格「　」均予清除//當寫在送去自動標點前！！20240918//發現問題出在使用了 .Text屬性值 故先還原再觀察
+            //originalText = Regex.Replace(originalText, $@"\s*{Environment.NewLine}+\s*", Environment.NewLine);
+            //因為自動標點為清除全形空格，故亦予清除以好比對
+            originalText = originalText.Replace("　", string.Empty);
             #endregion
 
             // Step 1: Find the positions of the paragraph breaks in the original text
@@ -1263,7 +1265,7 @@ namespace TextForCtext
                 //因為在子函式方法中，若沒有找到時會將標點符號清除再與原未標點之文本作比對，若原文本已略有標點，則會干擾比對結果，不如兩造一律均清除，則簡單有效 20240808
                 if (adjustedPos != -1)
                 {
-                    
+
                     //punctuatedText = punctuatedText.Insert(adjustedPos, newLine);
                     //offset += newLine.Length;
                     //以下改在迴圈後再處理--仍在這裡試看看：成功了！20240920                    
@@ -1271,9 +1273,9 @@ namespace TextForCtext
                         punctuationMarks.Contains(punctuatedText[adjustedPos]) ?
                         ++adjustedPos : adjustedPos
                                             , newLine + //若分段符號後起首是「􏿽」，如 ： 􏿽人之多事，私欲使然也。無欲則無事矣。<p>
-                                                                                 // 􏿽欲者，無涯之物也。原其端則一𫝹，要其極則無
+                                                        // 􏿽欲者，無涯之物也。原其端則一𫝹，要其極則無
                                                         // 則非縮排
-                                            ((indentCount > 0 && punctuatedText[adjustedPos] == "􏿽"[0])?string.Empty:indentStr));
+                                            ((indentCount > 0 && punctuatedText[adjustedPos] == "􏿽"[0]) ? string.Empty : indentStr));
                     offset += newLine.Length + indentCount;
 
                 }
@@ -1301,6 +1303,29 @@ namespace TextForCtext
             }
 
             return punctuatedText;
+        }
+        /// <summary>
+        /// 將非縮排用的全形空格置換成引數 symbolToReplace 值
+        /// 送去《古籍酷》自動標點前先將非縮排用的全形空格置換成引數 symbolToReplace 值
+        /// 因為自動標點會清除文本中的全形空格，故先置換非縮排的全形空格為特殊符號以便後來還原
+        /// </summary>
+        /// <param name="x">要置換的文本</param>        
+        /// <param name="symbolToReplace">要置換成的字符</param>
+        /// <returns></returns>
+        public static string ReplaceFullWidthSpace(ref string x, string symbolToReplace)
+        {
+            int s = x.IndexOf("　");
+            if (s == -1) return x;
+            if (s == 0) x = symbolToReplace + x.Substring(s + 1);
+            while (s > -1)
+            {
+                if (s > 2 && x.Substring(s - 2, 2) != Environment.NewLine)
+                {
+                    x = x.Substring(0, s) + symbolToReplace + x.Substring(s + 1);
+                }
+                s = x.IndexOf("　", s + 1);
+            }
+            return x;
         }
 
     }

@@ -783,7 +783,7 @@ If Not doNotAdd Then
         With .font
             .NameFarEast = "¼Ð·¢Åé"
             .Name = "¼Ð·¢Åé"
-            .position = 3
+            .Position = 3
         End With
         .Visibility = True
         .Priority = 1
@@ -895,7 +895,7 @@ Function mark©ö¾ÇÃöÁä¦r(Optional pasteRange As Range, Optional doNotMark As Bool
         clipBTxt = Replace(clipBTxt, strAutoCorrection(e), strAutoCorrection(e + 1))
         e = e + 1
     Next e
-    searchedTerm = Keywords.©ö¾ÇKeywordsToMark
+    searchedTerm = Keywords.©ö¾ÇKeywords_ToMark
         
     'If Selection.Type = wdSelectionIP Then
         Rem §PÂ_¬O§_¤w§t¦³¸Ó¤å¥»
@@ -937,7 +937,7 @@ Function mark©ö¾ÇÃöÁä¦r(Optional pasteRange As Range, Optional doNotMark As Bool
             If Not flgPaste Then
                 'vba.Chrw() & vba.Chrw() &'vba.Chrw() & vba.Chrw() &
                 Dim guaKeyword
-                guaKeyword = Keywords.©ö¾ÇKeywordsToCheck
+                guaKeyword = Keywords.©ö¾ÇKeywords_ToCheck
                 For Each e In guaKeyword
                     If InStr(clipBTxt, e) > 0 Then
                         flgPaste = True
@@ -1167,15 +1167,15 @@ Sub marking©ö¾ÇÃöÁä¦r_BAD_Copilot¤jµÐÂÄ(rng As Range, arr As Variant, Optional d
             rng.SetRange startRng + match.FirstIndex, startRng + match.FirstIndex + Len(match.Value)
             
             ' ÀË¬d¬O§_»Ý­n«e«á¤åÀË¬d
-            isFollowedAvoid = Keywords.©ö¾ÇKeywordsToMark_ExamFollowedAvoid.Exists(e)
-            isPrecededAvoid = Keywords.©ö¾ÇKeywordsToMark_ExamPrecededAvoid.Exists(e)
-            isInPhrasesAvoid = Keywords.©ö¾ÇKeywordsToMark_ExamInPhraseAvoid.Exists(e)
+            isFollowedAvoid = Keywords.©ö¾ÇKeywordsToMark_Exam_Followed_Avoid.Exists(e)
+            isPrecededAvoid = Keywords.©ö¾ÇKeywordsToMark_Exam_Preceded_Avoid.Exists(e)
+            isInPhrasesAvoid = Keywords.©ö¾ÇKeywordsToMark_Exam_InPhrase_Avoid.Exists(e)
             
             If isFollowedAvoid Or isPrecededAvoid Or isInPhrasesAvoid Then
                 ' «áºóÀË¬d
                 If Not rng.Next Is Nothing And rng.Next.Characters.Count > 0 Then
                     If isFollowedAvoid Then
-                        For Each key In Keywords.©ö¾ÇKeywordsToMark_ExamFollowedAvoid(e)
+                        For Each key In Keywords.©ö¾ÇKeywordsToMark_Exam_Followed_Avoid(e)
                             If rng.End + Len(key) <= endRng Then
                                 rngExam.SetRange rng.End, rng.End + Len(key)
                                 If StrComp(rngExam.text, key) = 0 Then
@@ -1190,7 +1190,7 @@ Sub marking©ö¾ÇÃöÁä¦r_BAD_Copilot¤jµÐÂÄ(rng As Range, arr As Variant, Optional d
                 ' «eºóÀË¬d
                 If examOK And Not rng.Previous Is Nothing And rng.Previous.Characters.Count > 0 Then
                     If isPrecededAvoid Then
-                        For Each key In Keywords.©ö¾ÇKeywordsToMark_ExamPrecededAvoid(e)
+                        For Each key In Keywords.©ö¾ÇKeywordsToMark_Exam_Preceded_Avoid(e)
                             If rng.start - Len(key) > -1 Then
                                 rngExam.SetRange rng.start - Len(key), rng.start
                                 If StrComp(rngExam.text, key) = 0 Then
@@ -1205,7 +1205,7 @@ Sub marking©ö¾ÇÃöÁä¦r_BAD_Copilot¤jµÐÂÄ(rng As Range, arr As Variant, Optional d
                 ' ¤º´O©óÀË¬d
                 If examOK And isInPhrasesAvoid Then
                     If dictCoordinatesPhrase.Count = 0 Then
-                        For Each key In Keywords.©ö¾ÇKeywordsToMark_ExamInPhraseAvoid(e)
+                        For Each key In Keywords.©ö¾ÇKeywordsToMark_Exam_InPhrase_Avoid(e)
                             rngExam.SetRange startRng, endRng
                             Do While rngExam.Find.Execute(key, , , , , , True, wdFindStop)
                                 dictCoordinatesPhrase.Add rngExam.start, rngExam.End
@@ -1284,14 +1284,14 @@ Sub marking©ö¾ÇÃöÁä¦r(rng As Range, arr As Variant, Optional defaultHighlightCol
             
                 rng.SetRange startRng, endRng
                 'If e = "¿Ý" Then
-                isFollowedAvoid = Keywords.©ö¾ÇKeywordsToMark_ExamFollowedAvoid.Exists(e)
-                isPrecededAvoid = Keywords.©ö¾ÇKeywordsToMark_ExamPrecededAvoid.Exists(e)
-                isInPhrasesAvoid = Keywords.©ö¾ÇKeywordsToMark_ExamInPhraseAvoid.Exists(e)
+                isFollowedAvoid = Keywords.©ö¾ÇKeywordsToMark_Exam_Followed_Avoid.Exists(e)
+                isPrecededAvoid = Keywords.©ö¾ÇKeywordsToMark_Exam_Preceded_Avoid.Exists(e)
+                isInPhrasesAvoid = Keywords.©ö¾ÇKeywordsToMark_Exam_InPhrase_Avoid.Exists(e)
                 If isFollowedAvoid Or isPrecededAvoid Or isInPhrasesAvoid Then
 '                    '­Y¦³¤º´O©óªº¤ù»y»yµü¡]¥]§tÃöÁäªº¤ù»y»y¥y¡^»Ý¬dÅçªº¸Ü¡A´N¥ý°O¤U­n¤ñ¹ïªº¦ì¸m¶°¦X
 '                    '­Y«á¡B«eÀË¬d³£¥¼¹L´N¤£¥²¤F¡A¬G¤µ¦A§ï²¾¦Ü¤º´O¤§ÀË¬d¡A¨Ã¥H dictCoordinatesPhrase.Count ¨Ó§@§PÂ_
 '                    If isInPhrasesAvoid Then
-'                        arrKey = Keywords.©ö¾ÇKeywordsToMark_ExamInPhraseAvoid(e)
+'                        arrKey = Keywords.©ö¾ÇKeywordsToMark_Exam_InPhrase_Avoid(e)
 '                        For Each eArrKey In arrKey '¹M¾ú¨C­Ó¸ÓÁ×¶}ªºµü»y¡A»`¶°¨ä¦b¤å¥ó¤¤ªº©Ò¦b¦ì¸m¡A¥H¨Ñ«áÄò¤ñ¹ï
 '                            'Set rngExam = rngExam.Document.Range '§Ë¿ù¤F¡A¤w¦³allDoc°Ñ¼Æ±±¨î¬O§_¾Þ§@¾ã¥÷¤å¥ó
 '                            rngExam.SetRange startRng, endRng '¤£»Ý³B²z¾ã¥÷¤å¥ó¡A´N¥u´N¾Þ§@½d³ò¤º³B¸m´N¥i¡C·P®¦·P®¦¡@Æg¼ÛÆg¼Û¡@«nµLªüÀ±ªû¦ò 20240915
@@ -1315,9 +1315,9 @@ Sub marking©ö¾ÇÃöÁä¦r(rng As Range, arr As Variant, Optional defaultHighlightCol
                                 
                                 'If rng.Document.Range(rng.End, rng.End + 4).text = "©[¤§²M®ð" Then Stop 'just for test
                                 
-                                'If UBound(VBA.Filter(Keywords.©ö¾ÇKeywordsToMark_ExamFollowedAvoid(e), rng.Next.Characters(1).text)) < 0 Then
+                                'If UBound(VBA.Filter(Keywords.©ö¾ÇKeywordsToMark_Exam_Followed_Avoid(e), rng.Next.Characters(1).text)) < 0 Then
                                 If isFollowedAvoid Then
-                                    arrKey = Keywords.©ö¾ÇKeywordsToMark_ExamFollowedAvoid(e)
+                                    arrKey = Keywords.©ö¾ÇKeywordsToMark_Exam_Followed_Avoid(e)
                                     For Each eArrKey In arrKey
                                         If rng.End + VBA.Len(eArrKey) <= endRng Then '³o¼Ëªº¼gªk¡A¦pªG¤º§t¶W³sµ²µ¥¥\¯àÅÜ¼Æ¡A®£©È´N·|¥¢»~¤F¡I
                                             rngExam.SetRange rng.End, rng.End + VBA.Len(eArrKey)
@@ -1333,9 +1333,9 @@ checkPrevious:
                                     If Not rng.Previous Is Nothing Then
                                         '«eºóÀË¬d
                                         If rng.Previous.Characters.Count > 0 Then
-                                            'If UBound(VBA.Filter(Keywords.©ö¾ÇKeywordsToMark_ExamPrecededAvoid(e), rng.Previous.Characters(rng.Previous.Characters.Count).text)) < 0 Then
+                                            'If UBound(VBA.Filter(Keywords.©ö¾ÇKeywordsToMark_Exam_Preceded_Avoid(e), rng.Previous.Characters(rng.Previous.Characters.Count).text)) < 0 Then
                                             If isPrecededAvoid Then
-                                                arrKey = Keywords.©ö¾ÇKeywordsToMark_ExamPrecededAvoid(e)
+                                                arrKey = Keywords.©ö¾ÇKeywordsToMark_Exam_Preceded_Avoid(e)
                                                 For Each eArrKey In arrKey
                                                     If rng.start - VBA.Len(eArrKey) > -1 Then '³o¼Ëªº¼gªk¡A¦pªG¤º§t¶W³sµ²µ¥¥\¯àÅÜ¼Æ¡A®£©È´N·|¥¢»~¤F¡I
                                                         rngExam.SetRange rng.start - VBA.Len(eArrKey), rng.start
@@ -1348,7 +1348,7 @@ checkPrevious:
                                             End If
                                             If examOK Then
 checkPhrases:                                   '¤º´O©óÀË¬d¡GÃöÁä¦r§t¦b¸ÓÁ×§Kªº¤ù»yµü¥yÀË¬d
-                                                'If Keywords.©ö¾ÇKeywordsToMark_ExamInPhraseAvoid.Exists(e) Then
+                                                'If Keywords.©ö¾ÇKeywordsToMark_Exam_InPhrase_Avoid.Exists(e) Then
                                                 If isInPhrasesAvoid Then
                                                     If dictCoordinatesPhrase.Count = 0 Then
                                                         GoSub buildDictCoordinatesPhrase
@@ -1366,7 +1366,7 @@ checkPhrases:                                   '¤º´O©óÀË¬d¡GÃöÁä¦r§t¦b¸ÓÁ×§Kªº¤
                                                         End If
                                                     Next key
 
-'                                                    arrKey = Keywords.©ö¾ÇKeywordsToMark_ExamInPhraseAvoid(e)
+'                                                    arrKey = Keywords.©ö¾ÇKeywordsToMark_Exam_InPhrase_Avoid(e)
 '                                                    For Each eArrKey In arrKey '¹M¾ú¨C­Ó¸ÓÁ×¶}ªºµü»y¡A·í¥ý»`¶°¨ä¦ì¸m¦b¤å¥ó¤¤©Ò¦b¦ì¸m¡A¥H¨Ñ«áÄò¤ñ¹ï
 '                                                        Set rngExam = rngExam.Document.Range
 '                                                        With rngExam.Find
@@ -1437,7 +1437,7 @@ checkPhrases:                                   '¤º´O©óÀË¬d¡GÃöÁä¦r§t¦b¸ÓÁ×§Kªº¤
                     If dictCoordinatesPhrase.Count > 0 Then
                         dictCoordinatesPhrase.RemoveAll 'Âk¹s¨Ñ¤U¤@­ÓÃöÁä¦r¨Ï¥Î
                     End If
-                        'If Keywords.©ö¾ÇKeywordsToMark_ExamInPhraseAvoid.Exists(e) Then
+                        'If Keywords.©ö¾ÇKeywordsToMark_Exam_InPhrase_Avoid.Exists(e) Then
                          '       ¡K¡K
                           '          dictCoordinatesPhrase.Add rngExam.start, rngExam.End
                           
@@ -1472,7 +1472,7 @@ buildDictCoordinatesPhrase:
         '­Y¦³¤º´O©óªº¤ù»y»yµü¡]¥]§tÃöÁäªº¤ù»y»y¥y¡^»Ý¬dÅçªº¸Ü¡A´N¥ý°O¤U­n¤ñ¹ïªº¦ì¸m¶°¦X
 '        ­Y«á¡B«eÀË¬d³£¥¼¹L´N¤£¥²¤F¡A¬G¤µ¦A§ï²¾¦Ü¤º´O¤§ÀË¬d¡A¨Ã¥H dictCoordinatesPhrase.Count ¨Ó§@§PÂ_
         If isInPhrasesAvoid Then
-            arrKey = Keywords.©ö¾ÇKeywordsToMark_ExamInPhraseAvoid(e)
+            arrKey = Keywords.©ö¾ÇKeywordsToMark_Exam_InPhrase_Avoid(e)
             For Each eArrKey In arrKey '¹M¾ú¨C­Ó¸ÓÁ×¶}ªºµü»y¡A»`¶°¨ä¦b¤å¥ó¤¤ªº©Ò¦b¦ì¸m¡A¥H¨Ñ«áÄò¤ñ¹ï
                     '¤w¦³allDoc°Ñ¼Æ±±¨î¬O§_¾Þ§@¾ã¥÷¤å¥ó
                 rngExam.SetRange startRng, endRng '¬G¤£»Ý³B²z¾ã¥÷¤å¥ó¡A´N¥u´N¾Þ§@½d³ò¤º³B¸m´N¥i¡C·P®¦·P®¦¡@Æg¼ÛÆg¼Û¡@«nµLªüÀ±ªû¦ò 20240915
@@ -1501,7 +1501,7 @@ Sub mark©ö¾ÇÃöÁä¦rDoc()
     SystemSetup.playSound 0.484
     SystemSetup.stopUndo ur, "mark©ö¾ÇÃöÁä¦rDoc"
     word.Application.ScreenUpdating = False
-    marking©ö¾ÇÃöÁä¦r ActiveDocument.Range, Keywords.©ö¾ÇKeywordsToMark, word.wdYellow
+    marking©ö¾ÇÃöÁä¦r ActiveDocument.Range, Keywords.©ö¾ÇKeywords_ToMark, word.wdYellow
     SystemSetup.contiUndo ur
     SystemSetup.playSound 2
     word.Application.ScreenUpdating = True

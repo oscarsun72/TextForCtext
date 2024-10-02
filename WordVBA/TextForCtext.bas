@@ -97,11 +97,11 @@ Function GjcoolPunct() As Boolean
     DoEvents
     AppActivate tx
     DoEvents
-    SystemSetup.wait 0.1
+    SystemSetup.wait 0.2
     SendKeys "^a"
     DoEvents
     'SendKeys "^x" '複製文本的功能寫在C#中
-    SystemSetup.wait 0.05
+    SystemSetup.wait 0.1
     SendKeys "{delete}"
     DoEvents
     GjcoolPunct = True

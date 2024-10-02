@@ -1783,8 +1783,8 @@ Sub ¤å¥ó¦rÀW_old()
     Set ExcelSheet = CreateObject("Excel.Sheet")
     With ExcelSheet.Application
         For j = 1 To i
-            .Cells(j, 1) = x(j - 1)
-            .Cells(j, 2) = xT(j - 1)
+            .cells(j, 1) = x(j - 1)
+            .cells(j, 2) = xT(j - 1)
             Xsort(xT(j - 1)) = Xsort(xT(j - 1)) & "¡B" & x(j - 1) 'Xsort(xT(j - 1)) & ww '°}¦C±Æ§Ç'2010/10/29
         Next j
     End With
@@ -2192,25 +2192,25 @@ If Selection.Type = wdSelectionIP Then Exit Sub
                 '.ActiveWorkbook.Save
                 r = .ActiveCell.row
                 For i = 1 To 7
-                    If .Cells(r, i).Value <> "" Then
+                    If .cells(r, i).Value <> "" Then
                         MsgBox "½Ð¨ì·s°O¿ý¦C¡I¡I", vbExclamation
                         Exit Sub
                     End If
                 Next i
-                .Cells(r, 1).Activate
+                .cells(r, 1).Activate
                 DoEvents
                 .activesheet.Paste
-                .Cells(r, 2).Value = Selection
-                .Cells(r, 2).font.Color = wdColorRed
+                .cells(r, 2).Value = Selection
+                .cells(r, 2).font.Color = wdColorRed
                 If Not Selection Like "*[óòñõôöø÷ùûúüýþ¡¸¡¹¡U¡@]*" Then
-                    .Cells(r, 5) = Len(Selection)
+                    .cells(r, 5) = Len(Selection)
                 ElseIf Selection Like "*¡@*" Then
-                    .Cells(r, 5) = Len(Selection) - 1
+                    .cells(r, 5) = Len(Selection) - 1
                 Else
-                    .Cells(r, 5) = 1
+                    .cells(r, 5) = 1
                 End If
                 .ActiveWorkbook.Save
-                .Cells(.ActiveCell.row + 1, .ActiveCell.Column).Activate
+                .cells(.ActiveCell.row + 1, .ActiveCell.Column).Activate
             End With
         End With
         ´å¼Ð©Ò¦b¦ì¸m®ÑÅÒ
@@ -2346,8 +2346,8 @@ ReDim Xsort(u) As String
 'Set xlSheet = xlBook.Worksheets(1)
 With xlSheet.Application
     For j = 1 To i
-        .Cells(j, 1) = x(j - 1)
-        .Cells(j, 2) = xT(j - 1)
+        .cells(j, 1) = x(j - 1)
+        .cells(j, 2) = xT(j - 1)
         Xsort(xT(j - 1)) = Xsort(xT(j - 1)) & "¡B" & x(j - 1) 'Xsort(xT(j - 1)) & ww '°}¦C±Æ§Ç'2010/10/29
     Next j
 End With
@@ -2566,8 +2566,8 @@ Set xlBook = xlApp.Workbooks.Add
 Set xlSheet = xlBook.Worksheets(1)
 With xlSheet.Application
     For j = 1 To i
-        .Cells(j, 1) = x(j - 1)
-        .Cells(j, 2) = xT(j - 1)
+        .cells(j, 1) = x(j - 1)
+        .cells(j, 2) = xT(j - 1)
         Xsort(xT(j - 1)) = Xsort(xT(j - 1)) & "¡B" & x(j - 1) 'Xsort(xT(j - 1)) & ww '°}¦C±Æ§Ç'2010/10/29
     Next j
 End With
@@ -2760,7 +2760,7 @@ Sub ¤¤°ê­õ¾Ç®Ñ¹q¤l¤Æ­p¹º_ªí®æÂà¤å¦r(ByRef r As Range)
 On Error GoTo eH
 Dim lngTemp As Long '¦]¬°»~«ö¨ì°lÂÜ­×­q¡A¤~·|¤Þµo°T®§´£¥Ü§R°£Àx¦s®æ¤£·|¦³¼ÐÃÑ
 'Dim d As Document
-Dim tb As Table, C As Cell ', ci As Long
+Dim tb As table, C As cell ', ci As Long
 'Set d = ActiveDocument
 lngTemp = word.Application.DisplayAlerts
 If r.Tables.Count > 0 Then
@@ -2776,7 +2776,7 @@ Exit Sub
 eH:
 Select Case Err.Number
     Case 5992 'µLªk­Ó§O¦s¨ú¦¹¶°¦X¤¤ªº¦UÄæ¡A¦]¬°ªí®æ¤¤¦³²V¦XªºÀx¦s®æ¼e«×¡C
-        For Each C In tb.Range.Cells
+        For Each C In tb.Range.cells
 '            ci = ci + 1
 '            If ci Mod 3 = 2 Then
                 'If VBA.IsNumeric(VBA.Left(c.Range.text, VBA.InStr(c.Range.text, "?") - 1)) Then
@@ -3108,7 +3108,7 @@ Sub º~Äy¹q¤l¤åÄm¸ê®Æ®w¤å¥»¾ã²z_ª`¤å«e«á¥[¬A¸¹() '³Ì«á°õ¦æ Docs.mark©ö¾ÇÃöÁä¦r(¦b
         
         Dim dx As String, punct, ePunct, hasPunct As Boolean
         dx = rng.Document.Range.text
-        punct = Array("¡C", "¡A", "¡B", "¡F", "¡u¡v", "¡y¡z", "¡I", "¡H")
+        punct = Array("¡C", "¡A", "¡B", "¡F", "¡u¡v", "¡y¡z", "¡I", "¡H", "¡E") '¡u¡E¡v¡G¦p¡mº~Äy¥þ¤å¸ê®Æ®w¡P®ø®L¶~°OºK§Û¡n
         For Each ePunct In punct
             If VBA.InStr(dx, ePunct) Then
                 hasPunct = True
@@ -3148,7 +3148,7 @@ Sub º~Äy¹q¤l¤åÄm¸ê®Æ®w¤å¥»¾ã²z_ª`¤å«e«á¥[¬A¸¹() '³Ì«á°õ¦æ Docs.mark©ö¾ÇÃöÁä¦r(¦b
                         pasteAppendedRange.text = SystemSetup.GetClipboard
                         DoEvents
                         SystemSetup.wait 0.1
-                        Docs.marking©ö¾ÇÃöÁä¦r pasteAppendedRange, Keywords.©ö¾ÇKeywordsToMark
+                        Docs.marking©ö¾ÇÃöÁä¦r pasteAppendedRange, Keywords.©ö¾ÇKeywords_ToMark
                         SystemSetup.playSound 2
                     Else
                         word.Application.Activate
@@ -3164,7 +3164,8 @@ Sub º~Äy¹q¤l¤åÄm¸ê®Æ®w¤å¥»¾ã²z_ª`¤å«e«á¥[¬A¸¹() '³Ì«á°õ¦æ Docs.mark©ö¾ÇÃöÁä¦r(¦b
                 pasteAppendedRange.InsertParagraphAfter
             End If
         End If
-
+        DoEvents
+        rng.Document.Close wdDoNotSaveChanges
     Else
         DoEvents
         rng.Document.Activate
