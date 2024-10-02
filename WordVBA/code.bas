@@ -828,7 +828,7 @@ Function ConvertToChrwCode_IfNotBig5() As String
     
     SystemSetup.stopUndo ur, "ConvertToChrwCode"
     rng.text = result
-    rng.Copy
+    rng.Cut
     ConvertToChrwCode_IfNotBig5 = result
     SystemSetup.contiUndo ur
 End Function

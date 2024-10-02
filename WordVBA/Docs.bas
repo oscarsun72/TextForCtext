@@ -612,6 +612,7 @@ Sub 在本文件中尋找選取字串() 'Ctrl+Alt+Down 2020/10/4改用 Ctrl+Shift+PageDown
             If ins(3) = ins(4) And .Information(wdInFootnote) = True Then _
                 MsgBox "本文只有註腳此處有!", vbInformation, "尋找：「" & FdText & "」": Exit Sub
     '        With .Document.StoryRanges(ins(1)).Find
+            If ins(1) < ins(2) Then .HomeKey wdStory 'ins(2)是文件本文最後出現的位置故 20241002
             With .Find
                 .ClearFormatting
                 .ClearAllFuzzyOptions
@@ -1146,7 +1147,7 @@ Sub marking易學關鍵字_BAD_Copilot大菩薩(rng As Range, arr As Variant, Optional d
     Dim dictCoordinatesPhrase As New Scripting.Dictionary, key
     
     On Error GoTo eH
-    word.Options.defaultHighlightColorIndex = defaultHighlightColorIndex
+    word.options.defaultHighlightColorIndex = defaultHighlightColorIndex
     If allDoc Then Set rng = rng.Document.Range
     startRng = rng.start
     endRng = rng.End
@@ -1259,7 +1260,7 @@ Sub marking易學關鍵字(rng As Range, arr As Variant, Optional defaultHighlightCol
     Dim examOK As Boolean, rngExam As Range, processCntr As Long, dictCoordinatesPhrase As New Scripting.Dictionary, key, isInPhrasesAvoid As Boolean, isFollowedAvoid As Boolean, isPrecededAvoid As Boolean
 
     On Error GoTo eH
-    word.Options.defaultHighlightColorIndex = defaultHighlightColorIndex
+    word.options.defaultHighlightColorIndex = defaultHighlightColorIndex
     examOK = True
     If allDoc Then Set rng = rng.Document.Range
     startRng = rng.start
@@ -1699,12 +1700,12 @@ Sub 中國哲學書電子化計劃_只保留正文注文_且注文前後加括弧_貼到古籍酷自動標點()
         If Documents.Count > 0 Then
             If InStr(ActiveDocument.path, "已初步標點") > 0 Then
             On Error GoTo eH:
-                If Not SeleniumOP.wd Is Nothing Then
+                If Not SeleniumOP.WD Is Nothing Then
                     Dim ws() As String
                     ws = SeleniumOP.WindowHandles
                     If Not VBA.IsEmpty(ws) Then
-                        wd.SwitchTo.Window ws(UBound(ws))
-                        SeleniumOP.wd.Manage.Window.Minimize
+                        WD.SwitchTo.Window ws(UBound(ws))
+                        SeleniumOP.WD.Manage.Window.Minimize
                     End If
                 End If
 mark:
@@ -1811,7 +1812,7 @@ Err1:
                 End If
             Case Else
                 If InStr(Err.Description, "no such window") Then
-                    If Not wd Is Nothing Then Resume
+                    If Not WD Is Nothing Then Resume
                 Else
                     MsgBox Err.Description, vbCritical
                     SystemSetup.killchromedriverFromHere

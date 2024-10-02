@@ -22,9 +22,11 @@ End Function
 Sub Hanchi_CTP_SearchingKeywordsYijing()
     ' Alt + shift + ,
     ' Alt + ,
+    ' Ctrl + Alt + ,
     ' Alt + shift + F5
     ' Ctrl + Alt + F9
     SystemSetup.playSound 0.484
+    If VBA.InStr(ActiveDocument.path, "易學雜著文本") And ActiveDocument.Saved = False Then ActiveDocument.Save
 
     If Not examToRun Then Exit Sub
     
