@@ -41,7 +41,7 @@ Sub ¦rÀW() '2002/11/10­nSub¤~¯à¦bWord¤¤°õ¦æ!
     'Dim chct As Long
     Dim StTime As Date, EndTime As Date
     'Dim x As Long, firstword As String '¶Ã½XÀË¬d!2002/11/13
-    Options.SaveInterval = 0 '¨ú®ø¦Û°ÊÀx¦s
+    options.SaveInterval = 0 '¨ú®ø¦Û°ÊÀx¦s
     Set d = CreateObject("access.application")
     d.UserControl = True
     d.OpenCurrentDatabase "d:\¤d¼{¤@±oÂN\®ÑÄy¸ê®Æ\µüÀW.mdb", False
@@ -131,7 +131,7 @@ retry:      Next ch
     d.docmd.OpenTable "¦rÀWªí", , d.acReadOnly
     d.docmd.Maximize
     rst.Close: db.Close: Set d = Nothing
-    Options.SaveInterval = 10 '«ì´_¦Û°ÊÀx¦s
+    options.SaveInterval = 10 '«ì´_¦Û°ÊÀx¦s
     End '¥ÎExit SubµLªk¨C¦¸Ãö³¬Access
 ¿ù»~³B²z:
     Select Case Err.Number
@@ -174,11 +174,11 @@ retry:      Next ch
 End Sub
 Sub µüÀW() '2002/11/10
     On Error GoTo ¿ù»~³B²z
-    Dim wd, wrong As Long
+    Dim WD, wrong As Long
     Dim wrongmark As Integer ', wdct As Long
     Dim StTime As Date, EndTime As Date
     Dim hfspace As Long
-    Options.SaveInterval = 0 '¨ú®ø¦Û°ÊÀx¦s
+    options.SaveInterval = 0 '¨ú®ø¦Û°ÊÀx¦s
     Set d = CreateObject("access.application")
     d.UserControl = True '¦pªG¬°False«hdb.close·|Ãö³¬¸ê®Æ®w!
     'd.UserControl = False
@@ -190,18 +190,18 @@ Sub µüÀW() '2002/11/10
     If rst.RecordCount > 0 Then db.Execute "DELETE * FROM µüÀWªí"
     StTime = VBA.Time
     With ActiveDocument
-        For Each wd In .words
+        For Each WD In .words
             wrong = wrong + 1 'ÀËµø¥Î!
     '        If wrong Mod 1000 = 0 Then Debug.Print wrong
     '        Debug.Print wd & vbCr & "--------"
-            If Len(wd) > 1 And VBA.Right(wd, 1) = " " Then
+            If Len(WD) > 1 And VBA.Right(WD, 1) = " " Then
                 hfspace = hfspace + 1 '­p¦¸
                 GoTo retry '¦r¦ê¥kÃä¬O¥b§ÎªÅ®æ®É,AccessUpdate®É·|¾P¥h,¥B©óµü·J¥çµL·N·N,¬G¤£­p!
             End If
-            rst.FindFirst "µü·J like '" & wd & "'"
+            rst.FindFirst "µü·J like '" & WD & "'"
             If rst.NoMatch Then
                 rst.AddNew
-                rst("µü·J") = wd
+                rst("µü·J") = WD
     '            On Error GoTo ¦¸¼Æ
                 rst.Update
             Else
@@ -214,7 +214,7 @@ Sub µüÀW() '2002/11/10
     '        wdct = Selection.StoryLength
     '        instr(1+
     '        .Select
-retry:      Next wd
+retry:      Next WD
     End With
     EndTime = VBA.Time
     AppActivate "Microsoft word"
@@ -228,7 +228,7 @@ retry:      Next wd
     d.docmd.OpenTable "µüÀWªí", , d.acReadOnly
     d.docmd.Maximize
     rst.Close: db.Close: Set d = Nothing
-    Options.SaveInterval = 10 '«ì´_¦Û°ÊÀx¦s
+    options.SaveInterval = 10 '«ì´_¦Û°ÊÀx¦s
     End
 ¿ù»~³B²z:
     Select Case Err.Number '¥D¯Á¤Þ­È­«½Æ
@@ -266,7 +266,7 @@ Sub ¶i¶¥µüÀW() '2002/11/10­nSub¤~¯à¦bWord¤¤°õ¦æ!'2005/4/21¦¹ªk¦b¶]¤jÀÉ®×®É¤Ó¨S®Ä
     Length = InputBox("½Ð«ü©w¤ÀªRµü·J¤§¤W­­,³Ì¦h¤­­Ó¦r", , "5")
     If Length = "" Or Not IsNumeric(Length) Then End
     If CByte(Length) < 1 Or CByte(Length) > 5 Then End
-    Options.SaveInterval = 0 '¨ú®ø¦Û°ÊÀx¦s
+    options.SaveInterval = 0 '¨ú®ø¦Û°ÊÀx¦s
     StTime = VBA.Time
     Set d = CreateObject("access.application")
     '©ÎSet d = CreateObject("Access.Application.9")
@@ -383,7 +383,7 @@ Sub ¶i¶¥µüÀW() '2002/11/10­nSub¤~¯à¦bWord¤¤°õ¦æ!'2005/4/21¦¹ªk¦b¶]¤jÀÉ®×®É¤Ó¨S®Ä
     d.docmd.OpenTable "µüÀWªí", , d.acReadOnly
     d.docmd.Maximize
     rst.Close: db.Close: Set d = Nothing
-    Options.SaveInterval = 10 '«ì´_¦Û°ÊÀx¦s
+    options.SaveInterval = 10 '«ì´_¦Û°ÊÀx¦s
     End '¥ÎExit SubµLªk¨C¦¸Ãö³¬Access'2002/11/15
 ¿ù»~³B²z:
     Select Case Err.Number '¥D¯Á¤Þ­È­«½Æ
@@ -413,7 +413,7 @@ Sub ¶i¶¥µüÀW1() '2002/11/15­nSub¤~¯à¦bWord¤¤°õ¦æ!
     Length = InputBox("½Ð«ü©w¤ÀªRµü·J¤§¤W­­,³Ì¦h255­Ó¦r", , "5")
     If Length = "" Or Not IsNumeric(Length) Then End
     If CByte(Length) < 1 Or CByte(Length) > 255 Then End
-    Options.SaveInterval = 0 '¨ú®ø¦Û°ÊÀx¦s
+    options.SaveInterval = 0 '¨ú®ø¦Û°ÊÀx¦s
     StTime = VBA.Time
     Set d = CreateObject("access.application")
     '©ÎSet d = CreateObject("Access.Application.9")
@@ -482,7 +482,7 @@ Sub ¶i¶¥µüÀW1() '2002/11/15­nSub¤~¯à¦bWord¤¤°õ¦æ!
     d.docmd.OpenTable "µüÀWªí", , d.acReadOnly
     d.docmd.Maximize
     rst.Close: db.Close: Set d = Nothing
-    Options.SaveInterval = 10 '«ì´_¦Û°ÊÀx¦s
+    options.SaveInterval = 10 '«ì´_¦Û°ÊÀx¦s
     End '¥ÎExit SubµLªk¨C¦¸Ãö³¬Access
 ¿ù»~³B²z:
     Select Case Err.Number '¥D¯Á¤Þ­È­«½Æ
@@ -510,7 +510,7 @@ Sub «ü©w¦r¼ÆµüÀW() '2002/11/11
     phralh = InputBox("½Ð¥Îªü©Ô§B¼Æ¦r«ü©wµüªº²Õ¦¨¦r¼Æ,³Ì¦h¦r¼Æ¬°¡u11¡v!", "«ü©wµü·J¦r¼Æ", "2")
     If phralh = "" Or Not IsNumeric(phralh) Then Exit Sub
     If CByte(phralh) > 11 Or CByte(phralh) < 1 Then Exit Sub
-    Options.SaveInterval = 0 '¨ú®ø¦Û°ÊÀx¦s
+    options.SaveInterval = 0 '¨ú®ø¦Û°ÊÀx¦s
     Set d = CreateObject("access.application")
     d.UserControl = True
     d.OpenCurrentDatabase "d:\¤d¼{¤@±oÂN\®ÑÄy¸ê®Æ\µüÀW.mdb", False
@@ -626,7 +626,7 @@ Sub «ü©w¦r¼ÆµüÀW() '2002/11/11
     d.docmd.OpenTable "µüÀWªí", , d.acReadOnly
     d.docmd.Maximize
     rst.Close: db.Close: Set d = Nothing
-    Options.SaveInterval = 10 '«ì´_¦Û°ÊÀx¦s
+    options.SaveInterval = 10 '«ì´_¦Û°ÊÀx¦s
     End '¥ÎExit SubµLªk¨C¦¸Ãö³¬Access
 ¿ù»~³B²z:
     Select Case Err.Number '¥D¯Á¤Þ­È­«½Æ
@@ -648,7 +648,7 @@ Sub «ü©w11¦r¼ÆµüÀW()     '2002/11/15'¥H¦¹¬°¨Ò,¥i§@¬°¹w¥ý­­©w¦r¼Æªº¦U­Óµ{§Ç(¥»¨Ò¬
     'phralh = InputBox("½Ð¥Îªü©Ô§B¼Æ¦r«ü©wµüªº²Õ¦¨¦r¼Æ,³Ì¦h¦r¼Æ¬°¡u11¡v!", "«ü©wµü·J¦r¼Æ", "2")
     'If phralh = "" Or Not IsNumeric(phralh) Then Exit Sub
     'If CByte(phralh) > 11 Or CByte(phralh) < 1 Then Exit Sub
-    Options.SaveInterval = 0 '¨ú®ø¦Û°ÊÀx¦s
+    options.SaveInterval = 0 '¨ú®ø¦Û°ÊÀx¦s
     Set d = CreateObject("access.application")
     d.UserControl = True
     d.OpenCurrentDatabase "d:\¤d¼{¤@±oÂN\®ÑÄy¸ê®Æ\µüÀW.mdb", False
@@ -712,7 +712,7 @@ Sub «ü©w11¦r¼ÆµüÀW()     '2002/11/15'¥H¦¹¬°¨Ò,¥i§@¬°¹w¥ý­­©w¦r¼Æªº¦U­Óµ{§Ç(¥»¨Ò¬
     d.docmd.OpenTable "µüÀWªí", , d.acReadOnly
     d.docmd.Maximize
     rst.Close: db.Close: Set d = Nothing
-    Options.SaveInterval = 10 '«ì´_¦Û°ÊÀx¦s
+    options.SaveInterval = 10 '«ì´_¦Û°ÊÀx¦s
     End '¥ÎExit SubµLªk¨C¦¸Ãö³¬Access
 ¿ù»~³B²z:
     Select Case Err.Number '¥D¯Á¤Þ­È­«½Æ
@@ -731,7 +731,7 @@ Sub «ü©w10¦r¼ÆµüÀW() '2002/11/15
     Dim wrong As Long, phra As Long, phras As String, phralh As String
     Dim StTime As Date, EndTime As Date
     Dim hfspace As Long
-    Options.SaveInterval = 0 '¨ú®ø¦Û°ÊÀx¦s
+    options.SaveInterval = 0 '¨ú®ø¦Û°ÊÀx¦s
     Set d = CreateObject("access.application")
     d.UserControl = True
     d.OpenCurrentDatabase "d:\¤d¼{¤@±oÂN\®ÑÄy¸ê®Æ\µüÀW.mdb", False
@@ -794,7 +794,7 @@ Sub «ü©w10¦r¼ÆµüÀW() '2002/11/15
     d.docmd.OpenTable "µüÀWªí", , d.acReadOnly
     d.docmd.Maximize
     rst.Close: db.Close: Set d = Nothing
-    Options.SaveInterval = 10 '«ì´_¦Û°ÊÀx¦s
+    options.SaveInterval = 10 '«ì´_¦Û°ÊÀx¦s
     End '¥ÎExit SubµLªk¨C¦¸Ãö³¬Access
 ¿ù»~³B²z:
     Select Case Err.Number '¥D¯Á¤Þ­È­«½Æ
@@ -814,7 +814,7 @@ Sub «ü©w9¦r¼ÆµüÀW()  '2002/11/15
     Dim wrong As Long, phra As Long, phras As String, phralh As String
     Dim StTime As Date, EndTime As Date
     Dim hfspace As Long
-    Options.SaveInterval = 0 '¨ú®ø¦Û°ÊÀx¦s
+    options.SaveInterval = 0 '¨ú®ø¦Û°ÊÀx¦s
     Set d = CreateObject("access.application")
     d.UserControl = True
     d.OpenCurrentDatabase "d:\¤d¼{¤@±oÂN\®ÑÄy¸ê®Æ\µüÀW.mdb", False
@@ -877,7 +877,7 @@ Sub «ü©w9¦r¼ÆµüÀW()  '2002/11/15
     d.docmd.OpenTable "µüÀWªí", , d.acReadOnly
     d.docmd.Maximize
     rst.Close: db.Close: Set d = Nothing
-    Options.SaveInterval = 10 '«ì´_¦Û°ÊÀx¦s
+    options.SaveInterval = 10 '«ì´_¦Û°ÊÀx¦s
     End '¥ÎExit SubµLªk¨C¦¸Ãö³¬Access
 ¿ù»~³B²z:
     Select Case Err.Number '¥D¯Á¤Þ­È­«½Æ
@@ -898,7 +898,7 @@ Sub «ü©w8¦r¼ÆµüÀW()   '2002/11/15
     Dim wrong As Long, phra As Long, phras As String, phralh As String
     Dim StTime As Date, EndTime As Date
     Dim hfspace As Long
-    Options.SaveInterval = 0 '¨ú®ø¦Û°ÊÀx¦s
+    options.SaveInterval = 0 '¨ú®ø¦Û°ÊÀx¦s
     Set d = CreateObject("access.application")
     d.UserControl = True
     d.OpenCurrentDatabase "d:\¤d¼{¤@±oÂN\®ÑÄy¸ê®Æ\µüÀW.mdb", False
@@ -960,7 +960,7 @@ Sub «ü©w8¦r¼ÆµüÀW()   '2002/11/15
     d.docmd.OpenTable "µüÀWªí", , d.acReadOnly
     d.docmd.Maximize
     rst.Close: db.Close: Set d = Nothing
-    Options.SaveInterval = 10 '«ì´_¦Û°ÊÀx¦s
+    options.SaveInterval = 10 '«ì´_¦Û°ÊÀx¦s
     End '¥ÎExit SubµLªk¨C¦¸Ãö³¬Access
 ¿ù»~³B²z:
     Select Case Err.Number '¥D¯Á¤Þ­È­«½Æ
@@ -980,7 +980,7 @@ Sub «ü©w6¦r¼ÆµüÀW()    '2002/11/15
     Dim wrong As Long, phra As Long, phras As String, phralh As String
     Dim StTime As Date, EndTime As Date
     Dim hfspace As Long
-    Options.SaveInterval = 0 '¨ú®ø¦Û°ÊÀx¦s
+    options.SaveInterval = 0 '¨ú®ø¦Û°ÊÀx¦s
     Set d = CreateObject("access.application")
     d.UserControl = True
     d.OpenCurrentDatabase "d:\¤d¼{¤@±oÂN\®ÑÄy¸ê®Æ\µüÀW.mdb", False
@@ -1041,7 +1041,7 @@ Sub «ü©w6¦r¼ÆµüÀW()    '2002/11/15
     d.docmd.OpenTable "µüÀWªí", , d.acReadOnly
     d.docmd.Maximize
     rst.Close: db.Close: Set d = Nothing
-    Options.SaveInterval = 10 '«ì´_¦Û°ÊÀx¦s
+    options.SaveInterval = 10 '«ì´_¦Û°ÊÀx¦s
     End '¥ÎExit SubµLªk¨C¦¸Ãö³¬Access
 ¿ù»~³B²z:
     Select Case Err.Number '¥D¯Á¤Þ­È­«½Æ
@@ -1061,7 +1061,7 @@ Sub «ü©w5¦r¼ÆµüÀW()     '2002/11/15
     Dim wrong As Long, phra As Long, phras As String, phralh As String
     Dim StTime As Date, EndTime As Date
     Dim hfspace As Long
-    Options.SaveInterval = 0 '¨ú®ø¦Û°ÊÀx¦s
+    options.SaveInterval = 0 '¨ú®ø¦Û°ÊÀx¦s
     Set d = CreateObject("access.application")
     d.UserControl = True
     d.OpenCurrentDatabase "d:\¤d¼{¤@±oÂN\®ÑÄy¸ê®Æ\µüÀW.mdb", False
@@ -1122,7 +1122,7 @@ Sub «ü©w5¦r¼ÆµüÀW()     '2002/11/15
     d.docmd.OpenTable "µüÀWªí", , d.acReadOnly
     d.docmd.Maximize
     rst.Close: db.Close: Set d = Nothing
-    Options.SaveInterval = 10 '«ì´_¦Û°ÊÀx¦s
+    options.SaveInterval = 10 '«ì´_¦Û°ÊÀx¦s
     End '¥ÎExit SubµLªk¨C¦¸Ãö³¬Access
 ¿ù»~³B²z:
     Select Case Err.Number '¥D¯Á¤Þ­È­«½Æ
@@ -1141,7 +1141,7 @@ Sub «ü©w4¦r¼ÆµüÀW()       '2002/11/15
     Dim wrong As Long, phra As Long, phras As String, phralh As String
     Dim StTime As Date, EndTime As Date
     Dim hfspace As Long
-    Options.SaveInterval = 0 '¨ú®ø¦Û°ÊÀx¦s
+    options.SaveInterval = 0 '¨ú®ø¦Û°ÊÀx¦s
     Set d = CreateObject("access.application")
     d.UserControl = True
     d.OpenCurrentDatabase "d:\¤d¼{¤@±oÂN\®ÑÄy¸ê®Æ\µüÀW.mdb", False
@@ -1201,7 +1201,7 @@ Sub «ü©w4¦r¼ÆµüÀW()       '2002/11/15
     d.docmd.OpenTable "µüÀWªí", , d.acReadOnly
     d.docmd.Maximize
     rst.Close: db.Close: Set d = Nothing
-    Options.SaveInterval = 10 '«ì´_¦Û°ÊÀx¦s
+    options.SaveInterval = 10 '«ì´_¦Û°ÊÀx¦s
     End '¥ÎExit SubµLªk¨C¦¸Ãö³¬Access
 ¿ù»~³B²z:
     Select Case Err.Number '¥D¯Á¤Þ­È­«½Æ
@@ -1221,7 +1221,7 @@ Sub «ü©w3¦r¼ÆµüÀW()      '2002/11/15
     Dim wrong As Long, phra As Long, phras As String, phralh As String
     Dim StTime As Date, EndTime As Date
     Dim hfspace As Long
-    Options.SaveInterval = 0 '¨ú®ø¦Û°ÊÀx¦s
+    options.SaveInterval = 0 '¨ú®ø¦Û°ÊÀx¦s
     Set d = CreateObject("access.application")
     d.UserControl = True
     d.OpenCurrentDatabase "d:\¤d¼{¤@±oÂN\®ÑÄy¸ê®Æ\µüÀW.mdb", False
@@ -1281,7 +1281,7 @@ Sub «ü©w3¦r¼ÆµüÀW()      '2002/11/15
     d.docmd.OpenTable "µüÀWªí", , d.acReadOnly
     d.docmd.Maximize
     rst.Close: db.Close: Set d = Nothing
-    Options.SaveInterval = 10 '«ì´_¦Û°ÊÀx¦s
+    options.SaveInterval = 10 '«ì´_¦Û°ÊÀx¦s
     End '¥ÎExit SubµLªk¨C¦¸Ãö³¬Access
 ¿ù»~³B²z:
     Select Case Err.Number '¥D¯Á¤Þ­È­«½Æ
@@ -1301,7 +1301,7 @@ Sub «ü©w2¦r¼ÆµüÀW()       '2002/11/15
     Dim wrong As Long, phra As Long, phras As String, phralh As String
     Dim StTime As Date, EndTime As Date
     Dim hfspace As Long
-    Options.SaveInterval = 0 '¨ú®ø¦Û°ÊÀx¦s
+    options.SaveInterval = 0 '¨ú®ø¦Û°ÊÀx¦s
     Set d = CreateObject("access.application")
     d.UserControl = True
     d.OpenCurrentDatabase "d:\¤d¼{¤@±oÂN\®ÑÄy¸ê®Æ\µüÀW.mdb", False
@@ -1360,7 +1360,7 @@ Sub «ü©w2¦r¼ÆµüÀW()       '2002/11/15
     d.docmd.OpenTable "µüÀWªí", , d.acReadOnly
     d.docmd.Maximize
     rst.Close: db.Close: Set d = Nothing
-    Options.SaveInterval = 10 '«ì´_¦Û°ÊÀx¦s
+    options.SaveInterval = 10 '«ì´_¦Û°ÊÀx¦s
     End '¥ÎExit SubµLªk¨C¦¸Ãö³¬Access
 ¿ù»~³B²z:
     Select Case Err.Number '¥D¯Á¤Þ­È­«½Æ
@@ -1380,7 +1380,7 @@ Sub «ü©w1¦r¼ÆµüÀW()        '2002/11/15
     Dim wrong As Long, phra As Long, phras As String, phralh As String
     Dim StTime As Date, EndTime As Date
     Dim hfspace As Long
-    Options.SaveInterval = 0 '¨ú®ø¦Û°ÊÀx¦s
+    options.SaveInterval = 0 '¨ú®ø¦Û°ÊÀx¦s
     Set d = CreateObject("access.application")
     d.UserControl = True
     d.OpenCurrentDatabase "d:\¤d¼{¤@±oÂN\®ÑÄy¸ê®Æ\µüÀW.mdb", False
@@ -1438,7 +1438,7 @@ Sub «ü©w1¦r¼ÆµüÀW()        '2002/11/15
     d.docmd.OpenTable "µüÀWªí", , d.acReadOnly
     d.docmd.Maximize
     rst.Close: db.Close: Set d = Nothing
-    Options.SaveInterval = 10 '«ì´_¦Û°ÊÀx¦s
+    options.SaveInterval = 10 '«ì´_¦Û°ÊÀx¦s
     End '¥ÎExit SubµLªk¨C¦¸Ãö³¬Access
 ¿ù»~³B²z:
     Select Case Err.Number '¥D¯Á¤Þ­È­«½Æ
@@ -1461,7 +1461,7 @@ Sub «ü©w7¦r¼ÆµüÀW()      '2002/11/15'¥H¦¹¬°¨Ò,¥i§@¬°¹w¥ý­­©w¦r¼Æªº¦U­Óµ{§Ç(¥»¨Ò¬
     'phralh = InputBox("½Ð¥Îªü©Ô§B¼Æ¦r«ü©wµüªº²Õ¦¨¦r¼Æ,³Ì¦h¦r¼Æ¬°¡u11¡v!", "«ü©wµü·J¦r¼Æ", "2")
     'If phralh = "" Or Not IsNumeric(phralh) Then Exit Sub
     'If CByte(phralh) > 11 Or CByte(phralh) < 1 Then Exit Sub
-    Options.SaveInterval = 0 '¨ú®ø¦Û°ÊÀx¦s
+    options.SaveInterval = 0 '¨ú®ø¦Û°ÊÀx¦s
     Set d = CreateObject("access.application")
     d.UserControl = True
     d.OpenCurrentDatabase "d:\¤d¼{¤@±oÂN\®ÑÄy¸ê®Æ\µüÀW.mdb", False
@@ -1523,7 +1523,7 @@ Sub «ü©w7¦r¼ÆµüÀW()      '2002/11/15'¥H¦¹¬°¨Ò,¥i§@¬°¹w¥ý­­©w¦r¼Æªº¦U­Óµ{§Ç(¥»¨Ò¬
     d.docmd.OpenTable "µüÀWªí", , d.acReadOnly
     d.docmd.Maximize
     rst.Close: db.Close: Set d = Nothing
-    Options.SaveInterval = 10 '«ì´_¦Û°ÊÀx¦s
+    options.SaveInterval = 10 '«ì´_¦Û°ÊÀx¦s
     End '¥ÎExit SubµLªk¨C¦¸Ãö³¬Access
 ¿ù»~³B²z:
     Select Case Err.Number '¥D¯Á¤Þ­È­«½Æ
@@ -1546,7 +1546,7 @@ Sub «ü©w¦r¼ÆµüÀW1() '2002/11/15'®Ä¯à¸ûºC!
     phralh = InputBox("½Ð¥Îªü©Ô§B¼Æ¦r«ü©wµüªº²Õ¦¨¦r¼Æ,³Ì¦h¦r¼Æ¬°¡u255¡v!", "«ü©wµü·J¦r¼Æ", "2")
     If phralh = "" Or Not IsNumeric(phralh) Then Exit Sub
     If CByte(phralh) > 255 Or CByte(phralh) < 1 Then Exit Sub
-    Options.SaveInterval = 0 '¨ú®ø¦Û°ÊÀx¦s
+    options.SaveInterval = 0 '¨ú®ø¦Û°ÊÀx¦s
     Set d = CreateObject("access.application")
     d.UserControl = True
     d.OpenCurrentDatabase "d:\¤d¼{¤@±oÂN\®ÑÄy¸ê®Æ\µüÀW.mdb", False
@@ -1618,7 +1618,7 @@ Sub «ü©w¦r¼ÆµüÀW1() '2002/11/15'®Ä¯à¸ûºC!
     d.docmd.OpenTable "µüÀWªí", , d.acReadOnly
     d.docmd.Maximize
     rst.Close: db.Close: Set d = Nothing
-    Options.SaveInterval = 10 '«ì´_¦Û°ÊÀx¦s
+    options.SaveInterval = 10 '«ì´_¦Û°ÊÀx¦s
     End '¥ÎExit SubµLªk¨C¦¸Ãö³¬Access
 ¿ù»~³B²z:
     Select Case Err.Number '¥D¯Á¤Þ­È­«½Æ
@@ -1641,7 +1641,7 @@ Sub «ü©w¦r¼ÆµüÀW2() '2002/11/15®Ä¯à»P­ì³]­p®t¤£¦h,¦ý¥iÅÜ¼Æ¤Æ!
     phralh = InputBox("½Ð¥Îªü©Ô§B¼Æ¦r«ü©wµüªº²Õ¦¨¦r¼Æ,³Ì¦h¦r¼Æ¬°¡u255¡v!", "«ü©wµü·J¦r¼Æ", "2")
     If phralh = "" Or Not IsNumeric(phralh) Then Exit Sub
     If CByte(phralh) > 255 Or CByte(phralh) < 1 Then Exit Sub
-    Options.SaveInterval = 0 '¨ú®ø¦Û°ÊÀx¦s
+    options.SaveInterval = 0 '¨ú®ø¦Û°ÊÀx¦s
     Set d = CreateObject("access.application")
     d.UserControl = True
     d.OpenCurrentDatabase "d:\¤d¼{¤@±oÂN\®ÑÄy¸ê®Æ\µüÀW.mdb", False
@@ -1709,7 +1709,7 @@ Sub «ü©w¦r¼ÆµüÀW2() '2002/11/15®Ä¯à»P­ì³]­p®t¤£¦h,¦ý¥iÅÜ¼Æ¤Æ!
     d.docmd.OpenTable "µüÀWªí", , d.acReadOnly
     d.docmd.Maximize
     rst.Close: db.Close: Set d = Nothing
-    Options.SaveInterval = 10 '«ì´_¦Û°ÊÀx¦s
+    options.SaveInterval = 10 '«ì´_¦Û°ÊÀx¦s
     End '¥ÎExit SubµLªk¨C¦¸Ãö³¬Access
 ¿ù»~³B²z:
     Select Case Err.Number '¥D¯Á¤Þ­È­«½Æ
@@ -1893,7 +1893,7 @@ ErrH:
 End Sub
 
 Function UppercaeEnglishLetter() '­^¤å¤j¼g¦r¥À
-    Dim wd, wdct As Long, i As Byte
+    Dim WD, wdct As Long, i As Byte
     For i = 65 To 90
         Debug.Print VBA.Chr(i) & vbCr
     Next
@@ -2081,30 +2081,30 @@ Next ch
 End Sub
 
 Sub ª`¸}²Å¸¹¸m´«() '2004/10/17
-Dim wd As Range 'As Range 'Wordsª«¥ó§Yªí¤@­ÓRangeª«¥ó,¨£½u¤W»¡©ú!
+Dim WD As Range 'As Range 'Wordsª«¥ó§Yªí¤@­ÓRangeª«¥ó,¨£½u¤W»¡©ú!
 'Dim i As Long ' Integer
 '­n¥ý°õ¦æ¥þ§ÎÂà¥b§Î,³o¼Ëwords¤~¯à¥¿½T§PÂ_¬°¼Æ¦r
 ¥þ§Î¼Æ¦rÂà´«¦¨¥b§Î¼Æ¦r
 With Selection '­ì¥H¾ã¥÷¤å¥ó(ActiveDocument),¤µ¦ý¥H¿ï¨ú½d³ò¾ã²z,¦ý¦]§ó§ï­È¦Ó¼vÅT,§@¼o!
     If .Type = wdSelectionIP Then .Document.Select '¦pªG¨S¦³¿ï¨ú½d³ò(¬°´¡¤JÂI)«h³B²z¾ã¥÷¤å¥ó
     If .Document.path = "" Then
-        For Each wd In .words
+        For Each WD In .words
             '­n¬O¼Æ¦r¥B«e«á¤£¯à¥[¡£¡¤©Î¡e¡f¤~°õ¦æ¡I
-            If Not wd.text Like "¡£" And Not wd.text Like "¡e" And Not wd Like "[[]" And Not wd Like "[]]" Then
-                If IsNumeric(wd) Then
-                    If wd.End = .Document.Content.StoryLength Or wd.start = 0 Then GoTo w '¤å¥ó¤§­º§À¥t¥~³B²z
-                    If Not wd.Previous Like "¡£" And Not wd.Previous Like "¡e" And Not wd.Previous Like "[[]" _
-                        And Not wd.Next Like "¡¤" And Not wd.Next Like "¡f" And Not wd.Next Like "]" Then
-w:                      If wd <= 20 Then 'Arial Unicode MS[ºØÃþ]¸Ì"¬A¸¹¤å¼Æ¦r"¥u¦³¤G¤Q­Ó!
-                            With wd
+            If Not WD.text Like "¡£" And Not WD.text Like "¡e" And Not WD Like "[[]" And Not WD Like "[]]" Then
+                If IsNumeric(WD) Then
+                    If WD.End = .Document.Content.StoryLength Or WD.start = 0 Then GoTo w '¤å¥ó¤§­º§À¥t¥~³B²z
+                    If Not WD.Previous Like "¡£" And Not WD.Previous Like "¡e" And Not WD.Previous Like "[[]" _
+                        And Not WD.Next Like "¡¤" And Not WD.Next Like "¡f" And Not WD.Next Like "]" Then
+w:                      If WD <= 20 Then 'Arial Unicode MS[ºØÃþ]¸Ì"¬A¸¹¤å¼Æ¦r"¥u¦³¤G¤Q­Ó!
+                            With WD
                                 '¿ï¨ú·|§ïÅÜSelectionªº½d³ò,¬G¤µ¨ú®ø!
 '                                .Select 'Wordsª«¥ó§Yªí¤@­ÓRangeª«¥ó,¨£½u¤W»¡©ú!
                                 .font.Name = "Arial Unicode MS"
-                                wd.text = VBA.ChrW((9312 - 1) + wd)
+                                WD.text = VBA.ChrW((9312 - 1) + WD)
                             End With
                         Else '¶W¹L20¸¹ªºµù¸}®É
-                            With wd
-                                .text = "¡£" & wd.text & "¡¤" '¥[¬A¸¹
+                            With WD
+                                .text = "¡£" & WD.text & "¡¤" '¥[¬A¸¹
                             End With
         '                    MsgBox "¦³¶W¹L20¸¹ªºµù¸},¤£¯à°õ¦æ¡I", vbCritical
         '                    Do Until .Undo(i) = False 'ÁÙ­ìª½¦Ü¤£¯àÁÙ­ì¡]ÁÙ­ì©Ò¦³°Ê§@¡^
@@ -3137,27 +3137,36 @@ Sub º~Äy¹q¤l¤åÄm¸ê®Æ®w¤å¥»¾ã²z_ª`¤å«e«á¥[¬A¸¹() '³Ì«á°õ¦æ Docs.mark©ö¾ÇÃöÁä¦r(¦b
             '¶K¤W¤§«á¥Ñ¨ä¶K¨ì¤å¥ó¥½ºÝ¡B¤S¹w¯d¤@¨Ç¤À¬q²Å¸¹¦¹¤@¯S¼x¡A¥i¥H§ì¨ì¶K¤WªºRange
                 pasteAppendedRange.End = d.Range.End
                 pasteAppendedRange.Select '¦]¬°°e¥æ¦Û°Ê¼ÐÂIµ{§Ç¤º¦³ Selection.Cut
+                
+'                Stop 'just for test
+                Network.Åª¤J¥jÄy»Å¦Û°Ê¼ÐÂIµ²ªG
+                Docs.marking©ö¾ÇÃöÁä¦r pasteAppendedRange, Keywords.©ö¾ÇKeywords_ToMark
+                SystemSetup.playSound 2
+                Rem ¥H¤U¬°ÂÂ¦¡
                 '¥H¤Uµ{§Ç¤º¤w¦³ mark©ö¾ÇÃöÁä¦r ¬G
-                If TextForCtext.TextForCtextExist Then
-                    pasteAppendedRange.Cut
-                    DoEvents
-                    'SystemSetup.wait
-                    If TextForCtext.GjcoolPunct() Then
-                        '¦]¬°¦b¤å¥óªº³Ì¥½ºÝ
-                        pasteAppendedRange.SetRange pasteAppendedRange.End - 1, pasteAppendedRange.End - 1
-                        pasteAppendedRange.text = SystemSetup.GetClipboard
-                        DoEvents
-                        SystemSetup.wait 0.1
-                        Docs.marking©ö¾ÇÃöÁä¦r pasteAppendedRange, Keywords.©ö¾ÇKeywords_ToMark
-                        SystemSetup.playSound 2
-                    Else
-                        word.Application.Activate
-                        MsgBox "µo¥Í¿ù»~¡A½Ð­«¸Õ¡I", vbCritical
-                        GoTo finish
-                    End If
-                Else
-                    Docs.¤¤°ê­õ¾Ç®Ñ¹q¤l¤Æ­p¹º_¥u«O¯d¥¿¤åª`¤å_¥Bª`¤å«e«á¥[¬A©·_¶K¨ì¥jÄy»Å¦Û°Ê¼ÐÂI
-                End If
+                
+'                If TextForCtext.TextForCtextExist Then
+'                    pasteAppendedRange.Cut
+'                    DoEvents
+'                    'SystemSetup.wait
+'                    If TextForCtext.GjcoolPunct() Then
+'                        '¦]¬°¦b¤å¥óªº³Ì¥½ºÝ
+'                        pasteAppendedRange.SetRange pasteAppendedRange.End - 1, pasteAppendedRange.End - 1
+'                        pasteAppendedRange.text = SystemSetup.GetClipboard
+'                        DoEvents
+'                        SystemSetup.wait 0.1
+'                        Docs.marking©ö¾ÇÃöÁä¦r pasteAppendedRange, Keywords.©ö¾ÇKeywords_ToMark
+'                        SystemSetup.playSound 2
+'                    Else
+'                        word.Application.Activate
+'                        MsgBox "µo¥Í¿ù»~¡A½Ð­«¸Õ¡I", vbCritical
+'                        GoTo finish
+'                    End If
+'                Else
+'                    Docs.¤¤°ê­õ¾Ç®Ñ¹q¤l¤Æ­p¹º_¥u«O¯d¥¿¤åª`¤å_¥Bª`¤å«e«á¥[¬A©·_¶K¨ì¥jÄy»Å¦Û°Ê¼ÐÂI
+'                End If
+                Rem ¥H¤W¬°ÂÂ¦¡
+
                 pasteAppendedRange.InsertParagraphAfter
                 pasteAppendedRange.InsertParagraphAfter
                 pasteAppendedRange.InsertParagraphAfter

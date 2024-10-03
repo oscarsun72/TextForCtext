@@ -464,7 +464,9 @@ Sub 讀入古籍酷自動標點結果()
     Rem 書名號、引號之處理
     result = VBA.Replace(VBA.Replace(result, "《", "〔"), "》", "〕") '書名號亦會被自動標點清除故,以備還原 20241001
     result = VBA.Replace(VBA.Replace(result, "「", "〔"), "」", "〕") '引號亦會被自動標點清除故,以備還原 20241001
-    SeleniumOP.grabGjCoolPunctResult result, result
+    
+    SeleniumOP.grabGjCoolPunctResult result, result, False
+    
     Selection.Document.Activate
     Selection.Document.Application.Activate
     Rem 書名號、引號之處理

@@ -117,15 +117,25 @@ Enum SurrogateCodePoint 'https://zhuanlan.zhihu.com/p/147339588
     LowStart = &HDC00 'https://zh.wikipedia.org/zh-tw/UTF-16
     LowEnd = &HDFFF
 End Enum
-'20240106 StackOverflow AI & Bing大菩薩:建置C#程式庫成dll檔案
-Public Function UrlEncode(ByRef szString As String) As String
-    If InStr(szString, "%") Then UrlEncode = szString: Exit Function
-    Dim encoder As New UrlEncodingDLL.UrlEncoder
-    Dim encodedUrl As String
-    encodedUrl = encoder.UrlEncode(szString) ' Chinese text
-    'Debug.Print encodedUrl ' Output: "%E4%BD%A0%E5%A5%BD%E4%B8%96%E7%95%8C"
-    UrlEncode = encodedUrl
+Rem 20240106 StackOverflow ai & Bing大菩薩: 建置C# 程式庫成dll檔案
+Rem 須【設定引用項目】UrlEncodingDLL.tlb
+Public Function UrlEncode_建置CSharp程式庫成dll檔案者(ByRef szString As String) As String
+'    If InStr(szString, "%") Then UrlEncode_建置CSharp程式庫成dll檔案者 = szString: Exit Function
+'    Dim encoder As New UrlEncodingDLL.UrlEncoder
+'    Dim encodedUrl As String
+'    encodedUrl = encoder.UrlEncode(szString) ' Chinese text
+'    'Debug.Print encodedUrl ' Output: "%E4%BD%A0%E5%A5%BD%E4%B8%96%E7%95%8C"
+'    UrlEncode_建置CSharp程式庫成dll檔案者 = encodedUrl
 End Function
+Rem 20241003 Copilot大菩薩：https://sl.bing.net/jCIXUMLIFTE
+Rem VBA URL Encoding Issue ： https://sl.bing.net/ctZR9HBRFBc ： 看來 CreateObject("HTMLFile").parentWindow.encodeURIComponent(szString) 這行在 VBA 中可能會出現物件不支援此屬性或方法的錯誤。這是因為 VBA 中的 CreateObject("HTMLFile") 無法正確地創建 HTML 文件對象。
+Public Function UrlEncode(ByRef szString As String) As String
+    Dim scriptControl As Object
+    Set scriptControl = CreateObject("MSScriptControl.ScriptControl")
+    scriptControl.Language = "JScript"
+    UrlEncode = scriptControl.Eval("encodeURIComponent('" & szString & "')") '在 VBA 中使用 JavaScript 的 encodeURIComponent 方法來進行 URL 編碼了。
+End Function
+
 
 
 Public Function UrlEncode_Big5UnicodOLNLY(ByRef szString As String) As String '以下函數可以編碼中文的URL： VBA與Unicode Ansi URL編碼解碼等相關的代碼集錦 - 成功需要自律的文章 - 知乎 https://zhuanlan.zhihu.com/p/435181691

@@ -347,6 +347,7 @@ reStart:
             .AddArgument "--disable-dev-shm-usage"
             '.AddArgument "--start-maximized"
             '.DebuggerAddress = "127.0.0.1:9999" '不要与其他几個混用
+'            .AddArgument "--remote-debugging-port=9222"
         End With
         WD.New_ChromeDriver Service:=Service, options:=options
         'WD.Quit 會自動清除chromedriver，就不用記下開過哪些了
@@ -356,7 +357,8 @@ reStart:
 '            chromedriversPID(chromedriversPIDcntr) = pid
 '            chromedriversPIDcntr = chromedriversPIDcntr + 1
 '        End If
-
+        
+'        OpenNewTab WD
         WD.url = url
         Set openChromeBackground = WD
     
@@ -1915,15 +1917,24 @@ Function grabGjCoolPunctResult(text As String, resultText As String, Optional Ba
     If Background Then
         Rem 隱藏
         Set wdB = openChromeBackground(url)
-        WBQuit = True '因為在背景執行，預設要可以關
+        WBQuit = True '因為在背景執行，預設要可以關'現在用 .AddArgument "--remote-debugging-port=9222"  兼容於其他所開啟者，故不必再背景了 20241003
         If wdB Is Nothing Then
             If WD Is Nothing Then OpenChrome ("https://gj.cool/punct")
             Set wdB = WD
         End If
     Else
         Rem 顯示
-        If WD Is Nothing Then OpenChrome ("https://gj.cool/punct")
+        If WD Is Nothing Then
+            OpenChrome ("https://gj.cool/punct")
+        Else
+            If IsWDInvalid(WD) Then
+                OpenNewTab WD
+            Else
+                Stop 'just for test
+            End If
+        End If
         Set wdB = WD
+        
     End If
     If wdB Is Nothing Then Exit Function
     If wdB.url <> url Then wdB.Navigate.GoToUrl url
