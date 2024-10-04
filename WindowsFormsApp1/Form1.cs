@@ -8479,18 +8479,40 @@ namespace WindowsFormsApp1
         /// </summary>
         private void bringBackMousePosFrmCenter()
         {
-            BringToFront();
-            Activate(); //Application.DoEvents();
-                        //if (!this.TopMost) this.TopMost = true;
+            if (this.InvokeRequired)
+            {
+                this.Invoke((MethodInvoker)delegate
+                {
+                    // 你的程式碼
+                    BringToFront();
+                    Activate(); //Application.DoEvents();
+                                //if (!this.TopMost) this.TopMost = true;
 
-            // 判斷滑鼠游標是否在表單內 20230824Bing大菩薩
-            if (this.Bounds.Contains(Cursor.Position)) return;
-            //20230115 chatGPT大菩薩：Cursor back to form：
-            Point formPos = new Point(this.Location.X + this.Size.Width / 2, this.Location.Y + this.Size.Height / 2);
-            Cursor.Position = formPos;
-            //上面這段程式碼將滑鼠游標的位置設置為表單的中心點位置。
-            //Point cursorPos = Cursor.Position;
-            //this.Location = cursorPos;
+                    // 判斷滑鼠游標是否在表單內 20230824Bing大菩薩
+                    if (this.Bounds.Contains(Cursor.Position)) return;
+                    //20230115 chatGPT大菩薩：Cursor back to form：
+                    Point formPos = new Point(this.Location.X + this.Size.Width / 2, this.Location.Y + this.Size.Height / 2);
+                    Cursor.Position = formPos;
+                    //上面這段程式碼將滑鼠游標的位置設置為表單的中心點位置。
+                    //Point cursorPos = Cursor.Position;
+                    //this.Location = cursorPos;
+                });
+            }
+            else
+            {
+                BringToFront();
+                Activate(); //Application.DoEvents();
+                            //if (!this.TopMost) this.TopMost = true;
+
+                // 判斷滑鼠游標是否在表單內 20230824Bing大菩薩
+                if (this.Bounds.Contains(Cursor.Position)) return;
+                //20230115 chatGPT大菩薩：Cursor back to form：
+                Point formPos = new Point(this.Location.X + this.Size.Width / 2, this.Location.Y + this.Size.Height / 2);
+                Cursor.Position = formPos;
+                //上面這段程式碼將滑鼠游標的位置設置為表單的中心點位置。
+                //Point cursorPos = Cursor.Position;
+                //this.Location = cursorPos;
+            }
         }
 
         bool autoPasteFromSBCKwhether = false;
@@ -8870,7 +8892,7 @@ namespace WindowsFormsApp1
                 }
                 if (e.KeyCode == Keys.R)
                 {//Ctrl + Alt + r :將如《趙城金藏》3欄式的版面書圖《古籍酷》AI服務OCR結果重新排列 
-                    //if (browsrOPMode == BrowserOPMode.appActivateByName) return;
+                 //if (browsrOPMode == BrowserOPMode.appActivateByName) return;
                     e.Handled = true; Form1.playSound(Form1.soundLike.press);
                     string x = textBox1.Text;
                     undoRecord();
@@ -9118,7 +9140,7 @@ namespace WindowsFormsApp1
 
                 if (e.KeyCode == Keys.D1)
                 {//Ctrl + 1 ：執行 Word VBA Sub 巨集指令「漢籍電子文獻資料庫文本整理_以轉貼到中國哲學書電子化計劃」【 附件即有 [Word VBA](https://github.com/oscarsun72/TextForCtext/tree/master/WordVBA) 相關模組 】
-                    //現在少用，故以此機制防制：
+                 //現在少用，故以此機制防制：
                     if (DialogResult.OK == Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("執行「漢籍電子文獻資料庫文本整理_以轉貼到中國哲學書電子化計劃」？"))
                         runWordMacro("漢籍電子文獻資料庫文本整理_以轉貼到中國哲學書電子化計劃");
                     e.Handled = true; return;
@@ -9580,7 +9602,7 @@ namespace WindowsFormsApp1
                 if (DialogResult.Cancel == MessageBoxShowOKCancelExclamationDefaultDesktopOnly("字數太少！碇定要送去《古籍酷》自動標點？", "《古籍酷》自動標點", true, MessageBoxDefaultButton.Button2))
                     return false;
             TopMost = false; int s = textBox1.SelectionStart;//,l=textBox1.SelectionLength;
-            //舊版會破壞"<p>"記號，故先予清除，之後可用軟件中標識<p>的功能補諸20240809(或有空時再學昨天恢復分段符號的方法 RestoreParagraphs ，只是這次不是分段符號，而是分段記號（<p>），或將之擴展為傳入指定字符作為引數）。
+                                                             //舊版會破壞"<p>"記號，故先予清除，之後可用軟件中標識<p>的功能補諸20240809(或有空時再學昨天恢復分段符號的方法 RestoreParagraphs ，只是這次不是分段符號，而是分段記號（<p>），或將之擴展為傳入指定字符作為引數）。
             bool reMarkFlag = false;
             saveText();
             if (url == "https://old.gj.cool/gjcool/index")
@@ -9606,9 +9628,9 @@ namespace WindowsFormsApp1
             //x = Regex.Replace(x, $@"\s*{Environment.NewLine}+\s*", Environment.NewLine);//發現問題出在使用了 .Text屬性值作判斷故自動標點之方法過早結束迴圈，故今先還原，再觀察 20240918
 
             string originalText = x;// 
-            //x = x.Replace(Environment.NewLine, string.Empty).Replace("·", string.Empty);//OCR回來後我這裡自動標點如「嗚呼」仍會標上驚嘆號，故交由 FormalizeText 來處理
+                                    //x = x.Replace(Environment.NewLine, string.Empty).Replace("·", string.Empty);//OCR回來後我這裡自動標點如「嗚呼」仍會標上驚嘆號，故交由 FormalizeText 來處理
             x = x.Replace(Environment.NewLine, string.Empty);//.Replace("·", string.Empty);音節號已於 RemoveBooksPunctuation 中清除
-            //x = x.Replace(Environment.NewLine, string.Empty).Replace("·", string.Empty).Replace("！",string.Empty);
+                                                             //x = x.Replace(Environment.NewLine, string.Empty).Replace("·", string.Empty).Replace("！",string.Empty);
             switch (url)
             {
                 case "https://old.gj.cool/gjcool/index":
@@ -9838,17 +9860,17 @@ namespace WindowsFormsApp1
             {
                 #region 檢查是否必要 20230804Bard大菩薩：https://g.co/bard/share/9130d688e253            
                 string quickedit_data_textboxTxt = br.Quickedit_data_textbox?.Text;//br.Quickedit_data_textboxTxt;
-                //bool chk = false;
-                //if (quickedit_data_textboxTxt.Length > 1000)
-                //{
-                //    Regex regex = new Regex(@"\，|\。");
-                //    Match match = regex.Match(quickedit_data_textboxTxt);
-                //    chk = match.Success;
-                //}
-                //else
-                //{
-                //    chk = quickedit_data_textboxTxt.Contains("，") || quickedit_data_textboxTxt.Contains("。");
-                //}
+                                                                                   //bool chk = false;
+                                                                                   //if (quickedit_data_textboxTxt.Length > 1000)
+                                                                                   //{
+                                                                                   //    Regex regex = new Regex(@"\，|\。");
+                                                                                   //    Match match = regex.Match(quickedit_data_textboxTxt);
+                                                                                   //    chk = match.Success;
+                                                                                   //}
+                                                                                   //else
+                                                                                   //{
+                                                                                   //    chk = quickedit_data_textboxTxt.Contains("，") || quickedit_data_textboxTxt.Contains("。");
+                                                                                   //}
                 if (CnText.HasEditedWithPunctuationMarks(ref quickedit_data_textboxTxt))
                 {
                     OCRBreakSoundNotification();
@@ -11347,8 +11369,8 @@ namespace WindowsFormsApp1
                                     else
                                         iweConfirm.Click();
                                     if (DialogResult.Cancel ==
-                                        Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("Please confirm that you are human! 敬請輸入認證圖案"
-                                        + Environment.NewLine + Environment.NewLine + "請輸入完畢後再按「確定」！"))
+                                        Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("Please confirm that you are human! 請輸入認證圖案"
+                                        + Environment.NewLine + Environment.NewLine + "請輸入完畢後再按「確定」！",string.Empty,false))
                                     {
                                         Debugger.Break();
                                     }
@@ -12102,7 +12124,7 @@ namespace WindowsFormsApp1
                     {//可能按下Shift+Delete 剪下textBox1的內容時
                         if (mk == Keys.ShiftKey)//20240920 Copilot大菩薩：全域鍵盤掛鉤在 C# Windows.Forms 中的使用：
                             hideToNICo();//https://sl.bing.net/f5zjhC1h9DU
-                        //,通常是要準備貼上的，所以就要將目前在用的瀏覽器置前，確保它取得焦點，否則有時系統焦點會或交給工作列                        
+                                         //,通常是要準備貼上的，所以就要將目前在用的瀏覽器置前，確保它取得焦點，否則有時系統焦點會或交給工作列                        
                         if (browsrOPMode == BrowserOPMode.appActivateByName)
                         {
                             //string currentForeTabUrl = br.ActiveTabURL_Ctext_Edit;
@@ -12579,7 +12601,7 @@ namespace WindowsFormsApp1
         /// 取得每行的
         /// </summary>
         public int NormalLineParaLength { get => normalLineParaLength; set => normalLineParaLength = value; }
-               
+
 
         internal void PauseEvents()
         {
@@ -13325,7 +13347,7 @@ namespace WindowsFormsApp1
                                 cntr++;
                             }
                         }
-                        #endregion                        
+                        #endregion
                         //keyDownCtrlAdd(false);
                         break;
                     case MouseButtons.XButton2:
@@ -14128,9 +14150,25 @@ namespace WindowsFormsApp1
                 , MessageBoxIcon.Exclamation, defaultButton, MessageBoxOptions.DefaultDesktopOnly);
             if (formActivated)
             {
-                form1.BringToFront(); form1.AvailableInUseBothKeysMouse();
+                if (br.ActiveForm1.InvokeRequired)
+                {
+                    br.ActiveForm1.Invoke((MethodInvoker)delegate
+                    {
+                        // 你的程式碼
+                        form1.BringToFront(); form1.AvailableInUseBothKeysMouse();
+                    });
+                }
+                else
+                {
+                    // 你的程式碼
+                    if (formActivated)
+                    {
+                        form1.BringToFront(); form1.AvailableInUseBothKeysMouse();
+                    }
+                }
             }
             return dr;
+
         }
 
         #region 取得Windows作業系統現行的程式視窗。此乃為自己練習&測試用爾 https://ithelp.ithome.com.tw/questions/10212282#answer-388757        

@@ -1396,7 +1396,7 @@ namespace TextForCtext
                 }
                 #endregion
 
-                if (cDrv.WindowHandles.Count > 0)
+                if (cDrv.WindowHandles.Count > 1)
                 {
                     foreach (var item in cDrv.WindowHandles)
                     {
@@ -1970,8 +1970,8 @@ namespace TextForCtext
                         else
                             iweConfirm.Click();
                         if (DialogResult.Cancel ==
-                            Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("Please confirm that you are human! 敬請輸入認證圖案"
-                            + Environment.NewLine + Environment.NewLine + "請輸入完畢後再按「確定」！"))
+                            Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("Please confirm that you are human! 請輸入認證圖案"
+                            + Environment.NewLine + Environment.NewLine + "請輸入完畢後再按「確定」！",string.Empty,false))
                         {
                             Debugger.Break();
                         }
