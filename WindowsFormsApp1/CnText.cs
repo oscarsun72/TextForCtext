@@ -10,8 +10,6 @@ using System.Threading.Tasks;
 using WindowsFormsApp1;
 using System.Windows.Forms;
 using System.Diagnostics;
-using Microsoft.Office.Interop.Word;
-using static System.Net.Mime.MediaTypeNames;
 using OpenQA.Selenium.DevTools.V125.Runtime;
 //using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 //using static System.Net.Mime.MediaTypeNames;
@@ -589,7 +587,7 @@ namespace TextForCtext
                 //,"}}<p>\r\n{{"//像《札迻》就有此種格式，不能取代掉！ https://ctext.org/library.pl?if=en&file=36575&page=12&editwiki=800245#editor
                 ,"\r\n。<p>","\r\n〗","\r\n。}}","\r\n："
                 ,"！。<p>","？。<p>","+<p>","<p>+","：。<p>","。\r\n。"
-                ,"《\r\n　　","《\r\n　","《\r\n《"
+                ,"《\r\n　　","《\r\n　","《\r\n"
                 ,"：。","\r\n，","\r\n。","\r\n、","\r\n？","\r\n」","「\r\n" ,"{{\r\n" ,"\r\n}}"
                 ,"􏿽？","􏿽。","，〉","。〉","〈、","！，","〈，"//自動標點結果的訂正
                 ,"，。"
@@ -703,7 +701,8 @@ namespace TextForCtext
                 string pattern = "[" + Regex.Escape("卷上下卄一二三四五六七八九十卅卌<p>") + "]";
                 line = Regex.Replace(line, pattern, "");
                 double similarity = Fuzz.Ratio(title, line) / 100.0;
-                if (similarity >= threshold)
+                //Form1 frm = (Form1)Application.OpenForms[0] ;//依Copilot大菩薩建議，改用依賴注入（Dependency Injection, DI） 
+                if (similarity >= threshold && line.Length < Form1.Instance.NormalLineParaLength)
                 {
                     //前一段若為「|」通常是卷末題目
                     if (i > lines.Length - 2 &&

@@ -423,12 +423,12 @@ Rem 20230215 chatGPT大菩薩：
 Rem 這段代碼中的 IsChineseCharacter 函數用於判斷單個字符是否是CJK或CJK擴展字符集中的漢字，而 IsChineseString 函數則用於判斷一個字符串是否全部由CJK或CJK擴展字符集中的漢字組成。
 Rem 在VBA中，我們使用了 AscW 函數來獲取字符的Unicode編碼值。然後，我們就可以使用和C#中類似的方式來判斷字符是否屬於CJK或CJK擴展字符集中的漢字。
 ' 判斷一個字符是否是CJK或CJK擴展字符集中的漢字
-Public Function IsChineseCharacter(C As String) As Boolean
+Public Function IsChineseCharacter(c As String) As Boolean
 '    chatGPT大菩薩： Unicode範圍: CJK字符集範圍：4E00–9FFF，CJK擴展字符集範圍：20000–2A6DF 孫守真按：這樣根本不夠，只有 CJK統一表意符號和CJK擴展B
 '    Dim unicodeVal As Long
 '    unicodeVal = AscW(c)
 '    IsChineseCharacter = (unicodeVal >= &H4E00 And unicodeVal <= &H9FFF) Or (unicodeVal >= &H20000 And unicodeVal <= &H2A6DF)
-    IsChineseCharacter = IsCJK(C)(1)
+    IsChineseCharacter = IsCJK(c)(1)
 End Function
 
 ' 判斷一個字符串是否全部由CJK或CJK擴展字符集中的漢字組成
@@ -447,9 +447,9 @@ Rem 20240122 Bing大菩薩：Excel中提取surrogate字元
 Rem 我明白您的問題了。在處理含有代理對的字串時，確實需要特別小心，以避免將代理對的字元錯誤地切割開來。在VBA中，我們可以使用一些特殊的方法來處理這種情況。
 Rem 一種可能的解決方案是使用一個自定義的函數來檢查每個字元是否為代理對的一部分。以下是一個可能的實現：
 Function IsSurrogatePair(str As String, pos As Integer) As Boolean
-    Dim C As Integer
-    C = AscW(VBA.Mid(str, pos, 1))
-    IsSurrogatePair = C >= &HD800 And C <= &HDFFF
+    Dim c As Integer
+    c = AscW(VBA.Mid(str, pos, 1))
+    IsSurrogatePair = c >= &HD800 And c <= &HDFFF
 End Function
 Rem 這個函數會檢查字串中指定位置的字元是否為代理對的一部分。然後，您可以在逐字處理字串時使用這個函數來確保不會將代理對的字元切割開來。
 Rem 請注意，這只是一種可能的解決方案，並且可能需要根據您的具體需求進行調整。希望這對您有所幫助！如果您有其他問題，請隨時告訴我。南無阿彌陀佛。
@@ -502,21 +502,21 @@ Function CharactersCount(x As String) As Long
     CharactersCount = cntr
 End Function
 
-Function IsCJK(C As String) As Collection 'Boolean,CJKBlockName
+Function IsCJK(c As String) As Collection 'Boolean,CJKBlockName
     Dim code As Long, cjk As Boolean, cjkBlackName As CJKBlockName, result As New Collection
     Dim codeHex As String
 '    Dim code
     Rem chatGPT大菩薩：是的，您說得沒錯。在 VBA 中，使用 AscW 函式取得 Unicode 字元的整數值時，如果傳入的字串是 surrogate pair，那麼函式只會計算 pair 的第一個字元（即 High surrogate）的值。因此，可以直接使用 AscW(c) 來計算 c 的整數值，而不必再使用 Left 函式來取得第一個字元。
     'code = AscW(vba.Left(c, 1))
     'code = AscW(c)
-    If Len(C) = 1 Then
-        code = AscW(C) 'AscW_IncludeSurrogatePairUnicodecode(c)
+    If Len(c) = 1 Then
+        code = AscW(c) 'AscW_IncludeSurrogatePairUnicodecode(c)
         If code < 0 Then 'Bing大菩薩：您好，這是Bing。關於您的問題，AscW 函數在 VBA 中用於獲取字符的 Unicode 編碼。然而，對於某些字符（特別是一些中文字符），AscW 可能會返回負值。這是因為 AscW 返回的是一個 16 位的有符號整數，範圍是 -32768 到 327671。當字符的 Unicode 編碼超過 32767 時，AscW 會返回一個負數23。
                         '解決這個問題的一種方法是對 AscW 返回的負值進行處理。如果 AscW 返回一個負數，您可以將該數值加上 65536 來獲得正確的 Unicode 編碼23。以下是一個修改過的函數：
             code = code + 65536
         End If
     Else
-        getCodePoint C, code
+        getCodePoint c, code
     End If
     Rem https://en.wikipedia.org/wiki/CJK_characters
     'CJK Unified Ideographs
@@ -758,6 +758,12 @@ Function ConvertToUnicode(chartoConvert As String) As Long
     ConvertToUnicode = unicodeCode
     
 End Function
+Rem 是否是八卦、六十四卦卦形字
+Function IsGuaShape(c As String) As Boolean
+    IsGuaShape = (VBA.AscW(c) >= &H2630 And VBA.AscW(c) <= &H2637) Or (VBA.AscW(c) >= &H4DC0 And VBA.AscW(c) <= &H4DFF)  '易經六十四卦符號 及八卦 https://zh.wikipedia.org/wiki/%E6%98%93%E7%B6%93%E5%85%AD%E5%8D%81%E5%9B%9B%E5%8D%A6%E7%AC%A6%E8%99%9F_(Unicode%E5%8D%80%E6%AE%B5)
+                                                                                                                         '八卦 https://zh.wikipedia.org/wiki/%E5%85%AB%E5%8D%A6
+End Function
+
 Rem 判斷是否是Big5碼 20240926 creedit_with_Copilot大菩薩 ：Word VBA 判斷 Big5 程式：https://sl.bing.net/cAEk03kEN4e
 Function IsBig5(text As String) As Boolean
     Dim stream As Object
@@ -796,6 +802,10 @@ Function ConvertToChrwCode_IfNotBig5() As String
     Dim ur As UndoRecord, combination As String
     Set rng = Selection.Range
     For Each a In rng.Characters
+'        If a.text = Chr(13) Then
+'            result = result & Chr(13)
+'            GoTo continue
+'        End If
         If big5FlagPrevisou Then
             quoteMark = vbNullString
         Else
@@ -831,6 +841,7 @@ Function ConvertToChrwCode_IfNotBig5() As String
         End If
         resultA = vbNullString
         big5FlagPrevisou = big5Flag
+continue:
     Next a
     
     If big5FlagPrevisou Then result = result & """"

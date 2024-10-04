@@ -5,6 +5,18 @@ Public chromedriversPID() As Long '儲存chromedriver程序ID的陣列
 Public chromedriversPIDcntr As Integer 'chromedriversPID的下標值
 Public ActiveXComponentsCanNotBeCreated As Boolean
 
+' 宣告 Windows API 函數 20241003 creedit_with_Copilot大菩薩：改進WordVBA+SeleniumBasic 開啟Chrome瀏覽器新分頁的方法：https://sl.bing.net/iqY5XH1MVci
+Declare PtrSafe Function SetForegroundWindow Lib "user32" (ByVal hwnd As LongPtr) As Long
+Declare PtrSafe Function FindWindow Lib "user32" Alias "FindWindowA" (ByVal lpClassName As String, ByVal lpWindowName As String) As LongPtr
+' 將 Chrome 瀏覽器設置為前端窗口
+Sub ActivateChrome()
+    Dim hwnd As LongPtr
+    hwnd = FindWindow("Chrome_WidgetWin_1", vbNullString)
+    If hwnd <> 0 Then
+        SetForegroundWindow hwnd
+    End If
+End Sub
+
 'Sub tesSeleniumBasic() 'https://github.com/florentbr/SeleniumBasic
 ''20230119 creedit chatGPT大菩薩
 '
@@ -25,6 +37,10 @@ reOpenChrome:
     Next ew
     If iw > 0 Then
           WD.ExecuteScript "window.open('about:blank','_blank');"
+          If Not IsNewBlankPageTab(WD) Then
+'            Stop 'just for test
+            OpenNewTab WD
+          End If
           For Each ew In WD.WindowHandles
                 ii = ii + 1
                 If ii = iw + 1 Then Exit For
@@ -95,11 +111,17 @@ eH:
 End Function
 
 Rem 檢查 wd 是否有效 20241002
-Function IsWDInvalid(ByRef WD As IWebDriver) As Boolean
+Function IsDriverInvalid(ByRef WD As IWebDriver) As Boolean
     On Error Resume Next
     Dim url As String
     url = WD.url
-    IsWDInvalid = url = vbNullString
+    IsDriverInvalid = url = vbNullString
+End Function
+Rem 檢查是否為新的空白頁 開啟的新分頁 20241003
+Function IsNewBlankPageTab(ByRef driver As IWebDriver) As Boolean
+    'On Error Resume Next
+    IsNewBlankPageTab = (driver.url = "about:blank" And WD.title = vbNullString) _
+                Or (WD.title = "新分頁" And WD.url = "chrome://new-tab-page/")
 End Function
 Rem 啟動Chrome瀏覽器或已啟動後開啟新分頁瀏覽。失敗時傳回false
 Function OpenChrome(Optional url As String) As Boolean
@@ -160,13 +182,15 @@ reStart:
                     chromedriversPID(chromedriversPIDcntr) = pid
                     chromedriversPIDcntr = chromedriversPIDcntr + 1
                 End If
-                WD.ExecuteScript "window.open('about:blank','_blank');" 'openNewTabWhenTabAlreadyExit WD
-                WD.SwitchTo.Window WindowHandlesItem(WindowHandlesCount - 1)
+                OpenNewTab WD
+'                WD.ExecuteScript "window.open('about:blank','_blank');" 'openNewTabWhenTabAlreadyExit WD
+'                WD.SwitchTo.Window WindowHandlesItem(WindowHandlesCount - 1)
                 WD.url = url
             End If
         Else
-            WD.ExecuteScript "window.open('about:blank','_blank');" 'openNewTabWhenTabAlreadyExit WD
-            WD.SwitchTo.Window WindowHandlesItem(WindowHandlesCount - 1)
+            If IsDriverInvalid(WD) Then OpenNewTab WD
+'            WD.ExecuteScript "window.open('about:blank','_blank');" 'openNewTabWhenTabAlreadyExit WD
+'            WD.SwitchTo.Window WindowHandlesItem(WindowHandlesCount - 1)
             WD.url = url
         End If
         If ActiveXComponentsCanNotBeCreated Then ActiveXComponentsCanNotBeCreated = False
@@ -440,7 +464,7 @@ Sub SeleniumGetTest()
         SystemSetup.playSound 1.469
         VBA.Interaction.DoEvents
     End If
-    If Not IsWDInvalid(driver) Then
+    If Not IsDriverInvalid(driver) Then
         Set WD = driver
     Else
         OpenChrome_NEW_Get
@@ -498,12 +522,13 @@ Sub OpenChrome_NEW_Get()
     On Error Resume Next
     driver.New_ChromeDriver Service:=Service, options:=options
     Set WD = driver
-    If IsWDInvalid(WD) Then
+    If IsDriverInvalid(WD) Then
         
 '        Dim urlCheck As String
 '        urlCheck = wd.url
 '        If urlCheck = vbNullString Then
             WD.SwitchTo.Window WD.CurrentWindowHandle
+            ActivateChrome
             SystemSetup.wait 2
             VBA.Interaction.DoEvents
             SendKeys "%{F4}" '關閉已開啟而無法成功的Chrome瀏覽器
@@ -516,7 +541,14 @@ Sub OpenChrome_NEW_Get()
                 .AddArgument "--start-maximized"
             End With
             driver.New_ChromeDriver Service:=Service, options:=options
-            If IsWDInvalid(driver) Then Stop  'just for test
+            If IsDriverInvalid(driver) Then
+                Stop  'just for test
+                killchromedriverFromHere
+                Set WD = Nothing
+                OpenChrome_NEW_Get
+'                MsgBox "請再執行一次。感恩感恩　南無阿彌陀佛", vbInformation
+                'End
+            End If
             Set WD = driver
 '            urlCheck = wd.url
 '            If urlCheck = vbNullString Then Stop 'just for test
@@ -539,6 +571,9 @@ Sub OpenChrome_NEW_Get()
                         Exit For
                     End If
                 Next wh
+                If IsDriverInvalid(WD) Then
+                    WD.SwitchTo.Window UBound(WD.WindowHandles)
+                End If
                 openNewTabWhenTabAlreadyExit WD
 '                OpenNewTab WD '再開啟一個新分頁，供後續程式操作用，避免影響原已開啟的分頁
             End If
@@ -564,18 +599,82 @@ eH:
             MsgBox Err.Number & Err.Description
     End Select
 End Sub
-Rem 開啟新分頁
-Sub OpenNewTab(ByVal driver As SeleniumBasic.IWebDriver)
+Rem 開啟新分頁 若失敗則傳回false'改進WordVBA+SeleniumBasic 開啟Chrome瀏覽器新分頁的方法 creedit_with_Copilot大菩薩： https://sl.bing.net/bcfc14PWlFc
+Function OpenNewTab(ByVal driver As SeleniumBasic.IWebDriver) As Boolean
+    Dim result As Boolean
+    result = True
     On Error GoTo eH
     driver.ExecuteScript "window.open('about:blank','_blank');" 'openNewTabWhenTabAlreadyExit WD
-    driver.SwitchTo.Window driver.WindowHandles()(UBound(driver.WindowHandles))
-    Exit Sub
+    VBA.Interaction.DoEvents
+    SwitchToLastWindowHandleWindow driver
+    If Not IsNewBlankPageTab(driver) Then
+        Dim key As New SeleniumBasic.keys, iwe As SeleniumBasic.IWebElement
+'        Set iwe = driver.FindElementByTagName("body")
+        Set iwe = driver.FindElementByCssSelector("body")
+        If iwe Is Nothing Then Stop 'just for test
+        iwe.SendKeys key.Control + "t"
+        VBA.Interaction.DoEvents
+        SystemSetup.playSound 1
+        SwitchToLastWindowHandleWindow driver
+        If Not IsNewBlankPageTab(driver) Then '若沒成功開啟
+            '建立 Actions 物件 。 Copilot大菩薩：在這段改進的程式碼中，我使用 CreateObject 方法來建立 Actions 物件，並且直接呼叫 Perform 方法來執行動作。這樣可以確保 Actions 物件正確建立並執行。
+            Dim actions As New SeleniumBasic.actions
+            actions.Create driver
+            actions.MoveToElement(iwe).Click().Perform
+            actions.SendKeys(key.Control + "t").Perform
+            actions.SendKeys key.Control + "t"
+            actions.SendKeys "^t"
+            VBA.Interaction.DoEvents
+            SystemSetup.playSound 1
+            SwitchToLastWindowHandleWindow driver
+            Dim wh
+            For Each wh In driver.WindowHandles
+                driver.SwitchTo.Window wh
+                If IsNewBlankPageTab(driver) Then Exit For
+            Next wh
+            If Not IsNewBlankPageTab(driver) Then '若沒成功開啟
+                driver.SwitchTo().Window driver.CurrentWindowHandle
+                VBA.Interaction.DoEvents
+                
+                ActivateChrome
+                VBA.Interaction.DoEvents
+                
+                VBA.Interaction.SendKeys "^t", True
+                VBA.Interaction.DoEvents
+                SwitchToLastWindowHandleWindow driver
+                VBA.Interaction.DoEvents
+                SystemSetup.playSound 1 'for test
+                If Not IsNewBlankPageTab(driver) Then '若沒成功開啟
+                    For Each wh In driver.WindowHandles
+                        driver.SwitchTo.Window wh
+                        If IsNewBlankPageTab(driver) Then Exit For
+                    Next wh
+                    If Not IsNewBlankPageTab(driver) Then '若沒成功開啟
+                    'Stop 'for debug
+                    ActivateChrome
+                    word.Application.Activate
+                        If VBA.vbOK = MsgBox("若要開啟新分頁視窗請手動開啟後再按下「確定」按鈕，否則即在此分頁繼續執行。" & vbCr & vbCr _
+                            & "若不想在此分頁執行，請務必自行開啟新分頁或新視窗，再按下「確定」按鈕。感恩感恩　南無阿彌陀佛", VBA.vbOKCancel + VBA.vbExclamation) Then
+                            SwitchToLastWindowHandleWindow driver
+                        Else
+                            result = False
+                            driver.SwitchTo.Window driver.CurrentWindowHandle
+                        End If
+                    End If
+                End If
+            End If
+        End If
+    Else
+        SystemSetup.playSound 0.484 'for test
+    End If
+    
+    OpenNewTab = result
+    
+    Exit Function
 eH:
     Select Case Err.Number
         Case -2146233088
             If VBA.InStr(Err.Description, "no such window: target window already closed") = 1 Then 'no such window: target window already closed
-'                                                from unknown error: web view not found
-'                                                  (Session info: chrome=129.0.6668.60)
                 driver.SwitchTo.Window driver.WindowHandles()(UBound(driver.WindowHandles))
                 Resume
             Else
@@ -585,7 +684,58 @@ CaseElse:
         Case Else
             Debug.Print Err.Number & Err.Description
             MsgBox Err.Number & Err.Description
+'            Resume
     End Select
+'    On Error GoTo eH
+'    driver.ExecuteScript "window.open('about:blank','_blank');" 'openNewTabWhenTabAlreadyExit WD
+'    If Not IsNewBlankPageTab(driver) Then
+'        Dim key As New SeleniumBasic.keys, iwe As SeleniumBasic.IWebElement
+''        driver.FindElementByTagName("body").SendKeys "^t" ' Ctrl + t to open a new tab '20241003creedit_with_Copilot大菩薩：解決WordVBA + SeleniumBasic開新分頁問題：https://sl.bing.net/gehCkm98JRA
+'        Set iwe = driver.FindElementByTagName("body")
+'        If iwe Is Nothing Then Stop 'just for test
+'        iwe.SendKeys key.Control + "t"
+'
+'        If Not IsNewBlankPageTab(driver) Then '若沒成功開啟
+'            '建立 Actions 物件
+'            Dim actions As New SeleniumBasic.actions
+''            actions.MoveToElement(iwe).Click().Perform
+''            actions.SendKeys(key.Control + "t").Build '().Perform
+'
+'            If Not IsNewBlankPageTab(driver) Then '若沒成功開啟
+'                word.Application.windowState = wdWindowStateMinimize
+'                driver.SwitchTo().Window driver.CurrentWindowHandle
+'                VBA.Interaction.DoEvents
+'                SendKeys "^t", True
+'                VBA.Interaction.DoEvents
+'                If Not IsNewBlankPageTab(driver) Then '若沒成功開啟
+'                    Stop 'for debug
+'                End If
+'            End If
+'        End If
+'
+'    End If
+'    SwitchToLastWindowHandleWindow driver
+'    Exit Sub
+'eH:
+'    Select Case Err.Number
+'        Case -2146233088
+'            If VBA.InStr(Err.Description, "no such window: target window already closed") = 1 Then 'no such window: target window already closed
+''                                                from unknown error: web view not found
+''                                                  (Session info: chrome=129.0.6668.60)
+'                driver.SwitchTo.Window driver.WindowHandles()(UBound(driver.WindowHandles))
+'                Resume
+'            Else
+'                GoTo CaseElse
+'            End If
+'CaseElse:
+'        Case Else
+'            Debug.Print Err.Number & Err.Description
+'            MsgBox Err.Number & Err.Description
+''            Resume
+'    End Select
+End Function
+Sub SwitchToLastWindowHandleWindow(driver As SeleniumBasic.IWebDriver)
+    driver.SwitchTo().Window driver.WindowHandles()(UBound(driver.WindowHandles))
 End Sub
 
 Rem 20241002 Copilot大菩薩：Word VBA 中的 Selenium 操作: https://sl.bing.net/jH2j6GzDiQm
@@ -1927,18 +2077,23 @@ Function grabGjCoolPunctResult(text As String, resultText As String, Optional Ba
         If WD Is Nothing Then
             OpenChrome ("https://gj.cool/punct")
         Else
-            If IsWDInvalid(WD) Then
+            If IsDriverInvalid(WD) Then
                 OpenNewTab WD
             Else
-                Stop 'just for test
+                'Stop 'just for test
+                killchromedriverFromHere
+                Set WD = Nothing
+                OpenChrome ("https://gj.cool/punct")
             End If
         End If
         Set wdB = WD
         
     End If
-    If wdB Is Nothing Then Exit Function
-    If wdB.url <> url Then wdB.Navigate.GoToUrl url
-    
+    If wdB Is Nothing Or IsDriverInvalid(wdB) Then Exit Function
+    If wdB.url <> url Then
+        If Not IsNewBlankPageTab(wdB) Then OpenNewTab wdB
+        wdB.Navigate.GoToUrl url
+    End If
     '整理文本
     Dim chkStr As String: chkStr = VBA.Chr(13) & VBA.Chr(10) & VBA.Chr(7) & VBA.Chr(9) & VBA.Chr(8)
     text = VBA.Trim(text)
@@ -2009,7 +2164,7 @@ Function grabGjCoolPunctResult(text As String, resultText As String, Optional Ba
     xl = VBA.Len(text)
     chkTxtTime = VBA.Now
     Do
-        If VBA.DateDiff("s", chkTxtTime, VBA.Now) > 1.5 Then
+        If VBA.DateDiff("s", chkTxtTime, VBA.Now) > 2.5 Then
             nx = textBox.text
             SystemSetup.playSound 1
             '檢查如果沒有按到「標點」按鈕，就再次按下 20240725 以出現等待圖示控制項為判斷
@@ -2105,6 +2260,28 @@ Err1:
     '           Resume
         End Select
     
+End Function
+Rem 取得《漢籍全文資料庫·斷句十三經經文·周易》文本 ： gua 卦名 。成功則傳回 true 20241004
+Function grabHanchiZhouYi_TheOriginalText_ThirteenSutras(gua As String, resultText As String) As Boolean
+
+End Function
+Rem 取得《易學網·易經〔周易〕原文》文本 ： gua 卦名 。成功則傳回 true 20241004
+Function grabEeeLearning_IChing_ZhouYi_originalText(guaSequence As String, resultText As String) As Boolean
+'    If Not OpenChrome("https://www.eee-learning.com/article/571") Then Exit Function
+    If Not OpenChrome("https://www.eee-learning.com/book/eee" & guaSequence) Then Exit Function
+    
+    grabEeeLearning_IChing_ZhouYi_originalText = True
+    
+    Dim iwe As SeleniumBasic.IWebElement
+    Set iwe = WD.FindElementByCssSelector("#block-bartik-content > div > article > div > div.clearfix.text-formatted.field.field--name-body.field--type-text-with-summary.field--label-hidden.field__item")
+    If iwe Is Nothing Then
+        grabEeeLearning_IChing_ZhouYi_originalText = False
+        Exit Function
+    End If
+    
+    resultText = iwe.GetAttribute("textContent")
+    
+    Set iwe = Nothing
 End Function
 Rem 20240914 creedit_with_Copilot大菩薩：https://sl.bing.net/gCpH6nC61Cu
 ' 設定元件 IWebElement的value屬性值  20240913

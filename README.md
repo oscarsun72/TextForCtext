@@ -31,7 +31,9 @@ Text for Ctext 是為了有效加速[《中國哲學書電子化計劃》](https
       - 第一種為預設模式，即在現前開啟的Chrome瀏覽器即可操作。（去年（2022）大致完成了）
       - 第二種操作模式是由selenium自動開啟另一個新的Chrome瀏覽器執行體來加以操作。（大致完成了 20230113）
        > 用 [TextForCtextPortable.zip](https://github.com/oscarsun72/TextForCtext/blob/master/TextForCtextPortable.zip) 者 請記得下載與您的Chrome瀏覽器對應的[chromedriver.exe](https://chromedriver.chromium.org/downloads)版本，並和本軟件 TextForCtext.exe 放在同一個目錄/路徑下即可。感恩感恩　南無阿彌陀佛
-       
+       > - ★★ **Selenium模式下，若不想關閉手動啟用或WordVBA啟動的Chrome瀏覽器即可共用Chrome瀏覽器：** 只要在Chrome瀏覽器啟動的捷徑內「目標(T)」欄位內的值末端輸入「` --remote-debugging-port=9222`」（程式碼碼裡也有）再按下「確定」或「套用（A)」按鈕即可。20241004 感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主
+        >> 在Chrome瀏覽器「chrome://version/」網址查看，其「命令列」欄下含有` --remote-debugging-port=9222 `即表示所啟動的、現用的Chrome瀏覽器已設定成功了，可供`TextForCtext`與`WordVBA`操作。
+
        > ★在全自動連續輸入模式下可配合 Windows 內建的語音辨識軟體 *Windows Speech Recognition* 完全不動手即可操作。快速鍵**Ctrl + F2**可切換此操作，並自動啟動軟體與結束）20230121 23:50壬寅年除夕夜
       - 第三種模式則是混搭前兩種， 或由selenium 取得現用的瀏覽器。來操作。。尚未實作。
   - 要切換三種模式。可在textbox2輸入以上指令。
@@ -323,8 +325,8 @@ Ctrl + F12 ：檢索《國語辭典》
 - Alt + 7 ： 將文件中的異體字轉正體字
 - Ctrl + Alt + = ： 以選取的文字檢索 CTP 所收阮元《十三經注疏·周易正義》並在選取文字上加上該檢索結果頁面之超連結
 - Alt + shift + , 即  Alt + < ： 以選取的文字檢索文件中第一段所載之 CTP 所收本網址，並在選取文字上加上該檢索結果頁面之超連結
-- Ctrl + Alt + F10 讀入《古籍酷》自動標點所選取文字的結果
-
+- Ctrl + Alt + F10 ： 讀入《古籍酷》自動標點所選取文字的結果
+- Alt + Shift + y ： 查[《易學網·易經［周易］原文》](https://www.eee-learning.com/article/571)指定卦名文本_並取回其純文字值及網址值插入至文件中插入點位置(y:易) 20241004
 **以下功能，目前須先開啟TextForCtext才能使用。** 原理是以本軟件作為中介故。
 - Alt + , 或 Ctrl + Alt + , 或 Ctrl + Alt + F9 或 Alt + shift + F5 同在TextForCtext 的 Alt + , 與 Alt + F9 與 Alt + F5。《漢籍全文資料庫》或《中國哲學書電子化計劃》檢索《易》學關鍵字。蓋藉由本軟件介面作中介爾。
 - Alt + F10 以選取文字送交《古籍酷》自動標點
@@ -831,6 +833,9 @@ Ctrl+ 滑鼠左鍵：清除框中所有文字
 > 在檔案總管的網址列輸入「%appdata%\Microsoft\Word\STARTUP」再按Enter鍵即可到達此路徑
 
 - 複製一份和本軟件所需相同的「chromedriver.exe」到「chrome.exe」的同一目錄（路徑）下
+
+- 在 Selenium 模式下，或使用SeleniumBasic，**若不想關閉手動啟用或TextForCtext啟動的Chrome瀏覽器即可共用Chrome瀏覽器：** 只要在Chrome瀏覽器啟動的捷徑內「目標(T)」欄位內的值末端輸入「` --remote-debugging-port=9222`」（程式碼碼裡也有）再按下「確定」或「套用（A)」按鈕即可。
+> 在Chrome瀏覽器「chrome://version/」網址查看，其「命令列」欄下含有` --remote-debugging-port=9222 `即表示所啟動的、現用的Chrome瀏覽器已設定成功了，可供`TextForCtext`與`WordVBA`操作。
 
 - 可詳以下4片：
 

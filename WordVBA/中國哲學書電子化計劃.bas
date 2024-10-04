@@ -1035,6 +1035,7 @@ Function Search(searchWhatsUrl As String) As String
     Dim d As Document, encode As String
     Set d = ActiveDocument
     If d.path <> "" Then If d.Saved = False Then d.Save
+    文字處理.ResetSelectionAvoidSymbols
     If Selection.Type = wdSelectionNormal Then
         Selection.Copy
     End If
@@ -1058,7 +1059,7 @@ End Sub
 
 
 Sub 讀史記三家注()
-Dim d As Document, t As Table
+Dim d As Document, t As table
 Set d = Documents.Add
 d.Range.Paste
 Set t = d.Tables(1)
@@ -1628,9 +1629,9 @@ Sub 只保留正文注文_且注文前後加括弧(d As Document)
 End Sub
 
 Sub 清除文本頁中的編號儲存格(rng As Range)
-    Dim C As Cell, cx As String, t As Table
+    Dim C As cell, cx As String, t As table
     For Each t In rng.Tables
-        For Each C In t.Range.Cells
+        For Each C In t.Range.cells
             C.Select
             cx = C.Range.text
             If VBA.IsNumeric(VBA.Left(cx, 1)) And VBA.InStr(cx, VBA.ChrW(160) & VBA.ChrW(47)) > 0 And C.Range.InlineShapes.Count = 1 And VBA.Len(cx) < 13 Then

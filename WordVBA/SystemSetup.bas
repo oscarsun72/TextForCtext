@@ -4,7 +4,7 @@ Public FsO As Object, UserProfilePath As String
 Public Declare PtrSafe Function sndPlaySound32 Lib "winmm.dll" Alias "sndPlaySoundA" (ByVal lpszSoundName As String, ByVal uFlags As Long) As Long
 '
 'https://msdn.microsoft.com/zh-tw/library/office/ff192913.aspx
-Private Declare PtrSafe Function OpenClipboard Lib "user32.dll" (ByVal hWnd As Long) As Long
+Private Declare PtrSafe Function OpenClipboard Lib "user32.dll" (ByVal hwnd As Long) As Long
 Private Declare PtrSafe Function EmptyClipboard Lib "user32.dll" () As Long
 Private Declare PtrSafe Function CloseClipboard Lib "user32.dll" () As Long
 Private Declare PtrSafe Function IsClipboardFormatAvailable Lib "user32.dll" (ByVal wFormat As Long) As Long
@@ -17,15 +17,15 @@ Private Declare PtrSafe Function GlobalSize Lib "kernel32" (ByVal hMem As Long) 
 Private Declare PtrSafe Function lstrcpy Lib "kernel32.dll" Alias "lstrcpyW" (ByVal lpString1 As Long, ByVal lpString2 As Long) As Long
 
 Public Declare PtrSafe Function ShellExecute Lib "shell32.dll" Alias "ShellExecuteA" _
-    (ByVal hWnd As Long, ByVal lpOperation As String, ByVal lpFile As String, _
+    (ByVal hwnd As Long, ByVal lpOperation As String, ByVal lpFile As String, _
   ByVal lpParameters As String, ByVal lpDirectory As String, _
   ByVal nShowCmd As Long) As Long 'https://www.mrexcel.com/board/threads/vba-api-call-issues-with-show-window-activation.920147/
 Public Declare PtrSafe Function ShowWindow Lib "user32" _
-  (ByVal hWnd As Long, ByVal nCmdSHow As Long) As Long
+  (ByVal hwnd As Long, ByVal nCmdSHow As Long) As Long
 Public Declare PtrSafe Function FindWindow Lib "user32" Alias "FindWindowA" _
   (ByVal lpClassName As String, ByVal lpWindowName As String) As Long
   
-Public Declare PtrSafe Function SetForegroundWindow Lib "user32" (ByVal hWnd As Long) As Boolean
+Public Declare PtrSafe Function SetForegroundWindow Lib "user32" (ByVal hwnd As Long) As Boolean
   
   
   
@@ -642,10 +642,10 @@ Sub killchromedriverFromHere()
     Dim objWMIService, objProcess, colProcess, pid
     If chromedriversPIDcntr = 0 Then
         ReDim chromedriversPID(0)
-        If Not SeleniumOP.wd Is Nothing Then
+        If Not SeleniumOP.WD Is Nothing Then
             On Error GoTo eH:
-            SeleniumOP.wd.Quit
-            Set SeleniumOP.wd = Nothing
+            SeleniumOP.WD.Quit
+            Set SeleniumOP.WD = Nothing
             Exit Sub
         End If
     End If
@@ -657,16 +657,16 @@ Sub killchromedriverFromHere()
         Next pid
     Next
     '重設儲存chromedriver程序ID的陣列
-    ReDim chromedriversPID(0): chromedriversPIDcntr = 0: Set SeleniumOP.wd = Nothing
+    ReDim chromedriversPID(0): chromedriversPIDcntr = 0: Set SeleniumOP.WD = Nothing
     
     Exit Sub
 eH:
     Select Case Err.Number
         Case -2147467261 '並未將物件參考設定為物件的執行個體。
-            Set SeleniumOP.wd = Nothing
+            Set SeleniumOP.WD = Nothing
             Resume Next
         Case Else
-            Set SeleniumOP.wd = Nothing
+            Set SeleniumOP.WD = Nothing
             MsgBox Err.Number + Err.Description
     End Select
     Rem 20230119 YouChat菩薩：

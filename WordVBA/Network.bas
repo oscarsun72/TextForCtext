@@ -436,6 +436,71 @@ Sub 查異體字字典並取回其說文釋形欄位及網址值插入至插入點位置()
         End With
     End If
 End Sub
+Rem 指定卦名再操作 20241004 Alt + Shift + y (y:易)
+Sub 查易學網易經周易原文指定卦名文本_並取回其純文字值及網址值插入至插入點位置()
+    文字處理.ResetSelectionAvoidSymbols
+    Dim gua As String
+    If Selection.Characters.Count > 2 Then
+errExit:
+        word.Application.Activate
+        VBA.MsgBox "卦名有誤! 請重新選取。", vbExclamation
+        Exit Sub
+    End If
+    
+    gua = Selection.text
+    
+    If Selection.Characters.Count = 2 Then
+        If Selection = "習坎" Then
+            If Selection.Characters(2) = "坎" Then
+                gua = "坎"
+            End If
+        End If
+    End If
+    
+    On Error GoTo eH:
+    If Keywords.周易卦名_卦形_卦序.Exists(gua) = False Then
+        If Keywords.易學異體字典.Exists(gua) = False Then
+            GoTo errExit
+        Else
+            gua = Keywords.易學異體字典(gua)
+        End If
+    End If
+    
+    gua = Keywords.周易卦名_卦形_卦序(gua)(1)
+
+    Dim result As String
+    If SeleniumOP.grabEeeLearning_IChing_ZhouYi_originalText(gua, result) = False Then
+        word.Application.Activate
+        VBA.MsgBox "找不到，或網頁改了或掛了……", vbInformation
+        Exit Sub
+    End If
+    word.Application.Activate
+    If VBA.InStr(result, "歷代注本：") Then
+        If VBA.vbOK = MsgBox("是否清除「歷代注本：」以後的文字？", VBA.vbQuestion + VBA.vbOKCancel) Then
+            result = VBA.Left(result, VBA.InStr(result, "歷代注本：") - 1)
+        End If
+    End If
+    Dim ur As UndoRecord, s As Long
+    SystemSetup.stopUndo ur, "查易學網易經周易原文指定卦名文本_並取回其純文字值及網址值插入至插入點位置"
+    With Selection
+        If .Type = wdSelectionIP Then .Delete
+        s = .start
+        .TypeText result
+                
+        文字處理.FixFontname .Document.Range(s, Selection.End)
+        
+        .Document.Range(s, s).Select
+    End With
+    SystemSetup.contiUndo ur
+    Exit Sub
+eH:
+    Select Case Err.Number
+        Case Else
+            Debug.Print Err.Number & Err.Description
+            Stop 'just for test
+            Resume
+    End Select
+End Sub
 Sub 送交古籍酷自動標點()
     'Alt + F10
     Dim ur As UndoRecord

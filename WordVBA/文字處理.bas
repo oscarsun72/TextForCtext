@@ -2760,7 +2760,7 @@ Sub 中國哲學書電子化計劃_表格轉文字(ByRef r As Range)
 On Error GoTo eH
 Dim lngTemp As Long '因為誤按到追蹤修訂，才會引發訊息提示刪除儲存格不會有標識
 'Dim d As Document
-Dim tb As table, C As cell ', ci As Long
+Dim tb As table, c As cell ', ci As Long
 'Set d = ActiveDocument
 lngTemp = word.Application.DisplayAlerts
 If r.Tables.Count > 0 Then
@@ -2776,16 +2776,16 @@ Exit Sub
 eH:
 Select Case Err.Number
     Case 5992 '無法個別存取此集合中的各欄，因為表格中有混合的儲存格寬度。
-        For Each C In tb.Range.cells
+        For Each c In tb.Range.cells
 '            ci = ci + 1
 '            If ci Mod 3 = 2 Then
                 'If VBA.IsNumeric(VBA.Left(c.Range.text, VBA.InStr(c.Range.text, "?") - 1)) Then
-                If VBA.InStr(C.Range.text, VBA.ChrW(160) & VBA.ChrW(47)) > 0 Then
+                If VBA.InStr(c.Range.text, VBA.ChrW(160) & VBA.ChrW(47)) > 0 Then
 '                    word.Application.DisplayAlerts = False
-                    C.Delete  '刪除編號之儲存格
+                    c.Delete  '刪除編號之儲存格
                 End If
 '            End If
-        Next C
+        Next c
         Resume Next
     Case Else
         MsgBox Err.Number & Err.Description
@@ -2830,7 +2830,7 @@ Beep 'MsgBox "done!", vbInformation
 SystemSetup.contiUndo ur
 End Sub
 Sub 中國哲學書電子化計劃_註文前後加括弧()
-    Dim slRng As Range, a, flg As Boolean, ur As UndoRecord, d As Document 'Alt+1
+    Dim slRng As Range, a, flg As Boolean, ur As UndoRecord, d As Document 'Alt + 1
     'Set ur = SystemSetup.stopUndo("中國哲學書電子化計劃_註文前後加括弧")
     SystemSetup.playSound 0.484
     SystemSetup.stopUndo ur, "中國哲學書電子化計劃_註文前後加括弧"
@@ -2839,6 +2839,7 @@ Sub 中國哲學書電子化計劃_註文前後加括弧()
     'If Selection.Type = wdSelectionIP Then d.Select
     If d Is Nothing Then Set d = ActiveDocument
     d.Range.Paste
+    d.ActiveWindow.Visible = True
     d.Activate
     Set slRng = Selection.Range
     中國哲學書電子化計劃_表格轉文字 slRng
@@ -3140,6 +3141,7 @@ Sub 漢籍電子文獻資料庫文本整理_注文前後加括號() '最後執行 Docs.mark易學關鍵字(在
                 
 '                Stop 'just for test
                 Network.讀入古籍酷自動標點結果
+                
                 Docs.marking易學關鍵字 pasteAppendedRange, Keywords.易學Keywords_ToMark
                 SystemSetup.playSound 2
                 Rem 以下為舊式
@@ -3166,11 +3168,14 @@ Sub 漢籍電子文獻資料庫文本整理_注文前後加括號() '最後執行 Docs.mark易學關鍵字(在
 '                    Docs.中國哲學書電子化計劃_只保留正文注文_且注文前後加括弧_貼到古籍酷自動標點
 '                End If
                 Rem 以上為舊式
-
-                pasteAppendedRange.InsertParagraphAfter
-                pasteAppendedRange.InsertParagraphAfter
-                pasteAppendedRange.InsertParagraphAfter
-                pasteAppendedRange.InsertParagraphAfter
+                If pasteAppendedRange.End = pasteAppendedRange.Document.Range.End Then
+                    If VBA.Right(pasteAppendedRange, 3) <> VBA.Chr(13) & VBA.Chr(13) & VBA.Chr(13) Then
+                        pasteAppendedRange.InsertParagraphAfter
+                        pasteAppendedRange.InsertParagraphAfter
+                        pasteAppendedRange.InsertParagraphAfter
+                        pasteAppendedRange.InsertParagraphAfter
+                    End If
+                End If
             End If
         End If
         DoEvents
@@ -4006,4 +4011,38 @@ For i = 1 To lenStr
 Next i
 SplitWithoutDelimiter_StringToStringArray = arr
 End Function
-
+Rem 根據碼位來設定字型名稱
+Sub FixFontname(rngMark As Range)
+    
+        Rem https://en.wikipedia.org/wiki/CJK_Unified_Ideographs
+        Rem 兼容字
+        'https://en.wikipedia.org/wiki/CJK_Compatibility_Ideographs
+    '    Docs.ChangeFontOfSurrogatePairs_Range "HanaMinA", d.Range(selection.Paragraphs(1).Range.start, d.Range.End), CJK_Compatibility_Ideographs
+        'https://en.wikipedia.org/wiki/CJK_Compatibility_Ideographs_Supplement
+        Dim rngChangeFontName As Range
+        'Set rngChangeFontName = d.Range(Selection.Paragraphs(1).Range.start, d.Range.End)
+        Set rngChangeFontName = rngMark.Document.Range(rngMark.start, rngMark.Document.Range.End)
+        Dim fontName As String '20240920 creedit_with_Copilot大菩薩:https://sl.bing.net/9KC0PtODtI
+        fontName = "全宋體-2"
+        If Fonts.IsFontInstalled(fontName) Then
+            'MsgBox fontName & " 已安裝在系統中。"
+        Else    'MsgBox fontName & " 未安裝在系統中。"
+            fontName = "HanaMinA"
+            If Fonts.IsFontInstalled("HanaMinA") Then
+            ElseIf Fonts.IsFontInstalled("TH-Tshyn-P2") Then
+                fontName = "TH-Tshyn-P2"
+            Else
+                fontName = vbNullString
+            End If
+        End If
+        If Not fontName = vbNullString Then
+            'Docs.ChangeFontOfSurrogatePairs_Range "HanaMinA", rngChangeFontName, CJK_Compatibility_Ideographs_Supplement
+            Docs.ChangeFontOfSurrogatePairs_Range fontName, rngChangeFontName, CJK_Compatibility_Ideographs_Supplement
+        End If
+        
+        Rem 擴充字集
+        'HanaMinB還不支援G以後的
+        fontName = "HanaMinB"
+        Docs.ChangeFontOfSurrogatePairs_Range fontName, rngChangeFontName, CJK_Unified_Ideographs_Extension_E
+        Docs.ChangeFontOfSurrogatePairs_Range fontName, rngChangeFontName, CJK_Unified_Ideographs_Extension_F
+End Sub
