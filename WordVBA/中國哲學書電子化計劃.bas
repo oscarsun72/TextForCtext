@@ -624,7 +624,7 @@ Sub searchuCtext()
     'For Each e In searchedTerm
         addressHyper = addressHyper + " " + site + cndn + bookID + "&searchu=" + e
     'Next e
-    Shell Network.getDefaultBrowserFullname + addressHyper
+    Shell Network.getDefaultBrowserFullname + addressHyper + " --remote-debugging-port=9222 "
     
     Selection.Hyperlinks.Add Selection.Range, addressHyper
 End Sub
@@ -1629,17 +1629,17 @@ Sub 只保留正文注文_且注文前後加括弧(d As Document)
 End Sub
 
 Sub 清除文本頁中的編號儲存格(rng As Range)
-    Dim C As cell, cx As String, t As table
+    Dim c As cell, cx As String, t As table
     For Each t In rng.Tables
-        For Each C In t.Range.cells
-            C.Select
-            cx = C.Range.text
-            If VBA.IsNumeric(VBA.Left(cx, 1)) And VBA.InStr(cx, VBA.ChrW(160) & VBA.ChrW(47)) > 0 And C.Range.InlineShapes.Count = 1 And VBA.Len(cx) < 13 Then
+        For Each c In t.Range.cells
+            c.Select
+            cx = c.Range.text
+            If VBA.IsNumeric(VBA.Left(cx, 1)) And VBA.InStr(cx, VBA.ChrW(160) & VBA.ChrW(47)) > 0 And c.Range.InlineShapes.Count = 1 And VBA.Len(cx) < 13 Then
                 If VBA.InStr(cx, VBA.Val(cx) & VBA.ChrW(160) & VBA.ChrW(47)) = 1 Then
-                    C.Delete
+                    c.Delete
                 End If
             End If
-        Next C
+        Next c
     Next t
 End Sub
 

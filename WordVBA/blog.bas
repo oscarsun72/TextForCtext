@@ -42,7 +42,7 @@ If x = "" Or InStr(x, "http") = 0 Then End
 If InStr(x, "&prev") > 0 Then x = VBA.Left(x, InStr(x, "&prev") - 1)
 i = Int(VBA.Mid(x, InStrRev(x, "=") + 1))
 x = VBA.Left(x, InStrRev(x, "="))
-Options.AutoFormatAsYouTypeReplaceQuotes = False '關掉智慧引號,如此"才不會被自動置換為”（在自動校正裡依照您的輸入自動格式頁籤裡）
+options.AutoFormatAsYouTypeReplaceQuotes = False '關掉智慧引號,如此"才不會被自動置換為”（在自動校正裡依照您的輸入自動格式頁籤裡）
 With ActiveDocument.Range
     With .Find
         .MatchWildcards = False
@@ -65,7 +65,7 @@ With ActiveDocument.Range
         .Execute , , , , , , , , , , wdReplaceAll
     End With
 End With
-Options.AutoFormatAsYouTypeReplaceQuotes = True '恢復智慧引號
+options.AutoFormatAsYouTypeReplaceQuotes = True '恢復智慧引號
 End Sub
 
 
@@ -178,7 +178,7 @@ End Select
 End Sub
 Sub 排列圖片後插入連結()
 If ActiveDocument.path <> "" Then Documents.Add DocumentType:=wdNewBlankDocument
-Options.AutoFormatAsYouTypeReplaceQuotes = False '恢復智慧引號
+options.AutoFormatAsYouTypeReplaceQuotes = False '恢復智慧引號
 With ActiveDocument.Range
     .Select
     .Paste
@@ -186,7 +186,7 @@ End With
 圖片插入頁後指定位置
 插入相簿圖片連結網址
 ActiveDocument.Range.Copy
-Options.AutoFormatAsYouTypeReplaceQuotes = True '恢復智慧引號
+options.AutoFormatAsYouTypeReplaceQuotes = True '恢復智慧引號
 End Sub
 Sub 取代為新的圖片網址()
 With ActiveDocument.Range
@@ -347,7 +347,7 @@ With d
     Loop
 
 .Range = Replace(d.Range, VBA.Chr(13), "")
-.Range.Font.Size = 8
+.Range.font.Size = 8
 End With
 End Sub
 
@@ -379,7 +379,7 @@ AppActivate "explorer"
 End Sub
 
 Sub 開啟超連結()
-'Ctrl +i   系統預設是 italic（即斜體字），此配合 ExcelVBA設定
+'Ctrl + i   系統預設是 italic（即斜體字），此配合 ExcelVBA設定
 Dim rng As Range
 Set rng = Selection.Range
 If rng.Hyperlinks.Count = 0 Then '如果所在位置沒有超連結，則看其前有否；若又無，則再看其後有否；若都無則不執行 2022/12/20
@@ -402,10 +402,10 @@ Selected_Range:
                 GoSub nxt
             End If
         Else
-            GoSub position
+            GoSub Position
         End If
     Else
-        GoSub position
+        GoSub Position
     End If
 End If
 If rng.Hyperlinks.Count > 0 Then
@@ -421,10 +421,10 @@ If rng.Hyperlinks.Count > 0 Then
         strLnk = rng.Hyperlinks(1).Address
     End If
     SystemSetup.playSound 0.484
-    Shell getDefaultBrowserFullname + " " + strLnk
+    Shell getDefaultBrowserFullname + " " + strLnk + " --remote-debugging-port=9222 "
 End If
 Exit Sub
-position:
+Position:
     If rng.Previous.Hyperlinks.Count > 0 Then
 pre:        Set rng = rng.Previous
     ElseIf rng.Next.Hyperlinks.Count > 0 Then
@@ -572,7 +572,7 @@ lnks.updateURL國學大師 ActiveDocument
 'SystemSetup.playSound 7
 End Sub
 Sub 標題文字()
-With Selection.Font
+With Selection.font
     .Size = 20
     .Bold = True
 End With
@@ -827,7 +827,7 @@ With d.Application.Selection
         .Hyperlinks.Add d.Range(.start - 2, .start - 1), h '.Range, h
         st = ""
     ElseIf d.Range(.start - 1, .start) = VBA.Chr(9) Or d.Range(.start - 1, .start) = "』" Then '以tab鍵定位字元為判斷,蓋在資料庫vba.Chr(13)皆會被轉成此字元故也.
-        Do Until st = VBA.Chr(9) Or st = " " Or .Next.Font.Size > 8
+        Do Until st = VBA.Chr(9) Or st = " " Or .Next.font.Size > 8
             .MoveRight wdCharacter, 1, wdExtend
             st = VBA.Right(.text, 1)
         Loop
@@ -917,7 +917,7 @@ Const x As String = "\\VBOXSVR\d_drive\千慮一得齋\資料庫\掃描資料庫\書藏\2487_語
 s = Selection.End
 For Each p In ActiveDocument.Paragraphs
     If p.Range.End > s Then
-        If IsNumeric(p.Range) And p.Range.Font.Size = 16 Then
+        If IsNumeric(p.Range) And p.Range.font.Size = 16 Then
             If Dir(x & Format(p.Range, "_000000") & ".tif") = "" Then
                 If Dir(x & Format(p.Range, "_000000") & ".jpg") <> "" Then
                     lnk = x & Format(p.Range, "_000000") & ".jpg"

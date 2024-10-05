@@ -517,7 +517,14 @@ namespace WindowsFormsApp1
             //手動編輯模式時：
             if (!autoPastetoQuickEdit && keyinTextMode)
             {
-                string xClp = Clipboard.GetText();
+                string xClp = string.Empty;
+                try
+                {
+                    xClp = Clipboard.GetText();
+                }
+                catch (Exception)
+                {
+                }
                 if (modifierKeys != Keys.Control && xClp.StartsWith("http") &&//xClp != "" &&
                     xClp.Length > "https://ctext.org/".Length + "#editor".Length
                     && xClp.Substring(0, "https://ctext.org/".Length) == "https://ctext.org/"
@@ -788,6 +795,7 @@ namespace WindowsFormsApp1
         internal static void ResetLastValidWindow()
         {
             string wh;
+            retry:
             try
             {
                 wh = br.driver.CurrentWindowHandle;
@@ -800,10 +808,37 @@ namespace WindowsFormsApp1
                 br.LastValidWindow = wh;
             else
             {
-                wh = br.LastValidWindow;
-                if (br.driver.WindowHandles.Count > 0 && !br.driver.WindowHandles.Contains(wh))
-                    br.LastValidWindow = br.driver.WindowHandles.Last();
-                br.driver.SwitchTo().Window(wh);
+                try
+                {
+                    wh = br.LastValidWindow;
+                    if (br.driver.WindowHandles.Count > 0 && !br.driver.WindowHandles.Contains(wh))
+                        br.LastValidWindow = br.driver.WindowHandles.Last();
+                    br.driver.SwitchTo().Window(wh);
+
+                }
+                catch (Exception ex)
+                {
+                    switch (ex.HResult)
+                    {
+                        case -2146233088:
+                            if (ex.Message.StartsWith("disconnected: not connected to DevTools"))//disconnected: not connected to DevTools
+                                                                                                 //(failed to check if window was closed: disconnected: not connected to DevTools)
+                                                                                                 //  (Session info: chrome = 129.0.6668.59)
+                            {
+                                Debugger.Break();
+                                br.driver = null;
+                                br.DriverNew();
+                                goto retry;
+                            }
+                            else
+                                goto default;
+                            break;
+                        default:
+                            Console.WriteLine(ex.HResult + ex.Message);
+                            Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
+                            break;
+                    }
+                }
             }
         }
 
@@ -3119,14 +3154,17 @@ namespace WindowsFormsApp1
                         AvailableInUseBothKeysMouse();
                         //清除前一個要被取代的單字
                         undoRecord(); PauseEvents();
-                        textBox1.SelectedText = character.SubstringByTextElements(1, 1);
-                        textBox1.Text = textBox1.Text.Replace(character.SubstringByTextElements(0, 1), character.SubstringByTextElements(1, 1));
-                        ResumeEvents();
-                        textBox1.Select(s, 0);
+                        textBox1.SelectedText = character.SubstringByTextElements(0, 1);
+                        textBox1.Select(textBox1.SelectionStart - character.SubstringByTextElements(0, 1).Length, character.SubstringByTextElements(0, 1).Length);
+                        //textBox1.Text = textBox1.Text.Replace(character.SubstringByTextElements(0, 1), character.SubstringByTextElements(1, 1));
+                        replaceWord(character.SubstringByTextElements(0, 1), character.SubstringByTextElements(1, 1));
+                        ResumeEvents(); undoRecord();
+                        textBox1.Select(textBox1.SelectionStart, 0);
                         if (overTypeMode) insertMode = !overTypeMode;
                     }
                     return;
                 }
+
                 if (e.KeyCode == Keys.G)
                 {//Alt + g
                     e.Handled = true;
@@ -3718,7 +3756,7 @@ namespace WindowsFormsApp1
             x = textBox1.SelectedText;
             x = x.EndsWith(Environment.NewLine) ? x.Substring(0, x.Length - 2) : x;
             x = x.EndsWith("\n") ? x.Substring(0, x.Length - 1) : x;
-            Clipboard.SetText(x);
+            if (x != string.Empty) Clipboard.SetText(x);
             return x;
         }
 
@@ -9432,15 +9470,16 @@ namespace WindowsFormsApp1
                     undoRecord(); stopUndoRec = true; PauseEvents();
                     autoKeysTitleCodeAndPreWideSpace();
                     ResumeEvents(); stopUndoRec = false;
-                    if (!textBox1.Text.IsNullOrEmpty())
-                        try
-                        {
-                            Clipboard.SetText(textBox1.Text);
-                        }
-                        catch (Exception)
-                        {
-                            playSound(soundLike.error, true);
-                        }
+                    undoRecord();
+                    //if (!textBox1.Text.IsNullOrEmpty())
+                    //    try
+                    //    {
+                    //        Clipboard.SetText(textBox1.Text);
+                    //    }
+                    //    catch (Exception)
+                    //    {
+                    //        playSound(soundLike.error, true);
+                    //    }
                     return;
 
                 }
@@ -9694,6 +9733,8 @@ namespace WindowsFormsApp1
                 pasteAllOverWrite = true;//防止隱藏到系統任務列去
                 if (reMarkFlag) x += "<p>";
                 undoRecord(); stopUndoRec = true; PauseEvents();
+                if (selAll && textBox1.SelectedText != textBox1.Text)
+                    textBox1.SelectAll();
                 textBox1.SelectedText = CnText.BooksPunctuation(ref x, true);
 
                 pasteAllOverWrite = p;
@@ -11370,7 +11411,7 @@ namespace WindowsFormsApp1
                                         iweConfirm.Click();
                                     if (DialogResult.Cancel ==
                                         Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("Please confirm that you are human! 請輸入認證圖案"
-                                        + Environment.NewLine + Environment.NewLine + "請輸入完畢後再按「確定」！",string.Empty,false))
+                                        + Environment.NewLine + Environment.NewLine + "請輸入完畢後再按「確定」！", string.Empty, false))
                                     {
                                         Debugger.Break();
                                     }

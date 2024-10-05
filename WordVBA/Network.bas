@@ -545,9 +545,13 @@ Sub 讀入古籍酷自動標點結果()
     Rem 清除原來的標點符號，以利比對與插入
     For Each e In Selection.Characters
         'If e = "。" Then Stop 'just for test
-        If VBA.InStr(ignoreMarker, e.text) = 0 Then '書名號、引號不處理（由前面的程式碼處理）
-            If puncts.PunctuationDictionary.Exists(e.text) Then
-                e.text = vbNullString
+        If e.text = "　" Then '空格要清除（《古籍酷》自動標點會清除空格）
+            e.text = vbNullString
+        Else
+            If VBA.InStr(ignoreMarker, e.text) = 0 Then '書名號、引號不處理（由前面的程式碼處理）
+                If puncts.PunctuationDictionary.Exists(e.text) Then
+                    e.text = vbNullString
+                End If
             End If
         End If
     Next e
