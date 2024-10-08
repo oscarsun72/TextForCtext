@@ -24,10 +24,10 @@ Sub CreatePunctuationMap()
     Dim map As New Scripting.Dictionary
     Dim i As Long
     For i = 1 To Len(text)
-        Dim C As String
-        C = VBA.Mid(text, i, 1)
-        If C Like "[!A-Za-z0-9 ]" Then
-            map.Add i, C
+        Dim c As String
+        c = VBA.Mid(text, i, 1)
+        If c Like "[!A-Za-z0-9 ]" Then
+            map.Add i, c
         End If
     Next i
     

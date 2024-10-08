@@ -1045,19 +1045,24 @@ Function Search(searchWhatsUrl As String) As String
     Shell TextForCtextWordVBA.Network.GetDefaultBrowserEXE & searchWhatsUrl & encode
     Search = searchWhatsUrl & encode
 End Function
-
+Rem 20241006 以Google檢索《中國哲學書電子化計劃》 Alt + t
+Sub SearchSite()
+    SeleniumOP.GoogleSearch "site:https://ctext.org/ """ + Selection.text + """"
+End Sub
+Rem Ctrl + s,j ： 以選取文字 search史記三家注並於於選取處插入檢索結果之超連結 （s=shi 史；j=ji 記 ） 20241005
 Sub search史記三家注()
     ActiveDocument.Hyperlinks.Add Selection.Range, Search(" https://ctext.org/wiki.pl?if=gb&res=384378&searchu=")
 End Sub
-
+Rem Ctrl + Alt + = ： 以選取的文字檢索 CTP 所收阮元《十三經注疏·周易正義》並在選取文字上加上該檢索結果頁面之超連結
 Sub search周易正義_阮元十三經注疏()
-    'Ctrl + Alt + =
     Dim url As String
     url = 中國哲學書電子化計劃.Search(" https://ctext.org/wiki.pl?if=gb&res=315747&searchu=")
     ActiveDocument.Hyperlinks.Add Selection.Range, url
 End Sub
-
-
+Rem Ctrl + shift + y ： 以選取文字 search《四部叢刊》本《周易》並於於選取處插入檢索結果之超連結(y:yi 易) 20241005
+Sub search周易_四部叢刊本()
+    ActiveDocument.Hyperlinks.Add Selection.Range, Search(" https://ctext.org/wiki.pl?if=gb&res=129518&searchu=")
+End Sub
 Sub 讀史記三家注()
 Dim d As Document, t As table
 Set d = Documents.Add

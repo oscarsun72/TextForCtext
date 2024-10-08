@@ -4,7 +4,7 @@ Public FsO As Object, UserProfilePath As String
 Public Declare PtrSafe Function sndPlaySound32 Lib "winmm.dll" Alias "sndPlaySoundA" (ByVal lpszSoundName As String, ByVal uFlags As Long) As Long
 '
 'https://msdn.microsoft.com/zh-tw/library/office/ff192913.aspx
-Private Declare PtrSafe Function OpenClipboard Lib "user32.dll" (ByVal hwnd As Long) As Long
+Private Declare PtrSafe Function OpenClipboard Lib "user32.dll" (ByVal hWnd As Long) As Long
 Private Declare PtrSafe Function EmptyClipboard Lib "user32.dll" () As Long
 Private Declare PtrSafe Function CloseClipboard Lib "user32.dll" () As Long
 Private Declare PtrSafe Function IsClipboardFormatAvailable Lib "user32.dll" (ByVal wFormat As Long) As Long
@@ -17,15 +17,15 @@ Private Declare PtrSafe Function GlobalSize Lib "kernel32" (ByVal hMem As Long) 
 Private Declare PtrSafe Function lstrcpy Lib "kernel32.dll" Alias "lstrcpyW" (ByVal lpString1 As Long, ByVal lpString2 As Long) As Long
 
 Public Declare PtrSafe Function ShellExecute Lib "shell32.dll" Alias "ShellExecuteA" _
-    (ByVal hwnd As Long, ByVal lpOperation As String, ByVal lpFile As String, _
+    (ByVal hWnd As Long, ByVal lpOperation As String, ByVal lpFile As String, _
   ByVal lpParameters As String, ByVal lpDirectory As String, _
   ByVal nShowCmd As Long) As Long 'https://www.mrexcel.com/board/threads/vba-api-call-issues-with-show-window-activation.920147/
 Public Declare PtrSafe Function ShowWindow Lib "user32" _
-  (ByVal hwnd As Long, ByVal nCmdSHow As Long) As Long
+  (ByVal hWnd As Long, ByVal nCmdSHow As Long) As Long
 Public Declare PtrSafe Function FindWindow Lib "user32" Alias "FindWindowA" _
   (ByVal lpClassName As String, ByVal lpWindowName As String) As Long
   
-Public Declare PtrSafe Function SetForegroundWindow Lib "user32" (ByVal hwnd As Long) As Boolean
+Public Declare PtrSafe Function SetForegroundWindow Lib "user32" (ByVal hWnd As Long) As Boolean
   
   
   
@@ -242,7 +242,8 @@ Sub 按下掃描鍵() 'ctrl+1 2008/7/23 F7'原為ToolsProofing
     'AppActivate "圖書管理"
 End Sub
 
-Sub 查詢奇摩() 'Ctrl+Shift+Y
+Sub 查詢奇摩()
+    'Ctrl +Shift + Y（似已取消了！ 20241006改由查找《四部叢刊》本《周易》並插入超連結）
     On Error GoTo ErrMsg '只查google
     'FollowHyperlink "http://tw.search.yahoo.com/search", , , , "fr=slv1-ptec&p=" & Screen.ActiveControl.seltext
     Selection.Copy
@@ -260,7 +261,7 @@ ErrMsg:
 End Sub
 
 Sub 查詢Google()
-    '快速鍵'Ctrl+shift+g'2011/8/11'2021/4/15此指定鍵已為字數統計用，今改指定為Alt+Shift+g、Alt+g
+    '快速鍵'Ctrl + shift + g'2011/8/11'2021/4/15此指定鍵已為字數統計用，今改指定為Alt+Shift+g、Alt+g
     On Error GoTo ErrMsg
     Const f As String = "網路搜尋_元搜尋-同時搜多個引擎.EXE"
     Const st As String = "C:\Program Files\孫守真\網路搜尋_元搜尋-同時搜多個引擎\"

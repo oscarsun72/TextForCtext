@@ -525,10 +525,13 @@ For Each d In Documents
     If d.FullName <> dn Then d.Close wdDoNotSaveChanges
 Next
 End Sub
-
-Sub 在本文件中尋找選取字串() 'Ctrl+Alt+Down 2020/10/4改用 Ctrl+Shift+PageDown
+Rem 'Ctrl+Alt+Down 2020/10/4改用 Ctrl + Shift + PageDown
+Sub 在本文件中尋找選取字串()
     'CheckSavedNoClear
-    If ActiveDocument.path <> "" Then If ActiveDocument.Saved = False Then ActiveDocument.Save
+    Dim d As Document
+    Set d = Selection.Document
+    'If ActiveDocument.path <> "" Then If ActiveDocument.Saved = False Then ActiveDocument.Save
+    If d.path <> "" Then If d.Saved = False Then d.Save
     Dim ins(4) As Long, MnText As String, FnText As String, FdText As String, st As Long, ed As Long
     On Error GoTo errHH
     With Selection '快速鍵：Alt+Ctrl+Down
@@ -539,7 +542,7 @@ Sub 在本文件中尋找選取字串() 'Ctrl+Alt+Down 2020/10/4改用 Ctrl+Shift+PageDown
         FdText = 文字處理.trimStrForSearch(.text, Selection)
         st = .start: ed = .End
         .Collapse wdCollapseEnd
-        MnText = .Document.StoryRanges(wdMainTextStory) '變數化處理較快2003/4/8
+        MnText = d.StoryRanges(wdMainTextStory) '變數化處理較快2003/4/8
     '    MnText = ActiveDocument.Range '2010/2/5
         ins(1) = InStr(MnText, FdText)
         ins(2) = InStrRev(MnText, FdText)
@@ -612,7 +615,8 @@ Sub 在本文件中尋找選取字串() 'Ctrl+Alt+Down 2020/10/4改用 Ctrl+Shift+PageDown
             If ins(3) = ins(4) And .Information(wdInFootnote) = True Then _
                 MsgBox "本文只有註腳此處有!", vbInformation, "尋找：「" & FdText & "」": Exit Sub
     '        With .Document.StoryRanges(ins(1)).Find
-            If ins(1) < ins(2) Then .HomeKey wdStory 'ins(2)是文件本文最後出現的位置故 20241002
+'            If ins(1) < ins(2) And ed = VBA.InStrRev(GetFullTextWithFields(d.StoryRanges(wdMainTextStory)), FdText) Then .HomeKey wdStory 'ins(2)是文件本文最後出現的位置故 20241002
+                                                         'ins(2) = InStrRev(MnText, FdText)
             With .Find
                 .ClearFormatting
                 .ClearAllFuzzyOptions
@@ -620,8 +624,8 @@ Sub 在本文件中尋找選取字串() 'Ctrl+Alt+Down 2020/10/4改用 Ctrl+Shift+PageDown
                 .Forward = True
                 .Wrap = wdFindAsk
                 .MatchCase = True
-                .text = FdText '.Parent.Text
-                .Execute
+                '.text = FdText '.Parent.Text
+                .Execute FdText
     '            .Parent.Select'用Range物件得用此方法才能改變選取
             End With
         End If
@@ -631,13 +635,31 @@ Sub 在本文件中尋找選取字串() 'Ctrl+Alt+Down 2020/10/4改用 Ctrl+Shift+PageDown
 errHH:
     Select Case Err.Number
         Case 7 '記憶體不足
-            ActiveDocument.ActiveWindow.Selection.Find.Execute Selection.text
+            d.ActiveWindow.Selection.Find.Execute Selection.text
         Case Else
             MsgBox Err.Number & Err.Description
             Resume
     End Select
 End Sub
-
+Rem 20241006 creedit_with_Copilot大菩薩：https://sl.bing.net/hLsq8pUTNKu
+Rem 還是有問題，與 End屬性值並不同！
+Function GetFullTextWithFields(rng As Range) As String
+    
+    Dim fld As Field
+    Dim fullText As String
+    
+    ' 取得範圍中的所有文字
+    fullText = rng.text
+    
+    ' 遍歷所有功能變數並將其結果和代碼插入到相應位置
+    For Each fld In rng.Fields
+        'fld.Select
+        fullText = Replace(fullText, fld.result.text, fld.code.text)
+    Next fld
+    
+    ' 傳回包含功能變數等值的純文字
+    GetFullTextWithFields = fullText
+End Function
 
 Sub 書籤_以選取文字作為書籤() 'ALT+SHIFT+B
 
@@ -904,7 +926,10 @@ Function mark易學關鍵字(Optional pasteRange As Range, Optional doNotMark As Bool
         If Not Docs.isDocumentContainClipboardText_IgnorePunctuation(d, clipBTxt) Then
             Rem 文本相似度比對
             Dim similarCompare As New Collection
-            Set similarCompare = Docs.similarTextCheckInSpecificDocument(d, clipBTxt)
+            Dim clipBTxtSub As String, sChr13inClipBTxtSub As Long '從頭少一段，再作檢查
+            clipBTxtSub = clipBTxt
+checkAgain:
+            Set similarCompare = Docs.similarTextCheckInSpecificDocument(d, clipBTxtSub)
             If similarCompare.item(1) Then
                 word.Application.Activate
 '                AppActivate word.ActiveWindow.Caption
@@ -923,6 +948,12 @@ Function mark易學關鍵字(Optional pasteRange As Range, Optional doNotMark As Bool
                     End If
                     Set similarCompare = Nothing
                     GoTo exitSub
+                Else
+                    sChr13inClipBTxtSub = VBA.InStr(clipBTxtSub, Chr(13))
+                    If sChr13inClipBTxtSub > 0 Then
+                        clipBTxtSub = VBA.Mid(clipBTxtSub, sChr13inClipBTxtSub + 1)
+                        GoTo checkAgain
+                    End If
                 End If
             End If
             Set similarCompare = Nothing
@@ -1020,7 +1051,9 @@ pasteAnyway:
         GoSub refres
         SystemSetup.playSound 1.921
         
-        文字處理.FixFontname rngMark
+        If Not rngMark Is Nothing Then
+            文字處理.FixFontname rngMark
+        End If
         
         returnVaule = True
         
@@ -1952,7 +1985,9 @@ Sub ChangeFontOfSurrogatePairs_Range(fontName As String, rngtoChange As Range, O
                             ' Change the font name to HanaMinB
                             ' Change the font name to fontName
                         End Select
-                        If change Then rng.font.Name = fontName '"HanaMinB"
+                        If change Then
+                            rng.font.Name = fontName '"HanaMinB"
+                        End If
                     End If
                 End If
 '            End If
@@ -2004,21 +2039,21 @@ End Sub
 
 Rem 20230224 chatGPT大菩薩或Bing in Skype 菩薩:
 Sub FindMissingCharacters() '這應該只是找文件中的字不能以新細明體、標楷體來顯示者
-    Dim Doc As Document
-    Set Doc = ActiveDocument
+    Dim doc As Document
+    Set doc = ActiveDocument
     
     '定義新細明體和標楷體字型的集合
     Dim nmf As font
-    Set nmf = Doc.Styles("Normal").font
+    Set nmf = doc.Styles("Normal").font
     Dim kff As font
-    Set kff = Doc.Styles("段落").font
+    Set kff = doc.Styles("段落").font
     
     Dim p As Paragraph
     Dim r As Range
     Dim c As Variant
     
     ' 遍歷文檔中的每個段落和字符
-    For Each p In Doc.Paragraphs
+    For Each p In doc.Paragraphs
         For Each r In p.Range.Characters
             
             ' 判斷字符是否在新細明體或標楷體字型中

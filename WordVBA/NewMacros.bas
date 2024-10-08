@@ -586,7 +586,7 @@ End Sub
 
 Sub 在圖書管理中尋找選取字串() '原名「尋找選取字串」
 Dim Mystr As String, ctl As Control, ctlSourceName As String ', f As Byte '快速鍵:Alt+Z
-Dim C As Integer
+Dim c As Integer
 CheckSaved
 
 With Selection
@@ -620,8 +620,8 @@ If .Type = wdSelectionNormal Then ' <> wdNoSelection OR wdSelectionIP Then '不為
 '            End If
 '        End If
 '    Next Ctl
-cl: For C = 0 To myaccess.screen.activeform.Controls.Count - 1 '2006/4/21
-        Set ctl = myaccess.screen.activeform.Controls(C)
+cl: For c = 0 To myaccess.screen.activeform.Controls.Count - 1 '2006/4/21
+        Set ctl = myaccess.screen.activeform.Controls(c)
         If TypeName(ctl) = "textbox" Then
             If ctl.ControlSource Like "[札劄]記" Then '= "札記" Then
                 ctl.SetFocus
@@ -629,7 +629,7 @@ cl: For C = 0 To myaccess.screen.activeform.Controls.Count - 1 '2006/4/21
                 Exit For
             End If
         End If
-    Next C
+    Next c
 
 '    If TypeName(Ctl) = "Nothing" Then
     If ctl Is Nothing Then
@@ -834,7 +834,7 @@ If .Type = wdSelectionNormal Then ' <> wdNoSelection OR wdSelectionIP Then '不為
     .Find.Replacement.font.Underline = .font.Underline
     .Find.Replacement.font.Borders = .font.Borders
     .Find.Replacement.font.Outline = .font.Outline
-    .Find.Replacement.font.position = .font.position
+    .Find.Replacement.font.Position = .font.Position
     .Find.Replacement.font.Animation = .font.Animation
     .Find.Replacement.font.Spacing = .font.Spacing
     .Find.Replacement.font.EmphasisMark = .font.EmphasisMark
@@ -1326,7 +1326,7 @@ With ActiveDocument.bookmarks
 End With
 End Sub
 
-Sub 插入交互參照() '2003/3/28'指定鍵：Ctrl+Shift+Insert
+Sub 插入交互參照() '2003/3/28'指定鍵：Ctrl + Shift + Insert
 Dim CrossReference, i As Integer, CrossReferenceID As String
 Static doinsert As Boolean, WinID As Byte, DocWin As Byte
 Dim Winview As Byte, s As Long '2003/3/31
@@ -1547,8 +1547,8 @@ With Selection '指定鍵：Alt+Ctrl+Up
                         d.Activate
                         With d.ActiveWindow
                             .ScrollIntoView Selection
-                            If .WindowState = wdWindowStateMinimize Then
-                                .WindowState = wdWindowStateNormal
+                            If .windowState = wdWindowStateMinimize Then
+                                .windowState = wdWindowStateNormal
                             End If
                         End With
 '                        With .Application.ActiveWindow
@@ -1657,7 +1657,7 @@ Again: If winNum <> 0 Then .Application.Windows(winNum).Activate
                 .Execute
                 .Parent.Select
                 With .Application.ActiveWindow
-                    If .WindowState = wdWindowStateMinimize Then .WindowState = wdWindowStateMaximize
+                    If .windowState = wdWindowStateMinimize Then .windowState = wdWindowStateMaximize
                 End With
             End With
         End With
@@ -1687,7 +1687,7 @@ End Select
 End Sub
 
 Public Sub 比對選取文字()  '2003/4/4(不包括任一符號)
-'指定鍵: Atl+Ctrl+Shift+Up(↑)
+'指定鍵: Atl + Ctrl + Shift + Up(↑)
 CheckSavedNoClear
 '字元表：between -24667 and 19968
 'Selection = vba.Chrw(字元表)
@@ -2029,7 +2029,7 @@ End Sub
 Sub 瀏覽瀚典_自動() '2003/4/6
 With Selection
     If IsNumeric(.Range) Then
-        Dim r As Integer, C As Integer, p1 As Long, p2 As Long
+        Dim r As Integer, c As Integer, p1 As Long, p2 As Long
         Do
             '如果倒著找或原地找，則表示找完了，須+1再繼續找。因為Find設定為Wrap:=wdFindContinue
             If p1 >= .start Then
@@ -2046,12 +2046,12 @@ With Selection
                 .Execute Forward:=True, Wrap:=wdFindContinue ' Wrap:=wdFindAsk
             End With
             If .Document.Range(.start - 1, .start) Like VBA.Chr(13) Or p2 >= p1 Then
-                MsgBox "已完成" & C & "次替換！", vbInformation
+                MsgBox "已完成" & c & "次替換！", vbInformation
                 Exit Do
             End If
             If .Range = r And .Document.Range(.End, .End + 1) Like "." Then
                 .Range = VBA.Chr(13) & r
-                C = C + 1
+                c = c + 1
                 p2 = .start
                 .MoveRight
             '要轉成字串，所得長度方為字串長度，數字者，Len()則得半長爾
@@ -2065,7 +2065,7 @@ End Sub
 Sub 瀏覽瀚典_檢查() '2003/4/6
 With Selection
     If IsNumeric(.Range) Then
-        Dim r As Integer, R1 As Integer, C As Integer, p1 As Long
+        Dim r As Integer, R1 As Integer, c As Integer, p1 As Long
         Do
             If p1 >= .start Then GoTo Out ' Exit Do
             r = CInt(.Range)
@@ -2080,12 +2080,12 @@ With Selection
                 .text = r 'CStr(r)
                 .Execute Forward:=True, Wrap:=wdFindContinue       ', Wrap:=wdFindContinue ' Wrap:=wdFindAsk
             End With
-            C = C + 1
+            c = c + 1
             If R1 = CInt(.Range) And _
                 (Not .Document.Range(.start - 1, .start) Like VBA.Chr(10) _
                     Or Not .Document.Range(.start - 1, .start) Like VBA.Chr(13)) _
                     And .Document.Range(.End, .End + 1) Like "." Then
-Out:            MsgBox "已檢查" & C & "次！", vbExclamation
+Out:            MsgBox "已檢查" & c & "次！", vbExclamation
                 Exit Do
             End If
         Loop
@@ -2095,7 +2095,7 @@ End Sub
 
 Sub 清除文句中斷行() '2003/4/7
 Dim a As String, b As String
-Dim C As Integer, p As Integer, d As Long, StepByStep As Byte
+Dim c As Integer, p As Integer, d As Long, StepByStep As Byte
 Const NoArrange = 255
 StepByStep = MsgBox("要逐處檢視嗎？", vbYesNoCancel + vbDefaultButton2 + vbQuestion)
 If StepByStep = vbCancel Then End
@@ -2113,7 +2113,7 @@ With Selection
     Do
         .Find.ClearFormatting
         .Find.Execute findtext:="^p", Forward:=True
-        C = C + 1
+        c = c + 1
         a = .Range.Previous '此法較快
 '        a = .Document.Range(.Start - 1, .Start)
 '        If .End + 1 > Len(.Document.Content) Then Exit Do
@@ -2172,7 +2172,7 @@ With Selection
             d = d - 2 '消除換行符號(vba.Chr(13)會併復位符號(vba.Chr(10)也取消掉,故須減二
         End If
     Loop
-    MsgBox "完成" & C & "次檢查，" & p & "次置換！", vbInformation
+    MsgBox "完成" & c & "次檢查，" & p & "次置換！", vbInformation
 End With
 End Sub
 
@@ -2560,7 +2560,7 @@ End Sub
 
 Sub 貼上ut內容()
 Attribute 貼上ut內容.VB_ProcData.VB_Invoke_Func = "Normal.NewMacros.巨集11"
-    Dim tb As Table, s As Long, ur As UndoRecord, rng As Range
+    Dim tb As table, s As Long, ur As UndoRecord, rng As Range
     SystemSetup.stopUndo ur, "貼上ut內容"
     word.Application.ScreenUpdating = False
     s = Selection.start
@@ -2575,7 +2575,7 @@ Attribute 貼上ut內容.VB_ProcData.VB_Invoke_Func = "Normal.NewMacros.巨集11"
     End If
     'For Each tb In Selection.Document.Tables
     For Each tb In rng.Tables
-        tb.Rows.ConvertToText Separator:=wdSeparateByParagraphs, _
+        tb.rows.ConvertToText Separator:=wdSeparateByParagraphs, _
             NestedTables:=True
     Next tb
 '    Selection.Find.ClearFormatting

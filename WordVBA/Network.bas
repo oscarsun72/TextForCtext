@@ -279,7 +279,9 @@ Sub 查說文解字並取回其解釋欄位段注及網址值插入至插入點位置()
     Dim ar 'As Variant
     Dim windowState As word.WdWindowState      '記下原來的視窗模式
     windowState = word.Application.windowState '記下原來的視窗模式
+    
     ar = SeleniumOP.LookupShuowenOrg(Selection.text, True)
+    
     If ar(0) = vbNullString Then
         word.Application.Activate
         MsgBox "找不到，或網頁當了或改版了！", vbExclamation
@@ -436,63 +438,159 @@ Sub 查異體字字典並取回其說文釋形欄位及網址值插入至插入點位置()
         End With
     End If
 End Sub
-Rem 指定卦名再操作 20241004 Alt + Shift + y (y:易)
+Rem 1.指定卦名再操作 20241004 Alt + Shift + y (y:易) 。2.若游標所在為《易學網》的網址，則將其內容讀入到文件（於該連結段落後插入）
 Sub 查易學網易經周易原文指定卦名文本_並取回其純文字值及網址值插入至插入點位置()
     文字處理.ResetSelectionAvoidSymbols
     Dim gua As String
+    
     If Selection.Characters.Count > 2 Then
 errExit:
         word.Application.Activate
         VBA.MsgBox "卦名有誤! 請重新選取。", vbExclamation
         Exit Sub
     End If
-    
+
     gua = Selection.text
     
-    If Selection.Characters.Count = 2 Then
-        If Selection = "習坎" Then
-            If Selection.Characters(2) = "坎" Then
-                gua = "坎"
+    Dim ur As UndoRecord
+    SystemSetup.stopUndo ur, "查易學網易經周易原文指定卦名文本_並取回其純文字值及網址值插入至插入點位置"
+
+    Dim result(1) As String, iwe As SeleniumBasic.IWebElement
+    '若游標所在為《易學網》的網址，則將其內容讀入到文件
+    If Selection.Range.Hyperlinks.Count = 1 Then
+        If VBA.Left(Selection.Range.Hyperlinks(1).Address, VBA.Len("https://www.eee-learning.com/")) = "https://www.eee-learning.com/" Then
+            If SeleniumOP.OpenChrome(Selection.Range.Hyperlinks(1).Address) Then
+                Set iwe = WD.FindElementByCssSelector("#block-bartik-content > div > article > div > div.clearfix.text-formatted.field.field--name-body.field--type-text-with-summary.field--label-hidden.field__item")
+                If Not iwe Is Nothing Then
+                    result(0) = iwe.GetAttribute("textContent")
+                    result(1) = Selection.Range.Hyperlinks(1).Address
+                    Selection.MoveUntil Chr(13)
+                    Selection.TypeText Chr(13)
+                    Selection.Style = word.wdStyleNormal '"內文"
+                    GoTo insertText:
+                End If
+            End If
+        Else
+            GoTo yiGua
+        End If
+    Else
+yiGua:
+        If Selection.Characters.Count = 2 Then
+            If Selection = "習坎" Then
+                If Selection.Characters(2) = "坎" Then
+                    gua = "坎"
+                End If
+            End If
+        End If
+        
+        On Error GoTo eH:
+        If Keywords.周易卦名_卦形_卦序.Exists(gua) = False Then
+            If Keywords.易學異體字典.Exists(gua) = False Then
+                GoTo errExit
+            Else
+                gua = Keywords.易學異體字典(gua)
             End If
         End If
     End If
+    '以上防呆檢查
     
-    On Error GoTo eH:
-    If Keywords.周易卦名_卦形_卦序.Exists(gua) = False Then
-        If Keywords.易學異體字典.Exists(gua) = False Then
-            GoTo errExit
-        Else
-            gua = Keywords.易學異體字典(gua)
-        End If
-    End If
+    '以下基本檢查通過後
+    Dim windowState As word.WdWindowState      '記下原來的視窗模式
+    windowState = word.Application.windowState '記下原來的視窗模式
     
     gua = Keywords.周易卦名_卦形_卦序(gua)(1)
 
-    Dim result As String
-    If SeleniumOP.grabEeeLearning_IChing_ZhouYi_originalText(gua, result) = False Then
+    Dim fontsize As Single
+    If Not SeleniumOP.grabEeeLearning_IChing_ZhouYi_originalText(gua, result) Then
         word.Application.Activate
         VBA.MsgBox "找不到，或網頁改了或掛了……", vbInformation
         Exit Sub
     End If
+insertText:
     word.Application.Activate
-    If VBA.InStr(result, "歷代注本：") Then
+    If VBA.InStr(result(0), "歷代注本：") Then
         If VBA.vbOK = MsgBox("是否清除「歷代注本：」以後的文字？", VBA.vbQuestion + VBA.vbOKCancel) Then
-            result = VBA.Left(result, VBA.InStr(result, "歷代注本：") - 1)
+            result(0) = VBA.Left(result(0), VBA.InStr(result(0), "歷代注本：") - 1)
         End If
     End If
-    Dim ur As UndoRecord, s As Long
-    SystemSetup.stopUndo ur, "查易學網易經周易原文指定卦名文本_並取回其純文字值及網址值插入至插入點位置"
+    Dim s As Long, ed As Long
     With Selection
-        If .Type = wdSelectionIP Then .Delete
+        fontsize = VBA.IIf(.font.Size = 9999999, 12, .font.Size) - 4
+        If fontsize < 0 Then fontsize = 10
+        If .Type = wdSelectionIP And .text <> Chr(13) Then
+            .Delete
+        End If
         s = .start
-        .TypeText result
-                
+        .TypeText VBA.Replace(result(0), ChrW(160), vbNullString)
         文字處理.FixFontname .Document.Range(s, Selection.End)
-        
+        ed = 讀入網路資料後_於其後植入網址及設定格式(Selection.Range, result(1), fontsize)
         .Document.Range(s, s).Select
+        讀入網路資料後_還原視窗狀態 .Document.ActiveWindow, windowState
     End With
+    
+    '保留歷代注本及其超連結
+    Dim rngBooks As Range, p As Paragraph, book As String, rngLink As Range
+    Set rngBooks = Selection.Document.Range
+    If VBA.InStr(result(0), "歷代注本：") Then
+        With rngBooks
+            With .Find
+                .ClearFormatting
+                If .Execute("歷代注本：", , , , , , True, wdFindStop) Then
+                    With rngBooks '"歷代注本："所在段落範圍
+                        .Style = wdStyleHeading1
+                        .font.Size = 22
+                        .ParagraphFormat.LineSpacingRule = wdLineSpaceSingle '單行間距
+                    End With
+                    rngBooks.End = ed '設定為全部歷代注本的範圍
+                    For Each p In rngBooks.Paragraphs
+                        If p.Range.text <> Chr(13) And VBA.Left(p.Range.text, 4) <> "http" And VBA.Left(p.Range.text, 5) <> "歷代注本：" Then
+                            book = VBA.Left(p.Range.text, VBA.Len(p.Range.text) - 1)
+                            Set iwe = SeleniumOP.WD.FindElementByLinkText(book)
+                            If Not iwe Is Nothing Then
+                                Set rngLink = p.Range.Document.Range(p.Range.start, p.Range.End - 1)
+                                With rngLink
+                                    .Hyperlinks.Add rngLink, iwe.GetAttribute("href")
+                                    .Style = wdStyleHeading2 '標題 2
+                                    .font.Size = 18
+                                    .ParagraphFormat.LineSpacingRule = wdLineSpaceSingle '單行間距
+                                End With
+                            End If
+                        End If
+                    Next p
+                End If
+            End With
+        End With
+    End If
+    
+    '閱讀古書    '　 閱讀古圖書
+    Dim chkBook As String
+    If VBA.InStr(result(0), "閱讀古書") Then
+        chkBook = "閱讀古書,"
+    ElseIf VBA.InStr(result(0), "閱讀古圖書") Then
+        chkBook = "閱讀古圖書"
+    Else
+'        Stop 'for check
+        GoTo finish
+    End If
+    If chkBook <> VBA.vbNullString Then
+        Set rngBooks = Selection.Document.Range(s, ed)
+        With rngBooks.Find
+            .ClearFormatting
+            If .Execute(chkBook, , , , , , True, wdFindStop) Then
+'                rngBooks.Paragraphs(1).Range.text = "　" & chkBook & Chr(13)
+'                Set iwe = WD.FindElementByPartialLinkText("閱讀古書")
+'                If Not iwe Is Nothing Then
+                    rngBooks.SetRange rngBooks.Paragraphs(1).Range.start, rngBooks.Paragraphs(1).Range.End - 1
+                    rngBooks.Hyperlinks.Add rngBooks, result(1) 'iwe.GetAttribute("href")
+'                End If
+            End If
+        End With
+    End If
+
+finish:
     SystemSetup.contiUndo ur
     Exit Sub
+
 eH:
     Select Case Err.Number
         Case Else
@@ -501,8 +599,49 @@ eH:
             Resume
     End Select
 End Sub
+Rem 20241006 《看典古籍·古籍全文檢索》 Ctrl + k,d
+Sub 查看典古籍古籍全文檢索()
+    文字處理.ResetSelectionAvoidSymbols
+    SeleniumOP.KandiangujiSearchAll Selection.text
+End Sub
+Rem 20241006 檢索《漢籍全文資料庫》 Alt + Shfit + h
+Sub 查漢籍全文資料庫()
+    文字處理.ResetSelectionAvoidSymbols
+    SeleniumOP.HanchiSearch Selection.text
+End Sub
+Rem 20241006 以Google檢索《中國哲學書電子化計劃》Alt + t
+Sub 查中國哲學書電子化計劃網域()
+    文字處理.ResetSelectionAvoidSymbols
+    中國哲學書電子化計劃.SearchSite
+End Sub
+Rem 20241006 rng 要處理的範圍，傳回結束的位置
+Private Function 讀入網路資料後_於其後植入網址及設定格式(rng As Range, url As String, fontsize As Single) As Long
+    With rng
+        '網址格式設定
+        .font.Size = fontsize
+        .InsertAfter url '插入網址
+        '.Collapse wdCollapseStart
+        讀入網路資料後_於其後植入網址及設定格式 = .End
+    End With
+End Function
+Rem 20241006 rng 要處理的範圍
+Private Sub 讀入網路資料後_還原視窗狀態(win As word.Window, windowState As word.WdWindowState)
+    
+    With win.Application
+        .Activate
+        With win
+            If .windowState = wdWindowStateMinimize Then
+                VBA.Interaction.DoEvents
+                .windowState = windowState
+                .Activate
+                VBA.Interaction.DoEvents
+            End If
+        End With
+    End With
+
+End Sub
 Sub 送交古籍酷自動標點()
-    'Alt + F10
+    'Alt + F10(此快速鍵待確認！）
     Dim ur As UndoRecord
     If Selection.Characters.Count < 10 Then
         MsgBox "字數太少，有必要嗎？請至少大於10字", vbExclamation
@@ -524,6 +663,7 @@ Sub 讀入古籍酷自動標點結果()
         MsgBox "字數太少，有必要嗎？請至少大於10字", vbExclamation
         Exit Sub
     End If
+    word.Application.ScreenUpdating = False
     Const ignoreMarker = "《》〈〉「」『』" '書名號、篇名號、引號不處理（由前面的程式碼處理）
     result = Selection.text
     Rem 書名號、引號之處理
@@ -589,6 +729,7 @@ Sub 讀入古籍酷自動標點結果()
             Selection.End = rng.End
         End If
     Next e
+    word.Application.ScreenUpdating = True
     SystemSetup.contiUndo ur
 End Sub
 Function GetUserAddress() As Boolean

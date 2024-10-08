@@ -296,9 +296,14 @@ Alt + x ：檢索《康熙字典網上版》（x=xi，「熙」漢語拼音）
 
 Alt + c ：檢索《漢語大詞典》（c=ci，「詞」漢語拼音）
 
+Alt + d ：以選取文字進行[《看典古籍·古籍全文檢索》](https://kandianguji.com/search_all) (d=dian 典) 20241008
+
+Alt + h ：以選取文字檢索[《漢籍全文資料庫》](https://hanchi.ihp.sinica.edu.tw/) (h=han 漢) 20241008
+
 Alt + F12 ：檢索《異體字字典》
 
 Ctrl + F12 ：檢索《國語辭典》
+
 ### 運行環境
 - 在textBox2輸入「mt」（Mute in Processing）在操作過程中靜音-不撥放音效
  > 此為切換式的、開關式的指令。即當播放音效時，會切換成不播放；當已靜音時，會恢復音效。
@@ -324,11 +329,18 @@ Ctrl + F12 ：檢索《國語辭典》
 - Alt + 1 ： 貼上複製自《中國哲學書電子化計劃》（CTP）的文字版之內容並在注文前後加上圓括弧。
 - Alt + 7 ： 將文件中的異體字轉正體字
 - Ctrl + Alt + = ： 以選取的文字檢索 CTP 所收阮元《十三經注疏·周易正義》並在選取文字上加上該檢索結果頁面之超連結
+- Ctrl + s,j ： 以選取文字 search史記三家注並於於選取處插入檢索結果之超連結 （s=shi 史；j=ji 記 ） 20241005
+- Ctrl + shift + y ： 以選取文字 search《四部叢刊》本《周易》並於於選取處插入檢索結果之超連結(y:yi 易) 20241005
 - Alt + shift + , 即  Alt + < ： 以選取的文字檢索文件中第一段所載之 CTP 所收本網址，並在選取文字上加上該檢索結果頁面之超連結
 - Ctrl + Alt + F10 或 Ctrl + Alt + F11： 讀入《古籍酷》自動標點所選取文字的結果
-- Alt + Shift + y ： 查[《易學網·易經［周易］原文》](https://www.eee-learning.com/article/571)指定卦名文本_並取回其純文字值及網址值插入至文件中插入點位置(y:易) 20241004
+- Alt + Shift + y ： 查[《易學網·易經［周易］原文》](https://www.eee-learning.com/article/571)指定卦名文本_並取回其純文字值及網址值插入至文件中插入點位置(y:yi 易) 20241004
+    > 若游標所在為《易學網》的網址，則將其網頁內容讀入到文件（於該連結段落後插入）
+- Ctrl + k,d  以文件中選取文字進行[《看典古籍·古籍全文檢索》](https://kandianguji.com/search_all) (k=kan 看；d=dian 典)
+- Alt + Shfit + h： 檢索《漢籍全文資料庫》 (h=han 漢)
+- Alt + t ： 以Google檢索《中國哲學書電子化計劃》 (t=CTP的t)20241006
+
 **以下功能，目前須先開啟TextForCtext才能使用。** 原理是以本軟件作為中介故。
-- Alt + , 或 Ctrl + Alt + , 或 Ctrl + Alt + F9 或 Alt + shift + F5 同在TextForCtext 的 Alt + , 與 Alt + F9 與 Alt + F5。《漢籍全文資料庫》或《中國哲學書電子化計劃》檢索《易》學關鍵字。蓋藉由本軟件介面作中介爾。
+- Alt + , 或 Ctrl + Alt + , 或 Ctrl + Alt + F9 或 Alt + shift + F5 或 Ctrl + Alt + F5 同在TextForCtext 的 Alt + , 與 Alt + F9 與 Alt + F5。《漢籍全文資料庫》或《中國哲學書電子化計劃》檢索《易》學關鍵字。蓋藉由本軟件介面作中介爾。
 - Alt + F10 以選取文字送交《古籍酷》自動標點
 - Alt + \` ： 貼上複製之內容時檢查是否已經錄入，在注文前後加上圓括弧，並標識《易》學關鍵字
 - Alt + Shift + \` ： 貼上複製自《漢籍全文資料庫》之內容時檢查是否已經錄入，在注文前後加上圓括弧，並標識《易》學關鍵字

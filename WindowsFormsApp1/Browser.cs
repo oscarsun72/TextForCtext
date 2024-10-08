@@ -22,6 +22,7 @@ using System.Net.Http.Headers;
 //using System.Net;
 //using System.Net.NetworkInformation;
 using System.Runtime.InteropServices;
+using System.Security.Policy;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -293,7 +294,30 @@ namespace TextForCtext
             set => _lastValidWindowHandle = value;
         }
 
+        /// <summary>
+        /// chromedriver被誤關時的處理 20241005
+        /// 發生"An unknown exception was encountered sending an HTTP request to the remote WebDriver server for URL …"例外情形時
+        /// </summary>
+        /// <param name="ex"></param>
+        /// <returns>是這個錯誤則傳回true </returns>
+        internal static bool ChromedriverLose(Exception ex)
+        {
+            if (ex.Message.StartsWith("An unknown exception was encountered sending an HTTP request to the remote WebDriver server for URL "))//An unknown exception was encountered sending an HTTP request to the remote WebDriver server for URL http://localhost:13451/session/6f6c77cfb73c5c388c6cdfd40a06b806/url. The exception message was: 傳送要求時發生錯誤。
+            {
+                killchromedriverFromHere();
+                driver = null;
+                DriverNew();
+                return true;
+            }
+            else
+            {
+                Console.WriteLine(ex.HResult + ex.Message);
+                Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
+                Debugger.Break();
+                return false;
+            }
 
+        }
         /// <summary>
         /// 20240731 Copilot大菩薩：Selenium WebDriver 瀏覽器畫面閃爍問題解決方法
         /// Unfortunately, Selenium WebDriver does not have a built-in feature like MS Word VBA’s ScreenUpdating = false to prevent the browser from updating the screen when switching windows. However, you can try a workaround by using JavaScript to minimize the visual impact. Here’s an example of how you might achieve this:
@@ -1025,7 +1049,8 @@ namespace TextForCtext
                 }
                 if (ie.Text != string.Empty)
                 {
-                    ie.SendKeys(OpenQA.Selenium.Keys.Control + "a");//會移動視窗焦點到文字方塊 ie（Quickedit_data_textbox）中
+                    //ie.SendKeys(OpenQA.Selenium.Keys.Control + "a");//會移動視窗焦點到文字方塊 ie（Quickedit_data_textbox）中
+                    SelectAllQuickedit_data_textboxContent();
                     ie.SendKeys(OpenQA.Selenium.Keys.Control + "c");
                     WindowsScrolltoTop();
                     //Clipboard.SetText(ie.Text);//.Text屬性會清除前首的全形空格，不適用！！20240313
@@ -1382,7 +1407,7 @@ namespace TextForCtext
                                 goto tryagain;
                             }
                             else if (ex.Message.StartsWith("session not created\nfrom disconnected: unable to connect to renderer (SessionNotCreated)"))//-2146233079session not created
-                                                                                                        //from disconnected: unable to connect to renderer(SessionNotCreated)
+                                                                                                                                                        //from disconnected: unable to connect to renderer(SessionNotCreated)
                             {
                                 //Debugger.Break();
                                 Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(@"請手動關閉Chrome瀏覽器，再按「ok」確定，以繼續");
@@ -8428,10 +8453,10 @@ internal static string getImageUrl() {
                 "咸恆","老陰", "老陽", "少陰", "少陽","十翼","四象","兩儀","大衍",
                 "无妄", "彖", "象曰", "象傳", "象日", "象云","大象","小象","象文", "筮", // 不支援標點檢索，如「, "象："」
                 "初九","九二","九三","九四","九五","上九","初六","六二","六三","六四","六五","上六","用九","用六", "繇辭","繇詞",
-                "隨時之義","庖有魚","包有魚","精義入神","豶豕","童牛","承之羞","雷在天上","錫馬", "蕃庶","晝日","三接","懲忿","窒欲","敬以直內","義以方外","迷後得主","利西南","品物咸章","天下大行","益動而", "日進無疆","頻巽","豚魚","頻復", "懲窒","閑邪","存誠","乾乾","悔吝","憧憧", "類萬物","柔順利貞","比之匪人","貞厲","履貞","履道坦坦","貞吉","悔亡","時義","健順", "內健而外順", "內健外順", "外順而內健", "外順內健","敦復","直方","開物成務","窮神知化", "夕惕","惕若","研幾極深","極深研幾","一陰一陽","允升","木上有水","勞民勸相","索而得","我有好爵","言有序","有聖人之道四","長子帥師","弟子輿尸","無悶","日用而不知", "日用不知","之道鮮","原始反終", "寂然不動", "感而遂通","朋從", "朋盍", "容民畜眾","有過則改","見善則遷","養正","養賢","知臨","臨大君", "默而成之","黙而成之","不言而信", "存乎德行","通天下之志","履正", "繼之者善", "仁者見之", "知者見之", "智者見之","屯其膏", "貞不字","翰音", "善不積","立成器", "與地之",
+                "隨時之義","庖有魚","包有魚","精義入神","豶豕","童牛","承之羞","雷在天上","錫馬", "蕃庶","晝日","三接","懲忿","窒欲","窒慾","敬以直內","義以方外","迷後得主","利西南","品物咸章","天下大行","益動而", "日進無疆","頻巽","豚魚","頻復", "懲窒","閑邪","存誠","乾乾","悔吝","憧憧", "類萬物","柔順利貞","比之匪人","貞厲","履貞","履道坦坦","貞吉","貞凶","悔亡","時義","健順", "內健而外順", "內健外順", "外順而內健", "外順內健","敦復","直方","開物成務","窮神知化", "夕惕","惕若","研幾極深","極深研幾","一陰一陽","允升","木上有水","勞民勸相","索而得","我有好爵","言有序","有聖人之道四","長子帥師","弟子輿尸","無悶","日用而不知", "日用不知","之道鮮","原始反終", "寂然不動", "感而遂通","朋從", "朋盍", "容民畜眾","有過則改","見善則遷","養正","養賢","知臨","臨大君", "默而成之","黙而成之","不言而信", "存乎德行","通天下之志","履正", "繼之者善", "仁者見之", "知者見之", "智者見之","屯其膏", "貞不字","翰音", "善不積","立成器", "與地之",
                 "象義","大貞","小貞", "帝出乎震","帝出於震","帝出于震","與時偕行","盈虛","豐亨","天在山中", "多識前言往行", "蹇蹇", "匪躬","洗心","龍德","慎言語","節飲食","艮其限","乃孚","幹父","裕父","係遯","甘臨","號咷", "風行水上",
-                "終難","咸之九五","賁於丘園","賁于丘園","賁於邱園","賁于邱園", "束帛","戔戔", "損下以益上", "損下益上", "損下而益上", "貳用缶","納約自牖","利見大人", "何思何慮","同歸而殊塗","一致而百慮", "同歸殊塗","一致百慮","先天後天","改命吉","天下雷行",
-                "精氣為物","游魂為變","遊䰟為變","游䰟為變", "漣如","焚如","知幾其神","禴祭", "東鄰","朋亡", "渙其群","有子考","甲三日","庚三日","不易乎世","不成乎名","天一地二","者其辭","升其高陵","天道虧盈","鞏用", "祗悔", "祇悔","秖悔","秪悔","履霜","蒞眾","理財", "正辭", "禁民為非","撝謙",
+                "終難","咸之九五","賁於丘園","賁于丘園","賁於邱園","賁于邱園", "束帛","戔戔", "損下以益上", "損下益上", "損下而益上", "貳用缶","納約自牖","利見大人", "何思何慮","同歸而殊塗","一致而百慮", "同歸殊塗","一致百慮","先天後天","改命吉","天下雷行","喪貝","羝羊","羝芉", "觸藩", "觸籓","事不密","艱貞","金矢","利有","攸往","中正","包蒙", "童蒙", "蒙吉",
+                "精氣為物","游魂為變","遊䰟為變","游䰟為變", "漣如","焚如","知幾其神","禴祭", "東鄰","朋亡", "渙其群","有子考","甲三日","庚三日","不易乎世","不成乎名","天一地二","者其辭","升其高陵","天道虧盈","鞏用", "祗悔", "祇悔","秖悔","秪悔","履霜","蒞眾","理財", "正辭", "禁民為非","撝謙", "浚恒","浚恆", "立其誠","立誠","修辭立誠","開國承家",
                 "伏羲","庖羲","庖𦏁","宓𦏁","宓羲","宓犧","伏犧","庖犧"};
 
             //異體字處理（只用在《中國哲學書電子化計劃》，因為《漢籍全文資料庫》已俱。）
@@ -8445,8 +8470,8 @@ internal static string getImageUrl() {
                     "〈泰〉","〈否〉","〈損〉","〈益〉","〈屯〉","〈豫〉","〈旡妄〉","〈復〉","〈震〉",
                     "少隂","太隂",
                 "𥘉九","𭃨九","𭃡九","𥘉六","𭃨六","𭃡六",
-                "悔亾","悔兦","无悶","遯世无悶","容民畜衆","盈虚","盈𮓡","盈虗","匪躳","愼言語","賁於𠀉園", "賁于𠀉園","賁於𠀌園", "賁于𠀌園","賁於𨚑園", "賁于𨚑園", "𩔖萬物", "𩔗萬物","東隣殺牛","禴𥙊","禴𫞴","涣其群","渙其羣","涣其羣","攺命吉","撝謙",
-                "有子攷","不易乎卋","不易乎丗","升其髙陵","蒞衆","莅眾","莅衆","大𧰼",
+                "悔亾","悔兦","无悶","遯世无悶","容民畜衆","盈虚","盈𮓡","盈虗","匪躳","愼言語","賁於𠀉園", "賁于𠀉園","賁於𠀌園", "賁于𠀌園","賁於𨚑園", "賁于𨚑園", "𩔖萬物", "𩔗萬物","東隣殺牛","禴𥙊","禴𫞴","涣其群","渙其羣","涣其羣","攺命吉","撝謙","事不宻","脩辭立誠",
+                "有子攷","不易乎卋","不易乎丗","升其髙陵","蒞衆","莅眾","莅衆","大𧰼","䘮貝","𭈬貝","𠷔貝","丧貝","𠸶貝","包𫎇", "童𫎇", "𫎇吉",
                 "伏𦏁"};
                 keywords.AddRange(additionalKeywords);
             }
@@ -10183,8 +10208,117 @@ internal static string getImageUrl() {
                 SetForegroundWindow(proc.MainWindowHandle);
             }
         }
+        /// <summary>
+        /// 檢測 driver 是否失效/無效或是null 20241008
+        /// </summary>
+        /// <param name="driver"></param>
+        /// <returns></returns>
+        internal static bool IsDriverInvalid()
+        {
+            try
+            {
+                string url = driver.Url;
+            }
+            catch (Exception)
+            {
+                return true;
+            }
+            return false;
+        }
+        /// <summary>
+        /// 進行[《看典古籍·古籍全文檢索》](https://kandianguji.com/search_all) (d=dian 典) ，成功則傳回true。20241008
+        /// </summary>
+        /// <param name="searchTxt"></param>
+        /// <returns></returns>
+        public static bool KanDianGuJiSearchAll(string searchTxt)
+        {
+            bool exact = false;
+            const string url = "https://kandianguji.com/search_all";
+            if (DialogResult.OK == Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("是否要【精確檢索】？")) exact = true;
+            if (!IsDriverInvalid())
+            {
+                if (driver.Url != url) driver.Url = url;
+            }
+            else
+            {
+                try
+                {
+                    openNewTabWindow();
+                    GoToUrlandActivate(url, true);
+                }
+                catch (Exception)
+                {
+                    return false;
+                }
+            }
+            IWebElement iwe = waitFindWebElementBySelector_ToBeClickable("#keyword");
+            if (iwe == null) return false;
+            SetIWebElementValueProperty(iwe, searchTxt);
+            //按下Enter是沒作用的
+            if (exact)
+                iwe = waitFindWebElementBySelector_ToBeClickable("body > div > div > div.form-inline > button.btn.btn-info.btn-lg.ml-2");
+            else
+                iwe = waitFindWebElementBySelector_ToBeClickable("body > div > div > div.form-inline > button.btn.btn-danger.btn-lg");
+            if (iwe == null) return false;
+            iwe.Click();
+            return true;
+        }
+        /// <summary>
+        /// 檢索《漢籍全文資料庫》，成功則傳回true。20241008
+        /// </summary>
+        /// <param name="searchTxt"></param>
+        /// <returns></returns>
+        public static bool HanchiSearch(string searchTxt)
+        {
+            bool free = true, inside = false;
+            if (!IsDriverInvalid())
+            {
+                if (!driver.Url.StartsWith("https://hanchi.ihp.sinica.edu.tw/"))
+                {
+                    if (DialogResult.Cancel == Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("是否是【授權使用】？"))
+                        free = true;
+                    else
+                        inside = true;
+                }
+            }
+            else
+                if (DialogResult.Cancel == Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("是否是【授權使用】？")) free = true;
 
+            const string url = "https://hanchi.ihp.sinica.edu.tw/ihp/hanji.htm";
 
+            if (!IsDriverInvalid())
+            {
+                if (!driver.Url.StartsWith("https://hanchi.ihp.sinica.edu.tw/")) driver.Url = url;
+            }
+            else
+            {
+                try
+                {
+                    openNewTabWindow();
+                    GoToUrlandActivate(url, true);
+                }
+                catch (Exception)
+                {
+                    return false;
+                }
+            }
+            IWebElement iwe = null;
+            if (!inside)
+            {
+                if (free)
+                    iwe = waitFindWebElementBySelector_ToBeClickable("body > table > tbody > tr:nth-child(2) > td > table > tbody > tr > td > table > tbody > tr:nth-child(4) > td > a:nth-child(8) > img");
+                else
+                    iwe = waitFindWebElementBySelector_ToBeClickable("body > table > tbody > tr:nth-child(2) > td > table > tbody > tr > td > table > tbody > tr:nth-child(4) > td > a:nth-child(9) > img");
+                if (iwe == null) return false;
+                iwe.Click();
+            }
+            //keyword
+            iwe = waitFindWebElementBySelector_ToBeClickable("#frmTitle > table > tbody > tr:nth-child(2) > td > table > tbody > tr:nth-child(1) > td > input[type=text]:nth-child(2)");
+            if (iwe == null) return false;
+            SetIWebElementValueProperty(iwe, searchTxt);
+            iwe.SendKeys(OpenQA.Selenium.Keys.Enter);
+            return true;
+        }
 
         /// <summary>
         /// 使用 JavaScriptExecutor 輸入中文。作為Selenium 同名方法的替代性實驗方法

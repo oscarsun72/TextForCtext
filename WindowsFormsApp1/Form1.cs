@@ -795,7 +795,7 @@ namespace WindowsFormsApp1
         internal static void ResetLastValidWindow()
         {
             string wh;
-            retry:
+        retry:
             try
             {
                 wh = br.driver.CurrentWindowHandle;
@@ -825,14 +825,15 @@ namespace WindowsFormsApp1
                                                                                                  //(failed to check if window was closed: disconnected: not connected to DevTools)
                                                                                                  //  (Session info: chrome = 129.0.6668.59)
                             {
-                                Debugger.Break();
+                                //Debugger.Break();
+                                MessageBoxShowOKExclamationDefaultDesktopOnly("請關閉Chrome瀏覽器後再按下「確定」以繼續！！感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主");
                                 br.driver = null;
+                                killchromedriverFromHere();
                                 br.DriverNew();
                                 goto retry;
                             }
                             else
                                 goto default;
-                            break;
                         default:
                             Console.WriteLine(ex.HResult + ex.Message);
                             Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
@@ -3125,6 +3126,15 @@ namespace WindowsFormsApp1
                     LookupHYDCD(textBox1.SelectedText);
                     return;
                 }
+                if (e.KeyCode == Keys.D)
+                {//Alt + d ：以選取文字進行[《看典古籍·古籍全文檢索》](https://kandianguji.com/search_all) (d=dian 典) 20241008
+                    e.Handled = true;
+                    if (!br.IsDriverInvalid()) br.LastValidWindow = br.driver.CurrentWindowHandle;
+                    TopMost = false;
+                    overtypeModeSelectedTextSetting(ref textBox1);
+                    br.KanDianGuJiSearchAll(textBox1.SelectedText);
+                    return;
+                }
 
                 if (e.KeyCode == Keys.E)
                 {// Alt + e ：在完整編輯頁面中直接取代文字。請將被取代+取代成之二字前後並置，並將其選取後（或在被取代之文字前放置插入點）再按下此組合鍵以執行直接取代 20240718
@@ -3194,6 +3204,17 @@ namespace WindowsFormsApp1
                     }
                     return;
                 }
+
+                if (e.KeyCode == Keys.H)
+                {//Alt + h ：以選取文字檢索[《漢籍全文資料庫》](https://hanchi.ihp.sinica.edu.tw/) (h=han 漢) 20241008
+                    e.Handled = true;
+                    overtypeModeSelectedTextSetting(ref textBox1);
+                    if (!br.IsDriverInvalid()) br.LastValidWindow = br.driver.CurrentWindowHandle;
+                    TopMost = false;
+                    br.HanchiSearch(textBox1.SelectedText);
+                    return;
+                }
+
                 if (e.KeyCode == Keys.J)
                 {//Alt + j : 鍵入換行分段符號（newline）（同 Ctrl + j 的系統預設）
                     e.Handled = true;
@@ -9774,7 +9795,28 @@ namespace WindowsFormsApp1
             //if (autoPastetoQuickEdit) autoPastetoQuickEdit = false;
             if (keyinTextMode) KeyinTextmodeSwitcher(false);
             playSound(soundLike.press, true);
+            if (br.IsDriverInvalid() && br.driver != null)
+            {
+                try
+                {
+                    br.driver.SwitchTo().Window(br.LastValidWindow);
 
+                }
+                catch (Exception ex)
+                {
+                    switch (ex.HResult)
+                    {
+                        default:
+                            Console.WriteLine(ex.HResult + ex.Message);
+                            //MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
+                            Debugger.Break();
+                            //chromedriver被誤關時 20241008
+                            br.driver = null;                            
+                            br.DriverNew();
+                            break;
+                    }
+                }
+            }
             #region 關閉《漢籍全文資料庫》開啟的頁面20240926
             for (int i = br.driver.WindowHandles.Count - 1; i > -1; i--)
             {
@@ -12882,7 +12924,13 @@ namespace WindowsFormsApp1
                                 if (ex.Message.StartsWith("no such window: target window already closed"))//"no such window: target window already closed\nfrom unknown error: web view not found\n  (Session info: chrome=109.0.5414.75)"
                                     br.GoToUrlandActivate(textBox3.Text, keyinTextMode);
                                 else
+                                    //chromedriver被誤關了
+                                    if (!br.ChromedriverLose(ex))
+                                {
                                     Debugger.Break();
+                                    Console.WriteLine(ex.HResult + ex.Message);
+                                    MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
+                                }
                                 break;
                             default:
                                 throw;

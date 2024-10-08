@@ -6,14 +6,36 @@ Public chromedriversPIDcntr As Integer 'chromedriversPID的下標值
 Public ActiveXComponentsCanNotBeCreated As Boolean
 
 ' 宣告 Windows API 函數 20241003 creedit_with_Copilot大菩薩：改進WordVBA+SeleniumBasic 開啟Chrome瀏覽器新分頁的方法：https://sl.bing.net/iqY5XH1MVci
-Declare PtrSafe Function SetForegroundWindow Lib "user32" (ByVal hwnd As LongPtr) As Long
+Declare PtrSafe Function SetForegroundWindow Lib "user32" (ByVal hWnd As LongPtr) As Long
 Declare PtrSafe Function FindWindow Lib "user32" Alias "FindWindowA" (ByVal lpClassName As String, ByVal lpWindowName As String) As LongPtr
+Declare PtrSafe Function GetForegroundWindow Lib "user32" () As LongPtr
+Declare PtrSafe Function GetWindowText Lib "user32" Alias "GetWindowTextA" (ByVal hWnd As LongPtr, ByVal lpString As String, ByVal cch As Long) As Long
+Rem 20241005 Copilot大菩薩：WordVBA 判斷 Word 是否為最前端視窗：https://sl.bing.net/b21Z8KIK3Ua
+Function IsWordActive() As Boolean
+    Dim hWnd As LongPtr
+    Dim title As String * 255
+    Dim length As Long
+    
+    ' 獲取當前活動視窗的句柄
+    hWnd = GetForegroundWindow()
+    
+    ' 獲取視窗標題
+    length = GetWindowText(hWnd, title, Len(title))
+    title = Left(title, length)
+    
+    ' 檢查標題是否包含 "Microsoft Word"
+    If InStr(title, "Microsoft Word") > 0 Then
+        IsWordActive = True
+    Else
+        IsWordActive = False
+    End If
+End Function
 ' 將 Chrome 瀏覽器設置為前端窗口
 Sub ActivateChrome()
-    Dim hwnd As LongPtr
-    hwnd = FindWindow("Chrome_WidgetWin_1", vbNullString)
-    If hwnd <> 0 Then
-        SetForegroundWindow hwnd
+    Dim hWnd As LongPtr
+    hWnd = FindWindow("Chrome_WidgetWin_1", vbNullString)
+    If hWnd <> 0 Then
+        SetForegroundWindow hWnd
     End If
 End Sub
 
@@ -110,13 +132,21 @@ eH:
     End Select
 End Function
 
+Rem 檢查 driver 是否有效 20241002
+Function IsDriverInvalid(ByRef driver As IWebDriver) As Boolean
+    On Error Resume Next
+    Dim url As String
+    url = driver.url
+    IsDriverInvalid = (url = vbNullString Or (driver Is Nothing))
+End Function
 Rem 檢查 wd 是否有效 20241002
-Function IsDriverInvalid(ByRef WD As IWebDriver) As Boolean
+Function IsWDInvalid() As Boolean
     On Error Resume Next
     Dim url As String
     url = WD.url
-    IsDriverInvalid = url = vbNullString
+    IsWDInvalid = (url = vbNullString Or (WD Is Nothing))
 End Function
+
 Rem 檢查是否為新的空白頁 開啟的新分頁 20241003
 Function IsNewBlankPageTab(ByRef driver As IWebDriver) As Boolean
     'On Error Resume Next
@@ -140,7 +170,13 @@ reStart:
         
             If IsChromeRunning Then '20241002
                 OpenChrome_NEW_Get
-                WD.url = url
+                If WD Is Nothing Then
+                    'Stop ' for test
+                    If MsgBox("請關閉Chrome瀏覽器後再按「確定」繼續。否則請按「取消」以取消作業。", vbExclamation + vbOKCancel) = VBA.vbCancel Then Exit Function
+                    GoTo reStart
+                Else
+                    WD.url = url
+                End If
             Else
                 Set WD = New SeleniumBasic.IWebDriver
                 
@@ -167,7 +203,7 @@ reStart:
                     'C#：options.AddArgument("user-data-dir=" + Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "\\Google\\Chrome\\User Data\\");
                     .AddArgument "user-data-dir=" + VBA.Environ("LOCALAPPDATA") + _
                         "\Google\Chrome\User Data\"
-        '            .AddArgument "--new-window"
+                    .AddArgument "--new-window"
                     '.AddArgument "--start-maximized"
                     '.DebuggerAddress = "127.0.0.1:9999" '不要与其他几個混用
                     
@@ -182,13 +218,13 @@ reStart:
                     chromedriversPID(chromedriversPIDcntr) = pid
                     chromedriversPIDcntr = chromedriversPIDcntr + 1
                 End If
-                OpenNewTab WD
+                OpenNewTab WD '前有.AddArgument "--new-window" 20241005 此是 window 不是 tab !!
 '                WD.ExecuteScript "window.open('about:blank','_blank');" 'openNewTabWhenTabAlreadyExit WD
 '                WD.SwitchTo.Window WindowHandlesItem(WindowHandlesCount - 1)
                 WD.url = url
             End If
         Else
-            If IsDriverInvalid(WD) Then OpenNewTab WD
+            If IsWDInvalid() Then OpenNewTab WD
 '            WD.ExecuteScript "window.open('about:blank','_blank');" 'openNewTabWhenTabAlreadyExit WD
 '            WD.SwitchTo.Window WindowHandlesItem(WindowHandlesCount - 1)
             WD.url = url
@@ -273,7 +309,7 @@ ErrH:
 
                 SystemSetup.killchromedriverFromHere
                 Set SeleniumOP.WD = Nothing
-                Stop 'just for test 20240924
+'                Stop 'just for test 20240924
                 Resume
             ElseIf VBA.InStr(Err.Description, "chromedriver.exe does not exist") Then 'The file C:\Program Files\Google\Chrome\Application\chromedriver.exe does not exist. The driver can be downloaded at http://chromedriver.storage.googleapis.com/index.html
                 Set WD = Nothing
@@ -477,20 +513,16 @@ Rem 20241002 由前面 SeleniumGet 得到的靈感 creedit_with_Copilot大菩薩：https://s
 Sub OpenChrome_NEW_Get()
     On Error GoTo eH
     If Not WD Is Nothing Then
-        On Error Resume Next
-        Dim url As String
-        url = WD.url
-        If url <> vbNullString Then
+        If Not IsWDInvalid() Then
             Exit Sub
         End If
-        On Error GoTo 0
-        
     End If
     'Dim driver As New WebDriver
     Dim driver As New IWebDriver
     Dim options As New ChromeOptions
     Dim Service As SeleniumBasic.ChromeDriverService
     Dim closeNewOpen As Boolean
+    Dim pid As Long
     closeNewOpen = IsChromeRunning
     
     Set Service = New SeleniumBasic.ChromeDriverService
@@ -521,19 +553,45 @@ Sub OpenChrome_NEW_Get()
     'driver.start "chrome", options
     On Error Resume Next
     driver.New_ChromeDriver Service:=Service, options:=options
+    Docs.Register_Event_Handler '為清除chromedriver作準備
+    pid = Service.ProcessId 'Chrome瀏覽器沒有開成功就會是0
+    If pid <> 0 Then
+        ReDim Preserve chromedriversPID(chromedriversPIDcntr)
+        chromedriversPID(chromedriversPIDcntr) = pid
+        chromedriversPIDcntr = chromedriversPIDcntr + 1
+    End If
     Set WD = driver
-    If IsDriverInvalid(WD) Then
+    If IsWDInvalid() Then
         
 '        Dim urlCheck As String
 '        urlCheck = wd.url
 '        If urlCheck = vbNullString Then
-            WD.SwitchTo.Window WD.CurrentWindowHandle
-            ActivateChrome
-            SystemSetup.wait 2
-            VBA.Interaction.DoEvents
-            SendKeys "%{F4}" '關閉已開啟而無法成功的Chrome瀏覽器
-            SystemSetup.playSound 1.469
-            VBA.Interaction.DoEvents
+'            WD.SwitchTo.Window WD.CurrentWindowHandle
+            
+            Rem 怕會誤關其他先開啟的Chrome瀏覽器
+            'ActivateChrome
+'            SystemSetup.wait 2
+'            VBA.Interaction.DoEvents
+            
+            Debug.Print "Word is active = " & VBA.CStr(IsWordActive())
+                        
+            If VBA.InStr(Err.Description, "from disconnected: unable to connect to renderer (SessionNotCreated)") = 0 Then
+                If IsWordActive() Then
+                    MsgBox "請關閉Chrome瀏覽器後再繼續。", vbExclamation
+                    'Stop 'just for test
+                    
+    '                SendKeys "%{F4}", True '關閉已開啟而無法成功的Chrome瀏覽器
+    '                SystemSetup.playSound 1.469
+    '                VBA.Interaction.DoEvents
+                Else
+    '                Stop 'just for test
+'                    ActivateChrome
+'                    SendKeys "^{F4}", True '關閉已開啟的Chrome瀏覽器分頁
+'                    SystemSetup.playSound 1.469
+'                    VBA.Interaction.DoEvents
+                    
+                End If
+            End If
             Set options = New SeleniumBasic.ChromeOptions
             With options
                 .AddArgument "--remote-debugging-port=9222"
@@ -541,11 +599,20 @@ Sub OpenChrome_NEW_Get()
                 .AddArgument "--start-maximized"
             End With
             driver.New_ChromeDriver Service:=Service, options:=options
+            Docs.Register_Event_Handler '為清除chromedriver作準備
+            pid = Service.ProcessId 'Chrome瀏覽器沒有開成功就會是0
+            If pid <> 0 Then
+                ReDim Preserve chromedriversPID(chromedriversPIDcntr)
+                chromedriversPID(chromedriversPIDcntr) = pid
+                chromedriversPIDcntr = chromedriversPIDcntr + 1
+            End If
+
             If IsDriverInvalid(driver) Then
-                Stop  'just for test
+'                Stop  'just for test
                 killchromedriverFromHere
                 Set WD = Nothing
-                OpenChrome_NEW_Get
+                Exit Sub
+'                OpenChrome_NEW_Get
 '                MsgBox "請再執行一次。感恩感恩　南無阿彌陀佛", vbInformation
                 'End
             End If
@@ -571,7 +638,7 @@ Sub OpenChrome_NEW_Get()
                         Exit For
                     End If
                 Next wh
-                If IsDriverInvalid(WD) Then
+                If IsWDInvalid() Then
                     WD.SwitchTo.Window UBound(WD.WindowHandles)
                 End If
                 openNewTabWhenTabAlreadyExit WD
@@ -1008,6 +1075,77 @@ Err1:
     '           Resume
         End Select
 
+End Function
+Rem 20241006 《看典古籍·古籍全文檢索》，成功則傳回true
+Function KandiangujiSearchAll(searchTxt As String) As Boolean
+    Dim exact As Boolean
+    Const url = "https://kandianguji.com/search_all"
+    If VBA.vbOK = VBA.MsgBox("是否要【精確檢索】？", vbQuestion + vbOKCancel) Then exact = True
+
+    If Not IsWDInvalid() Then
+        If WD.url <> url Then WD.url = url
+    Else
+        If Not OpenChrome(url) Then
+            Exit Function
+        End If
+    End If
+    
+    WD.SwitchTo().Window (WD.CurrentWindowHandle)
+    ActivateChrome
+    Dim iwe As SeleniumBasic.IWebElement ', key As New SeleniumBasic.keys
+    Set iwe = WD.FindElementByCssSelector("#keyword")
+    If iwe Is Nothing Then Exit Function
+    SetIWebElementValueProperty iwe, searchTxt
+'    iwe.SendKeys key.Enter'按下Enter鍵並無作用
+    If exact Then
+        Set iwe = WD.FindElementByCssSelector("body > div > div > div.form-inline > button.btn.btn-info.btn-lg.ml-2")
+    Else
+        Set iwe = WD.FindElementByCssSelector("body > div > div > div.form-inline > button.btn.btn-danger.btn-lg")
+    End If
+    If iwe Is Nothing Then Exit Function
+    iwe.Click
+    KandiangujiSearchAll = True
+End Function
+Rem 20241006 檢索《漢籍全文資料庫》，成功則傳回true
+Function HanchiSearch(searchTxt As String) As Boolean
+    Dim free As Boolean, inside As Boolean
+    If Not IsWDInvalid() Then
+        If VBA.Left(WD.url, VBA.Len("https://hanchi.ihp.sinica.edu.tw/")) <> "https://hanchi.ihp.sinica.edu.tw/" Then
+            If VBA.vbCancel = MsgBox("是否是【授權使用】？", vbQuestion + vbOKCancel) Then free = True
+        Else
+            inside = True
+        End If
+    Else
+        If VBA.vbCancel = MsgBox("是否是【授權使用】？", vbQuestion + vbOKCancel) Then free = True
+    End If
+    
+    Const url = "https://hanchi.ihp.sinica.edu.tw/ihp/hanji.htm"
+
+    If Not IsWDInvalid() Then
+        If VBA.Left(WD.url, VBA.Len("https://hanchi.ihp.sinica.edu.tw/")) <> "https://hanchi.ihp.sinica.edu.tw/" Then WD.url = url
+    Else
+        If Not OpenChrome(url) Then
+            Exit Function
+        End If
+    End If
+    WD.SwitchTo().Window (WD.CurrentWindowHandle)
+    ActivateChrome
+    Dim iwe As SeleniumBasic.IWebElement, key As New SeleniumBasic.keys
+    If Not inside Then
+        If free Then
+            Set iwe = WD.FindElementByCssSelector("body > table > tbody > tr:nth-child(2) > td > table > tbody > tr > td > table > tbody > tr:nth-child(4) > td > a:nth-child(8) > img")
+        Else
+            Set iwe = WD.FindElementByCssSelector("body > table > tbody > tr:nth-child(2) > td > table > tbody > tr > td > table > tbody > tr:nth-child(4) > td > a:nth-child(9) > img")
+        End If
+        If iwe Is Nothing Then Exit Function
+        iwe.Click
+    End If
+    'keyword
+    Set iwe = WD.FindElementByCssSelector("#frmTitle > table > tbody > tr:nth-child(2) > td > table > tbody > tr:nth-child(1) > td > input[type=text]:nth-child(2)")
+    If iwe Is Nothing Then Exit Function
+    SetIWebElementValueProperty iwe, searchTxt
+    iwe.SendKeys key.Enter
+    HanchiSearch = True
 End Function
 Rem x 要查的字,Variants 要不要看異體字 執行成功傳回true  20240828.
 Function LookupZitools(x As String, Optional Variants As Boolean = False) As Boolean
@@ -2006,6 +2144,7 @@ Sub GoogleSearch(Optional searchStr As String)
     If Not OpenChrome("https://www.google.com") Then Exit Sub
     word.Application.windowState = wdWindowStateMinimize
     WD.SwitchTo.Window (WD.CurrentWindowHandle)
+    appActivateChrome
     VBA.Interaction.DoEvents
     Dim iwe As SeleniumBasic.IWebElement
     Dim keys As New SeleniumBasic.keys
@@ -2056,7 +2195,7 @@ Err1:
 
 End Sub
 
-'貼到古籍酷自動標點()
+'貼到古籍酷自動標點,擷取其結果。若失敗，則傳回空字串 vbnullstring
 Function grabGjCoolPunctResult(text As String, resultText As String, Optional Background As Boolean) As String
     Const url = "https://gj.cool/punct"
     Dim wdB As SeleniumBasic.IWebDriver, WBQuit As Boolean '=true 則可以關Chrome瀏覽器
@@ -2069,21 +2208,29 @@ Function grabGjCoolPunctResult(text As String, resultText As String, Optional Ba
         Set wdB = openChromeBackground(url)
         WBQuit = True '因為在背景執行，預設要可以關'現在用 .AddArgument "--remote-debugging-port=9222"  兼容於其他所開啟者，故不必再背景了 20241003
         If wdB Is Nothing Then
-            If WD Is Nothing Then OpenChrome ("https://gj.cool/punct")
+            If WD Is Nothing Then
+                If OpenChrome("https://gj.cool/punct") Then
+                    Exit Function
+                End If
+            End If
             Set wdB = WD
         End If
     Else
         Rem 顯示
         If WD Is Nothing Then
-            OpenChrome ("https://gj.cool/punct")
+            If Not OpenChrome("https://gj.cool/punct") Then
+                Exit Function
+            End If
         Else
-            If IsDriverInvalid(WD) Then
+            If IsWDInvalid() Then
                 OpenNewTab WD
             Else
                 'Stop 'just for test
                 killchromedriverFromHere
                 Set WD = Nothing
-                OpenChrome ("https://gj.cool/punct")
+                If Not OpenChrome("https://gj.cool/punct") Then
+                    Exit Function
+                End If
             End If
         End If
         Set wdB = WD
@@ -2164,7 +2311,7 @@ Function grabGjCoolPunctResult(text As String, resultText As String, Optional Ba
     xl = VBA.Len(text)
     chkTxtTime = VBA.Now
     Do
-        If VBA.DateDiff("s", chkTxtTime, VBA.Now) > 2.5 Then
+        If VBA.DateDiff("s", chkTxtTime, VBA.Now) > 1.8 Then
             nx = textBox.text
             SystemSetup.playSound 1
             '檢查如果沒有按到「標點」按鈕，就再次按下 20240725 以出現等待圖示控制項為判斷
@@ -2265,10 +2412,20 @@ Rem 取得《漢籍全文資料庫·斷句十三經經文·周易》文本 ： gua 卦名 。成功則傳回 tr
 Function grabHanchiZhouYi_TheOriginalText_ThirteenSutras(gua As String, resultText As String) As Boolean
 
 End Function
-Rem 取得《易學網·易經〔周易〕原文》文本 ： gua 卦名 。成功則傳回 true 20241004
-Function grabEeeLearning_IChing_ZhouYi_originalText(guaSequence As String, resultText As String) As Boolean
+Rem 取得《易學網·易經〔周易〕原文》文本。成功則傳回 true 20241004.20241006 resultText是個集合，第1個元素是易卦的內容字串，第2個元素是查詢結果網址。若沒找到，則傳回元素是空字串的陣列
+Function grabEeeLearning_IChing_ZhouYi_originalText(guaSequence As String, resultText As Variant) As Boolean
 '    If Not OpenChrome("https://www.eee-learning.com/article/571") Then Exit Function
-    If Not OpenChrome("https://www.eee-learning.com/book/eee" & guaSequence) Then Exit Function
+    If Not VBA.IsArray(resultText) Then
+        MsgBox "第2個引數必須是字串陣列", vbCritical
+        'grabEeeLearning_IChing_ZhouYi_originalText = False'預設即為false
+    Else
+        If UBound(resultText) <> 1 Then
+            MsgBox "第2個引數必須是2個元素的字串陣列", vbCritical
+        End If
+    End If
+    Dim e2 As String
+    e2 = "https://www.eee-learning.com/book/eee" & guaSequence
+    If Not OpenChrome(e2) Then Exit Function
     
     grabEeeLearning_IChing_ZhouYi_originalText = True
     
@@ -2279,8 +2436,8 @@ Function grabEeeLearning_IChing_ZhouYi_originalText(guaSequence As String, resul
         Exit Function
     End If
     
-    resultText = iwe.GetAttribute("textContent")
-    
+    resultText(0) = iwe.GetAttribute("textContent")
+    resultText(1) = e2
     Set iwe = Nothing
 End Function
 Rem 20240914 creedit_with_Copilot大菩薩：https://sl.bing.net/gCpH6nC61Cu
@@ -2403,4 +2560,5 @@ msg:
             MsgBox Err.Number + Err.Description
     End Select
 End Property
+
 

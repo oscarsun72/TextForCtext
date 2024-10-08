@@ -261,11 +261,11 @@ Sub 進階詞頻() '2002/11/10要Sub才能在Word中執行!'2005/4/21此法在跑大檔案時太沒效
     Dim wrong As Long, phra As Long, phras As String, phralh As Byte
     Dim StTime As Date, EndTime As Date
     Dim hfspace As Long
-    Dim Length As Byte 'As String
+    Dim length As Byte 'As String
     Dim Dw As String, dwL As Long
-    Length = InputBox("請指定分析詞彙之上限,最多五個字", , "5")
-    If Length = "" Or Not IsNumeric(Length) Then End
-    If CByte(Length) < 1 Or CByte(Length) > 5 Then End
+    length = InputBox("請指定分析詞彙之上限,最多五個字", , "5")
+    If length = "" Or Not IsNumeric(length) Then End
+    If CByte(length) < 1 Or CByte(length) > 5 Then End
     options.SaveInterval = 0 '取消自動儲存
     StTime = VBA.Time
     Set d = CreateObject("access.application")
@@ -287,7 +287,7 @@ Sub 進階詞頻() '2002/11/10要Sub才能在Word中執行!'2005/4/21此法在跑大檔案時太沒效
         dwL = Len(Dw) '文件長度
         .Close
     End With
-        For phralh = 1 To Length 'CByte(length)
+        For phralh = 1 To length 'CByte(length)
     '    For phralh = 1 To 5 '暫定最長為5個字構成的詞(仍可改作變數)
             For phra = 1 To dwL '.Characters.Count
                 Select Case phralh
@@ -408,11 +408,11 @@ Sub 進階詞頻1() '2002/11/15要Sub才能在Word中執行!
     Dim wrong As Long, phra As Long, phras As String, phralh As Byte
     Dim StTime As Date, EndTime As Date
     Dim hfspace As Long
-    Dim Length As String
+    Dim length As String
     Dim i As Byte, j As Byte
-    Length = InputBox("請指定分析詞彙之上限,最多255個字", , "5")
-    If Length = "" Or Not IsNumeric(Length) Then End
-    If CByte(Length) < 1 Or CByte(Length) > 255 Then End
+    length = InputBox("請指定分析詞彙之上限,最多255個字", , "5")
+    If length = "" Or Not IsNumeric(length) Then End
+    If CByte(length) < 1 Or CByte(length) > 255 Then End
     options.SaveInterval = 0 '取消自動儲存
     StTime = VBA.Time
     Set d = CreateObject("access.application")
@@ -428,7 +428,7 @@ Sub 進階詞頻1() '2002/11/15要Sub才能在Word中執行!
     '    db.Execute "DELETE 字頻表.* FROM 字頻表"
         db.Execute "DELETE * FROM 詞頻表"
     End If
-    j = CByte(Length)
+    j = CByte(length)
     With ActiveDocument
         For phralh = 1 To j
     '    原暫定最長為5個字構成的詞,今改作變數j,則限於Byte大小耳!
@@ -3134,7 +3134,7 @@ Sub 漢籍電子文獻資料庫文本整理_注文前後加括號() '最後執行 Docs.mark易學關鍵字(在
             End If
             
         Else
-            If Docs.mark易學關鍵字(Nothing, hasPunct) Then
+            If Docs.mark易學關鍵字(Nothing, True) Then
             '貼上之後由其貼到文件末端、又預留一些分段符號此一特徵，可以抓到貼上的Range
                 pasteAppendedRange.End = d.Range.End
                 pasteAppendedRange.Select '因為送交自動標點程序內有 Selection.Cut
@@ -3143,6 +3143,7 @@ Sub 漢籍電子文獻資料庫文本整理_注文前後加括號() '最後執行 Docs.mark易學關鍵字(在
                 Network.讀入古籍酷自動標點結果
                 
                 Docs.marking易學關鍵字 pasteAppendedRange, Keywords.易學Keywords_ToMark
+                文字處理.FixFontname pasteAppendedRange
                 SystemSetup.playSound 2
                 Rem 以下為舊式
                 '以下程序內已有 mark易學關鍵字 故
@@ -4012,7 +4013,7 @@ Next i
 SplitWithoutDelimiter_StringToStringArray = arr
 End Function
 Rem 根據碼位來設定字型名稱
-Sub FixFontname(rngMark As Range)
+Sub FixFontname(rng As Range)
     
         Rem https://en.wikipedia.org/wiki/CJK_Unified_Ideographs
         Rem 兼容字
@@ -4021,7 +4022,7 @@ Sub FixFontname(rngMark As Range)
         'https://en.wikipedia.org/wiki/CJK_Compatibility_Ideographs_Supplement
         Dim rngChangeFontName As Range
         'Set rngChangeFontName = d.Range(Selection.Paragraphs(1).Range.start, d.Range.End)
-        Set rngChangeFontName = rngMark.Document.Range(rngMark.start, rngMark.Document.Range.End)
+        Set rngChangeFontName = rng.Document.Range(rng.start, rng.Document.Range.End)
         Dim fontName As String '20240920 creedit_with_Copilot大菩薩:https://sl.bing.net/9KC0PtODtI
         fontName = "全宋體-2"
         If Fonts.IsFontInstalled(fontName) Then
