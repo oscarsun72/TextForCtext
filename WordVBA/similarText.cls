@@ -57,7 +57,7 @@ Function Similarity(ByVal text1, ByVal text2) As Boolean 'text1 ³Q¤ñ¹ïªÌ text2 ®
     If SimilarityResult.Count > 0 Then SimilarityResult.RemoveAll
     similarWithTextCopy = text2
     Initialize text1, text2
-    If VBA.Abs(VBA.Len(text1) - VBA.Len(text2)) < 20 Then ' ¤@¬q¤¤ªº¤å¥»ªø«×®t²§¤Ó¦h·í«D¬Û¦ü20241005
+    If VBA.Abs(VBA.Len(text1) - VBA.Len(text2)) < 20 Then ' ¤@¬q¤¤ªº¤å¥»ªø«×®t²§¤Ó¦h·í«D¬Û¦ü20241005 ³oÁÙ­n¦A²Ó¥[µZ¿i¡I¡I¦hÆ[¹î
         If Me.CompareDictionaries(dict1, dict2) Then
             Similarity = True
         ElseIf Me.CompareDictionarySimilarity(dict1, dict2) > 0.75 Then '0.8

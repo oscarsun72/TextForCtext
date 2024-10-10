@@ -10,6 +10,9 @@ Declare PtrSafe Function SetForegroundWindow Lib "user32" (ByVal hWnd As LongPtr
 Declare PtrSafe Function FindWindow Lib "user32" Alias "FindWindowA" (ByVal lpClassName As String, ByVal lpWindowName As String) As LongPtr
 Declare PtrSafe Function GetForegroundWindow Lib "user32" () As LongPtr
 Declare PtrSafe Function GetWindowText Lib "user32" Alias "GetWindowTextA" (ByVal hWnd As LongPtr, ByVal lpString As String, ByVal cch As Long) As Long
+Private last_ValidWindow As String
+Private images_arrayIWebElement() As SeleniumBasic.IWebElement
+Private links_arrayIWebElement() As SeleniumBasic.IWebElement
 Rem 20241005 Copilot大菩薩：WordVBA 判斷 Word 是否為最前端視窗：https://sl.bing.net/b21Z8KIK3Ua
 Function IsWordActive() As Boolean
     Dim hWnd As LongPtr
@@ -39,6 +42,14 @@ Sub ActivateChrome()
     End If
 End Sub
 
+Property Get LastValidWindow() As String
+    LastValidWindow = last_ValidWindow
+End Property
+Rem 20241008 Copilot大菩薩：https://sl.bing.net/cmQuvtGT28O
+Rem Gemini大菩薩就不行了！https://sl.bing.net/cmQuvtGT28O
+Property Let LastValidWindow(validWindowHandle As String)
+    last_ValidWindow = validWindowHandle
+End Property
 'Sub tesSeleniumBasic() 'https://github.com/florentbr/SeleniumBasic
 ''20230119 creedit chatGPT大菩薩
 '
@@ -150,8 +161,8 @@ End Function
 Rem 檢查是否為新的空白頁 開啟的新分頁 20241003
 Function IsNewBlankPageTab(ByRef driver As IWebDriver) As Boolean
     'On Error Resume Next
-    IsNewBlankPageTab = (driver.url = "about:blank" And WD.title = vbNullString) _
-                Or (WD.title = "新分頁" And WD.url = "chrome://new-tab-page/")
+    IsNewBlankPageTab = (driver.url = "about:blank" Or WD.title = vbNullString) _
+                Or (WD.title = "新分頁" Or WD.url = "chrome://new-tab-page/")
 End Function
 Rem 啟動Chrome瀏覽器或已啟動後開啟新分頁瀏覽。失敗時傳回false
 Function OpenChrome(Optional url As String) As Boolean
@@ -323,6 +334,10 @@ ErrH:
                 killchromedriverFromHere
                 Set WD = Nothing
                 GoTo reStart
+            ElseIf VBA.InStr(Err.Description, "no such window") Then 'no such window
+                                                                    '  (Session info: chrome=129.0.6668.59)
+                OpenNewTab WD
+                Resume
             Else
                 Debug.Print Err.Number; Err.Description
                 MsgBox Err.Description, vbCritical
@@ -647,7 +662,9 @@ Sub OpenChrome_NEW_Get()
         End If
     End If
     On Error GoTo 0
-
+    Rem 20241008 Gemini大菩薩：關閉錯誤處理： 當程式執行到 On Error GoTo 0 這行時，之前設定的任何錯誤處理都會被關閉。
+    Rem 恢復預設行為： 關閉錯誤處理後，如果程式再次遇到錯誤，就會按照預設的行為，直接停止執行並顯示錯誤訊息。https://g.co/gemini/share/7359ab0a85e3
+    
     Docs.Register_Event_Handler '為清除chromedriver作準備
     'driver.Navigate.GoToUrl "https://github.com/oscarsun72/TextForCtext/blob/master/WordVBA/SeleniumOP.bas"
     'driver.Get "http://localhost:9222"
@@ -656,8 +673,8 @@ Sub OpenChrome_NEW_Get()
 '    Wd.Navigate "http://localhost:9222" 'https://github.com/GCuser99/SeleniumVBA/discussions/74
     ' 進行進一步的操作
     
+    If closeNewBlankPageTabs() Then OpenNewTab WD
     
-    WD.SwitchTo.Window WD.CurrentWindowHandle
     Exit Sub
 eH:
     Select Case Err.Number
@@ -666,6 +683,26 @@ eH:
             MsgBox Err.Number & Err.Description
     End Select
 End Sub
+Rem 若沒有新的空白頁要關閉則傳回false,若只剩一個分頁則不予關閉且傳回false供後續使用
+Private Function closeNewBlankPageTabs() As Boolean
+    Dim w, result As Boolean
+    For Each w In WD.WindowHandles
+        WD.SwitchTo.Window w
+        If SeleniumOP.IsNewBlankPageTab(WD) Then
+            If WindowHandlesCount > 1 Then
+                WD.Close
+                If Not result Then result = True
+            Else
+                If result Then
+                    result = False
+                End If
+                Exit Function
+            End If
+        End If
+        
+    Next w
+    closeNewBlankPageTabs = result
+End Function
 Rem 開啟新分頁 若失敗則傳回false'改進WordVBA+SeleniumBasic 開啟Chrome瀏覽器新分頁的方法 creedit_with_Copilot大菩薩： https://sl.bing.net/bcfc14PWlFc
 Function OpenNewTab(ByVal driver As SeleniumBasic.IWebDriver) As Boolean
     Dim result As Boolean
@@ -2064,7 +2101,11 @@ plural: '當查詢結果不止一個「字」時，如「去廾」字
             '說文釋形 儲存格元件右邊的儲存格
             Set iwe = WD.FindElementByCssSelector("#view > tbody > tr:nth-child(2) > td")
             GoSub iweNothingExitFunction
-            result(0) = iwe.GetAttribute("textContent")
+            If IslinkImageIncluded內容部分包含超連結或圖片(iwe) Then
+                result(0) = iwe.GetAttribute("innerHTML")
+            Else
+                result(0) = iwe.GetAttribute("textContent")
+            End If
             result(1) = WD.url
             SystemSetup.SetClipboard result(1)
         End If
@@ -2560,5 +2601,250 @@ msg:
             MsgBox Err.Number + Err.Description
     End Select
 End Property
+
+Rem 20241009 creedit_with_Copilot大菩薩：WordVBA+SeleniumBasic讀入網頁內容圖片與超連結：https://sl.bing.net/hxRfMU08232
+Function IslinkImageIncluded內容部分包含超連結或圖片(iwe As SeleniumBasic.IWebElement) As Boolean
+    Dim hasLinks As Boolean, arr
+    Dim hasImages As Boolean
+    
+    
+    ' 判斷是否包含超連結
+    arr = iwe.FindElementsByTagName("a")
+    If VBA.IsArray(arr) Then
+        links_arrayIWebElement = arr
+    End If
+    hasLinks = UBound(links_arrayIWebElement) > -1
+    
+    ' 判斷是否包含圖片
+    arr = iwe.FindElementsByTagName("img")
+    If VBA.IsArray(arr) Then
+        images_arrayIWebElement = arr
+    End If
+    hasImages = UBound(images_arrayIWebElement) > -1
+    
+    ' 返回結果
+    IslinkImageIncluded內容部分包含超連結或圖片 = hasLinks Or hasImages
+End Function
+Rem 20241009 creedit_with_Copilot大菩薩：WordVBA+SeleniumBasic讀入網頁內容圖片與超連結：https://sl.bing.net/hxRfMU08232
+Function IslinkIncluded內容部分包含超連結(iwe As SeleniumBasic.IWebElement) As Boolean
+    Dim hasLinks As Boolean, links
+        
+    ' 判斷是否包含超連結
+    links = iwe.FindElementsByTagName("a")
+    If VBA.IsArray(links) Then
+        links_arrayIWebElement = links
+    End If
+    hasLinks = UBound(links_arrayIWebElement) > -1
+    ' 返回結果
+    IslinkIncluded內容部分包含超連結 = hasLinks
+End Function
+Rem 20241009 creedit_with_Copilot大菩薩：WordVBA+SeleniumBasic讀入網頁內容圖片與超連結：https://sl.bing.net/hxRfMU08232
+Function IsImageIncluded內容部分包含圖片(iwe As SeleniumBasic.IWebElement) As Boolean
+
+    Dim hasImages As Boolean, imgs
+    ' 判斷是否包含圖片
+    imgs = iwe.FindElementsByTagName("img")
+    If VBA.IsArray(imgs) Then
+        images_arrayIWebElement = imgs
+    End If
+    'On Error Resume Next
+    hasImages = UBound(images_arrayIWebElement) > -1
+    'On Error GoTo 0
+    ' 返回結果
+    IsImageIncluded內容部分包含圖片 = hasImages
+End Function
+Property Get images() As SeleniumBasic.IWebElement()
+    images = images_arrayIWebElement
+End Property
+Property Get links()
+    links = links_arrayIWebElement
+End Property
+
+Rem 抓取網頁內容並記錄位置 20241009 creedit_with_Copilot大菩薩：https://sl.bing.net/gGHK9dMCbNQ
+Sub grabPageContent抓取網頁內容並記錄位置()
+    'Dim wd As New SeleniumBasic.ChromeDriver
+    Dim elements() As SeleniumBasic.IWebElement 'Object
+    Dim e
+    Dim element As SeleniumBasic.IWebElement 'As Object
+    Dim elementPositions As Collection
+    Set elementPositions = New Collection
+    
+    '' 打開網頁
+    'wd.start "Chrome"
+    'wd.Get "https://www.eee-learning.com/article/3694"
+    
+    ' 抓取所有內容並記錄位置
+    elements = WD.FindElementsByCssSelector("body *")
+    
+    For Each e In elements
+        Dim elementInfo As New Collection
+        Set element = e
+        elementInfo.Add element.tagName
+        elementInfo.Add element.text
+        elementInfo.Add element.GetAttribute("src")
+        elementInfo.Add element.GetAttribute("href")
+        elementPositions.Add elementInfo
+    Next e
+    
+    'wd.Quit
+    
+    ' 將抓取到的內容插入到Word文件中
+    inputElementContent插入網頁元件部分內容 elementPositions
+End Sub
+Sub inputElementContent插入網頁元件部分內容(elementPositions As Collection)
+    Dim elementInfo As Collection, e
+    Dim rng As Range
+    
+    For Each e In elementPositions
+        Set elementInfo = e
+        Select Case elementInfo(1)
+            Case "P", "DIV"
+                ' 插入文字
+                Set rng = Selection.Range
+                rng.text = elementInfo(2)
+                Selection.MoveRight Unit:=wdCharacter, Count:=1
+            Case "IMG"
+                ' 插入圖片
+                Set rng = Selection.Range
+                rng.InlineShapes.AddPicture fileName:=elementInfo(3), _
+                                            LinkToFile:=False, SaveWithDocument:=True
+                Selection.MoveRight Unit:=wdCharacter, Count:=1
+            Case "A"
+                ' 插入超連結
+                Set rng = Selection.Range
+                ActiveDocument.Hyperlinks.Add Anchor:=rng, _
+                                              Address:=elementInfo(4), _
+                                              TextToDisplay:=elementInfo(2)
+                Selection.MoveRight Unit:=wdCharacter, Count:=1
+        End Select
+    Next e
+End Sub
+
+Rem 遍歷特定範圍內的所有元素，並在特定位置插入圖片和超連結 https://sl.bing.net/f4Mv2PVPse4 20241009 creedit_with_Copilot大菩薩：
+Sub inputElementContentAll插入網頁元件所有的內容(iwe As SeleniumBasic.IWebElement)
+    'Dim wd As New SeleniumBasic.ChromeDriver
+    'Dim iwe As SeleniumBasic.IWebElement
+    Dim elements() As SeleniumBasic.IWebElement  'Object
+    Dim e, element As SeleniumBasic.IWebElement 'Object
+    Dim rng As Range
+    
+    ' 打開網頁
+'    wd.start "Chrome"
+'    wd.Get "https://www.eee-learning.com/article/3694"
+    
+    ' 抓取特定內容部分
+    'Set iwe = wd.FindElementByCssSelector("#block-bartik-content > div > article > div > div.clearfix.text-formatted.field.field--name-body.field--type-text-with-summary.field--label-hidden.field__item")
+    
+    ' 遍歷特定範圍內的所有元素
+    elements = iwe.FindElementsByTagName("*")
+    
+    For Each e In elements
+        Set element = e
+        
+'        Stop
+        
+'        If SeleniumOP.IsImageIncluded內容部分包含圖片(element) Then
+'            insertImageInline插入包含圖片的段落 element
+'        End If
+        Select Case element.tagName
+            Case "p", "div", "span" '"P", "DIV", "STRONG", "SPAN"
+                ' "strong" 粗體 .Bold=true 交由呼叫端處理
+                ' 插入文字
+                Set rng = Selection.Range
+                If element.tagName = "strong" Then
+                    
+                Else
+                    rng.text = element.GetAttribute("textContent") 'element.text
+                End If
+                If SeleniumOP.IsImageIncluded內容部分包含圖片(element) Then
+                    'insertImageInline插入包含圖片的段落 element
+                    rng.Find.Execute (ChrW(160))
+'                    If rng.Find.Execute(ChrW(160)) Then
+                        rng.InlineShapes.AddPicture fileName:=images_arrayIWebElement()(0).GetAttribute("src"), LinkToFile:=False, SaveWithDocument:=True
+                        If rng.Find.Found Then
+                            Selection.MoveDown
+                        Else
+                            Selection.MoveRight Unit:=wdCharacter, Count:=1
+                        End If
+'                    End If
+                End If
+                
+                'Selection.MoveRight Unit:=wdCharacter, Count:=1
+            Case "img"
+                ' 插入圖片
+                If UBound(images_arrayIWebElement) > -1 Then
+                    'If Not e.GetAttribute("src") = images_arrayIWebElement()(0).GetAttribute("src") Then
+                    If Not (e.GetAttribute("x") = images_arrayIWebElement()(0).GetAttribute("x") And e.GetAttribute("y") = images_arrayIWebElement()(0).GetAttribute("y")) Then
+                        Set rng = Selection.Range
+                        rng.InlineShapes.AddPicture fileName:=element.GetAttribute("src"), _
+                                                    LinkToFile:=False, SaveWithDocument:=True
+                        Selection.MoveRight Unit:=wdCharacter, Count:=1
+                    End If
+                Else
+                    Set rng = Selection.Range
+                    rng.InlineShapes.AddPicture fileName:=element.GetAttribute("src"), LinkToFile:=False, SaveWithDocument:=True
+                    Selection.MoveRight Unit:=wdCharacter, Count:=1
+                End If
+                
+            Case "a"
+'                ' 插入超連結 rem 先交給呼叫端做
+'                Set rng = Selection.Range
+'                ActiveDocument.Hyperlinks.Add Anchor:=rng, _
+'                                              Address:=element.GetAttribute("href"), _
+'                                              TextToDisplay:=element.text
+'                Selection.MoveRight Unit:=wdCharacter, Count:=1
+        End Select
+    Next e
+    
+'    wd.Quit
+End Sub
+
+Rem 處理包含圖片的段落，對於包含圖片的段落，您需要先抓取該段落的文字內容，然後在插入圖片時調整插入點的位置。 20241009 creedit_with_Copilot大菩薩：WordVBA+SeleniumBasic讀入網頁內容圖片與超連結：https://sl.bing.net/2k4A3xjuh2
+Private Sub insertImageInline插入包含圖片的段落(iwe As SeleniumBasic.IWebElement)
+    'Dim wd As New SeleniumBasic.ChromeDriver
+    'Dim
+    Dim elements As Object
+    Dim element As Object
+    Dim rng As Range
+    Dim textParts() As String
+    Dim i As Integer
+    
+'    ' 打開網頁
+'    wd.start "Chrome"
+'    wd.Get "https://www.eee-learning.com/article/3694"
+    
+'    ' 抓取特定段落
+    'Set iwe = wd.FindElementByCssSelector("#block-bartik-content > div > article > div > div.clearfix.text-formatted.field.field--name-body.field--type-text-with-summary.field--label-hidden.field__item > p:nth-child(2)")
+    
+    ' 分割段落文字內容
+    textParts = Split(iwe.GetAttribute("innerHTML"), "<img")
+    '如 ： 3 &nbsp;　<img style="border-width:0;" src="/image/yi03b.png" width="28" height="28" align="absbottom" border="0">　<strong>屯卦</strong>　水雷屯
+    
+    ' 插入文字和圖片
+    For i = LBound(textParts) To UBound(textParts)
+        If i > 0 Then
+            ' 插入圖片
+            Set rng = Selection.Range
+            rng.InlineShapes.AddPicture images_arrayIWebElement()(0).GetAttribute("src"), LinkToFile:=False, SaveWithDocument:=True
+'            rng.InlineShapes.AddPicture fileName:=Mid(textParts(i), InStr(textParts(i), "src=") + 5, InStr(textParts(i), """", InStr(textParts(i), "src=") + 5) - InStr(textParts(i), "src=") - 5), _
+                                        LinkToFile:=False, SaveWithDocument:=True
+            Selection.MoveRight Unit:=wdCharacter, Count:=1
+        End If
+        ' 插入文字
+        Set rng = Selection.Range
+        rng.text = iwe.GetAttribute("textContent") 'StripHTMLTags(textParts(i))
+        Selection.MoveRight Unit:=wdCharacter, Count:=1
+    Next i
+    
+'    wd.Quit
+End Sub
+
+Function StripHTMLTags(html As String) As String
+    Dim regex As Object
+    Set regex = CreateObject("VBScript.RegExp")
+    regex.Pattern = "<.*?>"
+    regex.Global = True
+    StripHTMLTags = regex.Replace(html, "")
+End Function
 
 

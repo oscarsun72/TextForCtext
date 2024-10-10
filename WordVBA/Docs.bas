@@ -617,17 +617,40 @@ Sub 在本文件中尋找選取字串()
     '        With .Document.StoryRanges(ins(1)).Find
 '            If ins(1) < ins(2) And ed = VBA.InStrRev(GetFullTextWithFields(d.StoryRanges(wdMainTextStory)), FdText) Then .HomeKey wdStory 'ins(2)是文件本文最後出現的位置故 20241002
                                                          'ins(2) = InStrRev(MnText, FdText)
+            Dim nowLocation As Range
+            Set nowLocation = .Range.Duplicate
+reFind:
             With .Find
                 .ClearFormatting
-                .ClearAllFuzzyOptions
+'                .ClearAllFuzzyOptions
                 .Replacement.ClearFormatting '這也要清除才行
-                .Forward = True
-                .Wrap = wdFindAsk
+'                .Forward = True
+'                .Wrap = wdFindAsk
                 .MatchCase = True
                 '.text = FdText '.Parent.Text
-                .Execute FdText
+                If Not .Execute(FdText, , , , , , True, wdFindAsk) Then
+                    If VBA.vbOK = VBA.MsgBox("往後沒有找到，是否從文件起頭處再找看看？") Then
+                        Selection.HomeKey wdStory
+                        GoTo reFind
+                    End If
+                ElseIf Selection.start = nowLocation.start Then
+                    Stop 'just for test
+                    If VBA.vbOK = VBA.MsgBox("往後沒有找到，是否從文件起頭處再找看看？") Then
+                        Selection.HomeKey wdStory
+                        GoTo reFind
+                    End If
+                End If
     '            .Parent.Select'用Range物件得用此方法才能改變選取
             End With
+            If .start = nowLocation.start Then
+                
+                Stop 'just for test
+                If VBA.vbOK = VBA.MsgBox("往後沒有找到，是否從文件起頭處再找看看？") Then
+                    Selection.HomeKey wdStory
+                    GoTo reFind
+                End If
+                    
+            End If
         End If
     End If
     End With
@@ -2079,7 +2102,7 @@ End Sub
 
 Sub updateURL() '更新超連結網址
 Dim site As String
-Dim lnk As New Links
+Dim lnk As New links
 site = InputBox("what site to update?", , "漢語大詞典=1;國語辭典=2;國學大師=3")
 If site = "" Then Exit Sub
 Select Case site

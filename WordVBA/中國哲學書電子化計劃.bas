@@ -618,7 +618,8 @@ Sub searchuCtext()
     If Not VBA.IsNumeric(bookID) Then
         MsgBox "error . not the proper bookID ref ", vbCritical: Exit Sub
     End If
-    e = Selection.text
+    文字處理.ResetSelectionAvoidSymbols
+    e = code.UrlEncode(Selection.text)
     'searchedTerm = 'Array("卦", "爻", "周易", "易經", "系辭", "繫辭", "擊辭", "說卦", "序卦", "卦序", "敘卦", "雜卦", "文言", "乾坤", "無咎", vba.Chrw(26080) & "咎", "天咎", "元亨", "利貞", "易") ', "", "", "", "")
     ''https://ctext.org/wiki.pl?if=gb&res=757381&searchu=%E5%8D%A6
     'For Each e In searchedTerm

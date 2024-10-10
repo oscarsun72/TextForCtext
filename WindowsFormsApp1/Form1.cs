@@ -832,6 +832,13 @@ namespace WindowsFormsApp1
                                 br.DriverNew();
                                 goto retry;
                             }
+                            else if (ex.Message.StartsWith("An unknown exception was encountered sending an HTTP request to the remote WebDriver server for URL"))//An unknown exception was encountered sending an HTTP request to the remote WebDriver server for URL http://localhost:14698/session/0f432de43d64b3c61bb847ce517358a3/window/handles. The exception message was: 傳送要求時發生錯誤。
+                            {
+                                if (ChromedriverLose(ex)) 
+                                    goto retry;
+                                else
+                                    goto default;
+                            }
                             else
                                 goto default;
                         default:
@@ -8908,6 +8915,7 @@ namespace WindowsFormsApp1
                         }
                     }
                     stopUndoRec = false;
+                    undoRecord();
                 }
                 return;
             }
@@ -9811,7 +9819,7 @@ namespace WindowsFormsApp1
                             //MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
                             Debugger.Break();
                             //chromedriver被誤關時 20241008
-                            br.driver = null;                            
+                            br.driver = null;
                             br.DriverNew();
                             break;
                     }
@@ -12248,9 +12256,9 @@ namespace WindowsFormsApp1
                                 }
 
                                 else if (mk == Keys.Shift && mk != (Keys.Shift | Keys.Control))//(mk == (Keys.Shift|Keys.Delete))
-                                {//如果是準備剪下貼上：
-                                    playSound(soundLike.press);
-                                    br.SelectAllQuickedit_data_textboxContent();
+                                {//如果是準備剪下貼上：           //20241008先作廢
+                                    //playSound(soundLike.press);
+                                    //br.SelectAllQuickedit_data_textboxContent();
                                 }
                             }
                             catch (Exception ex1)

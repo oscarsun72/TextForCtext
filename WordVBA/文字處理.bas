@@ -1773,7 +1773,7 @@ Sub 文件字頻_old()
         Next Char
     End With
     
-    Dim Doc As New Document, Xsort() As String, u As Long ', xTsort() As Integer, k As Long, so As Long, ww As String
+    Dim doc As New Document, Xsort() As String, u As Long ', xTsort() As Integer, k As Long, so As Long, ww As String
     'ReDim Xsort(i) As String ', xtsort(i) as Integer
     'ReDim Xsort(d.Characters.Count) As String
     If u = 0 Then u = 1 '若無執行「字頻加一:」副程序,若無超過1次的字頻，則　Xsort(xT(j - 1)) = Xsort(xT(j - 1)) & "、" & x(j - 1) & _
@@ -1792,7 +1792,7 @@ Sub 文件字頻_old()
     'U = UBound(Xsort)
     For j = u To 0 Step -1 '陣列排序'2010/10/29
         If Xsort(j) <> "" Then
-            With Doc
+            With doc
                 If Len(.Range) = 1 Then '尚未輸入內容
                     .Range.InsertAfter "字頻 = " & j & "次：（" & Len(Replace(Xsort(j), "、", "")) & "字）"
                     .Range.Paragraphs(1).Range.font.Size = 12
@@ -1824,15 +1824,15 @@ Sub 文件字頻_old()
         End If
     Next j
     
-    With Doc.Paragraphs(1).Range
+    With doc.Paragraphs(1).Range
          .InsertParagraphBefore
          .font.NameAscii = "times new roman"
-        Doc.Paragraphs(1).Range.InsertParagraphAfter
-        Doc.Paragraphs(1).Range.InsertParagraphAfter
-        Doc.Paragraphs(1).Range.InsertAfter "你提供的文本共使用了" & i & "個不同的字（傳統字與簡化字不予合併）"
+        doc.Paragraphs(1).Range.InsertParagraphAfter
+        doc.Paragraphs(1).Range.InsertParagraphAfter
+        doc.Paragraphs(1).Range.InsertAfter "你提供的文本共使用了" & i & "個不同的字（傳統字與簡化字不予合併）"
     End With
     
-    Doc.ActiveWindow.Visible = True
+    doc.ActiveWindow.Visible = True
     '
     
     'U = UBound(xT)
@@ -1867,7 +1867,7 @@ Sub 文件字頻_old()
     ExcelSheet.Application.Visible = True
     ExcelSheet.Application.UserControl = True
     ExcelSheet.SaveAs xlsp '"C:\Macros\守真TEST.XLS"
-    Doc.SaveAs Replace(xlsp, "XLS", "doc") '分大小寫
+    doc.SaveAs Replace(xlsp, "XLS", "doc") '分大小寫
     'Doc.SaveAs "c:\test1.doc"
     AppActivate "microsoft excel"
     Exit Sub
@@ -2242,7 +2242,7 @@ With Selection
 '        If .Find.Execute() = False Then Exit Do
         'Application.Browser.Next
         .TypeText text:="["
-        .MoveLeft unit:=wdCharacter, Count:=1, Extend:=wdExtend
+        .MoveLeft Unit:=wdCharacter, Count:=1, Extend:=wdExtend
         .font.Superscript = wdToggle
 '        Selection.Copy
 '        Selection.MoveRight Unit:=wdCharacter, Count:=3
@@ -2252,7 +2252,7 @@ With Selection
 '        Selection.Delete Unit:=wdCharacter, Count:=1
 '        Selection.TypeText Text:="》"
 '        Selection.MoveLeft Unit:=wdCharacter, Count:=1
-        Selection.MoveRight unit:=wdCharacter, Count:=2
+        Selection.MoveRight Unit:=wdCharacter, Count:=2
         'Selection.TypeBackspace
         Selection.TypeText text:="]"
         'Selection.MoveRight Unit:=wdCharacter, Count:=1
@@ -2333,7 +2333,7 @@ With d
     Next Char
 End With
 
-Dim Doc As New Document, Xsort() As String, u As Long ', xTsort() As Integer, k As Long, so As Long, ww As String
+Dim doc As New Document, Xsort() As String, u As Long ', xTsort() As Integer, k As Long, so As Long, ww As String
 'ReDim Xsort(i) As String ', xtsort(i) as Integer
 'ReDim Xsort(d.Characters.Count) As String
 If u = 0 Then u = 1 '若無執行「字頻加一:」副程序,若無超過1次的字頻，則　Xsort(xT(j - 1)) = Xsort(xT(j - 1)) & "、" & x(j - 1) & _
@@ -2355,7 +2355,7 @@ End With
 'U = UBound(Xsort)
 For j = u To 0 Step -1 '陣列排序'2010/10/29
     If Xsort(j) <> "" Then
-        With Doc
+        With doc
             If Len(.Range) = 1 Then '尚未輸入內容
                 .Range.InsertAfter "字頻 = " & j & "次：（" & Len(Replace(Xsort(j), "、", "")) & "字）"
                 .Range.Paragraphs(1).Range.font.Size = 12
@@ -2387,15 +2387,15 @@ For j = u To 0 Step -1 '陣列排序'2010/10/29
     End If
 Next j
 
-With Doc.Paragraphs(1).Range
+With doc.Paragraphs(1).Range
      .InsertParagraphBefore
      .font.NameAscii = "times new roman"
-    Doc.Paragraphs(1).Range.InsertParagraphAfter
-    Doc.Paragraphs(1).Range.InsertParagraphAfter
-    Doc.Paragraphs(1).Range.InsertAfter "你提供的文本共使用了" & i & "個不同的字（傳統字與簡化字不予合併）"
+    doc.Paragraphs(1).Range.InsertParagraphAfter
+    doc.Paragraphs(1).Range.InsertParagraphAfter
+    doc.Paragraphs(1).Range.InsertAfter "你提供的文本共使用了" & i & "個不同的字（傳統字與簡化字不予合併）"
 End With
 
-Doc.ActiveWindow.Visible = True
+doc.ActiveWindow.Visible = True
 '
 
 'U = UBound(xT)
@@ -2431,7 +2431,7 @@ MsgBox "完成！" & vbCr & vbCr & "費時" & VBA.Left(de - ds, 5) & "秒!", vbInforma
 xlSheet.Application.Visible = True
 xlSheet.Application.UserControl = True
 xlSheet.SaveAs xlsp '"C:\Macros\守真TEST.XLS"
-Doc.SaveAs Replace(xlsp, "XLS", "doc") '分大小寫
+doc.SaveAs Replace(xlsp, "XLS", "doc") '分大小寫
 Set Excel.Application = Nothing
 Exit Sub
 字頻加一:
@@ -2460,8 +2460,8 @@ Select Case Err.Number
     '    End If
         'Doc.Application.ActiveWindow.View.ReadingLayout
         d.ActiveWindow.View.ReadingLayout = Not d.ActiveWindow.View.ReadingLayout
-        Doc.ActiveWindow.View.ReadingLayout = False
-        Doc.ActiveWindow.Visible = False
+        doc.ActiveWindow.View.ReadingLayout = False
+        doc.ActiveWindow.Visible = False
         ReadingLayoutB = True
         Resume
     Case Else
@@ -2556,7 +2556,7 @@ With d
     Next
 End With
 12
-Dim Doc As New Document, Xsort() As String, u As Long ', xTsort() As Integer, k As Long, so As Long, ww As String
+Dim doc As New Document, Xsort() As String, u As Long ', xTsort() As Integer, k As Long, so As Long, ww As String
 If u = 0 Then u = 1 '若無執行「詞頻加一:」副程序,若無超過1次的詞頻，則　Xsort(xT(j - 1)) = Xsort(xT(j - 1)) & "、" & x(j - 1) & _
                                 會出錯：陣列索引超出範圍 2015/11/5
 
@@ -2571,12 +2571,12 @@ With xlSheet.Application
         Xsort(xT(j - 1)) = Xsort(xT(j - 1)) & "、" & x(j - 1) 'Xsort(xT(j - 1)) & ww '陣列排序'2010/10/29
     Next j
 End With
-Doc.ActiveWindow.Visible = False
+doc.ActiveWindow.Visible = False
 If d.ActiveWindow.View.ReadingLayout Then ReadingLayoutB = True: d.ActiveWindow.View.ReadingLayout = Not d.ActiveWindow.View.ReadingLayout
 'U = UBound(Xsort)
 For j = u To 0 Step -1 '陣列排序'2010/10/29
     If Xsort(j) <> "" Then
-        With Doc
+        With doc
             If Len(.Range) = 1 Then '尚未輸入內容
                 .Range.InsertAfter "詞頻 = " & j & "次：（" & Len(Replace(Xsort(j), "、", "")) / ln & "個）"
                 .Range.Paragraphs(1).Range.font.Size = 12
@@ -2608,18 +2608,18 @@ For j = u To 0 Step -1 '陣列排序'2010/10/29
     End If
 Next j
 
-With Doc.Paragraphs(1).Range
+With doc.Paragraphs(1).Range
      .InsertParagraphBefore
      .font.NameAscii = "times new roman"
-    Doc.Paragraphs(1).Range.InsertParagraphAfter
-    Doc.Paragraphs(1).Range.InsertParagraphAfter
-    Doc.Paragraphs(1).Range.InsertAfter "你提供的文本共使用了" & i & "個不同的詞彙（傳統字與簡化字不予合併）"
+    doc.Paragraphs(1).Range.InsertParagraphAfter
+    doc.Paragraphs(1).Range.InsertParagraphAfter
+    doc.Paragraphs(1).Range.InsertAfter "你提供的文本共使用了" & i & "個不同的詞彙（傳統字與簡化字不予合併）"
 End With
 
-Doc.ActiveWindow.Visible = True
+doc.ActiveWindow.Visible = True
 
 de = VBA.Timer
-Doc.SaveAs Replace(xlsp, "XLS", "doc") '分大小寫
+doc.SaveAs Replace(xlsp, "XLS", "doc") '分大小寫
 If ReadingLayoutB Then d.ActiveWindow.View.ReadingLayout = Not d.ActiveWindow.View.ReadingLayout
 Set d = Nothing ' ActiveDocument.Close wdDoNotSaveChanges
 
@@ -2656,8 +2656,8 @@ Select Case Err.Number
     '    End If
         'Doc.Application.ActiveWindow.View.ReadingLayout
         d.ActiveWindow.View.ReadingLayout = False ' Not d.ActiveWindow.View.ReadingLayout
-        Doc.ActiveWindow.View.ReadingLayout = False
-        Doc.ActiveWindow.Visible = False
+        doc.ActiveWindow.View.ReadingLayout = False
+        doc.ActiveWindow.Visible = False
         ReadingLayoutB = True
         Resume
     
@@ -3031,6 +3031,7 @@ Sub 漢籍電子文獻資料庫文本整理_注文前後加括號() '最後執行 Docs.mark易學關鍵字(在
     End If
     
     rng.Paste
+    SystemSetup.playSound 1
     
 '    If VBA.InStr(rng.text, "．　．　．　．　．　．　．　．　．　．　．　．　．　．　．　．　．　．") Then Stop 'just for test
     
@@ -3140,7 +3141,9 @@ Sub 漢籍電子文獻資料庫文本整理_注文前後加括號() '最後執行 Docs.mark易學關鍵字(在
                 pasteAppendedRange.Select '因為送交自動標點程序內有 Selection.Cut
                 
 '                Stop 'just for test
-                Network.讀入古籍酷自動標點結果
+                If Network.inputGjcoolPunctResult = False Then
+                    GoTo finish
+                End If
                 
                 Docs.marking易學關鍵字 pasteAppendedRange, Keywords.易學Keywords_ToMark
                 文字處理.FixFontname pasteAppendedRange
@@ -3297,7 +3300,7 @@ End Function
 Sub 生難字加上國語辭典注音()
 Dim rng As Range, x, rst As New ADODB.Recordset, st As WdSelectionType, words As String
 Dim cnt As New ADODB.Connection, id As Long, sty As word.Style, url As String
-Dim frmDict As New Form_DictsURL, lnks As New Links, db As New dBase ', frm As New MSForms.DataObject
+Dim frmDict As New Form_DictsURL, lnks As New links, db As New dBase ', frm As New MSForms.DataObject
 Static cntStr As String, chromePath As String
 st = Selection.Type
 If st = wdSelectionIP Then
