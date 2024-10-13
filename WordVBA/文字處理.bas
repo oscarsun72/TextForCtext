@@ -2763,9 +2763,9 @@ Dim lngTemp As Long '因為誤按到追蹤修訂，才會引發訊息提示刪除儲存格不會有標識
 Dim tb As table, c As cell ', ci As Long
 'Set d = ActiveDocument
 lngTemp = word.Application.DisplayAlerts
-If r.Tables.Count > 0 Then
+If r.tables.Count > 0 Then
     '中國哲學書電子化計劃.清除文本頁中的編號儲存格 r
-    For Each tb In r.Tables
+    For Each tb In r.tables
         'tb.Columns(1).Delete
         Err.Raise 5992
         Set r = tb.ConvertToText()
@@ -3513,7 +3513,8 @@ rePt:
                 x = InputBox("plz putin the url", , IIf(VBA.IsNull(rst.Fields(0).Value), "", rst.Fields(0).Value)) 'frmDict.add1URLTo1國語辭典(words)
                 If repeated Then
                     SystemSetup.wait 1 '先確定要輸入哪個詞條，再將瀏覽器置前
-                    appActivateChrome
+                    'AppActivateChrome
+                    SeleniumOP.ActivateChrome
                 End If
                 repeated = True
             End If

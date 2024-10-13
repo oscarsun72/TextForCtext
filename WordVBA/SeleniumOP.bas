@@ -1129,6 +1129,7 @@ Function KandiangujiSearchAll(searchTxt As String) As Boolean
     
     WD.SwitchTo().Window (WD.CurrentWindowHandle)
     ActivateChrome
+    word.Application.windowState = wdWindowStateMinimize
     Dim iwe As SeleniumBasic.IWebElement ', key As New SeleniumBasic.keys
     Set iwe = WD.FindElementByCssSelector("#keyword")
     If iwe Is Nothing Then Exit Function
@@ -1343,6 +1344,7 @@ Function LookupDictRevised(x As String) As String()
     WD.SwitchTo.Window (WD.CurrentWindowHandle)
     VBA.Interaction.DoEvents
 '    VBA.AppActivate "chrome"
+    ActivateChrome
 
     '找到檢索框之後
     If Not iwe Is Nothing Then
@@ -1408,7 +1410,9 @@ Function LookupHYDCD(x As String) As String()
     WD.SwitchTo.Window (WD.CurrentWindowHandle)
     VBA.Interaction.DoEvents
 '    VBA.AppActivate "chrome"
-
+    'AppActivateChrome
+    SeleniumOP.ActivateChrome
+    
     '找到檢索框之後
     If Not iwe Is Nothing Then
         Dim keys As New SeleniumBasic.keys
@@ -2055,17 +2059,47 @@ Function LookupDictionary_of_ChineseCharacterVariants_RetrieveShuoWenData(x As S
     '找到查詢輸入框之後
     Dim keys As New SeleniumBasic.keys
     iwe.Clear
-    iwe.SendKeys keys.Shift + keys.Insert '貼上檢索條件
-    iwe.SendKeys keys.Enter
+    SetIWebElementValueProperty iwe, x
+    'iwe.SendKeys keys.Shift + keys.Insert '貼上檢索條件
+    iwe.SendKeys keys.Enter '有時會失效
+    '「查詢」按鈕
+    SystemSetup.wait 1
+    Set iwe = WD.FindElementByCssSelector("#header > div > flex > div:nth-child(3) > div.quick > form > input[type=submit]:nth-child(5)")
+    If Not iwe Is Nothing Then
+        iwe.Submit
+    End If
     
-    '查詢結果訊息框，如【[ 孫 ]， 查詢結果：正文 1 字，附收字 3 字 】中的「1」這個元件，以此元件來判斷
-    Set iwe = WD.FindElementByCssSelector("body > main > div > flex > div:nth-child(1) > red:nth-child(1)")
-    Rem 找出來的結果頁面有二：一是列出正文、附收字各字列表的網頁，二是直接進以該字為字頭的網頁
+    dt = VBA.Now
+    Set iwe = Nothing
+    Do While iwe Is Nothing
+        '查詢結果訊息框，如【[ 孫 ]， 查詢結果：正文 1 字，附收字 3 字 】中的「1」這個元件，以此元件來判斷
+        Set iwe = WD.FindElementByCssSelector("body > main > div > flex > div:nth-child(1) > red:nth-child(1)")
+        '說文釋形欄位
+        If Not WD.FindElementByCssSelector("#view > tbody > tr:nth-child(2) > th") Is Nothing Then
+            Set iwe = WD.FindElementByCssSelector("#view > tbody > tr:nth-child(2) > th")
+            If iwe.GetAttribute("textContent") = "說文釋形" Then
+                GoTo shuowenField
+            End If
+        End If
+        Rem 找出來的結果頁面有二：一是列出正文、附收字各字列表的網頁，二是直接進以該字為字頭的網頁
+        If DateDiff("s", dt, VBA.Now) > 5 Then
+            Exit Function
+        End If
+    Loop
     If Not iwe Is Nothing Then
         Dim zhengWen As String
         zhengWen = iwe.text '前例的「1」
         '前例的「3」
-        Set iwe = WD.FindElementByCssSelector("body > main > div > flex > div:nth-child(1) > red:nth-child(2)")
+    
+        dt = VBA.Now
+        Set iwe = Nothing
+        Do While iwe Is Nothing '找「正」字
+            Set iwe = WD.FindElementByCssSelector("body > main > div > flex > div:nth-child(1) > red:nth-child(2)")
+            If DateDiff("s", dt, VBA.Now) > 5 Then
+                Exit Function
+            End If
+        Loop
+
         If zhengWen <> "0" Or iwe.text <> "0" Then
             '列出正文、附收字各字列表的網頁
             Set iwe = WD.FindElementByCssSelector("#searchL > a")
@@ -2098,6 +2132,7 @@ plural: '當查詢結果不止一個「字」時，如「去廾」字
                 result(1) = WD.url
                 GoSub iweNothingExitFunction
             End If
+shuowenField:
             '說文釋形 儲存格元件右邊的儲存格
             Set iwe = WD.FindElementByCssSelector("#view > tbody > tr:nth-child(2) > td")
             GoSub iweNothingExitFunction
@@ -2185,7 +2220,8 @@ Sub GoogleSearch(Optional searchStr As String)
     If Not OpenChrome("https://www.google.com") Then Exit Sub
     word.Application.windowState = wdWindowStateMinimize
     WD.SwitchTo.Window (WD.CurrentWindowHandle)
-    appActivateChrome
+'    AppActivateChrome
+    SeleniumOP.ActivateChrome
     VBA.Interaction.DoEvents
     Dim iwe As SeleniumBasic.IWebElement
     Dim keys As New SeleniumBasic.keys
@@ -2454,7 +2490,7 @@ Function grabHanchiZhouYi_TheOriginalText_ThirteenSutras(gua As String, resultTe
 
 End Function
 Rem 取得《易學網·易經〔周易〕原文》文本。成功則傳回 true 20241004.20241006 resultText是個集合，第1個元素是易卦的內容字串，第2個元素是查詢結果網址。若沒找到，則傳回元素是空字串的陣列
-Function grabEeeLearning_IChing_ZhouYi_originalText(guaSequence As String, resultText As Variant) As Boolean
+Function grabEeeLearning_IChing_ZhouYi_originalText(guaSequence As String, resultText As Variant, Optional iwe As SeleniumBasic.IWebElement) As Boolean
 '    If Not OpenChrome("https://www.eee-learning.com/article/571") Then Exit Function
     If Not VBA.IsArray(resultText) Then
         MsgBox "第2個引數必須是字串陣列", vbCritical
@@ -2470,7 +2506,7 @@ Function grabEeeLearning_IChing_ZhouYi_originalText(guaSequence As String, resul
     
     grabEeeLearning_IChing_ZhouYi_originalText = True
     
-    Dim iwe As SeleniumBasic.IWebElement
+    'Dim iwe As SeleniumBasic.IWebElement
     Set iwe = WD.FindElementByCssSelector("#block-bartik-content > div > article > div > div.clearfix.text-formatted.field.field--name-body.field--type-text-with-summary.field--label-hidden.field__item")
     If iwe Is Nothing Then
         grabEeeLearning_IChing_ZhouYi_originalText = False
@@ -2479,7 +2515,7 @@ Function grabEeeLearning_IChing_ZhouYi_originalText(guaSequence As String, resul
     
     resultText(0) = iwe.GetAttribute("textContent")
     resultText(1) = e2
-    Set iwe = Nothing
+    
 End Function
 Rem 20240914 creedit_with_Copilot大菩薩：https://sl.bing.net/gCpH6nC61Cu
 ' 設定元件 IWebElement的value屬性值  20240913

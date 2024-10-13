@@ -10,11 +10,11 @@ Attribute VB_Exposed = False
 Option Explicit
 Dim dbFullName As String, cnt As New ADODB.Connection
 
-Private Sub addNewRecords(URL As String, w As String, dictID, rst As ADODB.Recordset, cnt As ADODB.Connection, Optional ZhuYin)
-Dim lnks As New Links
-If Not lnks.chkLinks_http_Dicts_toAddZhuYin(URL, w, dictID) Then Exit Sub
+Private Sub addNewRecords(url As String, w As String, dictID, rst As ADODB.Recordset, cnt As ADODB.Connection, Optional ZhuYin)
+Dim lnks As New links
+If Not lnks.chkLinks_http_Dicts_toAddZhuYin(url, w, dictID) Then Exit Sub
     rst.AddNew
-    rst.Fields(0) = URL
+    rst.Fields(0) = url
     rst.Fields(1) = w
     rst.Fields(2) = dictID
     rst.Fields(3) = ZhuYin
@@ -22,14 +22,14 @@ If Not lnks.chkLinks_http_Dicts_toAddZhuYin(URL, w, dictID) Then Exit Sub
 End Sub
 
 Function add1URLTo1²§Åé¦r¦r¨å(words As String) As String
-Dim URL As String, rst As New ADODB.Recordset, lnks As New Links
+Dim url As String, rst As New ADODB.Recordset, lnks As New links
 Shell SystemSetup.getChrome() & " https://dict.variants.moe.edu.tw/variants/rbt/query_by_standard_tiles.rbt?command=clear"
 1
     AppActivateDefaultBrowser
-    URL = InputBox("plz  input the URL!")
-    If URL = "" Then Exit Function
-    If VBA.Left(URL, 4) <> "http" Then GoTo 1
-    URL = lnks.trimLinks(URL)
+    url = InputBox("plz  input the URL!")
+    If url = "" Then Exit Function
+    If VBA.Left(url, 4) <> "http" Then GoTo 1
+    url = lnks.trimLinks(url)
         Dim ZhuYin
 rep:
         AppActivateDefaultBrowser
@@ -50,9 +50,9 @@ reZY:
                 End If
             End If
         End If
-rst.Open "Select URL,word,dict,ª`­µ from dicturl where strcomp(word,""" & words & """)=0 and url=""" & URL & """", cnt, adOpenKeyset, adLockOptimistic
-If rst.RecordCount = 0 Then addNewRecords URL, words, 2, rst, cnt, ZhuYin
-add1URLTo1²§Åé¦r¦r¨å = URL
+rst.Open "Select URL,word,dict,ª`­µ from dicturl where strcomp(word,""" & words & """)=0 and url=""" & url & """", cnt, adOpenKeyset, adLockOptimistic
+If rst.RecordCount = 0 Then addNewRecords url, words, 2, rst, cnt, ZhuYin
+add1URLTo1²§Åé¦r¦r¨å = url
 rst.Close
 End Function
 
@@ -69,22 +69,22 @@ End Function
 'rst.Close
 'End Function
 Function add1URLTo1Dict(words As String, dictID As Byte) As String
-Dim URL As String, rst As New ADODB.Recordset, lnks As New Links
+Dim url As String, rst As New ADODB.Recordset, lnks As New links
 rst.Open "select dicturl from DictsNameList where dictid  =" & dictID, cnt, adOpenDynamic
-URL = rst.Fields(0).Value
+url = rst.Fields(0).Value
 rst.Close
 'open in the same windows
 'Shell SystemSetup.getChrome() & " " & lnks.trimLinks(URL)
 'open in the mew windows
 Shell SystemSetup.getChrome() & " "
-Shell SystemSetup.getChrome() & " " & lnks.trimLinks(URL)
+Shell SystemSetup.getChrome() & " " & lnks.trimLinks(url)
 
 1
     AppActivateDefaultBrowser
-    URL = InputBox("plz  input the URL!")
-    If URL = "" Then AppActivate word.ActiveDocument.ActiveWindow.Caption & " - word": Exit Function
-    If VBA.Left(URL, 4) <> "http" Then GoTo 1
-    URL = lnks.trimLinks(URL)
+    url = InputBox("plz  input the URL!")
+    If url = "" Then AppActivate word.ActiveDocument.ActiveWindow.Caption & " - word": Exit Function
+    If VBA.Left(url, 4) <> "http" Then GoTo 1
+    url = lnks.trimLinks(url)
 '        Dim zhuYin
 'rep:
 '        zhuYin = VBA.Trim(InputBox("plz input ZhuYin"))
@@ -92,14 +92,14 @@ Shell SystemSetup.getChrome() & " " & lnks.trimLinks(URL)
 '            rst.Close
 '            Exit Function
 '        End If
-rst.Open "Select URL,word,dict,ª`­µ from dicturl where strcomp(word,""" & words & """)=0 and url=""" & URL & """", cnt, adOpenKeyset, adLockOptimistic
-If rst.RecordCount = 0 Then addNewRecords URL, words, dictID, rst, cnt ', zhuYin
-add1URLTo1Dict = URL
+rst.Open "Select URL,word,dict,ª`­µ from dicturl where strcomp(word,""" & words & """)=0 and url=""" & url & """", cnt, adOpenKeyset, adLockOptimistic
+If rst.RecordCount = 0 Then addNewRecords url, words, dictID, rst, cnt ', zhuYin
+add1URLTo1Dict = url
 rst.Close
 End Function
 
 Sub Word_AfterUpdate(words As String)
-Dim dictID, rst As New ADODB.Recordset, w As String, URL As String, u As String, lnks As New Links
+Dim dictID, rst As New ADODB.Recordset, w As String, url As String, u As String, lnks As New links
 If words = "" Then words = Selection.text
 If words = "" Then Exit Sub
 w = words
@@ -114,21 +114,21 @@ End If
 If rst.RecordCount > 0 Then
     Do Until rst.EOF
         u = lnks.trimLinks(rst.Fields(0).Value)
-        URL = URL & " " & u
+        url = url & " " & u
         rst.MoveNext
     Loop
     'FollowHyperlink URL
-    Shell getChrome & URL
+    Shell getChrome & url
 Else
 1
     AppActivateDefaultBrowser
-    URL = InputBox("plz  input the URL!")
-    If URL = "" Then rst.Close: Exit Sub
-    If VBA.Left(URL, 4) <> "http" Then GoTo 1
+    url = InputBox("plz  input the URL!")
+    If url = "" Then rst.Close: Exit Sub
+    If VBA.Left(url, 4) <> "http" Then GoTo 1
     dictID = CLng(InputBox("plz  input the Dictionary ID!" & vbCr & vbLf & "°ê»yÃã¨å=1" & vbCr & vbLf & "²§Åé¦r¦r¨å=2" _
         & vbCr & vbLf & "º~»y¤j¦r¨å=3" & vbCr & vbLf & "º~»y¤jµü¨å=4", , 1))
-    URL = lnks.trimLinks(URL)
-    addNewRecords URL, w, dictID, rst, cnt
+    url = lnks.trimLinks(url)
+    addNewRecords url, w, dictID, rst, cnt
 End If
 rst.Close
 End Sub

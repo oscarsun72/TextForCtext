@@ -379,58 +379,78 @@ AppActivate "explorer"
 End Sub
 
 Sub 開啟超連結()
-'Ctrl + i   系統預設是 italic（即斜體字），此配合 ExcelVBA設定
-Dim rng As Range
-Set rng = Selection.Range
-If rng.Hyperlinks.Count = 0 Then '如果所在位置沒有超連結，則看其前有否；若又無，則再看其後有否；若都無則不執行 2022/12/20
-    If rng.start = 0 Then
-        If Selection.Type = wdSelectionNormal Then
-            GoTo Selected_Range
-        Else
-            GoSub nxt
-        End If
-    ElseIf rng.End = rng.Document.Range.End - 1 Then
-        GoSub pre
-    ElseIf rng.End < rng.Document.Range.End - 1 Then
-Selected_Range:
-        '為 「生難字加上國語辭典注音」 而設
-        Dim rngNext As Range
-        Set rngNext = rng.Next
-        If rngNext.text = "（" Then
-            If rngNext.Next.Hyperlinks.Count > 0 Then
-                rng.SetRange rngNext.Next.start, rngNext.Next.End
+    'Ctrl + i   系統預設是 italic（即斜體字），此配合 ExcelVBA設定
+    Dim rng As Range
+    Set rng = Selection.Range
+    If rng.Hyperlinks.Count = 0 And rng.Characters(rng.Characters.Count).Hyperlinks.Count > 0 Then
+        Set rng = rng.Characters(rng.Characters.Count)
+    End If
+    If rng.Hyperlinks.Count = 0 Then '如果所在位置沒有超連結，則看其前有否；若又無，則再看其後有否；若都無則不執行 2022/12/20
+        If rng.start = 0 Then
+            If Selection.Type = wdSelectionNormal Then
+                GoTo Selected_Range
+            Else
                 GoSub nxt
+            End If
+        ElseIf rng.End = rng.Document.Range.End - 1 Then
+            GoSub pre
+        ElseIf rng.End < rng.Document.Range.End - 1 Then
+Selected_Range:
+            '為 「生難字加上國語辭典注音」 而設
+            Dim rngNext As Range
+            Set rngNext = rng.Next
+            If rngNext.text = "（" Then
+                If rngNext.Next.Hyperlinks.Count > 0 Then
+                    rng.SetRange rngNext.Next.start, rngNext.Next.End
+                    GoSub nxt
+                End If
+'            ElseIf rngNext.Hyperlinks.Count > 0 And rng.Previous.Hyperlinks.Count = 0 Then
+'                Set rng = rngNext
+            Else
+                GoSub Position
             End If
         Else
             GoSub Position
         End If
-    Else
-        GoSub Position
     End If
-End If
-If rng.Hyperlinks.Count > 0 Then
-    Dim strLnk As String, lnk As Hyperlink
-    Set lnk = rng.Hyperlinks(1)
-    If rng.Hyperlinks(1).SubAddress <> "" Then
-        Dim subAdrs As String
-        subAdrs = rng.Hyperlinks(1).SubAddress
-        strLnk = rng.Hyperlinks(1).Address + "#" + _
-            VBA.IIf(VBA.InStr(subAdrs, "%"), subAdrs, _
-            IIf(code.IsSurrogate(subAdrs), UrlEncode(subAdrs), code.UrlEncode_Big5UnicodOLNLY(subAdrs)))
-    Else
-        strLnk = rng.Hyperlinks(1).Address
+    If rng.Hyperlinks.Count > 0 Then
+        Dim strLnk As String, lnk As Hyperlink
+        Set lnk = rng.Hyperlinks(1)
+        If rng.Hyperlinks(1).SubAddress <> "" Then
+            Dim subAdrs As String
+            subAdrs = rng.Hyperlinks(1).SubAddress
+            strLnk = rng.Hyperlinks(1).Address + "#" + _
+                VBA.IIf(VBA.InStr(subAdrs, "%"), subAdrs, _
+                IIf(code.IsSurrogate(subAdrs), UrlEncode(subAdrs), code.UrlEncode_Big5UnicodOLNLY(subAdrs)))
+        Else
+            strLnk = rng.Hyperlinks(1).Address
+        End If
+        If SeleniumOP.IsWDInvalid Then
+            SystemSetup.playSound 0.484
+            Shell getDefaultBrowserFullname + " " + strLnk + " --remote-debugging-port=9222 "
+'            AppActivateChrome
+            ActivateChrome
+        Else
+            WD.SwitchTo.Window WD.CurrentWindowHandle
+            WD.url = strLnk
+'            Dim win
+'            For Each win In WD.WindowHandles
+'                WD.SwitchTo.Window win
+'                If WD.url = strLnk Then Exit For
+'            Next win
+'            AppActivateChrome
+            ActivateChrome
+            word.Application.windowState = wdWindowStateMinimize
+        End If
     End If
-    SystemSetup.playSound 0.484
-    Shell getDefaultBrowserFullname + " " + strLnk + " --remote-debugging-port=9222 "
-End If
-Exit Sub
+    Exit Sub
 Position:
-    If rng.Previous.Hyperlinks.Count > 0 Then
-pre:        Set rng = rng.Previous
-    ElseIf rng.Next.Hyperlinks.Count > 0 Then
-nxt:        Set rng = rng.Next
-    End If
-Return
+        If rng.Previous.Hyperlinks.Count > 0 Then
+pre:            Set rng = rng.Previous
+        ElseIf rng.Next.Hyperlinks.Count > 0 Then
+nxt:            Set rng = rng.Next
+        End If
+    Return
 End Sub
 Sub 插入超連結() '2008/9/1 指定鍵(快捷鍵) Ctrl+shift+K(原系統指定在smallcaps為)
 'Alt+k
@@ -533,21 +553,21 @@ Sub 插入超連結() '2008/9/1 指定鍵(快捷鍵) Ctrl+shift+K(原系統指定在smallcaps為)
 End Sub
 
 Sub insertHydzdLink()
-Dim lk As New Links, db As New dBase
+Dim lk As New links, db As New dBase
 db.setWordControlValue (文字處理.trimStrForSearch(Selection.text, Selection))
 db.setDictControlValue 3
 lk.insertLinktoHydzd
 Set lk = Nothing: Set db = Nothing
 End Sub
 Sub insertHydcdLink()
-Dim lk As New Links, db As New dBase
+Dim lk As New links, db As New dBase
 db.setWordControlValue (文字處理.trimStrForSearch(Selection.text, Selection))
 db.setDictControlValue 4
 lk.insertLinktoHydcd
 Set lk = Nothing: Set db = Nothing
 End Sub
 Sub updateURL國語辭典()
-Dim lnks As New Links
+Dim lnks As New links
 lnks.updateURL國語辭典 ActiveDocument
 'SystemSetup.playSound 7
 MsgBox "done!", vbInformation
@@ -567,7 +587,7 @@ ac.Run "saveV5URL", lnk
 AppActivate "access"
 End Sub
 Sub updateURL國學大師()
-Dim lnks As New Links
+Dim lnks As New links
 lnks.updateURL國學大師 ActiveDocument
 'SystemSetup.playSound 7
 End Sub

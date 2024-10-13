@@ -392,9 +392,10 @@ Sub 查異體字字典並取回其說文釋形欄位及網址值插入至插入點位置()
             End With
         End With
     Else '如果ar(0)非空字串（空值）
-        Dim ur As UndoRecord, fontsize As Single
+        Dim ur As UndoRecord, fontsize As Single, st As Long ', ed As Long
         SystemSetup.stopUndo ur, "查異體字字典並取回其說文釋形欄位及網址值插入至插入點位置"
         With Selection
+            st = .start
             fontsize = VBA.IIf(.font.Size = 9999999, 12, .font.Size) - 4
             If fontsize < 0 Then fontsize = 10
             If .Type = wdSelectionIP Then
@@ -402,7 +403,7 @@ Sub 查異體字字典並取回其說文釋形欄位及網址值插入至插入點位置()
             Else
                 .Collapse wdCollapseEnd
             End If
-            Dim s As Byte, st As Long, ed As Long
+            Dim s As Byte
             s = VBA.InStr(ar(0), "《說文》不錄。")
             If s = 0 Then
                 If ar(0) = "說文釋形沒有資料！" Then
@@ -413,52 +414,48 @@ Sub 查異體字字典並取回其說文釋形欄位及網址值插入至插入點位置()
             Else
                  .TypeText "，" & VBA.Mid(ar(0), s) & VBA.Chr(13)
             End If
-            Dim shuoWen As String
-            shuoWen = VBA.Replace(VBA.Replace(ar(0), "：，", "：" & x & "，"), "段注本：", VBA.Chr(13) & "段注本：")
-            If VBA.Left(shuoWen, 1) = "，" Then
-                shuoWen = x & shuoWen
+            Dim shuowen As String
+            shuowen = VBA.Replace(VBA.Replace(ar(0), "：，", "：" & x & "，"), "段注本：", VBA.Chr(13) & "段注本：")
+            If VBA.Left(shuowen, 1) = "，" Then
+                shuowen = x & shuowen
             End If
             If s = 0 And ar(0) <> "說文釋形沒有資料！" Then
-                If VBA.InStr(shuoWen, "<img ") Then
-                    st = .start
-                    .TypeText shuoWen & VBA.Chr(13)
-                    ed = .End
+                If VBA.InStr(shuowen, "<img ") Then
+                    word.Application.ScreenUpdating = False
                     Dim rngHtml As Range
-                    Set rngHtml = .Document.Range(st, ed)
+                    Set rngHtml = .Document.Range(.start, .start)
+                    '.TypeText shuoWen & VBA.Chr(13)
+                    '字太長時TypeText會反應不及,會無效
+                    .text = shuowen & VBA.Chr(13)
+                    'ed = Selection.Range.End '插入文字後，即Selection改變後， 用 With 區塊未能及時反應！20221010
+                    'Set rngHtml = .Document.Range(st, ed)
+                    rngHtml.End = Selection.End
+                    讀入網路資料後_還原視窗狀態 .Application.ActiveWindow, windowState
                     
-                    InnerHTML_convert_DocContent rngHtml ', vbNullString
-                    
+                    'InnerHTML_Convert_to_WordDocumentContent Selection.Range ', vbNullString
+                    InnerHTML_Convert_to_WordDocumentContent rngHtml ', vbNullString
                     rngHtml.Collapse wdCollapseEnd
                     rngHtml.Select
                 Else
-                    .InsertAfter shuoWen & VBA.Chr(13)  'ar(0)=《說文》內容
+                    .InsertAfter shuowen & VBA.Chr(13)  'ar(0)=《說文》內容
                     .Collapse wdCollapseEnd
                 End If
             End If
+            
             If Selection.End = Selection.Document.Range.End - 1 Then
                 Selection.Document.Range.InsertParagraphAfter
             End If
-            .font.Size = fontsize
-            .InsertAfter ar(1) '插入網址
+            讀入網路資料後_於其後植入網址及設定格式 .Range, VBA.CStr(ar(1)), fontsize
+            讀入網路資料後_還原視窗狀態 .Application.ActiveWindow, windowState
             SystemSetup.contiUndo ur
-            .Collapse wdCollapseStart
-            With .Application
-                .Activate
-                With .ActiveWindow
-                    If .windowState = wdWindowStateMinimize Then
-                        VBA.Interaction.DoEvents
-                        .windowState = windowState
-                        .Activate
-                        VBA.Interaction.DoEvents
-                    End If
-                End With
-            End With
+            word.Application.ScreenUpdating = True
+            .SetRange st, st
         End With
     End If
 End Sub
 Rem 1.指定卦名再操作 20241004 Alt + Shift + y (y:易) 。2.若游標所在為《易學網》的網址，則將其內容讀入到文件（於該連結段落後插入）
 Sub 查易學網易經周易原文指定卦名文本_並取回其純文字值及網址值插入至插入點位置()
-    Dim linkInput As Boolean, rngLink As Range
+    Dim linkInput As Boolean, rngLink As Range, rngHtml As Range
     If Selection.Type = wdSelectionIP Then
         '若游標所在為《易學網》的網址，則將其內容讀入到文件
         Set rngLink = Selection.Range
@@ -521,9 +518,15 @@ errExit:
                     s = Selection.start
                     Selection.TypeText iwe.GetAttribute("innerHTML")
                     ed = Selection.End
+                                        
+                    Set rngHtml = Selection.Document.Range(s, ed)
                     
-                    InnerHTML_convert_DocContent Selection.Document.Range(s, ed), "https://www.eee-learning.com/"
+                    
+                    
+                    InnerHTML_Convert_to_WordDocumentContent rngHtml, "https://www.eee-learning.com"
                     'SeleniumOP.inputElementContentAll插入網頁元件所有的內容 iwe
+                    
+                    
                     
 
 '                    Stop 'just for test
@@ -565,12 +568,63 @@ errExit:
     
     gua = Keywords.周易卦名_卦形_卦序(gua)(1)
 
-    Dim fontsize As Single
-    If Not SeleniumOP.grabEeeLearning_IChing_ZhouYi_originalText(gua, result) Then
+    Dim fontsize As Single, rngBooks As Range
+    fontsize = VBA.IIf(Selection.font.Size = 9999999, 12, Selection.font.Size) * 0.6
+    If fontsize < 0 Then fontsize = 10
+    
+    If Not SeleniumOP.grabEeeLearning_IChing_ZhouYi_originalText(gua, result, iwe) Then
         word.Application.Activate
         VBA.MsgBox "找不到，或網頁改了或掛了……", vbInformation
         Exit Sub
     End If
+    
+    
+'        Set iwe = WD.FindElementByCssSelector("#block-bartik-content > div > article > div > div.clearfix.text-formatted.field.field--name-body.field--type-text-with-summary.field--label-hidden.field__item")
+'        If Not iwe Is Nothing Then
+            If SeleniumOP.IslinkImageIncluded內容部分包含超連結或圖片(iwe) Then '有圖片時取 "innerHTML" 屬性值
+            'If SeleniumOP.IsImageIncluded內容部分包含圖片(iwe) Then '有圖片時取 "innerHTML" 屬性值
+                If Selection.Style <> word.wdStyleNormal Then
+                    Selection.MoveUntil Chr(13)
+                    Selection.TypeText Chr(13)
+                    Selection.Style = word.wdStyleNormal '"內文"
+                End If
+                s = Selection.start
+                
+                Selection.TypeText iwe.GetAttribute("innerHTML")
+                ed = Selection.End
+                
+                
+                
+                Set rngHtml = Selection.Document.Range(s, ed)
+                
+                InnerHTML_Convert_to_WordDocumentContent rngHtml, "https://www.eee-learning.com"
+                'SeleniumOP.inputElementContentAll插入網頁元件所有的內容 iwe
+                
+                
+                
+                Rem 歷代注本：
+                Set rngBooks = Selection.Document.Range(rngHtml.start, rngHtml.End)
+                rngBooks.Find.ClearFormatting
+                If rngBooks.Find.Execute("歷代注本：", , , , , , True, wdFindStop) Then
+                    With rngBooks '"歷代注本："所在段落範圍
+                        .Style = wdStyleHeading1
+                        .font.Size = 22
+                        .ParagraphFormat.LineSpacingRule = wdLineSpaceSingle '單行間距
+                    End With
+                    ed = 讀入網路資料後_於其後植入網址及設定格式(rngHtml, result(1), fontsize)
+                    讀入網路資料後_還原視窗狀態 Selection.Document.ActiveWindow, windowState
+                End If
+
+        '                    Stop 'just for test
+                GoTo finish 'just for test
+        
+        
+        '    Else '沒有圖片時取 "textContent" 屬性值
+        '        result(0) = iwe.GetAttribute("textContent")
+        '        result(1) = rngLink.Hyperlinks(1).Address
+            End If
+'        End If
+    
 insertText:
     word.Application.Activate
     If VBA.InStr(result(0), "歷代注本：") Then
@@ -579,11 +633,11 @@ insertText:
         End If
     End If
         
-    Dim rngBooks As Range, p As Paragraph, book As String, iwes() As IWebElement, e, x As String
+    Dim p As Paragraph, book As String, iwes() As IWebElement, e, x As String
     
     With Selection
-        fontsize = VBA.IIf(.font.Size = 9999999, 12, .font.Size) - 4
-        If fontsize < 0 Then fontsize = 10
+'        fontsize = VBA.IIf(.font.Size = 9999999, 12, .font.Size) - 4
+'        If fontsize < 0 Then fontsize = 10
         If .Type = wdSelectionIP And .text <> Chr(13) Then
             .Delete
         End If
@@ -631,8 +685,9 @@ insertText:
         Next p
         
         ed = 讀入網路資料後_於其後植入網址及設定格式(Selection.Range, result(1), fontsize)
-        .Document.Range(s, s).Select
-        讀入網路資料後_還原視窗狀態 .Document.ActiveWindow, windowState
+'        .Document.Range(s, s).Select
+'        讀入網路資料後_還原視窗狀態 .Document.ActiveWindow, windowState
+        
     End With
     
     '保留歷代注本及其超連結
@@ -694,8 +749,12 @@ insertText:
     End If
 
 finish:
+
     word.Application.ScreenUpdating = True
+    Selection.Document.Range(s, s).Select
+    讀入網路資料後_還原視窗狀態 Selection.Document.ActiveWindow, windowState
     SystemSetup.contiUndo ur
+    playSound 2
     Exit Sub
 
 eH:
@@ -707,10 +766,23 @@ eH:
     End Select
 End Sub
 Rem 20241009 將HTML轉成Word文件內文。creedit_with_Copilot大菩薩：https://sl.bing.net/jij3PK59Rka
-Sub InnerHTML_convert_DocContent(rngHtml As Range, Optional domainUrlPrefix As String)
-    Dim htmlStr As String, rng As Range, rngClose As Range, p As Paragraph, textPart As String, url As String, w As Single, h As Single, s As Long
+Sub InnerHTML_Convert_to_WordDocumentContent(rngHtml As Range, Optional domainUrlPrefix As String)
+    If VBA.InStr(rngHtml.text, "<") = 0 Then Exit Sub
     
-    Dim ur As UndoRecord  'just for test
+     SystemSetup.playSound 1
+    
+    Dim htmlStr As String, rng As Range, rngClose As Range, p As Paragraph, url As String, stRngHTML As Long, pCntr As Long
+    Dim s As Integer '作為 InStr() 記下結果值用
+    Dim l As Integer '作為 Len() 記下結果值用
+    '作為通用變數用，或陣列記住用
+    Dim arr, arr1, e '作為通用一般變數用，或陣列元素記住用
+    Dim obj As Object '作為通用物件變數用
+    
+    'dim w As Single, h As Single, textPart As String
+    
+    'Dim ur As UndoRecord  'just for test
+    
+'    GoTo finish 'just for test
     
     '取得網址前綴的網域值（不含尾斜線）
     If domainUrlPrefix = vbNullString Then
@@ -719,84 +791,232 @@ Sub InnerHTML_convert_DocContent(rngHtml As Range, Optional domainUrlPrefix As S
         End If
     End If
     'SystemSetup.stopUndo ur, "InnerHTML_DocContent"
-    s = rngHtml.start
-    htmlStr = rngHtml.text
+    stRngHTML = rngHtml.start
+    htmlStr = rngHtml.text '記下起始位置
+    
+    Rem 前置整理文本
     rngHtml.text = VBA.Replace(VBA.Replace(VBA.Replace(htmlStr, "</p>", vbNullString), "<p>", vbNullString), "&nbsp;", ChrW(160))
+    htmlStr = rngHtml.text
+    
+    If VBA.InStr(htmlStr, "<sup>") Then
+        Set rng = rngHtml.Document.Range(rngHtml.start, rngHtml.End)
+        HTML2Doc.ConvertHTMLSupToWordSup rng
+    End If
+    If VBA.InStr(htmlStr, "<sub>") Then
+        Set rng = rngHtml.Document.Range(rngHtml.start, rngHtml.End)
+        HTML2Doc.ConvertHTMLSubToWordSub rng
+    End If
     With rngHtml.Find
-        .Execute "<br>", , , , , , , , , "^l", wdReplaceAll
-        .Execute ChrW(160), , , , , , , , , vbNullString, wdReplaceAll
+        .ClearFormatting
+        '置換
+        If VBA.InStr(htmlStr, "<br>") Then .Execute "<br>", , , , , , , , , "^l", wdReplaceAll
+        If VBA.InStr(htmlStr, "<a style=""line-height:1.5;"" href=") Then .Execute "<a style=""line-height:1.5;"" href=", , , , , , , , , "<a href=", wdReplaceAll ' " 會置換成 “
+        If VBA.InStr(htmlStr, "&lt;") Then .Execute "&lt;", , , , , , , , , "＜", wdReplaceAll
+        If VBA.InStr(htmlStr, "&gt;") Then .Execute "&gt;", , , , , , , , , "＞", wdReplaceAll
+        '清除
+'        If VBA.InStr(htmlStr, "<div>" & ChrW(160) & "</div>") Then .Execute "<div>" & ChrW(160) & "</div>", , , , , , , , , vbNullString, wdReplaceAll
+        If VBA.InStr(htmlStr, ChrW(160)) Then .Execute ChrW(160), , , , , , , , , vbNullString, wdReplaceAll
+        If VBA.InStr(htmlStr, " class=""colorbox cboxElement""") Then .Execute " class=""colorbox cboxElement""", , , , , , , , , vbNullString, wdReplaceAll
+        If VBA.InStr(htmlStr, " class=""colorbox colorbox-insert-image cboxElement""") Then .Execute " class=""colorbox colorbox-insert-image cboxElement""", , , , , , , , , vbNullString, wdReplaceAll '
+        'If VBA.InStr(htmlStr, "<a class=""colorbox colorbox-insert-image cboxElement"" href=") Then .Execute "<a class=""colorbox colorbox-insert-image cboxElement"" href=", , , , , , , , , "<a href=", wdReplaceAll ' " 會置換成 “
+        If VBA.InStr(htmlStr, " rel=""group-all""") Then .Execute " rel=""group-all""", , , , , , , , , vbNullString, wdReplaceAll
+        If VBA.InStr(htmlStr, "<o:p></o:p>") Then .Execute "<o:p></o:p>", , , , , , , , , vbNullString, wdReplaceAll
+        If VBA.InStr(htmlStr, "<span></span>") Then .Execute "<span></span>", , , , , , , , , vbNullString, wdReplaceAll
+        Rem 原網頁蓋用諸如Word等編輯貼上，故多有殘碼、亂碼
+        If VBA.InStr(htmlStr, "<o:p>") Then .Execute "<o:p>", , , , , , , , , vbNullString, wdReplaceAll
+        If VBA.InStr(htmlStr, "</o:p>") Then .Execute "</o:p>", , , , , , , , , vbNullString, wdReplaceAll
+        If VBA.InStr(htmlStr, "<span style=""color:#ffffff;"">ppp</span>") Then .Execute "<span style=""color:#ffffff;"">ppp</span>", , , , , , , , , vbNullString, wdReplaceAll
+        If VBA.InStr(htmlStr, "<!--EndFragment-->") Then .Execute "<!--EndFragment-->", , , , , , , , , vbNullString, wdReplaceAll
     End With
+    
+    SystemSetup.playSound 1
+    Set rng = rngHtml.Document.Range(rngHtml.start, rngHtml.End)
+    '清除空標籤
+    RemoveEmptyTags rngHtml
+    
+    Rem 表格處理 https://sl.bing.net/fQ5lVr8PLye
+    Do While VBA.InStr(rngHtml.text, "<table")
+        Set rng = rngHtml.Document.Range(rngHtml.start, rngHtml.End)
+        With rng.Find
+            .ClearFormatting
+            .text = "<table "
+            .Execute
+            Set rngClose = rng.Document.Range(rng.End, rngHtml.End)
+            With rngClose.Find
+                .text = "</table>"
+                .Execute
+            End With
+            InsertHTMLTable rngHtml.Document.Range(rng.start, rngClose.End), domainUrlPrefix
+        End With
+    Loop
+    
+    Set rng = rngHtml.Document.Range(rngHtml.start, rngHtml.End)
+    Rem 無序清單的處理
+    unorderedListPorc_HTML2Word rng
+    
     For Each p In rngHtml.Paragraphs
+        pCntr = pCntr + 1
+        If pCntr Mod 20 = 0 Then SystemSetup.playSound 1
+        
         Set rng = p.Range '用set 會歸零，用 setRange 不會，只是調整
         With rng
+            
+'            If VBA.InStr(rng.text, "六五，貞疾，恒不") Then
+'                Stop 'check
+'            End If
+
+'            If VBA.InStr(rng.text, "潛龍勿用，陽在下也") Then
+'                Stop 'check
+'            End If
+            
             With .Find
                 .ClearFormatting
-                .text = "<p id="
+                .text = "<b>"
+                Do While .Execute()
+                    Set rngClose = rng.Document.Range(rng.End, p.Range.End)
+                    rngClose.Find.ClearFormatting
+                    If Not rngClose.Find.Execute("</b>") Then Stop 'to check
+                    rng.Document.Range(rng.End, rngClose.start).font.Bold = True
+                    rng.text = vbNullString: rngClose.text = vbNullString
+                    rng.SetRange p.Range.start, p.Range.End '用set 會歸零，用 setRange 不會，只是調整
+                Loop
+                .text = "<b "
+                Do While .Execute()
+                    rng.MoveEndUntil ">"
+                    rng.End = rng.End + 1
+                    Set rngClose = rng.Document.Range(rng.End, p.Range.End)
+                    rngClose.Find.ClearFormatting
+                    If Not rngClose.Find.Execute("</b>") Then Stop 'to check
+                    rng.Document.Range(rng.End, rngClose.start).font.Bold = True
+                    rng.text = vbNullString: rngClose.text = vbNullString
+                    rng.SetRange p.Range.start, p.Range.End '用set 會歸零，用 setRange 不會，只是調整
+                Loop
+                .text = "<span lang=""EN-US"">"
+                Do While .Execute()
+                    Set rngClose = rng.Document.Range(rng.End, p.Range.End)
+                    rngClose.Find.ClearFormatting
+                    If Not rngClose.Find.Execute("</span>") Then Stop 'to check
+                    rng.Document.Range(rng.End, rngClose.start).font.Name = "Calibri"
+                    rng.text = vbNullString: rngClose.text = vbNullString
+                    rng.SetRange p.Range.start, p.Range.End '用set 會歸零，用 setRange 不會，只是調整
+                Loop
+                .text = "<st1:chmetcnv "
+                Do While .Execute()
+                    rng.MoveEndUntil ">"
+                    rng.End = rng.End + 1
+                    Set rngClose = rng.Document.Range(rng.End, p.Range.End)
+                    rngClose.Find.ClearFormatting
+                    If Not rngClose.Find.Execute("</st1:chmetcnv>") Then Stop 'to check
+                    rng.text = vbNullString: rngClose.text = vbNullString
+                    rng.SetRange p.Range.start, p.Range.End '用set 會歸零，用 setRange 不會，只是調整
+                Loop
+                .text = "<span class=""Apple-style-span"""
+                Do While .Execute()
+                    rng.MoveEndUntil ">"
+                    rng.End = rng.End + 1
+                    Set rngClose = rng.Document.Range(rng.End, p.Range.End)
+                    rngClose.Find.ClearFormatting
+                    If Not rngClose.Find.Execute("</span>") Then Stop 'to check
+                    rng.text = vbNullString: rngClose.text = vbNullString
+                    rng.SetRange p.Range.start, p.Range.End '用set 會歸零，用 setRange 不會，只是調整
+                Loop
+                .text = "<blockquote>"
+                Do While .Execute()
+                    Set rngClose = rng.Document.Range(rng.End, p.Next.Range.End)
+                    rngClose.Find.ClearFormatting
+                    If Not rngClose.Find.Execute("</blockquote>") Then Stop 'to check
+                    rng.text = vbNullString
+                    If rngClose.Paragraphs(1).Range.text = "</blockquote>" & Chr(13) Then
+                        rngClose.Paragraphs(1).Range.text = vbNullString
+                    Else
+                        Stop 'for check
+                        rngClose.text = vbNullString
+                    End If
+                    rng.ParagraphFormat.CharacterUnitLeftIndent = 3
+                    rng.Paragraphs(1).Range.font.Name = "標楷體"
+                    rng.SetRange p.Range.start, p.Range.End '用set 會歸零，用 setRange 不會，只是調整
+                Loop
+                .text = "<hr>"
+                If .Execute() Then
+                    rng.text = vbNullString
+                    'rng.InsertBreak WdBreakType.wdLineBreak
+                    With p.Borders(wdBorderBottom)
+                        .LineStyle = wdLineStyleSingle ' 插入實線  插入雙線：wdLineStyleDouble 插入虛線：wdLineStyleDot
+                        .LineWidth = wdLineWidth050pt
+                        .Color = wdColorAutomatic
+                    End With
+                    rng.SetRange p.Range.start, p.Range.End '用set 會歸零，用 setRange 不會，只是調整
+                End If
+                .text = "<hr " 'ex: <hr style="padding-left: 30px;">
                 If .Execute() Then
                     rng.MoveEndUntil ">"
                     rng.End = rng.End + 1
-                    rng.Select
+                    '借用 url 變數
+                    url = rng.text
                     rng.text = vbNullString
+                    'rng.InsertBreak WdBreakType.wdLineBreak
+                    With p.Borders(wdBorderBottom)
+                        .LineStyle = wdLineStyleSingle ' 插入實線  插入雙線：wdLineStyleDouble 插入虛線：wdLineStyleDot
+                        .LineWidth = wdLineWidth050pt
+                        .Color = wdColorAutomatic
+                    End With
+                    url = getHTML_AttributeValue("style", url)
+                    arr = VBA.Split(url, ";")
+                    For Each e In arr
+                        If e <> vbNullString Then
+                            e = VBA.Trim(e)
+                            l = VBA.Len("padding-left: ")
+                            If VBA.Left(e, l) = "padding-left: " Then
+                                rng.ParagraphFormat.LeftIndent = PixelsToPoints(VBA.Replace(VBA.Mid(e, l + 1), "px", vbNullString))
+                            Else
+                                playSound 12
+                                Stop 'for check
+                            End If
+                        End If
+                    Next e
+
+                    rng.SetRange p.Range.start, p.Range.End '用set 會歸零，用 setRange 不會，只是調整
                 End If
-                rng.SetRange p.Range.start, p.Range.End '用set 會歸零，用 setRange 不會，只是調整
+                '處理圖片
                 .text = "<img "
                 Do While .Execute()
                     rng.MoveEndUntil ">" 'ex: <img style="float:right;margin-left:15px;margin-right:15px;" src="/image/3.jpg" width="200" height="297"
-                    textPart = rng.text
-                    'url = getImageUrl(textPart)
-                    url = getHTMLatrbibuteValue("src", textPart)
-                    If VBA.InStr(textPart, "width") Then
-                        w = VBA.CSng(getHTMLatrbibuteValue("width", textPart))
-                    End If
-                    If VBA.InStr(textPart, "height") Then
-                        h = VBA.CSng(getHTMLatrbibuteValue("height", textPart))
-                    End If
-                    If VBA.InStr(url, "http") <> 1 Then
-                        If domainUrlPrefix = vbNullString Then
-                            'msgbox "須帶入網域前綴才行"
-                            'If domainUrlPrefix = vbNullString Then domainUrlPrefix = "https://www.eee-learning.com"
-                            
-                            'If Not SeleniumOP.IsWDInvalid() Then
-                                'domainUrlPrefix = getDomainUrlPrefix(SeleniumOP.WD.url)
-                            'End If
-                            
-                        End If
-                        If Not IsBase64Image(url) Then 'base64編碼的圖片
-                            url = domainUrlPrefix & url
-                        Else
-                            If Base64ToImage(url, VBA.Environ("TEMP") & "\" & "tempImage.png") = False Then
-                                Stop
-                                GoTo finish
-                            End If
-                        End If
-                    End If
+                    '借用變數
+                    url = rng.text
                     rng.End = rng.End + 1 '包含 ">"
                     rng.text = vbNullString
-'                    rng.Select 'for test
-                    If Not IsBase64Image(url) Then 'VBA.InStr(url, "data:image/png;base64") = 0 Then
-                            'rng.InlineShapes.AddPicture fileName:=url, _
-                                            LinkToFile:=False, SaveWithDocument:=True
-                        If w > 0 And h > 0 Then
-                            resizePicture rng, rng.InlineShapes.AddPicture(fileName:=url, _
-                                            LinkToFile:=False, SaveWithDocument:=True), url, w, h
-                        Else
-                            resizePicture rng, rng.InlineShapes.AddPicture(fileName:=url, _
-                                            LinkToFile:=False, SaveWithDocument:=True), url
-                        End If
-                    Else 'base64編碼的圖片
-                        Dim inlsp As inlineShape
-                        ' 插入base64編碼的圖片
-                        Set inlsp = InsertBase64Image(url, "tempImage.png", rng)
-                        resizePicture rng, inlsp, url
-                        
+                    'pCntr + VBA.Abs(10 - pCntr) '下載圖片需要時間
+                    If Not insert_ImageHTML(url, rng, domainUrlPrefix) Is Nothing Then
+                        p.Range.ParagraphFormat.BaseLineAlignment = wdBaselineAlignCenter
                     End If
+'                    If rng.Paragraphs(1).Range.ShapeRange.Count > 0 Then
+'                        Stop
+'                    End If
+                    
                     rng.SetRange rng.End, p.Range.End
-                    p.Range.ParagraphFormat.BaseLineAlignment = wdBaselineAlignCenter
+                    
                 Loop
                 If VBA.Len(p.Range.text) > VBA.Len("<strong></strong>") Then
                     rng.SetRange p.Range.start, p.Range.End '用set 會歸零，用 setRange 不會，只是調整
                     .text = "<strong>"
                     Do While .Execute()
+                        Set rngClose = rng.Document.Range(rng.End, p.Range.End)
+                        rngClose.Find.text = "</strong>"
+                        If Not rngClose.Find.Execute() Then
+                            rngClose.SetRange rngClose.End, rngClose.Paragraphs(1).Next.Range.End
+                            If Not rngClose.Find.Execute() Then Stop 'for check
+                        End If
+                        rng.Document.Range(rng.End, rngClose.start).font.Bold = True
+                        rng.text = vbNullString: rngClose.text = vbNullString
+                        rng.SetRange p.Range.start, p.Range.End
+                    Loop
+                End If
+                If VBA.Len(p.Range.text) > VBA.Len("<strong style=""; ;""></strong>") Then
+                    rng.SetRange p.Range.start, p.Range.End '用set 會歸零，用 setRange 不會，只是調整
+                    .text = "<strong style="""
+                    Do While .Execute()
+                        rng.MoveEndUntil ">"
+                        rng.End = rng.End + 1
                         Set rngClose = rng.Document.Range(rng.End, p.Range.End)
                         rngClose.Find.text = "</strong>"
                         rngClose.Find.Execute
@@ -805,31 +1025,7 @@ Sub InnerHTML_convert_DocContent(rngHtml As Range, Optional domainUrlPrefix As S
                         rng.SetRange p.Range.start, p.Range.End
                     Loop
                 End If
-                rng.SetRange p.Range.start, p.Range.End '用set 會歸零，用 setRange 不會，只是調整
-                If VBA.Len(p.Range.text) > VBA.Len("<a href=""></a>") Then
-                    .text = "<a href="""
-                    Do While .Execute()
-                        url = getHTMLatrbibuteValue("<a href", p.Range.text)
-                        Select Case VBA.Left(url, 1)
-                            Case "#"
-                                If Not SeleniumOP.IsWDInvalid() Then
-                                    url = WD.url & url
-                                End If
-                            Case "/"
-                                url = domainUrlPrefix & url
-                            Case Else
-                                Stop 'check
-                                url = domainUrlPrefix & url
-                        End Select
-                        rng.MoveEndUntil ">"
-                        rng.End = rng.End + 1
-                        rngClose.SetRange rng.End, p.Range.End
-                        rngClose.Find.Execute "</a>"
-                        rng.text = vbNullString: rngClose.text = vbNullString
-                        rng.Document.Range(rng.End, rngClose.start).Hyperlinks.Add rng.Document.Range(rng.End, rngClose.start), url
-                        rng.SetRange rngClose.End, p.Range.End
-                    Loop
-                End If
+                '處理字型樣式
                 If VBA.Len(p.Range.text) > VBA.Len("<span style=""></span>") Then
                     rng.SetRange p.Range.start, p.Range.End '用set 會歸零，用 setRange 不會，只是調整
                     .text = "<span style"
@@ -839,23 +1035,164 @@ Sub InnerHTML_convert_DocContent(rngHtml As Range, Optional domainUrlPrefix As S
                         Set rngClose = rng.Document.Range(rng.End, p.Range.End)
                         rngClose.Find.text = "</span>"
                         rngClose.Find.Execute
+                        
+'                        If InStr(p.Range.text, "陽湖　孫星衍　淵如纂") Then Stop 'just for test
+                        
                         '借用url變數
-                        url = VBA.Replace(getHTMLatrbibuteValue("span style", p.Range.text), "font-family:", vbNullString)
+                        url = VBA.Replace(getHTML_AttributeValue("span style", p.Range.text), "font-family:", vbNullString)
                         url = VBA.Left(url, VBA.Len(url) - 1)
                         Select Case url
-                            Case "font-size: x-large"
+                            Case "font-size: x-large", "font-size:x-large"
                                 rng.Document.Range(rng.End, rngClose.start).font.Size = rng.Document.Range(rng.End, rngClose.start).font.Size * 2
-                            Case "font-size: x-small"
+                            Case "font-size: small", "font-size:small"
+                                rng.Document.Range(rng.End, rngClose.start).font.Size = rng.Document.Range(rng.End, rngClose.start).font.Size * (5 / 6)
+                            Case "font-size: x-small", "font-size:x-small"
                                 rng.Document.Range(rng.End, rngClose.start).font.Size = rng.Document.Range(rng.End, rngClose.start).font.Size * (2 / 3)
+                            Case "font-size: xx-small", "font-size:xx-small"
+                                rng.Document.Range(rng.End, rngClose.start).font.Size = rng.Document.Range(rng.End, rngClose.start).font.Size * (1 / 2)
+                            Case "text-decoration:underline"
+                                rng.Document.Range(rng.End, rngClose.start).font.Underline = wdUnderlineSingle
                             Case Else
+                            
+                                If VBA.InStr(url, ";") = 0 And VBA.InStr(url, "; ") = 0 And VBA.InStr(url, "font-size:") <> 1 And VBA.InStr(url, "line-height:") = 0 And VBA.InStr(url, "font-family") = 0 And VBA.InStr(url, "Mso") = 0 And VBA.InStr(url, "mso-") = 0 And VBA.InStr(url, "標楷體") = 0 And VBA.InStr(url, "letter-spacing:0pt") = 0 And VBA.InStr(url, "新細明體") = 0 And VBA.InStr(url, "background-color: ") = 0 And VBA.InStr(url, "color: ") = 0 Then
+                                    
+                                    rng.Select
+                                    Debug.Print url
+                                    Stop 'for check
+                                End If
+                                
+                                'FontName
+                                If VBA.Left(url, 3) = "標楷體" Then url = "標楷體"
                                 If Fonts.IsFontInstalled(VBA.Trim(url)) Then
-                                    rng.Document.Range(rng.End, rngClose.start).font.Name = VBA.Trim(url)
+                                    If rng.Document.Range(rng.End, rngClose.start).font.Name <> VBA.Trim(url) Then
+                                        rng.Document.Range(rng.End, rngClose.start).font.Name = VBA.Trim(url)
+                                    End If
+                                End If
+                                'FontSzie
+                                If VBA.InStr(url, "font-size:") = 1 Then
+                                    l = VBA.Len("font-size:")
+                                    If VBA.Right(url, 2) = "em" Then ' em 是一個相對單位，用於設置字體大小。它相對於父元素的字體大小。例如，如果父元素的字體大小是16像素，則 1em 等於16像素，1.5em 等於24像素。20241011 https://sl.bing.net/bVzA9JEh8VM
+                                        l = VBA.Len("font-size:")
+                                        rng.Document.Range(rng.End, rngClose.start).font.Size = rng.Document.Range(rng.End, rngClose.start).font.Size _
+                                                * VBA.CSng(VBA.Trim(VBA.Mid(url, l + 1, VBA.Len(url) - l - VBA.Len("em"))))
+                                    ElseIf VBA.IsNumeric(VBA.Mid(url, l + 1)) Then
+                                        rng.Document.Range(rng.End, rngClose.start).font.Size = VBA.CSng(IIf(VBA.Mid(url, l + 1) < 1, VBA.Mid(url, l + 1) * 10, VBA.Mid(url, l + 1)))
+                                    Else
+                                        
+                                        If VBA.InStr(url, "font-size: medium") = 0 And VBA.InStr(url, "font-size:medium") = 0 Then
+                                            Stop
+                                        End If
+                                    End If
+                                End If
+                                '字型段落其他格式化雜項
+                                If VBA.InStr(url, "; ") Or VBA.InStr(url, ";") Then
+                                    arr = VBA.Split(url, ";")
+                                    For Each e In arr
+                                        e = VBA.Trim(e)
+                                        If VBA.Left(e, 17) = "background-color:" Then
+                                            arr1 = colorCodetoRGB(VBA.LTrim(VBA.Mid(e, VBA.Len("background-color:") + 1)))
+                                            rng.Document.Range(rng.End, rngClose.start).font.Shading.BackgroundPatternColor = VBA.RGB(arr1(0), arr1(1), arr1(2))
+                                        ElseIf VBA.Left(e, 6) = "color:" Then
+                                            arr1 = colorCodetoRGB(VBA.LTrim(VBA.Mid(e, VBA.Len("color:") + 1)))
+                                            rng.Document.Range(rng.End, rngClose.start).font.Color = VBA.RGB(arr1(0), arr1(1), arr1(2))
+                                        ElseIf VBA.Left(e, 12) = "line-height:" Then
+                                            arr1 = VBA.LTrim(VBA.Mid(e, VBA.Len("line-height:") + 1))
+                                            If Not VBA.IsNumeric(arr1) Then
+                                                If VBA.InStr(arr1, "px") Then
+                                                    arr1 = VBA.Replace(arr1, "px", vbNullString)
+                                                Else
+                                                    playSound 12 'for check
+                                                    Stop
+                                                End If
+                                            End If
+                                            If arr1 < 10 Then
+                                                rng.Document.Range(rng.End, rngClose.start).ParagraphFormat.LineSpacingRule = wdLineSpaceMultiple
+                                                rng.Document.Range(rng.End, rngClose.start).ParagraphFormat.LineSpacing = VBA.CSng(arr1)
+                                            Else
+                                                rng.Document.Range(rng.End, rngClose.start).ParagraphFormat.LineSpacingRule = wdLineSpaceMultiple
+                                                rng.Document.Range(rng.End, rngClose.start).ParagraphFormat.LineSpacing = VBA.CSng(arr1)
+                                            End If
+                                        ElseIf VBA.Left(e, 10) = "font-size:" Then
+                                            arr1 = VBA.Replace(VBA.LTrim(VBA.Mid(e, VBA.Len("font-size:") + 1)), "px", vbNullString)
+                                            If VBA.IsNumeric(arr1) Then
+                                                rng.Document.Range(rng.End, rngClose.start).font.Size = VBA.CSng(arr1)
+                                            Else
+                                                If arr1 = "x-small" Then
+                                                    rng.Document.Range(rng.End, rngClose.start).font.Size = rng.Document.Range(rng.End, rngClose.start).font.Size * (2 / 3)
+                                                ElseIf arr1 = "medium" Then
+                                                    'Stop
+                                                    '不處理，即預設大小
+                                                Else
+                                                    playSound 12
+                                                    Stop 'to check
+                                                End If
+                                            End If
+                                        Else
+                                            SystemSetup.playSound 12
+                                            rng.Select
+                                            Debug.Print e
+                                            Stop 'to check
+                                        End If
+                                    Next e
                                 End If
                         End Select
                         rng.text = vbNullString: rngClose.text = vbNullString
                         rng.SetRange p.Range.start, p.Range.End
                     Loop
                 End If
+                
+                '處理超連結
+                If VBA.Len(p.Range.text) > VBA.Len("<a href=""></a>") Then
+                    rng.SetRange p.Range.start, p.Range.End '用set 會歸零，用 setRange 不會，只是調整
+                    '.text = "<a href="""
+                    .text = "<a "
+                    Do While .Execute()
+                        rng.MoveEndUntil ">"
+                        rng.End = rng.End + 1
+                        url = rng.text: e = rng.text
+                        Set rngClose = rng.Document.Range(rng.End, p.Range.End)
+                        rngClose.Find.Execute "</a>"
+                        url = getHTML_AttributeValue("href", url)
+                        'url = getHTML_AttributeValue("<a href", p.Range.text)
+                        e = getHTML_AttributeValue("title", VBA.CStr(e))
+                        Select Case VBA.Left(url, 1)
+                            Case "#"
+                                If Not SeleniumOP.IsWDInvalid() Then
+                                    url = WD.url & url
+                                End If
+                            Case "/"
+                                url = domainUrlPrefix & url '路徑中多一個斜線（/）也是可以的，沒差 20241012
+                            Case Else
+                                If Not VBA.Left(url, 4) = "http" Then
+                                    Stop 'check
+                                    url = domainUrlPrefix & url
+                                End If
+                        End Select
+                        
+                        Set obj = rng.Document.Range(rng.start, rngClose.End).ShapeRange
+                        rng.text = vbNullString: rngClose.text = vbNullString
+                        If Not obj Is Nothing Then
+                            Select Case obj.Count
+                                Case 0
+                                    If rng.Document.Range(rng.End, rngClose.start).text <> vbNullString Then
+                                        rng.Document.Range(rng.End, rngClose.start).Hyperlinks.Add rng.Document.Range(rng.End, rngClose.start), url, , e
+                                    End If
+                                Case 1
+                                    rng.Document.Range(rng.End, rngClose.start).Hyperlinks.Add obj(1), url, , e
+                                Case Else
+                                    playSound 12 'for check
+                                    Stop
+                            End Select
+                            
+                            Set obj = Nothing
+                        Else
+                            playSound 12 'for check
+                            Stop
+                        End If
+                        rng.SetRange rngClose.End, p.Range.End
+                    Loop
+                End If
+
                 If VBA.Len(p.Range.text) > VBA.Len("<p style=""padding-left:;>") Then
                     rng.SetRange p.Range.start, p.Range.End '用set 會歸零，用 setRange 不會，只是調整
                     .text = "<p style=""padding-left:"
@@ -881,17 +1218,58 @@ Sub InnerHTML_convert_DocContent(rngHtml As Range, Optional domainUrlPrefix As S
                         rng.SetRange p.Range.start, p.Range.End
                     Loop
                 End If
+                If VBA.Len(p.Range.text) > VBA.Len("<span></span>") Then
+                    rng.SetRange p.Range.start, p.Range.End '用set 會歸零，用 setRange 不會，只是調整
+                    .text = "<span>"
+                    Do While .Execute()
+                        Set rngClose = rng.Document.Range(rng.End, p.Range.End)
+                        rngClose.Find.text = "</span>"
+                        rngClose.Find.Execute
+                        rng.text = vbNullString: rngClose.text = vbNullString
+                        rng.SetRange p.Range.start, p.Range.End
+                    Loop
+                End If
+                If VBA.Len(p.Range.text) > VBA.Len("<p id=") Then
+                    .text = "<p id="
+                    rng.SetRange p.Range.start, p.Range.End
+                    If .Execute() Then
+                        rng.MoveEndUntil ">"
+                        rng.End = rng.End + 1
+                        'rng.Select
+                        rng.text = vbNullString
+                        rng.SetRange p.Range.start, p.Range.End '用set 會歸零，用 setRange 不會，只是調整
+                    End If
+                End If
                 If VBA.Len(p.Range.text) > VBA.Len("<p style=""line-height:px;"">>") Then
                     rng.SetRange p.Range.start, p.Range.End '用set 會歸零，用 setRange 不會，只是調整
-                    .text = " style=""line-height: "
+                    '.text = " style=""line-height: "
+                    .text = "<p style="""
                     Do While .Execute()
-                        rng.MoveEndUntil """"
+                        rng.MoveEndUntil ">"
                         rng.End = rng.End + 1
                         '借用url變數
-                        url = getHTMLatrbibuteValue("style", p.Range.text)
-                        url = VBA.Replace(VBA.Replace(url, "line-height: ", vbNullString), "px;", vbNullString)
-                        rng.ParagraphFormat.LineSpacingRule = wdLineSpaceExactly
-                        rng.ParagraphFormat.LineSpacing = VBA.CSng(url)
+                        url = getHTML_AttributeValue("style", p.Range.text)
+                        arr = VBA.Split(url, ";")
+                        For Each e In arr
+                            e = VBA.Trim(e)
+                            If VBA.Left(e, 13) = "line-height: " Then
+                                rng.ParagraphFormat.LineSpacingRule = wdLineSpaceExactly
+                                rng.ParagraphFormat.LineSpacing = CSng(VBA.Replace(VBA.Mid(e, VBA.Len("line-height: ") + 1), "px", vbNullString))
+                            ElseIf VBA.Left(e, 11) = "font-size: " Then
+                                rng.Paragraphs(1).Range.font.Size = VBA.CSng(VBA.Replace(VBA.Mid(e, VBA.Len("font-size: ") + 1), "px", vbNullString))
+                            ElseIf VBA.Left(e, 11) = "margin-top:" Then
+                                '不處理
+                            Else
+                                If e <> vbNullString Then
+                                    playSound 12
+                                    rng.Select
+                                    Stop 'for check
+                                End If
+                            End If
+                        Next e
+                        'url = VBA.Replace(VBA.Replace(url, "line-height: ", vbNullString), "px;", vbNullString)
+                        'rng.ParagraphFormat.LineSpacingRule = wdLineSpaceExactly
+                        'rng.ParagraphFormat.LineSpacing = VBA.CSng(url)
                         rng.text = vbNullString
                         rng.SetRange p.Range.start, p.Range.End
                     Loop
@@ -907,21 +1285,594 @@ Sub InnerHTML_convert_DocContent(rngHtml As Range, Optional domainUrlPrefix As S
                         rng.SetRange p.Range.start, p.Range.End
                     Loop
                 End If
-
+                If VBA.Len(p.Range.text) > VBA.Len("<p class="";"">") Then
+                    rng.SetRange p.Range.start, p.Range.End '用set 會歸零，用 setRange 不會，只是調整
+                    .text = "<p class="""
+                    Do While .Execute()
+                        rng.MoveEndUntil ">"
+                        rng.End = rng.End + 1
+                        rng.text = vbNullString
+                        rng.SetRange p.Range.start, p.Range.End
+                    Loop
+                End If
+                If VBA.Len(p.Range.text) > VBA.Len("<st1:personname ></st1:personname>") Then
+                    rng.SetRange p.Range.start, p.Range.End '用set 會歸零，用 setRange 不會，只是調整
+                    .text = "<st1:personname "
+                    Do While .Execute()
+                        rng.MoveEndUntil ">"
+                        rng.End = rng.End + 1
+                        Set rngClose = rng.Document.Range(rng.End, p.Range.End)
+                        rngClose.Find.ClearFormatting
+                        rngClose.Find.Execute "</st1:personname>"
+                        rng.text = vbNullString: rngClose.text = vbNullString
+                        rng.SetRange p.Range.start, p.Range.End
+                    Loop
+                End If
                 'rng.SetRange p.Range.start, p.Range.End '用set 會歸零，用 setRange 不會，只是調整
                 
-            End With
-        End With
+            End With 'rng.Find
+            
+            
+            If .Paragraphs(1).Range.text = "<br class=""Apple-interchange-newline""> " & Chr(13) Then
+                .Paragraphs(1).Range.text = vbNullString
+            End If
+        End With 'rng
     Next p
-    文字處理.FixFontname rngHtml
     
-    Rem 表格處理 https://sl.bing.net/fQ5lVr8PLye
-    
+    Set rng = rngHtml.Document.Range(rngHtml.start, rngHtml.End)
+    文字處理.FixFontname rng
+
     
 finish:
-    rngHtml.Document.Range(s, s).Select
-    'SystemSetup.contiUndo ur
+    rngHtml.Document.Range(stRngHTML, stRngHTML).Select '回到起始位置
+    
+    Rem just for check
+    With rngHtml.Find
+        .ClearFormatting
+        If .Execute("[<>&;]", , , True) Then
+            rngHtml.Select
+            SystemSetup.playSound 3
+        End If
+    End With
 End Sub
+Rem 20241011 HTML 無序清單的處理.Porc=Porcess
+Private Sub unorderedListPorc_HTML2Word(rngHtml As Range)
+    Rem 無序清單的處理
+    Dim rngUnorderedList As Range, st As Long, ed As Long, rngUnorderedListSub As Range, p As Paragraph
+    Do
+        Set rngUnorderedList = GetRangeFromULToUL_UnorderedListRange(rngHtml)
+        If Not rngUnorderedList Is Nothing Then
+            st = rngUnorderedList.start
+            Set p = rngUnorderedList.Paragraphs(1).Previous
+            If Not p Is Nothing Then
+                '如果是易學網的「歷代注本：」
+                If VBA.InStr(p.Range.text, "歷代注本：") Then
+                    With rngUnorderedList.Find
+                        .Execute "<li>", , , , , , , , , vbNullString, wdReplaceAll
+                        .Execute "</li>", , , , , , , , , vbNullString, wdReplaceAll
+                        .Execute "</ul>", , , , , , , , , vbNullString, wdReplaceAll
+                         ed = rngUnorderedList.End
+                    End With
+                    Set rngUnorderedListSub = rngUnorderedList.Document.Range(rngUnorderedList.start, rngUnorderedList.End)
+                    rngUnorderedListSub.Find.ClearFormatting
+                    If rngUnorderedListSub.Find.Execute("<ul ") Then
+                        rngUnorderedListSub.MoveEndUntil ">"
+                        rngUnorderedListSub.End = rngUnorderedListSub.End + 2
+                        If rngUnorderedListSub.Characters(rngUnorderedListSub.Characters.Count) <> Chr(13) Then
+                            rngUnorderedListSub.End = rngUnorderedListSub.End - 1
+                        End If
+                        rngUnorderedListSub.text = vbNullString
+
+                    Else
+                        rngUnorderedListSub.SetRange rngUnorderedList.start, rngUnorderedList.End
+                        If rngUnorderedListSub.Find.Execute("<ul>") Then
+                            If rngUnorderedListSub.Paragraphs(1).Range.text = rngUnorderedListSub & Chr(13) Then
+                                rngUnorderedListSub.Paragraphs(1).Range.text = vbNullString
+                            Else
+                                rngUnorderedListSub.text = vbNullString
+                            End If
+                        End If
+                    End If
+                    If rngUnorderedList.Characters(rngUnorderedList.Characters.Count) = Chr(13) Then
+                        rngUnorderedList.End = rngUnorderedList.End - 1
+                    End If
+                    With rngUnorderedList
+                        '.Hyperlinks.Add rngLink, iwe.GetAttribute("href")'在前面已經插入超連結了
+                        .Style = wdStyleHeading2 '標題 2
+                        .font.Size = 18
+                        .ParagraphFormat.LineSpacingRule = wdLineSpaceSingle '單行間距
+                    End With
+                Else
+                    GoTo UnorderedListRange
+                End If
+            Else
+UnorderedListRange:
+                
+                rngUnorderedList.Select 'for chect
+                'Stop
+                
+                'Set rngUnorderedList = Nothing
+                'InsertHTMLList rngUnorderedList.text
+                
+                If VBA.Left(rngUnorderedList, 5) = "<ul>" & Chr(13) And VBA.Right(rngUnorderedList, 6) = Chr(13) & "</ul>" Then
+                    With rngUnorderedList
+                        With .Find
+                            .Execute "<li>", , , , , , , , , vbNullString, wdReplaceAll
+                            .Execute "</li>", , , , , , , , , vbNullString, wdReplaceAll
+                            .Execute "<ul>^p", , , , , , , , , vbNullString, wdReplaceAll
+                            .Execute "^p</ul>", , , , , , , , , vbNullString, wdReplaceAll
+                        End With
+                        .ListFormat.ApplyListTemplateWithLevel ListTemplate:= _
+                            ListGalleries(wdBulletGallery).ListTemplates(1), ContinuePreviousList:= _
+                            False, ApplyTo:=wdListApplyToWholeList, DefaultListBehavior:= _
+                            wdWord10ListBehavior
+                        
+                    End With
+                Else
+                    Stop 'for chect
+                
+                End If
+            End If
+        End If
+    Loop Until rngUnorderedList Is Nothing
+End Sub
+Rem 解析HTML並插入清單 20241011 creedit_with_Copilot大菩薩：https://sl.bing.net/gbeqh0TAks8：HTML表格轉換和屬性設置
+Rem 解析HTML內容，提取清單項目，然後在Word中插入相應的清單樣式。https://sl.bing.net/bhFU3zNMSom
+Sub InsertHTMLList(html As String)
+    Dim doc As Document
+    Dim listItems As Collection
+    Dim listItem As Variant
+    Dim rng As Range
+    
+    ' 解析HTML
+    Set listItems = ParseHTMLList(html)
+    
+    ' 插入清單
+    Set doc = ActiveDocument
+    Set rng = doc.Range(start:=doc.Content.End - 1, End:=doc.Content.End - 1)
+    
+    ' 開始清單
+    rng.ListFormat.ApplyBulletDefault
+    
+    ' 填充清單內容
+    For Each listItem In listItems
+        rng.text = StripHTMLTags(VBA.CStr(listItem))
+        rng.ParagraphFormat.Alignment = wdAlignParagraphLeft
+        rng.font.Name = "標楷體"
+        rng.InsertParagraphAfter
+        Set rng = rng.Next(wdParagraph, 1) '.Range
+    Next listItem
+End Sub
+
+Function ParseHTMLList(html As String) As Collection
+    Dim regex As Object
+    Dim matches As Object
+    Dim match As Object
+    Dim listItems As New Collection
+    
+    ' 初始化正則表達式對象
+    Set regex = CreateObject("VBScript.RegExp")
+    regex.Global = True
+    regex.Pattern = "<li.*?>(.*?)</li>"
+    
+    Set matches = regex.Execute(html)
+    For Each match In matches
+        listItems.Add match.SubMatches(0)
+    Next match
+    
+    Set ParseHTMLList = listItems
+End Function
+
+
+Rem 將HTML文本置換成圖片，成功則傳回一個有效了 InlineShape物件 20241011 textPart:要解析的HTML文本，rng：要插入圖片的位置；domainUrlPrefix 是否圖片網址要加域名前綴
+Private Function insert_ImageHTML(textPart As String, rng As Range, Optional domainUrlPrefix As String) As word.inlineShape
+    Dim url As String, w As Single, h As Single, align As String, hspace As String
+    'url = getImageUrl(textPart)
+    url = getHTML_AttributeValue("src", textPart)
+    If VBA.InStr(textPart, "width") Then
+        w = VBA.CSng(getHTML_AttributeValue("width", textPart))
+    End If
+    If VBA.InStr(textPart, "height") Then
+        h = VBA.CSng(getHTML_AttributeValue("height", textPart))
+    End If
+    If VBA.InStr(textPart, "align") Then
+        align = getHTML_AttributeValue("align", textPart)
+    End If
+    If VBA.InStr(textPart, "hspace") Then
+        hspace = getHTML_AttributeValue("hspace", textPart)
+    End If
+    
+    If VBA.InStr(url, "http") <> 1 Then
+'        If domainUrlPrefix = vbNullString Then
+'            'msgbox "須帶入網域前綴才行"
+'            'If domainUrlPrefix = vbNullString Then domainUrlPrefix = "https://www.eee-learning.com"
+'
+'            'If Not SeleniumOP.IsWDInvalid() Then
+'                'domainUrlPrefix = getDomainUrlPrefix(SeleniumOP.WD.url)
+'            'End If
+'
+'        End If
+        If Not IsBase64Image(url) Then 'base64編碼的圖片
+            url = domainUrlPrefix & url '路徑中多一個斜線（/）也是可以的，沒差 20241012
+        Else
+            If Base64ToImage(url, VBA.Environ("TEMP") & "\" & "tempImage.png") = False Then
+                Stop
+'                GoTo finish
+                Exit Function
+            End If
+        End If
+    End If
+    Dim inlsp As inlineShape
+    
+    If Not IsBase64Image(url) Then 'VBA.InStr(url, "data:image/png;base64") = 0 Then
+            'rng.InlineShapes.AddPicture fileName:=url, _
+                            LinkToFile:=False, SaveWithDocument:=True
+        If w > 0 And h > 0 Then
+            Set inlsp = rng.InlineShapes.AddPicture(fileName:=url, _
+                            LinkToFile:=False, SaveWithDocument:=True)
+            resizePicture rng, inlsp, url, w, h
+        Else
+            On Error Resume Next
+            Set inlsp = rng.InlineShapes.AddPicture(fileName:=url, _
+                            LinkToFile:=False, SaveWithDocument:=True)
+            On Error GoTo 0
+            If Not inlsp Is Nothing Then
+                If inlsp.Range.tables.Count > 0 Then
+                    'resizePicture rng, inlsp, url, inlsp.Range.tables(1).PreferredWidth, inlsp.height * (inlsp.width / inlsp.Range.tables(1).PreferredWidth)
+                    Rem 先插表格並處理其中的圖片，應該預設就是表格大小
+                Else
+                    resizePicture rng, inlsp, url
+                End If
+            Else
+                Exit Function
+            End If
+        End If
+    Else 'base64編碼的圖片
+        
+        ' 插入base64編碼的圖片
+        Set inlsp = InsertBase64Image(url, "tempImage.png", rng)
+        resizePicture rng, inlsp, url
+        
+    End If
+    
+    Rem 設定圖片格式
+    Rem inlineShape格式
+    Dim shp As Shape
+    If align <> vbNullString And hspace <> vbNullString Then
+        Select Case align
+            Case "right"
+                Set shp = inlsp.ConvertToShape
+                With shp.WrapFormat
+                    .Type = wdWrapSquare
+                    .Side = wdWrapBoth
+                    '.DistanceTop = CentimetersToPoints(0.5)
+                    .DistanceLeft = CentimetersToPoints(0.5)
+                    .Parent.RelativeHorizontalPosition = wdRelativeHorizontalPositionRightMarginArea
+                    .Parent.RelativeVerticalPosition = wdRelativeVerticalPositionTopMarginArea
+                    .Parent.Left = WdShapePosition.wdShapeRight
+                    'shp.Top = WdShapePosition.wdShapeTop
+    '                shp.Left = ActiveDocument.PageSetup.PageWidth - shp.width - CentimetersToPoints(1) ' 設定右邊距離
+    '                shp.Top = CentimetersToPoints(1) ' 設定上邊距離
+                End With
+            Case "left"
+                Set shp = inlsp.ConvertToShape
+                With shp.WrapFormat
+                    .Type = wdWrapSquare
+                    .Side = wdWrapBoth
+                    '.DistanceTop = CentimetersToPoints(0.5)
+                    .DistanceRight = CentimetersToPoints(0.5)
+                
+                    .Parent.RelativeHorizontalPosition = wdRelativeHorizontalPositionLeftMarginArea
+                    .Parent.RelativeVerticalPosition = wdRelativeVerticalPositionTopMarginArea
+                    .Parent.Left = WdShapePosition.wdShapeLeft
+    '                shp.Top = wdShapeTop
+                End With
+            Case "absbottom"
+            Case Else
+                playSound 12
+                Stop 'for check
+        End Select
+    End If
+    Rem Shape文繞圖格式
+    Dim imgStyle As String, float As String, marginLeft, marginRight
+    'ex: float:right;margin-left:10px;margin-right:10px;"
+    imgStyle = getHTML_AttributeValue("style", textPart)
+    If imgStyle <> vbNullString Then
+        If inlsp.Range.tables.Count = 0 Then
+            If InStr(imgStyle, "float:") Then
+                float = VBA.Mid(imgStyle, VBA.InStr(imgStyle, "float:") + VBA.Len("float:"), VBA.InStr(VBA.InStr(imgStyle, "float:"), imgStyle, ";") - (VBA.InStr(imgStyle, "float:") + VBA.Len("float:")))
+            End If
+            If InStr(imgStyle, "margin-left:") Then
+                marginLeft = VBA.Val(VBA.Mid(imgStyle, VBA.InStr(imgStyle, "margin-left:") + VBA.Len("margin-left:"), VBA.InStr(VBA.InStr(imgStyle, "margin-left:"), imgStyle, ";") - (VBA.InStr(imgStyle, "margin-left:") + VBA.Len("margin-left:"))))
+            End If
+            If InStr(imgStyle, "margin-right:") Then
+                marginRight = VBA.Val(VBA.Mid(imgStyle, VBA.InStr(imgStyle, "margin-right:") + VBA.Len("margin-right:"), VBA.InStr(VBA.InStr(imgStyle, "margin-right:"), imgStyle, ";") - (VBA.InStr(imgStyle, "margin-right:") + VBA.Len("margin-right:"))))
+            End If
+            If float <> "" And VBA.IsEmpty(marginLeft) = False And VBA.IsEmpty(marginRight) = False Then
+                ' 設置圖片的文繞圖方式和對齊方式
+                Set shp = inlsp.ConvertToShape
+                With shp
+                    .WrapFormat.Type = WdWrapType.wdWrapTight ' wdWrapSquare
+                    Select Case float
+                        Case vbNullString
+                        Case "left"
+                            .Left = WdShapePosition.wdShapeLeft
+                            '.WrapFormat.Side = WdWrapSideType.wdWrapLeft
+                        Case "right"
+                            .Left = WdShapePosition.wdShapeRight
+                            '.WrapFormat.Side = WdWrapSideType.wdWrapRight ' 對應於float:right
+                        Case Else
+                            Stop ' check
+                    End Select
+                    If marginLeft <> 0 Then
+                        .WrapFormat.DistanceLeft = marginLeft ' 對應於margin-left:10px
+                    End If
+                    If marginRight <> 0 Then
+                        .WrapFormat.DistanceRight = marginRight ' 對應於margin-right:10px
+                    End If
+                End With
+            End If
+        End If
+    End If
+    
+    Set insert_ImageHTML = inlsp
+    SystemSetup.playSound 0.411
+End Function
+Rem 解析HTML內容，提取表格、行、單元格、圖片和文字 20241011 creedit_with_Copilot大菩薩：https://sl.bing.net/fQ5lVr8PLye
+Function ParseHTMLTable(html As String) As Collection
+    Dim regex As Object
+    Dim matches As Object
+    Dim match As Object
+    Dim tables As New Collection
+    Dim rows As New Collection
+    Dim cells As New Collection
+    Dim table, row
+    
+    ' 初始化正則表達式對象
+    Set regex = CreateObject("VBScript.RegExp")
+    regex.Global = True
+    
+    ' 匹配表格
+    regex.Pattern = "<table.*?>(.*?)</table>"
+    Set matches = regex.Execute(html)
+    For Each match In matches
+        tables.Add match.SubMatches(0)
+    Next match
+    
+    ' 匹配行/列
+    regex.Pattern = "<tr.*?>(.*?)</tr>"
+    For Each table In tables
+        Set matches = regex.Execute(table)
+        For Each match In matches
+            rows.Add match.SubMatches(0)
+        Next match
+    Next table
+    
+    ' 匹配單元格
+    regex.Pattern = "<td.*?>(.*?)</td>"
+    For Each row In rows
+        Set matches = regex.Execute(row)
+        For Each match In matches
+            cells.Add match.SubMatches(0)
+        Next match
+    Next row
+    
+    Set ParseHTMLTable = cells
+End Function
+Rem 接下來，您可以在Word中創建表格並插入相應的內容 creedit_with_Copilot大菩薩 20241011
+Sub InsertHTMLTable(rngHtml As Range, Optional domainUrlPrefix As String)
+    Dim html As String
+    Dim tbl As word.table
+    Dim cells As Collection
+    Dim cell As Variant
+    Dim row As Integer
+    Dim col As Integer
+    Dim img As inlineShape
+    Dim rngTxt As Range
+    Dim c As cell
+    Dim align As String
+    Dim bgcolor As String
+    Dim tblWidth As Single
+'    Dim imgSrc As String
+'    Dim imgWidth As Single
+'    Dim imgHeight As Single
+    
+    
+'    Dim ur As UndoRecord
+'    SystemSetup.stopUndo ur, "InsertHTMLTable"
+    
+    html = rngHtml.text
+    ' 解析HTML
+    Set cells = ParseHTMLTable(html)
+    
+    ' 插入表格
+    rngHtml.text = vbNullString
+    
+    Set tbl = rngHtml.tables.Add(Range:=Selection.Range, NumRows:=1, NumColumns:=1)
+    
+     ' 設置表格屬性
+'    align = getHTML_AttributeValue("align", html)
+'    bgcolor = getHTML_AttributeValue("bgcolor", html)
+'    tblWidth = CSng(getHTML_AttributeValue("width", html))
+    align = getHTML_AttributeValue("align", html)
+    bgcolor = getHTML_AttributeValue("bgcolor", html)
+    tblWidth = VBA.CSng(VBA.Val((getHTML_AttributeValue("width", html, ":"))))
+    
+    
+    If align = "left" Then
+        tbl.rows.Alignment = wdAlignRowLeft
+    ElseIf align = "center" Then
+        tbl.rows.Alignment = wdAlignRowCenter
+    ElseIf align = "right" Then
+        tbl.rows.Alignment = wdAlignRowRight
+    End If
+    
+    If bgcolor <> "" Then
+        If VBA.Left(bgcolor, 1) = "#" Then
+            Dim arr
+            arr = colorCodetoRGB(bgcolor)
+            tbl.Shading.BackgroundPatternColor = RGB(arr(0), arr(1), arr(2))
+        Else
+            If bgcolor = "white" Then
+                tbl.Shading.BackgroundPatternColor = RGB(255, 255, 255)
+            Else
+                playSound 12 'for check
+                Stop
+            End If
+        End If
+    End If
+    
+'    Dim shp As Shape
+    ' 將表格轉換為Shape對象
+'    Set shp = tbl.ConvertToShape
+    tbl.rows.WrapAroundText = True
+    ' 設置文繞圖方式
+'    shp.WrapFormat.Type = wdWrapSquare
+'    shp.WrapFormat.Side = wdWrapBoth
+'    shp.WrapFormat.DistanceTop = 0
+'    shp.WrapFormat.DistanceBottom = 0
+'    shp.WrapFormat.DistanceLeft = 0
+'    shp.WrapFormat.DistanceRight = 0
+    
+    tbl.PreferredWidthType = wdPreferredWidthPoints
+    tbl.PreferredWidth = tblWidth
+    
+    ' 填充表格內容
+    row = 1
+    col = 1
+    For Each cell In cells
+        ' 檢查是否包含圖片
+        If InStr(cell, "<img") > 0 Then
+            
+            Set c = tbl.cell(row, col)
+            Set img = insert_ImageHTML(html, c.Range, domainUrlPrefix)
+'            imgSrc = getHTML_AttributeValue("src", VBA.CStr(cell))  'Mid(cell, InStr(cell, "src=") + 5, InStr(cell, """", InStr(cell, "src=") + 5) - InStr(cell, "src=") - 5)
+'            imgWidth = getHTML_AttributeValue("width", VBA.CStr(cell)) 'CSng(Mid(cell, InStr(cell, "width=") + 7, InStr(cell, """", InStr(cell, "width=") + 7) - InStr(cell, "width=") - 7))
+'            imgHeight = getHTML_AttributeValue("height", VBA.CStr(cell)) 'CSng(Mid(cell, InStr(cell, "height=") + 8, InStr(cell, """", InStr(cell, "height=") + 8) - InStr(cell, "height=") - 8))
+'            tbl.cell(row, col).Range.InlineShapes.AddPicture fileName:=imgSrc, LinkToFile:=False, SaveWithDocument:=True
+            c.Range.InlineShapes(1).width = img.width 'imgWidth
+            c.Range.InlineShapes(1).height = img.height 'imgHeight
+            Set rngTxt = c.Range.Document.Range(c.Range.End - 1, c.Range.End - 1)
+            rngTxt.text = StripHTMLTags(VBA.CStr(cell))
+        Else
+            tbl.cell(row, col).Range.text = StripHTMLTags(VBA.CStr(cell))
+        End If
+        col = col + 1
+        If col > tbl.Columns.Count Then
+            tbl.rows.Add
+            row = row + 1
+            col = 1
+        End If
+    Next cell
+    
+'    SystemSetup.contiUndo ur
+End Sub
+Rem 顏色碼轉換成RGB
+Private Function colorCodetoRGB(colorCode As String) As Long()
+    ' 將bgcolor轉換為RGB顏色
+    'Dim r As Integer, g As Integer, b As Integer
+    If VBA.Left(colorCode, 1) <> "#" Then Exit Function
+    Dim arr(2) As Long
+    arr(0) = CLng("&H" & Mid(colorCode, 2, 2))
+    arr(1) = CLng("&H" & Mid(colorCode, 4, 2))
+    arr(2) = CLng("&H" & Mid(colorCode, 6, 2))
+    colorCodetoRGB = arr
+End Function
+
+
+Rem 取得HTML中表格的屬性值 20241011 creedit_with_Copilot大菩薩：HTML表格轉換和屬性設置：HTML表格轉換和屬性設置
+Function getHTMLAttributeValue(attributeName As String, html As String) As String
+    Dim regex As Object
+    Dim matches As Object
+    Dim match As Object
+    
+    ' 初始化正則表達式對象
+    Set regex = CreateObject("VBScript.RegExp")
+    regex.Global = False
+    regex.Pattern = attributeName & "=""'[""']"
+    
+    Set matches = regex.Execute(html)
+    If matches.Count > 0 Then
+        getHTMLAttributeValue = matches(0).SubMatches(0)
+    Else
+        getHTMLAttributeValue = ""
+    End If
+End Function
+Rem 清除一切的html tags HTML標籤
+Function StripHTMLTags(html As String) As String
+    Dim regex As Object
+    Set regex = CreateObject("VBScript.RegExp")
+    regex.Pattern = "<.*?>"
+    regex.Global = True
+    StripHTMLTags = regex.Replace(html, "")
+End Function
+
+Rem 20241010國慶日 清除在標籤間沒有任何內容的HTML空標籤
+Sub RemoveEmptyTags(rng As Range)
+    Dim rngOriginal As Range, arr, e
+    Set rngOriginal = rng.Document.Range(rng.start, rng.End)
+    arr = Array(">" & VBA.Chr(11) & "<", "><", ">" & VBA.Chr(13) & "<")
+    rng.Find.MatchWildcards = False
+    With rng.Find
+        .ClearFormatting
+        For Each e In arr
+            .text = e
+            .Wrap = wdFindStop
+            Do While .Execute()
+                Do Until rng.Characters(1) = "<"
+                    rng.MoveStart , -1
+                Loop
+'                rng.Select 'for check
+                rng.MoveEndUntil ">"
+                rng.MoveEnd 1
+'                rng.Select 'for check
+                If Not VBA.Left(rng.text, 2) = "</" And (VBA.InStr(rng.text, e & "/") Or VBA.InStr(rng.text, ">" & VBA.Chr(13) & "/>")) _
+                        And VBA.Mid(rng.text, VBA.InStr(rng.text, "/") + 1, VBA.Len(rng.text) - VBA.InStr(rng.text, "/") - 1) _
+                            = rng.Document.Range(rng.start + 1, rng.start + 1 + VBA.Len(rng.text) - VBA.InStr(rng.text, "/") - 1) Then
+                    rng.text = vbNullString
+                End If
+                If rng.Characters.Count = 1 And rng.Characters(1).text = VBA.Chr(13) And rng.Paragraphs(1).Range.Characters.Count = 1 Then
+                    rng.Characters(1).text = vbNullString
+                End If
+                rng.Collapse wdCollapseEnd
+                'rng.SetRange rng.End, rngOriginal.End
+            Loop
+            rng.SetRange rngOriginal.start, rngOriginal.End
+        Next e
+    End With
+End Sub
+Rem 取得無序列表（<ul></ur>）的範圍 20241010creedit_with_Copilot大菩薩：HTML超連結轉換成Word VBA：https://sl.bing.net/bXsbFqI2cz6
+Function GetRangeFromULToUL_UnorderedListRange(rng As Range) As Range
+    Dim startRange As Range
+    Dim endRange As Range
+    
+    ' 查找 <ul> 標籤
+    Set startRange = rng.Document.Range(rng.start, rng.End)
+    With startRange.Find
+        .ClearFormatting
+        .text = "<ul"
+        If .Execute Then
+            startRange.Collapse Direction:=wdCollapseStart
+        End If
+    End With
+    
+    ' 查找 </ul> 標籤
+    Set endRange = rng.Document.Range(startRange.End, rng.End)
+    With endRange.Find
+        .ClearFormatting
+        .text = "</ul>"
+        If .Execute Then
+            endRange.Collapse Direction:=wdCollapseEnd
+        End If
+    End With
+    
+    ' 設定範圍
+    If Not (startRange.start = rng.start And endRange.End = rng.End) Then
+        Set GetRangeFromULToUL_UnorderedListRange = rng.Document.Range(startRange.start, endRange.End)
+    End If
+End Function
+
+
 Rem 判斷圖檔是否有效 creedit_with_Copilot大菩薩：20241010 https://sl.bing.net/emhYXUvuos8 https://sl.bing.net/cG4Jn2MciZ2
 Function IsValidImage_LoadPicture(filePath As String) As Boolean
     On Error Resume Next
@@ -933,8 +1884,8 @@ Function IsValidImage_LoadPicture(filePath As String) As Boolean
     On Error GoTo 0
 End Function
 Rem creedit_with_Copilot大菩薩：WordVBA+SeleniumBasic讀入網頁內容圖片與超連結：https://sl.bing.net/fWOLN5PwHsG
-Rem  啟動Chrome瀏覽器並導航到圖片URL,失敗則傳回false
-Function DownloadImage(url As String, filePath As String) As Boolean
+Rem  啟動Chrome瀏覽器並導航到圖片URL,失敗則傳回false。這可用，但須取得Chrome瀏覽器下載目錄才行
+Function DownloadImage_chromedriverExecuteScript(url As String, filePath As String) As Boolean
 '    Dim driver As New SeleniumBasic.ChromeDriver
 '    driver.start "Chrome"
 '    driver.Get url
@@ -950,19 +1901,19 @@ Function DownloadImage(url As String, filePath As String) As Boolean
         End If
     End If
     
-    ' 等待圖片加載完成'Application是我自行做的Excel模組中的物件。本專案並沒引用 Excel
+    ' 等待圖片加載完成  'Application是我自行做的Excel模組中的物件。本專案並沒引用 Excel
     'Excel.Application.wait (Now + TimeValue("0:00:05"))
-    Excel.Application.wait (Now + TimeValue("0:00:02"))
+    SystemSetup.wait (Now + TimeValue("0:00:02"))
     
     ' 下載圖片 rem 可以正常下載，只是要取得Chrome瀏覽器的下載路徑才能供後續使用！20241010
     driver.ExecuteScript "var link = document.createElement('a'); link.href = arguments[0]; link.download = arguments[1]; document.body.appendChild(link); link.click();", url, filePath
     ' 等待下載完成
-    Excel.Application.wait (Now + TimeValue("0:00:02"))
-    
+    'Excel.Application.wait (Now + TimeValue("0:00:02"))
+    SystemSetup.wait (Now + TimeValue("0:00:02"))
     If VBA.Dir(filePath) = vbNullString Or IsValidImage_LoadPicture(url) Then
         Stop
     Else
-        DownloadImage = True
+        DownloadImage_chromedriverExecuteScript = True
     End If
     
     'driver.Quit
@@ -1029,7 +1980,7 @@ End Function
 Rem  將下載的圖片插入到Word文件中
 Sub InsertDownloadedImage(url As String, filePath As String, rng As Range)
     ' 下載圖片
-    DownloadImage url, filePath
+    DownloadImage_chromedriverExecuteScript url, filePath
     
     ' 插入圖片
     rng.InlineShapes.AddPicture fileName:=filePath, LinkToFile:=False, SaveWithDocument:=True
@@ -1149,12 +2100,19 @@ End Function
 
 
 Rem 20241009 取得HTML中的屬性之值 pro 不包含「="」
-Private Function getHTMLatrbibuteValue(atrb As String, textIncludingAttribute As String)
+Private Function getHTML_AttributeValue(atrb As String, textIncludingAttribute As String, Optional marker As String)
     Dim lenatrb As Byte
-    atrb = atrb & "="""
-    lenatrb = VBA.Len(atrb)
-    getHTMLatrbibuteValue = VBA.Mid(textIncludingAttribute, VBA.InStr(textIncludingAttribute, atrb) + lenatrb, _
-        VBA.InStr(VBA.InStr(textIncludingAttribute, atrb) + lenatrb, textIncludingAttribute, """") - (VBA.InStr(textIncludingAttribute, atrb) + lenatrb))
+    Select Case marker
+        Case vbNullString
+            atrb = atrb & "="""
+        Case ":"
+        atrb = atrb & ": "
+    End Select
+    If VBA.InStr(textIncludingAttribute, atrb) > 0 Then
+        lenatrb = VBA.Len(atrb)
+        getHTML_AttributeValue = VBA.Mid(textIncludingAttribute, VBA.InStr(textIncludingAttribute, atrb) + lenatrb, _
+            VBA.InStr(VBA.InStr(textIncludingAttribute, atrb) + lenatrb, textIncludingAttribute, """") - (VBA.InStr(textIncludingAttribute, atrb) + lenatrb))
+    End If
 End Function
 
 Rem 插入圖片後，根據前後字型大小自動調整圖片大小 20241009 creedit_with_Copilot大菩薩：WordVBA 圖片自動調整大小：https://sl.bing.net/e1S3H59hvI4
@@ -1223,11 +2181,19 @@ Sub 查中國哲學書電子化計劃網域()
 End Sub
 Rem 20241006 rng 要處理的範圍，傳回結束的位置
 Private Function 讀入網路資料後_於其後植入網址及設定格式(rng As Range, url As String, fontsize As Single) As Long
-    With rng
+    Dim rngNote As Range
+    Set rngNote = rng.Document.Range(rng.start, rng.End)
+    With rngNote
         '網址格式設定
-        .font.Size = fontsize
+        If VBA.Len(.Paragraphs.Last.Range.text) > 1 Then .InsertParagraphAfter
+        If .Paragraphs.Count > 1 Then
+            rngNote.SetRange rng.Paragraphs.Last.Range.start, rng.Paragraphs.Last.Range.End
+        End If
         .InsertAfter url '插入網址
         .InsertParagraphAfter
+        .End = .End - 1
+        If .Characters(1) = Chr(13) Then .start = .start + 1
+        .font.Size = fontsize
         .Collapse wdCollapseEnd
         讀入網路資料後_於其後植入網址及設定格式 = rng.End 'Range或Selection值變動後，似乎用 With區塊無法及時回應，好像要用本尊「再次呼叫」才能反映及時真相 20241009
     End With
@@ -1481,28 +2447,28 @@ End Function
 
 
 Sub AppActivateDefaultBrowser()
-On Error GoTo eH
-Dim i As Byte, a
-a = Array("google chrome", "brave", "edge")
-DoEvents
-If DefaultBrowserNameAppActivate = "" Then getDefaultBrowserNameAppActivate
-AppActivate DefaultBrowserNameAppActivate
-DoEvents
-Exit Sub
+    On Error GoTo eH
+    Dim i As Byte, a
+    a = Array("google chrome", "brave", "edge")
+    DoEvents
+    If DefaultBrowserNameAppActivate = "" Then getDefaultBrowserNameAppActivate
+    AppActivate DefaultBrowserNameAppActivate
+    DoEvents
+    Exit Sub
 eH:
-    Select Case Err.Number
-        Case 5
-            DefaultBrowserNameAppActivate = a(i)
-            i = i + 1
-            If i > UBound(a) Then
-                MsgBox Err.Number & Err.Description
-                Exit Sub
-            End If
-            Resume
-        Case Else
-            MsgBox Err.Number + Err.Description
-    End Select
-'AppActivate ""
+        Select Case Err.Number
+            Case 5
+                DefaultBrowserNameAppActivate = a(i)
+                i = i + 1
+                If i > UBound(a) Then
+                    MsgBox Err.Number & Err.Description
+                    Exit Sub
+                End If
+                Resume
+            Case Else
+                MsgBox Err.Number + Err.Description
+        End Select
+    'AppActivate ""
 End Sub
 
 

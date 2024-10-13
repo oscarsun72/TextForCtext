@@ -123,7 +123,7 @@ Next p
 DoEvents
 d.Range.Copy
 d.Close wdDoNotSaveChanges
-appActivateChrome
+AppActivateChrome
 'SendKeys "+{insert}{tab}~"
 SendKeys "+{insert}"
 
@@ -298,23 +298,23 @@ Loop
 End Sub
 
 Sub pastetoEditBox(Description_from_ClipBoard As String)
-word.Application.windowState = wdWindowStateMinimize
-'MsgBox "ready to paste", vbInformation
-AppActivateDefaultBrowser
-DoEvents
-'SystemSetup.Wait 0.5 '關鍵在這行！否則大容量貼上會失效。20220809'根本還是沒用！實際上是在Word的剪下傳送到剪貼簿的資料是空的
-SendKeys "+{INSERT}" '"(^v)" ', True'恐怕要去掉這個才是；都不是！實際上問題是出在Word的剪下傳送到剪貼簿的資料是空的
-DoEvents ' DoEvents: DoEvents
-Beep
-SystemSetup.wait 0.3
-DoEvents:
-SendKeys "{tab}"
-AppActivateDefaultBrowser
-'SystemSetup.ClipboardPutIn Description_from_ClipBoard
-DoEvents
-'SendKeys "^v"
-SendKeys Description_from_ClipBoard
-SendKeys "{tab 2}~"
+    word.Application.windowState = wdWindowStateMinimize
+    'MsgBox "ready to paste", vbInformation
+    AppActivateDefaultBrowser
+    DoEvents
+    'SystemSetup.Wait 0.5 '關鍵在這行！否則大容量貼上會失效。20220809'根本還是沒用！實際上是在Word的剪下傳送到剪貼簿的資料是空的
+    SendKeys "+{INSERT}" '"(^v)" ', True'恐怕要去掉這個才是；都不是！實際上問題是出在Word的剪下傳送到剪貼簿的資料是空的
+    DoEvents ' DoEvents: DoEvents
+    Beep
+    SystemSetup.wait 0.3
+    DoEvents:
+    SendKeys "{tab}"
+    AppActivateDefaultBrowser
+    'SystemSetup.ClipboardPutIn Description_from_ClipBoard
+    DoEvents
+    'SendKeys "^v"
+    SendKeys Description_from_ClipBoard
+    SendKeys "{tab 2}~"
 End Sub
 
 Sub 金石錄_四部叢刊_維基文庫本() '《金石錄》格式者皆適用（即注文單行，而換行前的不單行） 20221110
@@ -1068,7 +1068,7 @@ Sub 讀史記三家注()
 Dim d As Document, t As table
 Set d = Documents.Add
 d.Range.Paste
-Set t = d.Tables(1)
+Set t = d.tables(1)
 With t
     .Columns(1).Delete
     .ConvertToText wdSeparateByParagraphs
@@ -1285,7 +1285,7 @@ Sub 補括弧()
     SystemSetup.contiUndo ur
 End Sub
 Sub 維基文庫造字圖取代為文字(rng As Range)
-Dim inlnsp As InlineShape, aLtTxt As String
+Dim inlnsp As inlineShape, aLtTxt As String
 Dim dictMdb As New dBase, cnt As New ADODB.Connection, rst As New ADODB.Recordset
 dictMdb.cnt查字 cnt
 For Each inlnsp In rng.InlineShapes
@@ -1636,7 +1636,7 @@ End Sub
 
 Sub 清除文本頁中的編號儲存格(rng As Range)
     Dim c As cell, cx As String, t As table
-    For Each t In rng.Tables
+    For Each t In rng.tables
         For Each c In t.Range.cells
             c.Select
             cx = c.Range.text

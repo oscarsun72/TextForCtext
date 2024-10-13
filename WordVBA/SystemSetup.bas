@@ -415,6 +415,8 @@ Sub playSound(longShort As Single, Optional waittoPlay As Byte = 1) 'Public Decl
     Dim mediaPath As String, path As New Paths
     mediaPath = getWinMediaPath()
     Select Case longShort
+        Case 0.411
+            sndPlaySound32 path.CombineFullName(mediaPath, "Windows Default.wav"), waittoPlay
         Case 0.484
             sndPlaySound32 path.CombineFullName(mediaPath, "Windows Pop-up Blocked.wav"), waittoPlay
         Case 1
@@ -541,7 +543,7 @@ Sub wait(sec As Single)
     Loop
 End Sub
 
-Sub appActivateChrome()
+Sub AppActivateChrome()
     AppActivateDefaultBrowser 'https://docs.microsoft.com/zh-tw/sql/ado/reference/ado-api/absoluteposition-property-ado?view=sql-server-ver15
         'try looking for both Chrome_WidgetWin_1 and Chrome_RenderWidgetHostHWND
 '    SystemSetup.apicShowWindow "Chrome_WidgetWin_1" _

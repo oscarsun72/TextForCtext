@@ -834,7 +834,7 @@ namespace WindowsFormsApp1
                             }
                             else if (ex.Message.StartsWith("An unknown exception was encountered sending an HTTP request to the remote WebDriver server for URL"))//An unknown exception was encountered sending an HTTP request to the remote WebDriver server for URL http://localhost:14698/session/0f432de43d64b3c61bb847ce517358a3/window/handles. The exception message was: 傳送要求時發生錯誤。
                             {
-                                if (ChromedriverLose(ex)) 
+                                if (ChromedriverLose(ex))
                                     goto retry;
                                 else
                                     goto default;
@@ -9482,7 +9482,8 @@ namespace WindowsFormsApp1
                 {//按下 Esc鍵
                     e.Handled = true;
                     if (!textBox4.Focused && !textBox2.Focused)
-                        hideToNICo();
+                        if (MessageBoxShowOKCancelExclamationDefaultDesktopOnly("將表單隱藏到系統任務列中？") == DialogResult.OK)
+                            hideToNICo();
                     return;
                     //if (textBox1.Text == "")
                     ////預設為最上層顯示，若textBox1值為空，則按下Esc鍵會隱藏到任務列中；點一下即恢復
