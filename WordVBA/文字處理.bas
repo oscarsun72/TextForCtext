@@ -4026,7 +4026,7 @@ Sub FixFontname(rng As Range)
         'https://en.wikipedia.org/wiki/CJK_Compatibility_Ideographs_Supplement
         Dim rngChangeFontName As Range
         'Set rngChangeFontName = d.Range(Selection.Paragraphs(1).Range.start, d.Range.End)
-        Set rngChangeFontName = rng.Document.Range(rng.start, rng.Document.Range.End)
+        Set rngChangeFontName = rng.Document.Range(rng.start, rng.End) 'rng.Document.Range.End)
         Dim fontName As String '20240920 creedit_with_Copilot¤jµÐÂÄ:https://sl.bing.net/9KC0PtODtI
         fontName = "¥þ§ºÅé-2"
         If Fonts.IsFontInstalled(fontName) Then

@@ -1050,7 +1050,8 @@ Rem 20241006 以Google檢索《中國哲學書電子化計劃》 Alt + t
 Sub SearchSite()
     SeleniumOP.GoogleSearch "site:https://ctext.org/ """ + Selection.text + """"
 End Sub
-Rem Ctrl + s,j ： 以選取文字 search史記三家注並於於選取處插入檢索結果之超連結 （s=shi 史；j=ji 記 ） 20241005
+Rem Alt + m ： 以選取文字 search史記三家注並於於選取處插入檢索結果之超連結 （m=司馬遷的馬 ma） 20241014;20241005
+'原為 Ctrl + s,j 因這樣的指定會取消掉內建的 Ctrl + s ，故改定 20241014
 Sub search史記三家注()
     ActiveDocument.Hyperlinks.Add Selection.Range, Search(" https://ctext.org/wiki.pl?if=gb&res=384378&searchu=")
 End Sub

@@ -534,6 +534,7 @@ Sub 在本文件中尋找選取字串()
     If d.path <> "" Then If d.Saved = False Then d.Save
     Dim ins(4) As Long, MnText As String, FnText As String, FdText As String, st As Long, ed As Long
     On Error GoTo errHH
+    文字處理.ResetSelectionAvoidSymbols
     With Selection '快速鍵：Alt+Ctrl+Down
     'If Not .Text Like "" Then '快速鍵：Alt+Ctrl+Down
     If .Type = wdSelectionIP Then MsgBox "請選取想要尋找之文字", vbExclamation: Exit Sub
@@ -542,7 +543,7 @@ Sub 在本文件中尋找選取字串()
         FdText = 文字處理.trimStrForSearch(.text, Selection)
         st = .start: ed = .End
         .Collapse wdCollapseEnd
-        MnText = d.StoryRanges(wdMainTextStory) '變數化處理較快2003/4/8
+        MnText = d.StoryRanges(wdMainTextStory).text '變數化處理較快2003/4/8
     '    MnText = ActiveDocument.Range '2010/2/5
         ins(1) = InStr(MnText, FdText)
         ins(2) = InStrRev(MnText, FdText)
@@ -617,25 +618,27 @@ Sub 在本文件中尋找選取字串()
     '        With .Document.StoryRanges(ins(1)).Find
 '            If ins(1) < ins(2) And ed = VBA.InStrRev(GetFullTextWithFields(d.StoryRanges(wdMainTextStory)), FdText) Then .HomeKey wdStory 'ins(2)是文件本文最後出現的位置故 20241002
                                                          'ins(2) = InStrRev(MnText, FdText)
+            .Collapse wdCollapseEnd
             Dim nowLocation As Range
-            Set nowLocation = .Range.Duplicate
+            Set nowLocation = .Document.Range(.Range.start, .Range.End) '這個沒有用→一樣會連動.Range.Duplicate 20241015
 reFind:
             With .Find
                 .ClearFormatting
-'                .ClearAllFuzzyOptions
+                .ClearAllFuzzyOptions
                 .Replacement.ClearFormatting '這也要清除才行
 '                .Forward = True
 '                .Wrap = wdFindAsk
                 .MatchCase = True
+                .MatchWholeWord = False
                 '.text = FdText '.Parent.Text
                 If Not .Execute(FdText, , , , , , True, wdFindAsk) Then
-                    If VBA.vbOK = VBA.MsgBox("往後沒有找到，是否從文件起頭處再找看看？") Then
+                    If VBA.vbOK = VBA.MsgBox("往後沒有找到，是否從文件起頭處再找看看？", vbOKCancel + vbQuestion) Then
                         Selection.HomeKey wdStory
                         GoTo reFind
                     End If
                 ElseIf Selection.start = nowLocation.start Then
                     Stop 'just for test
-                    If VBA.vbOK = VBA.MsgBox("往後沒有找到，是否從文件起頭處再找看看？") Then
+                    If VBA.vbOK = VBA.MsgBox("往後沒有找到，是否從文件起頭處再找看看？", vbOKCancel + vbQuestion) Then
                         Selection.HomeKey wdStory
                         GoTo reFind
                     End If
@@ -645,7 +648,7 @@ reFind:
             If .start = nowLocation.start Then
                 
                 Stop 'just for test
-                If VBA.vbOK = VBA.MsgBox("往後沒有找到，是否從文件起頭處再找看看？") Then
+                If VBA.vbOK = VBA.MsgBox("往後沒有找到，是否從文件起頭處再找看看？", vbOKCancel + vbQuestion) Then
                     Selection.HomeKey wdStory
                     GoTo reFind
                 End If
@@ -972,7 +975,7 @@ checkAgain:
                     Set similarCompare = Nothing
                     GoTo exitSub
                 Else
-                    sChr13inClipBTxtSub = VBA.InStr(clipBTxtSub, Chr(13))
+                    sChr13inClipBTxtSub = VBA.InStr(clipBTxtSub, VBA.Chr(13))
                     If sChr13inClipBTxtSub > 0 Then
                         clipBTxtSub = VBA.Mid(clipBTxtSub, sChr13inClipBTxtSub + 1)
                         GoTo checkAgain
@@ -1951,7 +1954,10 @@ Sub ChangeFontOfSurrogatePairs_Range(fontName As String, rngtoChange As Range, O
     Dim c           As String
     Dim i           As Long
     Dim ur As UndoRecord
-    SystemSetup.stopUndo ur, "ChangeFontOfSurrogatePairs_Range"
+    
+'     just for test
+'    SystemSetup.stopUndo ur, "ChangeFontOfSurrogatePairs_Range"
+
     For Each rng In rngtoChange.Characters
         c = rng.text
         
@@ -2037,7 +2043,7 @@ Sub ChangeFontOfSurrogatePairs_Range(fontName As String, rngtoChange As Range, O
             End If
         End If
     Next rng
-    SystemSetup.contiUndo ur
+'    SystemSetup.contiUndo ur
 End Sub
 Sub ChangeCharacterFontName(character As String, fontName As String, d As Document, Optional fontNameFarEast As String)
 With d.Range
