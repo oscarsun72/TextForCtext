@@ -2231,6 +2231,21 @@ Sub innerHTML_Convert_to_WordDocumentContent(rngHtml As Range, Optional domainUr
                                 '¤£³B²z
                             ElseIf VBA.Left(e, 12) = "margin-left:" Then
                             ElseIf VBA.Left(e, 13) = "margin-right:" Then
+                            ElseIf VBA.Left(e, 6) = "color:" Then
+                                arr1 = VBA.LTrim(VBA.Mid(e, VBA.Len("color:") + 1))
+                                If VBA.Left(arr1, 1) = "#" Then
+                                    'arr1 = HTML2Doc.ColorCodetoRGB(url)
+                                    p.Range.font.Color = RGBFormColorCode(VBA.CStr(arr1))  'VBA.RGB(arr1(0), arr1(1), arr1(2))
+                                Else
+                                    If arr1 = "red" Then
+                                        p.Range.font.ColorIndex = wdRed
+                                    Else
+                                        playSound 12
+                                        rng.Select
+                                        Debug.Print e
+                                        Stop 'for check
+                                    End If
+                                End If
                             ElseIf VBA.Left(e, 11) = "text-align:" Then
                                 l = VBA.Len("text-align:") + 1
                                 If VBA.LTrim(VBA.Mid(e, l)) = "right" Then

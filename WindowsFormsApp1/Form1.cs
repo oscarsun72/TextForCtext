@@ -2065,6 +2065,16 @@ namespace WindowsFormsApp1
                     return;
                 }
 
+                if (e.KeyCode == Keys.J)
+                {//Ctrl + Alt + j ：以選取文字進行[《看典古籍·古籍全文檢索》](https://kandianguji.com/search_all) (d=dian 典；j=籍 ji) 20241018
+                    if (driver == null) return;
+                    e.Handled = true;
+                    if (!br.IsDriverInvalid()) br.LastValidWindow = br.driver.CurrentWindowHandle;
+                    TopMost = false;
+                    overtypeModeSelectedTextSetting(ref textBox1);
+                    Task.Run(() => { br.KanDianGuJiSearchAll(textBox1.SelectedText); });                    
+                    return;
+                }
                 #region Ctrl + Alt + pageup Ctrl + Alt + pagedown                
                 if (e.KeyCode == Keys.PageUp || e.KeyCode == Keys.PageDown)
                 {//Ctrl + Alt + pageup : 在新的分頁開啟CTP圖文對照前一頁以供檢視 20240920
@@ -3139,7 +3149,7 @@ namespace WindowsFormsApp1
                     if (!br.IsDriverInvalid()) br.LastValidWindow = br.driver.CurrentWindowHandle;
                     TopMost = false;
                     overtypeModeSelectedTextSetting(ref textBox1);
-                    br.KanDianGuJiSearchAll(textBox1.SelectedText);
+                    Task.Run(() => {br.KanDianGuJiSearchAll(textBox1.SelectedText);});                    
                     return;
                 }
 
@@ -3253,14 +3263,14 @@ namespace WindowsFormsApp1
 
                         //Task.Run(() => { br.ImproveGJcoolOCRMemo(); });//因為即使開新執行緒，但仍是用同一個表單！
                         Task.Run(() => { br.ImproveGJcoolKandiangujiOCRMemo(txtbox1SelText, url); });
-                        try
-                        {
-                            Clipboard.SetText(textBox1.Text);//通常改正後是要再重標點，如書名等 20240306
-                        }
-                        catch (Exception)
-                        {
-                            playSound(soundLike.error);
-                        }
+                        //try
+                        //{
+                        //    Clipboard.SetText(textBox1.Text);//通常改正後是要再重標點，如書名等 20240306
+                        //}
+                        //catch (Exception)
+                        //{
+                        //    playSound(soundLike.error);
+                        //}
                         AvailableInUseBothKeysMouse();
                     }
                     return;
@@ -9484,6 +9494,8 @@ namespace WindowsFormsApp1
                     if (!textBox4.Focused && !textBox2.Focused)
                         if (MessageBoxShowOKCancelExclamationDefaultDesktopOnly("將表單隱藏到系統任務列中？") == DialogResult.OK)
                             hideToNICo();
+                        else
+                            AvailableInUseBothKeysMouse();
                     return;
                     //if (textBox1.Text == "")
                     ////預設為最上層顯示，若textBox1值為空，則按下Esc鍵會隱藏到任務列中；點一下即恢復

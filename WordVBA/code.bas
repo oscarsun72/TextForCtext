@@ -848,8 +848,11 @@ continue:
     If VBA.Right(result, 3) = " & " Then result = VBA.Left(result, VBA.Len(result) - 3)
     
     SystemSetup.stopUndo ur, "ConvertToChrwCode"
-    rng.text = result
-    rng.Cut
+    SystemSetup.ClipboardPutIn result
+    If Selection.Document.path = "" Then
+        rng.text = result
+        rng.Cut
+    End If
     ConvertToChrwCode_IfNotBig5 = result
     SystemSetup.contiUndo ur
 End Function
@@ -1085,7 +1088,7 @@ Sub ReplacePrivateUserCharactersWithCJK()
     
     SystemSetup.stopUndo ur, "ReplacePrivateUserCharactersWithCJK"
     word.Application.ScreenUpdating = False
-    For Each r In dTable.Tables(1).rows
+    For Each r In dTable.tables(1).rows
         wFind = r.cells(1).Range.Characters(1).text
         wReplace = r.cells(2).Range.Characters(1).text
         dReplaced.Range.Find.Execute wFind, , , , , , , wdFindContinue, _

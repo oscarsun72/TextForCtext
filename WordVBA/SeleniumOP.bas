@@ -1234,6 +1234,54 @@ Select Case Err.Number
             MsgBox "請關閉Chrome瀏覽器後再執行一次！" & vbCr & vbCr & Err.Number & Err.Description, vbExclamation
     End Select
 End Function
+Rem 查《古音小鏡·訓詁工具書查詢》,成功則傳回true 20241020
+Function LookupBook_Xungu_kaom(x As String) As Boolean
+    Dim iwe As SeleniumBasic.IWebElement, dt As Date, key As New SeleniumBasic.keys
+    If Not OpenChrome("http://www.kaom.net/book_xungu.php") Then Exit Function
+    word.Application.windowState = wdWindowStateMinimize
+    WD.SwitchTo.Window WD.CurrentWindowHandle
+    ActivateChrome
+    dt = VBA.Now
+    '檢索框
+    Set iwe = WD.FindElementByCssSelector("body > table > tbody > tr > td > form > input.form_1")
+    Do While iwe Is Nothing
+        Set iwe = WD.FindElementByCssSelector("body > table > tbody > tr > td > form > input.form_1")
+        If VBA.DateDiff("s", dt, VBA.Now) > 5 Then
+            Exit Function
+        End If
+    Loop
+    SetIWebElementValueProperty iwe, x
+    iwe.SendKeys key.Enter
+'    '查詢按鈕
+'    Set iwe = WD.FindElementByCssSelector("")
+'    If iwe Is Nothing Then Exit Function
+'    iwe.Click
+End Function
+Rem 查《古音小鏡》漢語大詞典,成功則傳回true 20241020
+Function LookupHYDCD_kaom(x As String) As Boolean
+    Dim iwe As SeleniumBasic.IWebElement, dt As Date ', key As New SeleniumBasic.keys
+    If Not OpenChrome("http://www.kaom.net/book_hanyudacidian.php") Then Exit Function
+    word.Application.windowState = wdWindowStateMinimize
+    WD.SwitchTo.Window WD.CurrentWindowHandle
+    ActivateChrome
+    '檢索框
+    dt = VBA.Now
+    Set iwe = WD.FindElementByCssSelector("body > table > tbody > tr > td > form > input.form_1")
+    Do While iwe Is Nothing
+        Set iwe = WD.FindElementByCssSelector("body > table > tbody > tr > td > form > input.form_1")
+        If VBA.DateDiff("s", dt, VBA.Now) > 5 Then
+            Exit Function
+        End If
+    Loop
+    SetIWebElementValueProperty iwe, x
+    'iwe.SendKeys key.Enter
+    '查詢按鈕
+    VBA.Interaction.DoEvents
+    SystemSetup.wait 1
+    Set iwe = WD.FindElementByCssSelector("body > table > tbody > tr > td > form > input.form_2")
+    If iwe Is Nothing Then Exit Function
+    iwe.Click
+End Function
 Rem 查《異體字字典》：x 要查的字。傳回一個字串陣列，第1個元素是所查詢的字串，第2個元素是查詢結果網址。若沒找到，則傳回空字串 ""
 Function LookupDictionary_of_ChineseCharacterVariants(x As String) As String()
     On Error GoTo eH
@@ -1776,6 +1824,29 @@ Select Case Err.Number
         Case Else
             MsgBox "請關閉Chrome瀏覽器後再執行一次！" & vbCr & vbCr & Err.Number & Err.Description, vbExclamation
     End Select
+End Function
+Rem 查《白雲深處人家》的《漢語大詞典》 20241020
+Function LookupHomeinmistsHYDCD(x As String) As Boolean
+    Dim iwe As SeleniumBasic.IWebElement, dt As Date, key As New SeleniumBasic.keys
+    If Not OpenChrome("https://homeinmists.ilotus.org/hd/hydcd.php") Then Exit Function
+    word.Application.windowState = wdWindowStateMinimize
+    WD.SwitchTo.Window WD.CurrentWindowHandle
+    ActivateChrome
+    '檢索框
+    dt = VBA.Now
+    Set iwe = WD.FindElementByCssSelector("#keywords")
+    Do While iwe Is Nothing
+        Set iwe = WD.FindElementByCssSelector("#keywords")
+        If VBA.DateDiff("s", dt, VBA.Now) > 5 Then
+            Exit Function
+        End If
+    Loop
+    SetIWebElementValueProperty iwe, x
+    iwe.SendKeys key.Enter
+'    '查詢按鈕
+'    Set iwe = WD.FindElementByCssSelector("")
+'    If iwe Is Nothing Then Exit Function
+'    iwe.Click
 End Function
 
 Rem 查《漢語多功能字庫》取回其《說文》「解釋」欄位的內容：x 要查的字。傳回一個字串陣列，第1個元素是《說文》「解釋」的內容字串，第2個元素是查詢結果網址。若沒找到，則傳回空字串
@@ -2715,7 +2786,7 @@ Sub grabPageContent抓取網頁內容並記錄位置()
     For Each e In elements
         Dim elementInfo As New Collection
         Set element = e
-        elementInfo.Add element.tagName
+        elementInfo.Add element.tagname
         elementInfo.Add element.text
         elementInfo.Add element.GetAttribute("src")
         elementInfo.Add element.GetAttribute("href")
@@ -2782,12 +2853,12 @@ Sub inputElementContentAll插入網頁元件所有的內容(iwe As SeleniumBasic.IWebElemen
 '        If SeleniumOP.IsImageIncluded內容部分包含圖片(element) Then
 '            insertImageInline插入包含圖片的段落 element
 '        End If
-        Select Case element.tagName
+        Select Case element.tagname
             Case "p", "div", "span" '"P", "DIV", "STRONG", "SPAN"
                 ' "strong" 粗體 .Bold=true 交由呼叫端處理
                 ' 插入文字
                 Set rng = Selection.Range
-                If element.tagName = "strong" Then
+                If element.tagname = "strong" Then
                     
                 Else
                     rng.text = element.GetAttribute("textContent") 'element.text

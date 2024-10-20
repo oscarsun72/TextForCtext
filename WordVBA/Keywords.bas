@@ -3,10 +3,10 @@ Option Explicit
 Rem 任何關鍵字檢索、標識相關之屬性、參照記錄
 Dim zhouyiguaShapeNameSequence As Scripting.Dictionary '這個筆數是固定的，所以可以如此
 Dim zhouyiguaNameShapeSequence As Scripting.Dictionary '這個筆數是固定的，所以可以如此
-Dim preceded_Avoid As Scripting.Dictionary '現在還在隨時新增中，故不宜寫死
+Dim preceded_Avoid As Scripting.Dictionary '現在還在隨時新增中，故不宜寫死'現在為求效能，還是先寫，反正重啟Word就會更新，且需要更新時可以在即時運算視窗中輸入指令清除已有的內容 20241019
 Dim followed_Avoid As Scripting.Dictionary '現在還在隨時新增中，故不宜寫死
 Dim inPhrase_Avoid As Scripting.Dictionary '現在還在隨時新增中，故不宜寫死
-Dim yiVariants As Scripting.Dictionary
+Dim yiVariants As Scripting.Dictionary '周易異體字字典
 Rem 《易》學異體字對照/置換用
 Property Get 易學異體字典() As Scripting.Dictionary
     If yiVariants Is Nothing Then
@@ -237,20 +237,20 @@ Property Get 易學Keywords_ToMark() As Variant 'string()因為 Array Returns a Vari
              "艮其背", "艮", "頤", "同人于宗", "同人", "坎", "中孚", "兌", VBA.ChrW(20817), VBA.ChrW(20810), "蠱", "姤", "巽", VBA.ChrW(14514), VBA.ChrW(-26520), "剝", VBA.ChrW(21093), "遯世無悶", "遯世" & ChrW(26080) & "悶", "遯", "大壯", "明夷", "明" & VBA.ChrW(-10171) & VBA.ChrW(-8739), "小畜", "大畜", "萃", "蹇", "渙", VBA.ChrW(28067), "睽", "暌", "歸妹", "小過", "大有", "大過", "〈泰〉", "〈否〉", "〈損〉", "〈益〉", "〈屯", "蒙〉", VBA.ChrW(-10132) & VBA.ChrW(-8313) & "〉", "豫大", "豫", "〈旡妄〉", "〈復〉", "〈震〉", "〈需〉", "老陰", "老" & VBA.ChrW(-27006), "老陽", "少陰", "少" & VBA.ChrW(-27006), "少陽", "繇辭", "繇詞", _
             "咎", "咸恒", "咸恆", "大衍", "咸之九五", "禴祭", "東鄰", "東" & VBA.ChrW(-26973), "禴" & VBA.ChrW(-10155) & VBA.ChrW(-8630), "禴" & VBA.ChrW(-10131) & VBA.ChrW(-8268), "善不積", "天下雷行", "號咷", _
         "無妄", VBA.ChrW(26080) & VBA.ChrW(-10171) & VBA.ChrW(-8522), VBA.ChrW(26080) & "妄", "無咎", VBA.ChrW(26080) & "咎", "天咎", "允升", "屯其膏", "豐亨", "終難", "知幾其神", "有子考", "有子攷", "不易乎世", "不易乎" & VBA.ChrW(21323), "不易乎" & VBA.ChrW(19991), "不成乎名", "天一地二", "蒞眾", VBA.ChrW(-31867) & "眾", VBA.ChrW(-31867) & VBA.ChrW(-30650), "蒞" & VBA.ChrW(-30650), "幹父", "裕父", "係遯", "甘臨", "翰音", _
-        "隨時之義", "庖有魚", "包有魚", "精義入神", "豶豕", "童牛", "承之羞", "雷在天上", "錫馬", "蕃庶", "晝日", "三接", "懲忿", "窒欲", "窒慾", "懲窒", "敬以直內", "義以方外", "迷後得主", "利西南", "品物咸章", "天下大行", "益動而", "日進無疆", "日進" & VBA.ChrW(26080) & "疆", "頻巽", "頻" & VBA.ChrW(14514), "豚魚", "頻復", "閑邪", "存誠", "乾乾", "悔吝", "憧憧", "類萬物", VBA.ChrW(-10139) & VBA.ChrW(-8938) & "萬物", VBA.ChrW(-10139) & VBA.ChrW(-8937) & "萬物", "柔順利貞", VBA.ChrW(-10163) & VBA.ChrW(-9167) & "順利貞", "比之匪人", "履貞", "貞厲", "履道坦坦", "貞吉", "貞凶", "直方", "木上有水", "勞民勸相", "索而得", "貞不字", "立成器", "與地之", _
+        "隨時之義", "庖有魚", "包有魚", "精義入神", "豶豕", "童牛", "承之羞", "雷在天上", "錫馬", "蕃庶", "晝日", "三接", "懲忿", "窒欲", "窒慾", "懲窒", "敬以直內", "義以方外", "迷後得主", "利西南", "品物咸章", "天下大行", "益動而", "日進無疆", "日進" & VBA.ChrW(26080) & "疆", "頻巽", "頻" & VBA.ChrW(14514), "豚魚", "頻復", "閑邪", "存誠", "乾乾", "悔吝", "憧憧", "類萬物", VBA.ChrW(-10139) & VBA.ChrW(-8938) & "萬物", VBA.ChrW(-10139) & VBA.ChrW(-8937) & "萬物", "柔順利貞", VBA.ChrW(-10163) & VBA.ChrW(-9167) & "順利貞", "比之匪人", "履貞", "貞厲", "履道坦坦", "貞吉", "貞凶", "直方", "木上有水", "勞民勸相", "索而得", "索而" & VBA.ChrW(-10167) & VBA.ChrW(-8906), "貞不字", "立成器", "與地之", _
         "無悶", VBA.ChrW(26080) & "悶", "悔亡", "悔" & VBA.ChrW(20158), "悔" & VBA.ChrW(20838), "時義", "健順", "內健而外順", "內健外順", "外順而內健", "外順內健", "易簡", "易" & VBA.ChrW(-10153) & VBA.ChrW(-9007), "敦復", "開物成務", "窮神知化", "研幾極深", "極深研幾", "見善則遷", "有過則改", "遷善改過", "夕惕", "惕若", "一陰一陽", "我有好爵", "言有序", "有聖人之道四", "長子帥師", "弟子輿尸", "日用而不知", "日用不知", "之道鮮", "原始反終", "寂然不動", "感而遂通", "朋從", "朋盍", "容民畜眾", "容民畜" & VBA.ChrW(-30650), "養正", "養賢", "知臨", "臨大君", "默而成之", VBA.ChrW(-24871) & "而成之", "不言而信", "存乎德行", "通天下之志", "履正", "繼之者善", "仁者見之", "知者見之", "智者見之", "撝謙", VBA.ChrW(-10114) & VBA.ChrW(-9019) & "謙", "理財", "正辭", "禁民為非", _
         "大貞", "小貞", "帝出乎震", "帝出於震", "帝出于震", "與時偕行", "盈虛", "盈" & VBA.ChrW(-31142), "盈" & VBA.ChrW(-10119) & VBA.ChrW(-8991), "盈" & VBA.ChrW(-31145), "履霜", "艮其限", "乃孚", "浚恒", "浚恆", "包蒙", "童蒙", "蒙吉", "包" & VBA.ChrW(-10132) & VBA.ChrW(-8313), "童" & VBA.ChrW(-10132) & VBA.ChrW(-8313), VBA.ChrW(-10132) & VBA.ChrW(-8313) & "吉", "確乎其不可拔", "碻乎其不可拔", _
         "天在山中", "多識前言往行", "蹇蹇", "匪躬", "匪" & VBA.ChrW(-29005), "洗心", "龍德", "慎言語", VBA.ChrW(24892) & "言語", "節飲食", "改命吉", VBA.ChrW(25914) & "命吉", "開國承家", _
-        "賁於丘園", "賁于丘園", "賁於邱園", "賁于邱園", "賁於" & VBA.ChrW(-10176) & VBA.ChrW(-9207) & "園", "賁于" & VBA.ChrW(-10176) & VBA.ChrW(-9207) & "園", "先天後天", "風行水上", "喪貝", VBA.ChrW(17966) & "貝", VBA.ChrW(-10124) & VBA.ChrW(-8660) & "貝", VBA.ChrW(-10173) & VBA.ChrW(-8748) & "貝", VBA.ChrW(20007) & "貝", VBA.ChrW(-10173) & VBA.ChrW(-8650) & "貝", "羝羊", "羝" & VBA.ChrW(-32119), "觸藩", "觸籓", "立其誠", "立誠", "修辭立誠", "脩辭立誠", _
+        "賁於丘園", "賁于丘園", "賁於邱園", "賁于邱園", "賁於" & VBA.ChrW(-10176) & VBA.ChrW(-9207) & "園", "賁于" & VBA.ChrW(-10176) & VBA.ChrW(-9207) & "園", "先天後天", "風行水上", "喪貝", VBA.ChrW(17966) & "貝", VBA.ChrW(-10172) & VBA.ChrW(-9052) & "貝", VBA.ChrW(-10124) & VBA.ChrW(-8660) & "貝", VBA.ChrW(-10173) & VBA.ChrW(-8748) & "貝", VBA.ChrW(20007) & "貝", VBA.ChrW(-10173) & VBA.ChrW(-8650) & "貝", "羝羊", "羝" & VBA.ChrW(-32119), "觸藩", "觸籓", "立其誠", "立誠", "修辭立誠", "脩辭立誠", _
         "賁於" & VBA.ChrW(-10176) & VBA.ChrW(-9204) & "園", "賁于" & VBA.ChrW(-10176) & VBA.ChrW(-9204) & "園", "賁於" & VBA.ChrW(-10143) & VBA.ChrW(-8559) & "園", "賁于" & VBA.ChrW(-10143) & VBA.ChrW(-8559) & "園", "鞏用", "艱貞", "金矢", "利有", "攸往", "中正", _
-        "束帛", "戔戔", "損下以益上", "損下益上", "損下而益上", "貳用缶", "納約自牖", "利見大人", "何思何慮", "同歸而殊塗", "一致而百慮", "同歸殊塗", "一致百慮", "精氣為物", "者其辭", "事不密", "事不" & VBA.ChrW(23483), _
+        "束帛", "戔戔", "損下以益上", "損下益上", "損下而益上", "貳用缶", "納約自牖", "利見大人", "何思何慮", "同歸而殊塗", "一致而百慮", "同歸殊塗", "一致百慮", "精氣為物", "者其辭", "事不密", "事不" & VBA.ChrW(23483), "喪貝", VBA.ChrW(-10173) & VBA.ChrW(-8748) & "貝", "日新", _
         "游魂為變", "遊" & VBA.ChrW(19487) & "為變", "游" & VBA.ChrW(19487) & "為變", "漣如", "焚如", "朋亡", "渙其群", VBA.ChrW(28067) & "其群", "渙其" & VBA.ChrW(32675), VBA.ChrW(28067) & "其" & VBA.ChrW(32675), "甲三日", "庚三日", "升其高陵", "升其" & VBA.ChrW(-25895) & "陵", "天道虧盈", "祗悔", "祇悔", "秖悔", "秪悔", _
         "伏羲", "伏" & VBA.ChrW(-10152) & VBA.ChrW(-8255), "庖" & VBA.ChrW(-10152) & VBA.ChrW(-8255), "庖羲", "宓羲", "宓" & VBA.ChrW(-10152) & VBA.ChrW(-8255), "宓犧", "伏犧", "庖犧")
         
 End Property
 Rem 某關鍵字的前面不能是 20240914
 Property Get 易學KeywordsToMark_Exam_Preceded_Avoid() As Scripting.Dictionary
-'    If preceded_Avoid Is Nothing Then
+    If preceded_Avoid Is Nothing Then
         
         Dim dict As New Scripting.Dictionary, cln As New VBA.Collection
         ' 添加資料到字典 creedit_with_Copilot大菩薩：https://sl.bing.net/goDF239cQVw
@@ -329,19 +329,20 @@ Property Get 易學KeywordsToMark_Exam_Preceded_Avoid() As Scripting.Dictionary
         dict.Add "易簡", Array("蘇")
         dict.Add "易" & VBA.ChrW(-10153) & VBA.ChrW(-9007), Array("蘇")
         dict.Add "索而得", Array("豈窮")
+        dict.Add "索而" & VBA.ChrW(-10167) & VBA.ChrW(-8906), Array("豈窮")
         dict.Add "養正", Array("劉")
         dict.Add "號咷", Array(VBA.ChrW(32675) & "臣")
         
-'        Set preceded_Avoid = dict
+        Set preceded_Avoid = dict
         Set 易學KeywordsToMark_Exam_Preceded_Avoid = dict
-'    Else
-'        Set 易學KeywordsToMark_Exam_Preceded_Avoid = preceded_Avoid
-'    End If
+    Else
+        Set 易學KeywordsToMark_Exam_Preceded_Avoid = preceded_Avoid
+    End If
         
 End Property
 Rem 某關鍵字的後面不能是 20240914
 Property Get 易學KeywordsToMark_Exam_Followed_Avoid() As Scripting.Dictionary
-'    If followed_Avoid Is Nothing Then
+    If followed_Avoid Is Nothing Then
         Dim dict As New Scripting.Dictionary
         dict.Add "易", Array("簀", "牙", "之以書契", "安居士", "幟", "轍", "厭", "水", "州", "順鼎", "破", "開罐", "筋", "姓", "名之日", "卜生", "堂", "科", _
             "守", "棺", "看", "積", "容", "衣", "萌", "葬", "獄", "其處", "名者", "曉", "得消散", "慢", "熔", "忘", "物", "易", "俗", "差", "陷", "肆", "下手", "渡", "紙易之", "腐敗", _
@@ -402,14 +403,14 @@ Property Get 易學KeywordsToMark_Exam_Followed_Avoid() As Scripting.Dictionary
 
         
         Set 易學KeywordsToMark_Exam_Followed_Avoid = dict
-'        Set followed_Avoid = dict
-'    Else
-'        Set 易學KeywordsToMark_Exam_Followed_Avoid = followed_Avoid
-'    End If
+        Set followed_Avoid = dict
+    Else
+        Set 易學KeywordsToMark_Exam_Followed_Avoid = followed_Avoid
+    End If
 End Property
 Rem 某關鍵字不能在某個語句裡面 20240914
 Property Get 易學KeywordsToMark_Exam_InPhrase_Avoid() As Scripting.Dictionary
-'    If inPhrase_Avoid Is Nothing Then
+    If inPhrase_Avoid Is Nothing Then
         Dim dict As New Scripting.Dictionary
         dict.Add "易", Array("李易安", "居易錄", "蘇易簡", "杜易簡", "張易之", "此易事", "人易老", "人易去", "兩易其任", _
             "江山易主", "深耕易耨", "周易癡", "豈易得", "豈易逢", "君子易事", "竇易直", "後易為", "此易彼", "不以易其", "得而易失", "人而易私", "人而易" & VBA.ChrW(-10155) & VBA.ChrW(-8352), "以易此", "無以易也", "延易府", "皮易布", "金易一", "名易知", "雖易得", "誠至易", "則易束", "者易窺", "置易制", "難、易相", "事易行", "今易以冠服", "俱易以", "易知也", "市易法", "可以易一飽", "賈易不", "和易之氣", _
@@ -461,10 +462,10 @@ Property Get 易學KeywordsToMark_Exam_InPhrase_Avoid() As Scripting.Dictionary
         dict.Add "童蒙", Array("民童蒙不")
                     
         Set 易學KeywordsToMark_Exam_InPhrase_Avoid = dict
-'        Set inPhrase_Avoid = dict
-'    Else
-'        Set 易學KeywordsToMark_Exam_InPhrase_Avoid = inPhrase_Avoid
-'    End If
+        Set inPhrase_Avoid = dict
+    Else
+        Set 易學KeywordsToMark_Exam_InPhrase_Avoid = inPhrase_Avoid
+    End If
 End Property
 Rem 檢測關鍵字
 'Function 易學KeywordsToMark_Exam()

@@ -425,22 +425,28 @@ Selected_Range:
         Else
             strLnk = rng.Hyperlinks(1).Address
         End If
-        If SeleniumOP.IsWDInvalid Then
-            SystemSetup.playSound 0.484
-            Shell getDefaultBrowserFullname + " " + strLnk + " --remote-debugging-port=9222 "
-'            AppActivateChrome
-            ActivateChrome
+        If VBA.Left(strLnk, 4) = "http" Then
+            If SeleniumOP.IsWDInvalid Then
+                SystemSetup.playSound 0.484
+                Shell getDefaultBrowserFullname + " " + strLnk + " --remote-debugging-port=9222 "
+    '            AppActivateChrome
+                ActivateChrome
+            Else
+                WD.SwitchTo.Window WD.CurrentWindowHandle
+                WD.url = strLnk
+    '            Dim win
+    '            For Each win In WD.WindowHandles
+    '                WD.SwitchTo.Window win
+    '                If WD.url = strLnk Then Exit For
+    '            Next win
+    '            AppActivateChrome
+                ActivateChrome
+                word.Application.windowState = wdWindowStateMinimize
+            End If
+        ElseIf VBA.Dir(VBA.Left(strLnk, 2), vbVolume) <> vbNullString Then
+            VBA.Interaction.Shell "explorer.exe " & strLnk
         Else
-            WD.SwitchTo.Window WD.CurrentWindowHandle
-            WD.url = strLnk
-'            Dim win
-'            For Each win In WD.WindowHandles
-'                WD.SwitchTo.Window win
-'                If WD.url = strLnk Then Exit For
-'            Next win
-'            AppActivateChrome
-            ActivateChrome
-            word.Application.windowState = wdWindowStateMinimize
+            MsgBox "¶W³sµ²¦³»~¡I", vbCritical
         End If
     End If
     Exit Sub

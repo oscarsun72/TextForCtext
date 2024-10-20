@@ -135,6 +135,22 @@ Sub 查國學大師()
     文字處理.ResetSelectionAvoidSymbols
     SeleniumOP.LookupGXDS Selection.text
 End Sub
+Sub 查古音小鏡_訓詁工具書查詢()
+    Rem Ctrl + Shift + Alt + U u=xun（訓）的u
+    文字處理.ResetSelectionAvoidSymbols
+    SeleniumOP.LookupBook_Xungu_kaom Selection.text
+End Sub
+Sub 查古音小鏡_漢語大詞典()
+    Rem Ctrl + Shift + Alt + i i=ci（詞）的i
+    文字處理.ResetSelectionAvoidSymbols
+    SeleniumOP.LookupHYDCD_kaom Selection.text
+End Sub
+Sub 查白雲深處人家漢語大詞典()
+    Rem Ctrl + Shift + Alt + c c=ci（詞）的c
+    文字處理.ResetSelectionAvoidSymbols
+    LookupHomeinmistsHYDCD Selection.text
+End Sub
+
 Sub 查白雲深處人家說文解字圖像查閱_藤花榭本優先()
     Rem  Alt + s （說文的說） Alt + j （解字的解）
     文字處理.ResetSelectionAvoidSymbols
@@ -1083,7 +1099,7 @@ Function GetDomainUrlPrefix(url As String)
     GetDomainUrlPrefix = VBA.Left(url, VBA.InStr(url, "//")) & "/" & VBA.Mid(url, VBA.InStr(url, "//") + 2, _
                 VBA.InStr(VBA.InStr(url, "//") + 2, url, "/") - (VBA.InStr(url, "//") + 2))
 End Function
-Rem 20241006 《看典古籍·古籍全文檢索》 Ctrl + Alt + j （j=籍 ji）
+Rem 20241006 《看典古籍·古籍全文檢索》 Ctrl + Alt + j （j=籍 ji） 或 Alt + d （d：典 dian）
 '原為 Ctrl + k,d  ，因會使內建的 Ctrl + k （插入超連結）失效，故改定 20241014
 Sub 查看典古籍古籍全文檢索()
     文字處理.ResetSelectionAvoidSymbols
@@ -1365,14 +1381,14 @@ End Select
 getDefaultBrowserNameAppActivate = DefaultBrowserNameAppActivate
 End Function
 
-
+Rem AppActivate方法常會當掉！！20241020
 Sub AppActivateDefaultBrowser()
     On Error GoTo eH
     Dim i As Byte, a
     a = Array("google chrome", "brave", "edge")
     DoEvents
     If DefaultBrowserNameAppActivate = "" Then getDefaultBrowserNameAppActivate
-    AppActivate DefaultBrowserNameAppActivate
+    VBA.Interaction.AppActivate DefaultBrowserNameAppActivate
     DoEvents
     Exit Sub
 eH:
