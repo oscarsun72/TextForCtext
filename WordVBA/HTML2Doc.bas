@@ -821,11 +821,13 @@ Function GetHTMLAttributeValue(attributeName As String, html As String) As Strin
     ' 初始化正則表達式對象
     Set regex = CreateObject("VBScript.RegExp")
     regex.Global = False
-    regex.Pattern = attributeName & "=""'[""']"
+'    regex.Pattern = attributeName & "=""'[""']"
+    regex.Pattern = attributeName & "="".*?[""']"
     
     Set matches = regex.Execute(html)
     If matches.Count > 0 Then
-        GetHTMLAttributeValue = matches(0).SubMatches(0)
+        'GetHTMLAttributeValue = matches(0).SubMatches(0)
+        GetHTMLAttributeValue = VBA.Replace(VBA.Replace(matches(0).Value, "href=""", vbNullString), """", vbNullString)
     Else
         GetHTMLAttributeValue = ""
     End If
@@ -2239,6 +2241,21 @@ Sub innerHTML_Convert_to_WordDocumentContent(rngHtml As Range, Optional domainUr
                                 Else
                                     If arr1 = "red" Then
                                         p.Range.font.ColorIndex = wdRed
+                                    Else
+                                        playSound 12
+                                        rng.Select
+                                        Debug.Print e
+                                        Stop 'for check
+                                    End If
+                                End If
+                            ElseIf VBA.Left(e, 17) = "background-color:" Then
+                                arr1 = VBA.LTrim(VBA.Mid(e, VBA.Len("background-color:") + 1))
+                                If VBA.Left(arr1, 1) = "#" Then
+                                    '20241018 Copilot大菩薩： 設置段落背景色 (對應HTML中的 background-color: #ffffff)
+                                    p.Range.ParagraphFormat.Shading.BackgroundPatternColor = RGBFormColorCode(VBA.CStr(arr1))
+                                Else
+                                    If arr1 = "red" Then
+                                        p.Range.ParagraphFormat.Shading.BackgroundPatternColorIndex = wdRed
                                     Else
                                         playSound 12
                                         rng.Select

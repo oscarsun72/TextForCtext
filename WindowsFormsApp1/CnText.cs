@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 using WindowsFormsApp1;
 using System.Windows.Forms;
 using System.Diagnostics;
-using OpenQA.Selenium.DevTools.V125.Runtime;
+//using OpenQA.Selenium.DevTools.V125.Runtime;
 //using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 //using static System.Net.Mime.MediaTypeNames;
 //using System.Reflection;
@@ -725,25 +725,25 @@ namespace TextForCtext
 
             return location;
         }        ///// <summary>
-        ///// 版心文字比對引入相似度方法。
-        ///// 檢查文本中是否包括書名（title）。如版心等內容。如果有則傳回所在位置。沒有或有錯誤則傳回-1
-        ///// 20240818：creedit with Copilot大菩薩：模糊比對與相似度比對的程式改寫：https://sl.bing.net/gnYNHR1sxRA
-        ///// 這段程式碼使用 FuzzySharp 函式庫來計算書名與文本行之間的相似度。如果相似度達到或超過 80%，則傳回找到的文本起始位置。
-        ///// </summary>
-        ///// <param name="xChecking">檢查的文本</param>
-        ///// <returns>傳回出現的位置。沒有或有錯誤則傳回-1</returns>
-        //internal static int HasPlatecenterTextIncluded(string xChecking)
-        //{/*要將您的程式碼增益為模糊比對與相似度比對，您可以使用一些字串相似度演算法，例如 Levenshtein 距離或 Cosine 相似度。以下是如何改寫您的程式碼以實現這一目標的範例：
-        //    引入模糊比對的函式庫，例如 FuzzySharp。
-        //    使用相似度演算法來計算文本與書名之間的相似度。
-        //    如果相似度達到 80%，則傳回找到的文本起始位置。
-        //    以下是改寫後的程式碼範例：*/
-        //    string title = Browser.Title_Linkbox?.GetAttribute("textContent");
-        //    if (title == null)
-        //    {
-        //        Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("未能找到正確的「書名（title）」超連結控制項，請檢查！", "HasPlatecenterTextIncluded");
-        //        return -1;
-        //    }
+                 ///// 版心文字比對引入相似度方法。
+                 ///// 檢查文本中是否包括書名（title）。如版心等內容。如果有則傳回所在位置。沒有或有錯誤則傳回-1
+                 ///// 20240818：creedit with Copilot大菩薩：模糊比對與相似度比對的程式改寫：https://sl.bing.net/gnYNHR1sxRA
+                 ///// 這段程式碼使用 FuzzySharp 函式庫來計算書名與文本行之間的相似度。如果相似度達到或超過 80%，則傳回找到的文本起始位置。
+                 ///// </summary>
+                 ///// <param name="xChecking">檢查的文本</param>
+                 ///// <returns>傳回出現的位置。沒有或有錯誤則傳回-1</returns>
+                 //internal static int HasPlatecenterTextIncluded(string xChecking)
+                 //{/*要將您的程式碼增益為模糊比對與相似度比對，您可以使用一些字串相似度演算法，例如 Levenshtein 距離或 Cosine 相似度。以下是如何改寫您的程式碼以實現這一目標的範例：
+                 //    引入模糊比對的函式庫，例如 FuzzySharp。
+                 //    使用相似度演算法來計算文本與書名之間的相似度。
+                 //    如果相似度達到 80%，則傳回找到的文本起始位置。
+                 //    以下是改寫後的程式碼範例：*/
+                 //    string title = Browser.Title_Linkbox?.GetAttribute("textContent");
+                 //    if (title == null)
+                 //    {
+                 //        Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("未能找到正確的「書名（title）」超連結控制項，請檢查！", "HasPlatecenterTextIncluded");
+                 //        return -1;
+                 //    }
 
         //    int location = -1;
         //    double threshold = 0.36; // 相似度閾值            

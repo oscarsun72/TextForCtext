@@ -1924,7 +1924,7 @@ namespace WindowsFormsApp1
             restoreCaretPosition(tb, sLast, 0);
             if (charIndexRecallTimes < 0) charIndexRecallTimes = charIndexListSize - 1;
         }
-
+        
         private void textBox1_KeyDown(object sender, KeyEventArgs e)
         {
             var m = ModifierKeys; keycodeNow = e.KeyCode;
@@ -2072,7 +2072,7 @@ namespace WindowsFormsApp1
                     if (!br.IsDriverInvalid()) br.LastValidWindow = br.driver.CurrentWindowHandle;
                     TopMost = false;
                     overtypeModeSelectedTextSetting(ref textBox1);
-                    Task.Run(() => { br.KanDianGuJiSearchAll(textBox1.SelectedText); });                    
+                    Task.Run(() => { br.KanDianGuJiSearchAll(textBox1.SelectedText); });
                     return;
                 }
                 #region Ctrl + Alt + pageup Ctrl + Alt + pagedown                
@@ -2471,6 +2471,7 @@ namespace WindowsFormsApp1
                 {
                     //不知為何，就是會將插入點前一個字元給刪除,即使有以下此行也無效
                     e.Handled = true;
+                    undoRecord();
                     overtypeModeSelectedTextSetting(ref textBox1);
                     textBox1OriginalText = textBox1.Text; selStart = textBox1.SelectionStart; selLength = textBox1.SelectionLength;
                     if (textBox1.SelectedText != string.Empty) Clipboard.SetText(textBox1.SelectedText);
@@ -2484,7 +2485,7 @@ namespace WindowsFormsApp1
                     //        char.IsHighSurrogate(nextChar) || nextChar == Environment.NewLine.ToArray()[0] ?
                     //        textBox1.SelectionLength += 2 : ++textBox1.SelectionLength;
                     //}
-                    textBox4.Focus();
+                    textBox4.Focus();                    
                     return;
                 }
 
@@ -3149,7 +3150,8 @@ namespace WindowsFormsApp1
                     if (!br.IsDriverInvalid()) br.LastValidWindow = br.driver.CurrentWindowHandle;
                     TopMost = false;
                     overtypeModeSelectedTextSetting(ref textBox1);
-                    Task.Run(() => {br.KanDianGuJiSearchAll(textBox1.SelectedText);});                    
+                    string str = textBox1.SelectedText;
+                    Task.Run(() => { br.KanDianGuJiSearchAll(str); });
                     return;
                 }
 
@@ -3260,9 +3262,13 @@ namespace WindowsFormsApp1
                         Thread.Sleep(9);
                         BackColor = clr;
                         string url = textBox3.Text;
-
-                        //Task.Run(() => { br.ImproveGJcoolOCRMemo(); });//因為即使開新執行緒，但仍是用同一個表單！
-                        Task.Run(() => { br.ImproveGJcoolKandiangujiOCRMemo(txtbox1SelText, url); });
+                        //Task.Run(() => { br.ImproveGJcoolOCRMemo(); });//因為即使開新執行緒，但仍是用同一個表單！                        
+                        Task.Run(() =>
+                        {
+                            //if (tkImproveGJcoolKandiangujiOCRMemo != null) tkImproveGJcoolKandiangujiOCRMemo.Wait(160);                                
+                            br.ImproveGJcoolKandiangujiOCRMemo(txtbox1SelText, url);
+                            //tkImproveGJcoolKandiangujiOCRMemo = null;
+                        });
                         //try
                         //{
                         //    Clipboard.SetText(textBox1.Text);//通常改正後是要再重標點，如書名等 20240306
@@ -5512,12 +5518,14 @@ namespace WindowsFormsApp1
             {
                 l = 0;
             }
+            undoRecord(); stopUndoRec = true; PauseEvents();
             int cntr = indentRow();//此函式執行完時會將執行結果的範圍選取，以便後續處理。傳回值為處理了幾行/段
                                    //if (l != 0)
                                    //{
                                    //textBox1.Select(s, l + 1 + cntr);                
                                    //}
                                    //textBox1.Select(s + 1 + cntr, l);
+            undoRecord(); stopUndoRec = false; ResumeEvents();
             if (!allIndent)
                 textBox1.Select(s + 1, l + cntr);
             else
@@ -6225,7 +6233,10 @@ namespace WindowsFormsApp1
                 NormalLineParaLength = wordsPerLinePara;
             }
             else
+            {
                 l = wordsPerLinePara != -1 ? wordsPerLinePara : countWordsLenPerLinePara(se);
+                if (NormalLineParaLength == 0) NormalLineParaLength = wordsPerLinePara;
+            }
 
             if (se.Replace("●", "") == "") textBox1.Text = textBox1.Text.Substring(e + 2);//●●●●●●●●乃作為權訂每行字數之參考，故可刪去
                                                                                           //if (countWordsLenPerLinePara(se) == wordsPerLinePara && se.Replace("●", "") == "") textBox1.Text = textBox1.Text.Substring(e + 2);
@@ -9316,6 +9327,25 @@ namespace WindowsFormsApp1
             #region 按下Alt鍵
             if (Control.ModifierKeys == Keys.Alt)
             {//按下Alt鍵
+
+                if (e.KeyCode == Keys.PageUp || e.KeyCode == Keys.PageDown)
+                {
+                    //if (browsrOPMode != BrowserOPMode.seleniumNew||driver==null) return;
+                    e.Handled = true;
+                    switch (e.KeyCode)
+                    {
+                        case Keys.PageUp:
+                            chromeSendkeys("^{PGUP}");
+                            break;
+                        case Keys.PageDown:
+                            chromeSendkeys("^{PGDN}");
+                            break;
+                        default:
+                            break;
+                    }
+                    return;
+                }
+
                 if (e.KeyCode == Keys.F)
                 {//Alt + f ：切換 Fast Mode 不待網頁回應即進行下一頁的貼入動作（即在不須檢覈貼上之文本正確與否，肯定、八成是無誤的，就可以執行此項以加快輸入文本的動作）當是 fast mode 模式時「送出貼上」按鈕會呈現紅綠燈的綠色表示一路直行通行順暢 20230130癸卯年初九第一上班日週一
                     e.Handled = true;
@@ -11939,6 +11969,7 @@ namespace WindowsFormsApp1
             textBox4.Text = "";
             ResumeEvents();
             textBox1.Focus();
+            undoRecord();
         }
 
         private void textBox4Resize()
@@ -13984,28 +14015,39 @@ namespace WindowsFormsApp1
         /// </summary>
         void closeChromeTab()
         {
+            chromeSendkeys("^{F4}");
+        }
+        /// <summary>
+        /// 對Chrome瀏覽器送出按鍵（由closeChromeTab()抽離出來）20241022
+        /// </summary>
+        /// <param name="keys"></param>
+        private void chromeSendkeys(string keys)
+        {
             appActivateByName();
-            SendKeys.Send("^{F4}");//關閉頁籤
-                                   //switch (browsrOPMode)
-                                   //{
-                                   //    case BrowserOPMode.appActivateByName:
-                                   //        appActivateByName();
-                                   //        SendKeys.Send("^{F4}");//關閉頁籤
-                                   //        break;
-                                   //    case BrowserOPMode.seleniumNew:
-                                   //        if (br.driver != null && Active)//表單不在最前面時也會觸發
-                                   //        {
-                                   //            //br.GoToCurrentUserActivateTab();
-                                   //            //br.driver.Navigate().Refresh();
-                                   //            br.driver.Close();
-                                   //        }
-                                   //        break;
-                                   //    case BrowserOPMode.seleniumGet:
-                                   //        break;
-                                   //}
+            Thread.Sleep(115);
+            SendKeys.Send(keys);//關閉頁籤
+                                //switch (browsrOPMode)
+                                //{
+                                //    case BrowserOPMode.appActivateByName:
+                                //        appActivateByName();
+                                //        SendKeys.Send("^{F4}");//關閉頁籤
+                                //        break;
+                                //    case BrowserOPMode.seleniumNew:
+                                //        if (br.driver != null && Active)//表單不在最前面時也會觸發
+                                //        {
+                                //            //br.GoToCurrentUserActivateTab();
+                                //            //br.driver.Navigate().Refresh();
+                                //            br.driver.Close();
+                                //        }
+                                //        break;
+                                //    case BrowserOPMode.seleniumGet:
+                                //        break;
+                                //}
+            Thread.Sleep(115);
             bool autoPastetoQuickEditMemo = autoPastetoQuickEdit;
             autoPastetoQuickEdit = false;
-            this.Activate();
+            //this.Activate();
+            AvailableInUseBothKeysMouse();
             autoPastetoQuickEdit = autoPastetoQuickEditMemo;
         }
 

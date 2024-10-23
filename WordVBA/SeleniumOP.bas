@@ -1,6 +1,8 @@
 Attribute VB_Name = "SeleniumOP"
 Option Explicit
 Public WD As SeleniumBasic.IWebDriver
+'Private Const timeoutsImplicitWait As Long = 0 '預設值為0 但實測為出錯，必須予一有效值供還原設定
+Private Const timeoutsPageLoad As Long = 300 ''預設值為300    20241020
 Public chromedriversPID() As Long '儲存chromedriver程序ID的陣列
 Public chromedriversPIDcntr As Integer 'chromedriversPID的下標值
 Public ActiveXComponentsCanNotBeCreated As Boolean
@@ -180,7 +182,7 @@ reStart:
         If WD Is Nothing Then
         
             If IsChromeRunning Then '20241002
-                OpenChrome_NEW_Get
+                If Not OpenChrome_NEW_Get Then Exit Function
                 If WD Is Nothing Then
                     'Stop ' for test
                     If MsgBox("請關閉Chrome瀏覽器後再按「確定」繼續。否則請按「取消」以取消作業。", vbExclamation + vbOKCancel) = VBA.vbCancel Then Exit Function
@@ -219,7 +221,7 @@ reStart:
                     '.DebuggerAddress = "127.0.0.1:9999" '不要与其他几個混用
                     
                     .AddArgument "--remote-debugging-port=9222" '20241002 Copilot大菩薩：Word VBA 中的 Selenium 操作：https://sl.bing.net/SMTsa6sktU
-                    
+                                        
                 End With
                 WD.New_ChromeDriver Service:=Service, options:=options
                 Docs.Register_Event_Handler '為清除chromedriver作準備
@@ -525,11 +527,11 @@ Sub SeleniumGetTest()
 '    ' 進行進一步的操作
 End Sub
 Rem 20241002 由前面 SeleniumGet 得到的靈感 creedit_with_Copilot大菩薩：https://sl.bing.net/hwtm2YPAfdY
-Sub OpenChrome_NEW_Get()
+Function OpenChrome_NEW_Get() As Boolean
     On Error GoTo eH
     If Not WD Is Nothing Then
         If Not IsWDInvalid() Then
-            Exit Sub
+            Exit Function
         End If
     End If
     'Dim driver As New WebDriver
@@ -626,7 +628,7 @@ Sub OpenChrome_NEW_Get()
 '                Stop  'just for test
                 killchromedriverFromHere
                 Set WD = Nothing
-                Exit Sub
+                Exit Function
 '                OpenChrome_NEW_Get
 '                MsgBox "請再執行一次。感恩感恩　南無阿彌陀佛", vbInformation
                 'End
@@ -674,15 +676,26 @@ Sub OpenChrome_NEW_Get()
     ' 進行進一步的操作
     
     If closeNewBlankPageTabs() Then OpenNewTab WD
-    
-    Exit Sub
+    OpenChrome_NEW_Get = True
+    Exit Function
 eH:
     Select Case Err.Number
+        Case -2146233088
+            If VBA.InStr(Err.Description, "chromedriver.exe does not exist") Then 'The file C:\Program Files\Google\Chrome\Application\chromedriver.exe does not exist. The driver can be downloaded at http://chromedriver.storage.googleapis.com/index.html
+                Set WD = Nothing
+                MsgBox "請在「" & getChromePathIncludeBackslash & "」路徑下複製chromedriver.exe檔案再繼續！", vbCritical
+                SystemSetup.OpenExplorerAtPath getChromePathIncludeBackslash
+                Exit Function
+            Else
+                GoTo caseElse
+            End If
+caseElse:
         Case Else
             Debug.Print Err.Number & vbTab & Err.Description
             MsgBox Err.Number & Err.Description
+            'Resume
     End Select
-End Sub
+End Function
 Rem 若沒有新的空白頁要關閉則傳回false,若只剩一個分頁則不予關閉且傳回false供後續使用
 Private Function closeNewBlankPageTabs() As Boolean
     Dim w, result As Boolean
@@ -782,9 +795,9 @@ eH:
                 driver.SwitchTo.Window driver.WindowHandles()(UBound(driver.WindowHandles))
                 Resume
             Else
-                GoTo CaseElse
+                GoTo caseElse
             End If
-CaseElse:
+caseElse:
         Case Else
             Debug.Print Err.Number & Err.Description
             MsgBox Err.Number & Err.Description
@@ -1236,6 +1249,10 @@ Select Case Err.Number
 End Function
 Rem 查《古音小鏡·訓詁工具書查詢》,成功則傳回true 20241020
 Function LookupBook_Xungu_kaom(x As String) As Boolean
+    If Not code.IsChineseString(x) Then
+        MsgBox "只限中文！", vbCritical
+        Exit Function
+    End If
     Dim iwe As SeleniumBasic.IWebElement, dt As Date, key As New SeleniumBasic.keys
     If Not OpenChrome("http://www.kaom.net/book_xungu.php") Then Exit Function
     word.Application.windowState = wdWindowStateMinimize
@@ -1250,15 +1267,22 @@ Function LookupBook_Xungu_kaom(x As String) As Boolean
             Exit Function
         End If
     Loop
+    SystemSetup.wait 3.3
     SetIWebElementValueProperty iwe, x
-    iwe.SendKeys key.Enter
+'    iwe.SendKeys key.Enter
 '    '查詢按鈕
-'    Set iwe = WD.FindElementByCssSelector("")
-'    If iwe Is Nothing Then Exit Function
-'    iwe.Click
+    SystemSetup.wait 3.3
+    Set iwe = WD.FindElementByCssSelector("body > table > tbody > tr > td > form > input.form_2")
+    If iwe Is Nothing Then Exit Function
+    iwe.Click
+    LookupBook_Xungu_kaom = True
 End Function
 Rem 查《古音小鏡》漢語大詞典,成功則傳回true 20241020
 Function LookupHYDCD_kaom(x As String) As Boolean
+    If Not code.IsChineseString(x) Then
+        MsgBox "只限中文！", vbCritical
+        Exit Function
+    End If
     Dim iwe As SeleniumBasic.IWebElement, dt As Date ', key As New SeleniumBasic.keys
     If Not OpenChrome("http://www.kaom.net/book_hanyudacidian.php") Then Exit Function
     word.Application.windowState = wdWindowStateMinimize
@@ -1273,14 +1297,16 @@ Function LookupHYDCD_kaom(x As String) As Boolean
             Exit Function
         End If
     Loop
+    SystemSetup.wait 3.3
     SetIWebElementValueProperty iwe, x
     'iwe.SendKeys key.Enter
     '查詢按鈕
     VBA.Interaction.DoEvents
-    SystemSetup.wait 1
+    SystemSetup.wait 3.3
     Set iwe = WD.FindElementByCssSelector("body > table > tbody > tr > td > form > input.form_2")
     If iwe Is Nothing Then Exit Function
     iwe.Click
+    LookupHYDCD_kaom = True
 End Function
 Rem 查《異體字字典》：x 要查的字。傳回一個字串陣列，第1個元素是所查詢的字串，第2個元素是查詢結果網址。若沒找到，則傳回空字串 ""
 Function LookupDictionary_of_ChineseCharacterVariants(x As String) As String()
@@ -1443,6 +1469,13 @@ Function LookupHYDCD(x As String) As String()
         OpenChrome ("https://ivantsoi.myds.me/web/hydcd/search.html")
         
     End If
+    word.Application.windowState = wdWindowStateMinimize
+    WD.SwitchTo.Window (WD.CurrentWindowHandle)
+'    VBA.Interaction.DoEvents
+'    VBA.AppActivate "chrome"
+    'AppActivateChrome
+    SeleniumOP.ActivateChrome
+    
     Dim iwe As SeleniumBasic.IWebElement
     Dim dt As Date
     dt = VBA.Now
@@ -1454,12 +1487,7 @@ Function LookupHYDCD(x As String) As String()
         End If
     Loop
     
-    word.Application.windowState = wdWindowStateMinimize
-    WD.SwitchTo.Window (WD.CurrentWindowHandle)
-    VBA.Interaction.DoEvents
-'    VBA.AppActivate "chrome"
-    'AppActivateChrome
-    SeleniumOP.ActivateChrome
+
     
     '找到檢索框之後
     If Not iwe Is Nothing Then
@@ -1508,6 +1536,187 @@ Select Case Err.Number
             MsgBox "請關閉Chrome瀏覽器後再執行一次！" & vbCr & vbCr & Err.Number & Err.Description, vbExclamation
     End Select
 End Function
+Rem 查中文大辭典（《國學大師》將我所掃的轉成黑白版），成功傳回true
+Function LookupZWDCD(x As String) As Boolean
+    On Error GoTo eH
+    If Not code.IsChineseString(x) Then
+        MsgBox "只限中文！", vbCritical
+        Exit Function
+    End If
+    Dim key As New SeleniumBasic.keys
+    Dim iwe As SeleniumBasic.IWebElement, dt As Date, tds() As SeleniumBasic.IWebElement, i As Integer, actions As New SeleniumBasic.actions, flag As Boolean, attr As String, retyrCntr As Byte
+    If Not IsWDInvalid() Then WD.Manage.timeouts.PageLoad = 3
+    If Not OpenChrome("https://www.guoxuedashi.net/zidian/bujian/") Then Exit Function
+    'WD.Manage.timeouts.ImplicitWait = 2
+    WD.Manage.timeouts.PageLoad = 2 '設置頁面載入超時3秒 creedit_with_Copilot大菩薩
+    WD.SwitchTo.Window WD.CurrentWindowHandle
+    ActivateChrome
+    word.Application.windowState = wdWindowStateMinimize
+    '檢索框
+    dt = VBA.Now
+    Set iwe = WD.FindElementByCssSelector("#sokeyzi")
+    Do While iwe Is Nothing
+        Set iwe = WD.FindElementByCssSelector("#sokeyzi")
+        If VBA.DateDiff("s", dt, VBA.Now) > 5 Then
+            Exit Function
+        End If
+    Loop
+    SetIWebElementValueProperty iwe, x
+    WD.Manage.timeouts.PageLoad = 10 '設置頁面載入超時秒數 creedit_with_Copilot大菩薩
+    On Error Resume Next
+    iwe.SendKeys key.Enter
+    
+    On Error GoTo 0
+'    '查詢按鈕
+'    Set iwe = WD.FindElementByCssSelector("")
+'    If iwe Is Nothing Then Exit Function
+'    iwe.Click
+    actions.Create WD
+    dt = VBA.Now
+    '書目列表
+    Set iwe = WD.FindElementById("shupage")
+    Do While iwe Is Nothing And VBA.DateDiff("s", dt, VBA.Now) < 10
+        Set iwe = WD.FindElementById("shupage")
+        actions.SendKeys(key.End).Perform
+    Loop
+    actions.SendKeys(key.End).Perform
+    '使用 JavaScript 判斷表格總行數是否改變
+    Dim prevRowCount As Long, currRowCount As Long
+scroll:
+    prevRowCount = 0
+    dt = VBA.Now
+    Do
+        currRowCount = WD.ExecuteScript("return document.getElementById('shupage').rows.length") '20241020creedit_with_Copilot大菩薩
+        If currRowCount > prevRowCount Then
+            prevRowCount = currRowCount
+            dt = VBA.Now '重置時間
+        End If
+        SystemSetup.wait 0.4
+        actions.SendKeys(key.End).Perform
+        '小停頓
+        SystemSetup.wait 0.4 ' 1000 毫秒等於 1 秒'Application.wait (Now + TimeValue("0:00:01"))
+        actions.SendKeys(key.End).Perform
+        If VBA.DateDiff("s", dt, VBA.Now) > 20 Then '時間可以調整
+            Exit Function
+        Else
+            actions.SendKeys(key.End).Perform
+            SystemSetup.wait 1
+        End If
+    Loop While currRowCount > prevRowCount
+
+    '找到目標標籤
+    Set iwe = WD.FindElementById("shupage")
+    tds = iwe.FindElementsByTagName("td")
+    
+
+    dt = VBA.Now
+    Do While UBound(tds) = 0
+        tds = WD.FindElementsByTagName("td")
+        If VBA.DateDiff("s", dt, VBA.Now) > 3 Then
+            Exit Function
+        End If
+    Loop
+        
+    On Error GoTo eH:
+    
+    For i = 0 To UBound(tds)
+        If tds(i).GetAttribute("textContent") = "中文大" & VBA.ChrW(-28770) & "典" Then
+            attr = tds(i + 1).GetAttribute("innerHTML")
+            flag = True
+            Exit For
+        End If
+    Next i
+    If Not flag Then
+        If retyrCntr > 1 Then
+            MsgBox "此字沒有《中文大辭典》訊息。感恩感恩　南無阿彌陀佛　讚美主", vbExclamation
+        Else
+            retyrCntr = retyrCntr + 1
+            GoTo scroll
+        End If
+    End If
+    'WD.Manage.timeouts.ImplicitWait = 3 ' 等待3秒
+    On Error GoTo 0
+    On Error GoTo eH:
+    WD.Manage.timeouts.PageLoad = 4 '設置頁面載入超時x秒 creedit_with_Copilot大菩薩
+    WD.url = "https://www.guoxuedashi.net" & HTML2Doc.GetHTMLAttributeValue("href", VBA.Replace(attr, "amp;", vbNullString))
+    'Set iwe = WD.FindElementByCssSelector("body > div:nth-child(3) > center:nth-child(2) > img")
+    'iwe.Click
+    WD.SwitchTo.Window WD.CurrentWindowHandle
+    ActivateChrome
+    retyrCntr = 0
+    Do Until isImageLoaded("body > div:nth-child(3) > center:nth-child(2) > img")
+        WD.Manage.timeouts.PageLoad = WD.Manage.timeouts.PageLoad + 2
+        WD.Navigate.Refresh
+        retyrCntr = retyrCntr + 1
+        Debug.Print "reload image" & retyrCntr
+        If retyrCntr > 3 Then Exit Do
+    Loop
+
+    word.Application.Activate
+finish:
+    LookupZWDCD = True
+    playSound 0.411
+    WD.SwitchTo.Window WD.CurrentWindowHandle
+    ActivateChrome
+    WD.FindElementByCssSelector("body > div:nth-child(3) > center:nth-child(2) > img").Click
+'    WD.Manage.timeouts.ImplicitWait = timeoutsImplicitWait '預設值為0
+    WD.Manage.timeouts.PageLoad = timeoutsPageLoad '預設值為300
+    Exit Function
+eH:
+    Select Case Err.Number
+        Case -2146233088
+            If VBA.InStr(Err.Description, "stale element reference: stale element not found in the current frame") = 1 Then 'stale element reference: stale element not found in the current frame
+'                                                (Session info: chrome=129.0.6668.101)
+                actions.SendKeys(key.End).Perform
+                GoTo scroll
+            ElseIf VBA.InStr(Err.Description, "timeout: Timed out receiving message from renderer:") = 1 Then 'timeout: Timed out receiving message from renderer: 3.000
+                                        '  (Session info: chrome=129.0.6668.101)
+                If VBA.InStr(WD.url, "zwdcd") Then
+    '                WD.Manage.timeouts.ImplicitWait = WD.Manage.timeouts.ImplicitWait + 3 ' 等待3秒
+    '                WD.Manage.timeouts.PageLoad = WD.Manage.timeouts.PageLoad + 3
+    '                Resume
+                    If Not isImageLoaded("body > div:nth-child(3) > center:nth-child(2) > img") Then
+                        WD.Manage.timeouts.PageLoad = WD.Manage.timeouts.PageLoad + 5
+                        playSound 1
+                        On Error Resume Next
+                        WD.Navigate.Refresh
+                        On Error GoTo 0
+                        Debug.Print "reload image" & retyrCntr
+                        If isImageLoaded("body > div:nth-child(3) > center:nth-child(2) > img") Then
+                            LookupZWDCD = True
+                            Exit Function
+                        Else
+                            Resume Next
+                        End If
+                    Else
+                        LookupZWDCD = True
+                        Debug.Print "okok..."
+                        playSound 0.484
+                        Exit Function
+                    End If
+                Else
+                    WD.Manage.timeouts.PageLoad = WD.Manage.timeouts.PageLoad + 2
+                    Resume
+                End If
+            ElseIf VBA.InStr(Err.Description, "javascript error: Cannot read properties of null (reading 'rows')") Then '-2146233088javascript error: Cannot read properties of null (reading 'rows')
+                                                                                                                    '(Session info: chrome=129.0.6668.101)
+                word.Application.Activate
+                MsgBox "網站故障，請取消作業或重試。感恩感恩　南無阿彌陀佛　讚美主", vbCritical
+                Exit Function
+            Else
+                GoTo caseElse
+            End If
+        Case Else
+caseElse:
+            Debug.Print Err.Number & Err.Description
+            word.Application.Activate
+            MsgBox Err.Number & Err.Description, vbCritical
+    End Select
+End Function
+'強制停止網頁載入 20241020 creedit_with_Copilot大菩薩
+Sub StopLoadPage()
+    WD.ExecuteScript "window.stop();"
+End Sub
 Rem 查《國學大師》：x 要查的字詞。傳回一個字串陣列，第1個元素是所查詢的字串，第2個元素是查詢結果網址。若沒找到，則傳回空字串 ""
 Function LookupGXDS(x As String) As String()
     On Error GoTo eH
@@ -1827,6 +2036,10 @@ Select Case Err.Number
 End Function
 Rem 查《白雲深處人家》的《漢語大詞典》 20241020
 Function LookupHomeinmistsHYDCD(x As String) As Boolean
+    If Not code.IsChineseString(x) Then
+        MsgBox "只限中文！", vbCritical
+        Exit Function
+    End If
     Dim iwe As SeleniumBasic.IWebElement, dt As Date, key As New SeleniumBasic.keys
     If Not OpenChrome("https://homeinmists.ilotus.org/hd/hydcd.php") Then Exit Function
     word.Application.windowState = wdWindowStateMinimize
@@ -1847,6 +2060,7 @@ Function LookupHomeinmistsHYDCD(x As String) As Boolean
 '    Set iwe = WD.FindElementByCssSelector("")
 '    If iwe Is Nothing Then Exit Function
 '    iwe.Click
+    LookupHomeinmistsHYDCD = True
 End Function
 
 Rem 查《漢語多功能字庫》取回其《說文》「解釋」欄位的內容：x 要查的字。傳回一個字串陣列，第1個元素是《說文》「解釋」的內容字串，第2個元素是查詢結果網址。若沒找到，則傳回空字串
@@ -1934,6 +2148,35 @@ Select Case Err.Number
         Case Else
             MsgBox "請關閉Chrome瀏覽器後再執行一次！" & vbCr & vbCr & Err.Number & Err.Description, vbExclamation
     End Select
+End Function
+
+Rem 查《韻典網》，成功則傳回true
+Function LookupYtenx(x As String) As Boolean
+    If Not code.IsChineseString(x) Then
+        MsgBox "只限中文！", vbCritical
+        Exit Function
+    End If
+    Dim iwe As SeleniumBasic.IWebElement, dt As Date, key As New SeleniumBasic.keys
+    If Not OpenChrome("https://ytenx.org/") Then Exit Function
+    word.Application.windowState = wdWindowStateMinimize
+    WD.SwitchTo.Window WD.CurrentWindowHandle
+    ActivateChrome
+    '檢索框
+    dt = VBA.Now
+    Set iwe = WD.FindElementByCssSelector("#search-form > input.search-query.span3")
+    Do While iwe Is Nothing
+        Set iwe = WD.FindElementByCssSelector("#search-form > input.search-query.span3")
+        If VBA.DateDiff("s", dt, VBA.Now) > 5 Then
+            Exit Function
+        End If
+    Loop
+    SetIWebElementValueProperty iwe, x
+    iwe.SendKeys key.Enter
+'    '查詢按鈕
+'    Set iwe = WD.FindElementByCssSelector("")
+'    If iwe Is Nothing Then Exit Function
+'    iwe.Click
+    LookupYtenx = True
 End Function
 
 Rem 查《說文解字》取回其《說文》「解釋」欄位的內容：x 要查的字,includingDuan 是否也傳回段注內容。傳回一個字串陣列，第1個元素是《說文》（大徐本）「解釋」的內容字串，第2個元素是查詢結果網址，第3個則是段注之內容。若沒找到，則傳回空字串陣列
@@ -2953,5 +3196,27 @@ Function StripHTMLTags(html As String) As String
     regex.Global = True
     StripHTMLTags = regex.Replace(html, "")
 End Function
-
-
+Rem 判斷圖片載入完成否 20241021creedit_with_Copilot大菩薩:要判斷圖片是否載入成功，可以透過檢查圖片元素的 complete 屬性或者是監聽圖片的 load 事件。這裡有一個簡單的方法，利用 SeleniumBasic 的 JavaScript 執行功能來檢查圖片是否已經載入成功：
+Private Function isImageLoaded(CssSelector As String) As Boolean
+    Dim script As String
+    Dim imgLoaded As Boolean
+    
+    ' JavaScript 代碼來檢查圖片是否載入成功
+    script = "return document.querySelector('" & CssSelector & "').complete;" '這段程式碼會檢查指定的圖片元素的 complete 屬性，如果圖片已經載入，complete 屬性會是 true，否則會是 false。
+'    script = "return document.querySelector('body > div:nth-child(3) > center:nth-child(2) > img').complete;"
+    ' 執行 JavaScript 並取得結果
+    imgLoaded = WD.ExecuteScript(script)
+    '如果圖片顯示的是替代文字，通常意味著圖片連結失敗或載入錯誤。在這種情況下，可以檢查圖片的 naturalWidth 和 naturalHeight 屬性。如果這兩個屬性都大於 0，則圖片載入成功；否則，載入失敗。
+    '這段程式碼會檢查指定圖片的 naturalWidth 和 naturalHeight 屬性，如果這兩個屬性都大於 0，表示圖片載入成功；否則，圖片載入失敗。這樣應該能更精確地判斷圖片是否載入成功。
+    If imgLoaded Then
+        ' JavaScript 代碼來檢查圖片的 naturalWidth 和 naturalHeight 屬性
+        script = "var img = document.querySelector('body > div:nth-child(3) > center:nth-child(2) > img');return (img.naturalWidth > 0 && img.naturalHeight > 0);"
+        ' 執行 JavaScript 並取得結果
+        imgLoaded = WD.ExecuteScript(script)
+    End If
+    If imgLoaded Then
+        isImageLoaded = True 'MsgBox "圖片已載入成功"
+    Else
+        isImageLoaded = False 'MsgBox "圖片尚未載入"
+    End If
+End Function

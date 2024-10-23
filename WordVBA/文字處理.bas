@@ -4016,6 +4016,80 @@ For i = 1 To lenStr
 Next i
 SplitWithoutDelimiter_StringToStringArray = arr
 End Function
+Sub 頓號文字加上篇名號如周易諸卦()
+    Rem Ctrl + Alt + ' （頓號）
+    頓號文字加上符號 "〈"
+End Sub
+Sub 頓號文字加上書名號如五經()
+    Rem Ctrl + shift + Alt + ' （頓號）
+    頓號文字加上符號 "《"
+End Sub
+Sub 頓號文字加上單引號()
+    Rem Ctrl + Alt + 9
+    頓號文字加上符號 "「"
+End Sub
+Sub 頓號文字加上雙引號()
+    Rem Ctrl + Alt + 0
+    頓號文字加上符號 "『"
+End Sub
+
+Rem 成功則傳回true
+Private Function 頓號文字加上符號(symbol As String) As Boolean
+    Dim rng As Range, x As String, ur As UndoRecord, symbolClose As String, a As Range
+    If Selection.Type = wdSelectionIP Then Exit Function
+    Select Case symbol
+        Case "〈"
+            symbolClose = "〉"
+        Case "《"
+            symbolClose = "》"
+        Case "「"
+            symbolClose = "」"
+        Case "『"
+            symbolClose = "』"
+        Case Else
+            Exit Function
+    End Select
+    SystemSetup.stopUndo ur, "頓號文字加上篇名號如周易諸卦"
+    word.Application.ScreenUpdating = False
+    文字處理.ResetSelectionAvoidSymbols
+    Set rng = Selection.Document.Range(Selection.start, Selection.End)
+'    If rng.ShapeRange.Count = 0 And rng.InlineShapes.Count = 0 Then
+'        x = symbol & VBA.Replace(rng.text, "、", symbolClose & "、" & symbol) & symbolClose
+'        Selection.TypeText x
+'    Else
+        For Each a In rng.Characters
+            If a.text = "、" Then
+                If Not a.Next Is Nothing Then
+                    If a.Next <> symbol And a.End < rng.End Then a.InsertAfter symbol
+                Else
+                    a.InsertAfter symbol
+                End If
+                If Not a.Previous Is Nothing Then
+                    If a.Previous <> symbolClose And a.start > rng.start Then a.InsertBefore symbolClose
+                Else
+                    a.InsertBefore symbolClose
+                End If
+            End If
+        Next a
+        If Not rng.Characters(1).Next Is Nothing Then
+            If rng.Characters(rng.Characters.Count).Next.text <> symbolClose And rng.Characters(rng.Characters.Count).text <> symbolClose And rng.Characters(rng.Characters.Count).text <> "、" Then rng.InsertAfter symbolClose
+        Else
+            If rng.Characters(rng.Characters.Count).text <> symbolClose And rng.Characters(rng.Characters.Count).text <> "、" Then rng.InsertAfter symbolClose
+        End If
+        If Not rng.Characters(1).Previous Is Nothing Then
+            If rng.Characters(1).Previous.text <> symbol And rng.Characters(1).text <> symbol And rng.Characters(1).text <> "、" Then rng.InsertBefore symbol
+        Else
+            If rng.Characters(1).text <> symbol And rng.Characters(1).text <> "、" Then rng.InsertBefore symbol
+        End If
+'        rng.InsertAfter symbolClose
+'        rng.InsertBefore symbol
+'    End If
+    Selection.start = rng.End
+    SystemSetup.contiUndo ur
+    word.Application.ScreenUpdating = True
+    頓號文字加上符號 = True
+End Function
+
 Rem 根據碼位來設定字型名稱
 Sub FixFontname(rng As Range)
     

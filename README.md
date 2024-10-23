@@ -316,7 +316,7 @@ Ctrl + F12 ：檢索《國語辭典》
 - Alt + F12 ：**單字**查找《異體字字典》（限單字）
 - Ctrl + Alt + F12 ：查《國語辭典》（單字複詞均可）
 - Alt + Shift + \ （即 Alt + | ）： 以選取的文字查找《國語辭典》若有結果，在其後加上注音括注，並加上檢索結果網址之超連結
-- Alt + j 或 Alt + s ：**單字**檢索《白雲深處人家·說文解字·圖像查閱》之字頭。檢索有結果後，直接點開藤花榭本以供檢覈（即會開出2個分頁。第2個－－最後一個開啟的－－是藤花榭本書頁圖。關閉後即回到第1個分頁，即可檢視站內所收諸版本該字頭所在之書頁圖）。（j = jie 《說文解字》的「解」，s ：說 shuo 的 s）
+- Alt + j 或 Alt + s ：**單字**檢索《[白雲深處人家](https://homeinmists.ilotus.org/)·說文解字·圖像查閱》之字頭。檢索有結果後，直接點開藤花榭本以供檢覈（即會開出2個分頁。第2個－－最後一個開啟的－－是藤花榭本書頁圖。關閉後即回到第1個分頁，即可檢視站內所收諸版本該字頭所在之書頁圖）。（j = jie 《說文解字》的「解」，s ：說 shuo 的 s）
 - Alt + shift + j 或 Alt + shift + s ：以釋義內文檢索《白雲深處人家·說文解字·圖文檢索WFG版》。（j = jie 《說文解字》的「解」，s ：說 shuo 的 s）
 - Alt + v ： **單字**檢索《異體字字典》並讀入其《說文》及網址資料以便引文。
 - Alt + n ： **單字**檢索《漢語多功能字庫》並取回其說文解釋欄位之值插入至插入點位置。 （n= 能 neng）
@@ -340,10 +340,15 @@ Ctrl + F12 ：檢索《國語辭典》
     > 原為 Ctrl + k,d (k=kan 看；d=dian 典) ，因會使內建的 Ctrl + k （插入超連結）失效，故改定 20241014
 - Alt + Shfit + h： 檢索《漢籍全文資料庫》 (h=han 漢)
 - Alt + t ： 以Google檢索《中國哲學書電子化計劃》 (t=CTP的t)20241006
-- Ctrl + Shift + Alt + U u=xun（訓）的u 查古音小鏡_訓詁工具書查詢 20241020
-- Ctrl + Shift + Alt + i i=ci（詞）的i 查古音小鏡_漢語大詞典
-- Ctrl + Shift + Alt + c c=ci（詞）的c 查白雲深處人家漢語大詞典
-
+- Ctrl + Shift + Alt + U u=xun（訓）的u 查[古音小鏡](http://www.kaom.net/)_訓詁工具書查詢 20241020
+- Ctrl + Shift + Alt + i 查古音小鏡_漢語大詞典 i=ci（詞）的i
+- Ctrl + Shift + Alt + c 查[白雲深處人家](http://www.homeinmists.com/)漢語大詞典 c=ci（詞）的c
+- Ctrl + Shift + Alt + y 查[韻典網](https://ytenx.org/) y=yun（韻）的y
+- Alt + Shift + z 或 ctrl + Alt + Shift + z 查《中文大辭典》－－《國學大師》所收轉愚所掃全彩為黑白版 20241020 （z：中（zh）的 z）20241020
+- Ctrl + Alt + ' （頓號） 頓號文字加上篇名號（〈〉）如周易諸卦
+- Ctrl + shift + Alt + ' （頓號） 頓號文字加上書名號（《》）如五經
+- Ctrl + Alt + 9 頓號文字加上單引號（「」）
+- Ctrl + Alt + 0 頓號文字加上雙引號（『』）20241022
 
 **以下功能，目前須先開啟TextForCtext才能使用。** 原理是以本軟件作為中介故。
 - Alt + , 或 Ctrl + Alt + , 或 Ctrl + Alt + F9 或 Alt + shift + F5 或 Ctrl + Alt + F5 同在TextForCtext 的 Alt + , 與 Alt + F9 與 Alt + F5。《漢籍全文資料庫》或《中國哲學書電子化計劃》檢索《易》學關鍵字。蓋藉由本軟件介面作中介爾。
@@ -414,6 +419,10 @@ Ctrl + Alt + i 顯示IP現狀訊息方塊
 Ctrl + Alt + pageup : 在新的分頁開啟CTP圖文對照前一頁以供檢視 20240920
 
 Ctrl + Alt + pagedown : 在新的分頁開啟CTP圖文對照下一頁以供檢視
+
+Alt + pageup : 切換至 Chrome瀏覽器上一分頁 20241022
+
+Alt + pagedown : 切換至 Chrome瀏覽器上一分頁
 
 Ctrl + Shift + o 執行《看典古籍》OCR API ，執行 GetOCRResult 方法。（須將token存成「OCRAPItoken.txt」檔置於「我的文件\\CtextTempFiles」下，並在程式碼中覆寫本人帳號/郵箱。）
 
