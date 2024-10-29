@@ -2261,18 +2261,18 @@ End With
 End Sub
 
 Sub 大陸引號換台灣引號()
-Dim a, b, i
-a = Array(-24153, -24152, -24155, -24154)  '“,”,‘,”
-b = Array("「", "」", "『", "』")
-
-With ActiveDocument.Range.Find
-    For i = 0 To 3
-        '.Text = a(i)
-         '.Replacement.Text = b(i)
-         .ClearFormatting
-         .Execute VBA.Chr(a(i)), , , , , , , , , b(i), wdReplaceAll
-    Next i
-End With
+    Dim a, b, i
+    a = Array(-24153, -24152, -24155, -24154)  '“,”,‘,”
+    b = Array("「", "」", "『", "』")
+    
+    With ActiveDocument.Range.Find
+        For i = 0 To 3
+            '.Text = a(i)
+             '.Replacement.Text = b(i)
+             .ClearFormatting
+             .Execute VBA.Chr(a(i)), , , , , , , , , b(i), wdReplaceAll
+        Next i
+    End With
 End Sub
 
 
@@ -3402,7 +3402,7 @@ notFound:
                     If rst.RecordCount > 0 Then
                         Beep
                         'Selection.Document.FollowHyperlink "https://www.zdic.net/hans/" & x, , True
-                        Shell chromePath & " https://www.zdic.net/hans/" & x
+                        shell chromePath & " https://www.zdic.net/hans/" & x
                         GoSub list
                         'Selection.Document.FollowHyperlink "http://dict.revised.moe.edu.tw/cbdic/search.htm", , True
 '                        Shell chromePath & " http://dict.revised.moe.edu.tw/cbdic/search.htm"
@@ -3413,7 +3413,7 @@ notFound:
                                 GoSub list
                             Else
                             'Selection.Document.FollowHyperlink "https://www.zdic.net/hans/" & x, , True
-                            Shell chromePath & " https://www.zdic.net/hans/" & x
+                            shell chromePath & " https://www.zdic.net/hans/" & x
                             End If
                     End If
                 End If
@@ -3487,7 +3487,7 @@ rePt:
             rng.Document.ActiveWindow.Application.Activate
             If rst.RecordCount = 1 Then '國語辭典資料庫裡只有1筆吻合資料
                 If x = "" Then '結果不止1個時
-                    Shell Network.getDefaultBrowserFullname & " https://dict.revised.moe.edu.tw/search.jsp?md=1"
+                    shell Network.getDefaultBrowserFullname & " https://dict.revised.moe.edu.tw/search.jsp?md=1"
                 End If
 ''                If Not SystemSetup.appActivatedYet("chrome") Then
 ''                'If Not word.Tasks.Exists("google chrome") Then
@@ -3503,9 +3503,9 @@ rePt:
                 If repeated = False Then
                     If SeleniumOP.ActiveXComponentsCanNotBeCreated Then
                         SystemSetup.playSound 2
-                        Shell Network.getDefaultBrowserFullname & " https://dict.revised.moe.edu.tw/search.jsp?md=1&word=" & words
+                        shell Network.getDefaultBrowserFullname & " https://dict.revised.moe.edu.tw/search.jsp?md=1&word=" & words
                     Else
-                        Shell Network.getDefaultBrowserFullname & " https://dict.revised.moe.edu.tw/search.jsp?md=1"
+                        shell Network.getDefaultBrowserFullname & " https://dict.revised.moe.edu.tw/search.jsp?md=1"
                     End If
                 Else
                 
@@ -4124,4 +4124,19 @@ Sub FixFontname(rng As Range)
         fontName = "HanaMinB"
         Docs.ChangeFontOfSurrogatePairs_Range fontName, rngChangeFontName, CJK_Unified_Ideographs_Extension_E
         Docs.ChangeFontOfSurrogatePairs_Range fontName, rngChangeFontName, CJK_Unified_Ideographs_Extension_F
+End Sub
+Sub 大陸引號改臺灣引號()
+    Rem Alt + Ctrl + Shift + + （Alt + Ctrl + Shift + =）
+    Dim rng As Range, ur As UndoRecord
+    If Selection.Type = wdSelectionIP Then
+        Set rng = Selection.Document.Range
+    Else
+        Set rng = Selection.Document.Range(Selection.start, Selection.End)
+    End If
+    SystemSetup.stopUndo ur, "大陸引號改臺灣引號"
+    rng.Find.Execute VBA.ChrW(8220), , , , , , , wdFindStop, , "「", wdReplaceAll
+    rng.Find.Execute VBA.ChrW(8221), , , , , , , wdFindStop, , "」", wdReplaceAll
+    rng.Find.Execute VBA.ChrW(8216), , , , , , , wdFindStop, , "『", wdReplaceAll
+    rng.Find.Execute VBA.ChrW(8217), , , , , , , wdFindStop, , "』", wdReplaceAll
+    SystemSetup.contiUndo ur
 End Sub

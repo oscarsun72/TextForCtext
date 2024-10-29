@@ -1454,7 +1454,8 @@ namespace TextForCtext
                     catch (Exception)
                     {
                         cDrv.SwitchTo().Window(cDrv.WindowHandles.Last());
-                        cDrv.SwitchTo().NewWindow(WindowType.Tab);
+                        openNewTabWindow();
+                        //cDrv.SwitchTo().NewWindow(WindowType.Tab);
                     }
 
                 }
@@ -1841,8 +1842,11 @@ namespace TextForCtext
                                 quickedit = driver.FindElement(selm.By.Id("quickedit"));
                             }
                             else
-                                MessageBox.Show(ex.HResult + ex.Message);
-                            Debugger.Break();
+                            {
+                                Console.WriteLine(ex.HResult + ex.Message);
+                                Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
+                                Debugger.Break();
+                            }
                             break;
                         default:
                             //cDrv.Navigate().GoToUrl(Form1.mainFromTextBox3Text ?? "https://ctext.org/account.pl?if=en");                    
@@ -2796,7 +2800,9 @@ namespace TextForCtext
                                     else if (ex1.Message.StartsWith("no such window"))
                                     //可能是按下擴充功能故 20231228
                                     {
-                                        SendKeys.SendWait("{esc}");
+                                        BringToFront("chrome");
+                                        if (!ActiveForm1.Active)
+                                            SendKeys.SendWait("{esc}");
                                         driver.SwitchTo().Window(driver.WindowHandles.Last());
                                         LastValidWindow = driver.WindowHandles.Last();
                                         try
@@ -8472,8 +8478,8 @@ internal static string getImageUrl() {
                 "咸恆","老陰", "老陽", "少陰", "少陽","十翼","四象","兩儀","大衍",
                 "无妄", "彖", "象曰", "象傳", "象日", "象云","大象","小象","象文", "筮", // 不支援標點檢索，如「, "象："」
                 "初九","九二","九三","九四","九五","上九","初六","六二","六三","六四","六五","上六","用九","用六", "繇辭","繇詞",
-                "伏羲","庖羲","庖𦏁","宓𦏁","宓羲","宓犧","伏犧","庖犧","中正",
-                "隨時之義","庖有魚","包有魚","精義入神","豶豕","童牛","承之羞","雷在天上","錫馬", "蕃庶","晝日","三接","懲忿","窒欲","窒慾","敬以直內","義以方外","迷後得主","利西南","品物咸章","天下大行","益動而", "日進無疆","頻巽","豚魚","頻復", "懲窒","閑邪","存誠","乾乾","悔吝","憧憧", "類萬物","柔順利貞","比之匪人","貞厲","履貞","履道坦坦","貞吉","貞凶","悔亡","時義","健順", "內健而外順", "內健外順", "外順而內健", "外順內健","敦復","直方","開物成務","窮神知化", "夕惕","惕若","研幾極深","極深研幾","一陰一陽","允升","木上有水","勞民勸相","索而得","我有好爵","言有序","有聖人之道四","長子帥師","弟子輿尸","無悶","日用而不知", "日用不知","之道鮮","原始反終", "寂然不動", "感而遂通","朋從", "朋盍", "容民畜眾","有過則改","見善則遷","養正","養賢","知臨","臨大君", "默而成之","黙而成之","不言而信", "存乎德行","通天下之志","履正", "繼之者善", "仁者見之", "知者見之", "智者見之","屯其膏", "貞不字","翰音", "善不積","立成器", "與地之",
+                "伏羲","庖羲","庖𦏁","宓𦏁","宓羲","宓犧","伏犧","庖犧","中正","見龍在田",
+                "隨時之義","庖有魚","包有魚","精義入神","豶豕","童牛","承之羞","雷在天上","錫馬", "蕃庶","晝日","三接","懲忿","窒欲","窒慾","敬以直內","義以方外","迷後得主","利西南","品物咸章","天下大行","益動而", "日進無疆","頻巽","豚魚","頻復", "懲窒","閑邪","存誠","乾乾","悔吝","憧憧", "類萬物","柔順利貞","比之匪人","貞厲","履貞","履道坦坦","貞吉","貞凶","悔亡","時義","健順", "內健而外順", "內健外順", "外順而內健", "外順內健","敦復","直方","開物成務","窮神知化", "夕惕","惕若","研幾極深","極深研幾","一陰一陽","允升","木上有水","勞民勸相","索而得","我有好爵","言有序","有聖人之道四","長子帥師","弟子輿尸","無悶","日用而不知", "日用不知","之道鮮","原始反終", "寂然不動", "感而遂通","朋從", "朋盍", "容民畜眾","有過則改","見善則遷","養正","養賢","知臨","臨大君", "默而成之","黙而成之","不言而信", "存乎德行","通天下之志","履正", "繼之者善", "仁者見之", "知者見之", "智者見之","屯其膏", "貞不字","翰音","鶾音", "善不積","立成器", "與地之",
                 "象義","大貞","小貞", "帝出乎震","帝出於震","帝出于震", "日新","與時偕行","盈虛","豐亨","天在山中", "多識前言往行", "蹇蹇", "匪躬","洗心","龍德","慎言語","節飲食","艮其限","乃孚","幹父","裕父","係遯","甘臨","號咷", "風行水上",
                 "終難","咸之九五","賁於丘園","賁于丘園","賁於邱園","賁于邱園", "束帛","戔戔", "損下以益上", "損下益上", "損下而益上", "貳用缶","納約自牖","利見大人", "何思何慮","同歸而殊塗","一致而百慮", "同歸殊塗","一致百慮","先天後天","改命吉","天下雷行","喪貝","羝羊","羝芉", "觸藩", "觸籓","事不密","艱貞","金矢","利有","攸往","包蒙", "童蒙", "蒙吉",
                 "精氣為物","游魂為變","遊䰟為變","游䰟為變", "漣如","焚如","知幾其神","禴祭", "東鄰","朋亡", "渙其群","有子考","甲三日","庚三日","不易乎世","不成乎名","天一地二","者其辭","升其高陵","天道虧盈","鞏用", "祗悔", "祇悔","秖悔","秪悔","履霜","蒞眾","理財", "正辭", "禁民為非","撝謙", "浚恒","浚恆", "立其誠","立誠","修辭立誠","開國承家","確乎其不可拔","碻乎其不可拔"
@@ -9572,813 +9578,850 @@ internal static string getImageUrl() {
                 if (!File.Exists(f = f.Replace("C:\\", "A:\\")))//A槽是我的虛擬機所設定者 20240822
                     return;
 
-                retry:            
-                if (ImproveGJcoolOCRMemoDoc == null)
+                retry:
+            if (ImproveGJcoolOCRMemoDoc == null)
+            {
+                taskOpeningDocument = Task.Run(() =>
                 {
-                    taskOpeningDocument = Task.Run(() =>
+                    Microsoft.Office.Interop.Word.Application wordapp = new Microsoft.Office.Interop.Word.Application
                     {
-                        Microsoft.Office.Interop.Word.Application wordapp = new Microsoft.Office.Interop.Word.Application
+                        Visible = true
+                    };
+                    wordapp.Activate();
+                    wordapp.WindowState = Microsoft.Office.Interop.Word.WdWindowState.wdWindowStateMinimize;
+                    //ActiveForm1.AvailableInUseBothKeysMouse();//跨執行緒時會出錯（寫到呼叫端就好）
+                    if (ActiveForm1.InvokeRequired)
+                    {
+                        ActiveForm1.Invoke((MethodInvoker)delegate
                         {
-                            Visible = true
-                        };
-                        wordapp.Activate();
-                        wordapp.WindowState = Microsoft.Office.Interop.Word.WdWindowState.wdWindowStateMinimize;
-                        //ActiveForm1.AvailableInUseBothKeysMouse();//跨執行緒時會出錯（寫到呼叫端就好）
-                        if (ActiveForm1.InvokeRequired)
-                        {
-                            ActiveForm1.Invoke((MethodInvoker)delegate
-                            {
-                                ActiveForm1.AvailableInUseBothKeysMouse();
-                            });
-                        }
-                        //ImproveGJcoolOCRMemoDoc = wordapp.Documents.Open("C:\\Users\\oscar\\Dropbox\\《古籍酷》AI OCR 待改進者隨記 感恩感恩　讚歎讚歎　南無阿彌陀佛.docx");
-                        ImproveGJcoolOCRMemoDoc = wordapp.Documents.Open(f);
-                        //ImproveGJcoolOCRMemoDoc = wordapp.Documents.Open("C:\\Users\\oscar\\Dropbox\\《古籍酷》AI%20OCR%20待改進者隨記%20感恩感恩　讚歎讚歎　南無阿彌陀佛.docx");
-                        //ImproveGJcoolOCRMemoDoc.ActiveWindow.Selection.EndKey(Microsoft.Office.Interop.Word.WdUnits.wdStory);
-
-                    });
-                    taskOpeningDocument.Wait();
-                }
-                else
-                {
-                    string fn = string.Empty;
-                    try
-                    {
-                        fn = ImproveGJcoolOCRMemoDoc.Name;
+                            ActiveForm1.AvailableInUseBothKeysMouse();
+                        });
                     }
-                    catch (Exception)
-                    {
-                        ImproveGJcoolOCRMemoDoc = null;
-                        goto retry;
-                    }
-                    if (!fn.StartsWith(preName))
-                    {
-                        Microsoft.Office.Interop.Word.Application wordapp = ImproveGJcoolOCRMemoDoc.Application;
-                        ImproveGJcoolOCRMemoDoc.Close(Microsoft.Office.Interop.Word.WdSaveOptions.wdDoNotSaveChanges);
-                        ImproveGJcoolOCRMemoDoc = wordapp.Documents.Open(f);
-                    }
-                }
+                    //ImproveGJcoolOCRMemoDoc = wordapp.Documents.Open("C:\\Users\\oscar\\Dropbox\\《古籍酷》AI OCR 待改進者隨記 感恩感恩　讚歎讚歎　南無阿彌陀佛.docx");
+                    ImproveGJcoolOCRMemoDoc = wordapp.Documents.Open(f);
+                    //ImproveGJcoolOCRMemoDoc = wordapp.Documents.Open("C:\\Users\\oscar\\Dropbox\\《古籍酷》AI%20OCR%20待改進者隨記%20感恩感恩　讚歎讚歎　南無阿彌陀佛.docx");
+                    //ImproveGJcoolOCRMemoDoc.ActiveWindow.Selection.EndKey(Microsoft.Office.Interop.Word.WdUnits.wdStory);
 
-
-                //-2146823683：此方法或屬性無法使用，因為此命令無法在閱讀中使用。
-                if (ImproveGJcoolOCRMemoDoc.ActiveWindow.View.ReadingLayout)//若是閱讀模式
-                    ImproveGJcoolOCRMemoDoc.ActiveWindow.View.ReadingLayout = false;
-                ImproveGJcoolOCRMemoDoc.ActiveWindow.Selection.EndKey(Microsoft.Office.Interop.Word.WdUnits.wdStory);
+                });
+                taskOpeningDocument.Wait();
+            }
+            else
+            {
+                string fn = string.Empty;
                 try
                 {
-                    string lnk = GetPageUrlKeywordLink(imporvement, url);
-                    if (lnk == string.Empty)
-                    {
-                        //if (!tb.Focused) tb.Focus();
-                        lnk = GetPageUrlKeywordLink(imporvement, url);
-                    }
-                    if (ImproveGJcoolOCRMemoDoc.Content.Text.IndexOf(lnk + Environment.NewLine.Substring(0, 1)) == -1)
-                    {
-                        imporvement += ("\t" + lnk);
-                        try
-                        {
-                            ImproveGJcoolOCRMemoDoc.Range().InsertAfter(imporvement + Environment.NewLine);
-                        }
-                        catch (Exception)
-                        {
-                            return;
-                        }
-                        try
-                        {
-                            ImproveGJcoolOCRMemoDoc.ActiveWindow.ScrollIntoView(ImproveGJcoolOCRMemoDoc.Range(), false);
-                        }
-                        catch (Exception)
-                        {
-                            return;
-                        }
-                        ImproveGJcoolOCRMemoDoc.Save();
-                        ImproveGJcoolOCRMemoDoc.Activate();
-                        //ImproveGJcoolOCRMemoDoc.Application.Activate();
-                        //if (ImproveGJcoolOCRMemoDoc.Application.WindowState == Microsoft.Office.Interop.Word.WdWindowState.wdWindowStateMinimize)
-                        //    ImproveGJcoolOCRMemoDoc.Application.WindowState = Microsoft.Office.Interop.Word.WdWindowState.wdWindowStateNormal;
-                        //Thread.Sleep(1000);
-                        //ImproveGJcoolOCRMemoDoc.Application.WindowState = Microsoft.Office.Interop.Word.WdWindowState.wdWindowStateMinimize;
-                        Form1.playSound(Form1.soundLike.done, true);
-                    }
-                    else
-                        Form1.playSound(Form1.soundLike.info, true);
+                    fn = ImproveGJcoolOCRMemoDoc.Name;
                 }
                 catch (Exception)
                 {
                     ImproveGJcoolOCRMemoDoc = null;
                     goto retry;
                 }
-                //    });
-                //}
+                if (!fn.StartsWith(preName))
+                {
+                    Microsoft.Office.Interop.Word.Application wordapp = ImproveGJcoolOCRMemoDoc.Application;
+                    ImproveGJcoolOCRMemoDoc.Close(Microsoft.Office.Interop.Word.WdSaveOptions.wdDoNotSaveChanges);
+                    ImproveGJcoolOCRMemoDoc = wordapp.Documents.Open(f);
+                }
             }
 
-
-            /// <summary>
-            /// 作為Selenium發生"no such window: target window already closed"例外情形的處理函式
-            /// </summary>
-            internal static void NoSuchWindowErrHandler()
+            while (ImproveGJcoolOCRMemoDoc == null)
             {
-                Form1.playSound(Form1.soundLike.error, true);
+                taskOpeningDocument.Wait();
+            }
 
-                if (IsWindowHandleValid(driver, LastValidWindow))
-                    driver.SwitchTo().Window(LastValidWindow);
-                else
+        reView:
+            try
+            {
+                //-2146823683：此方法或屬性無法使用，因為此命令無法在閱讀中使用。
+                if (ImproveGJcoolOCRMemoDoc.ActiveWindow.View.ReadingLayout)//若是閱讀模式
+                    ImproveGJcoolOCRMemoDoc.ActiveWindow.View.ReadingLayout = false;
+                ImproveGJcoolOCRMemoDoc.ActiveWindow.Selection.EndKey(Microsoft.Office.Interop.Word.WdUnits.wdStory);
+
+            }
+            catch (Exception ex)
+            {
+                switch (ex.HResult)
+                {
+                    case -2147417846:
+                        if (ex.Message.StartsWith("訊息篩選器顯示應用程式正在忙碌中。"))//訊息篩選器顯示應用程式正在忙碌中。 (發生例外狀況於 HRESULT: 0x8001010A (RPC_E_SERVERCALL_RETRYLATER))
+                        {
+                            ImproveGJcoolOCRMemoDoc.Application.Activate();
+                            Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("請先處理完Word的訊息再按「確定」繼續！");
+                            Application.DoEvents();
+                            goto reView;
+                        }
+                        else
+                            goto default;
+                    default:
+                        Console.WriteLine(ex.HResult + ex.Message);
+                        Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
+                        break;
+                }
+            }
+            try
+            {
+                string lnk = GetPageUrlKeywordLink(imporvement, url);
+                if (lnk == string.Empty)
+                {
+                    //if (!tb.Focused) tb.Focus();
+                    lnk = GetPageUrlKeywordLink(imporvement, url);
+                }
+                if (ImproveGJcoolOCRMemoDoc.Content.Text.IndexOf(lnk + Environment.NewLine.Substring(0, 1)) == -1)
+                {
+                    imporvement += ("\t" + lnk);
                     try
                     {
-                        Form1.ResetLastValidWindow();
+                        ImproveGJcoolOCRMemoDoc.Range().InsertAfter(imporvement + Environment.NewLine);
                     }
                     catch (Exception)
                     {
-                        try
-                        {
-                            driver.SwitchTo().NewWindow(WindowType.Tab);
-                        }
-                        catch (Exception ex)
-                        {
-                            try
-                            {
-                                Debugger.Break();
-                                killchromedriverFromHere();
-                                killProcesses(new string[] { "chrome" });
-                                driver = DriverNew();
-
-                            }
-                            catch (Exception)
-                            {
-                                Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
-                                throw;
-                            }
-                        }
-
+                        return;
                     }
-            }
-
-            /// <summary>
-            /// /// 作為Selenium發生"ChromeDriver only supports characters in the BMP"例外情形的處理函式
-            /// -2146233088: ChromeDriver only supports characters in the BMP
-            /// </summary>
-            /// <param name="iwe">要操作的網頁元件</param>
-            /// <param name="clipboardSetText">要貼上的文字（原本Sendkeys要送的按鍵）</param>
-            internal static void ChromeDriverOnlySupportsCharactersBMP(IWebElement iwe, string clipboardSetText)
-            {
-                //Form1.playSound(Form1.soundLike.error, true);
-                if (clipboardSetText == string.Empty) return;
-                Clipboard.SetText(clipboardSetText);
-                iwe.SendKeys(OpenQA.Selenium.Keys.Shift + OpenQA.Selenium.Keys.Insert);//改成貼上
-
-            }
-
-            /// <summary>
-            /// 查找《字統網》https://zi.tools/
-            /// </summary>
-            /// <param name="x">要查找的單字</param>
-            /// <returns>執行無誤則傳回true</returns>
-            public static bool LookupZitools(string x)
-            {
-                StringInfo si = new StringInfo(x);
-                if (si.LengthInTextElements != 1) return false;
-                retry:
-                try
-                {
-                    LastValidWindow = driver.CurrentWindowHandle;
-                    openNewTabWindow(OpenQA.Selenium.WindowType.Tab);
-                    driver.Navigate().GoToUrl("https://zi.tools/zi/" + x);
-
-                    //點擊"Relatives 相關字" .查詢《字統網》多是為找系統有無該異體字，故今改寫為查詢後在頁面尋找「異寫字」的功能，以利跳到該區塊 20240819
-                    //DateTime dt = DateTime.Now;
-                    IWebElement iwe = null;
-                    //while (true)
-                    //{
-                    iwe = waitFindWebElementBySelector_ToBeClickable("#mainContent > span > div.content > div > div.sidebar_navigation > div > div:nth-child(11)", 4);
-                    //if (iwe != null ||
-                    //DateTime.Now.Subtract(dt).TotalSeconds > 10) break;
-                    //}
-                    iwe?.Click();//當DateTime.Now.Subtract(dt).TotalSeconds > 10) break; 時需要 iwe? 會是null值
-
-                }
-                catch (Exception ex)
-                {
-                    if (ex.HResult == -2146233088)
-                    {
-                        if (ex.Message.StartsWith("no such window: target window already closed"))
-                        {
-                            NoSuchWindowErrHandler();
-                            goto retry;
-                        }
-                        else if (ex.Message.StartsWith("An unknown exception was encountered sending an HTTP request to the remote WebDriver server for URL "))
-                        {
-                            MessageBox.Show("請關閉Chrome瀏覽器，並用本程式重新啟動 Chrome瀏覽器", "", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
-                            return false;
-                        }
-                        else
-                        {
-                            MessageBox.Show(ex.HResult + ex.Message, "", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
-                        }
-                    }
-                    return false;
-                }
-                if (!SetFocusOnWebPageBody()) return false;
-
-                return true;
-            }
-
-            /// <summary>
-            /// 將系統焦點移到網頁本體
-            /// </summary>
-            /// <return>失敗則傳回false</return>
-            public static bool SetFocusOnWebPageBody()
-            {
-                try
-                {
-                    //焦點移到瀏覽器（離開預設的網址列）
-                    driver.SwitchTo().Window(driver.CurrentWindowHandle);
-
-                    //// 使用 JavaScript 將焦點移到網頁本體 20240821 Copilot大菩薩：您說得對，JavaScript 無法控制到 Chrome 瀏覽器的外殼。可以嘗試使用 Actions 類來模擬按鍵操作，將焦點移到網頁本體。
-                    //((IJavaScriptExecutor)driver).ExecuteScript("window.focus();");
-                    // 使用 Actions 類將焦點移到網頁本體
-                    //Actions actions = new Actions(driver);
-                    //actions.SendKeys(OpenQA.Selenium.Keys.Escape).Perform();
-                    // 使用 SendKeys 將焦點移到網頁本體
-                    //SendKeys.SendWait("{esc}");
-                    //// 使用 Actions 類模擬滑鼠點擊操作
-                    //Actions actions = new Actions(driver);
-                    //actions.MoveToElement(driver.FindElement(By.TagName("body"))).Click().Perform();
-                    // 使用 Windows API 將焦點移到網頁本體 20240821:Selenium 網頁焦點問題解決方法:https://sl.bing.net/TU0iPVtD7k
-                    //BringToFront("chrome");
-                    IntPtr hWnd = GetForegroundWindow();
-                    SetForegroundWindow(hWnd);
-                    //SendKeys.SendWait("{esc}");//會誤送到Form1主表單裡
-                    SendKeys.SendWait("^{F6}");
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show(ex.HResult + ex.Message, "", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
-                    return false;
-                }
-                return true;
-            }
-
-            /// <summary>
-            /// 查找《漢語大詞典》。最後會將結果網址複製到剪貼簿備用。如果有其他複製項目，可開啟剪貼簿檢視器 Win + v 以選用        
-            /// </summary>
-            /// <param name="x">要查找的單字</param>
-            /// <returns>傳回結果網址。找不到或執行有誤傳回null</returns>
-            public static string LookupHYDCD(string x)
-            {// 20240817 creedit with Gemini大菩薩：程式碼評析與改進建議 ： https://g.co/gemini/share/3f1f65fd36e0 (這個建議蠻好的，有空要再仔細看看。感恩感恩　讚歎讚歎　Gemini大菩薩　南無阿彌陀佛）
-                StringInfo si = new StringInfo(x);
-                if (si.LengthInTextElements < 2) return null;
-                string url = "https://ivantsoi.myds.me/web/hydcd/search.html", urlResult = null;
-                IWebElement iwe;
-            retry:
-                try
-                {
-                    LastValidWindow = driver.CurrentWindowHandle;
-                    openNewTabWindow(OpenQA.Selenium.WindowType.Tab);
-                    driver.Navigate().GoToUrl(url);
-                    Clipboard.SetText(x);
-                    //輸入「詞目」方塊（#SearchBox；name="T1"），再按下Enter鍵
-                    iwe = waitFindWebElementBySelector_ToBeClickable("#SearchBox");
-                    if (iwe == null) return null;
-                    //Console.WriteLine(iwe.TagName + Environment.NewLine + iwe.Text + Environment.NewLine+ iwe.GetAttribute("value"));
-                    iwe.SendKeys(OpenQA.Selenium.Keys.Shift + OpenQA.Selenium.Keys.Insert);
-                    iwe.SendKeys(OpenQA.Selenium.Keys.Enter);
-                    //找不到時
-                    iwe = waitFindWebElementBySelector_ToBeClickable("#SearchResult");
-                    if (iwe != null)
-                    {
-                        Console.WriteLine(iwe.GetAttribute("textContent"));
-                        if (iwe.GetAttribute("textContent").StartsWith("抱歉，無此詞語。"))
-                            return null;
-                        else
-                            iwe.Click();
-                    }
-                    else
-                    {
-                        iwe = waitFindWebElementBySelector_ToBeClickable("#SearchResult > p > a > font");//ex:守真
-                                                                                                         //iwe = waitFindWebElementBySelector_ToBeClickable("#SearchResult > p > a");//ex:總第 4709 頁，第三卷第 1303 頁
-                        if (iwe != null)
-                        {
-                            iwe.Click();
-                        }
-                    }
-                    driver.SwitchTo().Window(driver.WindowHandles.Last());
-                    urlResult = driver.Url;
-                }
-                catch (Exception ex)
-                {
-                    if (ex.HResult == -2146233088)
-                    {
-                        if (ex.Message.StartsWith("no such window: target window already closed"))
-                        {
-                            NoSuchWindowErrHandler();
-                            //Form1.playSound(Form1.soundLike.error, true);
-                            //if (IsWindowHandleValid(driver, LastValidWindow))
-                            //    driver.SwitchTo().Window(LastValidWindow);
-                            //else
-                            //    Form1.ResetLastValidWindow();
-                            goto retry;
-                        }
-                        else
-                        {
-                            Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
-                        }
-                    }
-                    return null;
-                }
-                Clipboard.SetText(urlResult);
-                return urlResult;
-            }
-            /// <summary>
-            /// 查找《異體字字典》。最後會將結果網址複製到剪貼簿備用。如果有其他複製項目，可開啟剪貼簿檢視器 Win + v 以選用        
-            /// </summary>
-            /// <param name="x">要查找的單字</param>
-            /// <returns>傳回查詢字串及結果網址。執行有誤則二者均傳回null</returns>
-            //public static (string urlSearch, string urlResult) LookupDictionary_of_ChineseCharacterVariants(string x)
-            public static Tuple<string, string> LookupDictionary_of_ChineseCharacterVariants(string x)
-            {// 20240817 creedit with Gemini大菩薩：程式碼評析與改進建議 ： https://g.co/gemini/share/3f1f65fd36e0 (這個建議蠻好的，有空要再仔細看看。感恩感恩　讚歎讚歎　Gemini大菩薩　南無阿彌陀佛）
-                StringInfo si = new StringInfo(x);
-                Tuple<string, string> tp = new Tuple<string, string>(null, null);
-                if (si.LengthInTextElements != 1) return tp;//(null, null);
-                string url = "https://dict.variants.moe.edu.tw/search.jsp?QTP=0&WORD="
-                    + EncodedStringURL(x)
-                     + "#searchL";
-                IWebElement iwe;
-            retry:
-                try
-                {
-                    LastValidWindow = driver.CurrentWindowHandle;
-                    openNewTabWindow(OpenQA.Selenium.WindowType.Tab);
-                    driver.Navigate().GoToUrl(url);
-                    //driver.Navigate().GoToUrl("https://dict.variants.moe.edu.tw/");
-                    //Clipboard.SetText(x);
-                    ////輸入「快速搜尋 ariaLabel 」方塊，再按下Enter鍵
-                    //iwe = waitFindWebElementBySelector_ToBeClickable("#header > div > flex > div:nth-child(3) > div.quick > form > input[type=text]:nth-child(2)");
-                    //if (iwe == null) return null;
-                    //iwe.SendKeys(OpenQA.Selenium.Keys.Shift + OpenQA.Selenium.Keys.Insert);
-                    //iwe.SendKeys(OpenQA.Selenium.Keys.Enter);
-                    ////網址中還是看得出指令的：https://dict.variants.moe.edu.tw/search.jsp?QTP=0&WORD=%F0%A4%94%AB#searchL 故今改成上式
-                }
-                catch (Exception ex)
-                {
-                    if (ex.HResult == -2146233088)
-                    {
-                        if (ex.Message.StartsWith("no such window: target window already closed"))
-                        {
-                            NoSuchWindowErrHandler();
-                            //Form1.playSound(Form1.soundLike.error, true);
-                            //if (IsWindowHandleValid(driver, LastValidWindow))
-                            //    driver.SwitchTo().Window(LastValidWindow);
-                            //else
-                            //    Form1.ResetLastValidWindow();
-                            goto retry;
-                        }
-                        else
-                        {
-                            Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
-                        }
-                    }
-                    return tp;
-                }
-                string urlResult = null;
-                try
-                {
-                    //查詢結果：正文 0 字，附收字 0 字
-                    iwe = waitFindWebElementBySelector_ToBeClickable("body > main > div > flex > div:nth-child(1)");
-                    if (iwe != null)
-                    {
-                        if (!iwe.GetAttribute("textContent").EndsWith("查詢結果：正文 0 字，附收字 0 字"))//[ 𪢨 ]， 查詢結果：正文 0 字，附收字 0 字
-                                                                                             //[ 襳 ]， 查詢結果：正文 2 字，附收字 0 字
-                        {
-                            urlResult = driver.Url;
-                            Clipboard.SetText(urlResult);
-                        }
-                    }
-                    else
-                    {
-                        urlResult = driver.Url;
-                        Clipboard.SetText(urlResult);
-                    }
-                }
-                catch (Exception)
-                {
-                }
-                //return driver.Url;
-                return new Tuple<string, string>(url, urlResult);
-            }
-            /// <summary>
-            /// 查找《國語辭典》。最後會將結果網址複製到剪貼簿備用。如果有其他複製項目，可開啟剪貼簿檢視器 Win + v 以選用        
-            /// </summary>
-            /// <param name="x">要查找的字詞</param>
-            /// <returns>傳回查詢字串及結果網址。執行有誤則二者均傳回null</returns>
-            //public static (string urlSearch, string urlResult) LookupDictRevised(string x)
-            public static Tuple<string, string> LookupDictRevised(string x)
-            {// 20240817 creedit with Gemini大菩薩：程式碼評析與改進建議 ： https://g.co/gemini/share/3f1f65fd36e0 (這個建議蠻好的，有空要再仔細看看。感恩感恩　讚歎讚歎　Gemini大菩薩　南無阿彌陀佛）
-                StringInfo si = new StringInfo(x); Tuple<string, string> tp = new Tuple<string, string>(null, null);
-                if (si.LengthInTextElements < 1) return tp;
-                string url = "https://dict.revised.moe.edu.tw/search.jsp?md=1&word="
-                    + EncodedStringURL(x)
-                    + "&qMd=0&qCol=1";
-                IWebElement iwe;
-            retry:
-                try
-                {
-                    LastValidWindow = driver.CurrentWindowHandle;
-                    openNewTabWindow(OpenQA.Selenium.WindowType.Tab);
-                    driver.Navigate().GoToUrl(url);
-                    //driver.Navigate().GoToUrl("https://dict.variants.moe.edu.tw/");
-                    //Clipboard.SetText(x);
-                    ////輸入「快速搜尋 ariaLabel 」方塊，再按下Enter鍵
-                    //iwe = waitFindWebElementBySelector_ToBeClickable("#header > div > flex > div:nth-child(3) > div.quick > form > input[type=text]:nth-child(2)");
-                    //if (iwe == null) return null;
-                    //iwe.SendKeys(OpenQA.Selenium.Keys.Shift + OpenQA.Selenium.Keys.Insert);
-                    //iwe.SendKeys(OpenQA.Selenium.Keys.Enter);
-                    ////網址中還是看得出指令的：https://dict.variants.moe.edu.tw/search.jsp?QTP=0&WORD=%F0%A4%94%AB#searchL 故今改成上式
-                }
-                catch (Exception ex)
-                {
-                    if (ex.HResult == -2146233088)
-                    {
-                        if (ex.Message.StartsWith("no such window: target window already closed"))
-                        {
-                            //Form1.playSound(Form1.soundLike.error, true);
-                            //if (IsWindowHandleValid(driver, LastValidWindow))
-                            //    driver.SwitchTo().Window(LastValidWindow);
-                            //else
-                            //    Form1.ResetLastValidWindow();
-                            NoSuchWindowErrHandler();
-                            goto retry;
-                        }
-                        else
-                        {
-                            Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
-                        }
-                    }
-                    return tp;
-                }
-                string urlResult = null;
-                try
-                {
-                    //查無資料
-                    iwe = waitFindWebElementBySelector_ToBeClickable("#searchL > tbody > tr > td");
-                    if (iwe == null)
-                    {//if(iwe.GetAttribute("textContent") == "查無資料")
-                        urlResult = driver.Url;
-                        Clipboard.SetText(urlResult);
-                    }
-                }
-                catch (Exception)
-                {
-                }
-                //return driver.Url;
-                return new Tuple<string, string>(url, urlResult);
-            }
-
-            /// <summary>
-            /// 查找《康熙字典網上版》https://www.kangxizidian.com
-            /// </summary>
-            /// <param name="x">要查找的單字</param>
-            /// <returns>執行無誤則傳回true</returns>
-            public static bool LookupKangxizidian(string x)
-            {
-                StringInfo si = new StringInfo(x);
-                if (si.LengthInTextElements != 1) return false;
-                retry:
-                try
-                {
-                    LastValidWindow = driver.CurrentWindowHandle;
-                    openNewTabWindow(OpenQA.Selenium.WindowType.Tab);
-                    driver.Navigate().GoToUrl("https://www.kangxizidian.com/search/index.php?stype=Word"
-                        + "&sword=" + x);// + "&detail=n" );
-                }
-                catch (Exception ex)
-                {
-                    if (ex.HResult == -2146233088)
-                    {
-                        if (ex.Message.StartsWith("no such window: target window already closed"))
-                        {
-                            NoSuchWindowErrHandler();
-                            goto retry;
-                        }
-                        else
-                        {
-                            Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
-                        }
-                    }
-                    return false;
-                }
-                return true;
-            }
-
-            /// <summary>
-            /// 0240817Gemini大菩薩：C# 字串網址編碼 https://g.co/gemini/share/e404139f0e17
-            /// </summary>
-            /// <param name="originalString"></param>
-            /// <returns></returns>
-            public static string EncodedStringURL(string originalString)
-            {
-                //string originalString = "這是一個包含中文和特殊符號的字串！&^%";
-                //string encodedString = HttpUtility.UrlEncode(originalString);
-                return HttpUtility.UrlEncode(originalString);
-
-                //Console.WriteLine("原始字串：{0}", originalString);
-                //    Console.WriteLine("編碼後字串：{0}", encodedString);
-            }
-
-            /// <summary>
-            /// 取得目前Chrome瀏覽器是否在最大化的狀態
-            /// 20240201 Copilot大菩薩：檢查 Chrome 瀏覽器是否已最大化：
-            /// 在 Selenium WebDriver 中，並沒有直接的方法可以檢查瀏覽器是否已最大化。但你可以透過比較當前視窗的尺寸和螢幕的解析度來間接判斷。以下是一個可能的 C# 程式碼片段：
-            /// 這個 IsBrowserMaximized 函數會回傳一個布林值，表示瀏覽器是否已最大化。請注意，這個方法可能無法在所有情況下正確運作，例如多螢幕設定或者視窗的尺寸與螢幕解析度不完全相同的情況。此外，這個方法需要參考 System.Windows.Forms，所以你需要在你的專案中加入這個參考。如果你的程式是在 .NET Core 或 .NET 5+ 環境下執行，你可能需要改用其他方式來取得螢幕的解析度。希望這個資訊對你有所幫助！
-            /// </summary>
-            /// <param name="driver"></param>
-            /// <returns></returns>
-            public static bool IsBrowserMaximized(ChromeDriver driver)
-            {
-                Size windowSize = driver.Manage().Window.Size;
-                Size workingAreaSize = Screen.PrimaryScreen.WorkingArea.Size;
-
-                return windowSize.Equals(workingAreaSize);
-            }
-
-            /// <summary>       
-            /// 20240430 Copilot大菩薩：下載網頁圖片的錯誤處理：
-            /// 以下是一個使用 Selenium 來模擬「另存圖片」的基本範例。請注意，這個範例需要使用到 Actions 類別來模擬鼠標右鍵點擊和選擇「另存圖片」的選項，並且可能需要根據您的瀏覽器和操作系統的具體情況來調整。
-            /// 段程式碼會打開圖片的網頁，然後模擬鼠標右鍵點擊圖片，並選擇「另存圖片」的選項。然而，這只是一個基本的範例，並且可能需要根據您的具體情況來調整。例如，處理「另存為」對話框可能需要使用到其他的工具或方法，例如 AutoIt 或 SendKeys。
-            /// </summary>
-            /// <param name="imageUrl">圖片所在網址</param>
-            /// <param name="downloadImgFullName"></param>
-            /// <param name="selectedInExplorer"></param>
-            /// <returns></returns>
-            internal static bool DownloadImage(string imageUrl, string downloadImgFullName, bool selectedInExplorer = false)
-            {
-                //var driver = new ChromeDriver();
-                openNewTabWindow();
-            reGoto:
-                try
-                {
-                    driver.Navigate().GoToUrl(imageUrl);
-                }
-                catch (Exception ex)
-                {
-                    switch (ex.HResult)
-                    {
-                        case -2146233088://The HTTP request to the remote WebDriver server for URL http://localhost:5908/session/0b71d83809d531eca84ae9d77e0b4888/url timed out after 30.5 seconds.
-                            if (ex.Message.EndsWith(" timed out after 30.5 seconds."))
-                            {
-                                Thread.Sleep(1500);
-                                if (Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("下載書圖的網頁有問題，是否繼續？" +
-                                    Environment.NewLine + Environment.NewLine + "請確認網頁沒問題再按確定，否則請按取消。感恩感恩　南無阿彌陀佛") == DialogResult.Cancel)
-                                    return false;
-                                goto reGoto;
-                            }
-                            else
-                                Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
-                            break;
-                        default:
-                            Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
-                            return false;
-                    }
-                }
-                BringToFront("chrome");
-                try
-                {
-                    driver.SwitchTo().Window(driver.CurrentWindowHandle);
-                }
-                catch (Exception)
-                {
-                    throw;
-                }
-                //IWebElement iw = waitFindWebElementBySelector_ToBeClickable("body > img");
-                //Cursor.Position = (Point)iw?.Location;
-                ////if (iw != null)  clickCopybutton_GjcoolFastExperience(iw.Location); 
-
-                try
-                {
-                    // 找到圖片元素
-                    var imageElement = driver.FindElement(By.TagName("img"));
-
-                    // 建立 Actions 物件
-                    var action = new Actions(driver);
-
-                    // 模擬鼠標右鍵點擊圖片
-
-                    action.ContextClick(imageElement).Perform();
-
-                    // 模擬按下「V」鍵，選擇「另存圖片」的選項
-                    // 注意：這可能需要根據您的瀏覽器和語言設定來調整
-                    action.SendKeys("v").Perform();
-                    //SendKeys.Send("{v 2}");
-                    SendKeys.SendWait("v");
-
-                    // TODO: 處理彈出的「另存為」對話框，輸入文件名並點擊「保存」
-                    // 這可能需要使用到其他的工具或方法，例如 AutoIt 或 SendKeys
-                    Clipboard.Clear();
                     try
                     {
-                        Clipboard.SetText(downloadImgFullName);
+                        ImproveGJcoolOCRMemoDoc.ActiveWindow.ScrollIntoView(ImproveGJcoolOCRMemoDoc.Range(), false);
                     }
                     catch (Exception)
                     {
+                        return;
                     }
-                    //Thread.Sleep(1190 + (
-                    Thread.Sleep(1900 + (
-                        800 + Extend_the_wait_time_for_the_Open_Old_File_dialog_box_to_appear_Millisecond < 0 ? 0 : Extend_the_wait_time_for_the_Open_Old_File_dialog_box_to_appear_Millisecond));//最小值（須在重開機後或系統最小負載時）（連「開啟」舊檔之視窗也看不見，即可完成）
-                                                                                                                                                                                                  //Thread.Sleep(1200);
-                                                                                                                                                                                                  //Thread.Sleep(500);            
-
-
-                    //輸入：檔案名稱 //SendKeys.Send(downloadImgFullName);
-                    SendKeys.SendWait("+{Insert}~");//or "^v"
-                                                    //Thread.Sleep(200);
-                                                    //SendKeys.SendWait("{ENTER}");
-                                                    //SendKeys.SendWait("%s");
-                                                    //Clipboard.Clear();
-
-                    //Thread.Sleep(300);
-                }
-                catch (Exception)
-                {
-                    return false;
-                }
-
-                try
-                {
-                    driver.Close();
-                }
-                catch (Exception)
-                {
-                    driver.SwitchTo().Window(LastValidWindow);//如果沒有切回關閉前的分頁，再打算開新分頁時Selenium就會出錯！20240720
-                    return false;
-                }
-                driver.SwitchTo().Window(LastValidWindow);//如果沒有切回關閉前的分頁，再打算開新分頁時Selenium就會出錯！20240720
-
-                ////等待書圖檔下載完成
-                //DateTime dt = DateTime.Now;
-                //while (!File.Exists(downloadImgFullName))
-                //{
-                //    if (DateTime.Now.Subtract(dt).TotalSeconds > 28) return false;
-                //}
-                return true;
-            }
-
-            /// <summary>
-            /// 在需要連續輸入截圖時 。按下Ctrl並按下滑鼠下一頁鍵時。今因《四庫全書》本《本草綱目》而設 20240510
-            /// 須先畫出之截圖區域，然後按下Ctrl並按下滑鼠下一頁鍵時，會自動按下頁面中的[Input picture]連結並再按下 Replace page with this data 按鈕
-            /// </summary>
-            /// <returns>失敗則傳回false</returns>
-            internal static bool Input_picture()
-            {
-                //按下頁面中的[Input picture]連結
-
-                IWebElement iwe = waitFindWebElementBySelector_ToBeClickable("#editor > a:nth-child(5)");
-                if (iwe != null)
-                {
-                    iwe.Click();
-                    //再按下 Replace page with this data 按鈕
-                    iwe = waitFindWebElementBySelector_ToBeClickable("#pictureinput > input[type=submit]");
-                    if (iwe != null)
-                        iwe.Click();
-                    else
-                    {
-                        Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("頁面的【Replace page with this data 按鈕】沒找到。");
-                        return false;
-                    }
-
+                    ImproveGJcoolOCRMemoDoc.Save();
+                    ImproveGJcoolOCRMemoDoc.Activate();
+                    //ImproveGJcoolOCRMemoDoc.Application.Activate();
+                    //if (ImproveGJcoolOCRMemoDoc.Application.WindowState == Microsoft.Office.Interop.Word.WdWindowState.wdWindowStateMinimize)
+                    //    ImproveGJcoolOCRMemoDoc.Application.WindowState = Microsoft.Office.Interop.Word.WdWindowState.wdWindowStateNormal;
+                    //Thread.Sleep(1000);
+                    //ImproveGJcoolOCRMemoDoc.Application.WindowState = Microsoft.Office.Interop.Word.WdWindowState.wdWindowStateMinimize;
+                    Form1.playSound(Form1.soundLike.done, true);
                 }
                 else
-                {
-                    Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("頁面的【[Input picture]連結元件】沒找到。");
-                    return false;
-                }
-                return true;
+                    Form1.playSound(Form1.soundLike.info, true);
             }
+            catch (Exception)
+            {
+                ImproveGJcoolOCRMemoDoc = null;
+                goto retry;
+            }
+            //    });
+            //}
+        }
 
-            /// <summary>
-            /// 將指定的程式視窗置於作業系統的最前面、最上端 
-            /// Copilot大菩薩 20240704 控制 Chrome 瀏覽器在 C# Windows.Forms 中:
-            /// </summary>
-            /// <param name="processName">所指定的視窗</param>
-            public static void BringToFront(string processName)
-            {
-                Process[] processes = Process.GetProcessesByName(processName);
-                foreach (Process proc in processes)
-                {
-                    // The second parameter 9 means "restore" and "activate" the window.
-                    //ShowWindow(proc.MainWindowHandle, 1);//Copilot大菩薩：在 ShowWindow 函數中，第二個參數是一個命令，用於指定視窗應該如何顯示。這個參數的值為 9 時，表示 “恢復” 和 “啟動” 視窗。如果視窗最小化或最大化，系統會將其恢復到原來的大小和位置。然後，系統會將該視窗設置為前景視窗。
-                    //在您的情況下，我們不希望改變視窗的大小和位置，所以我們將該參數改為 1，這表示只 “啟動” 視窗，不改變其大小和位置。
-                    //在這段程式碼中，我們完全移除了 ShowWindow 函數的調用，只保留了 SetForegroundWindow 函數，這樣就不會改變視窗的大小和位置了。
-                    SetForegroundWindow(proc.MainWindowHandle);
-                }
-            }
-            /// <summary>
-            /// 檢測 driver 是否失效/無效或是null 20241008
-            /// </summary>
-            /// <param name="driver"></param>
-            /// <returns></returns>
-            internal static bool IsDriverInvalid()
-            {
+
+        /// <summary>
+        /// 作為Selenium發生"no such window: target window already closed"例外情形的處理函式
+        /// </summary>
+        internal static void NoSuchWindowErrHandler()
+        {
+            Form1.playSound(Form1.soundLike.error, true);
+
+            if (IsWindowHandleValid(driver, LastValidWindow))
+                driver.SwitchTo().Window(LastValidWindow);
+            else
                 try
                 {
-                    if (driver == null)
-                    {
-                        Form1.browsrOPMode = Form1.BrowserOPMode.seleniumNew;
-                        DriverNew();
-
-                    }
-                    string url = driver.Url;
+                    Form1.ResetLastValidWindow();
                 }
                 catch (Exception)
                 {
-                    return true;
-                }
-                return false;
-            }
-            /// <summary>
-            /// 進行[《看典古籍·古籍全文檢索》](https://kandianguji.com/search_all) (d=dian 典) ，成功則傳回true。20241008
-            /// </summary>
-            /// <param name="searchTxt"></param>
-            /// <returns></returns>
-            public static bool KanDianGuJiSearchAll(string searchTxt)
-            {
-                bool exact = false;
-                const string url = "https://kandianguji.com/search_all";
-                if (DialogResult.OK == Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("是否要【精確檢索】？")) exact = true;
-                if (!IsDriverInvalid())
-                {
-                    LastValidWindow = driver.CurrentWindowHandle;
-                    //if (driver.Url != url) driver.Url = url;
-                }
-                //else
-                //{
-                try
-                {
-                    openNewTabWindow();
-                    GoToUrlandActivate(url, true);
-                }
-                catch (Exception)
-                {
-                    return false;
-                }
-                //}
-                IWebElement iwe = waitFindWebElementBySelector_ToBeClickable("#keyword");
-                if (iwe == null) return false;
-                SetIWebElementValueProperty(iwe, searchTxt);
-                //按下Enter是沒作用的
-                if (exact)
-                    iwe = waitFindWebElementBySelector_ToBeClickable("body > div > div > div.form-inline > button.btn.btn-info.btn-lg.ml-2");
-                else
-                    iwe = waitFindWebElementBySelector_ToBeClickable("body > div > div > div.form-inline > button.btn.btn-danger.btn-lg");
-                if (iwe == null) return false;
-                iwe.Click();
-                return true;
-            }
-            /// <summary>
-            /// 檢索《漢籍全文資料庫》，成功則傳回true。20241008
-            /// Alt + h
-            /// </summary>
-            /// <param name="searchTxt"></param>
-            /// <returns></returns>
-            public static bool HanchiSearch(string searchTxt)
-            {
-                if (driver == null) return false;
-                bool free = true, inside = false;
-                if (!IsDriverInvalid())
-                {
-                    LastValidWindow = driver.CurrentWindowHandle;
-                    ChromeSetFocus();
-                    if (!driver.Url.StartsWith("https://hanchi.ihp.sinica.edu.tw/"))
+                    try
                     {
-                        if (DialogResult.Cancel == Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("是否是【授權使用】？"))
-                            free = true;
-                        else
-                            inside = true;
+                        driver.SwitchTo().NewWindow(WindowType.Tab);
                     }
-                }
-                else
-                    if (DialogResult.Cancel == Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("是否是【授權使用】？")) free = true;
-
-                const string url = "https://hanchi.ihp.sinica.edu.tw/ihp/hanji.htm";
-
-                if (!IsDriverInvalid())
-                {
-                    if (!driver.Url.StartsWith("https://hanchi.ihp.sinica.edu.tw/"))
+                    catch (Exception ex)
                     {
                         try
                         {
-                            openNewTabWindow();
-                            GoToUrlandActivate(url, true);
+                            Debugger.Break();
+                            killchromedriverFromHere();
+                            killProcesses(new string[] { "chrome" });
+                            driver = DriverNew();
+
                         }
                         catch (Exception)
                         {
-                            return false;
+                            Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
+                            throw;
                         }
+                    }
+
+                }
+        }
+
+        /// <summary>
+        /// /// 作為Selenium發生"ChromeDriver only supports characters in the BMP"例外情形的處理函式
+        /// -2146233088: ChromeDriver only supports characters in the BMP
+        /// </summary>
+        /// <param name="iwe">要操作的網頁元件</param>
+        /// <param name="clipboardSetText">要貼上的文字（原本Sendkeys要送的按鍵）</param>
+        internal static void ChromeDriverOnlySupportsCharactersBMP(IWebElement iwe, string clipboardSetText)
+        {
+            //Form1.playSound(Form1.soundLike.error, true);
+            if (clipboardSetText == string.Empty) return;
+            Clipboard.SetText(clipboardSetText);
+            iwe.SendKeys(OpenQA.Selenium.Keys.Shift + OpenQA.Selenium.Keys.Insert);//改成貼上
+
+        }
+
+        /// <summary>
+        /// 查找《字統網》https://zi.tools/
+        /// </summary>
+        /// <param name="x">要查找的單字</param>
+        /// <returns>執行無誤則傳回true</returns>
+        public static bool LookupZitools(string x)
+        {
+            StringInfo si = new StringInfo(x);
+            if (si.LengthInTextElements != 1) return false;
+
+            retry:
+            try
+            {
+                if (!IsDriverInvalid())
+                    LastValidWindow = driver.CurrentWindowHandle;
+                else
+                {
+                    LastValidWindow = driver.WindowHandles.Last();
+                    Form1.playSound(Form1.soundLike.error, true);
+                }
+                openNewTabWindow(OpenQA.Selenium.WindowType.Tab);
+                driver.Navigate().GoToUrl("https://zi.tools/zi/" + x);
+
+                //點擊"Relatives 相關字" .查詢《字統網》多是為找系統有無該異體字，故今改寫為查詢後在頁面尋找「異寫字」的功能，以利跳到該區塊 20240819
+                //DateTime dt = DateTime.Now;
+                IWebElement iwe = null;
+                //while (true)
+                //{
+                iwe = waitFindWebElementBySelector_ToBeClickable("#mainContent > span > div.content > div > div.sidebar_navigation > div > div:nth-child(11)", 4);
+                //if (iwe != null ||
+                //DateTime.Now.Subtract(dt).TotalSeconds > 10) break;
+                //}
+                iwe?.Click();//當DateTime.Now.Subtract(dt).TotalSeconds > 10) break; 時需要 iwe? 會是null值
+
+            }
+            catch (Exception ex)
+            {
+                if (ex.HResult == -2146233088)
+                {
+                    if (ex.Message.StartsWith("no such window: target window already closed"))
+                    {
+                        NoSuchWindowErrHandler();
+                        goto retry;
+                    }
+                    else if (ex.Message.StartsWith("An unknown exception was encountered sending an HTTP request to the remote WebDriver server for URL "))
+                    {
+                        MessageBox.Show("請關閉Chrome瀏覽器，並用本程式重新啟動 Chrome瀏覽器", "", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
+                        return false;
                     }
                     else
                     {
-                        driver.Url = url;
+                        MessageBox.Show(ex.HResult + ex.Message, "", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
+                    }
+                }
+                return false;
+            }
+            if (!SetFocusOnWebPageBody())
+            {
+                driver.SwitchTo().Window(LastValidWindow);
+                return false;
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// 將系統焦點移到網頁本體
+        /// </summary>
+        /// <return>失敗則傳回false</return>
+        public static bool SetFocusOnWebPageBody()
+        {
+            try
+            {
+                //焦點移到瀏覽器（離開預設的網址列）
+                driver.SwitchTo().Window(driver.CurrentWindowHandle);
+
+                //// 使用 JavaScript 將焦點移到網頁本體 20240821 Copilot大菩薩：您說得對，JavaScript 無法控制到 Chrome 瀏覽器的外殼。可以嘗試使用 Actions 類來模擬按鍵操作，將焦點移到網頁本體。
+                //((IJavaScriptExecutor)driver).ExecuteScript("window.focus();");
+                // 使用 Actions 類將焦點移到網頁本體
+                //Actions actions = new Actions(driver);
+                //actions.SendKeys(OpenQA.Selenium.Keys.Escape).Perform();
+                // 使用 SendKeys 將焦點移到網頁本體
+                //SendKeys.SendWait("{esc}");
+                //// 使用 Actions 類模擬滑鼠點擊操作
+                //Actions actions = new Actions(driver);
+                //actions.MoveToElement(driver.FindElement(By.TagName("body"))).Click().Perform();
+                // 使用 Windows API 將焦點移到網頁本體 20240821:Selenium 網頁焦點問題解決方法:https://sl.bing.net/TU0iPVtD7k
+                //BringToFront("chrome");
+                IntPtr hWnd = GetForegroundWindow();
+                SetForegroundWindow(hWnd);
+                //SendKeys.SendWait("{esc}");//會誤送到Form1主表單裡
+                SendKeys.SendWait("^{F6}");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.HResult + ex.Message, "", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
+                return false;
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// 查找《漢語大詞典》。最後會將結果網址複製到剪貼簿備用。如果有其他複製項目，可開啟剪貼簿檢視器 Win + v 以選用        
+        /// </summary>
+        /// <param name="x">要查找的單字</param>
+        /// <returns>傳回結果網址。找不到或執行有誤傳回null</returns>
+        public static string LookupHYDCD(string x)
+        {// 20240817 creedit with Gemini大菩薩：程式碼評析與改進建議 ： https://g.co/gemini/share/3f1f65fd36e0 (這個建議蠻好的，有空要再仔細看看。感恩感恩　讚歎讚歎　Gemini大菩薩　南無阿彌陀佛）
+            StringInfo si = new StringInfo(x);
+            if (si.LengthInTextElements < 2) return null;
+            string url = "https://ivantsoi.myds.me/web/hydcd/search.html", urlResult = null;
+            IWebElement iwe;
+        retry:
+            try
+            {
+                LastValidWindow = driver.CurrentWindowHandle;
+                openNewTabWindow(OpenQA.Selenium.WindowType.Tab);
+                driver.Navigate().GoToUrl(url);
+                Clipboard.SetText(x);
+                //輸入「詞目」方塊（#SearchBox；name="T1"），再按下Enter鍵
+                iwe = waitFindWebElementBySelector_ToBeClickable("#SearchBox");
+                if (iwe == null) return null;
+                //Console.WriteLine(iwe.TagName + Environment.NewLine + iwe.Text + Environment.NewLine+ iwe.GetAttribute("value"));
+                iwe.SendKeys(OpenQA.Selenium.Keys.Shift + OpenQA.Selenium.Keys.Insert);
+                iwe.SendKeys(OpenQA.Selenium.Keys.Enter);
+                //找不到時
+                iwe = waitFindWebElementBySelector_ToBeClickable("#SearchResult");
+                if (iwe != null)
+                {
+                    Console.WriteLine(iwe.GetAttribute("textContent"));
+                    if (iwe.GetAttribute("textContent").StartsWith("抱歉，無此詞語。"))
+                        return null;
+                    else
+                        iwe.Click();
+                }
+                else
+                {
+                    iwe = waitFindWebElementBySelector_ToBeClickable("#SearchResult > p > a > font");//ex:守真
+                                                                                                     //iwe = waitFindWebElementBySelector_ToBeClickable("#SearchResult > p > a");//ex:總第 4709 頁，第三卷第 1303 頁
+                    if (iwe != null)
+                    {
+                        iwe.Click();
+                    }
+                }
+                driver.SwitchTo().Window(driver.WindowHandles.Last());
+                urlResult = driver.Url;
+            }
+            catch (Exception ex)
+            {
+                if (ex.HResult == -2146233088)
+                {
+                    if (ex.Message.StartsWith("no such window: target window already closed"))
+                    {
+                        NoSuchWindowErrHandler();
+                        //Form1.playSound(Form1.soundLike.error, true);
+                        //if (IsWindowHandleValid(driver, LastValidWindow))
+                        //    driver.SwitchTo().Window(LastValidWindow);
+                        //else
+                        //    Form1.ResetLastValidWindow();
+                        goto retry;
+                    }
+                    else
+                    {
+                        Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
+                    }
+                }
+                return null;
+            }
+            Clipboard.SetText(urlResult);
+            return urlResult;
+        }
+        /// <summary>
+        /// 查找《異體字字典》。最後會將結果網址複製到剪貼簿備用。如果有其他複製項目，可開啟剪貼簿檢視器 Win + v 以選用        
+        /// </summary>
+        /// <param name="x">要查找的單字</param>
+        /// <returns>傳回查詢字串及結果網址。執行有誤則二者均傳回null</returns>
+        //public static (string urlSearch, string urlResult) LookupDictionary_of_ChineseCharacterVariants(string x)
+        public static Tuple<string, string> LookupDictionary_of_ChineseCharacterVariants(string x)
+        {// 20240817 creedit with Gemini大菩薩：程式碼評析與改進建議 ： https://g.co/gemini/share/3f1f65fd36e0 (這個建議蠻好的，有空要再仔細看看。感恩感恩　讚歎讚歎　Gemini大菩薩　南無阿彌陀佛）
+            StringInfo si = new StringInfo(x);
+            Tuple<string, string> tp = new Tuple<string, string>(null, null);
+            if (si.LengthInTextElements != 1) return tp;//(null, null);
+            string url = "https://dict.variants.moe.edu.tw/search.jsp?QTP=0&WORD="
+                + EncodedStringURL(x)
+                 + "#searchL";
+            IWebElement iwe;
+        retry:
+            try
+            {
+                LastValidWindow = driver.CurrentWindowHandle;
+                openNewTabWindow(OpenQA.Selenium.WindowType.Tab);
+                driver.Navigate().GoToUrl(url);
+                //driver.Navigate().GoToUrl("https://dict.variants.moe.edu.tw/");
+                //Clipboard.SetText(x);
+                ////輸入「快速搜尋 ariaLabel 」方塊，再按下Enter鍵
+                //iwe = waitFindWebElementBySelector_ToBeClickable("#header > div > flex > div:nth-child(3) > div.quick > form > input[type=text]:nth-child(2)");
+                //if (iwe == null) return null;
+                //iwe.SendKeys(OpenQA.Selenium.Keys.Shift + OpenQA.Selenium.Keys.Insert);
+                //iwe.SendKeys(OpenQA.Selenium.Keys.Enter);
+                ////網址中還是看得出指令的：https://dict.variants.moe.edu.tw/search.jsp?QTP=0&WORD=%F0%A4%94%AB#searchL 故今改成上式
+            }
+            catch (Exception ex)
+            {
+                if (ex.HResult == -2146233088)
+                {
+                    if (ex.Message.StartsWith("no such window: target window already closed"))
+                    {
+                        NoSuchWindowErrHandler();
+                        //Form1.playSound(Form1.soundLike.error, true);
+                        //if (IsWindowHandleValid(driver, LastValidWindow))
+                        //    driver.SwitchTo().Window(LastValidWindow);
+                        //else
+                        //    Form1.ResetLastValidWindow();
+                        goto retry;
+                    }
+                    else
+                    {
+                        Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
+                    }
+                }
+                return tp;
+            }
+            string urlResult = null;
+            try
+            {
+                //查詢結果：正文 0 字，附收字 0 字
+                iwe = waitFindWebElementBySelector_ToBeClickable("body > main > div > flex > div:nth-child(1)");
+                if (iwe != null)
+                {
+                    if (!iwe.GetAttribute("textContent").EndsWith("查詢結果：正文 0 字，附收字 0 字"))//[ 𪢨 ]， 查詢結果：正文 0 字，附收字 0 字
+                                                                                         //[ 襳 ]， 查詢結果：正文 2 字，附收字 0 字
+                    {
+                        urlResult = driver.Url;
+                        Clipboard.SetText(urlResult);
                     }
                 }
                 else
+                {
+                    urlResult = driver.Url;
+                    Clipboard.SetText(urlResult);
+                }
+            }
+            catch (Exception)
+            {
+            }
+            //return driver.Url;
+            return new Tuple<string, string>(url, urlResult);
+        }
+        /// <summary>
+        /// 查找《國語辭典》。最後會將結果網址複製到剪貼簿備用。如果有其他複製項目，可開啟剪貼簿檢視器 Win + v 以選用        
+        /// </summary>
+        /// <param name="x">要查找的字詞</param>
+        /// <returns>傳回查詢字串及結果網址。執行有誤則二者均傳回null</returns>
+        //public static (string urlSearch, string urlResult) LookupDictRevised(string x)
+        public static Tuple<string, string> LookupDictRevised(string x)
+        {// 20240817 creedit with Gemini大菩薩：程式碼評析與改進建議 ： https://g.co/gemini/share/3f1f65fd36e0 (這個建議蠻好的，有空要再仔細看看。感恩感恩　讚歎讚歎　Gemini大菩薩　南無阿彌陀佛）
+            StringInfo si = new StringInfo(x); Tuple<string, string> tp = new Tuple<string, string>(null, null);
+            if (si.LengthInTextElements < 1) return tp;
+            string url = "https://dict.revised.moe.edu.tw/search.jsp?md=1&word="
+                + EncodedStringURL(x)
+                + "&qMd=0&qCol=1";
+            IWebElement iwe;
+        retry:
+            try
+            {
+                LastValidWindow = driver.CurrentWindowHandle;
+                openNewTabWindow(OpenQA.Selenium.WindowType.Tab);
+                driver.Navigate().GoToUrl(url);
+                //driver.Navigate().GoToUrl("https://dict.variants.moe.edu.tw/");
+                //Clipboard.SetText(x);
+                ////輸入「快速搜尋 ariaLabel 」方塊，再按下Enter鍵
+                //iwe = waitFindWebElementBySelector_ToBeClickable("#header > div > flex > div:nth-child(3) > div.quick > form > input[type=text]:nth-child(2)");
+                //if (iwe == null) return null;
+                //iwe.SendKeys(OpenQA.Selenium.Keys.Shift + OpenQA.Selenium.Keys.Insert);
+                //iwe.SendKeys(OpenQA.Selenium.Keys.Enter);
+                ////網址中還是看得出指令的：https://dict.variants.moe.edu.tw/search.jsp?QTP=0&WORD=%F0%A4%94%AB#searchL 故今改成上式
+            }
+            catch (Exception ex)
+            {
+                if (ex.HResult == -2146233088)
+                {
+                    if (ex.Message.StartsWith("no such window: target window already closed"))
+                    {
+                        //Form1.playSound(Form1.soundLike.error, true);
+                        //if (IsWindowHandleValid(driver, LastValidWindow))
+                        //    driver.SwitchTo().Window(LastValidWindow);
+                        //else
+                        //    Form1.ResetLastValidWindow();
+                        NoSuchWindowErrHandler();
+                        goto retry;
+                    }
+                    else
+                    {
+                        Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
+                    }
+                }
+                return tp;
+            }
+            string urlResult = null;
+            try
+            {
+                //查無資料
+                iwe = waitFindWebElementBySelector_ToBeClickable("#searchL > tbody > tr > td");
+                if (iwe == null)
+                {//if(iwe.GetAttribute("textContent") == "查無資料")
+                    urlResult = driver.Url;
+                    Clipboard.SetText(urlResult);
+                }
+            }
+            catch (Exception)
+            {
+            }
+            //return driver.Url;
+            return new Tuple<string, string>(url, urlResult);
+        }
+
+        /// <summary>
+        /// 查找《康熙字典網上版》https://www.kangxizidian.com
+        /// </summary>
+        /// <param name="x">要查找的單字</param>
+        /// <returns>執行無誤則傳回true</returns>
+        public static bool LookupKangxizidian(string x)
+        {
+            StringInfo si = new StringInfo(x);
+            if (si.LengthInTextElements != 1) return false;
+            retry:
+            try
+            {
+                LastValidWindow = driver.CurrentWindowHandle;
+                openNewTabWindow(OpenQA.Selenium.WindowType.Tab);
+                driver.Navigate().GoToUrl("https://www.kangxizidian.com/search/index.php?stype=Word"
+                    + "&sword=" + x);// + "&detail=n" );
+            }
+            catch (Exception ex)
+            {
+                if (ex.HResult == -2146233088)
+                {
+                    if (ex.Message.StartsWith("no such window: target window already closed"))
+                    {
+                        NoSuchWindowErrHandler();
+                        goto retry;
+                    }
+                    else
+                    {
+                        Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
+                    }
+                }
+                return false;
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// 0240817Gemini大菩薩：C# 字串網址編碼 https://g.co/gemini/share/e404139f0e17
+        /// </summary>
+        /// <param name="originalString"></param>
+        /// <returns></returns>
+        public static string EncodedStringURL(string originalString)
+        {
+            //string originalString = "這是一個包含中文和特殊符號的字串！&^%";
+            //string encodedString = HttpUtility.UrlEncode(originalString);
+            return HttpUtility.UrlEncode(originalString);
+
+            //Console.WriteLine("原始字串：{0}", originalString);
+            //    Console.WriteLine("編碼後字串：{0}", encodedString);
+        }
+
+        /// <summary>
+        /// 取得目前Chrome瀏覽器是否在最大化的狀態
+        /// 20240201 Copilot大菩薩：檢查 Chrome 瀏覽器是否已最大化：
+        /// 在 Selenium WebDriver 中，並沒有直接的方法可以檢查瀏覽器是否已最大化。但你可以透過比較當前視窗的尺寸和螢幕的解析度來間接判斷。以下是一個可能的 C# 程式碼片段：
+        /// 這個 IsBrowserMaximized 函數會回傳一個布林值，表示瀏覽器是否已最大化。請注意，這個方法可能無法在所有情況下正確運作，例如多螢幕設定或者視窗的尺寸與螢幕解析度不完全相同的情況。此外，這個方法需要參考 System.Windows.Forms，所以你需要在你的專案中加入這個參考。如果你的程式是在 .NET Core 或 .NET 5+ 環境下執行，你可能需要改用其他方式來取得螢幕的解析度。希望這個資訊對你有所幫助！
+        /// </summary>
+        /// <param name="driver"></param>
+        /// <returns></returns>
+        public static bool IsBrowserMaximized(ChromeDriver driver)
+        {
+            Size windowSize = driver.Manage().Window.Size;
+            Size workingAreaSize = Screen.PrimaryScreen.WorkingArea.Size;
+
+            return windowSize.Equals(workingAreaSize);
+        }
+
+        /// <summary>       
+        /// 20240430 Copilot大菩薩：下載網頁圖片的錯誤處理：
+        /// 以下是一個使用 Selenium 來模擬「另存圖片」的基本範例。請注意，這個範例需要使用到 Actions 類別來模擬鼠標右鍵點擊和選擇「另存圖片」的選項，並且可能需要根據您的瀏覽器和操作系統的具體情況來調整。
+        /// 段程式碼會打開圖片的網頁，然後模擬鼠標右鍵點擊圖片，並選擇「另存圖片」的選項。然而，這只是一個基本的範例，並且可能需要根據您的具體情況來調整。例如，處理「另存為」對話框可能需要使用到其他的工具或方法，例如 AutoIt 或 SendKeys。
+        /// </summary>
+        /// <param name="imageUrl">圖片所在網址</param>
+        /// <param name="downloadImgFullName"></param>
+        /// <param name="selectedInExplorer"></param>
+        /// <returns></returns>
+        internal static bool DownloadImage(string imageUrl, string downloadImgFullName, bool selectedInExplorer = false)
+        {
+            //var driver = new ChromeDriver();
+            openNewTabWindow();
+        reGoto:
+            try
+            {
+                driver.Navigate().GoToUrl(imageUrl);
+            }
+            catch (Exception ex)
+            {
+                switch (ex.HResult)
+                {
+                    case -2146233088://The HTTP request to the remote WebDriver server for URL http://localhost:5908/session/0b71d83809d531eca84ae9d77e0b4888/url timed out after 30.5 seconds.
+                        if (ex.Message.EndsWith(" timed out after 30.5 seconds."))
+                        {
+                            Thread.Sleep(1500);
+                            if (Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("下載書圖的網頁有問題，是否繼續？" +
+                                Environment.NewLine + Environment.NewLine + "請確認網頁沒問題再按確定，否則請按取消。感恩感恩　南無阿彌陀佛") == DialogResult.Cancel)
+                                return false;
+                            goto reGoto;
+                        }
+                        else
+                            Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
+                        break;
+                    default:
+                        Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
+                        return false;
+                }
+            }
+            BringToFront("chrome");
+            try
+            {
+                driver.SwitchTo().Window(driver.CurrentWindowHandle);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+            //IWebElement iw = waitFindWebElementBySelector_ToBeClickable("body > img");
+            //Cursor.Position = (Point)iw?.Location;
+            ////if (iw != null)  clickCopybutton_GjcoolFastExperience(iw.Location); 
+
+            try
+            {
+                // 找到圖片元素
+                var imageElement = driver.FindElement(By.TagName("img"));
+
+                // 建立 Actions 物件
+                var action = new Actions(driver);
+
+                // 模擬鼠標右鍵點擊圖片
+
+                action.ContextClick(imageElement).Perform();
+
+                // 模擬按下「V」鍵，選擇「另存圖片」的選項
+                // 注意：這可能需要根據您的瀏覽器和語言設定來調整
+                action.SendKeys("v").Perform();
+                //SendKeys.Send("{v 2}");
+                SendKeys.SendWait("v");
+
+                // TODO: 處理彈出的「另存為」對話框，輸入文件名並點擊「保存」
+                // 這可能需要使用到其他的工具或方法，例如 AutoIt 或 SendKeys
+                Clipboard.Clear();
+                try
+                {
+                    Clipboard.SetText(downloadImgFullName);
+                }
+                catch (Exception)
+                {
+                }
+                //Thread.Sleep(1190 + (
+                Thread.Sleep(1900 + (
+                    800 + Extend_the_wait_time_for_the_Open_Old_File_dialog_box_to_appear_Millisecond < 0 ? 0 : Extend_the_wait_time_for_the_Open_Old_File_dialog_box_to_appear_Millisecond));//最小值（須在重開機後或系統最小負載時）（連「開啟」舊檔之視窗也看不見，即可完成）
+                                                                                                                                                                                              //Thread.Sleep(1200);
+                                                                                                                                                                                              //Thread.Sleep(500);            
+
+
+                //輸入：檔案名稱 //SendKeys.Send(downloadImgFullName);
+                SendKeys.SendWait("+{Insert}~");//or "^v"
+                                                //Thread.Sleep(200);
+                                                //SendKeys.SendWait("{ENTER}");
+                                                //SendKeys.SendWait("%s");
+                                                //Clipboard.Clear();
+
+                //Thread.Sleep(300);
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+
+            try
+            {
+                driver.Close();
+            }
+            catch (Exception)
+            {
+                driver.SwitchTo().Window(LastValidWindow);//如果沒有切回關閉前的分頁，再打算開新分頁時Selenium就會出錯！20240720
+                return false;
+            }
+            driver.SwitchTo().Window(LastValidWindow);//如果沒有切回關閉前的分頁，再打算開新分頁時Selenium就會出錯！20240720
+
+            ////等待書圖檔下載完成
+            //DateTime dt = DateTime.Now;
+            //while (!File.Exists(downloadImgFullName))
+            //{
+            //    if (DateTime.Now.Subtract(dt).TotalSeconds > 28) return false;
+            //}
+            return true;
+        }
+
+        /// <summary>
+        /// 在需要連續輸入截圖時 。按下Ctrl並按下滑鼠下一頁鍵時。今因《四庫全書》本《本草綱目》而設 20240510
+        /// 須先畫出之截圖區域，然後按下Ctrl並按下滑鼠下一頁鍵時，會自動按下頁面中的[Input picture]連結並再按下 Replace page with this data 按鈕
+        /// </summary>
+        /// <returns>失敗則傳回false</returns>
+        internal static bool Input_picture()
+        {
+            //按下頁面中的[Input picture]連結
+
+            IWebElement iwe = waitFindWebElementBySelector_ToBeClickable("#editor > a:nth-child(5)");
+            if (iwe != null)
+            {
+                iwe.Click();
+                //再按下 Replace page with this data 按鈕
+                iwe = waitFindWebElementBySelector_ToBeClickable("#pictureinput > input[type=submit]");
+                if (iwe != null)
+                    iwe.Click();
+                else
+                {
+                    Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("頁面的【Replace page with this data 按鈕】沒找到。");
+                    return false;
+                }
+
+            }
+            else
+            {
+                Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("頁面的【[Input picture]連結元件】沒找到。");
+                return false;
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// 將指定的程式視窗置於作業系統的最前面、最上端 
+        /// Copilot大菩薩 20240704 控制 Chrome 瀏覽器在 C# Windows.Forms 中:
+        /// </summary>
+        /// <param name="processName">所指定的視窗</param>
+        public static void BringToFront(string processName)
+        {
+            Process[] processes = Process.GetProcessesByName(processName);
+            foreach (Process proc in processes)
+            {
+                // The second parameter 9 means "restore" and "activate" the window.
+                //ShowWindow(proc.MainWindowHandle, 1);//Copilot大菩薩：在 ShowWindow 函數中，第二個參數是一個命令，用於指定視窗應該如何顯示。這個參數的值為 9 時，表示 “恢復” 和 “啟動” 視窗。如果視窗最小化或最大化，系統會將其恢復到原來的大小和位置。然後，系統會將該視窗設置為前景視窗。
+                //在您的情況下，我們不希望改變視窗的大小和位置，所以我們將該參數改為 1，這表示只 “啟動” 視窗，不改變其大小和位置。
+                //在這段程式碼中，我們完全移除了 ShowWindow 函數的調用，只保留了 SetForegroundWindow 函數，這樣就不會改變視窗的大小和位置了。
+                SetForegroundWindow(proc.MainWindowHandle);
+            }
+        }
+        /// <summary>
+        /// 檢測 driver 是否失效/無效或是null 20241008
+        /// </summary>
+        /// <param name="driver"></param>
+        /// <returns></returns>
+        internal static bool IsDriverInvalid()
+        {
+            try
+            {
+                if (driver == null)
+                {
+                    Form1.browsrOPMode = Form1.BrowserOPMode.seleniumNew;
+                    DriverNew();
+
+                }
+                string url = driver.Url;
+            }
+            catch (Exception)
+            {
+                return true;
+            }
+            return false;
+        }
+        /// <summary>
+        /// 進行[《看典古籍·古籍全文檢索》](https://kandianguji.com/search_all) (d=dian 典) ，成功則傳回true。20241008
+        /// </summary>
+        /// <param name="searchTxt"></param>
+        /// <returns></returns>
+        public static bool KanDianGuJiSearchAll(string searchTxt)
+        {
+            bool exact = false;
+            const string url = "https://kandianguji.com/search_all";
+            if (DialogResult.OK == Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("是否要【精確檢索】？")) exact = true;
+            if (!IsDriverInvalid())
+            {
+                LastValidWindow = driver.CurrentWindowHandle;
+                //if (driver.Url != url) driver.Url = url;
+            }
+            //else
+            //{
+            try
+            {
+                openNewTabWindow();
+                GoToUrlandActivate(url, true);
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+            //}
+            IWebElement iwe = waitFindWebElementBySelector_ToBeClickable("#keyword");
+            if (iwe == null) return false;
+            SetIWebElementValueProperty(iwe, searchTxt);
+            //按下Enter是沒作用的
+            if (exact)
+                iwe = waitFindWebElementBySelector_ToBeClickable("body > div > div > div.form-inline > button.btn.btn-info.btn-lg.ml-2");
+            else
+                iwe = waitFindWebElementBySelector_ToBeClickable("body > div > div > div.form-inline > button.btn.btn-danger.btn-lg");
+            if (iwe == null) return false;
+            iwe.Click();
+            return true;
+        }
+        /// <summary>
+        /// 檢索《漢籍全文資料庫》，成功則傳回true。20241008
+        /// Alt + h
+        /// </summary>
+        /// <param name="searchTxt"></param>
+        /// <returns></returns>
+        public static bool HanchiSearch(string searchTxt)
+        {
+            if (driver == null) return false;
+            bool free = true, inside = false;
+            if (!IsDriverInvalid())
+            {
+                LastValidWindow = driver.CurrentWindowHandle;
+                ChromeSetFocus();
+                if (!driver.Url.StartsWith("https://hanchi.ihp.sinica.edu.tw/"))
+                {
+                    if (DialogResult.OK == Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("是否是【授權使用】？"))
+                        free = false;
+                }
+                else
+                {
+                    if (driver.Url != "https://hanchi.ihp.sinica.edu.tw/ihp/hanji.htm")
+                    {
+                        inside = true;
+                    }
+                    else
+                    {
+                        if (DialogResult.OK == Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("是否是【授權使用】？"))
+                            free = false;
+
+                    }
+
+
+                }
+
+            }
+            else
+                if (DialogResult.OK == Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("是否是【授權使用】？")) free = false;
+
+            const string url = "https://hanchi.ihp.sinica.edu.tw/ihp/hanji.htm";
+
+            if (!IsDriverInvalid())
+            {
+                if (!driver.Url.StartsWith("https://hanchi.ihp.sinica.edu.tw/"))
                 {
                     try
                     {
@@ -10390,80 +10433,106 @@ internal static string getImageUrl() {
                         return false;
                     }
                 }
-                DateTime dt = DateTime.Now;
-                IWebElement iwe = null;
-                if (!inside)
+                else
                 {
-                    while (iwe == null)
-                    {
-                        if (free)
-                            iwe = waitFindWebElementBySelector_ToBeClickable("body > table > tbody > tr:nth-child(2) > td > table > tbody > tr > td > table > tbody > tr:nth-child(4) > td > a:nth-child(8) > img");
-                        else
-                            iwe = waitFindWebElementBySelector_ToBeClickable("body > table > tbody > tr:nth-child(2) > td > table > tbody > tr > td > table > tbody > tr:nth-child(4) > td > a:nth-child(9) > img");
-                        if (DateTime.Now.Subtract(dt).TotalSeconds > 5) return false;
-                        if (null != waitFindWebElementBySelector_ToBeClickable("#frmTitle > table > tbody > tr:nth-child(2) > td > table > tbody > tr:nth-child(1) > td > input[type=text]:nth-child(2)")) goto search;
-                    }
-                    iwe.Click();
+                    if (!inside)
+                        driver.Url = url;
                 }
-            search:
-                //keyword
+            }
+            else
+            {
+                try
+                {
+                    openNewTabWindow();
+                    GoToUrlandActivate(url, true);
+                }
+                catch (Exception)
+                {
+                    return false;
+                }
+            }
+            DateTime dt = DateTime.Now;
+            IWebElement iwe = null;
+            if (!inside)
+            {
+                while (iwe == null)
+                {
+                    if (free)
+                        iwe = waitFindWebElementBySelector_ToBeClickable("body > table > tbody > tr:nth-child(2) > td > table > tbody > tr > td > table > tbody > tr:nth-child(4) > td > a:nth-child(8) > img");
+                    else
+                        iwe = waitFindWebElementBySelector_ToBeClickable("body > table > tbody > tr:nth-child(2) > td > table > tbody > tr > td > table > tbody > tr:nth-child(4) > td > a:nth-child(9) > img");
+                    if (DateTime.Now.Subtract(dt).TotalSeconds > 5) return false;
+                    if (null != waitFindWebElementBySelector_ToBeClickable("#frmTitle > table > tbody > tr:nth-child(2) > td > table > tbody > tr:nth-child(1) > td > input[type=text]:nth-child(2)")) goto search;
+                }
+                iwe.Click();
+            }
+        search:
+            dt = DateTime.Now;
+            //keyword
+            iwe = null;
+            while (iwe == null)
+            {
                 iwe = waitFindWebElementBySelector_ToBeClickable("#frmTitle > table > tbody > tr:nth-child(2) > td > table > tbody > tr:nth-child(1) > td > input[type=text]:nth-child(2)");
-                if (iwe == null) return false;
-                SetIWebElementValueProperty(iwe, searchTxt);
-                iwe.SendKeys(OpenQA.Selenium.Keys.Enter);
-                return true;
-            }
-            /// <summary>
-            /// 讓Chrome瀏覽器取得焦點
-            /// </summary>
-            /// <returns></returns>
-            internal static bool ChromeSetFocus()
-            {
-                if (driver == null) return false;
-                if (!IsDriverInvalid())
-                {
-                    driver.SwitchTo().Window(driver.CurrentWindowHandle);
-                    if (ActiveForm1.Active) BringToFront("chrome");
-                    return true;
-                }
-                else return false;
-            }
-            /// <summary>
-            /// 使用 JavaScriptExecutor 輸入中文。作為Selenium 同名方法的替代性實驗方法
-            /// 20240811 Gemini大菩薩：CJKV 字集擴充現況：https://g.co/gemini/share/b6380ac335aa
-            /// https://g.co/gemini/share/3fdbf8b43c46
-            /// </summary>
-            /// <param name="element">要輸入文字的網頁元件</param>
-            /// <param name="text">要輸入的文字</param>
-            /// <returns></returns>
-            public static bool Sendkeys(IWebElement element, string text)
-            {
-                IJavaScriptExecutor js = (IJavaScriptExecutor)driver;
-                //string text = "你好，世界！";
-                js.ExecuteScript($"arguments[0].value = '{text}';", element);
-
-                return true;
+                if (DateTime.Now.Subtract(dt).TotalSeconds > 5) return false;
             }
 
-            /// <summary>
-            /// 檢查是否是「Please confirm that you are human! 敬請輸入認證圖案」頁面 網址列：https://ctext.org/wiki.pl 20240929 52生日
-            /// <returns></returns>
-            internal static bool IsConfirmHumanPage()
+            SetIWebElementValueProperty(iwe, searchTxt);
+            iwe.SendKeys(OpenQA.Selenium.Keys.Enter);
+            return true;
+        }
+        /// <summary>
+        /// 讓Chrome瀏覽器取得焦點
+        /// </summary>
+        /// <returns></returns>
+        internal static bool ChromeSetFocus()
+        {
+            if (driver == null) return false;
+            if (!IsDriverInvalid())
             {
-                if (driver.Url == "https://ctext.org/wiki.pl")
+                driver.SwitchTo().Window(driver.CurrentWindowHandle);
+                if (ActiveForm1.Active) BringToFront("chrome");
+                return true;
+            }
+            else return false;
+        }
+        /// <summary>
+        /// 使用 JavaScriptExecutor 輸入中文。作為Selenium 同名方法的替代性實驗方法
+        /// 20240811 Gemini大菩薩：CJKV 字集擴充現況：https://g.co/gemini/share/b6380ac335aa
+        /// https://g.co/gemini/share/3fdbf8b43c46
+        /// </summary>
+        /// <param name="element">要輸入文字的網頁元件</param>
+        /// <param name="text">要輸入的文字</param>
+        /// <returns></returns>
+        public static bool Sendkeys(IWebElement element, string text)
+        {
+            IJavaScriptExecutor js = (IJavaScriptExecutor)driver;
+            //string text = "你好，世界！";
+            js.ExecuteScript($"arguments[0].value = '{text}';", element);
+
+            return true;
+        }
+
+        /// <summary>
+        /// 檢查是否是「Please confirm that you are human! 敬請輸入認證圖案」頁面 網址列：https://ctext.org/wiki.pl 20240929 52生日
+        /// <returns></returns>
+        internal static bool IsConfirmHumanPage()
+        {
+            if (driver.Url == "https://ctext.org/wiki.pl")
+            {
+                if (waitFindWebElementBySelector_ToBeClickable("#content > font")?.GetAttribute("textContent") == "Please confirm that you are human! 敬請輸入認證圖案")
                 {
                     confirm_that_you_are_human = true;
-                    if (waitFindWebElementBySelector_ToBeClickable("#content > font")?.GetAttribute("textContent") == "Please confirm that you are human! 敬請輸入認證圖案")
-                        return true;
-                    else
-                        return false;
+                    return true;
                 }
                 else
                     return false;
             }
+            else
+                return false;
         }
-
     }
+
+}
 
 
 

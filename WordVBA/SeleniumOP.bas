@@ -340,7 +340,16 @@ ErrH:
                                                                     '  (Session info: chrome=129.0.6668.59)
                 OpenNewTab WD
                 Resume
+            ElseIf VBA.InStr(Err.Description, "timeout: Timed out receiving message from renderer:") = 1 Then '-2146233088 timeout: Timed out receiving message from renderer: 2.972
+                                                                    '(Session info: chrome=130.0.6723.69)
+                If Not IsWDInvalid() Then
+                    WD.Manage.Timeouts.PageLoad = timeoutsPageLoad
+                    Resume
+                Else
+                    GoTo 2146233088
+                End If
             Else
+2146233088:
                 Debug.Print Err.Number; Err.Description
                 MsgBox Err.Description, vbCritical
                 Stop
@@ -696,6 +705,9 @@ caseElse:
             'Resume
     End Select
 End Function
+Sub CloseNewBlankPagesTabs()
+    closeNewBlankPageTabs
+End Sub
 Rem 若沒有新的空白頁要關閉則傳回false,若只剩一個分頁則不予關閉且傳回false供後續使用
 Private Function closeNewBlankPageTabs() As Boolean
     Dim w, result As Boolean
@@ -1545,10 +1557,15 @@ Function LookupZWDCD(x As String) As Boolean
     End If
     Dim key As New SeleniumBasic.keys
     Dim iwe As SeleniumBasic.IWebElement, dt As Date, tds() As SeleniumBasic.IWebElement, i As Integer, actions As New SeleniumBasic.actions, flag As Boolean, attr As String, retyrCntr As Byte
-    If Not IsWDInvalid() Then WD.Manage.timeouts.PageLoad = 3
-    If Not OpenChrome("https://www.guoxuedashi.net/zidian/bujian/") Then Exit Function
+    
+    If Not IsWDInvalid() Then WD.Manage.Timeouts.PageLoad = 3
+    
+    If Not OpenChrome("https://www.guoxuedashi.net/zidian/bujian/") Then
+        If Not IsWDInvalid() Then WD.Manage.Timeouts.PageLoad = timeoutsPageLoad
+        Exit Function
+    End If
     'WD.Manage.timeouts.ImplicitWait = 2
-    WD.Manage.timeouts.PageLoad = 2 '設置頁面載入超時3秒 creedit_with_Copilot大菩薩
+    WD.Manage.Timeouts.PageLoad = 2 '設置頁面載入超時3秒 creedit_with_Copilot大菩薩
     WD.SwitchTo.Window WD.CurrentWindowHandle
     ActivateChrome
     word.Application.windowState = wdWindowStateMinimize
@@ -1558,11 +1575,12 @@ Function LookupZWDCD(x As String) As Boolean
     Do While iwe Is Nothing
         Set iwe = WD.FindElementByCssSelector("#sokeyzi")
         If VBA.DateDiff("s", dt, VBA.Now) > 5 Then
+            WD.Manage.Timeouts.PageLoad = timeoutsPageLoad
             Exit Function
         End If
     Loop
     SetIWebElementValueProperty iwe, x
-    WD.Manage.timeouts.PageLoad = 10 '設置頁面載入超時秒數 creedit_with_Copilot大菩薩
+    WD.Manage.Timeouts.PageLoad = 10 '設置頁面載入超時秒數 creedit_with_Copilot大菩薩
     On Error Resume Next
     iwe.SendKeys key.Enter
     
@@ -1597,6 +1615,7 @@ scroll:
         SystemSetup.wait 0.4 ' 1000 毫秒等於 1 秒'Application.wait (Now + TimeValue("0:00:01"))
         actions.SendKeys(key.End).Perform
         If VBA.DateDiff("s", dt, VBA.Now) > 20 Then '時間可以調整
+            WD.Manage.Timeouts.PageLoad = timeoutsPageLoad
             Exit Function
         Else
             actions.SendKeys(key.End).Perform
@@ -1613,6 +1632,7 @@ scroll:
     Do While UBound(tds) = 0
         tds = WD.FindElementsByTagName("td")
         If VBA.DateDiff("s", dt, VBA.Now) > 3 Then
+            WD.Manage.Timeouts.PageLoad = timeoutsPageLoad
             Exit Function
         End If
     Loop
@@ -1637,7 +1657,7 @@ scroll:
     'WD.Manage.timeouts.ImplicitWait = 3 ' 等待3秒
     On Error GoTo 0
     On Error GoTo eH:
-    WD.Manage.timeouts.PageLoad = 4 '設置頁面載入超時x秒 creedit_with_Copilot大菩薩
+    WD.Manage.Timeouts.PageLoad = 4 '設置頁面載入超時x秒 creedit_with_Copilot大菩薩
     WD.url = "https://www.guoxuedashi.net" & HTML2Doc.GetHTMLAttributeValue("href", VBA.Replace(attr, "amp;", vbNullString))
     'Set iwe = WD.FindElementByCssSelector("body > div:nth-child(3) > center:nth-child(2) > img")
     'iwe.Click
@@ -1645,7 +1665,7 @@ scroll:
     ActivateChrome
     retyrCntr = 0
     Do Until isImageLoaded("body > div:nth-child(3) > center:nth-child(2) > img")
-        WD.Manage.timeouts.PageLoad = WD.Manage.timeouts.PageLoad + 2
+        WD.Manage.Timeouts.PageLoad = WD.Manage.Timeouts.PageLoad + 2
         WD.Navigate.Refresh
         retyrCntr = retyrCntr + 1
         Debug.Print "reload image" & retyrCntr
@@ -1660,7 +1680,7 @@ finish:
     ActivateChrome
     WD.FindElementByCssSelector("body > div:nth-child(3) > center:nth-child(2) > img").Click
 '    WD.Manage.timeouts.ImplicitWait = timeoutsImplicitWait '預設值為0
-    WD.Manage.timeouts.PageLoad = timeoutsPageLoad '預設值為300
+    WD.Manage.Timeouts.PageLoad = timeoutsPageLoad '預設值為300
     Exit Function
 eH:
     Select Case Err.Number
@@ -1676,7 +1696,7 @@ eH:
     '                WD.Manage.timeouts.PageLoad = WD.Manage.timeouts.PageLoad + 3
     '                Resume
                     If Not isImageLoaded("body > div:nth-child(3) > center:nth-child(2) > img") Then
-                        WD.Manage.timeouts.PageLoad = WD.Manage.timeouts.PageLoad + 5
+                        WD.Manage.Timeouts.PageLoad = WD.Manage.Timeouts.PageLoad + 5
                         playSound 1
                         On Error Resume Next
                         WD.Navigate.Refresh
@@ -1684,6 +1704,7 @@ eH:
                         Debug.Print "reload image" & retyrCntr
                         If isImageLoaded("body > div:nth-child(3) > center:nth-child(2) > img") Then
                             LookupZWDCD = True
+                            WD.Manage.Timeouts.PageLoad = timeoutsPageLoad
                             Exit Function
                         Else
                             Resume Next
@@ -1692,16 +1713,18 @@ eH:
                         LookupZWDCD = True
                         Debug.Print "okok..."
                         playSound 0.484
+                        WD.Manage.Timeouts.PageLoad = timeoutsPageLoad
                         Exit Function
                     End If
                 Else
-                    WD.Manage.timeouts.PageLoad = WD.Manage.timeouts.PageLoad + 2
+                    WD.Manage.Timeouts.PageLoad = WD.Manage.Timeouts.PageLoad + 2
                     Resume
                 End If
             ElseIf VBA.InStr(Err.Description, "javascript error: Cannot read properties of null (reading 'rows')") Then '-2146233088javascript error: Cannot read properties of null (reading 'rows')
                                                                                                                     '(Session info: chrome=129.0.6668.101)
                 word.Application.Activate
                 MsgBox "網站故障，請取消作業或重試。感恩感恩　南無阿彌陀佛　讚美主", vbCritical
+                If WD.Manage.Timeouts.PageLoad <> timeoutsPageLoad Then WD.Manage.Timeouts.PageLoad = timeoutsPageLoad
                 Exit Function
             Else
                 GoTo caseElse

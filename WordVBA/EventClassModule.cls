@@ -53,7 +53,7 @@ Private Sub app_Quit()
 End Sub
 
 
-Private Sub App_DocumentBeforeSave(ByVal Doc As Document, SaveAsUI As Boolean, Cancel As Boolean)
+Private Sub App_DocumentBeforeSave(ByVal doc As Document, SaveAsUI As Boolean, Cancel As Boolean)
     'ÁôÂÃ¦rªí
 End Sub
 
@@ -68,7 +68,7 @@ End Sub
 
 
 
-Private Sub App_WindowActivate(ByVal Doc As Document, ByVal Wn As Window)
+Private Sub App_WindowActivate(ByVal doc As Document, ByVal Wn As Window)
 ''If InStr(Doc.Name, "¦rªí7") = 0 Then Wn.Visible = False
 ''    'Wn.WindowState = wdWindowStateMaximize
 ''    ÁôÂÃ¦rªí
@@ -82,7 +82,7 @@ Private Sub App_WindowActivate(ByVal Doc As Document, ByVal Wn As Window)
 'End If
 End Sub
 
-Private Sub App_WindowDeactivate(ByVal Doc As Document, ByVal Wn As Window) '¼g¦bApp_DocumentChange¸û¦³®Ä!2010/10/20
+Private Sub App_WindowDeactivate(ByVal doc As Document, ByVal Wn As Window) '¼g¦bApp_DocumentChange¸û¦³®Ä!2010/10/20
 'Register_Event_Handler
 'If Documents.Count > 1 Then
 '    If InStr(Doc.Name, "¦rªí7") Then Wn.Visible = False
@@ -91,3 +91,29 @@ Private Sub App_WindowDeactivate(ByVal Doc As Document, ByVal Wn As Window) '¼g¦
 End Sub
 
 
+Private Sub App_WindowSelectionChange(ByVal Sel As Selection)
+    If Not Docs.AutoCopy Then
+        Exit Sub
+    End If
+    If Selection.Type = wdSelectionNormal Then
+        Exit Sub
+    End If
+'    Stop
+    On Error GoTo eH
+    Dim clipboardTxt As String
+    clipboardTxt = SystemSetup.GetClipboardText
+    
+    If Selection.InlineShapes.Count = 0 And Selection.ShapeRange.Count = 0 Then
+        Selection.Copy
+        SystemSetup.playSound 0.96
+    End If
+
+    Exit Sub
+eH:
+Select Case Err.Number
+    Case Else
+        Debug.Print Err.Number & Err.Description
+        MsgBox Err.Number & Err.Description
+        'Resume
+End Select
+End Sub

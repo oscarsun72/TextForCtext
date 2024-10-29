@@ -77,7 +77,7 @@ Function ClipBoard_GetData()
     #If Win64 Then
     'x64 host
             Rem 尚未實作
-            ClipBoard_GetData = ClipBoardOp.ClipBoard_GetData
+'            ClipBoard_GetData = ClipBoardOp.ClipBoard_GetData
             Exit Function
         #Else
     'x86 host
@@ -419,6 +419,8 @@ Sub playSound(longShort As Single, Optional waittoPlay As Byte = 1) 'Public Decl
             sndPlaySound32 path.CombineFullName(mediaPath, "Windows Default.wav"), waittoPlay
         Case 0.484
             sndPlaySound32 path.CombineFullName(mediaPath, "Windows Pop-up Blocked.wav"), waittoPlay
+        Case 0.96
+            sndPlaySound32 path.CombineFullName(mediaPath, "Windows Shutdown.wav"), waittoPlay
         Case 1
             sndPlaySound32 path.CombineFullName(mediaPath, "Chimes.wav"), waittoPlay '"C:\Windows\Media\Chimes.wav", waittoPlay '&H1 '&H0:等播完才執行之後的程式碼，&H1=1，一播放，不等播完，即執行接下來的程式碼
         Case 1.294 'https://learn.microsoft.com/en-us/previous-versions/dd798676(v=vs.85)
@@ -542,7 +544,7 @@ Sub wait(sec As Single)
     Do While Now < WaitDt
     Loop
 End Sub
-
+Rem 這個基於 AppActivate方法，常會當掉
 Sub AppActivateChrome()
     AppActivateDefaultBrowser 'https://docs.microsoft.com/zh-tw/sql/ado/reference/ado-api/absoluteposition-property-ado?view=sql-server-ver15
         'try looking for both Chrome_WidgetWin_1 and Chrome_RenderWidgetHostHWND

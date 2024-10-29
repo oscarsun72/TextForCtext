@@ -300,6 +300,8 @@ Alt + d 或 Ctrl + Alt + j ：以選取文字進行[《看典古籍·古籍全�
 
 Alt + h ：以選取文字檢索[《漢籍全文資料庫》](https://hanchi.ihp.sinica.edu.tw/) (h=han 漢) 20241008
 
+Alt + Shift + t : 查中國哲學書電子化計劃網域 (以Google檢索《中國哲學書電子化計劃》) 20241024
+
 Alt + F12 ：檢索《異體字字典》
 
 Ctrl + F12 ：檢索《國語辭典》
@@ -339,16 +341,17 @@ Ctrl + F12 ：檢索《國語辭典》
 - Ctrl + Alt + j 或 Alt + d 以文件中選取文字進行[《看典古籍·古籍全文檢索》](https://kandianguji.com/search_all) （j=籍 ji；d=典 dian）
     > 原為 Ctrl + k,d (k=kan 看；d=dian 典) ，因會使內建的 Ctrl + k （插入超連結）失效，故改定 20241014
 - Alt + Shfit + h： 檢索《漢籍全文資料庫》 (h=han 漢)
-- Alt + t ： 以Google檢索《中國哲學書電子化計劃》 (t=CTP的t)20241006
+- Alt + t ： 以Google檢索《中國哲學書電子化計劃》 查中國哲學書電子化計劃網域  (t=CTP的t)20241006
 - Ctrl + Shift + Alt + U u=xun（訓）的u 查[古音小鏡](http://www.kaom.net/)_訓詁工具書查詢 20241020
 - Ctrl + Shift + Alt + i 查古音小鏡_漢語大詞典 i=ci（詞）的i
 - Ctrl + Shift + Alt + c 查[白雲深處人家](http://www.homeinmists.com/)漢語大詞典 c=ci（詞）的c
 - Ctrl + Shift + Alt + y 查[韻典網](https://ytenx.org/) y=yun（韻）的y
-- Alt + Shift + z 或 ctrl + Alt + Shift + z 查《中文大辭典》－－《國學大師》所收轉愚所掃全彩為黑白版 20241020 （z：中（zh）的 z）20241020
+- Alt + Shift + z 或 ctrl + Alt + Shift + z 查《中文大辭典》－－[《國學大師》](https://www.guoxuedashi.net/zidian/)所收轉愚所掃全彩為黑白版 20241020 （z：中（zh）的 z）20241020
 - Ctrl + Alt + ' （頓號） 頓號文字加上篇名號（〈〉）如周易諸卦
 - Ctrl + shift + Alt + ' （頓號） 頓號文字加上書名號（《》）如五經
 - Ctrl + Alt + 9 頓號文字加上單引號（「」）
 - Ctrl + Alt + 0 頓號文字加上雙引號（『』）20241022
+- Alt + l 大陸引號改臺灣引號
 
 **以下功能，目前須先開啟TextForCtext才能使用。** 原理是以本軟件作為中介故。
 - Alt + , 或 Ctrl + Alt + , 或 Ctrl + Alt + F9 或 Alt + shift + F5 或 Ctrl + Alt + F5 同在TextForCtext 的 Alt + , 與 Alt + F9 與 Alt + F5。《漢籍全文資料庫》或《中國哲學書電子化計劃》檢索《易》學關鍵字。蓋藉由本軟件介面作中介爾。
@@ -863,6 +866,8 @@ Ctrl+ 滑鼠左鍵：清除框中所有文字
 
 - 在 Selenium 模式下，或使用SeleniumBasic，**若不想關閉手動啟用或TextForCtext啟動的Chrome瀏覽器即可共用Chrome瀏覽器：** 只要在Chrome瀏覽器啟動的捷徑內「目標(T)」欄位內的值末端輸入「` --remote-debugging-port=9222`」（程式碼碼裡也有）再按下「確定」或「套用（A)」按鈕即可。
 > 在Chrome瀏覽器「chrome://version/」網址查看，其「命令列」欄下含有` --remote-debugging-port=9222 `即表示所啟動的、現用的Chrome瀏覽器已設定成功了，可供`TextForCtext`與`WordVBA`操作。
+
+- 在安裝Office大菩薩時，記得將 Word 中開發人員選項要勾選安裝，以免有些元件未安裝在系統中。如 UrlEncode 方法中的類別 MSScriptControl.scriptControl就需要「Microsoft Script Control 1.0組件」才能正常引用。20241029 感恩感恩　讚歎讚歎　南無阿彌陀佛
 
 - 可詳以下4片：
 

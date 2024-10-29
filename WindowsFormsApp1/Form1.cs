@@ -798,7 +798,18 @@ namespace WindowsFormsApp1
         retry:
             try
             {
-                wh = br.driver.CurrentWindowHandle;
+                if (driver == null)
+                {
+                    browsrOPMode = BrowserOPMode.seleniumNew;
+                    DriverNew();
+                }
+                if (!br.IsDriverInvalid())
+                    wh = br.driver.CurrentWindowHandle;
+                else
+                {
+                    br.driver.SwitchTo().Window(driver.WindowHandles.Last());
+                    wh = br.driver.CurrentWindowHandle;
+                }
             }
             catch (Exception)
             {
@@ -1924,7 +1935,7 @@ namespace WindowsFormsApp1
             restoreCaretPosition(tb, sLast, 0);
             if (charIndexRecallTimes < 0) charIndexRecallTimes = charIndexListSize - 1;
         }
-        
+
         private void textBox1_KeyDown(object sender, KeyEventArgs e)
         {
             var m = ModifierKeys; keycodeNow = e.KeyCode;
@@ -2160,6 +2171,7 @@ namespace WindowsFormsApp1
 
             if (e.Control && e.Alt && e.KeyCode == Keys.K)// 20240718
             {//Ctrl + Alt + k ： 在完整編輯頁面中直接取代文字。請將被取代+取代成之二字前後並置，並將其選取後（或在被取代之文字前放置插入點）再按下此組合鍵以執行直接取代 20240718
+                //今均慣用Alt + e 此來日可作廢 20241024
                 e.Handled = true;
                 playSound(soundLike.press, true);
                 StringInfo character = new StringInfo(string.Empty); int s = textBox1.SelectionStart, l = 1;
@@ -2247,6 +2259,26 @@ namespace WindowsFormsApp1
                 if (e.KeyCode == Keys.Q)
                 {//Alt + Shift + q : 據選取區的CJK字長以作分段（末後植入 < p >，分行則以版式常態值劃分），為非《維基文庫》版式之電子文本，如《寒山子詩集》組詩
                     e.Handled = true; markParagraphwithSelectionLen(); return;
+                }
+                if (e.KeyCode == Keys.T)
+                {//Alt + Shift + t : 查中國哲學書電子化計劃網域 (以Google檢索《中國哲學書電子化計劃》) 20241024
+                    string x = overtypeModeSelectedTextSetting(ref textBox1);//CnText.ChangeSeltextWhenOvertypeMode(insertMode, textBox1);
+                    if (x.IsNullOrEmpty()) return;
+                    e.Handled = true;
+                    string url = "site: https://ctext.org/";
+                    x = x.EndsWith("》") ? x.Substring(0, x.Length - 1) : x;
+                    x = x.EndsWith(Environment.NewLine) ? x.Substring(0, x.Length - 2) : x;
+                    x = x.EndsWith("\n") ? x.Substring(0, x.Length - 1) : x;
+                    url = url + x;
+                    Clipboard.SetText(x);
+                    if (br.driver != null)
+                    {
+                        br.openNewTabWindow(OpenQA.Selenium.WindowType.Tab);
+                        br.driver.Navigate().GoToUrl("https://www.google.com/search?q=" + url);
+                    }
+                    else
+                        Process.Start("https://www.google.com/search?q=" + url);
+                    return;
                 }
             }
             #endregion
@@ -2485,7 +2517,7 @@ namespace WindowsFormsApp1
                     //        char.IsHighSurrogate(nextChar) || nextChar == Environment.NewLine.ToArray()[0] ?
                     //        textBox1.SelectionLength += 2 : ++textBox1.SelectionLength;
                     //}
-                    textBox4.Focus();                    
+                    textBox4.Focus();
                     return;
                 }
 

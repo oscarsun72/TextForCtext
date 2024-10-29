@@ -120,20 +120,41 @@ End Enum
 Rem 20240106 StackOverflow ai & Bing大菩薩: 建置C# 程式庫成dll檔案
 Rem 須【設定引用項目】UrlEncodingDLL.tlb
 Public Function UrlEncode_建置CSharp程式庫成dll檔案者(ByRef szString As String) As String
-'    If InStr(szString, "%") Then UrlEncode_建置CSharp程式庫成dll檔案者 = szString: Exit Function
-'    Dim encoder As New UrlEncodingDLL.UrlEncoder
-'    Dim encodedUrl As String
-'    encodedUrl = encoder.UrlEncode(szString) ' Chinese text
-'    'Debug.Print encodedUrl ' Output: "%E4%BD%A0%E5%A5%BD%E4%B8%96%E7%95%8C"
-'    UrlEncode_建置CSharp程式庫成dll檔案者 = encodedUrl
+'Public Function UrlEncode(ByRef szString As String) As String
+    If InStr(szString, "%") Then UrlEncode_建置CSharp程式庫成dll檔案者 = szString: Exit Function
+    'If InStr(szString, "%") Then UrlEncode = szString: Exit Function
+    Dim encoder As New UrlEncodingDLL.UrlEncoder
+    Dim encodedUrl As String
+    encodedUrl = encoder.UrlEncode(szString) ' Chinese text
+    'Debug.Print encodedUrl ' Output: "%E4%BD%A0%E5%A5%BD%E4%B8%96%E7%95%8C"
+    UrlEncode_建置CSharp程式庫成dll檔案者 = encodedUrl
+'    UrlEncode = encodedUrl
 End Function
 Rem 20241003 Copilot大菩薩：https://sl.bing.net/jCIXUMLIFTE
 Rem VBA URL Encoding Issue ： https://sl.bing.net/ctZR9HBRFBc ： 看來 CreateObject("HTMLFile").parentWindow.encodeURIComponent(szString) 這行在 VBA 中可能會出現物件不支援此屬性或方法的錯誤。這是因為 VBA 中的 CreateObject("HTMLFile") 無法正確地創建 HTML 文件對象。
 Public Function UrlEncode(ByRef szString As String) As String
-    Dim scriptControl As Object
-    Set scriptControl = CreateObject("MSScriptControl.ScriptControl")
+    'Dim scriptControl As Object
+    Dim scriptControl As New MSScriptControl.scriptControl '項目->添加引用->COM->類型庫中勾選Microsoft Script Control 1.0組件: https://blog.csdn.net/DXCyber409/article/details/79976104
+                     'msscript.ocx       '阿彌陀佛！剛才在網路上Google 「如何讓 Windows 10 登錄 MSScriptControl.ScriptControl 類別」結果看到這一篇 https://blog.csdn.net/DXCyber409/article/details/79976104 裡面提到了 「Microsoft Script Control 1.0」 結果我到VBE的「工具→設定引用項目」中找，就找到了，勾選後再改寫如下，一樣可以。為什麼　Copilot大菩薩您沒提到這個物件引用呢？如果這是有效的（因為我現在離開那個有問題的電腦沒法實測，再下禮拜去才能實測）請您記下來、學習起來，幫助更多和我一樣茫然助的人。感恩感恩　南無阿彌陀佛
+    On Error GoTo eH:
+    'Set scriptControl = CreateObject("MSScriptControl.ScriptControl")
     scriptControl.Language = "JScript"
     UrlEncode = scriptControl.Eval("encodeURIComponent('" & szString & "')") '在 VBA 中使用 JavaScript 的 encodeURIComponent 方法來進行 URL 編碼了。
+    Exit Function
+eH:
+    Select Case Err.Number
+        Case -2147221164
+            If VBA.InStr(Err.Description, "類別未登錄") = 1 Then
+                Stop
+                playSound 1.294
+                UrlEncode = szString
+            Else
+                GoTo default
+            End If
+        Case Else
+default:
+            Debug.Print Err.Number & Err.Description
+    End Select
 End Function
 
 

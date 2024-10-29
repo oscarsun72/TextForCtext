@@ -625,7 +625,7 @@ Sub searchuCtext()
     'For Each e In searchedTerm
         addressHyper = addressHyper + " " + site + cndn + bookID + "&searchu=" + e
     'Next e
-    Shell Network.getDefaultBrowserFullname + addressHyper + " --remote-debugging-port=9222 "
+    shell Network.getDefaultBrowserFullname + addressHyper + " --remote-debugging-port=9222 "
     
     Selection.Hyperlinks.Add Selection.Range, addressHyper
 End Sub
@@ -1043,7 +1043,7 @@ Function Search(searchWhatsUrl As String) As String
     encode = code.UrlEncode(Selection.text)
     'Shell "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe https://ctext.org/wiki.pl?if=gb&res=384378&searchu=" & Selection.text
     'Shell Normal.SystemSetup.getChrome & searchWhatsUrl & Selection.Text
-    Shell TextForCtextWordVBA.Network.GetDefaultBrowserEXE & searchWhatsUrl & encode
+    shell TextForCtextWordVBA.Network.GetDefaultBrowserEXE & searchWhatsUrl & encode
     Search = searchWhatsUrl & encode
 End Function
 Rem 20241006 以Google檢索《中國哲學書電子化計劃》 Alt + t
@@ -1053,17 +1053,25 @@ End Sub
 Rem Alt + m ： 以選取文字 search史記三家注並於於選取處插入檢索結果之超連結 （m=司馬遷的馬 ma） 20241014;20241005
 '原為 Ctrl + s,j 因這樣的指定會取消掉內建的 Ctrl + s ，故改定 20241014
 Sub search史記三家注()
+    Dim ur As UndoRecord
+    SystemSetup.stopUndo ur, "search史記三家注"
     ActiveDocument.Hyperlinks.Add Selection.Range, Search(" https://ctext.org/wiki.pl?if=gb&res=384378&searchu=")
+    SystemSetup.contiUndo ur
 End Sub
 Rem Ctrl + Alt + = ： 以選取的文字檢索 CTP 所收阮元《十三經注疏·周易正義》並在選取文字上加上該檢索結果頁面之超連結
 Sub search周易正義_阮元十三經注疏()
-    Dim url As String
+    Dim url As String, ur As UndoRecord
+    SystemSetup.stopUndo ur, "search周易正義_阮元十三經注疏"
     url = 中國哲學書電子化計劃.Search(" https://ctext.org/wiki.pl?if=gb&res=315747&searchu=")
     ActiveDocument.Hyperlinks.Add Selection.Range, url
+    SystemSetup.contiUndo ur
 End Sub
 Rem Ctrl + shift + y ： 以選取文字 search《四部叢刊》本《周易》並於於選取處插入檢索結果之超連結(y:yi 易) 20241005
 Sub search周易_四部叢刊本()
+    Dim ur As UndoRecord
+    SystemSetup.stopUndo ur, "search周易_四部叢刊本"
     ActiveDocument.Hyperlinks.Add Selection.Range, Search(" https://ctext.org/wiki.pl?if=gb&res=129518&searchu=")
+    SystemSetup.contiUndo ur
 End Sub
 Sub 讀史記三家注()
 Dim d As Document, t As table
@@ -1286,7 +1294,7 @@ Sub 補括弧()
     SystemSetup.contiUndo ur
 End Sub
 Sub 維基文庫造字圖取代為文字(rng As Range)
-Dim inlnsp As inlineShape, aLtTxt As String
+Dim inlnsp As InlineShape, aLtTxt As String
 Dim dictMdb As New dBase, cnt As New ADODB.Connection, rst As New ADODB.Recordset
 dictMdb.cnt查字 cnt
 For Each inlnsp In rng.InlineShapes

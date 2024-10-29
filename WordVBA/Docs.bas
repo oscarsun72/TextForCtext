@@ -1,6 +1,7 @@
 Attribute VB_Name = "Docs"
 Option Explicit
 Public d字表 As Document, x As New EventClassModule   '這才是所謂的建立"新"的類別模組--實際上是建立對它的參照.'原照線上說明乃Dim也.
+Public AutoCopy As Boolean
 'https://learn.microsoft.com/en-us/office/vba/word/concepts/objects-properties-methods/using-events-with-the-application-object-word
 Public Sub Register_Event_Handler() '使自設物件類別模組有效的登錄程序.見「使用 Application 物件 (Application Object) 的事件」
     If x Is Nothing Or Not x.App Is word.Application Then
@@ -293,12 +294,13 @@ Sub 貼上引文() '將已複製到剪貼簿的內容貼成引文
     r.Footnotes.Add r '插入註腳!
 End Sub
 Sub 貼上純文字() 'shift+insert 2016/7/20
-    Dim hl, s As Long, r As Range
+    Dim hl, s As Long, r As Range, ur As UndoRecord
+    SystemSetup.stopUndo ur, "貼上純文字"
     On Error GoTo ErrHandler
     hl = Selection.Range.HighlightColorIndex
     
     s = Selection.start
-    Set r = Selection.Range
+    Set r = Selection.Document.Range(Selection.start, Selection.End)
 '    '如果有選取則清除
     If Selection.Flags <> 24 And Selection.Flags <> 25 Or Selection.Flags = 9 Then
         If s < Selection.End Then Selection.text = vbNullString
@@ -307,6 +309,7 @@ Sub 貼上純文字() 'shift+insert 2016/7/20
     Selection.PasteAndFormat (wdFormatPlainText)
     r.SetRange s, Selection.End
     If hl <> 9999999 Then r.HighlightColorIndex = hl '9999999 is multi-color 多重高亮色彩則無顯示9999999（7位數9）的值
+    SystemSetup.contiUndo ur
     Exit Sub
 ErrHandler:
     Select Case Err.Number
