@@ -25,89 +25,89 @@ Enum CJKBlockName 'https://en.wikipedia.org/wiki/CJK_characters
 End Enum
 
 Enum CJKChartRange 'https://en.wikipedia.org/wiki/CJK_characters
-CJK_Unified_Ideographs_start = &H4E00
-CJK_Unified_Ideographs_Extension_A_start = &H3400
-CJK_Unified_Ideographs_Extension_B_start = &H20000
-CJK_Unified_Ideographs_Extension_C_start = &H2A700
-CJK_Unified_Ideographs_Extension_D_start = &H2B740
-CJK_Unified_Ideographs_Extension_E_start = &H2B820
-CJK_Unified_Ideographs_Extension_F_start = &H2CEB0
-CJK_Unified_Ideographs_Extension_G_start = &H30000
-CJK_Unified_Ideographs_Extension_H_start = &H31350
-CJK_Radicals_Supplement_start = &H2E80
-Kangxi_Radicals_start = &H2F00
-Ideographic_Description_Characters_start = &H2FF0
-CJK_Symbols_and_Punctuation_start = &H3000
-CJK_Strokes_start = &H31C0
-Enclosed_CJK_Letters_and_Months_start = &H3200
-CJK_Compatibility_start = &H3300
-CJK_Compatibility_Ideographs_start = &HF900
-CJK_Compatibility_Forms_start = &HFE30
-Enclosed_Ideographic_Supplement_start = &H1F200
-CJK_Compatibility_Ideographs_Supplement_start = &H2F800
-CJK_Unified_Ideographs_end = &H9FFF
-CJK_Unified_Ideographs_Extension_A_end = &H4DBF
-CJK_Unified_Ideographs_Extension_B_end = &H2A6DF
-CJK_Unified_Ideographs_Extension_C_end = &H2B73F
-CJK_Unified_Ideographs_Extension_D_end = &H2B81F
-CJK_Unified_Ideographs_Extension_E_end = &H2CEAF
-CJK_Unified_Ideographs_Extension_F_end = &H2EBEF
-CJK_Unified_Ideographs_Extension_G_end = &H3134F
-CJK_Unified_Ideographs_Extension_H_end = &H323AF
-CJK_Radicals_Supplement_end = &H2EFF
-Kangxi_Radicals_end = &H2FDF
-Ideographic_Description_Characters_end = &H2FFF
-CJK_Symbols_and_Punctuation_end = &H303F
-CJK_Strokes_end = &H31EF
-Enclosed_CJK_Letters_and_Months_end = &H32FF
-CJK_Compatibility_end = &H33FF
-CJK_Compatibility_Ideographs_end = &HFAFF
-CJK_Compatibility_Forms_end = &HFE4F
-Enclosed_Ideographic_Supplement_end = &H1F2FF
-CJK_Compatibility_Ideographs_Supplement_end = &H2FA1F
+    CJK_Unified_Ideographs_start = &H4E00
+    CJK_Unified_Ideographs_Extension_A_start = &H3400
+    CJK_Unified_Ideographs_Extension_B_start = &H20000
+    CJK_Unified_Ideographs_Extension_C_start = &H2A700
+    CJK_Unified_Ideographs_Extension_D_start = &H2B740
+    CJK_Unified_Ideographs_Extension_E_start = &H2B820
+    CJK_Unified_Ideographs_Extension_F_start = &H2CEB0
+    CJK_Unified_Ideographs_Extension_G_start = &H30000
+    CJK_Unified_Ideographs_Extension_H_start = &H31350
+    CJK_Radicals_Supplement_start = &H2E80
+    Kangxi_Radicals_start = &H2F00
+    Ideographic_Description_Characters_start = &H2FF0
+    CJK_Symbols_and_Punctuation_start = &H3000
+    CJK_Strokes_start = &H31C0
+    Enclosed_CJK_Letters_and_Months_start = &H3200
+    CJK_Compatibility_start = &H3300
+    CJK_Compatibility_Ideographs_start = &HF900
+    CJK_Compatibility_Forms_start = &HFE30
+    Enclosed_Ideographic_Supplement_start = &H1F200
+    CJK_Compatibility_Ideographs_Supplement_start = &H2F800
+    CJK_Unified_Ideographs_end = &H9FFF
+    CJK_Unified_Ideographs_Extension_A_end = &H4DBF
+    CJK_Unified_Ideographs_Extension_B_end = &H2A6DF
+    CJK_Unified_Ideographs_Extension_C_end = &H2B73F
+    CJK_Unified_Ideographs_Extension_D_end = &H2B81F
+    CJK_Unified_Ideographs_Extension_E_end = &H2CEAF
+    CJK_Unified_Ideographs_Extension_F_end = &H2EBEF
+    CJK_Unified_Ideographs_Extension_G_end = &H3134F
+    CJK_Unified_Ideographs_Extension_H_end = &H323AF
+    CJK_Radicals_Supplement_end = &H2EFF
+    Kangxi_Radicals_end = &H2FDF
+    Ideographic_Description_Characters_end = &H2FFF
+    CJK_Symbols_and_Punctuation_end = &H303F
+    CJK_Strokes_end = &H31EF
+    Enclosed_CJK_Letters_and_Months_end = &H32FF
+    CJK_Compatibility_end = &H33FF
+    CJK_Compatibility_Ideographs_end = &HFAFF
+    CJK_Compatibility_Forms_end = &HFE4F
+    Enclosed_Ideographic_Supplement_end = &H1F2FF
+    CJK_Compatibility_Ideographs_Supplement_end = &H2FA1F
 
 End Enum
 Enum CJKChartRangeString 'https://en.wikipedia.org/wiki/CJK_characters
-CJK_Unified_Ideographs_start = "&H4E00"
-CJK_Unified_Ideographs_Extension_A_start = "&H3400"
-CJK_Unified_Ideographs_Extension_B_start = "&H20000"
-CJK_Unified_Ideographs_Extension_C_start = "&H2A700"
-CJK_Unified_Ideographs_Extension_D_start = "&H2B740"
-CJK_Unified_Ideographs_Extension_E_start = "&H2B820"
-CJK_Unified_Ideographs_Extension_F_start = "&H2CEB0"
-CJK_Unified_Ideographs_Extension_G_start = "&H30000"
-CJK_Unified_Ideographs_Extension_H_start = "&H31350"
-CJK_Radicals_Supplement_start = "&H2E80"
-Kangxi_Radicals_start = "&H2F00"
-Ideographic_Description_Characters_start = "&H2FF0"
-CJK_Symbols_and_Punctuation_start = "&H3000"
-CJK_Strokes_start = "&H31C0"
-Enclosed_CJK_Letters_and_Months_start = "&H3200"
-CJK_Compatibility_start = "&H3300"
-CJK_Compatibility_Ideographs_start = "&HF900"
-CJK_Compatibility_Forms_start = "&HFE30"
-Enclosed_Ideographic_Supplement_start = "&H1F200"
-CJK_Compatibility_Ideographs_Supplement_start = "&H2F800"
-CJK_Unified_Ideographs_end = "&H9FFF"
-CJK_Unified_Ideographs_Extension_A_end = "&H4DBF"
-CJK_Unified_Ideographs_Extension_B_end = "&H2A6DF"
-CJK_Unified_Ideographs_Extension_C_end = "&H2B73F"
-CJK_Unified_Ideographs_Extension_D_end = "&H2B81F"
-CJK_Unified_Ideographs_Extension_E_end = "&H2CEAF"
-CJK_Unified_Ideographs_Extension_F_end = "&H2EBEF"
-CJK_Unified_Ideographs_Extension_G_end = "&H3134F"
-CJK_Unified_Ideographs_Extension_H_end = "&H323AF"
-CJK_Radicals_Supplement_end = "&H2EFF"
-Kangxi_Radicals_end = "&H2FDF"
-Ideographic_Description_Characters_end = "&H2FFF"
-CJK_Symbols_and_Punctuation_end = "&H303F"
-CJK_Strokes_end = "&H31EF"
-Enclosed_CJK_Letters_and_Months_end = "&H32FF"
-CJK_Compatibility_end = "&H33FF"
-CJK_Compatibility_Ideographs_end = "&HFAFF"
-CJK_Compatibility_Forms_end = "&HFE4F"
-Enclosed_Ideographic_Supplement_end = "&H1F2FF"
-CJK_Compatibility_Ideographs_Supplement_end = "&H2FA1F"
+    CJK_Unified_Ideographs_start = "&H4E00"
+    CJK_Unified_Ideographs_Extension_A_start = "&H3400"
+    CJK_Unified_Ideographs_Extension_B_start = "&H20000"
+    CJK_Unified_Ideographs_Extension_C_start = "&H2A700"
+    CJK_Unified_Ideographs_Extension_D_start = "&H2B740"
+    CJK_Unified_Ideographs_Extension_E_start = "&H2B820"
+    CJK_Unified_Ideographs_Extension_F_start = "&H2CEB0"
+    CJK_Unified_Ideographs_Extension_G_start = "&H30000"
+    CJK_Unified_Ideographs_Extension_H_start = "&H31350"
+    CJK_Radicals_Supplement_start = "&H2E80"
+    Kangxi_Radicals_start = "&H2F00"
+    Ideographic_Description_Characters_start = "&H2FF0"
+    CJK_Symbols_and_Punctuation_start = "&H3000"
+    CJK_Strokes_start = "&H31C0"
+    Enclosed_CJK_Letters_and_Months_start = "&H3200"
+    CJK_Compatibility_start = "&H3300"
+    CJK_Compatibility_Ideographs_start = "&HF900"
+    CJK_Compatibility_Forms_start = "&HFE30"
+    Enclosed_Ideographic_Supplement_start = "&H1F200"
+    CJK_Compatibility_Ideographs_Supplement_start = "&H2F800"
+    CJK_Unified_Ideographs_end = "&H9FFF"
+    CJK_Unified_Ideographs_Extension_A_end = "&H4DBF"
+    CJK_Unified_Ideographs_Extension_B_end = "&H2A6DF"
+    CJK_Unified_Ideographs_Extension_C_end = "&H2B73F"
+    CJK_Unified_Ideographs_Extension_D_end = "&H2B81F"
+    CJK_Unified_Ideographs_Extension_E_end = "&H2CEAF"
+    CJK_Unified_Ideographs_Extension_F_end = "&H2EBEF"
+    CJK_Unified_Ideographs_Extension_G_end = "&H3134F"
+    CJK_Unified_Ideographs_Extension_H_end = "&H323AF"
+    CJK_Radicals_Supplement_end = "&H2EFF"
+    Kangxi_Radicals_end = "&H2FDF"
+    Ideographic_Description_Characters_end = "&H2FFF"
+    CJK_Symbols_and_Punctuation_end = "&H303F"
+    CJK_Strokes_end = "&H31EF"
+    Enclosed_CJK_Letters_and_Months_end = "&H32FF"
+    CJK_Compatibility_end = "&H33FF"
+    CJK_Compatibility_Ideographs_end = "&HFAFF"
+    CJK_Compatibility_Forms_end = "&HFE4F"
+    Enclosed_Ideographic_Supplement_end = "&H1F2FF"
+    CJK_Compatibility_Ideographs_Supplement_end = "&H2FA1F"
 
 End Enum
 
@@ -120,15 +120,15 @@ End Enum
 Rem 20240106 StackOverflow ai & Bing大菩薩: 建置C# 程式庫成dll檔案
 Rem 須【設定引用項目】UrlEncodingDLL.tlb
 Public Function UrlEncode_建置CSharp程式庫成dll檔案者(ByRef szString As String) As String
-'Public Function UrlEncode(ByRef szString As String) As String
-    If InStr(szString, "%") Then UrlEncode_建置CSharp程式庫成dll檔案者 = szString: Exit Function
-    'If InStr(szString, "%") Then UrlEncode = szString: Exit Function
-    Dim encoder As New UrlEncodingDLL.UrlEncoder
-    Dim encodedUrl As String
-    encodedUrl = encoder.UrlEncode(szString) ' Chinese text
-    'Debug.Print encodedUrl ' Output: "%E4%BD%A0%E5%A5%BD%E4%B8%96%E7%95%8C"
-    UrlEncode_建置CSharp程式庫成dll檔案者 = encodedUrl
-'    UrlEncode = encodedUrl
+''Public Function UrlEncode(ByRef szString As String) As String
+'    If InStr(szString, "%") Then UrlEncode_建置CSharp程式庫成dll檔案者 = szString: Exit Function
+'    'If InStr(szString, "%") Then UrlEncode = szString: Exit Function
+'    Dim encoder As New UrlEncodingDLL.UrlEncoder
+'    Dim encodedUrl As String
+'    encodedUrl = encoder.UrlEncode(szString) ' Chinese text
+'    'Debug.Print encodedUrl ' Output: "%E4%BD%A0%E5%A5%BD%E4%B8%96%E7%95%8C"
+'    UrlEncode_建置CSharp程式庫成dll檔案者 = encodedUrl
+''    UrlEncode = encodedUrl
 End Function
 Rem 20241003 Copilot大菩薩：https://sl.bing.net/jCIXUMLIFTE
 Rem VBA URL Encoding Issue ： https://sl.bing.net/ctZR9HBRFBc ： 看來 CreateObject("HTMLFile").parentWindow.encodeURIComponent(szString) 這行在 VBA 中可能會出現物件不支援此屬性或方法的錯誤。這是因為 VBA 中的 CreateObject("HTMLFile") 無法正確地創建 HTML 文件對象。
@@ -145,7 +145,7 @@ eH:
     Select Case Err.Number
         Case -2147221164
             If VBA.InStr(Err.Description, "類別未登錄") = 1 Then
-                Stop
+'                Stop
                 playSound 1.294
                 UrlEncode = szString
             Else
@@ -449,16 +449,25 @@ Public Function IsChineseCharacter(c As String) As Boolean
 '    Dim unicodeVal As Long
 '    unicodeVal = AscW(c)
 '    IsChineseCharacter = (unicodeVal >= &H4E00 And unicodeVal <= &H9FFF) Or (unicodeVal >= &H20000 And unicodeVal <= &H2A6DF)
-    IsChineseCharacter = IsCJK(c)(1)
+    IsChineseCharacter = IsCJK(c)(1) And IsCJK(c)(2) <> CJKBlockName.CJK_Symbols_and_Punctuation
 End Function
 
 ' 判斷一個字符串是否全部由CJK或CJK擴展字符集中的漢字組成
 Public Function IsChineseString(s As String) As Boolean
     Dim i As Long
     For i = 1 To Len(s)
-        If Not IsChineseCharacter(VBA.Mid(s, i, 1)) Then
-            IsChineseString = False
-            Exit Function
+        If IsHighSurrogate(VBA.Mid(s, i, 1)) Then
+        
+        ElseIf IsLowSurrogate(VBA.Mid(s, i, 1)) Then
+            If Not IsChineseCharacter(VBA.Mid(s, i - 1, 2)) Then
+                IsChineseString = False
+                Exit Function
+            End If
+        Else
+            If Not IsChineseCharacter(VBA.Mid(s, i, 1)) Then
+                IsChineseString = False
+                Exit Function
+            End If
         End If
     Next i
     IsChineseString = True
@@ -523,7 +532,77 @@ Function CharactersCount(x As String) As Long
     CharactersCount = cntr
 End Function
 
-Function IsCJK(c As String) As Collection 'Boolean,CJKBlockName
+Function IsCJK(c As String) As Collection
+    Dim code As Long, cjk As Boolean, cjkBName As CJKBlockName, result As New Collection
+    Dim unsignedCode As Long
+    
+    If Len(c) = 1 Then
+        code = AscW(c)
+    Else
+        getCodePoint c, code
+    End If
+    
+    ' 將code轉換為無符號整數 rem 20241102 Copilot大菩薩：是的，不僅在基本區域，擴充區域也會遇到類似的問題。許多擴充的CJK字符也會因為符號位的緣故被當作負數處理。為了確保這些字符在所有區域都能正確判斷，可以對所有區域的比較進行無符號處理。
+                                                '這種處理方式會避免符號位影響判斷結果，不論字符在基本區域還是擴充區域。
+    If code < 0 Then
+        unsignedCode = code + 65536 'Copilot大菩薩 ： 在VBA中，您可以使用無符號整數來處理這些帶負號影響比較範圍的16進位值。通過以下方式可以避免負號問題：
+                                                '使用 AscW 獲取字符的Unicode碼。
+                                                '檢查其是否為負數，然後轉換為無符號整數。
+                                                '這樣可以確保即使在處理基本區域內的字符時，也能正確地比較範圍，避免負號問題。
+    Else
+        unsignedCode = code
+    End If
+    
+    If unsignedCode >= CLng(CJKChartRangeString.CJK_Unified_Ideographs_start) And unsignedCode <= CLng(CJKChartRangeString.CJK_Unified_Ideographs_end) Then
+        cjk = True: cjkBName = CJKBlockName.CJK_Unified_Ideographs
+    ElseIf unsignedCode >= CLng(CJKChartRangeString.CJK_Compatibility_Ideographs_start) And unsignedCode <= CLng(CJKChartRangeString.CJK_Compatibility_Ideographs_end) Then
+        cjk = True: cjkBName = CJKBlockName.CJK_Compatibility_Ideographs
+    ElseIf unsignedCode >= CLng(CJKChartRangeString.CJK_Unified_Ideographs_Extension_A_start) And unsignedCode <= CLng(CJKChartRangeString.CJK_Unified_Ideographs_Extension_A_end) Then
+        cjk = True: cjkBName = CJKBlockName.CJK_Unified_Ideographs_Extension_A
+    ElseIf unsignedCode >= CLng(CJKChartRangeString.CJK_Unified_Ideographs_Extension_B_start) And unsignedCode <= CLng(CJKChartRangeString.CJK_Unified_Ideographs_Extension_B_end) Then
+        cjk = True: cjkBName = CJKBlockName.CJK_Unified_Ideographs_Extension_B
+    ElseIf unsignedCode >= CLng(CJKChartRangeString.CJK_Unified_Ideographs_Extension_C_start) And unsignedCode <= CLng(CJKChartRangeString.CJK_Unified_Ideographs_Extension_C_end) Then
+        cjk = True: cjkBName = CJKBlockName.CJK_Unified_Ideographs_Extension_C
+    ElseIf unsignedCode >= CLng(CJKChartRangeString.CJK_Unified_Ideographs_Extension_D_start) And unsignedCode <= CLng(CJKChartRangeString.CJK_Unified_Ideographs_Extension_D_end) Then
+        cjk = True: cjkBName = CJKBlockName.CJK_Unified_Ideographs_Extension_D
+    ElseIf unsignedCode >= CLng(CJKChartRangeString.CJK_Unified_Ideographs_Extension_E_start) And unsignedCode <= CLng(CJKChartRangeString.CJK_Unified_Ideographs_Extension_E_end) Then
+        cjk = True: cjkBName = CJKBlockName.CJK_Unified_Ideographs_Extension_E
+    ElseIf unsignedCode >= CLng(CJKChartRangeString.CJK_Unified_Ideographs_Extension_F_start) And unsignedCode <= CLng(CJKChartRangeString.CJK_Unified_Ideographs_Extension_F_end) Then
+        cjk = True: cjkBName = CJKBlockName.CJK_Unified_Ideographs_Extension_F
+    ElseIf unsignedCode >= CLng(CJKChartRangeString.CJK_Unified_Ideographs_Extension_G_start) And unsignedCode <= CLng(CJKChartRangeString.CJK_Unified_Ideographs_Extension_G_end) Then
+        cjk = True: cjkBName = CJKBlockName.CJK_Unified_Ideographs_Extension_G
+    ElseIf unsignedCode >= CLng(CJKChartRangeString.CJK_Unified_Ideographs_Extension_H_start) And unsignedCode <= CLng(CJKChartRangeString.CJK_Unified_Ideographs_Extension_H_end) Then
+        cjk = True: cjkBName = CJKBlockName.CJK_Unified_Ideographs_Extension_H
+    ElseIf unsignedCode >= CLng(CJKChartRangeString.CJK_Radicals_Supplement_start) And unsignedCode <= CLng(CJKChartRangeString.CJK_Radicals_Supplement_end) Then
+        cjk = True: cjkBName = CJKBlockName.CJK_Radicals_Supplement
+    ElseIf unsignedCode >= CLng(CJKChartRangeString.Kangxi_Radicals_start) And unsignedCode <= CLng(CJKChartRangeString.Kangxi_Radicals_end) Then
+        cjk = True: cjkBName = CJKBlockName.Kangxi_Radicals
+    ElseIf unsignedCode >= CLng(CJKChartRangeString.Ideographic_Description_Characters_start) And unsignedCode <= CLng(CJKChartRangeString.Ideographic_Description_Characters_end) Then
+        cjk = True: cjkBName = CJKBlockName.Ideographic_Description_Characters
+    ElseIf unsignedCode >= CLng(CJKChartRangeString.CJK_Symbols_and_Punctuation_start) And unsignedCode <= CLng(CJKChartRangeString.CJK_Symbols_and_Punctuation_end) Then
+        cjk = True: cjkBName = CJKBlockName.CJK_Symbols_and_Punctuation
+    ElseIf unsignedCode >= CLng(CJKChartRangeString.CJK_Strokes_start) And unsignedCode <= CLng(CJKChartRangeString.CJK_Strokes_end) Then
+        cjk = True: cjkBName = CJKBlockName.CJK_Strokes
+    ElseIf unsignedCode >= CLng(CJKChartRangeString.Enclosed_CJK_Letters_and_Months_start) And unsignedCode <= CLng(CJKChartRangeString.Enclosed_CJK_Letters_and_Months_end) Then
+        cjk = True: cjkBName = CJKBlockName.Enclosed_CJK_Letters_and_Months
+    ElseIf unsignedCode >= CLng(CJKChartRangeString.CJK_Compatibility_start) And unsignedCode <= CLng(CJKChartRangeString.CJK_Compatibility_end) Then
+        cjk = True: cjkBName = CJKBlockName.CJK_Compatibility
+    ElseIf unsignedCode >= CLng(CJKChartRangeString.CJK_Compatibility_Forms_start) And unsignedCode <= CLng(CJKChartRangeString.CJK_Compatibility_Forms_end) Then
+        cjk = True: cjkBName = CJKBlockName.CJK_Compatibility_Forms
+    ElseIf unsignedCode >= CLng(CJKChartRangeString.Enclosed_Ideographic_Supplement_start) And unsignedCode <= CLng(CJKChartRangeString.Enclosed_Ideographic_Supplement_end) Then
+        cjk = True: cjkBName = CJKBlockName.Enclosed_Ideographic_Supplement
+    ElseIf unsignedCode >= CLng(CJKChartRangeString.CJK_Compatibility_Ideographs_Supplement_start) And unsignedCode <= CLng(CJKChartRangeString.CJK_Compatibility_Ideographs_Supplement_end) Then
+        cjk = True: cjkBName = CJKBlockName.CJK_Compatibility_Ideographs_Supplement
+    Else
+        cjk = False
+    End If
+    
+    result.Add cjk
+    result.Add cjkBName
+    Set IsCJK = result
+End Function
+
+Function IsCJK_old(c As String) As Collection 'Boolean,CJKBlockName
     Dim code As Long, cjk As Boolean, cjkBlackName As CJKBlockName, result As New Collection
     Dim codeHex As String
 '    Dim code
@@ -623,7 +702,7 @@ Function IsCJK(c As String) As Collection 'Boolean,CJKBlockName
     End If
     result.Add cjk
     result.Add cjkBlackName
-    Set IsCJK = result
+    Set IsCJK_old = result
 Rem chatGPT大菩薩：抱歉，我之前回答的有誤。您提到的「元」字的Unicode碼確實是5143，屬於CJK基本集範圍內。
 Rem 另外，我之前的計算是有誤的，因為將16進制轉為10進制時需要注意正負號。正確的範圍應為：
 Rem CJK基本集：4E00（19968）到9FFF（40959）

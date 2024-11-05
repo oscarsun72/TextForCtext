@@ -231,11 +231,10 @@ namespace TextForCtext
         {
             get
             {
-                if (driver == null) return string.Empty; ReadOnlyCollection<string> whs;
+                if (driver == null) return null; ReadOnlyCollection<string> whs;
                 try
                 {
                     whs = driver.WindowHandles;
-
                 }
                 catch (Exception ex)
                 {
@@ -274,10 +273,11 @@ namespace TextForCtext
                     }
                 }
 
-                if (whs == null || whs.Count == 0) return string.Empty;
-                _lastValidWindowHandle = _lastValidWindowHandle ?? (whs.Count > 0 ? whs[whs.Count - 1] : null);
+                if (whs == null || whs.Count == 0) return null;// string.Empty;                
+                //_lastValidWindowHandle = _lastValidWindowHandle ?? (whs.Count > 0 ? whs[whs.Count - 1] : null);
                 if (!whs.Contains(_lastValidWindowHandle))
-                    return whs[whs.Count - 1];
+                    //return whs[whs.Count - 1];
+                    return whs.Last();
                 else
                     return _lastValidWindowHandle;
                 /* 20230822 Bing大菩薩： https://sl.bing.net/fo9YWhdvMWG
@@ -1440,7 +1440,7 @@ namespace TextForCtext
                         if (cDrv.Title == "新分頁" || cDrv.Url == "chrome://new-tab-page/")
                         {
                             cDrv.Close();
-                            Form1.playSound(Form1.soundLike.over);
+                            Form1.playSound(Form1.soundLike.over, true);
 
                             break;
                         }
@@ -1743,6 +1743,23 @@ namespace TextForCtext
             #region 檢查網址
             Uri uri = new Uri(url);
             if (uri.Authority != "ctext.org") { Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("想要輸入的網址並不是CTP網址"); return false; }
+            if (driver.Url == "about:blank")
+            {
+                driver.Close();
+                bool found = false; string urlDriver;
+                driver.SwitchTo().Window(driver.WindowHandles.Last());
+                for (int i = driver.WindowHandles.Count - 1; i > -1; i--)
+                {
+                    urlDriver = ReplaceUrl_Box2Editor(driver.Url);
+                    if (urlDriver == url || url.Contains(urlDriver))
+                    {
+                        driver.Url = url;
+                        found = true; break;
+                    }
+                }
+                if (!found) driver.SwitchTo().Window(driver.WindowHandles.Last());
+            }
+
             uri = new Uri(driver.Url);
             if (uri.Authority != "ctext.org") { Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("目前 driver的網址並不是CTP網址"); return false; }
 
@@ -1995,7 +2012,12 @@ namespace TextForCtext
                             {
                             }
                         else
+                        {
                             Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("請手動檢查資料是否有正確送出。");
+                            //LastValidWindow = driver.CurrentWindowHandle;
+                            //openNewTabWindow();
+                            driver.Navigate().GoToUrl(url);
+                        }
                         //throw;
                     }
                     #region 送出後檢查是否是「Please confirm that you are human! 敬請輸入認證圖案」頁面 網址列：https://ctext.org/wiki.pl
@@ -2480,6 +2502,9 @@ namespace TextForCtext
                                 driver.Navigate().GoToUrl(url);
                                 //driver.SwitchTo().Window(driver.WindowHandles[0]);
                             }
+                            else if (ex.Message.StartsWith("not connected to DevTools"))//-2146233088disconnected: not connected to DevTools
+                                                                                        //(failed to check if window was closed: disconnected: not connected to DevTools)
+                                RestartChromedriver();
                             else
                             {
                                 MessageBox.Show(ex.HResult + ex.Message);
@@ -5806,6 +5831,7 @@ internal static string getImageUrl() {
             {
                 StopOCR = true; return false;
             }
+        reNavigate:
             try
             {
                 driver.Navigate().GoToUrl(gjCool);
@@ -5828,6 +5854,17 @@ internal static string getImageUrl() {
                             }
                             StopOCR = true;
                             return false;
+                        }
+                        else if (ex.Message.StartsWith("timeout: Timed out receiving message from renderer: "))//timeout: Timed out receiving message from renderer: 3.559
+                                                                                                               //(Session info: chrome = 130.0.6723.70)
+                        {
+                            if (driver.Manage().Timeouts().PageLoad < new TimeSpan(0, 2, 0))
+                            {
+                                driver.Manage().Timeouts().PageLoad = driver.Manage().Timeouts().PageLoad.Add(new TimeSpan(0, 1, 0));
+                                goto reNavigate;
+                            }
+                            else
+                                goto default;
                         }
                         else
                             goto default;
@@ -8478,10 +8515,10 @@ internal static string getImageUrl() {
                 "咸恆","老陰", "老陽", "少陰", "少陽","十翼","四象","兩儀","大衍",
                 "无妄", "彖", "象曰", "象傳", "象日", "象云","大象","小象","象文", "筮", // 不支援標點檢索，如「, "象："」
                 "初九","九二","九三","九四","九五","上九","初六","六二","六三","六四","六五","上六","用九","用六", "繇辭","繇詞",
-                "伏羲","庖羲","庖𦏁","宓𦏁","宓羲","宓犧","伏犧","庖犧","中正","見龍在田",
+                "伏羲","庖羲","庖𦏁","宓𦏁","宓羲","宓犧","伏犧","庖犧","中正","見龍在田","噬膚","舊井","井谷","為麗","離麗",
                 "隨時之義","庖有魚","包有魚","精義入神","豶豕","童牛","承之羞","雷在天上","錫馬", "蕃庶","晝日","三接","懲忿","窒欲","窒慾","敬以直內","義以方外","迷後得主","利西南","品物咸章","天下大行","益動而", "日進無疆","頻巽","豚魚","頻復", "懲窒","閑邪","存誠","乾乾","悔吝","憧憧", "類萬物","柔順利貞","比之匪人","貞厲","履貞","履道坦坦","貞吉","貞凶","悔亡","時義","健順", "內健而外順", "內健外順", "外順而內健", "外順內健","敦復","直方","開物成務","窮神知化", "夕惕","惕若","研幾極深","極深研幾","一陰一陽","允升","木上有水","勞民勸相","索而得","我有好爵","言有序","有聖人之道四","長子帥師","弟子輿尸","無悶","日用而不知", "日用不知","之道鮮","原始反終", "寂然不動", "感而遂通","朋從", "朋盍", "容民畜眾","有過則改","見善則遷","養正","養賢","知臨","臨大君", "默而成之","黙而成之","不言而信", "存乎德行","通天下之志","履正", "繼之者善", "仁者見之", "知者見之", "智者見之","屯其膏", "貞不字","翰音","鶾音", "善不積","立成器", "與地之",
-                "象義","大貞","小貞", "帝出乎震","帝出於震","帝出于震", "日新","與時偕行","盈虛","豐亨","天在山中", "多識前言往行", "蹇蹇", "匪躬","洗心","龍德","慎言語","節飲食","艮其限","乃孚","幹父","裕父","係遯","甘臨","號咷", "風行水上",
-                "終難","咸之九五","賁於丘園","賁于丘園","賁於邱園","賁于邱園", "束帛","戔戔", "損下以益上", "損下益上", "損下而益上", "貳用缶","納約自牖","利見大人", "何思何慮","同歸而殊塗","一致而百慮", "同歸殊塗","一致百慮","先天後天","改命吉","天下雷行","喪貝","羝羊","羝芉", "觸藩", "觸籓","事不密","艱貞","金矢","利有","攸往","包蒙", "童蒙", "蒙吉",
+                "象義","大貞","小貞", "帝出乎震","帝出於震","帝出于震", "日新","與時偕行","盈虛","山澤通氣","豐亨","天在山中", "多識前言往行", "蹇蹇", "匪躬","洗心","龍德","慎言語","節飲食","艮其限","乃孚","幹父","裕父","係遯","甘臨","號咷", "風行水上",
+                "終難","咸之九五","賁於丘園","賁于丘園","賁於邱園","賁于邱園", "束帛","戔戔", "損下以益上", "其腓","菑畬","葘畬", "損下益上", "損下而益上", "貳用缶","納約自牖","利見大人", "何思何慮","同歸而殊塗","一致而百慮", "同歸殊塗","一致百慮","先天後天","改命吉","天下雷行","喪貝","羝羊","羝芉", "觸藩", "觸籓","事不密","艱貞","金矢","利有","攸往","包蒙", "童蒙", "蒙吉",
                 "精氣為物","游魂為變","遊䰟為變","游䰟為變", "漣如","焚如","知幾其神","禴祭", "東鄰","朋亡", "渙其群","有子考","甲三日","庚三日","不易乎世","不成乎名","天一地二","者其辭","升其高陵","天道虧盈","鞏用", "祗悔", "祇悔","秖悔","秪悔","履霜","蒞眾","理財", "正辭", "禁民為非","撝謙", "浚恒","浚恆", "立其誠","立誠","修辭立誠","開國承家","確乎其不可拔","碻乎其不可拔"
                 };
 
@@ -8494,7 +8531,7 @@ internal static string getImageUrl() {
                 List<string> additionalKeywords = new List<string> { "无𡚶", "𧰼", "系辭", "擊詞", "擊辭", "繫驟",
                     "乹","〈乾〉", "〈坤〉", "〈乾坤〉", "咸恒","剥","頥","㢲","旣濟","涣","兑","兊","大壮",
                     "〈泰〉","〈否〉","〈損〉","〈益〉","〈屯〉","〈豫〉","〈旡妄〉","〈復〉","〈震〉",
-                    "少隂","太隂","𥘉九","𭃨九","𭃡九","𥘉六","𭃨六","𭃡六","索而𢔶",
+                    "少隂","太隂","𥘉九","𭃨九","𭃡九","𥘉六","𭃨六","𭃡六","索而𢔶","离麗","旧井","𦾔井",
                 "悔亾","悔兦","无悶","遯世无悶","容民畜衆","盈虚","盈𮓡","盈虗","匪躳","愼言語","賁於𠀉園", "賁于𠀉園","賁於𠀌園", "賁于𠀌園","賁於𨚑園", "賁于𨚑園", "𩔖萬物", "𩔗萬物","東隣殺牛","禴𥙊","禴𫞴","涣其群","渙其羣","涣其羣","攺命吉","撝謙","事不宻","脩辭立誠",
                 "有子攷","不易乎卋","不易乎丗","升其髙陵","蒞衆","莅眾","莅衆","大𧰼","䘮貝","𭈬貝","𠷔貝","丧貝","𠸶貝","𡂤貝","包𫎇", "童𫎇", "𫎇吉",
                 "伏𦏁"};
@@ -9268,6 +9305,41 @@ internal static string getImageUrl() {
             return true;
         }
 
+        /// <summary>
+        /// 置換Url中的Box 為Editor 如 https://ctext.org/library.pl?if=gb&file=34873&page=78&editwiki=164323#editor
+        /// https://ctext.org/library.pl?if=gb&file=34873&page=78&editwiki=164323#box(280,86,1,0) 20241101
+        /// 與 FixUrl＿ImageTextComparisonPage 可互參考
+        /// </summary>
+        /// <param name="url"></param>
+        /// <returns>傳回清除後的結果</returns>
+        internal static string ReplaceUrl_Box2Editor(string url)
+        {
+            if (!url.StartsWith("http")) return url;
+            int s = url.IndexOf("#box"); string xClear = null;
+            if (s > -1)
+            {
+                xClear = url.Substring(s, url.IndexOf(")", s) - s + 1);
+                url = url.Substring(0, s) + url.Substring(s + xClear.Length, url.Length - (s + xClear.Length))
+                    + (url.IndexOf("#editor") == -1 ? "#editor" : string.Empty);
+            }
+            return url;
+        }
+        /// <summary>
+        /// 清除Url中的雜項，如 #box(280,86,1,0) 20241101
+        /// </summary>
+        /// <param name="url"></param>
+        /// <returns>傳回清除後的結果</returns>
+        internal static string ClearUrl_BoxEtc(string url)
+        {
+            if (!url.StartsWith("http")) return url;
+            int s = url.IndexOf("#box"); string xClear = null;
+            if (s > -1)
+            {
+                xClear = url.Substring(s, url.IndexOf(")", s) - s + 1);
+                url = url.Substring(0, s) + url.Substring(s + xClear.Length, url.Length - (s + xClear.Length));
+            }
+            return url;
+        }
 
         /// <summary>
         /// 直接取代文字的編輯頁面
@@ -9325,7 +9397,7 @@ internal static string getImageUrl() {
                             {
                                 foreach (var item in driver.WindowHandles)
                                 {
-                                    if (driver.Url == url)
+                                    if (ReplaceUrl_Box2Editor(driver.Url) == url)
                                     {
                                         iwe = Edit_Linkbox;//waitFindWebElementBySelector_ToBeClickable("#content > div:nth-child(7) > div:nth-child(2) > a:nth-child(2)");
                                         if (iwe == null)
@@ -9346,7 +9418,7 @@ internal static string getImageUrl() {
                                         foreach (var item in driver.WindowHandles)
                                         {
                                             driver.SwitchTo().Window(item);
-                                            if (driver.Url == ActiveForm1.textBox3Text) { found = true; break; }
+                                            if (ReplaceUrl_Box2Editor(driver.Url) == ActiveForm1.textBox3Text) { found = true; break; }
                                         }
                                     }
                                     if (!found)
@@ -9392,7 +9464,7 @@ internal static string getImageUrl() {
                     string url;
                     try
                     {
-                        url = driver.SwitchTo().Window(item).Url;
+                        url = ReplaceUrl_Box2Editor(driver.SwitchTo().Window(item).Url);
                     }
                     catch (Exception)
                     {
@@ -9417,7 +9489,8 @@ internal static string getImageUrl() {
                 //openNewTabWindow();
                 try
                 {
-                    driver.SwitchTo().NewWindow(WindowType.Tab);
+                    //driver.SwitchTo().NewWindow(WindowType.Tab);
+                    openNewTabWindow();
                 }
                 catch (Exception)
                 {
@@ -9437,7 +9510,6 @@ internal static string getImageUrl() {
                 }
                 try
                 {
-
                     driver.Navigate().GoToUrl(editUrl);
                 }
                 catch (Exception ex)
@@ -9762,7 +9834,50 @@ internal static string getImageUrl() {
             iwe.SendKeys(OpenQA.Selenium.Keys.Shift + OpenQA.Selenium.Keys.Insert);//改成貼上
 
         }
-
+        /// <summary>
+        /// 檢索《韻典網》
+        /// </summary>
+        /// <param name="x"></param>
+        /// <returns></returns>
+        public static bool LookupYTenx(string x)
+        {
+            if (!IsDriverInvalid())
+            {
+                LastValidWindow = driver.CurrentWindowHandle;
+            }
+            else
+            {
+                try
+                {
+                    LastValidWindow = driver.WindowHandles.Last();
+                }
+                catch (Exception)
+                {
+                    RestartChromedriver();
+                }
+            }
+            openNewTabWindow();
+            driver.Navigate().GoToUrl("https://ytenx.org/");
+            //檢索框
+            IWebElement iwe = waitFindWebElementBySelector_ToBeClickable("#search-form > input.search-query.span3");
+            DateTime dt = DateTime.Now;
+            while (iwe == null)
+            {
+                iwe = waitFindWebElementBySelector_ToBeClickable("#search-form > input.search-query.span3");
+                if (DateTime.Now.Subtract(dt).TotalSeconds > 5)
+                {
+                    Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("逾時！");
+                    return false;
+                }
+            }
+            SetIWebElementValueProperty(iwe, x);
+            iwe.SendKeys(OpenQA.Selenium.Keys.Enter);
+            //檢索結果
+            if (null != waitFindWebElementBySelector_ToBeClickable("body > div.container.container-main > div > div > div.page-header > h1", 5))
+                return true;
+            else
+                return false;
+        }
         /// <summary>
         /// 查找《字統網》https://zi.tools/
         /// </summary>
@@ -9773,17 +9888,22 @@ internal static string getImageUrl() {
             StringInfo si = new StringInfo(x);
             if (si.LengthInTextElements != 1) return false;
 
-            retry:
+            TimeSpan ts = new TimeSpan();
+        retry:
             try
             {
                 if (!IsDriverInvalid())
+                {
                     LastValidWindow = driver.CurrentWindowHandle;
+                    ts = driver.Manage().Timeouts().PageLoad;
+                }
                 else
                 {
                     LastValidWindow = driver.WindowHandles.Last();
                     Form1.playSound(Form1.soundLike.error, true);
                 }
                 openNewTabWindow(OpenQA.Selenium.WindowType.Tab);
+                driver.Manage().Timeouts().PageLoad = new TimeSpan(0, 0, 4);
                 driver.Navigate().GoToUrl("https://zi.tools/zi/" + x);
 
                 //點擊"Relatives 相關字" .查詢《字統網》多是為找系統有無該異體字，故今改寫為查詢後在頁面尋找「異寫字」的功能，以利跳到該區塊 20240819
@@ -9791,7 +9911,8 @@ internal static string getImageUrl() {
                 IWebElement iwe = null;
                 //while (true)
                 //{
-                iwe = waitFindWebElementBySelector_ToBeClickable("#mainContent > span > div.content > div > div.sidebar_navigation > div > div:nth-child(11)", 4);
+                iwe = waitFindWebElementBySelector_ToBeClickable("#mainContent > span > div.content > div > div.sidebar_navigation > div > div:nth-child(11)"
+                        , 4);
                 //if (iwe != null ||
                 //DateTime.Now.Subtract(dt).TotalSeconds > 10) break;
                 //}
@@ -9810,11 +9931,14 @@ internal static string getImageUrl() {
                     else if (ex.Message.StartsWith("An unknown exception was encountered sending an HTTP request to the remote WebDriver server for URL "))
                     {
                         MessageBox.Show("請關閉Chrome瀏覽器，並用本程式重新啟動 Chrome瀏覽器", "", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
+                        if (ts != new TimeSpan()) driver.Manage().Timeouts().PageLoad = ts;
                         return false;
                     }
                     else
                     {
-                        MessageBox.Show(ex.HResult + ex.Message, "", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
+                        Console.WriteLine(ex.HResult + ex.Message);
+                        Form1.playSound(Form1.soundLike.error, true);
+                        //MessageBox.Show(ex.HResult + ex.Message, "", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
                     }
                 }
                 return false;
@@ -9822,9 +9946,11 @@ internal static string getImageUrl() {
             if (!SetFocusOnWebPageBody())
             {
                 driver.SwitchTo().Window(LastValidWindow);
+                if (ts != new TimeSpan()) driver.Manage().Timeouts().PageLoad = ts;
                 return false;
             }
 
+            if (ts != new TimeSpan()) driver.Manage().Timeouts().PageLoad = ts;
             return true;
         }
 
@@ -10349,34 +10475,58 @@ internal static string getImageUrl() {
             bool exact = false;
             const string url = "https://kandianguji.com/search_all";
             if (DialogResult.OK == Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("是否要【精確檢索】？")) exact = true;
+            TimeSpan ts = new TimeSpan();
             if (!IsDriverInvalid())
             {
                 LastValidWindow = driver.CurrentWindowHandle;
                 //if (driver.Url != url) driver.Url = url;
+                ts = driver.Manage().Timeouts().PageLoad;
             }
             //else
             //{
             try
             {
                 openNewTabWindow();
+                driver.Manage().Timeouts().PageLoad = new TimeSpan(0, 0, 3);
                 GoToUrlandActivate(url, true);
             }
             catch (Exception)
             {
+                if (ts != new TimeSpan()) driver.Manage().Timeouts().PageLoad = ts;
                 return false;
             }
             //}
             IWebElement iwe = waitFindWebElementBySelector_ToBeClickable("#keyword");
-            if (iwe == null) return false;
+            if (iwe == null)
+            {
+                if (ts != new TimeSpan()) driver.Manage().Timeouts().PageLoad = ts;
+                return false;
+            }
+
             SetIWebElementValueProperty(iwe, searchTxt);
             //按下Enter是沒作用的
             if (exact)
                 iwe = waitFindWebElementBySelector_ToBeClickable("body > div > div > div.form-inline > button.btn.btn-info.btn-lg.ml-2");
             else
                 iwe = waitFindWebElementBySelector_ToBeClickable("body > div > div > div.form-inline > button.btn.btn-danger.btn-lg");
-            if (iwe == null) return false;
+            if (iwe == null)
+            {
+                if (ts != new TimeSpan()) driver.Manage().Timeouts().PageLoad = ts;
+                return false;
+            }
             iwe.Click();
+            if (ts != new TimeSpan()) driver.Manage().Timeouts().PageLoad = ts;
+            //driver.Manage().Timeouts().PageLoad = new TimeSpan(0, 1, 0);
             return true;
+        }
+        /// <summary>
+        /// chromedriver被誤關時 20241008
+        /// </summary>
+        internal static void RestartChromedriver()
+        {
+            killchromedriverFromHere();
+            driver = null;
+            DriverNew();
         }
         /// <summary>
         /// 檢索《漢籍全文資料庫》，成功則傳回true。20241008
@@ -10478,8 +10628,10 @@ internal static string getImageUrl() {
 
             SetIWebElementValueProperty(iwe, searchTxt);
             iwe.SendKeys(OpenQA.Selenium.Keys.Enter);
+
             return true;
         }
+
         /// <summary>
         /// 讓Chrome瀏覽器取得焦點
         /// </summary>
@@ -10490,7 +10642,8 @@ internal static string getImageUrl() {
             if (!IsDriverInvalid())
             {
                 driver.SwitchTo().Window(driver.CurrentWindowHandle);
-                if (ActiveForm1.Active) BringToFront("chrome");
+                //if (ActiveForm1.Active) BringToFront("chrome");//多執行緒時會出現錯誤
+                BringToFront("chrome");
                 return true;
             }
             else return false;

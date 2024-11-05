@@ -7,9 +7,17 @@ Public chromedriversPID() As Long '儲存chromedriver程序ID的陣列
 Public chromedriversPIDcntr As Integer 'chromedriversPID的下標值
 Public ActiveXComponentsCanNotBeCreated As Boolean
 
-' 宣告 Windows API 函數 20241003 creedit_with_Copilot大菩薩：改進WordVBA+SeleniumBasic 開啟Chrome瀏覽器新分頁的方法：https://sl.bing.net/iqY5XH1MVci
-Declare PtrSafe Function SetForegroundWindow Lib "user32" (ByVal hWnd As LongPtr) As Long
-Declare PtrSafe Function FindWindow Lib "user32" Alias "FindWindowA" (ByVal lpClassName As String, ByVal lpWindowName As String) As LongPtr
+'' 宣告 Windows API 函數 20241003 creedit_with_Copilot大菩薩：改進WordVBA+SeleniumBasic 開啟Chrome瀏覽器新分頁的方法：https://sl.bing.net/iqY5XH1MVci
+'Declare PtrSafe Function SetForegroundWindow Lib "user32" (ByVal hWnd As LongPtr) As Long
+'Declare PtrSafe Function FindWindow Lib "user32" Alias "FindWindowA" (ByVal lpClassName As String, ByVal lpWindowName As String) As LongPtr
+#If VBA7 Then
+    Private Declare PtrSafe Function FindWindow Lib "user32" Alias "FindWindowA" (ByVal lpClassName As String, ByVal lpWindowName As String) As LongPtr
+    Private Declare PtrSafe Function SetForegroundWindow Lib "user32" (ByVal hWnd As LongPtr) As Long
+#Else
+    Private Declare Function FindWindow Lib "user32" Alias "FindWindowA" (ByVal lpClassName As String, ByVal lpWindowName As String) As Long
+    Private Declare Function SetForegroundWindow Lib "user32" (ByVal hWnd As Long) As Long
+#End If
+
 Declare PtrSafe Function GetForegroundWindow Lib "user32" () As LongPtr
 Declare PtrSafe Function GetWindowText Lib "user32" Alias "GetWindowTextA" (ByVal hWnd As LongPtr, ByVal lpString As String, ByVal cch As Long) As Long
 Private last_ValidWindow As String
@@ -19,14 +27,14 @@ Rem 20241005 Copilot大菩薩：WordVBA 判斷 Word 是否為最前端視窗：https://sl.bing.
 Function IsWordActive() As Boolean
     Dim hWnd As LongPtr
     Dim title As String * 255
-    Dim length As Long
+    Dim Length As Long
     
     ' 獲取當前活動視窗的句柄
     hWnd = GetForegroundWindow()
     
     ' 獲取視窗標題
-    length = GetWindowText(hWnd, title, Len(title))
-    title = Left(title, length)
+    Length = GetWindowText(hWnd, title, Len(title))
+    title = Left(title, Length)
     
     ' 檢查標題是否包含 "Microsoft Word"
     If InStr(title, "Microsoft Word") > 0 Then
@@ -41,6 +49,13 @@ Sub ActivateChrome()
     hWnd = FindWindow("Chrome_WidgetWin_1", vbNullString)
     If hWnd <> 0 Then
         SetForegroundWindow hWnd
+    Else
+        hWnd = FindWindow(vbNullString, "Google Chrome")
+        If hWnd <> 0 Then
+            SetForegroundWindow hWnd
+        Else
+            MsgBox "Could not find Chrome window", vbCritical
+        End If
     End If
 End Sub
 
@@ -272,14 +287,19 @@ ErrH:
                 Exit Function
             End If
         Case -2146233088 '**'
-            'Debug.Print Err.Description
-            If InStr(Err.Description, "Chrome failed to start: exited normally.") Then
+            Debug.Print Err.Number & Err.Description
+            If VBA.InStr(Err.Description, "invalid session id") = 1 Then '-2146233088 invalid session id
+                killchromedriverFromHere
+                Set WD = Nothing
+                GoTo reStart
+            ElseIf InStr(Err.Description, "Chrome failed to start: exited normally.") Then
                 '' err.Descriptionunknown error: Chrome failed to start: exited normally.
                 ''  (unknown error: DevToolsActivePort file doesn't exist)
                 '' (The process started from chrome location W:\PortableApps\PortableApps\GoogleChromePortable\App\Chrome-bin\chrome.exe is no longer running, so ChromeDriver is assuming that Chrome has crashed.)
                 If MsgBox("請關閉先前開啟的Chrome瀏覽器再繼續", vbExclamation + vbOKCancel) = vbOK Then
                         'killProcessesByName "ChromeDriver.exe", pid
                         killchromedriverFromHere
+                        Set WD = Nothing
                     GoTo reStart
                 Else
         '            WD.Quit
@@ -1142,6 +1162,7 @@ Rem 20241006 《看典古籍·古籍全文檢索》，成功則傳回true
 Function KandiangujiSearchAll(searchTxt As String) As Boolean
     Dim exact As Boolean
     Const url = "https://kandianguji.com/search_all"
+    SystemSetup.SetClipboard searchTxt
     If VBA.vbOK = VBA.MsgBox("是否要【精確檢索】？", vbQuestion + vbOKCancel) Then exact = True
 
     If Not IsWDInvalid() Then
@@ -1172,6 +1193,7 @@ End Function
 Rem 20241006 檢索《漢籍全文資料庫》，成功則傳回true
 Function HanchiSearch(searchTxt As String) As Boolean
     Dim free As Boolean, inside As Boolean
+    SystemSetup.SetClipboard searchTxt
     If Not IsWDInvalid() Then
         If VBA.Left(WD.url, VBA.Len("https://hanchi.ihp.sinica.edu.tw/")) <> "https://hanchi.ihp.sinica.edu.tw/" Then
             If VBA.vbCancel = MsgBox("是否是【授權使用】？", vbQuestion + vbOKCancel) Then free = True
@@ -1191,6 +1213,7 @@ Function HanchiSearch(searchTxt As String) As Boolean
             Exit Function
         End If
     End If
+    
     WD.SwitchTo().Window (WD.CurrentWindowHandle)
     ActivateChrome
     Dim iwe As SeleniumBasic.IWebElement, key As New SeleniumBasic.keys
@@ -1350,8 +1373,8 @@ Function LookupDictionary_of_ChineseCharacterVariants(x As String) As String()
     word.Application.windowState = wdWindowStateMinimize
     WD.SwitchTo.Window (WD.CurrentWindowHandle)
     VBA.Interaction.DoEvents
-
 '    VBA.AppActivate "chrome"
+    ActivateChrome
 
     
     If Not iwe Is Nothing Then
@@ -2856,7 +2879,7 @@ Function grabEeeLearning_IChing_ZhouYi_originalText(guaSequence As String, resul
 End Function
 Rem 20240914 creedit_with_Copilot大菩薩：https://sl.bing.net/gCpH6nC61Cu
 ' 設定元件 IWebElement的value屬性值  20240913
-Private Function SetIWebElementValueProperty(iwe As IWebElement, txt As String) As Boolean
+Function SetIWebElementValueProperty(iwe As IWebElement, txt As String) As Boolean
     If Not iwe Is Nothing Then
         'driver.ExecuteScript "arguments[0].value = arguments[1];", element, valueToSet
         WD.ExecuteScript "arguments[0].value = arguments[1];", iwe, txt
@@ -2865,7 +2888,7 @@ Private Function SetIWebElementValueProperty(iwe As IWebElement, txt As String) 
 End Function
 Rem 20240914 creedit_with_Copilot大菩薩：https://sl.bing.net/gCpH6nC61Cu
 ' 設定元件 IWebElement的value屬性值  20240913
-Private Function SetIWebElement_textContent_Property(iwe As IWebElement, txt As String) As Boolean
+Function SetIWebElement_textContent_Property(iwe As IWebElement, txt As String) As Boolean
     If Not iwe Is Nothing Then
         'driver.ExecuteScript "arguments[0].value = arguments[1];", element, valueToSet
         WD.ExecuteScript "arguments[0].textContent = arguments[1];", iwe, txt

@@ -137,16 +137,25 @@ namespace TextForCtext
             }
             if (response.IsSuccessStatusCode)
             {
-                var result = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+                try
+                {
+                    var result = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
 
-                // 解析 JSON
-                var parsedJson = JObject.Parse(result);
-                var data = parsedJson["data"].ToObject<List<string>>();
+                    // 解析 JSON
+                    var parsedJson = JObject.Parse(result);
 
-                // 將 data 轉換為換行分隔的字符串
-                var formattedResult = string.Join(Environment.NewLine, data);
+                    var data = parsedJson["data"].ToObject<List<string>>();
 
-                return formattedResult;
+
+                    // 將 data 轉換為換行分隔的字符串
+                    var formattedResult = string.Join(Environment.NewLine, data);
+
+                    return formattedResult;
+                }
+                catch (Exception)
+                {
+                    return null;
+                }
             }
             else
             {

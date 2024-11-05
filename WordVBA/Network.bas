@@ -35,7 +35,7 @@ Sub 查詢國語辭典() '指定鍵:Ctrl+F12'2010/10/18修訂
         Else
             Exit Sub
         End If
-        Shell funame
+        shell funame
     End If
     查國語辭典
 End Sub
@@ -66,7 +66,7 @@ If Selection.Type = wdSelectionNormal Then
     Else
         Exit Sub
     End If
-    Shell funame
+    shell funame
 End If
 
 End Sub
@@ -96,6 +96,10 @@ Sub 查字統網()
         MsgBox "限查1字", vbExclamation ', vbError
         Exit Sub
     End If
+    If Not code.IsChineseCharacter(Selection.text) Then
+        MsgBox "限中文字", vbCritical
+        Exit Sub
+    End If
     SeleniumOP.LookupZitools Selection.text
 End Sub
 Sub 查異體字字典()
@@ -105,6 +109,10 @@ Sub 查異體字字典()
         MsgBox "限查1字", vbExclamation ', vbError
         Exit Sub
     End If
+    If Not code.IsChineseCharacter(Selection.text) Then
+        MsgBox "限中文字", vbCritical
+        Exit Sub
+    End If
     SeleniumOP.LookupDictionary_of_ChineseCharacterVariants Selection.text
 End Sub
 Sub 查康熙字典網上版()
@@ -112,6 +120,10 @@ Sub 查康熙字典網上版()
     文字處理.ResetSelectionAvoidSymbols
     If Selection.Characters.Count > 1 Then
         MsgBox "限查1字", vbExclamation ', vbError
+        Exit Sub
+    End If
+    If Not code.IsChineseCharacter(Selection.text) Then
+        MsgBox "限中文字", vbCritical
         Exit Sub
     End If
     SeleniumOP.LookupKangxizidian Selection.text
@@ -136,7 +148,7 @@ Sub 查韻典網()
     SeleniumOP.LookupYtenx Selection.text
 End Sub
 Sub 查國學大師()
-    Rem Ctrl + d + s （ds：大師）
+    Rem Alt + Shift + g ：檢索《國學大師》（g=guo 國學大師的國）；原為：Ctrl + d + s （ds：大師）
     文字處理.ResetSelectionAvoidSymbols
     SeleniumOP.LookupGXDS Selection.text
 End Sub
@@ -250,6 +262,10 @@ Sub 查說文解字並取回其解釋欄位及網址值插入至插入點位置()
     Dim ar 'As Variant
     Dim windowState As word.WdWindowState      '記下原來的視窗模式
     windowState = word.Application.windowState '記下原來的視窗模式
+    If Not code.IsChineseCharacter(Selection.text) Then
+        MsgBox "限中文字", vbCritical
+        Exit Sub
+    End If
     ar = SeleniumOP.LookupShuowenOrg(Selection.text)
     If ar(0) = vbNullString Then
         word.Application.Activate
@@ -301,6 +317,10 @@ Sub 查說文解字並取回其解釋欄位段注及網址值插入至插入點位置()
     文字處理.ResetSelectionAvoidSymbols
     If Selection.Characters.Count > 1 Then
         MsgBox "限查1字", vbExclamation ', vbError
+        Exit Sub
+    End If
+    If Not code.IsChineseCharacter(Selection.text) Then
+        MsgBox "限中文字", vbCritical
         Exit Sub
     End If
     Dim ar 'As Variant
@@ -398,6 +418,10 @@ Sub 查異體字字典並取回其說文釋形欄位及網址值插入至插入點位置()
         MsgBox "限查1字", vbExclamation ', vbError
         Exit Sub
     End If
+    If Not code.IsChineseCharacter(Selection.text) Then
+        MsgBox "限中文字", vbCritical
+        Exit Sub
+    End If
     'ar(1) as String
     Dim ar As Variant, x As String, windowState As word.WdWindowState     '記下原來的視窗模式
 
@@ -483,7 +507,7 @@ End Sub
 Rem 1.指定卦名再操作 20241004 Alt + Shift + y (y:易) 。2.若游標所在為《易學網》的網址，則將其內容讀入到文件（於該連結段落後插入）
 Sub 查易學網易經周易原文指定卦名文本_並取回其純文字值及網址值插入至插入點位置()
     SystemSetup.playSound 0.484
-    Dim linkInput As Boolean, rngLink As Range, rngHtml As Range, ss As Long
+    Dim linkInput As Boolean, rngLink As Range, rngHtml As Range, ss As Long, x As String, gua As String, e, arrYi
     If Selection.Type = wdSelectionIP Then
         '若游標所在為《易學網》的網址，則將其內容讀入到文件
         Set rngLink = Selection.Range
@@ -514,16 +538,14 @@ previousLink:
         End If
     Else
         文字處理.ResetSelectionAvoidSymbols
-        
-        If Selection.Characters.Count > 2 Then
+                
+        If Selection.Characters.Count > 3 Then
 errExit:
             word.Application.Activate
             VBA.MsgBox "卦名有誤! 請重新選取。", vbExclamation
             Exit Sub
         End If
     End If
-    Dim gua As String
-    gua = Selection.text
     
     Dim ur As UndoRecord, s As Long, ed As Long
     Dim fontsize As Single, rngBooks As Range
@@ -532,6 +554,8 @@ errExit:
 
     SystemSetup.stopUndo ur, "查易學網易經周易原文指定卦名文本_並取回其純文字值及網址值插入至插入點位置"
     word.Application.ScreenUpdating = False
+    Dim windowState As word.WdWindowState      '記下原來的視窗模式
+    windowState = word.Application.windowState '記下原來的視窗模式
     If Selection.Document.path <> vbNullString And Selection.Document.Saved = False Then Selection.Document.Save
     
     s = Selection.start: ss = s
@@ -582,8 +606,48 @@ errExit:
                 GoTo finish
             End If
         End If
-    Else
-
+    Else 'If Not linkInput Then
+        Rem 自動檢查下一個字
+            Selection.Collapse wdCollapseStart
+'        If Selection.Characters.Count = 1 Then
+            x = Selection.text
+            If Not Keywords.周易卦名_卦形_卦序.Exists(x) And Not Keywords.易學異體字典.Exists(x) Then
+                x = Selection.Characters(1).text & Selection.Characters(1).Next(wdCharacter, 1).text
+                If Keywords.周易卦名_卦形_卦序.Exists(x) Or Keywords.易學異體字典.Exists(x) Then
+                    Selection.MoveRight wdCharacter, 2, wdExtend
+                Else
+                    arrYi = Array("習坎", "繫辭", "說卦", "序卦", "雜卦")
+                    If VBA.IsArray(VBA.Filter(arrYi, x)) Then
+                        If (UBound(VBA.Filter(arrYi, x)) > -1) Then
+                            Select Case x
+                                Case "習坎"
+                                    gua = "29"
+                                    GoTo grab:
+                                Case "繫辭"
+                                    Select Case Selection.Next(wdCharacter, 2).text
+                                        Case "上"
+                                            gua = "65"
+                                            GoTo grab:
+                                        Case "下"
+                                            gua = "66"
+                                            GoTo grab:
+                                    End Select
+                                Case "說卦"
+                                    gua = "67" '"說卦傳"
+                                    GoTo grab:
+                                Case "序卦"
+                                    gua = "68" '"序卦傳"
+                                    GoTo grab:
+                                Case "雜卦"
+                                    gua = "69" '"雜卦傳"
+                                    GoTo grab:
+                            End Select
+                        End If
+                    End If
+                End If
+            End If
+'        End If
+        gua = Selection.text
         If Selection.Characters.Count = 2 Then
             If Selection = "習坎" Then
                 If Selection.Characters(2) = "坎" Then
@@ -604,12 +668,10 @@ errExit:
     '以上防呆檢查
     
     '以下基本檢查通過後
-    Dim windowState As word.WdWindowState      '記下原來的視窗模式
-    windowState = word.Application.windowState '記下原來的視窗模式
-    
     
     gua = Keywords.周易卦名_卦形_卦序(gua)(1)
 
+grab:
     If Not SeleniumOP.grabEeeLearning_IChing_ZhouYi_originalText(gua, result, iwe) Then
         word.Application.Activate
         VBA.MsgBox "找不到，或網頁改了或掛了……", vbInformation
@@ -681,7 +743,7 @@ insertText:
         End If
     End If
         
-    Dim p As Paragraph, book As String, iwes() As IWebElement, e, x As String
+    Dim p As Paragraph, book As String, iwes() As IWebElement
     
     With Selection
 '        fontsize = VBA.IIf(.font.Size = 9999999, 12, .font.Size) - 4
@@ -935,19 +997,19 @@ Function DownloadImage_chromedriverExecuteScript(url As String, filePath As Stri
 End Function
 Rem 將使用 XMLHTTP 來下載圖片，然後將其保存為暫存文件.若失敗傳回false 20241010 creedit_with_Copilot大菩薩：https://sl.bing.net/caezeDQDlfg
 Function DownloadImage_XMLHTTP_url(url As String, filePath As String) As Boolean
-    Dim xmlHttp As Object
+    Dim xmlhttp As Object
     Dim stream As Object
     
     ' 創建 XMLHTTP 對象
-    Set xmlHttp = CreateObject("MSXML2.XMLHTTP")
-    xmlHttp.Open "GET", url, False
-    xmlHttp.send '-2147467259 無法指出的錯誤。可能是由於您使用的是 base64 編碼的 URL。XMLHTTP 無法直接處理 base64 編碼的圖像數據 https://sl.bing.net/dd1AOLdKBaK
+    Set xmlhttp = CreateObject("MSXML2.XMLHTTP")
+    xmlhttp.Open "GET", url, False
+    xmlhttp.send '-2147467259 無法指出的錯誤。可能是由於您使用的是 base64 編碼的 URL。XMLHTTP 無法直接處理 base64 編碼的圖像數據 https://sl.bing.net/dd1AOLdKBaK
     
     ' 創建 ADODB.Stream 對象
     Set stream = CreateObject("ADODB.Stream")
     stream.Type = 1 ' adTypeBinary
     stream.Open
-    stream.Write xmlHttp.responseBody
+    stream.Write xmlhttp.responseBody
     stream.SaveToFile filePath, 2 ' adSaveCreateOverWrite
     stream.Close
     If VBA.Dir(filePath) <> vbNullString And IsValidImage_LoadPicture(filePath) Then
@@ -958,19 +1020,19 @@ Rem 20241010 Copilot大菩薩：使用 ServerXMLHTTP: 有時候 MSXML2.XMLHTTP 會有問題，
 Rem XMLHTTP 無法直接處理 base64 編碼的圖像數據。您需要先將 base64 編碼的數據解碼，然後再將其保存為圖像文件。https://sl.bing.net/b9gYh5mICbc
 Function DownloadImage_XMLHTTP(url As String, filePath As String) As Boolean
     On Error GoTo ErrorHandler
-    Dim xmlHttp As Object
+    Dim xmlhttp As Object
     Dim stream As Object
     
     ' 創建 ServerXMLHTTP 對象
-    Set xmlHttp = CreateObject("MSXML2.ServerXMLHTTP")
-    xmlHttp.Open "GET", url, False
-    xmlHttp.send
+    Set xmlhttp = CreateObject("MSXML2.ServerXMLHTTP")
+    xmlhttp.Open "GET", url, False
+    xmlhttp.send
     
     ' 創建 ADODB.Stream 對象
     Set stream = CreateObject("ADODB.Stream")
     stream.Type = 1 ' adTypeBinary
     stream.Open
-    stream.Write xmlHttp.responseBody
+    stream.Write xmlhttp.responseBody
     stream.SaveToFile filePath, 2 ' adSaveCreateOverWrite
     stream.Close
     If VBA.Dir(filePath) <> vbNullString And IsValidImage_LoadPicture(filePath) Then
@@ -1270,7 +1332,7 @@ Function GetUserAddress() As Boolean
     x = a.Run("查詢字串轉換_國語會碼", x)
 ''    'ActiveDocument.FollowHyperlink "http://140.111.34.46/cgi-bin/dict/newsearch.cgi", , False, , "Database=dict&GraphicWord=yes&QueryString=^" & X & "$", msoMethodGet
 '    FollowHyperlink "http://dict.revised.moe.edu.tw/cgi-bin/newDict/dict.sh?", , False, , "=dict.idx&cond=^" & x & "$&pieceLen=50&fld=1&cat=&imgFont=1", msoMethodGet
-    Shell Replace(GetDefaultBrowserEXE, """%1", "http://dict.revised.moe.edu.tw/cgi-bin/newDict/dict.sh?cond=^" & x & "$&pieceLen=50&fld=1&cat=&imgFont=1")
+    shell Replace(GetDefaultBrowserEXE, """%1", "http://dict.revised.moe.edu.tw/cgi-bin/newDict/dict.sh?cond=^" & x & "$&pieceLen=50&fld=1&cat=&imgFont=1")
     'AppActivate GetDefaultBrowser'無效
 '    'FollowHyperlink "http://dict.revised.moe.edu.tw/cgi-bin/newDict/dict.sh?", , False, , "=dict.idx&cond=^" & X & "$&pieceLen=50&fld=1&cat=&imgFont=1", msoMethodGet
     

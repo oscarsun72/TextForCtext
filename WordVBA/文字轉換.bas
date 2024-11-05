@@ -14,7 +14,7 @@ Dim rst As New ADODB.Recordset, rstPinyin As New ADODB.Recordset
 Dim cnt As New ADODB.Connection
 'Dim p As New ADODB.Parameter
 Dim x As String, y As String, z As String
-Dim cmd As New ADODB.Command
+Dim cmd As New ADODB.command
 If Selection.Type = wdSelectionNormal Then
     x = Selection
     Selection.Copy
@@ -43,18 +43,18 @@ Else
             .Collapse wdCollapseEnd
             .TypeText y
             .MoveLeft wdCharacter, Len(y), wdExtend
-            .Font.Name = "simsun" '"NSimSun" simhei'"Verdana"
-            .Font.ColorIndex = wdRed
-            .Font.Size = 14 '18
+            .font.Name = "simsun" '"NSimSun" simhei'"Verdana"
+            .font.ColorIndex = wdRed
+            .font.Size = 14 '18
             .Collapse wdCollapseEnd
             .TypeText z
             .MoveLeft wdCharacter, Len(z), wdExtend
-            .Font.Name = "標楷體"
-            .Font.ColorIndex = wdRed
-            .Font.Size = 14
+            .font.Name = "標楷體"
+            .font.ColorIndex = wdRed
+            .font.Size = 14
             .MoveLeft wdCharacter, Len(y), wdExtend
             .Range.HighlightColorIndex = wdYellow
-            .Font.Bold = False
+            .font.Bold = False
             .Collapse wdCollapseEnd
         End With
     '    Selection.Document.Save
@@ -67,65 +67,72 @@ cnt.Close
 End Sub
 Sub 異體字轉正() '20210228
 Dim cnt As New ADODB.Connection, rst As New ADODB.Recordset, rng As Range, a, docAs As String, x As String, rngCC As Integer, flaSel As Byte, flgsel, drv As String, db As New dBase, ur As UndoRecord
-'Alt+7
-If Selection.Type = wdSelectionIP Then
-    Set rng = Selection.Document.Range 'ActiveDocument.Range
-    flgsel = wdFindContinue
-Else
-    Set rng = Selection.Range
-    flgsel = wdFindStop
-End If
-
-'Set ur = SystemSetup.stopUndo("異體字轉正")
-SystemSetup.stopUndo ur, "異體字轉正"
-'For Each a In rng.Characters
-'    If InStr(docAs, a) = 0 Then docAs = docAs & a '記下不重複的用字集
-'Next
-rngCC = rng.Characters.Count
-'If VBA.Dir("H:\", vbVolume) = "" Then
-'    drv = "D:\千慮一得齋\"
-'Else
-'    drv = "H:\我的雲端硬碟\私人\千慮一得齋(C槽版)\"
-'End If
-'cnt.Open _
-    "Provider=Microsoft.ACE.OLEDB.12.0;User ID=Admin;Data Source=" & drv & "書籍資料\圖書管理附件\查字.mdb;"
-db.cnt查字 cnt
-
-For Each a In rng.Characters
-    If InStr(docAs, a) = 0 Then
-        docAs = docAs & a '記下不重複的用字集
-        If rngCC = 1 Then
-            rst.Open "select * from 異體字轉正 " & _
-                "where strcomp(異體字,""" & a & """)=0 " & _
-                "order by 排序", cnt, adOpenKeyset, adLockReadOnly
-        Else
-            rst.Open "select * from 異體字轉正 " & _
-                "where (strcomp(異體字,""" & a & """)=0 " & _
-                "and 手挍=false) order by 排序", cnt, adOpenKeyset, adLockReadOnly
-        End If
-        If rst.RecordCount > 0 Then
-            x = 異體字轉正_取得取代資料(rst)
-            With rng.Find
-                .text = a 'rst.Fields("異體字")
-                .Replacement.text = x 'rst.Fields("正字")
-                .Execute , , , , , , True, flaSel, , , wdReplaceAll
-            End With
-        End If
-        rst.Close
+    'Alt+7
+    If Selection.Type = wdSelectionIP Then
+        Set rng = Selection.Document.Range 'ActiveDocument.Range
+        flgsel = wdFindContinue
+    Else
+        Set rng = Selection.Range
+        flgsel = wdFindStop
     End If
-Next
-'保留他是異體字形也好，可作識別
-'For Each a In rng.Characters
-'    Select Case a.Font.NameFarEast
-'        Case "微軟正黑體", "hanaminb", "kaixinsongb"
-'            rng.Font.NameFarEast = "新細明體-extb"
-'    End Select
-'Next a
+    
+    'Set ur = SystemSetup.stopUndo("異體字轉正")
+    SystemSetup.stopUndo ur, "異體字轉正"
+    'For Each a In rng.Characters
+    '    If InStr(docAs, a) = 0 Then docAs = docAs & a '記下不重複的用字集
+    'Next
+    rngCC = rng.Characters.Count
+    'If VBA.Dir("H:\", vbVolume) = "" Then
+    '    drv = "D:\千慮一得齋\"
+    'Else
+    '    drv = "H:\我的雲端硬碟\私人\千慮一得齋(C槽版)\"
+    'End If
+    'cnt.Open _
+        "Provider=Microsoft.ACE.OLEDB.12.0;User ID=Admin;Data Source=" & drv & "書籍資料\圖書管理附件\查字.mdb;"
+    db.cnt查字 cnt
+    
+    For Each a In rng.Characters
+        If InStr(docAs, a) = 0 Then
+            docAs = docAs & a '記下不重複的用字集
+            If rngCC = 1 Then
+                rst.Open "select * from 異體字轉正 " & _
+                    "where strcomp(異體字,""" & a & """)=0 " & _
+                    "order by 排序", cnt, adOpenKeyset, adLockReadOnly
+            Else
+                rst.Open "select * from 異體字轉正 " & _
+                    "where (strcomp(異體字,""" & a & """)=0 " & _
+                    "and 手挍=false) order by 排序", cnt, adOpenKeyset, adLockReadOnly
+            End If
+            If rst.RecordCount > 0 Then
+                x = 異體字轉正_取得取代資料(rst)
+                With rng.Find
+                    .text = a 'rst.Fields("異體字")
+                    .Replacement.text = x 'rst.Fields("正字")
+                    .Execute , , , , , , True, flaSel, , , wdReplaceAll
+                End With
+            End If
+            rst.Close
+        End If
+    Next
+    '保留他是異體字形也好，可作識別
+    'For Each a In rng.Characters
+    '    Select Case a.Font.NameFarEast
+    '        Case "微軟正黑體", "hanaminb", "kaixinsongb"
+    '            rng.Font.NameFarEast = "新細明體-extb"
+    '    End Select
+    'Next a
 endS:
-If Not rst.State = adStateClosed Then rst.Close
-cnt.Close: Set rst = Nothing: Set cnt = Nothing: Set a = Nothing: Set rng = Nothing
-SystemSetup.playSound 2
-SystemSetup.contiUndo ur
+    If VBA.InStr(rng.text, "★") Then
+        rng.Find.Execute "★", , , , , , , wdFindContinue
+        rng.Select
+        SystemSetup.playSound 3
+    Else
+        SystemSetup.playSound 2
+    End If
+    If Not rst.State = adStateClosed Then rst.Close
+    cnt.Close: Set rst = Nothing: Set cnt = Nothing: Set a = Nothing: Set rng = Nothing
+    SystemSetup.contiUndo ur
+
 End Sub
 Sub 異體字轉正_新增資料() '20210228
 Dim cnt As New ADODB.Connection, rst As New ADODB.Recordset, rng As Range, rngx As String, bz As Boolean, flaSel As Byte, drv As String, db As New dBase
@@ -268,7 +275,7 @@ Else
 End If
 With rngZhuYin
     .SetRange rngZhuYin.start, rng.End
-    .Font.Name = "標楷體"
+    .font.Name = "標楷體"
     .Bold = False
 End With
 Set rngZhuYin = Nothing

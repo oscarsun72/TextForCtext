@@ -1,81 +1,81 @@
 Attribute VB_Name = "中國哲學書電子化計劃"
 Option Explicit
 Sub 集杜詩_文山先生全集_四部叢刊_維基文庫本_去掉中間誤空的格() '《集杜詩》格式者皆適用（中間誤空的格） 20221112
-Dim rng As Range, d As Document, p As Paragraph, a As Range, i As Integer, ur As UndoRecord
-Set d = ActiveDocument
-If d.path <> "" Then Set d = Documents.Add
-SystemSetup.stopUndo ur, "集杜詩_文山先生全集_四部叢刊_維基文庫本_去掉中間誤空的格"
-For Each p In d.Paragraphs
-    For Each a In p.Range.Characters
-        i = i + 1
-        If i > 3 Then '此與標題、縮排等前空幾格之條件有關
-            If Not a.Next Is Nothing And Not a.Previous Is Nothing Then
-                If a <> "　" And a.Next = "　" And a.Previous = "　" Then '單字前後皆空格者才處理
-                    Set rng = d.Range(a.End, a.End)
-                    rng.MoveEndWhile "　"
-    '                rng.Select
-    '                Stop
-                    rng.Delete
+    Dim rng As Range, d As Document, p As Paragraph, a As Range, i As Integer, ur As UndoRecord
+    Set d = ActiveDocument
+    If d.path <> "" Then Set d = Documents.Add
+    SystemSetup.stopUndo ur, "集杜詩_文山先生全集_四部叢刊_維基文庫本_去掉中間誤空的格"
+    For Each p In d.Paragraphs
+        For Each a In p.Range.Characters
+            i = i + 1
+            If i > 3 Then '此與標題、縮排等前空幾格之條件有關
+                If Not a.Next Is Nothing And Not a.Previous Is Nothing Then
+                    If a <> "　" And a.Next = "　" And a.Previous = "　" Then '單字前後皆空格者才處理
+                        Set rng = d.Range(a.End, a.End)
+                        rng.MoveEndWhile "　"
+        '                rng.Select
+        '                Stop
+                        rng.Delete
+                    End If
                 End If
             End If
-        End If
-    Next
-    i = 0
-Next p
-DoEvents
-d.Range.Copy
-DoEvents
-SystemSetup.contiUndo ur
-SystemSetup.playSound 2
+        Next
+        i = 0
+    Next p
+    DoEvents
+    d.Range.Copy
+    DoEvents
+    SystemSetup.contiUndo ur
+    SystemSetup.playSound 2
 End Sub
 
 Rem 在新文件上操作：第一段為始頁碼、第二段為終頁碼、第三段為書ID
 Sub 新頁面()
-'the page begin
-Dim start As Integer, ur As UndoRecord
-' the page end
-Dim e As Integer
-' the book
-Dim fileID As Long
-'https://ctext.org/library.pl?if=gb&file=1000081&page=2621
-
-Dim x As String ', data As New MSForms.DataObject
-Dim i As Integer, rng As Range, d As Document
-SystemSetup.stopUndo ur, "新頁面"
-Set d = ActiveDocument
-If d.path <> "" Then Exit Sub
-Set rng = d.Range
-start = CInt(Replace(rng.Paragraphs(1).Range, VBA.Chr(13), ""))
-e = CInt(Replace(rng.Paragraphs(2).Range, VBA.Chr(13), ""))
-fileID = CLng(Replace(rng.Paragraphs(3).Range, VBA.Chr(13), ""))
-For i = start To e
-    If i = 1 Then
-        x = x & "<scanbegin file=""" & fileID & """ page=""" & i & """ />●" & VBA.Chr(9) & "<scanend file=""" & fileID & """ page=""" & i & """ />"
-    Else
-        x = x & "<scanbegin file=""" & fileID & """ page=""" & i & """ />" & VBA.Chr(9) & "<scanend file=""" & fileID & """ page=""" & i & """ />" '若中間沒有任何內容，頁面最後便不能成一段落。若剛好一個段落，會與下一頁黏合在一起
+    'the page begin
+    Dim start As Integer, ur As UndoRecord
+    ' the page end
+    Dim e As Integer
+    ' the book
+    Dim fileID As Long
+    'https://ctext.org/library.pl?if=gb&file=1000081&page=2621
+    
+    Dim x As String ', data As New MSForms.DataObject
+    Dim i As Integer, rng As Range, d As Document
+    SystemSetup.stopUndo ur, "新頁面"
+    Set d = ActiveDocument
+    If d.path <> "" Then Exit Sub
+    Set rng = d.Range
+    start = CInt(Replace(rng.Paragraphs(1).Range, VBA.Chr(13), ""))
+    e = CInt(Replace(rng.Paragraphs(2).Range, VBA.Chr(13), ""))
+    fileID = CLng(Replace(rng.Paragraphs(3).Range, VBA.Chr(13), ""))
+    For i = start To e
+        If i = 1 Then
+            x = x & "<scanbegin file=""" & fileID & """ page=""" & i & """ />●" & VBA.Chr(9) & "<scanend file=""" & fileID & """ page=""" & i & """ />"
+        Else
+            x = x & "<scanbegin file=""" & fileID & """ page=""" & i & """ />" & VBA.Chr(9) & "<scanend file=""" & fileID & """ page=""" & i & """ />" '若中間沒有任何內容，頁面最後便不能成一段落。若剛好一個段落，會與下一頁黏合在一起
+        End If
+    Next i
+    
+    rng.Paragraphs(3).Range = CLng(Replace(rng.Paragraphs(3).Range, VBA.Chr(13), "")) + 1
+    'For Each e In Selection.Value
+    '    x = x & e
+    'Next e
+    ''x = Replace(x, vba.Chr(13), "")
+    'data.SetText Replace(x, "/>", "/>●", 1, 1)
+    'data.PutInClipboard
+    'SystemSetup.SetClipboard x
+    'SystemSetup.CopyText x
+    SystemSetup.SetClipboard x
+    If SystemSetup.GetClipboardText <> x Then
+        rng.SetRange d.Range.End - 1, d.Range.End - 1
+        rng.InsertAfter x
+        rng.Cut
     End If
-Next i
-
-rng.Paragraphs(3).Range = CLng(Replace(rng.Paragraphs(3).Range, VBA.Chr(13), "")) + 1
-'For Each e In Selection.Value
-'    x = x & e
-'Next e
-''x = Replace(x, vba.Chr(13), "")
-'data.SetText Replace(x, "/>", "/>●", 1, 1)
-'data.PutInClipboard
-'SystemSetup.SetClipboard x
-'SystemSetup.CopyText x
-SystemSetup.SetClipboard x
-If SystemSetup.GetClipboardText <> x Then
-    rng.SetRange d.Range.End - 1, d.Range.End - 1
-    rng.InsertAfter x
-    rng.Cut
-End If
-rng.Document.ActiveWindow.windowState = wdWindowStateMinimize
-DoEvents
-Network.AppActivateDefaultBrowser
-SendKeys "^v"
-SystemSetup.contiUndo ur
+    rng.Document.ActiveWindow.windowState = wdWindowStateMinimize
+    DoEvents
+    Network.AppActivateDefaultBrowser
+    SendKeys "^v"
+    SystemSetup.contiUndo ur
 End Sub
 Sub setPage1Code() '(ByRef d As Document)
     Dim xd As String
@@ -283,18 +283,18 @@ eH:
 End Sub
 
 Sub 將每頁間的分段符號清除()
-Dim d As Document, rng As Range, s As Long, e As Long, rngCheck As Range
-Const pageStart As String = "<scanbegin file="
-Const pageEnd As String = "<scanend file="
-Set d = ActiveDocument
-Set rng = d.Range(Len(pageStart), d.Range.End)
-Do While rng.Find.Execute(pageStart)
-    e = rng.start: s = e - 2
-    Set rngCheck = d.Range(s, e)
-    rngCheck.Select
-    If rngCheck.Previous = ">" Then rngCheck.Delete
-    rng.SetRange rng.End + 1, d.Range.End
-Loop
+    Dim d As Document, rng As Range, s As Long, e As Long, rngCheck As Range
+    Const pageStart As String = "<scanbegin file="
+    Const pageEnd As String = "<scanend file="
+    Set d = ActiveDocument
+    Set rng = d.Range(Len(pageStart), d.Range.End)
+    Do While rng.Find.Execute(pageStart)
+        e = rng.start: s = e - 2
+        Set rngCheck = d.Range(s, e)
+        rngCheck.Select
+        If rngCheck.Previous = ">" Then rngCheck.Delete
+        rng.SetRange rng.End + 1, d.Range.End
+    Loop
 End Sub
 
 Sub pastetoEditBox(Description_from_ClipBoard As String)
@@ -318,265 +318,265 @@ Sub pastetoEditBox(Description_from_ClipBoard As String)
 End Sub
 
 Sub 金石錄_四部叢刊_維基文庫本() '《金石錄》格式者皆適用（即注文單行，而換行前的不單行） 20221110
-Dim rng As Range, d As Document, s As Long, e As Long, rngDel As Range, ur As UndoRecord
-Set d = ActiveDocument
-If d.path <> "" Then Set d = Documents.Add
-DoEvents
-d.Range.Paste
-DoEvents
-Set rng = d.Range: Set rngDel = rng
-rng.Find.ClearFormatting
-SystemSetup.stopUndo ur, "金石錄_四部叢刊_維基文庫本"
-Do While rng.Find.Execute("}}|" & VBA.Chr(13) & "{{", , , , , , True, wdFindStop)
-    s = rng.start - 1: e = rng.start
-    Do Until d.Range(s, e) <> "　" '清除其前空格
-        s = s - 1: e = e - 1
+    Dim rng As Range, d As Document, s As Long, e As Long, rngDel As Range, ur As UndoRecord
+    Set d = ActiveDocument
+    If d.path <> "" Then Set d = Documents.Add
+    DoEvents
+    d.Range.Paste
+    DoEvents
+    Set rng = d.Range: Set rngDel = rng
+    rng.Find.ClearFormatting
+    SystemSetup.stopUndo ur, "金石錄_四部叢刊_維基文庫本"
+    Do While rng.Find.Execute("}}|" & VBA.Chr(13) & "{{", , , , , , True, wdFindStop)
+        s = rng.start - 1: e = rng.start
+        Do Until d.Range(s, e) <> "　" '清除其前空格
+            s = s - 1: e = e - 1
+        Loop
+        rngDel.SetRange s + 1, rng.start
+        'rngDel.Select
+        If rngDel.text <> "" Then If Replace(rngDel, "　", "") = "" Then rngDel.Delete
+        rng.SetRange s + Len("}}|" & VBA.Chr(13) & "{{"), d.Range.End
+        
+        'Set rng = d.Range
     Loop
-    rngDel.SetRange s + 1, rng.start
-    'rngDel.Select
-    If rngDel.text <> "" Then If Replace(rngDel, "　", "") = "" Then rngDel.Delete
-    rng.SetRange s + Len("}}|" & VBA.Chr(13) & "{{"), d.Range.End
-    
-    'Set rng = d.Range
-Loop
-d.Range.text = Replace(Replace(d.Range.text, "|" & VBA.Chr(13) & "　", ""), "}}|" & VBA.Chr(13) & "{{", VBA.Chr(13))
-d.Range.Copy
-SystemSetup.contiUndo ur
-SystemSetup.playSound 2
-word.Application.windowState = wdWindowStateMinimize
-On Error Resume Next
-AppActivate "TextForCtext", True
+    d.Range.text = Replace(Replace(d.Range.text, "|" & VBA.Chr(13) & "　", ""), "}}|" & VBA.Chr(13) & "{{", VBA.Chr(13))
+    d.Range.Copy
+    SystemSetup.contiUndo ur
+    SystemSetup.playSound 2
+    word.Application.windowState = wdWindowStateMinimize
+    On Error Resume Next
+    AppActivate "TextForCtext", True
 End Sub
 
 Sub 轉成黑豆以作行字數長度判斷用()
-Dim p As Paragraph, a, i As Byte, cntr As Byte, ur As UndoRecord
-If ActiveDocument.path <> "" Then Exit Sub
-SystemSetup.stopUndo ur, "轉成黑豆以作行字數長度判斷用"
-Set p = Selection.Paragraphs(1)
-cntr = p.Range.Characters.Count - 1
-For i = 1 To cntr
-    Set a = p.Range.Characters(i)
-    If a.text <> VBA.Chr(13) Then a.text = "●"
-Next i
-p.Range.Cut
-SystemSetup.contiUndo ur
-Set ur = Nothing
+    Dim p As Paragraph, a, i As Byte, cntr As Byte, ur As UndoRecord
+    If ActiveDocument.path <> "" Then Exit Sub
+    SystemSetup.stopUndo ur, "轉成黑豆以作行字數長度判斷用"
+    Set p = Selection.Paragraphs(1)
+    cntr = p.Range.Characters.Count - 1
+    For i = 1 To cntr
+        Set a = p.Range.Characters(i)
+        If a.text <> VBA.Chr(13) Then a.text = "●"
+    Next i
+    p.Range.Cut
+    SystemSetup.contiUndo ur
+    Set ur = Nothing
 End Sub
 Sub 清除所有符號_分段注文符號例外()
-Dim f, i As Integer
-f = Array("。", "」", VBA.Chr(-24152), "：", "，", "；", _
-    "、", "「", ".", VBA.Chr(34), ":", ",", ";", _
-    "……", "...", "．", "【", "】", " ", "《", "》", "〈", "〉", "？" _
-    , "！", "﹝", "﹞", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0" _
-    , "『", "』", VBA.ChrW(9312), VBA.ChrW(9313), VBA.ChrW(9314), VBA.ChrW(9315), VBA.ChrW(9316) _
-    , VBA.ChrW(9317), VBA.ChrW(9318), VBA.ChrW(9319), VBA.ChrW(9320), VBA.ChrW(9321), VBA.ChrW(9322), VBA.ChrW(9323) _
-    , VBA.ChrW(9324), VBA.ChrW(9325), VBA.ChrW(9326), VBA.ChrW(9327), VBA.ChrW(9328), VBA.ChrW(9329), VBA.ChrW(9330) _
-    , VBA.ChrW(9331), VBA.ChrW(8221), """") '先設定標點符號陣列以備用
-    '全形圓括弧暫不取代！
-    For i = 0 To UBound(f)
-        ActiveDocument.Range.Find.Execute f(i), True, , , , , , wdFindContinue, True, "", wdReplaceAll
-    Next
+    Dim f, i As Integer
+    f = Array("。", "」", VBA.Chr(-24152), "：", "，", "；", _
+        "、", "「", ".", VBA.Chr(34), ":", ",", ";", _
+        "……", "...", "．", "【", "】", " ", "《", "》", "〈", "〉", "？" _
+        , "！", "﹝", "﹞", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0" _
+        , "『", "』", VBA.ChrW(9312), VBA.ChrW(9313), VBA.ChrW(9314), VBA.ChrW(9315), VBA.ChrW(9316) _
+        , VBA.ChrW(9317), VBA.ChrW(9318), VBA.ChrW(9319), VBA.ChrW(9320), VBA.ChrW(9321), VBA.ChrW(9322), VBA.ChrW(9323) _
+        , VBA.ChrW(9324), VBA.ChrW(9325), VBA.ChrW(9326), VBA.ChrW(9327), VBA.ChrW(9328), VBA.ChrW(9329), VBA.ChrW(9330) _
+        , VBA.ChrW(9331), VBA.ChrW(8221), """") '先設定標點符號陣列以備用
+        '全形圓括弧暫不取代！
+        For i = 0 To UBound(f)
+            ActiveDocument.Range.Find.Execute f(i), True, , , , , , wdFindContinue, True, "", wdReplaceAll
+        Next
 End Sub
 
 Sub 撤掉與書圖的對應_脫鉤() '20220210
-Dim rng As Range, angleRng As Range, cntr As Long
-word.Application.ScreenUpdating = False
-Set rng = Documents.Add().Range
-Set angleRng = rng
-rng.Paste
-Do While rng.Find.Execute("<")
-    rng.MoveEndUntil ">"
-    rng.SetRange rng.start, rng.End + 1
-    angleRng.SetRange rng.start, rng.End
-    If InStr(angleRng.text, "file") > 0 Then
-        angleRng.Delete
-    Else
-        rng.SetRange rng.End, rng.Document.Range.End - 1
-    End If
-    If InStr(rng.Document.Range, " file=") = 0 Then Exit Do '若有上標籤「<entity entityid=」，則判斷會失誤
-    cntr = cntr + 1
-    If cntr > 2300 Then Stop
-Loop
-SystemSetup.playSound 1
-rng.Document.Range.Cut
-rng.Document.Close wdDoNotSaveChanges
-word.Application.ScreenUpdating = True
-pastetoEditBox "與原本書圖不合，圖文脫鉤。另依《維基文庫》本輔以末學自製軟件TextForCtext對應錄入。感恩感恩　南無阿彌陀佛"
+    Dim rng As Range, angleRng As Range, cntr As Long
+    word.Application.ScreenUpdating = False
+    Set rng = Documents.Add().Range
+    Set angleRng = rng
+    rng.Paste
+    Do While rng.Find.Execute("<")
+        rng.MoveEndUntil ">"
+        rng.SetRange rng.start, rng.End + 1
+        angleRng.SetRange rng.start, rng.End
+        If InStr(angleRng.text, "file") > 0 Then
+            angleRng.Delete
+        Else
+            rng.SetRange rng.End, rng.Document.Range.End - 1
+        End If
+        If InStr(rng.Document.Range, " file=") = 0 Then Exit Do '若有上標籤「<entity entityid=」，則判斷會失誤
+        cntr = cntr + 1
+        If cntr > 2300 Then Stop
+    Loop
+    SystemSetup.playSound 1
+    rng.Document.Range.Cut
+    rng.Document.Close wdDoNotSaveChanges
+    word.Application.ScreenUpdating = True
+    pastetoEditBox "與原本書圖不合，圖文脫鉤。另依《維基文庫》本輔以末學自製軟件TextForCtext對應錄入。感恩感恩　南無阿彌陀佛"
 End Sub
 
 Sub formatter() '為《經典釋文》春秋三傳等格式用，日後可改成其他需要格式化的文本
-Dim d As Document, rng As Range, a As Range, s As Long, e As Long
-Const spcs As String = "　"
-
-Set d = Documents.Add: Set rng = d.Range
-rng.Paste
-For Each a In d.Characters
-    If a = spcs Then
-        If a.Next = spcs Then
-            If InStr(a.Paragraphs(1).Range.text, "*") = 0 Then
-                a.Select
-                s = a.start
-                Do Until Selection.Next <> spcs
-                    Selection.MoveRight , , wdExtend
-                Loop
-                e = Selection.End
-                Set a = Selection.Next
-                If a.Next = spcs Then
+    Dim d As Document, rng As Range, a As Range, s As Long, e As Long
+    Const spcs As String = "　"
+    
+    Set d = Documents.Add: Set rng = d.Range
+    rng.Paste
+    For Each a In d.Characters
+        If a = spcs Then
+            If a.Next = spcs Then
+                If InStr(a.Paragraphs(1).Range.text, "*") = 0 Then
                     a.Select
+                    s = a.start
                     Do Until Selection.Next <> spcs
-                        Selection.Next.Delete
+                        Selection.MoveRight , , wdExtend
                     Loop
-                
-                    rng.SetRange s, e
-                    'rng.Select
-                    rng.text = Replace(rng.text, "　", VBA.ChrW(-9217) & VBA.ChrW(-8195))
-                    Set a = rng.Characters(rng.Characters.Count)
+                    e = Selection.End
+                    Set a = Selection.Next
+                    If a.Next = spcs Then
+                        a.Select
+                        Do Until Selection.Next <> spcs
+                            Selection.Next.Delete
+                        Loop
+                    
+                        rng.SetRange s, e
+                        'rng.Select
+                        rng.text = Replace(rng.text, "　", VBA.ChrW(-9217) & VBA.ChrW(-8195))
+                        Set a = rng.Characters(rng.Characters.Count)
+                    End If
                 End If
             End If
         End If
-    End If
-Next a
-d.Range.Cut
-d.Close wdDoNotSaveChanges
-SystemSetup.playSound 2
+    Next a
+    d.Range.Cut
+    d.Close wdDoNotSaveChanges
+    SystemSetup.playSound 2
 End Sub
 
 Sub formatter年前加分段符號() '為《經典釋文》春秋三傳等格式用，日後可改成其他需要格式化的文本
-Dim d As Document, rng As Range, a As Range, s As Long, e As Long, i As Integer, yi As Byte, ok As Boolean, yStr As String
-Const y As String = "年"
-Set d = Documents.Add: Set rng = d.Range
-'d.ActiveWindow.Visible = True
-rng.Paste
-rng.Find.ClearFormatting
-Do While rng.Find.Execute("^p")
-    If rng.End = d.Range.End - 1 Then Exit Do
-    Set a = d.Range
-    For i = 4 To 2 Step -1
-        a.SetRange rng.End, rng.End + i
-'        a.Select
-        If VBA.Right(a, 1) = y Then
-            If a.Previous.Previous <> ">" Then
-                For yi = 1 To 99
-                    yStr = 文字轉換.數字轉漢字2位數(yi) + y
-                    If a.text = yStr Then
-                        rng.InsertBefore "<p>"
-                        ok = True: Exit For
+    Dim d As Document, rng As Range, a As Range, s As Long, e As Long, i As Integer, yi As Byte, ok As Boolean, yStr As String
+    Const y As String = "年"
+    Set d = Documents.Add: Set rng = d.Range
+    'd.ActiveWindow.Visible = True
+    rng.Paste
+    rng.Find.ClearFormatting
+    Do While rng.Find.Execute("^p")
+        If rng.End = d.Range.End - 1 Then Exit Do
+        Set a = d.Range
+        For i = 4 To 2 Step -1
+            a.SetRange rng.End, rng.End + i
+    '        a.Select
+            If VBA.Right(a, 1) = y Then
+                If a.Previous.Previous <> ">" Then
+                    For yi = 1 To 99
+                        yStr = 文字轉換.數字轉漢字2位數(yi) + y
+                        If a.text = yStr Then
+                            rng.InsertBefore "<p>"
+                            ok = True: Exit For
+                        End If
+                    Next yi
+                    If ok Then
+                        ok = False
+                        Exit For
                     End If
-                Next yi
-                If ok Then
-                    ok = False
-                    Exit For
                 End If
             End If
-        End If
-    Next i
-    rng.SetRange rng.End, d.Range.End
-Loop
-SystemSetup.playSound 2
-d.Range.Cut
-d.Close wdDoNotSaveChanges
+        Next i
+        rng.SetRange rng.End, d.Range.End
+    Loop
+    SystemSetup.playSound 2
+    d.Range.Cut
+    d.Close wdDoNotSaveChanges
 End Sub
 Sub 維基文庫四部叢刊本轉來()
-Dim d As Document, a, i, p As Paragraph, xP As String, acP As Integer, space As String, rng As Range
-On Error GoTo eH
-a = Array(VBA.ChrW(12296), "{{", VBA.ChrW(12297), "}}", "〈", "{{", "〉", "}}", _
-    "○", VBA.ChrW(12295))
-'《容齋三筆》等小注作正文省版面者 https://ctext.org/library.pl?if=gb&file=89545&page=24
-'a = Array("〈", "", "〉", "", _
-    "○", vba.Chrw(12295))
-
-
-Set d = Documents.Add()
-d.Range.Paste
-'提示貼上無礙
-SystemSetup.playSound 1
-維基文庫造字圖取代為文字 d.Range
-For i = 0 To UBound(a) - 1
-    d.Range.Find.Execute a(i), , , , , , True, wdFindContinue, , a(i + 1), wdReplaceAll
-    i = i + 1
-Next i
-For Each p In d.Range.Paragraphs
-    xP = p.Range
-    If VBA.Left(xP, 2) = "{{" And VBA.Right(xP, 3) = "}}" & VBA.Chr(13) Then
-        xP = VBA.Mid(p.Range, 3, Len(xP) - 5)
-        If InStr(xP, "{{") = 0 And InStr(xP, "}}") = 0 Then
-            acP = p.Range.Characters.Count - 1
-            If acP Mod 2 = 0 Then
-                acP = CInt(acP / 2)
-            Else
-                acP = CInt((acP + 1) / 2)
+    Dim d As Document, a, i, p As Paragraph, xP As String, acP As Integer, space As String, rng As Range
+    On Error GoTo eH
+    a = Array(VBA.ChrW(12296), "{{", VBA.ChrW(12297), "}}", "〈", "{{", "〉", "}}", _
+        "○", VBA.ChrW(12295))
+    '《容齋三筆》等小注作正文省版面者 https://ctext.org/library.pl?if=gb&file=89545&page=24
+    'a = Array("〈", "", "〉", "", _
+        "○", vba.Chrw(12295))
+    
+    
+    Set d = Documents.Add()
+    d.Range.Paste
+    '提示貼上無礙
+    SystemSetup.playSound 1
+    維基文庫造字圖取代為文字 d.Range
+    For i = 0 To UBound(a) - 1
+        d.Range.Find.Execute a(i), , , , , , True, wdFindContinue, , a(i + 1), wdReplaceAll
+        i = i + 1
+    Next i
+    For Each p In d.Range.Paragraphs
+        xP = p.Range
+        If VBA.Left(xP, 2) = "{{" And VBA.Right(xP, 3) = "}}" & VBA.Chr(13) Then
+            xP = VBA.Mid(p.Range, 3, Len(xP) - 5)
+            If InStr(xP, "{{") = 0 And InStr(xP, "}}") = 0 Then
+                acP = p.Range.Characters.Count - 1
+                If acP Mod 2 = 0 Then
+                    acP = CInt(acP / 2)
+                Else
+                    acP = CInt((acP + 1) / 2)
+                End If
+                If p.Range.Characters(acP).InlineShapes.Count = 0 Then
+                    p.Range.Characters(acP).InsertParagraphAfter
+                Else
+                    p.Range.Characters(acP).Select
+                    Selection.Delete
+                    Selection.TypeText " "
+                    p.Range.Characters(acP).InsertParagraphAfter
+                End If
             End If
-            If p.Range.Characters(acP).InlineShapes.Count = 0 Then
-                p.Range.Characters(acP).InsertParagraphAfter
-            Else
-                p.Range.Characters(acP).Select
-                Selection.Delete
-                Selection.TypeText " "
-                p.Range.Characters(acP).InsertParagraphAfter
-            End If
-        End If
-    ElseIf VBA.Left(xP, 1) = "　" Then '前有空格的
-        i = InStr(xP, "{{")
-        If i > 0 And VBA.Right(xP, 3) = "}}" & VBA.Chr(13) Then
-            space = VBA.Mid(xP, 1, i - 1)
-            If Replace(space, "　", "") = "" Then
-                xP = VBA.Mid(xP, i + 2, Len(xP) - 3 - (i + 2))
-                If InStr(xP, "{{") = 0 And InStr(xP, "}}") = 0 Then
-                    Set rng = p.Range
-                    rng.SetRange rng.Characters(1).start, rng.Characters(i + 1).End
-                    rng.text = "{{" & space
-                    acP = p.Range.Characters.Count - 1 - Len(space)
-                    If acP Mod 2 = 0 Then
-                        acP = CInt(acP / 2) + Len(space) + 1
-                    Else
-                        acP = CInt((acP + 1) / 2) + Len(space) + 1
+        ElseIf VBA.Left(xP, 1) = "　" Then '前有空格的
+            i = InStr(xP, "{{")
+            If i > 0 And VBA.Right(xP, 3) = "}}" & VBA.Chr(13) Then
+                space = VBA.Mid(xP, 1, i - 1)
+                If Replace(space, "　", "") = "" Then
+                    xP = VBA.Mid(xP, i + 2, Len(xP) - 3 - (i + 2))
+                    If InStr(xP, "{{") = 0 And InStr(xP, "}}") = 0 Then
+                        Set rng = p.Range
+                        rng.SetRange rng.Characters(1).start, rng.Characters(i + 1).End
+                        rng.text = "{{" & space
+                        acP = p.Range.Characters.Count - 1 - Len(space)
+                        If acP Mod 2 = 0 Then
+                            acP = CInt(acP / 2) + Len(space) + 1
+                        Else
+                            acP = CInt((acP + 1) / 2) + Len(space) + 1
+                        End If
+                        If p.Range.Characters(acP).InlineShapes.Count = 0 Then
+                            p.Range.Characters(acP).InsertBefore VBA.Chr(13) & space
+                        Else
+                            p.Range.Characters(acP).Select
+                            Selection.Delete
+                            Selection.TypeText " "
+                            p.Range.Characters(acP).InsertBefore VBA.Chr(13) & space
+                        End If
+                        
                     End If
-                    If p.Range.Characters(acP).InlineShapes.Count = 0 Then
-                        p.Range.Characters(acP).InsertBefore VBA.Chr(13) & space
-                    Else
-                        p.Range.Characters(acP).Select
-                        Selection.Delete
-                        Selection.TypeText " "
-                        p.Range.Characters(acP).InsertBefore VBA.Chr(13) & space
-                    End If
-                    
                 End If
             End If
         End If
-    End If
-Next p
-維基文庫等欲直接抽換之字 d
-文字處理.書名號篇名號標注
-d.Range.Cut
-d.Close wdDoNotSaveChanges
-SystemSetup.playSound 2
-Exit Sub
+    Next p
+    維基文庫等欲直接抽換之字 d
+    文字處理.書名號篇名號標注
+    d.Range.Cut
+    d.Close wdDoNotSaveChanges
+    SystemSetup.playSound 2
+    Exit Sub
 eH:
-Select Case Err.Number
-    Case 5904 '無法編輯 [範圍]。
-        If p.Range.Characters(acP).Hyperlinks.Count > 0 Then p.Range.Characters(acP).Hyperlinks(1).Delete
-        Resume
-    Case Else
-        MsgBox Err.Number & Err.Description
-End Select
+    Select Case Err.Number
+        Case 5904 '無法編輯 [範圍]。
+            If p.Range.Characters(acP).Hyperlinks.Count > 0 Then p.Range.Characters(acP).Hyperlinks(1).Delete
+            Resume
+        Case Else
+            MsgBox Err.Number & Err.Description
+    End Select
 End Sub
 
 Sub 維基文庫四部叢刊本轉來_early()
-Dim d As Document, a, i
-
-a = Array("^p^p", "@", "〈", "{{", "〉", "}}", "^p", "", "}}{{", "^p", "@", "^p", _
-    "○", VBA.ChrW(12295))
-Set d = Documents.Add()
-d.Range.Paste
-維基文庫造字圖取代為文字 d.Range
-For i = 0 To UBound(a) - 1
-    d.Range.Find.Execute a(i), , , , , , True, wdFindContinue, , a(i + 1), wdReplaceAll
-    i = i + 1
-Next i
-文字處理.書名號篇名號標注
-d.Range.Cut
-d.Close wdDoNotSaveChanges
-Beep
+    Dim d As Document, a, i
+    
+    a = Array("^p^p", "@", "〈", "{{", "〉", "}}", "^p", "", "}}{{", "^p", "@", "^p", _
+        "○", VBA.ChrW(12295))
+    Set d = Documents.Add()
+    d.Range.Paste
+    維基文庫造字圖取代為文字 d.Range
+    For i = 0 To UBound(a) - 1
+        d.Range.Find.Execute a(i), , , , , , True, wdFindContinue, , a(i + 1), wdReplaceAll
+        i = i + 1
+    Next i
+    文字處理.書名號篇名號標注
+    d.Range.Cut
+    d.Close wdDoNotSaveChanges
+    Beep
 End Sub
 
 Sub searchuCtext()
@@ -1046,6 +1046,40 @@ Function Search(searchWhatsUrl As String) As String
     shell TextForCtextWordVBA.Network.GetDefaultBrowserEXE & searchWhatsUrl & encode
     Search = searchWhatsUrl & encode
 End Function
+Rem 檢索CTP特定之書 成功則傳回true
+Function Searchu(res As String, undoName As String) As Boolean
+    Dim url As String, ur As UndoRecord, d As Document
+    SystemSetup.stopUndo ur, undoName
+    'SystemSetup.playSound 0.484
+    Set d = Selection.Document
+    If d.path <> "" Then If d.Saved = False Then d.Save
+    
+    文字處理.ResetSelectionAvoidSymbols
+    If Selection.Type = wdSelectionNormal Then
+        Selection.Copy
+    End If
+    
+    Dim iwe As SeleniumBasic.IWebElement, key As New SeleniumBasic.keys
+    If Not SeleniumOP.OpenChrome("https://ctext.org/wiki.pl?if=gb&res=" & res) Then Exit Function
+    SeleniumOP.ActivateChrome
+    word.Application.windowState = wdWindowStateMinimize
+    '檢索框
+    Set iwe = SeleniumOP.WD.FindElementByCssSelector("#content > div.wikibox > table > tbody > tr.mobilesearch > td > form > input[type=text]:nth-child(3)")
+    If iwe Is Nothing Then Exit Function
+    SeleniumOP.SetIWebElementValueProperty iwe, Selection.text
+    iwe.SendKeys key.Enter
+    '檢索結果
+    Set iwe = SeleniumOP.WD.FindElementByCssSelector("#content > table.searchsummary > tbody > tr:nth-child(4) > th > b")
+    If iwe Is Nothing Then Exit Function
+    If iwe.GetAttribute("textContent") <> "Total 0" Then url = SeleniumOP.WD.url
+    If url <> vbNullString Then
+        If Selection.Type = wdSelectionIP Then Selection.MoveRight wdCharacter, 1, wdExtend
+        ActiveDocument.Hyperlinks.Add Selection.Range, url
+    End If
+    SystemSetup.contiUndo ur
+    Searchu = True
+End Function
+
 Rem 20241006 以Google檢索《中國哲學書電子化計劃》 Alt + t
 Sub SearchSite()
     SeleniumOP.GoogleSearch "site:https://ctext.org/ """ + Selection.text + """"
@@ -1053,165 +1087,162 @@ End Sub
 Rem Alt + m ： 以選取文字 search史記三家注並於於選取處插入檢索結果之超連結 （m=司馬遷的馬 ma） 20241014;20241005
 '原為 Ctrl + s,j 因這樣的指定會取消掉內建的 Ctrl + s ，故改定 20241014
 Sub search史記三家注()
-    Dim ur As UndoRecord
-    SystemSetup.stopUndo ur, "search史記三家注"
-    ActiveDocument.Hyperlinks.Add Selection.Range, Search(" https://ctext.org/wiki.pl?if=gb&res=384378&searchu=")
-    SystemSetup.contiUndo ur
+    Searchu "384378", "search史記三家注"
+'    Dim ur As UndoRecord
+'    SystemSetup.stopUndo ur, "search史記三家注"
+'    ActiveDocument.Hyperlinks.Add Selection.Range, Search(" https://ctext.org/wiki.pl?if=gb&res=384378&searchu=")
+'    SystemSetup.contiUndo ur
 End Sub
 Rem Ctrl + Alt + = ： 以選取的文字檢索 CTP 所收阮元《十三經注疏·周易正義》並在選取文字上加上該檢索結果頁面之超連結
 Sub search周易正義_阮元十三經注疏()
-    Dim url As String, ur As UndoRecord
-    SystemSetup.stopUndo ur, "search周易正義_阮元十三經注疏"
-    url = 中國哲學書電子化計劃.Search(" https://ctext.org/wiki.pl?if=gb&res=315747&searchu=")
-    ActiveDocument.Hyperlinks.Add Selection.Range, url
-    SystemSetup.contiUndo ur
+    Searchu "315747", "search周易正義_阮元十三經注疏"
+    'url = 中國哲學書電子化計劃.Search(" https://ctext.org/wiki.pl?if=gb&res=315747&searchu=")
+    
 End Sub
 Rem Ctrl + shift + y ： 以選取文字 search《四部叢刊》本《周易》並於於選取處插入檢索結果之超連結(y:yi 易) 20241005
 Sub search周易_四部叢刊本()
-    Dim ur As UndoRecord
-    SystemSetup.stopUndo ur, "search周易_四部叢刊本"
-    ActiveDocument.Hyperlinks.Add Selection.Range, Search(" https://ctext.org/wiki.pl?if=gb&res=129518&searchu=")
-    SystemSetup.contiUndo ur
+    Searchu "129518", "search周易_四部叢刊本"
+    'ActiveDocument.Hyperlinks.Add Selection.Range, Search(" https://ctext.org/wiki.pl?if=gb&res=129518&searchu=")
 End Sub
 Sub 讀史記三家注()
-Dim d As Document, t As table
-Set d = Documents.Add
-d.Range.Paste
-Set t = d.tables(1)
-With t
-    .Columns(1).Delete
-    .ConvertToText wdSeparateByParagraphs
-End With
-d.Range.Cut
-d.Close wdDoNotSaveChanges
-If word.Application.Windows.Count > 0 Then word.Application.ActiveWindow.windowState = wdWindowStateMinimize
+    Dim d As Document, t As table
+    Set d = Documents.Add
+    d.Range.Paste
+    Set t = d.tables(1)
+    With t
+        .Columns(1).Delete
+        .ConvertToText wdSeparateByParagraphs
+    End With
+    d.Range.Cut
+    d.Close wdDoNotSaveChanges
+    If word.Application.Windows.Count > 0 Then word.Application.ActiveWindow.windowState = wdWindowStateMinimize
 End Sub
 
 Sub 戰國策_四部叢刊_維基文庫本() '《戰國策》格式者皆適用（即主文首行頂格，而其餘內容降一格者）
 'https://ctext.org/library.pl?if=gb&res=77385
-Dim a, rng As Range, rngDoc As Range, p As Paragraph, i As Long, rngCnt As Integer, ok As Boolean
-Dim omits As String
-omits = "《》〈〉「」『』·" & VBA.Chr(13)
-Set rngDoc = Documents.Add.Range
+    Dim a, rng As Range, rngDoc As Range, p As Paragraph, i As Long, rngCnt As Integer, ok As Boolean
+    Dim omits As String
+    omits = "《》〈〉「」『』·" & VBA.Chr(13)
+    Set rngDoc = Documents.Add.Range
 re:
-rngDoc.Paste
-維基文庫造字圖取代為文字 rngDoc
-For Each p In rngDoc.Paragraphs
-    Set a = p.Range.Characters(1)
-    If a <> "　" Then a.InsertBefore "　"
-Next p
-For Each a In rngDoc.Characters
-    If Not a.Next Is Nothing And Not a.Previous Is Nothing Then
-        If a = "　" And a.Next <> "　" And a.Previous <> "　" Then
-            If a.Previous <> VBA.Chr(13) Then a.InsertBefore VBA.Chr(13)
-            Set a = a.Next
-        End If
-    End If
-Next a
-
-For Each p In rngDoc.Paragraphs
-    Set rng = p.Range
-    If StrComp(rng.Characters(1), "　") = 0 And InStr(rng, "}") > 0 Then
-        If rng.Characters(1) = "　" And rng.Characters(2) = "{" And rng.Characters(3) = "{" Then
-            rng.Characters(1) = "{": rng.Characters(2) = "{": rng.Characters(3) = "　"
-            For Each a In rng.Characters
-               i = i + 1
-               If rng.Characters(i) = "}" Then Exit For
-               If rng.Characters(i) = VBA.Chr(13) Then
-                    i = 0
-                    Exit For
-               End If
-            Next a
-        Else
-            For Each a In rng.Characters
-               i = i + 1
-               If rng.Characters(i) = "}" Then Exit For
-               If rng.Characters(i) = VBA.Chr(13) Or rng.Characters(i) = "{" Then
-                    i = 0
-                    Exit For
-               End If
-            Next a
-        End If
-        If i <> 0 Then
-            If rng.Characters(1) = "{" And rng.Characters(2) = "{" And rng.Characters(3) = "　" Then
-                rng.SetRange rng.Characters(3).End, rng.Characters(i).start
-            Else
-                rng.SetRange rng.Characters(1).End, rng.Characters(i).start
-            End If
-'            rng.Select
-'            Stop
-            rngCnt = rng.Characters.Count
-            If rngCnt > 1 Then
-                i = 0
-                For Each a In rng.Characters
-                    If InStr(omits, a) = 0 Then i = i + 1
-                Next a
-                rngCnt = i: i = 0
-                If rngCnt Mod 2 = 1 Then
-                    rngCnt = (rngCnt + 1) / 2
-                Else
-                    rngCnt = rngCnt / 2
-                End If
-                For Each a In rng.Characters
-                    If InStr(omits, a) = 0 Then i = i + 1
-                    If i = rngCnt Then
-                        a.InsertAfter "　"
-                        Exit For
-                    End If
-                Next a
-'                If rngCnt Mod 2 = 1 Then
-'                    If rng.Characters((rngCnt - rngCnt Mod 2) / 2 + 1).Next <> "　" _
-'                        Then rng.Characters((rngCnt - rngCnt Mod 2) / 2 + 1).InsertAfter "　"
-'
-'                Else
-'                    If rng.Characters((rngCnt - rngCnt Mod 2) / 2).Next <> "　" _
-'                        Then rng.Characters((rngCnt - rngCnt Mod 2) / 2).InsertAfter "　"
-'                End If
-            Else
-                rng.Characters(1).InsertAfter "　"
-            End If
-        End If
-        i = 0
-    End If
-Next
-If ok Then
+    rngDoc.Paste
+    維基文庫造字圖取代為文字 rngDoc
     For Each p In rngDoc.Paragraphs
-        If VBA.Left(p.Range.text, 3) = "{{　" And p.Range.Characters(p.Range.Characters.Count - 1) = "}" Then
-            a = p.Range.text
-            a = VBA.Mid(a, 4, Len(a) - 6)
-            If InStr(a, "　") > 0 And InStr(a, "{") = 0 And InStr(a, "}") = 0 Then
-                rngCnt = p.Range.Characters.Count
-                For i = 4 To rngCnt
-                    Set a = p.Range.Characters(i)
-                    If a = "　" Then
-                        a.InsertParagraphBefore
-                        Exit For
-                    End If
-                Next i
+        Set a = p.Range.Characters(1)
+        If a <> "　" Then a.InsertBefore "　"
+    Next p
+    For Each a In rngDoc.Characters
+        If Not a.Next Is Nothing And Not a.Previous Is Nothing Then
+            If a = "　" And a.Next <> "　" And a.Previous <> "　" Then
+                If a.Previous <> VBA.Chr(13) Then a.InsertBefore VBA.Chr(13)
+                Set a = a.Next
             End If
         End If
-    Next p
-    '以下3行《戰國策》本身才需要
-'    rngDoc.Find.Execute "正曰", , , , , , , wdFindContinue, , "【正曰】", wdReplaceAll
-'    rngDoc.Find.Execute vba.Chrw(-10155) & vba.Chrw(-8585) & "曰", , , , , , , wdFindContinue, , "【" & vba.Chrw(-10155) & vba.Chrw(-8585) & "曰】", wdReplaceAll
-'    rngDoc.Find.Execute "補曰", , , , , , , wdFindContinue, , "【" & vba.Chrw(-10155) & vba.Chrw(-8585) & "曰】", wdReplaceAll
-End If
-If ok Then 文字處理.書名號篇名號標注
-rngDoc.Cut
-If Not ok Then
-    DoEvents
-    rngDoc.PasteAndFormat wdFormatPlainText
-    rngDoc.Find.Execute "〈", , , , , , , wdFindContinue, , "{{", wdReplaceAll
-    rngDoc.Find.Execute "〉", , , , , , , wdFindContinue, , "}}", wdReplaceAll
+    Next a
+    
+    For Each p In rngDoc.Paragraphs
+        Set rng = p.Range
+        If StrComp(rng.Characters(1), "　") = 0 And InStr(rng, "}") > 0 Then
+            If rng.Characters(1) = "　" And rng.Characters(2) = "{" And rng.Characters(3) = "{" Then
+                rng.Characters(1) = "{": rng.Characters(2) = "{": rng.Characters(3) = "　"
+                For Each a In rng.Characters
+                   i = i + 1
+                   If rng.Characters(i) = "}" Then Exit For
+                   If rng.Characters(i) = VBA.Chr(13) Then
+                        i = 0
+                        Exit For
+                   End If
+                Next a
+            Else
+                For Each a In rng.Characters
+                   i = i + 1
+                   If rng.Characters(i) = "}" Then Exit For
+                   If rng.Characters(i) = VBA.Chr(13) Or rng.Characters(i) = "{" Then
+                        i = 0
+                        Exit For
+                   End If
+                Next a
+            End If
+            If i <> 0 Then
+                If rng.Characters(1) = "{" And rng.Characters(2) = "{" And rng.Characters(3) = "　" Then
+                    rng.SetRange rng.Characters(3).End, rng.Characters(i).start
+                Else
+                    rng.SetRange rng.Characters(1).End, rng.Characters(i).start
+                End If
+    '            rng.Select
+    '            Stop
+                rngCnt = rng.Characters.Count
+                If rngCnt > 1 Then
+                    i = 0
+                    For Each a In rng.Characters
+                        If InStr(omits, a) = 0 Then i = i + 1
+                    Next a
+                    rngCnt = i: i = 0
+                    If rngCnt Mod 2 = 1 Then
+                        rngCnt = (rngCnt + 1) / 2
+                    Else
+                        rngCnt = rngCnt / 2
+                    End If
+                    For Each a In rng.Characters
+                        If InStr(omits, a) = 0 Then i = i + 1
+                        If i = rngCnt Then
+                            a.InsertAfter "　"
+                            Exit For
+                        End If
+                    Next a
+    '                If rngCnt Mod 2 = 1 Then
+    '                    If rng.Characters((rngCnt - rngCnt Mod 2) / 2 + 1).Next <> "　" _
+    '                        Then rng.Characters((rngCnt - rngCnt Mod 2) / 2 + 1).InsertAfter "　"
+    '
+    '                Else
+    '                    If rng.Characters((rngCnt - rngCnt Mod 2) / 2).Next <> "　" _
+    '                        Then rng.Characters((rngCnt - rngCnt Mod 2) / 2).InsertAfter "　"
+    '                End If
+                Else
+                    rng.Characters(1).InsertAfter "　"
+                End If
+            End If
+            i = 0
+        End If
+    Next
+    If ok Then
+        For Each p In rngDoc.Paragraphs
+            If VBA.Left(p.Range.text, 3) = "{{　" And p.Range.Characters(p.Range.Characters.Count - 1) = "}" Then
+                a = p.Range.text
+                a = VBA.Mid(a, 4, Len(a) - 6)
+                If InStr(a, "　") > 0 And InStr(a, "{") = 0 And InStr(a, "}") = 0 Then
+                    rngCnt = p.Range.Characters.Count
+                    For i = 4 To rngCnt
+                        Set a = p.Range.Characters(i)
+                        If a = "　" Then
+                            a.InsertParagraphBefore
+                            Exit For
+                        End If
+                    Next i
+                End If
+            End If
+        Next p
+        '以下3行《戰國策》本身才需要
+    '    rngDoc.Find.Execute "正曰", , , , , , , wdFindContinue, , "【正曰】", wdReplaceAll
+    '    rngDoc.Find.Execute vba.Chrw(-10155) & vba.Chrw(-8585) & "曰", , , , , , , wdFindContinue, , "【" & vba.Chrw(-10155) & vba.Chrw(-8585) & "曰】", wdReplaceAll
+    '    rngDoc.Find.Execute "補曰", , , , , , , wdFindContinue, , "【" & vba.Chrw(-10155) & vba.Chrw(-8585) & "曰】", wdReplaceAll
+    End If
+    If ok Then 文字處理.書名號篇名號標注
     rngDoc.Cut
-    ok = True
-    GoTo re
-End If
-rngDoc.Document.Close wdDoNotSaveChanges
-On Error Resume Next
-AppActivate "TextForCtext"
-SendKeys "%{insert}", True
-SystemSetup.playSound 4
+    If Not ok Then
+        DoEvents
+        rngDoc.PasteAndFormat wdFormatPlainText
+        rngDoc.Find.Execute "〈", , , , , , , wdFindContinue, , "{{", wdReplaceAll
+        rngDoc.Find.Execute "〉", , , , , , , wdFindContinue, , "}}", wdReplaceAll
+        rngDoc.Cut
+        ok = True
+        GoTo re
+    End If
+    rngDoc.Document.Close wdDoNotSaveChanges
+    On Error Resume Next
+    AppActivate "TextForCtext"
+    SendKeys "%{insert}", True
+    SystemSetup.playSound 4
 End Sub
 Sub 楚辭集注縮排N格雙行小注格式_四庫全書_國學大師()
     Dim d As Document, p As Paragraph, px As String, rng As Range, a As Range, ur As UndoRecord, s As Long, e As Long, sx As String

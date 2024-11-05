@@ -305,7 +305,7 @@ Sub 貼上純文字() 'shift+insert 2016/7/20
     If Selection.Flags <> 24 And Selection.Flags <> 25 Or Selection.Flags = 9 Then
         If s < Selection.End Then Selection.text = vbNullString
     End If
-    'Selection.PasteSpecial , , , , wdPasteText '貼上純文字
+'    Selection.PasteSpecial , , , , wdPasteText '貼上純文字
     Selection.PasteAndFormat (wdFormatPlainText)
     r.SetRange s, Selection.End
     If hl <> 9999999 Then r.HighlightColorIndex = hl '9999999 is multi-color 多重高亮色彩則無顯示9999999（7位數9）的值
@@ -521,12 +521,12 @@ Loop
 End Sub
 
 Sub 關閉其餘的文件()
-'Ctrl+Alt+W
-Dim d As Document, dn As String
-dn = ActiveDocument.FullName
-For Each d In Documents
-    If d.FullName <> dn Then d.Close wdDoNotSaveChanges
-Next
+    'Ctrl+Alt+W
+    Dim d As Document, dn As String
+    dn = ActiveDocument.FullName
+    For Each d In Documents
+        If d.FullName <> dn Then d.Close wdDoNotSaveChanges
+    Next
 End Sub
 Rem 'Ctrl+Alt+Down 2020/10/4改用 Ctrl + Shift + PageDown
 Sub 在本文件中尋找選取字串()
@@ -846,19 +846,25 @@ End If
 End Function
 
 Sub closeDocs關閉未儲存的文件檔案() 'Alt+w
-Dim d As Document
-word.Application.ScreenUpdating = False
-For Each d In Documents
-    If d.path = "" Then d.ActiveWindow.Visible = False
-Next d
-For Each d In Documents
-    If d.path = "" Then d.Close wdDoNotSaveChanges
-Next d
-word.Application.ScreenUpdating = True
-If word.Windows.Count = 0 Then
-    word.Documents.Add
-    ActiveWindow.Visible = True
-End If
+    Dim d As Document
+    word.Application.ScreenUpdating = False
+    For Each d In Documents
+        If d.path = "" Then
+            d.ActiveWindow.Visible = False
+            playSound 0.411
+        End If
+    Next d
+    For Each d In Documents
+        If d.path = "" Then
+            d.Close wdDoNotSaveChanges
+            playSound 0.411
+        End If
+    Next d
+    word.Application.ScreenUpdating = True
+    If word.Windows.Count = 0 Then
+        word.Documents.Add
+        ActiveWindow.Visible = True
+    End If
 End Sub
 Sub DocBackgroundFillColor() '頁面色彩
     ActiveDocument.ActiveWindow.View.Type = wdPrintView 'https://docs.microsoft.com/en-us/office/vba/api/word.document.background
@@ -1888,7 +1894,7 @@ App:
 Select Case Err.Number
     Case 5
         'Shell (Network.getDefaultBrowserFullname + " https://old.gj.cool/gjcool/index")'舊版
-        Shell (Network.getDefaultBrowserFullname + " https://gj.cool/punct")
+        shell (Network.getDefaultBrowserFullname + " https://gj.cool/punct")
         AppActivate Network.getDefaultBrowserNameAppActivate '"古籍酷"
         DoEvents
         SystemSetup.wait 2.9 '2.5 打開網頁 等待載入完畢

@@ -22,10 +22,17 @@ Public Declare PtrSafe Function ShellExecute Lib "shell32.dll" Alias "ShellExecu
   ByVal nShowCmd As Long) As Long 'https://www.mrexcel.com/board/threads/vba-api-call-issues-with-show-window-activation.920147/
 Public Declare PtrSafe Function ShowWindow Lib "user32" _
   (ByVal hWnd As Long, ByVal nCmdSHow As Long) As Long
-Public Declare PtrSafe Function FindWindow Lib "user32" Alias "FindWindowA" _
-  (ByVal lpClassName As String, ByVal lpWindowName As String) As Long
-  
-Public Declare PtrSafe Function SetForegroundWindow Lib "user32" (ByVal hWnd As Long) As Boolean
+'Public Declare PtrSafe Function FindWindow Lib "user32" Alias "FindWindowA" _
+'  (ByVal lpClassName As String, ByVal lpWindowName As String) As Long
+'
+'Public Declare PtrSafe Function SetForegroundWindow Lib "user32" (ByVal hWnd As Long) As Boolean
+#If VBA7 Then
+    Private Declare PtrSafe Function FindWindow Lib "user32" Alias "FindWindowA" (ByVal lpClassName As String, ByVal lpWindowName As String) As LongPtr
+    Private Declare PtrSafe Function SetForegroundWindow Lib "user32" (ByVal hWnd As LongPtr) As Long
+#Else
+    Private Declare Function FindWindow Lib "user32" Alias "FindWindowA" (ByVal lpClassName As String, ByVal lpWindowName As String) As Long
+    Private Declare Function SetForegroundWindow Lib "user32" (ByVal hWnd As Long) As Long
+#End If
   
   
   
@@ -249,7 +256,7 @@ Sub 查詢奇摩()
     Selection.Copy
     'FollowHyperlink "http://tw.search.yahoo.com/search", , , , "p=" & Selection, msoMethodGet
     'If Tasks.Exists("skqs professional version") Then
-        Shell Replace(GetDefaultBrowserEXE, """%1", "http://tw.search.yahoo.com/search?p=" & Selection)
+        shell Replace(GetDefaultBrowserEXE, """%1", "http://tw.search.yahoo.com/search?p=" & Selection)
     'Else
     '    Shell "C:\Program Files\Opera\opera.exe" & " http://tw.search.yahoo.com/search?p=" & Selection, vbNormalFocus
     'End If
@@ -295,7 +302,7 @@ Sub 查詢Google()
             Else
                 Exit Sub
             End If
-            Shell funame
+            shell funame
             'Shell "W:\!! for hpr\VB\網路搜尋_元搜尋-同時搜多個引擎\網路搜尋_元搜尋-同時搜多個引擎\bin\Debug\網路搜尋_元搜尋-同時搜多個引擎.exe"
     '    End If
     End If
@@ -360,16 +367,16 @@ Sub insertNowTime()
     End With
 End Sub
 Sub 重啟小小輸入法() 'Alt+q
-    Shell Replace(SystemSetup.取得桌面路徑, "Desktop", "Dropbox") & "\VS\bat\重啟小小輸入法.bat"
+    shell Replace(SystemSetup.取得桌面路徑, "Desktop", "Dropbox") & "\VS\bat\重啟小小輸入法.bat"
 End Sub
 
 Public Sub ShortcutKeys() '指定快速鍵
     Dim kb As KeyBinding, shortcutKeys貼上純文字 As Boolean, shortcutKeysEditCopy As Boolean
     For Each kb In KeyBindings
-        If kb.KeyCode = BuildKeyCode(wdKeyShift, wdKeyInsert) And kb.Command = "Docs.貼上純文字" Then
+        If kb.KeyCode = BuildKeyCode(wdKeyShift, wdKeyInsert) And kb.command = "Docs.貼上純文字" Then
     '        Stop
             shortcutKeys貼上純文字 = True
-        ElseIf kb.KeyCode = BuildKeyCode(wdKeyControl, wdKeyInsert) And kb.Command = "EditCopy" Then
+        ElseIf kb.KeyCode = BuildKeyCode(wdKeyControl, wdKeyInsert) And kb.command = "EditCopy" Then
     '        Stop
             shortcutKeysEditCopy = True
         End If
@@ -379,14 +386,14 @@ Public Sub ShortcutKeys() '指定快速鍵
         CustomizationContext = NormalTemplate
         KeyBindings.Add _
             KeyCategory:=wdKeyCategoryCommand, _
-            Command:="Docs.貼上純文字", _
+            command:="Docs.貼上純文字", _
             KeyCode:=BuildKeyCode(wdKeyShift, wdKeyInsert)
     End If
     If Not shortcutKeysEditCopy Then
         CustomizationContext = NormalTemplate
         KeyBindings.Add _
             KeyCategory:=wdKeyCategoryCommand, _
-            Command:="EditCopy", _
+            command:="EditCopy", _
             KeyCode:=BuildKeyCode(wdKeyControl, wdKeyInsert)
     End If
     
@@ -444,7 +451,7 @@ Sub playSound(longShort As Single, Optional waittoPlay As Byte = 1) 'Public Decl
 End Sub
 Rem 20240928 creedit_with_Copilot大菩薩 ： Word VBA 開啟指定路徑的檔案總管 ：https://sl.bing.net/rD1bSeOTPE
 Sub OpenExplorerAtPath(folderPath As String)
-    VBA.Interaction.Shell "explorer.exe " & folderPath, vbNormalFocus
+    VBA.Interaction.shell "explorer.exe " & folderPath, vbNormalFocus
 End Sub
 
 Property Get getChromePathIncludeBackslash() As String
@@ -526,15 +533,17 @@ eH:
 End Function
 
 Function apicShowWindow(strClassName As String, strWindowName As String, lngState As Long)
-  'https://www.mrexcel.com/board/threads/vba-api-call-issues-with-show-window-activation.920147/
-  'Declare variables
-  Dim lngWnd As Long
-  Dim intRet As Integer
-  
-  lngWnd = FindWindow(strClassName, strWindowName)
-  apicShowWindow = ShowWindow(lngWnd, lngState)
-  'Spy + + :https://docs.microsoft.com/zh-tw/visualstudio/debugger/how-to-start-spy-increment?view=vs-2022
-  SetForegroundWindow lngWnd 'https://zechs.taipei/?p=146
+     'https://www.mrexcel.com/board/threads/vba-api-call-issues-with-show-window-activation.920147/
+     'Declare variables
+     'Dim lngWnd As Long
+    Dim lngWnd As LongPtr
+    Dim intRet As Integer
+     
+     lngWnd = FindWindow(strClassName, strWindowName)
+     'apicShowWindow = ShowWindow(lngWnd, lngState)
+     apicShowWindow = ShowWindow(VBA.CLng(lngWnd), lngState)
+     'Spy + + :https://docs.microsoft.com/zh-tw/visualstudio/debugger/how-to-start-spy-increment?view=vs-2022
+     SetForegroundWindow lngWnd 'https://zechs.taipei/?p=146
 End Function
 
 Sub wait(sec As Single)
@@ -546,13 +555,15 @@ Sub wait(sec As Single)
 End Sub
 Rem 這個基於 AppActivate方法，常會當掉
 Sub AppActivateChrome()
+    On Error Resume Next
     AppActivateDefaultBrowser 'https://docs.microsoft.com/zh-tw/sql/ado/reference/ado-api/absoluteposition-property-ado?view=sql-server-ver15
         'try looking for both Chrome_WidgetWin_1 and Chrome_RenderWidgetHostHWND
 '    SystemSetup.apicShowWindow "Chrome_WidgetWin_1" _
         , vbNullString, 3 'https://zechs.taipei/?p=146
         'https://docs.microsoft.com/zh-tw/visualstudio/debugger/how-to-start-spy-increment?view=vs-2022
     'https://stackoverflow.com/questions/19705797/find-the-window-handle-for-a-chrome-browser
-
+    SystemSetup.apicShowWindow "Chrome_WidgetWin_1", vbNullString, 3
+    On Error GoTo 0
 End Sub
 
 Sub backupNormal_dotm() '自動備份Normal.dotm
@@ -599,7 +610,7 @@ Sub seleniumDllReference()
 End Sub
 
 Sub killProcessByName(imageName As String) 'ex: ChromeDriver.exe
-    Shell "taskkill /im " + imageName + " /f", vbHide
+    shell "taskkill /im " + imageName + " /f", vbHide
 End Sub
 Rem 20230119：chatGPT大菩薩：VBA 操控 Chrome 瀏覽器：
                 Rem 在您結束使用 Selenium Basic 庫操作 Chrome 瀏覽器之後，您可以使用 VBA 程式碼來結束 chromedriver.exe 程序。您可以使用 VBA 的 "Shell" 函數來達到這一目的。

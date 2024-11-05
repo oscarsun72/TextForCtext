@@ -524,7 +524,7 @@ namespace TextForCtext
             if (string.IsNullOrEmpty(text)) return false;
             if (text.Length > 1000)
             {
-                Regex regex = new Regex(@"\，|\。|\？|\！|\〈|\〉|\《|\》|\：|\『|\』|\〖|\〗|\「|\」|\􏿽|、|●|□|■|·|\*\*|\{\{\{|\}\}\}|\||〇|◯|　}}|\*　");
+                Regex regex = new Regex(@"\，|\。|\？|\！|\〈|\〉|\《|\》|\：|\『|\』|\〖|\〗|\【|\】|\「|\」|\􏿽|、|●|□|■|·|\*\*|\{\{\{|\}\}\}|\||〇|◯|　}}|\*　");
                 Match match = regex.Match(text);
                 return match.Success;
             }
@@ -533,7 +533,7 @@ namespace TextForCtext
                 return (text.Contains("，") || text.Contains("。") || text.Contains("：") || text.Contains("􏿽")
                     || text.Contains("！") || text.Contains("？") || text.Contains("《") || text.Contains("〈")
                     || text.Contains("『") || text.Contains("』") || text.Contains("〖") || text.Contains("〗")
-                    || text.Contains("「") || text.Contains("」")
+                    || text.Contains("「") || text.Contains("」") || text.Contains("【") || text.Contains("】")
                     || text.Contains("》") || text.Contains("〉")
                     || text.Contains("□") || text.Contains("■")
                     || text.Contains("●") || text.Contains("、")
@@ -589,7 +589,7 @@ namespace TextForCtext
                 ,"！。<p>","？。<p>","+<p>","<p>+","：。<p>","。\r\n。"
                 ,"《\r\n　　","《\r\n　","《\r\n"
                 ,"：。","\r\n，","\r\n。","\r\n、","\r\n？","\r\n」","「\r\n" ,"{{\r\n" ,"\r\n}}"
-                ,"􏿽？","􏿽。","，〉","。〉","〈、","！，","〈，","。〈。"//自動標點結果的訂正
+                ,"􏿽？","􏿽。","，〉","。〉","〈、","！，","〈，","。〈。","〈：","：〉"//自動標點結果的訂正
                 ,"，。","〉·","》·"
                 ,"*欽定《四庫全書》"
             };
@@ -602,7 +602,7 @@ namespace TextForCtext
                 ,"！<p>","？<p>","<p>","<p>","：<p>","。\r\n"
                 ,"\r\n　　《","\r\n　《","\r\n《"
                 ,"。","，\r\n","。\r\n","、\r\n","？\r\n","」\r\n","\r\n「" ,"\r\n{{", "}}\r\n"
-                ,"？􏿽","。􏿽","〉，","〉。","、〈","！","，〈","。〈"//自動標點結果的訂正
+                ,"？􏿽","。􏿽","〉，","〉。","、〈","！","，〈","。〈","〈","〉"//自動標點結果的訂正
                 ,"。","·","·"
                 ,"*欽定四庫全書"
             };
@@ -937,15 +937,30 @@ namespace TextForCtext
                 nextCloseBoldSquareBracket = result.IndexOf("】", posCloseBoldSquareBracket + 1);
 
             }
+
             if (input != result)
             {
-                Form1.playSound(Form1.soundLike.waiting, true);
-                Debugger.Break();
+                //if (!IsBalanced(result, "【".ToCharArray()[0], "】".ToCharArray()[0]))
+                if (!IsBalanced(result, '【', '】'))
+                {
+                    Form1.playSound(Form1.soundLike.waiting, true);
+                    Debugger.Break();
+                }
             }
             return result;
         }
-
-
+        /// <summary>
+        /// 檢查 string result 中是否有不對稱的符號
+        /// creedit_with_Copilot大菩薩 20241029
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        public static bool IsBalanced(string input, char openSymbol, char closeSymbol)
+        {
+            int countLeft = input.Count(c => c == openSymbol);
+            int countRight = input.Count(c => c == closeSymbol);
+            return countLeft == countRight;
+        }
         /// <summary>
         /// 沒作用！檢查文本中的成對「【」「】」符號，並清除其中的嵌套符號（【、】）。
         /// 20240901 Copilot大菩薩：C# Windows.Forms中檢查並清除成對的「【」「】」符號：https://sl.bing.net/jZwKT5iL7gO
