@@ -1099,7 +1099,7 @@ namespace TextForCtext
         /// </summary>
         /// <param name="originalText"></param>
         /// <param name="punctuatedText"></param>        
-        /// <returns></returns>
+        /// <returns>傳回復原段落的 punctuatedText</returns>
         public static string RestoreParagraphs(string originalText, ref string punctuatedText)
         //public static string RestoreParagraphs(ref string originalText, ref string punctuatedText)
         {

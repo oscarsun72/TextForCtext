@@ -269,10 +269,12 @@ textBox2中輸入 `fc` ：雙欄目錄或詩偈類型文本的排版（fc=format
 #### 小注
 Alt + s ：小注不換行、夾注不換行
 >還有其餘類似功能，詳後開列。
-#### 《古籍酷》自動標點
+#### 自動標點
 Alt + F10 、 Alt + F11 ： 將textBox1中選取的文字送去《古籍酷》自動標點。若無選取則將整個textBox1的內容送去。（小於20字元不處理）20240808（臺灣父親節）
 
 Ctrl + F10、 Ctrl + F11： 將textBox1中選取的文字送去《古籍酷》**舊版**自動標點。若無選取則將整個textBox1的內容送去。（小於20字元不處理）20240808（臺灣父親節）
+
+Ctrl + Alt + a ： [AI太炎](https://t.shenshen.wiki/)標點
 ### 文本檢測
 Alt + v： 檢查[查字.mdb].[異體字反正]資料表中是否已有該字記錄，以便程式將`異體字轉正`時參照。如果已有資料對應，則閃示橘紅色（表單顏色=Color.Tomato）0.02秒以示警
 
@@ -343,6 +345,7 @@ Ctrl + Shift + Alt + y 查[韻典網](https://ytenx.org/) y=yun（韻）的y
 - Ctrl + shift + y ： 以選取文字 search《四部叢刊》本《周易》並於於選取處插入檢索結果之超連結(y:yi 易) 20241005
 - Alt + shift + , 即  Alt + < ： 以選取的文字檢索文件中第一段所載之 CTP 所收本網址，並在選取文字上加上該檢索結果頁面之超連結
 - Ctrl + Alt + F10 或 Ctrl + Alt + F11： 讀入《古籍酷》自動標點所選取文字的結果
+- Ctrl + Alt + a ： [AI太炎](https://t.shenshen.wiki/)標點
 - Alt + Shift + y ： 查[《易學網·易經［周易］原文》](https://www.eee-learning.com/article/571)指定卦名文本_並取回其純文字值及網址值插入至文件中插入點位置(y:yi 易) 20241004
     > 若游標所在為《易學網》的網址，則將其網頁內容讀入到文件（於該連結段落後插入）
 - Ctrl + Alt + j 或 Alt + d 以文件中選取文字進行[《看典古籍·古籍全文檢索》](https://kandianguji.com/search_all) （j=籍 ji；d=典 dian）

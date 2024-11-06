@@ -14,6 +14,6 @@ Public Sub Create(str As String)
     Set clnString = ¤å¦r³B²z.CharactersStr(str)
 End Sub
 
-Public Property Get LengthByElements() As Long
-    LengthByElements = clnString.Count
+Public Property Get LengthInTextElements() As Long
+    LengthInTextElements = clnString.Count
 End Property

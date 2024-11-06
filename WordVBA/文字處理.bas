@@ -261,11 +261,11 @@ Sub 進階詞頻() '2002/11/10要Sub才能在Word中執行!'2005/4/21此法在跑大檔案時太沒效
     Dim wrong As Long, phra As Long, phras As String, phralh As Byte
     Dim StTime As Date, EndTime As Date
     Dim hfspace As Long
-    Dim length As Byte 'As String
+    Dim Length As Byte 'As String
     Dim Dw As String, dwL As Long
-    length = InputBox("請指定分析詞彙之上限,最多五個字", , "5")
-    If length = "" Or Not IsNumeric(length) Then End
-    If CByte(length) < 1 Or CByte(length) > 5 Then End
+    Length = InputBox("請指定分析詞彙之上限,最多五個字", , "5")
+    If Length = "" Or Not IsNumeric(Length) Then End
+    If CByte(Length) < 1 Or CByte(Length) > 5 Then End
     options.SaveInterval = 0 '取消自動儲存
     StTime = VBA.Time
     Set d = CreateObject("access.application")
@@ -287,7 +287,7 @@ Sub 進階詞頻() '2002/11/10要Sub才能在Word中執行!'2005/4/21此法在跑大檔案時太沒效
         dwL = Len(Dw) '文件長度
         .Close
     End With
-        For phralh = 1 To length 'CByte(length)
+        For phralh = 1 To Length 'CByte(length)
     '    For phralh = 1 To 5 '暫定最長為5個字構成的詞(仍可改作變數)
             For phra = 1 To dwL '.Characters.Count
                 Select Case phralh
@@ -408,11 +408,11 @@ Sub 進階詞頻1() '2002/11/15要Sub才能在Word中執行!
     Dim wrong As Long, phra As Long, phras As String, phralh As Byte
     Dim StTime As Date, EndTime As Date
     Dim hfspace As Long
-    Dim length As String
+    Dim Length As String
     Dim i As Byte, j As Byte
-    length = InputBox("請指定分析詞彙之上限,最多255個字", , "5")
-    If length = "" Or Not IsNumeric(length) Then End
-    If CByte(length) < 1 Or CByte(length) > 255 Then End
+    Length = InputBox("請指定分析詞彙之上限,最多255個字", , "5")
+    If Length = "" Or Not IsNumeric(Length) Then End
+    If CByte(Length) < 1 Or CByte(Length) > 255 Then End
     options.SaveInterval = 0 '取消自動儲存
     StTime = VBA.Time
     Set d = CreateObject("access.application")
@@ -428,7 +428,7 @@ Sub 進階詞頻1() '2002/11/15要Sub才能在Word中執行!
     '    db.Execute "DELETE 字頻表.* FROM 字頻表"
         db.Execute "DELETE * FROM 詞頻表"
     End If
-    j = CByte(length)
+    j = CByte(Length)
     With ActiveDocument
         For phralh = 1 To j
     '    原暫定最長為5個字構成的詞,今改作變數j,則限於Byte大小耳!
@@ -4127,7 +4127,7 @@ Sub FixFontname(rng As Range)
         Docs.ChangeFontOfSurrogatePairs_Range fontName, rngChangeFontName, CJK_Unified_Ideographs_Extension_F
 End Sub
 Sub 大陸引號改臺灣引號()
-    Rem Alt + l
+    Rem Alt + l （有選取只執行選取區，無則整份文件）
     Dim rng As Range, ur As UndoRecord
     If Selection.Type = wdSelectionIP Then
         Set rng = Selection.Document.Range
@@ -4156,4 +4156,5 @@ Function CharactersStr(str As String) As VBA.Collection
             cln.Add VBA.Mid(str, i, 1)
         End If
     Next i
+    Set CharactersStr = cln
 End Function

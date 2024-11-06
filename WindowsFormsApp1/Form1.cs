@@ -2094,7 +2094,24 @@ namespace WindowsFormsApp1
                     }
                     return;
                 }
-
+                if (e.KeyCode == Keys.A)
+                {//Ctrl + Alt + a ： [AI太炎](https://t.shenshen.wiki/)標點 20241105
+                    e.Handled = true;
+                    if (textBox1.SelectedText.IsNullOrEmpty())
+                        textBox1.SelectAll();
+                    else
+                        overtypeModeSelectedTextSetting(ref textBox1);
+                    while (("<p>" + Environment.NewLine).IndexOf(textBox1.SelectedText.Substring(textBox1.SelectedText.Length - 1, 1)) > -1)
+                    {
+                        textBox1.SelectionLength--;
+                    }
+                    string x = textBox1.SelectedText, original = x;
+                    AITShenShenWikiPunct(ref x); x = x.Replace("“", "「").Replace("”", "」").Replace("‘", "『").Replace("’", "』");
+                    CnText.RestoreParagraphs(original, ref x);
+                    textBox1.SelectedText = CnText.BooksPunctuation(ref x, true);
+                    AvailableInUseBothKeysMouse();
+                    return;
+                }
                 if (e.KeyCode == Keys.J)
                 {//Ctrl + Alt + j ：以選取文字進行[《看典古籍·古籍全文檢索》](https://kandianguji.com/search_all) (d=dian 典；j=籍 ji) 20241018
                     if (driver == null) return;
@@ -2296,7 +2313,7 @@ namespace WindowsFormsApp1
                 if (e.KeyCode == Keys.D6)
                 {//Alt + Shift + 6 小注文不換行
                     e.Handled = true; notes_a_line(); return;
-                }
+                }                
                 if (e.KeyCode == Keys.Q)
                 {//Alt + Shift + q : 據選取區的CJK字長以作分段（末後植入 < p >，分行則以版式常態值劃分），為非《維基文庫》版式之電子文本，如《寒山子詩集》組詩
                     e.Handled = true; markParagraphwithSelectionLen(); return;

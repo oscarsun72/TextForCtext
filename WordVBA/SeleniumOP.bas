@@ -644,6 +644,12 @@ Function OpenChrome_NEW_Get() As Boolean
                 '要能夠順利 Get 到手動啟動的Chrome瀏覽器，則在手動啟動Chrome瀏覽器的捷徑「目標(T)」欄位內的值後要加上 「--remote-debugging-port=9222」，如： "C:\Program Files\Google\Chrome\Application\chrome.exe" --remote-debugging-port=9222 '20241002
                 .AddArgument "--start-maximized"
             End With
+'            If Not WD Is Nothing Then
+'                'WD.Close
+'                WD.Quit
+'                Set WD = Nothing
+'                killchromedriverFromHere
+'            End If
             driver.New_ChromeDriver Service:=Service, options:=options
             Docs.Register_Event_Handler '為清除chromedriver作準備
             pid = Service.ProcessId 'Chrome瀏覽器沒有開成功就會是0
@@ -2845,10 +2851,72 @@ Err1:
         End Select
     
 End Function
+Rem Ctrl + Alt + a : [AI太炎](https://t.shenshen.wiki/)標點 20241105
+Function grabAITShenShenWikiPunctResult(text As String, resultText As String, Optional Background As Boolean) As String
+        '限500字
+    Dim strInfo As New StringInfo, iwe As IWebElement, winState As WdWindowState
+    strInfo.Create text
+    If strInfo.LengthInTextElements > 500 Then
+        MsgBox "限500字", vbCritical
+        Exit Function
+    End If
+    If IsWDInvalid() Then
+        If WD Is Nothing Then
+            If Not OpenChrome("https://t.shenshen.wiki/") Then Exit Function
+        Else
+            If IsChromeRunning Then
+                WD.SwitchTo.Window (WD.WindowHandles()(UBound(WD.WindowHandles)))
+            Else
+                If Not OpenChrome("https://t.shenshen.wiki/") Then Exit Function
+            End If
+        End If
+    Else
+        LastValidWindow = WD.CurrentWindowHandle
+    End If
+    winState = word.Application.windowState
+    WD.Navigate.GoToUrl "https://t.shenshen.wiki/"
+    WD.SwitchTo.Window WD.CurrentWindowHandle
+    ActivateChrome
+    word.Application.windowState = wdWindowStateMinimize
+    '標點
+    Set iwe = WD.FindElementByCssSelector("#nav-biaodian-tab")
+    Dim dt As Date
+    dt = DateTime.Now
+    Do While iwe Is Nothing
+        Set iwe = WD.FindElementByCssSelector("#nav-biaodian-tab")
+        If VBA.DateDiff("s", dt, DateTime.Now) > 5 Then Exit Function
+    Loop
+    iwe.Click
+    '輸入框
+    Set iwe = WD.FindElementByCssSelector("#textarea-biaodian")
+    If iwe Is Nothing Then Exit Function
+    SetIWebElementValueProperty iwe, text
+    '執行
+    Set iwe = WD.FindElementByCssSelector("#button-submit")
+    If iwe Is Nothing Then Exit Function
+    iwe.Click
+    dt = DateTime.Now
+    '結果怎么樣？
+    Set iwe = WD.FindElementByCssSelector("#feedback > div.feedback-button.feedback-tip")
+    Do While Not iwe.Displayed ' Is Nothing
+        If VBA.DateDiff("s", dt, DateTime.Now) > 36 Then Exit Function
+        Set iwe = WD.FindElementByCssSelector("#feedback > div.feedback-button.feedback-tip")
+    Loop
+    '結果
+    Set iwe = WD.FindElementByCssSelector("#output-content")
+    If iwe Is Nothing Then Exit Function
+    resultText = iwe.GetAttribute("textContent")
+    If UBound(WD.WindowHandles) > 1 Then WD.Close '不關閉，以手動評量其標點良窳
+    If LastValidWindow <> vbNullString Then WD.SwitchTo().Window (LastValidWindow)
+    grabAITShenShenWikiPunctResult = resultText
+    word.Application.Activate
+    word.Application.windowState = winState
+End Function
 Rem 取得《漢籍全文資料庫·斷句十三經經文·周易》文本 ： gua 卦名 。成功則傳回 true 20241004
 Function grabHanchiZhouYi_TheOriginalText_ThirteenSutras(gua As String, resultText As String) As Boolean
 
 End Function
+
 Rem 取得《易學網·易經〔周易〕原文》文本。成功則傳回 true 20241004.20241006 resultText是個集合，第1個元素是易卦的內容字串，第2個元素是查詢結果網址。若沒找到，則傳回元素是空字串的陣列
 Function grabEeeLearning_IChing_ZhouYi_originalText(guaSequence As String, resultText As Variant, Optional iwe As SeleniumBasic.IWebElement) As Boolean
 '    If Not OpenChrome("https://www.eee-learning.com/article/571") Then Exit Function

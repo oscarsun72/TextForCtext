@@ -1223,8 +1223,8 @@ Private Sub 讀入網路資料後_還原視窗狀態(win As word.Window, windowState As word.
     End With
 
 End Sub
+Rem Alt + F10(此快速鍵待確認！）
 Sub 送交古籍酷自動標點()
-    'Alt + F10(此快速鍵待確認！）
     Dim ur As UndoRecord
     If Selection.Characters.Count < 10 Then
         MsgBox "字數太少，有必要嗎？請至少大於10字", vbExclamation
@@ -1238,13 +1238,17 @@ Sub 送交古籍酷自動標點()
     Selection.text = SystemSetup.GetClipboardText
     SystemSetup.contiUndo ur
 End Sub
+Rem Ctrl + Alt + a
+Sub 讀入AI太炎標點結果()
+    If inputAITShenShenWikiPunctResult = False Then MsgBox "請重試！", vbCritical
+End Sub
 Sub 讀入古籍酷自動標點結果()
     'Ctrl + Alt + F10 或 Ctrl + Alt + F11
     If inputGjcoolPunctResult = False Then MsgBox "請重試！", vbCritical
 End Sub
 Rem 20241008 失敗則傳回false
 Function inputGjcoolPunctResult() As Boolean
-        Dim ur As UndoRecord, result As String
+    Dim ur As UndoRecord, result As String
     文字處理.ResetSelectionAvoidSymbols
     If Selection.Characters.Count < 10 Then
         MsgBox "字數太少，有必要嗎？請至少大於10字", vbExclamation
@@ -1286,7 +1290,7 @@ Function inputGjcoolPunctResult() As Boolean
         End If
     Next e
     Set rng = Selection.Document.Range(Selection.start, Selection.End)
-    rng.Find.ClearAllFuzzyOptions: rng.Find.ClearFormatting
+    rng.Find.ClearFormatting
     For Each e In cln
 '        If e(1) = Chr(13) Then Stop 'just for test
         If e(0) <> vbNullString Then
@@ -1322,6 +1326,102 @@ Function inputGjcoolPunctResult() As Boolean
     word.Application.ScreenUpdating = True
     SystemSetup.contiUndo ur
     inputGjcoolPunctResult = True
+End Function
+Rem 20241008 失敗則傳回false
+Function inputAITShenShenWikiPunctResult() As Boolean
+    Dim ur As UndoRecord, result As String
+    文字處理.ResetSelectionAvoidSymbols
+    If Selection.Characters.Count < 10 Then
+        MsgBox "字數太少，有必要嗎？請至少大於10字", vbExclamation
+        Exit Function
+    End If
+    word.Application.ScreenUpdating = False
+'    Const ignoreMarker = "《》〈〉「」『』" '書名號、篇名號、引號不處理（由前面的程式碼處理）
+    Const ignoreMarker = "《》〈〉（）·「」『』" '書名號、篇名號、括號、音節號、引號不處理（由前面的程式碼處理）
+    result = Selection.text
+    Rem 括號、篇名號之處理：〔、〕、〔、〕 會被清除掉
+    result = VBA.Replace(VBA.Replace(result, "《", "＜"), "》", "＞") '書名號亦會被自動標點清除故,以備還原 20241106
+    result = VBA.Replace(VBA.Replace(result, "（", "【"), "）", "】") '括號亦會被自動標點清除故,以備還原 202411106
+    result = VBA.Replace(VBA.Replace(result, "〈", VBA.ChrW(12310)), "〉", VBA.ChrW(12311))     '篇名號亦會被自動標點清除故,以備還原 20241001
+    result = VBA.Replace(result, "·", "⊙")     '音節號亦會被自動標點清除故,以備還原 20241001
+'
+    If SeleniumOP.grabAITShenShenWikiPunctResult(result, result, False) = vbNullString Then
+        Selection.Document.Activate
+        Selection.Document.Application.Activate
+        Exit Function
+    Else
+        result = VBA.Replace(VBA.Replace(VBA.Replace(VBA.Replace(result, VBA.ChrW(8220), "「"), VBA.ChrW(8221), "」"), VBA.ChrW(8216), "『"), VBA.ChrW(8217), "』")
+        result = VBA.Replace(VBA.Replace(result, VBA.ChrW(12310) & "《", VBA.ChrW(12310)), "》" & VBA.ChrW(12311), VBA.ChrW(12311))      '書名號亦會被自動標點清除故,以備還原 20241106
+        result = VBA.Replace(VBA.Replace(result, "《", "＜"), "》", "＞") '書名號亦會被自動標點清除故,以備還原 20241106
+        result = VBA.Replace(result, "·", "⊙")     '音節號亦會被自動標點清除故,以備還原 20241001
+    End If
+    Selection.Document.Activate
+    Selection.Document.Application.Activate
+    Rem 括號之處理'標點會在（處停止
+    result = VBA.Replace(VBA.Replace(result, "＜", "《"), "＞", "》") '書名號亦會被自動標點清除故,以備還原 20241001
+    result = VBA.Replace(result, "⊙", "·")  '音節號亦會被自動標點清除故,以備還原 20241001
+    result = VBA.Replace(VBA.Replace(result, "【", "（"), "】", "）")  '括號亦會被自動標點清除故,以備還原 20241001
+    result = VBA.Replace(VBA.Replace(result, VBA.ChrW(12310), "〈"), VBA.ChrW(12311), "〉")     '篇名號亦會被自動標點清除故,以備還原 20241001
+    'result = VBA.Replace(result, VBA.Chr(13) & VBA.Chr(10), VBA.Chr(13)) '讀回來的自動標點結果會將chr(13)轉成VBA.Chr(13) & VBA.Chr(10)
+    SystemSetup.stopUndo ur, "讀入AI太炎標點結果"
+    Rem Selection.text = result'純文字處理
+    Dim puncts As New punctuation, cln As New VBA.Collection, e, rng As Range '適應於格式化文字
+    Set cln = puncts.CreateContextPunctuationCollection(result)
+    Rem 清除原來的標點符號，以利比對與插入
+    Set rng = Selection.Document.Range(Selection.start, Selection.End)
+    For Each e In rng.Characters
+'        'If e = "。" Then Stop 'just for test
+'        If e.text = "　" Then '空格要清除（《古籍酷》自動標點會清除空格）
+'            e.text = vbNullString
+'        Else
+            If VBA.InStr(ignoreMarker, e.text) = 0 Then '書名號、引號不處理（由前面的程式碼處理）
+                If puncts.PunctuationDictionary.Exists(e.text) Then
+                    e.text = vbNullString
+                End If
+            End If
+'        End If
+    Next e
+    Set rng = Selection.Document.Range(Selection.start, Selection.End)
+    rng.Find.ClearFormatting
+    For Each e In cln
+'        If e(1) = Chr(13) Then Stop 'just for test
+        If e(0) <> vbNullString Then
+            If rng.Find.Execute(e(0), , , , , , True, wdFindStop) = False Then
+                If rng.text = e(0) Then '最後一個
+                    If VBA.InStr(ignoreMarker, e(1)) = 0 Then '篇名號、括號不處理（由前面的程式碼處理）
+                        rng.InsertAfter e(1)
+                    End If
+'                Else
+'                    Stop 'just for test
+                End If
+            Else
+                If VBA.InStr(ignoreMarker, e(1)) = 0 Then '括號、篇名號不處理（由前面的程式碼處理）
+                    rng.InsertAfter e(1)
+                Else
+                    rng.SetRange rng.start, rng.End + 1
+                End If
+            End If
+        Else
+            If VBA.InStr(ignoreMarker & VBA.Chr(13), e(1)) = 0 Then '篇名號、括號不處理（由前面的程式碼處理）
+                rng.Collapse wdCollapseStart
+                rng.InsertAfter e(1)
+            Else
+                rng.SetRange rng.start, rng.start + 1
+            End If
+        End If
+        If rng.End <= Selection.End Then '最後一個
+'            If rng.End = Selection.Document.Range.End Then
+'                Set rng = Selection.Document.Range(rng.End - 1, Selection.End)
+'            Else
+                Set rng = Selection.Document.Range(rng.End, Selection.End)
+'            End If
+        Else
+            Selection.End = rng.End
+        End If
+    Next e
+    SystemSetup.contiUndo ur
+    word.Application.ScreenUpdating = True
+    inputAITShenShenWikiPunctResult = True
 End Function
 Function GetUserAddress() As Boolean
     Dim x As String, a As Object 'Access.Application

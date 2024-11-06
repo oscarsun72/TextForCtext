@@ -9342,6 +9342,57 @@ internal static string getImageUrl() {
         }
 
         /// <summary>
+        /// Alt + Shift + a ： [AI太炎](https://t.shenshen.wiki/)標點 20241105
+        /// </summary>
+        /// <param name="x">要標點的文本變數，標點結果亦儲存在此</param>
+        /// <returns>成功傳回true</returns>
+        public static bool AITShenShenWikiPunct(ref string x)
+        {
+            //限500字
+            if (new StringInfo(x).LengthInTextElements > 500)
+            {
+                Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("限500字");
+                return false;
+            }
+            if (IsDriverInvalid())
+            {
+                if (driver == null)
+                    DriverNew();
+                else
+                    driver.SwitchTo().Window(driver.WindowHandles.Last());
+            }
+            else
+                LastValidWindow = driver.CurrentWindowHandle;
+            openNewTabWindow();
+            driver.Navigate().GoToUrl("https://t.shenshen.wiki/");
+            //標點
+            IWebElement iwe = waitFindWebElementBySelector_ToBeClickable("#nav-biaodian-tab", 5);
+            if (iwe == null) return false;
+            iwe.Click();
+            //輸入框
+            iwe = waitFindWebElementBySelector_ToBeClickable("#textarea-biaodian");
+            if (iwe == null) return false;
+            SetIWebElementValueProperty(iwe, x);
+            //執行
+            iwe = waitFindWebElementBySelector_ToBeClickable("#button-submit");
+            iwe.Click();
+            DateTime dt = DateTime.Now;
+            //结果怎么样？
+            iwe = waitFindWebElementBySelector_ToBeClickable("#feedback > div.feedback-button.feedback-tip");
+            while (iwe == null)//while (iwe.Displayed==false)
+            {
+                if (DateTime.Now.Subtract(dt).TotalMinutes > 0.6) return false;
+                iwe = waitFindWebElementBySelector_ToBeClickable("#feedback > div.feedback-button.feedback-tip");
+            }
+            //結果
+            iwe = waitFindWebElementBySelector_ToBeClickable("#output-content");
+            if (iwe == null) return false;
+            x = iwe.GetAttribute("textContent");
+            driver.Close();//不關閉，以手動評量其標點良窳
+            driver.SwitchTo().Window(LastValidWindow);
+            return true;
+        }
+        /// <summary>
         /// 直接取代文字的編輯頁面
         /// </summary>
         internal static string DirectlyReplacingCharactersPageWindowHandle = string.Empty;
