@@ -1105,7 +1105,10 @@ namespace TextForCtext
             IWebElement e = null;
             try
             {
-                e = (driver ?? drver).FindElement(By.Name(name));
+                if (driver == null && drver == null)
+                    RestartDriver();
+                else
+                    e = (driver ?? drver).FindElement(By.Name(name));
             }
             catch (Exception ex)
             {
@@ -10733,6 +10736,40 @@ internal static string getImageUrl() {
             }
             else
                 return false;
+        }
+        /// <summary>
+        /// 打開展開/收起閉合大綱標題（章節頁面）
+        /// </summary>
+        internal static void OutlineTitlesCloseOpenFoldExpandSwitcher()
+        {
+            if (driver == null) return;
+            if (IsDriverInvalid())
+            {
+                driver.SwitchTo().Window(driver.WindowHandles.LastOrDefault());
+            }
+            if (!driver.Url.StartsWith("https://ctext.org/wiki.pl?if=gb&res="))
+            {
+                for (int i = driver.WindowHandles.Count - 1; i > -1; i--)
+                {
+                    if (driver.SwitchTo().Window(driver.WindowHandles[i]).Url.StartsWith("https://ctext.org/wiki.pl?if=gb&res="))
+                        break;
+                }
+
+            }
+            ReadOnlyCollection<IWebElement> iwes = driver.FindElements(By.TagName("DIV"));
+            foreach (var item in iwes)
+            {
+                if (item.GetAttribute("title") == "+")
+                    try
+                    {
+                        item.Click();
+                    }
+                    catch (Exception)
+                    {
+
+                    }
+            }
+
         }
     }
 

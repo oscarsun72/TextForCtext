@@ -1148,7 +1148,14 @@ namespace WindowsFormsApp1
             {
                 if (isClipBoardAvailable_Text())
                 {
-                    textBox1.Text = Clipboard.GetText();
+                    try
+                    {
+                        textBox1.Text = Clipboard.GetText();
+                    }
+                    catch (Exception)
+                    {
+                        Thread.Sleep(2000);
+                    }
                     textBox1.Select(0, 0);
                     textBox1.ScrollToCaret();
                 }
@@ -2313,7 +2320,7 @@ namespace WindowsFormsApp1
                 if (e.KeyCode == Keys.D6)
                 {//Alt + Shift + 6 小注文不換行
                     e.Handled = true; notes_a_line(); return;
-                }                
+                }
                 if (e.KeyCode == Keys.Q)
                 {//Alt + Shift + q : 據選取區的CJK字長以作分段（末後植入 < p >，分行則以版式常態值劃分），為非《維基文庫》版式之電子文本，如《寒山子詩集》組詩
                     e.Handled = true; markParagraphwithSelectionLen(); return;
@@ -6011,7 +6018,8 @@ namespace WindowsFormsApp1
             if (undoTextBox1Text.Count - undoTimes - 1 > -1)
             {
                 //string x = undoTextBox1Text[undoTextBox1Text.Count - ++undoTimes];
-                string x = undoTextBox1Text[undoTextBox1Text.Count - 1 - ++undoTimes];//20241001
+                //string x = undoTextBox1Text[undoTextBox1Text.Count - 1 - ++undoTimes];//20241001
+                string x = undoTextBox1Text[undoTextBox1Text.Count - ++undoTimes];//20241001
                 while (x == "")
                 {
                     if (undoTextBox1Text.Count - undoTimes - 1 < 0) break;
@@ -6397,11 +6405,11 @@ namespace WindowsFormsApp1
                 if (eventEnabled)
                     ResumeEvents();
             }
-
+            undoRecord();
             replaceXdirrectly();
 
             int s = 0, l, e = textBox1.Text.IndexOf(Environment.NewLine); if (e < 0) return;
-            PauseEvents();
+            //PauseEvents();
             int rs = textBox1.SelectionStart, rl = textBox1.SelectionLength;
             string se = textBox1.Text.Substring(s, e - s);
             //int l = new StringInfo(se).LengthInTextElements;
@@ -12562,6 +12570,7 @@ namespace WindowsFormsApp1
 
         {//此中斷點專為偵錯測試用 感恩感恩　南無阿彌陀佛 20230314
 
+            //OutlineTitlesCloseOpenSwitcher();
             #region forDebugTest權作測試偵錯用20230310            
             //br.SetQuickedit_data_textboxTxt(textBox1.Text);
             //string x = Clipboard.GetText();
