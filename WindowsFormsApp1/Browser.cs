@@ -2508,6 +2508,10 @@ namespace TextForCtext
                             else if (ex.Message.StartsWith("not connected to DevTools"))//-2146233088disconnected: not connected to DevTools
                                                                                         //(failed to check if window was closed: disconnected: not connected to DevTools)
                                 RestartChromedriver();
+                            else if (ex.Message.StartsWith("disconnected: not connected to DevTools"))//disconnected: not connected to DevTools\n  (failed to check if window was closed: disconnected: not connected to DevTools)\n  (Session info: chrome=130.0.6723.117)
+                            {
+                                RestartChromedriver();
+                            }
                             else
                             {
                                 MessageBox.Show(ex.HResult + ex.Message);
@@ -8241,6 +8245,23 @@ internal static string getImageUrl() {
             }
             //x = iwe.Text;//.Text屬性傳回的會是經過trim的
             x = iwe.GetAttribute("textContent");
+            //補上句號
+            if (x.EndsWith("<p>") || x.EndsWith("<p>" + Environment.NewLine))
+            {
+                string endChar;
+                if (x.EndsWith("<p>"))
+                    endChar = x.Substring(x.Length - 4, 1);
+                else
+                    endChar = x.Substring(x.Length - 6, 1);
+                if (char.IsLowSurrogate(endChar.ToCharArray()[0]) ||
+                        Form1.IsChineseString(endChar))
+                {
+                    if (x.EndsWith("<p>"))
+                        x = x.Substring(0, x.Length - 3) + "。" + "<p>";
+                    else
+                        x = x.Substring(0, x.Length - 5) + "。" + "<p>" + Environment.NewLine;
+                }
+            }
             //關閉https://gj.cool/punct頁面回到原來的頁面
             driver.Close();
             driver.SwitchTo().Window(LastValidWindow);
@@ -8519,10 +8540,10 @@ internal static string getImageUrl() {
                 "无妄", "彖", "象曰", "象傳", "象日", "象云","大象","小象","象文", "筮", // 不支援標點檢索，如「, "象："」
                 "初九","九二","九三","九四","九五","上九","初六","六二","六三","六四","六五","上六","用九","用六", "繇辭","繇詞",
                 "伏羲","庖羲","庖𦏁","宓𦏁","宓羲","宓犧","伏犧","庖犧","中正","見龍在田","噬膚","舊井","井谷","為麗","離麗",
-                "隨時之義","庖有魚","包有魚","精義入神","豶豕","童牛","承之羞","雷在天上","錫馬", "蕃庶","晝日","三接","懲忿","窒欲","窒慾","敬以直內","義以方外","迷後得主","利西南","品物咸章","天下大行","益動而", "日進無疆","頻巽","豚魚","頻復", "懲窒","閑邪","存誠","乾乾","悔吝","憧憧", "類萬物","柔順利貞","比之匪人","貞厲","履貞","履道坦坦","貞吉","貞凶","悔亡","時義","健順", "內健而外順", "內健外順", "外順而內健", "外順內健","敦復","直方","開物成務","窮神知化", "夕惕","惕若","研幾極深","極深研幾","一陰一陽","允升","木上有水","勞民勸相","索而得","我有好爵","言有序","有聖人之道四","長子帥師","弟子輿尸","無悶","日用而不知", "日用不知","之道鮮","原始反終", "寂然不動", "感而遂通","朋從", "朋盍", "容民畜眾","有過則改","見善則遷","養正","養賢","知臨","臨大君", "默而成之","黙而成之","不言而信", "存乎德行","通天下之志","履正", "繼之者善", "仁者見之", "知者見之", "智者見之","屯其膏", "貞不字","翰音","鶾音", "善不積","立成器", "與地之",
+                "隨時之義","庖有魚","包有魚","精義入神","豶豕","童牛","承之羞","雷在天上","錫馬", "蕃庶","晝日","三接","懲忿","窒欲","窒慾","敬以直內","義以方外","迷後得主","利西南","品物咸章","天下大行","益動而", "日進無疆","頻巽","豚魚","頻復", "懲窒","閑邪","存誠","乾乾","悔吝","憧憧", "類萬物","柔順利貞","比之匪人","貞厲","履貞","履道坦坦","貞吉","貞凶","悔亡","時義","健順", "內健而外順", "內健外順", "外順而內健", "外順內健","敦復","直方","開物成務","窮神知化", "夕惕","惕若","研幾極深","極深研幾","一陰一陽","允升","木上有水","勞民勸相","索而得","我有好爵","言有序","有聖人之道四","長子帥師","弟子輿尸","無悶","日用而不知", "日用不知","之道鮮","原始反終", "然不動", "感而遂通","朋從", "朋盍", "容民畜眾","有過則改","見善則遷","養正","養賢","知臨","臨大君", "默而成之","黙而成之","不言而信", "存乎德行","通天下之志","履正", "繼之者善", "仁者見之", "知者見之", "智者見之","屯其膏", "貞不字","翰音","鶾音", "善不積","立成器", "與地之",
                 "象義","大貞","小貞", "帝出乎震","帝出於震","帝出于震", "日新","與時偕行","盈虛","山澤通氣","豐亨","天在山中", "多識前言往行", "蹇蹇", "匪躬","洗心","龍德","慎言語","節飲食","艮其限","乃孚","幹父","裕父","係遯","甘臨","號咷", "風行水上",
                 "終難","咸之九五","賁於丘園","賁于丘園","賁於邱園","賁于邱園", "束帛","戔戔", "損下以益上", "其腓","菑畬","葘畬", "損下益上", "損下而益上", "貳用缶","納約自牖","利見大人", "何思何慮","同歸而殊塗","一致而百慮", "同歸殊塗","一致百慮","先天後天","改命吉","天下雷行","喪貝","羝羊","羝芉", "觸藩", "觸籓","事不密","艱貞","金矢","利有","攸往","包蒙", "童蒙", "蒙吉",
-                "精氣為物","游魂為變","遊䰟為變","游䰟為變", "漣如","焚如","知幾其神","禴祭", "東鄰","朋亡", "渙其群","有子考","甲三日","庚三日","不易乎世","不成乎名","天一地二","者其辭","升其高陵","天道虧盈","鞏用", "祗悔", "祇悔","秖悔","秪悔","履霜","蒞眾","理財", "正辭", "禁民為非","撝謙", "浚恒","浚恆", "立其誠","立誠","修辭立誠","開國承家","確乎其不可拔","碻乎其不可拔"
+                "精氣為物","游魂為變","遊䰟為變","游䰟為變", "不家食","漣如","焚如","知幾其神","禴祭", "東鄰","朋亡", "渙其群","有子考","甲三日","庚三日","不易乎世","不成乎名","天一地二","者其辭","升其高陵","天道虧盈","鞏用", "祗悔", "祇悔","秖悔","秪悔","履霜","蒞眾","理財", "正辭", "禁民為非","撝謙", "浚恒","浚恆", "立其誠","立誠","修辭立誠","開國承家","確乎其不可拔","碻乎其不可拔"
                 };
 
             //異體字處理（只用在《中國哲學書電子化計劃》，因為《漢籍全文資料庫》已俱。）
@@ -9390,7 +9411,7 @@ internal static string getImageUrl() {
             //結果
             iwe = waitFindWebElementBySelector_ToBeClickable("#output-content");
             if (iwe == null) return false;
-            x = iwe.GetAttribute("textContent");
+            x = iwe.GetAttribute("textContent").Replace("□", "􏿽");
             driver.Close();//不關閉，以手動評量其標點良窳
             driver.SwitchTo().Window(LastValidWindow);
             return true;
@@ -10334,7 +10355,7 @@ internal static string getImageUrl() {
         /// <param name="imageUrl">圖片所在網址</param>
         /// <param name="downloadImgFullName"></param>
         /// <param name="selectedInExplorer"></param>
-        /// <returns></returns>
+        /// <returns>成功則傳回true</returns>
         internal static bool DownloadImage(string imageUrl, string downloadImgFullName, bool selectedInExplorer = false)
         {
             //var driver = new ChromeDriver();
@@ -10372,7 +10393,8 @@ internal static string getImageUrl() {
             }
             catch (Exception)
             {
-                throw;
+                return false;
+                //throw;
             }
             //IWebElement iw = waitFindWebElementBySelector_ToBeClickable("body > img");
             //Cursor.Position = (Point)iw?.Location;

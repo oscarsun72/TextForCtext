@@ -2829,8 +2829,16 @@ Err1:
                     openNewTabWhenTabAlreadyExit wdB
                     wdB.Navigate.GoToUrl url
                     Resume
+                ElseIf InStr(Err.Description, "disconnected: not connected to DevTools") = 1 Then 'disconnected: not connected to DevTools
+                                                                                        '  (failed to check if window was closed: disconnected: not connected to DevTools)
+                                                                                        '  (Session info: chrome=130.0.6723.117)
+                    killchromedriverFromHere 'WD.Quit: Set WD = Nothing:
+                    OpenChrome url
+                    Set wdB = WD
+                    Resume
+                    
                 Else
-                    MsgBox Err.Number + Err.Description
+                    MsgBox Err.Number & Err.Description
                     Stop
                 End If
             Case -2147467261 '並未將物件參考設定為物件的執行個體。

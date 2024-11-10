@@ -7960,7 +7960,8 @@ namespace WindowsFormsApp1
                 //    pageTextEndPosition = textBox1.SelectionStart + textBox1.SelectionLength;
                 //    pageEndText10 = textBox1.Text.Substring(pageTextEndPosition, 10);
                 //}
-                predictEndofPage();
+                //現在不用剪貼簿了，所以要傳引數以供參考 20241109
+                predictEndofPage(xCopy);
             }
             //重設自動判斷頁尾之值(有翻頁就得重設！）
             pageTextEndPosition = 0; pageEndText10 = "";
@@ -8067,13 +8068,16 @@ namespace WindowsFormsApp1
         /// <summary>
         /// 預測準備處理的那一頁，其頁末的位置及其文字
         /// </summary>
-        void predictEndofPage()
+        void predictEndofPage(string xCopy)
         {
 
-            if (lines_perPage == 0)
+            //if (lines_perPage == 0)
+            if (lines_perPage < 6)
             {
                 if (AutoPasteToCtext)
-                    lines_perPage = (linesParasPerPage != -1 && linesParasPerPage != 0) ? linesParasPerPage : countLinesPerPage(Clipboard.GetText());
+                    //現在不用剪貼簿了，所以以引數來判斷 20241109
+                    //lines_perPage = (linesParasPerPage != -1 && linesParasPerPage != 0) ? linesParasPerPage : countLinesPerPage(Clipboard.GetText());
+                    lines_perPage = (linesParasPerPage != -1 && linesParasPerPage != 0) ? linesParasPerPage : countLinesPerPage(xCopy);
                 if (lines_perPage == 0) return;
             }
             string x = textBox1.Text;
