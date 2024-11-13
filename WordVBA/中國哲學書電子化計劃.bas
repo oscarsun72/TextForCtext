@@ -1067,6 +1067,8 @@ Function Searchu(res As String, undoName As String) As Boolean
     Set iwe = SeleniumOP.WD.FindElementByCssSelector("#content > div.wikibox > table > tbody > tr.mobilesearch > td > form > input[type=text]:nth-child(3)")
     If iwe Is Nothing Then Exit Function
     SeleniumOP.SetIWebElementValueProperty iwe, Selection.text
+    
+    On Error GoTo eH
     iwe.SendKeys key.Enter
     '檢索結果
     Set iwe = SeleniumOP.WD.FindElementByCssSelector("#content > table.searchsummary > tbody > tr:nth-child(4) > th > b")
@@ -1078,6 +1080,22 @@ Function Searchu(res As String, undoName As String) As Boolean
     End If
     SystemSetup.contiUndo ur
     Searchu = True
+    Exit Function
+eH:
+    Select Case Err.Number
+        Case -2146233088
+            If VBA.InStr(Err.Description, "element not interactable") = 1 Then '(Session info: chrome=130.0.6723.117)
+                Set iwe = SeleniumOP.WD.FindElementByCssSelector("#searchform > input.searchbox")
+                SeleniumOP.SetIWebElementValueProperty iwe, Selection.text
+                Resume
+            Else
+                GoTo elses
+            End If
+        Case Else
+elses:
+            Debug.Print Err.Number & Err.Description
+            MsgBox Err.Number & Err.Description
+    End Select
 End Function
 
 Rem 20241006 以Google檢索《中國哲學書電子化計劃》 Alt + t

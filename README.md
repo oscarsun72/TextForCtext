@@ -350,11 +350,11 @@ Ctrl + Shift + Alt + y 查[韻典網](https://ytenx.org/) y=yun（韻）的y
     > 若游標所在為《易學網》的網址，則將其網頁內容讀入到文件（於該連結段落後插入）
 - Ctrl + Alt + j 或 Alt + d 以文件中選取文字進行[《看典古籍·古籍全文檢索》](https://kandianguji.com/search_all) （j=籍 ji；d=典 dian）
     > 原為 Ctrl + k,d (k=kan 看；d=dian 典) ，因會使內建的 Ctrl + k （插入超連結）失效，故改定 20241014
-- Alt + Shfit + h： 檢索《漢籍全文資料庫》 (h=han 漢)
+- Alt + h 或 Alt + Shfit + h： 檢索《漢籍全文資料庫》 (h=han 漢)
 - Alt + t ： 以Google檢索《中國哲學書電子化計劃》 查中國哲學書電子化計劃網域  (t=CTP的t)20241006
 - Ctrl + Shift + Alt + U u=xun（訓）的u 查[古音小鏡](http://www.kaom.net/)_訓詁工具書查詢 20241020
 - Ctrl + Shift + Alt + i 查古音小鏡_漢語大詞典 i=ci（詞）的i
-- Ctrl + Shift + Alt + c 查[白雲深處人家](http://www.homeinmists.com/)漢語大詞典 c=ci（詞）的c
+- Ctrl + Alt + b 或 Ctrl + Shift + Alt + c 查[白雲深處人家](http://www.homeinmists.com/)漢語大詞典 c=ci（詞）的c；b=bai(白，白雲深處人家的白)
 - Ctrl + Shift + Alt + y 查[韻典網](https://ytenx.org/) y=yun（韻）的y
 - Alt + Shift + z 或 ctrl + Alt + Shift + z 查《中文大辭典》－－[《國學大師》](https://www.guoxuedashi.net/zidian/)所收轉愚所掃全彩為黑白版 20241020 （z：中（zh）的 z）20241020
 - Ctrl + Alt + ' （頓號） 頓號文字加上篇名號（〈〉）如周易諸卦

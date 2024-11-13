@@ -780,9 +780,9 @@ namespace WindowsFormsApp1
                     break;
                 //自動擷取「簡單修改模式」（selector: # quickedit > a的連結)準備到《古籍酷》OCR
                 case Keys.Shift:
-                    //toOCR(br.OCRSiteTitle.GJcool);
-                    copyQuickeditLinkWhenKeyinModeSub();
-                    ResetLastValidWindow();
+                    toOCR(br.OCRSiteTitle.GJcool);
+                    //copyQuickeditLinkWhenKeyinModeSub();
+                    //ResetLastValidWindow();
                     break;
                 //自動擷取「簡單修改模式」（selector: # quickedit > a的連結)
                 case Keys.None:
@@ -811,9 +811,23 @@ namespace WindowsFormsApp1
                     wh = br.driver.CurrentWindowHandle;
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                wh = string.Empty;
+                switch (ex.HResult)
+                {
+                    case -2146233088:
+                        if (ex.Message.StartsWith("An unknown exception was encountered sending an HTTP request to the remote WebDriver server for URL "))//http://localhost:5395/session/f4e2d1e40ba5f7dbb4254af16a9ed493/window/handles. The exception message was: 傳送要求時發生錯誤。"))
+                        {
+                            RestartChromedriver();
+                            goto retry;
+                        }
+                        else
+                            goto default;
+                    default:
+                        Console.WriteLine(ex.HResult + ex.Message);
+                        wh = string.Empty;
+                        break;
+                }
             }
             if (wh != string.Empty)
                 br.LastValidWindow = wh;
@@ -2334,7 +2348,7 @@ namespace WindowsFormsApp1
                     x = x.EndsWith("》") ? x.Substring(0, x.Length - 1) : x;
                     x = x.EndsWith(Environment.NewLine) ? x.Substring(0, x.Length - 2) : x;
                     x = x.EndsWith("\n") ? x.Substring(0, x.Length - 1) : x;
-                    url = url + x;
+                    url = x + " " + url;//url置後方便按下 Ctrl + Delete 清除，以改用Google全球/全域搜尋
                     Clipboard.SetText(x);
                     if (br.driver != null)
                     {
@@ -3840,7 +3854,7 @@ namespace WindowsFormsApp1
                 }
                 if (e.KeyCode == Keys.F8)
                 {
-                    //F8 ：整頁貼上Quick edit [簡單修改模式]  並將下一頁直接送交《古籍酷》OCR// 原為加上篇名格式代碼
+                    //F8 ：整頁貼上Quick edit [簡單修改模式]  並轉到下一頁
                     e.Handled = true;
                     if (!OcrTextMode) PressAddKeyMethodPaste2QuickEditBox();
                     else
@@ -10919,7 +10933,7 @@ namespace WindowsFormsApp1
                                 //        //throw;
                                 //    }
                             }
-                            else if (modifierKeys == Keys.Shift && !pagePaste2GjcoolOCR && !PagePaste2GjcoolOCR_ing)
+                            else if (modifierKeys == Keys.Shift && !pagePaste2GjcoolOCR)//&& !PagePaste2GjcoolOCR_ing)
                             {
                                 toOCR(br.OCRSiteTitle.GJcool);
                             }

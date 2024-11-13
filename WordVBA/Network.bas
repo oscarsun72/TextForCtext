@@ -170,6 +170,7 @@ Sub 查古音小鏡_漢語大詞典()
 End Sub
 Sub 查白雲深處人家漢語大詞典()
     Rem Ctrl + Shift + Alt + c c=ci（詞）的c
+    Rem  Ctrl + Alt + b （b=bai(白，白雲深處人家的白)）
     文字處理.ResetSelectionAvoidSymbols
     LookupHomeinmistsHYDCD Selection.text
 End Sub
@@ -1178,7 +1179,7 @@ Sub 查看典古籍古籍全文檢索()
     文字處理.ResetSelectionAvoidSymbols
     SeleniumOP.KandiangujiSearchAll Selection.text
 End Sub
-Rem 20241006 檢索《漢籍全文資料庫》 Alt + Shfit + h
+Rem 20241006 檢索《漢籍全文資料庫》 Alt + Shfit + h 或 Alt + h
 Sub 查漢籍全文資料庫()
     文字處理.ResetSelectionAvoidSymbols
     SeleniumOP.HanchiSearch Selection.text
@@ -1355,14 +1356,18 @@ Function inputAITShenShenWikiPunctResult() As Boolean
         result = VBA.Replace(VBA.Replace(result, "《", "＜"), "》", "＞") '書名號亦會被自動標點清除故,以備還原 20241106
         result = VBA.Replace(result, "·", "⊙")     '音節號亦會被自動標點清除故,以備還原 20241001
     End If
-    Selection.Document.Activate
+    
     Selection.Document.Application.Activate
+    Selection.Document.Activate
     Rem 括號之處理'標點會在（處停止
     result = VBA.Replace(VBA.Replace(result, "＜", "《"), "＞", "》") '書名號亦會被自動標點清除故,以備還原 20241001
     result = VBA.Replace(result, "⊙", "·")  '音節號亦會被自動標點清除故,以備還原 20241001
     result = VBA.Replace(VBA.Replace(result, "【", "（"), "】", "）")  '括號亦會被自動標點清除故,以備還原 20241001
     result = VBA.Replace(VBA.Replace(result, VBA.ChrW(12310), "〈"), VBA.ChrW(12311), "〉")     '篇名號亦會被自動標點清除故,以備還原 20241001
     'result = VBA.Replace(result, VBA.Chr(13) & VBA.Chr(10), VBA.Chr(13)) '讀回來的自動標點結果會將chr(13)轉成VBA.Chr(13) & VBA.Chr(10)
+    
+    result = VBA.Replace(result, VBA.ChrW(12295), "○")  '"○"會被置換！
+    Debug.Print result
     SystemSetup.stopUndo ur, "讀入AI太炎標點結果"
     Rem Selection.text = result'純文字處理
     Dim puncts As New punctuation, cln As New VBA.Collection, e, rng As Range '適應於格式化文字
@@ -1398,7 +1403,12 @@ Function inputAITShenShenWikiPunctResult() As Boolean
                 If VBA.InStr(ignoreMarker, e(1)) = 0 Then '括號、篇名號不處理（由前面的程式碼處理）
                     rng.InsertAfter e(1)
                 Else
-                    rng.SetRange rng.start, rng.End + 1
+                    If rng.Document.Range(rng.End, rng.End + 1) <> e(1) Then
+                        rng.Collapse wdCollapseEnd
+                        rng.InsertAfter e(1)
+                    Else
+                        rng.SetRange rng.start, rng.End + 1
+                    End If
                 End If
             End If
         Else
@@ -1406,7 +1416,12 @@ Function inputAITShenShenWikiPunctResult() As Boolean
                 rng.Collapse wdCollapseStart
                 rng.InsertAfter e(1)
             Else
-                rng.SetRange rng.start, rng.start + 1
+                If rng.Document.Range(rng.start, rng.start + 1) <> e(1) Then
+                    rng.Collapse wdCollapseStart
+                    rng.InsertAfter e(1)
+                Else
+                    rng.SetRange rng.start, rng.start + 1
+                End If
             End If
         End If
         If rng.End <= Selection.End Then '最後一個

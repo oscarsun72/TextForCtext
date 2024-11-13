@@ -2869,20 +2869,21 @@ Function grabAITShenShenWikiPunctResult(text As String, resultText As String, Op
         Exit Function
     End If
     If IsWDInvalid() Then
-        If WD Is Nothing Then
-            If Not OpenChrome("https://t.shenshen.wiki/") Then Exit Function
-        Else
-            If IsChromeRunning Then
-                WD.SwitchTo.Window (WD.WindowHandles()(UBound(WD.WindowHandles)))
-            Else
-                If Not OpenChrome("https://t.shenshen.wiki/") Then Exit Function
-            End If
-        End If
+'        If WD Is Nothing Then
+'            If Not OpenChrome("https://t.shenshen.wiki/") Then Exit Function
+'        Else
+'            If IsChromeRunning Then
+'                WD.SwitchTo.Window (WD.WindowHandles()(UBound(WD.WindowHandles)))
+'            Else
+'                If Not OpenChrome("https://t.shenshen.wiki/") Then Exit Function
+'            End If
+'        End If
     Else
         LastValidWindow = WD.CurrentWindowHandle
     End If
+    If Not OpenChrome("https://t.shenshen.wiki/") Then Exit Function
     winState = word.Application.windowState
-    WD.Navigate.GoToUrl "https://t.shenshen.wiki/"
+'    WD.Navigate.GoToUrl "https://t.shenshen.wiki/"
     WD.SwitchTo.Window WD.CurrentWindowHandle
     ActivateChrome
     word.Application.windowState = wdWindowStateMinimize
@@ -2914,7 +2915,7 @@ Function grabAITShenShenWikiPunctResult(text As String, resultText As String, Op
     Set iwe = WD.FindElementByCssSelector("#output-content")
     If iwe Is Nothing Then Exit Function
     resultText = iwe.GetAttribute("textContent")
-    If UBound(WD.WindowHandles) > 1 Then WD.Close '不關閉，以手動評量其標點良窳
+    'If UBound(WD.WindowHandles) > 1 Then WD.Close '不關閉，以手動評量其標點良窳
     If LastValidWindow <> vbNullString Then WD.SwitchTo().Window (LastValidWindow)
     grabAITShenShenWikiPunctResult = resultText
     word.Application.Activate
