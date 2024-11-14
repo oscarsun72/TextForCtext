@@ -1269,6 +1269,10 @@ Function inputGjcoolPunctResult() As Boolean
     End If
     Selection.Document.Activate
     Selection.Document.Application.Activate
+    
+    GoSub 標點校正
+    
+    
     Rem 書名號、引號之處理
     result = VBA.Replace(VBA.Replace(result, "〔", "《"), "〕", "》") '書名號亦會被自動標點清除故,以備還原 20241001
     result = VBA.Replace(VBA.Replace(result, "〔", "「"), "〕", "」") '引號亦會被自動標點清除故,以備還原 20241001
@@ -1327,6 +1331,21 @@ Function inputGjcoolPunctResult() As Boolean
     word.Application.ScreenUpdating = True
     SystemSetup.contiUndo ur
     inputGjcoolPunctResult = True
+    Exit Function
+    
+標點校正:
+    Dim arrPunct, arrPunctCorrector, iarr As Byte, arrUb As Byte
+    arrPunct = Array(VBA.ChrW(-10148) & VBA.ChrW(-9010) & "：文" & VBA.ChrW(28152) & "公")
+    arrPunctCorrector = Array(VBA.ChrW(-10148) & VBA.ChrW(-9010) & "文" & VBA.ChrW(28152) & "公")
+    arrUb = UBound(arrPunct)
+    For iarr = 0 To arrUb
+        If VBA.InStr(result, arrPunct(iarr)) Then
+            result = VBA.Replace(result, arrPunct(iarr), arrPunctCorrector(iarr))
+        End If
+    Next iarr
+    
+    Return
+    
 End Function
 Rem 20241008 失敗則傳回false
 Function inputAITShenShenWikiPunctResult() As Boolean

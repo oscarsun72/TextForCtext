@@ -1402,6 +1402,9 @@ namespace TextForCtext
                             {
                                 Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("請更新 chromedriver 才能繼續");
                                 Form1.browsrOPMode = Form1.BrowserOPMode.appActivateByName; killchromedriverFromHere();
+                                Process.Start("https://googlechromelabs.github.io/chrome-for-testing/#stable");
+                                Process.Start(chrome_path);
+
                                 return null;
                             }
                             else if (ex.Message.StartsWith("session not created: Chrome failed to start: exited normally."))//"session not created: Chrome failed to start: exited normally.\n  (session not created: DevToolsActivePort file doesn't exist)\n  (The process started from chrome location W:\\PortableApps\\PortableApps\\GoogleChromePortable\\App\\Chrome-bin\\chrome.exe is no longer running, so ChromeDriver is assuming that Chrome has crashed.) (SessionNotCreated)"
