@@ -176,7 +176,7 @@ namespace TextForCtext
             //現在亦可用 https://www.kanripo.org/ 所收《四部叢刊》本，故加此條件判斷 20240804
             int isSKQS = xForStandardize.IndexOf("《欽定四庫全書》");
             if (isSKQS > -1)
-                xForStandardize = "〖文淵|閣寶〗<p>\r\n*欽定四庫全書<p>" + xForStandardize.Substring(isSKQS + "《欽定四庫全書》".Length);
+                xForStandardize = "*欽定四庫全書<p>〖文淵|閣寶〗<p>" + xForStandardize.Substring(isSKQS + "《欽定四庫全書》".Length);
 
             xForStandardize = xForStandardize.Replace("○", "◯");
             xForStandardize = xForStandardize.Replace("\r\n　\r\n　\r\n", "\r\n|\r\n|\r\n");

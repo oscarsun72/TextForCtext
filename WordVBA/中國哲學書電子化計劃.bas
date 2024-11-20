@@ -161,6 +161,7 @@ End Sub
 
 Sub 清除頁前的分段符號()
     Dim d As Document, rng As Range, e As Long, s As Long, xd As String
+    Dim iwe As SeleniumBasic.IWebElement
     Set d = Documents.Add
     DoEvents
     'If (MsgBox("add page 1 code?", vbExclamation + vbOKCancel) = vbOK) Then setPage1Code
@@ -297,7 +298,7 @@ Sub 將每頁間的分段符號清除()
     Loop
 End Sub
 
-Sub pastetoEditBox(Description_from_ClipBoard As String)
+Private Sub pastetoEditBox(Description_from_ClipBoard As String)
     word.Application.windowState = wdWindowStateMinimize
     'MsgBox "ready to paste", vbInformation
     AppActivateDefaultBrowser
@@ -625,7 +626,7 @@ Sub searchuCtext()
     'For Each e In searchedTerm
         addressHyper = addressHyper + " " + site + cndn + bookID + "&searchu=" + e
     'Next e
-    shell Network.getDefaultBrowserFullname + addressHyper + " --remote-debugging-port=9222 "
+    Shell Network.getDefaultBrowserFullname + addressHyper + " --remote-debugging-port=9222 "
     
     Selection.Hyperlinks.Add Selection.Range, addressHyper
 End Sub
@@ -1043,7 +1044,7 @@ Function Search(searchWhatsUrl As String) As String
     encode = code.UrlEncode(Selection.text)
     'Shell "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe https://ctext.org/wiki.pl?if=gb&res=384378&searchu=" & Selection.text
     'Shell Normal.SystemSetup.getChrome & searchWhatsUrl & Selection.Text
-    shell TextForCtextWordVBA.Network.GetDefaultBrowserEXE & searchWhatsUrl & encode
+    Shell TextForCtextWordVBA.Network.GetDefaultBrowserEXE & searchWhatsUrl & encode
     Search = searchWhatsUrl & encode
 End Function
 Rem 檢索CTP特定之書 成功則傳回true

@@ -3123,6 +3123,8 @@ Sub 漢籍電子文獻資料庫文本整理_注文前後加括號() '最後執行 Docs.mark易學關鍵字(在
         Set pasteAppendedRange = d.Range
         pasteAppendedRange.start = d.Range.End
         '汰重貼上內容部分由 mark易學關鍵字 負責，標識關鍵字則交由送交自動標點內含的呼叫 mark易學關鍵字 來處理
+        
+        Rem 標點
         If hasPunct Then
             Docs.mark易學關鍵字 Nothing, False
             
@@ -3135,12 +3137,14 @@ Sub 漢籍電子文獻資料庫文本整理_注文前後加括號() '最後執行 Docs.mark易學關鍵字(在
                 d.Activate
             End If
             
-        Else
+        Else Rem 送去《古籍酷》自動標點
             If Docs.mark易學關鍵字(Nothing, True) Then
             '貼上之後由其貼到文件末端、又預留一些分段符號此一特徵，可以抓到貼上的Range
                 pasteAppendedRange.End = d.Range.End
                 pasteAppendedRange.Select '因為送交自動標點程序內有 Selection.Cut
                 
+                 Rem 送去《古籍酷》自動標點
+
 '                Stop 'just for test
                 If Network.inputGjcoolPunctResult = False Then
                     GoTo finish
@@ -3173,6 +3177,33 @@ Sub 漢籍電子文獻資料庫文本整理_注文前後加括號() '最後執行 Docs.mark易學關鍵字(在
 '                    Docs.中國哲學書電子化計劃_只保留正文注文_且注文前後加括弧_貼到古籍酷自動標點
 '                End If
                 Rem 以上為舊式
+                
+                
+                Rem 清除頁碼前後的空行'清除頁碼段的標點
+                Dim p As Paragraph, pManageRng As Range
+                For Each p In pasteAppendedRange.Paragraphs
+                    If VBA.Len(p.Range.text) < 10 And VBA.Len(p.Range.text) > 1 Then
+                        If VBA.IsNumeric(VBA.Replace(VBA.Replace(VBA.Replace(p.Range.text, Chr(13), vbNullString), "-", vbNullString), "。", vbNullString)) Then
+                            Set pManageRng = p.Range.Document.Range(p.Range.start, p.Range.End - 1)
+                            pManageRng.text = VBA.Replace(pManageRng.text, "。", vbNullString)
+                            If Not p.Previous Is Nothing Then
+                                If p.Previous.Range.text = Chr(13) Then
+                                    Set pManageRng = p.Range.Document.Range(p.Previous.Range.start, p.Previous.Range.End)
+                                    pManageRng.text = vbNullString
+'                                    Set p = p.Previous
+                                End If
+                            End If
+                            If Not p.Next Is Nothing Then
+                                If p.Next.Range.text = Chr(13) Then
+                                    Set pManageRng = p.Range.Document.Range(p.Next.Range.start, p.Next.Range.End)
+                                    pManageRng.text = vbNullString
+'                                    Set p = p.Previous
+                                End If
+                            End If
+                        End If
+                    End If
+                Next p
+                Rem 稍後插入分段符號
                 If pasteAppendedRange.End = pasteAppendedRange.Document.Range.End Then
                     If VBA.Right(pasteAppendedRange, 3) <> VBA.Chr(13) & VBA.Chr(13) & VBA.Chr(13) Then
                         pasteAppendedRange.InsertParagraphAfter
@@ -3181,11 +3212,18 @@ Sub 漢籍電子文獻資料庫文本整理_注文前後加括號() '最後執行 Docs.mark易學關鍵字(在
                         pasteAppendedRange.InsertParagraphAfter
                     End If
                 End If
+                
+
+                
+                
+                Rem 檢查重複後貼上
             End If
+            Rem 送去《古籍酷》自動標點
         End If
         DoEvents
         rng.Document.Close wdDoNotSaveChanges
-    Else
+        
+    Else '非易學雜著文本
         DoEvents
         rng.Document.Activate
     End If
@@ -3298,280 +3336,281 @@ For i = 0 To UBound(ay)
 Next i
 國語辭典注音文字處理 = x
 End Function
+Rem alt + shift + \
 Sub 生難字加上國語辭典注音()
-Dim rng As Range, x, rst As New ADODB.Recordset, st As WdSelectionType, words As String
-Dim cnt As New ADODB.Connection, id As Long, sty As word.Style, url As String
-Dim frmDict As New Form_DictsURL, lnks As New links, db As New dBase ', frm As New MSForms.DataObject
-Static cntStr As String, chromePath As String
-st = Selection.Type
-If st = wdSelectionIP Then
-    If Selection.start = 0 Then Exit Sub
-    x = Selection.Previous.Characters(Selection.Previous.Characters.Count).text
-    If InStr("。，；「」『』〈〉《》？.,;""?－-──--（）()【】〔〕<>[]…! 　！", x) Then Exit Sub
-'    Selection.Previous.Copy
-Else
-    x = trimStrForSearch(VBA.CStr(Selection.text), Selection)
-    'Selection.Copy
-    SystemSetup.ClipboardPutIn "=" & Selection.text
-End If
-    If 文字處理.isSymbol(CStr(x)) Or 文字處理.is注音符號(CStr(x)) Or 文字處理.isLetter(CStr(x)) Or 文字處理.isNum(CStr(x)) Then Exit Sub
-Set rng = Selection.Range
-words = x
-db.setWordControlValue (words)
-On Error GoTo eH
-Dim ur As UndoRecord
-'Set ur = SystemSetup.stopUndo("生難字加上國語辭典注音")
-SystemSetup.stopUndo ur, "生難字加上國語辭典注音"
-
-'If Not Selection.Document.path = "" Then If Not Selection.Document.Saved Then Selection.Document.save
-If cntStr = "" Then
-    Dim dbp As New Paths
-    cntStr = dbp.getdb_重編國語辭典修訂本_資料庫fullName
-End If
-
-If chromePath = "" Then
-    chromePath = SystemSetup.getChrome
-End If
-
-'Dim ay, i As Byte
-'ay = Array("ㄧ", vba.Chrw(20008), "　", " ", "（又音）", "又音 ", "（讀音）", "讀音 ", "（語音）", "語音 ", _
-'        "(一)", "", "(二)", "", "(三)", "", "(四)", "", "(五)", "", "(六)", "", "）", "", "（", "")
-
-    cnt.Open "Provider=Microsoft.ACE.OLEDB.12.0;Data Source=" & cntStr
-'Exit Sub
-'cntt:
-    rst.Open "select 注音一式,釋義,url,ID,多音排序 from [《重編國語辭典修訂本》 總表] where strcomp(字詞名,""" & x & """)=0 order by 多音排序", cnt, adOpenKeyset, adLockOptimistic
-    If rst.RecordCount > 0 Then
-        GoSub list
+    Dim rng As Range, x, rst As New ADODB.Recordset, st As WdSelectionType, words As String
+    Dim cnt As New ADODB.Connection, id As Long, sty As word.Style, url As String
+    Dim frmDict As New Form_DictsURL, lnks As New links, db As New dBase ', frm As New MSForms.DataObject
+    Static cntStr As String, chromePath As String
+    st = Selection.Type
+    If st = wdSelectionIP Then
+        If Selection.start = 0 Then Exit Sub
+        x = Selection.Previous.Characters(Selection.Previous.Characters.Count).text
+        If InStr("。，；「」『』〈〉《》？.,;""?－-──--（）()【】〔〕<>[]…! 　！", x) Then Exit Sub
+    '    Selection.Previous.Copy
     Else
-        生難字加上國語辭典注音nextTable rst, cnt, x, "《重編國語辭典修訂本》 總表-20210928以前", True
+        x = trimStrForSearch(VBA.CStr(Selection.text), Selection)
+        'Selection.Copy
+        SystemSetup.ClipboardPutIn "=" & Selection.text
+    End If
+        If 文字處理.isSymbol(CStr(x)) Or 文字處理.is注音符號(CStr(x)) Or 文字處理.isLetter(CStr(x)) Or 文字處理.isNum(CStr(x)) Then Exit Sub
+    Set rng = Selection.Range
+    words = x
+    db.setWordControlValue (words)
+    On Error GoTo eH
+    Dim ur As UndoRecord
+    'Set ur = SystemSetup.stopUndo("生難字加上國語辭典注音")
+    SystemSetup.stopUndo ur, "生難字加上國語辭典注音"
+    
+    'If Not Selection.Document.path = "" Then If Not Selection.Document.Saved Then Selection.Document.save
+    If cntStr = "" Then
+        Dim dbp As New Paths
+        cntStr = dbp.getdb_重編國語辭典修訂本_資料庫fullName
+    End If
+    
+    If chromePath = "" Then
+        chromePath = SystemSetup.getChrome
+    End If
+    
+    'Dim ay, i As Byte
+    'ay = Array("ㄧ", vba.Chrw(20008), "　", " ", "（又音）", "又音 ", "（讀音）", "讀音 ", "（語音）", "語音 ", _
+    '        "(一)", "", "(二)", "", "(三)", "", "(四)", "", "(五)", "", "(六)", "", "）", "", "（", "")
+    
+        cnt.Open "Provider=Microsoft.ACE.OLEDB.12.0;Data Source=" & cntStr
+    'Exit Sub
+    'cntt:
+        rst.Open "select 注音一式,釋義,url,ID,多音排序 from [《重編國語辭典修訂本》 總表] where strcomp(字詞名,""" & x & """)=0 order by 多音排序", cnt, adOpenKeyset, adLockOptimistic
         If rst.RecordCount > 0 Then
             GoSub list
         Else
+            生難字加上國語辭典注音nextTable rst, cnt, x, "《重編國語辭典修訂本》 總表-20210928以前", True
+            If rst.RecordCount > 0 Then
+                GoSub list
+            Else
 2
-            If Selection.Characters.Count = 1 Then 'words  單字
-                frmDict.getDictVariantsRecS words, rst
-                If rst.RecordCount > 0 Then
-                    GoSub list
-                Else
-                    frmDict.getDictHydzdRecS words, rst
+                If Selection.Characters.Count = 1 Then 'words  單字
+                    frmDict.getDictVariantsRecS words, rst
                     If rst.RecordCount > 0 Then
-                        'GoSub list
-                        Set sty = rng.Style
-                        rng.Hyperlinks.Add rng, lnks.trimLinks(rst.Fields(2).Value), , , , "_blank"
-                        lnks.setStylewithHyperlinkMark sty, rng
+                        GoSub list
+                    Else
+                        frmDict.getDictHydzdRecS words, rst
+                        If rst.RecordCount > 0 Then
+                            'GoSub list
+                            Set sty = rng.Style
+                            rng.Hyperlinks.Add rng, lnks.trimLinks(rst.Fields(2).Value), , , , "_blank"
+                            lnks.setStylewithHyperlinkMark sty, rng
+                        Else
+                            GoSub notFound
+                        End If
+                    End If
+                Else 'terms 詞彙
+                    frmDict.getDictHydcdRecS words, rst
+                    If rst.RecordCount > 0 Then
+                        If Not VBA.IsNull(rst.Fields(0)) Then
+                            GoSub list
+                        Else
+                            Set sty = rng.Style
+                            rng.Hyperlinks.Add rng, lnks.trimLinks(rst.Fields(2).Value), , , , "_blank"
+                            lnks.setStylewithHyperlinkMark sty, rng
+                        End If
                     Else
                         GoSub notFound
                     End If
                 End If
-            Else 'terms 詞彙
-                frmDict.getDictHydcdRecS words, rst
-                If rst.RecordCount > 0 Then
-                    If Not VBA.IsNull(rst.Fields(0)) Then
-                        GoSub list
-                    Else
-                        Set sty = rng.Style
-                        rng.Hyperlinks.Add rng, lnks.trimLinks(rst.Fields(2).Value), , , , "_blank"
-                        lnks.setStylewithHyperlinkMark sty, rng
-                    End If
-                Else
-                    GoSub notFound
-                End If
             End If
         End If
-    End If
 endS:
-    SystemSetup.contiUndo ur
-    Set ur = Nothing
-    If rst.State <> adStateClosed Then rst.Close
-    If cnt.State <> adStateClosed Then cnt.Close
-    Set rst = Nothing: Set cnt = Nothing: Set frmDict = Nothing ': Set frm = Nothing
-    Set lnks = Nothing: Set db = Nothing: Set rng = Nothing
-Exit Sub
-
+        SystemSetup.contiUndo ur
+        Set ur = Nothing
+        If rst.State <> adStateClosed Then rst.Close
+        If cnt.State <> adStateClosed Then cnt.Close
+        Set rst = Nothing: Set cnt = Nothing: Set frmDict = Nothing ': Set frm = Nothing
+        Set lnks = Nothing: Set db = Nothing: Set rng = Nothing
+    Exit Sub
+    
 notFound:
-                If st = wdSelectionIP Then
-                    Selection.Previous.Copy
-                    'Selection.Document.FollowHyperlink "https://dict.variants.moe.edu.tw/variants/rbt/query_by_standard_tiles.rbt?command=clear"
-                    x = frmDict.add1URLTo1異體字字典(words)
-                    If x = "" Then GoTo endS
-                    GoTo 2
-                Else
-                    rst.Close
-                    rst.Open "select 注音一式,釋義,url,ID,多音排序 from [《重編國語辭典修訂本》 總表] where instr(字詞名,""" & x & """)>0 order by 多音排序", cnt, adOpenKeyset, adLockOptimistic
-                    Selection.Copy
-                    If rst.RecordCount > 0 Then
-                        Beep
-                        'Selection.Document.FollowHyperlink "https://www.zdic.net/hans/" & x, , True
-                        shell chromePath & " https://www.zdic.net/hans/" & x
-                        GoSub list
-                        'Selection.Document.FollowHyperlink "http://dict.revised.moe.edu.tw/cbdic/search.htm", , True
-'                        Shell chromePath & " http://dict.revised.moe.edu.tw/cbdic/search.htm"
+                    If st = wdSelectionIP Then
+                        Selection.Previous.Copy
+                        'Selection.Document.FollowHyperlink "https://dict.variants.moe.edu.tw/variants/rbt/query_by_standard_tiles.rbt?command=clear"
+                        x = frmDict.add1URLTo1異體字字典(words)
+                        If x = "" Then GoTo endS
+                        GoTo 2
                     Else
-                            生難字加上國語辭典注音nextTable rst, cnt, x, "《重編國語辭典修訂本》 總表-20210928以前", False
-                            If rst.RecordCount > 0 Then
-                                Beep
-                                GoSub list
-                            Else
+                        rst.Close
+                        rst.Open "select 注音一式,釋義,url,ID,多音排序 from [《重編國語辭典修訂本》 總表] where instr(字詞名,""" & x & """)>0 order by 多音排序", cnt, adOpenKeyset, adLockOptimistic
+                        Selection.Copy
+                        If rst.RecordCount > 0 Then
+                            Beep
                             'Selection.Document.FollowHyperlink "https://www.zdic.net/hans/" & x, , True
-                            shell chromePath & " https://www.zdic.net/hans/" & x
-                            End If
+                            Shell chromePath & " https://www.zdic.net/hans/" & x
+                            GoSub list
+                            'Selection.Document.FollowHyperlink "http://dict.revised.moe.edu.tw/cbdic/search.htm", , True
+    '                        Shell chromePath & " http://dict.revised.moe.edu.tw/cbdic/search.htm"
+                        Else
+                                生難字加上國語辭典注音nextTable rst, cnt, x, "《重編國語辭典修訂本》 總表-20210928以前", False
+                                If rst.RecordCount > 0 Then
+                                    Beep
+                                    GoSub list
+                                Else
+                                'Selection.Document.FollowHyperlink "https://www.zdic.net/hans/" & x, , True
+                                Shell chromePath & " https://www.zdic.net/hans/" & x
+                                End If
+                        End If
                     End If
-                End If
-Return
-
+    Return
+    
 list:
-'        Dim ur As UndoRecord
-'        Set ur = SystemSetup.stopUndo("沛榮按")
-'        Docs.樣式add_沛榮按等樣式
-        rng.Collapse wdCollapseEnd
-        If rng.Style <> "沛榮按" Then
-            rng.InsertAfter "（）"
-            rng.Style = "沛榮按"
-            rng.SetRange rng.End - 1, rng.End - 1
-        End If
-        Do Until rst.EOF
-            x = ""
-            If VBA.IsNull(rst.Fields(0).Value) Then
-                x = rst.Fields(1).Value '釋義
-            Else
-                x = rst.Fields(0).Value '注音
+    '        Dim ur As UndoRecord
+    '        Set ur = SystemSetup.stopUndo("沛榮按")
+    '        Docs.樣式add_沛榮按等樣式
+            rng.Collapse wdCollapseEnd
+            If rng.Style <> "沛榮按" Then
+                rng.InsertAfter "（）"
+                rng.Style = "沛榮按"
+                rng.SetRange rng.End - 1, rng.End - 1
             End If
-            GoSub typeTexts
-            rst.MoveNext
-        Loop
-        If rng.Previous = "，" Then rng.Previous.Delete
-'        SystemSetup.contiUndo ur
-'        Set ur = Nothing:  'Set frm = Nothing: Set frmDict = Nothing
-
-Return
-
-typeTexts:
-        If x = "" Or VBA.IsNull(x) Then GoTo 2
-'        X = VBA.Mid(X, 1, Len(X) - 1)
-        x = 國語辭典注音文字處理(CStr(x))
-'        If sT <> wdSelectionIP Then
-'            rng.SetRange Selection.End, Selection.End
-'        End If
-'        rng.SetRange rng.End - 1, rng.End - 1
-        rng.InsertAfter x 'insert ZhuYin
-        For Each x In rng.Characters 'format ZhuYin
-            If InStr("ˊˇˋ", x) Then
-                x.Style = "聲調"
-            ElseIf InStr("˙", x) Then
-                x.font.Name = "標楷體"
-            End If
-        Next x
-        x = rst.Fields(2).Value 'URL  'frmDict.get1URLfor1(words)
-        If VBA.IsNull(x) Then
-                If st = wdSelectionIP Then
-                    If Selection.Previous.Characters(Selection.Previous.Characters.Count).Hyperlinks.Count > 0 Then
-                        Dim rngW As Range
-                        Set rngW = Selection.Range
-                        rngW.SetRange Selection.Previous.Characters(Selection.Previous.Characters.Count).start, Selection.Previous.Characters(Selection.Previous.Characters.Count).End
-                        SystemSetup.ClipboardPutIn "=" & rngW.text '"^" & rngW.text & "$" 'version 6's new settings
-                        Set rngW = Nothing
-                    Else
-                        Set rngW = Selection.Previous.Characters(Selection.Previous.Characters.Count)
-                        SystemSetup.ClipboardPutIn "=" & rngW.text
-                        'Selection.Previous.Characters(Selection.Previous.Characters.Count).Copy
-                    End If
-                End If
-'                Shell chromePath & " http://dict.revised.moe.edu.tw/cbdic/search.htm"
-'            frm.Clear
-'            frm.SetText words, 1
-'            frm.PutInClipboard
-            'add new url
-            Dim repeated As Boolean '檢索結果不止一個時會重複
-rePt:
-            If repeated = False Then x = SeleniumOP.grabDictRevisedUrl_OnlyOneResult(words) '此法只適用於僅1筆資料時,沒有或多於1筆則返回""空字串
-            rng.Document.ActiveWindow.Application.Activate
-            If rst.RecordCount = 1 Then '國語辭典資料庫裡只有1筆吻合資料
-                If x = "" Then '結果不止1個時
-                    shell Network.getDefaultBrowserFullname & " https://dict.revised.moe.edu.tw/search.jsp?md=1"
-                End If
-''                If Not SystemSetup.appActivatedYet("chrome") Then
-''                'If Not word.Tasks.Exists("google chrome") Then
-''                    Shell SystemSetup.getChrome & " https://dict.revised.moe.edu.tw/search.jsp?md=1"
-''                Else
-''                    SystemSetup.appActivateChrome
-''                End If
-            Else
-                If VBA.IsNull(x) Then x = ""
-                Beep
-            End If
-            If x = "" Then '結果不止1個時
-                If repeated = False Then
-                    If SeleniumOP.ActiveXComponentsCanNotBeCreated Then
-                        SystemSetup.playSound 2
-                        shell Network.getDefaultBrowserFullname & " https://dict.revised.moe.edu.tw/search.jsp?md=1&word=" & words
-                    Else
-                        shell Network.getDefaultBrowserFullname & " https://dict.revised.moe.edu.tw/search.jsp?md=1"
-                    End If
+            Do Until rst.EOF
+                x = ""
+                If VBA.IsNull(rst.Fields(0).Value) Then
+                    x = rst.Fields(1).Value '釋義
                 Else
-                
+                    x = rst.Fields(0).Value '注音
                 End If
-                x = InputBox("plz putin the url", , IIf(VBA.IsNull(rst.Fields(0).Value), "", rst.Fields(0).Value)) 'frmDict.add1URLTo1國語辭典(words)
-                If repeated Then
-                    SystemSetup.wait 1 '先確定要輸入哪個詞條，再將瀏覽器置前
-                    'AppActivateChrome
-                    SeleniumOP.ActivateChrome
+                GoSub typeTexts
+                rst.MoveNext
+            Loop
+            If rng.Previous = "，" Then rng.Previous.Delete
+    '        SystemSetup.contiUndo ur
+    '        Set ur = Nothing:  'Set frm = Nothing: Set frmDict = Nothing
+    
+    Return
+    
+typeTexts:
+            If x = "" Or VBA.IsNull(x) Then GoTo 2
+    '        X = VBA.Mid(X, 1, Len(X) - 1)
+            x = 國語辭典注音文字處理(CStr(x))
+    '        If sT <> wdSelectionIP Then
+    '            rng.SetRange Selection.End, Selection.End
+    '        End If
+    '        rng.SetRange rng.End - 1, rng.End - 1
+            rng.InsertAfter x 'insert ZhuYin
+            For Each x In rng.Characters 'format ZhuYin
+                If InStr("ˊˇˋ", x) Then
+                    x.Style = "聲調"
+                ElseIf InStr("˙", x) Then
+                    x.font.Name = "標楷體"
                 End If
-                repeated = True
+            Next x
+            x = rst.Fields(2).Value 'URL  'frmDict.get1URLfor1(words)
+            If VBA.IsNull(x) Then
+                    If st = wdSelectionIP Then
+                        If Selection.Previous.Characters(Selection.Previous.Characters.Count).Hyperlinks.Count > 0 Then
+                            Dim rngW As Range
+                            Set rngW = Selection.Range
+                            rngW.SetRange Selection.Previous.Characters(Selection.Previous.Characters.Count).start, Selection.Previous.Characters(Selection.Previous.Characters.Count).End
+                            SystemSetup.ClipboardPutIn "=" & rngW.text '"^" & rngW.text & "$" 'version 6's new settings
+                            Set rngW = Nothing
+                        Else
+                            Set rngW = Selection.Previous.Characters(Selection.Previous.Characters.Count)
+                            SystemSetup.ClipboardPutIn "=" & rngW.text
+                            'Selection.Previous.Characters(Selection.Previous.Characters.Count).Copy
+                        End If
+                    End If
+    '                Shell chromePath & " http://dict.revised.moe.edu.tw/cbdic/search.htm"
+    '            frm.Clear
+    '            frm.SetText words, 1
+    '            frm.PutInClipboard
+                'add new url
+                Dim repeated As Boolean '檢索結果不止一個時會重複
+rePt:
+                If repeated = False Then x = SeleniumOP.grabDictRevisedUrl_OnlyOneResult(words) '此法只適用於僅1筆資料時,沒有或多於1筆則返回""空字串
+                rng.Document.ActiveWindow.Application.Activate
+                If rst.RecordCount = 1 Then '國語辭典資料庫裡只有1筆吻合資料
+                    If x = "" Then '結果不止1個時
+                        Shell Network.getDefaultBrowserFullname & " https://dict.revised.moe.edu.tw/search.jsp?md=1"
+                    End If
+    ''                If Not SystemSetup.appActivatedYet("chrome") Then
+    ''                'If Not word.Tasks.Exists("google chrome") Then
+    ''                    Shell SystemSetup.getChrome & " https://dict.revised.moe.edu.tw/search.jsp?md=1"
+    ''                Else
+    ''                    SystemSetup.appActivateChrome
+    ''                End If
+                Else
+                    If VBA.IsNull(x) Then x = ""
+                    Beep
+                End If
+                If x = "" Then '結果不止1個時
+                    If repeated = False Then
+                        If SeleniumOP.ActiveXComponentsCanNotBeCreated Then
+                            SystemSetup.playSound 2
+                            Shell Network.getDefaultBrowserFullname & " https://dict.revised.moe.edu.tw/search.jsp?md=1&word=" & words
+                        Else
+                            Shell Network.getDefaultBrowserFullname & " https://dict.revised.moe.edu.tw/search.jsp?md=1"
+                        End If
+                    Else
+                    
+                    End If
+                    x = InputBox("plz putin the url", , IIf(VBA.IsNull(rst.Fields(0).Value), "", rst.Fields(0).Value)) 'frmDict.add1URLTo1國語辭典(words)
+                    If repeated Then
+                        SystemSetup.wait 1 '先確定要輸入哪個詞條，再將瀏覽器置前
+                        'AppActivateChrome
+                        SeleniumOP.ActivateChrome
+                    End If
+                    repeated = True
+                End If
+                If x = "" Then GoTo endS
+                If VBA.Left(x, 4) <> "http" Then GoTo rePt
+                x = lnks.trimLinks_http_Dicts_toAddZhuYin_RevisedMoeEdu(CStr(x), rst.Fields(0))
+                url = VBA.CStr(x)
+                If lnks.chkLinks_http_Dicts_toAddZhuYin(url, words, 1, id, rst.Fields(0)) Then
+                    x = url
+                    rst.Fields(2).Value = x
+                    If id <> 0 Then
+                        rst.Fields("ID") = id
+                        id = 0
+                    End If
+                    rst.Update
+                    '以下先略去
+                    '在查字forInPut資料庫的表單中設定控制項的值
+                    'db.setURLControlValue VBA.CStr(x)
+                Else
+                    GoTo endS 'Exit Sub
+                End If
             End If
-            If x = "" Then GoTo endS
-            If VBA.Left(x, 4) <> "http" Then GoTo rePt
-            x = lnks.trimLinks_http_Dicts_toAddZhuYin_RevisedMoeEdu(CStr(x), rst.Fields(0))
-            url = VBA.CStr(x)
-            If lnks.chkLinks_http_Dicts_toAddZhuYin(url, words, 1, id, rst.Fields(0)) Then
-                x = url
-                rst.Fields(2).Value = x
-                If id <> 0 Then
-                    rst.Fields("ID") = id
-                    id = 0
-                End If
-                rst.Update
-                '以下先略去
-                '在查字forInPut資料庫的表單中設定控制項的值
-                'db.setURLControlValue VBA.CStr(x)
-            Else
-                GoTo endS 'Exit Sub
-            End If
-        End If
-        Set sty = rng.Style
-        rng.Hyperlinks.Add rng, lnks.trimLinks(VBA.CStr(x)), , , , "_blank"
-        lnks.setStylewithHyperlinkMark sty, rng
-        rng.Collapse wdCollapseEnd
-        'rng.SetRange rng.End, rng.End
-        rng.Next.InsertBefore "，"
-'        rng.Style = "沛榮按"
-        'rng.Hyperlinks.Item(1).Delete
-        'rng.Collapse wdCollapseEnd
-        rng.SetRange rng.End + 2, rng.End + 2
-Return
-
-
+            Set sty = rng.Style
+            rng.Hyperlinks.Add rng, lnks.trimLinks(VBA.CStr(x)), , , , "_blank"
+            lnks.setStylewithHyperlinkMark sty, rng
+            rng.Collapse wdCollapseEnd
+            'rng.SetRange rng.End, rng.End
+            rng.Next.InsertBefore "，"
+    '        rng.Style = "沛榮按"
+            'rng.Hyperlinks.Item(1).Delete
+            'rng.Collapse wdCollapseEnd
+            rng.SetRange rng.End + 2, rng.End + 2
+    Return
+    
+    
 eH:
-    Select Case Err.Number
-        Case 4198 '指令失敗 'Google Drive的問題
-            Resume Next
-        Case 5834 '指定名稱的項目不存在
-            Docs.樣式add_沛榮按等樣式
-            Resume
-        Case 5 '程序呼叫或引數不正確
-            SystemSetup.wait 3 'http://vbcity.com/forums/t/81315.aspx
-            'Application.Wait (Now + TimeValue("0:00:10")) '<~~ Waits ten seconds.
-            Resume 'https://stackoverflow.com/questions/21937053/appactivate-to-return-to-excel
-        Case Else
-            If Err.Number = -2146233088 And Err.Description = "A exception with a null response was thrown sending an HTTP request to the remote WebDriver server for URL http://localhost:9674/session/a3f86609a0c2a502c01fe9cdbef88686/window. The status of the exception was ConnectFailure, and the message was: 無法連接至遠端伺服器" Then
-                SystemSetup.killchromedriverFromHere
-            Else
-                MsgBox Err.Number & Err.Description
-            End If
-'            Resume
-            GoTo endS
-            'If cnt.State <> adStateClosed Then cnt.Close
-    End Select
+        Select Case Err.Number
+            Case 4198 '指令失敗 'Google Drive的問題
+                Resume Next
+            Case 5834 '指定名稱的項目不存在
+                Docs.樣式add_沛榮按等樣式
+                Resume
+            Case 5 '程序呼叫或引數不正確
+                SystemSetup.wait 3 'http://vbcity.com/forums/t/81315.aspx
+                'Application.Wait (Now + TimeValue("0:00:10")) '<~~ Waits ten seconds.
+                Resume 'https://stackoverflow.com/questions/21937053/appactivate-to-return-to-excel
+            Case Else
+                If Err.Number = -2146233088 And Err.Description = "A exception with a null response was thrown sending an HTTP request to the remote WebDriver server for URL http://localhost:9674/session/a3f86609a0c2a502c01fe9cdbef88686/window. The status of the exception was ConnectFailure, and the message was: 無法連接至遠端伺服器" Then
+                    SystemSetup.killchromedriverFromHere
+                Else
+                    MsgBox Err.Number & Err.Description
+                End If
+    '            Resume
+                GoTo endS
+                'If cnt.State <> adStateClosed Then cnt.Close
+        End Select
 End Sub
 
 Sub 生難字加上國語辭典注音nextTable(ByRef rst As ADODB.Recordset, ByRef cnt As ADODB.Connection, x, tbName As String, precise As Boolean)
@@ -3762,12 +3801,20 @@ Sub 書名號篇名號標注()
     '    MsgBox "路徑不存在！", vbCritical: Exit Sub
     'End If
     Set d = ActiveDocument: dx = d.Range.text: Set rngF = d.Range
+'    If Selection.Type = wdSelectionIP Then
+'        dx = d.Range.text
+'        Set rngF = d.Range
+'    Else
+'        Set rngF = Selection.Range
+'        dx = rngF.text
+'    End If
+    rngF.Find.ClearFormatting
     'cnt.Open cntStr
     word.Application.ScreenUpdating = False
     
     GoSub bookmarks '標點符號_書名號_自動加上用
     rst.Open "select * from 標點符號_篇名號_自動加上用 order by 排序", cnt, adOpenForwardOnly, adLockReadOnly
-    Set rngF = d.Range: dx = d.Range.text
+'    Set rngF = d.Range: dx = d.Range.text
     Do Until rst.EOF
         title = rst("篇名").Value
         If VBA.InStr(dx, title) Then 'if found
@@ -3818,7 +3865,7 @@ bookmarks:
     Do Until rst.EOF
         title = rst("書名").Value
         
-'        If title = "周易" Then Stop 'just for test
+'        If title = "通鑑外紀" Then Stop 'just for test
         
         If VBA.InStr(dx, title) Then 'if found
             Do While rngF.Find.Execute(title, , , , , , True, wdFindStop)

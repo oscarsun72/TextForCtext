@@ -3679,13 +3679,13 @@ namespace WindowsFormsApp1
                     {
                         bool gjcoolocrResultManual = clpTxt.IndexOf(Environment.NewLine + Environment.NewLine) > -1;
                         if (gjcoolocrResultManual) clpTxt = clpTxt.Replace(Environment.NewLine + Environment.NewLine, Environment.NewLine);
-                        if (!ocrTextMode)
-                        {
-                            textBox1.Text = clpTxt;
-                            //clearBracketsInsidePairsBrackets();
-                            clpTxt = textBox1.Text;
-                            textBox1.Text = CnText.BooksPunctuation(ref clpTxt, true);
-                        }
+                        //if (!ocrTextMode)
+                        //{
+                        textBox1.Text = clpTxt;
+                        //clearBracketsInsidePairsBrackets();
+                        clpTxt = textBox1.Text;
+                        textBox1.Text = CnText.BooksPunctuation(ref clpTxt, true);
+                        //}
                         if (gjcoolocrResultManual)
                         {
                             if (br.driver != null)
@@ -10509,7 +10509,7 @@ namespace WindowsFormsApp1
             //if (!Active) AvailableInUseBothKeysMouse();//前面已有
 
             //在連續輸入OCR結果時，提供一次（一頁）操作完成的提示音，以提醒繼續下一頁 20231128
-            if (!MuteProcessing)
+            if (!MuteProcessing && ocrTextMode)// && PasteOcrResultFisrtMode)
                 if (ocrResult && PasteOcrResultFisrtMode && File.Exists("C:\\Windows\\Media\\ring07.wav"))
                     using (SoundPlayer sp = new SoundPlayer("C:\\Windows\\Media\\ring07.wav")) { sp.Play(); }
 
@@ -11559,8 +11559,8 @@ namespace WindowsFormsApp1
                         throw;
                 }
             }
-            //手動輸入模式時
-            if (keyinTextMode)
+            //手動輸入模式時。20241119：新增自動連續輸入時也可以
+            if (keyinTextMode||autoPastetoQuickEdit)
             {
                 //Task task = Task.Run(() =>
                 //{
@@ -11850,17 +11850,17 @@ namespace WindowsFormsApp1
                     br.driver.Navigate().Refresh();
                 playSound(soundLike.over, true);
             }
-            Task wait1 = Task.Run(() =>
-            {
-                //chkUrlIsTextBox3Text(tabWindowHandles, textBox3.Text);
-                chkUrlIsTextBox3Text(br.driver.WindowHandles, textBox3.Text);
-            });
-            wait1.Wait();
-            //}
-            //Task.WaitAny();//如上所設「wait.Wait();」「wait1.Wait();」，即不必此行了
-            //在連續輸入時能清除框中文字；手動輸入時一般當不必自動清除框中文字
-            //br.在Chrome瀏覽器的Quick_edit文字框中輸入文字(br.driver, clear == " " ? clear : Clipboard.GetText(), url);
-            //br.在Chrome瀏覽器的Quick_edit文字框中輸入文字(br.driver, clear == br.chkClearQuickedit_data_textboxTxtStr ? clear : Clipboard.GetText(), url);
+            //Task wait1 = Task.Run(() =>
+            //{
+            //    //chkUrlIsTextBox3Text(tabWindowHandles, textBox3.Text);
+            chkUrlIsTextBox3Text(br.driver.WindowHandles, textBox3.Text);
+            //});
+            //wait1.Wait();
+            ////}
+            ////Task.WaitAny();//如上所設「wait.Wait();」「wait1.Wait();」，即不必此行了
+            ////在連續輸入時能清除框中文字；手動輸入時一般當不必自動清除框中文字
+            ////br.在Chrome瀏覽器的Quick_edit文字框中輸入文字(br.driver, clear == " " ? clear : Clipboard.GetText(), url);
+            ////br.在Chrome瀏覽器的Quick_edit文字框中輸入文字(br.driver, clear == br.chkClearQuickedit_data_textboxTxtStr ? clear : Clipboard.GetText(), url);
             string formalX = clear == br.chkClearQuickedit_data_textboxTxtStr ? clear : br.TextPatst2Quick_editBox;
             CnText.FormalizeText(ref formalX);
             if (br.在Chrome瀏覽器的Quick_edit文字框中輸入文字(br.driver,
@@ -12164,7 +12164,7 @@ namespace WindowsFormsApp1
             }
             //else if (textBox1.SelectionLength == 0 && insertMode == false)
             //{
-            int s = textBox1.SelectionStart;
+            int s = textBox1.SelectionStart; string x = textBox4.Text;
             //    textBox1.Select(s
             //        , char.IsHighSurrogate(textBox1.Text.Substring(s, 1), 0) ? 2 : 1);
             //}
@@ -12175,16 +12175,20 @@ namespace WindowsFormsApp1
             }
             //取代前備份
             saveText();
+
             //實際執行取代文字
-            replaceWord(textBox1.SelectedText, textBox4.Text);
-            if (textBox4.Text != "")
+            if (ModifierKeys != Keys.Shift)
             {
-                try
+                replaceWord(textBox1.SelectedText, x);// textBox4.Text);
+                if (textBox4.Text != "")
                 {
-                    Clipboard.SetText(textBox4.Text);
-                }
-                catch (Exception)
-                {
+                    try
+                    {
+                        Clipboard.SetText(x);// textBox4.Text);
+                    }
+                    catch (Exception)
+                    {
+                    }
                 }
             }
             textBox4Resize();
@@ -12193,6 +12197,14 @@ namespace WindowsFormsApp1
             ResumeEvents();
             textBox1.Focus();
             undoRecord();
+            if (ModifierKeys == Keys.Shift)
+            {
+                textBox1.Select(textBox1.SelectionStart + textBox1.SelectionLength, 0);
+                textBox1.SelectedText = x;
+                StringInfo si = new StringInfo(textBox1.Text.Substring(s, textBox1.SelectionStart - s));
+                textBox1.Select(s, 0);
+                SendKeys.Send("%e");
+            }
         }
 
         private void textBox4Resize()

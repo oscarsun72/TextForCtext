@@ -1536,13 +1536,18 @@ eH:
             Resume
     End Select
 End Sub
-Rem 整個文件重新標識易學關鍵字
+Rem 整個文件重新標識易學關鍵字（若有選取，則但處理選取區內文字）
 Sub mark易學關鍵字Doc()
-    Dim ur As word.UndoRecord
+    Dim ur As word.UndoRecord, rng As Range
     SystemSetup.playSound 0.484
     SystemSetup.stopUndo ur, "mark易學關鍵字Doc"
     word.Application.ScreenUpdating = False
-    marking易學關鍵字 ActiveDocument.Range, Keywords.易學Keywords_ToMark, word.wdYellow
+    If Selection.Type = wdSelectionIP Then
+        Set rng = Selection.Document.Range
+    Else
+        Set rng = Selection.Range
+    End If
+    marking易學關鍵字 rng, Keywords.易學Keywords_ToMark, word.wdYellow
     SystemSetup.contiUndo ur
     SystemSetup.playSound 2
     word.Application.ScreenUpdating = True
@@ -1894,7 +1899,7 @@ App:
 Select Case Err.Number
     Case 5
         'Shell (Network.getDefaultBrowserFullname + " https://old.gj.cool/gjcool/index")'舊版
-        shell (Network.getDefaultBrowserFullname + " https://gj.cool/punct")
+        Shell (Network.getDefaultBrowserFullname + " https://gj.cool/punct")
         AppActivate Network.getDefaultBrowserNameAppActivate '"古籍酷"
         DoEvents
         SystemSetup.wait 2.9 '2.5 打開網頁 等待載入完畢

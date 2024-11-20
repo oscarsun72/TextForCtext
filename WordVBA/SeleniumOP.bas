@@ -285,6 +285,14 @@ ErrH:
                 End If
                 
                 Exit Function
+            ElseIf VBA.InStr(Err.Description, "session not created: This version of ChromeDriver only supports Chrome version ") = 1 Then 'session not created: This version of ChromeDriver only supports Chrome version 129
+                                                                                                                                            'Current browser version is 131.0.6778.70 with binary path C:\Program Files\Google\Chrome\Application\chrome.exe (SessionNotCreated)
+                MsgBox "請更新chromedriver再重試！", vbCritical
+                VBA.Shell "explorer.exe " & chromePath, vbMaximizedFocus
+                VBA.Shell "explorer.exe https://googlechromelabs.github.io/chrome-for-testing/#stable", vbMaximizedFocus
+                killchromedriverFromHere
+                Set WD = Nothing
+                Exit Function
             End If
         Case -2146233088 '**'
             Debug.Print Err.Number & Err.Description
@@ -1062,7 +1070,11 @@ Function grabDictRevisedUrl_OnlyOneResult(searchStr As String, Optional Backgrou
             If WD Is Nothing Then
                 OpenChrome url
             Else
-                Set wdB = WD
+                If Not IsWDInvalid Then
+                    Set wdB = WD
+                Else
+                    OpenChrome url
+                End If
             End If
             If ActiveXComponentsCanNotBeCreated Then
                 Exit Function
@@ -2665,7 +2677,7 @@ Function grabGjCoolPunctResult(text As String, resultText As String, Optional Ba
                 Exit Function
             End If
         Else
-            If IsWDInvalid() Then
+            If Not IsWDInvalid() Then
                 OpenNewTab WD
             Else
                 'Stop 'just for test
@@ -2918,8 +2930,8 @@ Function grabAITShenShenWikiPunctResult(text As String, resultText As String, Op
     'If UBound(WD.WindowHandles) > 1 Then WD.Close '不關閉，以手動評量其標點良窳
     If LastValidWindow <> vbNullString Then WD.SwitchTo().Window (LastValidWindow)
     grabAITShenShenWikiPunctResult = resultText
-    word.Application.Activate
     word.Application.windowState = winState
+    word.Application.Activate
 End Function
 Rem 取得《漢籍全文資料庫·斷句十三經經文·周易》文本 ： gua 卦名 。成功則傳回 true 20241004
 Function grabHanchiZhouYi_TheOriginalText_ThirteenSutras(gua As String, resultText As String) As Boolean

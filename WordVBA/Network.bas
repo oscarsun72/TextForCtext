@@ -35,7 +35,7 @@ Sub 查詢國語辭典() '指定鍵:Ctrl+F12'2010/10/18修訂
         Else
             Exit Sub
         End If
-        shell funame
+        Shell funame
     End If
     查國語辭典
 End Sub
@@ -66,7 +66,7 @@ If Selection.Type = wdSelectionNormal Then
     Else
         Exit Sub
     End If
-    shell funame
+    Shell funame
 End If
 
 End Sub
@@ -1241,34 +1241,40 @@ Sub 送交古籍酷自動標點()
 End Sub
 Rem Ctrl + Alt + a
 Sub 讀入AI太炎標點結果()
+    playSound 0.484
     If inputAITShenShenWikiPunctResult = False Then MsgBox "請重試！", vbCritical
 End Sub
+Rem Ctrl + Alt + F10 或 Ctrl + Alt + F11
 Sub 讀入古籍酷自動標點結果()
-    'Ctrl + Alt + F10 或 Ctrl + Alt + F11
+    playSound 0.484
     If inputGjcoolPunctResult = False Then MsgBox "請重試！", vbCritical
 End Sub
 Rem 20241008 失敗則傳回false
 Function inputGjcoolPunctResult() As Boolean
-    Dim ur As UndoRecord, result As String
+    Dim ur As UndoRecord, result As String, d As Document
     文字處理.ResetSelectionAvoidSymbols
     If Selection.Characters.Count < 10 Then
         MsgBox "字數太少，有必要嗎？請至少大於10字", vbExclamation
         Exit Function
     End If
     word.Application.ScreenUpdating = False
+    Set d = Selection.Document
+    If d.path <> vbNullString And Not d.Saved Then d.Save
     Const ignoreMarker = "《》〈〉「」『』" '書名號、篇名號、引號不處理（由前面的程式碼處理）
     result = Selection.text
     Rem 書名號、引號之處理
     result = VBA.Replace(VBA.Replace(result, "《", "〔"), "》", "〕") '書名號亦會被自動標點清除故,以備還原 20241001
     result = VBA.Replace(VBA.Replace(result, "「", "〔"), "」", "〕") '引號亦會被自動標點清除故,以備還原 20241001
     
+    Rem 送去《古籍酷》自動標點
+
     If SeleniumOP.grabGjCoolPunctResult(result, result, False) = vbNullString Then
-        Selection.Document.Activate
-        Selection.Document.Application.Activate
+        d.Activate
+        d.Application.Activate
         Exit Function
     End If
-    Selection.Document.Activate
-    Selection.Document.Application.Activate
+    d.Activate
+    d.Application.Activate
     
     GoSub 標點校正
     
@@ -1294,7 +1300,7 @@ Function inputGjcoolPunctResult() As Boolean
             End If
         End If
     Next e
-    Set rng = Selection.Document.Range(Selection.start, Selection.End)
+    Set rng = d.Range(Selection.start, Selection.End)
     rng.Find.ClearFormatting
     For Each e In cln
 '        If e(1) = Chr(13) Then Stop 'just for test
@@ -1323,7 +1329,7 @@ Function inputGjcoolPunctResult() As Boolean
             End If
         End If
         If rng.End <= Selection.End Then '最後一個
-            Set rng = Selection.Document.Range(rng.End, Selection.End)
+            Set rng = d.Range(rng.End, Selection.End)
         Else
             Selection.End = rng.End
         End If
@@ -1349,13 +1355,15 @@ Function inputGjcoolPunctResult() As Boolean
 End Function
 Rem 20241008 失敗則傳回false
 Function inputAITShenShenWikiPunctResult() As Boolean
-    Dim ur As UndoRecord, result As String
+    Dim ur As UndoRecord, result As String, d As Document
     文字處理.ResetSelectionAvoidSymbols
     If Selection.Characters.Count < 10 Then
         MsgBox "字數太少，有必要嗎？請至少大於10字", vbExclamation
         Exit Function
     End If
     word.Application.ScreenUpdating = False
+    Set d = Selection.Document
+    If d.path <> vbNullString And Not d.Saved Then d.Save
 '    Const ignoreMarker = "《》〈〉「」『』" '書名號、篇名號、引號不處理（由前面的程式碼處理）
     Const ignoreMarker = "《》〈〉（）·「」『』" '書名號、篇名號、括號、音節號、引號不處理（由前面的程式碼處理）
     result = Selection.text
@@ -1366,8 +1374,8 @@ Function inputAITShenShenWikiPunctResult() As Boolean
     result = VBA.Replace(result, "·", "⊙")     '音節號亦會被自動標點清除故,以備還原 20241001
 '
     If SeleniumOP.grabAITShenShenWikiPunctResult(result, result, False) = vbNullString Then
-        Selection.Document.Activate
-        Selection.Document.Application.Activate
+        d.Activate
+        d.Application.Activate
         Exit Function
     Else
         result = VBA.Replace(VBA.Replace(VBA.Replace(VBA.Replace(result, VBA.ChrW(8220), "「"), VBA.ChrW(8221), "」"), VBA.ChrW(8216), "『"), VBA.ChrW(8217), "』")
@@ -1376,8 +1384,8 @@ Function inputAITShenShenWikiPunctResult() As Boolean
         result = VBA.Replace(result, "·", "⊙")     '音節號亦會被自動標點清除故,以備還原 20241001
     End If
     
-    Selection.Document.Application.Activate
-    Selection.Document.Activate
+    d.Application.Activate
+    d.Activate
     Rem 括號之處理'標點會在（處停止
     result = VBA.Replace(VBA.Replace(result, "＜", "《"), "＞", "》") '書名號亦會被自動標點清除故,以備還原 20241001
     result = VBA.Replace(result, "⊙", "·")  '音節號亦會被自動標點清除故,以備還原 20241001
@@ -1392,7 +1400,7 @@ Function inputAITShenShenWikiPunctResult() As Boolean
     Dim puncts As New punctuation, cln As New VBA.Collection, e, rng As Range '適應於格式化文字
     Set cln = puncts.CreateContextPunctuationCollection(result)
     Rem 清除原來的標點符號，以利比對與插入
-    Set rng = Selection.Document.Range(Selection.start, Selection.End)
+    Set rng = d.Range(Selection.start, Selection.End)
     For Each e In rng.Characters
 '        'If e = "。" Then Stop 'just for test
 '        If e.text = "　" Then '空格要清除（《古籍酷》自動標點會清除空格）
@@ -1405,7 +1413,7 @@ Function inputAITShenShenWikiPunctResult() As Boolean
             End If
 '        End If
     Next e
-    Set rng = Selection.Document.Range(Selection.start, Selection.End)
+    Set rng = d.Range(Selection.start, Selection.End)
     rng.Find.ClearFormatting
     For Each e In cln
 '        If e(1) = Chr(13) Then Stop 'just for test
@@ -1444,10 +1452,10 @@ Function inputAITShenShenWikiPunctResult() As Boolean
             End If
         End If
         If rng.End <= Selection.End Then '最後一個
-'            If rng.End = Selection.Document.Range.End Then
-'                Set rng = Selection.Document.Range(rng.End - 1, Selection.End)
+'            If rng.End = d.Range.End Then
+'                Set rng = d.Range(rng.End - 1, Selection.End)
 '            Else
-                Set rng = Selection.Document.Range(rng.End, Selection.End)
+                Set rng = d.Range(rng.End, Selection.End)
 '            End If
         Else
             Selection.End = rng.End
@@ -1466,7 +1474,7 @@ Function GetUserAddress() As Boolean
     x = a.Run("查詢字串轉換_國語會碼", x)
 ''    'ActiveDocument.FollowHyperlink "http://140.111.34.46/cgi-bin/dict/newsearch.cgi", , False, , "Database=dict&GraphicWord=yes&QueryString=^" & X & "$", msoMethodGet
 '    FollowHyperlink "http://dict.revised.moe.edu.tw/cgi-bin/newDict/dict.sh?", , False, , "=dict.idx&cond=^" & x & "$&pieceLen=50&fld=1&cat=&imgFont=1", msoMethodGet
-    shell Replace(GetDefaultBrowserEXE, """%1", "http://dict.revised.moe.edu.tw/cgi-bin/newDict/dict.sh?cond=^" & x & "$&pieceLen=50&fld=1&cat=&imgFont=1")
+    Shell Replace(GetDefaultBrowserEXE, """%1", "http://dict.revised.moe.edu.tw/cgi-bin/newDict/dict.sh?cond=^" & x & "$&pieceLen=50&fld=1&cat=&imgFont=1")
     'AppActivate GetDefaultBrowser'無效
 '    'FollowHyperlink "http://dict.revised.moe.edu.tw/cgi-bin/newDict/dict.sh?", , False, , "=dict.idx&cond=^" & X & "$&pieceLen=50&fld=1&cat=&imgFont=1", msoMethodGet
     
