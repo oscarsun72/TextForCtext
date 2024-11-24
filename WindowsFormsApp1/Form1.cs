@@ -852,9 +852,10 @@ namespace WindowsFormsApp1
                             {
                                 //Debugger.Break();
                                 MessageBoxShowOKExclamationDefaultDesktopOnly("請關閉Chrome瀏覽器後再按下「確定」以繼續！！感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主");
-                                br.driver = null;
-                                killchromedriverFromHere();
-                                br.DriverNew();
+                                RestartChromedriver();
+                                //br.driver = null;
+                                //killchromedriverFromHere();
+                                //br.DriverNew();
                                 goto retry;
                             }
                             else if (ex.Message.StartsWith("An unknown exception was encountered sending an HTTP request to the remote WebDriver server for URL"))//An unknown exception was encountered sending an HTTP request to the remote WebDriver server for URL http://localhost:14698/session/0f432de43d64b3c61bb847ce517358a3/window/handles. The exception message was: 傳送要求時發生錯誤。
@@ -2888,15 +2889,18 @@ namespace WindowsFormsApp1
                     if (findword == "") findword = textBox2.Text;
                     if (findword != "")
                     {
-                        int start = textBox1.SelectionStart - 1; string x = textBox1.Text;
-                        foundwhere = x.LastIndexOf(findword, start, StringComparison.Ordinal);
-                        if (foundwhere == -1)
+                        if (textBox1.SelectionStart > 0)
                         {
-                            MessageBox.Show("not found next!"); return;
+                            int start = textBox1.SelectionStart - 1; string x = textBox1.Text;
+                            foundwhere = x.LastIndexOf(findword, start, StringComparison.Ordinal);
+                            if (foundwhere == -1)
+                            {
+                                MessageBox.Show("not found next!"); return;
+                            }
+                            textBox1.SelectionStart = foundwhere;
+                            textBox1.SelectionLength = findword.Length;
+                            textBox1.ScrollToCaret();
                         }
-                        textBox1.SelectionStart = foundwhere;
-                        textBox1.SelectionLength = findword.Length;
-                        textBox1.ScrollToCaret();
                     }
                     if (findword != "") lastFindStr = findword;
                     return;
@@ -3542,6 +3546,16 @@ namespace WindowsFormsApp1
                                                                                       //  x.Substring(s+1>x.Length?x.Length:s,1)!="　") // 有時標題是頂行的                       
                     {
                         keysParagraphSymbol();
+                        undoRecord();PauseEvents();
+                        //將其後的空格也改成空白20241123
+                        while (textBox1.SelectionStart + 1 < textBox1.TextLength && textBox1.Text.Substring(textBox1.SelectionStart, 1) == "　")
+                        {
+
+                            textBox1.Select(textBox1.SelectionStart, 1);
+                            textBox1.SelectedText = "􏿽";
+                            textBox1.Select(textBox1.SelectionStart + textBox1.SelectionLength, 0);
+                        }
+                        undoRecord(); ResumeEvents();
                         return;
                     }
                     keysTitleCode();
@@ -4958,8 +4972,8 @@ namespace WindowsFormsApp1
             dontHide = true;
             if (sTxt != "")
             {//有選取範圍
-             //如果已選取「{{」或「}}」則逕以「􏿽」取代（《國學大師》的《四庫全書》本常見
-                if ("{{}}".IndexOf(sTxt) > -1)
+             //如果已選取「{{」或「}}」或「 」則逕以「􏿽」取代（《國學大師》的《四庫全書》本常見
+                if ("{{}} ".IndexOf(sTxt) > -1)
                 {
                     undoRecord();
                     stopUndoRec = true;
@@ -5020,8 +5034,9 @@ namespace WindowsFormsApp1
                 #endregion
                 //else
                 //{
-                if (s + 1 <= x.Length && x.Substring(s, 1) == "　")
-                    //x = x.Substring(0, s) + "􏿽" + x.Substring(s + 1);// 自動清除後面的「　」字元                
+                //if (s + 1 <= x.Length && x.Substring(s, 1) == "　")
+                if (s + 1 <= x.Length && (x.Substring(s, 1) == "　" || x.Substring(s, 1) == " "))
+                    //x = x.Substring(0, s) + "􏿽" + x.Substring(s + 1);// 自動清除後面的「　」與「　」字元                
                     textBox1.Select(s, 1);
                 else
                     //x = x.Substring(0, s) + "􏿽" + x.Substring(s);
@@ -11560,7 +11575,7 @@ namespace WindowsFormsApp1
                 }
             }
             //手動輸入模式時。20241119：新增自動連續輸入時也可以
-            if (keyinTextMode||autoPastetoQuickEdit)
+            if (keyinTextMode || autoPastetoQuickEdit)
             {
                 //Task task = Task.Run(() =>
                 //{

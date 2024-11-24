@@ -11,6 +11,7 @@ Enum CJKBlockName 'https://en.wikipedia.org/wiki/CJK_characters
     CJK_Unified_Ideographs_Extension_F
     CJK_Unified_Ideographs_Extension_G
     CJK_Unified_Ideographs_Extension_H
+    CJK_Unified_Ideographs_Extension_I
     CJK_Radicals_Supplement
     Kangxi_Radicals
     Ideographic_Description_Characters
@@ -34,6 +35,7 @@ Enum CJKChartRange 'https://en.wikipedia.org/wiki/CJK_characters
     CJK_Unified_Ideographs_Extension_F_start = &H2CEB0
     CJK_Unified_Ideographs_Extension_G_start = &H30000
     CJK_Unified_Ideographs_Extension_H_start = &H31350
+    CJK_Unified_Ideographs_Extension_I_start = &H2EBF0
     CJK_Radicals_Supplement_start = &H2E80
     Kangxi_Radicals_start = &H2F00
     Ideographic_Description_Characters_start = &H2FF0
@@ -54,6 +56,7 @@ Enum CJKChartRange 'https://en.wikipedia.org/wiki/CJK_characters
     CJK_Unified_Ideographs_Extension_F_end = &H2EBEF
     CJK_Unified_Ideographs_Extension_G_end = &H3134F
     CJK_Unified_Ideographs_Extension_H_end = &H323AF
+    CJK_Unified_Ideographs_Extension_I_end = &H2EE5D
     CJK_Radicals_Supplement_end = &H2EFF
     Kangxi_Radicals_end = &H2FDF
     Ideographic_Description_Characters_end = &H2FFF
@@ -77,6 +80,7 @@ Enum CJKChartRangeString 'https://en.wikipedia.org/wiki/CJK_characters
     CJK_Unified_Ideographs_Extension_F_start = "&H2CEB0"
     CJK_Unified_Ideographs_Extension_G_start = "&H30000"
     CJK_Unified_Ideographs_Extension_H_start = "&H31350"
+    CJK_Unified_Ideographs_Extension_I_start = "&H2EBF0"
     CJK_Radicals_Supplement_start = "&H2E80"
     Kangxi_Radicals_start = "&H2F00"
     Ideographic_Description_Characters_start = "&H2FF0"
@@ -97,6 +101,7 @@ Enum CJKChartRangeString 'https://en.wikipedia.org/wiki/CJK_characters
     CJK_Unified_Ideographs_Extension_F_end = "&H2EBEF"
     CJK_Unified_Ideographs_Extension_G_end = "&H3134F"
     CJK_Unified_Ideographs_Extension_H_end = "&H323AF"
+    CJK_Unified_Ideographs_Extension_I_end = "&H2EE5D"
     CJK_Radicals_Supplement_end = "&H2EFF"
     Kangxi_Radicals_end = "&H2FDF"
     Ideographic_Description_Characters_end = "&H2FFF"
@@ -573,6 +578,8 @@ Function IsCJK(c As String) As Collection
         cjk = True: cjkBName = CJKBlockName.CJK_Unified_Ideographs_Extension_G
     ElseIf unsignedCode >= CLng(CJKChartRangeString.CJK_Unified_Ideographs_Extension_H_start) And unsignedCode <= CLng(CJKChartRangeString.CJK_Unified_Ideographs_Extension_H_end) Then
         cjk = True: cjkBName = CJKBlockName.CJK_Unified_Ideographs_Extension_H
+    ElseIf unsignedCode >= CLng(CJKChartRangeString.CJK_Unified_Ideographs_Extension_I_start) And unsignedCode <= CLng(CJKChartRangeString.CJK_Unified_Ideographs_Extension_I_end) Then
+        cjk = True: cjkBName = CJKBlockName.CJK_Unified_Ideographs_Extension_I
     ElseIf unsignedCode >= CLng(CJKChartRangeString.CJK_Radicals_Supplement_start) And unsignedCode <= CLng(CJKChartRangeString.CJK_Radicals_Supplement_end) Then
         cjk = True: cjkBName = CJKBlockName.CJK_Radicals_Supplement
     ElseIf unsignedCode >= CLng(CJKChartRangeString.Kangxi_Radicals_start) And unsignedCode <= CLng(CJKChartRangeString.Kangxi_Radicals_end) Then
@@ -666,6 +673,9 @@ Function IsCJK_old(c As String) As Collection 'Boolean,CJKBlockName
     'CJK Unified Ideographs Extension H
     ElseIf code >= CLng(CJKChartRangeString.CJK_Unified_Ideographs_Extension_H_start) And code <= CLng(CJKChartRangeString.CJK_Unified_Ideographs_Extension_H_end) Then
         cjk = True: cjkBlackName = CJKBlockName.CJK_Unified_Ideographs_Extension_H
+    'CJK Unified Ideographs Extension I
+    ElseIf code >= CLng(CJKChartRangeString.CJK_Unified_Ideographs_Extension_I_start) And code <= CLng(CJKChartRangeString.CJK_Unified_Ideographs_Extension_I_end) Then
+        cjk = True: cjkBlackName = CJKBlockName.CJK_Unified_Ideographs_Extension_I
     'CJK Radicals Supplement
     ElseIf code >= CLng(CJKChartRangeString.CJK_Radicals_Supplement_start) And code <= CLng(CJKChartRangeString.CJK_Radicals_Supplement_end) Then
         cjk = True: cjkBlackName = CJKBlockName.CJK_Radicals_Supplement
@@ -773,6 +783,8 @@ If (highSurrogate >= SurrogateCodePoint.HighStart And highSurrogate <= Surrogate
             If codePoint >= CJKChartRange.CJK_Unified_Ideographs_Extension_G_start And codePoint <= CJKChartRange.CJK_Unified_Ideographs_Extension_G_end Then isCJK_Ext = True
         Case CJKBlockName.CJK_Unified_Ideographs_Extension_H
             If codePoint >= CJKChartRange.CJK_Unified_Ideographs_Extension_H_start And codePoint <= CJKChartRange.CJK_Unified_Ideographs_Extension_H_end Then isCJK_Ext = True
+        Case CJKBlockName.CJK_Unified_Ideographs_Extension_I
+            If codePoint >= CJKChartRange.CJK_Unified_Ideographs_Extension_I_start And codePoint <= CJKChartRange.CJK_Unified_Ideographs_Extension_I_end Then isCJK_Ext = True
     End Select
 End If
 End Function

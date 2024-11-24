@@ -2928,7 +2928,12 @@ Function grabAITShenShenWikiPunctResult(text As String, resultText As String, Op
     If iwe Is Nothing Then Exit Function
     resultText = iwe.GetAttribute("textContent")
     'If UBound(WD.WindowHandles) > 1 Then WD.Close '不關閉，以手動評量其標點良窳
-    If LastValidWindow <> vbNullString Then WD.SwitchTo().Window (LastValidWindow)
+    'If LastValidWindow <> vbNullString Then WD.SwitchTo().Window (LastValidWindow)
+    If IsValidWindowHandle(LastValidWindow, WD) Then
+        WD.SwitchTo().Window (LastValidWindow)
+    Else
+        LastValidWindow = WD.CurrentWindowHandle
+    End If
     grabAITShenShenWikiPunctResult = resultText
     word.Application.windowState = winState
     word.Application.Activate
@@ -3353,5 +3358,14 @@ Private Function isImageLoaded(CssSelector As String) As Boolean
         isImageLoaded = True 'MsgBox "圖片已載入成功"
     Else
         isImageLoaded = False 'MsgBox "圖片尚未載入"
+    End If
+End Function
+Function IsValidWindowHandle(windowHandle As String, driver As SeleniumBasic.IWebDriver) As Boolean
+    If windowHandle = vbNullString Then
+        IsValidWindowHandle = False
+    ElseIf UBound(VBA.Filter(driver.WindowHandles, windowHandle)) > -1 Then
+        IsValidWindowHandle = True
+    Else
+        IsValidWindowHandle = False
     End If
 End Function

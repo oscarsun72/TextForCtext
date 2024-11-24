@@ -1242,11 +1242,36 @@ End Sub
 Rem Ctrl + Alt + a
 Sub 讀入AI太炎標點結果()
     playSound 0.484
+    If Selection.Type = wdSelectionIP Then
+        '    word.Application.ScreenUpdating = False
+        Do Until VBA.InStr(VBA.Chr(13) & VBA.ChrW(9711) & "：　", Selection.Previous(wdCharacter).text)
+            Selection.MoveStart Count:=-1
+        Loop
+        Do Until VBA.InStr(VBA.Chr(13) & VBA.ChrW(9711), Selection.Next(wdCharacter).text) Or VBA.InStr(VBA.Chr(13) & VBA.ChrW(9711), Selection.Characters(Selection.Characters.Count).text)
+            Selection.MoveEnd Count:=1
+        Loop
+    '    word.Application.ScreenUpdating = True
+    '    SystemSetup.wait 0.4
+        word.Application.ScreenRefresh
+    End If
     If inputAITShenShenWikiPunctResult = False Then MsgBox "請重試！", vbCritical
 End Sub
+
 Rem Ctrl + Alt + F10 或 Ctrl + Alt + F11
 Sub 讀入古籍酷自動標點結果()
     playSound 0.484
+    If Selection.Type = wdSelectionIP Then
+        '    word.Application.ScreenUpdating = False
+        Do Until VBA.InStr(VBA.Chr(13) & VBA.ChrW(9711) & "：　", Selection.Previous(wdCharacter).text)
+            Selection.MoveStart Count:=-1
+        Loop
+        Do Until VBA.InStr(VBA.Chr(13) & VBA.ChrW(9711), Selection.Next(wdCharacter).text) Or VBA.InStr(VBA.Chr(13) & VBA.ChrW(9711), Selection.Characters(Selection.Characters.Count).text)
+            Selection.MoveEnd Count:=1
+        Loop
+    '    word.Application.ScreenUpdating = True
+    '    SystemSetup.wait 0.4
+        word.Application.ScreenRefresh
+    End If
     If inputGjcoolPunctResult = False Then MsgBox "請重試！", vbCritical
 End Sub
 Rem 20241008 失敗則傳回false
@@ -1254,8 +1279,9 @@ Function inputGjcoolPunctResult() As Boolean
     Dim ur As UndoRecord, result As String, d As Document
     文字處理.ResetSelectionAvoidSymbols
     If Selection.Characters.Count < 10 Then
-        MsgBox "字數太少，有必要嗎？請至少大於10字", vbExclamation
-        Exit Function
+        If MsgBox("字數太少，有必要嗎？請至少大於10字" & vbCr & vbCr & "若堅持要標點，請按下【確定】", vbExclamation + vbOKCancel + vbDefaultButton2) = vbCancel Then
+            Exit Function
+        End If
     End If
     word.Application.ScreenUpdating = False
     Set d = Selection.Document
@@ -1305,7 +1331,11 @@ Function inputGjcoolPunctResult() As Boolean
     For Each e In cln
 '        If e(1) = Chr(13) Then Stop 'just for test
         If e(0) <> vbNullString Then
-            If rng.Find.Execute(e(0), , , , , , True, wdFindStop) = False Then
+           'If rng.text = e(0) Then'最後一項/個
+            If VBA.StrComp(rng.text, e(0)) = 0 Then
+                rng.InsertAfter e(1)
+                rng.Collapse wdCollapseEnd
+            ElseIf rng.Find.Execute(e(0), , , , , , True, wdFindStop) = False Then
                 If rng.text = e(0) Then '最後一個
                     If VBA.InStr(ignoreMarker, e(1)) = 0 Then '書名號、引號不處理（由前面的程式碼處理）
                         rng.InsertAfter e(1)
@@ -1358,8 +1388,8 @@ Function inputAITShenShenWikiPunctResult() As Boolean
     Dim ur As UndoRecord, result As String, d As Document
     文字處理.ResetSelectionAvoidSymbols
     If Selection.Characters.Count < 10 Then
-        MsgBox "字數太少，有必要嗎？請至少大於10字", vbExclamation
-        Exit Function
+        MsgBox "字數太少，有必要嗎？請至少大於10字" & vbCr & vbCr & "請輸入足夠的上下文，以便模型理解文本，至少需要10個字。", vbCritical
+            Exit Function
     End If
     word.Application.ScreenUpdating = False
     Set d = Selection.Document
@@ -1382,10 +1412,12 @@ Function inputAITShenShenWikiPunctResult() As Boolean
         result = VBA.Replace(VBA.Replace(result, VBA.ChrW(12310) & "《", VBA.ChrW(12310)), "》" & VBA.ChrW(12311), VBA.ChrW(12311))      '書名號亦會被自動標點清除故,以備還原 20241106
         result = VBA.Replace(VBA.Replace(result, "《", "＜"), "》", "＞") '書名號亦會被自動標點清除故,以備還原 20241106
         result = VBA.Replace(result, "·", "⊙")     '音節號亦會被自動標點清除故,以備還原 20241001
+        Rem 幾乎它不認得的都會轉成「□」
+        result = VBA.Replace(result, "□", VBA.ChrW(9711))
     End If
     
-    d.Application.Activate
     d.Activate
+    d.Application.Activate
     Rem 括號之處理'標點會在（處停止
     result = VBA.Replace(VBA.Replace(result, "＜", "《"), "＞", "》") '書名號亦會被自動標點清除故,以備還原 20241001
     result = VBA.Replace(result, "⊙", "·")  '音節號亦會被自動標點清除故,以備還原 20241001
@@ -1397,7 +1429,7 @@ Function inputAITShenShenWikiPunctResult() As Boolean
     Debug.Print result
     SystemSetup.stopUndo ur, "讀入AI太炎標點結果"
     Rem Selection.text = result'純文字處理
-    Dim puncts As New punctuation, cln As New VBA.Collection, e, rng As Range '適應於格式化文字
+    Dim puncts As New punctuation, cln As New VBA.Collection, e, rng As Range, rngSub As Range '適應於格式化文字
     Set cln = puncts.CreateContextPunctuationCollection(result)
     Rem 清除原來的標點符號，以利比對與插入
     Set rng = d.Range(Selection.start, Selection.End)
@@ -1416,15 +1448,54 @@ Function inputAITShenShenWikiPunctResult() As Boolean
     Set rng = d.Range(Selection.start, Selection.End)
     rng.Find.ClearFormatting
     For Each e In cln
+        Set rngSub = rng.Document.Range(rng.start, rng.End)
 '        If e(1) = Chr(13) Then Stop 'just for test
         If e(0) <> vbNullString Then
-            If rng.Find.Execute(e(0), , , , , , True, wdFindStop) = False Then
-                If rng.text = e(0) Then '最後一個
+            'If rng.text = e(0) Then'最後一項/個
+            If VBA.StrComp(rng.text, e(0)) = 0 Then
+                rng.InsertAfter e(1)
+                rng.Collapse wdCollapseEnd
+            ElseIf rng.Find.Execute(e(0), , , , , , True, wdFindStop) = False Then
+                'If rng.text = e(0) Then '最後一個
+                If VBA.StrComp(rng.text, e(0)) = 0 Then '最後一個
                     If VBA.InStr(ignoreMarker, e(1)) = 0 Then '篇名號、括號不處理（由前面的程式碼處理）
                         rng.InsertAfter e(1)
                     End If
-'                Else
-'                    Stop 'just for test
+                Else
+                    'Stop 'just for test
+                    'rng.Select
+                    SystemSetup.ClipboardPutIn VBA.CStr(e(0))
+                    If MsgBox("當是原文被篡改，請檢查。" & vbCr & vbCr & "目前要插入標點的文字片段是： " & vbCr & vbCr & "【" & e(0) & "】" & vbCr & vbCr & "要修正文件中的文本後繼續請按【取消】", vbExclamation + vbOKCancel) = vbCancel Then '《AI太炎》會篡改原文，異體字改成通行字，甚至范氏改成範氏!! https://www.facebook.com/groups/chineseandme/posts/8754662361296223/
+                        '目前是書名號、音節號會被清掉纂改故 20241122
+                        Set rng = rng.Document.Range(rngSub.start, rngSub.End)
+                        rngSub.Find.Execute "《", , , , , , , , , vbNullString, wdReplaceAll
+                        rngSub.Find.Execute "》", , , , , , , , , vbNullString, wdReplaceAll
+                        rngSub.Find.Execute "·", , , , , , , , , vbNullString, wdReplaceAll
+                        If Selection.Type = wdSelectionIP Then
+                            Selection.start = rng.start: Selection.End = rng.End
+                        End If
+                        If rng.Find.Execute(e(0), , , , , , True, wdFindStop) = False Then
+                            If MsgBox("當是原文被篡改，請檢查。" & vbCr & vbCr & "目前要插入標點的文字片段是： " & vbCr & vbCr & "【" & e(0) & "】" & vbCr & vbCr & "要修正文件中的文本後繼續請按【取消】", vbExclamation + vbOKCancel) = vbCancel Then '《AI太炎》會篡改原文，異體字改成通行字，甚至范氏改成範氏!! https://www.facebook.com/groups/chineseandme/posts/8754662361296223/
+                                Stop
+                            Else
+                                GoTo finish
+                            End If
+                        Else
+                            If VBA.InStr(ignoreMarker, e(1)) = 0 Then '括號、篇名號不處理（由前面的程式碼處理）
+                                rng.InsertAfter e(1)
+                            Else
+                                If rng.Document.Range(rng.End, rng.End + 1) <> e(1) Then
+                                    rng.Collapse wdCollapseEnd
+                                    rng.InsertAfter e(1)
+                                Else
+                                    rng.SetRange rng.start, rng.End + 1
+                                End If
+                            End If
+                        End If
+                    Else
+                        'Documents.Add.Range.text = e(0)
+                        GoTo finish
+                    End If
                 End If
             Else
                 If VBA.InStr(ignoreMarker, e(1)) = 0 Then '括號、篇名號不處理（由前面的程式碼處理）
@@ -1460,10 +1531,14 @@ Function inputAITShenShenWikiPunctResult() As Boolean
         Else
             Selection.End = rng.End
         End If
+        
     Next e
+    inputAITShenShenWikiPunctResult = True
+    
+finish:
     SystemSetup.contiUndo ur
     word.Application.ScreenUpdating = True
-    inputAITShenShenWikiPunctResult = True
+    
 End Function
 Function GetUserAddress() As Boolean
     Dim x As String, a As Object 'Access.Application

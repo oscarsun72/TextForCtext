@@ -1,6 +1,6 @@
 # TextForCtext
 
-Text for Ctext 是為了有效加速[《中國哲學書電子化計劃》](https://ctext.org/)[*（Chinese Text Project, 簡稱 CTP 或 ctext）*](https://zh.wikipedia.org/wiki/%E4%B8%AD%E5%9C%8B%E5%93%B2%E5%AD%B8%E6%9B%B8%E9%9B%BB%E5%AD%90%E5%8C%96%E8%A8%88%E5%8A%83) [Wiki（維基）](https://ctext.org/wiki.pl)文本的輸入─尤其是圖文對照頁面─量身訂做的 Windows 應用程式。主體以 C# 寫成，輔以 Word VBA （主要是應付視覺格式化文本）等諸功能。*末學邊大量參與編輯維基區文本邊改寫、增益其功能，自信當是有在參與編輯者，不可或缺的利器。工欲善其事必先利其器，但願多加利用，把吾生也有涯的有限精力用在電腦科技還辦不到的精校解讀詮釋上面* 其中某些功能還可應用在 CTP 外的環境。*如文字編排、取代、自動標點及檢索[《字統網》](https://zi.tools/)(內含[《漢語大字典》](https://homeinmists.ilotus.org/hd/hydzd.php)《異體字字典》[《漢語多功能字庫》](https://humanum.arts.cuhk.edu.hk/Lexis/lexi-mf/)[《全字庫》](https://www.cns11643.gov.tw/index.jsp)《康熙字典》等連結)[《異體字字典》](http://dict.variants.moe.edu.tw/)[《國語辭典》](https://dict.revised.moe.edu.tw/index.jsp)[《漢語大詞典》](https://ivantsoi.myds.me/web/hydcd/search.html)[《康熙字典網上版》](https://www.kangxizidian.com/)、以《易》學關鍵檢索[《漢籍全文資料庫》](https://hanchi.ihp.sinica.edu.tw/ihp/hanji.htm)（可改寫[檢索關鍵字之清單值](https://github.com/oscarsun72/TextForCtext/blob/811364aed5fa4d3e88a0eb96d0ab12660fbb1672/WindowsFormsApp1/Browser.cs#L7898)以滿足特定需求）……等等*。
+Text for Ctext 是為了有效加速[《中國哲學書電子化計劃》](https://ctext.org/)[*（Chinese Text Project, 簡稱 CTP 或 ctext）*](https://zh.wikipedia.org/wiki/%E4%B8%AD%E5%9C%8B%E5%93%B2%E5%AD%B8%E6%9B%B8%E9%9B%BB%E5%AD%90%E5%8C%96%E8%A8%88%E5%8A%83) [Wiki（維基）](https://ctext.org/wiki.pl)文本的輸入─尤其是圖文對照頁面─量身訂做的 Windows 應用程式。主體以 C# 寫成，輔以 Word VBA （主要是應付視覺格式化文本）等諸功能。*末學邊大量參與編輯維基區文本邊改寫、增益其功能，自信當是有在參與編輯者，不可或缺的利器。工欲善其事必先利其器，但願多加利用，把吾生也有涯的有限精力用在電腦科技還辦不到的精校解讀詮釋上面* 其中某些功能還可應用在 CTP 外的環境。*如文字編排、取代、自動標點及檢索[《字統網》](https://zi.tools/)(內含[《漢語大字典》](https://homeinmists.ilotus.org/hd/hydzd.php)《異體字字典》[《漢語多功能字庫》](https://humanum.arts.cuhk.edu.hk/Lexis/lexi-mf/)[《全字庫》](https://www.cns11643.gov.tw/index.jsp)《康熙字典》等連結)[《異體字字典》](http://dict.variants.moe.edu.tw/)[《國語辭典》](https://dict.revised.moe.edu.tw/index.jsp)[《漢語大詞典》](https://ivantsoi.myds.me/web/hydcd/search.html)[《康熙字典網上版》](https://www.kangxizidian.com/)、以《易》學關鍵檢索[《漢籍全文資料庫》](https://hanchi.ihp.sinica.edu.tw/ihp/hanji.htm)（可改寫[檢索關鍵字之清單值](https://github.com/oscarsun72/TextForCtext/blob/e609c3d99f46387bb0b175511cff29087edbd4b4/WindowsFormsApp1/Browser.cs#L8541)以滿足特定需求）……等等*。
 
 *以下用DeepL翻譯再略加修訂：*
 
@@ -346,7 +346,9 @@ Ctrl + Shift + Alt + y 查[韻典網](https://ytenx.org/) y=yun（韻）的y
 - Ctrl + shift + y ： 以選取文字 search《四部叢刊》本《周易》並於於選取處插入檢索結果之超連結(y:yi 易) 20241005
 - Alt + shift + , 即  Alt + < ： 以選取的文字檢索文件中第一段所載之 CTP 所收本網址，並在選取文字上加上該檢索結果頁面之超連結
 - Ctrl + Alt + F10 或 Ctrl + Alt + F11： 讀入《古籍酷》自動標點所選取文字的結果
+    > 若無選取，則自動選取範圍（選取範圍詳程式碼）
 - Ctrl + Alt + a ： [AI太炎](https://t.shenshen.wiki/)標點
+    > 若無選取，則自動選取範圍（選取範圍詳程式碼）
 - Alt + Shift + y ： 查[《易學網·易經［周易］原文》](https://www.eee-learning.com/article/571)指定卦名文本_並取回其純文字值及網址值插入至文件中插入點位置(y:yi 易) 20241004
     > 若游標所在為《易學網》的網址，則將其網頁內容讀入到文件（於該連結段落後插入）
 - Ctrl + Alt + j 或 Alt + d 以文件中選取文字進行[《看典古籍·古籍全文檢索》](https://kandianguji.com/search_all) （j=籍 ji；d=典 dian）

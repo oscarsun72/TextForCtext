@@ -4138,8 +4138,21 @@ Private Function 頓號文字加上符號(symbol As String) As Boolean
     頓號文字加上符號 = True
 End Function
 
-Rem 根據碼位來設定字型名稱
-Sub FixFontname(rng As Range)
+Sub FixFontnames()
+    Dim rng As Range, ur As UndoRecord
+    If Selection.Type = wdSelectionIP Then
+        Set rng = Selection.Document.Range
+    Else
+        Set rng = Selection.Range
+    End If
+    SystemSetup.stopUndo ur, "FixFontnames"
+    word.Application.ScreenUpdating = False
+    FixFontname rng
+    SystemSetup.contiUndo ur
+    word.Application.ScreenUpdating = True
+End Sub
+Rem 根據碼位來設定字型名稱。失敗則傳回false
+Function FixFontname(rng As Range) As Boolean
     
         Rem https://en.wikipedia.org/wiki/CJK_Unified_Ideographs
         Rem 兼容字
@@ -4169,10 +4182,28 @@ Sub FixFontname(rng As Range)
         
         Rem 擴充字集
         'HanaMinB還不支援G以後的
+        If Not Fonts.IsFontInstalled("HanaMinB") Then
+            MsgBox "請先安裝""HanaMinB""字型再試一次！", vbExclamation
+            VBA.Shell "explorer.exe https://zh.wikipedia.org/zh-tw/%E8%8A%B1%E5%9C%92%E5%AD%97%E9%AB%94", vbMaximizedFocus
+            Exit Function
+        End If
         fontName = "HanaMinB"
         Docs.ChangeFontOfSurrogatePairs_Range fontName, rngChangeFontName, CJK_Unified_Ideographs_Extension_E
         Docs.ChangeFontOfSurrogatePairs_Range fontName, rngChangeFontName, CJK_Unified_Ideographs_Extension_F
-End Sub
+        If Not Fonts.IsFontInstalled("全宋體-3") Then
+            MsgBox "請先安裝""全宋體""字型再試一次！", vbExclamation
+            VBA.Shell "explorer.exe https://fgwang.blogspot.com/2020/06/blog-post.html", vbMaximizedFocus
+            Exit Function
+        End If
+        'G以後的
+        fontName = "全宋體-3"
+        Docs.ChangeFontOfSurrogatePairs_Range fontName, rngChangeFontName, CJK_Unified_Ideographs_Extension_G
+        Docs.ChangeFontOfSurrogatePairs_Range fontName, rngChangeFontName, CJK_Unified_Ideographs_Extension_H
+        fontName = "全宋體-2"
+        Docs.ChangeFontOfSurrogatePairs_Range fontName, rngChangeFontName, CJK_Unified_Ideographs_Extension_I
+        
+        FixFontname = True
+End Function
 Sub 大陸引號改臺灣引號()
     Rem Alt + l （有選取只執行選取區，無則整份文件）
     Dim rng As Range, ur As UndoRecord
@@ -4182,11 +4213,13 @@ Sub 大陸引號改臺灣引號()
         Set rng = Selection.Document.Range(Selection.start, Selection.End)
     End If
     SystemSetup.stopUndo ur, "大陸引號改臺灣引號"
+    word.Application.ScreenUpdating = False
     rng.Find.Execute VBA.ChrW(8220), , , , , , , wdFindStop, , "「", wdReplaceAll
     rng.Find.Execute VBA.ChrW(8221), , , , , , , wdFindStop, , "」", wdReplaceAll
     rng.Find.Execute VBA.ChrW(8216), , , , , , , wdFindStop, , "『", wdReplaceAll
     rng.Find.Execute VBA.ChrW(8217), , , , , , , wdFindStop, , "』", wdReplaceAll
     SystemSetup.contiUndo ur
+    word.Application.ScreenUpdating = True
 End Sub
 
 Rem 模擬Word Characters 集合物件的字串集合 https://learn.microsoft.com/en-us/office/vba/api/Word.characters

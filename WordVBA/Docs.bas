@@ -1538,9 +1538,17 @@ eH:
 End Sub
 Rem 整個文件重新標識易學關鍵字（若有選取，則但處理選取區內文字）
 Sub mark易學關鍵字Doc()
-    Dim ur As word.UndoRecord, rng As Range
+    Dim ur As word.UndoRecord, rng As Range, d
     SystemSetup.playSound 0.484
     SystemSetup.stopUndo ur, "mark易學關鍵字Doc"
+    For Each d In word.Documents
+        If d.Name = "TextForCtextWordVBA.dotm" Then
+            If MsgBox("是否要更新易學關鍵字的字典物件內容？", vbOKCancel) = VBA.vbOK Then
+                Keywords.ClearDicts_YiKeywords
+            End If
+            Exit For
+        End If
+    Next d
     word.Application.ScreenUpdating = False
     If Selection.Type = wdSelectionIP Then
         Set rng = Selection.Document.Range
@@ -2007,7 +2015,9 @@ Sub ChangeFontOfSurrogatePairs_Range(fontName As String, rngtoChange As Range, O
                             Case CJKBlockName.CJK_Compatibility_Ideographs_Supplement
                                  Set isCjkResult = IsCJK(c)
                                  If isCjkResult.item(1) Then
-                                    If isCjkResult.item(2) <> CJKBlockName.CJK_Compatibility_Ideographs_Supplement Then change = False
+                                    If isCjkResult.item(2) <> CJKBlockName.CJK_Compatibility_Ideographs_Supplement Then
+                                        change = False
+                                    End If
                                  End If
                             Case CJKBlockName.CJK_Unified_Ideographs_Extension_B
                                 change = isCJK_Ext(c, CJK_Unified_Ideographs_Extension_B)
@@ -2024,6 +2034,8 @@ Sub ChangeFontOfSurrogatePairs_Range(fontName As String, rngtoChange As Range, O
                                 change = isCJK_Ext(c, CJK_Unified_Ideographs_Extension_G)
                             Case CJKBlockName.CJK_Unified_Ideographs_Extension_H
                                 change = isCJK_Ext(c, CJK_Unified_Ideographs_Extension_H)
+                            Case CJKBlockName.CJK_Unified_Ideographs_Extension_I
+                                change = isCJK_Ext(c, CJK_Unified_Ideographs_Extension_I)
                             Case Else
                             ' Change the font name to HanaMinB
                             ' Change the font name to fontName
