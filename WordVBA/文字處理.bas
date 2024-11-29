@@ -4182,12 +4182,17 @@ Function FixFontname(rng As Range) As Boolean
         
         Rem 擴充字集
         'HanaMinB還不支援G以後的
-        If Not Fonts.IsFontInstalled("HanaMinB") Then
-            MsgBox "請先安裝""HanaMinB""字型再試一次！", vbExclamation
-            VBA.Shell "explorer.exe https://zh.wikipedia.org/zh-tw/%E8%8A%B1%E5%9C%92%E5%AD%97%E9%AB%94", vbMaximizedFocus
-            Exit Function
-        End If
         fontName = "HanaMinB"
+        If Not Fonts.IsFontInstalled("HanaMinB") Then
+            If Not Fonts.IsFontInstalled("全宋體(等寬)") Then
+                MsgBox "請先安裝""HanaMinB""字型再試一次！", vbExclamation
+                VBA.Shell "explorer.exe https://zh.wikipedia.org/zh-tw/%E8%8A%B1%E5%9C%92%E5%AD%97%E9%AB%94", vbMaximizedFocus
+                Exit Function
+            Else
+                fontName = "全宋體(等寬)"
+            End If
+        End If
+        
         Docs.ChangeFontOfSurrogatePairs_Range fontName, rngChangeFontName, CJK_Unified_Ideographs_Extension_E
         Docs.ChangeFontOfSurrogatePairs_Range fontName, rngChangeFontName, CJK_Unified_Ideographs_Extension_F
         If Not Fonts.IsFontInstalled("全宋體-3") Then

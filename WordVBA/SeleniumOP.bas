@@ -813,9 +813,9 @@ Function OpenNewTab(ByVal driver As SeleniumBasic.IWebDriver) As Boolean
                         If IsNewBlankPageTab(driver) Then Exit For
                     Next wh
                     If Not IsNewBlankPageTab(driver) Then '若沒成功開啟
-                    'Stop 'for debug
-                    ActivateChrome
-                    word.Application.Activate
+                        'Stop 'for debug
+                        ActivateChrome
+                        word.Application.Activate
                         If VBA.vbOK = MsgBox("若要開啟新分頁視窗請手動開啟後再按下「確定」按鈕，否則即在此分頁繼續執行。" & vbCr & vbCr _
                             & "若不想在此分頁執行，請務必自行開啟新分頁或新視窗，再按下「確定」按鈕。感恩感恩　南無阿彌陀佛", VBA.vbOKCancel + VBA.vbExclamation) Then
                             SwitchToLastWindowHandleWindow driver
@@ -823,6 +823,8 @@ Function OpenNewTab(ByVal driver As SeleniumBasic.IWebDriver) As Boolean
                             result = False
                             driver.SwitchTo.Window driver.CurrentWindowHandle
                         End If
+                        result = False
+                        driver.SwitchTo.Window driver.CurrentWindowHandle
                     End If
                 End If
             End If
@@ -1234,6 +1236,7 @@ Function HanchiSearch(searchTxt As String) As Boolean
     
     WD.SwitchTo().Window (WD.CurrentWindowHandle)
     ActivateChrome
+    word.Application.windowState = wdWindowStateMinimize
     Dim iwe As SeleniumBasic.IWebElement, key As New SeleniumBasic.keys
     If Not inside Then
         If free Then
@@ -1250,6 +1253,7 @@ Function HanchiSearch(searchTxt As String) As Boolean
     SetIWebElementValueProperty iwe, searchTxt
     iwe.SendKeys key.Enter
     HanchiSearch = True
+    
 End Function
 Rem x 要查的字,Variants 要不要看異體字 執行成功傳回true  20240828.
 Function LookupZitools(x As String, Optional Variants As Boolean = False) As Boolean
@@ -2691,9 +2695,12 @@ Function grabGjCoolPunctResult(text As String, resultText As String, Optional Ba
         Set wdB = WD
         
     End If
-    If wdB Is Nothing Or IsDriverInvalid(wdB) Then Exit Function
+    'If wdB Is Nothing Or IsDriverInvalid(wdB) Then Exit Function
+    If wdB Is Nothing Or IsWDInvalid() Then
+        Exit Function
+    End If
     If wdB.url <> url Then
-        If Not IsNewBlankPageTab(wdB) Then OpenNewTab wdB
+        '''''''''''If Not IsNewBlankPageTab(wdB) Then OpenNewTab wdB
         wdB.Navigate.GoToUrl url
     End If
     '整理文本
@@ -2709,6 +2716,16 @@ Function grabGjCoolPunctResult(text As String, resultText As String, Optional Ba
     
     '貼上文本
     Set textBox = wdB.FindElementById("PunctArea")
+    If textBox Is Nothing Then
+        If IsWDInvalid() Then
+            wdB.SwitchTo.Window wdB.WindowHandles()(UBound(wdB.WindowHandles))
+        End If
+        Set textBox = wdB.FindElementByCssSelector("#PunctArea")
+        If textBox Is Nothing Then
+            wdB.url = url
+            Set textBox = wdB.FindElementByCssSelector("#PunctArea")
+        End If
+    End If
     Dim key As New SeleniumBasic.keys
 
 '    textBox.Click 20240914作廢
@@ -2806,7 +2823,7 @@ Function grabGjCoolPunctResult(text As String, resultText As String, Optional Ba
     grabGjCoolPunctResult = textBox.text
     resultText = grabGjCoolPunctResult
     If WBQuit = False Then
-        wdB.Close
+        'wdB.Close
     Else
         wdB.Quit
         If Not Background Then Set WD = Nothing
@@ -2822,7 +2839,8 @@ Err1:
                     killchromedriverFromHere
                     OpenChrome url
                     Set wdB = WD
-                Resume
+                    If textBox Is Nothing Then Set textBox = wdB.FindElementByCssSelector("#PunctArea")
+                    Resume
             Case -2146233088 'unknown error: ChromeDriver only supports characters in the BMP  (Session info: chrome=109.0.5414.75)
                 Rem 完全無作用
                 Rem systemsetup.SetClipboard text
@@ -2871,6 +2889,262 @@ Err1:
         End Select
     
 End Function
+Function grabGjCoolPunctResult_New(text As String, resultText As String) As String
+    Dim iwe As IWebElement, winState As WdWindowState, btn As SeleniumBasic.IWebElement, k As New SeleniumBasic.keys
+    If WD Is Nothing Then
+'            If Not OpenChrome("https://t.shenshen.wiki/") Then Exit Function
+'        Else
+'            If IsChromeRunning Then
+'                WD.SwitchTo.Window (WD.WindowHandles()(UBound(WD.WindowHandles)))
+'            Else
+'                If Not OpenChrome("https://t.shenshen.wiki/") Then Exit Function
+'            End If
+'        End If
+    Else
+        
+        On Error Resume Next
+        LastValidWindow = WD.CurrentWindowHandle
+        If VBA.InStr(Err.Description, "no such window: target window already closed") = 1 Then
+            LastValidWindow = WD.WindowHandles()(UBound(WD.WindowHandles))
+        End If
+        On Error GoTo 0
+        
+    End If
+    If Not OpenChrome("https://gj.cool/punct") Then Exit Function
+    winState = word.ActiveDocument.ActiveWindow.windowState
+'    WD.Navigate.GoToUrl "https://t.shenshen.wiki/"
+    WD.SwitchTo.Window WD.CurrentWindowHandle
+    ActivateChrome
+    word.ActiveDocument.ActiveWindow.windowState = wdWindowStateMinimize
+    '標點區方塊
+    Set iwe = WD.FindElementByCssSelector("#PunctArea")
+    Dim dt As Date
+    dt = DateTime.Now
+    Do While iwe Is Nothing
+        Set iwe = WD.FindElementByCssSelector("#PunctArea")
+        If VBA.DateDiff("s", dt, DateTime.Now) > 5 Then Exit Function
+    Loop
+    
+    If text = vbNullString Or VBA.Replace(text, VBA.Chr(13), vbNullString) = vbNullString Then Exit Function
+    SetIWebElement_textContent_Property iwe, text
+    
+    '執行按鈕
+    Set btn = WD.FindElementByCssSelector("#main > div > div.p-1.p-md-3.d-flex.justify-content-end > div:nth-child(6) > button")
+    If btn Is Nothing Then Exit Function
+    btn.SendKeys k.Enter
+    
+    '執行中的圖示
+    Do While WD.FindElementByCssSelector("#waitingSpinner").Displayed = False
+        SystemSetup.wait 1
+        btn.SendKeys k.Enter
+        If VBA.DateDiff("s", dt, VBA.Now) > 5 Then
+            Exit Do
+        End If
+    Loop
+    
+    dt = DateTime.Now
+    '結果
+'    Set iwe = WD.FindElementByCssSelector("#PunctArea")
+'    Do While iwe Is Nothing
+'        Set iwe = WD.FindElementByCssSelector("#PunctArea")
+'        If VBA.DateDiff("s", dt, VBA.Now) > 5 Then
+'            Stop
+'            Exit Function
+'        End If
+'    Loop
+'    If iwe Is Nothing Then Set iwe = WD.FindElementByCssSelector("#PunctArea")
+    Do While WD.FindElementByCssSelector("#PunctArea").GetAttribute("textContent") = text
+        If VBA.DateDiff("s", dt, DateTime.Now) > 36 Then Exit Function
+    Loop
+    resultText = WD.FindElementByCssSelector("#PunctArea").GetAttribute("textContent")
+    'If UBound(WD.WindowHandles) > 1 Then WD.Close '不關閉，以手動評量其標點良窳
+    'If LastValidWindow <> vbNullString Then WD.SwitchTo().Window (LastValidWindow)
+    If IsValidWindowHandle(LastValidWindow, WD) Then
+        WD.SwitchTo().Window (LastValidWindow)
+    Else
+        LastValidWindow = WD.CurrentWindowHandle
+    End If
+    grabGjCoolPunctResult_New = resultText
+    word.ActiveDocument.ActiveWindow.windowState = winState
+    'word.Application.Activate
+    
+'    '==========
+'    Const url = "https://gj.cool/punct"
+'    Dim wdB As SeleniumBasic.IWebDriver, WBQuit As Boolean '=true 則可以關Chrome瀏覽器
+'    Dim textBox As SeleniumBasic.IWebElement, btn As SeleniumBasic.IWebElement, btn2 As SeleniumBasic.IWebElement, item As SeleniumBasic.IWebElement
+'    Dim timeOut As Byte '最多等 timeOut 秒
+'    On Error GoTo Err1
+'
+'    If Background Then
+'        Rem 隱藏
+'        Set wdB = openChromeBackground(url)
+'        WBQuit = True '因為在背景執行，預設要可以關'現在用 .AddArgument "--remote-debugging-port=9222"  兼容於其他所開啟者，故不必再背景了 20241003
+'        If wdB Is Nothing Then
+'            If WD Is Nothing Then
+'                If OpenChrome("https://gj.cool/punct") Then
+'                    Exit Function
+'                End If
+'            End If
+'            Set wdB = WD
+'        End If
+'    Else
+'        Rem 顯示
+'        If WD Is Nothing Then
+'            If Not OpenChrome("https://gj.cool/punct") Then
+'                Exit Function
+'            End If
+'        Else
+'            If Not IsWDInvalid() Then
+'                OpenNewTab WD
+'            Else
+'                'Stop 'just for test
+'                killchromedriverFromHere
+'                Set WD = Nothing
+'                If Not OpenChrome("https://gj.cool/punct") Then
+'                    Exit Function
+'                End If
+'            End If
+'        End If
+'        Set wdB = WD
+'
+'    End If
+'    'If wdB Is Nothing Or IsDriverInvalid(wdB) Then Exit Function
+'    If wdB Is Nothing Or IsWDInvalid() Then
+'        Exit Function
+'    End If
+'    If wdB.url <> url Then
+'        '''''''''''If Not IsNewBlankPageTab(wdB) Then OpenNewTab wdB
+'        wdB.Navigate.GoToUrl url
+'    End If
+'    '整理文本
+'    Dim chkStr As String: chkStr = VBA.Chr(13) & VBA.Chr(10) & VBA.Chr(7) & VBA.Chr(9) & VBA.Chr(8)
+'    text = VBA.Trim(text)
+'    Do While VBA.InStr(chkStr, VBA.Left(text, 1)) > 0
+'        text = VBA.Mid(text, 2)
+'    Loop
+'    Do While VBA.InStr(chkStr, VBA.Right(text, 1)) > 0
+'        text = VBA.Left(text, Len(text) - 1)
+'    Loop
+'
+'
+'    '貼上文本
+'    Set textBox = wdB.FindElementById("PunctArea")
+'    If textBox Is Nothing Then
+'        If IsWDInvalid() Then
+'            wdB.SwitchTo.Window wdB.WindowHandles()(UBound(wdB.WindowHandles))
+'        End If
+'        Set textBox = wdB.FindElementByCssSelector("#PunctArea")
+'        If textBox Is Nothing Then
+'            wdB.url = url
+'            Set textBox = wdB.FindElementByCssSelector("#PunctArea")
+'        End If
+'    End If
+'    Dim key As New SeleniumBasic.keys
+'
+''    textBox.Click 20240914作廢
+''    textBox.Clear
+'
+'    'textbox.SendKeys key.LeftShift + key.Insert
+'    'textbox.SendKeys VBA.KeyCodeConstants.vbKeyControl & VBA.KeyCodeConstants.vbKeyV
+'
+'    '如果只有vba.Chr(13)而沒有vba.Chr(13)&vba.Chr(10)則這行會使分段符號消失；因為下面標點按鈕一按，仍會使一組分段符號消失，必須換成兩組，才能保留一組
+'    If InStr(text, VBA.Chr(13) & VBA.Chr(10)) = 0 And InStr(text, VBA.Chr(13)) > 0 Then text = Replace(text, VBA.Chr(13), VBA.Chr(13) & VBA.Chr(10) & VBA.Chr(13) & VBA.Chr(10))
+'
+'    SetIWebElement_textContent_Property textBox, text
+''    If Background Then 20240914作廢
+''        textBox.SendKeys text 'SystemSetup.GetClipboardText
+''
+''    Else
+''        systemsetup.SetClipboard text
+''        textBox.SendKeys key.Control + "v"
+''    End If
+'
+'    '貼上不成則退出
+'    Dim WaitDt As Date, chkTxtTime As Date, nx As String, xl As Integer
+'
+'    nx = textBox.text
+'    text = nx
+'    SystemSetup.playSound 1.294
+'    If nx = "" Then
+'        grabGjCoolPunctResult = ""
+'        If WBQuit Then wdB.Quit
+'        Exit Function
+'    End If
+'
+'    '標點
+'    'Set btn = wdB.FindElementByCssSelector("#main > div.my-4 > div.p-1.p-md-3.d-flex.justify-content-end > div.ms-2 > button")
+'    Set btn = wdB.FindElementByCssSelector("#main > div > div.p-1.p-md-3.d-flex.justify-content-end > div:nth-child(6) > button") '20240710
+'    '即便是有vba.Chr(13)&vba.Chr(10)以下這行仍會使分段符號消失,故若要保持段落，仍須「vba.Chr(13) & vba.Chr(10) & vba.Chr(13) & vba.Chr(10)」二組分段符號，不能只有一個
+'    If btn Is Nothing Then Stop
+'    DoEvents
+'    wdB.SwitchTo().Window (wdB.CurrentWindowHandle)
+'    SystemSetup.wait 0.9
+'    'btn.Click
+'    Dim k As New SeleniumBasic.keys
+'    btn.SendKeys k.Enter
+'    SystemSetup.playSound 1.469
+'    '等待標點完成
+'    'SystemSetup.Wait 3.6
+'
+'    If VBA.Len(text) < 3000 Then
+'        timeOut = 10
+'    Else
+'        timeOut = 20
+'    End If
+'    '最多等 timeOut 秒
+'    WaitDt = DateAdd("s", timeOut, Now()) '極限10秒
+'    xl = VBA.Len(text)
+'    chkTxtTime = VBA.Now
+'    Do
+'        If VBA.DateDiff("s", chkTxtTime, VBA.Now) > 1.8 Then
+'            nx = textBox.text
+'            SystemSetup.playSound 1
+'            '檢查如果沒有按到「標點」按鈕，就再次按下 20240725 以出現等待圖示控制項為判斷
+'            If wdB.FindElementByCssSelector("#waitingSpinner") Is Nothing Then
+'                btn.SendKeys k.Enter
+'            Else
+'                If wdB.FindElementByCssSelector("#waitingSpinner").Displayed = False And nx = text Then
+'                    btn.SendKeys k.Enter
+'                    SystemSetup.playSound 1.469
+'                End If
+'            End If
+'            chkTxtTime = Now
+'            'VBA.StrComp(text, nx) <> 0
+'            If nx <> text Then Exit Do
+'            If InStr(nx, "，") > 0 And InStr(nx, "。") > 0 And Len(nx) > xl Then Exit Do
+'        End If
+'        If Now > WaitDt Then
+'            'Exit Do '超過指定時間後離開
+'            grabGjCoolPunctResult = ""
+'            'wdB.Quit
+'            wdB.Close
+'            SystemSetup.playSound 1.469
+'            Exit Function
+'        End If
+'    Loop
+'    'Set btn2 = WDB.FindElementById("dropdownMenuButton2")
+'    'btn2.Click
+'    '
+'    ''複製
+'    'Set item = WDB.FindElementByCssSelector("#main > div > div.p-1.p-md-3.d-flex.justify-content-end > div.dropdown > ul > li:nth-child(4) > a")
+'    'item.Click
+'    '
+'    ''讀取剪貼簿作為回傳值
+'    'SystemSetup.Wait 0.3
+'    'systemsetup.SetClipboard textbox.text
+'    'grabGjCoolPunctResult = SystemSetup.GetClipboardText
+'    grabGjCoolPunctResult = textBox.text
+'    resultText = grabGjCoolPunctResult
+'    If WBQuit = False Then
+'        'wdB.Close
+'    Else
+'        wdB.Quit
+'        If Not Background Then Set WD = Nothing
+'    End If
+'    'Debug.Print grabGjCoolPunctResult
+'    Exit Function
+
+End Function
 Rem Ctrl + Alt + a : [AI太炎](https://t.shenshen.wiki/)標點 20241105
 Function grabAITShenShenWikiPunctResult(text As String, resultText As String, Optional Background As Boolean) As String
         '限500字
@@ -2891,14 +3165,21 @@ Function grabAITShenShenWikiPunctResult(text As String, resultText As String, Op
 '            End If
 '        End If
     Else
+        
+        On Error Resume Next
         LastValidWindow = WD.CurrentWindowHandle
+        If VBA.InStr(Err.Description, "no such window: target window already closed") = 1 Then
+            LastValidWindow = WD.WindowHandles()(UBound(WD.WindowHandles))
+        End If
+        On Error GoTo 0
+
     End If
     If Not OpenChrome("https://t.shenshen.wiki/") Then Exit Function
-    winState = word.Application.windowState
+    winState = word.ActiveDocument.ActiveWindow.windowState
 '    WD.Navigate.GoToUrl "https://t.shenshen.wiki/"
     WD.SwitchTo.Window WD.CurrentWindowHandle
     ActivateChrome
-    word.Application.windowState = wdWindowStateMinimize
+    word.ActiveDocument.ActiveWindow.windowState = wdWindowStateMinimize
     '標點
     Set iwe = WD.FindElementByCssSelector("#nav-biaodian-tab")
     Dim dt As Date
@@ -2935,8 +3216,8 @@ Function grabAITShenShenWikiPunctResult(text As String, resultText As String, Op
         LastValidWindow = WD.CurrentWindowHandle
     End If
     grabAITShenShenWikiPunctResult = resultText
-    word.Application.windowState = winState
-    word.Application.Activate
+    word.ActiveDocument.ActiveWindow.windowState = winState
+    'word.Application.Activate
 End Function
 Rem 取得《漢籍全文資料庫·斷句十三經經文·周易》文本 ： gua 卦名 。成功則傳回 true 20241004
 Function grabHanchiZhouYi_TheOriginalText_ThirteenSutras(gua As String, resultText As String) As Boolean

@@ -2129,6 +2129,30 @@ namespace WindowsFormsApp1
                     }
                     string x = textBox1.SelectedText, original = x;
                     AITShenShenWikiPunct(ref x); x = x.Replace("“", "「").Replace("”", "」").Replace("‘", "『").Replace("’", "』");
+                    //檢查原文是否遭篡改！20241126
+                    int punctsCntr = 0;
+                    string originalPure = original;
+                    foreach (var item in PunctuationsNum+"{}　")//先略過注文標記及空格
+                    {
+                        //if (item.ToString() == "：") Debugger.Break();
+                        originalPure = originalPure.Replace(item.ToString(), string.Empty);
+                    }
+                    originalPure = originalPure.Replace(Environment.NewLine, string.Empty);
+                    for (int i = 0; i < x.Length; i++)
+                    {
+                        if (Form1.PunctuationsNum.IndexOf(x.Substring(i, 1).ToString()) == -1)
+                        {
+                            if (x.Substring(i, 1) != originalPure.Substring(i - punctsCntr, 1))
+                            {
+                                Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("原文已遭篡改，請檢查！");
+                                AvailableInUseBothKeysMouse();
+                                return;
+                            }
+                        }
+                        else
+                            punctsCntr++;
+                    }
+
                     CnText.RestoreParagraphs(original, ref x);
                     textBox1.SelectedText = CnText.BooksPunctuation(ref x, true);
                     AvailableInUseBothKeysMouse();
@@ -3546,7 +3570,7 @@ namespace WindowsFormsApp1
                                                                                       //  x.Substring(s+1>x.Length?x.Length:s,1)!="　") // 有時標題是頂行的                       
                     {
                         keysParagraphSymbol();
-                        undoRecord();PauseEvents();
+                        undoRecord(); PauseEvents();
                         //將其後的空格也改成空白20241123
                         while (textBox1.SelectionStart + 1 < textBox1.TextLength && textBox1.Text.Substring(textBox1.SelectionStart, 1) == "　")
                         {
@@ -7250,7 +7274,7 @@ namespace WindowsFormsApp1
         /// <summary>
         /// 標點符號和數字
         /// </summary>
-        public static readonly string PunctuationsNum = "－.,;?@'\"。，；！？、—…:：《·》〈‧〉「」『』〖〗【】（）()[]〔〕［］0123456789-";
+        public static readonly string PunctuationsNum = "－.,;?@'\"。，；！？、—…:：《·》〈‧〉「」『』〖〗【】（）()[]〔〕［］“”‘’0123456789-";
         //public static readonly string punctuationsNum = ".,;?@'\"。，；！？、－-—…:：《·》〈‧〉「」『』〖〗【】（）()[]〔〕［］0123456789";
         /// <summary>
         /// 判斷中文字
@@ -10950,7 +10974,8 @@ namespace WindowsFormsApp1
                             }
                             else if (modifierKeys == Keys.Shift && !pagePaste2GjcoolOCR)//&& !PagePaste2GjcoolOCR_ing)
                             {
-                                toOCR(br.OCRSiteTitle.GJcool);
+                                //toOCR(br.OCRSiteTitle.GJcool);
+                                toOCR(PagePast2OCRsite);
                             }
                             break;
                         case BrowserOPMode.seleniumGet:
@@ -12615,7 +12640,7 @@ namespace WindowsFormsApp1
 
         {//此中斷點專為偵錯測試用 感恩感恩　南無阿彌陀佛 20230314
 
-            //OutlineTitlesCloseOpenSwitcher();
+            //OutlineTitlesCloseOpenFoldExpandSwitcher();
             #region forDebugTest權作測試偵錯用20230310            
             //br.SetQuickedit_data_textboxTxt(textBox1.Text);
             //string x = Clipboard.GetText();

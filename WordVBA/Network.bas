@@ -1210,7 +1210,7 @@ Private Function 讀入網路資料後_於其後植入網址及設定格式(rng As Range, url As St
 End Function
 Rem 20241006 rng 要處理的範圍
 Private Sub 讀入網路資料後_還原視窗狀態(win As word.Window, windowState As word.WdWindowState)
-    
+    VBA.DoEvents '視窗無法正常切換的問題解決了 ！ 感恩感恩　讚歎讚歎　南無阿彌陀佛 20241127
     With win.Application
         .Activate
         With win
@@ -1242,37 +1242,96 @@ End Sub
 Rem Ctrl + Alt + a
 Sub 讀入AI太炎標點結果()
     playSound 0.484
+    Dim startCharacters, endCharacters, d As Document, winState As WdWindowState, rng As Range
+    startCharacters = VBA.Chr(13) & VBA.ChrW(9711) & "○：　。；，、}」』"
+    endCharacters = VBA.Chr(13) & "」』。"
+    Set d = Selection.Document:  winState = d.ActiveWindow.windowState
     If Selection.Type = wdSelectionIP Then
+        Set rng = Selection.Document.Range(Selection.start, Selection.End)
         '    word.Application.ScreenUpdating = False
-        Do Until VBA.InStr(VBA.Chr(13) & VBA.ChrW(9711) & "：　", Selection.Previous(wdCharacter).text)
-            Selection.MoveStart Count:=-1
-        Loop
-        Do Until VBA.InStr(VBA.Chr(13) & VBA.ChrW(9711), Selection.Next(wdCharacter).text) Or VBA.InStr(VBA.Chr(13) & VBA.ChrW(9711), Selection.Characters(Selection.Characters.Count).text)
-            Selection.MoveEnd Count:=1
-        Loop
+        If Not rng.Previous Is Nothing Then
+            Do Until VBA.InStr(startCharacters, rng.Previous(wdCharacter).text)
+                rng.MoveStart Count:=-1
+                If rng.Previous Is Nothing Then Exit Do
+            Loop
+        End If
+        If Not rng.Next Is Nothing Then
+            Do Until VBA.InStr(VBA.Chr(13) & VBA.ChrW(9711), rng.Next(wdCharacter).text) Or VBA.InStr(endCharacters, rng.Characters(rng.Characters.Count).text)
+                rng.MoveEnd Count:=1
+                If rng.Next Is Nothing Then Exit Do
+            Loop
+        End If
+        rng.Select
     '    word.Application.ScreenUpdating = True
     '    SystemSetup.wait 0.4
         word.Application.ScreenRefresh
+        
+        Set rng = Nothing
     End If
-    If inputAITShenShenWikiPunctResult = False Then MsgBox "請重試！", vbCritical
+    If inputAITShenShenWikiPunctResult = False Then
+        If Selection.Characters.Count > 500 Then
+            If MsgBox("是否改由《古籍酷》自動標點？", vbOKCancel + vbQuestion) = vbOK Then
+                讀入古籍酷自動標點結果
+            Else
+                MsgBox "請重試！", vbCritical
+            End If
+        ElseIf Selection.Characters.Count > 10 Then
+            If MsgBox("是否改用《古籍酷》AI自動標點？", vbOKCancel + vbQuestion) = vbOK Then
+                讀入古籍酷自動標點結果
+            Else
+                MsgBox "請重試！", vbCritical
+            End If
+        Else
+            If MsgBox("是否改由《古籍酷》自動標點？", vbOKCancel + vbQuestion) = vbOK Then
+                讀入古籍酷自動標點結果
+            End If
+        End If
+    End If
+    DoEvents '有了這行，視窗無法正常切換的問題解決了 ！ 感恩感恩　讚歎讚歎　南無阿彌陀佛 20241127
+    d.Activate
+    d.ActiveWindow.windowState = winState
+    d.ActiveWindow.ScrollIntoView Selection, False
 End Sub
 
 Rem Ctrl + Alt + F10 或 Ctrl + Alt + F11
 Sub 讀入古籍酷自動標點結果()
     playSound 0.484
+    Dim startCharacters, endCharacters, d As Document, winState As WdWindowState, rng As Range
+    startCharacters = VBA.Chr(13) & VBA.ChrW(9711) & "○：　。；，、}」』"
+    endCharacters = VBA.Chr(13) & "」』。"
+    Set d = Selection.Document:  winState = d.ActiveWindow.windowState
     If Selection.Type = wdSelectionIP Then
+        Set rng = Selection.Document.Range(Selection.start, Selection.End)
         '    word.Application.ScreenUpdating = False
-        Do Until VBA.InStr(VBA.Chr(13) & VBA.ChrW(9711) & "：　", Selection.Previous(wdCharacter).text)
-            Selection.MoveStart Count:=-1
-        Loop
-        Do Until VBA.InStr(VBA.Chr(13) & VBA.ChrW(9711), Selection.Next(wdCharacter).text) Or VBA.InStr(VBA.Chr(13) & VBA.ChrW(9711), Selection.Characters(Selection.Characters.Count).text)
-            Selection.MoveEnd Count:=1
-        Loop
+        If Not rng.Previous Is Nothing Then
+            Do Until VBA.InStr(startCharacters, rng.Previous(wdCharacter).text)
+                rng.MoveStart Count:=-1
+            If rng.Previous Is Nothing Then Exit Do
+            Loop
+        End If
+        If Not rng.Next Is Nothing Then
+            Do Until VBA.InStr(VBA.Chr(13) & VBA.ChrW(9711), rng.Next(wdCharacter).text) Or VBA.InStr(endCharacters, rng.Characters(rng.Characters.Count).text)
+                rng.MoveEnd Count:=1
+                If rng.Next Is Nothing Then Exit Do
+            Loop
+        End If
+        rng.Select
     '    word.Application.ScreenUpdating = True
     '    SystemSetup.wait 0.4
         word.Application.ScreenRefresh
+        
+        Set rng = Nothing
     End If
-    If inputGjcoolPunctResult = False Then MsgBox "請重試！", vbCritical
+    If inputGjcoolPunctResult = False Then
+        MsgBox "請重試！", vbCritical
+        killchromedriverFromHere
+        Set WD = Nothing
+    End If
+    DoEvents
+    d.Activate
+    d.ActiveWindow.windowState = winState
+    d.ActiveWindow.ScrollIntoView Selection, False
+    
 End Sub
 Rem 20241008 失敗則傳回false
 Function inputGjcoolPunctResult() As Boolean
@@ -1294,7 +1353,7 @@ Function inputGjcoolPunctResult() As Boolean
     
     Rem 送去《古籍酷》自動標點
 
-    If SeleniumOP.grabGjCoolPunctResult(result, result, False) = vbNullString Then
+    If SeleniumOP.grabGjCoolPunctResult_New(result, result) = vbNullString Then
         d.Activate
         d.Application.Activate
         Exit Function
@@ -1303,7 +1362,6 @@ Function inputGjcoolPunctResult() As Boolean
     d.Application.Activate
     
     GoSub 標點校正
-    
     
     Rem 書名號、引號之處理
     result = VBA.Replace(VBA.Replace(result, "〔", "《"), "〕", "》") '書名號亦會被自動標點清除故,以備還原 20241001
@@ -1331,6 +1389,10 @@ Function inputGjcoolPunctResult() As Boolean
     For Each e In cln
 '        If e(1) = Chr(13) Then Stop 'just for test
         If e(0) <> vbNullString Then
+            If VBA.Len(e(0)) > 255 Then
+                MsgBox "有未標點的內容！", vbExclamation
+                GoTo finish
+            End If
            'If rng.text = e(0) Then'最後一項/個
             If VBA.StrComp(rng.text, e(0)) = 0 Then
                 rng.InsertAfter e(1)
@@ -1364,6 +1426,8 @@ Function inputGjcoolPunctResult() As Boolean
             Selection.End = rng.End
         End If
     Next e
+    GoSub 標點校正_文件
+finish:
     word.Application.ScreenUpdating = True
     SystemSetup.contiUndo ur
     inputGjcoolPunctResult = True
@@ -1371,8 +1435,8 @@ Function inputGjcoolPunctResult() As Boolean
     
 標點校正:
     Dim arrPunct, arrPunctCorrector, iarr As Byte, arrUb As Byte
-    arrPunct = Array(VBA.ChrW(-10148) & VBA.ChrW(-9010) & "：文" & VBA.ChrW(28152) & "公")
-    arrPunctCorrector = Array(VBA.ChrW(-10148) & VBA.ChrW(-9010) & "文" & VBA.ChrW(28152) & "公")
+    arrPunct = Array(VBA.ChrW(-10148) & VBA.ChrW(-9010) & "：文" & VBA.ChrW(28152) & "公", "：〉", "》〉", "〈：", "〉：「·", "：，", "〈。", "〈、", "〈，")
+    arrPunctCorrector = Array(VBA.ChrW(-10148) & VBA.ChrW(-9010) & "文" & VBA.ChrW(28152) & "公", "〉：", "〉", "〈", "·", "：", "。〈", "、〈", "〈")
     arrUb = UBound(arrPunct)
     For iarr = 0 To arrUb
         If VBA.InStr(result, arrPunct(iarr)) Then
@@ -1382,6 +1446,15 @@ Function inputGjcoolPunctResult() As Boolean
     
     Return
     
+標點校正_文件:
+    rng.SetRange Selection.start, Selection.End
+    For iarr = 0 To arrUb
+        If VBA.InStr(rng.text, arrPunct(iarr)) Then
+            rng.Find.Execute arrPunct(iarr), , , , , , , , , arrPunctCorrector(iarr), wdReplaceAll
+        End If
+    Next iarr
+
+    Return
 End Function
 Rem 20241008 失敗則傳回false
 Function inputAITShenShenWikiPunctResult() As Boolean
@@ -1401,7 +1474,8 @@ Function inputAITShenShenWikiPunctResult() As Boolean
     result = VBA.Replace(VBA.Replace(result, "《", "＜"), "》", "＞") '書名號亦會被自動標點清除故,以備還原 20241106
     result = VBA.Replace(VBA.Replace(result, "（", "【"), "）", "】") '括號亦會被自動標點清除故,以備還原 202411106
     result = VBA.Replace(VBA.Replace(result, "〈", VBA.ChrW(12310)), "〉", VBA.ChrW(12311))     '篇名號亦會被自動標點清除故,以備還原 20241001
-    result = VBA.Replace(result, "·", "⊙")     '音節號亦會被自動標點清除故,以備還原 20241001
+    'result = VBA.Replace(result, "·", "⊙")     '音節號亦會被自動標點清除故,以備還原 20241001 ⊙‧則會被取代成□，無益，`則常被誤轉，.會被清除 20241124
+    result = VBA.Replace(result, "·", "&")     '音節號亦會被自動標點清除故,以備還原 20241124
 '
     If SeleniumOP.grabAITShenShenWikiPunctResult(result, result, False) = vbNullString Then
         d.Activate
@@ -1411,7 +1485,8 @@ Function inputAITShenShenWikiPunctResult() As Boolean
         result = VBA.Replace(VBA.Replace(VBA.Replace(VBA.Replace(result, VBA.ChrW(8220), "「"), VBA.ChrW(8221), "」"), VBA.ChrW(8216), "『"), VBA.ChrW(8217), "』")
         result = VBA.Replace(VBA.Replace(result, VBA.ChrW(12310) & "《", VBA.ChrW(12310)), "》" & VBA.ChrW(12311), VBA.ChrW(12311))      '書名號亦會被自動標點清除故,以備還原 20241106
         result = VBA.Replace(VBA.Replace(result, "《", "＜"), "》", "＞") '書名號亦會被自動標點清除故,以備還原 20241106
-        result = VBA.Replace(result, "·", "⊙")     '音節號亦會被自動標點清除故,以備還原 20241001
+        result = VBA.Replace(result, "·", "&")     '音節號亦會被自動標點清除故,以備還原 20241001
+        result = VBA.Replace(result, "&；", "·")
         Rem 幾乎它不認得的都會轉成「□」
         result = VBA.Replace(result, "□", VBA.ChrW(9711))
     End If
@@ -1420,7 +1495,7 @@ Function inputAITShenShenWikiPunctResult() As Boolean
     d.Application.Activate
     Rem 括號之處理'標點會在（處停止
     result = VBA.Replace(VBA.Replace(result, "＜", "《"), "＞", "》") '書名號亦會被自動標點清除故,以備還原 20241001
-    result = VBA.Replace(result, "⊙", "·")  '音節號亦會被自動標點清除故,以備還原 20241001
+    result = VBA.Replace(result, "&", "·")  '音節號亦會被自動標點清除故,以備還原 20241001
     result = VBA.Replace(VBA.Replace(result, "【", "（"), "】", "）")  '括號亦會被自動標點清除故,以備還原 20241001
     result = VBA.Replace(VBA.Replace(result, VBA.ChrW(12310), "〈"), VBA.ChrW(12311), "〉")     '篇名號亦會被自動標點清除故,以備還原 20241001
     'result = VBA.Replace(result, VBA.Chr(13) & VBA.Chr(10), VBA.Chr(13)) '讀回來的自動標點結果會將chr(13)轉成VBA.Chr(13) & VBA.Chr(10)
@@ -1464,7 +1539,7 @@ Function inputAITShenShenWikiPunctResult() As Boolean
                 Else
                     'Stop 'just for test
                     'rng.Select
-                    SystemSetup.ClipboardPutIn VBA.CStr(e(0))
+                    SystemSetup.ClipboardPutIn VBA.Replace(VBA.CStr(e(0)), VBA.ChrW(9711), "□")
                     If MsgBox("當是原文被篡改，請檢查。" & vbCr & vbCr & "目前要插入標點的文字片段是： " & vbCr & vbCr & "【" & e(0) & "】" & vbCr & vbCr & "要修正文件中的文本後繼續請按【取消】", vbExclamation + vbOKCancel) = vbCancel Then '《AI太炎》會篡改原文，異體字改成通行字，甚至范氏改成範氏!! https://www.facebook.com/groups/chineseandme/posts/8754662361296223/
                         '目前是書名號、音節號會被清掉纂改故 20241122
                         Set rng = rng.Document.Range(rngSub.start, rngSub.End)
@@ -1476,7 +1551,13 @@ Function inputAITShenShenWikiPunctResult() As Boolean
                         End If
                         If rng.Find.Execute(e(0), , , , , , True, wdFindStop) = False Then
                             If MsgBox("當是原文被篡改，請檢查。" & vbCr & vbCr & "目前要插入標點的文字片段是： " & vbCr & vbCr & "【" & e(0) & "】" & vbCr & vbCr & "要修正文件中的文本後繼續請按【取消】", vbExclamation + vbOKCancel) = vbCancel Then '《AI太炎》會篡改原文，異體字改成通行字，甚至范氏改成範氏!! https://www.facebook.com/groups/chineseandme/posts/8754662361296223/
-                                Stop
+                                If VBA.MsgBox("要改送去《古籍酷》AI 自動標點嗎？", vbQuestion + vbOKCancel) = vbOK Then
+                                    讀入古籍酷自動標點結果
+                                    inputAITShenShenWikiPunctResult = True
+                                    GoTo finish
+                                Else
+                                    GoTo finish
+                                End If
                             Else
                                 GoTo finish
                             End If
@@ -1493,7 +1574,6 @@ Function inputAITShenShenWikiPunctResult() As Boolean
                             End If
                         End If
                     Else
-                        'Documents.Add.Range.text = e(0)
                         GoTo finish
                     End If
                 End If
