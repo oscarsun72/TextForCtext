@@ -1511,14 +1511,18 @@ namespace TextForCtext
                                 {
                                     NoSuchWindowErrHandler();
                                 }
+                                else if (ex.Message.StartsWith("disconnected: not connected to DevTools"))//Message=disconnected: not connected to DevTools
+                                                                                                          //(failed to check if window was closed: disconnected: not connected to DevTools)
+                                    RestartChromedriver();
                                 else
-                                    Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
+                                    goto default;
                                 break;
                             default:
+                                Console.WriteLine(ex.HResult + ex.Message);
                                 Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
                                 break;
                         }
-                        throw;
+                        //throw;
                     }
 
                 if (!chromedriversPID.Contains(driverService.ProcessId)) chromedriversPID.Add(driverService.ProcessId);
@@ -5091,8 +5095,9 @@ internal static string getImageUrl() {
             driver.SwitchTo().Window(driver.CurrentWindowHandle);
             //按下「上傳圖片」
             //iwe = waitFindWebElementBySelector_ToBeClickable("#File > div.d-flex.justify-content-between.mt-2 > div.d-flex.mx-3 > div:nth-child(1) > div > ul > li:nth-child(3) > a");
-            iwe = waitFindWebElementBySelector_ToBeClickable("#File > div.d-flex.justify-content-between.mt-2 > div.d-flex.mx-3 > div:nth-child(1) > div > ul > li:nth-child(4) > a");
+            iwe = waitFindWebElementBySelector_ToBeClickable("#File > div.d-flex.justify-content-between.mt-2 > div.d-flex.mx-3 > div:nth-child(1) > div > ul > li:nth-child(4) > a");            
             iwe.Click();
+
             //clickCopybutton_GjcoolFastExperience(new Point(iwe.Location.X + 76 + (iwe.Size.Width) / 2, iwe.Location.Y + 120 + (iwe.Size.Height) / 2));//new Point(X, Y)=「選擇檔案」控制項之位置
             //iwe.Click();
 

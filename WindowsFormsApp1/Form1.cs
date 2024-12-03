@@ -2127,12 +2127,18 @@ namespace WindowsFormsApp1
                     {
                         textBox1.SelectionLength--;
                     }
-                    string x = textBox1.SelectedText, original = x;
+                    string x = textBox1.SelectedText, original = x, preSpaces = string.Empty; int iSpace = 0;
+                    while (x.Substring(iSpace, 1) == "　")//傳回的值會缺第一行/段的的縮排空格故 20241201 感恩感恩　讚歎讚歎　南無阿彌陀佛
+                    {
+                        iSpace++;
+                        preSpaces += "　";
+                    }
+
                     AITShenShenWikiPunct(ref x); x = x.Replace("“", "「").Replace("”", "」").Replace("‘", "『").Replace("’", "』");
                     //檢查原文是否遭篡改！20241126
                     int punctsCntr = 0;
                     string originalPure = original;
-                    foreach (var item in PunctuationsNum+"{}　")//先略過注文標記及空格
+                    foreach (var item in PunctuationsNum + "{}　")//先略過注文標記及空格
                     {
                         //if (item.ToString() == "：") Debugger.Break();
                         originalPure = originalPure.Replace(item.ToString(), string.Empty);
@@ -2154,7 +2160,7 @@ namespace WindowsFormsApp1
                     }
 
                     CnText.RestoreParagraphs(original, ref x);
-                    textBox1.SelectedText = CnText.BooksPunctuation(ref x, true);
+                    textBox1.SelectedText = preSpaces + CnText.BooksPunctuation(ref x, true);
                     AvailableInUseBothKeysMouse();
                     return;
                 }
@@ -3707,6 +3713,8 @@ namespace WindowsFormsApp1
                 if (e.KeyCode == Keys.Insert)
                 {//Alt + Insert ：將剪貼簿的文字內容讀入textBox1中;若在手動鍵入輸入模式下則自動加上書名號篇名號
                     e.Handled = true;
+                    int s = textBox1.SelectionStart;
+                    caretPositionRecord();
                     string clpTxt = Clipboard.GetText();
                     if (clpTxt.StartsWith("http"))
                     {
@@ -3751,6 +3759,11 @@ namespace WindowsFormsApp1
                     else textBox1.Text = clpTxt;
                     dragDrop = false;
                     AvailableInUseBothKeysMouse();
+                    if (s > 0) restoreCaretPosition(textBox1, s, 0);
+                    if (textBox1.SelectionStart == 0 && s > 0)
+                        textBox1.SelectionStart = s;
+
+                    //caretPositionRecord();
                     return;
                 }
 
@@ -6000,6 +6013,8 @@ namespace WindowsFormsApp1
             undoRecord();
             caretPositionRecall();
             if (s > 0) restoreCaretPosition(textBox1, s, 0);
+            if (textBox1.SelectionStart == 0 && s > 0)
+                textBox1.SelectionStart = s;
             //textBox1.SelectionStart = selStart;
             //textBox1.ScrollToCaret();
         }
@@ -10110,6 +10125,8 @@ namespace WindowsFormsApp1
                                          //(Session info: chrome = 130.0.6723.70)
                             if (ex.Message.StartsWith("invalid argument: 'handle' must be a string"))
                                 RestartChromedriver();
+                            else if (ex.Message.StartsWith("An unknown exception was encountered sending an HTTP request to the remote WebDriver server for URL"))//An unknown exception was encountered sending an HTTP request to the remote WebDriver server for URL http://localhost:1116/session/faf3a898f90c7f255a3a0d3264405372/window. The exception message was: 傳送要求時發生錯誤。
+                                RestartChromedriver();
                             else
                                 goto default;
                             break;
@@ -10975,6 +10992,7 @@ namespace WindowsFormsApp1
                             else if (modifierKeys == Keys.Shift && !pagePaste2GjcoolOCR)//&& !PagePaste2GjcoolOCR_ing)
                             {
                                 //toOCR(br.OCRSiteTitle.GJcool);
+                                Form1.playSound(Form1.soundLike.press, true);
                                 toOCR(PagePast2OCRsite);
                             }
                             break;

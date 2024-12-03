@@ -45,6 +45,7 @@ Function IsWordActive() As Boolean
 End Function
 ' 將 Chrome 瀏覽器設置為前端窗口
 Sub ActivateChrome()
+    VBA.DoEvents
     Dim hWnd As LongPtr
     hWnd = FindWindow("Chrome_WidgetWin_1", vbNullString)
     If hWnd <> 0 Then
@@ -246,13 +247,23 @@ reStart:
                     chromedriversPID(chromedriversPIDcntr) = pid
                     chromedriversPIDcntr = chromedriversPIDcntr + 1
                 End If
-                OpenNewTab WD '前有.AddArgument "--new-window" 20241005 此是 window 不是 tab !!
+                If url = "https://gj.cool/punct" Then
+                    OpenNewTab WD, url '前有.AddArgument "--new-window" 20241005 此是 window 不是 tab !!
+                Else
+                    OpenNewTab WD
+                End If
 '                WD.ExecuteScript "window.open('about:blank','_blank');" 'openNewTabWhenTabAlreadyExit WD
 '                WD.SwitchTo.Window WindowHandlesItem(WindowHandlesCount - 1)
                 WD.url = url
             End If
         Else
-            If IsWDInvalid() Then OpenNewTab WD
+            If IsWDInvalid() Then
+                If url = "https://gj.cool/punct" Then
+                    OpenNewTab WD, url
+                Else
+                    OpenNewTab WD
+                End If
+            End If
 '            WD.ExecuteScript "window.open('about:blank','_blank');" 'openNewTabWhenTabAlreadyExit WD
 '            WD.SwitchTo.Window WindowHandlesItem(WindowHandlesCount - 1)
             WD.url = url
@@ -366,7 +377,11 @@ ErrH:
                 GoTo reStart
             ElseIf VBA.InStr(Err.Description, "no such window") Then 'no such window
                                                                     '  (Session info: chrome=129.0.6668.59)
-                OpenNewTab WD
+                If url = "https://gj.cool/punct" Then
+                    OpenNewTab WD, url
+                Else
+                    OpenNewTab WD
+                End If
                 Resume
             ElseIf VBA.InStr(Err.Description, "timeout: Timed out receiving message from renderer:") = 1 Then '-2146233088 timeout: Timed out receiving message from renderer: 2.972
                                                                     '(Session info: chrome=130.0.6723.69)
@@ -763,10 +778,11 @@ Private Function closeNewBlankPageTabs() As Boolean
     closeNewBlankPageTabs = result
 End Function
 Rem 開啟新分頁 若失敗則傳回false'改進WordVBA+SeleniumBasic 開啟Chrome瀏覽器新分頁的方法 creedit_with_Copilot大菩薩： https://sl.bing.net/bcfc14PWlFc
-Function OpenNewTab(ByVal driver As SeleniumBasic.IWebDriver) As Boolean
-    Dim result As Boolean
+Function OpenNewTab(ByVal driver As SeleniumBasic.IWebDriver, Optional url As String) As Boolean
+    Dim result As Boolean, currentWinhdl As String
     result = True
     On Error GoTo eH
+    If Not IsWDInvalid Then currentWinhdl = driver.CurrentWindowHandle
     driver.ExecuteScript "window.open('about:blank','_blank');" 'openNewTabWhenTabAlreadyExit WD
     VBA.Interaction.DoEvents
     SwitchToLastWindowHandleWindow driver
@@ -802,8 +818,15 @@ Function OpenNewTab(ByVal driver As SeleniumBasic.IWebDriver) As Boolean
                 ActivateChrome
                 VBA.Interaction.DoEvents
                 
-                VBA.Interaction.SendKeys "^t", True
+                SystemSetup.playSound 0.411
+                
+                SystemSetup.wait 1.7 '有這行就可以了
+                
+                VBA.Interaction.SendKeys "^t" ', True
                 VBA.Interaction.DoEvents
+                
+                SystemSetup.wait 1.9 '有這行就可以了
+                
                 SwitchToLastWindowHandleWindow driver
                 VBA.Interaction.DoEvents
                 SystemSetup.playSound 1 'for test
@@ -813,6 +836,19 @@ Function OpenNewTab(ByVal driver As SeleniumBasic.IWebDriver) As Boolean
                         If IsNewBlankPageTab(driver) Then Exit For
                     Next wh
                     If Not IsNewBlankPageTab(driver) Then '若沒成功開啟
+                        If currentWinhdl <> vbNullString Then
+                            driver.SwitchTo.Window driver.CurrentWindowHandle
+                            SystemSetup.playSound 1
+                            Exit Function
+                        ElseIf url <> vbNullString Then
+                            For wh = UBound(driver.WindowHandles) To 0 Step -1
+                                driver.SwitchTo.Window driver.WindowHandles()(wh)
+                                If driver.url = url Then
+                                    SystemSetup.playSound 0.96
+                                    Exit Function
+                                End If
+                            Next wh
+                        End If
                         'Stop 'for debug
                         ActivateChrome
                         word.Application.Activate
@@ -2659,7 +2695,7 @@ Function grabGjCoolPunctResult(text As String, resultText As String, Optional Ba
     Const url = "https://gj.cool/punct"
     Dim wdB As SeleniumBasic.IWebDriver, WBQuit As Boolean '=true 則可以關Chrome瀏覽器
     Dim textBox As SeleniumBasic.IWebElement, btn As SeleniumBasic.IWebElement, btn2 As SeleniumBasic.IWebElement, item As SeleniumBasic.IWebElement
-    Dim timeOut As Byte '最多等 timeOut 秒
+    Dim timeout As Byte '最多等 timeOut 秒
     On Error GoTo Err1
     
     If Background Then
@@ -2774,12 +2810,12 @@ Function grabGjCoolPunctResult(text As String, resultText As String, Optional Ba
     'SystemSetup.Wait 3.6
     
     If VBA.Len(text) < 3000 Then
-        timeOut = 10
+        timeout = 10
     Else
-        timeOut = 20
+        timeout = 20
     End If
     '最多等 timeOut 秒
-    WaitDt = DateAdd("s", timeOut, Now()) '極限10秒
+    WaitDt = DateAdd("s", timeout, Now()) '極限10秒
     xl = VBA.Len(text)
     chkTxtTime = VBA.Now
     Do
@@ -2953,8 +2989,20 @@ Function grabGjCoolPunctResult_New(text As String, resultText As String) As Stri
 '        End If
 '    Loop
 '    If iwe Is Nothing Then Set iwe = WD.FindElementByCssSelector("#PunctArea")
+    Dim timeout As Byte, textInfo As New StringInfo
+    textInfo.Create text
+    Select Case textInfo.LengthInTextElements
+        Case Is > 2000
+            timeout = 36
+        Case Is > 1000, Is < 2001
+            timeout = 23
+        Case Is > 500, Is < 1001
+            timeout = 15
+        Case Else
+            timeout = 10
+    End Select
     Do While WD.FindElementByCssSelector("#PunctArea").GetAttribute("textContent") = text
-        If VBA.DateDiff("s", dt, DateTime.Now) > 36 Then Exit Function
+        If VBA.DateDiff("s", dt, DateTime.Now) > timeout Then Exit Function
     Loop
     resultText = WD.FindElementByCssSelector("#PunctArea").GetAttribute("textContent")
     'If UBound(WD.WindowHandles) > 1 Then WD.Close '不關閉，以手動評量其標點良窳
@@ -3225,7 +3273,7 @@ Function grabHanchiZhouYi_TheOriginalText_ThirteenSutras(gua As String, resultTe
 End Function
 
 Rem 取得《易學網·易經〔周易〕原文》文本。成功則傳回 true 20241004.20241006 resultText是個集合，第1個元素是易卦的內容字串，第2個元素是查詢結果網址。若沒找到，則傳回元素是空字串的陣列
-Function grabEeeLearning_IChing_ZhouYi_originalText(guaSequence As String, resultText As Variant, Optional iwe As SeleniumBasic.IWebElement) As Boolean
+Function GrabEeeLearning_IChing_ZhouYi_originalText(guaSequence As String, resultText As Variant, Optional iwe As SeleniumBasic.IWebElement) As Boolean
 '    If Not OpenChrome("https://www.eee-learning.com/article/571") Then Exit Function
     If Not VBA.IsArray(resultText) Then
         MsgBox "第2個引數必須是字串陣列", vbCritical
@@ -3239,17 +3287,49 @@ Function grabEeeLearning_IChing_ZhouYi_originalText(guaSequence As String, resul
     e2 = "https://www.eee-learning.com/book/eee" & guaSequence
     If Not OpenChrome(e2) Then Exit Function
     
-    grabEeeLearning_IChing_ZhouYi_originalText = True
+    GrabEeeLearning_IChing_ZhouYi_originalText = True
     
     'Dim iwe As SeleniumBasic.IWebElement
     Set iwe = WD.FindElementByCssSelector("#block-bartik-content > div > article > div > div.clearfix.text-formatted.field.field--name-body.field--type-text-with-summary.field--label-hidden.field__item")
     If iwe Is Nothing Then
-        grabEeeLearning_IChing_ZhouYi_originalText = False
+        GrabEeeLearning_IChing_ZhouYi_originalText = False
         Exit Function
     End If
     
     resultText(0) = iwe.GetAttribute("textContent")
     resultText(1) = e2
+    
+End Function
+Rem 小學堂上古音，傳回 innerHTML 屬性值;出錯則傳回空字串;w:要查的字
+Function GrabXiaoxueShangGuYin(w As String) As String
+    Const url = "https://xiaoxue.iis.sinica.edu.tw/shangguyin/"
+    Dim iwe As SeleniumBasic.IWebElement, key As New SeleniumBasic.keys
+    If Not IsWDInvalid Then
+        If WD.url <> url Then
+            WD.url = url
+        Else
+            WD.Navigate.Refresh
+        End If
+    Else
+        If Not OpenChrome("https://xiaoxue.iis.sinica.edu.tw/shangguyin/") Then
+            Exit Function
+        End If
+    End If
+    '「字形」輸入框
+    Set iwe = WD.FindElementByCssSelector("#EudcFontChar")
+    SetIWebElementValueProperty iwe, Selection.text
+    iwe.SendKeys key.Enter
+    
+    Dim dt As Date
+    dt = VBA.Now
+    '相關連結
+    Do While WD.FindElementByCssSelector("#PageResult > p:nth-child(2)") Is Nothing
+        If VBA.DateDiff("s", dt, VBA.Now) > 2 Then Exit Function
+    Loop
+    'SystemSetup.wait 2.65
+    
+    Set iwe = WD.FindElementByCssSelector("#PageResult")
+    GrabXiaoxueShangGuYin = iwe.GetAttribute("innerHTML") 'outerHTML 也可以
     
 End Function
 Rem 20240914 creedit_with_Copilot大菩薩：https://sl.bing.net/gCpH6nC61Cu
@@ -3424,8 +3504,8 @@ Function IsImageIncluded內容部分包含圖片(iwe As SeleniumBasic.IWebElement) As Bo
     ' 返回結果
     IsImageIncluded內容部分包含圖片 = hasImages
 End Function
-Property Get images() As SeleniumBasic.IWebElement()
-    images = images_arrayIWebElement
+Property Get Images() As SeleniumBasic.IWebElement()
+    Images = images_arrayIWebElement
 End Property
 Property Get links()
     links = links_arrayIWebElement

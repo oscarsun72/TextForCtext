@@ -2132,20 +2132,35 @@ Sub FindMissingCharacters() '³oÀ³¸Ó¥u¬O§ä¤å¥ó¤¤ªº¦r¤£¯à¥H·s²Ó©úÅé¡B¼Ð·¢Åé¨ÓÅã¥Üª
     Next p
 End Sub
 
+Rem ÀË¬d¬Y¼Ë¦¡¬O§_¦s¦b¦b«ü©w¤å¥ó¤¤
+Function IsStyleExists(styleName As String, doc As Document) As Boolean
+    
+    Dim s As Style
+    
+    For Each s In doc.Styles
+        If s.NameLocal = styleName Then
+            IsStyleExists = True
+            Exit Function
+        End If
+    Next s
+    
+End Function
+
+
 Sub updateURL() '§ó·s¶W³sµ²ºô§}
-Dim site As String
-Dim lnk As New links
-site = InputBox("what site to update?", , "º~»y¤jµü¨å=1;°ê»yÃã¨å=2;°ê¾Ç¤j®v=3")
-If site = "" Then Exit Sub
-Select Case site
-    Case 1 '"º~»y¤jµü¨å"
-        lnk.updateURLº~»y¤jµü¨å ActiveDocument
-    Case 2 '"°ê»yÃã¨å"
-        lnk.updateURL°ê»yÃã¨å ActiveDocument
-    Case 3 '"°ê¾Ç¤j®v"
-        lnk.updateURL°ê¾Ç¤j®v ActiveDocument
-        
-End Select
+    Dim site As String
+    Dim lnk As New links
+    site = InputBox("what site to update?", , "º~»y¤jµü¨å=1;°ê»yÃã¨å=2;°ê¾Ç¤j®v=3")
+    If site = "" Then Exit Sub
+    Select Case site
+        Case 1 '"º~»y¤jµü¨å"
+            lnk.updateURLº~»y¤jµü¨å ActiveDocument
+        Case 2 '"°ê»yÃã¨å"
+            lnk.updateURL°ê»yÃã¨å ActiveDocument
+        Case 3 '"°ê¾Ç¤j®v"
+            lnk.updateURL°ê¾Ç¤j®v ActiveDocument
+            
+    End Select
 End Sub
 
 

@@ -256,7 +256,7 @@ Sub 查詢奇摩()
     Selection.Copy
     'FollowHyperlink "http://tw.search.yahoo.com/search", , , , "p=" & Selection, msoMethodGet
     'If Tasks.Exists("skqs professional version") Then
-        shell Replace(GetDefaultBrowserEXE, """%1", "http://tw.search.yahoo.com/search?p=" & Selection)
+        Shell Replace(GetDefaultBrowserEXE, """%1", "http://tw.search.yahoo.com/search?p=" & Selection)
     'Else
     '    Shell "C:\Program Files\Opera\opera.exe" & " http://tw.search.yahoo.com/search?p=" & Selection, vbNormalFocus
     'End If
@@ -302,7 +302,7 @@ Sub 查詢Google()
             Else
                 Exit Sub
             End If
-            shell funame
+            Shell funame
             'Shell "W:\!! for hpr\VB\網路搜尋_元搜尋-同時搜多個引擎\網路搜尋_元搜尋-同時搜多個引擎\bin\Debug\網路搜尋_元搜尋-同時搜多個引擎.exe"
     '    End If
     End If
@@ -367,7 +367,7 @@ Sub insertNowTime()
     End With
 End Sub
 Sub 重啟小小輸入法() 'Alt+q
-    shell Replace(SystemSetup.取得桌面路徑, "Desktop", "Dropbox") & "\VS\bat\重啟小小輸入法.bat"
+    Shell Replace(SystemSetup.取得桌面路徑, "Desktop", "Dropbox") & "\VS\bat\重啟小小輸入法.bat"
 End Sub
 
 Public Sub ShortcutKeys() '指定快速鍵
@@ -424,7 +424,7 @@ Sub playSound(longShort As Single, Optional waittoPlay As Byte = 1) 'Public Decl
     Select Case longShort
         Case 0.411
             sndPlaySound32 path.CombineFullName(mediaPath, "Windows Default.wav"), waittoPlay
-        Case 0.484
+        Case 0.484 'press 按下按鈕時
             sndPlaySound32 path.CombineFullName(mediaPath, "Windows Pop-up Blocked.wav"), waittoPlay
         Case 0.96
             sndPlaySound32 path.CombineFullName(mediaPath, "Windows Shutdown.wav"), waittoPlay
@@ -451,7 +451,7 @@ Sub playSound(longShort As Single, Optional waittoPlay As Byte = 1) 'Public Decl
 End Sub
 Rem 20240928 creedit_with_Copilot大菩薩 ： Word VBA 開啟指定路徑的檔案總管 ：https://sl.bing.net/rD1bSeOTPE
 Sub OpenExplorerAtPath(folderPath As String)
-    VBA.Interaction.shell "explorer.exe " & folderPath, vbNormalFocus
+    VBA.Interaction.Shell "explorer.exe " & folderPath, vbNormalFocus
 End Sub
 
 Property Get getChromePathIncludeBackslash() As String
@@ -610,7 +610,7 @@ Sub seleniumDllReference()
 End Sub
 
 Sub killProcessByName(imageName As String) 'ex: ChromeDriver.exe
-    shell "taskkill /im " + imageName + " /f", vbHide
+    Shell "taskkill /im " + imageName + " /f", vbHide
 End Sub
 Rem 20230119：chatGPT大菩薩：VBA 操控 Chrome 瀏覽器：
                 Rem 在您結束使用 Selenium Basic 庫操作 Chrome 瀏覽器之後，您可以使用 VBA 程式碼來結束 chromedriver.exe 程序。您可以使用 VBA 的 "Shell" 函數來達到這一目的。

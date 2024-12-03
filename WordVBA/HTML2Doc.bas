@@ -145,7 +145,7 @@ Sub ParseHTML()
     
     ' 初始化 HTML 文檔
     Set htmlDoc = New MSHTML.HTMLDocument
-    htmlDoc.body.innerHTML = fileContent
+    htmlDoc.body.innerHtml = fileContent
     
     ' 獲取所有錨標籤
     Set htmlElements = htmlDoc.getElementsByTagName("a")
@@ -184,13 +184,13 @@ End Function
 
 Rem 上標格式 20241012 creedit_with_Copilot大菩薩：
 Sub ConvertHTMLSupToWordSup(rng As Range)
-    ConvertHTMLTagToWord rng, Sup
+    ConvertHTMLTagToWord rng, TagNameHTML.Sup
 End Sub
 Rem 下標格式
 Sub ConvertHTMLSubToWordSub(rng As Range)
-    ConvertHTMLTagToWord rng, Subscript
+    ConvertHTMLTagToWord rng, TagNameHTML.Subscript
 End Sub
-Private Sub ConvertHTMLTagToWord(rng As Range, tagname As TagNameHTML)
+Private Sub ConvertHTMLTagToWord(rng As Range, ByVal tagname As TagNameHTML)
     ' 查找所有標籤
     Dim tag As String
     rng.Find.ClearFormatting
@@ -313,7 +313,9 @@ UnorderedListRange:
                     'Set rngUnorderedList = Nothing
                     'InsertHTMLList rngUnorderedList.text
                     
-                    If (VBA.Left(rngUnorderedList, 5) = "<ul>" & Chr(13) Or VBA.Left(rngUnorderedList, 4) = "<ul ") And VBA.Right(rngUnorderedList, 6) = Chr(13) & "</ul>" Then
+                    'If (VBA.Left(rngUnorderedList, 5) = "<ul>" & Chr(13) Or VBA.Left(rngUnorderedList, 4) = "<ul ") And VBA.Right(rngUnorderedList, 6) = Chr(13) & "</ul>" Then
+                    'If (VBA.Left(rngUnorderedList, 4) = "<ul " Or VBA.Left(rngUnorderedList, 5) = "<ul>" & Chr(13) Or VBA.Left(rngUnorderedList, 4) = "<ul ") And VBA.Right(rngUnorderedList, 5) = "</ul>" Then
+                    If (VBA.Left(rngUnorderedList, 4) = "<ul " Or VBA.Left(rngUnorderedList, 5) = "<ul>" & Chr(13) Or VBA.Left(rngUnorderedList, 4) = "<ul ") And (VBA.Right(rngUnorderedList, 6) = " </ul>" Or VBA.Right(rngUnorderedList, 6) = Chr(13) & "</ul>") Then
                         With rngUnorderedList
                             With .Find
                                 .Execute "<li>", , , , , , , , , vbNullString, wdReplaceAll
@@ -1086,7 +1088,7 @@ Private Function parseHTMLTable(html As String) As Collection
 End Function
 
 Rem 接下來，您可以在Word中創建表格並插入相應的內容 creedit_with_Copilot大菩薩 20241011
-Private Sub insertHTMLTable(rngHtml As Range, Optional domainUrlPrefix As String)
+Private Sub insertHTMLTable(rngHtml As Range, Optional domainUrlPrefix As String, Optional fontName As String)
     Dim html As String
     Dim tbl As word.table
     Dim cells As Collection
@@ -1117,6 +1119,13 @@ Private Sub insertHTMLTable(rngHtml As Range, Optional domainUrlPrefix As String
     With rngHtml
         html = .text
 '        st = .start
+
+        Rem 剛才測試才發現，如果我在轉成表格前的文本先設定好 Range.font.Name = "Lucida Sans Unicode" 那在轉成表格後，就可以在想要是 "Lucida Sans Unicode" 字型的音標字元上設定成這個字型了。感恩感恩　讚歎讚歎　南無阿彌陀佛 所以不能在表格轉換後設定，要先在文字轉表格前先指定 阿彌陀佛
+        '.font.Name = "Lucida Sans Unicode"
+        If fontName <> vbNullString Then
+            .font.Name = fontName
+        End If
+        
     End With
     ' 解析HTML
     Set cells = parseHTMLTable(html)
@@ -1126,8 +1135,11 @@ Private Sub insertHTMLTable(rngHtml As Range, Optional domainUrlPrefix As String
     
     ' 計算欄數
     rowCount = UBound(Split(html, "<tr")) '- 1
-    colCount = cells.Count / rowCount 'UBound(Split(html, "<td")) ' - 1'creedit_with_Copilot大菩薩 20241013
-    
+    If rowCount = 0 Then
+        Exit Sub
+    Else
+        colCount = cells.Count / rowCount 'UBound(Split(html, "<td")) ' - 1'creedit_with_Copilot大菩薩 20241013
+    End If
     
     ' 插入表格
     Set tbl = rngHtml.tables.Add(Range:=rngHtml, NumRows:=rowCount, NumColumns:=colCount)
@@ -1480,7 +1492,7 @@ Private Sub insertHTMLTable(rngHtml As Range, Optional domainUrlPrefix As String
 End Sub
 
 Rem 20241009 將HTML轉成Word文件內文。creedit_with_Copilot大菩薩：https://sl.bing.net/jij3PK59Rka
-Sub innerHTML_Convert_to_WordDocumentContent(rngHtml As Range, Optional domainUrlPrefix As String)
+Sub innerHTML_Convert_to_WordDocumentContent(rngHtml As Range, Optional domainUrlPrefix As String, Optional fontName As String)
     If VBA.InStr(rngHtml.text, "<") = 0 Then Exit Sub
     
      SystemSetup.playSound 1
@@ -1598,7 +1610,7 @@ Sub innerHTML_Convert_to_WordDocumentContent(rngHtml As Range, Optional domainUr
                         .Execute
                     End With
                     Set rng = rngHtml.Document.Range(rng.start, rngClose.End)
-                    insertHTMLTable rng, domainUrlPrefix
+                    insertHTMLTable rng, domainUrlPrefix, fontName
                     'rng.text = vbNullString
                     GoTo nextP
                 End If

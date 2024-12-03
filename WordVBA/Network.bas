@@ -2,6 +2,7 @@ Attribute VB_Name = "Network"
 Option Explicit
 Dim DefaultBrowserNameAppActivate As String
 
+
 Sub 查詢國語辭典() '指定鍵:Ctrl+F12'2010/10/18修訂
     ''    If ActiveDocument.Path <> "" Then ActiveDocument.Save '怕word當掉忘了儲存
     ''    If GetUserAddress = True Then
@@ -585,7 +586,7 @@ errExit:
                     
                     
                     
-                    innerHTML_Convert_to_WordDocumentContent rngHtml, "https://www.eee-learning.com"
+                    HTML2Doc.innerHTML_Convert_to_WordDocumentContent rngHtml, "https://www.eee-learning.com"
                     'SeleniumOP.inputElementContentAll插入網頁元件所有的內容 iwe
                     
                     
@@ -673,7 +674,7 @@ errExit:
     gua = Keywords.周易卦名_卦形_卦序(gua)(1)
 
 grab:
-    If Not SeleniumOP.grabEeeLearning_IChing_ZhouYi_originalText(gua, result, iwe) Then
+    If Not SeleniumOP.GrabEeeLearning_IChing_ZhouYi_originalText(gua, result, iwe) Then
         word.Application.Activate
         VBA.MsgBox "找不到，或網頁改了或掛了……", vbInformation
         Exit Sub
@@ -700,7 +701,7 @@ grab:
                 
                 Set rngHtml = Selection.Document.Range(s, ed)
                 
-                innerHTML_Convert_to_WordDocumentContent rngHtml, "https://www.eee-learning.com"
+                HTML2Doc.innerHTML_Convert_to_WordDocumentContent rngHtml, "https://www.eee-learning.com"
                 'SeleniumOP.inputElementContentAll插入網頁元件所有的內容 iwe
                 
                 
@@ -943,6 +944,303 @@ eH:
             Resume
     End Select
 End Sub
+Rem 查小學堂上古音
+Sub 查小學堂上古音並讀入其結果()
+    
+    'https://xiaoxue.iis.sinica.edu.tw/shangguyin/
+    '#PageResult
+    'innerHTML
+    'outerHTML
+    Dim rng As Range, selInfo As New StringInfo, w As String, innerHtml As String, p As Paragraph, iwe As SeleniumBasic.IWebElement
+    Dim ur As UndoRecord, s As Long, e As Long
+    w = Selection.text
+    If Selection.Type <> wdSelectionIP Then
+        selInfo.Create w
+        If selInfo.LengthInTextElements > 1 Or Not code.IsChineseCharacter(w) Then
+            MsgBox "只能查詢1個漢字", vbCritical
+            Exit Sub
+        End If
+        s = Selection.Characters(1).End
+    Else
+        If Selection.End = Selection.Document.Range.End - 1 Then
+            Selection.MoveLeft wdCharacter, 1, wdMove
+        ElseIf Selection.text = VBA.Chr(13) Then
+            Selection.MoveLeft wdCharacter, 1, wdMove
+        End If
+        w = Selection.text
+        If Not code.IsChineseCharacter(w) Then
+            MsgBox "只能查詢1個漢字", vbCritical
+            Exit Sub
+        End If
+        If Not Selection.Next(wdCharacter, 1) Is Nothing Then
+            s = Selection.Next(wdCharacter, 1).start
+        Else
+            s = Selection.Document.Range.End - 1
+        End If
+    End If
+    
+    SystemSetup.stopUndo ur, "查小學堂上古音並讀入其結果"
+    word.Application.ScreenUpdating = False
+
+
+    Set rng = Selection.Document.Range(s, s)
+    
+    innerHtml = SeleniumOP.GrabXiaoxueShangGuYin(w)
+又:
+    If innerHtml = vbNullString Then
+        MsgBox "查無資料；或 請重試！", vbCritical
+        Exit Sub
+    Else
+         Rem 包含 相關連結 以下的部分
+         'innerHtml = VBA.Replace(innerHtml, "</form>" & VBA.Chr(13), vbNullString)
+         Rem 剔除 相關連結 以下的部分
+         innerHtml = VBA.Mid(innerHtml, 1, VBA.InStr(innerHtml, "</form>" & VBA.Chr(13)) - 1)
+         
+    End If
+
+    e = VBA.InStr(innerHtml, "（查無資料）")
+    Do While e
+        innerHtml = VBA.Mid(innerHtml, 1, VBA.InStrRev(innerHtml, "<table", e) - 1) & "查無資料" & VBA.Mid(innerHtml, VBA.InStr(e, innerHtml, "</table>") + VBA.Len("</table>"))
+        e = VBA.InStr(innerHtml, "（查無資料）")
+    Loop
+    innerHtml = VBA.Replace(innerHtml, "查無資料", "（查無資料）")
+    e = VBA.InStr(innerHtml, "colspan")
+    Do While e
+        innerHtml = VBA.Mid(innerHtml, 1, VBA.InStrRev(innerHtml, "<tr>", e) - 1) & VBA.Mid(innerHtml, VBA.InStr(e, innerHtml, "</tr>") + VBA.Len("</tr>"))
+        e = VBA.InStr(innerHtml, "colspan")
+    Loop
+    
+    rng.InsertParagraphAfter
+    rng.Collapse wdCollapseEnd
+    If Not IsStyleExists("小學堂上古音表格", rng.Document) Then
+        Dim styl As word.Style
+        Set styl = rng.Document.Styles.Add("小學堂上古音表格", wdStyleTypeParagraph)
+        With styl
+            .font.Name = "Lucida Sans Unicode"
+            .Priority = 13
+        End With
+    End If
+    rng.ParagraphFormat.Style = "小學堂上古音表格"
+
+    rng.text = innerHtml
+    e = rng.End
+    
+    rng.Find.Execute ">中古音<"
+    rng.SetRange rng.Paragraphs(1).Range.start, e
+    rng.Document.Range(s + 1, rng.start).text = vbNullString
+    
+    rng.Find.Execute "        ", , , , , , , , , vbNullString, wdReplaceAll
+    rng.Find.Execute "      ", , , , , , , , , vbNullString, wdReplaceAll
+    rng.Find.Execute "    ", , , , , , , , , vbNullString, wdReplaceAll
+    s = rng.start: e = rng.End
+    Do While rng.Find.Execute("MessageTitle")
+        rng.ParagraphFormat.Style = wdStyleHeading6
+    Loop
+    rng.SetRange s, e
+    
+    HTML2Doc.innerHTML_Convert_to_WordDocumentContent rng, vbNullString ', "Lucida Sans Unicode"'改用樣式來控制
+    
+    
+    '清除空行/段
+    Do While rng.Document.Range(rng.start, rng.End).Find.Execute("^p^p")
+        rng.Find.Execute "^p^p", , , , , , , , , "^p", wdReplaceAll
+    Loop
+    
+    For Each p In rng.Paragraphs
+        If p.Range.text = VBA.Chr(13) Or p.Range.text = " " & VBA.Chr(13) Then
+            p.Range.text = vbNullString
+        End If
+    Next p
+    '以上'清除空行/段
+    
+    Dim tb As word.table, c As word.cell, a As Range
+    For Each tb In rng.tables
+'        tb.AllowAutoFit = True
+'        tb.AutoFitBehavior wdAutoFitContent
+        
+        For Each c In tb.Range.cells
+            For Each a In c.Range.Characters
+                Select Case a.text
+                    Case VBA.ChrW(232)
+                        a.font.Name = "Lucida Sans Unicode"
+                        a.Select
+                        If a.font.Name <> "Lucida Sans Unicode" Then
+                            MsgBox "請手動設定字型為 ""Lucida Sans Unicode""", vbExclamation
+                        End If
+                    Case Else
+                    If a.font.Name = "Calibri" Then
+                        a.font.Name = "Lucida Sans Unicode"
+                        If a.font.Name = "Calibri" Then
+                            a.Select
+                            Stop
+                        End If
+                    End If
+                End Select
+            Next a
+        Next c
+
+        With tb
+            '.Range.font.Name = "Times New Roman"
+            '.Range.font.Name = "Lucida Sans Unicode"
+            '.Range.font.NameOther = "Lucida Sans Unicode"
+            '.Range.font.NameAscii = "Lucida Sans Unicode"
+'            .Range.font.NameFarEast = "新細明體"
+            Set c = .cell(2, 1)
+            If .cell(1, 1).Range.text = "國語注音" & VBA.Chr(13) & VBA.Chr(7) Then
+                If VBA.InStr(c.Range.text, "ㄧ") Then
+                    c.Range.text = VBA.Replace(VBA.Replace(c.Range.text, "ㄧ", VBA.ChrW(20008)), VBA.Chr(13) & VBA.Chr(7), vbNullString)
+                End If
+                c.Range.font.Name = "標楷體"
+            End If
+            
+            With .Borders(wdBorderLeft)
+                .LineStyle = wdLineStyleDot
+                '.LineWidth = wdLineWidth050pt
+                .Color = wdColorAutomatic
+            End With
+            With .Borders(wdBorderRight)
+                .LineStyle = wdLineStyleDot
+                '.LineWidth = wdLineWidth050pt
+                .Color = wdColorAutomatic
+            End With
+            With .Borders(wdBorderTop)
+                .LineStyle = wdLineStyleDot
+                '.LineWidth = wdLineWidth050pt
+                .Color = wdColorAutomatic
+            End With
+            With .Borders(wdBorderBottom)
+                .LineStyle = wdLineStyleDot
+                '.LineWidth = wdLineWidth050pt
+                .Color = wdColorAutomatic
+            End With
+            With .Borders(wdBorderHorizontal)
+                .LineStyle = wdLineStyleDot
+                .LineWidth = wdLineWidth050pt
+                .Color = wdColorAutomatic
+            End With
+            With .Borders(wdBorderVertical)
+                .LineStyle = wdLineStyleDot
+                .LineWidth = wdLineWidth050pt
+                .Color = wdColorAutomatic
+            End With
+            .Borders(wdBorderDiagonalDown).LineStyle = wdLineStyleNone
+            .Borders(wdBorderDiagonalUp).LineStyle = wdLineStyleNone
+            .Borders.Shadow = False
+
+            .TopPadding = CentimetersToPoints(0.1)
+            .BottomPadding = CentimetersToPoints(0.1)
+            .LeftPadding = CentimetersToPoints(0.1)
+            .RightPadding = CentimetersToPoints(0.1)
+            '.Spacing = CentimetersToPoints(0.04)
+            .AllowPageBreaks = True
+            .AllowAutoFit = True
+        
+            .Range.ParagraphFormat.Alignment = wdAlignParagraphCenter
+            .Range.cells.VerticalAlignment = wdCellAlignVerticalCenter
+            
+        End With
+        With options
+            .DefaultBorderLineStyle = wdLineStyleDot
+            .DefaultBorderLineWidth = wdLineWidth050pt
+            .DefaultBorderColor = wdColorAutomatic
+        End With
+        
+    Next tb
+    
+    rng.tables(1).Range.Find.Execute " ", , , , , , , , , vbNullString, wdReplaceAll
+    
+'    rng.font.Name = "Times New Roman"
+'    rng.font.Name = "Lucida Sans Unicode"
+'
+'    rng.Select
+'    Selection.font.Name = "Times New Roman"
+'    Selection.font.Name = "Lucida Sans Unicode"
+'    'Selection.font.Name = "Times New Roman"
+'    'rng.SetRange rng.tables(2).cell(2, 2).Range.start, rng.End '一定會選取一整列
+'    rng.tables(3).Select
+    
+    Dim dict As New Scripting.Dictionary, ziorder, tdi As Byte
+    '字號
+    ziorder = WD.FindElementByCssSelector("#ZiOrder").GetAttribute("value")
+    If Not dict.Exists(ziorder) Then dict.Add ziorder, vbNullString
+    If ziorder <> vbNullString Then
+        
+        If Not VBA.IsNumeric(VBA.Replace(rng.Paragraphs(1).Previous.Range, VBA.Chr(13), vbNullString)) Then
+            rng.Document.Range(rng.start, rng.start).InsertParagraphBefore
+            rng.Paragraphs(1).Range.text = ziorder & VBA.Chr(13)
+            rng.Paragraphs(1).Style = wdStyleHeading5
+        End If
+        
+        tdi = tdi + 1
+        
+        
+        '字頭點一下切換
+        'Set iwe = WD.FindElementByXPath("/html/body/table[2]/tbody/tr/td[3]/form/table[1]/tbody/tr/td[1]/a")
+        'If iwe Is Nothing Then
+            Set iwe = WD.FindElementByXPath("/html/body/table[2]/tbody/tr/td[3]/form/table[1]/tbody/tr/td[1]/a[" & tdi & "]")
+        'End If
+        If Not iwe Is Nothing Then
+            ziorder = iwe.GetAttribute("textContent")
+            If Not dict.Exists(ziorder) Then
+                iwe.Click
+                dict.Add ziorder, vbNullString
+                
+                Dim dt As Date
+                dt = VBA.Now
+                '相關連結
+                Do While WD.FindElementByCssSelector("#PageResult > p:nth-child(2)") Is Nothing
+                    If VBA.DateDiff("s", dt, VBA.Now) > 2 Then
+                        MsgBox "又讀字資料讀入失敗，請重試！", vbCritical
+                        GoTo finish
+                    End If
+                Loop
+                Do While WD.FindElementByCssSelector("#StartOrder").Displayed = False
+                    If VBA.DateDiff("s", dt, VBA.Now) > 2 Then
+                        MsgBox "又讀字資料讀入失敗，請重試！", vbCritical
+                        GoTo finish
+                    End If
+                Loop
+                
+                SystemSetup.wait 2
+                Do Until ziorder = WD.FindElementByCssSelector("#StartOrder").GetAttribute("textContent")
+                    If VBA.DateDiff("s", dt, VBA.Now) > 2 Then
+                        MsgBox "又讀字資料讀入失敗，請重試！", vbCritical
+                        GoTo finish
+                    End If
+                Loop
+        
+                Set iwe = WD.FindElementByCssSelector("#PageResult")
+                innerHtml = iwe.GetAttribute("innerHTML") 'outerHTML 也可以
+                
+                Set rng = Selection.Document.Range(rng.End, rng.End)
+                rng.InsertParagraphAfter
+                rng.Collapse wdCollapseEnd
+                rng.InsertAfter ziorder
+                rng.ParagraphFormat.Style = wdStyleHeading5
+                'rng.InsertParagraphAfter
+                rng.Collapse wdCollapseEnd
+                Set rng = rng.Document.Range(rng.start, rng.start)
+                s = rng.start
+                SystemSetup.playSound 0.411
+                GoTo 又
+            End If
+        End If
+    End If
+    
+    
+finish:
+    VBA.DoEvents
+    word.Application.Activate
+    
+    Set dict = Nothing
+    
+    SystemSetup.contiUndo ur
+    word.Application.ScreenUpdating = True
+    
+    
+End Sub
+
+
 Rem 判斷圖檔是否有效 creedit_with_Copilot大菩薩：20241010 https://sl.bing.net/emhYXUvuos8 https://sl.bing.net/cG4Jn2MciZ2
 Function IsValidImage_LoadPicture(filePath As String) As Boolean
     On Error Resume Next
@@ -1243,7 +1541,8 @@ Rem Ctrl + Alt + a
 Sub 讀入AI太炎標點結果()
     playSound 0.484
     Dim startCharacters, endCharacters, d As Document, winState As WdWindowState, rng As Range
-    startCharacters = VBA.Chr(13) & VBA.ChrW(9711) & "○：　。；，、}」』"
+'    startCharacters = VBA.Chr(13) & VBA.ChrW(9711) & "○：　。；，、}」』"
+    startCharacters = VBA.Chr(13) & VBA.ChrW(9711) & "○　"
     endCharacters = VBA.Chr(13) & "」』。"
     Set d = Selection.Document:  winState = d.ActiveWindow.windowState
     If Selection.Type = wdSelectionIP Then
