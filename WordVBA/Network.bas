@@ -944,21 +944,25 @@ eH:
             Resume
     End Select
 End Sub
-Rem 查小學堂上古音
-Sub 查小學堂上古音並讀入其結果()
+Rem 供指定快速鍵用
+Sub 查小學堂上古音並讀入其結果Sub()
+    查小學堂上古音並讀入其結果
+End Sub
+Rem 查小學堂上古音 因單一檔案還會調用，可以判斷執行成功與否。失敗傳回false
+Function 查小學堂上古音並讀入其結果() As Boolean
     
     'https://xiaoxue.iis.sinica.edu.tw/shangguyin/
     '#PageResult
     'innerHTML
     'outerHTML
     Dim rng As Range, selInfo As New StringInfo, w As String, innerHtml As String, p As Paragraph, iwe As SeleniumBasic.IWebElement
-    Dim ur As UndoRecord, s As Long, e As Long
+    Dim ur As UndoRecord, s As Long, e As Long, result As Boolean
     w = Selection.text
     If Selection.Type <> wdSelectionIP Then
         selInfo.Create w
         If selInfo.LengthInTextElements > 1 Or Not code.IsChineseCharacter(w) Then
             MsgBox "只能查詢1個漢字", vbCritical
-            Exit Sub
+            Exit Function
         End If
         s = Selection.Characters(1).End
     Else
@@ -970,7 +974,7 @@ Sub 查小學堂上古音並讀入其結果()
         w = Selection.text
         If Not code.IsChineseCharacter(w) Then
             MsgBox "只能查詢1個漢字", vbCritical
-            Exit Sub
+            Exit Function
         End If
         If Not Selection.Next(wdCharacter, 1) Is Nothing Then
             s = Selection.Next(wdCharacter, 1).start
@@ -982,14 +986,17 @@ Sub 查小學堂上古音並讀入其結果()
     SystemSetup.stopUndo ur, "查小學堂上古音並讀入其結果"
     word.Application.ScreenUpdating = False
 
+    On Error GoTo eH:
 
     Set rng = Selection.Document.Range(s, s)
     
     innerHtml = SeleniumOP.GrabXiaoxueShangGuYin(w)
 又:
     If innerHtml = vbNullString Then
+        VBA.DoEvents
+        word.Application.Activate
         MsgBox "查無資料；或 請重試！", vbCritical
-        Exit Sub
+        GoTo finish
     Else
          Rem 包含 相關連結 以下的部分
          'innerHtml = VBA.Replace(innerHtml, "</form>" & VBA.Chr(13), vbNullString)
@@ -1004,6 +1011,12 @@ Sub 查小學堂上古音並讀入其結果()
         e = VBA.InStr(innerHtml, "（查無資料）")
     Loop
     innerHtml = VBA.Replace(innerHtml, "查無資料", "（查無資料）")
+    e = VBA.InStr(innerHtml, "（資料增補中）")
+    Do While e
+        innerHtml = VBA.Mid(innerHtml, 1, VBA.InStrRev(innerHtml, "<table", e) - 1) & "資料增補中" & VBA.Mid(innerHtml, VBA.InStr(e, innerHtml, "</table>") + VBA.Len("</table>"))
+        e = VBA.InStr(innerHtml, "（資料增補中）")
+    Loop
+    innerHtml = VBA.Replace(innerHtml, "資料增補中", "（資料增補中）")
     e = VBA.InStr(innerHtml, "colspan")
     Do While e
         innerHtml = VBA.Mid(innerHtml, 1, VBA.InStrRev(innerHtml, "<tr>", e) - 1) & VBA.Mid(innerHtml, VBA.InStr(e, innerHtml, "</tr>") + VBA.Len("</tr>"))
@@ -1061,25 +1074,32 @@ Sub 查小學堂上古音並讀入其結果()
         For Each c In tb.Range.cells
             For Each a In c.Range.Characters
                 Select Case a.text
-                    Case VBA.ChrW(232)
-                        a.font.Name = "Lucida Sans Unicode"
-                        a.Select
+                    Case VBA.ChrW(232), VBA.ChrW(566), VBA.ChrW(545), VBA.ChrW(224)
                         If a.font.Name <> "Lucida Sans Unicode" Then
+                            a.font.Name = "Lucida Sans Unicode"
+                        End If
+                        If a.font.Name <> "Lucida Sans Unicode" Then
+                            a.Select
                             MsgBox "請手動設定字型為 ""Lucida Sans Unicode""", vbExclamation
                         End If
                     Case Else
-                    If a.font.Name = "Calibri" Then
-                        a.font.Name = "Lucida Sans Unicode"
                         If a.font.Name = "Calibri" Then
-                            a.Select
-                            Stop
+                            a.font.Name = "Lucida Sans Unicode"
+                            If a.font.Name = "Calibri" Then
+                                a.Select
+                                Stop
+                            End If
                         End If
-                    End If
                 End Select
             Next a
         Next c
 
         With tb
+            If .Range.Style Is Nothing Then
+                .Range.Style = "小學堂上古音表格"
+            ElseIf .Range.Style <> "小學堂上古音表格" Then
+                .Range.Style = "小學堂上古音表格"
+            End If
             '.Range.font.Name = "Times New Roman"
             '.Range.font.Name = "Lucida Sans Unicode"
             '.Range.font.NameOther = "Lucida Sans Unicode"
@@ -1091,6 +1111,16 @@ Sub 查小學堂上古音並讀入其結果()
                     c.Range.text = VBA.Replace(VBA.Replace(c.Range.text, "ㄧ", VBA.ChrW(20008)), VBA.Chr(13) & VBA.Chr(7), vbNullString)
                 End If
                 c.Range.font.Name = "標楷體"
+            End If
+            Set c = .cell(2, 2)
+            If .cell(1, 2).Range.text = "漢語拼音" & VBA.Chr(13) & VBA.Chr(7) Then
+                If VBA.InStr(c.Range.text, "g") Then
+                    c.Range.text = VBA.Replace(VBA.Replace(c.Range.text, "g", VBA.ChrW(609)), VBA.Chr(13) & VBA.Chr(7), vbNullString)
+                End If
+                With c.Range.font
+                    .Name = "SimHei"
+                    .Size = .Size + .Size * (2 / 12)
+                End With
             End If
             
             With .Borders(wdBorderLeft)
@@ -1227,6 +1257,7 @@ Sub 查小學堂上古音並讀入其結果()
         End If
     End If
     
+    result = True
     
 finish:
     VBA.DoEvents
@@ -1236,9 +1267,36 @@ finish:
     
     SystemSetup.contiUndo ur
     word.Application.ScreenUpdating = True
-    
-    
-End Sub
+    查小學堂上古音並讀入其結果 = result
+    Exit Function
+eH:
+    Select Case Err.Number
+        Case -2146233088
+            If VBA.InStr(Err.Description, "stale element reference: stale element not found in the current frame") = 1 Then '(Session info: chrome=131.0.6778.86)
+                Dim retryCntr As Byte
+                If retryCntr < 3 Then
+                    SystemSetup.wait 1
+                    retryCntr = retryCntr + 1
+                    Resume
+                Else
+                    Debug.Print Err.Number & Err.Description
+                    MsgBox Err.Number & Err.Description, vbCritical
+                    GoTo finish
+                End If
+            Else
+                GoTo caseElse
+            End If
+        Case Else
+caseElse:
+            Debug.Print Err.Number & Err.Description
+            If MsgBox(Err.Number & Err.Description & vbCr & vbCr & "是否要除錯？", vbCritical + vbOKCancel) = vbCancel Then
+                GoTo finish
+            Else
+                Stop
+                Resume
+            End If
+    End Select
+End Function
 
 
 Rem 判斷圖檔是否有效 creedit_with_Copilot大菩薩：20241010 https://sl.bing.net/emhYXUvuos8 https://sl.bing.net/cG4Jn2MciZ2

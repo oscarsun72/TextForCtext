@@ -7,19 +7,48 @@ Public chromedriversPID() As Long '儲存chromedriver程序ID的陣列
 Public chromedriversPIDcntr As Integer 'chromedriversPID的下標值
 Public ActiveXComponentsCanNotBeCreated As Boolean
 
+Const SW_RESTORE = 9
+Const SW_MAXIMIZE = 3
+Const WM_SYSCOMMAND = &H112
+Const SC_RESTORE = &HF120
+Const VK_CONTROL = &H11
+Const VK_MENU = &H12
+Const VK_SPACE = &H20
+Const VK_DOWN = &H28
+Const VK_RETURN = &HD
+Const KEYEVENTF_KEYUP = &H2
+
 '' 宣告 Windows API 函數 20241003 creedit_with_Copilot大菩薩：改進WordVBA+SeleniumBasic 開啟Chrome瀏覽器新分頁的方法：https://sl.bing.net/iqY5XH1MVci
 'Declare PtrSafe Function SetForegroundWindow Lib "user32" (ByVal hWnd As LongPtr) As Long
 'Declare PtrSafe Function FindWindow Lib "user32" Alias "FindWindowA" (ByVal lpClassName As String, ByVal lpWindowName As String) As LongPtr
 #If VBA7 Then
     Private Declare PtrSafe Function FindWindow Lib "user32" Alias "FindWindowA" (ByVal lpClassName As String, ByVal lpWindowName As String) As LongPtr
     Private Declare PtrSafe Function SetForegroundWindow Lib "user32" (ByVal hWnd As LongPtr) As Long
+    Private Declare PtrSafe Function IsIconic Lib "user32" (ByVal hWnd As LongPtr) As Long
+    Private Declare PtrSafe Function ShowWindow Lib "user32" (ByVal hWnd As LongPtr, ByVal nCmdShow As Long) As Long
+    Private Declare PtrSafe Function ShowWindowAsync Lib "user32" (ByVal hWnd As LongPtr, ByVal nCmdShow As Long) As Long
+    Private Declare PtrSafe Function IsWindowVisible Lib "user32" (ByVal hWnd As LongPtr) As Long
+    Private Declare PtrSafe Function GetWindowText Lib "user32" Alias "GetWindowTextA" (ByVal hWnd As LongPtr, ByVal lpString As String, ByVal cch As Long) As Long
+    Private Declare PtrSafe Function GetForegroundWindow Lib "user32" () As LongPtr
+    Private Declare PtrSafe Function SendMessage Lib "user32" Alias "SendMessageA" (ByVal hWnd As LongPtr, ByVal Msg As Long, ByVal wParam As LongPtr, ByVal lParam As LongPtr) As LongPtr
+    Private Declare PtrSafe Sub keybd_event Lib "user32" (ByVal bVk As Byte, ByVal bScan As Byte, ByVal dwFlags As Long, ByVal dwExtraInfo As LongPtr)
+
 #Else
     Private Declare Function FindWindow Lib "user32" Alias "FindWindowA" (ByVal lpClassName As String, ByVal lpWindowName As String) As Long
     Private Declare Function SetForegroundWindow Lib "user32" (ByVal hWnd As Long) As Long
+    Private Declare Function IsIconic Lib "user32" (ByVal hWnd As Long) As Long
+    Private Declare Function ShowWindow Lib "user32" (ByVal hWnd As Long, ByVal nCmdShow As Long) As Long
+    Private Declare Function ShowWindowAsync Lib "user32" (ByVal hWnd As Long, ByVal nCmdShow As Long) As Long
+    Private Declare Function IsWindowVisible Lib "user32" (ByVal hWnd As Long) As Long
+    Private Declare Function GetWindowText Lib "user32" Alias "GetWindowTextA" (ByVal hWnd As Long, ByVal lpString As String, ByVal cch As Long) As Long
+    Private Declare Function GetForegroundWindow Lib "user32" () As Long
+    Private Declare Function SendMessage Lib "user32" Alias "SendMessageA" (ByVal hWnd As Long, ByVal Msg As Long, ByVal wParam As Long, ByVal lParam As Long) As Long
+    Private Declare Sub keybd_event Lib "user32" (ByVal bVk As Byte, ByVal bScan As Byte, ByVal dwFlags As Long, ByVal dwExtraInfo As Long)
+
 #End If
 
-Declare PtrSafe Function GetForegroundWindow Lib "user32" () As LongPtr
-Declare PtrSafe Function GetWindowText Lib "user32" Alias "GetWindowTextA" (ByVal hWnd As LongPtr, ByVal lpString As String, ByVal cch As Long) As Long
+'Declare PtrSafe Function GetForegroundWindow Lib "user32" () As LongPtr
+'Declare PtrSafe Function GetWindowText Lib "user32" Alias "GetWindowTextA" (ByVal hWnd As LongPtr, ByVal lpString As String, ByVal cch As Long) As Long
 Private last_ValidWindow As String
 Private images_arrayIWebElement() As SeleniumBasic.IWebElement
 Private links_arrayIWebElement() As SeleniumBasic.IWebElement
@@ -43,8 +72,112 @@ Function IsWordActive() As Boolean
         IsWordActive = False
     End If
 End Function
-' 將 Chrome 瀏覽器設置為前端窗口
+
+' 模擬按鍵操作
+Sub SimulateKeyStroke(vk As Byte)
+    keybd_event vk, 0, 0, 0
+    keybd_event vk, 0, KEYEVENTF_KEYUP, 0
+End Sub
+' 將 Chrome 瀏覽器設置為前端窗口並恢復最小化或隱藏到托盤的窗口
 Sub ActivateChrome()
+    VBA.DoEvents
+    Dim hWnd As LongPtr
+    Dim title As String * 256
+    
+    hWnd = FindWindow("Chrome_WidgetWin_1", vbNullString)
+    If hWnd <> 0 Then
+        GetWindowText hWnd, title, 256
+        If InStr(title, "Chrome") > 0 Then ' 確保窗口標題包含 "Chrome"
+            If IsIconic(hWnd) Or Not IsWindowVisible(hWnd) Then
+                SetForegroundWindow hWnd
+                SimulateKeyStroke VK_MENU ' 模擬按下 Alt 鍵
+                SimulateKeyStroke VK_SPACE ' 模擬按下 Space 鍵
+                SimulateKeyStroke VK_DOWN ' 模擬按下箭頭向下鍵
+                SimulateKeyStroke VK_DOWN ' 再次模擬按下箭頭向下鍵
+                SimulateKeyStroke VK_RETURN ' 模擬按下 Enter 鍵
+                VBA.DoEvents ' 確保窗口已經顯示
+                ShowWindow hWnd, SW_MAXIMIZE ' 最大化窗口
+            End If
+        End If
+    Else
+        hWnd = FindWindow(vbNullString, "Google Chrome")
+        If hWnd <> 0 Then
+            GetWindowText hWnd, title, 256
+            If InStr(title, "Chrome") > 0 Then ' 確保窗口標題包含 "Chrome"
+                If IsIconic(hWnd) Or Not IsWindowVisible(hWnd) Then
+                    SetForegroundWindow hWnd
+                    SimulateKeyStroke VK_MENU ' 模擬按下 Alt 鍵
+                    SimulateKeyStroke VK_SPACE ' 模擬按下 Space 鍵
+                    SimulateKeyStroke VK_DOWN ' 模擬按下箭頭向下鍵
+                    SimulateKeyStroke VK_DOWN ' 再次模擬按下箭頭向下鍵
+                    SimulateKeyStroke VK_RETURN ' 模擬按下 Enter 鍵
+                    VBA.DoEvents ' 確保窗口已經顯示
+                    ShowWindow hWnd, SW_MAXIMIZE ' 最大化窗口
+                End If
+            End If
+        Else
+            MsgBox "Could not find Chrome window", vbCritical
+        End If
+    End If
+End Sub
+
+' 將 Chrome 瀏覽器設置為前端窗口並恢復最小化的窗口 20241204 Copilot大菩薩：這段程式碼現在同時檢查窗口是否最小化（IsIconic）以及是否可見（IsWindowVisible），並使用 ShowWindow 將其恢復。這樣即使 Chrome 瀏覽器在任務欄中或處於最小化狀態，程式碼都能將其恢復並設置為前台窗口。
+Sub ActivateChromeOK()
+    VBA.DoEvents
+    Dim hWnd As LongPtr
+    Dim title As String * 256
+
+    hWnd = FindWindow("Chrome_WidgetWin_1", vbNullString)
+    If hWnd <> 0 Then
+        GetWindowText hWnd, title, 256 '在這段程式碼中，我添加了 GetWindowText 函數來獲取窗口標題，然後使用 InStr 函數來檢查窗口標題是否包含 "Chrome"。這樣可以確保找到的窗口確實是 Chrome 瀏覽器，而不是其他應用程序，例如 Dropbox。
+                                            '可能是因為 FindWindow 函數在查找窗口時，偶爾會找到非目標應用程序的窗口，例如 Dropbox。為了解決這個問題，您可以嘗試通過窗口標題進一步篩選，以確保找到的是正確的 Chrome 瀏覽器窗口。
+        If InStr(title, "Chrome") > 0 Then ' 確保窗口標題包含 "Chrome"
+            If IsIconic(hWnd) Or Not IsWindowVisible(hWnd) Then
+                ShowWindowAsync hWnd, SW_RESTORE ' 恢復最小化或隱藏的窗口
+                VBA.DoEvents ' 確保窗口已經顯示
+                ShowWindow hWnd, SW_MAXIMIZE ' 最大化窗口
+            End If
+            SetForegroundWindow hWnd
+        End If
+    Else
+        hWnd = FindWindow(vbNullString, "Google Chrome")
+        If hWnd <> 0 Then
+            GetWindowText hWnd, title, 256
+            If InStr(title, "Chrome") > 0 Then ' 確保窗口標題包含 "Chrome"
+                If IsIconic(hWnd) Or Not IsWindowVisible(hWnd) Then
+                    ShowWindowAsync hWnd, SW_RESTORE ' 恢復最小化或隱藏的窗口
+                    VBA.DoEvents ' 確保窗口已經顯示
+                    ShowWindow hWnd, SW_MAXIMIZE ' 最大化窗口
+                End If
+                SetForegroundWindow hWnd
+            End If
+        Else
+            MsgBox "Could not find Chrome window", vbCritical
+        End If
+    End If
+End Sub
+
+' 將 Chrome 瀏覽器設置為前端窗口並恢復最小化的窗口
+Sub ActivateChrome_minim()
+    VBA.DoEvents
+    Dim hWnd As LongPtr
+    hWnd = FindWindow("Chrome_WidgetWin_1", vbNullString)
+    If hWnd <> 0 Then
+        If IsIconic(hWnd) Then ShowWindow hWnd, SW_RESTORE ' 恢復最小化的窗口
+        SetForegroundWindow hWnd
+    Else
+        hWnd = FindWindow(vbNullString, "Google Chrome")
+        If hWnd <> 0 Then
+            If IsIconic(hWnd) Then ShowWindow hWnd, SW_RESTORE ' 恢復最小化的窗口
+            SetForegroundWindow hWnd
+        Else
+            MsgBox "Could not find Chrome window", vbCritical
+        End If
+    End If
+End Sub
+
+' 將 Chrome 瀏覽器設置為前端窗口
+Sub ActivateChrome_noRestore()
     VBA.DoEvents
     Dim hWnd As LongPtr
     hWnd = FindWindow("Chrome_WidgetWin_1", vbNullString)
@@ -2336,9 +2469,9 @@ Function LookupShuowenOrg(x As String, Optional includingDuan As Boolean) As Str
             Set iwe = WD.FindElementByCssSelector("body > div.container.main > div > div.col-md-9.main-content.pull-right > div.row.paginator > div.col-md-4.info")
             GoSub iweNothingExitFunction
             'If iwe.Name = "楷書" Then
-            Dim msg As String
-            msg = iwe.GetAttribute("textContent")
-            If VBA.IsNumeric(VBA.Left(msg, 1)) Then '檢索結果訊息框第1個字是數字
+            Dim Msg As String
+            Msg = iwe.GetAttribute("textContent")
+            If VBA.IsNumeric(VBA.Left(Msg, 1)) Then '檢索結果訊息框第1個字是數字
                 '通常可能會以檢索結果清單中的第1筆為是，如「征」的結果第2個字「徵」，當係簡化字故
                 '今擴充為讓使用者輸入整數以指示要讀入的列，只要預設值為 1 即有等效的效果 20240928 creedit_with_Copilot大菩薩
                 Dim tb As SeleniumBasic.IWebElement
@@ -2365,7 +2498,7 @@ Function LookupShuowenOrg(x As String, Optional includingDuan As Boolean) As Str
 '                    Exit Function
 '                End If
 reInput:
-                r = VBA.InputBox(msg + vbCr + vbCr + _
+                r = VBA.InputBox(Msg + vbCr + vbCr + _
                     "檢索結果不止一筆，請輸入要插入第幾筆的說文資料？（正整數）", "請確認要讀入第幾筆的《說文》內容。預設值為 1 ", "1")
                 If VBA.IsNumeric(r) = False Then
                     Exit Function
@@ -3315,6 +3448,10 @@ Function GrabXiaoxueShangGuYin(w As String) As String
             Exit Function
         End If
     End If
+    
+    SeleniumOP.ActivateChrome
+    WD.SwitchTo.Window WD.CurrentWindowHandle
+    
     '「字形」輸入框
     Set iwe = WD.FindElementByCssSelector("#EudcFontChar")
     SetIWebElementValueProperty iwe, Selection.text
@@ -3445,10 +3582,10 @@ eH:
             If InStr(Err.Description, "invalid session id") Then
                 SystemSetup.killchromedriverFromHere
             Else
-                GoTo msg
+                GoTo Msg
             End If
         Case Else
-msg:
+Msg:
             MsgBox Err.Number + Err.Description
     End Select
 End Property
