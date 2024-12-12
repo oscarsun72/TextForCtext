@@ -1116,6 +1116,8 @@ namespace TextForCtext
                     如果您對 `HashSet` 有更多的興趣或有其他問題，請隨時告訴我。南無阿彌陀佛 🙏
              */
             // Function to remove punctuation marks from a string
+
+            DateTime dt = DateTime.Now;
             string RemovePunctuation(string text)
             {
                 var result = new List<char>();
@@ -1125,10 +1127,12 @@ namespace TextForCtext
                     {
                         result.Add(ch);
                     }
+
                 }
                 return new string(result.ToArray());
             }
 
+            bool error = false;
             // Function to find the adjusted position in punctuatedText
             //int FindAdjustedPosition(string text, string original, int pos, string before, string after)
             int FindAdjustedPosition(string text, int pos, string before, string after)
@@ -1139,6 +1143,15 @@ namespace TextForCtext
                 //while (adjustedPos + offset1 < text.Length)
                 //while ((adjustedPos + (before.Length + offset1)) < text.Length)
                 {
+                    if (DateTime.Now.Subtract(dt).TotalSeconds > 5)
+                    {
+                        if (!error)
+                        {
+                            Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("復原段落有誤，請注意！！");
+                            error = true;
+                        }
+                        return -1;
+                    }
                     // Process the 'before' part
                     string subText = text.Substring(adjustedPos - (before.Length + offset1), before.Length + offset1);
                     string subTextWithoutPunctuation = RemovePunctuation(subText);
@@ -1299,7 +1312,10 @@ namespace TextForCtext
 
             if (Form1.CountWordsinDomain("\r", originalText)
                 != Form1.CountWordsinDomain("\n", punctuatedText))
-                Debugger.Break();
+            {
+                Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("還原段落時出錯，請注意！！");
+                //Debugger.Break();
+            }
 
             //if (indentCount > 0)
             //{

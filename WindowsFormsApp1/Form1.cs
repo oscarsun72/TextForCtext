@@ -19,6 +19,7 @@ using System.Threading;
 //using Task = System.Threading.Tasks.Task;
 using System.Threading.Tasks;
 
+
 //using System.Windows;
 using System.Windows.Forms;
 using TextForCtext;
@@ -2135,6 +2136,16 @@ namespace WindowsFormsApp1
                     }
 
                     AITShenShenWikiPunct(ref x); x = x.Replace("“", "「").Replace("”", "」").Replace("‘", "『").Replace("’", "』");
+
+                    if (driver.Url != textBox3Text)
+                    {
+                        for (int i = driver.WindowHandles.Count - 1; i > -1; i--)
+                        {
+                            driver.SwitchTo().Window(driver.WindowHandles[i]);
+                            if (driver.Url == textBox3Text) break;
+                        }
+                    }
+
                     //檢查原文是否遭篡改！20241126
                     int punctsCntr = 0;
                     string originalPure = original;
@@ -2150,7 +2161,10 @@ namespace WindowsFormsApp1
                         {
                             if (x.Substring(i, 1) != originalPure.Substring(i - punctsCntr, 1))
                             {
-                                Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("原文已遭篡改，請檢查！");
+                                Clipboard.SetText((char.IsHighSurrogate(x.Substring(i, 1).ToCharArray()[0]) ? x.Substring(i, 2) : x.Substring(i, 1)).ToString());
+                                Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("原文已遭篡改，請檢查！" + Environment.NewLine + Environment.NewLine
+                                        + x.Substring(i, 1).ToString() + Environment.NewLine +
+                                            originalPure.Substring(i - punctsCntr, 1).ToString());
                                 AvailableInUseBothKeysMouse();
                                 return;
                             }
@@ -2616,7 +2630,14 @@ namespace WindowsFormsApp1
                     undoRecord();
                     overtypeModeSelectedTextSetting(ref textBox1);
                     textBox1OriginalText = textBox1.Text; selStart = textBox1.SelectionStart; selLength = textBox1.SelectionLength;
-                    if (textBox1.SelectedText != string.Empty) Clipboard.SetText(textBox1.SelectedText);
+                    if (textBox1.SelectedText != string.Empty)
+                        try
+                        {
+                            Clipboard.SetText(textBox1.SelectedText);
+                        }
+                        catch (Exception)
+                        {
+                        }
                     ////插件/取代模式不同處理
                     //char nextChar;
                     //if (selStart + selLength + 1 <= textBox1.TextLength)
@@ -3713,50 +3734,51 @@ namespace WindowsFormsApp1
                 if (e.KeyCode == Keys.Insert)
                 {//Alt + Insert ：將剪貼簿的文字內容讀入textBox1中;若在手動鍵入輸入模式下則自動加上書名號篇名號
                     e.Handled = true;
-                    int s = textBox1.SelectionStart;
+                    int s = textBox1.SelectionStart; string x = textBox1.Text;
                     caretPositionRecord();
-                    string clpTxt = Clipboard.GetText();
-                    if (clpTxt.StartsWith("http"))
-                    {
-                        playSound(soundLike.warn);
-                        clpTxt = textBox1.Text;
-                    }
-                    if (keyinTextMode && clpTxt != ClpTxtBefore)// &&clpTxt.IndexOf("《") == -1 && clpTxt.IndexOf("〈") == -1 && clpTxt.IndexOf("·") == -1)//之前是沒有優化 booksPunctuation 才需要避免已經標點過的又標，現在有正則表達式把關，就沒有這問題了。感恩感恩　讚歎讚歎　chatGPT大菩薩+Bing大菩薩 南無阿彌陀佛
-                    {
-                        bool gjcoolocrResultManual = clpTxt.IndexOf(Environment.NewLine + Environment.NewLine) > -1;
-                        if (gjcoolocrResultManual) clpTxt = clpTxt.Replace(Environment.NewLine + Environment.NewLine, Environment.NewLine);
-                        //if (!ocrTextMode)
-                        //{
-                        textBox1.Text = clpTxt;
-                        //clearBracketsInsidePairsBrackets();
-                        clpTxt = textBox1.Text;
-                        textBox1.Text = CnText.BooksPunctuation(ref clpTxt, true);
-                        //}
-                        if (gjcoolocrResultManual)
-                        {
-                            if (br.driver != null)
-                            {
-                                try
-                                {
-                                    br.driver.SwitchTo().Window(br.driver.CurrentWindowHandle);
-                                    SendKeys.Send("%r");
-                                    Thread.Sleep(550);
-                                    //br.driver.SwitchTo().Alert().SendKeys(OpenQA.Selenium.Keys.Space);
-                                    br.driver.SwitchTo().Alert().Accept();
-                                    //SendKeys.Send(" ");
+                    //string clpTxt = Clipboard.GetText();
+                    //if (clpTxt.StartsWith("http"))
+                    //{
+                    //    playSound(soundLike.warn);
+                    //    clpTxt = textBox1.Text;
+                    //}
+                    //if (keyinTextMode && clpTxt != ClpTxtBefore)// &&clpTxt.IndexOf("《") == -1 && clpTxt.IndexOf("〈") == -1 && clpTxt.IndexOf("·") == -1)//之前是沒有優化 booksPunctuation 才需要避免已經標點過的又標，現在有正則表達式把關，就沒有這問題了。感恩感恩　讚歎讚歎　chatGPT大菩薩+Bing大菩薩 南無阿彌陀佛
+                    //{
+                    //bool gjcoolocrResultManual = clpTxt.IndexOf(Environment.NewLine + Environment.NewLine) > -1;
+                    //if (gjcoolocrResultManual) clpTxt = clpTxt.Replace(Environment.NewLine + Environment.NewLine, Environment.NewLine);
+                    ////if (!ocrTextMode)
+                    ////{
+                    //textBox1.Text = clpTxt;
+                    ////clearBracketsInsidePairsBrackets();
+                    //clpTxt = textBox1.Text;
+                    //textBox1.Text = CnText.BooksPunctuation(ref clpTxt, true);
+                    textBox1.Text = CnText.BooksPunctuation(ref x, true);
+                    //}
+                    //if (gjcoolocrResultManual)
+                    //    {
+                    //        if (br.driver != null)
+                    //        {
+                    //            try
+                    //            {
+                    //                br.driver.SwitchTo().Window(br.driver.CurrentWindowHandle);
+                    //                SendKeys.Send("%r");
+                    //                Thread.Sleep(550);
+                    //                //br.driver.SwitchTo().Alert().SendKeys(OpenQA.Selenium.Keys.Space);
+                    //                br.driver.SwitchTo().Alert().Accept();
+                    //                //SendKeys.Send(" ");
 
-                                    playSound(soundLike.exam);
-                                    //Activate();
-                                    bringBackMousePosFrmCenter();
-                                }
-                                catch (Exception)
-                                {
-                                    //throw;
-                                }
-                            }
-                        }
-                    }
-                    else textBox1.Text = clpTxt;
+                    //                playSound(soundLike.exam);
+                    //                //Activate();
+                    //                bringBackMousePosFrmCenter();
+                    //            }
+                    //            catch (Exception)
+                    //            {
+                    //                //throw;
+                    //            }
+                    //        }
+                    //    }
+                    //}
+                    //else textBox1.Text = clpTxt;
                     dragDrop = false;
                     AvailableInUseBothKeysMouse();
                     if (s > 0) restoreCaretPosition(textBox1, s, 0);
@@ -4087,9 +4109,15 @@ namespace WindowsFormsApp1
                     textBox1.Text = CnText.RemarkBooksPunctuation(ref x);
                 else
                     textBox1.Text = CnText.BooksPunctuation(ref x);
-                //將頁面移至頂端，以便校對輸入時檢視
-                if (br.driver.Url != textBox3.Text)
-                    br.GoToUrlandActivate(br.driver.Url, true);
+                try
+                {
+                    //將頁面移至頂端，以便校對輸入時檢視
+                    if (br.driver.Url != textBox3.Text)
+                        br.GoToUrlandActivate(br.driver.Url, true);
+                }
+                catch (Exception)
+                {
+                }
             }
             bringBackMousePosFrmCenter();
             //ResumeEvents();
@@ -10279,7 +10307,8 @@ namespace WindowsFormsApp1
                                                                                    //{
                                                                                    //    chk = quickedit_data_textboxTxt.Contains("，") || quickedit_data_textboxTxt.Contains("。");
                                                                                    //}
-                if (CnText.HasEditedWithPunctuationMarks(ref quickedit_data_textboxTxt))
+                if (CnText.HasEditedWithPunctuationMarks(ref quickedit_data_textboxTxt) ||
+                    quickedit_data_textboxTxt.Contains("picture") || quickedit_data_textboxTxt.Contains("entity"))
                 {
                     OCRBreakSoundNotification();
                     if (DialogResult.Cancel == Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("目前頁面似乎已經整理過了，確定還要繼續嗎？" +
@@ -10436,35 +10465,33 @@ namespace WindowsFormsApp1
             if (!ocrResult)
             {
                 MessageBox.Show("請重來一次；重新執行一次。感恩感恩　南無阿彌陀佛", "發生錯誤", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
-                //if (!Visible) Visible = true;
-                //br.driver.SwitchTo().Window(br.driver.WindowHandles[br.driver.WindowHandles.Count-1]);
-                try
-                {
-                    bool eventenable = _eventsEnabled;
-                    if (EventsEnabled) PauseEvents();
-                    //br.driver?.SwitchTo().Window(currentWindowHndl);
-                    if (Clipboard.GetText() != string.Empty)
-                    {
-                        playSound(soundLike.waiting);
-                        AvailableInUseBothKeysMouse();
-                        SendKeys.SendWait("%{ins}");//Alt + Insert
-                        textBox1.Select(0, 0);
-                    }
-                    else
-                    {
-                        SendKeys.Send("%r");//Alt + r 關閉Chrome瀏覽器右邊所有分頁
-                    }
+                //try
+                //{
+                //    bool eventenable = _eventsEnabled;
+                //    if (EventsEnabled) PauseEvents();
+                //    //br.driver?.SwitchTo().Window(currentWindowHndl);
+                //    if (Clipboard.GetText() != string.Empty)
+                //    {
+                //        playSound(soundLike.waiting);
+                //        AvailableInUseBothKeysMouse();
+                //        SendKeys.SendWait("%{ins}");//Alt + Insert
+                //        textBox1.Select(0, 0);
+                //    }
+                //    else
+                //    {
+                //        SendKeys.Send("%r");//Alt + r 關閉Chrome瀏覽器右邊所有分頁
+                //    }
 
-                    _eventsEnabled = eventenable;
-                }
-                catch (Exception)
-                {
-                    //br.WindowsScrolltoTop();
-                    br.StopOCR = true;
-                    return false;
-                    //throw;
-                }
+                //    _eventsEnabled = eventenable;
+                //}
+                //catch (Exception)
+                //{
+                //    //br.WindowsScrolltoTop();
+                //    br.StopOCR = true;
+                //    return false;                    
+                //}
             }
+
             //WindowState = FormWindowState.Normal;
             //Visible = true; TopMost = true;
 

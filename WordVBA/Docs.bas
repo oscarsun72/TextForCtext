@@ -5,7 +5,7 @@ Public AutoCopy As Boolean
 'https://learn.microsoft.com/en-us/office/vba/word/concepts/objects-properties-methods/using-events-with-the-application-object-word
 Public Sub Register_Event_Handler() '使自設物件類別模組有效的登錄程序.見「使用 Application 物件 (Application Object) 的事件」
     If x Is Nothing Or Not x.App Is word.Application Then
-        SystemSetup.playSound 4
+        SystemSetup.playSound 0.96
         Set x.App = word.Application '此即使新建的物件與Word.Application物件作上關聯
     End If
 End Sub
@@ -1542,7 +1542,7 @@ Sub mark易學關鍵字Doc()
     SystemSetup.playSound 0.484
     SystemSetup.stopUndo ur, "mark易學關鍵字Doc"
     For Each d In word.Documents
-        If d.Name = "TextForCtextWordVBA.dotm" Then
+        If d.Name = "TextForCtext-WordVBA.dotm" Then
             If MsgBox("是否要更新易學關鍵字的字典物件內容？", vbOKCancel) = VBA.vbOK Then
                 Keywords.ClearDicts_YiKeywords
             End If
@@ -1777,7 +1777,7 @@ eH:
                 If InStr(Err.Description, "陣列索引超出範圍") Then
                     GoTo mark
                 Else
-                    GoTo msg:
+                    GoTo Msg:
                 End If
             Case -2146233088 'unknown error: unhandled inspector error: {"code":-32000,"message":"Browser window not found"}
                               '(Session info: chrome=126.0.6478.127)
@@ -1785,7 +1785,7 @@ eH:
                     GoTo mark
                 End If
             Case Else
-msg:
+Msg:
                 MsgBox Err.Number & Err.Description
         End Select
 End Sub

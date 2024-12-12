@@ -21,7 +21,7 @@ Public Declare PtrSafe Function ShellExecute Lib "shell32.dll" Alias "ShellExecu
   ByVal lpParameters As String, ByVal lpDirectory As String, _
   ByVal nShowCmd As Long) As Long 'https://www.mrexcel.com/board/threads/vba-api-call-issues-with-show-window-activation.920147/
 Public Declare PtrSafe Function ShowWindow Lib "user32" _
-  (ByVal hWnd As Long, ByVal nCmdSHow As Long) As Long
+  (ByVal hWnd As Long, ByVal nCmdShow As Long) As Long
 'Public Declare PtrSafe Function FindWindow Lib "user32" Alias "FindWindowA" _
 '  (ByVal lpClassName As String, ByVal lpWindowName As String) As Long
 '
@@ -572,8 +572,8 @@ Sub backupNormal_dotm() '自動備份Normal.dotm
     Source = SystemSetup.WordTemplatesPathIncldBackSlash + "Normal.dotm"
     Destination = SystemSetup.DropBoxPathIncldBackSlash + "Normal.dotm"
     If VBA.Dir(Destination) <> vbNullString Then GoSub backup:
-    Source = SystemSetup.WordStartupPathIncldBackSlash + "TextForCtextWordVBA.dotm"
-    Destination = SystemSetup.DropBoxPathIncldBackSlash + "TextForCtextWordVBA.dotm"
+    Source = SystemSetup.WordStartupPathIncldBackSlash + "TextForCtext-WordVBA.dotm"
+    Destination = SystemSetup.DropBoxPathIncldBackSlash + "TextForCtext-WordVBA.dotm"
     If VBA.Dir(Destination) <> vbNullString Then GoSub backup:
     Exit Sub
 

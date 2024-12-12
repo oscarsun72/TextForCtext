@@ -33,6 +33,8 @@ using System.Windows.Forms;
 using WebSocketSharp;
 using WindowsFormsApp1;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.Button;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.Tab;
+
 
 
 //using static System.Net.Mime.MediaTypeNames;
@@ -5084,8 +5086,10 @@ internal static string getImageUrl() {
                 }
                 Thread.Sleep(800);
             }
-        #endregion //以上檢查並刪除文件
+            #endregion //以上檢查並刪除文件
 
+            //等待書圖檔下載完成
+            DateTime dt = DateTime.Now;
 
         reUpload:
             //按下「上傳」
@@ -5095,14 +5099,21 @@ internal static string getImageUrl() {
             driver.SwitchTo().Window(driver.CurrentWindowHandle);
             //按下「上傳圖片」
             //iwe = waitFindWebElementBySelector_ToBeClickable("#File > div.d-flex.justify-content-between.mt-2 > div.d-flex.mx-3 > div:nth-child(1) > div > ul > li:nth-child(3) > a");
-            iwe = waitFindWebElementBySelector_ToBeClickable("#File > div.d-flex.justify-content-between.mt-2 > div.d-flex.mx-3 > div:nth-child(1) > div > ul > li:nth-child(4) > a");            
-            iwe.Click();
+
+            iwe = waitFindWebElementBySelector_ToBeClickable("#File > div.d-flex.justify-content-between.mt-2 > div.d-flex.mx-3 > div:nth-child(1) > div > ul > li:nth-child(4) > a");
+            try
+            {
+                iwe.Click();
+            }
+            catch (Exception)
+            {
+                StopOCR = true;
+                return false;
+            }
 
             //clickCopybutton_GjcoolFastExperience(new Point(iwe.Location.X + 76 + (iwe.Size.Width) / 2, iwe.Location.Y + 120 + (iwe.Size.Height) / 2));//new Point(X, Y)=「選擇檔案」控制項之位置
             //iwe.Click();
 
-            //等待書圖檔下載完成
-            DateTime dt = DateTime.Now;
             while (!File.Exists(downloadImgFullName))
             {
                 if (DateTime.Now.Subtract(dt).TotalSeconds > 38)
@@ -8561,7 +8572,7 @@ internal static string getImageUrl() {
                 "初九","九二","九三","九四","九五","上九","初六","六二","六三","六四","六五","上六","用九","用六", "繇辭","繇詞","往吝","往遴",
                 "伏羲","庖羲","庖𦏁","宓𦏁","宓羲","宓犧","伏犧","庖犧","中正","見龍在田","括囊","噬膚","舊井","井谷","為麗","離麗","天行健",
                 "隨時之義","來復","庖有魚","包有魚","精義入神","豶豕","童牛","承之羞","雷在天上","錫馬", "蕃庶","晝日","三接","懲忿","窒欲","窒慾","敬以直內","義以方外","迷後得主","利西南","品物咸章","天下大行","益動而", "日進無疆","頻巽","豚魚","頻復", "懲窒","閑邪","存誠","乾乾","悔吝","憧憧", "類萬物","柔順利貞","比之匪人","貞厲","履貞","履道坦坦","貞吉","貞凶","悔亡","時義","健順", "內健而外順", "內健外順", "外順而內健", "外順內健","敦復","直方","開物成務","窮神知化", "夕惕","惕若","研幾極深","極深研幾","研幾","一陰一陽","允升","木上有水","勞民勸相","索而得","我有好爵","言有序","有聖人之道四","長子帥師","弟子輿尸","無悶","日用而不知", "日用不知","之道鮮","原始反終", "然不動", "感而遂通","朋從", "朋盍", "容民畜眾","有過則改","見善則遷","養正","養賢","知臨","臨大君", "默而成之","黙而成之","不言而信", "存乎德行","通天下之志","履正", "繼之者善", "仁者見之", "知者見之", "智者見之","屯其膏", "貞不字","翰音","鶾音", "善不積","立成器", "與地之","變化云為","神道設教",
-                "象義","大貞","小貞", "帝出乎震","帝出於震","帝出于震","敬義", "日新","與時偕行","盈虛","山澤通氣","豐亨",",居業","確乎", "碻乎","天在山中", "多識前言往行", "蹇蹇", "匪躬","洗心","龍德","慎言語","節飲食","艮其限","乃孚","幹父","裕父","係遯","甘臨","號咷", "風行水上",
+                "象義","大貞","小貞", "帝出乎震","帝出於震","帝出于震","敬義", "日新","與時偕行","盈虛","山澤通氣","豐亨","居業","確乎", "碻乎","天在山中", "多識前言往行", "蹇蹇", "匪躬","洗心","龍德","慎言語","節飲食","艮其限","乃孚","幹父","裕父","係遯","甘臨","號咷", "風行水上",
                 "終難","咸之九五","賁於丘園","賁于丘園","賁於邱園","立人之道","賁于邱園", "束帛","戔戔", "損下以益上", "其腓","菑畬","葘畬", "損下益上", "損下而益上", "貳用缶","納約自牖","利見大人", "何思何慮","同歸而殊塗","一致而百慮", "同歸殊塗","一致百慮","先天後天","改命吉","天下雷行","喪貝","羝羊","羝芉", "觸藩", "觸籓","事不密","艱貞","金矢","利有","攸往","包蒙", "童蒙", "蒙吉","不事王侯","高尚其事",
                 "精氣為物","游魂為變","遊䰟為變","游䰟為變", "不家食","漣如","威如","焚如","知幾","禴祭", "東鄰","朋亡", "渙其群","有子考","甲三日","庚三日","不易乎世","不成乎名","天一地二","者其辭","升其高陵","天道虧盈","鞏用", "祗悔", "祇悔","秖悔","秪悔","履霜","蒞眾","理財", "正辭", "禁民為非","撝謙", "浚恒","浚恆", "立其誠","立誠","修辭立誠","開國承家",
                 "寬以居之","確乎其不可拔","碻乎其不可拔"
@@ -9408,10 +9419,14 @@ internal static string getImageUrl() {
                     DriverNew();
                 else
                     driver.SwitchTo().Window(driver.WindowHandles.Last());
+                openNewTabWindow();
             }
             else
+            {
                 LastValidWindow = driver.CurrentWindowHandle;
-            openNewTabWindow();
+                driver.SwitchTo().Window(driver.WindowHandles.Last());
+                if (driver.Url != "https://t.shenshen.wiki/") openNewTabWindow();
+            }
             driver.Navigate().GoToUrl("https://t.shenshen.wiki/");
             //標點
             IWebElement iwe = waitFindWebElementBySelector_ToBeClickable("#nav-biaodian-tab", 5);
@@ -9436,7 +9451,7 @@ internal static string getImageUrl() {
             iwe = waitFindWebElementBySelector_ToBeClickable("#output-content");
             if (iwe == null) return false;
             x = iwe.GetAttribute("textContent").Replace("□", "􏿽");
-            driver.Close();//不關閉，以手動評量其標點良窳
+            //driver.Close();//不關閉，以手動評量其標點良窳
             driver.SwitchTo().Window(LastValidWindow);
             return true;
         }
@@ -10702,15 +10717,35 @@ internal static string getImageUrl() {
                 }
             }
             DateTime dt = DateTime.Now;
-            IWebElement iwe = null;
+            IWebElement iwe = null; ReadOnlyCollection<IWebElement> iwes = driver.FindElements(By.TagName("IMG"));
             if (!inside)
             {
                 while (iwe == null)
                 {
                     if (free)
-                        iwe = waitFindWebElementBySelector_ToBeClickable("body > table > tbody > tr:nth-child(2) > td > table > tbody > tr > td > table > tbody > tr:nth-child(4) > td > a:nth-child(8) > img");
+                    //iwe = waitFindWebElementBySelector_ToBeClickable("body > table > tbody > tr:nth-child(2) > td > table > tbody > tr > td > table > tbody > tr:nth-child(4) > td > a:nth-child(8) > img");
+                    //iwe = waitFindWebElementByName_ToBeClickable("免費使用", 2);
+                    {
+                        foreach (var item in iwes)
+                        {
+                            if (item.GetAttribute("alt") == "免費使用")
+                            {
+                                iwe = item; break;
+                            }
+                        }
+                    }
                     else
-                        iwe = waitFindWebElementBySelector_ToBeClickable("body > table > tbody > tr:nth-child(2) > td > table > tbody > tr > td > table > tbody > tr:nth-child(4) > td > a:nth-child(9) > img");
+                    {
+                        //iwe = waitFindWebElementBySelector_ToBeClickable("body > table > tbody > tr:nth-child(2) > td > table > tbody > tr > td > table > tbody > tr:nth-child(4) > td > a:nth-child(9) > img");
+                        //iwe = waitFindWebElementByName_ToBeClickable("授權使用", 2);
+                        foreach (var item in iwes)
+                        {
+                            if (item.GetAttribute("alt") == "授權使用")
+                            {
+                                iwe = item; break;
+                            }
+                        }
+                    }
                     if (DateTime.Now.Subtract(dt).TotalSeconds > 5) return false;
                     if (null != waitFindWebElementBySelector_ToBeClickable("#frmTitle > table > tbody > tr:nth-child(2) > td > table > tbody > tr:nth-child(1) > td > input[type=text]:nth-child(2)")) goto search;
                 }
