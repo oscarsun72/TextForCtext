@@ -22,6 +22,7 @@ Text for Ctext 是為了有效加速[《中國哲學書電子化計劃》](https
  > **不保留任何權利**，歡迎改寫應用到麥金塔(Mac)或 Linux 等作業系統環境中運行
 
     可安裝虛擬機在非 Windows 系統執行本軟件。詳見末所附諸演示，以 VirtualBox 為例。
+** **已知問題 20241214：** [Windows內建的防毒軟體會誤報 TextForCtextWordVBA.dotm 為病毒](https://www.facebook.com/oscarsun72/posts/pfbid02vwgziw3QZLAymWLDMgWEKwKs47JnxNKXwTouAYycF3qcFHV8dXPqwhgi79RyWS4il)，[請將此檔排除在防毒之外](https://github.com/GCuser99/SeleniumVBA/discussions/135?fbclid=IwY2xjawHJ3rpleHRuA2FlbQIxMQABHcMKvBigaNUE6kX9_LmLSzRZopaZaVtQXCQd3DJee3cO5hFAvRFVslKH2Q_aem_ftQWeFZgWHqtCVaaEamTZg#discussioncomment-11527987)。末學電腦MS Word因無法再掛載此檔，故改其名為 **TextForCtext-WordVBA.dotm**
 
 - 本軟件架構為以下三種操作模式（目前本人主要以sl模式在操作）：
   - 在textbox2輸入「ap,」「sl,」「sg,」，可切換瀏覽操作模式設定：

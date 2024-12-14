@@ -5112,6 +5112,18 @@ internal static string getImageUrl() {
             iwe = waitFindWebElementBySelector_ToBeClickable("#FileUploadDropdown");
             iwe.Click();
 
+            while (!File.Exists(downloadImgFullName))
+            {
+                if (DateTime.Now.Subtract(dt).TotalSeconds > 38)
+                {
+                    if (DialogResult.Cancel == Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("書圖下載完成了嗎？感恩感恩　南無阿彌陀佛　讚美主"))
+                    { StopOCR = true; return false; }
+                    else
+                        goto reClickUploadOK;
+                }
+            }
+
+            ChromeSetFocus();
             driver.SwitchTo().Window(driver.CurrentWindowHandle);
             //按下「上傳圖片」
             //iwe = waitFindWebElementBySelector_ToBeClickable("#File > div.d-flex.justify-content-between.mt-2 > div.d-flex.mx-3 > div:nth-child(1) > div > ul > li:nth-child(3) > a");
@@ -5130,16 +5142,6 @@ internal static string getImageUrl() {
             //clickCopybutton_GjcoolFastExperience(new Point(iwe.Location.X + 76 + (iwe.Size.Width) / 2, iwe.Location.Y + 120 + (iwe.Size.Height) / 2));//new Point(X, Y)=「選擇檔案」控制項之位置
             //iwe.Click();
 
-            while (!File.Exists(downloadImgFullName))
-            {
-                if (DateTime.Now.Subtract(dt).TotalSeconds > 38)
-                {
-                    if (DialogResult.Cancel == Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("書圖下載完成了嗎？感恩感恩　南無阿彌陀佛　讚美主"))
-                    { StopOCR = true; return false; }
-                    else
-                        goto reClickUploadOK;
-                }
-            }
             try
             {
                 Clipboard.SetText(downloadImgFullName);
