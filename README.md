@@ -401,6 +401,8 @@ Alt + shift + F12  ： 更新最後的備份頁文本
 
 Esc 則按下Esc鍵會隱藏到任務列（系統列）中；滑鼠在其 ico 圖示上滑過即恢復
 
+    > 如果textBox4的值是數字，應該表示在作《易》學關鍵字的檢索，因為WordVBA常須借用到表單，故不予隱藏，直接最小化視窗
+
 Ctrl + 1 ：執行 Word VBA Sub 巨集指令「漢籍電子文獻資料庫文本整理_以轉貼到中國哲學書電子化計劃」【 附件即有 [Word VBA](https://github.com/oscarsun72/TextForCtext/tree/master/WordVBA) 相關模組 】
 
 Ctrl + 3 ：執行 Word VBA Sub 巨集指令「漢籍電子文獻資料庫文本整理_十三經注疏」
@@ -444,6 +446,8 @@ Alt + pageup : 切換至 Chrome瀏覽器上一分頁 20241022
 Alt + pagedown : 切換至 Chrome瀏覽器上一分頁
 
 Ctrl + Shift + o 執行《看典古籍》OCR API ，執行 GetOCRResult 方法。（須將token存成「OCRAPItoken.txt」檔置於「我的文件\\CtextTempFiles」下，並在程式碼中覆寫本人帳號/郵箱。）
+
+     可按下Ctrl鍵中斷！！20241213
 
 Ctrl + Shift + w 關閉 Chrome 網頁視窗
 

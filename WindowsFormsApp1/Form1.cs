@@ -2137,6 +2137,7 @@ namespace WindowsFormsApp1
 
                     AITShenShenWikiPunct(ref x); x = x.Replace("“", "「").Replace("”", "」").Replace("‘", "『").Replace("’", "』");
 
+                    //回到之前的分頁頁籤
                     if (driver.Url != textBox3Text)
                     {
                         for (int i = driver.WindowHandles.Count - 1; i > -1; i--)
@@ -2147,31 +2148,7 @@ namespace WindowsFormsApp1
                     }
 
                     //檢查原文是否遭篡改！20241126
-                    int punctsCntr = 0;
-                    string originalPure = original;
-                    foreach (var item in PunctuationsNum + "{}　")//先略過注文標記及空格
-                    {
-                        //if (item.ToString() == "：") Debugger.Break();
-                        originalPure = originalPure.Replace(item.ToString(), string.Empty);
-                    }
-                    originalPure = originalPure.Replace(Environment.NewLine, string.Empty);
-                    for (int i = 0; i < x.Length; i++)
-                    {
-                        if (Form1.PunctuationsNum.IndexOf(x.Substring(i, 1).ToString()) == -1)
-                        {
-                            if (x.Substring(i, 1) != originalPure.Substring(i - punctsCntr, 1))
-                            {
-                                Clipboard.SetText((char.IsHighSurrogate(x.Substring(i, 1).ToCharArray()[0]) ? x.Substring(i, 2) : x.Substring(i, 1)).ToString());
-                                Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("原文已遭篡改，請檢查！" + Environment.NewLine + Environment.NewLine
-                                        + x.Substring(i, 1).ToString() + Environment.NewLine +
-                                            originalPure.Substring(i - punctsCntr, 1).ToString());
-                                AvailableInUseBothKeysMouse();
-                                return;
-                            }
-                        }
-                        else
-                            punctsCntr++;
-                    }
+                    if (IsTextModified(x, original)) AvailableInUseBothKeysMouse();
 
                     CnText.RestoreParagraphs(original, ref x);
                     textBox1.SelectedText = preSpaces + CnText.BooksPunctuation(ref x, true);
@@ -4039,6 +4016,86 @@ namespace WindowsFormsApp1
                 #endregion
             }
         }
+
+        /// <summary>
+        /// 檢查原文是否已遭篡改
+        /// </summary>
+        /// <param name="x">要檢查的文本</param>
+        /// <param name="original">原文</param>
+        /// <returns>遭篡改則傳回true</returns>
+        internal static bool IsTextModified(string x, string original)
+        {
+            int punctsCntr = 0;
+            string originalPure = original;
+            foreach (var item in PunctuationsNum + "{}　")//先略過注文標記及空格
+            {
+                //if (item.ToString() == "：") Debugger.Break();
+                originalPure = originalPure.Replace(item.ToString(), string.Empty);
+            }
+            originalPure = originalPure.Replace(Environment.NewLine, string.Empty);
+            bool result = false;
+            StringInfo xSI = new StringInfo(x);
+            StringInfo originalPureSI = new StringInfo(originalPure);
+
+            for (int i = 0; i < xSI.LengthInTextElements; i++)
+            {
+                if (xSI.SubstringByTextElements(i) == "□" ||
+                    xSI.SubstringByTextElements(i) == "􏿽") Debugger.Break();
+                if (Form1.PunctuationsNum.IndexOf(xSI.SubstringByTextElements(i, 1)) == -1)
+                {
+                    string originalTxt = originalPureSI.SubstringByTextElements(i - punctsCntr, 1),
+                            modifiedTxt = xSI.SubstringByTextElements(i, 1);
+                    if (modifiedTxt != originalTxt)
+                    {
+                        Clipboard.SetText("「" + originalTxt + "」被篡改成「" + modifiedTxt.Replace("􏿽", "□") + "」！！！阿彌陀佛");
+                        result = true;
+                        if (Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly(
+
+                            "原文已遭篡改，請檢查！" + Environment.NewLine + Environment.NewLine
+                                + "被改成：  " + modifiedTxt
+                                + Environment.NewLine
+                                + "原來是：  " +
+                                originalTxt
+                                ) == DialogResult.Cancel)
+                            break;
+                    }
+                }
+                else
+                    punctsCntr++;
+            }
+
+            //for (int i = 0; i < x.Length; i++)
+            //{
+            //    if (Form1.PunctuationsNum.IndexOf(x.Substring(i, 1).ToString()) == -1)
+            //    {
+            //        if (x.Substring(i, 1) != originalPure.Substring(i - punctsCntr, 1))
+            //        {
+            //            //Clipboard.SetText((char.IsHighSurrogate(x.Substring(i, 1).ToCharArray()[0]) ? x.Substring(i, 2) : x.Substring(i, 1)).ToString());
+            //            string originalTxt = char.IsHighSurrogate(originalPure.Substring(i - punctsCntr, 1).ToCharArray()[0]) ? originalPure.Substring(i - punctsCntr, 2) : originalPure.Substring(i - punctsCntr, 1),
+            //                modifiedTxt = x.Substring(i, 1);
+            //            //(char.IsHighSurrogate(x.Substring(i, 1).ToCharArray()[0]) ? x.Substring(i, 2) : x.Substring(i, 1)).ToString();
+            //            //char.IsHighSurrogate(x.Substring(i, 1).ToString().ToCharArray()[0]) ? x.Substring(i, 2) : x.Substring(i, 1);
+
+            //            Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(
+
+            //                "原文已遭篡改，請檢查！" + Environment.NewLine + Environment.NewLine
+            //                    + "被改成：  " + modifiedTxt
+            //                    + Environment.NewLine
+            //                    + "原來是：  " +
+            //                    originalTxt
+            //                    );
+            //            Clipboard.SetText("「" + originalTxt + "」被篡改成「" + modifiedTxt + "」！！！阿彌陀佛");
+            //            result= true;
+            //        }
+            //    }
+            //    else
+            //        punctsCntr++;
+            //}
+
+
+            return result;
+        }
+
         /// <summary>
         /// 在textBox1選取1個字
         /// </summary>
@@ -9810,10 +9867,19 @@ namespace WindowsFormsApp1
                 {//按下 Esc鍵
                     e.Handled = true;
                     if (!textBox4.Focused && !textBox2.Focused)
-                        if (MessageBoxShowOKCancelExclamationDefaultDesktopOnly("將表單隱藏到系統任務列中？") == DialogResult.OK)
-                            hideToNICo();
+                    {
+                        if (!textBox4.Text.IsNullOrEmpty() && int.TryParse(textBox4.Text, out int i))
+                        {//如果在檢索《易》學關鍵字 20241212
+                            this.WindowState = FormWindowState.Minimized;
+                        }
                         else
-                            AvailableInUseBothKeysMouse();
+                        {
+                            if (MessageBoxShowOKCancelExclamationDefaultDesktopOnly("將表單隱藏到系統任務列中？") == DialogResult.OK)
+                                hideToNICo();
+                            else
+                                AvailableInUseBothKeysMouse();
+                        }
+                    }
                     return;
                     //if (textBox1.Text == "")
                     ////預設為最上層顯示，若textBox1值為空，則按下Esc鍵會隱藏到任務列中；點一下即恢復
@@ -10825,6 +10891,8 @@ namespace WindowsFormsApp1
             if (!Form1.IsValidUrl＿ImageTextComparisonPage(url)) return false;
             if (br.driver == null) return false;
             string baseUrl = url.Substring(0, url.IndexOf("&page="));
+            ChromeSetFocus();
+            driver.SwitchTo().Window(driver.CurrentWindowHandle);
             for (int i = startPageNum + 1; i <= stopPageNum; i++)
             {
                 //https://ctext.org/library.pl?if=gb&file=150025&page=59
@@ -14877,6 +14945,8 @@ namespace WindowsFormsApp1
             br.driver.SwitchTo().Window(br.GetCurrentWindowHandle(br.driver));
             while (!File.Exists(imagePath))
             {
+                //可按下Ctrl鍵中斷！！20241213
+                if(ModifierKeys==Keys.Control) return false;
                 if (DateTime.Now.Subtract(dt).TotalSeconds > 20)
                     if (MessageBoxShowOKCancelExclamationDefaultDesktopOnly("書圖下載尚未完成，是否繼續？") == DialogResult.Cancel)
                         return false;

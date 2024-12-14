@@ -1602,6 +1602,8 @@ namespace TextForCtext
                     return driver;
                 else
                 {
+                    if (Form1.browsrOPMode == Form1.BrowserOPMode.seleniumNew)
+                        Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("請重新在textBox2下「br」或「bb」的指令以啟動chromedriver。感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主");
                     //Debugger.Break();
                     return null;
                 }
@@ -3123,7 +3125,21 @@ internal static string getImageUrl() {
         /// </summary>
         internal static void killchromedriverFromHere()
         {
-            Process[] processInstances = Process.GetProcessesByName("chromedriver");
+            if (chromedriversPID == null || chromedriversPID.Count == 0) return;
+            Process[] processInstances = null;
+            try
+            {
+                processInstances = Process.GetProcessesByName("chromedriver");
+                if (processInstances.Count() == 0)
+                {
+                    chromedriversPID.Clear();
+                    return;
+                }
+            }
+            catch (Exception)
+            {
+                return;
+            }
             foreach (var processInstance in processInstances)
             {
                 try
@@ -5118,7 +5134,7 @@ internal static string getImageUrl() {
             {
                 if (DateTime.Now.Subtract(dt).TotalSeconds > 38)
                 {
-                    if (DialogResult.Cancel == Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("是否上傳完成？"))
+                    if (DialogResult.Cancel == Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("書圖下載完成了嗎？感恩感恩　南無阿彌陀佛　讚美主"))
                     { StopOCR = true; return false; }
                     else
                         goto reClickUploadOK;
@@ -5141,8 +5157,9 @@ internal static string getImageUrl() {
 
 
             //輸入：檔案名稱 //SendKeys.Send(downloadImgFullName);
-            SendKeys.SendWait("+{Insert}~");//or "^v"
-            //SendKeys.SendWait("{ENTER}");
+            SendKeys.SendWait("+{Insert}");//or "^v"
+            Thread.Sleep(250);
+            SendKeys.SendWait("{ENTER}");
             //Clipboard.Clear();
 
 
@@ -6999,6 +7016,7 @@ internal static string getImageUrl() {
             bool returnFalse = false;
             driver = driver ?? DriverNew();
             string currentWindowHndl = driver.CurrentWindowHandle;
+        reNavigate:
             const string gjCool = "https://gj.cool/";
             //openNewTabWindow(WindowType.Window);
             try
@@ -7038,6 +7056,20 @@ internal static string getImageUrl() {
             {
                 switch (ex.HResult)
                 {
+                    case -2146233088:
+                        if (ex.Message.StartsWith("timeout: Timed out receiving message from renderer: "))//timeout: Timed out receiving message from renderer: 3.559
+                                                                                                          //(Session info: chrome = 130.0.6723.70)
+                        {
+                            if (driver.Manage().Timeouts().PageLoad < new TimeSpan(0, 2, 0))
+                            {
+                                driver.Manage().Timeouts().PageLoad = driver.Manage().Timeouts().PageLoad.Add(new TimeSpan(0, 1, 0));
+                                goto reNavigate;
+                            }
+                            else
+                                goto default;
+                        }
+                        else
+                            goto default;
                     default:
                         string msgText = ex.HResult.ToString() + ex.Message;
                         Console.WriteLine(msgText);
@@ -7099,7 +7131,7 @@ internal static string getImageUrl() {
             //貼上圖檔全名
             //byte tryTimes = 1;
             SendKeys.Send("+{Insert}~");//or "^v"
-            //SendKeys.Send("{ENTER}");
+                                        //SendKeys.Send("{ENTER}");
 
             Form1.playSound(Form1.soundLike.processing);
 
@@ -7185,9 +7217,9 @@ internal static string getImageUrl() {
                 //Form1.playSound(Form1.soundLike.info);
 
                 if (Copybutton_GjcoolFastExperience_Location.IsEmpty) Copybutton_GjcoolFastExperience_Location = new Point(copyBtnPosX, copyBtnPosY);//Copybutton_GjcoolFastExperience_Location = new Point(835, 711);
-                //copyBtnPos = new Point(838, 711);
+                                                                                                                                                     //copyBtnPos = new Point(838, 711);
                 copyBtnPos = Copybutton_GjcoolFastExperience_Location;//new Point(835, 730);
-                //copyBtnPos = new Point(copyBtnPosX, copyBtnPosY);//複製按鈕的位置：20231106
+                                                                      //copyBtnPos = new Point(copyBtnPosX, copyBtnPosY);//複製按鈕的位置：20231106
                 DateTime dtMax = DateTime.Now;
                 //while (Clipboard.GetText() == string.Empty && !StopOCR && !trafficLimit)
                 //{//先取消20240223
@@ -8253,7 +8285,7 @@ internal static string getImageUrl() {
                 if (DateTime.Now.Subtract(dt).TotalSeconds > 8) if (Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("還沒找到「標點」按鈕，是否繼續？") == DialogResult.Cancel) return false;
             }
             iwe.Click();//Thread.Sleep(640);//非得要等一會才能成功！//自動標點會清除全形空格
-            //iwe.SendKeys(OpenQA.Selenium.Keys.Enter);//不能互動，會出現錯誤
+                        //iwe.SendKeys(OpenQA.Selenium.Keys.Enter);//不能互動，會出現錯誤
             iwe = waitFindWebElementBySelector_ToBeClickable("#PunctArea");
             dt = DateTime.Now; bool reClickFlag = false;
             //等待OCR結果
@@ -8365,8 +8397,8 @@ internal static string getImageUrl() {
                 if (DateTime.Now.Subtract(dt).TotalSeconds > 8) if (Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("還沒找到「標點」按鈕，是否繼續？") == DialogResult.Cancel) return false;
             }
             iwe.Click();//Thread.Sleep(640);//非得要等一會才能成功！
-            //iwe.SendKeys(OpenQA.Selenium.Keys.Enter);//不能互動，會出現錯誤
-            //標點結果文本框
+                        //iwe.SendKeys(OpenQA.Selenium.Keys.Enter);//不能互動，會出現錯誤
+                        //標點結果文本框
             while (null == waitFindWebElementBySelector_ToBeClickable("#result001")) { }
             iwe = waitFindWebElementBySelector_ToBeClickable("#result001");
             dt = DateTime.Now;
@@ -8761,7 +8793,7 @@ internal static string getImageUrl() {
 
 
                 string caption = string.Empty;// iwe1 == null ? "漢籍全文資料庫" : "漢籍全文文本閱讀";
-                //文本閱讀中的查詢輸入方塊 <input type="text" name="hanji/fld00.33.810" size="30" maxlength="200">
+                                              //文本閱讀中的查詢輸入方塊 <input type="text" name="hanji/fld00.33.810" size="30" maxlength="200">
                 IWebElement iwe1 = waitFindWebElementBySelector_ToBeClickable("body > form > table > tbody > tr:nth-child(2) > td > table > tbody > tr > td.leftbg > table > tbody > tr:nth-child(1) > td > table > tbody > tr:nth-child(2) > td > input[type=text]:nth-child(2)");
                 if (iwe1 == null)
                 {
@@ -10475,11 +10507,11 @@ internal static string getImageUrl() {
 
 
                 //輸入：檔案名稱 //SendKeys.Send(downloadImgFullName);
-                SendKeys.SendWait("+{Insert}~");//or "^v"
+                SendKeys.SendWait("+{Insert}~~");//or "^v"
                                                 //Thread.Sleep(200);
-                                                //SendKeys.SendWait("{ENTER}");
-                                                //SendKeys.SendWait("%s");
-                                                //Clipboard.Clear();
+                //SendKeys.Send("{ENTER}");
+                //SendKeys.SendWait("%s");
+                //Clipboard.Clear();
 
                 //Thread.Sleep(300);
             }
