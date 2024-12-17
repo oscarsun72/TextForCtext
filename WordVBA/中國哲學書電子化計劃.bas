@@ -1954,6 +1954,44 @@ Sub EditModeMakeup_changeFile_Page() '同版本文本帶入置換file id 和 頁數
     d.Application.Activate
 End Sub
 
+Rem 在序號欄位補零以調整章節及其次序用。因《御定佩文韻府》須調整章節單位長度而設（其原有290個單位故！！） https://ctext.org/wiki.pl?if=en&res=589161 20241214
+Sub Add0toSequenceField()
+    Dim w, url As String, iwe As SeleniumBasic.IWebElement, add0 As String
+    If SeleniumOP.IsWDInvalid() Then
+        If WD Is Nothing Then
+            SeleniumOP.OpenChrome "https://ctext.org/"
+        Else
+            'WD.SwitchTo.Window SeleniumOP.WindowHandles()(SeleniumOP.WindowHandlesCount - 1)
+            WD.SwitchTo.Window SeleniumOP.WindowHandles()(0)
+        End If
+    End If
+    If Selection.Type = wdSelectionIP Then
+        add0 = VBA.InputBox("輸入要補0的值，如要補兩個0，則輸入「00」。感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主")
+    Else
+        ResetSelectionAvoidSymbols
+        add0 = Selection.text
+    End If
+    For Each w In WD.WindowHandles
+        WD.SwitchTo.Window w
+        url = WD.url
+        If VBA.InStr(url, "https://ctext.org/wiki.pl") = 1 And VBA.InStr(url, "&chapter=") Then
+            'Edit Link
+            Set iwe = WD.FindElementByCssSelector("#content > h2 > span > a:nth-child(2)")
+            iwe.Click
+            'sequence Box
+            Set iwe = WD.FindElementByCssSelector("#sequence")
+            SeleniumOP.SetIWebElementValueProperty iwe, iwe.GetAttribute("value") & add0
+            'Submit changes
+            Set iwe = WD.FindElementByCssSelector("#commit")
+            iwe.Click
+            VBA.Interaction.DoEvents
+            Do While VBA.InStr(WD.url, "&action=editchapter")
+                SystemSetup.wait 0.3
+            Loop
+            WD.Close
+        End If
+    Next w
+End Sub
 
 Sub tempReplaceTxtforCtextEdit()
 Dim a, d As Document, i As Integer, x As String

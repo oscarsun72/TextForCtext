@@ -3586,7 +3586,8 @@ eH:
             End If
         Case Else
 Msg:
-            MsgBox Err.Number + Err.Description
+            MsgBox Err.Number & Err.Description
+'            Resume
     End Select
 End Property
 

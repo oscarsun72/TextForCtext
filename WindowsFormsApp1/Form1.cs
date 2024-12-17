@@ -2122,6 +2122,8 @@ namespace WindowsFormsApp1
                     e.Handled = true;
                     if (textBox1.SelectedText.IsNullOrEmpty())
                         textBox1.SelectAll();
+                    else if (textBox1.SelectedText.Length < 5)
+                        textBox1.SelectAll();
                     else
                         overtypeModeSelectedTextSetting(ref textBox1);
                     while (("<p>" + Environment.NewLine).IndexOf(textBox1.SelectedText.Substring(textBox1.SelectedText.Length - 1, 1)) > -1)
@@ -9194,6 +9196,7 @@ namespace WindowsFormsApp1
                 e.Handled = true;
                 playSound(soundLike.press, true);
                 toOCR(br.OCRSiteTitle.KanDianGuJiAPI);
+                AvailableInUseBothKeysMouse();
                 return;
             }
             //Ctrl + Shift + p ： 逐頁瀏覽肉眼檢查空白頁，以免白跑OCR 20240727 執行 CheckBlankPagesBeforeOCR
@@ -9418,6 +9421,7 @@ namespace WindowsFormsApp1
                     if (iw != null) // clickCopybutton_GjcoolFastExperience(iw.Location); 
                         Cursor.Position = (Point)iw.Location;
                     toOCR(br.OCRSiteTitle.GJcool);
+                    AvailableInUseBothKeysMouse();
                     //if (browsrOPMode == BrowserOPMode.appActivateByName) return;
                     //e.Handled = true;
                     //string imgUrl = Clipboard.GetText(), downloadImgFullName;
@@ -9495,6 +9499,7 @@ namespace WindowsFormsApp1
                         return;
                     }
                     e.Handled = true;
+                    if (textBox1.SelectedText.Length < 5) textBox1.DeselectAll();
                     toGjcoolPunct("https://old.gj.cool/gjcool/index");
                     return;
                 }
@@ -9506,6 +9511,7 @@ namespace WindowsFormsApp1
                         return;
                     }
                     e.Handled = true;
+                    if (textBox1.SelectedText.Length < 5) textBox1.DeselectAll();
                     toGjcoolPunct("https://old.gj.cool/gjcool/index");
                     return;
                 }
@@ -9805,6 +9811,7 @@ namespace WindowsFormsApp1
                         return;
                     }
                     e.Handled = true;
+                    if (textBox1.SelectedText.Length < 5) textBox1.DeselectAll();
                     toGjcoolPunct("https://gj.cool/punct");
                     return;
                 }
@@ -9816,6 +9823,7 @@ namespace WindowsFormsApp1
                         return;
                     }
                     e.Handled = true;
+                    if (textBox1.SelectedText.Length < 5) textBox1.DeselectAll();
                     toGjcoolPunct("https://gj.cool/punct");
                     return;
                 }
@@ -10906,6 +10914,9 @@ namespace WindowsFormsApp1
                 if (br.Div_generic_TextBoxFrame == null)
                     if (MessageBoxShowOKCancelExclamationDefaultDesktopOnly("是否終止/中斷？") == DialogResult.OK)
                         break;
+                    else
+                    { ChromeSetFocus(); }
+
 
             }
             return true;
@@ -13695,7 +13706,9 @@ namespace WindowsFormsApp1
             if (!insertMode
                 && textBox1.SelectionStart < textBox1.TextLength
                 //現在鍵入位置的後一個字不能是
-                && (regexPattern + omitSymbols).IndexOf(textBox1.Text.Substring(textBox1.SelectionStart, 1)) == -1
+                && ((regexPattern + omitSymbols).IndexOf(textBox1.Text.Substring(textBox1.SelectionStart, 1)) == -1 ||
+                    textBox1.Text.Substring(textBox1.SelectionStart, 1) == "�")
+                //&& (regexPattern.Replace("[",string.Empty).Replace("]",string.Empty) + omitSymbols).IndexOf(textBox1.Text.Substring(textBox1.SelectionStart, 1)) == -1
                 //&& omitSymbols.IndexOf(e.KeyChar.ToString()) == -1
                 && Regex.IsMatch(e.KeyChar.ToString(), "[^a-zA-Z" + omitSymbols + "]"))//YouChat菩薩
             {//https://stackoverflow.com/questions/1428047/how-to-set-winforms-textbox-to-overwrite-mode/70502655#70502655
@@ -13709,8 +13722,8 @@ namespace WindowsFormsApp1
                                                  //對標點符號punctuations所佔字位不取代
                     w = textBox1.SelectedText;
                     //標點符號不取代漢字，但可被取代
-                    if ((PunctuationsNum + "●\"").IndexOf(e.KeyChar) > -1 &&
-                        (PunctuationsNum + "●\"").IndexOf(textBox1.Text.Substring(textBox1.SelectionStart, 1)) == -1)
+                    if ((PunctuationsNum + "●�\"").IndexOf(e.KeyChar) > -1 &&
+                        (PunctuationsNum + "●�\"").IndexOf(textBox1.Text.Substring(textBox1.SelectionStart, 1)) == -1)
                         textBox1.SelectionLength = 0;
                     else if (char.IsSurrogate(w.ToCharArray()[0])) textBox1.SelectionLength = 2;
                 }
@@ -13732,9 +13745,9 @@ namespace WindowsFormsApp1
                 {
                     w = textBox1.Text.Substring(selStart, 1);//對標點符號punctuations所佔字位不取代
                     if (selStart + 1 > textBox1.TextLength ||
-                        ((PunctuationsNum + "●\"").IndexOf(e.KeyChar) > -1 &&
+                        ((PunctuationsNum + "●�\"").IndexOf(e.KeyChar) > -1 &&
                         //標點符號不取代漢字，但可被取代
-                        (PunctuationsNum + "●\"").IndexOf(textBox1.Text.Substring(textBox1.SelectionStart, 1)) == -1))
+                        (PunctuationsNum + "●�\"").IndexOf(textBox1.Text.Substring(textBox1.SelectionStart, 1)) == -1))
                         textBox1.Select(selStart, 0);
                     else
                     {
@@ -14946,7 +14959,7 @@ namespace WindowsFormsApp1
             while (!File.Exists(imagePath))
             {
                 //可按下Ctrl鍵中斷！！20241213
-                if(ModifierKeys==Keys.Control) return false;
+                if (ModifierKeys == Keys.Control) return false;
                 if (DateTime.Now.Subtract(dt).TotalSeconds > 20)
                     if (MessageBoxShowOKCancelExclamationDefaultDesktopOnly("書圖下載尚未完成，是否繼續？") == DialogResult.Cancel)
                         return false;

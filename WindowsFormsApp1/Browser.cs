@@ -7386,7 +7386,12 @@ internal static string getImageUrl() {
                     driver.SwitchTo().Window(driver.CurrentWindowHandle);
                 }
 
-
+                //20241217
+                if (Clipboard.GetText() != string.Empty)
+                {
+                    ActiveForm1.Activate();
+                    goto finish;
+                }
                 #region reach traffic limit
                 IWebElement iwtext = null;
                 try
@@ -7421,9 +7426,19 @@ internal static string getImageUrl() {
                     {
                     }
                 }
+                if (Clipboard.GetText() != string.Empty)
+                {
+                    ActiveForm1.Activate();
+                    goto finish;
+                }
                 if (iwtext != null)
                 //textContent
                 {
+                    if (Clipboard.GetText() != string.Empty)
+                    {
+                        ActiveForm1.Activate();
+                        goto finish;
+                    }
                     try
                     {
                         string info = iwtext.Text;
@@ -10510,10 +10525,10 @@ internal static string getImageUrl() {
 
                 //輸入：檔案名稱 //SendKeys.Send(downloadImgFullName);
                 SendKeys.SendWait("+{Insert}~~");//or "^v"
-                                                //Thread.Sleep(200);
-                //SendKeys.Send("{ENTER}");
-                //SendKeys.SendWait("%s");
-                //Clipboard.Clear();
+                                                 //Thread.Sleep(200);
+                                                 //SendKeys.Send("{ENTER}");
+                                                 //SendKeys.SendWait("%s");
+                                                 //Clipboard.Clear();
 
                 //Thread.Sleep(300);
             }
@@ -10866,8 +10881,12 @@ internal static string getImageUrl() {
             {
                 for (int i = driver.WindowHandles.Count - 1; i > -1; i--)
                 {
-                    if (driver.SwitchTo().Window(driver.WindowHandles[i]).Url.StartsWith("https://ctext.org/wiki.pl?if=gb&res="))
+                    string url = driver.SwitchTo().Window(driver.WindowHandles[i]).Url;
+                    //if (driver.SwitchTo().Window(driver.WindowHandles[i]).Url.StartsWith("https://ctext.org/wiki.pl?if=gb&res="))
+                    if (url.StartsWith("https://ctext.org/wiki.pl?if=gb&res=") ||
+                        url.StartsWith("https://ctext.org/wiki.pl?if=en&res="))
                         break;
+
                 }
 
             }

@@ -2147,6 +2147,14 @@ Function IsStyleExists(styleName As String, doc As Document) As Boolean
 End Function
 
 
+Sub 在整頁模式中不顯示頁面間的空白區域()
+    If word.ActiveWindow.View.ReadingLayout Then _
+        ActiveWindow.View.ReadingLayout = Not ActiveWindow.View.ReadingLayout
+    DoEvents
+    word.ActiveWindow.View.DisplayPageBoundaries = False
+End Sub
+
+
 Sub updateURL() '更新超連結網址
     Dim site As String
     Dim lnk As New links
