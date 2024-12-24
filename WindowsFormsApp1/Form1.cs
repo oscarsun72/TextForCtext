@@ -773,7 +773,8 @@ namespace WindowsFormsApp1
                                 }
                                 break;
                             default:
-                                MessageBox.Show(ex.HResult + ex.Message);
+                                //MessageBox.Show(ex.HResult + ex.Message);
+                                MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
                                 //throw;
                                 break;
                         }
@@ -3813,7 +3814,9 @@ namespace WindowsFormsApp1
             {//按下單一鍵
                 if (e.KeyCode == Keys.Scroll)
                 {//按下 Scroll Lock 將字數較少的行/段落尾末標上「<p>」符號
-                    e.Handled = true; paragraphMarkAccordingFirstOne(); Clipboard.SetText(textBox1.Text);
+                    e.Handled = true; paragraphMarkAccordingFirstOne();
+                    if (!textBox1.Text.IsNullOrEmpty())
+                        Clipboard.SetText(textBox1.Text);
                     return;
                 }
 
@@ -9608,7 +9611,16 @@ namespace WindowsFormsApp1
 
                 if (e.KeyCode == Keys.S) { e.Handled = true; saveText(); return; }
 
-                if (e.KeyCode == Keys.W) { e.Handled = true; closeChromeTab(); return; }//Ctrl + w 關閉 Chrome 網頁頁籤
+                if (e.KeyCode == Keys.W)
+                {//Ctrl + w 關閉 Chrome 網頁頁籤
+                    e.Handled = true;
+                    //主表單才執行 20241224
+                    if (Name == "Form1")
+                        closeChromeTab();
+                    else
+                        Close();
+                    return;
+                }
 
                 if (e.KeyCode == Keys.Multiply)
                 {//按下 Ctrl + * 設定為將《四部叢刊》資料庫所複製的文本在表單得到焦點時直接貼到 textBox1 的末尾,或反設定
@@ -10381,6 +10393,7 @@ namespace WindowsFormsApp1
                                                                                    //{
                                                                                    //    chk = quickedit_data_textboxTxt.Contains("，") || quickedit_data_textboxTxt.Contains("。");
                                                                                    //}
+                if (quickedit_data_textboxTxt == null) return false;
                 if (CnText.HasEditedWithPunctuationMarks(ref quickedit_data_textboxTxt) ||
                     quickedit_data_textboxTxt.Contains("picture") || quickedit_data_textboxTxt.Contains("entity"))
                 {
@@ -14423,6 +14436,7 @@ namespace WindowsFormsApp1
         void closeChromeTab()
         {
             chromeSendkeys("^{F4}");
+
         }
         /// <summary>
         /// 對Chrome瀏覽器送出按鍵（由closeChromeTab()抽離出來）20241022

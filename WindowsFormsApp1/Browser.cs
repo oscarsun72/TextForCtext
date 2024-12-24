@@ -2471,10 +2471,23 @@ namespace TextForCtext
             {
                 try
                 {
+                    //現在有設定Chrome瀏覽器的啟動參數 --remote-debugging-port=9222 了，這個可以省了
                     if (driver == null && Form1.browsrOPMode == Form1.BrowserOPMode.appActivateByName)
                     {
-                        Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("請先在textBox2執行「br」指令，切換為SeleniumNew模式再繼續。");
-                        return "";
+                        if (DialogResult.OK == Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("請先在textBox2執行「br」指令，切換為SeleniumNew模式再繼續。" +
+                            Environment.NewLine + Environment.NewLine + "---若已安裝配置器好chromedriver.exe，請按下【取消】，則程式會自動啟動，無須手動下指令--- 20241218感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主"))
+                            return "";
+                        else
+                        {
+                            if (driver == null)
+                            {
+                                Form1.browsrOPMode = Form1.BrowserOPMode.seleniumNew;
+                                DriverNew();
+                                driver.Close();//關閉新開啟的「首頁」分類頁籤，網址是： https://ctext.org/account.pl?if=en
+                            }
+                            else
+                                RestartChromedriver();
+                        }
                     }
                     try
                     {
@@ -5346,6 +5359,7 @@ internal static string getImageUrl() {
         reClickOCROK:
             try
             {
+                dt = DateTime.Now;
                 //等待「OCR完成 OK」出現
                 iwe = waitFindWebElementBySelector_ToBeClickable("#swal2-title", 0.1);
                 while (iwe == null)
@@ -5353,8 +5367,15 @@ internal static string getImageUrl() {
                     if (waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr > td.bs-checkbox > label > input[type=checkbox]", 0.1)?.Selected == false
                         && waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr > td:nth-child(7)", 0.1)?.GetAttribute("textContent") == " ") goto reRunOCR;
                     iwe = waitFindWebElementBySelector_ToBeClickable("#swal2-title", 0.1);
+                    if (DateTime.Now.Subtract(dt).TotalSeconds > 45)
+                        if (Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("等待OCR完成已逾時，是否繼續？") == DialogResult.Cancel) { StopOCR = true; return false; }
+                        else
+                        {
+                            ActiveForm1.TopMost = false;
+                            driver.SwitchTo().Window(driver.CurrentWindowHandle);
+                            BringToFront("chrome");
+                        }
                 }
-                dt = DateTime.Now;
                 while (iwe.GetAttribute("textContent") != "OCR完成")
                 {
                     if (DateTime.Now.Subtract(dt).TotalSeconds > 45)
@@ -9449,6 +9470,10 @@ internal static string getImageUrl() {
         }
 
         /// <summary>
+        /// 作為一些需要保留或比對驗證的視窗句柄集，鍵值是視窗ID（或唯一名稱）以供比較尋找，值為視窗句柄        
+        /// </summary>
+        internal static Dictionary<string, string> WindowHandles = new Dictionary<string, string>();
+        /// <summary>
         /// Alt + Shift + a ： [AI太炎](https://t.shenshen.wiki/)標點 20241105
         /// </summary>
         /// <param name="x">要標點的文本變數，標點結果亦儲存在此</param>
@@ -9462,21 +9487,50 @@ internal static string getImageUrl() {
                 Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("限500字，或須多於10字");
                 return false;
             }
-            if (IsDriverInvalid())
+            //string windowHandle= WindowHandles.FirstOrDefault(w => w.Value == "《AI太炎》").Key;            
+            //if (WindowHandles.Count > 0)
+            if (WindowHandles.TryGetValue("《AI太炎》", out string windowHandle))
             {
-                if (driver == null)
-                    DriverNew();
-                else
-                    driver.SwitchTo().Window(driver.WindowHandles.Last());
-                openNewTabWindow();
+                if (driver.WindowHandles.Contains(windowHandle))//20241224 Copilot大菩薩：在 C# 中，Dictionary 物件沒有直接內建的方法可以根據值來查找鍵，但你可以使用 LINQ 來達到這個目的。以下是一個簡單的範例，展示如何使用 LINQ 根據值來查找鍵：
+                /* namespace DictionaryValueSearch { class Program { static void Main(string[] args) { Dictionary<int, string> myDictionary = new Dictionary<int, string>() { { 1, "Apple" }, { 2, "Banana" }, { 3, "Cherry" } }; string valueToFind = "Banana"; var key = myDictionary.FirstOrDefault(x => x.Value == valueToFind).Key; if (!key.Equals(default(int))) { Console.WriteLine("Key: " + key); } else { Console.WriteLine("Value not found"); } } } }
+                 * 在這個範例中，FirstOrDefault 方法會遍歷 Dictionary，並根據指定的值來尋找鍵。如果找到了匹配的值，它會回傳對應的鍵；如果沒有找到，則會回傳 default 值。在這裡，我們假設鍵是 int 型別。
+                 */
+                {
+                    driver.SwitchTo().Window(windowHandle);
+                    if (driver.Url != "https://t.shenshen.wiki/")
+                    {
+                        openNewTabWindow();
+                        driver.Navigate().GoToUrl("https://t.shenshen.wiki/");
+                    }
+                }
             }
             else
             {
-                LastValidWindow = driver.CurrentWindowHandle;
-                driver.SwitchTo().Window(driver.WindowHandles.Last());
-                if (driver.Url != "https://t.shenshen.wiki/") openNewTabWindow();
+                if (IsDriverInvalid())
+                {
+                    if (driver == null)
+                        DriverNew();
+                    else
+                        driver.SwitchTo().Window(driver.WindowHandles.Last());
+                    openNewTabWindow();
+                }
+                else
+                {
+                    LastValidWindow = driver.CurrentWindowHandle;
+                    driver.SwitchTo().Window(driver.WindowHandles.Last());
+                    if (driver.Url != "https://t.shenshen.wiki/")
+                    {
+                        openNewTabWindow();
+                        driver.Navigate().GoToUrl("https://t.shenshen.wiki/");
+                    }
+                }
             }
-            driver.Navigate().GoToUrl("https://t.shenshen.wiki/");
+            if (!WindowHandles.TryGetValue("《AI太炎》", out windowHandle))
+                WindowHandles.Add("《AI太炎》", driver.CurrentWindowHandle);
+            else
+                if (windowHandle != driver.CurrentWindowHandle)
+                WindowHandles["《AI太炎》"] = driver.CurrentWindowHandle;
+
             //標點
             IWebElement iwe = waitFindWebElementBySelector_ToBeClickable("#nav-biaodian-tab", 5);
             if (iwe == null) return false;
