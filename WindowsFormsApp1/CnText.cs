@@ -570,7 +570,11 @@ namespace TextForCtext
         {
             if (x.Length == 0) return;
             //有語法內容者不執行（暫時先這樣，不做細緻的區別）20240803
-            if (x.IndexOf("\" ") > -1 && x.IndexOf("=\"") > -1 && x.IndexOf(" />") > -1) return;
+            if (x.IndexOf("\" ") > -1 && x.IndexOf("=\"") > -1 && x.IndexOf(" />") > -1)
+            {
+                x = x.Replace("/><p>＝", "/>＝");
+                return;
+            }
 
             #region narrow2WidePunctuationMarks 半形轉全形。置換為全形符號。
             //20230806Bing大菩薩：
@@ -581,6 +585,7 @@ namespace TextForCtext
             //x = Regex.Replace(x, pattern, evaluator).Replace("．", "。");
             #endregion
 
+            //被取代者
             string[] replaceDChar = { "＠","〇","!","！！","'", ",", ";", ":", "．", "?", "：：","：\r\n：", "《《", "》》", "〈〈", "〉〉",
                 "。}}<p>。}}","。}}。}}", "。}}}。<p>", "}}}。<p>", "。}}。<p>", "}}。<p>",".<p>","·<p>" ,"<p>。<p>","<p>。","􏿽。<p>","　。<p>"
                 ,"。。", "，，", "@" 
@@ -592,8 +597,10 @@ namespace TextForCtext
                 ,"􏿽？","􏿽。","，〉","。〉","〈、","！，","〈，","。〈。","〈：","：〉","〈。","：，"//自動標點結果的訂正
                 ,"，。","〉·","》·"
                 ,"*欽定《四庫全書》"
+
             };
 
+            //取代為
             string[] replaceChar = { string.Empty,"◯","！","！","、", "，", "；", "：", "·", "？", "：","：\r\n", "《", "》", "〈", "〉",
                 "。}}","。}}", "。}}}<p>", "。}}}<p>", "。}}<p>", "。}}<p>","。<p>","。<p>","<p>","<p>","　","　"
                 , "。", "，", "●" 
@@ -605,6 +612,7 @@ namespace TextForCtext
                 ,"？􏿽","。􏿽","〉，","〉。","、〈","！","，〈","。〈","〈","〉","。〈","："//自動標點結果的訂正
                 ,"。","·","·"
                 ,"*欽定四庫全書"
+
             };
             if (replaceDChar.Count() != replaceChar.Count()) Debugger.Break();//請檢查！！
             for (int i = 0; i < replaceChar.Count(); i++)

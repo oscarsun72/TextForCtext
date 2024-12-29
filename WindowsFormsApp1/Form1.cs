@@ -2121,8 +2121,34 @@ namespace WindowsFormsApp1
                 if (e.KeyCode == Keys.A)
                 {//Ctrl + Alt + a ： [AI太炎](https://t.shenshen.wiki/)標點 20241105
                     e.Handled = true;
+                    string x = textBox1.Text;
+                    if (x.IsNullOrEmpty()) return;
                     if (textBox1.SelectedText.IsNullOrEmpty())
-                        textBox1.SelectAll();
+                    {
+                        if (textBox1.Text.IndexOf("<") == -1)
+                            textBox1.SelectAll();
+                        else
+                        {//選取一個段落長 即 <p> 之區間 20241225 聖誕節
+                            int s = textBox1.SelectionStart;
+                            if (s + 1 <= x.Length)
+                            {
+                                if (x.Substring(s, 1) == "p")
+                                    textBox1.SelectionStart--;
+                                else if (x.Substring(s, 1) == ">")
+                                    textBox1.SelectionStart = textBox1.SelectionStart - 2;
+
+                            }
+                            else
+                            {
+                                if (s > 2 && x.Substring(s - 3, 3) == "<p>")
+                                    textBox1.SelectionStart = textBox1.SelectionStart - "<p>".Length;
+                            }
+                            s = x.LastIndexOf(">", textBox1.SelectionStart); int l = x.IndexOf("<", textBox1.SelectionStart);
+                            s = s == -1 ? 0 : s + 1; l = l == -1 ? x.Length - s : l - s;
+                            textBox1.Select(s, l);
+
+                        }
+                    }
                     else if (textBox1.SelectedText.Length < 5)
                         textBox1.SelectAll();
                     else
@@ -2131,30 +2157,34 @@ namespace WindowsFormsApp1
                     {
                         textBox1.SelectionLength--;
                     }
-                    string x = textBox1.SelectedText, original = x, preSpaces = string.Empty; int iSpace = 0;
+                    x = textBox1.SelectedText; string original = x, preSpaces = string.Empty; int iSpace = 0;
                     while (x.Substring(iSpace, 1) == "　")//傳回的值會缺第一行/段的的縮排空格故 20241201 感恩感恩　讚歎讚歎　南無阿彌陀佛
                     {
                         iSpace++;
                         preSpaces += "　";
                     }
 
-                    AITShenShenWikiPunct(ref x); x = x.Replace("“", "「").Replace("”", "」").Replace("‘", "『").Replace("’", "』");
-
-                    //回到之前的分頁頁籤
-                    if (driver.Url != textBox3Text)
+                    if (AITShenShenWikiPunct(ref x))
                     {
-                        for (int i = driver.WindowHandles.Count - 1; i > -1; i--)
+                        x = x.Replace("“", "「").Replace("”", "」").Replace("‘", "『").Replace("’", "』");
+
+                        //回到之前的分頁頁籤
+                        if (IsDriverInvalid()) driver.SwitchTo().Window(driver.WindowHandles.Last());
+                        if (driver.Url != textBox3Text)
                         {
-                            driver.SwitchTo().Window(driver.WindowHandles[i]);
-                            if (driver.Url == textBox3Text) break;
+                            for (int i = driver.WindowHandles.Count - 1; i > -1; i--)
+                            {
+                                driver.SwitchTo().Window(driver.WindowHandles[i]);
+                                if (driver.Url == textBox3Text) break;
+                            }
                         }
+
+                        //檢查原文是否遭篡改！20241126
+                        if (IsTextModified(x, original)) AvailableInUseBothKeysMouse();
+
+                        CnText.RestoreParagraphs(original, ref x);
+                        textBox1.SelectedText = preSpaces + CnText.BooksPunctuation(ref x, true);
                     }
-
-                    //檢查原文是否遭篡改！20241126
-                    if (IsTextModified(x, original)) AvailableInUseBothKeysMouse();
-
-                    CnText.RestoreParagraphs(original, ref x);
-                    textBox1.SelectedText = preSpaces + CnText.BooksPunctuation(ref x, true);
                     AvailableInUseBothKeysMouse();
                     return;
                 }
@@ -11013,6 +11043,24 @@ namespace WindowsFormsApp1
                     //break;
             }
             #endregion
+
+            #region 另一章節文本時 20241226
+            try
+            {
+                if (br.Div_generic_TextBoxFrame != null && br.Div_generic_TextBoxFrame.GetAttribute("textContent") != ""
+                    && br.Quickedit_data_textboxTxt == string.Empty)
+                {
+                    br.driver.Navigate().Refresh();
+                    url = br.QuickeditIWebElement.GetAttribute("href");
+                    textBox3.Text = url;//此會觸發textchanged事件程序
+                    br.QuickeditIWebElement.Click();
+                }
+            }
+            catch (Exception)
+            {
+            }
+            #endregion
+
             #region 要編輯時
             if (edit > -1)
             {//編輯才執行，瀏覽則省略

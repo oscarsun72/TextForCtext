@@ -7271,6 +7271,26 @@ internal static string getImageUrl() {
                 if (!trafficLimit) Form1.playSound(Form1.soundLike.info);
                 //Debugger.Break();
                 //if (Clipboard.GetText() != string.Empty) Application.OpenForms[0].Activate();
+
+
+                try
+                {
+                    e = driver.FindElement(By.XPath("/html/body/div[1]/div/div/div[2]/div/div[1]/div[3]/div[2]/div[2]/button/i"));
+                    //wait = new WebDriverWait(driver, TimeSpan.FromMilliseconds(150));
+                    //wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(e));
+                    while (e == null)
+                    {
+                        e = driver.FindElement(By.XPath("/html/body/div[1]/div/div/div[2]/div/div[1]/div[3]/div[2]/div[2]/button/i"));
+                    }
+                    e.Click();
+                    Thread.Sleep(255);
+
+                }
+                catch (Exception)
+                {
+
+                }
+
             });
             //}
             if (Clipboard.GetText() != "") goto finish;
@@ -7280,10 +7300,19 @@ internal static string getImageUrl() {
                 try
                 {
                     if (Clipboard.GetText() != "") goto finish;
-                    //e = driver.FindElement(By.XPath("/html/body/div[1]/div/div/div[2]/div/div[1]/div[3]/div[2]/div[2]/button"));
-                    e = driver.FindElement(By.XPath("//*[starts-with(@id, 'dialog_')]//div[contains(@class, 'col')]//div[contains(@class, 'd-flex py-1')]//button//i"));
-                    wait = new WebDriverWait(driver, TimeSpan.FromSeconds(15));
+                    //e = driver.FindElement(By.XPath("/html/body/div[1]/div/div/div[2]/div/div[1]/div[3]/div[2]/div[2]/button"));                    
+                    e = driver.FindElement(By.XPath("/html/body/div[1]/div/div/div[2]/div/div[1]/div[3]/div[2]/div[2]/button/i"));
+                    //e = driver.FindElement(By.XPath("//*[starts-with(@id, 'dialog_')]//div[contains(@class, 'col')]//div[contains(@class, 'd-flex py-1')]//button//i"));
+                    //wait = new WebDriverWait(driver, TimeSpan.FromSeconds(15));
+                    wait = new WebDriverWait(driver, TimeSpan.FromSeconds(0.2));//20241228
                     wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(e));
+                    
+                    //20241228
+                    if (e != null)
+                    {
+                        e.Click();
+                        Thread.Sleep(220);
+                    }
 
                 }
                 catch (Exception)
@@ -7352,12 +7381,14 @@ internal static string getImageUrl() {
                 {
                     //找出「複製」按鈕
                     //e = waitFindWebElementBySelector_ToBeClickable("#dialog_24bb81d92 > div.col > div.d-flex.py-1 > button");
-                    e = driver.FindElement(By.XPath("/html/body/div[1]/div/div/div[2]/div/div[1]/div[3]/div[2]/div[2]/button"));
+                    //e = driver.FindElement(By.XPath("/html/body/div[1]/div/div/div[2]/div/div[1]/div[3]/div[2]/div[2]/button"));
+                    e = driver.FindElement(By.XPath("/html/body/div[1]/div/div/div[2]/div/div[1]/div[3]/div[2]/div[2]/button/i"));
                     //e = driver.FindElement(By.XPath("//*[@id=\"dialog_df933239\"]/div[2]/div[2]/button"));
                     //e = driver.FindElement(By.XPath("//*[starts-with(@id, 'dialog_')]//div[contains(@class, 'col')]//div[contains(@class, 'd-flex py-1')]//button//i"));
                     wait = new WebDriverWait(driver, TimeSpan.FromMilliseconds(150));
                     wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(e));
                     e.Click();
+                    Thread.Sleep(255);
                     //第 1 次好像會找不到，只好用手動了：
                     //Thread.Sleep(450);
                     //if (Clipboard.GetText() != "") goto finish;
@@ -8641,9 +8672,9 @@ internal static string getImageUrl() {
                 "无妄", "彖", "象曰", "象傳", "象日", "象云","大象","小象","象文", "筮", // 不支援標點檢索，如「, "象："」
                 "初九","九二","九三","九四","九五","上九","初六","六二","六三","六四","六五","上六","用九","用六", "繇辭","繇詞","往吝","往遴",
                 "伏羲","庖羲","庖𦏁","宓𦏁","宓羲","宓犧","伏犧","庖犧","中正","見龍在田","括囊","噬膚","舊井","井谷","為麗","離麗","天行健",
-                "隨時之義","來復","庖有魚","包有魚","精義入神","豶豕","童牛","承之羞","雷在天上","錫馬", "蕃庶","晝日","三接","懲忿","窒欲","窒慾","敬以直內","義以方外","迷後得主","利西南","品物咸章","天下大行","益動而", "日進無疆","頻巽","豚魚","頻復", "懲窒","閑邪","存誠","乾乾","悔吝","憧憧", "類萬物","柔順利貞","比之匪人","貞厲","履貞","履道坦坦","貞吉","貞凶","悔亡","時義","健順", "內健而外順", "內健外順", "外順而內健", "外順內健","敦復","直方","開物成務","窮神知化", "夕惕","惕若","研幾極深","極深研幾","研幾","一陰一陽","允升","木上有水","勞民勸相","索而得","我有好爵","言有序","有聖人之道四","長子帥師","弟子輿尸","無悶","日用而不知", "日用不知","之道鮮","原始反終", "然不動", "感而遂通","朋從", "朋盍", "容民畜眾","有過則改","見善則遷","養正","養賢","知臨","臨大君", "默而成之","黙而成之","不言而信", "存乎德行","通天下之志","履正", "繼之者善", "仁者見之", "知者見之", "智者見之","屯其膏", "貞不字","翰音","鶾音", "善不積","立成器", "與地之","變化云為","神道設教",
+                "隨時之義","來復","庖有魚","包有魚","精義入神","豶豕","童牛","承之羞","雷在天上","錫馬", "蕃庶","晝日","三接","懲忿","窒欲","窒慾","敬以直內","義以方外","迷後得主","利西南","品物咸章","天下大行","益動而", "日進無疆","頻巽","豚魚","頻復", "懲窒","閑邪","存誠","乾乾","悔吝","憧憧", "類萬物","柔順利貞","比之匪人","貞厲","履貞","履道坦坦","貞吉","貞凶","悔亡","時義","健順", "內健而外順", "內健外順", "外順而內健", "外順內健","敦復","直方","開物成務","窮神知化", "夕惕","惕若","研幾極深","極深研幾","研幾","硏幾","一陰一陽","允升","木上有水","勞民勸相","索而得","我有好爵","言有序","有聖人之道四","長子帥師","弟子輿尸","無悶","日用而不知", "日用不知","之道鮮","原始反終", "然不動", "感而遂通","朋從", "朋盍", "容民畜眾","有過則改","見善則遷","養正","養賢","知臨","臨大君", "默而成之","黙而成之","不言而信", "存乎德行","通天下之志","履正", "繼之者善", "仁者見之", "知者見之", "智者見之","屯其膏", "貞不字","翰音","鶾音", "善不積","立成器", "與地之","變化云為","神道設教",
                 "象義","大貞","小貞", "帝出乎震","帝出於震","帝出于震","敬義", "日新","與時偕行","盈虛","山澤通氣","豐亨","居業","確乎", "碻乎","天在山中", "多識前言往行", "蹇蹇", "匪躬","洗心","龍德","慎言語","節飲食","艮其限","乃孚","幹父","裕父","係遯","甘臨","號咷", "風行水上",
-                "終難","咸之九五","賁於丘園","賁于丘園","賁於邱園","立人之道","賁于邱園", "束帛","戔戔", "損下以益上", "其腓","菑畬","葘畬", "損下益上", "損下而益上", "貳用缶","納約自牖","利見大人", "何思何慮","同歸而殊塗","一致而百慮", "同歸殊塗","一致百慮","先天後天","改命吉","天下雷行","喪貝","羝羊","羝芉", "觸藩", "觸籓","事不密","艱貞","金矢","利有","攸往","包蒙", "童蒙", "蒙吉","不事王侯","高尚其事",
+                "終難","輝光","咸之九五","賁於丘園","賁于丘園","賁於邱園","立人之道","賁于邱園", "束帛","戔戔", "損下以益上", "其腓","菑畬","葘畬", "損下益上", "損下而益上", "貳用缶","納約自牖","利見大人", "何思何慮","同歸而殊塗","一致而百慮", "同歸殊塗","一致百慮","先天後天","改命吉","天下雷行","喪貝","羝羊","羝芉", "觸藩", "觸籓","事不密","艱貞","金矢","利有","攸往","包蒙", "童蒙", "蒙吉","不事王侯","高尚其事",
                 "精氣為物","游魂為變","遊䰟為變","游䰟為變", "不家食","漣如","威如","焚如","知幾","禴祭", "東鄰","朋亡", "渙其群","有子考","甲三日","庚三日","不易乎世","不成乎名","天一地二","者其辭","升其高陵","天道虧盈","鞏用", "祗悔", "祇悔","秖悔","秪悔","履霜","蒞眾","理財", "正辭", "禁民為非","撝謙", "浚恒","浚恆", "立其誠","立誠","修辭立誠","開國承家",
                 "寬以居之","確乎其不可拔","碻乎其不可拔"
                 };
@@ -9487,9 +9518,13 @@ internal static string getImageUrl() {
                 Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("限500字，或須多於10字");
                 return false;
             }
+
+            if (!IsDriverInvalid()) LastValidWindow = driver.CurrentWindowHandle;
+            else LastValidWindow = driver.WindowHandles.Last();
+
             //string windowHandle= WindowHandles.FirstOrDefault(w => w.Value == "《AI太炎》").Key;            
             //if (WindowHandles.Count > 0)
-            if (WindowHandles.TryGetValue("《AI太炎》", out string windowHandle))
+            if (WindowHandles.TryGetValue("《AI太炎》", out string windowHandle))//20241224 Copilot大菩薩 ：是的，Dictionary 物件提供了一個非常快速的方法來根據鍵值 (Key) 取得對應的值 (Value)。在 C# 中，你可以使用字典的索引器來輕鬆地從字典中取得值。這裡有一個範例：……在這個範例中，TryGetValue 方法會嘗試根據指定的鍵來取得值。如果找到了對應的值，TryGetValue 方法會回傳 true 並將值存儲在 out 參數中；如果沒有找到，則回傳 false。 這種方法不僅簡潔，而且效能非常好，特別是對於大型字典。
             {
                 if (driver.WindowHandles.Contains(windowHandle))//20241224 Copilot大菩薩：在 C# 中，Dictionary 物件沒有直接內建的方法可以根據值來查找鍵，但你可以使用 LINQ 來達到這個目的。以下是一個簡單的範例，展示如何使用 LINQ 根據值來查找鍵：
                 /* namespace DictionaryValueSearch { class Program { static void Main(string[] args) { Dictionary<int, string> myDictionary = new Dictionary<int, string>() { { 1, "Apple" }, { 2, "Banana" }, { 3, "Cherry" } }; string valueToFind = "Banana"; var key = myDictionary.FirstOrDefault(x => x.Value == valueToFind).Key; if (!key.Equals(default(int))) { Console.WriteLine("Key: " + key); } else { Console.WriteLine("Value not found"); } } } }
@@ -9513,10 +9548,10 @@ internal static string getImageUrl() {
                     else
                         driver.SwitchTo().Window(driver.WindowHandles.Last());
                     openNewTabWindow();
+                    driver.Navigate().GoToUrl("https://t.shenshen.wiki/");
                 }
                 else
                 {
-                    LastValidWindow = driver.CurrentWindowHandle;
                     driver.SwitchTo().Window(driver.WindowHandles.Last());
                     if (driver.Url != "https://t.shenshen.wiki/")
                     {
@@ -9863,6 +9898,10 @@ internal static string getImageUrl() {
             //tb = ActiveForm1.Controls["textBox1"] as TextBox;
             //if (tb.SelectionLength == 0) return;
             string f = Path.Combine(Mdb.DropBoxPathIncldBackSlash, preName + "OCR 待改進者隨記 感恩感恩　讚歎讚歎　南無阿彌陀佛.docx");
+
+            //20241226 因《古籍酷》執事菩薩不處理，故今改用此檔為中介，再剪去與　他們共用的原檔，否則檔案太大、內容太多，執行效率太差。感恩感恩　南無阿彌陀佛
+            if (preName == "《古籍酷》AI ") f = f.Replace(".docx", "Append.docx");
+
             if (!File.Exists(f))
                 if (!File.Exists(f = f.Replace("C:\\", "A:\\")))//A槽是我的虛擬機所設定者 20240822
                     return;
