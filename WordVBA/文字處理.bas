@@ -4209,22 +4209,74 @@ Function FixFontname(rng As Range) As Boolean
         
         FixFontname = True
 End Function
+
 Sub 大陸引號改臺灣引號()
     Rem Alt + l （有選取只執行選取區，無則整份文件）
-    Dim rng As Range, ur As UndoRecord
+    Rem 今改成感應式, 即若偵測選取區有大陸引號, 則執行陸轉臺, 否則為臺轉陸 20241230
+    Dim rng As Range, ur As UndoRecord, clnRng As New VBA.Collection, rngStory ', s As Long, e As Long
     If Selection.Type = wdSelectionIP Then
         Set rng = Selection.Document.Range
+        For Each rngStory In rng.Document.StoryRanges
+            clnRng.Add rngStory
+        Next rngStory
     Else
         Set rng = Selection.Document.Range(Selection.start, Selection.End)
+        clnRng.Add rng
     End If
-    SystemSetup.stopUndo ur, "大陸引號改臺灣引號"
+    SystemSetup.stopUndo ur, "臺灣大陸引號轉換" ',"大陸引號改臺灣引號"
     word.Application.ScreenUpdating = False
-    rng.Find.Execute VBA.ChrW(8220), , , , , , , wdFindStop, , "「", wdReplaceAll
-    rng.Find.Execute VBA.ChrW(8221), , , , , , , wdFindStop, , "」", wdReplaceAll
-    rng.Find.Execute VBA.ChrW(8216), , , , , , , wdFindStop, , "『", wdReplaceAll
-    rng.Find.Execute VBA.ChrW(8217), , , , , , , wdFindStop, , "』", wdReplaceAll
+    
+    Dim smartQuotes As Boolean ' 保存當前設置
+    smartQuotes = options.AutoFormatAsYouTypeReplaceQuotes ' 暫時關閉智能引號自動校正功能
+    options.AutoFormatAsYouTypeReplaceQuotes = False
+        
+    For Each rngStory In clnRng
+        ' 執行你需要的操作 ' <你的程式碼>
+        Set rng = rngStory
+        If VBA.InStr(rng.text, VBA.ChrW(8220)) Or VBA.InStr(rng.text, VBA.ChrW(8221)) Or VBA.InStr(rng.text, VBA.ChrW(8216)) Or VBA.InStr(rng.text, VBA.ChrW(8217)) Then
+            If VBA.InStr(rng.text, VBA.ChrW(8220)) Then
+                rng.Find.Execute VBA.ChrW(8220), , , , , , , wdFindStop, , "「", wdReplaceAll
+            End If
+            If VBA.InStr(rng.text, VBA.ChrW(8221)) Then
+                rng.Find.Execute VBA.ChrW(8221), , , , , , , wdFindStop, , "」", wdReplaceAll
+            End If
+            If VBA.InStr(rng.text, VBA.ChrW(8216)) Then
+                rng.Find.Execute VBA.ChrW(8216), , , , , , , wdFindStop, , "『", wdReplaceAll
+            End If
+            If VBA.InStr(rng.text, VBA.ChrW(8217)) Then
+                rng.Find.Execute VBA.ChrW(8217), , , , , , , wdFindStop, , "』", wdReplaceAll
+            End If
+        Else
+            If VBA.InStr(rng.text, "「") Then
+                's = rng.start: e = rng.End
+                rng.Find.Execute "「", , , , , , , wdFindStop, , VBA.ChrW(8220), wdReplaceAll
+                Rem 有 options 的設定就不必跑迴圈了 20241230
+        '        Do While rng.Find.Execute("「")
+        '            rng.text = VBA.ChrW(8220)
+        '            rng.SetRange s, e
+        '        Loop
+            End If
+            If VBA.InStr(rng.text, "」") Then
+                rng.Find.Execute "」", , , , , , , wdFindStop, , VBA.ChrW(8221), wdReplaceAll
+            End If
+            If VBA.InStr(rng.text, "『") Then
+                rng.Find.Execute "『", , , , , , , wdFindStop, , VBA.ChrW(8216), wdReplaceAll
+        '        Do While rng.Find.Execute("『")
+        '            rng.text = VBA.ChrW(8216)
+        '            rng.SetRange s, e
+        '        Loop
+            End If
+            If VBA.InStr(rng.text, "』") Then
+                rng.Find.Execute "』", , , , , , , wdFindStop, , VBA.ChrW(8217), wdReplaceAll
+            End If
+        End If
+        
+    Next rngStory
+    
     SystemSetup.contiUndo ur
     word.Application.ScreenUpdating = True
+    ' 恢復原來設置
+    options.AutoFormatAsYouTypeReplaceQuotes = smartQuotes
 End Sub
 
 Rem 模擬Word Characters 集合物件的字串集合 https://learn.microsoft.com/en-us/office/vba/api/Word.characters

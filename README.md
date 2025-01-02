@@ -616,10 +616,10 @@ Alt + j : 鍵入換行分段符號（newline）（同 Ctrl + j 的系統預設�
 > 效力等同按下 Enter 鍵。
 
 Alt + k : 將選取的字詞句及其網址位址送到以下檔案的末後
-> C:\Users\oscar\Dropbox\《古籍酷》AI OCR 待改進者隨記 感恩感恩　讚歎讚歎　南無阿彌陀佛.docx
+> C:\Users\oscar\Dropbox\《古籍酷》AI OCR 待改進者隨記 感恩感恩　讚歎讚歎　南無阿彌陀佛Append.docx
 
 Alt + n : 將選取的字詞句及其網址位址送到以下檔案的末後
-> C:\Users\oscar\Dropbox\《看典古籍》OCR 待改進者隨記 感恩感恩　讚歎讚歎　南無阿彌陀佛
+> C:\Users\oscar\Dropbox\《看典古籍》OCR 待改進者隨記 感恩感恩　讚歎讚歎　南無阿彌陀佛Append.docx
 
 Alt + l : 檢查/輸入抬頭平抬時的條件：執行topLineFactorIuput04condition()
 

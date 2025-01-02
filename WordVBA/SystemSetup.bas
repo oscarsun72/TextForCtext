@@ -572,8 +572,8 @@ Sub backupNormal_dotm() '自動備份Normal.dotm
     Source = SystemSetup.WordTemplatesPathIncldBackSlash + "Normal.dotm"
     Destination = SystemSetup.DropBoxPathIncldBackSlash + "Normal.dotm"
     If VBA.Dir(Destination) <> vbNullString Then GoSub backup:
-    Source = SystemSetup.WordStartupPathIncldBackSlash + "TextForCtext-WordVBA.dotm"
-    Destination = SystemSetup.DropBoxPathIncldBackSlash + "TextForCtext-WordVBA.dotm"
+    Source = SystemSetup.WordStartupPathIncldBackSlash + "TextForCtext-WordVBA1.dotm"
+    Destination = SystemSetup.DropBoxPathIncldBackSlash + "TextForCtext-WordVBA1.dotm"
     If VBA.Dir(Destination) <> vbNullString Then GoSub backup:
     Exit Sub
 

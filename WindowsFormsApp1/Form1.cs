@@ -3420,7 +3420,13 @@ namespace WindowsFormsApp1
                             if (br.driver != null)
                             {
                                 br.openNewTabWindow(OpenQA.Selenium.WindowType.Tab);
-                                br.driver.Navigate().GoToUrl("https://www.google.com/search?q=" + x);
+                                try
+                                {
+                                    br.driver.Navigate().GoToUrl("https://www.google.com/search?q=" + x);
+                                }
+                                catch (Exception)
+                                {
+                                }
                             }
                             else
                             {
@@ -8075,7 +8081,8 @@ namespace WindowsFormsApp1
 
                         if (driverUrl != urlDriver)
                         {
-                            Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("現行分頁似乎有問題！網址應該是：" + urlDriver);
+                            Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("現行分頁似乎有問題！網址應該是：" + urlDriver
+                                + Environment.NewLine + "可按【確定】繼續。感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主");
                             Debugger.Break();
                         }
                     }
@@ -10254,11 +10261,15 @@ namespace WindowsFormsApp1
             //if (autoPastetoQuickEdit) autoPastetoQuickEdit = false;
             if (keyinTextMode) KeyinTextmodeSwitcher(false);
             playSound(soundLike.press, true);
+            WindowHandles.TryGetValue("Hanchi_CTP_SearchingKeywordsYijing", out string windowHandle_Hanchi_CTP_SearchingKeywordsYijing);
             if (br.IsDriverInvalid() && br.driver != null)
             {
                 try
                 {
-                    br.driver.SwitchTo().Window(br.LastValidWindow);
+                    if (windowHandle_Hanchi_CTP_SearchingKeywordsYijing != string.Empty)
+                        br.driver.SwitchTo().Window(windowHandle_Hanchi_CTP_SearchingKeywordsYijing);
+                    else
+                        br.driver.SwitchTo().Window(br.LastValidWindow);
 
                 }
                 catch (Exception ex)
@@ -10287,37 +10298,41 @@ namespace WindowsFormsApp1
                 }
             }
             #region 關閉《漢籍全文資料庫》開啟的頁面20240926
-            for (int i = br.driver.WindowHandles.Count - 1; i > -1; i--)
+            if (windowHandle_Hanchi_CTP_SearchingKeywordsYijing != string.Empty)
             {
-                br.driver.SwitchTo().Window(driver.WindowHandles[i]);
-                //如果「回查詢結果」元件存在的話//文本閱讀內的檢索（《漢籍全文資料庫》），如果有開啟「回查詢結果」的頁面，則關閉20240926
-                if (br.waitFindWebElementBySelector_ToBeClickable("body > form > table > tbody > tr:nth-child(2) > td > table > tbody > tr:nth-child(1) > td > table > tbody > tr > td.btn62 > a")?.GetAttribute("text") == "回查詢結果")
-                {//如果不能返回上一頁，即開啟新分頁者，即予關閉。
-                    if (!br.CanGoBack())
-                    {
-                        br.driver.Close();
-                        br.driver.SwitchTo().Window(br.driver.WindowHandles.Last());
-                    }
-                    //else
-                    //    br.driver.Navigate().Back();//CanGoBack()裡頭已有！ 20240926
-                    if (br.driver.Title.Contains("漢籍全文文本閱讀"))
-                    {
-                        while (br.waitFindWebElementBySelector_ToBeClickable("body > form > table > tbody > tr:nth-child(2) > td > table > tbody > tr > td > table > tbody > tr:nth-child(1) > td.btn62 > a")?.GetAttribute("text") == "回瀏覽")
-                        { br.driver.Navigate().Back(); }
-                        break;
-                    }
-                    //break;//如果有開啟多個
-                }
-                //《漢籍全文資料庫》【檢索報表】標籤控制項(關閉開啟的分頁）
-                else if (waitFindWebElementBySelector_ToBeClickable("body > form > table > tbody > tr:nth-child(2) > td:nth-child(1) > font > b > nobr")?.GetAttribute("textContent") == "【檢索報表】")
-                //while (null != waitFindWebElementBySelector_ToBeClickable("body > form > table > tbody > tr:nth-child(2) > td:nth-child(1) > font > b > nobr"))
+                for (int i = br.driver.WindowHandles.Count - 1; i > -1; i--)
                 {
-                    driver.Close(); driver.SwitchTo().Window(driver.WindowHandles.Last());
-                    if (br.driver.Title.Contains("漢籍全文資料庫"))
-                    {
-                        //搜尋按鈕
-                        if (br.waitFindWebElementBySelector_ToBeClickable("#frmTitle > table > tbody > tr:nth-child(2) > td > table > tbody > tr:nth-child(8) > td > input[type=IMAGE]:nth-child(2)")?.GetAttribute("title") == "搜尋")
+                    if (driver.CurrentWindowHandle == windowHandle_Hanchi_CTP_SearchingKeywordsYijing) break;
+                    br.driver.SwitchTo().Window(driver.WindowHandles[i]);
+                    //如果「回查詢結果」元件存在的話//文本閱讀內的檢索（《漢籍全文資料庫》），如果有開啟「回查詢結果」的頁面，則關閉20240926
+                    if (br.waitFindWebElementBySelector_ToBeClickable("body > form > table > tbody > tr:nth-child(2) > td > table > tbody > tr:nth-child(1) > td > table > tbody > tr > td.btn62 > a")?.GetAttribute("text") == "回查詢結果")
+                    {//如果不能返回上一頁，即開啟新分頁者，即予關閉。
+                        if (!br.CanGoBack())
+                        {
+                            br.driver.Close();
+                            br.driver.SwitchTo().Window(br.driver.WindowHandles.Last());
+                        }
+                        //else
+                        //    br.driver.Navigate().Back();//CanGoBack()裡頭已有！ 20240926
+                        if (br.driver.Title.Contains("漢籍全文文本閱讀"))
+                        {
+                            while (br.waitFindWebElementBySelector_ToBeClickable("body > form > table > tbody > tr:nth-child(2) > td > table > tbody > tr > td > table > tbody > tr:nth-child(1) > td.btn62 > a")?.GetAttribute("text") == "回瀏覽")
+                            { br.driver.Navigate().Back(); }
                             break;
+                        }
+                        //break;//如果有開啟多個
+                    }
+                    //《漢籍全文資料庫》【檢索報表】標籤控制項(關閉開啟的分頁）
+                    else if (waitFindWebElementBySelector_ToBeClickable("body > form > table > tbody > tr:nth-child(2) > td:nth-child(1) > font > b > nobr")?.GetAttribute("textContent") == "【檢索報表】")
+                    //while (null != waitFindWebElementBySelector_ToBeClickable("body > form > table > tbody > tr:nth-child(2) > td:nth-child(1) > font > b > nobr"))
+                    {
+                        driver.Close(); driver.SwitchTo().Window(driver.WindowHandles.Last());
+                        if (br.driver.Title.Contains("漢籍全文資料庫"))
+                        {
+                            //搜尋按鈕
+                            if (br.waitFindWebElementBySelector_ToBeClickable("#frmTitle > table > tbody > tr:nth-child(2) > td > table > tbody > tr:nth-child(8) > td > input[type=IMAGE]:nth-child(2)")?.GetAttribute("title") == "搜尋")
+                                break;
+                        }
                     }
                 }
             }

@@ -7231,6 +7231,56 @@ internal static string getImageUrl() {
 
             DateTime dateTime = DateTime.Now; bool clicked = false, trafficLimit = false;
             Thread.Sleep(950);
+
+            //2024除夕
+            try
+            {
+                e = driver.FindElement(By.XPath("/html/body/div[1]/div/div/div[2]/div/div[1]/div[3]/div[2]/div[2]/button/i"));
+                while (e == null || Clipboard.GetText() == string.Empty)
+                {
+
+                    e = driver.FindElement(By.XPath("/html/body/div[1]/div/div/div[2]/div/div[1]/div[3]/div[2]/div[2]/button/i"));
+                    if (DateTime.Now.Subtract(dateTime).TotalSeconds > 3 ||
+                        //reach traffic limit. wait …… 訊息文字框
+                        driver.FindElement(By.XPath("/html/body/div[1]/div/div/div[2]/div/div[1]/div[3]/div[2]/div")) != null)
+                        break;
+                    Thread.Sleep(555);
+                }
+                if (e != null)
+                {
+                    e.Click();
+                    Thread.Sleep(455);
+                }
+            }
+            catch (Exception)
+            {
+
+            }
+            try
+            {
+                //reach traffic limit. wait …… 訊息文字框
+                e = driver.FindElement(By.XPath("/html/body/div[1]/div/div/div[2]/div/div[1]/div[3]/div[2]/div"));
+                if (e != null)
+                {
+                    string msg = e.GetAttribute("textContent");
+                    if (msg.StartsWith("reach traffic limit. wait "))
+                    {
+                        if (MessageBox.Show(msg + Environment.NewLine + "是否要切換成批量處理模式？", "若按下【取消】，擬改用『標注平台』處理，請記得在textBox2下「gjk」指令以切換。感恩感恩　南無阿彌陀佛　讚美主",
+                                                                MessageBoxButtons.OKCancel, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly) == DialogResult.OK)
+                            Form1.BatchProcessingGJcoolOCR = true;
+                        else
+                            Form1.BatchProcessingGJcoolOCR = false;
+                        return false;
+                    }
+                }
+            }
+            catch (Exception)
+            {
+            }
+
+            if (Clipboard.GetText() != "") goto finish;
+
+
             //if (DateTime.Now.Subtract(dateTime).Seconds > 1 && !clicked && Clipboard.GetText() == string.Empty)
             //if (true)
             //{
@@ -7278,7 +7328,7 @@ internal static string getImageUrl() {
                     e = driver.FindElement(By.XPath("/html/body/div[1]/div/div/div[2]/div/div[1]/div[3]/div[2]/div[2]/button/i"));
                     //wait = new WebDriverWait(driver, TimeSpan.FromMilliseconds(150));
                     //wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(e));
-                    while (e == null)
+                    while (e == null || Clipboard.GetText() == string.Empty)
                     {
                         e = driver.FindElement(By.XPath("/html/body/div[1]/div/div/div[2]/div/div[1]/div[3]/div[2]/div[2]/button/i"));
                     }
@@ -7306,12 +7356,15 @@ internal static string getImageUrl() {
                     //wait = new WebDriverWait(driver, TimeSpan.FromSeconds(15));
                     wait = new WebDriverWait(driver, TimeSpan.FromSeconds(0.2));//20241228
                     wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(e));
-                    
-                    //20241228
-                    if (e != null)
+
+                    //20241228 20241231
+                    dateTime = DateTime.Now;
+                    while (e != null)
                     {
                         e.Click();
                         Thread.Sleep(220);
+                        e = driver.FindElement(By.XPath("/html/body/div[1]/div/div/div[2]/div/div[1]/div[3]/div[2]/div[2]/button/i"));
+                        if (DateTime.Now.Subtract(dateTime).TotalSeconds > 13) break;
                     }
 
                 }
@@ -8554,12 +8607,20 @@ internal static string getImageUrl() {
 
             string title = null;
 
+            if (WindowHandles.TryGetValue("Hanchi_CTP_SearchingKeywordsYijing", out string windowHandle_Hanchi_CTP_SearchingKeywordsYijing))
+                if (driver.WindowHandles.Contains(windowHandle_Hanchi_CTP_SearchingKeywordsYijing))
+                    if (!IsDriverInvalid())
+                    {
+                        if (driver.CurrentWindowHandle != windowHandle_Hanchi_CTP_SearchingKeywordsYijing)
+                            driver.SwitchTo().Window(windowHandle_Hanchi_CTP_SearchingKeywordsYijing);
+                    }
+
             #region 檢查title creedit_with_Copilot大菩薩： C# 比對字串中的特定子字串： https://sl.bing.net/dy0lfJJXE72
             //檢查title 如果不包含指定的條件，則傳回false
             bool checkTitle(string titleToCheck)
             {
                 string pattern = "漢籍全文|中國哲學書電子化計劃|Chinese Text Project";
-                return Regex.IsMatch(title, pattern);
+                return Regex.IsMatch(titleToCheck, pattern);
                 //string[] keywords = { "漢籍全文", "中國哲學書電子化計劃", "Chinese Text Project" };
                 //var foundKeywords = keywords.Where(keyword => title.Contains(keyword));
             }
@@ -8620,6 +8681,12 @@ internal static string getImageUrl() {
 
                     }
                 }
+
+                if (!WindowHandles.TryGetValue("Hanchi_CTP_SearchingKeywordsYijing", out windowHandle_Hanchi_CTP_SearchingKeywordsYijing))
+                    WindowHandles.Add("Hanchi_CTP_SearchingKeywordsYijing", driver.CurrentWindowHandle);
+                else
+                    if (windowHandle_Hanchi_CTP_SearchingKeywordsYijing != driver.CurrentWindowHandle)
+                    WindowHandles["Hanchi_CTP_SearchingKeywordsYijing"] = windowHandle_Hanchi_CTP_SearchingKeywordsYijing;
             }
 
             #endregion
@@ -9897,10 +9964,11 @@ internal static string getImageUrl() {
             //if (!ActiveForm1.Controls["textBox1"].Focused) return;
             //tb = ActiveForm1.Controls["textBox1"] as TextBox;
             //if (tb.SelectionLength == 0) return;
-            string f = Path.Combine(Mdb.DropBoxPathIncldBackSlash, preName + "OCR 待改進者隨記 感恩感恩　讚歎讚歎　南無阿彌陀佛.docx");
+            string f = Path.Combine(Mdb.DropBoxPathIncldBackSlash, preName + "OCR 待改進者隨記 感恩感恩　讚歎讚歎　南無阿彌陀佛Append.docx");
 
             //20241226 因《古籍酷》執事菩薩不處理，故今改用此檔為中介，再剪去與　他們共用的原檔，否則檔案太大、內容太多，執行效率太差。感恩感恩　南無阿彌陀佛
-            if (preName == "《古籍酷》AI ") f = f.Replace(".docx", "Append.docx");
+            //if (preName == "《古籍酷》AI ") f = f.Replace(".docx", "Append.docx");
+            //20250102 今皆改以Append方式 感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主
 
             if (!File.Exists(f))
                 if (!File.Exists(f = f.Replace("C:\\", "A:\\")))//A槽是我的虛擬機所設定者 20240822
