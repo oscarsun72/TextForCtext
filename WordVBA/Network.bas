@@ -155,9 +155,14 @@ Sub 查國學大師()
 End Sub
 Sub 查中文大辭典()
     '《國學大師》所收轉愚所掃全彩為黑白版 20241020
-    Rem Alt + Shift + z （z：中（zh）的 z）
+    Rem Ctrl + Alt + Shift + z （z：中（zh）的 z）
     文字處理.ResetSelectionAvoidSymbols
     SeleniumOP.LookupZWDCD Selection.text
+End Sub
+Sub 查漢語大字典()
+    Rem Alt + Shift + z （z：字（zi）的 z） 20250108
+    文字處理.ResetSelectionAvoidSymbols
+    SeleniumOP.LookupZWDZD Selection.text
 End Sub
 Sub 查古音小鏡_訓詁工具書查詢()
     Rem Ctrl + Shift + Alt + U u=xun（訓）的u

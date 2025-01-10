@@ -1979,13 +1979,18 @@ namespace WindowsFormsApp1
             #region 同時按下 Ctrl + Shift + Alt 
             if (e.Control && e.Shift && e.Alt)
             {
+                string x;
                 switch (e.KeyCode)
                 {
+                    case Keys.G://Ctrl + Shift + Alt + g ： 以選取文字加上雙引號`""`檢索Google
+                        x = overtypeModeSelectedTextSetting(ref textBox1);//CnText.ChangeSeltextWhenOvertypeMode(insertMode, textBox1);
+                        GoogleSearch(x, true);
+                        break;
                     case Keys.Y:
                         //- Ctrl + Shift + Alt + y 查[韻典網](https://ytenx.org/) y=yun（韻）的y
                         overtypeModeSelectedTextSetting(ref textBox1);
                         if (textBox1.SelectionLength == 0) return;
-                        string x = textBox1.SelectedText;
+                        x = textBox1.SelectedText;
                         this.Invoke((MethodInvoker)delegate { Clipboard.SetText(x); });
                         Task.Run(() =>
                         {
@@ -3408,35 +3413,7 @@ namespace WindowsFormsApp1
                 {//Alt + g
                     e.Handled = true;
                     string x = overtypeModeSelectedTextSetting(ref textBox1);//CnText.ChangeSeltextWhenOvertypeMode(insertMode, textBox1);
-                    if (x != "")
-                    {
-                        x = x.EndsWith("》") ? x.Substring(0, x.Length - 1) : x;
-                        x = x.EndsWith(Environment.NewLine) ? x.Substring(0, x.Length - 2) : x;
-                        x = x.EndsWith("\n") ? x.Substring(0, x.Length - 1) : x;
-                        Clipboard.SetText(x);
-                        //在Selenium模式下，直接以x搜尋網路
-                        if (browsrOPMode != BrowserOPMode.appActivateByName)
-                        {
-                            if (br.driver != null)
-                            {
-                                br.openNewTabWindow(OpenQA.Selenium.WindowType.Tab);
-                                try
-                                {
-                                    br.driver.Navigate().GoToUrl("https://www.google.com/search?q=" + x);
-                                }
-                                catch (Exception)
-                                {
-                                }
-                            }
-                            else
-                            {
-                                if (MessageBoxShowOKCancelExclamationDefaultDesktopOnly("是否執行【網路搜尋_元搜尋-同時搜多個引擎】") == DialogResult.OK)
-                                    Process.Start(dropBoxPathIncldBackSlash + @"VS\VB\網路搜尋_元搜尋-同時搜多個引擎\網路搜尋_元搜尋-同時搜多個引擎\bin\Debug\網路搜尋_元搜尋-同時搜多個引擎.exe");
-                            }
-                        }
-                        else
-                            Process.Start(dropBoxPathIncldBackSlash + @"VS\VB\網路搜尋_元搜尋-同時搜多個引擎\網路搜尋_元搜尋-同時搜多個引擎\bin\Debug\網路搜尋_元搜尋-同時搜多個引擎.exe");
-                    }
+                    GoogleSearch(x);
                     return;
                 }
 
@@ -3851,8 +3828,8 @@ namespace WindowsFormsApp1
                 if (e.KeyCode == Keys.Scroll)
                 {//按下 Scroll Lock 將字數較少的行/段落尾末標上「<p>」符號
                     e.Handled = true; paragraphMarkAccordingFirstOne();
-                    if (!textBox1.Text.IsNullOrEmpty())
-                        Clipboard.SetText(textBox1.Text);
+                    //if (!textBox1.Text.IsNullOrEmpty())
+                    //    Clipboard.SetText(textBox1.Text);
                     return;
                 }
 
@@ -4057,6 +4034,7 @@ namespace WindowsFormsApp1
                 #endregion
             }
         }
+
 
         /// <summary>
         /// 檢查原文是否已遭篡改
@@ -6619,8 +6597,27 @@ namespace WindowsFormsApp1
                 if (NormalLineParaLength == 0) NormalLineParaLength = wordsPerLinePara;
             }
 
-            if (se.Replace("●", "") == "") textBox1.Text = textBox1.Text.Substring(e + 2);//●●●●●●●●乃作為權訂每行字數之參考，故可刪去
-                                                                                          //if (countWordsLenPerLinePara(se) == wordsPerLinePara && se.Replace("●", "") == "") textBox1.Text = textBox1.Text.Substring(e + 2);
+            bool ev = _eventsEnabled;
+            if (se.Replace("●", "") == "")
+            {
+                if (ev) _eventsEnabled = false;
+                textBox1.Text = textBox1.Text.Substring(e + 2);//●●●●●●●●乃作為權訂每行字數之參考，故可刪去
+                _eventsEnabled = ev;                                                                   //if (countWordsLenPerLinePara(se) == wordsPerLinePara && se.Replace("●", "") == "") textBox1.Text = textBox1.Text.Substring(e + 2);
+            }
+            else
+            {//如果據以判斷的第一行不是用●●●●●●●●●●長度來判斷行/段長的話，亦清除此第1行 20250109
+                string x = textBox1.Text;
+                if (x.IndexOf(Environment.NewLine) > -1)
+                {
+                    if (x.Substring(x.IndexOf(Environment.NewLine) + Environment.NewLine.Length, 1) == "*")
+                    {
+                        if (ev) _eventsEnabled = false;
+                        textBox1.Text = x.Substring(x.IndexOf(Environment.NewLine) + Environment.NewLine.Length);
+                        _eventsEnabled = ev;
+                    }
+                }
+            }
+
             undoRecord(); stopUndoRec = true; PauseEvents();
 
             //string p = "<p>";
@@ -8835,6 +8832,10 @@ namespace WindowsFormsApp1
                     bool _autoPastetoQuickEdit = autoPastetoQuickEdit;
                     bool _check_the_adjacent_pages = check_the_adjacent_pages;
 
+                    //按著Ctrl鍵則直接ok 20250109
+                    if (ModifierKeys == Keys.Control) { dialogResult = DialogResult.OK; goto ok; }
+
+
                     if (!speechRecognitionOPmode)
                         dialogResult = MessageBox.Show("auto paste to Ctext Quit Edit textBox?" + Environment.NewLine + Environment.NewLine
                                                 + "……" + textBox1.SelectedText, "現在處理第" + (
@@ -8847,6 +8848,7 @@ namespace WindowsFormsApp1
                                                 _check_the_adjacent_pages ? (int.Parse(_currentPageNum) + 1).ToString() : CurrentPageNum)
                                                 + "頁", MessageBoxButtons.OKCancel, MessageBoxIcon.Question
                                                  );
+                    ok:
                     if (dialogResult == DialogResult.OK)
                     {
                         if (browsrOPMode == BrowserOPMode.appActivateByName) textBox1.Enabled = false;//避免誤觸
@@ -10267,7 +10269,15 @@ namespace WindowsFormsApp1
                 try
                 {
                     if (windowHandle_Hanchi_CTP_SearchingKeywordsYijing != string.Empty)
-                        br.driver.SwitchTo().Window(windowHandle_Hanchi_CTP_SearchingKeywordsYijing);
+                    {
+                        if (driver.WindowHandles.Contains(windowHandle_Hanchi_CTP_SearchingKeywordsYijing))
+                            br.driver.SwitchTo().Window(windowHandle_Hanchi_CTP_SearchingKeywordsYijing);
+                        else
+                        {
+                            WindowHandles.Remove("Hanchi_CTP_SearchingKeywordsYijing");
+                            windowHandle_Hanchi_CTP_SearchingKeywordsYijing = string.Empty;
+                        }
+                    }
                     else
                         br.driver.SwitchTo().Window(br.LastValidWindow);
 

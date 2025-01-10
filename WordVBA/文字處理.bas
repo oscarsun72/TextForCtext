@@ -4271,6 +4271,13 @@ Sub 大陸引號改臺灣引號()
             End If
         End If
         
+        Set rng = rngStory
+        rng.Find.Execute findText:=",", replacewith:="，", Replace:=wdReplaceAll
+        rng.Find.Execute findText:=";", replacewith:="；", Replace:=wdReplaceAll
+        rng.Find.Execute findText:=":", replacewith:="：", Replace:=wdReplaceAll
+        rng.Find.Execute findText:="?", replacewith:="？", Replace:=wdReplaceAll
+        rng.Find.Execute findText:="(", replacewith:="（", Replace:=wdReplaceAll
+        rng.Find.Execute findText:=")", replacewith:="）", Replace:=wdReplaceAll
     Next rngStory
     
     SystemSetup.contiUndo ur

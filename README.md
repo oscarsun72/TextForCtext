@@ -21,6 +21,8 @@ Text for Ctext 是為了有效加速[《中國哲學書電子化計劃》](https
 \*作業環境、系統需求：**Windows**、.NET Framework 4.5.2 以上、Chrome 瀏覽器（Selenium 模式才必要：[chromedriver](https://developer.chrome.com/docs/chromedriver/downloads?hl=zh-tw)） 
  > **不保留任何權利**，歡迎改寫應用到麥金塔(Mac)或 Linux 等作業系統環境中運行
 
+ > **非 Windows 作業系統可以 VirtualBox 等虛擬電腦軟體在其內執行**，後末有[演示影片](https://github.com/oscarsun72/TextForCtext#%E6%93%8D%E4%BD%9C%E6%BC%94%E7%A4%BA)。
+
     可安裝虛擬機在非 Windows 系統執行本軟件。詳見末所附諸演示，以 VirtualBox 為例。
 ** **已知問題 20241214：** [Windows內建的防毒軟體會誤報 TextForCtextWordVBA.dotm 為病毒](https://www.facebook.com/oscarsun72/posts/pfbid02vwgziw3QZLAymWLDMgWEKwKs47JnxNKXwTouAYycF3qcFHV8dXPqwhgi79RyWS4il)，[請將此檔排除在防毒之外](https://github.com/GCuser99/SeleniumVBA/discussions/135?fbclid=IwY2xjawHJ3rpleHRuA2FlbQIxMQABHcMKvBigaNUE6kX9_LmLSzRZopaZaVtQXCQd3DJee3cO5hFAvRFVslKH2Q_aem_ftQWeFZgWHqtCVaaEamTZg#discussioncomment-11527987)。末學電腦MS Word因無法再掛載此檔，故改其名為 **TextForCtext-WordVBA.dotm**
 
@@ -343,6 +345,7 @@ Ctrl + Shift + Alt + y 查[韻典網](https://ytenx.org/) y=yun（韻）的y
 - Ctrl + Alt + x ： **單字**檢索《康熙字典網上版》（x = xi 熙）
 - Alt + Shift + g ：檢索《國學大師》（g=guo 國學大師的國）
 - Alt + g ： 以選取文字檢索Google
+- Ctrl + Shift + Alt + g ： 以選取文字加上雙引號`""`檢索Google
 - Alt + b ： 以選取文字檢索百度（百度 baidu 的 b ）
 - Alt + 1 ： 貼上複製自《中國哲學書電子化計劃》（CTP）的文字版之內容並在注文前後加上圓括弧。
 - Alt + 7 ： 將文件中的異體字轉正體字
@@ -365,7 +368,8 @@ Ctrl + Shift + Alt + y 查[韻典網](https://ytenx.org/) y=yun（韻）的y
 - Ctrl + Shift + Alt + i 查古音小鏡_漢語大詞典 i=ci（詞）的i
 - Ctrl + Alt + b 或 Ctrl + Shift + Alt + c 查[白雲深處人家](http://www.homeinmists.com/)漢語大詞典 c=ci（詞）的c；b=bai(白，白雲深處人家的白)
 - Ctrl + Shift + Alt + y 查[韻典網](https://ytenx.org/) y=yun（韻）的y
-- Alt + Shift + z 或 ctrl + Alt + Shift + z 查《中文大辭典》－－[《國學大師》](https://www.guoxuedashi.net/zidian/)所收轉愚所掃全彩為黑白版 20241020 （z：中（zh）的 z）20241020
+- Alt + Shift + z 查《漢語大字典》（z：字（zi）的 z）20250108
+- ctrl + Alt + Shift + z 查《中文大辭典》－－[《國學大師》](https://www.guoxuedashi.net/zidian/)所收轉愚所掃全彩為黑白版 20241020 （z：中（zh）的 z）20241020
 - Ctrl + Alt + ' （頓號） 頓號文字加上篇名號（〈〉）如周易諸卦
 - Ctrl + shift + Alt + ' （頓號） 頓號文字加上書名號（《》）如五經
 - Ctrl + Alt + 9 頓號文字加上單引號（「」）
@@ -585,7 +589,7 @@ Alt + 1 : 鍵入空白（本站制式文字版留空空格標記）「􏿽」：
 
 > 空格與空白不同。空白會在文字版中留下一個空格，而全角全形空格會在文字版中被消除。半形半角空格只用在英文字的間隔中。
 
-Alt + Shift + 1 如宋詞中的換片空格，只將文中的空格轉成空白，其他如首綴前罝以明段落或標題者不轉換
+Alt + Shift + 1 如宋詞中的換片空格，或文中作為段落界隔的空格，只將文中的空格轉成空白，其他如首綴前罝以明段落或標題者不轉換
 
 Alt + 2 : 鍵入全形空格「　」（中國大陸云全角空格）
 

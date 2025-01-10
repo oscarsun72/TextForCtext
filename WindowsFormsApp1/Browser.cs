@@ -7176,8 +7176,8 @@ internal static string getImageUrl() {
             //Thread.Sleep(5200);//可多設時間以等待，若多餘，可手動按下複製按鈕即可。
             //Thread.Sleep(4300);
             //Thread.Sleep(3900);
-            //Thread.Sleep(1150);
-            Thread.Sleep(2950);
+            Thread.Sleep(1150);
+            //Thread.Sleep(2950);
             #region 將OCR結果讀入剪貼簿：
             Point copyBtnPos = new Point(); DateTime begin = DateTime.Now;
 
@@ -7230,53 +7230,7 @@ internal static string getImageUrl() {
             #endregion
 
             DateTime dateTime = DateTime.Now; bool clicked = false, trafficLimit = false;
-            Thread.Sleep(950);
-
-            //2024除夕
-            try
-            {
-                e = driver.FindElement(By.XPath("/html/body/div[1]/div/div/div[2]/div/div[1]/div[3]/div[2]/div[2]/button/i"));
-                while (e == null || Clipboard.GetText() == string.Empty)
-                {
-
-                    e = driver.FindElement(By.XPath("/html/body/div[1]/div/div/div[2]/div/div[1]/div[3]/div[2]/div[2]/button/i"));
-                    if (DateTime.Now.Subtract(dateTime).TotalSeconds > 3 ||
-                        //reach traffic limit. wait …… 訊息文字框
-                        driver.FindElement(By.XPath("/html/body/div[1]/div/div/div[2]/div/div[1]/div[3]/div[2]/div")) != null)
-                        break;
-                    Thread.Sleep(555);
-                }
-                if (e != null)
-                {
-                    e.Click();
-                    Thread.Sleep(455);
-                }
-            }
-            catch (Exception)
-            {
-
-            }
-            try
-            {
-                //reach traffic limit. wait …… 訊息文字框
-                e = driver.FindElement(By.XPath("/html/body/div[1]/div/div/div[2]/div/div[1]/div[3]/div[2]/div"));
-                if (e != null)
-                {
-                    string msg = e.GetAttribute("textContent");
-                    if (msg.StartsWith("reach traffic limit. wait "))
-                    {
-                        if (MessageBox.Show(msg + Environment.NewLine + "是否要切換成批量處理模式？", "若按下【取消】，擬改用『標注平台』處理，請記得在textBox2下「gjk」指令以切換。感恩感恩　南無阿彌陀佛　讚美主",
-                                                                MessageBoxButtons.OKCancel, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly) == DialogResult.OK)
-                            Form1.BatchProcessingGJcoolOCR = true;
-                        else
-                            Form1.BatchProcessingGJcoolOCR = false;
-                        return false;
-                    }
-                }
-            }
-            catch (Exception)
-            {
-            }
+            //Thread.Sleep(950);
 
             if (Clipboard.GetText() != "") goto finish;
 
@@ -7309,11 +7263,15 @@ internal static string getImageUrl() {
                 ////以滑鼠座標按下複製按鈕
                 //if (DateTime.Now.Subtract(dtMax).Seconds > 5 || Clipboard.GetText() != string.Empty || StopOCR) break;
 
+
+                Thread.Sleep(2950 - 1150 + 950);
+
                 ////bool frmActive = false;
                 ////ActiveForm1.Invoke((MethodInvoker)delegate { frmActive = ActiveForm1.Active; });
                 ////if (!frmActive)
                 ////{
-                clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.soundLike.none);
+                //clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.soundLike.none);
+                clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.soundLike.press);
                 Thread.Sleep(550);
                 ////}
                 ////else break;
@@ -7343,6 +7301,67 @@ internal static string getImageUrl() {
 
             });
             //}
+
+            Form1.playSound(Form1.soundLike.info, true);//just for test
+
+        retry:
+            //2024除夕
+            try
+            {
+                //e = driver.FindElement(By.XPath("/html/body/div[1]/div/div/div[2]/div/div[1]/div[3]/div[2]/div[2]/button/i"));
+                e = driver.FindElement(By.XPath("/html/body/div[1]/div/div/div[2]/div/div[1]/div[3]")).FindElement(By.XPath("/html/body/div[1]/div/div/div[2]/div/div[1]/div[3]/div[2]/div[2]/button/i"));
+                while (e == null || Clipboard.GetText() == string.Empty)
+                {
+
+                    //e = driver.FindElement(By.XPath("/html/body/div[1]/div/div/div[2]/div/div[1]/div[3]/div[2]/div[2]/button/i"));
+                    e = driver.FindElement(By.XPath("/html/body/div[1]/div/div/div[2]/div/div[1]/div[3]")).FindElement(By.XPath("/html/body/div[1]/div/div/div[2]/div/div[1]/div[3]/div[2]/div[2]/button/i"));
+                    if (DateTime.Now.Subtract(dateTime).TotalSeconds > 3 ||
+                        //reach traffic limit. wait …… 訊息文字框
+                        driver.FindElement(By.XPath("/html/body/div[1]/div/div/div[2]/div/div[1]/div[3]/div[2]/div")) != null)
+                        break;
+                    //Thread.Sleep(155);
+                }
+                if (e != null)
+                {
+                    e.Click();
+                    //Form1.playSound(Form1.soundLike.press, true);
+                    Form1.playSound(Form1.soundLike.info, true);//just for test
+                    Thread.Sleep(455);
+                }
+            }
+            catch (Exception)
+            {
+                if (DateTime.Now.Subtract(dateTime).TotalSeconds < 3)
+                {
+                    Thread.Sleep(200);
+                    Form1.playSound(Form1.soundLike.press, true);
+                    goto retry;
+                }
+            }
+            if (Clipboard.GetText() != "") goto finish;
+            try
+            {
+                //reach traffic limit. wait …… 訊息文字框
+                e = driver.FindElement(By.XPath("/html/body/div[1]/div/div/div[2]/div/div[1]/div[3]/div[2]/div"));
+                if (e != null)
+                {
+                    string msg = e.GetAttribute("textContent");
+                    if (msg.StartsWith("reach traffic limit. wait "))
+                    {
+                        if (MessageBox.Show(msg + Environment.NewLine + "是否要切換成批量處理模式？", "若按下【取消】，擬改用『標注平台』處理，請記得在textBox2下「gjk」指令以切換。感恩感恩　南無阿彌陀佛　讚美主",
+                                                                MessageBoxButtons.OKCancel, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly) == DialogResult.OK)
+                            Form1.BatchProcessingGJcoolOCR = true;
+                        else
+                            Form1.BatchProcessingGJcoolOCR = false;
+                        return false;
+                    }
+                }
+            }
+            catch (Exception)
+            {
+            }
+
+
             if (Clipboard.GetText() != "") goto finish;
             else
             {
@@ -11009,7 +11028,47 @@ internal static string getImageUrl() {
 
             return true;
         }
-
+        /// <summary>
+        /// 以選取文字檢索Google
+        /// </summary>
+        /// <param name="x">要檢索的文字</param>
+        /// <param name="quote">要加引號""就是true</param>
+        /// <returns>成功則傳回true</returns>
+        internal static bool GoogleSearch(string x, bool quote = false)
+        {
+            if (x != "")
+            {
+                x = x.EndsWith("》") ? x.Substring(0, x.Length - 1) : x;
+                x = x.EndsWith(Environment.NewLine) ? x.Substring(0, x.Length - 2) : x;
+                x = x.EndsWith("\n") ? x.Substring(0, x.Length - 1) : x;
+                if (quote) x = "\"" + x + "\"";
+                Clipboard.SetText(x);
+                //在Selenium模式下，直接以x搜尋網路
+                if (Form1.browsrOPMode != Form1.BrowserOPMode.appActivateByName)
+                {
+                    if (driver != null)
+                    {
+                        openNewTabWindow(OpenQA.Selenium.WindowType.Tab);
+                        try
+                        {
+                            driver.Navigate().GoToUrl("https://www.google.com/search?q=" + x);
+                        }
+                        catch (Exception)
+                        {
+                            return false;
+                        }
+                    }
+                    else
+                    {
+                        if (Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("是否執行【網路搜尋_元搜尋-同時搜多個引擎】") == DialogResult.OK)
+                            Process.Start(ActiveForm1.dropBoxPathIncldBackSlash + @"VS\VB\網路搜尋_元搜尋-同時搜多個引擎\網路搜尋_元搜尋-同時搜多個引擎\bin\Debug\網路搜尋_元搜尋-同時搜多個引擎.exe");
+                    }
+                }
+                else
+                    Process.Start(ActiveForm1.dropBoxPathIncldBackSlash + @"VS\VB\網路搜尋_元搜尋-同時搜多個引擎\網路搜尋_元搜尋-同時搜多個引擎\bin\Debug\網路搜尋_元搜尋-同時搜多個引擎.exe");
+            }
+            return true;
+        }
         /// <summary>
         /// 檢查是否是「Please confirm that you are human! 敬請輸入認證圖案」頁面 網址列：https://ctext.org/wiki.pl 20240929 52生日
         /// <returns></returns>

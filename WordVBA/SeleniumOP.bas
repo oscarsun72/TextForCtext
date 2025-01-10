@@ -1762,6 +1762,68 @@ Select Case Err.Number
             MsgBox "請關閉Chrome瀏覽器後再執行一次！" & vbCr & vbCr & Err.Number & Err.Description, vbExclamation
     End Select
 End Function
+Rem 查《漢語大字典》傳入檢索字，失敗傳回fasle，若成功，則複製其網址。
+Function LookupZWDZD(x As String)
+    Dim a As New StringInfo, e As SeleniumBasic.IWebElement, key As New SeleniumBasic.keys
+    a.Create x
+    If a.LengthInTextElements > 1 Then
+        word.Application.Activate
+        MsgBox "僅限查一字！", vbCritical
+        Exit Function
+        'LookupZWDZD = False
+    End If
+    If IsDriverInvalid(WD) Then
+        OpenChrome "https://homeinmists.ilotus.org/hd/hydzd.php"
+    Else
+        SeleniumOP.ActivateChrome
+        WD.SwitchTo.Window WD.CurrentWindowHandle
+        WD.Navigate.GoToUrl "https://homeinmists.ilotus.org/hd/hydzd.php"
+    End If
+    Set e = WD.FindElementByCssSelector("#keyword")
+    SeleniumOP.SetIWebElementValueProperty e, x
+    e.SendKeys key.Enter
+    
+    word.Application.ActiveWindow.windowState = wdWindowStateMinimize
+    
+    SystemSetup.wait 0.8
+    '檢索結果第2個頁碼的連結儲存格
+'    Set e = WD.FindElementByClassName("#searchTableOut > tbody > tr:nth-child(3) > td:nth-child(3) > a")
+    Set e = WD.FindElementByXPath("/html/body/div[2]/div[4]/div/table/tbody/tr[3]/td[3]/a")
+    '若檢索結果不止一個
+    If Not e Is Nothing Then Exit Function
+    
+    'Set e = WD.FindElementByClassName("#searchTableOut > tbody > tr:nth-child(2) > td:nth-child(3) > a")
+    Set e = WD.FindElementByXPath("/html/body/div[2]/div[4]/div/table/tbody/tr[2]/td[3]/a")
+    
+    If e Is Nothing Then
+            word.Application.Activate
+            MsgBox "有錯誤，請檢索，或手動執行！", vbCritical
+            Exit Function
+    End If
+'    Dim dt As Date
+'    dt = VBA.Now
+'    Do While e Is Nothing
+''        Set e = WD.FindElementByClassName("#searchTableOut > tbody > tr:nth-child(2) > td:nth-child(3) > a")
+'        Set e = WD.FindElementByXPath("/html/body/div[2]/div[4]/div/table/tbody/tr[2]/td[3]/a")
+'
+'        If Not WD.FindElementByClassName("/html/body/div[1]/div[1]/div[2]/h1/span") Is Nothing Then
+'            If WD.FindElementByClassName("/html/body/div[1]/div[1]/div[2]/h1/span").GetAttribute("textContent") = "這個網頁無法正常運作" Then
+'                GoTo exits
+'            End If
+'        End If
+'        If VBA.DateDiff("s", dt, VBA.Now) > 2 Then
+'exits:
+'            word.Application.Activate
+'            MsgBox "有錯誤，請檢索，或手動執行！", vbCritical
+'            Exit Function
+'        End If
+'    Loop
+    
+    e.Click
+    
+    LookupZWDZD = True
+End Function
+
 Rem 查中文大辭典（《國學大師》將我所掃的轉成黑白版），成功傳回true
 Function LookupZWDCD(x As String) As Boolean
     On Error GoTo eH
