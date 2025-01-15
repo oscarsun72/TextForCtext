@@ -161,8 +161,9 @@ Sub 查中文大辭典()
 End Sub
 Sub 查漢語大字典()
     Rem Alt + Shift + z （z：字（zi）的 z） 20250108
+    Rem Ctrl + Shift + Alt + h (h:漢 (han))
     文字處理.ResetSelectionAvoidSymbols
-    SeleniumOP.LookupZWDZD Selection.text
+    SeleniumOP.LookupHYDZD Selection.text
 End Sub
 Sub 查古音小鏡_訓詁工具書查詢()
     Rem Ctrl + Shift + Alt + U u=xun（訓）的u
@@ -180,9 +181,14 @@ Sub 查白雲深處人家漢語大詞典()
     文字處理.ResetSelectionAvoidSymbols
     LookupHomeinmistsHYDCD Selection.text
 End Sub
-
+Sub 查白雲深處人家漢語大字典釋義版檢索()
+    Rem Ctrl + Shift + Alt + d d=da（大）的d
+    文字處理.ResetSelectionAvoidSymbols
+    If Not LookupHomeinmistsHYDZDTextSearch(Selection.text) Then
+    End If
+End Sub
 Sub 查白雲深處人家說文解字圖像查閱_藤花榭本優先()
-    Rem  Alt + s （說文的說） Alt + j （解字的解）
+    Rem Alt + j （解字的解）
     文字處理.ResetSelectionAvoidSymbols
     If Selection.Characters.Count > 1 Then
         MsgBox "限查1字", vbExclamation ', vbError
@@ -201,6 +207,13 @@ Sub 查白雲深處人家說文解字圖文檢索WFG版_解說檢索()
     Rem  Alt + shift + s （說文的說） Alt + Shift + j （解字的解）
     文字處理.ResetSelectionAvoidSymbols
     SeleniumOP.LookupHomeinmistsShuowenImageTextSearchWFG_Interpretation Selection.text
+End Sub
+Sub 查白雲深處人家說文解字注()
+Rem  Alt + s （說文的說）
+    文字處理.ResetSelectionAvoidSymbols
+    If Not SeleniumOP.LookupHomeinmistsShuowenJieZiZhu(Selection.text) Then
+        MsgBox "請重試", vbCritical
+    End If
 End Sub
 Sub 查漢語多功能字庫並取回其說文解釋欄位之值插入至插入點位置()
     Rem  Alt + n （n= 能 neng）
@@ -949,7 +962,7 @@ eH:
             Resume
     End Select
 End Sub
-Rem 供指定快速鍵用
+Rem 供指定快速鍵用 Ctrl + Shift + Alt + x（x:小(xiao)的x)
 Sub 查小學堂上古音並讀入其結果Sub()
     查小學堂上古音並讀入其結果
 End Sub

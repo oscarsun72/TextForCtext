@@ -1420,7 +1420,7 @@ Function HanchiSearch(searchTxt As String) As Boolean
     Set iwe = WD.FindElementByCssSelector("#frmTitle > table > tbody > tr:nth-child(2) > td > table > tbody > tr:nth-child(1) > td > input[type=text]:nth-child(2)")
     If iwe Is Nothing Then Exit Function
     SetIWebElementValueProperty iwe, searchTxt
-    iwe.SendKeys key.Enter
+    iwe.SendKeys key.enter
     HanchiSearch = True
     
 End Function
@@ -1571,7 +1571,7 @@ Function LookupDictionary_of_ChineseCharacterVariants(x As String) As String()
     If Not iwe Is Nothing Then
         Dim keys As New SeleniumBasic.keys
         iwe.SendKeys keys.Shift + keys.Insert
-        iwe.SendKeys keys.Enter
+        iwe.SendKeys keys.enter
         '查詢結果訊息框，如[ 孫 ]， 查詢結果：正文 1 字，附收字 3 字
         Set iwe = WD.FindElementByCssSelector("body > main > div > flex > div:nth-child(1) > red:nth-child(1)")
         If Not iwe Is Nothing Then
@@ -1651,7 +1651,7 @@ Function LookupDictRevised(x As String) As String()
         Dim keys As New SeleniumBasic.keys
         'iwe.SendKeys keys.Shift + keys.Insert
         iwe.SendKeys keys.Control + "v"
-        iwe.SendKeys keys.Enter
+        iwe.SendKeys keys.enter
         '查詢結果訊息框，如 查無資料
         Set iwe = WD.FindElementByCssSelector("#searchL > tbody > tr > td")
         '查詢有結果時：
@@ -1720,7 +1720,7 @@ Function LookupHYDCD(x As String) As String()
         Dim keys As New SeleniumBasic.keys
         iwe.SendKeys keys.Shift + keys.Insert
         'iwe.SendKeys keys.Control + "v"
-        iwe.SendKeys keys.Enter
+        iwe.SendKeys keys.enter
         '查詢結果訊息框，如 抱歉，無此詞語。
                         '本掃描版詞典無法查詢簡體字，也無法定位到單字。
                         '若要查單字，可查詢以該字開頭的詞語，再按「上一頁」直到該單字出現，
@@ -1763,7 +1763,7 @@ Select Case Err.Number
     End Select
 End Function
 Rem 查《漢語大字典》傳入檢索字，失敗傳回fasle，若成功，則複製其網址。
-Function LookupZWDZD(x As String)
+Function LookupHYDZD(x As String)
     Dim a As New StringInfo, e As SeleniumBasic.IWebElement, key As New SeleniumBasic.keys
     a.Create x
     If a.LengthInTextElements > 1 Then
@@ -1779,16 +1779,21 @@ Function LookupZWDZD(x As String)
         WD.SwitchTo.Window WD.CurrentWindowHandle
         WD.Navigate.GoToUrl "https://homeinmists.ilotus.org/hd/hydzd.php"
     End If
+    'Set e = WD.FindElementByXPath("/html/body/div[2]/div[2]/form/div[3]/div[1]/input")
     Set e = WD.FindElementByCssSelector("#keyword")
     SeleniumOP.SetIWebElementValueProperty e, x
-    e.SendKeys key.Enter
+    'e.SendKeys key.enter
+    Set e = WD.FindElementByCssSelector("#main_form > div.form-row > div.col-3 > button")
+    e.Click
+    
     
     word.Application.ActiveWindow.windowState = wdWindowStateMinimize
     
-    SystemSetup.wait 0.8
+'    SystemSetup.wait 0.8
     '檢索結果第2個頁碼的連結儲存格
 '    Set e = WD.FindElementByClassName("#searchTableOut > tbody > tr:nth-child(3) > td:nth-child(3) > a")
     Set e = WD.FindElementByXPath("/html/body/div[2]/div[4]/div/table/tbody/tr[3]/td[3]/a")
+    
     '若檢索結果不止一個
     If Not e Is Nothing Then Exit Function
     
@@ -1796,32 +1801,46 @@ Function LookupZWDZD(x As String)
     Set e = WD.FindElementByXPath("/html/body/div[2]/div[4]/div/table/tbody/tr[2]/td[3]/a")
     
     If e Is Nothing Then
+            'word.Application.Activate
+            'MsgBox "有錯誤，請檢索，或手動執行！", vbCritical
+            'Exit Function
+            
+            GoSub enter
+            
+    End If
+    Dim dt As Date
+    dt = VBA.Now
+    Do While e Is Nothing
+        GoSub enter
+'        Set e = WD.FindElementByClassName("#searchTableOut > tbody > tr:nth-child(2) > td:nth-child(3) > a")
+        Set e = WD.FindElementByXPath("/html/body/div[2]/div[4]/div/table/tbody/tr[2]/td[3]/a")
+
+        If Not WD.FindElementByClassName("/html/body/div[1]/div[1]/div[2]/h1/span") Is Nothing Then
+            If WD.FindElementByClassName("/html/body/div[1]/div[1]/div[2]/h1/span").GetAttribute("textContent") = "這個網頁無法正常運作" Then
+                GoTo exits
+            End If
+        End If
+        If VBA.DateDiff("s", dt, VBA.Now) > 2 And e Is Nothing Then
+exits:
             word.Application.Activate
             MsgBox "有錯誤，請檢索，或手動執行！", vbCritical
             Exit Function
-    End If
-'    Dim dt As Date
-'    dt = VBA.Now
-'    Do While e Is Nothing
-''        Set e = WD.FindElementByClassName("#searchTableOut > tbody > tr:nth-child(2) > td:nth-child(3) > a")
-'        Set e = WD.FindElementByXPath("/html/body/div[2]/div[4]/div/table/tbody/tr[2]/td[3]/a")
-'
-'        If Not WD.FindElementByClassName("/html/body/div[1]/div[1]/div[2]/h1/span") Is Nothing Then
-'            If WD.FindElementByClassName("/html/body/div[1]/div[1]/div[2]/h1/span").GetAttribute("textContent") = "這個網頁無法正常運作" Then
-'                GoTo exits
-'            End If
-'        End If
-'        If VBA.DateDiff("s", dt, VBA.Now) > 2 Then
-'exits:
-'            word.Application.Activate
-'            MsgBox "有錯誤，請檢索，或手動執行！", vbCritical
-'            Exit Function
-'        End If
-'    Loop
+        End If
+    Loop
     
     e.Click
     
-    LookupZWDZD = True
+    LookupHYDZD = True
+    Exit Function
+
+enter:
+    '還在檢索頁面 'Set e = WD.FindElementByCssSelector("#keyword")
+    If Not WD.FindElementByXPath("/html/body/div[2]/div[2]/form/div[3]/div[1]/input") Is Nothing Then
+        WD.FindElementByXPath("/html/body/div[2]/div[2]/form/div[3]/div[1]/input").SendKeys key.enter
+        SystemSetup.playSound 1
+    End If
+    Return
+    
 End Function
 
 Rem 查中文大辭典（《國學大師》將我所掃的轉成黑白版），成功傳回true
@@ -1858,7 +1877,7 @@ Function LookupZWDCD(x As String) As Boolean
     SetIWebElementValueProperty iwe, x
     WD.Manage.Timeouts.PageLoad = 10 '設置頁面載入超時秒數 creedit_with_Copilot大菩薩
     On Error Resume Next
-    iwe.SendKeys key.Enter
+    iwe.SendKeys key.enter
     
     On Error GoTo 0
 '    '查詢按鈕
@@ -2053,7 +2072,7 @@ Function LookupGXDS(x As String) As String()
         Dim keys As New SeleniumBasic.keys
         iwe.SendKeys keys.Shift + keys.Insert
         'iwe.SendKeys keys.Control + "v"
-        iwe.SendKeys keys.Enter
+        iwe.SendKeys keys.enter
         
         '查詢結果訊息框，如 【精确】方式查……，推荐使用【模糊】或【詞首】方式查找。
         Set iwe = WD.FindElementByCssSelector("body > div:nth-child(3) > div.info.l > div.info_content.zj.clearfix > div.info_txt2.clearfix")
@@ -2120,7 +2139,7 @@ Function LookupKangxizidian(x As String) As String()
         Dim keys As New SeleniumBasic.keys
         iwe.Clear
         iwe.SendKeys keys.Shift + keys.Insert
-        iwe.SendKeys keys.Enter
+        iwe.SendKeys keys.enter
         '查詢結果訊息框，如： 抱歉，查無資料……請重查！
                                 '或請查找以下其他字典:
         Set iwe = WD.FindElementByCssSelector("body > center:nth-child(10) > center > table.td0 > tbody > tr > td.td1 > center > font22 > font > p:nth-child(1)")
@@ -2333,6 +2352,87 @@ Select Case Err.Number
             MsgBox "請關閉Chrome瀏覽器後再執行一次！" & vbCr & vbCr & Err.Number & Err.Description, vbExclamation
     End Select
 End Function
+Rem 查白雲深處人家漢語大字典釋義版檢索
+Function LookupHomeinmistsHYDZDTextSearch(x As String) As Boolean
+    Dim e As SeleniumBasic.IWebElement, si As New StringInfo
+    If Not code.IsChineseString(x) Then
+        MsgBox "只限中文！", vbCritical
+        Exit Function
+    End If
+    si.Create x
+    If si.LengthInTextElements > 1 Then
+        MsgBox "限 1 個中文字！", vbCritical
+        Exit Function
+    End If
+    If Not OpenChrome("https://homeinmists.ilotus.org/hd/search.php") Then
+        Exit Function
+    End If
+        
+    '字頭
+    Set e = WD.FindElementByCssSelector("#queryString1")
+    If e Is Nothing Then
+       Exit Function
+    End If
+    
+    ActivateChrome
+    WD.SwitchTo.Window WD.CurrentWindowHandle
+    word.Application.windowState = wdWindowStateMinimize
+    
+    SetIWebElementValueProperty e, x
+    '檢索
+    Set e = WD.FindElementByCssSelector("body > div.search-block > div > div:nth-child(1) > input[type=button]")
+    e.Click
+    
+    LookupHomeinmistsHYDZDTextSearch = True
+    
+End Function
+Rem 查《白雲深處人家·說文解字注》：x 要查的字。若檢索有結果，則傳回true，若沒有，或失敗、故障，則傳回false 20250115
+Function LookupHomeinmistsShuowenJieZiZhu(x As String) As Boolean
+    Dim e As SeleniumBasic.IWebElement, si As New StringInfo
+    If Not code.IsChineseString(x) Then
+        MsgBox "只限中文！", vbCritical
+        Exit Function
+    End If
+    si.Create x
+    If si.LengthInTextElements > 1 Then
+        MsgBox "限 1 個中文字！", vbCritical
+        Exit Function
+    End If
+    If Not OpenChrome("https://homeinmists.ilotus.org/shuowen/dyc.php") Then
+        Exit Function
+    End If
+        
+    '字頭
+    Set e = WD.FindElementByCssSelector("#queryString1")
+    If e Is Nothing Then
+       Exit Function
+    End If
+    
+    ActivateChrome
+    WD.SwitchTo.Window WD.CurrentWindowHandle
+    word.Application.windowState = wdWindowStateMinimize
+    
+    SetIWebElementValueProperty e, x
+    '檢索
+    Set e = WD.FindElementByCssSelector("body > div:nth-child(8) > input[type=button]:nth-child(2)")
+    e.Click
+    '圖像欄位的第1個值的儲存格
+    Set e = WD.FindElementByCssSelector("#searchTableOut > tr:nth-child(3) > td:nth-child(10) > a")
+    
+    If Not e Is Nothing Then
+        '圖像欄位的第2個值的儲存格
+        If Not WD.FindElementByCssSelector("#searchTableOut > tr:nth-child(4) > td:nth-child(10) > a") Is Nothing Then
+            LookupHomeinmistsShuowenJieZiZhu = True
+            Exit Function
+        End If
+        
+        e.Click
+    Else
+        Exit Function
+    End If
+    LookupHomeinmistsShuowenJieZiZhu = True
+    
+End Function
 Rem 查《白雲深處人家》的《漢語大詞典》 20241020
 Function LookupHomeinmistsHYDCD(x As String) As Boolean
     If Not code.IsChineseString(x) Then
@@ -2354,12 +2454,13 @@ Function LookupHomeinmistsHYDCD(x As String) As Boolean
         End If
     Loop
     SetIWebElementValueProperty iwe, x
-    iwe.SendKeys key.Enter
+    iwe.SendKeys key.enter
 '    '查詢按鈕
 '    Set iwe = WD.FindElementByCssSelector("")
 '    If iwe Is Nothing Then Exit Function
 '    iwe.Click
     LookupHomeinmistsHYDCD = True
+    
 End Function
 
 Rem 查《漢語多功能字庫》取回其《說文》「解釋」欄位的內容：x 要查的字。傳回一個字串陣列，第1個元素是《說文》「解釋」的內容字串，第2個元素是查詢結果網址。若沒找到，則傳回空字串
@@ -2403,7 +2504,7 @@ Function LookupMultiFunctionChineseCharacterDatabase(x As String, Optional backg
     Dim keys As New SeleniumBasic.keys
     iwe.Clear
     iwe.SendKeys keys.Shift + keys.Insert '貼上檢索條件
-    iwe.SendKeys keys.Enter
+    iwe.SendKeys keys.enter
     
     '等待檢索結果
     Set iwe = Nothing
@@ -2470,7 +2571,7 @@ Function LookupYtenx(x As String) As Boolean
         End If
     Loop
     SetIWebElementValueProperty iwe, x
-    iwe.SendKeys key.Enter
+    iwe.SendKeys key.enter
 '    '查詢按鈕
 '    Set iwe = WD.FindElementByCssSelector("")
 '    If iwe Is Nothing Then Exit Function
@@ -2517,7 +2618,7 @@ Function LookupShuowenOrg(x As String, Optional includingDuan As Boolean) As Str
     Dim keys As New SeleniumBasic.keys
     iwe.Clear
     iwe.SendKeys keys.Shift + keys.Insert '貼上檢索條件
-    iwe.SendKeys keys.Enter
+    iwe.SendKeys keys.enter
     
     '等待檢索結果
     Set iwe = WD.FindElementByCssSelector("body > div.container.main > div > div.col-md-9.main-content.pull-right > table > tbody > tr > td")
@@ -2674,7 +2775,7 @@ Function LookupDictionary_of_ChineseCharacterVariants_RetrieveShuoWenData(x As S
     iwe.Clear
     SetIWebElementValueProperty iwe, x
     'iwe.SendKeys keys.Shift + keys.Insert '貼上檢索條件
-    iwe.SendKeys keys.Enter '有時會失效
+    iwe.SendKeys keys.enter '有時會失效
     '「查詢」按鈕
     SystemSetup.wait 1
     Set iwe = WD.FindElementByCssSelector("#header > div > flex > div:nth-child(3) > div.quick > form > input[type=submit]:nth-child(5)")
@@ -2844,7 +2945,7 @@ Sub GoogleSearch(Optional searchStr As String)
 '        SystemSetup.SetClipboard searchStr
 '        iwe.SendKeys keys.Shift + keys.Insert
         SetIWebElementValueProperty iwe, searchStr
-        iwe.SendKeys keys.Enter
+        iwe.SendKeys keys.enter
     End If
     Exit Sub
     '    Dim form As SeleniumBasic.IWebElement
@@ -2999,7 +3100,7 @@ Function grabGjCoolPunctResult(text As String, resultText As String, Optional Ba
     SystemSetup.wait 0.9
     'btn.Click
     Dim k As New SeleniumBasic.keys
-    btn.SendKeys k.Enter
+    btn.SendKeys k.enter
     SystemSetup.playSound 1.469
     '等待標點完成
     'SystemSetup.Wait 3.6
@@ -3019,10 +3120,10 @@ Function grabGjCoolPunctResult(text As String, resultText As String, Optional Ba
             SystemSetup.playSound 1
             '檢查如果沒有按到「標點」按鈕，就再次按下 20240725 以出現等待圖示控制項為判斷
             If wdB.FindElementByCssSelector("#waitingSpinner") Is Nothing Then
-                btn.SendKeys k.Enter
+                btn.SendKeys k.enter
             Else
                 If wdB.FindElementByCssSelector("#waitingSpinner").Displayed = False And nx = text Then
-                    btn.SendKeys k.Enter
+                    btn.SendKeys k.enter
                     SystemSetup.playSound 1.469
                 End If
             End If
@@ -3162,12 +3263,12 @@ Function grabGjCoolPunctResult_New(text As String, resultText As String) As Stri
     '執行按鈕
     Set btn = WD.FindElementByCssSelector("#main > div > div.p-1.p-md-3.d-flex.justify-content-end > div:nth-child(6) > button")
     If btn Is Nothing Then Exit Function
-    btn.SendKeys k.Enter
+    btn.SendKeys k.enter
     
     '執行中的圖示
     Do While WD.FindElementByCssSelector("#waitingSpinner").Displayed = False
         SystemSetup.wait 1
-        btn.SendKeys k.Enter
+        btn.SendKeys k.enter
         If VBA.DateDiff("s", dt, VBA.Now) > 5 Then
             Exit Do
         End If
@@ -3517,7 +3618,7 @@ Function GrabXiaoxueShangGuYin(w As String) As String
     '「字形」輸入框
     Set iwe = WD.FindElementByCssSelector("#EudcFontChar")
     SetIWebElementValueProperty iwe, Selection.text
-    iwe.SendKeys key.Enter
+    iwe.SendKeys key.enter
     
     Dim dt As Date
     dt = VBA.Now

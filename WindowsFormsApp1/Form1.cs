@@ -6607,7 +6607,7 @@ namespace WindowsFormsApp1
             else
             {//如果據以判斷的第一行不是用●●●●●●●●●●長度來判斷行/段長的話，亦清除此第1行 20250109
                 string x = textBox1.Text;
-                if (x.IndexOf(Environment.NewLine) > -1)
+                if (x.IndexOf(Environment.NewLine) > -1 && autoPastetoQuickEdit && x.Length > 1100)
                 {
                     if (x.Substring(x.IndexOf(Environment.NewLine) + Environment.NewLine.Length, 1) == "*")
                     {
@@ -12851,6 +12851,13 @@ namespace WindowsFormsApp1
         {//此中斷點專為偵錯測試用 感恩感恩　南無阿彌陀佛 20230314
 
             //OutlineTitlesCloseOpenFoldExpandSwitcher();
+            
+            //20250113
+            if (this.Name != "Form1")
+            {
+                if (Application.OpenForms[0].Controls["textBox3"].Text != string.Empty && textBox3.Text != Application.OpenForms[0].Controls["textBox3"].Text)
+                    textBox3.Text = Application.OpenForms[0].Controls["textBox3"].Text;
+            }
             #region forDebugTest權作測試偵錯用20230310            
             //br.SetQuickedit_data_textboxTxt(textBox1.Text);
             //string x = Clipboard.GetText();

@@ -7123,7 +7123,8 @@ internal static string getImageUrl() {
             Form1.playSound(Form1.soundLike.processing);
             try
             {
-                iwe.Click();
+                driver.SwitchTo().Window(driver.CurrentWindowHandle);
+                iwe.Click();//按下首頁「快速體驗」按鈕：
             }
             catch (Exception)
             {
@@ -7136,7 +7137,8 @@ internal static string getImageUrl() {
             driver.SwitchTo().Window(driver.CurrentWindowHandle);//切換到目前Selenium操控的視窗，就不怕沒及時得到焦點而失誤了
             Form1.playSound(Form1.soundLike.processing);
             Clipboard.SetText(downloadImgFullName);
-            iwe.Click();
+            driver.SwitchTo().Window(driver.CurrentWindowHandle);
+            iwe.Click();//按下「上傳 拍照」按鈕：
 
             //等待「開啟」檔案對話框開啟
             Thread.Sleep(1600 + (

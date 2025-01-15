@@ -336,13 +336,15 @@ Ctrl + Shift + Alt + y 查[韻典網](https://ytenx.org/) y=yun（韻）的y
 - Alt + F12 ：**單字**查找《異體字字典》（限單字）
 - Ctrl + Alt + F12 ：查《國語辭典》（單字複詞均可）
 - Alt + Shift + \ （即 Alt + | ）： 以選取的文字查找《國語辭典》若有結果，在其後加上注音括注，並加上檢索結果網址之超連結
-- Alt + j 或 Alt + s ：**單字**檢索《[白雲深處人家](https://homeinmists.ilotus.org/)·說文解字·圖像查閱》之字頭。檢索有結果後，直接點開藤花榭本以供檢覈（即會開出2個分頁。第2個－－最後一個開啟的－－是藤花榭本書頁圖。關閉後即回到第1個分頁，即可檢視站內所收諸版本該字頭所在之書頁圖）。（j = jie 《說文解字》的「解」，s ：說 shuo 的 s）
+- Alt + j ：**單字**檢索《[白雲深處人家](https://homeinmists.ilotus.org/)·說文解字·圖像查閱》之字頭。檢索有結果後，直接點開藤花榭本以供檢覈（即會開出2個分頁。第2個－－最後一個開啟的－－是藤花榭本書頁圖。關閉後即回到第1個分頁，即可檢視站內所收諸版本該字頭所在之書頁圖）。（j = jie 《說文解字》的「解」，s ：說 shuo 的 s）
+- Alt + s ：**單字**檢索《[白雲深處人家·說文解字注](https://homeinmists.ilotus.org/shuowen/dyc.php)》（段注《說文》）之字頭。（s ：說 shuo 的 s）
 - Alt + shift + j 或 Alt + shift + s ：以釋義內文檢索《白雲深處人家·說文解字·圖文檢索WFG版》。（j = jie 《說文解字》的「解」，s ：說 shuo 的 s）
 - Alt + v ： **單字**檢索《異體字字典》並讀入其《說文》及網址資料以便引文。
 - Alt + n ： **單字**檢索《漢語多功能字庫》並取回其說文解釋欄位之值插入至插入點位置。 （n= 能 neng）
 - Alt + o ： **單字**檢索[《說文解字》網站](https://www.shuowen.org/)並取回其解釋欄位及網址值插入至插入點位置。 （o= 說文解字 ShuoWen.ORG 的 O）
 - Ctrl + Alt + Shift + o ： **單字**檢索[《說文解字》網站](https://www.shuowen.org/)並取回其解釋欄位及段注本內容與網址值插入至插入點位置，並予以適當的格式化。 （o= 說文解字 ShuoWen.ORG 的 O）
 - Ctrl + Alt + x ： **單字**檢索《康熙字典網上版》（x = xi 熙）
+- Ctrl + Shift + Alt + x ： 查[小學堂](https://xiaoxue.iis.sinica.edu.tw/shangguyin)上古音並讀入其結果（x:小(xiao)的x) 
 - Alt + Shift + g ：檢索《國學大師》（g=guo 國學大師的國）
 - Alt + g ： 以選取文字檢索Google
 - Ctrl + Shift + Alt + g ： 以選取文字加上雙引號`""`檢索Google
@@ -369,6 +371,7 @@ Ctrl + Shift + Alt + y 查[韻典網](https://ytenx.org/) y=yun（韻）的y
 - Ctrl + Alt + b 或 Ctrl + Shift + Alt + c 查[白雲深處人家](http://www.homeinmists.com/)漢語大詞典 c=ci（詞）的c；b=bai(白，白雲深處人家的白)
 - Ctrl + Shift + Alt + y 查[韻典網](https://ytenx.org/) y=yun（韻）的y
 - Alt + Shift + z 查《漢語大字典》（z：字（zi）的 z）20250108
+- Ctrl + Shift + Alt + d ： **單字**檢索《[白雲深處人家·漢語大字典釋義版檢索](https://homeinmists.ilotus.org/hd/search.php)》之字頭。（d ：大 da 的 d） 20250115
 - ctrl + Alt + Shift + z 查《中文大辭典》－－[《國學大師》](https://www.guoxuedashi.net/zidian/)所收轉愚所掃全彩為黑白版 20241020 （z：中（zh）的 z）20241020
 - Ctrl + Alt + ' （頓號） 頓號文字加上篇名號（〈〉）如周易諸卦
 - Ctrl + shift + Alt + ' （頓號） 頓號文字加上書名號（《》）如五經
