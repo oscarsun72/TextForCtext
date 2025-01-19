@@ -618,7 +618,24 @@ namespace TextForCtext
                 return iwe;
             }
         }
-
+        /// <summary>
+        /// 取得CTP網頁中的「書名」（title）超連結控制項，含 href 屬性者
+        /// </summary>
+        internal static IWebElement Title_Linkbox_Link
+        {
+            get
+            {
+                const string selector = "#content > div:nth-child(3) > span:nth-child(2) > a";//32位元免安裝版Chrome瀏覽器               
+                IWebElement iwe;
+                //if (Form1.IsValidUrl＿keyDownCtrlAdd(ActiveForm1.textBox3Text))
+                //{
+                iwe = waitFindWebElementBySelector_ToBeClickable(selector);
+                return iwe;
+                //}
+                //else
+                //    return null;                
+            }
+        }
         /// <summary>
         /// 取得CTP網頁中的「書名」（title）控制項
         /// <span itemprop="title">純常子枝語</span>
@@ -627,7 +644,7 @@ namespace TextForCtext
         {
             get
             {
-                const string selector = "#content > div:nth-child(3) > span:nth-child(2) > a > span";//33位元免安裝版Chrome瀏覽器
+                const string selector = "#content > div:nth-child(3) > span:nth-child(2) > a > span";//32位元免安裝版Chrome瀏覽器
                 const string selector1 = "#content > div:nth-child(5) > span:nth-child(2) > a > span"; //64位元安裝版Chrome瀏覽器
                 IWebElement iwe;
                 if (Form1.IsValidUrl＿keyDownCtrlAdd(ActiveForm1.textBox3Text))
@@ -1269,7 +1286,7 @@ namespace TextForCtext
         static double _chromeDriverServiceTimeSpan = 30.5;//《古籍酷》OCR所需
         /// <summary>
         ///  Selenium 操控的 Chrome瀏覽器中網頁元件的的等待秒數（WebDriverWait。即「new WebDriverWait()」的「TimeSpan」引數值）。預設為 3。
-        static double _webDriverWaitTimSpan = 3;
+        static double _webDriverWaitTimSpan = 5;
         /// </summary>
         /// <summary>
         /// - 在textBox2 輸入「tS」設定 Selenium 操控的 Chrome瀏覽器伺服器（ChromeDriverService）的等待秒數（即「new ChromeDriver()」的「TimeSpan」引數值）。預設為 8.5。
@@ -1999,9 +2016,11 @@ namespace TextForCtext
                     {
                         submit.Click();//按下 Save changes button（「保存編輯」按鈕）
                     }
-                    catch (Exception)
-                    {//chatGPT：
-                     // 等待網頁元素出現，最多等待 3 秒//應該不用這個，因為會貼上時，不太可能「savechangesbutton」按鈕還沒出現，除非網頁載入不完整……
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.HelpLink + ex.Message);
+                        //chatGPT：
+                        // 等待網頁元素出現，最多等待 3 秒//應該不用這個，因為會貼上時，不太可能「savechangesbutton」按鈕還沒出現，除非網頁載入不完整……
                         submit = waitFindWebElementById_ToBeClickable("savechangesbutton", _webDriverWaitTimSpan);  //driver.FindElement(selm.By.Id("savechangesbutton"));
                                                                                                                     //WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(3));
                                                                                                                     ////安裝了 Selenium.WebDriver 套件，才說沒有「ExpectedConditions」，然後照Visual Studio 2022的改正建議又用NuGet 安裝了 Selenium.Suport 套件，也自動「 using OpenQA.Selenium.Support.UI;」了，末學自己還用物件瀏覽器找過了 「OpenQA.Selenium.Support.UI」，可就是沒有「ExpectedConditions」靜態類別可用，即使官方文件也說有 ： https://www.selenium.dev/selenium/docs/api/dotnet/html/T_OpenQA_Selenium_Support_UI_ExpectedConditions.htm 20230109 未知何故 阿彌陀佛
@@ -2029,9 +2048,16 @@ namespace TextForCtext
                         else
                         {
                             Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("請手動檢查資料是否有正確送出。");
+                            driver.Manage().Timeouts().PageLoad += new TimeSpan(0, 0, 3);
                             //LastValidWindow = driver.CurrentWindowHandle;
                             //openNewTabWindow();
-                            driver.Navigate().GoToUrl(url);
+                            try
+                            {
+                                driver.Navigate().GoToUrl(url);
+                            }
+                            catch (Exception)
+                            {
+                            }
                         }
                         //throw;
                     }
@@ -7019,11 +7045,45 @@ internal static string getImageUrl() {
             return true;
         }
 
+
         /// <summary>
         /// 作為中止OCR相關作業的指標
         /// 欲中止OCR作業則設定為true，預設為false
         /// </summary>
         internal static bool StopOCR { get; set; } = false;
+
+        const int nChars = 256;
+        //[DllImport("user32.dll")]
+        //private static extern int GetForegroundWindow();//之前已有 [DllImport("user32.dll")]
+        //public static extern IntPtr GetForegroundWindow();
+        [DllImport("user32.dll")]
+        private static extern int GetWindowText(int hWnd, StringBuilder text, int count);
+        /// <summary>
+        /// Chrome瀏覽器是否為作用中的視窗（前景、最前端的應用程式視窗）
+        /// 20250116 Copilot大菩薩
+        /// </summary>
+        /// <returns></returns>
+        internal static bool IsChromeActive()
+        {
+            int handle = (int)GetForegroundWindow();
+            StringBuilder buffer = new StringBuilder(nChars);
+            if (GetWindowText(handle, buffer, nChars) > 0)
+            {
+                string windowTitle = buffer.ToString();
+                if (windowTitle.Contains("Google Chrome"))
+                {
+                    Console.WriteLine("Currently focused window is Chrome");
+                    return true;
+                }
+                else
+                {
+                    //Console.WriteLine("Currently focused window is not Chrome");
+                    return false;
+                }
+            }
+            return false;
+        }
+
 
         /// <summary>
         /// 以《古籍酷》首頁快速體驗OCR。不計點數（算力配额）
@@ -7116,7 +7176,8 @@ internal static string getImageUrl() {
 
 
             //Form1.playSound(Form1.soundLike.processing);
-            if (ActiveForm1.TopMost) ActiveForm1.TopMost = false;
+            ActiveForm1.TopMost = false;
+
             //首頁「快速體驗」按鈕：
             IWebElement iwe = waitFindWebElementBySelector_ToBeClickable("body > div.container-fluid.bg-dark.px-1 > div > h2.text-center.my-2.py-4 > button > div", 10);
             if (iwe == null) return false;
@@ -7240,60 +7301,73 @@ internal static string getImageUrl() {
             //if (DateTime.Now.Subtract(dateTime).Seconds > 1 && !clicked && Clipboard.GetText() == string.Empty)
             //if (true)
             //{
+            
             clicked = true;
             Task.Run(() =>
             {
-                //Form1.playSound(Form1.soundLike.info);
+                //按下「複製」圖示按鈕
+                Task.Run(() =>
+                {
+                    //Form1.playSound(Form1.soundLike.info);
 
-                if (Copybutton_GjcoolFastExperience_Location.IsEmpty) Copybutton_GjcoolFastExperience_Location = new Point(copyBtnPosX, copyBtnPosY);//Copybutton_GjcoolFastExperience_Location = new Point(835, 711);
-                                                                                                                                                     //copyBtnPos = new Point(838, 711);
-                copyBtnPos = Copybutton_GjcoolFastExperience_Location;//new Point(835, 730);
-                                                                      //copyBtnPos = new Point(copyBtnPosX, copyBtnPosY);//複製按鈕的位置：20231106
-                DateTime dtMax = DateTime.Now;
-                //while (Clipboard.GetText() == string.Empty && !StopOCR && !trafficLimit)
-                //{//先取消20240223
-                ////try
-                ////{
-                ////    driver.SwitchTo().Window(driver.CurrentWindowHandle);
-                ////}
-                ////catch (Exception)
-                ////{
-                ////    break;
-                ////    //if (Clipboard.GetText() == string.Empty) return false;
-                ////    //else goto finish;
-                ////}
-                ////以滑鼠座標按下複製按鈕
-                //if (DateTime.Now.Subtract(dtMax).Seconds > 5 || Clipboard.GetText() != string.Empty || StopOCR) break;
+                    if (Copybutton_GjcoolFastExperience_Location.IsEmpty) Copybutton_GjcoolFastExperience_Location = new Point(copyBtnPosX, copyBtnPosY);//Copybutton_GjcoolFastExperience_Location = new Point(835, 711);
+                                                                                                                                                         //copyBtnPos = new Point(838, 711);
+                    copyBtnPos = Copybutton_GjcoolFastExperience_Location;//new Point(835, 730);
+                                                                          //copyBtnPos = new Point(copyBtnPosX, copyBtnPosY);//複製按鈕的位置：20231106
+                                                                          //while (Clipboard.GetText() == string.Empty && !StopOCR && !trafficLimit)
+                                                                          //{//先取消20240223
+                                                                          ////try
+                                                                          ////{
+                                                                          ////    driver.SwitchTo().Window(driver.CurrentWindowHandle);
+                                                                          ////}
+                                                                          ////catch (Exception)
+                                                                          ////{
+                                                                          ////    break;
+                                                                          ////    //if (Clipboard.GetText() == string.Empty) return false;
+                                                                          ////    //else goto finish;
+                                                                          ////}
+                                                                          ////以滑鼠座標按下複製按鈕
+                                                                          //if (DateTime.Now.Subtract(dtMax).Seconds > 5 || Clipboard.GetText() != string.Empty || StopOCR) break;
 
 
-                Thread.Sleep(2950 - 1150 + 950);
+                    Thread.Sleep(2950 - 1150 + 950);
 
-                ////bool frmActive = false;
-                ////ActiveForm1.Invoke((MethodInvoker)delegate { frmActive = ActiveForm1.Active; });
-                ////if (!frmActive)
-                ////{
-                //clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.soundLike.none);
-                clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.soundLike.press);
-                Thread.Sleep(550);
-                ////}
-                ////else break;
-                //}
-                if (!trafficLimit) Form1.playSound(Form1.soundLike.info);
-                //Debugger.Break();
-                //if (Clipboard.GetText() != string.Empty) Application.OpenForms[0].Activate();
-
+                    ////bool frmActive = false;
+                    ////ActiveForm1.Invoke((MethodInvoker)delegate { frmActive = ActiveForm1.Active; });
+                    ////if (!frmActive)
+                    ////{
+                    //clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.soundLike.none);
+                    while (DateTime.Now.Subtract(dateTime).TotalSeconds < 6)
+                    {
+                        if (Clipboard.GetText() != string.Empty) break;
+                        if (IsChromeActive() && IsBrowserMaximized(driver))//按下「複製」圖示按鈕
+                            clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.soundLike.press);
+                        //Thread.Sleep(550);
+                        Thread.Sleep(450);
+                    }
+                    ////}
+                    ////else break;
+                    //}
+                    if (!trafficLimit) Form1.playSound(Form1.soundLike.info);
+                    //Debugger.Break();
+                    //if (Clipboard.GetText() != string.Empty) Application.OpenForms[0].Activate();
+                });
 
                 try
                 {
                     e = driver.FindElement(By.XPath("/html/body/div[1]/div/div/div[2]/div/div[1]/div[3]/div[2]/div[2]/button/i"));
                     //wait = new WebDriverWait(driver, TimeSpan.FromMilliseconds(150));
                     //wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(e));
-                    while (e == null || Clipboard.GetText() == string.Empty)
+                    while (e == null)
                     {
+                        if (Clipboard.GetText() != string.Empty || DateTime.Now.Subtract(dateTime).TotalSeconds > 5) break;
                         e = driver.FindElement(By.XPath("/html/body/div[1]/div/div/div[2]/div/div[1]/div[3]/div[2]/div[2]/button/i"));
                     }
-                    e.Click();
-                    Thread.Sleep(255);
+                    if (e != null)
+                    {
+                        e.Click();
+                        Thread.Sleep(255);
+                    }
 
                 }
                 catch (Exception)
@@ -7304,17 +7378,18 @@ internal static string getImageUrl() {
             });
             //}
 
+            if (Clipboard.GetText() != string.Empty) goto finish;
             Form1.playSound(Form1.soundLike.info, true);//just for test
-
+            string info;
         retry:
             //2024除夕
             try
             {
                 //e = driver.FindElement(By.XPath("/html/body/div[1]/div/div/div[2]/div/div[1]/div[3]/div[2]/div[2]/button/i"));
                 e = driver.FindElement(By.XPath("/html/body/div[1]/div/div/div[2]/div/div[1]/div[3]")).FindElement(By.XPath("/html/body/div[1]/div/div/div[2]/div/div[1]/div[3]/div[2]/div[2]/button/i"));
-                while (e == null || Clipboard.GetText() == string.Empty)
+                while (e == null)
                 {
-
+                    if (Clipboard.GetText() != string.Empty) break;
                     //e = driver.FindElement(By.XPath("/html/body/div[1]/div/div/div[2]/div/div[1]/div[3]/div[2]/div[2]/button/i"));
                     e = driver.FindElement(By.XPath("/html/body/div[1]/div/div/div[2]/div/div[1]/div[3]")).FindElement(By.XPath("/html/body/div[1]/div/div/div[2]/div/div[1]/div[3]/div[2]/div[2]/button/i"));
                     if (DateTime.Now.Subtract(dateTime).TotalSeconds > 3 ||
@@ -7323,6 +7398,7 @@ internal static string getImageUrl() {
                         break;
                     //Thread.Sleep(155);
                 }
+                if (Clipboard.GetText() != string.Empty) goto finish;
                 if (e != null)
                 {
                     e.Click();
@@ -7347,23 +7423,25 @@ internal static string getImageUrl() {
                 e = driver.FindElement(By.XPath("/html/body/div[1]/div/div/div[2]/div/div[1]/div[3]/div[2]/div"));
                 if (e != null)
                 {
-                    string msg = e.GetAttribute("textContent");
-                    if (msg.StartsWith("reach traffic limit. wait "))
+                    info = e.GetAttribute("textContent");
+                    if (info.StartsWith("reach traffic limit. wait "))
                     {
-                        if (MessageBox.Show(msg + Environment.NewLine + "是否要切換成批量處理模式？", "若按下【取消】，擬改用『標注平台』處理，請記得在textBox2下「gjk」指令以切換。感恩感恩　南無阿彌陀佛　讚美主",
+                        if (MessageBox.Show(info + Environment.NewLine + "是否要切換成批量處理模式？", "若按下【取消】，擬改用『標注平台』處理，請記得在textBox2下「gjk」指令以切換。感恩感恩　南無阿彌陀佛　讚美主",
                                                                 MessageBoxButtons.OKCancel, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly) == DialogResult.OK)
                             Form1.BatchProcessingGJcoolOCR = true;
                         else
                             Form1.BatchProcessingGJcoolOCR = false;
                         return false;
                     }
+                    else if (info.StartsWith("system is busy")) goto infos;
+
                 }
             }
             catch (Exception)
             {
             }
 
-
+            Form1.playSound(Form1.soundLike.over, true);
             if (Clipboard.GetText() != "") goto finish;
             else
             {
@@ -7385,6 +7463,7 @@ internal static string getImageUrl() {
                         e.Click();
                         Thread.Sleep(220);
                         e = driver.FindElement(By.XPath("/html/body/div[1]/div/div/div[2]/div/div[1]/div[3]/div[2]/div[2]/button/i"));
+                        //if (DateTime.Now.Subtract(dateTime).TotalSeconds > 13) break;
                         if (DateTime.Now.Subtract(dateTime).TotalSeconds > 13) break;
                     }
 
@@ -7430,7 +7509,7 @@ internal static string getImageUrl() {
                 ActiveForm1.Activate();
                 goto finish;
             }
-
+        infos:
             while (e == null)
             {
 
@@ -7518,6 +7597,7 @@ internal static string getImageUrl() {
                     ActiveForm1.Activate();
                     goto finish;
                 }
+
                 #region reach traffic limit
                 IWebElement iwtext = null;
                 try
@@ -7565,9 +7645,10 @@ internal static string getImageUrl() {
                         ActiveForm1.Activate();
                         goto finish;
                     }
+
                     try
                     {
-                        string info = iwtext.Text;
+                        info = iwtext.Text;
                         if (info == "reach limit"
                             || info.StartsWith("reach traffic limit.") || info.StartsWith("识别失败")
                             || info.StartsWith("ip address banned") || info.StartsWith("System is busy"))
@@ -10276,8 +10357,8 @@ internal static string getImageUrl() {
                     else if (ex.Message.StartsWith("An unknown exception was encountered sending an HTTP request to the remote WebDriver server for URL "))
                     {
                         MessageBox.Show("請關閉Chrome瀏覽器，並用本程式重新啟動 Chrome瀏覽器", "", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
-                        if (ts != new TimeSpan()) driver.Manage().Timeouts().PageLoad = ts;
-                        return false;
+                        //if (ts != new TimeSpan()) driver.Manage().Timeouts().PageLoad = ts;
+                        //return false;
                     }
                     else
                     {
@@ -10286,6 +10367,7 @@ internal static string getImageUrl() {
                         //MessageBox.Show(ex.HResult + ex.Message, "", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
                     }
                 }
+                if (ts != new TimeSpan()) driver.Manage().Timeouts().PageLoad = ts;
                 return false;
             }
             if (!SetFocusOnWebPageBody())
@@ -10614,7 +10696,7 @@ internal static string getImageUrl() {
             Size windowSize = driver.Manage().Window.Size;
             Size workingAreaSize = Screen.PrimaryScreen.WorkingArea.Size;
 
-            return windowSize.Equals(workingAreaSize);
+            return windowSize.Equals(workingAreaSize) || (windowSize.Width >= workingAreaSize.Width && windowSize.Height >= workingAreaSize.Height);
         }
 
         /// <summary>       
@@ -11095,6 +11177,7 @@ internal static string getImageUrl() {
         internal static void OutlineTitlesCloseOpenFoldExpandSwitcher()
         {
             if (driver == null) return;
+            ActiveForm1.TopMost = false;
             if (IsDriverInvalid())
             {
                 driver.SwitchTo().Window(driver.WindowHandles.LastOrDefault());
@@ -11125,7 +11208,7 @@ internal static string getImageUrl() {
 
                     }
             }
-
+            BringToFront("chrome");
         }
     }
 

@@ -336,6 +336,7 @@ Ctrl + Shift + Alt + y 查[韻典網](https://ytenx.org/) y=yun（韻）的y
 - Alt + F12 ：**單字**查找《異體字字典》（限單字）
 - Ctrl + Alt + F12 ：查《國語辭典》（單字複詞均可）
 - Alt + Shift + \ （即 Alt + | ）： 以選取的文字查找《國語辭典》若有結果，在其後加上注音括注，並加上檢索結果網址之超連結
+- Ctrl + Shift + Alt + j ： 查[教育百科_教育雲線上字典](https://pedia.cloud.edu.tw/) (j=jiao(教))
 - Alt + j ：**單字**檢索《[白雲深處人家](https://homeinmists.ilotus.org/)·說文解字·圖像查閱》之字頭。檢索有結果後，直接點開藤花榭本以供檢覈（即會開出2個分頁。第2個－－最後一個開啟的－－是藤花榭本書頁圖。關閉後即回到第1個分頁，即可檢視站內所收諸版本該字頭所在之書頁圖）。（j = jie 《說文解字》的「解」，s ：說 shuo 的 s）
 - Alt + s ：**單字**檢索《[白雲深處人家·說文解字注](https://homeinmists.ilotus.org/shuowen/dyc.php)》（段注《說文》）之字頭。（s ：說 shuo 的 s）
 - Alt + shift + j 或 Alt + shift + s ：以釋義內文檢索《白雲深處人家·說文解字·圖文檢索WFG版》。（j = jie 《說文解字》的「解」，s ：說 shuo 的 s）
@@ -428,6 +429,8 @@ Ctrl + 4 ：執行 Word VBA Sub 巨集指令「維基文庫四部叢刊本轉來
 Ctrl + f ：移至 textBox2 準備尋找文本
 
 Alt + f ：切換 Fast Mode 不待網頁回應即進行下一頁的貼入動作（即在不須檢覈貼上之文本正確與否，肯定、八成是無誤的，就可以執行此項以加快輸入文本的動作）當是 fast mode 模式時「送出貼上」按鈕會呈現紅綠燈的綠色表示一路直行通行順暢 20230130癸卯年初九第一上班日週一
+
+Alt + Shift + f ： 將章節單位的頁面樹狀目錄收起或展開 (f=folder vs unfolder) 20250116
 
 Alt + r ：在Selenium模式+手動輸入模式下、關閉所在Chrome瀏覽器右側之分頁。（因應《古籍酷》連線不暢所衍生之措施）20231026
 

@@ -1414,10 +1414,21 @@ namespace WindowsFormsApp1
                         }
                         else
                         {
-                            //MessageBox.Show("請指定頁尾處位置");
-                            MessageBoxShowOKExclamationDefaultDesktopOnly("請指定頁尾處位置");
-                            textBox1.Select(pageTextEndPosition, 0); pageTextEndPosition = 0;
-                            pageEndText10 = ""; return false;
+                            string PredictCopyX = CnText.GetSelectionTextByLineParaCount(ref textBox1, linesParasPerPage / 2);
+                            if (DialogResult.OK == Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("請重新指定頁面結束位置" + Environment.NewLine + Environment.NewLine +
+                                   "是不是這些內容？" +
+                                   Environment.NewLine + Environment.NewLine +
+                                   PredictCopyX))
+                            {
+                                l = 0; s = PredictCopyX.Length; pageTextEndPosition = s; pageEndText10 = PredictCopyX.Substring(s - 10);
+                            }
+                            else
+                            {
+                                //MessageBox.Show("請指定頁尾處位置");
+                                //MessageBoxShowOKExclamationDefaultDesktopOnly("請指定頁尾處位置");
+                                textBox1.Select(pageTextEndPosition, 0); pageTextEndPosition = 0;
+                                pageEndText10 = ""; return false;
+                            }
                         }
 
                     }
@@ -1443,7 +1454,7 @@ namespace WindowsFormsApp1
                     }
 
                 }
-                s = pageTextEndPosition;
+                if (s != pageTextEndPosition) s = pageTextEndPosition;
             }
             if (s == x.Length) l = 0;
             if (s + l <= x.Length)
@@ -1794,7 +1805,7 @@ namespace WindowsFormsApp1
                 }
                 else
                 {
-                    textBox1.Select(missWordPositon, 1);
+                    textBox1.Select(missWordPositon, insertMode ? 1 : 0);
                     textBox1.ScrollToCaret();
                     return false;
                 }
@@ -2289,6 +2300,12 @@ namespace WindowsFormsApp1
                 if (e.KeyCode == Keys.G || e.KeyCode == Keys.Packet)
                 { e.Handled = true; return; }
 
+            }
+
+            //alt + Shift + f ： 將章節單位的頁面樹狀目錄收起或展開
+            if (e.Shift && e.Alt && e.KeyCode == Keys.F)
+            {
+                OutlineTitlesCloseOpenFoldExpandSwitcher();
             }
 
             //Alt + Shift + s :  所有小注文都不換行。這個和我所使用的小小輸入法繁簡轉換快捷鍵有衝突，故須先停用小小輸入法才有作用。感恩感恩　南無阿彌陀佛
@@ -3498,9 +3515,16 @@ namespace WindowsFormsApp1
                 research:
                     if (!IsDriverInvalid())
                     {
-                        br.openNewTabWindow();
-                        br.BringToFront("chrome");
-                        driver.Navigate().GoToUrl(url);
+                        try
+                        {
+                            br.openNewTabWindow();
+                            br.BringToFront("chrome");
+                            driver.Navigate().GoToUrl(url);
+                        }
+                        catch (Exception)
+                        {
+                            Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("請重試！");
+                        }
                     }
                     else
                     {
@@ -3554,14 +3578,14 @@ namespace WindowsFormsApp1
 
                         //Task.Run(() => { br.ImproveGJcoolOCRMemo(); });//因為即使開新執行緒，但仍是用同一個表單！
                         Task.Run(() => { br.ImproveGJcoolKandiangujiOCRMemo(txtbox1SelText, url, "《看典古籍》"); });
-                        try
-                        {
-                            Clipboard.SetText(textBox1.Text);//通常改正後是要再重標點，如書名等 20240306
-                        }
-                        catch (Exception)
-                        {
-                            playSound(soundLike.error);
-                        }
+                        //try
+                        //{
+                        //    Clipboard.SetText(textBox1.Text);//通常改正後是要再重標點，如書名等 20240306 20150119 現在標點機制調整，故可略去矣。感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主
+                        //}
+                        //catch (Exception)
+                        //{
+                        //    playSound(soundLike.error);
+                        //}
                         AvailableInUseBothKeysMouse();
                     }
                     return;
@@ -7963,9 +7987,29 @@ namespace WindowsFormsApp1
                         }
                         else
                         {
-                            MessageBox.Show("請重新指定頁面結束位置", "", MessageBoxButtons.OK, MessageBoxIcon.Stop, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
-                            pageTextEndPosition = 0; pageEndText10 = "";
-                            Activate(); return false;
+                            if (autoPastetoQuickEdit && linesParasPerPage != -1)
+                            {
+                                string PredictCopyX = CnText.GetSelectionTextByLineParaCount(ref textBox1, lines_perPage / 2);
+                                if (DialogResult.OK == Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("請重新指定頁面結束位置" + Environment.NewLine + Environment.NewLine +
+                                       "是不是這些內容？" +
+                                       Environment.NewLine + Environment.NewLine +
+                                       PredictCopyX))
+                                {
+                                    s = 0; l = PredictCopyX.Length; xCopy = PredictCopyX; pageEndText10 = xCopy.Substring(l - 10);
+                                }
+                                else
+                                {
+                                    MessageBox.Show("請重新指定頁面結束位置", "", MessageBoxButtons.OK, MessageBoxIcon.Stop, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
+                                    pageTextEndPosition = 0; pageEndText10 = "";
+                                    Activate(); return false;
+                                }
+                            }
+                            else
+                            {
+                                MessageBox.Show("請重新指定頁面結束位置", "", MessageBoxButtons.OK, MessageBoxIcon.Stop, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
+                                pageTextEndPosition = 0; pageEndText10 = "";
+                                Activate(); return false;
+                            }
                         }
                     }
                 }
@@ -8835,16 +8879,31 @@ namespace WindowsFormsApp1
                     //按著Ctrl鍵則直接ok 20250109
                     if (ModifierKeys == Keys.Control) { dialogResult = DialogResult.OK; goto ok; }
 
+                    #region 取得最後不含 <p> 與 。<p> 的5個字來顯示於訊息方塊中20250118
+                    string last5Characters = textBox1.SelectedText; int eLast5Characters = last5Characters.IndexOf("<p>");
+                    if (eLast5Characters > -1)
+                    {
+                        if (eLast5Characters - 1 > -1 && last5Characters.Substring(eLast5Characters - 1, 1) == "。")//如果是「。<p>」
+                            eLast5Characters--;
+                        StringInfo siLast5Characters = new StringInfo(last5Characters.Replace("。", string.Empty).Replace("<p>", string.Empty));
+                        int sLast5Characters = textBox1.Text.IndexOf(last5Characters); eLast5Characters = sLast5Characters + last5Characters.Length;
+                        while (siLast5Characters.LengthInTextElements < 5)
+                        {
+                            siLast5Characters = new StringInfo(textBox1.Text.Substring(--sLast5Characters, eLast5Characters - sLast5Characters).Replace("。", string.Empty).Replace("<p>", string.Empty));
+                        }
+                        last5Characters = siLast5Characters.String;
+                    }
+                    #endregion
 
                     if (!speechRecognitionOPmode)
                         dialogResult = MessageBox.Show("auto paste to Ctext Quit Edit textBox?" + Environment.NewLine + Environment.NewLine
-                                                + "……" + textBox1.SelectedText, "現在處理第" + (
+                                                + "……" + last5Characters, "現在處理第" + (
                                                 _check_the_adjacent_pages ? (int.Parse(_currentPageNum) + 1).ToString() : CurrentPageNum)
                                                  + "頁", MessageBoxButtons.OKCancel, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1,
                                                  MessageBoxOptions.DefaultDesktopOnly);
                     else
                         dialogResult = MessageBox.Show("auto paste to Ctext Quit Edit textBox?" + Environment.NewLine + Environment.NewLine
-                                                + "……" + textBox1.SelectedText, "現在處理第" + (
+                                                + "……" + last5Characters, "現在處理第" + (
                                                 _check_the_adjacent_pages ? (int.Parse(_currentPageNum) + 1).ToString() : CurrentPageNum)
                                                 + "頁", MessageBoxButtons.OKCancel, MessageBoxIcon.Question
                                                  );
@@ -12850,8 +12909,9 @@ namespace WindowsFormsApp1
 
         {//此中斷點專為偵錯測試用 感恩感恩　南無阿彌陀佛 20230314
 
+            //alt + Shift + f ： 將章節單位的頁面樹狀目錄收起或展開
             //OutlineTitlesCloseOpenFoldExpandSwitcher();
-            
+
             //20250113
             if (this.Name != "Form1")
             {
@@ -12915,9 +12975,9 @@ namespace WindowsFormsApp1
             }
 
             #region 鍵入模式（手動輸入）時的處置
-            if (keyinTextMode)
+            if (keyinTextMode || autoPastetoQuickEdit)//20250117修訂
             {
-                #region 如果剪貼簿裡的是網址內容的話
+                #region 如果剪貼簿裡的內容是尾綴含「#editor」的網址內容的話 20250117修訂
                 if (ClpTxtBefore != clpTxt && clpTxt.StartsWith("http") && clpTxt.EndsWith("#editor"))
                 {
                     //new SoundPlayer(@"C:\Windows\Media\Windows Balloon.wav").Play();
@@ -14266,10 +14326,13 @@ namespace WindowsFormsApp1
             else
             {
                 editwikiID = GetEditwikiID_fromUrl(url);
-                OpenQA.Selenium.IWebElement ie = br.Full_text_search_textbox_searchressingle;
+                //OpenQA.Selenium.IWebElement ie = br.Full_text_search_textbox_searchressingle;
+                OpenQA.Selenium.IWebElement ie = br.Title_Linkbox_Link;
                 try
                 {
-                    resID = ie == null ? 0 : int.Parse(ie.GetAttribute("value").Substring("wiki:".Length));
+                    //resID = ie == null ? 0 : int.Parse(ie.GetAttribute("value").Substring("wiki:".Length));
+                    resID = ie == null ? 0 : int.Parse(ie.GetAttribute("href").Substring("https://ctext.org/library.pl?if=en&res=".Length));
+
                 }
                 catch (Exception)
                 {
@@ -14279,7 +14342,7 @@ namespace WindowsFormsApp1
             }
             if (previousBookID != bookID) previousBookID = bookID;
             //if (Math.Abs(previousBookID - bookID) > 1 || url == string.Empty)
-            if (previousResID == 0 || (previousResID != resID && resID > 0))
+            if (autoPastetoQuickEdit && (previousResID == 0 || (previousResID != resID && resID > 0)))
             { //normalLineParaLenggth = 0;
 
                 //if (url != string.Empty) Debugger.Break(); //just for test 
@@ -14420,7 +14483,7 @@ namespace WindowsFormsApp1
             //const string f = "file="; int s = x.IndexOf(f);
             int bookID = GetBookID_fromUrl(textBox3Text);// int.Parse(x.Substring(s + f.Length, x.IndexOf("&", s + 1) - s - f.Length));
 
-            if (bookID != previousBookID || previousBookID == 0)
+            if (autoPastetoQuickEdit && (bookID != previousBookID || previousBookID == 0))
             {
                 new SoundPlayer(@"C:\Windows\Media\Windows Notify Messaging.wav").Play();
                 if (Math.Abs(bookID - previousBookID) > 1) if (MessageBox.Show("是否更新頁面每行字數及每頁行數等資訊？", "", MessageBoxButtons.OKCancel

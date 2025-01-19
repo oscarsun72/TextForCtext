@@ -596,6 +596,7 @@ namespace TextForCtext
                 ,"：。","\r\n，","\r\n。","\r\n、","\r\n？","\r\n」","「\r\n" ,"{{\r\n" ,"\r\n}}"
                 ,"􏿽？","􏿽。","，〉","。〉","〈、","！，","〈，","。〈。","〈：","：〉","〈。","：，"//自動標點結果的訂正
                 ,"，。","〉·","》·"
+                ,"}}\r\n}"
                 ,"*欽定《四庫全書》"
 
             };
@@ -611,6 +612,7 @@ namespace TextForCtext
                 ,"。","，\r\n","。\r\n","、\r\n","？\r\n","」\r\n","\r\n「" ,"\r\n{{", "}}\r\n"
                 ,"？􏿽","。􏿽","〉，","〉。","、〈","！","，〈","。〈","〈","〉","。〈","："//自動標點結果的訂正
                 ,"。","·","·"
+                ,"}}}\r\n"
                 ,"*欽定四庫全書"
 
             };
@@ -1368,5 +1370,60 @@ namespace TextForCtext
             return x;
         }
 
+        /// <summary>
+        /// 20250117
+        /// 在數行/段（有\r\n作間隔符）文字裡將n行/段的文字選取起來、或取得這個n行/段範圍內的字串值
+        /// Copilot大菩薩：在C# Windows Forms中，要選取特定行數或段落內的文字或取得這些範圍內的字串值，可以利用TextBox或RichTextBox控制項和一些文字處理邏輯來完成。
+        /// 這段程式碼會將TextBox控制項中的文字以\r\n分割成行，然後根據指定的行數範圍選取並取得這些行的文字。
+        /// </summary>
+        /// <param name="textBox"></param>
+        /// <param name="lineParaCount"></param>
+        /// <returns></returns>
+        internal static string GetSelectionTextByLineParaCount(ref TextBox textBox, int lineParaCount)
+        {
+            //// 假設textBox是您的TextBox控制項
+            //// 將\r\n作為行分隔符將文字分割成行
+            string[] lines = textBox.Text.Split(new string[] { Environment.NewLine }, StringSplitOptions.None);
+
+            // 要選取的行數範圍
+            int startLine = 0;//2; // 開始行，行數從0開始
+            int endLine = lineParaCount-1;//4; // 結束行
+
+            // 確保範圍在有效的行數內
+            if (startLine >= 0 && endLine < lines.Length && startLine <= endLine)
+            {
+                // 取出指定範圍的行
+                var selectedLines = lines.Skip(startLine).Take(endLine - startLine + 1);
+                // 合併行為一個字串
+                string selectedText = string.Join(Environment.NewLine, selectedLines);
+
+                // 顯示或使用選取的文字
+                return selectedText;
+            }
+            else
+            {
+                Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("選取範圍無效");
+                return textBox.Text;
+            }
+
+        }
+
+        /// <summary>
+        /// 將斜線「/」前後的文本倒置過來
+        /// 20250118 Copilot大菩薩
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        public static string SwapTextAroundSlash(string input)
+        {
+            int slashIndex = input.IndexOf('/');
+            if (slashIndex >= 0)
+            {
+                string part1 = input.Substring(0, slashIndex);
+                string part2 = input.Substring(slashIndex + 1);
+                return part2 + "/" + part1;
+            }
+            return input;
+        }
     }
 }

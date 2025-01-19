@@ -1070,7 +1070,7 @@ Function Searchu(res As String, undoName As String) As Boolean
     SeleniumOP.SetIWebElementValueProperty iwe, Selection.text
     
     On Error GoTo eH
-    iwe.SendKeys key.Enter
+    iwe.SendKeys key.enter
     'ÀË¯Áµ²ªG
     Set iwe = SeleniumOP.WD.FindElementByCssSelector("#content > table.searchsummary > tbody > tr:nth-child(4) > th > b")
     If iwe Is Nothing Then Exit Function
@@ -1962,7 +1962,8 @@ Sub Add0toSequenceField()
             SeleniumOP.OpenChrome "https://ctext.org/"
         Else
             'WD.SwitchTo.Window SeleniumOP.WindowHandles()(SeleniumOP.WindowHandlesCount - 1)
-            WD.SwitchTo.Window SeleniumOP.WindowHandles()(0)
+'            WD.SwitchTo.Window SeleniumOP.WindowHandles()(0)
+            WD.SwitchTo.Window SeleniumOP.WD.WindowHandles()(0)
         End If
     End If
     If Selection.Type = wdSelectionIP Then

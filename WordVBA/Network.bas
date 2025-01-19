@@ -134,6 +134,11 @@ Sub 查國語辭典_到網頁去看()
     文字處理.ResetSelectionAvoidSymbols
     SeleniumOP.LookupDictRevised Selection.text
 End Sub
+Sub 查教育百科_教育雲線上字典()
+    Rem Ctrl + Shift + Alt + j (j=jiao(教))
+    文字處理.ResetSelectionAvoidSymbols
+    SeleniumOP.LookupPediaCloudEduTw Selection.text
+End Sub
 Sub 查漢語大詞典()
     Rem Alt + c
     文字處理.ResetSelectionAvoidSymbols

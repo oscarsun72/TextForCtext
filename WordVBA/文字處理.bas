@@ -4302,3 +4302,27 @@ Function CharactersStr(str As String) As VBA.Collection
     Next i
     Set CharactersStr = cln
 End Function
+
+Rem 20250118 將Word文檔中選定文本中的斜線前後文字進行倒置 creedit_with_Copilot大菩薩
+Function SwapTextAroundSlash(selectionText As String) As String
+    Dim parts As Variant
+    parts = VBA.Split(selectionText, "/")
+    If UBound(parts) = 1 Then
+        SwapTextAroundSlash = parts(1) & "/" & parts(0)
+    End If
+End Function
+Rem 20250118 將文本中小注文斜線前後顛倒的文本改正過來
+Sub SwapNoteTextAroundSlash()
+    Dim rng As Range, ur As UndoRecord
+    SystemSetup.stopUndo ur, "SwapNoteTextAroundSlash"
+    Set rng = ActiveDocument.Range
+    With rng.Find
+        .font.Size = 11.5
+        .font.Color = 16711935
+    End With
+    Do While rng.Find.Execute()
+        rng.text = SwapTextAroundSlash(rng.text)
+        rng.SetRange rng.End, rng.Document.Range.End
+    Loop
+    
+End Sub

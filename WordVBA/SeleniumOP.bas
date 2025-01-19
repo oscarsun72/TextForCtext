@@ -1178,7 +1178,7 @@ Sub dictRevisedSearch(Optional searchStr As String)
     On Error GoTo Err1
     'If searchStr = "" And Selection = "" Then Exit Sub
     Const url As String = "https://dict.revised.moe.edu.tw/search.jsp?md=1"
-    If WD Is Nothing Then
+    If WD Is Nothing Or IsDriverInvalid(WD) Then
         OpenChrome (url)
     End If
         If WD.url <> url Then WD.url = url
@@ -1626,7 +1626,12 @@ Function LookupDictRevised(x As String) As String()
     End If
     SystemSetup.SetClipboard x
     
-    If Not OpenChrome("https://dict.revised.moe.edu.tw/search.jsp?md=1") Then Exit Function
+    If IsDriverInvalid(WD) Then
+        If Not OpenChrome("https://dict.revised.moe.edu.tw/search.jsp?md=1") Then Exit Function
+    Else
+        WD.SwitchTo.Window WD.CurrentWindowHandle
+        If VBA.InStr(WD.url, "https://dict.revised.moe.edu.tw/") <> 1 Then WD.url = "https://dict.revised.moe.edu.tw/search.jsp?md=1"
+    End If
     
     
     Dim iwe As SeleniumBasic.IWebElement
@@ -1640,11 +1645,11 @@ Function LookupDictRevised(x As String) As String()
         End If
     Loop
     
+'    VBA.AppActivate "chrome"
+    ActivateChrome
     word.Application.windowState = wdWindowStateMinimize
     WD.SwitchTo.Window (WD.CurrentWindowHandle)
     VBA.Interaction.DoEvents
-'    VBA.AppActivate "chrome"
-    ActivateChrome
 
     '找到檢索框之後
     If Not iwe Is Nothing Then
@@ -2031,6 +2036,27 @@ caseElse:
             MsgBox Err.Number & Err.Description, vbCritical
     End Select
 End Function
+Rem 查教育百科_教育雲線上字典 失敗傳回false
+Function LookupPediaCloudEduTw(x As String) As Boolean
+    Dim e As SeleniumBasic.IWebElement, key As New SeleniumBasic.keys
+    If IsDriverInvalid(WD) Then
+        If Not OpenChrome("https://pedia.cloud.edu.tw/") Then Exit Function
+    End If
+    WD.SwitchTo.Window WD.CurrentWindowHandle
+    If VBA.InStr(WD.url, "https://pedia.cloud.edu.tw/") <> 1 Then WD.url = "https://pedia.cloud.edu.tw/"
+    
+    ActivateChrome
+    word.Application.windowState = wdWindowStateMinimize
+    
+    Set e = WD.FindElementByCssSelector("#searchInput")
+    If e Is Nothing Then Exit Function
+    
+    SetIWebElementValueProperty e, x
+    e.SendKeys key.enter
+    
+    LookupPediaCloudEduTw = True
+End Function
+
 '強制停止網頁載入 20241020 creedit_with_Copilot大菩薩
 Sub StopLoadPage()
     WD.ExecuteScript "window.stop();"
