@@ -3751,7 +3751,7 @@ namespace WindowsFormsApp1
                 if (e.KeyCode == Keys.Insert)
                 {//Alt + Insert ：將剪貼簿的文字內容讀入textBox1中;若在手動鍵入輸入模式下則自動加上書名號篇名號
                     e.Handled = true;
-                    int s = textBox1.SelectionStart; string x = textBox1.Text;
+                    int s = textBox1.SelectionStart, l = textBox1.SelectionLength; string x = textBox1.Text;
                     caretPositionRecord();
                     //string clpTxt = Clipboard.GetText();
                     //if (clpTxt.StartsWith("http"))
@@ -3798,9 +3798,13 @@ namespace WindowsFormsApp1
                     //else textBox1.Text = clpTxt;
                     dragDrop = false;
                     AvailableInUseBothKeysMouse();
-                    if (s > 0) restoreCaretPosition(textBox1, s, 0);
+                    //if (s > 0) restoreCaretPosition(textBox1, s, 0);
+                    if (s > 0) restoreCaretPosition(textBox1, s, l);//20250122
                     if (textBox1.SelectionStart == 0 && s > 0)
+                    {
                         textBox1.SelectionStart = s;
+                        textBox1.SelectionLength = l;
+                    }
 
                     //caretPositionRecord();
                     return;
@@ -5122,6 +5126,9 @@ namespace WindowsFormsApp1
                 }
                 else notTitleIndent = true;
             }
+
+            CnText.ReplaceBlanksWithSpaces(textBox1);
+
             restoreCaretPosition(textBox1, s, 0);
             stopUndoRec = false;
         }
@@ -5790,7 +5797,18 @@ namespace WindowsFormsApp1
             expandSelectedTextRangeToWholeLinePara(s, l, x);
             s = textBox1.SelectionStart; l = textBox1.SelectionLength;
             selTxt = textBox1.SelectedText;
-            //if (textBox1.SelectedText.Substring(0, 2) == "􏿽")//(textBox1.SelectedText.IndexOf("􏿽") > -1)
+
+            #region 將第一行/段是空白「􏿽」而後面是空格「　」的縮排改成都是空格「　」 20250124
+            if (selTxt.Substring(0, 2) == "􏿽" && selTxt.IndexOf(Environment.NewLine) > -1
+                    && selTxt.Substring(selTxt.IndexOf(Environment.NewLine) + Environment.NewLine.Length, 1) == "　")
+            {
+                textBox1.SelectedText = "　" + textBox1.SelectedText.Substring(2);//這樣會取消選取
+                l--;
+                textBox1.Select(s, l);
+                selTxt = textBox1.SelectedText;
+            }
+            #endregion
+            
             if (selTxt.Length > 1 && selTxt.Substring(0, 2) == "􏿽")//(textBox1.SelectedText.IndexOf("􏿽") > -1)
             {
                 i = selTxt.IndexOf(Environment.NewLine + "􏿽");
@@ -8887,8 +8905,10 @@ namespace WindowsFormsApp1
                             eLast5Characters--;
                         StringInfo siLast5Characters = new StringInfo(last5Characters.Replace("。", string.Empty).Replace("<p>", string.Empty));
                         int sLast5Characters = textBox1.Text.IndexOf(last5Characters); eLast5Characters = sLast5Characters + last5Characters.Length;
-                        while (siLast5Characters.LengthInTextElements < 5)
+                        while (sLast5Characters > -1 && eLast5Characters - sLast5Characters > -1
+                            && siLast5Characters.LengthInTextElements < 5)
                         {
+                            if (sLast5Characters - 1 < 0) break;
                             siLast5Characters = new StringInfo(textBox1.Text.Substring(--sLast5Characters, eLast5Characters - sLast5Characters).Replace("。", string.Empty).Replace("<p>", string.Empty));
                         }
                         last5Characters = siLast5Characters.String;

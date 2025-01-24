@@ -1387,7 +1387,7 @@ namespace TextForCtext
 
             // 要選取的行數範圍
             int startLine = 0;//2; // 開始行，行數從0開始
-            int endLine = lineParaCount-1;//4; // 結束行
+            int endLine = lineParaCount - 1;//4; // 結束行
 
             // 確保範圍在有效的行數內
             if (startLine >= 0 && endLine < lines.Length && startLine <= endLine)
@@ -1409,7 +1409,7 @@ namespace TextForCtext
         }
 
         /// <summary>
-        /// 將斜線「/」前後的文本倒置過來
+        /// 將斜線「/」前後的文本倒置過來（即《Kanripo漢籍リポジトリ》或《國學大師》所藏《四庫全書》或《四部叢刊》本小注夾注文前後行倒置的情形）
         /// 20250118 Copilot大菩薩
         /// </summary>
         /// <param name="input"></param>
@@ -1425,5 +1425,43 @@ namespace TextForCtext
             }
             return input;
         }
+        //將誤填滿為空白的改為空格
+        //private Document _document; _document = new Document(textBox1);
+        internal static void ReplaceBlanksWithSpaces(TextBox textBox1)
+        {/*
+          * 1.	取得 textBox1 內容的所有段落。
+            2.	遍歷各個段落，找出符合條件的段落。
+            3.	更改符合條件的段落的下一個段落的第一個字元。
+            4.	確保更改反映在 textBox1 的內容中。
+            這樣，當……符合條件的段落的下一個段落的第一個字元將被更改，並且 textBox1 中的內容也會相應更新。希望這對您有所幫助。感恩感恩，南無阿彌陀佛。
+
+          */
+            Document _document;
+            _document = new Document(textBox1);
+
+
+            var paragraphs = _document.GetParagraphs();
+
+            for (int i = 0; i < paragraphs.Count - 1; i++)
+            {
+                var currentParagraph = paragraphs[i];
+                var nextParagraph = paragraphs[i + 1];
+
+                if (currentParagraph.Text.Length > 0 && nextParagraph.Text.Length > 0)
+                {
+                    string firstCharCurrent = currentParagraph.Text.Substring(0, char.IsHighSurrogate(currentParagraph.Text[0]) ? 2 : 1);
+                    string firstCharNext = nextParagraph.Text.Substring(0, char.IsHighSurrogate(nextParagraph.Text[0]) ? 2 : 1);
+
+                    if (firstCharCurrent == "􏿽" && firstCharNext == "􏿽" &&
+                        !currentParagraph.Text.EndsWith("<p>") && nextParagraph.Text.EndsWith("<p>"))
+                    {
+                        _document.CurrentParagraphIndex = i + 1;
+
+                        _document.UpdateParagraphFirstCharacter(i + 1, "　");
+                    }
+                }
+            }
+        }
+
     }
 }

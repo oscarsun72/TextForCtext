@@ -304,7 +304,8 @@ namespace TextForCtext
         /// <returns>是這個錯誤則傳回true </returns>
         internal static bool ChromedriverLose(Exception ex)
         {
-            if (ex.Message.StartsWith("An unknown exception was encountered sending an HTTP request to the remote WebDriver server for URL "))//An unknown exception was encountered sending an HTTP request to the remote WebDriver server for URL http://localhost:13451/session/6f6c77cfb73c5c388c6cdfd40a06b806/url. The exception message was: 傳送要求時發生錯誤。
+            if (ex.Message.StartsWith("An unknown exception was encountered sending an HTTP request to the remote WebDriver server for URL ")||
+                ex.Message.StartsWith("disconnected: not connected to DevTools"))//An unknown exception was encountered sending an HTTP request to the remote WebDriver server for URL http://localhost:13451/session/6f6c77cfb73c5c388c6cdfd40a06b806/url. The exception message was: 傳送要求時發生錯誤。
             {
                 Form1.playSound(Form1.soundLike.over);
                 killchromedriverFromHere();
@@ -3409,24 +3410,32 @@ internal static string getImageUrl() {
             //LastValidWindow = driver.CurrentWindowHandle;
             //Form1.ResetLastValidWindow();
             openNewTabWindow();
-            GoToUrlandActivate("https://kandianguji.com/ocr");
+            GoToUrlandActivate("https://kandianguji.com/ocr");//https://kandianguji.com/shuzihua?page_mode=img_file
             //driver.Navigate().GoToUrl("https://kandianguji.com/ocr");
             Browser.BringToFront("chrome");
 
             //按下「選擇檔案」按鈕
             //IWebElement iwe = waitFindWebElementBySelector_ToBeClickable("#image-input");
-            IWebElement iwe = waitFindWebElementBySelector_ToBeClickable("#convert-form > label.drop-container", 3);
+            //IWebElement iwe = waitFindWebElementBySelector_ToBeClickable("#convert-form > label.drop-container", 3);
+            IWebElement iwe = waitFindWebElementBySelector_ToBeClickable("#app > div:nth-child(1) > div > div.col-md-3 > div > div.col-md-10 > label", 3);
             DateTime dt = DateTime.Now;
             while (iwe == null)
             {
                 if (DateTime.Now.Subtract(dt).TotalSeconds > 10)
                     if (Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("等候「選擇檔案」按鈕逾時，是否繼續？") == DialogResult.Cancel)
                     { StopOCR = true; return false; }
-                iwe = waitFindWebElementBySelector_ToBeClickable("#convert-form > label.drop-container");
+                iwe = waitFindWebElementBySelector_ToBeClickable("#app > div:nth-child(1) > div > div.col-md-3 > div > div.col-md-10 > label");
             }
             //ActiveForm1.TopMost = false;//前已有
-            driver.SwitchTo().Window(driver.CurrentWindowHandle);
-            iwe.Click();
+            try
+            {
+                driver.SwitchTo().Window(driver.CurrentWindowHandle);
+                iwe.Click();
+            }
+            catch (Exception)
+            {
+                StopOCR = true; return false;
+            }
 
             //等待書圖檔下載完成
             dt = DateTime.Now;
@@ -3442,7 +3451,14 @@ internal static string getImageUrl() {
             catch (Exception)
             {
             }
-            driver.SwitchTo().Window(driver.CurrentWindowHandle);
+            try
+            {
+                driver.SwitchTo().Window(driver.CurrentWindowHandle);
+            }
+            catch (Exception)
+            {
+                StopOCR = true; return false;
+            }
             //等待選取檔案對話框開啟
             //Thread.Sleep(800 + (
             Thread.Sleep(1600 + (
@@ -3455,32 +3471,36 @@ internal static string getImageUrl() {
             //SendKeys.SendWait("{ENTER}");
             //Clipboard.Clear();
 
-            iwe = waitFindWebElementBySelector_ToBeClickable("#image-input");
+            //圖像載入訊息框
+            iwe = waitFindWebElementBySelector_ToBeClickable("#img_create_message");
             while (iwe == null)
             {
-                iwe = waitFindWebElementBySelector_ToBeClickable("#image-input");
+                iwe = waitFindWebElementBySelector_ToBeClickable("#img_create_message");
+                if (DateTime.Now.Subtract(dt).TotalSeconds > 38) { StopOCR = true; return false; }
             }
-            while (!iwe.GetAttribute("value").Contains("Ctext_Page_Image.png")) { }
+            while (!iwe.GetAttribute("textContent").Contains("Ctext_Page_Image.png")) { if (DateTime.Now.Subtract(dt).TotalSeconds > 38) { StopOCR = true; return false; } }
             //Thread.Sleep(300);
 
-            //「文本排版方向」點選「豎排」：
-            iwe = waitFindWebElementBySelector_ToBeClickable("#sp");
-            iwe.Click();
+            ////「文本排版方向」點選「豎排」：
+            //iwe = waitFindWebElementBySelector_ToBeClickable("#img_det_mode");
+            //iwe.Click();
 
             //點選「 语序优化beta版」核取方塊：（對於正文、夾注之次予至關重要）20240803
-            iwe = waitFindWebElementBySelector_ToBeClickable("#version_2");
-            iwe.Click();
+            //iwe = waitFindWebElementBySelector_ToBeClickable("#version_2");
+            iwe = waitFindWebElementBySelector_ToBeClickable("#img_rec_version");
+            //iwe.Click();
+            SetIWebElementValueProperty(iwe, "beta");
 
             dt = DateTime.Now;
             //按下「開始識別」按鈕：
-            iwe = waitFindWebElementBySelector_ToBeClickable("#convert-form > button:nth-child(9)");
+            iwe = waitFindWebElementBySelector_ToBeClickable("#img_create_task_button");
             while (iwe == null)
             {
                 if (DateTime.Now.Subtract(dt).TotalSeconds > 5)
                 {
                     if (Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("等候「開始識別」按鈕逾時，是否繼續？") == DialogResult.Cancel) { StopOCR = true; return false; }
                 }
-                iwe = waitFindWebElementBySelector_ToBeClickable("#convert-form > button:nth-child(9)");
+                iwe = waitFindWebElementBySelector_ToBeClickable("#img_create_task_button");
             }
             iwe.Click();
 
@@ -3499,7 +3519,8 @@ internal static string getImageUrl() {
             dt = DateTime.Now;
             try
             {
-                while (iwe.GetAttribute("textContent") == "识别结果")
+                //while (iwe.GetAttribute("textContent") == "识别结果")
+                while (iwe.GetAttribute("value") == "")
                 {
                     if (DateTime.Now.Subtract(dt).TotalSeconds > 20)
                         if (Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("等候OCR結果逾時，是否繼續？") == DialogResult.Cancel) { StopOCR = true; return false; }
@@ -3515,7 +3536,7 @@ internal static string getImageUrl() {
             string ocrResult = string.Empty;
             try
             {
-                ocrResult = iwe.GetAttribute("textContent");
+                ocrResult = iwe.GetAttribute("value");
             }
             catch (Exception ex)
             {
@@ -4139,7 +4160,7 @@ internal static string getImageUrl() {
             if (iwe != null)
             {
                 info = iwe.Text;
-                if (info.Contains("IP已被封锁。 IP is blocked.") || info.Contains("系统太忙。 System is busy."))
+                if (info.Contains("IP已被封锁。 IP is blocked.") || info.Contains("系统太忙。 System is busy.") || info.StartsWith("system is busy"))
                 {//開啟Google Keep記錄，以檢視封鎖情況：
                  //openNewTabWindow(WindowType.Tab);
                  //GoToUrlandActivate("https://keep.google.com/#NOTE/1-bHzJG4vtIyJMsT7SSRkgSZ2DSvcAabhLC88WERCnPxTd9MqsSXwgpHxYFU2");
@@ -4180,7 +4201,7 @@ internal static string getImageUrl() {
                             rst.Fields["ctext"].Value = false;
                             rst.Fields["Systemisbusy"].Value = false;
                         }
-                        else if (info.Contains("系统太忙。 System is busy."))
+                        else if (info.Contains("系统太忙。 System is busy.") || info.StartsWith("system is busy"))
                         {
                             rst.Fields["IpAddressBanned"].Value = false;
                             rst.Fields["IPisblocked"].Value = false;
@@ -4205,7 +4226,7 @@ internal static string getImageUrl() {
             try
             {
                 driver.Close();
-                if (info.Contains("系统太忙。 System is busy."))
+                if (info.Contains("系统太忙。 System is busy.") || info.StartsWith("system is busy"))
                 {
                     if (ActiveForm1.InvokeRequired)
                     {
@@ -4779,7 +4800,9 @@ internal static string getImageUrl() {
                     }
                     catch (Exception ex)
                     {
-                        MessageBox.Show(ex.HResult + ex.Message, "", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
+                        if (ex.HResult == -2146233079 && ex.Message == "要求已經中止: 無法建立 SSL/TLS 的安全通道。") ;//不顯示 20250119
+                        else
+                            MessageBox.Show(ex.HResult + ex.Message, "", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
                     }
                 }
                 //string pcIpAddress = GetPCIpAddress("乙太網路");
@@ -7301,7 +7324,7 @@ internal static string getImageUrl() {
             //if (DateTime.Now.Subtract(dateTime).Seconds > 1 && !clicked && Clipboard.GetText() == string.Empty)
             //if (true)
             //{
-            
+
             clicked = true;
             Task.Run(() =>
             {
@@ -7433,8 +7456,15 @@ internal static string getImageUrl() {
                             Form1.BatchProcessingGJcoolOCR = false;
                         return false;
                     }
-                    else if (info.StartsWith("system is busy")) goto infos;
-
+                    else if (info.StartsWith("system is busy"))
+                    {//e = null; goto infos; 
+                        //string ip = GetPublicIpAddress(string.Empty);
+                        //Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("這個IP " + ip + " 不能用！");
+                        //Clipboard.SetText(ip);
+                        //ActiveForm1.Activate();
+                        //ActiveForm1.BringToFront();
+                        StopOCR = true; return false;
+                    }
                 }
             }
             catch (Exception)
@@ -7442,6 +7472,7 @@ internal static string getImageUrl() {
             }
 
             Form1.playSound(Form1.soundLike.over, true);
+
             if (Clipboard.GetText() != "") goto finish;
             else
             {
@@ -7651,7 +7682,7 @@ internal static string getImageUrl() {
                         info = iwtext.Text;
                         if (info == "reach limit"
                             || info.StartsWith("reach traffic limit.") || info.StartsWith("识别失败")
-                            || info.StartsWith("ip address banned") || info.StartsWith("System is busy"))
+                            || info.StartsWith("ip address banned") || info.StartsWith("System is busy") || info.StartsWith("system is busy"))
                         {
                             trafficLimit = true; DialogResult ds = DialogResult.None;
                             StopOCR = true; ActiveForm1.PagePaste2GjcoolOCR_ing = false;
@@ -7661,7 +7692,7 @@ internal static string getImageUrl() {
                             IntPtr targetWindowHandle = FindWindow(null, targetProcessName);
                             Task tsRing = Task.Run(() =>
                             {
-                                if (info.StartsWith("System is busy") || info.StartsWith("ip address banned"))
+                                if (info.StartsWith("System is busy") || info.StartsWith("system is busy") || info.StartsWith("ip address banned"))
                                 {
                                     Form1.OCRBreakSoundNotification();
                                     //if (File.Exists("C:\\Windows\\Media\\ring05.wav"))
@@ -7717,7 +7748,7 @@ internal static string getImageUrl() {
 
                             try
                             {
-                                if (info.StartsWith("System is busy") || info.StartsWith("ip address banned")) CurrentIP = GetPublicIpAddress(string.Empty);//CurrentIP = CurrentIP == string.Empty ? GetPublicIpAddress(string.Empty) : CurrentIP;
+                                if (info.StartsWith("System is busy") || info.StartsWith("system is busy") || info.StartsWith("ip address banned")) CurrentIP = GetPublicIpAddress(string.Empty);//CurrentIP = CurrentIP == string.Empty ? GetPublicIpAddress(string.Empty) : CurrentIP;
                             }
                             catch (Exception)
                             {
@@ -7726,7 +7757,7 @@ internal static string getImageUrl() {
                             }
 
                             string mark = info.StartsWith("识别失败") ? "●●●●●●●●●" :
-                                (info.StartsWith("System is busy") || info.StartsWith("ip address banned")) ? "★★★★★★★★★★★" + CurrentIP + "★★★★" : "●";
+                                (info.StartsWith("System is busy") || info.StartsWith("system is busy") || info.StartsWith("ip address banned")) ? "★★★★★★★★★★★" + CurrentIP + "★★★★" : "●";
                             if (info.StartsWith("ip address banned")) Clipboard.SetText(CurrentIP);
                             //現在有批量處理權限，此功能懸置，且VPN之IP多已遭《古籍酷》封鎖，故預設按鈕改為「取消」！20240831
                             ds = MessageBox.Show("是否讓程式自動更換IP？", "●切換IP？" + mark + "『" + info + "』" + mark
@@ -7845,10 +7876,10 @@ internal static string getImageUrl() {
             {
                 //throw;
             }
-            Form1.playSound(Form1.soundLike.done);//找到複製按鈕按下的音效
+            Form1.playSound(Form1.soundLike.over, true);//找到複製按鈕按下的音效
             #endregion
 
-            int timeSpanSecs = 0;
+            int timeSpanSecs = 25;//0;
             #region 原式
             /*
              * 上面 Bing大菩薩指導的 找到元件了，原來這個就不必要了，留作紀念。畢竟幫我們完成了許多書頁。感恩感恩　讚歎讚歎　南無阿彌陀佛
@@ -8081,29 +8112,33 @@ internal static string getImageUrl() {
 
             if (Clipboard.GetText() != "") goto finish;
 
-            while (!Form1.isClipBoardAvailable_Text(10))
-            {
-                //Form1.playSound(Form1.soundLike.info);
-                //if (timeSpanSecs > 0 && DateTime.Now.Subtract(begin).TotalSeconds > timeSpanSecs) return false;
-                //藉由手動關閉視窗以提早/強制中止程序
-                #region 方便提早取消作業（藉由關閉OCR視窗）
-                try
-                {
-                    if (currentWindowHndl != driver.CurrentWindowHandle) { };
-                }
-                catch (Exception)
-                {
-                    return false;
-                }
-                #endregion
-                //if (copyBtnPos.X > 0)//= Point(838, 711)
-                //{
-                //    MouseOperations.MouseEventMousePos(MouseOperations.MouseEventFlags.LeftDown, copyBtnPos);
-                //    Thread.Sleep(50);
-                //    MouseOperations.MouseEventMousePos(MouseOperations.MouseEventFlags.LeftUp, copyBtnPos);
-                //    Thread.Sleep(100);
-                //}
-            }
+
+            #region 20250119 取消
+            //while (!Form1.isClipBoardAvailable_Text(10))
+            //{
+            //    //Form1.playSound(Form1.soundLike.info);
+            //    //if (timeSpanSecs > 0 && DateTime.Now.Subtract(begin).TotalSeconds > timeSpanSecs) return false;
+            //    //藉由手動關閉視窗以提早/強制中止程序
+            //    #region 方便提早取消作業（藉由關閉OCR視窗）
+            //    try
+            //    {
+            //        if (currentWindowHndl != driver.CurrentWindowHandle) { };
+            //    }
+            //    catch (Exception)
+            //    {
+            //        return false;
+            //    }
+            //    #endregion
+            //    //if (copyBtnPos.X > 0)//= Point(838, 711)
+            //    //{
+            //    //    MouseOperations.MouseEventMousePos(MouseOperations.MouseEventFlags.LeftDown, copyBtnPos);
+            //    //    Thread.Sleep(50);
+            //    //    MouseOperations.MouseEventMousePos(MouseOperations.MouseEventFlags.LeftUp, copyBtnPos);
+            //    //    Thread.Sleep(100);
+            //    //}
+            //}
+            #endregion
+
             //while (Clipboard.GetText().Length == 0)
             //{
 
@@ -8158,7 +8193,19 @@ internal static string getImageUrl() {
                     (2) VBA) (Stop 語句 | Microsoft Learn.https://learn.microsoft.com/zh-tw/office/vba/language/reference/user-interface-help/stop-statement 已存取 2023/3/30.
                     (3) What is the equivalent of End(VB6/ VBA) in order to end in C# for Windows applications? - Stack Overflow. https://stackoverflow.com/questions/2033141/what-is-the-equivalent-of-end-vb6-vba-in-order-to-end-in-c-sharp-for-windows-a 已存取 2023/3/30.*/
                 //System.Diagnostics.Debugger.Break();
-                if (DateTime.Now.Subtract(begin).TotalSeconds > timeSpanSecs) return false;
+                if (DateTime.Now.Subtract(begin).TotalSeconds > timeSpanSecs)
+                {
+                    if (DialogResult.Cancel == Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("已過" + timeSpanSecs + "秒，是否再等5秒？"))
+                        return false;
+                    else
+                    {
+                        timeSpanSecs += 5;
+                        driver.SwitchTo().Window(driver.CurrentWindowHandle);
+                        driver.FindElement(By.XPath("/html/body/div[1]/div/div/div[2]/div/div[1]/div[3]/div[2]/div[2]/button/i"))?.Click();
+                        //BringToFront("chrome");
+                        goto retry;
+                    }
+                }
                 //if (Clipboard.GetText() == "")
                 //    return false;
                 //else
