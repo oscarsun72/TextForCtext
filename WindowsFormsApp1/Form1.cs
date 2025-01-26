@@ -2205,13 +2205,15 @@ namespace WindowsFormsApp1
                     return;
                 }
                 if (e.KeyCode == Keys.J)
-                {//Ctrl + Alt + j ：以選取文字進行[《看典古籍·古籍全文檢索》](https://kandianguji.com/search_all) (d=dian 典；j=籍 ji) 20241018
+                {//Ctrl + Alt + j ：以選取文字進行[《看典古籍·古籍全文檢索》](https://kandianguji.com/search) (d=dian 典；j=籍 ji) 20241018
                     if (driver == null) return;
                     e.Handled = true;
                     if (!br.IsDriverInvalid()) br.LastValidWindow = br.driver.CurrentWindowHandle;
                     TopMost = false;
                     overtypeModeSelectedTextSetting(ref textBox1);
-                    Task.Run(() => { br.KanDianGuJiSearchAll(textBox1.SelectedText); });
+                    string str = textBox1.SelectedText;
+                    Clipboard.SetText(str);
+                    Task.Run(() => { br.KanDianGuJiSearchAll(str); });
                     return;
                 }
                 #region Ctrl + Alt + pageup Ctrl + Alt + pagedown                
@@ -2996,7 +2998,13 @@ namespace WindowsFormsApp1
 
                 if (e.KeyCode == Keys.F7)
                 {//Shift + F7 每行凸排
-                    e.Handled = true; deleteSpacePreParagraphs_ConvexRow();
+                    e.Handled = true;
+                    #region 如果插入點剛好在行/段前 20250124
+                    if (textBox1.SelectionLength == 0 && textBox1.SelectionStart > 0
+                        && textBox1.SelectionStart < textBox1.TextLength - Environment.NewLine.Length &&
+                        textBox1.Text.Substring(textBox1.SelectionStart, Environment.NewLine.Length) == Environment.NewLine) textBox1.SelectionStart--;
+                    #endregion
+                    deleteSpacePreParagraphs_ConvexRow();
                     if (!Active)
                         bringBackMousePosFrmCenter();
                     return;
@@ -3343,7 +3351,7 @@ namespace WindowsFormsApp1
                     return;
                 }
                 if (e.KeyCode == Keys.D)
-                {//Alt + d ：以選取文字進行[《看典古籍·古籍全文檢索》](https://kandianguji.com/search_all) (d=dian 典) 20241008
+                {//Alt + d ：以選取文字進行[《看典古籍·古籍全文檢索》](https://kandianguji.com/search) (d=dian 典) 20241008
                     e.Handled = true;
                     if (!br.IsDriverInvalid())
                         br.LastValidWindow = br.driver.CurrentWindowHandle;
@@ -3353,12 +3361,14 @@ namespace WindowsFormsApp1
                     TopMost = false;
                     overtypeModeSelectedTextSetting(ref textBox1);
                     string str = textBox1.SelectedText;
-                    // 在主執行緒中設置剪貼簿 20241030 Copilot大菩薩
-                    this.Invoke((MethodInvoker)delegate
+                    if (str != string.Empty)
+                    {
+                        // 在主執行緒中設置剪貼簿 20241030 Copilot大菩薩
+                        this.Invoke((MethodInvoker)delegate
                     {
                         Clipboard.SetText(str);
                     });
-
+                    }
                     // 在新的執行緒中進行網頁檢索
                     Task.Run(() => { br.KanDianGuJiSearchAll(str); });
                     return;
@@ -5808,7 +5818,7 @@ namespace WindowsFormsApp1
                 selTxt = textBox1.SelectedText;
             }
             #endregion
-            
+
             if (selTxt.Length > 1 && selTxt.Substring(0, 2) == "􏿽")//(textBox1.SelectedText.IndexOf("􏿽") > -1)
             {
                 i = selTxt.IndexOf(Environment.NewLine + "􏿽");
@@ -7626,10 +7636,12 @@ namespace WindowsFormsApp1
         /// <returns>回傳網址是否合法</returns>
         internal static bool IsValidUrl＿keyDownCtrlAdd(string url)
         {
+            url = br.ClearUrl_BoxEtc(url);
             //return Regex.IsMatch(url, @"(#editor|&page=|ctext\.org)");
             //return Regex.IsMatch(url, @"ctext\.org.*&file.*&page=.*#editor");
             //也有可能是這種網址：https://ctext.org/library.pl?if=gb&file=34195&page=142&editwiki=826120#box(140,120,2,0)
-            return Regex.IsMatch(url, @"ctext\.org.*&file.*&page=.*&edit");
+            //return Regex.IsMatch(url, @"ctext\.org.*&file.*&page=.*&edit");
+            return Regex.IsMatch(url, @"ctext\.org.*&file.*&page=.*#edit")|| Regex.IsMatch(url, @"ctext\.org.*&file.*&page=.*&editwiki=.*");//20250126
             /*
              * Bing大菩薩：是的，在正則表達式中，小數點「.」是一個特殊字符，它匹配任何單個字符（除了換行符）。如果您想在正則表達式中匹配字面上的小數點，則需要在前面加上反斜杠「\」來對其進行轉義。
              * 在 C# 中，由於反斜杠「\」本身也是一個轉義字符，所以您需要使用兩個反斜杠「\\」來表示一個字面上的反斜杠。因此，在 C# 中的正則表達式中，要匹配字面上的小數點，您需要寫成「\\.」。
@@ -8915,6 +8927,7 @@ namespace WindowsFormsApp1
                     }
                     #endregion
 
+                    Refresh();
                     if (!speechRecognitionOPmode)
                         dialogResult = MessageBox.Show("auto paste to Ctext Quit Edit textBox?" + Environment.NewLine + Environment.NewLine
                                                 + "……" + last5Characters, "現在處理第" + (
@@ -10681,7 +10694,23 @@ namespace WindowsFormsApp1
                 default:
                     break;
             }
-            br.driver?.SwitchTo().Window(currentWindowHndl);
+            try
+            {
+                br.driver?.SwitchTo().Window(currentWindowHndl);
+            }
+            catch (Exception)
+            {
+                try
+                {
+                    br.driver?.SwitchTo().Window(LastValidWindow);
+                }
+                catch (Exception)
+                {
+                    br.driver.SwitchTo().Window(br.driver.WindowHandles.Last());
+                    StopOCR = true; return false;
+                }
+                StopOCR = true; return false;
+            }
 
             if (!ocrResult)
             {

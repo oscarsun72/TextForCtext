@@ -304,7 +304,7 @@ namespace TextForCtext
         /// <returns>是這個錯誤則傳回true </returns>
         internal static bool ChromedriverLose(Exception ex)
         {
-            if (ex.Message.StartsWith("An unknown exception was encountered sending an HTTP request to the remote WebDriver server for URL ")||
+            if (ex.Message.StartsWith("An unknown exception was encountered sending an HTTP request to the remote WebDriver server for URL ") ||
                 ex.Message.StartsWith("disconnected: not connected to DevTools"))//An unknown exception was encountered sending an HTTP request to the remote WebDriver server for URL http://localhost:13451/session/6f6c77cfb73c5c388c6cdfd40a06b806/url. The exception message was: 傳送要求時發生錯誤。
             {
                 Form1.playSound(Form1.soundLike.over);
@@ -1332,6 +1332,8 @@ namespace TextForCtext
                     //    cDrv = new ChromeDriver(driverService, options,TimeSpan.FromSeconds(_chromeDriverServiceTimeSpan));
                     //else
                     ////自己的電腦比較快
+                    if (_chromeDriverServiceTimeSpan < 30.5) _chromeDriverServiceTimeSpan = 30.5;//《古籍酷》OCR所需 
+                    if (chromedriversPID == null) chromedriversPID = new List<int>();
                     cDrv = new ChromeDriver(driverService, options, TimeSpan.FromSeconds(_chromeDriverServiceTimeSpan));//等待重啟時間，預設為 8.5秒鐘：其實也是等待伺服器回應的時間，太短則在完整編輯（如網址有「&action=editchapter」）送出時，會逾時
                                                                                                                         //若寫成「 , TimeSpan.MinValue);」這會出現超出設定值範圍的錯誤//TimeSpan是設定決定重新啟動chromedriver.exe須等待的時間，太長則人則不耐，太短則chromedriver.exe來不及反應而出錯。感恩感恩　讚歎讚歎　南無阿彌陀佛 202301051751
                 }
@@ -1547,7 +1549,9 @@ namespace TextForCtext
 
                 if (!chromedriversPID.Contains(driverService.ProcessId)) chromedriversPID.Add(driverService.ProcessId);
                 //配置quickedit_data_textbox以備用
+
                 driver = cDrv;// quickedit_data_textboxSetting 方法堆疊（stack）中要用到driver參考
+
                 if (Form1.IsValidUrl＿ImageTextComparisonPage(url))
                     quickedit_data_textboxSetting(url, null, cDrv);
                 //IWebElement clk  = cDrv.FindElement(selm.By.Id("logininfo")); clk.Click();
@@ -3154,7 +3158,7 @@ internal static string getImageUrl() {
         /// <summary>
         /// 儲存chromedriver程序ID的陣列
         /// </summary>
-        internal static List<int> chromedriversPID = new List<int>();
+        internal static List<int> chromedriversPID;// = new List<int>();
         ///// <summary>
         ///// 儲存chromedriver程序ID的陣列 chromedriversPID的下標值
         ///// </summary>
@@ -3410,7 +3414,8 @@ internal static string getImageUrl() {
             //LastValidWindow = driver.CurrentWindowHandle;
             //Form1.ResetLastValidWindow();
             openNewTabWindow();
-            GoToUrlandActivate("https://kandianguji.com/ocr");//https://kandianguji.com/shuzihua?page_mode=img_file
+            //GoToUrlandActivate("https://kandianguji.com/ocr");//https://kandianguji.com/shuzihua?page_mode=img_file
+            GoToUrlandActivate("https://kandianguji.com/shuzihua?page_mode=img_file");
             //driver.Navigate().GoToUrl("https://kandianguji.com/ocr");
             Browser.BringToFront("chrome");
 
@@ -4800,8 +4805,7 @@ internal static string getImageUrl() {
                     }
                     catch (Exception ex)
                     {
-                        if (ex.HResult == -2146233079 && ex.Message == "要求已經中止: 無法建立 SSL/TLS 的安全通道。") ;//不顯示 20250119
-                        else
+                        if (!(ex.HResult == -2146233079 && ex.Message == "要求已經中止: 無法建立 SSL/TLS 的安全通道。")) //不顯示 20250119                        
                             MessageBox.Show(ex.HResult + ex.Message, "", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
                     }
                 }
@@ -7540,7 +7544,7 @@ internal static string getImageUrl() {
                 ActiveForm1.Activate();
                 goto finish;
             }
-        infos:
+            //infos:
             while (e == null)
             {
 
@@ -9700,17 +9704,17 @@ internal static string getImageUrl() {
             return url;
         }
         /// <summary>
-        /// 清除Url中的雜項，如 #box(280,86,1,0) 20241101
+        /// 清除Url中的雜項，如 #box(280,86,1,0)等（etc） 20241101 20250126
         /// </summary>
         /// <param name="url"></param>
         /// <returns>傳回清除後的結果</returns>
         internal static string ClearUrl_BoxEtc(string url)
         {
             if (!url.StartsWith("http")) return url;
-            int s = url.IndexOf("#box"); string xClear = null;
+            int s = url.IndexOf("#box");
             if (s > -1)
             {
-                xClear = url.Substring(s, url.IndexOf(")", s) - s + 1);
+                string xClear = url.Substring(s, url.IndexOf(")", s) - s + 1);
                 url = url.Substring(0, s) + url.Substring(s + xClear.Length, url.Length - (s + xClear.Length));
             }
             return url;
@@ -10940,58 +10944,162 @@ internal static string getImageUrl() {
             }
             return false;
         }
+
+        /* GitHub Copilot大菩薩：
+         This error happens because the System.TypeInitializationException is thrown when a static constructor throws an exception, or when a static field initializer throws an exception.
+            This might be happening because the static field DriverManageTimeoutsPageLoad is being initialized with a value that involves accessing the driver object, which is null at the time of initialization. Specifically, the line internal static readonly TimeSpan DriverManageTimeoutsPageLoad = (TimeSpan)driver?.Manage().Timeouts().PageLoad; tries to access driver?.Manage().Timeouts().PageLoad, but driver is null, leading to a System.InvalidOperationException when trying to access the Value property of a null object.
+            To fix this, ensure that driver is properly initialized before it is used in the static field initializer. One way to do this is to initialize DriverManageTimeoutsPageLoad in a static constructor after ensuring driver is not null.
+            Example:
+        */
         /// <summary>
-        /// 進行[《看典古籍·古籍全文檢索》](https://kandianguji.com/search_all) (d=dian 典) ，成功則傳回true。20241008
+        /// chromedriver載入頁面的時間上限。預設為5分鐘（原以為是7秒） 20250125
+        /// creedit with GitHub Copilot大菩薩。感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主
+        /// </summary>        
+        internal static readonly TimeSpan DriverManageTimeoutsPageLoad= driver==null?TimeSpan.FromMinutes(5):driver.Manage().Timeouts().PageLoad;
+        //internal static readonly TimeSpan DriverManageTimeoutsPageLoad;
+        ///// <summary>
+        ///// 靜態建構器（constructor），靜態成員之初始化要在此中進行
+        ///// </summary>
+        //static Browser()
+        //{
+        //    if (driver != null)
+        //    {
+        //        DriverManageTimeoutsPageLoad = (TimeSpan)driver.Manage().Timeouts().PageLoad;
+        //    }
+        //    else
+        //    {
+        //        // Handle the case where driver is null
+        //        //DriverManageTimeoutsPageLoad = TimeSpan.FromSeconds(7); // default value
+        //        DriverManageTimeoutsPageLoad = TimeSpan.FromMinutes(5); // default value
+        //    }
+        //}
+
+
+        /// <summary>
+        /// 進行[《看典古籍·古籍全文檢索》](https://kandianguji.com/search) (d=dian 典) ，成功則傳回true。20241008
         /// </summary>
-        /// <param name="searchTxt"></param>
+        /// <param name="searchTxt">要檢索的文字</param>
         /// <returns></returns>
         public static bool KanDianGuJiSearchAll(string searchTxt)
         {
+            void openNewtab(string strUrl)
+            {
+                openNewTabWindow();
+                GoToUrlandActivate(strUrl, true);
+            }
             bool exact = false;
-            const string url = "https://kandianguji.com/search_all";
+            const string url = "https://kandianguji.com/search";
             if (DialogResult.OK == Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("是否要【精確檢索】？")) exact = true;
             TimeSpan ts = new TimeSpan();
             if (!IsDriverInvalid())
             {
                 LastValidWindow = driver.CurrentWindowHandle;
-                //if (driver.Url != url) driver.Url = url;
                 ts = driver.Manage().Timeouts().PageLoad;
+                if (ts < DriverManageTimeoutsPageLoad) ts = DriverManageTimeoutsPageLoad;
             }
-            //else
-            //{
+        reload:
             try
             {
-                openNewTabWindow();
-                driver.Manage().Timeouts().PageLoad = new TimeSpan(0, 0, 3);
-                GoToUrlandActivate(url, true);
+                if (!IsDriverInvalid())
+                {
+                    if (ts != driver.Manage().Timeouts().PageLoad) ts = driver.Manage().Timeouts().PageLoad;
+                    driver.Manage().Timeouts().PageLoad = new TimeSpan(0, 0, 3);
+                    if (driver.Url != url)
+                    {
+                        if (ts != driver.Manage().Timeouts().PageLoad) ts = driver.Manage().Timeouts().PageLoad;
+                        driver.Manage().Timeouts().PageLoad = new TimeSpan(0, 0, 3);
+                        openNewtab(url);
+                    }
+                }
+                else
+                {
+                    if (ts != driver.Manage().Timeouts().PageLoad) ts = driver.Manage().Timeouts().PageLoad;
+                    driver.Manage().Timeouts().PageLoad = new TimeSpan(0, 0, 3);
+                    openNewtab(url);
+                }
+
+                driver.SwitchTo().Window(driver.CurrentWindowHandle);
+                BringToFront("chrome");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Console.WriteLine(ex.HResult + ex.Message);
                 if (ts != new TimeSpan()) driver.Manage().Timeouts().PageLoad = ts;
                 return false;
             }
-            //}
-            IWebElement iwe = waitFindWebElementBySelector_ToBeClickable("#keyword");
-            if (iwe == null)
+            if (driver.Url == "about:blank")
             {
-                if (ts != new TimeSpan()) driver.Manage().Timeouts().PageLoad = ts;
-                return false;
+                driver.Manage().Timeouts().PageLoad = DriverManageTimeoutsPageLoad;
+                goto reload;
             }
 
-            SetIWebElementValueProperty(iwe, searchTxt);
-            //按下Enter是沒作用的
+            DateTime dt = DateTime.Now;
+
+            // 繁簡同檢
+            IWebElement iwe = waitFindWebElementBySelector_ToBeClickable("#search_select");
+            while (iwe == null)
+            {
+                iwe = waitFindWebElementBySelector_ToBeClickable("#search_select");
+                if (DateTime.Now.Subtract(dt).TotalSeconds > 3 && iwe == null)
+                {
+                    if (ts != new TimeSpan()) driver.Manage().Timeouts().PageLoad = ts;
+                    return false;
+                }
+            }
+            //iwe.Click();
+            //iwe = waitFindWebElementBySelector_ToBeClickable("#search_select > option:nth-child(2)");
+            //iwe.Click();
+            //iwe.SendKeys(OpenQA.Selenium.Keys.Down);
+            //iwe.SendKeys(OpenQA.Selenium.Keys.Down);
+            //iwe.Click();
+            SetIWebElementValueProperty(iwe, "jianfan");
+            //SetIWebElementValueProperty(iwe, string.Empty);
+            //SetIWebElementValueProperty(iwe, "jianfan");
+
+            // 設定匹配模式
+            iwe = waitFindWebElementBySelector_ToBeClickable("#search_mode");
+            iwe.Click();
             if (exact)
-                iwe = waitFindWebElementBySelector_ToBeClickable("body > div > div > div.form-inline > button.btn.btn-info.btn-lg.ml-2");
+            {
+                waitFindWebElementBySelector_ToBeClickable("#search_mode > option:nth-child(2)").Click();
+                //SetIWebElementValueProperty(iwe, "accurate");
+            }
             else
-                iwe = waitFindWebElementBySelector_ToBeClickable("body > div > div > div.form-inline > button.btn.btn-danger.btn-lg");
+            {
+                waitFindWebElementBySelector_ToBeClickable("#search_mode > option:nth-child(1)").Click();
+                //SetIWebElementValueProperty(iwe, "vague");
+            }
+
+
+            // 檢索詞
+            iwe = waitFindWebElementBySelector_ToBeClickable("#search_input");
+            while (iwe == null)
+            {
+                iwe = waitFindWebElementBySelector_ToBeClickable("#search_input");
+                if (DateTime.Now.Subtract(dt).TotalSeconds > 3 && iwe == null)
+                {
+                    if (ts != new TimeSpan()) driver.Manage().Timeouts().PageLoad = ts;
+                    return false;
+                }
+            }
+            iwe.Clear();
+            //iwe.SendKeys(OpenQA.Selenium.Keys.Shift + OpenQA.Selenium.Keys.Insert);
+            //SetIWebElementValueProperty(iwe, string.Empty);//設定值無法讓「檢索」按鈕運作，必須用SendKeys才行，故得用到剪貼簿了（因為Selenium還不支援非BMP的字面）
+            SetIWebElementValueProperty(iwe, searchTxt);//設定值無法讓「檢索」按鈕運作
+            //iwe.SendKeys(OpenQA.Selenium.Keys.Enter);//按下Enter鍵也無效
+            iwe.SendKeys(OpenQA.Selenium.Keys.Space);//按下Enter鍵也無效
+
+
+            // 「檢索」按鈕。好奇怪的檢索按鈕與機制！
+            iwe = waitFindWebElementBySelector_ToBeClickable("#search_button");
             if (iwe == null)
             {
                 if (ts != new TimeSpan()) driver.Manage().Timeouts().PageLoad = ts;
                 return false;
             }
-            iwe.Click();
+            //iwe.Click();
+            iwe.SendKeys(OpenQA.Selenium.Keys.Space);
             if (ts != new TimeSpan()) driver.Manage().Timeouts().PageLoad = ts;
-            //driver.Manage().Timeouts().PageLoad = new TimeSpan(0, 1, 0);
             return true;
         }
         /// <summary>

@@ -310,7 +310,7 @@ Alt + x ：檢索《康熙字典網上版》（x=xi，「熙」漢語拼音）
 
 Alt + c ：檢索《漢語大詞典》（c=ci，「詞」漢語拼音）
 
-Alt + d 或 Ctrl + Alt + j ：以選取文字進行[《看典古籍·古籍全文檢索》](https://kandianguji.com/search_all) (d=dian 典；j=籍 ji) 20241008
+Alt + d 或 Ctrl + Alt + j ：以選取文字進行[《看典古籍·古籍全文檢索》](https://kandianguji.com/search) (d=dian 典；j=籍 ji) 20241008
 
 Alt + h ：以選取文字檢索[《漢籍全文資料庫》](https://hanchi.ihp.sinica.edu.tw/) (h=han 漢) 20241008
 
@@ -363,7 +363,7 @@ Ctrl + Shift + Alt + y 查[韻典網](https://ytenx.org/) y=yun（韻）的y
     > 若無選取，則自動選取範圍（選取範圍詳程式碼）
 - Alt + Shift + y ： 查[《易學網·易經［周易］原文》](https://www.eee-learning.com/article/571)指定卦名文本_並取回其純文字值及網址值插入至文件中插入點位置(y:yi 易) 20241004
     > 若游標所在為《易學網》的網址，則將其網頁內容讀入到文件（於該連結段落後插入）
-- Ctrl + Alt + j 或 Alt + d 以文件中選取文字進行[《看典古籍·古籍全文檢索》](https://kandianguji.com/search_all) （j=籍 ji；d=典 dian）
+- Ctrl + Alt + j 或 Alt + d 以文件中選取文字進行[《看典古籍·古籍全文檢索》](https://kandianguji.com/search) （j=籍 ji；d=典 dian）
     > 原為 Ctrl + k,d (k=kan 看；d=dian 典) ，因會使內建的 Ctrl + k （插入超連結）失效，故改定 20241014
 - Alt + h 或 Alt + Shfit + h： 檢索《漢籍全文資料庫》 (h=han 漢)
 - Alt + t ： 以Google檢索《中國哲學書電子化計劃》 查中國哲學書電子化計劃網域  (t=CTP的t)20241006

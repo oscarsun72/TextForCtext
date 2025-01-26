@@ -214,7 +214,7 @@ Sub 查白雲深處人家說文解字圖文檢索WFG版_解說檢索()
     SeleniumOP.LookupHomeinmistsShuowenImageTextSearchWFG_Interpretation Selection.text
 End Sub
 Sub 查白雲深處人家說文解字注()
-Rem  Alt + s （說文的說）
+Rem  Alt + s （說文的說） 或  Ctlr + Shift + Alt + e (wen「文」的 e）
     文字處理.ResetSelectionAvoidSymbols
     If Not SeleniumOP.LookupHomeinmistsShuowenJieZiZhu(Selection.text) Then
         MsgBox "請重試", vbCritical
@@ -1555,8 +1555,11 @@ End Function
 Rem 20241006 《看典古籍·古籍全文檢索》 Ctrl + Alt + j （j=籍 ji） 或 Alt + d （d：典 dian）
 '原為 Ctrl + k,d  ，因會使內建的 Ctrl + k （插入超連結）失效，故改定 20241014
 Sub 查看典古籍古籍全文檢索()
+    Dim str As String
     文字處理.ResetSelectionAvoidSymbols
-    SeleniumOP.KandiangujiSearchAll Selection.text
+    str = Selection.text
+    SystemSetup.SetClipboard str
+    SeleniumOP.KandiangujiSearchAll str
 End Sub
 Rem 20241006 檢索《漢籍全文資料庫》 Alt + Shfit + h 或 Alt + h
 Sub 查漢籍全文資料庫()

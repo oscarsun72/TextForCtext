@@ -1349,13 +1349,16 @@ Err1:
 End Function
 Rem 20241006 《看典古籍·古籍全文檢索》，成功則傳回true
 Function KandiangujiSearchAll(searchTxt As String) As Boolean
-    Dim exact As Boolean
-    Const url = "https://kandianguji.com/search_all"
+    Dim exact As Boolean, key As New SeleniumBasic.keys
+    Const url = "https://kandianguji.com/search"
     SystemSetup.SetClipboard searchTxt
     If VBA.vbOK = VBA.MsgBox("是否要【精確檢索】？", vbQuestion + vbOKCancel) Then exact = True
 
     If Not IsWDInvalid() Then
-        If WD.url <> url Then WD.url = url
+        LastValidWindow = WD.CurrentWindowHandle
+        If WD.url <> url Then
+            If Not OpenChrome(url) Then Exit Function
+        End If
     Else
         If Not OpenChrome(url) Then
             Exit Function
@@ -1365,18 +1368,51 @@ Function KandiangujiSearchAll(searchTxt As String) As Boolean
     WD.SwitchTo().Window (WD.CurrentWindowHandle)
     ActivateChrome
     word.Application.windowState = wdWindowStateMinimize
+    
     Dim iwe As SeleniumBasic.IWebElement ', key As New SeleniumBasic.keys
-    Set iwe = WD.FindElementByCssSelector("#keyword")
-    If iwe Is Nothing Then Exit Function
-    SetIWebElementValueProperty iwe, searchTxt
-'    iwe.SendKeys key.Enter'按下Enter鍵並無作用
+    
+    Dim dt As Date
+    dt = VBA.Now
+
+    '   繁簡同檢
+    Set iwe = WD.FindElementByCssSelector("#search_select")
+    Do While iwe Is Nothing
+        Set iwe = WD.FindElementByCssSelector("#search_select")
+        If VBA.DateDiff("s", dt, VBA.Now) > 3 And iwe Is Nothing Then
+            Exit Function
+        End If
+    Loop
+    iwe.Click
+    'SetIWebElementValueProperty iwe, "jianfan"
+    Set iwe = WD.FindElementByCssSelector("#search_select > option:nth-child(2)")
+    iwe.Click
+    
+    ' 設定匹配模式
+    Set iwe = WD.FindElementByCssSelector("#search_mode")
+    iwe.Click
     If exact Then
-        Set iwe = WD.FindElementByCssSelector("body > div > div > div.form-inline > button.btn.btn-info.btn-lg.ml-2")
+        Set iwe = WD.FindElementByCssSelector("#search_mode > option:nth-child(2)")
     Else
-        Set iwe = WD.FindElementByCssSelector("body > div > div > div.form-inline > button.btn.btn-danger.btn-lg")
+        Set iwe = WD.FindElementByCssSelector("#search_mode > option:nth-child(1)")
     End If
     If iwe Is Nothing Then Exit Function
     iwe.Click
+    
+    Set iwe = WD.FindElementByCssSelector("#search_input")
+    If iwe Is Nothing Then Exit Function
+    
+    iwe.Clear
+    'SetIWebElementValueProperty iwe, searchTxt'須用Sendkeys才行
+    iwe.SendKeys key.Shift + key.Insert
+    
+    'iwe.SendKeys key.enter '按下Enter鍵並無作用
+    ' 「檢索」按鈕。好奇怪的檢索按鈕與機制！
+    Set iwe = WD.FindElementByCssSelector("#search_button")
+    If iwe Is Nothing Then
+        Exit Function
+    End If
+    iwe.Click
+    
     KandiangujiSearchAll = True
 End Function
 Rem 20241006 檢索《漢籍全文資料庫》，成功則傳回true
