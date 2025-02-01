@@ -143,14 +143,24 @@ namespace TextForCtext
 
                     // 解析 JSON
                     var parsedJson = JObject.Parse(result);
+                    if (parsedJson.First.First.ToString().Contains("token使用次数已用完"))
+                    {
+                        Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(parsedJson.First.First.ToString());
+                        return null; }
+                    try
+                    {
+                        var data = parsedJson["data"].ToObject<List<string>>();
 
-                    var data = parsedJson["data"].ToObject<List<string>>();
+                        // 將 data 轉換為換行分隔的字符串
+                        var formattedResult = string.Join(Environment.NewLine, data);
 
-
-                    // 將 data 轉換為換行分隔的字符串
-                    var formattedResult = string.Join(Environment.NewLine, data);
-
-                    return formattedResult;
+                        return formattedResult;
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.HResult + ex.Message);
+                        return null;
+                    }
                 }
                 catch (Exception)
                 {

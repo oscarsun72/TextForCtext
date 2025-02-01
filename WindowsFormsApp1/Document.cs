@@ -124,6 +124,146 @@ namespace TextForCtext
                 }
             }
         }
+        /// <summary>
+        /// 將插入點後的2行/段內容，改成夾注語法並接在插入點本行後（類似按下Ctrl + Shift + F1） 20250131大年初三
+        /// creedit with GitHub Copilot大菩薩：Alt + w
+        /// 加速OCR夾注文本的排版整理
+        /// </summary>
+        /// <exception cref="InvalidOperationException"></exception>
+        public void MergeParagraphsAtCaret()
+        {
+            var paragraphs = GetParagraphs();
+            int caretPosition = _textBox.SelectionStart;
+            int currentParagraphIndex = 0;
+            int charCount = 0;
+            int s = _textBox.SelectionStart;
+
+            // 找到插入點所在的段落
+            for (int i = 0; i < paragraphs.Count; i++)
+            {
+                charCount += paragraphs[i].Text.Length + Environment.NewLine.Length;
+                if (caretPosition < charCount)
+                {
+                    currentParagraphIndex = i;
+                    break;
+                }
+            }
+
+            // 確保有足夠的段落進行操作
+            if (currentParagraphIndex + 2 >= paragraphs.Count)
+            {
+                throw new InvalidOperationException("沒有足夠的段落進行操作。");
+            }
+
+            // 取得插入點所在段落及其後的兩個段落
+            var currentParagraph = paragraphs[currentParagraphIndex];
+            var nextParagraph1 = paragraphs[currentParagraphIndex + 1];
+            var nextParagraph2 = paragraphs[currentParagraphIndex + 2];
+
+            // 將這兩個段落前後分別加上「{{」和「}}」，並清除其中的分段符號
+            string mergedText = "{{" + nextParagraph1.Text.Replace(Environment.NewLine, "") + nextParagraph2.Text.Replace(Environment.NewLine, "") + "}}";
+
+            // 將這兩個段落的內容併到插入點所在段落的後面
+            currentParagraph.Text += mergedText;
+
+            // 刪除原來的兩個段落
+            paragraphs.RemoveAt(currentParagraphIndex + 2);
+            paragraphs.RemoveAt(currentParagraphIndex + 1);
+
+            // 更新文本框的內容
+            _textBox.Text = string.Join(Environment.NewLine, paragraphs.Select(p => p.Text));
+
+            // 更新插入點的位置到合併後的段落的末尾
+            //_textBox.SelectionStart += currentParagraph.Text.Length;
+            if (_textBox.Text.IndexOf(Environment.NewLine, s) > -1) s = _textBox.Text.IndexOf(Environment.NewLine, s);
+            else s = _textBox.TextLength;
+
+            // 合併插入點後的一個段落，但保持插入點在當前位置不變
+            if (currentParagraphIndex + 1 < paragraphs.Count)
+
+            {
+
+                var nextParagraph = paragraphs[currentParagraphIndex + 1];
+
+                currentParagraph.Text += nextParagraph.Text.Replace(Environment.NewLine, "");
+
+                paragraphs.RemoveAt(currentParagraphIndex + 1);
+
+                _textBox.Text = string.Join(Environment.NewLine, paragraphs.Select(p => p.Text));
+
+            }
+            _textBox.SelectionStart = s;
+            _textBox.ScrollToCaret();
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <exception cref="InvalidOperationException"></exception>
+        public void MergeParagraphsAtCaretWithShift()
+        {/* 20250131大年初三：GitHub Copilot大菩薩：
+          * 我們可以在 Document 類別中添加一個新的方法 MergeParagraphsAtCaretWithShift 來實現 Alt + Shift + w 的功能。這個方法將插入點所在行視為夾注的第1行，將其後的1行/段合併上來，並在合併後的前後分別加上「{{」和「}}」，然後再將它們後面的那1行也合併上來。最後，插入點將停留在最後合併上來的那行/段文字的起始處。
+          * ……
+          * 這樣，當您按下 Alt + Shift + w 時，將執行 MergeParagraphsAtCaretWithShift 方法，插入點所在行將視為夾注的第1行，並將其後的1行/段合併上來，前後分別加上「{{」和「}}」，然後再將它們後面的那1行也合併上來。最後，插入點將停留在最後合併上來的那行/段文字的起始處。
+          */
+            var paragraphs = GetParagraphs();
+            int caretPosition = _textBox.SelectionStart;
+            int currentParagraphIndex = 0;
+            int charCount = 0;
+            int s = _textBox.SelectionStart;
+
+            // 找到插入點所在的段落
+            for (int i = 0; i < paragraphs.Count; i++)
+            {
+                charCount += paragraphs[i].Text.Length + Environment.NewLine.Length;
+                if (caretPosition < charCount)
+                {
+                    currentParagraphIndex = i;
+                    break;
+                }
+            }
+
+            // 確保有足夠的段落進行操作
+            if (currentParagraphIndex + 2 >= paragraphs.Count)
+            {
+                throw new InvalidOperationException("沒有足夠的段落進行操作。");
+            }
+
+            // 取得插入點所在段落及其後的兩個段落
+            var currentParagraph = paragraphs[currentParagraphIndex];
+            var nextParagraph1 = paragraphs[currentParagraphIndex + 1];
+            var nextParagraph2 = paragraphs[currentParagraphIndex + 2];
+
+            // 將這兩個段落前後分別加上「{{」和「}}」，並清除其中的分段符號
+            string mergedText = "{{" + currentParagraph.Text.Replace(Environment.NewLine, "") + nextParagraph1.Text.Replace(Environment.NewLine, "") + "}}";
+
+            // 將這兩個段落的內容併到插入點所在段落的後面
+            currentParagraph.Text = mergedText;
+
+            // 刪除原來的兩個段落
+            paragraphs.RemoveAt(currentParagraphIndex + 1);
+            //paragraphs.RemoveAt(currentParagraphIndex + 1);
+            //因為　您給我的程式碼在前面已經清除過分段符號了，再移除一次，就會把後面接的行/段給誤刪了。
+
+            // 更新文本框的內容
+            _textBox.Text = string.Join(Environment.NewLine, paragraphs.Select(p => p.Text));
+
+            // 合併插入點後的一個段落，但保持插入點在當前位置不變
+            if (currentParagraphIndex + 1 < paragraphs.Count)
+            {
+                var nextParagraph = paragraphs[currentParagraphIndex + 1];
+                currentParagraph.Text += nextParagraph.Text.Replace(Environment.NewLine, "");
+                paragraphs.RemoveAt(currentParagraphIndex + 1);
+                _textBox.Text = string.Join(Environment.NewLine, paragraphs.Select(p => p.Text));
+            }
+
+            // 更新插入點的位置到合併後的段落的起始處
+            _textBox.SelectionStart = _textBox.Text.IndexOf("}}", s) + 2;
+            _textBox.ScrollToCaret();
+        }
+
+
+
+
     }
 
     /// <summary>
@@ -163,7 +303,7 @@ namespace TextForCtext
             var paragraphs = _document.GetParagraphs();
             //var paragraphs = _document.GetParagraphs(_document);
 
-            int index = paragraphs.IndexOf(this);            
+            int index = paragraphs.IndexOf(this);
 
             if (index == -1)
             {

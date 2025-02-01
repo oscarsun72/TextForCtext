@@ -1527,56 +1527,91 @@ Next inlnsp
 cnt.Close
 End Sub
 Sub 國學大師_四庫全書本轉來()
-Dim rng As Range, noteRng As Range
-Set rng = Documents.Add().Range
-SystemSetup.playSound 1
-rng.Paste
-'提示貼上無礙
-SystemSetup.playSound 1 '光貼上耗時就很久了，後面這一大堆式子反而快 20230211
-'With rng.Find
-'    .ClearAllFuzzyOptions
-'    .ClearFormatting
-'    .Execute "^l", , , True, , , True, wdFindContinue, , "^p", wdReplaceAll
-'End With
-With rng.Find
-    .ClearAllFuzzyOptions
-    .ClearFormatting
-    .MatchWildcards = True
-    .Execute "[[]*[]]  ", , , True, , , True, wdFindContinue, , "", wdReplaceAll
-    .ClearAllFuzzyOptions
-    .ClearFormatting
-End With
-Do While rng.Find.Execute("[[]", , , , , , True, wdFindContinue)
-   rng.MoveEndUntil "]"
-   rng.SetRange rng.start, rng.End + 1
-   rng.Delete
-Loop
-Set rng = rng.Document.Range
-rng.Find.Execute "^p^p", , , , , , , wdFindContinue, , "^p", wdReplaceAll
-rng.Find.font.Color = 16711935
-Do While rng.Find.Execute("", , , False, , , True, wdFindStop)
-    Set noteRng = rng
-    Do While noteRng.Next.font.Color = 16711935
-        noteRng.SetRange noteRng.start, noteRng.Next.End
+    Dim rng As Range, noteRng As Range, aNext As Range, aPre As Range, ur As UndoRecord, midNoteRngPos As Byte, midNoteRng As Range
+    Set rng = Documents.Add().Range
+    SystemSetup.stopUndo ur, "國學大師_Kanripo_四庫全書本轉來"
+    SystemSetup.playSound 1
+    rng.Paste
+    '提示貼上無礙
+    SystemSetup.playSound 1 '光貼上耗時就很久了，後面這一大堆式子反而快 20230211
+    'With rng.Find
+    '    .ClearAllFuzzyOptions
+    '    .ClearFormatting
+    '    .Execute "^l", , , True, , , True, wdFindContinue, , "^p", wdReplaceAll
+    'End With
+    With rng.Find
+        .ClearAllFuzzyOptions
+        .ClearFormatting
+        .MatchWildcards = True
+        .Execute "[[]*[]]  ", , , True, , , True, wdFindContinue, , vbNullString, wdReplaceAll
+        .ClearAllFuzzyOptions
+        .ClearFormatting
+    End With
+    Do While rng.Find.Execute("[[]", , , , , , True, wdFindContinue)
+       rng.MoveEndUntil "]"
+       rng.SetRange rng.start, rng.End + 1
+       rng.Delete
     Loop
-    noteRng.text = "{{" & Replace(noteRng, "/", "") & "}}"
-Loop
-
-文字處理.書名號篇名號標注
-
-With rng.Document
-'    With .Range.Find
-'        .ClearFormatting
-'        .Text = vba.Chrw(9675)
-'        .Replacement.Text = vba.Chrw(12295)
-'        .Execute , , , , , , True, wdFindContinue, , , wdReplaceAll
-'    End With
-    '.Range.Cut
-    SystemSetup.ClipboardPutIn .Range.text
-    DoEvents
-    .Close wdDoNotSaveChanges
-End With
-SystemSetup.playSound 1.921
+    Set rng = rng.Document.Range
+    rng.Find.Execute "^p^p", , , , , , , wdFindContinue, , "^p", wdReplaceAll
+    If VBA.InStr(rng.text, VBA.ChrW(160) & "/" & VBA.Chr(11)) Then _
+        rng.Find.Execute VBA.ChrW(160) & "^g" & VBA.Chr(11), , , , , , , wdFindContinue, , VBA.Chr(11), wdReplaceAll 'chr(11)分行符號
+    If VBA.InStr(rng.text, VBA.ChrW(160) & "/" & VBA.Chr(13)) Then _
+        rng.Find.Execute VBA.ChrW(160) & "^g" & VBA.Chr(13), , , , , , , wdFindContinue, , VBA.Chr(13), wdReplaceAll
+    rng.Find.font.Color = 16711935
+    Do While rng.Find.Execute(vbNullString, , , False, , , True, wdFindStop)
+        Set noteRng = rng '.Document.Range(rng.start, rng.End)
+        Do While noteRng.Next.font.Color = 16711935
+            noteRng.SetRange noteRng.start, noteRng.Next.End
+        Loop
+        Set aNext = noteRng.Characters(noteRng.Characters.Count).Next
+        Set aPre = noteRng.Characters(1).Previous
+        midNoteRngPos = Excel.RoundUpCustom(noteRng.Characters.Count / 2)
+        
+        Set midNoteRng = noteRng.Document.Range(noteRng.Characters(VBA.IIf(midNoteRngPos - 1 < 1, 1, midNoteRngPos - 1)).start _
+            , noteRng.Characters(VBA.IIf(midNoteRngPos + 1 > noteRng.Characters.Count, noteRng.Characters.Count, midNoteRngPos + 1)).End)
+        If midNoteRng.start = noteRng.start And midNoteRng.End = noteRng.End Then
+            Set midNoteRng = noteRng
+        End If
+        If (aNext.text = VBA.Chr(11) And aPre.text = VBA.Chr(11)) Then
+            If aNext.Previous = "/" Then
+                midNoteRng.text = VBA.Replace(midNoteRng, "/", vbNullString, 1, 1)
+                noteRng.text = "{{" & noteRng.text & "}}"
+            Else
+                midNoteRng.text = VBA.Replace(midNoteRng, "/", VBA.Chr(11), 1, 1)
+                noteRng.text = "{{" & noteRng.text & "}}"
+            End If
+        ElseIf aNext.text = VBA.Chr(13) And aPre.text = VBA.Chr(13) Then
+            If aNext.Previous = "/" Then
+                midNoteRng.text = VBA.Replace(midNoteRng, "/", vbNullString, 1, 1)
+                noteRng.text = "{{" & noteRng.text & "}}"
+            Else
+                midNoteRng.text = VBA.Replace(midNoteRng, "/", VBA.Chr(13), 1, 1)
+                noteRng.text = "{{" & noteRng.text & "}}"
+            End If
+        Else
+            midNoteRng.text = VBA.Replace(midNoteRng, "/", vbNullString, 1, 1)
+            noteRng.text = "{{" & noteRng.text & "}}"
+        End If
+    Loop
+    
+    SystemSetup.playSound 1
+    文字處理.書名號篇名號標注
+    
+    With rng.Document
+    '    With .Range.Find
+    '        .ClearFormatting
+    '        .Text = vba.Chrw(9675)
+    '        .Replacement.Text = vba.Chrw(12295)
+    '        .Execute , , , , , , True, wdFindContinue, , , wdReplaceAll
+    '    End With
+        '.Range.Cut
+        SystemSetup.ClipboardPutIn .Range.text
+        DoEvents
+        .Close wdDoNotSaveChanges
+    End With
+    SystemSetup.playSound 1.921
+    SystemSetup.contiUndo ur
 End Sub
 
 Sub mdb開發_千慮一得齋Export()
@@ -1911,15 +1946,22 @@ Sub EditModeMakeup_changeFile_Page() '同版本文本帶入置換file id 和 頁數
     
     '文件前3段分別是以下資訊,執行完會清除
     'If Not VBA.IsNumeric(VBA.Replace(d.Range.Paragraphs(1).Range.text, vba.Chr(13), "")) then
-    If Replace(d.Paragraphs(1).Range + d.Paragraphs(2).Range + d.Paragraphs(3).Range, VBA.Chr(13), "") = "" _
-        Or Not IsNumeric(Replace(d.Paragraphs(1).Range + d.Paragraphs(2).Range + d.Paragraphs(3).Range, VBA.Chr(13), "")) Then
+    If VBA.Replace(d.Paragraphs(1).Range + d.Paragraphs(2).Range + d.Paragraphs(3).Range, VBA.Chr(13), "") = "" _
+        Or Not IsNumeric(VBA.Replace(VBA.Replace(d.Paragraphs(1).Range + d.Paragraphs(2).Range + d.Paragraphs(3).Range, VBA.Chr(13), ""), "-", vbNullString, 1, 1)) Then
         MsgBox "請在文件前3段分別是以下資訊（皆是數字）,執行完會清除" & vbCr & vbCr & _
-            "1. 頁數差(來源-(減去)目的）。無頁差則為0，省略則預設為0" & vbCr & _
+            "1. 頁數差(來源-(減去)目的）。無頁差則為0，省略則預設為0" & vbCr & vbCr & _
+             "也可輸入「來源-目的」這樣的格式，如來源114頁，目的是69頁，可以「114-69」表示" & vbCr & _
             "2. 目的的 file number。要置換成的；不取代則為0，省略則預設為0" & vbCr & _
             "3. 來源的 file number，要被取代的,省略（仍要空其段落=空行）則取文件中的file=後的值"
         Exit Sub
     End If
     Dim differPageNum  As Integer '頁數差(來源-(減去)目的）
+    Dim numRngDashPost As Byte, numRng As Range
+    numRngDashPost = VBA.InStr(d.Paragraphs(1).Range.text, "-")
+    If numRngDashPost > 0 Then
+        Set numRng = d.Range(d.Paragraphs(1).Range.Characters(1).start, d.Paragraphs(1).Range.Characters(d.Paragraphs(1).Range.Characters.Count).start)
+        numRng.text = VBA.CInt(VBA.Left(numRng.text, numRngDashPost - 1)) - VBA.CInt(Mid(numRng.text, numRngDashPost + 1))
+    End If
     differPageNum = VBA.IIf(d.Paragraphs(1).Range.Characters.Count = 1, 0, VBA.Replace(d.Paragraphs(1).Range.text, VBA.Chr(13), "")) '頁數差(來源-(減去)目的）
     Dim file
     file = VBA.Replace(d.Paragraphs(2).Range.text, VBA.Chr(13), "") ' 目的。不取代則為0
@@ -1937,7 +1979,7 @@ Sub EditModeMakeup_changeFile_Page() '同版本文本帶入置換file id 和 頁數
         'rng.Find.Execute " file=""77991""", True, True, , , , True, wdFindContinue, , " file=""" & file & """", wdReplaceAll
         rng.text = Replace(rng.text, " file=""" & fileFrom & """", " file=""" & file & """")
     End If
-    
+
     Do While rng.Find.Execute(" page=""", , , , , , True, wdFindStop)
         Set pageNum = rng
         pageNum.SetRange rng.End, rng.End + 1

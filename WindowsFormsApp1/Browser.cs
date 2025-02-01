@@ -305,7 +305,8 @@ namespace TextForCtext
         internal static bool ChromedriverLose(Exception ex)
         {
             if (ex.Message.StartsWith("An unknown exception was encountered sending an HTTP request to the remote WebDriver server for URL ") ||
-                ex.Message.StartsWith("disconnected: not connected to DevTools"))//An unknown exception was encountered sending an HTTP request to the remote WebDriver server for URL http://localhost:13451/session/6f6c77cfb73c5c388c6cdfd40a06b806/url. The exception message was: 傳送要求時發生錯誤。
+                ex.Message.StartsWith("disconnected: not connected to DevTools")||
+                ex.Message.StartsWith("invalid session id") )//An unknown exception was encountered sending an HTTP request to the remote WebDriver server for URL http://localhost:13451/session/6f6c77cfb73c5c388c6cdfd40a06b806/url. The exception message was: 傳送要求時發生錯誤。
             {
                 Form1.playSound(Form1.soundLike.over);
                 killchromedriverFromHere();
@@ -775,7 +776,7 @@ namespace TextForCtext
             }
         }
         /// <summary>
-        /// 取得CTP網頁中的「下一頁」的編輯文字方塊
+        /// 取得CTP網頁中的「下一頁」(Next page:)的編輯文字方塊
         /// </summary>
         internal static IWebElement CheckAdjacentPages_DataNext
         {
@@ -2664,6 +2665,13 @@ namespace TextForCtext
                             DriverNew();
                             goto retry;
                         }
+                        else if (ex.Message.StartsWith("invalid session id"))
+                        {
+                            Form1.playSound(Form1.soundLike.error, true);
+                            RestartChromedriver();
+                            goto retry;
+                        }
+
                         else
                         {
                             Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
@@ -2694,6 +2702,8 @@ namespace TextForCtext
                         //操作中的分頁頁籤被手動誤關時
                         //no such window: target window already closed
                         case -2146233088:
+                            if (ex.Message.StartsWith("invalid session id"))
+                                RestartChromedriver();
                             openNewTabWindow();
                             break;
                         default:
@@ -2716,9 +2726,11 @@ namespace TextForCtext
                 if (frmKeyinTextModeTopWindow) WindowsScrolltoTop();//將分頁視窗頁面捲到頂端
                 quickedit_data_textboxSetting(url);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 //忽略錯誤不處理
+                if (ex.Message.StartsWith("invalid session id"))
+                    RestartChromedriver();
             }
         }
 
@@ -2750,7 +2762,7 @@ namespace TextForCtext
                     bool _events = ActiveForm1.EventsEnabled;
                     ActiveForm1.PauseEvents();
                     driver.ExecuteScript("window.scrollTo(0, 0)");//chatGPT:您好！如果您使用 C# 和 Selenium 來控制 Chrome 瀏覽器，您可以使用以下的程式碼將網頁捲到最上面：
-                    ActiveForm1.EventsEnabled = _events;
+                    ActiveForm1.EventsEnabled = _events;                    
                 }
                 //driver.SwitchTo().Window(driver.CurrentWindowHandle).SwitchTo().DefaultContent();//20231019
 
@@ -3493,8 +3505,13 @@ internal static string getImageUrl() {
             //點選「 语序优化beta版」核取方塊：（對於正文、夾注之次予至關重要）20240803
             //iwe = waitFindWebElementBySelector_ToBeClickable("#version_2");
             iwe = waitFindWebElementBySelector_ToBeClickable("#img_rec_version");
-            //iwe.Click();
-            SetIWebElementValueProperty(iwe, "beta");
+            iwe.Click();
+            //SetIWebElementValueProperty(iwe, "beta");//這樣設定在按下「開始識別」按鈕：時會被還原
+            //點選<option value="beta">语序优化beta版</option>
+            iwe = waitFindWebElementBySelector_ToBeClickable("#img_rec_version > option:nth-child(2)");
+            iwe.Click();
+
+
 
             dt = DateTime.Now;
             //按下「開始識別」按鈕：
@@ -10763,6 +10780,7 @@ internal static string getImageUrl() {
         {
             //var driver = new ChromeDriver();
             openNewTabWindow();
+            BringToFront("chrome");
         reGoto:
             try
             {

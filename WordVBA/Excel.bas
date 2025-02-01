@@ -200,15 +200,15 @@ Sub ReplacePrivateUseCharactersInExcel()
     Dim xlSheet As Object
     Dim privateUseChar As String
     Dim replacementChar As String, myExcelFileFullname As String
-    Dim tb As Table
+    Dim tb As table
     
     
     With Selection.Document
-        If .Tables.Count < 1 Then
+        If .tables.Count < 1 Then
             MsgBox "現用中的文件第一個1表格須是私人造字（第1欄）與系統用字（第2欄）的對照表", vbCritical
             Exit Sub
         Else
-            Set tb = .Tables(1)
+            Set tb = .tables(1)
         End If
         myExcelFileFullname = _
             .Range(.Paragraphs(1).Range.Characters(1).start _
@@ -239,17 +239,17 @@ Sub ReplacePrivateUseCharactersInExcel()
     xlApp.DisplayAlerts = False
     
     Dim r As row, i As Long
-    For Each r In tb.Rows
+    For Each r In tb.rows
         i = i + 1
         ' 設定私人造字區的範圍
         'privateUseChar = "[\uE000-\uF8FF]" ' 這是私人造字區的範圍
-        privateUseChar = r.Cells(1).Range.Characters(1).text
+        privateUseChar = r.cells(1).Range.Characters(1).text
         'replacementChar = "?" ' 替換字元，可以根據需要修改
-        replacementChar = r.Cells(2).Range.Characters(1).text
+        replacementChar = r.cells(2).Range.Characters(1).text
         If privateUseChar <> vbNullString And replacementChar <> vbNullString Then
     
             ' 使用 Replace 方法替換私人造字區的字元
-            xlSheet.Cells.Replace What:=privateUseChar, Replacement:=replacementChar, LookAt:=xlPart, SearchOrder:=xlByRows, MatchCase:=False, SearchFormat:=False, ReplaceFormat:=False
+            xlSheet.cells.Replace What:=privateUseChar, Replacement:=replacementChar, LookAt:=xlPart, SearchOrder:=xlByRows, MatchCase:=False, SearchFormat:=False, ReplaceFormat:=False
             
             If i Mod 10 = 0 Then
                 'Beep
@@ -273,4 +273,17 @@ Sub ReplacePrivateUseCharactersInExcel()
     
     
 End Sub
+Rem 20250129大年初一 無條件進位
+Function RoundUp(num As Double) As Long
+    RoundUp = VBA.IIf(VBA.Int(num) = num, num, VBA.Int(num) + 1)
+End Function
+Rem 20250129大年初一 Gemini大菩薩改進我上式者：
+Function RoundUpCustom(ByVal num As Double, Optional ByVal digits As Long = 0) As Double
+    ' RoundUpCustom 函式：將數字無條件進位到指定的小數位數
+    '   num: 要進位的數字
+    '   digits: 進位的位數 (預設為 0，即進位到整數)
 
+    Dim multiplier As Double
+    multiplier = 10 ^ digits
+    RoundUpCustom = Int(num * multiplier + 0.99999) / multiplier
+End Function

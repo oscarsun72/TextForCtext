@@ -1273,6 +1273,10 @@ namespace WindowsFormsApp1
                 if (!Active) bringBackMousePosFrmCenter();
                 stopUndoRec = false; ResumeEvents();
             }
+            else if (keyinTextMode && textBox1.SelectionLength == 0)
+            {
+                new Document(textBox1).MergeParagraphsAtCaret();
+            }
         }
 
         /// <summary>
@@ -2534,6 +2538,7 @@ namespace WindowsFormsApp1
                     if (!ocrTextMode) br.BringToFront("chrome");
                     if (e.KeyCode == Keys.Subtract)
                     {// Ctrl + -（數字鍵盤） 會重設以插入點位置為頁面結束位國
+
                         resetPageTextEndPositionPasteToCText();
                         return;
                     }
@@ -3671,6 +3676,48 @@ namespace WindowsFormsApp1
                     return;
                 }
 
+                if (e.KeyCode == Keys.W)
+                {//Alt + w ： 將插入點後的2行/段內容，改成夾注語法並接在插入點本行後（類似按下Ctrl + Shift + F1） 20250131大年初三
+                    if (!e.Control & !e.Shift)
+                    {
+                        e.Handled = true;
+                        Document document = new Document(textBox1);
+                        undoRecord(); PauseEvents();
+                        try
+                        {
+                            document.MergeParagraphsAtCaret();
+                            //SendKeys.Send("{del}");
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine(ex.HResult + ex.Message);
+                            MessageBox.Show(ex.Message, "錯誤", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }
+                        undoRecord(); ResumeEvents();
+                        return;
+                    }
+                    else if (e.Shift || e.Control)
+                    {//Alt + Shift + w 或 Ctrl + Alt + w ： 將執行 MergeParagraphsAtCaretWithShift 方法，插入點所在行將視為夾注的第1行，並將其後的1行/段合併上來，前後分別加上「{{」和「}}」，然後再將它們後面的那1行也合併上來。最後，插入點將停留在最後合併上來的那行/段文字的起始處。
+                        //> 即插入點所在視為後面有正文的夾注第一行（則加按Shift鍵）
+                        e.Handled = true;
+                        Document document = new Document(textBox1);
+                        undoRecord(); PauseEvents();
+                        try
+                        {
+                            document.MergeParagraphsAtCaretWithShift();
+                            //SendKeys.Send("{del}");
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine(ex.HResult + ex.Message);
+                            MessageBox.Show(ex.Message, "錯誤", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }
+                        undoRecord(); ResumeEvents();
+                        return;
+
+                    }
+                }
+
                 if (e.KeyCode == Keys.X)
                 {//Alt + x ：以所選之字（不能不等於1字）檢索《康熙字典網上版 》 https://www.kangxizidian.com/
                     e.Handled = true;
@@ -3971,7 +4018,8 @@ namespace WindowsFormsApp1
                 {
                     //F11 : run replaceXdirrectly() 維基文庫等欲直接抽換之字
                     e.Handled = true;
-                    replaceXdirrectly();
+                    string x = textBox1.Text;
+                    replaceXdirrectly(ref x);
                     return;
                 }
                 if (e.KeyCode == Keys.Add)
@@ -6630,7 +6678,9 @@ namespace WindowsFormsApp1
                     ResumeEvents();
             }
             undoRecord();
-            replaceXdirrectly();
+
+            string x = textBox1.Text;
+            replaceXdirrectly(ref x);
 
             int s = 0, l, e = textBox1.Text.IndexOf(Environment.NewLine); if (e < 0) return;
             //PauseEvents();
@@ -6658,7 +6708,7 @@ namespace WindowsFormsApp1
             }
             else
             {//如果據以判斷的第一行不是用●●●●●●●●●●長度來判斷行/段長的話，亦清除此第1行 20250109
-                string x = textBox1.Text;
+                x = textBox1.Text;
                 if (x.IndexOf(Environment.NewLine) > -1 && autoPastetoQuickEdit && x.Length > 1100)
                 {
                     if (x.Substring(x.IndexOf(Environment.NewLine) + Environment.NewLine.Length, 1) == "*")
@@ -7641,7 +7691,7 @@ namespace WindowsFormsApp1
             //return Regex.IsMatch(url, @"ctext\.org.*&file.*&page=.*#editor");
             //也有可能是這種網址：https://ctext.org/library.pl?if=gb&file=34195&page=142&editwiki=826120#box(140,120,2,0)
             //return Regex.IsMatch(url, @"ctext\.org.*&file.*&page=.*&edit");
-            return Regex.IsMatch(url, @"ctext\.org.*&file.*&page=.*#edit")|| Regex.IsMatch(url, @"ctext\.org.*&file.*&page=.*&editwiki=.*");//20250126
+            return Regex.IsMatch(url, @"ctext\.org.*&file.*&page=.*#edit") || Regex.IsMatch(url, @"ctext\.org.*&file.*&page=.*&editwiki=.*");//20250126
             /*
              * Bing大菩薩：是的，在正則表達式中，小數點「.」是一個特殊字符，它匹配任何單個字符（除了換行符）。如果您想在正則表達式中匹配字面上的小數點，則需要在前面加上反斜杠「\」來對其進行轉義。
              * 在 C# 中，由於反斜杠「\」本身也是一個轉義字符，所以您需要使用兩個反斜杠「\\」來表示一個字面上的反斜杠。因此，在 C# 中的正則表達式中，要匹配字面上的小數點，您需要寫成「\\.」。
@@ -7764,8 +7814,16 @@ namespace WindowsFormsApp1
                 catch (Exception)
                 {
                     ResetLastValidWindow();
-                    br.driver.SwitchTo().Window(br.LastValidWindow);
-                    urlDriver = br.driver.Url;
+                    try
+                    {
+                        br.driver.SwitchTo().Window(br.LastValidWindow);
+                        urlDriver = br.driver.Url;
+                    }
+                    catch (Exception)
+                    {
+                        RestartChromedriver();
+                        return false;
+                    }
                 }
             }
         reCheckUrl:
@@ -8267,6 +8325,11 @@ namespace WindowsFormsApp1
                     }
                 }
             }
+
+            #region 如果有「check the adjacent pages」連結控制項則將其點開
+            if (keyinTextMode)// && br.CheckAdjacentPages_Linkbox != null)//&& CheckAdjacentPages_DataNext == null)
+                br.CheckAdjacentPages_Linkbox?.Click();
+            #endregion
 
             #region 此程序執行完畢，表單顏色閃爍顯示，以供提示 20231029
             ////其實在執行時多數時看不到表單的，也會被其他的樂音遮蔽，故不作！
@@ -8906,8 +8969,10 @@ namespace WindowsFormsApp1
                     bool _autoPastetoQuickEdit = autoPastetoQuickEdit;
                     bool _check_the_adjacent_pages = check_the_adjacent_pages;
 
+                    bool doNotShowMsgBox = false;
                     //按著Ctrl鍵則直接ok 20250109
-                    if (ModifierKeys == Keys.Control) { dialogResult = DialogResult.OK; goto ok; }
+                    //if (ModifierKeys == Keys.Control && dialogResult != DialogResult.Abort) { dialogResult = DialogResult.OK; goto ok; }
+                    if (ModifierKeys == Keys.Control) { dialogResult = DialogResult.OK; doNotShowMsgBox = true; goto ok; }
 
                     #region 取得最後不含 <p> 與 。<p> 的5個字來顯示於訊息方塊中20250118
                     string last5Characters = textBox1.SelectedText; int eLast5Characters = last5Characters.IndexOf("<p>");
@@ -8955,7 +9020,8 @@ namespace WindowsFormsApp1
                             if (_check_the_adjacent_pages) nextPages(Keys.PageDown, false);
 
                         }
-                        keyDownCtrlAdd(false);
+                        if (!keyDownCtrlAdd(false) && doNotShowMsgBox == true) { dialogResult = DialogResult.Cancel; goto ok; }//dialogRes-ult = DialogResult.Abort;
+                        doNotShowMsgBox = false;
                         if (browsrOPMode != BrowserOPMode.appActivateByName)
                         {//if (autoPastetoQuickEdit) 會在autoPastetoCtextQuitEditTextbox()中判斷
                          //預估下一頁尾位置
@@ -9420,6 +9486,10 @@ namespace WindowsFormsApp1
                     stopUndoRec = false;
                     undoRecord();
                 }
+                else if (keyinTextMode && textBox1.SelectionLength == 0)
+                {//>若無選取範圍時就執行 Alt + Shift + w 之功能 20250131大年初三 感恩感恩　讚歎讚歎　GitHub Copilot大菩薩　南無阿彌陀佛　讚美主
+                    new Document(textBox1).MergeParagraphsAtCaretWithShift();
+                }
                 return;
             }
 
@@ -9702,7 +9772,25 @@ namespace WindowsFormsApp1
                     e.Handled = true;
                     if (e.KeyCode == Keys.Subtract)
                     {// Ctrl + -（數字鍵盤） 會重設以插入點位置為頁面結束位國
+                        int s = textBox1.SelectionStart;
+                        if (textBox1.SelectionLength == 0)
+                        {
+                            if (s > 0 && s < textBox1.TextLength && CheckAdjacentPages_DataNext != null && CheckAdjacentPages_DataNext.Displayed)
+                            {//Ctrl+ - ：若在手動輸入模式下，且插入點或選取範圍不是在textBox1內容的最後，且「Next page:」的方塊業已開啟，則將插入點後的文字清除並置於「Next page:」方塊內容的前綴，然後才執行一般的 Ctrl + - 的功能 20250130 大年（蛇年）初一夜初二丑時一刻
+                                SetIWebElementValueProperty(CheckAdjacentPages_DataNext, textBox1.Text.Substring(s) + CheckAdjacentPages_DataNext.GetAttribute("value"));
+                                textBox1.Text = textBox1.Text.Substring(0, s);
+                            }
+                            else if (s > Environment.NewLine.Length && s == textBox1.TextLength && textBox1.Text.Substring(s - Environment.NewLine.Length, Environment.NewLine.Length) == Environment.NewLine
+                                && CheckAdjacentPages_DataNext != null && CheckAdjacentPages_DataNext.Displayed)
+                            {//Ctrl + - ： 若插入點在textBox1內容的末端，則其前為分行/分段符號，且將「Next page:」方塊內容的第一行/段，追加為textBox1內容的尾綴，並清除「Next page:」方塊內容此行/段文字
+                                string str = CheckAdjacentPages_DataNext.GetAttribute("value");
+                                textBox1.Text += str.Substring(0, str.IndexOf(Environment.NewLine) + Environment.NewLine.Length);
+                                SetIWebElementValueProperty(CheckAdjacentPages_DataNext, str.Substring(str.IndexOf(Environment.NewLine) + Environment.NewLine.Length));
+                            }
+                        }
+
                         resetPageTextEndPositionPasteToCText();
+                        br.WindowsScrolltoTop();
                         return;
                     }
                     //if (keyDownCtrlAdd(false)) if (textBox1.Text != "") { pauseEvents(); textBox1.Text = ""; resumeEvents(); }
@@ -10666,7 +10754,6 @@ namespace WindowsFormsApp1
                     try
                     {
                         ocrResult = br.OCR_KanDianGuJi(downloadImgFullName);
-
                     }
                     catch (Exception)
                     {
@@ -10706,8 +10793,20 @@ namespace WindowsFormsApp1
                 }
                 catch (Exception)
                 {
-                    br.driver.SwitchTo().Window(br.driver.WindowHandles.Last());
-                    StopOCR = true; return false;
+                    try
+                    {
+                        if (!br.IsDriverInvalid())
+                        {
+                            br.driver.SwitchTo().Window(br.driver.WindowHandles.Last());
+                            StopOCR = true; return false;
+                        }
+                        else
+                            StopOCR = true; return false;
+                    }
+                    catch (Exception)
+                    {
+                        StopOCR = true; return false;
+                    }
                 }
                 StopOCR = true; return false;
             }
@@ -10776,6 +10875,10 @@ namespace WindowsFormsApp1
                 //saveText();
                 //清除英數字（OCR辨識誤讀者）                //加上書名號篇名號
                 undoRecord();//以便還原
+
+                //OCR自動校正
+                if (!autoPastetoQuickEdit) replaceXdirrectly(ref x, "OCR");
+
                 if (OcrTextMode)//不是OCR直接連續輸入時（即只是單一輸入時）才加上自動加上書名號等標點，畢竟批量輸入的特徵是容易識別的，
                                 //如此也可以方便日後後續再手動加工批量OCR讀入的結果時，判斷哪些頁面是已經人工處理/校讀過的，才不會在重新自動標點時，泯滅前人的辛勞，重複做白工 20240116
                                 //textBox1.Text = CnText.BooksPunctuation(ref CnText.ClearOthers_ExceptUnicodeCharacters(ref x), false);
@@ -14797,6 +14900,8 @@ namespace WindowsFormsApp1
             // 獲取圖片的 URL。
             //imageUrl = "https://example.com/image.png";
 
+            TopMost = false;
+
             bool returnVal = true;
             try
             {
@@ -14969,19 +15074,31 @@ namespace WindowsFormsApp1
         }
 
 
-
-        void replaceXdirrectly()
+        /// <summary>
+        /// 可以或必須直接取代之文字（以doit欄位控制是否執行）20250131大年初三增修
+        /// </summary>
+        /// <param name="whereNoteInstr">備註欄位要篩選的條件值</param>
+        void replaceXdirrectly(ref string tx, string whereNoteInstr = "")
         {// F11
-            string tx = textBox1.Text, rx;
+            //string tx = textBox1.Text, rx;
+            string rx;
             ado.Connection cnt = new ado.Connection();
             Mdb.openDatabase("查字.mdb", ref cnt);
             ado.Recordset rst = new ado.Recordset();
-            rst.Open("select * from 維基文庫等欲直接抽換之字 where doit=true order by len(replaced) desc", cnt, ado.CursorTypeEnum.adOpenForwardOnly, ado.LockTypeEnum.adLockReadOnly);
+            if (whereNoteInstr == string.Empty)
+                rst.Open("select * from 維基文庫等欲直接抽換之字 where doit=true order by len(replaced) desc", cnt, ado.CursorTypeEnum.adOpenForwardOnly, ado.LockTypeEnum.adLockReadOnly);
+            else
+                rst.Open("select * from 維基文庫等欲直接抽換之字 where (doit=true and instr(備註,\"" + whereNoteInstr + "\")>0) order by len(replaced) desc", cnt, ado.CursorTypeEnum.adOpenKeyset, ado.LockTypeEnum.adLockReadOnly);
+
+
             while (!rst.EOF)
             {
                 rx = rst.Fields[0].Value.ToString();
                 if (tx.IndexOf(rx) > -1)
+                {
+                    playSound(soundLike.notify, true);
                     tx = tx.Replace(rx, rst.Fields[1].Value.ToString());
+                }
                 rst.MoveNext();
             }
             rst.Close(); cnt.Close(); rst = null; cnt = null;//當您透過開啟 的 Recordset 物件結束作業時，請使用 Close 方法來釋放任何相關聯的系統資源。 關閉物件並不會從記憶體中移除它;您可以變更其屬性設定，並使用 Open 方法來稍後再次開啟它。 若要完全排除記憶體中的物件，請將物件變數設定為 Nothing。 https://docs.microsoft.com/zh-tw/sql/ado/reference/ado-api/open-method-ado-recordset?view=sql-server-ver16
