@@ -1526,8 +1526,11 @@ nxt:
 Next inlnsp
 cnt.Close
 End Sub
+Rem 現在多用Kanripo.org者 20250202大年初五
 Sub 國學大師_四庫全書本轉來()
-    Dim rng As Range, noteRng As Range, aNext As Range, aPre As Range, ur As UndoRecord, midNoteRngPos As Byte, midNoteRng As Range
+    Dim rng As Range, noteRng As Range, aNext As Range, aPre As Range, ur As UndoRecord, midNoteRngPos As Byte, midNoteRng As Range, aX As String, a As Range, aSt As Long, aEd As Long
+    Dim noteFont As font '記下注文格式以備用
+    Dim insertX As String
     Set rng = Documents.Add().Range
     SystemSetup.stopUndo ur, "國學大師_Kanripo_四庫全書本轉來"
     SystemSetup.playSound 1
@@ -1560,6 +1563,7 @@ Sub 國學大師_四庫全書本轉來()
         rng.Find.Execute VBA.ChrW(160) & "^g" & VBA.Chr(13), , , , , , , wdFindContinue, , VBA.Chr(13), wdReplaceAll
     rng.Find.font.Color = 16711935
     Do While rng.Find.Execute(vbNullString, , , False, , , True, wdFindStop)
+        If noteFont Is Nothing Then Set noteFont = rng.font
         Set noteRng = rng '.Document.Range(rng.start, rng.End)
         Do While noteRng.Next.font.Color = 16711935
             noteRng.SetRange noteRng.start, noteRng.Next.End
@@ -1573,27 +1577,73 @@ Sub 國學大師_四庫全書本轉來()
         If midNoteRng.start = noteRng.start And midNoteRng.End = noteRng.End Then
             Set midNoteRng = noteRng
         End If
-        If (aNext.text = VBA.Chr(11) And aPre.text = VBA.Chr(11)) Then
-            If aNext.Previous = "/" Then
-                midNoteRng.text = VBA.Replace(midNoteRng, "/", vbNullString, 1, 1)
-                noteRng.text = "{{" & noteRng.text & "}}"
-            Else
-                midNoteRng.text = VBA.Replace(midNoteRng, "/", VBA.Chr(11), 1, 1)
-                noteRng.text = "{{" & noteRng.text & "}}"
-            End If
-        ElseIf aNext.text = VBA.Chr(13) And aPre.text = VBA.Chr(13) Then
-            If aNext.Previous = "/" Then
-                midNoteRng.text = VBA.Replace(midNoteRng, "/", vbNullString, 1, 1)
-                noteRng.text = "{{" & noteRng.text & "}}"
-            Else
-                midNoteRng.text = VBA.Replace(midNoteRng, "/", VBA.Chr(13), 1, 1)
-                noteRng.text = "{{" & noteRng.text & "}}"
-            End If
-        Else
-            midNoteRng.text = VBA.Replace(midNoteRng, "/", vbNullString, 1, 1)
-            noteRng.text = "{{" & noteRng.text & "}}"
-        End If
+'        If (aNext.text = VBA.Chr(11) And aPre.text = VBA.Chr(11)) Then
+'            If aNext.Previous = "/" Then
+'                midNoteRng.text = VBA.Replace(midNoteRng, "/", vbNullString, 1, 1)
+'                noteRng.text = "{{" & noteRng.text & "}}"
+'            Else
+'                midNoteRng.text = VBA.Replace(midNoteRng, "/", VBA.Chr(11), 1, 1)
+'                noteRng.text = "{{" & noteRng.text & "}}"
+'            End If
+'        ElseIf aNext.text = VBA.Chr(13) And aPre.text = VBA.Chr(13) Then
+'            If aNext.Previous = "/" Then
+'                midNoteRng.text = VBA.Replace(midNoteRng, "/", vbNullString, 1, 1)
+'                noteRng.text = "{{" & noteRng.text & "}}"
+'            Else
+'                midNoteRng.text = VBA.Replace(midNoteRng, "/", VBA.Chr(13), 1, 1)
+'                noteRng.text = "{{" & noteRng.text & "}}"
+'            End If
+'        Else
+'            If aNext.text = VBA.Chr(11) Then
+
+                If InStr(rng, "加象十三餘九分三釐三三毫") Then Stop
+                
+                Set a = aPre.Document.Range(aPre.start, aPre.End)
+                Do Until aPre.Previous = VBA.Chr(11)
+                    aPre.Move wdCharacter, -1
+                Loop
+                a.SetRange aPre.start, a.End
+                aX = a.text '縮排的空格
+            
+                '如果有縮排
+                If VBA.Replace(aX, "　", vbNullString) = vbNullString Then
+                    insertX = VBA.Chr(11) & aX '縮排的空格
+                Else
+                    insertX = vbNullString
+                End If
+                For Each a In noteRng.Characters
+                    If a = "/" And a.InlineShapes.Count = 0 Then
+                        If a.font.Color = noteFont.Color And a.font.Size = noteFont.Size Then
+                            aSt = a.start
+                            aEd = a.End
+                            
+                            Do Until VBA.Abs(noteRng.Document.Range(noteRng.start, a.start).Characters.Count - noteRng.Document.Range(a.End, noteRng.End).Characters.Count) < 2
+                               'noteRng.Document.Range(a.End, noteRng.End).text = noteRng.Document.Range(a.End, noteRng.End).text & "　"
+                               noteRng.text = noteRng.text & "　"
+                               a.SetRange aSt, aEd
+                            Loop
+                            a.text = insertX
+                            Exit For
+                        End If
+                    End If
+                Next a
+                If insertX <> vbNullString Then
+                    aSt = noteRng.start
+                    noteRng.SetRange aPre.start, noteRng.End
+                    noteRng.text = "{{" & noteRng.text & "}}"
+                    noteRng.Collapse wdCollapseEnd
+                Else
+'                   midNoteRng.text = VBA.Replace(midNoteRng, "/", vbNullString, 1, 1)
+                    noteRng.text = "{{" & noteRng.text & "}}"
+                End If
+'            Else
+'                midNoteRng.text = VBA.Replace(midNoteRng, "/", vbNullString, 1, 1)
+'                noteRng.text = "{{" & noteRng.text & "}}"
+'            End If
+'        End If
     Loop
+    
+    國學大師_Kanripo_四庫全書本轉來_Sub rng.Document.Content
     
     SystemSetup.playSound 1
     文字處理.書名號篇名號標注
@@ -1612,6 +1662,27 @@ Sub 國學大師_四庫全書本轉來()
     End With
     SystemSetup.playSound 1.921
     SystemSetup.contiUndo ur
+End Sub
+Rem 作為 國學大師_四庫全書本轉來()的子程序
+Sub 國學大師_Kanripo_四庫全書本轉來_Sub(rng As Range)
+    Dim rngEd As Long, rngChk As Range, rngChkX As String
+    Do While rng.Find.Execute("　")
+        rngEd = rng.End
+        Set rngChk = rng.Document.Range(rng.start + rng.MoveStartUntil(VBA.Chr(11), -(rng.End - 1) + 1), rngEd)
+        rngChkX = VBA.Replace(rngChk.text, "　", vbNullString)
+        If rngChkX <> vbNullString And rngChkX <> "{{" Then
+            If rng.Previous.text <> VBA.Chr(11) Then
+                GoSub replaceSpaceWithBlank:
+            End If
+        End If
+        rng.SetRange rngEd + 1, rng.Document.Content.End
+    Loop
+    
+Exit Sub
+replaceSpaceWithBlank:
+    rngEd = rng.End
+    rng.text = VBA.ChrW(-9217) & VBA.ChrW(-8195)
+    Return
 End Sub
 
 Sub mdb開發_千慮一得齋Export()
@@ -1947,18 +2018,20 @@ Sub EditModeMakeup_changeFile_Page() '同版本文本帶入置換file id 和 頁數
     '文件前3段分別是以下資訊,執行完會清除
     'If Not VBA.IsNumeric(VBA.Replace(d.Range.Paragraphs(1).Range.text, vba.Chr(13), "")) then
     If VBA.Replace(d.Paragraphs(1).Range + d.Paragraphs(2).Range + d.Paragraphs(3).Range, VBA.Chr(13), "") = "" _
-        Or Not IsNumeric(VBA.Replace(VBA.Replace(d.Paragraphs(1).Range + d.Paragraphs(2).Range + d.Paragraphs(3).Range, VBA.Chr(13), ""), "-", vbNullString, 1, 1)) Then
-        MsgBox "請在文件前3段分別是以下資訊（皆是數字）,執行完會清除" & vbCr & vbCr & _
-            "1. 頁數差(來源-(減去)目的）。無頁差則為0，省略則預設為0" & vbCr & vbCr & _
-             "也可輸入「來源-目的」這樣的格式，如來源114頁，目的是69頁，可以「114-69」表示" & vbCr & _
-            "2. 目的的 file number。要置換成的；不取代則為0，省略則預設為0" & vbCr & _
-            "3. 來源的 file number，要被取代的,省略（仍要空其段落=空行）則取文件中的file=後的值"
-        Exit Sub
+        Or Not IsNumeric(VBA.Replace(d.Paragraphs(1).Range, VBA.Chr(13), "")) Then
+        If Not IsNumeric(VBA.Replace(VBA.Replace(d.Paragraphs(1).Range + d.Paragraphs(2).Range + d.Paragraphs(3).Range, VBA.Chr(13), ""), "-", vbNullString, 1, 1)) Then
+            MsgBox "請在文件前3段分別是以下資訊（皆是數字）,執行完會清除" & vbCr & vbCr & _
+                "1. 頁數差(來源-(減去)目的）。無頁差則為0，省略則預設為0" & vbCr & vbCr & _
+                 "也可輸入「來源-目的」這樣的格式，如來源114頁，目的是69頁，可以「114-69」表示" & vbCr & _
+                "2. 目的的 file number。要置換成的；不取代則為0，省略則預設為0" & vbCr & _
+                "3. 來源的 file number，要被取代的,省略（仍要空其段落=空行）則取文件中的file=後的值"
+            Exit Sub
+        End If
     End If
     Dim differPageNum  As Integer '頁數差(來源-(減去)目的）
     Dim numRngDashPost As Byte, numRng As Range
     numRngDashPost = VBA.InStr(d.Paragraphs(1).Range.text, "-")
-    If numRngDashPost > 0 Then
+    If numRngDashPost > 1 Then '=1 是負數標識
         Set numRng = d.Range(d.Paragraphs(1).Range.Characters(1).start, d.Paragraphs(1).Range.Characters(d.Paragraphs(1).Range.Characters.Count).start)
         numRng.text = VBA.CInt(VBA.Left(numRng.text, numRngDashPost - 1)) - VBA.CInt(Mid(numRng.text, numRngDashPost + 1))
     End If

@@ -528,7 +528,9 @@ Alt + Shift + F1 ：切換 textbox1 之字型： 切換支援 CJK - Ext 擴充�
 滑鼠下一頁鍵： 同Ctrl + PageDown 
 > 如果書圖處有拉出截圖區域，則會自動執行如下輸入截圖模式（滑鼠下一頁鍵 + Ctrl 鍵）
 
-滑鼠下一頁鍵 + Ctrl 鍵： 在需要連續輸入截圖時 ，須先畫出之截圖區域，然後按下Ctrl並按下滑鼠下一頁鍵時，會自動按下頁面中的[Input picture]連結並再按下 Replace page with this data 按鈕
+滑鼠下一頁鍵 + Ctrl 鍵： 在需要連續輸入截圖時 ，若無按住Ctrl鍵，須先畫出之截圖區域，然後按下Ctrl並按下滑鼠下一頁鍵時，會自動按下頁面中的[Input picture]連結並再按下 Replace page with this data 按鈕
+
+>若按住Ctrl再按五鍵滑鼠的下一頁按鈕，則可以以預設的書頁圖大小來設定紅框以供輸入。不必手動選取框選範圍，即可以網址來產生紅框。 20250202大年初五 感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主
 
 按下 Ctrl 、Alt 或 Shift 任一鍵再啟用表單成為現用的（activate form1)則會啟動自動輸入( auto paste to Quick Edit textbox in Ctext).
 

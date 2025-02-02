@@ -9045,6 +9045,7 @@ namespace WindowsFormsApp1
                                 {
                                     //如果是Word VBA 新頁面所產生的 tab鍵 \t（讀取值是「 」，非"\t"）
                                     case " ":// br.chkClearQuickedit_data_textboxTxtStr:
+                                        BringToFront();
                                         dialogResult = MessageBox.Show("是否清除當前頁面中的空白內容？（其實是有由tab鍵所按下的值）", "",
                                         MessageBoxButtons.OKCancel, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1,
                                         MessageBoxOptions.ServiceNotification);
@@ -9065,6 +9066,7 @@ namespace WindowsFormsApp1
                                         }
                                         break;
                                     case ""://如果文字框裡沒內容（即空白頁）
+                                        BringToFront();
                                         dialogResult = MessageBox.Show("是否移到下一頁？", "",
                                         MessageBoxButtons.OKCancel, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1,
                                         MessageBoxOptions.DefaultDesktopOnly);
@@ -14248,7 +14250,13 @@ namespace WindowsFormsApp1
                          //timeDifference = DateTime.Now.Subtract(nextPageStartTime);
                          //if (timeDifference.TotalSeconds < 0.3)
                          //return;
-                            if (ModifierKeys == Keys.Control) br.Input_picture();
+                            if (ModifierKeys == Keys.Control)
+                            {//按住Ctrl再按五鍵滑鼠的下一頁按鈕，則可以以預設的書頁圖大小來設定紅框以供輸入。可以網址來產生紅框如下： 20250202大年初五 感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主
+                                br.driver.Navigate().GoToUrl(br.driver.Url.Replace("#editor", "#box(2,14,792,1146)"));
+                                br.driver.Navigate().Refresh();
+                                br.Input_picture();
+                            
+                            }
                             //nextPageStartTime = DateTime.Now;
                             nextPages(Keys.PageDown, true);
                         }
