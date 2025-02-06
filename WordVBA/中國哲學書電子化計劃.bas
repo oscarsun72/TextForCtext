@@ -1568,6 +1568,8 @@ Sub 國學大師_四庫全書本轉來()
         Do While noteRng.Next.font.Color = 16711935
             noteRng.SetRange noteRng.start, noteRng.Next.End
         Loop
+        
+        
         Set aNext = noteRng.Characters(noteRng.Characters.Count).Next
         Set aPre = noteRng.Characters(1).Previous
         midNoteRngPos = Excel.RoundUpCustom(noteRng.Characters.Count / 2)
@@ -1596,18 +1598,34 @@ Sub 國學大師_四庫全書本轉來()
 '        Else
 '            If aNext.text = VBA.Chr(11) Then
 
-                If InStr(rng, "加象十三餘九分三釐三三毫") Then Stop
+              
                 
                 Set a = aPre.Document.Range(aPre.start, aPre.End)
-                Do Until aPre.Previous = VBA.Chr(11)
-                    aPre.Move wdCharacter, -1
-                Loop
+                If aPre.start > 0 Then
+                    Do Until aPre.Previous = VBA.Chr(11)
+                        aPre.Move wdCharacter, -1
+                        If aPre.start <= 0 Then Exit Do
+                    Loop
+                End If
                 a.SetRange aPre.start, a.End
                 aX = a.text '縮排的空格
-            
+                
+'                Dim line As New LineChr11
+                
                 '如果有縮排
                 If VBA.Replace(aX, "　", vbNullString) = vbNullString Then
-                    insertX = VBA.Chr(11) & aX '縮排的空格
+                    If noteRng.Next Is Nothing Then
+'                    If line.LineRange(noteRng).start = noteRng.start And line.LineRange(noteRng).End = noteRng.End Then
+                        insertX = VBA.Chr(11) & aX
+                    ElseIf noteRng.Next = VBA.Chr(11) Then
+                        insertX = VBA.Chr(11) & aX '縮排的空格
+                    Else
+                        If VBA.InStr(midNoteRng.text, "/") And noteRng.Next.text <> VBA.Chr(11) And noteRng.Next.font.Size > 11.5 And noteRng.Next.text = "　" Then '若是夾注(通常是標題下的夾注，如 https://ctext.org/library.pl?if=en&file=55677&page=6） 20250205
+                            insertX = aX '補空格以縮排
+                        Else
+                            insertX = vbNullString
+                        End If
+                    End If
                 Else
                     insertX = vbNullString
                 End If
@@ -1617,7 +1635,7 @@ Sub 國學大師_四庫全書本轉來()
                             aSt = a.start
                             aEd = a.End
                             
-                            Do Until VBA.Abs(noteRng.Document.Range(noteRng.start, a.start).Characters.Count - noteRng.Document.Range(a.End, noteRng.End).Characters.Count) < 2
+                            Do Until VBA.Abs(noteRng.Document.Range(noteRng.start, a.start).Characters.Count - VBA.IIf(a.End = noteRng.End, 0, noteRng.Document.Range(a.End, noteRng.End).Characters.Count)) < 2
                                'noteRng.Document.Range(a.End, noteRng.End).text = noteRng.Document.Range(a.End, noteRng.End).text & "　"
                                noteRng.text = noteRng.text & "　"
                                a.SetRange aSt, aEd
@@ -1627,7 +1645,7 @@ Sub 國學大師_四庫全書本轉來()
                         End If
                     End If
                 Next a
-                If insertX <> vbNullString Then
+                If insertX <> vbNullString And VBA.Replace(insertX, "　", vbNullString) <> vbNullString Then '如果置換「/」的字符不是空字串也不是縮排用的空格
                     aSt = noteRng.start
                     noteRng.SetRange aPre.start, noteRng.End
                     noteRng.text = "{{" & noteRng.text & "}}"
@@ -1643,7 +1661,11 @@ Sub 國學大師_四庫全書本轉來()
 '        End If
     Loop
     
-    國學大師_Kanripo_四庫全書本轉來_Sub rng.Document.Content
+'    'word.Application.Activate'在背景執行Word（即不見Word）時不能如此，會出錯
+'    SystemSetup.playSound 3
+'    If VBA.MsgBox("空格轉成空白？", vbOKCancel + vbExclamation) = vbOK Then
+'        國學大師_Kanripo_四庫全書本轉來_Sub rng.Document.Content
+'    End If
     
     SystemSetup.playSound 1
     文字處理.書名號篇名號標注
@@ -1663,25 +1685,41 @@ Sub 國學大師_四庫全書本轉來()
     SystemSetup.playSound 1.921
     SystemSetup.contiUndo ur
 End Sub
-Rem 作為 國學大師_四庫全書本轉來()的子程序
+Rem 作為 國學大師_四庫全書本轉來()的子程序:1.取代空格為空白
 Sub 國學大師_Kanripo_四庫全書本轉來_Sub(rng As Range)
-    Dim rngEd As Long, rngChk As Range, rngChkX As String
+    Dim rngEd As Long, rngChk As Range, rngChkX As String, rngChkPre As Range
     Do While rng.Find.Execute("　")
         rngEd = rng.End
-        Set rngChk = rng.Document.Range(rng.start + rng.MoveStartUntil(VBA.Chr(11), -(rng.End - 1) + 1), rngEd)
+        Set rngChk = rng.Document.Range(rng.start, rng.End)
+        rngChk.SetRange rng.start + rngChk.MoveStartUntil(VBA.Chr(11), -(rng.End - 1)) + 1, rngEd
         rngChkX = VBA.Replace(rngChk.text, "　", vbNullString)
+        Set rngChkPre = rng.Previous
         If rngChkX <> vbNullString And rngChkX <> "{{" Then
             If rng.Previous.text <> VBA.Chr(11) Then
                 GoSub replaceSpaceWithBlank:
             End If
+        ElseIf Not rngChkPre Is Nothing Then
+            If rngChkPre.text <> VBA.Chr(11) And VBA.Left(rngChk, 2) <> "{{" Then GoSub replaceSpaceWithBlank:
         End If
-        rng.SetRange rngEd + 1, rng.Document.Content.End
+        rng.SetRange rngEd, rng.Document.Content.End
     Loop
     
 Exit Sub
 replaceSpaceWithBlank:
-    rngEd = rng.End
-    rng.text = VBA.ChrW(-9217) & VBA.ChrW(-8195)
+    rngChk.SetRange rng.start, rng.End
+    Dim line As New LineChr11
+    If VBA.InStr(rngChk.Document.Range(rngChk.End, line.EndPosition(rngChk)).text, "}") Then
+        'rngChk.MoveEndUntil "}", line.LineRange(rngChk).End - rng.End
+        rngChk.MoveEndUntil "}", line.EndPosition(rngChk) - rng.End
+        rngChkX = rngChk.text
+        If VBA.Replace(rngChkX, "　", vbNullString) <> vbNullString Then
+            rngEd = rng.End
+            rng.text = VBA.ChrW(-9217) & VBA.ChrW(-8195) '取代空格為空白
+        End If
+    Else
+        rngEd = rng.End
+        rng.text = VBA.ChrW(-9217) & VBA.ChrW(-8195) '取代空格為空白
+    End If
     Return
 End Sub
 

@@ -11127,6 +11127,8 @@ internal static string getImageUrl() {
         {
             killchromedriverFromHere();
             driver = null;
+            if (Form1.browsrOPMode != Form1.BrowserOPMode.seleniumNew)
+                Form1.browsrOPMode = Form1.BrowserOPMode.seleniumNew;
             DriverNew();
         }
         /// <summary>

@@ -1,35 +1,36 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using WindowsFormsApp1;
 
-/* 20250124¦~°²«e³Ì«á¤W¯Z¤é GitHub Copilot¤jµĞÂÄ¡G
- * ¤F¸Ñ¤F±zªº»İ¨D¡A§Ú­Ì¥i¥H³Ğ«Ø¤@­Ó Document Ãş§O¨Óªí¥Ü textBox1¡A¨Ã³Ğ«Ø¤@­Ó Paragraph Ãş§O¨Óªí¥Ü¬q¸¨¡C³o¨ÇÃş§O±N¯à°÷¾Ş§@ textBox1 ¤¤ªº¤º®e¡A¨Ã½T«O§ó§ï¬q¸¨ªº¤å¦r«á¡AtextBox1 ªº¤å¦r¤]¯à¹ïÀ³¥¿½T¦a§ó·s¡C
-    ­º¥ı¡A§Ú­Ì³Ğ«Ø¤@­Ó Document Ãş§O¡A¸ÓÃş§O±N¥]§t textBox1 ¨Ã´£¨Ñ¾Ş§@¨ä¤º®eªº¤èªk¡CµM«á¡A§Ú­Ì³Ğ«Ø¤@­Ó Paragraph Ãş§O¡A¸ÓÃş§O±N¯à°÷¾Ş§@ Document ¤¤ªº¬q¸¨¡C
-    ¡K¡K
- * ³o¼Ë¡A§Ú­Ì´N³Ğ«Ø¤F Document ©M Paragraph Ãş§O¡CDocument Ãş§Oªí¥Ü textBox1¡A¨Ã´£¨Ñ¾Ş§@¨ä¤º®eªº¤èªk¡CParagraph Ãş§Oªí¥Ü³æ­Ó¬q¸¨¡A¨Ã¯à°÷¾Ş§@ Document ¤¤ªº¬q¸¨¡C
-    ±z¥i¥H¦b Form1 ¤¤³Ğ«Ø Document ©M Paragraph ¹ï¶H¡A¨Ã¨Ï¥Î¥¦­Ì¨Ó¾Ş§@ textBox1 ¤¤ªº¤º®e¡C¨Ò¦p¡G
+/* 20250124å¹´å‡å‰æœ€å¾Œä¸Šç­æ—¥ GitHub Copilotå¤§è©è–©ï¼š
+ * äº†è§£äº†æ‚¨çš„éœ€æ±‚ï¼Œæˆ‘å€‘å¯ä»¥å‰µå»ºä¸€å€‹ Document é¡åˆ¥ä¾†è¡¨ç¤º textBox1ï¼Œä¸¦å‰µå»ºä¸€å€‹ Paragraph é¡åˆ¥ä¾†è¡¨ç¤ºæ®µè½ã€‚é€™äº›é¡åˆ¥å°‡èƒ½å¤ æ“ä½œ textBox1 ä¸­çš„å…§å®¹ï¼Œä¸¦ç¢ºä¿æ›´æ”¹æ®µè½çš„æ–‡å­—å¾Œï¼ŒtextBox1 çš„æ–‡å­—ä¹Ÿèƒ½å°æ‡‰æ­£ç¢ºåœ°æ›´æ–°ã€‚
+    é¦–å…ˆï¼Œæˆ‘å€‘å‰µå»ºä¸€å€‹ Document é¡åˆ¥ï¼Œè©²é¡åˆ¥å°‡åŒ…å« textBox1 ä¸¦æä¾›æ“ä½œå…¶å…§å®¹çš„æ–¹æ³•ã€‚ç„¶å¾Œï¼Œæˆ‘å€‘å‰µå»ºä¸€å€‹ Paragraph é¡åˆ¥ï¼Œè©²é¡åˆ¥å°‡èƒ½å¤ æ“ä½œ Document ä¸­çš„æ®µè½ã€‚
+    â€¦â€¦
+ * é€™æ¨£ï¼Œæˆ‘å€‘å°±å‰µå»ºäº† Document å’Œ Paragraph é¡åˆ¥ã€‚Document é¡åˆ¥è¡¨ç¤º textBox1ï¼Œä¸¦æä¾›æ“ä½œå…¶å…§å®¹çš„æ–¹æ³•ã€‚Paragraph é¡åˆ¥è¡¨ç¤ºå–®å€‹æ®µè½ï¼Œä¸¦èƒ½å¤ æ“ä½œ Document ä¸­çš„æ®µè½ã€‚
+    æ‚¨å¯ä»¥åœ¨ Form1 ä¸­å‰µå»º Document å’Œ Paragraph å°è±¡ï¼Œä¸¦ä½¿ç”¨å®ƒå€‘ä¾†æ“ä½œ textBox1 ä¸­çš„å…§å®¹ã€‚ä¾‹å¦‚ï¼š
     private void button1_Click(object sender, EventArgs e)
     {
         var paragraphs = _document.GetParagraphs();
         if (paragraphs.Count > 0)
         {
-            paragraphs[0].Text = "·sªº¬q¸¨¤å¥»";
+            paragraphs[0].Text = "æ–°çš„æ®µè½æ–‡æœ¬";
         }
     }
- * ³o¼Ë¡A·í±zÂIÀ»«ö¶s®É¡A²Ä¤@­Ó¬q¸¨ªº¤å¥»±N³Q§ó§ï¡A¨Ã¥B textBox1 ¤¤ªº¤º®e¤]·|¬ÛÀ³§ó·s¡C§Æ±æ³o¹ï±z¦³©ÒÀ°§U¡C·P®¦·P®¦¡A«nµLªüÀ±ªû¦ò¡C
+ * é€™æ¨£ï¼Œç•¶æ‚¨é»æ“ŠæŒ‰éˆ•æ™‚ï¼Œç¬¬ä¸€å€‹æ®µè½çš„æ–‡æœ¬å°‡è¢«æ›´æ”¹ï¼Œä¸¦ä¸” textBox1 ä¸­çš„å…§å®¹ä¹Ÿæœƒç›¸æ‡‰æ›´æ–°ã€‚å¸Œæœ›é€™å°æ‚¨æœ‰æ‰€å¹«åŠ©ã€‚æ„Ÿæ©æ„Ÿæ©ï¼Œå—ç„¡é˜¿å½Œé™€ä½›ã€‚
  */
 namespace TextForCtext
 {
     /// <summary>
-    /// ªí¥Ü¤åÀÉ¡]¹ïÀ³©ó textBox1¡^
+    /// è¡¨ç¤ºæ–‡æª”ï¼ˆå°æ‡‰æ–¼ textBox1ï¼‰
     /// </summary>
     public class Document
     {
         private TextBox _textBox;
         private int currentParagraphIndex;
-        public Document(TextBox textBox)
+        public Document(ref TextBox textBox)
         {
             _textBox = textBox;
         }
@@ -72,10 +73,13 @@ namespace TextForCtext
         {
             var paragraphs = new List<Paragraph>();
             var lines = _textBox.Text.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
-
+            int start = 0;
             foreach (var line in lines)
             {
-                paragraphs.Add(new Paragraph(line, this));
+                start = this.Text.IndexOf(line, start);
+
+                paragraphs.Add(new Paragraph(line, this, start));
+                //paragraphs.Add(new Paragraph(line, ref _textBox, start));
             }
 
             return paragraphs;
@@ -93,18 +97,85 @@ namespace TextForCtext
         //    return paragraphs;
         //}
 
+        #region å–å¾—æ’å…¥é»æ‰€åœ¨ä½ç½®çš„æ®µè½ï¼Œä»¥åŠå…¶ä¸Šå€‹æ®µè½å’Œä¸‹å€‹æ®µè½ã€‚
+        /// <summary>
+        /// å–å¾—æ’å…¥é»æ‰€åœ¨ä½ç½®æ®µè½
+        /// </summary>
+        /// <returns></returns>
+        public Paragraph GetCurrentParagraph()
+        {
+            var paragraphs = GetParagraphs();
+            int caretPosition = _textBox.SelectionStart;
+            int charCount = 0;
+
+            for (int i = 0; i < paragraphs.Count; i++)
+            {
+                charCount += paragraphs[i].Text.Length + Environment.NewLine.Length;
+                if (caretPosition < charCount)
+                {
+                    return paragraphs[i];
+                }
+            }
+
+            return null;
+        }
+        /// <summary>
+        /// å–å¾—æ’å…¥é»æ‰€åœ¨ä½ç½®å¾Œä¸€å€‹æ®µè½
+        /// </summary>
+        /// <returns></returns>
+        public Paragraph GetNextParagraph()
+        {
+            var paragraphs = GetParagraphs();
+            int caretPosition = _textBox.SelectionStart;
+            int charCount = 0;
+
+            for (int i = 0; i < paragraphs.Count; i++)
+            {
+                charCount += paragraphs[i].Text.Length + Environment.NewLine.Length;
+                if (caretPosition < charCount && i + 1 < paragraphs.Count)
+                {
+                    return paragraphs[i + 1];
+                }
+            }
+
+            return null;
+        }
+        /// <summary>
+        /// å–å¾—æ’å…¥é»æ‰€åœ¨ä½ç½®å‰ä¸€å€‹æ®µè½
+        /// </summary>
+        /// <returns></returns>
+        public Paragraph GetPreviousParagraph()
+        {
+            var paragraphs = GetParagraphs();
+            int caretPosition = _textBox.SelectionStart;
+            int charCount = 0;
+
+            for (int i = 0; i < paragraphs.Count; i++)
+            {
+                charCount += paragraphs[i].Text.Length + Environment.NewLine.Length;
+                if (caretPosition < charCount && i - 1 >= 0)
+                {
+                    return paragraphs[i - 1];
+                }
+            }
+
+            return null;
+        }
+        #endregion
+
+
         /// <summary>
         /// 
         /// </summary>
         /// <param name="paragraphIndex"></param>
         /// <param name="newChar"></param>
         public void UpdateParagraphFirstCharacter(int paragraphIndex, string newChar)
-        {/* ¦nªº¡A§Ú­Ì¥i¥H®Ú¾Ú±zªº»İ¨D¨Ó½s¼g´ú¸Õ¥N½X¡C¥H¤U¬O¹ê²{³o¨Ç¨BÆJªº¥N½X¡G
-            1.	¨ú±o textBox1 ¤º®eªº©Ò¦³¬q¸¨¡C
-            2.	¹M¾ú¦U­Ó¬q¸¨¡A§ä¥X²Å¦X±ø¥óªº¬q¸¨¡C
-            3.	§ó§ï²Å¦X±ø¥óªº¬q¸¨ªº¤U¤@­Ó¬q¸¨ªº²Ä¤@­Ó¦r¤¸¡C
-            4.	½T«O§ó§ï¤Ï¬M¦b textBox1 ªº¤º®e¤¤¡C
-            ­º¥ı¡A§Ú­Ì»İ­n¦b Document Ãş§O¤¤²K¥[¤@­Ó¤èªk¨Ó§ó·s¬q¸¨ªº²Ä¤@­Ó¦r¤¸¡G
+        {/* å¥½çš„ï¼Œæˆ‘å€‘å¯ä»¥æ ¹æ“šæ‚¨çš„éœ€æ±‚ä¾†ç·¨å¯«æ¸¬è©¦ä»£ç¢¼ã€‚ä»¥ä¸‹æ˜¯å¯¦ç¾é€™äº›æ­¥é©Ÿçš„ä»£ç¢¼ï¼š
+            1.	å–å¾— textBox1 å…§å®¹çš„æ‰€æœ‰æ®µè½ã€‚
+            2.	éæ­·å„å€‹æ®µè½ï¼Œæ‰¾å‡ºç¬¦åˆæ¢ä»¶çš„æ®µè½ã€‚
+            3.	æ›´æ”¹ç¬¦åˆæ¢ä»¶çš„æ®µè½çš„ä¸‹ä¸€å€‹æ®µè½çš„ç¬¬ä¸€å€‹å­—å…ƒã€‚
+            4.	ç¢ºä¿æ›´æ”¹åæ˜ åœ¨ textBox1 çš„å…§å®¹ä¸­ã€‚
+            é¦–å…ˆï¼Œæˆ‘å€‘éœ€è¦åœ¨ Document é¡åˆ¥ä¸­æ·»åŠ ä¸€å€‹æ–¹æ³•ä¾†æ›´æ–°æ®µè½çš„ç¬¬ä¸€å€‹å­—å…ƒï¼š
           */
 
             var paragraphs = GetParagraphs();
@@ -125,9 +196,9 @@ namespace TextForCtext
             }
         }
         /// <summary>
-        /// ±N´¡¤JÂI«áªº2¦æ/¬q¤º®e¡A§ï¦¨§¨ª`»yªk¨Ã±µ¦b´¡¤JÂI¥»¦æ«á¡]Ãş¦ü«ö¤UCtrl + Shift + F1¡^ 20250131¤j¦~ªì¤T
-        /// creedit with GitHub Copilot¤jµĞÂÄ¡GAlt + w
-        /// ¥[³tOCR§¨ª`¤å¥»ªº±Æª©¾ã²z
+        /// å°‡æ’å…¥é»å¾Œçš„2è¡Œ/æ®µå…§å®¹ï¼Œæ”¹æˆå¤¾æ³¨èªæ³•ä¸¦æ¥åœ¨æ’å…¥é»æœ¬è¡Œå¾Œï¼ˆé¡ä¼¼æŒ‰ä¸‹Ctrl + Shift + F1ï¼‰ 20250131å¤§å¹´åˆä¸‰
+        /// creedit with GitHub Copilotå¤§è©è–©ï¼šAlt + w
+        /// åŠ é€ŸOCRå¤¾æ³¨æ–‡æœ¬çš„æ’ç‰ˆæ•´ç†
         /// </summary>
         /// <exception cref="InvalidOperationException"></exception>
         public void MergeParagraphsAtCaret()
@@ -138,7 +209,7 @@ namespace TextForCtext
             int charCount = 0;
             int s = _textBox.SelectionStart;
 
-            // §ä¨ì´¡¤JÂI©Ò¦bªº¬q¸¨
+            // æ‰¾åˆ°æ’å…¥é»æ‰€åœ¨çš„æ®µè½
             for (int i = 0; i < paragraphs.Count; i++)
             {
                 charCount += paragraphs[i].Text.Length + Environment.NewLine.Length;
@@ -149,36 +220,36 @@ namespace TextForCtext
                 }
             }
 
-            // ½T«O¦³¨¬°÷ªº¬q¸¨¶i¦æ¾Ş§@
+            // ç¢ºä¿æœ‰è¶³å¤ çš„æ®µè½é€²è¡Œæ“ä½œ
             if (currentParagraphIndex + 2 >= paragraphs.Count)
             {
-                throw new InvalidOperationException("¨S¦³¨¬°÷ªº¬q¸¨¶i¦æ¾Ş§@¡C");
+                throw new InvalidOperationException("æ²’æœ‰è¶³å¤ çš„æ®µè½é€²è¡Œæ“ä½œã€‚");
             }
 
-            // ¨ú±o´¡¤JÂI©Ò¦b¬q¸¨¤Î¨ä«áªº¨â­Ó¬q¸¨
+            // å–å¾—æ’å…¥é»æ‰€åœ¨æ®µè½åŠå…¶å¾Œçš„å…©å€‹æ®µè½
             var currentParagraph = paragraphs[currentParagraphIndex];
             var nextParagraph1 = paragraphs[currentParagraphIndex + 1];
             var nextParagraph2 = paragraphs[currentParagraphIndex + 2];
 
-            // ±N³o¨â­Ó¬q¸¨«e«á¤À§O¥[¤W¡u{{¡v©M¡u}}¡v¡A¨Ã²M°£¨ä¤¤ªº¤À¬q²Å¸¹
+            // å°‡é€™å…©å€‹æ®µè½å‰å¾Œåˆ†åˆ¥åŠ ä¸Šã€Œ{{ã€å’Œã€Œ}}ã€ï¼Œä¸¦æ¸…é™¤å…¶ä¸­çš„åˆ†æ®µç¬¦è™Ÿ
             string mergedText = "{{" + nextParagraph1.Text.Replace(Environment.NewLine, "") + nextParagraph2.Text.Replace(Environment.NewLine, "") + "}}";
 
-            // ±N³o¨â­Ó¬q¸¨ªº¤º®e¨Ö¨ì´¡¤JÂI©Ò¦b¬q¸¨ªº«á­±
+            // å°‡é€™å…©å€‹æ®µè½çš„å…§å®¹ä½µåˆ°æ’å…¥é»æ‰€åœ¨æ®µè½çš„å¾Œé¢
             currentParagraph.Text += mergedText;
 
-            // §R°£­ì¨Óªº¨â­Ó¬q¸¨
+            // åˆªé™¤åŸä¾†çš„å…©å€‹æ®µè½
             paragraphs.RemoveAt(currentParagraphIndex + 2);
             paragraphs.RemoveAt(currentParagraphIndex + 1);
 
-            // §ó·s¤å¥»®Øªº¤º®e
+            // æ›´æ–°æ–‡æœ¬æ¡†çš„å…§å®¹
             _textBox.Text = string.Join(Environment.NewLine, paragraphs.Select(p => p.Text));
 
-            // §ó·s´¡¤JÂIªº¦ì¸m¨ì¦X¨Ö«áªº¬q¸¨ªº¥½§À
+            // æ›´æ–°æ’å…¥é»çš„ä½ç½®åˆ°åˆä½µå¾Œçš„æ®µè½çš„æœ«å°¾
             //_textBox.SelectionStart += currentParagraph.Text.Length;
             if (_textBox.Text.IndexOf(Environment.NewLine, s) > -1) s = _textBox.Text.IndexOf(Environment.NewLine, s);
             else s = _textBox.TextLength;
 
-            // ¦X¨Ö´¡¤JÂI«áªº¤@­Ó¬q¸¨¡A¦ı«O«ù´¡¤JÂI¦b·í«e¦ì¸m¤£ÅÜ
+            // åˆä½µæ’å…¥é»å¾Œçš„ä¸€å€‹æ®µè½ï¼Œä½†ä¿æŒæ’å…¥é»åœ¨ç•¶å‰ä½ç½®ä¸è®Š
             if (currentParagraphIndex + 1 < paragraphs.Count)
 
             {
@@ -200,10 +271,10 @@ namespace TextForCtext
         /// </summary>
         /// <exception cref="InvalidOperationException"></exception>
         public void MergeParagraphsAtCaretWithShift()
-        {/* 20250131¤j¦~ªì¤T¡GGitHub Copilot¤jµĞÂÄ¡G
-          * §Ú­Ì¥i¥H¦b Document Ãş§O¤¤²K¥[¤@­Ó·sªº¤èªk MergeParagraphsAtCaretWithShift ¨Ó¹ê²{ Alt + Shift + w ªº¥\¯à¡C³o­Ó¤èªk±N´¡¤JÂI©Ò¦b¦æµø¬°§¨ª`ªº²Ä1¦æ¡A±N¨ä«áªº1¦æ/¬q¦X¨Ö¤W¨Ó¡A¨Ã¦b¦X¨Ö«áªº«e«á¤À§O¥[¤W¡u{{¡v©M¡u}}¡v¡AµM«á¦A±N¥¦­Ì«á­±ªº¨º1¦æ¤]¦X¨Ö¤W¨Ó¡C³Ì«á¡A´¡¤JÂI±N°±¯d¦b³Ì«á¦X¨Ö¤W¨Óªº¨º¦æ/¬q¤å¦rªº°_©l³B¡C
-          * ¡K¡K
-          * ³o¼Ë¡A·í±z«ö¤U Alt + Shift + w ®É¡A±N°õ¦æ MergeParagraphsAtCaretWithShift ¤èªk¡A´¡¤JÂI©Ò¦b¦æ±Nµø¬°§¨ª`ªº²Ä1¦æ¡A¨Ã±N¨ä«áªº1¦æ/¬q¦X¨Ö¤W¨Ó¡A«e«á¤À§O¥[¤W¡u{{¡v©M¡u}}¡v¡AµM«á¦A±N¥¦­Ì«á­±ªº¨º1¦æ¤]¦X¨Ö¤W¨Ó¡C³Ì«á¡A´¡¤JÂI±N°±¯d¦b³Ì«á¦X¨Ö¤W¨Óªº¨º¦æ/¬q¤å¦rªº°_©l³B¡C
+        {/* 20250131å¤§å¹´åˆä¸‰ï¼šGitHub Copilotå¤§è©è–©ï¼š
+          * æˆ‘å€‘å¯ä»¥åœ¨ Document é¡åˆ¥ä¸­æ·»åŠ ä¸€å€‹æ–°çš„æ–¹æ³• MergeParagraphsAtCaretWithShift ä¾†å¯¦ç¾ Alt + Shift + w çš„åŠŸèƒ½ã€‚é€™å€‹æ–¹æ³•å°‡æ’å…¥é»æ‰€åœ¨è¡Œè¦–ç‚ºå¤¾æ³¨çš„ç¬¬1è¡Œï¼Œå°‡å…¶å¾Œçš„1è¡Œ/æ®µåˆä½µä¸Šä¾†ï¼Œä¸¦åœ¨åˆä½µå¾Œçš„å‰å¾Œåˆ†åˆ¥åŠ ä¸Šã€Œ{{ã€å’Œã€Œ}}ã€ï¼Œç„¶å¾Œå†å°‡å®ƒå€‘å¾Œé¢çš„é‚£1è¡Œä¹Ÿåˆä½µä¸Šä¾†ã€‚æœ€å¾Œï¼Œæ’å…¥é»å°‡åœç•™åœ¨æœ€å¾Œåˆä½µä¸Šä¾†çš„é‚£è¡Œ/æ®µæ–‡å­—çš„èµ·å§‹è™•ã€‚
+          * â€¦â€¦
+          * é€™æ¨£ï¼Œç•¶æ‚¨æŒ‰ä¸‹ Alt + Shift + w æ™‚ï¼Œå°‡åŸ·è¡Œ MergeParagraphsAtCaretWithShift æ–¹æ³•ï¼Œæ’å…¥é»æ‰€åœ¨è¡Œå°‡è¦–ç‚ºå¤¾æ³¨çš„ç¬¬1è¡Œï¼Œä¸¦å°‡å…¶å¾Œçš„1è¡Œ/æ®µåˆä½µä¸Šä¾†ï¼Œå‰å¾Œåˆ†åˆ¥åŠ ä¸Šã€Œ{{ã€å’Œã€Œ}}ã€ï¼Œç„¶å¾Œå†å°‡å®ƒå€‘å¾Œé¢çš„é‚£1è¡Œä¹Ÿåˆä½µä¸Šä¾†ã€‚æœ€å¾Œï¼Œæ’å…¥é»å°‡åœç•™åœ¨æœ€å¾Œåˆä½µä¸Šä¾†çš„é‚£è¡Œ/æ®µæ–‡å­—çš„èµ·å§‹è™•ã€‚
           */
             var paragraphs = GetParagraphs();
             int caretPosition = _textBox.SelectionStart;
@@ -211,7 +282,7 @@ namespace TextForCtext
             int charCount = 0;
             int s = _textBox.SelectionStart;
 
-            // §ä¨ì´¡¤JÂI©Ò¦bªº¬q¸¨
+            // æ‰¾åˆ°æ’å…¥é»æ‰€åœ¨çš„æ®µè½
             for (int i = 0; i < paragraphs.Count; i++)
             {
                 charCount += paragraphs[i].Text.Length + Environment.NewLine.Length;
@@ -222,32 +293,32 @@ namespace TextForCtext
                 }
             }
 
-            // ½T«O¦³¨¬°÷ªº¬q¸¨¶i¦æ¾Ş§@
+            // ç¢ºä¿æœ‰è¶³å¤ çš„æ®µè½é€²è¡Œæ“ä½œ
             if (currentParagraphIndex + 2 >= paragraphs.Count)
             {
-                throw new InvalidOperationException("¨S¦³¨¬°÷ªº¬q¸¨¶i¦æ¾Ş§@¡C");
+                throw new InvalidOperationException("æ²’æœ‰è¶³å¤ çš„æ®µè½é€²è¡Œæ“ä½œã€‚");
             }
 
-            // ¨ú±o´¡¤JÂI©Ò¦b¬q¸¨¤Î¨ä«áªº¨â­Ó¬q¸¨
+            // å–å¾—æ’å…¥é»æ‰€åœ¨æ®µè½åŠå…¶å¾Œçš„å…©å€‹æ®µè½
             var currentParagraph = paragraphs[currentParagraphIndex];
             var nextParagraph1 = paragraphs[currentParagraphIndex + 1];
             var nextParagraph2 = paragraphs[currentParagraphIndex + 2];
 
-            // ±N³o¨â­Ó¬q¸¨«e«á¤À§O¥[¤W¡u{{¡v©M¡u}}¡v¡A¨Ã²M°£¨ä¤¤ªº¤À¬q²Å¸¹
+            // å°‡é€™å…©å€‹æ®µè½å‰å¾Œåˆ†åˆ¥åŠ ä¸Šã€Œ{{ã€å’Œã€Œ}}ã€ï¼Œä¸¦æ¸…é™¤å…¶ä¸­çš„åˆ†æ®µç¬¦è™Ÿ
             string mergedText = "{{" + currentParagraph.Text.Replace(Environment.NewLine, "") + nextParagraph1.Text.Replace(Environment.NewLine, "") + "}}";
 
-            // ±N³o¨â­Ó¬q¸¨ªº¤º®e¨Ö¨ì´¡¤JÂI©Ò¦b¬q¸¨ªº«á­±
+            // å°‡é€™å…©å€‹æ®µè½çš„å…§å®¹ä½µåˆ°æ’å…¥é»æ‰€åœ¨æ®µè½çš„å¾Œé¢
             currentParagraph.Text = mergedText;
 
-            // §R°£­ì¨Óªº¨â­Ó¬q¸¨
+            // åˆªé™¤åŸä¾†çš„å…©å€‹æ®µè½
             paragraphs.RemoveAt(currentParagraphIndex + 1);
             //paragraphs.RemoveAt(currentParagraphIndex + 1);
-            //¦]¬°¡@±zµ¹§Úªºµ{¦¡½X¦b«e­±¤w¸g²M°£¹L¤À¬q²Å¸¹¤F¡A¦A²¾°£¤@¦¸¡A´N·|§â«á­±±µªº¦æ/¬qµ¹»~§R¤F¡C
+            //å› ç‚ºã€€æ‚¨çµ¦æˆ‘çš„ç¨‹å¼ç¢¼åœ¨å‰é¢å·²ç¶“æ¸…é™¤éåˆ†æ®µç¬¦è™Ÿäº†ï¼Œå†ç§»é™¤ä¸€æ¬¡ï¼Œå°±æœƒæŠŠå¾Œé¢æ¥çš„è¡Œ/æ®µçµ¦èª¤åˆªäº†ã€‚
 
-            // §ó·s¤å¥»®Øªº¤º®e
+            // æ›´æ–°æ–‡æœ¬æ¡†çš„å…§å®¹
             _textBox.Text = string.Join(Environment.NewLine, paragraphs.Select(p => p.Text));
 
-            // ¦X¨Ö´¡¤JÂI«áªº¤@­Ó¬q¸¨¡A¦ı«O«ù´¡¤JÂI¦b·í«e¦ì¸m¤£ÅÜ
+            // åˆä½µæ’å…¥é»å¾Œçš„ä¸€å€‹æ®µè½ï¼Œä½†ä¿æŒæ’å…¥é»åœ¨ç•¶å‰ä½ç½®ä¸è®Š
             if (currentParagraphIndex + 1 < paragraphs.Count)
             {
                 var nextParagraph = paragraphs[currentParagraphIndex + 1];
@@ -256,7 +327,7 @@ namespace TextForCtext
                 _textBox.Text = string.Join(Environment.NewLine, paragraphs.Select(p => p.Text));
             }
 
-            // §ó·s´¡¤JÂIªº¦ì¸m¨ì¦X¨Ö«áªº¬q¸¨ªº°_©l³B
+            // æ›´æ–°æ’å…¥é»çš„ä½ç½®åˆ°åˆä½µå¾Œçš„æ®µè½çš„èµ·å§‹è™•
             _textBox.SelectionStart = _textBox.Text.IndexOf("}}", s) + 2;
             _textBox.ScrollToCaret();
         }
@@ -264,20 +335,137 @@ namespace TextForCtext
 
 
 
+        /* 20250203å¤§å¹´åˆå…­ç«‹æ˜¥ creedit with GitHub Copilotå¤§è©è–©ï¼š
+                  * å¥½çš„ï¼Œæˆ‘å€‘å¯ä»¥æ ¹æ“šæ‚¨çš„éœ€æ±‚ä¾†å¯¦ç¾é€™å€‹è‡ªå‹•æ¨™é¡Œæ¨™è¨˜çš„å‡½å¼æ–¹æ³•ã€‚ä»¥ä¸‹æ˜¯å…·é«”å¯¦ç¾ï¼š
+                    1.	æª¢æŸ¥æ¯å€‹è¡Œ/æ®µï¼Œæ ¹æ“šå…¨å½¢ç©ºæ ¼æ•¸é‡ä¾†åˆ¤æ–·æ˜¯å¦ç‚ºæ¨™é¡Œã€‚
+                    2.	æ ¹æ“šä¸åŒçš„ç©ºæ ¼æ•¸é‡ä¾†æ·»åŠ æ¨™è¨˜ã€‚
+                    3.	è™•ç†æ¨™é¡Œè¡Œ/æ®µä¹‹å¾Œçš„è¡Œ/æ®µï¼Œç›´åˆ°é‡åˆ°éç©ºæ ¼é–‹é ­çš„è¡Œ/æ®µã€‚
+                    ä»¥ä¸‹æ˜¯å…·é«”çš„å¯¦ç¾ä»£ç¢¼ï¼š
+                  */
+
+        /// <summary>
+        /// é€™å€‹æ–¹æ³•æœƒæ ¹æ“šæŒ‡å®šçš„å…¨å½¢ç©ºæ ¼æ•¸é‡ä¾†è‡ªå‹•æ¨™è¨˜æ¨™é¡Œï¼Œä¸¦åœ¨é©ç•¶çš„ä½ç½®æ·»åŠ æ¨™é¡Œæ¨™è¨˜çš„é–‹é ­å’ŒçµæŸæ¨™è¨˜ã€‚å¸Œæœ›é€™å°æ‚¨æœ‰æ‰€å¹«åŠ©ã€‚æ„Ÿæ©æ„Ÿæ©ï¼Œå—ç„¡é˜¿å½Œé™€ä½›ã€‚
+        /// </summary>
+        /// <param name="titleIndentationSpaces"></param>
+        public void AutoMarkTitles(int titleIndentationSpaces)
+        {
+            var paragraphs = GetParagraphs();
+            var sb = new StringBuilder();
+            bool inTitle = false;
+
+            for (int i = 0; i < paragraphs.Count; i++)
+            {
+                var paragraph = paragraphs[i];
+                var text = paragraph.Text;
+                int leadingSpaces = text.TakeWhile(c => c == 'ã€€').Count();
+
+                if (leadingSpaces == titleIndentationSpaces)
+                {
+                    // æ¨™é¡Œè¡Œ/æ®µ
+                    sb.Append(text.Insert(leadingSpaces, "*"));
+                    for (int j = leadingSpaces + 1; j < text.Length; j++)
+                    {
+                        if (text[j] == 'ã€€')
+                        {
+                            sb.Append("ô¿½");
+                        }
+                        else
+                        {
+                            sb.Append(text[j]);
+                        }
+                    }
+                    inTitle = true;
+                }
+                else if (leadingSpaces < titleIndentationSpaces)
+                {
+                    // éæ¨™é¡Œè¡Œ/æ®µï¼Œç©ºæ ¼æ•¸å°‘æ–¼æŒ‡å®šæ•¸é‡
+                    for (int j = 0; j < text.Length; j++)
+                    {
+                        if (text[j] == 'ã€€')
+                        {
+                            sb.Append("ô¿½");
+                        }
+                        else
+                        {
+                            sb.Append(text[j]);
+                        }
+                    }
+                    sb.Append("<p>");
+                    inTitle = false;
+                }
+                else
+                {
+                    // éæ¨™é¡Œè¡Œ/æ®µï¼Œç©ºæ ¼æ•¸å¤šæ–¼æŒ‡å®šæ•¸é‡
+                    sb.Append(text.Insert(leadingSpaces, "**"));
+                    for (int j = leadingSpaces + 2; j < text.Length; j++)
+                    {
+                        if (text[j] == 'ã€€')
+                        {
+                            sb.Append("ô¿½");
+                        }
+                        else
+                        {
+                            sb.Append(text[j]);
+                        }
+                    }
+                    inTitle = true;
+                }
+
+                if (inTitle && (i + 1 >= paragraphs.Count || !paragraphs[i + 1].Text.StartsWith("ã€€")))
+                {
+                    sb.Append("<p>");
+                    inTitle = false;
+                }
+
+                sb.Append(Environment.NewLine);
+            }
+
+            _textBox.Text = sb.ToString();
+        }
+
+
+        /// <summary>
+        /// å–å¾—æŒ‡å®šç¯„åœçš„ Range ç‰©ä»¶
+        /// </summary>
+        /// <param name="start">ç¯„åœçš„èµ·å§‹ä½ç½®</param>
+        /// <param name="end">ç¯„åœçš„çµæŸä½ç½®</param>
+        /// <returns>Range ç‰©ä»¶</returns>
+        public Range Range(int start, int end)
+        {
+            return new Range(this, start, end);
+            //return new Range(ref _textBox, start, end);
+        }
+
+
+
+
+
     }
 
+
     /// <summary>
-    /// ªí¥Ü³æ­Ó¬q¸¨
+    /// è¡¨ç¤ºå–®å€‹æ®µè½
     /// </summary>
     public class Paragraph
     {
         private string _text;
+        private readonly string _text_beforeUpdate;
         private Document _document;
+        private int _start;
+        private readonly int _start_beforeUpdate;
+        private int _end;
+        private Range _range;
+        //private TextBox _textBox=Form1.Instance.Controls["textBox1"] as TextBox;
 
-        public Paragraph(string text, Document document)
+        public Paragraph(string text, Document document, int start)
+        //public Paragraph(string text, ref TextBox textBox, int start)
         {
-            _text = text;
+            _text = text; _text_beforeUpdate = _text;
             _document = document;
+            //_document = new Document(ref textBox);
+            //_start = CalculateStart();
+            _start = start; _start_beforeUpdate = _start;
+            _end = _start + _text.Length;
         }
 
         public string Text
@@ -286,8 +474,69 @@ namespace TextForCtext
             set
             {
                 _text = value;
+                _end = _start + _text.Length;
+                UpdateDocument();
+
+            }
+        }
+
+        public string TextBeforeUpdate
+        {
+            get => _text_beforeUpdate;
+        }
+        /// <summary>
+        /// å–å¾—æ®µè½çš„èµ·å§‹ä½ç½®
+        /// </summary>
+        public int Start
+        {
+            get => _start;
+            set
+            {
+                _start = value;
+                _end = _start + _text.Length;
                 UpdateDocument();
             }
+        }
+        /// å–å¾—æ®µè½çš„ç·¨è¼¯å‰çš„èµ·å§‹ä½ç½®
+        public int StartBeforeUpdate
+        {
+            get => _start_beforeUpdate;
+        }
+        /// <summary>
+        /// å–å¾—æ®µè½çš„çµæŸä½ç½®
+        /// </summary>
+        public int End
+        {
+            get => _end;
+            set
+            {
+                _end = value;
+                _text = _document.Text.Substring(_start, _end - _start);
+                UpdateDocument();
+            }
+        }
+        /// <summary>
+        /// å–å¾—æ®µè½ç·¨è¼¯å‰çš„çµæŸä½ç½®
+        /// </summary>
+        public int EndBeforeUpdate
+        {
+            get => _start_beforeUpdate + _text_beforeUpdate.Length;
+        }
+        private int CalculateStart()
+        {
+            var paragraphs = _document.GetParagraphs();
+            int charCount = 0;
+
+            foreach (var paragraph in paragraphs)
+            {
+                if (paragraph == this)
+                {
+                    return charCount;
+                }
+                charCount += paragraph.Text.Length + Environment.NewLine.Length;
+            }
+
+            return charCount;
         }
 
         private void UpdateDocument()
@@ -304,15 +553,28 @@ namespace TextForCtext
             //var paragraphs = _document.GetParagraphs(_document);
 
             int index = paragraphs.IndexOf(this);
+            //int index = paragraphs.IndexOf(_document.GetCurrentParagraph());
 
             if (index == -1)
             {
                 //return;                
-                // ·í«eªº Paragraph ¹ï¶H¤£¦b paragraphs ¦Cªí¤¤¡A³B²z³oºØ±¡ªp
-                // ¥i¥H¿ï¾Ü©ß¥X²§±`©Î°O¿ı¿ù»~«H®§
-                //throw new InvalidOperationException("·í«eªº Paragraph ¹ï¶H¤£¦b paragraphs ¦Cªí¤¤¡C");
-
-                index = _document.CurrentParagraphIndex;
+                // ç•¶å‰çš„ Paragraph å°è±¡ä¸åœ¨ paragraphs åˆ—è¡¨ä¸­ï¼Œè™•ç†é€™ç¨®æƒ…æ³
+                // å¯ä»¥é¸æ“‡æ‹‹å‡ºç•°å¸¸æˆ–è¨˜éŒ„éŒ¯èª¤ä¿¡æ¯
+                //throw new InvalidOperationException("ç•¶å‰çš„ Paragraph å°è±¡ä¸åœ¨ paragraphs åˆ—è¡¨ä¸­ã€‚");
+                for (int i = 0; i < paragraphs.Count; i++)
+                {
+                    if (paragraphs[i].Start == StartBeforeUpdate && paragraphs[i].End == EndBeforeUpdate)
+                    {
+                        index = i;
+                        break;
+                    }
+                }
+                if (index == -1)
+                {
+                    {
+                        index = _document.CurrentParagraphIndex;
+                    }
+                }
             }
             var lines = _document.Text.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
             if (index < lines.Length)
@@ -322,9 +584,203 @@ namespace TextForCtext
             }
             else
             {
-                // ³B²z index ¶W¥X lines ½d³òªº±¡ªp
-                throw new IndexOutOfRangeException("¯Á¤Ş¶W¥X lines °}¦Cªº¬É­­¡C");
+                // è™•ç† index è¶…å‡º lines ç¯„åœçš„æƒ…æ³
+                throw new IndexOutOfRangeException("ç´¢å¼•è¶…å‡º lines é™£åˆ—çš„ç•Œé™ã€‚");
             }
         }
+
+        public Range Range
+        {
+            get
+            {
+                if (_range == null)
+                {
+                    return new Range(_document, _start, _end);
+                    //_range = new Range(ref _textBox, _start, _end);
+                }
+                return _range;
+            }
+        }
+
+
+    }
+
+
+
+    /* 20250204 GitHubã€€Copilotå¤§è©è–©ï¼š
+      * é€™æ¨£ï¼Œæˆ‘å€‘å°±å¯¦ç¾äº†åœ¨ Document é¡åˆ¥ä¸­å–å¾—æ’å…¥é»æ‰€åœ¨ä½ç½®çš„æ®µè½ï¼Œä»¥åŠå…¶ä¸Šå€‹æ®µè½å’Œä¸‹å€‹æ®µè½çš„æ–¹æ³•ï¼Œä¸¦ä¸”å‰µå»ºäº†ä¸€å€‹ Range é¡åˆ¥ä¾†æ¨¡æ“¬ MS Word VBA çš„ Range ç‰©ä»¶ã€‚å¸Œæœ›é€™å°æ‚¨æœ‰æ‰€å¹«åŠ©ã€‚æ„Ÿæ©æ„Ÿæ©ï¼Œå—ç„¡é˜¿å½Œé™€ä½›ã€‚
+      */
+
+    /// <summary>
+    /// å‰µå»ºä¸€å€‹ Range é¡åˆ¥ä¾†æ¨¡æ“¬ MS Word VBA çš„ Range ç‰©ä»¶ã€‚
+    /// </summary>
+    public class Range
+    {
+        private Document _document;
+        private int _start;
+        private int _end;
+        List<Paragraph> rangeParagraphs;
+        //TextBox _textBox;
+
+        public Range(Document document, int start, int end)
+        //public Range(ref TextBox textBox, int start, int end)
+        {
+            _document = document;
+            //_document = new Document(ref textBox);
+            _start = start;
+            _end = end;
+            rangeParagraphs = Paragraphs;
+            //_textBox = textBox;
+        }
+
+        public string Text
+        {
+            get => _document.Text.Substring(_start, _end - _start);
+            set
+            {
+                var text = _document.Text;
+                _document.Text = text.Substring(0, _start) + value + text.Substring(_end);
+                _end = _start + value.Length;
+                UpdateDocument();//GitHubã€€Copilotå¤§è©è–©ï¼šæˆ‘å€‘åœ¨è¨­ç½® Text å±¬æ€§æ™‚èª¿ç”¨ UpdateDocument æ–¹æ³•ï¼Œä»¥ç¢ºä¿æ–‡æª”å…§å®¹çš„æ›´æ–°ã€‚
+            }
+        }
+        /// <summary>
+        /// åœ¨ Range é¡åˆ¥ä¸­æ·»åŠ ä¸€å€‹ UpdateDocument æ–¹æ³•ï¼Œä¸¦åœ¨è¨­ç½® Text å±¬æ€§æ™‚èª¿ç”¨å®ƒã€‚ä»¥ä¸‹æ˜¯å…·é«”å¯¦ç¾ï¼š
+        /// </summary>
+        private void UpdateDocument()
+        {
+            var paragraphs = _document.GetParagraphs();
+            int charCount = 0;
+
+            for (int i = 0; i < paragraphs.Count; i++)
+            {
+                charCount += paragraphs[i].Text.Length + Environment.NewLine.Length;
+                if (_start < charCount)
+                {
+                    paragraphs[i].Text = _document.Text.Substring(charCount - paragraphs[i].Text.Length - Environment.NewLine.Length, paragraphs[i].Text.Length);
+                }
+            }
+        }
+        /*
+         GitHubã€€Copilotå¤§è©è–©ï¼šæ–°å¢ Start å’Œ End å±¬æ€§ï¼Œé€™äº›å±¬æ€§å°‡å…è¨±è®€å–å’Œè¨­ç½®ç¯„åœçš„èµ·å§‹å’ŒçµæŸä½ç½®ã€‚ä»¥ä¸‹æ˜¯å…·é«”å¯¦ç¾ï¼š20250204
+         */
+        /// <summary>
+        /// å°±æ–°å¢äº† Start å’Œ End å±¬æ€§ï¼Œå…è¨±è®€å–å’Œè¨­ç½®ç¯„åœçš„èµ·å§‹å’ŒçµæŸä½ç½®ã€‚å¸Œæœ›é€™å°æ‚¨æœ‰æ‰€å¹«åŠ©ã€‚æ„Ÿæ©æ„Ÿæ©ï¼Œå—ç„¡é˜¿å½Œé™€ä½›ã€‚
+        /// </summary>
+        public int Start
+        {
+            get => _start;
+            set => _start = value;
+        }
+        /// <summary>
+        /// å°±æ–°å¢äº† Start å’Œ End å±¬æ€§ï¼Œå…è¨±è®€å–å’Œè¨­ç½®ç¯„åœçš„èµ·å§‹å’ŒçµæŸä½ç½®ã€‚å¸Œæœ›é€™å°æ‚¨æœ‰æ‰€å¹«åŠ©ã€‚æ„Ÿæ©æ„Ÿæ©ï¼Œå—ç„¡é˜¿å½Œé™€ä½›ã€‚
+        /// </summary>
+        public int End
+        {
+            get => _end;
+            set => _end = value;
+        }
+        public void Select()
+        {
+            _document.SelectionStart = _start;
+            _document.SelectionLength = _end - _start;
+        }
+
+        public Paragraph GetCurrentParagraph()
+        {
+            var paragraphs = _document.GetParagraphs();
+            int charCount = 0;
+
+            for (int i = 0; i < paragraphs.Count; i++)
+            {
+                charCount += paragraphs[i].Text.Length + Environment.NewLine.Length;
+                if (_start < charCount)
+                {
+                    return paragraphs[i];
+                }
+            }
+
+            return null;
+        }
+
+        public Paragraph GetNextParagraph()
+        {
+            var paragraphs = _document.GetParagraphs();
+            int charCount = 0;
+
+            for (int i = 0; i < paragraphs.Count; i++)
+            {
+                charCount += paragraphs[i].Text.Length + Environment.NewLine.Length;
+                if (_start < charCount && i + 1 < paragraphs.Count)
+                {
+                    return paragraphs[i + 1];
+                }
+            }
+
+            return null;
+        }
+
+        public Paragraph GetPreviousParagraph()
+        {
+            var paragraphs = _document.GetParagraphs();
+            int charCount = 0;
+
+            for (int i = 0; i < paragraphs.Count; i++)
+            {
+                charCount += paragraphs[i].Text.Length + Environment.NewLine.Length;
+                if (_start < charCount && i - 1 >= 0)
+                {
+                    return paragraphs[i - 1];
+                }
+            }
+
+            return null;
+        }
+
+        public List<Paragraph> Paragraphs
+        {
+            get
+            {
+                if (rangeParagraphs == null)
+                {
+                    rangeParagraphs = new List<Paragraph>() ;
+                    var paragraphs = _document.GetParagraphs();
+
+                    int charCount = 0;
+                    //GitHubã€€Copilotå¤§è©è–©ï¼šé€™æ¨£ï¼ŒParagraphs å±¬æ€§å°‡å§‹çµ‚è¿”å›æœ€æ–°çš„æ®µè½é›†åˆã€‚å¸Œæœ›é€™å°æ‚¨æœ‰æ‰€å¹«åŠ©ã€‚æ„Ÿæ©æ„Ÿæ©ï¼Œå—ç„¡é˜¿å½Œé™€ä½›ã€‚ 20250204
+                    //æ•…ä¸è¦æ”¹ç‚ºæ¬„ä½å„²å­˜å€¼ï¼Œä»¥å…é€ æˆæ®µè½é›†åˆä¸æ˜¯æœ€æ–°çš„å•é¡Œã€‚
+                    foreach (var paragraph in paragraphs)
+                    {
+                        charCount += paragraph.Text.Length + Environment.NewLine.Length;
+                        if (charCount > _start && charCount - paragraph.Text.Length - Environment.NewLine.Length < _end)
+                        {
+                            rangeParagraphs.Add(paragraph);
+                        }
+                    }
+                }
+                return rangeParagraphs;
+            }
+        }
+        //public List<Paragraph> Paragraphs
+        //        {
+        //            get
+        //            {
+        //                var paragraphs = _document.GetParagraphs();
+        //                var rangeParagraphs = new List<Paragraph>();
+        //                int charCount = 0;
+        //                //GitHubã€€Copilotå¤§è©è–©ï¼šé€™æ¨£ï¼ŒParagraphs å±¬æ€§å°‡å§‹çµ‚è¿”å›æœ€æ–°çš„æ®µè½é›†åˆã€‚å¸Œæœ›é€™å°æ‚¨æœ‰æ‰€å¹«åŠ©ã€‚æ„Ÿæ©æ„Ÿæ©ï¼Œå—ç„¡é˜¿å½Œé™€ä½›ã€‚ 20250204
+        //                //æ•…ä¸è¦æ”¹ç‚ºæ¬„ä½å„²å­˜å€¼ï¼Œä»¥å…é€ æˆæ®µè½é›†åˆä¸æ˜¯æœ€æ–°çš„å•é¡Œã€‚
+        //                foreach (var paragraph in paragraphs)
+        //                {
+        //                    charCount += paragraph.Text.Length + Environment.NewLine.Length;
+        //                    if (charCount > _start && charCount - paragraph.Text.Length - Environment.NewLine.Length < _end)
+        //                    {
+        //                        rangeParagraphs.Add(paragraph);
+        //                    }
+        //                }
+
+        //                return rangeParagraphs;
+        //            }
+        //        }
     }
 }

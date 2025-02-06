@@ -529,7 +529,7 @@ Sub 查異體字字典並取回其說文釋形欄位及網址值插入至插入點位置()
         End With
     End If
 End Sub
-Rem 1.指定卦名再操作 20241004 Alt + Shift + y (y:易) 。2.若游標所在為《易學網》的網址，則將其內容讀入到文件（於該連結段落後插入）
+Rem 1.指定卦名再操作 20241004 Alt + Shift + y (y:易) 。2.若游標所在為《易學網》的網址，則將其內容讀入到文件（於該連結段落後插入）3.插入點位置可以在卦名前或後，不可在中
 Sub 查易學網易經周易原文指定卦名文本_並取回其純文字值及網址值插入至插入點位置()
     SystemSetup.playSound 0.484
     Dim linkInput As Boolean, rngLink As Range, rngHtml As Range, ss As Long, x As String, gua As String, e, arrYi
@@ -635,7 +635,17 @@ errExit:
         Rem 自動檢查下一個字
             Selection.Collapse wdCollapseStart
 '        If Selection.Characters.Count = 1 Then
-            x = Selection.text
+
+            'x = Selection.text
+            If Selection.text = VBA.Chr(13) Then '插入點位置可以在卦名前或後，不可在中
+                Selection.MoveLeft wdCharacter, 1
+                x = Selection.text
+                If Not Keywords.周易卦名_卦形_卦序.Exists(x) And Not Keywords.易學異體字典.Exists(x) Then
+                    Selection.MoveLeft wdCharacter, 1
+                    x = Selection.text
+                End If
+            End If
+            
             If Not Keywords.周易卦名_卦形_卦序.Exists(x) And Not Keywords.易學異體字典.Exists(x) Then
                 x = Selection.Characters(1).text & Selection.Characters(1).Next(wdCharacter, 1).text
                 If Keywords.周易卦名_卦形_卦序.Exists(x) Or Keywords.易學異體字典.Exists(x) Then

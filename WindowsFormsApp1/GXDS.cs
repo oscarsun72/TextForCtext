@@ -9,6 +9,8 @@ using System.Threading.Tasks;
 using WindowsFormsApp1;
 using System.Windows.Forms;
 using System.Globalization;
+using System.Diagnostics;
+
 
 namespace TextForCtext
 {
@@ -176,7 +178,30 @@ namespace TextForCtext
             //現在亦可用 https://www.kanripo.org/ 所收《四部叢刊》本，故加此條件判斷 20240804
             int isSKQS = xForStandardize.IndexOf("《欽定四庫全書》");
             if (isSKQS > -1)
-                xForStandardize = "*欽定四庫全書<p>〖文淵|閣寶〗<p>" + xForStandardize.Substring(isSKQS + "《欽定四庫全書》".Length);
+            {
+                string sbRoot;
+                if (xForStandardize.Substring(0, 1) == "　")
+                {
+                    sbRoot = "　";
+                }
+
+                else if (xForStandardize.Substring(0, 2) == "􏿽")
+                {
+                    sbRoot = "􏿽";
+                }
+                else
+                {
+                    sbRoot = string.Empty;
+                    Debugger.Break();
+                }
+
+                StringBuilder sb = new StringBuilder();
+                for (int i = 0; i < isSKQS; i++)
+                {
+                    sb.Append(sbRoot);
+                }
+                xForStandardize = sb.ToString() + "*欽定四庫全書<p>〖文淵|閣寶〗<p>" + xForStandardize.Substring(isSKQS + "《欽定四庫全書》".Length);
+            }
 
             xForStandardize = xForStandardize.Replace("○", "◯");
             xForStandardize = xForStandardize.Replace("\r\n　\r\n　\r\n", "\r\n|\r\n|\r\n");

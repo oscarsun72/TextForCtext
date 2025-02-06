@@ -1437,7 +1437,7 @@ namespace TextForCtext
 
           */
             Document _document;
-            _document = new Document(textBox1);
+            _document = new Document(ref textBox1);
 
 
             var paragraphs = _document.GetParagraphs();
