@@ -305,8 +305,8 @@ namespace TextForCtext
         internal static bool ChromedriverLose(Exception ex)
         {
             if (ex.Message.StartsWith("An unknown exception was encountered sending an HTTP request to the remote WebDriver server for URL ") ||
-                ex.Message.StartsWith("disconnected: not connected to DevTools")||
-                ex.Message.StartsWith("invalid session id") )//An unknown exception was encountered sending an HTTP request to the remote WebDriver server for URL http://localhost:13451/session/6f6c77cfb73c5c388c6cdfd40a06b806/url. The exception message was: 傳送要求時發生錯誤。
+                ex.Message.StartsWith("disconnected: not connected to DevTools") ||
+                ex.Message.StartsWith("invalid session id"))//An unknown exception was encountered sending an HTTP request to the remote WebDriver server for URL http://localhost:13451/session/6f6c77cfb73c5c388c6cdfd40a06b806/url. The exception message was: 傳送要求時發生錯誤。
             {
                 Form1.playSound(Form1.soundLike.over);
                 killchromedriverFromHere();
@@ -1641,6 +1641,8 @@ namespace TextForCtext
         {
             driver = null;
             killchromedriverFromHere();
+            if (Form1.browsrOPMode != Form1.BrowserOPMode.seleniumNew)
+                Form1.browsrOPMode = Form1.BrowserOPMode.seleniumNew;
             return DriverNew() == null ? false : true;
         }
         private static void setupChromeDriverService()
@@ -2762,7 +2764,7 @@ namespace TextForCtext
                     bool _events = ActiveForm1.EventsEnabled;
                     ActiveForm1.PauseEvents();
                     driver.ExecuteScript("window.scrollTo(0, 0)");//chatGPT:您好！如果您使用 C# 和 Selenium 來控制 Chrome 瀏覽器，您可以使用以下的程式碼將網頁捲到最上面：
-                    ActiveForm1.EventsEnabled = _events;                    
+                    ActiveForm1.EventsEnabled = _events;
                 }
                 //driver.SwitchTo().Window(driver.CurrentWindowHandle).SwitchTo().DefaultContent();//20231019
 
@@ -9800,8 +9802,12 @@ internal static string getImageUrl() {
             if (!WindowHandles.TryGetValue("《AI太炎》", out windowHandle))
                 WindowHandles.Add("《AI太炎》", driver.CurrentWindowHandle);
             else
-                if (windowHandle != driver.CurrentWindowHandle)
-                WindowHandles["《AI太炎》"] = driver.CurrentWindowHandle;
+            {
+                if (driver.WindowHandles.Contains(windowHandle))
+                    if (windowHandle != driver.CurrentWindowHandle)
+                        WindowHandles["《AI太炎》"] = driver.CurrentWindowHandle;
+            }
+
 
             //標點
             IWebElement iwe = waitFindWebElementBySelector_ToBeClickable("#nav-biaodian-tab", 5);
@@ -10952,7 +10958,8 @@ internal static string getImageUrl() {
                 {
                     Form1.browsrOPMode = Form1.BrowserOPMode.seleniumNew;
                     DriverNew();
-
+                    if (driver == null)
+                        RestartDriver();
                 }
                 string url = driver.Url;
             }
@@ -10973,7 +10980,7 @@ internal static string getImageUrl() {
         /// chromedriver載入頁面的時間上限。預設為5分鐘（原以為是7秒） 20250125
         /// creedit with GitHub Copilot大菩薩。感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主
         /// </summary>        
-        internal static readonly TimeSpan DriverManageTimeoutsPageLoad= driver==null?TimeSpan.FromMinutes(5):driver.Manage().Timeouts().PageLoad;
+        internal static readonly TimeSpan DriverManageTimeoutsPageLoad = driver == null ? TimeSpan.FromMinutes(5) : driver.Manage().Timeouts().PageLoad;
         //internal static readonly TimeSpan DriverManageTimeoutsPageLoad;
         ///// <summary>
         ///// 靜態建構器（constructor），靜態成員之初始化要在此中進行

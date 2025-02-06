@@ -192,7 +192,10 @@ namespace TextForCtext
                 else
                 {
                     sbRoot = string.Empty;
-                    Debugger.Break();
+                    if (xForStandardize.Substring(0, 2) == Environment.NewLine)
+                        xForStandardize = xForStandardize.Substring(2);
+                    else
+                        Debugger.Break();
                 }
 
                 StringBuilder sb = new StringBuilder();
@@ -200,7 +203,8 @@ namespace TextForCtext
                 {
                     sb.Append(sbRoot);
                 }
-                xForStandardize = sb.ToString() + "*欽定四庫全書<p>〖文淵|閣寶〗<p>" + xForStandardize.Substring(isSKQS + "《欽定四庫全書》".Length);
+                //xForStandardize = sb.ToString() + "*欽定四庫全書<p>〖文淵|閣寶〗<p>" + xForStandardize.Substring(isSKQS + "《欽定四庫全書》".Length);
+                xForStandardize = sb.ToString() + "*欽定四庫全書<p>" + xForStandardize.Substring(isSKQS + "《欽定四庫全書》".Length);
             }
 
             xForStandardize = xForStandardize.Replace("○", "◯");

@@ -9292,9 +9292,14 @@ namespace WindowsFormsApp1
                     bool _check_the_adjacent_pages = check_the_adjacent_pages;
 
                     bool doNotShowMsgBox = false;
-                    //按著Ctrl鍵則直接ok 20250109
+                    //按著Ctrl鍵則直接ok 20250109（並啟動快捷模式）
                     //if (ModifierKeys == Keys.Control && dialogResult != DialogResult.Abort) { dialogResult = DialogResult.OK; goto ok; }
-                    if (ModifierKeys == Keys.Control) { dialogResult = DialogResult.OK; doNotShowMsgBox = true; goto ok; }
+                    if (ModifierKeys == Keys.Control)
+                    {
+                        FastModeSwitcher();
+                    }
+                    if (ModifierKeys == Keys.Control || FastMode)
+                    { dialogResult = DialogResult.OK; doNotShowMsgBox = true; goto ok; }
 
                     #region 取得最後不含 <p> 與 。<p> 的5個字來顯示於訊息方塊中20250118
                     string last5Characters = textBox1.SelectedText; int eLast5Characters = last5Characters.IndexOf("<p>");
@@ -10255,17 +10260,7 @@ namespace WindowsFormsApp1
                 if (e.KeyCode == Keys.F)
                 {//Alt + f ：切換 Fast Mode 不待網頁回應即進行下一頁的貼入動作（即在不須檢覈貼上之文本正確與否，肯定、八成是無誤的，就可以執行此項以加快輸入文本的動作）當是 fast mode 模式時「送出貼上」按鈕會呈現紅綠燈的綠色表示一路直行通行順暢 20230130癸卯年初九第一上班日週一
                     e.Handled = true;
-                    FastMode = !FastMode;
-                    if (FastMode)
-                    {
-                        //YouChat菩薩：在C#中，紅綠燈的綠色值為Color.FromArgb(0, 255, 0)。它可以指定RGB顏色，其中紅色的值為0，綠色的值為255，藍色的值為0
-                        notFastModeColor = button1.ForeColor;
-                        button1.ForeColor = Color.FromArgb(0, 255, 0);
-                    }
-                    else
-                    {
-                        if (notFastModeColor != null) button1.ForeColor = notFastModeColor;
-                    }
+                    FastModeSwitcher();
                     return;
                 }
                 if (e.KeyCode == Keys.R)
@@ -10477,6 +10472,23 @@ namespace WindowsFormsApp1
             }//以上 按下單一鍵
             #endregion
         }
+
+        private void FastModeSwitcher()
+        {
+            FastMode = !FastMode;
+            if (FastMode)
+            {
+                playSound(soundLike.over, true);//播放音效，啟動快捷模式之通知 20250206 蛇年初九
+                //YouChat菩薩：在C#中，紅綠燈的綠色值為Color.FromArgb(0, 255, 0)。它可以指定RGB顏色，其中紅色的值為0，綠色的值為255，藍色的值為0
+                notFastModeColor = button1.ForeColor;
+                button1.ForeColor = Color.FromArgb(0, 255, 0);//https://www.google.com/search?q=Color.FromArgb(0%2C+255%2C+0)%3B&oq=Color.FromArgb(0%2C+255%2C+0)%3B&gs_lcrp=EgZjaHJvbWUyBggAEEUYOTIICAEQABgIGB4yCggCEAAYgAQYogQyBwgDEAAY7wUyBwgEEAAY7wXSAQczMDhqMGo3qAIAsAIA&sourceid=chrome&ie=UTF-8
+            }
+            else
+            {
+                if (notFastModeColor != null) button1.ForeColor = notFastModeColor;
+            }
+        }
+
         /// <summary>
         /// YAKC - Key-Mouse Click Visualizer 
         /// OBS運行時才處理
