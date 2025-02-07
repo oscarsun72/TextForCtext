@@ -176,9 +176,15 @@ namespace TextForCtext
             noteBeforeTitleSplitTwoLine(ref xForStandardize);
 
             //現在亦可用 https://www.kanripo.org/ 所收《四部叢刊》本，故加此條件判斷 20240804
-            int isSKQS = xForStandardize.IndexOf("《欽定四庫全書》");
+            int isSKQS = xForStandardize.IndexOf("《欽定四庫全書》"); bool reBuild = false;
             if (isSKQS > -1)
             {
+                if (xForStandardize.Substring(0, 2) == Environment.NewLine)
+                {
+                    xForStandardize = xForStandardize.Substring(2);
+                    isSKQS = xForStandardize.IndexOf("《欽定四庫全書》");
+                }
+
                 string sbRoot;
                 if (xForStandardize.Substring(0, 1) == "　")
                 {
@@ -193,18 +199,40 @@ namespace TextForCtext
                 {
                     sbRoot = string.Empty;
                     if (xForStandardize.Substring(0, 2) == Environment.NewLine)
+                    {
                         xForStandardize = xForStandardize.Substring(2);
+                        isSKQS = xForStandardize.IndexOf("《欽定四庫全書》");
+                    }
                     else
-                        Debugger.Break();
+                    {
+
+                        Document document = new Document(ref xForStandardize);
+                        foreach (var item in document.GetParagraphs())
+                        {
+                            if (item.Text.Contains("欽定四庫全書"))
+                            {
+                                //xForStandardize = xForStandardize.Substring(item.Range.Start);
+                                item.Text = item.Text.Replace("《欽定四庫全書》", "*欽定四庫全書<p>");
+                                xForStandardize = document.Range(item.Range.Start, document.Text.Length).Text;
+                                reBuild = true;
+                                break;
+                            }
+                        }
+                        if (!reBuild) Debugger.Break();
+                    }
                 }
 
-                StringBuilder sb = new StringBuilder();
-                for (int i = 0; i < isSKQS; i++)
+                if (sbRoot != string.Empty && !reBuild)
                 {
-                    sb.Append(sbRoot);
+                    StringBuilder sb = new StringBuilder();
+                    for (int i = 0; i < isSKQS; i++)
+                    {
+                        sb.Append(sbRoot);
+                    }
+                    //xForStandardize = sb.ToString() + "*欽定四庫全書<p>〖文淵|閣寶〗<p>" + xForStandardize.Substring(isSKQS + "《欽定四庫全書》".Length);
+                    xForStandardize = sb.ToString() + "*欽定四庫全書<p>" + xForStandardize.Substring(isSKQS + "《欽定四庫全書》".Length);
                 }
-                //xForStandardize = sb.ToString() + "*欽定四庫全書<p>〖文淵|閣寶〗<p>" + xForStandardize.Substring(isSKQS + "《欽定四庫全書》".Length);
-                xForStandardize = sb.ToString() + "*欽定四庫全書<p>" + xForStandardize.Substring(isSKQS + "《欽定四庫全書》".Length);
+
             }
 
             xForStandardize = xForStandardize.Replace("○", "◯");

@@ -47,6 +47,7 @@ namespace WindowsFormsApp1
             this.textBox1.ForeColor = System.Drawing.SystemColors.Menu;
             this.textBox1.HideSelection = false;
             this.textBox1.Location = new System.Drawing.Point(-1, 41);
+            this.textBox1.MaxLength = 0;
             this.textBox1.Multiline = true;
             this.textBox1.Name = "textBox1";
             this.textBox1.ScrollBars = System.Windows.Forms.ScrollBars.Both;

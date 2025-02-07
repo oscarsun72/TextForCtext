@@ -714,7 +714,7 @@ namespace TextForCtext
                 line = Regex.Replace(line, pattern, "");
                 double similarity = Fuzz.Ratio(title, line) / 100.0;
                 //Form1 frm = (Form1)Application.OpenForms[0] ;//依Copilot大菩薩建議，改用依賴注入（Dependency Injection, DI） 
-                if (similarity >= threshold && line.Length < Form1.Instance.NormalLineParaLength)
+                if (similarity >= threshold && line.Length < Form1.InstanceForm1.NormalLineParaLength)
                 {
                     //前一段若為「|」通常是卷末題目
                     if (i > lines.Length - 2 &&

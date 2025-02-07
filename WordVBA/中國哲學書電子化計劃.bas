@@ -1527,7 +1527,7 @@ Next inlnsp
 cnt.Close
 End Sub
 Rem 現在多用Kanripo.org者 20250202大年初五
-Sub 國學大師_四庫全書本轉來()
+Sub 國學大師_Kanripo_四庫全書本轉來()
     Dim rng As Range, noteRng As Range, aNext As Range, aPre As Range, ur As UndoRecord, midNoteRngPos As Byte, midNoteRng As Range, aX As String, a As Range, aSt As Long, aEd As Long
     Dim noteFont As font '記下注文格式以備用
     Dim insertX As String
@@ -1569,7 +1569,6 @@ Sub 國學大師_四庫全書本轉來()
             noteRng.SetRange noteRng.start, noteRng.Next.End
         Loop
         
-        
         Set aNext = noteRng.Characters(noteRng.Characters.Count).Next
         Set aPre = noteRng.Characters(1).Previous
         midNoteRngPos = Excel.RoundUpCustom(noteRng.Characters.Count / 2)
@@ -1598,22 +1597,25 @@ Sub 國學大師_四庫全書本轉來()
 '        Else
 '            If aNext.text = VBA.Chr(11) Then
 
-              
                 
                 Set a = aPre.Document.Range(aPre.start, aPre.End)
-                If aPre.start > 0 Then
+                If aPre.start > 0 And aPre.text <> VBA.Chr(11) Then
                     Do Until aPre.Previous = VBA.Chr(11)
                         aPre.Move wdCharacter, -1
                         If aPre.start <= 0 Then Exit Do
                     Loop
                 End If
-                a.SetRange aPre.start, a.End
-                aX = a.text '縮排的空格
+                If a.start > aPre.start Then
+                    a.SetRange aPre.start, a.End
+                    aX = a.text '縮排的空格
+                Else
+                    aX = vbNullString
+                End If
                 
 '                Dim line As New LineChr11
                 
                 '如果有縮排
-                If VBA.Replace(aX, "　", vbNullString) = vbNullString Then
+                If aX <> vbNullString And VBA.Replace(aX, "　", vbNullString) = vbNullString Then
                     If noteRng.Next Is Nothing Then
 '                    If line.LineRange(noteRng).start = noteRng.start And line.LineRange(noteRng).End = noteRng.End Then
                         insertX = VBA.Chr(11) & aX
@@ -1627,9 +1629,13 @@ Sub 國學大師_四庫全書本轉來()
                         End If
                     End If
                 Else
-                    insertX = vbNullString
+                    If aX = vbNullString And noteRng.Previous(wdCharacter, 1) = VBA.Chr(11) And noteRng.Next(wdCharacter, 1) = VBA.Chr(11) Then
+                        insertX = VBA.Chr(11)
+                    Else
+                        insertX = vbNullString
+                    End If
                 End If
-                For Each a In noteRng.Characters
+                For Each a In noteRng.Characters '找到/（夾注換行）的位置
                     If a = "/" And a.InlineShapes.Count = 0 Then
                         If a.font.Color = noteFont.Color And a.font.Size = noteFont.Size Then
                             aSt = a.start
@@ -1646,8 +1652,10 @@ Sub 國學大師_四庫全書本轉來()
                     End If
                 Next a
                 If insertX <> vbNullString And VBA.Replace(insertX, "　", vbNullString) <> vbNullString Then '如果置換「/」的字符不是空字串也不是縮排用的空格
-                    aSt = noteRng.start
-                    noteRng.SetRange aPre.start, noteRng.End
+                    If aX <> vbNullString Then
+                        aSt = noteRng.start
+                        noteRng.SetRange aPre.start, noteRng.End
+                    End If
                     noteRng.text = "{{" & noteRng.text & "}}"
                     noteRng.Collapse wdCollapseEnd
                 Else

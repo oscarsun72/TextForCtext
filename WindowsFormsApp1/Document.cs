@@ -34,6 +34,11 @@ namespace TextForCtext
         {
             _textBox = textBox;
         }
+        public Document(ref string context)
+        {
+            _textBox = new TextBox();
+            Text = context;
+        }
 
         public string Text
         {
@@ -595,7 +600,9 @@ namespace TextForCtext
             {
                 if (_range == null)
                 {
-                    return new Range(_document, _start, _end);
+                    //return new Range(_document, _start, _end);
+                    _range= new Range(_document, _start, _end); 
+                    return _range;
                     //_range = new Range(ref _textBox, _start, _end);
                 }
                 return _range;

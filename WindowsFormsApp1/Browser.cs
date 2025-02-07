@@ -2,12 +2,10 @@
 using Newtonsoft.Json.Linq;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
-using OpenQA.Selenium.DevTools;
 using OpenQA.Selenium.Interactions;
 using OpenQA.Selenium.Remote;
 using OpenQA.Selenium.Support.UI;
 using System;
-using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -17,12 +15,10 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Media;
-using System.Net.Http.Headers;
 
 //using System.Net;
 //using System.Net.NetworkInformation;
 using System.Runtime.InteropServices;
-using System.Security.Policy;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -32,8 +28,6 @@ using System.Windows.Automation;
 using System.Windows.Forms;
 using WebSocketSharp;
 using WindowsFormsApp1;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.Button;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.Tab;
 
 
 
@@ -2611,10 +2605,11 @@ namespace TextForCtext
         /// Selenium 瀏覽所指定的網址所在的網頁
         /// </summary>
         /// <param name="url">要瀏覽的網址</param>
-        /// <param name="frmKeyinTextModeTopWindow">是否將視窗內容可見位置調到最頂端</param>        
-        internal static void GoToUrlandActivate(string url, bool frmKeyinTextModeTopWindow = false)
+        /// <param name="frmKeyinTextModeTopWindow">是否將視窗內容可見位置調到最頂端</param>
+        /// <returns>失敗則傳回false</returns>
+        internal static bool GoToUrlandActivate(string url, bool frmKeyinTextModeTopWindow = false)
         {
-            if (string.IsNullOrEmpty(url) || url.Length < 7 || url.Substring(0, 4) != "http") return;
+            if (string.IsNullOrEmpty(url) || url.Length < 7 || url.Substring(0, 4) != "http") return false;
 
             ////driver.Close();//creedit
             ////creedit20230103 這樣處理誤關分頁頁籤的錯誤（例外情形）就成功了，但整個瀏覽器誤關則尚未
@@ -2641,7 +2636,10 @@ namespace TextForCtext
             try
             {
                 driver = driver ?? Browser.DriverNew();
-                tabCount = driver.WindowHandles.Count;
+                if (driver != null)
+                    tabCount = driver.WindowHandles.Count;
+                else
+                    return false;
             }
             catch (Exception ex)
             {
@@ -2656,7 +2654,9 @@ namespace TextForCtext
                             killProcesses(new string[] { "chromedriver" });//手動關閉由Selenium啟動的Chrome瀏覽器須由此才能清除
                             driver = null;
                             driver = DriverNew();
-                            tabCount = driver.WindowHandles.Count;
+                            if (driver != null) tabCount = driver.WindowHandles.Count;
+                            else return false;
+
                         }
                         else if (ex.Message.StartsWith("An unknown exception was encountered sending an HTTP request to the remote WebDriver server for URL"))
                         {
@@ -2734,6 +2734,7 @@ namespace TextForCtext
                 if (ex.Message.StartsWith("invalid session id"))
                     RestartChromedriver();
             }
+            return true;
         }
 
         /// <summary>
@@ -11261,7 +11262,191 @@ internal static string getImageUrl() {
 
             return true;
         }
+        /// <summary>
+        /// 翻到[Kanripo](https://www.kanripo.org/)或《國學大師》下一卷在複製其文本後即執行 Word VBA Sub 巨集指令「國學大師_Kanripo_四庫全書本轉來」
+        /// Ctrl + Shift + 4 20250207 creedit with GitHub Copilot大菩薩
+        /// 自動翻至Kanripo下一卷並複製其文字
+        /// </summary>
+        /// <param name="url">要翻卷的初始網址</param>
+        /// <returns>失敗則傳回fasle</returns>
+        internal static bool SikuQuanshu()
+        {
+            LastValidWindow = driver.CurrentWindowHandle;
 
+            string url = string.Empty; bool result = false;
+            string urlPrefixDomain = string.Empty;//= url.Substring(url.IndexOf("//") + "//".Length).Substring(0, url.IndexOf("/"));
+            string urlPrefix = string.Empty; //url.Substring(0, url.IndexOf("//") + "//".Length);            
+            //http://skqs.guoxuedashi.net/wen_2885i/174671.html#002-1a
+            //https://www.kanripo.org/text/KR4h0141/221
+
+            for (int i = driver.WindowHandles.Count - 1; i > -1; i--)
+            {
+                driver.SwitchTo().Window(driver.WindowHandles[i]);
+                url = driver.Url;
+                urlPrefixDomain = url.Substring(url.IndexOf("//") + "//".Length, url.IndexOf("/", url.IndexOf("//") + "//".Length) - (url.IndexOf("//") + "//".Length));
+                urlPrefix = url.Substring(0, url.IndexOf("//") + "//".Length);//http://skqs.guoxuedashi.net/wen_2885i/174671.html#002-1a //https://www.kanripo.org/text/KR4h0141/221
+                //if (driver.Url.StartsWith("https://www.kanripo.org/"))
+                switch (urlPrefixDomain)
+                {
+                    case "www.kanripo.org":
+                        result = true;
+                        goto gotoNext;
+                    case "skqs.guoxuedashi.net":
+                        result = true;
+                        goto gotoNext;
+                    default:
+                        break;
+                }
+            }
+            if (!result) return result;
+            gotoNext:
+            //取得下一卷的網址
+            if (urlPrefixDomain == "skqs.guoxuedashi.net")
+            {
+                url = GetNextPageUrl(url.Substring(0, url.IndexOf(".html")));
+            }
+            else if (urlPrefixDomain == "www.kanripo.org")
+                url = GetNextPageUrl(url);
+            retry:
+            try
+            {
+                //翻到下一頁（網頁）即處理下一卷的文本
+                driver.Navigate().GoToUrl(url);
+            }
+            catch (Exception ex)
+            {
+                switch (ex.HResult)
+                {
+                    case -2146233088:
+                        if (ex.Message.Contains("timed out after"))
+                            if (DialogResult.Cancel == Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("逾時，是否繼續？"))
+                                return false;
+                        goto retry;                        
+                    default:
+                        Console.WriteLine(ex.HResult + ex.Message);
+                        Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
+                        break;
+                }
+            }
+
+            string iElementSelector = string.Empty;
+            //creedit with GitHub Copilot大菩薩：20250207
+            // 找到指定的元素
+            switch (urlPrefixDomain)
+            {
+                case "www.kanripo.org":
+                    iElementSelector = "#txtcont > p:nth-child(1)";
+                    break;
+                case "skqs.guoxuedashi.net":
+                    iElementSelector = "body > div:nth-child(3) > div:nth-child(4) > div.col2";
+                    break;
+                default:
+                    break;
+            }
+            OpenQA.Selenium.IWebElement element;
+            try
+            {
+
+                element = driver.FindElement(OpenQA.Selenium.By.CssSelector(iElementSelector));
+                if (element == null)
+                {
+                    result = false; return result;
+                }
+            }
+            catch (Exception)
+            {
+                result = false; return result;
+            }
+
+            // 使用 JavaScript 來全選元素內的文字
+            OpenQA.Selenium.IJavaScriptExecutor js = (OpenQA.Selenium.IJavaScriptExecutor)driver;
+            //不複製
+            js.ExecuteScript("var range = document.createRange(); range.selectNodeContents(arguments[0]); var sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(range);", element);
+            //複製
+            //js.ExecuteScript(@"var range = document.createRange(); range.selectNodeContents(arguments[0]); var sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(range); document.execCommand('copy');", element);
+
+            //js.ExecuteScript(@"
+            //    var range = document.createRange();
+            //    range.selectNodeContents(arguments[0]);
+            //    var sel = window.getSelection();
+            //    sel.removeAllRanges();
+            //    sel.addRange(range);
+            //    document.execCommand('copy');
+            //", element);
+            //以上無效
+            //以下只是複製純文字字內容
+            //js.ExecuteScript(@"
+            //    var range = document.createRange();
+            //    range.selectNodeContents(arguments[0]);
+            //    var sel = window.getSelection();
+            //    sel.removeAllRanges();
+            //    sel.addRange(range);
+            //    navigator.clipboard.writeText(sel.toString()).then(function() {
+            //        console.log('Text copied to clipboard');
+            //    }).catch(function(error) {
+            //        console.error('Error copying text: ', error);
+            //    });
+            //", element);
+
+            //// 使用 Actions 來模擬 Ctrl + C 鍵盤操作
+            //Actions actions = new Actions(driver);
+            ////actions.MoveToElement(element).Click().KeyDown(OpenQA.Selenium.Keys.Control).SendKeys("a").SendKeys("c").KeyUp(OpenQA.Selenium.Keys.Control).Perform();
+            //actions.MoveToElement(element).Click().KeyDown(OpenQA.Selenium.Keys.Control).SendKeys("c").KeyUp(OpenQA.Selenium.Keys.Control).Perform();
+            ChromeSetFocus();
+            Clipboard.Clear();
+            SendKeys.Send("^c");
+            Thread.Sleep(900);
+            DateTime dt = DateTime.Now;
+            try
+            {
+                while (Clipboard.GetText() == string.Empty)
+                {
+                    Thread.Sleep(300);
+                    if (DateTime.Now.Subtract(dt).TotalSeconds > 4) return false;
+                }
+
+            }
+            catch (Exception)
+            {
+
+            }
+            try
+            {
+                if (Clipboard.GetText() == string.Empty) return false;
+
+            }
+            catch (Exception)
+            {
+
+            }
+
+            driver.SwitchTo().Window(LastValidWindow);
+            //剪貼簿只能單一執行緒
+            //Task.Run(() =>
+            //{
+            //Form1.InstanceForm1.runWordMacro("中國哲學書電子化計劃.國學大師_Kanripo_四庫全書本轉來");
+            //});            
+            Form1.InstanceForm1.AvailableInUseBothKeysMouse();
+            return result;
+
+            string GetNextPageUrl(string currentUrl)
+            {
+                // 找到最後一個斜杠的位置
+                int lastSlashIndex = currentUrl.LastIndexOf('/');
+
+                // 取得頁碼部分
+                string pageNumberStr = currentUrl.Substring(lastSlashIndex + 1);
+
+                // 將頁碼轉換為整數並加 1
+                int pageNumber = int.Parse(pageNumberStr) + 1;
+
+                // 生成下一頁的 URL
+                string nextUrl = currentUrl.Substring(0, lastSlashIndex + 1) + pageNumber.ToString();
+
+                return nextUrl;
+            }
+
+        }
         /// <summary>
         /// 讓Chrome瀏覽器取得焦點
         /// </summary>
@@ -11392,6 +11577,8 @@ internal static string getImageUrl() {
             }
             BringToFront("chrome");
         }
+
+
     }
 
 }

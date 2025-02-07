@@ -3,7 +3,6 @@ using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Configuration;
 using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Text;
@@ -11,10 +10,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Media;
-using System.Net.NetworkInformation;
 using System.Runtime.InteropServices;
-using System.Security.Cryptography;
-using System.Security.Policy;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -24,10 +20,8 @@ using System.Threading.Tasks;
 
 //using System.Windows;
 using System.Windows.Forms;
-using System.Xml.Linq;
 using TextForCtext;
 using WebSocketSharp;
-using static System.Net.Mime.MediaTypeNames;
 using static TextForCtext.Browser;
 
 
@@ -209,7 +203,7 @@ namespace WindowsFormsApp1
         /// <summary>
         /// 20241003 Copilot大菩薩：C# Windows.Forms 屬性讀取：https://sl.bing.net/hPdFVUz4788 依賴注入（Dependency Injection, DI），使用依賴注入來管理實例
         /// </summary>
-        public static Form1 Instance { get; private set; }
+        public static Form1 InstanceForm1 { get; private set; }
 
         public Form1()
         {
@@ -255,7 +249,9 @@ namespace WindowsFormsApp1
             textBox3.MouseMove += textBox3_MouseMove;
             textBox1.MouseWheel += new MouseEventHandler(textBox1_MouseWheel);
 
-            Instance = this;
+            if (Application.OpenForms.Count == 0)
+                InstanceForm1 = this;
+
             _document = new Document(ref textBox1);
         }
 
@@ -5755,7 +5751,7 @@ namespace WindowsFormsApp1
             string title = ("*" + textBox1.SelectedText + endCode)
                     .Replace("《", "").Replace("》", "").Replace("〈", "").Replace("〉", "").Replace("·", "");
 
-            //if (title.IndexOf("嘶水澗") > -1) Debugger.Break();//just for debug
+            //if (title.IndexOf("人乃傳秋露何也謝少谿侍郎者佳") > -1) Debugger.Break();//just for debug
 
 
             int st_title = textBox1.SelectionStart;//, ed_title =st_title+title.Length;
@@ -5851,6 +5847,36 @@ namespace WindowsFormsApp1
                                             item.Text = item.Text.Substring(0, spsStart) + sb.ToString() + item.Text.Substring(spsStart + sbRootCount);
                                             range.End += sbRootCount;
                                         }
+                                    }
+
+                                    else if (spsCount > 0)//●●●●●●●●●●●● 20250207
+                                    {//可能是末尾單純的作者格式（第1行是篇名的開頭），則將其前的空格轉成空白
+                                        Match match = _leadingSpacesRegex.Match(item.Text);
+                                        //如果此行/段的縮排空格較前一行/段的縮排空格較首行/段長不過2個字元，則可能只是標題的第2行
+                                        if ((match.Success ? match.Value.Length : 0) - leadspaceCount_firstLine > 2)//通常第2行後縮排不會縮超過2個字的
+                                        {
+                                            int isps = 0; StringBuilder sb = new StringBuilder();
+                                            while (item.Text.Substring(0 + isps, 1) == "　")
+                                            {
+                                                isps++;
+                                                sb.Append("􏿽");
+                                            }
+                                            if (sb.ToString() != string.Empty)
+                                            {
+                                                item.Text =  sb.ToString() + item.Text.Substring(isps);
+                                                //range.End = ed_range + isps;//"􏿽".Length=2 - "　".Length=1 ;
+                                                range.End += isps;//"􏿽".Length=2 - "　".Length=1 ;
+                                            }
+                                        }
+
+                                        //StringBuilder sb = new StringBuilder();
+                                        //for (int isps = 0; isps < spsCount; isps++)
+                                        //{
+                                        //    sb.Append("􏿽");
+                                        //}
+                                        //item.Text = sb.ToString() + item.Text.Substring(spsCount);
+                                        ////range.End = ed_range + spsCount;//"􏿽".Length=2 - "　".Length=1 ;
+                                        //range.End += spsCount;//"􏿽".Length=2 - "　".Length=1 ;
                                     }
                                     break;
 
@@ -7224,6 +7250,18 @@ namespace WindowsFormsApp1
                 textBox1.Text = textBox1.Text.Substring(0, textBox1.Text.LastIndexOf(Environment.NewLine));
             if (eventEnabled) ResumeEvents();
 
+            if (_document.Range(0, textBox1.Text.IndexOf(Environment.NewLine)).Text.Contains("欽定四庫全書"))
+            {
+                if (_document.Text.IndexOf("􏿽<p>") > -1)
+                {
+                    x = textBox1.Text;
+                    replaceXdirrectly(ref x);
+                    textBox1.Text = x;
+                }
+                if (textBox1.Text.Substring(textBox1.TextLength - 3, 3) != "<p>")
+                    textBox1.Text += "<p>";
+            }
+
             playSound(soundLike.over);
             if (topLine) { rst.Close(); cnt.Close(); rst = null; cnt = null; }
             //if (keyinTextMode)
@@ -7236,9 +7274,11 @@ namespace WindowsFormsApp1
                 textBox1.Text = lastLineText;
                 movePeriodsToFrontofBlank();
                 textBox1.Select(textBox1.TextLength, 0);
+
             }
             else
                 textBox1.Select(rs, rl);
+
             textBox1.ScrollToCaret();
             TopMost = topmost; stopUndoRec = false; ResumeEvents();
         }
@@ -9291,15 +9331,19 @@ namespace WindowsFormsApp1
                     bool _autoPastetoQuickEdit = autoPastetoQuickEdit;
                     bool _check_the_adjacent_pages = check_the_adjacent_pages;
 
-                    bool doNotShowMsgBox = false;
+                    bool doNotShowMsgBox = false, keyDownCtrlAdd_ReturnVale = false;
                     //按著Ctrl鍵則直接ok 20250109（並啟動快捷模式）
                     //if (ModifierKeys == Keys.Control && dialogResult != DialogResult.Abort) { dialogResult = DialogResult.OK; goto ok; }
-                    if (ModifierKeys == Keys.Control)
+                    if (ModifierKeys == Keys.Control || ModifierKeys == Keys.Alt)
                     {
                         FastModeSwitcher();
                     }
-                    if (ModifierKeys == Keys.Control || FastMode)
+
+                    if (FastMode)
                     { dialogResult = DialogResult.OK; doNotShowMsgBox = true; goto ok; }
+                    else if (ModifierKeys == Keys.Control)
+                    { dialogResult = DialogResult.OK; doNotShowMsgBox = true; goto ok; }
+
 
                     #region 取得最後不含 <p> 與 。<p> 的5個字來顯示於訊息方塊中20250118
                     string last5Characters = textBox1.SelectedText; int eLast5Characters = last5Characters.IndexOf("<p>");
@@ -9347,7 +9391,8 @@ namespace WindowsFormsApp1
                             if (_check_the_adjacent_pages) nextPages(Keys.PageDown, false);
 
                         }
-                        if (!keyDownCtrlAdd(false) && doNotShowMsgBox == true) { dialogResult = DialogResult.Cancel; goto ok; }//dialogRes-ult = DialogResult.Abort;
+                        keyDownCtrlAdd_ReturnVale = keyDownCtrlAdd(false);
+                        if (!keyDownCtrlAdd_ReturnVale && doNotShowMsgBox == true) { dialogResult = DialogResult.Cancel; goto ok; }//dialogRes-ult = DialogResult.Abort;
                         doNotShowMsgBox = false;
                         if (browsrOPMode != BrowserOPMode.appActivateByName)
                         {//if (autoPastetoQuickEdit) 會在autoPastetoCtextQuitEditTextbox()中判斷
@@ -9415,6 +9460,8 @@ namespace WindowsFormsApp1
                                                             textBox1.TextLength - pageTextEndPosition >= 10 ? 10
                                                                 : textBox1.TextLength - pageTextEndPosition);//終於抓到這個bug了，忘了加第2個參數
                         textBox1.Select(pageTextEndPosition, 0);
+                        if (!keyDownCtrlAdd_ReturnVale && textBox1.Text.IndexOf("/") > -1)
+                            textBox1.Select(textBox1.Text.IndexOf("/"), insertMode ? 1 : 0);
                         //焦點交回表單
                         #region 解除 textbox防觸鎖定，並準備檢視編輯；如果訊息方塊不是在取得 Cancel回應值時即關閉，則此下程式恐怕要移出這個 if else區塊才行
                         //Activate();已會觸發Form1_Activated(new object(), new EventArgs());事件
@@ -9634,6 +9681,15 @@ namespace WindowsFormsApp1
                 && (m & Keys.Shift) == Keys.Shift)
             {
 
+                if (e.KeyCode == Keys.D4)
+                {
+                    e.Handled = true;
+                    //Ctrl + Shift + 4 ：翻到[Kanripo](https://www.kanripo.org/)下一卷在複製其文本後即執行 Word VBA Sub 巨集指令「國學大師_Kanripo_四庫全書本轉來」
+                    //runWordMacro("國學大師_Kanripo_四庫全書本轉來");
+                    textBox1.Clear();
+                    br.SikuQuanshu();
+                    return;
+                }
                 //按下 ctrl + shift + * （數字鍵盤的星號）  toggle keyinTextmode 切換手動鍵入模式
                 if (e.KeyCode == Keys.Multiply)
                 {
@@ -10141,9 +10197,10 @@ namespace WindowsFormsApp1
                     e.Handled = true; return;
                 }
                 if (e.KeyCode == Keys.D4)
-                {//Ctrl + 4 ：執行 Word VBA Sub 巨集指令「維基文庫四部叢刊本轉來」
+                {//Ctrl + 4 ：執行 Word VBA Sub 巨集指令「維基文庫四部叢刊本轉來」                 
+                    e.Handled = true;
                     runWordMacro("維基文庫四部叢刊本轉來");
-                    e.Handled = true; return;
+                    return;
                 }
 
                 if (e.KeyCode == Keys.N)
@@ -10485,6 +10542,7 @@ namespace WindowsFormsApp1
             }
             else
             {
+                playSound(soundLike.warn, true);//播放音效，關閉快捷模式之通知 20250207 蛇年初十
                 if (notFastModeColor != null) button1.ForeColor = notFastModeColor;
             }
         }
@@ -11818,7 +11876,7 @@ namespace WindowsFormsApp1
 
         }
 
-        private void runWordMacro(string runName)
+        internal void runWordMacro(string runName)
         {
             if (!isClipBoardAvailable_Text()) return;
             string xClpBd = Clipboard.GetText();
@@ -11836,8 +11894,22 @@ namespace WindowsFormsApp1
                                     .Interop.Word.Application();
             try
             {
+                //Task.Run(() =>
+                //{
+                //    switch (runName)
+                //    {
+                //        case "中國哲學書電子化計劃.國學大師_Kanripo_四庫全書本轉來":
+                //            //自動翻至Kanripo下一卷並複製其文字
+
+
+                //            break;
+                //        default:
+                //            break;
+                //    }
+                //});
                 appWord.Run(runName);
                 Application.DoEvents();
+
             }
             catch (Exception e)
             {
@@ -11881,7 +11953,7 @@ namespace WindowsFormsApp1
                             textBox1.Text = xClpBd;
                             saveText();
                             break;
-                        case "中國哲學書電子化計劃.國學大師_四庫全書本轉來":
+                        case "中國哲學書電子化計劃.國學大師_Kanripo_四庫全書本轉來":
                             using (GXDS gxds = new GXDS(this)) { gxds.StandardizeSKQSContext(ref xClpBd); }
                             textBox1.Text = xClpBd; saveText();
                             //xClpBd = xClpBd.Replace(" /\v\v", Environment.NewLine).Replace("\v", Environment.NewLine)                                    
@@ -11889,6 +11961,7 @@ namespace WindowsFormsApp1
                             //        //這要做標題判斷，不能取代掉.Replace(Environment.NewLine + Environment.NewLine, Environment.NewLine)
                             //xClpBd = "*欽定四庫全書<p>" + xClpBd.Substring(xClpBd.IndexOf("欽定《四庫全書》") + "欽定《四庫全書》".Length);
                             bringBackMousePosFrmCenter();
+                            //AvailableInUseBothKeysMouse();
                             break;
                         default:
                             break;
@@ -11912,7 +11985,7 @@ namespace WindowsFormsApp1
         finish:
             this.BackColor = C;
             show_nICo(ModifierKeys);
-            NormalLineParaLength = 0;
+            //NormalLineParaLength = 0;
         }
 
         /// <summary>
@@ -13670,7 +13743,7 @@ namespace WindowsFormsApp1
                     else if (clpTxt.IndexOf("a]") > -1 || clpTxt.IndexOf("a] ") > -1)
                     {
                         ocrTextMode = false;
-                        runWordMacro("中國哲學書電子化計劃.國學大師_四庫全書本轉來");
+                        runWordMacro("中國哲學書電子化計劃.國學大師_Kanripo_四庫全書本轉來");
                         return;
                     }
                 }
