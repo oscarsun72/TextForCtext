@@ -11880,7 +11880,7 @@ namespace WindowsFormsApp1
         {
             if (!isClipBoardAvailable_Text()) return;
             string xClpBd = Clipboard.GetText();
-            if (autoPastetoQuickEdit && xClpBd.Length < 250 && xClpBd.IndexOf("Bot", StringComparison.Ordinal) == -1) return;
+            if (autoPastetoQuickEdit && xClpBd.Length < 100 && xClpBd.IndexOf("Bot", StringComparison.Ordinal) == -1) return;
             //&& runName!="Docs.中國哲學書電子化計劃_只保留正文注文_且注文前後加括弧_貼到古籍酷自動標點"
             Color C = this.BackColor; this.BackColor = Color.Green;
             SystemSounds.Hand.Play();
@@ -13696,8 +13696,8 @@ namespace WindowsFormsApp1
             #region 在textBox1內容文字少於100時的檢查，以自行決定其他的操作，如《中國哲學書電子化計劃》清除頁前的分段符號、撤掉與書圖的對應_脫鉤,《國學大師》的《四庫全書》本文等
             if (textBox1.TextLength < 100)
             {
-                //如果剪貼簿裡的文字內容長於300個字元，則執行相關的 Word VBA
-                if (clpTxt.Length > 300)
+                //如果剪貼簿裡的文字內容長於99個字元，則執行相關的 Word VBA
+                if (clpTxt.Length > 99)
                 {
                     //根據剪貼簿裡的文本特徵來作動作
                     if (clpTxt.IndexOf("<scanbegin file=") > -1 && clpTxt.IndexOf(" page=") > -1)

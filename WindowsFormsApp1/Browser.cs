@@ -11303,7 +11303,7 @@ internal static string getImageUrl() {
             //取得下一卷的網址
             if (urlPrefixDomain == "skqs.guoxuedashi.net")
             {
-                url = GetNextPageUrl(url.Substring(0, url.IndexOf(".html")));
+                url = GetNextPageUrl(url.Substring(0, url.IndexOf(".html")))+ ".html" ;
             }
             else if (urlPrefixDomain == "www.kanripo.org")
                 url = GetNextPageUrl(url);
@@ -11321,7 +11321,7 @@ internal static string getImageUrl() {
                         if (ex.Message.Contains("timed out after"))
                             if (DialogResult.Cancel == Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("逾時，是否繼續？"))
                                 return false;
-                        goto retry;                        
+                        goto retry;
                     default:
                         Console.WriteLine(ex.HResult + ex.Message);
                         Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
