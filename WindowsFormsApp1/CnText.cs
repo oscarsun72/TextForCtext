@@ -78,14 +78,16 @@ namespace TextForCtext
                 int line1CharCount = charCount / 2;
                 int line2CharCount = charCount / 2;
                 //Console.WriteLine(SplitString(text, line1CharCount, line2CharCount));
-                text = splitString(text, line1CharCount, line2CharCount);
+                //text = splitString(text, line1CharCount, line2CharCount);
+                text = splitString(text, line1CharCount);
             }
             else
             {
                 int line1CharCount = charCount / 2 + 1;
                 int line2CharCount = charCount / 2;
                 //Console.WriteLine(SplitString(text, line1CharCount, line2CharCount));
-                text = splitString(text, line1CharCount, line2CharCount);
+                //text = splitString(text, line1CharCount, line2CharCount);
+                text = splitString(text, line1CharCount);
             }
             //Console.ReadLine();
             return text;
@@ -107,7 +109,7 @@ namespace TextForCtext
 
             return charCount;
         }
-        private static string splitString(string text, int line1CharCount, int line2CharCount)
+        private static string splitString(string text, int line1CharCount)
         {
             StringBuilder sb = new StringBuilder();
             StringInfo si = new StringInfo(text);
@@ -1461,6 +1463,67 @@ namespace TextForCtext
                     }
                 }
             }
+        }
+
+
+        /* 20250212元宵節creedit_with_Copilot大菩薩： 
+         */
+        /// <summary>
+        /// 將夾注文本倒置者重整，如
+        /// 「{{雪電}}　{{雨霧}}　{{霽虹}}　{{雷}}」這樣的文本，改成「{{雪􏿽雨􏿽霽􏿽雷、電􏿽霧􏿽虹　　}}」
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        public static string TransformText(string input)
+        {/*
+          {{元正月晦}}　　{{人日寒食}}　　{{正月十五日三月三日}}
+          {{元正月晦}}　　{{人日寒食}}　　{{正月十五日三月三日}}
+          */
+
+            string spaces = "、";
+            if (input.IndexOf("}}") > -1)
+            {
+                spaces = input.Substring(input.IndexOf("}}")+"}}".Length, input.IndexOf("{{", input.IndexOf("}}"))- (input.IndexOf("}}")+"}}".Length)).Replace("　", "􏿽");
+            }
+
+            var matches = Regex.Matches(input, @"\{\{(.*?)\}\}");
+            List<string> firstItem = new List<string>();
+            List<string> secondItem = new List<string>();
+
+            foreach (Match match in matches)
+            {
+                string content = match.Groups[1].Value;
+                StringInfo si = new StringInfo(content);
+
+                if (si.LengthInTextElements >= 1)
+                    firstItem.Add(si.SubstringByTextElements(0,si.LengthInTextElements % 2==1?si.LengthInTextElements/2+1:si.LengthInTextElements/2));
+
+                if (si.LengthInTextElements > 1)
+                    secondItem.Add(si.SubstringByTextElements(si.LengthInTextElements % 2 == 1 ? si.LengthInTextElements / 2 + 1 : si.LengthInTextElements / 2));
+            }
+
+            string result = "{{" + string.Join(spaces, firstItem) + "、" + string.Join(spaces, secondItem) + "}}";
+            return result;
+            #region 單字且單空白間隔
+            //var matches = Regex.Matches(input, @"\{\{(.*?)\}\}");
+
+            //List<string> firstChars = new List<string>();
+            //List<string> secondChars = new List<string>();
+
+            //foreach (Match match in matches)
+            //{
+            //    string content = match.Groups[1].Value;
+
+            //    if (content.Length >= 1)
+            //        firstChars.Add(content.Substring(0, 1));
+
+            //    if (content.Length > 1)
+            //        secondChars.Add(content.Substring(1));
+            //}
+
+            //string result = "{{" + string.Join("􏿽", firstChars) + "、" + string.Join("􏿽", secondChars) + "　　}}";
+            //return result;
+            #endregion
         }
 
     }

@@ -476,6 +476,8 @@ Function getChrome() As String
         End If
     ElseIf FsO.fileexists("W:\PortableApps\PortableApps\GoogleChromePortable\App\Chrome-bin\chrome.exe") Then
         chromePath = "W:\PortableApps\PortableApps\GoogleChromePortable\App\Chrome-bin\chrome.exe"
+    ElseIf FsO.fileexists("W:\PortableApps\PortableApps\GoogleChromePortable64\App\Chrome-bin\chrome.exe") Then
+        chromePath = "W:\PortableApps\PortableApps\GoogleChromePortable64\App\Chrome-bin\chrome.exe"
     ElseIf Dir("C:\Program Files (x86)\Google\Chrome\Application\chrome.exe") <> "" Then
         chromePath = "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe"
     ElseIf FsO.fileexists("C:\Program Files\Google\Chrome\Application\chrome.exe") Then

@@ -90,13 +90,13 @@ Sub ActivateChrome()
         If InStr(title, "Chrome") > 0 Then ' 確保窗口標題包含 "Chrome"
             If IsIconic(hWnd) Or Not IsWindowVisible(hWnd) Then
                 SetForegroundWindow hWnd
-                SimulateKeyStroke VK_MENU ' 模擬按下 Alt 鍵
-                SimulateKeyStroke VK_SPACE ' 模擬按下 Space 鍵
-                SimulateKeyStroke VK_DOWN ' 模擬按下箭頭向下鍵
-                SimulateKeyStroke VK_DOWN ' 再次模擬按下箭頭向下鍵
-                SimulateKeyStroke VK_RETURN ' 模擬按下 Enter 鍵
+'                SimulateKeyStroke VK_MENU ' 模擬按下 Alt 鍵
+'                SimulateKeyStroke VK_SPACE ' 模擬按下 Space 鍵
+'                SimulateKeyStroke VK_DOWN ' 模擬按下箭頭向下鍵
+'                SimulateKeyStroke VK_DOWN ' 再次模擬按下箭頭向下鍵
+'                SimulateKeyStroke VK_RETURN ' 模擬按下 Enter 鍵
                 VBA.DoEvents ' 確保窗口已經顯示
-                ShowWindow hWnd, SW_MAXIMIZE ' 最大化窗口
+'                ShowWindow hWnd, SW_MAXIMIZE ' 最大化窗口
             End If
         End If
     Else
@@ -264,6 +264,11 @@ eH:
 '                openChrome "https://www.google.com"
 '                Resume 'GoTo reOpenChrome:
                 openNewTabWhenTabAlreadyExit = False
+            ElseIf InStr(Err.Description, "invalid session id") Then
+                killchromedriverFromHere
+                Set WD = Nothing
+                OpenChrome "https://www.google.com.tw/"
+                'Resume
             Else
                 MsgBox Err.Number & Err.Description
                 Stop
@@ -349,7 +354,11 @@ reStart:
                     Dim chromePath As String
                     chromePath = getChromePathIncludeBackslash
                     If InStr(chromePath, "GoogleChromePortable") Then
-                        chromePath = "W:\PortableApps\PortableApps\GoogleChromePortable\App\Chrome-bin\"
+                        If VBA.Dir("W:\PortableApps\PortableApps\GoogleChromePortable\App\Chrome-bin\") <> vbNullString Then
+                            chromePath = "W:\PortableApps\PortableApps\GoogleChromePortable\App\Chrome-bin\"
+                        Else
+                            chromePath = "W:\PortableApps\PortableApps\GoogleChromePortable64\App\Chrome-bin\"
+                        End If
                     End If
         
                 With Service
@@ -402,6 +411,8 @@ reStart:
             WD.url = url
         End If
         If ActiveXComponentsCanNotBeCreated Then ActiveXComponentsCanNotBeCreated = False
+        
+      
         OpenChrome = True
     Exit Function
 ErrH:
@@ -581,7 +592,11 @@ reStart:
         Dim chromePath As String
         chromePath = getChromePathIncludeBackslash
         If InStr(chromePath, "GoogleChromePortable") Then
-            chromePath = "W:\PortableApps\PortableApps\GoogleChromePortable\App\Chrome-bin\"
+            If VBA.Dir("W:\PortableApps\PortableApps\GoogleChromePortable\App\Chrome-bin\") <> vbNullString Then
+                chromePath = "W:\PortableApps\PortableApps\GoogleChromePortable\App\Chrome-bin\"
+            Else
+                chromePath = "W:\PortableApps\PortableApps\GoogleChromePortable64\App\Chrome-bin\"
+            End If
         End If
         
         With Service
@@ -680,7 +695,11 @@ Sub SeleniumGetTest()
     Dim chromePath As String
     chromePath = getChromePathIncludeBackslash
     If InStr(chromePath, "GoogleChromePortable") Then
-        chromePath = "W:\PortableApps\PortableApps\GoogleChromePortable\App\Chrome-bin\"
+        If VBA.Dir("W:\PortableApps\PortableApps\GoogleChromePortable\App\Chrome-bin\") <> vbNullString Then
+            chromePath = "W:\PortableApps\PortableApps\GoogleChromePortable\App\Chrome-bin\"
+        Else
+            chromePath = "W:\PortableApps\PortableApps\GoogleChromePortable64\App\Chrome-bin\"
+        End If
     End If
 
     With Service
@@ -732,7 +751,11 @@ Function OpenChrome_NEW_Get() As Boolean
     Dim chromePath As String
     chromePath = getChromePathIncludeBackslash
     If InStr(chromePath, "GoogleChromePortable") Then
-        chromePath = "W:\PortableApps\PortableApps\GoogleChromePortable\App\Chrome-bin\"
+        If VBA.Dir("W:\PortableApps\PortableApps\GoogleChromePortable\App\Chrome-bin\") <> vbNullString Then
+            chromePath = "W:\PortableApps\PortableApps\GoogleChromePortable\App\Chrome-bin\"
+        Else
+            chromePath = "W:\PortableApps\PortableApps\GoogleChromePortable64\App\Chrome-bin\"
+        End If
     End If
 
     With Service
@@ -849,6 +872,7 @@ Function OpenChrome_NEW_Get() As Boolean
                 If IsWDInvalid() Then
                     WD.SwitchTo.Window UBound(WD.WindowHandles)
                 End If
+
                 openNewTabWhenTabAlreadyExit WD
 '                OpenNewTab WD '再開啟一個新分頁，供後續程式操作用，避免影響原已開啟的分頁
             End If
@@ -893,6 +917,7 @@ End Sub
 Rem 若沒有新的空白頁要關閉則傳回false,若只剩一個分頁則不予關閉且傳回false供後續使用
 Private Function closeNewBlankPageTabs() As Boolean
     Dim w, result As Boolean
+    
     For Each w In WD.WindowHandles
         WD.SwitchTo.Window w
         If SeleniumOP.IsNewBlankPageTab(WD) Then
@@ -908,8 +933,12 @@ Private Function closeNewBlankPageTabs() As Boolean
         End If
         
     Next w
+    
+   
     closeNewBlankPageTabs = result
 End Function
+
+
 Rem 開啟新分頁 若失敗則傳回false'改進WordVBA+SeleniumBasic 開啟Chrome瀏覽器新分頁的方法 creedit_with_Copilot大菩薩： https://sl.bing.net/bcfc14PWlFc
 Function OpenNewTab(ByVal driver As SeleniumBasic.IWebDriver, Optional url As String) As Boolean
     Dim result As Boolean, currentWinhdl As String
@@ -1127,6 +1156,8 @@ Sub Search(url As String, frmID As String, keywdID As String, btnID As String, O
         word.Application.windowState = wdWindowStateMinimize
         WD.SwitchTo.Window (WD.CurrentWindowHandle)
         VBA.Interaction.DoEvents
+        SeleniumOP.ActivateChrome
+        
         Dim form As SeleniumBasic.IWebElement
         Dim keyword As SeleniumBasic.IWebElement
         Dim button As SeleniumBasic.IWebElement
@@ -1446,15 +1477,29 @@ Function HanchiSearch(searchTxt As String) As Boolean
     If Not inside Then
         If free Then
             Set iwe = WD.FindElementByCssSelector("body > table > tbody > tr:nth-child(2) > td > table > tbody > tr > td > table > tbody > tr:nth-child(4) > td > a:nth-child(8) > img")
+            If iwe Is Nothing Then
+                Set iwe = WD.FindElementByXPath("/html/body/table/tbody/tr[2]/td/table/tbody/tr/td/table/tbody/tr[4]/td/a[1]/img")
+            End If
         Else
             Set iwe = WD.FindElementByCssSelector("body > table > tbody > tr:nth-child(2) > td > table > tbody > tr > td > table > tbody > tr:nth-child(4) > td > a:nth-child(9) > img")
+            If iwe Is Nothing Then
+                Set iwe = WD.FindElementByXPath("/html/body/table/tbody/tr[2]/td/table/tbody/tr/td/table/tbody/tr[4]/td/a[2]/img")
+            End If
         End If
+        
         If iwe Is Nothing Then Exit Function
         iwe.Click
     End If
     'keyword
     Set iwe = WD.FindElementByCssSelector("#frmTitle > table > tbody > tr:nth-child(2) > td > table > tbody > tr:nth-child(1) > td > input[type=text]:nth-child(2)")
+    Dim dt As Date
+    dt = VBA.Now
+    Do While iwe Is Nothing
+        iwe = WD.FindElementByCssSelector("#frmTitle > table > tbody > tr:nth-child(2) > td > table > tbody > tr:nth-child(1) > td > input[type=text]:nth-child(2)")
+        If VBA.DateDiff("s", dt, VBA.Now) > 2 Then Exit Do
+    Loop
     If iwe Is Nothing Then Exit Function
+    
     SetIWebElementValueProperty iwe, searchTxt
     iwe.SendKeys key.enter
     HanchiSearch = True
@@ -1666,7 +1711,8 @@ Function LookupDictRevised(x As String) As String()
         If Not OpenChrome("https://dict.revised.moe.edu.tw/search.jsp?md=1") Then Exit Function
     Else
         WD.SwitchTo.Window WD.CurrentWindowHandle
-        If VBA.InStr(WD.url, "https://dict.revised.moe.edu.tw/") <> 1 Then WD.url = "https://dict.revised.moe.edu.tw/search.jsp?md=1"
+'        If VBA.InStr(WD.url, "https://dict.revised.moe.edu.tw/") <> 1 Then WD.url = "https://dict.revised.moe.edu.tw/search.jsp?md=1"
+        WD.Navigate.GoToUrl "https://dict.revised.moe.edu.tw/search.jsp?md=1"
     End If
     
     
@@ -2429,7 +2475,8 @@ Function LookupHomeinmistsHYDZDTextSearch(x As String) As Boolean
     If Not OpenChrome("https://homeinmists.ilotus.org/hd/search.php") Then
         Exit Function
     End If
-        
+
+    WD.Navigate.GoToUrl "https://homeinmists.ilotus.org/hd/search.php"
     '字頭
     Set e = WD.FindElementByCssSelector("#queryString1")
     If e Is Nothing Then
@@ -2441,8 +2488,21 @@ Function LookupHomeinmistsHYDZDTextSearch(x As String) As Boolean
     word.Application.windowState = wdWindowStateMinimize
     
     SetIWebElementValueProperty e, x
+    
+    Dim dt As Date
+    dt = VBA.Now
     '檢索
     Set e = WD.FindElementByCssSelector("body > div.search-block > div > div:nth-child(1) > input[type=button]")
+    Do While e Is Nothing
+        Set e = WD.FindElementByCssSelector("body > div.search-block > div > div:nth-child(1) > input[type=button]")
+        If VBA.DateDiff("s", dt, VBA.Now) > 2 Then
+            LookupHomeinmistsHYDZDTextSearch = False
+            Exit Function
+        End If
+    Loop
+    If WD.FindElementByCssSelector("#queryString1").GetAttribute("value") = vbNullString Then
+        SetIWebElementValueProperty WD.FindElementByCssSelector("#queryString1"), x
+    End If
     e.Click
     
     LookupHomeinmistsHYDZDTextSearch = True
@@ -2996,6 +3056,7 @@ Sub GoogleSearch(Optional searchStr As String)
     If Not OpenChrome("https://www.google.com") Then Exit Sub
     word.Application.windowState = wdWindowStateMinimize
     WD.SwitchTo.Window (WD.CurrentWindowHandle)
+    
 '    AppActivateChrome
     SeleniumOP.ActivateChrome
     VBA.Interaction.DoEvents

@@ -465,7 +465,7 @@ namespace TextForCtext
         /// <param name="driver"></param>
         /// <param name="orderedHandles">現行有效依序的分頁或視窗句柄之集合清單</param>
         /// <returns></returns>
-        public static int GetIndexofSpecificValidWindowHandle(IWebDriver driver, List<string> orderedHandles)
+        public static int GetIndexofSpecificValidWindowHandle(List<string> orderedHandles)
         {
             // 查找指定句柄在清單中的位置
             string targetHandle = orderedHandles[1]; // 假設我們要查找第二個分頁的句柄
@@ -1438,7 +1438,8 @@ namespace TextForCtext
                                 killchromedriverFromHere();
                                 //driver = null;
                                 RestartChromedriver();
-                                goto tryagain;
+                                return cDrv;
+                                //goto tryagain;
                             }
                             else
                             {
@@ -1456,19 +1457,37 @@ namespace TextForCtext
                 }
                 #endregion
 
+                #region 免安裝版Chrome瀏覽器適用
                 if (cDrv.WindowHandles.Count > 1)
                 {
                     foreach (var item in cDrv.WindowHandles)
                     {
                         cDrv.SwitchTo().Window(item);
-                        if (cDrv.Title == "新分頁" || cDrv.Url == "chrome://new-tab-page/")
+                        if (cDrv.Title == "新分頁" || cDrv.Title == string.Empty || cDrv.Url == "chrome://new-tab-page/")
                         {
                             cDrv.Close();
                             Form1.playSound(Form1.soundLike.over, true);
 
-                            break;
+                            //break;
                         }
 
+                    }
+
+
+                    //20250212creedit with Gemini大菩薩：C# Windows.Forms 我想把視窗標題為「新分頁 - Google Chrome」的視窗關掉請問該怎麼寫？
+                    Process[] chromeProcesses = Process.GetProcessesByName("chrome");
+
+                    foreach (Process process in chromeProcesses)
+                    {
+                        // 檢查視窗標題是否為「新分頁 - Google Chrome」
+                        if (process.MainWindowTitle == "新分頁 - Google Chrome")
+                        {
+                            // 關閉視窗
+                            process.CloseMainWindow();
+                            // 如果需要強制關閉，可以使用 Kill() 方法
+                            // process.Kill();
+                            break; // 找到目標視窗後，跳出迴圈
+                        }
                     }
                     cDrv.SwitchTo().Window(cDrv.WindowHandles.Last());
                     try
@@ -1483,6 +1502,7 @@ namespace TextForCtext
                     }
 
                 }
+                #endregion//#region 免安裝版Chrome瀏覽器適用
 
                 #region 成功開啟Chrome瀏覽器後
                 //originalWindow = cDrv.CurrentWindowHandle; LastValidWindow = originalWindow;
@@ -1955,6 +1975,7 @@ namespace TextForCtext
             //driver.Manage().Window.Position = new Point(0, 0);
             #endregion
 
+            //確定要送出文本時為true
             bool submitting = false;
             //清除內容不輸入(前已有textbox.Clear();）
             if (xInput != chkClearQuickedit_data_textboxTxtStr)//" ")// "\t")//是否清除當前頁面中的內容？（其實是有由tab鍵所按下的值)
@@ -1988,6 +2009,7 @@ namespace TextForCtext
                 //textbox.SendKeys(OpenQA.Selenium.Keys.LeftShift + OpenQA.Selenium.Keys.Insert);
                 textbox.SendKeys(OpenQA.Selenium.Keys.Shift + OpenQA.Selenium.Keys.Insert);*/
             }
+
             //SendKeys.Send("^v{tab}~");
             #endregion
             //}
@@ -2007,8 +2029,12 @@ namespace TextForCtext
                  */
                 if (submit == null)
                 {
-                    Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("請檢查頁面中的 Quict edit 是否可用，再按下確定繼續！");
-                    submit = waitFindWebElementById_ToBeClickable("savechangesbutton", _webDriverWaitTimSpan);
+                    submit = waitFindWebElementBySelector_ToBeClickable("#savechangesbutton");
+                    if (submit == null)
+                    {
+                        Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("請檢查頁面中的 Quict edit 是否可用，再按下確定繼續！");
+                        submit = waitFindWebElementById_ToBeClickable("savechangesbutton", _webDriverWaitTimSpan);
+                    }
                 }
                 LastValidWindow = driver.CurrentWindowHandle;
                 Task.Run(() =>//接下來不用理會，也沒有元件要操作、沒有訊息要回應，就可以給另一個線程去處理了。
@@ -2115,7 +2141,7 @@ namespace TextForCtext
                 }
                 #endregion
             }
-            else
+            else//若文本沒有改變，不用送出，則播放音效
                 Form1.playSound(Form1.soundLike.notify, true);
             return true;
         }
@@ -2172,7 +2198,7 @@ namespace TextForCtext
                         }
                         if (!Form1.IsValidUrl＿ImageTextComparisonPage(driver.Url))
                         {
-                            int windowsCount = 0;
+                            int windowsCount;// = 0;
                             try
                             {
                                 windowsCount = driver.WindowHandles.Count;
@@ -2519,7 +2545,8 @@ namespace TextForCtext
                     }
                     try
                     {
-                        url = driver.Url;
+                        url = GetDriverUrl;
+                        //url = driver.Url;
                     }
                     catch (Exception ex)
                     {
@@ -3185,7 +3212,7 @@ internal static string getImageUrl() {
         internal static void killchromedriverFromHere()
         {
             if (chromedriversPID == null || chromedriversPID.Count == 0) return;
-            Process[] processInstances = null;
+            Process[] processInstances;//= null;
             try
             {
                 processInstances = Process.GetProcessesByName("chromedriver");
@@ -3291,7 +3318,7 @@ internal static string getImageUrl() {
             return url;
         }
 
-        internal static void importBookmarks(ref ChromeDriver drive)//(ref ChromeDriver drive)
+        internal static void importBookmarks()//(ref ChromeDriver drive)
         {
             /*  chatGPT： 20230104
              您可以使用 ChromeDriver 和 ChromeOptions 類別來自動匯入書籤。
@@ -3558,7 +3585,7 @@ internal static string getImageUrl() {
             }
 
             //選取OCR結果
-            string ocrResult = string.Empty;
+            string ocrResult;// = string.Empty;
             try
             {
                 ocrResult = iwe.GetAttribute("value");
@@ -3781,6 +3808,7 @@ internal static string getImageUrl() {
                 {//檢查切換到的新IP狀態：
                     Thread.Sleep(800);
                     bool showBox = true;
+                    //Tuple<bool, bool, bool, bool, DateTime> ipStatus = Mdb.IPStatus(CurrentIP == null ? GetPublicIpAddress("") : CurrentIP);
                     Tuple<bool, bool, bool, bool, DateTime> ipStatus = Mdb.IPStatus(CurrentIP == null ? GetPublicIpAddress("") : CurrentIP);
                     if (ipStatus != null) showBox = ipStatus.Item4 ? false : true;
                     if (!IPStatusMessageShow(out ipStatus, string.Empty, false, showBox))
@@ -5122,7 +5150,7 @@ internal static string getImageUrl() {
 
             driver = driver ?? DriverNew();
             string currentWindowHndl = driver.CurrentWindowHandle;
-            IWebElement iwe = null;
+            IWebElement iwe;// = null;
             try
             {
                 openNewTabWindow(WindowType.Tab);
@@ -9101,7 +9129,7 @@ internal static string getImageUrl() {
                 { driver.Close(); driver.SwitchTo().Window(driver.WindowHandles.Last()); }
 
 
-                string caption = string.Empty;// iwe1 == null ? "漢籍全文資料庫" : "漢籍全文文本閱讀";
+                string caption;//= string.Empty;// iwe1 == null ? "漢籍全文資料庫" : "漢籍全文文本閱讀";
                                               //文本閱讀中的查詢輸入方塊 <input type="text" name="hanji/fld00.33.810" size="30" maxlength="200">
                 IWebElement iwe1 = waitFindWebElementBySelector_ToBeClickable("body > form > table > tbody > tr:nth-child(2) > td > table > tbody > tr > td.leftbg > table > tbody > tr:nth-child(1) > td > table > tbody > tr:nth-child(2) > td > input[type=text]:nth-child(2)");
                 if (iwe1 == null)
@@ -9714,7 +9742,7 @@ internal static string getImageUrl() {
         internal static string ReplaceUrl_Box2Editor(string url)
         {
             if (!url.StartsWith("http")) return url;
-            int s = url.IndexOf("#box"); string xClear = null;
+            int s = url.IndexOf("#box"); string xClear;// = null;
             if (s > -1)
             {
                 xClear = url.Substring(s, url.IndexOf(")", s) - s + 1);
@@ -9805,8 +9833,17 @@ internal static string getImageUrl() {
             else
             {
                 if (driver.WindowHandles.Contains(windowHandle))
+                {
                     if (windowHandle != driver.CurrentWindowHandle)
                         WindowHandles["《AI太炎》"] = driver.CurrentWindowHandle;
+                }
+                else
+                {
+                    openNewTabWindow();
+                    driver.Navigate().GoToUrl("https://t.shenshen.wiki/");
+                    WindowHandles["《AI太炎》"] = driver.CurrentWindowHandle;
+                }
+
             }
 
 
@@ -9867,7 +9904,7 @@ internal static string getImageUrl() {
                 driver.SwitchTo().Window(LastValidWindow);
             }
 
-            string editUrl = string.Empty;
+            string editUrl;// = string.Empty;
             //找到「編輯」超連結
             IWebElement iwe = Edit_Linkbox;//waitFindWebElementBySelector_ToBeClickable("#content > div:nth-child(7) > div:nth-child(2) > a:nth-child(2)");
             if (iwe == null)
@@ -10501,7 +10538,7 @@ internal static string getImageUrl() {
         {// 20240817 creedit with Gemini大菩薩：程式碼評析與改進建議 ： https://g.co/gemini/share/3f1f65fd36e0 (這個建議蠻好的，有空要再仔細看看。感恩感恩　讚歎讚歎　Gemini大菩薩　南無阿彌陀佛）
             StringInfo si = new StringInfo(x);
             if (si.LengthInTextElements < 2) return null;
-            string url = "https://ivantsoi.myds.me/web/hydcd/search.html", urlResult = null;
+            string url = "https://ivantsoi.myds.me/web/hydcd/search.html", urlResult;//= null;
             IWebElement iwe;
         retry:
             try
@@ -10783,7 +10820,7 @@ internal static string getImageUrl() {
         /// <param name="downloadImgFullName"></param>
         /// <param name="selectedInExplorer"></param>
         /// <returns>成功則傳回true</returns>
-        internal static bool DownloadImage(string imageUrl, string downloadImgFullName, bool selectedInExplorer = false)
+        internal static bool DownloadImage(string imageUrl, string downloadImgFullName)
         {
             //var driver = new ChromeDriver();
             openNewTabWindow();
@@ -10962,7 +10999,21 @@ internal static string getImageUrl() {
                     if (driver == null)
                         RestartDriver();
                 }
-                string url = driver.Url;
+                try
+                {
+                    string url;
+                    if (driver != null)
+                    {
+                        if (driver?.WindowHandles.Contains(driver?.CurrentWindowHandle) == false)
+                            return true;
+                        else
+                            url = driver?.Url;
+                    }
+                }
+                catch (Exception)
+                {
+                    return true;
+                }
             }
             catch (Exception)
             {
@@ -11271,11 +11322,19 @@ internal static string getImageUrl() {
         /// <returns>失敗則傳回fasle</returns>
         internal static bool SikuQuanshu()
         {
-            LastValidWindow = driver.CurrentWindowHandle;
+            if (IsDriverInvalid())
+            {
+                if (driver != null)
+                    driver.SwitchTo().Window(driver.WindowHandles.Last());
+                else
+                    return false;
+            }
+            else
+                LastValidWindow = driver.CurrentWindowHandle;
 
             string url = string.Empty; bool result = false;
             string urlPrefixDomain = string.Empty;//= url.Substring(url.IndexOf("//") + "//".Length).Substring(0, url.IndexOf("/"));
-            string urlPrefix = string.Empty; //url.Substring(0, url.IndexOf("//") + "//".Length);            
+            string urlPrefix;// = string.Empty; //url.Substring(0, url.IndexOf("//") + "//".Length);            
             //http://skqs.guoxuedashi.net/wen_2885i/174671.html#002-1a
             //https://www.kanripo.org/text/KR4h0141/221
 
@@ -11303,10 +11362,10 @@ internal static string getImageUrl() {
             //取得下一卷的網址
             if (urlPrefixDomain == "skqs.guoxuedashi.net")
             {
-                url = GetNextPageUrl(url.Substring(0, url.IndexOf(".html")))+ ".html" ;
+                url = GetNextPageUrl(url.Substring(0, url.IndexOf(".html"))) + ".html";
             }
             else if (urlPrefixDomain == "www.kanripo.org")
-                url = GetNextPageUrl(url);
+                url = GetNextPageUrl(url.IndexOf("#") > -1 ? url.Substring(0, url.IndexOf("#")) : url);
             retry:
             try
             {

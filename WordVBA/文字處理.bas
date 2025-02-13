@@ -4214,6 +4214,7 @@ Sub 大陸引號改臺灣引號()
     Rem Alt + l （有選取只執行選取區，無則整份文件）
     Rem 今改成感應式, 即若偵測選取區有大陸引號, 則執行陸轉臺, 否則為臺轉陸 20241230
     Dim rng As Range, ur As UndoRecord, clnRng As New VBA.Collection, rngStory ', s As Long, e As Long
+    Dim aPre As Range
     If Selection.Type = wdSelectionIP Then
         Set rng = Selection.Document.Range
         For Each rngStory In rng.Document.StoryRanges
@@ -4278,10 +4279,57 @@ Sub 大陸引號改臺灣引號()
         rng.Find.Execute findText:="?", replacewith:="？", Replace:=wdReplaceAll
         rng.Find.Execute findText:="(", replacewith:="（", Replace:=wdReplaceAll
         rng.Find.Execute findText:=")", replacewith:="）", Replace:=wdReplaceAll
+        
+        
+        '是否在上單引號後
+        Set aPre = rngStory.Previous(wdCharacter, 1)
+        If Not aPre Is Nothing Then
+            Do While aPre.text <> VBA.Chr(13)
+                Select Case aPre.text
+                    Case "「"
+                        Set rng = rngStory
+                        With rng.Find
+                            .Execute "『", , , , , , , wdFindStop, , VBA.Chr(1), wdReplaceAll
+                            .Execute "「", , , , , , , wdFindStop, , "『", wdReplaceAll
+                            .Execute VBA.Chr(1), , , , , , , wdFindStop, , "「", wdReplaceAll
+                            
+                            .Execute "』", , , , , , , wdFindStop, , VBA.Chr(1), wdReplaceAll
+                            .Execute "」", , , , , , , wdFindStop, , "』", wdReplaceAll
+                            .Execute VBA.Chr(1), , , , , , , wdFindStop, , "」", wdReplaceAll
+                            
+                        End With
+                        Exit Do
+                    Case VBA.ChrW(8220)
+                        
+                        Set rng = rngStory
+                        With rng.Find
+                            'VBA.ChrW(8216)大陸的上單引號 VBA.ChrW(8217)大陸的下單引號
+                            'VBA.ChrW(8220)大陸的上雙引號 VBA.ChrW(8221)大陸的下雙引號
+                            .Execute VBA.ChrW(8216), , , , , , , wdFindStop, , VBA.Chr(1), wdReplaceAll
+                            .Execute VBA.ChrW(8220), , , , , , , wdFindStop, , VBA.ChrW(8216), wdReplaceAll
+                            .Execute VBA.Chr(1), , , , , , , wdFindStop, , VBA.ChrW(8220), wdReplaceAll
+                            
+                            .Execute VBA.ChrW(8217), , , , , , , wdFindStop, , VBA.Chr(1), wdReplaceAll
+                            .Execute VBA.ChrW(8221), , , , , , , wdFindStop, , VBA.ChrW(8217), wdReplaceAll
+                            .Execute VBA.Chr(1), , , , , , , wdFindStop, , VBA.ChrW(8221), wdReplaceAll
+                            
+                        End With
+                        Exit Do
+                End Select
+                
+                If aPre.start = 0 Then Exit Do
+                Set aPre = aPre.Previous(wdCharacter, 1)
+            Loop
+        End If
+        
     Next rngStory
+    
+    
+    
     
     SystemSetup.contiUndo ur
     word.Application.ScreenUpdating = True
+    
     ' 恢復原來設置
     options.AutoFormatAsYouTypeReplaceQuotes = smartQuotes
 End Sub

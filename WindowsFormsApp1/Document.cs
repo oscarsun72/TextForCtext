@@ -576,9 +576,16 @@ namespace TextForCtext
                 }
                 if (index == -1)
                 {
+                    if (_document.CurrentParagraphIndex == 0)
                     {
-                        index = _document.CurrentParagraphIndex;
+                        Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("找不到要更新段落"
+                            + Environment.NewLine + Environment.NewLine
+                            + this.Text + Environment.NewLine + Environment.NewLine
+                            + this._text_beforeUpdate);
+
                     }
+
+                    index = _document.CurrentParagraphIndex;
                 }
             }
             var lines = _document.Text.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
@@ -592,6 +599,8 @@ namespace TextForCtext
                 // 處理 index 超出 lines 範圍的情況
                 throw new IndexOutOfRangeException("索引超出 lines 陣列的界限。");
             }
+
+
         }
 
         public Range Range
@@ -601,7 +610,7 @@ namespace TextForCtext
                 if (_range == null)
                 {
                     //return new Range(_document, _start, _end);
-                    _range= new Range(_document, _start, _end); 
+                    _range = new Range(_document, _start, _end);
                     return _range;
                     //_range = new Range(ref _textBox, _start, _end);
                 }
@@ -664,7 +673,8 @@ namespace TextForCtext
                 charCount += paragraphs[i].Text.Length + Environment.NewLine.Length;
                 if (_start < charCount)
                 {
-                    paragraphs[i].Text = _document.Text.Substring(charCount - paragraphs[i].Text.Length - Environment.NewLine.Length, paragraphs[i].Text.Length);
+                    if (paragraphs[i].Text != _document.Text.Substring(charCount - paragraphs[i].Text.Length - Environment.NewLine.Length, paragraphs[i].Text.Length))
+                        paragraphs[i].Text = _document.Text.Substring(charCount - paragraphs[i].Text.Length - Environment.NewLine.Length, paragraphs[i].Text.Length);//●●●●●●●●●●●●●●20250213
                 }
             }
         }
@@ -750,7 +760,7 @@ namespace TextForCtext
             {
                 if (rangeParagraphs == null)
                 {
-                    rangeParagraphs = new List<Paragraph>() ;
+                    rangeParagraphs = new List<Paragraph>();
                     var paragraphs = _document.GetParagraphs();
 
                     int charCount = 0;
