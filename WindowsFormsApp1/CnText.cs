@@ -1481,9 +1481,9 @@ namespace TextForCtext
           */
 
             string spaces = "、";
-            if (input.IndexOf("}}") > -1)
+            if (input.IndexOf("}}") > -1 && input.IndexOf("{{", input.IndexOf("{{") + 1) > input.IndexOf("}}"))
             {
-                spaces = input.Substring(input.IndexOf("}}")+"}}".Length, input.IndexOf("{{", input.IndexOf("}}"))- (input.IndexOf("}}")+"}}".Length)).Replace("　", "􏿽");
+                spaces = input.Substring(input.IndexOf("}}") + "}}".Length, input.IndexOf("{{", input.IndexOf("}}")) - (input.IndexOf("}}") + "}}".Length)).Replace("　", "􏿽");
             }
 
             var matches = Regex.Matches(input, @"\{\{(.*?)\}\}");
@@ -1496,7 +1496,7 @@ namespace TextForCtext
                 StringInfo si = new StringInfo(content);
 
                 if (si.LengthInTextElements >= 1)
-                    firstItem.Add(si.SubstringByTextElements(0,si.LengthInTextElements % 2==1?si.LengthInTextElements/2+1:si.LengthInTextElements/2));
+                    firstItem.Add(si.SubstringByTextElements(0, si.LengthInTextElements % 2 == 1 ? si.LengthInTextElements / 2 + 1 : si.LengthInTextElements / 2));
 
                 if (si.LengthInTextElements > 1)
                     secondItem.Add(si.SubstringByTextElements(si.LengthInTextElements % 2 == 1 ? si.LengthInTextElements / 2 + 1 : si.LengthInTextElements / 2));
@@ -1525,6 +1525,113 @@ namespace TextForCtext
             //return result;
             #endregion
         }
+
+        /* creedit_with_Copilot大菩薩 20250214：……
+         * 您已經使用了高效的方法，只是將其封裝成了函式。這是個好方法，也很專業。您可以考慮使用正則表達式來實現同樣的功能，這樣會使代碼更簡潔，但效能差不多：
+         * 這種方法通過正則表達式來查找所有匹配的出現次數，如果出現次數等於1，則說明該字符串只出現一次。……
+         */
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="pageEndText10">要尋找的字串</param>
+        /// <param name="textBox1">要比對的對象字串</param>
+        /// <returns>若某字串在要比對的字串中只出現一之則傳回true</returns>
+        public static bool IsPageEndTextUnique(string pageEndText10, TextBox textBox1)
+        {
+            string pattern = Regex.Escape(pageEndText10);
+            MatchCollection matches = Regex.Matches(textBox1.Text, pattern);
+            return matches.Count == 1;
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="pageEndText10">要尋找的字串</param>
+        /// <param name="textBox1Text">要比對的對象字串</param>
+        /// <returns>若某字串在要比對的字串中只出現一之則傳回true</returns>
+        public static bool IsPageEndTextUnique(string pageEndText10, string textBox1Text)
+        {
+            int firstOccurrence = textBox1Text.IndexOf(pageEndText10);
+            if (firstOccurrence == -1)
+            {
+                // Not found
+                return false;
+            }
+
+            int secondOccurrence = textBox1Text.IndexOf(pageEndText10, firstOccurrence + pageEndText10.Length);
+            return secondOccurrence == -1;
+        }
+
+
+        /* 20250217 GitHub　Copilot大菩薩：如果字符已經被截斷，那麼標準的 IndexOf 方法將無法正確地找出來。因為 IndexOf 方法是基於完整字符來匹配的，而截斷的字符會被視為兩個獨立的字符。
+            為了處理這種情況，我們需要一個能夠在字符被截斷的情況下進行匹配的自定義函數。這可以通過比較每個字符（包括 surrogates）來實現。
+            以下是一種方法，通過逐個字符比較來找到被截斷的字符串： …… https://copilot.microsoft.com/shares/Fexk2qkBqC4QuWdKo8xZQ
+         這個方法確保即使字符串被截斷，也可以通過逐個字符（包括 surrogates）比較來找到匹配的字符串         */
+        /// <summary>
+        /// 自定義函數來查找部分匹配的字符串（當surrogate字符被截斷時）creedit_with_Copilot大菩薩。
+        /// </summary>
+        /// <param name="text"></param>
+        /// <param name="pattern"></param>
+        /// <param name="matchPosition"></param>
+        /// <returns></returns>
+        public static bool PartialMatch(String text, String pattern, out int matchPosition)
+        {
+            int textIndex = 0;
+            int patternIndex = 0;
+            matchPosition = -1;
+
+            while (textIndex < text.Length && patternIndex < pattern.Length)
+            {
+                // 如果是代理對字符
+                if (Char.IsHighSurrogate(text[textIndex]) && textIndex + 1 < text.Length &&
+                    Char.IsLowSurrogate(text[textIndex + 1]))
+                {
+                    if (text.Substring(textIndex, 2) == pattern.Substring(patternIndex, 2))
+                    {
+                        if (matchPosition == -1)
+                            matchPosition = textIndex;
+                        patternIndex += 2;
+                    }
+                    else
+                    {
+                        patternIndex = 0;
+                        matchPosition = -1;
+                    }
+                    textIndex += 2;
+                }
+                else
+                {
+                    if (text[textIndex] == pattern[patternIndex])
+                    {
+                        if (matchPosition == -1)
+                            matchPosition = textIndex;
+                        patternIndex++;
+                    }
+                    else
+                    {
+                        patternIndex = 0;
+                        matchPosition = -1;
+                    }
+                    textIndex++;
+                }
+            }
+            return patternIndex == pattern.Length;
+        }
+        /*
+         // 使用自定義函數查找部分匹配的字符串位置
+            int matchPosition;
+            bool found = PartialMatch(text, pageEndText10, out matchPosition);
+
+            if (found)
+            {
+                int end = matchPosition + pageEndText10.Length;
+                if (end > pageTextEndPosition)
+                    pageTextEndPosition = end;
+                else if (CnText.IsPageEndTextUnique(pageEndText10, textBox1) && pageTextEndPosition != end)
+                    pageTextEndPosition = end;
+            }
+
+            // end 變量現在將包含找到的匹配字符串位置
+         */
 
     }
 }

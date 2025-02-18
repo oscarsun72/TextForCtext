@@ -483,6 +483,8 @@ namespace TextForCtext
         {
             try
             {
+                if (IsDriverInvalid())
+                    driver.SwitchTo().Window(driver.WindowHandles.LastOrDefault());
                 string currentHandle = driver.CurrentWindowHandle;
                 if (driver.WindowHandles.Contains(currentHandle))
                 {
@@ -834,7 +836,7 @@ namespace TextForCtext
             }
         }
         /// <summary>
-        /// 取得CTP網頁中的「文本框」（圖文對照的文框）控制項
+        /// 取得CTP網頁中的「文本框」（文字框）（圖文對照的文框）控制項
         /// </summary>
         internal static IWebElement Div_generic_TextBoxFrame
         {
@@ -2033,108 +2035,125 @@ namespace TextForCtext
                     if (submit == null)
                     {
                         Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("請檢查頁面中的 Quict edit 是否可用，再按下確定繼續！");
-                        submit = waitFindWebElementById_ToBeClickable("savechangesbutton", _webDriverWaitTimSpan);
+                        //submit = waitFindWebElementById_ToBeClickable("savechangesbutton", _webDriverWaitTimSpan);
+                        submit = driver.FindElement(By.XPath("/html/body/div[2]/div[4]/form/div/input"));
                     }
                 }
                 LastValidWindow = driver.CurrentWindowHandle;
-                Task.Run(() =>//接下來不用理會，也沒有元件要操作、沒有訊息要回應，就可以給另一個線程去處理了。
+            //20250218取消多線程（多執行緒操作）
+            //Task.Run(() =>//接下來不用理會，也沒有元件要操作、沒有訊息要回應，就可以給另一個線程去處理了。
+            //{
+            reSubmit:
+                try
                 {
-                reSubmit:
-                    try
+                    if (submit == null)
+                        Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("請檢查頁面中的 Quict edit 是否可用，再按下確定繼續！");
+                    //submit = waitFindWebElementById_ToBeClickable("savechangesbutton", _webDriverWaitTimSpan);
+                    //submit = waitFindWebElementBySelector_ToBeClickable("#savechangesbutton");
+                    submit = driver.FindElement(By.XPath("/html/body/div[2]/div[4]/form/div/input"));
+                    if (submit == null)
                     {
-                        submit.Click();//按下 Save changes button（「保存編輯」按鈕）
+                        Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("請檢查頁面中的 Quict edit 是否可用!!!!!！");
+                        if (Form1.InstanceForm1.FastMode)
+                            Form1.InstanceForm1.FastModeSwitcher();
+                        return false;
                     }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine(ex.HelpLink + ex.Message);
-                        //chatGPT：
-                        // 等待網頁元素出現，最多等待 3 秒//應該不用這個，因為會貼上時，不太可能「savechangesbutton」按鈕還沒出現，除非網頁載入不完整……
-                        submit = waitFindWebElementById_ToBeClickable("savechangesbutton", _webDriverWaitTimSpan);  //driver.FindElement(selm.By.Id("savechangesbutton"));
-                                                                                                                    //WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(3));
-                                                                                                                    ////安裝了 Selenium.WebDriver 套件，才說沒有「ExpectedConditions」，然後照Visual Studio 2022的改正建議又用NuGet 安裝了 Selenium.Suport 套件，也自動「 using OpenQA.Selenium.Support.UI;」了，末學自己還用物件瀏覽器找過了 「OpenQA.Selenium.Support.UI」，可就是沒有「ExpectedConditions」靜態類別可用，即使官方文件也說有 ： https://www.selenium.dev/selenium/docs/api/dotnet/html/T_OpenQA_Selenium_Support_UI_ExpectedConditions.htm 20230109 未知何故 阿彌陀佛
-                                                                                                                    //wait.Until(ExpectedConditions.ElementToBeClickable(submit));
-                        /*chatGPT 您好，謝謝您將您的程式碼提供給我，我現在有更多的資訊可以幫助我了解您遇到的問題。按照您的程式碼，我可以確認您已經在您的項目中安裝了 Selenium.WebDriver 和 Selenium.Support NuGet 套件，並且在您的程式碼中使用了 using OpenQA.Selenium.Support.UI; 的聲明。
-                         * 然而，我注意到您正在使用 .NET Framework 4.8，而非 .NET Core。根據 Selenium 文件，ExpectedConditions 類別在 .NET Framework 中只支援 .NET Core。
-                         * 因此，如果您想在 .NET Framework 中使用 ExpectedConditions 類別，則您需要使用 .NET Core 來建立您的項目。如果您無法更改您的項目類型， 我現在繼續提供您有關解決方法的更多資訊。
-                         * 如果您無法更改您的項目類型，則可以使用不同的方法來等待網頁元素的出現。例如，您可以使用以下方法之一：
-                         * 使用 Thread.Sleep() 函式等待指定的時間。
-                         * 使用 while 迴圈和 DateTime.Now 來等待網頁元素的出現。
-                         * 使用 WebDriverWait 類別和 Until() 方法來等待網頁元素的出現。下面是使用第 3 種方法的示例程式碼：……
-                         * 末學我回：菩薩您的解答終於、應該是對的了 是 Core 有 而Framework 不支援 才對 否則真的不知道是何緣故了。感恩感恩　讚歎讚歎　南無阿彌陀佛
-                         * --然而--
-                         * 不用更改 我找到了 謝謝您的回答 以後再來請教您。我剛才成功解決的是，如下所述： 在Visual Studio 2022 中的NuGet 套件不要裝「SeleniumExtras.WaitHelpers」要裝「DotNetSeleniumExtras.WaitHelpers」就可以成功安裝，再用「using SeleniumExtras.WaitHelpers;」則「wait.Until(ExpectedConditions.ElementToBeClickable(submit));」這一行程式碼就不再出錯了，也沒有紅蚯蚓了。現在我已正常編譯，……感恩感恩　讚歎讚歎　南無阿彌陀佛
-                         */
-                        // 在網頁元素載入完畢後，執行 Click 方法
-                        if (submit != null)
-                            try
-                            {
-                                submit.Click();
-                            }
-                            catch (Exception)
-                            {
-                            }
-                        else
-                        {
-                            Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("請手動檢查資料是否有正確送出。");
-                            driver.Manage().Timeouts().PageLoad += new TimeSpan(0, 0, 3);
-                            //LastValidWindow = driver.CurrentWindowHandle;
-                            //openNewTabWindow();
-                            try
-                            {
-                                driver.Navigate().GoToUrl(url);
-                            }
-                            catch (Exception)
-                            {
-                            }
-                        }
-                        //throw;
-                    }
-                    #region 送出後檢查是否是「Please confirm that you are human! 敬請輸入認證圖案」頁面 網址列：https://ctext.org/wiki.pl
-                    if (IsConfirmHumanPage())
-                    {
+                    submit.Click();//按下 Save changes button（「保存編輯」按鈕）
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.HelpLink + ex.Message);
+                    //chatGPT：
+                    // 等待網頁元素出現，最多等待 3 秒//應該不用這個，因為會貼上時，不太可能「savechangesbutton」按鈕還沒出現，除非網頁載入不完整……
+                    submit = waitFindWebElementById_ToBeClickable("savechangesbutton", _webDriverWaitTimSpan);  //driver.FindElement(selm.By.Id("savechangesbutton"));
+                                                                                                                //WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(3));
+                                                                                                                ////安裝了 Selenium.WebDriver 套件，才說沒有「ExpectedConditions」，然後照Visual Studio 2022的改正建議又用NuGet 安裝了 Selenium.Suport 套件，也自動「 using OpenQA.Selenium.Support.UI;」了，末學自己還用物件瀏覽器找過了 「OpenQA.Selenium.Support.UI」，可就是沒有「ExpectedConditions」靜態類別可用，即使官方文件也說有 ： https://www.selenium.dev/selenium/docs/api/dotnet/html/T_OpenQA_Selenium_Support_UI_ExpectedConditions.htm 20230109 未知何故 阿彌陀佛
+                                                                                                                //wait.Until(ExpectedConditions.ElementToBeClickable(submit));
+                    /*chatGPT 您好，謝謝您將您的程式碼提供給我，我現在有更多的資訊可以幫助我了解您遇到的問題。按照您的程式碼，我可以確認您已經在您的項目中安裝了 Selenium.WebDriver 和 Selenium.Support NuGet 套件，並且在您的程式碼中使用了 using OpenQA.Selenium.Support.UI; 的聲明。
+                     * 然而，我注意到您正在使用 .NET Framework 4.8，而非 .NET Core。根據 Selenium 文件，ExpectedConditions 類別在 .NET Framework 中只支援 .NET Core。
+                     * 因此，如果您想在 .NET Framework 中使用 ExpectedConditions 類別，則您需要使用 .NET Core 來建立您的項目。如果您無法更改您的項目類型， 我現在繼續提供您有關解決方法的更多資訊。
+                     * 如果您無法更改您的項目類型，則可以使用不同的方法來等待網頁元素的出現。例如，您可以使用以下方法之一：
+                     * 使用 Thread.Sleep() 函式等待指定的時間。
+                     * 使用 while 迴圈和 DateTime.Now 來等待網頁元素的出現。
+                     * 使用 WebDriverWait 類別和 Until() 方法來等待網頁元素的出現。下面是使用第 3 種方法的示例程式碼：……
+                     * 末學我回：菩薩您的解答終於、應該是對的了 是 Core 有 而Framework 不支援 才對 否則真的不知道是何緣故了。感恩感恩　讚歎讚歎　南無阿彌陀佛
+                     * --然而--
+                     * 不用更改 我找到了 謝謝您的回答 以後再來請教您。我剛才成功解決的是，如下所述： 在Visual Studio 2022 中的NuGet 套件不要裝「SeleniumExtras.WaitHelpers」要裝「DotNetSeleniumExtras.WaitHelpers」就可以成功安裝，再用「using SeleniumExtras.WaitHelpers;」則「wait.Until(ExpectedConditions.ElementToBeClickable(submit));」這一行程式碼就不再出錯了，也沒有紅蚯蚓了。現在我已正常編譯，……感恩感恩　讚歎讚歎　南無阿彌陀佛
+                     */
+                    // 在網頁元素載入完畢後，執行 Click 方法
+                    if (submit != null)
                         try
                         {
-                            Clipboard.SetText(xInput);//複製到剪貼簿備用
+                            submit.Click();
                         }
                         catch (Exception)
                         {
                         }
-
-                        //點選輸入框
-                        //waitFindWebElementBySelector_ToBeClickable("#content3 > form > table > tbody > tr:nth-child(2) > td:nth-child(2) > input[type=text]")?.Click();
-                        IWebElement iweConfirm = waitFindWebElementBySelector_ToBeClickable("#content3 > form > table > tbody > tr:nth-child(2) > td:nth-child(2) > input[type=text]");
-                        if (iweConfirm == null) driver.Navigate().Back();//因非同步，若已翻到下一頁
-                        iweConfirm = waitFindWebElementBySelector_ToBeClickable("#content3 > form > table > tbody > tr:nth-child(2) > td:nth-child(2) > input[type=text]");
-                        if (iweConfirm == null)
-                            Debugger.Break();
-                        else
-                            iweConfirm.Click();
-                        if (DialogResult.Cancel ==
-                            Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("Please confirm that you are human! 請輸入認證圖案"
-                            + Environment.NewLine + Environment.NewLine + "請輸入完畢後再按「確定」！", string.Empty, false))
+                    else
+                    {
+                        Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("請手動檢查資料是否有正確送出。");
+                        driver.Manage().Timeouts().PageLoad += new TimeSpan(0, 0, 3);
+                        //LastValidWindow = driver.CurrentWindowHandle;
+                        //openNewTabWindow();
+                        try
                         {
-                            Debugger.Break();
+                            driver.Navigate().GoToUrl(url);
                         }
-                        driver.Navigate().Back();
-                        while (driver.Url == "https://ctext.org/wiki.pl")
+                        catch (Exception)
                         {
-                            driver.Navigate().Back();
                         }
-                        if (driver.Url != url)
-                            Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("網址並非 " + url + " 請檢查後再按下確定");
-                        if (driver.Url == url)
-                        {
-                            SetQuickedit_data_textboxTxt(xInput);
-                            goto reSubmit;
-                        }
-
-                        else Debugger.Break();
                     }
-                    #endregion
-                });
+                    //throw;
+                }
+                #region 送出後檢查是否是「Please confirm that you are human! 敬請輸入認證圖案」頁面 網址列：https://ctext.org/wiki.pl
+                if (IsConfirmHumanPage())
+                {
+                    try
+                    {
+                        Clipboard.SetText(xInput);//複製到剪貼簿備用
+                    }
+                    catch (Exception)
+                    {
+                    }
+
+                    //點選輸入框
+                    //waitFindWebElementBySelector_ToBeClickable("#content3 > form > table > tbody > tr:nth-child(2) > td:nth-child(2) > input[type=text]")?.Click();
+                    IWebElement iweConfirm = waitFindWebElementBySelector_ToBeClickable("#content3 > form > table > tbody > tr:nth-child(2) > td:nth-child(2) > input[type=text]");
+                    if (iweConfirm == null) driver.Navigate().Back();//因非同步，若已翻到下一頁
+                    iweConfirm = waitFindWebElementBySelector_ToBeClickable("#content3 > form > table > tbody > tr:nth-child(2) > td:nth-child(2) > input[type=text]");
+                    if (iweConfirm == null)
+                        Debugger.Break();
+                    else
+                        iweConfirm.Click();
+                    if (DialogResult.Cancel ==
+                        Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("Please confirm that you are human! 請輸入認證圖案"
+                        + Environment.NewLine + Environment.NewLine + "請輸入完畢後再按「確定」！", string.Empty, false))
+                    {
+                        Debugger.Break();
+                    }
+                    driver.Navigate().Back();
+                    while (driver.Url == "https://ctext.org/wiki.pl")
+                    {
+                        driver.Navigate().Back();
+                    }
+                    if (driver.Url != url)
+                        Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("網址並非 " + url + " 請檢查後再按下確定");
+                    if (driver.Url == url)
+                    {
+                        SetQuickedit_data_textboxTxt(xInput);
+                        goto reSubmit;
+                    }
+
+                    else Debugger.Break();
+                }
+                #endregion
+                //});
+
+
                 //加速連續性輸入（不必檢視貼入的文本時，很有效）
                 //if (ActiveForm1.AutoPasteToCtext && Form1.FastMode)
-                if (ActiveForm1.AutoPasteToCtext && Form1.FastMode && Form1.browsrOPMode == Form1.BrowserOPMode.appActivateByName)
+                //if (ActiveForm1.AutoPasteToCtext && Form1.fastMode && Form1.browsrOPMode == Form1.BrowserOPMode.appActivateByName)
+                if (ActiveForm1.AutoPasteToCtext && Form1.InstanceForm1.FastMode && Form1.browsrOPMode == Form1.BrowserOPMode.appActivateByName)
                 {
                     Thread.Sleep(10);//等待 submit = waitFin……完成
                     driver.Close(); //需要重啟檢視時，只要開啟前一個被關掉的分頁頁籤即可（快速鍵時 Ctrl + Shift + t）
@@ -5861,7 +5880,8 @@ internal static string getImageUrl() {
                 #region 方便提早取消作業（藉由關閉OCR視窗）
                 try
                 {
-                    if (currentWindowHndl != driver.CurrentWindowHandle) { };
+                    if (currentWindowHndl != driver.CurrentWindowHandle) { }
+                    ;
                 }
                 catch (Exception)
                 {
@@ -5900,7 +5920,8 @@ internal static string getImageUrl() {
                 #region 方便提早取消作業（藉由關閉OCR視窗）
                 try
                 {
-                    if (currentWindowHndl != driver.CurrentWindowHandle) { };
+                    if (currentWindowHndl != driver.CurrentWindowHandle) { }
+                    ;
                 }
                 catch (Exception)
                 {
@@ -5994,7 +6015,8 @@ internal static string getImageUrl() {
                     StopOCR = true;
                     return false;
                 }
-                if (currentWindowHndl != driver.CurrentWindowHandle) { };
+                if (currentWindowHndl != driver.CurrentWindowHandle) { }
+                ;
             }
             catch (Exception)
             {
@@ -6241,7 +6263,8 @@ internal static string getImageUrl() {
             //檢查使用者是否已關閉視窗，取消這次的操作（比如說才發現已經有OCR了、或弄錯頁了……等等，可逕接關閉《古籍酷》OCR視窗以終結之）
             try
             {
-                if (driver.CurrentWindowHandle == currentWindowHndl) { };
+                if (driver.CurrentWindowHandle == currentWindowHndl) { }
+                ;
             }
             catch (Exception)
             {
@@ -7358,7 +7381,8 @@ internal static string getImageUrl() {
             #region 方便提早取消作業（藉由關閉OCR視窗）
             try
             {
-                if (currentWindowHndl != driver.CurrentWindowHandle) { };
+                if (currentWindowHndl != driver.CurrentWindowHandle) { }
+                ;
             }
             catch (Exception)
             {
@@ -7605,7 +7629,8 @@ internal static string getImageUrl() {
                 #region 方便提早取消作業（藉由關閉OCR視窗）
                 try
                 {
-                    if (currentWindowHndl != driver.CurrentWindowHandle) { };
+                    if (currentWindowHndl != driver.CurrentWindowHandle) { }
+                    ;
                 }
                 catch (Exception)
                 {
@@ -8094,7 +8119,8 @@ internal static string getImageUrl() {
             #region 方便提早取消作業（藉由關閉OCR視窗）
             try
             {
-                if (currentWindowHndl != driver.CurrentWindowHandle) { };
+                if (currentWindowHndl != driver.CurrentWindowHandle) { }
+                ;
             }
             catch (Exception)
             {
@@ -8154,7 +8180,8 @@ internal static string getImageUrl() {
             #region 方便提早取消作業（藉由關閉OCR視窗）
             try
             {
-                if (currentWindowHndl != driver.CurrentWindowHandle) { };
+                if (currentWindowHndl != driver.CurrentWindowHandle) { }
+                ;
             }
             catch (Exception)
             {
@@ -8268,7 +8295,8 @@ internal static string getImageUrl() {
                 //藉由手動關閉視窗以提早/強制中止程序
                 try
                 {
-                    if (currentWindowHndl != driver.CurrentWindowHandle) { };
+                    if (currentWindowHndl != driver.CurrentWindowHandle) { }
+                    ;
                 }
                 catch (Exception)
                 {
@@ -9130,7 +9158,7 @@ internal static string getImageUrl() {
 
 
                 string caption;//= string.Empty;// iwe1 == null ? "漢籍全文資料庫" : "漢籍全文文本閱讀";
-                                              //文本閱讀中的查詢輸入方塊 <input type="text" name="hanji/fld00.33.810" size="30" maxlength="200">
+                               //文本閱讀中的查詢輸入方塊 <input type="text" name="hanji/fld00.33.810" size="30" maxlength="200">
                 IWebElement iwe1 = waitFindWebElementBySelector_ToBeClickable("body > form > table > tbody > tr:nth-child(2) > td > table > tbody > tr > td.leftbg > table > tbody > tr:nth-child(1) > td > table > tbody > tr:nth-child(2) > td > input[type=text]:nth-child(2)");
                 if (iwe1 == null)
                 {
@@ -10424,7 +10452,7 @@ internal static string getImageUrl() {
         public static bool LookupZitools(string x)
         {
             StringInfo si = new StringInfo(x);
-            if (si.LengthInTextElements != 1) return false;
+            if (si.LengthInTextElements == 0) return false;
 
             TimeSpan ts = new TimeSpan();
         retry:
@@ -10442,19 +10470,42 @@ internal static string getImageUrl() {
                 }
                 openNewTabWindow(OpenQA.Selenium.WindowType.Tab);
                 driver.Manage().Timeouts().PageLoad = new TimeSpan(0, 0, 4);
-                driver.Navigate().GoToUrl("https://zi.tools/zi/" + x);
+                string selector;
+                if (si.LengthInTextElements == 1)
+                {
+                    driver.Navigate().GoToUrl("https://zi.tools/zi/" + x);
+                    selector = "#mainContent > span > div.content > div > div.sidebar_navigation > div > div:nth-child(11)";
+                }
+                else
+                {
+                    driver.Navigate().GoToUrl("https://zi.tools/?secondary=search");
+                    selector = "#search_input";
+                }
 
                 //點擊"Relatives 相關字" .查詢《字統網》多是為找系統有無該異體字，故今改寫為查詢後在頁面尋找「異寫字」的功能，以利跳到該區塊 20240819
-                //DateTime dt = DateTime.Now;
+                DateTime dt = DateTime.Now;
                 IWebElement iwe = null;
-                //while (true)
-                //{
-                iwe = waitFindWebElementBySelector_ToBeClickable("#mainContent > span > div.content > div > div.sidebar_navigation > div > div:nth-child(11)"
-                        , 4);
-                //if (iwe != null ||
-                //DateTime.Now.Subtract(dt).TotalSeconds > 10) break;
-                //}
-                iwe?.Click();//當DateTime.Now.Subtract(dt).TotalSeconds > 10) break; 時需要 iwe? 會是null值
+                while (true)
+                {
+                    iwe = waitFindWebElementBySelector_ToBeClickable(selector);
+                    if (iwe != null ||
+                    DateTime.Now.Subtract(dt).TotalSeconds > 3) break;
+                }
+
+                if (iwe == null)
+                {
+                    //driver.SwitchTo().Window(LastValidWindow);
+                    if (ts != new TimeSpan()) driver.Manage().Timeouts().PageLoad = ts;
+                    return false;
+                }
+
+                if (si.LengthInTextElements == 1)
+                    iwe?.Click();//當DateTime.Now.Subtract(dt).TotalSeconds > 10) break; 時需要 iwe? 會是null值
+                else
+                {
+                    //SetIWebElementValueProperty(iwe, x);//沒反應                    
+                    iwe.SendKeys(selm.Keys.Shift + selm.Keys.Insert);
+                }
 
             }
             catch (Exception ex)
@@ -10468,7 +10519,8 @@ internal static string getImageUrl() {
                     }
                     else if (ex.Message.StartsWith("An unknown exception was encountered sending an HTTP request to the remote WebDriver server for URL "))
                     {
-                        MessageBox.Show("請關閉Chrome瀏覽器，並用本程式重新啟動 Chrome瀏覽器", "", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
+                        RestartDriver();
+                        //MessageBox.Show("請關閉Chrome瀏覽器，並用本程式重新啟動 Chrome瀏覽器", "", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
                         //if (ts != new TimeSpan()) driver.Manage().Timeouts().PageLoad = ts;
                         //return false;
                     }
@@ -10479,14 +10531,21 @@ internal static string getImageUrl() {
                         //MessageBox.Show(ex.HResult + ex.Message, "", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
                     }
                 }
+                if (!IsDriverInvalid())
+                    driver.SwitchTo().Window(driver.WindowHandles.Last());
                 if (ts != new TimeSpan()) driver.Manage().Timeouts().PageLoad = ts;
+
                 return false;
             }
-            if (!SetFocusOnWebPageBody())
+
+            if (si.LengthInTextElements == 1)
             {
-                driver.SwitchTo().Window(LastValidWindow);
-                if (ts != new TimeSpan()) driver.Manage().Timeouts().PageLoad = ts;
-                return false;
+                if (!SetFocusOnWebPageBody())
+                {
+                    driver.SwitchTo().Window(LastValidWindow);
+                    if (ts != new TimeSpan()) driver.Manage().Timeouts().PageLoad = ts;
+                    return false;
+                }
             }
 
             if (ts != new TimeSpan()) driver.Manage().Timeouts().PageLoad = ts;
@@ -10541,6 +10600,7 @@ internal static string getImageUrl() {
             string url = "https://ivantsoi.myds.me/web/hydcd/search.html", urlResult;//= null;
             IWebElement iwe;
         retry:
+            if (IsDriverInvalid()) driver.SwitchTo().Window(driver.WindowHandles.Last());
             try
             {
                 LastValidWindow = driver.CurrentWindowHandle;
@@ -10615,6 +10675,7 @@ internal static string getImageUrl() {
                  + "#searchL";
             IWebElement iwe;
         retry:
+            if (IsDriverInvalid()) driver.SwitchTo().Window(driver.WindowHandles.Last());
             try
             {
                 LastValidWindow = driver.CurrentWindowHandle;
@@ -10691,6 +10752,7 @@ internal static string getImageUrl() {
                 + "&qMd=0&qCol=1";
             IWebElement iwe;
         retry:
+            if (IsDriverInvalid()) driver.SwitchTo().Window(driver.WindowHandles.Last());
             try
             {
                 LastValidWindow = driver.CurrentWindowHandle;
@@ -10753,6 +10815,7 @@ internal static string getImageUrl() {
         {
             StringInfo si = new StringInfo(x);
             if (si.LengthInTextElements != 1) return false;
+            if (IsDriverInvalid()) driver.SwitchTo().Window(driver.WindowHandles.Last());
             retry:
             try
             {
@@ -10984,7 +11047,8 @@ internal static string getImageUrl() {
             }
         }
         /// <summary>
-        /// 檢測 driver 是否失效/無效或是null 20241008
+        /// 檢測 driver 是否失效/無效（當前分頁 CurrentWindowHandle）20241008
+        /// 或是null則會自行啟用chromedriver 20250215
         /// </summary>
         /// <param name="driver"></param>
         /// <returns></returns>
@@ -11059,6 +11123,9 @@ internal static string getImageUrl() {
         /// <returns></returns>
         public static bool KanDianGuJiSearchAll(string searchTxt)
         {
+            //防呆：非中文則駁回
+            if (Math.Abs(Form1.isChineseChar(searchTxt, true)) != 1) return false;
+
             void openNewtab(string strUrl)
             {
                 openNewTabWindow();
@@ -11135,7 +11202,14 @@ internal static string getImageUrl() {
 
             // 設定匹配模式
             iwe = waitFindWebElementBySelector_ToBeClickable("#search_mode");
-            iwe.Click();
+            try
+            {
+                iwe.Click();
+            }
+            catch (Exception)
+            {
+                return false;
+            }
             if (exact)
             {
                 waitFindWebElementBySelector_ToBeClickable("#search_mode > option:nth-child(2)").Click();
@@ -11454,7 +11528,8 @@ internal static string getImageUrl() {
             ChromeSetFocus();
             Clipboard.Clear();
             SendKeys.Send("^c");
-            Thread.Sleep(900);
+            //Thread.Sleep(900);
+            Thread.Sleep(450);
             DateTime dt = DateTime.Now;
             try
             {
