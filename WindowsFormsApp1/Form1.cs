@@ -3406,6 +3406,8 @@ namespace WindowsFormsApp1
                         Paragraph p = _document.Range(textBox1.SelectionStart, textBox1.SelectionStart).GetCurrentParagraph();
                         textBox1.Select(p.Start, p.End - p.Start);
                     }
+                    if (textBox1.SelectedText.IndexOf("{{") == -1 || textBox1.SelectedText.IndexOf("}}") == -1 || textBox1.SelectedText.IndexOf(" ") == -1)
+                        return;
                     x = textBox1.SelectedText;
                     x = CnText.CorrectNoteBlankContent(x);
                     if (!x.IsNullOrEmpty() && textBox1.SelectedText != x)
