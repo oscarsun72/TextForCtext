@@ -1465,6 +1465,8 @@ namespace TextForCtext
             }
         }
 
+        /* 20250219 creedit_with_Copilot大菩薩 https://copilot.microsoft.com/shares/WUwdpzQFHY57cyPUyLE89
+                   https://ctext.org/library.pl?if=gb&file=62381&page=7#%E4%BB%A5%E4%B8%8B%E5%92%8C%E5%8F%A5%E4%BA%A1 */
         /// <summary>
         /// 訂正註文中空白錯亂的文本
         /// 如「{{帝和霍王以下 句亡}}」訂正為「{{帝 霍王以下和句亡}}」，將半形空格與其前半對應的漢字對調。
@@ -1472,10 +1474,21 @@ namespace TextForCtext
         /// <param name="text">要訂正的文本</param>
         /// <returns>若失敗則傳回null</returns>
         public static string CorrectNoteBlankContent(string text)
-        {/* 20250219 creedit_with_Copilot大菩薩 https://copilot.microsoft.com/shares/WUwdpzQFHY57cyPUyLE89
-           https://ctext.org/library.pl?if=gb&file=62381&page=7#%E4%BB%A5%E4%B8%8B%E5%92%8C%E5%8F%A5%E4%BA%A1 */
+        {
+            if (text.IndexOf(" ") == -1) return null;
             int startIndex = text.IndexOf("{{");
+            if (startIndex == -1) return null;
             int endIndex = text.IndexOf("}}", startIndex);
+            if (endIndex == -1) return null;
+
+            int split = text.IndexOf(Environment.NewLine);
+            if (split > -1)
+            {
+                text = text.Replace(Environment.NewLine, string.Empty);
+                split = new StringInfo(text.Substring(0, split)).LengthInTextElements;
+                startIndex = text.IndexOf("{{");
+                endIndex = text.IndexOf("}}", startIndex);
+            }
 
             if (startIndex != -1 && endIndex != -1)
             {
@@ -1497,7 +1510,7 @@ namespace TextForCtext
                     {
                         correspondingIndex = spaceIndex - (midIndex + 1);
                     }
-                    
+
                     if (correspondingIndex < 0) return null;
 
                     StringInfo precedingChar = new StringInfo(segment.SubstringByTextElements(correspondingIndex, 1));
@@ -1507,9 +1520,20 @@ namespace TextForCtext
                     sb[spaceIndex] = precedingChar.String[0];
                     sb[correspondingIndex] = ' ';
 
+                    text = (text.Substring(0, startIndex) + "{{" + sb.ToString() + "}}" + text.Substring(endIndex + 2)).Replace(" ", "􏿽");
+                    
+                    if (split > -1)
+                    {
+
+                        text = new StringInfo(text).SubstringByTextElements(0, split)
+                            + Environment.NewLine
+                            + new StringInfo(text).SubstringByTextElements(split);
+                    }
+
                     //string result = text.Substring(0, startIndex) + "{{" + sb.ToString() + "}}" + text.Substring(endIndex + 2);
                     //return result.Replace(" ", "􏿽");
-                    return (text.Substring(0, startIndex) + "{{" + sb.ToString() + "}}" + text.Substring(endIndex + 2)).Replace(" ", "􏿽");
+                    //return (text.Substring(0, startIndex) + "{{" + sb.ToString() + "}}" + text.Substring(endIndex + 2)).Replace(" ", "􏿽");
+                    return text;
                 }
             }
             return null;
@@ -1577,7 +1601,7 @@ namespace TextForCtext
         }
 
 
-        
+
 
         /* creedit_with_Copilot大菩薩 20250214：……
          * 您已經使用了高效的方法，只是將其封裝成了函式。這是個好方法，也很專業。您可以考慮使用正則表達式來實現同樣的功能，這樣會使代碼更簡潔，但效能差不多：

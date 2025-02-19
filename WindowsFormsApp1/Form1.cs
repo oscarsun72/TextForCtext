@@ -3405,6 +3405,10 @@ namespace WindowsFormsApp1
                     {
                         Paragraph p = _document.Range(textBox1.SelectionStart, textBox1.SelectionStart).GetCurrentParagraph();
                         textBox1.Select(p.Start, p.End - p.Start);
+                        if (textBox1.SelectedText.IndexOf("{{") == -1)
+                            textBox1.Select(p.Range.GetPreviousParagraph().Start, p.End - p.Range.GetPreviousParagraph().Start);
+                        if (textBox1.SelectedText.IndexOf("}}") == -1)
+                            textBox1.Select(p.Start, p.Range.GetNextParagraph().End - p.Start);
                     }
                     if (textBox1.SelectedText.IndexOf("{{") == -1 || textBox1.SelectedText.IndexOf("}}") == -1 || textBox1.SelectedText.IndexOf(" ") == -1)
                         return;
@@ -4270,7 +4274,11 @@ namespace WindowsFormsApp1
 
             }
 
-
+            if (lines_perPage == 0)
+            {
+                Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("請先設定每頁正常的行/段數！");
+                return;
+            }
 
             //if ((textBox1.SelectionStart < pageTextEndPosition
             //    && _document.Range(0, pageTextEndPosition).Paragraphs.Count * 2 != lines_perPage)
@@ -7562,7 +7570,10 @@ namespace WindowsFormsApp1
                             if (se.IndexOf("*") > -1)
                             {
                                 //如果在標題中，且下一行/段是空格開頭且又多於標題題首空格2格的話 20250204
-                                string next_se = textBox1.Text.Substring(e + Environment.NewLine.Length, textBox1.Text.IndexOf(Environment.NewLine, e + 1) - e + Environment.NewLine.Length);
+                                string next_se = textBox1.Text.Substring(e + Environment.NewLine.Length,
+                                    (e + Environment.NewLine.Length + textBox1.Text.IndexOf(Environment.NewLine, e + 1) - e + Environment.NewLine.Length) > textBox1.TextLength ?
+                                    (textBox1.TextLength - (e + Environment.NewLine.Length)) :
+                                    textBox1.Text.IndexOf(Environment.NewLine, e + 1) - e + Environment.NewLine.Length);
                                 //if (nextse.IndexOf("{{")==-1 &&)
                                 //20250204 creedit with Gemini大菩薩 https://g.co/gemini/share/eb6c0ed286c6
                                 // 使用正則表達式匹配開頭的連續空格
