@@ -1524,6 +1524,49 @@ namespace TextForCtext
             //string result = "{{" + string.Join("􏿽", firstChars) + "、" + string.Join("􏿽", secondChars) + "　　}}";
             //return result;
             #endregion
+
+        }
+
+
+        /// <summary>
+        /// 訂正註文中空白錯亂的文本 20250219 creedit_with_Copilot大菩薩 https://copilot.microsoft.com/shares/WUwdpzQFHY57cyPUyLE89
+        /// 如「{{帝和霍王以下 句亡}}」訂正為「{{帝 霍王以下和句亡}}」，將半形空格與其前半對應的漢字對調。 
+        /// https://ctext.org/library.pl?if=gb&file=62381&page=7#%E4%BB%A5%E4%B8%8B%E5%92%8C%E5%8F%A5%E4%BA%A1
+        /// </summary>
+        /// <param name="text"></param>
+        /// <returns></returns>
+        public static string CorrectNoteBlankContent(string text)
+        {
+            int startIndex = text.IndexOf("{{");
+            if (startIndex == -1) return null;
+            int endIndex = text.IndexOf("}}", startIndex);
+
+            if (startIndex != -1 && endIndex != -1)
+            {
+                StringInfo segment = new StringInfo(text.Substring(startIndex + 2, endIndex - startIndex - 2));
+                string segmentStr = segment.String;
+                int spaceIndex = segmentStr.IndexOf(' ');
+
+                if (spaceIndex != -1 && spaceIndex > 0)
+                {
+                    // Find the corresponding position in the first half
+                    int midIndex = (segmentStr.Length - 1) / 2;
+                    int correspondingIndex = spaceIndex - (segmentStr.Length - midIndex);
+
+                    if (correspondingIndex >= 0 && correspondingIndex < midIndex)
+                    {
+                        StringInfo precedingChar = new StringInfo(segment.SubstringByTextElements(correspondingIndex, 1));
+                        StringBuilder sb = new StringBuilder(segmentStr);
+
+                        // Swap the space and the corresponding character in the first half
+                        sb[spaceIndex] = precedingChar.String[0];
+                        sb[correspondingIndex] = ' ';
+
+                        return (text.Substring(0, startIndex) + "{{" + sb.ToString() + "}}" + text.Substring(endIndex + 2)).Replace(" ", "􏿽");
+                    }
+                }
+            }
+            return text;
         }
 
         /* creedit_with_Copilot大菩薩 20250214：……

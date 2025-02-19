@@ -3397,6 +3397,27 @@ namespace WindowsFormsApp1
                     altA_predictRange();
                     return;
                 }
+                if (e.KeyCode == Keys.B)
+                {//Alt + b： 訂正註文中空白錯亂的文本。如「{{帝和霍王以下 句亡}}」訂正為「{{帝 霍王以下和句亡}}」，將半形空格與其前半對應的漢字對調。 20250219
+                    e.Handled = true;
+                    string x;
+                    if (textBox1.SelectionLength == 0)
+                    {
+                        Paragraph p = _document.Range(textBox1.SelectionStart, textBox1.SelectionStart).GetCurrentParagraph();
+                        textBox1.Select(p.Start, p.End - p.Start);
+                    }
+                    x = textBox1.SelectedText;
+                    x = CnText.CorrectNoteBlankContent(x);
+                    if (!x.IsNullOrEmpty() && textBox1.SelectedText != x)
+                    {
+                        undoRecord();
+                        PauseEvents();
+                        textBox1.SelectedText = x;
+                        ResumeEvents();
+                        undoRecord();
+                    }
+                    return;
+                }
                 if (e.KeyCode == Keys.C)
                 {//Alt + c ：以所選之詞（不能少於2字）檢索《漢語大詞典》 https://ivantsoi.myds.me/web/hydcd/search.html
                     e.Handled = true;
@@ -16166,6 +16187,8 @@ namespace WindowsFormsApp1
             {
                 if (br.IsDriverInvalid())
                     br.driver.SwitchTo().Window(driver.WindowHandles.Last());
+                else
+                    br.driver.SwitchTo().Window(driver.CurrentWindowHandle);
                 driver.Url = clpTxt;
                 OpenQA.Selenium.IWebElement iwe = br.Textarea_data_Edit_textbox;
                 if (iwe != null)

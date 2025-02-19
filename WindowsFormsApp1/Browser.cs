@@ -9915,8 +9915,8 @@ internal static string getImageUrl() {
         {
             #region 防呆
 
-            if (character.LengthInTextElements != 2) { Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("指定的字元長度不對！請檢查"); return false; }
-            if (character.SubstringByTextElements(0, 1) == character.SubstringByTextElements(1, 1)) { Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("所指定取代的字元相同，請重設！"); return false; }
+            if (character.LengthInTextElements != 2) { Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("指定的字元長度不對！請檢查"); return false; }
+            if (character.SubstringByTextElements(0, 1) == character.SubstringByTextElements(1, 1)) { Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("所指定取代的字元相同，請重設！"); return false; }
 
             #endregion
 
