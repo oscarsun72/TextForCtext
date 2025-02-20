@@ -417,35 +417,35 @@ Function getWinMediaPath() As String
 End Function
 
 'https://analystcave.com/vba-status-bar-progress-bar-sounds-emails-alerts-vba/#:~:text=The%20VBA%20Status%20Bar%20is%20a%20panel%20that,Bar%20we%20need%20to%20Enable%20it%20using%20Application.DisplayStatusBar%3A
-Sub playSound(longShort As Single, Optional waittoPlay As Byte = 1) 'Public Declare Function sndPlaySound32 Lib "winmm.dll" Alias "sndPlaySoundA" (ByVal lpszSoundName As String, ByVal uFlags As Long) As Long
+Sub playSound(longShort As Single, Optional notWait2Play As Byte = 1) 'Public Declare Function sndPlaySound32 Lib "winmm.dll" Alias "sndPlaySoundA" (ByVal lpszSoundName As String, ByVal uFlags As Long) As Long
     '播放聲音、音效、音樂'https://blog.csdn.net/xuemanqianshan/article/details/113485233
     Dim mediaPath As String, path As New Paths
     mediaPath = getWinMediaPath()
     Select Case longShort
         Case 0.411
-            sndPlaySound32 path.CombineFullName(mediaPath, "Windows Default.wav"), waittoPlay
+            sndPlaySound32 path.CombineFullName(mediaPath, "Windows Default.wav"), notWait2Play
         Case 0.484 'press 按下按鈕時
-            sndPlaySound32 path.CombineFullName(mediaPath, "Windows Pop-up Blocked.wav"), waittoPlay
+            sndPlaySound32 path.CombineFullName(mediaPath, "Windows Pop-up Blocked.wav"), notWait2Play
         Case 0.96
-            sndPlaySound32 path.CombineFullName(mediaPath, "Windows Shutdown.wav"), waittoPlay
+            sndPlaySound32 path.CombineFullName(mediaPath, "Windows Shutdown.wav"), notWait2Play
         Case 1
-            sndPlaySound32 path.CombineFullName(mediaPath, "Chimes.wav"), waittoPlay '"C:\Windows\Media\Chimes.wav", waittoPlay '&H1 '&H0:等播完才執行之後的程式碼，&H1=1，一播放，不等播完，即執行接下來的程式碼
+            sndPlaySound32 path.CombineFullName(mediaPath, "Chimes.wav"), notWait2Play '"C:\Windows\Media\Chimes.wav", notWait2Play '&H1 '&H0:等播完才執行之後的程式碼，&H1=1，一播放，不等播完，即執行接下來的程式碼
         Case 1.294 'https://learn.microsoft.com/en-us/previous-versions/dd798676(v=vs.85)
-            sndPlaySound32 path.CombineFullName(mediaPath, "notify.wav"), waittoPlay
+            sndPlaySound32 path.CombineFullName(mediaPath, "notify.wav"), notWait2Play
         Case 1.469
-            sndPlaySound32 path.CombineFullName(mediaPath, "Windows Message Nudge.wav"), waittoPlay
+            sndPlaySound32 path.CombineFullName(mediaPath, "Windows Message Nudge.wav"), notWait2Play
         Case 1.921
-            sndPlaySound32 path.CombineFullName(mediaPath, "Windows Notify System Generic.wav"), waittoPlay '以 PotPlayer 播放即可於清單中檢視英文檔名
+            sndPlaySound32 path.CombineFullName(mediaPath, "Windows Notify System Generic.wav"), notWait2Play '以 PotPlayer 播放即可於清單中檢視英文檔名
         Case 2
-            sndPlaySound32 path.CombineFullName(mediaPath, "Windows Notify Calendar.wav"), waittoPlay
+            sndPlaySound32 path.CombineFullName(mediaPath, "Windows Notify Calendar.wav"), notWait2Play
         Case 3
-            sndPlaySound32 path.CombineFullName(mediaPath, "Alarm10.wav"), waittoPlay
+            sndPlaySound32 path.CombineFullName(mediaPath, "Alarm10.wav"), notWait2Play
         Case 4
-            sndPlaySound32 path.CombineFullName(mediaPath, "Alarm03.wav"), waittoPlay
+            sndPlaySound32 path.CombineFullName(mediaPath, "Alarm03.wav"), notWait2Play
         Case 7
-            sndPlaySound32 path.CombineFullName(mediaPath, "Ring10.wav"), waittoPlay
+            sndPlaySound32 path.CombineFullName(mediaPath, "Ring10.wav"), notWait2Play
         Case 12
-            sndPlaySound32 path.CombineFullName(mediaPath, "Ring05.wav"), waittoPlay
+            sndPlaySound32 path.CombineFullName(mediaPath, "Ring05.wav"), notWait2Play
     End Select
     Set path = Nothing
 End Sub

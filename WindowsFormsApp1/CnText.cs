@@ -1475,6 +1475,8 @@ namespace TextForCtext
         /// <returns>若失敗則傳回null</returns>
         public static string CorrectNoteBlankContent(string text)
         {
+            CnText.RemoveBooksPunctuation(ref text);
+
             if (text.IndexOf(" ") == -1) return null;
             int startIndex = text.IndexOf("{{");
             if (startIndex == -1) return null;

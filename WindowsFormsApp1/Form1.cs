@@ -3401,6 +3401,7 @@ namespace WindowsFormsApp1
                 {//Alt + b： 訂正註文中空白錯亂的文本。如「{{帝和霍王以下 句亡}}」訂正為「{{帝 霍王以下和句亡}}」，將半形空格與其前半對應的漢字對調。 20250219
                     e.Handled = true;
                     string x;
+                    if (textBox1.SelectedText == " ") textBox1.SelectionLength = 0;
                     if (textBox1.SelectionLength == 0)
                     {
                         Paragraph p = _document.Range(textBox1.SelectionStart, textBox1.SelectionStart).GetCurrentParagraph();
@@ -3411,7 +3412,7 @@ namespace WindowsFormsApp1
                             textBox1.Select(p.Start, p.Range.GetNextParagraph().End - p.Start);
                     }
                     if (textBox1.SelectedText.IndexOf("{{") == -1 || textBox1.SelectedText.IndexOf("}}") == -1 || textBox1.SelectedText.IndexOf(" ") == -1)
-                        return;
+                        return;                    
                     x = textBox1.SelectedText;
                     x = CnText.CorrectNoteBlankContent(x);
                     if (!x.IsNullOrEmpty() && textBox1.SelectedText != x)
@@ -6513,6 +6514,20 @@ namespace WindowsFormsApp1
                 selTxt = selTxt.Substring(1);
                 cntr++;
             }
+            else if (first == "{")//下一個字元是「　」或「􏿽」
+            {
+                int sSpaceBalank = 2;//2="{{".Length
+                if (selTxt.Substring(sSpaceBalank, 1) == "　")
+                {
+                    selTxt = selTxt.Substring(0, sSpaceBalank) + selTxt.Substring(sSpaceBalank + 1);
+                    cntr++;
+                }
+                if (selTxt.Substring(sSpaceBalank, 1) == "􏿽")
+                {
+                    selTxt = selTxt.Substring(0, sSpaceBalank) + selTxt.Substring(sSpaceBalank + 2);
+                    cntr++;
+                }
+            }
             else
             {
                 first = selTxt.Substring(0, 2);
@@ -6532,6 +6547,21 @@ namespace WindowsFormsApp1
                         + selTxt.Substring(newline + Environment.NewLine.Length + 1);
                     cntr++;
                 }
+                else if (first == "{")//下一個字元是「　」或「􏿽」
+                {
+                    int sSpaceBalank = newline + Environment.NewLine.Length + 2;//2="{{".Length
+                    if (selTxt.Substring(sSpaceBalank, 1) == "　")
+                    {
+                        selTxt = selTxt.Substring(0, sSpaceBalank) + selTxt.Substring(sSpaceBalank + 1);
+                        cntr++;
+                    }
+                    if (selTxt.Substring(sSpaceBalank, 1) == "􏿽")
+                    {
+                        selTxt = selTxt.Substring(0, sSpaceBalank) + selTxt.Substring(sSpaceBalank + 2);
+                        cntr++;
+                    }
+                }
+
                 else
                 {
                     if (newline + Environment.NewLine.Length + 2 > selTxt.Length) break;
@@ -12491,15 +12521,16 @@ namespace WindowsFormsApp1
 
         finish:
             this.BackColor = C;
-            show_nICo(ModifierKeys);
             //NormalLineParaLength = 0;
 
             if (runName == "中國哲學書電子化計劃.清除頁前的分段符號")
             {
-                TopMost = false;
+                //TopMost = false;
                 br.ChromeSetFocus();
                 br.BringToFront("chrome");
             }
+            else
+                show_nICo(ModifierKeys);
         }
 
         /// <summary>

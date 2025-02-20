@@ -1569,6 +1569,8 @@ Sub 國學大師_Kanripo_四庫全書本轉來()
             noteRng.SetRange noteRng.start, noteRng.Next.End
         Loop
         
+'        If InStr(noteRng, "壺") Then Stop 'just for test
+        
         Set aNext = noteRng.Characters(noteRng.Characters.Count).Next
         Set aPre = noteRng.Characters(1).Previous
         midNoteRngPos = Excel.RoundUpCustom(noteRng.Characters.Count / 2)
@@ -1646,7 +1648,11 @@ Sub 國學大師_Kanripo_四庫全書本轉來()
                                noteRng.text = noteRng.text & "　"
                                a.SetRange aSt, aEd
                             Loop
-                            a.text = insertX
+                            If a.Next = VBA.Chr(11) Then '如果斜線/後面即換行，則清除掉斜線/
+                                a.text = vbNullString
+                            Else
+                                a.text = insertX
+                            End If
                             Exit For
                         End If
                     End If
@@ -1686,6 +1692,11 @@ Sub 國學大師_Kanripo_四庫全書本轉來()
     '        .Execute , , , , , , True, wdFindContinue, , , wdReplaceAll
     '    End With
         '.Range.Cut
+        
+'        If VBA.InStr(.Range.text, "{{}}") Then
+'            SystemSetup.playSound 12, 0
+'        End If
+
         SystemSetup.ClipboardPutIn .Range.text
         DoEvents
         .Close wdDoNotSaveChanges
