@@ -1466,18 +1466,32 @@ namespace TextForCtext
         }
 
 
-        public static int indexOfStringInfo(string s, string x)
+        public static int IndexOf_StringInfo(string searchStr, string contextStr)
         {
             //StringInfo sInfo = new StringInfo(s);
             //StringInfo xInfo = new StringInfo(x);
-            TextElementEnumerator xTE = StringInfo.GetTextElementEnumerator(x);
+            TextElementEnumerator xTE = StringInfo.GetTextElementEnumerator(contextStr);
             int i = 0;
             while (xTE.MoveNext())
             {
-                string sComp = xTE.Current.ToString();
-                if (s == sComp)
+                string sCompare = xTE.Current.ToString(); bool found = true;
+                if (searchStr == sCompare)
                 {
                     return i;
+                }
+                else if (sCompare == "\r")
+                {
+
+                    for (int j = 0; j < searchStr.Length; j++)
+                    {
+                        if (searchStr[j] != contextStr[xTE.ElementIndex + j])
+                        {
+                            found = false; break;
+                        }
+                    }
+                    if (found)
+                        return i;
+
                 }
                 i++;
             }
@@ -1502,11 +1516,13 @@ namespace TextForCtext
             int endIndex = text.IndexOf("}}", startIndex);
             if (endIndex == -1) return null;
 
-            int split = text.IndexOf(Environment.NewLine);
-            if (split > -1)
+            int splitIndex = text.IndexOf(Environment.NewLine);
+            //用以下的式子取值則不必再有下面的：splitIndex = new StringInfo(text.Substring(0, splitIndex)).LengthInTextElements; 
+            //int splitIndex = IndexOf_StringInfo(Environment.NewLine, text);
+            if (splitIndex > -1)
             {
                 text = text.Replace(Environment.NewLine, string.Empty);
-                split = new StringInfo(text.Substring(0, split)).LengthInTextElements;
+                splitIndex = new StringInfo(text.Substring(0, splitIndex)).LengthInTextElements;
                 startIndex = text.IndexOf("{{");
                 endIndex = text.IndexOf("}}", startIndex);
             }
@@ -1516,14 +1532,19 @@ namespace TextForCtext
                 StringInfo segment = new StringInfo(text.Substring(startIndex + 2, endIndex - startIndex - 2));
                 string segmentStr = segment.String;
                 //int spaceIndex = segmentStr.IndexOf(' ');
-                int spaceIndex = indexOfStringInfo(" ", segmentStr);
+                int spaceIndex = IndexOf_StringInfo(" ", segmentStr);
 
                 //if (spaceIndex != -1 && spaceIndex > 0)
-                if (spaceIndex > 0)
+                if (spaceIndex > 0 )
                 {
+                    if (splitIndex > spaceIndex)
+                    {
+                        return text.Replace(" ", "􏿽");
+                    }
                     //int segmentLength = segmentStr.Length;
                     int segmentLength = segment.LengthInTextElements;
-                    int midIndex = segmentLength / 2;
+                    //int midIndex = splitIndex > -1 ? splitIndex : segmentLength / 2;
+                    int midIndex =  segmentLength / 2;
                     int correspondingIndex = spaceIndex < midIndex ? spaceIndex : spaceIndex - midIndex;
 
                     if (segmentLength % 2 == 0)  // Even length
@@ -1536,7 +1557,7 @@ namespace TextForCtext
                     }
 
                     if (correspondingIndex < 0) return null;
-                    if (correspondingIndex < spaceIndex)
+                    if (correspondingIndex > spaceIndex)
                     {
                         return text.Replace(" ", "􏿽");
                     }
@@ -1555,12 +1576,12 @@ namespace TextForCtext
                                 + segment.SubstringByTextElements(spaceIndex + 1, segmentLength - (spaceIndex + 1)))
                             + "}}"
                             + text.Substring(endIndex + 2);
-                    if (split > -1)
+                    if (splitIndex > -1)
                     {
 
-                        text = new StringInfo(text).SubstringByTextElements(0, split)
+                        text = new StringInfo(text).SubstringByTextElements(0, splitIndex)
                             + Environment.NewLine
-                            + new StringInfo(text).SubstringByTextElements(split);
+                            + new StringInfo(text).SubstringByTextElements(splitIndex);
                     }
 
                     //string result = text.Substring(0, startIndex) + "{{" + sb.ToString() + "}}" + text.Substring(endIndex + 2);
