@@ -1599,19 +1599,32 @@ Sub 國學大師_Kanripo_四庫全書本轉來()
 '        Else
 '            If aNext.text = VBA.Chr(11) Then
 
-                
-                Set a = aPre.Document.Range(aPre.start, aPre.End)
-                If aPre.start > 0 And aPre.text <> VBA.Chr(11) Then
-                    Do Until aPre.Previous = VBA.Chr(11)
-                        aPre.Move wdCharacter, -1
-                        If aPre.start <= 0 Then Exit Do
-                    Loop
-                End If
-                If a.start > aPre.start Then
-                    a.SetRange aPre.start, a.End
-                    aX = a.text '縮排的空格
-                Else
-                    aX = vbNullString
+'        If InStr(noteRng, "集題作江南意詩云南國多新意東行伺早天潮平") Then Stop
+
+                If Not aPre Is Nothing Then
+                    Set a = aPre.Document.Range(aPre.start, aPre.End)
+                    If aPre.start > 0 And aPre.text <> VBA.Chr(11) Then
+                        Do Until aPre.Previous = VBA.Chr(11)
+                            aPre.Move wdCharacter, -1
+                            If aPre.start <= 0 Then Exit Do
+                        Loop
+                    End If
+                    If a.start > aPre.start Then
+                        a.SetRange aPre.start, a.End
+                        aX = a.text '縮排的空格
+                    Else
+                        If a.text = aPre.text Then
+                            If aPre.text = "　" Then '有縮排
+                                aX = a.text
+                            Else
+                                aX = vbNullString
+'                                SystemSetup.playSound 12, 0
+'                                Stop
+                            End If
+                        Else
+                            aX = vbNullString
+                        End If
+                    End If
                 End If
                 
 '                Dim line As New LineChr11
@@ -1630,13 +1643,21 @@ Sub 國學大師_Kanripo_四庫全書本轉來()
                             insertX = vbNullString
                         End If
                     End If
-                Else
-                    If aX = vbNullString And noteRng.Previous(wdCharacter, 1) = VBA.Chr(11) And noteRng.Next(wdCharacter, 1) = VBA.Chr(11) Then
-                        insertX = VBA.Chr(11)
+                Else '沒有縮排
+                    If aX = vbNullString And Not noteRng.Previous(wdCharacter, 1) Is Nothing And Not noteRng.Next(wdCharacter, 1) Is Nothing Then
+                        If noteRng.Previous(wdCharacter, 1) = VBA.Chr(11) And noteRng.Next(wdCharacter, 1) = VBA.Chr(11) Then
+                            insertX = VBA.Chr(11)
+                        Else
+'                            SystemSetup.playSound 7, 0
+'                            Stop
+                            insertX = vbNullString
+                        End If
                     Else
                         insertX = vbNullString
                     End If
                 End If
+                
+                
                 For Each a In noteRng.Characters '找到/（夾注換行）的位置
                     If a = "/" And a.InlineShapes.Count = 0 Then
                         If a.font.Color = noteFont.Color And a.font.Size = noteFont.Size Then
@@ -1651,7 +1672,18 @@ Sub 國學大師_Kanripo_四庫全書本轉來()
                             If a.Next = VBA.Chr(11) Then '如果斜線/後面即換行，則清除掉斜線/
                                 a.text = vbNullString
                             Else
-                                a.text = insertX
+                                If noteRng.Next = VBA.Chr(11) And aX <> vbNullString And VBA.Replace(aX, "　", vbNullString) = vbNullString Then
+                                'If noteRng.Next = VBA.Chr(11) And VBA.Replace(aPre.text, "　", vbNullString) = vbNullString Then
+                                    If aPre.Previous = VBA.Chr(11) Then
+                                        noteRng.SetRange aPre.start, noteRng.End
+                                        a.text = "}}" & VBA.Replace(insertX, VBA.Chr(11), VBA.Chr(11) & "{{")
+                                    Else
+                                        SystemSetup.playSound 12, 0
+                                        Stop
+                                    End If
+                                Else
+                                    a.text = insertX
+                                End If
                             End If
                             Exit For
                         End If

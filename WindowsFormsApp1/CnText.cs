@@ -1465,6 +1465,25 @@ namespace TextForCtext
             }
         }
 
+
+        public static int indexOfStringInfo(string s, string x)
+        {
+            //StringInfo sInfo = new StringInfo(s);
+            //StringInfo xInfo = new StringInfo(x);
+            TextElementEnumerator xTE = StringInfo.GetTextElementEnumerator(x);
+            int i = 0;
+            while (xTE.MoveNext())
+            {
+                string sComp = xTE.Current.ToString();
+                if (s == sComp)
+                {
+                    return i;
+                }
+                i++;
+            }
+            return -1;
+        }
+
         /* 20250219 creedit_with_Copilot大菩薩 https://copilot.microsoft.com/shares/WUwdpzQFHY57cyPUyLE89
                    https://ctext.org/library.pl?if=gb&file=62381&page=7#%E4%BB%A5%E4%B8%8B%E5%92%8C%E5%8F%A5%E4%BA%A1 */
         /// <summary>
@@ -1496,11 +1515,14 @@ namespace TextForCtext
             {
                 StringInfo segment = new StringInfo(text.Substring(startIndex + 2, endIndex - startIndex - 2));
                 string segmentStr = segment.String;
-                int spaceIndex = segmentStr.IndexOf(' ');
+                //int spaceIndex = segmentStr.IndexOf(' ');
+                int spaceIndex = indexOfStringInfo(" ", segmentStr);
 
-                if (spaceIndex != -1 && spaceIndex > 0)
+                //if (spaceIndex != -1 && spaceIndex > 0)
+                if (spaceIndex > 0)
                 {
-                    int segmentLength = segmentStr.Length;
+                    //int segmentLength = segmentStr.Length;
+                    int segmentLength = segment.LengthInTextElements;
                     int midIndex = segmentLength / 2;
                     int correspondingIndex = spaceIndex < midIndex ? spaceIndex : spaceIndex - midIndex;
 
@@ -1514,16 +1536,25 @@ namespace TextForCtext
                     }
 
                     if (correspondingIndex < 0) return null;
+                    if (correspondingIndex < spaceIndex)
+                    {
+                        return text.Replace(" ", "􏿽");
+                    }
 
-                    StringInfo precedingChar = new StringInfo(segment.SubstringByTextElements(correspondingIndex, 1));
-                    StringBuilder sb = new StringBuilder(segmentStr);
-
+                    //StringInfo precedingChar = new StringInfo(segment.SubstringByTextElements(correspondingIndex, 1));
+                    //StringBuilder sb = new StringBuilder(segmentStr);
                     // Swap the space and the corresponding character in the first half
-                    sb[spaceIndex] = precedingChar.String[0];
-                    sb[correspondingIndex] = ' ';
+                    //sb[spaceIndex] = precedingChar.String[0];
+                    //sb[correspondingIndex] = ' ';
+                    //text = (text.Substring(0, startIndex) + "{{" + sb.ToString() + "}}" + text.Substring(endIndex + 2)).Replace(" ", "􏿽");
 
-                    text = (text.Substring(0, startIndex) + "{{" + sb.ToString() + "}}" + text.Substring(endIndex + 2)).Replace(" ", "􏿽");
-                    
+                    text = text.Substring(0, startIndex)
+                            + "{{" +
+                                (segment.SubstringByTextElements(0, correspondingIndex) + "􏿽" + segment.SubstringByTextElements(correspondingIndex + 1, spaceIndex - (correspondingIndex + 1))
+                                + segment.SubstringByTextElements(correspondingIndex, 1)
+                                + segment.SubstringByTextElements(spaceIndex + 1, segmentLength - (spaceIndex + 1)))
+                            + "}}"
+                            + text.Substring(endIndex + 2);
                     if (split > -1)
                     {
 

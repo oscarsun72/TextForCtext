@@ -601,7 +601,7 @@ namespace TextForCtext
         /// 取得[簡單修改模式](quick edit)超連結控制項（元件）
         /// </summary>
         /// <returns>傳回[簡單修改模式](quick edit)控制項</returns>
-        internal static IWebElement QuickeditIWebElement
+        internal static IWebElement QuickeditLinkIWebElement
         {
             get
             {
@@ -616,6 +616,26 @@ namespace TextForCtext
                 return iwe;
             }
         }
+
+        /// <summary>
+        /// 取得[簡單修改模式](quick edit)下的Save changes按鈕（元件）
+        /// </summary>
+        /// <returns>傳回[簡單修改模式](quick edit)下的Save changes按鈕控制項</returns>
+        internal static IWebElement SavechangesButton
+        {
+            get
+            {
+                IWebElement iwe = null;
+                //if (driver == null) driver = DriverNew();
+                if (!IsDriverInvalid())
+                {
+                    iwe = waitFindWebElementBySelector_ToBeClickable("#savechangesbutton");
+                }
+                return iwe;
+            }
+        }
+
+
         /// <summary>
         /// 取得CTP網頁中的「書名」（title）超連結控制項，含 href 屬性者
         /// </summary>
@@ -2295,7 +2315,7 @@ namespace TextForCtext
         {
             string url = "";
             if (driver == null) driver = DriverNew();
-            IWebElement ie = QuickeditIWebElement;
+            IWebElement ie = QuickeditLinkIWebElement;
             if (ie != null) url = ie.GetAttribute("href");
             return url;
             /*
@@ -3156,15 +3176,15 @@ namespace TextForCtext
         }
 
         /* 以下是我先寫來問chatGPT的，依其建議改如上
-internal static string getImageUrl() {
+        internal static string getImageUrl() {
 
-   Browser br = new Browser(System.Windows.Forms.Application.OpenForms[0] as Form1);
-   ChromeDriver driver = new ChromeDriver();
-   IWebElement scancont = driver.FindElement(By.Id("scancont"));
-   return scancont.GetAttribute("src");
+        Browser br = new Browser(System.Windows.Forms.Application.OpenForms[0] as Form1);
+        ChromeDriver driver = new ChromeDriver();
+        IWebElement scancont = driver.FindElement(By.Id("scancont"));
+        return scancont.GetAttribute("src");
 
-}
-*/
+        }
+        */
 
         #region Ctext 三種網頁模式判斷
         /// <summary>
@@ -3220,10 +3240,10 @@ internal static string getImageUrl() {
         /// 儲存chromedriver程序ID的陣列
         /// </summary>
         internal static List<int> chromedriversPID;// = new List<int>();
-        ///// <summary>
-        ///// 儲存chromedriver程序ID的陣列 chromedriversPID的下標值
-        ///// </summary>
-        //internal static int chromedriversPIDcntr = 0;
+                                                   ///// <summary>
+                                                   ///// 儲存chromedriver程序ID的陣列 chromedriversPID的下標值
+                                                   ///// </summary>
+                                                   //internal static int chromedriversPIDcntr = 0;
 
         /// <summary>
         /// 清除從這裡啟動的 chromedriver
@@ -3534,8 +3554,8 @@ internal static string getImageUrl() {
 
             //輸入：檔案名稱 //SendKeys.Send(downloadImgFullName);
             SendKeys.SendWait("+{Insert}~");//or "^v"
-            //SendKeys.SendWait("{ENTER}");
-            //Clipboard.Clear();
+                                            //SendKeys.SendWait("{ENTER}");
+                                            //Clipboard.Clear();
 
             //圖像載入訊息框
             iwe = waitFindWebElementBySelector_ToBeClickable("#img_create_message");
@@ -5007,7 +5027,7 @@ internal static string getImageUrl() {
 
                 //輸入：檔案名稱 //SendKeys.Send(downloadImgFullName);
                 SendKeys.Send("+{Insert}~");//or "^v"
-                //SendKeys.Send("{ENTER}");
+                                            //SendKeys.Send("{ENTER}");
                 Clipboard.Clear();
 
             ////图片预览
@@ -5914,7 +5934,7 @@ internal static string getImageUrl() {
                 }
                 else
                     gjCool = OCRSite_URL[OCRSiteTitle.GJcool]; //"https://gj.cool/try_ocr";
-                //Form1.playSound(Form1.soundLike.processing);
+                                                               //Form1.playSound(Form1.soundLike.processing);
                 if (_OCR_GJcool_AccountChanged) { _OCR_GJcool_AccountChanged = !_OCR_GJcool_AccountChanged; gjCoolPointLess150When = DateTime.Now; }
 
                 #region 方便提早取消作業（藉由關閉OCR視窗）
@@ -6082,8 +6102,8 @@ internal static string getImageUrl() {
             IWebElement iwe = null;
             try
             {//以備隨時被使用者關閉
-                //IWebElement iwe = waitFindWebElementBySelector_ToBeClickable("#compute-value");
-                //IWebElement iwe = driver.FindElement(By.CssSelector("#compute-value"));
+             //IWebElement iwe = waitFindWebElementBySelector_ToBeClickable("#compute-value");
+             //IWebElement iwe = driver.FindElement(By.CssSelector("#compute-value"));
                 WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(_chromeDriverServiceTimeSpan));
                 try
                 {
@@ -6211,7 +6231,7 @@ internal static string getImageUrl() {
                 }
                 else
                 {//點數足時：
-                    //此帳戶下的最後一次
+                 //此帳戶下的最後一次
                     if (points - pointCoin < pointCoin)
                         //Form1.playSound(Form1.soundLike.stop);
                         using (SoundPlayer sp = new SoundPlayer("C:\\Windows\\Media\\chord.wav")) { sp.Play(); }
@@ -6369,14 +6389,14 @@ internal static string getImageUrl() {
             //等待選取檔案對話框開啟
             Thread.Sleep(1600 + (
                 800 + Extend_the_wait_time_for_the_Open_Old_File_dialog_box_to_appear_Millisecond < 0 ? 0 : Extend_the_wait_time_for_the_Open_Old_File_dialog_box_to_appear_Millisecond));//最小值（須在重開機後或系統最小負載時）（連「開啟」舊檔之視窗也看不見，即可完成）
-            //Thread.Sleep(1200);
-            //Thread.Sleep(500);            
+                                                                                                                                                                                          //Thread.Sleep(1200);
+                                                                                                                                                                                          //Thread.Sleep(500);            
 
             //輸入：檔案名稱 //SendKeys.Send(downloadImgFullName);
             //retry:
             SendKeys.Send("+{Insert}~");//or "^v"
-            //SendKeys.Send("{ENTER}");
-            //Form1.playSound(Form1.soundLike.processing);
+                                        //SendKeys.Send("{ENTER}");
+                                        //Form1.playSound(Form1.soundLike.processing);
 
             if (_downloadResult)
                 Form1.playSound(Form1.soundLike.processing);
@@ -7217,7 +7237,7 @@ internal static string getImageUrl() {
                     Thread.Sleep(900);
 
                     string targetProcessName = "Proton VPN";//"ProtonVPN.exe"; // 目標程序的名稱
-                    // 查找具有指定程式名稱的窗體
+                                                            // 查找具有指定程式名稱的窗體
                     IntPtr targetWindowHandle = FindWindow(null, targetProcessName);
                     if (targetWindowHandle != IntPtr.Zero)
                     {
@@ -7268,7 +7288,7 @@ internal static string getImageUrl() {
             //MessageBox.Show("你的螢幕解析度是" + Size + "\n Width = " + Width + "\n Height = " + Height);
             //複製按鈕的位置：20231106
             int copyBtnPosX = Width / 1920 * 835, copyBtnPosY = Height / 1200 * 730;//835,730
-            //int copyBtnPosX = (Width / 1920) * 835, copyBtnPosY = (Height / 1200) * 711;//835,711
+                                                                                    //int copyBtnPosX = (Width / 1920) * 835, copyBtnPosY = (Height / 1200) * 711;//835,711
             if (Copybutton_GjcoolFastExperience_Location.IsEmpty) Copybutton_GjcoolFastExperience_Location = new Point(copyBtnPosX, copyBtnPosY);
             //int copyBtnPosX = Width * (835 / 1920), copyBtnPosY = Height * (730 / 1200);
 
@@ -7534,11 +7554,11 @@ internal static string getImageUrl() {
                     }
                     else if (info.StartsWith("system is busy"))
                     {//e = null; goto infos; 
-                        //string ip = GetPublicIpAddress(string.Empty);
-                        //Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("這個IP " + ip + " 不能用！");
-                        //Clipboard.SetText(ip);
-                        //ActiveForm1.Activate();
-                        //ActiveForm1.BringToFront();
+                     //string ip = GetPublicIpAddress(string.Empty);
+                     //Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("這個IP " + ip + " 不能用！");
+                     //Clipboard.SetText(ip);
+                     //ActiveForm1.Activate();
+                     //ActiveForm1.BringToFront();
                         StopOCR = true; return false;
                     }
                 }
@@ -9933,7 +9953,7 @@ internal static string getImageUrl() {
             }
 
             string editUrl;// = string.Empty;
-            //找到「編輯」超連結
+                           //找到「編輯」超連結
             IWebElement iwe = Edit_Linkbox;//waitFindWebElementBySelector_ToBeClickable("#content > div:nth-child(7) > div:nth-child(2) > a:nth-child(2)");
             if (iwe == null)
             {
@@ -11186,7 +11206,7 @@ internal static string getImageUrl() {
                 iwe = waitFindWebElementBySelector_ToBeClickable("#search_select");
                 if (DateTime.Now.Subtract(dt).TotalSeconds > 3 && iwe == null)
                 {
-                    if (ts != new TimeSpan()) driver.Manage().Timeouts().PageLoad = ts;
+                    if (ts != new TimeSpan() && IsDriverInvalid() == false) driver.Manage().Timeouts().PageLoad = ts;
                     return false;
                 }
             }
@@ -11237,7 +11257,7 @@ internal static string getImageUrl() {
             //iwe.SendKeys(OpenQA.Selenium.Keys.Shift + OpenQA.Selenium.Keys.Insert);
             //SetIWebElementValueProperty(iwe, string.Empty);//設定值無法讓「檢索」按鈕運作，必須用SendKeys才行，故得用到剪貼簿了（因為Selenium還不支援非BMP的字面）
             SetIWebElementValueProperty(iwe, searchTxt);//設定值無法讓「檢索」按鈕運作
-            //iwe.SendKeys(OpenQA.Selenium.Keys.Enter);//按下Enter鍵也無效
+                                                        //iwe.SendKeys(OpenQA.Selenium.Keys.Enter);//按下Enter鍵也無效
             iwe.SendKeys(OpenQA.Selenium.Keys.Space);//按下Enter鍵也無效
 
 
@@ -11409,8 +11429,8 @@ internal static string getImageUrl() {
             string url = string.Empty; bool result = false;
             string urlPrefixDomain = string.Empty;//= url.Substring(url.IndexOf("//") + "//".Length).Substring(0, url.IndexOf("/"));
             string urlPrefix;// = string.Empty; //url.Substring(0, url.IndexOf("//") + "//".Length);            
-            //http://skqs.guoxuedashi.net/wen_2885i/174671.html#002-1a
-            //https://www.kanripo.org/text/KR4h0141/221
+                             //http://skqs.guoxuedashi.net/wen_2885i/174671.html#002-1a
+                             //https://www.kanripo.org/text/KR4h0141/221
 
             for (int i = driver.WindowHandles.Count - 1; i > -1; i--)
             {
@@ -11418,7 +11438,7 @@ internal static string getImageUrl() {
                 url = driver.Url;
                 urlPrefixDomain = url.Substring(url.IndexOf("//") + "//".Length, url.IndexOf("/", url.IndexOf("//") + "//".Length) - (url.IndexOf("//") + "//".Length));
                 urlPrefix = url.Substring(0, url.IndexOf("//") + "//".Length);//http://skqs.guoxuedashi.net/wen_2885i/174671.html#002-1a //https://www.kanripo.org/text/KR4h0141/221
-                //if (driver.Url.StartsWith("https://www.kanripo.org/"))
+                                                                              //if (driver.Url.StartsWith("https://www.kanripo.org/"))
                 switch (urlPrefixDomain)
                 {
                     case "www.kanripo.org":

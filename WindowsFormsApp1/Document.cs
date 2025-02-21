@@ -73,7 +73,10 @@ namespace TextForCtext
             _textBox.Text = _textBox.Text.Insert(selectionStart, text);
             _textBox.SelectionStart = selectionStart + text.Length;
         }
-
+        /// <summary>
+        /// 取從文件（textBox1內容的段落集合）。20250220補充說明
+        /// </summary>
+        /// <returns>傳回null則有問題，須檢查！</returns>
         public List<Paragraph> GetParagraphs()
         {
             var paragraphs = new List<Paragraph>();
@@ -83,8 +86,18 @@ namespace TextForCtext
             {
                 start = this.Text.IndexOf(line, start);
 
+                if (start == -1)
+                {
+                    Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("有問題，請檢查！");
+                    return null;
+                }
+
                 paragraphs.Add(new Paragraph(line, this, start));
                 //paragraphs.Add(new Paragraph(line, ref _textBox, start));
+
+                //GitHub Copilot大菩薩漏掉了以下2個判斷暨設定式 20250220
+                start += (line.Length == 0 ? 1 : line.Length);
+                start = start > this.Text.Length ? this.Text.Length : start;
             }
 
             return paragraphs;
@@ -645,6 +658,8 @@ namespace TextForCtext
             //_document = new Document(ref textBox);
             _start = start;
             _end = end;
+            //Text = _document.Text.Substring(start, end - start);
+
             rangeParagraphs = Paragraphs;
             //_textBox = textBox;
         }

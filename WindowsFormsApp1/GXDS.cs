@@ -233,7 +233,8 @@ namespace TextForCtext
                     xForStandardize = sb.ToString() + "*欽定四庫全書<p>" + xForStandardize.Substring(isSKQS + "《欽定四庫全書》".Length);
                 }
 
-            }
+
+            }//if (isSKQS > -1)
 
             xForStandardize = xForStandardize.Replace("○", "◯");
             xForStandardize = xForStandardize.Replace("\r\n　\r\n　\r\n", "\r\n|\r\n|\r\n");
