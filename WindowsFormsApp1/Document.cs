@@ -82,8 +82,9 @@ namespace TextForCtext
             var paragraphs = new List<Paragraph>();
             var lines = _textBox.Text.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
             int start = 0;
-            foreach (var line in lines)
+            for (int i = 0; i < lines.Length; i++)
             {
+                var line = lines[i];
                 start = this.Text.IndexOf(line, start);
 
                 if (start == -1)
@@ -92,8 +93,7 @@ namespace TextForCtext
                     return null;
                 }
 
-                paragraphs.Add(new Paragraph(line, this, start));
-                //paragraphs.Add(new Paragraph(line, ref _textBox, start));
+                paragraphs.Add(new Paragraph(line, this, start, i));
 
                 //GitHub Copilot大菩薩漏掉了以下2個判斷暨設定式 20250220
                 start += (line.Length == 0 ? 1 : line.Length);
@@ -473,17 +473,17 @@ namespace TextForCtext
         private readonly int _start_beforeUpdate;
         private int _end;
         private Range _range;
-        //private TextBox _textBox=Form1.Instance.Controls["textBox1"] as TextBox;
+        private int _index; // 新增的屬性
 
-        public Paragraph(string text, Document document, int start)
-        //public Paragraph(string text, ref TextBox textBox, int start)
+        public Paragraph(string text, Document document, int start, int index)
         {
-            _text = text; _text_beforeUpdate = _text;
+            _text = text;
+            _text_beforeUpdate = _text;
             _document = document;
-            //_document = new Document(ref textBox);
-            //_start = CalculateStart();
-            _start = start; _start_beforeUpdate = _start;
+            _start = start;
+            _start_beforeUpdate = _start;
             _end = _start + _text.Length;
+            _index = index; // 初始化屬性
         }
 
         public string Text
@@ -494,7 +494,6 @@ namespace TextForCtext
                 _text = value;
                 _end = _start + _text.Length;
                 UpdateDocument();
-
             }
         }
 
@@ -502,9 +501,7 @@ namespace TextForCtext
         {
             get => _text_beforeUpdate;
         }
-        /// <summary>
-        /// 取得段落的起始位置
-        /// </summary>
+
         public int Start
         {
             get => _start;
@@ -515,14 +512,12 @@ namespace TextForCtext
                 UpdateDocument();
             }
         }
-        /// 取得段落的編輯前的起始位置
+
         public int StartBeforeUpdate
         {
             get => _start_beforeUpdate;
         }
-        /// <summary>
-        /// 取得段落的結束位置
-        /// </summary>
+
         public int End
         {
             get => _end;
@@ -533,74 +528,33 @@ namespace TextForCtext
                 UpdateDocument();
             }
         }
-        /// <summary>
-        /// 取得段落編輯前的結束位置
-        /// </summary>
+
         public int EndBeforeUpdate
         {
             get => _start_beforeUpdate + _text_beforeUpdate.Length;
         }
-        private int CalculateStart()
+
+        public int Index // 新增的屬性
         {
-            var paragraphs = _document.GetParagraphs();
-            int charCount = 0;
-
-            foreach (var paragraph in paragraphs)
-            {
-                if (paragraph == this)
-                {
-                    return charCount;
-                }
-                charCount += paragraph.Text.Length + Environment.NewLine.Length;
-            }
-
-            return charCount;
+            get => _index;
+            set => _index = value;
         }
 
+        
         private void UpdateDocument()
         {
-            /*
             var paragraphs = _document.GetParagraphs();
-            int index = paragraphs.IndexOf(this);
-            var lines = _document.Text.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
-            lines[index] = _text;
-            _document.Text = string.Join(Environment.NewLine, lines);
-            */
+            int index = _index; // 使用 Index 屬性
 
-            var paragraphs = _document.GetParagraphs();
-            //var paragraphs = _document.GetParagraphs(_document);
-
-            int index = paragraphs.IndexOf(this);
-            //int index = paragraphs.IndexOf(_document.GetCurrentParagraph());
-
-            if (index == -1)
+            if (index < 0 || index >= paragraphs.Count)
             {
-                //return;                
-                // 當前的 Paragraph 對象不在 paragraphs 列表中，處理這種情況
-                // 可以選擇拋出異常或記錄錯誤信息
-                //throw new InvalidOperationException("當前的 Paragraph 對象不在 paragraphs 列表中。");
-                for (int i = 0; i < paragraphs.Count; i++)
-                {
-                    if (paragraphs[i].Start == StartBeforeUpdate && paragraphs[i].End == EndBeforeUpdate)
-                    {
-                        index = i;
-                        break;
-                    }
-                }
-                if (index == -1)
-                {
-                    if (_document.CurrentParagraphIndex == 0)
-                    {
-                        Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("找不到要更新段落"
-                            + Environment.NewLine + Environment.NewLine
-                            + this.Text + Environment.NewLine + Environment.NewLine
-                            + this._text_beforeUpdate);
-
-                    }
-
-                    index = _document.CurrentParagraphIndex;
-                }
+                Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("找不到要更新段落"
+                    + Environment.NewLine + Environment.NewLine
+                    + this.Text + Environment.NewLine + Environment.NewLine
+                    + this._text_beforeUpdate);
+                return;
             }
+
             var lines = _document.Text.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
             if (index < lines.Length)
             {
@@ -609,11 +563,8 @@ namespace TextForCtext
             }
             else
             {
-                // 處理 index 超出 lines 範圍的情況
                 throw new IndexOutOfRangeException("索引超出 lines 陣列的界限。");
             }
-
-
         }
 
         public Range Range
@@ -622,16 +573,12 @@ namespace TextForCtext
             {
                 if (_range == null)
                 {
-                    //return new Range(_document, _start, _end);
                     _range = new Range(_document, _start, _end);
                     return _range;
-                    //_range = new Range(ref _textBox, _start, _end);
                 }
                 return _range;
             }
         }
-
-
     }
 
 
@@ -773,7 +720,7 @@ namespace TextForCtext
         {
             get
             {
-                if (rangeParagraphs == null)
+                if (rangeParagraphs == null||rangeParagraphs.Count==0)
                 {
                     rangeParagraphs = new List<Paragraph>();
                     var paragraphs = _document.GetParagraphs();

@@ -1466,7 +1466,7 @@ namespace TextForCtext
         }
 
 
-        public static int IndexOf_StringInfo(string searchStr, string contextStr)
+        public static int IndexOf_StringInfo(string searchStr, string contextStr, int start = 0)
         {
             //StringInfo sInfo = new StringInfo(s);
             //StringInfo xInfo = new StringInfo(x);
@@ -1474,24 +1474,27 @@ namespace TextForCtext
             int i = 0;
             while (xTE.MoveNext())
             {
-                string sCompare = xTE.Current.ToString(); bool found = true;
-                if (searchStr == sCompare)
+                if (i > start)
                 {
-                    return i;
-                }
-                else if (sCompare == "\r")
-                {
-
-                    for (int j = 0; j < searchStr.Length; j++)
+                    string sCompare = xTE.Current.ToString(); bool found = true;
+                    if (searchStr == sCompare)
                     {
-                        if (searchStr[j] != contextStr[xTE.ElementIndex + j])
-                        {
-                            found = false; break;
-                        }
-                    }
-                    if (found)
                         return i;
+                    }
+                    else if (sCompare == "\r")
+                    {
 
+                        for (int j = 0; j < searchStr.Length; j++)
+                        {
+                            if (searchStr[j] != contextStr[xTE.ElementIndex + j])
+                            {
+                                found = false; break;
+                            }
+                        }
+                        if (found)
+                            return i;
+
+                    }
                 }
                 i++;
             }
@@ -1535,7 +1538,7 @@ namespace TextForCtext
                 int spaceIndex = IndexOf_StringInfo(" ", segmentStr);
 
                 //if (spaceIndex != -1 && spaceIndex > 0)
-                if (spaceIndex > 0 )
+                if (spaceIndex > 0)
                 {
                     if (splitIndex > spaceIndex)
                     {
@@ -1544,7 +1547,8 @@ namespace TextForCtext
                     //int segmentLength = segmentStr.Length;
                     int segmentLength = segment.LengthInTextElements;
                     //int midIndex = splitIndex > -1 ? splitIndex : segmentLength / 2;
-                    int midIndex =  segmentLength / 2;
+                    int midIndex = segmentLength / 2;
+
                     int correspondingIndex = spaceIndex < midIndex ? spaceIndex : spaceIndex - midIndex;
 
                     if (segmentLength % 2 == 0)  // Even length
