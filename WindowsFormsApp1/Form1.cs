@@ -5959,7 +5959,13 @@ namespace WindowsFormsApp1
                     //else s = i;
                 }
 
-                if (_leadingSpacesRegex.Match(GetLineTxt(x, s)).Value.Length != titleLeadingSpaceCount) return;
+                //若前置空格數不相符則不作標記（若原始文本排版錯誤則會漏標，只能人工校正了）20250223
+                if (_leadingSpacesRegex.Match(GetLineTxt(x, s)).Value.Length != titleLeadingSpaceCount)return;
+
+                string titleFirstParaText;// = pTitleFirstPara.Text;//標題首行/段的string
+                titleFirstParaText = GetLineTxt(x, s);
+                if (titleFirstParaText.IndexOf(asterisks) > -1) return;//如果已有星號標記則斥回
+
 
                 #region 取得標題範圍（多行標題下的範圍）
 
@@ -5967,9 +5973,7 @@ namespace WindowsFormsApp1
                 //Paragraph pTitleFirstPara = _document.Range(s, s).GetCurrentParagraph();
                 //Paragraph pNextTitleFirstPara = pTitleFirstPara.Range.GetNextParagraph();//標題首行/段的下一行/段
                 int pTitleFirstParaEnd;//= pTitleFirstPara.End;
-                string titleFirstParaText;// = pTitleFirstPara.Text;//標題首行/段的string
                 string pNextTitleFirstParaText;// = pNextTitleFirstPara.Text;
-                titleFirstParaText = GetLineTxt(x, s);
                 titleFirstParaText = GetLineTxt(x, s, out int lineS, out int lineL);
                 pTitleFirstParaEnd = lineS + lineL;
                 pNextTitleFirstParaText = GetLineTxt(x, pTitleFirstParaEnd + Environment.NewLine.Length);
@@ -5993,7 +5997,7 @@ namespace WindowsFormsApp1
                             //標題首行長度若小於常規就不再繼續找下去
 
                             //singleLineTitle:
-                            if (countWordsLenPerLinePara(titleFirstParaText) < lines_perPage)//titleFistLineStr) < lines_perPage)
+                            if (countWordsLenPerLinePara(titleFirstParaText) < wordsPerLinePara)
                             {
                                 textBox1.Select(s, pTitleFirstParaEnd - s);//選取標題文字內容,準備將標題格式，置換成標題語法格式
 
@@ -6003,7 +6007,7 @@ namespace WindowsFormsApp1
 
                                 //下一行/段也是短於正常行長者，則當屬組詩之類的標題了 20250221
                                 //且其前縮排之空格當較正題為多 20250222
-                                if (countWordsLenPerLinePara(pNextTitleFirstParaText) < lines_perPage &&
+                                if (countWordsLenPerLinePara(pNextTitleFirstParaText) < wordsPerLinePara &&
                                     _leadingSpacesRegex.Match(titleFirstParaText).Value.Length <= _leadingSpacesRegex.Match(pNextTitleFirstParaText).Value.Length)
                                 {
 
