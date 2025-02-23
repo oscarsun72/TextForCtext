@@ -856,6 +856,21 @@ namespace TextForCtext
             }
         }
         /// <summary>
+        /// 取得某書書頁碼的上限值
+        /// 若出錯則傳回0
+        /// </summary>
+        /// <returns></returns>
+        internal static int pageUBound
+        {
+            get
+            {
+                IWebElement iwe = Div_generic_IncludePathAndEndPageNum;
+                if (iwe == null) return 0;
+                string input = iwe.GetAttribute("textContent");//"線上圖書館 -> 松煙小錄 -> 松煙小錄三  /117 ";
+                return CnText.ExtractNumberAfterSlash(input);
+            }
+        }
+        /// <summary>
         /// 取得CTP網頁中的「文本框」（文字框）（圖文對照的文框）控制項
         /// </summary>
         internal static IWebElement Div_generic_TextBoxFrame
@@ -907,6 +922,23 @@ namespace TextForCtext
         }
 
 
+        /// <summary>
+        /// 取得如欽定四庫全書的版本連結元件；若失敗則回傳null
+        /// </summary>
+        internal static IWebElement Version_LinkBox
+        {
+            get
+            {
+                IWebElement version_LinkBox;
+                if (Form1.IsValidUrl＿keyDownCtrlAdd(ActiveForm1.textBox3Text))
+                {
+                    version_LinkBox = waitFindWebElementBySelector_ToBeClickable("#content > div:nth-child(8) > div:nth-child(3) > a:nth-child(1)");
+                }
+                else
+                    version_LinkBox = null;
+                return version_LinkBox;
+            }
+        }
         /// <summary>
         /// 取得[簡單修改模式]的文字方塊（編輯區的文字方塊）；若失敗則回傳null        
         /// Get the textbox of [Quick edit] 
@@ -11414,7 +11446,7 @@ namespace TextForCtext
         /// </summary>
         /// <param name="url">要翻卷的初始網址</param>
         /// <returns>失敗則傳回fasle</returns>
-        internal static bool SikuQuanshu()
+        internal static bool SikuQuanshu_SKQSContextCopyReading()
         {
             if (IsDriverInvalid())
             {
@@ -11423,8 +11455,26 @@ namespace TextForCtext
                 else
                     return false;
             }
-            else
-                LastValidWindow = driver.CurrentWindowHandle;
+            bool found=false;
+            if (driver.WindowHandles.Contains(driver.CurrentWindowHandle))
+            {
+                if (!Form1.IsValidUrl＿keyDownCtrlAdd(driver.CurrentWindowHandle))
+                {
+
+                    for (int i = driver.WindowHandles.Count - 1; i > -1; i--)
+                    {
+                        driver.SwitchTo().Window(driver.WindowHandles[i]);
+                        if (Form1.IsValidUrl＿keyDownCtrlAdd(driver.Url)){ found = true; break;}
+                    }
+                }
+
+            }
+            if (!found)
+            {
+                openNewTabWindow();
+                driver.Navigate().GoToUrl(Form1.InstanceForm1.textBox3Text);
+            }
+            LastValidWindow = driver.CurrentWindowHandle;
 
             string url = string.Empty; bool result = false;
             string urlPrefixDomain = string.Empty;//= url.Substring(url.IndexOf("//") + "//".Length).Substring(0, url.IndexOf("/"));
@@ -11548,8 +11598,9 @@ namespace TextForCtext
             ChromeSetFocus();
             Clipboard.Clear();
             SendKeys.Send("^c");
+            //SendKeys.SendWait("^c");
             //Thread.Sleep(900);
-            Thread.Sleep(450);
+            Thread.Sleep(150);
             DateTime dt = DateTime.Now;
             try
             {

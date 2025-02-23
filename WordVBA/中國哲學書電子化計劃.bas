@@ -1599,17 +1599,17 @@ Sub 國學大師_Kanripo_四庫全書本轉來()
 '        Else
 '            If aNext.text = VBA.Chr(11) Then
 
-'        If InStr(noteRng, "集題作江南意詩云南國多新意東行伺早天潮平") Then Stop
-
+'        If InStr(noteRng, "有答") Then Stop
+                '判斷有無縮排
                 If Not aPre Is Nothing Then
-                    Set a = aPre.Document.Range(aPre.start, aPre.End)
+                    Set a = aPre.Document.Range(aPre.start, aPre.End) '記下aPre原來的位置
                     If aPre.start > 0 And aPre.text <> VBA.Chr(11) Then
                         Do Until aPre.Previous = VBA.Chr(11)
                             aPre.Move wdCharacter, -1
                             If aPre.start <= 0 Then Exit Do
                         Loop
                     End If
-                    If a.start > aPre.start Then
+                    If a.start > aPre.start Then 'a =aPre原來的位置
                         a.SetRange aPre.start, a.End
                         aX = a.text '縮排的空格
                     Else
@@ -1629,7 +1629,7 @@ Sub 國學大師_Kanripo_四庫全書本轉來()
                 
 '                Dim line As New LineChr11
                 
-                '如果有縮排
+                '如果有縮排('aX=縮排的空格)
                 If aX <> vbNullString And VBA.Replace(aX, "　", vbNullString) = vbNullString Then
                     If noteRng.Next Is Nothing Then
 '                    If line.LineRange(noteRng).start = noteRng.start And line.LineRange(noteRng).End = noteRng.End Then
@@ -1637,7 +1637,10 @@ Sub 國學大師_Kanripo_四庫全書本轉來()
                     ElseIf noteRng.Next = VBA.Chr(11) Then
                         insertX = VBA.Chr(11) & aX '縮排的空格
                     Else
-                        If VBA.InStr(midNoteRng.text, "/") And noteRng.Next.text <> VBA.Chr(11) And noteRng.Next.font.Size > 11.5 And noteRng.Next.text = "　" Then '若是夾注(通常是標題下的夾注，如 https://ctext.org/library.pl?if=en&file=55677&page=6） 20250205
+                        If VBA.InStr(midNoteRng.text, "/") _
+                            And noteRng.Next.font.Size > 11.5 _
+                            And (noteRng.Next.text <> VBA.Chr(11) Or noteRng.Next.text = "　") Then  '若是夾注(通常是標題下的夾注（則後面有空格），如 https://ctext.org/library.pl?if=en&file=55677&page=6） 20250205
+                            'noteRng.Next.text <> VBA.Chr(11):後面還有文字，則為夾注 20250223補
                             insertX = aX '補空格以縮排
                         Else
                             insertX = vbNullString

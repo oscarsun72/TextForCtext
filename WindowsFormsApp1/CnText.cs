@@ -1501,6 +1501,45 @@ namespace TextForCtext
             return -1;
         }
 
+
+        /// <summary>
+        /// 取得給定字串「/」後方的數字
+        /// 20240727 Copilot大菩薩：C# 字串處理：取出「/」後的數字
+        /// </summary>
+        /// <param name="input">所給定的字串</param>
+        /// <returns></returns>
+        /// <exception cref="Exception">出錯時顯示</exception>
+        public static int ExtractNumberAfterSlash(string input)
+        {
+            // 使用正則表達式找到「/」後的數字
+            Match match = Regex.Match(input, @"/(\d+)");
+            if (match.Success)
+            {
+                // 將數字部分轉換為 int 型別
+                return int.Parse(match.Groups[1].Value);
+            }
+            else
+            {
+                throw new Exception("未找到數字");
+            }
+        }
+
+        /// <summary>
+        /// 取得一個含有t個字串的字串
+        /// </summary>
+        /// <param name="t">想要的字串的數量</param>
+        /// <param name="str">想要重複的字串</param>
+        /// <returns>含有t個字串的字串</returns>
+        public static string GetStrings(int t,string str)
+        {
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < t; i++)
+            {
+                sb.Append(str);
+            }
+            return sb.ToString();
+        }
+
         /* 20250219 creedit_with_Copilot大菩薩 https://copilot.microsoft.com/shares/WUwdpzQFHY57cyPUyLE89
                    https://ctext.org/library.pl?if=gb&file=62381&page=7#%E4%BB%A5%E4%B8%8B%E5%92%8C%E5%8F%A5%E4%BA%A1 */
         /// <summary>
@@ -1511,7 +1550,23 @@ namespace TextForCtext
         /// <returns>若失敗則傳回null</returns>
         public static string CorrectNoteBlankContent(string text)
         {
+            int splitIndex = text.IndexOf(Environment.NewLine);
+            #region 規範文本
             CnText.RemoveBooksPunctuation(ref text);
+
+            if (splitIndex > -1)
+            {
+                //選取整個行/段
+                Form1.InstanceForm1.TextBox1_SelectionStart =
+                    Form1.InstanceForm1._document.Range(Form1.InstanceForm1.TextBox1_SelectionStart, Form1.InstanceForm1.TextBox1_SelectionStart).GetCurrentParagraph().Start;
+                Form1.InstanceForm1.TextBox1_SelectionLength =
+                    Form1.InstanceForm1._document.Range(Form1.InstanceForm1.TextBox1_SelectionStart + Form1.InstanceForm1.TextBox1_SelectionLength, Form1.InstanceForm1.TextBox1_SelectionStart + Form1.InstanceForm1.TextBox1_SelectionLength).GetCurrentParagraph().End
+                     - Form1.InstanceForm1._document.Range(Form1.InstanceForm1.TextBox1_SelectionStart, Form1.InstanceForm1.TextBox1_SelectionStart).GetCurrentParagraph().Start;
+
+                text = Form1.InstanceForm1._document.Text.Substring(Form1.InstanceForm1.TextBox1_SelectionStart, Form1.InstanceForm1.TextBox1_SelectionLength);
+                text = text.Replace("}}" + Environment.NewLine + "{{", Environment.NewLine);
+            }
+            #endregion
 
             if (text.IndexOf(" ") == -1) return null;
             int startIndex = text.IndexOf("{{");
@@ -1519,7 +1574,7 @@ namespace TextForCtext
             int endIndex = text.IndexOf("}}", startIndex);
             if (endIndex == -1) return null;
 
-            int splitIndex = text.IndexOf(Environment.NewLine);
+            splitIndex = text.IndexOf(Environment.NewLine);
             //用以下的式子取值則不必再有下面的：splitIndex = new StringInfo(text.Substring(0, splitIndex)).LengthInTextElements; 
             //int splitIndex = IndexOf_StringInfo(Environment.NewLine, text);
             if (splitIndex > -1)
