@@ -1599,7 +1599,10 @@ Sub 國學大師_Kanripo_四庫全書本轉來()
 '        Else
 '            If aNext.text = VBA.Chr(11) Then
 
-'        If InStr(noteRng, "有答") Then Stop
+
+        If InStr(noteRng, "云") Then Stop
+
+
                 '判斷有無縮排
                 If Not aPre Is Nothing Then
                     Set a = aPre.Document.Range(aPre.start, aPre.End) '記下aPre原來的位置
@@ -1635,7 +1638,7 @@ Sub 國學大師_Kanripo_四庫全書本轉來()
 '                    If line.LineRange(noteRng).start = noteRng.start And line.LineRange(noteRng).End = noteRng.End Then
                         insertX = VBA.Chr(11) & aX
                     ElseIf noteRng.Next = VBA.Chr(11) Then
-                        insertX = VBA.Chr(11) & aX '縮排的空格
+                        insertX = aX  '縮排的空格
                     Else
                         If VBA.InStr(midNoteRng.text, "/") _
                             And noteRng.Next.font.Size > 11.5 _
@@ -1672,8 +1675,14 @@ Sub 國學大師_Kanripo_四庫全書本轉來()
                                noteRng.text = noteRng.text & "　"
                                a.SetRange aSt, aEd
                             Loop
-                            If a.Next = VBA.Chr(11) Then '如果斜線/後面即換行，則清除掉斜線/
-                                a.text = vbNullString
+                            If a.Next = VBA.Chr(11) Then '如果斜線/後面即換行
+                                If aX = vbnullstrig Then '若無縮排，則清除掉斜線/
+                                    a.text = vbNullString
+                                Else '有縮排時
+                                    aSt = noteRng.start: aEd = noteRng.End
+                                    a.text = insertX
+                                    noteRng.SetRange aSt, aEd + VBA.Len(insertX) - 1 '「/」（ a = "/" ）拿掉了故減1
+                                End If
                             Else
                                 If noteRng.Next = VBA.Chr(11) And aX <> vbNullString And VBA.Replace(aX, "　", vbNullString) = vbNullString Then
                                 'If noteRng.Next = VBA.Chr(11) And VBA.Replace(aPre.text, "　", vbNullString) = vbNullString Then
