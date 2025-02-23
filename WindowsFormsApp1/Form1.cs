@@ -3733,7 +3733,7 @@ namespace WindowsFormsApp1
                     e.Handled = true;
                     if (e.KeyCode == Keys.P) { keysParagraphSymbol(false); return; }
                     if (textBox1.SelectedText != "" && textBox1.SelectedText.Replace("　", "") == "")
-                    {
+                    {//如果選取的是空格
                         autoMarkTitles(); return;
                         //string sps = textBox1.SelectedText;
                         //if (sps.Replace("　", string.Empty) != string.Empty) return;
@@ -3882,7 +3882,7 @@ namespace WindowsFormsApp1
 
                 if (e.KeyCode == Keys.F7)
                 {// Alt + F7 : 每行縮排一格後將其末誤標之<p>
-                    e.Handled = true; keysSpacePreParagraphs_indent_ClearEnd＿P_Mark(); return;
+                    e.Handled = true; indent_ClearEnd＿P_Mark(); return;
                 }
 
                 if (e.KeyCode == Keys.Add || e.KeyCode == Keys.Oemplus)//|| e.KeyCode == Keys.Subtract || e.KeyCode == Keys.NumPad5)
@@ -4050,7 +4050,7 @@ namespace WindowsFormsApp1
                     e.Handled = true;
                     if (e.KeyCode == Keys.Pause)
                     {
-                        keysSpacePreParagraphs_indent_ClearEnd＿P_Mark(); return;
+                        indent_ClearEnd＿P_Mark(); return;
                     }
                     if (textBox1.SelectionLength == 0)
                         Clipboard.SetText(textBox1.Text);
@@ -4122,7 +4122,7 @@ namespace WindowsFormsApp1
                 if (e.KeyCode == Keys.F7)
                 {//F7 ： 每行/段前空一格
                     e.Handled = true;
-                    keysSpacePreParagraphs_indent();
+                    indent();
                     return;
                 }
                 if (e.KeyCode == Keys.F8)
@@ -5887,6 +5887,7 @@ namespace WindowsFormsApp1
             }
             //textBox1.Text = textBox1.Text.Replace("<p>" + Environment.NewLine + sps + "*", Environment.NewLine + sps);
             stopUndoRec = false;
+            titleLeadingSpaceCount = 0;//歸零
             textBox1.Select(ss, 0); textBox1.ScrollToCaret();
         }
         /// <summary>
@@ -5959,12 +5960,22 @@ namespace WindowsFormsApp1
                     //else s = i;
                 }
 
+                //以上s為標題內容起始位置，即空格末後位置
+
                 //若前置空格數不相符則不作標記（若原始文本排版錯誤則會漏標，只能人工校正了）20250223
-                if (_leadingSpacesRegex.Match(GetLineTxt(x, s)).Value.Length != titleLeadingSpaceCount)return;
+                if (_leadingSpacesRegex.Match(GetLineTxt(x, s)).Value.Length != titleLeadingSpaceCount) return;
 
                 string titleFirstParaText;// = pTitleFirstPara.Text;//標題首行/段的string
                 titleFirstParaText = GetLineTxt(x, s);
                 if (titleFirstParaText.IndexOf(asterisks) > -1) return;//如果已有星號標記則斥回
+                //檢查前一行/段的內容
+                int preLineEnd = x.LastIndexOf(Environment.NewLine, s);
+                if (preLineEnd > -1)
+                {
+                    string preLineText = GetLineTxt(x, preLineEnd);
+                    if (preLineText.IndexOf("*") > -1 && countWordsLenPerLinePara(preLineText) >= wordsPerLinePara)
+                        return;//如果前一段已有星號，且其長度又與正常長度相同或更長（則此行當是標題太長而折行）則駁回
+                }
 
 
                 #region 取得標題範圍（多行標題下的範圍）
@@ -6949,7 +6960,7 @@ namespace WindowsFormsApp1
         /// <summary>
         /// 按下F7：每行/段縮排
         /// </summary>
-        private void keysSpacePreParagraphs_indent()
+        private void indent()
         {
             List<Paragraph> paragraphs;
             int s = textBox1.SelectionStart, l = textBox1.SelectionLength, offset = 0; string x = textBox1.Text;
@@ -6975,9 +6986,9 @@ namespace WindowsFormsApp1
                     int endIndex = text.IndexOf("}}");
                     if (endIndex != -1
                         //須不是獨立注文才執行
-                        || (text.IndexOf("}}", endIndex + 1) == -1 && endIndex != text.Length - "}}".Length)
-                        || (text.IndexOf("}}", endIndex + 1) == -1 && endIndex != text.Length - "}}<p>".Length)
-                        || (text.IndexOf("}}", endIndex + 1) == -1 && endIndex != text.Length - "}}。<p>".Length))
+                        && (text.IndexOf("}}", endIndex + 1) == -1 && endIndex != text.Length - "}}".Length)
+                        && (text.IndexOf("}}<p>") > -1 && text.IndexOf("}}", endIndex + 1) == -1 && endIndex != text.Length - "}}<p>".Length)
+                        && (text.IndexOf("}}。<p>") > -1 && text.IndexOf("}}", endIndex + 1) == -1 && endIndex != text.Length - "}}。<p>".Length))
 
                     {
                         noteIndent(text, endIndex, paragraph, 0);
@@ -6995,8 +7006,8 @@ namespace WindowsFormsApp1
                         (openIndex == -1 || (openIndex > -1 && openIndex > endIndex))
                         //須不是獨立注文才執行
                         && (text.IndexOf("}}", endIndex + 1) == -1 && endIndex != text.Length - "}}".Length)//「}}」不會是該行、該段唯一的「}}」且在末尾。
-                        && (text.IndexOf("}}", endIndex + 1) == -1 && endIndex != text.Length - "}}<p>".Length)
-                        && (text.IndexOf("}}", endIndex + 1) == -1 && endIndex != text.Length - "}}。<p>".Length))
+                        && (text.IndexOf("}}<p>") > -1 && text.IndexOf("}}", endIndex + 1) == -1 && endIndex != text.Length - "}}<p>".Length)
+                        && (text.IndexOf("}}。<p>") > -1 && text.IndexOf("}}", endIndex + 1) == -1 && endIndex != text.Length - "}}。<p>".Length))
                     {//開頭是注文，但沒有「{{」
                         noteIndent(text, endIndex, paragraph, openIndex);
                     }
@@ -7134,7 +7145,7 @@ namespace WindowsFormsApp1
         /// <summary>
         /// Alt + F7 (先改 Pause/Break）: 每行縮排一格後、清除其末誤標之<p>
         /// </summary>
-        private void keysSpacePreParagraphs_indent_ClearEnd＿P_Mark()
+        private void indent_ClearEnd＿P_Mark()
         {
             int l = textBox1.SelectionLength; int s = textBox1.SelectionStart; dontHide = true;
             if (l == 0)
@@ -7680,6 +7691,7 @@ namespace WindowsFormsApp1
         }
         /// <summary>
         /// 計算單行/段的字數
+        /// 含空格空白；而標點符號、校按、標題標記、段落標記、分行標記均不計（即只計算原書內文之長度）
         /// 待除錯，可以此頁內容檢測（當已標記時再執行此函式會誤改動 20240905 https://ctext.org/library.pl?if=en&file=36096&page=99&editwiki=644293#editor
         /// </summary>
         /// <param name="xLinePara">要計算的行/段的文字字串</param>
@@ -7694,13 +7706,23 @@ namespace WindowsFormsApp1
              * …在C#中，您可以使用正則表達式來滿足您的需求。以下是一個範例程式碼，它將會找到「{{{」和「}}}」之間的所有文字並將其移除：…
              * …在這個程式碼中，我們使用了 Regex.Replace 方法來替換匹配到的部分。正則表達式 {{{.*?}}} 會匹配到「{{{」和「}}}」之間的所有文字（包含「{{{」和「}}}」）。請注意，我們在 .*? 中使用了 ? 來實現非貪婪匹配，這樣可以確保當有多組「{{{」和「}}}」時能夠正確地匹配。…
              */
+            string pattern;
             if (xLinePara.IndexOf("{{{") > -1 || xLinePara.IndexOf("}}}") > -1)
             {
-                string pattern = "{{{.*?}}}";
+                pattern = "{{{.*?}}}";
                 xLinePara = Regex.Replace(xLinePara, pattern, string.Empty);
             }
             #endregion
 
+            #region 語法標記不記（如插圖、專名標誌等語法）
+            //待實作,碰到再說
+            #endregion
+
+            #region 標題標記、段落標記、分行標記均不計（即只計算原書內文之長度）
+
+            #endregion
+            pattern = "[*<p>|]";
+            xLinePara = Regex.Replace(xLinePara, pattern, string.Empty);
             #region 標點符號不計
             //StringInfo seInfo = new StringInfo(se);
             foreach (var item in PunctuationsNum)
@@ -7708,6 +7730,8 @@ namespace WindowsFormsApp1
                 xLinePara = xLinePara.Replace(item.ToString(), "");
             }
             #endregion
+
+
 
             int openCurlybracketsPostion = xLinePara.IndexOf("{{"), closeCurlybracketsPostion = xLinePara.IndexOf("}}"),
                 s = 0, countResult = 0;//, e = 0

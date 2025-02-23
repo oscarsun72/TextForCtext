@@ -1600,7 +1600,7 @@ Sub 國學大師_Kanripo_四庫全書本轉來()
 '            If aNext.text = VBA.Chr(11) Then
 
 
-        If InStr(noteRng, "云") Then Stop
+'        If InStr(noteRng, "一作") Then Stop
 
 
                 '判斷有無縮排
@@ -1634,11 +1634,11 @@ Sub 國學大師_Kanripo_四庫全書本轉來()
                 
                 '如果有縮排('aX=縮排的空格)
                 If aX <> vbNullString And VBA.Replace(aX, "　", vbNullString) = vbNullString Then
-                    If noteRng.Next Is Nothing Then
+                    If noteRng.Next Is Nothing Then '怕在文件最末端，與下一年判斷並不重複
 '                    If line.LineRange(noteRng).start = noteRng.start And line.LineRange(noteRng).End = noteRng.End Then
                         insertX = VBA.Chr(11) & aX
-                    ElseIf noteRng.Next = VBA.Chr(11) Then
-                        insertX = aX  '縮排的空格
+                    ElseIf noteRng.Next = VBA.Chr(11) Then 'ax=縮排的空格 ●●●●●●●●●●●●●
+                        insertX = VBA.Chr(11) & aX  'VBA.Chr(11) 後面 a.text = "}}" & VBA.Replace(insertX, VBA.Chr(11), VBA.Chr(11) & "{{") 要參照
                     Else
                         If VBA.InStr(midNoteRng.text, "/") _
                             And noteRng.Next.font.Size > 11.5 _
@@ -1679,8 +1679,7 @@ Sub 國學大師_Kanripo_四庫全書本轉來()
                                 If aX = vbnullstrig Then '若無縮排，則清除掉斜線/
                                     a.text = vbNullString
                                 Else '有縮排時
-                                    aSt = noteRng.start: aEd = noteRng.End
-                                    a.text = insertX
+                                    a.text = insertX '●●●●●●●●●●●●●再觀察
                                     noteRng.SetRange aSt, aEd + VBA.Len(insertX) - 1 '「/」（ a = "/" ）拿掉了故減1
                                 End If
                             Else
