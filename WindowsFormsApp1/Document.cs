@@ -26,24 +26,34 @@ namespace TextForCtext
     /// <summary>
     /// 表示文檔（對應於 textBox1）
     /// </summary>
-    public class Document
+    public class Document : IDisposable
     {
         private TextBox _textBox;
         private int currentParagraphIndex;
+        private List<Paragraph> _cachedParagraphs; // 緩存段落集合
+
         public Document(ref TextBox textBox)
         {
             _textBox = textBox;
+            _cachedParagraphs = null;
         }
         public Document(ref string context)
         {
+            //if (context.IndexOf("\v") > -1) context.Replace("\v", Environment.NewLine);
             _textBox = new TextBox();
             Text = context;
+            _cachedParagraphs = null;
         }
 
         public string Text
         {
             get => _textBox.Text;
-            set => _textBox.Text = value;
+            set
+            {
+                _textBox.Text = value;
+                _cachedParagraphs = null; // 文本改變時清空緩存
+                //_textBox.Refresh(); // 更新文本框
+            }
         }
 
         public int SelectionStart
@@ -64,6 +74,7 @@ namespace TextForCtext
             int selectionStart = _textBox.SelectionStart;
             _textBox.Text = _textBox.Text.Insert(selectionStart, text);
             _textBox.SelectionStart = selectionStart + text.Length;
+            _cachedParagraphs = null; // 文本改變時清空緩存
         }
 
         public void ReplaceText(string text)
@@ -72,36 +83,65 @@ namespace TextForCtext
             _textBox.Text = _textBox.Text.Remove(selectionStart, _textBox.SelectionLength);
             _textBox.Text = _textBox.Text.Insert(selectionStart, text);
             _textBox.SelectionStart = selectionStart + text.Length;
+            _cachedParagraphs = null; // 文本改變時清空緩存
         }
         /// <summary>
         /// 取從文件（textBox1內容的段落集合）。20250220補充說明
         /// </summary>
         /// <returns>傳回null則有問題，須檢查！</returns>
-        public List<Paragraph> GetParagraphs()
+        public List<Paragraph> GetParagraphs(bool newOne = false)
         {
-            var paragraphs = new List<Paragraph>();
-            var lines = _textBox.Text.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
-            int start = 0;
-            for (int i = 0; i < lines.Length; i++)
+            // 檢查並更新緩存
+            if (_cachedParagraphs == null || newOne || !IsTextEqualToCachedParagraphs())
             {
-                var line = lines[i];
-                start = this.Text.IndexOf(line, start);
-
-                if (start == -1)
+                var paragraphs = new List<Paragraph>();
+                var lines = _textBox.Text.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
+                int start = 0;
+                for (int i = 0; i < lines.Length; i++)
                 {
-                    Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("有問題，請檢查！");
-                    return null;
+                    var line = lines[i];
+                    start = this.Text.IndexOf(line, start);
+
+                    if (start == -1)
+                    {
+                        Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("有問題，請檢查！");
+                        return null;
+                    }
+
+                    paragraphs.Add(new Paragraph(line, this, start, i));
+
+                    start += (line.Length == 0 ? 1 : line.Length);
+                    start = start > this.Text.Length ? this.Text.Length : start;
                 }
 
-                paragraphs.Add(new Paragraph(line, this, start, i));
-
-                //GitHub Copilot大菩薩漏掉了以下2個判斷暨設定式 20250220
-                start += (line.Length == 0 ? 1 : line.Length);
-                start = start > this.Text.Length ? this.Text.Length : start;
+                _cachedParagraphs = paragraphs; // 更新緩存
             }
 
-            return paragraphs;
+            return _cachedParagraphs;
         }
+
+        private bool IsTextEqualToCachedParagraphs()
+        {
+            var lines = _textBox.Text.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
+
+            if (lines.Length != _cachedParagraphs.Count)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < lines.Length; i++)
+            {
+                if (lines[i].Length != _cachedParagraphs[i].Text.Length
+                    || !lines[i].Equals(_cachedParagraphs[i].Text))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+
         //public List<Paragraph> GetParagraphs(Document document)
         //{
         //    var paragraphs = new List<Paragraph>();
@@ -454,7 +494,49 @@ namespace TextForCtext
             //return new Range(ref _textBox, start, end);
         }
 
+        public void Dispose()
+        {
+            _textBox?.Dispose();
+        }
+        /// <summary>
+        /// 取得指定索引前後的段落集合
+        /// </summary>
+        /// <param name="index">指定的索引</param>
+        /// <param name="range">前後段落的範圍</param>
+        /// <returns>前後段落的集合</returns>
+        public List<Paragraph> GetSurroundingParagraphs(int index, int range = 3)
+        {
+            // 檢查並更新緩存
+            if (_cachedParagraphs == null || _textBox.Text != string.Join(Environment.NewLine, _cachedParagraphs.Select(p => p.Text)))
+            {
+                _cachedParagraphs = GetParagraphs();
+            }
 
+            var paragraphs = _cachedParagraphs;
+            if (paragraphs == null || index < 0 || index >= paragraphs.Count)
+            {
+                return null;
+            }
+
+            int start = Math.Max(0, index - range);
+            int end = Math.Min(paragraphs.Count - 1, index + range);
+
+            return paragraphs.GetRange(start, end - start + 1);
+        }
+
+        /// <summary>
+        /// 檢查 textBox1 的內容是否有異，並重新取得段落集合
+        /// </summary>
+        /// <returns>是否重新取得段落集合</returns>
+        public bool CheckAndRefreshParagraphs()
+        {
+            if (_cachedParagraphs == null || _textBox.Text != string.Join(Environment.NewLine, _cachedParagraphs.Select(p => p.Text)))
+            {
+                _cachedParagraphs = GetParagraphs();
+                return true;
+            }
+            return false;
+        }
 
 
 
@@ -497,10 +579,8 @@ namespace TextForCtext
             }
         }
 
-        public string TextBeforeUpdate
-        {
-            get => _text_beforeUpdate;
-        }
+        public string TextBeforeUpdate => _text_beforeUpdate;
+
 
         public int Start
         {
@@ -513,10 +593,8 @@ namespace TextForCtext
             }
         }
 
-        public int StartBeforeUpdate
-        {
-            get => _start_beforeUpdate;
-        }
+        public int StartBeforeUpdate => _start_beforeUpdate;
+
 
         public int End
         {
@@ -529,10 +607,11 @@ namespace TextForCtext
             }
         }
 
-        public int EndBeforeUpdate
-        {
-            get => _start_beforeUpdate + _text_beforeUpdate.Length;
-        }
+        //public int EndBeforeUpdate
+        //{
+        //    get => _start_beforeUpdate + _text_beforeUpdate.Length;
+        //}
+        public int EndBeforeUpdate => _start_beforeUpdate + _text_beforeUpdate.Length;
 
         public int Index // 新增的屬性
         {
@@ -540,7 +619,7 @@ namespace TextForCtext
             set => _index = value;
         }
 
-        
+
         private void UpdateDocument()
         {
             var paragraphs = _document.GetParagraphs();
@@ -619,7 +698,8 @@ namespace TextForCtext
                 var text = _document.Text;
                 _document.Text = text.Substring(0, _start) + value + text.Substring(_end);
                 _end = _start + value.Length;
-                UpdateDocument();//GitHub　Copilot大菩薩：我們在設置 Text 屬性時調用 UpdateDocument 方法，以確保文檔內容的更新。
+                UpdateDocument();
+                //GitHub　Copilot大菩薩：我們在設置 Text 屬性時調用 UpdateDocument 方法，以確保文檔內容的更新。
             }
         }
         /// <summary>
@@ -720,7 +800,7 @@ namespace TextForCtext
         {
             get
             {
-                if (rangeParagraphs == null||rangeParagraphs.Count==0)
+                if (rangeParagraphs == null || rangeParagraphs.Count == 0)
                 {
                     rangeParagraphs = new List<Paragraph>();
                     var paragraphs = _document.GetParagraphs();

@@ -1363,7 +1363,7 @@ namespace TextForCtext
                                                      //cDrv = new ChromeDriver(@"x:\chromedriver.exe", options);
                                                      //上述加入書籤並不管用！！！20230104//解法已詳下chromeOptions()中
 
-                bool isChromeRunning = IsChromeRunning;//作為是否在前已開啟Chrome瀏覽器時，關閉新多開的 20241002
+                //bool isChromeRunning;= IsChromeRunning;//作為是否在前已開啟Chrome瀏覽器時，關閉新多開的 20241002
 
             tryagain:
                 //////////////ChromeDriverService driverService;
@@ -1711,7 +1711,7 @@ namespace TextForCtext
             killchromedriverFromHere();
             if (Form1.browsrOPMode != Form1.BrowserOPMode.seleniumNew)
                 Form1.browsrOPMode = Form1.BrowserOPMode.seleniumNew;
-            return DriverNew() == null ? false : true;
+            return DriverNew() != null;
         }
         private static void setupChromeDriverService()
         {

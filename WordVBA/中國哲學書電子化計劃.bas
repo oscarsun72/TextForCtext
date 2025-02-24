@@ -1600,7 +1600,7 @@ Sub 國學大師_Kanripo_四庫全書本轉來()
 '            If aNext.text = VBA.Chr(11) Then
 
 
-'        If InStr(noteRng, "一作") Then Stop
+'        If InStr(noteRng, "適/") Then Stop
 
 
                 '判斷有無縮排
@@ -1676,7 +1676,7 @@ Sub 國學大師_Kanripo_四庫全書本轉來()
                                a.SetRange aSt, aEd
                             Loop
                             If a.Next = VBA.Chr(11) Then '如果斜線/後面即換行
-                                If aX = vbnullstrig Then '若無縮排，則清除掉斜線/
+                                If aX = vbnullstrig Or VBA.Replace(aX, "　", vbnullstrig) <> vbnullstrig Then '若無縮排，則清除掉斜線/
                                     a.text = vbNullString
                                 Else '有縮排時
                                     a.text = insertX '●●●●●●●●●●●●●再觀察
@@ -1709,7 +1709,17 @@ Sub 國學大師_Kanripo_四庫全書本轉來()
                     noteRng.Collapse wdCollapseEnd
                 Else
 '                   midNoteRng.text = VBA.Replace(midNoteRng, "/", vbNullString, 1, 1)
-                    noteRng.text = "{{" & noteRng.text & "}}"
+                    If aX <> nullstring And VBA.Replace(aX, "　", vbNullString) = vbNullString Then '●●●●●●●●●●●●
+                        '如果有縮排，則擴展noteRng至前後全形空格的兩端
+                        noteRng.MoveStartWhile "　", -50
+                        noteRng.MoveEndWhile "　", 50
+                        noteRng.InsertBefore "{{"
+                        noteRng.InsertAfter "}}"
+                        rng.SetRange rng.End, rng.End
+                    Else
+                        noteRng.text = "{{" & noteRng.text & "}}"
+                    End If
+                    
                 End If
 '            Else
 '                midNoteRng.text = VBA.Replace(midNoteRng, "/", vbNullString, 1, 1)
