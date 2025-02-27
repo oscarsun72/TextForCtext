@@ -221,7 +221,7 @@ Sub 清除頁前的分段符號()
     DoEvents
     playSound 1, 0
     DoEvents
-    pastetoEditBox "將星號前的分段符號移置前段之末 & 清除頁前的分段符號"
+    pastetoEditBox "將星號前的分段符號移置前段之末 & 清除頁前的分段符號{據Kanripo.org或《國學大師》所藏本輔以末學於GitHub開源自製免費免安裝之TextForCtext排版對應錄入。討論區與末學YouTube頻道有實境演示影片可資參考。感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主}" '"將星號前的分段符號移置前段之末 & 清除頁前的分段符號"
     d.Close wdDoNotSaveChanges
 
 End Sub
@@ -298,7 +298,7 @@ Sub 將每頁間的分段符號清除()
     Loop
 End Sub
 
-Private Sub pastetoEditBox(Description_from_ClipBoard As String)
+Private Sub pastetoEditBox(Optional Description_from_ClipBoard As String = vbNullString)
     word.Application.windowState = wdWindowStateMinimize
     'MsgBox "ready to paste", vbInformation
     AppActivateDefaultBrowser
@@ -311,11 +311,13 @@ Private Sub pastetoEditBox(Description_from_ClipBoard As String)
     DoEvents:
     SendKeys "{tab}"
     AppActivateDefaultBrowser
-    'SystemSetup.ClipboardPutIn Description_from_ClipBoard
-    DoEvents
-    'SendKeys "^v"
-    SendKeys Description_from_ClipBoard
-    SendKeys "{tab 2}~"
+    If Description_from_ClipBoard <> vbNullString Then
+        SystemSetup.ClipboardPutIn Description_from_ClipBoard
+        DoEvents
+        SendKeys "^v"
+'        SendKeys Description_from_ClipBoard
+    End If
+    SendKeys "{tab 2}~" '按下 Submit changes
 End Sub
 
 Sub 金石錄_四部叢刊_維基文庫本() '《金石錄》格式者皆適用（即注文單行，而換行前的不單行） 20221110
@@ -1676,7 +1678,7 @@ Sub 國學大師_Kanripo_四庫全書本轉來()
                                a.SetRange aSt, aEd
                             Loop
                             If a.Next = VBA.Chr(11) Then '如果斜線/後面即換行
-                                If aX = vbnullstrig Or VBA.Replace(aX, "　", vbnullstrig) <> vbnullstrig Then '若無縮排，則清除掉斜線/
+                                If aX = vbNullString Or VBA.Replace(aX, "　", vbNullString) <> vbNullString Then '若無縮排，則清除掉斜線/
                                     a.text = vbNullString
                                 Else '有縮排時
                                     a.text = insertX '●●●●●●●●●●●●●再觀察
@@ -1709,7 +1711,7 @@ Sub 國學大師_Kanripo_四庫全書本轉來()
                     noteRng.Collapse wdCollapseEnd
                 Else
 '                   midNoteRng.text = VBA.Replace(midNoteRng, "/", vbNullString, 1, 1)
-                    If aX <> nullstring And VBA.Replace(aX, "　", vbNullString) = vbNullString Then '●●●●●●●●●●●●
+                    If aX <> vbNullString And VBA.Replace(aX, "　", vbNullString) = vbNullString Then '●●●●●●●●●●●●
                         '如果有縮排，則擴展noteRng至前後全形空格的兩端
                         noteRng.MoveStartWhile "　", -50
                         noteRng.MoveEndWhile "　", 50

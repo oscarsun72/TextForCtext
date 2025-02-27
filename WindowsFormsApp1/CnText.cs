@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using WindowsFormsApp1;
 using System.Windows.Forms;
 using System.Diagnostics;
+using static System.Net.Mime.MediaTypeNames;
 //using OpenQA.Selenium.DevTools.V125.Runtime;
 //using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 //using static System.Net.Mime.MediaTypeNames;
@@ -1530,7 +1531,7 @@ namespace TextForCtext
         /// <param name="t">想要的字串的數量</param>
         /// <param name="str">想要重複的字串</param>
         /// <returns>含有t個字串的字串</returns>
-        public static string GetStrings(int t,string str)
+        public static string GetStrings(int t, string str)
         {
             StringBuilder sb = new StringBuilder();
             for (int i = 0; i < t; i++)
@@ -1539,6 +1540,43 @@ namespace TextForCtext
             }
             return sb.ToString();
         }
+        /// <summary>
+        /// 將缺失字元後的空格轉換為空白
+        /// </summary>
+        /// <param name="x">要檢查與轉換的文本</param>
+        /// <returns>傳回轉換後的文本</returns>
+        public static string ConvertSpace2BlankAfterMissingCharacter(string x)
+        {
+            List<string> missingcharacters = new List<string>() { "{{缺}}", "{{闕}}" };
+            foreach (var item in missingcharacters)
+            {
+                int missIndex = x.IndexOf(item);
+                if (missIndex > -1)
+                {
+                    int spasceIndex = missIndex + item.Length;
+                    while (spasceIndex + 1 < x.Length && x.Substring(spasceIndex, 1) == "　") //1="　".Length
+                    {
+                        x = x.Substring(0, spasceIndex) + "􏿽" + x.Substring(spasceIndex + 1);
+                        spasceIndex += 2; //2 = "􏿽".Length;
+                    }
+                }
+            }
+            return x;
+        }
+        /// <summary>
+        /// 在文本更動後，取得更動前原來位置的對應值。
+        /// 在文本經過如去除標點符號的處理後，在新文本找到的定位，如何回溯至原文本的對應位置時用
+        /// </summary>
+        /// <param name="position_afterupdate">更動文本後的位置</param>
+        /// <param name="textOrigin">更動前的文本</param>
+        /// <param name="text">更動後的文本</param>
+        /// <returns></returns>
+        public static int ResetPositionAfterTextUpdateed(int position_afterupdate, string textOrigin, string text)
+        {
+            if (text == textOrigin) return position_afterupdate;
+            else
+                return position_afterupdate += (textOrigin.Substring(0, textOrigin.IndexOf(" ", textOrigin.IndexOf(" ") + 1)).Length - text.Substring(0, position_afterupdate).Length);
+        }
 
         /* 20250219 creedit_with_Copilot大菩薩 https://copilot.microsoft.com/shares/WUwdpzQFHY57cyPUyLE89
                    https://ctext.org/library.pl?if=gb&file=62381&page=7#%E4%BB%A5%E4%B8%8B%E5%92%8C%E5%8F%A5%E4%BA%A1 */
@@ -1546,12 +1584,14 @@ namespace TextForCtext
         /// 訂正註文中空白錯亂的文本
         /// 如「{{帝和霍王以下 句亡}}」訂正為「{{帝 霍王以下和句亡}}」，將半形空格與其前半對應的漢字對調。
         /// </summary>
-        /// <param name="text">要訂正的文本</param>
-        /// <returns>若失敗則傳回null</returns>
-        public static string CorrectNoteBlankContent(string text)
+        /// <param name="text">要訂正的文本</param>        
+        /// <param name="spacePosition">傳回半形空格所在位置；若範圍內多於1個空格，則將其選位置指出</param>
+        /// <returns>若失敗或無須校正（如沒半形空格）則傳回null</returns>
+        public static string CorrectNoteBlankContent(string text, out int spacePosition)
         {
-            int splitIndex = text.IndexOf(Environment.NewLine);
+            int splitIndex = text.IndexOf(Environment.NewLine); spacePosition = -1;
             #region 規範文本
+            string textOrigin = text;
             CnText.RemoveBooksPunctuation(ref text);
 
             if (splitIndex > -1)
@@ -1585,68 +1625,91 @@ namespace TextForCtext
                 endIndex = text.IndexOf("}}", startIndex);
             }
 
+
             if (startIndex != -1 && endIndex != -1)
             {
-                StringInfo segment = new StringInfo(text.Substring(startIndex + 2, endIndex - startIndex - 2));
-                string segmentStr = segment.String;
-                //int spaceIndex = segmentStr.IndexOf(' ');
-                int spaceIndex = IndexOf_StringInfo(" ", segmentStr);
 
-                //if (spaceIndex != -1 && spaceIndex > 0)
-                if (spaceIndex > 0)
+                string pattern = "{{.*?}}";//Copilot大菩薩： 如果要使用貪婪匹配，只需要把正則表達式中的「?」去掉即可。原本的模式 ＝.*?＝ 中，「?」使得匹配變成非貪婪模式，而去掉它後，模式 ＝.*＝ 就變成了貪婪匹配。 20250224
+                MatchCollection matchCollection = Regex.Matches(text, pattern);
+                foreach (Match item in matchCollection)
                 {
-                    if (splitIndex > spaceIndex)
+                    //傳回半形空格所在位置；若範圍內多於1個空格，則將其選位置指出
+                    string x = item.Value;
+                    spacePosition = x.IndexOf(" ");
+                    spacePosition = x.IndexOf(" ", spacePosition + 1);
+                    if (spacePosition > -1)
                     {
-                        return text.Replace(" ", "􏿽");
-                    }
-                    //int segmentLength = segmentStr.Length;
-                    int segmentLength = segment.LengthInTextElements;
-                    //int midIndex = splitIndex > -1 ? splitIndex : segmentLength / 2;
-                    int midIndex = segmentLength / 2;
-
-                    int correspondingIndex = spaceIndex < midIndex ? spaceIndex : spaceIndex - midIndex;
-
-                    if (segmentLength % 2 == 0)  // Even length
-                    {
-                        correspondingIndex = spaceIndex - midIndex;
-                    }
-                    else  // Odd length
-                    {
-                        correspondingIndex = spaceIndex - (midIndex + 1);
+                        spacePosition += (item.Index);
+                        //spacePosition += (textOrigin.Substring(0, textOrigin.IndexOf(" ", textOrigin.IndexOf(" ") + 1)).Length - text.Substring(0, spacePosition).Length);
+                        spacePosition = ResetPositionAfterTextUpdateed(spacePosition, textOrigin, text);
+                        return null;
                     }
 
-                    if (correspondingIndex < 0) return null;
-                    if (correspondingIndex > spaceIndex)
+                    startIndex = item.Index;
+                    endIndex = item.Index + item.Length - "}}".Length;
+
+
+                    StringInfo segment = new StringInfo(text.Substring(startIndex + 2, endIndex - startIndex - 2));
+                    string segmentStr = segment.String;
+                    //int spaceIndex = segmentStr.IndexOf(' ');
+                    int spaceIndex = IndexOf_StringInfo(" ", segmentStr);
+
+                    //if (spaceIndex != -1 && spaceIndex > 0)
+                    if (spaceIndex > 0)
                     {
-                        return text.Replace(" ", "􏿽");
+                        if (splitIndex > spaceIndex)
+                        {
+                            return text.Replace(" ", "􏿽");
+                        }
+                        //int segmentLength = segmentStr.Length;
+                        int segmentLength = segment.LengthInTextElements;
+                        //int midIndex = splitIndex > -1 ? splitIndex : segmentLength / 2;
+                        int midIndex = segmentLength / 2;
+
+                        int correspondingIndex = spaceIndex < midIndex ? spaceIndex : spaceIndex - midIndex;
+
+                        if (segmentLength % 2 == 0)  // Even length
+                        {
+                            correspondingIndex = spaceIndex - midIndex;
+                        }
+                        else  // Odd length
+                        {
+                            correspondingIndex = spaceIndex - (midIndex + 1);
+                        }
+
+                        if (correspondingIndex < 0) return null;
+                        if (correspondingIndex > spaceIndex)
+                        {
+                            return text.Replace(" ", "􏿽");
+                        }
+
+                        //StringInfo precedingChar = new StringInfo(segment.SubstringByTextElements(correspondingIndex, 1));
+                        //StringBuilder sb = new StringBuilder(segmentStr);
+                        // Swap the space and the corresponding character in the first half
+                        //sb[spaceIndex] = precedingChar.String[0];
+                        //sb[correspondingIndex] = ' ';
+                        //text = (text.Substring(0, startIndex) + "{{" + sb.ToString() + "}}" + text.Substring(endIndex + 2)).Replace(" ", "􏿽");
+
+                        text = text.Substring(0, startIndex)
+                                + "{{" +
+                                    (segment.SubstringByTextElements(0, correspondingIndex) + "􏿽" + segment.SubstringByTextElements(correspondingIndex + 1, spaceIndex - (correspondingIndex + 1))
+                                    + segment.SubstringByTextElements(correspondingIndex, 1)
+                                    + segment.SubstringByTextElements(spaceIndex + 1, segmentLength - (spaceIndex + 1)))
+                                + "}}"
+                                + text.Substring(endIndex + 2);
+                        if (splitIndex > -1)
+                        {
+
+                            text = new StringInfo(text).SubstringByTextElements(0, splitIndex)
+                                + Environment.NewLine
+                                + new StringInfo(text).SubstringByTextElements(splitIndex);
+                        }
+
+                        //string result = text.Substring(0, startIndex) + "{{" + sb.ToString() + "}}" + text.Substring(endIndex + 2);
+                        //return result.Replace(" ", "􏿽");
+                        //return (text.Substring(0, startIndex) + "{{" + sb.ToString() + "}}" + text.Substring(endIndex + 2)).Replace(" ", "􏿽");
+                        return text;
                     }
-
-                    //StringInfo precedingChar = new StringInfo(segment.SubstringByTextElements(correspondingIndex, 1));
-                    //StringBuilder sb = new StringBuilder(segmentStr);
-                    // Swap the space and the corresponding character in the first half
-                    //sb[spaceIndex] = precedingChar.String[0];
-                    //sb[correspondingIndex] = ' ';
-                    //text = (text.Substring(0, startIndex) + "{{" + sb.ToString() + "}}" + text.Substring(endIndex + 2)).Replace(" ", "􏿽");
-
-                    text = text.Substring(0, startIndex)
-                            + "{{" +
-                                (segment.SubstringByTextElements(0, correspondingIndex) + "􏿽" + segment.SubstringByTextElements(correspondingIndex + 1, spaceIndex - (correspondingIndex + 1))
-                                + segment.SubstringByTextElements(correspondingIndex, 1)
-                                + segment.SubstringByTextElements(spaceIndex + 1, segmentLength - (spaceIndex + 1)))
-                            + "}}"
-                            + text.Substring(endIndex + 2);
-                    if (splitIndex > -1)
-                    {
-
-                        text = new StringInfo(text).SubstringByTextElements(0, splitIndex)
-                            + Environment.NewLine
-                            + new StringInfo(text).SubstringByTextElements(splitIndex);
-                    }
-
-                    //string result = text.Substring(0, startIndex) + "{{" + sb.ToString() + "}}" + text.Substring(endIndex + 2);
-                    //return result.Replace(" ", "􏿽");
-                    //return (text.Substring(0, startIndex) + "{{" + sb.ToString() + "}}" + text.Substring(endIndex + 2)).Replace(" ", "􏿽");
-                    return text;
                 }
             }
             return null;

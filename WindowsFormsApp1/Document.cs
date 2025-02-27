@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Remoting.Contexts;
 using System.Text;
 using System.Windows.Forms;
 using WindowsFormsApp1;
@@ -31,28 +32,41 @@ namespace TextForCtext
         private TextBox _textBox;
         private int currentParagraphIndex;
         private List<Paragraph> _cachedParagraphs; // 緩存段落集合
-
+        /// <summary>
+        /// 適用於前端介面操作
+        /// </summary>
+        /// <param name="textBox">要操作的介面textBox</param>
         public Document(ref TextBox textBox)
         {
             _textBox = textBox;
+            Text = textBox.Text;
+            Content = Range(0, textBox.Text.Length);
             _cachedParagraphs = null;
         }
+        /// <summary>
+        /// 後端伺服計算適用 20250225
+        /// </summary>
+        /// <param name="context">要計算的文字內容</param>
         public Document(ref string context)
         {
-            //if (context.IndexOf("\v") > -1) context.Replace("\v", Environment.NewLine);
             _textBox = new TextBox();
-            Text = context;
+            Text = context;//End = context.Length;已在Text屬性內設置
+            if (Content == null)
+                Content = Range(0, context.Length);
             _cachedParagraphs = null;
         }
 
+        public Range Content { get; set; }
         public string Text
         {
             get => _textBox.Text;
             set
             {
                 _textBox.Text = value;
+                End = Start + value.Length;
+                Content = Range(0, value.Length);
                 _cachedParagraphs = null; // 文本改變時清空緩存
-                //_textBox.Refresh(); // 更新文本框
+
             }
         }
 
@@ -67,6 +81,11 @@ namespace TextForCtext
             get => _textBox.SelectionLength;
             set => _textBox.SelectionLength = value;
         }
+
+        //public int Start { get;private  set; }
+        public int Start { get => 0; }
+        public int End { get; private set; }
+
         internal int CurrentParagraphIndex { get => currentParagraphIndex; set => currentParagraphIndex = value; }
 
         public void InsertText(string text)
@@ -85,13 +104,10 @@ namespace TextForCtext
             _textBox.SelectionStart = selectionStart + text.Length;
             _cachedParagraphs = null; // 文本改變時清空緩存
         }
-        /// <summary>
-        /// 取從文件（textBox1內容的段落集合）。20250220補充說明
-        /// </summary>
-        /// <returns>傳回null則有問題，須檢查！</returns>
-        public List<Paragraph> GetParagraphs(bool newOne = false)
+
+        public List<Paragraph> GetParagraphs(bool newOne = false, Range range = null)
         {
-            // 檢查並更新緩存
+            ////在9百多萬字元、15萬多的行/段長時，有沒有以下判斷式效能差不多 20250225 若發現慢了再將此條件式還原
             if (_cachedParagraphs == null || newOne || !IsTextEqualToCachedParagraphs())
             {
                 var paragraphs = new List<Paragraph>();
@@ -108,7 +124,8 @@ namespace TextForCtext
                         return null;
                     }
 
-                    paragraphs.Add(new Paragraph(line, this, start, i));
+                    //paragraphs.Add(new Paragraph(line, this,new Range(this,Start,End), start, i));
+                    paragraphs.Add(new Paragraph(line, this, range ?? Content, start, i));
 
                     start += (line.Length == 0 ? 1 : line.Length);
                     start = start > this.Text.Length ? this.Text.Length : start;
@@ -119,6 +136,7 @@ namespace TextForCtext
 
             return _cachedParagraphs;
         }
+
 
         private bool IsTextEqualToCachedParagraphs()
         {
@@ -141,25 +159,7 @@ namespace TextForCtext
             return true;
         }
 
-
-        //public List<Paragraph> GetParagraphs(Document document)
-        //{
-        //    var paragraphs = new List<Paragraph>();
-        //    var lines = this.Text.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
-
-        //    foreach (var line in lines)
-        //    {
-        //        paragraphs.Add(new Paragraph(line, this));
-        //    }
-
-        //    return paragraphs;
-        //}
-
         #region 取得插入點所在位置的段落，以及其上個段落和下個段落。
-        /// <summary>
-        /// 取得插入點所在位置段落
-        /// </summary>
-        /// <returns></returns>
         public Paragraph GetCurrentParagraph()
         {
             var paragraphs = GetParagraphs();
@@ -177,10 +177,7 @@ namespace TextForCtext
 
             return null;
         }
-        /// <summary>
-        /// 取得插入點所在位置後一個段落
-        /// </summary>
-        /// <returns></returns>
+
         public Paragraph GetNextParagraph()
         {
             var paragraphs = GetParagraphs();
@@ -198,10 +195,7 @@ namespace TextForCtext
 
             return null;
         }
-        /// <summary>
-        /// 取得插入點所在位置前一個段落
-        /// </summary>
-        /// <returns></returns>
+
         public Paragraph GetPreviousParagraph()
         {
             var paragraphs = GetParagraphs();
@@ -221,21 +215,8 @@ namespace TextForCtext
         }
         #endregion
 
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="paragraphIndex"></param>
-        /// <param name="newChar"></param>
         public void UpdateParagraphFirstCharacter(int paragraphIndex, string newChar)
-        {/* 好的，我們可以根據您的需求來編寫測試代碼。以下是實現這些步驟的代碼：
-            1.	取得 textBox1 內容的所有段落。
-            2.	遍歷各個段落，找出符合條件的段落。
-            3.	更改符合條件的段落的下一個段落的第一個字元。
-            4.	確保更改反映在 textBox1 的內容中。
-            首先，我們需要在 Document 類別中添加一個方法來更新段落的第一個字元：
-          */
-
+        {
             var paragraphs = GetParagraphs();
             if (paragraphs.Count > paragraphIndex)
             {
@@ -253,12 +234,7 @@ namespace TextForCtext
                 }
             }
         }
-        /// <summary>
-        /// 將插入點後的2行/段內容，改成夾注語法並接在插入點本行後（類似按下Ctrl + Shift + F1） 20250131大年初三
-        /// creedit with GitHub Copilot大菩薩：Alt + w
-        /// 加速OCR夾注文本的排版整理
-        /// </summary>
-        /// <exception cref="InvalidOperationException"></exception>
+
         public void MergeParagraphsAtCaret()
         {
             var paragraphs = GetParagraphs();
@@ -267,7 +243,6 @@ namespace TextForCtext
             int charCount = 0;
             int s = _textBox.SelectionStart;
 
-            // 找到插入點所在的段落
             for (int i = 0; i < paragraphs.Count; i++)
             {
                 charCount += paragraphs[i].Text.Length + Environment.NewLine.Length;
@@ -278,69 +253,46 @@ namespace TextForCtext
                 }
             }
 
-            // 確保有足夠的段落進行操作
             if (currentParagraphIndex + 2 >= paragraphs.Count)
             {
                 throw new InvalidOperationException("沒有足夠的段落進行操作。");
             }
 
-            // 取得插入點所在段落及其後的兩個段落
             var currentParagraph = paragraphs[currentParagraphIndex];
             var nextParagraph1 = paragraphs[currentParagraphIndex + 1];
             var nextParagraph2 = paragraphs[currentParagraphIndex + 2];
 
-            // 將這兩個段落前後分別加上「{{」和「}}」，並清除其中的分段符號
             string mergedText = "{{" + nextParagraph1.Text.Replace(Environment.NewLine, "") + nextParagraph2.Text.Replace(Environment.NewLine, "") + "}}";
 
-            // 將這兩個段落的內容併到插入點所在段落的後面
             currentParagraph.Text += mergedText;
 
-            // 刪除原來的兩個段落
             paragraphs.RemoveAt(currentParagraphIndex + 2);
             paragraphs.RemoveAt(currentParagraphIndex + 1);
 
-            // 更新文本框的內容
             _textBox.Text = string.Join(Environment.NewLine, paragraphs.Select(p => p.Text));
 
-            // 更新插入點的位置到合併後的段落的末尾
-            //_textBox.SelectionStart += currentParagraph.Text.Length;
             if (_textBox.Text.IndexOf(Environment.NewLine, s) > -1) s = _textBox.Text.IndexOf(Environment.NewLine, s);
             else s = _textBox.TextLength;
 
-            // 合併插入點後的一個段落，但保持插入點在當前位置不變
             if (currentParagraphIndex + 1 < paragraphs.Count)
-
             {
-
                 var nextParagraph = paragraphs[currentParagraphIndex + 1];
-
                 currentParagraph.Text += nextParagraph.Text.Replace(Environment.NewLine, "");
-
                 paragraphs.RemoveAt(currentParagraphIndex + 1);
-
                 _textBox.Text = string.Join(Environment.NewLine, paragraphs.Select(p => p.Text));
-
             }
             _textBox.SelectionStart = s;
             _textBox.ScrollToCaret();
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <exception cref="InvalidOperationException"></exception>
+
         public void MergeParagraphsAtCaretWithShift()
-        {/* 20250131大年初三：GitHub Copilot大菩薩：
-          * 我們可以在 Document 類別中添加一個新的方法 MergeParagraphsAtCaretWithShift 來實現 Alt + Shift + w 的功能。這個方法將插入點所在行視為夾注的第1行，將其後的1行/段合併上來，並在合併後的前後分別加上「{{」和「}}」，然後再將它們後面的那1行也合併上來。最後，插入點將停留在最後合併上來的那行/段文字的起始處。
-          * ……
-          * 這樣，當您按下 Alt + Shift + w 時，將執行 MergeParagraphsAtCaretWithShift 方法，插入點所在行將視為夾注的第1行，並將其後的1行/段合併上來，前後分別加上「{{」和「}}」，然後再將它們後面的那1行也合併上來。最後，插入點將停留在最後合併上來的那行/段文字的起始處。
-          */
+        {
             var paragraphs = GetParagraphs();
             int caretPosition = _textBox.SelectionStart;
             int currentParagraphIndex = 0;
             int charCount = 0;
             int s = _textBox.SelectionStart;
 
-            // 找到插入點所在的段落
             for (int i = 0; i < paragraphs.Count; i++)
             {
                 charCount += paragraphs[i].Text.Length + Environment.NewLine.Length;
@@ -351,32 +303,23 @@ namespace TextForCtext
                 }
             }
 
-            // 確保有足夠的段落進行操作
             if (currentParagraphIndex + 2 >= paragraphs.Count)
             {
                 throw new InvalidOperationException("沒有足夠的段落進行操作。");
             }
 
-            // 取得插入點所在段落及其後的兩個段落
             var currentParagraph = paragraphs[currentParagraphIndex];
             var nextParagraph1 = paragraphs[currentParagraphIndex + 1];
             var nextParagraph2 = paragraphs[currentParagraphIndex + 2];
 
-            // 將這兩個段落前後分別加上「{{」和「}}」，並清除其中的分段符號
             string mergedText = "{{" + currentParagraph.Text.Replace(Environment.NewLine, "") + nextParagraph1.Text.Replace(Environment.NewLine, "") + "}}";
 
-            // 將這兩個段落的內容併到插入點所在段落的後面
             currentParagraph.Text = mergedText;
 
-            // 刪除原來的兩個段落
             paragraphs.RemoveAt(currentParagraphIndex + 1);
-            //paragraphs.RemoveAt(currentParagraphIndex + 1);
-            //因為　您給我的程式碼在前面已經清除過分段符號了，再移除一次，就會把後面接的行/段給誤刪了。
 
-            // 更新文本框的內容
             _textBox.Text = string.Join(Environment.NewLine, paragraphs.Select(p => p.Text));
 
-            // 合併插入點後的一個段落，但保持插入點在當前位置不變
             if (currentParagraphIndex + 1 < paragraphs.Count)
             {
                 var nextParagraph = paragraphs[currentParagraphIndex + 1];
@@ -385,26 +328,10 @@ namespace TextForCtext
                 _textBox.Text = string.Join(Environment.NewLine, paragraphs.Select(p => p.Text));
             }
 
-            // 更新插入點的位置到合併後的段落的起始處
             _textBox.SelectionStart = _textBox.Text.IndexOf("}}", s) + 2;
             _textBox.ScrollToCaret();
         }
 
-
-
-
-        /* 20250203大年初六立春 creedit with GitHub Copilot大菩薩：
-                  * 好的，我們可以根據您的需求來實現這個自動標題標記的函式方法。以下是具體實現：
-                    1.	檢查每個行/段，根據全形空格數量來判斷是否為標題。
-                    2.	根據不同的空格數量來添加標記。
-                    3.	處理標題行/段之後的行/段，直到遇到非空格開頭的行/段。
-                    以下是具體的實現代碼：
-                  */
-
-        /// <summary>
-        /// 這個方法會根據指定的全形空格數量來自動標記標題，並在適當的位置添加標題標記的開頭和結束標記。希望這對您有所幫助。感恩感恩，南無阿彌陀佛。
-        /// </summary>
-        /// <param name="titleIndentationSpaces"></param>
         public void AutoMarkTitles(int titleIndentationSpaces)
         {
             var paragraphs = GetParagraphs();
@@ -419,7 +346,6 @@ namespace TextForCtext
 
                 if (leadingSpaces == titleIndentationSpaces)
                 {
-                    // 標題行/段
                     sb.Append(text.Insert(leadingSpaces, "*"));
                     for (int j = leadingSpaces + 1; j < text.Length; j++)
                     {
@@ -436,7 +362,6 @@ namespace TextForCtext
                 }
                 else if (leadingSpaces < titleIndentationSpaces)
                 {
-                    // 非標題行/段，空格數少於指定數量
                     for (int j = 0; j < text.Length; j++)
                     {
                         if (text[j] == '　')
@@ -453,7 +378,6 @@ namespace TextForCtext
                 }
                 else
                 {
-                    // 非標題行/段，空格數多於指定數量
                     sb.Append(text.Insert(leadingSpaces, "**"));
                     for (int j = leadingSpaces + 2; j < text.Length; j++)
                     {
@@ -481,32 +405,21 @@ namespace TextForCtext
             _textBox.Text = sb.ToString();
         }
 
-
-        /// <summary>
-        /// 取得指定範圍的 Range 物件
-        /// </summary>
-        /// <param name="start">範圍的起始位置</param>
-        /// <param name="end">範圍的結束位置</param>
-        /// <returns>Range 物件</returns>
-        public Range Range(int start, int end)
+        public Range Range(int start = 0, int end = 0)
         {
-            return new Range(this, start, end);
-            //return new Range(ref _textBox, start, end);
+            if (end == 0)
+                return new Range(this, Start, End);
+            else
+                return new Range(this, start, end);
         }
 
         public void Dispose()
         {
             _textBox?.Dispose();
         }
-        /// <summary>
-        /// 取得指定索引前後的段落集合
-        /// </summary>
-        /// <param name="index">指定的索引</param>
-        /// <param name="range">前後段落的範圍</param>
-        /// <returns>前後段落的集合</returns>
+
         public List<Paragraph> GetSurroundingParagraphs(int index, int range = 3)
         {
-            // 檢查並更新緩存
             if (_cachedParagraphs == null || _textBox.Text != string.Join(Environment.NewLine, _cachedParagraphs.Select(p => p.Text)))
             {
                 _cachedParagraphs = GetParagraphs();
@@ -524,10 +437,6 @@ namespace TextForCtext
             return paragraphs.GetRange(start, end - start + 1);
         }
 
-        /// <summary>
-        /// 檢查 textBox1 的內容是否有異，並重新取得段落集合
-        /// </summary>
-        /// <returns>是否重新取得段落集合</returns>
         public bool CheckAndRefreshParagraphs()
         {
             if (_cachedParagraphs == null || _textBox.Text != string.Join(Environment.NewLine, _cachedParagraphs.Select(p => p.Text)))
@@ -537,9 +446,6 @@ namespace TextForCtext
             }
             return false;
         }
-
-
-
     }
 
 
@@ -548,25 +454,62 @@ namespace TextForCtext
     /// </summary>
     public class Paragraph
     {
+        private Document _document;
         private string _text;
         private readonly string _text_beforeUpdate;
-        private Document _document;
         private int _start;
         private readonly int _start_beforeUpdate;
         private int _end;
+        //private readonly int _end_beforeUpdate;
+        /// <summary>
+        /// 段落的Range
+        /// </summary>
         private Range _range;
+        /// <summary>
+        /// 段落集合上一層的Range
+        /// </summary>
+        private Range _parent;
         private int _index; // 新增的屬性
-
-        public Paragraph(string text, Document document, int start, int index)
+        /// <summary>
+        /// 以documnent建立的段落集合
+        /// </summary>
+        /// <param name="text"></param>
+        /// <param name="document"></param>
+        /// <param name="start"></param>
+        /// <param name="index"></param>
+        public Paragraph(string text, Document document, Range range, int start, int index)
         {
             _text = text;
             _text_beforeUpdate = _text;
             _document = document;
+            _parent = range;
             _start = start;
             _start_beforeUpdate = _start;
+            //_end_beforeUpdate = _end;
             _end = _start + _text.Length;
             _index = index; // 初始化屬性
+            //_range = document.Range(_start, _end);//此會造成overflow
+            //UpdateDocumentRange();
         }
+        ///// <summary>
+        ///// 以range建立的段落集合
+        ///// </summary>
+        ///// <param name="text"></param>
+        ///// <param name="range"></param>
+        ///// <param name="start"></param>
+        ///// <param name="index"></param>
+        //public Paragraph(string text, Range range, int start, int index)
+        //{
+        //    _text = text;
+        //    _text_beforeUpdate = _text;
+        //    _Range = range;
+        //    _document = range.Document;
+        //    _start = start;
+        //    _start_beforeUpdate = _start;
+        //    _end = _start + _text.Length;
+        //    _index = index; // 初始化屬性
+        //    //UpdateDocumentRange();
+        //}
 
         public string Text
         {
@@ -574,9 +517,49 @@ namespace TextForCtext
             set
             {
                 _text = value;
-                _end = _start + _text.Length;
+                _end = _start + _text.Length;//_start 是在建置或更新集合 Paragraphs時傳入的。即 public List<Paragraph> GetParagraphs(bool newOne = false) 中的 paragraphs.Add(new Paragraph(line, this, start, i));
                 UpdateDocument();
+                UpdateParentRange();//●●●●●●●●●●●●●
+                //UpdateDocumentRange();//在UpdateDocument();中已有 _document.Text = …… 會更新
             }
+        }
+
+        public Range Parent { get => _parent; }
+
+        /// <summary>
+        /// 將段落所在的Range更新
+        /// 如是則此Range即可與Paragraphs的內容一致，同時異動、連動。
+        /// </summary>
+        private void UpdateParentRange()
+        {
+            if (_document != null)
+            {
+
+                //var range = _document.Range(_start, _end);
+                //range.Text = _text;
+                //●●●●●●●●●●●
+                _parent.Start = Math.Min(_parent.Start, _start);
+
+                //_parent.End = Math.Max(_parent.End, _end) + (_end - _end_beforeUpdate);
+                //_parent.End = Math.Max(_parent.End, _end) + ((_end-_start) - _text_beforeUpdate.Length);
+                _parent.End = Math.Max(_parent.End, _end) + (Text.Length - _text_beforeUpdate.Length);
+            }
+        }
+
+        private void UpdateDocumentRange()
+
+        {
+
+            //if (_document != null)
+
+            //{
+
+            //    //_document.Start = Math.Min(_document.Start, _start);
+
+            //    //_document.End = Math.Max(_document.End, _end);
+
+            //}
+
         }
 
         public string TextBeforeUpdate => _text_beforeUpdate;
@@ -585,12 +568,13 @@ namespace TextForCtext
         public int Start
         {
             get => _start;
-            set
-            {
-                _start = value;
-                _end = _start + _text.Length;
-                UpdateDocument();
-            }
+            //set
+            //{
+            //    _start = value;
+            //    _end = _start + _text.Length;
+            //    UpdateDocument();
+            //    UpdateDocumentRange();
+            //}
         }
 
         public int StartBeforeUpdate => _start_beforeUpdate;
@@ -599,12 +583,13 @@ namespace TextForCtext
         public int End
         {
             get => _end;
-            set
-            {
-                _end = value;
-                _text = _document.Text.Substring(_start, _end - _start);
-                UpdateDocument();
-            }
+            //set
+            //{
+            //    _end = value;
+            //    _text = _document.Text.Substring(_start, _end - _start);
+            //    UpdateDocument();
+            //    UpdateDocumentRange();
+            //}
         }
 
         //public int EndBeforeUpdate
@@ -682,24 +667,26 @@ namespace TextForCtext
         {
             _document = document;
             //_document = new Document(ref textBox);
-            _start = start;
-            _end = end;
+            _start = start < 0 ? 0 : start;
+            _end = end > document.Text.Length ? document.Text.Length : end;
             //Text = _document.Text.Substring(start, end - start);
 
             rangeParagraphs = Paragraphs;
             //_textBox = textBox;
+            //UpdateDocumentRange();
         }
 
         public string Text
         {
-            get => _document.Text.Substring(_start, _end - _start);
+            get => Document.Text.Substring(_start, _end - _start);
             set
             {
-                var text = _document.Text;
-                _document.Text = text.Substring(0, _start) + value + text.Substring(_end);
+                var text = Document.Text;
+                Document.Text = text.Substring(0, _start) + value + text.Substring(_end);
                 _end = _start + value.Length;
                 UpdateDocument();
                 //GitHub　Copilot大菩薩：我們在設置 Text 屬性時調用 UpdateDocument 方法，以確保文檔內容的更新。
+                //UpdateDocumentRange();
             }
         }
         /// <summary>
@@ -707,7 +694,7 @@ namespace TextForCtext
         /// </summary>
         private void UpdateDocument()
         {
-            var paragraphs = _document.GetParagraphs();
+            var paragraphs = Document.GetParagraphs();
             int charCount = 0;
 
             for (int i = 0; i < paragraphs.Count; i++)
@@ -715,11 +702,23 @@ namespace TextForCtext
                 charCount += paragraphs[i].Text.Length + Environment.NewLine.Length;
                 if (_start < charCount)
                 {
-                    if (paragraphs[i].Text != _document.Text.Substring(charCount - paragraphs[i].Text.Length - Environment.NewLine.Length, paragraphs[i].Text.Length))
-                        paragraphs[i].Text = _document.Text.Substring(charCount - paragraphs[i].Text.Length - Environment.NewLine.Length, paragraphs[i].Text.Length);//●●●●●●●●●●●●●●20250213
+                    if (paragraphs[i].Text != Document.Text.Substring(charCount - paragraphs[i].Text.Length - Environment.NewLine.Length, paragraphs[i].Text.Length))
+                        paragraphs[i].Text = Document.Text.Substring(charCount - paragraphs[i].Text.Length - Environment.NewLine.Length, paragraphs[i].Text.Length);//●●●●●●●●●●●●●●20250213
                 }
             }
         }
+
+
+        private void UpdateDocumentRange()
+        {
+            if (Document != null)
+            {
+                //_document.Start = Math.Min(_document.Start, _start);
+                //_document.End = Math.Max(_document.End, _end);
+            }
+        }
+
+
         /*
          GitHub　Copilot大菩薩：新增 Start 和 End 屬性，這些屬性將允許讀取和設置範圍的起始和結束位置。以下是具體實現：20250204
          */
@@ -729,7 +728,14 @@ namespace TextForCtext
         public int Start
         {
             get => _start;
-            set => _start = value;
+            set
+            {
+                if (value < 0) value = 0;
+                else if (value > Document.End) value = Document.End;
+                _start = value;
+                //UpdateDocumentRange();
+            }
+
         }
         /// <summary>
         /// 就新增了 Start 和 End 屬性，允許讀取和設置範圍的起始和結束位置。希望這對您有所幫助。感恩感恩，南無阿彌陀佛。
@@ -737,17 +743,21 @@ namespace TextForCtext
         public int End
         {
             get => _end;
-            set => _end = value;
+            set
+            {
+                _end = value > Document.End ? Document.End : value;
+                //UpdateDocumentRange();//由Text屬性更新即可
+            }
         }
         public void Select()
         {
-            _document.SelectionStart = _start;
-            _document.SelectionLength = _end - _start;
+            Document.SelectionStart = _start;
+            Document.SelectionLength = _end - _start;
         }
 
         public Paragraph GetCurrentParagraph()
         {
-            var paragraphs = _document.GetParagraphs();
+            var paragraphs = Document.GetParagraphs();
             int charCount = 0;
 
             for (int i = 0; i < paragraphs.Count; i++)
@@ -764,7 +774,7 @@ namespace TextForCtext
 
         public Paragraph GetNextParagraph()
         {
-            var paragraphs = _document.GetParagraphs();
+            var paragraphs = Document.GetParagraphs();
             int charCount = 0;
 
             for (int i = 0; i < paragraphs.Count; i++)
@@ -781,7 +791,7 @@ namespace TextForCtext
 
         public Paragraph GetPreviousParagraph()
         {
-            var paragraphs = _document.GetParagraphs();
+            var paragraphs = Document.GetParagraphs();
             int charCount = 0;
 
             for (int i = 0; i < paragraphs.Count; i++)
@@ -796,36 +806,20 @@ namespace TextForCtext
             return null;
         }
 
-        public List<Paragraph> Paragraphs
-        {
-            get
-            {
-                if (rangeParagraphs == null || rangeParagraphs.Count == 0)
-                {
-                    rangeParagraphs = new List<Paragraph>();
-                    var paragraphs = _document.GetParagraphs();
-
-                    int charCount = 0;
-                    //GitHub　Copilot大菩薩：這樣，Paragraphs 屬性將始終返回最新的段落集合。希望這對您有所幫助。感恩感恩，南無阿彌陀佛。 20250204
-                    //故不要改為欄位儲存值，以免造成段落集合不是最新的問題。
-                    foreach (var paragraph in paragraphs)
-                    {
-                        charCount += paragraph.Text.Length + Environment.NewLine.Length;
-                        if (charCount > _start && charCount - paragraph.Text.Length - Environment.NewLine.Length < _end)
-                        {
-                            rangeParagraphs.Add(paragraph);
-                        }
-                    }
-                }
-                return rangeParagraphs;
-            }
-        }
         //public List<Paragraph> Paragraphs
+        //{
+        //    get
+        //    {
+        //        if (rangeParagraphs == null || rangeParagraphs.Count == 0)
         //        {
-        //            get
+        //            rangeParagraphs = new List<Paragraph>();
+        //            var paragraphs = Document.GetParagraphs();
+        //            if (_start == Document.Start && _end == Document.End)
         //            {
-        //                var paragraphs = _document.GetParagraphs();
-        //                var rangeParagraphs = new List<Paragraph>();
+        //                rangeParagraphs = paragraphs;
+        //            }
+        //            else
+        //            {
         //                int charCount = 0;
         //                //GitHub　Copilot大菩薩：這樣，Paragraphs 屬性將始終返回最新的段落集合。希望這對您有所幫助。感恩感恩，南無阿彌陀佛。 20250204
         //                //故不要改為欄位儲存值，以免造成段落集合不是最新的問題。
@@ -837,9 +831,70 @@ namespace TextForCtext
         //                        rangeParagraphs.Add(paragraph);
         //                    }
         //                }
-
-        //                return rangeParagraphs;
         //            }
         //        }
+        //        return rangeParagraphs;
+        //    }
+        //}
+
+        //private List<Paragraph> GetParagraphs()
+        //{
+        //    var paragraphs = new List<Paragraph>();
+        //    var lines = this.Text.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
+        //    int start = 0;
+        //    for (int i = 0; i < lines.Length; i++)
+        //    {
+        //        var line = lines[i];
+        //        start = this.Text.IndexOf(line, start) + _start;//●●●●●●●●●●●●●●
+
+        //        if (start == -1)
+        //        {
+        //            Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("有問題，請檢查！");
+        //            return null;
+        //        }
+
+        //        paragraphs.Add(new Paragraph(line, this, start, i));
+
+        //        start += (line.Length == 0 ? 1 : line.Length);
+        //        start = start > this.Text.Length ? this.Text.Length : start;
+        //    }
+
+
+        //    return paragraphs;
+        //}
+        //public List<Paragraph> Paragraphs
+        //{
+        //    get
+        //    {
+        //        if (rangeParagraphs == null || rangeParagraphs.Count == 0)
+        //            rangeParagraphs = GetParagraphs();
+        //        return rangeParagraphs;
+        //    }
+        //}
+
+        public List<Paragraph> Paragraphs
+        {
+            get
+            {
+                var paragraphs = _document.GetParagraphs(true, this);
+                var rangeParagraphs = new List<Paragraph>();
+                int charCount = 0;
+                //GitHub　Copilot大菩薩：這樣，Paragraphs 屬性將始終返回最新的段落集合。希望這對您有所幫助。感恩感恩，南無阿彌陀佛。 20250204
+                //故不要改為欄位儲存值，以免造成段落集合不是最新的問題。
+                foreach (var paragraph in paragraphs)
+                {
+                    charCount += paragraph.Text.Length + Environment.NewLine.Length;
+                    if (charCount > _start && charCount - paragraph.Text.Length - Environment.NewLine.Length < _end)
+                    {
+                        rangeParagraphs.Add(paragraph);
+                    }
+                }
+
+                return rangeParagraphs;
+            }
+        }
+
+        public Document Document { get => _document; }// set => _document = value; }
+
     }
 }

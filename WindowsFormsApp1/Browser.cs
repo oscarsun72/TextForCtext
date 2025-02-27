@@ -2160,6 +2160,7 @@ namespace TextForCtext
                 #region 送出後檢查是否是「Please confirm that you are human! 敬請輸入認證圖案」頁面 網址列：https://ctext.org/wiki.pl
                 if (IsConfirmHumanPage())
                 {
+                    Debugger.Break();
                     try
                     {
                         Clipboard.SetText(xInput);//複製到剪貼簿備用
@@ -3019,7 +3020,8 @@ namespace TextForCtext
                                             driver.SwitchTo().Window(driver.WindowHandles.Last());
                                         }
                                     }
-
+                                    else if (ex1.Message.StartsWith("invalid session id"))
+                                        RestartChromedriver();
                                     else
                                         goto default;
                                     break;
@@ -10404,7 +10406,7 @@ namespace TextForCtext
         internal static void NoSuchWindowErrHandler()
         {
             Form1.playSound(Form1.soundLike.error, true);
-
+            if(driver ==null) DriverNew();
             if (IsWindowHandleValid(driver, LastValidWindow))
                 driver.SwitchTo().Window(LastValidWindow);
             else
@@ -11100,7 +11102,7 @@ namespace TextForCtext
         }
         /// <summary>
         /// 檢測 driver 是否失效/無效（當前分頁 CurrentWindowHandle）20241008
-        /// 或是null則會自行啟用chromedriver 20250215
+        /// 若是null則會自行啟用chromedriver 20250215
         /// </summary>
         /// <param name="driver"></param>
         /// <returns></returns>
@@ -11455,7 +11457,7 @@ namespace TextForCtext
                 else
                     return false;
             }
-            bool found=false;
+            bool found = false;
             if (driver.WindowHandles.Contains(driver.CurrentWindowHandle))
             {
                 if (!Form1.IsValidUrl＿keyDownCtrlAdd(driver.CurrentWindowHandle))
@@ -11464,7 +11466,7 @@ namespace TextForCtext
                     for (int i = driver.WindowHandles.Count - 1; i > -1; i--)
                     {
                         driver.SwitchTo().Window(driver.WindowHandles[i]);
-                        if (Form1.IsValidUrl＿keyDownCtrlAdd(driver.Url)){ found = true; break;}
+                        if (Form1.IsValidUrl＿keyDownCtrlAdd(driver.Url)) { found = true; break; }
                     }
                 }
 
@@ -11475,7 +11477,16 @@ namespace TextForCtext
                 driver.Navigate().GoToUrl(Form1.InstanceForm1.textBox3Text);
             }
             LastValidWindow = driver.CurrentWindowHandle;
-
+            bool result= CopySKQSNextVolume(); 
+            driver.SwitchTo().Window(LastValidWindow);
+            return result;
+        }
+        /// <summary>
+        /// 複製下一卷《四庫全書》文本
+        /// </summary>
+        /// <returns></returns>
+        internal static bool CopySKQSNextVolume()
+        {
             string url = string.Empty; bool result = false;
             string urlPrefixDomain = string.Empty;//= url.Substring(url.IndexOf("//") + "//".Length).Substring(0, url.IndexOf("/"));
             string urlPrefix;// = string.Empty; //url.Substring(0, url.IndexOf("//") + "//".Length);            
@@ -11596,6 +11607,7 @@ namespace TextForCtext
             ////actions.MoveToElement(element).Click().KeyDown(OpenQA.Selenium.Keys.Control).SendKeys("a").SendKeys("c").KeyUp(OpenQA.Selenium.Keys.Control).Perform();
             //actions.MoveToElement(element).Click().KeyDown(OpenQA.Selenium.Keys.Control).SendKeys("c").KeyUp(OpenQA.Selenium.Keys.Control).Perform();
             ChromeSetFocus();
+            BringToFront("chrome");
             Clipboard.Clear();
             SendKeys.Send("^c");
             //SendKeys.SendWait("^c");
@@ -11625,13 +11637,13 @@ namespace TextForCtext
 
             }
 
-            driver.SwitchTo().Window(LastValidWindow);
             //剪貼簿只能單一執行緒
             //Task.Run(() =>
             //{
             //Form1.InstanceForm1.runWordMacro("中國哲學書電子化計劃.國學大師_Kanripo_四庫全書本轉來");
             //});            
             Form1.InstanceForm1.AvailableInUseBothKeysMouse();
+            
             return result;
 
             string GetNextPageUrl(string currentUrl)
@@ -11650,8 +11662,8 @@ namespace TextForCtext
 
                 return nextUrl;
             }
-
         }
+
         /// <summary>
         /// 讓Chrome瀏覽器取得焦點
         /// </summary>
