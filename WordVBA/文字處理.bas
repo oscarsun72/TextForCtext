@@ -3865,7 +3865,7 @@ bookmarks:
     Do Until rst.EOF
         title = rst("書名").Value
         
-'        If title = "通鑑外紀" Then Stop 'just for test
+'        If title = "事文　類聚" Then Stop 'just for test
         
         If VBA.InStr(dx, title) Then 'if found
             Do While rngF.Find.Execute(title, , , , , , True, wdFindStop)

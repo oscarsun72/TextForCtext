@@ -536,7 +536,6 @@ namespace WindowsFormsApp1
         /// </summary>
         void show_nICo(Keys modifierKeys)
         {
-
             this.Show();
             if (ntfyICo.Visible) ntfyICo.Visible = false;
             this.WindowState = FormWindowState.Normal;
@@ -1577,7 +1576,8 @@ namespace WindowsFormsApp1
                 //以下《國學大師》本《四庫全書》發生者
                 if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("B");
                 if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("/");
-                if (missWordPositon != -1)//檢查「/」
+                //檢查「/」
+                if (xCopy.IndexOf("/") > -1 && missWordPositon != -1)
                 {//20240803 Copilot大菩薩：C# Windows.Forms 應用程式中檢測半形空格 ：因為在檢查斜線「/」後面不是接著下角括號「>」的情況下，我們需要確保每個匹配的結果都符合這個條件，所以使用了 matches 物件來進一步檢查。
                  //而在檢查半形空格的情況下，正則表達式(?< ! [\w""'\\])\s(?![\w""'\\]) 已經包含了前後字符的條件，因此不需要進一步使用 matches 物件來檢查。
                     string pattern = @"(?<!<)/(?!>)";//20240804 Copilot大菩薩：修正正則表達式問題：您可以使用以下的正則表達式來同時檢測「/」前面不是「<」且後面不是「>」的情況：https://sl.bing.net/hBPULfGmh0m
@@ -1787,6 +1787,8 @@ namespace WindowsFormsApp1
                 this.BackColor = Color.Yellow;
                 Task.Delay(400).Wait();
                 this.BackColor = c;
+
+                //若要忽略則為true
                 bool omit = false;
                 if (chkP > 0)
                 {
@@ -1829,12 +1831,15 @@ namespace WindowsFormsApp1
                 if (xCopy.IndexOf("□") > -1 && xCopy.IndexOfAny("�".ToCharArray()) == -1 && xCopy.IndexOf(" ") == -1
                     || chkP == 0 || omit)
                 {
-                    //if (MessageBox.Show("有造字，是否先予訂補上？", "", MessageBoxButtons.OKCancel, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1) == DialogResult.OK)
+                    //if (DialogResult.OK==MessageBox.Show("有造字，是否先予訂補上？", "", MessageBoxButtons.OKCancel, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1) )
                     //{
-                    //    textBox1.Select(missWordPositon, 1);
-                    //    textBox1.ScrollToCaret();
-                    //    return false;
-                    //}
+                    //●●●●●●●●●●●●●●● 20250227
+                    if (missWordPositon > -1 && xCopy.IndexOf("+<p>") == -1)
+                    {
+                        textBox1.Select(missWordPositon, 1);
+                        textBox1.ScrollToCaret();
+                        return false;
+                    }
                 }
                 else
                 {
@@ -1847,7 +1852,11 @@ namespace WindowsFormsApp1
                 //{
                 //    xCopy = xCopy.Replace(rs, "●");//「●」為《中國哲學書電子化計劃》的缺字符，詳：https://ctext.org/instructions/wiki-formatting/zh
                 //}
+
+                //omit = false;//20250227●●●●●●●●●●●●●●●●●●●●●
             }
+
+
             string[] clearedStr = { "" };
             foreach (var item in clearedStr)
             {
@@ -8520,6 +8529,7 @@ namespace WindowsFormsApp1
                 textBox1.Text = textBox1.Text.Substring(0, textBox1.Text.LastIndexOf(Environment.NewLine));
             if (eventEnabled) ResumeEvents();
 
+            #region 如果是《欽定四庫全書》的文本
             if (textBox1.Text.IndexOf(Environment.NewLine) > -1 && textBox1.Text.Substring(0, textBox1.Text.IndexOf(Environment.NewLine)).Contains("欽定四庫全書"))
             {
                 if (_document.Text.IndexOf("􏿽<p>") > -1)
@@ -8530,7 +8540,14 @@ namespace WindowsFormsApp1
                 }
                 if (textBox1.Text.Substring(textBox1.TextLength - 3, 3) != "<p>")
                     textBox1.Text += "<p>";
+
+                //將第2行/段的文本做標題標記（如果是《欽定四庫全書》的文本）
+                int start = textBox1.SelectionStart, len = textBox1.SelectionLength;
+                textBox1.Select(textBox1.Text.IndexOf(Environment.NewLine) + 3, 0);
+                titleMarkCode();
+                textBox1.Select(start, len);
             }
+            #endregion
 
             playSound(soundLike.over);
             if (topLine) { rst.Close(); cnt.Close(); rst = null; cnt = null; }
@@ -9933,7 +9950,9 @@ namespace WindowsFormsApp1
 
             #region 決定是否要到下一頁
             //if (!shiftKeyDownYet ) nextPages(Keys.PageDown, false);
-            if (!shiftKeyDownYet && !check_the_adjacent_pages) nextPages(Keys.PageDown, false, notBooksPunctuation, pagePaste2GjcoolOCR);
+            if (!shiftKeyDownYet && !check_the_adjacent_pages) 
+                if(!nextPages(Keys.PageDown, false, notBooksPunctuation, pagePaste2GjcoolOCR))
+                    return false;
             #endregion
 
             #region 預測下一頁頁末尾端在哪裡               
@@ -10722,6 +10741,14 @@ namespace WindowsFormsApp1
                     #endregion
 
                     Refresh();
+
+                    if (!CheckPageNumBeforeSubmitSaveChanges(driver))
+                    {
+                        autoPastetoCtextQuitEditTextboxCancel = true;
+                        dialogResult = DialogResult.Cancel;
+                        return false;
+                    }
+
                     //if (!autoPastetoCtextQuitEditTextboxCancel && ModifierKeys == Keys.None && (!speechRecognitionOPmode || !FastMode))
                     if (ModifierKeys == Keys.None && (!speechRecognitionOPmode || !fastMode))
                     {
@@ -10847,7 +10874,8 @@ namespace WindowsFormsApp1
                                                                     : textBox1.TextLength - pageTextEndPosition);//終於抓到這個bug了，忘了加第2個參數
                         }
                         #region 連續輸入終止時的插入點位置
-                        if (textBox1.TextLength > 0 && !keyDownCtrlAdd_ReturnVale && textBox1.Text.Substring(0, pageTextEndPosition).IndexOf("/") > -1)
+                        if (textBox1.TextLength > 0 && !keyDownCtrlAdd_ReturnVale
+                            && textBox1.TextLength >= pageTextEndPosition && textBox1.Text.Substring(0, pageTextEndPosition).IndexOf("/") > -1)
                             textBox1.Select(textBox1.Text.Substring(0, pageTextEndPosition).IndexOf("/"), insertMode ? 1 : 0);
                         //else
                         //    textBox1.Select(pageTextEndPosition, 0);
@@ -11103,17 +11131,17 @@ namespace WindowsFormsApp1
                 playSound(soundLike.exam, true);
 
                 if (!IsDriverInvalid())
-                    br.CopySKQSNextVolume();
+                    //br.CopySKQSNextVolume();
 
-                //expandSelectedTextRangeToWholeLinePara(textBox1.SelectionStart,textBox1.SelectionLength,textBox1.Text);
-                //Range range = new Document(ref textBox1).Range(textBox1.SelectionStart, textBox1.SelectionStart + textBox1.SelectionLength);
-                //outdent_ConvexRow(ref range);
-                //undoRecord();
-                //PauseEvents();                
-                //textBox1.SelectedText = range.Text;
-                //ResumeEvents();
+                    //expandSelectedTextRangeToWholeLinePara(textBox1.SelectionStart,textBox1.SelectionLength,textBox1.Text);
+                    //Range range = new Document(ref textBox1).Range(textBox1.SelectionStart, textBox1.SelectionStart + textBox1.SelectionLength);
+                    //outdent_ConvexRow(ref range);
+                    //undoRecord();
+                    //PauseEvents();                
+                    //textBox1.SelectedText = range.Text;
+                    //ResumeEvents();
 
-                //MessageBoxShowOKExclamationDefaultDesktopOnly(countWordsLenPerLinePara(GetLineTxt(textBox1.Text, textBox1.SelectionStart)).ToString() + " 字長");
+                    MessageBoxShowOKExclamationDefaultDesktopOnly(countWordsLenPerLinePara(GetLineTxt(textBox1.Text, textBox1.SelectionStart)).ToString() + " 字長");
                 return;
             }
             #endregion
@@ -13034,11 +13062,14 @@ namespace WindowsFormsApp1
         /// <param name="stayInHere">留在本頁而不到下一頁則為true</param>
         /// <param name="notBooksPunctuation">不作書名號等標點時為true</param>
         /// <param name="pagePaste2GjcoolOCR"></param>
-        private void nextPages(Keys eKeyCode, bool stayInHere, bool notBooksPunctuation = false, bool pagePaste2GjcoolOCR = false)
+        /// <returns>失敗則傳回false</returns>
+        private bool nextPages(Keys eKeyCode, bool stayInHere, bool notBooksPunctuation = false, bool pagePaste2GjcoolOCR = false)
         {
+            //記下完成的頁面頁碼
+            WindowHandles["currentPageNum"] = _currentPageNum;
             string url = textBox3.Text;
-            if (url == "") return;
-            if (url.IndexOf("&page=") == -1) return;
+            if (url == "") return false;
+            if (url.IndexOf("&page=") == -1) return false;
             int edit = url.IndexOf("&editwiki");
             int page = 0; string urlSub = url;
             if (edit > -1)
@@ -13102,7 +13133,7 @@ namespace WindowsFormsApp1
                     //尚未實作完成
                     break;
                 default:
-                    return;
+                    return false;
                     //break;
             }
             #endregion
@@ -13303,7 +13334,17 @@ namespace WindowsFormsApp1
                 }
             }
             #endregion
+            #region 檢查是否真有到下一頁或上一頁
+            if (autoPaste2QuickEdit && int.Parse(_currentPageNum) > 2 &&
+                Math.Abs(int.Parse(_currentPageNum) - int.Parse(WindowHandles["currentPageNum"])) != 1)
+            {
 
+                MessageBoxShowOKExclamationDefaultDesktopOnly("★★★★★★翻頁失敗，請注意！！！！！！", "●翻頁失敗！");
+                if (fastMode) FastModeSwitcher();
+                return false;
+            }
+
+            #endregion
             #region 在自動連續輸入模式下若是欽定四庫全書則自動輸入Kanripo或《國學大師》的文本,如同按下Ctrl + Shift + 4
             if (autoPaste2QuickEdit && eKeyCode == Keys.PageDown)
             {
@@ -13314,7 +13355,7 @@ namespace WindowsFormsApp1
 
             /////////////這先取消，交由呼叫端處理 20240904
             //if (stayInHere && !pagePaste2GjcoolOCR) AvailableInUseBothKeysMouse();//this.Activate();
-
+            return true;
 
         }
         #region 在自動連續輸入模式下若是欽定四庫全書則自動輸入Kanripo或《國學大師》的文本,如同按下Ctrl + Shift + 4

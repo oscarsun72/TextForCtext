@@ -1363,7 +1363,7 @@ namespace TextForCtext
                                                      //cDrv = new ChromeDriver(@"x:\chromedriver.exe", options);
                                                      //上述加入書籤並不管用！！！20230104//解法已詳下chromeOptions()中
 
-                //bool isChromeRunning;= IsChromeRunning;//作為是否在前已開啟Chrome瀏覽器時，關閉新多開的 20241002
+            //bool isChromeRunning;= IsChromeRunning;//作為是否在前已開啟Chrome瀏覽器時，關閉新多開的 20241002
 
             tryagain:
                 //////////////ChromeDriverService driverService;
@@ -2110,7 +2110,8 @@ namespace TextForCtext
                             Form1.InstanceForm1.FastModeSwitcher();
                         return false;
                     }
-                    submit.Click();//按下 Save changes button（「保存編輯」按鈕）
+
+                    return CheckPageNumBeforeSubmitSaveChanges(driver, submit);
                 }
                 catch (Exception ex)
                 {
@@ -2136,7 +2137,7 @@ namespace TextForCtext
                     if (submit != null)
                         try
                         {
-                            submit.Click();
+                            return CheckPageNumBeforeSubmitSaveChanges(driver, submit);
                         }
                         catch (Exception)
                         {
@@ -2216,6 +2217,38 @@ namespace TextForCtext
             else//若文本沒有改變，不用送出，則播放音效
                 Form1.playSound(Form1.soundLike.notify, true);
             return true;
+        }
+        /// <summary>
+        /// 在按下
+        /// </summary>
+        /// <param name="driver"></param>
+        /// <param name="submit_saveChanges"></param>
+        /// <returns></returns>
+        internal static bool CheckPageNumBeforeSubmitSaveChanges(ChromeDriver driver, IWebElement submit_saveChanges = null)
+        {
+            if (!IsDriverInvalid())
+            {
+                int currentPageNum = int.Parse(Form1.InstanceForm1.CurrentPageNum);
+                if (currentPageNum != Form1.InstanceForm1.GetPageNumFromUrl(driver.Url) ||
+                    Math.Abs(int.Parse(ActiveForm1.CurrentPageNum) - int.Parse(WindowHandles["currentPageNum"])) != 1)
+                {
+                    if (DialogResult.OK == Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("頁碼不同！請轉至頁面" +
+                        "頁再按下「確定」以供輸入"))
+                    {
+                        submit_saveChanges?.Click();//按下 Save changes button（「保存編輯」按鈕）
+                        return true;
+                    }
+                    else
+                        return false;
+                }
+                else
+                {
+                    submit_saveChanges?.Click();//按下 Save changes button（「保存編輯」按鈕）
+                    return true;
+                }
+            }
+            else
+                return false;
         }
 
         static internal bool isAllinBmp(string xChk)
@@ -9851,7 +9884,8 @@ namespace TextForCtext
         }
 
         /// <summary>
-        /// 作為一些需要保留或比對驗證的視窗句柄集，鍵值是視窗ID（或唯一名稱）以供比較尋找，值為視窗句柄        
+        /// 作為一些需要保留或比對驗證的視窗句柄集，鍵值是視窗ID（或唯一名稱）以供比較尋找，值為視窗句柄
+        /// 也可作為其他必要的參考、參數，如鍵值為"currentPageNum"時，乃翻到下一頁前記下的前一頁的頁碼
         /// </summary>
         internal static Dictionary<string, string> WindowHandles = new Dictionary<string, string>();
         /// <summary>
@@ -10406,7 +10440,7 @@ namespace TextForCtext
         internal static void NoSuchWindowErrHandler()
         {
             Form1.playSound(Form1.soundLike.error, true);
-            if(driver ==null) DriverNew();
+            if (driver == null) DriverNew();
             if (IsWindowHandleValid(driver, LastValidWindow))
                 driver.SwitchTo().Window(LastValidWindow);
             else
@@ -11477,8 +11511,15 @@ namespace TextForCtext
                 driver.Navigate().GoToUrl(Form1.InstanceForm1.textBox3Text);
             }
             LastValidWindow = driver.CurrentWindowHandle;
-            bool result= CopySKQSNextVolume(); 
+            bool result = CopySKQSNextVolume();
             driver.SwitchTo().Window(LastValidWindow);
+            BringToFront("chrome");
+            //剪貼簿只能單一執行緒
+            //Task.Run(() =>
+            //{
+            //Form1.InstanceForm1.runWordMacro("中國哲學書電子化計劃.國學大師_Kanripo_四庫全書本轉來");
+            //});            
+            Form1.InstanceForm1.AvailableInUseBothKeysMouse();
             return result;
         }
         /// <summary>
@@ -11572,6 +11613,8 @@ namespace TextForCtext
                 result = false; return result;
             }
 
+            element.Click();
+
             // 使用 JavaScript 來全選元素內的文字
             OpenQA.Selenium.IJavaScriptExecutor js = (OpenQA.Selenium.IJavaScriptExecutor)driver;
             //不複製
@@ -11637,13 +11680,7 @@ namespace TextForCtext
 
             }
 
-            //剪貼簿只能單一執行緒
-            //Task.Run(() =>
-            //{
-            //Form1.InstanceForm1.runWordMacro("中國哲學書電子化計劃.國學大師_Kanripo_四庫全書本轉來");
-            //});            
-            Form1.InstanceForm1.AvailableInUseBothKeysMouse();
-            
+
             return result;
 
             string GetNextPageUrl(string currentUrl)

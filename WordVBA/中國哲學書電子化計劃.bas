@@ -1571,7 +1571,7 @@ Sub 國學大師_Kanripo_四庫全書本轉來()
             noteRng.SetRange noteRng.start, noteRng.Next.End
         Loop
         
-'        If InStr(noteRng, "壺") Then Stop 'just for test
+'        If InStr(noteRng, "萁草之句") Then Stop 'just for test
         
         Set aNext = noteRng.Characters(noteRng.Characters.Count).Next
         Set aPre = noteRng.Characters(1).Previous
@@ -1714,7 +1714,10 @@ Sub 國學大師_Kanripo_四庫全書本轉來()
                     If aX <> vbNullString And VBA.Replace(aX, "　", vbNullString) = vbNullString Then '●●●●●●●●●●●●
                         '如果有縮排，則擴展noteRng至前後全形空格的兩端
                         noteRng.MoveStartWhile "　", -50
-                        noteRng.MoveEndWhile "　", 50
+                        '如果夾注中沒有縮排補上的空格
+                        If a.text <> "　" Then
+                            noteRng.MoveEndWhile "　", 50
+                        End If
                         noteRng.InsertBefore "{{"
                         noteRng.InsertAfter "}}"
                         rng.SetRange rng.End, rng.End
@@ -1740,12 +1743,14 @@ Sub 國學大師_Kanripo_四庫全書本轉來()
     文字處理.書名號篇名號標注
     
     With rng.Document
-    '    With .Range.Find
-    '        .ClearFormatting
+        With .Range.Find
+            .ClearFormatting
     '        .Text = vba.Chrw(9675)
+            .text = "}}{{　}}"
     '        .Replacement.Text = vba.Chrw(12295)
-    '        .Execute , , , , , , True, wdFindContinue, , , wdReplaceAll
-    '    End With
+            .Replacement.text = "　}}"
+            .Execute , , , , , , True, wdFindContinue, , , wdReplaceAll
+        End With
         '.Range.Cut
         
 '        If VBA.InStr(.Range.text, "{{}}") Then

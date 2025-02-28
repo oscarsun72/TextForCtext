@@ -1620,6 +1620,7 @@ namespace TextForCtext
             if (splitIndex > -1)
             {
                 text = text.Replace(Environment.NewLine, string.Empty);
+                //記下分行/段符號位置
                 splitIndex = new StringInfo(text.Substring(0, splitIndex)).LengthInTextElements;
                 startIndex = text.IndexOf("{{");
                 endIndex = text.IndexOf("}}", startIndex);
@@ -1657,10 +1658,11 @@ namespace TextForCtext
                     //if (spaceIndex != -1 && spaceIndex > 0)
                     if (spaceIndex > 0)
                     {
-                        if (splitIndex > spaceIndex)
-                        {
-                            return text.Replace(" ", "􏿽");
-                        }
+                        //if (splitIndex > spaceIndex)//這該是原書原文的空格，在分段後，不是電子文本。未見原書是無法判斷的！20250227
+                        //{//若原書原文的空格是在後半，其電子文本是不會出錯的！唯有在前半，才會出錯。
+                        //    return text.Replace(" ", "􏿽");
+                        //}
+
                         //int segmentLength = segmentStr.Length;
                         int segmentLength = segment.LengthInTextElements;
                         //int midIndex = splitIndex > -1 ? splitIndex : segmentLength / 2;
