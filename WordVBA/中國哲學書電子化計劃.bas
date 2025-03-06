@@ -57,6 +57,8 @@ Sub 新頁面()
     Next i
     
     rng.Paragraphs(3).Range = CLng(Replace(rng.Paragraphs(3).Range, VBA.Chr(13), "")) + 1
+    'rng.Document.Paragraphs(3).Range.text = VBA.CStr(VBA.CLng(VBA.Left(rng.Document.Paragraphs(3).Range.text, VBA.Len(rng.Document.Paragraphs(3).Range.text) - 1)) + 1)
+    
     'For Each e In Selection.Value
     '    x = x & e
     'Next e
@@ -75,6 +77,7 @@ Sub 新頁面()
     DoEvents
     Network.AppActivateDefaultBrowser
     SendKeys "^v"
+    
     SystemSetup.contiUndo ur
 End Sub
 Sub setPage1Code() '(ByRef d As Document)

@@ -606,7 +606,7 @@ namespace TextForCtext
             get
             {
                 if (driver == null) driver = DriverNew();
-                IWebElement iwe = waitFindWebElementBySelector_ToBeClickable("#quickedit > a");
+                IWebElement iwe = WaitFindWebElementBySelector_ToBeClickable("#quickedit > a", 5);
                 if (iwe != null)
                 {
                     string iweText = iwe.GetAttribute("text");
@@ -629,7 +629,7 @@ namespace TextForCtext
                 //if (driver == null) driver = DriverNew();
                 if (!IsDriverInvalid())
                 {
-                    iwe = waitFindWebElementBySelector_ToBeClickable("#savechangesbutton");
+                    iwe = WaitFindWebElementBySelector_ToBeClickable("#savechangesbutton");
                 }
                 return iwe;
             }
@@ -647,7 +647,7 @@ namespace TextForCtext
                 IWebElement iwe;
                 //if (Form1.IsValidUrl＿keyDownCtrlAdd(ActiveForm1.textBox3Text))
                 //{
-                iwe = waitFindWebElementBySelector_ToBeClickable(selector);
+                iwe = WaitFindWebElementBySelector_ToBeClickable(selector);
                 return iwe;
                 //}
                 //else
@@ -667,14 +667,14 @@ namespace TextForCtext
                 IWebElement iwe;
                 if (Form1.IsValidUrl＿keyDownCtrlAdd(ActiveForm1.textBox3Text))
                 {
-                    iwe = waitFindWebElementBySelector_ToBeClickable(selector);
+                    iwe = WaitFindWebElementBySelector_ToBeClickable(selector);
                 reCheck:
                     if (iwe != null)
                     {
                         string tx = iwe.GetAttribute("outerHTML");
                         if (!tx.StartsWith("<span itemprop=\"title\">"))
                         {
-                            iwe = waitFindWebElementBySelector_ToBeClickable(selector1);//64位元安裝版Chrome瀏覽器
+                            iwe = WaitFindWebElementBySelector_ToBeClickable(selector1);//64位元安裝版Chrome瀏覽器
                             if (iwe != null)
                             {
                                 tx = iwe.GetAttribute("outerHTML");
@@ -695,7 +695,7 @@ namespace TextForCtext
                     }
                     else
                     {
-                        iwe = waitFindWebElementBySelector_ToBeClickable(selector1);
+                        iwe = WaitFindWebElementBySelector_ToBeClickable(selector1);
                         if (iwe != null)
                             goto reCheck;
                         else
@@ -711,6 +711,11 @@ namespace TextForCtext
             }
         }
 
+        internal static IWebElement GraphicMatchingPagesLink
+        {
+            get => WaitFindWebElementBySelector_ToBeClickable("#p2 > td:nth-child(1) > div > a.sprite-photo > div", 3);
+        }
+
         /// <summary>
         /// 取得CTP網頁中的「編輯」（Edit）控制項
         /// </summary>
@@ -723,30 +728,37 @@ namespace TextForCtext
                 {
                     //會因位置而移動，如：Add to 學海蠡測 Add to 思舊錄 [文字版] [編輯] [簡單修改模式] [編輯指南] https://ctext.org/library.pl?if=gb&file=194081&page=75&editwiki=5083072#editor
                     //故得逐一比對，目前應該只會有2種情形，當然也可能會不止如此
-                    iwe = waitFindWebElementBySelector_ToBeClickable("#content > div:nth-child(7) > div:nth-child(2) > a:nth-child(2)");
+                    iwe = WaitFindWebElementBySelector_ToBeClickable("#content > div:nth-child(7) > div:nth-child(2) > a:nth-child(2)");
                 reCheck:
                     if (iwe != null)
                     {
                         string tx = iwe.GetAttribute("text");
                         if (tx != "編輯" && tx != "Edit")
                         {
-                            iwe = waitFindWebElementBySelector_ToBeClickable("#content > div:nth-child(7) > div:nth-child(2) > a:nth-child(4)");
+                            iwe = WaitFindWebElementBySelector_ToBeClickable("#content > div:nth-child(7) > div:nth-child(2) > a:nth-child(4)");
                             if (iwe != null)
                                 tx = iwe.GetAttribute("text");
                             if (tx != "編輯" && tx != "Edit")
                             {
-                                Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("未能找到正確的「編輯（Edit）」超連結控制項，請檢查！");
-                                return null;
+                                iwe = WaitFindWebElementBySelector_ToBeClickable("#content > div:nth-child(7) > div:nth-child(2) > a:nth-child(3)");
+                                if (iwe != null)
+                                    tx = iwe.GetAttribute("text");
+                                if (tx != "編輯" && tx != "Edit")
+                                {
+                                    Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("未能找到正確的「編輯（Edit）」超連結控制項，請檢查！");
+                                    return null;
+                                }
+                                else
+                                    return iwe;
                             }
                             else
                                 return iwe;
-
                         }
                         //Edit_Linkbox = waitFindWebElementByName_ToBeClickable("#content > div:nth-child(7) > div:nth-child(2) > a:nth-child(2)", WebDriverWaitTimeSpan);
                     }
                     else
                     {
-                        iwe = waitFindWebElementBySelector_ToBeClickable("#content > div:nth-child(9) > div:nth-child(2) > a:nth-child(2)");
+                        iwe = WaitFindWebElementBySelector_ToBeClickable("#content > div:nth-child(9) > div:nth-child(2) > a:nth-child(2)");
                         if (iwe != null) goto reCheck;
                     }
                 }
@@ -766,7 +778,7 @@ namespace TextForCtext
                 IWebElement iwe;
                 if (Form1.IsValidUrl＿keyDownCtrlAdd(ActiveForm1.textBox3Text))
                 {
-                    iwe = waitFindWebElementBySelector_ToBeClickable("#editor > a:nth-child(13)");
+                    iwe = WaitFindWebElementBySelector_ToBeClickable("#editor > a:nth-child(13)");
                 }
                 else
                     return null;
@@ -784,7 +796,7 @@ namespace TextForCtext
                 IWebElement iwe;
                 if (Form1.IsValidUrl＿keyDownCtrlAdd(ActiveForm1.textBox3Text))
                 {
-                    iwe = waitFindWebElementBySelector_ToBeClickable("#dataprev");
+                    iwe = WaitFindWebElementBySelector_ToBeClickable("#dataprev");
                 }
                 else
                     return null;
@@ -802,14 +814,20 @@ namespace TextForCtext
                 IWebElement iwe;
                 if (Form1.IsValidUrl＿keyDownCtrlAdd(ActiveForm1.textBox3Text))
                 {
-                    iwe = waitFindWebElementBySelector_ToBeClickable("#datanext");
+                    iwe = WaitFindWebElementBySelector_ToBeClickable("#datanext");
                 }
                 else
                     return null;
                 return iwe;
             }
         }
-
+        /// <summary>
+        /// 下一頁控制項（元件）
+        /// </summary>
+        internal static IWebElement NextPage
+        {
+            get => WaitFindWebElementBySelector_ToBeClickable("#content > div:nth-child(3) > div:nth-child(5) > a > div",5);
+        }
         /// <summary>
         /// 取得CTP網頁中的「顯示頁碼，可輸入頁碼的」（page）控制項
         /// </summary>
@@ -825,10 +843,10 @@ namespace TextForCtext
                 }
                 if (Form1.IsValidUrl＿ImageTextComparisonPage(ActiveForm1.textBox3Text))
                 {
-                    iwe = waitFindWebElementBySelector_ToBeClickable("#content > div:nth-child(3) > form > input[type=text]:nth-child(3)");
+                    iwe = WaitFindWebElementBySelector_ToBeClickable("#content > div:nth-child(3) > form > input[type=text]:nth-child(3)");
                     if (iwe == null)
                     {
-                        iwe = waitFindWebElementBySelector_ToBeClickable("#content > div:nth-child(5) > form");
+                        iwe = WaitFindWebElementBySelector_ToBeClickable("#content > div:nth-child(5) > form");
                     }
                     if (!checkNamePorp()) return null;
                 }
@@ -848,7 +866,7 @@ namespace TextForCtext
                 IWebElement iwe;
                 if (Form1.IsValidUrl＿ImageTextComparisonPage(ActiveForm1.textBox3Text))
                 {
-                    iwe = waitFindWebElementBySelector_ToBeClickable("#content > div:nth-child(3)");
+                    iwe = WaitFindWebElementBySelector_ToBeClickable("#content > div:nth-child(3)");
                 }
                 else
                     return null;
@@ -881,7 +899,7 @@ namespace TextForCtext
                 IWebElement iwe;
                 if (Form1.IsValidUrl＿ImageTextComparisonPage(ActiveForm1.textBox3Text))
                 {
-                    iwe = waitFindWebElementBySelector_ToBeClickable("#content > div:nth-child(7) > div:nth-child(1)");
+                    iwe = WaitFindWebElementBySelector_ToBeClickable("#content > div:nth-child(7) > div:nth-child(1)");
                 }
                 else
                     return null;
@@ -899,7 +917,7 @@ namespace TextForCtext
                 IWebElement iwe;
                 if (Form1.IsValidUrl＿ImageTextComparisonPage(ActiveForm1.textBox3Text))
                 {
-                    iwe = waitFindWebElementBySelector_ToBeClickable("#canvas > svg");
+                    iwe = WaitFindWebElementBySelector_ToBeClickable("#canvas > svg");
                 }
                 else
                     return null;
@@ -932,7 +950,12 @@ namespace TextForCtext
                 IWebElement version_LinkBox;
                 if (Form1.IsValidUrl＿keyDownCtrlAdd(ActiveForm1.textBox3Text))
                 {
-                    version_LinkBox = waitFindWebElementBySelector_ToBeClickable("#content > div:nth-child(8) > div:nth-child(3) > a:nth-child(1)");
+                    //  /html/body/div[2]/div[5]/div[3]/a[1]
+                    version_LinkBox = WaitFindWebElementBySelector_ToBeClickable("#content > div:nth-child(8) > div:nth-child(3) > a:nth-child(1)");
+                    if (version_LinkBox == null)
+                        // /html/body/div[2]/div[5]/div/a[1] /html/body/div[2]/div[5]/div/a[1]
+                        version_LinkBox = WaitFindWebElementBySelector_ToBeClickable("#content > div:nth-child(8) > div > a:nth-child(1)");
+
                 }
                 else
                     version_LinkBox = null;
@@ -970,7 +993,7 @@ namespace TextForCtext
 
                 if (driver.Url.IndexOf("&action=editchapter#") > -1)
                 {
-                    return waitFindWebElementBySelector_ToBeClickable("#data", WebDriverWaitTimeSpan);
+                    return WaitFindWebElementBySelector_ToBeClickable("#data", WebDriverWaitTimeSpan);
                 }
                 else
                     return null;
@@ -1104,17 +1127,17 @@ namespace TextForCtext
             if (ie != null)
             {
                 //[簡單修改模式]方塊若不存在
-                if (waitFindWebElementBySelector_ToBeClickable("#data") == null)
+                if (WaitFindWebElementBySelector_ToBeClickable("#data") == null)
                 {
                     //[簡單修改模式]超連結
-                    if (waitFindWebElementBySelector_ToBeClickable("#quickedit > a") != null)
+                    if (WaitFindWebElementBySelector_ToBeClickable("#quickedit > a") != null)
                     {
                         //按下[簡單修改模式]超連結
-                        waitFindWebElementBySelector_ToBeClickable("#quickedit > a").Click();
+                        WaitFindWebElementBySelector_ToBeClickable("#quickedit > a").Click();
                     }
                     else
                         return string.Empty;
-                    quickedit_data_textbox = waitFindWebElementBySelector_ToBeClickable("#data");
+                    quickedit_data_textbox = WaitFindWebElementBySelector_ToBeClickable("#data");
                     ie = Quickedit_data_textbox;
                 }
                 if (ie.Text != string.Empty)
@@ -1260,13 +1283,99 @@ namespace TextForCtext
                 }
             }
         }
+
+        /// <summary>
+        /// 取出如以下這個字串中的「tr:nth-child(2)」這個個部分的「2」這個數值以供計算，如加1後變成3，而轉置回這個Selector的字串中
+        /// #content > div:nth-child(6) > table > tbody > tr:nth-child(2) > td:nth-child(1) > a
+        /// 20250305 GitHub　Copilot大菩薩
+        /// </summary>
+        /// <param name="selector"></param>
+        /// <returns></returns>
+        internal static string IncrementNthChild(string selector)
+        {
+            var match = Regex.Match(selector, @"tr:nth-child\((\d+)\)");
+            if (match.Success)
+            {
+                int number = int.Parse(match.Groups[1].Value);
+                number++;
+                return Regex.Replace(selector, @"tr:nth-child\(\d+\)", $"tr:nth-child({number})");
+            }
+            return selector;
+        }
+        /// <summary>
+        /// 取得目前chapter（冊）的Selector值，不存在則傳回null
+        /// </summary>
+        internal static string ChapterSelector
+        {
+            set
+            {
+                if (!WindowHandles.TryGetValue("ChapterSelector", out _))
+                    WindowHandles.Add("ChapterSelector", value);
+                else
+                    WindowHandles["ChapterSelector"] = value;
+            }
+            get
+            {
+                if (!WindowHandles.TryGetValue("ChapterSelector", out string chapterSelector))
+                    return null;
+                else
+                    return chapterSelector;
+            }
+        }
+        /// <summary>
+        /// 取得下一個chapter（冊）的Selector值，不存在則傳回null
+        /// </summary>
+        internal static string NextChapterSelector
+        {
+            get
+            {
+                if (ChapterSelector == null)
+                    return null;
+
+                string selector = ChapterSelector;//"#content > div:nth-child(6) > table > tbody > tr:nth-child(2) > td:nth-child(1) > a";
+                                                  //if (!WindowHandles.TryGetValue("ChapterSelecto", out string chapterSelector))
+                                                  //    WindowHandles.Add("ChapterSelector ",);
+                                                  //else
+                                                  //{
+                string newSelector = IncrementNthChild(selector);
+                //Console.WriteLine(newSelector); // 輸出: #content > div:nth-child(6) > table > tbody > tr:nth-child(3) > td:nth-child(1) > a
+                ChapterSelector = newSelector;
+                return newSelector;
+                //}
+            }
+        }
+        /// <summary>
+        /// 取得目前章節chapter（冊）的序號，以供Selector字串參照使用
+        /// </summary>
+        internal static string CurrentChapterNum_Selector
+        {
+            get
+            {
+                string selector = ChapterSelector;//"#content > div:nth-child(6) > table > tbody > tr:nth-child(2) > td:nth-child(1) > a";
+                var match = Regex.Match(selector, @"tr:nth-child\((\d+)\)");
+                //if (match.Success)
+                return match.Groups[1].Value;
+
+
+                //string pattern = @"tr:nth-child\((\d+)\)";//@"nth-child\((\d+)\)";
+                //MatchCollection matches = Regex.Matches(selector, pattern);
+                //foreach (Match match in matches)
+                //{
+                //    // 提取括號中的數值
+                //    int value = int.Parse(match.Groups[1].Value);
+                //    //Console.WriteLine($"nth-child 的值: {value}");
+                //    // 在這裡進行你的後續計算
+                //    retun
+                //}
+            }
+        }
         /// <summary>
         /// 以 Selector 為條件尋找網頁元件
         /// </summary>
         /// <param name="selector">所根據的 Selector 字串值</param>
         /// <param name="second">等待元素出現的秒數上限</param>
         /// <returns>成功找到則回傳該元件物件，出錯則回傳 null</returns>
-        internal static IWebElement waitFindWebElementBySelector_ToBeClickable(string selector, double second = 2)
+        internal static IWebElement WaitFindWebElementBySelector_ToBeClickable(string selector, double second = 2)
         {
             try
             {
@@ -2041,7 +2150,17 @@ namespace TextForCtext
                                                                //actions.SendKeys(OpenQA.Selenium.Keys.LeftShift + OpenQA.Selenium.Keys.Insert).Build().Perform();
             {
                 if (quickedit_data_textboxTxt != xInput)
-                    if (!SetQuickedit_data_textboxTxt(xInput)) Debugger.Break();
+                    if (!SetQuickedit_data_textboxTxt(xInput))
+                    {
+                        ActiveForm1.textBox3Text = driver.Url;
+                        if (!SetQuickedit_data_textboxTxt(xInput))
+                            Debugger.Break();
+                        if (Quickedit_data_textboxTxt != xInput)
+                            Debugger.Break();
+                        else
+                            submitting = true;
+                        //waitFindWebElementBySelector_ToBeClickable("#savechangesbutton")?.Click();
+                    }
                     else
                         submitting = true;
                 //20240913 改寫：以下作廢
@@ -2083,7 +2202,7 @@ namespace TextForCtext
                  */
                 if (submit == null)
                 {
-                    submit = waitFindWebElementBySelector_ToBeClickable("#savechangesbutton");
+                    submit = WaitFindWebElementBySelector_ToBeClickable("#savechangesbutton");
                     if (submit == null)
                     {
                         Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("請檢查頁面中的 Quict edit 是否可用，再按下確定繼續！");
@@ -2099,10 +2218,10 @@ namespace TextForCtext
                 try
                 {
                     if (submit == null)
-                        Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("請檢查頁面中的 Quict edit 是否可用，再按下確定繼續！");
-                    //submit = waitFindWebElementById_ToBeClickable("savechangesbutton", _webDriverWaitTimSpan);
-                    //submit = waitFindWebElementBySelector_ToBeClickable("#savechangesbutton");
-                    submit = driver.FindElement(By.XPath("/html/body/div[2]/div[4]/form/div/input"));
+                        //Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("請檢查頁面中的 Quict edit 是否可用，再按下確定繼續！");
+                        //submit = waitFindWebElementById_ToBeClickable("savechangesbutton", _webDriverWaitTimSpan);
+                        //submit = waitFindWebElementBySelector_ToBeClickable("#savechangesbutton");
+                        submit = driver.FindElement(By.XPath("/html/body/div[2]/div[4]/form/div/input"));
                     if (submit == null)
                     {
                         Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("請檢查頁面中的 Quict edit 是否可用!!!!!！");
@@ -2110,8 +2229,13 @@ namespace TextForCtext
                             Form1.InstanceForm1.FastModeSwitcher();
                         return false;
                     }
-
-                    return CheckPageNumBeforeSubmitSaveChanges(driver, submit);
+                    if (int.Parse(ActiveForm1.CurrentPageNum) < 3)
+                        submit.Click();
+                    else
+                    {
+                        if (!CheckPageNumBeforeSubmitSaveChanges(driver, submit))
+                            return false;
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -2162,6 +2286,7 @@ namespace TextForCtext
                 if (IsConfirmHumanPage())
                 {
                     Debugger.Break();
+                    if (ActiveForm1.FastMode) ActiveForm1.FastModeSwitcher();
                     try
                     {
                         Clipboard.SetText(xInput);//複製到剪貼簿備用
@@ -2172,21 +2297,26 @@ namespace TextForCtext
 
                     //點選輸入框
                     //waitFindWebElementBySelector_ToBeClickable("#content3 > form > table > tbody > tr:nth-child(2) > td:nth-child(2) > input[type=text]")?.Click();
-                    IWebElement iweConfirm = waitFindWebElementBySelector_ToBeClickable("#content3 > form > table > tbody > tr:nth-child(2) > td:nth-child(2) > input[type=text]");
+                    IWebElement iweConfirm = WaitFindWebElementBySelector_ToBeClickable("#content3 > form > table > tbody > tr:nth-child(2) > td:nth-child(2) > input[type=text]");
                     if (iweConfirm == null) driver.Navigate().Back();//因非同步，若已翻到下一頁
-                    iweConfirm = waitFindWebElementBySelector_ToBeClickable("#content3 > form > table > tbody > tr:nth-child(2) > td:nth-child(2) > input[type=text]");
+                    iweConfirm = WaitFindWebElementBySelector_ToBeClickable("#content3 > form > table > tbody > tr:nth-child(2) > td:nth-child(2) > input[type=text]");
                     if (iweConfirm == null)
                         Debugger.Break();
                     else
                         iweConfirm.Click();
                     if (DialogResult.Cancel ==
                         Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("Please confirm that you are human! 請輸入認證圖案"
-                        + Environment.NewLine + Environment.NewLine + "請輸入完畢後再按「確定」！", string.Empty, false))
+                        + Environment.NewLine + Environment.NewLine + "請輸入完畢後再按「確定」！程式會幫忙按下「OK」送出", string.Empty, false))
                     {
                         Debugger.Break();
                     }
+                    while (true)
+                    {
+                        WaitFindWebElementBySelector_ToBeClickable("#content3 > form > table > tbody > tr:nth-child(3) > td:nth-child(2) > input[type=submit]")?.Click();
+                        if (DialogResult.Cancel == Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("是否重試？")) break;
+                    }
                     driver.Navigate().Back();
-                    while (driver.Url == "https://ctext.org/wiki.pl")
+                    while (driver.Url == "https://ctext.org/wiki.pl" || driver.Url == "https://ctext.org/wiki.pl?if=en")
                     {
                         driver.Navigate().Back();
                     }
@@ -2226,7 +2356,7 @@ namespace TextForCtext
         /// <returns></returns>
         internal static bool CheckPageNumBeforeSubmitSaveChanges(ChromeDriver driver, IWebElement submit_saveChanges = null)
         {
-            if (!IsDriverInvalid())
+            if (!IsDriverInvalid() && int.Parse(ActiveForm1.CurrentPageNum) > 2)
             {
                 int currentPageNum = int.Parse(Form1.InstanceForm1.CurrentPageNum);
                 if (currentPageNum != Form1.InstanceForm1.GetPageNumFromUrl(driver.Url) ||
@@ -3465,11 +3595,11 @@ namespace TextForCtext
             ActiveForm1.TopMost = false;
             driver.Navigate().GoToUrl(keep);
             //取得文字框
-            IWebElement iwe = waitFindWebElementBySelector_ToBeClickable("body > div.VIpgJd-TUo6Hb.XKSfm-L9AdLc.eo9XGd > div > div.IZ65Hb-TBnied.zTETae-h1U9Be-hxXJme > div.IZ65Hb-s2gQvd > div.IZ65Hb-qJTHM-haAclf > div.notranslate.IZ65Hb-YPqjbf.fmcmS-x3Eknd.h1U9Be-YPqjbf");
+            IWebElement iwe = WaitFindWebElementBySelector_ToBeClickable("body > div.VIpgJd-TUo6Hb.XKSfm-L9AdLc.eo9XGd > div > div.IZ65Hb-TBnied.zTETae-h1U9Be-hxXJme > div.IZ65Hb-s2gQvd > div.IZ65Hb-qJTHM-haAclf > div.notranslate.IZ65Hb-YPqjbf.fmcmS-x3Eknd.h1U9Be-YPqjbf");
             iwe.Click();
             //iwe.Clear();
             //按下：新增圖片
-            waitFindWebElementBySelector_ToBeClickable("body > div.VIpgJd-TUo6Hb.XKSfm-L9AdLc.eo9XGd > div > div.IZ65Hb-TBnied.zTETae-h1U9Be-hxXJme > div.IZ65Hb-yePe5c > div.IZ65Hb-INgbqf > div.Q0hgme-LgbsSe.Q0hgme-Bz112c-LgbsSe.Ge5tnd-HiaYvf.INgbqf-LgbsSe.VIpgJd-LgbsSe", 6).Click();
+            WaitFindWebElementBySelector_ToBeClickable("body > div.VIpgJd-TUo6Hb.XKSfm-L9AdLc.eo9XGd > div > div.IZ65Hb-TBnied.zTETae-h1U9Be-hxXJme > div.IZ65Hb-yePe5c > div.IZ65Hb-INgbqf > div.Q0hgme-LgbsSe.Q0hgme-Bz112c-LgbsSe.Ge5tnd-HiaYvf.INgbqf-LgbsSe.VIpgJd-LgbsSe", 6).Click();
             Thread.Sleep(1200);
             //輸入：檔案名稱
             //SendKeys.Send(downloadImgFullName);
@@ -3490,7 +3620,7 @@ namespace TextForCtext
                 //待圖載入
                 Thread.Sleep(6520);
             //按下：…更多
-            IWebElement iwe_morebtn = waitFindWebElementBySelector_ToBeClickable("body > div.VIpgJd-TUo6Hb.XKSfm-L9AdLc.eo9XGd > div > div.IZ65Hb-TBnied.zTETae-h1U9Be-hxXJme > div.IZ65Hb-yePe5c > div.IZ65Hb-INgbqf > div.Q0hgme-LgbsSe.Q0hgme-Bz112c-LgbsSe.xl07Ob.INgbqf-LgbsSe.VIpgJd-LgbsSe");
+            IWebElement iwe_morebtn = WaitFindWebElementBySelector_ToBeClickable("body > div.VIpgJd-TUo6Hb.XKSfm-L9AdLc.eo9XGd > div > div.IZ65Hb-TBnied.zTETae-h1U9Be-hxXJme > div.IZ65Hb-yePe5c > div.IZ65Hb-INgbqf > div.Q0hgme-LgbsSe.Q0hgme-Bz112c-LgbsSe.xl07Ob.INgbqf-LgbsSe.VIpgJd-LgbsSe");
             if (iwe_morebtn == null) return false;
             iwe_morebtn.Click();
             byte tryTimes = 1;//重做記數，防有例外情形、成無窮迴圈；如「按下：新增圖片」處可能還來不及待輸入框出現程式便兀自執行下去
@@ -3498,7 +3628,7 @@ namespace TextForCtext
             //按下：擷取圖片文字
             //Thread.Sleep(300);
 
-            IWebElement iwe_ocr = waitFindWebElementBySelector_ToBeClickable("#\\:8 > div", 0); int waitTime = 900;
+            IWebElement iwe_ocr = WaitFindWebElementBySelector_ToBeClickable("#\\:8 > div", 0); int waitTime = 900;
             while (iwe_ocr == null)
             {   //愈等愈短時間    
                 Thread.Sleep(waitTime); iwe_morebtn.Click(); tryTimes++;
@@ -3529,7 +3659,7 @@ namespace TextForCtext
             #region 刪除一則記事
             iwe_morebtn.Click();
             //IWebElement iwe_del =
-            waitFindWebElementBySelector_ToBeClickable("#\\:1 > div").Click();
+            WaitFindWebElementBySelector_ToBeClickable("#\\:1 > div").Click();
             //移除圖片
 
             //IWebElement iwe_pic=
@@ -3570,14 +3700,14 @@ namespace TextForCtext
             //按下「選擇檔案」按鈕
             //IWebElement iwe = waitFindWebElementBySelector_ToBeClickable("#image-input");
             //IWebElement iwe = waitFindWebElementBySelector_ToBeClickable("#convert-form > label.drop-container", 3);
-            IWebElement iwe = waitFindWebElementBySelector_ToBeClickable("#app > div:nth-child(1) > div > div.col-md-3 > div > div.col-md-10 > label", 3);
+            IWebElement iwe = WaitFindWebElementBySelector_ToBeClickable("#app > div:nth-child(1) > div > div.col-md-3 > div > div.col-md-10 > label", 3);
             DateTime dt = DateTime.Now;
             while (iwe == null)
             {
                 if (DateTime.Now.Subtract(dt).TotalSeconds > 10)
                     if (Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("等候「選擇檔案」按鈕逾時，是否繼續？") == DialogResult.Cancel)
                     { StopOCR = true; return false; }
-                iwe = waitFindWebElementBySelector_ToBeClickable("#app > div:nth-child(1) > div > div.col-md-3 > div > div.col-md-10 > label");
+                iwe = WaitFindWebElementBySelector_ToBeClickable("#app > div:nth-child(1) > div > div.col-md-3 > div > div.col-md-10 > label");
             }
             //ActiveForm1.TopMost = false;//前已有
             try
@@ -3625,10 +3755,10 @@ namespace TextForCtext
                                             //Clipboard.Clear();
 
             //圖像載入訊息框
-            iwe = waitFindWebElementBySelector_ToBeClickable("#img_create_message");
+            iwe = WaitFindWebElementBySelector_ToBeClickable("#img_create_message");
             while (iwe == null)
             {
-                iwe = waitFindWebElementBySelector_ToBeClickable("#img_create_message");
+                iwe = WaitFindWebElementBySelector_ToBeClickable("#img_create_message");
                 if (DateTime.Now.Subtract(dt).TotalSeconds > 38) { StopOCR = true; return false; }
             }
             while (!iwe.GetAttribute("textContent").Contains("Ctext_Page_Image.png")) { if (DateTime.Now.Subtract(dt).TotalSeconds > 38) { StopOCR = true; return false; } }
@@ -3640,25 +3770,25 @@ namespace TextForCtext
 
             //點選「 语序优化beta版」核取方塊：（對於正文、夾注之次予至關重要）20240803
             //iwe = waitFindWebElementBySelector_ToBeClickable("#version_2");
-            iwe = waitFindWebElementBySelector_ToBeClickable("#img_rec_version");
+            iwe = WaitFindWebElementBySelector_ToBeClickable("#img_rec_version");
             iwe.Click();
             //SetIWebElementValueProperty(iwe, "beta");//這樣設定在按下「開始識別」按鈕：時會被還原
             //點選<option value="beta">语序优化beta版</option>
-            iwe = waitFindWebElementBySelector_ToBeClickable("#img_rec_version > option:nth-child(2)");
+            iwe = WaitFindWebElementBySelector_ToBeClickable("#img_rec_version > option:nth-child(2)");
             iwe.Click();
 
 
 
             dt = DateTime.Now;
             //按下「開始識別」按鈕：
-            iwe = waitFindWebElementBySelector_ToBeClickable("#img_create_task_button");
+            iwe = WaitFindWebElementBySelector_ToBeClickable("#img_create_task_button");
             while (iwe == null)
             {
                 if (DateTime.Now.Subtract(dt).TotalSeconds > 5)
                 {
                     if (Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("等候「開始識別」按鈕逾時，是否繼續？") == DialogResult.Cancel) { StopOCR = true; return false; }
                 }
-                iwe = waitFindWebElementBySelector_ToBeClickable("#img_create_task_button");
+                iwe = WaitFindWebElementBySelector_ToBeClickable("#img_create_task_button");
             }
             iwe.Click();
 
@@ -3666,12 +3796,12 @@ namespace TextForCtext
             //currentSrc=https://kandianguji.com/static/loading.gif
             //檢查結果出來沒：            
             dt = DateTime.Now;
-            iwe = waitFindWebElementBySelector_ToBeClickable("#result_text");
+            iwe = WaitFindWebElementBySelector_ToBeClickable("#result_text");
             while (iwe == null)
             {
                 if (DateTime.Now.Subtract(dt).TotalSeconds > 10)
                     if (Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("等候OCR結果逾時，是否繼續？") == DialogResult.Cancel) { StopOCR = true; return false; }
-                iwe = waitFindWebElementBySelector_ToBeClickable("#result_text");
+                iwe = WaitFindWebElementBySelector_ToBeClickable("#result_text");
             }
 
             dt = DateTime.Now;
@@ -4118,7 +4248,7 @@ namespace TextForCtext
                     if (!ActiveForm1.Visible && !ActiveForm1.HiddenIcon) ActiveForm1.Visible = true;
                 }
 
-                IWebElement ie = waitFindWebElementBySelector_ToBeClickable("#username");
+                IWebElement ie = WaitFindWebElementBySelector_ToBeClickable("#username");
                 if (ie != null)
                 {
                     //Task tsk = Task.Run(() =>
@@ -4130,7 +4260,7 @@ namespace TextForCtext
                     //while(ie.Text != "") ie.Clear();
                     ie.SendKeys(currentAccount);
                     //將插入點置於輸入「驗證碼」處：
-                    IWebElement ie1 = waitFindWebElementBySelector_ToBeClickable("#captcha");
+                    IWebElement ie1 = WaitFindWebElementBySelector_ToBeClickable("#captcha");
                     ie1.Click();//此方法無法將鍵入輸入之插入點實際切換到此方塊內，故須以下行執行
                     ie1.SendKeys(currentAccount);
 
@@ -4306,7 +4436,7 @@ namespace TextForCtext
             if (ip == string.Empty)
             {
                 GoToUrlandActivate("https://iplocation.com/");
-                ip = waitFindWebElementBySelector_ToBeClickable("body > div.top-container > div.bottom-container > div.rubber-container.result > div > table > tbody > tr:nth-child(1) > td > b")?.Text;
+                ip = WaitFindWebElementBySelector_ToBeClickable("body > div.top-container > div.bottom-container > div.rubber-container.result > div > table > tbody > tr:nth-child(1) > td > b")?.Text;
                 Thread.Sleep(850);
             }
             Clipboard.SetText(ip);
@@ -4314,7 +4444,7 @@ namespace TextForCtext
             GoToUrlandActivate("https://gj.cool/login?next=%2Ftry_ocr");//檢視IP是否被封鎖
                                                                         //Thread.Sleep(850);
             Thread.Sleep(1450);
-            IWebElement iwe = waitFindWebElementBySelector_ToBeClickable("body > div.alert.alert-danger.alert-dismissible");
+            IWebElement iwe = WaitFindWebElementBySelector_ToBeClickable("body > div.alert.alert-danger.alert-dismissible");
             string info = string.Empty;
             if (iwe != null)
             {
@@ -4990,10 +5120,10 @@ namespace TextForCtext
                         }
                     }
                     DateTime dt = DateTime.Now;
-                    IWebElement ie = waitFindWebElementBySelector_ToBeClickable(selector);
+                    IWebElement ie = WaitFindWebElementBySelector_ToBeClickable(selector);
                     while (ie == null)
                     {
-                        ie = waitFindWebElementBySelector_ToBeClickable(selector);
+                        ie = WaitFindWebElementBySelector_ToBeClickable(selector);
                         if (DateTime.Now.Subtract(dt).Seconds > 15)
                         {
                             if (ipUrl == "https://api.ipify.org")
@@ -5065,17 +5195,17 @@ namespace TextForCtext
                 //GoToUrlandActivate("https://gj.cool/try_ocr#Batch");
 
                 //按下「批量處理（面向授權用戶）」頁籤
-                IWebElement iwe = waitFindWebElementBySelector_ToBeClickable("#batch_Tab_A", 15);
+                IWebElement iwe = WaitFindWebElementBySelector_ToBeClickable("#batch_Tab_A", 15);
                 iwe.Click();
 
                 //按下「OCR」
-                iwe = waitFindWebElementBySelector_ToBeClickable("#batchUploadSelect0");
+                iwe = WaitFindWebElementBySelector_ToBeClickable("#batchUploadSelect0");
                 iwe.Click();
 
                 driver.SwitchTo().Window(driver.CurrentWindowHandle);
                 //按下「批量處理（面向授權用戶）」頁面下的「選擇檔案」
                 //iwe = waitFindWebElementBySelector_ToBeClickable("#BatchFilesInput");
-                iwe = waitFindWebElementBySelector_ToBeClickable("#Batch > div.d-flex.justify-content-between.mt-2 > div.d-flex.ms-2 > div:nth-child(2) > button > i");
+                iwe = WaitFindWebElementBySelector_ToBeClickable("#Batch > div.d-flex.justify-content-between.mt-2 > div.d-flex.ms-2 > div:nth-child(2) > button > i");
                 iwe.Click();
                 //clickCopybutton_GjcoolFastExperience(new Point(iwe.Location.X + 76 + (iwe.Size.Width) / 2, iwe.Location.Y + 120 + (iwe.Size.Height) / 2));//new Point(X, Y)=「選擇檔案」控制項之位置
                 //iwe.Click();
@@ -5131,22 +5261,22 @@ namespace TextForCtext
 
                 //按下「編輯」
                 //iwe = waitFindWebElementBySelector_ToBeClickable("#result_edit_0", 30);
-                iwe = waitFindWebElementBySelector_ToBeClickable("#result_edit_0", 1);
+                iwe = WaitFindWebElementBySelector_ToBeClickable("#result_edit_0", 1);
                 while (iwe == null)
                 {
                     //訊息方塊：文件 1 识别失败。Ocr failed
-                    IWebElement iw = waitFindWebElementBySelector_ToBeClickable("#swal2-html-container");
+                    IWebElement iw = WaitFindWebElementBySelector_ToBeClickable("#swal2-html-container");
                     //<div class="swal2-html-container" id="swal2-html-container" style="display: block;">文件 1 识别失败。Ocr failed</div>
                     //<div class="swal2-html-container" id="swal2-html-container" style="display: block;">出现错误。error.</div>
                     if (iw != null && (iw.Text.Contains("文件 1 识别失败。Ocr failed") || iw.Text.Contains("出现错误。error.")))
                     {
                         //按下ok:
-                        iw = waitFindWebElementBySelector_ToBeClickable("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled");
+                        iw = WaitFindWebElementBySelector_ToBeClickable("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled");
                         iw.Click();
                         goto retry;
                     }
 
-                    iwe = waitFindWebElementBySelector_ToBeClickable("#result_edit_0");
+                    iwe = WaitFindWebElementBySelector_ToBeClickable("#result_edit_0");
                 }
                 iwe.Click();
 
@@ -5158,17 +5288,17 @@ namespace TextForCtext
 
 
                 //按下準備完畢OK
-                iwe = waitFindWebElementBySelector_ToBeClickable("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled", 1);
+                iwe = WaitFindWebElementBySelector_ToBeClickable("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled", 1);
                 while (iwe == null)
-                    iwe = waitFindWebElementBySelector_ToBeClickable("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled", 1);
+                    iwe = WaitFindWebElementBySelector_ToBeClickable("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled", 1);
                 iwe.Click();
 
                 //按下「文本行」
                 //【文本行】按鈕
-                iwe = waitFindWebElementBySelector_ToBeClickable("#line_image_panel > div > div:nth-child(2) > div:nth-child(8) > button:nth-child(2)");
+                iwe = WaitFindWebElementBySelector_ToBeClickable("#line_image_panel > div > div:nth-child(2) > div:nth-child(8) > button:nth-child(2)");
 
                 while (iwe == null)
-                    iwe = waitFindWebElementBySelector_ToBeClickable("#line_image_panel > div > div:nth-child(2) > div:nth-child(8) > button:nth-child(2)");
+                    iwe = WaitFindWebElementBySelector_ToBeClickable("#line_image_panel > div > div:nth-child(2) > div:nth-child(8) > button:nth-child(2)");
                 //if (iwe == null)
                 //{
                 //    SendKeys.SendWait("{esc}");
@@ -5191,7 +5321,7 @@ namespace TextForCtext
                         iwe.Click();
                     }
                     //文本窗口
-                    iwe = waitFindWebElementBySelector_ToBeClickable("#TextArea");
+                    iwe = WaitFindWebElementBySelector_ToBeClickable("#TextArea");
                     if (iwe != null)
                     {
                         //將OCR結果讀入剪貼簿：
@@ -5266,7 +5396,7 @@ namespace TextForCtext
                 //ActiveForm1.TopMost = false;
                 //按下「批量處理(new)」頁籤
                 //IWebElement iwe = waitFindWebElementBySelector_ToBeClickable("#batch_Tab_A", 15);
-                iwe = waitFindWebElementBySelector_ToBeClickable("#File_Tab", 15);
+                iwe = WaitFindWebElementBySelector_ToBeClickable("#File_Tab", 15);
                 if (iwe == null) { StopOCR = true; return false; }
                 iwe.Click();
             }
@@ -5278,14 +5408,14 @@ namespace TextForCtext
 
 
             #region 檢查並刪除文件
-            iwe = waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr:nth-child(1) > td.bs-checkbox > label > input[type=checkbox]", 1);
+            iwe = WaitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr:nth-child(1) > td.bs-checkbox > label > input[type=checkbox]", 1);
             if (iwe != null)
             {
                 try
                 {
                     //按下選取方塊，準備刪除
                     while (iwe == null)
-                        iwe = waitFindWebElementBySelector_ToBeClickable("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled");
+                        iwe = WaitFindWebElementBySelector_ToBeClickable("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled");
                     if (!iwe.Selected)
                         iwe.Click();
                 }
@@ -5301,15 +5431,15 @@ namespace TextForCtext
                 //刪除文件
                 try
                 {
-                    iwe = waitFindWebElementBySelector_ToBeClickable("#FileUploadDropdown");
+                    iwe = WaitFindWebElementBySelector_ToBeClickable("#FileUploadDropdown");
                     //按下「上傳」
                     while (iwe == null)
-                        iwe = waitFindWebElementBySelector_ToBeClickable("#FileUploadDropdown");
+                        iwe = WaitFindWebElementBySelector_ToBeClickable("#FileUploadDropdown");
                     iwe.Click();
                     //按下「刪除文件」                    
-                    iwe = waitFindWebElementBySelector_ToBeClickable("#File > div.d-flex.justify-content-between.mt-2 > div.d-flex.mx-3 > div:nth-child(1) > div > ul > li:nth-child(8) > a");
+                    iwe = WaitFindWebElementBySelector_ToBeClickable("#File > div.d-flex.justify-content-between.mt-2 > div.d-flex.mx-3 > div:nth-child(1) > div > ul > li:nth-child(8) > a");
                     while (iwe == null)
-                        iwe = waitFindWebElementBySelector_ToBeClickable("#File > div.d-flex.justify-content-between.mt-2 > div.d-flex.mx-3 > div:nth-child(1) > div > ul > li:nth-child(8) > a");
+                        iwe = WaitFindWebElementBySelector_ToBeClickable("#File > div.d-flex.justify-content-between.mt-2 > div.d-flex.mx-3 > div:nth-child(1) > div > ul > li:nth-child(8) > a");
                     iwe.Click();
 
                 }
@@ -5329,7 +5459,7 @@ namespace TextForCtext
 
         reUpload:
             //按下「上傳」
-            iwe = waitFindWebElementBySelector_ToBeClickable("#FileUploadDropdown");
+            iwe = WaitFindWebElementBySelector_ToBeClickable("#FileUploadDropdown");
             iwe.Click();
 
             while (!File.Exists(downloadImgFullName))
@@ -5348,7 +5478,7 @@ namespace TextForCtext
             //按下「上傳圖片」
             //iwe = waitFindWebElementBySelector_ToBeClickable("#File > div.d-flex.justify-content-between.mt-2 > div.d-flex.mx-3 > div:nth-child(1) > div > ul > li:nth-child(3) > a");
 
-            iwe = waitFindWebElementBySelector_ToBeClickable("#File > div.d-flex.justify-content-between.mt-2 > div.d-flex.mx-3 > div:nth-child(1) > div > ul > li:nth-child(4) > a");
+            iwe = WaitFindWebElementBySelector_ToBeClickable("#File > div.d-flex.justify-content-between.mt-2 > div.d-flex.mx-3 > div:nth-child(1) > div > ul > li:nth-child(4) > a");
             try
             {
                 iwe.Click();
@@ -5402,19 +5532,19 @@ namespace TextForCtext
             try
             {
                 //等待「上傳完成」訊息方塊出現
-                iwe = waitFindWebElementBySelector_ToBeClickable("#swal2-title", 0.1);
+                iwe = WaitFindWebElementBySelector_ToBeClickable("#swal2-title", 0.1);
                 dt = DateTime.Now;
                 while (iwe == null)
                 {
                     try
                     {
-                        if (waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr > td:nth-child(4)", 0.1)?.GetAttribute("textContent") != string.Empty
-                            && waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr > td:nth-child(7)", 0.1)?.GetAttribute("textContent") == " ") goto reRunOCR;
+                        if (WaitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr > td:nth-child(4)", 0.1)?.GetAttribute("textContent") != string.Empty
+                            && WaitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr > td:nth-child(7)", 0.1)?.GetAttribute("textContent") == " ") goto reRunOCR;
                     }
                     catch (Exception)
                     {
                     }
-                    iwe = waitFindWebElementBySelector_ToBeClickable("#swal2-title", 0.1);
+                    iwe = WaitFindWebElementBySelector_ToBeClickable("#swal2-title", 0.1);
                     if (DateTime.Now.Subtract(dt).TotalSeconds > 8)
                         if (Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("等待「上傳完成」訊息方塊出現、已逾時，要繼續嗎？") == DialogResult.Cancel)
                         { StopOCR = true; return false; }
@@ -5441,19 +5571,19 @@ namespace TextForCtext
                         }
                 }
                 //按下「上傳完成」按鈕
-                iwe = waitFindWebElementBySelector_ToBeClickable("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled", 0.1);
+                iwe = WaitFindWebElementBySelector_ToBeClickable("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled", 0.1);
                 while (iwe == null)
                 {
                     try
                     {
-                        if (waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr > td:nth-child(4)", 0.1)?.GetAttribute("textContent") != string.Empty
-                            && waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr > td:nth-child(7)", 0.1)?.GetAttribute("textContent") == " "
-                            && waitFindWebElementBySelector_ToBeClickable("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled", 0.1) == null) goto reRunOCR;
+                        if (WaitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr > td:nth-child(4)", 0.1)?.GetAttribute("textContent") != string.Empty
+                            && WaitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr > td:nth-child(7)", 0.1)?.GetAttribute("textContent") == " "
+                            && WaitFindWebElementBySelector_ToBeClickable("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled", 0.1) == null) goto reRunOCR;
                     }
                     catch (Exception)
                     {
                     }
-                    iwe = waitFindWebElementBySelector_ToBeClickable("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled", 0.1);
+                    iwe = WaitFindWebElementBySelector_ToBeClickable("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled", 0.1);
                 }
                 //{
                 ////訊息方塊：文件 1 识别失败。Ocr failed
@@ -5504,16 +5634,16 @@ namespace TextForCtext
             //按下選取方塊，準備OCR
             try
             {
-                string tx = waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr > td:nth-child(7)", 0.1)?.GetAttribute("textContent");
+                string tx = WaitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr > td:nth-child(7)", 0.1)?.GetAttribute("textContent");
                 if (!tx.IsNullOrEmpty() && tx != " ")
                 {
                     //System.Diagnostics.Debugger.Break();
                     goto copyResult;
                 }
-                while (waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr > td:nth-child(4)", 0.1)?.GetAttribute("textContent") == string.Empty) ;
-                iwe = waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr:nth-child(1) > td.bs-checkbox > label > input[type=checkbox]", 0.1);
+                while (WaitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr > td:nth-child(4)", 0.1)?.GetAttribute("textContent") == string.Empty) ;
+                iwe = WaitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr:nth-child(1) > td.bs-checkbox > label > input[type=checkbox]", 0.1);
                 while (iwe == null)
-                    iwe = waitFindWebElementBySelector_ToBeClickable("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled", 0.1);
+                    iwe = WaitFindWebElementBySelector_ToBeClickable("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled", 0.1);
                 dt = DateTime.Now;
                 while (!iwe.Selected)
                 {
@@ -5539,7 +5669,7 @@ namespace TextForCtext
             //按下「執行命令」按鈕
             try
             {
-                iwe = waitFindWebElementBySelector_ToBeClickable("#OcrFileDropdown", 0.1);
+                iwe = WaitFindWebElementBySelector_ToBeClickable("#OcrFileDropdown", 0.1);
 
                 iwe.Click();
             }
@@ -5552,13 +5682,13 @@ namespace TextForCtext
             //按下「OCR」按鈕
             try
             {
-                iwe = waitFindWebElementBySelector_ToBeClickable("#File > div.d-flex.justify-content-between.mt-2 > div.d-flex.mx-3 > div.d-flex.mx-2.align-self-center > div:nth-child(1) > ul > li:nth-child(2) > a", 0.1);
+                iwe = WaitFindWebElementBySelector_ToBeClickable("#File > div.d-flex.justify-content-between.mt-2 > div.d-flex.mx-3 > div.d-flex.mx-2.align-self-center > div:nth-child(1) > ul > li:nth-child(2) > a", 0.1);
                 iwe.Click();
 
             }
             catch (Exception)
             {
-                if (waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr > td:nth-child(4)", 0.1).GetAttribute("textContent") != string.Empty)
+                if (WaitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr > td:nth-child(4)", 0.1).GetAttribute("textContent") != string.Empty)
                     goto reClickUploadOK;
                 throw;
             }
@@ -5568,12 +5698,12 @@ namespace TextForCtext
             {
                 dt = DateTime.Now;
                 //等待「OCR完成 OK」出現
-                iwe = waitFindWebElementBySelector_ToBeClickable("#swal2-title", 0.1);
+                iwe = WaitFindWebElementBySelector_ToBeClickable("#swal2-title", 0.1);
                 while (iwe == null)
                 {
-                    if (waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr > td.bs-checkbox > label > input[type=checkbox]", 0.1)?.Selected == false
-                        && waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr > td:nth-child(7)", 0.1)?.GetAttribute("textContent") == " ") goto reRunOCR;
-                    iwe = waitFindWebElementBySelector_ToBeClickable("#swal2-title", 0.1);
+                    if (WaitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr > td.bs-checkbox > label > input[type=checkbox]", 0.1)?.Selected == false
+                        && WaitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr > td:nth-child(7)", 0.1)?.GetAttribute("textContent") == " ") goto reRunOCR;
+                    iwe = WaitFindWebElementBySelector_ToBeClickable("#swal2-title", 0.1);
                     if (DateTime.Now.Subtract(dt).TotalSeconds > 45)
                         if (Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("等待OCR完成已逾時，是否繼續？") == DialogResult.Cancel) { StopOCR = true; return false; }
                         else
@@ -5595,19 +5725,19 @@ namespace TextForCtext
                         }
                 }
                 //按下「OCR完成 OK」按鈕
-                iwe = waitFindWebElementBySelector_ToBeClickable("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled", 0.1);
+                iwe = WaitFindWebElementBySelector_ToBeClickable("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled", 0.1);
                 while (iwe == null)
                 {
                     try
                     {
-                        if (waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr > td.bs-checkbox > label > input[type=checkbox]", 0.1)?.Selected == false
-                            && waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr > td:nth-child(7)", 0.1)?.GetAttribute("textContent") == " ") goto reRunOCR;
+                        if (WaitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr > td.bs-checkbox > label > input[type=checkbox]", 0.1)?.Selected == false
+                            && WaitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr > td:nth-child(7)", 0.1)?.GetAttribute("textContent") == " ") goto reRunOCR;
 
                     }
                     catch (Exception)
                     {
                     }
-                    iwe = waitFindWebElementBySelector_ToBeClickable("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled", 0.1);
+                    iwe = WaitFindWebElementBySelector_ToBeClickable("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled", 0.1);
                     //提前結束用
                     if (Clipboard.GetText() != string.Empty)// && !Clipboard.GetText().Contains("Ctext_Page_Image"))
                     { StopOCR = true; return false; }
@@ -5615,7 +5745,7 @@ namespace TextForCtext
                 try
                 {
                     //訊息方塊：成功: 0, 失败: 1
-                    IWebElement iw = waitFindWebElementBySelector_ToBeClickable("#swal2-html-container", 0.1);
+                    IWebElement iw = WaitFindWebElementBySelector_ToBeClickable("#swal2-html-container", 0.1);
                     bool stopProcess = false;
 
                     if (iw != null)
@@ -5636,24 +5766,24 @@ namespace TextForCtext
             }
             catch (Exception)
             {
-                IWebElement iewMsgBox = waitFindWebElementBySelector_ToBeClickable("#swal2-title", 0.1);
-                IWebElement iew = waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr > td.bs-checkbox > label > input[type=checkbox]", 0.1);
+                IWebElement iewMsgBox = WaitFindWebElementBySelector_ToBeClickable("#swal2-title", 0.1);
+                IWebElement iew = WaitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr > td.bs-checkbox > label > input[type=checkbox]", 0.1);
                 if (iew == null)
                 {
                     if (iewMsgBox != null)
                     {
-                        iewMsgBox = waitFindWebElementBySelector_ToBeClickable("#swal2-title", 0.1);
+                        iewMsgBox = WaitFindWebElementBySelector_ToBeClickable("#swal2-title", 0.1);
                         if (iewMsgBox.GetAttribute("textContent").Contains("OCR完成")) goto reClickOCROK;
                     }
                     goto reUpload;
                 }
-                else if (waitFindWebElementBySelector_ToBeClickable("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled", 0.1) != null)
+                else if (WaitFindWebElementBySelector_ToBeClickable("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled", 0.1) != null)
                     goto reClickOCROK;
                 //有選取項目，且其「文本」欄位值非空
                 //else if (iew?.Selected == false
                 //    && waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr > td:nth-child(7)")?.GetAttribute("textContent") == " ")
                 //    goto reRunOCR;
-                else if (waitFindWebElementBySelector_ToBeClickable("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled", 0.1) != null)
+                else if (WaitFindWebElementBySelector_ToBeClickable("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled", 0.1) != null)
                     goto reClickUploadOK;
                 else
                     goto reClickOCROK;
@@ -5679,7 +5809,7 @@ namespace TextForCtext
             try
             {
                 // 取得網頁元素的 title 屬性值 
-                iwe = waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr:nth-child(1) > td:nth-child(7) > div", 0.1);
+                iwe = WaitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr:nth-child(1) > td:nth-child(7) > div", 0.1);
                 if (iwe == null)
                     goto reClickOCROK;
                 //while (iwe == null)
@@ -5689,18 +5819,18 @@ namespace TextForCtext
                 {
                     DateTime dtt = DateTime.Now;
                     //檢查「OCR完成 OK」按鈕
-                    while (waitFindWebElementBySelector_ToBeClickable("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled", 0.1) == null)
+                    while (WaitFindWebElementBySelector_ToBeClickable("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled", 0.1) == null)
                     { if (DateTime.Now.Subtract(dtt).TotalSeconds > 45) break; }
-                    iwe = waitFindWebElementBySelector_ToBeClickable("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled", 0.1);
+                    iwe = WaitFindWebElementBySelector_ToBeClickable("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled", 0.1);
                     if (iwe == null)
                     {
                         Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("OCR結果是空字串，請檢查！");
-                        if (waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr:nth-child(1) > td:nth-child(7) > div", 0.1)?.GetAttribute("title").IsNullOrEmpty() == false) { goto copyResult; }
+                        if (WaitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr:nth-child(1) > td:nth-child(7) > div", 0.1)?.GetAttribute("title").IsNullOrEmpty() == false) { goto copyResult; }
                     }
                     else
                     //按下「OCR完成 OK」按鈕                        
                     {
-                        if (waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr:nth-child(1) > td:nth-child(7) > div", 0.1)?.GetAttribute("title").IsNullOrEmpty() == false) { iwe.Click(); goto copyResult; }
+                        if (WaitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr:nth-child(1) > td:nth-child(7) > div", 0.1)?.GetAttribute("title").IsNullOrEmpty() == false) { iwe.Click(); goto copyResult; }
                     }
                     StopOCR = true; return false;
                 }
@@ -5759,12 +5889,12 @@ namespace TextForCtext
                 //按下選取方塊，準備刪除
                 //dt = DateTime.Now;
                 //iwe = waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr:nth-child(1) > td.bs-checkbox > label > input[type=checkbox]", 1);
-                iwe = waitFindWebElementBySelector_ToBeClickable("#fileTable > thead > tr > th.bs-checkbox > div.th-inner > label > input[type=checkbox]", 0.1);
+                iwe = WaitFindWebElementBySelector_ToBeClickable("#fileTable > thead > tr > th.bs-checkbox > div.th-inner > label > input[type=checkbox]", 0.1);
                 while (iwe == null)
                 {
                     //if (DateTime.Now.Subtract(dt).TotalSeconds > 30)
                     //    if (DialogResult.Cancel == Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("「選取方塊」等候逾時，是否繼續？")) { StopOCR = true; return false; }
-                    iwe = waitFindWebElementBySelector_ToBeClickable("#fileTable > thead > tr > th.bs-checkbox > div.th-inner > label > input[type=checkbox]", 0.1);
+                    iwe = WaitFindWebElementBySelector_ToBeClickable("#fileTable > thead > tr > th.bs-checkbox > div.th-inner > label > input[type=checkbox]", 0.1);
                 }
 
                 if (!iwe.Selected)
@@ -5775,8 +5905,8 @@ namespace TextForCtext
             }
             catch (Exception)
             {
-                if (!waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr > td.bs-checkbox > label > input[type=checkbox]", 0.1).Selected
-                    && waitFindWebElementBySelector_ToBeClickable("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled", 0.1) != null)
+                if (!WaitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr > td.bs-checkbox > label > input[type=checkbox]", 0.1).Selected
+                    && WaitFindWebElementBySelector_ToBeClickable("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled", 0.1) != null)
                     goto reClickOCROK;
                 else
                 {
@@ -5790,24 +5920,24 @@ namespace TextForCtext
             try
             {
                 //dt = DateTime.Now;
-                iwe = waitFindWebElementBySelector_ToBeClickable("#FileUploadDropdown", 0.1);
+                iwe = WaitFindWebElementBySelector_ToBeClickable("#FileUploadDropdown", 0.1);
                 //按下「上傳」
                 while (iwe == null)
                 {
                     //if (DateTime.Now.Subtract(dt).TotalSeconds > 30)
                     //    if (DialogResult.Cancel == Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("「上傳」等候逾時，是否繼續？")) { StopOCR = true; return false; }
-                    iwe = waitFindWebElementBySelector_ToBeClickable("#FileUploadDropdown", 0.1);
+                    iwe = WaitFindWebElementBySelector_ToBeClickable("#FileUploadDropdown", 0.1);
                 }
                 driver.SwitchTo().Window(driver.CurrentWindowHandle);
                 iwe.Click();
                 //按下「刪除文件」
                 //dt = DateTime.Now;
-                iwe = waitFindWebElementBySelector_ToBeClickable("#File > div.d-flex.justify-content-between.mt-2 > div.d-flex.mx-3 > div:nth-child(1) > div > ul > li:nth-child(8) > a", 0.1);
+                iwe = WaitFindWebElementBySelector_ToBeClickable("#File > div.d-flex.justify-content-between.mt-2 > div.d-flex.mx-3 > div:nth-child(1) > div > ul > li:nth-child(8) > a", 0.1);
                 while (iwe == null)
                 {
                     //if (DateTime.Now.Subtract(dt).TotalSeconds > 30)
                     //    if (DialogResult.Cancel == Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("「刪除文件」等候逾時，是否繼續？")) { StopOCR = true; return false; }
-                    iwe = waitFindWebElementBySelector_ToBeClickable("#File > div.d-flex.justify-content-between.mt-2 > div.d-flex.mx-3 > div:nth-child(1) > div > ul > li:nth-child(8) > a", 0.1);
+                    iwe = WaitFindWebElementBySelector_ToBeClickable("#File > div.d-flex.justify-content-between.mt-2 > div.d-flex.mx-3 > div:nth-child(1) > div > ul > li:nth-child(8) > a", 0.1);
                 }
                 driver.SwitchTo().Window(driver.CurrentWindowHandle);
                 iwe.Click();
@@ -5815,15 +5945,15 @@ namespace TextForCtext
             }
             catch (Exception)
             {
-                if (!waitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr > td.bs-checkbox > label > input[type=checkbox]", 0.1).Selected
-                    && waitFindWebElementBySelector_ToBeClickable("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled", 0.1) != null)
+                if (!WaitFindWebElementBySelector_ToBeClickable("#fileTable > tbody > tr > td.bs-checkbox > label > input[type=checkbox]", 0.1).Selected
+                    && WaitFindWebElementBySelector_ToBeClickable("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled", 0.1) != null)
                     goto reClickOCROK;
                 throw;
             }
             //Thread.Sleep(300);
             dt = DateTime.Now;
-            iwe = waitFindWebElementBySelector_ToBeClickable("#swal2-title", 0.02);
-            while (iwe == null || waitFindWebElementBySelector_ToBeClickable("#swal2-html-container", 0.02) == null)
+            iwe = WaitFindWebElementBySelector_ToBeClickable("#swal2-title", 0.02);
+            while (iwe == null || WaitFindWebElementBySelector_ToBeClickable("#swal2-html-container", 0.02) == null)
             {
                 try
                 {
@@ -5843,7 +5973,7 @@ namespace TextForCtext
                     }
                 }
 
-                iwe = waitFindWebElementBySelector_ToBeClickable("#swal2-title", 0.02);
+                iwe = WaitFindWebElementBySelector_ToBeClickable("#swal2-title", 0.02);
 
             }
 
@@ -6337,11 +6467,11 @@ namespace TextForCtext
             Clipboard.Clear();
             DateTime begin = DateTime.Now; const int timeSpanSecs = 30;
             TimeSpan timeSpan = new TimeSpan();
-            iwe = waitFindWebElementBySelector_ToBeClickable("#line_img_form > div > input[type=file]");
+            iwe = WaitFindWebElementBySelector_ToBeClickable("#line_img_form > div > input[type=file]");
             while (iwe == null)
             {
                 //iwe = waitFindWebElementBySelector_ToBeClickable("#line_img_form > div > input[type=file]");
-                iwe = waitFindWebElementBySelector_ToBeClickable("#OneLine > div.d-flex.mt-2 > div:nth-child(1) > div.ps-1.pe-2.align-self-center > button > i");
+                iwe = WaitFindWebElementBySelector_ToBeClickable("#OneLine > div.d-flex.mt-2 > div:nth-child(1) > div.ps-1.pe-2.align-self-center > button > i");
                 timeSpan = (DateTime.Now.Subtract(begin));
                 if (timeSpan.TotalSeconds > timeSpanSecs ||
                     Clipboard.GetText() != string.Empty) { StopOCR = true; return false; }
@@ -6484,7 +6614,7 @@ namespace TextForCtext
             #region「上傳完畢」對話方塊的「OK」按鈕 20231103
             try
             {
-                iwe = waitFindWebElementBySelector_ToBeClickable
+                iwe = WaitFindWebElementBySelector_ToBeClickable
                 //("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled", 0.2);
                 ("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled", 3.3);
 
@@ -6526,7 +6656,7 @@ namespace TextForCtext
                 Thread.Sleep(150);
                 try
                 {
-                    iwe = waitFindWebElementBySelector_ToBeClickable
+                    iwe = WaitFindWebElementBySelector_ToBeClickable
                                     ("body > div.swal2-container.swal2-center.swal2-backdrop-show > div > div.swal2-actions > button.swal2-confirm.swal2-styled", 0.3);
 
                 }
@@ -6585,7 +6715,7 @@ namespace TextForCtext
 
             #region 按下「Pro」
             //iwe = waitFindWebElementBySelector_ToBeClickable("#auto_ocr");
-            iwe = waitFindWebElementBySelector_ToBeClickable("#auto_ocr");
+            iwe = WaitFindWebElementBySelector_ToBeClickable("#auto_ocr");
             //if (iwe == null)
             while (iwe == null)
             {
@@ -6595,7 +6725,7 @@ namespace TextForCtext
                 if (Clipboard.GetText().IndexOf(Environment.NewLine + Environment.NewLine) > -1) goto finished;
 
                 Thread.Sleep(250);
-                iwe = waitFindWebElementBySelector_ToBeClickable("#auto_ocr");
+                iwe = WaitFindWebElementBySelector_ToBeClickable("#auto_ocr");
                 if (DateTime.Now.Subtract(dtimr).Seconds > 20)
                 {
                     StopOCR = true; return false;
@@ -6619,7 +6749,7 @@ namespace TextForCtext
             #region 按下「自動識別(豎版)」，開始OCR……
             //SendKeys.Send("{down}~");            
             //iwe = waitFindWebElementBySelector_ToBeClickable("#OneLine > div.d-flex.justify-content-between.mt-2.mb-1 > div:nth-child(1) > div:nth-child(2) > ul > li:nth-child(2) > button");
-            iwe = waitFindWebElementBySelector_ToBeClickable("#OneLine > div.d-flex.mt-2 > div:nth-child(1) > div:nth-child(3) > ul > li:nth-child(2) > button");
+            iwe = WaitFindWebElementBySelector_ToBeClickable("#OneLine > div.d-flex.mt-2 > div:nth-child(1) > div:nth-child(3) > ul > li:nth-child(2) > button");
             driver.SwitchTo().Window(driver.CurrentWindowHandle);
             try
             {
@@ -6637,13 +6767,13 @@ namespace TextForCtext
 
             //等待OCR，上限為30秒
             //iwe = waitFindWebElementBySelector_ToBeClickable("# OneLine > div.d-flex.justify-content-between.mt-2.mb-1 > div:nth-child(1) > div:nth-child(2) > ul > li:nth-child(2) > button");
-            iwe = waitFindWebElementBySelector_ToBeClickable("#line_list_table > tbody > tr:nth-child(1) > td:nth-child(2)");
+            iwe = WaitFindWebElementBySelector_ToBeClickable("#line_list_table > tbody > tr:nth-child(1) > td:nth-child(2)");
             begin = DateTime.Now;
             while (iwe == null)
             {
                 if (Clipboard.GetText().IndexOf(Environment.NewLine + Environment.NewLine) > -1) goto finished;
 
-                iwe = waitFindWebElementBySelector_ToBeClickable("#line_list_table > tbody > tr:nth-child(1) > td:nth-child(2)");
+                iwe = WaitFindWebElementBySelector_ToBeClickable("#line_list_table > tbody > tr:nth-child(1) > td:nth-child(2)");
                 //上限為30秒
                 if (DateTime.Now.Subtract(begin).TotalSeconds > timeSpanSecs)
                 {
@@ -6748,7 +6878,7 @@ namespace TextForCtext
                 //iwe = waitFindWebElementBySelector_ToBeClickable("#OneLine > div.d-flex.justify-content-between.mt-2.mb-1 > div:nth-child(3) > div:nth-child(6) > button:nth-child(2) > i");
                 //iwe = waitFindWebElementBySelector_ToBeClickable("#OneLine > div.d-flex.justify-content-between.mt-2.mb-1 > div:nth-child(3) > div:nth-child(6) > button:nth-child(2)");
                 //iwe = waitFindWebElementBySelector_ToBeClickable("#line_image_panel > div > div:nth-child(2) > div:nth-child(8) > button:nth-child(2) > i");
-                iwe = waitFindWebElementBySelector_ToBeClickable("#line_image_panel > div > div:nth-child(2) > div:nth-child(8) > button:nth-child(2)");
+                iwe = WaitFindWebElementBySelector_ToBeClickable("#line_image_panel > div > div:nth-child(2) > div:nth-child(8) > button:nth-child(2)");
                 //if (iwe == null)
                 //{
                 //    SendKeys.SendWait("{esc}");
@@ -6768,7 +6898,7 @@ namespace TextForCtext
                         iwe.Click();
                     }
                     //文本窗口
-                    iwe = waitFindWebElementBySelector_ToBeClickable("#TextArea");
+                    iwe = WaitFindWebElementBySelector_ToBeClickable("#TextArea");
                     if (iwe != null)
                     {
                         //將OCR結果讀入剪貼簿：
@@ -7294,7 +7424,7 @@ namespace TextForCtext
                 if (signOut)
                 {//登出帳號
                     Form1.playSound(Form1.soundLike.done);
-                    waitFindWebElementBySelector_ToBeClickable("#navbarNav > ul:nth-child(2) > li:nth-child(2) > a > p.mb-0.fs-6.fst-italic").Click();
+                    WaitFindWebElementBySelector_ToBeClickable("#navbarNav > ul:nth-child(2) > li:nth-child(2) > a > p.mb-0.fs-6.fst-italic").Click();
                     //if (signOut)waitFindWebElementBySelector_ToBeClickable("#navbarNav > ul:nth-child(2) > li > a > p.mb-0.fs-6.fst-italic").Click();
                     Form1.playSound(Form1.soundLike.over);
 
@@ -7364,7 +7494,7 @@ namespace TextForCtext
             ActiveForm1.TopMost = false;
 
             //首頁「快速體驗」按鈕：
-            IWebElement iwe = waitFindWebElementBySelector_ToBeClickable("body > div.container-fluid.bg-dark.px-1 > div > h2.text-center.my-2.py-4 > button > div", 10);
+            IWebElement iwe = WaitFindWebElementBySelector_ToBeClickable("body > div.container-fluid.bg-dark.px-1 > div > h2.text-center.my-2.py-4 > button > div", 10);
             if (iwe == null) return false;
             Form1.playSound(Form1.soundLike.processing);
             try
@@ -7378,7 +7508,7 @@ namespace TextForCtext
             }
 
             //「上傳 拍照」按鈕：
-            iwe = waitFindWebElementBySelector_ToBeClickable("#task-upload-btn");
+            iwe = WaitFindWebElementBySelector_ToBeClickable("#task-upload-btn");
             if (iwe == null) return false;
             driver.SwitchTo().Window(driver.CurrentWindowHandle);//切換到目前Selenium操控的視窗，就不怕沒及時得到焦點而失誤了
             Form1.playSound(Form1.soundLike.processing);
@@ -8676,11 +8806,11 @@ namespace TextForCtext
                         break;
                 }
             }
-            IWebElement iwe = waitFindWebElementBySelector_ToBeClickable("#PunctArea");
+            IWebElement iwe = WaitFindWebElementBySelector_ToBeClickable("#PunctArea");
             DateTime dt = DateTime.Now;
             while (iwe == null)
             {
-                iwe = waitFindWebElementBySelector_ToBeClickable("#PunctArea");
+                iwe = WaitFindWebElementBySelector_ToBeClickable("#PunctArea");
                 if (DateTime.Now.Subtract(dt).TotalSeconds > 10) if (Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("等待頁面開啟已逾時，是否繼續？") == DialogResult.Cancel) return false;
             }
             SetIWebElement_textContent_Property(iwe, x);
@@ -8719,27 +8849,27 @@ namespace TextForCtext
             dt = DateTime.Now;
             while (iwe == null)
             {
-                iwe = waitFindWebElementBySelector_ToBeClickable("#main > div > div.p-1.p-md-3.d-flex.justify-content-end > div:nth-child(6) > button > i");
+                iwe = WaitFindWebElementBySelector_ToBeClickable("#main > div > div.p-1.p-md-3.d-flex.justify-content-end > div:nth-child(6) > button > i");
                 if (DateTime.Now.Subtract(dt).TotalSeconds > 8) if (Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("還沒找到「標點」按鈕，是否繼續？") == DialogResult.Cancel) return false;
             }
             iwe.Click();//Thread.Sleep(640);//非得要等一會才能成功！//自動標點會清除全形空格
                         //iwe.SendKeys(OpenQA.Selenium.Keys.Enter);//不能互動，會出現錯誤
-            iwe = waitFindWebElementBySelector_ToBeClickable("#PunctArea");
+            iwe = WaitFindWebElementBySelector_ToBeClickable("#PunctArea");
             dt = DateTime.Now; bool reClickFlag = false;
             //等待OCR結果
             //while (iwe.Text == x)//.Text屬性傳回的會是經過trim的，故若開頭是全形空格，則一下子就會誤判成已經標點過（文本經改過）的了
             while (iwe.GetAttribute("textContent") == x)//.Text屬性傳回的會是經過trim的，故若開頭是全形空格，則一下子就會誤判成已經標點過（文本經改過）的了
             {
                 //檢查如果沒有按到「標點」按鈕，就再次按下 20240811 以出現等待圖示控制項為判斷
-                if (waitFindWebElementBySelector_ToBeClickable("#waitingSpinner") == null && reClickFlag == false && iwe.Text == x)
+                if (WaitFindWebElementBySelector_ToBeClickable("#waitingSpinner") == null && reClickFlag == false && iwe.Text == x)
                 {
-                    waitFindWebElementBySelector_ToBeClickable("#main > div > div.p-1.p-md-3.d-flex.justify-content-end > div:nth-child(6) > button > i").Click();
+                    WaitFindWebElementBySelector_ToBeClickable("#main > div > div.p-1.p-md-3.d-flex.justify-content-end > div:nth-child(6) > button > i").Click();
                     Form1.playSound(Form1.soundLike.over, true);
                     reClickFlag = true;
                 }
                 //reach traffic limit. wait 1.2 hours
-                if (waitFindWebElementBySelector_ToBeClickable("#main > div:nth-child(1)") != null)
-                    if (waitFindWebElementBySelector_ToBeClickable("#main > div:nth-child(1)").GetAttribute("textContent").StartsWith("reach traffic limit. wait "))
+                if (WaitFindWebElementBySelector_ToBeClickable("#main > div:nth-child(1)") != null)
+                    if (WaitFindWebElementBySelector_ToBeClickable("#main > div:nth-child(1)").GetAttribute("textContent").StartsWith("reach traffic limit. wait "))
                     { Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("超過額度！"); return false; }
 
                 if (DateTime.Now.Subtract(dt).TotalSeconds > 25) if (Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("標點逾時，是否繼續？") == DialogResult.Cancel) return false;
@@ -8788,11 +8918,11 @@ namespace TextForCtext
             openNewTabWindow();
             driver.Navigate().GoToUrl("https://old.gj.cool/gjcool/index");
             //文本輸入框
-            IWebElement iwe = waitFindWebElementBySelector_ToBeClickable("#origin000");
+            IWebElement iwe = WaitFindWebElementBySelector_ToBeClickable("#origin000");
             DateTime dt = DateTime.Now;
             while (iwe == null)
             {
-                iwe = waitFindWebElementBySelector_ToBeClickable("#origin000");
+                iwe = WaitFindWebElementBySelector_ToBeClickable("#origin000");
                 if (DateTime.Now.Subtract(dt).TotalSeconds > 10) if (Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("等待頁面開啟已逾時，是否繼續？") == DialogResult.Cancel) return false;
             }
             SetIWebElementValueProperty(iwe, x);
@@ -8831,14 +8961,14 @@ namespace TextForCtext
             dt = DateTime.Now;
             while (iwe == null)
             {
-                iwe = waitFindWebElementBySelector_ToBeClickable("#processbtn");
+                iwe = WaitFindWebElementBySelector_ToBeClickable("#processbtn");
                 if (DateTime.Now.Subtract(dt).TotalSeconds > 8) if (Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("還沒找到「標點」按鈕，是否繼續？") == DialogResult.Cancel) return false;
             }
             iwe.Click();//Thread.Sleep(640);//非得要等一會才能成功！
                         //iwe.SendKeys(OpenQA.Selenium.Keys.Enter);//不能互動，會出現錯誤
                         //標點結果文本框
-            while (null == waitFindWebElementBySelector_ToBeClickable("#result001")) { }
-            iwe = waitFindWebElementBySelector_ToBeClickable("#result001");
+            while (null == WaitFindWebElementBySelector_ToBeClickable("#result001")) { }
+            iwe = WaitFindWebElementBySelector_ToBeClickable("#result001");
             dt = DateTime.Now;
             while (iwe.GetAttribute("textContent") == x || iwe.GetAttribute("textContent") == string.Empty)
             {
@@ -9099,12 +9229,12 @@ namespace TextForCtext
             researchCtext:
                 //桌面版和手機版的尋找方塊不同
                 //手機版
-                IWebElement iwe = waitFindWebElementBySelector_ToBeClickable("#deskimg");
+                IWebElement iwe = WaitFindWebElementBySelector_ToBeClickable("#deskimg");
                 if (iwe != null)
-                    iwe = waitFindWebElementBySelector_ToBeClickable("#content > div.wikibox > table > tbody > tr.mobilesearch > td > form > input[type=text]:nth-child(3)");
+                    iwe = WaitFindWebElementBySelector_ToBeClickable("#content > div.wikibox > table > tbody > tr.mobilesearch > td > form > input[type=text]:nth-child(3)");
                 //桌面版
-                else if (waitFindWebElementBySelector_ToBeClickable("#mobimg") != null)
-                    iwe = waitFindWebElementBySelector_ToBeClickable("#searchform > input.searchbox");
+                else if (WaitFindWebElementBySelector_ToBeClickable("#mobimg") != null)
+                    iwe = WaitFindWebElementBySelector_ToBeClickable("#searchform > input.searchbox");
                 else
                     Debugger.Break();
                 if (iwe != null)
@@ -9148,7 +9278,7 @@ namespace TextForCtext
                     iwe.SendKeys(OpenQA.Selenium.Keys.Enter);
 
                     //Total 0
-                    iwe = waitFindWebElementBySelector_ToBeClickable("#content > table.searchsummary > tbody > tr:nth-child(4) > th > b", 5);
+                    iwe = WaitFindWebElementBySelector_ToBeClickable("#content > table.searchsummary > tbody > tr:nth-child(4) > th > b", 5);
                     if (iwe != null)
                     {
                         if (iwe.GetAttribute("textContent") == "Total 0")
@@ -9187,16 +9317,16 @@ namespace TextForCtext
                 {
                     string url = driver.Url;
                     // 一直回到有「檢索方塊」的上一頁
-                    while (null == waitFindWebElementBySelector_ToBeClickable("#content > div.wikibox > table > tbody > tr.mobilesearch > td > form > input[type=text]:nth-child(3)"))
+                    while (null == WaitFindWebElementBySelector_ToBeClickable("#content > div.wikibox > table > tbody > tr.mobilesearch > td > form > input[type=text]:nth-child(3)"))
                     {
                         driver.Navigate().Back();
                         #region 送出後檢查是否是「Please confirm that you are human! 敬請輸入認證圖案」頁面 網址列：https://ctext.org/wiki.pl
                         if (IsConfirmHumanPage())
                         {
                             //點選輸入框
-                            OpenQA.Selenium.IWebElement iweConfirm = waitFindWebElementBySelector_ToBeClickable("#content3 > form > table > tbody > tr:nth-child(2) > td:nth-child(2) > input[type=text]");
+                            OpenQA.Selenium.IWebElement iweConfirm = WaitFindWebElementBySelector_ToBeClickable("#content3 > form > table > tbody > tr:nth-child(2) > td:nth-child(2) > input[type=text]");
                             if (iweConfirm == null) driver.Navigate().Back();//因非同步，若已翻到下一頁
-                            iweConfirm = waitFindWebElementBySelector_ToBeClickable("#content3 > form > table > tbody > tr:nth-child(2) > td:nth-child(2) > input[type=text]");
+                            iweConfirm = WaitFindWebElementBySelector_ToBeClickable("#content3 > form > table > tbody > tr:nth-child(2) > td:nth-child(2) > input[type=text]");
                             if (iweConfirm == null)
                                 Debugger.Break();
                             else
@@ -9221,7 +9351,7 @@ namespace TextForCtext
                         }
                         url = driver.Url;
                     }
-                    if (null != waitFindWebElementBySelector_ToBeClickable("#content > div.wikibox > table > tbody > tr.mobilesearch > td > form > input[type=text]:nth-child(3)"))
+                    if (null != WaitFindWebElementBySelector_ToBeClickable("#content > div.wikibox > table > tbody > tr.mobilesearch > td > form > input[type=text]:nth-child(3)"))
                         goto researchCtext;
                     ////Total 標籤
                     //if (waitFindWebElementBySelector_ToBeClickable("#content > table.searchsummary > tbody > tr:nth-child(4) > th > b", 5)?.GetAttribute("textContent").StartsWith("Total ") == true)
@@ -9240,24 +9370,24 @@ namespace TextForCtext
             {//如果檢索《漢籍全文資料庫》
 
                 //【檢索報表】標籤控制項(關閉開啟的分頁）
-                while (null != waitFindWebElementBySelector_ToBeClickable("body > form > table > tbody > tr:nth-child(2) > td:nth-child(1) > font > b > nobr"))
+                while (null != WaitFindWebElementBySelector_ToBeClickable("body > form > table > tbody > tr:nth-child(2) > td:nth-child(1) > font > b > nobr"))
                 { driver.Close(); driver.SwitchTo().Window(driver.WindowHandles.Last()); }
 
 
                 string caption;//= string.Empty;// iwe1 == null ? "漢籍全文資料庫" : "漢籍全文文本閱讀";
                                //文本閱讀中的查詢輸入方塊 <input type="text" name="hanji/fld00.33.810" size="30" maxlength="200">
-                IWebElement iwe1 = waitFindWebElementBySelector_ToBeClickable("body > form > table > tbody > tr:nth-child(2) > td > table > tbody > tr > td.leftbg > table > tbody > tr:nth-child(1) > td > table > tbody > tr:nth-child(2) > td > input[type=text]:nth-child(2)");
+                IWebElement iwe1 = WaitFindWebElementBySelector_ToBeClickable("body > form > table > tbody > tr:nth-child(2) > td > table > tbody > tr > td.leftbg > table > tbody > tr:nth-child(1) > td > table > tbody > tr:nth-child(2) > td > input[type=text]:nth-child(2)");
                 if (iwe1 == null)
                 {
                     //標題橫幅(中含有「回漢籍」）
-                    iwe1 = waitFindWebElementBySelector_ToBeClickable("body > form > table > tbody > tr:nth-child(1) > td");
+                    iwe1 = WaitFindWebElementBySelector_ToBeClickable("body > form > table > tbody > tr:nth-child(1) > td");
                     if (iwe1 != null)
                     {
                         if (iwe1.GetAttribute("innerText").Contains("回漢籍"))
                         {
                             caption = "漢籍全文文本閱讀"; string url = string.Empty;
                             //文本閱讀中的查詢輸入方塊
-                            while (null == waitFindWebElementBySelector_ToBeClickable("body > form > table > tbody > tr:nth-child(2) > td > table > tbody > tr > td.leftbg > table > tbody > tr:nth-child(1) > td > table > tbody > tr:nth-child(2) > td > input[type=text]:nth-child(2)"))
+                            while (null == WaitFindWebElementBySelector_ToBeClickable("body > form > table > tbody > tr:nth-child(2) > td > table > tbody > tr > td.leftbg > table > tbody > tr:nth-child(1) > td > table > tbody > tr:nth-child(2) > td > input[type=text]:nth-child(2)"))
                             {
                                 if (url == driver.Url) break;
                                 url = driver.Url;
@@ -9270,7 +9400,7 @@ namespace TextForCtext
                                 }
                             }
                             //文本閱讀中的查詢輸入方塊
-                            iwe1 = waitFindWebElementBySelector_ToBeClickable("body > form > table > tbody > tr:nth-child(2) > td > table > tbody > tr > td.leftbg > table > tbody > tr:nth-child(1) > td > table > tbody > tr:nth-child(2) > td > input[type=text]:nth-child(2)");
+                            iwe1 = WaitFindWebElementBySelector_ToBeClickable("body > form > table > tbody > tr:nth-child(2) > td > table > tbody > tr > td.leftbg > table > tbody > tr:nth-child(1) > td > table > tbody > tr:nth-child(2) > td > input[type=text]:nth-child(2)");
                         }
                         else
                             caption = "漢籍全文資料庫";
@@ -9301,7 +9431,7 @@ namespace TextForCtext
                 {
 
                     //輸入「任意詞」：KeywordInputBox
-                    IWebElement iweKeywordInputBox = waitFindWebElementBySelector_ToBeClickable("#frmTitle > table > tbody > tr:nth-child(2) > td > table > tbody > tr:nth-child(1) > td > table > tbody > tr > td > table > tbody > tr:nth-child(1) > td:nth-child(2) > nobr > input[type=TEXT]");
+                    IWebElement iweKeywordInputBox = WaitFindWebElementBySelector_ToBeClickable("#frmTitle > table > tbody > tr:nth-child(2) > td > table > tbody > tr:nth-child(1) > td > table > tbody > tr > td > table > tbody > tr:nth-child(1) > td:nth-child(2) > nobr > input[type=TEXT]");
                     if (iweKeywordInputBox == null)
                     {
                         if (iwe1 == null)
@@ -9361,11 +9491,11 @@ namespace TextForCtext
                                     Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
                                     break;
                             }
-                            waitFindWebElementBySelector_ToBeClickable("#frmTitle > table > tbody > tr:nth-child(2) > td > table > tbody > tr:nth-child(1) > td > table > tbody > tr > td > table > tbody > tr:nth-child(1) > td:nth-child(2) > nobr > input[type=TEXT]")?.SendKeys(OpenQA.Selenium.Keys.Enter);
+                            WaitFindWebElementBySelector_ToBeClickable("#frmTitle > table > tbody > tr:nth-child(2) > td > table > tbody > tr:nth-child(1) > td > table > tbody > tr > td > table > tbody > tr:nth-child(1) > td:nth-child(2) > nobr > input[type=TEXT]")?.SendKeys(OpenQA.Selenium.Keys.Enter);
                             //throw;
                         }
 
-                        iwe = waitFindWebElementBySelector_ToBeClickable("body > form > table > tbody > tr:nth-child(2) > td:nth-child(3) > center > table > tbody > tr:nth-child(2) > td > font");
+                        iwe = WaitFindWebElementBySelector_ToBeClickable("body > form > table > tbody > tr:nth-child(2) > td:nth-child(3) > center > table > tbody > tr:nth-child(2) > td > font");
                         if (iwe != null)
                         {
                             //if (iwe.GetAttribute("innerText") == "　抱歉，找不到您所查詢的資料")
@@ -9397,7 +9527,7 @@ namespace TextForCtext
                                 Thread.Sleep(300);//等待開新視窗開啟（實測290還不行，最快也要300微秒）20240726
                                 driver.SwitchTo().Window(driver.WindowHandles.Last());
                                 //「附註開啟」:「註」開展控制項
-                                iwe = waitFindWebElementBySelector_ToBeClickable("body > form > table > tbody > tr:nth-child(2) > td:nth-child(2) > input[type=IMAGE]:nth-child(1)", 5);
+                                iwe = WaitFindWebElementBySelector_ToBeClickable("body > form > table > tbody > tr:nth-child(2) > td:nth-child(2) > input[type=IMAGE]:nth-child(1)", 5);
                                 if (iwe != null)
                                 {
                                     if (iwe.GetAttribute("title") == "附註開啟")
@@ -9562,19 +9692,19 @@ namespace TextForCtext
                     //查詢結果      -文本閱讀內的檢索（《漢籍全文資料庫》
                     //查詢結果編號「1」
                     //iwe1 = waitFindWebElementBySelector_ToBeClickable("body > form > table > tbody > tr:nth-child(2) > td > table > tbody > tr > td > table > tbody > tr:nth-child(2) > td > table > tbody > tr:nth-child(1) > td.seqno > a");
-                    iwe1 = waitFindWebElementBySelector_ToBeClickable("body > form > table > tbody > tr:nth-child(2) > td > table > tbody > tr > td.leftbg > table > tbody > tr:nth-child(1) > td > table > tbody > tr:nth-child(2) > td > div > span");
+                    iwe1 = WaitFindWebElementBySelector_ToBeClickable("body > form > table > tbody > tr:nth-child(2) > td > table > tbody > tr > td.leftbg > table > tbody > tr:nth-child(1) > td > table > tbody > tr:nth-child(2) > td > div > span");
                     ////if (iwe1 != null)
                     ////Console.WriteLine(iwe1.GetAttribute("name"));
                     while (iwe1 == null)
                     {
-                        if (waitFindWebElementBySelector_ToBeClickable("body > form > table > tbody > tr:nth-child(2) > td > table > tbody > tr > td > table > tbody > tr:nth-child(2) > td > table > tbody > tr:nth-child(1) > td.seqno", 0.3) != null)
+                        if (WaitFindWebElementBySelector_ToBeClickable("body > form > table > tbody > tr:nth-child(2) > td > table > tbody > tr > td > table > tbody > tr:nth-child(2) > td > table > tbody > tr:nth-child(1) > td.seqno", 0.3) != null)
                         {
-                            iwe1 = waitFindWebElementBySelector_ToBeClickable("body > form > table > tbody > tr:nth-child(2) > td > table > tbody > tr > td > table > tbody > tr:nth-child(2) > td > table > tbody > tr:nth-child(1) > td.seqno");
+                            iwe1 = WaitFindWebElementBySelector_ToBeClickable("body > form > table > tbody > tr:nth-child(2) > td > table > tbody > tr > td > table > tbody > tr:nth-child(2) > td > table > tbody > tr:nth-child(1) > td.seqno");
                             returnValue = true;
                             Form1.playSound(Form1.soundLike.info, true);//靜音模式時仍播出
                             break;
                         }
-                        iwe1 = waitFindWebElementBySelector_ToBeClickable("body > form > table > tbody > tr:nth-child(2) > td > table > tbody > tr > td.leftbg > table > tbody > tr:nth-child(1) > td > table > tbody > tr:nth-child(2) > td > input.s_btn.hjblock", 0.3);
+                        iwe1 = WaitFindWebElementBySelector_ToBeClickable("body > form > table > tbody > tr:nth-child(2) > td > table > tbody > tr > td.leftbg > table > tbody > tr:nth-child(1) > td > table > tbody > tr:nth-child(2) > td > input.s_btn.hjblock", 0.3);
                     }
 
                     //if (iwe1 != null && waitFindWebElementBySelector_ToBeClickable("body > form > table > tbody > tr:nth-child(2) > td > table > tbody > tr > td > table > tbody > tr:nth-child(2) > td > table > tbody > tr:nth-child(1) > td.seqno", 0.3) == null)
@@ -9964,26 +10094,26 @@ namespace TextForCtext
 
 
             //標點
-            IWebElement iwe = waitFindWebElementBySelector_ToBeClickable("#nav-biaodian-tab", 5);
+            IWebElement iwe = WaitFindWebElementBySelector_ToBeClickable("#nav-biaodian-tab", 5);
             if (iwe == null) return false;
             iwe.Click();
             //輸入框
-            iwe = waitFindWebElementBySelector_ToBeClickable("#textarea-biaodian");
+            iwe = WaitFindWebElementBySelector_ToBeClickable("#textarea-biaodian");
             if (iwe == null) return false;
             SetIWebElementValueProperty(iwe, x);
             //執行
-            iwe = waitFindWebElementBySelector_ToBeClickable("#button-submit");
+            iwe = WaitFindWebElementBySelector_ToBeClickable("#button-submit");
             iwe.Click();
             DateTime dt = DateTime.Now;
             //结果怎么样？
-            iwe = waitFindWebElementBySelector_ToBeClickable("#feedback > div.feedback-button.feedback-tip");
+            iwe = WaitFindWebElementBySelector_ToBeClickable("#feedback > div.feedback-button.feedback-tip");
             while (iwe == null)//while (iwe.Displayed==false)
             {
                 if (DateTime.Now.Subtract(dt).TotalMinutes > 0.6) return false;
-                iwe = waitFindWebElementBySelector_ToBeClickable("#feedback > div.feedback-button.feedback-tip");
+                iwe = WaitFindWebElementBySelector_ToBeClickable("#feedback > div.feedback-button.feedback-tip");
             }
             //結果
-            iwe = waitFindWebElementBySelector_ToBeClickable("#output-content");
+            iwe = WaitFindWebElementBySelector_ToBeClickable("#output-content");
             if (iwe == null) return false;
             x = iwe.GetAttribute("textContent").Replace("□", "􏿽");
             //driver.Close();//不關閉，以手動評量其標點良窳
@@ -10183,7 +10313,7 @@ namespace TextForCtext
 
                 //取代區中的「名稱」欄名
                 //while (null == waitFindWebElementBySelector_ToBeClickable("#content > table.restable > tbody > tr > td > table > tbody > tr:nth-child(1) > th:nth-child(1)", 0.2)) { }
-                iwe = waitFindWebElementBySelector_ToBeClickable("#content > table.restable > tbody > tr > td > table > tbody > tr:nth-child(1) > th:nth-child(1)", 10);
+                iwe = WaitFindWebElementBySelector_ToBeClickable("#content > table.restable > tbody > tr > td > table > tbody > tr:nth-child(1) > th:nth-child(1)", 10);
                 if (iwe != null)
                     DirectlyReplacingCharactersPageWindowHandle = driver.CurrentWindowHandle;
                 else
@@ -10513,11 +10643,11 @@ namespace TextForCtext
             openNewTabWindow();
             driver.Navigate().GoToUrl("https://ytenx.org/");
             //檢索框
-            IWebElement iwe = waitFindWebElementBySelector_ToBeClickable("#search-form > input.search-query.span3");
+            IWebElement iwe = WaitFindWebElementBySelector_ToBeClickable("#search-form > input.search-query.span3");
             DateTime dt = DateTime.Now;
             while (iwe == null)
             {
-                iwe = waitFindWebElementBySelector_ToBeClickable("#search-form > input.search-query.span3");
+                iwe = WaitFindWebElementBySelector_ToBeClickable("#search-form > input.search-query.span3");
                 if (DateTime.Now.Subtract(dt).TotalSeconds > 5)
                 {
                     Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("逾時！");
@@ -10527,7 +10657,7 @@ namespace TextForCtext
             SetIWebElementValueProperty(iwe, x);
             iwe.SendKeys(OpenQA.Selenium.Keys.Enter);
             //檢索結果
-            if (null != waitFindWebElementBySelector_ToBeClickable("body > div.container.container-main > div > div > div.page-header > h1", 5))
+            if (null != WaitFindWebElementBySelector_ToBeClickable("body > div.container.container-main > div > div > div.page-header > h1", 5))
                 return true;
             else
                 return false;
@@ -10536,11 +10666,16 @@ namespace TextForCtext
         /// 查找《字統網》https://zi.tools/
         /// </summary>
         /// <param name="x">要查找的單字</param>
-        /// <returns>執行無誤則傳回true</returns>
+        /// <returns>執行無誤或毋需出現錯誤訊息則傳回true</returns>
         public static bool LookupZitools(string x)
         {
+            if (x.IsNullOrEmpty()) return true;
+            if (Math.Abs(Form1.isChineseChar(x, false)) != 1) return true;
+
             StringInfo si = new StringInfo(x);
             if (si.LengthInTextElements == 0) return false;
+
+            //以上防呆
 
             TimeSpan ts = new TimeSpan();
         retry:
@@ -10567,7 +10702,7 @@ namespace TextForCtext
                 else
                 {
                     driver.Navigate().GoToUrl("https://zi.tools/?secondary=search");
-                    selector = "#search_input";
+                    selector = "#search_input";//組字檢索框
                 }
 
                 //點擊"Relatives 相關字" .查詢《字統網》多是為找系統有無該異體字，故今改寫為查詢後在頁面尋找「異寫字」的功能，以利跳到該區塊 20240819
@@ -10575,16 +10710,19 @@ namespace TextForCtext
                 IWebElement iwe = null;
                 while (true)
                 {
-                    iwe = waitFindWebElementBySelector_ToBeClickable(selector);
+                    iwe = WaitFindWebElementBySelector_ToBeClickable(selector);
                     if (iwe != null ||
-                    DateTime.Now.Subtract(dt).TotalSeconds > 3) break;
+                    DateTime.Now.Subtract(dt).TotalSeconds > 3 ||
+                    (WaitFindWebElementBySelector_ToBeClickable("#content > div:nth-child(2) > div:nth-child(5) > div.mobile-row.ant-col-6 > div.left_row_column_1 > div.left_row_column_1_1 > div.pc-only > span > span > span > span") != null //大字圖
+                    && WaitFindWebElementBySelector_ToBeClickable(selector) == null)) break;
                 }
 
+                //若沒有 "Relatives 相關字" 之元件，略過，不算錯誤 20250301
                 if (iwe == null)
                 {
                     //driver.SwitchTo().Window(LastValidWindow);
                     if (ts != new TimeSpan()) driver.Manage().Timeouts().PageLoad = ts;
-                    return false;
+                    //return true;
                 }
 
                 if (si.LengthInTextElements == 1)
@@ -10593,6 +10731,9 @@ namespace TextForCtext
                 {
                     //SetIWebElementValueProperty(iwe, x);//沒反應                    
                     iwe.SendKeys(selm.Keys.Shift + selm.Keys.Insert);
+                    //iwe.Click();//將焦點移至組字檢索框
+                    SendKeys.SendWait("{F6}");
+                    SendKeys.SendWait("{F6}");
                 }
 
             }
@@ -10632,7 +10773,7 @@ namespace TextForCtext
                 {
                     driver.SwitchTo().Window(LastValidWindow);
                     if (ts != new TimeSpan()) driver.Manage().Timeouts().PageLoad = ts;
-                    return false;
+                    return true;
                 }
             }
 
@@ -10696,13 +10837,13 @@ namespace TextForCtext
                 driver.Navigate().GoToUrl(url);
                 Clipboard.SetText(x);
                 //輸入「詞目」方塊（#SearchBox；name="T1"），再按下Enter鍵
-                iwe = waitFindWebElementBySelector_ToBeClickable("#SearchBox");
+                iwe = WaitFindWebElementBySelector_ToBeClickable("#SearchBox");
                 if (iwe == null) return null;
                 //Console.WriteLine(iwe.TagName + Environment.NewLine + iwe.Text + Environment.NewLine+ iwe.GetAttribute("value"));
                 iwe.SendKeys(OpenQA.Selenium.Keys.Shift + OpenQA.Selenium.Keys.Insert);
                 iwe.SendKeys(OpenQA.Selenium.Keys.Enter);
                 //找不到時
-                iwe = waitFindWebElementBySelector_ToBeClickable("#SearchResult");
+                iwe = WaitFindWebElementBySelector_ToBeClickable("#SearchResult");
                 if (iwe != null)
                 {
                     Console.WriteLine(iwe.GetAttribute("textContent"));
@@ -10713,7 +10854,7 @@ namespace TextForCtext
                 }
                 else
                 {
-                    iwe = waitFindWebElementBySelector_ToBeClickable("#SearchResult > p > a > font");//ex:守真
+                    iwe = WaitFindWebElementBySelector_ToBeClickable("#SearchResult > p > a > font");//ex:守真
                                                                                                      //iwe = waitFindWebElementBySelector_ToBeClickable("#SearchResult > p > a");//ex:總第 4709 頁，第三卷第 1303 頁
                     if (iwe != null)
                     {
@@ -10803,7 +10944,7 @@ namespace TextForCtext
             try
             {
                 //查詢結果：正文 0 字，附收字 0 字
-                iwe = waitFindWebElementBySelector_ToBeClickable("body > main > div > flex > div:nth-child(1)");
+                iwe = WaitFindWebElementBySelector_ToBeClickable("body > main > div > flex > div:nth-child(1)");
                 if (iwe != null)
                 {
                     if (!iwe.GetAttribute("textContent").EndsWith("查詢結果：正文 0 字，附收字 0 字"))//[ 𪢨 ]， 查詢結果：正文 0 字，附收字 0 字
@@ -10880,7 +11021,7 @@ namespace TextForCtext
             try
             {
                 //查無資料
-                iwe = waitFindWebElementBySelector_ToBeClickable("#searchL > tbody > tr > td");
+                iwe = WaitFindWebElementBySelector_ToBeClickable("#searchL > tbody > tr > td");
                 if (iwe == null)
                 {//if(iwe.GetAttribute("textContent") == "查無資料")
                     urlResult = driver.Url;
@@ -11094,12 +11235,12 @@ namespace TextForCtext
         {
             //按下頁面中的[Input picture]連結
 
-            IWebElement iwe = waitFindWebElementBySelector_ToBeClickable("#editor > a:nth-child(5)");
+            IWebElement iwe = WaitFindWebElementBySelector_ToBeClickable("#editor > a:nth-child(5)");
             if (iwe != null)
             {
                 iwe.Click();
                 //再按下 Replace page with this data 按鈕
-                iwe = waitFindWebElementBySelector_ToBeClickable("#pictureinput > input[type=submit]");
+                iwe = WaitFindWebElementBySelector_ToBeClickable("#pictureinput > input[type=submit]");
                 if (iwe != null)
                     iwe.Click();
                 else
@@ -11268,10 +11409,10 @@ namespace TextForCtext
             DateTime dt = DateTime.Now;
 
             // 繁簡同檢
-            IWebElement iwe = waitFindWebElementBySelector_ToBeClickable("#search_select");
+            IWebElement iwe = WaitFindWebElementBySelector_ToBeClickable("#search_select");
             while (iwe == null)
             {
-                iwe = waitFindWebElementBySelector_ToBeClickable("#search_select");
+                iwe = WaitFindWebElementBySelector_ToBeClickable("#search_select");
                 if (DateTime.Now.Subtract(dt).TotalSeconds > 3 && iwe == null)
                 {
                     if (ts != new TimeSpan() && IsDriverInvalid() == false) driver.Manage().Timeouts().PageLoad = ts;
@@ -11289,7 +11430,7 @@ namespace TextForCtext
             //SetIWebElementValueProperty(iwe, "jianfan");
 
             // 設定匹配模式
-            iwe = waitFindWebElementBySelector_ToBeClickable("#search_mode");
+            iwe = WaitFindWebElementBySelector_ToBeClickable("#search_mode");
             try
             {
                 iwe.Click();
@@ -11300,21 +11441,21 @@ namespace TextForCtext
             }
             if (exact)
             {
-                waitFindWebElementBySelector_ToBeClickable("#search_mode > option:nth-child(2)").Click();
+                WaitFindWebElementBySelector_ToBeClickable("#search_mode > option:nth-child(2)").Click();
                 //SetIWebElementValueProperty(iwe, "accurate");
             }
             else
             {
-                waitFindWebElementBySelector_ToBeClickable("#search_mode > option:nth-child(1)").Click();
+                WaitFindWebElementBySelector_ToBeClickable("#search_mode > option:nth-child(1)").Click();
                 //SetIWebElementValueProperty(iwe, "vague");
             }
 
 
             // 檢索詞
-            iwe = waitFindWebElementBySelector_ToBeClickable("#search_input");
+            iwe = WaitFindWebElementBySelector_ToBeClickable("#search_input");
             while (iwe == null)
             {
-                iwe = waitFindWebElementBySelector_ToBeClickable("#search_input");
+                iwe = WaitFindWebElementBySelector_ToBeClickable("#search_input");
                 if (DateTime.Now.Subtract(dt).TotalSeconds > 3 && iwe == null)
                 {
                     if (ts != new TimeSpan()) driver.Manage().Timeouts().PageLoad = ts;
@@ -11330,7 +11471,7 @@ namespace TextForCtext
 
 
             // 「檢索」按鈕。好奇怪的檢索按鈕與機制！
-            iwe = waitFindWebElementBySelector_ToBeClickable("#search_button");
+            iwe = WaitFindWebElementBySelector_ToBeClickable("#search_button");
             if (iwe == null)
             {
                 if (ts != new TimeSpan()) driver.Manage().Timeouts().PageLoad = ts;
@@ -11456,7 +11597,7 @@ namespace TextForCtext
                         }
                     }
                     if (DateTime.Now.Subtract(dt).TotalSeconds > 5) return false;
-                    if (null != waitFindWebElementBySelector_ToBeClickable("#frmTitle > table > tbody > tr:nth-child(2) > td > table > tbody > tr:nth-child(1) > td > input[type=text]:nth-child(2)")) goto search;
+                    if (null != WaitFindWebElementBySelector_ToBeClickable("#frmTitle > table > tbody > tr:nth-child(2) > td > table > tbody > tr:nth-child(1) > td > input[type=text]:nth-child(2)")) goto search;
                 }
                 iwe.Click();
             }
@@ -11466,7 +11607,7 @@ namespace TextForCtext
             iwe = null;
             while (iwe == null)
             {
-                iwe = waitFindWebElementBySelector_ToBeClickable("#frmTitle > table > tbody > tr:nth-child(2) > td > table > tbody > tr:nth-child(1) > td > input[type=text]:nth-child(2)");
+                iwe = WaitFindWebElementBySelector_ToBeClickable("#frmTitle > table > tbody > tr:nth-child(2) > td > table > tbody > tr:nth-child(1) > td > input[type=text]:nth-child(2)");
                 if (DateTime.Now.Subtract(dt).TotalSeconds > 5) return false;
             }
 
@@ -11655,30 +11796,31 @@ namespace TextForCtext
             SendKeys.Send("^c");
             //SendKeys.SendWait("^c");
             //Thread.Sleep(900);
-            Thread.Sleep(150);
-            DateTime dt = DateTime.Now;
-            try
-            {
-                while (Clipboard.GetText() == string.Empty)
-                {
-                    Thread.Sleep(300);
-                    if (DateTime.Now.Subtract(dt).TotalSeconds > 4) return false;
-                }
+            //Thread.Sleep(150);
+            Thread.Sleep(450);
+            //DateTime dt = DateTime.Now;
+            //try
+            //{
+            //    while (Clipboard.GetText() == string.Empty)
+            //    {
+            //        Thread.Sleep(300);
+            //        if (DateTime.Now.Subtract(dt).TotalSeconds > 4) return false;
+            //    }
 
-            }
-            catch (Exception)
-            {
+            //}
+            //catch (Exception)
+            //{
 
-            }
-            try
-            {
-                if (Clipboard.GetText() == string.Empty) return false;
+            //}
+            //try
+            //{
+            //    if (Clipboard.GetText() == string.Empty) return false;
 
-            }
-            catch (Exception)
-            {
+            //}
+            //catch (Exception)
+            //{
 
-            }
+            //}
 
 
             return result;
@@ -11781,7 +11923,7 @@ namespace TextForCtext
         {
             if (driver.Url == "https://ctext.org/wiki.pl")
             {
-                if (waitFindWebElementBySelector_ToBeClickable("#content > font")?.GetAttribute("textContent") == "Please confirm that you are human! 敬請輸入認證圖案")
+                if (WaitFindWebElementBySelector_ToBeClickable("#content > font")?.GetAttribute("textContent") == "Please confirm that you are human! 敬請輸入認證圖案")
                 {
                     confirm_that_you_are_human = true;
                     return true;

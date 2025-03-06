@@ -251,7 +251,7 @@ Ctrl + Shift + 6 ： 輸入`}}`
 
 Ctrl + 7 ： 輸入`。}}`
 ### 加速清除
-Ctrl + Delete ：可清除插入點後多餘的空格、空白與語法標記`< …… >` （含常見的 `<p>`）等
+Ctrl + Delete ：可清除插入點後多餘的空格、空白、星號與語法標記`< …… >` （含常見的 `<p>`）等
 
 Ctrl + Shift + Delete ： 清除textBox1中選取的字符及其相關字符。詳後說明
 
@@ -923,7 +923,11 @@ Ctrl+ 滑鼠左鍵：清除框中所有文字
    - kapi：《看典古籍》api
    - df ：default 古籍酷
 
+- 在textBox2中輸入「`tr:nth-child(2)`」或當前chapter（冊）的Selector字串值，以指定或重設目前的文字版(View)單元（章節 chapter） 
 
+  或在textBox2中輸入「cpt序號」以指定。如「cpt183」即第183（冊） 20250305
+> 如 `tr:nth-child(3)`，即 tr:nth-child(2) 的下一章（節、單元 chapter）
+>>`"#content > div:nth-child(6) > table > tbody > tr:nth-child(2) > td:nth-child(1) > a"`
 
 ### 在 textBox3 網址資訊專用方塊框：
 - 拖曳網址在 textBox3 或 textBox1 上放開，則會讀入所拖曳的網址值給 textBox3

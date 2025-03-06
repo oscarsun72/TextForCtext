@@ -4,6 +4,7 @@ using System.Linq;
 using System.Runtime.Remoting.Contexts;
 using System.Text;
 using System.Windows.Forms;
+using System.Windows.Media.TextFormatting;
 using WindowsFormsApp1;
 
 /* 20250124年假前最後上班日 GitHub Copilot大菩薩：
@@ -408,9 +409,9 @@ namespace TextForCtext
         public Range Range(int start = 0, int end = 0)
         {
             if (end == 0)
-                return new Range(this, Start, End);
+                return new Range(this, Start, End, this.Content);
             else
-                return new Range(this, start, end);
+                return new Range(this, start, end, this.Content);
         }
 
         public void Dispose()
@@ -637,7 +638,7 @@ namespace TextForCtext
             {
                 if (_range == null)
                 {
-                    _range = new Range(_document, _start, _end);
+                    _range = new Range(_document, _start, _end, _parent);
                     return _range;
                 }
                 return _range;
@@ -660,18 +661,21 @@ namespace TextForCtext
         private int _start;
         private int _end;
         List<Paragraph> rangeParagraphs;
+        private Range _parent;
+        private readonly string _text_beforeUpdate;
+
         //TextBox _textBox;
 
-        public Range(Document document, int start, int end)
+        public Range(Document document, int start, int end, Range parent)
         //public Range(ref TextBox textBox, int start, int end)
         {
             _document = document;
             //_document = new Document(ref textBox);
             _start = start < 0 ? 0 : start;
             _end = end > document.Text.Length ? document.Text.Length : end;
-            //Text = _document.Text.Substring(start, end - start);
-
+            _text_beforeUpdate = _document.Text.Substring(start, end - start);
             rangeParagraphs = Paragraphs;
+            _parent = parent;
             //_textBox = textBox;
             //UpdateDocumentRange();
         }
@@ -687,6 +691,24 @@ namespace TextForCtext
                 UpdateDocument();
                 //GitHub　Copilot大菩薩：我們在設置 Text 屬性時調用 UpdateDocument 方法，以確保文檔內容的更新。
                 //UpdateDocumentRange();
+                UpdateParentRange();
+            }
+        }
+
+        private void UpdateParentRange()
+        {
+            if (_document != null)
+            {
+
+                //var range = _document.Range(_start, _end);
+                //range.Text = _text;
+                //●●●●●●●●●●●
+                _parent.Start = Math.Min(_parent.Start, _start);
+
+                //_parent.End = Math.Max(_parent.End, _end) + (_end - _end_beforeUpdate);
+                //_parent.End = Math.Max(_parent.End, _end) + ((_end-_start) - _text_beforeUpdate.Length);
+                //_parent.End = Math.Max(_parent.End, _end) + (Text.Length - _text_beforeUpdate.Length);
+                _parent.End += (Text.Length - _text_beforeUpdate.Length);
             }
         }
         /// <summary>
