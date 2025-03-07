@@ -3697,12 +3697,14 @@ namespace WindowsFormsApp1
                     e.Handled = true;
                     if (e.KeyCode == Keys.P) { keysParagraphSymbol(false); return; }
                     if (textBox1.SelectedText != "" && textBox1.SelectedText.Replace("　", "") == "")
-                    {//如果選取的是空格
+                    {//如果選取的是空格，則進行自動標記（mark）
                         autoMarkTitles(); return;
                         //string sps = textBox1.SelectedText;
                         //if (sps.Replace("　", string.Empty) != string.Empty) return;
                         //new Document(textBox1).AutoMarkTitles(sps.Length);
                     }
+
+                    //如果是選取標題範圍
                     int s = textBox1.SelectionStart; string x = textBox1.Text;
                     if (x.Length == s ||
                         (s + 2 <= x.Length && (x.Substring(s, 2) == Environment.NewLine || x.Substring(s < 2 ? s : s - 2, 2)
@@ -3723,7 +3725,23 @@ namespace WindowsFormsApp1
                         undoRecord(); ResumeEvents();
                         return;
                     }
+                    BeginUpdate(false);
+
                     titleMarkCode();
+
+                    #region 標題標記完後若其行/段後面還有文字，則予以格式化（全形空格轉空白）
+                    if (CountWordsinDomain("<p>", GetLineText(textBox1.Text, textBox1.SelectionStart)) > 1)
+                    {
+                        Paragraph p = new Range(_document, textBox1.SelectionStart, textBox1.SelectionStart, _document.Content).GetCurrentParagraph();
+                        textBox1.Select(p.Start, p.End - p.Start);
+                        undoRecord(); stopUndoRec = true; PauseEvents();
+                        textBox1.SelectedText = CnText.ReplaceFullWidthSpace_withBlank(textBox1.SelectedText);
+                        undoRecord(); stopUndoRec = false; ResumeEvents();
+                    }
+                    #endregion 標題標記完後若其行/段後面還有文字，則予以格式化（全形空格轉空白）
+
+                    EndUpdate();
+
                     return;
                 }
                 if (e.KeyCode == Keys.Q)
@@ -5245,7 +5263,20 @@ namespace WindowsFormsApp1
             string xSel = textBox1.SelectedText;
             if (xSel.Length > 2 && xSel.Substring(xSel.Length - 3) == "<p>") { textBox1.Select(s, xSel.Length - 3); xSel = textBox1.SelectedText; }//最後一個<p>不處理
             if (xSel.Length > 4 && xSel.Substring(xSel.Length - 5) == "<p>" + Environment.NewLine) { textBox1.Select(s, xSel.Length - 5); xSel = textBox1.SelectedText; }//最後一個<p>不處理
-            xSel = xSel.Replace("<p>", "|").Replace("　", "􏿽");
+            //xSel = xSel.Replace("<p>", "|").Replace("　", "􏿽");
+            xSel = xSel.Replace("<p>", "|");//.Replace("　", "􏿽");
+            //xSel = Regex.Replace(xSel, @"　?(!}})", "􏿽");
+            //xSel = Regex.Replace(xSel, @"　*(!}})", "􏿽");// Copilot大菩薩：// 使用負向環視 (?<! ) 確保不替換 "}}" 前的空格 20250306 https://copilot.microsoft.com/shares/5vKyp5oM72zFwJmbboSMw
+            xSel = ReplaceSpaces(xSel);
+            string ReplaceSpaces(string input)//20250306 Gemini大菩薩：https://g.co/gemini/share/d5b66edbaea1
+            {
+                // 修正後的正規表達式模式：
+                // (?!(\\s*\\}\\})|(\\{\\{.*?\\}\\})) - 負向先行斷言，確保不匹配 }} 前面的連續空白，以及 {{}} 標籤內的空白
+                // 　                                  - 匹配全形空白
+                string pattern = "(?!((\\s*\\}\\})|(\\{\\{.*?\\}\\})))　";
+                return Regex.Replace(input, pattern, "􏿽");
+            }
+
             if (xSel.IndexOf("*") > -1)
             {
                 xSel = xSel.Replace("*", "");
@@ -5464,7 +5495,7 @@ namespace WindowsFormsApp1
         /// 在指定文本中計算某單字出現的次數
         /// 若是要找分段符號 Environment.NewLine，則只需輸入 \r 或 \n 來查找計算即可
         /// </summary>
-        /// <param name="whatWord"></param>
+        /// <param name="whatWord">任何字串（不必是單個漢字）</param>
         /// <param name="domain"></param>
         /// <returns></returns>
         public static int CountWordsinDomain(string whatWord, string domain)
@@ -5473,7 +5504,10 @@ namespace WindowsFormsApp1
             for (int i = 0; i < dw.LengthInTextElements; i++)
             {
                 // SubstringByTextElements方法於分段符號或切成 \r \n 兩個部分
-                if (dw.SubstringByTextElements(i, 1) == whatWord)
+                //if (dw.SubstringByTextElements(i, 1) == whatWord)
+                int siLength = new StringInfo(whatWord).LengthInTextElements;
+                if (i + siLength > dw.LengthInTextElements) break;
+                if (dw.SubstringByTextElements(i, siLength) == whatWord)
                 {
                     cntr++;
                 }
@@ -5655,10 +5689,11 @@ namespace WindowsFormsApp1
                 else
                 {
                     if (sTxt.IndexOf("　") == -1) { stopUndoRec = false; dontHide = false; return; }
-                    string sTxtChk = sTxt.Replace("　", "􏿽");
+
                     undoRecord();
                     stopUndoRec = true;
-                    textBox1.SelectedText = sTxtChk;
+                    //textBox1.SelectedText = sTxtChk;
+                    textBox1.SelectedText = CnText.ReplaceFullWidthSpace_withBlank(sTxt);//進階版 string sTxtChk = sTxt.Replace("　", "􏿽");
                     dontHide = false;
                     stopUndoRec = false;
                     /*
@@ -6094,7 +6129,7 @@ namespace WindowsFormsApp1
                 titleFirstParaText = GetLineText(x, s);
 
                 //若前置空格數不相符則不作標記（若原始文本排版錯誤則會漏標，只能人工校正了）20250223
-                if (_leadingSpacesRegex.Match(titleFirstParaText).Value.Length != titleLeadingSpaceCount) return true;
+                if (titleLeadingSpaceCount > 0 && _leadingSpacesRegex.Match(titleFirstParaText).Value.Length != titleLeadingSpaceCount) return true;
 
 
                 //if (titleFirstParaText.Contains("歌")) Debugger.Break();
@@ -6428,25 +6463,33 @@ namespace WindowsFormsApp1
                 }
                 #endregion
 
-                //   title = title.Replace("　", "􏿽");//標題格式化、標準化//單行才置換
+                #region 單行標題中的全形空格格式化、標準化
+                //   title = title.Replace("　", "􏿽");//原式，不加判斷，一律取代為空白
                 //20250204大年初六立春~初七子夜 感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主
                 int spsStart = title.IndexOf("　");
                 if (spsStart > 1)
                 {
-                    title = title.Replace("}}　{{", "}}􏿽{{");
-                    if (title.Substring(spsStart + 1, 1) == "　" || spsStart < title.Length - (3 + 3)) //至少有3個中文（+<p>.Length）在末後才轉此前之空格為空白
-                    {
-                        int isps = 0; StringBuilder sb = new StringBuilder();
-                        while (title.Substring(spsStart + isps, 1) == "　")
+                    if (!title.Contains("{{"))//如果標題不含注文
+                        //title = title.Replace("　", "􏿽");
+                        title = CnText.ReplaceFullWidthSpace_withBlank(title);
+                    else
+                    {//如果標題中有注文
+                        title = title.Replace("}}　{{", "}}􏿽{{");
+                        if (title.Substring(spsStart + 1, 1) == "　" || spsStart < title.Length - (3 + 3)) //至少有3個中文（+<p>.Length）在末後才轉此前之空格為空白
                         {
-                            isps++;
-                            sb.Append("􏿽");
+                            int isps = 0; StringBuilder sb = new StringBuilder();
+                            while (title.Substring(spsStart + isps, 1) == "　")
+                            {
+                                isps++;
+                                sb.Append("􏿽");
+                            }
+                            if (title.Substring(spsStart + isps, 1) == "}") sb.Replace("􏿽", "　");//若是小注不換行的補空格則不能轉為空白
+                            title = title.Substring(0, spsStart) + sb.ToString() + title.Substring(spsStart + isps);
                         }
-                        if (title.Substring(spsStart + isps, 1) == "}") sb.Replace("􏿽", "　");//若是小注不換行的補空格則不能轉為空白
-                        title = title.Substring(0, spsStart) + sb.ToString() + title.Substring(spsStart + isps);
                     }
                 }
-                textBox1.SelectedText = title;
+                if (textBox1.SelectedText != title) textBox1.SelectedText = title;
+                #endregion 單行標題中的全形空格格式化、標準化
             }
             else
             {//兩行以上的標題格式處理：20250204
@@ -8114,15 +8157,27 @@ namespace WindowsFormsApp1
                                 item.LastIndexOf("}}", closeBracketS) == item.LastIndexOf("}}}", closeBracketS))
                         ))//獨立注文
                     {
-                        string preItem;
+                        string preItem, prePreItem;
                         if (index == 0) i += 2;
                         else if (index > 0)
                         {
                             preItem = linesParasPage[index - 1];
+                            if (index > 1)
+                                prePreItem = linesParasPage[index - 2];
+                            else
+                                prePreItem = null;
                             if (((preItem.IndexOf("{{") == -1 || (preItem.StartsWith("{{") && preItem.IndexOf("{{", 2) == -1))
                                         || (preItem.IndexOf("{{") > 0 && preItem.IndexOf("}}") > (preItem.IndexOf("{{"))))
                                 && (preItem.EndsWith("}}") || preItem.EndsWith("}}<p>") || preItem.EndsWith("}}。<p>"))
-                                && preItem.LastIndexOf("}}", preItem.LastIndexOf("}}")) == -1)
+                                && preItem.LastIndexOf("}}", preItem.LastIndexOf("}}")) == -1
+                                && ((item.EndsWith("}}<p>") || item.EndsWith("}}。<p>")) &&
+                                    ((preItem.StartsWith("{{") && preItem.EndsWith("}}") && preItem.IndexOf("{{", 2) == -1)
+                                    || preItem.Contains("{{") == false && preItem.EndsWith("}}")))
+                                //本段是末有<p>的獨立注文，而前2段不是獨立注文
+                                && !(((item.EndsWith("}}<p>") || item.EndsWith("}}。<p>")) && item.LastIndexOf("}}", item.LastIndexOf("}}")) == -1)
+                                    && prePreItem != null && prePreItem.StartsWith("{{") && preItem.EndsWith("}}")
+                                    && prePreItem.IndexOf("{{", 2) == -1 && preItem.LastIndexOf("}}", preItem.Length - 2) == -1)
+                                )
                                 i++;
                             else
                                 i += 2;
@@ -8581,7 +8636,7 @@ namespace WindowsFormsApp1
                 s = e + 2;
                 e = textBox1.Text.IndexOf(Environment.NewLine, s);
                 if (e == -1) break;
-                se = textBox1.Text.Substring(s, e - s);//本行/段文字
+                se = textBox1.Text.Substring(s, e - s);//本行/段文字==currentLineText
                                                        //foreach (var item in punctuations)
                                                        //{
                                                        //    se = se.Replace(item.ToString(), "");
@@ -8601,7 +8656,7 @@ namespace WindowsFormsApp1
 
                 //if (se.IndexOf("吾山}}") > -1) Debugger.Break();
 
-                if (se != "")//se 正要處理的這一行/段的內容string
+                if (se != string.Empty)//se 正要處理的這一行/段的內容string
                 {
                     string textBox1Text = textBox1.Text;//l作為正常的行/段長度（含幾個漢字中文字）的儲存變量
                     if (countWordsLenPerLinePara(se) < l//長度小於常規
@@ -8850,11 +8905,37 @@ namespace WindowsFormsApp1
                 if (textBox1.Text.Substring(textBox1.TextLength - 3, 3) != "<p>")
                     textBox1.Text += "<p>";
 
-                //將第2行/段的文本做標題標記（如果是《欽定四庫全書》的文本）
-                int start = textBox1.SelectionStart, len = textBox1.SelectionLength;
-                textBox1.Select(textBox1.Text.IndexOf(Environment.NewLine) + 3, 0);
-                titleMarkCode();
-                textBox1.Select(start, len);
+                string secondLineText = GetLineText(textBox1.Text, textBox1.Text.IndexOf(Environment.NewLine) + 3, out int lineS, out int lineL);
+                secondLineText = secondLineText.Replace("􏿽", "　");
+                int leadingSpacesLength = _leadingSpacesRegex.Match(secondLineText).Value.Length;
+                //if (!secondLineText.Substring(_leadingSpacesRegex.Match(secondLineText).Value.Length).Contains("　"))
+                if (!secondLineText.Substring(leadingSpacesLength).StartsWith("　"))
+                {
+                    //將第2行/段的文本做標題標記（如果是《欽定四庫全書》的文本）
+                    int start = textBox1.SelectionStart, len = textBox1.SelectionLength;
+                    textBox1.Select(textBox1.Text.IndexOf(Environment.NewLine) + 2, leadingSpacesLength * 2);
+                    string blank2Space = textBox1.SelectedText.Replace("􏿽", "　");
+                    textBox1.SelectedText = blank2Space;
+                    int spsPos = textBox1.Text.IndexOf("　", lineS + leadingSpacesLength);
+                    if (spsPos > -1)
+                        textBox1.Select(lineS + leadingSpacesLength, spsPos - lineS);
+                    else
+                        textBox1.Select(lineS, lineL);
+                    titleMarkCode();
+
+                    #region 標題標記完後若其行/段後面還有文字，則予以格式化（全形空格轉空白）
+                    if (CountWordsinDomain("<p>", GetLineText(textBox1.Text, textBox1.SelectionStart)) > 1)
+                    {
+                        Paragraph paragraph = new Range(_document, textBox1.SelectionStart, textBox1.SelectionStart, _document.Content).GetCurrentParagraph();
+                        textBox1.Select(paragraph.Start, paragraph.End - paragraph.Start);
+                        undoRecord(); stopUndoRec = true; PauseEvents();
+                        textBox1.SelectedText = CnText.ReplaceFullWidthSpace_withBlank(textBox1.SelectedText);
+                        undoRecord(); stopUndoRec = false; ResumeEvents();
+                    }
+                    #endregion 標題標記完後若其行/段後面還有文字，則予以格式化（全形空格轉空白）
+
+                    textBox1.Select(start, len);
+                }
             }
             #endregion
 
@@ -10323,7 +10404,7 @@ namespace WindowsFormsApp1
                     //pageTextEndPosition = 0; pageEndText10 = "";
                     return false;
                 }
-                if (fastMode && rePaint) BeginUpdate();
+                if (fastMode && rePaint) BeginUpdate(true);
             }
             //重設自動判斷頁尾之值(有翻頁就得重設！）
             //pageTextEndPosition = 0; pageEndText10 = "";
@@ -10993,9 +11074,10 @@ namespace WindowsFormsApp1
         /// <summary>
         /// 停止重畫並隱藏表單
         /// </summary>
-        public void BeginUpdate()
+        /// <param name="hideForm">指定是否要隱藏表單，預設為隱藏</param>
+        public void BeginUpdate(bool hideForm = true)
         {
-            if (Visible) Visible = false;
+            if (hideForm && Visible) Visible = false;
             rePaint = false;
             SendMessage(this.Handle, WM_SETREDRAW, (IntPtr)0, IntPtr.Zero);//通過使用SendMessage來控制WM_SETREDRAW消息，可以暫時禁用或啟用重畫。
         }
@@ -13828,13 +13910,15 @@ namespace WindowsFormsApp1
             string nextChapterSelector = NextChapterSelector;
             if (nextChapterSelector.IsNullOrEmpty()) return false;
             //點擊本書首頁的冊連結
-            WaitFindWebElementBySelector_ToBeClickable(nextChapterSelector, 5)?.Click();
+            OpenQA.Selenium.IWebElement iwe = WaitFindWebElementBySelector_ToBeClickable(nextChapterSelector, 5);
+            if (iwe == null) return false;
+            iwe.Click();
             //翻到本書該冊的第1頁
-            if (Div_generic_TextBoxFrame.GetAttribute("textContent") == "●\t")//如果是WordVBA.中國哲學書電子化計劃.新頁面() 產生的新頁面
+            if (Div_generic_TextBoxFrame?.GetAttribute("textContent") == "●\t")//如果是WordVBA.中國哲學書電子化計劃.新頁面() 產生的新頁面
                 inputSKQSFrontPage();
             else
             {
-                while (Div_generic_TextBoxFrame.GetAttribute("textContent") == string.Empty)//當冊首頁圖文對照之文字框沒有內容時才轉到下一頁
+                while (Div_generic_TextBoxFrame == null || Div_generic_TextBoxFrame?.GetAttribute("textContent") == string.Empty)//當冊首頁圖文對照之文字框沒有內容時才轉到下一頁
                     NextPage?.Click();
                 formatContentInput_SKQS(Edit_Linkbox?.GetAttribute("href"));
             }

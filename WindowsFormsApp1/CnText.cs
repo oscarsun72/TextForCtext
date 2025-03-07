@@ -1373,6 +1373,64 @@ namespace TextForCtext
             return x;
         }
 
+        /* 20250307 creedit with Gemini大菩薩： https://g.co/gemini/share/6b0eda0a373f */
+        /// <summary>
+        /// 將全形空格（　）取代為指定的字符
+        /// 進階版的 string sTxtChk = sTxt.Replace("　", "􏿽")
+        /// </summary>
+        /// <param name="input">要處理的字串</param>
+        /// <param name="symbolToReplace">要將全形空格取代為的對象，預設為「􏿽」（空白）</param>
+        /// <returns>傳回處理的字串</returns>
+        public static string ReplaceFullWidthSpace_withBlank(string input, string symbolToReplace = "􏿽")
+        {
+            ////string pattern = @"(?<!(\*|^|\G(?!^)(?!<p>))(\s*))　(?!(?<=\<p\>)\s?　|(\s*\}\}))";
+            ////string pattern = @"(?<!(\*|^|\G(?!^)(?!<p>))(\s*))　(?!(?<=\<p\>\s)\s　|(\s*\}\}))";
+            //string pattern = @"(?<!(\*|^|\G(?!^)(?!<p>))(\s*))　(?!(?<=\<p\>\s?)　|(\s*\}\}))";
+
+            //string sTxtChk = Regex.Replace(sTxt, pattern, "􏿽");
+
+            //string sTxtChk = ReplaceSpacesCompletely(sTxt);
+            //string ReplaceSpacesCompletely(string input)
+            //{
+            // 第一次處理
+            string pattern = @"(?<!(\*|^|\G(?!^)(?!<p>))(\s*))　(?!(?<=\<p\>\s?)　|(\s*\}\}))";
+            //input = Regex.Replace(input, pattern, "􏿽");
+            input = Regex.Replace(input, pattern, symbolToReplace);
+
+            // 第二次處理
+            //string[] correct = { "<p>　􏿽", "}}􏿽" }; int st = 0;
+            string[] correct = { "<p>　" + symbolToReplace, "}}" + symbolToReplace }; int st = 0;
+            foreach (var item in correct)
+            {
+                st = input.IndexOf(item, st);
+                while (st > -1 && st + item.Length < input.Length)
+                {
+                    int spsSt = st + item.Length; string inputOld = input;
+                    while (spsSt < input.Length && input.Substring(spsSt, 1) == "　")
+                    {
+                        input = input.Substring(0, spsSt) + "􏿽" + input.Substring(spsSt + 1);
+                        //spsSt += 2;//2="􏿽".Length;
+                        spsSt += symbolToReplace.Length;
+                    }
+                    st = input.IndexOf(item, st + 1);
+                }
+                st = 0;
+            }
+
+            //第3次處理
+            if (input.Contains("<p>" + Environment.NewLine + symbolToReplace))
+            {
+                //input = input.Replace("<p>" + Environment.NewLine + "􏿽", "<p>" + Environment.NewLine + "　");
+                input = input.Replace("<p>" + Environment.NewLine + symbolToReplace, "<p>" + Environment.NewLine + "　");
+            }
+
+            //第4次處理
+            while (input.Contains(symbolToReplace +"　"))                        
+                input = input.Replace(symbolToReplace + "　", symbolToReplace + symbolToReplace);
+            return input;
+
+        }
+
         /// <summary>
         /// 20250117
         /// 在數行/段（有\r\n作間隔符）文字裡將n行/段的文字選取起來、或取得這個n行/段範圍內的字串值
