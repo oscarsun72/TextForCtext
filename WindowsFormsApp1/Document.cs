@@ -40,7 +40,7 @@ namespace TextForCtext
         public Document(ref TextBox textBox)
         {
             _textBox = textBox;
-            Text = textBox.Text;
+            Text = textBox.Text;            
             Content = Range(0, textBox.Text.Length);
             _cachedParagraphs = null;
         }
@@ -48,15 +48,15 @@ namespace TextForCtext
         /// 後端伺服計算適用 20250225
         /// </summary>
         /// <param name="context">要計算的文字內容</param>
-        public Document(ref string context)
+        public Document(string context)
         {
             _textBox = new TextBox();
-            Text = context;//End = context.Length;已在Text屬性內設置
+            Text = context;//End = context.Length;已在Text屬性內設置            
             if (Content == null)
                 Content = Range(0, context.Length);
             _cachedParagraphs = null;
         }
-
+        
         public Range Content { get; set; }
         public string Text
         {

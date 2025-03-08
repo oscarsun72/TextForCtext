@@ -1425,9 +1425,23 @@ namespace TextForCtext
             }
 
             //第4次處理
-            while (input.Contains(symbolToReplace +"　"))                        
+            while (input.Contains(symbolToReplace + "　"))
                 input = input.Replace(symbolToReplace + "　", symbolToReplace + symbolToReplace);
-            return input;
+
+            Document document = new Document(input);
+            foreach (var item in document.GetParagraphs())
+            {
+                int i = 0; StringBuilder sb = new StringBuilder();
+                while (i < item.Text.Length && item.Text.Substring(i, 1) == "　")
+                {
+                    sb.Append("􏿽");
+                    i++;
+                }
+                if (i > 0)
+                    item.Text = sb.ToString() + item.Text.Substring(i);
+            }
+            //input = document.Text;
+            return document.Text;
 
         }
 

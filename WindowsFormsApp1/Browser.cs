@@ -2373,7 +2373,9 @@ namespace TextForCtext
                 }
                 else
                 {
+                    Form1.InstanceForm1.PauseEvents();
                     submit_saveChanges?.Click();//按下 Save changes button（「保存編輯」按鈕）
+                    Form1.InstanceForm1.ResumeEvents();
                     return true;
                 }
             }

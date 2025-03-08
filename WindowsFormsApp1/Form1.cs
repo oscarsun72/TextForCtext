@@ -1964,11 +1964,15 @@ namespace WindowsFormsApp1
             }
             #endregion//清除空行
 
-            PauseEvents();//20240919所增，避免誤觸 textBox1_TextChanged事件程序中的 hideToNICo();方法
-            textBox1.Text = x;
-            ResumeEvents();
-            textBox1.SelectionStart = 0; textBox1.SelectionLength = 0;
-            textBox1.ScrollToCaret();
+            if (Name == "Form1")
+            {
+                PauseEvents();//20240919所增，避免誤觸 textBox1_TextChanged事件程序中的 hideToNICo();方法            
+                textBox1.Text = x;
+                ResumeEvents();
+
+                textBox1.SelectionStart = 0; textBox1.SelectionLength = 0;
+                textBox1.ScrollToCaret();
+            }
             return true;
         }
 
@@ -2588,7 +2592,7 @@ namespace WindowsFormsApp1
                     ////if (keyDownCtrlAdd(false))  if (textBox1.Text != "") { pauseEvents(); textBox1.Text = ""; resumeEvents(); }
                     //keyDownCtrlAdd(false);// if (textBox1.Text != "") { pauseEvents(); textBox1.Text = ""; resumeEvents(); }
 
-                    altA_predictEndofPageRange();
+                    if (autoPaste2QuickEdit) altA_predictEndofPageRange();
                     keyDownCtrlAdd(false);
 
                     TopMost = true;
@@ -3068,7 +3072,7 @@ namespace WindowsFormsApp1
                     #region 後端伺服                    
                     //outdent_ConvexRow();//原式，純操作介面操作者
                     //Range range = new Document(ref x).Range();
-                    Range range = new Document(ref x).Content;
+                    Range range = new Document(x).Content;
                     outdent_ConvexRow(ref range);
                     #endregion 後端伺服
 
@@ -3414,7 +3418,7 @@ namespace WindowsFormsApp1
                 if (e.KeyCode == Keys.A)
                 {//Alt + a : 通常是用在自動輸入模式時根據上一次判斷的頁尾來自動貼入本頁內容
                     e.Handled = true;
-                    altA_predictEndofPageRange();
+                    if (autoPaste2QuickEdit) altA_predictEndofPageRange();
                     keyDownCtrlAdd(false);
                     return;
                 }
@@ -3698,6 +3702,10 @@ namespace WindowsFormsApp1
                     if (e.KeyCode == Keys.P) { keysParagraphSymbol(false); return; }
                     if (textBox1.SelectedText != "" && textBox1.SelectedText.Replace("　", "") == "")
                     {//如果選取的是空格，則進行自動標記（mark）
+                        if (wordsPerLinePara == -1)
+                        {
+                            Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("請先用Scroll Lock鍵讓程式取得每行/段的正常長度（字數）以供判斷。"); return;
+                        }
                         autoMarkTitles(); return;
                         //string sps = textBox1.SelectedText;
                         //if (sps.Replace("　", string.Empty) != string.Empty) return;
@@ -4111,7 +4119,7 @@ namespace WindowsFormsApp1
                     st = textBox1.SelectionStart; ed = textBox1.SelectionStart + textBox1.SelectionLength;
                     //Range range = new Range(new Document(ref x), st, ed);
                     string x = textBox1.SelectedText;
-                    Document document = new Document(ref x);
+                    Document document = new Document(x);
                     Range range = new Range(document, 0, x.Length, document.Content);
                     undoRecord(); stopUndoRec = true; PauseEvents();
                     indent(ref range);
@@ -4266,7 +4274,7 @@ namespace WindowsFormsApp1
                 #endregion
                 #region 後端計算則用 new Document(ref x) 效能差太多！！
                 x = textBox1.Text;
-                Paragraph p = new Document(ref x).Range(textBox1.SelectionStart, textBox1.SelectionStart).GetCurrentParagraph();
+                Paragraph p = new Document(x).Range(textBox1.SelectionStart, textBox1.SelectionStart).GetCurrentParagraph();
                 #endregion
                 textBox1.Select(p.Start, p.End - p.Start);
                 if (textBox1.SelectedText.IndexOf("{{") == -1)
@@ -4384,7 +4392,7 @@ namespace WindowsFormsApp1
             if (paraCount > lines_perPage)
             {
                 //List<Paragraph> paragraphs = _document.GetParagraphs();
-                List<Paragraph> paragraphs = new Document(ref x).GetParagraphs();
+                List<Paragraph> paragraphs = new Document(x).GetParagraphs();
                 if (paragraphs.Count > 0 && paragraphs.Count >= paraCount)
                 {
                     if (paragraphs[paraCount - 1].Text.StartsWith("{{"))
@@ -4399,7 +4407,7 @@ namespace WindowsFormsApp1
             else
             {
                 //p = _document.Range(st, st).GetCurrentParagraph();
-                p = new Document(ref x).Range(st, st).GetCurrentParagraph();
+                p = new Document(x).Range(st, st).GetCurrentParagraph();
                 end = p.End;
             }
             //如果所抓到或預測的送出範圍少於正常每頁的行/段數的話： 20250216
@@ -4451,48 +4459,50 @@ namespace WindowsFormsApp1
             //if (!KeyboardInfo.getKeyStateDown(System.Windows.Input.Key.LeftShift))
             //keyDownCtrlAdd(false);
             return true;
-
-            //失敗時傳回false
-            bool predictRange()
+        }
+        /// <summary>
+        /// 預測、評估要送出去的頁面範圍
+        /// </summary>
+        /// <returns>失敗時傳回false</returns>
+        bool predictRange()
+        {
+            if (textBox1.TextLength == 0) return false;
+            if (lines_perPage == 0)
             {
-                if (textBox1.TextLength == 0) return false;
-                if (lines_perPage == 0)
+                Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("請先設定每頁正常的行/段數！");
+                return false;
+            }
+            //if (x != textBox1.Text) x = textBox1.Text;
+            string x = textBox1.Text;
+            int end = 0;
+            int paraCount = countLinesPerPage(x.Substring(0, end));
+            while (paraCount < lines_perPage)
+            {
+                end = x.IndexOf(Environment.NewLine, end + 1);// + 2;
+                if (end > -1)
                 {
-                    Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("請先設定每頁正常的行/段數！");
-                    return false;
-                }
-                if (x != textBox1.Text) x = textBox1.Text;
-                end = 0;
-                paraCount = countLinesPerPage(x.Substring(0, end));
-                while (paraCount < lines_perPage)
-                {
-                    end = x.IndexOf(Environment.NewLine, end + 1);// + 2;
-                    if (end > -1)
-                    {
-                        if (end > x.Length)
-                        {
-                            end = x.Length;
-                            break;
-                        }
-                    }
-                    else
+                    if (end > x.Length)
                     {
                         end = x.Length;
                         break;
                     }
-                    string countRange = x.Substring(0, end).Replace("+<p>", "<p>");
-                    paraCount = countLinesPerPage(countRange);
                 }
-                //p = _document.Range(0, end).Paragraphs[_document.Range(0, end).Paragraphs.Count - 1];
-                //p = new Document(ref x).Range(0, end).Paragraphs[_document.Range(0, end).Paragraphs.Count - 1];
-                //end = p.End;
-                textBox1.Select(end, 0);
-                pageTextEndPosition = end;
-                pageEndText10 = textBox1.Text.Substring(end - 10, 10);
-                return true;
+                else
+                {
+                    end = x.Length;
+                    break;
+                }
+                string countRange = x.Substring(0, end).Replace("+<p>", "<p>");
+                paraCount = countLinesPerPage(countRange);
             }
+            //p = _document.Range(0, end).Paragraphs[_document.Range(0, end).Paragraphs.Count - 1];
+            //p = new Document(ref x).Range(0, end).Paragraphs[_document.Range(0, end).Paragraphs.Count - 1];
+            //end = p.End;
+            textBox1.Select(end, 0);
+            pageTextEndPosition = end;
+            pageEndText10 = textBox1.Text.Substring(end - 10, 10);
+            return true;
         }
-
         /// <summary>
         /// 檢查原文是否已遭篡改
         /// </summary>
@@ -6058,10 +6068,12 @@ namespace WindowsFormsApp1
         /// <returns>出錯或失敗則傳回false。不標或已標而不再重標亦傳回true</returns>
         private bool titleMarkCode()
         {
-            if (wordsPerLinePara == -1)
-            {
-                Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("請先用Scroll Lock鍵讓程式取得每行/段的正常長度（字數）以供判斷。"); return false;
-            }
+            //移至呼叫端
+            //if (textBox1.SelectionLength==0 && textBox1.Text  wordsPerLinePara == -1)
+            //{
+            //    Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("請先用Scroll Lock鍵讓程式取得每行/段的正常長度（字數）以供判斷。"); return false;
+            //}
+
             int s = textBox1.SelectionStart, i = s;
             bool groupTitle = false;
             string x = textBox1.Text, asterisks = "*", asteriskAppend = string.Empty;
@@ -6091,7 +6103,7 @@ namespace WindowsFormsApp1
                 }
             }
             string context = textBox1.Text;
-            Document document = new Document(ref context);
+            Document document = new Document(context);
             if (textBox1.SelectedText == string.Empty)//目前好像用不到選取指定標題，故暫去掉
             {
                 if (x.Length >= s + 1 && x.Substring(s, 1) == "　")
@@ -6178,7 +6190,7 @@ namespace WindowsFormsApp1
                 else
                     pNextTitleFirstParaText = GetLineText(x, pTitleFirstParaEnd + Environment.NewLine.Length);
                 context = textBox1.Text;
-                document = new Document(ref context);
+                document = new Document(context);
                 //借用x變數，取得插入點後的文字
                 x = x.Substring(s);
                 for (int j = 0; j + 2 <= x.Length; j++)//j為偏移的個數
@@ -8157,26 +8169,33 @@ namespace WindowsFormsApp1
                                 item.LastIndexOf("}}", closeBracketS) == item.LastIndexOf("}}}", closeBracketS))
                         ))//獨立注文
                     {
-                        string preItem, prePreItem;
+                        string preItem, preItem1;
                         if (index == 0) i += 2;
                         else if (index > 0)
                         {
                             preItem = linesParasPage[index - 1];
                             if (index > 1)
-                                prePreItem = linesParasPage[index - 2];
+                                preItem1 = linesParasPage[index - 2];
                             else
-                                prePreItem = null;
+                                preItem1 = null;
                             if (((preItem.IndexOf("{{") == -1 || (preItem.StartsWith("{{") && preItem.IndexOf("{{", 2) == -1))
                                         || (preItem.IndexOf("{{") > 0 && preItem.IndexOf("}}") > (preItem.IndexOf("{{"))))
                                 && (preItem.EndsWith("}}") || preItem.EndsWith("}}<p>") || preItem.EndsWith("}}。<p>"))
                                 && preItem.LastIndexOf("}}", preItem.LastIndexOf("}}")) == -1
+                                //前一行是獨立注文
                                 && ((item.EndsWith("}}<p>") || item.EndsWith("}}。<p>")) &&
                                     ((preItem.StartsWith("{{") && preItem.EndsWith("}}") && preItem.IndexOf("{{", 2) == -1)
                                     || preItem.Contains("{{") == false && preItem.EndsWith("}}")))
-                                //本段是末有<p>的獨立注文，而前2段不是獨立注文
-                                && !(((item.EndsWith("}}<p>") || item.EndsWith("}}。<p>")) && item.LastIndexOf("}}", item.LastIndexOf("}}")) == -1)
-                                    && prePreItem != null && prePreItem.StartsWith("{{") && preItem.EndsWith("}}")
-                                    && prePreItem.IndexOf("{{", 2) == -1 && preItem.LastIndexOf("}}", preItem.Length - 2) == -1)
+                                && (//本段是末有<p>的獨立注文，而前2段不是獨立注文
+                                    !(((item.EndsWith("}}<p>") || item.EndsWith("}}。<p>")) && item.LastIndexOf("}}", item.LastIndexOf("}}")) == -1)
+                                        && ((preItem1 != null && (preItem1.StartsWith("{{") && preItem1.IndexOf("{{", 2) == -1)
+                                        && preItem.EndsWith("}}") && preItem.LastIndexOf("}}", preItem.Length - 2) == -1)
+                                        ||
+                                        (preItem1 != null && (!preItem1.Contains("{{") && !preItem1.Contains("}}"))
+                                            && !preItem.Contains("{{") && preItem.EndsWith("}}") && preItem.LastIndexOf("}}", preItem.Length - 2) == -1)
+                                        ))
+                                    //或者本/行段與前行/段字數差不超過1
+                                    || Math.Abs(countWordsLenPerLinePara(item) - countWordsLenPerLinePara(preItem)) <= 1)
                                 )
                                 i++;
                             else
@@ -8376,11 +8395,12 @@ namespace WindowsFormsApp1
                                 //return (((l + 1) % 2) == 1) ? ++l / 2 : l / 2;
             return y == 0 ? x : ++x;
         }
+
+        /* https://ctext.org/library.pl?if=en&file=36096&page=99&editwiki=644293#editor (20250224 已測試） */
         /// <summary>
         /// 計算單行/段的字數
         /// 含空格空白；而標點符號、校按、標題標記、段落標記、分行標記均不計（即只計算原書內文之長度，以供比較行/段長度）
         /// 待除錯，可以此頁內容檢測（當已標記時再執行此函式會誤改動 20240905 
-        /// https://ctext.org/library.pl?if=en&file=36096&page=99&editwiki=644293#editor (20250224 已測試）
         /// </summary>
         /// <param name="xLinePara">要計算的行/段的文字字串</param>
         /// <returns></returns>
@@ -8905,37 +8925,42 @@ namespace WindowsFormsApp1
                 if (textBox1.Text.Substring(textBox1.TextLength - 3, 3) != "<p>")
                     textBox1.Text += "<p>";
 
+                #region 第2行/段標題的自動格式化
                 string secondLineText = GetLineText(textBox1.Text, textBox1.Text.IndexOf(Environment.NewLine) + 3, out int lineS, out int lineL);
-                secondLineText = secondLineText.Replace("􏿽", "　");
-                int leadingSpacesLength = _leadingSpacesRegex.Match(secondLineText).Value.Length;
-                //if (!secondLineText.Substring(_leadingSpacesRegex.Match(secondLineText).Value.Length).Contains("　"))
-                if (!secondLineText.Substring(leadingSpacesLength).StartsWith("　"))
+                if (!secondLineText.Contains("*"))
                 {
-                    //將第2行/段的文本做標題標記（如果是《欽定四庫全書》的文本）
-                    int start = textBox1.SelectionStart, len = textBox1.SelectionLength;
-                    textBox1.Select(textBox1.Text.IndexOf(Environment.NewLine) + 2, leadingSpacesLength * 2);
-                    string blank2Space = textBox1.SelectedText.Replace("􏿽", "　");
-                    textBox1.SelectedText = blank2Space;
-                    int spsPos = textBox1.Text.IndexOf("　", lineS + leadingSpacesLength);
-                    if (spsPos > -1)
-                        textBox1.Select(lineS + leadingSpacesLength, spsPos - lineS);
-                    else
-                        textBox1.Select(lineS, lineL);
-                    titleMarkCode();
-
-                    #region 標題標記完後若其行/段後面還有文字，則予以格式化（全形空格轉空白）
-                    if (CountWordsinDomain("<p>", GetLineText(textBox1.Text, textBox1.SelectionStart)) > 1)
+                    secondLineText = secondLineText.Replace("􏿽", "　");
+                    int leadingSpacesLength = _leadingSpacesRegex.Match(secondLineText).Value.Length;
+                    //if (!secondLineText.Substring(_leadingSpacesRegex.Match(secondLineText).Value.Length).Contains("　"))
+                    if (!secondLineText.Substring(leadingSpacesLength).StartsWith("　"))
                     {
-                        Paragraph paragraph = new Range(_document, textBox1.SelectionStart, textBox1.SelectionStart, _document.Content).GetCurrentParagraph();
-                        textBox1.Select(paragraph.Start, paragraph.End - paragraph.Start);
-                        undoRecord(); stopUndoRec = true; PauseEvents();
-                        textBox1.SelectedText = CnText.ReplaceFullWidthSpace_withBlank(textBox1.SelectedText);
-                        undoRecord(); stopUndoRec = false; ResumeEvents();
-                    }
-                    #endregion 標題標記完後若其行/段後面還有文字，則予以格式化（全形空格轉空白）
+                        //將第2行/段的文本做標題標記（如果是《欽定四庫全書》的文本）
+                        int start = textBox1.SelectionStart, len = textBox1.SelectionLength;
+                        textBox1.Select(textBox1.Text.IndexOf(Environment.NewLine) + 2, leadingSpacesLength * 2);
+                        string blank2Space = textBox1.SelectedText.Replace("􏿽", "　");
+                        textBox1.SelectedText = blank2Space;
+                        int spsPos = textBox1.Text.IndexOf("　", lineS + leadingSpacesLength);
+                        if (spsPos > -1)
+                            textBox1.Select(lineS + leadingSpacesLength, spsPos - (lineS + leadingSpacesLength));
+                        else
+                            textBox1.Select(lineS, lineL);
+                        titleMarkCode();
 
-                    textBox1.Select(start, len);
+                        #region 標題標記完後若其行/段後面還有文字，則予以格式化（全形空格轉空白）
+                        if (CountWordsinDomain("<p>", GetLineText(textBox1.Text, textBox1.SelectionStart)) > 1)
+                        {
+                            Paragraph paragraph = new Range(_document, textBox1.SelectionStart, textBox1.SelectionStart, _document.Content).GetCurrentParagraph();
+                            textBox1.Select(paragraph.Start, paragraph.End - paragraph.Start);
+                            undoRecord(); stopUndoRec = true; PauseEvents();
+                            textBox1.SelectedText = CnText.ReplaceFullWidthSpace_withBlank(textBox1.SelectedText);
+                            undoRecord(); stopUndoRec = false; ResumeEvents();
+                        }
+                        #endregion 標題標記完後若其行/段後面還有文字，則予以格式化（全形空格轉空白）
+
+                        textBox1.Select(start, len);
+                    }
                 }
+                #endregion 第2行/段標題的自動格式化
             }
             #endregion
 
@@ -10390,7 +10415,7 @@ namespace WindowsFormsApp1
             #endregion
 
             #region 預測下一頁頁末尾端在哪裡               
-            if (!pagePaste2GjcoolOCR && !autoPastetoCtextQuitEditTextboxCancel)
+            if (!pagePaste2GjcoolOCR && autoPaste2QuickEdit && !autoPastetoCtextQuitEditTextboxCancel)
             {
                 //if (pageTextEndPosition == 0 && pageEndText10 == "" && !keyinText && autoPastetoQuickEdit)
                 //{
@@ -11189,7 +11214,7 @@ namespace WindowsFormsApp1
 
                     #region 取得最後不含 <p> 與 。<p> 的5個字來顯示於訊息方塊中20250118
                     string textbox1Text = textBox1.Text;
-                    StringInfo si = new StringInfo(new Document(ref textbox1Text).Range(0, textBox1.SelectionStart).Text.Replace("*", string.Empty).Replace("<p>", string.Empty));
+                    StringInfo si = new StringInfo(new Document(textbox1Text).Range(0, textBox1.SelectionStart).Text.Replace("*", string.Empty).Replace("<p>", string.Empty));
                     string last5Characters = si.SubstringByTextElements(si.LengthInTextElements - 5);
                     //string last5Characters = textBox1.SelectedText; int eLast5Characters = last5Characters.IndexOf("<p>");
                     int eLast5Characters = last5Characters.IndexOf("<p>");
@@ -11261,7 +11286,7 @@ namespace WindowsFormsApp1
                         if (fastMode && rePaint) BeginUpdate();
                         keyDownCtrlAdd_ReturnVale = keyDownCtrlAdd(false);
                         //if (fastMode) EndUpdate();
-                        if (!keyDownCtrlAdd_ReturnVale && doNotShowMsgBox == true) { dialogResult = DialogResult.Cancel; goto ok; }//dialogRes-ult = DialogResult.Abort;
+                        if (!keyDownCtrlAdd_ReturnVale && doNotShowMsgBox == true) { dialogResult = DialogResult.Cancel; WindowsScrolltoTop(); goto ok; }//dialogRes-ult = DialogResult.Abort;
                         doNotShowMsgBox = false;
                         //if (browsrOPMode != BrowserOPMode.appActivateByName && !autoPastetoCtextQuitEditTextboxCancel)
                         if (browsrOPMode != BrowserOPMode.appActivateByName)
@@ -11602,7 +11627,7 @@ namespace WindowsFormsApp1
                         if (br.QuickeditLinkIWebElement != null)
                         {
                             //const string inputText = "《四庫全書》􏿽{{經史子集部　}}<p>";
-                            const string inputText = "《四庫全書》􏿽{{集部　}}<p>";
+                            const string inputText = "《四庫全書》􏿽{{子部　}}<p>";
                             br.QuickeditLinkIWebElement.Click();
                             PauseEvents();
                             textBox3.Text = driver.Url;
@@ -12955,8 +12980,66 @@ namespace WindowsFormsApp1
             Form1 formNew = new Form1();
             formNew.Show();
             formNew.Name = "Form" + Application.OpenForms.Count;
+            formNew.Text = formNew.Name;
+            //formNew.textBox1.Text = formNew.Name;
+
+            // 調整背景顏色
+            lightenTextBoxBackground(formNew);
+
             return formNew;
+
+            void lightenTextBoxBackground(Form1 newForm)
+            {// 20250308 Copilot大菩薩
+                // 確保有其他表單已經開啟
+                if (Application.OpenForms.Count > 1)
+                {
+                    // 使用目前已開啟最後一個表單的背景顏色
+                    Form1 lastOpenedForm = (Form1)Application.OpenForms[Application.OpenForms.Count - 2];
+                    Color currentColor = lastOpenedForm.textBox1.BackColor;
+
+                    // 計算變淡後的顏色
+                    int lightenAmount = 10; // 調整這個值來控制變淡程度
+                    int red = Math.Min(currentColor.R + lightenAmount, 255);
+                    int green = Math.Min(currentColor.G + lightenAmount, 255);
+                    int blue = Math.Min(currentColor.B + lightenAmount, 255);
+
+                    // 設定新表單 textBox1 的背景顏色
+                    newForm.textBox1.BackColor = Color.FromArgb(currentColor.A, red, green, blue);
+                }
+                else
+                {
+                    // 如果是第一個表單，使用默認背景顏色或指定顏色
+                    //newForm.textBox1.BackColor = Color.LightGray;
+                }
+            }
         }
+
+        //private static Form1 newForm1()
+        //{
+        //    Form1 formNew = new Form1();
+        //    formNew.Show();
+        //    formNew.Name = "Form" + Application.OpenForms.Count;
+        //    formNew.Text = formNew.Name;
+        //    formNew.textBox1.Text = formNew.Name;
+        //    lightenTextBoxBackground(formNew);
+        //    return formNew;
+
+        //    //Copilot大菩薩：20250308 https://copilot.microsoft.com/shares/SZjL4PEMMyz3KUNszbUeB
+        //    void lightenTextBoxBackground(Form1 newForm)
+        //    {
+        //        // 取得目前的背景顏色
+        //        Color currentColor = ((Form1)Application.OpenForms[Application.OpenForms.Count-1]).textBox1.BackColor;
+
+        //        // 計算變淡後的顏色
+        //        int lightenAmount = 20; // 調整這個值來控制變淡程度
+        //        int red = Math.Min(currentColor.R + lightenAmount, 255);
+        //        int green = Math.Min(currentColor.G + lightenAmount, 255);
+        //        int blue = Math.Min(currentColor.B + lightenAmount, 255);
+
+        //        // 設定 textBox1 的背景顏色為變淡後的顏色
+        //        newForm.textBox1.BackColor = Color.FromArgb(currentColor.A, red, green, blue);
+        //    }
+        //}
 
 
         /// <summary>
@@ -13632,7 +13715,11 @@ namespace WindowsFormsApp1
                     try
                     {
                         if (br.driver.Url != url)
-                            br.GoToUrlandActivate(url, true);
+                            if (!fastMode)
+                                br.GoToUrlandActivate(url, true);
+                            else
+                                br.driver.Url = url;
+                        //br.driver.Navigate().GoToUrl(url);
                     }
                     catch (Exception)
                     {
@@ -14134,7 +14221,7 @@ namespace WindowsFormsApp1
             if (xClpBd.IndexOf("欽定四庫全書") > -1)
             {
                 //取得縮排的行/段數（通常是2頁）
-                Document document = new Document(ref xClpBd);
+                Document document = new Document(xClpBd);
                 List<Paragraph> paragraphs = document.GetParagraphs();
                 Range range = null;
                 int lastParaIndex = 2, leadingSpaceCount = _leadingSpacesRegex.Match(paragraphs[0].Text).Value.Length;//首行「欽定四庫全書」前的縮排空格數
@@ -14953,9 +15040,10 @@ namespace WindowsFormsApp1
             //else
             //{
             // 當前視窗句柄無效
-            br.driver.SwitchTo().Window(currentWin);//切回圖文對照的頁面分頁視窗
-                                                    //}
-                                                    //如果存在「參考上下頁」控制項，則須刷新，否則會被前後頁的舊資料所干擾
+            if (driver.CurrentWindowHandle != currentWin)
+                br.driver.SwitchTo().Window(currentWin);//切回圖文對照的頁面分頁視窗
+                                                        //}
+                                                        //如果存在「參考上下頁」控制項，則須刷新，否則會被前後頁的舊資料所干擾
             if (br.CheckAdjacentPages_Linkbox != null && Edited)
             { //要先記下可能有所編輯的前、後頁，否則一刷新就沒有了：
                 if (br.CheckAdjacentPages_DataPrev != null)

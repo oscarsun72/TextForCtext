@@ -206,7 +206,7 @@ namespace TextForCtext
                     else
                     {
 
-                        Document document = new Document(ref xForStandardize);
+                        Document document = new Document(xForStandardize);
                         foreach (var item in document.GetParagraphs())
                         {
                             if (item.Text.Contains("欽定四庫全書"))
