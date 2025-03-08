@@ -7564,7 +7564,7 @@ namespace WindowsFormsApp1
                         && ((text.IndexOf("<p>") == -1 && text.IndexOf("}}", endIndex + 1) == -1 && endIndex != text.Length - "}}".Length)
                             || (text.IndexOf("}}<p>") > -1 && text.IndexOf("}}", endIndex + 1) == -1 && endIndex != text.Length - "}}<p>".Length)
                             || (text.IndexOf("}}。<p>") > -1 && text.IndexOf("}}", endIndex + 1) == -1 && endIndex != text.Length - "}}。<p>".Length))
-                        || ((openIndex > -1 && endIndex < openIndex) && (text.IndexOf("}}", endIndex + 1) > -1 || text.IndexOf("{{", endIndex + 1) > -1))
+                        || (endIndex != -1 && (openIndex > -1 && endIndex < openIndex) && (text.IndexOf("}}", endIndex + 1) > -1 || text.IndexOf("{{", endIndex + 1) > -1))
                         //|| (text.LastIndexOf("}}") > -1 && text.LastIndexOf("}}") < text.Length - "{{".Length)
                         )
                     {//開頭是注文，但沒有「{{」
