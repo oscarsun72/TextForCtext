@@ -1,5 +1,6 @@
 Attribute VB_Name = "中國哲學書電子化計劃"
 Option Explicit
+Dim ChapterSelector As String
 Sub 集杜詩_文山先生全集_四部叢刊_維基文庫本_去掉中間誤空的格() '《集杜詩》格式者皆適用（中間誤空的格） 20221112
     Dim rng As Range, d As Document, p As Paragraph, a As Range, i As Integer, ur As UndoRecord
     Set d = ActiveDocument
@@ -56,7 +57,7 @@ Sub 新頁面()
         End If
     Next i
     
-    rng.Paragraphs(3).Range = CLng(Replace(rng.Paragraphs(3).Range, VBA.Chr(13), "")) + 1
+    rng.Document.Range(d.Paragraphs(3).Range.start, d.Paragraphs(3).Range.End - 1).text = CLng(Replace(rng.Paragraphs(3).Range, VBA.Chr(13), "")) + 1
     'rng.Document.Paragraphs(3).Range.text = VBA.CStr(VBA.CLng(VBA.Left(rng.Document.Paragraphs(3).Range.text, VBA.Len(rng.Document.Paragraphs(3).Range.text) - 1)) + 1)
     
     'For Each e In Selection.Value
@@ -277,12 +278,12 @@ NextOne:
     'pastetoEditBox "將星號前的分段符號移置前段之末"
     Exit Sub
 eH:
-    Select Case Err.Number
+    Select Case Err.number
         Case 4605, 13 '此方法或屬性無法使用，因為[剪貼簿] 是空的或無效的。
             SystemSetup.wait 0.8
             Resume
         Case Else
-            MsgBox Err.Number + Err.Description
+            MsgBox Err.number + Err.Description
      End Select
 End Sub
 
@@ -558,12 +559,12 @@ Sub 維基文庫四部叢刊本轉來()
     SystemSetup.playSound 2
     Exit Sub
 eH:
-    Select Case Err.Number
+    Select Case Err.number
         Case 5904 '無法編輯 [範圍]。
             If p.Range.Characters(acP).Hyperlinks.Count > 0 Then p.Range.Characters(acP).Hyperlinks(1).Delete
             Resume
         Case Else
-            MsgBox Err.Number & Err.Description
+            MsgBox Err.number & Err.Description
     End Select
 End Sub
 
@@ -1088,7 +1089,7 @@ Function Searchu(res As String, undoName As String) As Boolean
     Searchu = True
     Exit Function
 eH:
-    Select Case Err.Number
+    Select Case Err.number
         Case -2146233088
             If VBA.InStr(Err.Description, "element not interactable") = 1 Then '(Session info: chrome=130.0.6723.117)
                 Set iwe = SeleniumOP.WD.FindElementByCssSelector("#searchform > input.searchbox")
@@ -1099,8 +1100,8 @@ eH:
             End If
         Case Else
 elses:
-            Debug.Print Err.Number & Err.Description
-            MsgBox Err.Number & Err.Description
+            Debug.Print Err.number & Err.Description
+            MsgBox Err.number & Err.Description
     End Select
 End Function
 
@@ -1743,7 +1744,7 @@ Sub 國學大師_Kanripo_四庫全書本轉來()
 '    End If
     
     SystemSetup.playSound 1
-    文字處理.書名號篇名號標注
+    '文字處理.書名號篇名號標注 '擬交給TextForCtext C#來標 20250312
     
     With rng.Document
         With .Range.Find
@@ -2188,6 +2189,183 @@ Sub EditModeMakeup_changeFile_Page() '同版本文本帶入置換file id 和 頁數
     SystemSetup.playSound 1
     d.Application.Activate
 End Sub
+Property Get Div_generic_IncludePathAndEndPageNum() As SeleniumBasic.IWebElement
+    Dim iwe As SeleniumBasic.IWebElement
+    'if Form1.IsValidUrl＿ImageTextComparisonPage(ActiveForm1.textBox3Text))
+    Set iwe = WD.FindElementByCssSelector("#content > div:nth-child(3)")
+    Set Div_generic_IncludePathAndEndPageNum = iwe
+End Property
+Property Get pageUBound() As Integer
+    Dim iwe  As SeleniumBasic.IWebElement, str As String
+    Set iwe = Div_generic_IncludePathAndEndPageNum
+    If iwe Is Nothing Then pageUBound = 0
+    str = iwe.GetAttribute("textContent") '"線上圖書館 -> 松煙小錄 -> 松煙小錄三  /117 ";
+    pageUBound = VBA.CInt(VBA.Mid(str, VBA.InStr(str, "/") + 1, VBA.Len(str) - 1 - VBA.InStr(str, "/")))
+End Property
+Function CurrentChapterNum_Selector() As String
+    Dim selector As String
+    Dim match As Object
+    Dim regex As Object
+    
+    ' 設定選擇器字符串
+    selector = ChapterSelector '"#content > div:nth-child(6) > table > tbody > tr:nth-child(2) > td:nth-child(1) > a"
+    
+    ' 建立正則表達式對象
+    Set regex = CreateObject("VBScript.RegExp")
+    regex.Pattern = "tr:nth-child\((\d+)\)"
+    regex.Global = False
+    
+    ' 進行匹配
+    Set match = regex.Execute(selector)
+    If match.Count > 0 Then
+        ' 取得匹配的群組值
+        CurrentChapterNum_Selector = match(0).SubMatches(0)
+    Else
+        ' 若無匹配，返回空字串
+        CurrentChapterNum_Selector = ""
+    End If
+End Function
+Function IncrementNthChild(selector As String) As String
+    Dim regex As Object
+    Dim match As Object
+    Dim number As Integer
+    
+    ' 建立正則表達式對象
+    Set regex = CreateObject("VBScript.RegExp")
+    regex.Pattern = "tr:nth-child\((\d+)\)"
+    regex.Global = False
+    
+    ' 執行匹配
+    Set match = regex.Execute(selector)
+    If match.Count > 0 Then
+        ' 取得群組中的數字，並轉為整數
+        number = CInt(match(0).SubMatches(0))
+        number = number + 1
+        
+        ' 使用正則表達式替換為更新後的值
+        IncrementNthChild = regex.Replace(selector, "tr:nth-child(" & number & ")")
+    Else
+        ' 如果匹配失敗，返回原始字符串
+        IncrementNthChild = selector
+    End If
+End Function
+
+Function NextChapterSelector(ChapterSelector As String) As String
+    'Static ChapterSelector As String
+    Dim selector As String
+    Dim newSelector As String
+    
+    ' 檢查 ChapterSelector 是否為空
+    If IsEmpty(ChapterSelector) Or ChapterSelector = "" Then
+        NextChapterSelector = "" ' 如果為空，返回空字串
+        Exit Function
+    End If
+    
+    ' 設定當前的選擇器
+    selector = ChapterSelector ' 範例: "#content > div:nth-child(6) > table > tbody > tr:nth-child(2) > td:nth-child(1) > a"
+    
+    ' 使用 IncrementNthChild 函式來更新選擇器
+    newSelector = IncrementNthChild(selector)
+    
+    ' 更新靜態變數 ChapterSelector
+    ChapterSelector = newSelector
+    
+    ' 返回新的選擇器
+    NextChapterSelector = newSelector
+End Function
+Property Get Head_Edit_textbox() As SeleniumBasic.IWebElement
+    If VBA.InStr(WD.url, "&action=newchapter") Then
+        Set Head_Edit_textbox = WD.FindElementByCssSelector("#content > h2")
+    End If
+End Property
+Property Get Title_Edit_textbox() As SeleniumBasic.IWebElement
+    If VBA.InStr(WD.url, "&action=newchapter") Then
+        Set Title_Edit_textbox = WD.FindElementByCssSelector("#title")
+    End If
+End Property
+Property Get Sequence_data_Edit_textbox() As SeleniumBasic.IWebElement
+    If VBA.InStr(WD.url, "&action=newchapter") Then
+        Set Sequence_data_Edit_textbox = WD.FindElementByCssSelector("#sequence")
+    End If
+End Property
+Property Get Textarea_data_Edit_textbox() As SeleniumBasic.IWebElement
+    If VBA.InStr(WD.url, "&action=newchapter") Then
+        Set Textarea_data_Edit_textbox = WD.FindElementByCssSelector("#data")
+    End If
+End Property
+Property Get Description_Edit_textbox() As SeleniumBasic.IWebElement
+    If VBA.InStr(WD.url, "&action=newchapter") Then
+        Set Description_Edit_textbox = WD.FindElementByCssSelector("#description")
+    End If
+End Property
+Property Get Commit_Edit_textbox() As SeleniumBasic.IWebElement
+    If VBA.InStr(WD.url, "&action=newchapter") Then
+        Set Commit_Edit_textbox = WD.FindElementByCssSelector("#commit")
+    End If
+End Property
+Sub 新頁面Auto()
+    Dim d As Document, chapterNum As Integer, iwe As SeleniumBasic.IWebElement, newchapterUrl As String, title As String
+    Set d = ActiveDocument
+    '文件第4段輸入要開啟的書首頁面，如https://ctext.org/library.pl?if=gb&res=4925
+    
+    If IsWDInvalid Then
+        If Not OpenChrome(VBA.Left(d.Paragraphs(4).Range.text, VBA.Len(d.Paragraphs(4).Range.text) - 1)) Then Exit Sub
+    Else
+        If Not Commit_Edit_textbox Is Nothing Then
+            Commit_Edit_textbox.Click '送出
+        End If
+        WD.url = VBA.Left(d.Paragraphs(4).Range.text, VBA.Len(d.Paragraphs(4).Range.text) - 1)
+    End If
+    WD.SwitchTo.Window WD.CurrentWindowHandle
+    '第5段輸入現在要新增單位的冊chapter序號，如第1冊則為2（冊序號+1）
+    chapterNum = VBA.CInt(VBA.Left(d.Paragraphs(5).Range.text, VBA.Len(d.Paragraphs(5).Range.text) - 1))
+    '"#content > div:nth-child(6) > table > tbody > tr:nth-child(2) > td:nth-child(1) > a"
+    ChapterSelector = "#content > div:nth-child(6) > table > tbody > tr:nth-child(" & chapterNum & ") > td:nth-child(1) > a"
+    '第6段為新增單位的頁面網址：
+    'https://ctext.org/wiki.pl?if=gb&res=350225&action=newchapter
+    newchapterUrl = VBA.Left(d.Paragraphs(6).Range.text, VBA.Len(d.Paragraphs(6).Range.text) - 1)
+    
+    '在書首資訊頁面中點擊相對應的chapter（冊）
+    Set iwe = WD.FindElementByCssSelector(ChapterSelector)
+    If iwe Is Nothing Then
+        MsgBox "done!", vbInformation
+        Exit Sub
+    End If
+    title = iwe.GetAttribute("text")
+    iwe.Click
+    'Set iwe = WD.FindElementByCssSelector(Div_generic_IncludePathAndEndPageNum)
+    d.Range(d.Paragraphs(1).Range.start, d.Paragraphs(1).Range.End - 1).text = 1
+    d.Range(d.Paragraphs(2).Range.start, d.Paragraphs(2).Range.End - 1).text = pageUBound
+    'https://ctext.org/library.pl?if=gb&file=76754&page=1
+    d.Range(d.Paragraphs(3).Range.start, d.Paragraphs(3).Range.End - 1).text = VBA.Trim(VBA.Mid(WD.url, VBA.InStr(WD.url, "&file=") + VBA.Len("&file="), VBA.InStr(WD.url, "&page=") - (VBA.InStr(WD.url, "&file=") + VBA.Len("&file="))))
+    d.Activate
+    WD.url = newchapterUrl
+    WD.SwitchTo.Window WD.CurrentWindowHandle
+    ActivateChrome
+    Textarea_data_Edit_textbox.Click
+    ActivateChrome
+    VBA.DoEvents
+    新頁面
+    d.Undo
+    If Textarea_data_Edit_textbox.GetAttribute("value") = vbNullString Then
+        SetIWebElementValueProperty Textarea_data_Edit_textbox, GetClipboardText
+    End If
+    '輸入title值：
+    Dim head As String
+    head = Head_Edit_textbox.GetAttribute("outerText")
+    head = VBA.Mid(head, 2, VBA.InStr(head, "》") - 2)
+    
+    SetIWebElementValueProperty Title_Edit_textbox, VBA.Replace(title, head, vbNullString)
+    '輸入Sequence值：
+    SetIWebElementValueProperty Sequence_data_Edit_textbox, VBA.CStr(chapterNum) & "0"
+    '輸入修改摘要:
+    SetIWebElementValueProperty Description_Edit_textbox, "據《國學大師》所收本輔以末學於GitHub開源自製免費免安裝之TextForCtext軟件排版對應錄入；討論區及末學YouTube頻道有實境演示影片。感恩感恩　讚歎讚歎　南無阿彌陀佛"
+    'Commit_Edit_textbox.Click '送出
+    
+    Title_Edit_textbox.Click
+    d.Range(d.Paragraphs(5).Range.start, d.Paragraphs(5).Range.End - 1).text = chapterNum + 1
+End Sub
+
 
 Rem 在序號欄位補零以調整章節及其次序用。因《御定佩文韻府》須調整章節單位長度而設（其原有290個單位故！！） https://ctext.org/wiki.pl?if=en&res=589161 20241214
 Sub Add0toSequenceField()

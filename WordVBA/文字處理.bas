@@ -14,7 +14,10 @@ Dim db As Database 'set db=CurrentDb _
 Rem ¼ÐÂI²Å¸¹¦r¦ê
 Public Static Property Get PunctuationString() As String
 If punctuationStr = "" Then _
-    punctuationStr = "¡]¡^¡C¡u¡v¡y¡z[]¡i¡j¡e¡f¡m¡n¡q¡r-¡Ð"",  ¡G¡A¡F¡I¡H?" _
+    punctuationStr = "¡]¡^¡C¡u¡v¡y¡z[]¡i¡j¡e¡f¡m¡n¡q¡r-¡Ð"",¡G¡A¡F¡I¡H?" _
+        & "¡B.:,;" _
+        & "¡K¡K...!()-¡P¡E" & VBA.Chr(34) & VBA.Chr(-24153) & VBA.Chr(-24152) & VBA.Chr(-24155) & VBA.Chr(-24154) & VBA.ChrW(8218) '34¡GÂù¤Þ¸¹¡C¤j³°¼ÐÂI²Å¸¹¤W¤UÂù¤Þ¸¹¡B¤W¤U³æ¤Þ¼Æ¡B³r¸¹
+    'punctuationStr = "¡]¡^¡C¡u¡v¡y¡z[]¡i¡j¡e¡f¡m¡n¡q¡r-¡Ð"",  ¡G¡A¡F¡I¡H?" _
         & "¡B. :,;" _
         & "¡K¡K...!()-¡P¡E" & VBA.Chr(34) & VBA.Chr(-24153) & VBA.Chr(-24152) & VBA.Chr(-24155) & VBA.Chr(-24154) & VBA.ChrW(8218) '34¡GÂù¤Þ¸¹¡C¤j³°¼ÐÂI²Å¸¹¤W¤UÂù¤Þ¸¹¡B¤W¤U³æ¤Þ¼Æ¡B³r¸¹
 PunctuationString = punctuationStr
@@ -134,7 +137,7 @@ retry:      Next ch
     options.SaveInterval = 10 '«ì´_¦Û°ÊÀx¦s
     End '¥ÎExit SubµLªk¨C¦¸Ãö³¬Access
 ¿ù»~³B²z:
-    Select Case Err.Number
+    Select Case Err.number
         Case Is = 91, 3078 '°Ñ·Ó¤£¨ìDataBase¤ºª«¥ó®É
             MsgBox "½Ð¦A«ö¤@¦¸!", vbCritical
             'access.Application.Quit
@@ -168,7 +171,7 @@ retry:      Next ch
     '        Set rst = db.OpenRecordset("µüÀWªí", dbOpenDynaset)
     '        Resume
         Case Else
-            MsgBox Err.Number & ":" & Err.Description, vbExclamation
+            MsgBox Err.number & ":" & Err.Description, vbExclamation
             Resume
     End Select
 End Sub
@@ -231,14 +234,14 @@ retry:      Next WD
     options.SaveInterval = 10 '«ì´_¦Û°ÊÀx¦s
     End
 ¿ù»~³B²z:
-    Select Case Err.Number '¥D¯Á¤Þ­È­«½Æ
+    Select Case Err.number '¥D¯Á¤Þ­È­«½Æ
         Case Is = 91, 3078
             MsgBox "½Ð¦A«ö¤@¦¸!", vbCritical
             'access.Application.Quit
             d.Quit
             End
         Case Else
-            MsgBox Err.Number & ":" & Err.Description, vbExclamation
+            MsgBox Err.number & ":" & Err.Description, vbExclamation
             Resume
     End Select
     '¦¸¼Æ:
@@ -293,14 +296,14 @@ Sub ¶i¶¥µüÀW() '2002/11/10­nSub¤~¯à¦bWord¤¤°õ¦æ!'2005/4/21¦¹ªk¦b¶]¤jÀÉ®×®É¤Ó¨S®Ä
                 Select Case phralh
                     Case Is = 1
                         If Err.LastDllError <> 0 Then
-                            MsgBox Err.LastDllError & ":" & Err.Description & "Err.Number:" & Err.Number
+                            MsgBox Err.LastDllError & ":" & Err.Description & "Err.Number:" & Err.number
                             GoTo ¿ù»~³B²z
                         End If
     '                    phras = .Characters(phra)'¦¹ªk¤ÓºC!
                         phras = VBA.Mid(Dw, phra, 1)
                     Case Is = 2
                         If Err.LastDllError <> 0 Then
-                            MsgBox Err.LastDllError & ":" & Err.Description & "Err.Number:" & Err.Number
+                            MsgBox Err.LastDllError & ":" & Err.Description & "Err.Number:" & Err.number
                             GoTo ¿ù»~³B²z
                         End If
     '                    If phra + 1 <= .Characters.Count Then _
@@ -308,7 +311,7 @@ Sub ¶i¶¥µüÀW() '2002/11/10­nSub¤~¯à¦bWord¤¤°õ¦æ!'2005/4/21¦¹ªk¦b¶]¤jÀÉ®×®É¤Ó¨S®Ä
                         If phra + 1 <= dwL Then phras = VBA.Mid(Dw, phra, 2)
                     Case Is = 3
                         If Err.LastDllError <> 0 Then
-                            MsgBox Err.LastDllError & ":" & Err.Description & "Err.Number:" & Err.Number
+                            MsgBox Err.LastDllError & ":" & Err.Description & "Err.Number:" & Err.number
                             GoTo ¿ù»~³B²z
                         End If
     '                    If phra + 2 <= .Characters.Count Then _
@@ -318,7 +321,7 @@ Sub ¶i¶¥µüÀW() '2002/11/10­nSub¤~¯à¦bWord¤¤°õ¦æ!'2005/4/21¦¹ªk¦b¶]¤jÀÉ®×®É¤Ó¨S®Ä
                     Case Is = 4
                         On Error GoTo ¿ù»~³B²z
                         If Err.LastDllError <> 0 Then
-                            MsgBox Err.LastDllError & ":" & Err.Description & "Err.Number:" & Err.Number
+                            MsgBox Err.LastDllError & ":" & Err.Description & "Err.Number:" & Err.number
                             GoTo ¿ù»~³B²z
                         End If
     '                    If phra + 3 <= .Characters.Count Then _
@@ -328,7 +331,7 @@ Sub ¶i¶¥µüÀW() '2002/11/10­nSub¤~¯à¦bWord¤¤°õ¦æ!'2005/4/21¦¹ªk¦b¶]¤jÀÉ®×®É¤Ó¨S®Ä
                     Case Is = 5
                         On Error GoTo ¿ù»~³B²z
                         If Err.LastDllError <> 0 Then
-                            MsgBox Err.LastDllError & ":" & Err.Description & "Err.Number:" & Err.Number
+                            MsgBox Err.LastDllError & ":" & Err.Description & "Err.Number:" & Err.number
                             GoTo ¿ù»~³B²z
                         End If
     '                    If phra + 4 <= .Characters.Count Then _
@@ -386,7 +389,7 @@ Sub ¶i¶¥µüÀW() '2002/11/10­nSub¤~¯à¦bWord¤¤°õ¦æ!'2005/4/21¦¹ªk¦b¶]¤jÀÉ®×®É¤Ó¨S®Ä
     options.SaveInterval = 10 '«ì´_¦Û°ÊÀx¦s
     End '¥ÎExit SubµLªk¨C¦¸Ãö³¬Access'2002/11/15
 ¿ù»~³B²z:
-    Select Case Err.Number '¥D¯Á¤Þ­È­«½Æ
+    Select Case Err.number '¥D¯Á¤Þ­È­«½Æ
         Case Is = 3022
             rst.Requery
             rst.FindFirst "µü·J like '" & Trim(phras) & "'"
@@ -399,7 +402,7 @@ Sub ¶i¶¥µüÀW() '2002/11/10­nSub¤~¯à¦bWord¤¤°õ¦æ!'2005/4/21¦¹ªk¦b¶]¤jÀÉ®×®É¤Ó¨S®Ä
             d.Quit
             End
         Case Else
-            MsgBox Err.Number & ":" & Err.Description, vbExclamation
+            MsgBox Err.number & ":" & Err.Description, vbExclamation
             Resume
     End Select
 End Sub
@@ -485,7 +488,7 @@ Sub ¶i¶¥µüÀW1() '2002/11/15­nSub¤~¯à¦bWord¤¤°õ¦æ!
     options.SaveInterval = 10 '«ì´_¦Û°ÊÀx¦s
     End '¥ÎExit SubµLªk¨C¦¸Ãö³¬Access
 ¿ù»~³B²z:
-    Select Case Err.Number '¥D¯Á¤Þ­È­«½Æ
+    Select Case Err.number '¥D¯Á¤Þ­È­«½Æ
         Case Is = 3022
             rst.Requery
             rst.FindFirst "µü·J like '" & Trim(phras) & "'"
@@ -498,7 +501,7 @@ Sub ¶i¶¥µüÀW1() '2002/11/15­nSub¤~¯à¦bWord¤¤°õ¦æ!
             d.Quit
             End
         Case Else
-            MsgBox Err.Number & ":" & Err.Description, vbExclamation
+            MsgBox Err.number & ":" & Err.Description, vbExclamation
             Resume
     End Select
 End Sub
@@ -629,14 +632,14 @@ Sub «ü©w¦r¼ÆµüÀW() '2002/11/11
     options.SaveInterval = 10 '«ì´_¦Û°ÊÀx¦s
     End '¥ÎExit SubµLªk¨C¦¸Ãö³¬Access
 ¿ù»~³B²z:
-    Select Case Err.Number '¥D¯Á¤Þ­È­«½Æ
+    Select Case Err.number '¥D¯Á¤Þ­È­«½Æ
         Case Is = 91, 3078
             MsgBox "½Ð¦A«ö¤@¦¸!", vbCritical
             'access.Application.Quit
             d.Quit
             End
         Case Else
-            MsgBox Err.Number & ":" & Err.Description, vbExclamation
+            MsgBox Err.number & ":" & Err.Description, vbExclamation
             Resume
     End Select
 End Sub
@@ -715,14 +718,14 @@ Sub «ü©w11¦r¼ÆµüÀW()     '2002/11/15'¥H¦¹¬°¨Ò,¥i§@¬°¹w¥ý­­©w¦r¼Æªº¦U­Óµ{§Ç(¥»¨Ò¬
     options.SaveInterval = 10 '«ì´_¦Û°ÊÀx¦s
     End '¥ÎExit SubµLªk¨C¦¸Ãö³¬Access
 ¿ù»~³B²z:
-    Select Case Err.Number '¥D¯Á¤Þ­È­«½Æ
+    Select Case Err.number '¥D¯Á¤Þ­È­«½Æ
         Case Is = 91, 3078
             MsgBox "½Ð¦A«ö¤@¦¸!", vbCritical
             'access.Application.Quit
             d.Quit
             End
         Case Else
-            MsgBox Err.Number & ":" & Err.Description, vbExclamation
+            MsgBox Err.number & ":" & Err.Description, vbExclamation
             Resume
     End Select
 End Sub
@@ -797,14 +800,14 @@ Sub «ü©w10¦r¼ÆµüÀW() '2002/11/15
     options.SaveInterval = 10 '«ì´_¦Û°ÊÀx¦s
     End '¥ÎExit SubµLªk¨C¦¸Ãö³¬Access
 ¿ù»~³B²z:
-    Select Case Err.Number '¥D¯Á¤Þ­È­«½Æ
+    Select Case Err.number '¥D¯Á¤Þ­È­«½Æ
         Case Is = 91, 3078
             MsgBox "½Ð¦A«ö¤@¦¸!", vbCritical
             'access.Application.Quit
             d.Quit
             End
         Case Else
-            MsgBox Err.Number & ":" & Err.Description, vbExclamation
+            MsgBox Err.number & ":" & Err.Description, vbExclamation
             Resume
     End Select
 End Sub
@@ -880,14 +883,14 @@ Sub «ü©w9¦r¼ÆµüÀW()  '2002/11/15
     options.SaveInterval = 10 '«ì´_¦Û°ÊÀx¦s
     End '¥ÎExit SubµLªk¨C¦¸Ãö³¬Access
 ¿ù»~³B²z:
-    Select Case Err.Number '¥D¯Á¤Þ­È­«½Æ
+    Select Case Err.number '¥D¯Á¤Þ­È­«½Æ
         Case Is = 91, 3078
             MsgBox "½Ð¦A«ö¤@¦¸!", vbCritical
             'access.Application.Quit
             d.Quit
             End
         Case Else
-            MsgBox Err.Number & ":" & Err.Description, vbExclamation
+            MsgBox Err.number & ":" & Err.Description, vbExclamation
             Resume
     End Select
 End Sub
@@ -963,14 +966,14 @@ Sub «ü©w8¦r¼ÆµüÀW()   '2002/11/15
     options.SaveInterval = 10 '«ì´_¦Û°ÊÀx¦s
     End '¥ÎExit SubµLªk¨C¦¸Ãö³¬Access
 ¿ù»~³B²z:
-    Select Case Err.Number '¥D¯Á¤Þ­È­«½Æ
+    Select Case Err.number '¥D¯Á¤Þ­È­«½Æ
         Case Is = 91, 3078
             MsgBox "½Ð¦A«ö¤@¦¸!", vbCritical
             'access.Application.Quit
             d.Quit
             End
         Case Else
-            MsgBox Err.Number & ":" & Err.Description, vbExclamation
+            MsgBox Err.number & ":" & Err.Description, vbExclamation
             Resume
     End Select
 End Sub
@@ -1044,14 +1047,14 @@ Sub «ü©w6¦r¼ÆµüÀW()    '2002/11/15
     options.SaveInterval = 10 '«ì´_¦Û°ÊÀx¦s
     End '¥ÎExit SubµLªk¨C¦¸Ãö³¬Access
 ¿ù»~³B²z:
-    Select Case Err.Number '¥D¯Á¤Þ­È­«½Æ
+    Select Case Err.number '¥D¯Á¤Þ­È­«½Æ
         Case Is = 91, 3078
             MsgBox "½Ð¦A«ö¤@¦¸!", vbCritical
             'access.Application.Quit
             d.Quit
             End
         Case Else
-            MsgBox Err.Number & ":" & Err.Description, vbExclamation
+            MsgBox Err.number & ":" & Err.Description, vbExclamation
             Resume
     End Select
 End Sub
@@ -1125,14 +1128,14 @@ Sub «ü©w5¦r¼ÆµüÀW()     '2002/11/15
     options.SaveInterval = 10 '«ì´_¦Û°ÊÀx¦s
     End '¥ÎExit SubµLªk¨C¦¸Ãö³¬Access
 ¿ù»~³B²z:
-    Select Case Err.Number '¥D¯Á¤Þ­È­«½Æ
+    Select Case Err.number '¥D¯Á¤Þ­È­«½Æ
         Case Is = 91, 3078
             MsgBox "½Ð¦A«ö¤@¦¸!", vbCritical
             'access.Application.Quit
             d.Quit
             End
         Case Else
-            MsgBox Err.Number & ":" & Err.Description, vbExclamation
+            MsgBox Err.number & ":" & Err.Description, vbExclamation
             Resume
     End Select
 End Sub
@@ -1204,14 +1207,14 @@ Sub «ü©w4¦r¼ÆµüÀW()       '2002/11/15
     options.SaveInterval = 10 '«ì´_¦Û°ÊÀx¦s
     End '¥ÎExit SubµLªk¨C¦¸Ãö³¬Access
 ¿ù»~³B²z:
-    Select Case Err.Number '¥D¯Á¤Þ­È­«½Æ
+    Select Case Err.number '¥D¯Á¤Þ­È­«½Æ
         Case Is = 91, 3078
             MsgBox "½Ð¦A«ö¤@¦¸!", vbCritical
             'access.Application.Quit
             d.Quit
             End
         Case Else
-            MsgBox Err.Number & ":" & Err.Description, vbExclamation
+            MsgBox Err.number & ":" & Err.Description, vbExclamation
             Resume
     End Select
 End Sub
@@ -1284,14 +1287,14 @@ Sub «ü©w3¦r¼ÆµüÀW()      '2002/11/15
     options.SaveInterval = 10 '«ì´_¦Û°ÊÀx¦s
     End '¥ÎExit SubµLªk¨C¦¸Ãö³¬Access
 ¿ù»~³B²z:
-    Select Case Err.Number '¥D¯Á¤Þ­È­«½Æ
+    Select Case Err.number '¥D¯Á¤Þ­È­«½Æ
         Case Is = 91, 3078
             MsgBox "½Ð¦A«ö¤@¦¸!", vbCritical
             'access.Application.Quit
             d.Quit
             End
         Case Else
-            MsgBox Err.Number & ":" & Err.Description, vbExclamation
+            MsgBox Err.number & ":" & Err.Description, vbExclamation
             Resume
     End Select
 End Sub
@@ -1363,14 +1366,14 @@ Sub «ü©w2¦r¼ÆµüÀW()       '2002/11/15
     options.SaveInterval = 10 '«ì´_¦Û°ÊÀx¦s
     End '¥ÎExit SubµLªk¨C¦¸Ãö³¬Access
 ¿ù»~³B²z:
-    Select Case Err.Number '¥D¯Á¤Þ­È­«½Æ
+    Select Case Err.number '¥D¯Á¤Þ­È­«½Æ
         Case Is = 91, 3078
             MsgBox "½Ð¦A«ö¤@¦¸!", vbCritical
             'access.Application.Quit
             d.Quit
             End
         Case Else
-            MsgBox Err.Number & ":" & Err.Description, vbExclamation
+            MsgBox Err.number & ":" & Err.Description, vbExclamation
             Resume
     End Select
 End Sub
@@ -1441,14 +1444,14 @@ Sub «ü©w1¦r¼ÆµüÀW()        '2002/11/15
     options.SaveInterval = 10 '«ì´_¦Û°ÊÀx¦s
     End '¥ÎExit SubµLªk¨C¦¸Ãö³¬Access
 ¿ù»~³B²z:
-    Select Case Err.Number '¥D¯Á¤Þ­È­«½Æ
+    Select Case Err.number '¥D¯Á¤Þ­È­«½Æ
         Case Is = 91, 3078
             MsgBox "½Ð¦A«ö¤@¦¸!", vbCritical
             'access.Application.Quit
             d.Quit
             End
         Case Else
-            MsgBox Err.Number & ":" & Err.Description, vbExclamation
+            MsgBox Err.number & ":" & Err.Description, vbExclamation
             Resume
     End Select
 End Sub
@@ -1526,14 +1529,14 @@ Sub «ü©w7¦r¼ÆµüÀW()      '2002/11/15'¥H¦¹¬°¨Ò,¥i§@¬°¹w¥ý­­©w¦r¼Æªº¦U­Óµ{§Ç(¥»¨Ò¬
     options.SaveInterval = 10 '«ì´_¦Û°ÊÀx¦s
     End '¥ÎExit SubµLªk¨C¦¸Ãö³¬Access
 ¿ù»~³B²z:
-    Select Case Err.Number '¥D¯Á¤Þ­È­«½Æ
+    Select Case Err.number '¥D¯Á¤Þ­È­«½Æ
         Case Is = 91, 3078
             MsgBox "½Ð¦A«ö¤@¦¸!", vbCritical
             'access.Application.Quit
             d.Quit
             End
         Case Else
-            MsgBox Err.Number & ":" & Err.Description, vbExclamation
+            MsgBox Err.number & ":" & Err.Description, vbExclamation
             Resume
     End Select
 End Sub
@@ -1621,14 +1624,14 @@ Sub «ü©w¦r¼ÆµüÀW1() '2002/11/15'®Ä¯à¸ûºC!
     options.SaveInterval = 10 '«ì´_¦Û°ÊÀx¦s
     End '¥ÎExit SubµLªk¨C¦¸Ãö³¬Access
 ¿ù»~³B²z:
-    Select Case Err.Number '¥D¯Á¤Þ­È­«½Æ
+    Select Case Err.number '¥D¯Á¤Þ­È­«½Æ
         Case Is = 91, 3078
             MsgBox "½Ð¦A«ö¤@¦¸!", vbCritical
             'access.Application.Quit
             d.Quit
             End
         Case Else
-            MsgBox Err.Number & ":" & Err.Description, vbExclamation
+            MsgBox Err.number & ":" & Err.Description, vbExclamation
             Resume
     End Select
 End Sub
@@ -1712,14 +1715,14 @@ Sub «ü©w¦r¼ÆµüÀW2() '2002/11/15®Ä¯à»P­ì³]­p®t¤£¦h,¦ý¥iÅÜ¼Æ¤Æ!
     options.SaveInterval = 10 '«ì´_¦Û°ÊÀx¦s
     End '¥ÎExit SubµLªk¨C¦¸Ãö³¬Access
 ¿ù»~³B²z:
-    Select Case Err.Number '¥D¯Á¤Þ­È­«½Æ
+    Select Case Err.number '¥D¯Á¤Þ­È­«½Æ
         Case Is = 91, 3078
             MsgBox "½Ð¦A«ö¤@¦¸!", vbCritical
             'access.Application.Quit
             d.Quit
             End
         Case Else
-            MsgBox Err.Number & ":" & Err.Description, vbExclamation
+            MsgBox Err.number & ":" & Err.Description, vbExclamation
             Resume
     End Select
 End Sub
@@ -1883,9 +1886,9 @@ Sub ¤å¥ó¦rÀW_old()
     
     Return
 ErrH:
-    Select Case Err.Number
+    Select Case Err.number
         Case Else
-            MsgBox Err.Number & Err.Description, vbCritical 'STOP: Resume
+            MsgBox Err.number & Err.Description, vbCritical 'STOP: Resume
     '        Resume
             End
         
@@ -1926,9 +1929,9 @@ Function trimStrForSearch_PlainText(x As String) As String
     trimStrForSearch_PlainText = x
     Exit Function
 eH:
-    Select Case Err.Number
+    Select Case Err.number
         Case Else
-            MsgBox Err.Number & Err.Description
+            MsgBox Err.number & Err.Description
     '        Resume
     End Select
 End Function
@@ -1960,9 +1963,9 @@ Function trimStrForSearch(x As String, sl As word.Selection) As String
     End If
     Exit Function
 eH:
-    Select Case Err.Number
+    Select Case Err.number
         Case Else
-            MsgBox Err.Number & Err.Description
+            MsgBox Err.number & Err.Description
     '        Resume
     End Select
 End Function
@@ -2046,13 +2049,13 @@ Else
 End If
 Exit Function
 eH:
-Select Case Err.Number
+Select Case Err.number
     Case 424 '¦¹³B»Ý­nª«¥ó
         Set rng = Nothing
         Resume
     Case Else
-        MsgBox Err.Number & Err.Description
-        Debug.Print Err.Number & Err.Description
+        MsgBox Err.number & Err.Description
+        Debug.Print Err.number & Err.Description
 End Select
 End Function
 
@@ -2447,7 +2450,7 @@ Next j
 
 Return
 ErrH:
-Select Case Err.Number
+Select Case Err.number
     Case 4605 '¾\Åª¼Ò¦¡¤£¯à½s¿è'¦¹¤èªk©ÎÄÝ©ÊµLªk¨Ï¥Î¡A¦]¬°¦¹©R¥OµLªk¦b¾\Åª¤¤¨Ï¥Î¡C
     '    If ActiveWindow.View.SplitSpecial = wdPaneNone Then
     '        ActiveWindow.ActivePane.View.Type = wdNormalView
@@ -2466,7 +2469,7 @@ Select Case Err.Number
         ReadingLayoutB = True
         Resume
     Case Else
-        MsgBox Err.Number & Err.Description, vbCritical 'STOP: Resume
+        MsgBox Err.number & Err.Description, vbCritical 'STOP: Resume
         'Resume
         End
     
@@ -2643,7 +2646,7 @@ Next j
 
 Return
 ErrH:
-Select Case Err.Number
+Select Case Err.number
     Case 4605 '¾\Åª¼Ò¦¡¤£¯à½s¿è'¦¹¤èªk©ÎÄÝ©ÊµLªk¨Ï¥Î¡A¦]¬°¦¹©R¥OµLªk¦b¾\Åª¤¤¨Ï¥Î¡C
     '    If ActiveWindow.View.SplitSpecial = wdPaneNone Then
     '        ActiveWindow.ActivePane.View.Type = wdNormalView
@@ -2665,7 +2668,7 @@ Select Case Err.Number
     Case 91, 5941 '¨S¦³³]©wª«¥óÅÜ¼Æ©Î With °Ï¶ôÅÜ¼Æ,¶°¦X¤¤©Ò»Ýªº¦¨­û¤£¦s¦b
         GoTo 12
     Case Else
-        MsgBox Err.Number & Err.Description, vbCritical 'STOP: Resume
+        MsgBox Err.number & Err.Description, vbCritical 'STOP: Resume
         Resume
         End
     
@@ -2699,7 +2702,7 @@ Do
 Loop
 Exit Sub
 eH:
-Select Case Err.Number
+Select Case Err.number
     Case 92 '¨S¦³³]©w For °j°éªºªì©l­È °}¦C©|¥¼¦³­È
         GoTo 2
 End Select
@@ -2775,7 +2778,7 @@ End If
 'word.Application.DisplayAlerts = lngTemp
 Exit Sub
 eH:
-Select Case Err.Number
+Select Case Err.number
     Case 5992 'µLªk­Ó§O¦s¨ú¦¹¶°¦X¤¤ªº¦UÄæ¡A¦]¬°ªí®æ¤¤¦³²V¦XªºÀx¦s®æ¼e«×¡C
         For Each c In tb.Range.cells
 '            ci = ci + 1
@@ -2789,7 +2792,7 @@ Select Case Err.Number
         Next c
         Resume Next
     Case Else
-        MsgBox Err.Number & Err.Description
+        MsgBox Err.number & Err.Description
         End
 End Select
 End Sub
@@ -2991,12 +2994,12 @@ Sub º~Äy¹q¤l¤åÄm¸ê®Æ®w¤å¥»¾ã²z_¥HÂà¶K¨ì¤¤°ê­õ¾Ç®Ñ¹q¤l¤Æ­p¹º(Optional doNotCloseD
     SystemSetup.contiUndo ur
     Exit Sub
 eH:
-    Select Case Err.Number
+    Select Case Err.number
         Case 4198 '«ü¥O¥¢±Ñ
             SystemSetup.wait 900
             Resume
         Case Else
-            MsgBox Err.Number + Err.Description
+            MsgBox Err.number + Err.Description
     End Select
 End Sub
 Sub º~Äy¹q¤l¤åÄm¸ê®Æ®w¤å¥»¾ã²z_ª`¤å«e«á¥[¬A¸¹() '³Ì«á°õ¦æ Docs.mark©ö¾ÇÃöÁä¦r(¦b¡u©ö¾ÇÂøµÛ¤å¥»¡v¸ô®|¤U®É¡^
@@ -3591,7 +3594,7 @@ rePt:
     
     
 eH:
-        Select Case Err.Number
+        Select Case Err.number
             Case 4198 '«ü¥O¥¢±Ñ 'Google Driveªº°ÝÃD
                 Resume Next
             Case 5834 '«ü©w¦WºÙªº¶µ¥Ø¤£¦s¦b
@@ -3602,10 +3605,10 @@ eH:
                 'Application.Wait (Now + TimeValue("0:00:10")) '<~~ Waits ten seconds.
                 Resume 'https://stackoverflow.com/questions/21937053/appactivate-to-return-to-excel
             Case Else
-                If Err.Number = -2146233088 And Err.Description = "A exception with a null response was thrown sending an HTTP request to the remote WebDriver server for URL http://localhost:9674/session/a3f86609a0c2a502c01fe9cdbef88686/window. The status of the exception was ConnectFailure, and the message was: µLªk³s±µ¦Ü»·ºÝ¦øªA¾¹" Then
+                If Err.number = -2146233088 And Err.Description = "A exception with a null response was thrown sending an HTTP request to the remote WebDriver server for URL http://localhost:9674/session/a3f86609a0c2a502c01fe9cdbef88686/window. The status of the exception was ConnectFailure, and the message was: µLªk³s±µ¦Ü»·ºÝ¦øªA¾¹" Then
                     SystemSetup.killchromedriverFromHere
                 Else
-                    MsgBox Err.Number & Err.Description
+                    MsgBox Err.number & Err.Description
                 End If
     '            Resume
                 GoTo endS
@@ -3625,6 +3628,115 @@ Sub ¥ÍÃø¦r¥[¤W°ê»yÃã¨åª`­µnextTable(ByRef rst As ADODB.Recordset, ByRef cnt As A
     End If
     rst.Open srcs & src, cnt, adOpenKeyset
 End Sub
+Sub ®Ñ¦W¸¹½g¦W¸¹¼Ðª`_º[·s¼W¼Ðª`¼Æ¾Ú()
+    If InStr(Selection, "¡m") Or InStr(Selection, "¡n") Then
+        ®Ñ¦W¸¹½g¦W¸¹¼Ðª`_·s¼W®Ñ¦W¸¹¼Ðª`¼Æ¾Ú
+    ElseIf InStr(Selection, "¡q") Or InStr(Selection, "¡r") Then
+        ®Ñ¦W¸¹½g¦W¸¹¼Ðª`_·s¼W½g¦W¸¹¼Ðª`¼Æ¾Ú
+    Else
+        If MsgBox("¬O®Ñ¦W¶Ü¡H", vbOKCancel + vbInformation) = vbOK Then
+            ®Ñ¦W¸¹½g¦W¸¹¼Ðª`_·s¼W®Ñ¦W¸¹¼Ðª`¼Æ¾Ú
+        Else
+            ®Ñ¦W¸¹½g¦W¸¹¼Ðª`_·s¼W½g¦W¸¹¼Ðª`¼Æ¾Ú
+        End If
+    End If
+    If Selection.Type = wdSelectionIP Or VBA.InStr(Selection.text, "¡B") Or VBA.InStr(Selection.text, VBA.Chr(13)) Then
+        ®Ñ¦W¸¹½g¦W¸¹¼Ðª`
+    End If
+End Sub
+Sub ®Ñ¦W¸¹½g¦W¸¹¼Ðª`_·s¼W®Ñ¦W¸¹¼Ðª`¼Æ¾Ú()
+    Dim cnt As ADODB.Connection, rng As Range, rngX As String, arr, e
+    Dim db As New dBase, rst As ADODB.Recordset, rst1 As New ADODB.Recordset
+    '¡mµü·½áõ«ß¡n¡B¡m¼Ö¬ö¦Ò­ì¡n¡B¡mµüÃÐ¤JÁn­q¡n¡B¡mµü§¡ÃÐ¡n¡B¡m©M«¸¥þµü¡n¡B¡m¸É¥Õ¥Û¶Ç¡n
+    Set rng = Selection.Range
+    rngX = rng.text
+    rngX = VBA.Replace(rngX, "¡n¡m", "¡B")
+    rngX = VBA.Replace(rngX, "¡m", vbNullString)
+    rngX = VBA.Replace(rngX, "¡n", vbNullString)
+    rngX = VBA.Replace(rngX, "¡u", vbNullString)
+    rngX = VBA.Replace(rngX, "¡v", vbNullString)
+    rngX = VBA.Replace(rngX, Chr(13), "¡B")
+    arr = VBA.Split(rngX, "¡B")
+    
+    db.cnt¬d¦r cnt
+    If rst Is Nothing Then Set rst = New ADODB.Recordset
+    For Each e In arr
+        If e <> vbNullString Then
+            rst.Open "select * from ¼ÐÂI²Å¸¹_®Ñ¦W¸¹_¦Û°Ê¥[¤W¥Î where instr(®Ñ¦W,""" & e & """)>0", cnt, adOpenKeyset, adLockOptimistic
+            Select Case rst.RecordCount
+                Case 0
+                    'ClipboardPutIn VBA.CStr(e)
+                    'If MsgBox("·s¼W¡m" & e & "¡n¶Ü¡H", vbInformation + vbOKCancel) = VBA.vbOK Then
+                        rst.AddNew
+                        rst.Fields("®Ñ¦W").Value = e
+                        rst.Fields("±Æ§Ç").Value = 32767 'integerªº½d³ò
+                        rst.Update
+                    'End If
+                Case Is > 0
+                    ClipboardPutIn VBA.CStr(e)
+                    rst1.Open "select * from ¼ÐÂI²Å¸¹_®Ñ¦W¸¹_¦Û°Ê¥[¤W¥Î where strcomp(®Ñ¦W,""" & e & """)=0", cnt, adOpenKeyset, adLockReadOnly
+                    If rst1.RecordCount = 0 Then
+                    'If VBA.StrComp(rst.Fields("®Ñ¦W").Value, e) <> 0 Then
+                        If MsgBox("¤w¦³¡m" & rst.Fields("®Ñ¦W").Value & "¡nÁÙ­n·s¼W¡m" & e & "¡n¶Ü¡H", vbExclamation + vbOKCancel) = VBA.vbOK Then
+                            rst.AddNew
+                            rst.Fields("®Ñ¦W").Value = e
+                            rst.Fields("±Æ§Ç").Value = 32767 'integerªº½d³ò
+                            rst.Update
+                        End If
+                    End If
+                    rst1.Close
+            End Select
+            rst.Close
+        End If
+    Next e
+End Sub
+Sub ®Ñ¦W¸¹½g¦W¸¹¼Ðª`_·s¼W½g¦W¸¹¼Ðª`¼Æ¾Ú()
+    Dim cnt As ADODB.Connection, rng As Range, rngX As String, arr, e
+    Dim db As New dBase, rst As ADODB.Recordset, rst1 As New ADODB.Recordset
+    '¡mµü·½áõ«ß¡n¡B¡m¼Ö¬ö¦Ò­ì¡r¡B¡qµüÃÐ¤JÁn­q¡r¡B¡qµü§¡ÃÐ¡r¡B¡q©M«¸¥þµü¡r¡B¡q¸É¥Õ¥Û¶Ç¡r
+    Set rng = Selection.Range
+    rngX = rng.text
+    rngX = VBA.Replace(rngX, "¡r¡q", "¡B")
+    rngX = VBA.Replace(rngX, "¡q", vbNullString)
+    rngX = VBA.Replace(rngX, "¡r", vbNullString)
+    rngX = VBA.Replace(rngX, "¡u", vbNullString)
+    rngX = VBA.Replace(rngX, "¡v", vbNullString)
+    rngX = VBA.Replace(rngX, Chr(13), "¡B")
+    arr = VBA.Split(rngX, "¡B")
+    
+    db.cnt¬d¦r cnt
+    If rst Is Nothing Then Set rst = New ADODB.Recordset
+    For Each e In arr
+        If e <> vbNullString Then
+            rst.Open "select * from ¼ÐÂI²Å¸¹_½g¦W¸¹_¦Û°Ê¥[¤W¥Î where instr(½g¦W,""" & e & """)>0", cnt, adOpenKeyset, adLockOptimistic
+            Select Case rst.RecordCount
+                Case 0
+                    'ClipboardPutIn VBA.CStr(e)
+                    'If MsgBox("·s¼W¡q" & e & "¡r¶Ü¡H", vbInformation + vbOKCancel) = VBA.vbOK Then
+                        rst.AddNew
+                        rst.Fields("½g¦W").Value = e
+                        rst.Fields("±Æ§Ç").Value = 32767 'integerªº½d³ò
+                        rst.Update
+                    'End If
+                Case Is > 0
+                    ClipboardPutIn VBA.CStr(e)
+                    rst1.Open "select * from ¼ÐÂI²Å¸¹_½g¦W¸¹_¦Û°Ê¥[¤W¥Î where strcomp(½g¦W,""" & e & """)=0", cnt, adOpenKeyset, adLockReadOnly
+                    If rst1.RecordCount = 0 Then
+                    'If VBA.StrComp(rst.Fields("½g¦W").Value, e) <> 0 Then
+                        If MsgBox("¤w¦³¡q" & rst.Fields("½g¦W").Value & "¡rÁÙ­n·s¼W¡q" & e & "¡r¶Ü¡H", vbExclamation + vbOKCancel) = VBA.vbOK Then
+                            rst.AddNew
+                            rst.Fields("½g¦W").Value = e
+                            rst.Fields("±Æ§Ç").Value = 32767 'integerªº½d³ò
+                            rst.Update
+                        End If
+                    End If
+                    rst1.Close
+            End Select
+            rst.Close
+        End If
+    Next e
+End Sub
+
 
 Rem «Å§i¥¢±Ñ¡G¦b¡udx = regEx.Replace(dx, rw)¡v³o¦æ·|¥X²{¡G 5017¡GÀ³¥Îµ{¦¡©Îª«¥ó©w¸q¤Wªº¿ù»~
 Rem 20230309 creedit with chatGPT¤jµÐÂÄ¡G®Ñ¦W¸¹¼ÐÂI»P¥¿«hªí¹F¦¡ADO.NET¡BLINQ¡G
@@ -3737,21 +3849,25 @@ Rem ¬Oªº¡A±z»¡±o«D±`¥¿½T¡C¦b Word VBA ¤¤¡A­n±N Find ª«¥óªº .Text ÄÝ©Ê³]¬°¥¿«hªí¹
 Rem
 End Sub
 'Function ®Ñ¦W¸¹½g¦W¸¹¼Ðª`PreExamOK(d As Document, term As String, whatMark As String, startPos_term As Long, Optional endPos_term As Long) As Boolean
-Function ®Ñ¦W¸¹½g¦W¸¹¼Ðª`PreExamOK(d As Document, term As String, startPos_term As Long, Optional endPos_term As Long) As Boolean
+Function ®Ñ¦W¸¹½g¦W¸¹¼Ðª`PreExamOK(dRange As Range, term As String, startPos_term As Long, Optional endPos_term As Long) As Boolean
     Dim rngChk As Range, xChk As String
     On Error GoTo eH:
-    Set rngChk = d.Range(0, startPos_term)
+    Set rngChk = dRange.Document.Range(dRange.start, startPos_term)
+    Set rngChk = dRange.Duplicate
+    rngChk.SetRange 0, startPos_term
     xChk = rngChk.text
     'If term = "¸êªv³qÅ²" Then Stop
     If InStrRev(xChk, "¡m") <= InStrRev(xChk, "¡n") And InStrRev(xChk, "¡q") <= InStrRev(xChk, "¡r") Then ®Ñ¦W¸¹½g¦W¸¹¼Ðª`PreExamOK = True
     
     Exit Function
 eH:
-        Select Case Err.Number
-            'Case 4608 '¼Æ­È¶W¥X½d³ò
+        Select Case Err.number
+            Case 4608 '¼Æ­È¶W¥X½d³ò ¥ÎDocument.Range¤èªk¥u¯à¨ú±o¥¿¤åªº½d³ò¡]¦pContent¡^¨Ã¤£¯à¨ú±oª`¸}µ¥ªº½d³ò 20250312
+                MsgBox Err.number & Err.Description
+                Set rngChk = Nothing
                 'Resume
             Case Else
-                MsgBox Err.Number + Err.Description
+                MsgBox Err.number + Err.Description
     '            Resume
         End Select
     
@@ -3786,8 +3902,8 @@ eH:
     '®Ñ¦W¸¹½g¦W¸¹¼Ðª`PreExamOK = result
 End Function
 Sub ®Ñ¦W¸¹½g¦W¸¹¼Ðª`()
-    Dim cnt As New ADODB.Connection, rst As New ADODB.Recordset
-    Dim cntStr As String, d As Document, dx As String, rngF As Range, title As String
+    Dim cnt As New ADODB.Connection, rst As New ADODB.Recordset, counter As Long
+    Dim cntStr As String, d As Document, dRange As Range, dRangeX As String, rngF As Range, title As String, rngFDup As Range, dRangeDup As Range
     Dim db As New dBase
     Dim ur As UndoRecord
     On Error GoTo eH:
@@ -3800,78 +3916,169 @@ Sub ®Ñ¦W¸¹½g¦W¸¹¼Ðª`()
     'Else
     '    MsgBox "¸ô®|¤£¦s¦b¡I", vbCritical: Exit Sub
     'End If
-    Set d = ActiveDocument: dx = d.Range.text: Set rngF = d.Range
-'    If Selection.Type = wdSelectionIP Then
-'        dx = d.Range.text
-'        Set rngF = d.Range
-'    Else
-'        Set rngF = Selection.Range
-'        dx = rngF.text
-'    End If
-    rngF.Find.ClearFormatting
-    'cnt.Open cntStr
     word.Application.ScreenUpdating = False
     
-    GoSub bookmarks '¼ÐÂI²Å¸¹_®Ñ¦W¸¹_¦Û°Ê¥[¤W¥Î
-    rst.Open "select * from ¼ÐÂI²Å¸¹_½g¦W¸¹_¦Û°Ê¥[¤W¥Î order by ±Æ§Ç", cnt, adOpenForwardOnly, adLockReadOnly
-'    Set rngF = d.Range: dx = d.Range.text
-    Do Until rst.EOF
-        title = rst("½g¦W").Value
-        If VBA.InStr(dx, title) Then 'if found
-            Do While rngF.Find.Execute(title, , , , , , True, wdFindStop)
-    '            If InStr("¡n¡r¡P¡E", IIf(rngF.Characters(rngF.Characters.Count).Next Is Nothing, "", rngF.Characters(rngF.Characters.Count).Next)) = 0 And _
-    '                InStr("¡m¡q¡P¡E", IIf(rngF.Characters(1).Previous Is Nothing, "", rngF.Characters(1).Previous)) = 0 Then
-                    If ®Ñ¦W¸¹½g¦W¸¹¼Ðª`PreExamOK(d, title, rngF.start) Then
-                        If VBA.IsNull(rst("¨ú¥N¬°").Value) Then
-                        Rem «ç»ò¼g³£·|¼vÅT­ì¨Ó¤å¦r®æ¦¡¡A¬G¥u¯à¥Î«e«á´¡¤Jªº¤è¦¡¤F
-                            rngF.InsertBefore "¡q"
-                            rngF.InsertAfter "¡r"
-                            'rngF.text = "¡q" & title & "¡r"
-                                      'd.Range.Find.Execute title, , , , , , True, wdFindContinue, , "¡q" & title & "¡r", wdReplaceAll
-                        Else
-                            rngF.text = rst("¨ú¥N¬°").Value
-                            'd.Range.Find.Execute title, , , , , , True, wdFindContinue, , rst("¨ú¥N¬°").Value, wdReplaceAll
-                        End If
-                        rngF.SetRange rngF.End, d.Range.End
-                    End If
-    '            End If
-            Loop
-            Set rngF = d.Range: dx = d.Range.text
+    If Selection.Type = wdSelectionIP Then
+        'dx = dRange.text: Set rngF = d.Range(dRange.start, dRange.End): Set rngFDup = rngF.Duplicate
+        'dx = dRange.text: Set rngF = dRange.Duplicate: Set rngFDup = rngF.Duplicate
+        Set d = ActiveDocument
+        For Each dRange In d.StoryRanges
+            dRangeX = dRange.text: Set rngF = dRange.Duplicate: Set rngFDup = rngF.Duplicate
+            GoSub marking
+        Next dRange
+    Else
+        Set rngF = Selection.Range.Duplicate: Set rngFDup = rngF.Duplicate: dRangeX = Selection.Range.text:
+        Set dRange = Selection.Range
+        GoSub marking
+    End If
+    GoTo finish
+
+marking:
+    If VBA.Len(dRange.text) > 2 Then
+        Set dRangeDup = dRange.Duplicate
+
+        rngF.Find.ClearFormatting
+        
+        Dim punct As New punctuation, e, hasPunct As Boolean
+        For Each e In punct.PunctuationArray
+            If VBA.InStr(rngFDup.text, e) > 0 Then
+                hasPunct = True
+                Exit For
+            End If
+        Next e
+        Set punct = Nothing
+        
+        playSound 1
+        GoSub bookmarks '¼ÐÂI²Å¸¹_®Ñ¦W¸¹_¦Û°Ê¥[¤W¥Î
+        playSound 1
+        If hasPunct Then
+            rst.Open "select * from ¼ÐÂI²Å¸¹_½g¦W¸¹_¦Û°Ê¥[¤W¥Î where(instr(¨ú¥N¬°,""¡G"")=0 or ¨ú¥N¬° is null) order by ±Æ§Ç,Len(½g¦W) desc ", cnt, adOpenForwardOnly, adLockReadOnly
+        Else
+            'rst.Open "select * from ¼ÐÂI²Å¸¹_½g¦W¸¹_¦Û°Ê¥[¤W¥Î order by ±Æ§Ç", cnt, adOpenForwardOnly, adLockReadOnly
+            rst.Open "select * from ¼ÐÂI²Å¸¹_½g¦W¸¹_¦Û°Ê¥[¤W¥Î order by ±Æ§Ç,Len(½g¦W) desc", cnt, adOpenForwardOnly, adLockReadOnly
         End If
         
-        rst.MoveNext
-    Loop
-    d.Range.Find.Execute "¡m¡m", , , , , , True, wdFindContinue, , "¡m", wdReplaceAll
-    d.Range.Find.Execute "¡n¡n", , , , , , True, wdFindContinue, , "¡n", wdReplaceAll
-    d.Range.Find.Execute "¡q¡q", , , , , , True, wdFindContinue, , "¡q", wdReplaceAll
-    d.Range.Find.Execute "¡r¡r", , , , , , True, wdFindContinue, , "¡r", wdReplaceAll
-    
-    'GoSub bookmarks 'do again to check and correct SHOULD BE use another table to do this
-    If ur.CustomRecordLevel > 0 Then
-        SystemSetup.playSound 1.921
-    Else
-        SystemSetup.playSound 1
+    '    Set rngF = d.Range: dx = d.Range.text
+        rngF.SetRange rngFDup.start, rngFDup.End: dRangeX = rngFDup.text  '¡´¡´¡´¡´¡´¡´¡´¡´¡´¡´¡´¡´¡´¡´¡´¡´¡´¡´¡´
+        Do Until rst.EOF
+            counter = counter + 1
+            If counter Mod 3500 = 0 Then playSound 1
+            title = rst("½g¦W").Value
+            
+            If VBA.InStr(dRangeX, title) Then  'if found
+                Do While rngF.Find.Execute(title, , , , , , True, wdFindStop)
+                    If rngF.End > rngFDup.End Then
+                        Exit Do
+                    End If
+        '            If InStr("¡n¡r¡P¡E", IIf(rngF.Characters(rngF.Characters.Count).Next Is Nothing, "", rngF.Characters(rngF.Characters.Count).Next)) = 0 And _
+        '                InStr("¡m¡q¡P¡E", IIf(rngF.Characters(1).Previous Is Nothing, "", rngF.Characters(1).Previous)) = 0 Then
+                        If ®Ñ¦W¸¹½g¦W¸¹¼Ðª`PreExamOK(dRange, title, rngF.start) Then
+                            If VBA.IsNull(rst("¨ú¥N¬°").Value) Then
+                            Rem «ç»ò¼g³£·|¼vÅT­ì¨Ó¤å¦r®æ¦¡¡A¬G¥u¯à¥Î«e«á´¡¤Jªº¤è¦¡¤F
+                                rngF.InsertBefore "¡q"
+    '                            If rngF.start < rngFDup.start Then
+    '                                rngFDup.start = rngF.start
+    '                            End If
+                                rngF.InsertAfter "¡r"
+    '                            If rngF.End > rngFDup.End Then
+    '                                rngFDup.End = rngF.End
+    '                            End If
+                                'rngF.text = "¡q" & title & "¡r"
+                                          'd.Range.Find.Execute title, , , , , , True, wdFindContinue, , "¡q" & title & "¡r", wdReplaceAll
+                            Else
+                                rngF.text = rst("¨ú¥N¬°").Value
+                                'd.Range.Find.Execute title, , , , , , True, wdFindContinue, , rst("¨ú¥N¬°").Value, wdReplaceAll
+                            End If
+                                                            
+                            '²M°£ÂÂ¦¡¥H¡u¡v¼Ðª`ªº½g¦W¸¹
+                            If rngF.start - 1 > -1 And rngF.End + 1 < dRange.End Then
+                                If VBA.Left(rngF.text, 1) = "¡q" And VBA.Right(rngF.text, 1) = "¡r" Then
+                                    dRangeDup.SetRange rngF.start - 1, rngF.start
+                                    If dRangeDup.text = "¡u" Then
+                                        dRangeDup.SetRange rngF.End, rngF.End + 1
+                                        If dRangeDup.text = "¡v" Then
+                                            dRangeDup.text = vbNullString
+                                            dRangeDup.SetRange rngF.start - 1, rngF.start
+                                            dRangeDup.text = vbNullString
+                                        End If
+                                    End If
+                                    Set dRangeDup = dRange.Duplicate
+                                End If
+                            End If
+                            
+                            
+                            'rngF.SetRange rngF.End, d.Range.End'¡´¡´¡´¡´¡´¡´¡´¡´¡´¡´¡´¡´¡´¡´¡´¡´¡´
+                            rngF.SetRange rngF.End, rngFDup.End
+                        End If
+        '            End If
+                Loop
+                'Set rngF = d.Range: dx = d.Range.text '¡´¡´¡´¡´¡´¡´¡´¡´¡´¡´¡´¡´¡´¡´¡´¡´¡´¡´¡´
+                rngF.SetRange rngFDup.start, rngFDup.End
+                dRangeX = rngFDup.text
+            End If 'If VBA.InStr(dRangeX, title) Then  'if found
+            
+            rst.MoveNext
+        Loop
+        
+        dRange.Find.Execute "¡m¡m", , , , , , True, wdFindContinue, , "¡m", wdReplaceAll
+        dRange.Find.Execute "¡n¡n", , , , , , True, wdFindContinue, , "¡n", wdReplaceAll
+        dRange.Find.Execute "¡q¡q", , , , , , True, wdFindContinue, , "¡q", wdReplaceAll
+        dRange.Find.Execute "¡r¡r", , , , , , True, wdFindContinue, , "¡r", wdReplaceAll
+        dRange.Find.Execute "¡G¡G", , , , , , True, wdFindContinue, , "¡G", wdReplaceAll
+        dRange.Find.Execute "¡I¡I", , , , , , True, wdFindContinue, , "¡I", wdReplaceAll
     End If
-    rst.Close: cnt.Close: SystemSetup.contiUndo ur
-    word.Application.ScreenUpdating = True
-    
-    
+    Return
+
+finish:
+        'GoSub bookmarks 'do again to check and correct SHOULD BE use another table to do this
+        If ur.CustomRecordLevel > 0 Then
+            SystemSetup.playSound 1.921
+        Else
+            SystemSetup.playSound 1
+        End If
+        rst.Close: cnt.Close: SystemSetup.contiUndo ur
+        If Selection.start <> rngFDup.start And Selection.End <> rngFDup.End Then
+            Selection.Range.SetRange rngFDup.start, rngFDup.End
+        End If
+        
+        word.Application.ScreenUpdating = True
+        
+        
     Exit Sub
     
     
 bookmarks:
     If rst.State = adStateOpen Then rst.Close
-    rst.Open "select * from ¼ÐÂI²Å¸¹_®Ñ¦W¸¹_¦Û°Ê¥[¤W¥Î order by ±Æ§Ç", cnt, adOpenForwardOnly, adLockReadOnly
+    If hasPunct Then
+        rst.Open "select * from ¼ÐÂI²Å¸¹_®Ñ¦W¸¹_¦Û°Ê¥[¤W¥Î where (instr(¨ú¥N¬°,""¡G"")=0 or ¨ú¥N¬° is null) order by ±Æ§Ç,Len(®Ñ¦W) desc", cnt, adOpenForwardOnly, adLockReadOnly
+        
+    '        SELECT ¼ÐÂI²Å¸¹_®Ñ¦W¸¹_¦Û°Ê¥[¤W¥Î.*
+        '   FROM ¼ÐÂI²Å¸¹_®Ñ¦W¸¹_¦Û°Ê¥[¤W¥Î
+            'WHERE (((InStr([¨ú¥N¬°], "¡G")) = 0))
+            'ORDER BY ¼ÐÂI²Å¸¹_®Ñ¦W¸¹_¦Û°Ê¥[¤W¥Î.±Æ§Ç, Len([®Ñ¦W]) DESC;
+
+        
+    Else
+        rst.Open "select * from ¼ÐÂI²Å¸¹_®Ñ¦W¸¹_¦Û°Ê¥[¤W¥Î order by ±Æ§Ç,Len(®Ñ¦W) desc", cnt, adOpenForwardOnly, adLockReadOnly
+        'rst.Open "select * from ¼ÐÂI²Å¸¹_®Ñ¦W¸¹_¦Û°Ê¥[¤W¥Î order by ±Æ§Ç", cnt, adOpenForwardOnly, adLockReadOnly
+    End If
     Do Until rst.EOF
+        counter = counter + 1
+        If counter Mod 2500 = 0 Then playSound 1
+        
         title = rst("®Ñ¦W").Value
         
-'        If title = "¨Æ¤å¡@Ãþ»E" Then Stop 'just for test
+'        If title = "­ÊÁnªì¶°" Then Stop 'just for test
         
-        If VBA.InStr(dx, title) Then 'if found
+        'If VBA.InStr(dx, title) Then 'if found
+        If VBA.InStr(dRangeX, title) Then 'if found
             Do While rngF.Find.Execute(title, , , , , , True, wdFindStop)
+                If rngF.End > rngFDup.End Then
+                    Exit Do
+                End If
     '            If InStr("¡n¡r¡P¡E", IIf(rngF.Characters(rngF.Characters.Count).Next Is Nothing, "", rngF.Characters(rngF.Characters.Count).Next)) = 0 And _
     '                InStr("¡m¡q¡P¡E", IIf(rngF.Characters(1).Previous Is Nothing, "", rngF.Characters(1).Previous)) = 0 Then
-                    If ®Ñ¦W¸¹½g¦W¸¹¼Ðª`PreExamOK(d, title, rngF.start) Then
+                    If ®Ñ¦W¸¹½g¦W¸¹¼Ðª`PreExamOK(dRange, title, rngF.start) Then
                         
 ''                        If title = "¸êªv³qÅ²" Then Stop 'just for test
 '                        'just for test
@@ -3885,7 +4092,14 @@ bookmarks:
                         If VBA.IsNull(rst("¨ú¥N¬°").Value) Then
                             Rem «ç»ò¼g³£·|¼vÅT­ì¨Ó¤å¦r®æ¦¡¡A¬G¥u¯à¥Î«e«á´¡¤Jªº¤è¦¡¤F
                             rngF.InsertBefore "¡m"
+'                            If rngF.start < rngFDup.start Then
+'                                rngFDup.start = rngF.start
+'                            End If
                             rngF.InsertAfter "¡n"
+'                            If rngF.End > rngFDup.End Then
+'                                rngFDup.End = rngF.End
+'                            End If
+                            
                             'rngF.text = "¡m" & title & "¡n"
                             
                             'rngF.Find.Execute rngF.text, , , , , , , , , "¡m" & title & "¡n", wdReplaceOne
@@ -3900,12 +4114,33 @@ bookmarks:
                             rngF.text = rst("¨ú¥N¬°").Value
                 '            d.Range.Find.Execute title, , , , , , True, wdFindContinue, , rst("¨ú¥N¬°").Value, wdReplaceAll
                         End If
-                        rngF.SetRange rngF.End, d.Range.End
+                        
+                        '²M°£ÂÂ¦¡¥H¡u¡v¼Ðª`ªº®Ñ¦W¸¹
+                        If rngF.start - 1 > -1 And rngF.End + 1 < dRange.End Then
+                            If VBA.Left(rngF.text, 1) = "¡m" And VBA.Right(rngF.text, 1) = "¡n" Then
+                                dRangeDup.SetRange rngF.start - 1, rngF.start
+                                If dRangeDup.text = "¡u" Then
+                                    dRangeDup.SetRange rngF.End, rngF.End + 1
+                                    If dRangeDup.text = "¡v" Then
+                                        dRangeDup.text = vbNullString
+                                        dRangeDup.SetRange rngF.start - 1, rngF.start
+                                        dRangeDup.text = vbNullString
+                                    End If
+                                End If
+                                Set dRangeDup = dRange.Duplicate
+                            End If
+                        End If
+                        
+                        
+                        'rngF.SetRange rngF.End, d.Range.End '¡´¡´¡´¡´¡´¡´¡´¡´¡´¡´¡´¡´¡´¡´¡´¡´¡´
+                        rngF.SetRange rngF.End, rngFDup.End
                     End If
     '            End If
             Loop
-            Set rngF = d.Range: dx = d.Range.text
-        End If
+            'Set rngF = d.Range: dx = d.Range.text '¡´¡´¡´¡´¡´¡´¡´¡´¡´¡´¡´¡´¡´¡´¡´¡´¡´¡´¡´
+            rngF.SetRange rngFDup.start, rngFDup.End
+            dRangeX = rngFDup.text
+        End If 'If VBA.InStr(dRangeX, title) Then 'if found
         
         rst.MoveNext
     Loop
@@ -3913,10 +4148,10 @@ bookmarks:
     Return
     
 eH:
-        Select Case Err.Number
+        Select Case Err.number
             Case Else
-                MsgBox Err.Number + Err.Description
-    '            Resume
+                MsgBox Err.number + Err.Description
+                'Resume
         End Select
 End Sub
 

@@ -12,15 +12,16 @@ Option Explicit
 Const cntStr As String = "Provider=Microsoft.ACE.OLEDB.12.0;Data Source="
 
 Sub cnt查字(ByRef cnt As ADODB.Connection)
-Dim pat As New Paths, p As String
-p = pat.getdb_查字FullName()
-If p = "" Then
-    MsgBox "找不到查字.mdb", vbCritical
-    End
-Else
-    cnt.Open cntStr & p
-End If
-Set pat = Nothing
+    Dim pat As New Paths, p As String
+    If cnt Is Nothing Then Set cnt = New ADODB.Connection
+    p = pat.getdb_查字FullName()
+    If p = "" Then
+        MsgBox "找不到查字.mdb", vbCritical
+        End
+    Else
+        cnt.Open cntStr & p
+    End If
+    Set pat = Nothing
 End Sub
 Sub cnt_重編國語辭典修訂本_資料庫(ByRef cnt As ADODB.Connection)
 Dim pat As New Paths
@@ -126,23 +127,23 @@ With Me.ctl("word")
 End With
 Exit Sub
 eH:
-Select Case Err.Number
+Select Case Err.number
     Case 5 '程序呼叫或引數不正確
     Case Else
-        MsgBox Err.Number & Err.Description
+        MsgBox Err.number & Err.Description
         'resume
 End Select
 End Sub
 
-Sub setURLControlValue(URL As String)
-Dim lnk As New Links
+Sub setURLControlValue(url As String)
+Dim lnk As New links
 If Not SystemSetup.appActivatedYet("msaccess") Then Exit Sub
 If Not word.Tasks.Exists("查字forinput - [dictsurl]") Then Exit Sub
-If Not lnk.checkURL_single(URL) Then Exit Sub
+If Not lnk.checkURL_single(url) Then Exit Sub
 
 On Error Resume Next
-Me.ctl("Text8").Value = URL
-Me.ctl("url").Value = URL
+Me.ctl("Text8").Value = url
+Me.ctl("url").Value = url
 
 End Sub
 Sub setDictControlValue(dictID As Byte)
@@ -170,7 +171,7 @@ Public Function FieldExists(rs As ADODB.Recordset, fieldName As String) As Boole
     Err.Clear
     ' This field DOES NOT EXIST
     Set fd = rs.Fields("fieldName")
-    If Err.Number <> 0 Then
+    If Err.number <> 0 Then
         'FieldExists = False
         'MsgBox "'NONEXIST' Does NOT exist"
     Else

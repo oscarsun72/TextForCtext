@@ -826,7 +826,7 @@ namespace TextForCtext
         /// </summary>
         internal static IWebElement NextPage
         {
-            get => WaitFindWebElementBySelector_ToBeClickable("#content > div:nth-child(3) > div:nth-child(5) > a > div",5);
+            get => WaitFindWebElementBySelector_ToBeClickable("#content > div:nth-child(3) > div:nth-child(5) > a > div", 5);
         }
         /// <summary>
         /// 取得CTP網頁中的「顯示頁碼，可輸入頁碼的」（page）控制項
@@ -1266,7 +1266,7 @@ namespace TextForCtext
         {
             try
             {
-                driver.SwitchTo().Window(driver.CurrentWindowHandle);
+                //driver.SwitchTo().Window(driver.CurrentWindowHandle);
                 IWebElement e = driver.FindElement(By.Id(id));
                 WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(second));
                 wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(e));
@@ -2285,8 +2285,9 @@ namespace TextForCtext
                 #region 送出後檢查是否是「Please confirm that you are human! 敬請輸入認證圖案」頁面 網址列：https://ctext.org/wiki.pl
                 if (IsConfirmHumanPage())
                 {
-                    Debugger.Break();
-                    if (ActiveForm1.FastMode) ActiveForm1.FastModeSwitcher();
+                    //Debugger.Break();
+                    Form1.playSound(Form1.soundLike.waiting, true);
+                    //if (ActiveForm1.FastMode) ActiveForm1.FastModeSwitcher();
                     try
                     {
                         Clipboard.SetText(xInput);//複製到剪貼簿備用

@@ -136,11 +136,11 @@ With Selection
     End If
 Exit Sub
 5941 '集合中的成員不存在！
-    Select Case Err.Number
+    Select Case Err.number
         Case 5941
             MsgBox "此處沒有書籤！", vbExclamation
         Case Else
-            MsgBox Err.Number & Err.Description
+            MsgBox Err.number & Err.Description
     End Select
 End With
 End Sub
@@ -269,7 +269,7 @@ End With
     If Windows.Count = 0 And Documents.Count = 0 Then word.Application.Quit ' wdDotNotSaveChanges    '如果沒有視窗和文件開啟,才關掉2003/3/27
 Exit Sub
 ErrH:
-Select Case Err.Number
+Select Case Err.number
     Case 5 '程序呼叫或引數不正確(即 AppActivate的引數有誤!)
         On Error GoTo ErrH1
 '        AppActivate "圖書管理 - [" & Screen.ActiveControl.Parent.Caption & "]"
@@ -277,11 +277,11 @@ Select Case Err.Number
         AppActivate blog.myaccess.CurrentObjectName
         Resume Next
     Case Else
-Shows:  MsgBox Err.Number & Err.Description
+Shows:  MsgBox Err.number & Err.Description
 End Select
 Exit Sub
 ErrH1:
-Select Case Err.Number
+Select Case Err.number
     Case 5 '程序呼叫或引數不正確(即 AppActivate的引數有誤!)
         AppActivate "圖書管理 - [" & blog.myaccess.screen.ActiveControl.Parent.Caption & "]"
         Resume Next
@@ -423,7 +423,7 @@ HideWebBar
 '    按下掃描鍵
 Exit Sub
 ErrH:
-Select Case Err.Number
+Select Case Err.number
     Case 5828 '不正確的書籤名稱。
         If MsgBox("不正確的書籤名稱,是否略過？", vbOKCancel) = vbCancel Then
             Stop
@@ -432,7 +432,7 @@ Select Case Err.Number
             Resume Next
         End If
     Case Else
-        MsgBox Err.Number & Err.Description
+        MsgBox Err.number & Err.Description
 End Select
 End Sub
 Sub 編輯處書籤()
@@ -714,7 +714,7 @@ End With
 Exit Sub
 備註:
 'Stop '檢查用
-Select Case Err.Number
+Select Case Err.number
     Case 5 '呼叫引數不正確'程序呼叫或引數不正確(即 AppActivate的引數有誤!)
 '        MsgBox Err.Number & Err.Description
         If myaccess.CurrentProject.AllForms("原文").IsLoaded Then blog.myaccess.Forms("原文").Visible = False 'docmd.Close acForm,"原文",acSaveNo
@@ -751,7 +751,7 @@ Select Case Err.Number
                                 If ctl Is Nothing Then Set ctl = myaccess.Forms(i).ActiveControl
                                 If ctl.Parent.Dirty = True Then ctl.Parent.Refresh
         ''                        If Not IsEmpty(f) Then GoTo cl
-                                If Err.Number = 0 Then GoTo cl '沒錯誤，表示在尋找表單，找到表單後，要重新找控制項（Cl)2003/3/22
+                                If Err.number = 0 Then GoTo cl '沒錯誤，表示在尋找表單，找到表單後，要重新找控制項（Cl)2003/3/22
                                 Exit For
                             End If
                         End If
@@ -788,7 +788,7 @@ Select Case Err.Number
 '        Next
         Resume
     Case Else
-        MsgBox Err.Number & Err.Description
+        MsgBox Err.number & Err.Description
         End
 End Select
 'Resume
@@ -806,7 +806,7 @@ If .Type = wdSelectionNormal Then ' <> wdNoSelection OR wdSelectionIP Then '不為
     .Find.ClearFormatting
     .Find.Replacement.font.Color = wdColorRed
     .Find.Replacement.font.Bold = True
-    .Find.Execute findtext:=.text, MatchCase:=True, Replace:=wdReplaceAll, Replacewith:=.text, Wrap:=wdFindContinue
+    .Find.Execute findText:=.text, MatchCase:=True, Replace:=wdReplaceAll, replacewith:=.text, Wrap:=wdFindContinue
     '一定要有Wrap:=wdFindContinue否則單向找尋時,預設值為Wrap:=wdFindStop
 End If
 End With
@@ -852,7 +852,7 @@ If .Type = wdSelectionNormal Then ' <> wdNoSelection OR wdSelectionIP Then '不為
     .Find.Replacement.font.Subscript = .font.Subscript
     .Find.Replacement.font.Superscript = .font.Superscript
     .Find.Replacement.font.UnderlineColor = .font.UnderlineColor
-    .Find.Execute findtext:=.text, MatchCase:=True, Replace:=wdReplaceAll, Replacewith:=.text, Wrap:=wdFindContinue
+    .Find.Execute findText:=.text, MatchCase:=True, Replace:=wdReplaceAll, replacewith:=.text, Wrap:=wdFindContinue
     '一定要有Wrap:=wdFindContinue否則單向找尋時,預設值為Wrap:=wdFindStop
 End If
 End With
@@ -925,7 +925,7 @@ If .Type = wdSelectionNormal Then ' <> wdNoSelection OR wdSelectionIP Then '不為
 End If
 Exit Sub
 errs:
-    Select Case Err.Number
+    Select Case Err.number
         Case 7866 '已開啟
             Select Case MsgBox("已開啟，是否要關閉再繼續？", vbYesNoCancel + vbExclamation)
                 Case vbYes
@@ -995,10 +995,10 @@ errs:
 '            If ActiveDocument.Subdocuments(3).Locked Then ActiveDocument.Subdocuments(1).Locked = False
 '            if ActiveDocument.Subdocuments
             Else
-                MsgBox Err.Number & ":" & Err.Description, vbExclamation
+                MsgBox Err.number & ":" & Err.Description, vbExclamation
             End If
         Case Else
-            MsgBox Err.Number & ":" & Err.Description, vbExclamation
+            MsgBox Err.number & ":" & Err.Description, vbExclamation
     End Select
 End With
 End Sub
@@ -1076,12 +1076,12 @@ If Selection.Type <> wdSelectionIP Or wdNoSelection Then
 End If
 Exit Sub
 e:
-Select Case Err.Number
+Select Case Err.number
     Case 5 '程序呼叫或引數不正確(即 AppActivate的引數有誤!)
         AppActivate "圖書管理 - [" & blog.myaccess.screen.ActiveControl.Parent.Caption & "]"
         Resume Next
     Case Else
-        MsgBox Err.Number & Err.Description
+        MsgBox Err.number & Err.Description
 End Select
 End Sub
 
@@ -1110,7 +1110,7 @@ With Selection '如果沒選取則先選取
     If .Type = wdSelectionIP Then
         p = MsgBox("確定「跨頁」嗎？", vbQuestion + vbYesNoCancel)
         If p = vbNo Then End 'Exit Sub'2003/11/20
-        .HomeKey unit:=wdStory, Extend:=wdExtend
+        .HomeKey Unit:=wdStory, Extend:=wdExtend
         .Cut
         Do While Asc(.text) = 10 Or Asc(.text) = 13
         If .End + 1 = .Document.Content.End Then Exit Do
@@ -1196,7 +1196,7 @@ Public Sub 轉換分行符號為手動分行符號()
 '2003/3/25
 With Selection.Find '如此才不會更改字形格式！
     .ClearFormatting
-    .Execute findtext:="^p", Replacewith:="^l", Wrap:=wdFindContinue, Replace:=wdReplaceAll
+    .Execute findText:="^p", replacewith:="^l", Wrap:=wdFindContinue, Replace:=wdReplaceAll
 '    .ClearFormatting
 End With
 '2003/3/23
@@ -1460,7 +1460,7 @@ Exit Sub
 'End With
 ErrHs:
 'With ActiveDocument
-Select Case Err.Number
+Select Case Err.number
 '    Case 5941 '集合中的成員不存在（即沒有註腳）,則插入書籤2003/3/29
 '        For Each CrossReference In .Bookmarks
 '            If CrossReference.Range Like ActiveWindow.Selection Then
@@ -1483,7 +1483,7 @@ Select Case Err.Number
 '            If IsEmpty(CrossReference) Then MsgBox "沒有合適的書籤參照，請手動操作！", vbExclamation: End
 '        End If
     Case Else
-        MsgBox Err.Number & Err.Description: End
+        MsgBox Err.number & Err.Description: End
 End Select
 End With
 End Sub
@@ -1568,7 +1568,7 @@ End With
 
 Exit Sub
 Previews:
-Select Case Err.Number
+Select Case Err.number
 '    Case 91
 '        On Error Resume Next
 '        Dim d As Byte
@@ -1585,7 +1585,7 @@ Select Case Err.Number
 '    Case 5941
 '        Resume Next
     Case Else
-        MsgBox Err.Number & Err.Description, vbExclamation
+        MsgBox Err.number & Err.Description, vbExclamation
 End Select
 End Sub
 
@@ -1665,7 +1665,7 @@ Again: If winNum <> 0 Then .Application.Windows(winNum).Activate
 End With
 Exit Sub
 Previews:
-Select Case Err.Number
+Select Case Err.number
     Case 91
         On Error Resume Next
         Dim d As Byte
@@ -1682,7 +1682,7 @@ Select Case Err.Number
     Case 5941
         Resume Next
     Case Else
-        MsgBox Err.Number & Err.Description, vbExclamation
+        MsgBox Err.number & Err.Description, vbExclamation
 End Select
 End Sub
 
@@ -1826,7 +1826,7 @@ With Selection '指定鍵：Alt+Ctrl+Up
 End With
 Exit Sub
 Previews:
-Select Case Err.Number
+Select Case Err.number
     Case 91
         On Error Resume Next
         Dim d As Byte
@@ -1843,7 +1843,7 @@ Select Case Err.Number
     Case 5941
         Resume Next
     Case Else
-        MsgBox Err.Number & Err.Description, vbExclamation
+        MsgBox Err.number & Err.Description, vbExclamation
 End Select
 End Sub
 
@@ -1982,7 +1982,7 @@ With Selection '指定鍵：Alt+Ctrl+Up
 End With
 Exit Sub
 Previews:
-Select Case Err.Number
+Select Case Err.number
     Case 91
         On Error Resume Next
         Dim d As Byte
@@ -1999,7 +1999,7 @@ Select Case Err.Number
     Case 5941
         Resume Next
     Case Else
-        MsgBox Err.Number & Err.Description, vbExclamation
+        MsgBox Err.number & Err.Description, vbExclamation
 End Select
 End Sub
 
@@ -2112,7 +2112,7 @@ With Selection
     If .Type <> wdSelectionIP Then .MoveRight '有選取範圍時會取代掉選取範圍, 故須先檢查!
     Do
         .Find.ClearFormatting
-        .Find.Execute findtext:="^p", Forward:=True
+        .Find.Execute findText:="^p", Forward:=True
         c = c + 1
         a = .Range.Previous '此法較快
 '        a = .Document.Range(.Start - 1, .Start)
@@ -2205,9 +2205,9 @@ With Selection
 End With
 End Sub
 
-Sub a() '宋明理學期末作業用2004/5/2
-Attribute a.VB_Description = "巨集錄製於 2004/1/13，錄製者 孫守真"
-Attribute a.VB_ProcData.VB_Invoke_Func = "Normal.NewMacros.巨集1"
+Sub 宋明理學期末作業用() '2004/5/2
+Attribute 宋明理學期末作業用.VB_Description = "巨集錄製於 2004/1/13，錄製者 孫守真"
+Attribute 宋明理學期末作業用.VB_ProcData.VB_Invoke_Func = "Normal.NewMacros.巨集1"
 '
 ' 巨集1 巨集
 ' 巨集錄製於 2004/1/13，錄製者 孫守真
@@ -2265,9 +2265,9 @@ With Selection
     Next i
 End With
 End Sub
-Sub a1()
-Selection.Range.Find.Execute "為", , , , , , , , , VBA.ChrW(29234), wdReplaceAll
-End Sub
+'Sub a1()
+'    Selection.Range.Find.Execute "為", , , , , , , , , VBA.ChrW(29234), wdReplaceAll
+'End Sub
 
 Sub 清除頁碼標記()
 Dim p As Paragraph
@@ -2498,7 +2498,7 @@ Attribute 巨集6.VB_ProcData.VB_Invoke_Func = "Normal.NewMacros.巨集6"
 ' 巨集6 巨集
 '
 '
-    Selection.MoveLeft unit:=wdCharacter, Count:=1, Extend:=wdExtend
+    Selection.MoveLeft Unit:=wdCharacter, Count:=1, Extend:=wdExtend
     ActiveDocument.DefaultTargetFrame = ""
     Selection.Range.Hyperlinks(1).Range.Fields(1).result.Select
     Selection.Range.Hyperlinks(1).Delete
@@ -2574,7 +2574,7 @@ Attribute 貼上ut內容.VB_ProcData.VB_Invoke_Func = "Normal.NewMacros.巨集11"
         End With
     End If
     'For Each tb In Selection.Document.Tables
-    For Each tb In rng.Tables
+    For Each tb In rng.tables
         tb.rows.ConvertToText Separator:=wdSeparateByParagraphs, _
             NestedTables:=True
     Next tb

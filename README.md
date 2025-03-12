@@ -397,6 +397,7 @@ Ctrl + Shift + Alt + y 查[韻典網](https://ytenx.org/) y=yun（韻）的y
 - Ctrl + Shift + Alt + y 查[韻典網](https://ytenx.org/) y=yun（韻）的y
 - Alt + Shift + z 查《漢語大字典》（z：字（zi）的 z）20250108
 - Ctrl + Shift + Alt + d ： **單字**檢索《[白雲深處人家·漢語大字典釋義版檢索](https://homeinmists.ilotus.org/hd/search.php)》之字頭。（d ：大 da 的 d） 20250115
+- Ctrl + Shift + Alt + n：執行「新頁面Auto」程序：自動根據書籍相關參數建立新的文字版章節文本單位、及其內容的圖文對應語法標記
 - ctrl + Alt + Shift + z 查《中文大辭典》－－[《國學大師》](https://www.guoxuedashi.net/zidian/)所收轉愚所掃全彩為黑白版 20241020 （z：中（zh）的 z）20241020
 - Ctrl + Alt + ' （頓號） 頓號文字加上篇名號（〈〉）如周易諸卦
 - Ctrl + shift + Alt + ' （頓號） 頓號文字加上書名號（《》）如五經
@@ -928,6 +929,10 @@ Ctrl+ 滑鼠左鍵：清除框中所有文字
   或在textBox2中輸入「cpt序號」以指定。如「cpt183」即第183（冊） 20250305
 > 如 `tr:nth-child(3)`，即 tr:nth-child(2) 的下一章（節、單元 chapter）
 >>`"#content > div:nth-child(6) > table > tbody > tr:nth-child(2) > td:nth-child(1) > a"`
+
+- 輸入「tlsc」(TitleLeadingSpacesCount)後可以在textBox1前端列出目前的標題階級及其空格數
+- 輸入「tlsc.rmv1」(rmv=Remove)，可以移除第1個項目，「tlsc.clr」(clr=Clear)可以清除全部；清除textBox3的內容亦可以清除所有項目，及重設所有書面特徵參數（如每頁幾行、每行幾字等）
+- 輸入「tlsc.add」可以依textBox1被選取的行段資料來新增標題空格之項目。一行一筆，元素值為整數。
 
 ### 在 textBox3 網址資訊專用方塊框：
 - 拖曳網址在 textBox3 或 textBox1 上放開，則會讀入所拖曳的網址值給 textBox3

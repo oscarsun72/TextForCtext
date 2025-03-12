@@ -300,7 +300,8 @@ Sub 貼上純文字() 'shift+insert 2016/7/20
     hl = Selection.Range.HighlightColorIndex
     
     s = Selection.start
-    Set r = Selection.Document.Range(Selection.start, Selection.End)
+'    Set r = Selection.Document.Range(Selection.start, Selection.End)
+    Set r = Selection.Range.Duplicate
 '    '如果有選取則清除
     If Selection.Flags <> 24 And Selection.Flags <> 25 Or Selection.Flags = 9 Then
         If s < Selection.End Then Selection.text = vbNullString
@@ -312,11 +313,11 @@ Sub 貼上純文字() 'shift+insert 2016/7/20
     SystemSetup.contiUndo ur
     Exit Sub
 ErrHandler:
-    Select Case Err.Number
+    Select Case Err.number
         Case 5342 '指定的資料類型無法取得。
             
         Case Else
-            MsgBox Err.Number & Err.Description
+            MsgBox Err.number & Err.Description
     End Select
 End Sub
 Sub 貼上簡化字文本轉正()
@@ -453,18 +454,20 @@ SystemSetup.playSound 2
 End Sub
 
 Sub 開新視窗() '快速鍵:alt+shift+w-原為OLE至備忘欄()指定鍵  '2011/6/23''2012/5/20 2003不能設定Alt+w 原設於"字形轉換_華康儷粗黑"
-Dim l As Long, s As Long, YwdInFootnoteEndnotePane
+    Dim e As Long, s As Long, YwdInFootnoteEndnotePane, w As Window
+    'alt + shift + w
     YwdInFootnoteEndnotePane = Selection.Information(wdInFootnoteEndnotePane) '記下開新視窗前註腳窗格狀態
-    l = Selection.End '.Information(wdActiveEndPageNumber)
+    e = Selection.End '.Information(wdActiveEndPageNumber)
     s = Selection.start '記下原位置
     If CommandBars("web").Visible Then CommandBars("web").Visible = False
-    NewWindow
-    'ActiveWindow.Document.Range.Characters(l).Select
+    Set w = NewWindow
+    'ActiveWindow.Document.Range.Characters(e).Select
     If YwdInFootnoteEndnotePane Then '如果在註腳窗格中
         ActiveWindow.View.SplitSpecial = wdPaneFootnotes '2011/8/13
     End If
-    Selection.End = l ' 'Selection.GoTo wdGoToObject, wdGoToAbsolute, l
+    Selection.End = e ' 'Selection.GoTo wdGoToObject, wdGoToAbsolute, e
     Selection.start = s '到原位置
+    w.ScrollIntoView Selection.Range
 End Sub
 
 Sub 文件引導模式切換() ' Alt+M 2011/6/26
@@ -662,11 +665,11 @@ reFind:
     End With
     Exit Sub
 errHH:
-    Select Case Err.Number
+    Select Case Err.number
         Case 7 '記憶體不足
             d.ActiveWindow.Selection.Find.Execute Selection.text
         Case Else
-            MsgBox Err.Number & Err.Description
+            MsgBox Err.number & Err.Description
             Resume
     End Select
 End Sub
@@ -793,13 +796,27 @@ subP:
     End With
     Return
 End Sub
+Sub 樣式檢查()
+    Dim d As Document, p As Paragraph
+    Set d = ActiveDocument
+    For Each p In d.Paragraphs
+        Select Case p.Style
+            Case "內文", "本文", "引文", "參考書目"
+            Case Else
+                If VBA.Left(p.Style, 2) <> "標題" And VBA.Left(p.Style, 5) <> "目錄的標題" Then
+                    p.Range.Select
+                    Stop
+                End If
+        End Select
+    Next p
+End Sub
 Function 樣式取代()
-Const styleSrc As String = "純文字"
-Const styleDest As String = "易經原文"
-Dim d As Document, p As Paragraph
-For Each p In d.Paragraphs
-    If p.Style = styleSrc Then p.Style = styleDest
-Next p
+    Const styleSrc As String = "純文字"
+    Const styleDest As String = "易經原文"
+    Dim d As Document, p As Paragraph
+    For Each p In d.Paragraphs
+        If p.Style = styleSrc Then p.Style = styleDest
+    Next p
 End Function
 
 Function 樣式add_沛榮按等樣式()
@@ -877,12 +894,173 @@ Sub DocBackgroundFillColor() '頁面色彩
     ActiveDocument.Background.Fill.Solid
 End Sub
 
-Sub 內文前空二格() 'Alt+n
+Sub 內文前空二格() 'Alt+n（已改為：查漢語多功能字庫並取回其說文解釋欄位之值插入至插入點位置()）
     With Selection.ParagraphFormat
         .Style = "內文"
         .CharacterUnitFirstLineIndent = 2
     End With
 End Sub
+Sub 樣式瀏覽檢閱()
+    Dim styNameLocal As String
+    Dim sty As Style, d As Document, p As Paragraph, base As String, a As Range
+    Set d = ActiveDocument
+    styNameLocal = InputBox("要查找瀏覽檢閱的樣式名稱：")
+    For Each sty In d.Styles
+        If sty.NameLocal = styNameLocal Then Exit For
+    Next sty
+    If sty Is Nothing Then Exit Sub
+    Select Case sty.Type
+        Case wdStyleTypeParagraph, wdStyleTypeParagraphOnly
+            For Each p In d.Paragraphs
+                'If p.Style.NameLocal = sty.NameLocal Then
+                If p.Style = sty Then
+                    p.Range.Select
+                    Stop
+                End If
+            Next p
+        
+        Case wdStyleTypeCharacter
+            Set a = d.Range
+            a.Find.ClearFormatting
+            a.Find.Style = sty
+            Do While a.Find.Execute()
+                a.Select
+                Stop
+            Loop
+'            For Each a In d.Characters
+'                If a.Style = sty Then
+'                    a.Select
+'                    Stop
+'                End If
+'            Next a
+    End Select
+End Sub
+Sub 樣式化現用文件_整理未樣式化的現用文件() '20250311
+    Dim d As Document, ur As UndoRecord
+    Set d = ActiveDocument
+    SystemSetup.stopUndo ur, "樣式化現用文件_整理未樣式化的現用文件"
+    word.Application.ScreenUpdating = False
+    將前空二格之段落改為本文樣式並清除其二空格 d
+    將前空三格之段落改為引文樣式並清除其三空格 d
+    將樣式為純文字且字型為細明體之段落改為預設內文樣式 d
+    將樣式為純文字且字型為標楷體之段落改為引文樣式 d
+    將樣式為標楷體之段落改為引文樣式 d
+    將樣式不為引文而字型為標楷體之段落改為引文樣式 d
+    word.Application.ScreenUpdating = True
+    SystemSetup.contiUndo ur
+End Sub
+Sub 將前空二格之段落改為本文樣式並清除其二空格(d As Document) '20250311
+    Dim p As Paragraph
+    For Each p In d.Paragraphs
+        If VBA.Len(p.Range.text) > 2 Then
+            If VBA.Left(p.Style, 2) <> "標題" And VBA.Left(p.Range.text, 2) = "　　" And VBA.Mid(p.Range.text, 3, 1) <> "　" Then
+               'p.Range.Select
+                p.Style = "本文"
+                d.Range(p.Range.start, p.Range.start + 2).text = vbNullString
+            End If
+        End If
+    Next p
+End Sub
+Sub 將前空三格之段落改為引文樣式並清除其三空格(d As Document) '20250311
+    Dim p As Paragraph
+    For Each p In d.Paragraphs
+        If VBA.Len(p.Range.text) > 3 Then
+            If VBA.Left(p.Style, 2) <> "標題" And VBA.Left(p.Range.text, 3) = "　　　" And VBA.Mid(p.Range, 3, 1) <> "　" Then
+                'p.Range.Select
+                p.Style = "引文"
+                d.Range(p.Range.start, p.Range.start + 3).text = vbNullString
+            End If
+        End If
+    Next p
+End Sub
+Sub 將樣式為純文字且字型為細明體之段落改為預設內文樣式(d As Document) '20250311
+    Dim p As Paragraph
+    For Each p In d.Paragraphs
+        If p.Style = "純文字" And p.Range.font.Name = "細明體" Then
+            p.Range.Select
+            Selection.ClearParagraphStyle
+        End If
+    Next p
+End Sub
+Sub 將樣式為純文字且字型為標楷體之段落改為引文樣式(d As Document) '20250311
+    Dim p As Paragraph
+    For Each p In d.Paragraphs
+        If p.Style = "純文字" And p.Range.font.Name = "標楷體" Then
+            'p.Range.Select
+            p.Style = "引文"
+        End If
+    Next p
+End Sub
+Sub 將樣式為標楷體之段落改為引文樣式(d As Document)  '20250311
+    Dim p As Paragraph
+    For Each p In d.Paragraphs
+        If p.Style = "標楷體" Then
+            'p.Range.Select
+            p.Style = "引文"
+        End If
+    Next p
+End Sub
+Sub 將樣式不為引文而字型為標楷體之段落改為引文樣式(d As Document)  '20250311
+    Dim p As Paragraph
+    For Each p In d.Paragraphs
+        If p.Style <> "引文" And VBA.InStr(p.Style, "標題") = 0 And p.Range.font.Name = "標楷體" Then
+            p.Range.Select
+            p.Style = "引文"
+        End If
+    Next p
+End Sub
+Sub 將附注文改成腳注()
+    Dim ur As UndoRecord
+    SystemSetup.stopUndo ur, "將附注文改成腳注"
+    將注一等注改成腳注 Selection.Document
+    SystemSetup.contiUndo ur
+End Sub
+Sub 將注一等注改成腳注(d As Document) '20250311
+    Dim rng As Range, arr, e
+'    arr = Array("（▲注") ', "（注")
+'    Set rng = d.Range
+'    For Each e In arr
+'        Do While rng.Find.Execute(e)
+''            d.Footnotes.Add (rng)
+'        Loop
+'    Next e
+    
+    Dim noteMark As String, noteNum As String, notePrefix As String, noteStr As String
+    Dim p As Paragraph
+    Set d = ActiveDocument
+    notePrefix = "（▲注"
+    If Selection.Type = wdSelectionIP Or Selection.Characters(1) <> "（" Or Selection.Characters(Selection.Characters.Count) <> "）" Then
+        Selection.MoveStartUntil "（", -10
+        Selection.MoveEndUntil "）", 10
+        If Selection.Characters(1) <> "（" Then Selection.start = Selection.start - 1
+        If Selection.Characters(Selection.Characters.Count) <> "）" Then Selection.End = Selection.End + 1
+    End If
+    noteMark = Selection.text
+    noteNum = VBA.Mid(noteMark, VBA.InStr(noteMark, notePrefix) + VBA.Len(notePrefix), _
+        VBA.InStr(VBA.InStr(noteMark, notePrefix) + VBA.Len(notePrefix), noteMark, "）") - (VBA.InStr(noteMark, notePrefix) + VBA.Len(notePrefix)))
+    noteNum = VBA.IIf(VBA.Len(noteNum) = 1, "　" & noteNum, noteNum)
+    
+    Set rng = d.Range(Selection.start, d.Range.End)
+    rng.Find.Execute ("附註：" & VBA.Chr(13))
+    rng.End = rng.Sections(1).Range.End
+    For Each p In rng.Paragraphs
+        If VBA.Left(p.Range.text, 2) = noteNum Then
+            Exit For
+        End If
+    Next p
+    If Not p Is Nothing Then
+        d.Range(p.Range.start, p.Range.Characters(2).End).text = vbNullString
+        If p.Range.Characters(1).text = "　" Then p.Range.Characters(1).text = vbNullString
+        noteStr = d.Range(p.Range.start, p.Range.End - 1)
+        p.Range.Cut
+        Selection.text = vbNullString
+        Selection.Footnotes.Add Selection.Range, , noteStr
+    Else
+        MsgBox "check", vbExclamation
+    End If
+    
+End Sub
+
 Sub 易學關鍵字()
     ' Alt + `
     mark易學關鍵字
@@ -1157,11 +1335,11 @@ refres:
     Return
     
 eH:
-    Select Case Err.Number
+    Select Case Err.number
         Case 5825 '物件已被刪除。
             GoTo exitSub
         Case Else
-            MsgBox Err.Number & Err.Description
+            MsgBox Err.number & Err.Description
             Resume
     End Select
 End Function
@@ -1288,7 +1466,7 @@ finish:
     Exit Sub
 
 eH:
-    MsgBox Err.Number & Err.Description
+    MsgBox Err.number & Err.Description
     Resume finish
 End Sub
 
@@ -1529,10 +1707,10 @@ buildDictCoordinatesPhrase:
         Return
 
 eH:
-    Select Case Err.Number
+    Select Case Err.number
         Case Else
-            MsgBox Err.Number & Err.Description
-            Debug.Print Err.Number & Err.Description
+            MsgBox Err.number & Err.Description
+            Debug.Print Err.number & Err.Description
             Resume
     End Select
 End Sub
@@ -1772,7 +1950,7 @@ exitSub:
     word.Application.ScreenUpdating = True
     Exit Sub
 eH:
-        Select Case Err.Number
+        Select Case Err.number
             Case 9
                 If InStr(Err.Description, "陣列索引超出範圍") Then
                     GoTo mark
@@ -1786,7 +1964,7 @@ eH:
                 End If
             Case Else
 Msg:
-                MsgBox Err.Number & Err.Description
+                MsgBox Err.number & Err.Description
         End Select
 End Sub
 
@@ -1811,7 +1989,7 @@ Function 貼到古籍酷自動標點() As Boolean
     
     Exit Function
 Err1:
-        Select Case Err.Number
+        Select Case Err.number
             Case 49 'DLL 呼叫規格錯誤
                 resumeTimer = resumeTimer + 1
                 If resumeTimer > 2 Then
@@ -1904,7 +2082,7 @@ SendKeys "+{TAB 1} ", True
 'If d.path = "" Then d.Close wdDoNotSaveChanges
 Exit Sub
 App:
-Select Case Err.Number
+Select Case Err.number
     Case 5
         'Shell (Network.getDefaultBrowserFullname + " https://old.gj.cool/gjcool/index")'舊版
         Shell (Network.getDefaultBrowserFullname + " https://gj.cool/punct")
@@ -1914,7 +2092,7 @@ Select Case Err.Number
         'SendKeys "{TAB 16}", True
         Resume Next
     Case Else
-        MsgBox Err.Number & Err.Description
+        MsgBox Err.number & Err.Description
 End Select
 End Sub
 
