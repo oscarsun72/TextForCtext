@@ -10,6 +10,7 @@ using WindowsFormsApp1;
 using System.Windows.Forms;
 using System.Globalization;
 using System.Diagnostics;
+using static WindowsFormsApp1.Form1;
 
 
 namespace TextForCtext
@@ -176,13 +177,16 @@ namespace TextForCtext
             noteBeforeTitleSplitTwoLine(ref xForStandardize);
 
             //現在亦可用 https://www.kanripo.org/ 所收《四部叢刊》本，故加此條件判斷 20240804
-            int isSKQS = xForStandardize.IndexOf("《欽定四庫全書》"); bool reBuild = false;
+            //int isSKQS = xForStandardize.IndexOf("《欽定四庫全書》"); //現在不交給WordVBA作書名篇名標點了，故改如下：
+            int isSKQS = xForStandardize.IndexOf("欽定四庫全書"); //現在不交給WordVBA標點了，故改如左
+            bool reBuild = false;
             if (isSKQS > -1)
             {
                 if (xForStandardize.Substring(0, 2) == Environment.NewLine)
-                {
+                {//清除最前面的分段符號
                     xForStandardize = xForStandardize.Substring(2);
-                    isSKQS = xForStandardize.IndexOf("《欽定四庫全書》");
+                    //isSKQS = xForStandardize.IndexOf("《欽定四庫全書》");//現在不交給WordVBA標點了，故改如下：
+                    isSKQS = xForStandardize.IndexOf("欽定四庫全書");
                 }
 
                 string sbRoot;
@@ -201,7 +205,7 @@ namespace TextForCtext
                     if (xForStandardize.Substring(0, 2) == Environment.NewLine)
                     {
                         xForStandardize = xForStandardize.Substring(2);
-                        isSKQS = xForStandardize.IndexOf("《欽定四庫全書》");
+                        isSKQS = xForStandardize.IndexOf("欽定四庫全書");
                     }
                     else
                     {
@@ -212,7 +216,8 @@ namespace TextForCtext
                             if (item.Text.Contains("欽定四庫全書"))
                             {
                                 //xForStandardize = xForStandardize.Substring(item.Range.Start);
-                                item.Text = item.Text.Replace("《欽定四庫全書》", "*欽定四庫全書<p>");
+                                //item.Text = item.Text.Replace("《欽定四庫全書》", "*欽定四庫全書<p>");//現在不交給WordVBA標點了，故改如下：
+                                item.Text = item.Text.Replace("欽定四庫全書", "*欽定四庫全書<p>");
                                 xForStandardize = document.Range(item.Range.Start, document.Text.Length).Text;
                                 reBuild = true;
                                 break;
@@ -239,7 +244,8 @@ namespace TextForCtext
             xForStandardize = xForStandardize.Replace("○", "◯");
             xForStandardize = xForStandardize.Replace("\r\n　\r\n　\r\n", "\r\n|\r\n|\r\n");
             xForStandardize = xForStandardize.Replace("|\r\n　\r\n|", "|\r\n|\r\n|");
-
+            playSound(soundLike.processing);
+            CnText.BooksPunctuation(ref xForStandardize, true);//書名號篇名號等標點
         }
         /// <summary>
         /// 標題/篇名標識。只要一行/段之前後均只是空行的話（跨行以上的不處理，手動自行處理）

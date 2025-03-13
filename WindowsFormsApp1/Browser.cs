@@ -655,6 +655,21 @@ namespace TextForCtext
             }
         }
         /// <summary>
+        /// 取得圖文對照頁面中的「Add transcription」控制項（元件）
+        /// </summary>
+        internal static IWebElement AddTranscription_Linkbox
+        {
+            get
+            {
+                IWebElement iwe = WaitFindWebElementBySelector_ToBeClickable("#content > div:nth-child(7) > a");
+                if (iwe == null) return null;
+                if (iwe.GetAttribute("text") == "Add transcription")
+                    return iwe;
+                else
+                    return null;
+            }
+        }
+        /// <summary>
         /// 取得CTP網頁中的「書名」（title）控制項
         /// <span itemprop="title">純常子枝語</span>
         /// </summary>
@@ -710,7 +725,21 @@ namespace TextForCtext
                 return iwe;
             }
         }
-
+        /// <summary>
+        /// 取得「Please confirm that you are human! 敬請輸入認證圖案」元件
+        /// </summary>
+        internal static IWebElement Please_confirm_that_you_are_human_Page
+        {
+            get
+            {
+                IWebElement iwe = WaitFindWebElementBySelector_ToBeClickable("#content > font");
+                if (iwe == null) return null;
+                if (iwe.GetAttribute("textContent") == "Please confirm that you are human! 敬請輸入認證圖案")
+                    return iwe;
+                else
+                    return null;
+            }
+        }
         internal static IWebElement GraphicMatchingPagesLink
         {
             get => WaitFindWebElementBySelector_ToBeClickable("#p2 > td:nth-child(1) > div > a.sprite-photo > div", 3);
@@ -4048,7 +4077,7 @@ namespace TextForCtext
                     Thread.Sleep(800);
                     bool showBox = true;
                     //Tuple<bool, bool, bool, bool, DateTime> ipStatus = Mdb.IPStatus(CurrentIP == null ? GetPublicIpAddress("") : CurrentIP);
-                    Tuple<bool, bool, bool, bool, DateTime> ipStatus = Mdb.IPStatus(CurrentIP == null ? GetPublicIpAddress("") : CurrentIP);
+                    Tuple<bool, bool, bool, bool, DateTime> ipStatus = Mdb.IPStatus(CurrentIP ?? GetPublicIpAddress(""));
                     if (ipStatus != null) showBox = ipStatus.Item4 ? false : true;
                     if (!IPStatusMessageShow(out ipStatus, string.Empty, false, showBox))
                     {
@@ -10859,10 +10888,7 @@ namespace TextForCtext
                 {
                     iwe = WaitFindWebElementBySelector_ToBeClickable("#SearchResult > p > a > font");//ex:守真
                                                                                                      //iwe = waitFindWebElementBySelector_ToBeClickable("#SearchResult > p > a");//ex:總第 4709 頁，第三卷第 1303 頁
-                    if (iwe != null)
-                    {
-                        iwe.Click();
-                    }
+                    iwe?.Click();
                 }
                 driver.SwitchTo().Window(driver.WindowHandles.Last());
                 urlResult = driver.Url;
@@ -11656,7 +11682,12 @@ namespace TextForCtext
             }
             LastValidWindow = driver.CurrentWindowHandle;
             bool result = CopySKQSNextVolume();
-            driver.SwitchTo().Window(LastValidWindow);
+            if (driver.WindowHandles.Contains(LastValidWindow))
+                driver.SwitchTo().Window(LastValidWindow);
+            else
+                Debugger.Break();
+
+
             BringToFront("chrome");
             //剪貼簿只能單一執行緒
             //Task.Run(() =>
@@ -11924,18 +11955,22 @@ namespace TextForCtext
         /// <returns></returns>
         internal static bool IsConfirmHumanPage()
         {
-            if (driver.Url == "https://ctext.org/wiki.pl")
-            {
-                if (WaitFindWebElementBySelector_ToBeClickable("#content > font")?.GetAttribute("textContent") == "Please confirm that you are human! 敬請輸入認證圖案")
-                {
-                    confirm_that_you_are_human = true;
-                    return true;
-                }
-                else
-                    return false;
-            }
-            else
-                return false;
+
+            return confirm_that_you_are_human = driver.Url == "https://ctext.org/wiki.pl" || Please_confirm_that_you_are_human_Page != null;
+            //return confirm_that_you_are_human;
+
+            //if (driver.Url == "https://ctext.org/wiki.pl" ||Please_confirm_that_you_are_human_Page!=null)
+            //{
+            //    if (WaitFindWebElementBySelector_ToBeClickable("#content > font")?.GetAttribute("textContent") == "Please confirm that you are human! 敬請輸入認證圖案")
+            //    {
+            //        confirm_that_you_are_human = true;
+            //        return true;
+            //    }
+            //    else
+            //        return false;
+            //}
+            //else
+            //    return false;
         }
         /// <summary>
         /// 打開展開/收起閉合大綱標題（章節頁面）

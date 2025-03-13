@@ -268,8 +268,10 @@ namespace WindowsFormsApp1
             }
             thisHeight = this.Height; thisWidth = this.Width; thisLeft = this.Left; thisTop = this.Top;
             //加入事件處理常式
-            this.ntfyICo = new NotifyIcon();
-            this.ntfyICo.Icon = this.Icon;
+            this.ntfyICo = new NotifyIcon
+            {
+                Icon = this.Icon
+            };
             this.ntfyICo.MouseClick += new System.Windows.Forms.MouseEventHandler(nICo_MouseClick);
             //this.ntfyICo.MouseClick += new System.Windows.Forms.MouseEventHandler(nICo_MouseMove);
             this.ntfyICo.MouseMove += new System.Windows.Forms.MouseEventHandler(nICo_MouseMove);
@@ -1218,8 +1220,7 @@ namespace WindowsFormsApp1
             if (s == "" || s == textBox1.SelectedText)
             { textBox2.BackColor = textBox2BackColorDefault; return; }
             //如何判斷字串是否代表數值 (c # 程式設計手冊):https://docs.microsoft.com/zh-tw/dotnet/csharp/programming-guide/strings/how-to-determine-whether-a-string-represents-a-numeric-value
-            int i;
-            bool result = int.TryParse(s, out i); //i now = textBox2.Text
+            bool result = int.TryParse(s, out int i); //i now = textBox2.Text
             if (result && (processID == null || processID == ""))
             {
                 processID = s;
@@ -2571,7 +2572,7 @@ namespace WindowsFormsApp1
                 {//Ctrl + + （Ctrl + 數字鍵盤 +） Ctrl + -
                     e.Handled = true;
                     undoRecord();
-                    autoPastetoCtextQuitEditTextboxCancel = false;
+                    //autoPastetoCtextQuitEditTextboxCancel = false;
                     TopMost = false;
 
                     betweenAddParaMarkMoveEnd();
@@ -4378,7 +4379,7 @@ namespace WindowsFormsApp1
 
             undoRecord();
             //if (keyDownCtrlAdd(false)) // if (textBox1.Text != "") { pauseEvents(); textBox1.Text = ""; resumeEvents(); }
-            autoPastetoCtextQuitEditTextboxCancel = false;
+            //autoPastetoCtextQuitEditTextboxCancel = false;
             betweenAddParaMarkMoveEnd();
 
             if (autoPaste2QuickEdit && textBox1.SelectionLength > 0)
@@ -6198,6 +6199,7 @@ namespace WindowsFormsApp1
 
                 string titleFirstParaText;// = pTitleFirstPara.Text;//標題首行/段的string
                 titleFirstParaText = GetLineText(x, s);
+                if (titleFirstParaText == string.Empty) return true;
 
                 //若前置空格數不相符則不作標記（若原始文本排版錯誤則會漏標，只能人工校正了）20250223
                 if (titleLeadingSpaceCount > 0 && _leadingSpacesRegex.Match(titleFirstParaText).Value.Length != titleLeadingSpaceCount) return true;
@@ -8642,7 +8644,12 @@ namespace WindowsFormsApp1
             int rs = textBox1.SelectionStart, rl = textBox1.SelectionLength;
             string se = textBox1.Text.Substring(s, e - s);//取得s(start)和e(end)之間的字串，就叫se
                                                           //int l = new StringInfo(se).LengthInTextElements;
-            if (se.Replace("●", "") == "")
+            if (new StringInfo(se).LengthInTextElements < 10)
+            {
+                MessageBoxShowOKExclamationDefaultDesktopOnly("請先在第1行指定正常行長再繼續！");
+                return;
+            }
+            if (se.Contains("●") && se.Replace("●", "") == "")
             {
                 l = se.Length;
                 wordsPerLinePara = l;
@@ -8651,6 +8658,11 @@ namespace WindowsFormsApp1
             else
             {
                 l = wordsPerLinePara != -1 ? wordsPerLinePara : countWordsLenPerLinePara(se);
+                if (wordsPerLinePara == 0)
+                {
+                    Debugger.Break();
+                    wordsPerLinePara = countWordsLenPerLinePara(se);
+                }
                 if (NormalLineParaLength == 0) NormalLineParaLength = wordsPerLinePara;
             }
 
@@ -10529,11 +10541,10 @@ namespace WindowsFormsApp1
             //DialogResult dialogresult = new DialogResult(); 原來在這裡！！！ 20231022
             if (browsrOPMode != BrowserOPMode.appActivateByName && !pagePaste2GjcoolOCR)
             {//使用selenium模式時（非預設模式時）
-                DialogResult dialogresult;//= new DialogResult();
+             //= new DialogResult();
                 if (autoPaste2QuickEdit && !keyinTextMode && !autoPastetoCtextQuitEditTextboxCancel)
                 {//全自動輸入模式時
-                    autoPaste2CtextQuitEditTextbox(out dialogresult);//在此中雖有判斷autoPastetoQuickEdit時，然呼叫它會造成無限遞迴（recursion）
-
+                    autoPaste2CtextQuitEditTextbox(out DialogResult dialogresult);//在此中雖有判斷autoPastetoQuickEdit時，然呼叫它會造成無限遞迴（recursion）                    
                     //Debugger.Break();
                     //●●●●●●●●●●●●●20250213
 
@@ -10598,7 +10609,7 @@ namespace WindowsFormsApp1
                     //int st = Form1.InstanceForm1.textBox1.SelectionStart, len = Form1.InstanceForm1.textBox1.SelectionLength;
                     string tx1 = Form1.InstanceForm1.textBox1.Text;
                     int wygbStart = tx1.IndexOf("欽定四庫全書<p>");
-                    if (wygbStart > -1)
+                    if (wygbStart > -1 && !tx1.Contains("〖文淵|閣寶〗"))
                     {
                         wygbStart += "欽定四庫全書<p>".Length;
                         //tx1 = tx1.Substring(0, wygbStart)+"〖文淵|閣寶〗<p>"+tx1.Substring(wygbStart);
@@ -10606,6 +10617,8 @@ namespace WindowsFormsApp1
                         Form1.InstanceForm1.textBox1.Select(wygbStart, 0);
                         Form1.InstanceForm1.textBox1.SelectedText = "〖文淵|閣寶〗<p>";
                         ResumeEvents(); stopUndoRec = false;
+                        Form1.InstanceForm1.textBox3.Text = textBox3.Text;//主表單網址與本表單連動、同步
+                        br.WindowHandles["currentPageNum"] = (int.Parse(_currentPageNum) - 1).ToString();
                     }
                     //Form1.InstanceForm1.textBox1.Select(s, l);
                 }
@@ -11232,9 +11245,10 @@ namespace WindowsFormsApp1
 
         /// <summary>
         /// 記下遞迴的ws對話方塊傳回的參數 20250213
-        /// 預設為false，若須停止遞迴（recursion），就設為true 20250222
+        /// 停止遞迴（recursion），則設為true 20250222
+        /// 預設為true。
         /// </summary>
-        bool autoPastetoCtextQuitEditTextboxCancel = false;
+        bool autoPastetoCtextQuitEditTextboxCancel = true;
         /// <summary>
         /// Ctrl + F2 切換語音操作（預設為非 Windows 語音辨識操作）識別用
         /// </summary>
@@ -11307,7 +11321,13 @@ namespace WindowsFormsApp1
                         || IsCapsLockOn())
                     {
                         if (KeyboardInfo.getKeyStateToggled(System.Windows.Input.Key.CapsLock)
-                            || KeyboardInfo.getKeyStateDown(System.Windows.Input.Key.LeftShift)
+                            || (KeyboardInfo.getKeyStateDown(System.Windows.Input.Key.LeftShift)
+                                && !KeyboardInfo.getKeyStateDown(System.Windows.Input.Key.Insert)//非在複製貼上
+                                && !KeyboardInfo.getKeyStateDown(System.Windows.Input.Key.Delete)
+                                && !KeyboardInfo.getKeyStateDown(System.Windows.Input.Key.Left)//非在做選取時
+                                && !KeyboardInfo.getKeyStateDown(System.Windows.Input.Key.Right)
+                                && !KeyboardInfo.getKeyStateDown(System.Windows.Input.Key.Up)
+                                && !KeyboardInfo.getKeyStateDown(System.Windows.Input.Key.Down))
                             || Control.IsKeyLocked(Keys.CapsLock)
                             || IsCapsLockOn())//GitHub　Copilot大菩薩：要實現根據 Caps Lock 燈的狀態來執行 FastModeSwitcher 方法，我們可以使用 Control.IsKeyLocked 方法來檢查 Caps Lock 燈的狀態。這個方法可以直接檢查 Caps Lock 燈是否亮著。……這樣可以確保在 Caps Lock 燈亮時觸發 FastModeSwitcher 方法，而不需要按住 Caps Lock 鍵。
                         {
@@ -11349,8 +11369,9 @@ namespace WindowsFormsApp1
 
                     if (!fastMode) Refresh();
 
-                    if (!CheckPageNumBeforeSubmitSaveChanges(driver))
+                    if (int.Parse(Form1.InstanceForm1.CurrentPageNum) != Form1.InstanceForm1.GetPageNumFromUrl(driver.Url))//!CheckPageNumBeforeSubmitSaveChanges(driver))
                     {
+                        MessageBoxShowOKCancelExclamationDefaultDesktopOnly("頁碼不同！請檢查！！");
                         autoPastetoCtextQuitEditTextboxCancel = true;
                         dialogResult = DialogResult.Cancel;
                         return false;
@@ -11490,7 +11511,7 @@ namespace WindowsFormsApp1
                         //else
                         //    textBox1.Select(pageTextEndPosition, 0);
                         #endregion
-
+                        driver.SwitchTo().Window(driver.CurrentWindowHandle);
                         //焦點交回表單
                         #region 解除 textbox防觸鎖定，並準備檢視編輯；如果訊息方塊不是在取得 Cancel回應值時即關閉，則此下程式恐怕要移出這個 if else區塊才行
                         //Activate();已會觸發Form1_Activated(new object(), new EventArgs());事件
@@ -11761,8 +11782,6 @@ namespace WindowsFormsApp1
                                 {
                                     //autoExecuteSKQSContextMark();
                                     runWordMacro("中國哲學書電子化計劃.國學大師_Kanripo_四庫全書本轉來");
-                                    string txt = textBox1.Text;
-                                    textBox1.Text = CnText.BooksPunctuation(ref txt, true);
                                     AutoMarkTitleParagraph();
                                 }
                             }
@@ -12050,8 +12069,7 @@ namespace WindowsFormsApp1
                 {
                     e.Handled = true;
                     SystemSounds.Exclamation.Play();
-                    Tuple<bool, bool, bool, bool, DateTime> ipStatus;
-                    br.IPStatusMessageShow(out ipStatus, string.Empty, false, true);
+                    br.IPStatusMessageShow(out Tuple<bool, bool, bool, bool, DateTime> ipStatus, string.Empty, false, true);
                     if (Clipboard.GetText() != br.CurrentIP) Clipboard.SetText(br.CurrentIP);
                     bringBackMousePosFrmCenter();
                     return;
@@ -12288,6 +12306,7 @@ namespace WindowsFormsApp1
                 {//Ctrl + PageDown Ctrl + PageUP
                     e.Handled = true;//取得或設定值，指出是否處理事件。https://docs.microsoft.com/zh-tw/dotnet/api/system.windows.forms.keyeventargs.handled?view=netframework-4.7.2&f1url=%3FappId%3DDev16IDEF1%26l%3DZH-TW%26k%3Dk(System.Windows.Forms.KeyEventArgs.Handled);k(TargetFrameworkMoniker-.NETFramework,Version%253Dv4.7.2);k(DevLang-csharp)%26rd%3Dtrue
                     nextPages(e.KeyCode, true);
+                    if (browsrOPMode != BrowserOPMode.appActivateByName) driver.SwitchTo().Window(driver.CurrentWindowHandle);
                     //if (autoPastetoQuickEdit) AvailableInUseBothKeysMouse();
                     AvailableInUseBothKeysMouse();
                     return;
@@ -14069,6 +14088,8 @@ namespace WindowsFormsApp1
                 if (fastMode) FastModeSwitcher();
                 return false;
             }
+            //else
+            //    WindowHandles["currentPageNum"] = _currentPageNum;
 
             #endregion
             #region 在自動連續輸入模式下若是欽定四庫全書則自動輸入Kanripo或《國學大師》的文本,如同按下Ctrl + Shift + 4
@@ -14085,8 +14106,6 @@ namespace WindowsFormsApp1
                         if (Clipboard.GetText().Contains("-1a]"))
                         {
                             runWordMacro("中國哲學書電子化計劃.國學大師_Kanripo_四庫全書本轉來");
-                            string txt = textBox1.Text;
-                            textBox1.Text = CnText.BooksPunctuation(ref txt, true);
                             AutoMarkTitleParagraph();
                             AvailableInUseBothKeysMouse();
                         }
@@ -14914,7 +14933,7 @@ namespace WindowsFormsApp1
             }
             //手動輸入模式時。20241119：新增自動連續輸入時也可以
             string waitTabWindowHandle = string.Empty; DateTime dt;
-            if (keyinTextMode || autoPaste2QuickEdit)
+            if (autoPastetoCtextQuitEditTextboxCancel && (keyinTextMode || autoPaste2QuickEdit))
             {
                 //Task task = Task.Run(() =>
                 //{
@@ -15259,7 +15278,9 @@ namespace WindowsFormsApp1
 
             string beforeUpdated = null;
             if (waitTabWindowHandle != string.Empty || Edited)
-                beforeUpdated = br.Div_generic_TextBoxFrame?.GetAttribute("textContent");
+                beforeUpdated = br.Div_generic_TextBoxFrame == null ? string.Empty : br.Div_generic_TextBoxFrame.GetAttribute("textContent");
+
+            if (autoPastetoCtextQuitEditTextboxCancel) autoPastetoCtextQuitEditTextboxCancel = false;
 
             if (br.在Chrome瀏覽器的Quick_edit文字框中輸入文字(br.driver,
                 formalX
@@ -15284,9 +15305,11 @@ namespace WindowsFormsApp1
             }
             else
             {
-                if (beforeUpdated != null)
+                if (beforeUpdated != null || AddTranscription_Linkbox != null)
                 {
-                    if (br.Div_generic_TextBoxFrame?.GetAttribute("textContent") == beforeUpdated
+                    if (AddTranscription_Linkbox != null
+                        || beforeUpdated == string.Empty || beforeUpdated == "\t"
+                        || br.Div_generic_TextBoxFrame?.GetAttribute("textContent") == beforeUpdated
                         || driver.Url.Contains("&chapter="))
                     {
                         //Debugger.Break();
@@ -16352,8 +16375,6 @@ namespace WindowsFormsApp1
                     {
                         ocrTextMode = false;
                         runWordMacro("中國哲學書電子化計劃.國學大師_Kanripo_四庫全書本轉來");
-                        string txt = textBox1.Text;
-                        textBox1.Text = CnText.BooksPunctuation(ref txt, true);
                         return;
                     }
                 }
@@ -17311,6 +17332,7 @@ namespace WindowsFormsApp1
                             nextPageStartTime = DateTime.Now;
                         }
                         nextPages(Keys.PageUp, false);
+                        br.driver.SwitchTo().Window(driver.CurrentWindowHandle);
                         //上一頁
                         if (autoPaste2QuickEdit || keyinTextMode) AvailableInUseBothKeysMouse();
                         #region 檢查textBox1的Text值                        
@@ -17341,6 +17363,7 @@ namespace WindowsFormsApp1
                         //keyDownCtrlAdd(true);
                         //下一頁
                         nextPages(Keys.PageDown, false);
+                        br.driver.SwitchTo().Window(driver.CurrentWindowHandle);
                         if (autoPaste2QuickEdit || keyinTextMode) AvailableInUseBothKeysMouse();
                         break;
                     default:
@@ -17387,6 +17410,7 @@ namespace WindowsFormsApp1
                             }
                             //nextPageStartTime = DateTime.Now;
                             nextPages(Keys.PageDown, true);
+                            //br.driver.SwitchTo().Window(driver.CurrentWindowHandle);
                         }
                         break;
                     default:
@@ -17682,7 +17706,9 @@ namespace WindowsFormsApp1
 
                 //if (url != string.Empty) Debugger.Break(); //just for test 
                 playSound(soundLike.done, true);
-                resetBooksPagesFeatures();
+                if (previousResID == 0)
+                    if (DialogResult.OK == MessageBoxShowOKCancelExclamationDefaultDesktopOnly("是否要重設書籍版面資訊？"))
+                        resetBooksPagesFeatures();
                 previousResID = resID;
                 if (editwikiID > 0 && editwikiID != previousEditwikiID) previousEditwikiID = editwikiID;
                 if (textBox3.Text.StartsWith("http"))
@@ -17862,7 +17888,7 @@ namespace WindowsFormsApp1
         /// 可藉由textBox3.Text值的改變（不同的書ID值）即會自動執行此項
         /// </summary>
         private void resetBooksPagesFeatures()
-            {
+        {
             linesParasPerPage = -1;//每頁行/段數
             wordsPerLinePara = -1;//每行/段字數 reset
             pageTextEndPosition = 0; pageEndText10 = "";
@@ -18476,12 +18502,14 @@ namespace WindowsFormsApp1
 
         private void InitializeVerticalTextBox()
         {
-            TextBox verticalTextBox = new TextBox();
-            verticalTextBox.Multiline = true;
-            verticalTextBox.ScrollBars = ScrollBars.Vertical;
-            verticalTextBox.Width = 100;
-            verticalTextBox.Height = 200;
-            verticalTextBox.Location = new Point(50, 50);
+            TextBox verticalTextBox = new TextBox
+            {
+                Multiline = true,
+                ScrollBars = ScrollBars.Vertical,
+                Width = 100,
+                Height = 200,
+                Location = new Point(50, 50)
+            };
             verticalTextBox.Paint += VerticalTextBox_Paint;
             // 設定文字方向為垂直
             verticalTextBox.Text = "感恩感恩\n南無阿彌陀佛";

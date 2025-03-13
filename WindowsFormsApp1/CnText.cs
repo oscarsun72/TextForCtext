@@ -1117,7 +1117,7 @@ namespace TextForCtext
         //public static string RestoreParagraphs(ref string originalText, ref string punctuatedText)
         {
             //記下縮排的字數
-            int indentCount = 0; string indentStr = IndentCounter(originalText, out indentCount);
+            string indentStr = IndentCounter(originalText, out int indentCount);
 
             // Define a set of punctuation marks to ignore
             HashSet<char> punctuationMarks = new HashSet<char> { '。', '，', '；', '：', '、', '？', '！', '《', '》', '「', '」', '『', '』' };
