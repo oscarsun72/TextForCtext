@@ -540,121 +540,130 @@ namespace WindowsFormsApp1
         /// </summary>
         void show_nICo(Keys modifierKeys)
         {
-            this.Show();
-            if (ntfyICo.Visible) ntfyICo.Visible = false;
-            this.WindowState = FormWindowState.Normal;
-            this.Height = thisHeight;
-            this.Width = thisWidth;
-            this.Left = thisLeft;
-            this.Top = thisTop;
-            //手動編輯模式時：
-            //if (!autoPaste2QuickEdit && keyinTextMode)//今連續輸入模式也需要 20250301
-            if (autoPaste2QuickEdit && keyinTextMode)
+            try
             {
-                string xClp = string.Empty;
-                try
+
+                this.Show();
+                if (ntfyICo.Visible) ntfyICo.Visible = false;
+                this.WindowState = FormWindowState.Normal;
+                this.Height = thisHeight;
+                this.Width = thisWidth;
+                this.Left = thisLeft;
+                this.Top = thisTop;
+                //手動編輯模式時：
+                //if (!autoPaste2QuickEdit && keyinTextMode)//今連續輸入模式也需要 20250301
+                if (autoPaste2QuickEdit && keyinTextMode)
                 {
-                    xClp = Clipboard.GetText();
-                }
-                catch (Exception)
-                {
-                }
-                if (modifierKeys != Keys.Control && xClp.StartsWith("http") &&//xClp != "" &&
-                    xClp.Length > "https://ctext.org/".Length + "#editor".Length
-                    && xClp.Substring(0, "https://ctext.org/".Length) == "https://ctext.org/"
-                    && !ocrTextMode)
-                {
-                    string url = xClp;
-                    textBox3_Click(new object(), new MouseEventArgs(MouseButtons.Left, 0, 0, 0, 0));//textBox3_MouseMove(new object(), new MouseEventArgs(MouseButtons.Left, 0, 0, 0, 0));
-                    if (browsrOPMode != BrowserOPMode.appActivateByName)
+                    string xClp = string.Empty;
+                    try
                     {
-                        br.driver = br.driver ?? br.DriverNew();
-                        try
+                        xClp = Clipboard.GetText();
+                    }
+                    catch (Exception)
+                    {
+                    }
+                    if (modifierKeys != Keys.Control && xClp.StartsWith("http") &&//xClp != "" &&
+                        xClp.Length > "https://ctext.org/".Length + "#editor".Length
+                        && xClp.Substring(0, "https://ctext.org/".Length) == "https://ctext.org/"
+                        && !ocrTextMode)
+                    {
+                        string url = xClp;
+                        textBox3_Click(new object(), new MouseEventArgs(MouseButtons.Left, 0, 0, 0, 0));//textBox3_MouseMove(new object(), new MouseEventArgs(MouseButtons.Left, 0, 0, 0, 0));
+                        if (browsrOPMode != BrowserOPMode.appActivateByName)
                         {
-                            br.GoToUrlandActivate(url, keyinTextMode);
-                        }
-                        catch (Exception ex)
-                        {
-                            switch (ex.HResult)
+                            br.driver = br.driver ?? br.DriverNew();
+                            try
                             {
-                                default:
-                                    Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
-                                    break;
+                                br.GoToUrlandActivate(url, keyinTextMode);
                             }
-                        }
-                        if (xClp.IndexOf("edit") > -1 && xClp.IndexOf("&page") > -1)//xClp.Substring(xClp.LastIndexOf("#editor")) == "#editor")
-                        //url此頁的Quick edit值傳到textBox1,並存入剪貼簿以備用
-                        {
-                            //若此時按下 Shift 則不會取得文本而是逕行送去《古籍酷》OCR取回文本至textBox1以備用
-                            if (modifierKeys == Keys.Shift && !PagePaste2GjcoolOCR_ing)
-                                toOCR(br.OCRSiteTitle.GJcool);
-                            else
+                            catch (Exception ex)
                             {
-                                //if (keyinTextMode)
+                                switch (ex.HResult)
+                                {
+                                    default:
+                                        Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
+                                        break;
+                                }
+                            }
+                            if (xClp.IndexOf("edit") > -1 && xClp.IndexOf("&page") > -1)//xClp.Substring(xClp.LastIndexOf("#editor")) == "#editor")
+                                                                                        //url此頁的Quick edit值傳到textBox1,並存入剪貼簿以備用
+                            {
+                                //若此時按下 Shift 則不會取得文本而是逕行送去《古籍酷》OCR取回文本至textBox1以備用
+                                if (modifierKeys == Keys.Shift && !PagePaste2GjcoolOCR_ing)
+                                    toOCR(br.OCRSiteTitle.GJcool);
+                                else
+                                {
+                                    //if (keyinTextMode)
+                                    //{
+                                    //全選文字方塊內容以備貼入
+                                    //ie.SendKeys(OpenQA.Selenium.Keys.Control + "a");
+                                    //br.SelectAllQuickedit_data_textboxContent();//20240913作廢（現已可以由value屬性設定了，儘量不用剪貼簿！）
+                                    //}
+                                    //string text = br.CopyQuickedit_data_textboxText();
+                                    string text = br.Quickedit_data_textboxTxt;
+                                    CnText.BooksPunctuation(ref text, false);
+                                    undoRecord();
+                                    textBox1.Text = text;
+                                    //if (!OcrTextMode)
+                                    //clearBracketsInsidePairsBrackets();
+
+
+                                    //20240913先作廢看看
+                                    //if (Clipboard.GetText() != text && text != "")//CopyQuickedit_data_textboxText已用到等價 SetText 的方法了
+                                    //    Clipboard.SetText(text);
+                                }
+
+                                //改到後面呼叫
+                                //if (!Active)
                                 //{
-                                //全選文字方塊內容以備貼入
-                                //ie.SendKeys(OpenQA.Selenium.Keys.Control + "a");
-                                //br.SelectAllQuickedit_data_textboxContent();//20240913作廢（現已可以由value屬性設定了，儘量不用剪貼簿！）
+                                //    AvailableInUseBothKeysMouse();
                                 //}
-                                //string text = br.CopyQuickedit_data_textboxText();
-                                string text = br.Quickedit_data_textboxTxt;
-                                CnText.BooksPunctuation(ref text, false);
-                                undoRecord();
-                                textBox1.Text = text;
-                                //if (!OcrTextMode)
-                                //clearBracketsInsidePairsBrackets();
 
-
-                                //20240913先作廢看看
-                                //if (Clipboard.GetText() != text && text != "")//CopyQuickedit_data_textboxText已用到等價 SetText 的方法了
-                                //    Clipboard.SetText(text);
+                                //避免剪貼簿內還殘留上一次用過的網址
+                                xClp = Clipboard.GetText();
+                                if (xClp.IndexOf("edit") > -1 && xClp.IndexOf("&page") > -1) Clipboard.Clear();
                             }
 
-                            //改到後面呼叫
-                            //if (!Active)
-                            //{
-                            //    AvailableInUseBothKeysMouse();
-                            //}
-
-                            //避免剪貼簿內還殘留上一次用過的網址
-                            xClp = Clipboard.GetText();
-                            if (xClp.IndexOf("edit") > -1 && xClp.IndexOf("&page") > -1) Clipboard.Clear();
                         }
+                        else//if (browsrOPMode == BrowserOPMode.appActivateByName)
+                        { Process.Start(url); appActivateByName(); }
+                        //Clipboard.Clear();
 
+                        //bringBackMousePosFrmCenter();
+                        //if (!Active)
+                        //{
+                        AvailableInUseBothKeysMouse();
+                        //}
                     }
-                    else//if (browsrOPMode == BrowserOPMode.appActivateByName)
-                    { Process.Start(url); appActivateByName(); }
-                    //Clipboard.Clear();
-
-                    //bringBackMousePosFrmCenter();
-                    //if (!Active)
-                    //{
-                    AvailableInUseBothKeysMouse();
-                    //}
-                }
-                //若此時按下 Shift 則不會取得文本而是逕行送去《古籍酷》OCR取回文本至textBox1以備用
-                else if ((modifierKeys == Keys.Shift || (ocrTextMode && modifierKeys != Keys.Control))
-                    && !PagePaste2GjcoolOCR_ing && browsrOPMode != BrowserOPMode.appActivateByName)
-                {
-                    if (modifierKeys == Keys.Shift) ocrTextMode = true;
-                    br.GoToCurrentUserActivateTab();
-                    string brUrl = br.GetDriverUrl;//.driver.Url;
-                    if (brUrl.IndexOf("ctext.org") > -1 && brUrl.IndexOf("&file=") > -1 && brUrl.IndexOf("&page=") > -1)
+                    //若此時按下 Shift 則不會取得文本而是逕行送去《古籍酷》OCR取回文本至textBox1以備用
+                    else if ((modifierKeys == Keys.Shift || (ocrTextMode && modifierKeys != Keys.Control))
+                        && !PagePaste2GjcoolOCR_ing && browsrOPMode != BrowserOPMode.appActivateByName)
                     {
-                        if (brUrl.IndexOf("edit") == -1)
+                        if (modifierKeys == Keys.Shift) ocrTextMode = true;
+                        br.GoToCurrentUserActivateTab();
+                        string brUrl = br.GetDriverUrl;//.driver.Url;
+                        if (brUrl.IndexOf("ctext.org") > -1 && brUrl.IndexOf("&file=") > -1 && brUrl.IndexOf("&page=") > -1)
                         {
-                            brUrl = br.GetQuickeditUrl();
+                            if (brUrl.IndexOf("edit") == -1)
+                            {
+                                brUrl = br.GetQuickeditUrl();
+                                if (brUrl != string.Empty)
+                                    br.driver.Navigate().GoToUrl(brUrl);
+                            }
                             if (brUrl != string.Empty)
-                                br.driver.Navigate().GoToUrl(brUrl);
-                        }
-                        if (brUrl != string.Empty)
-                        {
-                            if (textBox3.Text != brUrl) textBox3.Text = brUrl;
-                            Form1.playSound(Form1.soundLike.press);
-                            toOCR(br.OCRSiteTitle.GJcool);
+                            {
+                                if (textBox3.Text != brUrl) textBox3.Text = brUrl;
+                                Form1.playSound(Form1.soundLike.press);
+                                toOCR(br.OCRSiteTitle.GJcool);
+                            }
                         }
                     }
                 }
+            }
+            catch (Exception ex)
+            {
+                Debugger.Break();
+                Console.WriteLine(ex.HResult + ex.Message);
             }
         }
         /// <summary>
@@ -985,6 +994,9 @@ namespace WindowsFormsApp1
                             textBox3.Text = quickEditLinkUrl;
                             _eventsEnabled = eventEnable;
                         }
+                        //在手動輸入模式下，讀入Quick edit 方塊中的內容
+                        if (keyinTextMode && textBox1.Text != br.Quickedit_data_textboxTxt)
+                            textBox1.Text = br.Quickedit_data_textboxTxt;
                         Clipboard.SetText(quickEditLinkUrl);
                     }
                 }
@@ -2571,6 +2583,8 @@ namespace WindowsFormsApp1
                 if (e.KeyCode == Keys.Add || e.KeyCode == Keys.Oemplus || e.KeyCode == Keys.Subtract || e.KeyCode == Keys.NumPad5)
                 {//Ctrl + + （Ctrl + 數字鍵盤 +） Ctrl + -
                     e.Handled = true;
+                    //還原放大的書圖
+                    RestoreImageSize();
                     undoRecord();
                     //autoPastetoCtextQuitEditTextboxCancel = false;
                     TopMost = false;
@@ -2595,7 +2609,10 @@ namespace WindowsFormsApp1
                     ////if (keyDownCtrlAdd(false))  if (textBox1.Text != "") { pauseEvents(); textBox1.Text = ""; resumeEvents(); }
                     //keyDownCtrlAdd(false);// if (textBox1.Text != "") { pauseEvents(); textBox1.Text = ""; resumeEvents(); }
 
-                    if (autoPaste2QuickEdit) altA_predictEndofPageRange();
+                    if (autoPaste2QuickEdit)
+                    {
+                        playSound(soundLike.press, true); altA_predictEndofPageRange();
+                    }
                     keyDownCtrlAdd(false);
 
                     TopMost = true;
@@ -3421,7 +3438,10 @@ namespace WindowsFormsApp1
                 if (e.KeyCode == Keys.A)
                 {//Alt + a : 通常是用在自動輸入模式時根據上一次判斷的頁尾來自動貼入本頁內容
                     e.Handled = true;
-                    if (autoPaste2QuickEdit) altA_predictEndofPageRange();
+                    //還原放大的書圖
+                    if (autoPaste2QuickEdit)
+                    { playSound(soundLike.press, true); altA_predictEndofPageRange(); }
+                    RestoreImageSize();
                     keyDownCtrlAdd(false);
 
                     return;
@@ -3772,6 +3792,10 @@ namespace WindowsFormsApp1
                                 else
                                     l = x.Length - s;
                             }
+                            else//如果插入點前是全形空格
+                            {
+                                l = _document.GetCurrentParagraph().End - s;
+                            }
                         }
                         textBox1.Select(s, l);
                     }//如果沒有選取，則自動選取插件點所在行/段
@@ -3898,11 +3922,11 @@ namespace WindowsFormsApp1
                             TopMost = false;
                             if (new StringInfo(x).LengthInTextElements > 1)
                                 Clipboard.SetText(x);
-                            Task.Run(() =>
-                            {
-                                if (!LookupZitools(x))
-                                    MessageBoxShowOKExclamationDefaultDesktopOnly("查找《字統網》發生錯誤，請重來一遍。感恩感恩　南無阿彌陀佛");
-                            });
+                            //Task.Run(() =>
+                            //{
+                            if (!LookupZitools(x))
+                                MessageBoxShowOKExclamationDefaultDesktopOnly("查找《字統網》發生錯誤，請重來一遍。感恩感恩　南無阿彌陀佛");
+                            //});
                         }
                         else
                         {
@@ -3926,6 +3950,8 @@ namespace WindowsFormsApp1
                 {// Alt + +
                     if (e.KeyCode == Keys.Oemplus && autoPaste2QuickEdit) return;//防止在連續輸入時誤按
                     e.Handled = true;
+                    //還原放大的書圖
+                    RestoreImageSize();
                     //if (keyDownCtrlAdd(false)) if (textBox1.Text != "") { pauseEvents(); textBox1.Text = ""; resumeEvents(); }
                     keyDownCtrlAdd(false);
                     return;
@@ -4181,12 +4207,15 @@ namespace WindowsFormsApp1
                 {
                     //F8 ：整頁貼上Quick edit [簡單修改模式]  並轉到下一頁
                     e.Handled = true;
+                    //還原放大的書圖
+                    RestoreImageSize();
                     if (!OcrTextMode)
                     {
                         if (keyinTextMode)
                             PressAddKeyMethodPaste2QuickEditBox();
                         else if (autoPaste2QuickEdit)
                         {
+                            playSound(soundLike.press, true);
                             altA_predictEndofPageRange();
                             keyDownCtrlAdd(false);
                         }
@@ -4206,6 +4235,9 @@ namespace WindowsFormsApp1
                 if (e.KeyCode == Keys.Add)
                 {//在非自動且手動輸入模式下單獨按下數字鍵盤的「+」("+") →方便檢索到這塊程式碼
                  //整頁貼上Quick edit [簡單修改模式]  並將下一頁直接送交《古籍酷》OCR// 原為加上篇名格式代碼
+
+                    //還原放大的書圖
+                    RestoreImageSize();
 
                     #region 全自動貼上模式（自動連續輸入模式）不適用，因為要輸入「+」成「+<p>」以取消「<p>」的檢查判斷
                     if (autoPaste2QuickEdit)
@@ -5521,10 +5553,21 @@ namespace WindowsFormsApp1
             undoRecord();
             stopUndoRec = true;
             if (selX != "")
-                textBox1.SelectedText = selX.Replace("􏿽", "　");
+                if (selX == " ")
+                    textBox1.SelectedText = selX.Replace(" ", "　");
+                else
+                    textBox1.SelectedText = selX.Replace("􏿽", "　");
             else
+            {
+                while (textBox1.SelectionStart < textBox1.TextLength && textBox1.Text.Substring(textBox1.SelectionStart, 1) == " ")
+                {//清除插入點末的半形空格
+                    textBox1.Select(textBox1.SelectionStart, 1);
+                    textBox1.SelectedText = string.Empty;
+                }
                 //insertWords("　", textBox1, textBox1.Text);
                 insertWords("　", textBox1);
+
+            }
             stopUndoRec = false;
         }
 
@@ -6220,8 +6263,17 @@ namespace WindowsFormsApp1
                 if (preLineEnd > -1)
                 {
                     preLineText = GetLineText(x, preLineEnd);
-                    if (preLineText.IndexOf("*") > -1 && countWordsLenPerLinePara(preLineText) >= wordsPerLinePara)
-                        return true;//如果前一段已有星號，且其長度又與正常長度相同或更長（則此行當是標題太長而折行）則駁回
+                    if ((preLineText.IndexOf("*") > -1 && countWordsLenPerLinePara(preLineText) >= wordsPerLinePara)
+                        //如果前一段已有星號，且其長度又與正常長度相同或更長（則此行當是標題太長而折行）則駁回
+                        ||//或者是第一行小於正常長長而本行又同於正常行長，則本行當屬縮排的序文等項
+                        (preLineText.IndexOf("*") > -1 && countWordsLenPerLinePara(preLineText) < wordsPerLinePara
+                            && countWordsLenPerLinePara(titleFirstParaText) == wordsPerLinePara)
+                        ||//或者不是縮排中的文字
+                        (preLineText.IndexOf("*") == -1 && _leadingSpacesRegex.Match(preLineText).Value.Length == titleLeadingSpaceCount
+                            && countWordsLenPerLinePara(preLineText) >= countWordsLenPerLinePara(titleFirstParaText))
+                        )
+                        return true;
+
                 }
                 #endregion
 
@@ -6481,7 +6533,8 @@ namespace WindowsFormsApp1
             //設定標題格式（完成標題語法設置）
             //string title = ("*" + textBox1.SelectedText + endCode)
             string title = (asterisks + textBox1.SelectedText + endCode)
-                    .Replace("《", "").Replace("》", "").Replace("〈", "").Replace("〉", "").Replace("·", "");
+                    .Replace("《", "").Replace("》", "").Replace("〈", "").Replace("〉", "").Replace("·", "")
+                    .Replace("|<p>", "<p>");
 
             //if (title.IndexOf("人乃傳秋露何也謝少谿侍郎者佳") > -1) Debugger.Break();//just for debug
 
@@ -6652,7 +6705,7 @@ namespace WindowsFormsApp1
                                             }
                                             Debugger.Break();
                                             item.Range.Text = item.Text.Substring(0, spsStart) + sb.ToString() + item.Text.Substring(item.Text.IndexOf("{{"));
-                                            range.End += ispscount;
+                                            //range.End += ispscount;//已與Paragraph.Range.Text同步
 
                                         }
                                     }
@@ -6674,7 +6727,7 @@ namespace WindowsFormsApp1
                                                 Debugger.Break();
                                                 item.Range.Text = sb.ToString() + item.Text.Substring(isps);
                                                 //range.End = ed_range + isps;//"􏿽".Length=2 - "　".Length=1 ;
-                                                range.End += isps;//"􏿽".Length=2 - "　".Length=1 ;
+                                                //range.End += isps;//"􏿽".Length=2 - "　".Length=1 ;//已與Paragraph.Range.Text同步
                                             }
                                         }
 
@@ -6804,7 +6857,7 @@ namespace WindowsFormsApp1
                                         }
                                         if (sb.ToString() != string.Empty)
                                         {
-                                            Debugger.Break();
+                                            //Debugger.Break();
                                             item.Range.Text = item.Text.Substring(0, spsStart) + sb.ToString() + item.Text.Substring(spsStart + isps);
                                             ////range.End = ed_range + isps;//"􏿽".Length=2 - "　".Length=1 ;
                                             //range.End += isps;//"􏿽".Length=2 - "　".Length=1 ;//已於Range.Text中以UpdateParentRange()更新 20250306●●●●●●●●●
@@ -10597,13 +10650,14 @@ namespace WindowsFormsApp1
             //Thread.Sleep(20);
             //this.BackColor = this.FormBackColorDefault;
             #endregion
-
+            //若停止重畫，則恢復之
             if (!rePaint)
                 EndUpdate();
 
             #region 若是《四庫全書》直接加入〖文淵|閣寶〗
             if (Name != "Form1")
             {
+
                 if (xCopy.Contains("欽定四庫全書") && xCopy.Contains("部") && xCopy.Contains("校官") && xCopy.Contains("{{臣}}"))
                 {
                     //int st = Form1.InstanceForm1.textBox1.SelectionStart, len = Form1.InstanceForm1.textBox1.SelectionLength;
@@ -10617,14 +10671,27 @@ namespace WindowsFormsApp1
                         Form1.InstanceForm1.textBox1.Select(wygbStart, 0);
                         Form1.InstanceForm1.textBox1.SelectedText = "〖文淵|閣寶〗<p>";
                         ResumeEvents(); stopUndoRec = false;
-                        Form1.InstanceForm1.textBox3.Text = textBox3.Text;//主表單網址與本表單連動、同步
-                        br.WindowHandles["currentPageNum"] = (int.Parse(_currentPageNum) - 1).ToString();
                     }
+                    Form1.InstanceForm1.textBox3.Text = textBox3.Text;//主表單網址與本表單連動、同步
+                    Form1.InstanceForm1.AvailableInUseBothKeysMouse();
+                    br.WindowHandles["currentPageNum"] = (int.Parse(_currentPageNum) - 1).ToString();
                     //Form1.InstanceForm1.textBox1.Select(s, l);
                 }
             }
             #endregion 若是《四庫全書》直接加入〖文淵|閣寶〗
+
             return true;
+        }
+        /// <summary>
+        ///還原放大的書圖
+        /// </summary>
+        internal static void RestoreImageSize()
+        {
+            string height = br.Svg_image_PageImageFrame?.GetAttribute("height");
+            if (height != null)
+                if (int.Parse(height) > 650)//587)
+                    br.Svg_image_PageImageFrame?.Click();
+
         }
 
         /// <summary>
@@ -11313,7 +11380,8 @@ namespace WindowsFormsApp1
                     //按著Ctrl鍵則直接ok 20250109（並啟動快捷模式）
                     //if (ModifierKeys == Keys.Control && dialogResult != DialogResult.Abort) { dialogResult = DialogResult.OK; goto ok; }
 
-                    if (ModifierKeys == Keys.Control || Control.IsKeyLocked(Keys.CapsLock)
+                    if ((ModifierKeys == Keys.Control && !KeyboardInfo.getKeyStateDown(System.Windows.Input.Key.Add) && !KeyboardInfo.getKeyStateDown(System.Windows.Input.Key.Subtract) && !KeyboardInfo.getKeyStateDown(System.Windows.Input.Key.LeftCtrl) && !KeyboardInfo.getKeyStateDown(System.Windows.Input.Key.RightCtrl))
+                        || Control.IsKeyLocked(Keys.CapsLock)
                         // 檢查 Caps Lock 狀態
                         || KeyboardInfo.getKeyStateToggled(System.Windows.Input.Key.CapsLock)
                         || KeyboardInfo.getKeyStateDown(System.Windows.Input.Key.LeftShift)
@@ -11763,7 +11831,7 @@ namespace WindowsFormsApp1
                         if (br.QuickeditLinkIWebElement != null)
                         {
                             //const string inputText = "《四庫全書》􏿽{{經史子集部　}}<p>";
-                            const string inputText = "《四庫全書》􏿽{{史部　}}<p>";
+                            const string inputText = "《四庫全書》􏿽{{集部　}}<p>";
                             br.QuickeditLinkIWebElement.Click();
                             PauseEvents();
                             textBox3.Text = driver.Url;
@@ -11805,7 +11873,10 @@ namespace WindowsFormsApp1
             {
                 e.Handled = true;
                 playSound(soundLike.exam, true);
-                AutoMarkTitleParagraph();
+                MessageBoxShowOKExclamationDefaultDesktopOnly(countWordsLenPerLinePara(GetLineText(textBox1.Text, textBox1.SelectionStart)).ToString() + " 字長");
+
+
+                //AutoMarkTitleParagraph();
 
                 //if (!IsDriverInvalid())
                 //br.CopySKQSNextVolume();
@@ -11818,7 +11889,6 @@ namespace WindowsFormsApp1
                 //textBox1.SelectedText = range.Text;
                 //ResumeEvents();
 
-                //MessageBoxShowOKExclamationDefaultDesktopOnly(countWordsLenPerLinePara(GetLineText(textBox1.Text, textBox1.SelectionStart)).ToString() + " 字長");
                 return;
             }
             #endregion
@@ -12601,6 +12671,8 @@ namespace WindowsFormsApp1
                 if (e.KeyCode == Keys.F9)
                 {//F9 ：同數字鍵盤「+」 F8 20231213
                     e.Handled = true;
+                    //還原放大的書圖
+                    RestoreImageSize();
                     //Process.Start(dropBoxPathIncldBackSlash + @"VS\bat\重啟小小輸入法.bat");
                     if (ocrTextMode)
                         pagePaste2GjcoolOCR();
@@ -12610,6 +12682,7 @@ namespace WindowsFormsApp1
                             PressAddKeyMethodPaste2QuickEditBox();
                         else if (autoPaste2QuickEdit)
                         {
+                            playSound(soundLike.press, true);
                             altA_predictEndofPageRange();
                             keyDownCtrlAdd(false);
                         }
@@ -12618,8 +12691,10 @@ namespace WindowsFormsApp1
                     return;
                 }
                 if (e.KeyCode == Keys.F12)
-                {
+                {//按下F12
                     e.Handled = true;
+                    //還原放大的書圖
+                    RestoreImageSize();
                     if (OcrTextMode)
                         pagePaste2GjcoolOCR();//F12
                     else
@@ -12628,6 +12703,7 @@ namespace WindowsFormsApp1
                             PressAddKeyMethodPaste2QuickEditBox();
                         else if (autoPaste2QuickEdit)
                         {
+                            playSound(soundLike.press, true);
                             altA_predictEndofPageRange();
                             keyDownCtrlAdd(false);
                         }
@@ -13651,6 +13727,16 @@ namespace WindowsFormsApp1
             {
                 new SoundPlayer(@"C:\Windows\Media\Speech Off.wav").Play();
                 autoPaste2QuickEdit = false;
+                //button1.Text = "分行分段";
+                button1.ForeColor = Color.FromArgb(255, 0, 0, 0);
+                ////如果是鄰近頁連動編輯模式，則顯示為較亮青色 Aquamarine，否則為深青色 Color.DarkCyan。
+                //if (check_the_adjacent_pages)
+                //{
+                //    button1.ForeColor = Color.LightCyan;
+                //}
+                //else
+                //    button1.ForeColor = Color.DarkCyan;//
+
             }
         }
         /// <summary>
@@ -14352,6 +14438,7 @@ namespace WindowsFormsApp1
 
         /// <summary>
         /// 若是《四庫全書》本則將頭尾縮排的文本行/段還原 20250220
+        /// 以利自動標題標記。在手動編輯時再還原其因超平抬而縮排的文本行 20250315
         /// 以字串string xClpBd操作，不藉由textBox1
         /// </summary>
         /// <param name="xClpBd">要操作的字串</param>
@@ -15182,13 +15269,19 @@ namespace WindowsFormsApp1
             //else
             //{
             // 當前視窗句柄無效
-            string currents = driver.CurrentWindowHandle;
+            //string currents = driver.CurrentWindowHandle;
             if (driver.CurrentWindowHandle != currentWin && !fastMode)
             {
                 br.driver.SwitchTo().Window(currentWin);//切回圖文對照的頁面分頁視窗
                 LastValidWindow = currentWin;
 
             }
+
+
+            string beforeUpdated = null;
+            if (waitTabWindowHandle != string.Empty || Edited)
+                beforeUpdated = br.Div_generic_TextBoxFrame == null ? string.Empty : br.Div_generic_TextBoxFrame.GetAttribute("textContent");
+
             //如果存在「參考上下頁」控制項，則須刷新，否則會被前後頁的舊資料所干擾
             if (br.CheckAdjacentPages_Linkbox != null && Edited)
             { //要先記下可能有所編輯的前、後頁，否則一刷新就沒有了：
@@ -15276,11 +15369,7 @@ namespace WindowsFormsApp1
             }
 
 
-            string beforeUpdated = null;
-            if (waitTabWindowHandle != string.Empty || Edited)
-                beforeUpdated = br.Div_generic_TextBoxFrame == null ? string.Empty : br.Div_generic_TextBoxFrame.GetAttribute("textContent");
-
-            if (autoPastetoCtextQuitEditTextboxCancel) autoPastetoCtextQuitEditTextboxCancel = false;
+            if (autoPaste2QuickEdit && autoPastetoCtextQuitEditTextboxCancel) autoPastetoCtextQuitEditTextboxCancel = false;
 
             if (br.在Chrome瀏覽器的Quick_edit文字框中輸入文字(br.driver,
                 formalX

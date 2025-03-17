@@ -218,7 +218,8 @@ namespace TextForCtext
                                 //xForStandardize = xForStandardize.Substring(item.Range.Start);
                                 //item.Text = item.Text.Replace("《欽定四庫全書》", "*欽定四庫全書<p>");//現在不交給WordVBA標點了，故改如下：
                                 item.Text = item.Text.Replace("欽定四庫全書", "*欽定四庫全書<p>");
-                                xForStandardize = document.Range(item.Range.Start, document.Text.Length).Text;
+                                xForStandardize = document.Text;
+                                //xForStandardize = document.Range(item.Range.Start, document.Text.Length).Text;
                                 reBuild = true;
                                 break;
                             }
@@ -235,7 +236,8 @@ namespace TextForCtext
                         sb.Append(sbRoot);
                     }
                     //xForStandardize = sb.ToString() + "*欽定四庫全書<p>〖文淵|閣寶〗<p>" + xForStandardize.Substring(isSKQS + "《欽定四庫全書》".Length);
-                    xForStandardize = sb.ToString() + "*欽定四庫全書<p>" + xForStandardize.Substring(isSKQS + "《欽定四庫全書》".Length);
+                    //xForStandardize = sb.ToString() + "*欽定四庫全書<p>" + xForStandardize.Substring(isSKQS + "《欽定四庫全書》".Length);//現在不交給WordVBA做書名號篇名號的標點了，故改如下：
+                    xForStandardize = sb.ToString() + "*欽定四庫全書<p>" + xForStandardize.Substring(isSKQS + "欽定四庫全書".Length);
                 }
 
 
@@ -244,8 +246,8 @@ namespace TextForCtext
             xForStandardize = xForStandardize.Replace("○", "◯");
             xForStandardize = xForStandardize.Replace("\r\n　\r\n　\r\n", "\r\n|\r\n|\r\n");
             xForStandardize = xForStandardize.Replace("|\r\n　\r\n|", "|\r\n|\r\n|");
-            playSound(soundLike.processing);
             CnText.BooksPunctuation(ref xForStandardize, true);//書名號篇名號等標點
+            playSound(soundLike.processing);
         }
         /// <summary>
         /// 標題/篇名標識。只要一行/段之前後均只是空行的話（跨行以上的不處理，手動自行處理）

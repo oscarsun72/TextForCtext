@@ -176,6 +176,7 @@ namespace TextForCtext
                 rst.MoveNext();
             }
             rst.Close();
+            Form1.playSound(Form1.soundLike.processing);
             rst.Open("select * from 標點符號_篇名號_自動加上用 order by 排序", cnt, ado.CursorTypeEnum.adOpenForwardOnly);
             while (!rst.EOF)
             {
@@ -237,80 +238,122 @@ namespace TextForCtext
         {
             int pos_Term = context.IndexOf(term);//ABBREVIATION:1.position https://www.collinsdictionary.com/dictionary/english/pos
             if (pos_Term == -1) return;
-            ////我自己的，更簡短，更優化；運作邏輯忖度，應當還是用正則表達式好，因為這是一次取代，與WordVBA中的逐一檢查不同；以下這樣寫，則只瞻前、未顧後，誠掛一漏萬者也。感恩感恩　南無阿彌陀佛 20230312
-            //string patternCntext = context.Substring(0, pos_Term);
-            //if (patternCntext.LastIndexOf("《") <= patternCntext.LastIndexOf("》")
-            //    && patternCntext.LastIndexOf("〈") <= patternCntext.LastIndexOf("〉"))
-            //    context = context.Replace(term, termReplaced);
 
+            //202503314 GitHub　Copilot大菩薩
+            //你可以考慮先用程式碼將星號* 和<p> 之間的文字單獨提取或保護起來，再進行其他替換操作。例如：
 
-            //if(patternCntext.LastIndexOf("")==-1&& patternCntext.LastIndexOf("")==-1)
-            //if (termReplaced.IndexOf("《") > -1)
-            //{
-            //    if (patternCntext.LastIndexOf("《") <= patternCntext.LastIndexOf("》")
-            //        && patternCntext.LastIndexOf("〈") <= patternCntext.LastIndexOf("〉"))
-            //        context = context.Replace(term, termReplaced);
-            //}
-            //else
-            //{
-            //    if (patternCntext.LastIndexOf("〈") <= patternCntext.LastIndexOf("〉")
-            //        && patternCntext.LastIndexOf("《") <= patternCntext.LastIndexOf("》"))
-            //        context = context.Replace(term, termReplaced);
-            //}
+            //string input = "*欽定四庫全書<p>";
+            //string term = "四庫全書";
 
+            // 將星號和 <p> 之間的範圍保護
+            string protectedPattern = @"\*.*?<p>";
+            var matches = Regex.Matches(context, protectedPattern);
 
+            // 暫時保護匹配到的範圍
+            foreach (Match match in matches)
+            {
+                context = context.Replace(match.Value, $"{{PROTECTED:{match.Index}}}");
+            }
 
-            //string pattern = "(?<!《)(?<!〈)" + Regex.Escape(item[0]) + "(?!》)(?!〉)";
-            //string pattern = "(?<!《)(?<!〈)" + Regex.Escape(term) + "(?!》)(?!〉)";
-            //chatGPT大菩薩：其中的 (?<![\\p{P}&&[^》〉]]+) 表示前面沒有其他的標點符號（但是可以有其他非標點符號的字符）。這樣就可以避免誤標的情況了。
-            //string pattern = "(?<!《)(?<!〈)(?<![\\p{P}&&[^》〉]]+)" + Regex.Escape(term) + "(?!》)(?!〉)";
-            /*\\p{P}是什麼意思 \\ 前一個 \ 是逸出字元吧？
-                是的，你說的沒錯。在正則表達式中，反斜杠符號 \ 是用來表示特殊字符的逸出字符，它可以使得某些字符在正則表達式中具有特殊含義，例如 .、* 等。如果要匹配 \ 本身，那麼需要使用 \\ 逸出一個反斜杠字符。
-                而 \\p{P} 則是一個 Unicode 屬性表達式，表示匹配任何一個 Unicode 的標點符號字符。其中 \\p{} 是用來匹配具有某個 Unicode 屬性的字符，而 {P} 則是用來指定匹配的 Unicode 屬性是「標點符號」。
-                孫守真
-                為什麼要用 p 是內建的關鍵字還是需要自己宣告的變數？
-                孫守真
-                喔 所以 p 就是 punct 也是 punctiaton 的簡寫（縮寫）囉
-                是的，您理解得很對。p是punctuation(標點符號)的簡寫，而\p{P}是正則表達式的一種語法，用於匹配任何標點符號。             
-             */
-            ////string replacement = item[1];
-            ////string replacement = termReplaced;
-            ////text = Regex.Replace(text, pattern, replacement);
-            ////20230311 Bing大菩薩：
-            ////string pattern = "(?<!《[^》]*)(?<!〈[^〉]*)" + Regex.Escape(term) + "(?![^《]*》)(?![^〈]*〉)";
-            //20230311 合併Bing大菩薩與之前chatGPT大菩薩的：
-            //不計星號「*」：
-            //string pattern = "(?<!《[^》]*)(?<!〈[^〉]*)(?<![\\p{P}&&[^》〉]]+)" + Regex.Escape(term) + "(?![^《]*》)(?![^〈]*〉)";
+            // 對其餘部分進行替換
+            //context = Regex.Replace(context, Regex.Escape(term), $"《{term}》");
+
             //避開有星號「*」的段落：
             string pattern = "(?<!\\*)(?<!《[^》]*)(?<!〈[^〉]*)(?<![\\p{P}&&[^》〉]]+)" + Regex.Escape(term) + "(?![^《]*》)(?![^〈]*〉)";
-            /* Bing大菩薩： 20230709:
-             * 這是因為您的正則表達式中使用了否定的零寬度前瞻断言 (?<!\\*) 來排除前面有星號的情況。這個断言只會查看比對位置之前的字符，而不會跨越段落分隔符（例如換行符）去查看其他段落中的字符。
-             * 
-             * 如果您希望跨越段落進行比對，那麼您可以使用正則表達式中的「點」字符 . 來匹配任意字符（除了換行符之外）。例如，您可以使用 .* 來匹配任意數量的任意字符。
-                但是，請注意，由於否定的零寬度前瞻断言 (?<!) 只能查看固定長度的字符，因此您不能直接在 (?<!) 中使用 .* 來跨越段落進行比對。如果您希望跨越段落進行比對，那麼您可能需要使用其他方法來實現。
-                例如，您可以先將輸入字串中的所有段落分隔符（例如換行符）替換為某個特殊字符（例如 #），然後再使用正則表達式進行比對。這樣，您就可以使用 .* 來匹配任意數量的任意字符，並且能夠跨越原來的段落分隔符進行比對了。
-             */
-
-
-            /* the result of this one : (?<!《)(?<!〈)(?<![\\p{P}&&[^》〉]]+)" + Regex.Escape(term) + "(?!》)(?!〉) will be 《續《資治通鑑》長編》 not 《續資治通鑑長編》 however it should not to be "《續《資治通鑑》長編》" ,because when ready to mark "資治通鑑"，the code should check out of the "資治通鑑" is already marked "《續資治通鑑長編》",so it should jump this replacement
-             * Bing大菩薩：
-             * I see. It seems that the regular expression pattern "(?<!《)(?<!〈)(?<![\\p{P}&&[^》〉]]+)" + Regex.Escape(term) + "(?!》)(?!〉)" is not working as intended and is resulting in nested replacements like “《續《資治通鑑》長編》” instead of “《續資治通鑑長編》”.
-                One possible solution could be to modify the regular expression pattern to check if the term is already enclosed within another pair of 《》 or 〈〉 symbols before replacing it. For example, you could try using a pattern like "(?<!《[^》]*)(?<!〈[^〉]*)" + Regex.Escape(term) + "(?![^《]*》)(?![^〈]*〉)".
-                This pattern uses negative lookbehind and negative lookahead assertions to check if the term is not enclosed within another pair of 《》 or 〈〉 symbols before replacing it with termReplaced.
-                Would you like to try this solution?
-                已接收訊息. I see. It seems that the regular expression pattern `"(?<!《)(?<!〈)(?<![\\p{P}&&[^》〉]]+)" + Regex.Escape(term) + "(?!》)(?!〉)"` is not working as intended and is resulting in nested replacements like "《續《資治通鑑》長編》" instead of "《續資治通鑑長編》". One possible solution could be to modify the regular expression pattern to check if the term is already enclosed within another pair of 《》 or 〈〉 symbols before replacing it. For example, you could try using a pattern like `"(?<!《[^》]*)(?<!〈[^〉]*)" + Regex.Escape(term) + "(?![^《]*》)(?![^〈]*〉)"`. This pattern uses negative lookbehind and negative lookahead assertions to check if the term is not enclosed within another pair of 《》 or 〈〉 symbols before replacing it with `termReplaced`. Would you like to try this solution?
-             *  已傳送訊息. Yes.
-             *  Great! You can try modifying the booksPunctuationExamReplace method to use the new regular expression pattern like this:
-                static void booksPunctuationExamReplace(ref string context, string term, string termReplaced)
-                {
-                    string pattern = "(?<!《[^》]*)(?<!〈[^〉]*)" + Regex.Escape(term) + "(?![^《]*》)(?![^〈]*〉)";
-                    context = Regex.Replace(context, pattern, termReplaced);
-                }
-                This should prevent nested replacements and ensure that terms that are already enclosed within another pair of 《》 or 〈〉 symbols are not replaced again.
-                Let me know if this works for you or if you have any further questions.
-             */
 
             context = Regex.Replace(context, pattern, termReplaced);
+
+            // 還原保護範圍
+            foreach (Match match in matches)
+            {
+                context = context.Replace($"{{PROTECTED:{match.Index}}}", match.Value);
+            }
+
+            //Console.WriteLine(context);
+
+
+
+            //////我自己的，更簡短，更優化；運作邏輯忖度，應當還是用正則表達式好，因為這是一次取代，與WordVBA中的逐一檢查不同；以下這樣寫，則只瞻前、未顧後，誠掛一漏萬者也。感恩感恩　南無阿彌陀佛 20230312
+            ////string patternCntext = context.Substring(0, pos_Term);
+            ////if (patternCntext.LastIndexOf("《") <= patternCntext.LastIndexOf("》")
+            ////    && patternCntext.LastIndexOf("〈") <= patternCntext.LastIndexOf("〉"))
+            ////    context = context.Replace(term, termReplaced);
+
+
+            ////if(patternCntext.LastIndexOf("")==-1&& patternCntext.LastIndexOf("")==-1)
+            ////if (termReplaced.IndexOf("《") > -1)
+            ////{
+            ////    if (patternCntext.LastIndexOf("《") <= patternCntext.LastIndexOf("》")
+            ////        && patternCntext.LastIndexOf("〈") <= patternCntext.LastIndexOf("〉"))
+            ////        context = context.Replace(term, termReplaced);
+            ////}
+            ////else
+            ////{
+            ////    if (patternCntext.LastIndexOf("〈") <= patternCntext.LastIndexOf("〉")
+            ////        && patternCntext.LastIndexOf("《") <= patternCntext.LastIndexOf("》"))
+            ////        context = context.Replace(term, termReplaced);
+            ////}
+
+
+
+            ////string pattern = "(?<!《)(?<!〈)" + Regex.Escape(item[0]) + "(?!》)(?!〉)";
+            ////string pattern = "(?<!《)(?<!〈)" + Regex.Escape(term) + "(?!》)(?!〉)";
+            ////chatGPT大菩薩：其中的 (?<![\\p{P}&&[^》〉]]+) 表示前面沒有其他的標點符號（但是可以有其他非標點符號的字符）。這樣就可以避免誤標的情況了。
+            ////string pattern = "(?<!《)(?<!〈)(?<![\\p{P}&&[^》〉]]+)" + Regex.Escape(term) + "(?!》)(?!〉)";
+            ///*\\p{P}是什麼意思 \\ 前一個 \ 是逸出字元吧？
+            //    是的，你說的沒錯。在正則表達式中，反斜杠符號 \ 是用來表示特殊字符的逸出字符，它可以使得某些字符在正則表達式中具有特殊含義，例如 .、* 等。如果要匹配 \ 本身，那麼需要使用 \\ 逸出一個反斜杠字符。
+            //    而 \\p{P} 則是一個 Unicode 屬性表達式，表示匹配任何一個 Unicode 的標點符號字符。其中 \\p{} 是用來匹配具有某個 Unicode 屬性的字符，而 {P} 則是用來指定匹配的 Unicode 屬性是「標點符號」。
+            //    孫守真
+            //    為什麼要用 p 是內建的關鍵字還是需要自己宣告的變數？
+            //    孫守真
+            //    喔 所以 p 就是 punct 也是 punctiaton 的簡寫（縮寫）囉
+            //    是的，您理解得很對。p是punctuation(標點符號)的簡寫，而\p{P}是正則表達式的一種語法，用於匹配任何標點符號。             
+            // */
+            //////string replacement = item[1];
+            //////string replacement = termReplaced;
+            //////text = Regex.Replace(text, pattern, replacement);
+            //////20230311 Bing大菩薩：
+            //////string pattern = "(?<!《[^》]*)(?<!〈[^〉]*)" + Regex.Escape(term) + "(?![^《]*》)(?![^〈]*〉)";
+            ////20230311 合併Bing大菩薩與之前chatGPT大菩薩的：
+            ////不計星號「*」：
+            ////string pattern = "(?<!《[^》]*)(?<!〈[^〉]*)(?<![\\p{P}&&[^》〉]]+)" + Regex.Escape(term) + "(?![^《]*》)(?![^〈]*〉)";
+
+            ////避開有星號「*」的段落：
+            //string pattern = "(?<!\\*)(?<!《[^》]*)(?<!〈[^〉]*)(?<![\\p{P}&&[^》〉]]+)" + Regex.Escape(term) + "(?![^《]*》)(?![^〈]*〉)";
+            //////GitHub　Copilot大菩薩：
+            ////string pattern = "(?<!\\*)(?<!\\*[^<]*<p>)(?<!《[^》]*)(?<!〈[^〉]*)(?<![\\p{P}&&[^》〉]]+)" + Regex.Escape(term) + "(?![^《]*》)(?![^〈]*〉)";
+            //////Copilot大菩薩：
+            ////string pattern = "(?<!\\*)(?<!\\*[^<]*<p>)(?<!《[^》]*)(?<!〈[^〉]*)(?<![\\p{P}&&[^》〉]]+)" + Regex.Escape(term) + "(?![^《]*》)(?![^〈]*〉)(?![^*]*\\*[^<]*<p>)";
+
+
+            ///* Bing大菩薩： 20230709:
+            // * 這是因為您的正則表達式中使用了否定的零寬度前瞻断言 (?<!\\*) 來排除前面有星號的情況。這個断言只會查看比對位置之前的字符，而不會跨越段落分隔符（例如換行符）去查看其他段落中的字符。
+            // * 
+            // * 如果您希望跨越段落進行比對，那麼您可以使用正則表達式中的「點」字符 . 來匹配任意字符（除了換行符之外）。例如，您可以使用 .* 來匹配任意數量的任意字符。
+            //    但是，請注意，由於否定的零寬度前瞻断言 (?<!) 只能查看固定長度的字符，因此您不能直接在 (?<!) 中使用 .* 來跨越段落進行比對。如果您希望跨越段落進行比對，那麼您可能需要使用其他方法來實現。
+            //    例如，您可以先將輸入字串中的所有段落分隔符（例如換行符）替換為某個特殊字符（例如 #），然後再使用正則表達式進行比對。這樣，您就可以使用 .* 來匹配任意數量的任意字符，並且能夠跨越原來的段落分隔符進行比對了。
+            // */
+
+
+            ///* the result of this one : (?<!《)(?<!〈)(?<![\\p{P}&&[^》〉]]+)" + Regex.Escape(term) + "(?!》)(?!〉) will be 《續《資治通鑑》長編》 not 《續資治通鑑長編》 however it should not to be "《續《資治通鑑》長編》" ,because when ready to mark "資治通鑑"，the code should check out of the "資治通鑑" is already marked "《續資治通鑑長編》",so it should jump this replacement
+            // * Bing大菩薩：
+            // * I see. It seems that the regular expression pattern "(?<!《)(?<!〈)(?<![\\p{P}&&[^》〉]]+)" + Regex.Escape(term) + "(?!》)(?!〉)" is not working as intended and is resulting in nested replacements like “《續《資治通鑑》長編》” instead of “《續資治通鑑長編》”.
+            //    One possible solution could be to modify the regular expression pattern to check if the term is already enclosed within another pair of 《》 or 〈〉 symbols before replacing it. For example, you could try using a pattern like "(?<!《[^》]*)(?<!〈[^〉]*)" + Regex.Escape(term) + "(?![^《]*》)(?![^〈]*〉)".
+            //    This pattern uses negative lookbehind and negative lookahead assertions to check if the term is not enclosed within another pair of 《》 or 〈〉 symbols before replacing it with termReplaced.
+            //    Would you like to try this solution?
+            //    已接收訊息. I see. It seems that the regular expression pattern `"(?<!《)(?<!〈)(?<![\\p{P}&&[^》〉]]+)" + Regex.Escape(term) + "(?!》)(?!〉)"` is not working as intended and is resulting in nested replacements like "《續《資治通鑑》長編》" instead of "《續資治通鑑長編》". One possible solution could be to modify the regular expression pattern to check if the term is already enclosed within another pair of 《》 or 〈〉 symbols before replacing it. For example, you could try using a pattern like `"(?<!《[^》]*)(?<!〈[^〉]*)" + Regex.Escape(term) + "(?![^《]*》)(?![^〈]*〉)"`. This pattern uses negative lookbehind and negative lookahead assertions to check if the term is not enclosed within another pair of 《》 or 〈〉 symbols before replacing it with `termReplaced`. Would you like to try this solution?
+            // *  已傳送訊息. Yes.
+            // *  Great! You can try modifying the booksPunctuationExamReplace method to use the new regular expression pattern like this:
+            //    static void booksPunctuationExamReplace(ref string context, string term, string termReplaced)
+            //    {
+            //        string pattern = "(?<!《[^》]*)(?<!〈[^〉]*)" + Regex.Escape(term) + "(?![^《]*》)(?![^〈]*〉)";
+            //        context = Regex.Replace(context, pattern, termReplaced);
+            //    }
+            //    This should prevent nested replacements and ensure that terms that are already enclosed within another pair of 《》 or 〈〉 symbols are not replaced again.
+            //    Let me know if this works for you or if you have any further questions.
+            // */
+
+            //context = Regex.Replace(context, pattern, termReplaced);
         }
 
         /// <summary>
