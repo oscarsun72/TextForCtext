@@ -76,7 +76,9 @@ Sub 新頁面()
     End If
     rng.Document.ActiveWindow.windowState = wdWindowStateMinimize
     DoEvents
-    Network.AppActivateDefaultBrowser
+    'Network.AppActivateDefaultBrowser
+    ActivateChrome
+    SendKeys "^a"
     SendKeys "^v"
     
     SystemSetup.contiUndo ur
@@ -225,7 +227,9 @@ Sub 清除頁前的分段符號()
     DoEvents
     playSound 1, 0
     DoEvents
-    pastetoEditBox "將星號前的分段符號移置前段之末 & 清除頁前的分段符號{據Kanripo.org或《國學大師》所藏本輔以末學於GitHub開源自製免費免安裝之TextForCtext排版對應錄入。討論區與末學YouTube頻道有實境演示影片可資參考。感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主}" '"將星號前的分段符號移置前段之末 & 清除頁前的分段符號"
+'    Const description As String = "將星號前的分段符號移置前段之末 & 清除頁前的分段符號"
+    Const description As String = "將星號前的分段符號移置前段之末 & 清除頁前的分段符號{據Kanripo.org或《國學大師》所藏本輔以末學自製於GitHub開源免費免安裝之TextForCtext排版對應錄入。討論區與末學YouTube頻道有實境演示影片可資參考。感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主}"
+    pastetoEditBox description
     d.Close wdDoNotSaveChanges
 
 End Sub
@@ -283,7 +287,7 @@ eH:
             SystemSetup.wait 0.8
             Resume
         Case Else
-            MsgBox Err.number + Err.Description
+            MsgBox Err.number + Err.description
      End Select
 End Sub
 
@@ -564,7 +568,7 @@ eH:
             If p.Range.Characters(acP).Hyperlinks.Count > 0 Then p.Range.Characters(acP).Hyperlinks(1).Delete
             Resume
         Case Else
-            MsgBox Err.number & Err.Description
+            MsgBox Err.number & Err.description
     End Select
 End Sub
 
@@ -1091,7 +1095,7 @@ Function Searchu(res As String, undoName As String) As Boolean
 eH:
     Select Case Err.number
         Case -2146233088
-            If VBA.InStr(Err.Description, "element not interactable") = 1 Then '(Session info: chrome=130.0.6723.117)
+            If VBA.InStr(Err.description, "element not interactable") = 1 Then '(Session info: chrome=130.0.6723.117)
                 Set iwe = SeleniumOP.WD.FindElementByCssSelector("#searchform > input.searchbox")
                 SeleniumOP.SetIWebElementValueProperty iwe, Selection.text
                 Resume
@@ -1100,8 +1104,8 @@ eH:
             End If
         Case Else
 elses:
-            Debug.Print Err.number & Err.Description
-            MsgBox Err.number & Err.Description
+            Debug.Print Err.number & Err.description
+            MsgBox Err.number & Err.description
     End Select
 End Function
 
@@ -1532,6 +1536,90 @@ nxt:
 Next inlnsp
 cnt.Close
 End Sub
+Sub 千慮一得齋匯出() '20250318
+    Dim db As New dBase, cnt As New ADODB.Connection, rst As New ADODB.Recordset, rstNote As New ADODB.Recordset, note As String, noteMark As String
+    Dim d As Document, stPageNum As Integer, endPageNum As Integer, rng As Range, p As Paragraph, followWords As String, rngDup As Range, si As New StringInfo, ur As UndoRecord
+    Rem 第1段是始頁，第2段指定末頁
+    Set d = ActiveDocument
+    stPageNum = VBA.CInt(d.Range(d.Paragraphs(1).Range.start, d.Paragraphs(1).Range.End - 1).text)
+    endPageNum = VBA.CInt(d.Range(d.Paragraphs(2).Range.start, d.Paragraphs(2).Range.End - 1).text)
+    
+    SystemSetup.stopUndo ur, "千慮一得齋匯出"
+    d.Range.text = vbNullString
+    
+    db.cnt_開發_千慮一得齋 cnt
+    rst.Open "SELECT 札.札ID, 札.札記 FROM (書 LEFT JOIN 篇 ON 書.書ID = 篇.書ID) LEFT JOIN 札 ON 篇.篇ID = 札.篇ID " & _
+                    "WHERE (((書.書ID)=9325) AND ((札.頁) Between " & stPageNum & " And " & endPageNum & ")) " & _
+                    "ORDER BY 篇.頁, 篇.篇ID, 札.頁", cnt, adOpenForwardOnly, adLockReadOnly
+    Do Until rst.EOF
+        Set p = d.Paragraphs.Add
+        Set rng = d.Range(p.Range.start, p.Range.End - 1)
+        rng.InsertAfter rst.Fields("札記").Value '在套用此方法之後，該範圍就會展開成包含新的文字。
+        Set rngDup = rng.Duplicate
+        '19323:校,校勘記,真按    36171:注
+        rstNote.Open "SELECT 札_類.類ID,札箋.札箋, 札箋.後續字元, 札箋.備註 FROM 札_類 INNER JOIN 札箋 ON 札_類.類_ID = 札箋.類_ID " & _
+                        "WHERE (((札_類.札ID)=" & rst.Fields("札ID") & ") AND ((札_類.類ID)=36171 Or (札_類.類ID)=19323)) " & _
+                        " order by st", cnt, adOpenKeyset, adLockReadOnly
+        Do Until rstNote.EOF
+            noteMark = rstNote.Fields("札箋").Value
+findnext:
+            If rng.Find.Execute(noteMark) Then
+                followWords = VBA.Replace(VBA.IIf(VBA.IsNull(rstNote.Fields("後續字元").Value), vbNullString, rstNote.Fields("後續字元").Value), VBA.Chr(13) & VBA.Chr(10), VBA.Chr(13))
+                If followWords <> vbNullString Then
+                    Do Until d.Range(rng.End, rng.End + VBA.Len(followWords)).text = followWords
+                        If Not rng.Find.Execute(rstNote.Fields("札箋").Value) Then Exit Do
+                        If rng.End + VBA.Len(followWords) >= d.Content.End Then GoTo nextRecord
+                    Loop
+                End If
+            End If
+            Select Case rstNote.Fields("類ID").Value
+                Case 36171 '注
+                    If rng.Previous(wdCharacter, 1) = "{" Then
+                        rng.SetRange rng.End, rngDup.End
+                        GoTo findnext
+                    End If
+                    rng.text = "{{" & rng.text & "}}"
+                Case 19323 '校,校勘記,真
+                    note = rstNote.Fields("備註").Value
+                    If VBA.InStr(note, "不復一一出校") = 0 Then
+                        Do Until VBA.InStr("。，" & VBA.Chr(13), rng.Previous.text)
+                            If rng.Previous.text <> VBA.Chr(13) Then rng.Move wdCharacter, 1
+                            If rng.End = rng.Document.Content.End - 1 Then Exit Do
+                        Loop
+                        si.Create noteMark
+                        If si.LengthInTextElements > 1 Then
+                            rng.InsertAfter "{{{孫守真按：" & "「" & noteMark & "」：" & note & "}}}"
+                        Else
+                            rng.InsertAfter "{{{孫守真按：" & noteMark & "，" & note & "}}}"
+                        End If
+                    End If
+            End Select
+nextRecord:
+            rng.SetRange rngDup.start, rngDup.End
+            rstNote.MoveNext
+        Loop
+        rstNote.Close
+        
+        rst.MoveNext
+    Loop
+    
+    rst.Close: cnt.Close
+    
+    文字處理.書名號篇名號標注
+    rng.Document.Content.Cut '剪下準備貼到TextForCtext的textBox1中
+    SystemSetup.contiUndo ur
+    
+    d.ActiveWindow.windowState = wdWindowStateMinimize
+    d.Range(d.Paragraphs(1).Range.start, d.Paragraphs(1).Range.End - 1).text = endPageNum + 1
+    d.Range(d.Paragraphs(2).Range.start, d.Paragraphs(2).Range.End - 1).text = endPageNum + 9
+    
+    On Error Resume Next
+    AppActivate "TextForCtext"
+    VBA.DoEvents
+    SendKeys "^v", True
+    VBA.DoEvents
+    
+End Sub
 Rem 現在多用Kanripo.org者 20250202大年初五
 Sub 國學大師_Kanripo_四庫全書本轉來()
     Dim rng As Range, noteRng As Range, aNext As Range, aPre As Range, ur As UndoRecord, midNoteRngPos As Byte, midNoteRng As Range, aX As String, a As Range, aSt As Long, aEd As Long
@@ -1807,25 +1895,25 @@ replaceSpaceWithBlank:
 End Sub
 
 Sub mdb開發_千慮一得齋Export()
-Dim cnt As New ADODB.Connection, db As New dBase, rst As New ADODB.Recordset, exportStr As String, preTitle As String, title As String
-Const bookName As String = "原抄本日知錄" '執行前請先指定書名
-db.cnt_開發_千慮一得齋 cnt
-rst.Open "SELECT 篇.篇名, 札.札記, 書.書名, 篇.卷, 篇.頁, 篇.末頁, 札.篇ID, 札.頁, 札.札ID, 札.類ID, 類別主題.類別主題" & _
-        " FROM 類別主題 INNER JOIN ((書 INNER JOIN 篇 ON 書.書ID = 篇.書ID) INNER JOIN 札 ON 篇.篇ID = 札.篇ID) ON 類別主題.類ID = 札.類ID" & _
-        " WHERE (((書.書名)=""" & bookName & """) AND ((類別主題.類別主題) Not Like "" * 真按 * "" Or (類別主題.類別主題) Is Null))" & _
-        " ORDER BY 篇.卷, 篇.頁, 篇.末頁, 札.篇ID, 札.頁, 札.札ID;", cnt, adOpenKeyset, adLockReadOnly
-Do Until rst.EOF
-    title = rst.Fields(0).Value
-    If preTitle <> title Then
-        exportStr = exportStr & VBA.Chr(13) & "*" & title & VBA.Chr(13)
-    End If
-    preTitle = title
-    exportStr = exportStr & rst.Fields(1).Value
-    rst.MoveNext
-Loop
-rst.Close
-cnt.Close
-Documents.Add.Range = exportStr
+    Dim cnt As New ADODB.Connection, db As New dBase, rst As New ADODB.Recordset, exportStr As String, preTitle As String, title As String
+    Const bookName As String = "原抄本日知錄" '執行前請先指定書名
+    db.cnt_開發_千慮一得齋 cnt
+    rst.Open "SELECT 篇.篇名, 札.札記, 書.書名, 篇.卷, 篇.頁, 篇.末頁, 札.篇ID, 札.頁, 札.札ID, 札.類ID, 類別主題.類別主題" & _
+            " FROM 類別主題 INNER JOIN ((書 INNER JOIN 篇 ON 書.書ID = 篇.書ID) INNER JOIN 札 ON 篇.篇ID = 札.篇ID) ON 類別主題.類ID = 札.類ID" & _
+            " WHERE (((書.書名)=""" & bookName & """) AND ((類別主題.類別主題) Not Like "" * 真按 * "" Or (類別主題.類別主題) Is Null))" & _
+            " ORDER BY 篇.卷, 篇.頁, 篇.末頁, 札.篇ID, 札.頁, 札.札ID;", cnt, adOpenKeyset, adLockReadOnly
+    Do Until rst.EOF
+        title = rst.Fields(0).Value
+        If preTitle <> title Then
+            exportStr = exportStr & VBA.Chr(13) & "*" & title & VBA.Chr(13)
+        End If
+        preTitle = title
+        exportStr = exportStr & rst.Fields(1).Value
+        rst.MoveNext
+    Loop
+    rst.Close
+    cnt.Close
+    Documents.Add.Range = exportStr
 End Sub
 Sub 清除所有符號_加上井號_作為網址後綴()
     Dim rng As Range, e, sybol 'Alt + l
@@ -2195,6 +2283,7 @@ Property Get Div_generic_IncludePathAndEndPageNum() As SeleniumBasic.IWebElement
     Set iwe = WD.FindElementByCssSelector("#content > div:nth-child(3)")
     Set Div_generic_IncludePathAndEndPageNum = iwe
 End Property
+Rem 取得某書冊頁之上限
 Property Get pageUBound() As Integer
     Dim iwe  As SeleniumBasic.IWebElement, str As String
     Set iwe = Div_generic_IncludePathAndEndPageNum
@@ -2274,36 +2363,49 @@ Function NextChapterSelector(ChapterSelector As String) As String
     NextChapterSelector = newSelector
 End Function
 Property Get Head_Edit_textbox() As SeleniumBasic.IWebElement
-    If VBA.InStr(WD.url, "&action=newchapter") Then
+    If VBA.InStr(WD.url, "&action") Then '"&action=newchapter" 或 action=editchapter
         Set Head_Edit_textbox = WD.FindElementByCssSelector("#content > h2")
     End If
 End Property
 Property Get Title_Edit_textbox() As SeleniumBasic.IWebElement
-    If VBA.InStr(WD.url, "&action=newchapter") Then
+    If VBA.InStr(WD.url, "&action=") Then '"&action=newchapter" 或 action=editchapter
         Set Title_Edit_textbox = WD.FindElementByCssSelector("#title")
     End If
 End Property
 Property Get Sequence_data_Edit_textbox() As SeleniumBasic.IWebElement
-    If VBA.InStr(WD.url, "&action=newchapter") Then
+    If VBA.InStr(WD.url, "&action=") Then '"&action=newchapter" 或 action=editchapter
         Set Sequence_data_Edit_textbox = WD.FindElementByCssSelector("#sequence")
     End If
 End Property
 Property Get Textarea_data_Edit_textbox() As SeleniumBasic.IWebElement
-    If VBA.InStr(WD.url, "&action=newchapter") Then
+    If VBA.InStr(WD.url, "&action=") Then '"&action=newchapter" 或 action=editchapter
         Set Textarea_data_Edit_textbox = WD.FindElementByCssSelector("#data")
     End If
 End Property
 Property Get Description_Edit_textbox() As SeleniumBasic.IWebElement
-    If VBA.InStr(WD.url, "&action=newchapter") Then
+    If VBA.InStr(WD.url, "&action=") Then '"&action=newchapter" 或 action=editchapter
         Set Description_Edit_textbox = WD.FindElementByCssSelector("#description")
     End If
 End Property
 Property Get Commit_Edit_textbox() As SeleniumBasic.IWebElement
-    If VBA.InStr(WD.url, "&action=newchapter") Then
+    If VBA.InStr(WD.url, "&action=") Then '"&action=newchapter" 或 action=editchapter
         Set Commit_Edit_textbox = WD.FindElementByCssSelector("#commit")
     End If
 End Property
-Sub 新頁面Auto()
+Sub 新頁面Auto_get_argument()
+'    Rem 未完成
+'    Rem 自動取得首頁、末頁及file ID num 3個引數
+'    '文件第一段貼上首頁網址，如： https://ctext.org/library.pl?if=en&file=3918&page=1
+'    Dim url As String, d As Document, p As Paragraph, iwe As SeleniumBasic.IWebElement
+'    Set d = ActiveDocument
+'    Set p = d.Paragraphs(1)
+'    url = d.Range(p.Range.start, p.Range.End - 1).text
+'    d.Range(p.Range.start, p.Range.End - 1).text = 1 '第一段為首頁頁碼=1
+'    p.Range.InsertParagraphAfter
+'    Set p = d.Paragraphs(2)
+'    d.Range(p.Range.start, p.Range.End - 1).text = pageUBound '第2段為末頁頁碼
+End Sub
+Sub 新頁面Auto_action_newchapter()
     Dim d As Document, chapterNum As Integer, iwe As SeleniumBasic.IWebElement, newchapterUrl As String, title As String
     Set d = ActiveDocument
     '文件第4段輸入要開啟的書首頁面，如https://ctext.org/library.pl?if=gb&res=4925
@@ -2334,8 +2436,9 @@ Sub 新頁面Auto()
     title = iwe.GetAttribute("text")
     iwe.Click
     'Set iwe = WD.FindElementByCssSelector(Div_generic_IncludePathAndEndPageNum)
-    d.Range(d.Paragraphs(1).Range.start, d.Paragraphs(1).Range.End - 1).text = 1
-    d.Range(d.Paragraphs(2).Range.start, d.Paragraphs(2).Range.End - 1).text = pageUBound
+    d.Range(d.Paragraphs(1).Range.start, d.Paragraphs(1).Range.End - 1).text = 1 '首頁
+    d.Range(d.Paragraphs(2).Range.start, d.Paragraphs(2).Range.End - 1).text = pageUBound '末頁
+    'file ID
     'https://ctext.org/library.pl?if=gb&file=76754&page=1
     d.Range(d.Paragraphs(3).Range.start, d.Paragraphs(3).Range.End - 1).text = VBA.Trim(VBA.Mid(WD.url, VBA.InStr(WD.url, "&file=") + VBA.Len("&file="), VBA.InStr(WD.url, "&page=") - (VBA.InStr(WD.url, "&file=") + VBA.Len("&file="))))
     d.Activate
@@ -2347,7 +2450,7 @@ Sub 新頁面Auto()
     VBA.DoEvents
     新頁面
     d.Undo
-    If Textarea_data_Edit_textbox.GetAttribute("value") = vbNullString Then
+    If VBA.Len(Textarea_data_Edit_textbox.GetAttribute("value")) < 4 Then
         SetIWebElementValueProperty Textarea_data_Edit_textbox, GetClipboardText
     End If
     '輸入title值：
@@ -2359,7 +2462,7 @@ Sub 新頁面Auto()
     '輸入Sequence值：
     SetIWebElementValueProperty Sequence_data_Edit_textbox, VBA.CStr(chapterNum) & "0"
     '輸入修改摘要:
-    SetIWebElementValueProperty Description_Edit_textbox, "據《國學大師》所收本輔以末學於GitHub開源自製免費免安裝之TextForCtext軟件排版對應錄入；討論區及末學YouTube頻道有實境演示影片。感恩感恩　讚歎讚歎　南無阿彌陀佛"
+    SetIWebElementValueProperty Description_Edit_textbox, "據《國學大師》或《Kanripo》所收本輔以末學於GitHub開源自製免費免安裝之TextForCtext軟件排版對應錄入；討論區及末學YouTube頻道有實境演示影片。感恩感恩　讚歎讚歎　南無阿彌陀佛"
     'Commit_Edit_textbox.Click '送出
     
     Title_Edit_textbox.Click

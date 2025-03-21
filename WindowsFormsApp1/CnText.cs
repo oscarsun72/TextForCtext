@@ -632,7 +632,7 @@ namespace TextForCtext
             #endregion
 
             //被取代者
-            string[] replaceDChar = { "＠","〇","!","！！","'", ",", ";", ":", "．", "?", "：：","：\r\n：", "《《", "》》", "〈〈", "〉〉",
+            string[] replaceDChar = { "＠","○","〇","!","！！","'", ",", ";", ":", "．", "?", "：：","：\r\n：", "《《", "》》", "〈〈", "〉〉",
                 "。}}<p>。}}","。}}。}}", "。}}}。<p>", "}}}。<p>", "。}}。<p>", "}}。<p>",".<p>","·<p>" ,"<p>。<p>","<p>。","􏿽。<p>","　。<p>"
                 ,"。。", "，，", "@" 
                 //,"}}<p>\r\n{{"//像《札迻》就有此種格式，不能取代掉！ https://ctext.org/library.pl?if=en&file=36575&page=12&editwiki=800245#editor
@@ -648,7 +648,7 @@ namespace TextForCtext
             };
 
             //取代為
-            string[] replaceChar = { string.Empty,"◯","！","！","、", "，", "；", "：", "·", "？", "：","：\r\n", "《", "》", "〈", "〉",
+            string[] replaceChar = { string.Empty,"◯","◯","！","！","、", "，", "；", "：", "·", "？", "：","：\r\n", "《", "》", "〈", "〉",
                 "。}}","。}}", "。}}}<p>", "。}}}<p>", "。}}<p>", "。}}<p>","。<p>","。<p>","<p>","<p>","　","　"
                 , "。", "，", "●" 
                 //,"}}\r\n{{"//像《札迻》就有此種格式，不能取代掉！ https://ctext.org/library.pl?if=en&file=36575&page=12&editwiki=800245#editor
@@ -1474,14 +1474,17 @@ namespace TextForCtext
             Document document = new Document(input);
             foreach (var item in document.GetParagraphs())
             {
-                int i = 0; StringBuilder sb = new StringBuilder();
-                while (i < item.Text.Length && item.Text.Substring(i, 1) == "　")
+                if (item.Text.IndexOf("*") == -1)
                 {
-                    sb.Append("􏿽");
-                    i++;
+                    int i = 0; StringBuilder sb = new StringBuilder();
+                    while (i < item.Text.Length && item.Text.Substring(i, 1) == "　")
+                    {
+                        sb.Append("􏿽");
+                        i++;
+                    }
+                    if (i > 0)
+                        item.Text = sb.ToString() + item.Text.Substring(i);
                 }
-                if (i > 0)
-                    item.Text = sb.ToString() + item.Text.Substring(i);
             }
             //input = document.Text;
             return document.Text;

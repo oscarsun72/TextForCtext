@@ -2602,7 +2602,7 @@ namespace WindowsFormsApp1
 
 
                         resetPageTextEndPositionPasteToCText();
-
+                        if (!autoPaste2QuickEdit && Name == "Form1") AvailableInUseBothKeysMouse();
                         return;//因為函式中已有keyDownCtrlAdd
                     }
 
@@ -3043,6 +3043,13 @@ namespace WindowsFormsApp1
             //按下Shift鍵
             if ((m & Keys.Shift) == Keys.Shift)
             {
+                if (e.KeyCode == Keys.Enter)
+                {//Shift + Enter（ 與 Ctrl + 滑鼠左鍵 同） ： 新行、折行、分行，並可依插入點所在行之縮排情形，自動補上前綴全形空格
+                    e.Handled = true;
+                    newLine();
+                    SendKeys.Send("{backspace}");
+                    return;
+                }
                 if (e.KeyCode == Keys.F3)
                 {//Shift + F3
                     e.Handled = true;
@@ -3139,6 +3146,12 @@ namespace WindowsFormsApp1
             //按下Alt鍵
             if ((m & Keys.Alt) == Keys.Alt)//⇌ if (Control.ModifierKeys == Keys.Alt)
             {
+                if (e.KeyCode == Keys.Enter)//Alt + Enter（ 與 Ctrl + 滑鼠左鍵 同） ： 新行、折行、分行，並可依插入點所在行之縮排情形，自動補上前綴全形空格
+                {
+                    e.Handled = true;
+                    newLine();
+                    return;
+                }
                 if (e.KeyCode == Keys.F1)// Alt + F1
                 {
                     e.Handled = true;
@@ -3439,11 +3452,12 @@ namespace WindowsFormsApp1
                 {//Alt + a : 通常是用在自動輸入模式時根據上一次判斷的頁尾來自動貼入本頁內容
                     e.Handled = true;
                     //還原放大的書圖
-                    if (autoPaste2QuickEdit)
+                    //if (autoPaste2QuickEdit)
+                    if (!keyinTextMode)
                     { playSound(soundLike.press, true); altA_predictEndofPageRange(); }
                     RestoreImageSize();
                     keyDownCtrlAdd(false);
-
+                    if (!autoPaste2QuickEdit) AvailableInUseBothKeysMouse();
                     return;
                 }
                 if (e.KeyCode == Keys.B)
@@ -3797,10 +3811,14 @@ namespace WindowsFormsApp1
                                 l = _document.GetCurrentParagraph().End - s;
                             }
                         }
+                        else if (s - 1 == 0)
+                            s--;
                         textBox1.Select(s, l);
                     }//如果沒有選取，則自動選取插件點所在行/段
 
                     BeginUpdate(false);
+
+                    undoRecord(); stopUndoRec = true; PauseEvents();
 
                     titleMarkCode();
 
@@ -3809,16 +3827,23 @@ namespace WindowsFormsApp1
                     {
                         Paragraph p = new Range(_document, textBox1.SelectionStart, textBox1.SelectionStart, _document.Content).GetCurrentParagraph();
                         textBox1.Select(p.Start, p.End - p.Start);
-                        undoRecord(); stopUndoRec = true; PauseEvents();
+
                         textBox1.SelectedText = CnText.ReplaceFullWidthSpace_withBlank(textBox1.SelectedText);
-                        undoRecord(); stopUndoRec = false; ResumeEvents();
+
                     }
                     #endregion 標題標記完後若其行/段後面還有文字，則予以格式化（全形空格轉空白）
 
+                    undoRecord(); stopUndoRec = false; ResumeEvents();
                     EndUpdate();
 
-                    if (textBox1.SelectionStart + 1 <= textBox1.TextLength)
-                        textBox1.SelectionStart++;//方便要按2次以上以降階標題
+                    #region 方便要按2次以上以降階標題                    
+                    if (s + 1 <= textBox1.TextLength && textBox1.Text.Substring(s + 1) != "<"
+                                    && Environment.NewLine.IndexOf(textBox1.Text.Substring(s + 1)) == -1)
+                        if (s + 3 <= textBox1.TextLength && textBox1.Text.Substring(s + 1, 2) == Environment.NewLine)
+                            s += 3;
+                        else
+                            textBox1.SelectionStart = ++s;
+                    #endregion
 
                     return;
                 }
@@ -3828,7 +3853,12 @@ namespace WindowsFormsApp1
                 }
                 if (e.KeyCode == Keys.S)
                 {//Alt + s 小注文不換行
-                    e.Handled = true; notes_a_line(); return;
+                    e.Handled = true; int s = textBox1.SelectionStart;
+                    if (textBox1.SelectionLength == 0 && s < textBox1.TextLength)
+                        textBox1.SelectionStart++;
+                    notes_a_line();
+                    textBox1.SelectionStart = s;
+                    return;
                 }
 
                 if (e.KeyCode == Keys.T)
@@ -4451,7 +4481,7 @@ namespace WindowsFormsApp1
             }
 
             //lines_perPage = 16;//●●●●●●●●●●●●●●●●●●
-            if (lines_perPage == 0 && autoPaste2QuickEdit)
+            if (lines_perPage == 0)//&& autoPaste2QuickEdit)
             {
                 Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("請先設定每頁正常的行/段數！");
                 return false;
@@ -10356,7 +10386,8 @@ namespace WindowsFormsApp1
                         }
                         else
                         {//如果在自動輸入模式，且已取得每頁正常行/段數時
-                            if (autoPaste2QuickEdit && (linesParasPerPage != -1 || lines_perPage != 0))
+                            //if (autoPaste2QuickEdit && (linesParasPerPage != -1 || lines_perPage != 0))
+                            if (!keyinTextMode && (linesParasPerPage != -1 || lines_perPage != 0))
                             {
                                 if (lines_perPage > 0 && countLinesPerPage(textBox1.Text.Substring(0, textBox1.SelectionStart)) != lines_perPage)
                                 {
@@ -10689,7 +10720,7 @@ namespace WindowsFormsApp1
         {
             string height = br.Svg_image_PageImageFrame?.GetAttribute("height");
             if (height != null)
-                if (int.Parse(height) > 650)//587)
+                if (int.Parse(height) > 700)//587)
                     br.Svg_image_PageImageFrame?.Click();
 
         }
@@ -11384,18 +11415,19 @@ namespace WindowsFormsApp1
                         || Control.IsKeyLocked(Keys.CapsLock)
                         // 檢查 Caps Lock 狀態
                         || KeyboardInfo.getKeyStateToggled(System.Windows.Input.Key.CapsLock)
-                        || KeyboardInfo.getKeyStateDown(System.Windows.Input.Key.LeftShift)
+                        || KeyboardInfo.getKeyStateDown(System.Windows.Input.Key.CapsLock)
+                        //|| KeyboardInfo.getKeyStateDown(System.Windows.Input.Key.LeftShift)//因為多工時易遭誤按，故改用Caps鍵就好
                         || Control.IsKeyLocked(Keys.CapsLock)
                         || IsCapsLockOn())
                     {
                         if (KeyboardInfo.getKeyStateToggled(System.Windows.Input.Key.CapsLock)
-                            || (KeyboardInfo.getKeyStateDown(System.Windows.Input.Key.LeftShift)
-                                && !KeyboardInfo.getKeyStateDown(System.Windows.Input.Key.Insert)//非在複製貼上
-                                && !KeyboardInfo.getKeyStateDown(System.Windows.Input.Key.Delete)
-                                && !KeyboardInfo.getKeyStateDown(System.Windows.Input.Key.Left)//非在做選取時
-                                && !KeyboardInfo.getKeyStateDown(System.Windows.Input.Key.Right)
-                                && !KeyboardInfo.getKeyStateDown(System.Windows.Input.Key.Up)
-                                && !KeyboardInfo.getKeyStateDown(System.Windows.Input.Key.Down))
+                            //|| (KeyboardInfo.getKeyStateDown(System.Windows.Input.Key.LeftShift)
+                            //    && !KeyboardInfo.getKeyStateDown(System.Windows.Input.Key.Insert)//非在複製貼上
+                            //    && !KeyboardInfo.getKeyStateDown(System.Windows.Input.Key.Delete)
+                            //    && !KeyboardInfo.getKeyStateDown(System.Windows.Input.Key.Left)//非在做選取時
+                            //    && !KeyboardInfo.getKeyStateDown(System.Windows.Input.Key.Right)
+                            //    && !KeyboardInfo.getKeyStateDown(System.Windows.Input.Key.Up)
+                            //    && !KeyboardInfo.getKeyStateDown(System.Windows.Input.Key.Down))//因為多工時易遭誤按，故改用Caps鍵就好
                             || Control.IsKeyLocked(Keys.CapsLock)
                             || IsCapsLockOn())//GitHub　Copilot大菩薩：要實現根據 Caps Lock 燈的狀態來執行 FastModeSwitcher 方法，我們可以使用 Control.IsKeyLocked 方法來檢查 Caps Lock 燈的狀態。這個方法可以直接檢查 Caps Lock 燈是否亮著。……這樣可以確保在 Caps Lock 燈亮時觸發 FastModeSwitcher 方法，而不需要按住 Caps Lock 鍵。
                         {
@@ -11403,6 +11435,7 @@ namespace WindowsFormsApp1
                                 FastModeSwitcher();
                         }
                         else
+                            if (!KeyboardInfo.getKeyStateToggled(System.Windows.Input.Key.Add) && !KeyboardInfo.getKeyStateDown(System.Windows.Input.Key.Subtract))
                             FastModeSwitcher();
                         //if (!FastMode) autoPastetoCtextQuitEditTextboxCancel = true;
                     }
@@ -11831,7 +11864,7 @@ namespace WindowsFormsApp1
                         if (br.QuickeditLinkIWebElement != null)
                         {
                             //const string inputText = "《四庫全書》􏿽{{經史子集部　}}<p>";
-                            const string inputText = "《四庫全書》􏿽{{集部　}}<p>";
+                            const string inputText = "《四庫全書》􏿽{{史部　}}<p>";
                             br.QuickeditLinkIWebElement.Click();
                             PauseEvents();
                             textBox3.Text = driver.Url;
@@ -15942,17 +15975,7 @@ namespace WindowsFormsApp1
             //點一下加新分行
             if (ModifierKeys == Keys.Control && e.Button == MouseButtons.Left)
             {
-                if (textBox1.SelectionLength == 0)
-                {
-                    //Point p = e.Location;
-                    //int s = textBox1.GetCharIndexFromPosition(p);
-                    //string x = textBox1.Text;
-                    undoRecord();
-                    textBox1.SelectedText = Environment.NewLine;
-                    //textBox1.Text = x.Substring(0, s) + Environment.NewLine + x.Substring(s, x.Length - s);
-                    //resumeLocationView(p, s);
-                }
-                //switchRichTextBox1();
+                newLine();
                 return;
             }
 
@@ -15969,6 +15992,45 @@ namespace WindowsFormsApp1
                 return;
             }
 
+        }
+
+        /// <summary>
+        /// 折行、分行、新行
+        /// </summary>
+        private void newLine()
+        {
+            if (textBox1.SelectionLength == 0)
+            {
+                //Point p = e.Location;
+                //int s = textBox1.GetCharIndexFromPosition(p);
+                //string x = textBox1.Text;
+                undoRecord();
+                caretPositionRecord();
+                string clipChkSpace = Clipboard.GetText();  //如果剪貼簿裡是分段符號+全形空格者，蓋為縮排之文本，將自動再按下其空格數
+                StringBuilder sbInsertBreak = new StringBuilder(); int i = 0;
+                sbInsertBreak.Append(Environment.NewLine);
+                if (clipChkSpace.StartsWith(Environment.NewLine) && clipChkSpace.EndsWith("　") && clipChkSpace.Replace("　", string.Empty) == Environment.NewLine)
+                {
+                    while (Environment.NewLine.Length + i + 1 <= clipChkSpace.Length && clipChkSpace.Substring(Environment.NewLine.Length + i, 1) == "　")
+                    {
+                        i++;
+                        sbInsertBreak.Append("　");
+                    }
+                }
+                else//如果剪貼簿裡不是分段符號+全形空格者，則以插入點所在行/段的縮排格數為準
+                {
+                    while (i < _leadingSpacesRegex.Match(GetLineText(textBox1.Text, textBox1.SelectionStart).Replace("􏿽", "　")).Value.Length)
+                    {
+                        i++;
+                        sbInsertBreak.Append("　");
+                    }
+                }
+                textBox1.SelectedText = sbInsertBreak.ToString();
+                textBox1.Select(textBox1.SelectionStart + textBox1.SelectionLength, 0);
+                //textBox1.Text = x.Substring(0, s) + Environment.NewLine + x.Substring(s, x.Length - s);
+                //resumeLocationView(p, s);
+            }
+            //switchRichTextBox1();
         }
 
         private void resumeLocationView(Point p, int s)
@@ -17423,7 +17485,8 @@ namespace WindowsFormsApp1
                         nextPages(Keys.PageUp, false);
                         br.driver.SwitchTo().Window(driver.CurrentWindowHandle);
                         //上一頁
-                        if (autoPaste2QuickEdit || keyinTextMode) AvailableInUseBothKeysMouse();
+                        //if (autoPaste2QuickEdit || keyinTextMode) AvailableInUseBothKeysMouse();
+                        AvailableInUseBothKeysMouse();
                         #region 檢查textBox1的Text值                        
                         if (keyinTextMode && browsrOPMode == BrowserOPMode.seleniumNew)
                         {
@@ -17440,6 +17503,7 @@ namespace WindowsFormsApp1
                         //keyDownCtrlAdd(false);
                         break;
                     case MouseButtons.XButton2:
+                        bool rect = false;
                         if (browsrOPMode != BrowserOPMode.appActivateByName)
                         {//過於頻繁會造成chromedriver反應不及而當掉
                             timeDifference = DateTime.Now.Subtract(nextPageStartTime);
@@ -17447,13 +17511,17 @@ namespace WindowsFormsApp1
                                 return;
                             nextPageStartTime = DateTime.Now;
                             if (br.WaitFindWebElementBySelector_ToBeClickable("#canvas > svg > rect") != null)
+                            {
+                                rect = true;
                                 br.Input_picture(); //圖像的輔助輸入
+                            }
                         }
                         //keyDownCtrlAdd(true);
                         //下一頁
                         nextPages(Keys.PageDown, false);
                         br.driver.SwitchTo().Window(driver.CurrentWindowHandle);
-                        if (autoPaste2QuickEdit || keyinTextMode) AvailableInUseBothKeysMouse();
+                        //if (autoPaste2QuickEdit || keyinTextMode) AvailableInUseBothKeysMouse();
+                        if (!rect) AvailableInUseBothKeysMouse();
                         break;
                     default:
                         break;
@@ -17518,6 +17586,7 @@ namespace WindowsFormsApp1
                     lines_perPage = countLinesPerPage(textBox1.Text.Substring(0, textBox1.SelectionStart));
                 }
                 resetPageTextEndPositionPasteToCText();
+                if (!autoPaste2QuickEdit) AvailableInUseBothKeysMouse();
             }
         }
 

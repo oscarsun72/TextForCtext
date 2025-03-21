@@ -269,11 +269,21 @@ namespace TextForCtext
                     }
                 }
 
+                whs = driver.WindowHandles;
                 if (whs == null || whs.Count == 0) return null;// string.Empty;                
                 //_lastValidWindowHandle = _lastValidWindowHandle ?? (whs.Count > 0 ? whs[whs.Count - 1] : null);
                 if (!whs.Contains(_lastValidWindowHandle))
+                {
+                    for (int i = whs.Count - 1; i > -1; i--)
+                    {
+                        driver.SwitchTo().Window(whs[i]);
+                        if (DialogResult.OK == Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("是這個分頁嗎？"))
+                            _lastValidWindowHandle = whs[i];
+                        return _lastValidWindowHandle;
+                    }
                     //return whs[whs.Count - 1];
                     return whs.Last();
+                }
                 else
                     return _lastValidWindowHandle;
                 /* 20230822 Bing大菩薩： https://sl.bing.net/fo9YWhdvMWG
@@ -611,7 +621,14 @@ namespace TextForCtext
                 {
                     string iweText = iwe.GetAttribute("text");
                     if (iweText != "簡單修改模式" && iweText != "Quick edit")
+                    {
+                        //#quickedit > a:nth-child(1)                        
+                        //# quickedit > a:nth-child(2)
+                        if (DialogResult.OK == Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("是否是這個超連結控制項？"
+                            + Environment.NewLine + Environment.NewLine + iweText))
+                            return iwe;
                         Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("沒有找到正確的「簡單修改模式Quick edit」超連結控制項，請檢查！");
+                    }
                 }
                 return iwe;
             }
@@ -2336,9 +2353,10 @@ namespace TextForCtext
                         iweConfirm.Click();
                     if (DialogResult.Cancel ==
                         Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("Please confirm that you are human! 請輸入認證圖案"
-                        + Environment.NewLine + Environment.NewLine + "請輸入完畢後再按「確定」！程式會幫忙按下「OK」送出", string.Empty, false))
+                        + Environment.NewLine + Environment.NewLine + "請輸入完畢後再按「確定」！程式會幫忙按下「OK」送出"
+                        + Environment.NewLine + Environment.NewLine + "★★！最好按下「取消」以回到前數頁檢查是否有正確送出，以免白做！！", string.Empty, false))
                     {
-                        Debugger.Break();
+                        //Debugger.Break();
                         return false;
                     }
                     while (true)
@@ -11686,12 +11704,31 @@ namespace TextForCtext
             LastValidWindow = driver.CurrentWindowHandle;
             bool result = CopySKQSNextVolume();
             if (driver.WindowHandles.Contains(LastValidWindow))
+            {
                 driver.SwitchTo().Window(LastValidWindow);
+                if (driver.Url != Form1.InstanceForm1.textBox3Text)
+                {
+                    //Debugger.Break();
+                    bool foundWindowHandle = false;
+                    for (int i = driver.WindowHandles.Count - 1; i > -1; i--)
+                    {
+                        driver.SwitchTo().Window(driver.WindowHandles[i]);
+                        if (driver.Url == Form1.InstanceForm1.textBox3Text)
+                        {
+                            foundWindowHandle = true;
+                            LastValidWindow = driver.WindowHandles[i];
+                            break;
+                        }
+                    }
+                    if (!foundWindowHandle)
+                        driver.SwitchTo().Window(LastValidWindow);
+                }
+            }
             else
                 Debugger.Break();
 
 
-            BringToFront("chrome");
+            //BringToFront("chrome");//●●●●●●●●●●●●●●
             //剪貼簿只能單一執行緒
             //Task.Run(() =>
             //{
@@ -11827,10 +11864,12 @@ namespace TextForCtext
             //Actions actions = new Actions(driver);
             ////actions.MoveToElement(element).Click().KeyDown(OpenQA.Selenium.Keys.Control).SendKeys("a").SendKeys("c").KeyUp(OpenQA.Selenium.Keys.Control).Perform();
             //actions.MoveToElement(element).Click().KeyDown(OpenQA.Selenium.Keys.Control).SendKeys("c").KeyUp(OpenQA.Selenium.Keys.Control).Perform();
-            ChromeSetFocus();
-            BringToFront("chrome");
+            //ChromeSetFocus();
+            //BringToFront("chrome");
             Clipboard.Clear();
-            SendKeys.Send("^c");
+            //element.SendKeys(selm.Keys.Control + "c");//此元件無法與使用者互動
+            WaitFindWebElementBySelector_ToBeClickable("body").SendKeys(selm.Keys.Control + "c");//外面的框
+            //SendKeys.Send("^c");
             //SendKeys.SendWait("^c");
             //Thread.Sleep(900);
             //Thread.Sleep(150);
