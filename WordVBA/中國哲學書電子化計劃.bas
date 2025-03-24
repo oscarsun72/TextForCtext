@@ -1610,6 +1610,7 @@ nextRecord:
     SystemSetup.contiUndo ur
     
     d.ActiveWindow.windowState = wdWindowStateMinimize
+    d.Range.InsertParagraphAfter
     d.Range(d.Paragraphs(1).Range.start, d.Paragraphs(1).Range.End - 1).text = endPageNum + 1
     d.Range(d.Paragraphs(2).Range.start, d.Paragraphs(2).Range.End - 1).text = endPageNum + 9
     

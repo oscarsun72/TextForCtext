@@ -260,8 +260,17 @@ namespace TextForCtext
                             }
                             else
                             {
-                                Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
-                                return null;
+                                if (DialogResult.OK == Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly(ex.HResult + ex.Message + Environment.NewLine +
+                                    "是否要重啟chromedriver？"))
+                                {
+                                    RestartChromedriver();
+                                    if (driver.WindowHandles.Contains(_lastValidWindowHandle))
+                                        return _lastValidWindowHandle;
+                                    else
+                                        return driver.WindowHandles.Last();
+                                }
+                                else
+                                    return null;
                             }
                         default:
                             Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
@@ -271,17 +280,18 @@ namespace TextForCtext
 
                 whs = driver.WindowHandles;
                 if (whs == null || whs.Count == 0) return null;// string.Empty;                
-                //_lastValidWindowHandle = _lastValidWindowHandle ?? (whs.Count > 0 ? whs[whs.Count - 1] : null);
+                                                               //_lastValidWindowHandle = _lastValidWindowHandle ?? (whs.Count > 0 ? whs[whs.Count - 1] : null);
                 if (!whs.Contains(_lastValidWindowHandle))
                 {
                     for (int i = whs.Count - 1; i > -1; i--)
                     {
                         driver.SwitchTo().Window(whs[i]);
                         if (DialogResult.OK == Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("是這個分頁嗎？"))
+                        {
                             _lastValidWindowHandle = whs[i];
-                        return _lastValidWindowHandle;
+                            return _lastValidWindowHandle;
+                        }
                     }
-                    //return whs[whs.Count - 1];
                     return whs.Last();
                 }
                 else
@@ -2357,6 +2367,9 @@ namespace TextForCtext
                         + Environment.NewLine + Environment.NewLine + "★★！最好按下「取消」以回到前數頁檢查是否有正確送出，以免白做！！", string.Empty, false))
                     {
                         //Debugger.Break();
+                        ActiveForm1.TopMost = false;
+                        driver.SwitchTo().Window(driver.CurrentWindowHandle);
+                        //BringToFront("chrome");
                         return false;
                     }
                     while (true)
@@ -11773,6 +11786,7 @@ namespace TextForCtext
             //取得下一卷的網址
             if (urlPrefixDomain == "skqs.guoxuedashi.net")
             {
+                if (url.IndexOf(".html") == -1) return false;
                 url = GetNextPageUrl(url.Substring(0, url.IndexOf(".html"))) + ".html";
             }
             else if (urlPrefixDomain == "www.kanripo.org")
@@ -12003,9 +12017,9 @@ namespace TextForCtext
             {
                 result = confirm_that_you_are_human = driver.Url == "https://ctext.org/wiki.pl" || Please_confirm_that_you_are_human_Page != null;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-
+                Console.WriteLine(ex.HResult + ex.Message);
                 Console.WriteLine(WebDriverWaitTimeSpan.ToString());
                 Console.WriteLine(driver.Manage().Timeouts().PageLoad.ToString());
                 Debugger.Break();

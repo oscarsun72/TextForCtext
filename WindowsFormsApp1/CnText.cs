@@ -156,7 +156,7 @@ namespace TextForCtext
         {
             if (!force2mark) if (HasEditedWithPunctuationMarks(ref clpTxt)) { Form1.playSound(Form1.soundLike.error); return ref clpTxt; }
             //提示音
-            //new SoundPlayer(@"C:\Windows\Media\Windows Balloon.wav").Play();
+            new System.Media.SoundPlayer(@"C:\Windows\Media\Windows Balloon.wav").Play();
             string clpTxtOriginal = clpTxt;
             ado.Connection cnt = new ado.Connection();
             ado.Recordset rst = new ado.Recordset();
@@ -1871,7 +1871,7 @@ namespace TextForCtext
                     secondItem.Add(si.SubstringByTextElements(si.LengthInTextElements % 2 == 1 ? si.LengthInTextElements / 2 + 1 : si.LengthInTextElements / 2));
             }
 
-            string result = "{{" + string.Join(spaces, firstItem) + "、" + string.Join(spaces, secondItem) + "}}";
+            string result = ("{{" + string.Join(spaces, firstItem) + "、" + string.Join(spaces, secondItem) + "}}").Replace(" ", "􏿽");
             return result;
             #region 單字且單空白間隔
             //var matches = Regex.Matches(input, @"\{\{(.*?)\}\}");

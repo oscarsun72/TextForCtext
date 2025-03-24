@@ -913,7 +913,9 @@ namespace WindowsFormsApp1
                                 goto default;
                         default:
                             Console.WriteLine(ex.HResult + ex.Message);
-                            Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
+                            if (DialogResult.OK ==
+                                    Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly(ex.HResult + ex.Message))
+                                RestartChromedriver();
                             break;
                     }
                 }
@@ -1713,7 +1715,10 @@ namespace WindowsFormsApp1
                     if (Math.Abs(
                         new StringInfo(xCopy.Substring(prePPos + 2,
                         chkP - ("<p>".Length + Environment.NewLine.Length) - (prePPos + 2))).LengthInTextElements
-                         - NormalLineParaLength) > 3)
+                         - NormalLineParaLength) > 2)//檢查<p>位置不當者（不當分段）                    
+                    //if (Math.Abs(
+                    //        countWordsLenPerLinePara(GetLineText(xCopy, prePPos + 2))
+                    //        - NormalLineParaLength) > 2)//檢查<p>位置不當者（不當分段）
                     {
                         chkP = -1;
                     }
@@ -2433,7 +2438,8 @@ namespace WindowsFormsApp1
             {
                 if (e.KeyCode == Keys.D1)
                 {//Alt + Shift + 1 如宋詞中的換片空格，只將文中的空格轉成空白，其他如首綴前罝以明段落或標題者不轉換
-                    e.Handled = true; SpacesBlanksInContext(); return;
+                    e.Handled = true; SpacesBlanksInContext(); 
+                    return;
                 }
                 if (e.KeyCode == Keys.D2)
                 {//Alt + Shift + 2 : 將選取區內的「<p>」取代為「|」 ，而「　」取代為「􏿽」並清除「*」且將無「|」前綴的分行符號加上「|」
@@ -2583,6 +2589,7 @@ namespace WindowsFormsApp1
                 if (e.KeyCode == Keys.Add || e.KeyCode == Keys.Oemplus || e.KeyCode == Keys.Subtract || e.KeyCode == Keys.NumPad5)
                 {//Ctrl + + （Ctrl + 數字鍵盤 +） Ctrl + -
                     e.Handled = true;
+                    if (fastMode) BeginUpdate();
                     //還原放大的書圖
                     RestoreImageSize();
                     undoRecord();
@@ -3451,12 +3458,14 @@ namespace WindowsFormsApp1
                 if (e.KeyCode == Keys.A)
                 {//Alt + a : 通常是用在自動輸入模式時根據上一次判斷的頁尾來自動貼入本頁內容
                     e.Handled = true;
+                    if (fastMode) BeginUpdate();
                     //還原放大的書圖
                     //if (autoPaste2QuickEdit)
+                    RestoreImageSize();
                     if (!keyinTextMode)
                     { playSound(soundLike.press, true); altA_predictEndofPageRange(); }
-                    RestoreImageSize();
                     keyDownCtrlAdd(false);
+                    RestoreImageSize();
                     if (!autoPaste2QuickEdit) AvailableInUseBothKeysMouse();
                     return;
                 }
@@ -3813,6 +3822,7 @@ namespace WindowsFormsApp1
                         }
                         else if (s - 1 == 0)
                             s--;
+
                         textBox1.Select(s, l);
                     }//如果沒有選取，則自動選取插件點所在行/段
 
@@ -3844,6 +3854,8 @@ namespace WindowsFormsApp1
                         else
                             textBox1.SelectionStart = ++s;
                     #endregion
+
+                    AvailableInUseBothKeysMouse();
 
                     return;
                 }
@@ -5700,11 +5712,14 @@ namespace WindowsFormsApp1
                     #endregion
                     if (i > 1 && x.Substring(i - 2, 2) != Environment.NewLine && notTitleIndent)
                     {
-                        textBox1.Select(i + offset, 1);
-                        if (textBox1.SelectedText == "　")
+                        if (i - 3 > -1 && textBox1.Text.Substring(i - 3, 3) != "<p>")//<p>後面的全形空格（　）也不取代為空白（􏿽）
                         {
-                            textBox1.SelectedText = "􏿽";
-                            offset++;
+                            textBox1.Select(i + offset, 1);
+                            if (textBox1.SelectedText == "　")
+                            {
+                                textBox1.SelectedText = "􏿽";
+                                offset++;
+                            }
                         }
                     }
                     else
@@ -5794,6 +5809,8 @@ namespace WindowsFormsApp1
 
             restoreCaretPosition(textBox1, s, 0);
             stopUndoRec = false;
+            if (textBox1.TextLength > 1100) playSound(soundLike.over, true);
+
         }
         /// <summary>
         /// Alt + 1 : 鍵入本站制式留空空格標記「􏿽」：若有選取則取代全形空格「　」為「􏿽」
@@ -6285,8 +6302,8 @@ namespace WindowsFormsApp1
                 //if (titleFirstParaText.Contains("歌")) Debugger.Break();
 
                 #region 星號檢查
-                if (titleFirstParaText.IndexOf(asterisks) > -1) return true;//如果已有星號標記則斥回
-                                                                            //檢查前一行/段的內容
+                if (s > 0 && titleFirstParaText.IndexOf(asterisks) > -1) return true;//如果已有星號標記則斥回
+                                                                                     //檢查前一行/段的內容
 
                 int preLineEnd = x.LastIndexOf(Environment.NewLine, s);
                 string preLineText, nextLineText;
@@ -8746,7 +8763,9 @@ namespace WindowsFormsApp1
                     Debugger.Break();
                     wordsPerLinePara = countWordsLenPerLinePara(se);
                 }
-                if (NormalLineParaLength == 0) NormalLineParaLength = wordsPerLinePara;
+                //if (NormalLineParaLength == 0) NormalLineParaLength = wordsPerLinePara;
+                if (normalLineParaLength != wordsPerLinePara)
+                    NormalLineParaLength = wordsPerLinePara;
             }
 
             bool ev = _eventsEnabled;
@@ -9097,11 +9116,12 @@ namespace WindowsFormsApp1
                         string blank2Space = textBox1.SelectedText.Replace("􏿽", "　");
                         textBox1.SelectedText = blank2Space;
                         secondLineText = GetLineText(textBox1.Text, lineS, out lineS, out lineL);
-                        int spsPos = secondLineText.IndexOf("　", leadingSpacesLength);
+                        int spsPos = secondLineText.IndexOf("　", leadingSpacesLength);//如果標題前置空格後面還有空格
 
                         if (spsPos > -1)
                             //textBox1.Select(lineS + leadingSpacesLength, spsPos - (lineS + leadingSpacesLength));
-                            textBox1.Select(lineS + leadingSpacesLength + leadingSpacesLength, spsPos - (lineS + leadingSpacesLength) - leadingSpacesLength);
+                            //textBox1.Select(lineS + leadingSpacesLength + leadingSpacesLength, spsPos - (lineS + leadingSpacesLength) - leadingSpacesLength);
+                            textBox1.Select(lineS + leadingSpacesLength, spsPos - leadingSpacesLength);
                         else
                             //textBox1.Select(lineS, lineL);
                             textBox1.Select(lineS + leadingSpacesLength, lineL - leadingSpacesLength);
@@ -10718,9 +10738,9 @@ namespace WindowsFormsApp1
         /// </summary>
         internal static void RestoreImageSize()
         {
-            string height = br.Svg_image_PageImageFrame?.GetAttribute("height");
-            if (height != null)
-                if (int.Parse(height) > 700)//587)
+            string width = br.Svg_image_PageImageFrame?.GetAttribute("width");
+            if (width != null)
+                if (int.Parse(width) > 500)
                     br.Svg_image_PageImageFrame?.Click();
 
         }
@@ -11863,8 +11883,10 @@ namespace WindowsFormsApp1
                         br.driver.Navigate().GoToUrl(textBox3.Text);
                         if (br.QuickeditLinkIWebElement != null)
                         {
-                            //const string inputText = "《四庫全書》􏿽{{經史子集部　}}<p>";
-                            const string inputText = "《四庫全書》􏿽{{史部　}}<p>";
+                            //const string inputText = "《四庫全書》􏿽{{經部　}}<p>";
+                            //const string inputText = "《四庫全書》􏿽{{史部　}}<p>";
+                            const string inputText = "《四庫全書》􏿽{{子部　}}<p>";
+                            //const string inputText = "《四庫全書》􏿽{{集部　}}<p>";                            
                             br.QuickeditLinkIWebElement.Click();
                             PauseEvents();
                             textBox3.Text = driver.Url;
@@ -15218,6 +15240,9 @@ namespace WindowsFormsApp1
                                 + Environment.NewLine + Environment.NewLine + "請輸入完畢後再按「確定」！", string.Empty, false))
                             {
                                 Debugger.Break();
+                                TopMost = false;
+                                driver.SwitchTo().Window(driver.CurrentWindowHandle);
+                                return false;
                             }
                             driver.Navigate().Back();
                             while (driver.Url == "https://ctext.org/wiki.pl")
