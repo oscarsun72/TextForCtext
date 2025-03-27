@@ -977,6 +977,22 @@ namespace TextForCtext
                 }
                 else
                     return null;
+                if (iwe == null)
+                    iwe = WaitFindWebElementBySelector_ToBeClickable("#previmg");
+                if (iwe == null)
+                {
+                    if (!IsDriverInvalid())
+                        iwe = WaitFindWebElementBySelector_ToBeClickable("#previmg");
+                    //iwe = driver.FindElement(By.XPath("/html/body/div[2]/div[3]/img"));
+                    else
+                    {
+                        if (!driver.WindowHandles.Contains(LastValidWindow))
+                            LastValidWindow = driver.WindowHandles.Last();
+                        driver.SwitchTo().Window(LastValidWindow);
+
+                        iwe = WaitFindWebElementBySelector_ToBeClickable("#previmg");
+                    }
+                }
                 return iwe;
             }
         }
@@ -10199,6 +10215,7 @@ namespace TextForCtext
 
             if (character.LengthInTextElements != 2) { Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("指定的字元長度不對！請檢查"); return false; }
             if (character.SubstringByTextElements(0, 1) == character.SubstringByTextElements(1, 1)) { Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("所指定取代的字元相同，請重設！"); return false; }
+            if (!Form1.IsChineseString(character.SubstringByTextElements(0, 1)) || !Form1.IsChineseString(character.SubstringByTextElements(1, 1))) { return false; }
 
             #endregion
 
@@ -12022,7 +12039,7 @@ namespace TextForCtext
                 Console.WriteLine(ex.HResult + ex.Message);
                 Console.WriteLine(WebDriverWaitTimeSpan.ToString());
                 Console.WriteLine(driver.Manage().Timeouts().PageLoad.ToString());
-                Debugger.Break();
+                //Debugger.Break();
                 if (driver.Manage().Timeouts().PageLoad < DriverManageTimeoutsPageLoad)
                     driver.Manage().Timeouts().PageLoad = DriverManageTimeoutsPageLoad;
                 Thread.Sleep(1000);
