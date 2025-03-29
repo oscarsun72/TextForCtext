@@ -5737,20 +5737,29 @@ namespace WindowsFormsApp1
                     }
                     #endregion                    
                     #region 作為縮排的空格也不處理(正文者詳後，此處理注文的縮排）
-                    string currentLine = GetLineText(x, i);
+                    string currentLine = GetLineText(x, i, out int lineS, out int lineL);
 
-                    //if (currentLine.Contains("潘述")) Debugger.Break();
+                    if (currentLine.Contains("不忍移災於卿佐曰移腹心之疾寘諸")) Debugger.Break();
+                    //if (currentLine.Contains("杜預曰：慆疑")) Debugger.Break();
                     //if (x.Substring(i-1,1)== "述") Debugger.Break();
 
                     if ((currentLine.StartsWith("{{　") || (currentLine.StartsWith("　") && currentLine.Contains("{{") == false))//獨立注文的縮排
                         && ((currentLine.EndsWith("}}") || currentLine.EndsWith("}}<p>") || currentLine.EndsWith("}}。<p>")
                                             && currentLine.LastIndexOf("}}", currentLine.LastIndexOf("}}")) == -1)
-                        || (currentLine.StartsWith("{{　") && currentLine.IndexOf("}}") == -1)))
+                        || (currentLine.StartsWith("{{　") && currentLine.IndexOf("}}") == -1))
+                        /*如：􏿽臣光曰：晏嬰有言天命不慆不貳其命{{晏子對齊侯禳彗之辭也}}
+                            {{　杜預曰：慆疑　也音他刀翻}}禍福之至安可移乎昔楚昭王宋景公……
+                        */
+                        || (currentLine.StartsWith("{{　") && currentLine.IndexOf("}}", 3) > currentLine.IndexOf("　", 3)
+                            && CountWordsinDomain("　", x.Substring(lineS, i - lineS)) < 2)//3="{{　".Length 
+                        )
                     {
+
                         spsCount = 1;
                         while (i + 1 <= x.Length && x.Substring(i + spsCount, 1) == "　")
                         {
                             spsCount++;
+
                         }
                         //if (spsCount > 1) spsCount--;
                         i += spsCount;
@@ -5795,7 +5804,15 @@ namespace WindowsFormsApp1
                             //    xLine = xLine;
                             //}
                             #endregion
-                            if (xLine.Substring(1, 1) != "　" && xLine.IndexOf("*") == -1)
+
+                            int preParaEnd = x.LastIndexOf(Environment.NewLine, i);
+                            int preParaStart = x.LastIndexOf(Environment.NewLine, preParaEnd - 1) + 2; string prePara = string.Empty;
+                            if (preParaStart > -1)
+                                prePara = x.Substring(preParaStart, preParaEnd - preParaStart);
+                            if (xLine.Substring(1, 1) != "　" && xLine.IndexOf("*") == -1
+                                && (!prePara.StartsWith("{{　") && !prePara.StartsWith("　"))
+                                && (!(prePara.StartsWith("􏿽") && countWordsLenPerLinePara(prePara) == wordsPerLinePara))
+                                )
                             {
                                 textBox1.Select(i + offset, 1);
                                 if (textBox1.SelectedText == "　")
@@ -11428,7 +11445,9 @@ namespace WindowsFormsApp1
         /// </summary>
         public void EndUpdate()
         {
-            if (!Visible) Visible = true;
+            Visible = true;
+            this.Show();
+            //show_nICo(Keys.None);
             rePaint = true;
             SendMessage(this.Handle, WM_SETREDRAW, (IntPtr)1, IntPtr.Zero);
             this.Refresh();
@@ -11964,8 +11983,8 @@ namespace WindowsFormsApp1
                         if (br.QuickeditLinkIWebElement != null)
                         {
                             //const string inputText = "《四庫全書》􏿽{{經部　}}<p>";
-                            //const string inputText = "《四庫全書》􏿽{{史部　}}<p>";
-                            const string inputText = "《四庫全書》􏿽{{子部　}}<p>";
+                            const string inputText = "《四庫全書》􏿽{{史部　}}<p>";
+                            //const string inputText = "《四庫全書》􏿽{{子部　}}<p>";
                             //const string inputText = "《四庫全書》􏿽{{集部　}}<p>";                            
                             br.QuickeditLinkIWebElement.Click();
                             PauseEvents();
@@ -14332,7 +14351,8 @@ namespace WindowsFormsApp1
                         }
                     }
                     else
-                        gotoNextChapter_FormatContentInput_SKQS();
+                        if (!gotoNextChapter_FormatContentInput_SKQS())
+                        Debugger.Break();
                     undoRecord(); stopUndoRec = false; ResumeEvents();
                 }
             }
@@ -18759,7 +18779,8 @@ namespace WindowsFormsApp1
                 if (textBox1.TextLength == 0 && br.pageUBound < int.Parse(_currentPageNum) && IsValidUrl＿keyDownCtrlAdd(driver.Url))
                 {
                     undoRecord(); stopUndoRec = true; PauseEvents();
-                    gotoNextChapter_FormatContentInput_SKQS();
+                    if (!gotoNextChapter_FormatContentInput_SKQS())
+                        Debugger.Break();
                     undoRecord(); stopUndoRec = false; ResumeEvents();
                 }
                 else

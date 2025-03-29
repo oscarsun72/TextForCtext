@@ -1710,7 +1710,6 @@ namespace TextForCtext
             int splitIndex = text.IndexOf(Environment.NewLine); spacePosition = -1;
             #region 規範文本
             string textOrigin = text;
-            CnText.RemoveBooksPunctuation(ref text);
 
             if (splitIndex > -1)
             {
@@ -1724,6 +1723,7 @@ namespace TextForCtext
                 text = Form1.InstanceForm1._document.Text.Substring(Form1.InstanceForm1.TextBox1_SelectionStart, Form1.InstanceForm1.TextBox1_SelectionLength);
                 text = text.Replace("}}" + Environment.NewLine + "{{", Environment.NewLine);
             }
+            CnText.RemoveBooksPunctuation(ref text);
             #endregion
 
             if (text.IndexOf(" ") == -1) return null;
@@ -1828,6 +1828,9 @@ namespace TextForCtext
                         //string result = text.Substring(0, startIndex) + "{{" + sb.ToString() + "}}" + text.Substring(endIndex + 2);
                         //return result.Replace(" ", "􏿽");
                         //return (text.Substring(0, startIndex) + "{{" + sb.ToString() + "}}" + text.Substring(endIndex + 2)).Replace(" ", "􏿽");
+                                                
+                        CnText.RemarkBooksPunctuation(ref text);
+
                         return text;
                     }
                 }
