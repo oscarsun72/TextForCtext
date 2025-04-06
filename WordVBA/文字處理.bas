@@ -171,7 +171,7 @@ retry:      Next ch
     '        Set rst = db.OpenRecordset("µüÀWªí", dbOpenDynaset)
     '        Resume
         Case Else
-            MsgBox Err.number & ":" & Err.Description, vbExclamation
+            MsgBox Err.number & ":" & Err.description, vbExclamation
             Resume
     End Select
 End Sub
@@ -241,7 +241,7 @@ retry:      Next WD
             d.Quit
             End
         Case Else
-            MsgBox Err.number & ":" & Err.Description, vbExclamation
+            MsgBox Err.number & ":" & Err.description, vbExclamation
             Resume
     End Select
     '¦¸¼Æ:
@@ -296,14 +296,14 @@ Sub ¶i¶¥µüÀW() '2002/11/10­nSub¤~¯à¦bWord¤¤°õ¦æ!'2005/4/21¦¹ªk¦b¶]¤jÀÉ®×®É¤Ó¨S®Ä
                 Select Case phralh
                     Case Is = 1
                         If Err.LastDllError <> 0 Then
-                            MsgBox Err.LastDllError & ":" & Err.Description & "Err.Number:" & Err.number
+                            MsgBox Err.LastDllError & ":" & Err.description & "Err.Number:" & Err.number
                             GoTo ¿ù»~³B²z
                         End If
     '                    phras = .Characters(phra)'¦¹ªk¤ÓºC!
                         phras = VBA.Mid(Dw, phra, 1)
                     Case Is = 2
                         If Err.LastDllError <> 0 Then
-                            MsgBox Err.LastDllError & ":" & Err.Description & "Err.Number:" & Err.number
+                            MsgBox Err.LastDllError & ":" & Err.description & "Err.Number:" & Err.number
                             GoTo ¿ù»~³B²z
                         End If
     '                    If phra + 1 <= .Characters.Count Then _
@@ -311,7 +311,7 @@ Sub ¶i¶¥µüÀW() '2002/11/10­nSub¤~¯à¦bWord¤¤°õ¦æ!'2005/4/21¦¹ªk¦b¶]¤jÀÉ®×®É¤Ó¨S®Ä
                         If phra + 1 <= dwL Then phras = VBA.Mid(Dw, phra, 2)
                     Case Is = 3
                         If Err.LastDllError <> 0 Then
-                            MsgBox Err.LastDllError & ":" & Err.Description & "Err.Number:" & Err.number
+                            MsgBox Err.LastDllError & ":" & Err.description & "Err.Number:" & Err.number
                             GoTo ¿ù»~³B²z
                         End If
     '                    If phra + 2 <= .Characters.Count Then _
@@ -321,7 +321,7 @@ Sub ¶i¶¥µüÀW() '2002/11/10­nSub¤~¯à¦bWord¤¤°õ¦æ!'2005/4/21¦¹ªk¦b¶]¤jÀÉ®×®É¤Ó¨S®Ä
                     Case Is = 4
                         On Error GoTo ¿ù»~³B²z
                         If Err.LastDllError <> 0 Then
-                            MsgBox Err.LastDllError & ":" & Err.Description & "Err.Number:" & Err.number
+                            MsgBox Err.LastDllError & ":" & Err.description & "Err.Number:" & Err.number
                             GoTo ¿ù»~³B²z
                         End If
     '                    If phra + 3 <= .Characters.Count Then _
@@ -331,7 +331,7 @@ Sub ¶i¶¥µüÀW() '2002/11/10­nSub¤~¯à¦bWord¤¤°õ¦æ!'2005/4/21¦¹ªk¦b¶]¤jÀÉ®×®É¤Ó¨S®Ä
                     Case Is = 5
                         On Error GoTo ¿ù»~³B²z
                         If Err.LastDllError <> 0 Then
-                            MsgBox Err.LastDllError & ":" & Err.Description & "Err.Number:" & Err.number
+                            MsgBox Err.LastDllError & ":" & Err.description & "Err.Number:" & Err.number
                             GoTo ¿ù»~³B²z
                         End If
     '                    If phra + 4 <= .Characters.Count Then _
@@ -402,7 +402,7 @@ Sub ¶i¶¥µüÀW() '2002/11/10­nSub¤~¯à¦bWord¤¤°õ¦æ!'2005/4/21¦¹ªk¦b¶]¤jÀÉ®×®É¤Ó¨S®Ä
             d.Quit
             End
         Case Else
-            MsgBox Err.number & ":" & Err.Description, vbExclamation
+            MsgBox Err.number & ":" & Err.description, vbExclamation
             Resume
     End Select
 End Sub
@@ -501,7 +501,7 @@ Sub ¶i¶¥µüÀW1() '2002/11/15­nSub¤~¯à¦bWord¤¤°õ¦æ!
             d.Quit
             End
         Case Else
-            MsgBox Err.number & ":" & Err.Description, vbExclamation
+            MsgBox Err.number & ":" & Err.description, vbExclamation
             Resume
     End Select
 End Sub
@@ -639,7 +639,7 @@ Sub «ü©w¦r¼ÆµüÀW() '2002/11/11
             d.Quit
             End
         Case Else
-            MsgBox Err.number & ":" & Err.Description, vbExclamation
+            MsgBox Err.number & ":" & Err.description, vbExclamation
             Resume
     End Select
 End Sub
@@ -725,7 +725,7 @@ Sub «ü©w11¦r¼ÆµüÀW()     '2002/11/15'¥H¦¹¬°¨Ò,¥i§@¬°¹w¥ý­­©w¦r¼Æªº¦U­Óµ{§Ç(¥»¨Ò¬
             d.Quit
             End
         Case Else
-            MsgBox Err.number & ":" & Err.Description, vbExclamation
+            MsgBox Err.number & ":" & Err.description, vbExclamation
             Resume
     End Select
 End Sub
@@ -807,7 +807,7 @@ Sub «ü©w10¦r¼ÆµüÀW() '2002/11/15
             d.Quit
             End
         Case Else
-            MsgBox Err.number & ":" & Err.Description, vbExclamation
+            MsgBox Err.number & ":" & Err.description, vbExclamation
             Resume
     End Select
 End Sub
@@ -890,7 +890,7 @@ Sub «ü©w9¦r¼ÆµüÀW()  '2002/11/15
             d.Quit
             End
         Case Else
-            MsgBox Err.number & ":" & Err.Description, vbExclamation
+            MsgBox Err.number & ":" & Err.description, vbExclamation
             Resume
     End Select
 End Sub
@@ -973,7 +973,7 @@ Sub «ü©w8¦r¼ÆµüÀW()   '2002/11/15
             d.Quit
             End
         Case Else
-            MsgBox Err.number & ":" & Err.Description, vbExclamation
+            MsgBox Err.number & ":" & Err.description, vbExclamation
             Resume
     End Select
 End Sub
@@ -1054,7 +1054,7 @@ Sub «ü©w6¦r¼ÆµüÀW()    '2002/11/15
             d.Quit
             End
         Case Else
-            MsgBox Err.number & ":" & Err.Description, vbExclamation
+            MsgBox Err.number & ":" & Err.description, vbExclamation
             Resume
     End Select
 End Sub
@@ -1135,7 +1135,7 @@ Sub «ü©w5¦r¼ÆµüÀW()     '2002/11/15
             d.Quit
             End
         Case Else
-            MsgBox Err.number & ":" & Err.Description, vbExclamation
+            MsgBox Err.number & ":" & Err.description, vbExclamation
             Resume
     End Select
 End Sub
@@ -1214,7 +1214,7 @@ Sub «ü©w4¦r¼ÆµüÀW()       '2002/11/15
             d.Quit
             End
         Case Else
-            MsgBox Err.number & ":" & Err.Description, vbExclamation
+            MsgBox Err.number & ":" & Err.description, vbExclamation
             Resume
     End Select
 End Sub
@@ -1294,7 +1294,7 @@ Sub «ü©w3¦r¼ÆµüÀW()      '2002/11/15
             d.Quit
             End
         Case Else
-            MsgBox Err.number & ":" & Err.Description, vbExclamation
+            MsgBox Err.number & ":" & Err.description, vbExclamation
             Resume
     End Select
 End Sub
@@ -1373,7 +1373,7 @@ Sub «ü©w2¦r¼ÆµüÀW()       '2002/11/15
             d.Quit
             End
         Case Else
-            MsgBox Err.number & ":" & Err.Description, vbExclamation
+            MsgBox Err.number & ":" & Err.description, vbExclamation
             Resume
     End Select
 End Sub
@@ -1451,7 +1451,7 @@ Sub «ü©w1¦r¼ÆµüÀW()        '2002/11/15
             d.Quit
             End
         Case Else
-            MsgBox Err.number & ":" & Err.Description, vbExclamation
+            MsgBox Err.number & ":" & Err.description, vbExclamation
             Resume
     End Select
 End Sub
@@ -1536,7 +1536,7 @@ Sub «ü©w7¦r¼ÆµüÀW()      '2002/11/15'¥H¦¹¬°¨Ò,¥i§@¬°¹w¥ý­­©w¦r¼Æªº¦U­Óµ{§Ç(¥»¨Ò¬
             d.Quit
             End
         Case Else
-            MsgBox Err.number & ":" & Err.Description, vbExclamation
+            MsgBox Err.number & ":" & Err.description, vbExclamation
             Resume
     End Select
 End Sub
@@ -1631,7 +1631,7 @@ Sub «ü©w¦r¼ÆµüÀW1() '2002/11/15'®Ä¯à¸ûºC!
             d.Quit
             End
         Case Else
-            MsgBox Err.number & ":" & Err.Description, vbExclamation
+            MsgBox Err.number & ":" & Err.description, vbExclamation
             Resume
     End Select
 End Sub
@@ -1722,7 +1722,7 @@ Sub «ü©w¦r¼ÆµüÀW2() '2002/11/15®Ä¯à»P­ì³]­p®t¤£¦h,¦ý¥iÅÜ¼Æ¤Æ!
             d.Quit
             End
         Case Else
-            MsgBox Err.number & ":" & Err.Description, vbExclamation
+            MsgBox Err.number & ":" & Err.description, vbExclamation
             Resume
     End Select
 End Sub
@@ -1888,7 +1888,7 @@ Sub ¤å¥ó¦rÀW_old()
 ErrH:
     Select Case Err.number
         Case Else
-            MsgBox Err.number & Err.Description, vbCritical 'STOP: Resume
+            MsgBox Err.number & Err.description, vbCritical 'STOP: Resume
     '        Resume
             End
         
@@ -1931,7 +1931,7 @@ Function trimStrForSearch_PlainText(x As String) As String
 eH:
     Select Case Err.number
         Case Else
-            MsgBox Err.number & Err.Description
+            MsgBox Err.number & Err.description
     '        Resume
     End Select
 End Function
@@ -1965,7 +1965,7 @@ Function trimStrForSearch(x As String, sl As word.Selection) As String
 eH:
     Select Case Err.number
         Case Else
-            MsgBox Err.number & Err.Description
+            MsgBox Err.number & Err.description
     '        Resume
     End Select
 End Function
@@ -2054,8 +2054,8 @@ Select Case Err.number
         Set rng = Nothing
         Resume
     Case Else
-        MsgBox Err.number & Err.Description
-        Debug.Print Err.number & Err.Description
+        MsgBox Err.number & Err.description
+        Debug.Print Err.number & Err.description
 End Select
 End Function
 
@@ -2469,7 +2469,7 @@ Select Case Err.number
         ReadingLayoutB = True
         Resume
     Case Else
-        MsgBox Err.number & Err.Description, vbCritical 'STOP: Resume
+        MsgBox Err.number & Err.description, vbCritical 'STOP: Resume
         'Resume
         End
     
@@ -2668,7 +2668,7 @@ Select Case Err.number
     Case 91, 5941 '¨S¦³³]©wª«¥óÅÜ¼Æ©Î With °Ï¶ôÅÜ¼Æ,¶°¦X¤¤©Ò»Ýªº¦¨­û¤£¦s¦b
         GoTo 12
     Case Else
-        MsgBox Err.number & Err.Description, vbCritical 'STOP: Resume
+        MsgBox Err.number & Err.description, vbCritical 'STOP: Resume
         Resume
         End
     
@@ -2792,7 +2792,7 @@ Select Case Err.number
         Next c
         Resume Next
     Case Else
-        MsgBox Err.number & Err.Description
+        MsgBox Err.number & Err.description
         End
 End Select
 End Sub
@@ -2999,7 +2999,7 @@ eH:
             SystemSetup.wait 900
             Resume
         Case Else
-            MsgBox Err.number + Err.Description
+            MsgBox Err.number + Err.description
     End Select
 End Sub
 Sub º~Äy¹q¤l¤åÄm¸ê®Æ®w¤å¥»¾ã²z_ª`¤å«e«á¥[¬A¸¹() '³Ì«á°õ¦æ Docs.mark©ö¾ÇÃöÁä¦r(¦b¡u©ö¾ÇÂøµÛ¤å¥»¡v¸ô®|¤U®É¡^
@@ -3605,10 +3605,10 @@ eH:
                 'Application.Wait (Now + TimeValue("0:00:10")) '<~~ Waits ten seconds.
                 Resume 'https://stackoverflow.com/questions/21937053/appactivate-to-return-to-excel
             Case Else
-                If Err.number = -2146233088 And Err.Description = "A exception with a null response was thrown sending an HTTP request to the remote WebDriver server for URL http://localhost:9674/session/a3f86609a0c2a502c01fe9cdbef88686/window. The status of the exception was ConnectFailure, and the message was: µLªk³s±µ¦Ü»·ºÝ¦øªA¾¹" Then
+                If Err.number = -2146233088 And Err.description = "A exception with a null response was thrown sending an HTTP request to the remote WebDriver server for URL http://localhost:9674/session/a3f86609a0c2a502c01fe9cdbef88686/window. The status of the exception was ConnectFailure, and the message was: µLªk³s±µ¦Ü»·ºÝ¦øªA¾¹" Then
                     SystemSetup.killchromedriverFromHere
                 Else
-                    MsgBox Err.number & Err.Description
+                    MsgBox Err.number & Err.description
                 End If
     '            Resume
                 GoTo endS
@@ -3863,11 +3863,11 @@ Function ®Ñ¦W¸¹½g¦W¸¹¼Ðª`PreExamOK(dRange As Range, term As String, startPos_ter
 eH:
         Select Case Err.number
             Case 4608 '¼Æ­È¶W¥X½d³ò ¥ÎDocument.Range¤èªk¥u¯à¨ú±o¥¿¤åªº½d³ò¡]¦pContent¡^¨Ã¤£¯à¨ú±oª`¸}µ¥ªº½d³ò 20250312
-                MsgBox Err.number & Err.Description
+                MsgBox Err.number & Err.description
                 Set rngChk = Nothing
                 'Resume
             Case Else
-                MsgBox Err.number + Err.Description
+                MsgBox Err.number + Err.description
     '            Resume
         End Select
     
@@ -4150,7 +4150,7 @@ bookmarks:
 eH:
         Select Case Err.number
             Case Else
-                MsgBox Err.number + Err.Description
+                MsgBox Err.number + Err.description
                 'Resume
         End Select
 End Sub

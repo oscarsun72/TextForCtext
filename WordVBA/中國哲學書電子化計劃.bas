@@ -1549,7 +1549,7 @@ Sub 千慮一得齋匯出() '20250318
     
     db.cnt_開發_千慮一得齋 cnt
     rst.Open "SELECT 札.札ID, 札.札記 FROM (書 LEFT JOIN 篇 ON 書.書ID = 篇.書ID) LEFT JOIN 札 ON 篇.篇ID = 札.篇ID " & _
-                    "WHERE (((書.書ID)=9325) AND ((札.頁) Between " & stPageNum & " And " & endPageNum & ")) " & _
+                    "WHERE (((書.書ID)=9326) AND ((札.頁) Between " & stPageNum & " And " & endPageNum & ")) " & _
                     "ORDER BY 篇.頁, 篇.篇ID, 札.頁", cnt, adOpenForwardOnly, adLockReadOnly
     Do Until rst.EOF
         Set p = d.Paragraphs.Add
@@ -1574,9 +1574,11 @@ findnext:
             End If
             Select Case rstNote.Fields("類ID").Value
                 Case 36171 '注
-                    If rng.Previous(wdCharacter, 1) = "{" Then
-                        rng.SetRange rng.End, rngDup.End
-                        GoTo findnext
+                    If rng.start > 0 Then
+                        If rng.Previous(wdCharacter, 1) = "{" Then
+                            rng.SetRange rng.End, rngDup.End
+                            GoTo findnext
+                        End If
                     End If
                     rng.text = "{{" & rng.text & "}}"
                 Case 19323 '校,校勘記,真

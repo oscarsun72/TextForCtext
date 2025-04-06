@@ -2386,6 +2386,7 @@ namespace TextForCtext
                         ActiveForm1.TopMost = false;
                         driver.SwitchTo().Window(driver.CurrentWindowHandle);
                         //BringToFront("chrome");
+                        Form1.InstanceForm1.EndUpdate();
                         return false;
                     }
                     while (true)
@@ -9416,6 +9417,7 @@ namespace TextForCtext
                                 + Environment.NewLine + Environment.NewLine + "請輸入完畢後再按「確定」！"))
                             {
                                 Debugger.Break();
+                                Form1.InstanceForm1.EndUpdate();
                             }
                             driver.Navigate().Back();
                             while (driver.Url == "https://ctext.org/wiki.pl")

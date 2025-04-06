@@ -658,7 +658,7 @@ namespace WindowsFormsApp1
             }
             catch (Exception ex)
             {
-                Debugger.Break();
+                //Debugger.Break();
                 Console.WriteLine(ex.HResult + ex.Message);
             }
         }
@@ -1755,7 +1755,7 @@ namespace WindowsFormsApp1
                 if (chkP > -1)
                 {//過短的行略過不檢查
                     if (Math.Abs(countWordsLenPerLinePara(GetLineText(xCopy, chkP - ("<p>".Length + Environment.NewLine.Length)).Replace("<p", ""))
-                        - NormalLineParaLength) > 3)
+                        - NormalLineParaLength) > 2)//3)
                     {
                         chkP = -1;
                     }
@@ -3475,7 +3475,7 @@ namespace WindowsFormsApp1
                     { playSound(soundLike.press, true); altA_predictEndofPageRange(); }
                     keyDownCtrlAdd(false);
                     RestoreImageSize();
-                    if (!autoPaste2QuickEdit) AvailableInUseBothKeysMouse();
+                    if (!autoPaste2QuickEdit && !isSKQSFrontPage(textBox1.Text)) AvailableInUseBothKeysMouse();
                     return;
                 }
                 if (e.KeyCode == Keys.B)
@@ -4399,7 +4399,7 @@ namespace WindowsFormsApp1
         /// </summary>
         private void runCorrectNoteBlankContent()
         {
-            string x;
+            string x, openMark = string.Empty; ;
             if (textBox1.SelectedText == " ") textBox1.SelectionLength = 0;
             if (textBox1.SelectionLength == 0)
             {
@@ -4416,18 +4416,28 @@ namespace WindowsFormsApp1
                 if (textBox1.SelectedText.IndexOf("}}") == -1)
                     textBox1.Select(p.Start, p.Range.GetNextParagraph().End - p.Start);
             }
-            if (textBox1.SelectedText.IndexOf("{{") == -1 || textBox1.SelectedText.IndexOf("}}") == -1
-                || textBox1.SelectedText.IndexOf(" ") == -1)
+            x = textBox1.SelectedText;//以一行/段為處理的單位
+            if (x.IndexOf("{{") == -1 && textBox1.SelectionStart == 0)
+            {
+                openMark = "{{"; int end = textBox1.SelectionLength;
+                x = openMark + x;
+                textBox1.SelectedText = x;
+                textBox1.Select(0, end + 2);
+            }
+            if (x.IndexOf("{{") == -1 || x.IndexOf("}}") == -1
+                || x.IndexOf(" ") == -1)
                 return;
 
             //以上防呆
 
-            x = textBox1.SelectedText;//以一行/段為處理的單位
+            //x = textBox1.SelectedText;//以一行/段為處理的單位
             x = CnText.CorrectNoteBlankContent(x, out int spaceIndex);
             if (!x.IsNullOrEmpty() && textBox1.SelectedText != x)
             {
                 undoRecord();
                 PauseEvents();
+                if (openMark != string.Empty)
+                    x = x.Substring(2);
                 textBox1.SelectedText = x;
                 ResumeEvents();
                 undoRecord();
@@ -8203,8 +8213,10 @@ namespace WindowsFormsApp1
                 //string x = undoTextBox1Text[undoTextBox1Text.Count - ++undoTimes];
                 //string x = undoTextBox1Text[undoTextBox1Text.Count - 1 - ++undoTimes];//20241001
                 string x = undoTextBox1Text[undoTextBox1Text.Count - ++undoTimes];//20241001
-                if (textBox1.Text == x)//●●●●●●●●●●●●●●●20250304
+                if (textBox1.Text == x && undoTextBox1Text.Count - (undoTimes + 1) > 0)//●●●●●●●●●●●●●●●20250304
                     x = undoTextBox1Text[undoTextBox1Text.Count - ++undoTimes];
+                else
+                    x = undoTextBox1Text[undoTextBox1Text.Count - undoTimes];
                 while (x == "")
                 {
                     if (undoTextBox1Text.Count - undoTimes - 1 < 0) break;
@@ -10137,6 +10149,23 @@ namespace WindowsFormsApp1
 
             return url;
         }
+        /// <summary>
+        /// 是否是四庫全書的扉頁
+        /// </summary>
+        /// <param name="x">要作為判斷的文本</param>
+        /// <returns></returns>
+        bool isSKQSFrontPage(string x)
+        {
+            if (Name != "Form1")
+            {
+
+                if (x.Contains("欽定四庫全書") && x.Contains("部") && x.Contains("校官") && x.Contains("{{臣}}"))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
 
         /* 使用正則表達式：可以使用正則表達式來檢查和替換網址中的特定字串，這樣會更靈活和高效。
             簡化條件檢查：將防呆區塊的條件檢查合併成一行，讓程式碼更簡潔。
@@ -10272,6 +10301,18 @@ namespace WindowsFormsApp1
                     }
                 }
             }
+
+            #region 若是《四庫全書》原書的扉頁直接加入〖文淵|閣寶〗
+            if (isSKQSFrontPage(x))
+            {
+                TopMost = false;
+                br.driver.SwitchTo().Window(driver.CurrentWindowHandle);
+                br.BringToFront("chrome");
+                br.ChromeSetFocus();
+                //WindowState = FormWindowState.Minimized;
+            }
+            #endregion 若是《四庫全書》直接加入〖文淵|閣寶〗
+
             #region 在手動編輯模式下（尤其是需要OCR時）的前置檢查
             if (keyinTextMode)
             {//如果是在手動輸入模式下：
@@ -10788,31 +10829,30 @@ namespace WindowsFormsApp1
             if (!rePaint)
                 EndUpdate();
 
-            #region 若是《四庫全書》直接加入〖文淵|閣寶〗
-            if (Name != "Form1")
+            #region 若是《四庫全書》原書的扉頁直接加入〖文淵|閣寶〗
+            if (isSKQSFrontPage(x))
             {
-
-                if (xCopy.Contains("欽定四庫全書") && xCopy.Contains("部") && xCopy.Contains("校官") && xCopy.Contains("{{臣}}"))
+                //int st = Form1.InstanceForm1.textBox1.SelectionStart, len = Form1.InstanceForm1.textBox1.SelectionLength;
+                string tx1 = Form1.InstanceForm1.textBox1.Text;
+                int wygbStart = tx1.IndexOf("欽定四庫全書<p>");
+                if (wygbStart > -1 && !tx1.Contains("〖文淵|閣寶〗"))
                 {
-                    //int st = Form1.InstanceForm1.textBox1.SelectionStart, len = Form1.InstanceForm1.textBox1.SelectionLength;
-                    string tx1 = Form1.InstanceForm1.textBox1.Text;
-                    int wygbStart = tx1.IndexOf("欽定四庫全書<p>");
-                    if (wygbStart > -1 && !tx1.Contains("〖文淵|閣寶〗"))
-                    {
-                        wygbStart += "欽定四庫全書<p>".Length;
-                        //tx1 = tx1.Substring(0, wygbStart)+"〖文淵|閣寶〗<p>"+tx1.Substring(wygbStart);
-                        PauseEvents(); stopUndoRec = true;
-                        Form1.InstanceForm1.textBox1.Select(wygbStart, 0);
-                        Form1.InstanceForm1.textBox1.SelectedText = "〖文淵|閣寶〗<p>";
-                        ResumeEvents(); stopUndoRec = false;
-                    }
-                    Form1.InstanceForm1.textBox3.Text = textBox3.Text;//主表單網址與本表單連動、同步
-                    Form1.InstanceForm1.AvailableInUseBothKeysMouse();
-                    br.WindowHandles["currentPageNum"] = (int.Parse(_currentPageNum) - 1).ToString();
-                    //Form1.InstanceForm1.textBox1.Select(s, l);
+                    wygbStart += "欽定四庫全書<p>".Length;
+                    //tx1 = tx1.Substring(0, wygbStart)+"〖文淵|閣寶〗<p>"+tx1.Substring(wygbStart);
+                    PauseEvents(); stopUndoRec = true;
+                    Form1.InstanceForm1.textBox1.Select(wygbStart, 0);
+                    Form1.InstanceForm1.textBox1.SelectedText = "〖文淵|閣寶〗<p>";
+                    ResumeEvents(); stopUndoRec = false;
                 }
+                Form1.InstanceForm1.textBox3.Text = textBox3.Text;//主表單網址與本表單連動、同步
+                //TopMost = false;
+                //br.driver.SwitchTo().Window(driver.CurrentWindowHandle);
+                ////WindowState = FormWindowState.Minimized;
+                Form1.InstanceForm1.AvailableInUseBothKeysMouse();
+                br.WindowHandles["currentPageNum"] = (int.Parse(_currentPageNum) - 1).ToString();
+                //Form1.InstanceForm1.textBox1.Select(s, l);
             }
-            #endregion 若是《四庫全書》直接加入〖文淵|閣寶〗
+            #endregion
 
             return true;
         }
@@ -11436,7 +11476,13 @@ namespace WindowsFormsApp1
         /// <param name="hideForm">指定是否要隱藏表單，預設為隱藏</param>
         public void BeginUpdate(bool hideForm = true)
         {
-            if (hideForm && Visible) Visible = false;
+            if (hideForm && Visible)
+            {
+                Visible = false;
+                if (!IsDriverInvalid()) driver.SwitchTo().Window(driver.CurrentWindowHandle);
+                br.BringToFront("chrome");
+                br.ChromeSetFocus();
+            }
             rePaint = false;
             SendMessage(this.Handle, WM_SETREDRAW, (IntPtr)0, IntPtr.Zero);//通過使用SendMessage來控制WM_SETREDRAW消息，可以暫時禁用或啟用重畫。
         }
@@ -11445,9 +11491,13 @@ namespace WindowsFormsApp1
         /// </summary>
         public void EndUpdate()
         {
-            Visible = true;
-            this.Show();
-            //show_nICo(Keys.None);
+            if (Visible)
+            {
+                Visible = true;
+                this.Show();
+                Activate();
+                //show_nICo(Keys.None);//會影響表單大小及位置
+            }
             rePaint = true;
             SendMessage(this.Handle, WM_SETREDRAW, (IntPtr)1, IntPtr.Zero);
             this.Refresh();
@@ -14352,7 +14402,8 @@ namespace WindowsFormsApp1
                     }
                     else
                         if (!gotoNextChapter_FormatContentInput_SKQS())
-                        Debugger.Break();
+                        //return false;
+                        //Debugger.Break();
                     undoRecord(); stopUndoRec = false; ResumeEvents();
                 }
             }
@@ -14384,7 +14435,9 @@ namespace WindowsFormsApp1
             if (iwe == null) return false;
             iwe.Click();
             //翻到本書該冊的第1頁
-            if (Div_generic_TextBoxFrame?.GetAttribute("textContent") == "●\t")//如果是WordVBA.中國哲學書電子化計劃.新頁面() 產生的新頁面
+            if (Div_generic_TextBoxFrame?.GetAttribute("textContent") == "●\t"
+                || Div_generic_TextBoxFrame?.GetAttribute("textContent") == "●<p>"
+                )//如果是WordVBA.中國哲學書電子化計劃.新頁面() 產生的新頁面
                 inputSKQSFrontPage();
             else
             {
@@ -15342,6 +15395,7 @@ namespace WindowsFormsApp1
                                 Debugger.Break();
                                 TopMost = false;
                                 driver.SwitchTo().Window(driver.CurrentWindowHandle);
+                                Form1.InstanceForm1.EndUpdate();
                                 return false;
                             }
                             driver.Navigate().Back();
@@ -16380,9 +16434,10 @@ namespace WindowsFormsApp1
             {
                 if (Application.OpenForms[0].Controls["textBox3"].Text != string.Empty && textBox3.Text != Application.OpenForms[0].Controls["textBox3"].Text)
                 {
-                    PauseEvents();
+                    //PauseEvents();
                     textBox3.Text = Application.OpenForms[0].Controls["textBox3"].Text;
-                    ResumeEvents();
+                    //setCurrentPageNum(textBox3.Text);
+                    //ResumeEvents();
                 }
             }
             #region forDebugTest權作測試偵錯用20230310            
@@ -17921,12 +17976,7 @@ namespace WindowsFormsApp1
             #endregion
 
             #region 取得現前頁碼
-            if (url.IndexOf("&page=") > -1)
-            {
-                int s = url.IndexOf("&page=") + "&page=".Length;
-                _currentPageNum = url.Substring(s, url.IndexOf("&", s) > -1 ? url.IndexOf("&", s) - s : url.Length - s);
-            }
-            else _currentPageNum = "";
+            setCurrentPageNum(url);
             #endregion
 
             //mainFromTextBox3Text = textBox3.Text;
@@ -18088,6 +18138,20 @@ namespace WindowsFormsApp1
 
 
         }
+        /// <summary>
+        /// 設定目前頁碼欄位的值
+        /// </summary>
+        /// <param name="url"></param>
+        private void setCurrentPageNum(string url)
+        {
+            if (url.IndexOf("&page=") > -1)
+            {
+                int s = url.IndexOf("&page=") + "&page=".Length;
+                _currentPageNum = url.Substring(s, url.IndexOf("&", s) > -1 ? url.IndexOf("&", s) - s : url.Length - s);
+            }
+            else _currentPageNum = "";
+        }
+
         /// <summary>
         /// 由指定的url中擷取出 book ID
         /// </summary>

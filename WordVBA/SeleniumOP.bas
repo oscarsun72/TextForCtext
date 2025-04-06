@@ -96,7 +96,7 @@ Sub ActivateChrome()
 '                SimulateKeyStroke VK_DOWN ' 再次模擬按下箭頭向下鍵
 '                SimulateKeyStroke VK_RETURN ' 模擬按下 Enter 鍵
                 VBA.DoEvents ' 確保窗口已經顯示
-'                ShowWindow hWnd, SW_MAXIMIZE ' 最大化窗口
+                ShowWindow hWnd, SW_MAXIMIZE ' 最大化窗口
             End If
         End If
     Else
@@ -234,9 +234,9 @@ reOpenChrome:
     openNewTabWhenTabAlreadyExit = True
     Exit Function
 eH:
-    Select Case Err.Number
+    Select Case Err.number
         Case -2146233088
-            If InStr(Err.Description, "no such window: target window already closed") Then
+            If InStr(Err.description, "no such window: target window already closed") Then
                 If iw > 0 Then
                     For Each ew In WD.WindowHandles
                         Exit For
@@ -246,7 +246,7 @@ eH:
                 Else
                     Stop
                 End If
-            ElseIf InStr(Err.Description, "ot connected to DevTools") Then
+            ElseIf InStr(Err.description, "ot connected to DevTools") Then
 '                disconnected: not connected to DevTools
 '                (failed to check if window was closed: disconnected: not connected to DevTools)
 '                (Session info: chrome=127.0.6533.120)
@@ -256,7 +256,7 @@ eH:
                 MsgBox "若Chrome瀏覽器已開啟，請關閉Chrome瀏覽器後再按確定", vbExclamation
                 OpenChrome "https://www.google.com"
                 Resume 'GoTo reOpenChrome:
-            ElseIf InStr(Err.Description, "A exception with a null response was thrown sending an HTTP") Then
+            ElseIf InStr(Err.description, "A exception with a null response was thrown sending an HTTP") Then
 '                A exception with a null response was thrown sending an HTTP request to the remote WebDriver server for URL http://localhost:1760/session/ed5864479325c154783256563f97e610/window/handles. The status of the exception was ConnectFailure, and the message was: 無法連接至遠端伺服器
                 Set WD = Nothing
                 killchromedriverFromHere
@@ -264,17 +264,17 @@ eH:
 '                openChrome "https://www.google.com"
 '                Resume 'GoTo reOpenChrome:
                 openNewTabWhenTabAlreadyExit = False
-            ElseIf InStr(Err.Description, "invalid session id") Then
+            ElseIf InStr(Err.description, "invalid session id") Then
                 killchromedriverFromHere
                 Set WD = Nothing
                 OpenChrome "https://www.google.com.tw/"
                 'Resume
             Else
-                MsgBox Err.Number & Err.Description
+                MsgBox Err.number & Err.description
                 Stop
             End If
         Case -2147467261
-            If Err.Description = "並未將物件參考設定為物件的執行個體。" Then
+            If Err.description = "並未將物件參考設定為物件的執行個體。" Then
                 Set WD = Nothing
                 killchromedriverFromHere
                 MsgBox "若Chrome瀏覽器已開啟，請關閉Chrome瀏覽器後再執行一次", vbExclamation
@@ -283,7 +283,7 @@ eH:
                 Stop
             End If
         Case 91
-            If Err.Description = "沒有設定物件變數或 With 區塊變數" Then
+            If Err.description = "沒有設定物件變數或 With 區塊變數" Then
                 Set WD = Nothing
                 killchromedriverFromHere
                 MsgBox "若Chrome瀏覽器已開啟，請關閉Chrome瀏覽器後再執行一次", vbExclamation
@@ -292,7 +292,7 @@ eH:
                 Stop
             End If
         Case Else
-            MsgBox Err.Description, vbCritical
+            MsgBox Err.description, vbCritical
             WD.Quit
             SystemSetup.killchromedriverFromHere
     '           Resume
@@ -416,16 +416,16 @@ reStart:
         OpenChrome = True
     Exit Function
 ErrH:
-    Select Case Err.Number
+    Select Case Err.number
         Case 49
-            If Err.Description = "DLL 呼叫規格錯誤" Then
+            If Err.description = "DLL 呼叫規格錯誤" Then
 '                WD.Quit
 '                killchromedriverFromHere
                 Stop
                 Resume
             End If
         Case -2146233079
-            If VBA.Left(Err.Description, Len("session not created: Chrome failed to start: exited normally.")) = "session not created: Chrome failed to start: exited normally." Then
+            If VBA.Left(Err.description, Len("session not created: Chrome failed to start: exited normally.")) = "session not created: Chrome failed to start: exited normally." Then
                 WD.Quit
                 SystemSetup.killchromedriverFromHere
                 Set WD = Nothing
@@ -440,7 +440,7 @@ ErrH:
                 End If
                 
                 Exit Function
-            ElseIf VBA.InStr(Err.Description, "session not created: This version of ChromeDriver only supports Chrome version ") = 1 Then 'session not created: This version of ChromeDriver only supports Chrome version 129
+            ElseIf VBA.InStr(Err.description, "session not created: This version of ChromeDriver only supports Chrome version ") = 1 Then 'session not created: This version of ChromeDriver only supports Chrome version 129
                                                                                                                                             'Current browser version is 131.0.6778.70 with binary path C:\Program Files\Google\Chrome\Application\chrome.exe (SessionNotCreated)
                 MsgBox "請更新chromedriver再重試！", vbCritical
                 VBA.Shell "explorer.exe " & chromePath, vbMaximizedFocus
@@ -450,12 +450,12 @@ ErrH:
                 Exit Function
             End If
         Case -2146233088 '**'
-            Debug.Print Err.Number & Err.Description
-            If VBA.InStr(Err.Description, "invalid session id") = 1 Then '-2146233088 invalid session id
+            Debug.Print Err.number & Err.description
+            If VBA.InStr(Err.description, "invalid session id") = 1 Then '-2146233088 invalid session id
                 killchromedriverFromHere
                 Set WD = Nothing
                 GoTo reStart
-            ElseIf InStr(Err.Description, "Chrome failed to start: exited normally.") Then
+            ElseIf InStr(Err.description, "Chrome failed to start: exited normally.") Then
                 '' err.Descriptionunknown error: Chrome failed to start: exited normally.
                 ''  (unknown error: DevToolsActivePort file doesn't exist)
                 '' (The process started from chrome location W:\PortableApps\PortableApps\GoogleChromePortable\App\Chrome-bin\chrome.exe is no longer running, so ChromeDriver is assuming that Chrome has crashed.)
@@ -468,14 +468,14 @@ ErrH:
         '            WD.Quit
                     killchromedriverFromHere
                 End If
-            ElseIf InStr(Err.Description, "no such window: No target with given id found") Then
+            ElseIf InStr(Err.description, "no such window: No target with given id found") Then
                 killchromedriverFromHere
                 GoTo reStart
-            ElseIf InStr(Err.Description, "disconnected: received Inspector.detached event") Then '(failed to check if window was closed: disconnected: not connected to DevTools)
+            ElseIf InStr(Err.description, "disconnected: received Inspector.detached event") Then '(failed to check if window was closed: disconnected: not connected to DevTools)
                                                                                                     '(Session info: chrome=110.0.5481.178)
                 killchromedriverFromHere
                 GoTo reStart
-            ElseIf InStr(Err.Description, "no such window: target window already closed") Then 'no such window: target window already closed
+            ElseIf InStr(Err.description, "no such window: target window already closed") Then 'no such window: target window already closed
                                                                                                         'from unknown error: web view not found
                                                                                                          ' (Session info: chrome=128.0.6613.85)
 '                Stop
@@ -492,7 +492,7 @@ ErrH:
                 Resume
                 '回到 wd.ExecuteScript "window.open('about:blank','_blank');" 'openNewTabWhenTabAlreadyExit WD
                      'wd.SwitchTo.Window WindowHandlesItem(WindowHandlesCount - 1)
-            ElseIf InStr(Err.Description, "Unexpected error. System.Net.WebException: 無法連接至遠端伺服器") Then 'Unexpected error. System.Net.WebException: 無法連接至遠端伺服器 ---> System.Net.Sockets.SocketException: 無法連線，因為目標電腦拒絕連線。 127.0.0.1:6579
+            ElseIf InStr(Err.description, "Unexpected error. System.Net.WebException: 無法連接至遠端伺服器") Then 'Unexpected error. System.Net.WebException: 無法連接至遠端伺服器 ---> System.Net.Sockets.SocketException: 無法連線，因為目標電腦拒絕連線。 127.0.0.1:6579
                                                                                                 '   於 System.Net.Sockets.Socket.DoConnect(EndPoint endPointSnapshot, SocketAddress socketAddress)
                                                                                                 '   於 System.Net.ServicePoint.ConnectSocketInternal(Boolean connectFailure, Socket s4, Socket s6, Socket& socket, IPAddress& address, ConnectSocketState state, IAsyncResult asyncResult, Exception& exception)
                                                                                                 '   --- 內部例外狀況堆疊追蹤的結尾 ---
@@ -507,19 +507,19 @@ ErrH:
                 Set SeleniumOP.WD = Nothing
 '                Stop 'just for test 20240924
                 Resume
-            ElseIf VBA.InStr(Err.Description, "chromedriver.exe does not exist") Then 'The file C:\Program Files\Google\Chrome\Application\chromedriver.exe does not exist. The driver can be downloaded at http://chromedriver.storage.googleapis.com/index.html
+            ElseIf VBA.InStr(Err.description, "chromedriver.exe does not exist") Then 'The file C:\Program Files\Google\Chrome\Application\chromedriver.exe does not exist. The driver can be downloaded at http://chromedriver.storage.googleapis.com/index.html
                 Set WD = Nothing
                 MsgBox "請在「" & getChromePathIncludeBackslash & "」路徑下複製chromedriver.exe檔案再繼續！", vbCritical
                 OpenChrome = False
                 SystemSetup.OpenExplorerAtPath getChromePathIncludeBackslash
                 Exit Function
-            ElseIf VBA.InStr(Err.Description, "disconnected: not connected to DevTools") Then 'disconnected: not connected to DevTools
+            ElseIf VBA.InStr(Err.description, "disconnected: not connected to DevTools") Then 'disconnected: not connected to DevTools
                                                                                     '  (failed to check if window was closed: disconnected: not connected to DevTools)
                                                                                     '  (Session info: chrome=129.0.6668.60)
                 killchromedriverFromHere
                 Set WD = Nothing
                 GoTo reStart
-            ElseIf VBA.InStr(Err.Description, "no such window") Then 'no such window
+            ElseIf VBA.InStr(Err.description, "no such window") Then 'no such window
                                                                     '  (Session info: chrome=129.0.6668.59)
                 If url = "https://gj.cool/punct" Then
                     OpenNewTab WD, url
@@ -527,7 +527,7 @@ ErrH:
                     OpenNewTab WD
                 End If
                 Resume
-            ElseIf VBA.InStr(Err.Description, "timeout: Timed out receiving message from renderer:") = 1 Then '-2146233088 timeout: Timed out receiving message from renderer: 2.972
+            ElseIf VBA.InStr(Err.description, "timeout: Timed out receiving message from renderer:") = 1 Then '-2146233088 timeout: Timed out receiving message from renderer: 2.972
                                                                     '(Session info: chrome=130.0.6723.69)
                 If Not IsWDInvalid() Then
                     WD.Manage.Timeouts.PageLoad = timeoutsPageLoad
@@ -537,15 +537,15 @@ ErrH:
                 End If
             Else
 2146233088:
-                Debug.Print Err.Number; Err.Description
-                MsgBox Err.Description, vbCritical
+                Debug.Print Err.number; Err.description
+                MsgBox Err.description, vbCritical
                 Stop
             End If
         Case 429 'ActiveX 元件無法產生物件'
             ActiveXComponentsCanNotBeCreated = True
             Exit Function
         Case -2147467261
-            If InStr(Err.Description, "並未將物件參考設定為物件的執行個體。") Then
+            If InStr(Err.description, "並未將物件參考設定為物件的執行個體。") Then
                 SystemSetup.killchromedriverFromHere
                 Set WD = Nothing
 '                Stop
@@ -561,12 +561,12 @@ ErrH:
                 End If
                 Exit Function
             Else
-                MsgBox Err.Description, vbCritical
+                MsgBox Err.description, vbCritical
                 Stop
             End If
         Case Else
-            MsgBox Err.Description, vbCritical
-            If Err.Description = "沒有設定物件變數或 With 區塊變數" Then
+            MsgBox Err.description, vbCritical
+            If Err.description = "沒有設定物件變數或 With 區塊變數" Then
                 killchromedriverFromHere
                 Set WD = Nothing
                 GoTo reStart
@@ -641,7 +641,7 @@ reStart:
     
 Exit Function
 ErrH:
-Select Case Err.Number
+Select Case Err.number
 
     Case -2146233088 '**'
         'Debug.Print Err.Description
@@ -651,7 +651,7 @@ Select Case Err.Number
         If chromedriversPIDcntr = 0 Then chromedriversPIDcntr = 1
         ReDim chromedriversPID(chromedriversPIDcntr - 1)
         chromedriversPID(chromedriversPIDcntr - 1) = Service.ProcessId
-        If InStr(Err.Description, "/session timed out after 60 seconds.") Then
+        If InStr(Err.description, "/session timed out after 60 seconds.") Then
             killchromedriverFromHere
             Set openChromeBackground = Nothing
         Else
@@ -662,7 +662,7 @@ Select Case Err.Number
             End If
         End If
     Case Else
-        MsgBox Err.Description, vbCritical
+        MsgBox Err.description, vbCritical
 '        Resume
 End Select
 
@@ -714,7 +714,7 @@ Sub SeleniumGetTest()
 
 '    driver.Get "http://localhost:9222"
 '    driver.Navigate.GoToUrl "http://localhost:9222"
-    If Err.Number = 0 Then
+    If Err.number = 0 Then
         driver.SwitchTo.Window driver.CurrentWindowHandle
         VBA.Interaction.DoEvents
         SendKeys "%{F4}"
@@ -800,7 +800,7 @@ Function OpenChrome_NEW_Get() As Boolean
             
             Debug.Print "Word is active = " & VBA.CStr(IsWordActive())
                         
-            If VBA.InStr(Err.Description, "from disconnected: unable to connect to renderer (SessionNotCreated)") = 0 Then
+            If VBA.InStr(Err.description, "from disconnected: unable to connect to renderer (SessionNotCreated)") = 0 Then
                 If IsWordActive() Then
                     MsgBox "請關閉Chrome瀏覽器後再繼續。", vbExclamation
                     'Stop 'just for test
@@ -894,9 +894,9 @@ Function OpenChrome_NEW_Get() As Boolean
     OpenChrome_NEW_Get = True
     Exit Function
 eH:
-    Select Case Err.Number
+    Select Case Err.number
         Case -2146233088
-            If VBA.InStr(Err.Description, "chromedriver.exe does not exist") Then 'The file C:\Program Files\Google\Chrome\Application\chromedriver.exe does not exist. The driver can be downloaded at http://chromedriver.storage.googleapis.com/index.html
+            If VBA.InStr(Err.description, "chromedriver.exe does not exist") Then 'The file C:\Program Files\Google\Chrome\Application\chromedriver.exe does not exist. The driver can be downloaded at http://chromedriver.storage.googleapis.com/index.html
                 Set WD = Nothing
                 MsgBox "請在「" & getChromePathIncludeBackslash & "」路徑下複製chromedriver.exe檔案再繼續！", vbCritical
                 SystemSetup.OpenExplorerAtPath getChromePathIncludeBackslash
@@ -906,8 +906,8 @@ eH:
             End If
 caseElse:
         Case Else
-            Debug.Print Err.Number & vbTab & Err.Description
-            MsgBox Err.Number & Err.Description
+            Debug.Print Err.number & vbTab & Err.description
+            MsgBox Err.number & Err.description
             'Resume
     End Select
 End Function
@@ -1035,9 +1035,9 @@ Function OpenNewTab(ByVal driver As SeleniumBasic.IWebDriver, Optional url As St
     
     Exit Function
 eH:
-    Select Case Err.Number
+    Select Case Err.number
         Case -2146233088
-            If VBA.InStr(Err.Description, "no such window: target window already closed") = 1 Then 'no such window: target window already closed
+            If VBA.InStr(Err.description, "no such window: target window already closed") = 1 Then 'no such window: target window already closed
                 driver.SwitchTo.Window driver.WindowHandles()(UBound(driver.WindowHandles))
                 Resume
             Else
@@ -1045,8 +1045,8 @@ eH:
             End If
 caseElse:
         Case Else
-            Debug.Print Err.Number & Err.Description
-            MsgBox Err.Number & Err.Description
+            Debug.Print Err.number & Err.description
+            MsgBox Err.number & Err.description
 '            Resume
     End Select
 '    On Error GoTo eH
@@ -1176,11 +1176,11 @@ Sub Search(url As String, frmID As String, keywdID As String, btnID As String, O
     '    WD.Quit
         Exit Sub
 Err1:
-        Select Case Err.Number
+        Select Case Err.number
             Case 49 'DLL 呼叫規格錯誤
                 Resume
             Case Else
-                MsgBox Err.Description, vbCritical
+                MsgBox Err.description, vbCritical
                 SystemSetup.killchromedriverFromHere
     '           Resume
     End Select
@@ -1194,11 +1194,11 @@ Sub BaiduSearch(Optional searchStr As String)
 '    VBA.Interaction.DoEvents
         Exit Sub
 Err1:
-        Select Case Err.Number
+        Select Case Err.number
             Case 49 'DLL 呼叫規格錯誤
                 Resume
             Case Else
-                MsgBox Err.Description, vbCritical
+                MsgBox Err.description, vbCritical
                 SystemSetup.killchromedriverFromHere
     '           Resume
     End Select
@@ -1233,11 +1233,11 @@ Sub dictRevisedSearch(Optional searchStr As String)
     '    WD.Quit
         Exit Sub
 Err1:
-        Select Case Err.Number
+        Select Case Err.number
             Case 49 'DLL 呼叫規格錯誤
                 Resume
             Case Else
-                MsgBox Err.Description, vbCritical
+                MsgBox Err.description, vbCritical
                 SystemSetup.killchromedriverFromHere
     '           Resume
         End Select
@@ -1335,12 +1335,12 @@ retry:
         End If
         Exit Function
 Err1:
-        Select Case Err.Number
+        Select Case Err.number
             Case 49 'DLL 呼叫規格錯誤
                 Resume
             Case 91 '沒有設定物件變數或 With 區塊變數
                 If retryTime > 1 Then
-                    MsgBox Err.Number + Err.Description
+                    MsgBox Err.number + Err.description
                 Else
     '                SystemSetup.wait 0.5
     '                Resume
@@ -1359,10 +1359,10 @@ Err1:
                 WBQuit = True
                 Resume
             Case -2146233088 'unknown error: ChromeDriver only supports characters in the BMP  (Session info: chrome=109.0.5414.75)
-                If InStr(Err.Description, "/session timed out after 60 seconds.") Then
+                If InStr(Err.description, "/session timed out after 60 seconds.") Then
                     If WD Is Nothing Then OpenChrome (url)
                     Set wdB = WD
-                ElseIf InStr(Err.Description, "no such window: target window already closed") Or InStr(Err.Description, "invalid session id") Then
+                ElseIf InStr(Err.description, "no such window: target window already closed") Or InStr(Err.description, "invalid session id") Then
                     WD.Quit: Set WD = Nothing: killchromedriverFromHere: OpenChrome (url)
                     Set wdB = WD
                 Else
@@ -1371,7 +1371,7 @@ Err1:
                 End If
                 Resume Next
             Case Else
-                MsgBox Err.Description, vbCritical
+                MsgBox Err.description, vbCritical
                 wdB.Quit
                 SystemSetup.killchromedriverFromHere
     '           Resume
@@ -1538,9 +1538,9 @@ Function LookupZitools(x As String, Optional Variants As Boolean = False) As Boo
     LookupZitools = True
     Exit Function
 eH:
-Select Case Err.Number
+Select Case Err.number
         Case -2146233088
-            If InStr(Err.Description, "disconnected: not connected to DevTools") Then 'disconnected: not connected to DevTools
+            If InStr(Err.description, "disconnected: not connected to DevTools") Then 'disconnected: not connected to DevTools
                                             '  (failed to check if window was closed: disconnected: not connected to DevTools)
                                             '  (Session info: chrome=128.0.6613.85)
                 'Set wd = Nothing
@@ -1548,10 +1548,10 @@ Select Case Err.Number
                 Set WD = Nothing
                 Resume
             Else
-                MsgBox Err.Number & Err.Description, vbExclamation
+                MsgBox Err.number & Err.description, vbExclamation
             End If
         Case Else
-            MsgBox "請關閉Chrome瀏覽器後再執行一次！" & vbCr & vbCr & Err.Number & Err.Description, vbExclamation
+            MsgBox "請關閉Chrome瀏覽器後再執行一次！" & vbCr & vbCr & Err.number & Err.description, vbExclamation
     End Select
 End Function
 Rem 查《古音小鏡·訓詁工具書查詢》,成功則傳回true 20241020
@@ -1679,9 +1679,9 @@ Function LookupDictionary_of_ChineseCharacterVariants(x As String) As String()
     LookupDictionary_of_ChineseCharacterVariants = result
     Exit Function
 eH:
-Select Case Err.Number
+Select Case Err.number
         Case -2146233088
-            If InStr(Err.Description, "disconnected: not connected to DevTools") Then 'disconnected: not connected to DevTools
+            If InStr(Err.description, "disconnected: not connected to DevTools") Then 'disconnected: not connected to DevTools
                                             '  (failed to check if window was closed: disconnected: not connected to DevTools)
                                             '  (Session info: chrome=128.0.6613.85)
                 'Set wd = Nothing
@@ -1689,10 +1689,10 @@ Select Case Err.Number
                 Set WD = Nothing
                 Resume
             Else
-                MsgBox Err.Number & Err.Description, vbExclamation
+                MsgBox Err.number & Err.description, vbExclamation
             End If
         Case Else
-            MsgBox "請關閉Chrome瀏覽器後再執行一次！" & vbCr & vbCr & Err.Number & Err.Description, vbExclamation
+            MsgBox "請關閉Chrome瀏覽器後再執行一次！" & vbCr & vbCr & Err.number & Err.description, vbExclamation
     End Select
 End Function
 Rem 查《國語辭典》：x 要查的字詞。傳回一個字串陣列，第1個元素是所查詢的字串，第2個元素是查詢結果網址。若沒找到，則傳回空字串 ""
@@ -1751,9 +1751,9 @@ Function LookupDictRevised(x As String) As String()
     LookupDictRevised = result
     Exit Function
 eH:
-Select Case Err.Number
+Select Case Err.number
         Case -2146233088
-            If InStr(Err.Description, "disconnected: not connected to DevTools") Then 'disconnected: not connected to DevTools
+            If InStr(Err.description, "disconnected: not connected to DevTools") Then 'disconnected: not connected to DevTools
                                             '  (failed to check if window was closed: disconnected: not connected to DevTools)
                                             '  (Session info: chrome=128.0.6613.85)
                 'Set wd = Nothing
@@ -1761,10 +1761,10 @@ Select Case Err.Number
                 Set WD = Nothing
                 Resume
             Else
-                MsgBox Err.Number & Err.Description, vbExclamation
+                MsgBox Err.number & Err.description, vbExclamation
             End If
         Case Else
-            MsgBox "請關閉Chrome瀏覽器後再執行一次！" & vbCr & vbCr & Err.Number & Err.Description, vbExclamation
+            MsgBox "請關閉Chrome瀏覽器後再執行一次！" & vbCr & vbCr & Err.number & Err.description, vbExclamation
     End Select
 End Function
 Rem 查《漢語大詞典》：x 要查的字詞。傳回一個字串陣列，第1個元素是所查詢的字串，第2個元素是查詢結果網址。若沒找到，則傳回空字串 ""
@@ -1833,9 +1833,9 @@ Function LookupHYDCD(x As String) As String()
     LookupHYDCD = result
     Exit Function
 eH:
-Select Case Err.Number
+Select Case Err.number
         Case -2146233088
-            If InStr(Err.Description, "disconnected: not connected to DevTools") Then 'disconnected: not connected to DevTools
+            If InStr(Err.description, "disconnected: not connected to DevTools") Then 'disconnected: not connected to DevTools
                                             '  (failed to check if window was closed: disconnected: not connected to DevTools)
                                             '  (Session info: chrome=128.0.6613.85)
                 'Set wd = Nothing
@@ -1843,10 +1843,10 @@ Select Case Err.Number
                 Set WD = Nothing
                 Resume
             Else
-                MsgBox Err.Number & Err.Description, vbExclamation
+                MsgBox Err.number & Err.description, vbExclamation
             End If
         Case Else
-            MsgBox "請關閉Chrome瀏覽器後再執行一次！" & vbCr & vbCr & Err.Number & Err.Description, vbExclamation
+            MsgBox "請關閉Chrome瀏覽器後再執行一次！" & vbCr & vbCr & Err.number & Err.description, vbExclamation
     End Select
 End Function
 Rem 查《漢語大字典》傳入檢索字，失敗傳回fasle，若成功，則複製其網址。
@@ -2065,13 +2065,13 @@ finish:
     WD.Manage.Timeouts.PageLoad = timeoutsPageLoad '預設值為300
     Exit Function
 eH:
-    Select Case Err.Number
+    Select Case Err.number
         Case -2146233088
-            If VBA.InStr(Err.Description, "stale element reference: stale element not found in the current frame") = 1 Then 'stale element reference: stale element not found in the current frame
+            If VBA.InStr(Err.description, "stale element reference: stale element not found in the current frame") = 1 Then 'stale element reference: stale element not found in the current frame
 '                                                (Session info: chrome=129.0.6668.101)
                 actions.SendKeys(key.End).Perform
                 GoTo scroll
-            ElseIf VBA.InStr(Err.Description, "timeout: Timed out receiving message from renderer:") = 1 Then 'timeout: Timed out receiving message from renderer: 3.000
+            ElseIf VBA.InStr(Err.description, "timeout: Timed out receiving message from renderer:") = 1 Then 'timeout: Timed out receiving message from renderer: 3.000
                                         '  (Session info: chrome=129.0.6668.101)
                 If VBA.InStr(WD.url, "zwdcd") Then
     '                WD.Manage.timeouts.ImplicitWait = WD.Manage.timeouts.ImplicitWait + 3 ' 等待3秒
@@ -2102,7 +2102,7 @@ eH:
                     WD.Manage.Timeouts.PageLoad = WD.Manage.Timeouts.PageLoad + 2
                     Resume
                 End If
-            ElseIf VBA.InStr(Err.Description, "javascript error: Cannot read properties of null (reading 'rows')") Then '-2146233088javascript error: Cannot read properties of null (reading 'rows')
+            ElseIf VBA.InStr(Err.description, "javascript error: Cannot read properties of null (reading 'rows')") Then '-2146233088javascript error: Cannot read properties of null (reading 'rows')
                                                                                                                     '(Session info: chrome=129.0.6668.101)
                 word.Application.Activate
                 MsgBox "網站故障，請取消作業或重試。感恩感恩　南無阿彌陀佛　讚美主", vbCritical
@@ -2113,9 +2113,9 @@ eH:
             End If
         Case Else
 caseElse:
-            Debug.Print Err.Number & Err.Description
+            Debug.Print Err.number & Err.description
             word.Application.Activate
-            MsgBox Err.Number & Err.Description, vbCritical
+            MsgBox Err.number & Err.description, vbCritical
     End Select
 End Function
 Rem 查教育百科_教育雲線上字典 失敗傳回false
@@ -2194,9 +2194,9 @@ Function LookupGXDS(x As String) As String()
     LookupGXDS = result
     Exit Function
 eH:
-Select Case Err.Number
+Select Case Err.number
         Case -2146233088
-            If InStr(Err.Description, "disconnected: not connected to DevTools") Then 'disconnected: not connected to DevTools
+            If InStr(Err.description, "disconnected: not connected to DevTools") Then 'disconnected: not connected to DevTools
                                             '  (failed to check if window was closed: disconnected: not connected to DevTools)
                                             '  (Session info: chrome=128.0.6613.85)
                 'Set wd = Nothing
@@ -2204,10 +2204,10 @@ Select Case Err.Number
                 Set WD = Nothing
                 Resume
             Else
-                MsgBox Err.Number & Err.Description, vbExclamation
+                MsgBox Err.number & Err.description, vbExclamation
             End If
         Case Else
-            MsgBox "請關閉Chrome瀏覽器後再執行一次！" & vbCr & vbCr & Err.Number & Err.Description, vbExclamation
+            MsgBox "請關閉Chrome瀏覽器後再執行一次！" & vbCr & vbCr & Err.number & Err.description, vbExclamation
     End Select
 End Function
 Rem 查《康熙字典網上版》：x 要查的字詞。傳回一個字串陣列，第1個元素是所查詢的字串，第2個元素是查詢結果網址。若沒找到，則傳回空字串 ""
@@ -2261,9 +2261,9 @@ Function LookupKangxizidian(x As String) As String()
     LookupKangxizidian = result
     Exit Function
 eH:
-Select Case Err.Number
+Select Case Err.number
         Case -2146233088
-            If InStr(Err.Description, "disconnected: not connected to DevTools") Then 'disconnected: not connected to DevTools
+            If InStr(Err.description, "disconnected: not connected to DevTools") Then 'disconnected: not connected to DevTools
                                             '  (failed to check if window was closed: disconnected: not connected to DevTools)
                                             '  (Session info: chrome=128.0.6613.85)
                 'Set wd = Nothing
@@ -2271,10 +2271,10 @@ Select Case Err.Number
                 Set WD = Nothing
                 Resume
             Else
-                MsgBox Err.Number & Err.Description, vbExclamation
+                MsgBox Err.number & Err.description, vbExclamation
             End If
         Case Else
-            MsgBox "請關閉Chrome瀏覽器後再執行一次！" & vbCr & vbCr & Err.Number & Err.Description, vbExclamation
+            MsgBox "請關閉Chrome瀏覽器後再執行一次！" & vbCr & vbCr & Err.number & Err.description, vbExclamation
     End Select
 End Function
 Rem 查《白雲深處人家·說文解字·圖像查閱·藤花榭本》：x 要查的字。傳回一個字串陣列，第1個元素是所查詢的字串，第2個元素是查詢結果網址。若沒找到或找到多條，則傳回空字串
@@ -2369,9 +2369,9 @@ iweNothingExitFunction:
     End If
     Return
 eH:
-Select Case Err.Number
+Select Case Err.number
         Case -2146233088
-            If InStr(Err.Description, "disconnected: not connected to DevTools") Then 'disconnected: not connected to DevTools
+            If InStr(Err.description, "disconnected: not connected to DevTools") Then 'disconnected: not connected to DevTools
                                             '  (failed to check if window was closed: disconnected: not connected to DevTools)
                                             '  (Session info: chrome=128.0.6613.85)
                 'Set wd = Nothing
@@ -2379,10 +2379,10 @@ Select Case Err.Number
                 Set WD = Nothing
                 Resume
             Else
-                MsgBox Err.Number & Err.Description, vbExclamation
+                MsgBox Err.number & Err.description, vbExclamation
             End If
         Case Else
-            MsgBox "請關閉Chrome瀏覽器後再執行一次！" & vbCr & vbCr & Err.Number & Err.Description, vbExclamation
+            MsgBox "請關閉Chrome瀏覽器後再執行一次！" & vbCr & vbCr & Err.number & Err.description, vbExclamation
     End Select
 End Function
 
@@ -2444,9 +2444,9 @@ iweNothingExitFunction:
     End If
     Return
 eH:
-Select Case Err.Number
+Select Case Err.number
         Case -2146233088
-            If InStr(Err.Description, "disconnected: not connected to DevTools") Then 'disconnected: not connected to DevTools
+            If InStr(Err.description, "disconnected: not connected to DevTools") Then 'disconnected: not connected to DevTools
                                             '  (failed to check if window was closed: disconnected: not connected to DevTools)
                                             '  (Session info: chrome=128.0.6613.85)
                 'Set wd = Nothing
@@ -2454,10 +2454,10 @@ Select Case Err.Number
                 Set WD = Nothing
                 Resume
             Else
-                MsgBox Err.Number & Err.Description, vbExclamation
+                MsgBox Err.number & Err.description, vbExclamation
             End If
         Case Else
-            MsgBox "請關閉Chrome瀏覽器後再執行一次！" & vbCr & vbCr & Err.Number & Err.Description, vbExclamation
+            MsgBox "請關閉Chrome瀏覽器後再執行一次！" & vbCr & vbCr & Err.number & Err.description, vbExclamation
     End Select
 End Function
 Rem 查白雲深處人家漢語大字典釋義版檢索
@@ -2568,7 +2568,8 @@ Function LookupHomeinmistsHYDCD(x As String) As Boolean
     ActivateChrome
     '檢索框
     dt = VBA.Now
-    Set iwe = WD.FindElementByCssSelector("#keywords")
+    'Set iwe = WD.FindElementByCssSelector("#keywords")
+    Set iwe = WD.FindElementByName("kw")
     Do While iwe Is Nothing
         Set iwe = WD.FindElementByCssSelector("#keywords")
         If VBA.DateDiff("s", dt, VBA.Now) > 5 Then
@@ -2576,11 +2577,11 @@ Function LookupHomeinmistsHYDCD(x As String) As Boolean
         End If
     Loop
     SetIWebElementValueProperty iwe, x
-    iwe.SendKeys key.enter
-'    '查詢按鈕
-'    Set iwe = WD.FindElementByCssSelector("")
-'    If iwe Is Nothing Then Exit Function
-'    iwe.Click
+    'iwe.SendKeys key.enter
+    '檢索按鈕
+    Set iwe = WD.FindElementByCssSelector("body > div.search-block > div > div:nth-child(2) > input[type=button]:nth-child(2)")
+    If iwe Is Nothing Then Exit Function
+    iwe.Click
     LookupHomeinmistsHYDCD = True
     
 End Function
@@ -2655,9 +2656,9 @@ iweNothingExitFunction:
     End If
     Return
 eH:
-Select Case Err.Number
+Select Case Err.number
         Case -2146233088
-            If InStr(Err.Description, "disconnected: not connected to DevTools") Then 'disconnected: not connected to DevTools
+            If InStr(Err.description, "disconnected: not connected to DevTools") Then 'disconnected: not connected to DevTools
                                             '  (failed to check if window was closed: disconnected: not connected to DevTools)
                                             '  (Session info: chrome=128.0.6613.85)
                 'Set wd = Nothing
@@ -2665,10 +2666,10 @@ Select Case Err.Number
                 Set WD = Nothing
                 Resume
             Else
-                MsgBox Err.Number & Err.Description, vbExclamation
+                MsgBox Err.number & Err.description, vbExclamation
             End If
         Case Else
-            MsgBox "請關閉Chrome瀏覽器後再執行一次！" & vbCr & vbCr & Err.Number & Err.Description, vbExclamation
+            MsgBox "請關閉Chrome瀏覽器後再執行一次！" & vbCr & vbCr & Err.number & Err.description, vbExclamation
     End Select
 End Function
 
@@ -2841,23 +2842,23 @@ iweNothingExitFunction:
     End If
     Return
 eH:
-Select Case Err.Number
+Select Case Err.number
         Case -2146233088
-            If InStr(Err.Description, "disconnected: not connected to DevTools") Then 'disconnected: not connected to DevTools
+            If InStr(Err.description, "disconnected: not connected to DevTools") Then 'disconnected: not connected to DevTools
                                             '  (failed to check if window was closed: disconnected: not connected to DevTools)
                                             '  (Session info: chrome=128.0.6613.85)
                 SystemSetup.killchromedriverFromHere
                 Set WD = Nothing
                 Resume
-            ElseIf InStr(Err.Description, "chromedriver.exe does not exist") Then 'The file C:\Program Files\Google\Chrome\Application\chromedriver.exe does not exist. The driver can be downloaded at http://chromedriver.storage.googleapis.com/index.html
+            ElseIf InStr(Err.description, "chromedriver.exe does not exist") Then 'The file C:\Program Files\Google\Chrome\Application\chromedriver.exe does not exist. The driver can be downloaded at http://chromedriver.storage.googleapis.com/index.html
                 Set WD = Nothing
                 MsgBox "請在「" & getChromePathIncludeBackslash & "」路徑下複製chromedriver.exe檔案再繼續！", vbCritical
                 SystemSetup.OpenExplorerAtPath getChromePathIncludeBackslash
             Else
-                MsgBox Err.Number & Err.Description, vbExclamation
+                MsgBox Err.number & Err.description, vbExclamation
             End If
         Case Else
-            MsgBox "請關閉Chrome瀏覽器後再執行一次！" & vbCr & vbCr & Err.Number & Err.Description, vbExclamation
+            MsgBox "請關閉Chrome瀏覽器後再執行一次！" & vbCr & vbCr & Err.number & Err.description, vbExclamation
     End Select
 End Function
 
@@ -3026,9 +3027,9 @@ iweNothingExitFunction:
     End If
     Return
 eH:
-Select Case Err.Number
+Select Case Err.number
         Case -2146233088
-            If InStr(Err.Description, "disconnected: not connected to DevTools") Then 'disconnected: not connected to DevTools
+            If InStr(Err.description, "disconnected: not connected to DevTools") Then 'disconnected: not connected to DevTools
                                             '  (failed to check if window was closed: disconnected: not connected to DevTools)
                                             '  (Session info: chrome=128.0.6613.85)
                 'Set wd = Nothing
@@ -3036,10 +3037,10 @@ Select Case Err.Number
                 Set WD = Nothing
                 Resume
             Else
-                MsgBox Err.Number & Err.Description, vbExclamation
+                MsgBox Err.number & Err.description, vbExclamation
             End If
         Case Else
-            MsgBox "請關閉Chrome瀏覽器後再執行一次！" & vbCr & vbCr & Err.Number & Err.Description, vbExclamation
+            MsgBox "請關閉Chrome瀏覽器後再執行一次！" & vbCr & vbCr & Err.number & Err.description, vbExclamation
     End Select
 End Function
 
@@ -3086,11 +3087,11 @@ Sub GoogleSearch(Optional searchStr As String)
     ''    WD.Quit
     '    Exit Sub
 Err1:
-        Select Case Err.Number
+        Select Case Err.number
 '            Case 49 'DLL 呼叫規格錯誤
 '                Resume
             Case -2146233088
-                If InStr(Err.Description, "disconnected: not connected to DevTools") Then 'disconnected: not connected to DevTools
+                If InStr(Err.description, "disconnected: not connected to DevTools") Then 'disconnected: not connected to DevTools
                                                 '  (failed to check if window was closed: disconnected: not connected to DevTools)
                                                 '  (Session info: chrome=128.0.6613.85)
                     'Set wd = Nothing
@@ -3098,10 +3099,10 @@ Err1:
                     Set WD = Nothing
                     Resume
                 Else
-                    MsgBox Err.Number & Err.Description, vbExclamation
+                    MsgBox Err.number & Err.description, vbExclamation
                 End If
             Case Else
-                MsgBox Err.Description, vbCritical
+                MsgBox Err.description, vbCritical
                 SystemSetup.killchromedriverFromHere
                 Set WD = Nothing
     '           Resume
@@ -3287,7 +3288,7 @@ Function grabGjCoolPunctResult(text As String, resultText As String, Optional Ba
     Exit Function
     
 Err1:
-        Select Case Err.Number
+        Select Case Err.number
             Case 49 'DLL 呼叫規格錯誤
                 Resume
             Case 91 '沒有設定物件變數或 With 區塊變數
@@ -3302,19 +3303,19 @@ Err1:
                 Rem SystemSetup.Wait 0.3
                 Rem textBox.SendKeys key.Control + "v"
                 Rem textBox.SendKeys key.LeftShift + key.Insert
-                If InStr(Err.Description, "ChromeDriver only supports characters in the BMP") Then
+                If InStr(Err.description, "ChromeDriver only supports characters in the BMP") Then
                     WBQuit = pasteWhenOutBMP(wdB, url, "PunctArea", text, textBox, Background)
                     Resume Next
-                ElseIf InStr(Err.Description, "invalid session id") Or InStr(Err.Description, "A exception with a null response was thrown sending an HTTP request to the remote WebDriver server for URL http://localhost:4609/session/455865a54d3f64364cf76b41fe7953a3/url. The status of the exception was ConnectFailure, and the message was: 無法連接至遠端伺服器") Then 'Or InStr(Err.Description, "no such window: target window already closed") Then
+                ElseIf InStr(Err.description, "invalid session id") Or InStr(Err.description, "A exception with a null response was thrown sending an HTTP request to the remote WebDriver server for URL http://localhost:4609/session/455865a54d3f64364cf76b41fe7953a3/url. The status of the exception was ConnectFailure, and the message was: 無法連接至遠端伺服器") Then 'Or InStr(Err.Description, "no such window: target window already closed") Then
                     killchromedriverFromHere
                     OpenChrome url
                     Set wdB = WD: WBQuit = True
                     Resume
-                ElseIf InStr(Err.Description, "no such window: target window already closed") Then
+                ElseIf InStr(Err.description, "no such window: target window already closed") Then
                     openNewTabWhenTabAlreadyExit wdB
                     wdB.Navigate.GoToUrl url
                     Resume
-                ElseIf InStr(Err.Description, "disconnected: not connected to DevTools") = 1 Then 'disconnected: not connected to DevTools
+                ElseIf InStr(Err.description, "disconnected: not connected to DevTools") = 1 Then 'disconnected: not connected to DevTools
                                                                                         '  (failed to check if window was closed: disconnected: not connected to DevTools)
                                                                                         '  (Session info: chrome=130.0.6723.117)
                     killchromedriverFromHere 'WD.Quit: Set WD = Nothing:
@@ -3323,21 +3324,21 @@ Err1:
                     Resume
                     
                 Else
-                    MsgBox Err.Number & Err.Description
+                    MsgBox Err.number & Err.description
                     Stop
                 End If
             Case -2147467261 '並未將物件參考設定為物件的執行個體。
-                If InStr(Err.Description, "並未將物件參考設定為物件的執行個體。") Then
+                If InStr(Err.description, "並未將物件參考設定為物件的執行個體。") Then
                     killchromedriverFromHere 'WD.Quit: Set WD = Nothing:
                      OpenChrome url
                     Set wdB = WD
                     Resume
                 Else
-                    MsgBox Err.Description, vbCritical
+                    MsgBox Err.description, vbCritical
                     Stop
                 End If
             Case Else
-                MsgBox Err.Description, vbCritical
+                MsgBox Err.description, vbCritical
                 wdB.Quit
                 SystemSetup.killchromedriverFromHere
     '           Resume
@@ -3359,7 +3360,7 @@ Function grabGjCoolPunctResult_New(text As String, resultText As String) As Stri
         
         On Error Resume Next
         LastValidWindow = WD.CurrentWindowHandle
-        If VBA.InStr(Err.Description, "no such window: target window already closed") = 1 Then
+        If VBA.InStr(Err.description, "no such window: target window already closed") = 1 Then
             LastValidWindow = WD.WindowHandles()(UBound(WD.WindowHandles))
         End If
         On Error GoTo 0
@@ -3635,7 +3636,7 @@ Function grabAITShenShenWikiPunctResult(text As String, resultText As String, Op
         
         On Error Resume Next
         LastValidWindow = WD.CurrentWindowHandle
-        If VBA.InStr(Err.Description, "no such window: target window already closed") = 1 Then
+        If VBA.InStr(Err.description, "no such window: target window already closed") = 1 Then
             LastValidWindow = WD.WindowHandles()(UBound(WD.WindowHandles))
         End If
         On Error GoTo 0
@@ -3804,12 +3805,12 @@ textBox.SendKeys key.Control + "v"
 
 Exit Function
 Err1:
-    Select Case Err.Number
+    Select Case Err.number
         Case 49 'DLL 呼叫規格錯誤
             Resume
         Case 91 '未設定物件變數
             If retryTimes > 1 Then
-                MsgBox Err.Number + Err.Description
+                MsgBox Err.number + Err.description
             Else
                 retryTimes = retryTimes + 1
                 GoTo retry
@@ -3819,7 +3820,7 @@ Err1:
 '            textbox.SendKeys key.LeftShift + key.Insert
 '            usePaste WD, url
 '            Resume Next
-            If InStr(Err.Description, "timed out after 60 seconds") Or InStr(Err.Description, "無法連接至遠端伺服器") Then
+            If InStr(Err.description, "timed out after 60 seconds") Or InStr(Err.description, "無法連接至遠端伺服器") Then
                 'The HTTP request to the remote WebDriver server for URL http://localhost:1944/session/d83a0c74803e25f1e7f48999b87a6b7d/element/69589515-4189-4db6-8655-80e30fc05ee0/value timed out after 60 seconds.
                 'A exception with a null response was thrown sending an HTTP request to the remote WebDriver server for URL http://localhost:1921/session//element/a9208c93-91ae-4956-9455-d42f51719f23/text. The status of the exception was ConnectFailure, and the message was: 無法連接至遠端伺服器
                 iwd.Close
@@ -3835,7 +3836,7 @@ Err1:
                 pasteWhenOutBMP = True
                 Resume Next
             Else
-                MsgBox Err.Description, vbCritical
+                MsgBox Err.description, vbCritical
     '            WD.Quit
                 iwd.Close
                 SystemSetup.killchromedriverFromHere
@@ -3863,16 +3864,16 @@ Public Property Get WindowHandles() As String()
     If Not WD Is Nothing Then WindowHandles = WD.WindowHandles
     Exit Property
 eH:
-    Select Case Err.Number
+    Select Case Err.number
         Case -2146233088
-            If InStr(Err.Description, "invalid session id") Then
+            If InStr(Err.description, "invalid session id") Then
                 SystemSetup.killchromedriverFromHere
             Else
                 GoTo Msg
             End If
         Case Else
 Msg:
-            MsgBox Err.Number & Err.Description
+            MsgBox Err.number & Err.description
 '            Resume
     End Select
 End Property
