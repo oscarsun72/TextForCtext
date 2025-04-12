@@ -227,8 +227,9 @@ Sub 清除頁前的分段符號()
     DoEvents
     playSound 1, 0
     DoEvents
-'    Const description As String = "將星號前的分段符號移置前段之末 & 清除頁前的分段符號"
-    Const description As String = "將星號前的分段符號移置前段之末 & 清除頁前的分段符號{據Kanripo.org或《國學大師》所藏本輔以末學自製於GitHub開源免費免安裝之TextForCtext排版對應錄入。討論區與末學YouTube頻道有實境演示影片可資參考。感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主}"
+    'Const description As String = "將星號前的分段符號移置前段之末 & 清除頁前的分段符號"
+    Const description As String = "將星號前的分段符號移置前段之末 & 清除頁前的分段符號{佛弟子文獻學者孫守真任真甫按：仁者志士義民菩薩賢友請多利用賢超法師《古籍酷AI》或《看典古籍》OCR事半功倍也。如蒙不棄，可利用末學於GitHub開源免費免安裝之TextForCtext 應用程式，加速輸入與排版。討論區與末學YouTube頻道有演示影片可資參考。感恩感恩　讚歎讚歎　南無阿彌陀佛"
+'    Const description As String = "將星號前的分段符號移置前段之末 & 清除頁前的分段符號{據Kanripo.org或《國學大師》所藏本輔以末學自製於GitHub開源免費免安裝之TextForCtext排版對應錄入。討論區與末學YouTube頻道有實境演示影片可資參考。感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主}"
     pastetoEditBox description
     d.Close wdDoNotSaveChanges
 
@@ -1549,7 +1550,7 @@ Sub 千慮一得齋匯出() '20250318
     
     db.cnt_開發_千慮一得齋 cnt
     rst.Open "SELECT 札.札ID, 札.札記 FROM (書 LEFT JOIN 篇 ON 書.書ID = 篇.書ID) LEFT JOIN 札 ON 篇.篇ID = 札.篇ID " & _
-                    "WHERE (((書.書ID)=9326) AND ((札.頁) Between " & stPageNum & " And " & endPageNum & ")) " & _
+                    "WHERE (((書.書ID)=9327) AND ((札.頁) Between " & stPageNum & " And " & endPageNum & ")) " & _
                     "ORDER BY 篇.頁, 篇.篇ID, 札.頁", cnt, adOpenForwardOnly, adLockReadOnly
     Do Until rst.EOF
         Set p = d.Paragraphs.Add
@@ -1568,7 +1569,7 @@ findnext:
                 If followWords <> vbNullString Then
                     Do Until d.Range(rng.End, rng.End + VBA.Len(followWords)).text = followWords
                         If Not rng.Find.Execute(rstNote.Fields("札箋").Value) Then Exit Do
-                        If rng.End + VBA.Len(followWords) >= d.Content.End Then GoTo nextRecord
+                        If rng.End + VBA.Len(followWords) >= d.content.End Then GoTo nextRecord
                     Loop
                 End If
             End If
@@ -1579,20 +1580,22 @@ findnext:
                             rng.SetRange rng.End, rngDup.End
                             GoTo findnext
                         End If
+                        rng.text = "{{" & rng.text & "}}"
                     End If
-                    rng.text = "{{" & rng.text & "}}"
                 Case 19323 '校,校勘記,真
                     note = rstNote.Fields("備註").Value
                     If VBA.InStr(note, "不復一一出校") = 0 Then
-                        Do Until VBA.InStr("。，" & VBA.Chr(13), rng.Previous.text)
-                            If rng.Previous.text <> VBA.Chr(13) Then rng.Move wdCharacter, 1
-                            If rng.End = rng.Document.Content.End - 1 Then Exit Do
-                        Loop
-                        si.Create noteMark
-                        If si.LengthInTextElements > 1 Then
-                            rng.InsertAfter "{{{孫守真按：" & "「" & noteMark & "」：" & note & "}}}"
-                        Else
-                            rng.InsertAfter "{{{孫守真按：" & noteMark & "，" & note & "}}}"
+                        If rng.start > 0 Then
+                            Do Until VBA.InStr("。，" & VBA.Chr(13), rng.Previous.text)
+                                If rng.Previous.text <> VBA.Chr(13) Then rng.Move wdCharacter, 1
+                                If rng.End = rng.Document.content.End - 1 Then Exit Do
+                            Loop
+                            si.Create noteMark
+                            If si.LengthInTextElements > 1 Then
+                                rng.InsertAfter "{{{孫守真按：" & "「" & noteMark & "」：" & note & "}}}"
+                            Else
+                                rng.InsertAfter "{{{孫守真按：" & noteMark & "，" & note & "}}}"
+                            End If
                         End If
                     End If
             End Select
@@ -1608,7 +1611,7 @@ nextRecord:
     rst.Close: cnt.Close
     
     文字處理.書名號篇名號標注
-    rng.Document.Content.Cut '剪下準備貼到TextForCtext的textBox1中
+    rng.Document.content.Cut '剪下準備貼到TextForCtext的textBox1中
     SystemSetup.contiUndo ur
     
     d.ActiveWindow.windowState = wdWindowStateMinimize
@@ -1875,7 +1878,7 @@ Sub 國學大師_Kanripo_四庫全書本轉來_Sub(rng As Range)
         ElseIf Not rngChkPre Is Nothing Then
             If rngChkPre.text <> VBA.Chr(11) And VBA.Left(rngChk, 2) <> "{{" Then GoSub replaceSpaceWithBlank:
         End If
-        rng.SetRange rngEd, rng.Document.Content.End
+        rng.SetRange rngEd, rng.Document.content.End
     Loop
     
 Exit Sub

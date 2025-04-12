@@ -281,18 +281,20 @@ namespace TextForCtext
                 whs = driver.WindowHandles;
                 if (whs == null || whs.Count == 0) return null;// string.Empty;                
                                                                //_lastValidWindowHandle = _lastValidWindowHandle ?? (whs.Count > 0 ? whs[whs.Count - 1] : null);
-                if (!whs.Contains(_lastValidWindowHandle))
+                                                               //if (driver.WindowHandles.IndexOf(_lastValidWindowHandle)>-1)
+                if (!driver.WindowHandles.Contains(_lastValidWindowHandle))
                 {
-                    for (int i = whs.Count - 1; i > -1; i--)
+                    for (int i = driver.WindowHandles.Count - 1; i > -1; i--)
                     {
-                        driver.SwitchTo().Window(whs[i]);
-                        if (DialogResult.OK == Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("是這個分頁嗎？"))
+                        driver.SwitchTo().Window(driver.WindowHandles[i]);
+                        //if (DialogResult.OK == Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("是這個分頁嗎？"))
+                        if (Form1.IsValidUrl＿ImageTextComparisonPage(driver.Url))
                         {
-                            _lastValidWindowHandle = whs[i];
+                            _lastValidWindowHandle = driver.WindowHandles[i];
                             return _lastValidWindowHandle;
                         }
                     }
-                    return whs.Last();
+                    return driver.WindowHandles.Last();
                 }
                 else
                     return _lastValidWindowHandle;
@@ -2301,7 +2303,7 @@ namespace TextForCtext
                             Form1.InstanceForm1.FastModeSwitcher();
                         return false;
                     }
-                    if (int.Parse(ActiveForm1.CurrentPageNum) < 3)
+                    if (ActiveForm1.KeyinTextMode || int.Parse(ActiveForm1.CurrentPageNum) < 3)
                         submit.Click();
                     else
                     {
@@ -2438,7 +2440,7 @@ namespace TextForCtext
             if (!IsDriverInvalid() && int.Parse(ActiveForm1.CurrentPageNum) > 2)
             {
                 int currentPageNum = int.Parse(Form1.InstanceForm1.CurrentPageNum);
-                if (currentPageNum != Form1.InstanceForm1.GetPageNumFromUrl(driver.Url) ||
+                if (ActiveForm1.AutoPasteToCtext && currentPageNum != Form1.InstanceForm1.GetPageNumFromUrl(driver.Url) ||
                     Math.Abs(int.Parse(ActiveForm1.CurrentPageNum) - int.Parse(WindowHandles["currentPageNum"])) != 1)
                 {
                     if (DialogResult.OK == Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("頁碼不同！請轉至頁面" +
@@ -2604,7 +2606,102 @@ namespace TextForCtext
                     }
              */
         }
+        /// <summary>
+        /// 傳回Chrome瀏覽器作用中分頁視窗頁籤url 
+        /// 20250410 GitHub　Copilot大菩薩
+        /// </summary>
+        /// <returns></returns>
+        public static string GetActiveChromeTabUrl()
+        {
+            // 找到 Chrome 主視窗
+            IntPtr chromeHandle = FindWindow("Chrome_WidgetWin_1", null);
+            if (chromeHandle == IntPtr.Zero)
+            {
+                Console.WriteLine("未找到 Chrome 瀏覽器！");
+                return null;
+            }
 
+            try
+            {
+                AutomationElement rootElement = AutomationElement.FromHandle(chromeHandle);
+                if (rootElement == null)
+                {
+                    Console.WriteLine("無法取得 Chrome 的 AutomationElement！");
+                    return null;
+                }
+
+                // 列舉所有子元素
+                AutomationElementCollection children = rootElement.FindAll(TreeScope.Descendants, Condition.TrueCondition);
+                foreach (AutomationElement child in children)
+                {
+                    Console.WriteLine($"Name: {child.Current.Name}, ControlType: {child.Current.ControlType.ProgrammaticName}");
+                }
+
+                // 嘗試找到地址列
+                AutomationElement addressBar = rootElement.FindFirst(TreeScope.Descendants,
+                      new PropertyCondition(AutomationElement.NameProperty, "地址和搜尋列")); // 根據實際名稱調整
+                                                                                        //new PropertyCondition(AutomationElement.NameProperty, "Address and search bar")); // 根據實際名稱調整
+                if (addressBar != null)
+                {
+                    ValuePattern valuePattern = addressBar.GetCurrentPattern(ValuePattern.Pattern) as ValuePattern;
+                    return valuePattern?.Current.Value;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"發生錯誤: {ex.Message}");
+            }
+
+            return null;
+        }
+        /// <summary>
+        /// 用 UI Automation 獲取 Chrome 瀏覽器中所有分頁的 URL
+        /// 20250410 GitHub　Copilot大菩薩
+        /// </summary>
+        public static void GetAllChromeTabUrls()
+        {
+            // 找到 Chrome 主視窗
+            IntPtr chromeHandle = FindWindow("Chrome_WidgetWin_1", null);
+            if (chromeHandle == IntPtr.Zero)
+            {
+                Console.WriteLine("未找到 Chrome 瀏覽器！");
+                return;
+            }
+
+            try
+            {
+                // 獲取 Chrome 的 AutomationElement
+                AutomationElement rootElement = AutomationElement.FromHandle(chromeHandle);
+                if (rootElement == null)
+                {
+                    Console.WriteLine("無法取得 Chrome 的 AutomationElement！");
+                    return;
+                }
+
+                // 列舉所有子元素
+                AutomationElementCollection children = rootElement.FindAll(TreeScope.Descendants, Condition.TrueCondition);
+                foreach (AutomationElement child in children)
+                {
+                    Console.WriteLine($"ControlType: {child.Current.ControlType.ProgrammaticName}");
+                    Console.WriteLine($"Name: {child.Current.Name}");
+                    Console.WriteLine($"AutomationId: {child.Current.AutomationId}");
+                    Console.WriteLine($"LocalizedControlType: {child.Current.LocalizedControlType}");
+
+                    // 列舉所有屬性
+                    foreach (AutomationProperty property in child.GetSupportedProperties())
+                    {
+                        object value = child.GetCurrentPropertyValue(property);
+                        Console.WriteLine($"Property: {property.ProgrammaticName}, Value: {value}");
+                    }
+
+                    Console.WriteLine("--------------------------------------------------");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"發生錯誤: {ex.Message}");
+            }
+        }
 
         /// <summary>
         /// geturl 修改後的程式碼:20230308 creedit with NotionAI大菩薩
@@ -2836,12 +2933,15 @@ namespace TextForCtext
         internal static string GoToCurrentUserActivateTab(string urlActiveTab = "")
         {
             if (urlActiveTab == "") urlActiveTab = ActiveTabURL_Ctext_Edit;
+            return urlActiveTab;
+            #region 現在有設定Chrome瀏覽器的啟動參數 --remote-debugging-port=9222 了，這個可以省了!!●●●●●●●●●真的可以省了
+
             string url = "";
             if (urlActiveTab != "")
             {
                 try
                 {
-                    //現在有設定Chrome瀏覽器的啟動參數 --remote-debugging-port=9222 了，這個可以省了
+                    //現在有設定Chrome瀏覽器的啟動參數 --remote-debugging-port=9222 了，這個可以省了!!●●●●●●●●●真的可以省了
                     if (driver == null && Form1.browsrOPMode == Form1.BrowserOPMode.appActivateByName)
                     {
                         if (DialogResult.OK == Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("請先在textBox2執行「br」指令，切換為SeleniumNew模式再繼續。" +
@@ -2943,6 +3043,7 @@ namespace TextForCtext
             else
                 return url == "" ? urlActiveTab : url;
 
+            #endregion
         }
         /// <summary>
         /// Selenium 瀏覽所指定的網址所在的網頁
@@ -3065,7 +3166,7 @@ namespace TextForCtext
             {
                 if (driver.Url != url)
                     driver.Navigate().GoToUrl(url);
-                LastValidWindow = driver.CurrentWindowHandle;
+                //LastValidWindow = driver.CurrentWindowHandle;//●●●●●●●●●●●●●●●●●●●● 20250408取消
                 //activate and move to most front of desktop
                 //driver.SwitchTo().Window(driver.CurrentWindowHandle;
                 if (frmKeyinTextModeTopWindow) WindowsScrolltoTop();//將分頁視窗頁面捲到頂端
@@ -3203,8 +3304,8 @@ namespace TextForCtext
             }
             try
             {
-                //LastValidWindow = driver.CurrentWindowHandle;
-                Form1.ResetLastValidWindow();
+                //LastValidWindow = driver.CurrentWindowHandle;//●●●●●●●●●●●●●●●●●●●●● 20250408取消
+                //Form1.ResetLastValidWindow();
                 driver = (ChromeDriver)driver.SwitchTo().NewWindow(tabOrwindow);
 
             }
@@ -6959,7 +7060,8 @@ namespace TextForCtext
                 //iwe = waitFindWebElementBySelector_ToBeClickable("#OneLine > div.d-flex.justify-content-between.mt-2.mb-1 > div:nth-child(3) > div:nth-child(6) > button:nth-child(2) > i");
                 //iwe = waitFindWebElementBySelector_ToBeClickable("#OneLine > div.d-flex.justify-content-between.mt-2.mb-1 > div:nth-child(3) > div:nth-child(6) > button:nth-child(2)");
                 //iwe = waitFindWebElementBySelector_ToBeClickable("#line_image_panel > div > div:nth-child(2) > div:nth-child(8) > button:nth-child(2) > i");
-                iwe = WaitFindWebElementBySelector_ToBeClickable("#line_image_panel > div > div:nth-child(2) > div:nth-child(8) > button:nth-child(2)");
+                //iwe = WaitFindWebElementBySelector_ToBeClickable("#line_image_panel > div > div:nth-child(2) > div:nth-child(8) > button:nth-child(2)");
+                iwe = WaitFindWebElementBySelector_ToBeClickable("#line_image_panel > div > div:nth-child(2) > div.ps-3.align-self-center > button:nth-child(2)");
                 //if (iwe == null)
                 //{
                 //    SendKeys.SendWait("{esc}");
@@ -6999,6 +7101,7 @@ namespace TextForCtext
                 }
                 else
                 {
+                    Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("「文本行」按鈕的Selector值已變，請重新取得！");
                     StopOCR = true; return false;
                 }
             }
@@ -11168,6 +11271,16 @@ namespace TextForCtext
             //Console.WriteLine("原始字串：{0}", originalString);
             //    Console.WriteLine("編碼後字串：{0}", encodedString);
         }
+        public static string DecodedStringURL(string originalString)
+        {
+            //string originalString = "這是一個包含中文和特殊符號的字串！&^%";
+            //string encodedString = HttpUtility.UrlEncode(originalString);
+            //return HttpUtility.HtmlDecode(originalString);
+            return HttpUtility.UrlDecode(originalString);
+
+            //Console.WriteLine("原始字串：{0}", originalString);
+            //    Console.WriteLine("編碼後字串：{0}", encodedString);
+        }
 
         /// <summary>
         /// 取得目前Chrome瀏覽器是否在最大化的狀態
@@ -11179,10 +11292,22 @@ namespace TextForCtext
         /// <returns></returns>
         public static bool IsBrowserMaximized(ChromeDriver driver)
         {
-            Size windowSize = driver.Manage().Window.Size;
-            Size workingAreaSize = Screen.PrimaryScreen.WorkingArea.Size;
+            if (IsDriverInvalid())
+            {
+                return false;
+            }
+            try
+            {
+                Size windowSize = driver.Manage().Window.Size;
+                Size workingAreaSize = Screen.PrimaryScreen.WorkingArea.Size;
+                return windowSize.Equals(workingAreaSize) || (windowSize.Width >= workingAreaSize.Width && windowSize.Height >= workingAreaSize.Height);
 
-            return windowSize.Equals(workingAreaSize) || (windowSize.Width >= workingAreaSize.Width && windowSize.Height >= workingAreaSize.Height);
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+
         }
 
         /// <summary>       

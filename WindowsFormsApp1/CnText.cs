@@ -156,7 +156,8 @@ namespace TextForCtext
         {
             if (!force2mark) if (HasEditedWithPunctuationMarks(ref clpTxt)) { Form1.playSound(Form1.soundLike.error); return ref clpTxt; }
             //提示音
-            new System.Media.SoundPlayer(@"C:\Windows\Media\Windows Balloon.wav").Play();
+            if (!Form1.MuteProcessing)
+                new System.Media.SoundPlayer(@"C:\Windows\Media\Windows Balloon.wav").Play();
             string clpTxtOriginal = clpTxt;
             ado.Connection cnt = new ado.Connection();
             ado.Recordset rst = new ado.Recordset();
@@ -1828,7 +1829,7 @@ namespace TextForCtext
                         //string result = text.Substring(0, startIndex) + "{{" + sb.ToString() + "}}" + text.Substring(endIndex + 2);
                         //return result.Replace(" ", "􏿽");
                         //return (text.Substring(0, startIndex) + "{{" + sb.ToString() + "}}" + text.Substring(endIndex + 2)).Replace(" ", "􏿽");
-                                                
+
                         CnText.RemarkBooksPunctuation(ref text);
 
                         return text;

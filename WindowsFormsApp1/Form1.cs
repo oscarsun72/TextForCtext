@@ -17,10 +17,13 @@ using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Security.Policy;
 using System.Text;
+//using System.Text.Encodings.Web;
 using System.Text.RegularExpressions;
 using System.Threading;
 //using Task = System.Threading.Tasks.Task;
 using System.Threading.Tasks;
+using System.Web;
+
 
 //using System.Windows;
 using System.Windows.Forms;
@@ -743,16 +746,20 @@ namespace WindowsFormsApp1
 
 
         /// <summary>
-        /// 自動將Quick edit的連結複製到剪貼簿
+        /// 自動將Quick edit的連結複製到剪貼簿（不一定是在手動模式下才執行）
         /// 按下的控制鍵是Ctrl時才執行
         /// </summary>
         /// <param name="modifierKeys">按下的控制鍵是Ctrl時才執行</param>
         void copyQuickeditLinkWhenKeyinMode(Keys modifierKeys)
         {
+            string url = null;
             try
             {
-                //如果是完整編輯頁面則逕予返回20240810
-                if (br.GetChromeActiveUrl.Contains("action=editchapter")) return;
+                //如果是完整編輯頁面則逕予返回20240810                
+                url = br.GetChromeActiveUrl;
+                if (url.IsNullOrEmpty())
+                    url = br.GetActiveChromeTabUrl();
+                if (url.Contains("action=editchapter")) return;
                 //if (Clipboard.GetText().IndexOf("<scanbegin ") > -1) return;
                 if (Clipboard.GetText().IndexOf("<scanbegin ") > -1)
                 {
@@ -826,7 +833,9 @@ namespace WindowsFormsApp1
                     break;
                 //自動擷取「簡單修改模式」（selector: # quickedit > a的連結)
                 case Keys.None:
-                    copyQuickeditLinkWhenKeyinModeSub();
+                    if (!url.IsNullOrEmpty()) Clipboard.SetText(url);//●●●●●●●●●●●●●●●●●●●●●●●●●
+                    copyQuickeditLinkWhenKeyinModeSub(url);
+                    Clipboard.Clear();
                     ResetLastValidWindow();
                     break;
             }
@@ -931,14 +940,43 @@ namespace WindowsFormsApp1
         /// 自動擷取「簡單修改模式」（selector: # quickedit > a的連結)到剪貼簿
         /// </summary>
         /// <returns>執行成功傳回true</returns>
-        bool copyQuickeditLinkWhenKeyinModeSub()
+        bool copyQuickeditLinkWhenKeyinModeSub(string currUrl = "")
         {
             if (Clipboard.GetText().IndexOf("#editor") == -1)
             {
                 try
                 {
                     br.driver = br.driver ?? Browser.DriverNew();
-                    if (br.GoToCurrentUserActivateTab() == "") return false;
+                    if (currUrl.IsNullOrEmpty()) currUrl = br.GoToCurrentUserActivateTab();
+                    if (currUrl == "") return false;
+                    if (br.IsDriverInvalid())
+                    {
+                        for (int i = driver.WindowHandles.Count - 1; i > -1; i--)
+                        {
+                            br.driver.SwitchTo().Window(driver.WindowHandles[i]);
+                            if (br.driver.Url == currUrl) break;
+                        }
+                    }
+                    else
+                    {
+                        int i = driver.WindowHandles.Count;
+                        string url = driver.Url; currUrl = currUrl.StartsWith("http") ? currUrl : "https://" + currUrl;
+                        while (i > -1 && url != currUrl)
+                        {
+                            i--;
+                            driver.SwitchTo().Window(driver.WindowHandles[i]);
+                            url = driver.Url;
+                            if (url.Contains("%"))
+                            {
+                                //string decodeStr = url.Substring(url.IndexOf("#")+1);
+                                //HttpUtility.deco
+                                //url = br.DecodedStringURL(url);
+                                url = HttpUtility.UrlDecode(url);
+
+                            }
+
+                        }
+                    }
                     string quickEditLinkUrl = "";
                     try
                     {
@@ -951,7 +989,12 @@ namespace WindowsFormsApp1
                             case -2146233088:
                                 //"stale element reference: element is not attached to the page document\n  (Session info: chrome=110.0.5481.100)"
                                 //"no such window: target window already closed\nfrom unknown error: web view not found\n  (Session info: chrome=110.0.5481.100)"
-                                br.driver.SwitchTo().Window(br.driver.WindowHandles[br.driver.WindowHandles.Count - 1]);
+                                //br.driver.SwitchTo().Window(br.driver.WindowHandles[br.driver.WindowHandles.Count - 1]);
+                                for (int i = driver.WindowHandles.Count - 1; i > -1; i--)
+                                {
+                                    br.driver.SwitchTo().Window(driver.WindowHandles[i]);
+                                    if (br.driver.Url == currUrl) break;
+                                }
                                 quickEditLinkUrl = br.driver.Url;
                                 break;
                             default:
@@ -988,6 +1031,18 @@ namespace WindowsFormsApp1
                         //    quickEditLinkUrl = quickEditLink.GetAttribute("href");
                         //}
                         quickEditLinkUrl = br.GetQuickeditUrl();
+                        //if (keyinTextMode && br.driver.Url != quickEditLinkUrl)
+                        if (br.driver.Url != quickEditLinkUrl)
+                            //br.driver.Url = quickEditLinkUrl;
+                            br.GoToUrlandActivate(quickEditLinkUrl,true);
+                        if (textBox3.Text != quickEditLinkUrl)
+                        {
+                            bool eventable = _eventsEnabled;
+                            _eventsEnabled = true;
+                            textBox3.Text = quickEditLinkUrl;
+                            WindowHandles["currentPageNum"] = _currentPageNum;
+                            _eventsEnabled = eventable;
+                        }
                     }
                     if (quickEditLinkUrl.IndexOf("#editor") > -1)
                     {
@@ -997,13 +1052,15 @@ namespace WindowsFormsApp1
                         {
                             bool eventEnable = _eventsEnabled;
                             ResumeEvents();
-                            playSound(soundLike.error);
+                            playSound(soundLike.error, true);
                             textBox3.Text = quickEditLinkUrl;
                             _eventsEnabled = eventEnable;
                         }
                         //在手動輸入模式下，讀入Quick edit 方塊中的內容
-                        if (keyinTextMode && textBox1.Text != br.Quickedit_data_textboxTxt)
-                            textBox1.Text = br.Quickedit_data_textboxTxt;
+                        string quicteditX = br.Quickedit_data_textboxTxt;
+                        //if (keyinTextMode && !quicteditX.IsNullOrEmpty() && textBox1.Text != quicteditX)
+                        if (!quicteditX.IsNullOrEmpty() && textBox1.Text != quicteditX)
+                            textBox1.Text = quicteditX;
                         Clipboard.SetText(quickEditLinkUrl);
                     }
                 }
@@ -1777,7 +1834,8 @@ namespace WindowsFormsApp1
                     }
                 }
                 //如果正文中真有分段，則設定chkP=0作為提示音就好,一如含有「□」之文本處理方式
-                //(檢查過沒問題者於<p>前加「+」以識別(用「+」乃不可能存在的字符故）
+                //(檢查過沒問題者於<p>前加
+                //以識別(用「+」乃不可能存在的字符故）
                 if (chkP > -1 && chkPTitleNotEnd == false)
                 {
                     if (chkP - ("<p>".Length + Environment.NewLine.Length) - 1 > -1 &&
@@ -3467,6 +3525,8 @@ namespace WindowsFormsApp1
                 if (e.KeyCode == Keys.A)
                 {//Alt + a : 通常是用在自動輸入模式時根據上一次判斷的頁尾來自動貼入本頁內容
                     e.Handled = true;
+                    TopMost = false;
+                    br.driver.SwitchTo().Window(driver.CurrentWindowHandle);
                     if (fastMode) BeginUpdate();
                     //還原放大的書圖
                     //if (autoPaste2QuickEdit)
@@ -3864,7 +3924,11 @@ namespace WindowsFormsApp1
                         if (s + 3 <= textBox1.TextLength && textBox1.Text.Substring(s + 1, 2) == Environment.NewLine)
                             s += 3;
                         else
-                            textBox1.SelectionStart = ++s;
+                        {
+                            while (textBox1.Text.Substring(s, 1) != "*")
+                                ++s;
+                            textBox1.SelectionStart = s;
+                        }
                     #endregion
 
                     AvailableInUseBothKeysMouse();
@@ -4256,28 +4320,7 @@ namespace WindowsFormsApp1
                         bringBackMousePosFrmCenter();
                     //textBox1.Select(st > 0 ? st - 1 : st, textBox1.Text.IndexOf(Environment.NewLine, ed) == -1 ? textBox1.TextLength : textBox1.Text.IndexOf(Environment.NewLine, ed));
                     return;
-                }
-                if (e.KeyCode == Keys.F8)
-                {
-                    //F8 ：整頁貼上Quick edit [簡單修改模式]  並轉到下一頁
-                    e.Handled = true;
-                    //還原放大的書圖
-                    RestoreImageSize();
-                    if (!OcrTextMode)
-                    {
-                        if (keyinTextMode)
-                            PressAddKeyMethodPaste2QuickEditBox();
-                        else if (autoPaste2QuickEdit)
-                        {
-                            playSound(soundLike.press, true);
-                            altA_predictEndofPageRange();
-                            keyDownCtrlAdd(false);
-                        }
-                    }
-                    else
-                        pagePaste2GjcoolOCR();//F8 :原為 keysTitleCode();
-                    return;
-                }
+                }                
                 if (e.KeyCode == Keys.F11)
                 {
                     //F11 : run replaceXdirrectly() 維基文庫等欲直接抽換之字
@@ -4342,11 +4385,7 @@ namespace WindowsFormsApp1
                     else
                     {
                         e.Handled = true;
-
-                        PagePaste2GjcoolOCR_ing = true;
-                        PressAddKeyMethodPaste2QuickEditBox();
-                        bringBackMousePosFrmCenter();
-                        //TopMost = true;
+                        SelectAll2Quickedit();
                         return;
                     }
 
@@ -4392,6 +4431,23 @@ namespace WindowsFormsApp1
                 //以上按下單一鍵
                 #endregion
             }
+        }
+
+        /// <summary>
+        /// 將textBox1的內容送去簡單修改模式的方塊中
+        /// </summary>
+        internal void SelectAll2Quickedit()
+        {
+            PagePaste2GjcoolOCR_ing = true;
+            PressAddKeyMethodPaste2QuickEditBox();
+            bringBackMousePosFrmCenter();
+            if (ModifierKeys == Keys.Shift)
+            {
+                playSound(soundLike.press, true);
+                //toOCR(br.OCRSiteTitle.GJcool);
+                toOCR(PagePast2OCRsite);
+            }
+            //TopMost = true;
         }
 
         /// <summary>
@@ -4918,15 +4974,18 @@ namespace WindowsFormsApp1
                 }
             }
             if (!stopUndoRec) stopUndoRec = true; if (EventsEnabled) undoRecord();
+            //undoRecord();stopUndoRec = true;            
             titleMarkCode();
-            if (textBox1.SelectionStart > 1 && textBox1.Text.Substring(textBox1.SelectionStart - 2, 2) == Environment.NewLine)
+
+            if (!GetLineText(textBox1.Text, textBox1.SelectionStart).Contains("*") &&
+                textBox1.SelectionStart > 1 && textBox1.Text.Substring(textBox1.SelectionStart - 2, 2) == Environment.NewLine)
                 textBox1.Select(textBox1.SelectionStart - 2, 0);
             int sPre = textBox1.Text.LastIndexOf(Environment.NewLine, textBox1.SelectionStart);
             sPre = sPre == -1 ? 0 : sPre + 2;
             textBox1.Select(sPre, textBox1.SelectionStart - sPre);
             if (!textBox1.SelectedText.StartsWith("　"))
                 textBox1.SelectedText = spaceStrBreforeTitle + textBox1.SelectedText;
-            stopUndoRec = false;
+            stopUndoRec = false;//undoRecord();
             if (!Active)
                 bringBackMousePosFrmCenter();
         }
@@ -6392,7 +6451,7 @@ namespace WindowsFormsApp1
                         (preLineText.IndexOf("*") > -1 && countWordsLenPerLinePara(preLineText) < wordsPerLinePara
                             && countWordsLenPerLinePara(titleFirstParaText) == wordsPerLinePara)
                         ||//或者不是縮排中的文字
-                        (preLineText.IndexOf("*") == -1 && _leadingSpacesRegex.Match(preLineText).Value.Length == titleLeadingSpaceCount
+                        (preLineText.IndexOf("*") == -1 && titleLeadingSpaceCount > 0 && _leadingSpacesRegex.Match(preLineText).Value.Length == titleLeadingSpaceCount
                             && countWordsLenPerLinePara(preLineText) >= countWordsLenPerLinePara(titleFirstParaText))
                         )
                         return true;
@@ -6401,7 +6460,7 @@ namespace WindowsFormsApp1
                 #endregion
 
                 int nextLineStart = x.IndexOf(Environment.NewLine, s);
-                if (nextLineStart == -1) return true;//沒有下一段當然不會是標題
+                if (!keyinTextMode && nextLineStart == -1) return true;//沒有下一段當然不會是標題(手動輸入時通常是一頁頁，不是一卷卷故）
                 nextLineStart += Environment.NewLine.Length;
                 nextLineText = GetLineText(x, nextLineStart);
                 #region 空一格之行/段檢查
@@ -7043,7 +7102,10 @@ namespace WindowsFormsApp1
             if (!groupTitle)
                 textBox1.Select(endPostion, 0);//將插入點置於標題尾端以便接著貼入Quit Edit中
             else
-                textBox1.Select(endPostion - Environment.NewLine.Length, 0);//是組詩標題的話，則將插入點移回標題行/段末，以供呼叫端定位用
+            {
+                if (endPostion > Environment.NewLine.Length)
+                    textBox1.Select(endPostion - Environment.NewLine.Length, 0);//是組詩標題的話，則將插入點移回標題行/段末，以供呼叫端定位用
+            }
 
             keysTitleCode＿WithPrefaceNote();//處理「并序」
             stopUndoRec = false;
@@ -8838,7 +8900,7 @@ namespace WindowsFormsApp1
             int rs = textBox1.SelectionStart, rl = textBox1.SelectionLength;
             string se = textBox1.Text.Substring(s, e - s);//取得s(start)和e(end)之間的字串，就叫se
                                                           //int l = new StringInfo(se).LengthInTextElements;
-            if (new StringInfo(se).LengthInTextElements < 10)
+            if (wordsPerLinePara == -1 && new StringInfo(se).LengthInTextElements < 10)
             {
                 MessageBoxShowOKExclamationDefaultDesktopOnly("請先在第1行指定正常行長再繼續！");
                 return;
@@ -11831,7 +11893,8 @@ namespace WindowsFormsApp1
         /// </summary>
         private void bringBackMousePosFrmCenter()
         {
-            if (browsrOPMode != BrowserOPMode.appActivateByName && driver != null && br.IsConfirmHumanPage()) return;
+            if (browsrOPMode != BrowserOPMode.appActivateByName && driver != null
+                && !IsDriverInvalid() && br.IsConfirmHumanPage()) return;
             if (this.InvokeRequired)
             {
                 this.Invoke((MethodInvoker)delegate
@@ -12872,6 +12935,27 @@ namespace WindowsFormsApp1
                     restoreCaretPosition(textBox1, selStart, selLength);
                     return;
                 }
+                if (e.KeyCode == Keys.F8)
+                {
+                    //F8 ：整頁貼上Quick edit [簡單修改模式]  並轉到下一頁
+                    e.Handled = true;
+                    //還原放大的書圖
+                    RestoreImageSize();
+                    if (!OcrTextMode)
+                    {
+                        if (keyinTextMode)
+                            SelectAll2Quickedit();
+                        else if (autoPaste2QuickEdit)
+                        {
+                            playSound(soundLike.press, true);
+                            altA_predictEndofPageRange();
+                            keyDownCtrlAdd(false);
+                        }
+                    }
+                    else
+                        pagePaste2GjcoolOCR();//F8 :原為 keysTitleCode();
+                    return;
+                }
                 if (e.KeyCode == Keys.F9)
                 {//F9 ：同數字鍵盤「+」 F8 20231213
                     e.Handled = true;
@@ -12883,7 +12967,7 @@ namespace WindowsFormsApp1
                     else
                     {
                         if (keyinTextMode)
-                            PressAddKeyMethodPaste2QuickEditBox();
+                            SelectAll2Quickedit();
                         else if (autoPaste2QuickEdit)
                         {
                             playSound(soundLike.press, true);
@@ -12904,7 +12988,7 @@ namespace WindowsFormsApp1
                     else
                     {
                         if (keyinTextMode)
-                            PressAddKeyMethodPaste2QuickEditBox();
+                            SelectAll2Quickedit();
                         else if (autoPaste2QuickEdit)
                         {
                             playSound(soundLike.press, true);
@@ -14404,7 +14488,7 @@ namespace WindowsFormsApp1
                         if (!gotoNextChapter_FormatContentInput_SKQS())
                         //return false;
                         //Debugger.Break();
-                    undoRecord(); stopUndoRec = false; ResumeEvents();
+                        undoRecord(); stopUndoRec = false; ResumeEvents();
                 }
             }
             #endregion
@@ -15482,7 +15566,7 @@ namespace WindowsFormsApp1
             //{
             // 當前視窗句柄無效
             //string currents = driver.CurrentWindowHandle;
-            if (driver.CurrentWindowHandle != currentWin && !fastMode)
+            if (!br.IsDriverInvalid() && driver.CurrentWindowHandle != currentWin && !fastMode)
             {
                 br.driver.SwitchTo().Window(currentWin);//切回圖文對照的頁面分頁視窗
                 LastValidWindow = currentWin;
@@ -16507,6 +16591,8 @@ namespace WindowsFormsApp1
 
                     //更新網址
                     textBox3.Text = clpTxt;
+                    WindowHandles["currentPageNum"] = _currentPageNum;
+
                     //記下次的網址，作為與下次的比對
                     ClpTxtBefore = clpTxt;
 
@@ -16538,10 +16624,12 @@ namespace WindowsFormsApp1
                                 }
 
                                 //如果是要編輯而不瀏覽，使擷取其中 quick_edit_box 框內的文字內容，複製到剪貼簿
-                                if (br.driver.Url.IndexOf("edit") > -1)
+                                if (br.driver.Url.IndexOf("edit") > -1 || clpTxt.Contains("edit"))
                                 {
-                                    OpenQA.Selenium.IWebElement quick_edit_box = br.driver.FindElement(OpenQA.Selenium.By.Name("data"));
-                                    Clipboard.SetText(quick_edit_box.Text);
+                                    //OpenQA.Selenium.IWebElement quick_edit_box = br.driver.FindElement(OpenQA.Selenium.By.Name("data"));
+                                    //Clipboard.SetText(quick_edit_box.Text);//本事件函式最後會清除剪貼簿，故無用！●●●●●●●●●●●●●●● 20250410
+                                    string quickeditX = br.Quickedit_data_textboxTxt;
+                                    if (textBox1.Text != quickeditX) textBox1.Text = quickeditX;
                                 }
                             }
                             catch (Exception ex)
@@ -18487,6 +18575,13 @@ namespace WindowsFormsApp1
                     fileStream.Write(imageBytes, 0, imageBytes.Length);
                     //Console.WriteLine("圖片已成功下載。");//在「即時運算視窗」寫出訊息
                 }
+                if (File.Exists(downloadImgFullName))
+                    //取得 downloadImgFullName 的檔案大小，20250408 GitHub　Copilot大菩薩：
+                    if (new FileInfo(downloadImgFullName).Length <= 7620)
+                    {
+                        File.Delete(downloadImgFullName);
+                        returnVal = br.DownloadImage(imageUrl, downloadImgFullName);
+                    }
                 #endregion
             }
             catch (Exception ex)
@@ -18494,14 +18589,15 @@ namespace WindowsFormsApp1
                 if (ex.HResult == -2146233079 && (
                     ex.Message.StartsWith("遠端伺服器傳回一個錯誤: (404) 找不到。")
                     || ex.Message.StartsWith("遠端伺服器傳回一個錯誤: (403) 禁止。")
-                    || ex.Message.StartsWith("要求已經中止: 無法建立 SSL/TLS 的安全通道。")))
+                    || ex.Message.StartsWith("要求已經中止: 無法建立 SSL/TLS 的安全通道。")
+                    || ex.Message.StartsWith("無法連接至遠端伺服器")))
                     returnVal = br.DownloadImage(imageUrl, downloadImgFullName);
                 //20240430 Copilot大菩薩：如果 WebClient 的 DownloadData 方法無法滿足需求，那麼您可能需要考慮使用其他的方法來下載圖片。我之前提到的兩種方法是：
                 //使用 Selenium 模擬瀏覽器操作：這種方法可以模擬「另存圖片」的操作，但可能需要一些複雜的程式碼，並且可能需要安裝特定的瀏覽器擴充功能。
                 //使用 HttpClient 或其他第三方函式庫：這些函式庫通常提供了更靈活和強大的功能，可以處理更複雜的網路操作，例如處理 cookies、session、referer 等等。
                 else
                 {
-                    MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
+                    MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message, "DownloadImage Fail！！");
                     return false;
                 }
             }
