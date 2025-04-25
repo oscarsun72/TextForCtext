@@ -15,6 +15,8 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Media;
+using System.Resources;
+
 
 //using System.Net;
 //using System.Net.NetworkInformation;
@@ -5742,7 +5744,8 @@ namespace TextForCtext
                 while (iwe?.GetAttribute("textContent") != "上传完成")
                 {
                     if (iwe?.GetAttribute("textContent") == "OCR完成") goto reClickOCROK;
-                    if (DateTime.Now.Subtract(dt).TotalSeconds > 68)
+                    if (DateTime.Now.Subtract(dt).TotalSeconds > 16)
+                        //if (DateTime.Now.Subtract(dt).TotalSeconds > 68)
                         if (Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("等候上傳完成已逾時，要繼續嗎？") == DialogResult.Cancel)
                         { StopOCR = true; return false; }
                         else
@@ -5794,7 +5797,14 @@ namespace TextForCtext
 
             #region  檢查確實已上傳：
             DateTime dddt = DateTime.Now;
-            iwe = driver.FindElement(By.XPath("/html/body/div[13]/div/div[2]/div[2]/div[1]/div[2]/div[2]/table/tbody/tr/td[6]/div/div"));
+            try
+            {
+                iwe = driver.FindElement(By.XPath("/html/body/div[13]/div/div[2]/div[2]/div[1]/div[2]/div[2]/table/tbody/tr/td[6]/div/div"));
+            }
+            catch (Exception)
+            {
+                return false;
+            }
             while (iwe == null)
             {
                 iwe = driver.FindElement(By.XPath("/html/body/div[13]/div/div[2]/div[2]/div[1]/div[2]/div[2]/table/tbody/tr/td[6]/div/div"));
@@ -8916,7 +8926,7 @@ namespace TextForCtext
         /// Ctrl + k
         /// </summary>
         /// <returns></returns>
-        internal static string GetPageUrlKeywordLink(string w, string url)
+        internal static string GetPageUrlKeywordLink(string w, string url, bool reMovePunctuations = false)
         {
             //if (!ActiveForm1.Controls["textBox1"].Focused) return string.Empty;
             //TextBox tb = ActiveForm1.Controls["textBox1"] as TextBox;
@@ -8942,7 +8952,8 @@ namespace TextForCtext
             //Clipboard.SetText(w);
             //return url + "#" + HttpUtility.UrlEncode(w) ;//VBA中文編碼好像還是有問題，先用這個，並先複製一個字進剪貼簿，可以利用 Win + v 的方式檢視調用
             //以上VBA bug 已排除
-            return url + "#" + w;//到VBA再轉碼，以便複製此字、不必再key也。況昨晚才經Bing大菩薩、StackOverflow AI大菩薩的加持，得以成功建置此生第1個 dll檔案，供Word VBA調用。感恩感恩　讚歎讚歎　南無阿彌陀佛
+            w = w.Replace(Environment.NewLine, string.Empty);
+            return url + "#" + (reMovePunctuations ? CnText.RemovePunctuationsNum(w) : w);//到VBA再轉碼，以便複製此字、不必再key也。況昨晚才經Bing大菩薩、StackOverflow AI大菩薩的加持，得以成功建置此生第1個 dll檔案，供Word VBA調用。感恩感恩　讚歎讚歎　南無阿彌陀佛
         }
 
         /// <summary>
@@ -10703,11 +10714,11 @@ namespace TextForCtext
             }
             try
             {
-                string lnk = GetPageUrlKeywordLink(imporvement, url);
+                string lnk = GetPageUrlKeywordLink(imporvement, url, true);
                 if (lnk == string.Empty)
                 {
                     //if (!tb.Focused) tb.Focus();
-                    lnk = GetPageUrlKeywordLink(imporvement, url);
+                    lnk = GetPageUrlKeywordLink(imporvement, url, true);
                 }
                 if (ImproveGJcoolOCRMemoDoc.Content.Text.IndexOf(lnk + Environment.NewLine.Substring(0, 1)) == -1)
                 {
@@ -11823,6 +11834,132 @@ namespace TextForCtext
 
             return true;
         }
+
+        public static bool HanchiTextReadinginPagebyPage()
+        {//找不到元件！！沒完成
+
+            //手動開啟【圖】頁面 https://hanchi.ihp.sinica.edu.tw/ihpc/hanji_book?0^0^0529174^DD485BB0290179000100001-1
+            bool gotoTab()
+            {
+                bool found = false;
+                for (int i = driver.WindowHandles.Count - 1; i > -1; i--)
+                {
+                    driver.SwitchTo().Window(driver.WindowHandles[i]);
+                    if (driver.Url.StartsWith("https://hanchi.ihp.sinica.edu.tw/ihpc/hanji_book?"))
+                    {
+                        found = true;
+                        break;
+                    }
+                }
+                return found;
+            }
+            IWebElement iwe = null;
+
+            //檢查頁面
+            if (!IsDriverInvalid())
+            {
+                LastValidWindow = driver.CurrentWindowHandle;
+
+                if (!driver.Url.StartsWith("https://hanchi.ihp.sinica.edu.tw/ihpc/hanji_book?"))
+                    if (!gotoTab())
+                    {
+                        if (!driver.WindowHandles.Contains(LastValidWindow)) return false;
+                        driver.SwitchTo().Window(LastValidWindow);
+                        return false;
+                    }
+
+            }
+            else
+            {
+                RestartChromedriver();
+                LastValidWindow = driver.WindowHandles.Last();
+                if (!gotoTab())
+                {
+                    if (!driver.WindowHandles.Contains(LastValidWindow)) return false;
+                    driver.SwitchTo().Window(LastValidWindow);
+                    return false;
+                }
+            }
+
+            //第一頁用手動複製？
+
+            //文字框所在元件：
+            //iwe = WaitFindWebElementBySelector_ToBeClickable("html");   
+            ////iwe = WaitFindWebElementBySelector_ToBeClickable("body > form > div > div:nth-child(3)");
+            //Console.WriteLine(iwe.GetAttribute("textContent"));
+            //iwe = driver.FindElement(By.XPath("/html/body/form/center/a/img"));
+            //iwe = driver.FindElement(By.TagName("IMG"));
+            ////iwe = iwe.FindElement(By.XPath("/html/body/form/div"));
+            ////iwe = iwe.FindElement(By.XPath("/html/body/form/div"));
+            //ReadOnlyCollection<IWebElement> iwes = driver.FindElements(By.TagName("IMG"));
+            ////Console.WriteLine(iwe.GetAttribute("textContent"));
+
+
+            ////iwe = driver.FindElement(By.XPath("/html/body/form/div"));
+            ////iwe = driver.FindElement(By.CssSelector("body > form > div"));
+            ////Console.WriteLine(iwe.GetAttribute("textContent"));
+            //iwe = driver.FindElement(By.ClassName("fulltext"));
+            //Console.WriteLine(iwe.GetAttribute("textContent"));
+            //if (iwe == null) {
+            //    if (!driver.WindowHandles.Contains(LastValidWindow)) return false;
+            //    driver.SwitchTo().Window(LastValidWindow);
+            //    return false;
+            //}
+
+
+            ////iwe.Click();
+            ////// 使用 JavaScript 來全選元素內的文字
+            ////OpenQA.Selenium.IJavaScriptExecutor js = (OpenQA.Selenium.IJavaScriptExecutor)driver;
+            //////不複製
+            ////js.ExecuteScript("var range = document.createRange(); range.selectNodeContents(arguments[0]); var sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(range);", iwe);
+
+            ////取得文本框內容
+            //string x = iwe.GetAttribute("textContent");
+            //x = iwe.Text;
+            //x = iwe.GetAttribute("outerText");
+            //if (x.IndexOf("-->" + Environment.NewLine + Environment.NewLine + Environment.NewLine + Environment.NewLine) == -1)
+            //{
+            //    if (!driver.WindowHandles.Contains(LastValidWindow)) return false;
+            //    driver.SwitchTo().Window(LastValidWindow);
+            //    return false;
+            //}
+            //x = x.Substring(x.IndexOf("-->" + Environment.NewLine + Environment.NewLine + Environment.NewLine + Environment.NewLine) +
+            //    ("-->" + Environment.NewLine + Environment.NewLine + Environment.NewLine + Environment.NewLine).Length);
+            //x = x.Substring(x.IndexOf(Environment.NewLine + Environment.NewLine) + (Environment.NewLine + Environment.NewLine).Length);
+            ////取得要擷取的文本部分
+            //string content = x.Substring(0, x.IndexOf(Environment.NewLine + Environment.NewLine))
+            //        .Replace("．　．　．　．　．　．　．　．　．　．　．　．　．　．　．　．　．　．" + Environment.NewLine, string.Empty);
+
+            ////ActiveForm1.TextBox1_Text = content;
+
+            ////手動翻到下一頁？
+
+
+
+
+            ////「下一頁」按鈕
+            //iwe = WaitFindWebElementBySelector_ToBeClickable("body > form > center:nth-child(1) > a.pgdown > img");
+            //if (iwe == null)
+            //    //無「上一頁」按鈕的「下一頁」按鈕
+            //    iwe = WaitFindWebElementBySelector_ToBeClickable("body > form > center > a > img");
+            //if (iwe == null) return false;
+            //iwe.Click();
+
+
+            Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("複製完文本後再按下確定！");
+            string content = Clipboard.GetText().Replace("．　．　．　．　．　．　．　．　．　．　．　．　．　．　．　．　．　．" + Environment.NewLine, string.Empty);
+
+
+            //回到CTP圖文對照以輸入文本內容
+            if (!driver.WindowHandles.Contains(LastValidWindow)) return false;
+            driver.SwitchTo().Window(LastValidWindow);
+            在Chrome瀏覽器的Quick_edit文字框中輸入文字(driver, content, driver.Url);
+
+
+
+            return true;
+        }
+
         /// <summary>
         /// 翻到[Kanripo](https://www.kanripo.org/)或《國學大師》下一卷在複製其文本後即執行 Word VBA Sub 巨集指令「國學大師_Kanripo_四庫全書本轉來」
         /// Ctrl + Shift + 4 20250207 creedit with GitHub Copilot大菩薩
@@ -11859,7 +11996,10 @@ namespace TextForCtext
                 driver.Navigate().GoToUrl(Form1.InstanceForm1.textBox3Text);
             }
             LastValidWindow = driver.CurrentWindowHandle;
+
+            //複製下一卷或單位的內容
             bool result = CopySKQSNextVolume();
+
             if (driver.WindowHandles.Contains(LastValidWindow))
             {
                 driver.SwitchTo().Window(LastValidWindow);
@@ -11892,10 +12032,16 @@ namespace TextForCtext
             //Form1.InstanceForm1.runWordMacro("中國哲學書電子化計劃.國學大師_Kanripo_四庫全書本轉來");
             //});            
             Form1.InstanceForm1.AvailableInUseBothKeysMouse();
+            if (Form1.InstanceForm1.TextBox1_Text == string.Empty)
+            {
+                BringToFront("chrome");
+                Form1.InstanceForm1.AvailableInUseBothKeysMouse();
+            }
             return result;
         }
         /// <summary>
         /// 複製下一卷《四庫全書》文本
+        /// 佛 20250418 新增非《四庫》之文本
         /// </summary>
         /// <returns></returns>
         internal static bool CopySKQSNextVolume()
@@ -11921,6 +12067,9 @@ namespace TextForCtext
                     case "skqs.guoxuedashi.net":
                         result = true;
                         goto gotoNext;
+                    case "www.inindex.com":
+                        result = true;
+                        goto gotoNext;
                     default:
                         break;
                 }
@@ -11935,11 +12084,33 @@ namespace TextForCtext
             }
             else if (urlPrefixDomain == "www.kanripo.org")
                 url = GetNextPageUrl(url.IndexOf("#") > -1 ? url.Substring(0, url.IndexOf("#")) : url);
-            retry:
+            else if (urlPrefixDomain == "www.inindex.com")
+            {
+                string urlOld = driver.Url;
+                //按下到下一單位的按鈕
+                IWebElement iwe = WaitFindWebElementBySelector_ToBeClickable("#root > main > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div.gt");
+                if (iwe == null) return false;
+                BringToFront("chrome");
+                iwe.Click();
+                //clickCopybutton_GjcoolFastExperience(iwe.Location);
+                //if (Cursor.Position != iwe.Location)
+                //    Cursor.Position = iwe.Location;
+                DateTime dt = DateTime.Now;
+                while (DateTime.Now.Subtract(dt).TotalSeconds < 2) { }//要有這樣才能複製到正確的卷頁單位
+                while (urlOld == driver.Url)
+                {
+                    if (DateTime.Now.Subtract(dt).TotalSeconds > 10) return false;
+                }
+                //driver.SwitchTo().Window(driver.CurrentWindowHandle);
+                //ChromeSetFocus();
+                url = driver.Url;
+            }
+        retry:
             try
             {
-                //翻到下一頁（網頁）即處理下一卷的文本
-                driver.Navigate().GoToUrl(url);
+                if (urlPrefixDomain != "www.inindex.com")//已於前翻頁了
+                    //翻到下一頁（網頁）即處理下一卷的文本
+                    driver.Navigate().GoToUrl(url);
             }
             catch (Exception ex)
             {
@@ -11967,6 +12138,9 @@ namespace TextForCtext
                     break;
                 case "skqs.guoxuedashi.net":
                     iElementSelector = "body > div:nth-child(3) > div:nth-child(4) > div.col2";
+                    break;
+                case "www.inindex.com":
+                    iElementSelector = "#printView > div:nth-child(3) > div:nth-child(1) > div";
                     break;
                 default:
                     break;

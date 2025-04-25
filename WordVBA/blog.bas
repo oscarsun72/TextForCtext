@@ -25,9 +25,9 @@ Sub 儲存供google索引並備分(dp As Document)  '2008/12/24
     'AppActivate "iexplorer"
 Exit Sub
 eH:
-Select Case Err.Number
+Select Case Err.number
     Case Else
-        MsgBox Err.Number & " - " & Err.Description
+        MsgBox Err.number & " - " & Err.description
         htmFilename = InputBox("請輸入檔名", , htmFilename)
         Resume
 End Select
@@ -171,7 +171,7 @@ With d.Range
 End With
 Exit Sub
 errhan:
-Select Case Err.Number
+Select Case Err.number
     Case 91 '沒有設定物件變數或 With 區塊變數
         Resume Next '表示之前沒有開啟的新文件.
 End Select
@@ -515,11 +515,13 @@ Sub 插入超連結() '2008/9/1 指定鍵(快捷鍵) Ctrl+shift+K(原系統指定在smallcaps為)
     Dim ssharp As String
     ssharp = InStr(lnk, "#")
     If ssharp > 0 Then
-        Dim w As String
         lnk = VBA.Replace(lnk, VBA.ChrW(-9217) & VBA.ChrW(-8195), "　")
-        w = VBA.Mid(lnk, ssharp + 1, Len(lnk) - ssharp)
-        w = code.UrlEncode(w)   'byRef
-        lnk = VBA.Mid(lnk, 1, ssharp) + w
+        If VBA.InStr(Mid(lnk, VBA.IIf(VBA.InStr(lnk, "#") = 0, 1, VBA.InStr(lnk, "#"))), "%") = 0 Then
+            Dim w As String
+            w = VBA.Mid(lnk, ssharp + 1, Len(lnk) - ssharp)
+            w = code.UrlEncode(w)   'byRef
+            lnk = VBA.Mid(lnk, 1, ssharp) + w
+        End If
     End If
     rng.Hyperlinks.Add Anchor:=rng, Address:= _
         VBA.StrConv(lnk, vbNarrow) _

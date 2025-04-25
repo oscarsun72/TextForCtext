@@ -1,6 +1,145 @@
 Attribute VB_Name = "中國哲學書電子化計劃"
 Option Explicit
 Dim ChapterSelector As String
+'Const description As String = "將星號前的分段符號移置前段之末 & 清除頁前的分段符號"
+'Const description As String = "將星號前的分段符號移置前段之末 & 清除頁前的分段符號{佛弟子文獻學者孫守真任真甫按：仁者志士義民菩薩賢友請多利用賢超法師《古籍酷AI》或《看典古籍》OCR事半功倍也。如蒙不棄，可利用末學於GitHub開源免費免安裝之TextForCtext 應用程式，加速輸入與排版。討論區與末學YouTube頻道有演示影片可資參考。感恩感恩　讚歎讚歎　南無阿彌陀佛"
+Const description As String = "將星號前的分段符號移置前段之末 & 清除頁前的分段符號{據Kanripo.org或《國學大師》所藏本輔以末學自製於GitHub開源免費免安裝之TextForCtext排版對應錄入。討論區與末學YouTube頻道有實境演示影片可資參考。感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主}"
+'Const description As String = "將星號前的分段符號移置前段之末 & 清除頁前的分段符號{據《國學大師》或北京元引科技有限公司《元引科技引得數字人文資源平臺·中國歷代文獻》所藏本輔以末學自製於GitHub開源免費免安裝之TextForCtext排版對應錄入。討論區與末學YouTube頻道有實境演示影片可資參考。感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主}"
+'Const description As String = "將星號前的分段符號移置前段之末 & 清除頁前的分段符號{據北京元引科技有限公司《元引科技引得數字人文資源平臺·中國歷代文獻》所藏本輔以末學自製於GitHub開源免費免安裝之TextForCtext排版對應錄入。討論區與末學YouTube頻道有實境演示影片可資參考。感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主}"
+
+Sub 分行分段()
+    
+    Dim lineLength As Byte, d As Document, rng As Range, si As New StringInfo, firstLineIndentValue As Single, leadSpaceCount As Byte, p As Paragraph, leadSpaces As String, i As Long, t As table
+    
+    lineLength = 21 ''第一行指定正常行長度: d.Paragraphs(1).Range.Characters.Count - 1
+    'd.Paragraphs(1).Range.text = vbNullString
+    
+    Set d = Documents.Add
+    d.Range.Paste
+    
+    
+    For Each p In d.Paragraphs
+        If p.Style = "內文" And p.Range.ParagraphFormat.Alignment = wdAlignParagraphLeft Then
+            firstLineIndentValue = p.Range.ParagraphFormat.FirstLineIndent
+            If firstLineIndentValue <> 0 Then
+                leadSpaceCount = VBA.Abs(firstLineIndentValue) / d.Paragraphs(1).Range.Characters(1).font.Size
+            End If
+            Exit For
+        End If
+    Next p
+    'firstLineIndentValue = d.Paragraphs(1).Range.ParagraphFormat.FirstLineIndent
+    
+    
+    For Each t In d.tables
+        t.Delete
+    Next t
+    '清除 【圖】（《漢籍全文資料庫》文本，以其複製文字功能）
+    If VBA.InStr(d.Range.text, "【圖】") Then d.Range.Find.Execute "【圖】", , , , , , , wdFindContinue, , vbNullString, wdReplaceAll
+    d.Range.Find.Execute "^l", , , , , , , wdFindContinue, , vbNullString, wdReplaceAll
+    For Each p In d.Paragraphs
+        If p.Style = "內文" And p.Range.ParagraphFormat.Alignment = wdAlignParagraphLeft Then
+            If Not p.Next Is Nothing Then
+                If p.Next.Range.text <> "．　．　．　．　．　．　．　．　．　．　．　．　．　．　．　．　．　．" & Chr(13) Then
+                    p.Range.Characters(p.Range.Characters.Count).text = vbNullString
+                    Set p = p.Previous
+                Else
+                    p.Next.Range.text = vbNullString
+                End If
+            End If
+        End If
+    Next p
+'    d.Range.Find.Execute "．　．　．　．　．　．　．　．　．　．　．　．　．　．　．　．　．　．^p", , , , , , , wdFindContinue, , vbNullString, wdReplaceAll
+
+    Dim lineCntr As Byte, noteCntr As Long
+    For Each p In d.Paragraphs
+        If p.Style = "內文" And p.Range.ParagraphFormat.Alignment = wdAlignParagraphLeft Then
+        
+'            If InStr(p.Range, "一作原武") Then
+'                p.Range.Select
+'                Stop
+'            End If
+
+            If p.Range.Characters.Count - 1 > lineLength Then
+                i = 0 ''i =  1 'lineLength
+                Set rng = p.Range.Characters(1)
+                Do While i + lineLength < p.Range.Characters.Count - 1 'Step lineLength 'p.Range.Characters.Count Step lineLength
+lastfew:
+                    
+                    lineCntr = 0
+                    Do While lineCntr < lineLength
+                        If rng.font.Size = 7.5 Then '小注
+                            noteCntr = noteCntr + 1
+                            rng.Move wdCharacter, 1
+                            i = i + 1
+                            If rng.font.Size = 7.5 Then
+                                noteCntr = noteCntr + 1
+                                rng.Move wdCharacter, 1
+                                i = i + 1
+                            End If
+                            'i = i + 2
+                        Else
+                            If noteCntr > 0 Then
+                                If noteCntr Mod 2 = 1 Then lineCntr = lineCntr + 1
+                                noteCntr = 0
+                            End If
+                            rng.Move wdCharacter, 1
+                            i = i + 1
+                        End If
+                        lineCntr = lineCntr + 1
+                    Loop
+                    
+'                    rng.Select
+                    '如果有凸排
+                    If leadSpaceCount > 0 Then
+                        If VBA.InStr(p.Range.text, Chr(11)) Then
+                            'p.Range.Characters(i - leadSpaceCount).InsertAfter Chr(11)
+                            rng.Move wdCharacter, -leadSpaceCount
+                            rng.InsertAfter Chr(11)
+                            rng.Collapse wdCollapseEnd
+                            i = i - leadSpaceCount
+                        Else
+                            'p.Range.Characters(i).InsertAfter Chr(11)
+                            rng.InsertAfter Chr(11)
+                            rng.Collapse wdCollapseEnd
+                        End If
+                    Else '沒有凸排
+                        'p.Range.Characters(i).InsertAfter Chr(11)
+                        rng.InsertAfter Chr(11)
+                        rng.Collapse wdCollapseEnd
+                    End If
+                    
+                    i = i + 1
+'
+                    'i = i + lineLength
+                Loop
+            End If
+        End If
+    Next p
+    
+    Set rng = d.Range
+    With rng.Find
+        .ClearFormatting
+        .font.Size = 7.5
+    End With
+    
+    Do While rng.Find.Execute()
+        rng.InsertAfter "}}"
+        rng.InsertBefore "{{"
+        rng.Collapse wdCollapseEnd
+    Loop
+    
+    d.Range.Find.ClearFormatting
+    
+    leadSpaces = VBA.StrConv(VBA.space(leadSpaceCount), vbWide)
+    d.Range.Find.Execute "^l", , , , , , , , , "^p" & leadSpaces, wdReplaceAll
+    d.Range.Cut
+    d.Close wdDoNotSaveChanges
+    AppActivate "TextForCtext"
+    DoEvents
+    SendKeys "^v"
+    DoEvents
+End Sub
+
 Sub 集杜詩_文山先生全集_四部叢刊_維基文庫本_去掉中間誤空的格() '《集杜詩》格式者皆適用（中間誤空的格） 20221112
     Dim rng As Range, d As Document, p As Paragraph, a As Range, i As Integer, ur As UndoRecord
     Set d = ActiveDocument
@@ -78,8 +217,8 @@ Sub 新頁面()
     DoEvents
     'Network.AppActivateDefaultBrowser
     ActivateChrome
-    SendKeys "^a"
-    SendKeys "^v"
+'    SendKeys "^a"
+'    SendKeys "^v"
     
     SystemSetup.contiUndo ur
 End Sub
@@ -227,9 +366,7 @@ Sub 清除頁前的分段符號()
     DoEvents
     playSound 1, 0
     DoEvents
-    'Const description As String = "將星號前的分段符號移置前段之末 & 清除頁前的分段符號"
-    Const description As String = "將星號前的分段符號移置前段之末 & 清除頁前的分段符號{佛弟子文獻學者孫守真任真甫按：仁者志士義民菩薩賢友請多利用賢超法師《古籍酷AI》或《看典古籍》OCR事半功倍也。如蒙不棄，可利用末學於GitHub開源免費免安裝之TextForCtext 應用程式，加速輸入與排版。討論區與末學YouTube頻道有演示影片可資參考。感恩感恩　讚歎讚歎　南無阿彌陀佛"
-'    Const description As String = "將星號前的分段符號移置前段之末 & 清除頁前的分段符號{據Kanripo.org或《國學大師》所藏本輔以末學自製於GitHub開源免費免安裝之TextForCtext排版對應錄入。討論區與末學YouTube頻道有實境演示影片可資參考。感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主}"
+    
     pastetoEditBox description
     d.Close wdDoNotSaveChanges
 
@@ -1627,7 +1764,7 @@ nextRecord:
     
 End Sub
 Rem 現在多用Kanripo.org者 20250202大年初五
-Sub 國學大師_Kanripo_四庫全書本轉來()
+Sub 元引科技引得數字人文資源平臺_北京元引科技有限公司轉來()
     Dim rng As Range, noteRng As Range, aNext As Range, aPre As Range, ur As UndoRecord, midNoteRngPos As Byte, midNoteRng As Range, aX As String, a As Range, aSt As Long, aEd As Long
     Dim noteFont As font '記下注文格式以備用
     Dim insertX As String
@@ -1637,6 +1774,256 @@ Sub 國學大師_Kanripo_四庫全書本轉來()
     rng.Paste
     '提示貼上無礙
     SystemSetup.playSound 1 '光貼上耗時就很久了，後面這一大堆式子反而快 20230211
+    
+    With rng.Find
+        .font.ColorIndex = 6
+    End With
+    Set rng = rng.Document.Range
+    '清除頁碼
+    Do While rng.Find.Execute("P", , , , , , True, wdFindContinue)
+       rng.Paragraphs(1).Range.Delete
+    Loop
+    rng.Find.ClearFormatting
+    
+    Set rng = rng.Document.Range
+'    rng.Find.Execute "^p^p", , , , , , , wdFindContinue, , "^p", wdReplaceAll
+'    If VBA.InStr(rng.text, VBA.ChrW(160) & "/" & VBA.Chr(11)) Then _
+'        rng.Find.Execute VBA.ChrW(160) & "^g" & VBA.Chr(11), , , , , , , wdFindContinue, , VBA.Chr(11), wdReplaceAll 'chr(11)分行符號
+'    If VBA.InStr(rng.text, VBA.ChrW(160) & "/" & VBA.Chr(13)) Then _
+'        rng.Find.Execute VBA.ChrW(160) & "^g" & VBA.Chr(13), , , , , , , wdFindContinue, , VBA.Chr(13), wdReplaceAll
+    
+    rng.Find.Execute VBA.Chr(13), , , , , , , wdFindContinue, , VBA.Chr(11), wdReplaceAll
+        
+    rng.Find.font.Color = 1310883
+    Do While rng.Find.Execute(vbNullString, , , False, , , True, wdFindStop)
+        If noteFont Is Nothing Then Set noteFont = rng.font
+        Set noteRng = rng '.Document.Range(rng.start, rng.End)
+        Do While noteRng.Next.font.Color = 1310883
+            noteRng.SetRange noteRng.start, noteRng.Next.End
+        Loop
+        
+'        If InStr(noteRng, "萁草之句") Then Stop 'just for test
+        
+        Set aNext = noteRng.Characters(noteRng.Characters.Count).Next
+        Set aPre = noteRng.Characters(1).Previous
+        midNoteRngPos = Excel.RoundUpCustom(noteRng.Characters.Count / 2)
+        
+        Set midNoteRng = noteRng.Document.Range(noteRng.Characters(VBA.IIf(midNoteRngPos - 1 < 1, 1, midNoteRngPos - 1)).start _
+            , noteRng.Characters(VBA.IIf(midNoteRngPos + 1 > noteRng.Characters.Count, noteRng.Characters.Count, midNoteRngPos + 1)).End)
+        If midNoteRng.start = noteRng.start And midNoteRng.End = noteRng.End Then
+            Set midNoteRng = noteRng
+        End If
+'        If (aNext.text = VBA.Chr(11) And aPre.text = VBA.Chr(11)) Then
+'            If aNext.Previous = "/" Then
+'                midNoteRng.text = VBA.Replace(midNoteRng, "/", vbNullString, 1, 1)
+'                noteRng.text = "{{" & noteRng.text & "}}"
+'            Else
+'                midNoteRng.text = VBA.Replace(midNoteRng, "/", VBA.Chr(11), 1, 1)
+'                noteRng.text = "{{" & noteRng.text & "}}"
+'            End If
+'        ElseIf aNext.text = VBA.Chr(13) And aPre.text = VBA.Chr(13) Then
+'            If aNext.Previous = "/" Then
+'                midNoteRng.text = VBA.Replace(midNoteRng, "/", vbNullString, 1, 1)
+'                noteRng.text = "{{" & noteRng.text & "}}"
+'            Else
+'                midNoteRng.text = VBA.Replace(midNoteRng, "/", VBA.Chr(13), 1, 1)
+'                noteRng.text = "{{" & noteRng.text & "}}"
+'            End If
+'        Else
+'            If aNext.text = VBA.Chr(11) Then
+
+
+'        If InStr(noteRng, "適/") Then Stop
+
+
+                '判斷有無縮排
+                If Not aPre Is Nothing Then
+                    Set a = aPre.Document.Range(aPre.start, aPre.End) '記下aPre原來的位置
+                    If aPre.start > 0 And aPre.text <> VBA.Chr(11) Then
+                        Do Until aPre.Previous = VBA.Chr(11)
+                            aPre.Move wdCharacter, -1
+                            If aPre.start <= 0 Then Exit Do
+                        Loop
+                    End If
+                    If a.start > aPre.start Then 'a =aPre原來的位置
+                        a.SetRange aPre.start, a.End
+                        aX = a.text '縮排的空格
+                    Else
+                        If a.text = aPre.text Then
+                            If aPre.text = "　" Then '有縮排
+                                aX = a.text
+                            Else
+                                aX = vbNullString
+'                                SystemSetup.playSound 12, 0
+'                                Stop
+                            End If
+                        Else
+                            aX = vbNullString
+                        End If
+                    End If
+                End If
+                
+'                Dim line As New LineChr11
+                
+                '如果有縮排('aX=縮排的空格)
+                If aX <> vbNullString And VBA.Replace(aX, "　", vbNullString) = vbNullString Then
+                    If noteRng.Next Is Nothing Then '怕在文件最末端，與下一年判斷並不重複
+'                    If line.LineRange(noteRng).start = noteRng.start And line.LineRange(noteRng).End = noteRng.End Then
+                        insertX = VBA.Chr(11) & aX
+                    ElseIf noteRng.Next = VBA.Chr(11) Then 'ax=縮排的空格 ●●●●●●●●●●●●●
+                        insertX = VBA.Chr(11) & aX  'VBA.Chr(11) 後面 a.text = "}}" & VBA.Replace(insertX, VBA.Chr(11), VBA.Chr(11) & "{{") 要參照
+                    Else
+                        If VBA.InStr(midNoteRng.text, "/") _
+                            And noteRng.Next.font.Size > 11.5 _
+                            And (noteRng.Next.text <> VBA.Chr(11) Or noteRng.Next.text = "　") Then  '若是夾注(通常是標題下的夾注（則後面有空格），如 https://ctext.org/library.pl?if=en&file=55677&page=6） 20250205
+                            'noteRng.Next.text <> VBA.Chr(11):後面還有文字，則為夾注 20250223補
+                            insertX = aX '補空格以縮排
+                        Else
+                            insertX = vbNullString
+                        End If
+                    End If
+                Else '沒有縮排
+                    If aX = vbNullString And Not noteRng.Previous(wdCharacter, 1) Is Nothing And Not noteRng.Next(wdCharacter, 1) Is Nothing Then
+                        If noteRng.Previous(wdCharacter, 1) = VBA.Chr(11) And noteRng.Next(wdCharacter, 1) = VBA.Chr(11) Then
+                            insertX = VBA.Chr(11)
+                        Else
+'                            SystemSetup.playSound 7, 0
+'                            Stop
+                            insertX = vbNullString
+                        End If
+                    Else
+                        insertX = vbNullString
+                    End If
+                End If
+                
+                
+                For Each a In noteRng.Characters '找到/（夾注換行）的位置
+                    If a = "/" And a.InlineShapes.Count = 0 Then
+                        If a.font.Color = noteFont.Color And a.font.Size = noteFont.Size Then
+                            aSt = a.start
+                            aEd = a.End
+                            
+                            Do Until VBA.Abs(noteRng.Document.Range(noteRng.start, a.start).Characters.Count - VBA.IIf(a.End = noteRng.End, 0, noteRng.Document.Range(a.End, noteRng.End).Characters.Count)) < 2
+                               'noteRng.Document.Range(a.End, noteRng.End).text = noteRng.Document.Range(a.End, noteRng.End).text & "　"
+                               noteRng.text = noteRng.text & "　"
+                               a.SetRange aSt, aEd
+                               If rng.End + 3 >= rng.Document.Range.End Then Exit Do
+                            Loop
+                            If a.Next = VBA.Chr(11) Then '如果斜線/後面即換行
+                                If aX = vbNullString Or VBA.Replace(aX, "　", vbNullString) <> vbNullString Then '若無縮排，則清除掉斜線/
+                                    a.text = vbNullString
+                                Else '有縮排時
+                                    a.text = insertX '●●●●●●●●●●●●●再觀察
+                                    noteRng.SetRange aSt, aEd + VBA.Len(insertX) - 1 '「/」（ a = "/" ）拿掉了故減1
+                                End If
+                            Else
+                                If noteRng.Next = VBA.Chr(11) And aX <> vbNullString And VBA.Replace(aX, "　", vbNullString) = vbNullString Then
+                                'If noteRng.Next = VBA.Chr(11) And VBA.Replace(aPre.text, "　", vbNullString) = vbNullString Then
+                                    If aPre.Previous = VBA.Chr(11) Then
+                                        noteRng.SetRange aPre.start, noteRng.End
+                                        a.text = "}}" & VBA.Replace(insertX, VBA.Chr(11), VBA.Chr(11) & "{{")
+                                    Else
+                                        SystemSetup.playSound 12, 0
+                                        Stop
+                                    End If
+                                Else
+                                    a.text = insertX
+                                End If
+                            End If
+                            Exit For
+                        End If
+                    End If
+                Next a
+                If insertX <> vbNullString And VBA.Replace(insertX, "　", vbNullString) <> vbNullString Then '如果置換「/」的字符不是空字串也不是縮排用的空格
+                    If aX <> vbNullString Then
+                        aSt = noteRng.start
+                        noteRng.SetRange aPre.start, noteRng.End
+                    End If
+                    noteRng.text = "{{" & noteRng.text & "}}"
+                    noteRng.Collapse wdCollapseEnd
+                Else
+'                   midNoteRng.text = VBA.Replace(midNoteRng, "/", vbNullString, 1, 1)
+                    If aX <> vbNullString And VBA.Replace(aX, "　", vbNullString) = vbNullString Then '●●●●●●●●●●●●
+                        '如果有縮排，則擴展noteRng至前後全形空格的兩端
+                        noteRng.MoveStartWhile "　", -50
+                        '如果夾注中沒有縮排補上的空格
+                        If a.text <> "　" Then
+                            noteRng.MoveEndWhile "　", 50
+                        End If
+                        noteRng.InsertBefore "{{"
+                        noteRng.InsertAfter "}}"
+                        rng.SetRange rng.End, rng.End
+                    Else
+                        noteRng.text = "{{" & noteRng.text & "}}"
+                    End If
+                    
+                End If
+'            Else
+'                midNoteRng.text = VBA.Replace(midNoteRng, "/", vbNullString, 1, 1)
+'                noteRng.text = "{{" & noteRng.text & "}}"
+'            End If
+'        End If
+    Loop
+    
+'    'word.Application.Activate'在背景執行Word（即不見Word）時不能如此，會出錯
+'    SystemSetup.playSound 3
+'    If VBA.MsgBox("空格轉成空白？", vbOKCancel + vbExclamation) = vbOK Then
+'        國學大師_Kanripo_四庫全書本轉來_Sub rng.Document.Content
+'    End If
+    
+    SystemSetup.playSound 1
+    '文字處理.書名號篇名號標注 '擬交給TextForCtext C#來標 20250312
+    
+    With rng.Document
+        With .Range.Find
+            .ClearFormatting
+    '        .Text = vba.Chrw(9675)
+            .text = "}}{{　}}"
+    '        .Replacement.Text = vba.Chrw(12295)
+            .Replacement.text = "　}}"
+            .Execute , , , , , , True, wdFindContinue, , , wdReplaceAll
+        End With
+        .Range.text = Replace(Replace(.Range.text, Chr(11), Chr(13) & Chr(10)), "?", "/")
+        .Range.Cut
+        
+'        If VBA.InStr(.Range.text, "{{}}") Then
+'            SystemSetup.playSound 12, 0
+'        End If
+
+'        SystemSetup.ClipboardPutIn Replace(Replace(.Range.text, Chr(11), Chr(13) & Chr(10)), "?", "/")
+        DoEvents
+        If .Application.Visible Then .Application.windowState = wdWindowStateMinimize
+        .Close wdDoNotSaveChanges
+        
+    End With
+    SystemSetup.playSound 1.921
+    SystemSetup.contiUndo ur
+    
+    
+'    AppActivate "TextForCtext"
+'    DoEvents
+'    SendKeys "^v"
+'    DoEvents
+End Sub
+Rem 現在多用Kanripo.org者 20250202大年初五
+Sub 國學大師_Kanripo_四庫全書本轉來()
+    Dim rng As Range, noteRng As Range, aNext As Range, aPre As Range, ur As UndoRecord, midNoteRngPos As Byte, midNoteRng As Range, aX As String, a As Range, aSt As Long, aEd As Long
+    Dim noteFont As font '記下注文格式以備用
+    Dim insertX As String
+    Set rng = Documents.Add().Range
+    SystemSetup.stopUndo ur, "國學大師_Kanripo_四庫全書本轉來"
+    SystemSetup.playSound 1
+    
+    'P 乃「北京元引科技有限公司《元引科技引得數字人文資源平臺·中國歷代文獻》」的文本特徵
+    If VBA.InStr(SystemSetup.GetClipboard, "P") Then
+        元引科技引得數字人文資源平臺_北京元引科技有限公司轉來
+        Exit Sub
+    End If
+    
+    rng.Paste
+    '提示貼上無礙
+    SystemSetup.playSound 1 '光貼上耗時就很久了，後面這一大堆式子反而快 20230211
+    
     'With rng.Find
     '    .ClearAllFuzzyOptions
     '    .ClearFormatting
@@ -1661,6 +2048,10 @@ Sub 國學大師_Kanripo_四庫全書本轉來()
         rng.Find.Execute VBA.ChrW(160) & "^g" & VBA.Chr(11), , , , , , , wdFindContinue, , VBA.Chr(11), wdReplaceAll 'chr(11)分行符號
     If VBA.InStr(rng.text, VBA.ChrW(160) & "/" & VBA.Chr(13)) Then _
         rng.Find.Execute VBA.ChrW(160) & "^g" & VBA.Chr(13), , , , , , , wdFindContinue, , VBA.Chr(13), wdReplaceAll
+        
+    rng.Find.ClearFormatting
+    
+    
     rng.Find.font.Color = 16711935
     Do While rng.Find.Execute(vbNullString, , , False, , , True, wdFindStop)
         If noteFont Is Nothing Then Set noteFont = rng.font
@@ -1812,9 +2203,11 @@ Sub 國學大師_Kanripo_四庫全書本轉來()
                     If aX <> vbNullString And VBA.Replace(aX, "　", vbNullString) = vbNullString Then '●●●●●●●●●●●●
                         '如果有縮排，則擴展noteRng至前後全形空格的兩端
                         noteRng.MoveStartWhile "　", -50
+                        If Not a Is Nothing Then
                         '如果夾注中沒有縮排補上的空格
-                        If a.text <> "　" Then
-                            noteRng.MoveEndWhile "　", 50
+                            If a.text <> "　" Then
+                                noteRng.MoveEndWhile "　", 50
+                            End If
                         End If
                         noteRng.InsertBefore "{{"
                         noteRng.InsertAfter "}}"
@@ -2441,6 +2834,13 @@ Sub 新頁面Auto_action_newchapter()
     End If
     title = iwe.GetAttribute("text")
     iwe.Click
+    Do Until VBA.InStr(WD.url, "&page")
+        DoEvents
+        Set iwe = WD.FindElementByCssSelector(ChapterSelector)
+        If Not iwe Is Nothing Then
+            iwe.Click
+        End If
+    Loop
     'Set iwe = WD.FindElementByCssSelector(Div_generic_IncludePathAndEndPageNum)
     d.Range(d.Paragraphs(1).Range.start, d.Paragraphs(1).Range.End - 1).text = 1 '首頁
     d.Range(d.Paragraphs(2).Range.start, d.Paragraphs(2).Range.End - 1).text = pageUBound '末頁
@@ -2468,7 +2868,8 @@ Sub 新頁面Auto_action_newchapter()
     '輸入Sequence值：
     SetIWebElementValueProperty Sequence_data_Edit_textbox, VBA.CStr(chapterNum) & "0"
     '輸入修改摘要:
-    SetIWebElementValueProperty Description_Edit_textbox, "據《國學大師》或《Kanripo》所收本輔以末學於GitHub開源自製免費免安裝之TextForCtext軟件排版對應錄入；討論區及末學YouTube頻道有實境演示影片。感恩感恩　讚歎讚歎　南無阿彌陀佛"
+    SetIWebElementValueProperty Description_Edit_textbox, "據《國學大師》或《Kanripo》所收本輔以末學自製於GitHub開源免費免安裝之TextForCtext軟件排版對應錄入；討論區及末學YouTube頻道有實境演示影片。感恩感恩　讚歎讚歎　南無阿彌陀佛"
+'    SetIWebElementValueProperty Description_Edit_textbox, "據北京元引科技有限公司《元引科技引得數字人文資源平臺·中國歷代文獻》所收本輔以末學自製於GitHub開源免費免安裝之TextForCtext軟件排版對應錄入；討論區及末學YouTube頻道有實境演示影片。感恩感恩　讚歎讚歎　南無阿彌陀佛"
     'Commit_Edit_textbox.Click '送出
     
     Title_Edit_textbox.Click

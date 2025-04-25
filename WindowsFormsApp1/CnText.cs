@@ -534,6 +534,30 @@ namespace TextForCtext
             text = sb.ToString();
             return ref text;
         }
+        /// <summary>
+        /// 清除首段誤空二格或誤空格的情形（《四庫全書》文本適用，會與篇標題空2格者混） 20250418
+        /// </summary>
+        /// <param name="text"></param>
+        internal static void ClearFirstParaLeadingSpace(ref string text)
+        {
+            string[] paragraphs = text.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
+            int i = 0, PCount = paragraphs.Length;
+            foreach (string p in paragraphs)
+            {
+                if (p.StartsWith("　"))
+                {
+                    if (i + 1 < PCount && !paragraphs[i + 1].StartsWith("　") &&
+                        Form1.CountWordsLenPerLinePara(p.TrimStart('　')) == Form1.InstanceForm1.NormalLineParaLength)
+                    {
+                        //string pNew = p.TrimStart('　');
+                        int pSt = text.IndexOf(p);
+                        if (text.IndexOf(p, pSt + 1) == -1)
+                            text = text.Substring(0, pSt) + p.TrimStart('　') + text.Substring(pSt + p.Length);
+                    }
+                }
+                i++;
+            }
+        }
 
         /* 20230414 YouChat大菩薩：
          * 我想在textBox1中，將前後不是英數字的小數點（英文句號）「.」取代為中文句號「。」要怎麼寫呢 C# Windows.Forms應用程式
