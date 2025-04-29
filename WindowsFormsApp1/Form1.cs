@@ -25,17 +25,14 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
 
-
 //using System.Windows;
 using System.Windows.Forms;
+//using System.Windows.Input;
 using System.Windows.Media.TextFormatting;
 using TextForCtext;
 using WebSocketSharp;
 using static System.Net.Mime.MediaTypeNames;
 using static TextForCtext.Browser;
-
-
-
 //using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 //引用adodb 要將其「內嵌 Interop 類型」（Embed Interop Type）屬性設為false（預設是true）才不會出現以下錯誤：  HResult=0x80131522  Message=無法從組件 載入類型 'ADODB.FieldsToInternalFieldsMarshaler'。
 //https://stackoverflow.com/questions/5666265/adodbcould-not-load-type-adodb-fieldstointernalfieldsmarshaler-from-assembly  https://blog.csdn.net/m15188153014/article/details/119895082
@@ -2296,6 +2293,11 @@ namespace WindowsFormsApp1
                 if (e.KeyCode == Keys.A)
                 {//Ctrl + Alt + a ： [AI太炎](https://t.shenshen.wiki/)標點 20241105
                     e.Handled = true;
+                    //避免事件被終止
+                    if (!_eventsEnabled) _eventsEnabled = true;
+                    //避免還原記錄被終止
+                    if (stopUndoRec) stopUndoRec = false;
+
                     string x = textBox1.Text;
                     if (x.IsNullOrEmpty()) return;
                     if (textBox1.SelectedText.IsNullOrEmpty())
@@ -2362,9 +2364,15 @@ namespace WindowsFormsApp1
                         if (IsTextModified(x, original)) AvailableInUseBothKeysMouse();
 
                         CnText.RestoreParagraphs(original, ref x);
+                        //undoRecord();
                         textBox1.SelectedText = preSpaces + CnText.BooksPunctuation(ref x, true);
+                        //避免事件被終止
+                        if (!_eventsEnabled) _eventsEnabled = true;
+                        undoRecord();
                     }
                     AvailableInUseBothKeysMouse();
+                    //避免事件被終止
+                    if (!_eventsEnabled) _eventsEnabled = true;
                     return;
                 }
                 if (e.KeyCode == Keys.J)
@@ -4530,6 +4538,10 @@ namespace WindowsFormsApp1
                 //toOCR(br.OCRSiteTitle.GJcool);
                 toOCR(PagePast2OCRsite);
             }
+
+            //避免事件被終止
+            if (!_eventsEnabled) _eventsEnabled = true;
+
             //TopMost = true;
         }
 
@@ -4943,7 +4955,12 @@ namespace WindowsFormsApp1
                     && (x.IndexOf("《") > -1 || x.IndexOf("〈") > -1 || x.IndexOf("：") > -1))
                     textBox1.Text = CnText.RemarkBooksPunctuation(ref x);
                 else
-                    textBox1.Text = CnText.BooksPunctuation(ref x);
+                {
+                    if (ModifierKeys != Keys.Shift)//按下Shift鍵即欲逕送去OCR，故不必再標書名號、篇名號了
+                        textBox1.Text = CnText.BooksPunctuation(ref x);
+                    else
+                        textBox1.Text = x;
+                }
                 try
                 {
                     //將頁面移至頂端，以便校對輸入時檢視
@@ -9444,9 +9461,11 @@ namespace WindowsFormsApp1
                         {
                             string nextLineX = GetLineText(x, s);
                             //下行與正常行等長且無縮排 或者下行文字長度為0（如為「|」）
-                            if ((CountWordsLenPerLinePara(nextLineX) == wordsPerLinePara &&
+                            if (((CountWordsLenPerLinePara(nextLineX) == wordsPerLinePara &&
                                     _leadingSpacesRegex.Match(nextLineX).Value.Length == 0)
                                 || (CountWordsLenPerLinePara(nextLineX) == 0))
+                                && (!nextLineX.StartsWith("{{") && !currLineX.EndsWith("}}"))
+                                )
                             {
                                 x = x.Substring(0, sCurr) + "<p>" + x.Substring(sCurr);
                                 s += "<p>".Length;
@@ -9461,7 +9480,8 @@ namespace WindowsFormsApp1
                         {
                             string nextLineX = GetLineText(x, s);
                             //下行與正常行等長且無縮排 或者下行文字長度為0（如為「|」）
-                            if (CountWordsLenPerLinePara(nextLineX) == 0)
+                            if (CountWordsLenPerLinePara(nextLineX) == 0
+                                && (!nextLineX.StartsWith("{{") && !currLineX.EndsWith("}}")))
                             {
                                 x = x.Substring(0, sCurr) + "<p>" + x.Substring(sCurr);
                                 s += "<p>".Length;
@@ -12266,8 +12286,8 @@ namespace WindowsFormsApp1
                             //const string inputText = "《四庫全書》􏿽{{經部　}}<p>";
                             //const string inputText = "《四庫全書》􏿽{{史部　}}<p>";
                             //const string inputText = "《四庫全書》􏿽{{子部　}}<p>";
-                            const string inputText = "《四庫全書》􏿽{{集部　}}<p>";
-                            //const string inputText = "《渭　南　文　集》􏿽􏿽􏿽􏿽􏿽<p>";
+                            //const string inputText = "《四庫全書》􏿽{{集部　}}<p>";
+                            const string inputText = "《新刻增補藝苑巵言》<p>";
                             br.QuickeditLinkIWebElement.Click();
                             PauseEvents();
                             textBox3.Text = driver.Url;
@@ -13633,6 +13653,11 @@ namespace WindowsFormsApp1
         {
             //避免事件被終止
             if (!_eventsEnabled) _eventsEnabled = true;
+
+            //避免還原記錄被終止
+            if (stopUndoRec) stopUndoRec = false;
+
+
             //重設欄位變量，以免OCR快速鍵失效
             PagePaste2GjcoolOCR_ing = false;
             if (keyinTextMode)
@@ -14584,7 +14609,10 @@ namespace WindowsFormsApp1
                                 //nextpagetextBox1Text_Default = textBox1.Text;
                             }
                             if (!notBooksPunctuation)
-                                chkX = CnText.BooksPunctuation(ref nextpagetextBox1Text_Default, false);
+                                if (modifierKeys != Keys.Shift && ModifierKeys != Keys.Shift)//按下Shift鍵即欲逕送去OCR，故不必再標書名號、篇名號了
+                                    chkX = CnText.BooksPunctuation(ref nextpagetextBox1Text_Default, false);
+                                else
+                                    chkX = nextpagetextBox1Text_Default;
                             textBox1.Text = notBooksPunctuation ? nextpagetextBox1Text_Default : chkX;
 
                         }

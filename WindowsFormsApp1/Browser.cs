@@ -7934,7 +7934,7 @@ namespace TextForCtext
                 if (e != null)
                 {
                     info = e.GetAttribute("textContent");
-                    if (info.StartsWith("reach traffic limit. wait "))
+                    if (info.StartsWith("reach traffic limit. wait ") || info.StartsWith("wait for "))
                     {
                         if (MessageBox.Show(info + Environment.NewLine + "是否要切換成批量處理模式？", "若按下【取消】，擬改用『標注平台』處理，請記得在textBox2下「gjk」指令以切換。感恩感恩　南無阿彌陀佛　讚美主",
                                                                 MessageBoxButtons.OKCancel, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly) == DialogResult.OK)
