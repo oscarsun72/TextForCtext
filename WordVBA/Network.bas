@@ -970,9 +970,9 @@ finish:
     Exit Sub
 
 eH:
-    Select Case Err.Number
+    Select Case Err.number
         Case Else
-            Debug.Print Err.Number & Err.Description
+            Debug.Print Err.number & Err.description
             Stop 'just for test
             Resume
     End Select
@@ -1303,17 +1303,17 @@ finish:
     查小學堂上古音並讀入其結果 = result
     Exit Function
 eH:
-    Select Case Err.Number
+    Select Case Err.number
         Case -2146233088
-            If VBA.InStr(Err.Description, "stale element reference: stale element not found in the current frame") = 1 Then '(Session info: chrome=131.0.6778.86)
+            If VBA.InStr(Err.description, "stale element reference: stale element not found in the current frame") = 1 Then '(Session info: chrome=131.0.6778.86)
                 Dim retryCntr As Byte
                 If retryCntr < 3 Then
                     SystemSetup.wait 1
                     retryCntr = retryCntr + 1
                     Resume
                 Else
-                    Debug.Print Err.Number & Err.Description
-                    MsgBox Err.Number & Err.Description, vbCritical
+                    Debug.Print Err.number & Err.description
+                    MsgBox Err.number & Err.description, vbCritical
                     GoTo finish
                 End If
             Else
@@ -1321,8 +1321,8 @@ eH:
             End If
         Case Else
 caseElse:
-            Debug.Print Err.Number & Err.Description
-            If MsgBox(Err.Number & Err.Description & vbCr & vbCr & "是否要除錯？", vbCritical + vbOKCancel) = vbCancel Then
+            Debug.Print Err.number & Err.description
+            If MsgBox(Err.number & Err.description & vbCr & vbCr & "是否要除錯？", vbCritical + vbOKCancel) = vbCancel Then
                 GoTo finish
             Else
                 Stop
@@ -1431,8 +1431,8 @@ Function DownloadImage_XMLHTTP(url As String, filePath As String) As Boolean
     Exit Function
     
 ErrorHandler:
-    Debug.Print Err.Number & Err.Description
-    MsgBox "Error: " & Err.Description
+    Debug.Print Err.number & Err.description
+    MsgBox "Error: " & Err.description
     DownloadImage_XMLHTTP = False
 End Function
 
@@ -1499,7 +1499,7 @@ Function Base64ToImage(base64String As String, filePath As String) As Boolean
     Exit Function
     
 ErrorHandler:
-    MsgBox "Error: " & Err.Description
+    MsgBox "Error: " & Err.description
     Base64ToImage = False
 End Function
 
@@ -2039,7 +2039,7 @@ Exit_GetUserAddress:
     Exit Function
 
 Error_GetUserAddress:
-    MsgBox Err & ": " & Err.Description
+    MsgBox Err & ": " & Err.description
     GetUserAddress = False
     Resume Exit_GetUserAddress
 End Function
@@ -2155,17 +2155,17 @@ Sub AppActivateDefaultBrowser()
     DoEvents
     Exit Sub
 eH:
-        Select Case Err.Number
+        Select Case Err.number
             Case 5
                 DefaultBrowserNameAppActivate = a(i)
                 i = i + 1
                 If i > UBound(a) Then
-                    MsgBox Err.Number & Err.Description
+                    MsgBox Err.number & Err.description
                     Exit Sub
                 End If
                 Resume
             Case Else
-                MsgBox Err.Number + Err.Description
+                MsgBox Err.number + Err.description
         End Select
     'AppActivate ""
 End Sub

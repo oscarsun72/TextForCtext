@@ -432,7 +432,19 @@ Selected_Range:
     '            AppActivateChrome
                 ActivateChrome
             Else
-                WD.SwitchTo.Window WD.CurrentWindowHandle
+'                WD.SwitchTo.Window WD.CurrentWindowHandle
+'                WD.url = strLnk 'WD.Navigate.GoToUrl strLnk
+'                If VBA.InStr(strLnk, "#") Then WD.Navigate.Refresh
+
+
+                rng.Document.ActiveWindow.windowState = wdWindowStateMinimize
+                rng.Document.Application.ActiveWindow.windowState = wdWindowStateMinimize
+                SeleniumOP.ActivateChrome
+                DoEvents
+                SendKeys "^t"
+                DoEvents
+
+                OpenNewTab WD, strLnk
                 WD.url = strLnk
     '            Dim win
     '            For Each win In WD.WindowHandles
@@ -459,7 +471,7 @@ nxt:            Set rng = rng.Next
     Return
 End Sub
 Sub 插入超連結() '2008/9/1 指定鍵(快捷鍵) Ctrl+shift+K(原系統指定在smallcaps為)
-'Alt+k
+'Alt + k
 '    Selection.MoveLeft Unit:=wdCharacter, Count:=1, Extend:=wdExtend
 '    Selection.Range.Hyperlinks(1).Range.Fields(1).Result.Select
 '    Selection.Range.Hyperlinks(1).Delete

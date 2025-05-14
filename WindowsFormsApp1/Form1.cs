@@ -5998,6 +5998,10 @@ namespace WindowsFormsApp1
                             if (xLine.Substring(1, 1) != "　" && xLine.IndexOf("*") == -1
                                 && (!prePara.StartsWith("{{　") && !prePara.StartsWith("　"))
                                 && (!(prePara.StartsWith("􏿽") && CountWordsLenPerLinePara(prePara) == wordsPerLinePara))
+                                //不是「本行短於正常行長，而前一行等於正常行常」
+                                && !(CountWordsLenPerLinePara(xLine) < wordsPerLinePara && CountWordsLenPerLinePara(prePara) == wordsPerLinePara)
+                                && (CountWordsLenPerLinePara(xLine) == wordsPerLinePara && CountWordsLenPerLinePara(prePara) == wordsPerLinePara
+                                        && !xLine.EndsWith("<p>"))
                                 )
                             {
                                 textBox1.Select(i + offset, 1);
@@ -6760,6 +6764,7 @@ namespace WindowsFormsApp1
                                 {
                                     if (k - 2 < 0)
                                     {
+
                                         Debugger.Break();//●●●●●●●●●●●●●●●●●●
                                         //stopUndoRec = false; return true;
                                         break;
@@ -7024,7 +7029,8 @@ namespace WindowsFormsApp1
                                             }
                                             if (sb.ToString() != string.Empty)
                                             {
-                                                Debugger.Break();
+                                                //Debugger.Break();
+                                                playSound(soundLike.exam, true);
                                                 item.Range.Text = sb.ToString() + item.Text.Substring(isps);
                                                 //range.End = ed_range + isps;//"􏿽".Length=2 - "　".Length=1 ;
                                                 //range.End += isps;//"􏿽".Length=2 - "　".Length=1 ;//已與Paragraph.Range.Text同步
@@ -7090,7 +7096,8 @@ namespace WindowsFormsApp1
                                         {
                                             sbb.Append("　");
                                         }
-                                        Debugger.Break();
+                                        //Debugger.Break();
+                                        playSound(soundLike.exam, true);
                                         item.Range.Text = sbb.ToString() + result1;
                                         //range.End += (result1.Length - text.Length);//已於Range.Text中調用UpdateParentRange()方法解決同步更新連動的問題了！
                                         //20250306監測成功！●●●●●●●●●●●●●●
@@ -7229,7 +7236,7 @@ namespace WindowsFormsApp1
             return true;
         }
         /// <summary>
-        /// 計算x中的行/段有幾個
+        /// 計算x中的行/段有幾個(不顧慮正文注文的差別，純粹只是計算分行/段符號的數量）
         /// </summary>
         /// <param name="x"></param>
         /// <returns>x中的總行/段數</returns>
@@ -8244,9 +8251,16 @@ namespace WindowsFormsApp1
                 insertWords(insertX + Environment.NewLine, textBox1);
             if (x.Substring(s - 2 < 0 ? 0 : s - 2, 2) == Environment.NewLine)
             {
+                if (s - 3 > -1 && x.Substring(s - 3, 1) == "|")
+                {//清除「|」
+                    textBox1.Select(s - 3, 1);
+                    textBox1.SelectedText = string.Empty;
+                    s--;
+                }
                 //textBox1.SelectionStart = s + "<p>".Length; textBox1.ScrollToCaret();
                 textBox1.SelectionStart = s + insertX.Length; textBox1.ScrollToCaret();
             }
+
             stopUndoRec = false;
         }
 
@@ -9431,8 +9445,10 @@ namespace WindowsFormsApp1
             //if (keyinTextMode)
             if (!ocrTextMode)
             {
+                TopMost = true;//方便檢視要清除的誤標「<p>」
                 clearParagraphMarkersBetweenPairsBrackets();
                 clearParagraphMarkersInsidePairsBrackets();
+                TopMost = topmost;
                 lastLineText = textBox1.Text;//借用此變數
                 CnText.FormalizeText(ref lastLineText);
                 textBox1.Text = lastLineText;
@@ -9467,8 +9483,11 @@ namespace WindowsFormsApp1
                                 && (!nextLineX.StartsWith("{{") && !currLineX.EndsWith("}}"))
                                 )
                             {
-                                x = x.Substring(0, sCurr) + "<p>" + x.Substring(sCurr);
-                                s += "<p>".Length;
+                                if (sCurr - 3 > -1 && x.Substring(sCurr - 3, 3) != "<p>")
+                                {
+                                    x = x.Substring(0, sCurr) + "<p>" + x.Substring(sCurr);
+                                    s += "<p>".Length;
+                                }
                             }
                         }
                     }
@@ -9483,8 +9502,11 @@ namespace WindowsFormsApp1
                             if (CountWordsLenPerLinePara(nextLineX) == 0
                                 && (!nextLineX.StartsWith("{{") && !currLineX.EndsWith("}}")))
                             {
-                                x = x.Substring(0, sCurr) + "<p>" + x.Substring(sCurr);
-                                s += "<p>".Length;
+                                if (sCurr - 3 > -1 && x.Substring(sCurr - 3, 3) != "<p>")
+                                {
+                                    x = x.Substring(0, sCurr) + "<p>" + x.Substring(sCurr);
+                                    s += "<p>".Length;
+                                }
                             }
                         }
                     }
@@ -9969,7 +9991,7 @@ namespace WindowsFormsApp1
                     && px.IndexOf("*") == -1)
                 {
                     int i = 0;
-                    while (px != "" && px.Substring(i, 1) == "　")
+                    while (px != "" && i + 1 <= px.Length && px.Substring(i, 1) == "　")
                     {
                         x = x.Substring(0, s + i + j) + "􏿽" + x.Substring(s + i + 1 + j); i++; j++;
                     }
@@ -12287,7 +12309,7 @@ namespace WindowsFormsApp1
                             //const string inputText = "《四庫全書》􏿽{{史部　}}<p>";
                             //const string inputText = "《四庫全書》􏿽{{子部　}}<p>";
                             //const string inputText = "《四庫全書》􏿽{{集部　}}<p>";
-                            const string inputText = "《新刻增補藝苑巵言》<p>";
+                            const string inputText = "《廿　二　史　考　異》<p>";
                             br.QuickeditLinkIWebElement.Click();
                             PauseEvents();
                             textBox3.Text = driver.Url;
@@ -12297,7 +12319,7 @@ namespace WindowsFormsApp1
                             DateTime dt = DateTime.Now;
                             while (br.Quickedit_data_textbox == null) { if (DateTime.Now.Subtract(dt).TotalSeconds > 5) break; }
                             string text = br.Quickedit_data_textboxTxt;
-                            if (text == string.Empty || text == "●" || text == "●\t")
+                            if (text == string.Empty || text == "●" || text == "●\t" || text == "●<p>")
                             {
                                 br.SetIWebElementValueProperty(br.Quickedit_data_textbox, inputText);
                                 br.SavechangesButton?.Click();//送出
@@ -14232,7 +14254,7 @@ namespace WindowsFormsApp1
                 //}
                 //else
                 //    button1.ForeColor = Color.DarkCyan;//
-
+                if (fastMode) FastModeSwitcher();
             }
         }
         /// <summary>
@@ -17025,7 +17047,9 @@ namespace WindowsFormsApp1
                     }
 
                     //對複製自《國學大師》的《四庫全書》文本的處置
-                    else if (clpTxt.IndexOf("a]") > -1 || clpTxt.IndexOf("a] ") > -1 || clpTxt.IndexOf("P") > -1)//P 乃「北京元引科技有限公司《元引科技引得數字人文資源平臺·中國歷代文獻》」的文本特徵
+                    else if (clpTxt.IndexOf("a]") > -1 || clpTxt.IndexOf("a] ") > -1 ||
+                        (clpTxt.IndexOf("P") > -1
+                            && int.TryParse(clpTxt.Substring(clpTxt.IndexOf("P") + 1, 1), out _)))//P 乃「北京元引科技有限公司《元引科技引得數字人文資源平臺·中國歷代文獻》」的文本特徵
                     {
                         ocrTextMode = false;
                         runWordMacro("中國哲學書電子化計劃.國學大師_Kanripo_四庫全書本轉來");
@@ -17105,6 +17129,16 @@ namespace WindowsFormsApp1
 
         private void textBox2_Enter(object sender, EventArgs e)
         {
+            //避免事件被終止
+            if (!_eventsEnabled) _eventsEnabled = true;
+
+            //避免還原記錄被終止
+            if (stopUndoRec) stopUndoRec = false;
+
+
+            //重設欄位變量，以免OCR快速鍵失效
+            PagePaste2GjcoolOCR_ing = false;
+
             textBox2.BackColor = Color.GreenYellow;
         }
 
@@ -17225,6 +17259,7 @@ namespace WindowsFormsApp1
                     if (int.TryParse(x, out int chapterNum))
                     {
                         PauseEvents();
+                        x = (++chapterNum).ToString();//第一列欄名也要算在內，故+1 （詳書首頁，如：https://ctext.org/library.pl?if=gb&res=1069）
                         ChapterSelector = "#content > div:nth-child(6) > table > tbody > tr:nth-child(" + x + ") > td:nth-child(1) > a";
                         textBox2.Text = ""; ResumeEvents(); return;
                     }
@@ -18084,10 +18119,10 @@ namespace WindowsFormsApp1
         {
             if (ModifierKeys == Keys.None)
             {//滑鼠左鍵點二下，同 Ctrl + -（數字鍵盤） 會重設以插入點位置為頁面結束位國
-                if (autoPaste2QuickEdit && lines_perPage == 0)
-                {
-                    lines_perPage = countLinesPerPage(textBox1.Text.Substring(0, textBox1.SelectionStart));
-                }
+             //if (autoPaste2QuickEdit && lines_perPage == 0)
+             //{
+                lines_perPage = countLinesPerPage(textBox1.Text.Substring(0, textBox1.SelectionStart));
+                //}
                 resetPageTextEndPositionPasteToCText();
                 if (!autoPaste2QuickEdit) AvailableInUseBothKeysMouse();
             }

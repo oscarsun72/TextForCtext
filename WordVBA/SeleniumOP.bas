@@ -942,8 +942,13 @@ End Function
 Rem 開啟新分頁 若失敗則傳回false'改進WordVBA+SeleniumBasic 開啟Chrome瀏覽器新分頁的方法 creedit_with_Copilot大菩薩： https://sl.bing.net/bcfc14PWlFc
 Function OpenNewTab(ByVal driver As SeleniumBasic.IWebDriver, Optional url As String) As Boolean
     Dim result As Boolean, currentWinhdl As String
+    
     result = True
     On Error GoTo eH
+    
+'    SeleniumOP.ActivateChrome
+'    SendKeys "^t"
+'
     If Not IsWDInvalid Then currentWinhdl = driver.CurrentWindowHandle
     driver.ExecuteScript "window.open('about:blank','_blank');" 'openNewTabWhenTabAlreadyExit WD
     VBA.Interaction.DoEvents

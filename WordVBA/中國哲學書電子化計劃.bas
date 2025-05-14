@@ -3,9 +3,12 @@ Option Explicit
 Dim ChapterSelector As String
 'Const description As String = "將星號前的分段符號移置前段之末 & 清除頁前的分段符號"
 'Const description As String = "將星號前的分段符號移置前段之末 & 清除頁前的分段符號{佛弟子文獻學者孫守真任真甫按：仁者志士義民菩薩賢友請多利用賢超法師《古籍酷AI》或《看典古籍》OCR事半功倍也。如蒙不棄，可利用末學於GitHub開源免費免安裝之TextForCtext 應用程式，加速輸入與排版。討論區與末學YouTube頻道有演示影片可資參考。感恩感恩　讚歎讚歎　南無阿彌陀佛"
-Const description As String = "將星號前的分段符號移置前段之末 & 清除頁前的分段符號{據Kanripo.org或《國學大師》所藏本輔以末學自製於GitHub開源免費免安裝之TextForCtext排版對應錄入。討論區與末學YouTube頻道有實境演示影片可資參考。感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主}"
+'Const description As String = "將星號前的分段符號移置前段之末 & 清除頁前的分段符號{據Kanripo.org或《國學大師》所藏本輔以末學自製於GitHub開源免費免安裝之TextForCtext排版對應錄入。討論區與末學YouTube頻道有實境演示影片可資參考。感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主}"
 'Const description As String = "將星號前的分段符號移置前段之末 & 清除頁前的分段符號{據《國學大師》或北京元引科技有限公司《元引科技引得數字人文資源平臺·中國歷代文獻》所藏本輔以末學自製於GitHub開源免費免安裝之TextForCtext排版對應錄入。討論區與末學YouTube頻道有實境演示影片可資參考。感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主}"
-'Const description As String = "將星號前的分段符號移置前段之末 & 清除頁前的分段符號{據北京元引科技有限公司《元引科技引得數字人文資源平臺·中國歷代文獻》所藏本輔以末學自製於GitHub開源免費免安裝之TextForCtext排版對應錄入。討論區與末學YouTube頻道有實境演示影片可資參考。感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主}"
+Const description As String = "將星號前的分段符號移置前段之末 & 清除頁前的分段符號{據北京元引科技有限公司《元引科技引得數字人文資源平臺·中國歷代文獻》所藏本輔以末學自製於GitHub開源免費免安裝之TextForCtext排版對應錄入。討論區與末學YouTube頻道有實境演示影片可資參考。感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主}"
+
+'const description_Edit_textbox_新頁面 as String = "據《國學大師》或《Kanripo》所收本輔以末學自製於GitHub開源免費免安裝之TextForCtext軟件排版對應錄入；討論區及末學YouTube頻道有實境演示影片。感恩感恩　讚歎讚歎　南無阿彌陀佛"
+Const description_Edit_textbox_新頁面 As String = "據北京元引科技有限公司《元引科技引得數字人文資源平臺·中國歷代文獻》所收本輔以末學自製於GitHub開源免費免安裝之TextForCtext軟件排版對應錄入；討論區及末學YouTube頻道有實境演示影片。感恩感恩　讚歎讚歎　南無阿彌陀佛"
 
 Sub 分行分段()
     
@@ -1767,7 +1770,7 @@ Rem 現在多用Kanripo.org者 20250202大年初五
 Sub 元引科技引得數字人文資源平臺_北京元引科技有限公司轉來()
     Dim rng As Range, noteRng As Range, aNext As Range, aPre As Range, ur As UndoRecord, midNoteRngPos As Byte, midNoteRng As Range, aX As String, a As Range, aSt As Long, aEd As Long
     Dim noteFont As font '記下注文格式以備用
-    Dim insertX As String
+    Dim insertX As String, counter As Byte
     Set rng = Documents.Add().Range
     SystemSetup.stopUndo ur, "國學大師_Kanripo_四庫全書本轉來"
     SystemSetup.playSound 1
@@ -1908,7 +1911,10 @@ Sub 元引科技引得數字人文資源平臺_北京元引科技有限公司轉來()
                                noteRng.text = noteRng.text & "　"
                                a.SetRange aSt, aEd
                                If rng.End + 3 >= rng.Document.Range.End Then Exit Do
+                               counter = counter + 1
+                               If counter > 50 Then Exit Do
                             Loop
+                            counter = 0
                             If a.Next = VBA.Chr(11) Then '如果斜線/後面即換行
                                 If aX = vbNullString Or VBA.Replace(aX, "　", vbNullString) <> vbNullString Then '若無縮排，則清除掉斜線/
                                     a.text = vbNullString
@@ -2781,9 +2787,9 @@ Property Get Textarea_data_Edit_textbox() As SeleniumBasic.IWebElement
         Set Textarea_data_Edit_textbox = WD.FindElementByCssSelector("#data")
     End If
 End Property
-Property Get Description_Edit_textbox() As SeleniumBasic.IWebElement
+Property Get description_Edit_textbox() As SeleniumBasic.IWebElement
     If VBA.InStr(WD.url, "&action=") Then '"&action=newchapter" 或 action=editchapter
-        Set Description_Edit_textbox = WD.FindElementByCssSelector("#description")
+        Set description_Edit_textbox = WD.FindElementByCssSelector("#description")
     End If
 End Property
 Property Get Commit_Edit_textbox() As SeleniumBasic.IWebElement
@@ -2868,7 +2874,7 @@ Sub 新頁面Auto_action_newchapter()
     '輸入Sequence值：
     SetIWebElementValueProperty Sequence_data_Edit_textbox, VBA.CStr(chapterNum) & "0"
     '輸入修改摘要:
-    SetIWebElementValueProperty Description_Edit_textbox, "據《國學大師》或《Kanripo》所收本輔以末學自製於GitHub開源免費免安裝之TextForCtext軟件排版對應錄入；討論區及末學YouTube頻道有實境演示影片。感恩感恩　讚歎讚歎　南無阿彌陀佛"
+    SetIWebElementValueProperty description_Edit_textbox, description_Edit_textbox_新頁面 '"據《國學大師》或《Kanripo》所收本輔以末學自製於GitHub開源免費免安裝之TextForCtext軟件排版對應錄入；討論區及末學YouTube頻道有實境演示影片。感恩感恩　讚歎讚歎　南無阿彌陀佛"
 '    SetIWebElementValueProperty Description_Edit_textbox, "據北京元引科技有限公司《元引科技引得數字人文資源平臺·中國歷代文獻》所收本輔以末學自製於GitHub開源免費免安裝之TextForCtext軟件排版對應錄入；討論區及末學YouTube頻道有實境演示影片。感恩感恩　讚歎讚歎　南無阿彌陀佛"
     'Commit_Edit_textbox.Click '送出
     

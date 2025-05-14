@@ -12070,6 +12070,9 @@ namespace TextForCtext
                     case "www.inindex.com":
                         result = true;
                         goto gotoNext;
+                    case "inindex.com":
+                        result = true;
+                        goto gotoNext;
                     default:
                         break;
                 }
@@ -12084,7 +12087,7 @@ namespace TextForCtext
             }
             else if (urlPrefixDomain == "www.kanripo.org")
                 url = GetNextPageUrl(url.IndexOf("#") > -1 ? url.Substring(0, url.IndexOf("#")) : url);
-            else if (urlPrefixDomain == "www.inindex.com")
+            else if (urlPrefixDomain == "www.inindex.com"|| urlPrefixDomain == "inindex.com")
             {
                 string urlOld = driver.Url;
                 //按下到下一單位的按鈕
@@ -12140,6 +12143,9 @@ namespace TextForCtext
                     iElementSelector = "body > div:nth-child(3) > div:nth-child(4) > div.col2";
                     break;
                 case "www.inindex.com":
+                    iElementSelector = "#printView > div:nth-child(3) > div:nth-child(1) > div";
+                    break;
+                case "inindex.com":
                     iElementSelector = "#printView > div:nth-child(3) > div:nth-child(1) > div";
                     break;
                 default:
@@ -12338,6 +12344,16 @@ namespace TextForCtext
             catch (Exception ex)
             {
                 Console.WriteLine(ex.HResult + ex.Message);
+                switch (ex.HResult)
+                {
+                    case -2146233088:
+                        if (ex.Message.StartsWith("tab crashed"))
+                            RestartChromedriver();
+                        break;
+                    default:
+
+                        break;
+                }
                 Console.WriteLine(WebDriverWaitTimeSpan.ToString());
                 Console.WriteLine(driver.Manage().Timeouts().PageLoad.ToString());
                 //Debugger.Break();
@@ -12345,6 +12361,7 @@ namespace TextForCtext
                     driver.Manage().Timeouts().PageLoad = DriverManageTimeoutsPageLoad;
                 Thread.Sleep(1000);
                 if (retryCount < 2) { retryCount++; goto retry; }
+
             }
             return result;
             //return confirm_that_you_are_human;
