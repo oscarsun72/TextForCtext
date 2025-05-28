@@ -6487,7 +6487,7 @@ namespace TextForCtext
             }
 
             #region 先檢查點數是否足夠
-            const byte pointCoin = 150;//「自動識別(豎版)」所需點數120，載入圖檔要30
+            const byte pointCoin = 120;// 150;//「自動識別(豎版)」所需點數120，載入圖檔要30//20250525： 現在改為上傳圖片20，OCR 100
             IWebElement iwe = null;
             try
             {//以備隨時被使用者關閉

@@ -12309,7 +12309,8 @@ namespace WindowsFormsApp1
                             //const string inputText = "《四庫全書》􏿽{{史部　}}<p>";
                             //const string inputText = "《四庫全書》􏿽{{子部　}}<p>";
                             //const string inputText = "《四庫全書》􏿽{{集部　}}<p>";
-                            const string inputText = "《廿　二　史　考　異》<p>";
+                            const string inputText = "《晚　晴　簃　詩　匯》<p>";
+                            //const string inputText = "《甘　泉　鄉　人　稿》<p>";
                             br.QuickeditLinkIWebElement.Click();
                             PauseEvents();
                             textBox3.Text = driver.Url;
@@ -14243,6 +14244,7 @@ namespace WindowsFormsApp1
             }
             else
             {
+                if (fastMode) FastModeSwitcher();
                 new SoundPlayer(@"C:\Windows\Media\Speech Off.wav").Play();
                 autoPaste2QuickEdit = false;
                 //button1.Text = "分行分段";
@@ -14254,7 +14256,6 @@ namespace WindowsFormsApp1
                 //}
                 //else
                 //    button1.ForeColor = Color.DarkCyan;//
-                if (fastMode) FastModeSwitcher();
             }
         }
         /// <summary>
@@ -16776,6 +16777,9 @@ namespace WindowsFormsApp1
                     //ResumeEvents();
                 }
             }
+            //else
+            //    if (fastMode) ChromeSetFocus();
+
             #region forDebugTest權作測試偵錯用20230310            
             //br.SetQuickedit_data_textboxTxt(textBox1.Text);
             //string x = Clipboard.GetText();
@@ -18270,7 +18274,7 @@ namespace WindowsFormsApp1
                 string pageNum = GetPageNumFromUrl(textBox3.Text).ToString();
                 if (_currentPageNum != pageNum)
                 {
-                    Debugger.Break();
+                    //Debugger.Break();
                     _currentPageNum = pageNum;
                     WindowHandles["currentPageNum"] = _currentPageNum;
 
@@ -18412,13 +18416,14 @@ namespace WindowsFormsApp1
             }
             if (previousBookID != bookID) previousBookID = bookID;
             //if (Math.Abs(previousBookID - bookID) > 1 || url == string.Empty)
-            if (autoPaste2QuickEdit && (previousResID == 0 || (previousResID != resID && resID > 0)))
+            //if (autoPaste2QuickEdit && (previousResID == 0 || (previousResID != resID && resID > 0)))
+            if (previousResID == 0 || (previousResID != resID && resID > 0))
             { //normalLineParaLenggth = 0;
 
                 //if (url != string.Empty) Debugger.Break(); //just for test 
                 playSound(soundLike.done, true);
-                if (previousResID == 0)
-                    if (DialogResult.OK == MessageBoxShowOKCancelExclamationDefaultDesktopOnly("是否要重設書籍版面資訊？"))
+                if (previousResID == 0 || (previousResID != resID && resID > 0))
+                    //if (DialogResult.OK == MessageBoxShowOKCancelExclamationDefaultDesktopOnly("是否要重設書籍版面資訊？"))
                         resetBooksPagesFeatures();
                 previousResID = resID;
                 if (editwikiID > 0 && editwikiID != previousEditwikiID) previousEditwikiID = editwikiID;
@@ -18658,6 +18663,7 @@ namespace WindowsFormsApp1
             //    !autoPasteFromSBCKwhether) this.TopMost = false;//hideToNICo();
             if (!textBox2.Focused && !dragDrop &&
                             !autoPasteFromSBCKwhether) this.TopMost = false;//hideToNICo();
+            if (dragDrop) dragDrop = false;
             selStart = textBox1.SelectionStart; selLength = textBox1.SelectionLength;
             //if (this.WindowState==FormWindowState.Minimized)
             //{

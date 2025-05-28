@@ -7,7 +7,7 @@ Dim ChapterSelector As String
 'Const description As String = "將星號前的分段符號移置前段之末 & 清除頁前的分段符號{據《國學大師》或北京元引科技有限公司《元引科技引得數字人文資源平臺·中國歷代文獻》所藏本輔以末學自製於GitHub開源免費免安裝之TextForCtext排版對應錄入。討論區與末學YouTube頻道有實境演示影片可資參考。感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主}"
 Const description As String = "將星號前的分段符號移置前段之末 & 清除頁前的分段符號{據北京元引科技有限公司《元引科技引得數字人文資源平臺·中國歷代文獻》所藏本輔以末學自製於GitHub開源免費免安裝之TextForCtext排版對應錄入。討論區與末學YouTube頻道有實境演示影片可資參考。感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主}"
 
-'const description_Edit_textbox_新頁面 as String = "據《國學大師》或《Kanripo》所收本輔以末學自製於GitHub開源免費免安裝之TextForCtext軟件排版對應錄入；討論區及末學YouTube頻道有實境演示影片。感恩感恩　讚歎讚歎　南無阿彌陀佛"
+'Const description_Edit_textbox_新頁面 As String = "據《國學大師》或《Kanripo》所收本輔以末學自製於GitHub開源免費免安裝之TextForCtext軟件排版對應錄入；討論區及末學YouTube頻道有實境演示影片。感恩感恩　讚歎讚歎　南無阿彌陀佛"
 Const description_Edit_textbox_新頁面 As String = "據北京元引科技有限公司《元引科技引得數字人文資源平臺·中國歷代文獻》所收本輔以末學自製於GitHub開源免費免安裝之TextForCtext軟件排版對應錄入；討論區及末學YouTube頻道有實境演示影片。感恩感恩　讚歎讚歎　南無阿彌陀佛"
 
 Sub 分行分段()
@@ -1796,6 +1796,7 @@ Sub 元引科技引得數字人文資源平臺_北京元引科技有限公司轉來()
 '        rng.Find.Execute VBA.ChrW(160) & "^g" & VBA.Chr(13), , , , , , , wdFindContinue, , VBA.Chr(13), wdReplaceAll
     
     rng.Find.Execute VBA.Chr(13), , , , , , , wdFindContinue, , VBA.Chr(11), wdReplaceAll
+    rng.Find.Execute "^p/", , , , , , , wdFindContinue, , "^p", wdReplaceAll
         
     rng.Find.font.Color = 1310883
     Do While rng.Find.Execute(vbNullString, , , False, , , True, wdFindStop)
@@ -2680,7 +2681,7 @@ Sub EditModeMakeup_changeFile_Page() '同版本文本帶入置換file id 和 頁數
     SystemSetup.SetClipboard d.Range.text
     SystemSetup.contiUndo ur
     SystemSetup.playSound 1
-    d.Application.Activate
+'    d.Application.Activate
 End Sub
 Property Get Div_generic_IncludePathAndEndPageNum() As SeleniumBasic.IWebElement
     Dim iwe As SeleniumBasic.IWebElement
@@ -2880,6 +2881,14 @@ Sub 新頁面Auto_action_newchapter()
     
     Title_Edit_textbox.Click
     d.Range(d.Paragraphs(5).Range.start, d.Paragraphs(5).Range.End - 1).text = chapterNum + 1
+    
+    '按下【保存編輯】
+    WD.FindElementByCssSelector("#commit").Click
+    
+    d.Application.Activate
+    d.Application.windowState = wdWindowStateNormal
+    d.Activate
+    
 End Sub
 
 
