@@ -1795,8 +1795,9 @@ Sub 元引科技引得數字人文資源平臺_北京元引科技有限公司轉來()
 '    If VBA.InStr(rng.text, VBA.ChrW(160) & "/" & VBA.Chr(13)) Then _
 '        rng.Find.Execute VBA.ChrW(160) & "^g" & VBA.Chr(13), , , , , , , wdFindContinue, , VBA.Chr(13), wdReplaceAll
     
-    rng.Find.Execute VBA.Chr(13), , , , , , , wdFindContinue, , VBA.Chr(11), wdReplaceAll
     rng.Find.Execute "^p/", , , , , , , wdFindContinue, , "^p", wdReplaceAll
+    
+    rng.Find.Execute VBA.Chr(13), , , , , , , wdFindContinue, , VBA.Chr(11), wdReplaceAll
         
     rng.Find.font.Color = 1310883
     Do While rng.Find.Execute(vbNullString, , , False, , , True, wdFindStop)

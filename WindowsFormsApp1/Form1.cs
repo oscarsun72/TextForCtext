@@ -12309,8 +12309,7 @@ namespace WindowsFormsApp1
                             //const string inputText = "《四庫全書》􏿽{{史部　}}<p>";
                             //const string inputText = "《四庫全書》􏿽{{子部　}}<p>";
                             //const string inputText = "《四庫全書》􏿽{{集部　}}<p>";
-                            const string inputText = "《晚　晴　簃　詩　匯》<p>";
-                            //const string inputText = "《甘　泉　鄉　人　稿》<p>";
+                            const string inputText = "《儀　顧　堂　題　跋》<p>";
                             br.QuickeditLinkIWebElement.Click();
                             PauseEvents();
                             textBox3.Text = driver.Url;
@@ -13273,6 +13272,7 @@ namespace WindowsFormsApp1
         internal void FastModeSwitcher()
         {
             fastMode = !fastMode;
+            if (!autoPaste2QuickEdit && textBox1.TextLength > 3000) turnOn_autoPastetoQuickEdit();//在內容量大時自動切到自動連續輸入模式
             if (fastMode)
             {
                 playSound(soundLike.over, true);//播放音效，啟動快捷模式之通知 20250206 蛇年初九
@@ -18424,7 +18424,7 @@ namespace WindowsFormsApp1
                 playSound(soundLike.done, true);
                 if (previousResID == 0 || (previousResID != resID && resID > 0))
                     //if (DialogResult.OK == MessageBoxShowOKCancelExclamationDefaultDesktopOnly("是否要重設書籍版面資訊？"))
-                        resetBooksPagesFeatures();
+                    resetBooksPagesFeatures();
                 previousResID = resID;
                 if (editwikiID > 0 && editwikiID != previousEditwikiID) previousEditwikiID = editwikiID;
                 if (textBox3.Text.StartsWith("http"))

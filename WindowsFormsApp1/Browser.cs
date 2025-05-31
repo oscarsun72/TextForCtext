@@ -2378,7 +2378,13 @@ namespace TextForCtext
                     if (iweConfirm == null) driver.Navigate().Back();//因非同步，若已翻到下一頁
                     iweConfirm = WaitFindWebElementBySelector_ToBeClickable("#content3 > form > table > tbody > tr:nth-child(2) > td:nth-child(2) > input[type=text]");
                     if (iweConfirm == null)
+                    {
                         Debugger.Break();
+                        ActiveForm1.TopMost = false;
+                        driver.SwitchTo().Window(driver.CurrentWindowHandle);
+                        Form1.InstanceForm1.EndUpdate();
+                        return false;
+                    }
                     else
                         iweConfirm.Click();
                     if (DialogResult.Cancel ==
@@ -10929,8 +10935,10 @@ namespace TextForCtext
                     //SetIWebElementValueProperty(iwe, x);//沒反應                    
                     iwe.SendKeys(selm.Keys.Shift + selm.Keys.Insert);
                     //iwe.Click();//將焦點移至組字檢索框
-                    SendKeys.SendWait("{F6}");
-                    SendKeys.SendWait("{F6}");
+                    SendKeys.SendWait("^{F6}");
+                    //SendKeys.SendWait("{F6}");//以下3行無用，不如上一行 20250529
+                    //SendKeys.SendWait("{F6}");
+                    //iwe.Click();
                 }
 
             }
@@ -12087,7 +12095,7 @@ namespace TextForCtext
             }
             else if (urlPrefixDomain == "www.kanripo.org")
                 url = GetNextPageUrl(url.IndexOf("#") > -1 ? url.Substring(0, url.IndexOf("#")) : url);
-            else if (urlPrefixDomain == "www.inindex.com"|| urlPrefixDomain == "inindex.com")
+            else if (urlPrefixDomain == "www.inindex.com" || urlPrefixDomain == "inindex.com")
             {
                 string urlOld = driver.Url;
                 //按下到下一單位的按鈕
