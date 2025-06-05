@@ -2683,6 +2683,7 @@ Sub EditModeMakeup_changeFile_Page() '同版本文本帶入置換file id 和 頁數
     SystemSetup.contiUndo ur
     SystemSetup.playSound 1
 '    d.Application.Activate
+    SeleniumOP.ActivateChrome
 End Sub
 Property Get Div_generic_IncludePathAndEndPageNum() As SeleniumBasic.IWebElement
     Dim iwe As SeleniumBasic.IWebElement

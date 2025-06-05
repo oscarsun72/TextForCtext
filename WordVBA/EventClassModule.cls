@@ -95,25 +95,27 @@ Private Sub App_WindowSelectionChange(ByVal Sel As Selection)
     If Not Docs.AutoCopy Then
         Exit Sub
     End If
-    If Selection.Type = wdSelectionNormal Then
+    If Selection.Type = wdSelectionIP Then
         Exit Sub
     End If
 '    Stop
     On Error GoTo eH
-    Dim clipboardTxt As String
-    clipboardTxt = SystemSetup.GetClipboardText
+    'Dim clipboardTxt As String
+'    clipboardTxt = SystemSetup.GetClipboardText
     
     If Selection.InlineShapes.Count = 0 And Selection.ShapeRange.Count = 0 Then
-        Selection.Copy
-        SystemSetup.playSound 0.96
+        If code.IsChineseString(Selection.text) Then
+            Selection.Copy
+            SystemSetup.playSound 0.96
+        End If
     End If
 
     Exit Sub
 eH:
-Select Case Err.Number
+Select Case Err.number
     Case Else
-        Debug.Print Err.Number & Err.Description
-        MsgBox Err.Number & Err.Description
+        Debug.Print Err.number & Err.description
+        MsgBox Err.number & Err.description
         'Resume
 End Select
 End Sub

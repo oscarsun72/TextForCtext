@@ -2,6 +2,17 @@ Attribute VB_Name = "Docs"
 Option Explicit
 Public d字表 As Document, x As New EventClassModule   '這才是所謂的建立"新"的類別模組--實際上是建立對它的參照.'原照線上說明乃Dim也.
 Public AutoCopy As Boolean
+
+Public Sub AutoCopySwitcher()
+    'Alt + Shift + F8
+    AutoCopy = Not AutoCopy
+    If Selection.Type = wdSelectionNormal Then Selection.Copy
+    If AutoCopy Then
+        SystemSetup.playSound 1.469
+    End If
+End Sub
+
+
 'https://learn.microsoft.com/en-us/office/vba/word/concepts/objects-properties-methods/using-events-with-the-application-object-word
 Public Sub Register_Event_Handler() '使自設物件類別模組有效的登錄程序.見「使用 Application 物件 (Application Object) 的事件」
     If x Is Nothing Or Not x.App Is word.Application Then
@@ -132,7 +143,7 @@ If MsgBox("是否要清除符號?", vbQuestion + vbOKCancel) = vbOK Then
 End If
 If dn = "" Then dn = d1.Name
 If Not d1.Name Like dn And Not d1.Name Like dn Then i = 0: dn = d1.Name
-If Selection.start + 1 = ActiveDocument.Content.End Then Selection.HomeKey wdStory, wdMove '如果插入點為文件末時...
+If Selection.start + 1 = ActiveDocument.content.End Then Selection.HomeKey wdStory, wdMove '如果插入點為文件末時...
 If i = 0 Then i = Selection.start 'ActiveDocument.Range.Start
 If d1.Characters.Count >= d2.Characters.Count Then
     j = d1.Characters.Count
@@ -198,7 +209,7 @@ If MsgBox("是否要清除符號?", vbQuestion + vbOKCancel) = vbOK Then
 End If
 If DwN = "" Then DwN = Dw1.Name
 If Not Dw1.Name Like DwN And Not Dw1.Name Like DwN Then i = 0: DwN = Dw1.Name
-If Dw1.Selection.start + 1 = ActiveDocument.Content.End Then Selection.HomeKey wdStory, wdMove '如果插入點為文件末時...
+If Dw1.Selection.start + 1 = ActiveDocument.content.End Then Selection.HomeKey wdStory, wdMove '如果插入點為文件末時...
 If i = 0 Then i = Dw1.Selection.start 'ActiveDocument.Range.Start
 If Dw1.Characters.Count >= Dw2.Characters.Count Then
     j = Dw1.Characters.Count
@@ -317,7 +328,7 @@ ErrHandler:
         Case 5342 '指定的資料類型無法取得。
             
         Case Else
-            MsgBox Err.number & Err.Description
+            MsgBox Err.number & Err.description
     End Select
 End Sub
 Sub 貼上簡化字文本轉正()
@@ -669,7 +680,7 @@ errHH:
         Case 7 '記憶體不足
             d.ActiveWindow.Selection.Find.Execute Selection.text
         Case Else
-            MsgBox Err.number & Err.Description
+            MsgBox Err.number & Err.description
             Resume
     End Select
 End Sub
@@ -1221,7 +1232,7 @@ pasteAnyway:
             End If
         Else '如果文件中已有文本，則顯示其所在處
             Dim sx As String
-            If InStr(d.Content, clipBTxt) Then
+            If InStr(d.content, clipBTxt) Then
                 'rng.Find.Execute VBA.Left(clipBTxt, 255), , , , , , , wdFindContinue
                 Dim ps As Integer
                 ps = InStr(clipBTxt, VBA.Chr(13)) '如有本來要貼入的文本中有段落，則止到其段落前為止；若沒有，則取能尋找的最大值255個字元長的內容作搜尋
@@ -1339,7 +1350,7 @@ eH:
         Case 5825 '物件已被刪除。
             GoTo exitSub
         Case Else
-            MsgBox Err.number & Err.Description
+            MsgBox Err.number & Err.description
             Resume
     End Select
 End Function
@@ -1466,7 +1477,7 @@ finish:
     Exit Sub
 
 eH:
-    MsgBox Err.number & Err.Description
+    MsgBox Err.number & Err.description
     Resume finish
 End Sub
 
@@ -1709,8 +1720,8 @@ buildDictCoordinatesPhrase:
 eH:
     Select Case Err.number
         Case Else
-            MsgBox Err.number & Err.Description
-            Debug.Print Err.number & Err.Description
+            MsgBox Err.number & Err.description
+            Debug.Print Err.number & Err.description
             Resume
     End Select
 End Sub
@@ -1765,7 +1776,7 @@ End Function
 Function similarTextCheckInSpecificDocument(d As Document, text As String) As Collection 'item1 as Boolean(文本是否相似),item2 as string(找到的相似文本段落),item3 as String from Dictionary SimilarityResult(相似度名&相似度)
 Rem 文本相似度比對
 Dim similarText As New similarText, dClearPunctuation As String, textClearPunctuation As String, dCleanParagraphs() As String, punc As New punctuation, e, Similarity As Boolean, result As New Collection
-dClearPunctuation = d.Content.text
+dClearPunctuation = d.content.text
 textClearPunctuation = text
 '清除標點符號
 punc.clearPunctuations textClearPunctuation: punc.clearPunctuations dClearPunctuation
@@ -1787,7 +1798,7 @@ Next e
 Rem index   Required. An expression that specifies the position of a member of the collection. If a numeric expression, index must be a number from 1 to the value of the collection's Count property. If a string expression, index must correspond to the key argument specified when the member referred to was added to the collection.
 result.Add Similarity 'item1:文本是否相似'https://learn.microsoft.com/en-us/office/vba/Language/Reference/User-Interface-Help/item-method-visual-basic-for-applications
 dClearPunctuation = e
-punc.restoreOriginalTextPunctuations d.Content.text, dClearPunctuation
+punc.restoreOriginalTextPunctuations d.content.text, dClearPunctuation
 result.Add dClearPunctuation 'item2:找到的相似文本段落
 result.Add similarText.SimilarityResultsString 'item3:相似度名&相似度
 Set similarText = Nothing
@@ -1952,19 +1963,19 @@ exitSub:
 eH:
         Select Case Err.number
             Case 9
-                If InStr(Err.Description, "陣列索引超出範圍") Then
+                If InStr(Err.description, "陣列索引超出範圍") Then
                     GoTo mark
                 Else
                     GoTo Msg:
                 End If
             Case -2146233088 'unknown error: unhandled inspector error: {"code":-32000,"message":"Browser window not found"}
                               '(Session info: chrome=126.0.6478.127)
-                If VBA.InStr(Err.Description, "unknown error: unhandled inspector error:") > 0 Then
+                If VBA.InStr(Err.description, "unknown error: unhandled inspector error:") > 0 Then
                     GoTo mark
                 End If
             Case Else
 Msg:
-                MsgBox Err.number & Err.Description
+                MsgBox Err.number & Err.description
         End Select
 End Sub
 
@@ -1993,7 +2004,7 @@ Err1:
             Case 49 'DLL 呼叫規格錯誤
                 resumeTimer = resumeTimer + 1
                 If resumeTimer > 2 Then
-                    MsgBox Err.Description, vbCritical
+                    MsgBox Err.description, vbCritical
                     SystemSetup.killchromedriverFromHere
                 Else
                     Resume
@@ -2002,50 +2013,50 @@ Err1:
                 SystemSetup.wait 1.5
                 resumeTimer = resumeTimer + 1
                 If resumeTimer > 2 Then
-                    MsgBox Err.Description, vbCritical
+                    MsgBox Err.description, vbCritical
                     SystemSetup.killchromedriverFromHere
                 Else
                     Resume
                 End If
             Case 13
-                If InStr(Err.Description, "型態不符合") Then
+                If InStr(Err.description, "型態不符合") Then
                     SystemSetup.killchromedriverFromHere
     '                Stop
                     resumeTimer = resumeTimer + 1
                     If resumeTimer > 2 Then
-                        MsgBox Err.Description, vbCritical
+                        MsgBox Err.description, vbCritical
                         SystemSetup.killchromedriverFromHere
                     Else
                         Resume
                     End If
                 Else
-                    MsgBox Err.Description, vbCritical
+                    MsgBox Err.description, vbCritical
                     Stop
         '           Resume
                 End If
             Case -2146233088
-                If InStr(Err.Description, "disconnected: not connected to DevTools") Then '(failed to check if window was closed: disconnected: not connected to DevTools)
+                If InStr(Err.description, "disconnected: not connected to DevTools") Then '(failed to check if window was closed: disconnected: not connected to DevTools)
                                                                                             '(Session info: chrome=110.0.5481.178)
                     SystemSetup.killchromedriverFromHere
     '                Stop
                     resumeTimer = resumeTimer + 1
                     If resumeTimer > 2 Then
-                        MsgBox Err.Description, vbCritical
+                        MsgBox Err.description, vbCritical
                         SystemSetup.killchromedriverFromHere
                     Else
                         Resume
                     End If
     
                 Else
-                    MsgBox Err.Description, vbCritical
+                    MsgBox Err.description, vbCritical
                     SystemSetup.killchromedriverFromHere
         '           Resume
                 End If
             Case Else
-                If InStr(Err.Description, "no such window") Then
+                If InStr(Err.description, "no such window") Then
                     If Not WD Is Nothing Then Resume
                 Else
-                    MsgBox Err.Description, vbCritical
+                    MsgBox Err.description, vbCritical
                     SystemSetup.killchromedriverFromHere
         '           Resume
                 End If
@@ -2092,7 +2103,7 @@ Select Case Err.number
         'SendKeys "{TAB 16}", True
         Resume Next
     Case Else
-        MsgBox Err.number & Err.Description
+        MsgBox Err.number & Err.description
 End Select
 End Sub
 
@@ -2109,7 +2120,7 @@ Sub ChangeFontOfSurrogatePairs_ActiveDocument(fontName As String, Optional whatC
         ' Check if the character is a high surrogate
         If AscW(c) >= &HD800 And AscW(c) <= &HDBFF Then
             ' Check if the next character is a low surrogate
-            If rng.End < ActiveDocument.Content.End Then
+            If rng.End < ActiveDocument.content.End Then
                 i = rng.End + 1        ' The index of the next character
                 If i < ActiveDocument.Range.End Then
                     c = c & ActiveDocument.Range(i, i).text        ' The combined character
