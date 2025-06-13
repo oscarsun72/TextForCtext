@@ -1417,6 +1417,9 @@ namespace TextForCtext
 
             return punctuatedText;
         }
+
+        
+
         /// <summary>
         /// 將非縮排用的全形空格置換成引數 symbolToReplace 值
         /// 送去《古籍酷》自動標點前先將非縮排用的全形空格置換成引數 symbolToReplace 值

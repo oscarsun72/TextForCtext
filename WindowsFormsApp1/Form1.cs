@@ -10885,6 +10885,39 @@ namespace WindowsFormsApp1
             }
 
             //貼到 Ctext Quick edit 前的文本檢查
+            if (fastMode)
+            {//在快速模式下，有時《國學大師》或《Kanripo漢籍リポジトリ》等的文本分行不當，2行成1行，故添此判斷
+                if (wordsPerLinePara < 1)
+                {
+                    MessageBoxShowOKExclamationDefaultDesktopOnly("請先設定每行正常長度！感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主"); return false;
+                }
+                //int[] chk = checkAbnormalLinePara(xCopy);// int st = 0, ln = 0;
+                int[] chk = CheckAbnormalLinePara(xCopy, wordsPerLinePara);
+                if (chk.Length > 0)
+                {
+                    //if (chk[1] - chk[2] > 4)
+                    //{//)chk[2] * 0.5)
+                    int st = textBox1.SelectionStart;
+                    int ln = textBox1.SelectionLength;
+                    textBox1.Select(chk[0], chk[1]);
+                    //Refresh();
+                    if (DialogResult.OK == MessageBoxShowOKCancelExclamationDefaultDesktopOnly("發現不正常的分行，是否終止？"))
+                    {
+                        //textBox1.Select(chk[0] + chk[2] + (chk[0] > 0 ? 2 : 0), 0);//定位以便Enter切行
+                        int i = wordsPerLinePara;
+                        //while (new StringInfo(CnText.RemovePunctuationsNum(textBox1.Text.Substring(chk[0], i))).LengthInTextElements < wordsPerLinePara)
+                        while (CountWordsLenPerLinePara(textBox1.Text.Substring(chk[0], i)) < wordsPerLinePara)
+                            i++;
+                        if (char.IsLowSurrogate(textBox1.Text.Substring(chk[0] + i, 1).ToCharArray()[0]))
+                            textBox1.Select(chk[0] + i + 1, 0);//定位以便Enter切行                        
+                        else
+                            textBox1.Select(chk[0] + i, 0);//定位以便Enter切行                        
+                        return false;
+                    }
+                    textBox1.Select(st, ln);
+                    //}
+                }
+            }
             //if (!newTextBox1(out s, out l, autoPastetoQuickEdit ? x : xCopy))
             //if (!newTextBox1(out s, out l,  x))// 只用 xCopy的話 如《漢籍全文資料庫》的《十三經注疏》輸入就會傳回false
             if (!newTextBox1(out s, out l, autoPaste2QuickEdit ? x : (keyinTextMode ? xCopy : x)))
@@ -11415,6 +11448,33 @@ namespace WindowsFormsApp1
         /// </summary>
         int normalLineParaLength = 0;
 
+        /// <summary>
+        /// 檢查非常長度的行（段）
+        /// </summary>
+        /// <param name="xChk">這引數是指定要傳入檢查的文本</param>
+        /// <returns>若發現非常長度的行，則傳回一個數組（陣列）以表示非常行諸特徵：
+        /// { lineSeprtStart（起點）, lineSeprtEnd - lineSeprtStart（非常長度） ,
+        ///     normalLineParaLength（通常長度）};
+        /// </returns>
+        public static int[] CheckAbnormalLinePara(string xChk, int normalLenght)
+        {
+            string[] xLineParas = xChk.Split(
+                    new[] { Environment.NewLine },
+                        StringSplitOptions.RemoveEmptyEntries);
+            //string[] xLineParas = Regex.Split(xChk, @"\r?\n");//  20250608 GitHub　Copilot大菩薩：	若你要支援不同平台的換行（如 \n、\r），可以用 Regex.Split(xChk, @"\r?\n")。
+            foreach (string line in xLineParas)
+            {
+                int l = Form1.CountWordsLenPerLinePara(line);
+                if (l - normalLenght > 4)
+                {
+                    return new int[] { xChk.IndexOf(line), l, normalLenght };
+                }
+
+            }
+            return new int[0];
+
+        }
+
         //20230117 creedit chatGPT大菩薩：C# Visual Studio 註解顯示:/// 是用於多行註解，用於註釋程式碼的多行。……在 C# 中，使用三個斜線 (///) 來撰寫註解文字，並將它放在該函式的宣告之前，就可以在 Visual Studio 中在自訂函式上停駐滑鼠游標時顯示該函式的提示文字。……這樣可以顯示註解文字，且註解文字可以在 Intellisense 中顯示。
         /// <summary>
         /// 檢查非常長度的行（段）
@@ -11423,11 +11483,11 @@ namespace WindowsFormsApp1
         /// <returns>若發現非常長度的行，則傳回一個數組（陣列）以表示非常行諸特徵：
         /// { lineSeprtStart（起點）, lineSeprtEnd - lineSeprtStart（非常長度） ,
         ///     normalLineParaLength（通常長度）,len（長度）};
-        /// 。</returns>
+        /// </returns>
         private int[] checkAbnormalLinePara(string xChk)
         {
 
-            saveText();//備份以防萬一
+            if (!fastMode) saveText();//備份以防萬一
             string[] xLineParas = xChk.Split(
                 Environment.NewLine.ToArray(),
                 StringSplitOptions.RemoveEmptyEntries);
@@ -12310,7 +12370,7 @@ namespace WindowsFormsApp1
                             //const string inputText = "《四庫全書》􏿽{{子部　}}<p>";
                             //const string inputText = "《四庫全書》􏿽{{集部　}}<p>";
                             //const string inputText = "《小　倦　遊　閣　集》<p>";
-                            const string inputText = "《泰　雲　堂　集》<p>";
+                            const string inputText = "《晉　書　斠　注》<p>";
                             br.QuickeditLinkIWebElement.Click();
                             PauseEvents();
                             textBox3.Text = driver.Url;
@@ -12325,7 +12385,13 @@ namespace WindowsFormsApp1
                                 br.SetIWebElementValueProperty(br.Quickedit_data_textbox, inputText);
                                 br.SavechangesButton?.Click();//送出
                                 nextPages(Keys.PageDown, false);//翻到下一頁
-                                if (textBox1.TextLength == 0 && Clipboard.GetText().Length > 0)
+                                string clpTxt = Clipboard.GetText();
+                                if (textBox1.TextLength == 0 && clpTxt.Length > 0
+                                    &&
+                                    (clpTxt.IndexOf("a]") > -1 || clpTxt.IndexOf("a] ") > -1 ||
+                                        (!clpTxt.Contains("感恩感恩　讚歎讚歎　南無阿彌陀佛") && clpTxt.IndexOf("P") > -1
+                                        && int.TryParse(clpTxt.Substring(clpTxt.IndexOf("P") + 1, 1), out _)))//P 乃「北京元引科技有限公司《元引科技引得數字人文資源平臺·中國歷代文獻》」的文本特徵
+                                    )
                                 {
                                     //autoExecuteSKQSContextMark();
                                     runWordMacro("中國哲學書電子化計劃.國學大師_Kanripo_四庫全書本轉來");
@@ -15241,6 +15307,11 @@ namespace WindowsFormsApp1
         /// </summary>
         private void loadText()
         {
+            if(!File.Exists(dropBoxPathIncldBackSlash + fName_to_Save_Txt))
+            {
+                MessageBoxShowOKExclamationDefaultDesktopOnly("找不到檔案： "  + dropBoxPathIncldBackSlash + fName_to_Save_Txt);
+                return;
+            }
             //C# 對文字檔案的幾種讀寫方法總結:https://codertw.com/%E7%A8%8B%E5%BC%8F%E8%AA%9E%E8%A8%80/542361/
             textBox1.Text = File.ReadAllText(dropBoxPathIncldBackSlash + fName_to_Save_Txt);
         }
@@ -17053,7 +17124,7 @@ namespace WindowsFormsApp1
 
                     //對複製自《國學大師》的《四庫全書》文本的處置
                     else if (clpTxt.IndexOf("a]") > -1 || clpTxt.IndexOf("a] ") > -1 ||
-                        (clpTxt.IndexOf("P") > -1
+                        (!clpTxt.Contains("感恩感恩　讚歎讚歎　南無阿彌陀佛") && clpTxt.IndexOf("P") > -1
                             && int.TryParse(clpTxt.Substring(clpTxt.IndexOf("P") + 1, 1), out _)))//P 乃「北京元引科技有限公司《元引科技引得數字人文資源平臺·中國歷代文獻》」的文本特徵
                     {
                         ocrTextMode = false;
