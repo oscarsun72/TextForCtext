@@ -2,9 +2,9 @@ Attribute VB_Name = "中國哲學書電子化計劃"
 Option Explicit
 Dim ChapterSelector As String
 'Const description As String = "將星號前的分段符號移置前段之末 & 清除頁前的分段符號"
-'Const description As String = "將星號前的分段符號移置前段之末 & 清除頁前的分段符號{佛弟子文獻學者孫守真任真甫按：仁者志士義民菩薩賢友請多利用賢超法師《古籍酷AI》或《看典古籍》OCR事半功倍也。如蒙不棄，可利用末學於GitHub開源免費免安裝之TextForCtext 應用程式，加速輸入與排版。討論區與末學YouTube頻道有演示影片可資參考。感恩感恩　讚歎讚歎　南無阿彌陀佛"
-'Const description As String = "將星號前的分段符號移置前段之末 & 清除頁前的分段符號{據Kanripo.org或《國學大師》所藏本輔以末學自製於GitHub開源免費免安裝之TextForCtext排版對應錄入。討論區與末學YouTube頻道有實境演示影片可資參考。感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主}"
-Const description As String = "將星號前的分段符號移置前段之末 & 清除頁前的分段符號{據《維基文庫》或《國學大師》或Kanripo.org所藏本輔以末學自製於GitHub開源免費免安裝之TextForCtext排版對應錄入。討論區與末學YouTube頻道有實境演示影片可資參考。感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主}"
+Const description As String = "將星號前的分段符號移置前段之末 & 清除頁前的分段符號{佛弟子文獻學者孫守真任真甫按：仁者志士義民菩薩賢友請多利用賢超法師《古籍酷AI》或《看典古籍》OCR事半功倍也。如蒙不棄，可利用末學於GitHub開源免費免安裝之TextForCtext 應用程式，加速輸入與排版。討論區與末學YouTube頻道有演示影片可資參考。感恩感恩　讚歎讚歎　南無阿彌陀佛"
+'Const description As String = "將星號前的分段符號移置前段之末 & 清除頁前的分段符號{據《國學大師》或Kanripo.org所藏本輔以末學自製於GitHub開源免費免安裝之TextForCtext排版對應錄入。討論區與末學YouTube頻道有實境演示影片可資參考。感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主}"
+'Const description As String = "將星號前的分段符號移置前段之末 & 清除頁前的分段符號{據《維基文庫》或《國學大師》或Kanripo.org所藏本輔以末學自製於GitHub開源免費免安裝之TextForCtext排版對應錄入。討論區與末學YouTube頻道有實境演示影片可資參考。感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主}"
 'Const description As String = "將星號前的分段符號移置前段之末 & 清除頁前的分段符號{據《國學大師》或北京元引科技有限公司《元引科技引得數字人文資源平臺·中國歷代文獻》所藏本輔以末學自製於GitHub開源免費免安裝之TextForCtext排版對應錄入。討論區與末學YouTube頻道有實境演示影片可資參考。感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主}"
 'Const description As String = "將星號前的分段符號移置前段之末 & 清除頁前的分段符號{據北京元引科技有限公司《元引科技引得數字人文資源平臺·中國歷代文獻》所藏本輔以末學自製於GitHub開源免費免安裝之TextForCtext排版對應錄入。討論區與末學YouTube頻道有實境演示影片可資參考。感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主}"
 
@@ -2018,7 +2018,7 @@ Rem 現在多用Kanripo.org者 20250202大年初五
 Sub 國學大師_Kanripo_四庫全書本轉來()
     Dim rng As Range, noteRng As Range, aNext As Range, aPre As Range, ur As UndoRecord, midNoteRngPos As Byte, midNoteRng As Range, aX As String, a As Range, aSt As Long, aEd As Long
     Dim noteFont As font '記下注文格式以備用
-    Dim insertX As String
+    Dim insertX As String, counter As Byte
     Set rng = Documents.Add().Range
     SystemSetup.stopUndo ur, "國學大師_Kanripo_四庫全書本轉來"
     SystemSetup.playSound 1
@@ -2174,6 +2174,9 @@ Sub 國學大師_Kanripo_四庫全書本轉來()
                                'noteRng.Document.Range(a.End, noteRng.End).text = noteRng.Document.Range(a.End, noteRng.End).text & "　"
                                noteRng.text = noteRng.text & "　"
                                a.SetRange aSt, aEd
+                               
+                               counter = counter + 1
+                               If counter > 50 Then Exit Do
                             Loop
                             If a.Next = VBA.Chr(11) Then '如果斜線/後面即換行
                                 If aX = vbNullString Or VBA.Replace(aX, "　", vbNullString) <> vbNullString Then '若無縮排，則清除掉斜線/

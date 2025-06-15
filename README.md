@@ -939,6 +939,8 @@ Ctrl+ 滑鼠左鍵：清除框中所有文字
 - 輸入「tlsc」(TitleLeadingSpacesCount)後可以在textBox1前端列出目前的標題階級及其空格數
 - 輸入「tlsc.rmv1」(rmv=Remove)，可以移除第1個項目，「tlsc.clr」(clr=Clear)可以清除全部；清除textBox3的內容亦可以清除所有項目，及重設所有書面特徵參數（如每頁幾行、每行幾字等）
 - 輸入「tlsc.add」可以依textBox1被選取的行段資料來新增標題空格之項目。一行一筆，元素值為整數。
+- 輸入「alp」由textBox2輸入 "alp" 來切換設定是否進行非正常行長（CheckAbnormalLinePara 方法）的檢查。 20250614
+>a=abnormal, l=line, p=paragraph
 
 ### 在 textBox3 網址資訊專用方塊框：
 - 拖曳網址在 textBox3 或 textBox1 上放開，則會讀入所拖曳的網址值給 textBox3

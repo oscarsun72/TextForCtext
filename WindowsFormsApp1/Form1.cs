@@ -121,6 +121,11 @@ namespace WindowsFormsApp1
         /// 手動輸入模式時為true
         /// </summary>
         bool keyinTextMode = false;
+        /// <summary>
+        /// 是否進行非正常行長（CheckAbnormalLinePara 方法）的檢查
+        /// 由textBox2輸入 "alp" 來切換設定
+        /// </summary>
+        bool abnormalLineParaChecking = true;
 
         /// <summary>
         /// OCR輸入模式時為true（直接連續輸入OCR結果，先不校讀）
@@ -10885,7 +10890,7 @@ namespace WindowsFormsApp1
             }
 
             //貼到 Ctext Quick edit 前的文本檢查
-            if (fastMode)
+            if (abnormalLineParaChecking && fastMode)
             {//在快速模式下，有時《國學大師》或《Kanripo漢籍リポジトリ》等的文本分行不當，2行成1行，故添此判斷
                 if (wordsPerLinePara < 1)
                 {
@@ -10895,6 +10900,7 @@ namespace WindowsFormsApp1
                 int[] chk = CheckAbnormalLinePara(xCopy, wordsPerLinePara);
                 if (chk.Length > 0)
                 {
+                    br.driver.SwitchTo().Window(br.driver.CurrentWindowHandle);
                     //if (chk[1] - chk[2] > 4)
                     //{//)chk[2] * 0.5)
                     int st = textBox1.SelectionStart;
@@ -10914,6 +10920,8 @@ namespace WindowsFormsApp1
                             textBox1.Select(chk[0] + i, 0);//定位以便Enter切行                        
                         return false;
                     }
+                    //br.ChromeSetFocus();
+                    br.driver.SwitchTo().Window(br.driver.CurrentWindowHandle);
                     textBox1.Select(st, ln);
                     //}
                 }
@@ -12141,15 +12149,19 @@ namespace WindowsFormsApp1
                 if (!autoPastetoCtextQuitEditTextboxCancel)
                 {
                     autoPastetoCtextQuitEditTextboxCancel = true;
+                    br.driver.SwitchTo().Window(br.driver.CurrentWindowHandle);
                     AvailableInUseBothKeysMouse();
                     if (fastMode) Form1.playSound(Form1.soundLike.waiting, true);
+
                     return false;//20250301●●●●●●●●●●●●●●●●●
                 }
                 else//20250301●●●●●●●●●●●●●●●●●
                 {//會影響自動讀如下一卷文本的機制，故須在有內容時（尚有內容待輸入時）才觸動
+                    br.driver.SwitchTo().Window(br.driver.CurrentWindowHandle);
                     if (!Active && textBox1.Text != string.Empty) AvailableInUseBothKeysMouse();
                     //autoPastetoCtextQuitEditTextboxCancel = false;
                     if (fastMode) Form1.playSound(Form1.soundLike.waiting, true);
+
                     return false;
                 }
             }
@@ -12370,7 +12382,7 @@ namespace WindowsFormsApp1
                             //const string inputText = "《四庫全書》􏿽{{子部　}}<p>";
                             //const string inputText = "《四庫全書》􏿽{{集部　}}<p>";
                             //const string inputText = "《小　倦　遊　閣　集》<p>";
-                            const string inputText = "《晉　書　斠　注》<p>";
+                            const string inputText = "《欽　定　全　唐　文》<p>";
                             br.QuickeditLinkIWebElement.Click();
                             PauseEvents();
                             textBox3.Text = driver.Url;
@@ -14887,6 +14899,10 @@ namespace WindowsFormsApp1
         {
             if (textBox1.TextLength > 100)
             {
+                br.driver.SwitchTo().Window(br.driver.CurrentWindowHandle);
+                bringBackMousePosFrmCenter();
+                textBox1.Refresh();
+                if (DialogResult.Cancel == MessageBoxShowOKCancelExclamationDefaultDesktopOnly("要自動標題標記、段落標記否？")) return true;
 
                 #region 自動標題標記
 
@@ -15307,9 +15323,9 @@ namespace WindowsFormsApp1
         /// </summary>
         private void loadText()
         {
-            if(!File.Exists(dropBoxPathIncldBackSlash + fName_to_Save_Txt))
+            if (!File.Exists(dropBoxPathIncldBackSlash + fName_to_Save_Txt))
             {
-                MessageBoxShowOKExclamationDefaultDesktopOnly("找不到檔案： "  + dropBoxPathIncldBackSlash + fName_to_Save_Txt);
+                MessageBoxShowOKExclamationDefaultDesktopOnly("找不到檔案： " + dropBoxPathIncldBackSlash + fName_to_Save_Txt);
                 return;
             }
             //C# 對文字檔案的幾種讀寫方法總結:https://codertw.com/%E7%A8%8B%E5%BC%8F%E8%AA%9E%E8%A8%80/542361/
@@ -17345,6 +17361,13 @@ namespace WindowsFormsApp1
             }
             #endregion
 
+            // 是否進行非正常行長（CheckAbnormalLinePara 方法）的檢查
+            if (x == "alp")// 由textBox2輸入 "alp" 來切換設定
+            {
+                PauseEvents(); textBox2.Text = "";
+                abnormalLineParaChecking = !abnormalLineParaChecking;
+                ResumeEvents(); return;
+            }
             #region 設置標題空格參數-即操作「TitleLeadingSpacesCount」欄位
             /* - 輸入「tlsc」(TitleLeadingSpacesCount)後可以在textBox1前端列出目前的標題階級及其空格數
                 - 輸入「tlsc.rmv1」(rmv=Remove)，可以移除第1個項目，「tlsc.clr」(clr=Clear)可以清除全部；清除textBox3的內容亦可以清除所有項目，及重設所有書面特徵參數（如每頁幾行、每行幾字等）*/

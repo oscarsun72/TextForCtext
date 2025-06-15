@@ -12097,18 +12097,28 @@ namespace TextForCtext
                 url = GetNextPageUrl(url.IndexOf("#") > -1 ? url.Substring(0, url.IndexOf("#")) : url);
             else if (urlPrefixDomain == "www.inindex.com" || urlPrefixDomain == "inindex.com")
             {
-                string urlOld = driver.Url;
+                //string urlOld = driver.Url;                
                 //按下到下一單位的按鈕
-                IWebElement iwe = WaitFindWebElementBySelector_ToBeClickable("#root > main > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div.gt");
+                IWebElement iwe = WaitFindWebElementBySelector_ToBeClickable("#printView > div:nth-child(3) > div:nth-child(1) > div");//文本內容框                
+                string textContent = iwe.GetAttribute("textContent");//.Substring(0, 100);
+                int l = textContent.Length;
+                l = l > 100 ? 100 : l;
+                textContent = textContent.Substring(0, l);
+                iwe = WaitFindWebElementBySelector_ToBeClickable("#root > main > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div.gt");
                 if (iwe == null) return false;
                 BringToFront("chrome");
                 iwe.Click();
                 //clickCopybutton_GjcoolFastExperience(iwe.Location);
                 //if (Cursor.Position != iwe.Location)
                 //    Cursor.Position = iwe.Location;
+
+                iwe = WaitFindWebElementBySelector_ToBeClickable("#printView > div:nth-child(3) > div:nth-child(1) > div");//文本內容框
+
                 DateTime dt = DateTime.Now;
-                while (DateTime.Now.Subtract(dt).TotalSeconds < 2) { }//要有這樣才能複製到正確的卷頁單位
-                while (urlOld == driver.Url)
+                //while (DateTime.Now.Subtract(dt).TotalSeconds < 2) { }//要有這樣才能複製到正確的卷頁單位
+                //while (urlOld == driver.Url)
+                //while (iwe.GetAttribute("textContent").Substring(0,100) == textContent)
+                while (iwe.GetAttribute("textContent").Substring(0, l) == textContent)
                 {
                     if (DateTime.Now.Subtract(dt).TotalSeconds > 10) return false;
                 }
@@ -12347,7 +12357,9 @@ namespace TextForCtext
         retry:
             try
             {
-                result = confirm_that_you_are_human = driver.Url == "https://ctext.org/wiki.pl" || Please_confirm_that_you_are_human_Page != null;
+                //result = confirm_that_you_are_human = driver.Url == "https://ctext.org/wiki.pl" || Please_confirm_that_you_are_human_Page != null;
+                confirm_that_you_are_human = (driver.Url == "https://ctext.org/wiki.pl" || Please_confirm_that_you_are_human_Page != null);
+                result = confirm_that_you_are_human;
             }
             catch (Exception ex)
             {

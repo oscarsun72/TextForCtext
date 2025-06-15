@@ -105,14 +105,19 @@ Private Sub App_WindowSelectionChange(ByVal Sel As Selection)
     
     If Selection.InlineShapes.Count = 0 And Selection.ShapeRange.Count = 0 Then
         If code.IsChineseString(Selection.text) Then
-            Selection.Copy
-            SystemSetup.playSound 0.96
+            If Selection.Type = wdSelectionNormal Then
+                Selection.Copy
+                SystemSetup.playSound 0.96
+            End If
         End If
     End If
 
     Exit Sub
 eH:
 Select Case Err.number
+    Case 4605, -2147467259 'Copy' 方法 ('Range' 物件) 失敗
+        '4605此方法或屬性無法使用，因為未選取任何文字。
+        Exit Sub
     Case Else
         Debug.Print Err.number & Err.description
         MsgBox Err.number & Err.description
