@@ -124,6 +124,7 @@ namespace WindowsFormsApp1
         /// <summary>
         /// 是否進行非正常行長（CheckAbnormalLinePara 方法）的檢查
         /// 由textBox2輸入 "alp" 來切換設定
+        /// 預設為 true
         /// </summary>
         bool abnormalLineParaChecking = true;
 
@@ -12379,10 +12380,11 @@ namespace WindowsFormsApp1
                         {
                             //const string inputText = "《四庫全書》􏿽{{經部　}}<p>";
                             //const string inputText = "《四庫全書》􏿽{{史部　}}<p>";
-                            //const string inputText = "《四庫全書》􏿽{{子部　}}<p>";
+                            const string inputText = "《四庫全書》􏿽{{子部　}}<p>";
                             //const string inputText = "《四庫全書》􏿽{{集部　}}<p>";
                             //const string inputText = "《小　倦　遊　閣　集》<p>";
-                            const string inputText = "《欽　定　全　唐　文》<p>";
+                            //const string inputText = "《欽　定　全　唐　文》<p>";
+                            //const string inputText = "《留春草堂詩鈔》<p>";
                             br.QuickeditLinkIWebElement.Click();
                             PauseEvents();
                             textBox3.Text = driver.Url;
@@ -18712,14 +18714,15 @@ namespace WindowsFormsApp1
         /// 重設書本的頁面資訊（一頁幾行，一行幾字，各階標題的空格有幾個……）。
         /// 可藉由textBox3.Text值的改變（不同的書ID值）即會自動執行此項
         /// </summary>
-        private void resetBooksPagesFeatures()
-        {
+        private void resetBooksPagesFeatures()        {
+
             linesParasPerPage = -1;//每頁行/段數
             wordsPerLinePara = -1;//每行/段字數 reset
             pageTextEndPosition = 0; pageEndText10 = "";
             lines_perPage = 0;
             //normalLineParaLength = 0;
             NormalLineParaLength = 0; //wordsPerLinePara = -1;
+            abnormalLineParaChecking = true;
             //resetPageTextEndPositionPasteToCText();//不知何時誤貼的，到無問題時，即可刪去
             //TopLine = false; Indents = true;
             TopLine = false; Indents = false;
