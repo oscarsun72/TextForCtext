@@ -1766,6 +1766,18 @@ namespace WindowsFormsApp1
                 {
                     goto checkOthers;
                 }
+
+
+                int lastspacePosition = xCopy.LastIndexOf(" ");
+                // 空白錯亂之注文要先處理最末一行（因為送出前會清除每頁最末的注腳標記「}}」會影響 Alt + b 的判斷式，如是才能用 Ctrl + z 來還原之） 20250618●●●●●●●●●●●●●●●
+                if (xCopy.Substring(lastspacePosition).IndexOf(Environment.NewLine) == -1
+                        && xCopy.Substring(lastspacePosition).IndexOf("}}") == -1)
+                {
+                    playSound(soundLike.notify, true);
+                    Thread.Sleep(300);
+                    if (lastspacePosition != missWordPositon) missWordPositon = lastspacePosition;
+                }
+
             }
             #endregion
 
@@ -4598,6 +4610,8 @@ namespace WindowsFormsApp1
                 textBox1.SelectedText = x;
                 ResumeEvents();
                 undoRecord();
+                //標識被置換位置後的「􏿽」以便檢閱 20250618 感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主
+                textBox1.Select(textBox1.Text.LastIndexOf("􏿽", textBox1.SelectionStart), insertMode ? "􏿽".Length : 0);
             }
             else if (spaceIndex > -1)
             {
@@ -11144,6 +11158,8 @@ namespace WindowsFormsApp1
                     PauseEvents(); stopUndoRec = true;
                     Form1.InstanceForm1.textBox1.Select(wygbStart, 0);
                     Form1.InstanceForm1.textBox1.SelectedText = "〖文淵|閣寶〗<p>";
+                    if (int.Parse(br.Svg_image_PageImageFrame.GetAttribute("width")) > 500)
+                        br.Svg_image_PageImageFrame.Click();
                     ResumeEvents(); stopUndoRec = false;
                 }
                 Form1.InstanceForm1.textBox3.Text = textBox3.Text;//主表單網址與本表單連動、同步
@@ -16859,6 +16875,12 @@ namespace WindowsFormsApp1
             //20250113
             if (this.Name != "Form1")
             {
+                if (Name == "Form2" && textBox1.Text.Contains("校官") && textBox1.Text.StartsWith("*欽定四庫全書")
+                        && !Form1.InstanceForm1.textBox1.Text.Contains("〖文淵|閣寶〗"))
+                {//如果是《四庫全書》原扉頁，則將其書圖點大，以便檢視輸入
+                    if (int.Parse(br.Svg_image_PageImageFrame.GetAttribute("width")) <= 500)
+                        br.Svg_image_PageImageFrame.Click();
+                }
                 if (Application.OpenForms[0].Controls["textBox3"].Text != string.Empty && textBox3.Text != Application.OpenForms[0].Controls["textBox3"].Text)
                 {
                     //PauseEvents();
@@ -18714,7 +18736,8 @@ namespace WindowsFormsApp1
         /// 重設書本的頁面資訊（一頁幾行，一行幾字，各階標題的空格有幾個……）。
         /// 可藉由textBox3.Text值的改變（不同的書ID值）即會自動執行此項
         /// </summary>
-        private void resetBooksPagesFeatures()        {
+        private void resetBooksPagesFeatures()
+        {
 
             linesParasPerPage = -1;//每頁行/段數
             wordsPerLinePara = -1;//每行/段字數 reset
