@@ -12102,7 +12102,7 @@ namespace TextForCtext
                 IWebElement iwe = WaitFindWebElementBySelector_ToBeClickable("#printView > div:nth-child(3) > div:nth-child(1) > div");//文本內容框                
                 string textContent = iwe.GetAttribute("textContent");//.Substring(0, 100);
                 int l = textContent.Length;
-                l = l > 100 ? 100 : l;
+                l = l > 50 ? 50 : l;
                 textContent = textContent.Substring(0, l);
                 iwe = WaitFindWebElementBySelector_ToBeClickable("#root > main > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div.gt");
                 if (iwe == null) return false;
@@ -12118,7 +12118,7 @@ namespace TextForCtext
                 //while (DateTime.Now.Subtract(dt).TotalSeconds < 2) { }//要有這樣才能複製到正確的卷頁單位
                 //while (urlOld == driver.Url)
                 //while (iwe.GetAttribute("textContent").Substring(0,100) == textContent)
-                while (iwe.GetAttribute("textContent").Substring(0, l) == textContent)
+                while (iwe.GetAttribute("textContent").Substring(0,  l) == textContent)
                 {
                     if (DateTime.Now.Subtract(dt).TotalSeconds > 10) return false;
                 }

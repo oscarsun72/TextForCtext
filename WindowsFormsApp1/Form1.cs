@@ -3347,6 +3347,13 @@ namespace WindowsFormsApp1
                 if (e.KeyCode == Keys.D6 || e.KeyCode == Keys.D7)
                 {//Alt + 6 、 Alt + 7 : 鍵入 「"}}"+ newline +"{{"」
                     e.Handled = true;
+                    //自動清除插入點後的分行/段符號
+                    int s1 = textBox1.SelectionStart + 1;
+                    if (s1 <= textBox1.TextLength && textBox1.Text.Substring(s1 - 1, 1) == Environment.NewLine)
+                    {
+                        textBox1.Select(s1 - 1, 1);
+                        textBox1.SelectedText = string.Empty;
+                    }
                     //insertWords("}}" + Environment.NewLine + "{{", textBox1, textBox1.Text);
                     insertWords("}}" + Environment.NewLine + "{{", textBox1);
                     return;
@@ -4425,7 +4432,9 @@ namespace WindowsFormsApp1
                     //F11 : run replaceXdirrectly() 維基文庫等欲直接抽換之字
                     e.Handled = true;
                     string x = textBox1.Text;
+                    undoRecord();
                     replaceXdirectly(ref x, string.Empty, false);
+                    undoRecord();
                     return;
                 }
                 if (e.KeyCode == Keys.Add)
@@ -12396,11 +12405,11 @@ namespace WindowsFormsApp1
                         {
                             //const string inputText = "《四庫全書》􏿽{{經部　}}<p>";
                             //const string inputText = "《四庫全書》􏿽{{史部　}}<p>";
-                            const string inputText = "《四庫全書》􏿽{{子部　}}<p>";
+                            //const string inputText = "《四庫全書》􏿽{{子部　}}<p>";
                             //const string inputText = "《四庫全書》􏿽{{集部　}}<p>";
                             //const string inputText = "《小　倦　遊　閣　集》<p>";
-                            //const string inputText = "《欽　定　全　唐　文》<p>";
-                            //const string inputText = "《留春草堂詩鈔》<p>";
+                            const string inputText = "《欽　定　全　唐　文》<p>";
+                            //const string inputText = "《過　　宜　　言》<p>";
                             br.QuickeditLinkIWebElement.Click();
                             PauseEvents();
                             textBox3.Text = driver.Url;
@@ -14917,10 +14926,15 @@ namespace WindowsFormsApp1
         {
             if (textBox1.TextLength > 100)
             {
-                br.driver.SwitchTo().Window(br.driver.CurrentWindowHandle);
-                bringBackMousePosFrmCenter();
-                textBox1.Refresh();
-                if (DialogResult.Cancel == MessageBoxShowOKCancelExclamationDefaultDesktopOnly("要自動標題標記、段落標記否？")) return true;
+
+                if (fastMode && (GetLineText(textBox1.Text, 0).Contains("目錄")
+                        || GetLineText(textBox1.Text, 0).Contains("目録")))
+                    return true;
+                //br.driver.SwitchTo().Window(br.driver.CurrentWindowHandle);
+                //bringBackMousePosFrmCenter();
+                //textBox1.Refresh();
+                //if (DialogResult.Cancel == MessageBoxShowOKCancelExclamationDefaultDesktopOnly("要自動標題標記、段落標記否？")) return true;
+
 
                 #region 自動標題標記
 
