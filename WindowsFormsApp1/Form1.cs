@@ -12176,6 +12176,7 @@ namespace WindowsFormsApp1
                 {
                     autoPastetoCtextQuitEditTextboxCancel = true;
                     br.driver.SwitchTo().Window(br.driver.CurrentWindowHandle);
+                    br.ChromeSetFocus();
                     AvailableInUseBothKeysMouse();
                     if (fastMode) Form1.playSound(Form1.soundLike.waiting, true);
 
@@ -17183,6 +17184,11 @@ namespace WindowsFormsApp1
                     {
                         ocrTextMode = false;
                         runWordMacro("中國哲學書電子化計劃.國學大師_Kanripo_四庫全書本轉來");
+                        undoRecord();
+                        if (fastMode && !textBox1.Text.Contains("　*") && TitleLeadingSpacesCount.Count > 0)
+                            //if (fastMode && TitleLeadingSpacesCount.Count > 0)
+                            AutoMarkTitleParagraph();
+                        undoRecord();
                         return;
                     }
                 }

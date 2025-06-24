@@ -12117,9 +12117,13 @@ namespace TextForCtext
                 DateTime dt = DateTime.Now;
                 //while (DateTime.Now.Subtract(dt).TotalSeconds < 2) { }//要有這樣才能複製到正確的卷頁單位
                 //while (urlOld == driver.Url)
+                string textContent1 = iwe.GetAttribute("textContent");                
+                if (textContent1.Length > 50) textContent1 = textContent1.Substring(0, l);
                 //while (iwe.GetAttribute("textContent").Substring(0,100) == textContent)
-                while (iwe.GetAttribute("textContent").Substring(0,  l) == textContent)
+                while (textContent1 == textContent)
                 {
+                    textContent1 = iwe.GetAttribute("textContent");
+                    if (textContent1.Length > 50) textContent1 = textContent1.Substring(0, l);
                     if (DateTime.Now.Subtract(dt).TotalSeconds > 10) return false;
                 }
                 //driver.SwitchTo().Window(driver.CurrentWindowHandle);
