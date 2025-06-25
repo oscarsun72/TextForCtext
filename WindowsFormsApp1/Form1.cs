@@ -12178,7 +12178,18 @@ namespace WindowsFormsApp1
                     br.driver.SwitchTo().Window(br.driver.CurrentWindowHandle);
                     br.ChromeSetFocus();
                     AvailableInUseBothKeysMouse();
-                    if (fastMode) Form1.playSound(Form1.soundLike.waiting, true);
+                    if (fastMode)
+                    {
+                        if (br.pageUBound == int.Parse(br.Page_textbox.GetAttribute("value")))
+                        {
+                            if (File.Exists("C:\\Windows\\Media\\ring07.wav"))
+                                using (SoundPlayer sp = new SoundPlayer("C:\\Windows\\Media\\ring07.wav")) { sp.Play(); }
+                            else
+                                Form1.playSound(Form1.soundLike.waiting, true);
+                        }
+                        else
+                            Form1.playSound(Form1.soundLike.waiting, true);
+                    }
 
                     return false;//20250301●●●●●●●●●●●●●●●●●
                 }
@@ -12187,7 +12198,18 @@ namespace WindowsFormsApp1
                     br.driver.SwitchTo().Window(br.driver.CurrentWindowHandle);
                     if (!Active && textBox1.Text != string.Empty) AvailableInUseBothKeysMouse();
                     //autoPastetoCtextQuitEditTextboxCancel = false;
-                    if (fastMode) Form1.playSound(Form1.soundLike.waiting, true);
+                    if (fastMode)
+                    {
+                        if (br.pageUBound == int.Parse(br.Page_textbox.GetAttribute("value")))
+                        {
+                            if (File.Exists("C:\\Windows\\Media\\ring07.wav"))
+                                using (SoundPlayer sp = new SoundPlayer("C:\\Windows\\Media\\ring07.wav")) { sp.Play(); }
+                            else
+                                Form1.playSound(Form1.soundLike.waiting, true);
+                        }
+                        else
+                            Form1.playSound(Form1.soundLike.waiting, true);
+                    }
 
                     return false;
                 }

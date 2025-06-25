@@ -12099,7 +12099,8 @@ namespace TextForCtext
             {
                 //string urlOld = driver.Url;                
                 //按下到下一單位的按鈕
-                IWebElement iwe = WaitFindWebElementBySelector_ToBeClickable("#printView > div:nth-child(3) > div:nth-child(1) > div");//文本內容框                
+                IWebElement iwe = WaitFindWebElementBySelector_ToBeClickable("#printView > div:nth-child(3) > div:nth-child(1) > div");//文本內容框
+                if (iwe == null) return false;
                 string textContent = iwe.GetAttribute("textContent");//.Substring(0, 100);
                 int l = textContent.Length;
                 l = l > 50 ? 50 : l;
@@ -12117,7 +12118,7 @@ namespace TextForCtext
                 DateTime dt = DateTime.Now;
                 //while (DateTime.Now.Subtract(dt).TotalSeconds < 2) { }//要有這樣才能複製到正確的卷頁單位
                 //while (urlOld == driver.Url)
-                string textContent1 = iwe.GetAttribute("textContent");                
+                string textContent1 = iwe.GetAttribute("textContent");
                 if (textContent1.Length > 50) textContent1 = textContent1.Substring(0, l);
                 //while (iwe.GetAttribute("textContent").Substring(0,100) == textContent)
                 while (textContent1 == textContent)
