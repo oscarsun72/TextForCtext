@@ -873,7 +873,7 @@ namespace WindowsFormsApp1
         retry:
             try
             {
-                if (driver == null)
+                if (br.driver == null)
                 {
                     browsrOPMode = BrowserOPMode.seleniumNew;
                     DriverNew();
@@ -12431,7 +12431,7 @@ namespace WindowsFormsApp1
                             //const string inputText = "《四庫全書》􏿽{{子部　}}<p>";
                             //const string inputText = "《四庫全書》􏿽{{集部　}}<p>";
                             //const string inputText = "《小　倦　遊　閣　集》<p>";
-                            const string inputText = "《欽　定　全　唐　文》<p>";
+                            const string inputText = "《全　唐　文　紀　事》<p>";
                             //const string inputText = "《過　　宜　　言》<p>";
                             br.QuickeditLinkIWebElement.Click();
                             PauseEvents();
@@ -15089,6 +15089,8 @@ namespace WindowsFormsApp1
                         default:
                             break;
                     }
+
+                    // 再進行賦值
                     if (textBox1.Text != xClpBd) textBox1.Text = xClpBd;
                     textBox1.Select(0, 0);
                     textBox1.ScrollToCaret();

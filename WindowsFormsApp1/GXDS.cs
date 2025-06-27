@@ -247,6 +247,18 @@ namespace TextForCtext
             xForStandardize = xForStandardize.Replace("\r\n　\r\n　\r\n", "\r\n|\r\n|\r\n");
             xForStandardize = xForStandardize.Replace("|\r\n　\r\n|", "|\r\n|\r\n|");
             CnText.BooksPunctuation(ref xForStandardize, true);//書名號篇名號等標點
+
+
+            //202500625 GitHub　Copilot大菩薩：利用 C# 的 Regex 來移除字串前端的分段符號（如換行符號 \r、\n、&#x0a;），這是最簡潔且有效率的做法。
+            //•	@"^\s*[&#x0a;]+"：這個正則表達式會移除字串開頭所有空白字元（\s*）以及一連串的換行符號（\r、\n）。
+            //•	這樣可以確保 xClpBd 前端的分段符號都被清除。
+            //using System.Text.RegularExpressions;
+            // 假設 xClpBd 是您的來源字串
+            //xClpBd = Regex.Replace(xClpBd, @"^\s*[\r\n]+", "");
+            //如需移除所有前端的分段符號（不論有無空白），可簡化為：
+            xForStandardize = Regex.Replace(xForStandardize, @"^[\r\n]+", "");
+
+
             playSound(soundLike.processing);
         }
         /// <summary>
