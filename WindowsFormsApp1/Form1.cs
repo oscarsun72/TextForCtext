@@ -12431,8 +12431,7 @@ namespace WindowsFormsApp1
                             //const string inputText = "《四庫全書》􏿽{{子部　}}<p>";
                             //const string inputText = "《四庫全書》􏿽{{集部　}}<p>";
                             //const string inputText = "《小　倦　遊　閣　集》<p>";
-                            const string inputText = "《全　唐　文　紀　事》<p>";
-                            //const string inputText = "《過　　宜　　言》<p>";
+                            const string inputText = "《聊　齋　誌　異》<p>";                            
                             br.QuickeditLinkIWebElement.Click();
                             PauseEvents();
                             textBox3.Text = driver.Url;

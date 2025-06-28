@@ -209,22 +209,24 @@ namespace TextForCtext
                     }
                     else
                     {
-
                         Document document = new Document(xForStandardize);
-                        foreach (var item in document.GetParagraphs())
+                        if (document.Text.StartsWith("欽定四庫全書"))// || document.Text.StartsWith("《欽定四庫全書"))
                         {
-                            if (item.Text.Contains("欽定四庫全書"))
+                            foreach (var item in document.GetParagraphs())
                             {
-                                //xForStandardize = xForStandardize.Substring(item.Range.Start);
-                                //item.Text = item.Text.Replace("《欽定四庫全書》", "*欽定四庫全書<p>");//現在不交給WordVBA標點了，故改如下：
-                                item.Text = item.Text.Replace("欽定四庫全書", "*欽定四庫全書<p>");
-                                xForStandardize = document.Text;
-                                //xForStandardize = document.Range(item.Range.Start, document.Text.Length).Text;
-                                reBuild = true;
-                                break;
+                                if (item.Text.Contains("欽定四庫全書"))
+                                {
+                                    //xForStandardize = xForStandardize.Substring(item.Range.Start);
+                                    //item.Text = item.Text.Replace("《欽定四庫全書》", "*欽定四庫全書<p>");//現在不交給WordVBA標點了，故改如下：
+                                    item.Text = item.Text.Replace("欽定四庫全書", "*欽定四庫全書<p>");
+                                    xForStandardize = document.Text;
+                                    //xForStandardize = document.Range(item.Range.Start, document.Text.Length).Text;
+                                    reBuild = true;
+                                    break;
+                                }
                             }
+                            if (!reBuild) Debugger.Break();
                         }
-                        if (!reBuild) Debugger.Break();
                     }
                 }
 
