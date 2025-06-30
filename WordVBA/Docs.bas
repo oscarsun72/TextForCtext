@@ -25,11 +25,11 @@ Function ªÅ¥Õªº·s¤å¥ó(Optional newDocVisible As Boolean = True) As Document '202
     Dim a As Document, flg As Boolean
     word.Application.ScreenUpdating = False
     If Documents.Count = 0 Then GoTo a:
-    If ActiveDocument.Characters.Count = 1 And VBA.InStr(ActiveDocument.Name, "dotm") = 0 Then
+    If ActiveDocument.Characters.Count = 1 And VBA.InStr(ActiveDocument.name, "dotm") = 0 Then
         Set a = ActiveDocument
     ElseIf ActiveDocument.Characters.Count > 1 Then
         For Each a In Documents
-            If (a.path = "" Or a.Characters.Count = 1) And VBA.InStr(a.Name, "dotm") = 0 Then
+            If (a.path = "" Or a.Characters.Count = 1) And VBA.InStr(a.name, "dotm") = 0 Then
     '            a.Range.Paste'­ì¨Ó³£¦³¶K¤W¡A²{¦b¤£­n¡A³æ¯Â§ä+¶}·s¤å¥ó´N¦n
     '            a.Activate
     '            a.ActiveWindow.Activate
@@ -141,8 +141,8 @@ If MsgBox("¬O§_­n²M°£²Å¸¹?", vbQuestion + vbOKCancel) = vbOK Then
     d1.Activate: ²M°£©Ò¦³²Å¸¹
     d2.Activate: ²M°£©Ò¦³²Å¸¹
 End If
-If dn = "" Then dn = d1.Name
-If Not d1.Name Like dn And Not d1.Name Like dn Then i = 0: dn = d1.Name
+If dn = "" Then dn = d1.name
+If Not d1.name Like dn And Not d1.name Like dn Then i = 0: dn = d1.name
 If Selection.start + 1 = ActiveDocument.content.End Then Selection.HomeKey wdStory, wdMove '¦pªG´¡¤JÂI¬°¤å¥ó¥½®É...
 If i = 0 Then i = Selection.start 'ActiveDocument.Range.Start
 If d1.Characters.Count >= d2.Characters.Count Then
@@ -207,8 +207,8 @@ If MsgBox("¬O§_­n²M°£²Å¸¹?", vbQuestion + vbOKCancel) = vbOK Then
     Dw1.Activate: ²M°£©Ò¦³²Å¸¹
     Dw2.Activate: ²M°£©Ò¦³²Å¸¹
 End If
-If DwN = "" Then DwN = Dw1.Name
-If Not Dw1.Name Like DwN And Not Dw1.Name Like DwN Then i = 0: DwN = Dw1.Name
+If DwN = "" Then DwN = Dw1.name
+If Not Dw1.name Like DwN And Not Dw1.name Like DwN Then i = 0: DwN = Dw1.name
 If Dw1.Selection.start + 1 = ActiveDocument.content.End Then Selection.HomeKey wdStory, wdMove '¦pªG´¡¤JÂI¬°¤å¥ó¥½®É...
 If i = 0 Then i = Dw1.Selection.start 'ActiveDocument.Range.Start
 If Dw1.Characters.Count >= Dw2.Characters.Count Then
@@ -275,7 +275,7 @@ Sub ª`¸}²Å¸¹() 'ª`ÄÀ²Å¸¹¡BµùÄÀ²Å¸¹¡Bµù¸}²Å¸¹
 Dim i As Integer
 For i = 9312 To 9331
     With Selection.Range.Find
-        .Replacement.font.Name = "Arial Unicode MS"
+        .Replacement.font.name = "Arial Unicode MS"
         .Execute VBA.ChrW(i), , , , , , , wdFindContinue, , VBA.ChrW(i), wdReplaceAll
     End With
 Next i
@@ -423,7 +423,7 @@ With word.Application.FileSearch
         For i = 1 To .FoundFiles.Count
             x = .FoundFiles(i)
             x = VBA.Mid(x, InStrRev(x, "\") + 1)
-            If x <> d.Name Then
+            If x <> d.name Then
                 If MsgBox(x, vbOKCancel) = vbOK Then
                      Documents.Open .FoundFiles(i)
                 End If
@@ -708,13 +708,13 @@ Sub ®ÑÅÒ_¥H¿ï¨ú¤å¦r§@¬°®ÑÅÒ() 'ALT+SHIFT+B
 
 ' ¥¨¶°¿ý»s©ó 2015/9/20¡A¿ý»sªÌ ¤ýÆ[¦p
     With ActiveDocument.bookmarks
-        .Add Range:=Selection.Range, Name:=Replace(Selection.text, VBA.Chr(13), "")
+        .Add Range:=Selection.Range, name:=Replace(Selection.text, VBA.Chr(13), "")
         .DefaultSorting = wdSortByName
         .ShowHidden = False
     End With
 End Sub
 Sub ¤p¤p¿é¤Jªkµü®wcj5_ftzk_3¦r¥H¤Wµü·JÁôÂÃ()
-If Not ActiveDocument.Name = "cj5-ftzk.txt" Then Exit Sub
+If Not ActiveDocument.name = "cj5-ftzk.txt" Then Exit Sub
 Dim d As Document, flg As Boolean, s As Byte, prngTxt As String
 Set d = ActiveDocument
 Dim p As Paragraph
@@ -735,7 +735,7 @@ d.ActiveWindow.View.ShowHiddenText = False
 Beep
 End Sub
 Sub ¤p¤p¿é¤Jªkµü®wcj5_ftzk_3¦r¥H¤Wµü·J§R¦s¦Ücj5_ftzk_other()
-If Not ActiveDocument.Name = "cj5-ftzk.txt" Then Exit Sub
+If Not ActiveDocument.name = "cj5-ftzk.txt" Then Exit Sub
 Dim d As Document
 ¤p¤p¿é¤Jªkµü®wcj5_ftzk_3¦r¥H¤Wµü·JÁôÂÃ
 Set d = ActiveDocument
@@ -763,7 +763,7 @@ End Sub
 Sub ¤p¤p¿é¤Jªkµü®wcj5_ftzk§R¦s¦Ücj5_ftzk_other()
 'Dim p As Paragraph'Alt+1 Alt+2 ctrl+q
 Dim rng As Range, p As Paragraph, pc As Integer, pSelRng As Range, x As String
-If ActiveDocument.Name <> "cj5-ftzk.txt" Then Exit Sub
+If ActiveDocument.name <> "cj5-ftzk.txt" Then Exit Sub
 word.Application.ScreenUpdating = False
 If Selection.Type = wdSelectionIP Then
     If Not Selection.Range.TextRetrievalMode.IncludeHiddenText Then
@@ -862,7 +862,7 @@ If Not doNotAdd Then
         .BaseStyle = d.Styles(styleHprAn)
         With .font
             .NameFarEast = "¼Ð·¢Åé"
-            .Name = "¼Ð·¢Åé"
+            .name = "¼Ð·¢Åé"
             .Position = 3
         End With
         .Visibility = True
@@ -987,7 +987,7 @@ End Sub
 Sub ±N¼Ë¦¡¬°¯Â¤å¦r¥B¦r«¬¬°²Ó©úÅé¤§¬q¸¨§ï¬°¹w³]¤º¤å¼Ë¦¡(d As Document) '20250311
     Dim p As Paragraph
     For Each p In d.Paragraphs
-        If p.Style = "¯Â¤å¦r" And p.Range.font.Name = "²Ó©úÅé" Then
+        If p.Style = "¯Â¤å¦r" And p.Range.font.name = "²Ó©úÅé" Then
             p.Range.Select
             Selection.ClearParagraphStyle
         End If
@@ -996,7 +996,7 @@ End Sub
 Sub ±N¼Ë¦¡¬°¯Â¤å¦r¥B¦r«¬¬°¼Ð·¢Åé¤§¬q¸¨§ï¬°¤Þ¤å¼Ë¦¡(d As Document) '20250311
     Dim p As Paragraph
     For Each p In d.Paragraphs
-        If p.Style = "¯Â¤å¦r" And p.Range.font.Name = "¼Ð·¢Åé" Then
+        If p.Style = "¯Â¤å¦r" And p.Range.font.name = "¼Ð·¢Åé" Then
             'p.Range.Select
             p.Style = "¤Þ¤å"
         End If
@@ -1014,7 +1014,7 @@ End Sub
 Sub ±N¼Ë¦¡¤£¬°¤Þ¤å¦Ó¦r«¬¬°¼Ð·¢Åé¤§¬q¸¨§ï¬°¤Þ¤å¼Ë¦¡(d As Document)  '20250311
     Dim p As Paragraph
     For Each p In d.Paragraphs
-        If p.Style <> "¤Þ¤å" And VBA.InStr(p.Style, "¼ÐÃD") = 0 And p.Range.font.Name = "¼Ð·¢Åé" Then
+        If p.Style <> "¤Þ¤å" And VBA.InStr(p.Style, "¼ÐÃD") = 0 And p.Range.font.name = "¼Ð·¢Åé" Then
             p.Range.Select
             p.Style = "¤Þ¤å"
         End If
@@ -1085,7 +1085,7 @@ Function mark©ö¾ÇÃöÁä¦r(Optional pasteRange As Range, Optional doNotMark As Bool
     SystemSetup.playSound 0.484
     strAutoCorrection = Array("¡A¡r", "¡r¡A", "¡q¡B", "¡q", "¡q¡C", "¡q", "¡C¡r", "¡r", "¡q¡G", "¡q", "¡G¡r", "¡r", "¡q¡A", "¡q", "¡B¡r", "¡r")
     If InStr(ActiveDocument.path, "©ö¾ÇÂøµÛ¤å¥»") = 0 Then
-        If MsgBox("¥Ø«e¤å¥ó¬°" + ActiveDocument.Name + "¬O§_Ä~Äò¡H", vbExclamation + vbOKCancel) = vbCancel Then Exit Function
+        If MsgBox("¥Ø«e¤å¥ó¬°" + ActiveDocument.name + "¬O§_Ä~Äò¡H", vbExclamation + vbOKCancel) = vbCancel Then Exit Function
     End If
     Set dSource = ActiveDocument: If Not dSource.Saved Then dSource.Save
     Set rng = dSource.Range
@@ -1731,7 +1731,7 @@ Sub mark©ö¾ÇÃöÁä¦rDoc()
     SystemSetup.playSound 0.484
     SystemSetup.stopUndo ur, "mark©ö¾ÇÃöÁä¦rDoc"
     For Each d In word.Documents
-        If d.Name = "TextForCtext-WordVBA.dotm" Then
+        If d.name = "TextForCtext-WordVBA.dotm" Then
             If MsgBox("¬O§_­n§ó·s©ö¾ÇÃöÁä¦rªº¦r¨åª«¥ó¤º®e¡H", vbOKCancel) = VBA.vbOK Then
                 Keywords.ClearDicts_YiKeywords
             End If
@@ -2152,7 +2152,7 @@ Sub ChangeFontOfSurrogatePairs_ActiveDocument(fontName As String, Optional whatC
                             ' Change the font name to HanaMinB
                             ' Change the font name to fontName
                         End Select
-                        If change Then rng.font.Name = fontName '"HanaMinB"
+                        If change Then rng.font.name = fontName '"HanaMinB"
                     End If
                 End If
             End If
@@ -2230,7 +2230,7 @@ Sub ChangeFontOfSurrogatePairs_Range(fontName As String, rngtoChange As Range, O
                             ' Change the font name to fontName
                         End Select
                         If change Then
-                            rng.font.Name = fontName '"HanaMinB"
+                            rng.font.name = fontName '"HanaMinB"
                         End If
                     End If
                 End If
@@ -2254,7 +2254,7 @@ Sub ChangeFontOfSurrogatePairs_Range(fontName As String, rngtoChange As Range, O
                 End If
             End If
             If Not fontName = vbNullString Then
-                rng.font.Name = fontName
+                rng.font.name = fontName
             End If
         End If
     Next rng
@@ -2264,7 +2264,7 @@ Sub ChangeCharacterFontName(character As String, fontName As String, d As Docume
 With d.Range
     With .Find
         With .Replacement.font
-            .Name = fontName
+            .name = fontName
             .NameFarEast = fontNameFarEast
         End With
         .Execute character, , , , , , True, wdFindContinue, , , wdReplaceAll
@@ -2275,7 +2275,7 @@ End Sub
 Sub ChangeCharacterFontNameAccordingSelection()
     Dim fontName As String, fontNameFarEast As String
     With Selection
-        fontName = .font.Name
+        fontName = .font.name
         fontNameFarEast = .font.NameFarEast
         ChangeCharacterFontName .text, fontName, .Document, fontNameFarEast
     End With
@@ -2311,9 +2311,9 @@ Sub FindMissingCharacters() '³oÀ³¸Ó¥u¬O§ä¤å¥ó¤¤ªº¦r¤£¯à¥H·s²Ó©úÅé¡B¼Ð·¢Åé¨ÓÅã¥Üª
                     Or (AscW(VBA.Left(c, 1)) >= &H2B820 And AscW(VBA.Left(c, 1)) <= &H2CEAF) _
                     Or (AscW(VBA.Left(c, 1)) >= &HF900 And AscW(VBA.Left(c, 1)) <= &HFAFF) _
                     Or (AscW(VBA.Left(c, 1)) >= &H2F800 And AscW(VBA.Left(c, 1)) <= &H2FA1F) Then '³o¸Ì¨S¨ú½XÂI¡A¥²©w¦³»~¡A«Ý§ï¼g¡I¡I¡I¡I¡I¡I¡I¡I
-                    If Not r.font.Name = nmf.Name And Not r.font.Name = kff.Name Then '¹B¥Î¤§­ì²z¦b¦¹¦æ¡I¡I¡I¡I
+                    If Not r.font.name = nmf.name And Not r.font.name = kff.name Then '¹B¥Î¤§­ì²z¦b¦¹¦æ¡I¡I¡I¡I
                         ' ¦pªG¦r²Å¤£¦b·s²Ó©úÅé©Î¼Ð·¢Åé¦r«¬¤¤¡A«h±N¨ä¦rÅé§ó§ï¬°HanaMinB
-                        r.font.Name = "HanaMinB"
+                        r.font.name = "HanaMinB"
                     End If
                 End If
             End If
@@ -2335,6 +2335,24 @@ Function IsStyleExists(styleName As String, doc As Document) As Boolean
     
 End Function
 
+Sub ´£¨ú¤H¦W_¤G¦r¤H¦W¤¤¦³ªÅ¥ÕªÌ()
+    Dim rng As Range, name
+    Dim w As String
+    w = ChrW(-9217) & ChrW(-8195)
+    
+    Set rng = ActiveDocument.Range
+    Do While rng.Find.Execute(w)
+        If Not rng.Previous Is Nothing And Not rng.Next Is Nothing Then
+            If VBA.StrComp(rng.Previous, w) <> 0 And VBA.StrComp(rng.Next, w) <> 0 Then
+                If code.IsChineseCharacter(rng.Previous) And code.IsChineseCharacter(rng.Next) Then
+                    name = name & rng.Previous & rng.text & rng.Next & Chr(13)
+                End If
+            End If
+        End If
+    Loop
+    Documents.Add.Range.text = name
+End Sub
+
 
 Sub ¦b¾ã­¶¼Ò¦¡¤¤¤£Åã¥Ü­¶­±¶¡ªºªÅ¥Õ°Ï°ì()
     If word.ActiveWindow.View.ReadingLayout Then _
@@ -2342,6 +2360,7 @@ Sub ¦b¾ã­¶¼Ò¦¡¤¤¤£Åã¥Ü­¶­±¶¡ªºªÅ¥Õ°Ï°ì()
     DoEvents
     word.ActiveWindow.View.DisplayPageBoundaries = False
 End Sub
+
 
 
 Sub updateURL() '§ó·s¶W³sµ²ºô§}

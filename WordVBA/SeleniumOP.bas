@@ -3669,7 +3669,10 @@ Function grabAITShenShenWikiPunctResult(text As String, resultText As String, Op
     '執行
     Set iwe = WD.FindElementByCssSelector("#button-submit")
     If iwe Is Nothing Then Exit Function
-    iwe.Click
+    'iwe.Click'在螢幕解析度過大時，不能按到
+    Dim key As New SeleniumBasic.keys
+    iwe.SendKeys key.enter
+    
     dt = DateTime.Now
     '結果怎么樣？
     Set iwe = WD.FindElementByCssSelector("#feedback > div.feedback-button.feedback-tip")
