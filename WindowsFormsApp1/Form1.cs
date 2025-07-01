@@ -5680,7 +5680,10 @@ namespace WindowsFormsApp1
                 xSel = xSel.Replace(Environment.NewLine, "|" + Environment.NewLine).Replace("||", "|");
             }
             xSel = xSel.Replace("。", string.Empty);
-            textBox1.SelectedText = xSel; textBox1.Select(s, xSel.Length);
+            textBox1.SelectedText = xSel; 
+            //string tx = textBox1.Text;
+            //replaceXdirectly(ref tx);
+            textBox1.Select(s, xSel.Length);
             stopUndoRec = false;
         }
 
@@ -12426,12 +12429,12 @@ namespace WindowsFormsApp1
                         br.driver.Navigate().GoToUrl(textBox3.Text);
                         if (br.QuickeditLinkIWebElement != null)
                         {
-                            //const string inputText = "《四庫全書》􏿽{{經部　}}<p>";
+                            const string inputText = "《四庫全書》􏿽{{經部　}}<p>";
                             //const string inputText = "《四庫全書》􏿽{{史部　}}<p>";
                             //const string inputText = "《四庫全書》􏿽{{子部　}}<p>";
                             //const string inputText = "《四庫全書》􏿽{{集部　}}<p>";
                             //const string inputText = "《小　倦　遊　閣　集》<p>";
-                            const string inputText = "《宋　　史　　翼》<p>";
+                            //const string inputText = "《三　才　圖　會》<p>";
                             br.QuickeditLinkIWebElement.Click();
                             PauseEvents();
                             textBox3.Text = driver.Url;
@@ -18264,7 +18267,8 @@ namespace WindowsFormsApp1
                          //return;
                             if (ModifierKeys == Keys.Control)
                             {//按住Ctrl再按五鍵滑鼠的下一頁按鈕，則可以以預設的書頁圖大小來設定紅框以供輸入。可以網址來產生紅框如下： 20250202大年初五 感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主
-                                br.driver.Navigate().GoToUrl(br.driver.Url.Replace("#editor", "#box(2,14,792,1146)"));
+                                //br.driver.Navigate().GoToUrl(br.driver.Url.Replace("#editor", "#box(2,14,792,1146)"));
+                                br.driver.Navigate().GoToUrl(br.driver.Url.Replace("#editor", "#box(0,2,798,1288)"));
                                 br.driver.Navigate().Refresh();
                                 br.Input_picture();
 
@@ -19199,6 +19203,7 @@ namespace WindowsFormsApp1
         /// <summary>
         /// 可以或必須直接取代之文字（以doit欄位控制是否執行）20250131大年初三增修
         /// </summary>
+        /// <param name="tx">要取代的字串</param>
         /// <param name="whereNoteInstr">備註欄位要篩選的條件值</param>
         /// <param name="selection">只作選取區的取代則為true</param>
         void replaceXdirectly(ref string tx, string whereNoteInstr = "", bool selection = false)

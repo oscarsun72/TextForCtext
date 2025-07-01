@@ -12096,7 +12096,7 @@ namespace TextForCtext
             else if (urlPrefixDomain == "www.kanripo.org")
                 url = GetNextPageUrl(url.IndexOf("#") > -1 ? url.Substring(0, url.IndexOf("#")) : url);
             else if (urlPrefixDomain == "www.inindex.com" || urlPrefixDomain == "inindex.com")
-            {
+            {//如果是《元引科技引得數字人文資源平臺·中國歷代文獻》
                 //string urlOld = driver.Url;                
                 //按下到下一單位的按鈕
                 IWebElement iwe = WaitFindWebElementBySelector_ToBeClickable("#printView > div:nth-child(3) > div:nth-child(1) > div");//文本內容框
@@ -12104,7 +12104,7 @@ namespace TextForCtext
                 string textContent = iwe.GetAttribute("textContent");//.Substring(0, 100);
                 int l = textContent.Length;
                 l = l > 50 ? 50 : l;
-                textContent = textContent.Substring(0, l);
+                textContent = textContent.Replace("　", string.Empty).Substring(0, l);
                 iwe = WaitFindWebElementBySelector_ToBeClickable("#root > main > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div.gt");
                 if (iwe == null) return false;
                 BringToFront("chrome");
@@ -12119,12 +12119,12 @@ namespace TextForCtext
                 //while (DateTime.Now.Subtract(dt).TotalSeconds < 2) { }//要有這樣才能複製到正確的卷頁單位
                 //while (urlOld == driver.Url)
                 string textContent1 = iwe.GetAttribute("textContent");
-                if (textContent1.Length > 50) textContent1 = textContent1.Substring(0, l);
+                if (textContent1.Length > 50) textContent1 = textContent1.Replace("　", string.Empty).Substring(0, l);
                 //while (iwe.GetAttribute("textContent").Substring(0,100) == textContent)
                 while (textContent1 == textContent)
                 {
                     textContent1 = iwe.GetAttribute("textContent");
-                    if (textContent1.Length > 50) textContent1 = textContent1.Substring(0, l);
+                    if (textContent1.Length > 50) textContent1 = textContent1.Replace("　", string.Empty).Substring(0, l);
                     if (DateTime.Now.Subtract(dt).TotalSeconds > 10) return false;
                 }
                 //driver.SwitchTo().Window(driver.CurrentWindowHandle);
