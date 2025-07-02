@@ -5680,7 +5680,7 @@ namespace WindowsFormsApp1
                 xSel = xSel.Replace(Environment.NewLine, "|" + Environment.NewLine).Replace("||", "|");
             }
             xSel = xSel.Replace("。", string.Empty);
-            textBox1.SelectedText = xSel; 
+            textBox1.SelectedText = xSel;
             //string tx = textBox1.Text;
             //replaceXdirectly(ref tx);
             textBox1.Select(s, xSel.Length);
@@ -12399,6 +12399,8 @@ namespace WindowsFormsApp1
 
 
         #region 如果是在自動連續輸入下
+        string inputTextFrontPage = "{{{封面}}}<p>";
+
         /// <summary>
         /// 如果是在自動連續輸入下，自動輸入《四庫全書》扉頁資訊到Quick edit中 20250221
         /// </summary>
@@ -12429,12 +12431,13 @@ namespace WindowsFormsApp1
                         br.driver.Navigate().GoToUrl(textBox3.Text);
                         if (br.QuickeditLinkIWebElement != null)
                         {
-                            const string inputText = "《四庫全書》􏿽{{經部　}}<p>";
+                            //const string inputText = "《四庫全書》􏿽{{經部　}}<p>";
                             //const string inputText = "《四庫全書》􏿽{{史部　}}<p>";
                             //const string inputText = "《四庫全書》􏿽{{子部　}}<p>";
                             //const string inputText = "《四庫全書》􏿽{{集部　}}<p>";
                             //const string inputText = "《小　倦　遊　閣　集》<p>";
                             //const string inputText = "《三　才　圖　會》<p>";
+                            //const string inputTextFrontPage = "《帶　經　堂　詩　話》<p>";
                             br.QuickeditLinkIWebElement.Click();
                             PauseEvents();
                             textBox3.Text = driver.Url;
@@ -12446,7 +12449,7 @@ namespace WindowsFormsApp1
                             string text = br.Quickedit_data_textboxTxt;
                             if (text == string.Empty || text == "●" || text == "●\t" || text == "●<p>")
                             {
-                                br.SetIWebElementValueProperty(br.Quickedit_data_textbox, inputText);
+                                br.SetIWebElementValueProperty(br.Quickedit_data_textbox, inputTextFrontPage);
                                 br.SavechangesButton?.Click();//送出
                                 nextPages(Keys.PageDown, false);//翻到下一頁
                                 string clpTxt = Clipboard.GetText();
@@ -17438,6 +17441,18 @@ namespace WindowsFormsApp1
                 abnormalLineParaChecking = !abnormalLineParaChecking;
                 ResumeEvents(); return;
             }
+
+            //- 輸入「ifp」 設定各冊冊首/書首內容值（inputTextFrontPage）值
+            if (x.StartsWith("ifp"))// 由textBox2輸入 "ifp" 來切換設定:如「ifp冊府元龜」即設定inputTextFrontPage值為"冊府元龜"，預設值為"{{{封面}}}\<p>"
+            {
+                PauseEvents(); textBox2.Text = "";
+                if (x == "ifp")// 若只輸入「ifp」則還原為預設值
+                    inputTextFrontPage = "{{{封面}}}<p>";
+                else
+                    inputTextFrontPage = x.Substring(3);
+                ResumeEvents(); return;
+            }
+
             #region 設置標題空格參數-即操作「TitleLeadingSpacesCount」欄位
             /* - 輸入「tlsc」(TitleLeadingSpacesCount)後可以在textBox1前端列出目前的標題階級及其空格數
                 - 輸入「tlsc.rmv1」(rmv=Remove)，可以移除第1個項目，「tlsc.clr」(clr=Clear)可以清除全部；清除textBox3的內容亦可以清除所有項目，及重設所有書面特徵參數（如每頁幾行、每行幾字等）*/
@@ -18014,7 +18029,7 @@ namespace WindowsFormsApp1
             //20240731 Copilot大菩薩 ： 簡化程式碼：您可以簡化這兩行檢查的程式碼如下：這樣可以達到相同的效果，並使程式碼更加簡潔明瞭。
             if (e.KeyChar == ' ' || e.KeyChar == '/') return;
 
-            string regexPattern = "[《〈」】〗]", omitSymbols = "＝{}□■<>*〇◯○⿰⿱」』|" + Environment.NewLine;//輸入缺字構字式●＝＝、及注文標記符{{}}、及標題星號*時不取代
+            string regexPattern = "[《〈」】〗]", omitSymbols = @"＝{}□■<>*〇◯○⿰⿱」』|\\" + Environment.NewLine;//輸入缺字構字式●＝＝、及注文標記符{{}}、及標題星號*時不取代
             checkkeyPressOverTyping_oscarsun72note_Inserting_switch2insertMode(e.KeyChar, regexPattern + omitSymbols);
             string w;//, punctuationsNumWithout前書名號與前篇名號 = Regex.Replace(Form1.punctuationsNum, regexPattern, ""); 
             if (!insertMode
@@ -18797,6 +18812,7 @@ namespace WindowsFormsApp1
             //TopLine = false; Indents = true;
             TopLine = false; Indents = false;
             TitleLeadingSpacesCount.Clear();
+            inputTextFrontPage = "{{{封面}}}<p>";
         }
 
         private void textBox3_DragDrop(object sender, DragEventArgs e)

@@ -2,14 +2,15 @@ Attribute VB_Name = "中國哲學書電子化計劃"
 Option Explicit
 Dim ChapterSelector As String
 'Const description As String = "將星號前的分段符號移置前段之末 & 清除頁前的分段符號"
-'Const description As String = "將星號前的分段符號移置前段之末 & 清除頁前的分段符號{佛弟子文獻學者孫守真任真甫按：仁者志士義民菩薩賢友請多利用賢超法師《古籍酷AI》或《看典古籍》OCR事半功倍也。如蒙不棄，可利用末學於GitHub開源免費免安裝之TextForCtext 應用程式，加速輸入與排版。討論區與末學YouTube頻道有演示影片可資參考。感恩感恩　讚歎讚歎　南無阿彌陀佛"
-Const description As String = "將星號前的分段符號移置前段之末 & 清除頁前的分段符號{據《國學大師》或Kanripo.org所藏本輔以末學自製於GitHub開源免費免安裝之TextForCtext排版對應錄入。討論區與末學YouTube頻道有實境演示影片可資參考。感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主}"
+'Const description As String = "將星號前的分段符號移置前段之末 & 清除頁前的分段符號{佛弟子文獻學者孫守真任真甫按：仁者志士義民菩薩賢友請多利用賢超法師《古籍酷AI》或《看典古籍》OCR事半功倍也。如蒙不棄，可利用末學自製於GitHub開源免費免安裝之TextForCtext 應用程式，加速輸入與排版。討論區與末學YouTube頻道有演示影片可資參考。感恩感恩　讚歎讚歎　南無阿彌陀佛"
+'Const description As String = "將星號前的分段符號移置前段之末 & 清除頁前的分段符號{據《國學大師》或Kanripo.org所藏本輔以末學自製於GitHub開源免費免安裝之TextForCtext排版對應錄入。討論區與末學YouTube頻道有實境演示影片可資參考。感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主}"
 'Const description As String = "將星號前的分段符號移置前段之末 & 清除頁前的分段符號{據《維基文庫》或《國學大師》或Kanripo.org所藏本輔以末學自製於GitHub開源免費免安裝之TextForCtext排版對應錄入。討論區與末學YouTube頻道有實境演示影片可資參考。感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主}"
-'Const description As String = "將星號前的分段符號移置前段之末 & 清除頁前的分段符號{據《國學大師》或北京元引科技有限公司《元引科技引得數字人文資源平臺·中國歷代文獻》所藏本輔以末學自製於GitHub開源免費免安裝之TextForCtext排版對應錄入。討論區與末學YouTube頻道有實境演示影片可資參考。感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主}"
+Const description As String = "將星號前的分段符號移置前段之末 & 清除頁前的分段符號{據《國學大師》或北京元引科技有限公司《元引科技引得數字人文資源平臺·中國歷代文獻》所藏本輔以末學自製於GitHub開源免費免安裝之TextForCtext排版對應錄入。討論區與末學YouTube頻道有實境演示影片可資參考。感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主}"
 'Const description As String = "將星號前的分段符號移置前段之末 & 清除頁前的分段符號{據北京元引科技有限公司《元引科技引得數字人文資源平臺·中國歷代文獻》所藏本輔以末學自製於GitHub開源免費免安裝之TextForCtext排版對應錄入。討論區與末學YouTube頻道有實境演示影片可資參考。感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主}"
 
 'Const description_Edit_textbox_新頁面 As String = "據《國學大師》或《Kanripo》所收本輔以末學自製於GitHub開源免費免安裝之TextForCtext軟件排版對應錄入；討論區及末學YouTube頻道有實境演示影片。感恩感恩　讚歎讚歎　南無阿彌陀佛"
-Const description_Edit_textbox_新頁面 As String = "據北京元引科技有限公司《元引科技引得數字人文資源平臺·中國歷代文獻》所收本輔以末學自製於GitHub開源免費免安裝之TextForCtext軟件排版對應錄入；討論區及末學YouTube頻道有實境演示影片。感恩感恩　讚歎讚歎　南無阿彌陀佛"
+Const description_Edit_textbox_新頁面 As String = "據《國學大師》或《Kanripo》或北京元引科技有限公司《元引科技引得數字人文資源平臺·中國歷代文獻》所收本輔以末學自製於GitHub開源免費免安裝之TextForCtext軟件排版對應錄入；討論區及末學YouTube頻道有實境演示影片。感恩感恩　讚歎讚歎　南無阿彌陀佛"
+'Const description_Edit_textbox_新頁面 As String = "據北京元引科技有限公司《元引科技引得數字人文資源平臺·中國歷代文獻》所收本輔以末學自製於GitHub開源免費免安裝之TextForCtext軟件排版對應錄入；討論區及末學YouTube頻道有實境演示影片。感恩感恩　讚歎讚歎　南無阿彌陀佛"
 
 Sub 分行分段()
     
@@ -2451,14 +2452,14 @@ Sub dbSBCKWordtoReplace() '四部叢刊造字對照表 Alt+5
     Dim rng As Range, ur As UndoRecord
     'Set ur = stopUndo("《四部叢刊》資料庫造字取代為系統字")
     SystemSetup.stopUndo ur, "《四部叢刊》資料庫造字取代為系統字"
-    If ActiveDocument.Name = "《四部叢刊資料庫》補入《中國哲學書電子化計劃》.docm" Then
+    If ActiveDocument.name = "《四部叢刊資料庫》補入《中國哲學書電子化計劃》.docm" Then
         Set rng = ActiveDocument.Range
     Else
         Set rng = Documents.Add.Range
         rng.Paste
     End If
     dbSBCKWordtoReplaceSub rng
-    If Not ActiveDocument.Name = "《四部叢刊資料庫》補入《中國哲學書電子化計劃》.docm" Then
+    If Not ActiveDocument.name = "《四部叢刊資料庫》補入《中國哲學書電子化計劃》.docm" Then
         rng.Cut
         If rng.Application.Documents.Count = 1 Then
             rng.Application.Quit wdDoNotSaveChanges
@@ -2880,8 +2881,10 @@ Sub 新頁面Auto_action_newchapter()
     Dim head As String
     head = Head_Edit_textbox.GetAttribute("outerText")
     head = VBA.Mid(head, 2, VBA.InStr(head, "》") - 2)
+    title = VBA.Replace(title, head, vbNullString)
+    If VBA.Left(title, 1) = "·" Then title = Mid(title, 2)
     
-    SetIWebElementValueProperty Title_Edit_textbox, VBA.Replace(title, head, vbNullString)
+    SetIWebElementValueProperty Title_Edit_textbox, title
     '輸入Sequence值：
     SetIWebElementValueProperty Sequence_data_Edit_textbox, VBA.CStr(chapterNum) & "0"
     '輸入修改摘要:
@@ -2898,6 +2901,7 @@ Sub 新頁面Auto_action_newchapter()
     d.Application.Activate
     d.Application.windowState = wdWindowStateNormal
     d.Activate
+    SystemSetup.playSound 1
     
 End Sub
 

@@ -879,7 +879,7 @@ Ctrl + Alt + = : 以選取文字檢索CTP中阮元刻《十三經注疏》本《
 
 F2 : 全選/取消全選框裡文字。若原有選取文字則取消選取至其尾端
 
-Ctrl+ 滑鼠左鍵：清除框中所有文字
+Ctrl + 滑鼠左鍵：清除框中所有文字
 
 ### 在 textBox2 尋找文本及設置指令方塊框：
 - 按下 F1 鍵：以找到的字串位置**前**分行分段
@@ -941,6 +941,9 @@ Ctrl+ 滑鼠左鍵：清除框中所有文字
 - 輸入「tlsc.add」可以依textBox1被選取的行段資料來新增標題空格之項目。一行一筆，元素值為整數。
 - 輸入「alp」由textBox2輸入 "alp" 來切換設定是否進行非正常行長（CheckAbnormalLinePara 方法）的檢查。 20250614
 >a=abnormal, l=line, p=paragraph
+- 輸入「ifp」 設定各冊冊首/書首內容值（inputTextFrontPage）值
+>如「ifp冊府元龜」即設定inputTextFrontPage值為"冊府元龜"，預設值為"{{{封面}}}\<p>"
+>> 若只輸入「ifp」則還原為預設值
 
 ### 在 textBox3 網址資訊專用方塊框：
 - 拖曳網址在 textBox3 或 textBox1 上放開，則會讀入所拖曳的網址值給 textBox3
