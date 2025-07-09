@@ -11511,6 +11511,9 @@ namespace TextForCtext
         {
             try
             {
+                if (getChromedrivers().Length == 0)
+                    RestartChromedriver();
+
                 if (driver == null)
                 {
                     Form1.browsrOPMode = Form1.BrowserOPMode.seleniumNew;

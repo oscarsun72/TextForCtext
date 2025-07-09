@@ -2351,6 +2351,7 @@ Sub 提取人名_二字人名中有空白者()
         End If
     Loop
     Documents.Add.Range.text = name
+    Documents(1).Activate
 End Sub
 
 

@@ -4352,7 +4352,13 @@ namespace WindowsFormsApp1
                 if (e.KeyCode == Keys.F2)
                 {//按下 F2 鍵,並複製textBox1的內容到剪貼簿
                     keyDownF2(textBox1);
-                    Clipboard.SetText(textBox1.Text);
+                    try
+                    {
+                        Clipboard.SetText(textBox1.Text);
+                    }
+                    catch (Exception)
+                    {
+                    }
                     return;
                 }
 
@@ -12117,14 +12123,25 @@ namespace WindowsFormsApp1
                                         break;
                                     case ""://如果文字框裡沒內容（即空白頁）
                                         BringToFront();
-                                        dialogResult = MessageBox.Show("是否移到下一頁？", "",
-                                        MessageBoxButtons.OKCancel, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1,
-                                        MessageBoxOptions.DefaultDesktopOnly);
-                                        //if (DialogResult.OK == dialogResult && !autoPastetoCtextQuitEditTextboxCancel)
-                                        if (DialogResult.OK == dialogResult)
+                                        if (br.pageUBound > int.Parse(br.Page_textbox.GetAttribute("value")))
                                         {
-                                            nextPages(Keys.PageDown, false);
-                                            autoPaste2CtextQuitEditTextbox(out DialogResult dialogresult);
+                                            dialogResult = MessageBox.Show("是否移到下一頁？", "",
+                                                MessageBoxButtons.OKCancel, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1,
+                                                MessageBoxOptions.DefaultDesktopOnly);
+                                            //if (DialogResult.OK == dialogResult && !autoPastetoCtextQuitEditTextboxCancel)
+                                            if (DialogResult.OK == dialogResult)
+                                            {
+                                                nextPages(Keys.PageDown, false);
+                                                autoPaste2CtextQuitEditTextbox(out DialogResult dialogresult);
+                                            }
+                                        }
+                                        else
+                                        {
+                                            dialogResult = DialogResult.Cancel;
+                                            if (File.Exists("C:\\Windows\\Media\\ring07.wav"))
+                                                using (SoundPlayer sp = new SoundPlayer("C:\\Windows\\Media\\ring07.wav")) { sp.Play(); }
+                                            else
+                                                Form1.playSound(Form1.soundLike.waiting, true);
                                         }
                                         break;
                                     default:
@@ -12437,7 +12454,7 @@ namespace WindowsFormsApp1
                             //const string inputText = "《四庫全書》􏿽{{集部　}}<p>";
                             //const string inputText = "《小　倦　遊　閣　集》<p>";
                             //const string inputText = "《三　才　圖　會》<p>";
-                            //const string inputTextFrontPage = "《帶　經　堂　詩　話》<p>";
+                            //const string inputTextFrontPage = "《帶　經　堂　詩　話》<p>";                            
                             br.QuickeditLinkIWebElement.Click();
                             PauseEvents();
                             textBox3.Text = driver.Url;
@@ -14845,10 +14862,12 @@ namespace WindowsFormsApp1
                 if (textBox1.TextLength == 0 || (textBox1.Text.IndexOf("|") == -1 && textBox1.Text.IndexOf("<p>") == -1))
                 {
                     undoRecord(); stopUndoRec = true; PauseEvents();
-                    if (autoExecuteSKQSContextMark())
-                        AvailableInUseBothKeysMouse();
+
+                    if (autoNextVolumnContextMark)
+                        if (autoExecuteSKQSContextMark())
+                            AvailableInUseBothKeysMouse();
                     //if (textBox1.TextLength == 0 && br.pageUBound >= int.Parse(_currentPageNum))
-                    if (br.pageUBound >= int.Parse(_currentPageNum))
+                    if (autoNextVolumnContextMark && br.pageUBound >= int.Parse(_currentPageNum))
                     {
                         if (Clipboard.GetText().Contains("-1a]"))
                         {
@@ -14858,14 +14877,16 @@ namespace WindowsFormsApp1
                         }
                     }
                     else
+                        if (br.pageUBound < int.Parse(_currentPageNum))
                         if (!gotoNextChapter_FormatContentInput_SKQS())
-                    {
-                        //Debugger.Break();
-                        if (!_eventsEnabled) _eventsEnabled = true;
-                        //if (!Visible) EndUpdate();//show_nICo();
+                        {
+                            //Debugger.Break();
+                            if (!_eventsEnabled) _eventsEnabled = true;
+                            //if (!Visible) EndUpdate();//show_nICo();
 
-                        return false;
-                    }
+                            return false;
+                        }
+
                     undoRecord(); stopUndoRec = false; ResumeEvents();
                 }
             }
@@ -14897,8 +14918,10 @@ namespace WindowsFormsApp1
             if (iwe == null) return false;
             iwe.Click();
             //翻到本書該冊的第1頁
-            if (Div_generic_TextBoxFrame?.GetAttribute("textContent") == "●\t"
-                || Div_generic_TextBoxFrame?.GetAttribute("textContent") == "●<p>"
+            string Div_generic_TextBoxFrameGetTextContent = Div_generic_TextBoxFrame?.GetAttribute("textContent");
+            if (Div_generic_TextBoxFrameGetTextContent == "●\t"
+                || Div_generic_TextBoxFrameGetTextContent == "●<p>"
+                || Div_generic_TextBoxFrameGetTextContent == "●"
                 )//如果是WordVBA.中國哲學書電子化計劃.新頁面() 產生的新頁面
                 inputSKQSFrontPage();
             else
@@ -14914,6 +14937,11 @@ namespace WindowsFormsApp1
             }
             return true;
         }
+
+        /// <summary>
+        /// 設定是否要自動複製下一卷/單位文本
+        /// </summary>
+        bool autoNextVolumnContextMark = true;
 
         #region 在自動連續輸入模式下若是欽定四庫全書則自動輸入Kanripo或《國學大師》的文本,如同按下Ctrl + Shift + 4
         /// <summary>
@@ -17450,6 +17478,15 @@ namespace WindowsFormsApp1
                     inputTextFrontPage = "{{{封面}}}<p>";
                 else
                     inputTextFrontPage = x.Substring(3);
+                ResumeEvents(); return;
+            }
+
+            //輸入「anv」 設定是否要自動複製下一卷/單位文本
+            // autoNextVolumnContextMark值的切換。預設為true
+            if (x.StartsWith("anv"))// 由textBox2輸入 "anv" 來切換設定
+            {
+                PauseEvents(); textBox2.Text = "";
+                autoNextVolumnContextMark = !autoNextVolumnContextMark;
                 ResumeEvents(); return;
             }
 
