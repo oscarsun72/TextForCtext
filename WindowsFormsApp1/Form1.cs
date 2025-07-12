@@ -16948,7 +16948,8 @@ namespace WindowsFormsApp1
             if (this.Name != "Form1")
             {
                 if (Name == "Form2" && textBox1.Text.Contains("校官") && textBox1.Text.StartsWith("*欽定四庫全書")
-                        && !Form1.InstanceForm1.textBox1.Text.Contains("〖文淵|閣寶〗"))
+                        && !Form1.InstanceForm1.textBox1.Text.Contains("〖文淵|閣寶〗")
+                        && br.Svg_image_PageImageFrame != null)
                 {//如果是《四庫全書》原扉頁，則將其書圖點大，以便檢視輸入
                     if (int.Parse(br.Svg_image_PageImageFrame.GetAttribute("width")) <= 500)
                         br.Svg_image_PageImageFrame.Click();
@@ -17303,6 +17304,12 @@ namespace WindowsFormsApp1
                     nextPageAuto = true;
                 //處理《維基文庫》的每卷文本準備貼入
                 runWordMacro("維基文庫四部叢刊本轉來");
+                xClip = Clipboard.GetText();
+                xClip = xClip.Substring(0, xClip.IndexOf("MidleadingBot"));
+                while (xClip.Substring(xClip.Length - 2, 2) == Environment.NewLine)
+                    xClip = xClip.Substring(0, xClip.Length - 2);
+
+                Clipboard.SetText(xClip);
                 if (nextPageAuto && browsrOPMode == BrowserOPMode.appActivateByName)
                 {//自動模式通常在最後一頁會停住，故自行翻下一頁（下一卷首）備用
                     Task.WaitAll();

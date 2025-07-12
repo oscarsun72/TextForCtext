@@ -4,14 +4,16 @@ Dim ChapterSelector As String
 'Const description As String = "將星號前的分段符號移置前段之末 & 清除頁前的分段符號"
 'Const description As String = "將星號前的分段符號移置前段之末 & 清除頁前的分段符號{佛弟子文獻學者孫守真任真甫按：仁者志士義民菩薩賢友請多利用賢超法師《古籍酷AI》或《看典古籍》OCR事半功倍也。如蒙不棄，可利用末學自製於GitHub開源免費免安裝之TextForCtext 應用程式，加速輸入與排版。討論區與末學YouTube頻道有演示影片可資參考。感恩感恩　讚歎讚歎　南無阿彌陀佛"
 'Const description As String = "將星號前的分段符號移置前段之末 & 清除頁前的分段符號{據《國學大師》或Kanripo.org所藏本輔以末學自製於GitHub開源免費免安裝之TextForCtext排版對應錄入。討論區與末學YouTube頻道有實境演示影片可資參考。感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主}"
-'Const description As String = "將星號前的分段符號移置前段之末 & 清除頁前的分段符號{據《維基文庫》或《國學大師》或Kanripo.org所藏本輔以末學自製於GitHub開源免費免安裝之TextForCtext排版對應錄入。討論區與末學YouTube頻道有實境演示影片可資參考。感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主}"
-'Const description As String = "將星號前的分段符號移置前段之末 & 清除頁前的分段符號{據《國學大師》或北京元引科技有限公司《元引科技引得數字人文資源平臺·中國歷代文獻》所藏本輔以末學自製於GitHub開源免費免安裝之TextForCtext排版對應錄入。討論區與末學YouTube頻道有實境演示影片可資參考。感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主}"
-Const description As String = "將星號前的分段符號移置前段之末 & 清除頁前的分段符號{據北京元引科技有限公司《元引科技引得數字人文資源平臺·中國歷代文獻》所藏本輔以末學自製於GitHub開源免費免安裝之TextForCtext排版對應錄入。討論區與末學YouTube頻道有實境演示影片可資參考。感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主}"
+Const description As String = "將星號前的分段符號移置前段之末 & 清除頁前的分段符號{據《維基文庫》所藏本輔以末學自製於GitHub開源免費免安裝之TextForCtext排版對應錄入。討論區與末學YouTube頻道有實境演示影片可資參考。感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主}"
+'Const description As String = "將星號前的分段符號移置前段之末 & 清除頁前的分段符號{據《維基文庫》或《國學大師》或Kanripo.org或北京元引科技有限公司《元引科技引得數字人文資源平臺·中國歷代文獻》所藏本輔以末學自製於GitHub開源免費免安裝之TextForCtext排版對應錄入。討論區與末學YouTube頻道有實境演示影片可資參考。感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主}"
+'Const description As String = "將星號前的分段符號移置前段之末 & 清除頁前的分段符號{據《國學大師》或Kanripo.org或北京元引科技有限公司《元引科技引得數字人文資源平臺·中國歷代文獻》所藏本輔以末學自製於GitHub開源免費免安裝之TextForCtext排版對應錄入。討論區與末學YouTube頻道有實境演示影片可資參考。感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主}"
+'Const description As String = "將星號前的分段符號移置前段之末 & 清除頁前的分段符號{據北京元引科技有限公司《元引科技引得數字人文資源平臺·中國歷代文獻》所藏本輔以末學自製於GitHub開源免費免安裝之TextForCtext排版對應錄入。討論區與末學YouTube頻道有實境演示影片可資參考。感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主}"
 
 'Const description As String = "本書與URN: ctp:wb 同版，今據另一同版者以末學自製於GitHub開源免費免安裝之TextForCtext應用程式內WordVBA對應迻入（討論區與末學YouTube頻道有實境演示影片可供參考），以俟後賢精校。各本後亦可同步更新。感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主"
 
 'Const description_Edit_textbox_新頁面 As String = "據《國學大師》或《Kanripo》所收本輔以末學自製於GitHub開源免費免安裝之TextForCtext軟件排版對應錄入；討論區及末學YouTube頻道有實境演示影片。感恩感恩　讚歎讚歎　南無阿彌陀佛"
-Const description_Edit_textbox_新頁面 As String = "據《國學大師》或《Kanripo》或北京元引科技有限公司《元引科技引得數字人文資源平臺·中國歷代文獻》所收本輔以末學自製於GitHub開源免費免安裝之TextForCtext軟件排版對應錄入；討論區及末學YouTube頻道有實境演示影片。感恩感恩　讚歎讚歎　南無阿彌陀佛"
+'Const description_Edit_textbox_新頁面 As String = "據《國學大師》或《Kanripo》或北京元引科技有限公司《元引科技引得數字人文資源平臺·中國歷代文獻》所收本輔以末學自製於GitHub開源免費免安裝之TextForCtext軟件排版對應錄入；討論區及末學YouTube頻道有實境演示影片。感恩感恩　讚歎讚歎　南無阿彌陀佛"
+Const description_Edit_textbox_新頁面 As String = "據《維基文庫》或《國學大師》或《Kanripo》或北京元引科技有限公司《元引科技引得數字人文資源平臺·中國歷代文獻》所收本輔以末學自製於GitHub開源免費免安裝之TextForCtext軟件排版對應錄入；討論區及末學YouTube頻道有實境演示影片。感恩感恩　讚歎讚歎　南無阿彌陀佛"
 'Const description_Edit_textbox_新頁面 As String = "據北京元引科技有限公司《元引科技引得數字人文資源平臺·中國歷代文獻》所收本輔以末學自製於GitHub開源免費免安裝之TextForCtext軟件排版對應錄入；討論區及末學YouTube頻道有實境演示影片。感恩感恩　讚歎讚歎　南無阿彌陀佛"
 
 Sub 分行分段()
@@ -2908,6 +2910,78 @@ Sub 新頁面Auto_action_newchapter()
     SystemSetup.playSound 1
     
 End Sub
+
+Rem 找出維基編輯記錄中不連號的頁碼 20250710 creedit with Copilot大菩薩：： https://copilot.microsoft.com/shares/5QRmNrjHttWhws7PTMunM
+Sub FindNonSequentialPages()
+    'Alt + \
+    Dim regex As Object, page, d As Document
+    Dim matches As Object
+    Dim match As Object
+    Dim content As String
+    Dim pageNumbers As Collection
+    Dim i As Long
+    Dim prevPage As Long
+    Dim nonSequential As Collection
+    
+    ' 初始化
+    Set regex = CreateObject("VBScript.RegExp")
+    regex.Global = True
+    regex.Pattern = "<scanend file=""47547"" page=""(\d+)"" />"
+    
+    Set pageNumbers = New Collection
+    Set nonSequential = New Collection
+    Set d = Documents.Add
+    d.Range.Paste
+    If d.tables.Count > 1 Then
+        d.tables(2).Delete
+    ElseIf d.tables.Count = 0 Then
+        Exit Sub
+    End If
+    d.tables(1).Columns(1).Delete
+    d.tables(1).ConvertToText
+    content = d.Range.text
+
+    ' 擷取頁碼
+    If regex.Test(content) Then
+        Set matches = regex.Execute(content)
+        For Each match In matches
+            pageNumbers.Add CLng(match.SubMatches(0))
+        Next
+    End If
+    
+    ' 找出不連號的頁碼
+    prevPage = -1
+    For i = 1 To pageNumbers.Count
+        If prevPage <> -1 Then
+            If pageNumbers(i) <> prevPage + 1 Then
+                nonSequential.Add pageNumbers(i)
+            End If
+        End If
+        prevPage = pageNumbers(i)
+    Next
+    If nonSequential.Count > 0 Then
+        
+        ' 建立新文件並輸出結果
+        Set d = Documents.Add
+        With Selection
+            .TypeText "不連號頁碼清單：" & vbCrLf
+            For Each page In nonSequential
+                .TypeText "頁碼：" & page & vbCrLf
+            Next
+        End With
+    
+'        MsgBox "分析完畢，已建立新文件。", vbInformation
+        SystemSetup.playSound 12
+        d.Activate
+        d.Application.Activate
+    Else
+'        MsgBox "沒有缺頁", vbInformation
+        SystemSetup.playSound 2
+        d.Close wdDoNotSaveChanges
+        word.Application.windowState = wdWindowStateMinimize
+    End If
+End Sub
+
 
 
 Rem 在序號欄位補零以調整章節及其次序用。因《御定佩文韻府》須調整章節單位長度而設（其原有290個單位故！！） https://ctext.org/wiki.pl?if=en&res=589161 20241214
