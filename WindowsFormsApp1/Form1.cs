@@ -13423,7 +13423,7 @@ namespace WindowsFormsApp1
         internal void FastModeSwitcher()
         {
             fastMode = !fastMode;
-            if (!autoPaste2QuickEdit && textBox1.TextLength > 3000) turnOn_autoPastetoQuickEdit();//在內容量大時自動切到自動連續輸入模式
+            if (!autoPaste2QuickEdit && textBox1.TextLength > 1000) turnOn_autoPastetoQuickEdit();//在內容量大時自動切到自動連續輸入模式
             if (fastMode)
             {
                 playSound(soundLike.over, true);//播放音效，啟動快捷模式之通知 20250206 蛇年初九
@@ -17304,12 +17304,22 @@ namespace WindowsFormsApp1
                     nextPageAuto = true;
                 //處理《維基文庫》的每卷文本準備貼入
                 runWordMacro("維基文庫四部叢刊本轉來");
-                xClip = Clipboard.GetText();
-                xClip = xClip.Substring(0, xClip.IndexOf("MidleadingBot"));
-                while (xClip.Substring(xClip.Length - 2, 2) == Environment.NewLine)
-                    xClip = xClip.Substring(0, xClip.Length - 2);
 
-                Clipboard.SetText(xClip);
+                if (textBox1.Text.IndexOf("MidleadingBot") > -1)
+                {
+                    xClip = textBox1.Text;
+                    xClip = xClip.Substring(0, xClip.IndexOf("MidleadingBot"));
+                    while (xClip.Substring(xClip.Length - 2, 2) == Environment.NewLine)
+                        xClip = xClip.Substring(0, xClip.Length - 2);
+                    textBox1.Text = xClip;
+                    try
+                    {
+                        Clipboard.Clear();
+                    }
+                    catch (Exception)
+                    {
+                    }
+                }
                 if (nextPageAuto && browsrOPMode == BrowserOPMode.appActivateByName)
                 {//自動模式通常在最後一頁會停住，故自行翻下一頁（下一卷首）備用
                     Task.WaitAll();

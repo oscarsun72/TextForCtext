@@ -899,7 +899,7 @@ namespace TextForCtext
                 IWebElement iwe;
                 bool checkNamePorp()
                 {
-                    return iwe.GetAttribute("name") == "page";
+                    return iwe?.GetAttribute("name") == "page";
                 }
                 if (Form1.IsValidUrl＿ImageTextComparisonPage(ActiveForm1.textBox3Text))
                 {
