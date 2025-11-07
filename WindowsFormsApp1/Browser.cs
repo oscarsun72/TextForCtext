@@ -10228,7 +10228,7 @@ namespace TextForCtext
         public static bool AITShenShenWikiPunct(ref string x)
         {
             //限500字,大於10字
-            StringInfo xInfo = new StringInfo(x);
+            StringInfo xInfo = new StringInfo(x);const string url = "https://t.shenshen.wiki/llm";
             if (xInfo.LengthInTextElements > 500 || xInfo.LengthInTextElements < 11)
             {
                 Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("限500字，或須多於10字");
@@ -10248,10 +10248,12 @@ namespace TextForCtext
                  */
                 {
                     driver.SwitchTo().Window(windowHandle);
-                    if (driver.Url != "https://t.shenshen.wiki/")
+                    //if (driver.Url != "https://t.shenshen.wiki/")
+                    if (driver.Url != url)
                     {
                         openNewTabWindow();
-                        driver.Navigate().GoToUrl("https://t.shenshen.wiki/");
+                        //driver.Navigate().GoToUrl("https://t.shenshen.wiki/");
+                        driver.Navigate().GoToUrl(url);
                     }
                 }
             }
@@ -10264,15 +10266,15 @@ namespace TextForCtext
                     else
                         driver.SwitchTo().Window(driver.WindowHandles.Last());
                     openNewTabWindow();
-                    driver.Navigate().GoToUrl("https://t.shenshen.wiki/");
+                    driver.Navigate().GoToUrl(url);
                 }
                 else
                 {
                     driver.SwitchTo().Window(driver.WindowHandles.Last());
-                    if (driver.Url != "https://t.shenshen.wiki/")
+                    if (driver.Url != url)
                     {
                         openNewTabWindow();
-                        driver.Navigate().GoToUrl("https://t.shenshen.wiki/");
+                        driver.Navigate().GoToUrl(url);
                     }
                 }
             }
@@ -10288,7 +10290,7 @@ namespace TextForCtext
                 else
                 {
                     openNewTabWindow();
-                    driver.Navigate().GoToUrl("https://t.shenshen.wiki/");
+                    driver.Navigate().GoToUrl(url);
                     WindowHandles["《AI太炎》"] = driver.CurrentWindowHandle;
                 }
 

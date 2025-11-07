@@ -286,7 +286,7 @@ Sub 進階詞頻() '2002/11/10要Sub才能在Word中執行!'2005/4/21此法在跑大檔案時太沒效
     End If
     'With ActiveDocument
     With ActiveDocument
-        Dw = .Content '文件內容
+        Dw = .content '文件內容
         dwL = Len(Dw) '文件長度
         .Close
     End With
@@ -1740,7 +1740,7 @@ Sub 文件字頻_old()
     'If Dir(xlsp) = "" Then xlsp = "C:\Documents and Settings\Superwings\桌面\" & Replace(ActiveDocument.Name, ".doc", "") & "字頻.XLS"
     'xlsp = "C:\Documents and Settings\Superwings\桌面\" & Replace(ActiveDocument.Name, ".doc", "") & "字頻.XLS"
     xlsp = InputBox("請輸入存檔路徑及檔名(全檔名,含副檔名)!" & vbCr & vbCr & _
-            "預設將以此word文件檔名 + ""字頻.XLSX""字綴,存於桌面上", "字頻調查", xlsp & Replace(ActiveDocument.Name, ".doc", "") & "字頻" & VBA.StrConv(VBA.Time, vbWide) & ".XLSX")
+            "預設將以此word文件檔名 + ""字頻.XLSX""字綴,存於桌面上", "字頻調查", xlsp & Replace(ActiveDocument.name, ".doc", "") & "字頻" & VBA.StrConv(VBA.Time, vbWide) & ".XLSX")
     If xlsp = "" Then Exit Sub
     
     ds = VBA.Timer
@@ -1799,7 +1799,7 @@ Sub 文件字頻_old()
                 If Len(.Range) = 1 Then '尚未輸入內容
                     .Range.InsertAfter "字頻 = " & j & "次：（" & Len(Replace(Xsort(j), "、", "")) & "字）"
                     .Range.Paragraphs(1).Range.font.Size = 12
-                    .Range.Paragraphs(.Paragraphs.Count).Range.font.Name = "新細明體"
+                    .Range.Paragraphs(.Paragraphs.Count).Range.font.name = "新細明體"
                     .Range.Paragraphs(.Paragraphs.Count).Range.font.NameAscii = "Times New Roman"
                     '.Range.Paragraphs(1).Range.Font.Bold = True
                 Else
@@ -1808,7 +1808,7 @@ Sub 文件字頻_old()
                     .Range.InsertAfter "字頻 = " & j & "次：（" & Len(Replace(Xsort(j), "、", "")) & "字）"
                     .Range.Paragraphs(.Paragraphs.Count).Range.font.Size = 12
                     '.Range.Paragraphs(.Paragraphs.Count).Range.Bold = True
-                    .Range.Paragraphs(.Paragraphs.Count).Range.font.Name = "新細明體"
+                    .Range.Paragraphs(.Paragraphs.Count).Range.font.name = "新細明體"
                     .Range.Paragraphs(.Paragraphs.Count).Range.font.NameAscii = "Times New Roman"
                 End If
                 .Range.InsertParagraphAfter
@@ -1818,9 +1818,9 @@ Sub 文件字頻_old()
                 .Range.InsertAfter Replace(Xsort(j), "、", VBA.Chr(9), 1, 1) 'vba.Chr(9)為定位字元(Tab鍵值)
                 .Range.InsertParagraphAfter
                 If InStr(.Range.Paragraphs(.Paragraphs.Count).Range, "字頻") = 0 Then
-                    .Range.Paragraphs(.Paragraphs.Count - 1).Range.font.Name = "標楷體"
+                    .Range.Paragraphs(.Paragraphs.Count - 1).Range.font.name = "標楷體"
                 Else
-                    .Range.Paragraphs(.Paragraphs.Count).Range.font.Name = "新細明體"
+                    .Range.Paragraphs(.Paragraphs.Count).Range.font.name = "新細明體"
                     .Range.Paragraphs(.Paragraphs.Count).Range.font.NameAscii = "Times New Roman"
                 End If
             End With
@@ -2079,7 +2079,7 @@ For Each ch In ActiveDocument.Characters
 '    If AscW(ch) < -1491 Or AscW(ch) > 19968 Then
     If Asc(ch) < -24256 Or (0 > Asc(ch) And Asc(ch) >= -1468) Then
         ch.Select
-        ch.font.Name = "EUDC"
+        ch.font.name = "EUDC"
     End If
 Next ch
 End Sub
@@ -2096,14 +2096,14 @@ With Selection '原以整份文件(ActiveDocument),今但以選取範圍整理,但因更改值而影響
             '要是數字且前後不能加﹝﹞或〔〕才執行！
             If Not WD.text Like "﹝" And Not WD.text Like "〔" And Not WD Like "[[]" And Not WD Like "[]]" Then
                 If IsNumeric(WD) Then
-                    If WD.End = .Document.Content.StoryLength Or WD.start = 0 Then GoTo w '文件之首尾另外處理
+                    If WD.End = .Document.content.StoryLength Or WD.start = 0 Then GoTo w '文件之首尾另外處理
                     If Not WD.Previous Like "﹝" And Not WD.Previous Like "〔" And Not WD.Previous Like "[[]" _
                         And Not WD.Next Like "﹞" And Not WD.Next Like "〕" And Not WD.Next Like "]" Then
 w:                      If WD <= 20 Then 'Arial Unicode MS[種類]裡"括號文數字"只有二十個!
                             With WD
                                 '選取會改變Selection的範圍,故今取消!
 '                                .Select 'Words物件即表一個Range物件,見線上說明!
-                                .font.Name = "Arial Unicode MS"
+                                .font.name = "Arial Unicode MS"
                                 WD.text = VBA.ChrW((9312 - 1) + WD)
                             End With
                         Else '超過20號的註腳時
@@ -2166,7 +2166,7 @@ Register_Event_Handler
 '    Selection.MoveLeft Unit:=wdCharacter, Count:=2, Extend:=wdExtend
 If Selection.Type = wdSelectionIP Then Exit Sub
     With Selection.font.Shading
-        If InStr(ActiveDocument.Name, "排印") Then
+        If InStr(ActiveDocument.name, "排印") Then
             .Parent.Color = wdColorRed
             .Texture = wdTextureNone
         Else
@@ -2181,7 +2181,7 @@ If Selection.Type = wdSelectionIP Then Exit Sub
             End If
         End If
     End With
-    If InStr(ActiveDocument.Name, "排印") Then
+    If InStr(ActiveDocument.name, "排印") Then
         ActiveDocument.Save
 '        setOX
 '        OX.WinActivate "Microsoft Excel"
@@ -2227,7 +2227,7 @@ Sub 註腳編號前後加方括號()
 With Selection
     Do
 
-        Selection.GoTo What:=wdGoToFootnote, Which:=wdGoToNext, Count:=1, Name:=""
+        Selection.GoTo What:=wdGoToFootnote, Which:=wdGoToNext, Count:=1, name:=""
 '        Selection.GoTo What:=wdGoToFootnote, Which:=wdGoToNext, Count:=1, Name:=""
         Selection.Find.ClearFormatting
 '        With Selection.Find
@@ -2301,7 +2301,7 @@ If Dir(xlsp) = "" Then xlsp = 取得桌面路徑 'GetDeskDir ' "C:\Users\Wong\Desktop\
 'If Dir(xlsp) = "" Then xlsp = "C:\Documents and Settings\Superwings\桌面\" & Replace(ActiveDocument.Name, ".doc", "") & "字頻.XLS"
 'xlsp = "C:\Documents and Settings\Superwings\桌面\" & Replace(ActiveDocument.Name, ".doc", "") & "字頻.XLS"
 xlsp = InputBox("請輸入存檔路徑及檔名(全檔名,含副檔名)!" & vbCr & vbCr & _
-        "預設將以此word文件檔名 + ""字頻.XLSX""字綴,存於桌面上", "字頻調查", xlsp & Replace(ActiveDocument.Name, ".doc", "") & "字頻" & VBA.StrConv(VBA.Time, vbWide) & ".XLSX")
+        "預設將以此word文件檔名 + ""字頻.XLSX""字綴,存於桌面上", "字頻調查", xlsp & Replace(ActiveDocument.name, ".doc", "") & "字頻" & VBA.StrConv(VBA.Time, vbWide) & ".XLSX")
 If xlsp = "" Then Exit Sub
 
 ds = VBA.Timer
@@ -2363,7 +2363,7 @@ For j = u To 0 Step -1 '陣列排序'2010/10/29
             If Len(.Range) = 1 Then '尚未輸入內容
                 .Range.InsertAfter "字頻 = " & j & "次：（" & Len(Replace(Xsort(j), "、", "")) & "字）"
                 .Range.Paragraphs(1).Range.font.Size = 12
-                .Range.Paragraphs(.Paragraphs.Count).Range.font.Name = "新細明體"
+                .Range.Paragraphs(.Paragraphs.Count).Range.font.name = "新細明體"
                 .Range.Paragraphs(.Paragraphs.Count).Range.font.NameAscii = "Times New Roman"
                 '.Range.Paragraphs(1).Range.Font.Bold = True
             Else
@@ -2372,7 +2372,7 @@ For j = u To 0 Step -1 '陣列排序'2010/10/29
                 .Range.InsertAfter "字頻 = " & j & "次：（" & Len(Replace(Xsort(j), "、", "")) & "字）"
                 .Range.Paragraphs(.Paragraphs.Count).Range.font.Size = 12
                 '.Range.Paragraphs(.Paragraphs.Count).Range.Bold = True
-                .Range.Paragraphs(.Paragraphs.Count).Range.font.Name = "新細明體"
+                .Range.Paragraphs(.Paragraphs.Count).Range.font.name = "新細明體"
                 .Range.Paragraphs(.Paragraphs.Count).Range.font.NameAscii = "Times New Roman"
             End If
             .Range.InsertParagraphAfter
@@ -2382,9 +2382,9 @@ For j = u To 0 Step -1 '陣列排序'2010/10/29
             .Range.InsertAfter Replace(Xsort(j), "、", VBA.Chr(9), 1, 1) 'vba.Chr(9)為定位字元(Tab鍵值)
             .Range.InsertParagraphAfter
             If InStr(.Range.Paragraphs(.Paragraphs.Count).Range, "字頻") = 0 Then
-                .Range.Paragraphs(.Paragraphs.Count - 1).Range.font.Name = "標楷體"
+                .Range.Paragraphs(.Paragraphs.Count - 1).Range.font.name = "標楷體"
             Else
-                .Range.Paragraphs(.Paragraphs.Count).Range.font.Name = "新細明體"
+                .Range.Paragraphs(.Paragraphs.Count).Range.font.name = "新細明體"
                 .Range.Paragraphs(.Paragraphs.Count).Range.font.NameAscii = "Times New Roman"
             End If
         End With
@@ -2495,9 +2495,9 @@ Set d = ActiveDocument
 'xlsp = InputBox("請輸入存檔路徑及檔名(全檔名,含副檔名)!" & vbCr & vbCr & _
         "預設將以此word文件檔名 + ""詞頻.XLSX""字綴,存於桌面上", "詞頻調查", xlsp & Replace(d.Name, ".doc", "") & "詞頻" & VBA.StrConv(VBA.Time, vbWide) & ".XLSX")
 'If xlsp = "" Then Exit Sub
-xlsp = 取得桌面路徑 & "\" & Replace(d.Name, ".doc", "") & "_詞頻" & VBA.StrConv(VBA.Time, vbWide) & ".XLSX"
+xlsp = 取得桌面路徑 & "\" & Replace(d.name, ".doc", "") & "_詞頻" & VBA.StrConv(VBA.Time, vbWide) & ".XLSX"
 If ln = "" Then ln = 1
-ln = InputBox("請指定詞彙長度" & vbCr & vbCr & "檔案會存在桌面上名為:" & vbCr & vbCr & Replace(d.Name, ".doc", "") & "_詞頻" & VBA.StrConv(VBA.Time, vbWide) & ".XLSX" & _
+ln = InputBox("請指定詞彙長度" & vbCr & vbCr & "檔案會存在桌面上名為:" & vbCr & vbCr & Replace(d.name, ".doc", "") & "_詞頻" & VBA.StrConv(VBA.Time, vbWide) & ".XLSX" & _
                 vbCr & vbCr & "的檔案", , ln + 1)
 If ln = "" Then Exit Sub
 If Not IsNumeric(ln) Then Exit Sub
@@ -2584,7 +2584,7 @@ For j = u To 0 Step -1 '陣列排序'2010/10/29
             If Len(.Range) = 1 Then '尚未輸入內容
                 .Range.InsertAfter "詞頻 = " & j & "次：（" & Len(Replace(Xsort(j), "、", "")) / ln & "個）"
                 .Range.Paragraphs(1).Range.font.Size = 12
-                .Range.Paragraphs(.Paragraphs.Count).Range.font.Name = "新細明體"
+                .Range.Paragraphs(.Paragraphs.Count).Range.font.name = "新細明體"
                 .Range.Paragraphs(.Paragraphs.Count).Range.font.NameAscii = "Times New Roman"
                 '.Range.Paragraphs(1).Range.Font.Bold = True
             Else
@@ -2593,7 +2593,7 @@ For j = u To 0 Step -1 '陣列排序'2010/10/29
                 .Range.InsertAfter "詞頻 = " & j & "次：（" & Len(Replace(Xsort(j), "、", "")) / ln & "個）"
                 .Range.Paragraphs(.Paragraphs.Count).Range.font.Size = 12
                 '.Range.Paragraphs(.Paragraphs.Count).Range.Bold = True
-                .Range.Paragraphs(.Paragraphs.Count).Range.font.Name = "新細明體"
+                .Range.Paragraphs(.Paragraphs.Count).Range.font.name = "新細明體"
                 .Range.Paragraphs(.Paragraphs.Count).Range.font.NameAscii = "Times New Roman"
             End If
             .Range.InsertParagraphAfter
@@ -2603,9 +2603,9 @@ For j = u To 0 Step -1 '陣列排序'2010/10/29
             .Range.InsertAfter Replace(Xsort(j), "、", VBA.Chr(9), 1, 1) 'vba.Chr(9)為定位字元(Tab鍵值)
             .Range.InsertParagraphAfter
             If InStr(.Range.Paragraphs(.Paragraphs.Count).Range, "詞頻") = 0 Then
-                .Range.Paragraphs(.Paragraphs.Count - 1).Range.font.Name = "標楷體"
+                .Range.Paragraphs(.Paragraphs.Count - 1).Range.font.name = "標楷體"
             Else
-                .Range.Paragraphs(.Paragraphs.Count).Range.font.Name = "新細明體"
+                .Range.Paragraphs(.Paragraphs.Count).Range.font.name = "新細明體"
                 .Range.Paragraphs(.Paragraphs.Count).Range.font.NameAscii = "Times New Roman"
             End If
         End With
@@ -2716,7 +2716,7 @@ Set myRng = ActiveDocument.Range
 Set chRng = ActiveDocument.Range
 s = -1
 For Each a In ActiveDocument.Characters
-    If a.font.Name = "Times New Roman" Then
+    If a.font.name = "Times New Roman" Then
         If s = -1 Then s = a.start
         If a = VBA.Chr(13) Then GoTo 1
     Else
@@ -2931,7 +2931,7 @@ Sub 漢籍電子文獻資料庫文本整理_以轉貼到中國哲學書電子化計劃(Optional doNotCloseD
     SystemSetup.stopUndo ur, "漢籍電子文獻資料庫文本整理_以轉貼到中國哲學書電子化計劃"
     If Documents.Count = 0 Then Documents.Add
     Set d = ActiveDocument
-    If (d.path <> "" Or d.Content.text <> VBA.Chr(13)) And openNewDoc Then
+    If (d.path <> "" Or d.content.text <> VBA.Chr(13)) And openNewDoc Then
         Set d = Documents.Add()
         'Exit Sub
     End If
@@ -3501,7 +3501,7 @@ typeTexts:
                 If InStr("ˊˇˋ", x) Then
                     x.Style = "聲調"
                 ElseIf InStr("˙", x) Then
-                    x.font.Name = "標楷體"
+                    x.font.name = "標楷體"
                 End If
             Next x
             x = rst.Fields(2).Value 'URL  'frmDict.get1URLfor1(words)
@@ -4569,6 +4569,25 @@ Sub 大陸引號改臺灣引號()
     options.AutoFormatAsYouTypeReplaceQuotes = smartQuotes
 End Sub
 
+Sub 維基文庫去注文()
+    Dim rng As Range, ur As UndoRecord
+    SystemSetup.stopUndo ur, "維基文庫去注文"
+    If ActiveDocument.path <> vbNullString Then
+        Set rng = Documents.Add.Range
+    Else
+        Set rng = ActiveDocument.Range
+    End If
+    If rng.text = Chr(13) Then rng.Paste
+    With rng.Find
+        .font.Color = 5592479
+        .Execute vbNullString, , , , , , , , , vbNullString, wdReplaceAll
+        .ClearFormatting
+        .text = VBA.ChrW(160)
+        .Replacement.text = vbNullString
+        .Execute , , , , , , , , , vbNullString, wdReplaceAll
+    End With
+    SystemSetup.contiUndo ur
+End Sub
 Rem 模擬Word Characters 集合物件的字串集合 https://learn.microsoft.com/en-us/office/vba/api/Word.characters
 Function CharactersStr(str As String) As VBA.Collection
     Dim i As Long, lStr As Long, char As String

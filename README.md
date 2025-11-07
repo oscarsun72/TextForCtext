@@ -306,7 +306,7 @@ Alt + F10 、 Alt + F11 ： 將textBox1中選取的文字送去《古籍酷》�
 Ctrl + F10、 Ctrl + F11： 將textBox1中選取的文字送去《古籍酷》**舊版**自動標點。
 >若無選取則將整個textBox1的內容送去。（小於20字元不處理）20240808（臺灣父親節）
 
-Ctrl + Alt + a ： [AI太炎](https://t.shenshen.wiki/)標點
+Ctrl + Alt + a ： [AI太炎](https://t.shenshen.wiki/)[標點](https://t.shenshen.wiki/llm)
 >若有選取範圍，則以選取範圍送交標點。若無選取，則以textBox1的內容為單位送去標點；若內容中含\<p>標記，則以\<p>區間範圍為單位送出 20241225聖誕節
 ### 文本檢測
 Alt + v： 檢查[查字.mdb].[異體字反正]資料表中是否已有該字記錄，以便程式將`異體字轉正`時參照。如果已有資料對應，則閃示橘紅色（表單顏色=Color.Tomato）0.02秒以示警
@@ -385,7 +385,7 @@ Ctrl + Shift + Alt + y 查[韻典網](https://ytenx.org/) y=yun（韻）的y
 - Alt + shift + , 即  Alt + < ： 以選取的文字檢索文件中第一段所載之 CTP 所收本網址，並在選取文字上加上該檢索結果頁面之超連結
 - Ctrl + Alt + F10 或 Ctrl + Alt + F11： 讀入《古籍酷》自動標點所選取文字的結果
     > 若無選取，則自動選取範圍（選取範圍詳程式碼）
-- Ctrl + Alt + a ： [AI太炎](https://t.shenshen.wiki/)標點
+- Ctrl + Alt + a ： [AI太炎](https://t.shenshen.wiki/)[標點](https://t.shenshen.wiki/llm)
     > 若無選取，則自動選取範圍（選取範圍詳程式碼）
 - Alt + Shift + y ： 查[《易學網·易經［周易］原文》](https://www.eee-learning.com/article/571)指定卦名文本_並取回其純文字值及網址值插入至文件中插入點位置(y:yi 易) 20241004
     > 若游標所在為《易學網》的網址，則將其網頁內容讀入到文件（於該連結段落後插入）
