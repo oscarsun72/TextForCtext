@@ -3647,7 +3647,8 @@ Function grabAITShenShenWikiPunctResult(text As String, resultText As String, Op
         On Error GoTo 0
 
     End If
-    If Not OpenChrome("https://t.shenshen.wiki/") Then Exit Function
+'    If Not OpenChrome("https://t.shenshen.wiki/") Then Exit Function
+    If Not OpenChrome("https://t.shenshen.wiki/llm") Then Exit Function
     winState = word.ActiveDocument.ActiveWindow.windowState
 '    WD.Navigate.GoToUrl "https://t.shenshen.wiki/"
     WD.SwitchTo.Window WD.CurrentWindowHandle

@@ -83,7 +83,7 @@ namespace WindowsFormsApp1
         /// <summary>
         /// 《古籍酷》OCR批量處理。在textBox2中輸入bT以啟用，輸入bF以停用
         /// </summary>
-        internal static bool BatchProcessingGJcoolOCR = true;
+        internal static bool BatchProcessingGJcoolOCR = false;
 
         /// <summary>
         /// CJK大字集字型集合（陣列。含CJK 擴充字集者）
@@ -13982,7 +13982,7 @@ namespace WindowsFormsApp1
                                                                                    //    chk = quickedit_data_textboxTxt.Contains("，") || quickedit_data_textboxTxt.Contains("。");
                                                                                    //}
                 if (quickedit_data_textboxTxt == null) return false;
-                if (CnText.HasEditedWithPunctuationMarks(ref quickedit_data_textboxTxt) ||
+                if ((CnText.HasEditedWithPunctuationMarks(ref quickedit_data_textboxTxt) && (textBox1.Text != "●" || quickedit_data_textboxTxt != "●")) ||
                     quickedit_data_textboxTxt.Contains("picture") || quickedit_data_textboxTxt.Contains("entity"))
                 {
                     OCRBreakSoundNotification();
@@ -14000,7 +14000,8 @@ namespace WindowsFormsApp1
                 //else if ((br.Quickedit_data_textbox == null ? 0 : (new StringInfo(br.Quickedit_data_textbox?.Text)?.LengthInTextElements)) < (normalLineParaLength == 0 ? 20 : normalLineParaLength)
                 //    && quickedit_data_textboxTxt != "\t")// 「	」"\t"是新建的維基文本故 20240405
                 else if ((quickedit_data_textboxTxt == null ? 0 : (new StringInfo(quickedit_data_textboxTxt)?.LengthInTextElements)) < (NormalLineParaLength == 0 ? 20 : NormalLineParaLength)
-                    && quickedit_data_textboxTxt != "\t" && quickedit_data_textboxTxt != " ")// 「	」"\t"是新建的維基文本故 20240405 "\t"會被Text屬性轉換成 " "
+                    && quickedit_data_textboxTxt != "\t" && quickedit_data_textboxTxt != " "
+                    && quickedit_data_textboxTxt != "●")// 「	」"\t"是新建的維基文本故 20240405 "\t"會被Text屬性轉換成 " "
                 {
                     OCRBreakSoundNotification();
                     if (DialogResult.Cancel == Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("目前頁面內容似乎太短了，確定還要交給OCR嗎？" +
@@ -16885,7 +16886,11 @@ namespace WindowsFormsApp1
                                 {
                                     case -2146233088:
                                         if (ex1.Message.IndexOf("no such window: target window already closed") > -1)
-                                        { br.GoToCurrentUserActivateTab(); goto retry; }
+                                        {
+                                            //br.GoToCurrentUserActivateTab(); 
+                                            ResetLastValidWindow();
+                                            goto retry;
+                                        }
                                         break;
                                     default:
                                         try

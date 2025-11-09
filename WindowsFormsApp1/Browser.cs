@@ -5486,9 +5486,10 @@ namespace TextForCtext
                 //按下「文本行」
                 //【文本行】按鈕
                 iwe = WaitFindWebElementBySelector_ToBeClickable("#line_image_panel > div > div:nth-child(2) > div:nth-child(8) > button:nth-child(2)");
-
+                
                 while (iwe == null)
                     iwe = WaitFindWebElementBySelector_ToBeClickable("#line_image_panel > div > div:nth-child(2) > div:nth-child(8) > button:nth-child(2)");
+                    
                 //if (iwe == null)
                 //{
                 //    SendKeys.SendWait("{esc}");
@@ -6669,7 +6670,8 @@ namespace TextForCtext
             while (iwe == null)
             {
                 //iwe = waitFindWebElementBySelector_ToBeClickable("#line_img_form > div > input[type=file]");
-                iwe = WaitFindWebElementBySelector_ToBeClickable("#OneLine > div.d-flex.mt-2 > div:nth-child(1) > div.ps-1.pe-2.align-self-center > button > i");
+                //iwe = WaitFindWebElementBySelector_ToBeClickable("#OneLine > div.d-flex.mt-2 > div:nth-child(1) > div.ps-1.pe-2.align-self-center > button > i");                
+                iwe = WaitFindWebElementBySelector_ToBeClickable("#OneLine > div.d-flex.mt-2 > div:nth-child(1) > div:nth-child(2) > button");
                 timeSpan = (DateTime.Now.Subtract(begin));
                 if (timeSpan.TotalSeconds > timeSpanSecs ||
                     Clipboard.GetText() != string.Empty) { StopOCR = true; return false; }
@@ -6944,7 +6946,7 @@ namespace TextForCtext
             //clickCopybutton_GjcoolFastExperience(new Point(iwe.Location.X + iwe.Size.Width / 2, iwe.Location.Y + iwe.Size.Height / 2), Form1.soundLike.press);
             #endregion
 
-            #region 按下「自動識別(豎版)」，開始OCR……
+            #region 按下「自動識別(豎版)」（今改為「古籍識別」20251109），開始OCR……
             //SendKeys.Send("{down}~");            
             //iwe = waitFindWebElementBySelector_ToBeClickable("#OneLine > div.d-flex.justify-content-between.mt-2.mb-1 > div:nth-child(1) > div:nth-child(2) > ul > li:nth-child(2) > button");
             iwe = WaitFindWebElementBySelector_ToBeClickable("#OneLine > div.d-flex.mt-2 > div:nth-child(1) > div:nth-child(3) > ul > li:nth-child(2) > button");
@@ -6952,6 +6954,9 @@ namespace TextForCtext
             try
             {
                 iwe.Click();
+                //現在會跑出對話方塊
+                Thread.Sleep(200);
+                SendKeys.SendWait("~");
             }
             catch (Exception)
             {
@@ -7077,7 +7082,8 @@ namespace TextForCtext
                 //iwe = waitFindWebElementBySelector_ToBeClickable("#OneLine > div.d-flex.justify-content-between.mt-2.mb-1 > div:nth-child(3) > div:nth-child(6) > button:nth-child(2)");
                 //iwe = waitFindWebElementBySelector_ToBeClickable("#line_image_panel > div > div:nth-child(2) > div:nth-child(8) > button:nth-child(2) > i");
                 //iwe = WaitFindWebElementBySelector_ToBeClickable("#line_image_panel > div > div:nth-child(2) > div:nth-child(8) > button:nth-child(2)");
-                iwe = WaitFindWebElementBySelector_ToBeClickable("#line_image_panel > div > div:nth-child(2) > div.ps-3.align-self-center > button:nth-child(2)");
+                //iwe = WaitFindWebElementBySelector_ToBeClickable("#line_image_panel > div > div:nth-child(2) > div.ps-3.align-self-center > button:nth-child(2)");
+                iwe = WaitFindWebElementBySelector_ToBeClickable("#line_image_panel > div > div.d-flex.gap-2 > div:nth-child(6) > button:nth-child(2)");
                 //if (iwe == null)
                 //{
                 //    SendKeys.SendWait("{esc}");
@@ -10228,7 +10234,7 @@ namespace TextForCtext
         public static bool AITShenShenWikiPunct(ref string x)
         {
             //限500字,大於10字
-            StringInfo xInfo = new StringInfo(x);const string url = "https://t.shenshen.wiki/llm";
+            StringInfo xInfo = new StringInfo(x); const string url = "https://t.shenshen.wiki/llm";
             if (xInfo.LengthInTextElements > 500 || xInfo.LengthInTextElements < 11)
             {
                 Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("限500字，或須多於10字");

@@ -17,6 +17,7 @@ Text for Ctext 是為了有效加速[《中國哲學書電子化計劃》](https
 
 > 20240725：配合運用賢超法師[《古籍酷》AI](https://gj.cool/)或[《看典古籍》](https://kandianguji.com/)OCR輸入，將事半功倍也。感恩感恩　讚歎讚歎　南無阿彌陀佛。目前鄙人主要以sl（詳下） 模式在操作，技術已趨成熟穩定可用。阿彌陀佛
  >> 因末學個人使用需要，故《古籍酷》OCR預設為批量授權帳號處理，若無批量授權，請在textBox2中輸入「bF」以關閉之，程式就會改用一般帳號來處理OCR程序（即每日贈予之1000點，約6次OCR額度者）。
+ >>> 因已無批量授權，故改預設值為false（ BatchProcessingGJcoolOCR = false）需要切換時再下指令「bT」即可。20251109
 
 \*作業環境、系統需求：**Windows**、.NET Framework 4.5.2 以上、Chrome 瀏覽器（Selenium 模式才必要：[chromedriver](https://developer.chrome.com/docs/chromedriver/downloads?hl=zh-tw)） 
  > **不保留任何權利**，歡迎改寫應用到麥金塔(Mac)或 Linux 等作業系統環境中運行
