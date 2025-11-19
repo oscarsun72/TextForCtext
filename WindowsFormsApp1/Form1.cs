@@ -357,12 +357,15 @@ namespace WindowsFormsApp1
                         //Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
                     }
 
-                    Task.Run(() =>
+                    if (MessageBoxShowOKCancelExclamationDefaultDesktopOnly("是否關閉Chrome瀏覽器？") == DialogResult.OK)
+                    {
+                        Task.Run(() =>
                     {
                         if (br.driver != null)
                         {
                             try
                             {
+
                                 //Task.WaitAny();
                                 br.driver.Quit();
                                 //chatGPT：不過，建議使用 Quit() 方法來關閉 WebDriver 實例並釋放所有資源，因為它會同時處理 Close() 和 Dispose() 方法20230108
@@ -378,6 +381,9 @@ namespace WindowsFormsApp1
                         }
                     });
                     Task.WaitAll();
+                    }
+                    else
+                        br.driver = null;
                     //終止 chromedriver.exe 程序,釋放系統記憶體
                     //Process[] processes = Process.GetProcessesByName("chromedriver");
                     //foreach (Process process in processes)
@@ -14876,6 +14882,12 @@ namespace WindowsFormsApp1
                             AutoMarkTitleParagraph();
                             AvailableInUseBothKeysMouse();
                         }
+                        if (Clipboard.GetText().Contains(":KR"))
+                        {
+                            runWordMacro("中國哲學書電子化計劃.Kanripo_GitHub轉來");
+                            AutoMarkTitleParagraph();
+                            AvailableInUseBothKeysMouse();
+                        }
                     }
                     else
                         if (br.pageUBound < int.Parse(_currentPageNum))
@@ -15102,6 +15114,25 @@ namespace WindowsFormsApp1
                             saveText();
                             break;
                         case "中國哲學書電子化計劃.國學大師_Kanripo_四庫全書本轉來":
+                            using (GXDS gxds = new GXDS(this)) { gxds.StandardizeSKQSContext(ref xClpBd); }
+
+                            #region 若是《四庫全書》本則將頭尾縮排的文本行/段還原
+
+                            standardizeSKQSContext(ref xClpBd);
+                            textBox1.Text = xClpBd;
+                            //standardizeSKQSContext();
+                            //xClpBd = textBox1.Text;
+                            #endregion
+                            saveText();
+                            Clipboard.Clear();
+                            //xClpBd = xClpBd.Replace(" /\v\v", Environment.NewLine).Replace("\v", Environment.NewLine)                                    
+                            //        .Replace(" /", "");
+                            //        //這要做標題判斷，不能取代掉.Replace(Environment.NewLine + Environment.NewLine, Environment.NewLine)
+                            //xClpBd = "*欽定四庫全書<p>" + xClpBd.Substring(xClpBd.IndexOf("欽定《四庫全書》") + "欽定《四庫全書》".Length);
+                            //bringBackMousePosFrmCenter();//交由呼叫端處理
+                            ////AvailableInUseBothKeysMouse();
+                            break;
+                        case "中國哲學書電子化計劃.Kanripo_GitHub轉來":
                             using (GXDS gxds = new GXDS(this)) { gxds.StandardizeSKQSContext(ref xClpBd); }
 
                             #region 若是《四庫全書》本則將頭尾縮排的文本行/段還原
@@ -17254,6 +17285,18 @@ namespace WindowsFormsApp1
                         undoRecord();
                         return;
                     }
+                    //對複製自《Kanripo漢籍リポジトリ》GitHub存放庫（repository）《Kanseki Repository 漢籍リポジトリ》的文本的處置
+                    else if (Clipboard.GetText().Contains(":KR"))
+                    {
+                        ocrTextMode = false;
+                        runWordMacro("中國哲學書電子化計劃.Kanripo_GitHub轉來");
+                        undoRecord();
+                        if (fastMode && !textBox1.Text.Contains("　*") && TitleLeadingSpacesCount.Count > 0)
+                            //if (fastMode && TitleLeadingSpacesCount.Count > 0)
+                            AutoMarkTitleParagraph();
+                        undoRecord();
+                        return;
+                    }
                 }
                 else if (clpTxt.Contains("action=editchapter"))
                 {
@@ -17535,10 +17578,14 @@ namespace WindowsFormsApp1
             else if (x.StartsWith("tlsc.rmv"))
             {
                 if (int.TryParse(x.Substring("tlsc.rmv".Length), out int i))
-                {
-                    PauseEvents(); textBox2.Text = "";
-                    TitleLeadingSpacesCount.RemoveAt(i);
-                    ResumeEvents(); return;
+                {//在textBox2中輸入「tlsc.rmv1」(rmv=Remove)，可以移除第1個項目
+                    if (i > 0)
+                    {
+                        i--;
+                        PauseEvents(); textBox2.Text = "";
+                        TitleLeadingSpacesCount.RemoveAt(i);
+                        ResumeEvents(); return;
+                    }
                 }
             }
             else if (x == "tlsc.add")//- 輸入「tlsc.add」可以依textBox1被選取的行段資料來新增標題空格之項目。一行一筆，元素值為整數。

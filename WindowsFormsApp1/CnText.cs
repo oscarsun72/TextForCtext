@@ -1236,14 +1236,21 @@ namespace TextForCtext
                     // Process the 'before' part
                     string subText = text.Substring(adjustedPos - (before.Length + offset1), before.Length + offset1);
                     string subTextWithoutPunctuation = RemovePunctuation(subText);
+                    int cntr = 0;//20251118
                     while (subTextWithoutPunctuation.Length < before.Length)
                     {
+                        cntr++; if (cntr > 2000) break;
                         //if ((adjustedPos + (before.Length + offset1)) < text.Length)
                         if (adjustedPos + after.Length + offset1 < text.Length)
                         {
                             offset1++;
-                            subText = text.Substring(adjustedPos - (before.Length + offset1), before.Length + offset1);
-                            subTextWithoutPunctuation = RemovePunctuation(subText);
+                            if (adjustedPos - (before.Length + offset1) > 0) break;////////●●●●●●●●● 20251118 待觀察！！！！
+                            //{
+                                subText = text.Substring(adjustedPos - (before.Length + offset1), before.Length + offset1);
+                                subTextWithoutPunctuation = RemovePunctuation(subText);
+                            //}
+                            //else//●●●●●●●●●●●
+                            //    if (offset1 > 2000) break;
                         }
                         else
                         {

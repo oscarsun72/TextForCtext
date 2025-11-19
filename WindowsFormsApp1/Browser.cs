@@ -5486,10 +5486,10 @@ namespace TextForCtext
                 //按下「文本行」
                 //【文本行】按鈕
                 iwe = WaitFindWebElementBySelector_ToBeClickable("#line_image_panel > div > div:nth-child(2) > div:nth-child(8) > button:nth-child(2)");
-                
+
                 while (iwe == null)
                     iwe = WaitFindWebElementBySelector_ToBeClickable("#line_image_panel > div > div:nth-child(2) > div:nth-child(8) > button:nth-child(2)");
-                    
+
                 //if (iwe == null)
                 //{
                 //    SendKeys.SendWait("{esc}");
@@ -7700,7 +7700,8 @@ namespace TextForCtext
             ActiveForm1.TopMost = false;
 
             //首頁「快速體驗」按鈕：
-            IWebElement iwe = WaitFindWebElementBySelector_ToBeClickable("body > div.container-fluid.bg-dark.px-1 > div > h2.text-center.my-2.py-4 > button > div", 10);
+            //IWebElement iwe = WaitFindWebElementBySelector_ToBeClickable("body > div.container-fluid.bg-dark.px-1 > div > h2.text-center.my-2.py-4 > button > div", 10);
+            IWebElement iwe = WaitFindWebElementBySelector_ToBeClickable("body > div.container-fluid.px-1 > div > h2.text-center.my-2.py-4 > button > div", 10);
             if (iwe == null) return false;
             Form1.playSound(Form1.soundLike.processing);
             try
@@ -12070,11 +12071,12 @@ namespace TextForCtext
             string urlPrefix;// = string.Empty; //url.Substring(0, url.IndexOf("//") + "//".Length);            
                              //http://skqs.guoxuedashi.net/wen_2885i/174671.html#002-1a
                              //https://www.kanripo.org/text/KR4h0141/221
-
+                             //https://github.com/kanripo/KR4h0160/blob/master/KR4h0160_049.txt
             for (int i = driver.WindowHandles.Count - 1; i > -1; i--)
             {
                 driver.SwitchTo().Window(driver.WindowHandles[i]);
                 url = driver.Url;
+                if (!url.Contains("//")) break;
                 urlPrefixDomain = url.Substring(url.IndexOf("//") + "//".Length, url.IndexOf("/", url.IndexOf("//") + "//".Length) - (url.IndexOf("//") + "//".Length));
                 urlPrefix = url.Substring(0, url.IndexOf("//") + "//".Length);//http://skqs.guoxuedashi.net/wen_2885i/174671.html#002-1a //https://www.kanripo.org/text/KR4h0141/221
                                                                               //if (driver.Url.StartsWith("https://www.kanripo.org/"))
@@ -12083,7 +12085,17 @@ namespace TextForCtext
                     case "www.kanripo.org":
                         result = true;
                         goto gotoNext;
+                    case "github.com":// https://github.com/kanripo/KR4h0160/blob/master/KR4h0160_049.txt":
+                        if (url.IndexOf("kanripo/") > -1)
+                        {
+                            result = true;
+                            goto gotoNext;
+                        }
+                        break;
                     case "skqs.guoxuedashi.net":
+                        result = true;
+                        goto gotoNext;
+                    case "skqs.39017.com"://其實只是將「guoxuedashi.net」改成「39017.com」爾
                         result = true;
                         goto gotoNext;
                     case "www.inindex.com":
@@ -12099,13 +12111,26 @@ namespace TextForCtext
             if (!result) return result;
             gotoNext:
             //取得下一卷的網址
-            if (urlPrefixDomain == "skqs.guoxuedashi.net")
+            if (urlPrefixDomain == "skqs.guoxuedashi.net" || urlPrefixDomain == "skqs.39017.com")
             {
                 if (url.IndexOf(".html") == -1) return false;
                 url = GetNextPageUrl(url.Substring(0, url.IndexOf(".html"))) + ".html";
             }
             else if (urlPrefixDomain == "www.kanripo.org")
                 url = GetNextPageUrl(url.IndexOf("#") > -1 ? url.Substring(0, url.IndexOf("#")) : url);
+            else if (urlPrefixDomain == "github.com")
+            {//url = GetNextPageUrl(url.IndexOf("#") > -1 ? url.Substring(0, url.IndexOf("#")) : url);
+
+                //https://github.com/kanripo/KR4h0160/blob/master/KR4h0160_049.txt
+                string prefix = url.Substring(0, url.IndexOf("_") + "_".Length);
+                string vol = url.Substring(url.IndexOf("_") + "_".Length, url.IndexOf(".txt") - (url.IndexOf("_") + "_".Length));
+                if (!int.TryParse(vol, out int volNum)) return false;
+                volNum++;
+                //url = prefix + volNum.ToString("D3") + ".txt";
+                url = prefix + volNum.ToString("D" + vol.Length.ToString()) + ".txt";
+
+                //url = GetNextPageUrl(url.Substring(0, url.IndexOf(".txt"))) + ".txt";
+            }
             else if (urlPrefixDomain == "www.inindex.com" || urlPrefixDomain == "inindex.com")
             {//如果是《元引科技引得數字人文資源平臺·中國歷代文獻》
                 //string urlOld = driver.Url;                
@@ -12173,7 +12198,13 @@ namespace TextForCtext
                 case "www.kanripo.org":
                     iElementSelector = "#txtcont > p:nth-child(1)";
                     break;
+                case "github.com":
+                    iElementSelector = "#read-only-cursor-text-area";
+                    break;
                 case "skqs.guoxuedashi.net":
+                    iElementSelector = "body > div:nth-child(3) > div:nth-child(4) > div.col2";
+                    break;
+                case "skqs.39017.com":
                     iElementSelector = "body > div:nth-child(3) > div:nth-child(4) > div.col2";
                     break;
                 case "www.inindex.com":
@@ -12272,6 +12303,7 @@ namespace TextForCtext
 
 
             return result;
+
 
             string GetNextPageUrl(string currentUrl)
             {
