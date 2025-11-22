@@ -2380,6 +2380,7 @@ namespace TextForCtext
                     if (iweConfirm == null)
                     {
                         Debugger.Break();
+                        Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("似有網頁故障！請檢查之前輸入的資料是否有正確送出。感恩感恩　南無阿彌陀佛");
                         ActiveForm1.TopMost = false;
                         driver.SwitchTo().Window(driver.CurrentWindowHandle);
                         Form1.InstanceForm1.EndUpdate();

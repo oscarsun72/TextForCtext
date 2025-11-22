@@ -380,7 +380,7 @@ namespace WindowsFormsApp1
 
                         }
                     });
-                    Task.WaitAll();
+                        Task.WaitAll();
                     }
                     else
                         br.driver = null;
@@ -2565,7 +2565,10 @@ namespace WindowsFormsApp1
             {
                 if (e.KeyCode == Keys.D1)
                 {//Alt + Shift + 1 如宋詞中的換片空格，只將文中的空格轉成空白，其他如首綴前罝以明段落或標題者不轉換
-                    e.Handled = true; SpacesBlanksInContext();
+                    e.Handled = true; TopMost = false;
+                    SpacesBlanksInContext();
+                    TopMost = true;
+                    AvailableInUseBothKeysMouse();
                     return;
                 }
                 if (e.KeyCode == Keys.D2)
@@ -8473,7 +8476,7 @@ namespace WindowsFormsApp1
 
         }
         /// <summary>
-        /// Ctrl + y 重做（即復原還原的動作），目前上限為50個記錄
+        /// Ctrl + y 重做（即復原還原的動作），目前上限為300個記錄，詳此行操作： if (undoTextBox1Text.Count > 300)
         /// </summary>
         /// <param name="textBox1"></param>
         private void redoTextBox(TextBox textBox1)
@@ -16955,7 +16958,7 @@ namespace WindowsFormsApp1
         }
 
         /// <summary>
-        /// textBox1還原記錄儲存器
+        /// textBox1還原記錄儲存器。目前還原上限定為300個（原為50個），詳此行操作： if (undoTextBox1Text.Count > 300)
         /// </summary>
         List<string> undoTextBox1Text = new List<string>();
         private void undoTextValueChanged(int s, int l)
@@ -18243,7 +18246,7 @@ namespace WindowsFormsApp1
             }
 
             if (undoTimes != 0) undoTimes = 0;
-            if (undoTextBox1Text.Count > 50)//還原上限定為50個
+            if (undoTextBox1Text.Count > 300)//還原上限定為300個(原為50個）
             {
                 undoTextBox1Text.RemoveAt(0);
             }

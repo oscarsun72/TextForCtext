@@ -1244,10 +1244,11 @@ namespace TextForCtext
                         if (adjustedPos + after.Length + offset1 < text.Length)
                         {
                             offset1++;
-                            if (adjustedPos - (before.Length + offset1) > 0) break;////////●●●●●●●●● 20251118 待觀察！！！！
-                            //{
-                                subText = text.Substring(adjustedPos - (before.Length + offset1), before.Length + offset1);
-                                subTextWithoutPunctuation = RemovePunctuation(subText);
+                            int startIndex = adjustedPos - (before.Length + offset1);
+                            if (startIndex < 0) break;////////●●●●●●●●● 20251118 待觀察！！！！
+                                                      //{
+                            subText = text.Substring(startIndex, before.Length + offset1);
+                            subTextWithoutPunctuation = RemovePunctuation(subText);
                             //}
                             //else//●●●●●●●●●●●
                             //    if (offset1 > 2000) break;
