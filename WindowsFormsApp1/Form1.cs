@@ -357,7 +357,7 @@ namespace WindowsFormsApp1
                         //Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
                     }
 
-                    if (MessageBoxShowOKCancelExclamationDefaultDesktopOnly("是否關閉Chrome瀏覽器？") == DialogResult.OK)
+                    if (MessageBoxShowOKCancelExclamationDefaultDesktopOnly("是否關閉Chrome瀏覽器？", string.Empty, true, MessageBoxDefaultButton.Button2) == DialogResult.OK)
                     {
                         Task.Run(() =>
                     {
@@ -395,7 +395,7 @@ namespace WindowsFormsApp1
                     Thread.Sleep(850);
                     if (br.getChromedrivers().Length > 0)
                         if (MessageBox.Show("還有chromedriver.exe程序在運行，是否全部清除？", "chromedrivers still there"
-                            , MessageBoxButtons.OKCancel, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly)
+                            , MessageBoxButtons.OKCancel, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2, MessageBoxOptions.DefaultDesktopOnly)
                             == DialogResult.OK)
                             br.killProcesses(new string[] { "chromedriver" });
                 }
@@ -3197,7 +3197,8 @@ namespace WindowsFormsApp1
                 {//Shift + F3
                     e.Handled = true;
                     int foundwhere;
-                    if (textBox1.SelectionLength == 0) overtypeModeSelectedTextSetting(ref textBox1);
+                    //if (textBox1.SelectionLength == 0) overtypeModeSelectedTextSetting(ref textBox1);
+                    overtypeModeSelectedTextSetting(ref textBox1);
                     string findword = textBox1.SelectionLength == 0 ? lastFindStr : textBox1.SelectedText;
                     if (findword == "") findword = textBox2.Text;
                     if (findword != "")
@@ -4025,6 +4026,31 @@ namespace WindowsFormsApp1
                     textBox1.Select(s, x.IndexOf("<p>", s) - s);
                     x = textBox1.SelectedText;
                     stopUndoRec = true;
+
+                    int moveIP = s;
+                    //20251112 Gemini大菩薩： 星號（*）移到全形空格（　）的最後面 https://gemini.google.com/share/da499dbcf965
+                    if (x.IndexOf("*　") > -1)//在連續輸入時，篇與篇間有空白時很好用。將插入點位置置於行首，方便定位要送出的內容。在做篇名標題標記時，將該篇名範圍選取起來，星號就會保持在行首，而再經過下面式子的移動，則星號可以移置漢字之前、全形空格之後，而仍然保持插入點位置在行首，方便定位、指定送出的內容範疇。如《度支奏議》此書：https://ctext.org/library.pl?if=en&res=1957
+                    {
+                        // Regex 邏輯：找到開頭的星號(^*), 捕捉後面的全形空格(　+), 然後交換位置
+                        x = Regex.Replace(x, @"^\*(　+)", "$1*");
+                        textBox1.SelectedText = x;
+                        /*
+                         * 代碼解析
+                            ^ : 確保只匹配字串開頭。
+
+                            \* : 匹配星號（因為 * 是特殊符號，所以要加 \ 跳脫）。
+
+                            (　+) : 括號代表「群組」，　 是全形空格，+ 代表一個或多個。這裡把空格抓起來當作 $1。
+
+                            $1* : 替換成「剛剛抓到的空格群組」加上「星號」。
+                         */
+                        textBox1.Select(s, x.Length);//恢復選取
+                    }
+                    else
+                    {
+                        moveIP = -1;
+                    }
+
                     replaceXdirectly(ref x, string.Empty, true);
                     stopUndoRec = false;
                     #endregion
@@ -4033,17 +4059,22 @@ namespace WindowsFormsApp1
                     undoRecord(); stopUndoRec = false; ResumeEvents();
                     EndUpdate();
 
-                    #region 方便要按2次以上以降階標題                    
-                    if (s + 1 <= textBox1.TextLength && textBox1.Text.Substring(s + 1) != "<"
-                                    && Environment.NewLine.IndexOf(textBox1.Text.Substring(s + 1)) == -1)
-                        if (s + 3 <= textBox1.TextLength && textBox1.Text.Substring(s + 1, 2) == Environment.NewLine)
-                            s += 3;
-                        else
-                        {
-                            while (s < textBox1.TextLength && textBox1.Text.Substring(s, 1) != "*")
-                                ++s;
-                            textBox1.SelectionStart = s;
-                        }
+                    #region 方便要按2次以上以降階標題，將插入點位置移到星號前
+                    if (moveIP == -1)//需要移動游標時才執行
+                    {
+                        if (s + 1 <= textBox1.TextLength && textBox1.Text.Substring(s + 1) != "<"
+                                        && Environment.NewLine.IndexOf(textBox1.Text.Substring(s + 1)) == -1)
+                            if (s + 3 <= textBox1.TextLength && textBox1.Text.Substring(s + 1, 2) == Environment.NewLine)
+                                s += 3;
+                            else
+                            {
+                                while (s < textBox1.TextLength && textBox1.Text.Substring(s, 1) != "*")
+                                    ++s;
+                                textBox1.SelectionStart = s;
+                            }
+                    }
+                    else
+                        textBox1.SelectionStart = moveIP;
                     #endregion
 
                     AvailableInUseBothKeysMouse();
@@ -4375,7 +4406,8 @@ namespace WindowsFormsApp1
                 {//按下 F3 鍵
                     e.Handled = true;
                     int foundwhere;
-                    if (textBox1.SelectionLength == 0) overtypeModeSelectedTextSetting(ref textBox1);
+                    //if (textBox1.SelectionLength == 0) overtypeModeSelectedTextSetting(ref textBox1);
+                    overtypeModeSelectedTextSetting(ref textBox1);
                     string findword = textBox1.SelectionLength == 0 ? lastFindStr : textBox1.SelectedText;
                     if (findword == "") findword = textBox2.Text;
                     if (findword != "")
@@ -5638,6 +5670,7 @@ namespace WindowsFormsApp1
         private void preceded_followed_specify_symbols(string whatSymbol)
         {//`： 於插入點處起至「　」或「􏿽」前止之文字加上黑括號【】//Print/SysRq 為OS鎖定不能用
          //throw new NotImplementedException();
+            overtypeModeSelectedTextSetting(ref textBox1);
             int s = textBox1.SelectionStart; string x = textBox1.Text;
             if (textBox1.SelectionLength == 0)
             {
@@ -9573,6 +9606,7 @@ namespace WindowsFormsApp1
 
             textBox1.ScrollToCaret();
             TopMost = topmost; stopUndoRec = false; ResumeEvents();
+            AvailableInUseBothKeysMouse();
         }
         /// <summary>
         /// 清除成對的大括號間的分段標記
@@ -15070,6 +15104,12 @@ namespace WindowsFormsApp1
                 //            break;
                 //    }
                 //});
+                if (runName == "中國哲學書電子化計劃.清除頁前的分段符號")
+                {
+                    appWord.WindowState = Microsoft.Office.Interop.Word.WdWindowState.wdWindowStateMinimize;
+                    appWord.Visible = true;//   用了LTSC專業增加版2021後，不知為合就無法正常取得結果。手動的卻可以 20251214●●●●●●●●●●●●● 還真的成功了！要顯示出來才成
+                    appWord.WindowState = Microsoft.Office.Interop.Word.WdWindowState.wdWindowStateMinimize;
+                }
                 appWord.Run(runName);
                 Application.DoEvents();
 
@@ -15555,8 +15595,13 @@ namespace WindowsFormsApp1
                     return @"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe";//"msedge"
 
                 case "chrome":// "ChromeHTML"://, "google chrome": '"chrome"
+                    /*
+                     ★★★★★**無寫入權限的電腦**(如無法安裝Chrome)，請將[portableapps.com](https://portableapps.com/)網站的[GoogleChromePortable](https://portableapps.com/apps/internet/google_chrome_portable)複製/安裝到`我的文件`，並將壓縮檔內的chromedriver.exe移到:
+                    > C:\Users\(這是使用者登入作業系統的帳號名稱)\Documents\GoogleChromePortable\App\Chrome-bin 目錄下，與「chrome.exe」並置同一資料夾內
+                     */
                     if (File.Exists(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + @"\GoogleChromePortable\App\Chrome-bin\chrome.exe"))
-                        return "C:\\Users\\ssz3\\Documents\\GoogleChromePortable\\App\\Chrome-bin\\chrome.exe";
+                        return Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + @"\GoogleChromePortable\App\Chrome-bin\chrome.exe";
+                        //return "C:\\Users\\ssz3\\Documents\\GoogleChromePortable\\App\\Chrome-bin\\chrome.exe";
                     else if (File.Exists(@"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe"))
                         return @"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe";
                     //return @"W:\PortableApps\PortableApps\GoogleChromePortable\GoogleChromePortable.exe";
@@ -18314,7 +18359,8 @@ namespace WindowsFormsApp1
                             nextPageStartTime = DateTime.Now;
                         }
                         nextPages(Keys.PageUp, false);
-                        br.driver.SwitchTo().Window(driver.CurrentWindowHandle);
+                        if (browsrOPMode != BrowserOPMode.appActivateByName)
+                            br.driver.SwitchTo().Window(driver.CurrentWindowHandle);
                         //上一頁
                         //if (autoPaste2QuickEdit || keyinTextMode) AvailableInUseBothKeysMouse();
                         AvailableInUseBothKeysMouse();

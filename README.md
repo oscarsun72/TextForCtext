@@ -36,7 +36,13 @@ Text for Ctext 是為了有效加速[《中國哲學書電子化計劃》](https
       - 第二種操作模式是由selenium自動開啟另一個新的Chrome瀏覽器執行體來加以操作。（大致完成了 20230113）
        > 用 [TextForCtextPortable.zip](https://github.com/oscarsun72/TextForCtext/blob/master/TextForCtextPortable.zip) 者 請記得下載與您的Chrome瀏覽器對應的[chromedriver.exe](https://chromedriver.chromium.org/downloads)版本，並和本軟件 TextForCtext.exe 放在同一個目錄/路徑下即可。感恩感恩　南無阿彌陀佛
        > - ★★ **Selenium模式下，若不想關閉手動啟用或WordVBA啟動的Chrome瀏覽器即可共用Chrome瀏覽器：** 只要在Chrome瀏覽器啟動的捷徑內「目標(T)」欄位內的值末端輸入「` --remote-debugging-port=9222`」（程式碼碼裡也有）再按下「確定」或「套用（A)」按鈕即可。20241004 感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主
-        >> 在Chrome瀏覽器「chrome://version/」網址查看，其「命令列」欄下含有` --remote-debugging-port=9222 `即表示所啟動的、現用的Chrome瀏覽器已設定成功了，可供`TextForCtext`與`WordVBA`操作。
+          >> 在Chrome瀏覽器「chrome://version/」網址查看，其「命令列」欄下含有` --remote-debugging-port=9222 `即表示所啟動的、現用的Chrome瀏覽器已設定成功了，可供`TextForCtext`與`WordVBA`操作。         
+         >>>現在Chrome瀏覽器 143 版後好像安裝版也不行了。我現在是用[免安裝版](https://portableapps.com/)，路徑如下。一樣啟動的捷徑目標中請輸入以上參數，如是chromedriver才能用操作既有的Chrome瀏覽器，且啟動Chrome瀏覽器也才打得開，不會有錯誤。20251213
+    
+          >釘選於開始的捷徑： C:\Users\Admin\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\GoogleChromePortable.lnk
+          目標(T): W:\PortableApps\PortableApps\GoogleChromePortable64\GoogleChromePortable.exe --remote-debugging-port=9222
+
+       >>> ★★★請詳下「★★★★★**無寫入權限的電腦**」之說明。很方便，即可上手。當初早已設想好，自己卻忘記了。哈哈！！何況前世累劫耶？感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主 20251215
 
        > ★在全自動連續輸入模式下可配合 Windows 內建的語音辨識軟體 *Windows Speech Recognition* 完全不動手即可操作。快速鍵**Ctrl + F2**可切換此操作，並自動啟動軟體與結束）20230121 23:50壬寅年除夕夜
       - 第三種模式則是混搭前兩種， 或由selenium 取得現用的瀏覽器。來操作。。尚未實作。
@@ -46,9 +52,12 @@ Text for Ctext 是為了有效加速[《中國哲學書電子化計劃》](https
  
  > 只要將其中的 chromedriver.exe 放於免安裝版的解壓目錄中（和TextForCtext.exe同一路徑）即可。
   - 以下非 appActivateByName 模式乃適用：
-    - 無寫入權限的電腦(如無法安裝Chrome)，請將[GoogleChromePortable](https://portableapps.com/apps/internet/google_chrome_portable)複製到我的文件，並將壓縮檔內的chromedriver.exe移到:
-      > C:\Users\(這是使用者登入作業系統的帳號名稱)\Documents\GoogleChromePortable\App\Chrome-bin 目錄下，與「chrome.exe」並置同一資料夾內
-    - 末學目前無它電腦可試，以 Selenium 操控 Chrome瀏覽器或許需要其他權限，然而在母校華岡學習雲的公用電腦也可以成功動啟了，若無法開啟，請將您之前打開的Chrome瀏覽器給關閉再啟動本軟件。。若還有問題，請多反饋，仝玉于成。感恩感恩　南無阿彌陀佛
+    - ★★★★★**無寫入權限的電腦**(如無法安裝Chrome)，請將[portableapps.com](https://portableapps.com/)網站的[GoogleChromePortable](https://portableapps.com/apps/internet/google_chrome_portable)複製/安裝到`我的文件`，並將壓縮檔內的chromedriver.exe移到:
+      > C:\Users\(這是使用者登入作業系統的帳號名稱)\Documents\GoogleChromePortable\App\Chrome-bin 目錄下，即與「chrome.exe」並置同一資料夾內
+    - 末學目前無它電腦可試，以 Selenium 操控 Chrome瀏覽器或許需要其他權限，然而在母校華岡學習雲的公用電腦也可以成功啟用了，非常便利！若無法開啟，請將您之前打開的Chrome瀏覽器給關閉再啟動本軟件。若還有問題，請多反饋，仝玉于成。感恩感恩　南無阿彌陀佛
+    - 將 `...\GoogleChromePortable\` 目錄下的`GoogleChromePortable.exe` 釘選到開始→在釘選的開始磚上按滑鼠右鍵→開啟檔案位置→按滑鼠右鍵點選「內容」，或按Alt+Enter 跳出內容方塊→在目標(T)末後輸入如上所述的參數` --remote-debugging-port=9222`即可。
+    - 之後要啟動Chrome瀏覽器時，請用這個釘選的捷徑啟動，您也可以將此捷徑複製到其他您方便或習慣使用的地方，以供啟動操作。這樣就可以輕鬆使用本軟件應用程式來操作Chrome瀏覽器了。
+    - 如果您已安裝Chrome瀏覽器，也可以如上所述再裝一個免安裝版，然後以此免安裝版來開啟Chrome瀏覽器，一樣適用。只是徒佔空間罷了。如果您常用本軟件操作，不如就用免安裝版，不要用安裝版，像末學本機電腦這樣也行。
 
 ## 介面簡介：
 ![操作介面](https://github.com/oscarsun72/TextForCtext/blob/master/TextforCtext%E4%BB%8B%E9%9D%A2%E7%B0%A1%E4%BB%8B.png)
@@ -593,6 +602,7 @@ Insert : 如 MS Word ，切換插入/取代文字模式（hit! 還原機制亦�
 \` 或 Ctrl + \` ： 於插入點處起至「　」或「􏿽」或「|」或「{」或「<」或分段符號前止之文字加上黑括號【】；若插入點位置前不是「　􏿽」等，則移至該處。如果非插入點，則將選取區前後加上黑括號 (以下不知是什麼，疑是誤貼的文字，待無誤後可刪除： //Print/SysRq 為OS鎖定不能用)
 
 Alt + [ ： 於插入點處起至「　」或「􏿽」或「|」或「{」或「<」或分段符號前止之文字加上**中空黑括號〖〗**；若插入點位置前不是「　􏿽」等，則移至該處。如果非插入點，則將選取區前後加上中空黑括號
+>在取代輸入模式時，會自動多選一個字，如原未選取字，則會選取插入點後一個字，若原選取2個字，則會選取3個字，如是方便手動操作少選一個字。如〖疏〗這個的標識，則在取代輸入模式時不必選取，即可按下此組合鍵以便執行在「疏」字加標「〖〗」。20251215
 
 Ctrl + Backspace : 清除插入點之前的所有「　」或「􏿽」，若插入點前為「\<p\>」則一併清除
 
@@ -748,8 +758,10 @@ F1 : 複製textBox1的內容到剪貼簿
 F2 : 全選/取消全選框裡文字。若原有選取文字則取消選取至其尾端。20240225元宵後一日：並複製textBox1的內容到剪貼簿
 
 F3 ： 在textBox1 從插入點（游標所在處）開始尋找下一個符合所選取的字串；如果沒有選取，則以 textBox2 的字串為據
+>在取代輸入模式時，會自動多選一個字，如原未選取字，則會選取插入點後一個字，若原選取2個字，則會選取3個字，如是方便手動操作少選一個字。20251215
 
 Shift + F3 ： 從插入點（游標所在處）開始在textBox1 尋找上一個符合所選取的字串；如果沒有選取，則以 textBox2 的字串為據
+>在取代輸入模式時，會自動多選一個字，如原未選取字，則會選取插入點後一個字，若原選取2個字，則會選取3個字，如是方便手動操作少選一個字。20251215
 
 F4 ： 重複輸入最後一個輸入的字（字碼）
 > 字元、字符，包括特殊字及指令

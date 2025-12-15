@@ -76,8 +76,12 @@ namespace TextForCtext
                 token = token,
                 email = "oscarsun72@hotmail.com",
                 image = base64Image,
-                version = "beta",//這是站長在微信跟我說的，相當於網頁版的「语序优化beta版」選項 https://kandianguji.com/ocr
-                det_mode = "sp"//det_mode：文字内容排版样式，目前有三种可选：auto（自动识别）、sp（竖向排版）、hp（横向排版）；字符串类型，默认值：auto
+                //version = "beta",//這是站長在微信跟我說的，相當於網頁版的「语序优化beta版」選項 https://kandianguji.com/ocr
+                version = "v2",//https://kandianguji.com/api_documentation#:~:text=%E4%BC%98%E5%8C%96%E7%89%88%E6%9C%AC%EF%BC%89%E3%80%81-,v2%EF%BC%88%E6%9C%80%E6%96%B0%E7%89%88%E6%9C%AC%EF%BC%89,-%EF%BC%8C%E9%BB%98%E8%AE%A4%E5%80%BC%EF%BC%9Adefault
+                det_mode = "sp",//det_mode：文字内容排版样式，目前有三种可选：auto（自动识别）、sp（竖向排版）、hp（横向排版）；字符串类型，默认值：auto
+                auto_insert_space = true //auto_insert_space：是否自动插入空格以分隔单词，布尔类型，默认值：false
+                //按照字符间距自动插入空格；布尔类型（开启True、关闭False），默认值：False
+                //https://kandianguji.com/api_documentation#:~:text=%E9%BB%98%E8%AE%A4%E5%80%BC%EF%BC%9AFalse-,auto_insert_space,-%EF%BC%88v2%EF%BC%89%EF%BC%9A%E6%8C%89%E7%85%A7%E5%AD%97%E7%AC%A6
             });
             request.Content = new StringContent(json, Encoding.UTF8, "application/json");
 
@@ -146,7 +150,8 @@ namespace TextForCtext
                     if (parsedJson.First.First.ToString().Contains("token使用次数已用完"))
                     {
                         Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(parsedJson.First.First.ToString());
-                        return null; }
+                        return null;
+                    }
                     try
                     {
                         var data = parsedJson["data"].ToObject<List<string>>();
