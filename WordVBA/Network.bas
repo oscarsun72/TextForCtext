@@ -1062,7 +1062,7 @@ Function 查小學堂上古音並讀入其結果() As Boolean
         Dim styl As word.Style
         Set styl = rng.Document.Styles.Add("小學堂上古音表格", wdStyleTypeParagraph)
         With styl
-            .font.Name = "Lucida Sans Unicode"
+            .font.name = "Lucida Sans Unicode"
             .Priority = 13
         End With
     End If
@@ -1108,17 +1108,17 @@ Function 查小學堂上古音並讀入其結果() As Boolean
             For Each a In c.Range.Characters
                 Select Case a.text
                     Case VBA.ChrW(232), VBA.ChrW(566), VBA.ChrW(545), VBA.ChrW(224)
-                        If a.font.Name <> "Lucida Sans Unicode" Then
-                            a.font.Name = "Lucida Sans Unicode"
+                        If a.font.name <> "Lucida Sans Unicode" Then
+                            a.font.name = "Lucida Sans Unicode"
                         End If
-                        If a.font.Name <> "Lucida Sans Unicode" Then
+                        If a.font.name <> "Lucida Sans Unicode" Then
                             a.Select
                             MsgBox "請手動設定字型為 ""Lucida Sans Unicode""", vbExclamation
                         End If
                     Case Else
-                        If a.font.Name = "Calibri" Then
-                            a.font.Name = "Lucida Sans Unicode"
-                            If a.font.Name = "Calibri" Then
+                        If a.font.name = "Calibri" Then
+                            a.font.name = "Lucida Sans Unicode"
+                            If a.font.name = "Calibri" Then
                                 a.Select
                                 Stop
                             End If
@@ -1143,7 +1143,7 @@ Function 查小學堂上古音並讀入其結果() As Boolean
                 If VBA.InStr(c.Range.text, "ㄧ") Then
                     c.Range.text = VBA.Replace(VBA.Replace(c.Range.text, "ㄧ", VBA.ChrW(20008)), VBA.Chr(13) & VBA.Chr(7), vbNullString)
                 End If
-                c.Range.font.Name = "標楷體"
+                c.Range.font.name = "標楷體"
             End If
             Set c = .cell(2, 2)
             If .cell(1, 2).Range.text = "漢語拼音" & VBA.Chr(13) & VBA.Chr(7) Then
@@ -1151,7 +1151,7 @@ Function 查小學堂上古音並讀入其結果() As Boolean
                     c.Range.text = VBA.Replace(VBA.Replace(c.Range.text, "g", VBA.ChrW(609)), VBA.Chr(13) & VBA.Chr(7), vbNullString)
                 End If
                 With c.Range.font
-                    .Name = "SimHei"
+                    .name = "SimHei"
                     .Size = .Size + .Size * (2 / 12)
                 End With
             End If
@@ -1461,7 +1461,7 @@ Function IsBase64Image(url As String) As Boolean '應該是解析時出錯了，無效！2024
     Set regex = CreateObject("VBScript.RegExp") 'If VBA.InStr(url, "data:image/png;base64")  Then 'base64編碼的圖片
     regex.Pattern = "^data:image\/(png|jpg|jpeg|gif);base64," '可以更靈活地判斷是否是base64編碼的圖片
     regex.IgnoreCase = True
-    IsBase64Image = regex.test(url)
+    IsBase64Image = regex.Test(url)
 End Function
 Rem 20241010 creedit_with_Copilot大菩薩：解決WordVBA + Selenium下載Chrome瀏覽器網頁中的圖片問題：https://sl.bing.net/dJlhQRbUOHI
 Rem 解碼 base64 編碼的圖像數據並將其保存為文件：https://sl.bing.net/c3GitspZG8G
@@ -2117,6 +2117,7 @@ End Function
 
 Function getDefaultBrowserNameAppActivate() As String
 Dim objShell, ProgID As String: Set objShell = CreateObject("WScript.Shell")
+On Error GoTo eH:
 ProgID = objShell.RegRead _
             ("HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\Shell\Associations\UrlAssociations\http\UserChoice\ProgID")
 ProgID = VBA.Mid(ProgID, 1, IIf(InStr(ProgID, ".") = 0, Len(ProgID), InStr(ProgID, ".") - 1))
@@ -2142,6 +2143,17 @@ Select Case ProgID
         DefaultBrowserNameAppActivate = "google chrome" '"chrome"
 End Select
 getDefaultBrowserNameAppActivate = DefaultBrowserNameAppActivate
+Exit Function
+
+eH:
+Select Case Err.number
+    Case -2147024894 '無法開啟註冊鍵 "HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\Shell\Associations\UrlAssociations\http\UserChoice\ProgID" 以供讀取。
+        ProgID = objShell.RegRead _
+            ("HKEY_CURRENT_USER\Software\Microsoft\Windows\Shell\Associations\UrlAssociations\http\UserChoiceLatest\ProgId\ProgId")
+        Resume Next
+    Case Else
+        MsgBox Err.number & vbCr & vbCr & Err.description
+End Select
 End Function
 
 Rem AppActivate方法常會當掉！！20241020

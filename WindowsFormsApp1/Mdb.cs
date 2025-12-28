@@ -314,7 +314,7 @@ namespace TextForCtext
                     else
                     {
                         //if (DialogResult.OK == MessageBox.Show("確定新增？", "", MessageBoxButtons.OKCancel, MessageBoxIcon.Exclamation))
-                        if (DialogResult.OK == Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("確定新增？", "【抬頭資訊新增】"))
+                        if (DialogResult.OK == Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("確定新增「"+ termtoChk +"」？", "【抬頭資訊新增】"))
                         {
                             cmd.CommandText = "INSERT INTO 每行字數判斷用 (term,condition) VALUES (@term, @condition);";
                             reader.Close();

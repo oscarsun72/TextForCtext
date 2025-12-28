@@ -30,6 +30,10 @@ using System.Windows.Automation;
 using System.Windows.Forms;
 using WebSocketSharp;
 using WindowsFormsApp1;
+using static WindowsFormsApp1.Form1;
+
+using static WindowsFormsApp1.Form1;
+
 
 
 
@@ -990,11 +994,19 @@ namespace TextForCtext
                     //iwe = driver.FindElement(By.XPath("/html/body/div[2]/div[3]/img"));
                     else
                     {
-                        if (!driver.WindowHandles.Contains(LastValidWindow))
-                            LastValidWindow = driver.WindowHandles.Last();
-                        driver.SwitchTo().Window(LastValidWindow);
+                        try
+                        {
+                            if (!driver.WindowHandles.Contains(LastValidWindow))
+                                LastValidWindow = driver.WindowHandles.Last();
+                            driver.SwitchTo().Window(LastValidWindow);
 
-                        iwe = WaitFindWebElementBySelector_ToBeClickable("#previmg");
+                            iwe = WaitFindWebElementBySelector_ToBeClickable("#previmg");
+                        }
+                        catch (Exception ex)
+                        {
+                            if (IsDriverInvalid()) RestartChromedriver();
+                            //throw;
+                        }
                     }
                 }
                 return iwe;
@@ -1939,16 +1951,19 @@ namespace TextForCtext
             ChromeOptions options = new ChromeOptions();
 
             #region it worked！！ ：D 加入的順序決定參數的順序，「"user-data-dir="」此參數在 driverNew()中要參考（string user_data_dir = options.Arguments[0];），故必須第一個加入！
-            if (chrome_path.IndexOf("W:\\") == -1 && chrome_path.IndexOf("Documents") == -1)
+            if (chrome_path.IndexOf("W:\\") == -1 && chrome_path.IndexOf("Documents") == -1 && chrome_path.IndexOf(@"D:\") == -1)
                 //安裝版：
                 //202301050205終於成了 這可以用原來的chrome（即使用者啟動操作慣用的一切設定，如書籤、擴充功能等等）而不是空白的、原始的來操作了 https://www.cnblogs.com/baihuitestsoftware/articles/7742069.html            
                 //options.AddArgument("--user-data-dir=C:\\Users\\oscar\\AppData\\Local\\Google\\Chrome\\User Data\\");
                 //有沒有「--」（--user or user）都可
                 options.AddArgument("user-data-dir=" + Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "\\Google\\Chrome\\User Data\\");
 
+            //若為免安裝版
             //https://www.cnblogs.com/hushaojun/p/5981646.html
-            else if (chrome_path.IndexOf("W:\\") == -1)
+            else if (chrome_path.IndexOf("W:\\") == -1 && chrome_path.IndexOf(@"D:\") == -1)
                 options.AddArgument("user-data-dir=" + Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\GoogleChromePortable\\Data\\profile\\");
+            else if (chrome_path.IndexOf(@"D:\") > -1)
+                options.AddArgument("user-data-dir=" + "D:\\GoogleChromePortable\\Data\\profile\\");
             else
                 //免安裝版：
                 //options.AddArgument("user-data-dir=" + "W:\\PortableApps\\PortableApps\\GoogleChromePortable\\Data\\profile\\");// + "\\Google\\Chrome\\User Data\\");
@@ -2379,46 +2394,52 @@ namespace TextForCtext
                     iweConfirm = WaitFindWebElementBySelector_ToBeClickable("#content3 > form > table > tbody > tr:nth-child(2) > td:nth-child(2) > input[type=text]");
                     if (iweConfirm == null)
                     {
-                        Debugger.Break();
+                        //Debugger.Break();
                         Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("似有網頁故障！請檢查之前輸入的資料是否有正確送出。感恩感恩　南無阿彌陀佛");
                         ActiveForm1.TopMost = false;
                         driver.SwitchTo().Window(driver.CurrentWindowHandle);
                         Form1.InstanceForm1.EndUpdate();
+                        Form1.InstanceForm1.TopMost = false;
+                        driver.SwitchTo().Window(driver.CurrentWindowHandle);
+                        BringToFront("chrome");
                         return false;
                     }
                     else
                         iweConfirm.Click();
-                    if (DialogResult.Cancel ==
-                        Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("Please confirm that you are human! 請輸入認證圖案"
-                        + Environment.NewLine + Environment.NewLine + "請輸入完畢後再按「確定」！程式會幫忙按下「OK」送出"
-                        + Environment.NewLine + Environment.NewLine + "★★！最好按下「取消」以回到前數頁檢查是否有正確送出，以免白做！！", string.Empty, false))
-                    {
-                        //Debugger.Break();
-                        ActiveForm1.TopMost = false;
-                        driver.SwitchTo().Window(driver.CurrentWindowHandle);
-                        //BringToFront("chrome");
-                        Form1.InstanceForm1.EndUpdate();
-                        return false;
-                    }
-                    while (true)
-                    {
-                        WaitFindWebElementBySelector_ToBeClickable("#content3 > form > table > tbody > tr:nth-child(3) > td:nth-child(2) > input[type=submit]")?.Click();
-                        if (DialogResult.Cancel == Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("是否重試？")) break;
-                    }
-                    driver.Navigate().Back();
-                    while (driver.Url == "https://ctext.org/wiki.pl" || driver.Url == "https://ctext.org/wiki.pl?if=en")
-                    {
-                        driver.Navigate().Back();
-                    }
-                    if (driver.Url != url)
-                        Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("網址並非 " + url + " 請檢查後再按下確定");
-                    if (driver.Url == url)
-                    {
-                        SetQuickedit_data_textboxTxt(xInput);
-                        goto reSubmit;
-                    }
+                    //20251228 一律改成停下手動輸入了。因為會有誤差，有時會有兩頁以上沒正確送出。殘念。
+                    //if (DialogResult.Cancel ==
+                    //    Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("Please confirm that you are human! 請輸入認證圖案"
+                    //    + Environment.NewLine + Environment.NewLine + "請輸入完畢後再按「確定」！程式會幫忙按下「OK」送出"
+                    //    + Environment.NewLine + Environment.NewLine + "★★！最好按下「取消」以回到前數頁檢查是否有正確送出，以免白做！！", string.Empty, false))
+                    //{
+                    //Debugger.Break();
+                    ActiveForm1.TopMost = false;
+                    driver.SwitchTo().Window(driver.CurrentWindowHandle);
+                    Form1.InstanceForm1.EndUpdate();
+                    Application.DoEvents();
+                    BringToFront("chrome");
 
-                    else Debugger.Break();
+                    return false;
+                    //}
+                    //while (true)
+                    //{
+                    //    WaitFindWebElementBySelector_ToBeClickable("#content3 > form > table > tbody > tr:nth-child(3) > td:nth-child(2) > input[type=submit]")?.Click();
+                    //    if (DialogResult.Cancel == Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("是否重試？")) break;
+                    //}
+                    //driver.Navigate().Back();
+                    //while (driver.Url == "https://ctext.org/wiki.pl" || driver.Url == "https://ctext.org/wiki.pl?if=en")
+                    //{
+                    //    driver.Navigate().Back();
+                    //}
+                    //if (driver.Url != url)
+                    //    Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("網址並非 " + url + " 請檢查後再按下確定");
+                    //if (driver.Url == url)
+                    //{
+                    //    SetQuickedit_data_textboxTxt(xInput);
+                    //    goto reSubmit;
+                    //}
+
+                    //else Debugger.Break();
                 }
                 #endregion
                 //});
@@ -10229,7 +10250,7 @@ namespace TextForCtext
         /// </summary>
         internal static Dictionary<string, string> WindowHandles = new Dictionary<string, string>();
         /// <summary>
-        /// Alt + Shift + a ： [AI太炎](https://t.shenshen.wiki/)標點 20241105
+        /// Ctrl + Alt + a ： [AI太炎](https://t.shenshen.wiki/)標點 20241105
         /// </summary>
         /// <param name="x">要標點的文本變數，標點結果亦儲存在此</param>
         /// <returns>成功傳回true</returns>
@@ -11049,6 +11070,13 @@ namespace TextForCtext
             {
                 LastValidWindow = driver.CurrentWindowHandle;
                 openNewTabWindow(OpenQA.Selenium.WindowType.Tab);
+                string wh = driver.CurrentWindowHandle;
+                //Task.Run(() =>
+                //{//以防圖像網站當掉之權宜措施
+                openNewTabWindow(); driver.Navigate().GoToUrl("https://homeinmists.ilotus.org/hd/hydcd.php?m=s&p=1&st=term&kw=" + x);
+                openNewTabWindow(); driver.Navigate().GoToUrl("https://www.hanyucidian.org/dictionary/entry?dictionaryCode=hydcdcx&entryName=" + x);
+                driver.SwitchTo().Window(wh);
+                //});
                 driver.Navigate().GoToUrl(url);
                 Clipboard.SetText(x);
                 //輸入「詞目」方塊（#SearchBox；name="T1"），再按下Enter鍵
@@ -11475,6 +11503,10 @@ namespace TextForCtext
             if (iwe != null)
             {
                 iwe.Click();
+                //變更 quality="5" 為 quality="10" 以提高圖像質量
+                iwe = WaitFindWebElementBySelector_ToBeClickable("#picturexml");
+                SetIWebElementValueProperty(iwe, iwe.GetAttribute("value").Replace("quality=\"5\"", "quality=\"10\""));
+
                 //再按下 Replace page with this data 按鈕
                 iwe = WaitFindWebElementBySelector_ToBeClickable("#pictureinput > input[type=submit]");
                 if (iwe != null)
@@ -11521,6 +11553,8 @@ namespace TextForCtext
         {
             try
             {
+                if (browsrOPMode == BrowserOPMode.appActivateByName) return true;
+
                 if (getChromedrivers().Length == 0)
                     RestartChromedriver();
 
@@ -12019,7 +12053,7 @@ namespace TextForCtext
             LastValidWindow = driver.CurrentWindowHandle;
 
             //複製下一卷或單位的內容
-            bool result = CopySKQSNextVolume();
+            bool result = CopyNextVolume();
 
             if (driver.WindowHandles.Contains(LastValidWindow))
             {
@@ -12061,11 +12095,11 @@ namespace TextForCtext
             return result;
         }
         /// <summary>
-        /// 複製下一卷《四庫全書》文本
-        /// 佛 20250418 新增非《四庫》之文本
+        /// 複製下一卷文本以供快捷模式連續輸入
+        /// 由《四庫全書》文本起，至 20250418 起新增非《四庫》之文本 20251227 改今名
         /// </summary>
         /// <returns></returns>
-        internal static bool CopySKQSNextVolume()
+        internal static bool CopyNextVolume()
         {
             string url = string.Empty; bool result = false;
             string urlPrefixDomain = string.Empty;//= url.Substring(url.IndexOf("//") + "//".Length).Substring(0, url.IndexOf("/"));
@@ -12073,6 +12107,7 @@ namespace TextForCtext
                              //http://skqs.guoxuedashi.net/wen_2885i/174671.html#002-1a
                              //https://www.kanripo.org/text/KR4h0141/221
                              //https://github.com/kanripo/KR4h0160/blob/master/KR4h0160_049.txt
+                             //https://zh.wikisource.org/wiki/%E5%A4%A9%E4%B8%8B%E9%83%A1%E5%9C%8B%E5%88%A9%E7%97%85%E6%9B%B8_(%E5%9B%9B%E9%83%A8%E5%8F%A2%E5%88%8A%E6%9C%AC)/%E5%86%8A%E4%BA%94
             for (int i = driver.WindowHandles.Count - 1; i > -1; i--)
             {
                 driver.SwitchTo().Window(driver.WindowHandles[i]);
@@ -12105,6 +12140,9 @@ namespace TextForCtext
                     case "inindex.com":
                         result = true;
                         goto gotoNext;
+                    case "zh.wikisource.org":
+                        result = true;
+                        goto gotoNext;
                     default:
                         break;
                 }
@@ -12134,14 +12172,16 @@ namespace TextForCtext
             }
             else if (urlPrefixDomain == "www.inindex.com" || urlPrefixDomain == "inindex.com")
             {//如果是《元引科技引得數字人文資源平臺·中國歷代文獻》
-                //string urlOld = driver.Url;                
-                //按下到下一單位的按鈕
+             //string urlOld = driver.Url;                
+             //按下到下一單位的按鈕
+                #region 檢查是否有翻到下一卷（單位）
                 IWebElement iwe = WaitFindWebElementBySelector_ToBeClickable("#printView > div:nth-child(3) > div:nth-child(1) > div");//文本內容框
                 if (iwe == null) return false;
                 string textContent = iwe.GetAttribute("textContent");//.Substring(0, 100);
                 int l = textContent.Length;
                 l = l > 50 ? 50 : l;
                 textContent = textContent.Replace("　", string.Empty).Substring(0, l);
+                #endregion
                 iwe = WaitFindWebElementBySelector_ToBeClickable("#root > main > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div.gt");
                 if (iwe == null) return false;
                 BringToFront("chrome");
@@ -12166,6 +12206,35 @@ namespace TextForCtext
                 }
                 //driver.SwitchTo().Window(driver.CurrentWindowHandle);
                 //ChromeSetFocus();
+                url = driver.Url;
+            }
+            else if (urlPrefixDomain == "zh.wikisource.org")
+            {//如果是《維基文庫》，必須是「行動版檢視」（非「桌面版」）才行
+                //按下到下一單位的按鈕
+                IWebElement iwe = WaitFindWebElementBySelector_ToBeClickable("#mf-section-0 > table > tbody > tr > td:nth-child(3) > a");
+                if (iwe == null) return false;
+                //string textContent = iwe.GetAttribute("textContent");//.Substring(0, 100);//文本內容框
+                //int l = textContent.Length;
+                //l = l > 50 ? 50 : l;
+                //textContent = textContent.Replace("　", string.Empty).Substring(0, l);
+                BringToFront("chrome");
+                iwe.Click();
+
+                //iwe = WaitFindWebElementBySelector_ToBeClickable("#mf-section-0 > div");//文本內容框
+                //DateTime dt = DateTime.Now;
+                ////while (DateTime.Now.Subtract(dt).TotalSeconds < 2) { }//要有這樣才能複製到正確的卷頁單位
+                ////while (urlOld == driver.Url)
+                //string textContent1 = iwe.GetAttribute("textContent");
+                //if (textContent1.Length > 50) textContent1 = textContent1.Replace("　", string.Empty).Substring(0, l);
+                ////while (iwe.GetAttribute("textContent").Substring(0,100) == textContent)
+                //while (textContent1 == textContent)
+                //{
+                //    textContent1 = iwe.GetAttribute("textContent");
+                //    if (textContent1.Length > 50) textContent1 = textContent1.Replace("　", string.Empty).Substring(0, l);
+                //    if (DateTime.Now.Subtract(dt).TotalSeconds > 10) return false;
+                //}
+                ////driver.SwitchTo().Window(driver.CurrentWindowHandle);
+                ////ChromeSetFocus();
                 url = driver.Url;
             }
         retry:
@@ -12214,6 +12283,9 @@ namespace TextForCtext
                 case "inindex.com":
                     iElementSelector = "#printView > div:nth-child(3) > div:nth-child(1) > div";
                     break;
+                case "zh.wikisource.org":
+                    iElementSelector = "#mf-section-0 > div";
+                    break;
                 default:
                     break;
             }
@@ -12232,7 +12304,12 @@ namespace TextForCtext
                 result = false; return result;
             }
 
+            //將焦點交給Chrome瀏覽器，在以滑鼠啟動視窗時所需
+            //clickCopybutton_GjcoolFastExperience(iwe.Location);
+            if (Cursor.Position != element.Location)
+                Cursor.Position = element.Location;
             element.Click();
+
 
             // 使用 JavaScript 來全選元素內的文字
             OpenQA.Selenium.IJavaScriptExecutor js = (OpenQA.Selenium.IJavaScriptExecutor)driver;

@@ -270,7 +270,8 @@ namespace TextForCtext
         void skqsTitleMark_WithoutPreSpaceWrappedinBlankLines(ref string xForMark)
         {
             int s = xForMark.IndexOf(Environment.NewLine);
-            while (s > -1)
+            //while (s > -1)
+            while (s > -1 && xForMark.Length > 60 && s < xForMark.Length - 60)//卷末的連續空行不處理 20251219
             {//只要一行/段之前後均只是空行的話（跨行以上的不處理，手動自行處理）
                 string tx = Form1.GetLineText(xForMark, s, out int sLineStart, out int sLineLen);
                 //如果後一行/段是空行段

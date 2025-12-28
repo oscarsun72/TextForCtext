@@ -18,6 +18,7 @@ Text for Ctext 是為了有效加速[《中國哲學書電子化計劃》](https
 > 20240725：配合運用賢超法師[《古籍酷》AI](https://gj.cool/)或[《看典古籍》](https://kandianguji.com/)OCR輸入，將事半功倍也。感恩感恩　讚歎讚歎　南無阿彌陀佛。目前鄙人主要以sl（詳下） 模式在操作，技術已趨成熟穩定可用。阿彌陀佛
  >> 因末學個人使用需要，故《古籍酷》OCR預設為批量授權帳號處理，若無批量授權，請在textBox2中輸入「bF」以關閉之，程式就會改用一般帳號來處理OCR程序（即每日贈予之1000點，約6次OCR額度者）。
  >>> 因已無批量授權，故改預設值為false（ BatchProcessingGJcoolOCR = false）需要切換時再下指令「bT」即可。20251109
+ >>>> 若在操作後發現應用程式好像**失靈**了，應該是與末學程式bugs有關，蓋將事件觸發程序取消、而未能妥善周全予以恢復之故，目前無暇細予巡校，故請將插入點置入textBox2中、再離開即可**恢復事件處理程序**之功能。20251224
 
 \*作業環境、系統需求：**Windows**、.NET Framework 4.5.2 以上、Chrome 瀏覽器（Selenium 模式才必要：[chromedriver](https://developer.chrome.com/docs/chromedriver/downloads?hl=zh-tw)） 
  > **不保留任何權利**，歡迎改寫應用到麥金塔(Mac)或 Linux 等作業系統環境中運行
@@ -26,6 +27,8 @@ Text for Ctext 是為了有效加速[《中國哲學書電子化計劃》](https
 
     可安裝虛擬機在非 Windows 系統執行本軟件。詳見末所附諸演示，以 VirtualBox 為例。
 ** **已知問題 20241214：** [Windows內建的防毒軟體會誤報 TextForCtextWordVBA.dotm 為病毒](https://www.facebook.com/oscarsun72/posts/pfbid02vwgziw3QZLAymWLDMgWEKwKs47JnxNKXwTouAYycF3qcFHV8dXPqwhgi79RyWS4il)，[請將此檔排除在防毒之外](https://github.com/GCuser99/SeleniumVBA/discussions/135?fbclid=IwY2xjawHJ3rpleHRuA2FlbQIxMQABHcMKvBigaNUE6kX9_LmLSzRZopaZaVtQXCQd3DJee3cO5hFAvRFVslKH2Q_aem_ftQWeFZgWHqtCVaaEamTZg#discussioncomment-11527987)。末學電腦MS Word因無法再掛載此檔，故改其名為 **TextForCtext-WordVBA.dotm**
+
+** **已知問題 20251216：** [新版Chrome瀏覽器（約143版後）無法以Selenium chromedriver.exe 正常啟動，也懶得再改程式碼測試了。請改用此處的免安裝版（末學也都用此版），並置於`我的文件`中，即可繼續使用。很方便。詳下文說明。](https://portableapps.com/apps/internet/google_chrome_portable)。
 
 - 本軟件架構為以下三種操作模式（目前本人主要以sl模式在操作）：
   - 在textbox2輸入「ap,」「sl,」「sg,」，可切換瀏覽操作模式設定：
@@ -47,17 +50,21 @@ Text for Ctext 是為了有效加速[《中國哲學書電子化計劃》](https
        > ★在全自動連續輸入模式下可配合 Windows 內建的語音辨識軟體 *Windows Speech Recognition* 完全不動手即可操作。快速鍵**Ctrl + F2**可切換此操作，並自動啟動軟體與結束）20230121 23:50壬寅年除夕夜
       - 第三種模式則是混搭前兩種， 或由selenium 取得現用的瀏覽器。來操作。。尚未實作。
   - 要切換三種模式。可在textbox2輸入以上指令。
+
+ ## 免安裝版的配置（無有權限時亦可行，很便利，末學目前即如此）：
 - [免安裝可執行檔TextForCtextPortable下載，解壓後點擊 TextForCtext.exe 檔案即可](https://github.com/oscarsun72/TextForCtext/blob/master/TextForCtextPortable.zip)：202301052034（2023/1/5 20:34)[直接下載](https://github.com/oscarsun72/TextForCtext/raw/master/TextForCtextPortable.zip)(20240817)
  > [chromedriver下載](https://googlechromelabs.github.io/chrome-for-testing/)（請選擇Windows版：win64或win32看您使用的Chrome瀏覽器是64位元版還是32位元版的，且和您所使用的Chrome瀏覽器版本號相同的版本下載）
  
  > 只要將其中的 chromedriver.exe 放於免安裝版的解壓目錄中（和TextForCtext.exe同一路徑）即可。
   - 以下非 appActivateByName 模式乃適用：
-    - ★★★★★**無寫入權限的電腦**(如無法安裝Chrome)，請將[portableapps.com](https://portableapps.com/)網站的[GoogleChromePortable](https://portableapps.com/apps/internet/google_chrome_portable)複製/安裝到`我的文件`，並將壓縮檔內的chromedriver.exe移到:
-      > C:\Users\(這是使用者登入作業系統的帳號名稱)\Documents\GoogleChromePortable\App\Chrome-bin 目錄下，即與「chrome.exe」並置同一資料夾內
-    - 末學目前無它電腦可試，以 Selenium 操控 Chrome瀏覽器或許需要其他權限，然而在母校華岡學習雲的公用電腦也可以成功啟用了，非常便利！若無法開啟，請將您之前打開的Chrome瀏覽器給關閉再啟動本軟件。若還有問題，請多反饋，仝玉于成。感恩感恩　南無阿彌陀佛
+    - ★★★★★**無寫入權限的電腦**(如無法安裝Chrome)，請將[portableapps.com](https://portableapps.com/)網站的[GoogleChromePortable](https://portableapps.com/apps/internet/google_chrome_portable)複製/安裝到`我的文件`或磁碟`D槽`之根目錄，並將壓縮檔內的chromedriver.exe移到「Chrome-bin」目錄下，即與「chrome.exe」並置同一資料夾內:
+      > C:\Users\(這是使用者登入作業系統的帳號名稱)\Documents\GoogleChromePortable\App\Chrome-bin    
+      > 或    
+      > D:\GoogleChromePortable\App\Chrome-bin
+    - 末學目前無它電腦可試，以 Selenium 操控 Chrome瀏覽器或許需要其他權限，然而在母校華岡學習雲的公用電腦也可以成功啟用了，**非常便利！** 若無法開啟，請將您之前打開的Chrome瀏覽器給關閉再啟動本軟件。若還有問題，請多反饋，仝玉于成。感恩感恩　南無阿彌陀佛
     - 將 `...\GoogleChromePortable\` 目錄下的`GoogleChromePortable.exe` 釘選到開始→在釘選的開始磚上按滑鼠右鍵→開啟檔案位置→按滑鼠右鍵點選「內容」，或按Alt+Enter 跳出內容方塊→在目標(T)末後輸入如上所述的參數` --remote-debugging-port=9222`即可。
     - 之後要啟動Chrome瀏覽器時，請用這個釘選的捷徑啟動，您也可以將此捷徑複製到其他您方便或習慣使用的地方，以供啟動操作。這樣就可以輕鬆使用本軟件應用程式來操作Chrome瀏覽器了。
-    - 如果您已安裝Chrome瀏覽器，也可以如上所述再裝一個免安裝版，然後以此免安裝版來開啟Chrome瀏覽器，一樣適用。只是徒佔空間罷了。如果您常用本軟件操作，不如就用免安裝版，不要用安裝版，像末學本機電腦這樣也行。
+    - 如果　您已安裝Chrome瀏覽器，也可以如上所述再裝一個免安裝版，然後以此免安裝版來開啟Chrome瀏覽器，一樣適用。只是徒佔空間罷了。如果您常用本軟件操作，不如就用免安裝版，不要用安裝版，像末學本機電腦這樣也行。
 
 ## 介面簡介：
 ![操作介面](https://github.com/oscarsun72/TextForCtext/blob/master/TextforCtext%E4%BB%8B%E9%9D%A2%E7%B0%A1%E4%BB%8B.png)
@@ -113,7 +120,8 @@ button1 「分行分段」或「送出貼上」按鈕:
 　貼至[簡單修改模式]框有 auto連續模式與單一模式，也有移至下一頁或停留在本頁兩種選擇（停留在本頁則加按 Shift 鍵即可），可以 Ctrl + / (數字鍵）切換。我現在常用的是再以 Ctrl + Shift + / （數字鍵） 切換的，Ctext 的鄰頁編輯模式，以確保後來貼上的不會蓋過前頁的。詳各指定鍵（快速鍵）下的說明。
 - 自動文本備份及更正備份功能（在複製到剪貼簿時），蓋剛才辛苦做的《四部叢刊》本《南華真經》（《莊子》）第四冊文本，竟然莫名其妙地遺失了，只殘留最後幾頁，整個半天乃至一天的勞動，化為烏有。20211217
 - 預設為最上層顯示，則按下Esc鍵或滑鼠中鍵會隱藏到任務列（系統列）中；滑鼠在其 ico 圖示上滑過即恢復（若在SeleniumNew+手動輸入模式下，瀏覽圖文對照的頁面時，即會開啟該頁簡單修改模式頁面，並將其內容讀入textBox1中。若按住Shift再滿滑過（或未按下時，已切換到OCR輸入模式（ocrTextMode=true） ，則會直接送交賢超法師《古籍酷AI》OCR，若識讀成功，則直接取回文本並加上[查字.mdb](https://www.dropbox.com/s/nbbm2hbneq5g3vx/%E6%9F%A5%E5%AD%97.mdb?dl=0)資料庫已存在的書名篇名號等標點符號。）
-- 要清除所選文字，則選取其字，然後在 textBox4 輸入兩個英文半形雙引號 「""」（即表空字串），則不會取代成「""」，而是清除之。⊙或按下 Ctrl + Shift + Delete 組合鍵即可。
+- 要清除所選文字，則選取其字，然後在 textBox4 輸入兩個英文半形雙引號 「`""`」（即表空字串），則不會取代成「`""`」，而是清除之。⊙或按下 Ctrl + Shift + Delete 組合鍵即可。
+> 然 Ctrl + Shift + Delete 組合鍵 還設定有其他快捷功能，如若選取`{`或`}`，則會清除全部的注文標記，若選取`<p>>`或`*`則會清除所有標題/篇名標記符；若選取任一個書名篇名號，則會清除所有自動標識的書名篇名號；若選取任一標點符號，則會清除所有的標點符號，……等。詳程式碼。
 - Ctrl + z 還原 textBox1 文本功能。支援打字與取代文字後的還原。還原上限為300次。
 
 - isShortLine() 配合「每行字數判斷用」資料表作為每行字數判斷參考 
@@ -223,6 +231,10 @@ Ctrl + Alt + p ： 清除選取內的`<p>` 在行長不一而自動加上段落�
 
 Scroll Lock 或 數字鍵盤 `-` 或 F10 ：自動加上段落標記`。<p>`
 > 在`啟用抬頭平抬檢測模式`時，則於平抬前一行/段末加上換行標記 `|`
+
+>用以判斷行長的變數非靜態的（即非所有Form1類別之實例所共用的），按下Ctrl + Shift + n 所產生的新表單，可以有獨立的行長判斷，適用於行長不規則的文獻整理，如[《四部叢刊三編·天下郡國利病書》](https://ctext.org/library.pl?if=gb&res=77746)。
+
+Ctrl + Shift + F10 :只在 textBox1 可視範圍內處理自動加上段落標記 `<p>`
 
 ##### 換行折行
 Ctrl + Shift + \ ：啟動/關閉抬頭平抬檢測模式
@@ -468,13 +480,22 @@ Ctrl + Shift + 4 ：翻到[Kanripo](https://www.kanripo.org/)下一卷在複製�
 Ctrl + f ：移至 textBox2 準備尋找文本
 
 Alt + f ：切換 Fast Mode 不待網頁回應即進行下一頁的貼入動作（即在不須檢覈貼上之文本正確與否，肯定、八成是無誤的，就可以執行此項以加快輸入文本的動作）當是 fast mode 模式時「送出貼上」按鈕會呈現紅綠燈的綠色表示一路直行通行順暢 20230130癸卯年初九第一上班日週一
->在快速模式（快捷模式）作為背景工作時，請勿將其分頁（tab）切到Chrome瀏覽器的後面，最好保持在最前面、作用中。
+>在快速模式（快捷模式）作為背景工作時，請勿將其分頁（tab）切到Chrome瀏覽器的後面，最好保持在最前面、作用中，才不會造成輸入失敗。（目前還未知何故 20251218）
+
 >若有其他瀏覽器操作的需求，請開新視窗，或最好改用另一款瀏覽器，如末學用Brave。這樣比較不會出現送出資料失敗的問題。20250706準備離世隱居求道往生前不出二週
+
+>啟用快速模式時會順便啟用連續輸入模式。
+
+>按下CapsLock按鍵，使Caps Lock燈亮 或 啟動 cmd.exe （在「執行」中（可按 Win+ r 叫出）輸入「cmd」後按 Enter 鍵來啟動，可釘選在工作列或開始來快速啟動）來剎車。可 20251218
+
+>>發現在表單隱藏時，啟用CpasLock燈號後，滑鼠左鍵點一下、或在表單位置處滑動滑鼠，較易有反應、起作用。可多試試。不靈光時才啟動 cmd.exe 以遏止之。感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主20251223
 
 > 今試將連續輸入Quick edit不出現對話方塊時的設定，並在此功能下看看 20250206年初九
 >> 已實測成功。操作詳最近的演示影片：連續輸入《御定佩文齋詠物詩選》《藝文類聚》等書 20250217
 
 Alt + Shift + f ： 將章節單位的頁面樹狀目錄收起或展開 (f=folder vs unfolder) 20250116
+
+Alt + Shift + j ： 將[《識典古籍》](https://www.shidianguji.com/)檢視網頁原始碼的內容轉成ctext.org的簡單修改模式的內容
 
 Alt + r ：在Selenium模式+手動輸入模式下、關閉所在Chrome瀏覽器右側之分頁。（因應《古籍酷》連線不暢所衍生之措施）20231026
 
@@ -590,7 +611,7 @@ Alt + Shift + F1 ：切換 textbox1 之字型： 切換支援 CJK - Ext 擴充�
 
 Ctrl + Shift + t 同Chrome瀏覽器 --還原最近關閉的頁籤
 
-Ctrl + Shift + p ： 自動翻頁，逐頁瀏覽圖文對照的書圖頁面。要中止，則對本軟件介面或Chrome瀏覽器按住 Ctrl 同時按下滑鼠左鍵。
+Ctrl + Shift + p ： 自動翻頁，逐頁瀏覽圖文對照的書圖頁面。要中止，則對本軟件介面或Chrome瀏覽器按住 Ctrl 同時按下滑鼠左鍵；或啟動 cmd.exe 。
 >> 逐頁瀏覽肉眼檢查是否有空白頁，以免白跑OCR 20240727 執行 CheckBlankPagesBeforeOCR
 
 
@@ -616,6 +637,8 @@ Alt + Shift + r ：將夾注文本錯亂倒置者重整，如「{{雪電}}　{{�
 > 若沒有選取範圍，則會自動偵測適當時範圍以進行置換
 
 Ctrl + \ （反斜線） 或 Alt + \ ： 清除textBox1文本插入點後的分段
+
+Alt + Shift + \ 或 Alt + Shift + a：在卷末插入對應的空行數標記 creedit_with_Gemini大菩薩： 20251221冬至 https://gemini.google.com/share/a3f9a3e7fee6
 
 按下 F1 鍵：以找到的字串位置**前**分行分段（在文字選取內容接的不是newline時；若是，且選取長度等於常數「predictEndofPageSelectedTextLen」則進行自動貼入 Ctext 的 quit edit 方塊中）
 //暫時取消，釋放 F1、 Pause 鍵給 Alt + Shift + 2 用
@@ -683,7 +706,18 @@ Alt + 9 : 鍵入 「   輸入上單引號。
 
 Alt + 0 : 鍵入 『   輸入下單引號。
 
-Alt + b： 訂正註文中空白錯亂的文本。如「{{帝和霍王以下 句亡}}」訂正為「{{帝 霍王以下和句亡}}」，將半形空格與其前半對應的漢字對調。（b：blank） 20250219
+Alt + b： 訂正注文夾注中空白錯亂的文本。如「{{帝和霍王以下 句亡}}」訂正為「{{帝 霍王以下和句亡}}」，將半形空格與其前半對應的漢字對調。（b：blank） 20250219
+> 1個半形空格對應1個字錯亂時適用
+>> 已調整成可自動判斷。若有2個以上的半形空格時，可調用 Alt + Shift + b 執行的程序。這樣就按 Alt + b 就可以了
+
+Alt + Shift + b : 同上，請Gemini大菩薩撰作者 20251224平安夜
+>若全選textBox1，則處理textBox1中的全部文本；否則只處理插入點所在位置的注文（因為無法判斷原文的空白到底是在前面還是後面，而通常是在前面的才會倒置，在後面的則不會）
+
+Ctrl + b ： 若發現小注未錯亂，按下此組合鍵則將其中的 `/`  清除，並將半形空格取代為空白「􏿽」
+
+Ctrl + Shift + Alt + b：直接執行整個textBox1的文本注文校正（即Gemini大菩薩撰作者）
+
+> 2個半形空格對應1個字錯亂時適用
 
 Alt + e： 在完整編輯頁面中直接取代文字。請將被取代+取代成之二字前後並置，並將其選取後（或在被取代之文字前放置插入點）再按下此組合鍵以執行直接取代 20240718
 
@@ -703,8 +737,10 @@ Alt + n : 將選取的字詞句及其網址位址送到以下檔案的末後
 
 Alt + l : 檢查/輸入抬頭平抬時的條件：執行topLineFactorIuput04condition()
 
-    > 目前只支援新增 condition=0與4 的情形，故名為 04condition，即當後綴是什麼時，此行文字雖短，不是分段，乃是平抬 
-    >> 0=後綴；1=前綴；2=前後之前；3前後之後；4是前+後之詞彙；5非前+後之詞彙；6非後綴之詞彙；7非前綴之詞彙
+>目前只支援新增 condition=0與4 的情形，故名為 04condition，即當後綴是什麼時，此行文字雖短，不是分段，乃是平抬 
+    
+>>0=後綴；1=前綴；2=前後之前；3前後之後；4是前+後之詞彙；5非前+後之詞彙；6非後綴之詞彙；7非前綴之詞彙
+
 
 **分段標記**
 
@@ -815,6 +851,8 @@ Alt + g ：就 textBox1 所選之字串，執行「[網路搜尋_元搜尋-同�
 
 Alt + z ：以所選之字（或插入點後之一字）檢索《字統網》 https://zi.tools/
   > 在 appActivateByName 模式下是執行【速檢網路字辭典.exe】
+
+  > 在取代輸入模式時會自動向後/右多選取一個字，選取區如游標所示位置
 
 Alt + c ：以所選之詞（不能少於2字）檢索《漢語大詞典》 https://ivantsoi.myds.me/web/hydcd/search.html
 
@@ -957,7 +995,7 @@ Ctrl + 滑鼠左鍵：清除框中所有文字
 - 輸入「alp」由textBox2輸入 "alp" 來切換設定是否進行非正常行長（CheckAbnormalLinePara 方法）的檢查。 20250614
 >a=abnormal, l=line, p=paragraph
 - 輸入「ifp」 設定各冊冊首/書首內容值（inputTextFrontPage）值
->如「ifp冊府元龜」即設定inputTextFrontPage值為"冊府元龜"，預設值為"{{{封面}}}\<p>"
+>如「ifp冊府元龜」或「冊府元龜ifp」即設定inputTextFrontPage值為"冊府元龜"，預設值為"{{{封面}}}\<p>"
 >> 若只輸入「ifp」則還原為預設值
 - 輸入「anv」 設定是否要自動複製下一卷/單位文本
  > autoNextVolumnContextMark值的切換。預設為true

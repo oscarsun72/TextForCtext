@@ -45,9 +45,11 @@ Private Sub app_Quit()
     Do While DateDiff("s", dt, VBA.Now) < 1
         DoEvents
     Loop
-    If Chromedrivers.Count > 0 Then
-        If MsgBox("是否要清除剩下的chromedriver？", vbOKCancel + vbExclamation) = vbOK Then
-            killchromedrivers
+    If Not Tasks.Exists("TextForCtext") Then
+        If Chromedrivers.Count > 0 Then
+            If MsgBox("是否要清除剩下的chromedriver？", vbOKCancel + vbExclamation) = vbOK Then
+                killchromedrivers
+            End If
         End If
     End If
 End Sub

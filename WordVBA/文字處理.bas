@@ -1999,7 +1999,13 @@ Function isSymbol(ByVal a As String) As Boolean
         isSymbol = True
     End If
 End Function
-
+Sub 清除半形空格(rng As Range)
+    Dim mw As Boolean
+    mw = rng.Find.MatchWildcards
+    rng.Find.MatchWildcards = True
+    rng.Find.Execute "[ ]", , , , , , , wdFindContinue, , vbNullString, wdReplaceAll
+    rng.Find.MatchWildcards = mw
+End Sub
 Sub 清除選取處的所有符號() '由圖書管理symbles模組清除標點符號改編'包括註腳、數字
 'Dim F, a As String, i As Integer
 Dim f, i As Integer, ur As UndoRecord
@@ -4508,12 +4514,12 @@ Sub 大陸引號改臺灣引號()
         End If
         
         Set rng = rngStory
-        rng.Find.Execute findText:=",", replacewith:="，", Replace:=wdReplaceAll
-        rng.Find.Execute findText:=";", replacewith:="；", Replace:=wdReplaceAll
-        rng.Find.Execute findText:=":", replacewith:="：", Replace:=wdReplaceAll
-        rng.Find.Execute findText:="?", replacewith:="？", Replace:=wdReplaceAll
-        rng.Find.Execute findText:="(", replacewith:="（", Replace:=wdReplaceAll
-        rng.Find.Execute findText:=")", replacewith:="）", Replace:=wdReplaceAll
+        rng.Find.Execute findText:=",", Replacewith:="，", Replace:=wdReplaceAll
+        rng.Find.Execute findText:=";", Replacewith:="；", Replace:=wdReplaceAll
+        rng.Find.Execute findText:=":", Replacewith:="：", Replace:=wdReplaceAll
+        rng.Find.Execute findText:="?", Replacewith:="？", Replace:=wdReplaceAll
+        rng.Find.Execute findText:="(", Replacewith:="（", Replace:=wdReplaceAll
+        rng.Find.Execute findText:=")", Replacewith:="）", Replace:=wdReplaceAll
         
         
         '是否在上單引號後

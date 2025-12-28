@@ -1,16 +1,18 @@
 ﻿using FuzzySharp;
-using ado = ADODB;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using WindowsFormsApp1;
 using System.Windows.Forms;
-using System.Diagnostics;
+using WindowsFormsApp1;
 using static System.Net.Mime.MediaTypeNames;
+using ado = ADODB;
 //using OpenQA.Selenium.DevTools.V125.Runtime;
 //using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 //using static System.Net.Mime.MediaTypeNames;
@@ -2045,5 +2047,399 @@ namespace TextForCtext
             // end 變量現在將包含找到的匹配字符串位置
          */
 
+        //Gemini大菩薩：202512223 https://gemini.google.com/share/23e368f6f258
+        public static void JSON提取中文內容(ref string input)
+        {
+            //string input = @"顧氏"",""objectRef"":null...（您的文本內容）";
+
+            // 定義匹配範圍：
+            // 1. \u4e00-\u9fa5 : 基本漢字
+            // 2. \u3000-\u303f : 中式標點符號 (如：，。、)
+            // 3. \uff01-\uff0f, \uff1a-\uff20, \uff3b-\uff40, \uff5b-\uff5e : 其他全形標點
+            string pattern = @"[^\u4e00-\u9fa5\u3000-\u303f\uff01-\uff0f\uff1a-\uff20\uff3b-\uff40\uff5b-\uff5e]";
+
+            // 將不符合上述範圍的字元替換為空字串
+            //string result = Regex.Replace(input, pattern, "");
+            input = Regex.Replace(input, pattern, "");
+
+            //Console.WriteLine(result);
+        }
+
+        /// <summary>
+        /// 《識典古籍》檢視原始碼內容轉換成ctext.org簡單編輯輸入格式
+        /// Gemini大菩薩：202512223 https://gemini.google.com/share/23e368f6f258
+        /// </summary>
+        /// <param name="rawJson"></param>
+        /// <returns></returns>
+        public static string JSON提取中文內容_ProcessTextWithLineBreaks(string rawJson)
+        {
+            // 補齊為 JSON 陣列格式
+            string formattedJson = rawJson.Trim().StartsWith("[") ? rawJson : "[" + rawJson + "]";
+            JArray lines = JArray.Parse(formattedJson);
+
+            StringBuilder result = new StringBuilder();
+
+            foreach (var line in lines)
+            {
+                int lineType = line["lineType"]?.Value<int>() ?? 0;
+                string content = line["content"]?.ToString() ?? "";
+
+                // 1. 處理內容：僅保留漢字與中式標點
+                string cleanContent = Regex.Replace(content, @"[^\u4e00-\u9fa5\u3000-\u303f\uff01-\uff0f\uff1a-\uff20\uff3b-\uff40\uff5b-\uff5e]", "");
+
+                // 2. 根據類型決定輸出格式
+                if (lineType == 1) // 正文
+                {
+                    result.AppendLine(cleanContent); // 結尾加換行
+                }
+                else if (lineType == 2) // 注文
+                {
+                    if (!string.IsNullOrEmpty(cleanContent))
+                    {
+                        result.AppendLine($"{{{{{cleanContent}}}}}"); // 注文也換行，以對應原書行數
+                    }
+                }
+                else if (lineType == 3) // 分頁標記
+                {
+                    // 如果 lineType 為 3，代表原書在此分頁，可插入分頁線
+                    result.AppendLine("\n---【原書分頁點】---\n");
+                }
+            }
+            return result.ToString();
+        }
+
+        public static bool IsChineseChar(string s)
+        {
+            if (string.IsNullOrEmpty(s)) return false;
+            char c = s[0];
+            // 判定是否為中文字元範圍（包含擴展區）
+            return (c >= 0x4E00 && c <= 0x9FFF) || (c >= 0x3400 && c <= 0x4DBF) || char.IsHighSurrogate(c);
+        }
+    }
+
+
+    /// <summary>
+    /// 《識典古籍》檢視網頁原始碼的內容轉換成ctext.org簡單修改模式的內容
+    /// Gemini大菩薩：C# 文本清除與標點符號保留 202512223 https://gemini.google.com/share/23e368f6f258
+    /// </summary>
+    public class AncientTextConverter
+    {
+        /// <summary>
+        /// 《識典古籍》檢視網頁原始碼的內容轉換成ctext.org簡單修改模式的內容
+        /// </summary>
+        /// <param name="inputSource"></param>
+        /// <returns></returns>
+        public static string ConvertHtmlToAncientFormat(string inputSource)
+        {
+            if (string.IsNullOrWhiteSpace(inputSource)) return "輸入內容為空";
+
+            try
+            {
+                // 1. 基礎解碼與 Unicode 轉義還原 (確保 □、■、◯ 能正確顯示)
+                string decoded = WebUtility.HtmlDecode(inputSource);
+                decoded = UnescapeUnicode(decoded);
+
+                // 2. 識典古籍專屬：鎖定包含 lineType 與 content 的數據區塊
+                // 我們依然需要定位 content 欄位，否則會抓到 lineId 等數字
+                string pattern = @"\\""lineType\\"":(?<type>\d+),\\""content\\"":\\""(?<text>.*?)(?<!\\)\\""";
+
+                MatchCollection matches = Regex.Matches(decoded, pattern, RegexOptions.Singleline);
+
+                if (matches.Count == 0) return "無法定位數據內容";
+
+                StringBuilder finalResult = new StringBuilder();
+
+                foreach (Match m in matches)
+                {
+                    string typeStr = m.Groups["type"].Value;
+                    string rawContent = m.Groups["text"].Value;
+
+                    // 3. 淨化內容 (只處理 JSON 轉義，不處理字元過濾)
+                    // 將內容中的 \" 轉回 "，\\ 轉回 \
+                    string cleanContent = rawContent.Replace("\\\"", "\"").Replace("\\\\", "\\");
+
+                    // 移除內容中可能殘留的控制符 (如 \n, \t)
+                    cleanContent = Regex.Replace(cleanContent, @"\\[rntf]", "");
+
+                    if (string.IsNullOrWhiteSpace(cleanContent)) continue;
+
+                    // 4. 根據類型排版，並保留所有字元（含 □ ■ ◯ 〇 等）
+                    if (typeStr == "1") // 正文
+                    {
+                        finalResult.AppendLine(cleanContent);
+                    }
+                    else if (typeStr == "2") // 注文
+                    {
+                        finalResult.AppendLine($"{{{{{cleanContent}}}}}");
+                    }
+                }
+
+                return finalResult.ToString().Trim();
+            }
+            catch (Exception ex)
+            {
+                return $"【處理出錯】：{ex.Message}";
+            }
+        }
+
+        /// <summary>
+        /// 將 \uXXXX 格式的字串轉回實際字元，這是保留缺字符號的關鍵
+        /// </summary>
+        private static string UnescapeUnicode(string input)
+        {
+            try
+            {
+                return Regex.Replace(input, @"\\u(?<val>[a-fA-F0-9]{4})", m =>
+                    ((char)Convert.ToInt32(m.Groups["val"].Value, 16)).ToString());
+            }
+            catch { return input; }
+        }
+    }
+
+    /// <summary>
+    /// 注解排版校正
+    /// Gemini大菩薩 20251224平安夜 https://gemini.google.com/share/fb51391730eb
+    /// </summary>
+    public class AncientTextRestorer
+    {
+        public static string UniversalSwap(string input)
+        {
+            
+            if (string.IsNullOrEmpty(input)) return input;
+
+            string specialBlank = "􏿽";
+            string[] lines = input.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
+            StringBuilder finalResult = new StringBuilder();
+
+            foreach (string line in lines)
+            {
+                if (!line.Contains("/")) { finalResult.AppendLine(line); continue; }
+
+                string[] parts = line.Split('/');
+                string partA = parts[0];
+                string partB = "/" + parts[1]; // 保留斜槓作為基準點
+
+                // 建立視覺寬度地圖
+                var mapA = BuildVisualWidthMap(partA);
+                var mapB = BuildVisualWidthMap(partB);
+
+                // 找出 B 段中的坑位並從 A 段對應座標抓取文字
+                // 注意：我們遍歷 B 段的每一個座標點
+                var sortedBKeys = mapB.Keys.OrderBy(k => k).ToList();
+                foreach (var pos in sortedBKeys)
+                {
+                    // 如果 B 段這個位置是半形空格，且下一個位置也是半形空格 (構成一個漢字坑)
+                    if (mapB.ContainsKey(pos) && mapB[pos].Content == " " &&
+                        mapB.ContainsKey(pos + 1) && mapB[pos + 1].Content == " ")
+                    {
+                        // 檢查 A 段在相同座標是否有「非空格」的文字
+                        if (mapA.ContainsKey(pos) && mapA[pos].Content != " ")
+                        {
+                            var nodeA = mapA[pos];
+                            var nodeB1 = mapB[pos];
+                            var nodeB2 = mapB[pos + 1];
+
+                            // 執行物理對調
+                            string textToMove = nodeA.Content;
+                            nodeB1.Content = textToMove; // 填入文字
+                            nodeB2.Content = "REMOVE";   // 標記待移除的第二個半形位
+                            nodeA.Content = "  ";        // A 段原位留空 (稍後轉特殊符號)
+                        }
+                    }
+                }
+
+                // 重組並處理特殊空白符號
+                string resultA = Reconstruct(mapA).Replace("  ", specialBlank);
+                //string resultB = Reconstruct(mapB).Replace("REMOVE", "");
+                string resultB = Reconstruct(mapB).Replace("/", "");
+
+                finalResult.AppendLine(resultA + resultB);
+            }
+
+            return finalResult.ToString().TrimEnd();
+        }
+
+        class WidthNode { public string Content; }
+
+        private static Dictionary<int, WidthNode> BuildVisualWidthMap(string s)
+        {
+            var map = new Dictionary<int, WidthNode>();
+            TextElementEnumerator charEnum = StringInfo.GetTextElementEnumerator(s);
+            int currentWidth = 0;
+
+            while (charEnum.MoveNext())
+            {
+                string element = charEnum.GetTextElement();
+                // 判斷該 Text Element 的物理寬度：半形字元寬 1，其餘(漢字等)寬 2
+                int w = (element.Length == 1 && element[0] < 128) ? 1 : 2;
+
+                var node = new WidthNode { Content = element };
+                map[currentWidth] = node;
+
+                // 如果寬度是 2，我們讓地圖的兩個座標都指向同一個節點，方便偵測
+                if (w == 2)
+                {
+                    map[currentWidth + 1] = node;
+                }
+
+                currentWidth += w;
+            }
+            return map;
+        }
+
+        private static string Reconstruct(Dictionary<int, WidthNode> map)
+        {
+            StringBuilder sb = new StringBuilder();
+            int lastPos = -1;
+            foreach (var kvp in map.OrderBy(k => k.Key))
+            {
+                // 避免重複添加寬度為 2 的同一個節點
+                if (kvp.Value.Content == "REMOVE") continue;
+
+                // 這裡用對象引用檢查，確保寬度為 2 的漢字只被添加一次
+                if (lastPos != -1 && map[lastPos] == kvp.Value) continue;
+
+                sb.Append(kvp.Value.Content);
+                lastPos = kvp.Key;
+            }
+            return sb.ToString();
+        }
+    }
+
+    /// <summary>
+    /// 夾注文自動校正 Gemini大菩薩 20251224平安夜 ：https://gemini.google.com/share/639690183e06
+    /// Provides utilities for processing and correcting ancient or complex text formats, including visual width
+    /// adjustments and line formatting within delimited regions.
+    /// </summary>
+    /// <remarks>The AncientTextTool class is designed for scenarios where text contains special formatting,
+    /// such as visually aligned columns or embedded markup (e.g., text enclosed in double curly braces). It offers
+    /// static methods to process such text, making it suitable for applications involving historical documents, digital
+    /// humanities, or advanced text layout correction. All members are static and thread-safe.</remarks>
+    public class AncientTextTool
+    {
+        /// <summary>
+        /// 處理入口：解析 {{ }} 區塊並執行校正與排版 https://gemini.google.com/share/8ed9c9c823dd
+        /// </summary>
+        /// <param name="input">原始文本</param>
+        /// <param name="lineLengthLimit">單行長度閾值（字數）</param>
+        public static string ProcessText(string input, int lineLengthLimit)
+        {
+            if (string.IsNullOrEmpty(input)) return input;
+
+            return Regex.Replace(input, @"\{\{([\s\S]*?)\}\}", m =>
+            {
+                string innerText = m.Groups[1].Value;
+
+                // --- 智慧判斷門檻開始 ---
+                // 只有符合條件的注文才執行校正，否則直接進入排版判斷
+                string processedContent = innerText;
+
+                if (ShouldApplyCorrection(innerText))
+                {
+                    processedContent = CorrectVisualWidth(innerText);
+                }
+                // --- 智慧判斷門檻結束 ---
+
+                // 處理斜槓邏輯
+                StringInfo si = new StringInfo(processedContent.Replace("/", ""));
+                if (si.LengthInTextElements < lineLengthLimit * 2)
+                    processedContent = processedContent.Replace("/", "");
+                else
+                    processedContent = processedContent.Replace("/", Environment.NewLine);
+
+                return "{{" + processedContent + "}}";
+            });
+        }
+
+        /// <summary>
+        /// 智慧判斷門檻：決定這段注文是否需要執行「空格/文字反轉」校正 https://gemini.google.com/share/022b7575825b
+        /// </summary>
+        private static bool ShouldApplyCorrection(string text)
+        {
+            // 條件 1：目前的已知條件，含有「字缺」二字
+            if (text.Contains("字缺")) return true;
+
+            // 條件 2：日後您若發現其他關鍵字，可以加在這裡
+            // 例如：if (text.Contains("稱為")) return true;
+
+            // 條件 3：敏感字詞庫（範例）
+            /*
+            string[] sensitiveWords = { "撰", "註", "補" };
+            foreach (var word in sensitiveWords) {
+                if (text.Contains(word)) return true;
+            }
+            */
+
+            return false; // 預設不執行校正，避免誤傷正確的排版
+        }
+
+        private static string CorrectVisualWidth(string input)
+        {
+            string specialBlank = "􏿽";
+            string[] lines = input.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
+            List<string> processedLines = new List<string>();
+
+            foreach (var line in lines)
+            {
+                if (!line.Contains("/")) { processedLines.Add(line); continue; }
+
+                int slashIdx = line.IndexOf('/');
+                string partA = line.Substring(0, slashIdx);
+                string partB = line.Substring(slashIdx);
+
+                var mapA = BuildWidthMap(partA);
+                var mapB = BuildWidthMap(partB);
+
+                foreach (var pos in mapB.Keys.OrderBy(k => k))
+                {
+                    if (mapB.ContainsKey(pos) && mapB[pos].Content == " " &&
+                        mapB.ContainsKey(pos + 1) && mapB[pos + 1].Content == " ")
+                    {
+                        if (mapA.ContainsKey(pos) && mapA[pos].Content != " ")
+                        {
+                            var nodeA = mapA[pos];
+                            mapB[pos].Content = nodeA.Content;
+                            mapB[pos + 1].Content = "REMOVE";
+                            nodeA.Content = "  ";
+                        }
+                    }
+                }
+                processedLines.Add(Reconstruct(mapA).Replace("  ", specialBlank) + Reconstruct(mapB).Replace("REMOVE", ""));
+            }
+            return string.Join(Environment.NewLine, processedLines);
+        }
+
+        // --- 輔助工具 ---
+        class WidthNode { public string Content; }
+
+        private static Dictionary<int, WidthNode> BuildWidthMap(string s)
+        {
+            var map = new Dictionary<int, WidthNode>();
+            TextElementEnumerator charEnum = StringInfo.GetTextElementEnumerator(s);
+            int currentWidth = 0;
+            while (charEnum.MoveNext())
+            {
+                string element = charEnum.GetTextElement();
+                int w = (element.Length == 1 && element[0] < 128) ? 1 : 2;
+                var node = new WidthNode { Content = element };
+                map[currentWidth] = node;
+                if (w == 2) map[currentWidth + 1] = node;
+                currentWidth += w;
+            }
+            return map;
+        }
+
+        private static string Reconstruct(Dictionary<int, WidthNode> map)
+        {
+            StringBuilder sb = new StringBuilder();
+            HashSet<WidthNode> seen = new HashSet<WidthNode>();
+            foreach (var k in map.Keys.OrderBy(x => x))
+            {
+                if (map[k].Content == "REMOVE" || seen.Contains(map[k])) continue;
+                sb.Append(map[k].Content);
+                seen.Add(map[k]);
+            }
+            return sb.ToString();
+        }
     }
 }

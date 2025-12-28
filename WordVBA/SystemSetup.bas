@@ -1,6 +1,6 @@
 Attribute VB_Name = "SystemSetup"
 Option Explicit
-Public FsO As Object, UserProfilePath As String
+Public fso As Object, UserProfilePath As String
 Public Declare PtrSafe Function sndPlaySound32 Lib "winmm.dll" Alias "sndPlaySoundA" (ByVal lpszSoundName As String, ByVal uFlags As Long) As Long
 '
 'https://msdn.microsoft.com/zh-tw/library/office/ff192913.aspx
@@ -58,8 +58,8 @@ Public Const CF_TEXT = 1
 Public Const MAXSIZE = 4096
 
 Public Property Get FileSystemObject() As Object
-    If FsO Is Nothing Then Set FsO = CreateObject("scripting.filesystemobject")
-    Set FileSystemObject = FsO
+    If fso Is Nothing Then Set fso = CreateObject("scripting.filesystemobject")
+    Set FileSystemObject = fso
 End Property
 
 Public Property Get UserProfilePathIncldBackSlash() As String
@@ -264,7 +264,7 @@ Sub 查詢奇摩()
     'ActiveDocument.Save
     Exit Sub
 ErrMsg:
-    MsgBox Err & " : " & Err.Description
+    MsgBox Err & " : " & Err.description
 End Sub
 
 Sub 查詢Google()
@@ -310,7 +310,7 @@ Sub 查詢Google()
     Exit Sub
     
 ErrMsg:
-    MsgBox Err & " : " & Err.Description
+    MsgBox Err & " : " & Err.description
 End Sub
 
 
@@ -351,12 +351,12 @@ Function GetClipboardText()
     GetClipboardText = ClipBoard.GetText
     Exit Function
 eH:
-        Select Case Err.Number
+        Select Case Err.number
             Case -2147221040 'DataObject:GetFromClipboard OpenClipboard 失敗
                 SystemSetup.wait 0.8
                 Resume
             Case Else
-                MsgBox Err.Number + Err.Description
+                MsgBox Err.number + Err.description
         End Select
 End Function
 
@@ -463,24 +463,24 @@ End Property
 
 Function getChrome() As String
     Dim chromePath As String
-    If FsO Is Nothing Then Set FsO = CreateObject("scripting.filesystemobject")
-    If FsO.fileexists("W:\PortableApps\PortableApps\GoogleChromePortable\GoogleChromePortable.exe") Then '用這個才不會和 Selenium 打架
+    If fso Is Nothing Then Set fso = CreateObject("scripting.filesystemobject")
+    If fso.fileexists("W:\PortableApps\PortableApps\GoogleChromePortable\GoogleChromePortable.exe") Then '用這個才不會和 Selenium 打架
         If VBA.Dir("a:", vbVolume) = "" Then '我虛擬電腦才有A槽 20240928
             chromePath = "W:\PortableApps\PortableApps\GoogleChromePortable\GoogleChromePortable.exe"
         Else
             If Dir("C:\Program Files (x86)\Google\Chrome\Application\chrome.exe") <> "" Then
                 chromePath = "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe"
-            ElseIf FsO.fileexists("C:\Program Files\Google\Chrome\Application\chrome.exe") Then
+            ElseIf fso.fileexists("C:\Program Files\Google\Chrome\Application\chrome.exe") Then
                 chromePath = "C:\Program Files\Google\Chrome\Application\chrome.exe"
             End If
         End If
-    ElseIf FsO.fileexists("W:\PortableApps\PortableApps\GoogleChromePortable\App\Chrome-bin\chrome.exe") Then
+    ElseIf fso.fileexists("W:\PortableApps\PortableApps\GoogleChromePortable\App\Chrome-bin\chrome.exe") Then
         chromePath = "W:\PortableApps\PortableApps\GoogleChromePortable\App\Chrome-bin\chrome.exe"
-    ElseIf FsO.fileexists("W:\PortableApps\PortableApps\GoogleChromePortable64\App\Chrome-bin\chrome.exe") Then
+    ElseIf fso.fileexists("W:\PortableApps\PortableApps\GoogleChromePortable64\App\Chrome-bin\chrome.exe") Then
         chromePath = "W:\PortableApps\PortableApps\GoogleChromePortable64\App\Chrome-bin\chrome.exe"
     ElseIf Dir("C:\Program Files (x86)\Google\Chrome\Application\chrome.exe") <> "" Then
         chromePath = "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe"
-    ElseIf FsO.fileexists("C:\Program Files\Google\Chrome\Application\chrome.exe") Then
+    ElseIf fso.fileexists("C:\Program Files\Google\Chrome\Application\chrome.exe") Then
         chromePath = "C:\Program Files\Google\Chrome\Application\chrome.exe"
     End If
     getChrome = chromePath
@@ -516,7 +516,7 @@ Public Function appActivatedYet(exeName As String) As Boolean
         For Each Process In objProcessSet
            'Debug.Print Process.ProcessID, Process.Name
            'If Process.Name = exeName Then 'processName Then
-           If Not StrComp(Process.Name, exeName, vbTextCompare) Then 'processName Then
+           If Not StrComp(Process.name, exeName, vbTextCompare) Then 'processName Then
             appActivatedYet = True
             Exit Function
            End If
@@ -526,10 +526,10 @@ Public Function appActivatedYet(exeName As String) As Boolean
         Set objProcessSet = Nothing
     Exit Function
 eH:
-    Select Case Err.Number
+    Select Case Err.number
         Case 5 '程序呼叫或引數不正確
         Case Else
-            MsgBox Err.Number & Err.Description
+            MsgBox Err.number & Err.description
             'resume
     End Select
 End Function
@@ -574,8 +574,10 @@ Sub backupNormal_dotm() '自動備份Normal.dotm
     Source = SystemSetup.WordTemplatesPathIncldBackSlash + "Normal.dotm"
     Destination = SystemSetup.DropBoxPathIncldBackSlash + "Normal.dotm"
     If VBA.Dir(Destination) <> vbNullString Then GoSub backup:
-    Source = SystemSetup.WordStartupPathIncldBackSlash + "TextForCtext-WordVBA1.dotm"
-    Destination = SystemSetup.DropBoxPathIncldBackSlash + "TextForCtext-WordVBA1.dotm"
+    Source = SystemSetup.WordStartupPathIncldBackSlash + "TextForCtext-WordVBA.dotm"
+    Destination = SystemSetup.DropBoxPathIncldBackSlash + "TextForCtext-WordVBA.dotm"
+'    Source = SystemSetup.WordStartupPathIncldBackSlash + "TextForCtext-WordVBA1.dotm"
+'    Destination = SystemSetup.DropBoxPathIncldBackSlash + "TextForCtext-WordVBA1.dotm"
     If VBA.Dir(Destination) <> vbNullString Then GoSub backup:
     Exit Sub
 
@@ -592,11 +594,11 @@ backup:
     Return
     
 eH:
-    Select Case Err.Number
+    Select Case Err.number
         Case 70
             MsgBox "Normal.dotm還未備份", vbExclamation
         Case Else
-            MsgBox Err.Number & Err.Description
+            MsgBox Err.number & Err.description
     End Select
 End Sub
 Sub seleniumDllReference()
@@ -648,12 +650,12 @@ Sub killProcessesByName(imageName As String)
     Next
 Exit Sub
 eH:
-    Select Case Err.Number
+    Select Case Err.number
         Case -2147217406
-            If VBA.InStr(Err.Description, "找不到 ") Then
+            If VBA.InStr(Err.description, "找不到 ") Then
             End If
         Case Else
-            MsgBox Err.Number & Err.Description
+            MsgBox Err.number & Err.description
     End Select
 End Sub
 Sub killchromedriverFromHere()
@@ -679,13 +681,13 @@ Sub killchromedriverFromHere()
     
     Exit Sub
 eH:
-    Select Case Err.Number
+    Select Case Err.number
         Case -2147467261 '並未將物件參考設定為物件的執行個體。
             Set SeleniumOP.WD = Nothing
             Resume Next
         Case Else
             Set SeleniumOP.WD = Nothing
-            MsgBox Err.Number + Err.Description
+            MsgBox Err.number + Err.description
     End Select
     Rem 20230119 YouChat菩薩：
     Rem 有沒有現成的函式方法可以套用呢？ 只能用 loop through 嗎？

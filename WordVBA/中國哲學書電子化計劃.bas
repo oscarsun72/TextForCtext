@@ -4,13 +4,17 @@ Dim ChapterSelector As String
 'Const description As String = "將星號前的分段符號移置前段之末 & 清除頁前的分段符號"
 'Const description As String = "將星號前的分段符號移置前段之末 & 清除頁前的分段符號{佛弟子文獻學者孫守真任真甫按：仁者志士義民菩薩賢友請多利用賢超法師《古籍酷AI》或《看典古籍》OCR事半功倍也。二站每日均有不少的免費額度可供善用，願毋荒蕪、空拋虛擲了！如蒙不棄，可利用末學自製於GitHub開源免費免安裝之TextForCtext 應用程式，加速輸入與排版。討論區與末學YouTube頻道有演示影片可資參考。感恩感恩　讚歎讚歎　南無阿彌陀佛"
 'Const description As String = "將星號前的分段符號移置前段之末 & 清除頁前的分段符號{據《國學大師》或Kanripo.org所藏本輔以末學自製於GitHub開源免費免安裝之TextForCtext排版對應錄入。討論區與末學YouTube頻道有實境演示影片可資參考。感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主}"
+
 'Const description As String = "將星號前的分段符號移置前段之末 & 清除頁前的分段符號{據Kanripo.org或《國學大師》或北京元引科技有限公司《元引科技引得數字人文資源平臺·中國歷代文獻》所藏本輔以末學自製於GitHub開源免費免安裝之TextForCtext排版對應錄入。討論區與末學YouTube頻道有實境演示影片可資參考。感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主}"
 'Const description As String = "將星號前的分段符號移置前段之末 & 清除頁前的分段符號{據Kanripo.org或北京元引科技有限公司《元引科技引得數字人文資源平臺·中國歷代文獻》所藏本輔以末學自製於GitHub開源免費免安裝之TextForCtext排版對應錄入。討論區與末學YouTube頻道有實境演示影片可資參考。感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主}"
 'Const description As String = "將星號前的分段符號移置前段之末 & 清除頁前的分段符號{據Kanripo.org所藏本輔以末學自製於GitHub開源免費免安裝之TextForCtext排版對應錄入。討論區與末學YouTube頻道有實境演示影片可資參考。感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主}"
+Const description As String = "將星號前的分段符號移置前段之末 & 清除頁前的分段符號{據《維基文庫》或Kanripo.org所藏本輔以末學自製於GitHub開源免費免安裝之TextForCtext排版對應錄入。討論區與末學YouTube頻道有實境演示影片可資參考。感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主}"
 'Const description As String = "將星號前的分段符號移置前段之末 & 清除頁前的分段符號{據《維基文庫》所藏本輔以末學自製於GitHub開源免費免安裝之TextForCtext排版對應錄入。討論區與末學YouTube頻道有實境演示影片可資參考。感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主}"
 'Const description As String = "將星號前的分段符號移置前段之末 & 清除頁前的分段符號{據《維基文庫》或《國學大師》或Kanripo.org或北京元引科技有限公司《元引科技引得數字人文資源平臺·中國歷代文獻》所藏本輔以末學自製於GitHub開源免費免安裝之TextForCtext排版對應錄入。討論區與末學YouTube頻道有實境演示影片可資參考。感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主}"
-Const description As String = "將星號前的分段符號移置前段之末 & 清除頁前的分段符號{據北京元引科技有限公司《元引科技引得數字人文資源平臺·中國歷代文獻》所藏本輔以末學自製於GitHub開源免費免安裝之TextForCtext排版對應錄入。討論區與末學YouTube頻道有實境演示影片可資參考。感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主}"
+
+'Const description As String = "將星號前的分段符號移置前段之末 & 清除頁前的分段符號{據北京元引科技有限公司《元引科技引得數字人文資源平臺·中國歷代文獻》所藏本輔以末學自製於GitHub開源免費免安裝之TextForCtext排版對應錄入。討論區與末學YouTube頻道有實境演示影片可資參考。感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主}"
 'Const description As String = "將星號前的分段符號移置前段之末 & 清除頁前的分段符號{據《漢籍電子文獻資料庫》（今《漢籍全文資料庫》）所收本輔以末學自製於GitHub開源免費免安裝之TextForCtext排版對應錄入。討論區與末學YouTube頻道有實境演示影片可資參考。感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主}"
+'Const description As String = "將星號前的分段符號移置前段之末 & 清除頁前的分段符號{據《識典古籍》所收本輔以末學自製於GitHub開源免費免安裝之TextForCtext排版對應錄入。此乃與Gemini大菩薩合作之新功能，有緣末學再於YouTube頻道實境直播演示以供參考。感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主}"
 
 'Const description As String = "本書與URN: ctp:wb 同版，今據另一同版者以末學自製於GitHub開源免費免安裝之TextForCtext應用程式內WordVBA對應迻入（討論區與末學YouTube頻道有實境演示影片可供參考），以俟後賢精校。各本後亦可同步更新。感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主"
 
@@ -19,6 +23,7 @@ Const description_Edit_textbox_新頁面 As String = "據《Kanripo》所收本輔以末學自
 'Const description_Edit_textbox_新頁面 As String = "據《國學大師》或《Kanripo》或北京元引科技有限公司《元引科技引得數字人文資源平臺·中國歷代文獻》所收本輔以末學自製於GitHub開源免費免安裝之TextForCtext軟件排版對應錄入；討論區及末學YouTube頻道有實境演示影片。感恩感恩　讚歎讚歎　南無阿彌陀佛"
 'Const description_Edit_textbox_新頁面 As String = "據《維基文庫》或《國學大師》或《Kanripo》或北京元引科技有限公司《元引科技引得數字人文資源平臺·中國歷代文獻》所收本輔以末學自製於GitHub開源免費免安裝之TextForCtext軟件排版對應錄入；討論區及末學YouTube頻道有實境演示影片。感恩感恩　讚歎讚歎　南無阿彌陀佛"
 'Const description_Edit_textbox_新頁面 As String = "據北京元引科技有限公司《元引科技引得數字人文資源平臺·中國歷代文獻》所收本輔以末學自製於GitHub開源免費免安裝之TextForCtext軟件排版對應錄入；討論區及末學YouTube頻道有實境演示影片。感恩感恩　讚歎讚歎　南無阿彌陀佛"
+
 
 Sub 分行分段()
     
@@ -236,7 +241,7 @@ Sub 新頁面()
     SystemSetup.contiUndo ur
 End Sub
 Sub setPage1Code() '(ByRef d As Document)
-    Dim xd As String
+    Dim xd As String, page1 As String
     xd = SystemSetup.GetClipboardText
     If InStr(xd, "page=""1""") = 0 Then
         Dim bID As String, s As Byte, pge As String
@@ -248,8 +253,55 @@ Sub setPage1Code() '(ByRef d As Document)
             xd = "<scanbegin file=""" & bID & """ page=""1"" />●<scanend file=""" & bID & """ page=""1"" />" + xd
             SystemSetup.ClipboardPutIn xd
         End If
+    Else
+        '清理現有假的亂碼扉頁，以免影響自動連續輸入之進程 20251226聖誕節後一日
+        '取得第一頁的範圍
+        page1 = GetPageContent(xd, 1)
+        If InStr(page1, "}}<scanskip ") Then '直接清除的條件
+            xd = Replace(xd, page1, "●")
+            SystemSetup.ClipboardPutIn xd
+        Else '待觀察彙整出的條件
+            If Not Page1Exam_ContainsRegex(page1) Then
+                word.ActiveDocument.Activate
+                word.Application.Activate
+                If MsgBox("是否清除第一頁的內容，以利連續自動輸入之進程？", vbInformation + vbOKCancel) = vbOK Then
+                    xd = Replace(xd, page1, "●")
+                    SystemSetup.ClipboardPutIn xd
+                End If
+            End If
+        End If
+        
     End If
 End Sub
+Rem GitHub　Copilot大菩薩 2025聖誕節後1日 https://copilot.microsoft.com/shares/L7jgGeRALLMN26kEvtWEV
+Function Page1Exam_ContainsRegex(ByVal text As String) As Boolean
+    Dim re As Object
+    Set re = CreateObject("VBScript.RegExp")
+    
+    ' 這裡可以放多種模式，例如特殊符號或換行
+    re.Pattern = "[《》]|(\r\n)"
+    re.Global = True
+    
+    Page1Exam_ContainsRegex = re.Test(text)
+End Function
+
+Rem GetPageContent(xmlText, "1") 取得第 1 頁的內容，或 GetPageContent(xmlText, "2") 取得第 2 頁。GitHub　Copilot大菩薩 20251226聖誕節後一日 https://copilot.microsoft.com/shares/fcnRVb1mNcY3f4PvDVg9i
+Function GetPageContent(xmlText As String, pageNum As String) As String
+    Dim re As Object, matches As Object
+    
+    Set re = CreateObject("VBScript.RegExp")
+    re.Pattern = "<scanbegin[^>]*page=""" & pageNum & """[^>]*>([\s\S]*?)<scanend[^>]*page=""" & pageNum & """[^>]*>"
+    re.IgnoreCase = True
+    re.Global = False
+    
+    Set matches = re.Execute(xmlText)
+    If matches.Count > 0 Then
+        GetPageContent = matches(0).SubMatches(0)
+    Else
+        GetPageContent = ""
+    End If
+End Function
+
 
 Sub clearRedundantCode()
 Dim xd As String, s As Long, e As Long
@@ -392,12 +444,8 @@ Sub 將星號前的分段符號移置前段之末(ByRef d As Document) '20220522
     DoEvents
     On Error GoTo eH
     rng.Paste
-    
-    Set rng = rng.Document.Range '20251213增，測試 ●●●●●●●●●
-    
     rng.Find.ClearFormatting
-    'Do While rng.Find.Execute("*")
-    Do While rng.Find.Execute("*", , , False, , , True, wdFindContinue)
+    Do While rng.Find.Execute("*")
         e = rng.End
         If rng.start > 0 Then
             If rng.Previous = VBA.Chr(13) Then
@@ -519,6 +567,8 @@ Sub 轉成黑豆以作行字數長度判斷用()
     If ActiveDocument.path <> "" Then Exit Sub
     SystemSetup.stopUndo ur, "轉成黑豆以作行字數長度判斷用"
     Set p = Selection.Paragraphs(1)
+    p.Range.Select
+    清除選取處的所有符號
     cntr = p.Range.Characters.Count - 1
     For i = 1 To cntr
         Set a = p.Range.Characters(i)
@@ -711,7 +761,9 @@ Sub 維基文庫四部叢刊本轉來()
             End If
         End If
     Next p
+    SystemSetup.playSound 1
     維基文庫等欲直接抽換之字 d
+    SystemSetup.playSound 1
     文字處理.書名號篇名號標注
     d.Range.Cut
     d.Close wdDoNotSaveChanges
@@ -1650,10 +1702,12 @@ For Each inlnsp In rng.InlineShapes
         ElseIf aLtTxt Like "（?血?）" Then
             aLtTxt = VBA.ChrW(-30654)
         ElseIf aLtTxt Like "SKchar" Then
-            GoTo nxt
+            aLtTxt = "●" '∵無法判斷其形構，必須檢閱原書圖方可 20251227
+'            GoTo nxt
 '            aLtTxt = "疾,優,虢,曷,姬,鮑,徑,梓,死（2DB7E）,鬼,灌,瓘,鸛,毓,褭,舁"'餘詳 查字.mdb
         ElseIf aLtTxt Like "SKchar2" Then
-            GoTo nxt
+            aLtTxt = "●" '∵無法判斷其形構，必須檢閱原書圖方可
+'            GoTo nxt
 '            aLtTxt = "纏（7E92）,丑,"'餘詳 查字.mdb
         Else
             Select Case aLtTxt
@@ -1684,9 +1738,10 @@ For Each inlnsp In rng.InlineShapes
         End If
     End If
 replaceIt:
-    inlnsp.Select
-    Selection.TypeText aLtTxt
-    inlnsp.Delete
+    inlnsp.Range.text = aLtTxt '一行抵下3行！ ：） 感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主 20251227
+'    inlnsp.Select
+'    Selection.TypeText aLtTxt
+'    inlnsp.Delete
 nxt:
 Next inlnsp
 cnt.Close
@@ -1782,7 +1837,7 @@ nextRecord:
 End Sub
 Rem 現在多用Kanripo.org者 20250202大年初五
 Sub 元引科技引得數字人文資源平臺_北京元引科技有限公司轉來()
-    Dim rng As Range, noteRng As Range, aNext As Range, aPre As Range, ur As UndoRecord, midNoteRngPos As Byte, midNoteRng As Range, aX As String, a As Range, aSt As Long, aEd As Long
+    Dim rng As Range, noteRng As Range, aNext As Range, aPre As Range, ur As UndoRecord, midNoteRngPos As Byte, midNoteRng As Range, aX As String, a As Range, aSt As Long, aEd As Long, si As New StringInfo
     Dim noteFont As font '記下注文格式以備用
     Dim insertX As String, counter As Byte
     Set rng = Documents.Add().Range
@@ -1812,8 +1867,26 @@ Sub 元引科技引得數字人文資源平臺_北京元引科技有限公司轉來()
     rng.Find.Execute "^p/", , , , , , , wdFindContinue, , "^p", wdReplaceAll
     
     rng.Find.Execute VBA.Chr(13), , , , , , , wdFindContinue, , VBA.Chr(11), wdReplaceAll
-        
-    rng.Find.font.Color = 1310883
+
+    Rem 清理文本，會誤衍出許多半形空格
+    rng.Find.font.Color = 1310883 '小注文顏色
+    If rng.Find.Execute("/ ") Then
+        rng.start = rng.start - 1
+        rng.MoveStartUntil " ", -200
+        rng.MoveEndUntil " "
+        If rng.font.Color = 1310883 Then
+            playSound 0.411
+            rng.Find.ClearFormatting
+'            rng.Find.MatchWildcards = True
+'            rng.Find.Execute "[ ]", , , , , , , wdFindContinue, , vbNullString, wdReplaceAll
+            文字處理.清除半形空格 rng
+        End If
+    End If
+    
+    Rem 準備找小注來處理
+    Set rng = rng.Document.Range
+    rng.Find.font.Color = 1310883 '小注文顏色
+    
     Do While rng.Find.Execute(vbNullString, , , False, , , True, wdFindStop)
         If noteFont Is Nothing Then Set noteFont = rng.font
         Set noteRng = rng '.Document.Range(rng.start, rng.End)
@@ -1933,7 +2006,18 @@ Sub 元引科技引得數字人文資源平臺_北京元引科技有限公司轉來()
                             counter = 0
                             If a.Next = VBA.Chr(11) Then '如果斜線/後面即換行
                                 If aX = vbNullString Or VBA.Replace(aX, "　", vbNullString) <> vbNullString Then '若無縮排，則清除掉斜線/
-                                    a.text = vbNullString
+                                    If (a.Next = Chr(11) _
+                                            And noteRng.Previous = Chr(11) _
+                                            And si.Create(Replace(noteRng, "　", vbNullString)).LengthInTextElements = 2 _
+                                            And Right(Replace(noteRng, "　", vbNullString), 1) = "/") Then ' 獨立純注文且僅有1字無縮排時的處理 And si.Create(noteRng.text).LengthInTextElements = 2) Then
+'                                        noteRng.Select '20251225聖誕節
+'                                        Stop
+                                        'insertX = Chr(11)
+                                        a.text = Chr(11) & "　"
+                                        noteRng.End = noteRng.End + 2
+                                    Else
+                                        a.text = vbNullString
+                                    End If
                                 Else '有縮排時
                                     a.text = insertX '●●●●●●●●●●●●●再觀察
                                     noteRng.SetRange aSt, aEd + VBA.Len(insertX) - 1 '「/」（ a = "/" ）拿掉了故減1
@@ -2022,7 +2106,7 @@ Sub 元引科技引得數字人文資源平臺_北京元引科技有限公司轉來()
     End With
     SystemSetup.playSound 1.921
     SystemSetup.contiUndo ur
-    
+    Set si = Nothing
     
 '    AppActivate "TextForCtext"
 '    DoEvents
@@ -2034,7 +2118,7 @@ Sub Kanripo_GitHub轉來()
     '以下問題已解決，待觀察
     '還未完善，如以下此檔之獨立注文處：
     'https://github.com/kanripo/KR4h0160/blob/master/KR4h0160_046.txt
-    Dim rng As Range, d As Document, p As Paragraph, noteRng As Range, i As Long, ac_noteRng As Long, a As Range, exa_rng As Range, xd As String
+    Dim rng As Range, d As Document, p As Paragraph, noteRng As Range, i As Long, ac_noteRng As Long, a As Range, exa_rng As Range, xd As String, si As New StringInfo
     Set d = Documents.Add
     Set rng = d.Range
     rng.Document.Activate
@@ -2122,8 +2206,9 @@ Sub Kanripo_GitHub轉來()
         noteRng.MoveEndUntil ")" '取得注文範圍
         
         Rem just for test
-'        If InStr(rng.Paragraphs(1).Range.text, "代之讀相如賦者多矣皆改易") Or InStr(noteRng, "師古曰漢制三公號稱萬石其俸") Or InStr(noteRng, "以下復古詩") Then
+'        If InStr(rng.Paragraphs(1).Range.text, "人/") Or InStr(noteRng, "師古曰漢制三公號稱萬石其俸") Or InStr(noteRng, "以下復古詩") Then
 '            noteRng.Select
+'            noteRng.Document.Activate
 '            Stop
 '        End If
         
@@ -2145,8 +2230,9 @@ Sub Kanripo_GitHub轉來()
 '                                End If
                                 
                                 a.InsertAfter StrConv(space(i - 1), vbWide)
-                                a.Characters(1).Delete
+                                If InStr(noteRng, " ") = 0 Then a.Characters(1).Delete
                             Else
+                                '獨立夾注注文且只有1個字
                                 If VBA.InStr(exa_rng.text, "　") And VBA.Replace(exa_rng.text, "　", vbNullString) = vbNullString Then '縮排文字首為小注時
                                     a.InsertAfter VBA.StrConv(VBA.space(VBA.Len(exa_rng.text)), vbWide)
                                     'a.SetRange a.Characters(1).start, a.Characters(1).End
@@ -2155,11 +2241,15 @@ Sub Kanripo_GitHub轉來()
                                 End If
                                 'a.Delete '清除/
                                 'If noteRng.start - 1 = p.Range.start And noteRng.End + 1 = p.Range.End - 1 And p.Range.Characters(p.Range.Characters.Count - 1).text = ")" Then
-                                '行全注文則注文之字數會較整段來得少3個，即注文起迄符2個再加上段落標記符chr(13)一個
-                                If p.Range.Characters.Count - 3 - VBA.Len(exa_rng.text) = noteRng.Characters.Count Then '在有縮排及插入全形空格時便不適用，要再減去插入的空格數
+                                '全注文則注文之字數會較整段來得少3個，即注文起迄符2個再加上段落標記符chr(13)一個
+                                '在有縮排及插入全形空格時便不適用，要再減去插入的空格數
+                                If p.Range.Characters.Count - 3 - VBA.Len(exa_rng.text) = noteRng.Characters.Count _
+                                    Or (a.Next.Next = Chr(13) _
+                                        And Replace(d.Range(p.Range.start, p.Range.start + (InStr(p.Range.text, "(")) - 1), "　", vbNullString) = vbNullString _
+                                        And noteRng.Characters(2).text = "/" And si.Create(noteRng.text).LengthInTextElements = 2) Then '或者是獨立注文只有2個字（第1個是漢字，末後是「/」）
                                     a.Characters(1).text = VBA.Chr(13)
                                 Else
-                                    a.Characters(1).Delete
+                                    If InStr(noteRng, " ") = 0 Then a.Characters(1).Delete
                                 End If
                             End If
                         ElseIf VBA.InStr(exa_rng.text, "　") And VBA.Replace(exa_rng.text, "　", vbNullString) = vbNullString Then '縮排文字首為小注時
@@ -2172,7 +2262,7 @@ Sub Kanripo_GitHub轉來()
                             If p.Range.Characters.Count - 3 - VBA.Len(exa_rng.text) = noteRng.Characters.Count Then '在有縮排及插入全形空格時便不適用，要再減去插入的空格數
                                 a.Characters(1).text = VBA.Chr(13)
                             Else
-                                a.Characters(1).Delete
+                                If InStr(noteRng, " ") = 0 Then a.Characters(1).Delete
                             End If
                         ElseIf InStr(d.Range(p.Range.start, rng.start), ")") = 0 And noteRng.Next.Next.text = Chr(13) And _
                             (p.Range.Characters(1) = "(" Or VBA.Replace(d.Range(p.Range.start, rng.start), "　", vbNullString) = vbNullString) Then
@@ -2182,7 +2272,7 @@ Sub Kanripo_GitHub轉來()
                                 a.text = Chr(13) & d.Range(p.Range.start, rng.start)
                             End If
                         Else
-                            a.Delete '清除/
+                            If InStr(noteRng, " ") = 0 Then a.Delete '清除/
                         End If
                     Else
                         If a.Next = ")" Then
@@ -2191,10 +2281,10 @@ Sub Kanripo_GitHub轉來()
                                 Set p = rng.Paragraphs(1)
                                 If noteRng.start > p.Range.start + 1 Then 'noteRng 不包括「()」故須+1
                                     a.InsertAfter StrConv(space(i - 1), vbWide)
-                                    a.Characters(1).Delete '清除/
+                                    If InStr(noteRng, " ") = 0 Then a.Characters(1).Delete '清除/
                                 End If
                             Else
-                                a.Delete '清除/
+                                If InStr(noteRng, " ") = 0 Then a.Delete '清除/
                             End If
                         End If
                     End If
@@ -2227,6 +2317,7 @@ Sub Kanripo_GitHub轉來()
     d.Range.Cut
     d.Close wdDoNotSaveChanges
     
+    Set si = Nothing
     SystemSetup.playSound 1.921
 End Sub
 
@@ -2656,11 +2747,17 @@ Sub 清除文本頁中的編號儲存格(rng As Range)
 End Sub
 
 Sub 維基文庫等欲直接抽換之字(d As Document)
-    Dim rst As New ADODB.Recordset, cnt As New ADODB.Connection, db As New dBase
+    Dim rst As New ADODB.Recordset, cnt As New ADODB.Connection, db As New dBase, xd As String
     db.cnt查字 cnt
+    xd = d.Range.text
     rst.Open "select * from 維基文庫等欲直接抽換之字 where doIt = true order by len(replaced) desc", cnt, adOpenForwardOnly, adLockReadOnly
+    'rst.Open "select * from 維基文庫等欲直接抽換之字 where doIt = true order by len(replaced) desc", cnt, adOpenStatic, adLockReadOnly
     Do Until rst.EOF
-        d.Range.Find.Execute rst.Fields("replaced").Value, , , , , , True, wdFindContinue, , rst.Fields("replacewith").Value, wdReplaceAll
+        If InStr(xd, rst.Fields("replaced").Value) Then '如果不用字串來比對，而以 d.Range.Text 來比對，效能差太多了！ 20251227 這樣優化後真的差太多了！！感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主
+            d.Range.Find.Execute rst.Fields("replaced").Value, , , , , , True, wdFindContinue, , rst.Fields("replacewith").Value, wdReplaceAll
+            playSound 0.411
+            xd = d.Range.text '更新資料，以供比對
+        End If
         rst.MoveNext
     Loop
     rst.Close: cnt.Close: Set db = Nothing
@@ -2853,21 +2950,74 @@ CheckOut:
 End Sub
 
 Sub EditModeMakeup_changeFile_Page() '同版本文本帶入置換file id 和 頁數
-    Dim rng As Range, pageNum As Range, d As Document, ur As UndoRecord
+    Dim rng As Range, pageNum As Range, d As Document, ur As UndoRecord, p As Paragraph, xd As String
+    Static preFileNum As Long
     Set d = ActiveDocument
+restart:
+    If d.AttachedTemplate = "Normal.dotm" Then '新檔案單獨輸入時 20251220
     
-    '文件前3段分別是以下資訊,執行完會清除
-    'If Not VBA.IsNumeric(VBA.Replace(d.Range.Paragraphs(1).Range.text, vba.Chr(13), "")) then
-    If VBA.Replace(d.Paragraphs(1).Range + d.Paragraphs(2).Range + d.Paragraphs(3).Range, VBA.Chr(13), "") = "" _
-        Or Not IsNumeric(VBA.Replace(d.Paragraphs(1).Range, VBA.Chr(13), "")) Then
-        If Not IsNumeric(VBA.Replace(VBA.Replace(d.Paragraphs(1).Range + d.Paragraphs(2).Range + d.Paragraphs(3).Range, VBA.Chr(13), ""), "-", vbNullString, 1, 1)) Then
-            MsgBox "請在文件前3段分別是以下資訊（皆是數字）,執行完會清除" & vbCr & vbCr & _
-                "1. 頁數差(來源-(減去)目的）。無頁差則為0，省略則預設為0" & vbCr & vbCr & _
-                 "也可輸入「來源-目的」這樣的格式，如來源114頁，目的是69頁，可以「114-69」表示" & vbCr & _
-                "2. 目的的 file number。要置換成的；不取代則為0，省略則預設為0" & vbCr & _
-                "3. 來源的 file number，要被取代的,省略（仍要空其段落=空行）則取文件中的file=後的值"
-            Exit Sub
+        '文件前3段分別是以下資訊,執行完會清除
+        'If Not VBA.IsNumeric(VBA.Replace(d.Range.Paragraphs(1).Range.text, vba.Chr(13), "")) then
+        If VBA.Replace(d.Paragraphs(1).Range + d.Paragraphs(2).Range + d.Paragraphs(3).Range, VBA.Chr(13), "") = "" _
+            Or Not IsNumeric(VBA.Replace(d.Paragraphs(1).Range, VBA.Chr(13), "")) Then
+            If Not IsNumeric(VBA.Replace(VBA.Replace(d.Paragraphs(1).Range + d.Paragraphs(2).Range + d.Paragraphs(3).Range, VBA.Chr(13), ""), "-", vbNullString, 1, 1)) Then
+                MsgBox "請在文件前3段分別是以下資訊（皆是數字）,執行完會清除" & vbCr & vbCr & _
+                    "1. 頁數差(來源-(減去)目的）。無頁差則為0，省略則預設為0" & vbCr & vbCr & _
+                     "也可輸入「來源-目的」這樣的格式，如來源114頁，目的是69頁，可以「114-69」表示" & vbCr & _
+                    "2. 目的的 file number。要置換成的；不取代則為0，省略則預設為0" & vbCr & _
+                    "3. 來源的 file number，要被取代的,省略（仍要空其段落=空行）則取文件中的file=後的值"
+                Exit Sub
+            Else
+                GoSub autoInput
+            End If
+        Else
+            GoSub autoInput
         End If
+    Else '連續輸入時，以Normal.dotm範本以外的範本（如 TextForCtext-WordVBA.dotm）開啟之新文件者
+        If d.Paragraphs(1).Range.Characters(1) <> "-" And InStr(GetClipboardText(), "<scanbegin file=""") Then
+            d.Range.text = Chr(13) & Chr(13) & Chr(13) & GetClipboardText()
+        End If
+
+        If InStr(d.Range.text, "<scanbegin file=""") = 0 Then Exit Sub
+        If InStr(d.Range.text, "<scanbegin file=""") = 1 Then
+            
+            If MsgBox("是否要由程式自行輸入前3個空白段落？", vbInformation + vbOKCancel) = vbOK Then
+                d.Range.InsertParagraphBefore: d.Range.InsertParagraphBefore: d.Range.InsertParagraphBefore
+            Else
+                Exit Sub
+            End If
+        End If
+        Set p = d.Paragraphs(3)
+        If Len(p.Range.text) > 1 Then
+            If vbOK = MsgBox("第3段請留空！" & vbCr & vbCr & vbCr & "是否由程式直接「在現前第3段前」插入空白段落？", vbExclamation + vbOKCancel) Then
+                p.Range.InsertParagraphBefore
+                GoTo restart
+            Else
+                Exit Sub
+            End If
+        End If
+        '第1段為「source - dest 」頁碼，可省略來源的起始頁碼
+        '第2段可留空由程式自動+1以讀入下一單位之file值
+        Set p = d.Paragraphs(1): xd = d.Range.text
+        If p.Range.Characters(1) = "-" Then '第1段為「source - dest 」頁碼，可省略來源的起始頁碼
+            p.Range.InsertBefore Mid(xd, InStr(xd, " page=""") + Len(" page="""), InStr(xd, """ />") - (InStr(xd, " page=""") + Len(" page=""")))
+        End If
+        Set p = d.Paragraphs(2)
+        If p.Range.text = Chr(13) Then
+            If preFileNum = 0 Then
+                MsgBox "請輸入目的地的file值，之後可由程式自動+1"
+                Exit Sub
+            Else
+                d.Range(p.Range.start, p.Range.End - 1) = preFileNum + 1
+            End If
+        Else
+            If Not IsNumeric(trimStrForSearch_PlainText(p.Range)) Then
+                MsgBox "請在第2段輸入目的地的file值", vbExclamation
+                Exit Sub
+            End If
+            preFileNum = CLng(trimStrForSearch_PlainText(p.Range))
+        End If
+        preFileNum = CLng(d.Range(p.Range.start, p.Range.End - 1))
     End If
     Dim differPageNum  As Integer '頁數差(來源-(減去)目的）
     Dim numRngDashPost As Byte, numRng As Range
@@ -2891,7 +3041,9 @@ Sub EditModeMakeup_changeFile_Page() '同版本文本帶入置換file id 和 頁數
     SystemSetup.stopUndo ur, "EditMakeupCtext"
     If file > 0 Then
         'rng.Find.Execute " file=""77991""", True, True, , , , True, wdFindContinue, , " file=""" & file & """", wdReplaceAll
-        rng.text = Replace(rng.text, " file=""" & fileFrom & """", " file=""" & file & """")
+        rng.text = VBA.Replace(Replace(rng.text, " file=""" & fileFrom & """", " file=""" & file & """") _
+                , "picture location=""" & fileFrom & ":", "picture location=""" & file & ":")
+        
     End If
 
     Do While rng.Find.Execute(" page=""", , , , , , True, wdFindStop)
@@ -2901,8 +3053,37 @@ Sub EditModeMakeup_changeFile_Page() '同版本文本帶入置換file id 和 頁數
         pageNum.text = CStr(CInt(pageNum.text) - differPageNum)
         rng.SetRange pageNum.End, d.Range.End
     Loop
+    Set rng = d.Range
+    Do While rng.Find.Execute("picture location=""" & file & ":", , , , , , True, wdFindStop)
+        Set pageNum = rng
+        pageNum.SetRange rng.End, rng.End + 1
+        pageNum.MoveEndUntil ":"
+        pageNum.text = CStr(CInt(pageNum.text) - differPageNum)
+        rng.SetRange pageNum.End, d.Range.End
+    Loop
+    
+    '清除設定值
     rng.SetRange d.Range.Paragraphs(1).Range.start, d.Range.Paragraphs(3).Range.End
     rng.Delete
+    '清除前面多除的空段，以免影響xml結果
+    Do While d.Range.Paragraphs(1).Range = Chr(13)
+        d.Range.Paragraphs(1).Range.Delete
+    Loop
+    '清除闕頁造成的無用xml語法
+    Set p = d.Paragraphs(1)
+    rng.SetRange 0, 0
+    Do While InStr(p.Range, """ /><") > 0
+        rng.MoveEndUntil ">"
+        rng.MoveEnd , 1
+        'rng.Select 'just for test
+        If rng.Document.Range(rng.End, rng.End + 8) = "<scanend" Or d.Range(rng.End, rng.End + 10) = "<scanbegin" Then
+            rng.text = vbNullString
+        Else
+            Exit Do
+        End If
+    Loop
+
+    
     d.Range.Select
     'd.Range.Cut
     SystemSetup.SetClipboard d.Range.text
@@ -2911,7 +3092,18 @@ Sub EditModeMakeup_changeFile_Page() '同版本文本帶入置換file id 和 頁數
 '    d.Application.Activate
     SeleniumOP.ActivateChrome
     'On Error Resume Next
-'    AppActivate "chrome"
+    AppActivate "chrome"
+    Exit Sub
+autoInput:
+    If InStr(d.Range, "<scan") = 0 Then
+        If InStr(GetClipboardText, "<scan") Then
+            d.Range.InsertAfter GetClipboardText '自動貼上
+        Else
+            MsgBox "要處理的內容尚未貼上", vbCritical
+            Exit Sub
+        End If
+    End If
+    Return
 End Sub
 Property Get Div_generic_IncludePathAndEndPageNum() As SeleniumBasic.IWebElement
     Dim iwe As SeleniumBasic.IWebElement
@@ -3239,6 +3431,10 @@ Sub Quickedit_Syntax_Convert2_Edit()
     d.Range.Copy
     playSound 1
     
+End Sub
+
+Sub 提取作者人名_二字人名中有空白者()
+    Docs.提取人名_二字人名中有空白者
 End Sub
 
 Rem 在序號欄位補零以調整章節及其次序用。因《御定佩文韻府》須調整章節單位長度而設（其原有290個單位故！！） https://ctext.org/wiki.pl?if=en&res=589161 20241214

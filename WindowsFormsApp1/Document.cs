@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.Remoting.Contexts;
 using System.Text;
@@ -40,7 +41,7 @@ namespace TextForCtext
         public Document(ref TextBox textBox)
         {
             _textBox = textBox;
-            Text = textBox.Text;            
+            Text = textBox.Text;
             Content = Range(0, textBox.Text.Length);
             _cachedParagraphs = null;
         }
@@ -56,7 +57,7 @@ namespace TextForCtext
                 Content = Range(0, context.Length);
             _cachedParagraphs = null;
         }
-        
+
         public Range Content { get; set; }
         public string Text
         {
@@ -673,7 +674,12 @@ namespace TextForCtext
             //_document = new Document(ref textBox);
             _start = start < 0 ? 0 : start;
             _end = end > document.Text.Length ? document.Text.Length : end;
-            _text_beforeUpdate = _document.Text.Substring(start, end - start);
+
+            if (end - start < 0 || start + (end - start) > _document.Text.Length)
+                //Debugger.Break();
+                _text_beforeUpdate = string.Empty;
+            else
+                _text_beforeUpdate = _document.Text.Substring(start, end - start);
             rangeParagraphs = Paragraphs;
             _parent = parent;
             //_textBox = textBox;

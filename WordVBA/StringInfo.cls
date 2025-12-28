@@ -10,10 +10,19 @@ Attribute VB_Exposed = True
 Option Explicit
 Private clnString As VBA.Collection
 
-Public Sub Create(str As String)
+Public Function Create(str As String) As StringInfo
+    Dim si As New StringInfo
     Set clnString = ¤å¦r³B²z.CharactersStr(str)
-End Sub
+    Set si.ClnStringSet = clnString
+    Set Create = si
+End Function
 
 Public Property Get LengthInTextElements() As Long
     LengthInTextElements = clnString.Count
 End Property
+
+Property Set ClnStringSet(c As VBA.Collection)
+    Set clnString = c
+End Property
+
+
