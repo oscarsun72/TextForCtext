@@ -8,11 +8,11 @@ Dim ChapterSelector As String
 'Const description As String = "±N¬P¸¹«eªº¤À¬q²Å¸¹²¾¸m«e¬q¤§¥½ & ²M°£­¶«eªº¤À¬q²Å¸¹{¾ÚKanripo.org©Î¡m°ê¾Ç¤j®v¡n©Î¥_¨Ê¤¸¤Þ¬ì§Þ¦³­­¤½¥q¡m¤¸¤Þ¬ì§Þ¤Þ±o¼Æ¦r¤H¤å¸ê·½¥­»O¡P¤¤°ê¾ú¥N¤åÄm¡n©ÒÂÃ¥»»²¥H¥½¾Ç¦Û»s©óGitHub¶}·½§K¶O§K¦w¸Ë¤§TextForCtext±Æª©¹ïÀ³¿ý¤J¡C°Q½×°Ï»P¥½¾ÇYouTubeÀW¹D¦³¹ê¹Òºt¥Ü¼v¤ù¥i¸ê°Ñ¦Ò¡C·P®¦·P®¦¡@Æg¼ÛÆg¼Û¡@«nµLªüÀ±ªû¦ò¡@Æg¬ü¥D}"
 'Const description As String = "±N¬P¸¹«eªº¤À¬q²Å¸¹²¾¸m«e¬q¤§¥½ & ²M°£­¶«eªº¤À¬q²Å¸¹{¾ÚKanripo.org©Î¥_¨Ê¤¸¤Þ¬ì§Þ¦³­­¤½¥q¡m¤¸¤Þ¬ì§Þ¤Þ±o¼Æ¦r¤H¤å¸ê·½¥­»O¡P¤¤°ê¾ú¥N¤åÄm¡n©ÒÂÃ¥»»²¥H¥½¾Ç¦Û»s©óGitHub¶}·½§K¶O§K¦w¸Ë¤§TextForCtext±Æª©¹ïÀ³¿ý¤J¡C°Q½×°Ï»P¥½¾ÇYouTubeÀW¹D¦³¹ê¹Òºt¥Ü¼v¤ù¥i¸ê°Ñ¦Ò¡C·P®¦·P®¦¡@Æg¼ÛÆg¼Û¡@«nµLªüÀ±ªû¦ò¡@Æg¬ü¥D}"
 'Const description As String = "±N¬P¸¹«eªº¤À¬q²Å¸¹²¾¸m«e¬q¤§¥½ & ²M°£­¶«eªº¤À¬q²Å¸¹{¾ÚKanripo.org©ÒÂÃ¥»»²¥H¥½¾Ç¦Û»s©óGitHub¶}·½§K¶O§K¦w¸Ë¤§TextForCtext±Æª©¹ïÀ³¿ý¤J¡C°Q½×°Ï»P¥½¾ÇYouTubeÀW¹D¦³¹ê¹Òºt¥Ü¼v¤ù¥i¸ê°Ñ¦Ò¡C·P®¦·P®¦¡@Æg¼ÛÆg¼Û¡@«nµLªüÀ±ªû¦ò¡@Æg¬ü¥D}"
-Const description As String = "±N¬P¸¹«eªº¤À¬q²Å¸¹²¾¸m«e¬q¤§¥½ & ²M°£­¶«eªº¤À¬q²Å¸¹{¾Ú¡mºû°ò¤å®w¡n©ÎKanripo.org©ÒÂÃ¥»»²¥H¥½¾Ç¦Û»s©óGitHub¶}·½§K¶O§K¦w¸Ë¤§TextForCtext±Æª©¹ïÀ³¿ý¤J¡C°Q½×°Ï»P¥½¾ÇYouTubeÀW¹D¦³¹ê¹Òºt¥Ü¼v¤ù¥i¸ê°Ñ¦Ò¡C·P®¦·P®¦¡@Æg¼ÛÆg¼Û¡@«nµLªüÀ±ªû¦ò¡@Æg¬ü¥D}"
+'Const description As String = "±N¬P¸¹«eªº¤À¬q²Å¸¹²¾¸m«e¬q¤§¥½ & ²M°£­¶«eªº¤À¬q²Å¸¹{¾Ú¡mºû°ò¤å®w¡n©ÎKanripo.org©ÒÂÃ¥»»²¥H¥½¾Ç¦Û»s©óGitHub¶}·½§K¶O§K¦w¸Ë¤§TextForCtext±Æª©¹ïÀ³¿ý¤J¡C°Q½×°Ï»P¥½¾ÇYouTubeÀW¹D¦³¹ê¹Òºt¥Ü¼v¤ù¥i¸ê°Ñ¦Ò¡C·P®¦·P®¦¡@Æg¼ÛÆg¼Û¡@«nµLªüÀ±ªû¦ò¡@Æg¬ü¥D}"
 'Const description As String = "±N¬P¸¹«eªº¤À¬q²Å¸¹²¾¸m«e¬q¤§¥½ & ²M°£­¶«eªº¤À¬q²Å¸¹{¾Ú¡mºû°ò¤å®w¡n©ÒÂÃ¥»»²¥H¥½¾Ç¦Û»s©óGitHub¶}·½§K¶O§K¦w¸Ë¤§TextForCtext±Æª©¹ïÀ³¿ý¤J¡C°Q½×°Ï»P¥½¾ÇYouTubeÀW¹D¦³¹ê¹Òºt¥Ü¼v¤ù¥i¸ê°Ñ¦Ò¡C·P®¦·P®¦¡@Æg¼ÛÆg¼Û¡@«nµLªüÀ±ªû¦ò¡@Æg¬ü¥D}"
 'Const description As String = "±N¬P¸¹«eªº¤À¬q²Å¸¹²¾¸m«e¬q¤§¥½ & ²M°£­¶«eªº¤À¬q²Å¸¹{¾Ú¡mºû°ò¤å®w¡n©Î¡m°ê¾Ç¤j®v¡n©ÎKanripo.org©Î¥_¨Ê¤¸¤Þ¬ì§Þ¦³­­¤½¥q¡m¤¸¤Þ¬ì§Þ¤Þ±o¼Æ¦r¤H¤å¸ê·½¥­»O¡P¤¤°ê¾ú¥N¤åÄm¡n©ÒÂÃ¥»»²¥H¥½¾Ç¦Û»s©óGitHub¶}·½§K¶O§K¦w¸Ë¤§TextForCtext±Æª©¹ïÀ³¿ý¤J¡C°Q½×°Ï»P¥½¾ÇYouTubeÀW¹D¦³¹ê¹Òºt¥Ü¼v¤ù¥i¸ê°Ñ¦Ò¡C·P®¦·P®¦¡@Æg¼ÛÆg¼Û¡@«nµLªüÀ±ªû¦ò¡@Æg¬ü¥D}"
 
-'Const description As String = "±N¬P¸¹«eªº¤À¬q²Å¸¹²¾¸m«e¬q¤§¥½ & ²M°£­¶«eªº¤À¬q²Å¸¹{¾Ú¥_¨Ê¤¸¤Þ¬ì§Þ¦³­­¤½¥q¡m¤¸¤Þ¬ì§Þ¤Þ±o¼Æ¦r¤H¤å¸ê·½¥­»O¡P¤¤°ê¾ú¥N¤åÄm¡n©ÒÂÃ¥»»²¥H¥½¾Ç¦Û»s©óGitHub¶}·½§K¶O§K¦w¸Ë¤§TextForCtext±Æª©¹ïÀ³¿ý¤J¡C°Q½×°Ï»P¥½¾ÇYouTubeÀW¹D¦³¹ê¹Òºt¥Ü¼v¤ù¥i¸ê°Ñ¦Ò¡C·P®¦·P®¦¡@Æg¼ÛÆg¼Û¡@«nµLªüÀ±ªû¦ò¡@Æg¬ü¥D}"
+Const description As String = "±N¬P¸¹«eªº¤À¬q²Å¸¹²¾¸m«e¬q¤§¥½ & ²M°£­¶«eªº¤À¬q²Å¸¹{¾Ú¥_¨Ê¤¸¤Þ¬ì§Þ¦³­­¤½¥q¡m¤¸¤Þ¬ì§Þ¤Þ±o¼Æ¦r¤H¤å¸ê·½¥­»O¡P¤¤°ê¾ú¥N¤åÄm¡n©ÒÂÃ¥»»²¥H¥½¾Ç¦Û»s©óGitHub¶}·½§K¶O§K¦w¸Ë¤§TextForCtext±Æª©¹ïÀ³¿ý¤J¡C°Q½×°Ï»P¥½¾ÇYouTubeÀW¹D¦³¹ê¹Òºt¥Ü¼v¤ù¥i¸ê°Ñ¦Ò¡C·P®¦·P®¦¡@Æg¼ÛÆg¼Û¡@«nµLªüÀ±ªû¦ò¡@Æg¬ü¥D}"
 'Const description As String = "±N¬P¸¹«eªº¤À¬q²Å¸¹²¾¸m«e¬q¤§¥½ & ²M°£­¶«eªº¤À¬q²Å¸¹{¾Ú¡mº~Äy¹q¤l¤åÄm¸ê®Æ®w¡n¡]¤µ¡mº~Äy¥þ¤å¸ê®Æ®w¡n¡^©Ò¦¬¥»»²¥H¥½¾Ç¦Û»s©óGitHub¶}·½§K¶O§K¦w¸Ë¤§TextForCtext±Æª©¹ïÀ³¿ý¤J¡C°Q½×°Ï»P¥½¾ÇYouTubeÀW¹D¦³¹ê¹Òºt¥Ü¼v¤ù¥i¸ê°Ñ¦Ò¡C·P®¦·P®¦¡@Æg¼ÛÆg¼Û¡@«nµLªüÀ±ªû¦ò¡@Æg¬ü¥D}"
 'Const description As String = "±N¬P¸¹«eªº¤À¬q²Å¸¹²¾¸m«e¬q¤§¥½ & ²M°£­¶«eªº¤À¬q²Å¸¹{¾Ú¡mÃÑ¨å¥jÄy¡n©Ò¦¬¥»»²¥H¥½¾Ç¦Û»s©óGitHub¶}·½§K¶O§K¦w¸Ë¤§TextForCtext±Æª©¹ïÀ³¿ý¤J¡C¦¹¤D»PGemini¤jµÐÂÄ¦X§@¤§·s¥\¯à¡A¦³½t¥½¾Ç¦A©óYouTubeÀW¹D¹ê¹Òª½¼½ºt¥Ü¥H¨Ñ°Ñ¦Ò¡C·P®¦·P®¦¡@Æg¼ÛÆg¼Û¡@«nµLªüÀ±ªû¦ò¡@Æg¬ü¥D}"
 
@@ -694,6 +694,18 @@ Sub formatter¦~«e¥[¤À¬q²Å¸¹() '¬°¡m¸g¨åÄÀ¤å¡n¬K¬î¤T¶Çµ¥®æ¦¡¥Î¡A¤é«á¥i§ï¦¨¨ä¥L»Ý­
 End Sub
 Sub ºû°ò¤å®w¥|³¡ÂO¥Z¥»Âà¨Ó()
     Dim d As Document, a, i, p As Paragraph, xP As String, acP As Integer, space As String, rng As Range
+    
+    'P# ¤D¡u¥_¨Ê¤¸¤Þ¬ì§Þ¦³­­¤½¥q¡m¤¸¤Þ¬ì§Þ¤Þ±o¼Æ¦r¤H¤å¸ê·½¥­»O¡P¤¤°ê¾ú¥N¤åÄm¡n¡vªº¤å¥»¯S¼x
+    Dim pp As Long, xClip As String
+    xClip = SystemSetup.GetClipboard
+    pp = VBA.InStr(xClip, "P")
+    If pp Then
+        If IsNumeric(Mid(xClip, pp + 1, 1)) Then
+            ¤¸¤Þ¬ì§Þ¤Þ±o¼Æ¦r¤H¤å¸ê·½¥­»O_¥_¨Ê¤¸¤Þ¬ì§Þ¦³­­¤½¥qÂà¨Ó
+            Exit Sub
+        End If
+    End If
+    
     On Error GoTo eH
     a = Array(VBA.ChrW(12296), "{{", VBA.ChrW(12297), "}}", "¡q", "{{", "¡r", "}}", _
         "¡³", VBA.ChrW(12295))
@@ -2326,8 +2338,6 @@ Sub °ê¾Ç¤j®v_Kanripo_¥|®w¥þ®Ñ¥»Âà¨Ó()
     Dim rng As Range, noteRng As Range, aNext As Range, aPre As Range, ur As UndoRecord, midNoteRngPos As Byte, midNoteRng As Range, aX As String, a As Range, aSt As Long, aEd As Long
     Dim noteFont As font '°O¤Uª`¤å®æ¦¡¥H³Æ¥Î
     Dim insertX As String, counter As Byte
-    Set rng = Documents.Add().Range
-    SystemSetup.stopUndo ur, "°ê¾Ç¤j®v_Kanripo_¥|®w¥þ®Ñ¥»Âà¨Ó"
     SystemSetup.playSound 1
     
     'P ¤D¡u¥_¨Ê¤¸¤Þ¬ì§Þ¦³­­¤½¥q¡m¤¸¤Þ¬ì§Þ¤Þ±o¼Æ¦r¤H¤å¸ê·½¥­»O¡P¤¤°ê¾ú¥N¤åÄm¡n¡vªº¤å¥»¯S¼x
@@ -2335,8 +2345,11 @@ Sub °ê¾Ç¤j®v_Kanripo_¥|®w¥þ®Ñ¥»Âà¨Ó()
         ¤¸¤Þ¬ì§Þ¤Þ±o¼Æ¦r¤H¤å¸ê·½¥­»O_¥_¨Ê¤¸¤Þ¬ì§Þ¦³­­¤½¥qÂà¨Ó
         Exit Sub
     End If
+    
+    SystemSetup.stopUndo ur, "°ê¾Ç¤j®v_Kanripo_¥|®w¥þ®Ñ¥»Âà¨Ó"
     'word.Application.ScreenUpdating = False
     
+    Set rng = Documents.Add().Range
     rng.Paste
     '´£¥Ü¶K¤WµLÃª
     SystemSetup.playSound 1.294 '¥ú¶K¤W¯Ó®É´N«Ü¤[¤F¡A«á­±³o¤@¤j°ï¦¡¤l¤Ï¦Ó§Ö 20230211

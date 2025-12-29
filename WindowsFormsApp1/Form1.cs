@@ -12562,7 +12562,7 @@ namespace WindowsFormsApp1
                         #region 解除 textbox防觸鎖定，並準備檢視編輯；如果訊息方塊不是在取得 Cancel回應值時即關閉，則此下程式恐怕要移出這個 if else區塊才行
                         //Activate();已會觸發Form1_Activated(new object(), new EventArgs());事件
                         //訊息方塊就是一個表單，顯示時會讓此表單失去焦點。
-                        if (!Active)
+                        if (!Active && !IsConfirmHumanPage())
                         {
                             bringBackMousePosFrmCenter();
                         }
@@ -17674,8 +17674,8 @@ namespace WindowsFormsApp1
             if (textBox2.BackColor == Color.GreenYellow &&
                 doNotLeaveTextBox2 && textBox2.Focused) textBox2.SelectAll();
 
-            //函式內會作判斷要不要自動執行Word VBA相關的程序
-            autoRunWordVBAMacro();
+            ////函式內會作判斷要不要自動執行Word VBA相關的程序
+            //autoRunWordVBAMacro();//因為條件太寬，改寫到後面 20251229
 
             //bool autoPasteFromSBCKwhether = false; this.autoPasteFromSBCKwhether = autoPasteFromSBCKwhether;            
 
@@ -17755,6 +17755,9 @@ namespace WindowsFormsApp1
                         undoRecord();
                         return;
                     }
+                    else//主要是針對《維基文庫》的文本，移至此處●●●●●●●●●●●●●●●●●●●●●●●
+                        //函式內會作判斷要不要自動執行Word VBA相關的程序
+                        autoRunWordVBAMacro();//因為條件太寬，改寫到後面 20251229
                 }
                 else if (clpTxt.Contains("action=editchapter"))
                 {
@@ -17802,10 +17805,13 @@ namespace WindowsFormsApp1
                 {
                 }
             }
-            if ((xClip.IndexOf("MidleadingBot") > 0 || xClip.IndexOf("此頁面可能存在如下一些問題：") > -1 || xClip.IndexOf("Wmr-bot") > -1
-                || (xClip.Contains(Environment.NewLine.Substring(1, 1) + Environment.NewLine.Substring(0, 1)) && !xClip.Contains("<scan"))
+            if ((xClip.IndexOf("MidleadingBot") > 0 || xClip.IndexOf("此頁面可能存在如下一些問題：") > -1 
+                || xClip.IndexOf("Wmr-bot") > -1                
                 || xClip.Contains("〈" + Environment.NewLine.Substring(0, 1)) || xClip.Contains(".djvu") || xClip.Contains("​Page:"))
-                && textBox1.TextLength < 100)//xClip.Length > 500 )                
+                && textBox1.TextLength < 100
+                || (xClip.Contains(Environment.NewLine.Substring(1, 1) +
+                Environment.NewLine.Substring(0, 1)) && !xClip.Contains("<scan"))//這個條件太寬，先交給WordVBA去分派 20251229
+                )//xClip.Length > 500 )                
             {
                 bool nextPageAuto = false;
                 if (ModifierKeys == Keys.Control)//如果按下Ctrl則自動翻到下一頁

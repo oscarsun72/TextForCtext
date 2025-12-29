@@ -2400,8 +2400,16 @@ namespace TextForCtext
                         driver.SwitchTo().Window(driver.CurrentWindowHandle);
                         Form1.InstanceForm1.EndUpdate();
                         Form1.InstanceForm1.TopMost = false;
+                        Application.DoEvents();
                         driver.SwitchTo().Window(driver.CurrentWindowHandle);
                         BringToFront("chrome");
+                        //將焦點交給Chrome瀏覽器，在以滑鼠啟動視窗時所需
+                        //clickCopybutton_GjcoolFastExperience(iwe.Location);
+                        IWebElement element = WaitFindWebElementBySelector_ToBeClickable("#content3 > form > table > tbody > tr:nth-child(2) > td:nth-child(2) > input[type=text]");
+                        if (Cursor.Position != element?.Location)
+                            Cursor.Position = element.Location;
+                        element?.Click();
+                        Application.DoEvents();
                         return false;
                     }
                     else
@@ -2419,6 +2427,13 @@ namespace TextForCtext
                     Application.DoEvents();
                     BringToFront("chrome");
 
+                    //將焦點交給Chrome瀏覽器，在以滑鼠啟動視窗時所需
+                    //clickCopybutton_GjcoolFastExperience(iwe.Location);
+                    IWebElement iwe = WaitFindWebElementBySelector_ToBeClickable("#content3 > form > table > tbody > tr:nth-child(2) > td:nth-child(2) > input[type=text]");
+                    if (Cursor.Position != iwe?.Location)
+                        Cursor.Position = iwe.Location;
+                    iwe?.Click();
+                    Application.DoEvents();
                     return false;
                     //}
                     //while (true)
