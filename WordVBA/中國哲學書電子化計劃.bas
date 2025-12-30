@@ -261,12 +261,21 @@ Sub setPage1Code() '(ByRef d As Document)
             xd = Replace(xd, page1, "●")
             SystemSetup.ClipboardPutIn xd
         Else '待觀察彙整出的條件
-            If Not Page1Exam_ContainsRegex(page1) Then
-                word.ActiveDocument.Activate
-                word.Application.Activate
-                If MsgBox("是否清除第一頁的內容，以利連續自動輸入之進程？", vbInformation + vbOKCancel) = vbOK Then
+            If Not Page1Exam_NotContainsRegex(page1) Then
+                If Page1Exam_ContainsRegex(page1) Then
                     xd = Replace(xd, page1, "●")
                     SystemSetup.ClipboardPutIn xd
+                Else
+                    word.ActiveDocument.Activate
+                    word.Application.Activate
+                    If MsgBox("是否清除第一頁的內容，以利連續自動輸入之進程？" & _
+                           vbCr & vbCr & vbCr _
+                           & "目前頁一的xml內容是：" & vbCr & vbCr & vbCr & _
+                           page1, vbInformation + vbOKCancel) = vbOK Then
+                        xd = Replace(xd, page1, "●")
+                        SystemSetup.ClipboardPutIn xd
+                    End If
+
                 End If
             End If
         End If
@@ -274,17 +283,35 @@ Sub setPage1Code() '(ByRef d As Document)
     End If
 End Sub
 Rem GitHub　Copilot大菩薩 2025聖誕節後1日 https://copilot.microsoft.com/shares/L7jgGeRALLMN26kEvtWEV
-Function Page1Exam_ContainsRegex(ByVal text As String) As Boolean
+Function Page1Exam_NotContainsRegex(ByVal text As String) As Boolean
     Dim re As Object
     Set re = CreateObject("VBScript.RegExp")
     
     ' 這裡可以放多種模式，例如特殊符號或換行
-    re.Pattern = "[《》]|(\r\n)"
+    're.Pattern = "[《》]|(\r\n)"
+    re.Pattern = "[《》]"
     re.Global = True
+    
+    Page1Exam_NotContainsRegex = re.Test(text)
+End Function
+
+Rem GitHub　Copilot大菩薩 2025聖誕節後1日 https://copilot.microsoft.com/shares/L7jgGeRALLMN26kEvtWEV
+Function Page1Exam_ContainsRegex(ByVal text As String) As Boolean
+    Dim re As Object, patterns As Variant, p As Variant, combined As String
+    Set re = CreateObject("VBScript.RegExp")
+    
+    ' 在這裡列出所有要檢查的字串
+    'patterns = Array("《", "》", "\r\n", "\}\}<p>", "\{\{") '這樣只要在 patterns 陣列裡加新字串，就能擴充檢查條件，非常方便。20251229 https://copilot.microsoft.com/shares/84qxHcBUPMKHGBGsrkQLX
+    patterns = Array("\}\}\r\n\r\n<scanbreak")
+    ' 組合成一個正則模式
+    combined = "(" & Join(patterns, "|") & ")"
+    
+    re.Pattern = combined
+    re.Global = True
+    re.IgnoreCase = False
     
     Page1Exam_ContainsRegex = re.Test(text)
 End Function
-
 Rem GetPageContent(xmlText, "1") 取得第 1 頁的內容，或 GetPageContent(xmlText, "2") 取得第 2 頁。GitHub　Copilot大菩薩 20251226聖誕節後一日 https://copilot.microsoft.com/shares/fcnRVb1mNcY3f4PvDVg9i
 Function GetPageContent(xmlText As String, pageNum As String) As String
     Dim re As Object, matches As Object
@@ -2989,9 +3016,14 @@ restart:
     Else '連續輸入時，以Normal.dotm範本以外的範本（如 TextForCtext-WordVBA.dotm）開啟之新文件者
         If d.Paragraphs(1).Range.Characters(1) <> "-" And InStr(GetClipboardText(), "<scanbegin file=""") Then
             d.Range.text = Chr(13) & Chr(13) & Chr(13) & GetClipboardText()
+        ElseIf preFileNum > 0 And d.Paragraphs(3).Range.text = Chr(13) And InStr(GetClipboardText(), "<scanbegin file=""") Then
+            d.Range.InsertAfter GetClipboardText()
+        ElseIf IsNumeric(d.Range(d.Paragraphs(2).Range.start, d.Paragraphs(2).Range.Characters(d.Paragraphs(2).Range.Characters.Count - 1).End)) And d.Paragraphs(3).Range.text = Chr(13) And InStr(GetClipboardText(), "<scanbegin file=""") Then
+            d.Range.InsertAfter GetClipboardText()
         End If
 
         If InStr(d.Range.text, "<scanbegin file=""") = 0 Then Exit Sub
+        
         If InStr(d.Range.text, "<scanbegin file=""") = 1 Then
             
             If MsgBox("是否要由程式自行輸入前3個空白段落？", vbInformation + vbOKCancel) = vbOK Then

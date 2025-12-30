@@ -2336,11 +2336,19 @@ Function IsStyleExists(styleName As String, doc As Document) As Boolean
 End Function
 
 Sub 提取人名_二字人名中有空白者()
-    Dim rng As Range, name
+    Dim rng As Range, name, d As Document, p As Paragraph
+    
+    Rem cpt的空白字符
     Dim w As String
     w = ChrW(-9217) & ChrW(-8195)
     
-    Set rng = ActiveDocument.Range
+    If ActiveDocument.Range.text = Chr(13) Then
+        Set d = ActiveDocument
+    Else
+        Set d = Documents.Add
+    End If
+    d.Range.text = GetClipboardText
+    Set rng = d.Range
     Do While rng.Find.Execute(w)
         If Not rng.Previous Is Nothing And Not rng.Next Is Nothing Then
             If VBA.StrComp(rng.Previous, w) <> 0 And VBA.StrComp(rng.Next, w) <> 0 Then
@@ -2350,8 +2358,15 @@ Sub 提取人名_二字人名中有空白者()
             End If
         End If
     Loop
-    Documents.Add.Range.text = name
-    Documents(1).Activate
+    d.Range.text = name
+    For Each p In d.Paragraphs
+        If p.Range.Characters.Count > 1 Then
+            Set rng = d.Range(p.Range.start, p.Range.Characters(p.Range.Characters.Count - 1).End)
+            rng.InsertAfter vbTab & Replace(rng.text, w, "　")
+        End If
+    Next p
+    d.Activate
+    d.Application.Activate
 End Sub
 
 

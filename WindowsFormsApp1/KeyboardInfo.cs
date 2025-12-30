@@ -35,6 +35,21 @@ namespace WindowsFormsApp1
         {
             return (Keyboard.GetKeyStates(key) & KeyStates.Down) > 0;
         }
+        /// <summary>
+        /// 控制組合鍵（Ctrl、Shift、Alt）判斷用
+        /// Copilot大菩薩  20251230 https://copilot.microsoft.com/shares/uvjjTasgwd3rfhh9qDyp6
+        /// Determines whether all specified modifier keys are currently pressed.
+        /// </summary>
+        /// <remarks>This method checks the current state of the keyboard's modifier keys against the
+        /// specified combination. It is commonly used to detect keyboard shortcuts or input gestures that require
+        /// multiple modifier keys.</remarks>
+        /// <param name="required">A bitwise combination of modifier keys to check. Typically includes values such as Control, Shift, or Alt.</param>
+        /// <returns>true if all specified modifier keys are pressed; otherwise, false.</returns>
+        public static bool AreModifiersPressed(Keys required)
+        {
+            return (Control.ModifierKeys & required) == required;
+        }
+
     }
 
     // 鍵盤掛鉤管理類

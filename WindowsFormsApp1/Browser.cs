@@ -2321,7 +2321,16 @@ namespace TextForCtext
                         return false;
                     }
                     if (ActiveForm1.KeyinTextMode || int.Parse(ActiveForm1.CurrentPageNum) < 3)
-                        submit.Click();
+                        ////submit.Click();
+                        ////submit.Submit();
+                        //if (submit != null)
+                        //{//https://copilot.microsoft.com/shares/HMYjVyzi4Hz6WkCnCKgd6
+                        //    ((IJavaScriptExecutor)driver).ExecuteScript("arguments[0].click();", submit);
+                        //    return true;
+                        //}
+                        //else
+                        //    return false;
+                        return submit.JsClick(); //Click(submit);
                     else
                     {
                         if (!CheckPageNumBeforeSubmitSaveChanges(driver, submit))
@@ -2406,9 +2415,11 @@ namespace TextForCtext
                         //將焦點交給Chrome瀏覽器，在以滑鼠啟動視窗時所需
                         //clickCopybutton_GjcoolFastExperience(iwe.Location);
                         IWebElement element = WaitFindWebElementBySelector_ToBeClickable("#content3 > form > table > tbody > tr:nth-child(2) > td:nth-child(2) > input[type=text]");
-                        if (Cursor.Position != element?.Location)
+                        if (element != null && Cursor.Position != element?.Location)
+                        {
                             Cursor.Position = element.Location;
-                        element?.Click();
+                            element?.Click();
+                        }
                         Application.DoEvents();
                         return false;
                     }
@@ -2491,8 +2502,17 @@ namespace TextForCtext
                     if (DialogResult.OK == Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("頁碼不同！請轉至頁面" +
                         "頁再按下「確定」以供輸入"))
                     {
-                        submit_saveChanges?.Click();//按下 Save changes button（「保存編輯」按鈕）
-                        return true;
+                        //submit_saveChanges?.Click();//按下 Save changes button（「保存編輯」按鈕）
+                        //submit_saveChanges?.Submit();
+                        //if (submit_saveChanges != null)
+                        //{//https://copilot.microsoft.com/shares/HMYjVyzi4Hz6WkCnCKgd6
+                        //    //((IJavaScriptExecutor)driver).ExecuteScript("arguments[0].click();", submit_saveChanges);
+                        //    return true;
+                        //}
+                        //else
+                        //    return false;
+                        return submit_saveChanges.JsClick();//Click(submit_saveChanges);
+
                     }
                     else
                         return false;
@@ -2500,14 +2520,22 @@ namespace TextForCtext
                 else
                 {
                     Form1.InstanceForm1.PauseEvents();
-                    submit_saveChanges?.Click();//按下 Save changes button（「保存編輯」按鈕）
-                    Form1.InstanceForm1.ResumeEvents();
-                    return true;
+                    //submit_saveChanges?.Click();//按下 Save changes button（「保存編輯」按鈕）
+                    //submit_saveChanges?.Submit();//和 Click 方法一樣 若被最大化的視窗遮住都會失效（無法確實按下），但不會出錯。 20251229
+                    //以下的方法則大成功！感謝Copilot大菩薩、Gemini大菩薩 感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主
+                    if (submit_saveChanges.JsClick())//Click(submit_saveChanges))
+                    {
+                        Form1.InstanceForm1.ResumeEvents();
+                        return true;
+                    }
+                    else
+                        return false;
                 }
             }
             else
                 return false;
         }
+
 
         static internal bool isAllinBmp(string xChk)
         {
@@ -7744,7 +7772,8 @@ namespace TextForCtext
             try
             {
                 driver.SwitchTo().Window(driver.CurrentWindowHandle);
-                iwe.Click();//按下首頁「快速體驗」按鈕：
+                //iwe.Click();//按下首頁「快速體驗」按鈕：
+                iwe.JsClick();//Click(iwe);
             }
             catch (Exception)
             {
@@ -7758,7 +7787,8 @@ namespace TextForCtext
             Form1.playSound(Form1.soundLike.processing);
             Clipboard.SetText(downloadImgFullName);
             driver.SwitchTo().Window(driver.CurrentWindowHandle);
-            iwe.Click();//按下「上傳 拍照」按鈕：
+            //iwe.Click();//按下「上傳 拍照」按鈕：
+            iwe.JsClick();// Click(iwe);
 
             //等待「開啟」檔案對話框開啟
             Thread.Sleep(1600 + (
@@ -7961,7 +7991,8 @@ namespace TextForCtext
                 if (Clipboard.GetText() != string.Empty) goto finish;
                 if (e != null)
                 {
-                    e.Click();
+                    //e.Click();
+                    e.JsClick();//Click(e);
                     //Form1.playSound(Form1.soundLike.press, true);
                     Form1.playSound(Form1.soundLike.info, true);//just for test
                     Thread.Sleep(455);
@@ -8028,7 +8059,8 @@ namespace TextForCtext
                     dateTime = DateTime.Now;
                     while (e != null)
                     {
-                        e.Click();
+                        //e.Click();
+                        e.JsClick();//Click(e);
                         Thread.Sleep(220);
                         e = driver.FindElement(By.XPath("/html/body/div[1]/div/div/div[2]/div/div[1]/div[3]/div[2]/div[2]/button/i"));
                         //if (DateTime.Now.Subtract(dateTime).TotalSeconds > 13) break;
@@ -8109,7 +8141,8 @@ namespace TextForCtext
                     //e = driver.FindElement(By.XPath("//*[starts-with(@id, 'dialog_')]//div[contains(@class, 'col')]//div[contains(@class, 'd-flex py-1')]//button//i"));
                     wait = new WebDriverWait(driver, TimeSpan.FromMilliseconds(150));
                     wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(e));
-                    e.Click();
+                    //e.Click();
+                    e.JsClick();//Click(e);
                     Thread.Sleep(255);
                     //第 1 次好像會找不到，只好用手動了：
                     //Thread.Sleep(450);
@@ -8408,7 +8441,8 @@ namespace TextForCtext
 
             try
             {
-                e?.Click();
+                //e?.Click();
+                e.JsClick();//Click(e);
             }
             catch (Exception)
             {
@@ -8741,7 +8775,9 @@ namespace TextForCtext
                     {
                         timeSpanSecs += 5;
                         driver.SwitchTo().Window(driver.CurrentWindowHandle);
-                        driver.FindElement(By.XPath("/html/body/div[1]/div/div/div[2]/div/div[1]/div[3]/div[2]/div[2]/button/i"))?.Click();
+                        //driver.FindElement(By.XPath("/html/body/div[1]/div/div/div[2]/div/div[1]/div[3]/div[2]/div[2]/button/i"))?.Click();
+                        //Click(driver.FindElement(By.XPath("/html/body/div[1]/div/div/div[2]/div/div[1]/div[3]/div[2]/div[2]/button/i")));
+                        driver.FindElement(By.XPath("/html/body/div[1]/div/div/div[2]/div/div[1]/div[3]/div[2]/div[2]/button/i"))?.JsClick();
                         //BringToFront("chrome");
                         goto retry;
                     }
@@ -10344,14 +10380,16 @@ namespace TextForCtext
             //標點
             IWebElement iwe = WaitFindWebElementBySelector_ToBeClickable("#nav-biaodian-tab", 5);
             if (iwe == null) return false;
-            iwe.Click();
+            //iwe.Click();
+            iwe.JsClick();//Click(iwe);
             //輸入框
             iwe = WaitFindWebElementBySelector_ToBeClickable("#textarea-biaodian");
             if (iwe == null) return false;
             SetIWebElementValueProperty(iwe, x);
             //執行
             iwe = WaitFindWebElementBySelector_ToBeClickable("#button-submit");
-            iwe.Click();
+            //iwe.Click();
+            iwe.JsClick();//Click(iwe);
             DateTime dt = DateTime.Now;
             //结果怎么样？
             iwe = WaitFindWebElementBySelector_ToBeClickable("#feedback > div.feedback-button.feedback-tip");
@@ -11517,7 +11555,8 @@ namespace TextForCtext
             IWebElement iwe = WaitFindWebElementBySelector_ToBeClickable("#editor > a:nth-child(5)");
             if (iwe != null)
             {
-                iwe.Click();
+                //iwe.Click();
+                iwe.JsClick();
                 //變更 quality="5" 為 quality="10" 以提高圖像質量
                 iwe = WaitFindWebElementBySelector_ToBeClickable("#picturexml");
                 SetIWebElementValueProperty(iwe, iwe.GetAttribute("value").Replace("quality=\"5\"", "quality=\"10\""));
@@ -11525,7 +11564,8 @@ namespace TextForCtext
                 //再按下 Replace page with this data 按鈕
                 iwe = WaitFindWebElementBySelector_ToBeClickable("#pictureinput > input[type=submit]");
                 if (iwe != null)
-                    iwe.Click();
+                    //iwe.Click();
+                    iwe.JsClick();
                 else
                 {
                     Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("頁面的【Replace page with this data 按鈕】沒找到。");
@@ -12580,6 +12620,112 @@ namespace TextForCtext
             BringToFront("chrome");
         }
 
+
+
+
+    }
+    /// <summary>
+    /// Gemini大菩薩：20251230 擴充方法（Extension Methods）：這是 C# 最優雅的寫法，讓您可以像呼叫 element.Click() 一樣呼叫您的 JS 點擊。
+    /// https://gemini.google.com/share/5e5e407fc128
+    /// </summary>
+    public static class SeleniumExtensions
+    {
+        ///// <summary>
+        ///// Submit() 和 Click 方法一樣 若被最大化的視窗遮住都會失效（無法確實按下），但不會出錯。 20251229
+        ///// 以下的方法則大成功！感謝Copilot大菩薩、Gemini大菩薩 感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主
+        ///// Attempts to perform a click action on the specified web element using JavaScript execution.
+        ///// </summary>
+        ///// <remarks>This method uses JavaScript to trigger the click event on the provided element, which
+        ///// can be useful when standard click actions are not effective. The method does not throw an exception if the
+        ///// element is null; instead, it returns false.</remarks>
+        ///// <param name="submit">The web element to be clicked. Must not be null.</param>
+        ///// <returns>true if the click action was performed; otherwise, false.</returns>
+        //static internal bool Click(IWebElement submit)
+        //{//https://copilot.microsoft.com/shares/HMYjVyzi4Hz6WkCnCKgd6 //https://gemini.google.com/share/84beebf37561
+        //    if (submit != null)
+        //    {
+        //        ((IJavaScriptExecutor)driver).ExecuteScript("arguments[0].click();", submit);
+        //        return true;
+        //    }
+        //    else
+        //        return false;
+
+        //}
+
+
+        /// <summary>
+        /// 使用 JavaScript 強制點擊元素，解決視窗遮擋問題
+        /// </summary>
+        public static bool JsClick_Gemini大菩薩(this IWebElement element)
+        {
+            if (element == null) return false;
+
+            try
+            {
+                // 從元素本身獲取驅動程式，避免依賴外部全域變數
+                IWebDriver driver = ((IWrapsDriver)element).WrappedDriver;
+                IJavaScriptExecutor js = (IJavaScriptExecutor)driver;
+
+                js.ExecuteScript("arguments[0].click();", element);
+                return true;
+            }
+            catch (Exception)
+            {
+                // 可以在這裡記錄 Log
+                return false;
+            }
+        }
+        /// <summary>
+        /// Copilot大菩薩：20251230 https://copilot.microsoft.com/shares/6TQ4nEzEq6vLaGPJJ57XV https://copilot.microsoft.com/shares/XeMLKX5QwpzW2GfoJSvQC
+        /// Attempts to click the specified web element using JavaScript and waits for the page to finish loading.
+        /// </summary>
+        /// <remarks>This method uses JavaScript to perform the click action, which can be useful when
+        /// standard WebDriver click actions are blocked by overlays or other UI elements. The method waits for the
+        /// document's ready state to become 'complete' after the click. If the element is not attached to a driver or
+        /// an error occurs during execution, the method returns false.</remarks>
+        /// <param name="element">The web element to be clicked. Must not be null and must implement IWrapsDriver.</param>
+        /// <param name="waitSeconds">The maximum number of seconds to wait for the page to reach a ready state after the click. The default is 5
+        /// seconds.</param>
+        /// <returns>true if the JavaScript click was executed and the page finished loading within the specified time;
+        /// otherwise, false.</returns>
+        public static bool JsClick(this IWebElement element, int waitSeconds = 5)
+        {
+            if (element == null) return false;
+
+            try
+            {
+                // 從元素本身獲取驅動程式，避免依賴外部全域變數
+                IWebDriver driver = ((IWrapsDriver)element).WrappedDriver;
+                IJavaScriptExecutor js = (IJavaScriptExecutor)driver;
+
+                // 執行 JavaScript 點擊
+                js.ExecuteScript("arguments[0].click();", element);
+
+                // 可選：等待頁面是否開始載入（例如檢查 document.readyState）
+                WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(waitSeconds));
+                bool pageLoading = wait.Until(d =>
+                {
+                    try
+                    {
+                        return ((IJavaScriptExecutor)d)
+                            .ExecuteScript("return document.readyState").ToString() == "complete";
+                    }
+                    catch
+                    {
+                        return false;
+                    }
+                });
+
+                return pageLoading;
+            }
+            catch (Exception ex)
+            {
+                // 可以在這裡記錄 Log，例如 ex.Message
+                Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HelpLink + ex.Message);
+                Console.WriteLine(ex.HelpLink + ex.Message);
+                return false;
+            }
+        }
 
     }
 

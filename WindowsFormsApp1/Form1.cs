@@ -4037,7 +4037,8 @@ namespace WindowsFormsApp1
                 {
                     e.Handled = true;
                     overtypeModeSelectedTextSetting(ref textBox1);
-                    Clipboard.SetText(textBox1.SelectedText);
+                    if (textBox1.SelectionLength > 0)
+                        Clipboard.SetText(textBox1.SelectedText);
                     if (examSeledWord(out string termtochk))
                     {
                         Mdb.TopLineFactorIuput04condition(termtochk);
@@ -4707,7 +4708,13 @@ namespace WindowsFormsApp1
                     {
                         e.Handled = true;
                         if (keyinTextMode)
+                        {
+                            PagePaste2GjcoolOCR_ing = true;//這樣寫才是 20251230 才能防止誤輸入「+」
                             SelectAll2Quickedit();
+                            PagePaste2GjcoolOCR_ing = false;
+                            //if (!PagePaste2GjcoolOCR_ing)
+                            //    PagePaste2GjcoolOCR_ing = true;//防止誤輸入「+」//在前面方法執行時就被輸入「+」了！20251230
+                        }
                         else// if(!autoPaste2QuickEdit)//前已有 return了
                         {
                             { playSound(soundLike.press, true); altA_predictEndofPageRange(); }
@@ -4853,6 +4860,7 @@ namespace WindowsFormsApp1
             TopMost = false; bool foundTab = false;
             if (IsDriverInvalid())
             {
+                //if (driver == null) { browsrOPMode = BrowserOPMode.seleniumNew; DriverNew(); }
                 for (int i = driver.WindowHandles.Count - 1; i > -1; i--)
                 {
                     driver.SwitchTo().Window(driver.WindowHandles[i]);
@@ -4878,29 +4886,40 @@ namespace WindowsFormsApp1
         }
 
         /// <summary>
-        /// 將textBox1的內容送去簡單修改模式的方塊中
+        /// 將textBox1的內容送去簡單修改模式的方塊中        
+        /// Performs the 'Select All' operation in the quick edit context and initiates OCR processing if the Shift key
+        /// is held.
         /// </summary>
-        internal void SelectAll2Quickedit()
+        /// <remarks>If the Shift key is held during the operation, OCR processing is triggered
+        /// automatically. This method is intended for internal use and may enable certain event handling as part of its
+        /// operation.</remarks>
+        /// <returns>true if the 'Select All' operation was successfully performed; otherwise, false.</returns>
+        internal bool SelectAll2Quickedit()
         {
-            PagePaste2GjcoolOCR_ing = true;
-            if (PressAddKeyMethodPaste2QuickEditBox())
+            //PagePaste2GjcoolOCR_ing = true;//改在呼叫端控制，因為只有按下「+」鍵時會有影響●●●●●●●●●●●●●●●●●●●●●●●20251230
+            bool result = PressAddKeyMethodPaste2QuickEditBox();
+            if (result)
             {
                 WindowsScrolltoTop();
                 bringBackMousePosFrmCenter();
-                if (ModifierKeys == Keys.Shift)
+                if (ModifierKeys == Keys.Shift)//翻頁時按住Shift鍵即可直接送出OCR
                 {
                     playSound(soundLike.press, true);
                     //toOCR(br.OCRSiteTitle.GJcool);
                     toOCR(PagePast2OCRsite);
+                    if (PagePaste2GjcoolOCR_ing) { Debugger.Break(); PagePaste2GjcoolOCR_ing = false; }//●●●●●●●●●●●●●●●●●●●●●●●20251230
                 }
 
                 //避免事件被終止
                 if (!_eventsEnabled) _eventsEnabled = true;
-                //恢復 ●●●●●●●●●●●●●●●●●●●●20251226聖誕節後一日 觀察中！
+                ////恢復 ●●●●●●●●●●●●●●●●●●●●20251226聖誕節後一日 觀察中！
                 if (PagePaste2GjcoolOCR_ing) { Debugger.Break(); PagePaste2GjcoolOCR_ing = false; }
+                //改在呼叫端控制，因為只有按下「+」鍵時會有影響●●●●●●●●●●●●●●●●●●●●●●●20251230
+
             }
 
             //TopMost = true;
+            return result;
         }
 
         /// <summary>
@@ -5289,8 +5308,14 @@ namespace WindowsFormsApp1
 
         /// <summary>
         /// 在已經《古籍酷》OCR文本化後的資料，加以編輯再送出
-        /// 即整理完《古籍酷》OCR的文本後送出到簡易編輯【Quick edit】的機制
+        /// 即整理完《古籍酷》OCR的文本後送出到簡易編輯【Quick edit】的機制        
+        /// Attempts to process and paste text into the quick edit box, applying book title punctuation as needed.
         /// </summary>
+        /// <remarks>This method selects all text in the quick edit box and applies book title or remark
+        /// punctuation based on the content and modifier keys. If the Shift key is held, the text is sent directly for
+        /// OCR without additional punctuation. The method also attempts to bring the relevant browser window to the
+        /// foreground for review.</remarks>
+        /// <returns>true if the text was successfully processed and pasted; otherwise, false.</returns>
         internal bool PressAddKeyMethodPaste2QuickEditBox()
         {
             bool result = false;
@@ -11216,7 +11241,7 @@ namespace WindowsFormsApp1
                                            Environment.NewLine + Environment.NewLine +
                                            PredictCopyX))
                                     {
-                                        s = 0; l = PredictCopyX.Length; xCopy = PredictCopyX; 
+                                        s = 0; l = PredictCopyX.Length; xCopy = PredictCopyX;
                                         pageEndText10 = xCopy.Substring(l - 10);
                                         if (pageTextEndPosition != l) pageTextEndPosition = l;
                                         if (PredictCopyX != textBox1.SelectedText)
@@ -13298,7 +13323,8 @@ namespace WindowsFormsApp1
                 }
                 if (e.KeyCode == Keys.O)
                 {//Alt + Shift + o ：交給《古籍酷》 OCR ，模擬使用者手動操作的功能（測試成功！！！！）
-                    if (PagePaste2GjcoolOCR_ing) return;
+                    //if (PagePaste2GjcoolOCR_ing) return;●●●●●●●●●●●●●●●●●●●●●20251230先撤銷
+                    if (PagePaste2GjcoolOCR_ing) PagePaste2GjcoolOCR_ing = false;
                     if (browsrOPMode == BrowserOPMode.appActivateByName) return;
                     if (!IsValidUrl＿ImageTextComparisonPage(textBox3.Text)) return;
                     e.Handled = true; Form1.playSound(Form1.soundLike.press, true);
@@ -15349,7 +15375,8 @@ namespace WindowsFormsApp1
             //點擊本書首頁的冊連結
             OpenQA.Selenium.IWebElement iwe = WaitFindWebElementBySelector_ToBeClickable(nextChapterSelector, 5);
             if (iwe == null) return false;
-            iwe.Click();
+            //iwe.Click();
+            iwe.JsClick();//br.Click(iwe);
             //翻到本書該冊的第1頁
             string Div_generic_TextBoxFrameGetTextContent = Div_generic_TextBoxFrame?.GetAttribute("textContent");
             if (Div_generic_TextBoxFrameGetTextContent == "●\t"
@@ -17805,13 +17832,13 @@ namespace WindowsFormsApp1
                 {
                 }
             }
-            if ((xClip.IndexOf("MidleadingBot") > 0 || xClip.IndexOf("此頁面可能存在如下一些問題：") > -1 
-                || xClip.IndexOf("Wmr-bot") > -1                
+            if ((xClip.IndexOf("MidleadingBot") > 0 || xClip.IndexOf("此頁面可能存在如下一些問題：") > -1
+                || xClip.IndexOf("Wmr-bot") > -1
                 || xClip.Contains("〈" + Environment.NewLine.Substring(0, 1)) || xClip.Contains(".djvu") || xClip.Contains("​Page:"))
-                && textBox1.TextLength < 100
-                || (xClip.Contains(Environment.NewLine.Substring(1, 1) +
-                Environment.NewLine.Substring(0, 1)) && !xClip.Contains("<scan"))//這個條件太寬，先交給WordVBA去分派 20251229
-                )//xClip.Length > 500 )                
+                && textBox1.TextLength < 100)//xClip.Length > 500 )
+                                             //|| (xClip.Contains(Environment.NewLine.Substring(1, 1) +
+                                             //Environment.NewLine.Substring(0, 1)) && !xClip.Contains("<scan"))//這個條件太寬，先交給WordVBA去分派 20251229 1230 實在太寬，易誤觸發，先撤銷！
+                                             //)
             {
                 bool nextPageAuto = false;
                 if (ModifierKeys == Keys.Control)//如果按下Ctrl則自動翻到下一頁
@@ -18479,6 +18506,7 @@ namespace WindowsFormsApp1
             if (e.KeyChar == 8) return;
             //按下數字鍵盤的「+」執行 pagePaste2GjcoolOCR 方法時
             if ((PagePaste2GjcoolOCR_ing && e.KeyChar == 43)) { e.Handled = true; PagePaste2GjcoolOCR_ing = false; return; }
+            if ((fastMode || autoPaste2QuickEdit) && e.KeyChar == 43) { e.Handled = true; return; }//防止「+」誤入
 
             //按下 Scroll Lock 將字數較少的行/段落尾末標上分行/段符號（「\<p\>」或「\。<p\>」
             //> -： 在非自動且手動輸入模式下，在 textBox1 單獨按下數字鍵盤的「-」，執行與按下 Scroll Lock 一樣的功能
@@ -18726,7 +18754,6 @@ namespace WindowsFormsApp1
 
         private void Form1_MouseDown(object sender, MouseEventArgs e)
         {
-
             mouseBtnDown(sender, e);
         }
 
@@ -18734,9 +18761,9 @@ namespace WindowsFormsApp1
         void mouseBtnDown(object sender, MouseEventArgs e)
         {
             #region ModifierKeys == Keys.None
+            TimeSpan timeDifference;
             if (ModifierKeys == Keys.None)
             {
-                TimeSpan timeDifference;
                 switch (e.Button)
                 {
                     case MouseButtons.Left:
@@ -18853,10 +18880,19 @@ namespace WindowsFormsApp1
                     case MouseButtons.XButton2://下一頁按鈕
                         if (browsrOPMode != BrowserOPMode.appActivateByName)
                         {//過於頻繁會造成chromedriver反應不及而當掉
-                         //timeDifference = DateTime.Now.Subtract(nextPageStartTime);
-                         //if (timeDifference.TotalSeconds < 0.3)
-                         //return;
-                            if (ModifierKeys == Keys.Control)
+                            timeDifference = DateTime.Now.Subtract(nextPageStartTime);
+                            if (timeDifference.TotalSeconds < 0.3)
+                                return;
+                            if (KeyboardInfo.AreModifiersPressed(Keys.Control | Keys.Shift))
+                            { //Ctrl + Shift + 滑鼠下一頁：清除 [Quick edit]([簡單修改模式])中的內容並送出
+                                OpenQA.Selenium.IWebElement quickedit = br.Quickedit_data_textbox;
+                                if (quickedit != null)
+                                {
+                                    br.SetIWebElementValueProperty(quickedit, string.Empty);
+                                    br.SavechangesButton.JsClick();
+                                }
+                            }
+                            else if (ModifierKeys == Keys.Control)//（Ctrl + 滑鼠下一頁）
                             {//按住Ctrl再按五鍵滑鼠的下一頁按鈕，則可以以預設的書頁圖大小來設定紅框以供輸入。可以網址來產生紅框如下： 20250202大年初五 感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主
                                 //br.driver.Navigate().GoToUrl(br.driver.Url.Replace("#editor", "#box(2,14,792,1146)"));
                                 br.driver.Navigate().GoToUrl(br.driver.Url.Replace("#editor", "#box(0,2,798,1288)"));
