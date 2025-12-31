@@ -95,9 +95,13 @@ namespace WindowsFormsApp1
 
         /// <summary>
         /// 在 Selenium連續輸入時是否為快捷模式，即不檢視貼上結果即進行至下一頁的動作
-        /// Alt + f ：切換 Fast Mode 不待網頁回應即進行下一頁的貼入動作（即在不須檢覈貼上之文本正確與否，肯定、八成是無誤的，就可以執行此項以加快輸入文本的動作）當是 fast mode 模式時「送出貼上」按鈕會呈現紅綠燈的綠色表示一路直行通行順暢 20230130癸卯年初九第一上班日週一
+        /// Alt + f ：切換 Fast Mode 不待網頁回應即進行下一頁的貼入動作（即在不須檢覈貼上之文本正確與否，肯定、八成是無誤的，就可以執行此項以加快輸入文本的動作）當是 fast mode 模式時「送出貼上」按鈕會呈現紅綠燈的綠色表示一路直行通行順暢 20230130癸卯年初九第一上班日週一        
         /// </summary>
         private bool fastMode = false;
+        /* ★★★★★重要！！！！！在連續自動輸入時，盡量不要同時編輯同一單位（篇卷 chapter）的文本，在末學編輯此頁時
+         * https://ctext.org/library.pl?if=gb&file=95825&page=272  就被此頁的手動編輯 https://ctext.org/library.pl?if=gb&file=95825&page=266
+         * 所蓋覆。蓋編輯時間戳記同在 2025-12-31 03:13:05 同時衝突的緣故，伺服器反應不過來吧。詳 history 頁面記錄：https://ctext.org/wiki.pl?if=gb&chapter=980722&action=history
+         * 即便前後頁不相連，也沒OCR_MATCH的標籤，也會如此。 */
         /// <summary>
         /// 記下切換 FastModd 前的顏色
         /// </summary>
@@ -2037,8 +2041,10 @@ namespace WindowsFormsApp1
             }
             */
 
-            br.TextPatst2Quick_editBox = xCopy;
 
+            if (lpMode && xCopy.EndsWith("|"))
+                xCopy = xCopy.Substring(0, xCopy.Length - "|".Length) + "<p>";
+            br.TextPatst2Quick_editBox = xCopy;
             BackupLastPageText(xCopy, false, false);
 
 
@@ -3428,7 +3434,8 @@ namespace WindowsFormsApp1
                 if (e.KeyCode == Keys.F2)// Alt + F2
                 {
                     e.Handled = true;
-                    keySymbols("□");
+                    //keySymbols("□");//□作為造字缺字待補符，作為程式中斷手動校訂之用，故今輸入時改用此「▢」符，以免造成程式中斷
+                    keySymbols("▢");
                     return;
                 }
                 if (e.KeyCode == Keys.F12)
@@ -4711,7 +4718,7 @@ namespace WindowsFormsApp1
                         {
                             PagePaste2GjcoolOCR_ing = true;//這樣寫才是 20251230 才能防止誤輸入「+」
                             SelectAll2Quickedit();
-                            PagePaste2GjcoolOCR_ing = false;
+                            //PagePaste2GjcoolOCR_ing = false;//不能恢復，否則會誤輸入「+」
                             //if (!PagePaste2GjcoolOCR_ing)
                             //    PagePaste2GjcoolOCR_ing = true;//防止誤輸入「+」//在前面方法執行時就被輸入「+」了！20251230
                         }
@@ -7406,11 +7413,15 @@ namespace WindowsFormsApp1
                                                 sb.Append("􏿽");
                                                 ispscount++;
                                             }
-                                            Debugger.Break();
-                                            item.Range.Text = item.Text.Substring(0, spsStart) + sb.ToString() + item.Text.Substring(item.Text.IndexOf("{{"));
-                                            //range.End += ispscount;//已與Paragraph.Range.Text同步
 
-                                            return false;
+                                            Debugger.Break();//★★★★★這個很重要，不能取消！還要再除錯！！！（因為文本的複雜性，如此頁 https://ctext.org/library.pl?if=gb&file=93823&page=16 崔莅 標題之標識）
+                                            //item.Range.Text = item.Text.Substring(0, spsStart) + sb.ToString() + item.Text.Substring(item.Text.IndexOf("{{"));//這一行會造成篡改資料（之前不知道，不知執行幾次了。嗟呼！），如上所指摘之頁，可供測試 文本來源：https://www.inindex.com/literature/bookDetails/1167459247318110210/1167459285729546241 20251231元旦除夕
+                                            //標題（篇名）前後端都加入半形空格以便人工檢查；在「*」前之空格之前加入半形空格以供執行時程式停下來人工校對！20251231
+                                            range.Text = " " + range.Text + " ";//range為目前要標題的範圍（篇名範圍），起自「　*」（看目前前空幾格為標明）迄於「<p>」                                            
+                                            continue;//應是改成continue 才是，否別會造成後面的都無法標識了
+                                            //range.End += ispscount;//已與Paragraph.Range.Text同步
+                                            //return false;//這樣會造成後面的都無法標識了
+
                                         }
                                     }
 
@@ -9252,7 +9263,11 @@ namespace WindowsFormsApp1
             }
             return count;
         }
-
+        /// <summary>
+        /// 判定是否將頁末的「|」取代為「<p>」。
+        /// 由textBox2輸入 "lp" 來切換設定是否將每頁的尾端「`|`」字符改成「`<p>`」以方便文字版的圖文對照連結圖示的出現。這在目錄或清單、詩偈特長的篇卷中很適用。
+        /// </summary>
+        bool lpMode = false;
         /// <summary>
         /// 每頁行/段數。初始化（歸零）值為-1
         /// </summary>
@@ -10043,12 +10058,19 @@ namespace WindowsFormsApp1
                             //    + textBox1.Text.Substring(textBox1.SelectionStart + textBox1.SelectionLength <= textBox1.TextLength ? textBox1.SelectionStart + textBox1.SelectionLength : textBox1.TextLength
                             //                                , textBox1.SelectionStart + textBox1.SelectionLength + 10 <= textBox1.TextLength ? 10 : textBox1.TextLength - (textBox1.SelectionStart + textBox1.SelectionLength))) == DialogResult.OK)
 
-                            dr = MessageBox.Show("是否要清除注文間的段落標記<p>？"
-                                + Environment.NewLine + Environment.NewLine
-                                + textBox1.Text.Substring(textBox1.SelectionStart - 10 > -1 ? textBox1.SelectionStart - 10 : 0, 10)
-                                + textBox1.SelectedText
-                                + textBox1.Text.Substring(textBox1.SelectionStart + textBox1.SelectionLength <= textBox1.TextLength ? textBox1.SelectionStart + textBox1.SelectionLength : textBox1.TextLength
-                                                            , textBox1.SelectionStart + textBox1.SelectionLength + 10 <= textBox1.TextLength ? 10 : textBox1.TextLength - (textBox1.SelectionStart + textBox1.SelectionLength)), string.Empty, MessageBoxButtons.YesNoCancel, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
+                            //如果前面那行/段較後面長許多，則直接清除。若後面長則不清除
+                            string xTb1 = textBox1.Text; int st = textBox1.SelectionStart, len = textBox1.SelectionLength;
+                            if (CountWordsLenPerLinePara(GetLineText_WithoutPunctuation(xTb1, st)) - CountWordsLenPerLinePara(GetLineText_WithoutPunctuation(xTb1, st + len)) > 2)
+                                dr = DialogResult.Yes;
+                            else if (CountWordsLenPerLinePara(GetLineText_WithoutPunctuation(xTb1, st)) - CountWordsLenPerLinePara(GetLineText_WithoutPunctuation(xTb1, st + len)) < -2)
+                                dr = DialogResult.No;
+                            else
+                                dr = MessageBox.Show("是否要清除注文間的段落標記<p>？"
+                                    + Environment.NewLine + Environment.NewLine
+                                    + textBox1.Text.Substring(textBox1.SelectionStart - 10 > -1 ? textBox1.SelectionStart - 10 : 0, 10)
+                                    + textBox1.SelectedText
+                                    + textBox1.Text.Substring(textBox1.SelectionStart + textBox1.SelectionLength <= textBox1.TextLength ? textBox1.SelectionStart + textBox1.SelectionLength : textBox1.TextLength
+                                                                , textBox1.SelectionStart + textBox1.SelectionLength + 10 <= textBox1.TextLength ? 10 : textBox1.TextLength - (textBox1.SelectionStart + textBox1.SelectionLength)), string.Empty, MessageBoxButtons.YesNoCancel, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
                         }
                         if (dr == DialogResult.Yes)
                             textBox1.SelectedText = "}}\r\n{{";
@@ -10595,7 +10617,7 @@ namespace WindowsFormsApp1
         {
             //if (skipPunctuation) if (punctuationsNum.IndexOf(x, StringComparison.Ordinal) > -1) return -1;
             if (skipPunctuation) if (PunctuationsNum.Replace("《", "").IndexOf(x, StringComparison.Ordinal) > -1) return -1;//先拿掉「《」不計 20240315
-            const string cha = "�□▫စခငဇဌ◍ᗍⲲ⛋ဂဃဆဈဉ";
+            const string cha = "�□▢▫စခငဇဌ◍ᗍⲲ⛋ဂဃဆဈဉ";
             string notChineseCharPriority = cha + "〇◯　 \r\n<>{}.,;?@●'\"。，；！？、－-《》〈〉「」『』〖〗【】（）()[]〔〕［］0123456789";
 
             if (notChineseCharPriority.IndexOf(x, StringComparison.Ordinal) > -1) return 0;
@@ -12294,6 +12316,7 @@ namespace WindowsFormsApp1
         /// <returns>結束或失敗、沒操作則傳回false</returns>
         bool autoPaste2CtextQuitEditTextbox(out DialogResult dialogResult)
         {
+
             if (autoPastetoCtextQuitEditTextboxCancel || textBox1.TextLength == 0)
             {
                 //autoPastetoQuickEdit = false;
@@ -12360,6 +12383,7 @@ namespace WindowsFormsApp1
                     || KeyboardInfo.getKeyStateDown(System.Windows.Input.Key.CapsLock)
                     //|| KeyboardInfo.getKeyStateDown(System.Windows.Input.Key.LeftShift)//因為多工時易遭誤按，故改用Caps鍵就好
                     || Control.IsKeyLocked(Keys.CapsLock)
+                    || Console.CapsLock
                     || IsCapsLockOn()
                     || BrakeByCmd())//啟動 cmd.exe 來剎車
                     {
@@ -12373,13 +12397,16 @@ namespace WindowsFormsApp1
                             //    && !KeyboardInfo.getKeyStateDown(System.Windows.Input.Key.Up)
                             //    && !KeyboardInfo.getKeyStateDown(System.Windows.Input.Key.Down))//因為多工時易遭誤按，故改用Caps鍵就好
                             || Control.IsKeyLocked(Keys.CapsLock)
+                            || Console.CapsLock
                             || IsCapsLockOn()//GitHub　Copilot大菩薩：要實現根據 Caps Lock 燈的狀態來執行 FastModeSwitcher 方法，我們可以使用 Control.IsKeyLocked 方法來檢查 Caps Lock 燈的狀態。這個方法可以直接檢查 Caps Lock 燈是否亮著。……這樣可以確保在 Caps Lock 燈亮時觸發 FastModeSwitcher 方法，而不需要按住 Caps Lock 鍵。
                             || BrakeByCmd())//啟動 cmd.exe 來剎車 20251218
                         {
-                            if (fastMode)
-                                FastModeSwitcher();
+                            if (fastMode) FastModeSwitcher();
                             //killProcesses(new string[] { "OpenConsole", "cmd" });
                             toggleAutoPastetoQuickEdit();
+                            //if (Console.CapsLock) //https://copilot.microsoft.com/shares/eKhg7mDDaoJZywT3DYsAA
+                                //// 模擬按下 CapsLock 鍵
+                                //SendKeys.SendWait("{CAPSLOCK}");
                         }
                         else
                             if (keycodeNow != Keys.Subtract &&
@@ -12393,8 +12420,14 @@ namespace WindowsFormsApp1
                         //if (!FastMode) autoPastetoCtextQuitEditTextboxCancel = true;
                     }
 
-                    if (fastMode)
-                    { dialogResult = DialogResult.OK; doNotShowMsgBox = true; goto ok; }
+                    if (fastMode) { dialogResult = DialogResult.OK; doNotShowMsgBox = true; goto ok; }
+                    else if (Console.CapsLock)
+                    { // 模擬按下 CapsLock 鍵
+                        //SendKeys.SendWait("{CAPSLOCK}");
+                        KeyboardPress.CAPSLOCK_Press();//關閉 CapsLock 燈
+                        dialogResult = DialogResult.OK; doNotShowMsgBox = true; goto ok;
+                    }
+                    else if (!fastMode && !autoPaste2QuickEdit) { dialogResult = DialogResult.OK; doNotShowMsgBox = true; goto ok; }
                     else if (ModifierKeys == Keys.Control)
                     { dialogResult = DialogResult.OK; doNotShowMsgBox = true; goto ok; }
 
@@ -12862,7 +12895,8 @@ namespace WindowsFormsApp1
             {
                 if (!IsDriverInvalid() && driver.Url.Contains("&chapter="))
                 {
-                    GraphicMatchingPagesLink?.Click();//圖文對照圖標按鈕元件
+                    //GraphicMatchingPagesLink?.Click();//圖文對照圖標按鈕元件
+                    GraphicMatchingPagesLink?.JsClick();//圖文對照圖標按鈕元件
                     textBox3.Text = driver.Url;
                 }
                 //如果是在第1頁
@@ -12890,11 +12924,13 @@ namespace WindowsFormsApp1
                             //const string inputText = "《小　倦　遊　閣　集》<p>";
                             //const string inputText = "《三　才　圖　會》<p>";
                             //const string inputTextFrontPage = "《帶　經　堂　詩　話》<p>";                            
-                            br.QuickeditLinkIWebElement.Click();
+                            //br.QuickeditLinkIWebElement.Click();
+                            br.QuickeditLinkIWebElement.JsClick();
                             PauseEvents();
                             textBox3.Text = driver.Url;
                             ResumeEvents();
-                            br.driver.SwitchTo().Window(driver.CurrentWindowHandle);
+                            //現在用JsClick()可在背景工作，便不需要了
+                            //br.driver.SwitchTo().Window(driver.CurrentWindowHandle);
                             //設定Quick edit textBox
                             DateTime dt = DateTime.Now;
                             while (br.Quickedit_data_textbox == null) { if (DateTime.Now.Subtract(dt).TotalSeconds > 5) break; }
@@ -12902,7 +12938,8 @@ namespace WindowsFormsApp1
                             if (text == string.Empty || text == "●" || text == "●\t" || text == "●<p>")
                             {
                                 br.SetIWebElementValueProperty(br.Quickedit_data_textbox, inputTextFrontPage);
-                                br.SavechangesButton?.Click();//送出
+                                //br.SavechangesButton?.Click();//送出
+                                br.SavechangesButton?.JsClick();//送出
                                 nextPages(Keys.PageDown, false);//翻到下一頁
                                 string clpTxt = Clipboard.GetText();
                                 if (textBox1.TextLength == 0 && clpTxt.Length > 0
@@ -15368,7 +15405,8 @@ namespace WindowsFormsApp1
             if (IsDriverInvalid()) return false;
 
             //點擊書名連結控制項
-            Title_Linkbox?.Click();
+            //Title_Linkbox?.Click();
+            Title_Linkbox?.JsClick();
             //點擊下一個chapter的連結
             string nextChapterSelector = NextChapterSelector;
             if (nextChapterSelector.IsNullOrEmpty()) return false;
@@ -15378,7 +15416,8 @@ namespace WindowsFormsApp1
             //iwe.Click();
             iwe.JsClick();//br.Click(iwe);
             //翻到本書該冊的第1頁
-            string Div_generic_TextBoxFrameGetTextContent = Div_generic_TextBoxFrame?.GetAttribute("textContent");
+            //string Div_generic_TextBoxFrameGetTextContent = Div_generic_TextBoxFrame?.GetAttribute("textContent");
+            string Div_generic_TextBoxFrameGetTextContent = Div_generic_TextBoxFrame?.GetDomProperty("textContent");
             if (Div_generic_TextBoxFrameGetTextContent == "●\t"
                 || Div_generic_TextBoxFrameGetTextContent == "●<p>"
                 || Div_generic_TextBoxFrameGetTextContent == "●"
@@ -15389,7 +15428,8 @@ namespace WindowsFormsApp1
                 while (Div_generic_TextBoxFrame == null || Div_generic_TextBoxFrame?.GetAttribute("textContent") == string.Empty)//當冊首頁圖文對照之文字框沒有內容時才轉到下一頁
                 {
                     if (GetPageNumFromUrl(driver.Url) < 4)
-                        NextPage?.Click();
+                        //NextPage?.Click();
+                        NextPage?.JsClick();
                     else
                         return false;
                 }
@@ -15426,9 +15466,11 @@ namespace WindowsFormsApp1
                 //{
                 //讀入四庫全書文本（已不限四庫專用）
                 br.SikuQuanshu_SKQSContextCopyReading();
-                AutoMarkTitleParagraph();
-                //});
+                //在前面讀回WordVBA的結果時，表單顯示時已經標識過了 20251230 ●●●●●●●●●●●●●●●●●●
+                if (textBox1.TextLength > 100 && textBox1.Text.IndexOf("<p>", 100) == -1)
+                    AutoMarkTitleParagraph();
                 return true;
+                //});
             }
             return false;
         }
@@ -15553,11 +15595,11 @@ namespace WindowsFormsApp1
                     #region 規範化WordVBA處理後的文本                    
                     if (xClpBd.Length > 100)
                     {
-                        //清除多餘的空行,排除卷末的空行
+                        //清除多餘的空行,排除卷末的空行//★！！如《唐文拾遺》「盧懷愼」處此文本本身就有空行，不宜逕行刪去 https://ctext.org/library.pl?if=gb&file=93822&page=59 https://www.inindex.com/literature/bookDetails/1167459247318110210/1167459284857131009 20251231
                         //textBox1.Text = xClpBd.Substring(0, xClpBd.Length - 100).Replace(Environment.NewLine + Environment.NewLine, Environment.NewLine)
                         //    + xClpBd.Substring(xClpBd.Length - 100);
-                        xClpBd = xClpBd.Substring(0, xClpBd.Length - 100).Replace(Environment.NewLine + Environment.NewLine, Environment.NewLine)
-                            + xClpBd.Substring(xClpBd.Length - 100);
+                        //xClpBd = xClpBd.Substring(0, xClpBd.Length - 100).Replace(Environment.NewLine + Environment.NewLine, Environment.NewLine)
+                        //+ xClpBd.Substring(xClpBd.Length - 100);
 
                         while (xClpBd.EndsWith(Environment.NewLine))
                             xClpBd = xClpBd.Substring(0, xClpBd.Length - Environment.NewLine.Length);
@@ -18020,6 +18062,14 @@ namespace WindowsFormsApp1
             }
             #endregion
 
+            // 輸入「lp」：由textBox2輸入 "lp" 來切換設定是否將每頁的尾端「`|`」字符改成「`<p>`」以方便文字版的圖文對照連結圖示的出現。這在目錄或清單、詩偈特長的篇卷中很適用。
+            if (x == "lp")
+            {
+                PauseEvents(); textBox2.Text = "";
+                lpMode = !lpMode;
+                ResumeEvents(); return;
+            }
+
             // 是否進行非正常行長（CheckAbnormalLinePara 方法）的檢查
             if (x == "alp")// 由textBox2輸入 "alp" 來切換設定
             {
@@ -18506,7 +18556,7 @@ namespace WindowsFormsApp1
             if (e.KeyChar == 8) return;
             //按下數字鍵盤的「+」執行 pagePaste2GjcoolOCR 方法時
             if ((PagePaste2GjcoolOCR_ing && e.KeyChar == 43)) { e.Handled = true; PagePaste2GjcoolOCR_ing = false; return; }
-            if ((fastMode || autoPaste2QuickEdit) && e.KeyChar == 43) { e.Handled = true; return; }//防止「+」誤入
+            //if ((fastMode || autoPaste2QuickEdit) && e.KeyChar == 43) { e.Handled = true; return; }//防止「+」誤入//不行！有需要輸入！如「<p>+」以作識別
 
             //按下 Scroll Lock 將字數較少的行/段落尾末標上分行/段符號（「\<p\>」或「\。<p\>」
             //> -： 在非自動且手動輸入模式下，在 textBox1 單獨按下數字鍵盤的「-」，執行與按下 Scroll Lock 一樣的功能
@@ -18629,7 +18679,7 @@ namespace WindowsFormsApp1
             //20240731 Copilot大菩薩 ： 簡化程式碼：您可以簡化這兩行檢查的程式碼如下：這樣可以達到相同的效果，並使程式碼更加簡潔明瞭。
             if (e.KeyChar == ' ' || e.KeyChar == '/') return;
 
-            string regexPattern = "[《〈」】〗]", omitSymbols = @"＝{}□■<>*〇◯○⿰⿱」』|\\" + Environment.NewLine;//輸入缺字構字式●＝＝、及注文標記符{{}}、及標題星號*時不取代
+            string regexPattern = "[《〈」】〗]", omitSymbols = @"＝{}□▢■<>*〇◯○⿰⿱」』|\\" + Environment.NewLine;//輸入缺字構字式●＝＝、及注文標記符{{}}、及標題星號*時不取代
             checkkeyPressOverTyping_oscarsun72note_Inserting_switch2insertMode(e.KeyChar, regexPattern + omitSymbols);
             string w;//, punctuationsNumWithout前書名號與前篇名號 = Regex.Replace(Form1.punctuationsNum, regexPattern, ""); 
             if (!insertMode
@@ -19890,11 +19940,13 @@ namespace WindowsFormsApp1
                 if (iwe != null)
                 {
                     if (clpTxt.Contains(" page=\"1\" />●\t<")) return false;
-                    Clipboard.SetText(iwe.GetAttribute("value"));
+                    //Clipboard.SetText(iwe.GetAttribute("value"));
+                    Clipboard.SetText(iwe.GetDomProperty("value"));
                     br.SetIWebElementValueProperty(iwe, string.Empty);//清除內容
                     //iwe.SendKeys(OpenQA.Selenium.Keys.Control + "a");
                     //iwe.SendKeys(OpenQA.Selenium.Keys.Delete);
-                    iwe.Click();
+                    ChromeSetFocus();
+                    iwe.Click();//這裡也是要將焦點交給編輯內容框以利WordVBA貼上，故不宜用iwe.JsClick()方法
                     return true;
                 }
             }

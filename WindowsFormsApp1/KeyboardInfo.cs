@@ -1,9 +1,32 @@
 ﻿
 using System.Windows.Forms;
 using System.Windows.Input;
+using System;
+using System.Runtime.InteropServices;
 
 namespace WindowsFormsApp1
 {
+
+    class KeyboardPress
+    {
+        [DllImport("user32.dll", SetLastError = true)]
+        static extern void keybd_event(byte bVk, byte bScan, uint dwFlags, UIntPtr dwExtraInfo);
+
+        const byte VK_CAPITAL = 0x14; // CapsLock 鍵代碼
+        const uint KEYEVENTF_EXTENDEDKEY = 0x1;
+        const uint KEYEVENTF_KEYUP = 0x2;
+        /// <summary>
+        /// 按下 CAPSLOCK 鍵 https://copilot.microsoft.com/shares/qQJ7QY7JQan94YhGHzAcT
+        /// </summary>
+        public static void CAPSLOCK_Press()
+        {
+            // 按下 CapsLock
+            keybd_event(VK_CAPITAL, 0, KEYEVENTF_EXTENDEDKEY, UIntPtr.Zero);
+            // 放開 CapsLock
+            keybd_event(VK_CAPITAL, 0, KEYEVENTF_KEYUP, UIntPtr.Zero);
+        }
+    }
+
     internal static class KeyboardInfo
     {
         /// <summary>

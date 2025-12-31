@@ -73,6 +73,7 @@ namespace TextForCtext
         internal static int VPNSwitchedTimer = 0;
         /// <summary>
         /// 因為剪貼簿的操作頻繁，故以此記下要貼去簡單修改模式方塊中的文字內容，以免被干擾
+        /// 雖然Selenium模式已不復用剪貼簿來操作，但非Selenium模式仍有必要
         /// </summary>
         internal static string TextPatst2Quick_editBox = "";
 
@@ -7019,6 +7020,7 @@ namespace TextForCtext
             try
             {
                 iwe.Click();
+                //iwe.JsClick();//這裡用這個會不如預期！20251230
                 //現在會跑出對話方塊
                 Thread.Sleep(200);
                 SendKeys.SendWait("~");
@@ -7047,6 +7049,22 @@ namespace TextForCtext
                 {
                     StopOCR = true; return false;
                 }
+                //限制訊息 20251230                
+                IWebElement restrictMsg = WaitFindWebElementBySelector_ToBeClickable("#swal2-html-container");//https://copilot.microsoft.com/shares/5kWSZG8rCWN9hM8PUJ8w7
+                //string msg = restrictMsg?.GetDomProperty("textContent");
+                //if (msg == "操作过于频繁，请等待0小时后重试。 Operation too frequent. Please wait for 0 hours and try again.")
+                if (restrictMsg?.GetDomProperty("textContent").StartsWith("操作过于频繁") == true)
+                {
+                    Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("已達上限，請稍後再試！");
+                    driver.Close();
+                    if (driver.WindowHandles.Contains(LastValidWindow))
+                        driver.SwitchTo().Window(LastValidWindow);
+                    else
+                        driver.SwitchTo().Window(driver.WindowHandles.Last());
+
+                    StopOCR = true; return false;
+                }
+
             }
             //iwe.Click();
             //Thread.Sleep(6220);
@@ -12079,33 +12097,36 @@ namespace TextForCtext
         /// <returns>失敗則傳回fasle</returns>
         internal static bool SikuQuanshu_SKQSContextCopyReading()
         {
-            if (IsDriverInvalid())
-            {
-                if (driver != null)
-                    driver.SwitchTo().Window(driver.WindowHandles.Last());
-                else
-                    return false;
-            }
-            bool found = false;
-            if (driver.WindowHandles.Contains(driver.CurrentWindowHandle))
-            {
-                if (!Form1.IsValidUrl＿keyDownCtrlAdd(driver.CurrentWindowHandle))
-                {
+            #region 這一區塊先取消掉，現在已可在背景馳騁了●●●●●●●●●●●●●●●●●●●●●●●20251231
 
-                    for (int i = driver.WindowHandles.Count - 1; i > -1; i--)
-                    {
-                        driver.SwitchTo().Window(driver.WindowHandles[i]);
-                        if (Form1.IsValidUrl＿keyDownCtrlAdd(driver.Url)) { found = true; break; }
-                    }
-                }
+            //if (IsDriverInvalid())
+            //{
+            //    if (driver != null)
+            //        driver.SwitchTo().Window(driver.WindowHandles.Last());
+            //    else
+            //        return false;
+            //}
+            //bool found = false;
+            //if (driver.WindowHandles.Contains(driver.CurrentWindowHandle))
+            //{
+            //    if (!Form1.IsValidUrl＿keyDownCtrlAdd(driver.CurrentWindowHandle))
+            //    {
 
-            }
-            if (!found)
-            {
-                openNewTabWindow();
-                driver.Navigate().GoToUrl(Form1.InstanceForm1.textBox3Text);
-            }
-            LastValidWindow = driver.CurrentWindowHandle;
+            //        for (int i = driver.WindowHandles.Count - 1; i > -1; i--)
+            //        {
+            //            driver.SwitchTo().Window(driver.WindowHandles[i]);
+            //            if (Form1.IsValidUrl＿keyDownCtrlAdd(driver.Url)) { found = true; break; }
+            //        }
+            //    }
+
+            //}
+            //if (!found)
+            //{
+            //    openNewTabWindow();
+            //    driver.Navigate().GoToUrl(Form1.InstanceForm1.textBox3Text);
+            //}
+            //LastValidWindow = driver.CurrentWindowHandle;
+            #endregion
 
             //複製下一卷或單位的內容
             bool result = CopyNextVolume();
@@ -12144,7 +12165,16 @@ namespace TextForCtext
             Form1.InstanceForm1.AvailableInUseBothKeysMouse();
             if (Form1.InstanceForm1.TextBox1_Text == string.Empty)
             {
-                BringToFront("chrome");
+                //BringToFront("chrome");
+                ChromeSetFocus();
+                IWebElement element = WaitFindWebElementBySelector_ToBeClickable("body");
+                //將焦點交給Chrome瀏覽器，在以滑鼠啟動視窗時所需
+                //clickCopybutton_GjcoolFastExperience(iwe.Location);
+                if (Cursor.Position != element.Location)
+                    Cursor.Position = element.Location;
+                //element.Click();//這裡須要模擬實際按下滑鼠，以將焦點交給該視窗，故不用 JsClick()方法
+                //停留一下
+                Thread.Sleep(850);
                 Form1.InstanceForm1.AvailableInUseBothKeysMouse();
             }
             return result;
@@ -12232,30 +12262,39 @@ namespace TextForCtext
                 #region 檢查是否有翻到下一卷（單位）
                 IWebElement iwe = WaitFindWebElementBySelector_ToBeClickable("#printView > div:nth-child(3) > div:nth-child(1) > div");//文本內容框
                 if (iwe == null) return false;
-                string textContent = iwe.GetAttribute("textContent");//.Substring(0, 100);
+                //string textContent = iwe.GetAttribute("textContent");//.Substring(0, 100);
+                string textContent = iwe.GetDomProperty("textContent");//.Substring(0, 100);
                 int l = textContent.Length;
                 l = l > 50 ? 50 : l;
                 textContent = textContent.Replace("　", string.Empty).Substring(0, l);
                 #endregion
                 iwe = WaitFindWebElementBySelector_ToBeClickable("#root > main > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div.gt");
                 if (iwe == null) return false;
-                BringToFront("chrome");
-                iwe.Click();
+                //BringToFront("chrome");//現在用JsClick()可在背景工作 20251231
+                //iwe.Click();
+                iwe.JsClick();//翻到下一頁
                 //clickCopybutton_GjcoolFastExperience(iwe.Location);
                 //if (Cursor.Position != iwe.Location)
                 //    Cursor.Position = iwe.Location;
 
+                //內容框
                 iwe = WaitFindWebElementBySelector_ToBeClickable("#printView > div:nth-child(3) > div:nth-child(1) > div");//文本內容框
 
                 DateTime dt = DateTime.Now;
                 //while (DateTime.Now.Subtract(dt).TotalSeconds < 2) { }//要有這樣才能複製到正確的卷頁單位
                 //while (urlOld == driver.Url)
-                string textContent1 = iwe.GetAttribute("textContent");
+                //string textContent1 = iwe.GetAttribute("textContent");
+                string textContent1 = iwe.GetDomProperty("textContent");
                 if (textContent1.Length > 50) textContent1 = textContent1.Replace("　", string.Empty).Substring(0, l);
                 //while (iwe.GetAttribute("textContent").Substring(0,100) == textContent)
                 while (textContent1 == textContent)
                 {
-                    textContent1 = iwe.GetAttribute("textContent");
+                    /* Copilot大菩薩：https://copilot.microsoft.com/shares/wTwDg8n8UjyLRNxN52T92 * 
+                        GetDomAttribute(name)	從 DOM 中的 attribute node 讀取	適合檢查元素是否有某個屬性存在，以及其初始值	若屬性在 DOM 中不存在，會回傳 null
+                        GetDomProperty(name)	從 DOM 中的 property 讀取	適合取得即時屬性值，例如 checked、value、textContent	反映瀏覽器渲染後的最新狀態
+                     */
+                    //textContent1 = iwe.GetAttribute("textContent");
+                    textContent1 = iwe.GetDomProperty("textContent");
                     if (textContent1.Length > 50) textContent1 = textContent1.Replace("　", string.Empty).Substring(0, l);
                     if (DateTime.Now.Subtract(dt).TotalSeconds > 10) return false;
                 }
@@ -12273,7 +12312,8 @@ namespace TextForCtext
                 //l = l > 50 ? 50 : l;
                 //textContent = textContent.Replace("　", string.Empty).Substring(0, l);
                 BringToFront("chrome");
-                iwe.Click();
+                //iwe.Click();
+                iwe.JsClick();
 
                 //iwe = WaitFindWebElementBySelector_ToBeClickable("#mf-section-0 > div");//文本內容框
                 //DateTime dt = DateTime.Now;
@@ -12359,11 +12399,13 @@ namespace TextForCtext
                 result = false; return result;
             }
 
-            //將焦點交給Chrome瀏覽器，在以滑鼠啟動視窗時所需
-            //clickCopybutton_GjcoolFastExperience(iwe.Location);
-            if (Cursor.Position != element.Location)
-                Cursor.Position = element.Location;
-            element.Click();
+            
+            //改到 SikuQuanshu_SKQSContextCopyReading 裡面
+            ////將焦點交給Chrome瀏覽器，在以滑鼠啟動視窗時所需
+            ////clickCopybutton_GjcoolFastExperience(iwe.Location);
+            //if (Cursor.Position != element.Location)
+            //    Cursor.Position = element.Location;
+            //element.Click();//這裡須要模擬實際按下滑鼠，以將焦點交給該視窗，故不用 JsClick()方法
 
 
             // 使用 JavaScript 來全選元素內的文字
