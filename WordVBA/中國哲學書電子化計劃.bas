@@ -18,11 +18,11 @@ Const description As String = "±N¬P¸¹«eªº¤À¬q²Å¸¹²¾¸m«e¬q¤§¥½ & ²M°£­¶«eªº¤À¬q²Å
 
 'Const description As String = "¥»®Ñ»PURN: ctp:wb ¦Pª©¡A¤µ¾Ú¥t¤@¦Pª©ªÌ¥H¥½¾Ç¦Û»s©óGitHub¶}·½§K¶O§K¦w¸Ë¤§TextForCtextÀ³¥Îµ{¦¡¤ºWordVBA¹ïÀ³Óî¤J¡]°Q½×°Ï»P¥½¾ÇYouTubeÀW¹D¦³¹ê¹Òºt¥Ü¼v¤ù¥i¨Ñ°Ñ¦Ò¡^¡A¥H«S«á½åºë®Õ¡C¦U¥»«á¥ç¥i¦P¨B§ó·s¡C·P®¦·P®¦¡@Æg¼ÛÆg¼Û¡@«nµLªüÀ±ªû¦ò¡@Æg¬ü¥D"
 
-Const description_Edit_textbox_·s­¶­± As String = "¾Ú¡mKanripo¡n©Ò¦¬¥»»²¥H¥½¾Ç¦Û»s©óGitHub¶}·½§K¶O§K¦w¸Ë¤§TextForCtext³n¥ó±Æª©¹ïÀ³¿ý¤J¡F°Q½×°Ï¤Î¥½¾ÇYouTubeÀW¹D¦³¹ê¹Òºt¥Ü¼v¤ù¡C·P®¦·P®¦¡@Æg¼ÛÆg¼Û¡@«nµLªüÀ±ªû¦ò"
+'Const description_Edit_textbox_·s­¶­± As String = "¾Ú¡mKanripo¡n©Ò¦¬¥»»²¥H¥½¾Ç¦Û»s©óGitHub¶}·½§K¶O§K¦w¸Ë¤§TextForCtext³n¥ó±Æª©¹ïÀ³¿ý¤J¡F°Q½×°Ï¤Î¥½¾ÇYouTubeÀW¹D¦³¹ê¹Òºt¥Ü¼v¤ù¡C·P®¦·P®¦¡@Æg¼ÛÆg¼Û¡@«nµLªüÀ±ªû¦ò"
 'Const description_Edit_textbox_·s­¶­± As String = "¾Ú¡m°ê¾Ç¤j®v¡n©Î¡mKanripo¡n©Ò¦¬¥»»²¥H¥½¾Ç¦Û»s©óGitHub¶}·½§K¶O§K¦w¸Ë¤§TextForCtext³n¥ó±Æª©¹ïÀ³¿ý¤J¡F°Q½×°Ï¤Î¥½¾ÇYouTubeÀW¹D¦³¹ê¹Òºt¥Ü¼v¤ù¡C·P®¦·P®¦¡@Æg¼ÛÆg¼Û¡@«nµLªüÀ±ªû¦ò"
 'Const description_Edit_textbox_·s­¶­± As String = "¾Ú¡m°ê¾Ç¤j®v¡n©Î¡mKanripo¡n©Î¥_¨Ê¤¸¤Þ¬ì§Þ¦³­­¤½¥q¡m¤¸¤Þ¬ì§Þ¤Þ±o¼Æ¦r¤H¤å¸ê·½¥­»O¡P¤¤°ê¾ú¥N¤åÄm¡n©Ò¦¬¥»»²¥H¥½¾Ç¦Û»s©óGitHub¶}·½§K¶O§K¦w¸Ë¤§TextForCtext³n¥ó±Æª©¹ïÀ³¿ý¤J¡F°Q½×°Ï¤Î¥½¾ÇYouTubeÀW¹D¦³¹ê¹Òºt¥Ü¼v¤ù¡C·P®¦·P®¦¡@Æg¼ÛÆg¼Û¡@«nµLªüÀ±ªû¦ò"
 'Const description_Edit_textbox_·s­¶­± As String = "¾Ú¡mºû°ò¤å®w¡n©Î¡m°ê¾Ç¤j®v¡n©Î¡mKanripo¡n©Î¥_¨Ê¤¸¤Þ¬ì§Þ¦³­­¤½¥q¡m¤¸¤Þ¬ì§Þ¤Þ±o¼Æ¦r¤H¤å¸ê·½¥­»O¡P¤¤°ê¾ú¥N¤åÄm¡n©Ò¦¬¥»»²¥H¥½¾Ç¦Û»s©óGitHub¶}·½§K¶O§K¦w¸Ë¤§TextForCtext³n¥ó±Æª©¹ïÀ³¿ý¤J¡F°Q½×°Ï¤Î¥½¾ÇYouTubeÀW¹D¦³¹ê¹Òºt¥Ü¼v¤ù¡C·P®¦·P®¦¡@Æg¼ÛÆg¼Û¡@«nµLªüÀ±ªû¦ò"
-'Const description_Edit_textbox_·s­¶­± As String = "¾Ú¥_¨Ê¤¸¤Þ¬ì§Þ¦³­­¤½¥q¡m¤¸¤Þ¬ì§Þ¤Þ±o¼Æ¦r¤H¤å¸ê·½¥­»O¡P¤¤°ê¾ú¥N¤åÄm¡n©Ò¦¬¥»»²¥H¥½¾Ç¦Û»s©óGitHub¶}·½§K¶O§K¦w¸Ë¤§TextForCtext³n¥ó±Æª©¹ïÀ³¿ý¤J¡F°Q½×°Ï¤Î¥½¾ÇYouTubeÀW¹D¦³¹ê¹Òºt¥Ü¼v¤ù¡C·P®¦·P®¦¡@Æg¼ÛÆg¼Û¡@«nµLªüÀ±ªû¦ò"
+Const description_Edit_textbox_·s­¶­± As String = "¾Ú¥_¨Ê¤¸¤Þ¬ì§Þ¦³­­¤½¥q¡m¤¸¤Þ¬ì§Þ¤Þ±o¼Æ¦r¤H¤å¸ê·½¥­»O¡P¤¤°ê¾ú¥N¤åÄm¡n©Ò¦¬¥»»²¥H¥½¾Ç¦Û»s©óGitHub¶}·½§K¶O§K¦w¸Ë¤§TextForCtext³n¥ó±Æª©¹ïÀ³¿ý¤J¡F°Q½×°Ï¤Î¥½¾ÇYouTubeÀW¹D¦³¹ê¹Òºt¥Ü¼v¤ù¡C·P®¦·P®¦¡@Æg¼ÛÆg¼Û¡@«nµLªüÀ±ªû¦ò"
 
 
 Sub ¤À¦æ¤À¬q()
@@ -266,6 +266,7 @@ Sub setPage1Code() '(ByRef d As Document)
                     xd = Replace(xd, page1, "¡´")
                     SystemSetup.ClipboardPutIn xd
                 Else
+                    word.Application.windowState = wdWindowStateMaximize
                     word.ActiveDocument.Activate
                     word.Application.Activate
                     If MsgBox("¬O§_²M°£²Ä¤@­¶ªº¤º®e¡A¥H§Q³sÄò¦Û°Ê¿é¤J¤§¶iµ{¡H" & _
@@ -275,7 +276,7 @@ Sub setPage1Code() '(ByRef d As Document)
                         xd = Replace(xd, page1, "¡´")
                         SystemSetup.ClipboardPutIn xd
                     End If
-
+                    word.Application.windowState = wdWindowStateMinimize
                 End If
             End If
         End If
@@ -719,7 +720,7 @@ Sub formatter¦~«e¥[¤À¬q²Å¸¹() '¬°¡m¸g¨åÄÀ¤å¡n¬K¬î¤T¶Çµ¥®æ¦¡¥Î¡A¤é«á¥i§ï¦¨¨ä¥L»Ý­
     d.Range.Cut
     d.Close wdDoNotSaveChanges
 End Sub
-Sub ºû°ò¤å®w¥|³¡ÂO¥Z¥»Âà¨Ó()
+Sub ºû°ò¤å®w¥|³¡ÂO¥Z¥»Âà¨Ó(Optional lineCntPerPage As Byte = 0)
     Dim d As Document, a, i, p As Paragraph, xP As String, acP As Integer, space As String, rng As Range
     
     'P# ¤D¡u¥_¨Ê¤¸¤Þ¬ì§Þ¦³­­¤½¥q¡m¤¸¤Þ¬ì§Þ¤Þ±o¼Æ¦r¤H¤å¸ê·½¥­»O¡P¤¤°ê¾ú¥N¤åÄm¡n¡vªº¤å¥»¯S¼x
@@ -728,7 +729,7 @@ Sub ºû°ò¤å®w¥|³¡ÂO¥Z¥»Âà¨Ó()
     pp = VBA.InStr(xClip, "P")
     If pp Then
         If IsNumeric(Mid(xClip, pp + 1, 1)) Then
-            ¤¸¤Þ¬ì§Þ¤Þ±o¼Æ¦r¤H¤å¸ê·½¥­»O_¥_¨Ê¤¸¤Þ¬ì§Þ¦³­­¤½¥qÂà¨Ó
+            ¤¸¤Þ¬ì§Þ¤Þ±o¼Æ¦r¤H¤å¸ê·½¥­»O_¥_¨Ê¤¸¤Þ¬ì§Þ¦³­­¤½¥qÂà¨Ó lineCntPerPage
             Exit Sub
         End If
     End If
@@ -1874,9 +1875,11 @@ nextRecord:
     VBA.DoEvents
     
 End Sub
-Rem ²{¦b¦h¥ÎKanripo.orgªÌ 20250202¤j¦~ªì¤­
-Sub ¤¸¤Þ¬ì§Þ¤Þ±o¼Æ¦r¤H¤å¸ê·½¥­»O_¥_¨Ê¤¸¤Þ¬ì§Þ¦³­­¤½¥qÂà¨Ó()
-    Dim rng As Range, noteRng As Range, aNext As Range, aPre As Range, ur As UndoRecord, midNoteRngPos As Byte, midNoteRng As Range, aX As String, a As Range, aSt As Long, aEd As Long, si As New StringInfo
+Rem ²{¦b¦h¥ÎKanripo.orgªÌ 20250202¤j¦~ªì¤­¡FlineCntPerPage ¨C­¶¦æ¼Æ¡A¥H¨ÑÀË¬d¸ÉªÅ¦æ
+Sub ¤¸¤Þ¬ì§Þ¤Þ±o¼Æ¦r¤H¤å¸ê·½¥­»O_¥_¨Ê¤¸¤Þ¬ì§Þ¦³­­¤½¥qÂà¨Ó(Optional lineCntPerPage As Byte = 0)
+'Sub ¤¸¤Þ¬ì§Þ¤Þ±o¼Æ¦r¤H¤å¸ê·½¥­»O_¥_¨Ê¤¸¤Þ¬ì§Þ¦³­­¤½¥qÂà¨Ó()
+'    Const lineCntPerPage As Byte = 10
+    Dim rng As Range, noteRng As Range, aNext As Range, aPre As Range, ur As UndoRecord, midNoteRngPos As Byte, midNoteRng As Range, aX As String, a As Range, aSt As Long, aEd As Long, si As New StringInfo, p As Paragraph
     Dim noteFont As font '°O¤Uª`¤å®æ¦¡¥H³Æ¥Î
     Dim insertX As String, counter As Byte
     Set rng = Documents.Add().Range
@@ -1886,26 +1889,11 @@ Sub ¤¸¤Þ¬ì§Þ¤Þ±o¼Æ¦r¤H¤å¸ê·½¥­»O_¥_¨Ê¤¸¤Þ¬ì§Þ¦³­­¤½¥qÂà¨Ó()
     '´£¥Ü¶K¤WµLÃª
     SystemSetup.playSound 1.294 '¥ú¶K¤W¯Ó®É´N«Ü¤[¤F¡A«á­±³o¤@¤j°ï¦¡¤l¤Ï¦Ó§Ö 20230211
     
-    With rng.Find
-        .font.ColorIndex = 6
-    End With
     Set rng = rng.Document.Range
-    '²M°£­¶½X
-    Do While rng.Find.Execute("P", , , , , , True, wdFindContinue)
-       rng.Paragraphs(1).Range.Delete
-    Loop
-    rng.Find.ClearFormatting
-    
-    Set rng = rng.Document.Range
-'    rng.Find.Execute "^p^p", , , , , , , wdFindContinue, , "^p", wdReplaceAll
-'    If VBA.InStr(rng.text, VBA.ChrW(160) & "/" & VBA.Chr(11)) Then _
-'        rng.Find.Execute VBA.ChrW(160) & "^g" & VBA.Chr(11), , , , , , , wdFindContinue, , VBA.Chr(11), wdReplaceAll 'chr(11)¤À¦æ²Å¸¹
-'    If VBA.InStr(rng.text, VBA.ChrW(160) & "/" & VBA.Chr(13)) Then _
-'        rng.Find.Execute VBA.ChrW(160) & "^g" & VBA.Chr(13), , , , , , , wdFindContinue, , VBA.Chr(13), wdReplaceAll
     
     rng.Find.Execute "^p/", , , , , , , wdFindContinue, , "^p", wdReplaceAll
     
-    rng.Find.Execute VBA.Chr(13), , , , , , , wdFindContinue, , VBA.Chr(11), wdReplaceAll
+'    rng.Find.Execute VBA.Chr(13), , , , , , , wdFindContinue, , VBA.Chr(11), wdReplaceAll
 
     Rem ²M²z¤å¥»¡A·|»~­l¥X³\¦h¥b§ÎªÅ®æ
     rng.Find.font.Color = 1310883 '¤pª`¤åÃC¦â
@@ -1920,6 +1908,53 @@ Sub ¤¸¤Þ¬ì§Þ¤Þ±o¼Æ¦r¤H¤å¸ê·½¥­»O_¥_¨Ê¤¸¤Þ¬ì§Þ¦³­­¤½¥qÂà¨Ó()
 '            rng.Find.Execute "[ ]", , , , , , , wdFindContinue, , vbNullString, wdReplaceAll
             ¤å¦r³B²z.²M°£¥b§ÎªÅ®æ rng
         End If
+    End If
+    
+    '²M°£¨C¦æ/¬q²Å¸¹«eªº¤¾¾lªÅ®æ
+    For Each p In rng.Document.Paragraphs
+        If (Len(p.Range.text) > 1) Then
+            Do While p.Range.Characters(p.Range.Characters.Count - 1) = "¡@"
+                p.Range.Characters(p.Range.Characters.Count - 1).Delete
+            Loop
+        End If
+    Next p
+
+    'ÀË¬d¨C­¶¦æ¼Æ¡A¥H¸ÉªÅ¦æ
+    If lineCntPerPage > 0 Then
+        Dim rngExamLineCntPerPage As Range, rngAddPara As Range
+        Set rng = rng.Document.Range: Set rngExamLineCntPerPage = rng.Document.Range: Set rngAddPara = rng.Document.Range
+        rng.Find.ClearFormatting
+        With rng.Find
+            '.font.ColorIndex = 6
+            .font.Color = 4882109
+        End With
+        'ÀË¬d¨C­¶¦æ¼Æ¡A¥H¸ÉªÅ¦æ
+        Do While rng.Find.Execute(vbNullString, , , , , , True, wdFindContinue)
+            rngExamLineCntPerPage.start = rng.End + 1
+            rngExamLineCntPerPage.End = rng.End + 1
+            rngExamLineCntPerPage.MoveEndUntil "P", (rng.Document.Range.End - 1) - rng.End
+            If InStr(rng.Document.Range(rngExamLineCntPerPage.start, rng.Document.Range.End), "P") = 0 Then '«á­±¨S¦³¡uP¡v¤F¡A³B²z§¹¤F¡A´NÂ÷¶}
+                rng.Paragraphs(1).Range.Delete ' ²M°£­¶½X
+                Exit Do
+            End If
+            Do While rngExamLineCntPerPage.Paragraphs.Count < lineCntPerPage
+                 rngAddPara.SetRange rngExamLineCntPerPage.End, rngExamLineCntPerPage.End
+                 rngExamLineCntPerPage.InsertAfter "¡@"
+                 rngExamLineCntPerPage.InsertParagraphAfter
+                 rngAddPara.End = rngAddPara.End + 2
+                 If rngAddPara.font.Color <> 1447971 Then rngAddPara.font.Color = 1447971
+            Loop
+            rng.Paragraphs(1).Range.Delete ' ²M°£­¶½X
+        Loop
+    Else 'lineCntPerPage = 0 '¹w³]­È
+'        '²M°£­¶½X' «e­± ¡urng.Paragraphs(1).Range.Delete ' rng.text = vbNullString¡v ¤w§¹¦¨
+        Set rng = rng.Document.Range
+        rng.Find.MatchCase = True
+'        '²M°£­¶½X
+        Do While rng.Find.Execute("P", , , , , , True, wdFindContinue)
+           rng.Paragraphs(1).Range.Delete
+        Loop
+'        'rng.Find.ClearFormatting
     End If
     
     Rem ·Ç³Æ§ä¤pª`¨Ó³B²z
@@ -1944,34 +1979,14 @@ Sub ¤¸¤Þ¬ì§Þ¤Þ±o¼Æ¦r¤H¤å¸ê·½¥­»O_¥_¨Ê¤¸¤Þ¬ì§Þ¦³­­¤½¥qÂà¨Ó()
         If midNoteRng.start = noteRng.start And midNoteRng.End = noteRng.End Then
             Set midNoteRng = noteRng
         End If
-'        If (aNext.text = VBA.Chr(11) And aPre.text = VBA.Chr(11)) Then
-'            If aNext.Previous = "/" Then
-'                midNoteRng.text = VBA.Replace(midNoteRng, "/", vbNullString, 1, 1)
-'                noteRng.text = "{{" & noteRng.text & "}}"
-'            Else
-'                midNoteRng.text = VBA.Replace(midNoteRng, "/", VBA.Chr(11), 1, 1)
-'                noteRng.text = "{{" & noteRng.text & "}}"
-'            End If
-'        ElseIf aNext.text = VBA.Chr(13) And aPre.text = VBA.Chr(13) Then
-'            If aNext.Previous = "/" Then
-'                midNoteRng.text = VBA.Replace(midNoteRng, "/", vbNullString, 1, 1)
-'                noteRng.text = "{{" & noteRng.text & "}}"
-'            Else
-'                midNoteRng.text = VBA.Replace(midNoteRng, "/", VBA.Chr(13), 1, 1)
-'                noteRng.text = "{{" & noteRng.text & "}}"
-'            End If
-'        Else
-'            If aNext.text = VBA.Chr(11) Then
-
-
 '        If InStr(noteRng, "¾A/") Then Stop
 
 
                 '§PÂ_¦³µLÁY±Æ
                 If Not aPre Is Nothing Then
                     Set a = aPre.Document.Range(aPre.start, aPre.End) '°O¤UaPre­ì¨Óªº¦ì¸m
-                    If aPre.start > 0 And aPre.text <> VBA.Chr(11) Then
-                        Do Until aPre.Previous = VBA.Chr(11)
+                    If aPre.start > 0 And aPre.text <> VBA.Chr(13) Then
+                        Do Until aPre.Previous = VBA.Chr(13)
                             aPre.Move wdCharacter, -1
                             If aPre.start <= 0 Then Exit Do
                         Loop
@@ -2000,14 +2015,14 @@ Sub ¤¸¤Þ¬ì§Þ¤Þ±o¼Æ¦r¤H¤å¸ê·½¥­»O_¥_¨Ê¤¸¤Þ¬ì§Þ¦³­­¤½¥qÂà¨Ó()
                 If aX <> vbNullString And VBA.Replace(aX, "¡@", vbNullString) = vbNullString Then
                     If noteRng.Next Is Nothing Then '©È¦b¤å¥ó³Ì¥½ºÝ¡A»P¤U¤@¦~§PÂ_¨Ã¤£­«½Æ
 '                    If line.LineRange(noteRng).start = noteRng.start And line.LineRange(noteRng).End = noteRng.End Then
-                        insertX = VBA.Chr(11) & aX
-                    ElseIf noteRng.Next = VBA.Chr(11) Then 'ax=ÁY±ÆªºªÅ®æ ¡´¡´¡´¡´¡´¡´¡´¡´¡´¡´¡´¡´¡´
-                        insertX = VBA.Chr(11) & aX  'VBA.Chr(11) «á­± a.text = "}}" & VBA.Replace(insertX, VBA.Chr(11), VBA.Chr(11) & "{{") ­n°Ñ·Ó
+                        insertX = VBA.Chr(13) & aX
+                    ElseIf noteRng.Next = VBA.Chr(13) Then 'ax=ÁY±ÆªºªÅ®æ ¡´¡´¡´¡´¡´¡´¡´¡´¡´¡´¡´¡´¡´
+                        insertX = VBA.Chr(13) & aX  'VBA.Chr(13) «á­± a.text = "}}" & VBA.Replace(insertX, VBA.Chr(13), VBA.Chr(13) & "{{") ­n°Ñ·Ó
                     Else
                         If VBA.InStr(midNoteRng.text, "/") _
                             And noteRng.Next.font.Size > 11.5 _
-                            And (noteRng.Next.text <> VBA.Chr(11) Or noteRng.Next.text = "¡@") Then  '­Y¬O§¨ª`(³q±`¬O¼ÐÃD¤Uªº§¨ª`¡]«h«á­±¦³ªÅ®æ¡^¡A¦p https://ctext.org/library.pl?if=en&file=55677&page=6¡^ 20250205
-                            'noteRng.Next.text <> VBA.Chr(11):«á­±ÁÙ¦³¤å¦r¡A«h¬°§¨ª` 20250223¸É
+                            And (noteRng.Next.text <> VBA.Chr(13) Or noteRng.Next.text = "¡@") Then  '­Y¬O§¨ª`(³q±`¬O¼ÐÃD¤Uªº§¨ª`¡]«h«á­±¦³ªÅ®æ¡^¡A¦p https://ctext.org/library.pl?if=en&file=55677&page=6¡^ 20250205
+                            'noteRng.Next.text <> VBA.Chr(13):«á­±ÁÙ¦³¤å¦r¡A«h¬°§¨ª` 20250223¸É
                             insertX = aX '¸ÉªÅ®æ¥HÁY±Æ
                         Else
                             insertX = vbNullString
@@ -2015,8 +2030,8 @@ Sub ¤¸¤Þ¬ì§Þ¤Þ±o¼Æ¦r¤H¤å¸ê·½¥­»O_¥_¨Ê¤¸¤Þ¬ì§Þ¦³­­¤½¥qÂà¨Ó()
                     End If
                 Else '¨S¦³ÁY±Æ
                     If aX = vbNullString And Not noteRng.Previous(wdCharacter, 1) Is Nothing And Not noteRng.Next(wdCharacter, 1) Is Nothing Then
-                        If noteRng.Previous(wdCharacter, 1) = VBA.Chr(11) And noteRng.Next(wdCharacter, 1) = VBA.Chr(11) Then
-                            insertX = VBA.Chr(11)
+                        If noteRng.Previous(wdCharacter, 1) = VBA.Chr(13) And noteRng.Next(wdCharacter, 1) = VBA.Chr(13) Then
+                            insertX = VBA.Chr(13)
                         Else
 '                            SystemSetup.playSound 7, 0
 '                            Stop
@@ -2043,16 +2058,16 @@ Sub ¤¸¤Þ¬ì§Þ¤Þ±o¼Æ¦r¤H¤å¸ê·½¥­»O_¥_¨Ê¤¸¤Þ¬ì§Þ¦³­­¤½¥qÂà¨Ó()
                                If counter > 50 Then Exit Do
                             Loop
                             counter = 0
-                            If a.Next = VBA.Chr(11) Then '¦pªG±×½u/«á­±§Y´«¦æ
+                            If a.Next = VBA.Chr(13) Then '¦pªG±×½u/«á­±§Y´«¦æ
                                 If aX = vbNullString Or VBA.Replace(aX, "¡@", vbNullString) <> vbNullString Then '­YµLÁY±Æ¡A«h²M°£±¼±×½u/
-                                    If (a.Next = Chr(11) _
-                                            And noteRng.Previous = Chr(11) _
+                                    If (a.Next = VBA.Chr(13) _
+                                            And noteRng.Previous = VBA.Chr(13) _
                                             And si.Create(Replace(noteRng, "¡@", vbNullString)).LengthInTextElements = 2 _
                                             And Right(Replace(noteRng, "¡@", vbNullString), 1) = "/") Then ' ¿W¥ß¯Âª`¤å¥B¶È¦³1¦rµLÁY±Æ®Éªº³B²z And si.Create(noteRng.text).LengthInTextElements = 2) Then
 '                                        noteRng.Select '20251225¸t½Ï¸`
 '                                        Stop
-                                        'insertX = Chr(11)
-                                        a.text = Chr(11) & "¡@"
+                                        'insertX = VBA.Chr(13)
+                                        a.text = VBA.Chr(13) & "¡@"
                                         noteRng.End = noteRng.End + 2
                                     Else
                                         a.text = vbNullString
@@ -2062,11 +2077,11 @@ Sub ¤¸¤Þ¬ì§Þ¤Þ±o¼Æ¦r¤H¤å¸ê·½¥­»O_¥_¨Ê¤¸¤Þ¬ì§Þ¦³­­¤½¥qÂà¨Ó()
                                     noteRng.SetRange aSt, aEd + VBA.Len(insertX) - 1 '¡u/¡v¡] a = "/" ¡^®³±¼¤F¬G´î1
                                 End If
                             Else
-                                If noteRng.Next = VBA.Chr(11) And aX <> vbNullString And VBA.Replace(aX, "¡@", vbNullString) = vbNullString Then
-                                'If noteRng.Next = VBA.Chr(11) And VBA.Replace(aPre.text, "¡@", vbNullString) = vbNullString Then
-                                    If aPre.Previous = VBA.Chr(11) Then
+                                If noteRng.Next = VBA.Chr(13) And aX <> vbNullString And VBA.Replace(aX, "¡@", vbNullString) = vbNullString Then
+                                'If noteRng.Next = VBA.Chr(13) And VBA.Replace(aPre.text, "¡@", vbNullString) = vbNullString Then
+                                    If aPre.Previous = VBA.Chr(13) Then
                                         noteRng.SetRange aPre.start, noteRng.End
-                                        a.text = "}}" & VBA.Replace(insertX, VBA.Chr(11), VBA.Chr(11) & "{{")
+                                        a.text = "}}" & VBA.Replace(insertX, VBA.Chr(13), VBA.Chr(13) & "{{")
                                     Else
                                         SystemSetup.playSound 12, 0
                                         Stop
@@ -2130,7 +2145,12 @@ Sub ¤¸¤Þ¬ì§Þ¤Þ±o¼Æ¦r¤H¤å¸ê·½¥­»O_¥_¨Ê¤¸¤Þ¬ì§Þ¦³­­¤½¥qÂà¨Ó()
             .Replacement.text = "¡@}}"
             .Execute , , , , , , True, wdFindContinue, , , wdReplaceAll
         End With
-        .Range.text = Replace(Replace(.Range.text, Chr(11), Chr(13) & Chr(10)), "?", "/")
+        
+       
+
+        
+'        .Range.text = Replace(Replace(.Range.text, VBA.Chr(11), Chr(13) & Chr(10)), "?", "/")'¡´¡´¡´¡´¡´¡´¡´¡´¡´¡´¡´¡´¡´¡´¡´¡´¡´¡´¡´
+        .Range.text = VBA.Replace(.Range.text, "?", "/") '±N³y¦r¶Ã½X§ï¬°¡u/¡v¥H¨Ñ«áÄòµ{¦¡¤§ÃÑ§O 20260101¤¸¥¹
         .Range.Cut
         
 '        If VBA.InStr(.Range.text, "{{}}") Then
@@ -2143,6 +2163,10 @@ Sub ¤¸¤Þ¬ì§Þ¤Þ±o¼Æ¦r¤H¤å¸ê·½¥­»O_¥_¨Ê¤¸¤Þ¬ì§Þ¦³­­¤½¥qÂà¨Ó()
         .Close wdDoNotSaveChanges
         
     End With
+    
+    
+
+    
     SystemSetup.playSound 1.921
     SystemSetup.contiUndo ur
     Set si = Nothing
@@ -2152,7 +2176,7 @@ Sub ¤¸¤Þ¬ì§Þ¤Þ±o¼Æ¦r¤H¤å¸ê·½¥­»O_¥_¨Ê¤¸¤Þ¬ì§Þ¦³­­¤½¥qÂà¨Ó()
 '    SendKeys "^v"
 '    DoEvents
 End Sub
-Sub Kanripo_GitHubÂà¨Ó()
+Sub Kanripo_GitHubÂà¨Ó(Optional lineCntPerPage As Byte = 0)
     'https://github.com/kanripo
     '¥H¤U°ÝÃD¤w¸Ñ¨M¡A«ÝÆ[¹î
     'ÁÙ¥¼§¹µ½¡A¦p¥H¤U¦¹ÀÉ¤§¿W¥ßª`¤å³B¡G
@@ -2361,7 +2385,7 @@ Sub Kanripo_GitHubÂà¨Ó()
 End Sub
 
 Rem ²{¦b¦h¥ÎKanripo.orgªÌ 20250202¤j¦~ªì¤­
-Sub °ê¾Ç¤j®v_Kanripo_¥|®w¥þ®Ñ¥»Âà¨Ó()
+Sub °ê¾Ç¤j®v_Kanripo_¥|®w¥þ®Ñ¥»Âà¨Ó(Optional lineCntPerPage As Byte = 0)
     Dim rng As Range, noteRng As Range, aNext As Range, aPre As Range, ur As UndoRecord, midNoteRngPos As Byte, midNoteRng As Range, aX As String, a As Range, aSt As Long, aEd As Long
     Dim noteFont As font '°O¤Uª`¤å®æ¦¡¥H³Æ¥Î
     Dim insertX As String, counter As Byte
@@ -2369,7 +2393,7 @@ Sub °ê¾Ç¤j®v_Kanripo_¥|®w¥þ®Ñ¥»Âà¨Ó()
     
     'P ¤D¡u¥_¨Ê¤¸¤Þ¬ì§Þ¦³­­¤½¥q¡m¤¸¤Þ¬ì§Þ¤Þ±o¼Æ¦r¤H¤å¸ê·½¥­»O¡P¤¤°ê¾ú¥N¤åÄm¡n¡vªº¤å¥»¯S¼x
     If VBA.InStr(SystemSetup.GetClipboard, "P") Then
-        ¤¸¤Þ¬ì§Þ¤Þ±o¼Æ¦r¤H¤å¸ê·½¥­»O_¥_¨Ê¤¸¤Þ¬ì§Þ¦³­­¤½¥qÂà¨Ó
+        ¤¸¤Þ¬ì§Þ¤Þ±o¼Æ¦r¤H¤å¸ê·½¥­»O_¥_¨Ê¤¸¤Þ¬ì§Þ¦³­­¤½¥qÂà¨Ó lineCntPerPage
         Exit Sub
     End If
     
@@ -3342,7 +3366,7 @@ Sub ·s­¶­±Auto_action_newchapter()
     
     SetIWebElementValueProperty Title_Edit_textbox, title
     '¿é¤JSequence­È¡G
-    SetIWebElementValueProperty Sequence_data_Edit_textbox, VBA.CStr(chapterNum) & "0"
+    SetIWebElementValueProperty Sequence_data_Edit_textbox, VBA.CStr(chapterNum) & "000"
     '¿é¤J­×§ïºK­n:
     SetIWebElementValueProperty description_Edit_textbox, description_Edit_textbox_·s­¶­± '"¾Ú¡m°ê¾Ç¤j®v¡n©Î¡mKanripo¡n©Ò¦¬¥»»²¥H¥½¾Ç¦Û»s©óGitHub¶}·½§K¶O§K¦w¸Ë¤§TextForCtext³n¥ó±Æª©¹ïÀ³¿ý¤J¡F°Q½×°Ï¤Î¥½¾ÇYouTubeÀW¹D¦³¹ê¹Òºt¥Ü¼v¤ù¡C·P®¦·P®¦¡@Æg¼ÛÆg¼Û¡@«nµLªüÀ±ªû¦ò"
 '    SetIWebElementValueProperty Description_Edit_textbox, "¾Ú¥_¨Ê¤¸¤Þ¬ì§Þ¦³­­¤½¥q¡m¤¸¤Þ¬ì§Þ¤Þ±o¼Æ¦r¤H¤å¸ê·½¥­»O¡P¤¤°ê¾ú¥N¤åÄm¡n©Ò¦¬¥»»²¥H¥½¾Ç¦Û»s©óGitHub¶}·½§K¶O§K¦w¸Ë¤§TextForCtext³n¥ó±Æª©¹ïÀ³¿ý¤J¡F°Q½×°Ï¤Î¥½¾ÇYouTubeÀW¹D¦³¹ê¹Òºt¥Ü¼v¤ù¡C·P®¦·P®¦¡@Æg¼ÛÆg¼Û¡@«nµLªüÀ±ªû¦ò"

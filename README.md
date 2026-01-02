@@ -279,7 +279,7 @@ Ctrl + Delete ：可清除插入點後多餘的空格、空白、星號與語法
 
 Ctrl + Shift + Delete ： 清除textBox1中選取的字符及其相關字符。詳後說明
 
-Alt + Delete : 刪除插入點後第一個分行分段
+Alt + Delete : 刪除插入點後第一個分行分段。如果各行分行分段前僅是「|」則一併清除之。
 
 Ctrl + \ （反斜線） 或 Alt + \ ： 清除textBox1文本插入點後的分段
 
@@ -790,7 +790,7 @@ Alt + -（字母區與數字鍵盤的減號） : 如果被選取的是「􏿽」
 
     > 每頁書圖只檢查一次，只要有嫌疑即暫停，餘請自行檢查 （寫在函式：detectIncorrectBlankAndCurlybrackets_Suspected_aPageaTime()）
 
-Alt + Delete : 刪除插入點後第一個分行分段
+Alt + Delete : 刪除插入點後第一個分行分段。如果各行分行分段前僅是「|」則一併清除之。
 
 Alt + Insert ：將剪貼簿的文字內容讀入textBox1中；在手動輸入鍵入模式下，會自動加上書名號、篇名號。
 

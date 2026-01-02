@@ -693,6 +693,7 @@ namespace TextForCtext
             for (int i = 0; i < replaceChar.Count(); i++)
             {
                 //if (replaceDChar[i] == "{{\r\n") Debugger.Break();
+                //if (replaceDChar[i].Contains("?") ) Debugger.Break();
                 x = x.Replace(replaceDChar[i], replaceChar[i]);
             }
 
@@ -759,7 +760,7 @@ namespace TextForCtext
         /// <returns>傳回出現的位置。沒有或有錯誤則傳回-1</returns>
         internal static int HasPlatecenterTextIncluded(string xChecking)
         {
-            string title = Browser.Title_Linkbox?.GetAttribute("textContent");
+            string title = CTP.Title_Linkbox?.GetAttribute("textContent");
             if (title == null)
             {
                 Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("未能找到正確的「書名（title）」超連結控制項，請檢查！", "HasPlatecenterTextIncluded");
@@ -823,7 +824,7 @@ namespace TextForCtext
                  //    使用相似度演算法來計算文本與書名之間的相似度。
                  //    如果相似度達到 80%，則傳回找到的文本起始位置。
                  //    以下是改寫後的程式碼範例：*/
-                 //    string title = Browser.Title_Linkbox?.GetAttribute("textContent");
+                 //    string title = CTP.Title_Linkbox?.GetAttribute("textContent");
                  //    if (title == null)
                  //    {
                  //        Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("未能找到正確的「書名（title）」超連結控制項，請檢查！", "HasPlatecenterTextIncluded");
@@ -855,7 +856,7 @@ namespace TextForCtext
         /// <returns>傳回出現的位置。沒有或有錯誤則傳回-1</returns>
         internal static int HasPlatecenterTextIncluded_exactly(string xChecking)
         {
-            string title = Browser.Title_Linkbox?.GetAttribute("textContent");
+            string title = CTP.Title_Linkbox?.GetAttribute("textContent");
             if (title == null)
             {
                 Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("未能找到正確的「書名（title）」超連結控制項，請檢查！", "HasPlatecenterTextIncluded");

@@ -34,6 +34,7 @@ using TextForCtext;
 using WebSocketSharp;
 using static System.Net.Mime.MediaTypeNames;
 using static TextForCtext.Browser;
+using static TextForCtext.CTP;
 //using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 //引用adodb 要將其「內嵌 Interop 類型」（Embed Interop Type）屬性設為false（預設是true）才不會出現以下錯誤：  HResult=0x80131522  Message=無法從組件 載入類型 'ADODB.FieldsToInternalFieldsMarshaler'。
 //https://stackoverflow.com/questions/5666265/adodbcould-not-load-type-adodb-fieldstointernalfieldsmarshaler-from-assembly  https://blog.csdn.net/m15188153014/article/details/119895082
@@ -152,7 +153,7 @@ namespace WindowsFormsApp1
         /// kapi：《看典古籍》api
         /// df ：default 古籍酷
         /// </summary>
-        internal br.OCRSiteTitle PagePast2OCRsite = br.OCRSiteTitle.GJcool;
+        internal OCRSiteTitle PagePast2OCRsite = OCRSiteTitle.GJcool;
         /// <summary>
         /// 指定是否要在OCR讀入後自動標識標題語法標記
         /// </summary>
@@ -342,7 +343,7 @@ namespace WindowsFormsApp1
 
             //終止由 chromedriver.exe 程序開啟的Chrome瀏覽器,釋放系統記憶體
             //new Task(Action ).Wait(4500);
-            if (Name == "Form1" && (br.driver != null || browsrOPMode != BrowserOPMode.appActivateByName))
+            if (Name == "Form1" && (driver != null || browsrOPMode != BrowserOPMode.appActivateByName))
             {
                 //if (MessageBox.Show("本軟件即將關閉，也會同時關閉由其開啟的Chrome瀏覽器，若有沒儲存的資訊，請先儲存再按「確定」鈕繼續；否則請按「取消」", "", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning) == DialogResult.Cancel) { e.Cancel = true; return; }
                 if (MessageBoxShowOKCancelExclamationDefaultDesktopOnly("本軟件即將關閉，也會同時關閉由其開啟的Chrome瀏覽器，若有沒儲存的資訊，請先儲存再按「確定」鈕繼續；否則請按「取消」") == DialogResult.Cancel) { e.Cancel = true; return; }
@@ -350,7 +351,7 @@ namespace WindowsFormsApp1
                 {
                     try
                     {
-                        if (br.ImproveGJcoolOCRMemoDoc != null)
+                        if (ImproveGJcoolOCRMemoDoc != null)
                         {
                             //ImproveGJcoolOCRMemoDoc.Close(Microsoft.Office.Interop.Word.WdSaveOptions.wdDoNotSaveChanges);
                             ImproveGJcoolOCRMemoDoc.Application.Quit();
@@ -366,20 +367,20 @@ namespace WindowsFormsApp1
                     {
                         Task.Run(() =>
                     {
-                        if (br.driver != null)
+                        if (driver != null)
                         {
                             try
                             {
 
                                 //Task.WaitAny();
-                                br.driver.Quit();
+                                driver.Quit();
                                 //chatGPT：不過，建議使用 Quit() 方法來關閉 WebDriver 實例並釋放所有資源，因為它會同時處理 Close() 和 Dispose() 方法20230108
-                                //br.driver.Close();
-                                //br.driver.Dispose();
+                                //driver.Close();
+                                //driver.Dispose();
                             }
                             catch (Exception)
                             {
-                                br.driver = null;
+                                driver = null;
                                 //throw;
                             }
 
@@ -388,22 +389,22 @@ namespace WindowsFormsApp1
                         Task.WaitAll();
                     }
                     else
-                        br.driver = null;
+                        driver = null;
                     //終止 chromedriver.exe 程序,釋放系統記憶體
                     //Process[] processes = Process.GetProcessesByName("chromedriver");
                     //foreach (Process process in processes)
                     //{
                     //    process.Kill();
                     //}
-                    //br.killProcesses(new string[] { "chromedriver" });
-                    br.killchromedriverFromHere();
+                    //killProcesses(new string[] { "chromedriver" });
+                    killchromedriverFromHere();
                     Thread.Sleep(850);
                     if (Process.GetProcessesByName("TextForCtext").Length == 1)
-                        if (br.getChromedrivers().Length > 0)
+                        if (getChromedrivers().Length > 0)
                             if (MessageBox.Show("還有chromedriver.exe程序在運行，是否全部清除？", "chromedrivers still there"
                                 , MessageBoxButtons.OKCancel, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2, MessageBoxOptions.DefaultDesktopOnly)
                                 == DialogResult.OK)
-                                br.killProcesses(new string[] { "chromedriver" });
+                                killProcesses(new string[] { "chromedriver" });
                 }
             }
 
@@ -411,7 +412,7 @@ namespace WindowsFormsApp1
             //try
             //{
             //    //釋放應用程式佔用的記憶體
-            //    br.driver.Close();//202301051447(2013/1/5 14:47) creedit
+            //    driver.Close();//202301051447(2013/1/5 14:47) creedit
 
             //}
             //catch (OpenQA.Selenium.WebDriverException ex)
@@ -587,10 +588,10 @@ namespace WindowsFormsApp1
                         textBox3_Click(new object(), new MouseEventArgs(MouseButtons.Left, 0, 0, 0, 0));//textBox3_MouseMove(new object(), new MouseEventArgs(MouseButtons.Left, 0, 0, 0, 0));
                         if (browsrOPMode != BrowserOPMode.appActivateByName)
                         {
-                            br.driver = br.driver ?? br.DriverNew();
+                            driver = driver ?? DriverNew();
                             try
                             {
-                                br.GoToUrlandActivate(url, keyinTextMode);
+                                GoToUrlandActivate(url, keyinTextMode);
                             }
                             catch (Exception ex)
                             {
@@ -606,17 +607,17 @@ namespace WindowsFormsApp1
                             {
                                 //若此時按下 Shift 則不會取得文本而是逕行送去《古籍酷》OCR取回文本至textBox1以備用
                                 if (modifierKeys == Keys.Shift && !PagePaste2GjcoolOCR_ing)
-                                    toOCR(br.OCRSiteTitle.GJcool);
+                                    toOCR(OCRSiteTitle.GJcool);
                                 else
                                 {
                                     //if (keyinTextMode)
                                     //{
                                     //全選文字方塊內容以備貼入
                                     //ie.SendKeys(OpenQA.Selenium.Keys.Control + "a");
-                                    //br.SelectAllQuickedit_data_textboxContent();//20240913作廢（現已可以由value屬性設定了，儘量不用剪貼簿！）
+                                    //SelectAllQuickedit_data_textboxContent();//20240913作廢（現已可以由value屬性設定了，儘量不用剪貼簿！）
                                     //}
-                                    //string text = br.CopyQuickedit_data_textboxText();
-                                    string text = br.Quickedit_data_textboxTxt;
+                                    //string text = CopyQuickedit_data_textboxText();
+                                    string text = Quickedit_data_textboxTxt;
                                     CnText.BooksPunctuation(ref text, false);
                                     undoRecord();
                                     textBox1.Text = text;
@@ -656,21 +657,21 @@ namespace WindowsFormsApp1
                         && !PagePaste2GjcoolOCR_ing && browsrOPMode != BrowserOPMode.appActivateByName)
                     {
                         if (modifierKeys == Keys.Shift) ocrTextMode = true;
-                        br.GoToCurrentUserActivateTab();
-                        string brUrl = br.GetDriverUrl;//.driver.Url;
+                        GoToCurrentUserActivateTab();
+                        string brUrl = GetDriverUrl;//.driver.Url;
                         if (brUrl.IndexOf("ctext.org") > -1 && brUrl.IndexOf("&file=") > -1 && brUrl.IndexOf("&page=") > -1)
                         {
                             if (brUrl.IndexOf("edit") == -1)
                             {
-                                brUrl = br.GetQuickeditUrl();
+                                brUrl = GetQuickeditUrl();
                                 if (brUrl != string.Empty)
-                                    br.driver.Navigate().GoToUrl(brUrl);
+                                    driver.Navigate().GoToUrl(brUrl);
                             }
                             if (brUrl != string.Empty)
                             {
                                 if (textBox3.Text != brUrl) textBox3.Text = brUrl;
                                 Form1.playSound(Form1.soundLike.press);
-                                toOCR(br.OCRSiteTitle.GJcool);
+                                toOCR(OCRSiteTitle.GJcool);
                             }
                         }
                     }
@@ -773,9 +774,9 @@ namespace WindowsFormsApp1
             try
             {
                 //如果是完整編輯頁面則逕予返回20240810                
-                url = br.GetChromeActiveUrl;
+                url = GetChromeActiveUrl;
                 if (url.IsNullOrEmpty())
-                    //url = br.GetActiveChromeTabUrl();//這個太慢了，沒效率
+                    //url = GetActiveChromeTabUrl();//這個太慢了，沒效率
                     if (DialogResult.OK == MessageBoxShowOKCancelExclamationDefaultDesktopOnly("無法取得現用的分頁，是否抓取最後開的一頁？"))
                     {
                         driver.SwitchTo().Window(driver.WindowHandles.Last());
@@ -805,15 +806,15 @@ namespace WindowsFormsApp1
                     {
                         //應該是在[新增單位]之後：
                         Clipboard.Clear();
-                        if (IsValidUrl＿ImageTextComparisonPage(br.driver.Url))
+                        if (IsValidUrl＿ImageTextComparisonPage(driver.Url))
                         {
-                            if (null == br.Page_textbox)//br.driver.Navigate().Refresh();
+                            if (null == Page_textbox)//driver.Navigate().Refresh();
                             {
                                 MessageBoxShowOKExclamationDefaultDesktopOnly("請檢查textBox3中的網址值");
                                 return;
                             }
                             else
-                                br.Page_textbox.SendKeys(OpenQA.Selenium.Keys.Enter);
+                                Page_textbox.SendKeys(OpenQA.Selenium.Keys.Enter);
                         }
                     }
                 }
@@ -828,9 +829,9 @@ namespace WindowsFormsApp1
                 case Keys.Control:
                     try
                     {
-                        br.driver = br.driver ?? Browser.DriverNew();//creedit with chatGPT大菩薩
-                        //OpenQA.Selenium.IWebElement quickEditLink = br.driver.FindElement(OpenQA.Selenium.By.XPath("//a[@title='Quick edit']"));
-                        OpenQA.Selenium.IWebElement quickEditLink = br.driver.FindElement(OpenQA.Selenium.By.XPath("//*[@id=\"quickedit\"]/a"));
+                        driver = driver ?? Browser.DriverNew();//creedit with chatGPT大菩薩
+                        //OpenQA.Selenium.IWebElement quickEditLink = driver.FindElement(OpenQA.Selenium.By.XPath("//a[@title='Quick edit']"));
+                        OpenQA.Selenium.IWebElement quickEditLink = driver.FindElement(OpenQA.Selenium.By.XPath("//*[@id=\"quickedit\"]/a"));
                         if (quickEditLink != null)
                         {
                             string quickEditLinkUrl = quickEditLink.GetAttribute("href");
@@ -847,12 +848,12 @@ namespace WindowsFormsApp1
                                 if (ex.Message.StartsWith(@"The HTTP request to the remote WebDriver server for URL http://localhost:") && ex.Message.IndexOf("timed out after") > -1)
                                 {
                                     MessageBoxShowOKExclamationDefaultDesktopOnly("Chrome瀏覽器分頁頁籤進入休眠省電模式，請藉由激活（Activate）它將之喚醒。");
-                                    br.LastValidWindow = br.driver.CurrentWindowHandle;
-                                    for (int i = br.driver.WindowHandles.Count - 1; i > -1; i--)
+                                    LastValidWindow = driver.CurrentWindowHandle;
+                                    for (int i = driver.WindowHandles.Count - 1; i > -1; i--)
                                     {
-                                        br.driver.SwitchTo().Window(br.driver.WindowHandles[i]);
+                                        driver.SwitchTo().Window(driver.WindowHandles[i]);
                                     }
-                                    br.driver.SwitchTo().Window(br.LastValidWindow);
+                                    driver.SwitchTo().Window(LastValidWindow);
                                 }
                                 break;
                             default:
@@ -865,7 +866,7 @@ namespace WindowsFormsApp1
                     break;
                 //自動擷取「簡單修改模式」（selector: # quickedit > a的連結)準備到《古籍酷》OCR
                 case Keys.Shift:
-                    toOCR(br.OCRSiteTitle.GJcool);
+                    toOCR(OCRSiteTitle.GJcool);
                     //copyQuickeditLinkWhenKeyinModeSub();
                     //ResetLastValidWindow();
                     break;
@@ -885,25 +886,25 @@ namespace WindowsFormsApp1
         retry:
             try
             {
-                if (br.driver == null)
+                if (driver == null)
                 {
                     browsrOPMode = BrowserOPMode.seleniumNew;
                     DriverNew();
                 }
-                if (!br.IsDriverInvalid())
-                    wh = br.driver.CurrentWindowHandle;
+                if (!IsDriverInvalid())
+                    wh = driver.CurrentWindowHandle;
                 else
                 {
                     try
                     {
-                        br.driver.SwitchTo().Window(driver.WindowHandles.Last());
-                        wh = br.driver.CurrentWindowHandle;
+                        driver.SwitchTo().Window(driver.WindowHandles.Last());
+                        wh = driver.CurrentWindowHandle;
                     }
                     catch (Exception)
                     {
                         RestartDriver();//●●●●●●●●●●●●●●●●●●●
-                        br.driver.SwitchTo().Window(driver.WindowHandles.Last());
-                        wh = br.driver.CurrentWindowHandle;
+                        driver.SwitchTo().Window(driver.WindowHandles.Last());
+                        wh = driver.CurrentWindowHandle;
                     }
                 }
             }
@@ -926,15 +927,15 @@ namespace WindowsFormsApp1
                 }
             }
             if (wh != string.Empty)
-                br.LastValidWindow = wh;
+                LastValidWindow = wh;
             else
             {
                 try
                 {
-                    wh = br.LastValidWindow;
-                    if (br.driver.WindowHandles.Count > 0 && !br.driver.WindowHandles.Contains(wh))
-                        br.LastValidWindow = br.driver.WindowHandles.Last();
-                    br.driver.SwitchTo().Window(wh);
+                    wh = LastValidWindow;
+                    if (driver.WindowHandles.Count > 0 && !driver.WindowHandles.Contains(wh))
+                        LastValidWindow = driver.WindowHandles.Last();
+                    driver.SwitchTo().Window(wh);
 
                 }
                 catch (Exception ex)
@@ -949,9 +950,9 @@ namespace WindowsFormsApp1
                                 //Debugger.Break();
                                 MessageBoxShowOKExclamationDefaultDesktopOnly("請關閉Chrome瀏覽器後再按下「確定」以繼續！！感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主");
                                 RestartChromedriver();
-                                //br.driver = null;
+                                //driver = null;
                                 //killchromedriverFromHere();
-                                //br.DriverNew();
+                                //DriverNew();
                                 goto retry;
                             }
                             else if (ex.Message.StartsWith("An unknown exception was encountered sending an HTTP request to the remote WebDriver server for URL"))//An unknown exception was encountered sending an HTTP request to the remote WebDriver server for URL http://localhost:14698/session/0f432de43d64b3c61bb847ce517358a3/window/handles. The exception message was: 傳送要求時發生錯誤。
@@ -984,15 +985,15 @@ namespace WindowsFormsApp1
             {
                 try
                 {
-                    br.driver = br.driver ?? Browser.DriverNew();
-                    if (currUrl.IsNullOrEmpty()) currUrl = br.GoToCurrentUserActivateTab();
+                    driver = driver ?? Browser.DriverNew();
+                    if (currUrl.IsNullOrEmpty()) currUrl = GoToCurrentUserActivateTab();
                     if (currUrl == "") return false;
-                    if (br.IsDriverInvalid())
+                    if (IsDriverInvalid())
                     {
                         for (int i = driver.WindowHandles.Count - 1; i > -1; i--)
                         {
-                            br.driver.SwitchTo().Window(driver.WindowHandles[i]);
-                            if (br.driver.Url == currUrl) break;
+                            driver.SwitchTo().Window(driver.WindowHandles[i]);
+                            if (driver.Url == currUrl) break;
                         }
                     }
                     else
@@ -1008,7 +1009,7 @@ namespace WindowsFormsApp1
                             {
                                 //string decodeStr = url.Substring(url.IndexOf("#")+1);
                                 //HttpUtility.deco
-                                //url = br.DecodedStringURL(url);
+                                //url = DecodedStringURL(url);
                                 url = HttpUtility.UrlDecode(url);
 
                             }
@@ -1018,7 +1019,7 @@ namespace WindowsFormsApp1
                     string quickEditLinkUrl = "";
                     try
                     {
-                        quickEditLinkUrl = br.driver.Url;
+                        quickEditLinkUrl = driver.Url;
                     }
                     catch (Exception ex)
                     {
@@ -1027,13 +1028,13 @@ namespace WindowsFormsApp1
                             case -2146233088:
                                 //"stale element reference: element is not attached to the page document\n  (Session info: chrome=110.0.5481.100)"
                                 //"no such window: target window already closed\nfrom unknown error: web view not found\n  (Session info: chrome=110.0.5481.100)"
-                                //br.driver.SwitchTo().Window(br.driver.WindowHandles[br.driver.WindowHandles.Count - 1]);
+                                //driver.SwitchTo().Window(driver.WindowHandles[driver.WindowHandles.Count - 1]);
                                 for (int i = driver.WindowHandles.Count - 1; i > -1; i--)
                                 {
-                                    br.driver.SwitchTo().Window(driver.WindowHandles[i]);
-                                    if (br.driver.Url == currUrl) break;
+                                    driver.SwitchTo().Window(driver.WindowHandles[i]);
+                                    if (driver.Url == currUrl) break;
                                 }
-                                quickEditLinkUrl = br.driver.Url;
+                                quickEditLinkUrl = driver.Url;
                                 break;
                             default:
                                 MessageBox.Show(ex.HResult + ex.Message);
@@ -1046,11 +1047,11 @@ namespace WindowsFormsApp1
                         (quickEditLinkUrl.IndexOf("#editor") > -1 && quickEditLinkUrl.IndexOf("&page=1") > -1))
                     {
                         string foundUrl = string.Empty;
-                        for (int i = br.driver.WindowHandles.Count - 1; i > -1; i--)
+                        for (int i = driver.WindowHandles.Count - 1; i > -1; i--)
                         {//找到分頁是書圖圖文對照瀏覽頁面且非第1頁者：                            
                             try
                             {
-                                foundUrl = br.driver.SwitchTo().Window(br.driver.WindowHandles[i]).Url;
+                                foundUrl = driver.SwitchTo().Window(driver.WindowHandles[i]).Url;
                             }
                             catch (Exception)
                             {
@@ -1058,21 +1059,21 @@ namespace WindowsFormsApp1
                             }
                             if (foundUrl.IndexOf("&page=") > -1 && foundUrl.IndexOf("&page=1&") == -1) break;
                         }
-                        quickEditLinkUrl = br.driver.Url;
+                        quickEditLinkUrl = driver.Url;
                     }
                     if (quickEditLinkUrl.IndexOf("#editor") == -1 && quickEditLinkUrl.IndexOf("&page=") > -1)
                     {
-                        //OpenQA.Selenium.IWebElement quickEditLink = br.
+                        //OpenQA.Selenium.IWebElement quickEditLink = 
                         //    waitFindWebElementBySelector_ToBeClickable("#quickedit > a");
                         //if (quickEditLink != null)
                         //{
                         //    quickEditLinkUrl = quickEditLink.GetAttribute("href");
                         //}
-                        quickEditLinkUrl = br.GetQuickeditUrl();
-                        //if (keyinTextMode && br.driver.Url != quickEditLinkUrl)
-                        if (br.driver.Url != quickEditLinkUrl)
-                            //br.driver.Url = quickEditLinkUrl;
-                            br.GoToUrlandActivate(quickEditLinkUrl, true);
+                        quickEditLinkUrl = GetQuickeditUrl();
+                        //if (keyinTextMode && driver.Url != quickEditLinkUrl)
+                        if (driver.Url != quickEditLinkUrl)
+                            //driver.Url = quickEditLinkUrl;
+                            GoToUrlandActivate(quickEditLinkUrl, true);
                         if (textBox3.Text != quickEditLinkUrl)
                         {
                             bool eventable = _eventsEnabled;
@@ -1095,7 +1096,7 @@ namespace WindowsFormsApp1
                             _eventsEnabled = eventEnable;
                         }
                         //在手動輸入模式下，讀入Quick edit 方塊中的內容
-                        string quicteditX = br.Quickedit_data_textboxTxt;
+                        string quicteditX = Quickedit_data_textboxTxt;
                         //if (keyinTextMode && !quicteditX.IsNullOrEmpty() && textBox1.Text != quicteditX)
                         if (!quicteditX.IsNullOrEmpty() && textBox1.Text != quicteditX)
                         {
@@ -2044,7 +2045,7 @@ namespace WindowsFormsApp1
 
             if (lpMode && xCopy.EndsWith("|"))
                 xCopy = xCopy.Substring(0, xCopy.Length - "|".Length) + "<p>";
-            br.TextPatst2Quick_editBox = xCopy;
+            TextPatst2Quick_editBox = xCopy;
             BackupLastPageText(xCopy, false, false);
 
 
@@ -2285,16 +2286,16 @@ namespace WindowsFormsApp1
                     e.Handled = true; bool thisTopMost = this.TopMost;
                     this.TopMost = false;
                     if (!ocrTextMode) br.BringToFront("chrome");
-                    string urlActive = br.ActiveTabURL_Ctext_Edit;
+                    string urlActive = ActiveTabURL_Ctext_Edit;
                     if (textBox3.Text == "" && IsValidUrl＿keyDownCtrlAdd(urlActive))
                     {
                         playSound(soundLike.done);
                         textBox3.Text = urlActive;
                     }
-                    if (browsrOPMode != BrowserOPMode.appActivateByName && br.driver != null
+                    if (browsrOPMode != BrowserOPMode.appActivateByName && driver != null
                         && textBox3.Text != urlActive)
                     {
-                        br.SwitchToCurrentForeActivateTab(ref textBox3, urlActive);
+                        SwitchToCurrentForeActivateTab(ref textBox3, urlActive);
                     }
                     this.TopMost = false;
                     if (!ocrTextMode) br.BringToFront("chrome");
@@ -2310,11 +2311,11 @@ namespace WindowsFormsApp1
                         Visible = false;
                         hideToNICo();
                         //隱藏表單後使瀏覽器取得焦點；以下皆未妥當
-                        //if (browsrOPMode != BrowserOPMode.appActivateByName && br.driver != null)
-                        //br.driver.Navigate().Refresh();
-                        //br.driver.Navigate().GoToUrl(br.driver.Url);
-                        //    //br.SwitchToCurrentForeActivateTab(ref textBox3);
-                        //br.driver.SwitchTo().Window(br.driver.CurrentWindowHandle);
+                        //if (browsrOPMode != BrowserOPMode.appActivateByName && driver != null)
+                        //driver.Navigate().Refresh();
+                        //driver.Navigate().GoToUrl(driver.Url);
+                        //    //SwitchToCurrentForeActivateTab(ref textBox3);
+                        //driver.SwitchTo().Window(driver.CurrentWindowHandle);
                     }
                     this.TopMost = thisTopMost;
                     return;
@@ -2342,9 +2343,9 @@ namespace WindowsFormsApp1
                             Process.Start(url);
                             break;
                         case BrowserOPMode.seleniumNew:
-                            br.LastValidWindow = br.GetCurrentWindowHandle(driver);
-                            br.openNewTabWindow();
-                            br.GoToUrlandActivate(url);
+                            LastValidWindow = GetCurrentWindowHandle(driver);
+                            openNewTabWindow();
+                            GoToUrlandActivate(url);
                             break;
                         case BrowserOPMode.seleniumGet:
                             break;
@@ -2443,12 +2444,12 @@ namespace WindowsFormsApp1
                 {//Ctrl + Alt + j ：以選取文字進行[《看典古籍·古籍全文檢索》](https://kandianguji.com/search) (d=dian 典；j=籍 ji) 20241018
                     if (driver == null) return;
                     e.Handled = true;
-                    if (!br.IsDriverInvalid()) br.LastValidWindow = br.driver.CurrentWindowHandle;
+                    if (!IsDriverInvalid()) LastValidWindow = driver.CurrentWindowHandle;
                     TopMost = false;
                     overtypeModeSelectedTextSetting(ref textBox1);
                     string str = textBox1.SelectedText;
                     Clipboard.SetText(str);
-                    Task.Run(() => { br.KanDianGuJiSearchAll(str); });
+                    Task.Run(() => { KanDianGuJiSearchAll(str); });
                     return;
                 }
                 #region Ctrl + Alt + pageup Ctrl + Alt + pagedown                
@@ -2460,7 +2461,7 @@ namespace WindowsFormsApp1
                     try
                     {
                         if (!IsDriverInvalid())
-                            url = br.driver.Url;
+                            url = driver.Url;
                         else
                         {
                             if (IsValidUrl＿ImageTextComparisonPage(textBox3.Text))
@@ -2475,13 +2476,13 @@ namespace WindowsFormsApp1
                                         break;
                                     }
                                 }
-                                if (!found) br.driver.SwitchTo().Window(driver.WindowHandles.Last());
+                                if (!found) driver.SwitchTo().Window(driver.WindowHandles.Last());
                             }
                             else
-                                br.driver.SwitchTo().Window(driver.WindowHandles.Last());
-                            url = br.driver.Url;
+                                driver.SwitchTo().Window(driver.WindowHandles.Last());
+                            url = driver.Url;
                         }
-                        LastValidWindow = br.driver.CurrentWindowHandle;
+                        LastValidWindow = driver.CurrentWindowHandle;
                     }
                     catch (Exception ex)
                     {
@@ -2493,8 +2494,8 @@ namespace WindowsFormsApp1
                                                                                                           //  (Session info: chrome = 129.0.6668.59)
                                     try
                                     {
-                                        br.driver.SwitchTo().Window(br.LastValidWindow);
-                                        url = br.driver.Url;
+                                        driver.SwitchTo().Window(LastValidWindow);
+                                        url = driver.Url;
                                     }
                                     catch (Exception exx)
                                     {
@@ -2519,10 +2520,10 @@ namespace WindowsFormsApp1
                         page--;
                     else
                         page++;
-                    url = br.ChangePageParameter(url, page);
-                    br.LastValidWindow = br.driver.CurrentWindowHandle;
-                    br.openNewTabWindow();
-                    br.GoToUrlandActivate(url, true);
+                    url = ChangePageParameter(url, page);
+                    LastValidWindow = driver.CurrentWindowHandle;
+                    openNewTabWindow();
+                    GoToUrlandActivate(url, true);
                     return;
 
                 }//以上 Ctrl + Alt + pageup : 在新的分頁開啟CTP圖文對照前一頁以供檢視 20240920
@@ -2587,10 +2588,10 @@ namespace WindowsFormsApp1
                 //string x = textBox1.Text;
                 //if (keyDownCtrlAdd(false))
                 //{
-                //    if (x != br.Quickedit_data_textboxTxt)
+                //    if (x != Quickedit_data_textboxTxt)
                 //    {
                 //        playSound(soundLike.exam);
-                //        x = br.Quickedit_data_textboxTxt;
+                //        x = Quickedit_data_textboxTxt;
                 //    }
                 //    //非同步整理OCR文本時，這行就很需要：
                 //    textBox1.Text = CnText.RemarkBooksPunctuation(ref x);
@@ -2684,10 +2685,10 @@ namespace WindowsFormsApp1
                     x = x.EndsWith("\n") ? x.Substring(0, x.Length - 1) : x;
                     url = x + " " + url;//url置後方便按下 Ctrl + Delete 清除，以改用Google全球/全域搜尋
                     Clipboard.SetText(x);
-                    if (br.driver != null)
+                    if (driver != null)
                     {
-                        br.openNewTabWindow(OpenQA.Selenium.WindowType.Tab);
-                        br.driver.Navigate().GoToUrl("https://www.google.com/search?q=" + url);
+                        openNewTabWindow(OpenQA.Selenium.WindowType.Tab);
+                        driver.Navigate().GoToUrl("https://www.google.com/search?q=" + url);
                     }
                     else
                         Process.Start("https://www.google.com/search?q=" + url);
@@ -2773,7 +2774,7 @@ namespace WindowsFormsApp1
 
                         if (browsrOPMode != BrowserOPMode.appActivateByName)
                         {
-                            if (br.driver != null)
+                            if (driver != null)
                             {
                                 //Task.Run(() =>
                                 //{
@@ -2781,8 +2782,8 @@ namespace WindowsFormsApp1
                                 //if (LookupDictRevised(x).urlSearch == null)
                                 if (LookupDictRevised(x).Item1 == null)
                                     MessageBoxShowOKExclamationDefaultDesktopOnly("發生錯誤，請重新查詢");
-                                //br.openNewTabWindow(OpenQA.Selenium.WindowType.Tab);
-                                //br.driver.Navigate().GoToUrl("https://dict.revised.moe.edu.tw/search.jsp?md=1&word=" + x + "&qMd=0&qCol=1");
+                                //openNewTabWindow(OpenQA.Selenium.WindowType.Tab);
+                                //driver.Navigate().GoToUrl("https://dict.revised.moe.edu.tw/search.jsp?md=1&word=" + x + "&qMd=0&qCol=1");
                                 //});
                             }
                             else
@@ -3041,7 +3042,7 @@ namespace WindowsFormsApp1
                     if (textBox1.SelectionLength > 0)
                     {
                         string w = textBox1.SelectedText, url = textBox3.Text;
-                        string x = br.GetPageUrlKeywordLink(w, url, true);
+                        string x = GetPageUrlKeywordLink(w, url, true);
                         if (x != string.Empty) Clipboard.SetText(x);
                         else MessageBoxShowOKExclamationDefaultDesktopOnly("無法取得具關鍵字的連結字串，請檢查！");
                     }
@@ -3789,8 +3790,8 @@ namespace WindowsFormsApp1
                 if (e.KeyCode == Keys.D)
                 {//Alt + d ：以選取文字進行[《看典古籍·古籍全文檢索》](https://kandianguji.com/search) (d=dian 典) 20241008
                     e.Handled = true;
-                    if (!br.IsDriverInvalid())
-                        br.LastValidWindow = br.driver.CurrentWindowHandle;
+                    if (!IsDriverInvalid())
+                        LastValidWindow = driver.CurrentWindowHandle;
                     else
                         ResetLastValidWindow();
 
@@ -3806,7 +3807,7 @@ namespace WindowsFormsApp1
                     });
                     }
                     // 在新的執行緒中進行網頁檢索
-                    Task.Run(() => { br.KanDianGuJiSearchAll(str); });
+                    Task.Run(() => { KanDianGuJiSearchAll(str); });
                     return;
                 }
 
@@ -3832,14 +3833,14 @@ namespace WindowsFormsApp1
                         character = new StringInfo(textBox1.SelectedText);
 
                     if (!IsDriverInvalid())
-                        //br.driver.SwitchTo().Window(br.driver.CurrentWindowHandle);                    
-                        LastValidWindow = br.driver.CurrentWindowHandle;
+                        //driver.SwitchTo().Window(driver.CurrentWindowHandle);                    
+                        LastValidWindow = driver.CurrentWindowHandle;
                     else
                     {
                         ResetLastValidWindow();
-                        LastValidWindow = br.driver.CurrentWindowHandle;
+                        LastValidWindow = driver.CurrentWindowHandle;
                     }
-                    if (br.DirectlyReplacingCharacters(character))
+                    if (DirectlyReplacingCharacters(character))
                     {
                         if (IsValidUrl＿keyDownCtrlAdd(textBox3.Text))
                         {
@@ -3851,7 +3852,7 @@ namespace WindowsFormsApp1
                                     string driverUrl = ReplaceUrl_Box2Editor(driver.Url);
                                     if (driverUrl.IndexOf(textBox3.Text) > -1 || textBox3.Text.Contains(driverUrl))
                                     {
-                                        if (br.driver.Url.IndexOf("#box") > -1) br.driver.Url = textBox3.Text;//driverUrl;
+                                        if (driver.Url.IndexOf("#box") > -1) driver.Url = textBox3.Text;//driverUrl;
                                         break;
                                     }
                                 }
@@ -3886,8 +3887,8 @@ namespace WindowsFormsApp1
                     overtypeModeSelectedTextSetting(ref textBox1);
                     if (textBox1.SelectedText.IsNullOrEmpty()) return;
                     string x = textBox1.SelectedText;
-                    if (!br.IsDriverInvalid())
-                        br.LastValidWindow = br.driver.CurrentWindowHandle;
+                    if (!IsDriverInvalid())
+                        LastValidWindow = driver.CurrentWindowHandle;
                     else
                         ResetLastValidWindow();
                     TopMost = false;
@@ -3900,7 +3901,7 @@ namespace WindowsFormsApp1
                     // 在新的執行緒中進行網頁檢索
                     Task.Run(() =>
                     {
-                        br.HanchiSearch(x);
+                        HanchiSearch(x);
                     });
                     return;
                 }
@@ -3934,11 +3935,11 @@ namespace WindowsFormsApp1
                         Thread.Sleep(9);
                         BackColor = clr;
                         string url = textBox3.Text;
-                        //Task.Run(() => { br.ImproveGJcoolOCRMemo(); });//因為即使開新執行緒，但仍是用同一個表單！                        
+                        //Task.Run(() => { ImproveGJcoolOCRMemo(); });//因為即使開新執行緒，但仍是用同一個表單！                        
                         Task.Run(() =>
                         {
                             //if (tkImproveGJcoolKandiangujiOCRMemo != null) tkImproveGJcoolKandiangujiOCRMemo.Wait(160);                                
-                            br.ImproveGJcoolKandiangujiOCRMemo(txtbox1SelText, url);
+                            ImproveGJcoolKandiangujiOCRMemo(txtbox1SelText, url);
                             //tkImproveGJcoolKandiangujiOCRMemo = null;
                         });
                         //try
@@ -3964,7 +3965,7 @@ namespace WindowsFormsApp1
                     {
                         try
                         {
-                            br.openNewTabWindow();
+                            openNewTabWindow();
                             br.BringToFront("chrome");
                             driver.Navigate().GoToUrl(url);
                         }
@@ -4023,8 +4024,8 @@ namespace WindowsFormsApp1
                         BackColor = clr;
                         string url = textBox3.Text;
 
-                        //Task.Run(() => { br.ImproveGJcoolOCRMemo(); });//因為即使開新執行緒，但仍是用同一個表單！
-                        Task.Run(() => { br.ImproveGJcoolKandiangujiOCRMemo(txtbox1SelText, url, "《看典古籍》"); });
+                        //Task.Run(() => { ImproveGJcoolOCRMemo(); });//因為即使開新執行緒，但仍是用同一個表單！
+                        Task.Run(() => { ImproveGJcoolKandiangujiOCRMemo(txtbox1SelText, url, "《看典古籍》"); });
                         //try
                         //{
                         //    Clipboard.SetText(textBox1.Text);//通常改正後是要再重標點，如書名等 20240306 20150119 現在標點機制調整，故可略去矣。感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主
@@ -4155,7 +4156,7 @@ namespace WindowsFormsApp1
                         textBox1.Select(s, l);
                     }//如果沒有選取，則自動選取插件點所在行/段
 
-                    BeginUpdate(false);
+                    //BeginUpdate(false);
 
                     undoRecord(); stopUndoRec = true; PauseEvents();
 
@@ -4209,7 +4210,7 @@ namespace WindowsFormsApp1
                     undoRecord(); stopUndoRec = false; ResumeEvents();
 
                     //if (browsrOPMode != BrowserOPMode.appActivateByName)//在以下方法中有
-                    EndUpdate();
+                    //EndUpdate();
 
                     #region 方便要按2次以上以降階標題，將插入點位置移到星號前
                     if (moveIP == -1)//需要移動游標時才執行
@@ -4229,7 +4230,8 @@ namespace WindowsFormsApp1
                         textBox1.SelectionStart = moveIP;
                     #endregion
 
-                    AvailableInUseBothKeysMouse();
+                    if (!Active)
+                        AvailableInUseBothKeysMouse();
 
                     return;
                 }
@@ -4339,7 +4341,7 @@ namespace WindowsFormsApp1
                     {
                         Task.Run(() =>
                         {
-                            br.LookupKangxizidian(x);
+                            LookupKangxizidian(x);
                         });
                     }
                     return;
@@ -4355,7 +4357,7 @@ namespace WindowsFormsApp1
 
                     if (browsrOPMode != BrowserOPMode.appActivateByName)
                     {
-                        if (br.driver != null)
+                        if (driver != null)
                         {
                             TopMost = false;
                             if (new StringInfo(x).LengthInTextElements > 1)
@@ -4415,14 +4417,72 @@ namespace WindowsFormsApp1
                 }
 
                 if (e.KeyCode == Keys.Delete)
-                {//Alt + Del : 刪除插入點後第一個分行分段
+                {//Alt + Delete : 刪除插入點後第一個分行分段。如果各行分行分段前僅是「|」則一併清除之。
                     e.Handled = true;
                     string x = textBox1.Text;
                     int s = textBox1.SelectionStart, p = x.IndexOf(Environment.NewLine, s), l = textBox1.SelectionLength;
                     if (p == -1) return;
-                    x = x.Substring(0, p) + x.Substring(p + Environment.NewLine.Length);
-                    textBox1.Text = x;
-                    restoreCaretPosition(textBox1, s, l);
+                    textBox1.Select(p, Environment.NewLine.Length);
+                    s = textBox1.SelectionStart; x = textBox1.Text;
+                    if (s >= 1 && x.Substring(s - 1, 1) == "|")
+                    {
+                        if (x.LastIndexOf(Environment.NewLine, s) > -1 || s - 1 == 0)
+                        {
+                            undoRecord(); stopUndoRec = true;
+                            //s = p - 1;
+                            ////textBox1.Select(s, Environment.NewLine.Length + 1);
+                            //while (x.Substring(s, Environment.NewLine.Length + 3) == "|" + Environment.NewLine)
+                            //{
+                            //    textBox1.SelectedText = string.Empty;
+                            //    textBox1.Select(s, Environment.NewLine.Length + 1);
+                            //}
+                            textBox1.Text = cleanConsecutivePipeNewlines(x);
+
+                            string cleanConsecutivePipeNewlines(string text)
+                            {
+                                if (string.IsNullOrEmpty(text)) return text;
+
+                                int firstPipe = text.IndexOf('|');
+                                if (firstPipe < 0) return text;
+
+                                string nl = Environment.NewLine;
+
+                                // 分段：firstPipe 之前原樣保留；之後開始「連續清除」
+                                string before = text.Substring(0, firstPipe);
+                                int pos = firstPipe;
+
+                                // 逐段檢查是否為 "|"+NewLine，連續清除
+                                while (pos < text.Length)
+                                {
+                                    // 足夠長度才能匹配
+                                    int remaining = text.Length - pos;
+                                    if (remaining >= 1 + nl.Length &&
+                                        text[pos] == '|' &&
+                                        text.Substring(pos + 1, nl.Length) == nl)
+                                    {
+                                        pos += 1 + nl.Length; // 吃掉一個 "|"+NewLine
+                                        continue;
+                                    }
+                                    break; // 遇到非模式，停止清除
+                                }
+
+                                // 尾部剩餘內容原樣保留
+                                string after = text.Substring(pos);
+                                return before + after;
+                            }
+
+
+                            stopUndoRec = false; undoRecord();
+                        }
+                    }
+                    else
+                        //textBox1.Select(p, Environment.NewLine.Length);
+                        textBox1.SelectedText = string.Empty;
+
+
+                    //x = x.Substring(0, p) + x.Substring(p + Environment.NewLine.Length);
+                    //textBox1.Text = x;
+                    //restoreCaretPosition(textBox1, s, l);
                     return;
                 }
 
@@ -4451,15 +4511,15 @@ namespace WindowsFormsApp1
                     //}
                     //if (gjcoolocrResultManual)
                     //    {
-                    //        if (br.driver != null)
+                    //        if (driver != null)
                     //        {
                     //            try
                     //            {
-                    //                br.driver.SwitchTo().Window(br.driver.CurrentWindowHandle);
+                    //                driver.SwitchTo().Window(driver.CurrentWindowHandle);
                     //                SendKeys.Send("%r");
                     //                Thread.Sleep(550);
-                    //                //br.driver.SwitchTo().Alert().SendKeys(OpenQA.Selenium.Keys.Space);
-                    //                br.driver.SwitchTo().Alert().Accept();
+                    //                //driver.SwitchTo().Alert().SendKeys(OpenQA.Selenium.Keys.Space);
+                    //                driver.SwitchTo().Alert().Accept();
                     //                //SendKeys.Send(" ");
 
                     //                playSound(soundLike.exam);
@@ -4673,7 +4733,7 @@ namespace WindowsFormsApp1
                     #endregion
 
                     //防止誤按
-                    if (br.Quickedit_data_textboxTxt == "+" &&
+                    if (Quickedit_data_textboxTxt == "+" &&
                         textBox1.Text.Replace("+", string.Empty) == string.Empty)//textBox1.Text == string.Empty 已包含
                         return;
                     if (keyinTextMode && OcrTextMode)
@@ -4681,14 +4741,14 @@ namespace WindowsFormsApp1
                         e.Handled = true;
                         //if (textBox1.Text != string.Empty)
                         //{ undoRecord(); pauseEvents(); textBox1.Text = string.Empty; resumeEvents(); }
-                        //OpenQA.Selenium.IWebElement iw = br.waitFindWebElementBySelector_ToBeClickable("#canvas > svg");
+                        //OpenQA.Selenium.IWebElement iw = waitFindWebElementBySelector_ToBeClickable("#canvas > svg");
                         TopMost = false;
-                        OpenQA.Selenium.IWebElement iw = br.WaitFindWebElementBySelector_ToBeClickable("#content");
+                        OpenQA.Selenium.IWebElement iw = WaitFindWebElementBySelector_ToBeClickable("#content");
                         if (iw != null) // clickCopybutton_GjcoolFastExperience(iw.Location); 
                             Cursor.Position = (Point)iw.Location;
 
                         rep://OCR連續輸入
-                        if (pagePaste2GjcoolOCR() && PasteOcrResultFisrtMode && ModifierKeys != Keys.Control && !br.confirm_that_you_are_human)
+                        if (pagePaste2GjcoolOCR() && PasteOcrResultFisrtMode && ModifierKeys != Keys.Control && !confirm_that_you_are_human)
                             goto rep;
 
                         //if (!pagePaste2GjcoolOCR())//因為失敗的結果非唯一，故改寫在方法之中
@@ -4696,12 +4756,12 @@ namespace WindowsFormsApp1
                         //    PauseEvents();//為了等待時可以切到別的視窗看看，在執行成功且完成後，再把這2個關鍵的視窗置前
                         //    try
                         //    {
-                        //        br.driver.SwitchTo().Window(br.LastValidWindow);
+                        //        driver.SwitchTo().Window(LastValidWindow);
                         //        Thread.Sleep(300);
                         //    }
                         //    catch (Exception)
                         //    {
-                        //        br.LastValidWindow = null;
+                        //        LastValidWindow = null;
                         //    }
                         //    ResumeEvents();
                         //    //SendKeys.Send("^z");//因為會輸入「+」取代選取區文字//這應該是在下一個程序textBox1_KeyPress才會輸入，而不是在這時
@@ -4876,10 +4936,10 @@ namespace WindowsFormsApp1
                         foundTab = true; break;
                     }
                 }
-                if (!foundTab) br.driver.SwitchTo().Window(driver.WindowHandles.Last());
+                if (!foundTab) driver.SwitchTo().Window(driver.WindowHandles.Last());
             }
             else
-                br.driver.SwitchTo().Window(driver.CurrentWindowHandle);
+                driver.SwitchTo().Window(driver.CurrentWindowHandle);
             if (fastMode) BeginUpdate();
             //還原放大的書圖
             //if (autoPaste2QuickEdit)
@@ -4912,7 +4972,7 @@ namespace WindowsFormsApp1
                 if (ModifierKeys == Keys.Shift)//翻頁時按住Shift鍵即可直接送出OCR
                 {
                     playSound(soundLike.press, true);
-                    //toOCR(br.OCRSiteTitle.GJcool);
+                    //toOCR(OCRSiteTitle.GJcool);
                     toOCR(PagePast2OCRsite);
                     if (PagePaste2GjcoolOCR_ing) { Debugger.Break(); PagePaste2GjcoolOCR_ing = false; }//●●●●●●●●●●●●●●●●●●●●●●●20251230
                 }
@@ -5339,10 +5399,10 @@ namespace WindowsFormsApp1
                 goto reSelect;
             if (result = keyDownCtrlAdd(false, "", true))
             {
-                //if (x != br.Quickedit_data_textboxTxt)
+                //if (x != Quickedit_data_textboxTxt)
                 //{
                 //    playSound(soundLike.exam);
-                //    x = br.Quickedit_data_textboxTxt;
+                //    x = Quickedit_data_textboxTxt;
                 //}
                 string x = textBox1.Text;
                 //非同步整理OCR文本時，這行就很需要：（因為查字資料庫的標書名號資料表可能不同步。）
@@ -5359,8 +5419,8 @@ namespace WindowsFormsApp1
                 try
                 {
                     //將頁面移至頂端，以便校對輸入時檢視
-                    if (br.driver.Url != textBox3.Text)
-                        br.GoToUrlandActivate(br.driver.Url, true);
+                    if (driver.Url != textBox3.Text)
+                        GoToUrlandActivate(driver.Url, true);
                 }
                 catch (Exception)
                 {
@@ -5394,8 +5454,8 @@ namespace WindowsFormsApp1
 
             bool eventsEnable = _eventsEnabled;
             if (eventsEnable) PauseEvents();
-            string _lastValidWindow = br.LastValidWindow;
-            if (!string.IsNullOrEmpty(_lastValidWindow)) br.driver.SwitchTo().Window(_lastValidWindow);
+            string _lastValidWindow = LastValidWindow;
+            if (!string.IsNullOrEmpty(_lastValidWindow)) driver.SwitchTo().Window(_lastValidWindow);
             //ResumeEvents();//見return前
             textBox1.SelectionStart = textBox1.TextLength; textBox1.SelectionLength = 0;
             pageTextEndPosition = 0; pageEndText10 = string.Empty;
@@ -5410,7 +5470,7 @@ namespace WindowsFormsApp1
                 if (ModifierKeys != Keys.Control)
                 {
                     playSound(soundLike.press);
-                    //if (toOCR(br.OCRSiteTitle.GJcool))
+                    //if (toOCR(OCRSiteTitle.GJcool))
                     if (toOCR(PagePast2OCRsite))
                         returnValue = true;
                     else
@@ -5443,13 +5503,13 @@ namespace WindowsFormsApp1
                 //PauseEvents();//為了等待時可以切到別的視窗看看，在執行成功且完成後，再把這2個關鍵的視窗置前
                 try
                 {
-                    //br.driver.SwitchTo().Window(br.LastValidWindow);
-                    br.driver?.SwitchTo().Window(br.driver.CurrentWindowHandle);
+                    //driver.SwitchTo().Window(LastValidWindow);
+                    driver?.SwitchTo().Window(driver.CurrentWindowHandle);
                     Thread.Sleep(300);
                 }
                 catch (Exception)
                 {
-                    //br.LastValidWindow = null;
+                    //LastValidWindow = null;
                 }
                 //ResumeEvents();
 
@@ -6396,7 +6456,7 @@ namespace WindowsFormsApp1
                             int preParaStart = x.LastIndexOf(Environment.NewLine, preParaEnd - 1) + 2; string prePara = string.Empty;
                             if (preParaStart > -1)
                                 prePara = x.Substring(preParaStart, preParaEnd - preParaStart);
-                            if (xLine.Substring(1, 1) != "　" && xLine.IndexOf("*") == -1
+                            if (xLine.Length > 1 && xLine.Substring(1, 1) != "　" && xLine.IndexOf("*") == -1
                                 && (!prePara.StartsWith("{{　") && !prePara.StartsWith("　"))
                                 && (!(prePara.StartsWith("􏿽") && CountWordsLenPerLinePara(prePara) == wordsPerLinePara))
                                 //不是「本行短於正常行長，而前一行等於正常行常」
@@ -7662,6 +7722,9 @@ namespace WindowsFormsApp1
             }
             return lineCnt;
         }
+        /// <summary>
+        /// 標題下有小注者處理程序
+        /// </summary>
         void keysTitleCode＿WithPrefaceNote()
         {//由 keysTitleCode 調用，keysTitleCode完成時是停在「并序」字前
             int s = textBox1.SelectionStart; bool replaceIt = false;
@@ -8774,8 +8837,8 @@ namespace WindowsFormsApp1
             textBox1.ScrollToCaret();
             return;
         notFound:
-            MessageBox.Show("not found!");
-
+            //MessageBox.Show("not found!");
+            MessageBoxShowOKExclamationDefaultDesktopOnly("not found!");
         }
 
         private void clearNewLinesAfterCaret()
@@ -10819,7 +10882,7 @@ namespace WindowsFormsApp1
         /// <returns>回傳網址是否合法</returns>
         internal static bool IsValidUrl＿keyDownCtrlAdd(string url)
         {
-            url = br.ClearUrl_BoxEtc(url);
+            url = ClearUrl_BoxEtc(url);
             //return Regex.IsMatch(url, @"(#editor|&page=|ctext\.org)");
             //return Regex.IsMatch(url, @"ctext\.org.*&file.*&page=.*#editor");
             //也有可能是這種網址：https://ctext.org/library.pl?if=gb&file=34195&page=142&editwiki=826120#box(140,120,2,0)
@@ -10852,7 +10915,7 @@ namespace WindowsFormsApp1
         internal static string FixUrl＿ImageTextComparisonPage(string url, bool editor = false, bool driverGoToUrl = false)
         {
             #region 防呆
-            if (!IsValidUrl＿ImageTextComparisonPage(url) || browsrOPMode == BrowserOPMode.appActivateByName || br.driver == null) return null;
+            if (!IsValidUrl＿ImageTextComparisonPage(url) || browsrOPMode == BrowserOPMode.appActivateByName || driver == null) return null;
             #endregion
 
             // 使用正則表達式檢查和替換網址中的特定字串
@@ -10860,7 +10923,7 @@ namespace WindowsFormsApp1
 
             try
             {
-                if (driverGoToUrl) br.driver.Navigate().GoToUrl(url);
+                if (driverGoToUrl) driver.Navigate().GoToUrl(url);
             }
             catch (Exception ex)
             {
@@ -10898,7 +10961,7 @@ namespace WindowsFormsApp1
         //    #region 防呆
         //    if (!IsValidUrl＿ImageTextComparisonPage(url)) return null;
         //    if (browsrOPMode == BrowserOPMode.appActivateByName) return null;
-        //    if (br.driver == null) return null;
+        //    if (driver == null) return null;
         //    #endregion
 
         //    int boxTag = url.IndexOf("#box(");
@@ -10908,7 +10971,7 @@ namespace WindowsFormsApp1
         //        url = url.Substring(0, boxTag) + (editor ? "#editor" : string.Empty);
         //        try
         //        {
-        //            if (driverGoToUrl) br.driver.Navigate().GoToUrl(url);
+        //            if (driverGoToUrl) driver.Navigate().GoToUrl(url);
 
         //        catch (Exception ex)
         //        {
@@ -10942,9 +11005,9 @@ namespace WindowsFormsApp1
             string url = textBox3.Text, urlShort = url.Substring(0, url.IndexOf("#editor") == -1 ? url.Length : url.IndexOf("#editor")), urlDriver = string.Empty;
             try
             {
-                urlDriver = br.driver.Url;
+                urlDriver = driver.Url;
                 if (!IsValidUrl＿keyDownCtrlAdd(url) && !IsValidUrl＿keyDownCtrlAdd(urlDriver)) { MessageBoxShowOKExclamationDefaultDesktopOnly("請檢查網址再重試！" + Environment.NewLine + "driver.Url= " + urlDriver + Environment.NewLine + "textBox3.Text= " + url); return false; }
-                if (urlDriver.StartsWith("https://ctext.org/library.pl?if=gb&file=") && br.isQuickEditUrl(urlDriver) == false)
+                if (urlDriver.StartsWith("https://ctext.org/library.pl?if=gb&file=") && isQuickEditUrl(urlDriver) == false)
                 {
                     int boxTag = urlDriver.IndexOf("#box(");
                     if (boxTag > -1)
@@ -10952,27 +11015,27 @@ namespace WindowsFormsApp1
                         //playSound(soundLike.exam);
                         //urlDriver = urlDriver.Substring(0, boxTag) + "#editor";
                         urlDriver = FixUrl＿ImageTextComparisonPage(urlDriver, true, true);
-                        //br.driver.Navigate().GoToUrl(urlDriver);
+                        //driver.Navigate().GoToUrl(urlDriver);
                         goto reGetURL;
                     }
                     if (DialogResult.OK == MessageBoxShowOKCancelExclamationDefaultDesktopOnly("是否要開啟[簡單修改模式](quick edit)？" + Environment.NewLine + Environment.NewLine + "driver.Url= " + urlDriver))
-                    { br.QuickeditLinkIWebElement?.Click(); textBox3.Text = br.driver.Url; goto reGetURL; }
+                    { QuickeditLinkIWebElement?.Click(); textBox3.Text = driver.Url; goto reGetURL; }
                 }
             }
             catch (Exception)
             {
                 try
                 {
-                    br.driver.SwitchTo().Window(br.LastValidWindow);
-                    urlDriver = br.driver.Url;
+                    driver.SwitchTo().Window(LastValidWindow);
+                    urlDriver = driver.Url;
                 }
                 catch (Exception)
                 {
                     ResetLastValidWindow();
                     try
                     {
-                        br.driver.SwitchTo().Window(br.LastValidWindow);
-                        urlDriver = br.driver.Url;
+                        driver.SwitchTo().Window(LastValidWindow);
+                        urlDriver = driver.Url;
                     }
                     catch (Exception)
                     {
@@ -10996,28 +11059,28 @@ namespace WindowsFormsApp1
                 else
                 {
                     bool found = false;
-                    //foreach (var item in br.driver.WindowHandles)
-                    for (int i = br.driver.WindowHandles.Count - 1; i > -1; i--)
+                    //foreach (var item in driver.WindowHandles)
+                    for (int i = driver.WindowHandles.Count - 1; i > -1; i--)
                     {
-                        br.driver.SwitchTo().Window(br.driver.WindowHandles[i]);
-                        if (br.driver.Url.StartsWith(urlShort))
+                        driver.SwitchTo().Window(driver.WindowHandles[i]);
+                        if (driver.Url.StartsWith(urlShort))
                         {
                             found = true; break;
                         }
                     }
                     if (!found)
                     {
-                        if (!string.IsNullOrEmpty(br.LastValidWindow))
+                        if (!string.IsNullOrEmpty(LastValidWindow))
                         {
-                            br.driver.SwitchTo().Window(br.LastValidWindow);
-                            if (br.driver.Url != textBox3.Text)
-                                textBox3.Text = br.driver.Url;
+                            driver.SwitchTo().Window(LastValidWindow);
+                            if (driver.Url != textBox3.Text)
+                                textBox3.Text = driver.Url;
                         }
                     }
                     else
                     {
-                        br.LastValidWindow = br.driver.CurrentWindowHandle;
-                        urlDriver = br.driver.Url;
+                        LastValidWindow = driver.CurrentWindowHandle;
+                        urlDriver = driver.Url;
                         if (!urlDriver.StartsWith(urlShort)) goto reCheckUrl;
                     }
                 }
@@ -11027,9 +11090,9 @@ namespace WindowsFormsApp1
             if (isSKQSFrontPage(x))
             {
                 TopMost = false;
-                br.driver.SwitchTo().Window(driver.CurrentWindowHandle);
+                driver.SwitchTo().Window(driver.CurrentWindowHandle);
                 br.BringToFront("chrome");
-                br.ChromeSetFocus();
+                ChromeSetFocus();
                 //WindowState = FormWindowState.Minimized;
             }
             #endregion 若是《四庫全書》直接加入〖文淵|閣寶〗
@@ -11096,12 +11159,12 @@ namespace WindowsFormsApp1
 
                 //TopMost = false;//前面已有： if (TopMost) TopMost = false; //20240211
                 //將焦點交給Chrome瀏覽器
-                if (browsrOPMode != BrowserOPMode.appActivateByName && br.driver != null)
+                if (browsrOPMode != BrowserOPMode.appActivateByName && driver != null)
                 {
                     PauseEvents();
                     try
                     {
-                        br.driver.SwitchTo().Window(br.LastValidWindow);
+                        driver.SwitchTo().Window(LastValidWindow);
                     }
                     catch (Exception ex)
                     {
@@ -11267,7 +11330,7 @@ namespace WindowsFormsApp1
                                         pageEndText10 = xCopy.Substring(l - 10);
                                         if (pageTextEndPosition != l) pageTextEndPosition = l;
                                         if (PredictCopyX != textBox1.SelectedText)
-                                            textBox1.Select(s, PredictCopyX.Length);
+                                            textBox1.Select(s, l);//PredictCopyX.Length
                                     }
                                     else
                                     {
@@ -11327,7 +11390,7 @@ namespace WindowsFormsApp1
                                 pageTextEndPosition = s;
                             }
 
-                            AvailableInUseBothKeysMouse();//BringToFront(); 
+                            AvailableInUseBothKeysMouse();//br.BringToFront(); 
                             TopMost = true;
                             return false;
                         }
@@ -11336,7 +11399,7 @@ namespace WindowsFormsApp1
                             //wordsPerLinePara為許多判斷行字數函式的重要參考，暫時不在此作調整！20231101
                             NormalLineParaLength = 0; //wordsPerLinePara = chk[chk.Length - 1];
                             TopMost = false;
-                            br.driver?.SwitchTo().Window(br.driver.CurrentWindowHandle);
+                            driver?.SwitchTo().Window(driver.CurrentWindowHandle);
 
                         }// 目前 chk[chk.Length-1]=3
                     }
@@ -11344,7 +11407,7 @@ namespace WindowsFormsApp1
                 catch (Exception ex)
                 {
                     MessageBoxShowOKExclamationDefaultDesktopOnly("  checkAbnormalLinePara函式有誤，請留意！！\n\r" + ex.HResult + ex.Message);
-                    AvailableInUseBothKeysMouse();//BringToFront();
+                    AvailableInUseBothKeysMouse();//br.BringToFront();
                 }
                 #endregion
 
@@ -11361,7 +11424,7 @@ namespace WindowsFormsApp1
                 int[] chk = CheckAbnormalLinePara(xCopy, wordsPerLinePara);
                 if (chk.Length > 0)
                 {
-                    br.driver.SwitchTo().Window(br.driver.CurrentWindowHandle);
+                    driver.SwitchTo().Window(driver.CurrentWindowHandle);
                     //if (chk[1] - chk[2] > 4)
                     //{//)chk[2] * 0.5)
                     int st = textBox1.SelectionStart;
@@ -11381,8 +11444,8 @@ namespace WindowsFormsApp1
                             textBox1.Select(chk[0] + i, 0);//定位以便Enter切行                        
                         return false;
                     }
-                    //br.ChromeSetFocus();
-                    br.driver.SwitchTo().Window(br.driver.CurrentWindowHandle);
+                    //ChromeSetFocus();
+                    driver.SwitchTo().Window(driver.CurrentWindowHandle);
                     textBox1.Select(st, ln);
                     //}
                 }
@@ -11413,15 +11476,15 @@ namespace WindowsFormsApp1
                     string driverUrl = "";
                     try
                     {
-                        driverUrl = br.driver.Url;//竟然是Google翻譯的擴充功能在作怪！難怪用selenium一直出錯 ：chrome-extension://aapbdbdomjkkjkaonfhkkikfgjllcleb/offscreen.html   https://www.facebook.com/oscarsun72/posts/pfbid02t9mQG6j2b5GFsbzoMiuUVWASczcPMLnvrGWPHnWQGeoaGo3x234PkymfPdMYSLj4l
-                                                  //https://sl.bing.net/cZ2i6BiKAmW
+                        driverUrl = driver.Url;//竟然是Google翻譯的擴充功能在作怪！難怪用selenium一直出錯 ：chrome-extension://aapbdbdomjkkjkaonfhkkikfgjllcleb/offscreen.html   https://www.facebook.com/oscarsun72/posts/pfbid02t9mQG6j2b5GFsbzoMiuUVWASczcPMLnvrGWPHnWQGeoaGo3x234PkymfPdMYSLj4l
+                                               //https://sl.bing.net/cZ2i6BiKAmW
                         if (driverUrl != urlDriver && new Uri(urlDriver).Authority == "ctext.org")
                         {
                             playSound(soundLike.exam, true);
-                            for (int i = br.driver.WindowHandles.Count - 1; i > -1; i--)
+                            for (int i = driver.WindowHandles.Count - 1; i > -1; i--)
                             {
-                                br.driver.SwitchTo().Window(br.driver.WindowHandles[i]);
-                                if (br.driver.Url == urlDriver) { driverUrl = br.driver.Url; break; }
+                                driver.SwitchTo().Window(driver.WindowHandles[i]);
+                                if (driver.Url == urlDriver) { driverUrl = driver.Url; break; }
                             }
                         }
                         else if (driverUrl != urlDriver && new Uri(driverUrl).Authority == "ctext.org")
@@ -11445,7 +11508,7 @@ namespace WindowsFormsApp1
                                 //"no such window: target window already closed\nfrom unknown error: web view not found\n  (Session info: chrome=111.0.5563.147)"
                                 if (ex.Message.IndexOf("no such window: target window already closed") > -1)
                                 {
-                                    br.GoToUrlandActivate(url);
+                                    GoToUrlandActivate(url);
                                 }
                                 break;
                             default:
@@ -11457,18 +11520,18 @@ namespace WindowsFormsApp1
                     }
                     if (!IsValidUrl＿keyDownCtrlAdd(driverUrl))
                     {
-                        string brdriverUrl = br.GoToCurrentUserActivateTab();
-                        //if (!IsValidUrl＿keyDownCtrlAdd(br.driver.Url))
+                        string brdriverUrl = GoToCurrentUserActivateTab();
+                        //if (!IsValidUrl＿keyDownCtrlAdd(driver.Url))
                         if (!IsValidUrl＿keyDownCtrlAdd(brdriverUrl))
-                        //if (br.driver.Url.IndexOf("#editor") == -1 && br.driver.Url.IndexOf("&page=") == -1 && br.driver.Url.IndexOf("ctext.org") == -1)
+                        //if (driver.Url.IndexOf("#editor") == -1 && driver.Url.IndexOf("&page=") == -1 && driver.Url.IndexOf("ctext.org") == -1)
                         {
                             //Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("請檢查 textBox3 中是否是有效的簡單修改模式的網址");
                             if (IsValidUrl＿ImageTextComparisonPage(brdriverUrl))
                             {
                                 if (DialogResult.OK == Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("是否要切換到「簡單修改模式」頁面以供輸入？"))
                                 {
-                                    brdriverUrl = br.GetQuickeditUrl();
-                                    br.QuickeditLinkIWebElement.Click();
+                                    brdriverUrl = GetQuickeditUrl();
+                                    QuickeditLinkIWebElement.Click();
                                     if (!input2Ctext(brdriverUrl, shiftKeyDownYet)) return false;
                                 }
                                 else
@@ -11478,12 +11541,12 @@ namespace WindowsFormsApp1
                                 return false;
                         }
                         else
-                            //pasteToCtext(br.driver.Url, shiftKeyDownYet);
+                            //pasteToCtext(driver.Url, shiftKeyDownYet);
                             if (!input2Ctext(brdriverUrl, shiftKeyDownYet)) return false;
                     }
                     else
-                        if (!input2Ctext(textBox3.Text, shiftKeyDownYet)) return false;//string currentUrl = br.driver.Url;
-                                                                                       //pasteToCtext(currentUrl);//故改用 br.……
+                        if (!input2Ctext(textBox3.Text, shiftKeyDownYet)) return false;//string currentUrl = driver.Url;
+                                                                                       //pasteToCtext(currentUrl);//故改用 ……
                     break;
                 case BrowserOPMode.seleniumGet://Selenium配合Windows API模式（1+2）或純不用Selenium模式
                                                //還未實作
@@ -11493,7 +11556,7 @@ namespace WindowsFormsApp1
             }
             #endregion
 
-            if (autoPaste2QuickEdit && textBox1.Text == br.TextPatst2Quick_editBox + Environment.NewLine)
+            if (autoPaste2QuickEdit && textBox1.Text == TextPatst2Quick_editBox + Environment.NewLine)
             {
                 playSound(soundLike.stop, true);
                 undoRecord(); PauseEvents();
@@ -11557,7 +11620,7 @@ namespace WindowsFormsApp1
                     {//自動送交賢超法師《古籍酷AI》OCR
                      //已改寫在 nextPage 裡
                      //Form1.playSound(Form1.soundLike.press);
-                     //toOCR(br.OCRSiteTitle.GJcool);
+                     //toOCR(OCRSiteTitle.GJcool);
                     }
                     else
                     {
@@ -11566,22 +11629,22 @@ namespace WindowsFormsApp1
                         //將插入點置於頁首，以備編輯
                         textBox1.Select(0, 0);
                         textBox1.ScrollToCaret();
-                        //br.WindowsScrolltoTop();
+                        //WindowsScrolltoTop();
                         //}
                     }
                 }
             }
 
             #region 如果有「check the adjacent pages」連結控制項則將其點開
-            if (keyinTextMode)// && br.CheckAdjacentPages_Linkbox != null)//&& CheckAdjacentPages_DataNext == null)
-                br.CheckAdjacentPages_Linkbox?.Click();
+            if (keyinTextMode)// && CheckAdjacentPages_Linkbox != null)//&& CheckAdjacentPages_DataNext == null)
+                CheckAdjacentPages_Linkbox?.Click();
             #endregion
 
             #region 此程序執行完畢，表單顏色閃爍顯示，以供提示 20231029
             ////其實在執行時多數時看不到表單的，也會被其他的樂音遮蔽，故不作！
             //Form1.playSound(soundLike.info);
             //if (!Visible) Visible = true;
-            //BringToFront();
+            //br.BringToFront();
             //this.BackColor = Color.Tan;
             //this.Refresh();
             //Thread.Sleep(20);
@@ -11604,16 +11667,16 @@ namespace WindowsFormsApp1
                     PauseEvents(); stopUndoRec = true;
                     Form1.InstanceForm1.textBox1.Select(wygbStart, 0);
                     Form1.InstanceForm1.textBox1.SelectedText = "〖文淵|閣寶〗<p>";
-                    if (int.Parse(br.Svg_image_PageImageFrame.GetAttribute("width")) > 500)
-                        br.Svg_image_PageImageFrame.Click();
+                    if (int.Parse(Svg_image_PageImageFrame.GetAttribute("width")) > 500)
+                        Svg_image_PageImageFrame.Click();
                     ResumeEvents(); stopUndoRec = false;
                 }
                 Form1.InstanceForm1.textBox3.Text = textBox3.Text;//主表單網址與本表單連動、同步
                 //TopMost = false;
-                //br.driver.SwitchTo().Window(driver.CurrentWindowHandle);
+                //driver.SwitchTo().Window(driver.CurrentWindowHandle);
                 ////WindowState = FormWindowState.Minimized;
                 Form1.InstanceForm1.AvailableInUseBothKeysMouse();
-                br.WindowHandles["currentPageNum"] = (int.Parse(_currentPageNum) - 1).ToString();
+                WindowHandles["currentPageNum"] = (int.Parse(_currentPageNum) - 1).ToString();
                 //Form1.InstanceForm1.textBox1.Select(s, l);
             }
             #endregion
@@ -11626,17 +11689,17 @@ namespace WindowsFormsApp1
         /// </summary>
         internal static void RestoreImageSize()
         {
-            OpenQA.Selenium.IWebElement iwe = br.Svg_image_PageImageFrame;
+            OpenQA.Selenium.IWebElement iwe = Svg_image_PageImageFrame;
             DateTime dt = DateTime.Now;
             while (iwe == null)
             {
-                iwe = br.Svg_image_PageImageFrame;
+                iwe = Svg_image_PageImageFrame;
                 if (DateTime.Now.Subtract(dt).TotalSeconds > 2) break;
             }
             string width = iwe?.GetAttribute("width");
             if (width != null)
                 if (int.Parse(width) > 500)
-                    br.Svg_image_PageImageFrame?.Click();
+                    Svg_image_PageImageFrame?.Click();
 
         }
 
@@ -12273,7 +12336,7 @@ namespace WindowsFormsApp1
                 Visible = false;
                 if (!IsDriverInvalid()) driver.SwitchTo().Window(driver.CurrentWindowHandle);
                 br.BringToFront("chrome");
-                br.ChromeSetFocus();
+                ChromeSetFocus();
             }
             rePaint = false;
             SendMessage(this.Handle, WM_SETREDRAW, (IntPtr)0, IntPtr.Zero);//通過使用SendMessage來控制WM_SETREDRAW消息，可以暫時禁用或啟用重畫。
@@ -12294,8 +12357,8 @@ namespace WindowsFormsApp1
             rePaint = true;
             SendMessage(this.Handle, WM_SETREDRAW, (IntPtr)1, IntPtr.Zero);
             this.Refresh();
-            if (browsrOPMode != BrowserOPMode.appActivateByName && !br.IsDriverInvalid())
-                br.WindowsScrolltoTop();
+            if (browsrOPMode != BrowserOPMode.appActivateByName && !IsDriverInvalid())
+                WindowsScrolltoTop();
         }
 
         /// <summary>
@@ -12405,8 +12468,8 @@ namespace WindowsFormsApp1
                             //killProcesses(new string[] { "OpenConsole", "cmd" });
                             toggleAutoPastetoQuickEdit();
                             //if (Console.CapsLock) //https://copilot.microsoft.com/shares/eKhg7mDDaoJZywT3DYsAA
-                                //// 模擬按下 CapsLock 鍵
-                                //SendKeys.SendWait("{CAPSLOCK}");
+                            //// 模擬按下 CapsLock 鍵
+                            //SendKeys.SendWait("{CAPSLOCK}");
                         }
                         else
                             if (keycodeNow != Keys.Subtract &&
@@ -12548,7 +12611,7 @@ namespace WindowsFormsApp1
                                 switch (quickedit_data_textboxtxt)
                                 {
                                     //如果是Word VBA 新頁面所產生的 tab鍵 \t（讀取值是「 」，非"\t"）
-                                    case " ":// br.chkClearQuickedit_data_textboxTxtStr:
+                                    case " ":// chkClearQuickedit_data_textboxTxtStr:
                                         BringToFront();
                                         dialogResult = MessageBox.Show("是否清除當前頁面中的空白內容？（其實是有由tab鍵所按下的值）", "",
                                         MessageBoxButtons.OKCancel, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1,
@@ -12558,7 +12621,7 @@ namespace WindowsFormsApp1
                                         {
 
                                             #region 以下是據方法函式「keyDownCtrlAdd(bool shiftKeyDownYet = false)」而來
-                                            input2Ctext(textBox3.Text, false, br.chkClearQuickedit_data_textboxTxtStr);
+                                            input2Ctext(textBox3.Text, false, chkClearQuickedit_data_textboxTxtStr);
                                             //if (!textBox1.Enabled) { textBox1.Enabled = true; textBox1.Focus(); }
                                             //Task.WaitAll(); Thread.Sleep(500);
                                             nextPages(Keys.PageDown, false);
@@ -12572,7 +12635,8 @@ namespace WindowsFormsApp1
                                         break;
                                     case ""://如果文字框裡沒內容（即空白頁）
                                         BringToFront();
-                                        if (br.pageUBound > int.Parse(br.Page_textbox.GetAttribute("value")))
+                                        //IsConfirmHumanPage();
+                                        if (driver.Url != "https://ctext.org/wiki.pl" && pageUBound > int.Parse(Page_textbox.GetAttribute("value")))
                                         {
                                             dialogResult = MessageBox.Show("是否移到下一頁？", "",
                                                 MessageBoxButtons.OKCancel, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1,
@@ -12644,12 +12708,12 @@ namespace WindowsFormsApp1
                 if (!autoPastetoCtextQuitEditTextboxCancel)
                 {
                     autoPastetoCtextQuitEditTextboxCancel = true;
-                    br.driver.SwitchTo().Window(br.driver.CurrentWindowHandle);
-                    br.ChromeSetFocus();
+                    driver.SwitchTo().Window(driver.CurrentWindowHandle);
+                    ChromeSetFocus();
                     AvailableInUseBothKeysMouse();
                     if (fastMode)
                     {
-                        if (br.pageUBound == int.Parse(br.Page_textbox.GetAttribute("value")))
+                        if (pageUBound == int.Parse(Page_textbox.GetAttribute("value")))
                         {
                             if (File.Exists("C:\\Windows\\Media\\ring07.wav"))
                                 using (SoundPlayer sp = new SoundPlayer("C:\\Windows\\Media\\ring07.wav")) { sp.Play(); }
@@ -12664,12 +12728,12 @@ namespace WindowsFormsApp1
                 }
                 else//20250301●●●●●●●●●●●●●●●●●
                 {//會影響自動讀如下一卷文本的機制，故須在有內容時（尚有內容待輸入時）才觸動
-                    br.driver.SwitchTo().Window(br.driver.CurrentWindowHandle);
+                    driver.SwitchTo().Window(driver.CurrentWindowHandle);
                     if (!Active && textBox1.Text != string.Empty) AvailableInUseBothKeysMouse();
                     //autoPastetoCtextQuitEditTextboxCancel = false;
                     if (fastMode)
                     {
-                        if (br.pageUBound == int.Parse(br.Page_textbox.GetAttribute("value")))
+                        if (pageUBound == int.Parse(Page_textbox.GetAttribute("value")))
                         {
                             if (File.Exists("C:\\Windows\\Media\\ring07.wav"))
                                 using (SoundPlayer sp = new SoundPlayer("C:\\Windows\\Media\\ring07.wav")) { sp.Play(); }
@@ -12712,7 +12776,7 @@ namespace WindowsFormsApp1
         private void bringBackMousePosFrmCenter()
         {
             if (browsrOPMode != BrowserOPMode.appActivateByName && driver != null
-                && !IsDriverInvalid() && br.IsConfirmHumanPage()) return;
+                && !IsDriverInvalid() && IsConfirmHumanPage()) return;
             if (this.InvokeRequired)
             {
                 this.Invoke((MethodInvoker)delegate
@@ -12872,7 +12936,7 @@ namespace WindowsFormsApp1
                     //SystemSounds.Beep.Play();
                     //Form1.playSound(Form1.soundLike.processing);
                     Form1.playSound(Form1.soundLike.done); if (TopMost) TopMost = false;
-                    //if (browsrOPMode != BrowserOPMode.appActivateByName) br.GoToUrlandActivate(textBox3.Text);
+                    //if (browsrOPMode != BrowserOPMode.appActivateByName) GoToUrlandActivate(textBox3.Text);
                     textBox1.Focus();
                 }
 
@@ -12900,7 +12964,7 @@ namespace WindowsFormsApp1
                     textBox3.Text = driver.Url;
                 }
                 //如果是在第1頁
-                if (CurrentPageNum != string.Empty && int.Parse(CurrentPageNum) != 1 && (br.driver.Url.EndsWith("&page=1") || br.driver.Url.Contains("&page=1&")))
+                if (CurrentPageNum != string.Empty && int.Parse(CurrentPageNum) != 1 && (driver.Url.EndsWith("&page=1") || driver.Url.Contains("&page=1&")))
                 {
                     textBox3.Text = driver.Url;
                     string url = textBox3.Text;
@@ -12914,8 +12978,8 @@ namespace WindowsFormsApp1
                 if (CurrentPageNum == "1")// && textBox3.Text.EndsWith("#editor"))
                     if (!IsDriverInvalid())
                     {
-                        br.driver.Navigate().GoToUrl(textBox3.Text);
-                        if (br.QuickeditLinkIWebElement != null)
+                        driver.Navigate().GoToUrl(textBox3.Text);
+                        if (QuickeditLinkIWebElement != null)
                         {
                             //const string inputText = "《四庫全書》􏿽{{經部　}}<p>";
                             //const string inputText = "《四庫全書》􏿽{{史部　}}<p>";
@@ -12924,22 +12988,22 @@ namespace WindowsFormsApp1
                             //const string inputText = "《小　倦　遊　閣　集》<p>";
                             //const string inputText = "《三　才　圖　會》<p>";
                             //const string inputTextFrontPage = "《帶　經　堂　詩　話》<p>";                            
-                            //br.QuickeditLinkIWebElement.Click();
-                            br.QuickeditLinkIWebElement.JsClick();
+                            //QuickeditLinkIWebElement.Click();
+                            QuickeditLinkIWebElement.JsClick();
                             PauseEvents();
                             textBox3.Text = driver.Url;
                             ResumeEvents();
                             //現在用JsClick()可在背景工作，便不需要了
-                            //br.driver.SwitchTo().Window(driver.CurrentWindowHandle);
+                            //driver.SwitchTo().Window(driver.CurrentWindowHandle);
                             //設定Quick edit textBox
                             DateTime dt = DateTime.Now;
-                            while (br.Quickedit_data_textbox == null) { if (DateTime.Now.Subtract(dt).TotalSeconds > 5) break; }
-                            string text = br.Quickedit_data_textboxTxt;
+                            while (Quickedit_data_textbox == null) { if (DateTime.Now.Subtract(dt).TotalSeconds > 5) break; }
+                            string text = Quickedit_data_textboxTxt;
                             if (text == string.Empty || text == "●" || text == "●\t" || text == "●<p>")
                             {
-                                br.SetIWebElementValueProperty(br.Quickedit_data_textbox, inputTextFrontPage);
-                                //br.SavechangesButton?.Click();//送出
-                                br.SavechangesButton?.JsClick();//送出
+                                SetIWebElementValueProperty(Quickedit_data_textbox, inputTextFrontPage);
+                                //SavechangesButton?.Click();//送出
+                                SavechangesButton?.JsClick();//送出
                                 nextPages(Keys.PageDown, false);//翻到下一頁
                                 string clpTxt = Clipboard.GetText();
                                 if (textBox1.TextLength == 0 && clpTxt.Length > 0
@@ -12975,7 +13039,7 @@ namespace WindowsFormsApp1
             {
                 e.Handled = true;
                 playSound(soundLike.exam, true);
-                br.HanchiTextReadinginPagebyPage();
+                HanchiTextReadinginPagebyPage();
 
                 //string x = textBox1.Text;
                 //CnText.ClearFirstParaLeadingSpace(ref x);
@@ -12987,7 +13051,7 @@ namespace WindowsFormsApp1
                 //AutoMarkTitleParagraph();
 
                 //if (!IsDriverInvalid())
-                //br.CopySKQSNextVolume();
+                //CopySKQSNextVolume();
 
                 //expandSelectedTextRangeToWholeLinePara(textBox1.SelectionStart,textBox1.SelectionLength,textBox1.Text);
                 //Range range = new Document(ref textBox1).Range(textBox1.SelectionStart, textBox1.SelectionStart + textBox1.SelectionLength);
@@ -13035,7 +13099,7 @@ namespace WindowsFormsApp1
                     //Ctrl + Shift + 4 ：翻到[Kanripo](https://www.kanripo.org/)下一卷在複製其文本後即執行 Word VBA Sub 巨集指令「國學大師_Kanripo_四庫全書本轉來」
                     //runWordMacro("國學大師_Kanripo_四庫全書本轉來");
                     textBox1.Clear();
-                    br.SikuQuanshu_SKQSContextCopyReading();
+                    SikuQuanshu_SKQSContextCopyReading();
                     return;
                 }
                 //按下 ctrl + shift + * （數字鍵盤的星號）  toggle keyinTextmode 切換手動鍵入模式
@@ -13066,16 +13130,16 @@ namespace WindowsFormsApp1
                     string pagePast2OCRsiteName = string.Empty;
                     switch (PagePast2OCRsite)
                     {
-                        case br.OCRSiteTitle.GoogleKeep:
+                        case OCRSiteTitle.GoogleKeep:
                             pagePast2OCRsiteName = "Google Keep";
                             break;
-                        case br.OCRSiteTitle.GJcool:
+                        case OCRSiteTitle.GJcool:
                             pagePast2OCRsiteName = "《古籍酷》";
                             break;
-                        case br.OCRSiteTitle.KanDianGuJi:
+                        case OCRSiteTitle.KanDianGuJi:
                             pagePast2OCRsiteName = "《看典古籍》OCR網頁版";
                             break;
-                        case br.OCRSiteTitle.KanDianGuJiAPI:
+                        case OCRSiteTitle.KanDianGuJiAPI:
                             pagePast2OCRsiteName = "《看典古籍》OCR API";
                             break;
                         default:
@@ -13128,7 +13192,7 @@ namespace WindowsFormsApp1
                 //await PerformOCR();
                 e.Handled = true;
                 playSound(soundLike.press, true);
-                toOCR(br.OCRSiteTitle.KanDianGuJiAPI);
+                toOCR(OCRSiteTitle.KanDianGuJiAPI);
                 if (!EventsEnabled) EventsEnabled = true;
                 AvailableInUseBothKeysMouse();
                 return;
@@ -13138,25 +13202,25 @@ namespace WindowsFormsApp1
             {
                 e.Handled = true;
                 string url = string.Empty;
-                if (br.driver == null) return;
+                if (driver == null) return;
                 try
                 {
-                    url = br.driver.Url;
+                    url = driver.Url;
                 }
                 catch (Exception)
                 {
                     //Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
                     //return;
-                    if (br.IsWindowHandleValid(br.driver, br.LastValidWindow))
-                        br.driver.SwitchTo().Window(br.LastValidWindow);
+                    if (IsWindowHandleValid(driver, LastValidWindow))
+                        driver.SwitchTo().Window(LastValidWindow);
                 }
                 //檢查是否是可操作的頁面（分頁）
                 if (!IsValidUrl＿ImageTextComparisonPage(url))
                 {
-                    foreach (var item in br.driver.WindowHandles)
+                    foreach (var item in driver.WindowHandles)
                     {
-                        br.driver.SwitchTo().Window(item);
-                        url = br.driver.Url;
+                        driver.SwitchTo().Window(item);
+                        url = driver.Url;
                         if (IsValidUrl＿ImageTextComparisonPage(url))
                             if (MessageBoxShowOKCancelExclamationDefaultDesktopOnly("是否是這個頁面？") == DialogResult.OK) break;
                     }
@@ -13167,9 +13231,9 @@ namespace WindowsFormsApp1
                 }
                 if (url != textBox3.Text) textBox3.Text = url;
 
-                int stopPageNum = br.pageUBound;
+                int stopPageNum = pageUBound;
 
-                CheckBlankPagesBeforeOCR_NextPage(url, int.Parse(br.Page_textbox.GetAttribute("defaultValue")), stopPageNum);
+                CheckBlankPagesBeforeOCR_NextPage(url, int.Parse(Page_textbox.GetAttribute("defaultValue")), stopPageNum);
                 return;
             }
 
@@ -13257,8 +13321,8 @@ namespace WindowsFormsApp1
                 {
                     e.Handled = true;
                     SystemSounds.Exclamation.Play();
-                    br.IPStatusMessageShow(out Tuple<bool, bool, bool, bool, DateTime> ipStatus, string.Empty, false, true);
-                    if (Clipboard.GetText() != br.CurrentIP) Clipboard.SetText(br.CurrentIP);
+                    IPStatusMessageShow(out Tuple<bool, bool, bool, bool, DateTime> ipStatus, string.Empty, false, true);
+                    if (Clipboard.GetText() != CurrentIP) Clipboard.SetText(CurrentIP);
                     bringBackMousePosFrmCenter();
                     return;
                 }
@@ -13267,10 +13331,10 @@ namespace WindowsFormsApp1
                     if (browsrOPMode == BrowserOPMode.appActivateByName) return;
                     e.Handled = true; Form1.playSound(Form1.soundLike.press);
                     TopMost = false;
-                    OpenQA.Selenium.IWebElement iw = br.WaitFindWebElementBySelector_ToBeClickable("#content");
+                    OpenQA.Selenium.IWebElement iw = WaitFindWebElementBySelector_ToBeClickable("#content");
                     if (iw != null) // clickCopybutton_GjcoolFastExperience(iw.Location); 
                         Cursor.Position = (Point)iw.Location;
-                    toOCR(br.OCRSiteTitle.GoogleKeep);
+                    toOCR(OCRSiteTitle.GoogleKeep);
                     return;
                 }
                 if (e.KeyCode == Keys.R)
@@ -13331,7 +13395,7 @@ namespace WindowsFormsApp1
                     string f = MydocumentsPathIncldBackSlash + "CtextTempFiles\\Ctext_Page_Image.png", mspaint = "C:\\WINDOWS\\system32\\mspaint.exe";
                     if (File.Exists(f))
                         File.Delete(f);
-                    toOCR(br.OCRSiteTitle.KanDianGuJi, true);
+                    toOCR(OCRSiteTitle.KanDianGuJi, true);
 
                     if (File.Exists(mspaint))
                     {
@@ -13351,10 +13415,10 @@ namespace WindowsFormsApp1
                 {// Alt + Shift + k ：下載書圖並交給《看典古籍》OCR（網頁版）
                     e.Handled = true; Form1.playSound(Form1.soundLike.press, true);
                     TopMost = false;
-                    OpenQA.Selenium.IWebElement iw = br.WaitFindWebElementBySelector_ToBeClickable("#content");
+                    OpenQA.Selenium.IWebElement iw = WaitFindWebElementBySelector_ToBeClickable("#content");
                     if (iw != null) // clickCopybutton_GjcoolFastExperience(iw.Location); 
                         Cursor.Position = (Point)iw.Location;
-                    toOCR(br.OCRSiteTitle.KanDianGuJi);
+                    toOCR(OCRSiteTitle.KanDianGuJi);
                     if (!EventsEnabled) EventsEnabled = true;
                     return;
                 }
@@ -13366,10 +13430,10 @@ namespace WindowsFormsApp1
                     if (!IsValidUrl＿ImageTextComparisonPage(textBox3.Text)) return;
                     e.Handled = true; Form1.playSound(Form1.soundLike.press, true);
                     TopMost = false;
-                    OpenQA.Selenium.IWebElement iw = br.WaitFindWebElementBySelector_ToBeClickable("#content");
+                    OpenQA.Selenium.IWebElement iw = WaitFindWebElementBySelector_ToBeClickable("#content");
                     if (iw != null) // clickCopybutton_GjcoolFastExperience(iw.Location); 
                         Cursor.Position = (Point)iw.Location;
-                    toOCR(br.OCRSiteTitle.GJcool);
+                    toOCR(OCRSiteTitle.GJcool);
                     if (!EventsEnabled) EventsEnabled = true;
                     AvailableInUseBothKeysMouse();
                     //if (browsrOPMode == BrowserOPMode.appActivateByName) return;
@@ -13381,12 +13445,12 @@ namespace WindowsFormsApp1
                     //    downloadImage(imgUrl, out downloadImgFullName);
                     //else
                     //{
-                    //    imgUrl = br.GetImageUrl();
+                    //    imgUrl = GetImageUrl();
                     //    downloadImage(imgUrl, out downloadImgFullName);
                     //}
 
                     //#region toOCR
-                    //bool ocrResult = br.OCR_GJcool_AutoRecognizeVertical(downloadImgFullName);
+                    //bool ocrResult = OCR_GJcool_AutoRecognizeVertical(downloadImgFullName);
                     //if (!ocrResult) MessageBox.Show("請重來一次；重新執行一次。感恩感恩　南無阿彌陀佛", "", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
                     //if (!Active) bringBackMousePosFrmCenter();
                     //#region 如果是手動鍵入輸入模式且OCR程序無誤則直接貼上結果並自動標上書名號篇名號，20230309 creedit with chatGPT大菩薩：
@@ -13658,10 +13722,10 @@ namespace WindowsFormsApp1
                     {
                         try
                         {
-                            br.driver = br.driver ?? br.DriverNew();
-                            br.driver.SwitchTo().Window(br.driver.CurrentWindowHandle);
+                            driver = driver ?? DriverNew();
+                            driver.SwitchTo().Window(driver.CurrentWindowHandle);
 
-                            OpenQA.Selenium.IWebElement iw = br.driver.FindElement(OpenQA.Selenium.By.XPath("/html/body/div[2]"));
+                            OpenQA.Selenium.IWebElement iw = driver.FindElement(OpenQA.Selenium.By.XPath("/html/body/div[2]"));
                             iw.Click();
                             //Thread.Sleep(800);
                             //Point copyBtnPos = new Point(100, 1050);
@@ -13948,7 +14012,7 @@ namespace WindowsFormsApp1
             else
             {
                 //終止程序,釋放系統記憶體                        
-                br.killProcesses(new string[] { fn });
+                killProcesses(new string[] { fn });
             }
         }
         /// <summary>
@@ -13975,7 +14039,7 @@ namespace WindowsFormsApp1
             {
                 new SoundPlayer(@"C:\Windows\Media\Speech Off.wav").Play();
                 //終止 語音辨識軟體 程序,釋放系統記憶體                        
-                br.killProcesses(new string[] { "sapisvr" });
+                killProcesses(new string[] { "sapisvr" });
             }
         }
 
@@ -13993,41 +14057,41 @@ namespace WindowsFormsApp1
             {
                 try
                 {
-                    if (!IsValidUrl＿keyDownCtrlAdd(br.GetDriverUrl) || !IsValidUrl＿keyDownCtrlAdd(textBox3.Text))
+                    if (!IsValidUrl＿keyDownCtrlAdd(GetDriverUrl) || !IsValidUrl＿keyDownCtrlAdd(textBox3.Text))
                     {
                         bool found = false;
-                        if (!IsValidUrl＿keyDownCtrlAdd(br.GetDriverUrl) && IsValidUrl＿keyDownCtrlAdd(textBox3.Text))
+                        if (!IsValidUrl＿keyDownCtrlAdd(GetDriverUrl) && IsValidUrl＿keyDownCtrlAdd(textBox3.Text))
                         {
-                            for (int i = br.driver.WindowHandles.Count - 1; i > -1; i--)
+                            for (int i = driver.WindowHandles.Count - 1; i > -1; i--)
                             {
-                                br.driver.SwitchTo().Window(br.driver.WindowHandles[i]);
-                                if (br.driver.Url == textBox3.Text)
+                                driver.SwitchTo().Window(driver.WindowHandles[i]);
+                                if (driver.Url == textBox3.Text)
                                 { found = true; break; }
                             }
                             if (!found)
                             {
                                 string preUrl = textBox3.Text.Substring(0, textBox3.Text.IndexOf("&editwiki="));
-                                for (int i = br.driver.WindowHandles.Count - 1; i > -1; i--)
+                                for (int i = driver.WindowHandles.Count - 1; i > -1; i--)
                                 {
-                                    br.driver.SwitchTo().Window(br.driver.WindowHandles[i]);
-                                    if (br.driver.Url.StartsWith(preUrl))
+                                    driver.SwitchTo().Window(driver.WindowHandles[i]);
+                                    if (driver.Url.StartsWith(preUrl))
                                     {
                                         found = true;
                                         if (MessageBoxShowOKCancelExclamationDefaultDesktopOnly("是否是這個頁面？" + Environment.NewLine + Environment.NewLine + "textBox3.Text=" + textBox3.Text) == DialogResult.OK)
                                         {
                                             if (IsValidUrl＿keyDownCtrlAdd(textBox3Text))
-                                                br.driver.Url = textBox3Text;
+                                                driver.Url = textBox3Text;
                                             else
-                                                br.driver.Url = ReplaceUrl_Box2Editor(br.driver.Url);
-                                            br.QuickeditLinkIWebElement.Click();
+                                                driver.Url = ReplaceUrl_Box2Editor(driver.Url);
+                                            QuickeditLinkIWebElement.Click();
                                         }
                                         break;
                                     }
                                 }
                             }
                         }
-                        else if (IsValidUrl＿keyDownCtrlAdd(br.GetDriverUrl) || !IsValidUrl＿keyDownCtrlAdd(textBox3.Text))
-                            textBox3.Text = br.GetDriverUrl;
+                        else if (IsValidUrl＿keyDownCtrlAdd(GetDriverUrl) || !IsValidUrl＿keyDownCtrlAdd(textBox3.Text))
+                            textBox3.Text = GetDriverUrl;
                         if (!found)
                             if (DialogResult.Cancel == MessageBoxShowOKCancelExclamationDefaultDesktopOnly("當前頁面似乎沒有自動標點的必要性，確定要送出？", "送交《古籍酷》自動標點", true, MessageBoxDefaultButton.Button2))
                                 return false;
@@ -14116,10 +14180,10 @@ namespace WindowsFormsApp1
             switch (url)
             {
                 case "https://old.gj.cool/gjcool/index":
-                    if (!br.GjcoolPunctOld(ref x)) return false;//舊版不會去除分段符號，但會在每段前誤加句號，故還是先清除分段符號再送去
+                    if (!GjcoolPunctOld(ref x)) return false;//舊版不會去除分段符號，但會在每段前誤加句號，故還是先清除分段符號再送去
                     break;
                 case "https://gj.cool/punct":
-                    if (!br.GjcoolPunct(ref x)) return false;//新版會去除分段符號（但感覺有時會干擾，還不如先幫它清除分段符號試試。20240813
+                    if (!GjcoolPunct(ref x)) return false;//新版會去除分段符號（但感覺有時會干擾，還不如先幫它清除分段符號試試。20240813
                     break;
                 default:
                     break;
@@ -14143,25 +14207,25 @@ namespace WindowsFormsApp1
                 x = x.Replace("〔", "「").Replace("〕", "」");//引號亦會被自動標點清除故,以還原 20241001
                 try
                 {
-                    br.driver.SwitchTo().Window(br.LastValidWindow);
-                    if (br.driver.Url != textBox3.Text)
+                    driver.SwitchTo().Window(LastValidWindow);
+                    if (driver.Url != textBox3.Text)
                     {
-                        foreach (var item in br.driver.WindowHandles)
+                        foreach (var item in driver.WindowHandles)
                         {
-                            br.driver.SwitchTo().Window(item);
-                            if (br.driver.Url == textBox3.Text) break;
+                            driver.SwitchTo().Window(item);
+                            if (driver.Url == textBox3.Text) break;
                         }
                     }
-                    if (br.driver.Url != textBox3.Text)
+                    if (driver.Url != textBox3.Text)
                     {
                         //Debugger.Break();
-                        if (IsValidUrl＿keyDownCtrlAdd(br.driver.Url))
+                        if (IsValidUrl＿keyDownCtrlAdd(driver.Url))
                         {
-                            FixUrl＿ImageTextComparisonPage(br.driver.Url, true, true);
-                            //int boxPosition = br.driver.Url.IndexOf("#box(");
-                            //if (boxPosition > -1) br.driver.Navigate().GoToUrl(br.driver.Url.Substring(0, boxPosition) + "#editor");
-                            if (br.driver.Url != textBox3.Text)
-                                textBox3.Text = br.driver.Url;
+                            FixUrl＿ImageTextComparisonPage(driver.Url, true, true);
+                            //int boxPosition = driver.Url.IndexOf("#box(");
+                            //if (boxPosition > -1) driver.Navigate().GoToUrl(driver.Url.Substring(0, boxPosition) + "#editor");
+                            if (driver.Url != textBox3.Text)
+                                textBox3.Text = driver.Url;
                         }
                     }
 
@@ -14218,14 +14282,14 @@ namespace WindowsFormsApp1
             if (keyinTextMode) KeyinTextmodeSwitcher(false);
             playSound(soundLike.press, true);
             WindowHandles.TryGetValue("Hanchi_CTP_SearchingKeywordsYijing", out string windowHandle_Hanchi_CTP_SearchingKeywordsYijing);
-            if (br.driver != null && br.IsDriverInvalid())
+            if (driver != null && IsDriverInvalid())
             {
                 try
                 {
                     if (windowHandle_Hanchi_CTP_SearchingKeywordsYijing != string.Empty)
                     {
                         if (driver.WindowHandles.Contains(windowHandle_Hanchi_CTP_SearchingKeywordsYijing))
-                            br.driver.SwitchTo().Window(windowHandle_Hanchi_CTP_SearchingKeywordsYijing);
+                            driver.SwitchTo().Window(windowHandle_Hanchi_CTP_SearchingKeywordsYijing);
                         else
                         {
                             WindowHandles.Remove("Hanchi_CTP_SearchingKeywordsYijing");
@@ -14233,7 +14297,7 @@ namespace WindowsFormsApp1
                         }
                     }
                     else
-                        br.driver.SwitchTo().Window(br.LastValidWindow);
+                        driver.SwitchTo().Window(LastValidWindow);
 
                 }
                 catch (Exception ex)
@@ -14254,8 +14318,8 @@ namespace WindowsFormsApp1
                             //MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
                             Debugger.Break();
                             ////chromedriver被誤關時 20241008
-                            //br.driver = null;
-                            //br.DriverNew();
+                            //driver = null;
+                            //DriverNew();
                             RestartChromedriver();
                             break;
                     }
@@ -14264,24 +14328,24 @@ namespace WindowsFormsApp1
             #region 關閉《漢籍全文資料庫》開啟的頁面20240926
             if (windowHandle_Hanchi_CTP_SearchingKeywordsYijing != string.Empty)
             {
-                for (int i = br.driver.WindowHandles.Count - 1; i > -1; i--)
+                for (int i = driver.WindowHandles.Count - 1; i > -1; i--)
                 {
                     if (driver.CurrentWindowHandle == windowHandle_Hanchi_CTP_SearchingKeywordsYijing) break;
-                    br.driver.SwitchTo().Window(driver.WindowHandles[i]);
+                    driver.SwitchTo().Window(driver.WindowHandles[i]);
                     //如果「回查詢結果」元件存在的話//文本閱讀內的檢索（《漢籍全文資料庫》），如果有開啟「回查詢結果」的頁面，則關閉20240926
-                    if (br.WaitFindWebElementBySelector_ToBeClickable("body > form > table > tbody > tr:nth-child(2) > td > table > tbody > tr:nth-child(1) > td > table > tbody > tr > td.btn62 > a")?.GetAttribute("text") == "回查詢結果")
+                    if (WaitFindWebElementBySelector_ToBeClickable("body > form > table > tbody > tr:nth-child(2) > td > table > tbody > tr:nth-child(1) > td > table > tbody > tr > td.btn62 > a")?.GetAttribute("text") == "回查詢結果")
                     {//如果不能返回上一頁，即開啟新分頁者，即予關閉。
-                        if (!br.CanGoBack())
+                        if (!CanGoBack())
                         {
-                            br.driver.Close();
-                            br.driver.SwitchTo().Window(br.driver.WindowHandles.Last());
+                            driver.Close();
+                            driver.SwitchTo().Window(driver.WindowHandles.Last());
                         }
                         //else
-                        //    br.driver.Navigate().Back();//CanGoBack()裡頭已有！ 20240926
-                        if (br.driver.Title.Contains("漢籍全文文本閱讀"))
+                        //    driver.Navigate().Back();//CanGoBack()裡頭已有！ 20240926
+                        if (driver.Title.Contains("漢籍全文文本閱讀"))
                         {
-                            while (br.WaitFindWebElementBySelector_ToBeClickable("body > form > table > tbody > tr:nth-child(2) > td > table > tbody > tr > td > table > tbody > tr:nth-child(1) > td.btn62 > a")?.GetAttribute("text") == "回瀏覽")
-                            { br.driver.Navigate().Back(); }
+                            while (WaitFindWebElementBySelector_ToBeClickable("body > form > table > tbody > tr:nth-child(2) > td > table > tbody > tr > td > table > tbody > tr:nth-child(1) > td.btn62 > a")?.GetAttribute("text") == "回瀏覽")
+                            { driver.Navigate().Back(); }
                             break;
                         }
                         //break;//如果有開啟多個
@@ -14291,10 +14355,10 @@ namespace WindowsFormsApp1
                     //while (null != waitFindWebElementBySelector_ToBeClickable("body > form > table > tbody > tr:nth-child(2) > td:nth-child(1) > font > b > nobr"))
                     {
                         driver.Close(); driver.SwitchTo().Window(driver.WindowHandles.Last());
-                        if (br.driver.Title.Contains("漢籍全文資料庫"))
+                        if (driver.Title.Contains("漢籍全文資料庫"))
                         {
                             //搜尋按鈕
-                            if (br.WaitFindWebElementBySelector_ToBeClickable("#frmTitle > table > tbody > tr:nth-child(2) > td > table > tbody > tr:nth-child(8) > td > input[type=IMAGE]:nth-child(2)")?.GetAttribute("title") == "搜尋")
+                            if (WaitFindWebElementBySelector_ToBeClickable("#frmTitle > table > tbody > tr:nth-child(2) > td > table > tbody > tr:nth-child(8) > td > input[type=IMAGE]:nth-child(2)")?.GetAttribute("title") == "搜尋")
                                 break;
                         }
                     }
@@ -14305,7 +14369,7 @@ namespace WindowsFormsApp1
             while (true)
             {
                 TopMost = false;
-                if (br.Hanchi_CTP_SearchingKeywordsYijing()) break;
+                if (Hanchi_CTP_SearchingKeywordsYijing()) break;
             }
         }
 
@@ -14415,40 +14479,40 @@ namespace WindowsFormsApp1
         /// </summary>
         /// <param name="ocrSiteTitle">指OCR網站（Google Keep或《古籍酷》）</param>
         /// <returns>成功執行傳回true</returns>
-        private bool toOCR(br.OCRSiteTitle ocrSiteTitle, bool justDownloadImage = false)
+        private bool toOCR(OCRSiteTitle ocrSiteTitle, bool justDownloadImage = false)
         {
             //Form1.playSound(Form1.soundLike.press);
 
             TopMost = false;
 
-            //br.ActiveForm1 = this;
+            //ActiveForm1 = this;
 
             try
             {
 
                 try
                 {
-                    if (!br.driver.WindowHandles.Contains(br.driver.CurrentWindowHandle))
-                        br.driver.SwitchTo().Window(br.LastValidWindow);
+                    if (!driver.WindowHandles.Contains(driver.CurrentWindowHandle))
+                        driver.SwitchTo().Window(LastValidWindow);
                 }
                 catch (Exception)
                 {
                     try
                     {
-                        br.driver.SwitchTo().Window(br.LastValidWindow);
+                        driver.SwitchTo().Window(LastValidWindow);
                         playSound(soundLike.exam);
                     }
                     catch (Exception)
                     {
-                        if (br.driver.WindowHandles.Count > 0)
+                        if (driver.WindowHandles.Count > 0)
                         {
-                            br.driver.SwitchTo().Window(br.driver.WindowHandles[0]);
-                            br.LastValidWindow = br.driver.WindowHandles[0];
+                            driver.SwitchTo().Window(driver.WindowHandles[0]);
+                            LastValidWindow = driver.WindowHandles[0];
                         }
 
                     }
                 }
-                br.LastValidWindow = br.driver.CurrentWindowHandle;
+                LastValidWindow = driver.CurrentWindowHandle;
             }
             catch (Exception)
             {
@@ -14458,18 +14522,18 @@ namespace WindowsFormsApp1
             if (!justDownloadImage)
             {
                 #region 檢查是否必要 20230804Bard大菩薩：https://g.co/bard/share/9130d688e253            
-                string quickedit_data_textboxTxt = br.Quickedit_data_textbox?.Text;//br.Quickedit_data_textboxTxt;
-                                                                                   //bool chk = false;
-                                                                                   //if (quickedit_data_textboxTxt.Length > 1000)
-                                                                                   //{
-                                                                                   //    Regex regex = new Regex(@"\，|\。");
-                                                                                   //    Match match = regex.Match(quickedit_data_textboxTxt);
-                                                                                   //    chk = match.Success;
-                                                                                   //}
-                                                                                   //else
-                                                                                   //{
-                                                                                   //    chk = quickedit_data_textboxTxt.Contains("，") || quickedit_data_textboxTxt.Contains("。");
-                                                                                   //}
+                string quickedit_data_textboxTxt = Quickedit_data_textbox?.Text;//Quickedit_data_textboxTxt;
+                                                                                //bool chk = false;
+                                                                                //if (quickedit_data_textboxTxt.Length > 1000)
+                                                                                //{
+                                                                                //    Regex regex = new Regex(@"\，|\。");
+                                                                                //    Match match = regex.Match(quickedit_data_textboxTxt);
+                                                                                //    chk = match.Success;
+                                                                                //}
+                                                                                //else
+                                                                                //{
+                                                                                //    chk = quickedit_data_textboxTxt.Contains("，") || quickedit_data_textboxTxt.Contains("。");
+                                                                                //}
                 if (quickedit_data_textboxTxt == null) return false;
                 if ((CnText.HasEditedWithPunctuationMarks(ref quickedit_data_textboxTxt) && (textBox1.Text != "●" || quickedit_data_textboxTxt != "●")) ||
                     quickedit_data_textboxTxt.Contains("picture") || quickedit_data_textboxTxt.Contains("entity"))
@@ -14480,13 +14544,13 @@ namespace WindowsFormsApp1
                         quickedit_data_textboxTxt))
                     {
                         undoRecord();
-                        textBox1.Text = br.CopyQuickedit_data_textboxText();//quickedit_data_textboxTxt;
+                        textBox1.Text = CopyQuickedit_data_textboxText();//quickedit_data_textboxTxt;
                         if (!Active) AvailableInUseBothKeysMouse();
-                        //br.WindowsScrolltoTop();
+                        //WindowsScrolltoTop();
                         return false;
                     }
                 }
-                //else if ((br.Quickedit_data_textbox == null ? 0 : (new StringInfo(br.Quickedit_data_textbox?.Text)?.LengthInTextElements)) < (normalLineParaLength == 0 ? 20 : normalLineParaLength)
+                //else if ((Quickedit_data_textbox == null ? 0 : (new StringInfo(Quickedit_data_textbox?.Text)?.LengthInTextElements)) < (normalLineParaLength == 0 ? 20 : normalLineParaLength)
                 //    && quickedit_data_textboxTxt != "\t")// 「	」"\t"是新建的維基文本故 20240405
                 else if ((quickedit_data_textboxTxt == null ? 0 : (new StringInfo(quickedit_data_textboxTxt)?.LengthInTextElements)) < (NormalLineParaLength == 0 ? 20 : NormalLineParaLength)
                     && quickedit_data_textboxTxt != "\t" && quickedit_data_textboxTxt != " "
@@ -14498,9 +14562,9 @@ namespace WindowsFormsApp1
                             quickedit_data_textboxTxt))
                     {
                         undoRecord();
-                        textBox1.Text = br.CopyQuickedit_data_textboxText();//quickedit_data_textboxTxt;
+                        textBox1.Text = CopyQuickedit_data_textboxText();//quickedit_data_textboxTxt;
                         if (!Active) AvailableInUseBothKeysMouse();
-                        //br.WindowsScrolltoTop();
+                        //WindowsScrolltoTop();
                         return false;
                     }
                 }
@@ -14511,13 +14575,13 @@ namespace WindowsFormsApp1
             string currentWindowHndl = string.Empty;
             try
             {
-                currentWindowHndl = br.driver.CurrentWindowHandle;
+                currentWindowHndl = driver.CurrentWindowHandle;
             }
             catch (Exception)
             {
-                currentWindowHndl = br.driver.WindowHandles.Last();
+                currentWindowHndl = driver.WindowHandles.Last();
             }
-            br.LastValidWindow = currentWindowHndl;
+            LastValidWindow = currentWindowHndl;
             #endregion
 
             //下載書圖
@@ -14528,23 +14592,23 @@ namespace WindowsFormsApp1
                 ocrResult = DownloadImage(imgUrl, out downloadImgFullName);
             else
             {
-                imgUrl = br.GetImageUrl();
+                imgUrl = GetImageUrl();
                 if (imgUrl == "")
                 {
-                    //br.WindowsScrolltoTop();
+                    //WindowsScrolltoTop();
                     return false;
                 }
                 ocrResult = DownloadImage(imgUrl, out downloadImgFullName);
                 if (downloadImgFullName == "")
                 {
-                    //br.WindowsScrolltoTop();
+                    //WindowsScrolltoTop();
                     return false;
                 }
             }
 
             if (!ocrResult)
             {
-                //br.WindowsScrolltoTop();
+                //WindowsScrolltoTop();
                 return false;
             }
 
@@ -14554,29 +14618,29 @@ namespace WindowsFormsApp1
 
             #region toOCR
             int windowsCount = driver.WindowHandles.Count;//作為判斷在執行OCR程序時有沒有新開的分頁視窗
-            br.StopOCR = false;
-            ////string currentWindowHndl = br.driver.CurrentWindowHandle;
-            //br.LastValidWindow = currentWindowHndl;//br.driver.CurrentWindowHandle;//改到前面
+            StopOCR = false;
+            ////string currentWindowHndl = driver.CurrentWindowHandle;
+            //LastValidWindow = currentWindowHndl;//driver.CurrentWindowHandle;//改到前面
             switch (ocrSiteTitle)
             {
                 //Google Keep
-                case br.OCRSiteTitle.GoogleKeep:
-                    ocrResult = br.OCR_GoogleKeep(downloadImgFullName);
+                case OCRSiteTitle.GoogleKeep:
+                    ocrResult = OCR_GoogleKeep(downloadImgFullName);
                     break;
                 //《古籍酷》
-                case br.OCRSiteTitle.GJcool:
-                    //br.ActiveForm1 = this;
-                    //br.ActiveForm1.TopMost = false;
-                    //br.ActiveForm1 = this;
+                case OCRSiteTitle.GJcool:
+                    //ActiveForm1 = this;
+                    //ActiveForm1.TopMost = false;
+                    //ActiveForm1 = this;
                     TopMost = false;
                     //try
                     //{
-                    br.driver.SwitchTo().Window(currentWindowHndl);
+                    driver.SwitchTo().Window(currentWindowHndl);
                     if (BatchProcessingGJcoolOCR)
-                        //ocrResult = br.OCR_GJcool_BatchProcessing(downloadImgFullName);
-                        ocrResult = br.OCR_GJcool_BatchProcessing_new(downloadImgFullName);
+                        //ocrResult = OCR_GJcool_BatchProcessing(downloadImgFullName);
+                        ocrResult = OCR_GJcool_BatchProcessing_new(downloadImgFullName);
                     else
-                        ocrResult = br.OCR_GJcool_AutoRecognizeVertical(downloadImgFullName);
+                        ocrResult = OCR_GJcool_AutoRecognizeVertical(downloadImgFullName);
                     //}
                     //catch (Exception ex)
                     //{
@@ -14593,10 +14657,10 @@ namespace WindowsFormsApp1
                     //}
                     break;
                 //《看典古籍》網頁版
-                case br.OCRSiteTitle.KanDianGuJi:
+                case OCRSiteTitle.KanDianGuJi:
                     try
                     {
-                        ocrResult = br.OCR_KanDianGuJi(downloadImgFullName);
+                        ocrResult = OCR_KanDianGuJi(downloadImgFullName);
                     }
                     catch (Exception)
                     {
@@ -14605,7 +14669,7 @@ namespace WindowsFormsApp1
                     }
                     break;
                 //《看典古籍》OCR API
-                case br.OCRSiteTitle.KanDianGuJiAPI:
+                case OCRSiteTitle.KanDianGuJiAPI:
                     //20240730 Copilot大菩薩：如果您不希望在呼叫端使用 await，您可以使用 Task.Result 或 Task.GetAwaiter().GetResult() 來獲取 Task 的結果。這兩種方法都會阻塞當前線程，直到 Task 完成。以下是一個範例：
                     //bool ocrResult = PerformOCR().GetAwaiter().GetResult();
                     //或者
@@ -14626,24 +14690,24 @@ namespace WindowsFormsApp1
             }
             try
             {
-                br.driver?.SwitchTo().Window(currentWindowHndl);
+                driver?.SwitchTo().Window(currentWindowHndl);
             }
             catch (Exception)
             {
                 try
                 {
-                    if (br.driver.WindowHandles.Contains(LastValidWindow))
-                        br.driver?.SwitchTo().Window(LastValidWindow);
+                    if (driver.WindowHandles.Contains(LastValidWindow))
+                        driver?.SwitchTo().Window(LastValidWindow);
                     else
-                        br.driver?.SwitchTo().Window(br.driver.WindowHandles.Last());
+                        driver?.SwitchTo().Window(driver.WindowHandles.Last());
                 }
                 catch (Exception)
                 {
                     try
                     {
-                        if (!br.IsDriverInvalid())
+                        if (!IsDriverInvalid())
                         {
-                            br.driver.SwitchTo().Window(br.driver.WindowHandles.Last());
+                            driver.SwitchTo().Window(driver.WindowHandles.Last());
                             StopOCR = true; return false;
                         }
                         else
@@ -14664,7 +14728,7 @@ namespace WindowsFormsApp1
                 //{
                 //    bool eventenable = _eventsEnabled;
                 //    if (EventsEnabled) PauseEvents();
-                //    //br.driver?.SwitchTo().Window(currentWindowHndl);
+                //    //driver?.SwitchTo().Window(currentWindowHndl);
                 //    if (Clipboard.GetText() != string.Empty)
                 //    {
                 //        playSound(soundLike.waiting);
@@ -14681,8 +14745,8 @@ namespace WindowsFormsApp1
                 //}
                 //catch (Exception)
                 //{
-                //    //br.WindowsScrolltoTop();
-                //    br.StopOCR = true;
+                //    //WindowsScrolltoTop();
+                //    StopOCR = true;
                 //    return false;                    
                 //}
             }
@@ -14690,7 +14754,7 @@ namespace WindowsFormsApp1
             //WindowState = FormWindowState.Normal;
             //Visible = true; TopMost = true;
 
-            br.StopOCR = true;
+            StopOCR = true;
 
             #region 如果是手動鍵入輸入模式且OCR程序無誤則直接貼上結果並自動標上書名號篇名號，20230309 creedit with chatGPT大菩薩：
             if (ocrResult && keyinTextMode)
@@ -14701,8 +14765,8 @@ namespace WindowsFormsApp1
                 // 建立 Keys.Alt + Keys.Insert 的組合鍵
                 //Keys comboKey = Keys.Alt & Keys.Insert;//在 C# 中，要表示兩個按鍵的組合鍵，需要使用 "|" 運算子進行位元運算，而不是 "&" 或 "+" 運算子。 "|" 運算子可以將兩個按鍵的 KeyCode 合併成一個整數，表示按下這兩個按鍵的組合鍵。
                 //                                       // 使用 SendKeys 方法觸發按下組合鍵                
-                //if (!PasteOcrResultFisrtMode || ocrSiteTitle == br.OCRSiteTitle.KanDianGuJi)
-                if (!ocrTextMode || ocrSiteTitle == br.OCRSiteTitle.KanDianGuJi)
+                //if (!PasteOcrResultFisrtMode || ocrSiteTitle == OCRSiteTitle.KanDianGuJi)
+                if (!ocrTextMode || ocrSiteTitle == OCRSiteTitle.KanDianGuJi)
                 {
                     AvailableInUseBothKeysMouse();//Activate();
                     if (!textBox1.Focused) textBox1.Focus();
@@ -14769,7 +14833,7 @@ namespace WindowsFormsApp1
                 try
                 {
                     chk = ModifierKeys != Keys.Control
-                        && br.driver.WindowHandles[br.driver.WindowHandles.Count - 1] != currentWindowHndl
+                        && driver.WindowHandles[driver.WindowHandles.Count - 1] != currentWindowHndl
                         && windowsCount < driver.WindowHandles.Count;
                 }
                 catch (Exception)
@@ -14798,28 +14862,28 @@ namespace WindowsFormsApp1
             //if (keyinTextMode)
             //{//如果在手動輸入模式下則自動選取[Quick edit]的內容，方便有時候須用剪下貼上者
             // //其實不用，只要按下1個Tab鍵再全選即可。
-            // //br.SelectAllQuickedit_data_textboxContent();
+            // //SelectAllQuickedit_data_textboxContent();
 
             //    //#region 如果在右邊有新開啟的分頁且網域均為《古籍酷》者等，即予關閉
-            //    //for (int i = br.driver.WindowHandles.Count - 1; i > -1; i--)
+            //    //for (int i = driver.WindowHandles.Count - 1; i > -1; i--)
             //    //{
-            //    //    if (br.driver.WindowHandles[i] == currentWindowHndl) break;
+            //    //    if (driver.WindowHandles[i] == currentWindowHndl) break;
             //    //    //這樣的話，還要等網頁開好才能執行
-            //    //    br.driver.SwitchTo().Window(br.driver.WindowHandles[i]);
-            //    //    string urls = br.driver.Url;
+            //    //    driver.SwitchTo().Window(driver.WindowHandles[i]);
+            //    //    string urls = driver.Url;
             //    //    if (urls.StartsWith("https://gj.cool/")
             //    //        || urls.StartsWith("https://ocr.gj.cool/")
             //    //        || urls == "https://iplocation.com/"
             //    //        || urls.StartsWith("https://stackoverflow.com/"))
             //    //    {
-            //    //        br.driver.Close();
+            //    //        driver.Close();
             //    //    }
             //    //}
             //    //#endregion
             //}
 
             if (!textBox1.Focused) textBox1.Focus();
-            //br.WindowsScrolltoTop();
+            //WindowsScrolltoTop();
             if (autoTitleMark_OCRTextMode)
             {
                 //or lines_perPage 
@@ -15012,7 +15076,7 @@ namespace WindowsFormsApp1
         internal bool CheckBlankPagesBeforeOCR_NextPage(string url, int startPageNum, int stopPageNum)
         {
             if (!Form1.IsValidUrl＿ImageTextComparisonPage(url)) return false;
-            if (br.driver == null) return false;
+            if (driver == null) return false;
             string baseUrl = url.Substring(0, url.IndexOf("&page="));
             ChromeSetFocus();
             driver.SwitchTo().Window(driver.CurrentWindowHandle);
@@ -15020,13 +15084,13 @@ namespace WindowsFormsApp1
             {
                 //https://ctext.org/library.pl?if=gb&file=150025&page=59
                 string pageUrl = $"{baseUrl}&page={i}";
-                br.driver.Navigate().GoToUrl(pageUrl);
+                driver.Navigate().GoToUrl(pageUrl);
                 //if (MessageBoxShowOKCancelExclamationDefaultDesktopOnly("繼續下一頁？") == DialogResult.Cancel) break;
                 if (ModifierKeys == Keys.Control || BrakeByCmd()) break;
                 //Thread.Sleep(300);
-                //while (br.waitFindWebElementBySelector_ToBeClickable("#canvas > svg") == null) { }
-                while (br.Svg_image_PageImageFrame == null) { }
-                if (br.Div_generic_TextBoxFrame == null)
+                //while (waitFindWebElementBySelector_ToBeClickable("#canvas > svg") == null) { }
+                while (Svg_image_PageImageFrame == null) { }
+                if (Div_generic_TextBoxFrame == null)
                     if (MessageBoxShowOKCancelExclamationDefaultDesktopOnly("是否終止/中斷？") == DialogResult.OK)
                         break;
                     else
@@ -15091,23 +15155,23 @@ namespace WindowsFormsApp1
                     appActivateByName();
                     break;
                 case BrowserOPMode.seleniumNew:
-                    if (br.driver == null) br.DriverNew();
-                    //br.GoToUrlandActivate(url);
+                    if (driver == null) DriverNew();
+                    //GoToUrlandActivate(url);
                     //Task wait = Task.Run(() =>//此間操作，因為沒有要操作的元件，所以可以跑線程。20230111
                     //{以別處還要參考，故取消Task
-                    //br.GoToUrlandActivate(url, keyinTextMode);
+                    //GoToUrlandActivate(url, keyinTextMode);
                     try
                     {
-                        if (br.driver.Url != url)
+                        if (driver.Url != url)
                             if (!fastMode)
-                                br.GoToUrlandActivate(url, true);
+                                GoToUrlandActivate(url, true);
                             else
-                                br.driver.Url = url;
-                        //br.driver.Navigate().GoToUrl(url);
+                                driver.Url = url;
+                        //driver.Navigate().GoToUrl(url);
                     }
                     catch (Exception)
                     {
-                        br.GoToUrlandActivate(url, true);
+                        GoToUrlandActivate(url, true);
                     }
                     //});
                     //Task.WaitAll();
@@ -15130,13 +15194,13 @@ namespace WindowsFormsApp1
             #region 另一章節文本時 20241226
             try
             {
-                if (br.Div_generic_TextBoxFrame != null && br.Div_generic_TextBoxFrame.GetAttribute("textContent") != ""
-                    && br.Quickedit_data_textboxTxt == string.Empty)
+                if (Div_generic_TextBoxFrame != null && Div_generic_TextBoxFrame.GetAttribute("textContent") != ""
+                    && Quickedit_data_textboxTxt == string.Empty)
                 {
-                    br.driver.Navigate().Refresh();
-                    url = br.QuickeditLinkIWebElement.GetAttribute("href");
+                    driver.Navigate().Refresh();
+                    url = QuickeditLinkIWebElement.GetAttribute("href");
                     textBox3.Text = url;//此會觸發textchanged事件程序
-                    br.QuickeditLinkIWebElement.Click();
+                    QuickeditLinkIWebElement.Click();
                 }
             }
             catch (Exception)
@@ -15167,7 +15231,7 @@ namespace WindowsFormsApp1
                     case BrowserOPMode.seleniumNew:
                         try
                         {
-                            quickedit_data_textboxtxt = br.Quickedit_data_textboxTxt;
+                            quickedit_data_textboxtxt = Quickedit_data_textboxTxt;
                         }
                         catch (Exception ex)
                         {
@@ -15203,17 +15267,17 @@ namespace WindowsFormsApp1
 
                                 //    int retrytimes = 0;
                                 //retry:
-                                if (br.driver == null) Debugger.Break();
-                                //br.driver = br.driver ?? br.DriverNew();
+                                if (driver == null) Debugger.Break();
+                                //driver = driver ?? DriverNew();
 
                                 //    try
                                 //    {//這裡需要參照元件來操作就不宜跑線程了！故此區塊最後的剪貼簿，要求須是單線程者，蓋因剪貼簿須獨占式使用故也20230111                                
-                                //     //quick_edit_box = br.waitFindWebElementByName_ToBeClickable("data", br.WebDriverWaitTimeSpan);//br.driver.FindElement(OpenQA.Selenium.By.Name("data"));
+                                //     //quick_edit_box = waitFindWebElementByName_ToBeClickable("data", WebDriverWaitTimeSpan);//driver.FindElement(OpenQA.Selenium.By.Name("data"));
                                 //     //                                                                                             ////chatGPT：
                                 //     //                                                                                             //// 等待網頁元素出現，最多等待 2 秒
                                 //     //                                                                                             //OpenQA.Selenium.Support.UI.WebDriverWait wait =
                                 //     //                                                                                             //    new OpenQA.Selenium.Support.UI.WebDriverWait
-                                //     //                                                                                             //    (br.driver, TimeSpan.FromSeconds(2));
+                                //     //                                                                                             //    (driver, TimeSpan.FromSeconds(2));
                                 //     //                                                                                             ////安裝了 Selenium.WebDriver 套件，才說沒有「ExpectedConditions」，然後照Visual Studio 2022的改正建議又用NuGet 安裝了 Selenium.Suport 套件，也自動「 using OpenQA.Selenium.Support.UI;」了，末學自己還用物件瀏覽器找過了 「OpenQA.Selenium.Support.UI」，可就是沒有「ExpectedConditions」靜態類別可用，即使官方文件也說有 ： https://www.selenium.dev/selenium/docs/api/dotnet/html/T_OpenQA_Selenium_Support_UI_ExpectedConditions.htm 20230109 未知何故 阿彌陀佛
                                 //     //                                                                                             //wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(quick_edit_box));
 
@@ -15228,7 +15292,7 @@ namespace WindowsFormsApp1
                                 //        //}
                                 //        //////Task.Delay(-1);
                                 //        ////Clipboard.SetText(quick_edit_box.Text);
-                                //        br.CopyQuickedit_data_textboxText();
+                                //        CopyQuickedit_data_textboxText();
                                 //    }
                                 //    catch (Exception)
                                 //    {
@@ -15241,7 +15305,7 @@ namespace WindowsFormsApp1
                             }
                             else if (modifierKeys == Keys.Shift && !pagePaste2GjcoolOCR)//&& !PagePaste2GjcoolOCR_ing)
                             {
-                                //toOCR(br.OCRSiteTitle.GJcool);
+                                //toOCR(OCRSiteTitle.GJcool);
                                 Form1.playSound(Form1.soundLike.press, true);
                                 toOCR(PagePast2OCRsite);
                             }
@@ -15260,7 +15324,7 @@ namespace WindowsFormsApp1
                         Application.DoEvents();
                         //設定textbox1的內容以備編輯
                         //string nextpagetextBox1Text_Default = Clipboard.GetText();
-                        string nextpagetextBox1Text_Default = br.Quickedit_data_textboxTxt;
+                        string nextpagetextBox1Text_Default = Quickedit_data_textboxTxt;
                         //textBox1.Text = CnText.BooksPunctuation(ref nextpagetextBox1Text_Default, false);// + Environment.NewLine + Environment.NewLine + Environment.NewLine + textBox1.Text;                    
 
                         string chkX = string.Empty;
@@ -15328,13 +15392,13 @@ namespace WindowsFormsApp1
             #endregion
             #region 檢查是否真有到下一頁或上一頁
             if (autoPaste2QuickEdit && int.Parse(_currentPageNum) > 2 &&
-                Math.Abs(int.Parse(_currentPageNum) - int.Parse(br.WindowHandles["currentPageNum"])) != 1)
+                Math.Abs(int.Parse(_currentPageNum) - int.Parse(WindowHandles["currentPageNum"])) != 1)
             {
 
                 MessageBoxShowOKExclamationDefaultDesktopOnly("★★★★★★翻頁失敗，請注意！！！！！！", "●翻頁失敗！" +
                     Environment.NewLine + Environment.NewLine +
                     "現在textBox3的頁碼是：" + _currentPageNum +
-                    "存放機制的頁碼是：" + br.WindowHandles["currentPageNum"]);
+                    "存放機制的頁碼是：" + WindowHandles["currentPageNum"]);
                 if (fastMode) FastModeSwitcher();
                 return false;
             }
@@ -15347,8 +15411,8 @@ namespace WindowsFormsApp1
             {
 
                 //if (textBox1.TextLength < 100 && (textBox1.Text.IndexOf("|") == -1 || textBox1.Text.IndexOf("<p>") == -1))
-                //&& br.Div_generic_TextBoxFrame.Text==string.Empty)
-                //&& br.pageUBound < int.Parse(_currentPageNum))
+                //&& Div_generic_TextBoxFrame.Text==string.Empty)
+                //&& pageUBound < int.Parse(_currentPageNum))
                 if (textBox1.TextLength == 0 || (textBox1.Text.IndexOf("|") == -1 && textBox1.Text.IndexOf("<p>") == -1))
                 {
                     undoRecord(); stopUndoRec = true; PauseEvents();
@@ -15356,8 +15420,8 @@ namespace WindowsFormsApp1
                     if (autoNextVolumnContextMark)
                         if (autoExecuteSKQSContextMark())
                             AvailableInUseBothKeysMouse();
-                    //if (textBox1.TextLength == 0 && br.pageUBound >= int.Parse(_currentPageNum))
-                    if (autoNextVolumnContextMark && br.pageUBound >= int.Parse(_currentPageNum))
+                    //if (textBox1.TextLength == 0 && pageUBound >= int.Parse(_currentPageNum))
+                    if (autoNextVolumnContextMark && pageUBound >= int.Parse(_currentPageNum))
                     {
                         if (Clipboard.GetText().Contains("-1a]"))
                         {
@@ -15373,7 +15437,7 @@ namespace WindowsFormsApp1
                         }
                     }
                     else
-                        if (br.pageUBound < int.Parse(_currentPageNum))
+                        if (pageUBound < int.Parse(_currentPageNum))
                         if (!gotoNextChapter_FormatContentInput_SKQS())
                         {
                             //Debugger.Break();
@@ -15414,7 +15478,8 @@ namespace WindowsFormsApp1
             OpenQA.Selenium.IWebElement iwe = WaitFindWebElementBySelector_ToBeClickable(nextChapterSelector, 5);
             if (iwe == null) return false;
             //iwe.Click();
-            iwe.JsClick();//br.Click(iwe);
+            iwe.JsClick();//Click(iwe);
+
             //翻到本書該冊的第1頁
             //string Div_generic_TextBoxFrameGetTextContent = Div_generic_TextBoxFrame?.GetAttribute("textContent");
             string Div_generic_TextBoxFrameGetTextContent = Div_generic_TextBoxFrame?.GetDomProperty("textContent");
@@ -15450,14 +15515,14 @@ namespace WindowsFormsApp1
         /// <returns>失敗或未執行則傳回false</returns>
         private bool autoExecuteSKQSContextMark()
         {
-            //if (br.Version_LinkBox != null && textBox1.TextLength < 100
+            //if (Version_LinkBox != null && textBox1.TextLength < 100
             //                && (textBox1.Text.IndexOf("|") == -1 || textBox1.Text.IndexOf("<p>") == -1)
-            //                && br.pageUBound >= int.Parse(_currentPageNum))
+            //                && pageUBound >= int.Parse(_currentPageNum))
             //已非四庫本專用了！20250418
             if (textBox1.TextLength < 100
                         && (textBox1.Text.IndexOf("|") == -1 || textBox1.Text.IndexOf("<p>") == -1)
-                        && br.pageUBound >= int.Parse(_currentPageNum))
-            //&& br.pageUBound >= GetPageNumFromUrl(textBox3Text))
+                        && pageUBound >= int.Parse(_currentPageNum))
+            //&& pageUBound >= GetPageNumFromUrl(textBox3Text))
             {
                 autoPastetoCtextQuitEditTextboxCancel = true;
                 //if (fastMode) FastModeSwitcher();
@@ -15465,7 +15530,9 @@ namespace WindowsFormsApp1
                 //Task.Run(() =>
                 //{
                 //讀入四庫全書文本（已不限四庫專用）
-                br.SikuQuanshu_SKQSContextCopyReading();
+                SikuQuanshu_SKQSContextCopyReading();
+                if (!textBox1.Focused)
+                    textBox1.Focus();
                 //在前面讀回WordVBA的結果時，表單顯示時已經標識過了 20251230 ●●●●●●●●●●●●●●●●●●
                 if (textBox1.TextLength > 100 && textBox1.Text.IndexOf("<p>", 100) == -1)
                     AutoMarkTitleParagraph();
@@ -15488,7 +15555,7 @@ namespace WindowsFormsApp1
                 if (fastMode && (GetLineText(textBox1.Text, 0).Contains("目錄")
                         || GetLineText(textBox1.Text, 0).Contains("目録")))
                     return true;
-                //br.driver.SwitchTo().Window(br.driver.CurrentWindowHandle);
+                //driver.SwitchTo().Window(driver.CurrentWindowHandle);
                 //bringBackMousePosFrmCenter();
                 //textBox1.Refresh();
                 //if (DialogResult.Cancel == MessageBoxShowOKCancelExclamationDefaultDesktopOnly("要自動標題標記、段落標記否？")) return true;
@@ -15539,6 +15606,7 @@ namespace WindowsFormsApp1
                 this.WindowState = FormWindowState.Minimized;
                 this.Hide();
             }
+
             Microsoft.Office.Interop.Word.Application appWord = new Microsoft.Office
                                     .Interop.Word.Application();
             try
@@ -15562,7 +15630,57 @@ namespace WindowsFormsApp1
                     appWord.Visible = true;//   用了LTSC專業增加版2021後，不知為合就無法正常取得結果。手動的卻可以 20251214●●●●●●●●●●●●● 還真的成功了！要顯示出來才成
                     appWord.WindowState = Microsoft.Office.Interop.Word.WdWindowState.wdWindowStateMinimize;
                 }
-                appWord.Run(runName);
+
+                //appWord.Run(runName);
+
+                // 定義巨集名稱與參數的對應表//Copilot大菩薩：https://copilot.microsoft.com/shares/Tk6JkGzRgUBNi3x2eUmtA
+                /* var macroArgsMap = new Dictionary<string, object[]>
+                        {
+                            { "MacroNoArgs", new object[] { } },
+                            { "MacroOneArg", new object[] { "Hello" } },
+                            { "MacroTwoArgs", new object[] { "文字參數", 123, true } }
+                        }; 
+                */
+                //var macroArgsMap = new Dictionary<string, object[]>
+                //        {
+                //            { "中國哲學書電子化計劃.清除頁前的分段符號", new object[] { } },
+                //            { "中國哲學書電子化計劃.撤掉與書圖的對應_脫鉤", new object[] { } },
+                //            { "漢籍電子文獻資料庫文本整理_以轉貼到中國哲學書電子化計劃", new object[] { } },
+
+                //            { "中國哲學書電子化計劃.國學大師_Kanripo_四庫全書本轉來", new object[] { (byte)((lines_perPage > 0 && lines_perPage < 255) ? lines_perPage / 2 : 0 ) } },
+                //            { "中國哲學書電子化計劃.Kanripo_GitHub轉來", new object[] { (byte)((lines_perPage > 0 && lines_perPage <255 )? lines_perPage/2 :0) }  },
+                //            { "中國哲學書電子化計劃.維基文庫四部叢刊本轉來", new object[] { (byte)((lines_perPage > 0 && lines_perPage <255 )? lines_perPage/2 :0)} }
+                //        };
+
+                var macroArgsMap = new Dictionary<string, object[]>
+                {
+                    { "中國哲學書電子化計劃.清除頁前的分段符號", MacroUtils.EmptyArgs() },
+                    { "中國哲學書電子化計劃.撤掉與書圖的對應_脫鉤", MacroUtils.EmptyArgs() },
+                    { "漢籍電子文獻資料庫文本整理_以轉貼到中國哲學書電子化計劃", MacroUtils.EmptyArgs() },
+
+                    { "中國哲學書電子化計劃.國學大師_Kanripo_四庫全書本轉來",
+                        new object[] { (lines_perPage > 0 && lines_perPage < 255) ? lines_perPage / 2 : 0 } },
+
+                    { "中國哲學書電子化計劃.Kanripo_GitHub轉來",
+                        new object[] { (lines_perPage > 0 && lines_perPage < 255) ? lines_perPage / 2 : 0 } },
+
+                    { "中國哲學書電子化計劃.維基文庫四部叢刊本轉來",
+                        new object[] { (lines_perPage > 0 && lines_perPage < 255) ? lines_perPage / 2 : 0 } }
+                };
+
+
+                // 假設巨集名稱是變數
+                string macroName = runName;//"MacroTwoArgs"; // 可動態決定
+
+                if (macroArgsMap.TryGetValue(macroName, out var args))
+                {
+                    MacroRunner.Run(appWord, macroName, args);
+                }
+                else
+                {
+                    Console.WriteLine("未知的巨集名稱");
+                }
+
                 Application.DoEvents();
 
             }
@@ -15685,7 +15803,7 @@ namespace WindowsFormsApp1
             if (runName == "中國哲學書電子化計劃.清除頁前的分段符號")
             {
                 //TopMost = false;
-                br.ChromeSetFocus();
+                ChromeSetFocus();
                 br.BringToFront("chrome");
             }
             else
@@ -15930,10 +16048,10 @@ namespace WindowsFormsApp1
                 #region 再檢查瀏覽器下載目錄並取得 ：
                 Task.Run(() =>
                 {
-                    string downloadDirectory = br.DownloadDirectory_Chrome;
+                    string downloadDirectory = DownloadDirectory_Chrome;
                     //string downloadImgFullName = dropBoxPathIncldBackSlash + "Ctext_Page_Image.png";
                     string downloadImgFullName = MydocumentsPathIncldBackSlash + "CtextTempFiles\\Ctext_Page_Image.png";
-                    if (br.ChkDownloadDirectory_Chrome(downloadImgFullName, downloadDirectory))
+                    if (ChkDownloadDirectory_Chrome(downloadImgFullName, downloadDirectory))
                     {
                         #endregion
                         string filePath = Path.Combine(downloadDirectory,
@@ -16246,21 +16364,21 @@ namespace WindowsFormsApp1
             //if (!(url.IndexOf("&file=") > -1 && url.IndexOf("&page=") > -1 && url.IndexOf("&editwiki=") > -1 && url.IndexOf("#edit") == -1)) return false;
             if (!IsValidUrl＿keyDownCtrlAdd(url)) return false;
 
-            br.driver = br.driver ?? br.DriverNew();
-            //br.HideBrowserWindow(br.driver);
+            driver = driver ?? DriverNew();
+            //HideBrowserWindow(driver);
             //取得所有現行窗體（分頁頁籤）
             //System.Collections.ObjectModel.ReadOnlyCollection<string> tabWindowHandles = new ReadOnlyCollection<string>(new List<string>());
-            //System.Collections.ObjectModel.ReadOnlyCollection<string> tabWindowHandles = br.driver.WindowHandles;
-            //br.ConvertToReadOnlyCollection(br.GetValiOrdereddWindowHandles(br.driver));
-            //br.ConvertToReadOnlyCollection(br.GetValidWindowHandles(br.driver));
-            //br.ShowBrowserWindow(br.driver);
-            //br.driver.SwitchTo().Window(br.GetCurrentWindowHandle(br.driver));
-            //br.driver.SwitchTo().Window(br.driver.CurrentWindowHandle);
-            //br.driver.Navigate().Refresh();
+            //System.Collections.ObjectModel.ReadOnlyCollection<string> tabWindowHandles = driver.WindowHandles;
+            //ConvertToReadOnlyCollection(GetValiOrdereddWindowHandles(driver));
+            //ConvertToReadOnlyCollection(GetValidWindowHandles(driver));
+            //ShowBrowserWindow(driver);
+            //driver.SwitchTo().Window(GetCurrentWindowHandle(driver));
+            //driver.SwitchTo().Window(driver.CurrentWindowHandle);
+            //driver.Navigate().Refresh();
 
             //try
             //{
-            //    if (!CompareReadOnlyCollection(tabWindowHandles, br.driver.WindowHandles))
+            //    if (!CompareReadOnlyCollection(tabWindowHandles, driver.WindowHandles))
             //        Debugger.Break();
             //}
             //catch (Exception ex)
@@ -16274,21 +16392,21 @@ namespace WindowsFormsApp1
             string currentWin = ""; bool Edited = false;
             try
             {
-                //tabWindowHandles = br.driver.WindowHandles;
-                //currentWin = br.driver.CurrentWindowHandle;
-                string getCurrentWindowHandle = br.GetCurrentWindowHandle(br.driver);
+                //tabWindowHandles = driver.WindowHandles;
+                //currentWin = driver.CurrentWindowHandle;
+                string getCurrentWindowHandle = GetCurrentWindowHandle(driver);
                 if (getCurrentWindowHandle != null) currentWin = getCurrentWindowHandle;
-                else currentWin = br.GetValidWindowHandles(br.driver).Last();
+                else currentWin = GetValidWindowHandles(driver).Last();
             }
             catch (Exception ex)
             {
                 switch (ex.HResult)
                 {
                     case -2146233088: //"An unknown exception was encountered sending an HTTP request to the remote WebDriver server for URL http://localhost:6763/session/b17084f4c8e209d232d5a9eb18cf181a/window/handles. The exception message was: 傳送要求時發生錯誤。"
-                        br.driver.Quit();
-                        br.driver = null; br.driver = br.DriverNew();
-                        //tabWindowHandles = br.driver.WindowHandles;
-                        //tabWindowHandles = br.ConvertToReadOnlyCollection(br.GetValiOrdereddWindowHandles(br.driver));
+                        driver.Quit();
+                        driver = null; driver = DriverNew();
+                        //tabWindowHandles = driver.WindowHandles;
+                        //tabWindowHandles = ConvertToReadOnlyCollection(GetValiOrdereddWindowHandles(driver));
                         break;
                     default:
                         throw;
@@ -16300,17 +16418,17 @@ namespace WindowsFormsApp1
             {
                 //Task task = Task.Run(() =>
                 //{
-                //url = br.driver.Url;
-                //string activeTabTitlel = br.driver.Title;
-                //br.driver.SwitchTo();//br.driver.SwitchTo().Window(br.driver.CurrentWindowHandle).Url;
-                //br.driver.SwitchTo().Window(br.getOriginalWindow); 
-                //br.driver.SwitchTo();
-                //url = br.driver.Url;
-                //br.driver.SwitchTo().Window(br.driver.WindowHandles[0]);
-                //br.driver.SwitchTo().Window(br.driver.WindowHandles.First());
-                ////url = br.driver.Url;
+                //url = driver.Url;
+                //string activeTabTitlel = driver.Title;
+                //driver.SwitchTo();//driver.SwitchTo().Window(driver.CurrentWindowHandle).Url;
+                //driver.SwitchTo().Window(getOriginalWindow); 
+                //driver.SwitchTo();
+                //url = driver.Url;
+                //driver.SwitchTo().Window(driver.WindowHandles[0]);
+                //driver.SwitchTo().Window(driver.WindowHandles.First());
+                ////url = driver.Url;
                 //20230103 目前無法抓到正在作用中的視窗，只能以使用者習慣，通常在用的都是最後一個視窗，先試試 感恩感恩　南無阿彌陀佛
-                //br.driver.SwitchTo().Window(br.driver.WindowHandles.Last());//br.driver.SwitchTo().Window(br.driver.CurrentWindowHandle).Url;
+                //driver.SwitchTo().Window(driver.WindowHandles.Last());//driver.SwitchTo().Window(driver.CurrentWindowHandle).Url;
                 //20230103 目前所知也只能用以下的笨方法了，雖然土，但管用。∴就不必上一行多此一舉了。感恩感恩　南無阿彌陀佛
                 //檢查driver物件是否為空
 
@@ -16333,16 +16451,16 @@ namespace WindowsFormsApp1
                 //因為多數情況皆是使用者在作用/使用中的的分頁為最後開啟的，故反向巡覽遍歷檢查，以省去不必要的查找（尤其在分頁很多的時候）
                 //且多在目前簡單編輯（Quick edit）分頁後，故只找到目前簡單編輯（Quick edit）分頁為止，以加速效率
                 //for (int i = tabWindowHandles.Count - 1; i > -1; i--)
-                for (int i = br.driver.WindowHandles.Count - 1; i > -1; i--)
+                for (int i = driver.WindowHandles.Count - 1; i > -1; i--)
                 //for (int i = 0; i < tabWindowHandles.Count; i++)
                 {
                     //int retry = 0;
                     //reLoadWindowHandles:
                     //tabWin = tabWindowHandles[i];
-                    tabWin = br.driver.WindowHandles[i];
+                    tabWin = driver.WindowHandles[i];
                     //try
                     //{
-                    //    currentWin = br.driver.CurrentWindowHandle;
+                    //    currentWin = driver.CurrentWindowHandle;
                     //}
                     //catch (Exception ex)
                     //{
@@ -16354,42 +16472,42 @@ namespace WindowsFormsApp1
                         ////重新開啟分頁，以取得在分頁集合中最後一個位置（如果可以的話）20240731
                         ////if (tabWindowHandles.Count > 1 && i < tabWindowHandles.Count - 1)
                         //reLoadWindowHandles:
-                        //    int tabCount = br.driver.WindowHandles.Count;// DateTime dt = DateTime.Now;
-                        //    //while (tabCount > 1 && i < tabCount - 1 && tabCount == br.driver.WindowHandles.Count) { if (DateTime.Now.Subtract(dt).TotalSeconds > 20) { playSound(soundLike.over, true); break; } }
-                        //    //tabCount = br.driver.WindowHandles.Count;
+                        //    int tabCount = driver.WindowHandles.Count;// DateTime dt = DateTime.Now;
+                        //    //while (tabCount > 1 && i < tabCount - 1 && tabCount == driver.WindowHandles.Count) { if (DateTime.Now.Subtract(dt).TotalSeconds > 20) { playSound(soundLike.over, true); break; } }
+                        //    //tabCount = driver.WindowHandles.Count;
                         //    if (tabCount > 1 && i < tabCount - 1)
                         //    {
                         //        ////寫在這裡就太快，必須寫在後面
-                        //        //if (br.GetValidWindowHandles(br.driver).Count > 1 && waitUpdate == false && waitTabWindowHandle == ""
+                        //        //if (GetValidWindowHandles(driver).Count > 1 && waitUpdate == false && waitTabWindowHandle == ""
                         //        //        && ocrTextMode == false)
                         //        //{
-                        //        //    retry++;//重新取得 tabWin = br.driver.WindowHandles[i]; 才比較會載入新的WindowHandles數量
+                        //        //    retry++;//重新取得 tabWin = driver.WindowHandles[i]; 才比較會載入新的WindowHandles數量
                         //        //    if (retry == 1) { playSound(soundLike.over, true); goto reLoadWindowHandles; }
                         //        //    retry = 0;
                         //        //}
 
-                        //        if (waitUpdate && waitTabWindowHandle != "") br.driver.SwitchTo().Window(waitTabWindowHandle); br.driver.Close();
+                        //        if (waitUpdate && waitTabWindowHandle != "") driver.SwitchTo().Window(waitTabWindowHandle); driver.Close();
 
                         //        //playSound(soundLike.warn, true);
-                        //        br.driver.SwitchTo().Window(tabWin);
-                        //        string url_Driver = br.driver.Url;
-                        //        //if (br.GetValidWindowHandles(br.driver).Count > 2&& !(waitUpdate && waitTabWindowHandle != ""))
+                        //        driver.SwitchTo().Window(tabWin);
+                        //        string url_Driver = driver.Url;
+                        //        //if (GetValidWindowHandles(driver).Count > 2&& !(waitUpdate && waitTabWindowHandle != ""))
                         //        //莫名其妙，明明1個分類，都會平白成了2個！               
-                        //        //if (br.GetValidWindowHandles(br.driver).Count > 1 && !(waitUpdate && waitTabWindowHandle != ""))
+                        //        //if (GetValidWindowHandles(driver).Count > 1 && !(waitUpdate && waitTabWindowHandle != ""))
                         //        //這個 GetValidWindowHandles 方法完全沒有用，明明無中生有的分頁句柄也能切換過去而不出錯 20240802//恢復之前舊式的就好了！！
-                        //        if (br.GetValidWindowHandles(br.driver).Count > 1 && waitUpdate == false && waitTabWindowHandle == ""
+                        //        if (GetValidWindowHandles(driver).Count > 1 && waitUpdate == false && waitTabWindowHandle == ""
                         //                && ocrTextMode == false)
                         //        {
-                        //            retry++;//重新取得 tabWin = br.driver.WindowHandles[i]; 才比較會載入新的WindowHandles數量（寫在這才能抓到新的視窗句柄集合）
+                        //            retry++;//重新取得 tabWin = driver.WindowHandles[i]; 才比較會載入新的WindowHandles數量（寫在這才能抓到新的視窗句柄集合）
                         //            if (retry == 1) { playSound(soundLike.over, true); goto reLoadWindowHandles; }
                         //            retry = 0;
 
-                        //            br.driver.Close();
-                        //            br.openNewTabWindow().Navigate().GoToUrl(url_Driver);
-                        //            currentWin = br.GetCurrentWindowHandle(br.driver);
+                        //            driver.Close();
+                        //            openNewTabWindow().Navigate().GoToUrl(url_Driver);
+                        //            currentWin = GetCurrentWindowHandle(driver);
                         //        }
                         //        else
-                        //            br.driver.SwitchTo().Window(br.GetCurrentWindowHandle(br.driver));
+                        //            driver.SwitchTo().Window(GetCurrentWindowHandle(driver));
                         //}
                         break;
                     }
@@ -16399,24 +16517,24 @@ namespace WindowsFormsApp1
                     int chkWindows = 0;
                     try
                     {
-                        chkWindows = br.driver.SwitchTo().Window(tabWin).Url.IndexOf("&action=editchapter");
+                        chkWindows = driver.SwitchTo().Window(tabWin).Url.IndexOf("&action=editchapter");
                     }
                     catch (Exception)
                     {
                         continue;
                     }
 
-                    //if (br.driver.SwitchTo().Window(tabWin).Url.IndexOf("&action=editchapter") > -1)
+                    //if (driver.SwitchTo().Window(tabWin).Url.IndexOf("&action=editchapter") > -1)
                     if (chkWindows > -1)
                     {
                         waitUpdate = true; waitTabWindowHandle = tabWin;
-                        OpenQA.Selenium.IWebElement commit = br.waitFindWebElementByName_ToBeClickable("commit", br.WebDriverWaitTimeSpan); //br.driver.FindElement(OpenQA.Selenium.By.Name("commit"));
-                                                                                                                                            //OpenQA.Selenium.Support.UI.WebDriverWait waitcommit = new OpenQA.Selenium.Support.UI.WebDriverWait(br.driver, TimeSpan.FromSeconds(2));
-                                                                                                                                            //waitcommit.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(commit));
-                                                                                                                                            //string xInput = br.Textarea_data_Edit_textbox.GetAttribute("value"), urlEdit = driver.Url;
+                        OpenQA.Selenium.IWebElement commit = waitFindWebElementByName_ToBeClickable("commit", WebDriverWaitTimeSpan); //driver.FindElement(OpenQA.Selenium.By.Name("commit"));
+                                                                                                                                      //OpenQA.Selenium.Support.UI.WebDriverWait waitcommit = new OpenQA.Selenium.Support.UI.WebDriverWait(driver, TimeSpan.FromSeconds(2));
+                                                                                                                                      //waitcommit.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(commit));
+                                                                                                                                      //string xInput = Textarea_data_Edit_textbox.GetAttribute("value"), urlEdit = driver.Url;
                         string xInput = string.Empty, urlEdit = driver.Url;
-                        if (br.Textarea_data_Edit_textbox != null)
-                            xInput = br.Textarea_data_Edit_textbox.GetAttribute("value");
+                        if (Textarea_data_Edit_textbox != null)
+                            xInput = Textarea_data_Edit_textbox.GetAttribute("value");
                         if (xInput == string.Empty) return false;//●●●●●●●●●●●●●●●●●●●●20251220
                         //await Task.Run(() =>
                         //{ //送出後也不必等待，也沒有其他須用到的元件，故可交給作業系統開個新線程去跑就好，但因為editchapter上傳儲存時常較Quit edit費時，故保險起見，還是在後加個Task.delay一下比較好
@@ -16430,8 +16548,8 @@ namespace WindowsFormsApp1
                             switch (ex.HResult)
                             {
                                 case -2146233088://原有窗體被關閉時："stale element reference: element is not attached to the page document
-                                                 ////string urlOld = br.driver.SwitchTo().Window(tabWin).Url;
-                                                 ////br.driver.Navigate().GoToUrl(br.driver.SwitchTo().Window(tabWin).Url);
+                                                 ////string urlOld = driver.SwitchTo().Window(tabWin).Url;
+                                                 ////driver.Navigate().GoToUrl(driver.SwitchTo().Window(tabWin).Url);
                                                  //MessageBox.Show("原有窗體已被關閉，請自行先送出儲存，再回來按OK確定！","",
                                                  //    MessageBoxButtons.OK,MessageBoxIcon.Warning,MessageBoxDefaultButton.Button1,
                                                  //    MessageBoxOptions.DefaultDesktopOnly);
@@ -16442,7 +16560,7 @@ namespace WindowsFormsApp1
                         }
 
                         #region 送出後檢查是否是「Please confirm that you are human! 敬請輸入認證圖案」頁面 網址列：https://ctext.org/wiki.pl
-                        if (br.IsConfirmHumanPage())
+                        if (IsConfirmHumanPage())
                         {
                             try
                             {
@@ -16479,7 +16597,7 @@ namespace WindowsFormsApp1
                                 Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("網址並非 " + urlEdit + " 請檢查後再按下確定");
                             if (driver.Url == url)
                             {
-                                br.SetIWebElementValueProperty(br.Textarea_data_Edit_textbox, xInput);
+                                SetIWebElementValueProperty(Textarea_data_Edit_textbox, xInput);
                                 goto reCommit;//commit.Click();
                             }
                             else Debugger.Break();
@@ -16520,11 +16638,11 @@ namespace WindowsFormsApp1
                         //} //20250213●●●●●●●●●●●●●
                     }
                     Edited = true;
-                    br.driver.SwitchTo().Window(waitTabWindowHandle); br.driver.Close();//關掉開啟的Edit頁面
-                    if (br.DirectlyReplacingCharactersPageWindowHandle != string.Empty)
-                        br.DirectlyReplacingCharactersPageWindowHandle = string.Empty;//重設；
-                    br.driver.SwitchTo().Window(currentWin);
-                    br.LastValidWindow = currentWin;
+                    driver.SwitchTo().Window(waitTabWindowHandle); driver.Close();//關掉開啟的Edit頁面
+                    if (DirectlyReplacingCharactersPageWindowHandle != string.Empty)
+                        DirectlyReplacingCharactersPageWindowHandle = string.Empty;//重設；
+                    driver.SwitchTo().Window(currentWin);
+                    LastValidWindow = currentWin;
                 }
 
                 #endregion
@@ -16533,30 +16651,30 @@ namespace WindowsFormsApp1
                 //url = chkUrlIsTextBox3Text(tabWindowHandles);
 
                 ////手動輸入時一般當不必自動清除框中文字
-                //br.在Chrome瀏覽器的Quick_edit文字框中輸入文字(br.driver, Clipboard.GetText(), url);                
+                //在Chrome瀏覽器的Quick_edit文字框中輸入文字(driver, Clipboard.GetText(), url);                
                 //});
             }
             //else//不是在手動鍵入時
             //{//檢查textbox3的值與現用網頁相同否
-            //string newCurrentWin = br.GetCurrentWindowHandle(br.driver);
-            //if (newCurrentWin != null && br.IsWindowHandleValid(br.driver, newCurrentWin))
+            //string newCurrentWin = GetCurrentWindowHandle(driver);
+            //if (newCurrentWin != null && IsWindowHandleValid(driver, newCurrentWin))
             //{
 
             //    if (currentWin != newCurrentWin)
             //    {
-            //        if (br.GetValidWindowHandles(br.driver).Contains(currentWin))
-            //            br.driver.SwitchTo().Window(currentWin);
+            //        if (GetValidWindowHandles(driver).Contains(currentWin))
+            //            driver.SwitchTo().Window(currentWin);
             //        else
-            //            br.driver.SwitchTo().Window(newCurrentWin);
+            //            driver.SwitchTo().Window(newCurrentWin);
             //    }
             //}
             //else
             //{
             // 當前視窗句柄無效
             //string currents = driver.CurrentWindowHandle;
-            if (!br.IsDriverInvalid() && driver.CurrentWindowHandle != currentWin && !fastMode)
+            if (!IsDriverInvalid() && driver.CurrentWindowHandle != currentWin && !fastMode)
             {
-                br.driver.SwitchTo().Window(currentWin);//切回圖文對照的頁面分頁視窗
+                driver.SwitchTo().Window(currentWin);//切回圖文對照的頁面分頁視窗
                 LastValidWindow = currentWin;
 
             }
@@ -16564,48 +16682,48 @@ namespace WindowsFormsApp1
 
             string beforeUpdated = null;
             if (waitTabWindowHandle != string.Empty || Edited)
-                beforeUpdated = br.Div_generic_TextBoxFrame == null ? string.Empty : br.Div_generic_TextBoxFrame.GetAttribute("textContent");
+                beforeUpdated = Div_generic_TextBoxFrame == null ? string.Empty : Div_generic_TextBoxFrame.GetAttribute("textContent");
 
             //如果存在「參考上下頁」控制項，則須刷新，否則會被前後頁的舊資料所干擾
-            if (br.CheckAdjacentPages_Linkbox != null && Edited)
+            if (CheckAdjacentPages_Linkbox != null && Edited)
             { //要先記下可能有所編輯的前、後頁，否則一刷新就沒有了：
-                if (br.CheckAdjacentPages_DataPrev != null)
-                { //br.CheckAdjacentPages_Linkbox.Click();
+                if (CheckAdjacentPages_DataPrev != null)
+                { //CheckAdjacentPages_Linkbox.Click();
                     string prePageText = string.Empty, nextPageText = string.Empty; //Clipboard.Clear(); 20240913作廢
                     try
                     {
-                        if (br.CheckAdjacentPages_DataPrev.Text != string.Empty)
+                        if (CheckAdjacentPages_DataPrev.Text != string.Empty)
                         {
-                            //br.CheckAdjacentPages_DataPrev.SendKeys(OpenQA.Selenium.Keys.Control + "ac");20240913作廢
+                            //CheckAdjacentPages_DataPrev.SendKeys(OpenQA.Selenium.Keys.Control + "ac");20240913作廢
                             //prePageText = Clipboard.GetText();
-                            prePageText = br.CheckAdjacentPages_DataPrev.GetAttribute("value");
+                            prePageText = CheckAdjacentPages_DataPrev.GetAttribute("value");
                         }
-                        if (br.CheckAdjacentPages_DataNext.Text != string.Empty)
+                        if (CheckAdjacentPages_DataNext.Text != string.Empty)
                         {
-                            //br.CheckAdjacentPages_DataNext.SendKeys(OpenQA.Selenium.Keys.Control + "ac");20240913作廢
+                            //CheckAdjacentPages_DataNext.SendKeys(OpenQA.Selenium.Keys.Control + "ac");20240913作廢
                             //nextPageText = Clipboard.GetText();
-                            nextPageText = br.CheckAdjacentPages_DataNext.GetAttribute("value");
+                            nextPageText = CheckAdjacentPages_DataNext.GetAttribute("value");
                         }
                     }
                     catch (Exception ex)
                     {
                         Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
                     }
-                    br.driver.Navigate().Refresh();
-                    br.CheckAdjacentPages_Linkbox.Click();
+                    driver.Navigate().Refresh();
+                    CheckAdjacentPages_Linkbox.Click();
                     try
                     {
                         if (prePageText != string.Empty)
                         {
                             //Clipboard.SetText(prePageText);
-                            //br.CheckAdjacentPages_DataPrev.SendKeys(OpenQA.Selenium.Keys.Control + "av");//20240913作廢
-                            br.SetIWebElementValueProperty(br.CheckAdjacentPages_DataPrev, prePageText);
+                            //CheckAdjacentPages_DataPrev.SendKeys(OpenQA.Selenium.Keys.Control + "av");//20240913作廢
+                            SetIWebElementValueProperty(CheckAdjacentPages_DataPrev, prePageText);
                         }
                         if (nextPageText != string.Empty)
                         {
                             //Clipboard.SetText(nextPageText);
-                            //br.CheckAdjacentPages_DataNext.SendKeys(OpenQA.Selenium.Keys.Control + "av");//20240913作廢
-                            br.SetIWebElementValueProperty(br.CheckAdjacentPages_DataNext, nextPageText);
+                            //CheckAdjacentPages_DataNext.SendKeys(OpenQA.Selenium.Keys.Control + "av");//20240913作廢
+                            SetIWebElementValueProperty(CheckAdjacentPages_DataNext, nextPageText);
                         }
                     }
                     catch (Exception ex)
@@ -16613,8 +16731,8 @@ namespace WindowsFormsApp1
                         Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
                     }
                 }
-                else//br.CheckAdjacentPages_DataPrev == null
-                    br.driver.Navigate().Refresh();
+                else//CheckAdjacentPages_DataPrev == null
+                    driver.Navigate().Refresh();
                 playSound(soundLike.over, true);
             }
             //無效，改寫到後面！
@@ -16630,15 +16748,15 @@ namespace WindowsFormsApp1
             //Task wait1 = Task.Run(() =>
             //{
             //    //chkUrlIsTextBox3Text(tabWindowHandles, textBox3.Text);
-            chkUrlIsTextBox3Text(br.driver.WindowHandles, textBox3.Text);
+            chkUrlIsTextBox3Text(driver.WindowHandles, textBox3.Text);
             //});
             //wait1.Wait();
             ////}
             ////Task.WaitAny();//如上所設「wait.Wait();」「wait1.Wait();」，即不必此行了
             ////在連續輸入時能清除框中文字；手動輸入時一般當不必自動清除框中文字
-            ////br.在Chrome瀏覽器的Quick_edit文字框中輸入文字(br.driver, clear == " " ? clear : Clipboard.GetText(), url);
-            ////br.在Chrome瀏覽器的Quick_edit文字框中輸入文字(br.driver, clear == br.chkClearQuickedit_data_textboxTxtStr ? clear : Clipboard.GetText(), url);
-            string formalX = clear == br.chkClearQuickedit_data_textboxTxtStr ? clear : br.TextPatst2Quick_editBox;
+            ////在Chrome瀏覽器的Quick_edit文字框中輸入文字(driver, clear == " " ? clear : Clipboard.GetText(), url);
+            ////在Chrome瀏覽器的Quick_edit文字框中輸入文字(driver, clear == chkClearQuickedit_data_textboxTxtStr ? clear : Clipboard.GetText(), url);
+            string formalX = clear == chkClearQuickedit_data_textboxTxtStr ? clear : TextPatst2Quick_editBox;
             CnText.FormalizeText(ref formalX);
 
             dt = DateTime.Now;
@@ -16655,17 +16773,17 @@ namespace WindowsFormsApp1
 
             if (autoPaste2QuickEdit && autoPastetoCtextQuitEditTextboxCancel) autoPastetoCtextQuitEditTextboxCancel = false;
 
-            if (br.在Chrome瀏覽器的Quick_edit文字框中輸入文字(br.driver,
+            if (在Chrome瀏覽器的Quick_edit文字框中輸入文字(driver,
                 formalX
                 , url))
             {
                 if (beforeUpdated != null)
                 {
                     //檢查是否真有成功送出
-                    if (br.Div_generic_TextBoxFrame?.GetAttribute("textContent") == beforeUpdated)
+                    if (Div_generic_TextBoxFrame?.GetAttribute("textContent") == beforeUpdated)
                     //|| driver.Url.Contains("&chapter="))
                     {
-                        //br.CheckAdjacentPages_Linkbox != null && Edited
+                        //CheckAdjacentPages_Linkbox != null && Edited
 
                         //Debugger.Break();
                         Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("★★★★資料並未送出，請檢查!!!!!!!!");
@@ -16673,7 +16791,7 @@ namespace WindowsFormsApp1
                         return false;
                     }
                 }
-                //br.LastValidWindow = br.driver.CurrentWindowHandle;//在br.在Chrome瀏覽器的Quick_edit文字框中輸入文字()方法中已有
+                //LastValidWindow = driver.CurrentWindowHandle;//在在Chrome瀏覽器的Quick_edit文字框中輸入文字()方法中已有
                 return true;
             }
             else
@@ -16682,7 +16800,7 @@ namespace WindowsFormsApp1
                 {
                     if (AddTranscription_Linkbox != null
                         || beforeUpdated == string.Empty || beforeUpdated == "\t"
-                        || br.Div_generic_TextBoxFrame?.GetAttribute("textContent") == beforeUpdated
+                        || Div_generic_TextBoxFrame?.GetAttribute("textContent") == beforeUpdated
                         || driver.Url.Contains("&chapter="))
                     {
                         //Debugger.Break();
@@ -16707,16 +16825,16 @@ namespace WindowsFormsApp1
             if (url == "") return url;
             //再回到正在編輯的本頁，準備貼入
 
-            if (br.GetDriverUrl != textBox3.Text)
+            if (GetDriverUrl != textBox3.Text)
             {
                 bool found = false;
-                if (tabWindowHandles.Count < br.driver.WindowHandles.Count) tabWindowHandles = br.driver.WindowHandles;//避免分頁視窗被關閉了。
+                if (tabWindowHandles.Count < driver.WindowHandles.Count) tabWindowHandles = driver.WindowHandles;//避免分頁視窗被關閉了。
                 for (int i = tabWindowHandles.Count - 1; i > -1; i--)
                 {
                     string tabWindowHandle = tabWindowHandles[i]; string taburl = string.Empty;
                     try
                     {
-                        taburl = br.driver.SwitchTo().Window(tabWindowHandle).Url;
+                        taburl = driver.SwitchTo().Window(tabWindowHandle).Url;
                     }
                     catch (Exception ex)
                     {
@@ -16732,11 +16850,11 @@ namespace WindowsFormsApp1
                     if (taburl == textBox3.Text || taburl.IndexOf(url.Replace("editor", "box")) > -1) { found = true; break; }
                 }
                 if (!found)
-                    br.driver = br.openNewTabWindow();//網址由下面「在Chrome瀏覽器的Quick_edit文字框中輸入文字」那行給
+                    driver = openNewTabWindow();//網址由下面「在Chrome瀏覽器的Quick_edit文字框中輸入文字」那行給
             }
             //url = textBox3.Text;
             //textBox3.Text = url;
-            //string urlLast= url = br.driver.Url;
+            //string urlLast= url = driver.Url;
             return url;
         }
 
@@ -16746,13 +16864,13 @@ namespace WindowsFormsApp1
 
             //if (ModifierKeys == Keys.None)//在textBox1_TextChanged事件中已處理按著Shift時的行為
             //{
-            //    string currentForeTabUrl = br.ActiveTabURL_Ctext_Edit;
+            //    string currentForeTabUrl = ActiveTabURL_Ctext_Edit;
             //    appActivateByName();
             //    //如果視窗改變，非原所見之分頁，則回到按下 Ctrl + Shift + + 組合鍵時的分頁視窗
-            //    if (currentForeTabUrl != br.ActiveTabURL_Ctext_Edit)
+            //    if (currentForeTabUrl != ActiveTabURL_Ctext_Edit)
             //    {
-            //        br.driver = br.driver ?? br.driverNew();
-            //        br.GoToUrlandActivate(currentForeTabUrl);
+            //        driver = driver ?? driverNew();
+            //        GoToUrlandActivate(currentForeTabUrl);
             //    }
             //}
 
@@ -16769,7 +16887,7 @@ namespace WindowsFormsApp1
             }
             Task.Delay(100).Wait();
             Task.WaitAll();
-            if (Clipboard.GetText() != br.TextPatst2Quick_editBox) Clipboard.SetText(br.TextPatst2Quick_editBox);
+            if (Clipboard.GetText() != TextPatst2Quick_editBox) Clipboard.SetText(TextPatst2Quick_editBox);
             SendKeys.Send("^v{tab}~");
             //this.WindowState = FormWindowState.Minimized;
             //throw new NotImplementedException();
@@ -17393,37 +17511,37 @@ namespace WindowsFormsApp1
                                          //,通常是要準備貼上的，所以就要將目前在用的瀏覽器置前，確保它取得焦點，否則有時系統焦點會或交給工作列                        
                         if (browsrOPMode == BrowserOPMode.appActivateByName)
                         {
-                            //string currentForeTabUrl = br.ActiveTabURL_Ctext_Edit;
+                            //string currentForeTabUrl = ActiveTabURL_Ctext_Edit;
                             appActivateByName();
-                            //if (currentForeTabUrl != br.ActiveTabURL_Ctext_Edit)
-                            //    br.GoToUrlandActivate(currentForeTabUrl);
+                            //if (currentForeTabUrl != ActiveTabURL_Ctext_Edit)
+                            //    GoToUrlandActivate(currentForeTabUrl);
                         }
                         else
                         {
                         retry:
                             try
                             {
-                                br.driver = br.driver ?? br.DriverNew();
+                                driver = driver ?? DriverNew();
                                 //chatGPT：在 C# 中使用 Selenium 控制 Chrome 瀏覽器時，可以使用以下方法切換到 Chrome 瀏覽器視窗：
-                                if (br.driver == null) { Form1.browsrOPMode = BrowserOPMode.seleniumNew; br.DriverNew(); }
+                                if (driver == null) { Form1.browsrOPMode = BrowserOPMode.seleniumNew; DriverNew(); }
 
-                                br.driver.SwitchTo().Window(br.driver.CurrentWindowHandle);
+                                driver.SwitchTo().Window(driver.CurrentWindowHandle);
 
                                 //以下按鍵判斷若仍出錯，則改用新增一個欄位作參考，記錄下在非按下 Ctrl + Shift + + 等鍵時造成的text改變
                                 if (textBox3.Text.IndexOf("edit") > -1 &&
                                     (!KeyboardInfo.getKeyStateDown(System.Windows.Input.Key.LeftCtrl) && KeyboardInfo.getKeyStateNone(System.Windows.Input.Key.Add)) &&
                                     KeyboardInfo.getKeyStateToggled(System.Windows.Input.Key.Delete))//判斷Delete鍵是否被按下彈起
                                 {//手動輸入時，當按下 Shift+Delete 當即時要準備貼上該頁，故如此操作，以備確定無誤後手動按下 submit 按鈕
-                                    br.GoToCurrentUserActivateTab();//if (browsrOPMode != BrowserOPMode.appActivateByName) 前已判斷
-                                    OpenQA.Selenium.IWebElement quick_edit_box = br.waitFindWebElementByName_ToBeClickable("data", br.WebDriverWaitTimeSpan);//br.driver.FindElement(OpenQA.Selenium.By.Name("data"));
-                                                                                                                                                             //OpenQA.Selenium.Support.UI.WebDriverWait wait = new OpenQA.Selenium.Support.UI.WebDriverWait(br.driver, TimeSpan.FromSeconds(2));
-                                                                                                                                                             //wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(quick_edit_box));
+                                    GoToCurrentUserActivateTab();//if (browsrOPMode != BrowserOPMode.appActivateByName) 前已判斷
+                                    OpenQA.Selenium.IWebElement quick_edit_box = waitFindWebElementByName_ToBeClickable("data", WebDriverWaitTimeSpan);//driver.FindElement(OpenQA.Selenium.By.Name("data"));
+                                                                                                                                                       //OpenQA.Selenium.Support.UI.WebDriverWait wait = new OpenQA.Selenium.Support.UI.WebDriverWait(driver, TimeSpan.FromSeconds(2));
+                                                                                                                                                       //wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(quick_edit_box));
                                     quick_edit_box.Clear();
                                     quick_edit_box.Click();
                                     quick_edit_box.SendKeys(OpenQA.Selenium.Keys.LeftShift + OpenQA.Selenium.Keys.Insert);
-                                    OpenQA.Selenium.IWebElement submit = br.waitFindWebElementById_ToBeClickable("savechangesbutton", br.WebDriverWaitTimeSpan);//br.driver.FindElement(OpenQA.Selenium.By.Id("savechangesbutton"));
-                                                                                                                                                                //wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(submit));
-                                                                                                                                                                //放在一個 Task 中去執行，並立即返回。                                     
+                                    OpenQA.Selenium.IWebElement submit = waitFindWebElementById_ToBeClickable("savechangesbutton", WebDriverWaitTimeSpan);//driver.FindElement(OpenQA.Selenium.By.Id("savechangesbutton"));
+                                                                                                                                                          //wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(submit));
+                                                                                                                                                          //放在一個 Task 中去執行，並立即返回。                                     
                                     Task.Run(() =>
                                     {//送出按鈕按下後可以跑線程，其他要取得元件操作者，就不移另跑線程。20230111 現在終於破解bugs找到癥結所在了。感恩感恩　讚歎讚歎　南無阿彌陀佛 19:09
                                         submit.Click();
@@ -17433,7 +17551,7 @@ namespace WindowsFormsApp1
                                 else if (mk == Keys.Shift && mk != (Keys.Shift | Keys.Control))//(mk == (Keys.Shift|Keys.Delete))
                                 {//如果是準備剪下貼上：           //20241008先作廢
                                  //playSound(soundLike.press);
-                                 //br.SelectAllQuickedit_data_textboxContent();
+                                 //SelectAllQuickedit_data_textboxContent();
                                 }
                             }
                             catch (Exception ex1)
@@ -17443,7 +17561,7 @@ namespace WindowsFormsApp1
                                     case -2146233088:
                                         if (ex1.Message.IndexOf("no such window: target window already closed") > -1)
                                         {
-                                            //br.GoToCurrentUserActivateTab(); 
+                                            //GoToCurrentUserActivateTab(); 
                                             ResetLastValidWindow();
                                             goto retry;
                                         }
@@ -17451,8 +17569,8 @@ namespace WindowsFormsApp1
                                     default:
                                         try
                                         {
-                                            br.driver = null;
-                                            br.driver = br.DriverNew(); goto retry;
+                                            driver = null;
+                                            driver = DriverNew(); goto retry;
                                         }
                                         catch (Exception ex)
                                         {
@@ -17511,10 +17629,10 @@ namespace WindowsFormsApp1
             {
                 if (Name == "Form2" && textBox1.Text.Contains("校官") && textBox1.Text.StartsWith("*欽定四庫全書")
                         && !Form1.InstanceForm1.textBox1.Text.Contains("〖文淵|閣寶〗")
-                        && br.Svg_image_PageImageFrame != null)
+                        && Svg_image_PageImageFrame != null)
                 {//如果是《四庫全書》原扉頁，則將其書圖點大，以便檢視輸入
-                    if (int.Parse(br.Svg_image_PageImageFrame.GetAttribute("width")) <= 500)
-                        br.Svg_image_PageImageFrame.Click();
+                    if (int.Parse(Svg_image_PageImageFrame.GetAttribute("width")) <= 500)
+                        Svg_image_PageImageFrame.Click();
                 }
                 if (Application.OpenForms[0].Controls["textBox3"].Text != string.Empty && textBox3.Text != Application.OpenForms[0].Controls["textBox3"].Text)
                 {
@@ -17528,7 +17646,7 @@ namespace WindowsFormsApp1
             //    if (fastMode) ChromeSetFocus();
 
             #region forDebugTest權作測試偵錯用20230310            
-            //br.SetQuickedit_data_textboxTxt(textBox1.Text);
+            //SetQuickedit_data_textboxTxt(textBox1.Text);
             //string x = Clipboard.GetText();
             //x = CnText.RemoveNestedBrackets(x);
             //Console.WriteLine(x);//在「即時運算視窗」寫出訊息
@@ -17613,26 +17731,26 @@ namespace WindowsFormsApp1
                             break;
                         //在Selenium操控Chrome瀏覽器時鍵入
                         case BrowserOPMode.seleniumNew:
-                            if (br.driver == null) br.driver = br.DriverNew();
+                            if (driver == null) driver = DriverNew();
 
                             //自動取得網址 textBox3.Text = clpTxt 網頁內 quick_edit_box 框內的文字內容
                             try
                             {
                                 //網頁就定位
-                                if (br.driver.Url != clpTxt)
+                                if (driver.Url != clpTxt)
                                 {
-                                    //br.driver.ExecuteScript("window.open();");
-                                    //br.driver.SwitchTo().NewWindow(OpenQA.Selenium.WindowType.Tab);//取得網址時順便貼上簡單修改模式下的文字
-                                    br.openNewTabWindow();
-                                    br.GoToUrlandActivate(clpTxt, keyinTextMode);
+                                    //driver.ExecuteScript("window.open();");
+                                    //driver.SwitchTo().NewWindow(OpenQA.Selenium.WindowType.Tab);//取得網址時順便貼上簡單修改模式下的文字
+                                    openNewTabWindow();
+                                    GoToUrlandActivate(clpTxt, keyinTextMode);
                                 }
 
                                 //如果是要編輯而不瀏覽，使擷取其中 quick_edit_box 框內的文字內容，複製到剪貼簿
-                                if (br.driver.Url.IndexOf("edit") > -1 || clpTxt.Contains("edit"))
+                                if (driver.Url.IndexOf("edit") > -1 || clpTxt.Contains("edit"))
                                 {
-                                    //OpenQA.Selenium.IWebElement quick_edit_box = br.driver.FindElement(OpenQA.Selenium.By.Name("data"));
+                                    //OpenQA.Selenium.IWebElement quick_edit_box = driver.FindElement(OpenQA.Selenium.By.Name("data"));
                                     //Clipboard.SetText(quick_edit_box.Text);//本事件函式最後會清除剪貼簿，故無用！●●●●●●●●●●●●●●● 20250410
-                                    string quickeditX = br.Quickedit_data_textboxTxt;
+                                    string quickeditX = Quickedit_data_textboxTxt;
                                     if (textBox1.Text != quickeditX) textBox1.Text = quickeditX;
                                 }
                             }
@@ -17642,9 +17760,9 @@ namespace WindowsFormsApp1
                                 {
                                     //重新定位網頁
                                     case -2146233088://"no such window: target window already closed\nfrom unknown error: web view not found\n  (Session info: chrome=109.0.5414.75)"
-                                                     //br.driver.SwitchTo().Window(br.driver.WindowHandles.Last());
-                                                     //br.driver.Navigate().GoToUrl(clpTxt);
-                                        br.GoToUrlandActivate(clpTxt, keyinTextMode);
+                                                     //driver.SwitchTo().Window(driver.WindowHandles.Last());
+                                                     //driver.Navigate().GoToUrl(clpTxt);
+                                        GoToUrlandActivate(clpTxt, keyinTextMode);
                                         break;
                                     default:
                                         Console.WriteLine(ex.HResult + ex.Message);
@@ -17656,7 +17774,7 @@ namespace WindowsFormsApp1
                             break;
                         //尚未實作
                         case BrowserOPMode.seleniumGet:
-                            //Task.Run(() => { if (br.driver == null) br.driver = br.driverNew(); });
+                            //Task.Run(() => { if (driver == null) driver = driverNew(); });
                             break;
                         default:
                             break;
@@ -17748,6 +17866,20 @@ namespace WindowsFormsApp1
 
             //bool autoPasteFromSBCKwhether = false; this.autoPasteFromSBCKwhether = autoPasteFromSBCKwhether;            
 
+            bool flowControl = AssignedRunWordVBA(clpTxt);
+            if (!flowControl)
+            {
+                return;
+            }
+        }//完成 From1的 Activated事件處理程序
+
+        /// <summary>
+        /// 由剪貼簿或clpTxt裡的內容來決定要交給WordVBA哪個巨集去執行 20251231元旦除夕
+        /// </summary>
+        /// <param name="clpTxt"></param>
+        /// <returns></returns>
+        internal bool AssignedRunWordVBA(string clpTxt)
+        {
             #region 在textBox1內容文字少於100時的檢查，以自行決定其他的操作，如《中國哲學書電子化計劃》清除頁前的分段符號、撤掉與書圖的對應_脫鉤,《國學大師》的《四庫全書》本文等
             if (textBox1.TextLength < 100)
             {
@@ -17762,7 +17894,7 @@ namespace WindowsFormsApp1
                         if ((ModifierKeys & Keys.Control) == Keys.Control && (ModifierKeys & Keys.Alt) == Keys.Alt)
                         {
                             runWordMacro("中國哲學書電子化計劃.撤掉與書圖的對應_脫鉤");
-                            return;
+                            return false;
                         }
                         //if (ModifierKeys == (Keys.Control | Keys.Shift))
                         //{
@@ -17793,7 +17925,7 @@ namespace WindowsFormsApp1
                             Clipboard.Clear();
                             //throw;
                         }
-                        return;
+                        return false;
 
                     }
 
@@ -17809,8 +17941,11 @@ namespace WindowsFormsApp1
                         if (fastMode && !textBox1.Text.Contains("　*") && TitleLeadingSpacesCount.Count > 0)
                             //if (fastMode && TitleLeadingSpacesCount.Count > 0)
                             AutoMarkTitleParagraph();
+                        ////保留來源文本之半形問號「?」改成「/」以供程式對於造字之識別 //改到WordVBA裡，因為目前只是專對《元引科技引得數字人文資源平臺·中國歷代文獻》之文本作處理--原來不會現在會，原來是剛才程式碼誤動了。現已恢復！ 20260101 元旦
+                        //string tx1 = textBox1.Text;
+                        //if (tx1.Contains("？")) textBox1.Text = tx1.Replace("？", "/");
                         undoRecord();
-                        return;
+                        return false;
                     }
                     //對複製自《Kanripo漢籍リポジトリ》GitHub存放庫（repository）《Kanseki Repository 漢籍リポジトリ》的文本的處置
                     else if (Clipboard.GetText().Contains(":KR"))
@@ -17822,7 +17957,7 @@ namespace WindowsFormsApp1
                             //if (fastMode && TitleLeadingSpacesCount.Count > 0)
                             AutoMarkTitleParagraph();
                         undoRecord();
-                        return;
+                        return false;
                     }
                     else//主要是針對《維基文庫》的文本，移至此處●●●●●●●●●●●●●●●●●●●●●●●
                         //函式內會作判斷要不要自動執行Word VBA相關的程序
@@ -17834,8 +17969,10 @@ namespace WindowsFormsApp1
                 }
             }
             #endregion
-
-        }//完成 From1的 Activated事件處理程序
+            //if (!textBox1.Focused)
+            //    textBox1.Focus();
+            return true;
+        }
 
         /// <summary>
         /// 執行讀入文本的格式化整理與輸入首頁的動作
@@ -18152,7 +18289,7 @@ namespace WindowsFormsApp1
             if (x != "/" && Directory.Exists(x))
             {
                 PauseEvents();
-                br.DownloadDirectory_Chrome = x; textBox2.Text = "";
+                DownloadDirectory_Chrome = x; textBox2.Text = "";
                 ResumeEvents(); return;
             }
             #endregion
@@ -18164,8 +18301,8 @@ namespace WindowsFormsApp1
             if (rgx.IsMatch(x))
             {
                 string[] numbers = x.Split(',');
-                br.Copybutton_GjcoolFastExperience_Location.X = Int32.Parse(numbers[0]);
-                br.Copybutton_GjcoolFastExperience_Location.Y = Int32.Parse(numbers[1]);
+                Copybutton_GjcoolFastExperience_Location.X = Int32.Parse(numbers[0]);
+                Copybutton_GjcoolFastExperience_Location.Y = Int32.Parse(numbers[1]);
                 PauseEvents(); textBox2.Text = "";
                 ResumeEvents(); return;
 
@@ -18186,7 +18323,7 @@ namespace WindowsFormsApp1
             if (x.StartsWith("lx") && x.Length > 2)
             {//輸入「lx9」，即重設《漢籍全文資料庫》檢索易學關鍵字清單之起始索引值為9 即 ListIndex_Hanchi_SearchingKeywordsYijing=9。 
 
-                if (Int32.TryParse(x.Substring("lx".Length), out br.ListIndex_Hanchi_SearchingKeywordsYijing))
+                if (Int32.TryParse(x.Substring("lx".Length), out ListIndex_Hanchi_SearchingKeywordsYijing))
                     PauseEvents();
                 textBox2.Text = "";
                 ResumeEvents(); return;
@@ -18200,13 +18337,13 @@ namespace WindowsFormsApp1
 
                 case "oT":
                     BatchProcessingGJcoolOCR = false; PasteOcrResultFisrtMode = true; ocrTextMode = true; PagePaste2GjcoolOCR_ing = false; _eventsEnabled = true;
-                    br.OCR_wait_time_Top_Limit＿second = 60;
+                    OCR_wait_time_Top_Limit＿second = 60;
                     PauseEvents();
                     textBox2.Text = "";
                     ResumeEvents(); return;
                 case "oF":
                     BatchProcessingGJcoolOCR = true; PasteOcrResultFisrtMode = false; ocrTextMode = false; PagePaste2GjcoolOCR_ing = false; _eventsEnabled = true;
-                    br.OCR_wait_time_Top_Limit＿second = 15;
+                    OCR_wait_time_Top_Limit＿second = 15;
                     PauseEvents();
                     textBox2.Text = "";
                     ResumeEvents(); return;
@@ -18215,14 +18352,14 @@ namespace WindowsFormsApp1
                 case "bT":
                     //BatchProcessingGJcoolOCR = true; PasteOcrResultFisrtMode = true; ocrTextMode = true; PagePaste2GjcoolOCR_ing = false; _eventsEnabled = true;
                     BatchProcessingGJcoolOCR = true; PagePaste2GjcoolOCR_ing = false; _eventsEnabled = true;
-                    br.OCR_wait_time_Top_Limit＿second = 60;
+                    OCR_wait_time_Top_Limit＿second = 60;
                     PauseEvents();
                     textBox2.Text = "";
                     ResumeEvents(); return;
                 case "bF":
                     //BatchProcessingGJcoolOCR = false; PasteOcrResultFisrtMode = false; ocrTextMode = false; PagePaste2GjcoolOCR_ing = false; _eventsEnabled = true;
                     BatchProcessingGJcoolOCR = false; PagePaste2GjcoolOCR_ing = false; _eventsEnabled = true;
-                    br.OCR_wait_time_Top_Limit＿second = 15;
+                    OCR_wait_time_Top_Limit＿second = 15;
                     PauseEvents();
                     textBox2.Text = "";
                     ResumeEvents(); return;
@@ -18244,7 +18381,7 @@ namespace WindowsFormsApp1
                     textBox2.Text = "";
                     ResumeEvents(); return;
                 case "lx"://輸入「lx」重設《漢籍全文資料庫》檢索易學關鍵字清單之索引值為0 即 ListIndex_Hanchi_SearchingKeywordsYijing=0。 
-                    br.ListIndex_Hanchi_SearchingKeywordsYijing = 0;
+                    ListIndex_Hanchi_SearchingKeywordsYijing = 0;
                     PauseEvents();
                     textBox2.Text = "";
                     ResumeEvents(); return;
@@ -18253,17 +18390,17 @@ namespace WindowsFormsApp1
                 /// kdapi：《看典古籍》api
                 /// df ：default 古籍酷
                 case "kd"://《看典古籍》OCR網頁
-                    PagePast2OCRsite = br.OCRSiteTitle.KanDianGuJi;
+                    PagePast2OCRsite = OCRSiteTitle.KanDianGuJi;
                     PauseEvents();
                     textBox2.Text = "";
                     ResumeEvents(); return;
                 case "kapi"://《看典古籍》api
-                    PagePast2OCRsite = br.OCRSiteTitle.KanDianGuJiAPI;
+                    PagePast2OCRsite = OCRSiteTitle.KanDianGuJiAPI;
                     PauseEvents();
                     textBox2.Text = "";
                     ResumeEvents(); return;
                 case "df"://default 古籍酷
-                    PagePast2OCRsite = br.OCRSiteTitle.GJcool;
+                    PagePast2OCRsite = OCRSiteTitle.GJcool;
                     PauseEvents();
                     textBox2.Text = "";
                     ResumeEvents(); return;
@@ -18320,11 +18457,11 @@ namespace WindowsFormsApp1
                 sl: browsrOPMode = BrowserOPMode.seleniumNew;
                     PauseEvents(); textBox2.Text = string.Empty; ResumeEvents();
                     //第一次開啟Chrome瀏覽器，或前有未關閉的瀏覽器時
-                    if (br.driver == null)
-                        br.driver = br.DriverNew();//不用Task.Run()包裹也成了
+                    if (driver == null)
+                        driver = DriverNew();//不用Task.Run()包裹也成了
                     else
                     {//如果Chrome瀏覽器都沒有開啟或被誤關的話20230109
-                     //因為 br.driver != null 先清除chromedriver：
+                     //因為 driver != null 先清除chromedriver：
                         Process[] chromeInstances = Process.GetProcessesByName("chrome");
                         if (chromeInstances.Length == 0)
                         {
@@ -18335,12 +18472,12 @@ namespace WindowsFormsApp1
                             }
                             Task.WaitAll();
                             //清除完後創建新的執行個體實例
-                            br.driver = null; br.DriverNew();
+                            driver = null; DriverNew();
                         }
                     }
                     try
                     {
-                        if (br.driver != null && br.driver.Url != textBox3.Text) br.GoToUrlandActivate(textBox3.Text, keyinTextMode);
+                        if (driver != null && driver.Url != textBox3.Text) GoToUrlandActivate(textBox3.Text, keyinTextMode);
                     }
                     catch (Exception ex)
                     {
@@ -18348,10 +18485,10 @@ namespace WindowsFormsApp1
                         {
                             case -2146233088:
                                 if (ex.Message.StartsWith("no such window: target window already closed"))//"no such window: target window already closed\nfrom unknown error: web view not found\n  (Session info: chrome=109.0.5414.75)"
-                                    br.GoToUrlandActivate(textBox3.Text, keyinTextMode);
+                                    GoToUrlandActivate(textBox3.Text, keyinTextMode);
                                 else
                                     //chromedriver被誤關了
-                                    if (!br.ChromedriverLose(ex))
+                                    if (!ChromedriverLose(ex))
                                 {
                                     Debugger.Break();
                                     Console.WriteLine(ex.HResult + ex.Message);
@@ -18379,11 +18516,11 @@ namespace WindowsFormsApp1
                 case "sg,":
                     //還未實作
                     //browsrOPMode = BrowserOPMode.seleniumGet;
-                    //if (br.driver == null)
+                    //if (driver == null)
                     //{
                     //    Task.Run(() =>
                     //    {
-                    //        br.driver = br.driverNew();
+                    //        driver = driverNew();
                     //    });
                     //}
                     //textBox2.Text = "";
@@ -18420,25 +18557,25 @@ namespace WindowsFormsApp1
                     switch (x.Substring(0, 2))
                     {
                         case "tS":
-                            br.ChromeDriverServiceTimeSpan = t;
+                            ChromeDriverServiceTimeSpan = t;
                             PauseEvents();
                             textBox2.Clear();
                             ResumeEvents();
                             return;
                         case "tE":
-                            br.WebDriverWaitTimeSpan = t;
+                            WebDriverWaitTimeSpan = t;
                             PauseEvents();
                             textBox2.Clear();
                             ResumeEvents();
                             return;
                         case "ws"://輸入「ws」（wait second）以指定延長等待開啟舊檔對話方塊出現的時間（毫秒數），如「ws1000」即延長1秒
-                            br.Extend_the_wait_time_for_the_Open_Old_File_dialog_box_to_appear_Millisecond = (int)t;
+                            Extend_the_wait_time_for_the_Open_Old_File_dialog_box_to_appear_Millisecond = (int)t;
                             PauseEvents();
                             textBox2.Clear();
                             ResumeEvents();
                             return;
                         case "wO"://輸入「wO」（wait OCR）以指定等待OCR諸過程最久的時間（以秒數），如「wO60」即最久等到60秒（1分鐘）
-                            br.OCR_wait_time_Top_Limit＿second = (int)t;
+                            OCR_wait_time_Top_Limit＿second = (int)t;
                             PauseEvents();
                             textBox2.Clear();
                             ResumeEvents();
@@ -18460,37 +18597,37 @@ namespace WindowsFormsApp1
                     textBox2.Text = ""; ResumeEvents(); bool topmost = TopMost; TopMost = false;
                     if (x == "gjk")//只手動告知系統《古籍酷》帳號已切換                        
                     {
-                        br.OCR_GJcool_AccountChanged = true;
-                        if (br.waitGJcoolPoint) br.waitGJcoolPoint = false;
+                        OCR_GJcool_AccountChanged = true;
+                        if (waitGJcoolPoint) waitGJcoolPoint = false;
                     }
                     else if (x == "kk")//只切換IP，不切換《古籍酷》帳戶
                     {
                         TopMost = false;
                         Task ts = Task.Run(() =>
                         {
-                            br.IPSwitchOnly();
+                            IPSwitchOnly();
 
 
                         });
-                        //br.IPStatusMessageShow();//在上一行 IPSwitchOnly 內已有
+                        //IPStatusMessageShow();//在上一行 IPSwitchOnly 內已有
                         ts.Wait(7000);
                         //SystemSounds.Exclamation.Play();
                         AvailableInUseBothKeysMouse();
-                        //if (Mdb.IPStatus(br.CurrentIP??br.GetPublicIpAddress("")).Item4) textBox2.Text = "kk";
+                        //if (Mdb.IPStatus(CurrentIP??GetPublicIpAddress("")).Item4) textBox2.Text = "kk";
                     }
                     else if (x == "jk")//不切換IP，不切換《古籍酷》帳戶，欲直接進入首頁快速體驗者
                     {
-                        if (!br.waitGJcoolPoint) br.waitGJcoolPoint = true;
-                        br.OCR_GJcool_AccountChanged = false;
-                        //if (!Active) BringToFront(); 
+                        if (!waitGJcoolPoint) waitGJcoolPoint = true;
+                        OCR_GJcool_AccountChanged = false;
+                        //if (!Active) br.BringToFront(); 
                         //availableInUseBothKeysMouse();
                     }
                     else if (x == "jj")//只切換《古籍酷》帳號，不換IP
-                        br.OCR_GJcool_AccountChanged_Switcher(false, true);
+                        OCR_GJcool_AccountChanged_Switcher(false, true);
                     else
                     {//"gg" : 切換《古籍酷》帳號，且也換IP
                         if (TopMost) TopMost = false;
-                        br.OCR_GJcool_AccountChanged_Switcher();
+                        OCR_GJcool_AccountChanged_Switcher();
                     }
                     TopMost = topmost;
                     return;
@@ -18855,9 +18992,9 @@ namespace WindowsFormsApp1
                         nextPages(Keys.PageUp, false);
                         if (browsrOPMode != BrowserOPMode.appActivateByName)
                         {
-                            if (br.IsDriverInvalid())
+                            if (IsDriverInvalid())
                                 RestartChromedriver();
-                            br.driver.SwitchTo().Window(driver.CurrentWindowHandle);
+                            driver.SwitchTo().Window(driver.CurrentWindowHandle);
                         }
                         //上一頁
                         //if (autoPaste2QuickEdit || keyinTextMode) AvailableInUseBothKeysMouse();
@@ -18866,10 +19003,10 @@ namespace WindowsFormsApp1
                         if (keyinTextMode && browsrOPMode == BrowserOPMode.seleniumNew)
                         {
                             int cntr = 0;
-                            while (textBox1.Text != br.Quickedit_data_textboxTxt)
+                            while (textBox1.Text != Quickedit_data_textboxTxt)
                             {
                                 playSound(soundLike.info);
-                                textBox1.Text = br.Quickedit_data_textboxTxt;
+                                textBox1.Text = Quickedit_data_textboxTxt;
                                 if (cntr > 2) Debugger.Break();
                                 cntr++;
                             }
@@ -18885,16 +19022,16 @@ namespace WindowsFormsApp1
                             if (timeDifference.TotalSeconds < 0.3)
                                 return;
                             nextPageStartTime = DateTime.Now;
-                            if (br.WaitFindWebElementBySelector_ToBeClickable("#canvas > svg > rect") != null)
+                            if (WaitFindWebElementBySelector_ToBeClickable("#canvas > svg > rect") != null)
                             {
                                 rect = true;
-                                br.Input_picture(); //圖像的輔助輸入
+                                Input_picture(); //圖像的輔助輸入
                             }
                         }
                         //keyDownCtrlAdd(true);
                         //下一頁
                         nextPages(Keys.PageDown, false);
-                        br.driver.SwitchTo().Window(driver.CurrentWindowHandle);
+                        driver.SwitchTo().Window(driver.CurrentWindowHandle);
                         //if (autoPaste2QuickEdit || keyinTextMode) AvailableInUseBothKeysMouse();
                         if (!rect) AvailableInUseBothKeysMouse();
                         break;
@@ -18935,24 +19072,36 @@ namespace WindowsFormsApp1
                                 return;
                             if (KeyboardInfo.AreModifiersPressed(Keys.Control | Keys.Shift))
                             { //Ctrl + Shift + 滑鼠下一頁：清除 [Quick edit]([簡單修改模式])中的內容並送出
-                                OpenQA.Selenium.IWebElement quickedit = br.Quickedit_data_textbox;
+                                OpenQA.Selenium.IWebElement quickedit = Quickedit_data_textbox;
                                 if (quickedit != null)
                                 {
-                                    br.SetIWebElementValueProperty(quickedit, string.Empty);
-                                    br.SavechangesButton.JsClick();
+                                    SetIWebElementValueProperty(quickedit, string.Empty);
+                                    SavechangesButton.JsClick();
                                 }
                             }
                             else if (ModifierKeys == Keys.Control)//（Ctrl + 滑鼠下一頁）
                             {//按住Ctrl再按五鍵滑鼠的下一頁按鈕，則可以以預設的書頁圖大小來設定紅框以供輸入。可以網址來產生紅框如下： 20250202大年初五 感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主
-                                //br.driver.Navigate().GoToUrl(br.driver.Url.Replace("#editor", "#box(2,14,792,1146)"));
-                                br.driver.Navigate().GoToUrl(br.driver.Url.Replace("#editor", "#box(0,2,798,1288)"));
-                                br.driver.Navigate().Refresh();
-                                br.Input_picture();
+                                //driver.Navigate().GoToUrl(driver.Url.Replace("#editor", "#box(2,14,792,1146)"));
+                                driver.Navigate().GoToUrl(driver.Url.Replace("#editor", "#box(0,2,798,1288)"));
+                                driver.Navigate().Refresh();
+                                Input_picture();
+                                //清除空行；因為碰到許多中間會空行或篇末會空行之排版，以致原來程式邏輯不堪應用。今將保留其空行部分（由程式判斷每頁行數；但確實也有不規則的，但畢竟較此情況少見），不像之前那樣一律清除，故在確定不須保留時，可逕行清除。 2026年元旦
+                                string tx1 = textBox1.Text;
+                                if (lines_perPage > 0)
+                                {
+                                    if (tx1.Substring(0, (lines_perPage + lines_perPage / 2)).Replace("|" + Environment.NewLine, string.Empty) == string.Empty)
+                                    {
+                                        textBox1.Select(0, (lines_perPage + lines_perPage / 2));
+                                        undoRecord();
+                                        textBox1.SelectedText = string.Empty;
+                                        undoRecord();
+                                    }
+                                }
 
                             }
                             //nextPageStartTime = DateTime.Now;
                             nextPages(Keys.PageDown, true);
-                            //br.driver.SwitchTo().Window(driver.CurrentWindowHandle);
+                            //driver.SwitchTo().Window(driver.CurrentWindowHandle);
                         }
                         break;
                     default:
@@ -19144,7 +19293,7 @@ namespace WindowsFormsApp1
                     Debugger.Break();
                 else
                 {
-                    url = br.ReplaceUrl_Box2Editor(url);
+                    url = ReplaceUrl_Box2Editor(url);
                     bool events = _eventsEnabled;
                     PauseEvents();
                     textBox3.Text = url;
@@ -19153,10 +19302,10 @@ namespace WindowsFormsApp1
                     {
                         try
                         {
-                            string ur = br.GetDriverUrl;
+                            string ur = GetDriverUrl;
                             if (ur.IndexOf("#box(") > -1)
-                                //    br.driver.Navigate().GoToUrl(ur.Substring(0, ur.IndexOf("#box(")));
-                                br.driver.Url = Form1.FixUrl＿ImageTextComparisonPage(ur, false, true);
+                                //    driver.Navigate().GoToUrl(ur.Substring(0, ur.IndexOf("#box(")));
+                                driver.Url = Form1.FixUrl＿ImageTextComparisonPage(ur, false, true);
                         }
                         catch (Exception ex)
                         {
@@ -19176,7 +19325,7 @@ namespace WindowsFormsApp1
                 try
                 {
                     if (browsrOPMode != BrowserOPMode.appActivateByName)
-                        if (br.driver?.Url.StartsWith(url.Substring(0, url.IndexOf("#editor"))) == true) br.driver.Navigate().GoToUrl(url);
+                        if (driver?.Url.StartsWith(url.Substring(0, url.IndexOf("#editor"))) == true) driver.Navigate().GoToUrl(url);
                 }
                 catch (Exception ex)
                 {
@@ -19200,20 +19349,20 @@ namespace WindowsFormsApp1
             //    {
             //        Task.Run(() =>/*須使用多執行緒才不會出現以下錯誤:
             //                   The HTTP request to the remote WebDriver server for URL http://localhost:6164/session/c574811b5a05d8f951364b5156b15ff8/window/handles timed out after 4.5 seconds.
-            //                   因為textBox3_DragDrop(sender, e)要用到這個函式（DragDrop事件執行時會吃掉系統焦點，則br.driver無法正常運行）20230108                               */
+            //                   因為textBox3_DragDrop(sender, e)要用到這個函式（DragDrop事件執行時會吃掉系統焦點，則driver無法正常運行）20230108                               */
             //        {
-            //            if (br.driver == null) br.driver = br.driverNew();
+            //            if (driver == null) driver = driverNew();
             //            //if (Clipboard.GetText().IndexOf("http") == 0) Clipboard.Clear();
-            //            string url = br.driver.Url;//交給區域變數，才好監看
-            //            if (oldValue != mainFromTextBox3Text && url != mainFromTextBox3Text) br.GoToUrlandActivate(mainFromTextBox3Text);
+            //            string url = driver.Url;//交給區域變數，才好監看
+            //            if (oldValue != mainFromTextBox3Text && url != mainFromTextBox3Text) GoToUrlandActivate(mainFromTextBox3Text);
             //        });
             //        dragDropUrl = false;
             //    }
             //    else
             //    {
-            //        if (br.driver == null) br.driver = br.driverNew();
+            //        if (driver == null) driver = driverNew();
             //        //if (Clipboard.GetText().IndexOf("http") == 0) Clipboard.Clear();                    
-            //        if (oldValue != mainFromTextBox3Text) br.GoToUrlandActivate(mainFromTextBox3Text);
+            //        if (oldValue != mainFromTextBox3Text) GoToUrlandActivate(mainFromTextBox3Text);
             //    }
             //}
             //Task.WaitAll();
@@ -19229,9 +19378,9 @@ namespace WindowsFormsApp1
             else
             {
                 editwikiID = GetEditwikiID_fromUrl(url);
-            //OpenQA.Selenium.IWebElement ie = br.Full_text_search_textbox_searchressingle;
+            //OpenQA.Selenium.IWebElement ie = Full_text_search_textbox_searchressingle;
             retry:
-                if (br.IsDriverInvalid())
+                if (IsDriverInvalid())
                 {
                     try
                     {
@@ -19244,7 +19393,7 @@ namespace WindowsFormsApp1
                         goto retry;
                     }
                 }
-                OpenQA.Selenium.IWebElement ie = br.Title_Linkbox_Link;
+                OpenQA.Selenium.IWebElement ie = Title_Linkbox_Link;
                 try
                 {
                     //resID = ie == null ? 0 : int.Parse(ie.GetAttribute("value").Substring("wiki:".Length));
@@ -19289,7 +19438,7 @@ namespace WindowsFormsApp1
 
             #region OCR成功後則刪除下載的書圖,備份OCR結果; 因為 https://gj.cool/try_ocr 頁面時常傳回假資料（之前曾識別的文本），故今改寫在 textBox3.TextChanged事件中
             //OCR成功後則刪除下載的書圖,備份OCR結果
-            string downloadImgFullName = string.Empty;//, imgUrl = br.GetImageUrl(); //bool imgResult = false;
+            string downloadImgFullName = string.Empty;//, imgUrl = GetImageUrl(); //bool imgResult = false;
                                                       //if (imgUrl != "")
             if (_previousPageNum != _currentPageNum ||
                 (_previousPageNum == _currentPageNum && previousBookID != GetBookID_fromUrl(textBox3Text))
@@ -19484,7 +19633,7 @@ namespace WindowsFormsApp1
             if (textBox3.Text == data) return;
 
             //if (browsrOPMode != BrowserOPMode.seleniumNew ||
-            //    br.driver == null || chromedriversPID.Count == 0)
+            //    driver == null || chromedriversPID.Count == 0)
             //{
             PauseEvents();
             textBox3.Text = data;
@@ -19541,11 +19690,11 @@ namespace WindowsFormsApp1
                                 //        SendKeys.Send("^{F4}");//關閉頁籤
                                 //        break;
                                 //    case BrowserOPMode.seleniumNew:
-                                //        if (br.driver != null && Active)//表單不在最前面時也會觸發
+                                //        if (driver != null && Active)//表單不在最前面時也會觸發
                                 //        {
-                                //            //br.GoToCurrentUserActivateTab();
-                                //            //br.driver.Navigate().Refresh();
-                                //            br.driver.Close();
+                                //            //GoToCurrentUserActivateTab();
+                                //            //driver.Navigate().Refresh();
+                                //            driver.Close();
                                 //        }
                                 //        break;
                                 //    case BrowserOPMode.seleniumGet:
@@ -19718,7 +19867,7 @@ namespace WindowsFormsApp1
                     if (new FileInfo(downloadImgFullName).Length <= 7620)
                     {
                         File.Delete(downloadImgFullName);
-                        returnVal = br.DownloadImage(imageUrl, downloadImgFullName);
+                        returnVal = DownloadImage(imageUrl, out downloadImgFullName);
                     }
                 #endregion
             }
@@ -19729,7 +19878,7 @@ namespace WindowsFormsApp1
                     || ex.Message.StartsWith("遠端伺服器傳回一個錯誤: (403) 禁止。")
                     || ex.Message.StartsWith("要求已經中止: 無法建立 SSL/TLS 的安全通道。")
                     || ex.Message.StartsWith("無法連接至遠端伺服器")))
-                    returnVal = br.DownloadImage(imageUrl, downloadImgFullName);
+                    returnVal = CTP.DownloadImage(imageUrl, downloadImgFullName);
                 //20240430 Copilot大菩薩：如果 WebClient 的 DownloadData 方法無法滿足需求，那麼您可能需要考慮使用其他的方法來下載圖片。我之前提到的兩種方法是：
                 //使用 Selenium 模擬瀏覽器操作：這種方法可以模擬「另存圖片」的操作，但可能需要一些複雜的程式碼，並且可能需要安裝特定的瀏覽器擴充功能。
                 //使用 HttpClient 或其他第三方函式庫：這些函式庫通常提供了更靈活和強大的功能，可以處理更複雜的網路操作，例如處理 cookies、session、referer 等等。
@@ -19780,9 +19929,9 @@ namespace WindowsFormsApp1
             Form1 form1 = Application.OpenForms[0] as Form1;
             //20221021Bing大菩薩：C# 跨執行緒作業無效：
             //form1.bringBackMousePosFrmCenter();
-            if (br.ActiveForm1.InvokeRequired)
+            if (ActiveForm1.InvokeRequired)
             {
-                br.ActiveForm1.Invoke((MethodInvoker)delegate
+                ActiveForm1.Invoke((MethodInvoker)delegate
                 {
                     // 你的程式碼
                 });
@@ -19799,9 +19948,9 @@ namespace WindowsFormsApp1
                 , MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
 
             //20221021Bing大菩薩：C# 跨執行緒作業無效：
-            if (br.ActiveForm1.InvokeRequired)
+            if (ActiveForm1.InvokeRequired)
             {
-                br.ActiveForm1.Invoke((MethodInvoker)delegate
+                ActiveForm1.Invoke((MethodInvoker)delegate
                 {
                     // 你的程式碼
                 });
@@ -19824,9 +19973,9 @@ namespace WindowsFormsApp1
                 , MessageBoxIcon.Exclamation, defaultButton, MessageBoxOptions.DefaultDesktopOnly);
             if (formActivated)
             {
-                if (br.ActiveForm1.InvokeRequired)
+                if (ActiveForm1.InvokeRequired)
                 {
-                    br.ActiveForm1.Invoke((MethodInvoker)delegate
+                    ActiveForm1.Invoke((MethodInvoker)delegate
                     {
                         // 你的程式碼
                         form1.BringToFront(); form1.AvailableInUseBothKeysMouse();
@@ -19931,18 +20080,18 @@ namespace WindowsFormsApp1
             if (clpTxt.IsNullOrEmpty()) clpTxt = Clipboard.GetText();
             if (clpTxt.Contains("action=editchapter"))
             {
-                if (br.IsDriverInvalid())
-                    br.driver.SwitchTo().Window(driver.WindowHandles.Last());
+                if (IsDriverInvalid())
+                    driver.SwitchTo().Window(driver.WindowHandles.Last());
                 else
-                    br.driver.SwitchTo().Window(driver.CurrentWindowHandle);
+                    driver.SwitchTo().Window(driver.CurrentWindowHandle);
                 driver.Url = clpTxt;
-                OpenQA.Selenium.IWebElement iwe = br.Textarea_data_Edit_textbox;
+                OpenQA.Selenium.IWebElement iwe = Textarea_data_Edit_textbox;
                 if (iwe != null)
                 {
                     if (clpTxt.Contains(" page=\"1\" />●\t<")) return false;
                     //Clipboard.SetText(iwe.GetAttribute("value"));
                     Clipboard.SetText(iwe.GetDomProperty("value"));
-                    br.SetIWebElementValueProperty(iwe, string.Empty);//清除內容
+                    SetIWebElementValueProperty(iwe, string.Empty);//清除內容
                     //iwe.SendKeys(OpenQA.Selenium.Keys.Control + "a");
                     //iwe.SendKeys(OpenQA.Selenium.Keys.Delete);
                     ChromeSetFocus();
@@ -20081,7 +20230,7 @@ namespace WindowsFormsApp1
                     driver.SwitchTo().Window(driver.WindowHandles.Last());
                     LastValidWindow = driver.CurrentWindowHandle;
                 }
-                if (textBox1.TextLength == 0 && br.pageUBound < int.Parse(_currentPageNum) && IsValidUrl＿keyDownCtrlAdd(driver.Url))
+                if (textBox1.TextLength == 0 && pageUBound < int.Parse(_currentPageNum) && IsValidUrl＿keyDownCtrlAdd(driver.Url))
                 {
                     undoRecord(); stopUndoRec = true; PauseEvents();
                     if (!gotoNextChapter_FormatContentInput_SKQS())
@@ -20148,14 +20297,14 @@ namespace WindowsFormsApp1
         #region 《看典古籍》OCR API
         private bool PerformOCR()
         {
-            //string imageUrl = br.GetImageUrl();
+            //string imageUrl = GetImageUrl();
             //string result = await _ocrClient.GetOCRResult(imageUrl);
             string imagePath = MydocumentsPathIncldBackSlash + "CtextTempFiles\\Ctext_Page_Image.png", result = string.Empty;
-            //if (DownloadImage(br.GetImageUrl(), out imagePath))
+            //if (DownloadImage(GetImageUrl(), out imagePath))
             DateTime dt = DateTime.Now;
             TopMost = false;
             br.BringToFront("chrome");
-            br.driver.SwitchTo().Window(br.GetCurrentWindowHandle(br.driver));
+            driver.SwitchTo().Window(GetCurrentWindowHandle(driver));
             while (!File.Exists(imagePath))
             {
                 //可按下Ctrl鍵中斷！！20241213
