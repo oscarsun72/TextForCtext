@@ -1885,7 +1885,7 @@ namespace TextForCtext
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        public static string TransformText(string input)
+        public static string FixNoteDisorder_TransformText(string input)
         {/*
           {{元正月晦}}　　{{人日寒食}}　　{{正月十五日三月三日}}
           {{元正月晦}}　　{{人日寒食}}　　{{正月十五日三月三日}}
@@ -2214,11 +2214,14 @@ namespace TextForCtext
 
             foreach (string line in lines)
             {
-                if (!line.Contains("/")) { finalResult.AppendLine(line); continue; }
+                //if (!line.Contains("/")) { finalResult.AppendLine(line); continue; }
+                if (!line.Contains(@"\")) { finalResult.AppendLine(line); continue; }//現在在WordVBA處理源文本時，改用「\」來表示夾注小注換行之標識符，以與造字缺字者作區別
 
-                string[] parts = line.Split('/');
+                //string[] parts = line.Split('/');
+                string[] parts = line.Split('\\');//現在在WordVBA處理源文本時，改用「\」來表示夾注小注換行之標識符，以與造字缺字者作區別
                 string partA = parts[0];
-                string partB = "/" + parts[1]; // 保留斜槓作為基準點
+                //string partB = "/" + parts[1]; // 保留斜槓作為基準點
+                string partB = @"\" + parts[1]; // 保留斜槓作為基準點//現在在WordVBA處理源文本時，改用「\」來表示夾注小注換行之標識符，以與造字缺字者作區別
 
                 // 建立視覺寬度地圖
                 var mapA = BuildVisualWidthMap(partA);
@@ -2252,7 +2255,8 @@ namespace TextForCtext
                 // 重組並處理特殊空白符號
                 string resultA = Reconstruct(mapA).Replace("  ", specialBlank);
                 //string resultB = Reconstruct(mapB).Replace("REMOVE", "");
-                string resultB = Reconstruct(mapB).Replace("/", "");
+                //string resultB = Reconstruct(mapB).Replace("/", "");
+                string resultB = Reconstruct(mapB).Replace(@"\", "");//現在在WordVBA處理源文本時，改用「\」來表示夾注小注換行之標識符，以與造字缺字者作區別
 
                 finalResult.AppendLine(resultA + resultB);
             }

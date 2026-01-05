@@ -2,7 +2,11 @@
 using Newtonsoft.Json.Linq;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
+using OpenQA.Selenium.DevTools;
+using OpenQA.Selenium.DevTools.V125.Storage;
+using OpenQA.Selenium.DevTools.V127;
 using OpenQA.Selenium.Interactions;
+using OpenQA.Selenium.Internal;
 using OpenQA.Selenium.Remote;
 using OpenQA.Selenium.Support.UI;
 using System;
@@ -15,9 +19,8 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Media;
+using System.Net;
 using System.Resources;
-
-
 //using System.Net;
 //using System.Net.NetworkInformation;
 using System.Runtime.InteropServices;
@@ -30,9 +33,8 @@ using System.Windows.Automation;
 using System.Windows.Forms;
 using WebSocketSharp;
 using WindowsFormsApp1;
-using static WindowsFormsApp1.Form1;
 using static TextForCtext.CTP;
-
+using static WindowsFormsApp1.Form1;
 //using static System.Net.Mime.MediaTypeNames;
 using forms = System.Windows.Forms;
 using selm = OpenQA.Selenium;
@@ -627,7 +629,7 @@ namespace TextForCtext
             }
         }
 
-        
+
         /// <summary>
         /// 設定網頁元件（IWebElement）的 value 屬性值  20240913
         /// creedit_with_Copilot大菩薩：C# Selenium 屬性設定方法： https://sl.bing.net/jv1AQReen36
@@ -808,7 +810,7 @@ namespace TextForCtext
             {
                 if (driver == null)
                 {
-                    Form1.browsrOPMode = Form1.BrowserOPMode.seleniumNew;
+                    Form1.BrowsrOPMode = Form1.BrowserOPMode.seleniumNew;
                     driver = DriverNew();
                 }
                 IWebElement e = driver.FindElement(By.CssSelector(selector));
@@ -894,7 +896,7 @@ namespace TextForCtext
         /// <returns></returns>
         internal static ChromeDriver DriverNew()
         {
-            if (Form1.browsrOPMode != Form1.BrowserOPMode.appActivateByName && driver == null)
+            if (Form1.BrowsrOPMode != Form1.BrowserOPMode.appActivateByName && driver == null)
             {
                 //string chrome_path = Form1.getDefaultBrowserEXE();
 
@@ -1001,7 +1003,7 @@ namespace TextForCtext
                             }
                             else
                             {
-                                Form1.browsrOPMode = Form1.BrowserOPMode.appActivateByName;
+                                Form1.BrowsrOPMode = Form1.BrowserOPMode.appActivateByName;
                                 //killProcesses(new string[] { "chromedriver" });//至少把之前當掉的（已經無法由C#表單操控的）清掉
                                 killchromedriverFromHere();//至少把之前當掉的（已經無法由C#表單操控的）清掉
                                 return null;
@@ -1014,7 +1016,7 @@ namespace TextForCtext
                             if (ex.Message.IndexOf("This version of ChromeDriver only supports Chrome") > -1)
                             {
                                 Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("請更新 chromedriver 才能繼續");
-                                Form1.browsrOPMode = Form1.BrowserOPMode.appActivateByName; killchromedriverFromHere();
+                                Form1.BrowsrOPMode = Form1.BrowserOPMode.appActivateByName; killchromedriverFromHere();
                                 Process.Start("https://googlechromelabs.github.io/chrome-for-testing/#stable");
                                 Process.Start(chrome_path);
 
@@ -1235,7 +1237,7 @@ namespace TextForCtext
                     return driver;
                 else
                 {
-                    if (Form1.browsrOPMode == Form1.BrowserOPMode.seleniumNew)
+                    if (Form1.BrowsrOPMode == Form1.BrowserOPMode.seleniumNew)
                         Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("請重新在textBox2下「br」或「bb」的指令以啟動chromedriver。感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主");
                     //Debugger.Break();
                     return null;
@@ -1251,8 +1253,8 @@ namespace TextForCtext
         {
             driver = null;
             killchromedriverFromHere();
-            if (Form1.browsrOPMode != Form1.BrowserOPMode.seleniumNew)
-                Form1.browsrOPMode = Form1.BrowserOPMode.seleniumNew;
+            if (Form1.BrowsrOPMode != Form1.BrowserOPMode.seleniumNew)
+                Form1.BrowsrOPMode = Form1.BrowserOPMode.seleniumNew;
             return DriverNew() != null;
         }
         private static void setupChromeDriverService()
@@ -1396,7 +1398,7 @@ namespace TextForCtext
 
             set => downloadDirectory_Chrome = value;
         }
-        
+
 
         /// <summary>
         /// 傳回Chrome瀏覽器作用中分頁視窗頁籤url 
@@ -1654,7 +1656,7 @@ namespace TextForCtext
                 try
                 {
                     //現在有設定Chrome瀏覽器的啟動參數 --remote-debugging-port=9222 了，這個可以省了!!●●●●●●●●●真的可以省了
-                    if (driver == null && Form1.browsrOPMode == Form1.BrowserOPMode.appActivateByName)
+                    if (driver == null && Form1.BrowsrOPMode == Form1.BrowserOPMode.appActivateByName)
                     {
                         if (DialogResult.OK == Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("請先在textBox2執行「br」指令，切換為SeleniumNew模式再繼續。" +
                             Environment.NewLine + Environment.NewLine + "---若已安裝配置器好chromedriver.exe，請按下【取消】，則程式會自動啟動，無須手動下指令--- 20241218感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主"))
@@ -1663,7 +1665,7 @@ namespace TextForCtext
                         {
                             if (driver == null)
                             {
-                                Form1.browsrOPMode = Form1.BrowserOPMode.seleniumNew;
+                                Form1.BrowsrOPMode = Form1.BrowserOPMode.seleniumNew;
                                 DriverNew();
                                 driver.Close();//關閉新開啟的「首頁」分類頁籤，網址是： https://ctext.org/account.pl?if=en
                             }
@@ -1819,7 +1821,7 @@ namespace TextForCtext
                             killchromedriverFromHere();
                             Form1.playSound(Form1.soundLike.error, true);
                             //Debugger.Break();
-                            driver = null; Form1.browsrOPMode = Form1.BrowserOPMode.seleniumNew;
+                            driver = null; Form1.BrowsrOPMode = Form1.BrowserOPMode.seleniumNew;
                             DriverNew();
                             goto retry;
                         }
@@ -1965,7 +1967,7 @@ namespace TextForCtext
             }
         }
 
-        
+
 
         internal static ChromeDriver openNewTabWindow(WindowType tabOrwindow = WindowType.Tab)//creedit 20230103
         {/*chatGPT
@@ -1975,8 +1977,8 @@ namespace TextForCtext
             //ChromeDriver driver = driverNew();//new ChromeDriver();
             if (driver == null)
             {
-                if (Form1.browsrOPMode == Form1.BrowserOPMode.appActivateByName)
-                    Form1.browsrOPMode = Form1.BrowserOPMode.seleniumNew;
+                if (Form1.BrowsrOPMode == Form1.BrowserOPMode.appActivateByName)
+                    Form1.BrowsrOPMode = Form1.BrowserOPMode.seleniumNew;
                 driver = DriverNew();
             }
             try
@@ -2097,7 +2099,7 @@ namespace TextForCtext
         internal static string GetImageUrl(string url = null)
         {//20230104 creedit
         retry:
-            if (Form1.browsrOPMode == Form1.BrowserOPMode.appActivateByName) Form1.browsrOPMode = Form1.BrowserOPMode.seleniumNew;
+            if (Form1.BrowsrOPMode == Form1.BrowserOPMode.appActivateByName) Form1.BrowsrOPMode = Form1.BrowserOPMode.seleniumNew;
             if (driver == null) driver = DriverNew();
             //using (driver)//var driver = new ChromeDriver())//若這樣寫則會出現「無法存取已處置的物件。」之錯誤    HResult	-2146232798	int               
             //{因為 using(driver) 這 driver 只在 ) 後的第一層大括弧{}間有效，生命週期僅止於此間而已
@@ -8757,7 +8759,7 @@ namespace TextForCtext
             return true;
         }
 
-        
+
 
         /// <summary>
         /// 作為一些需要保留或比對驗證的視窗句柄集，鍵值是視窗ID（或唯一名稱）以供比較尋找，值為視窗句柄
@@ -9617,11 +9619,11 @@ namespace TextForCtext
             }
 
         }
-       
+
 
 
         /// <summary>
-        /// 將指定的程式視窗置於作業系統的最前面、最上端 
+        /// 將指定的程式視窗置於作業系統的最前面、最上端 。不限Selenium才能用。都適用。
         /// Copilot大菩薩 20240704 控制 Chrome 瀏覽器在 C# Windows.Forms 中:
         /// </summary>
         /// <param name="processName">所指定的視窗</param>
@@ -9647,14 +9649,14 @@ namespace TextForCtext
         {
             try
             {
-                if (browsrOPMode == BrowserOPMode.appActivateByName) return true;
+                if (BrowsrOPMode == BrowserOPMode.appActivateByName) return true;
 
                 if (getChromedrivers().Length == 0)
                     RestartChromedriver();
 
                 if (driver == null)
                 {
-                    Form1.browsrOPMode = Form1.BrowserOPMode.seleniumNew;
+                    Form1.BrowsrOPMode = Form1.BrowserOPMode.seleniumNew;
                     DriverNew();
                     if (driver == null)
                         RestartDriver();
@@ -9856,8 +9858,8 @@ namespace TextForCtext
         {
             killchromedriverFromHere();
             driver = null;
-            if (Form1.browsrOPMode != Form1.BrowserOPMode.seleniumNew)
-                Form1.browsrOPMode = Form1.BrowserOPMode.seleniumNew;
+            if (Form1.BrowsrOPMode != Form1.BrowserOPMode.seleniumNew)
+                Form1.BrowsrOPMode = Form1.BrowserOPMode.seleniumNew;
             DriverNew();
         }
         /// <summary>
@@ -10002,7 +10004,7 @@ namespace TextForCtext
                 }
                 return found;
             }
-            IWebElement iwe = null;
+            //IWebElement iwe = null;
 
             //檢查頁面
             if (!IsDriverInvalid())
@@ -10205,9 +10207,10 @@ namespace TextForCtext
         /// 複製下一卷文本以供快捷模式連續輸入
         /// 由《四庫全書》文本起，至 20250418 起新增非《四庫》之文本 20251227 改今名
         /// </summary>
-        /// <returns></returns>
+        /// <returns>失敗傳回false</returns>
         internal static bool CopyNextVolume()
         {
+        reNavigate:
             string url = string.Empty; bool result = false;
             string urlPrefixDomain = string.Empty;//= url.Substring(url.IndexOf("//") + "//".Length).Substring(0, url.IndexOf("/"));
             string urlPrefix;// = string.Empty; //url.Substring(0, url.IndexOf("//") + "//".Length);            
@@ -10267,6 +10270,15 @@ namespace TextForCtext
             else if (urlPrefixDomain == "github.com")
             {//url = GetNextPageUrl(url.IndexOf("#") > -1 ? url.Substring(0, url.IndexOf("#")) : url);
 
+                if (url.IndexOf("_") < 0)
+                {
+                    if (MessageBoxShowOKCancelExclamationDefaultDesktopOnly("請翻到《Kanripo漢籍リポジトリ》存放庫（repository）正確的頁面。感恩感恩　南無阿彌陀佛。"
+                        + Environment.NewLine + Environment.NewLine + Environment.NewLine +
+                        "若要重試，請在正確的頁面（即各分卷/篇單位所在的頁面）開啟後再按「確定」。") == DialogResult.Cancel)
+                        return false;
+                    else
+                        goto reNavigate;
+                }
                 //https://github.com/kanripo/KR4h0160/blob/master/KR4h0160_049.txt
                 string prefix = url.Substring(0, url.IndexOf("_") + "_".Length);
                 string vol = url.Substring(url.IndexOf("_") + "_".Length, url.IndexOf(".txt") - (url.IndexOf("_") + "_".Length));
@@ -10333,7 +10345,7 @@ namespace TextForCtext
                 //int l = textContent.Length;
                 //l = l > 50 ? 50 : l;
                 //textContent = textContent.Replace("　", string.Empty).Substring(0, l);
-                BringToFront("chrome");
+                //BringToFront("chrome");
                 //iwe.Click();
                 iwe.JsClick();
 
@@ -10431,72 +10443,106 @@ namespace TextForCtext
 
 
             // 使用 JavaScript 來全選元素內的文字
-            OpenQA.Selenium.IJavaScriptExecutor js = (OpenQA.Selenium.IJavaScriptExecutor)driver;
-            //不複製
-            js.ExecuteScript("var range = document.createRange(); range.selectNodeContents(arguments[0]); var sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(range);", element);
-            //複製
-            //js.ExecuteScript(@"var range = document.createRange(); range.selectNodeContents(arguments[0]); var sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(range); document.execCommand('copy');", element);
+            //OpenQA.Selenium.IJavaScriptExecutor js = (OpenQA.Selenium.IJavaScriptExecutor)driver;
+            //js.ExecuteScript("var range = document.createRange(); range.selectNodeContents(arguments[0]); var sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(range);", element);
 
-            //js.ExecuteScript(@"
-            //    var range = document.createRange();
-            //    range.selectNodeContents(arguments[0]);
-            //    var sel = window.getSelection();
-            //    sel.removeAllRanges();
-            //    sel.addRange(range);
-            //    document.execCommand('copy');
-            //", element);
-            //以上無效
-            //以下只是複製純文字字內容
-            //js.ExecuteScript(@"
-            //    var range = document.createRange();
-            //    range.selectNodeContents(arguments[0]);
-            //    var sel = window.getSelection();
-            //    sel.removeAllRanges();
-            //    sel.addRange(range);
-            //    navigator.clipboard.writeText(sel.toString()).then(function() {
-            //        console.log('Text copied to clipboard');
-            //    }).catch(function(error) {
-            //        console.error('Error copying text: ', error);
-            //    });
-            //", element);
 
-            //// 使用 Actions 來模擬 Ctrl + C 鍵盤操作
-            //Actions actions = new Actions(driver);
-            ////actions.MoveToElement(element).Click().KeyDown(OpenQA.Selenium.Keys.Control).SendKeys("a").SendKeys("c").KeyUp(OpenQA.Selenium.Keys.Control).Perform();
-            //actions.MoveToElement(element).Click().KeyDown(OpenQA.Selenium.Keys.Control).SendKeys("c").KeyUp(OpenQA.Selenium.Keys.Control).Perform();
-            //ChromeSetFocus();
-            //BringToFront("chrome");
-            Clipboard.Clear();
-            //element.SendKeys(selm.Keys.Control + "c");//此元件無法與使用者互動
-            WaitFindWebElementBySelector_ToBeClickable("body").SendKeys(selm.Keys.Control + "c");//外面的框
-            //SendKeys.Send("^c");
-            //SendKeys.SendWait("^c");
-            //Thread.Sleep(900);
-            //Thread.Sleep(150);
-            Thread.Sleep(450);
-            //DateTime dt = DateTime.Now;
-            //try
-            //{
-            //    while (Clipboard.GetText() == string.Empty)
-            //    {
-            //        Thread.Sleep(300);
-            //        if (DateTime.Now.Subtract(dt).TotalSeconds > 4) return false;
-            //    }
 
-            //}
-            //catch (Exception)
-            //{
+            ////複製
+            ////複製 HTML 格式到剪貼簿 https://copilot.microsoft.com/shares/6R7mAqFXVsSkaSCDEPCyF
+            //WebClipboardHelper.CopyPageHtmlToClipboard(driver);
 
-            //}
-            //try
-            //{
-            //    if (Clipboard.GetText() == string.Empty) return false;
+            //直接選取元素並複製其內容(合併以上的方法）https://copilot.microsoft.com/shares/KSyLebUr36C24gDZB5deJ
+            //result = WebClipboardHelper.SelectAndCopyElementHtmlContent(driver, element);
+            // 呼叫一次 Smart 方法即可，內部會自動判斷並分工
+            //result = WebClipboardHelper.SelectAndCopyElementHtmlContentSmart(driver, element);
+            //WebClipboardHelper.SelectAndCopyElementTextContent(driver, element);
+            //https://copilot.microsoft.com/shares/CyT7XUAEyDHbNQvCHXYR1 https://copilot.microsoft.com/shares/guippKFagqRyvsmAckcw4
 
-            //}
-            //catch (Exception)
-            //{
+            //string iElementSelector = "#printView > div:nth-child(3) > div:nth-child(1) > div";
+            // 呼叫捲動檢查版完整抓取器
+            //WebClipboardHelper.CopyElementContentSmartWithScroll(driver, iElementSelector);
+            //// 例如 inindex.com 的 selector
+            //string iElementSelector = "#printView > div:nth-child(3) > div:nth-child(1) > div";
+            // 呼叫穩健版方法
+            //WebClipboardHelper.CopyElementContentSmartStable(driver, iElementSelector);
+            WebClipboardHelper.SelectAndCopyElementHtmlContentSmartStable(driver, element);//與上一行等效（即由其略改而來）20260105
 
-            //}
+
+            //以下為舊式，來日可刪(原來作用中的幾行）
+            ////// 使用 Actions 來模擬 Ctrl + C 鍵盤操作
+            ////Actions actions = new Actions(driver);
+            //////actions.MoveToElement(element).Click().KeyDown(OpenQA.Selenium.Keys.Control).SendKeys("a").SendKeys("c").KeyUp(OpenQA.Selenium.Keys.Control).Perform();
+            ////actions.MoveToElement(element).Click().KeyDown(OpenQA.Selenium.Keys.Control).SendKeys("c").KeyUp(OpenQA.Selenium.Keys.Control).Perform();
+            ////ChromeSetFocus();
+            ////BringToFront("chrome");
+            //Clipboard.Clear();
+            ////element.SendKeys(selm.Keys.Control + "c");//此元件無法與使用者互動
+            //WaitFindWebElementBySelector_ToBeClickable("body").SendKeys(selm.Keys.Control + "c");//外面的框
+
+            //以下為舊式，來日可刪
+            ////js.ExecuteScript(@"var range = document.createRange(); range.selectNodeContents(arguments[0]); var sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(range); document.execCommand('copy');", element);
+
+            ////js.ExecuteScript(@"
+            ////    var range = document.createRange();
+            ////    range.selectNodeContents(arguments[0]);
+            ////    var sel = window.getSelection();
+            ////    sel.removeAllRanges();
+            ////    sel.addRange(range);
+            ////    document.execCommand('copy');
+            ////", element);
+            ////以上無效
+            ////以下只是複製純文字字內容
+            ////js.ExecuteScript(@"
+            ////    var range = document.createRange();
+            ////    range.selectNodeContents(arguments[0]);
+            ////    var sel = window.getSelection();
+            ////    sel.removeAllRanges();
+            ////    sel.addRange(range);
+            ////    navigator.clipboard.writeText(sel.toString()).then(function() {
+            ////        console.log('Text copied to clipboard');
+            ////    }).catch(function(error) {
+            ////        console.error('Error copying text: ', error);
+            ////    });
+            ////", element);
+
+            ////// 使用 Actions 來模擬 Ctrl + C 鍵盤操作
+            ////Actions actions = new Actions(driver);
+            //////actions.MoveToElement(element).Click().KeyDown(OpenQA.Selenium.Keys.Control).SendKeys("a").SendKeys("c").KeyUp(OpenQA.Selenium.Keys.Control).Perform();
+            ////actions.MoveToElement(element).Click().KeyDown(OpenQA.Selenium.Keys.Control).SendKeys("c").KeyUp(OpenQA.Selenium.Keys.Control).Perform();
+            ////ChromeSetFocus();
+            ////BringToFront("chrome");
+            //Clipboard.Clear();
+            ////element.SendKeys(selm.Keys.Control + "c");//此元件無法與使用者互動
+            //WaitFindWebElementBySelector_ToBeClickable("body").SendKeys(selm.Keys.Control + "c");//外面的框
+            ////SendKeys.Send("^c");
+            ////SendKeys.SendWait("^c");
+            ////Thread.Sleep(900);
+            ////Thread.Sleep(150);
+            //Thread.Sleep(450);
+            ////DateTime dt = DateTime.Now;
+            ////try
+            ////{
+            ////    while (Clipboard.GetText() == string.Empty)
+            ////    {
+            ////        Thread.Sleep(300);
+            ////        if (DateTime.Now.Subtract(dt).TotalSeconds > 4) return false;
+            ////    }
+
+            ////}
+            ////catch (Exception)
+            ////{
+
+            ////}
+            ////try
+            ////{
+            ////    if (Clipboard.GetText() == string.Empty) return false;
+
+            ////}
+            ////catch (Exception)
+            ////{
+
+            ////}
 
 
             return result;
@@ -10521,7 +10567,7 @@ namespace TextForCtext
         }
 
         /// <summary>
-        /// 讓Chrome瀏覽器取得焦點
+        /// 讓Chrome瀏覽器取得焦點。限Selenium模式下用
         /// </summary>
         /// <returns></returns>
         internal static bool ChromeSetFocus()
@@ -10568,7 +10614,7 @@ namespace TextForCtext
                 if (quote) x = "\"" + x + "\"";
                 Clipboard.SetText(x);
                 //在Selenium模式下，直接以x搜尋網路
-                if (Form1.browsrOPMode != Form1.BrowserOPMode.appActivateByName)
+                if (Form1.BrowsrOPMode != Form1.BrowserOPMode.appActivateByName)
                 {
                     if (driver != null)
                     {
@@ -10593,7 +10639,7 @@ namespace TextForCtext
             }
             return true;
         }
-        
+
 
     }
 
@@ -10702,6 +10748,736 @@ namespace TextForCtext
             }
         }
 
+    }
+
+    /// <summary>
+    /// 反譯轉譯Html實體
+    /// </summary>
+    public static class HtmlEntityDecoder
+    {//https://copilot.microsoft.com/shares/vK6hkcZXfoLsmBcvqnz2f
+        // 自訂常用 HTML 實體字典
+        private static readonly Dictionary<string, string> customEntities = new Dictionary<string, string>
+    {
+        {"&lt;", "<"},
+        {"&gt;", ">"},
+        {"&amp;", "&"},
+        {"&quot;", "\""},
+        {"&apos;", "'"},
+        {"&nbsp;", " "},
+        {"&copy;", "©"},
+        {"&reg;", "®"},
+        {"&trade;", "™"},
+        {"&yen;", "¥"},
+        {"&euro;", "€"}
+    };
+
+        /// <summary>
+        /// 使用 .NET 內建 HtmlDecode
+        /// </summary>
+        public static string DecodeWithBuiltin(string input)
+        {
+            return WebUtility.HtmlDecode(input);
+        }
+
+        /// <summary>
+        /// 使用自訂字典逐一替換
+        /// </summary>
+        public static string DecodeWithCustom(string input)
+        {
+            string result = input;
+            foreach (var kvp in customEntities)
+            {
+                result = result.Replace(kvp.Key, kvp.Value);
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// 混合模式：先用自訂字典，再用內建 HtmlDecode
+        /// （確保特殊符號也能被完整處理）
+        /// </summary>
+        public static string DecodeHybrid(string input)
+        {
+            return WebUtility.HtmlDecode(DecodeWithCustom(input));
+        }
+    }
+    /// <summary>
+    /// Html 實體的轉換
+    /// </summary>
+    class HtmlEntityHelper
+    {//https://copilot.microsoft.com/shares/TzP5jUJWmLd4u4wtjcU8G
+        private static readonly Dictionary<string, string> htmlEntities = new Dictionary<string, string>
+    {
+        {"&lt;", "<"},
+        {"&gt;", ">"},
+        {"&amp;", "&"},
+        {"&quot;", "\""},
+        {"&apos;", "'"},
+        {"&nbsp;", " "},
+        {"&copy;", "©"},
+        {"&reg;", "®"},
+        {"&trade;", "™"},
+        {"&yen;", "¥"},
+        {"&euro;", "€"}
+    };
+
+        public static string DecodeEntities(string input)
+        {
+            string result = input;
+            foreach (var kvp in htmlEntities)
+            {
+                result = result.Replace(kvp.Key, kvp.Value);
+            }
+            return result;
+        }
+    }
+
+    /*
+     * 這裡我幫您整理一個 封裝方法庫，讓您未來只要呼叫一個方法，就能完成「抓 HTML → 複製到剪貼簿 → 貼到 Word → VBA 判斷格式」的流程。
+     * https://copilot.microsoft.com/shares/6R7mAqFXVsSkaSCDEPCyF
+     */
+    /// <summary>
+    /// 網頁剪貼簿操作 by Copilot大菩薩 20260104
+    /// </summary>
+    public static class WebClipboardHelper
+    {
+
+
+        public static Dictionary<string, string> HtmlEntities = new Dictionary<string, string>
+{
+    {"&lt;", "<"},
+    {"&gt;", ">"},
+    {"&amp;", "&"},
+    {"&quot;", "\""},
+    {"&apos;", "'"},
+    {"&nbsp;", " "},
+    {"&copy;", "©"},
+    {"&reg;", "®"},
+    {"&trade;", "™"},
+    {"&yen;", "¥"},
+    {"&euro;", "€"}
+};
+
+
+
+        //public static bool HtmlEntitiesReverce(string content)
+        //{
+        //    foreach (var item in HtmlEntities)
+        //    {
+
+        //    }
+        //}
+
+        /// <summary>
+        /// 抓取整個網頁 Body 的 HTML，並複製到剪貼簿 (HTML 格式)
+        /// </summary>
+        public static void CopyPageHtmlToClipboard(IWebDriver driver)
+        {
+            IJavaScriptExecutor js = (IJavaScriptExecutor)driver;
+            string htmlContent = (string)js.ExecuteScript("return document.body.innerHTML;");
+            Clipboard.SetText(htmlContent, TextDataFormat.Html);
+        }
+
+        /// <summary>
+        /// 抓取整個網頁 Body 的純文字，並複製到剪貼簿 (Text 格式)
+        /// </summary>
+        public static void CopyPageTextToClipboard(IWebDriver driver)
+        {
+            IJavaScriptExecutor js = (IJavaScriptExecutor)driver;
+            string textContent = (string)js.ExecuteScript("return document.body.innerText;");
+            Clipboard.SetText(textContent, TextDataFormat.Text);
+        }
+
+        /// <summary>
+        /// 抓取指定元素的 HTML，並複製到剪貼簿 (HTML 格式)
+        /// </summary>
+        public static void CopyElementHtmlToClipboard(IWebDriver driver, IWebElement element)
+        {
+            IJavaScriptExecutor js = (IJavaScriptExecutor)driver;
+            string htmlContent = (string)js.ExecuteScript("return arguments[0].innerHTML;", element);
+            Clipboard.SetText(htmlContent, TextDataFormat.Html);
+        }
+
+        /// <summary>
+        /// 抓取指定元素的純文字，並複製到剪貼簿 (Text 格式)
+        /// </summary>
+        public static void CopyElementTextToClipboard(IWebDriver driver, IWebElement element)
+        {
+            IJavaScriptExecutor js = (IJavaScriptExecutor)driver;
+            string textContent = (string)js.ExecuteScript("return arguments[0].innerText;", element);
+            Clipboard.SetText(textContent, TextDataFormat.Text);
+        }
+
+        /// <summary>
+        /// 在瀏覽器中選取指定元素的內容 (模擬使用者選取效果)
+        /// </summary>
+        public static void SelectElementContent(IWebDriver driver, IWebElement element)
+        {
+            IJavaScriptExecutor js = (IJavaScriptExecutor)driver;
+            js.ExecuteScript(@"
+            var range = document.createRange();
+            range.selectNodeContents(arguments[0]);
+            var sel = window.getSelection();
+            sel.removeAllRanges();
+            sel.addRange(range);
+        ", element);
+        }
+
+        /// <summary>
+        /// 選取指定元素並直接複製到剪貼簿 (結合選取+複製)
+        /// </summary>
+        /// <param name="driver"></param>
+        /// <param name="element"></param>
+        /// <returns>失敗傳回false</returns>
+        public static bool SelectAndCopyElementTextContent(IWebDriver driver, IWebElement element)
+        {
+            IJavaScriptExecutor js = (IJavaScriptExecutor)driver;
+            string textContent = (string)js.ExecuteScript("return arguments[0].innerText;", element);
+            if (!string.IsNullOrEmpty(textContent))
+                //Clipboard.SetText(textContent, TextDataFormat.Text);
+                Clipboard.SetText(textContent, TextDataFormat.UnicodeText);
+            else
+                return false;
+            return true;
+        }
+
+        //https://copilot.microsoft.com/shares/KSyLebUr36C24gDZB5deJ
+
+        /// <summary>
+        /// 選取指定元素並直接複製到剪貼簿 (結合選取+複製)
+        /// </summary>
+        /// <param name="driver"></param>
+        /// <param name="element"></param>
+        /// <returns>失敗傳回false</returns>
+        public static bool SelectAndCopyElementHtmlContent(IWebDriver driver, IWebElement element)
+        {
+            IJavaScriptExecutor js = (IJavaScriptExecutor)driver;
+            string textContent = (string)js.ExecuteScript("return arguments[0].innerHTML;", element);
+            if (!string.IsNullOrEmpty(textContent))
+            {
+                //Clipboard.SetText(textContent, TextDataFormat.Text);//會有亂碼
+                //Clipboard.SetText(textContent, TextDataFormat.UnicodeText);//只適用於純文字
+                Clipboard.SetText(textContent, TextDataFormat.Html);
+                //Clipboard.SetText(elementHtml, TextDataFormat.Html);//方法 2：存成 HTML 格式
+                //如果您要在 Word / Office Interop 中貼上 HTML，建議用 HTML 格式：
+                //這樣 Word 會識別為 HTML，而不是純文字。
+            }
+
+            else
+                return false;
+            return true;
+        }
+        /// <summary>
+        /// 選取並複製指定元件的內容，猶如按下 Ctrl + c
+        /// </summary>
+        /// <param name="driver"></param>
+        /// <param name="element">指定的元件</param>
+        /// <returns>失敗傳回false</returns>
+        public static bool SelectAndCopyElementHtmlContentSmart(IWebDriver driver, IWebElement element)
+        {
+            IJavaScriptExecutor js = (IJavaScriptExecutor)driver;
+            string content = (string)js.ExecuteScript("return arguments[0].innerHTML;", element);
+
+            ClipboardContentType type = ClipboardInspector.GetContentTypeFromString(content);
+
+            switch (type)
+            {
+                case ClipboardContentType.Html_CFHTML:
+                    {
+                        // 包裝成 CF_HTML 格式
+                        string header = "Version:0.9\r\n";
+                        string source = "SourceURL:" + driver.Url + "\r\n";
+
+                        string pre = "<html><body>";
+                        string post = "</body></html>";
+                        string fullHtml = pre + content + post;
+
+                        int startHtml = header.Length + source.Length;
+                        int endHtml = startHtml + fullHtml.Length;
+
+                        string cfHtml =
+                            header +
+                            $"StartHTML:{startHtml:D10}\r\n" +
+                            $"EndHTML:{endHtml:D10}\r\n" +
+                            $"StartFragment:{startHtml:D10}\r\n" +
+                            $"EndFragment:{endHtml:D10}\r\n" +
+                            source +
+                            fullHtml;
+
+                        Clipboard.SetText(cfHtml, TextDataFormat.Html);
+                        break;
+                    }
+
+                case ClipboardContentType.PlainText:
+                    {
+                        string textContent = (string)js.ExecuteScript("return arguments[0].innerText;", element);
+                        Clipboard.SetText(textContent, TextDataFormat.UnicodeText);
+                        break;
+                    }
+
+                default:
+                    return false;
+            }
+
+            return true;
+        }
+        /// <summary>
+        /// 智慧複製指定元素的完整內容到剪貼簿（Word可完整貼上）
+        /// 由 CopyElementContentSmartStable改寫而來
+        /// </summary>        
+        /// <param name="driver"></param>
+        /// <param name="element"></param>
+        /// <returns>失敗傳回false</returns>
+        public static bool SelectAndCopyElementHtmlContentSmartStable(IWebDriver driver, IWebElement element)
+        {
+            var js = (IJavaScriptExecutor)driver;
+            //var element = driver.FindElement(By.CssSelector(cssSelector));
+
+            // 抓完整 HTML 片段（包含子元素）
+            string fragmentHtml = (string)js.ExecuteScript("return arguments[0].outerHTML;", element);
+            if (string.IsNullOrWhiteSpace(fragmentHtml)) return false;
+
+            // 生成穩健 CF_HTML
+            string cfHtml = BuildCfHtmlUtf8(fragmentHtml, driver.Url);
+
+            // 同時提供純文字（方便 Notepad++）
+            string plainText = (string)js.ExecuteScript("return arguments[0].innerText;", element);
+
+            var data = new DataObject();//https://copilot.microsoft.com/shares/562GQdNPLGNavN1UPHeDz 這次能在 Word 完整貼上格式化內容、同時在 Notepad++ 貼上純文字，正是因為最後的修正把 CF_HTML 與 UnicodeText 兩種格式同時正確寫入剪貼簿了。
+            data.SetData(DataFormats.Html, cfHtml);
+            data.SetData(DataFormats.UnicodeText, plainText ?? string.Empty);
+            Clipboard.SetDataObject(data, true);
+
+            return true;
+        }
+        /// <summary>
+        /// 自動判斷內容且自動展開以複製指定元件的所有內容
+        /// </summary>
+        /// <param name="driver"></param>
+        /// <param name="cssSelector"></param>
+        /// <param name="timeoutSeconds"></param>
+        /// <returns></returns>
+        public static bool CopyElementContentSmartWithScroll(IWebDriver driver, string cssSelector, int timeoutSeconds = 15)
+        {//https://copilot.microsoft.com/shares/kHyxuixBW118E2S8uPVya
+            IJavaScriptExecutor js = (IJavaScriptExecutor)driver;
+
+            // 找到元素
+            IWebElement element = driver.FindElement(By.CssSelector(cssSelector));
+
+            // 模擬捲動，直到高度穩定
+            long lastHeight = 0;
+            long newHeight = (long)js.ExecuteScript("return arguments[0].scrollHeight;", element);
+
+            DateTime endTime = DateTime.Now.AddSeconds(timeoutSeconds);
+
+            while (DateTime.Now < endTime)
+            {
+                if (newHeight == lastHeight)
+                    break; // 高度不再變化，表示已載入完成
+
+                lastHeight = newHeight;
+
+                // 捲到底部
+                js.ExecuteScript("arguments[0].scrollTop = arguments[0].scrollHeight;", element);
+
+                System.Threading.Thread.Sleep(500); // 等待半秒再檢查
+
+                newHeight = (long)js.ExecuteScript("return arguments[0].scrollHeight;", element);
+            }
+
+            // 抓完整 HTML
+            string htmlContent = (string)js.ExecuteScript("return arguments[0].outerHTML;", element);
+
+            if (string.IsNullOrEmpty(htmlContent))
+                return false;
+
+            ClipboardContentType type = ClipboardInspector.GetContentTypeFromString(htmlContent);
+
+            switch (type)
+            {
+                case ClipboardContentType.Html_CFHTML:
+                    {
+                        string header = "Version:0.9\r\n";
+                        string source = "SourceURL:" + driver.Url + "\r\n";
+
+                        string pre = "<html><body>";
+                        string post = "</body></html>";
+                        string fullHtml = pre + htmlContent + post;
+
+                        int startHtml = header.Length + source.Length;
+                        int endHtml = startHtml + fullHtml.Length;
+
+                        string cfHtml =
+                            header +
+                            $"StartHTML:{startHtml:D10}\r\n" +
+                            $"EndHTML:{endHtml:D10}\r\n" +
+                            $"StartFragment:{startHtml:D10}\r\n" +
+                            $"EndFragment:{endHtml:D10}\r\n" +
+                            source +
+                            fullHtml;
+
+                        Clipboard.SetText(cfHtml, TextDataFormat.Html);
+                        break;
+                    }
+
+                case ClipboardContentType.PlainText:
+                    {
+                        string textContent = (string)js.ExecuteScript("return arguments[0].innerText;", element);
+                        Clipboard.SetText(textContent, TextDataFormat.UnicodeText);
+                        break;
+                    }
+
+                default:
+                    return false;
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// 建立符合 CF_HTML 規範的字串（UTF-8，精準位元組偏移）
+        /// </summary>
+        private static string BuildCfHtmlUtf8(string fragmentHtml, string sourceUrl = null)
+        {
+            string htmlDoc =
+                "<html><head><meta charset=\"utf-8\"></head><body><!--StartFragment-->" +
+                fragmentHtml +
+                "<!--EndFragment--></body></html>";
+
+            string header =
+                "Version:1.0\r\n" +
+                "StartHTML:0000000000\r\n" +
+                "EndHTML:0000000000\r\n" +
+                "StartFragment:0000000000\r\n" +
+                "EndFragment:0000000000\r\n" +
+                (string.IsNullOrEmpty(sourceUrl) ? "" : $"SourceURL:{sourceUrl}\r\n");
+
+            string preliminary = header + htmlDoc;
+
+            Encoding enc = Encoding.UTF8;
+            int startHtml = enc.GetByteCount(header);
+            int endHtml = startHtml + enc.GetByteCount(htmlDoc);
+
+            int fragStartCharIndex = htmlDoc.IndexOf("<!--StartFragment-->");
+            int fragEndCharIndex = htmlDoc.IndexOf("<!--EndFragment-->");
+
+            int startFragment = startHtml + enc.GetByteCount(htmlDoc.Substring(0, fragStartCharIndex));
+            int endFragment = startHtml + enc.GetByteCount(htmlDoc.Substring(0, fragEndCharIndex));
+
+            string startHtmlStr = startHtml.ToString("D10");
+            string endHtmlStr = endHtml.ToString("D10");
+            string startFragmentStr = startFragment.ToString("D10");
+            string endFragmentStr = endFragment.ToString("D10");
+
+            StringBuilder sb = new StringBuilder(preliminary);
+
+            int posStartHtml = sb.ToString().IndexOf("StartHTML:") + "StartHTML:".Length;
+            int posEndHtml = sb.ToString().IndexOf("EndHTML:") + "EndHTML:".Length;
+            int posStartFragment = sb.ToString().IndexOf("StartFragment:") + "StartFragment:".Length;
+            int posEndFragment = sb.ToString().IndexOf("EndFragment:") + "EndFragment:".Length;
+
+            sb.Remove(posStartHtml, 10).Insert(posStartHtml, startHtmlStr);
+            sb.Remove(posEndHtml, 10).Insert(posEndHtml, endHtmlStr);
+            sb.Remove(posStartFragment, 10).Insert(posStartFragment, startFragmentStr);
+            sb.Remove(posEndFragment, 10).Insert(posEndFragment, endFragmentStr);
+
+            return sb.ToString();
+        }
+
+        /// <summary>
+        /// 智慧複製指定元素的完整內容到剪貼簿（Word可完整貼上）
+        /// </summary>
+        public static bool CopyElementContentSmartStable(IWebDriver driver, string cssSelector)
+        {//https://copilot.microsoft.com/shares/4ERPZfGEzNrcm7kKETrRG https://copilot.microsoft.com/shares/sAk4fpVtBhoe6QMJJcYxt
+            var js = (IJavaScriptExecutor)driver;
+            var element = driver.FindElement(By.CssSelector(cssSelector));
+
+            // 抓完整 HTML 片段（包含子元素）
+            string fragmentHtml = (string)js.ExecuteScript("return arguments[0].outerHTML;", element);
+            if (string.IsNullOrWhiteSpace(fragmentHtml)) return false;
+
+            // 生成穩健 CF_HTML
+            string cfHtml = BuildCfHtmlUtf8(fragmentHtml, driver.Url);
+
+            // 同時提供純文字（方便 Notepad++）
+            string plainText = (string)js.ExecuteScript("return arguments[0].innerText;", element);
+
+            var data = new DataObject();//https://copilot.microsoft.com/shares/562GQdNPLGNavN1UPHeDz 這次能在 Word 完整貼上格式化內容、同時在 Notepad++ 貼上純文字，正是因為最後的修正把 CF_HTML 與 UnicodeText 兩種格式同時正確寫入剪貼簿了。
+            data.SetData(DataFormats.Html, cfHtml);
+            data.SetData(DataFormats.UnicodeText, plainText ?? string.Empty);
+            Clipboard.SetDataObject(data, true);
+
+            return true;
+        }
+
+
+        /// <summary>
+        /// 字串是否含有非BMP字元
+        /// </summary>
+        /// <param name="x">要檢查的字串</param>
+        /// <returns></returns>
+        public static bool HasNonBmpChar(string x)
+        {//自動判斷複製模式：若字串含有非BMP字元則用UnicodeText，否則用Html
+            return x.Any(c => char.ConvertToUtf32(x, x.IndexOf(c)) > 0xFFFF);
+        }
+
+
+
+    }
+
+    /// <summary>
+    /// 剪貼簿內是怎樣的內容
+    /// </summary>
+    public enum ClipboardContentType
+    {//https://copilot.microsoft.com/shares/CyT7XUAEyDHbNQvCHXYR1
+        None,
+        PlainText,
+        Html_CFHTML,
+        Html_Invalid
+    }
+    /// <summary>
+    /// 剪貼簿內容檢測
+    /// </summary>
+    public static class ClipboardInspector
+    {
+        /// <summary>
+        /// 檢查剪貼簿內容，回傳可用的格式類型
+        /// </summary>
+        public static ClipboardContentType GetClipboardContentType()
+        {
+            if (Clipboard.ContainsText(TextDataFormat.Html))
+            {
+                string htmlData = Clipboard.GetText(TextDataFormat.Html);
+
+                if (htmlData.Contains("Version:") &&
+                    htmlData.Contains("StartHTML:") &&
+                    htmlData.Contains("EndHTML:") &&
+                    htmlData.Contains("StartFragment:") &&
+                    htmlData.Contains("EndFragment:"))
+                {
+                    return ClipboardContentType.Html_CFHTML;
+                }
+                else
+                {
+                    return ClipboardContentType.Html_Invalid;
+                }
+            }
+            else if (Clipboard.ContainsText(TextDataFormat.UnicodeText))
+            {
+                return ClipboardContentType.PlainText;
+            }
+            else
+            {
+                return ClipboardContentType.None;
+            }
+        }
+
+        /// <summary>
+        /// 判斷字串內容型態（用於 Smart 方法）
+        /// </summary>
+        public static ClipboardContentType GetContentTypeFromString(string content)
+        {
+            if (string.IsNullOrEmpty(content))
+                return ClipboardContentType.None;
+
+            // 簡單判斷：有 HTML 標籤
+            if (content.Contains("<") && content.Contains(">"))
+            {
+                return ClipboardContentType.Html_CFHTML;
+            }
+            else
+            {
+                return ClipboardContentType.PlainText;
+            }
+        }
+    }
+
+    /* 使用情境：
+     ClipboardContentType type = ClipboardInspector.GetClipboardContentType();
+
+            switch (type)
+            {
+                case ClipboardContentType.Html_CFHTML:
+                    // 呼叫 HTML 智慧方法
+                    result = WebClipboardHelper.SelectAndCopyElementHtmlContentSmart(driver, element, true);
+                    break;
+
+                case ClipboardContentType.PlainText:
+                    // 呼叫純文字方法
+                    result = WebClipboardHelper.SelectAndCopyElementHtmlContentSmart(driver, element, false);
+                    break;
+
+                case ClipboardContentType.Html_Invalid:
+                    // 有 HTML 但不符合 CF_HTML → 建議重新包裝
+                    result = WebClipboardHelper.SelectAndCopyElementHtmlContentSmart(driver, element, true);
+                    break;
+
+                case ClipboardContentType.None:
+                    // 沒有內容 → 可視情況重試或報錯
+                    result = false;
+                    Console.WriteLine("剪貼簿沒有可用內容，請重新抓取。");
+                    MessageBoxShowOKExclamationDefaultDesktopOnly("剪貼簿沒有可用內容，請重新抓取。");
+                    break;
+            }
+     */
+
+
+    /*
+    使用範例
+    iElementSelector = "#printView";
+        element = driver.FindElement(By.CssSelector(iElementSelector));
+
+        // 呼叫完整抓取器
+        WebElementExtractor.CopyElementContentSmart(driver, element);
+        ✅ 特點
+            outerHTML → 抓取元素及所有子元素的完整 HTML 結構。
+
+            innerText → 抓取元素及所有子元素的純文字。
+
+            Smart 判斷 → 自動選擇 HTML 或純文字，並一次性寫入剪貼簿。
+
+            守真，這樣就能保證您在 #printView 上抓到完整的內容，不會只剩前半段。
+            要不要我再幫您加一個「遞迴展開」版本，能逐層遍歷 DOM，把所有子元素的文字拼接起來，確保即使有特殊排版也不會漏掉？ https://copilot.microsoft.com/shares/LL2gyPQtRsmvabFHAQ7WA
+     */
+
+    /// <summary>
+    /// 完整抓取器方法:遞迴抓取的版本，會遍歷元素及其所有子元素，組合成完整的文字或 HTML：
+    /// </summary>
+    public static class WebElementExtractor
+    {//https://copilot.microsoft.com/shares/eirL19dyqRgkmuNoH85WM
+        /// <summary>
+        /// 遞迴抓取指定元素及所有子元素的純文字
+        /// </summary>
+        public static string GetFullInnerText(IWebDriver driver, IWebElement element)
+        {
+            IJavaScriptExecutor js = (IJavaScriptExecutor)driver;
+            // innerText 本身會包含子元素的文字，但有些情況可能漏掉隱藏或特殊排版
+            string textContent = (string)js.ExecuteScript("return arguments[0].innerText;", element);
+            return textContent;
+        }
+
+        /// <summary>
+        /// 遞迴抓取指定元素及所有子元素的 HTML
+        /// </summary>
+        public static string GetFullOuterHtml(IWebDriver driver, IWebElement element)
+        {
+            IJavaScriptExecutor js = (IJavaScriptExecutor)driver;
+            // outerHTML 會包含子元素的完整 HTML 結構
+            string htmlContent = (string)js.ExecuteScript("return arguments[0].outerHTML;", element);
+            return htmlContent;
+        }
+
+        /// <summary>
+        /// 將完整文字或 HTML 寫入剪貼簿，並自動判斷格式
+        /// </summary>
+        public static bool CopyElementContentSmart(IWebDriver driver, IWebElement element)
+        {
+            string htmlContent = GetFullOuterHtml(driver, element);
+
+            if (string.IsNullOrEmpty(htmlContent))
+                return false;
+
+            // 判斷是否為 HTML
+            if (htmlContent.Contains("<") && htmlContent.Contains(">"))
+            {
+                // 包裝成 CF_HTML 格式
+                string header = "Version:0.9\r\n";
+                string source = "SourceURL:" + driver.Url + "\r\n";
+
+                string pre = "<html><body>";
+                string post = "</body></html>";
+                string fullHtml = pre + htmlContent + post;
+
+                int startHtml = header.Length + source.Length;
+                int endHtml = startHtml + fullHtml.Length;
+
+                string cfHtml =
+                    header +
+                    $"StartHTML:{startHtml:D10}\r\n" +
+                    $"EndHTML:{endHtml:D10}\r\n" +
+                    $"StartFragment:{startHtml:D10}\r\n" +
+                    $"EndFragment:{endHtml:D10}\r\n" +
+                    source +
+                    fullHtml;
+
+                Clipboard.SetText(cfHtml, TextDataFormat.Html);
+            }
+            else
+            {
+                string textContent = GetFullInnerText(driver, element);
+                Clipboard.SetText(textContent, TextDataFormat.UnicodeText);
+            }
+
+            return true;
+        }
+    }
+
+    public static class CfHtmlBuilder
+    {//https://copilot.microsoft.com/shares/rN5fXQPXjUGTzR5PaXtUc
+        public static string BuildCfHtmlUtf8(string fragmentHtml, string sourceUrl = null)
+        {
+            // 1) 用註解標記片段邊界
+            string htmlDoc =
+                "<html><head><meta charset=\"utf-8\"></head><body><!--StartFragment-->" +
+                fragmentHtml +
+                "<!--EndFragment--></body></html>";
+
+            // 2) 固定寬度欄位的標頭（10位數字），先用0占位，不影響總長度
+            string header =
+                "Version:1.0\r\n" +
+                "StartHTML:0000000000\r\n" +
+                "EndHTML:0000000000\r\n" +
+                "StartFragment:0000000000\r\n" +
+                "EndFragment:0000000000\r\n" +
+                (string.IsNullOrEmpty(sourceUrl) ? "" : $"SourceURL:{sourceUrl}\r\n");
+
+            // 3) 組合初稿，計算位元組偏移
+            string preliminary = header + htmlDoc;
+
+            // 用 UTF-8 逐一計算位元組偏移
+            Encoding enc = Encoding.UTF8;
+            int startHtml = enc.GetByteCount(header);
+            int endHtml = startHtml + enc.GetByteCount(htmlDoc);
+
+            int fragStartCharIndex = htmlDoc.IndexOf("<!--StartFragment-->");
+            int fragEndCharIndex = htmlDoc.IndexOf("<!--EndFragment-->");
+
+            int startFragment = startHtml + enc.GetByteCount(htmlDoc.Substring(0, fragStartCharIndex));
+            int endFragment = startHtml + enc.GetByteCount(htmlDoc.Substring(0, fragEndCharIndex));
+
+            // 4) 將數字填回固定欄位（不改變標頭長度）
+            string startHtmlStr = startHtml.ToString("D10");
+            string endHtmlStr = endHtml.ToString("D10");
+            string startFragmentStr = startFragment.ToString("D10");
+            string endFragmentStr = endFragment.ToString("D10");
+
+            // 用 StringBuilder 取代對應欄位的數字
+            StringBuilder sb = new StringBuilder(preliminary);
+
+            // 幫助函式：在指定標記後覆寫10位數字
+            void Patch(string tag)
+            {
+                int pos = preliminary.IndexOf(tag) + tag.Length;
+                for (int i = 0; i < 10; i++) sb[pos + i] = '#'; // 先墊位，避免不同位數影響
+            }
+            Patch("StartHTML:");
+            Patch("EndHTML:");
+            Patch("StartFragment:");
+            Patch("EndFragment:");
+
+            // 再次定位位置，覆寫成正確數字
+            int posStartHtml = sb.ToString().IndexOf("StartHTML:") + "StartHTML:".Length;
+            int posEndHtml = sb.ToString().IndexOf("EndHTML:") + "EndHTML:".Length;
+            int posStartFragment = sb.ToString().IndexOf("StartFragment:") + "StartFragment:".Length;
+            int posEndFragment = sb.ToString().IndexOf("EndFragment:") + "EndFragment:".Length;
+
+            sb.Remove(posStartHtml, 10).Insert(posStartHtml, startHtmlStr);
+            sb.Remove(posEndHtml, 10).Insert(posEndHtml, endHtmlStr);
+            sb.Remove(posStartFragment, 10).Insert(posStartFragment, startFragmentStr);
+            sb.Remove(posEndFragment, 10).Insert(posEndFragment, endFragmentStr);
+
+            return sb.ToString();
+        }
     }
 
 }

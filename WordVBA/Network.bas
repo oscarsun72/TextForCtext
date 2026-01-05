@@ -1864,7 +1864,8 @@ Function inputAITShenShenWikiPunctResult() As Boolean
     Const ignoreMarker = "《》〈〉（）·「」『』" '書名號、篇名號、括號、音節號、引號不處理（由前面的程式碼處理）
     result = Selection.text
     Rem 括號、篇名號之處理：〔、〕、〔、〕 會被清除掉
-    result = VBA.Replace(VBA.Replace(result, "《", "＜"), "》", "＞") '書名號亦會被自動標點清除故,以備還原 20241106
+    'result = VBA.Replace(VBA.Replace(result, "《", "＜"), "》", "＞") '書名號亦會被自動標點清除故,以備還原 20241106
+    result = VBA.Replace(VBA.Replace(result, "《", "○"), "》", "`")     '書名號亦會被自動標點清除故,以備還原 20241106 20260103 發現原符號會導致其程序無法進行，故暫改作此號
     result = VBA.Replace(VBA.Replace(result, "（", "【"), "）", "】") '括號亦會被自動標點清除故,以備還原 202411106
     result = VBA.Replace(VBA.Replace(result, "〈", VBA.ChrW(12310)), "〉", VBA.ChrW(12311))     '篇名號亦會被自動標點清除故,以備還原 20241001
     'result = VBA.Replace(result, "·", "⊙")     '音節號亦會被自動標點清除故,以備還原 20241001 ⊙‧則會被取代成□，無益，`則常被誤轉，.會被清除 20241124
@@ -1877,17 +1878,23 @@ Function inputAITShenShenWikiPunctResult() As Boolean
     Else
         result = VBA.Replace(VBA.Replace(VBA.Replace(VBA.Replace(result, VBA.ChrW(8220), "「"), VBA.ChrW(8221), "」"), VBA.ChrW(8216), "『"), VBA.ChrW(8217), "』")
         result = VBA.Replace(VBA.Replace(result, VBA.ChrW(12310) & "《", VBA.ChrW(12310)), "》" & VBA.ChrW(12311), VBA.ChrW(12311))      '書名號亦會被自動標點清除故,以備還原 20241106
-        result = VBA.Replace(VBA.Replace(result, "《", "＜"), "》", "＞") '書名號亦會被自動標點清除故,以備還原 20241106
+        'result = VBA.Replace(VBA.Replace(result, "《", "＜"), "》", "＞") '書名號亦會被自動標點清除故,以備還原 20241106
+        'result = VBA.Replace(VBA.Replace(result, "《", "○"), "》", "`")     '書名號亦會被自動標點清除故,以備還原 20241106 20260103 發現原符號會導致其程序無法進行，故暫改作此號
+        result = VBA.Replace(VBA.Replace(result, "《", vbNullString), "》", vbNullString) '清除它所標的書名號（且常標錯），以免影響原文是否被篡改之判斷 20260103
         result = VBA.Replace(result, "·", "&")     '音節號亦會被自動標點清除故,以備還原 20241001
         result = VBA.Replace(result, "&；", "·")
         Rem 幾乎它不認得的都會轉成「□」
         result = VBA.Replace(result, "□", VBA.ChrW(9711))
     End If
     
+    
     d.Activate
     d.Application.Activate
     Rem 括號之處理'標點會在（處停止
-    result = VBA.Replace(VBA.Replace(result, "＜", "《"), "＞", "》") '書名號亦會被自動標點清除故,以備還原 20241001
+    'result = VBA.Replace(VBA.Replace(result, "＜", "《"), "＞", "》") '書名號亦會被自動標點清除故,以備還原 20241001
+    'result = VBA.Replace(VBA.Replace(result, "○", "《"), "`", "》")     '書名號亦會被自動標點清除故,以備還原 20241106 20260103 發現原符號會導致其程序無法進行，故暫改作此號
+    result = VBA.Replace(VBA.Replace(result, ChrW(12295), "《"), "`", "》")         '書名號亦會被自動標點清除故,以備還原 20241106 20260103 發現原符號會導致其程序無法進行，故暫改作此號
+                        '"○" 會被篡改成「chrw(  12295  )」故 20260103
     result = VBA.Replace(result, "&", "·")  '音節號亦會被自動標點清除故,以備還原 20241001
     result = VBA.Replace(VBA.Replace(result, "【", "（"), "】", "）")  '括號亦會被自動標點清除故,以備還原 20241001
     result = VBA.Replace(VBA.Replace(result, VBA.ChrW(12310), "〈"), VBA.ChrW(12311), "〉")     '篇名號亦會被自動標點清除故,以備還原 20241001
@@ -2182,5 +2189,29 @@ eH:
     'AppActivate ""
 End Sub
 
+Property Get HtmlEntity(htmlStr As String) As String
+'https://copilot.microsoft.com/shares/EPiwEZqBbB611FKN5J5eS '20260104
+    Dim pHtmlEntities As New Scripting.Dictionary
+    ' 建立 Dictionary 'https://copilot.microsoft.com/shares/NoB2TkGBSXqsrbcpcF39M
+    'Set pHtmlEntities = CreateObject("Scripting.Dictionary")
+    With pHtmlEntities
+        .Add "&lt;", "<"
+        .Add "&gt;", ">"
+        .Add "&amp;", "&"
+        .Add "&quot;", """"
+        .Add "&apos;", "'"
+        .Add "&nbsp;", " "
+        .Add "&copy;", "c"
+        .Add "&reg;", "R"
+        .Add "&trade;", "?"
+        .Add "&yen;", "￥"
+        .Add "&euro;", "€"
+    End With
+    If pHtmlEntities.Exists(htmlStr) Then
+        HtmlEntity = pHtmlEntities(htmlStr)
+    Else
+        HtmlEntity = vbNullString
+    End If
+End Property
 
 

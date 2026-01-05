@@ -1,12 +1,8 @@
 ﻿// 為WordVBA做API等事宜  https://sl.bing.net/fljln2wR7mK 感恩感恩　Copilot大菩薩 南無阿彌陀佛 20240914
 using Microsoft.Win32;
-using OpenQA.Selenium.DevTools.V125.Profiler;
-using OpenQA.Selenium.Support.UI;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Configuration;
 using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Text;
@@ -14,10 +10,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Media;
-using System.Net.Http.Headers;
 using System.Runtime.InteropServices;
-using System.Security.Cryptography;
-using System.Security.Policy;
 using System.Text;
 //using System.Text.Encodings.Web;
 using System.Text.RegularExpressions;
@@ -29,10 +22,8 @@ using System.Web;
 //using System.Windows;
 using System.Windows.Forms;
 //using System.Windows.Input;
-using System.Windows.Media.TextFormatting;
 using TextForCtext;
 using WebSocketSharp;
-using static System.Net.Mime.MediaTypeNames;
 using static TextForCtext.Browser;
 using static TextForCtext.CTP;
 //using static System.Windows.Forms.VisualStyles.VisualStyleElement;
@@ -218,8 +209,10 @@ namespace WindowsFormsApp1
         /// <summary>
         /// 現行軟體運行之架構是哪種（appActivateByName, seleniumNew, seleniumGet……）
         /// 每表獨立的表單可指定不同的模式，故不能是 static；有空再來改
+        /// 還是不適合，應該是整個系統依據使用者在設定中所選擇的模式來決定，故仍宣告為 static 以便全域存取。
+        /// 若有需要不同的操作模式，可以開另一個應用程式（只要記憶體夠，這個軟件可以開無限個），或再做另一個新的表單實例來指定不同的操作模式。20260102
         /// </summary>
-        internal static BrowserOPMode browsrOPMode = BrowserOPMode.appActivateByName;
+        internal static BrowserOPMode BrowsrOPMode = BrowserOPMode.appActivateByName;
 
 
         /// <summary>
@@ -343,7 +336,7 @@ namespace WindowsFormsApp1
 
             //終止由 chromedriver.exe 程序開啟的Chrome瀏覽器,釋放系統記憶體
             //new Task(Action ).Wait(4500);
-            if (Name == "Form1" && (driver != null || browsrOPMode != BrowserOPMode.appActivateByName))
+            if (Name == "Form1" && (driver != null || BrowsrOPMode != BrowserOPMode.appActivateByName))
             {
                 //if (MessageBox.Show("本軟件即將關閉，也會同時關閉由其開啟的Chrome瀏覽器，若有沒儲存的資訊，請先儲存再按「確定」鈕繼續；否則請按「取消」", "", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning) == DialogResult.Cancel) { e.Cancel = true; return; }
                 if (MessageBoxShowOKCancelExclamationDefaultDesktopOnly("本軟件即將關閉，也會同時關閉由其開啟的Chrome瀏覽器，若有沒儲存的資訊，請先儲存再按「確定」鈕繼續；否則請按「取消」") == DialogResult.Cancel) { e.Cancel = true; return; }
@@ -408,26 +401,46 @@ namespace WindowsFormsApp1
                 }
             }
 
-            //有上式便不用以下了
-            //try
-            //{
-            //    //釋放應用程式佔用的記憶體
-            //    driver.Close();//202301051447(2013/1/5 14:47) creedit
+            #region 輸出一些常用設定值以供下次再用。如果在除錯撰碼時 20260102
+            bool logged = false; string log = string.Empty;
+            if (WindowHandles.TryGetValue("ChapterSelector", out string chapterSelector))
+            //Debug.WriteLine("cpt= " + chapterSelector);//https://copilot.microsoft.com/shares/j5vsqNpooaUje3bo1T3N1
+            {
+                Log("cpt= " + chapterSelector, out logged);//https://copilot.microsoft.com/shares/j5vsqNpooaUje3bo1T3N1
+                log += "cpt= " + chapterSelector;
+            }
+            if (inputTextFrontPage != "{{{封面}}}<p>")
+            {
+                Log("扉頁: " + inputTextFrontPage, out logged);
+                log += Environment.NewLine + Environment.NewLine + "扉頁: " + inputTextFrontPage;
+            }
+            if (lines_perPage > 0)
+            {
+                Log("lines_perPage: " + lines_perPage, out logged);
+                log += Environment.NewLine + Environment.NewLine + "lines_perPage: " + lines_perPage;
+            }
+            if (wordsPerLinePara > 0)
+            {
+                Log("wordsPerLinePara: " + wordsPerLinePara, out logged);
+                log += Environment.NewLine + Environment.NewLine + "wordsPerLinePara: " + wordsPerLinePara;
+            }
+            if (logged)
+            {
+                if (!string.IsNullOrEmpty(log)) { 
+                    //MessageBoxShowOKExclamationDefaultDesktopOnly(log);
+                    Clipboard.SetText(log);//以備用
+                }
+                //Debugger.Break();
+                #endregion
 
-            //}
-            //catch (OpenQA.Selenium.WebDriverException ex)
-            //{
-            //    bool v = ex.HResult == -2146233088;//先手動關了 chromedriver.exe 時
-            //    if (v) { }
-            //    else
-            //    {
-            //        v = ex.HResult == -2146233036;
-            //        if (v) { }
-            //        else throw;
-            //    }
-
-            //}
-        }
+            }
+            /// <summary>
+            /// Windows Forms 偵錯最佳習慣清單 使用 Debug.WriteLine 將訊息導向 Output → Debug，避免混淆。建議建立小工具方法，例如：
+            /// </summary>
+            /// <param name="message"></param>
+            void Log(string message, out bool lg)
+            { System.Diagnostics.Debug.WriteLine(message); lg = true; }
+        }//https://copilot.microsoft.com/shares/S2WMcnw3tQ83ujECcZE2e
 
         /// <summary>
         /// 主表單是否在作用中（有系統焦點）
@@ -586,7 +599,7 @@ namespace WindowsFormsApp1
                     {
                         string url = xClp;
                         textBox3_Click(new object(), new MouseEventArgs(MouseButtons.Left, 0, 0, 0, 0));//textBox3_MouseMove(new object(), new MouseEventArgs(MouseButtons.Left, 0, 0, 0, 0));
-                        if (browsrOPMode != BrowserOPMode.appActivateByName)
+                        if (BrowsrOPMode != BrowserOPMode.appActivateByName)
                         {
                             driver = driver ?? DriverNew();
                             try
@@ -643,7 +656,7 @@ namespace WindowsFormsApp1
 
                         }
                         else//if (browsrOPMode == BrowserOPMode.appActivateByName)
-                        { Process.Start(url); appActivateByName(); }
+                        { Process.Start(url); AppActivateByName(); }
                         //Clipboard.Clear();
 
                         //bringBackMousePosFrmCenter();
@@ -654,7 +667,7 @@ namespace WindowsFormsApp1
                     }
                     //若此時按下 Shift 則不會取得文本而是逕行送去《古籍酷》OCR取回文本至textBox1以備用
                     else if ((modifierKeys == Keys.Shift || (ocrTextMode && modifierKeys != Keys.Control))
-                        && !PagePaste2GjcoolOCR_ing && browsrOPMode != BrowserOPMode.appActivateByName)
+                        && !PagePaste2GjcoolOCR_ing && BrowsrOPMode != BrowserOPMode.appActivateByName)
                     {
                         if (modifierKeys == Keys.Shift) ocrTextMode = true;
                         GoToCurrentUserActivateTab();
@@ -830,7 +843,7 @@ namespace WindowsFormsApp1
                     try
                     {
                         driver = driver ?? Browser.DriverNew();//creedit with chatGPT大菩薩
-                        //OpenQA.Selenium.IWebElement quickEditLink = driver.FindElement(OpenQA.Selenium.By.XPath("//a[@title='Quick edit']"));
+                                                               //OpenQA.Selenium.IWebElement quickEditLink = driver.FindElement(OpenQA.Selenium.By.XPath("//a[@title='Quick edit']"));
                         OpenQA.Selenium.IWebElement quickEditLink = driver.FindElement(OpenQA.Selenium.By.XPath("//*[@id=\"quickedit\"]/a"));
                         if (quickEditLink != null)
                         {
@@ -888,7 +901,7 @@ namespace WindowsFormsApp1
             {
                 if (driver == null)
                 {
-                    browsrOPMode = BrowserOPMode.seleniumNew;
+                    BrowsrOPMode = BrowserOPMode.seleniumNew;
                     DriverNew();
                 }
                 if (!IsDriverInvalid())
@@ -1698,6 +1711,8 @@ namespace WindowsFormsApp1
                 //以下《國學大師》本《四庫全書》發生者
                 if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("B");
                 if (missWordPositon == -1) missWordPositon = xCopy.IndexOf("/");
+                //在WordVBA處理時將源文本中以「/」標識注文換行處置換成「\」故（如《Kanseki Repository 漢籍リポジトリ》與《元引科技引得數字人文資源平臺·中國歷代文獻》之文本） 20260104
+                if (missWordPositon == -1) missWordPositon = xCopy.IndexOf(@"\");
                 //檢查「/」
                 if (xCopy.IndexOf("/") > -1 && missWordPositon != -1)
                 {//20240803 Copilot大菩薩：C# Windows.Forms 應用程式中檢測半形空格 ：因為在檢查斜線「/」後面不是接著下角括號「>」的情況下，我們需要確保每個匹配的結果都符合這個條件，所以使用了 matches 物件來進一步檢查。
@@ -1710,7 +1725,7 @@ namespace WindowsFormsApp1
                         missWordPositon = matches[0].Index;
                     #region 另一種方式：
                     /* 
-                     
+
                     bool isValid = true;
 
                     // 檢查後一個字符
@@ -1730,13 +1745,13 @@ namespace WindowsFormsApp1
 
                     missWordPositon = xCopy.IndexOf("/", missWordPositon + 1);
                     */
-                    #endregion 
+                    #endregion
 
                 }
             }
             else//檢查半形空格" "
             {//20240803 Copilot大菩薩：C# Windows.Forms 應用程式中檢測半形空格
-                //missWordPositon = xCopy.IndexOf(" ");
+             //missWordPositon = xCopy.IndexOf(" ");
                 while (missWordPositon != -1)
                 {
                     bool isValid = true;
@@ -1832,9 +1847,9 @@ namespace WindowsFormsApp1
                         new StringInfo(xCopy.Substring(prePPos + 2,
                         chkP - ("<p>".Length + Environment.NewLine.Length) - (prePPos + 2))).LengthInTextElements
                          - NormalLineParaLength) > 2)//檢查<p>位置不當者（不當分段）                    
-                    //if (Math.Abs(
-                    //        CountWordsLenPerLinePara(GetLineText(xCopy, prePPos + 2))
-                    //        - NormalLineParaLength) > 2)//檢查<p>位置不當者（不當分段）
+                                                     //if (Math.Abs(
+                                                     //        CountWordsLenPerLinePara(GetLineText(xCopy, prePPos + 2))
+                                                     //        - NormalLineParaLength) > 2)//檢查<p>位置不當者（不當分段）
                     {
                         chkP = -1;
                     }
@@ -2118,7 +2133,11 @@ namespace WindowsFormsApp1
 
 
         //const string soundWarningLocation = @"c:\windows\media\Windows Foreground.wav";
-
+        /// <summary>
+        /// 若須人工再校勘者，則以「●●」（目前）標識之 20260104 
+        /// 宣告常值方便日後管理。
+        /// </summary>
+        const string reviewMark = "●●";
         string textBox1OriginalText = "";
         /// <summary>
         /// 之前字元位置記錄器
@@ -2292,7 +2311,7 @@ namespace WindowsFormsApp1
                         playSound(soundLike.done);
                         textBox3.Text = urlActive;
                     }
-                    if (browsrOPMode != BrowserOPMode.appActivateByName && driver != null
+                    if (BrowsrOPMode != BrowserOPMode.appActivateByName && driver != null
                         && textBox3.Text != urlActive)
                     {
                         SwitchToCurrentForeActivateTab(ref textBox3, urlActive);
@@ -2337,7 +2356,7 @@ namespace WindowsFormsApp1
                     overtypeModeSelectedTextSetting(ref textBox1);
                     string url = "https://ctext.org/wiki.pl?if=gb&res=315747&searchu=" + textBox1.SelectedText;
                     textBox1.Copy();
-                    switch (browsrOPMode)
+                    switch (BrowsrOPMode)
                     {
                         case BrowserOPMode.appActivateByName:
                             Process.Start(url);
@@ -2455,8 +2474,8 @@ namespace WindowsFormsApp1
                 #region Ctrl + Alt + pageup Ctrl + Alt + pagedown                
                 if (e.KeyCode == Keys.PageUp || e.KeyCode == Keys.PageDown)
                 {//Ctrl + Alt + pageup : 在新的分頁開啟CTP圖文對照前一頁以供檢視 20240920
-                    //Ctrl + Alt + pagedown : 在新的分頁開啟CTP圖文對照下一頁以供檢視
-                    if (browsrOPMode != BrowserOPMode.seleniumNew) return;
+                 //Ctrl + Alt + pagedown : 在新的分頁開啟CTP圖文對照下一頁以供檢視
+                    if (BrowsrOPMode != BrowserOPMode.seleniumNew) return;
                     string url = null;
                     try
                     {
@@ -2527,7 +2546,7 @@ namespace WindowsFormsApp1
                     return;
 
                 }//以上 Ctrl + Alt + pageup : 在新的分頁開啟CTP圖文對照前一頁以供檢視 20240920
-                //Ctrl + Alt + pagedown : 在新的分頁開啟CTP圖文對照下一頁以供檢視
+                 //Ctrl + Alt + pagedown : 在新的分頁開啟CTP圖文對照下一頁以供檢視
                 #endregion
                 if (e.KeyCode == Keys.P)
                 {//Ctrl + Alt + p ： 清除textBox1選取內的`<p>` 20250215
@@ -2661,6 +2680,8 @@ namespace WindowsFormsApp1
                     e.Handled = true;
                     undoRecord();
                     //當無選取時自動選取適當範圍
+                    //if (textBox1.SelectedText == "/") textBox1.SelectionLength = 0;//源文件注文分行，今WordVBA改為「\」以便識別
+                    if (textBox1.SelectedText == @"\") textBox1.SelectionLength = 0;
                     if (textBox1.SelectionLength == 0)
                     {
                         int s = textBox1.SelectionStart; Paragraph p = _document.Range(s, s).GetCurrentParagraph();
@@ -2669,7 +2690,10 @@ namespace WindowsFormsApp1
                         textBox1.Select(s + p.Start, currParaTxt.LastIndexOf("}}") - s + 2);
                     }
 
-                    textBox1.SelectedText = CnText.TransformText(textBox1.SelectedText);
+                    //textBox1.SelectedText = CnText.TransformText(textBox1.SelectedText).Replace("/", string.Empty);
+                    //textBox1.SelectedText = CnText.TransformText(textBox1.SelectedText.Replace("/", string.Empty));//.Replace("/", string.Empty);
+                    //現在在WordVBA處理源文本時，改用「\」來表示夾注小注換行之標識符，以與造字缺字者作區別
+                    textBox1.SelectedText = CnText.FixNoteDisorder_TransformText(textBox1.SelectedText.Replace(@"\", string.Empty)) + reviewMark;//因為程式並未能完美校正，故加上「●●」標識以醒目，以利後人留意此處錯亂情況。感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主 20260104
                     undoRecord();
                     return;
 
@@ -2760,8 +2784,8 @@ namespace WindowsFormsApp1
                 }
                 if (e.KeyCode == Keys.F12)
                 {//Ctrl + F12 查詢國語辭典
-                    //overtypeModeSelectedTextSetting(ref textBox1);
-                    //string x = textBox1.SelectedText;
+                 //overtypeModeSelectedTextSetting(ref textBox1);
+                 //string x = textBox1.SelectedText;
                     string x;
                     if (textBox1.SelectionLength == 0)
                         x = SelectSingleCharacter();
@@ -2772,7 +2796,7 @@ namespace WindowsFormsApp1
                     {
                         Clipboard.SetText(x);
 
-                        if (browsrOPMode != BrowserOPMode.appActivateByName)
+                        if (BrowsrOPMode != BrowserOPMode.appActivateByName)
                         {
                             if (driver != null)
                             {
@@ -2797,7 +2821,8 @@ namespace WindowsFormsApp1
                 }
                 if (e.KeyCode == Keys.Back)
                 {//Ctrl + Backspace : 清除插入點之前的所有「　」或「􏿽」
-                    e.Handled = true; 清除插入點之前的所有空格(); return;
+                    e.Handled = true; 清除插入點之前的所有空格();
+                    return;
                 }
                 if (e.KeyCode == Keys.Insert)
                 {//Ctrl + Insert ：無選取時則複製插入點後一CJK字長
@@ -3254,7 +3279,7 @@ namespace WindowsFormsApp1
 
                 if (e.KeyCode == Keys.Delete && !e.Shift && !e.Alt)
                 {//Ctrl + Delete ： 將插入點所在位置之後的文字一律清除(Ctrl + z 還原功能支援)
-                    //> 如果插入點後是空格（space）、空白（􏿽）、段落標記<p>或*，則清除到非此諸標記符號，否則就一律清除
+                 //> 如果插入點後是空格（space）、空白（􏿽）、段落標記<p>或*，則清除到非此諸標記符號，否則就一律清除
                     e.Handled = true;
                     int s = textBox1.SelectionStart, l = textBox1.SelectionLength; string x = textBox1.Text;
                     if (s < textBox1.TextLength && l == 0)
@@ -3278,6 +3303,15 @@ namespace WindowsFormsApp1
                             while (textBox1.TextLength >= s + l + 2 && textBox1.Text.Substring(s + l, 2) == "􏿽")
                             {
                                 textBox1.Select(s + l, 2); l += 2;
+                                //textBox1.SelectedText = string.Empty;
+                            }
+                            textBox1.Select(s, l);
+                        }
+                        else if (s < x.Length - reviewMark.Length && x.Substring(s, reviewMark.Length) == reviewMark)//清除有待人工再校者之記號 20260104
+                        {
+                            while (textBox1.TextLength >= s + l + reviewMark.Length && textBox1.Text.Substring(s + l, reviewMark.Length) == reviewMark)
+                            {
+                                textBox1.Select(s + l, reviewMark.Length); l += reviewMark.Length;
                                 //textBox1.SelectedText = string.Empty;
                             }
                             textBox1.Select(s, l);
@@ -3453,7 +3487,7 @@ namespace WindowsFormsApp1
 
                 if (e.KeyCode == Keys.OemPeriod)
                 {// Alt + . //插入書名、篇名號中間符號
-                    //insertWords("·", textBox1, textBox1.Text);
+                 //insertWords("·", textBox1, textBox1.Text);
                     insertWords("·", textBox1);
                     e.Handled = true;
                     return;
@@ -3463,13 +3497,30 @@ namespace WindowsFormsApp1
                 {//Alt + 1 : 鍵入本站制式留空空格標記「􏿽」：若有選取則取代全形空格「　」為「􏿽」
                     e.Handled = true;
                     e.SuppressKeyPress = true;
+                    int s = textBox1.SelectionStart; string x = textBox1.Text;
+                    bool clearSpace = false;
+                    if ((textBox1.SelectedText == " " && (s + 1 <= x.Length) && (x.Substring(s + 1, 1) == " "))
+                        || ((s + 2 <= x.Length) && (x.Substring(s, 1) == " ")
+                            && x.Substring(s + 1, 1) == " ")) clearSpace = true;
                     keysSpacesBlank();
+                    s = textBox1.SelectionStart; x = textBox1.Text;
+                    //if (s + 1 <= x.Length)//清除接在後面的半形空格(《Kanripo漢籍リポジトリ》GitHub存放庫（repository）的文本會有2個半形空格 20260103
+                    if (clearSpace)
+                    {
+                        if (x.Substring(s, 1) == " ")
+                        {
+                            textBox1.Select(s, 1);
+                            undoRecord(); stopUndoRec = true; textBox1.SelectedText = string.Empty; stopUndoRec = false;
+                            stopUndoRec = false; dontHide = false;
+                            return;
+                        }
+                    }
                     if (!Active) AvailableInUseBothKeysMouse();
                     return;
                 }
 
                 if (e.KeyCode == Keys.D2)
-                {//Alt + 2 : 鍵入全形空格「　」
+                {//Alt + 2 : 鍵入全形空格「　」//若選取的是<p>，則逕自輸入全形空格以取代之；在快捷模式連續輸入時，因為檢查行長的緣故，會自行選取<p>，並在剪貼簿中嵌入全形空格以供貼上備用。故亦可經由如此方法以便輸入。看個人習慣與順手。蓋多因挪抬的緣故留有空格，而源文本未予適當保留的緣故。感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主 20260102
                     e.Handled = true;
                     e.SuppressKeyPress = true;
                     keysSpaces();
@@ -3751,7 +3802,12 @@ namespace WindowsFormsApp1
                     {
                         return;
                     }
-                    undoRecord();
+                    undoRecord(); stopUndoRec = true;
+                    //清除注文中的源文件小注夾注分行符號
+                    textBox1.Select(st, len);
+                    //不要清除，後續程式還得判斷！20260104
+                    //textBox1.SelectedText = textBox1.SelectedText.Replace(@"\", string.Empty);//現在源文本以「/」標識之小注夾注分行符號在WordVBA處理時已改為「\」故 20260104
+
                     // 計算半形空格數量
                     int spaceCount = innerText.Count(c => c == ' ');
 
@@ -3765,7 +3821,8 @@ namespace WindowsFormsApp1
                             runCorrectNoteBlankContent();
                             break;
                         default:
-                            if (!innerText.Contains("/"))
+                            //if (!innerText.Contains("/"))
+                            if (!innerText.Contains(@"\"))
                             {
                                 textBox1.Select(st, len);
                                 textBox1.SelectedText = innerText.Replace("  ", " ");
@@ -3778,6 +3835,7 @@ namespace WindowsFormsApp1
                             }
                             break;
                     }
+                    stopUndoRec = false; undoRecord();
                     return;
                 }
                 if (e.KeyCode == Keys.C)
@@ -3976,7 +4034,7 @@ namespace WindowsFormsApp1
                     }
                     else
                     {
-                        if (browsrOPMode == BrowserOPMode.appActivateByName)
+                        if (BrowsrOPMode == BrowserOPMode.appActivateByName)
                             Process.Start(url);
                         else
                         {
@@ -4236,7 +4294,7 @@ namespace WindowsFormsApp1
                     return;
                 }
                 if (e.KeyCode == Keys.Q)
-                {
+                {//Alt + q 分行分段-根據第一行的長度來將後面的文本分行分段
                     e.Handled = true; splitLineByFristLen(); return;
                 }
                 if (e.KeyCode == Keys.S)
@@ -4248,14 +4306,14 @@ namespace WindowsFormsApp1
                     int nl = innerText.IndexOf(Environment.NewLine);
                     if (nl > -1)
                     {//兩行獨立注文
-                        //選取第二行獨立注文，以填滿空格「　」
+                     //選取第二行獨立注文，以填滿空格「　」
                         textBox1.Select(innerStart + nl + Environment.NewLine.Length,
                             innerLength - (nl + Environment.NewLine.Length));
                         int lineWordsCnter = CountWordsLenPerLinePara(textBox1.Text.Substring(innerStart, nl));
                         string xSel = textBox1.SelectedText;
                         while (CountWordsLenPerLinePara(xSel) < lineWordsCnter)
                             xSel += "　";//這樣寫 textBox1.SelectedText 會變空字串
-                        //undoRecord();
+                                        //undoRecord();
                         textBox1.SelectedText = xSel;
                     }
                     else//一般與正文並行的夾注
@@ -4313,7 +4371,7 @@ namespace WindowsFormsApp1
                     }
                     else if (e.Shift || e.Control)
                     {//Alt + Shift + w 或 Ctrl + Alt + w ： 將執行 MergeParagraphsAtCaretWithShift 方法，插入點所在行將視為夾注的第1行，並將其後的1行/段合併上來，前後分別加上「{{」和「}}」，然後再將它們後面的那1行也合併上來。最後，插入點將停留在最後合併上來的那行/段文字的起始處。
-                        //> 即插入點所在視為後面有正文的夾注第一行（則加按Shift鍵）
+                     //> 即插入點所在視為後面有正文的夾注第一行（則加按Shift鍵）
                         e.Handled = true;
                         Document document = new Document(ref textBox1);
                         undoRecord(); PauseEvents();
@@ -4337,7 +4395,7 @@ namespace WindowsFormsApp1
                 {//Alt + x ：以所選之字（不能不等於1字）檢索《康熙字典網上版 》 https://www.kangxizidian.com/
                     e.Handled = true;
                     string x = SelectSingleCharacter();
-                    if (browsrOPMode != BrowserOPMode.appActivateByName)
+                    if (BrowsrOPMode != BrowserOPMode.appActivateByName)
                     {
                         Task.Run(() =>
                         {
@@ -4355,7 +4413,7 @@ namespace WindowsFormsApp1
 
                     string x = SelectSingleCharacter();
 
-                    if (browsrOPMode != BrowserOPMode.appActivateByName)
+                    if (BrowsrOPMode != BrowserOPMode.appActivateByName)
                     {
                         if (driver != null)
                         {
@@ -4382,12 +4440,12 @@ namespace WindowsFormsApp1
                 }
 
                 if (e.KeyCode == Keys.F7)
-                {// Alt + F7 : 每行縮排一格後將其末誤標之<p>
+                {// Alt + F7 : 每行縮排一格後將其末誤標之<p>清除
                     e.Handled = true; indent_ClearEnd＿P_Mark(); return;
                 }
 
                 if (e.KeyCode == Keys.Add || e.KeyCode == Keys.Oemplus)//|| e.KeyCode == Keys.Subtract || e.KeyCode == Keys.NumPad5)
-                {// Alt + +
+                {// Alt + +   自動選取指定範圍送出至quick edit
                     if (e.KeyCode == Keys.Oemplus && autoPaste2QuickEdit) return;//防止在連續輸入時誤按
                     e.Handled = true;
                     //還原放大的書圖
@@ -4399,19 +4457,20 @@ namespace WindowsFormsApp1
 
                 if (e.KeyCode == Keys.OemMinus || e.KeyCode == Keys.Subtract)
                 {// Alt + -（字母區與數字鍵盤的減號） : 如果被選取的是「􏿽」則與下一個「{{」對調；若是「}}」則與「􏿽」對調。。（針對《國學大師》《四庫全書》文本小注文誤標而開發）
+                 // 似乎和目前習用的 Alt + b 相似20260102
                     e.Handled = true;
                     undoRecord(); stopUndoRec = true;
-                    using (GXDS gxds = new GXDS(this)) { gxds.correctBlankAndUppercurlybrackets(ref textBox1); }
+                    using (GXDS gxds = new GXDS(this)) { gxds.CorrectBlankAndUppercurlybrackets(ref textBox1); }
                     stopUndoRec = false;
                     return;
                 }
 
                 if (e.KeyCode == Keys.OemBackslash || e.KeyCode == Keys.Oem5)
-                {// Alt + \ 
+                {// Alt + \  將插入點後的分行分段清除
                     e.Handled = true; clearNewLinesAfterCaret(); return;
                 }
                 if (e.KeyCode == Keys.Down)
-                //Ctrl + ↓ 或 Alr + ↓：從插入點開始向後移至這一段末（無分段則不移動）
+                //Ctrl + ↓ 或 Alr + ↓：從插入點開始向後移至這一段末（無分段則不移動）//現在改為表單移動了（或二者衝突，以表單取得按鍵為優先） 20260102
                 {
                     e.Handled = true; keyDownCtrlAltUpDown(e); return;
                 }
@@ -5977,7 +6036,7 @@ namespace WindowsFormsApp1
             stopUndoRec = false;
         }
         /// <summary>
-        /// 清除插入點之前的所有空格「　」、空白「􏿽」、「<p>」、「}}」、「*」
+        /// 清除插入點之前的所有空格「　」、空白「􏿽」、「<p>」、「}}」、「*」、「●●」
         /// </summary>
         private void 清除插入點之前的所有空格()
         {//Ctrl + Backspace,若插入點前為「<p>」則一併清除
@@ -5996,6 +6055,10 @@ namespace WindowsFormsApp1
             {
                 textBox1.Select(s - 2, 2);//2="}}".Length
             }
+            else if (s > reviewMark.Length && x.Substring(s - reviewMark.Length, reviewMark.Length) == reviewMark)//清除有待人工再校者之記號。若須人工再校勘者，則以「●●」標識之 20260104
+            {
+                textBox1.Select(s - reviewMark.Length, reviewMark.Length);
+            }
             else if (x.Contains("〖"))
             {
                 clearWhiteSquareBracketsRange(s, x, true);
@@ -6007,6 +6070,7 @@ namespace WindowsFormsApp1
             }
             undoRecord();
             stopUndoRec = true; PauseEvents();
+            //清除之
             textBox1.SelectedText = string.Empty;
             stopUndoRec = false; ResumeEvents();
         }
@@ -6089,10 +6153,10 @@ namespace WindowsFormsApp1
             string xSel = textBox1.SelectedText;
             if (xSel.Length > 2 && xSel.Substring(xSel.Length - 3) == "<p>") { textBox1.Select(s, xSel.Length - 3); xSel = textBox1.SelectedText; }//最後一個<p>不處理
             if (xSel.Length > 4 && xSel.Substring(xSel.Length - 5) == "<p>" + Environment.NewLine) { textBox1.Select(s, xSel.Length - 5); xSel = textBox1.SelectedText; }//最後一個<p>不處理
-            //xSel = xSel.Replace("<p>", "|").Replace("　", "􏿽");
+                                                                                                                                                                         //xSel = xSel.Replace("<p>", "|").Replace("　", "􏿽");
             xSel = xSel.Replace("<p>", "|");//.Replace("　", "􏿽");
-            //xSel = Regex.Replace(xSel, @"　?(!}})", "􏿽");
-            //xSel = Regex.Replace(xSel, @"　*(!}})", "􏿽");// Copilot大菩薩：// 使用負向環視 (?<! ) 確保不替換 "}}" 前的空格 20250306 https://copilot.microsoft.com/shares/5vKyp5oM72zFwJmbboSMw
+                                            //xSel = Regex.Replace(xSel, @"　?(!}})", "􏿽");
+                                            //xSel = Regex.Replace(xSel, @"　*(!}})", "􏿽");// Copilot大菩薩：// 使用負向環視 (?<! ) 確保不替換 "}}" 前的空格 20250306 https://copilot.microsoft.com/shares/5vKyp5oM72zFwJmbboSMw
             xSel = ReplaceSpaces(xSel);
             string ReplaceSpaces(string input)//20250306 Gemini大菩薩：https://g.co/gemini/share/d5b66edbaea1
             {
@@ -6274,6 +6338,8 @@ namespace WindowsFormsApp1
                     stopUndoRec = false;
                     return;
                 }
+                else if (textBox1.SelectedText == "<p>")//若選取的是<p>，則逕自輸入全形空格以取代之；在快捷模式連續輸入時，因為檢查行長的緣故，會自行選取<p>，並在剪貼簿中嵌入全形空格以供貼上備用。故亦可經由如此方法以便輸入。看個人習慣與順手。蓋多因挪抬的緣故留有空格，而源文本未予適當保留的緣故。感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主 20260102
+                    textBox1.SelectedText = "　";
             }
             else if (s <= 2 && x.Length > s + 2 && x.Substring(s, 2) == "􏿽")
             {//插入點在textBox1最前端時的處理
@@ -6286,8 +6352,12 @@ namespace WindowsFormsApp1
                     }
                     textBox1.Select(s, sLen -= 2); selX = textBox1.SelectedText;
                 }
+                else if (textBox1.SelectedText == "<p>")//若選取的是<p>，則逕自輸入全形空格以取代之；在快捷模式連續輸入時，因為檢查行長的緣故，會自行選取<p>，並在剪貼簿中嵌入全形空格以供貼上備用。故亦可經由如此方法以便輸入。看個人習慣與順手。蓋多因挪抬的緣故留有空格，而源文本未予適當保留的緣故。感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主 20260102
+                    textBox1.SelectedText = "　";
             }
+
             undoRecord();
+            if (selX == "<p>") return;//已在前面處理過了
             stopUndoRec = true;
             if (selX != "")
                 if (selX == " ")
@@ -6360,8 +6430,8 @@ namespace WindowsFormsApp1
         private void SpacesBlanksInContext()
         {
             bool notTitleIndent = true; int s = textBox1.SelectionStart, offset = 0;//記下位移數（因為「　」與「􏿽」的Length不同
-            //string x = textBox1.SelectedText;
-            //if (x == "") x = textBox1.Text;
+                                                                                    //string x = textBox1.SelectedText;
+                                                                                    //if (x == "") x = textBox1.Text;
             string x = textBox1.Text;
             undoRecord(); stopUndoRec = true;
             for (int i = 0; i < x.Length; i++)//用每個字去算
@@ -6382,7 +6452,7 @@ namespace WindowsFormsApp1
                         i += spsCount;
                         continue;
                     }
-                    #endregion                    
+                    #endregion
                     #region 作為縮排的空格也不處理(正文者詳後，此處理注文的縮排）
                     string currentLine = GetLineText(x, i, out int lineS, out int lineL);
 
@@ -6598,7 +6668,6 @@ namespace WindowsFormsApp1
                             return;
                         }
                     }
-
                 }
                 #endregion
                 //else
@@ -7227,7 +7296,7 @@ namespace WindowsFormsApp1
                                     {
 
                                         Debugger.Break();//●●●●●●●●●●●●●●●●●●
-                                        //stopUndoRec = false; return true;
+                                                         //stopUndoRec = false; return true;
                                         break;
                                     }
                                     if (x.Substring(k - 2, 2) == "}}" && x.Substring(k + 2, 2) != "{{")
@@ -7370,7 +7439,7 @@ namespace WindowsFormsApp1
                 if (spsStart > 1)
                 {
                     if (!title.Contains("{{"))//如果標題不含注文
-                        //title = title.Replace("　", "􏿽");
+                                              //title = title.Replace("　", "􏿽");
                         title = CnText.ReplaceFullWidthSpace_withBlank(title);
                     else
                     {//如果標題中有注文
@@ -7475,12 +7544,12 @@ namespace WindowsFormsApp1
                                             }
 
                                             Debugger.Break();//★★★★★這個很重要，不能取消！還要再除錯！！！（因為文本的複雜性，如此頁 https://ctext.org/library.pl?if=gb&file=93823&page=16 崔莅 標題之標識）
-                                            //item.Range.Text = item.Text.Substring(0, spsStart) + sb.ToString() + item.Text.Substring(item.Text.IndexOf("{{"));//這一行會造成篡改資料（之前不知道，不知執行幾次了。嗟呼！），如上所指摘之頁，可供測試 文本來源：https://www.inindex.com/literature/bookDetails/1167459247318110210/1167459285729546241 20251231元旦除夕
-                                            //標題（篇名）前後端都加入半形空格以便人工檢查；在「*」前之空格之前加入半形空格以供執行時程式停下來人工校對！20251231
+                                                             //item.Range.Text = item.Text.Substring(0, spsStart) + sb.ToString() + item.Text.Substring(item.Text.IndexOf("{{"));//這一行會造成篡改資料（之前不知道，不知執行幾次了。嗟呼！），如上所指摘之頁，可供測試 文本來源：https://www.inindex.com/literature/bookDetails/1167459247318110210/1167459285729546241 20251231元旦除夕
+                                                             //標題（篇名）前後端都加入半形空格以便人工檢查；在「*」前之空格之前加入半形空格以供執行時程式停下來人工校對！20251231
                                             range.Text = " " + range.Text + " ";//range為目前要標題的範圍（篇名範圍），起自「　*」（看目前前空幾格為標明）迄於「<p>」                                            
                                             continue;//應是改成continue 才是，否別會造成後面的都無法標識了
-                                            //range.End += ispscount;//已與Paragraph.Range.Text同步
-                                            //return false;//這樣會造成後面的都無法標識了
+                                                     //range.End += ispscount;//已與Paragraph.Range.Text同步
+                                                     //return false;//這樣會造成後面的都無法標識了
 
                                         }
                                     }
@@ -8940,7 +9009,12 @@ namespace WindowsFormsApp1
                 MessageBox.Show("no more to redo!");
 
         }
-
+        /// <summary>
+        /// 還原插入點位置
+        /// </summary>
+        /// <param name="textBox1"></param>
+        /// <param name="s"></param>
+        /// <param name="l"></param>
         private static void restoreCaretPosition(TextBox textBox1, int s, int l)
         {
             if (s < 0 || l < 0) return;
@@ -10121,6 +10195,7 @@ namespace WindowsFormsApp1
                             //    + textBox1.Text.Substring(textBox1.SelectionStart + textBox1.SelectionLength <= textBox1.TextLength ? textBox1.SelectionStart + textBox1.SelectionLength : textBox1.TextLength
                             //                                , textBox1.SelectionStart + textBox1.SelectionLength + 10 <= textBox1.TextLength ? 10 : textBox1.TextLength - (textBox1.SelectionStart + textBox1.SelectionLength))) == DialogResult.OK)
 
+                            AvailableInUseBothKeysMouse();
                             //如果前面那行/段較後面長許多，則直接清除。若後面長則不清除
                             string xTb1 = textBox1.Text; int st = textBox1.SelectionStart, len = textBox1.SelectionLength;
                             if (CountWordsLenPerLinePara(GetLineText_WithoutPunctuation(xTb1, st)) - CountWordsLenPerLinePara(GetLineText_WithoutPunctuation(xTb1, st + len)) > 2)
@@ -10133,13 +10208,18 @@ namespace WindowsFormsApp1
                                     + textBox1.Text.Substring(textBox1.SelectionStart - 10 > -1 ? textBox1.SelectionStart - 10 : 0, 10)
                                     + textBox1.SelectedText
                                     + textBox1.Text.Substring(textBox1.SelectionStart + textBox1.SelectionLength <= textBox1.TextLength ? textBox1.SelectionStart + textBox1.SelectionLength : textBox1.TextLength
-                                                                , textBox1.SelectionStart + textBox1.SelectionLength + 10 <= textBox1.TextLength ? 10 : textBox1.TextLength - (textBox1.SelectionStart + textBox1.SelectionLength)), string.Empty, MessageBoxButtons.YesNoCancel, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
+                                                                , textBox1.SelectionStart + textBox1.SelectionLength + 10 <= textBox1.TextLength ? 10 : textBox1.TextLength - (textBox1.SelectionStart + textBox1.SelectionLength))
+                                    , string.Empty, MessageBoxButtons.YesNoCancel, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
                         }
+
                         if (dr == DialogResult.Yes)
                             textBox1.SelectedText = "}}\r\n{{";
                         //textBox1.Text = textBox1.Text.Replace("}}。<p>\r\n{{", "}}\r\n{{");
                         else if (dr == DialogResult.Cancel)//●●●●●●●●●●●●●●●●20250308
+                        {
+                            AvailableInUseBothKeysMouse();
                             break;
+                        }
                     }
                     ip = textBox1.Text.IndexOf(item, ip + 1);
                 }
@@ -10915,7 +10995,7 @@ namespace WindowsFormsApp1
         internal static string FixUrl＿ImageTextComparisonPage(string url, bool editor = false, bool driverGoToUrl = false)
         {
             #region 防呆
-            if (!IsValidUrl＿ImageTextComparisonPage(url) || browsrOPMode == BrowserOPMode.appActivateByName || driver == null) return null;
+            if (!IsValidUrl＿ImageTextComparisonPage(url) || BrowsrOPMode == BrowserOPMode.appActivateByName || driver == null) return null;
             #endregion
 
             // 使用正則表達式檢查和替換網址中的特定字串
@@ -11159,7 +11239,7 @@ namespace WindowsFormsApp1
 
                 //TopMost = false;//前面已有： if (TopMost) TopMost = false; //20240211
                 //將焦點交給Chrome瀏覽器
-                if (browsrOPMode != BrowserOPMode.appActivateByName && driver != null)
+                if (BrowsrOPMode != BrowserOPMode.appActivateByName && driver != null)
                 {
                     PauseEvents();
                     try
@@ -11173,7 +11253,7 @@ namespace WindowsFormsApp1
                     ResumeEvents();
                 }
                 else
-                    appActivateByName();
+                    AppActivateByName();
                 //Point formPos = new Point(this.Location.X - 10, this.Location.Y);
                 //Cursor.Position = formPos;
                 //Thread.Sleep(501);// regedit : HKEY_CURRENT_USER\Control Panel\Desktop\ActiveWndTrkTimeout = 500（十進位）
@@ -11314,7 +11394,7 @@ namespace WindowsFormsApp1
                         }
                         else
                         {//如果在自動輸入模式，且已取得每頁正常行/段數時
-                            //if (autoPaste2QuickEdit && (linesParasPerPage != -1 || lines_perPage != 0))
+                         //if (autoPaste2QuickEdit && (linesParasPerPage != -1 || lines_perPage != 0))
                             if (!keyinTextMode && (linesParasPerPage != -1 || lines_perPage != 0))
                             {
                                 if (lines_perPage > 0 && countLinesPerPage(textBox1.Text.Substring(0, textBox1.SelectionStart)) != lines_perPage)
@@ -11464,7 +11544,7 @@ namespace WindowsFormsApp1
 
             #region 貼到/送至 Ctext Quick edit 
             //根據不同輸入模式需求操作
-            switch (browsrOPMode)
+            switch (BrowsrOPMode)
             {
                 case BrowserOPMode.appActivateByName://預設模式（1）
                     pasteToCtext();
@@ -11592,14 +11672,14 @@ namespace WindowsFormsApp1
             #endregion
 
             //DialogResult dialogresult = new DialogResult(); 原來在這裡！！！ 20231022
-            if (browsrOPMode != BrowserOPMode.appActivateByName && !pagePaste2GjcoolOCR)
+            if (BrowsrOPMode != BrowserOPMode.appActivateByName && !pagePaste2GjcoolOCR)
             {//使用selenium模式時（非預設模式時）
              //= new DialogResult();
                 if (autoPaste2QuickEdit && !keyinTextMode && !autoPastetoCtextQuitEditTextboxCancel)
                 {//全自動輸入模式時
                     autoPaste2CtextQuitEditTextbox(out DialogResult dialogresult);//在此中雖有判斷autoPastetoQuickEdit時，然呼叫它會造成無限遞迴（recursion）                    
-                    //Debugger.Break();
-                    //●●●●●●●●●●●●●20250213
+                                                                                  //Debugger.Break();
+                                                                                  //●●●●●●●●●●●●●20250213
 
                     //if (dialogresult == DialogResult.Cancel)
                     //    autoPastetoCtextQuitEditTextboxCancel = true;
@@ -11672,9 +11752,9 @@ namespace WindowsFormsApp1
                     ResumeEvents(); stopUndoRec = false;
                 }
                 Form1.InstanceForm1.textBox3.Text = textBox3.Text;//主表單網址與本表單連動、同步
-                //TopMost = false;
-                //driver.SwitchTo().Window(driver.CurrentWindowHandle);
-                ////WindowState = FormWindowState.Minimized;
+                                                                  //TopMost = false;
+                                                                  //driver.SwitchTo().Window(driver.CurrentWindowHandle);
+                                                                  ////WindowState = FormWindowState.Minimized;
                 Form1.InstanceForm1.AvailableInUseBothKeysMouse();
                 WindowHandles["currentPageNum"] = (int.Parse(_currentPageNum) - 1).ToString();
                 //Form1.InstanceForm1.textBox1.Select(s, l);
@@ -12357,7 +12437,7 @@ namespace WindowsFormsApp1
             rePaint = true;
             SendMessage(this.Handle, WM_SETREDRAW, (IntPtr)1, IntPtr.Zero);
             this.Refresh();
-            if (browsrOPMode != BrowserOPMode.appActivateByName && !IsDriverInvalid())
+            if (BrowsrOPMode != BrowserOPMode.appActivateByName && !IsDriverInvalid())
                 WindowsScrolltoTop();
         }
 
@@ -12486,7 +12566,7 @@ namespace WindowsFormsApp1
                     if (fastMode) { dialogResult = DialogResult.OK; doNotShowMsgBox = true; goto ok; }
                     else if (Console.CapsLock)
                     { // 模擬按下 CapsLock 鍵
-                        //SendKeys.SendWait("{CAPSLOCK}");
+                      //SendKeys.SendWait("{CAPSLOCK}");
                         KeyboardPress.CAPSLOCK_Press();//關閉 CapsLock 燈
                         dialogResult = DialogResult.OK; doNotShowMsgBox = true; goto ok;
                     }
@@ -12561,12 +12641,12 @@ namespace WindowsFormsApp1
                             && !fastMode) FastModeSwitcher();
                         //if (!doNotShowMsgBox && (KeyboardInfo.getKeyStateDown(System.Windows.Input.Key.LeftCtrl) || ModifierKeys == Keys.Control) && !fastMode) FastModeSwitcher();
 
-                        if (browsrOPMode == BrowserOPMode.appActivateByName) textBox1.Enabled = false;//避免誤觸
+                        if (BrowsrOPMode == BrowserOPMode.appActivateByName) textBox1.Enabled = false;//避免誤觸
                         if (_autoPastetoQuickEdit && (ModifierKeys == Keys.Control || _check_the_adjacent_pages))
                         {
-                            if (browsrOPMode == BrowserOPMode.appActivateByName)
+                            if (BrowsrOPMode == BrowserOPMode.appActivateByName)
                             {
-                                appActivateByName();
+                                AppActivateByName();
                                 //關閉瀏覽器分頁
                                 SendKeys.Send("^{F4}");
                             }
@@ -12579,7 +12659,7 @@ namespace WindowsFormsApp1
                         if (!keyDownCtrlAdd_ReturnVale && doNotShowMsgBox == true) { dialogResult = DialogResult.Cancel; WindowsScrolltoTop(); goto ok; }//dialogRes-ult = DialogResult.Abort;
                         doNotShowMsgBox = false;
                         //if (browsrOPMode != BrowserOPMode.appActivateByName && !autoPastetoCtextQuitEditTextboxCancel)
-                        if (browsrOPMode != BrowserOPMode.appActivateByName)
+                        if (BrowsrOPMode != BrowserOPMode.appActivateByName)
                         {//if (autoPastetoQuickEdit) 會在autoPastetoCtextQuitEditTextbox()中判斷
                          //預估下一頁尾位置
                          //predictEndofPage();//在前面keyDownCtrlAdd(false);已做一次，這次做是給遞迴（recursion）用的「if (textBox1.SelectionLength == predictEndofPageSelectedTextLen &&……」這行要判斷                            
@@ -12606,7 +12686,7 @@ namespace WindowsFormsApp1
                         }
                         else//如果不是鄰近頁牽連編輯
                         {
-                            if (browsrOPMode != BrowserOPMode.appActivateByName)
+                            if (BrowsrOPMode != BrowserOPMode.appActivateByName)
                             {//決定是否清除原在quickedit_data_textbox裡的文字
                                 switch (quickedit_data_textboxtxt)
                                 {
@@ -12663,7 +12743,7 @@ namespace WindowsFormsApp1
                             }
                         }
                         //避免誤觸
-                        if (browsrOPMode != BrowserOPMode.appActivateByName) textBox1.Enabled = false;
+                        if (BrowsrOPMode != BrowserOPMode.appActivateByName) textBox1.Enabled = false;
                         if (keyDownCtrlAdd_ReturnVale && dialogResult == DialogResult.OK)
                             pageTextEndPosition = textBox1.SelectionStart + predictEndofPageSelectedTextLen;
                         if (textBox1.TextLength > 0 && textBox1.TextLength - pageTextEndPosition > 0)
@@ -12775,7 +12855,7 @@ namespace WindowsFormsApp1
         /// </summary>
         private void bringBackMousePosFrmCenter()
         {
-            if (browsrOPMode != BrowserOPMode.appActivateByName && driver != null
+            if (BrowsrOPMode != BrowserOPMode.appActivateByName && driver != null
                 && !IsDriverInvalid() && IsConfirmHumanPage()) return;
             if (this.InvokeRequired)
             {
@@ -13014,7 +13094,7 @@ namespace WindowsFormsApp1
                                     )
                                 {
                                     //autoExecuteSKQSContextMark();
-                                    runWordMacro("中國哲學書電子化計劃.國學大師_Kanripo_四庫全書本轉來");
+                                    RunWordMacro("中國哲學書電子化計劃.國學大師_Kanripo_四庫全書本轉來");
                                     AutoMarkTitleParagraph();
                                 }
                             }
@@ -13181,7 +13261,7 @@ namespace WindowsFormsApp1
             if ((m & Keys.Control) == Keys.Control && (m & Keys.Shift) == Keys.Shift && e.KeyCode == Keys.T)
             {
                 e.Handled = true;
-                appActivateByName();
+                AppActivateByName();
                 SendKeys.Send("^+t");
                 return;
 
@@ -13328,7 +13408,7 @@ namespace WindowsFormsApp1
                 }
                 if (e.KeyCode == Keys.O)
                 {//Ctrl + Alt + o :下載圖片，交給Google Keep OCR
-                    if (browsrOPMode == BrowserOPMode.appActivateByName) return;
+                    if (BrowsrOPMode == BrowserOPMode.appActivateByName) return;
                     e.Handled = true; Form1.playSound(Form1.soundLike.press);
                     TopMost = false;
                     OpenQA.Selenium.IWebElement iw = WaitFindWebElementBySelector_ToBeClickable("#content");
@@ -13349,7 +13429,7 @@ namespace WindowsFormsApp1
                 }
                 if (e.KeyCode == Keys.F10)
                 {//Ctrl + Alt + f10： 將textBox1中選取的文字送去《古籍酷》自動標點。若無選取則將整個textBox1的內容送去。（略去其他檢查，唯小於20字元不處理）20240910
-                    if (browsrOPMode != BrowserOPMode.seleniumNew)
+                    if (BrowsrOPMode != BrowserOPMode.seleniumNew)
                     {
                         Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("請先以Selenium模式啟動Chrome瀏覽器（在textBox2中輸入「br」或「bb」就可以了），再繼續。");
                         return;
@@ -13424,9 +13504,9 @@ namespace WindowsFormsApp1
                 }
                 if (e.KeyCode == Keys.O)
                 {//Alt + Shift + o ：交給《古籍酷》 OCR ，模擬使用者手動操作的功能（測試成功！！！！）
-                    //if (PagePaste2GjcoolOCR_ing) return;●●●●●●●●●●●●●●●●●●●●●20251230先撤銷
+                 //if (PagePaste2GjcoolOCR_ing) return;●●●●●●●●●●●●●●●●●●●●●20251230先撤銷
                     if (PagePaste2GjcoolOCR_ing) PagePaste2GjcoolOCR_ing = false;
-                    if (browsrOPMode == BrowserOPMode.appActivateByName) return;
+                    if (BrowsrOPMode == BrowserOPMode.appActivateByName) return;
                     if (!IsValidUrl＿ImageTextComparisonPage(textBox3.Text)) return;
                     e.Handled = true; Form1.playSound(Form1.soundLike.press, true);
                     TopMost = false;
@@ -13507,7 +13587,7 @@ namespace WindowsFormsApp1
 
                 if (e.KeyCode == Keys.F10)
                 {//Ctrl + F10： 將textBox1中選取的文字送去《古籍酷》舊版自動標點。若無選取則將整個textBox1的內容送去。（小於20字元不處理）20240808（臺灣父親節）
-                    if (browsrOPMode != BrowserOPMode.seleniumNew)
+                    if (BrowsrOPMode != BrowserOPMode.seleniumNew)
                     {
                         Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("請先以Selenium模式啟動Chrome瀏覽器（在textBox2中輸入「br」或「bb」就可以了），再繼續。");
                         return;
@@ -13519,7 +13599,7 @@ namespace WindowsFormsApp1
                 }
                 if (e.KeyCode == Keys.F11)
                 {//Ctrl + F11： 將textBox1中選取的文字送去《古籍酷》舊版自動標點。若無選取則將整個textBox1的內容送去。（小於20字元不處理）20240808（臺灣父親節）
-                    if (browsrOPMode != BrowserOPMode.seleniumNew)
+                    if (BrowsrOPMode != BrowserOPMode.seleniumNew)
                     {
                         Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("請先以Selenium模式啟動Chrome瀏覽器（在textBox2中輸入「br」或「bb」就可以了），再繼續。");
                         return;
@@ -13540,7 +13620,7 @@ namespace WindowsFormsApp1
                 if (e.KeyCode == Keys.R)
                 {//Ctrl + r ：刷新目前 Chrome瀏覽器 或 預設瀏覽器 網頁（同於網頁上按下F5鍵）；因為有時瀏覽器網頁未完整開啟必須重載
                     e.Handled = true;
-                    appActivateByName();
+                    AppActivateByName();
                     SendKeys.Send("{F5}");
                     //textBox1.Focused; ⇒此為取得在桌面的焦面，不是表單中的焦點，故當表單並非桌面中作用中的表單時，此值也會是fasle，因為TextBox是在表單Form容器中的子元件故 20230125癸卯年初四
                     if (ActiveControl.Name == "textBox1" && !Active) { AvailableInUseBothKeysMouse(); }
@@ -13561,7 +13641,7 @@ namespace WindowsFormsApp1
                 {//Ctrl + PageDown Ctrl + PageUP
                     e.Handled = true;//取得或設定值，指出是否處理事件。https://docs.microsoft.com/zh-tw/dotnet/api/system.windows.forms.keyeventargs.handled?view=netframework-4.7.2&f1url=%3FappId%3DDev16IDEF1%26l%3DZH-TW%26k%3Dk(System.Windows.Forms.KeyEventArgs.Handled);k(TargetFrameworkMoniker-.NETFramework,Version%253Dv4.7.2);k(DevLang-csharp)%26rd%3Dtrue
                     nextPages(e.KeyCode, true);
-                    if (browsrOPMode != BrowserOPMode.appActivateByName) driver.SwitchTo().Window(driver.CurrentWindowHandle);
+                    if (BrowsrOPMode != BrowserOPMode.appActivateByName) driver.SwitchTo().Window(driver.CurrentWindowHandle);
                     //if (autoPastetoQuickEdit) AvailableInUseBothKeysMouse();
                     AvailableInUseBothKeysMouse();
                     return;
@@ -13582,18 +13662,18 @@ namespace WindowsFormsApp1
                 {//Ctrl + 1 ：執行 Word VBA Sub 巨集指令「漢籍電子文獻資料庫文本整理_以轉貼到中國哲學書電子化計劃」【 附件即有 [Word VBA](https://github.com/oscarsun72/TextForCtext/tree/master/WordVBA) 相關模組 】
                  //現在少用，故以此機制防制：
                     if (DialogResult.OK == Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("執行「漢籍電子文獻資料庫文本整理_以轉貼到中國哲學書電子化計劃」？"))
-                        runWordMacro("漢籍電子文獻資料庫文本整理_以轉貼到中國哲學書電子化計劃");
+                        RunWordMacro("漢籍電子文獻資料庫文本整理_以轉貼到中國哲學書電子化計劃");
                     e.Handled = true; return;
                 }
                 if (e.KeyCode == Keys.D3)
                 {//Ctrl + 3 ：執行 Word VBA Sub 巨集指令「漢籍電子文獻資料庫文本整理_十三經注疏」
-                    runWordMacro("漢籍電子文獻資料庫文本整理_十三經注疏");
+                    RunWordMacro("漢籍電子文獻資料庫文本整理_十三經注疏");
                     e.Handled = true; return;
                 }
                 if (e.KeyCode == Keys.D4)
                 {//Ctrl + 4 ：執行 Word VBA Sub 巨集指令「維基文庫四部叢刊本轉來」                 
                     e.Handled = true;
-                    runWordMacro("維基文庫四部叢刊本轉來");
+                    RunWordMacro("維基文庫四部叢刊本轉來");
                     return;
                 }
 
@@ -13601,10 +13681,10 @@ namespace WindowsFormsApp1
                 {// Ctrl + n ：開新預設瀏覽器視窗 //原：在新頁籤開啟 google 網頁，以備用（在預設瀏覽器為 Chrome 時）
                     e.Handled = true;
                     //Process.Start("https://www.google.com.tw/?hl=zh_TW");
-                    appActivateByName();
+                    AppActivateByName();
                     SendKeys.Send("^n");
                     this.Activate();
-                    appActivateByName();
+                    AppActivateByName();
                     e.Handled = true; return;
                 }
 
@@ -13674,7 +13754,7 @@ namespace WindowsFormsApp1
                         x = x.Replace(Environment.NewLine, "");
                         Clipboard.SetText(x);
                     }
-                    runWordMacro("Docs.中國哲學書電子化計劃_只保留正文注文_且注文前後加括弧_貼到古籍酷自動標點");
+                    RunWordMacro("Docs.中國哲學書電子化計劃_只保留正文注文_且注文前後加括弧_貼到古籍酷自動標點");
                     return;
                 }
                 if (e.KeyCode == Keys.F12)
@@ -13691,7 +13771,9 @@ namespace WindowsFormsApp1
             {//按下Alt鍵
 
                 if (e.KeyCode == Keys.PageUp || e.KeyCode == Keys.PageDown)
-                {
+                {//Alt + pageup : 切換至 Chrome瀏覽器上一分頁 20241022
+                 //Alt + pagedown : 切換至 Chrome瀏覽器上一分頁
+
                     //if (browsrOPMode != BrowserOPMode.seleniumNew||driver==null) return;
                     e.Handled = true;
                     switch (e.KeyCode)
@@ -13718,7 +13800,7 @@ namespace WindowsFormsApp1
                 {//Alt + r ：在Selenium模式+手動輸入模式下、關閉所在Chrome瀏覽器右側之分頁。（因應《古籍酷》連線不暢所衍生之措施）20231026
                  //有時--尤其在傳回OCR結果時，等待過久，可以多開幾個《古籍酷》的頁面以刺激之。因為取得OCR結果後會切回目前交付OCR的頁面，故將其右方的分頁悉數關閉即可。
                     e.Handled = true;
-                    if (browsrOPMode != BrowserOPMode.appActivateByName && keyinTextMode)
+                    if (BrowsrOPMode != BrowserOPMode.appActivateByName && keyinTextMode)
                     {
                         try
                         {
@@ -13793,7 +13875,7 @@ namespace WindowsFormsApp1
 
                 if (e.KeyCode == Keys.Oemcomma)
                 {//Alt + , : 在《漢籍全文資料庫》檢索易學關鍵字
-                    if (browsrOPMode != BrowserOPMode.seleniumNew)
+                    if (BrowsrOPMode != BrowserOPMode.seleniumNew)
                     {
                         Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("請先以Selenium模式啟動Chrome瀏覽器（在textBox2中輸入「br」或「bb」就可以了），再繼續。");
                         return;
@@ -13806,7 +13888,7 @@ namespace WindowsFormsApp1
 
                 if (e.KeyCode == Keys.F10)
                 {//Alt + F10 ： 將textBox1中選取的文字送去《古籍酷》自動標點。若無選取則將整個textBox1的內容送去。（小於20字元不處理）20240808（臺灣父親節）
-                    if (browsrOPMode != BrowserOPMode.seleniumNew)
+                    if (BrowsrOPMode != BrowserOPMode.seleniumNew)
                     {
                         Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("請先以Selenium模式啟動Chrome瀏覽器（在textBox2中輸入「br」或「bb」就可以了），再繼續。");
                         return;
@@ -13818,7 +13900,7 @@ namespace WindowsFormsApp1
                 }
                 if (e.KeyCode == Keys.F11)
                 {//Alt + F11 ： 將textBox1中選取的文字送去《古籍酷》自動標點。若無選取則將整個textBox1的內容送去。（小於20字元不處理）20240808（臺灣父親節）
-                    if (browsrOPMode != BrowserOPMode.seleniumNew)
+                    if (BrowsrOPMode != BrowserOPMode.seleniumNew)
                     {
                         Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("請先以Selenium模式啟動Chrome瀏覽器（在textBox2中輸入「br」或「bb」就可以了），再繼續。");
                         return;
@@ -14422,7 +14504,7 @@ namespace WindowsFormsApp1
 
             void lightenTextBoxBackground(Form1 newForm)
             {// 20250308 Copilot大菩薩
-                // 確保有其他表單已經開啟
+             // 確保有其他表單已經開啟
                 if (Application.OpenForms.Count > 1)
                 {
                     // 使用目前已開啟最後一個表單的背景顏色
@@ -14912,7 +14994,7 @@ namespace WindowsFormsApp1
                     "要檢查的話，請先複製其文本，再按確定（ok）按鈕", "", MessageBoxButtons.OKCancel
                     , MessageBoxIcon.Question, MessageBoxDefaultButton.Button2, MessageBoxOptions.DefaultDesktopOnly) == DialogResult.OK)
                 {
-                    runWordMacro("checkEditingOfPreviousVersion");
+                    RunWordMacro("checkEditingOfPreviousVersion");
                 }
             }
             else
@@ -15148,11 +15230,11 @@ namespace WindowsFormsApp1
             textBox3.Text = url;//此會觸發textchanged事件程序
             _eventsEnabled = eventAble;
             #region 僅瀏覽而不編輯
-            switch (browsrOPMode)
+            switch (BrowsrOPMode)
             {
                 case BrowserOPMode.appActivateByName:
                     Process.Start(url);
-                    appActivateByName();
+                    AppActivateByName();
                     break;
                 case BrowserOPMode.seleniumNew:
                     if (driver == null) DriverNew();
@@ -15212,7 +15294,7 @@ namespace WindowsFormsApp1
             if (edit > -1)
             {//編輯才執行，瀏覽則省略
 
-                switch (browsrOPMode)
+                switch (BrowsrOPMode)
                 {
                     //預設瀏覽模式（即開發Selenium架構前）：
                     case BrowserOPMode.appActivateByName:
@@ -15253,7 +15335,7 @@ namespace WindowsFormsApp1
                         Form1.playSound(Form1.soundLike.press);
 
                     //OpenQA.Selenium.IWebElement quick_edit_box;
-                    switch (browsrOPMode)
+                    switch (BrowsrOPMode)
                     {
                         case BrowserOPMode.appActivateByName:
                             Task.Delay(290).Wait();
@@ -15373,7 +15455,7 @@ namespace WindowsFormsApp1
                 //如果該書沒有「OCR_MATCH」tag的話，即不是上下臨近頁牽連編輯模式者：
                 if (!check_the_adjacent_pages)
                 {
-                    switch (browsrOPMode)
+                    switch (BrowsrOPMode)
                     {
                         case BrowserOPMode.appActivateByName:
                             Task.Delay(500).Wait();
@@ -15425,13 +15507,13 @@ namespace WindowsFormsApp1
                     {
                         if (Clipboard.GetText().Contains("-1a]"))
                         {
-                            runWordMacro("中國哲學書電子化計劃.國學大師_Kanripo_四庫全書本轉來");
+                            RunWordMacro("中國哲學書電子化計劃.國學大師_Kanripo_四庫全書本轉來");
                             AutoMarkTitleParagraph();
                             AvailableInUseBothKeysMouse();
                         }
                         if (Clipboard.GetText().Contains(":KR"))
                         {
-                            runWordMacro("中國哲學書電子化計劃.Kanripo_GitHub轉來");
+                            RunWordMacro("中國哲學書電子化計劃.Kanripo_GitHub轉來");
                             AutoMarkTitleParagraph();
                             AvailableInUseBothKeysMouse();
                         }
@@ -15591,8 +15673,12 @@ namespace WindowsFormsApp1
             return false;
         }
 
-
-        internal void runWordMacro(string runName)
+        /// <summary>
+        /// 執行 Word VBA 巨集
+        /// 每個表單不同，故須動態的，不能是靜態成員
+        /// </summary>
+        /// <param name="runName">要執行的巨集名稱</param>
+        internal void RunWordMacro(string runName)
         {
             if (!isClipBoardAvailable_Text()) return;
             string xClpBd = Clipboard.GetText();
@@ -15699,7 +15785,7 @@ namespace WindowsFormsApp1
                 }
             }
 
-            //自剪貼簿擷取Word VBA結果
+            //自剪貼簿擷取 Word VBA 結果
             while (!isClipBoardAvailable_Text()) { }
             xClpBd = Clipboard.GetText();
             switch (runName)
@@ -16263,7 +16349,7 @@ namespace WindowsFormsApp1
         static extern void SwitchToThisWindow(IntPtr hWnd, bool turnOn);
 
         internal static string defaultBrowserName = string.Empty;//https://cybarlab.com/web-browser-name-in-c-sharp
-        internal void appActivateByName()
+        internal void AppActivateByName()
         {
         //Process[] procsBrowser = Process.GetProcessesByName("chrome");
         tryagain:
@@ -16536,8 +16622,8 @@ namespace WindowsFormsApp1
                         if (Textarea_data_Edit_textbox != null)
                             xInput = Textarea_data_Edit_textbox.GetAttribute("value");
                         if (xInput == string.Empty) return false;//●●●●●●●●●●●●●●●●●●●●20251220
-                        //await Task.Run(() =>
-                        //{ //送出後也不必等待，也沒有其他須用到的元件，故可交給作業系統開個新線程去跑就好，但因為editchapter上傳儲存時常較Quit edit費時，故保險起見，還是在後加個Task.delay一下比較好
+                                                                 //await Task.Run(() =>
+                                                                 //{ //送出後也不必等待，也沒有其他須用到的元件，故可交給作業系統開個新線程去跑就好，但因為editchapter上傳儲存時常較Quit edit費時，故保險起見，還是在後加個Task.delay一下比較好
                         reCommit:
                         try
                         {
@@ -16860,7 +16946,7 @@ namespace WindowsFormsApp1
 
         private void pasteToCtext()
         {//for .BrowserOPMode.appActivateByName
-            appActivateByName();
+            AppActivateByName();
 
             //if (ModifierKeys == Keys.None)//在textBox1_TextChanged事件中已處理按著Shift時的行為
             //{
@@ -16926,70 +17012,73 @@ namespace WindowsFormsApp1
         /// 取代文字
         /// 用「7」為前綴以更新要取代成的字串
         /// </summary>
-        /// <param name="replacedword">要被取代的字串</param>
-        /// <param name="rplsword">用以取代的字串</param>
-        private void replaceWord(string replacedword, string rplsword)
+        /// <param name="replacedWord">要被取代的字串</param>
+        /// <param name="rplsWord">用以取代的字串</param>
+        private void replaceWord(string replacedWord, string rplsWord)
         {
-            if (rplsword == "") return;
-            bool editListMode = false;
-            if (rplsword.StartsWith("7"))
-            {//如果在此框輸入的字串前綴半形「@」符號，則會將被取代的字串其對應的用以取代之字串改成目前指定的這個（即在「@」後的字串）20230903蘇拉Saola颱風大菩薩往生後海葵Haikui颱風大菩薩光臨臺灣本島日。感恩感恩　讚歎讚歎　南無阿彌陀佛
-                editListMode = true;
-                rplsword = rplsword.Substring("7".Length);
-            }
+            if (rplsWord == "") return;
+            //bool editListMode = false;
+            //if (rplsword.StartsWith("7"))//「@」現早已改換成「7」 20260102
+            //{//如果在此框輸入的字串前綴半形「@」符號，則會將被取代的字串其對應的用以取代之字串改成目前指定的這個（即在「@」後的字串）20230903蘇拉Saola颱風大菩薩往生後海葵Haikui颱風大菩薩光臨臺灣本島日。感恩感恩　讚歎讚歎　南無阿彌陀佛
+            //    editListMode = true;
+            //    rplsword = rplsword.Substring("7".Length);
+            //}
             if (textBox1.SelectionStart == textBox1.Text.Length) return;
-            StringInfo selWord = new StringInfo(rplsword);
+            StringInfo selWord = new StringInfo(rplsWord);
             string x = textBox1.Text;
             //string replacedword = textBox1.SelectedText;
-            if (replacedword == "")//(!(selWord.LengthInTextElements > 1 || textBox1.SelectionLength == 0))
+            if (replacedWord == "")//(!(selWord.LengthInTextElements > 1 || textBox1.SelectionLength == 0))
             {//無選取文字則以插入點後一字為被取代字                
-                StringInfo replacedWord;
+                StringInfo replacedWordSi;
                 if (textBox1.SelectionStart + CJK_Crtr_Len_Max > textBox1.Text.Length)
-                    replacedWord = new StringInfo(
+                    replacedWordSi = new StringInfo(
                             x.Substring(textBox1.SelectionStart, 1));
                 else
-                    replacedWord = new StringInfo(
+                    replacedWordSi = new StringInfo(
                             x.Substring(textBox1.SelectionStart, CJK_Crtr_Len_Max));
-                replacedword = replacedWord.SubstringByTextElements(0, 1);//取CJK一個單位字
+                replacedWord = replacedWordSi.SubstringByTextElements(0, 1);//取CJK一個單位字
             }
-            if (replacedword == rplsword) return;
+            if (replacedWord == rplsWord) return;
             int s = textBox1.SelectionStart; int l = 0;
 
             undoRecord();
             stopUndoRec = true; int cntr = 0, beforeScntr = 0;
             if (button2.Text == "選取文")
             {
-                replacedword = textBox2.Text;
-                if (replacedword == "") { stopUndoRec = false; return; }
+                replacedWord = textBox2.Text;
+                if (replacedWord == "") { stopUndoRec = false; return; }
                 l = textBox1.SelectionLength;
                 string xBefore = x.Substring(0, s), xAfter = x.Substring(s + l);
                 x = textBox1.SelectedText;
-                if (rplsword == "\"\"") rplsword = "";//要清除所選文字，則選取其字，然後在 textBox4 輸入兩個英文半形雙引號 「""」（即表空字串），則不會取代成「""」，而是清除之。
+                if (rplsWord == "\"\"") rplsWord = "";//要清除所選文字，則選取其字，然後在 textBox4 輸入兩個英文半形雙引號 「""」（即表空字串），則不會取代成「""」，而是清除之。
                                                       //textBox1.Text = xBefore + x.Replace(replacedword, rplsword) + xAfter;
-                cntr = ReplaceCntr(ref x, replacedword, rplsword, s, ref beforeScntr);
+                cntr = ReplaceCntr(ref x, replacedWord, rplsWord, s, ref beforeScntr);
                 textBox1.Text = xBefore + x + xAfter;
             }
             else
             {
                 l = selWord.LengthInTextElements;
-                if (rplsword == "\"\"") rplsword = "";
+                if (rplsWord == "\"\"") rplsWord = "";
                 //textBox1.Text = x.Replace(replacedword, rplsword);
-                cntr = ReplaceCntr(ref x, replacedword, rplsword, s, ref beforeScntr);
+                cntr = ReplaceCntr(ref x, replacedWord, rplsWord, s, ref beforeScntr);
                 textBox1.Text = x;
 
             }
-            if (replacedword.Length != rplsword.Length)
+            if (replacedWord.Length != rplsWord.Length)
             {
-                s += beforeScntr * (rplsword.Length - replacedword.Length);
+                s += beforeScntr * (rplsWord.Length - replacedWord.Length);
             }
-            addReplaceWordDefault(replacedword, rplsword, editListMode);
+            //將取代資訊記錄下來
+            //addReplaceWordDefault(replacedword, rplsword, editListMode);
+            //addReplaceWordDefault(replacedword, rplsword);
+            replaceWordDict[replacedWord] = rplsWord;
             #region 自動將圓括弧置換成{{}}
-            if (replacedword == "（" && rplsword == "{{") textBox1.Text = textBox1.Text.Replace("）", "}}");
-            if (replacedword == "）" && rplsword == "}}") textBox1.Text = textBox1.Text.Replace("（", "{{");
+            if (replacedWord == "（" && rplsWord == "{{") textBox1.Text = textBox1.Text.Replace("）", "}}");
+            if (replacedWord == "）" && rplsWord == "}}") textBox1.Text = textBox1.Text.Replace("（", "{{");
             #endregion
             textBox1.SelectionStart = s; textBox1.SelectionLength = l;
             //restoreCaretPosition(textBox1, s, l == 0 ? 1 : l);//textBox1.ScrollToCaret();
-            restoreCaretPosition(textBox1, s, rplsword.Length);//textBox1.ScrollToCaret();
+            restoreCaretPosition(textBox1, s, rplsWord.Length);//textBox1.ScrollToCaret();
                                                                //if (l != 0)
                                                                //{
                                                                //    if (new StringInfo(replacedword).LengthInTextElements == 1)
@@ -16998,73 +17087,113 @@ namespace WindowsFormsApp1
                                                                //    }
                                                                //}
                                                                ////restoreCaretPosition(textBox1, s,  l);
-            textBox1.Focus();
-
-            if (!insertMode)
+            if (!textBox4.Focused && !textBox1.Focused)//在textBox4_Leave裡已有下一行指令了 20260102
             {
-                if (new StringInfo(textBox1.SelectedText).LengthInTextElements == 1)
-                    textBox1.SelectionLength = 0;
-            }
+                textBox1.Focus();
 
+                if (!insertMode)
+                {
+                    if (new StringInfo(textBox1.SelectedText).LengthInTextElements == 1)
+                        textBox1.SelectionLength = 0;
+                }
+            }
             undoRecord();
 
             stopUndoRec = false;
             playSound(soundLike.notify, true);//若有取代則播音效，否則有些字筆畫太似，不放大不知道有沒有一致，取代了沒 20240913
         }
 
-        List<string> replaceWordList = new List<string>();
-        List<string> replacedWordList = new List<string>();
+        /// <summary>
+        /// 取代字串之記錄：要取代成的新值。原為List物件，改用Dictionary物件以方便比對查詢。20260103
+        /// key=被取代的字串，value=用以取代的字串
+        /// </summary>
+        Dictionary<string, string> replaceWordDict = new Dictionary<string, string>();
+        ///// <summary>
+        ///// 取代字串之記錄：要取代成的新值。當時不知有Dictionay物件可以用。有空時再來改寫。20260102
+        ///// </summary>
+        //List<string> replaceWordList = new List<string>();
+        ///// <summary>
+        ///// 取代字串之記錄：要被取代的舊值。當時不知有Dictionay物件可以用。有空時再來改寫。20260102
+        ///// </summary>
+        //List<string> replacedWordList = new List<string>();
 
         string getReplaceWordDefault(string replacedWord)
         {
-            if (replacedWordList.Count == 0) return "";
-            string replsWord = "";
-            //for (int i = 0; i < replacedWordList.Count; i++)
-            for (int i = replacedWordList.Count - 1; i > -1; i--)
-            {
-                if (replacedWord == replacedWordList[i])
-                {
-                    replsWord += replaceWordList[i];
-                }
-            }
-            return replsWord;
+            if (replaceWordDict.Count == 0) return string.Empty;
+            if (replaceWordDict.ContainsKey(replacedWord))
+                return replaceWordDict[replacedWord];
+            return string.Empty;
 
         }
-        /// <summary>
-        /// 加入取代字串之資料
-        /// </summary>
-        /// <param name="replacedWord"></param>
-        /// <param name="replaceWord"></param>
-        /// <param name="editMode">如果是改訂已存在的資料，就是true</param>
-        void addReplaceWordDefault(string replacedWord, string replaceWord, bool editMode = false)
-        {
-            if (replacedWordList.Contains(replacedWord))
-            {
-                int i = 0, count = replacedWordList.Count;
-                if (editMode)
-                {
-                    if (replaceWordList[replacedWordList.IndexOf(replacedWord)] != replaceWord)
-                        replaceWordList[replacedWordList.IndexOf(replacedWord)] = replaceWord;
-                    return;
-                }
-                else
-                {
-                    while (i < count)
-                    {
+        //20260103 改用 Dictionary 物件以方便比對查詢，以下為舊版
+        //string getReplaceWordDefault(string replacedWord)
+        //{
+        //    if (replacedWordList.Count == 0) return "";
+        //    string replsWord = "";
+        //    //for (int i = 0; i < replacedWordList.Count; i++)
+        //    for (int i = replacedWordList.Count - 1; i > -1; i--)
+        //    {
+        //        if (replacedWord == replacedWordList[i])
+        //        {
+        //            replsWord += replaceWordList[i];
+        //        }
+        //    }
+        //    return replsWord;
 
-                        if (replacedWordList.IndexOf(replacedWord, i) == replaceWordList.IndexOf(replaceWord, i))
-                        {
-                            return;
-                        }
-                        i++;
-                    }
-                }
+        //}
 
-            }
-            replacedWordList.Add(replacedWord);
-            replaceWordList.Add(replaceWord);
+        ///// <summary>
+        ///// 加入取代字串之資料。將取代資訊記錄下來。
+        ///// </summary>
+        ///// <param name="replacedWord">被取代的字串</param>
+        ///// <param name="replaceWord">取代成的新值</param>
+        ///// <param name="editMode">是否是編輯字典清單模式</param>
+        //void addReplaceWordDefault(string replacedWord, string replaceWord, bool editMode = false)
+        //{   
+        //    replaceWordDict[replacedWord] = replaceWord;         
+        //}
+        //以下為舊版 20260103 改用 Dictionary 物件以方便比對查詢
+        /// <param name="xDomain"></param>
+        /// <param name="replacedword"></param>
+        /// <param name="rplsword"></param>
+        /// <param name="s"></param>
+        /// <param name="beforeScntr"></param>
+        /// <returns></returns>
+        ///// <summary>
+        ///// 加入取代字串之資料。將取代資訊記錄下來
+        ///// </summary>
+        ///// <param name="replacedWord"></param>
+        ///// <param name="replaceWord"></param>
+        ///// <param name="editMode">如果是改訂已存在的資料，就是true</param>
+        //void addReplaceWordDefault(string replacedWord, string replaceWord, bool editMode = false)
+        //{
+        //    if (replacedWordList.Contains(replacedWord))
+        //    {
+        //        int i = 0, count = replacedWordList.Count;
+        //        if (editMode)
+        //        {
+        //            if (replaceWordList[replacedWordList.IndexOf(replacedWord)] != replaceWord)
+        //                replaceWordList[replacedWordList.IndexOf(replacedWord)] = replaceWord;
+        //            return;
+        //        }
+        //        else
+        //        {
+        //            while (i < count)
+        //            {
 
-        }
+        //                if (replacedWordList.IndexOf(replacedWord, i) == replaceWordList.IndexOf(replaceWord, i))
+        //                {
+        //                    return;
+        //                }
+        //                i++;
+        //            }
+        //        }
+
+        //    }
+        //    replacedWordList.Add(replacedWord);
+        //    replaceWordList.Add(replaceWord);
+
+        //}
 
         int ReplaceCntr(ref string xDomain, string replacedword,
             string rplsword, int s, ref int beforeScntr)
@@ -17106,27 +17235,30 @@ namespace WindowsFormsApp1
             }
             //else if (textBox1.SelectionLength == 0 && insertMode == false)
             //{
-            int s = textBox1.SelectionStart; string x = textBox4.Text;
+            int s = textBox1.SelectionStart; string newStr = textBox4.Text;
             //    textBox1.Select(s
             //        , char.IsHighSurrogate(textBox1.Text.Substring(s, 1), 0) ? 2 : 1);
             //}
-            if (textBox1.SelectedText != "")
+            if (textBox1.SelectedText != string.Empty)
             {
                 if (char.IsHighSurrogate(textBox1.SelectedText, 0) && textBox1.SelectedText.Length < 3)
                     textBox1.Select(s, 2);
             }
             //取代前備份
             saveText();
+            string oldStr = textBox1.SelectedText;
+            StringInfo oldSi = new StringInfo(oldStr), newSi = new StringInfo(newStr);
 
+            //https://copilot.microsoft.com/shares/mn6afwZiwdJTNQkki4aMb 20260102
             //實際執行取代文字
-            if (ModifierKeys != Keys.Shift)
+            if (!(ModifierKeys == Keys.Shift && oldSi.LengthInTextElements == 1 && newSi.LengthInTextElements == 1))
             {
-                replaceWord(textBox1.SelectedText, x);// textBox4.Text);
+                replaceWord(oldStr, newStr);// textBox4.Text);
                 if (textBox4.Text != "")
                 {
                     try
                     {
-                        Clipboard.SetText(x);// textBox4.Text);
+                        Clipboard.SetText(newStr);// textBox4.Text);
                     }
                     catch (Exception)
                     {
@@ -17135,17 +17267,48 @@ namespace WindowsFormsApp1
             }
             textBox4Resize();
             PauseEvents();
-            textBox4.Text = "";
+            textBox4.Text = string.Empty;
             ResumeEvents();
             textBox1.Focus();
             undoRecord();
-            if (ModifierKeys == Keys.Shift)
+            if (ModifierKeys == Keys.Shift)//想要一併取代完整編輯內的xml內容
             {
-                textBox1.Select(textBox1.SelectionStart + textBox1.SelectionLength, 0);
-                textBox1.SelectedText = x;
-                StringInfo si = new StringInfo(textBox1.Text.Substring(s, textBox1.SelectionStart - s));
-                textBox1.Select(s, 0);
-                SendKeys.Send("%e");
+                if (oldSi.LengthInTextElements == 1 && newSi.LengthInTextElements == 1)
+                {
+                    #region 只限一字換一字
+                    textBox1.Select(textBox1.SelectionStart + textBox1.SelectionLength, 0);
+                    textBox1.SelectedText = newStr;
+                    //StringInfo si = new StringInfo(textBox1.Text.Substring(s, textBox1.SelectionStart - s));
+                    textBox1.Select(s, 0);
+                    SendKeys.Send("%e");
+                    #endregion
+                }
+                else if (oldSi.LengthInTextElements > 1 && newSi.LengthInTextElements > 1)
+                {//一字以上的替換、取代；其實可以取代上面一字換一字的區塊；蓋當初是想取 Alt + e 方法之便爾。 20260102
+                    OpenEditPage();
+
+                    //「內容:」欄位文字方塊控制項
+                    OpenQA.Selenium.IWebElement iwe = Textarea_data_Edit_textbox;//waitFindWebElementBySelector_ToBeClickable("#data");
+                    if (iwe == null)
+                    {
+                        DirectlyReplacingCharactersPageWindowHandle = string.Empty;
+                        Debugger.Break();
+                    }// goto reOpenEdittab; } //20260102●●●●●●●●●●●●●●●●●
+
+
+                    // 抓取 file 值（從網頁內容） https://copilot.microsoft.com/shares/YJGkQJFz4sdpWFHsYUYkN
+                    string htmlContent = iwe.GetDomProperty("value"); // 你原本的網頁字串來源
+                    var match = Regex.Match(htmlContent, @"<scanbegin file=""(\d+)""");
+                    string fileValue = match.Success ? match.Groups[1].Value : "00000";
+                    if (fileValue == "00000") return;
+                    //輸入取代後的值
+                    //htmlContent = htmlContent.Replace(Replace_NewLine_Scanbreak(oldStr, fileValue), Replace_NewLine_Scanbreak(newStr, fileValue));
+                    htmlContent = htmlContent.Replace(ReplaceBreaksAndFullWidthSpaces(oldStr, fileValue), ReplaceBreaksAndFullWidthSpaces(newStr, fileValue));
+                    if (!SetIWebElementValueProperty(iwe, htmlContent)) Debugger.Break();
+
+                    Browser.driver.SwitchTo().Window(LastValidWindow);
+                }
+
             }
         }
 
@@ -17509,10 +17672,10 @@ namespace WindowsFormsApp1
                         if (mk == Keys.ShiftKey)//20240920 Copilot大菩薩：全域鍵盤掛鉤在 C# Windows.Forms 中的使用：
                             hideToNICo();//https://sl.bing.net/f5zjhC1h9DU
                                          //,通常是要準備貼上的，所以就要將目前在用的瀏覽器置前，確保它取得焦點，否則有時系統焦點會或交給工作列                        
-                        if (browsrOPMode == BrowserOPMode.appActivateByName)
+                        if (BrowsrOPMode == BrowserOPMode.appActivateByName)
                         {
                             //string currentForeTabUrl = ActiveTabURL_Ctext_Edit;
-                            appActivateByName();
+                            AppActivateByName();
                             //if (currentForeTabUrl != ActiveTabURL_Ctext_Edit)
                             //    GoToUrlandActivate(currentForeTabUrl);
                         }
@@ -17523,7 +17686,7 @@ namespace WindowsFormsApp1
                             {
                                 driver = driver ?? DriverNew();
                                 //chatGPT：在 C# 中使用 Selenium 控制 Chrome 瀏覽器時，可以使用以下方法切換到 Chrome 瀏覽器視窗：
-                                if (driver == null) { Form1.browsrOPMode = BrowserOPMode.seleniumNew; DriverNew(); }
+                                if (driver == null) { Form1.BrowsrOPMode = BrowserOPMode.seleniumNew; DriverNew(); }
 
                                 driver.SwitchTo().Window(driver.CurrentWindowHandle);
 
@@ -17718,11 +17881,11 @@ namespace WindowsFormsApp1
                     ClpTxtBefore = clpTxt;
 
                     //據程式進行模式架構分別處置
-                    switch (browsrOPMode)
+                    switch (BrowsrOPMode)
                     {
                         //於預設模式時鍵入
                         case BrowserOPMode.appActivateByName:
-                            appActivateByName();//取得網址時順便貼上簡單修改模式下的文字
+                            AppActivateByName();//取得網址時順便貼上簡單修改模式下的文字
                             Task.WaitAll();
                             SendKeys.Send("{F6 3}");
                             Task.WaitAll();
@@ -17849,7 +18012,7 @@ namespace WindowsFormsApp1
                 {
                     //20230115 非Selenium模式才執行，因為 Selenium模式 已在函式方法裡啟用遞迴（recursion），不必靠表單此Activated事件才能再次啟動了貼上機制了，真正達到全自動化的境地
                     //if (browsrOPMode == BrowserOPMode.appActivateByName && !autoPastetoCtextQuitEditTextboxCancel)
-                    if (browsrOPMode == BrowserOPMode.appActivateByName)
+                    if (BrowsrOPMode == BrowserOPMode.appActivateByName)
                         autoPaste2CtextQuitEditTextbox(out DialogResult dialogResult);
                     if (textBox1.TextLength >= 100)//配合下面「if (textBox1.TextLength < 100)」還要執行
                         return;//20230113
@@ -17893,7 +18056,7 @@ namespace WindowsFormsApp1
                         //若有按下Ctrl 或 Shift 則執行圖文脫鉤 Word VBA
                         if ((ModifierKeys & Keys.Control) == Keys.Control && (ModifierKeys & Keys.Alt) == Keys.Alt)
                         {
-                            runWordMacro("中國哲學書電子化計劃.撤掉與書圖的對應_脫鉤");
+                            RunWordMacro("中國哲學書電子化計劃.撤掉與書圖的對應_脫鉤");
                             return false;
                         }
                         //if (ModifierKeys == (Keys.Control | Keys.Shift))
@@ -17902,7 +18065,7 @@ namespace WindowsFormsApp1
                         //    return;
                         //}
                         //若沒有按下Ctrl 或 Shift 則執行 Word VBA
-                        runWordMacro("中國哲學書電子化計劃.清除頁前的分段符號");
+                        RunWordMacro("中國哲學書電子化計劃.清除頁前的分段符號");
 
 
                         //Application.DoEvents();//●●●●●●●●●●●●●●●●●●20250214
@@ -17936,7 +18099,7 @@ namespace WindowsFormsApp1
                             && int.TryParse(clpTxt.Substring(clpTxt.IndexOf("P") + 1, 1), out _))))//P 乃「北京元引科技有限公司《元引科技引得數字人文資源平臺·中國歷代文獻》」的文本特徵
                     {
                         ocrTextMode = false;
-                        runWordMacro("中國哲學書電子化計劃.國學大師_Kanripo_四庫全書本轉來");
+                        RunWordMacro("中國哲學書電子化計劃.國學大師_Kanripo_四庫全書本轉來");
                         undoRecord();
                         if (fastMode && !textBox1.Text.Contains("　*") && TitleLeadingSpacesCount.Count > 0)
                             //if (fastMode && TitleLeadingSpacesCount.Count > 0)
@@ -17951,7 +18114,7 @@ namespace WindowsFormsApp1
                     else if (Clipboard.GetText().Contains(":KR"))
                     {
                         ocrTextMode = false;
-                        runWordMacro("中國哲學書電子化計劃.Kanripo_GitHub轉來");
+                        RunWordMacro("中國哲學書電子化計劃.Kanripo_GitHub轉來");
                         undoRecord();
                         if (fastMode && !textBox1.Text.Contains("　*") && TitleLeadingSpacesCount.Count > 0)
                             //if (fastMode && TitleLeadingSpacesCount.Count > 0)
@@ -17984,7 +18147,7 @@ namespace WindowsFormsApp1
             clpTxt = Clipboard.GetText();
             if (clpTxt.IndexOf("<scanbegin file=") > -1 && clpTxt.IndexOf(" page=") > -1 &&
                 clpTxt.Contains(" page=\"1\" />●\t<") == false && modifyParaMark)// page="1" />●	<   為 WordVBA 中國哲學書電子化計劃.新頁面 巨集程序所產生的新頁面語法標記，含「\t」為其特徵
-                runWordMacro("中國哲學書電子化計劃.清除頁前的分段符號");
+                RunWordMacro("中國哲學書電子化計劃.清除頁前的分段符號");
             if (autoPaste2QuickEdit || fastMode)
                 inputSKQSFrontPage();
 
@@ -18023,7 +18186,7 @@ namespace WindowsFormsApp1
                 if (ModifierKeys == Keys.Control)//如果按下Ctrl則自動翻到下一頁
                     nextPageAuto = true;
                 //處理《維基文庫》的每卷文本準備貼入
-                runWordMacro("維基文庫四部叢刊本轉來");
+                RunWordMacro("維基文庫四部叢刊本轉來");
 
                 if (textBox1.Text.IndexOf("MidleadingBot") > -1)
                 {//清除末尾的"MidleadingBot"字樣文字
@@ -18040,7 +18203,7 @@ namespace WindowsFormsApp1
                     {
                     }
                 }
-                if (nextPageAuto && browsrOPMode == BrowserOPMode.appActivateByName)
+                if (nextPageAuto && BrowsrOPMode == BrowserOPMode.appActivateByName)
                 {//自動模式通常在最後一頁會停住，故自行翻下一頁（下一卷首）備用
                     Task.WaitAll();
                     nextPages(Keys.PageDown, false);
@@ -18446,7 +18609,7 @@ namespace WindowsFormsApp1
             switch (textBox2.Text)
             {
                 case "ap,":
-                ap: browsrOPMode = BrowserOPMode.appActivateByName;
+                ap: BrowsrOPMode = BrowserOPMode.appActivateByName;
                     PauseEvents();
                     textBox2.Text = "";
                     ResumeEvents();
@@ -18454,7 +18617,7 @@ namespace WindowsFormsApp1
                 case "aa":
                     goto ap;
                 case "sl,":
-                sl: browsrOPMode = BrowserOPMode.seleniumNew;
+                sl: BrowsrOPMode = BrowserOPMode.seleniumNew;
                     PauseEvents(); textBox2.Text = string.Empty; ResumeEvents();
                     //第一次開啟Chrome瀏覽器，或前有未關閉的瀏覽器時
                     if (driver == null)
@@ -18982,7 +19145,7 @@ namespace WindowsFormsApp1
 
                     //須避免textbox1 與Form的同一事件衝突（呼叫 nextPage方法太頻繁）變成連翻上下頁，以致 chromedriver不及反應而出錯當掉20230111
                     case MouseButtons.XButton1:
-                        if (browsrOPMode != BrowserOPMode.appActivateByName)
+                        if (BrowsrOPMode != BrowserOPMode.appActivateByName)
                         {//過於頻繁會造成chromedriver反應不及而當掉。終於抓到 bugs了！202301110632
                             timeDifference = DateTime.Now.Subtract(nextPageStartTime);
                             if (timeDifference.TotalSeconds < 0.3)
@@ -18990,7 +19153,7 @@ namespace WindowsFormsApp1
                             nextPageStartTime = DateTime.Now;
                         }
                         nextPages(Keys.PageUp, false);
-                        if (browsrOPMode != BrowserOPMode.appActivateByName)
+                        if (BrowsrOPMode != BrowserOPMode.appActivateByName)
                         {
                             if (IsDriverInvalid())
                                 RestartChromedriver();
@@ -19000,7 +19163,7 @@ namespace WindowsFormsApp1
                         //if (autoPaste2QuickEdit || keyinTextMode) AvailableInUseBothKeysMouse();
                         AvailableInUseBothKeysMouse();
                         #region 檢查textBox1的Text值                        
-                        if (keyinTextMode && browsrOPMode == BrowserOPMode.seleniumNew)
+                        if (keyinTextMode && BrowsrOPMode == BrowserOPMode.seleniumNew)
                         {
                             int cntr = 0;
                             while (textBox1.Text != Quickedit_data_textboxTxt)
@@ -19016,7 +19179,7 @@ namespace WindowsFormsApp1
                         break;
                     case MouseButtons.XButton2:
                         bool rect = false;
-                        if (browsrOPMode != BrowserOPMode.appActivateByName)
+                        if (BrowsrOPMode != BrowserOPMode.appActivateByName)
                         {//過於頻繁會造成chromedriver反應不及而當掉
                             timeDifference = DateTime.Now.Subtract(nextPageStartTime);
                             if (timeDifference.TotalSeconds < 0.3)
@@ -19065,7 +19228,7 @@ namespace WindowsFormsApp1
                     case MouseButtons.XButton1://上一頁按鈕
                         break;
                     case MouseButtons.XButton2://下一頁按鈕
-                        if (browsrOPMode != BrowserOPMode.appActivateByName)
+                        if (BrowsrOPMode != BrowserOPMode.appActivateByName)
                         {//過於頻繁會造成chromedriver反應不及而當掉
                             timeDifference = DateTime.Now.Subtract(nextPageStartTime);
                             if (timeDifference.TotalSeconds < 0.3)
@@ -19081,7 +19244,7 @@ namespace WindowsFormsApp1
                             }
                             else if (ModifierKeys == Keys.Control)//（Ctrl + 滑鼠下一頁）
                             {//按住Ctrl再按五鍵滑鼠的下一頁按鈕，則可以以預設的書頁圖大小來設定紅框以供輸入。可以網址來產生紅框如下： 20250202大年初五 感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主
-                                //driver.Navigate().GoToUrl(driver.Url.Replace("#editor", "#box(2,14,792,1146)"));
+                             //driver.Navigate().GoToUrl(driver.Url.Replace("#editor", "#box(2,14,792,1146)"));
                                 driver.Navigate().GoToUrl(driver.Url.Replace("#editor", "#box(0,2,798,1288)"));
                                 driver.Navigate().Refresh();
                                 Input_picture();
@@ -19236,7 +19399,7 @@ namespace WindowsFormsApp1
                 //Clipboard.SetData(DataFormats.UnicodeText, e.Data.GetData(DataFormats.UnicodeText));//由 vs studio 的 intel 幫我填入的（按兩下tab鍵後）
                 Clipboard.SetDataObject(e.Data);//由以上一行自己摸索、測試的
                 textBox1.Text = "autoRunWordMacro=true……";
-                runWordMacro("維基文庫四部叢刊本轉來");//不想被鎖死的話得考慮用多工、多執行緒了
+                RunWordMacro("維基文庫四部叢刊本轉來");//不想被鎖死的話得考慮用多工、多執行緒了
                 return;
             }
         }
@@ -19298,7 +19461,7 @@ namespace WindowsFormsApp1
                     PauseEvents();
                     textBox3.Text = url;
                     _eventsEnabled = events;
-                    if (browsrOPMode != BrowserOPMode.appActivateByName)
+                    if (BrowsrOPMode != BrowserOPMode.appActivateByName)
                     {
                         try
                         {
@@ -19324,7 +19487,7 @@ namespace WindowsFormsApp1
                 textBox3.Text = url;
                 try
                 {
-                    if (browsrOPMode != BrowserOPMode.appActivateByName)
+                    if (BrowsrOPMode != BrowserOPMode.appActivateByName)
                         if (driver?.Url.StartsWith(url.Substring(0, url.IndexOf("#editor"))) == true) driver.Navigate().GoToUrl(url);
                 }
                 catch (Exception ex)
@@ -19680,27 +19843,13 @@ namespace WindowsFormsApp1
         /// <param name="keys"></param>
         private void chromeSendkeys(string keys)
         {
-            appActivateByName();
-            Thread.Sleep(115);
-            SendKeys.Send(keys);//關閉頁籤
-                                //switch (browsrOPMode)
-                                //{
-                                //    case BrowserOPMode.appActivateByName:
-                                //        appActivateByName();
-                                //        SendKeys.Send("^{F4}");//關閉頁籤
-                                //        break;
-                                //    case BrowserOPMode.seleniumNew:
-                                //        if (driver != null && Active)//表單不在最前面時也會觸發
-                                //        {
-                                //            //GoToCurrentUserActivateTab();
-                                //            //driver.Navigate().Refresh();
-                                //            driver.Close();
-                                //        }
-                                //        break;
-                                //    case BrowserOPMode.seleniumGet:
-                                //        break;
-                                //}
-            Thread.Sleep(115);
+            //AppActivateByName();
+            //ChromeSetFocus();//不知為何用這個方法，就會多按一下，下面這行才不會
+            br.BringToFront("chrome");
+            Thread.Sleep(555);
+            //SendKeys.Send(keys);
+            SendKeys.SendWait(keys);
+            //Thread.Sleep(115);
             bool autoPastetoQuickEditMemo = autoPaste2QuickEdit;
             autoPaste2QuickEdit = false;
             //this.Activate();
@@ -19710,7 +19859,7 @@ namespace WindowsFormsApp1
 
         void closeChromeWindow()
         {//Ctrl + Shift + w 關閉 Chrome 網頁視窗
-            appActivateByName();
+            AppActivateByName();
             SendKeys.Send("%{F4}");//關閉頁籤
             bool autoPastetoQuickEditMemo = autoPaste2QuickEdit;
             autoPaste2QuickEdit = false;
@@ -19795,7 +19944,7 @@ namespace WindowsFormsApp1
                 if (ModifierKeys == Keys.Control)
                 {
                     //分行分段按鈕：若有按下Ctrl才按此鈕則執行圖文脫鉤 Word VBA
-                    runWordMacro("中國哲學書電子化計劃.撤掉與書圖的對應_脫鉤");
+                    RunWordMacro("中國哲學書電子化計劃.撤掉與書圖的對應_脫鉤");
                     textBox1.Focus();
                     return;
                 }
@@ -20052,7 +20201,14 @@ namespace WindowsFormsApp1
                 if (tx.IndexOf(rx) > -1)
                 {
                     playSound(soundLike.notify, true);
-                    tx = tx.Replace(rx, rst.Fields[1].Value.ToString());
+                    try
+                    {
+                        tx = tx.Replace(rx, rst.Fields[1].Value?.ToString());
+                    }
+                    catch (Exception)
+                    {
+                        if (string.IsNullOrEmpty(rst.Fields[1].Value.ToString())) { }
+                    }
                 }
                 rst.MoveNext();
             }
@@ -20092,8 +20248,8 @@ namespace WindowsFormsApp1
                     //Clipboard.SetText(iwe.GetAttribute("value"));
                     Clipboard.SetText(iwe.GetDomProperty("value"));
                     SetIWebElementValueProperty(iwe, string.Empty);//清除內容
-                    //iwe.SendKeys(OpenQA.Selenium.Keys.Control + "a");
-                    //iwe.SendKeys(OpenQA.Selenium.Keys.Delete);
+                                                                   //iwe.SendKeys(OpenQA.Selenium.Keys.Control + "a");
+                                                                   //iwe.SendKeys(OpenQA.Selenium.Keys.Delete);
                     ChromeSetFocus();
                     iwe.Click();//這裡也是要將焦點交給編輯內容框以利WordVBA貼上，故不宜用iwe.JsClick()方法
                     return true;
@@ -20210,7 +20366,7 @@ namespace WindowsFormsApp1
          //        "WHERE(((書.書名) = \"" + bookName + "\") AND((類別主題.類別主題)Not Like \" * 真按 * \" Or(類別主題.類別主題) Is Null)) ORDER BY 篇.卷, 篇.頁, 篇.末頁, 札.頁, 札.札ID;";
 
             //const string cntStr = @"Provider=Microsoft.ACE.OLEDB.12.0;Data Source=D:\千慮一得齋\書籍資料\開發_千慮一得齋.mdb";
-            runWordMacro("中國哲學書電子化計劃.mdb開發_千慮一得齋Export");
+            RunWordMacro("中國哲學書電子化計劃.mdb開發_千慮一得齋Export");
         }
         #endregion
 

@@ -2,27 +2,28 @@ Attribute VB_Name = "中國哲學書電子化計劃"
 Option Explicit
 Dim ChapterSelector As String
 'Const description As String = "將星號前的分段符號移置前段之末 & 清除頁前的分段符號"
+'Const description As String = "將星號前的分段符號移置前段之末 & 清除頁前的分段符號{佛弟子文獻學博士孫守真任真甫按：以末學自製於GitHub開源免費免安裝之 TextForCtext 應用程式加速輸入與排版。討論區與末學YouTube頻道有演示影片可資參考。感恩感恩　讚歎讚歎　南無阿彌陀佛"
 'Const description As String = "將星號前的分段符號移置前段之末 & 清除頁前的分段符號{佛弟子文獻學者孫守真任真甫按：仁者志士義民菩薩賢友請多利用賢超法師《古籍酷AI》或《看典古籍》OCR事半功倍也。二站每日均有不少的免費額度可供善用，願毋荒蕪、空拋虛擲了！如蒙不棄，可利用末學自製於GitHub開源免費免安裝之TextForCtext 應用程式，加速輸入與排版。討論區與末學YouTube頻道有演示影片可資參考。感恩感恩　讚歎讚歎　南無阿彌陀佛"
 'Const description As String = "將星號前的分段符號移置前段之末 & 清除頁前的分段符號{據《國學大師》或Kanripo.org所藏本輔以末學自製於GitHub開源免費免安裝之TextForCtext排版對應錄入。討論區與末學YouTube頻道有實境演示影片可資參考。感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主}"
 
-'Const description As String = "將星號前的分段符號移置前段之末 & 清除頁前的分段符號{據Kanripo.org或《國學大師》或北京元引科技有限公司《元引科技引得數字人文資源平臺·中國歷代文獻》所藏本輔以末學自製於GitHub開源免費免安裝之TextForCtext排版對應錄入。討論區與末學YouTube頻道有實境演示影片可資參考。感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主}"
+Const description As String = "將星號前的分段符號移置前段之末 & 清除頁前的分段符號{據Kanripo.org或《國學大師》或北京元引科技有限公司《元引科技引得數字人文資源平臺·中國歷代文獻》所藏本輔以末學自製於GitHub開源免費免安裝之TextForCtext排版對應錄入。討論區與末學YouTube頻道有實境演示影片可資參考。感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主}"
 'Const description As String = "將星號前的分段符號移置前段之末 & 清除頁前的分段符號{據Kanripo.org或北京元引科技有限公司《元引科技引得數字人文資源平臺·中國歷代文獻》所藏本輔以末學自製於GitHub開源免費免安裝之TextForCtext排版對應錄入。討論區與末學YouTube頻道有實境演示影片可資參考。感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主}"
 'Const description As String = "將星號前的分段符號移置前段之末 & 清除頁前的分段符號{據Kanripo.org所藏本輔以末學自製於GitHub開源免費免安裝之TextForCtext排版對應錄入。討論區與末學YouTube頻道有實境演示影片可資參考。感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主}"
 'Const description As String = "將星號前的分段符號移置前段之末 & 清除頁前的分段符號{據《維基文庫》或Kanripo.org所藏本輔以末學自製於GitHub開源免費免安裝之TextForCtext排版對應錄入。討論區與末學YouTube頻道有實境演示影片可資參考。感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主}"
 'Const description As String = "將星號前的分段符號移置前段之末 & 清除頁前的分段符號{據《維基文庫》所藏本輔以末學自製於GitHub開源免費免安裝之TextForCtext排版對應錄入。討論區與末學YouTube頻道有實境演示影片可資參考。感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主}"
 'Const description As String = "將星號前的分段符號移置前段之末 & 清除頁前的分段符號{據《維基文庫》或《國學大師》或Kanripo.org或北京元引科技有限公司《元引科技引得數字人文資源平臺·中國歷代文獻》所藏本輔以末學自製於GitHub開源免費免安裝之TextForCtext排版對應錄入。討論區與末學YouTube頻道有實境演示影片可資參考。感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主}"
 
-Const description As String = "將星號前的分段符號移置前段之末 & 清除頁前的分段符號{據北京元引科技有限公司《元引科技引得數字人文資源平臺·中國歷代文獻》所藏本輔以末學自製於GitHub開源免費免安裝之TextForCtext排版對應錄入。討論區與末學YouTube頻道有實境演示影片可資參考。感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主}"
+'Const description As String = "將星號前的分段符號移置前段之末 & 清除頁前的分段符號{據北京元引科技有限公司《元引科技引得數字人文資源平臺·中國歷代文獻》所藏本輔以末學自製於GitHub開源免費免安裝之TextForCtext排版對應錄入。討論區與末學YouTube頻道有實境演示影片可資參考。感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主}"
 'Const description As String = "將星號前的分段符號移置前段之末 & 清除頁前的分段符號{據《漢籍電子文獻資料庫》（今《漢籍全文資料庫》）所收本輔以末學自製於GitHub開源免費免安裝之TextForCtext排版對應錄入。討論區與末學YouTube頻道有實境演示影片可資參考。感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主}"
 'Const description As String = "將星號前的分段符號移置前段之末 & 清除頁前的分段符號{據《識典古籍》所收本輔以末學自製於GitHub開源免費免安裝之TextForCtext排版對應錄入。此乃與Gemini大菩薩合作之新功能，有緣末學再於YouTube頻道實境直播演示以供參考。感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主}"
 
 'Const description As String = "本書與URN: ctp:wb 同版，今據另一同版者以末學自製於GitHub開源免費免安裝之TextForCtext應用程式內WordVBA對應迻入（討論區與末學YouTube頻道有實境演示影片可供參考），以俟後賢精校。各本後亦可同步更新。感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主"
 
-'Const description_Edit_textbox_新頁面 As String = "據《Kanripo》所收本輔以末學自製於GitHub開源免費免安裝之TextForCtext軟件排版對應錄入；討論區及末學YouTube頻道有實境演示影片。感恩感恩　讚歎讚歎　南無阿彌陀佛"
-'Const description_Edit_textbox_新頁面 As String = "據《國學大師》或《Kanripo》所收本輔以末學自製於GitHub開源免費免安裝之TextForCtext軟件排版對應錄入；討論區及末學YouTube頻道有實境演示影片。感恩感恩　讚歎讚歎　南無阿彌陀佛"
-'Const description_Edit_textbox_新頁面 As String = "據《國學大師》或《Kanripo》或北京元引科技有限公司《元引科技引得數字人文資源平臺·中國歷代文獻》所收本輔以末學自製於GitHub開源免費免安裝之TextForCtext軟件排版對應錄入；討論區及末學YouTube頻道有實境演示影片。感恩感恩　讚歎讚歎　南無阿彌陀佛"
-'Const description_Edit_textbox_新頁面 As String = "據《維基文庫》或《國學大師》或《Kanripo》或北京元引科技有限公司《元引科技引得數字人文資源平臺·中國歷代文獻》所收本輔以末學自製於GitHub開源免費免安裝之TextForCtext軟件排版對應錄入；討論區及末學YouTube頻道有實境演示影片。感恩感恩　讚歎讚歎　南無阿彌陀佛"
-Const description_Edit_textbox_新頁面 As String = "據北京元引科技有限公司《元引科技引得數字人文資源平臺·中國歷代文獻》所收本輔以末學自製於GitHub開源免費免安裝之TextForCtext軟件排版對應錄入；討論區及末學YouTube頻道有實境演示影片。感恩感恩　讚歎讚歎　南無阿彌陀佛"
+Const description_Edit_textbox_新頁面 As String = "據《Kanripo》所收本輔以末學自製於GitHub開源免費免安裝之TextForCtext軟件排版對應錄入；討論區及末學YouTube頻道有實境演示影片。感恩感恩　讚歎讚歎　南無阿彌陀佛"
+'Const description_Edit_textbox_新頁面 As String = "據《Kanripo》或《國學大師》所收本輔以末學自製於GitHub開源免費免安裝之TextForCtext軟件排版對應錄入；討論區及末學YouTube頻道有實境演示影片。感恩感恩　讚歎讚歎　南無阿彌陀佛"
+'Const description_Edit_textbox_新頁面 As String = "據《Kanripo》或《國學大師》或北京元引科技有限公司《元引科技引得數字人文資源平臺·中國歷代文獻》所收本輔以末學自製於GitHub開源免費免安裝之TextForCtext軟件排版對應錄入；討論區及末學YouTube頻道有實境演示影片。感恩感恩　讚歎讚歎　南無阿彌陀佛"
+'Const description_Edit_textbox_新頁面 As String = "據《維基文庫》或《Kanripo》或《國學大師》或北京元引科技有限公司《元引科技引得數字人文資源平臺·中國歷代文獻》所收本輔以末學自製於GitHub開源免費免安裝之TextForCtext軟件排版對應錄入；討論區及末學YouTube頻道有實境演示影片。感恩感恩　讚歎讚歎　南無阿彌陀佛"
+'Const description_Edit_textbox_新頁面 As String = "據北京元引科技有限公司《元引科技引得數字人文資源平臺·中國歷代文獻》所收本輔以末學自製於GitHub開源免費免安裝之TextForCtext軟件排版對應錄入；討論區及末學YouTube頻道有實境演示影片。感恩感恩　讚歎讚歎　南無阿彌陀佛"
 
 
 Sub 分行分段()
@@ -1928,13 +1929,13 @@ Sub 元引科技引得數字人文資源平臺_北京元引科技有限公司轉來(Optional lineCntPerPag
             '.font.ColorIndex = 6
             .font.Color = 4882109
         End With
-        '檢查每頁行數，以補空行
+        '檢查每頁行數，以補空行'找到標識頁碼段落
         Do While rng.Find.Execute(vbNullString, , , , , , True, wdFindContinue)
             rngExamLineCntPerPage.start = rng.End + 1
             rngExamLineCntPerPage.End = rng.End + 1
             rngExamLineCntPerPage.MoveEndUntil "P", (rng.Document.Range.End - 1) - rng.End
             If InStr(rng.Document.Range(rngExamLineCntPerPage.start, rng.Document.Range.End), "P") = 0 Then '後面沒有「P」了，處理完了，就離開
-                rng.Paragraphs(1).Range.Delete ' 清除頁碼
+                rng.Paragraphs(1).Range.Delete ' 清除頁碼所在段落
                 Exit Do
             End If
             Do While rngExamLineCntPerPage.Paragraphs.Count < lineCntPerPage
@@ -1944,7 +1945,7 @@ Sub 元引科技引得數字人文資源平臺_北京元引科技有限公司轉來(Optional lineCntPerPag
                  rngAddPara.End = rngAddPara.End + 2
                  If rngAddPara.font.Color <> 1447971 Then rngAddPara.font.Color = 1447971
             Loop
-            rng.Paragraphs(1).Range.Delete ' 清除頁碼
+            rng.Paragraphs(1).Range.Delete ' 清除頁碼所在段落
         Loop
     Else 'lineCntPerPage = 0 '預設值
 '        '清除頁碼' 前面 「rng.Paragraphs(1).Range.Delete ' rng.text = vbNullString」 已完成
@@ -2181,11 +2182,22 @@ Sub Kanripo_GitHub轉來(Optional lineCntPerPage As Byte = 0)
     '以下問題已解決，待觀察
     '還未完善，如以下此檔之獨立注文處：
     'https://github.com/kanripo/KR4h0160/blob/master/KR4h0160_046.txt
-    Dim rng As Range, d As Document, p As Paragraph, noteRng As Range, i As Long, ac_noteRng As Long, a As Range, exa_rng As Range, xd As String, si As New StringInfo
+    Dim rng As Range, d As Document, p As Paragraph, noteRng As Range, i As Long, a As Range, exa_rng As Range, xd As String, si As New StringInfo ', ac_noteRng As Long,
+    
     Set d = Documents.Add
     Set rng = d.Range
     rng.Document.Activate
     貼上純文字
+    Dim lt As String '目前只用得到「<」, gt As String '如「&lt;pb:KR2k0003_WYG_015-1a&gt;」這樣的情形 https://copilot.microsoft.com/shares/VhSHyY1MbFaYKJ6MDH3hE
+    Dim amp As String
+    If InStr(rng.Document.Range, "&lt;") Then '在TextForCtext C#程式碼裡新加入了 SelectAndCopyElementHtmlContent 這樣讀取html時「<、>」會成了如上如左「&lt;、&gt;」的樣子，不會是「<」與「>」
+        lt = "&lt;"  ': gt = "&gt;"
+        amp = "&" '"&amp;"'因為「查字.mdb」資料庫裡存的是「&KR1335;」這樣的值，故先轉 "&amp"為"&"
+        d.Range.text = VBA.Replace(d.Range.text, "&amp;", "&")
+    Else
+        lt = Network.HtmlEntity("&lt;") '"<" ': gt = ">"
+        amp = Network.HtmlEntity("&amp;") '"&"
+    End If
     
     Rem just for test
 '    If InStr(d.Range.text, " (") Then
@@ -2194,10 +2206,54 @@ Sub Kanripo_GitHub轉來(Optional lineCntPerPage As Byte = 0)
 '        Stop
 '    End If
 
-    For Each p In rng.Paragraphs
+    Rem 清除標頭
+    Do While d.Paragraphs(i + 1).Range.Characters(1).text Like "[#" & Chr(13) & "]"
+        d.Paragraphs(i + 1).Range.Delete '都是刪除文件的第1段，故可以不設定 i=i+1
+    Loop
+    
+    '檢查每頁行數，以補空行
+    If lineCntPerPage > 0 Then
+        Dim rngExamLineCntPerPage As Range
+        Set rng = rng.Document.Range: Set rngExamLineCntPerPage = rng.Document.Range
+        '檢查每頁行數，以補空行'找到標識頁碼段落
+        Do While rng.Find.Execute(lt & "pb:", , , , , , True, wdFindContinue)
+            rngExamLineCntPerPage.start = rng.Paragraphs(1).Range.End
+            rngExamLineCntPerPage.End = rng.Paragraphs(1).Range.End
+            rngExamLineCntPerPage.MoveEndUntil lt, (rng.Document.Range.End - 1) - rng.Paragraphs(1).Range.End
+            If InStr(rngExamLineCntPerPage.text, "#") Then '分篇卷處前置會有「#」
+                rngExamLineCntPerPage.start = rng.Paragraphs(1).Range.End
+                rngExamLineCntPerPage.End = rng.Paragraphs(1).Range.End
+                rngExamLineCntPerPage.MoveEndUntil "#", (rng.Document.Range.End - 1) - rng.Paragraphs(1).Range.End
+            End If
+            If InStr(rng.Document.Range(rngExamLineCntPerPage.start, rng.Document.Range.End), lt & "pb:") = 0 Then '後面沒有「<pb:」了，處理完了，就離開
+                rng.Paragraphs(1).Range.Delete ' 清除頁碼所在段落
+                Exit Do
+            End If
+            Do While rngExamLineCntPerPage.Paragraphs.Count < lineCntPerPage
+                 rngExamLineCntPerPage.InsertAfter "　"
+                 rngExamLineCntPerPage.InsertParagraphAfter
+            Loop
+            rng.Paragraphs(1).Range.Delete ' 清除頁碼所在段落
+        Loop
+        Rem 以下後面已處理，故先註解掉，待刪除 20260103
+'    Else 'lineCntPerPage = 0 '預設值
+''        '清除頁碼' 前面 「rng.Paragraphs(1).Range.Delete ' rng.text = vbNullString」 已完成
+'        Set rng = rng.Document.Range
+'        rng.Find.MatchCase = True
+''        '清除頁碼
+'        Do While rng.Find.Execute("P", , , , , , True, wdFindContinue)
+'           rng.Paragraphs(1).Range.Delete
+'        Loop
+''        'rng.Find.ClearFormatting
+    End If
+
+    Rem 清理頁碼標頭
+    For Each p In rng.Document.Paragraphs
         Select Case p.Range.Characters(1)
-            Case "#", "<"
+            Case lt
                 p.Range.Delete
+            Case "#"
+                p.Range.text = " " '在分卷/篇處加上此半形空格，可讓程式碼中止（在TextForCtext C#裡）
         End Select
     Next p
     
@@ -2214,24 +2270,16 @@ Sub Kanripo_GitHub轉來(Optional lineCntPerPage As Byte = 0)
 '        rng.Find.ClearFormatting
     End If
     
+    'ChrW(182)乃其段落符號
     rng.Find.Execute findText:=ChrW(182), Replacewith:=vbNullString, Replace:=wdReplaceAll, Wrap:=wdFindContinue
     
-    Rem 應該只有前述那段執行時才會產生" ("，先取消這裡的，再觀察 20251112
-'    If InStr(d.Range.text, " (") Then
-'        Set rng = d.Range
-'        Do While rng.Find.Execute(findText:=" [(]", MatchWildcards:=True, Wrap:=wdFindContinue)
-'            If rng.Paragraphs(1).Range.start = rng.start Then
-'                rng.Characters(1).text = vbNullString
-'            End If
-'        Loop
-'        rng.Find.MatchWildcards = False
-'        If InStr(d.Range.text, " (") Then
-'
-'        End If
-'    End If
+    'https://darkranger.no-ip.org/terminology/Placeholder Placeholder（佔位字元、佔位符）
+    '與《元引科技引得數字人文資源平臺·中國歷代文獻》本均係純文字字無圖（圖在word文件中的佔位字元即「/」，蓋缺字多用字圖表示故也），以「/」表示小注換行之處，故先取代為\以與造字缺字者區別 20260104
+    rng.Find.Execute findText:="/", Replacewith:="\", Replace:=wdReplaceAll, Wrap:=wdFindContinue
+    
     
     Rem 取代KanripoGitHub存放庫的造字圖碼
-    If VBA.InStr(d.Range.text, "&KR") Then
+    If VBA.InStr(d.Range.text, amp & "KR") Then
         Dim db As New dBase, cnt As ADODB.Connection, rst As New ADODB.Recordset
         db.cnt查字 cnt
         rst.Open "KanripoGitHub存放庫造字圖碼取代對照表", cnt, adOpenStatic
@@ -2240,24 +2288,58 @@ Sub Kanripo_GitHub轉來(Optional lineCntPerPage As Byte = 0)
             If VBA.InStr(xd, rst.Fields(0).Value) Then
                 playSound 0.411
 '                Debug.Print rst.Fields(0) & VBA.vbCr
-                d.Range.Find.Execute findText:=rst.Fields(0).Value, Wrap:=wdFindContinue, Replacewith:=rst.Fields(1).Value, Replace:=wdReplaceAll
+                'd.Range.Find.Execute findText:=rst.Fields(0).Value, Wrap:=wdFindContinue, Replacewith:=rst.Fields(1).Value, Replace:=wdReplaceAll
+                '因為都是純文字處理的，所以用這個比較快
+                xd = VBA.Replace(xd, rst.Fields(0).Value, rst.Fields(1).Value)
             End If
             rst.MoveNext
         Loop
+        d.Range.text = xd
         rst.Close
-        cnt.Close
-        Set db = Nothing
+        'cnt.Close
+        'Set db = Nothing '後面還有用
     End If
-    
-    Rem 先取代造字編碼（如：&KR1016;）為「/」才好作字數計算
-    Set rng = d.Range
-    Do While rng.Find.Execute(findText:="&KR", Wrap:=wdFindStop, Forward:=True)
+
+    Rem 先取代造字編碼（如：&KR1016;）為其本字或「/」才好作字數計算 20260104
+    Set rng = d.Range: xd = rng.text
+    Do While rng.Find.Execute(findText:=amp & "KR", Wrap:=wdFindStop, Forward:=True)
         Set noteRng = rng.Duplicate
         noteRng.MoveEndUntil ";"
         noteRng.MoveEnd 1
-        noteRng.text = "/"
+        If amp <> "&" Then
+            noteRng.text = Replace(noteRng.text, "&amp;", "&")
+        End If
+        noteRng.Copy
+        noteRng.Application.Visible = True
+        noteRng.Application.windowState = wdWindowStateMaximize
+        noteRng.Application.Activate
+        noteRng.Document.ActiveWindow.Visible = True
+        noteRng.Document.ActiveWindow.Activate
+        If MsgBox("請開啟「查字forinput.mdb」資料庫，按下「Ctrl + 1」鍵進行造字或缺字字圖資料之新增(記錄在「KanripoGitHub存放庫造字圖碼取代對照表」中)。" & _
+            vbCr & vbCr & vbCr & "完成後再按下「確定」繼續。" & _
+            vbCr & vbCr & vbCr & "若目前系統尚無字、或如《字統網》之組字式亦不易表達者，則請按「取消」。", vbOKCancel + vbExclamation) = vbCancel Then
+            noteRng.text = "/" '先取代造字編碼（如：&KR1016;）為「/」才好作字數計算
+        End If
+        If cnt Is Nothing Then db.cnt查字 cnt
+        rst.Open "select find,replace from KanripoGitHub存放庫造字圖碼取代對照表 where find=""" & noteRng.text & """", cnt, adOpenKeyset, adLockReadOnly
+        If rst.RecordCount > 0 Then
+            d.Range.text = Replace(xd, rst.Fields(0).Value, rst.Fields(1).Value)
+            'd.Range.Find.Execute findText:=rst.Fields(0).Value, Wrap:=wdFindContinue, Replacewith:=rst.Fields(1).Value, Replace:=wdReplaceAll
+            'noteRng.text = rst.Fields("replace").Value '將補入的造字/缺字資料置換掉原來的編碼標記
+            
+        Else
+            d.Range.text = Replace(xd, noteRng.text, "/")
+            'd.Range.Find.Execute findText:=noteRng.text, Wrap:=wdFindContinue, Replacewith:="/", Replace:=wdReplaceAll
+            'noteRng.text = "/" '先取代造字編碼（如：&KR1016;）為「/」才好作字數計算
+            
+        End If
+        Set rng = d.Range: xd = rng.text
+        rst.Close
     Loop
-
+    If Not cnt Is Nothing Then
+        cnt.Close
+        Set db = Nothing
+    End If
     
     Rem 重設rng才能尋找整個文件
     Set rng = d.Range
@@ -2275,12 +2357,13 @@ Sub Kanripo_GitHub轉來(Optional lineCntPerPage As Byte = 0)
 '            Stop
 '        End If
         
-        If VBA.InStr(noteRng.text, "/") Then
-            ac_noteRng = noteRng.Characters.Count
+        'If VBA.InStr(noteRng.text, "/") Then
+        If VBA.InStr(noteRng.text, "\") Then
+            'ac_noteRng = noteRng.Characters.Count '這是是否為夾注/小注分行處之判斷，現在已改為「\」，故不需要再與造字缺字之「/」作識別了。一律都要處理
             For Each a In noteRng.Characters
                 i = i + 1
-                If a = "/" Then
-                    If i = Int(ac_noteRng / 2) + 1 Then
+                If a = "\" Then
+                    'If i = Int(ac_noteRng / 2) + 1 Then '這是是否為夾注/小注分行處之判斷，現在已改為「\」，故不需要再與造字缺字之「/」作識別了。一律都要處理
                         Set p = rng.Paragraphs(1)
                         Set exa_rng = d.Range(p.Range.start, noteRng.start - 1)
                         If a.Next = ")" Then
@@ -2309,7 +2392,7 @@ Sub Kanripo_GitHub轉來(Optional lineCntPerPage As Byte = 0)
                                 If p.Range.Characters.Count - 3 - VBA.Len(exa_rng.text) = noteRng.Characters.Count _
                                     Or (a.Next.Next = Chr(13) _
                                         And Replace(d.Range(p.Range.start, p.Range.start + (InStr(p.Range.text, "(")) - 1), "　", vbNullString) = vbNullString _
-                                        And noteRng.Characters(2).text = "/" And si.Create(noteRng.text).LengthInTextElements = 2) Then '或者是獨立注文只有2個字（第1個是漢字，末後是「/」）
+                                        And noteRng.Characters(2).text = "\" And si.Create(noteRng.text).LengthInTextElements = 2) Then '或者是獨立注文只有2個字（第1個是漢字，末後是「/」）
                                     a.Characters(1).text = VBA.Chr(13)
                                 Else
                                     If InStr(noteRng, " ") = 0 Then a.Characters(1).Delete
@@ -2337,20 +2420,20 @@ Sub Kanripo_GitHub轉來(Optional lineCntPerPage As Byte = 0)
                         Else
                             If InStr(noteRng, " ") = 0 Then a.Delete '清除/
                         End If
-                    Else
-                        If a.Next = ")" Then
-                            'If noteRng.Characters.Count > 1 Then
-                            If i > 2 Then
-                                Set p = rng.Paragraphs(1)
-                                If noteRng.start > p.Range.start + 1 Then 'noteRng 不包括「()」故須+1
-                                    a.InsertAfter StrConv(space(i - 1), vbWide)
-                                    If InStr(noteRng, " ") = 0 Then a.Characters(1).Delete '清除/
-                                End If
-                            Else
-                                If InStr(noteRng, " ") = 0 Then a.Delete '清除/
-                            End If
-                        End If
-                    End If
+'                    Else'If i = Int(ac_noteRng / 2) + 1 Then '這是是否為夾注/小注分行處之判斷，現在已改為「\」，故不需要再與造字缺字之「/」作識別了。一律都要處理
+'                        If a.Next = ")" Then
+'                            'If noteRng.Characters.Count > 1 Then
+'                            If i > 2 Then
+'                                Set p = rng.Paragraphs(1)
+'                                If noteRng.start > p.Range.start + 1 Then 'noteRng 不包括「()」故須+1
+'                                    a.InsertAfter StrConv(space(i - 1), vbWide)
+'                                    If InStr(noteRng, " ") = 0 Then a.Characters(1).Delete '清除/
+'                                End If
+'                            Else
+'                                If InStr(noteRng, " ") = 0 Then a.Delete '清除/
+'                            End If
+'                        End If
+'                    End If
                 End If
             Next
             i = 0
@@ -2363,7 +2446,7 @@ Sub Kanripo_GitHub轉來(Optional lineCntPerPage As Byte = 0)
                 rng.SetRange p.Range.start, p.Range.start
                 rng.MoveEndUntil "("
                 If Replace(rng.text, "　", vbNullString) = vbNullString Then
-                    rng.Select
+'                    rng.Select 'just for test
                     p.Range.Characters(1) = "("
                     rng.Next = "　"
                 End If
@@ -2372,7 +2455,9 @@ Sub Kanripo_GitHub轉來(Optional lineCntPerPage As Byte = 0)
     Next p
     d.Range.Find.Execute findText:="(", Replacewith:="{{", Replace:=wdReplaceAll
     d.Range.Find.Execute findText:=")", Replacewith:="}}", Replace:=wdReplaceAll
-    d.Range.text = VBA.Replace(d.Range.text, ChrW(63), "/") '取代「?」為「/」
+    If InStr(d.Range.text, ChrW(63)) Then
+        d.Range.text = VBA.Replace(d.Range.text, ChrW(63), "/") '取代「?」(應是缺字）為「/」
+    End If
 '    Do While d.Range.Find.Execute(findText:="^p　^p", Wrap:=wdFindStop)
 '        d.Range.Find.Execute findText:="^p　^p", replacewith:="^p|^p", Replace:=wdReplaceAll
 '    Loop

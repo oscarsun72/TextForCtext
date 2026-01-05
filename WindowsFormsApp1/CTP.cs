@@ -7,6 +7,7 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Windows.Automation;
@@ -403,6 +404,8 @@ namespace TextForCtext
                         catch (Exception ex)
                         {
                             if (IsDriverInvalid()) RestartChromedriver();
+                            else
+                                Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
                             //throw;
                         }
                     }
@@ -975,7 +978,7 @@ namespace TextForCtext
             //20250218取消多線程（多執行緒操作）
             //Task.Run(() =>//接下來不用理會，也沒有元件要操作、沒有訊息要回應，就可以給另一個線程去處理了。
             //{
-            reSubmit:
+            //reSubmit:
                 try
                 {
                     if (submit == null)
@@ -1144,7 +1147,7 @@ namespace TextForCtext
                 //加速連續性輸入（不必檢視貼入的文本時，很有效）
                 //if (ActiveForm1.AutoPasteToCtext && Form1.FastMode)
                 //if (ActiveForm1.AutoPasteToCtext && Form1.fastMode && Form1.browsrOPMode == Form1.BrowserOPMode.appActivateByName)
-                if (ActiveForm1.AutoPasteToCtext && Form1.InstanceForm1.FastMode && Form1.browsrOPMode == Form1.BrowserOPMode.appActivateByName)
+                if (ActiveForm1.AutoPasteToCtext && Form1.InstanceForm1.FastMode && Form1.BrowsrOPMode == Form1.BrowserOPMode.appActivateByName)
                 {
                     Thread.Sleep(10);//等待 submit = waitFin……完成
                     Browser.driver.Close(); //需要重啟檢視時，只要開啟前一個被關掉的分頁頁籤即可（快速鍵時 Ctrl + Shift + t）
@@ -1618,25 +1621,38 @@ namespace TextForCtext
             }
             return url;
         }
-
         /// <summary>
-        /// 直接取代文字的編輯頁面
+        /// 開啟完整編輯頁面
+        /// 從DirectlyReplacingCharacters獨立出來 20260102
         /// </summary>
-        internal static string DirectlyReplacingCharactersPageWindowHandle = string.Empty;
-        /// <summary>
-        /// 直接取代文字
-        /// </summary>
-        /// <param name="character">要直接被取代的單字（regexfrom）及取代成的單字（regexto）的字串陣列</param>
-        /// <returns>成功則傳回true</returns>
-        internal static bool DirectlyReplacingCharacters(StringInfo character)
+        /// <returns>失敗則傳回false</returns>
+        internal static bool OpenEditPage()
         {
-            #region 防呆
+            //if (DirectlyReplacingCharactersPageWindowHandle != string.Empty)
+            //{
+            //    try
+            //    {
+            //        Browser.driver.SwitchTo().Window(DirectlyReplacingCharactersPageWindowHandle);
+            //        return;
+            //    }
+            //    catch (Exception)
+            //    {
+            //        DirectlyReplacingCharactersPageWindowHandle = string.Empty;
+            //    }
+            //}
+            //string editUrl = ActiveTabURL_Ctext_Edit_includingEditorStr;
+            //if (editUrl == string.Empty) return;
+            //if (!isQuickEditUrl(editUrl))
+            //{
+            //    Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("目前分頁並非簡單修改模式，無法直接取代文字，請先切換到簡單修改模式的編輯頁面再試");
+            //    return;
+            //}
+            //Browser.driver.Navigate().GoToUrl(editUrl);
+            //DirectlyReplacingCharactersPageWindowHandle = Browser.driver.CurrentWindowHandle;
 
-            if (character.LengthInTextElements != 2) { Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("指定的字元長度不對！請檢查"); return false; }
-            if (character.SubstringByTextElements(0, 1) == character.SubstringByTextElements(1, 1)) { Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("所指定取代的字元相同，請重設！"); return false; }
-            if (!Form1.IsChineseString(character.SubstringByTextElements(0, 1)) || !Form1.IsChineseString(character.SubstringByTextElements(1, 1))) { return false; }
+            //以上是建議的
 
-            #endregion
+            if (Form1.BrowsrOPMode == Form1.BrowserOPMode.appActivateByName) return false;
 
             try
             {
@@ -1834,55 +1850,40 @@ namespace TextForCtext
                 }
             }
 
-            //「內容:」欄位文字方塊控制項
-            iwe = Textarea_data_Edit_textbox;//waitFindWebElementBySelector_ToBeClickable("#data");
-            if (iwe == null) { DirectlyReplacingCharactersPageWindowHandle = string.Empty; goto reOpenEdittab; }
+            return true;
 
-            #region 輸入取代後的值
+        }
+        /// <summary>
+        /// 直接取代文字的編輯頁面
+        /// </summary>
+        internal static string DirectlyReplacingCharactersPageWindowHandle = string.Empty;
+        /// <summary>
+        /// 直接取代文字
+        /// </summary>
+        /// <param name="character">要直接被取代的單字（regexfrom）及取代成的單字（regexto）的字串陣列</param>
+        /// <returns>成功則傳回true</returns>
+        internal static bool DirectlyReplacingCharacters(StringInfo character)
+        {
+            #region 防呆
 
-            if (!SetIWebElementValueProperty(iwe, iwe.GetAttribute("value").Replace(character.SubstringByTextElements(0, 1), character.SubstringByTextElements(1, 1)))) Debugger.Break();
-            /* 20240913 作廢
-            //複製要編輯的文本
-            iwe.SendKeys(OpenQA.Selenium.Keys.Control + "a");//直接用 iwe.Text讀取，若要取代多個便不行
-            iwe.SendKeys(OpenQA.Selenium.Keys.Control + "c");
-            if (iwe.Text.Length > 200000)
-                Thread.Sleep(200);
-            //借用變數，執行逕行取代
-            editUrl = Clipboard.GetText().Replace(character.SubstringByTextElements(0, 1), character.SubstringByTextElements(1, 1));
-            try
-            {
-                Clipboard.SetText(editUrl);
-                if (iwe.Text.Length > 200000)
-                    Thread.Sleep(200);
-            }
-            catch (Exception)
-            {
-            }
-            //清除原文本
-            iwe.Clear();
-            //貼上已編輯的文本
-            iwe.SendKeys(OpenQA.Selenium.Keys.Shift + OpenQA.Selenium.Keys.Insert);
-            */
+            if (character.LengthInTextElements != 2) { Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("指定的字元長度不對！請檢查"); return false; }
+            if (character.SubstringByTextElements(0, 1) == character.SubstringByTextElements(1, 1)) { Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("所指定取代的字元相同，請重設！"); return false; }
+            if (!Form1.IsChineseString(character.SubstringByTextElements(0, 1)) || !Form1.IsChineseString(character.SubstringByTextElements(1, 1))) { return false; }
+
             #endregion
+            OpenEditPage();
 
+            //「內容:」欄位文字方塊控制項
+            IWebElement iwe = Textarea_data_Edit_textbox;//waitFindWebElementBySelector_ToBeClickable("#data");
+            if (iwe == null)
+            {
+                DirectlyReplacingCharactersPageWindowHandle = string.Empty;
+                Debugger.Break(); return false;
+            }// goto reOpenEdittab; } //20260102●●●●●●●●●●●●●●●●●
 
+            //輸入取代後的值//https://copilot.microsoft.com/shares/adtmSoMCVAJAebZxMzEke :GetDomProperty(name)	從 DOM 中的 property 讀取	適合取得即時屬性值，例如 checked、value、textContent	反映瀏覽器渲染後的最新狀態
+            if (!SetIWebElementValueProperty(iwe, iwe.GetDomProperty("value").Replace(character.SubstringByTextElements(0, 1), character.SubstringByTextElements(1, 1)))) Debugger.Break();
 
-            //iwe = null;
-            //ReadOnlyCollection<IWebElement> iwes = Browser.driver.FindElements(By.ClassName("resrow"));
-            //foreach (var item in iwes)            
-            //{
-            //    string outerHTML = item.GetAttribute("outerHTML");
-            //    if(outerHTML== "<a href=\"#\" onclick=\"document.getElementById('regexfrom').value='"+ character.SubstringByTextElements(0, 1) 
-            //        + "'; document.getElementById('regexto').value='"+ character.SubstringByTextElements(1, 1) + 
-            //        "'; document.getElementById('regexname').value='"+ character.SubstringByTextElements(1, 1) + "'; applyregex(); return false;\">執行</a>")
-
-            //    //if (outerHTML.Length<220 && outerHTML.Contains(">執行<") && outerHTML.Contains("'regexfrom').value='" + character.SubstringByTextElements(0,1)) && outerHTML.Contains("'regexto').value='" + character.SubstringByTextElements(1,1)))
-            //    {
-            //        iwe = item;//取得要「執行」的元件
-            //        break;
-            //    }
-            //}
-            //if (iwe != null) iwe.Click();
             Browser.driver.SwitchTo().Window(LastValidWindow);
             return true;
         }
@@ -2139,6 +2140,90 @@ namespace TextForCtext
             }
             BringToFront("chrome");
         }
+
+        /// <summary>
+        /// 取代字串並取代分行符號為xml標記
+        /// 待改名為「Replace_NewLine_Scanbreak」
+        /// </summary>
+        /// <param name="input"></param>
+        /// <param name="oldStr"></param>
+        /// <param name="newStr"></param>
+        /// <param name="fileValue"></param>
+        /// <returns></returns>
+        internal static string Replace_NewLine_Scanbreak(string input, string fileValue = "")
+        {//https://copilot.microsoft.com/shares/e3YDqo4V1tF253b1oem8a
+            return fileValue == string.Empty ?
+                input :
+                input.Replace(Environment.NewLine, $"<scanbreak file=\"{fileValue}\" />");
+        }
+        /// <summary>
+        /// 一次處理分行和全形空格的xml語法轉換
+        /// </summary>
+        /// <param name="input">要處理的字串</param>
+        /// <param name="fileValue">指定 xlm 內容中的 file 值</param>
+        /// <returns>轉換後的字串</returns>
+        internal static string ReplaceBreaksAndFullWidthSpaces(string input, string fileValue)
+        {//https://copilot.microsoft.com/shares/ar3XgcQ1vcSXRerZy7GCr
+            // 1) 先切行，但自己控制換行輸出（避免 AppendLine 帶來多餘換行）
+            var lines = input.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
+            var sb = new StringBuilder();
+
+            // 2) 處理第一行（沒有換行在前）
+            if (lines.Length > 0)
+            {
+                sb.Append(processInlineFullWidthSpaces(lines[0], fileValue));
+            }
+
+            // 3) 其餘行：在行前插入換行標記（scanbreak），視行首全形空格數量決定 y 與是否去除行首空格
+            for (int i = 1; i < lines.Length; i++)
+            {
+                string line = lines[i];
+
+                int leadingCount = 0;
+                foreach (char c in line)
+                {
+                    if (c == '\u3000') leadingCount++;
+                    else break;
+                }
+
+                if (leadingCount > 0)
+                {
+                    string trimmed = line.Substring(leadingCount);
+                    sb.Append($"<scanbreak file=\"{fileValue}\" y=\"{leadingCount}\" />");
+                    sb.Append(processInlineFullWidthSpaces(trimmed, fileValue));
+                }
+                else
+                {
+                    sb.Append($"<scanbreak file=\"{fileValue}\" />");
+                    sb.Append(processInlineFullWidthSpaces(line, fileValue));
+                }
+            }
+
+            return sb.ToString();
+        }
+
+        // 行中／行尾的全形空格群組，轉為 <scanskip file="..." y="N" />
+        private static string processInlineFullWidthSpaces(string line, string fileValue)
+        {
+            // 行首空格不在此處理；本方法僅處理非行首的全形空格
+            // 用正則把非行首的 U+3000 連續群組替換為 scanskip
+            // 先跳過行首的 U+3000（若有），讓 caller 決定行首邏輯
+            int idx = 0;
+            while (idx < line.Length && line[idx] == '\u3000') idx++;
+
+            string head = line.Substring(0, idx);
+            string tail = line.Substring(idx);
+
+            // 將 tail 中的所有 \u3000 群組替換為 scanskip
+            string replacedTail = Regex.Replace(tail, "\u3000+", m =>
+            {
+                int n = m.Value.Length;
+                return $"<scanskip file=\"{fileValue}\" y=\"{n}\" />";
+            });
+
+            return head + replacedTail;
+        }
+
 
 
     }

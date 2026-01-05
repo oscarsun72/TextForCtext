@@ -163,7 +163,6 @@ namespace TextForCtext
         /// 《四庫全書》文本標準化
         /// </summary>
         /// <param name="xForStandardize">要處理的文本</param>
-        /// <returns></returns>
         internal void StandardizeSKQSContext(ref string xForStandardize)
         {
             if (string.IsNullOrEmpty(xForStandardize)) return;
@@ -180,7 +179,7 @@ namespace TextForCtext
             //int isSKQS = xForStandardize.IndexOf("《欽定四庫全書》"); //現在不交給WordVBA作書名篇名標點了，故改如下：
             int isSKQS = xForStandardize.IndexOf("欽定四庫全書"); //現在不交給WordVBA標點了，故改如左
             bool reBuild = false;
-            if (isSKQS > -1)
+            if (isSKQS > -1)//是《四庫全書》文本才處理。《四庫全書》文本專用
             {
                 if (xForStandardize.Substring(0, 2) == Environment.NewLine)
                 {//清除最前面的分段符號
@@ -248,6 +247,7 @@ namespace TextForCtext
             xForStandardize = xForStandardize.Replace("○", "◯");
             xForStandardize = xForStandardize.Replace("\r\n　\r\n　\r\n", "\r\n|\r\n|\r\n");
             xForStandardize = xForStandardize.Replace("|\r\n　\r\n|", "|\r\n|\r\n|");
+            xForStandardize = xForStandardize.Replace("\r\n　\r\n", "\r\n|\r\n");//20260102新增此行
             CnText.BooksPunctuation(ref xForStandardize, true);//書名號篇名號等標點
 
 
@@ -304,7 +304,8 @@ namespace TextForCtext
                 s = xForMark.IndexOf(newLine, sLineStart + sLineLen + newLineLen);
             }
             //清除跨行標題誤標的後面部分: xForMark.Replace("<p><p>\r\n*", "\r\n");
-            xForMark = xForMark.Replace("<p><p>" + newLine + "*", newLine);
+            if (xForMark.Contains("<p><p>" + newLine + "*"))
+                xForMark = xForMark.Replace("<p><p>" + newLine + "*", newLine);
             //Regex.Replace(xForMark, "<p><p>" + newLine + "*", newLine);//此無效，應該是要pattern才行，不能指定字串
             //清除末尾冗餘
             if (xForMark.Substring(xForMark.Length - 1, 1) == "\r") xForMark = xForMark.Substring(0, xForMark.Length - 1);
@@ -364,7 +365,7 @@ namespace TextForCtext
         /// Alt + - （字母區與數字鍵盤的減號）: 如果被選取的是「􏿽」則與下一個「{{」對調；若是「}}」則與「􏿽」對調。（針對《國學大師》《四庫全書》文本小注文誤標而開發）
         /// 若無選取文字，則自動從插入點往後找「􏿽」或「}}」，直到該行/段末為止
         /// </summary>
-        internal void correctBlankAndUppercurlybrackets(ref TextBox txb)
+        internal void CorrectBlankAndUppercurlybrackets(ref TextBox txb)
         {
             if (txb.Text.IndexOf("􏿽") == -1) return;
             if (txb.SelectionStart == txb.TextLength) return;

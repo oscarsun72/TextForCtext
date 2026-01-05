@@ -322,7 +322,7 @@ Function IsNewBlankPageTab(ByRef driver As IWebDriver) As Boolean
 End Function
 Rem 啟動Chrome瀏覽器或已啟動後開啟新分頁瀏覽。失敗時傳回false
 Function OpenChrome(Optional url As String) As Boolean
-reStart:
+restart:
         'Dim WD As SeleniumBasic.IWebDriver
         On Error GoTo ErrH
         Dim Service As SeleniumBasic.ChromeDriverService
@@ -340,7 +340,7 @@ reStart:
                 If WD Is Nothing Then
                     'Stop ' for test
                     If MsgBox("請關閉Chrome瀏覽器後再按「確定」繼續。否則請按「取消」以取消作業。", vbExclamation + vbOKCancel) = VBA.vbCancel Then Exit Function
-                    GoTo reStart
+                    GoTo restart
                 Else
                     WD.url = url
                 End If
@@ -434,7 +434,7 @@ ErrH:
                     vbTab & "是否要程式自動幫您關閉、啟動。感恩感恩　南無阿彌陀佛", vbCritical + vbOKCancel) _
                         = vbOK Then
                     SystemSetup.killProcessesByName "chrome.exe"
-                    GoTo reStart
+                    GoTo restart
                 Else
                     OpenChrome = False
                 End If
@@ -454,7 +454,7 @@ ErrH:
             If VBA.InStr(Err.description, "invalid session id") = 1 Then '-2146233088 invalid session id
                 killchromedriverFromHere
                 Set WD = Nothing
-                GoTo reStart
+                GoTo restart
             ElseIf InStr(Err.description, "Chrome failed to start: exited normally.") Then
                 '' err.Descriptionunknown error: Chrome failed to start: exited normally.
                 ''  (unknown error: DevToolsActivePort file doesn't exist)
@@ -463,18 +463,18 @@ ErrH:
                         'killProcessesByName "ChromeDriver.exe", pid
                         killchromedriverFromHere
                         Set WD = Nothing
-                    GoTo reStart
+                    GoTo restart
                 Else
         '            WD.Quit
                     killchromedriverFromHere
                 End If
             ElseIf InStr(Err.description, "no such window: No target with given id found") Then
                 killchromedriverFromHere
-                GoTo reStart
+                GoTo restart
             ElseIf InStr(Err.description, "disconnected: received Inspector.detached event") Then '(failed to check if window was closed: disconnected: not connected to DevTools)
                                                                                                     '(Session info: chrome=110.0.5481.178)
                 killchromedriverFromHere
-                GoTo reStart
+                GoTo restart
             ElseIf InStr(Err.description, "no such window: target window already closed") Then 'no such window: target window already closed
                                                                                                         'from unknown error: web view not found
                                                                                                          ' (Session info: chrome=128.0.6613.85)
@@ -518,7 +518,7 @@ ErrH:
                                                                                     '  (Session info: chrome=129.0.6668.60)
                 killchromedriverFromHere
                 Set WD = Nothing
-                GoTo reStart
+                GoTo restart
             ElseIf VBA.InStr(Err.description, "no such window") Then 'no such window
                                                                     '  (Session info: chrome=129.0.6668.59)
                 If url = "https://gj.cool/punct" Then
@@ -553,7 +553,7 @@ ErrH:
                     vbTab & "是否要程式自動幫您關閉、啟動。感恩感恩　南無阿彌陀佛", vbCritical + vbOKCancel) _
                         = vbOK Then
                     SystemSetup.killProcessesByName "chrome.exe"
-                    GoTo reStart
+                    GoTo restart
                 Else
                     killchromedriverFromHere
                     Set WD = Nothing
@@ -569,7 +569,7 @@ ErrH:
             If Err.description = "沒有設定物件變數或 With 區塊變數" Then
                 killchromedriverFromHere
                 Set WD = Nothing
-                GoTo reStart
+                GoTo restart
             End If
             
             Resume
@@ -578,7 +578,7 @@ ErrH:
 End Function
 
 Function openChromeBackground(url As String) As SeleniumBasic.IWebDriver
-reStart:
+restart:
     'Dim WD As SeleniumBasic.IWebDriver
     On Error GoTo ErrH
     Dim WD As SeleniumBasic.IWebDriver
@@ -658,7 +658,7 @@ Select Case Err.number
             If MsgBox("請關閉先前開啟的Chrome瀏覽器再繼續", vbExclamation + vbOKCancel) = vbOK Then
                 'killProcessesByName "ChromeDriver.exe", pid
                 killchromedriverFromHere
-            GoTo reStart
+            GoTo restart
             End If
         End If
     Case Else
@@ -3662,7 +3662,8 @@ Function grabAITShenShenWikiPunctResult(text As String, resultText As String, Op
         Set iwe = WD.FindElementByCssSelector("#nav-biaodian-tab")
         If VBA.DateDiff("s", dt, DateTime.Now) > 5 Then Exit Function
     Loop
-    iwe.Click
+    'iwe.Click
+    WD.ExecuteScript "arguments[0].click();", iwe
     '輸入框
     Set iwe = WD.FindElementByCssSelector("#textarea-biaodian")
     If iwe Is Nothing Then Exit Function
@@ -3672,7 +3673,8 @@ Function grabAITShenShenWikiPunctResult(text As String, resultText As String, Op
     If iwe Is Nothing Then Exit Function
     'iwe.Click'在螢幕解析度過大時，不能按到
     Dim key As New SeleniumBasic.keys
-    iwe.SendKeys key.enter
+    'iwe.SendKeys key.enter
+    WD.ExecuteScript "arguments[0].click();", iwe
     
     dt = DateTime.Now
     '結果怎么樣？
