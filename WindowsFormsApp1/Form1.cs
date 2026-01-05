@@ -401,32 +401,33 @@ namespace WindowsFormsApp1
                 }
             }
 
-            #region 輸出一些常用設定值以供下次再用。如果在除錯撰碼時 20260102
+            #region 輸出一些常用設定值以供下次再用。如果在除錯撰碼時 只為開發方便爾。使用者可以不用。20260102
             bool logged = false; string log = string.Empty;
             if (WindowHandles.TryGetValue("ChapterSelector", out string chapterSelector))
             //Debug.WriteLine("cpt= " + chapterSelector);//https://copilot.microsoft.com/shares/j5vsqNpooaUje3bo1T3N1
             {
                 Log("cpt= " + chapterSelector, out logged);//https://copilot.microsoft.com/shares/j5vsqNpooaUje3bo1T3N1
-                log += "cpt= " + chapterSelector;
+                log += "cpt= " + Environment.NewLine + chapterSelector;
             }
             if (inputTextFrontPage != "{{{封面}}}<p>")
             {
                 Log("扉頁: " + inputTextFrontPage, out logged);
-                log += Environment.NewLine + Environment.NewLine + "扉頁: " + inputTextFrontPage;
+                log += Environment.NewLine + Environment.NewLine + "扉頁: " + Environment.NewLine + inputTextFrontPage;
             }
             if (lines_perPage > 0)
             {
                 Log("lines_perPage: " + lines_perPage, out logged);
-                log += Environment.NewLine + Environment.NewLine + "lines_perPage: " + lines_perPage;
+                log += Environment.NewLine + Environment.NewLine + "lines_perPage: " + Environment.NewLine + lines_perPage;
             }
             if (wordsPerLinePara > 0)
             {
                 Log("wordsPerLinePara: " + wordsPerLinePara, out logged);
-                log += Environment.NewLine + Environment.NewLine + "wordsPerLinePara: " + wordsPerLinePara;
+                log += Environment.NewLine + Environment.NewLine + "wordsPerLinePara: " + Environment.NewLine + wordsPerLinePara;
             }
             if (logged)
             {
-                if (!string.IsNullOrEmpty(log)) { 
+                if (!string.IsNullOrEmpty(log))
+                {
                     //MessageBoxShowOKExclamationDefaultDesktopOnly(log);
                     Clipboard.SetText(log);//以備用
                 }

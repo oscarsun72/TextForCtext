@@ -10466,7 +10466,8 @@ namespace TextForCtext
             //string iElementSelector = "#printView > div:nth-child(3) > div:nth-child(1) > div";
             // 呼叫穩健版方法
             //WebClipboardHelper.CopyElementContentSmartStable(driver, iElementSelector);
-            WebClipboardHelper.SelectAndCopyElementHtmlContentSmartStable(driver, element);//與上一行等效（即由其略改而來）20260105
+            //WebClipboardHelper.SelectAndCopyElementHtmlContentSmartStable(driver, element);//與上一行等效（即由其略改而來）20260105
+            result = WebClipboardHelper.SelectAndCopyElementHtmlContentSmart(driver, element);
 
 
             //以下為舊式，來日可刪(原來作用中的幾行）
@@ -10956,8 +10957,8 @@ namespace TextForCtext
             if (!string.IsNullOrEmpty(textContent))
             {
                 //Clipboard.SetText(textContent, TextDataFormat.Text);//會有亂碼
-                //Clipboard.SetText(textContent, TextDataFormat.UnicodeText);//只適用於純文字
-                Clipboard.SetText(textContent, TextDataFormat.Html);
+                Clipboard.SetText(textContent, TextDataFormat.UnicodeText);//只適用於純文字
+                //Clipboard.SetText(textContent, TextDataFormat.Html);
                 //Clipboard.SetText(elementHtml, TextDataFormat.Html);//方法 2：存成 HTML 格式
                 //如果您要在 Word / Office Interop 中貼上 HTML，建議用 HTML 格式：
                 //這樣 Word 會識別為 HTML，而不是純文字。
@@ -10984,35 +10985,42 @@ namespace TextForCtext
             {
                 case ClipboardContentType.Html_CFHTML:
                     {
-                        // 包裝成 CF_HTML 格式
-                        string header = "Version:0.9\r\n";
-                        string source = "SourceURL:" + driver.Url + "\r\n";
+                        SelectAndCopyElementHtmlContentSmartStable(driver, element);
+                        //// 包裝成 CF_HTML 格式
+                        //string header = "Version:0.9\r\n";
+                        //string source = "SourceURL:" + driver.Url + "\r\n";
 
-                        string pre = "<html><body>";
-                        string post = "</body></html>";
-                        string fullHtml = pre + content + post;
+                        //string pre = "<html><body>";
+                        //string post = "</body></html>";
+                        //string fullHtml = pre + content + post;
 
-                        int startHtml = header.Length + source.Length;
-                        int endHtml = startHtml + fullHtml.Length;
+                        //int startHtml = header.Length + source.Length;
+                        //int endHtml = startHtml + fullHtml.Length;
 
-                        string cfHtml =
-                            header +
-                            $"StartHTML:{startHtml:D10}\r\n" +
-                            $"EndHTML:{endHtml:D10}\r\n" +
-                            $"StartFragment:{startHtml:D10}\r\n" +
-                            $"EndFragment:{endHtml:D10}\r\n" +
-                            source +
-                            fullHtml;
+                        //string cfHtml =
+                        //    header +
+                        //    $"StartHTML:{startHtml:D10}\r\n" +
+                        //    $"EndHTML:{endHtml:D10}\r\n" +
+                        //    $"StartFragment:{startHtml:D10}\r\n" +
+                        //    $"EndFragment:{endHtml:D10}\r\n" +
+                        //    source +
+                        //    fullHtml;
 
-                        Clipboard.SetText(cfHtml, TextDataFormat.Html);
+                        //Clipboard.SetText(cfHtml, TextDataFormat.Html);
                         break;
                     }
 
                 case ClipboardContentType.PlainText:
                     {
                         string textContent = (string)js.ExecuteScript("return arguments[0].innerText;", element);
-                        Clipboard.SetText(textContent, TextDataFormat.UnicodeText);
-                        break;
+                        if (string.IsNullOrEmpty(textContent))
+                            return SelectAndCopyElementHtmlContent(driver, element);// fallback https://copilot.microsoft.com/shares/CQPkTg4cmA6LAzjzV9yBD
+                        else
+                        {
+                            Clipboard.SetText(textContent, TextDataFormat.UnicodeText);
+                            return true;// success
+                        }
+
                     }
 
                 default:
@@ -11021,6 +11029,25 @@ namespace TextForCtext
 
             return true;
         }
+        /*
+         開始
+            │
+            ▼
+        抓 innerHTML → 判斷型態
+            │
+            ├── HTML → 呼叫 SmartStable
+            │           （生成 CF_HTML + UnicodeText）
+            │
+            └── PlainText → 抓 innerText
+                    │
+                    ├── 有內容 → 寫入 UnicodeText
+                    │
+                    └── 空字串 → fallback 到 SelectAndCopyElementHtmlContent
+                                （用 innerHTML 當純文字）
+                https://copilot.microsoft.com/shares/DzMwwRF6wBQ41xCLqpHJr https://copilot.microsoft.com/shares/J696S91DUrxWDjjYV53nR
+         */
+
+
         /// <summary>
         /// 智慧複製指定元素的完整內容到剪貼簿（Word可完整貼上）
         /// 由 CopyElementContentSmartStable改寫而來

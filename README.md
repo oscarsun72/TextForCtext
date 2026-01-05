@@ -1035,7 +1035,7 @@ Ctrl + 滑鼠左鍵：清除框中所有文字
 
 ## 參照資源：
 （大於 25MB 無法在此上傳的檔案則表列於此，且均是末學本機Dropbox上自己正在使用的最新檔。若有疏漏，尚祈提醒末學。感恩感恩　南無阿彌陀佛）
-- [查字.mdb](https://www.dropbox.com/scl/fi/k8su56gofykrumrlesksy/.mdb?rlkey=yujze1bhhj228oqu6knyorrrl&dl=0)：此為資料檔；資料結構可參看此檔
+- [查字.mdb](https://www.dropbox.com/scl/fi/vze6vqx4ooj7dwd6met53/.mdb?rlkey=mh1kl48l75di505wedo771naw&dl=0)：此為資料檔；資料結構可參看此檔
 - [查字forInput.mdb](https://www.dropbox.com/scl/fi/meazmnt9o5pim0xssw5s0/forinput.mdb?rlkey=zdqcgvrvkc3xdz7wnfrjtd3sf&dl=0)：此為使用者介面及程式檔，末學均用此作為輸入的前端介面，將資料回存上一「查字.mdb」檔；即程式碼可參考此檔 202301051619（2023/1/5 16:19）
 - [《重編國語辭典修訂本》資料庫.mdb](https://www.dropbox.com/s/dxumn4awnx4e0o9/%E3%80%8A%E9%87%8D%E7%B7%A8%E5%9C%8B%E8%AA%9E%E8%BE%AD%E5%85%B8%E4%BF%AE%E8%A8%82%E6%9C%AC%E3%80%8B%E8%B3%87%E6%96%99%E5%BA%AB.mdb?dl=0)
 > 請將以上3檔均複製到 Dropbox 安裝目錄根目錄中，許多功能才能正常執行（若無安裝 Dropbox ，請自己在建立相關路徑，如末學登入Windows的帳號是「**oscar**」，路徑就是：C:\Users\**oscar**\Dropbox 。將以上路徑中的帳號換成您的應該就可以了）。
