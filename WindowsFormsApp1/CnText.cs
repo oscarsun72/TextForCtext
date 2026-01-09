@@ -8,11 +8,10 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using WindowsFormsApp1;
-using static System.Net.Mime.MediaTypeNames;
 using ado = ADODB;
+using static WindowsFormsApp1.Form1;
 //using OpenQA.Selenium.DevTools.V125.Runtime;
 //using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 //using static System.Net.Mime.MediaTypeNames;
@@ -2205,7 +2204,7 @@ namespace TextForCtext
     {
         public static string UniversalSwap(string input)
         {
-            
+
             if (string.IsNullOrEmpty(input)) return input;
 
             string specialBlank = "􏿽";
@@ -2447,4 +2446,556 @@ namespace TextForCtext
             return sb.ToString();
         }
     }
+
+    public static class TextBoxPagingHelper
+    {
+        /// <summary>
+        /// 取得指定頁面的文字內容（單純依行數分頁）
+        /// </summary>
+        public static string GetPageText(TextBox textBox, int pageNumber, int linesPerPage)
+        {
+            if (textBox == null) throw new ArgumentNullException(nameof(textBox));
+            if (pageNumber < 1) throw new ArgumentOutOfRangeException(nameof(pageNumber));
+            if (linesPerPage < 1) throw new ArgumentOutOfRangeException(nameof(linesPerPage));
+
+            string[] allLines = textBox.Lines;
+
+            int startIndex = (pageNumber - 1) * linesPerPage;
+            if (startIndex >= allLines.Length) return string.Empty;
+
+            int endIndex = Math.Min(startIndex + linesPerPage, allLines.Length);
+
+            string[] pageLines = allLines.Skip(startIndex).Take(endIndex - startIndex).ToArray();
+
+            return string.Join(Environment.NewLine, pageLines);
+        }
+
+        /// <summary>
+        /// 計算總頁數（單純依行數分頁）
+        /// </summary>
+        public static int GetTotalPages(TextBox textBox, int linesPerPage)
+        {
+            if (textBox == null) throw new ArgumentNullException(nameof(textBox));
+            if (linesPerPage < 1) throw new ArgumentOutOfRangeException(nameof(linesPerPage));
+
+            int totalLines = textBox.Lines.Length;
+            return (int)Math.Ceiling((double)totalLines / linesPerPage);
+        }
+
+        /// <summary>
+        /// 計算一頁中的「實際行/段數」
+        /// （正文算 2，小注算 1，依 {{ }} 標記判斷）
+        /// </summary>
+        public static int CountLinesPerPage(string xPage)
+        {
+            // 這裡直接放你提供的邏輯，
+            // 或者抽取成獨立的 private 方法以保持整潔。
+            // 為了簡潔，這裡只示範呼叫你的原始方法。
+            return AncientTextExamine.CountLinesPerPage(xPage);
+        }
+    }
+
+    /// <summary>
+    /// 專門處理古籍文本的行數字數頁面排版訊息等計算邏輯
+    /// </summary>
+    public static class AncientTextExamine
+    {//https://copilot.microsoft.com/shares/xuC8fA9dA7oyxp9XGKP93 GitHub　Copilot大菩薩：C# 分頁顯示 TextBox 行內容 20260107
+        const string omitStr = "．‧.…【】〖〗＝{}<p>（）《》〈〉：；、，。「」『』？！0123456789-‧·\r\n";//"　"
+        /// <summary>
+        /// 將全文依古籍實際行數分頁 依古籍實際行數（正文=2，注文=1，夾注=1）分頁。 
+        /// 以「累積文字段」呼叫 CountLinesPerPage，避免逐行計算造成頁尾誤差。
+        /// </summary>
+        /// <param name="text">全文</param>
+        /// <param name="linesPerPage">每頁的實際行數上限</param>
+        /// <returns>分頁後的文字集合，每頁一個字串</returns>
+        /// <summary>
+        /// 將全文依古籍實際行數分頁
+        /// </summary>
+        public static List<string> SplitIntoPages(string text, int linesPerPage)
+        {
+            if (string.IsNullOrEmpty(text)) return new List<string>();
+            if (linesPerPage < 1) throw new ArgumentOutOfRangeException(nameof(linesPerPage));
+
+            string[] rawLines = text.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
+
+            var pages = new List<string>();
+            var bufferLines = new List<string>();//https://copilot.microsoft.com/shares/SAeUq1UcVuawWFqKv4ZNh
+
+            foreach (string line in rawLines)
+            {
+                bufferLines.Add(line);
+                string bufferText = string.Join(Environment.NewLine, bufferLines);
+
+                int counted = CountLinesPerPage(bufferText);
+
+                if (counted >= linesPerPage)
+                {
+                    pages.Add(bufferText);
+                    bufferLines.Clear();
+                }
+            }
+
+            if (bufferLines.Count > 0)
+            {
+                pages.Add(string.Join(Environment.NewLine, bufferLines));
+            }
+
+            return pages;
+        }
+
+        /// <summary>
+        /// 取得指定頁面的文字內容（傳入 List<string>）
+        /// </summary>
+        public static string GetPageText(List<string> pages, int pageNumber)
+        {
+            if (pages == null) throw new ArgumentNullException(nameof(pages));
+            if (pageNumber < 1 || pageNumber > pages.Count) return string.Empty;
+            return pages[pageNumber - 1];
+        }
+
+        /// <summary>
+        /// 取得指定頁面的文字內容（傳入全文 string，自動分頁）
+        /// </summary>
+        public static string GetPageText(string text, int pageNumber, int linesPerPage)
+        {
+            var pages = SplitIntoPages(text, linesPerPage);
+            return GetPageText(pages, pageNumber);
+        }
+
+        /// <summary>
+        /// 計算總頁數
+        /// </summary>
+        public static int GetTotalPages(string text, int linesPerPage)
+        {
+            return SplitIntoPages(text, linesPerPage).Count;
+        }
+
+
+        ///// <summary>
+        ///// 調用您現成的 countLinesPerPage 方法
+        ///// </summary>
+        //private static int CountLinesPerPage(string xPage)
+        //{
+        //    // 這裡直接放您原本的 countLinesPerPage 方法完整內容
+        //    // （您已經提供了，我建議直接複製貼上）
+        //    throw new NotImplementedException("請貼上您原本的 countLinesPerPage 方法內容");
+        //}
+
+        /// <summary>
+        /// 計算xPage中的實際行/段數（正文算1，注文算2，故8行正文之文本傳回的值即16）
+        /// </summary>
+        /// <param name="xPage">要計算的文本</param>
+        /// <returns>xPage中的實際行/段數</returns>
+        public static int CountLinesPerPage(string xPage)
+        {
+            #region 規範文本
+
+            while (xPage.Contains("􏿽<p>"))
+            {
+                xPage = xPage.Replace("􏿽<p>", string.Empty);
+            }
+            while (xPage.Contains("<p>+"))
+            {
+                xPage = xPage.Replace("<p>+", "<p>");
+            }
+            while (xPage.Contains("+<p>"))
+            {
+                xPage = xPage.Replace("+<p>", "<p>");
+            }
+            while (xPage.Contains("<p>+<p>"))
+            {
+                xPage = xPage.Replace("<p>+<p>", "<p>");
+            }
+            while (xPage.Contains(Environment.NewLine + Environment.NewLine))
+                xPage = xPage.Replace(Environment.NewLine + Environment.NewLine, Environment.NewLine + "|" + Environment.NewLine);
+            if (xPage.Length > Environment.NewLine.Length && xPage.Substring(xPage.Length - Environment.NewLine.Length, Environment.NewLine.Length) == Environment.NewLine)
+                xPage = xPage + "|";
+
+            #endregion
+            int i = 0, openBracketS, closeBracketS, e = xPage.IndexOf(Environment.NewLine); bool openNote = false;
+            string[] linesParasPage = xPage.Split(Environment.NewLine.ToArray(), StringSplitOptions.RemoveEmptyEntries);
+            string item;
+            if (linesParasPage.Length == 1)
+            {
+                item = linesParasPage[0];
+                if (item == "|") return 2;
+                else
+                {
+                    if (item.IndexOf("{{") == -1 && item.IndexOf("}}") == -1)
+                        return 2;
+                    else
+                    {
+                        if ((item.StartsWith("{{") && item.IndexOf("}}") == -1)
+                            || (item.EndsWith("}}") && item.IndexOf("{{") == -1)
+                            || (item.StartsWith("{{") && item.EndsWith("}}")))
+                            return 1;
+                        else
+                            return 2;
+
+                    }
+                }
+            }
+            for (int index = 0; index < linesParasPage.Length; index++)
+            //foreach (string item in linesParasPage)
+            {
+                #region 舊式
+                item = linesParasPage[index];
+                //if (item == "") return;
+                openBracketS = item.IndexOf("{{"); closeBracketS = item.IndexOf("}}");
+
+                if (item == "}}<p>" || item == "}}|" || (closeBracketS == -1 && openBracketS == 0 && item.Length < 5))//《維基文庫》純注文空及其前一行
+                {
+                    i++;
+                    if (item == "}}<p>" || item == "}}|") openNote = false; else openNote = true;
+                }
+
+                else if (i == 0 && xPage.IndexOf("}}") > -1 && xPage.IndexOf("}}") < (xPage.IndexOf("{{") == -1 ? xPage.Length : xPage.IndexOf("{{")) && xPage.IndexOf("}}") > e)
+                { i++; openNote = true; }//第一段/行是純注文        
+                else if (i == 0 && item.IndexOf("{{") == -1 && item.IndexOf("}}") == -1)
+                {
+                    string xx = linesParasPage[i + 1];
+                    if (xx.IndexOf("}}") > -1 && xx.IndexOf("{{") == -1)//&& x.IndexOf("}}") > e)
+                    { i++; openNote = true; }//第一段/行是純注文
+                    else { i += 2; openNote = false; }//第一段/行是純正文
+                }
+
+                else if (i == 0 && ((closeBracketS > -1 && openBracketS > closeBracketS) ||
+                    (openBracketS == -1 && closeBracketS > -1 && closeBracketS < item.Length - 2))) //第一行正、注夾雜
+                {
+                    if (openBracketS > 2)
+                    {
+                        i += 2;
+                    }
+                    else
+                    {
+                        if (openBracketS == -1) i += 2;
+                        else if (openBracketS == 1)
+                        {//目前分行分段於有標點者切割有誤差，權以此暫補丁
+                            if (omitStr.IndexOf(item.Substring(0, 1)) == -1)
+                            {
+                                i += 2;
+                            }
+                            else i++;
+                        }
+                        else if (openBracketS == 2)
+                        {
+                            if (omitStr.IndexOf(item.Substring(0, 1)) == -1) i += 2;
+                            else if (omitStr.IndexOf(item.Substring(1, 1)) == -1)
+                            {//目前分行分段於有標點者切割有誤差，權以此暫補丁
+                                i += 2;
+                            }
+                            else
+                            {
+                                i++;
+                            }
+                        }
+                    }
+
+                    if (item.LastIndexOf("}}") > item.LastIndexOf("{{"))
+                        openNote = false;
+                    else
+                        openNote = true;
+                }
+
+                else if (openBracketS == 0 && closeBracketS == -1)//獨立注文（純注文）（開始）
+                { i++; openNote = true; }
+                else if (openBracketS == -1 && openNote)
+                {//純注文（末截）
+                    if (closeBracketS == item.Length - 2)//第2行/段純注文、獨立注文
+                    { i++; openNote = false; }
+                    else if (item.Length > 4 || item.EndsWith("}}|"))
+                    {
+                        if (item.Substring(item.Length - 3) == "}}|" ||
+                            item.Substring(item.Length - 5) == "}}<p>") { i++; openNote = false; }
+                        else
+                        {
+                            if (closeBracketS == -1)
+                            {
+                                if (openNote)
+                                    i++;
+                                else
+                                    i += 2;
+                            }
+                            else
+                            {
+                                i += 2;
+                                openNote = false;
+                            }
+
+                        }
+                    }
+                }
+                else if (openBracketS == -1 && closeBracketS > -1 && closeBracketS < item.Length - 2)
+                {//正注夾雜注文結束
+                    { i += 2; openNote = false; }
+                }
+                else if (openBracketS > -1 && item.IndexOf("{{", openBracketS + 2) > -1
+                    && item.IndexOf("{{{", openBracketS + 2) != item.IndexOf("{{", openBracketS + 2))//正注夾雜
+                {
+                    i += 2;
+                    if (item.LastIndexOf("}}") < item.LastIndexOf("{{")) openNote = true;
+                    else openNote = false;
+                }
+                else if (openBracketS > -1 && closeBracketS > -1 && closeBracketS < item.Length - 2)
+                {
+                    if (openBracketS == 0 && (item.EndsWith("}}") || item.EndsWith("}}<p>") || item.EndsWith("}}|") || item.EndsWith("}}。<p>"))
+                        && ((item.IndexOf("{{", openBracketS + 2) == -1 && item.LastIndexOf("}}", closeBracketS) == -1)
+                        || (item.IndexOf("{{", openBracketS + 2) == item.IndexOf("{{{", openBracketS + 2) &&
+                                item.LastIndexOf("}}", closeBracketS) == item.LastIndexOf("}}}", closeBracketS))
+                        ))//獨立注文
+                    {
+                        string preItem, preItem1;
+                        if (index == 0) i += 2;
+                        else if (index > 0)
+                        {
+                            preItem = linesParasPage[index - 1];
+                            if (index > 1)
+                                preItem1 = linesParasPage[index - 2];
+                            else
+                                preItem1 = null;
+                            if (((preItem.IndexOf("{{") == -1 || (preItem.StartsWith("{{") && preItem.IndexOf("{{", 2) == -1))
+                                        || (preItem.IndexOf("{{") > 0 && preItem.IndexOf("}}") > (preItem.IndexOf("{{"))))
+                                && (preItem.EndsWith("}}") || preItem.EndsWith("}}<p>") || preItem.EndsWith("}}|") || preItem.EndsWith("}}。<p>"))
+                                && preItem.LastIndexOf("}}", preItem.LastIndexOf("}}")) == -1
+                                //前一行是獨立注文
+                                && ((item.EndsWith("}}<p>") || item.EndsWith("}}|") || item.EndsWith("}}。<p>")) &&
+                                    ((preItem.StartsWith("{{") && preItem.EndsWith("}}") && preItem.IndexOf("{{", 2) == -1)
+                                    || preItem.Contains("{{") == false && preItem.EndsWith("}}")))
+                                && (//本段是末有<p>的獨立注文，而前2段不是獨立注文
+                                    !(((item.EndsWith("}}<p>") || item.EndsWith("}}|") || item.EndsWith("}}。<p>")) && item.LastIndexOf("}}", item.LastIndexOf("}}")) == -1)
+                                        && ((preItem1 != null && (preItem1.StartsWith("{{") && preItem1.IndexOf("{{", 2) == -1)
+                                        && preItem.EndsWith("}}") && preItem.LastIndexOf("}}", preItem.Length - 2) == -1)
+                                        ||
+                                        (preItem1 != null && (!preItem1.Contains("{{") && !preItem1.Contains("}}"))
+                                            && !preItem.Contains("{{") && preItem.EndsWith("}}") && preItem.LastIndexOf("}}", preItem.Length - 2) == -1)
+                                        ))
+                                    //或者本/行段與前行/段字數差不超過1
+                                    || Math.Abs(CountWordsLenPerLinePara(item) - CountWordsLenPerLinePara(preItem)) <= 1)
+                                )
+                                i++;
+                            else
+                                i += 2;
+                        }
+                        openNote = false;
+                    }
+                    else//●●●●●●●●●●●●●●●
+                    {//正注夾雜
+                        i += 2;
+                        if (item.LastIndexOf("}}") < item.LastIndexOf("{{")) openNote = true;
+                        else openNote = false;
+                    }
+
+                }
+
+                //無{{}}標記：
+                else if (openBracketS == -1 && closeBracketS == -1)
+                {
+                    if (openNote == false)//《維基文庫》純正文
+                        i += 2;
+                    else //《維基文庫》純注文
+                        i++;
+                }
+
+                //《維基文庫》正注文夾雜
+                else if (openBracketS > 0)//正注夾雜
+                {
+                    if (openBracketS > 2)
+                    {
+                        i += 2;
+                    }
+                    else
+                    {
+                        if (openBracketS == 1)
+                        {//目前分行分段於有標點者切割有誤差，權以此暫補丁
+                            if (omitStr.IndexOf(item.Substring(0, 1)) == -1)
+                            {
+                                i += 2;
+                            }
+                            else i++;
+                        }
+                        if (openBracketS == 2)
+                        {
+                            if (omitStr.IndexOf(item.Substring(0, 1)) == -1) i += 2;
+                            else if (omitStr.IndexOf(item.Substring(1, 1)) == -1)
+                            {//目前分行分段於有標點者切割有誤差，權以此暫補丁
+                                i += 2;
+                            }
+                            else
+                            {
+                                i++;
+                            }
+                        }
+                    }
+                    if (closeBracketS == -1) openNote = true;
+                    else
+                    {
+                        if (item.LastIndexOf("}}") > item.LastIndexOf("{{"))
+                            openNote = false;
+                        else
+                            openNote = true;
+                    }
+                }
+                //else if (openBracketS > 0 && closeBracketS == -1) { i += 2; openNote = true; }
+                else if (openBracketS == -1 && closeBracketS > -1 && closeBracketS < item.Length - 2) { i += 2; openNote = false; }
+                /*
+                if ((item.IndexOf("{{") == -1 && item.IndexOf("}}") == -1)//純正文
+                    || item.IndexOf("{{") > 0 || item.IndexOf("}}") + 2 < item.Length)////正注文夾雜
+                {
+                    count += 2;
+                }
+                else if ((item.IndexOf("{{") > -1 && item.IndexOf("}}") > -1)//純注文
+                    || (item.IndexOf("{{") > -1 && item.IndexOf("}}") == -1)
+                    || (item.IndexOf("{{") == -1 && item.IndexOf("}}") > -1))
+                {
+                    count++;
+                }
+                */
+
+                //else if 一行裡面不能有2個「{{」或「}}」，請完成這樣的判斷式 20250304 GitHub Copilot大菩薩：
+                else if (item.Count(c => c == '{') > 2 || item.Count(c => c == '}') > 2)//只要不止1個大括號，不論是上或下大括弧，就必非獨立注文
+                {
+                    // 處理包含兩個或更多「{{」或「}}」的行
+                    Debugger.Break();
+                    i += 2;//●●●●●●●●●●●●●●●●●●●●●
+                }
+                else if (openBracketS == 0 && closeBracketS == item.Length - 2
+                    && item.IndexOf("{{", openBracketS + 2) == -1 && item.LastIndexOf("}}", closeBracketS) == -1) { i++; openNote = false; }
+                //●●●●●●●●●●●●●●●●●●●●●
+                else if (openBracketS == -1 && closeBracketS == item.Length - 2
+                    && item.IndexOf("{{", openBracketS + 2) == -1 && item.LastIndexOf("}}", closeBracketS) == -1) { i++; openNote = false; }
+            }
+            return i;
+            #endregion
+
+        }
+        /// <summary>
+        /// 作為 countLinesPerPage 之改良，但未成功！202050301
+        /// </summary>
+        /// <param name="xPage"></param>
+        /// <returns></returns>
+        static public int CountLinesPerPage_NewTry(string xPage)
+        {
+
+            string[] linesParasPage = xPage.Split(Environment.NewLine.ToArray(), StringSplitOptions.RemoveEmptyEntries);
+
+            int count = 0, index = -1;
+            foreach (string item in linesParasPage)
+            {
+                index++;
+                if (item == "|") count += 2;
+                else
+                {
+                    if (item.IndexOf("{{") == -1 && item.IndexOf("}}") == -1)
+                        count += 2;
+                    else if (item.Contains("*"))
+                        count += 2;
+                    else if (item.IndexOf("{{") > 0)
+                        count += 2;
+                    else if (item.IndexOf("<p>") == -1 && item.LastIndexOf("}}") > -1 && item.LastIndexOf("}}") < item.Length - "}}".Length)
+                        count += 2;
+                    else if (item.LastIndexOf("}}") + 2 < item.IndexOf("<p>") || item.LastIndexOf("}}") + 2 < item.IndexOf("。<p>"))
+                        count += 2;
+                    else if (item.StartsWith("{{") && item.LastIndexOf("}}") == -1)
+                        count++;
+                    else
+                    {
+                        //落單的獨立注文，或夾注尾字數不足者
+                        if ((item.StartsWith("{{") && item.EndsWith("}}"))
+                            || (item.StartsWith("{{") && item.EndsWith("}}<p>"))
+                            || (item.StartsWith("{{") && item.EndsWith("}}。<p>")))
+                        {
+                            string itemShort = item.Substring(2, item.IndexOf("}}") - 2);
+                            if (!itemShort.Contains("{{") && !itemShort.Contains("}}"))
+                            {
+                                bool singleNoteLine = false;
+                                if (index > 0)
+                                {
+                                    string preLine = linesParasPage[index - 1];
+                                    string nextLine = string.Empty;
+
+                                    if (index + 1 < linesParasPage.Length)
+                                        nextLine = linesParasPage[index + 1];
+                                    if (!preLine.Contains("{{") && !preLine.Contains("}}"))
+                                        singleNoteLine = true;
+                                    else if (preLine.EndsWith("}}"))
+                                    {
+                                        if (nextLine != string.Empty && !nextLine.StartsWith("{{"))
+                                        {
+                                            string preLineShort = preLine.Substring(2, preLine.IndexOf("}}") - 2);
+                                            if (!(preLine.StartsWith("{{") && preLine.EndsWith("}}")
+                                                && preLineShort.IndexOf("{{") == -1 && preLineShort.IndexOf("}}") == -1))
+                                                singleNoteLine = true;
+                                        }
+                                        else if (new StringInfo(itemShort).LengthInTextElements == 1)
+                                            singleNoteLine = true;
+                                    }
+
+                                    if (singleNoteLine)
+                                        count += 2;
+                                    else
+                                        count++;
+                                }
+                                else
+                                    count += 2;
+                            }//以上落單獨立注文的處理
+                             //獨立注文
+                            else if ((item.StartsWith("{{") && item.IndexOf("}}") == -1)
+                                || (item.EndsWith("}}") && item.IndexOf("{{") == -1)
+                                || (item.EndsWith("}}<p>") && item.IndexOf("{{") == -1)
+                                || (item.EndsWith("}}。<p>") && item.IndexOf("{{") == -1))
+                                count++;
+                            else
+                                count += 2;
+
+                        }
+                    }
+                }
+            }
+            return count;
+        }
+
+
+        //public static bool IsInBraces(string text, int start, int end)
+        //{
+        //    text = "　　　*念奴嬌{{錄一　}}　　　　　{{宋}}蘇　軾<p>";
+
+        //    start = text.IndexOf('*') + 1;
+        //    end = text.IndexOf("<p>");
+
+        //    StringBuilder sb = new StringBuilder(text);
+
+        //    bool inBraces = false; // 是否在 {{}} 内
+
+        //    for (int i = start; i < end; i++)
+        //    {
+        //        // 检查是否进入或退出 {{}} 块
+        //        if (text.Substring(i).StartsWith("{{"))
+        //        {
+        //            inBraces = true;
+        //            i += 1; // 跳过 '{'，因为下一次循环会再加 1
+        //            continue;
+        //        }
+        //        if (text.Substring(i).StartsWith("}}"))
+        //        {
+        //            inBraces = false;
+        //            i += 1;
+        //            continue;
+        //        }
+        //        if (!inBraces && text[i] == '　')
+        //        {
+        //            sb[i] = '􏿽';
+        //        }
+        //    }
+
+        //    string result = sb.ToString();
+        //    Console.WriteLine(result);
+        //}
+
+    }
+
+
+
+
 }
+
+

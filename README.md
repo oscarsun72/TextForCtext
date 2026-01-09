@@ -675,6 +675,8 @@ Ctrl + F1 ：選取範圍前後加上{{}}
 
 Ctrl + Shift + F1：選取範圍前後加上{{}}並清除分行/段符號
 
+Ctrl + Shift + F2：選取範圍前後加上{{}}並清除分行/段符號+並小注不換行-在整理OCR文本人名時很好用 20260109
+
 >若無選取範圍時就執行 Alt + Shift + w 之功能 20250131大年初三 感恩感恩　讚歎讚歎　GitHub Copilot大菩薩　南無阿彌陀佛　讚美主
 
 Alt + Shift + 6 或 Alt + s：小注文不換行：notes_a_line()
@@ -973,13 +975,13 @@ Ctrl + 滑鼠左鍵：清除框中所有文字
 - 輸入「fc」可執行「formatCategory2Columns」函式：以選取範圍為格式化依據，將上下兩欄的目錄/目次內容，從插入點所在位置開始向後格式化（取format,Category二字首，故為fc）執行時若無選取，則以之前的設定為準。若第一次，請務必要選取以供指定。
 - 輸入「ws」（wait second）以指定延長等待開啟舊檔對話方塊出現的時間（毫秒數），如「ws1000」即延長1秒；若要縮減時間，請指定負數，如「ws-200」則等待時間再減200毫秒
 - 輸入「wO」（wait OCR）以指定等待OCR諸過程最久的時間（以秒數），如「wO60」即最久等到60秒（1分鐘）
-   > 由變數 OCR_wait_time_Top_Limit＿second 掌握）
+    > 由變數 OCR_wait_time_Top_Limit＿second 掌握）
 - 輸入「oT」（ocr first ture）設定直接貼入OCR結果先不管版面行款排版模式 PasteOcrResultFisrtMode=true
 - 輸入「oF」（ocr first false ）設定直接貼入OCR結果先不管版面行款排版模式 PasteOcrResultFisrtMode=false
 - 輸入「bT」（batch processing true ）《古籍酷》OCR批量處理。輸入bT以啟用，輸入bF以停用 BatchProcessingGJcoolOCR=true
 - 輸入「bF」（batch processing false ）《古籍酷》OCR批量處理。輸入bT以啟用，輸入bF以停用 BatchProcessingGJcoolOCR=false
 - 輸入「mt」（Mute in Processing）則在操作過程中靜音-不撥放音效。MuteProcessing=true。20240315
- > 今天改為切換式的、開關式的。 「mf」依然有效。20240821
+    > 今天改為切換式的、開關式的。 「mf」依然有效。20240821
 - 輸入「mf」（Mute in Processing=false）則在操作過程中撥放音效。MuteProcessing=false。20240315
 - 輸入「fm」（form move）切換設定-自動移動表單位置以迴避圖文對照頁面的文本區，以便檢校是否已經編輯過 autoTestPositionAvoidance=true 20240501
 - 
@@ -991,7 +993,7 @@ Ctrl + 滑鼠左鍵：清除框中所有文字
 
 - 輸入「lx」+數字，即可重設《漢籍全文資料庫》與CTP 檢索《易》學關鍵字清單之起始索引值。
 
- > 如輸入「lx9」，即重設《漢籍全文資料庫》檢索易學關鍵字清單之起始索引值為9 即 ListIndex_Hanchi_SearchingKeywordsYijing=9。 
+    > 如輸入「lx9」，即重設《漢籍全文資料庫》檢索易學關鍵字清單之起始索引值為9 即 ListIndex_Hanchi_SearchingKeywordsYijing=9。 
 
 - 在textBox2中輸入開關切換要整頁貼上Quick edit [簡單修改模式]  並將下一頁直接送交去OCR的網站
    - kd：《看典古籍》 （kandianguji）網頁
@@ -1001,20 +1003,24 @@ Ctrl + 滑鼠左鍵：清除框中所有文字
 - 在textBox2中輸入「`tr:nth-child(2)`」或當前chapter（冊）的Selector字串值，以指定或重設目前的文字版(View)單元（章節 chapter） 
 
   或在textBox2中輸入「cpt序號」以指定。如「cpt183」即第183（冊） 20250305
-> 如 `tr:nth-child(3)`，即 tr:nth-child(2) 的下一章（節、單元 chapter）
->>`"#content > div:nth-child(6) > table > tbody > tr:nth-child(2) > td:nth-child(1) > a"`
+    > 如 `tr:nth-child(3)`，即 tr:nth-child(2) 的下一章（節、單元 chapter）
+    >>`"#content > div:nth-child(6) > table > tbody > tr:nth-child(2) > td:nth-child(1) > a"`
 
 - 輸入「tlsc」(TitleLeadingSpacesCount)後可以在textBox1前端列出目前的標題階級及其空格數
 - 輸入「tlsc.rmv1」(rmv=Remove)，可以移除第1個項目，「tlsc.clr」(clr=Clear)可以清除全部；清除textBox3的內容亦可以清除所有項目，及重設所有書面特徵參數（如每頁幾行、每行幾字等）
 - 輸入「tlsc.add」可以依textBox1被選取的行段資料來新增標題空格之項目。一行一筆，元素值為整數。
 - 輸入「lp」：由textBox2輸入 "lp" 來切換設定是否將每頁的尾端「`|`」字符改成「`<p>`」以方便文字版的圖文對照連結圖示的出現。這在目錄或清單、詩偈特長的篇卷中很適用。如[《唐文拾遺》](https://ctext.org/wiki.pl?if=gb&chapter=980722#%E5%94%90%E6%96%87%E6%8B%BE%E9%81%BA%E7%9B%AE%E9%8C%84%E7%AC%AC%E4%B8%80)。（l:line,p:paragraph）20251231
 - 輸入「alp」：由textBox2輸入 "alp" 來切換設定是否進行非正常行長（CheckAbnormalLinePara 方法）的檢查。 20250614 (a:abnormal,l:line,p:paragraph)
->a=abnormal, l=line, p=paragraph
+    >a=abnormal, l=line, p=paragraph
+- 輸入「ls」：設定「lines_perPage」（每頁行數）值。如每頁行數為8行，則輸入「ls16」。（8*2=16；以雙行小注單位為準以供程式參考） 20260107
+    > 正文算1，注文算2，故8行正文之文本傳回的值即16； 起始值（初始化）為0
+- 輸入「wl」：設定「wordsPerLinePara」（每行字數）值。如每行字數為20字，則輸入「wl20」。
+    > 初始化（歸零）值為-1
 - 輸入「ifp」 設定各冊冊首/書首內容值（inputTextFrontPage）值
->如「ifp冊府元龜」或「冊府元龜ifp」即設定inputTextFrontPage值為"冊府元龜"，預設值為"{{{封面}}}\<p>"
->> 若只輸入「ifp」則還原為預設值
+    >如「ifp冊府元龜」或「冊府元龜ifp」即設定inputTextFrontPage值為"冊府元龜"，預設值為"{{{封面}}}\<p>"
+    >> 若只輸入「ifp」則還原為預設值
 - 輸入「anv」 設定是否要自動複製下一卷/單位文本
- > autoNextVolumnContextMark值的切換。預設為true
+    > autoNextVolumnContextMark值的切換。預設為true
 
 ### 在 textBox3 網址資訊專用方塊框：
 - 拖曳網址在 textBox3 或 textBox1 上放開，則會讀入所拖曳的網址值給 textBox3
@@ -1026,8 +1032,11 @@ Ctrl + 滑鼠左鍵：清除框中所有文字
 - (Ctrl + z 還原功能支援)
 - 若有指定要取代的文字，進入後會自動填入之前用以取代過的文字以便輸入（即自動填入對應的預設值）
 - 指定要被取代的文字方式：1. 在textBox1中選取文字；2. 若按下 button2 切換成「選取文」（背景紅色）狀態，則將以 textBox2 內的文字為被取代的字串。
-- Alt + 1 ：輸入「·」。
-- 如果在此框輸入的字串前綴半形「@」符號，則會將被取代的字串其對應的用以取代之字串改成目前指定的這個（即在「@」後的字串）20230903蘇拉Saola颱風大菩薩往生後海葵Haikui颱風大菩薩光臨臺灣本島日。感恩感恩　讚歎讚歎　南無阿彌陀佛
+- 如果在此框輸入的字串前綴半形「@」或「7」符號，則會將被取代的字串其對應的用以取代之字串改成目前指定的這個（即在「@」後的字串）20230903蘇拉Saola颱風大菩薩往生後海葵Haikui颱風大菩薩光臨臺灣本島日。感恩感恩　讚歎讚歎　南無阿彌陀佛
+    >現在應已改為直接更新欲取代的字串了。因為取代資訊已改由字典物件操作，若有需求再恢復此功能。20260110
+- Alt + . ：輸入「·」。
+- Alt + 1 ：輸入「􏿽」（CTP空白字符）。
+- Alt + 2 ：輸入「　」（全形空格）。
 
 ### 在表單：
 - 點二下滑鼠左鍵，則將剪貼簿的文字內容讀入textBox1中（此暫取消，以免和 textBox1 的點二下衝突 ）

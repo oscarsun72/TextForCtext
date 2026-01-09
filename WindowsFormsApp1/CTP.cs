@@ -6,7 +6,10 @@ using System;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Globalization;
+using System.IO;
 using System.Linq;
+using System.Net;
+using System.Net.Http;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -577,7 +580,7 @@ namespace TextForCtext
                     WindowsScrolltoTop();
                     //Clipboard.SetText(ie.Text);//.Text屬性會清除前首的全形空格，不適用！！20240313
                     DateTime dt = DateTime.Now;
-                    while (!Form1.isClipBoardAvailable_Text())
+                    while (!Form1.IsClipBoardAvailable_Text())
                         if (DateTime.Now.Subtract(dt).TotalSeconds > 2) break;
                 }
                 else
@@ -975,10 +978,10 @@ namespace TextForCtext
                     }
                 }
                 LastValidWindow = Browser.driver.CurrentWindowHandle;
-            //20250218取消多線程（多執行緒操作）
-            //Task.Run(() =>//接下來不用理會，也沒有元件要操作、沒有訊息要回應，就可以給另一個線程去處理了。
-            //{
-            //reSubmit:
+                //20250218取消多線程（多執行緒操作）
+                //Task.Run(() =>//接下來不用理會，也沒有元件要操作、沒有訊息要回應，就可以給另一個線程去處理了。
+                //{
+                //reSubmit:
                 try
                 {
                     if (submit == null)
@@ -2224,6 +2227,131 @@ namespace TextForCtext
             return head + replacedTail;
         }
 
+
+        /// <summary>
+        /// 下載書圖以供OCR用
+        /// </summary>
+        /// <param name="driver"></param>
+        /// <param name="imageUrl">書圖網址</param>
+        /// <param name="pageUrl">書圖所在網頁網址（即圖文對照頁面，即textBox3.Text的值）</param>
+        /// <param name="downloadImgFullName">下載路徑全檔名</param>
+        /// <returns>若下載成功則傳回true</returns>
+        internal static bool DownloadImage(ChromeDriver driver, string imageUrl, string pageUrl, out string downloadImgFullName)
+        {//https://copilot.microsoft.com/shares/869qxNTvQ3AzbsSX2N8iG  https://copilot.microsoft.com/shares/869qxNTvQ3AzbsSX2N8iG 20260109
+            downloadImgFullName = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+                "CtextTempFiles",
+                "Ctext_Page_Image.png");
+
+            Directory.CreateDirectory(Path.GetDirectoryName(downloadImgFullName));
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+
+            // 先試 Cookie 模式
+            if (DownloadImage_WithSeleniumCookies(driver, imageUrl, pageUrl, downloadImgFullName))
+                return true;
+
+            // 如果失敗，回退到瀏覽器 fetch 模式
+            return DownloadImage_ViaBrowserFetch(driver, imageUrl, downloadImgFullName);
+        }
+
+        private static bool DownloadImage_WithSeleniumCookies(ChromeDriver driver, string imageUrl, string pageUrl, string downloadImgFullName)
+        {
+            try
+            {
+                var seleniumCookies = driver.Manage().Cookies.AllCookies;
+                var cookieContainer = new CookieContainer();
+
+                foreach (var c in seleniumCookies)
+                {
+                    var domain = c.Domain;
+                    if (!domain.StartsWith(".")) domain = "." + domain;
+                    var path = string.IsNullOrEmpty(c.Path) ? "/" : c.Path;
+
+                    try
+                    {
+                        cookieContainer.Add(new System.Net.Cookie(c.Name, c.Value, path, domain)
+                        {
+                            Secure = c.Secure,
+                            HttpOnly = c.IsHttpOnly,
+                            Expires = c.Expiry ?? DateTime.MinValue
+                        });
+                    }
+                    catch { }
+                }
+
+                var handler = new HttpClientHandler
+                {
+                    AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate,
+                    UseCookies = true,
+                    CookieContainer = cookieContainer,
+                    AllowAutoRedirect = true
+                };
+
+                using (var client = new HttpClient(handler))
+                {
+                    client.DefaultRequestHeaders.Add("User-Agent",
+                        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36");
+                    client.DefaultRequestHeaders.Add("Accept", "image/png,image/*;q=0.8,*/*;q=0.5");
+                    client.DefaultRequestHeaders.Add("Accept-Language", "zh-TW,zh;q=0.9,en;q=0.8");
+
+                    if (!string.IsNullOrWhiteSpace(pageUrl))
+                        client.DefaultRequestHeaders.Referrer = new Uri(pageUrl);
+
+                    var response = client.GetAsync(imageUrl).GetAwaiter().GetResult();
+                    if (!response.IsSuccessStatusCode) return false;
+
+                    var bytes = response.Content.ReadAsByteArrayAsync().GetAwaiter().GetResult();
+                    if (IsHotlinkBlocked(response, bytes)) return false;
+
+                    File.WriteAllBytes(downloadImgFullName, bytes);
+                    return true;
+                }
+            }
+            catch { return false; }
+        }
+
+        private static bool DownloadImage_ViaBrowserFetch(ChromeDriver driver, string imageUrl, string downloadImgFullName)
+        {
+            try
+            {
+                string script = @"
+var callback = arguments[arguments.length - 1];
+(async function(url) {
+  try {
+    const res = await fetch(url, { credentials: 'include' });
+    if (!res.ok) { callback(null); return; }
+    const blob = await res.blob();
+    const arrayBuf = await blob.arrayBuffer();
+    let binary = '';
+    const bytes = new Uint8Array(arrayBuf);
+    const len = bytes.byteLength;
+    for (let i = 0; i < len; i++) { binary += String.fromCharCode(bytes[i]); }
+    callback(btoa(binary));
+  } catch (e) { callback(null); }
+})(arguments[0]);
+";
+                var base64 = (string)((OpenQA.Selenium.IJavaScriptExecutor)driver).ExecuteAsyncScript(script, imageUrl);
+                if (string.IsNullOrEmpty(base64)) return false;
+
+                var bytes = Convert.FromBase64String(base64);
+                if (bytes.Length < 7000) return false;
+
+                File.WriteAllBytes(downloadImgFullName, bytes);
+                return true;
+            }
+            catch { return false; }
+        }
+
+        private static bool IsHotlinkBlocked(HttpResponseMessage response, byte[] bytes)
+        {
+            if (response.Headers.TryGetValues("X-Sendfile", out var xs))
+                foreach (var v in xs)
+                    if (v.IndexOf("hotlink.png", StringComparison.OrdinalIgnoreCase) >= 0)
+                        return true;
+
+            if (bytes == null || bytes.Length < 7000) return true;
+            return false;
+        }
 
 
     }

@@ -3,7 +3,7 @@ Option Explicit
 Dim ChapterSelector As String
 'Const description As String = "將星號前的分段符號移置前段之末 & 清除頁前的分段符號"
 'Const description As String = "將星號前的分段符號移置前段之末 & 清除頁前的分段符號{佛弟子文獻學博士孫守真任真甫按：以末學自製於GitHub開源免費免安裝之 TextForCtext 應用程式加速輸入與排版。討論區與末學YouTube頻道有演示影片可資參考。感恩感恩　讚歎讚歎　南無阿彌陀佛"
-'Const description As String = "將星號前的分段符號移置前段之末 & 清除頁前的分段符號{佛弟子文獻學者孫守真任真甫按：仁者志士義民菩薩賢友請多利用賢超法師《古籍酷AI》或《看典古籍》OCR事半功倍也。二站每日均有不少的免費額度可供善用，願毋荒蕪、空拋虛擲了！如蒙不棄，可利用末學自製於GitHub開源免費免安裝之TextForCtext 應用程式，加速輸入與排版。討論區與末學YouTube頻道有演示影片可資參考。感恩感恩　讚歎讚歎　南無阿彌陀佛"
+'Const description As String = "將星號前的分段符號移置前段之末 & 清除頁前的分段符號{佛弟子文獻學博士孫守真任真甫按：仁者志士義民菩薩賢友請多利用賢超法師《古籍酷AI》或《看典古籍》OCR事半功倍也。二站每日均有不少的免費額度可供善用，願毋荒蕪、空拋虛擲了！如蒙不棄，可利用末學自製於GitHub開源免費免安裝之TextForCtext 應用程式，加速輸入與排版。討論區與末學YouTube頻道有演示影片可資參考。感恩感恩　讚歎讚歎　南無阿彌陀佛"
 'Const description As String = "將星號前的分段符號移置前段之末 & 清除頁前的分段符號{據《國學大師》或Kanripo.org所藏本輔以末學自製於GitHub開源免費免安裝之TextForCtext排版對應錄入。討論區與末學YouTube頻道有實境演示影片可資參考。感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主}"
 
 'Const description As String = "將星號前的分段符號移置前段之末 & 清除頁前的分段符號{據Kanripo.org或《國學大師》或北京元引科技有限公司《元引科技引得數字人文資源平臺·中國歷代文獻》所藏本輔以末學自製於GitHub開源免費免安裝之TextForCtext排版對應錄入。討論區與末學YouTube頻道有實境演示影片可資參考。感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主}"
@@ -13,17 +13,18 @@ Dim ChapterSelector As String
 'Const description As String = "將星號前的分段符號移置前段之末 & 清除頁前的分段符號{據《維基文庫》所藏本輔以末學自製於GitHub開源免費免安裝之TextForCtext排版對應錄入。討論區與末學YouTube頻道有實境演示影片可資參考。感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主}"
 'Const description As String = "將星號前的分段符號移置前段之末 & 清除頁前的分段符號{據《維基文庫》或《國學大師》或Kanripo.org或北京元引科技有限公司《元引科技引得數字人文資源平臺·中國歷代文獻》所藏本輔以末學自製於GitHub開源免費免安裝之TextForCtext排版對應錄入。討論區與末學YouTube頻道有實境演示影片可資參考。感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主}"
 
-Const description As String = "將星號前的分段符號移置前段之末 & 清除頁前的分段符號{據北京元引科技有限公司《元引科技引得數字人文資源平臺·中國歷代文獻》所藏本輔以末學自製於GitHub開源免費免安裝之TextForCtext排版對應錄入。討論區與末學YouTube頻道有實境演示影片可資參考。感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主}"
+'Const description As String = "將星號前的分段符號移置前段之末 & 清除頁前的分段符號{據北京元引科技有限公司《元引科技引得數字人文資源平臺·中國歷代文獻》所藏本輔以末學自製於GitHub開源免費免安裝之TextForCtext排版對應錄入。討論區與末學YouTube頻道有實境演示影片可資參考。感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主}"
+Const description As String = "將星號前的分段符號移置前段之末 & 清除頁前的分段符號{佛弟子文獻學博士孫守真任真甫按：據《國學大師》或北京元引科技有限公司《元引科技引得數字人文資源平臺·中國歷代文獻》所藏本輔以末學自製於GitHub開源免費免安裝之TextForCtext排版對應錄入。討論區與末學YouTube頻道有實境演示影片可資參考。感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主}"
 'Const description As String = "將星號前的分段符號移置前段之末 & 清除頁前的分段符號{據《漢籍電子文獻資料庫》（今《漢籍全文資料庫》）所收本輔以末學自製於GitHub開源免費免安裝之TextForCtext排版對應錄入。討論區與末學YouTube頻道有實境演示影片可資參考。感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主}"
 'Const description As String = "將星號前的分段符號移置前段之末 & 清除頁前的分段符號{據《識典古籍》所收本輔以末學自製於GitHub開源免費免安裝之TextForCtext排版對應錄入。此乃與Gemini大菩薩合作之新功能，有緣末學再於YouTube頻道實境直播演示以供參考。感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主}"
 
 'Const description As String = "本書與URN: ctp:wb 同版，今據另一同版者以末學自製於GitHub開源免費免安裝之TextForCtext應用程式內WordVBA對應迻入（討論區與末學YouTube頻道有實境演示影片可供參考），以俟後賢精校。各本後亦可同步更新。感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主"
 
-Const description_Edit_textbox_新頁面 As String = "據《Kanripo》所收本輔以末學自製於GitHub開源免費免安裝之TextForCtext軟件排版對應錄入；討論區及末學YouTube頻道有實境演示影片。感恩感恩　讚歎讚歎　南無阿彌陀佛"
+'Const description_Edit_textbox_新頁面 As String = "據《Kanripo》所收本輔以末學自製於GitHub開源免費免安裝之TextForCtext軟件排版對應錄入；討論區及末學YouTube頻道有實境演示影片。感恩感恩　讚歎讚歎　南無阿彌陀佛"
 'Const description_Edit_textbox_新頁面 As String = "據《Kanripo》或《國學大師》所收本輔以末學自製於GitHub開源免費免安裝之TextForCtext軟件排版對應錄入；討論區及末學YouTube頻道有實境演示影片。感恩感恩　讚歎讚歎　南無阿彌陀佛"
 'Const description_Edit_textbox_新頁面 As String = "據《Kanripo》或《國學大師》或北京元引科技有限公司《元引科技引得數字人文資源平臺·中國歷代文獻》所收本輔以末學自製於GitHub開源免費免安裝之TextForCtext軟件排版對應錄入；討論區及末學YouTube頻道有實境演示影片。感恩感恩　讚歎讚歎　南無阿彌陀佛"
 'Const description_Edit_textbox_新頁面 As String = "據《維基文庫》或《Kanripo》或《國學大師》或北京元引科技有限公司《元引科技引得數字人文資源平臺·中國歷代文獻》所收本輔以末學自製於GitHub開源免費免安裝之TextForCtext軟件排版對應錄入；討論區及末學YouTube頻道有實境演示影片。感恩感恩　讚歎讚歎　南無阿彌陀佛"
-'Const description_Edit_textbox_新頁面 As String = "據北京元引科技有限公司《元引科技引得數字人文資源平臺·中國歷代文獻》所收本輔以末學自製於GitHub開源免費免安裝之TextForCtext軟件排版對應錄入；討論區及末學YouTube頻道有實境演示影片。感恩感恩　讚歎讚歎　南無阿彌陀佛"
+Const description_Edit_textbox_新頁面 As String = "據北京元引科技有限公司《元引科技引得數字人文資源平臺·中國歷代文獻》所收本輔以末學自製於GitHub開源免費免安裝之TextForCtext軟件排版對應錄入；討論區及末學YouTube頻道有實境演示影片。感恩感恩　讚歎讚歎　南無阿彌陀佛"
 
 
 Sub 分行分段()
@@ -314,7 +315,7 @@ Function Page1Exam_ContainsRegex(ByVal text As String) As Boolean
     
     Page1Exam_ContainsRegex = re.Test(text)
 End Function
-Rem GetPageContent(xmlText, "1") 取得第 1 頁的內容，或 GetPageContent(xmlText, "2") 取得第 2 頁。GitHub　Copilot大菩薩 20251226聖誕節後一日 https://copilot.microsoft.com/shares/fcnRVb1mNcY3f4PvDVg9i
+Rem GetPageContent(xmlText, "1") 取得第 1 頁的內容，或 GetPageContent(xmlText, "2") 取得第 2 頁。GitHub　Copilot大菩薩 20251226聖誕節後一日:WordVBA 擷取特定頁面 XML 區段： https://copilot.microsoft.com/shares/fcnRVb1mNcY3f4PvDVg9i
 Function GetPageContent(xmlText As String, pageNum As String) As String
     Dim re As Object, matches As Object
     
@@ -1916,6 +1917,7 @@ Sub 元引科技引得數字人文資源平臺_北京元引科技有限公司轉來(Optional lineCntPerPag
         If (Len(p.Range.text) > 1) Then
             Do While p.Range.Characters(p.Range.Characters.Count - 1) = "　"
                 p.Range.Characters(p.Range.Characters.Count - 1).Delete
+                If Not Len(p.Range.text) > 1 Then Exit Do
             Loop
         End If
     Next p
@@ -2211,64 +2213,20 @@ Sub Kanripo_GitHub轉來(Optional lineCntPerPage As Byte = 0)
         d.Paragraphs(i + 1).Range.Delete '都是刪除文件的第1段，故可以不設定 i=i+1
     Loop
     
-    '檢查每頁行數，以補空行
-    If lineCntPerPage > 0 Then
-        Dim rngExamLineCntPerPage As Range
-        Set rng = rng.Document.Range: Set rngExamLineCntPerPage = rng.Document.Range
-        '檢查每頁行數，以補空行'找到標識頁碼段落
-        Do While rng.Find.Execute(lt & "pb:", , , , , , True, wdFindContinue)
-            rngExamLineCntPerPage.start = rng.Paragraphs(1).Range.End
-            rngExamLineCntPerPage.End = rng.Paragraphs(1).Range.End
-            rngExamLineCntPerPage.MoveEndUntil lt, (rng.Document.Range.End - 1) - rng.Paragraphs(1).Range.End
-            If InStr(rngExamLineCntPerPage.text, "#") Then '分篇卷處前置會有「#」
-                rngExamLineCntPerPage.start = rng.Paragraphs(1).Range.End
-                rngExamLineCntPerPage.End = rng.Paragraphs(1).Range.End
-                rngExamLineCntPerPage.MoveEndUntil "#", (rng.Document.Range.End - 1) - rng.Paragraphs(1).Range.End
-            End If
-            If InStr(rng.Document.Range(rngExamLineCntPerPage.start, rng.Document.Range.End), lt & "pb:") = 0 Then '後面沒有「<pb:」了，處理完了，就離開
-                rng.Paragraphs(1).Range.Delete ' 清除頁碼所在段落
-                Exit Do
-            End If
-            Do While rngExamLineCntPerPage.Paragraphs.Count < lineCntPerPage
-                 rngExamLineCntPerPage.InsertAfter "　"
-                 rngExamLineCntPerPage.InsertParagraphAfter
-            Loop
-            rng.Paragraphs(1).Range.Delete ' 清除頁碼所在段落
-        Loop
-        Rem 以下後面已處理，故先註解掉，待刪除 20260103
-    Else 'lineCntPerPage = 0 '預設值
-'        '清除頁碼' 前面 「rng.Paragraphs(1).Range.Delete ' rng.text = vbNullString」 已完成
-        Set rng = rng.Document.Range
-        rng.Find.MatchCase = True
-'        '清除頁碼
-        Do While rng.Find.Execute(lt & "pb:", , , , , , True, wdFindContinue)
-           rng.Paragraphs(1).Range.Delete
-        Loop
-'        'rng.Find.ClearFormatting
-    End If
 
-    Rem 清理頁碼標頭
-    For Each p In rng.Document.Paragraphs
-        Select Case p.Range.Characters(1)
-            Case lt
-                p.Range.Delete
-            Case "#"
-                p.Range.text = " " '在分卷/篇處加上此半形空格，可讓程式碼中止（在TextForCtext C#裡）
-        End Select
-    Next p
     
-    Rem 執行上述的清除時會產生" ("，且都在段落前端，不知何故，清除前並沒有。
-    If InStr(d.Range.text, " (") Then
-        Set rng = d.Range
-        Do While rng.Find.Execute(findText:=" [(]", MatchWildcards:=True, Wrap:=wdFindContinue)
-            If rng.Paragraphs(1).Range.start = rng.start Then
-                rng.Characters(1).text = vbNullString
-            End If
-        Loop
-        rng.Find.MatchWildcards = False '以下2行皆沒用，故必須寫這行以取消匹配萬用字元的尋找 20251112
-'        rng.Find.ClearAllFuzzyOptions
-'        rng.Find.ClearFormatting
-    End If
+'    Rem 執行上述的清除時會產生" ("，且都在段落前端，不知何故，清除前並沒有。
+'    If InStr(d.Range.text, " (") Then
+'        Set rng = d.Range
+'        Do While rng.Find.Execute(findText:=" [(]", MatchWildcards:=True, Wrap:=wdFindContinue)
+'            If rng.Paragraphs(1).Range.start = rng.start Then
+'                rng.Characters(1).text = vbNullString
+'            End If
+'        Loop
+'        rng.Find.MatchWildcards = False '以下2行皆沒用，故必須寫這行以取消匹配萬用字元的尋找 20251112
+''        rng.Find.ClearAllFuzzyOptions
+''        rng.Find.ClearFormatting
+'    End If
     
     'ChrW(182)乃其段落符號
     rng.Find.Execute findText:=ChrW(182), Replacewith:=vbNullString, Replace:=wdReplaceAll, Wrap:=wdFindContinue
@@ -2315,31 +2273,83 @@ Sub Kanripo_GitHub轉來(Optional lineCntPerPage As Byte = 0)
         noteRng.Application.Activate
         noteRng.Document.ActiveWindow.Visible = True
         noteRng.Document.ActiveWindow.Activate
+        DoEvents
         If MsgBox("請開啟「查字forinput.mdb」資料庫，按下「Ctrl + 1」鍵進行造字或缺字字圖資料之新增(記錄在「KanripoGitHub存放庫造字圖碼取代對照表」中)。" & _
             vbCr & vbCr & vbCr & "完成後再按下「確定」繼續。" & _
-            vbCr & vbCr & vbCr & "若目前系統尚無字、或如《字統網》之組字式亦不易表達者，則請按「取消」。", vbOKCancel + vbExclamation) = vbCancel Then
-            noteRng.text = "/" '先取代造字編碼（如：&KR1016;）為「/」才好作字數計算
-        End If
-        If cnt Is Nothing Then db.cnt查字 cnt
-        rst.Open "select find,replace from KanripoGitHub存放庫造字圖碼取代對照表 where find=""" & noteRng.text & """", cnt, adOpenKeyset, adLockReadOnly
-        If rst.RecordCount > 0 Then
-            d.Range.text = Replace(xd, rst.Fields(0).Value, rst.Fields(1).Value)
-            'd.Range.Find.Execute findText:=rst.Fields(0).Value, Wrap:=wdFindContinue, Replacewith:=rst.Fields(1).Value, Replace:=wdReplaceAll
-            'noteRng.text = rst.Fields("replace").Value '將補入的造字/缺字資料置換掉原來的編碼標記
-            
+            vbCr & vbCr & vbCr & "若目前系統尚無字、或如《字統網》之組字式亦不易表達者，則請按「取消」。", vbOKCancel + vbExclamation) = vbOK Then
+        
+            If cnt Is Nothing Then db.cnt查字 cnt
+            rst.Open "select find,replace from KanripoGitHub存放庫造字圖碼取代對照表 where find=""" & noteRng.text & """", cnt, adOpenKeyset, adLockReadOnly
+            If rst.RecordCount > 0 Then
+                d.Range.text = Replace(xd, rst.Fields(0).Value, rst.Fields(1).Value)
+                'd.Range.Find.Execute findText:=rst.Fields(0).Value, Wrap:=wdFindContinue, Replacewith:=rst.Fields(1).Value, Replace:=wdReplaceAll
+                'noteRng.text = rst.Fields("replace").Value '將補入的造字/缺字資料置換掉原來的編碼標記
+            Else
+                d.Range.text = Replace(xd, noteRng.text, "/")
+                'd.Range.Find.Execute findText:=noteRng.text, Wrap:=wdFindContinue, Replacewith:="/", Replace:=wdReplaceAll
+                'noteRng.text = "/" '先取代造字編碼（如：&KR1016;）為「/」才好作字數計算
+            End If
+            rst.Close
         Else
-            d.Range.text = Replace(xd, noteRng.text, "/")
-            'd.Range.Find.Execute findText:=noteRng.text, Wrap:=wdFindContinue, Replacewith:="/", Replace:=wdReplaceAll
-            'noteRng.text = "/" '先取代造字編碼（如：&KR1016;）為「/」才好作字數計算
-            
+            d.Range.text = Replace(xd, noteRng.text, "/") 'noteRng.text = "/" '先取代造字編碼（如：&KR1016;）為「/」才好作字數計算
         End If
         Set rng = d.Range: xd = rng.text
-        rst.Close
     Loop
     If Not cnt Is Nothing Then
         cnt.Close
         Set db = Nothing
+        rng.Application.windowState = wdWindowStateMinimize
+        rng.Application.Visible = False
     End If
+    
+    
+    
+        '檢查每頁行數，以補空行
+    If lineCntPerPage > 0 Then
+        Dim rngExamLineCntPerPage As Range
+        Set rng = rng.Document.Range: Set rngExamLineCntPerPage = rng.Document.Range
+        '檢查每頁行數，以補空行'找到標識頁碼段落
+        Do While rng.Find.Execute(lt & "pb:", , , , , , True, wdFindContinue)
+            rngExamLineCntPerPage.start = rng.Paragraphs(1).Range.End
+            rngExamLineCntPerPage.End = rng.Paragraphs(1).Range.End
+            rngExamLineCntPerPage.MoveEndUntil lt, (rng.Document.Range.End - 1) - rng.Paragraphs(1).Range.End
+            If InStr(rngExamLineCntPerPage.text, "#") Then '分篇卷處前置會有「#」
+                rngExamLineCntPerPage.start = rng.Paragraphs(1).Range.End
+                rngExamLineCntPerPage.End = rng.Paragraphs(1).Range.End
+                rngExamLineCntPerPage.MoveEndUntil "#", (rng.Document.Range.End - 1) - rng.Paragraphs(1).Range.End
+            End If
+            If InStr(rng.Document.Range(rngExamLineCntPerPage.start, rng.Document.Range.End), lt & "pb:") = 0 Then '後面沒有「<pb:」了，處理完了，就離開
+                rng.Paragraphs(1).Range.Delete ' 清除頁碼所在段落
+                Exit Do
+            End If
+            Do While rngExamLineCntPerPage.Paragraphs.Count < lineCntPerPage
+                 rngExamLineCntPerPage.InsertAfter "　"
+                 rngExamLineCntPerPage.InsertParagraphAfter
+            Loop
+            rng.Paragraphs(1).Range.Delete ' 清除頁碼所在段落
+        Loop
+        Rem 以下後面已處理，故先註解掉，待刪除 20260103
+    Else 'lineCntPerPage = 0 '預設值
+'        '清除頁碼' 前面 「rng.Paragraphs(1).Range.Delete ' rng.text = vbNullString」 已完成
+        Set rng = rng.Document.Range
+        rng.Find.MatchCase = True
+'        '清除頁碼
+        Do While rng.Find.Execute(lt & "pb:", , , , , , True, wdFindContinue)
+           rng.Paragraphs(1).Range.Delete
+        Loop
+'        'rng.Find.ClearFormatting
+    End If
+
+    Rem 清理頁碼標頭
+    For Each p In rng.Document.Paragraphs
+        Select Case p.Range.Characters(1)
+            Case lt
+                p.Range.Delete
+            Case "#"
+                p.Range.text = " " '在分卷/篇處加上此半形空格，可讓程式碼中止（在TextForCtext C#裡）
+        End Select
+    Next p
+    
     
     Rem 重設rng才能尋找整個文件
     Set rng = d.Range
@@ -3101,10 +3111,30 @@ End Sub
 Sub EditModeMakeup_changeFile_Page() '同版本文本帶入置換file id 和 頁數
     Dim rng As Range, pageNum As Range, d As Document, ur As UndoRecord, p As Paragraph, xd As String
     Static preFileNum As Long
+    SystemSetup.stopUndo ur, "EditModeMakeup_changeFile_Page"
     Set d = ActiveDocument
 restart:
     If d.AttachedTemplate = "Normal.dotm" Then '新檔案單獨輸入時 20251220
-    
+        Set p = d.Paragraphs(1)
+        '文件只有一段內容時（方便快捷整理）
+        If d.Paragraphs.Count = 1 Then
+            If IsNumeric(Replace(p.Range, Chr(13), vbNullString)) Then
+                If InStr(GetClipboardText(), " file=""") Then
+                    d.Range.InsertParagraphAfter
+                    d.Range.InsertParagraphAfter
+                    d.Range.InsertParagraphAfter
+                End If
+            ElseIf (InStr(p.Range, "-") And IsNumeric(Mid(p.Range, 1, InStr(p.Range, "-") - 1)) And _
+                    IsNumeric(Mid(p.Range, InStr(p.Range, "-") + 1, Len(p.Range) - 1 - InStr(p.Range, "-") + 1))) _
+                    Then '如果第1段是數字，則為加或減現前之頁碼（加為-，減為正）; 或是 #-#的形式（來源頁碼-目的頁碼）
+                If InStr(GetClipboardText(), " file=""") Then
+                    d.Range.InsertParagraphAfter
+                    d.Range.InsertParagraphAfter
+                    d.Range.InsertParagraphAfter
+                End If
+            End If
+        End If
+            
         '文件前3段分別是以下資訊,執行完會清除
         'If Not VBA.IsNumeric(VBA.Replace(d.Range.Paragraphs(1).Range.text, vba.Chr(13), "")) then
         If VBA.Replace(d.Paragraphs(1).Range + d.Paragraphs(2).Range + d.Paragraphs(3).Range, VBA.Chr(13), "") = "" _
@@ -3192,14 +3222,16 @@ restart:
     End If
     Set rng = d.Range
     'Set ur = SystemSetup.stopUndo("EditMakeupCtext")
-    SystemSetup.stopUndo ur, "EditMakeupCtext"
+    'SystemSetup.stopUndo ur, "EditMakeupCtext"
+    
+    '更換書碼
     If file > 0 Then
         'rng.Find.Execute " file=""77991""", True, True, , , , True, wdFindContinue, , " file=""" & file & """", wdReplaceAll
         rng.text = VBA.Replace(Replace(rng.text, " file=""" & fileFrom & """", " file=""" & file & """") _
                 , "picture location=""" & fileFrom & ":", "picture location=""" & file & ":")
         
     End If
-
+    '更換頁碼
     Do While rng.Find.Execute(" page=""", , , , , , True, wdFindStop)
         Set pageNum = rng
         pageNum.SetRange rng.End, rng.End + 1
@@ -3207,6 +3239,7 @@ restart:
         pageNum.text = CStr(CInt(pageNum.text) - differPageNum)
         rng.SetRange pageNum.End, d.Range.End
     Loop
+    '更換書圖中之頁碼
     Set rng = d.Range
     Do While rng.Find.Execute("picture location=""" & file & ":", , , , , , True, wdFindStop)
         Set pageNum = rng
@@ -3215,6 +3248,7 @@ restart:
         pageNum.text = CStr(CInt(pageNum.text) - differPageNum)
         rng.SetRange pageNum.End, d.Range.End
     Loop
+    
     
     '清除設定值
     rng.SetRange d.Range.Paragraphs(1).Range.start, d.Range.Paragraphs(3).Range.End
@@ -3412,6 +3446,7 @@ Sub 新頁面Auto_action_newchapter()
     '在書首資訊頁面中點擊相對應的chapter（冊）
     Set iwe = WD.FindElementByCssSelector(ChapterSelector)
     If iwe Is Nothing Then
+        d.Application.Activate
         MsgBox "done!", vbInformation
         Exit Sub
     End If
@@ -3540,7 +3575,7 @@ Sub FindNonSequentialPages()
         word.Application.windowState = wdWindowStateMinimize
     End If
 End Sub
-Rem 將[簡單修改模式]下的語法改為[編輯]模式下的語法表示
+Rem 將[簡單修改模式]下的語法改為[編輯]模式下的語法表示。請複製簡單修改模式之單頁文本（不含xml頁碼標記）於剪貼簿中再執行
 Sub Quickedit_Syntax_Convert2_Edit()
     Static fileNo
     Dim d As Document, a(2) As String, i As Integer, b(2) As String, xd As String, sp As String, rng As Range, xReplace As String
