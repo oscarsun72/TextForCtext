@@ -18612,7 +18612,7 @@ namespace WindowsFormsApp1
                         //if (Mdb.IPStatus(CurrentIP??GetPublicIpAddress("")).Item4) textBox2.Text = "kk";
                     }
                     else if (x == "jk")//不切換IP，不切換《古籍酷》帳戶，欲直接進入首頁快速體驗者
-                    {
+                    {//textBox2 中輸入 `jk` ：指定用《古籍酷》首頁快速體驗（Fast Experience）OCR處理。（jk=「（古）籍酷」漢語拼音ji-ku）
                         if (!waitGJcoolPoint) waitGJcoolPoint = true;
                         OCR_GJcool_AccountChanged = false;
                         //if (!Active) br.BringToFront(); 

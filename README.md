@@ -209,6 +209,7 @@ textBox2 中輸入 `bF` ：終止《古籍酷》OCR批量處理模式。（b=bat
 
 textBox2 中輸入 `gjk` ：指定用《古籍酷》OCR標注平台處理。（gjk=「古籍酷」漢語拼音gu-ji-ku）
 > 在首頁快速體驗Fast Experiece 額滿後，可以此指令切換回標注平台操作。
+textBox2 中輸入 `jk` ：指定用《古籍酷》首頁快速體驗（Fast Experience）OCR處理。（jk=「（古）籍酷」漢語拼音ji-ku）
 
 textBox2 中輸入 `kd` ：在OCR連續輸入模式下，指定用《看典古籍》網頁版OCR（kd=看典古籍kan-dianguji）
 
