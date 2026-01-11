@@ -3,6 +3,7 @@ using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Interactions;
 using OpenQA.Selenium.Support.UI;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Globalization;
@@ -15,8 +16,15 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Windows.Automation;
 using System.Windows.Forms;
+using System.Xml;
+using WebSocketSharp;
 using WindowsFormsApp1;
+using static System.Windows.Forms.LinkLabel;
 using static TextForCtext.Browser;
+using static TextForCtext.CTP;
+using static TextForCtext.XML.ScanPageAdjuster;
+using static WindowsFormsApp1.Form1;
+using static WindowsFormsApp1.KeyboardInfo;
 using selm = OpenQA.Selenium;
 
 namespace TextForCtext
@@ -81,7 +89,7 @@ namespace TextForCtext
             {
                 const string selector = "#content > div:nth-child(3) > span:nth-child(2) > a";//32位元免安裝版Chrome瀏覽器               
                 IWebElement iwe;
-                //if (Form1.IsValidUrl＿keyDownCtrlAdd(ActiveForm1.textBox3Text))
+                //if (IsValidUrl＿keyDownCtrlAdd(ActiveForm1.textBox3Text))
                 //{
                 iwe = Browser.WaitFindWebElementBySelector_ToBeClickable(selector);
                 return iwe;
@@ -116,7 +124,7 @@ namespace TextForCtext
                 const string selector = "#content > div:nth-child(3) > span:nth-child(2) > a > span";//32位元免安裝版Chrome瀏覽器
                 const string selector1 = "#content > div:nth-child(5) > span:nth-child(2) > a > span"; //64位元安裝版Chrome瀏覽器
                 IWebElement iwe;
-                if (Form1.IsValidUrl＿keyDownCtrlAdd(ActiveForm1.textBox3Text))
+                if (IsValidUrl＿keyDownCtrlAdd(ActiveForm1.textBox3Text))
                 {
                     iwe = Browser.WaitFindWebElementBySelector_ToBeClickable(selector);
                 reCheck:
@@ -183,13 +191,15 @@ namespace TextForCtext
 
         /// <summary>
         /// 取得CTP網頁中的「編輯」（Edit）控制項
+        /// 圖文對照頁面中的「編輯」連結元件
         /// </summary>
         internal static IWebElement Edit_Linkbox
         {
             get
             {
                 IWebElement iwe;
-                if (Form1.IsValidUrl＿keyDownCtrlAdd(ActiveForm1.textBox3Text))
+                //if (IsValidUrl＿keyDownCtrlAdd(ActiveForm1.textBox3Text))
+                if (IsValidUrl＿ImageTextComparisonPage(ActiveForm1.textBox3Text))
                 {
                     //會因位置而移動，如：Add to 學海蠡測 Add to 思舊錄 [文字版] [編輯] [簡單修改模式] [編輯指南] https://ctext.org/library.pl?if=gb&file=194081&page=75&editwiki=5083072#editor
                     //故得逐一比對，目前應該只會有2種情形，當然也可能會不止如此
@@ -241,7 +251,7 @@ namespace TextForCtext
             get
             {
                 IWebElement iwe;
-                if (Form1.IsValidUrl＿keyDownCtrlAdd(ActiveForm1.textBox3Text))
+                if (IsValidUrl＿keyDownCtrlAdd(ActiveForm1.textBox3Text))
                 {
                     iwe = Browser.WaitFindWebElementBySelector_ToBeClickable("#editor > a:nth-child(13)");
                 }
@@ -259,7 +269,7 @@ namespace TextForCtext
             get
             {
                 IWebElement iwe;
-                if (Form1.IsValidUrl＿keyDownCtrlAdd(ActiveForm1.textBox3Text))
+                if (IsValidUrl＿keyDownCtrlAdd(ActiveForm1.textBox3Text))
                 {
                     iwe = Browser.WaitFindWebElementBySelector_ToBeClickable("#dataprev");
                 }
@@ -277,7 +287,7 @@ namespace TextForCtext
             get
             {
                 IWebElement iwe;
-                if (Form1.IsValidUrl＿keyDownCtrlAdd(ActiveForm1.textBox3Text))
+                if (IsValidUrl＿keyDownCtrlAdd(ActiveForm1.textBox3Text))
                 {
                     iwe = Browser.WaitFindWebElementBySelector_ToBeClickable("#datanext");
                 }
@@ -296,7 +306,7 @@ namespace TextForCtext
         /// <summary>
         /// 取得CTP網頁中的「顯示頁碼，可輸入頁碼的」（page）控制項
         /// </summary>
-        internal static IWebElement Page_textbox
+        internal static IWebElement PageNum_textbox
         {
             //get { return quickedit_data_textbox == null ? waitFindWebElementByName_ToBeClickable("data", WebDriverWaitTimeSpan) : quickedit_data_textbox; }
             get
@@ -307,7 +317,7 @@ namespace TextForCtext
                     return iwe?.GetDomAttribute("name") == "page";
                     //return iwe?.GetAttribute("name") == "page";
                 }
-                if (Form1.IsValidUrl＿ImageTextComparisonPage(ActiveForm1.textBox3Text))
+                if (IsValidUrl＿ImageTextComparisonPage(ActiveForm1.textBox3Text))
                 {
                     iwe = Browser.WaitFindWebElementBySelector_ToBeClickable("#content > div:nth-child(3) > form > input[type=text]:nth-child(3)");
                     if (iwe == null)
@@ -322,6 +332,18 @@ namespace TextForCtext
             }
         }
         /// <summary>
+        /// 取得現前/現用的頁碼-CTP網頁中的「顯示頁碼，可輸入頁碼的」（page）控制項的值
+        /// </summary>
+        internal static string CurrentPageNum_textbox_Value
+        {
+            get
+            {
+                IWebElement iwe = PageNum_textbox;
+                if (iwe == null) return string.Empty;
+                return iwe.GetDomProperty("value");
+            }
+        }
+        /// <summary>
         /// 取得CTP網頁中的「顯示頁碼資訊的條幅」（page）控制項（以取得該書的末頁）
         /// </summary>
         internal static IWebElement Div_generic_IncludePathAndEndPageNum
@@ -330,7 +352,7 @@ namespace TextForCtext
             get
             {
                 IWebElement iwe;
-                if (Form1.IsValidUrl＿ImageTextComparisonPage(ActiveForm1.textBox3Text))
+                if (IsValidUrl＿ImageTextComparisonPage(ActiveForm1.textBox3Text))
                 {
                     iwe = Browser.WaitFindWebElementBySelector_ToBeClickable("#content > div:nth-child(3)");
                 }
@@ -363,7 +385,7 @@ namespace TextForCtext
             get
             {
                 IWebElement iwe;
-                if (Form1.IsValidUrl＿ImageTextComparisonPage(ActiveForm1.textBox3Text))
+                if (IsValidUrl＿ImageTextComparisonPage(ActiveForm1.textBox3Text))
                 {
                     iwe = Browser.WaitFindWebElementBySelector_ToBeClickable("#content > div:nth-child(7) > div:nth-child(1)");
                 }
@@ -381,7 +403,7 @@ namespace TextForCtext
             get
             {
                 IWebElement iwe;
-                if (Form1.IsValidUrl＿ImageTextComparisonPage(ActiveForm1.textBox3Text))
+                if (IsValidUrl＿ImageTextComparisonPage(ActiveForm1.textBox3Text))
                 {
                     iwe = Browser.WaitFindWebElementBySelector_ToBeClickable("#canvas > svg");
                 }
@@ -440,7 +462,7 @@ namespace TextForCtext
             get
             {
                 IWebElement version_LinkBox;
-                if (Form1.IsValidUrl＿keyDownCtrlAdd(ActiveForm1.textBox3Text))
+                if (IsValidUrl＿keyDownCtrlAdd(ActiveForm1.textBox3Text))
                 {
                     //  /html/body/div[2]/div[5]/div[3]/a[1]
                     version_LinkBox = Browser.WaitFindWebElementBySelector_ToBeClickable("#content > div:nth-child(8) > div:nth-child(3) > a:nth-child(1)");
@@ -463,7 +485,7 @@ namespace TextForCtext
             //get { return quickedit_data_textbox == null ? waitFindWebElementByName_ToBeClickable("data", WebDriverWaitTimeSpan) : quickedit_data_textbox; }
             get
             {
-                if (Form1.IsValidUrl＿keyDownCtrlAdd(ActiveForm1.textBox3Text))
+                if (IsValidUrl＿keyDownCtrlAdd(ActiveForm1.textBox3Text))
                 {
                     quickedit_data_textbox = waitFindWebElementByName_ToBeClickable("data", WebDriverWaitTimeSpan);
                 }
@@ -482,8 +504,7 @@ namespace TextForCtext
             //get { return quickedit_data_textbox == null ? waitFindWebElementByName_ToBeClickable("data", WebDriverWaitTimeSpan) : quickedit_data_textbox; }
             get
             {
-
-                if (Browser.driver.Url.IndexOf("&action=editchapter#") > -1)
+                if (Browser.driver.Url.IndexOf("&action=editchapter") > -1)
                 {
                     return Browser.WaitFindWebElementBySelector_ToBeClickable("#data", WebDriverWaitTimeSpan);
                 }
@@ -492,7 +513,59 @@ namespace TextForCtext
             }
             //private set { Textarea_data_Edit_textbox = value; }
         }
+        /// <summary>
+        /// 完整編輯頁面下「修改摘要」欄位控件
+        /// </summary>
+        internal static IWebElement Description_Edit_textbox
+        {
+            get { return WaitFindWebElementBySelector_ToBeClickable("#description", WebDriverWaitTimeSpan); }
+        }
+        /// <summary>
+        /// 取得[編輯]的文字；若失敗則回傳空字串 20260111
+        /// </summary>
+        internal static string Textarea_data_Edit_textboxTxt
+        {
+            get
+            {
+                IWebElement ie = Textarea_data_Edit_textbox;
+                if (ie != null)
+                    return ie.GetDomProperty("value");
+                else
+                    return string.Empty;
+            }
+        }
+        /// <summary>
+        /// 取得[編輯]的[保存編輯]按鈕；若失敗則回傳null 20260110
+        /// Get the submit of [commit] 
+        /// </summary>
+        internal static IWebElement Commit
+        {
+            get
+            {
 
+                if (Browser.driver.Url.IndexOf("&action=editchapter") > -1)
+                {
+                    return Browser.WaitFindWebElementBySelector_ToBeClickable("#commit", WebDriverWaitTimeSpan);
+                }
+                else
+                    return null;
+            }
+        }
+        /// <summary>
+        /// 取得[編輯]的[標題]（書名）元件；若失敗則回傳null 20260110
+        /// </summary>
+        internal static IWebElement Title_Edit_Chapter_BookName
+        {
+            get
+            {
+                if (Browser.driver.Url.IndexOf("chapter") > -1)
+                {
+                    return Browser.WaitFindWebElementBySelector_ToBeClickable("#content > div:nth-child(4) > span:nth-child(2) > a > span", WebDriverWaitTimeSpan);
+                }
+                else
+                    return null;
+            }
+        }
 
         /// <summary>
         /// 儲存[簡單修改模式]的文字方塊
@@ -509,7 +582,7 @@ namespace TextForCtext
         {
             get
             {
-                if (!Form1.IsValidUrl＿keyDownCtrlAdd(ActiveForm1.textBox3Text)) return string.Empty;
+                if (!IsValidUrl＿keyDownCtrlAdd(ActiveForm1.textBox3Text)) return string.Empty;
                 IWebElement ie = Quickedit_data_textbox;
                 if (ie != null)
                 {
@@ -533,7 +606,7 @@ namespace TextForCtext
         /// <returns>若失敗則傳回false</returns>
         internal static bool SetQuickedit_data_textboxTxt(string txt)
         {
-            if (!Form1.IsValidUrl＿keyDownCtrlAdd(ActiveForm1.textBox3Text)) return false;
+            if (!IsValidUrl＿keyDownCtrlAdd(ActiveForm1.textBox3Text)) return false;
             IWebElement ie = Quickedit_data_textbox;
             if (ie != null)
             {
@@ -602,7 +675,7 @@ namespace TextForCtext
                 IWebElement full_text_search_textbox_searchressingle = null;
                 try
                 {
-                    if (Form1.IsValidUrl＿keyDownCtrlAdd(ActiveForm1.textBox3Text))
+                    if (IsValidUrl＿keyDownCtrlAdd(ActiveForm1.textBox3Text))
                     {
                         //< input type = "hidden" name = "searchressingle" id = "searchressingle" value = "wiki:728745" style = "width: 80px;" >
                         //full_text_search_textbox_searchressingle = Browser.driver.FindElement(By.Name("searchressingle"));
@@ -685,6 +758,66 @@ namespace TextForCtext
             }
         }
         /// <summary>
+        /// 取得目前章節chapter（篇）的序號控制項（元件） 20260111
+        /// </summary>
+        internal static IWebElement Sequence_Edit_Chapter
+        {
+            get
+            {
+                return Browser.WaitFindWebElementBySelector_ToBeClickable("#sequence");
+            }
+        }
+        /// <summary>
+        /// 取得目前章節chapter（篇）的序號值
+        /// </summary>
+        internal static string Sequence_Edit_Chapter_Value
+        {
+            get
+            {
+                return Sequence_Edit_Chapter?.GetDomProperty("value");
+            }
+        }
+        /// <summary>
+        /// 在全書單位中，取得在目前章節chapter（篇）序號基礎上加1後的下一個章節chapter（篇）的序號控制項（元件）
+        /// 全書單位，即 https://ctext.org/wiki.pl?if=gb&res= 這樣的網址頁面（res=後的數值即為書文本的編號，即「URN: ctp:wb」後綴的數值） 20260111
+        /// </summary>
+        /// <param name="currentSequence"></param>
+        /// <returns></returns>
+        internal static IWebElement NextSequence_Linkbox(string currentSequence)
+        {
+            if (!int.TryParse(currentSequence, result: out int result)) return null;
+            string nextSequence = (++result).ToString(), nextSeq = nextSequence;
+            string nextSequenceTextContent = WaitFindWebElementBySelector_ToBeClickable("#content > div.ctext > span:nth-child(" + nextSequence + ")").GetDomProperty("textContent");
+            if (nextSequenceTextContent.IndexOf(".") == -1) return null;
+            nextSequence = nextSequenceTextContent.Substring(0, nextSequenceTextContent.IndexOf("."));
+            while (nextSequence != nextSeq)
+            {
+                nextSequenceTextContent = WaitFindWebElementBySelector_ToBeClickable("#content > div.ctext > span:nth-child(" + (++result).ToString() + ")").GetDomProperty("textContent");
+                nextSequence = nextSequenceTextContent.Substring(0, nextSequenceTextContent.IndexOf("."));
+            }
+            return WaitFindWebElementBySelector_ToBeClickable("#content > div.ctext > span:nth-child(" + result.ToString() + ") > a");
+        }
+        /// <summary>
+        /// 前往下一個章節chapter（篇）準備編輯頁面
+        /// </summary>
+        /// <param name="currentSeq">目前章節序號</param>
+        /// <returns>失敗則為false</returns>
+        internal static bool GotoNextSequenceChapterPage(string currentSeq)
+        {
+            //string currentSeq = Sequence_Edit_Chapter_Value;
+            IWebElement iwe = NextSequence_Linkbox(currentSeq);
+            if (iwe != null) { iwe.JsClick(); return true; }
+            return false;
+        }
+        /// <summary>
+        /// 取得CTP篇章單元網頁中的「修改」（Edit）控制項
+        /// </summary>
+        internal static IWebElement Edit_linkbox
+        {
+            get =>
+            Browser.WaitFindWebElementBySelector_ToBeClickable("#content > h2 > span > a:nth-child(2)");
+        }
+        /// <summary>
         /// 取得目前章節chapter（冊）的序號，以供Selector字串參照使用
         /// </summary>
         internal static string CurrentChapterNum_Selector
@@ -765,7 +898,7 @@ namespace TextForCtext
                 //Uri uri=new  Uri(url);
 
                 string urlShort = url.EndsWith("#editor") ? url.Substring(0, url.IndexOf("#editor")) : url;
-                if (Form1.IsValidUrl＿keyDownCtrlAdd(url) && Form1.IsValidUrl＿keyDownCtrlAdd(Browser.driver.Url) == false)
+                if (IsValidUrl＿keyDownCtrlAdd(url) && IsValidUrl＿keyDownCtrlAdd(Browser.driver.Url) == false)
                 {
                     bool found = false;
                     foreach (var item in Browser.driver.WindowHandles)
@@ -779,11 +912,11 @@ namespace TextForCtext
                     }
                     if (!found)
                     {
-                        Form1.playSound(Form1.soundLike.error, true);
+                        Form1.PlaySound(Form1.SoundLike.error, true);
                         return false;
                     }
                 }
-                else if (Form1.IsValidUrl＿keyDownCtrlAdd(url) && Form1.IsValidUrl＿keyDownCtrlAdd(Browser.driver.Url))
+                else if (IsValidUrl＿keyDownCtrlAdd(url) && IsValidUrl＿keyDownCtrlAdd(Browser.driver.Url))
                 {
                     if (!Browser.driver.Url.StartsWith(urlShort))
                     {
@@ -799,7 +932,7 @@ namespace TextForCtext
                         }
                         if (!found)
                         {
-                            Form1.playSound(Form1.soundLike.error, true);
+                            Form1.PlaySound(Form1.SoundLike.error, true);
                             return false;
                         }
                     }
@@ -943,7 +1076,7 @@ namespace TextForCtext
                     //Thread.Sleep(1500);
                     //Clipboard.Clear();
                     //Clipboard.SetText("x");
-                    //Form1.playSound(Form1.soundLike.error, true);
+                    //Form1.PlaySound(Form1.soundLike.error, true);
                     //Clipboard.SetText(xInput);
                 }
                 //textbox.SendKeys(OpenQA.Selenium.Keys.LeftShift + OpenQA.Selenium.Keys.Insert);
@@ -1062,7 +1195,7 @@ namespace TextForCtext
                 if (IsConfirmHumanPage())
                 {
                     //Debugger.Break();
-                    Form1.playSound(Form1.soundLike.waiting, true);
+                    Form1.PlaySound(Form1.SoundLike.waiting, true);
                     //if (ActiveForm1.FastMode) ActiveForm1.FastModeSwitcher();
                     try
                     {
@@ -1158,7 +1291,7 @@ namespace TextForCtext
                 #endregion
             }
             else//若文本沒有改變，不用送出，則播放音效
-                Form1.playSound(Form1.soundLike.notify, true);
+                Form1.PlaySound(Form1.SoundLike.notify, true);
             return true;
         }
         /// <summary>
@@ -1244,7 +1377,7 @@ namespace TextForCtext
                     }
                     catch (Exception)
                     {
-                        if (Form1.IsValidUrl＿keyDownCtrlAdd(ActiveForm1.textBox3Text))
+                        if (IsValidUrl＿keyDownCtrlAdd(ActiveForm1.textBox3Text))
                         {
                             //如：https://ctext.org/library.pl?if=en&file=38675&page=1&editwiki=573099#editor
                             string shortUrl = ActiveForm1.textBox3Text.Substring(0, ActiveForm1.textBox3Text.IndexOf("#editor") == -1 ? ActiveForm1.textBox3Text.Length : ActiveForm1.textBox3Text.IndexOf("#editor"));
@@ -1256,14 +1389,14 @@ namespace TextForCtext
                         }
                     }
 
-                    if (!Form1.IsValidUrl＿ImageTextComparisonPage(Browser.driver.Url))
+                    if (!IsValidUrl＿ImageTextComparisonPage(Browser.driver.Url))
                     {
                         for (int i = Browser.driver.WindowHandles.Count - 1; i > -1; i--)
                         {
                             Browser.driver.SwitchTo().Window(Browser.driver.WindowHandles[i]);
-                            if (Form1.IsValidUrl＿ImageTextComparisonPage(Browser.driver.Url)) break;
+                            if (IsValidUrl＿ImageTextComparisonPage(Browser.driver.Url)) break;
                         }
-                        if (!Form1.IsValidUrl＿ImageTextComparisonPage(Browser.driver.Url))
+                        if (!IsValidUrl＿ImageTextComparisonPage(Browser.driver.Url))
                         {
                             int windowsCount;// = 0;
                             try
@@ -1691,7 +1824,7 @@ namespace TextForCtext
                         if (iwe == null)
                         {
                             string url = ActiveForm1.textBox3Text;
-                            if (Form1.IsValidUrl＿ImageTextComparisonPage(url))
+                            if (IsValidUrl＿ImageTextComparisonPage(url))
                             {
                                 foreach (var item in Browser.driver.WindowHandles)
                                 {
@@ -1711,7 +1844,7 @@ namespace TextForCtext
                                 if (iwe == null)
                                 {
                                     bool found = false;
-                                    if (Form1.IsValidUrl＿ImageTextComparisonPage(ActiveForm1.textBox3Text))
+                                    if (IsValidUrl＿ImageTextComparisonPage(ActiveForm1.textBox3Text))
                                     {
                                         foreach (var item in Browser.driver.WindowHandles)
                                         {
@@ -2353,6 +2486,467 @@ var callback = arguments[arguments.length - 1];
             return false;
         }
 
+        /* 20230408 Bing大菩薩 ： 您可以使用正則表達式來簡化您的 if 判斷句。例如，您可以將條件提取到一個單獨的函數中，並使用正則表達式來檢查 url 是否包含特定字符串：
+         */
+        /// <summary>
+        /// 檢查要輸入簡單修改模式頁面的指定網址是否合法
+        /// </summary>
+        /// <param name="url">要檢查的網址字串值</param>
+        /// <returns>回傳網址是否合法</returns>
+        internal static bool IsValidUrl＿keyDownCtrlAdd(string url)
+        {
+            url = ClearUrl_BoxEtc(url);
+            //return Regex.IsMatch(url, @"(#editor|&page=|ctext\.org)");
+            //return Regex.IsMatch(url, @"ctext\.org.*&file.*&page=.*#editor");
+            //也有可能是這種網址：https://ctext.org/library.pl?if=gb&file=34195&page=142&editwiki=826120#box(140,120,2,0)
+            //return Regex.IsMatch(url, @"ctext\.org.*&file.*&page=.*&edit");
+            return Regex.IsMatch(url, @"ctext\.org.*&file.*&page=.*#edit") || Regex.IsMatch(url, @"ctext\.org.*&file.*&page=.*&editwiki=.*");//20250126
+            /*
+             * Bing大菩薩：是的，在正則表達式中，小數點「.」是一個特殊字符，它匹配任何單個字符（除了換行符）。如果您想在正則表達式中匹配字面上的小數點，則需要在前面加上反斜杠「\」來對其進行轉義。
+             * 在 C# 中，由於反斜杠「\」本身也是一個轉義字符，所以您需要使用兩個反斜杠「\\」來表示一個字面上的反斜杠。因此，在 C# 中的正則表達式中，要匹配字面上的小數點，您需要寫成「\\.」。
+                希望這對您有所幫助！*/
+        }
+        /// <summary>
+        /// 檢查是否是瀏覽圖文對照之頁面
+        /// 可與 isQuickEditUrl 方法互參用
+        /// </summary>
+        /// <param name="url">要檢查的網址字串值</param>
+        /// <returns></returns>
+        internal static bool IsValidUrl＿ImageTextComparisonPage(string url)
+        {
+            return Regex.IsMatch(url, @"ctext\.org.*&file.*&page=");
+        }
+        /// <summary>
+        /// 將圖文對照網址修整、規範之
+        /// 20240813 creedit with Copilot大菩薩：改進C#程式碼：圖文對照網址修整：https://sl.bing.net/f2S0RcHJLyK
+        /// 與 ReplaceUrl_Box2Editor 可互參考
+        /// </summary>
+        /// <param name="url">要被修整、規範化的圖文對照網址</param>
+        /// <param name="editor">是否要在末尾改綴上"#editor"字串</param>
+        /// <param name="driverGoToUrl">是否要移至這個網址</param>
+        /// <returns>回傳修整過、規範的圖文對照網址</returns>
+        internal static string FixUrl＿ImageTextComparisonPage(string url, bool editor = false, bool driverGoToUrl = false)
+        {
+            #region 防呆
+            if (!IsValidUrl＿ImageTextComparisonPage(url) || BrowsrOPMode == BrowserOPMode.appActivateByName || driver == null) return null;
+            #endregion
 
+            // 使用正則表達式檢查和替換網址中的特定字串
+            url = System.Text.RegularExpressions.Regex.Replace(url, "#box\\(.*?\\)", editor ? "#editor" : string.Empty);
+
+            try
+            {
+                if (driverGoToUrl) driver.Navigate().GoToUrl(url);
+            }
+            catch (Exception ex)
+            {
+                // 記錄詳細的錯誤訊息
+                Form1.MessageBoxShowOKExclamationDefaultDesktopOnly($"Error: {ex.HResult} - {ex.Message}");
+            }
+
+            return url;
+        }
+
+    }
+    /// <summary>
+    /// 有關 XML 處理的靜態類別；凡是完整編輯等處要處理 XML 內容的功能都放在這裡 20260111
+    /// </summary>
+    public static class XML
+    {
+
+
+
+        // https://chatgpt.com/share/696261b5-652c-800b-bcc5-81f4bb36efb8
+        /// <summary>
+        /// 要調整 <scanbegin> / <scanend> 中的屬性值時使用
+        /// xml編輯 完整編輯頁面時會用到 20260110
+        /// </summary>
+        public static class ScanPageAdjuster
+        {
+            /// <summary>
+            /// 安全地調整 scanbegin / scanend 的 page，
+            /// 以及 picture location 中的頁碼（第二段）
+            /// </summary>
+            /// <param name="input"></param>
+            /// <param name="offset">頁碼差（=目的-來源）</param>
+            /// <param name="minPage"></param>
+            /// <returns></returns>
+            public static string ShiftScanPages(string input, int offset = -1, int minPage = 1)
+            {
+                if (string.IsNullOrEmpty(input))
+                    return input;
+
+                StringBuilder output = new StringBuilder();
+
+                XmlReaderSettings readerSettings = new XmlReaderSettings();
+                readerSettings.ConformanceLevel = ConformanceLevel.Fragment;
+                readerSettings.IgnoreComments = false;
+                readerSettings.IgnoreWhitespace = false;
+
+                XmlWriterSettings writerSettings = new XmlWriterSettings();
+                writerSettings.ConformanceLevel = ConformanceLevel.Fragment;
+                writerSettings.OmitXmlDeclaration = true;
+
+                XmlReader reader = null;
+                XmlWriter writer = null;
+
+                try
+                {
+                    reader = XmlReader.Create(new StringReader(input), readerSettings);
+                    writer = XmlWriter.Create(output, writerSettings);
+
+                    while (reader.Read())
+                    {
+                        if (reader.NodeType == XmlNodeType.Element)
+                        {
+                            writer.WriteStartElement(reader.Name);
+
+                            if (reader.HasAttributes)
+                            {
+                                while (reader.MoveToNextAttribute())
+                                {
+                                    // 1. scanbegin / scanend 的 page
+                                    if ((reader.Name == "page") &&
+                                        (reader.Value.Length > 0) &&
+                                        IsAllDigits(reader.Value))
+                                    {
+                                        int page = int.Parse(reader.Value);
+                                        int newPage = Math.Max(page + offset, minPage);
+
+                                        writer.WriteAttributeString(
+                                            reader.Name,
+                                            newPage.ToString()
+                                        );
+                                    }
+                                    // 2. picture 的 location
+                                    else if (reader.Name == "location")
+                                    {
+                                        writer.WriteAttributeString(
+                                            reader.Name,
+                                            AdjustPictureLocation(reader.Value, offset, minPage)
+                                        );
+                                    }
+                                    else
+                                    {
+                                        // 其他屬性（包含 file）原樣保留
+                                        writer.WriteAttributeString(reader.Name, reader.Value);
+                                    }
+                                }
+
+                                reader.MoveToElement();
+                            }
+
+                            if (reader.IsEmptyElement)
+                            {
+                                writer.WriteEndElement();
+                            }
+                        }
+                        else if (reader.NodeType == XmlNodeType.Text)
+                        {
+                            writer.WriteString(reader.Value);
+                        }
+                        else if (reader.NodeType == XmlNodeType.EndElement)
+                        {
+                            writer.WriteEndElement();
+                        }
+                        else if (reader.NodeType == XmlNodeType.CDATA)
+                        {
+                            writer.WriteCData(reader.Value);
+                        }
+                        else if (reader.NodeType == XmlNodeType.Whitespace ||
+                                 reader.NodeType == XmlNodeType.SignificantWhitespace)
+                        {
+                            writer.WriteWhitespace(reader.Value);
+                        }
+                    }
+                }
+                finally
+                {
+                    if (writer != null) writer.Close();
+                    if (reader != null) reader.Close();
+                }
+
+                return output.ToString();
+            }
+
+            /// <summary>
+            /// 調整 picture location="檔號:頁碼(:座標)"
+            /// 只改第二段頁碼
+            /// </summary>
+            private static string AdjustPictureLocation(string location, int offset, int minPage)
+            {
+                if (string.IsNullOrEmpty(location))
+                    return location;
+
+                string[] parts = location.Split(':');
+                if (parts.Length < 2)
+                    return location;
+
+                int page;
+                if (!int.TryParse(parts[1], out page))
+                    return location;
+
+                parts[1] = Math.Max(page + offset, minPage).ToString();
+                return string.Join(":", parts);
+            }
+
+            /// <summary>
+            /// 判斷是否全為數字（避免 LINQ，C# 7.3 安全）
+            /// </summary>
+            private static bool IsAllDigits(string text)
+            {
+                for (int i = 0; i < text.Length; i++)
+                {
+                    if (text[i] < '0' || text[i] > '9')
+                        return false;
+                }
+                return true;
+            }
+
+            /* 20260111 完整編輯頁面會用到 由 editPageNumOffset_PageNumModifier發想而來
+             https://copilot.microsoft.com/shares/TuLUScKoFWypCnvBzpCfS
+             */
+            /// <summary>
+            /// 分割含有「<scanbegin file=」的XML為兩部分，依據指定的 pageNum
+            ///  Tuple 版本
+            /// </summary>
+            /// <param name="content">要分割的XML內容</param>
+            /// <param name="pageNum">要據以分割的頁碼</param>
+            /// <param name="splitPos">可取得分割點的字串位置</param>
+            /// <returns>傳回Tuple<string,string>物件，其第1個元素即分割出來的第1部分。第2個即第2部分</returns>
+            internal static Tuple<string, string> SplitContentAtPageNum(string content, string pageNum, out int splitPos)
+            {
+                // 防呆：檢查輸入
+                if (string.IsNullOrEmpty(content) || string.IsNullOrEmpty(pageNum))
+                {
+                    splitPos = -1;
+                    return Tuple.Create<string, string>(content, (string)null);
+                    // 或：return new Tuple<string, string>(content, null);
+                }
+
+                // 找到 pageNum 的位置
+                int pageIndex = content.IndexOf(" page=\"" + pageNum + "\"", StringComparison.Ordinal);
+                if (pageIndex == -1)
+                {
+                    splitPos = -1;
+                    return Tuple.Create<string, string>(content, (string)null);
+                }
+
+                // 找到對應的 <scanbegin file= 標記
+                splitPos = content.LastIndexOf("<scanbegin file=", pageIndex, StringComparison.Ordinal);
+                if (splitPos == -1)
+                {
+                    return Tuple.Create<string, string>(content, (string)null);
+                }
+
+                // 分割字串
+                string firstPart = content.Substring(0, splitPos);
+                string secondPart = content.Substring(splitPos);
+
+                return Tuple.Create<string, string>(firstPart, secondPart);
+            }
+
+            //https://copilot.microsoft.com/shares/qkNvEXe11Xuo8CbsYFJhu
+
+            /// <summary>            
+            /// 使用命名結果的版本
+            /// 分割含有「<scanbegin file=」的XML為兩部分，依據指定的 pageNum
+            /// </summary>
+            /// <param name="content">要分割的XML內容</param>
+            /// <param name="pageNum">要據以分割的頁碼</param>
+            /// <returns>傳回 SplitResult 物件，其第1個元素即分割出來的第1部分。第2個即第2部分</returns>
+            internal static SplitResult SplitContentAtPageNum(string content, string pageNum)
+            {
+                if (string.IsNullOrEmpty(content) || string.IsNullOrEmpty(pageNum))
+                    return SplitResult.NotSplit(content);
+
+                int pageIndex = content.IndexOf(" page=\"" + pageNum + "\"", StringComparison.Ordinal);
+                if (pageIndex == -1)
+                    return SplitResult.NotSplit(content);
+
+                int splitPos = content.LastIndexOf("<scanbegin file=", pageIndex, StringComparison.Ordinal);
+                if (splitPos == -1)
+                    return SplitResult.NotSplit(content);
+
+                return new SplitResult(
+                    content.Substring(0, splitPos),
+                    content.Substring(splitPos),
+                    splitPos
+                );
+            }
+
+            //https://copilot.microsoft.com/shares/34kpDrMYhMRELXecXRctw
+
+            /// <summary>
+            /// 如果你不喜歡 Item1/Item2，可以用一個簡單的類別包起來，讓語意更直觀 
+            /// </summary>
+            internal sealed class SplitResult
+            {
+                public string FirstPart { get; private set; }
+                public string SecondPart { get; private set; }
+                public int SplitPos { get; private set; }
+
+                public SplitResult(string firstPart, string secondPart, int splitPos)
+                {
+                    FirstPart = firstPart;
+                    SecondPart = secondPart;
+                    SplitPos = splitPos;
+                }
+
+                public static SplitResult NotSplit(string originalContent)
+                {
+                    return new SplitResult(originalContent, null, -1);
+                }
+            }
+
+
+            /// <summary>
+            /// Xml重新編頁：編輯區內容頁碼減頁差後回存。
+            /// 頁差由textBox1第一段設定
+            /// （頁差=目的-來源頁碼）
+            /// 在Selenium模式有效頁面下，網頁停在要開始編輯頁碼之首頁圖文對照頁面上，按下Ctrl + Shift 再顯示Form1（TextForCtext 主介面主表單）即可全程自動化
+            /// </summary>
+            internal static void EditPageNumOffset_PageNumModifier(string refers = "")
+            {
+                #region 編輯區內容頁碼減1後回存 20260110
+                //20260110 為方便編輯同版書籍作對應頁故，因《天下郡國利病書》此二本之迻錄 https://ctext.org/wiki.pl?if=gb&res=5115261 https://ctext.org/wiki.pl?if=gb&res=951851
+                string originalText = Clipboard.GetText();//記錄剪貼簿內文字資料
+                void shiftPage()
+                {
+                    if (refers.IsNullOrEmpty() == false && int.TryParse(refers.Substring(0, refers.IndexOf(Environment.NewLine)), result: out int offset))
+                        Clipboard.SetText(ScanPageAdjuster.ShiftScanPages(originalText, offset));
+                    else
+                        Clipboard.SetText(ScanPageAdjuster.ShiftScanPages(originalText));
+                }
+
+
+                PlaySound(SoundLike.exam);
+                if (originalText.Contains(@"<scanbegin file="""))
+                {
+                    shiftPage();
+                    PlaySound(SoundLike.done, true);
+                }
+                else if (!IsDriverInvalid())
+                {
+                    driver.SwitchTo().Window(driver.CurrentWindowHandle);
+                    Form1.InstanceForm1.PauseEvents();
+                    Form1.InstanceForm1.textBox3Text = driver.Url;
+                    Form1.InstanceForm1.ResumeEvents();
+                    if (Div_generic_TextBoxFrame != null)
+                    {
+                        string pageNum = CurrentPageNum_textbox_Value;//PageNum_textbox.GetDomProperty("value");
+                        if (pageNum.IsNullOrEmpty()) return;
+                        if (Edit_Linkbox != null)
+                        {
+                            Edit_Linkbox.JsClick();
+                            WaitFindWebElementBySelector_ToBeClickable("#data", 5);
+                            if (Textarea_data_Edit_textbox == null) return;
+                            if (!originalText.Contains(@"<scanbegin file="""))
+                            {
+                                string data = Textarea_data_Edit_textboxTxt;//Textarea_data_Edit_textbox.GetDomProperty("value");
+                                if (data.IsNullOrEmpty()) return;
+                                //int splitPos = data.LastIndexOf("<scanbegin file=", data.IndexOf(" page=\"" + pageNum + "\""));
+                                ////<scanbegin file="175494" page="85" />
+                                //Clipboard.SetText(data.Substring(splitPos));
+                                //originalText = Clipboard.GetText();
+                                SplitResult part = SplitContentAtPageNum(data, pageNum);
+                                //List<string> part = SplitContentAtPageNum(data, pageNum, out _);
+                                originalText = part.SecondPart;//data.Substring(splitPos);
+                                                               //先設定一次；如果後續出錯的話還可以手動操作貼上，如碰到要輸入驗證時
+                                SetIWebElementValueProperty(Textarea_data_Edit_textbox, part.FirstPart);//data.Substring(0, splitPos));
+                            }
+                            //檢視重新編頁後的結果
+                            shiftPage();
+                        }
+                    }
+                    if (Textarea_data_Edit_textbox != null)
+                    {
+                        SetIWebElementValueProperty(Textarea_data_Edit_textbox, Textarea_data_Edit_textbox.GetDomProperty("value") + Clipboard.GetText());
+                    }
+                    if (Commit != null)
+                    {
+                        Commit.JsClick();
+                        Clipboard.Clear();
+                    }
+                    PlaySound(SoundLike.done);
+                }
+                #endregion
+            }
+
+
+        }
+
+        /// <summary>
+        /// 將編輯區內容指定頁碼之後的部分搬到下一個單位後回存
+        /// 在Selenium模式表單顯示時，且其內容不少於30字元，按下Ctrl+Shift+Alt 可以啟動
+        /// 在textBox1第一行/段輸入「修改摘要」欄位的值，開頭須是「本書與 URN: ctp:」以供程式判斷
+        /// 如：本書與 URN: ctp:wb951851 同版，今據此版並以末學自製於GitHub開源、免費免安裝之TextForCtext應用程式及其內之WordVBA對應迻入，（討論區與末學YouTube頻道有實境演示影片可供參考），以俟後賢精校。各本後亦可同步更新。感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主
+        /// </summary>
+        internal static void Move2NextChapter()
+        {
+            if (Browser.IsDriverInvalid()) return;
+            #region 將編輯區內容指定頁碼之後的部分搬到下一個單位後回存 20260111
+            //20260111 為方便編輯同版書籍作對應頁故，因《天下郡國利病書》此二本之迻錄 https://ctext.org/wiki.pl?if=gb&res=5115261 https://ctext.org/wiki.pl?if=gb&res=951851
+            driver.SwitchTo().Window(driver.CurrentWindowHandle);
+            Form1.InstanceForm1.PauseEvents();
+            Form1.InstanceForm1.textBox3Text = driver.Url;
+            Form1.InstanceForm1.ResumeEvents();
+            //如果不是圖文對照之頁面就離開，不處理
+            if (Div_generic_TextBoxFrame == null) return;
+            string pageNum = CurrentPageNum_textbox_Value;
+            if (pageNum.IsNullOrEmpty()) return;
+
+            PlaySound(SoundLike.exam);
+            if (Edit_Linkbox != null)
+            {
+                //進入編輯區
+                Edit_Linkbox.JsClick();
+                WaitFindWebElementBySelector_ToBeClickable("#data", 5);
+                if (Textarea_data_Edit_textbox == null) return;
+                string data = Textarea_data_Edit_textboxTxt;//Textarea_data_Edit_textbox.GetDomProperty("value");
+                if (data.IsNullOrEmpty()) return;
+
+                // 命名結果版本 https://copilot.microsoft.com/shares/gSnkjNrwocdyBVayFzFsg
+                SplitResult part = SplitContentAtPageNum(data, pageNum);
+                if (part.SplitPos == -1)
+                {
+                    // 未分割：result.FirstPart = 原字串；result.SecondPart = null
+                    return;
+                }
+                else
+                {
+                    //// 已分割
+                    //var first = result.FirstPart;
+                    //var second = result.SecondPart;
+                }
+                //先設定一次；如果後續出錯的話還可以手動操作貼上，如碰到要輸入驗證時
+                SetIWebElementValueProperty(Textarea_data_Edit_textbox, part.FirstPart);
+                string sequence = Sequence_Edit_Chapter_Value;//取得目前章節單位的序號
+                Clipboard.SetText(part.SecondPart);//存入剪貼簿中，以備萬一，若網頁壞掉或須驗證碼，則便手動搬到下一個單位來貼上
+                if (sequence.IsNullOrEmpty()) return;
+                if (Commit == null) return;
+                Commit.JsClick();//保存編輯
+                if (Title_Edit_Chapter_BookName == null) return;
+                Title_Edit_Chapter_BookName.JsClick();//返回全書單位_章節列表
+                                                      //進入下一單位
+                if (!GotoNextSequenceChapterPage(sequence)) return;//進入下一章節文字版內容
+                if (Edit_linkbox == null) return;
+                Edit_linkbox.JsClick();//進入編輯頁面
+                if (Textarea_data_Edit_textbox == null) return;
+                //string moved = part[1];//Clipboard.SetText(part[1]);
+                SetIWebElementValueProperty(Textarea_data_Edit_textbox, part.SecondPart);//搬入內容，取代原有內容（未經校對之亂碼內容）
+                string description = Form1.InstanceForm1.TextBox1_Text;
+                if (description.StartsWith("本書與 URN: ctp:"))
+                {
+                    int lines = description.IndexOf(Environment.NewLine);
+                    description = lines > -1 ? description.Substring(0, lines) : description;
+                }
+                SetIWebElementValueProperty(Description_Edit_textbox, description);
+                Commit?.JsClick();
+                PlaySound(SoundLike.done);
+                Clipboard.Clear();                
+            }
+            #endregion
+        }
     }
 }

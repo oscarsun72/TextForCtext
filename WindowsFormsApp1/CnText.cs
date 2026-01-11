@@ -155,7 +155,7 @@ namespace TextForCtext
         /// <returns>傳址回傳clpTxt被標點後的結果</returns>
         internal static ref string BooksPunctuation(ref string clpTxt, bool force2mark = false)
         {
-            if (!force2mark) if (HasEditedWithPunctuationMarks(ref clpTxt)) { Form1.playSound(Form1.soundLike.error); return ref clpTxt; }
+            if (!force2mark) if (HasEditedWithPunctuationMarks(ref clpTxt)) { Form1.PlaySound(Form1.SoundLike.error); return ref clpTxt; }
             //提示音
             if (!Form1.MuteProcessing)
                 new System.Media.SoundPlayer(@"C:\Windows\Media\Windows Balloon.wav").Play();
@@ -178,7 +178,7 @@ namespace TextForCtext
                 rst.MoveNext();
             }
             rst.Close();
-            Form1.playSound(Form1.soundLike.processing);
+            Form1.PlaySound(Form1.SoundLike.processing);
             rst.Open("select * from 標點符號_篇名號_自動加上用 order by 排序", cnt, ado.CursorTypeEnum.adOpenForwardOnly);
             while (!rst.EOF)
             {
@@ -201,7 +201,7 @@ namespace TextForCtext
             if (clpTxt != clpTxtOriginal)
                 System.Media.SystemSounds.Asterisk.Play();
             else
-                Form1.playSound(Form1.soundLike.warn);
+                Form1.PlaySound(Form1.SoundLike.warn);
 
             //取代有規則的標點：20240221大年十二
             clpTxt = clpTxt.Replace("》云", "》云：").Replace("〉云", "〉云：").Replace("》曰", "》曰：")
@@ -1026,7 +1026,7 @@ namespace TextForCtext
                 //if (!IsBalanced(result, "【".ToCharArray()[0], "】".ToCharArray()[0]))
                 if (!IsBalanced(result, '【', '】'))
                 {
-                    Form1.playSound(Form1.soundLike.waiting, true);
+                    Form1.PlaySound(Form1.SoundLike.waiting, true);
                     Debugger.Break();
                 }
             }
@@ -1260,7 +1260,7 @@ namespace TextForCtext
                             Debugger.Break();
                             //text=RemovePunctuation(text);
                             adjustedPos = (before.Length + offset1 + 1);
-                            Form1.playSound(Form1.soundLike.error);
+                            Form1.PlaySound(Form1.SoundLike.error);
                             //return -1;
                             //break;
                         }

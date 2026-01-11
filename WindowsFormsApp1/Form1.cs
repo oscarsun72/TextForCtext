@@ -10,8 +10,6 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Media;
-using System.Net;
-using System.Net.Http;
 using System.Runtime.InteropServices;
 using System.Text;
 //using System.Text.Encodings.Web;
@@ -25,10 +23,12 @@ using System.Windows.Forms;
 //using System.Windows.Input;
 using TextForCtext;
 using WebSocketSharp;
-using static System.Net.Mime.MediaTypeNames;
 using static TextForCtext.AncientTextExamine;
 using static TextForCtext.Browser;
 using static TextForCtext.CTP;
+using static TextForCtext.XML;
+using static TextForCtext.XML.ScanPageAdjuster;
+using static WindowsFormsApp1.KeyboardInfo;
 //using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 //引用adodb 要將其「內嵌 Interop 類型」（Embed Interop Type）屬性設為false（預設是true）才不會出現以下錯誤：  HResult=0x80131522  Message=無法從組件 載入類型 'ADODB.FieldsToInternalFieldsMarshaler'。
 //https://stackoverflow.com/questions/5666265/adodbcould-not-load-type-adodb-fieldstointernalfieldsmarshaler-from-assembly  https://blog.csdn.net/m15188153014/article/details/119895082
@@ -707,7 +707,7 @@ namespace WindowsFormsApp1
                             if (brUrl != string.Empty)
                             {
                                 if (textBox3.Text != brUrl) textBox3.Text = brUrl;
-                                Form1.playSound(Form1.soundLike.press);
+                                Form1.PlaySound(Form1.SoundLike.press);
                                 toOCR(OCRSiteTitle.GJcool);
                             }
                         }
@@ -756,10 +756,10 @@ namespace WindowsFormsApp1
             if (y > Screen.PrimaryScreen.Bounds.Height - 230 &&
                 x < 80)
             {
-                ntfyICo.Visible = false; if (modifierKeys == Keys.Shift) Form1.playSound(Form1.soundLike.press);
+                ntfyICo.Visible = false; if (modifierKeys == Keys.Shift) Form1.PlaySound(Form1.SoundLike.press);
                 //按下Ctrl時，自動將Quick edit的連結複製到剪貼簿
                 if (keyinTextMode) copyQuickeditLinkWhenKeyinMode(modifierKeys);
-                //Form1.playSound(Form1.soundLike.exam);
+                //Form1.PlaySound(Form1.soundLike.exam);
                 show_nICo(modifierKeys);//this.Left + this.Width) show_nICo();                
             }
             #endregion
@@ -768,9 +768,9 @@ namespace WindowsFormsApp1
             else if (y > Screen.PrimaryScreen.Bounds.Height - 50 &&
                 x > Screen.PrimaryScreen.Bounds.Width - 270)
             {
-                ntfyICo.Visible = false; if (modifierKeys == Keys.Shift) Form1.playSound(Form1.soundLike.press);
+                ntfyICo.Visible = false; if (modifierKeys == Keys.Shift) Form1.PlaySound(Form1.SoundLike.press);
                 if (keyinTextMode) copyQuickeditLinkWhenKeyinMode(modifierKeys);
-                Form1.playSound(Form1.soundLike.over);
+                Form1.PlaySound(Form1.SoundLike.over);
                 show_nICo(modifierKeys);//this.Left + this.Width) show_nICo();
             }
             #endregion
@@ -845,13 +845,13 @@ namespace WindowsFormsApp1
                         Clipboard.Clear();
                         if (IsValidUrl＿ImageTextComparisonPage(driver.Url))
                         {
-                            if (null == Page_textbox)//driver.Navigate().Refresh();
+                            if (null == PageNum_textbox)//driver.Navigate().Refresh();
                             {
                                 MessageBoxShowOKExclamationDefaultDesktopOnly("請檢查textBox3中的網址值");
                                 return;
                             }
                             else
-                                Page_textbox.SendKeys(OpenQA.Selenium.Keys.Enter);
+                                PageNum_textbox.SendKeys(OpenQA.Selenium.Keys.Enter);
                         }
                     }
                 }
@@ -1128,7 +1128,7 @@ namespace WindowsFormsApp1
                         {
                             bool eventEnable = _eventsEnabled;
                             ResumeEvents();
-                            playSound(soundLike.error, true);
+                            PlaySound(SoundLike.error, true);
                             textBox3.Text = quickEditLinkUrl;
                             _eventsEnabled = eventEnable;
                         }
@@ -1137,7 +1137,7 @@ namespace WindowsFormsApp1
                         //if (keyinTextMode && !quicteditX.IsNullOrEmpty() && textBox1.Text != quicteditX)
                         if (!quicteditX.IsNullOrEmpty() && textBox1.Text != quicteditX)
                         {
-                            playSound(soundLike.over, true);
+                            PlaySound(SoundLike.over, true);
                             textBox1.Text = quicteditX;
                         }
                         Clipboard.SetText(quickEditLinkUrl);
@@ -1826,7 +1826,7 @@ namespace WindowsFormsApp1
                 if (xCopy.Substring(lastspacePosition).IndexOf(Environment.NewLine) == -1
                         && xCopy.Substring(lastspacePosition).IndexOf("}}") == -1)
                 {
-                    playSound(soundLike.notify, true);
+                    PlaySound(SoundLike.notify, true);
                     Thread.Sleep(300);
                     if (lastspacePosition != missWordPositon) missWordPositon = lastspacePosition;
                 }
@@ -2057,7 +2057,7 @@ namespace WindowsFormsApp1
                     {
                         if (gxds.detectIncorrectBlankAndCurlybrackets_Suspected_aPageaTime(line_xCopy, out sGxds, out lGxds))
                         {// out 出來的是每行(item）位置，不是原來textBox1裡要給剪貼簿的文字(xCopy)內的位置
-                            playSound(soundLike.warn);
+                            PlaySound(SoundLike.warn);
                             textBox1.Select(xCopy.IndexOf(line_xCopy), line_xCopy.Length);
                             textBox1.ScrollToCaret();
                             return false;
@@ -2077,7 +2077,7 @@ namespace WindowsFormsApp1
             catch (Exception)
             {
                 while (!isClipBoardAvailable_Text()) { if (DateTime.Now.Subtract(dt).TotalSeconds > 2) break; }
-                //playSound(soundLike.error);
+                //PlaySound(soundLike.error);
                 //Clipboard.SetText(xCopy);
             }
             */
@@ -2333,7 +2333,7 @@ namespace WindowsFormsApp1
                     string urlActive = ActiveTabURL_Ctext_Edit;
                     if (textBox3.Text == "" && IsValidUrl＿keyDownCtrlAdd(urlActive))
                     {
-                        playSound(soundLike.done);
+                        PlaySound(SoundLike.done);
                         textBox3.Text = urlActive;
                     }
                     if (BrowsrOPMode != BrowserOPMode.appActivateByName && driver != null
@@ -2634,7 +2634,7 @@ namespace WindowsFormsApp1
                 //{
                 //    if (x != Quickedit_data_textboxTxt)
                 //    {
-                //        playSound(soundLike.exam);
+                //        PlaySound(soundLike.exam);
                 //        x = Quickedit_data_textboxTxt;
                 //    }
                 //    //非同步整理OCR文本時，這行就很需要：
@@ -2904,7 +2904,7 @@ namespace WindowsFormsApp1
 
                     //if (autoPaste2QuickEdit)
                     //{
-                    //    playSound(soundLike.press, true); altA_predictEndofPageRange();
+                    //    PlaySound(soundLike.press, true); altA_predictEndofPageRange();
                     //}
                     //keyDownCtrlAdd(false);
 
@@ -3897,7 +3897,7 @@ namespace WindowsFormsApp1
                 {// Alt + e ：在完整編輯頁面中直接取代文字。請將被取代+取代成之二字前後並置，並將其選取後（或在被取代之文字前放置插入點）再按下此組合鍵以執行直接取代 20240718
                     e.Handled = true;
                     bool overTypeMode = !insertMode;
-                    playSound(soundLike.press, true);
+                    PlaySound(SoundLike.press, true);
                     StringInfo character = new StringInfo(string.Empty); int s = textBox1.SelectionStart, l = 1;
                     if (textBox1.SelectionLength == 0)
                     {
@@ -4010,7 +4010,7 @@ namespace WindowsFormsApp1
                         string txtbox1SelText = textBox1.SelectedText;
                         //if (Math.Abs(isChineseChar(txtbox1SelText, false)) != 1 && "■□◯".IndexOf(txtbox1SelText) == -1) return;
                         if (!IsChineseString(txtbox1SelText) && "■□◯".IndexOf(txtbox1SelText) == -1) return;
-                        //playSound(soundLike.press, true);
+                        //PlaySound(soundLike.press, true);
                         Color clr = BackColor;
                         BackColor = Color.Aqua;
                         Refresh();//沒有這行還不行！20240709
@@ -4030,7 +4030,7 @@ namespace WindowsFormsApp1
                         //}
                         //catch (Exception)
                         //{
-                        //    playSound(soundLike.error);
+                        //    PlaySound(soundLike.error);
                         //}
                         AvailableInUse_BothKeysMouse();
                     }
@@ -4098,7 +4098,7 @@ namespace WindowsFormsApp1
                         string txtbox1SelText = textBox1.SelectedText;
                         //if (Math.Abs(isChineseChar(txtbox1SelText, false)) != 1 && "■□◯".IndexOf(txtbox1SelText) == -1) return;
                         if (!IsChineseString(txtbox1SelText) && "■□◯".IndexOf(txtbox1SelText) == -1) return;
-                        //playSound(soundLike.press, true);
+                        //PlaySound(soundLike.press, true);
                         Color clr = BackColor;
                         BackColor = Color.Aqua;
                         Refresh();//沒有這行還不行！20240709
@@ -4114,7 +4114,7 @@ namespace WindowsFormsApp1
                         //}
                         //catch (Exception)
                         //{
-                        //    playSound(soundLike.error);
+                        //    PlaySound(soundLike.error);
                         //}
                         AvailableInUse_BothKeysMouse();
                     }
@@ -4341,7 +4341,7 @@ namespace WindowsFormsApp1
                                                           //如果已有資料對應，則閃示橘紅色（表單顏色）示警
                                                           //MessageBox.Show("existed!!");
                         {
-                            Form1.playSound(soundLike.info);
+                            Form1.PlaySound(SoundLike.info);
                             this.BackColor = Color.Tomato;
                             this.Refresh();
                             Thread.Sleep(35);
@@ -4555,7 +4555,7 @@ namespace WindowsFormsApp1
                     //string clpTxt = Clipboard.GetText();
                     //if (clpTxt.StartsWith("http"))
                     //{
-                    //    playSound(soundLike.warn);
+                    //    PlaySound(soundLike.warn);
                     //    clpTxt = textBox1.Text;
                     //}
                     //if (keyinTextMode && clpTxt != ClpTxtBefore)// &&clpTxt.IndexOf("《") == -1 && clpTxt.IndexOf("〈") == -1 && clpTxt.IndexOf("·") == -1)//之前是沒有優化 booksPunctuation 才需要避免已經標點過的又標，現在有正則表達式把關，就沒有這問題了。感恩感恩　讚歎讚歎　chatGPT大菩薩+Bing大菩薩 南無阿彌陀佛
@@ -4583,7 +4583,7 @@ namespace WindowsFormsApp1
                     //                driver.SwitchTo().Alert().Accept();
                     //                //SendKeys.Send(" ");
 
-                    //                playSound(soundLike.exam);
+                    //                PlaySound(soundLike.exam);
                     //                //Activate();
                     //                bringBackMousePosFrmCenter();
                     //            }
@@ -4849,7 +4849,7 @@ namespace WindowsFormsApp1
                         }
                         else// if(!autoPaste2QuickEdit)//前已有 return了
                         {
-                            { playSound(soundLike.press, true); altA_predictEndofPageRange(); }
+                            { PlaySound(SoundLike.press, true); altA_predictEndofPageRange(); }
                             keyDownCtrlAdd(false);
                             RestoreImageSize();
                             if (!autoPaste2QuickEdit && !isSKQSFrontPage(textBox1.Text)) AvailableInUse_BothKeysMouse();
@@ -4875,7 +4875,7 @@ namespace WindowsFormsApp1
                             }
                             catch (Exception)
                             {
-                                //playSound(soundLike.error, true);
+                                //PlaySound(soundLike.error, true);
                             }
                         return;
                     }
@@ -5056,7 +5056,7 @@ namespace WindowsFormsApp1
             RestoreImageSize();
             undoRecord();//●●●20260108
             if (!keyinTextMode)
-            { playSound(soundLike.press, true); altA_predictEndofPageRange(); }
+            { PlaySound(SoundLike.press, true); altA_predictEndofPageRange(); }
 
             result = keyDownCtrlAdd(false);
             if (!result)
@@ -5122,7 +5122,7 @@ namespace WindowsFormsApp1
                 bringBackMousePosFrmCenter();
                 if (ModifierKeys == Keys.Shift)//翻頁時按住Shift鍵即可直接送出OCR
                 {
-                    playSound(soundLike.press, true);
+                    PlaySound(SoundLike.press, true);
                     //toOCR(OCRSiteTitle.GJcool);
                     toOCR(PagePast2OCRsite);
                     if (PagePaste2GjcoolOCR_ing) { Debugger.Break(); PagePaste2GjcoolOCR_ing = false; }//●●●●●●●●●●●●●●●●●●●●●●●20251230
@@ -5552,7 +5552,7 @@ namespace WindowsFormsApp1
             {
                 //if (x != Quickedit_data_textboxTxt)
                 //{
-                //    playSound(soundLike.exam);
+                //    PlaySound(soundLike.exam);
                 //    x = Quickedit_data_textboxTxt;
                 //}
                 string x = textBox1.Text;
@@ -5599,7 +5599,7 @@ namespace WindowsFormsApp1
         private bool pagePaste2GjcoolOCR()
         {
             bool returnValue = false; PagePaste2GjcoolOCR_ing = true;
-            //playSound(soundLike.press);
+            //PlaySound(soundLike.press);
             //textBox1.SelectAll();//此方法必須在表單有焦點時才行
             TopMost = false;//將焦點交給Chrome瀏覽器
 
@@ -5610,7 +5610,7 @@ namespace WindowsFormsApp1
             //ResumeEvents();//見return前
             textBox1.SelectionStart = textBox1.TextLength; textBox1.SelectionLength = 0;
             pageTextEndPosition = 0; pageEndText10 = string.Empty;
-            playSound(soundLike.waiting);//請靜待OCR完成
+            PlaySound(SoundLike.waiting);//請靜待OCR完成
 
             if (keyDownCtrlAdd(false, "", true, true))
             {
@@ -5620,7 +5620,7 @@ namespace WindowsFormsApp1
                 //Console.WriteLine(ModifierKeys.ToString());//just for test
                 if (ModifierKeys != Keys.Control)
                 {
-                    playSound(soundLike.press);
+                    PlaySound(SoundLike.press);
                     //if (toOCR(OCRSiteTitle.GJcool))
                     if (toOCR(PagePast2OCRsite))
                         returnValue = true;
@@ -5629,7 +5629,7 @@ namespace WindowsFormsApp1
                 }
                 else
                 {
-                    playSound(soundLike.stop);
+                    PlaySound(SoundLike.stop);
                     if (!Visible) Visible = true;
                     bringBackMousePosFrmCenter();
                     _eventsEnabled = eventsEnable;
@@ -6687,7 +6687,7 @@ namespace WindowsFormsApp1
 
             restoreCaretPosition(textBox1, s, 0);
             stopUndoRec = false;
-            if (textBox1.TextLength > 1100) playSound(soundLike.over, true);
+            if (textBox1.TextLength > 1100) PlaySound(SoundLike.over, true);
 
         }
         /// <summary>
@@ -6959,7 +6959,7 @@ namespace WindowsFormsApp1
                 }
                 s = p + newLineTag.Length + 1;
             } while (p > -1);
-            playSound(soundLike.over);
+            PlaySound(SoundLike.over);
             bringBackMousePosFrmCenter();
         }
 
@@ -7270,7 +7270,7 @@ namespace WindowsFormsApp1
 
                                     if (!groupTitle)
                                     {
-                                        playSound(soundLike.warn, true);
+                                        PlaySound(SoundLike.warn, true);
                                         groupTitle = true;
                                     }
                                 }
@@ -7661,7 +7661,7 @@ namespace WindowsFormsApp1
                                             if (sb.ToString() != string.Empty)
                                             {
                                                 //Debugger.Break();
-                                                playSound(soundLike.exam, true);
+                                                PlaySound(SoundLike.exam, true);
                                                 item.Range.Text = sb.ToString() + item.Text.Substring(isps);
                                                 //range.End = ed_range + isps;//"􏿽".Length=2 - "　".Length=1 ;
                                                 //range.End += isps;//"􏿽".Length=2 - "　".Length=1 ;//已與Paragraph.Range.Text同步
@@ -7728,7 +7728,7 @@ namespace WindowsFormsApp1
                                             sbb.Append("　");
                                         }
                                         //Debugger.Break();
-                                        playSound(soundLike.exam, true);
+                                        PlaySound(SoundLike.exam, true);
                                         item.Range.Text = sbb.ToString() + result1;
                                         //range.End += (result1.Length - text.Length);//已於Range.Text中調用UpdateParentRange()方法解決同步更新連動的問題了！
                                         //20250306監測成功！●●●●●●●●●●●●●●
@@ -8917,7 +8917,7 @@ namespace WindowsFormsApp1
                 }
                 catch (Exception)
                 {
-                    playSound(soundLike.error, true);
+                    PlaySound(SoundLike.error, true);
                 }
             else
                 textBox1.Text = x;
@@ -9737,7 +9737,7 @@ namespace WindowsFormsApp1
             }
             #endregion
 
-            playSound(soundLike.over);
+            PlaySound(SoundLike.over);
             if (topLine) { rst.Close(); cnt.Close(); rst = null; cnt = null; }
             //if (keyinTextMode)
             if (!ocrTextMode)
@@ -10215,7 +10215,7 @@ namespace WindowsFormsApp1
         /// <summary>
         /// 軟體操作時提醒之系統音效參照
         /// </summary>
-        public enum soundLike
+        public enum SoundLike
         {
             none, over, done, stop, info, error, warn, exam, processing, press, waiting, finish,
             notify
@@ -10224,47 +10224,47 @@ namespace WindowsFormsApp1
         /// 播放指定音效
         /// </summary>
         /// <param name="sndlike">音效的名稱（作用、含義）</param>
-        public static void playSound(soundLike sndlike, bool soundAnyway = false)
+        public static void PlaySound(SoundLike sndlike, bool soundAnyway = false)
         {
             if (MuteProcessing && !soundAnyway) return;
             string mediaPathWithBackslash = Environment.GetFolderPath(Environment.SpecialFolder.Windows) + "\\Media\\";
             string wav = "";
             switch (sndlike)
             {
-                case soundLike.over:
+                case SoundLike.over:
                     wav = "windows logoff sound";
                     break;
-                case soundLike.done:
+                case SoundLike.done:
                     wav = "Windows Notify Messaging";
                     break;
-                case soundLike.stop:
+                case SoundLike.stop:
                     wav = "Windows Exclamation";
                     break;
-                case soundLike.info:
+                case SoundLike.info:
                     wav = "tada";
                     break;
-                case soundLike.error:
+                case SoundLike.error:
                     wav = "Windows Notify";
                     break;
-                case soundLike.warn:
+                case SoundLike.warn:
                     wav = "Windows Proximity Notification";
                     break;
-                case soundLike.exam:
+                case SoundLike.exam:
                     wav = "Windows Notify Email";
                     break;
-                case soundLike.processing:
+                case SoundLike.processing:
                     wav = "Chimes";
                     break;
-                case soundLike.press:
+                case SoundLike.press:
                     wav = "Windows Pop-up Blocked";
                     break;
-                case soundLike.waiting:
+                case SoundLike.waiting:
                     wav = "Ring10";
                     break;
-                case soundLike.finish:
+                case SoundLike.finish:
                     wav = "Ring03";
                     break;
-                case soundLike.notify:
+                case SoundLike.notify:
                     //wav = "Windows Unlock";
                     wav = "Windows Shutdown";//Windows 關機
                                              //wav = "Windows Information Bar";//Windows 資訊列
@@ -10674,66 +10674,7 @@ namespace WindowsFormsApp1
         }
 
 
-        /* 20230408 Bing大菩薩 ： 您可以使用正則表達式來簡化您的 if 判斷句。例如，您可以將條件提取到一個單獨的函數中，並使用正則表達式來檢查 url 是否包含特定字符串：
-         */
-        /// <summary>
-        /// 檢查要輸入簡單修改模式頁面的指定網址是否合法
-        /// </summary>
-        /// <param name="url">要檢查的網址字串值</param>
-        /// <returns>回傳網址是否合法</returns>
-        internal static bool IsValidUrl＿keyDownCtrlAdd(string url)
-        {
-            url = ClearUrl_BoxEtc(url);
-            //return Regex.IsMatch(url, @"(#editor|&page=|ctext\.org)");
-            //return Regex.IsMatch(url, @"ctext\.org.*&file.*&page=.*#editor");
-            //也有可能是這種網址：https://ctext.org/library.pl?if=gb&file=34195&page=142&editwiki=826120#box(140,120,2,0)
-            //return Regex.IsMatch(url, @"ctext\.org.*&file.*&page=.*&edit");
-            return Regex.IsMatch(url, @"ctext\.org.*&file.*&page=.*#edit") || Regex.IsMatch(url, @"ctext\.org.*&file.*&page=.*&editwiki=.*");//20250126
-            /*
-             * Bing大菩薩：是的，在正則表達式中，小數點「.」是一個特殊字符，它匹配任何單個字符（除了換行符）。如果您想在正則表達式中匹配字面上的小數點，則需要在前面加上反斜杠「\」來對其進行轉義。
-             * 在 C# 中，由於反斜杠「\」本身也是一個轉義字符，所以您需要使用兩個反斜杠「\\」來表示一個字面上的反斜杠。因此，在 C# 中的正則表達式中，要匹配字面上的小數點，您需要寫成「\\.」。
-                希望這對您有所幫助！*/
-        }
-        /// <summary>
-        /// 檢查是否是瀏覽圖文對照之頁面
-        /// 可與 isQuickEditUrl 方法互參用
-        /// </summary>
-        /// <param name="url">要檢查的網址字串值</param>
-        /// <returns></returns>
-        internal static bool IsValidUrl＿ImageTextComparisonPage(string url)
-        {
-            return Regex.IsMatch(url, @"ctext\.org.*&file.*&page=");
-        }
-        /// <summary>
-        /// 將圖文對照網址修整、規範之
-        /// 20240813 creedit with Copilot大菩薩：改進C#程式碼：圖文對照網址修整：https://sl.bing.net/f2S0RcHJLyK
-        /// 與 ReplaceUrl_Box2Editor 可互參考
-        /// </summary>
-        /// <param name="url">要被修整、規範化的圖文對照網址</param>
-        /// <param name="editor">是否要在末尾改綴上"#editor"字串</param>
-        /// <param name="driverGoToUrl">是否要移至這個網址</param>
-        /// <returns>回傳修整過、規範的圖文對照網址</returns>
-        internal static string FixUrl＿ImageTextComparisonPage(string url, bool editor = false, bool driverGoToUrl = false)
-        {
-            #region 防呆
-            if (!IsValidUrl＿ImageTextComparisonPage(url) || BrowsrOPMode == BrowserOPMode.appActivateByName || driver == null) return null;
-            #endregion
-
-            // 使用正則表達式檢查和替換網址中的特定字串
-            url = System.Text.RegularExpressions.Regex.Replace(url, "#box\\(.*?\\)", editor ? "#editor" : string.Empty);
-
-            try
-            {
-                if (driverGoToUrl) driver.Navigate().GoToUrl(url);
-            }
-            catch (Exception ex)
-            {
-                // 記錄詳細的錯誤訊息
-                Form1.MessageBoxShowOKExclamationDefaultDesktopOnly($"Error: {ex.HResult} - {ex.Message}");
-            }
-
-            return url;
-        }
+        
         /// <summary>
         /// 是否是四庫全書的扉頁
         /// </summary>
@@ -10768,7 +10709,7 @@ namespace WindowsFormsApp1
         //    int boxTag = url.IndexOf("#box(");
         //    if (boxTag > -1)
         //    {
-        //        playSound(soundLike.exam);
+        //        PlaySound(soundLike.exam);
         //        url = url.Substring(0, boxTag) + (editor ? "#editor" : string.Empty);
         //        try
         //        {
@@ -10814,7 +10755,7 @@ namespace WindowsFormsApp1
                     int boxTag = urlDriver.IndexOf("#box(");
                     if (boxTag > -1)
                     {
-                        //playSound(soundLike.exam);
+                        //PlaySound(soundLike.exam);
                         //urlDriver = urlDriver.Substring(0, boxTag) + "#editor";
                         urlDriver = FixUrl＿ImageTextComparisonPage(urlDriver, true, true);
                         //driver.Navigate().GoToUrl(urlDriver);
@@ -10849,12 +10790,12 @@ namespace WindowsFormsApp1
         reCheckUrl:
             if (!urlDriver.StartsWith(urlShort))
             {//真的都是擴充功能Google翻譯在作怪！難怪害得 driver.Url 和 WindowHandles.Count 都無法取得正確值！
-                if (urlDriver == "chrome-extension://aapbdbdomjkkjkaonfhkkikfgjllcleb/offscreen.html") playSound(soundLike.exam, true);//Debugger.Break();
-                else if (urlDriver.StartsWith("chrome-extension://")) playSound(soundLike.exam, true);//Debugger.Break();
+                if (urlDriver == "chrome-extension://aapbdbdomjkkjkaonfhkkikfgjllcleb/offscreen.html") PlaySound(SoundLike.exam, true);//Debugger.Break();
+                else if (urlDriver.StartsWith("chrome-extension://")) PlaySound(SoundLike.exam, true);//Debugger.Break();
                 if (urlDriver.StartsWith("https://ctext.org/library.pl?if=gb&file=") && url.StartsWith("https://ctext.org/library.pl?if=gb&file=")
                     && urlDriver.EndsWith("#editor") && url.EndsWith("#editor") && url == textBox3.Text)//string url = textBox3.Text 見前 20240803
                 {
-                    playSound(soundLike.exam, true);
+                    PlaySound(SoundLike.exam, true);
                     textBox3.Text = urlDriver;
                     url = urlDriver;
                 }
@@ -10954,7 +10895,7 @@ namespace WindowsFormsApp1
                     CnText.FormalizeText(ref x);
                     if (!CnText.HasEditedWithPunctuationMarks(ref x))
                     {
-                        //playSound(soundLike.warn);
+                        //PlaySound(soundLike.warn);
                         if (MessageBoxShowOKCancelExclamationDefaultDesktopOnly("尚未有以供程式判斷之編輯標記（標點符號及符號格式化字元等），是否確定送出？", string.Empty, true, MessageBoxDefaultButton.Button2) == DialogResult.Cancel) return false;
                     }
                 }
@@ -11157,7 +11098,8 @@ namespace WindowsFormsApp1
 
 
             //規範化文本，如半形標點符號轉全形：//在 下面 newTextBox1 會執行，此略（須加第3引數×才行，否則原本是根據textBox1.Text來執行的 20240427）
-            CnText.FormalizeText(ref xCopy);
+            if (!xCopy.Contains("<p>+") && !xCopy.Contains("+<p>"))
+                CnText.FormalizeText(ref xCopy);//+<p> 與 <p>+ 會被清除，所以要先保留，以作為是否正確的人工判斷 20260111
             if (!PasteOcrResultFisrtMode && (autoPaste2QuickEdit && lines_perPage == 0))//自動輸入時 lines_perPage 要由 checkAbnormalLinePara 取得
             {
                 #region checkAbnormalLinePara method test unit
@@ -11282,7 +11224,7 @@ namespace WindowsFormsApp1
                                                //https://sl.bing.net/cZ2i6BiKAmW
                         if (driverUrl != urlDriver && new Uri(urlDriver).Authority == "ctext.org")
                         {
-                            playSound(soundLike.exam, true);
+                            PlaySound(SoundLike.exam, true);
                             for (int i = driver.WindowHandles.Count - 1; i > -1; i--)
                             {
                                 driver.SwitchTo().Window(driver.WindowHandles[i]);
@@ -11291,7 +11233,7 @@ namespace WindowsFormsApp1
                         }
                         else if (driverUrl != urlDriver && new Uri(driverUrl).Authority == "ctext.org")
                         {
-                            playSound(soundLike.exam, true);
+                            PlaySound(SoundLike.exam, true);
                             urlDriver = driverUrl;
                         }
 
@@ -11360,7 +11302,7 @@ namespace WindowsFormsApp1
 
             if (autoPaste2QuickEdit && textBox1.Text == TextPatst2Quick_editBox + Environment.NewLine)
             {
-                playSound(soundLike.stop, true);
+                PlaySound(SoundLike.stop, true);
                 undoRecord(); PauseEvents();
                 textBox1.Clear(); ResumeEvents();
             }
@@ -11421,7 +11363,7 @@ namespace WindowsFormsApp1
                     if (ModifierKeys == Keys.Shift)
                     {//自動送交賢超法師《古籍酷AI》OCR
                      //已改寫在 nextPage 裡
-                     //Form1.playSound(Form1.soundLike.press);
+                     //Form1.PlaySound(Form1.soundLike.press);
                      //toOCR(OCRSiteTitle.GJcool);
                     }
                     else
@@ -11444,7 +11386,7 @@ namespace WindowsFormsApp1
 
             #region 此程序執行完畢，表單顏色閃爍顯示，以供提示 20231029
             ////其實在執行時多數時看不到表單的，也會被其他的樂音遮蔽，故不作！
-            //Form1.playSound(soundLike.info);
+            //Form1.PlaySound(soundLike.info);
             //if (!Visible) Visible = true;
             //br.BringToFront();
             //this.BackColor = Color.Tan;
@@ -12458,7 +12400,7 @@ namespace WindowsFormsApp1
                                     case ""://如果文字框裡沒內容（即空白頁）
                                         BringToFront();
                                         //IsConfirmHumanPage();
-                                        if (driver.Url != "https://ctext.org/wiki.pl" && pageUBound > int.Parse(Page_textbox.GetAttribute("value")))
+                                        if (driver.Url != "https://ctext.org/wiki.pl" && pageUBound > int.Parse(PageNum_textbox.GetAttribute("value")))
                                         {
                                             dialogResult = MessageBox.Show("是否移到下一頁？", "",
                                                 MessageBoxButtons.OKCancel, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1,
@@ -12476,7 +12418,7 @@ namespace WindowsFormsApp1
                                             if (File.Exists("C:\\Windows\\Media\\ring07.wav"))
                                                 using (SoundPlayer sp = new SoundPlayer("C:\\Windows\\Media\\ring07.wav")) { sp.Play(); }
                                             else
-                                                Form1.playSound(Form1.soundLike.waiting, true);
+                                                Form1.PlaySound(Form1.SoundLike.waiting, true);
                                         }
                                         break;
                                     default:
@@ -12538,15 +12480,15 @@ namespace WindowsFormsApp1
                     AvailableInUse_BothKeysMouse();
                     if (fastMode)
                     {
-                        if (pageUBound == int.Parse(Page_textbox.GetAttribute("value")))
+                        if (pageUBound == int.Parse(PageNum_textbox.GetAttribute("value")))
                         {
                             if (File.Exists("C:\\Windows\\Media\\ring07.wav"))
                                 using (SoundPlayer sp = new SoundPlayer("C:\\Windows\\Media\\ring07.wav")) { sp.Play(); }
                             else
-                                Form1.playSound(Form1.soundLike.waiting, true);
+                                Form1.PlaySound(Form1.SoundLike.waiting, true);
                         }
                         else
-                            Form1.playSound(Form1.soundLike.waiting, true);
+                            Form1.PlaySound(Form1.SoundLike.waiting, true);
                     }
 
                     return false;//20250301●●●●●●●●●●●●●●●●●
@@ -12558,15 +12500,15 @@ namespace WindowsFormsApp1
                     //autoPastetoCtextQuitEditTextboxCancel = false;
                     if (fastMode)
                     {
-                        if (pageUBound == int.Parse(Page_textbox.GetAttribute("value")))
+                        if (pageUBound == int.Parse(PageNum_textbox.GetAttribute("value")))
                         {
                             if (File.Exists("C:\\Windows\\Media\\ring07.wav"))
                                 using (SoundPlayer sp = new SoundPlayer("C:\\Windows\\Media\\ring07.wav")) { sp.Play(); }
                             else
-                                Form1.playSound(Form1.soundLike.waiting, true);
+                                Form1.PlaySound(Form1.SoundLike.waiting, true);
                         }
                         else
-                            Form1.playSound(Form1.soundLike.waiting, true);
+                            Form1.PlaySound(Form1.SoundLike.waiting, true);
                     }
 
                     return false;
@@ -12759,8 +12701,8 @@ namespace WindowsFormsApp1
                     if (textBox3.Text != x)
                         textBox3.Text = x;
                     //SystemSounds.Beep.Play();
-                    //Form1.playSound(Form1.soundLike.processing);
-                    Form1.playSound(Form1.soundLike.done); if (TopMost) TopMost = false;
+                    //Form1.PlaySound(Form1.soundLike.processing);
+                    Form1.PlaySound(Form1.SoundLike.done); if (TopMost) TopMost = false;
                     //if (browsrOPMode != BrowserOPMode.appActivateByName) GoToUrlandActivate(textBox3.Text);
                     textBox1.Focus();
                 }
@@ -12867,7 +12809,7 @@ namespace WindowsFormsApp1
                                                                      //{//ctrl + alt + shift + t ： 測試專用
             {
                 e.Handled = true;
-                playSound(soundLike.exam, true);
+                PlaySound(SoundLike.exam, true);
                 HanchiTextReadinginPagebyPage();
 
                 //string x = textBox1.Text;
@@ -13020,9 +12962,12 @@ namespace WindowsFormsApp1
             {
                 //await PerformOCR();
                 e.Handled = true;
-                playSound(soundLike.press, true);
+                PlaySound(SoundLike.press, true);
                 toOCR(OCRSiteTitle.KanDianGuJiAPI);
                 if (!EventsEnabled) EventsEnabled = true;
+                //讀入OCR結果後將插入點置於最前端，以便開始檢閱校讀 20260109
+                textBox1.Select(0, 0);
+                textBox1.ScrollToCaret();
                 AvailableInUse_BothKeysMouse();
                 return;
             }
@@ -13062,7 +13007,7 @@ namespace WindowsFormsApp1
 
                 int stopPageNum = pageUBound;
 
-                CheckBlankPagesBeforeOCR_NextPage(url, int.Parse(Page_textbox.GetAttribute("defaultValue")), stopPageNum);
+                CheckBlankPagesBeforeOCR_NextPage(url, int.Parse(PageNum_textbox.GetAttribute("defaultValue")), stopPageNum);
                 return;
             }
 
@@ -13121,18 +13066,22 @@ namespace WindowsFormsApp1
                 if (e.KeyCode == Keys.O)
                 {//Ctrl + Alt + o :下載圖片，交給Google Keep OCR
                     if (BrowsrOPMode == BrowserOPMode.appActivateByName) return;
-                    e.Handled = true; Form1.playSound(Form1.soundLike.press);
+                    e.Handled = true; Form1.PlaySound(Form1.SoundLike.press);
                     TopMost = false;
                     OpenQA.Selenium.IWebElement iw = WaitFindWebElementBySelector_ToBeClickable("#content");
                     if (iw != null) // clickCopybutton_GjcoolFastExperience(iw.Location); 
                         Cursor.Position = (Point)iw.Location;
                     toOCR(OCRSiteTitle.GoogleKeep);
+                    //讀入OCR結果後將插入點置於最前端，以便開始檢閱校讀 20260109
+                    textBox1.Select(0, 0);
+                    textBox1.ScrollToCaret();
+                    AvailableInUse_BothKeysMouse();
                     return;
                 }
                 if (e.KeyCode == Keys.R)
                 {//Ctrl + Alt + r :將如《趙城金藏》3欄式的版面書圖《古籍酷》AI服務OCR結果重新排列 
                  //if (browsrOPMode == BrowserOPMode.appActivateByName) return;
-                    e.Handled = true; Form1.playSound(Form1.soundLike.press);
+                    e.Handled = true; Form1.PlaySound(Form1.SoundLike.press);
                     string x = textBox1.Text;
                     undoRecord();
                     CnText.Rearrangement3ColumnLayout(ref x);
@@ -13146,7 +13095,7 @@ namespace WindowsFormsApp1
                         Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("請先以Selenium模式啟動Chrome瀏覽器（在textBox2中輸入「br」或「bb」就可以了），再繼續。");
                         return;
                     }
-                    e.Handled = true; Form1.playSound(Form1.soundLike.press);
+                    e.Handled = true; Form1.PlaySound(Form1.SoundLike.press);
                     undoRecord(); PauseEvents();
                     if (!textBox1.Focused) textBox1.Focus();
                     this.toGjcoolPunct("https://gj.cool/punct", true, true);
@@ -13183,7 +13132,7 @@ namespace WindowsFormsApp1
                 if (e.KeyCode == Keys.D)
                 {//Alt + Shift + d : 下載當前頁面書圖
                     e.Handled = true;
-                    Form1.playSound(Form1.soundLike.press, true);
+                    Form1.PlaySound(Form1.SoundLike.press, true);
                     string f = MydocumentsPathIncldBackSlash + "CtextTempFiles\\Ctext_Page_Image.png", mspaint = "C:\\WINDOWS\\system32\\mspaint.exe";
                     if (File.Exists(f))
                         File.Delete(f);
@@ -13205,13 +13154,17 @@ namespace WindowsFormsApp1
 
                 if (e.KeyCode == Keys.K)
                 {// Alt + Shift + k ：下載書圖並交給《看典古籍》OCR（網頁版）
-                    e.Handled = true; Form1.playSound(Form1.soundLike.press, true);
+                    e.Handled = true; Form1.PlaySound(Form1.SoundLike.press, true);
                     TopMost = false;
                     OpenQA.Selenium.IWebElement iw = WaitFindWebElementBySelector_ToBeClickable("#content");
                     if (iw != null) // clickCopybutton_GjcoolFastExperience(iw.Location); 
                         Cursor.Position = (Point)iw.Location;
                     toOCR(OCRSiteTitle.KanDianGuJi);
                     if (!EventsEnabled) EventsEnabled = true;
+                    //讀入OCR結果後將插入點置於最前端，以便開始檢閱校讀 20260109
+                    textBox1.Select(0, 0);
+                    textBox1.ScrollToCaret();
+                    AvailableInUse_BothKeysMouse();
                     return;
                 }
                 if (e.KeyCode == Keys.O)
@@ -13220,13 +13173,16 @@ namespace WindowsFormsApp1
                     if (PagePaste2GjcoolOCR_ing) PagePaste2GjcoolOCR_ing = false;
                     if (BrowsrOPMode == BrowserOPMode.appActivateByName) return;
                     if (!IsValidUrl＿ImageTextComparisonPage(textBox3.Text)) return;
-                    e.Handled = true; Form1.playSound(Form1.soundLike.press, true);
+                    e.Handled = true; Form1.PlaySound(Form1.SoundLike.press, true);
                     TopMost = false;
                     OpenQA.Selenium.IWebElement iw = WaitFindWebElementBySelector_ToBeClickable("#content");
                     if (iw != null) // clickCopybutton_GjcoolFastExperience(iw.Location); 
                         Cursor.Position = (Point)iw.Location;
                     toOCR(OCRSiteTitle.GJcool);
                     if (!EventsEnabled) EventsEnabled = true;
+                    //讀入OCR結果後將插入點置於最前端，以便開始檢閱校讀 20260111
+                    textBox1.Select(0, 0);
+                    textBox1.ScrollToCaret();
                     AvailableInUse_BothKeysMouse();
                     //if (browsrOPMode == BrowserOPMode.appActivateByName) return;
                     //e.Handled = true;
@@ -13270,7 +13226,7 @@ namespace WindowsFormsApp1
                 if (e.KeyCode == Keys.V)
                 {//Alt + Shift + v ：新增一個直書的文字方塊
                  //20230824 chatGPT大菩薩：中文文字方塊直書示例:根本就是失敗的。沒有用。沒變成直書，且亂排了一通。如果能截圖給您看，我就截給您看了。感恩感恩　南無阿彌陀佛
-                    e.Handled = true; Form1.playSound(Form1.soundLike.press);
+                    e.Handled = true; Form1.PlaySound(Form1.SoundLike.press);
                     //AddVerticalTextBox();
                     return;
                 }
@@ -13661,7 +13617,7 @@ namespace WindowsFormsApp1
                         else if (autoPaste2QuickEdit)
                         {
                             Alt_a();
-                            //playSound(soundLike.press, true);
+                            //PlaySound(soundLike.press, true);
                             //altA_predictEndofPageRange();
                             //keyDownCtrlAdd(false);
                         }
@@ -13685,7 +13641,7 @@ namespace WindowsFormsApp1
                         else if (autoPaste2QuickEdit)
                         {
                             Alt_a();
-                            //playSound(soundLike.press, true);
+                            //PlaySound(soundLike.press, true);
                             //altA_predictEndofPageRange();
                             //keyDownCtrlAdd(false);
                         }
@@ -13707,7 +13663,7 @@ namespace WindowsFormsApp1
                         else if (autoPaste2QuickEdit)
                         {
                             Alt_a();
-                            //playSound(soundLike.press, true);
+                            //PlaySound(soundLike.press, true);
                             //altA_predictEndofPageRange();
                             //keyDownCtrlAdd(false);
                         }
@@ -13755,7 +13711,7 @@ namespace WindowsFormsApp1
                     //    }
                     //    catch (Exception)
                     //    {
-                    //        playSound(soundLike.error, true);
+                    //        PlaySound(soundLike.error, true);
                     //    }
                     return;
 
@@ -13768,12 +13724,13 @@ namespace WindowsFormsApp1
 
         private void ctrlShiftF1()
         {
-            if (insertMode && textBox1.SelectionLength > 0 || !insertMode)
+            //if (insertMode && textBox1.SelectionLength > 0 || !insertMode)
+            if (textBox1.SelectionLength > 0)
             {
                 undoRecord();
                 stopUndoRec = true;
-                if (textBox1.SelectionLength == 0)
-                    overtypeModeSelectedTextSetting(ref textBox1);
+                //if (textBox1.SelectionLength == 0)
+                overtypeModeSelectedTextSetting(ref textBox1);
                 string x = textBox1.SelectedText;
                 //先清理
                 x = x.Replace("。<p>", string.Empty).Replace("<p>", string.Empty);
@@ -13830,14 +13787,14 @@ namespace WindowsFormsApp1
             {
                 //turnOn_autoPastetoQuickEdit();
                 if (!autoPaste2QuickEdit) turnOn_autoPastetoQuickEdit();
-                playSound(soundLike.over, true);//播放音效，啟動快捷模式之通知 20250206 蛇年初九
+                PlaySound(SoundLike.over, true);//播放音效，啟動快捷模式之通知 20250206 蛇年初九
                                                 //YouChat菩薩：在C#中，紅綠燈的綠色值為Color.FromArgb(0, 255, 0)。它可以指定RGB顏色，其中紅色的值為0，綠色的值為255，藍色的值為0
                 notFastModeColor = button1.ForeColor;
                 button1.ForeColor = Color.FromArgb(0, 255, 0);//https://www.google.com/search?q=Color.FromArgb(0%2C+255%2C+0)%3B&oq=Color.FromArgb(0%2C+255%2C+0)%3B&gs_lcrp=EgZjaHJvbWUyBggAEEUYOTIICAEQABgIGB4yCggCEAAYgAQYogQyBwgDEAAY7wUyBwgEEAAY7wXSAQczMDhqMGo3qAIAsAIA&sourceid=chrome&ie=UTF-8
             }
             else
             {
-                playSound(soundLike.warn, true);//播放音效，關閉快捷模式之通知 20250207 蛇年初十
+                PlaySound(SoundLike.warn, true);//播放音效，關閉快捷模式之通知 20250207 蛇年初十
                 if (notFastModeColor != null) button1.ForeColor = notFastModeColor;
             }
         }
@@ -14132,7 +14089,7 @@ namespace WindowsFormsApp1
             //if(autoPasteFromSBCKwhether)autoPasteFromSBCKwhether    = false;
             //if (autoPastetoQuickEdit) autoPastetoQuickEdit = false;
             if (keyinTextMode) KeyinTextmodeSwitcher(false);
-            playSound(soundLike.press, true);
+            PlaySound(SoundLike.press, true);
             WindowHandles.TryGetValue("Hanchi_CTP_SearchingKeywordsYijing", out string windowHandle_Hanchi_CTP_SearchingKeywordsYijing);
             if (driver != null && IsDriverInvalid())
             {
@@ -14333,7 +14290,7 @@ namespace WindowsFormsApp1
         /// <returns>成功執行傳回true</returns>
         private bool toOCR(OCRSiteTitle ocrSiteTitle, bool justDownloadImage = false)
         {
-            //Form1.playSound(Form1.soundLike.press);
+            //Form1.PlaySound(Form1.soundLike.press);
 
             TopMost = false;
 
@@ -14352,7 +14309,7 @@ namespace WindowsFormsApp1
                     try
                     {
                         driver.SwitchTo().Window(LastValidWindow);
-                        playSound(soundLike.exam);
+                        PlaySound(SoundLike.exam);
                     }
                     catch (Exception)
                     {
@@ -14538,7 +14495,7 @@ namespace WindowsFormsApp1
                     }
                     ocrResult = PerformOCR();
                     if (!ocrTextMode)
-                        Form1.playSound(Form1.soundLike.info, true);
+                        Form1.PlaySound(Form1.SoundLike.info, true);
                     //請注意，這種方法會阻塞當前線程，直到 PerformOCR 方法完成。如果 PerformOCR 方法需要花費很長時間，這可能會導致您的應用程式暫時無響應。因此，雖然這種方法可以避免將呼叫端方法變為異步，但它可能會降低您的應用程式的響應性。
                     break;
                 default:
@@ -14587,7 +14544,7 @@ namespace WindowsFormsApp1
                 //    //driver?.SwitchTo().Window(currentWindowHndl);
                 //    if (Clipboard.GetText() != string.Empty)
                 //    {
-                //        playSound(soundLike.waiting);
+                //        PlaySound(soundLike.waiting);
                 //        AvailableInUseBothKeysMouse();
                 //        SendKeys.SendWait("%{ins}");//Alt + Insert
                 //        textBox1.Select(0, 0);
@@ -14752,8 +14709,8 @@ namespace WindowsFormsApp1
                     _eventsEnabled = ee; stopUndoRec = false;
                 }
             }
-            //讀入OCR結果後將插入點置於最前端，以便開始檢閱校讀 20260109
-            textBox1.Select(0, 0);
+            ////讀入OCR結果後將插入點置於最前端，以便開始檢閱校讀 20260109
+            //textBox1.Select(0, 0);//連續批量OCR時也會操作到，所以寫在呼叫端才行
             return ocrResult;// true;
             #endregion
 
@@ -14933,7 +14890,7 @@ namespace WindowsFormsApp1
         /// <returns></returns>
         internal bool CheckBlankPagesBeforeOCR_NextPage(string url, int startPageNum, int stopPageNum)
         {
-            if (!Form1.IsValidUrl＿ImageTextComparisonPage(url)) return false;
+            if (!IsValidUrl＿ImageTextComparisonPage(url)) return false;
             if (driver == null) return false;
             string baseUrl = url.Substring(0, url.IndexOf("&page="));
             ChromeSetFocus();
@@ -15108,7 +15065,7 @@ namespace WindowsFormsApp1
                 {
                     Keys modifierKeys = ModifierKeys;
                     if (modifierKeys == Keys.Shift && !stayInHere)
-                        Form1.playSound(Form1.soundLike.press);
+                        Form1.PlaySound(Form1.SoundLike.press);
 
                     //OpenQA.Selenium.IWebElement quick_edit_box;
                     switch (BrowsrOPMode)
@@ -15164,7 +15121,7 @@ namespace WindowsFormsApp1
                             else if (modifierKeys == Keys.Shift && !pagePaste2GjcoolOCR)//&& !PagePaste2GjcoolOCR_ing)
                             {
                                 //toOCR(OCRSiteTitle.GJcool);
-                                Form1.playSound(Form1.soundLike.press, true);
+                                Form1.PlaySound(Form1.SoundLike.press, true);
                                 toOCR(PagePast2OCRsite);
                             }
                             break;
@@ -15439,7 +15396,7 @@ namespace WindowsFormsApp1
                 }
                 #endregion
                 #region 自動段落標記
-                playSound(soundLike.over, true);
+                PlaySound(SoundLike.over, true);
                 if (TitleLeadingSpacesCount.Count > 0)
                     paragraphMarkingAccordingFirstOneLineLength();
                 #endregion
@@ -15712,7 +15669,7 @@ namespace WindowsFormsApp1
                     }
                 }
                 //以上卷首縮排的處理
-                //playSound(soundLike.processing, true);
+                //PlaySound(soundLike.processing, true);
                 //以下卷尾縮排的處理
 
                 paragraphs = document.GetParagraphs();//更新paragraphs，因為_document（也就是textBox1內容已經因為前面的凸排而更動了）                
@@ -15781,7 +15738,7 @@ namespace WindowsFormsApp1
                     }
                 }
                 //以上卷首縮排的處理
-                playSound(soundLike.processing, true);
+                PlaySound(SoundLike.processing, true);
                 //以下卷尾縮排的處理
                 range = null;
                 paragraphs = document.GetParagraphs();//更新paragraphs，因為_document（也就是textBox1內容已經因為前面的凸排而更動了）                
@@ -16335,7 +16292,7 @@ namespace WindowsFormsApp1
                         ////if (tabWindowHandles.Count > 1 && i < tabWindowHandles.Count - 1)
                         //reLoadWindowHandles:
                         //    int tabCount = driver.WindowHandles.Count;// DateTime dt = DateTime.Now;
-                        //    //while (tabCount > 1 && i < tabCount - 1 && tabCount == driver.WindowHandles.Count) { if (DateTime.Now.Subtract(dt).TotalSeconds > 20) { playSound(soundLike.over, true); break; } }
+                        //    //while (tabCount > 1 && i < tabCount - 1 && tabCount == driver.WindowHandles.Count) { if (DateTime.Now.Subtract(dt).TotalSeconds > 20) { PlaySound(soundLike.over, true); break; } }
                         //    //tabCount = driver.WindowHandles.Count;
                         //    if (tabCount > 1 && i < tabCount - 1)
                         //    {
@@ -16344,13 +16301,13 @@ namespace WindowsFormsApp1
                         //        //        && ocrTextMode == false)
                         //        //{
                         //        //    retry++;//重新取得 tabWin = driver.WindowHandles[i]; 才比較會載入新的WindowHandles數量
-                        //        //    if (retry == 1) { playSound(soundLike.over, true); goto reLoadWindowHandles; }
+                        //        //    if (retry == 1) { PlaySound(soundLike.over, true); goto reLoadWindowHandles; }
                         //        //    retry = 0;
                         //        //}
 
                         //        if (waitUpdate && waitTabWindowHandle != "") driver.SwitchTo().Window(waitTabWindowHandle); driver.Close();
 
-                        //        //playSound(soundLike.warn, true);
+                        //        //PlaySound(soundLike.warn, true);
                         //        driver.SwitchTo().Window(tabWin);
                         //        string url_Driver = driver.Url;
                         //        //if (GetValidWindowHandles(driver).Count > 2&& !(waitUpdate && waitTabWindowHandle != ""))
@@ -16361,7 +16318,7 @@ namespace WindowsFormsApp1
                         //                && ocrTextMode == false)
                         //        {
                         //            retry++;//重新取得 tabWin = driver.WindowHandles[i]; 才比較會載入新的WindowHandles數量（寫在這才能抓到新的視窗句柄集合）
-                        //            if (retry == 1) { playSound(soundLike.over, true); goto reLoadWindowHandles; }
+                        //            if (retry == 1) { PlaySound(soundLike.over, true); goto reLoadWindowHandles; }
                         //            retry = 0;
 
                         //            driver.Close();
@@ -16595,7 +16552,7 @@ namespace WindowsFormsApp1
                 }
                 else//CheckAdjacentPages_DataPrev == null
                     driver.Navigate().Refresh();
-                playSound(soundLike.over, true);
+                PlaySound(SoundLike.over, true);
             }
             //無效，改寫到後面！
             //else
@@ -16604,7 +16561,7 @@ namespace WindowsFormsApp1
             //{
             //    driver.Navigate().Refresh();//如果有開啟Edit頁面分頁，則當切回圖文對照分頁時都一律刷新當前頁面，以免Edit頁面的舊資料覆蓋過圖文對照頁面的新資料 20250218
 
-            //    playSound(soundLike.exam, true);//just for test
+            //    PlaySound(soundLike.exam, true);//just for test
             //}
             //}
             //Task wait1 = Task.Run(() =>
@@ -16876,7 +16833,7 @@ namespace WindowsFormsApp1
             undoRecord();
 
             stopUndoRec = false;
-            playSound(soundLike.notify, true);//若有取代則播音效，否則有些字筆畫太似，不放大不知道有沒有一致，取代了沒 20240913
+            PlaySound(SoundLike.notify, true);//若有取代則播音效，否則有些字筆畫太似，不放大不知道有沒有一致，取代了沒 20240913
         }
 
         /// <summary>
@@ -17155,7 +17112,7 @@ namespace WindowsFormsApp1
                 }
                 catch (Exception)
                 {
-                    playSound(soundLike.error, true);
+                    PlaySound(SoundLike.error, true);
                 }
                 textBox4.Text = textBox1.SelectedText; textBox4.DeselectAll();
             }
@@ -17506,7 +17463,7 @@ namespace WindowsFormsApp1
 
                                 else if (mk == Keys.Shift && mk != (Keys.Shift | Keys.Control))//(mk == (Keys.Shift|Keys.Delete))
                                 {//如果是準備剪下貼上：           //20241008先作廢
-                                 //playSound(soundLike.press);
+                                 //PlaySound(soundLike.press);
                                  //SelectAllQuickedit_data_textboxContent();
                                 }
                             }
@@ -17579,6 +17536,22 @@ namespace WindowsFormsApp1
 
             //alt + Shift + f ： 將章節單位的頁面樹狀目錄收起或展開
             //OutlineTitlesCloseOpenFoldExpandSwitcher();            
+
+            //在textBox1的第一段指定頁差（=目的-來源頁碼）
+            //if (ModifierKeys == Keys.Shift && (textBox1.TextLength > 30 || originalText.Contains(@"<scanbegin file=""")))
+            if (AreModifiersPressed(Keys.Alt) == false && KeyboardInfo.AreModifiersPressed(Keys.Control | Keys.Shift) && (textBox1.TextLength > 30 || Clipboard.GetText().Contains(@"<scanbegin file=""")))
+            {
+                EditPageNumOffset_PageNumModifier();
+                nextPages(Keys.PageUp, false);//檢視編輯結果
+                AvailableInUse_BothKeysMouse();
+            }
+            if (!IsDriverInvalid() && AreModifiersPressed(Keys.Control | Keys.Shift | Keys.Alt) && textBox1.TextLength > 30)
+            {
+                Move2NextChapter();
+                nextPages(Keys.PageUp, false);//檢視重新編頁後的結果
+                AvailableInUse_BothKeysMouse();
+            }
+
 
             //20250113
             if (this.Name != "Form1")
@@ -18893,7 +18866,7 @@ namespace WindowsFormsApp1
             {//if (x.Substring(s - 2) == "{{" && c == "{".ToCharArray()[0])
              //insertMode = true;
                 InsertModeSwitcher();
-                playSound(soundLike.exam);
+                PlaySound(SoundLike.exam);
             }
         }
 
@@ -19001,7 +18974,7 @@ namespace WindowsFormsApp1
                             int cntr = 0;
                             while (textBox1.Text != Quickedit_data_textboxTxt)
                             {
-                                playSound(soundLike.info);
+                                PlaySound(SoundLike.info);
                                 textBox1.Text = Quickedit_data_textboxTxt;
                                 if (cntr > 2) Debugger.Break();
                                 cntr++;
@@ -19288,7 +19261,7 @@ namespace WindowsFormsApp1
             //if (url.IndexOf("#box(") > -1 && (url.IndexOf("&editwiki=") > -1)
             if (url.IndexOf("#box(") > -1)
             {
-                playSound(soundLike.waiting, true);
+                PlaySound(SoundLike.waiting, true);
                 if (MessageBoxShowOKCancelExclamationDefaultDesktopOnly("網址內含「#box(……)」是否要偵錯？", string.Empty, true, MessageBoxDefaultButton.Button2) == DialogResult.OK)
                     Debugger.Break();
                 else
@@ -19305,7 +19278,7 @@ namespace WindowsFormsApp1
                             string ur = GetDriverUrl;
                             if (ur.IndexOf("#box(") > -1)
                                 //    driver.Navigate().GoToUrl(ur.Substring(0, ur.IndexOf("#box(")));
-                                driver.Url = Form1.FixUrl＿ImageTextComparisonPage(ur, false, true);
+                                driver.Url = FixUrl＿ImageTextComparisonPage(ur, false, true);
                         }
                         catch (Exception ex)
                         {
@@ -19413,14 +19386,14 @@ namespace WindowsFormsApp1
             { //normalLineParaLenggth = 0;
 
                 //if (url != string.Empty) Debugger.Break(); //just for test 
-                playSound(soundLike.done, true);
+                PlaySound(SoundLike.done, true);
                 if (previousResID == 0 || (previousResID != resID && resID > 0))
                     //if (DialogResult.OK == MessageBoxShowOKCancelExclamationDefaultDesktopOnly("是否要重設書籍版面資訊？"))
                     resetBooksPagesFeatures();
                 previousResID = resID;
                 if (editwikiID > 0 && editwikiID != previousEditwikiID) previousEditwikiID = editwikiID;
                 if (textBox3.Text.StartsWith("http"))
-                    playSound(soundLike.warn);
+                    PlaySound(SoundLike.warn);
             }
             //else
             //{
@@ -19429,7 +19402,7 @@ namespace WindowsFormsApp1
             //        resetBooksPagesFeatures();
             //        previousResID = resID;
             //        previousEditwikiID = editwikiID;
-            //        playSound(soundLike.warn);
+            //        PlaySound(soundLike.warn);
             //    }
             //}
 
@@ -19464,7 +19437,7 @@ namespace WindowsFormsApp1
                         //{
                         //    using (SoundPlayer sp= new SoundPlayer("C:\\Windows\\Media\\recycle.wav")) { sp.Play(); }
 
-                        //    //playSound(soundLike.error);
+                        //    //PlaySound(soundLike.error);
                         //});
                     }
                     catch (Exception ex1)
@@ -20039,7 +20012,7 @@ namespace WindowsFormsApp1
                 rx = rst.Fields[0].Value.ToString();
                 if (tx.IndexOf(rx) > -1)
                 {
-                    playSound(soundLike.notify, true);
+                    PlaySound(SoundLike.notify, true);
                     try
                     {
                         tx = tx.Replace(rx, rst.Fields[1].Value?.ToString());

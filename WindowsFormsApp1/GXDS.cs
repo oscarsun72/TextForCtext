@@ -261,7 +261,7 @@ namespace TextForCtext
             xForStandardize = Regex.Replace(xForStandardize, @"^[\r\n]+", "");
 
 
-            playSound(soundLike.processing);
+            PlaySound(SoundLike.processing);
         }
         /// <summary>
         /// 標題/篇名標識。只要一行/段之前後均只是空行的話（跨行以上的不處理，手動自行處理）

@@ -247,7 +247,7 @@ namespace TextForCtext
                         case -2146233088:
                             if (ex.Message.IndexOf("An unknown exception was encountered sending an HTTP request to the remote WebDriver server for URL") > -1)
                             {
-                                Form1.playSound(Form1.soundLike.error);
+                                Form1.PlaySound(Form1.SoundLike.error);
                                 try
                                 {
                                     _lastValidWindowHandle = driver.WindowHandles[driver.WindowHandles.Count - 1];
@@ -296,7 +296,7 @@ namespace TextForCtext
                     {
                         driver.SwitchTo().Window(driver.WindowHandles[i]);
                         //if (DialogResult.OK == Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("是這個分頁嗎？"))
-                        if (Form1.IsValidUrl＿ImageTextComparisonPage(driver.Url))
+                        if (IsValidUrl＿ImageTextComparisonPage(driver.Url))
                         {
                             _lastValidWindowHandle = driver.WindowHandles[i];
                             return _lastValidWindowHandle;
@@ -332,7 +332,7 @@ namespace TextForCtext
                 ex.Message.StartsWith("disconnected: not connected to DevTools") ||
                 ex.Message.StartsWith("invalid session id"))//An unknown exception was encountered sending an HTTP request to the remote WebDriver server for URL http://localhost:13451/session/6f6c77cfb73c5c388c6cdfd40a06b806/url. The exception message was: 傳送要求時發生錯誤。
             {
-                Form1.playSound(Form1.soundLike.over);
+                Form1.PlaySound(Form1.SoundLike.over);
                 killchromedriverFromHere();
                 driver = null;
                 DriverNew();
@@ -1062,7 +1062,7 @@ namespace TextForCtext
                         if (cDrv.Title == "新分頁" || cDrv.Title == string.Empty || cDrv.Url == "chrome://new-tab-page/")
                         {
                             cDrv.Close();
-                            Form1.playSound(Form1.soundLike.over, true);
+                            Form1.PlaySound(Form1.SoundLike.over, true);
 
                             //break;
                         }
@@ -1163,7 +1163,7 @@ namespace TextForCtext
 
                 driver = cDrv;// quickedit_data_textboxSetting 方法堆疊（stack）中要用到driver參考
 
-                if (Form1.IsValidUrl＿ImageTextComparisonPage(url))
+                if (IsValidUrl＿ImageTextComparisonPage(url))
                     Quickedit_data_textboxSetting(url, null, cDrv);
                 //IWebElement clk  = cDrv.FindElement(selm.By.Id("logininfo")); clk.Click();
                 //cDrv.FindElement(selm.By.Id("logininfo")).Click();
@@ -1506,7 +1506,7 @@ namespace TextForCtext
         /// <returns></returns>
         internal static string getUrl(ControlType controlType)
         {
-            string urls = ""; Form1.playSound(Form1.soundLike.over);
+            string urls = ""; Form1.PlaySound(Form1.SoundLike.over);
             try
             {
                 //Process[] procsChrome = Process.GetProcessesByName("chrome");
@@ -1683,7 +1683,7 @@ namespace TextForCtext
                             case -2146233088:
                                 if (ex.Message.StartsWith("no such window: target window already closed"))
                                 {
-                                    Form1.playSound(Form1.soundLike.error);
+                                    Form1.PlaySound(Form1.SoundLike.error);
                                     driver.SwitchTo().Window(driver.WindowHandles[driver.WindowHandles.Count - 1]);
                                     url = driver.Url;
                                 }
@@ -1817,7 +1817,7 @@ namespace TextForCtext
                         else if (ex.Message.StartsWith("An unknown exception was encountered sending an HTTP request to the remote WebDriver server for URL"))
                         {
                             killchromedriverFromHere();
-                            Form1.playSound(Form1.soundLike.error, true);
+                            Form1.PlaySound(Form1.SoundLike.error, true);
                             //Debugger.Break();
                             driver = null; Form1.BrowsrOPMode = Form1.BrowserOPMode.seleniumNew;
                             DriverNew();
@@ -1825,7 +1825,7 @@ namespace TextForCtext
                         }
                         else if (ex.Message.StartsWith("invalid session id"))
                         {
-                            Form1.playSound(Form1.soundLike.error, true);
+                            Form1.PlaySound(Form1.SoundLike.error, true);
                             RestartChromedriver();
                             goto retry;
                         }
@@ -2035,8 +2035,8 @@ namespace TextForCtext
                                         }
                                         catch (Exception)
                                         {
-                                            Form1.playSound(Form1.soundLike.error, true);
-                                            Form1.playSound(Form1.soundLike.warn, true);
+                                            Form1.PlaySound(Form1.SoundLike.error, true);
+                                            Form1.PlaySound(Form1.SoundLike.warn, true);
                                             //Copilot大菩薩 20240727：
                                             ((IJavaScriptExecutor)driver).ExecuteScript("window.open();");
                                             driver.SwitchTo().Window(driver.WindowHandles.Last());
@@ -3008,7 +3008,7 @@ namespace TextForCtext
                         GJcoolAccounts[j] = new Tuple<string, DateTime>(GJcoolAccounts[j].Item1, DateTime.Parse("2023/9/29"));
                     }
                     gjcoolAccountCounter = 0;
-                    Form1.playSound(Form1.soundLike.warn);
+                    Form1.PlaySound(Form1.SoundLike.warn);
                 }
                 else
                     gjcoolAccountCounter++;
@@ -3019,7 +3019,7 @@ namespace TextForCtext
                     if (DateTime.Now.Subtract(GJcoolAccounts[i].Item2).TotalHours > 23.6)
                     {
                         gjcoolAccountCounter--;
-                        Form1.playSound(Form1.soundLike.exam);
+                        Form1.PlaySound(Form1.SoundLike.exam);
                         break;
                     }
                     i = rand.Next(0, gjcoolaccountsCount);
@@ -3054,11 +3054,11 @@ namespace TextForCtext
 
                     //SendKeys.Send("{tab 14}");//driver.Navigate().GoToUrl("https://gj.cool/login");
                     //SendKeys.Send("{tab 15}");//driver.Navigate().GoToUrl("https://gj.cool/account");
-                    //Form1.playSound(Form1.soundLike.done);                    
+                    //Form1.PlaySound(Form1.soundLike.done);                    
                     //Point pt = new Point(1002, 656);
                     Point pt = new Point(1002, 666);
                     //Cursor.Position = pt;
-                    clickCopybutton_GjcoolFastExperience(pt, Form1.soundLike.done);
+                    clickCopybutton_GjcoolFastExperience(pt, Form1.SoundLike.done);
 
                     GJcoolAccounts[i] = new Tuple<string, DateTime>(GJcoolAccounts[i].Item1, DateTime.Now);
 
@@ -3069,7 +3069,7 @@ namespace TextForCtext
                         ie.Clear();
                         ie.SendKeys(currentAccount);
                         //SendKeys.Send("{tab 2}");
-                        clickCopybutton_GjcoolFastExperience(pt, Form1.soundLike.none);
+                        clickCopybutton_GjcoolFastExperience(pt, Form1.SoundLike.none);
                     }
 
                 }
@@ -3113,19 +3113,19 @@ namespace TextForCtext
                 Cursor.Position = copyBtnPos;
                 //ClickLeftMouse(x, y);
                 //Thread.Sleep(150);
-                clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.soundLike.press);
+                clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.SoundLike.press);
                 Thread.Sleep(450);
                 //copyBtnPos = new Point(1597, 295);//連接（Connect）按鈕位置
                 //copyBtnPos = new Point(1595, 333);//連接（Connect）按鈕位置（此與TouchVPN的有交集）
                 //copyBtnPos = new Point(1525, 333);//連接（Connect）按鈕位置（此與TouchVPN的有交集） 118.0.5993.89版以後
                 copyBtnPos = new Point(1525, 320);//連接（Connect）按鈕位置（此與TouchVPN、VeePN的有交集） 118.0.5993.89版以後
                 Cursor.Position = copyBtnPos;
-                clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.soundLike.over);
+                clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.SoundLike.over);
                 Thread.Sleep(250);
                 //copyBtnPos = new Point(1700, 160);//TouchVPN的Stop按鈕
                 copyBtnPos = new Point(1630, 160);//TouchVPN的Stop按鈕  118.0.5993.89版以後
                 Cursor.Position = copyBtnPos;
-                clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.soundLike.over);
+                clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.SoundLike.over);
                 if (VPNSwitchedTimer == 0)
                     Thread.Sleep(2400);//TouchVPN比較久
                 else
@@ -3134,7 +3134,7 @@ namespace TextForCtext
                                        //copyBtnPos = new Point(1525, 333);// TouchVPN 連接（Connect）按鈕位置 118.0.5993.89版以後
                 copyBtnPos = new Point(1525, 320);// TouchVPN 連接（Connect）按鈕位置 118.0.5993.89版以後
                 Cursor.Position = copyBtnPos;
-                clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.soundLike.done);
+                clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.SoundLike.done);
                 Thread.Sleep(150);
                 SendKeys.SendWait("{esc}");
                 try
@@ -3148,7 +3148,7 @@ namespace TextForCtext
                 }
                 Thread.Sleep(650);
 
-                Task.Run(() => { Form1.playSound(Form1.soundLike.over); });
+                Task.Run(() => { Form1.PlaySound(Form1.SoundLike.over); });
                 if (VPNSwitchedTimer == 0)
                     Thread.Sleep(850);
                 else
@@ -3166,12 +3166,12 @@ namespace TextForCtext
 
             Point copyBtnPos = new Point(1739, 55);//擴充功能顯示清單中最右邊的位置
             Cursor.Position = copyBtnPos;
-            clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.soundLike.press);
+            clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.SoundLike.press);
             Thread.Sleep(450);
 
             copyBtnPos = new Point(1606, 401);
             Cursor.Position = copyBtnPos;
-            clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.soundLike.press);
+            clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.SoundLike.press);
             Thread.Sleep(250);
 
             SendKeys.SendWait("{tab}");
@@ -3206,7 +3206,7 @@ namespace TextForCtext
             SendKeys.SendWait("{ESC}");
             Thread.Sleep(850);
 
-            Task.Run(() => { Form1.playSound(Form1.soundLike.over); });
+            Task.Run(() => { Form1.PlaySound(Form1.SoundLike.over); });
 
             return true;
 
@@ -3372,7 +3372,7 @@ namespace TextForCtext
                     Cursor.Position = copyBtnPos;
                     //ClickLeftMouse(x, y);
                     Thread.Sleep(350);
-                    clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.soundLike.none);
+                    clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.SoundLike.none);
                     Thread.Sleep(150);
                     //Task.Run(() => { Thread.Sleep(5800); ShowWindow(targetWindowHandle, SW_MINIMIZE); });
                     Task.Run(() => { Thread.Sleep(8800); ShowWindow(targetWindowHandle, SW_MINIMIZE); });
@@ -3397,7 +3397,7 @@ namespace TextForCtext
             Cursor.Position = copyBtnPos;
             //ClickLeftMouse(x, y);
             //Thread.Sleep(150);
-            clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.soundLike.press);
+            clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.SoundLike.press);
             Thread.Sleep(450);
 
             List<string> list = new List<string>() { "土耳其", "丹麥", "厄瓜多", "巴西", "巴基斯坦", "日本", "比利時", "以色列", "加拿大", "北馬其頓", "台灣", "立陶宛", "冰島", "匈牙利", "印尼", "印度", "西班牙", "克羅埃西亞", "希臘", "奈及利亞", "拉脫維亞", "法國", "波多黎各", "波蘭", "芬蘭", "阿拉伯聯合大公國", "阿根廷", "俄羅斯", "保加利亞", "南非", "南韓", "柬埔寨", "美國", "英國", "香港", "哥倫比亞", "哥斯達黎加", "埃及", "挪威", "泰國", "烏克蘭", "秘魯", "紐西蘭", "馬來西亞", "馬爾他", "捷克", "荷蘭", "喬治亞", "斯洛伐克", "斯洛維尼亞", "智利", "菲律賓", "越南", "塞爾維亞", "奧地利", "愛沙尼亞", "愛爾蘭", "新加坡", "瑞士", "瑞典", "義大利", "葡萄牙", "德國", "摩洛哥", "摩爾多瓦", "緬甸", "墨西哥", "澳洲", "盧森堡", "賽普勒斯", "羅馬尼亞" };
@@ -3426,7 +3426,7 @@ namespace TextForCtext
             SendKeys.SendWait("{ESC}");
             Thread.Sleep(850);
 
-            Task.Run(() => { Form1.playSound(Form1.soundLike.over); });
+            Task.Run(() => { Form1.PlaySound(Form1.SoundLike.over); });
 
             return true;
         }
@@ -3562,10 +3562,10 @@ namespace TextForCtext
                 //ClickLeftMouse(x, y);
                 //Thread.Sleep(150);
                 Thread.Sleep(450);
-                clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.soundLike.none);
+                clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.SoundLike.none);
                 //Thread.Sleep(1150);//等待斷開 
                 Thread.Sleep(1350);//等待斷開
-                clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.soundLike.none);
+                clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.SoundLike.none);
                 Thread.Sleep(6500);//監看連線成功
                 return true;
             }
@@ -3628,9 +3628,9 @@ namespace TextForCtext
                 Cursor.Position = copyBtnPos;
                 //ClickLeftMouse(x, y);
                 Thread.Sleep(150);
-                clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.soundLike.none);
+                clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.SoundLike.none);
                 Thread.Sleep(850);//等待斷開
-                clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.soundLike.none);
+                clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.SoundLike.none);
                 Thread.Sleep(900);//監看連線成功
 
                 Point form1Location = ActiveForm1.Location; bool eventEnable = ActiveForm1.EventsEnabled;
@@ -3676,7 +3676,7 @@ namespace TextForCtext
                     {
                         ipChangedCounter++;
                         //Debugger.Break();
-                        Form1.playSound(Form1.soundLike.over);
+                        Form1.PlaySound(Form1.SoundLike.over);
                         GoogleOneVPNSwitcher();
                     }
                     else
@@ -3718,7 +3718,7 @@ namespace TextForCtext
                 {
                     throw;
                 }
-                Form1.playSound(Form1.soundLike.done);
+                Form1.PlaySound(Form1.SoundLike.done);
                 //if (ActiveForm1.InvokeRequired)
                 //{
                 //    ActiveForm1.Invoke((MethodInvoker)delegate
@@ -3730,7 +3730,7 @@ namespace TextForCtext
                 //}
                 return true;
             }
-            Form1.playSound(Form1.soundLike.done);
+            Form1.PlaySound(Form1.SoundLike.done);
             //if (ActiveForm1.InvokeRequired)
             //{
             //    ActiveForm1.Invoke((MethodInvoker)delegate
@@ -4043,7 +4043,7 @@ namespace TextForCtext
                 //iwe = waitFindWebElementBySelector_ToBeClickable("#Batch > div.d-flex.justify-content-between.mt-3 > div > div > div:nth-child(2) > ul > li:nth-child(1) > a");
                 //iwe.Click();
 
-                //Form1.playSound(Form1.soundLike.over);
+                //Form1.PlaySound(Form1.soundLike.over);
 
                 //Thread.Sleep(800);
 
@@ -4102,7 +4102,7 @@ namespace TextForCtext
                     }
                     catch (Exception)
                     {
-                        Form1.playSound(Form1.soundLike.error, true);
+                        Form1.PlaySound(Form1.SoundLike.error, true);
                         driver.SwitchTo().Window(driver.CurrentWindowHandle);
                         SendKeys.SendWait("{esc}");
                         driver.SwitchTo().Window(driver.CurrentWindowHandle);
@@ -4313,7 +4313,7 @@ namespace TextForCtext
             //iwe = waitFindWebElementBySelector_ToBeClickable("#Batch > div.d-flex.justify-content-between.mt-3 > div > div > div:nth-child(2) > ul > li:nth-child(1) > a");
             //iwe.Click();
 
-            //Form1.playSound(Form1.soundLike.over);
+            //Form1.PlaySound(Form1.soundLike.over);
 
             Thread.Sleep(1400);
         reClickUploadOK:
@@ -4805,7 +4805,7 @@ namespace TextForCtext
             //    }
             //    catch (Exception)
             //    {
-            //        Form1.playSound(Form1.soundLike.error, true);
+            //        Form1.PlaySound(Form1.soundLike.error, true);
             //        driver.SwitchTo().Window(driver.CurrentWindowHandle);
             //        SendKeys.SendWait("{esc}");
             //        driver.SwitchTo().Window(driver.CurrentWindowHandle);
@@ -4881,7 +4881,7 @@ namespace TextForCtext
         /// <returns>順利完成則回傳true</returns>
         internal static bool OCR_GJcool_AutoRecognizeVertical(string downloadImgFullName)
         {
-            //Form1.playSound(Form1.soundLike.press);
+            //Form1.PlaySound(Form1.soundLike.press);
             string gjCool = string.Empty; string currentWindowHndl = ""; WindowType windowType = WindowType.Tab;
             try
             {
@@ -4909,7 +4909,7 @@ namespace TextForCtext
                 //點數（算力值、算力配额）不足逕用「快速體驗」執行
                 if (!OCR_GJcool_AccountChanged && waitGJcoolPoint || (!OCR_GJcool_AccountChanged && waitGJcoolPoint && DateTime.Now.Subtract(gjCoolPointLess150When) < gjCoolPointEnoughTimespan))
                 {
-                    //Form1.playSound(Form1.soundLike.processing);
+                    //Form1.PlaySound(Form1.soundLike.processing);
                     bool fastXResulut = OCR_GJcool_FastExperience(downloadImgFullName);
                     //driver.Close();
                     driver?.Close();
@@ -4928,7 +4928,7 @@ namespace TextForCtext
                 }
                 else
                     gjCool = OCRSite_URL[OCRSiteTitle.GJcool]; //"https://gj.cool/try_ocr";
-                                                               //Form1.playSound(Form1.soundLike.processing);
+                                                               //Form1.PlaySound(Form1.soundLike.processing);
                 if (_OCR_GJcool_AccountChanged) { _OCR_GJcool_AccountChanged = !_OCR_GJcool_AccountChanged; gjCoolPointLess150When = DateTime.Now; }
 
                 #region 方便提早取消作業（藉由關閉OCR視窗）
@@ -5125,7 +5125,7 @@ namespace TextForCtext
                     StopOCR = true;
                     return false;
                 }
-                //Form1.playSound(Form1.soundLike.processing);
+                //Form1.PlaySound(Form1.soundLike.processing);
             }
             catch (Exception ex)
             {
@@ -5176,7 +5176,7 @@ namespace TextForCtext
                 //當點數不足時：
                 if (points < pointCoin)
                 {
-                    Form1.playSound(Form1.soundLike.processing);
+                    Form1.PlaySound(Form1.SoundLike.processing);
                     waitGJcoolPoint = true;
                     gjCoolPointLess150When = DateTime.Now;
                     ////登出帳戶： 以下這會跳出訊息方塊，得處理，故改為傳引數的方式
@@ -5228,7 +5228,7 @@ namespace TextForCtext
                 {//點數足時：
                  //此帳戶下的最後一次
                     if (points - pointCoin < pointCoin)
-                        //Form1.playSound(Form1.soundLike.stop);
+                        //Form1.PlaySound(Form1.soundLike.stop);
                         using (SoundPlayer sp = new SoundPlayer("C:\\Windows\\Media\\chord.wav")) { sp.Play(); }
                     waitGJcoolPoint = false; innerText = null;
                 }//釋放記憶體
@@ -5377,14 +5377,14 @@ namespace TextForCtext
             ////retry:
             //SendKeys.Send("+{Insert}~");//or "^v"
             //                            //SendKeys.Send("{ENTER}");
-            //                            //Form1.playSound(Form1.soundLike.processing);
+            //                            //Form1.PlaySound(Form1.soundLike.processing);
             #endregion
 
             byte tryTimes = 1;
 
 
 
-            //Form1.playSound(Form1.soundLike.waiting);
+            //Form1.PlaySound(Form1.soundLike.waiting);
             using (SoundPlayer sp = new SoundPlayer("C:\\Windows\\Media\\ring08.wav")) { sp.Play(); }
 
             //待圖載入完畢：
@@ -5461,7 +5461,7 @@ namespace TextForCtext
                 }
                 catch (Exception)
                 {
-                    if (tryTimes == 0) Form1.playSound(Form1.soundLike.error);
+                    if (tryTimes == 0) Form1.PlaySound(Form1.SoundLike.error);
                     //if (tryTimes % 50 == 0)//> 50)
                     if (tryTimes % 50 == 0 && DateTime.Now.Subtract(dtimr).TotalSeconds > OCR_wait_time_Top_Limit＿second)//> 50)
                     {
@@ -5521,7 +5521,7 @@ namespace TextForCtext
             try
             {
                 iwe.Click();
-                Form1.playSound(Form1.soundLike.processing);
+                Form1.PlaySound(Form1.SoundLike.processing);
             }
             catch (Exception)
             {
@@ -5616,7 +5616,7 @@ namespace TextForCtext
                 }
                 catch (Exception)
                 {
-                    Form1.playSound(Form1.soundLike.error, true);
+                    Form1.PlaySound(Form1.SoundLike.error, true);
                     driver.SwitchTo().Window(driver.CurrentWindowHandle);
                     SendKeys.SendWait("{esc}");
                     iwe.Click();
@@ -5682,7 +5682,7 @@ namespace TextForCtext
         /// <returns>順利完成則回傳true</returns>
         internal static bool OCR_GJcool_AutoRecognizeVertical(string downloadImgFullName, bool _downloadResult = false)
         {
-            //Form1.playSound(Form1.soundLike.press);
+            //Form1.PlaySound(Form1.soundLike.press);
             string gjCool = string.Empty; string currentWindowHndl = ""; WindowType windowType = WindowType.Tab;
             try
             {
@@ -5710,7 +5710,7 @@ namespace TextForCtext
                 //點數（算力值、算力配额）不足逕用「快速體驗」執行
                 if (!OCR_GJcool_AccountChanged && waitGJcoolPoint || (!OCR_GJcool_AccountChanged && waitGJcoolPoint && DateTime.Now.Subtract(gjCoolPointLess150When) < gjCoolPointEnoughTimespan))
                 {
-                    //Form1.playSound(Form1.soundLike.processing);
+                    //Form1.PlaySound(Form1.soundLike.processing);
                     bool fastXResulut = OCR_GJcool_FastExperience(downloadImgFullName);
                     //driver.Close();
                     driver?.Close();
@@ -5729,7 +5729,7 @@ namespace TextForCtext
                 }
                 else
                     gjCool = OCRSite_URL[OCRSiteTitle.GJcool]; //"https://gj.cool/try_ocr";
-                                                               //Form1.playSound(Form1.soundLike.processing);
+                                                               //Form1.PlaySound(Form1.soundLike.processing);
                 if (_OCR_GJcool_AccountChanged) { _OCR_GJcool_AccountChanged = !_OCR_GJcool_AccountChanged; gjCoolPointLess150When = DateTime.Now; }
 
                 #region 方便提早取消作業（藉由關閉OCR視窗）
@@ -5926,7 +5926,7 @@ namespace TextForCtext
                     StopOCR = true;
                     return false;
                 }
-                //Form1.playSound(Form1.soundLike.processing);
+                //Form1.PlaySound(Form1.soundLike.processing);
             }
             catch (Exception ex)
             {
@@ -5977,7 +5977,7 @@ namespace TextForCtext
                 //當點數不足時：
                 if (points < pointCoin)
                 {
-                    Form1.playSound(Form1.soundLike.processing);
+                    Form1.PlaySound(Form1.SoundLike.processing);
                     waitGJcoolPoint = true;
                     gjCoolPointLess150When = DateTime.Now;
                     ////登出帳戶： 以下這會跳出訊息方塊，得處理，故改為傳引數的方式
@@ -6028,7 +6028,7 @@ namespace TextForCtext
                 {//點數足時：
                  //此帳戶下的最後一次
                     if (points - pointCoin < pointCoin)
-                        //Form1.playSound(Form1.soundLike.stop);
+                        //Form1.PlaySound(Form1.soundLike.stop);
                         using (SoundPlayer sp = new SoundPlayer("C:\\Windows\\Media\\chord.wav")) { sp.Play(); }
                     waitGJcoolPoint = false; innerText = null;
                 }//釋放記憶體
@@ -6219,16 +6219,16 @@ namespace TextForCtext
             ////retry:
             //SendKeys.Send("+{Insert}~");//or "^v"
             //                            //SendKeys.Send("{ENTER}");
-            //                            //Form1.playSound(Form1.soundLike.processing);
+            //                            //Form1.PlaySound(Form1.soundLike.processing);
             #endregion
 
             byte tryTimes = 1;
 
 
             if (_downloadResult)
-                Form1.playSound(Form1.soundLike.processing);
+                Form1.PlaySound(Form1.SoundLike.processing);
             else
-                //Form1.playSound(Form1.soundLike.waiting);
+                //Form1.PlaySound(Form1.soundLike.waiting);
                 using (SoundPlayer sp = new SoundPlayer("C:\\Windows\\Media\\ring08.wav")) { sp.Play(); }
 
             //待圖載入完畢：
@@ -6305,7 +6305,7 @@ namespace TextForCtext
                 }
                 catch (Exception)
                 {
-                    if (tryTimes == 0) Form1.playSound(Form1.soundLike.error);
+                    if (tryTimes == 0) Form1.PlaySound(Form1.SoundLike.error);
                     //if (tryTimes % 50 == 0)//> 50)
                     if (tryTimes % 50 == 0 && DateTime.Now.Subtract(dtimr).TotalSeconds > OCR_wait_time_Top_Limit＿second)//> 50)
                     {
@@ -6365,7 +6365,7 @@ namespace TextForCtext
             try
             {
                 iwe.Click();
-                Form1.playSound(Form1.soundLike.processing);
+                Form1.PlaySound(Form1.SoundLike.processing);
             }
             catch (Exception)
             {
@@ -6544,7 +6544,7 @@ namespace TextForCtext
                     }
                     catch (Exception)
                     {
-                        Form1.playSound(Form1.soundLike.error, true);
+                        Form1.PlaySound(Form1.SoundLike.error, true);
                         driver.SwitchTo().Window(driver.CurrentWindowHandle);
                         SendKeys.SendWait("{esc}");
                         iwe.Click();
@@ -6611,7 +6611,7 @@ namespace TextForCtext
         /// <returns>順利完成則回傳true</returns>
         internal static bool OCR_GJcool_AutoRecognizeVertical_DownloadResult(string downloadImgFullName)
         {
-            //Form1.playSound(Form1.soundLike.press);
+            //Form1.PlaySound(Form1.soundLike.press);
             string gjCool = string.Empty; string currentWindowHndl = ""; WindowType windowType = WindowType.Tab;
             try
             {
@@ -6624,7 +6624,7 @@ namespace TextForCtext
                 //點數（算力值、算力配额）不足逕用「快速體驗」執行
                 if (!OCR_GJcool_AccountChanged && waitGJcoolPoint || (!OCR_GJcool_AccountChanged && waitGJcoolPoint && DateTime.Now.Subtract(gjCoolPointLess150When) < gjCoolPointEnoughTimespan))
                 {
-                    //Form1.playSound(Form1.soundLike.processing);
+                    //Form1.PlaySound(Form1.soundLike.processing);
                     bool fastXResulut = OCR_GJcool_FastExperience(downloadImgFullName);
                     driver.Close();
                     _OCR_GJcool_WindowClosed = true;
@@ -6633,7 +6633,7 @@ namespace TextForCtext
                 }
                 else
                     gjCool = OCRSite_URL[OCRSiteTitle.GJcool]; //"https://gj.cool/try_ocr";
-                //Form1.playSound(Form1.soundLike.processing);
+                //Form1.PlaySound(Form1.soundLike.processing);
                 if (_OCR_GJcool_AccountChanged) { _OCR_GJcool_AccountChanged = !_OCR_GJcool_AccountChanged; gjCoolPointLess150When = DateTime.Now; }
             }
             catch (Exception ex)
@@ -6705,7 +6705,7 @@ namespace TextForCtext
                 //IWebElement iwe = driver.FindElement(By.CssSelector("#compute-value"));
                 WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(_chromeDriverServiceTimeSpan));
                 iwe = wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementIsVisible(By.CssSelector("#compute-value")));
-                //Form1.playSound(Form1.soundLike.processing);
+                //Form1.PlaySound(Form1.soundLike.processing);
             }
             catch (Exception ex)
             {
@@ -6743,7 +6743,7 @@ namespace TextForCtext
             }
             if (iwe != null)
             {
-                Form1.playSound(Form1.soundLike.processing);
+                Form1.PlaySound(Form1.soundLike.processing);
                 //取得點數，如「 117 / 1000」格式
                 string innerText = iwe.GetAttribute("innerText"); int points = 0;
                 if (innerText.IndexOf(" /") > -1 && " ".Length + innerText.IndexOf(" /") - " ".Length <= innerText.Length)
@@ -6866,7 +6866,7 @@ namespace TextForCtext
         retry:
             SendKeys.Send("+{Insert}");//or "^v"
             SendKeys.Send("{ENTER}");
-            Form1.playSound(Form1.soundLike.processing);
+            Form1.PlaySound(Form1.soundLike.processing);
             //待圖載入完畢：
             //Thread.Sleep(3220);
             //Thread.Sleep(1220);
@@ -6883,7 +6883,7 @@ namespace TextForCtext
             SendKeys.Send("{tab}~");
             //按下「自動識別(豎版)」，開始OCR……
             SendKeys.Send("{down}~");
-            Form1.playSound(Form1.soundLike.processing);
+            Form1.PlaySound(Form1.soundLike.processing);
             //等待OCR，上限為30秒
             //iwe = waitFindWebElementBySelector_ToBeClickable("# OneLine > div.d-flex.justify-content-between.mt-2.mb-1 > div:nth-child(1) > div:nth-child(2) > ul > li:nth-child(2) > button");
             iwe = waitFindWebElementBySelector_ToBeClickable("#line_list_table > tbody > tr:nth-child(1) > td:nth-child(2)");
@@ -7100,14 +7100,14 @@ namespace TextForCtext
                 }
             }
 
-            //Form1.playSound(Form1.soundLike.processing);
+            //Form1.PlaySound(Form1.soundLike.processing);
             ActiveForm1.TopMost = false;
 
             //首頁「快速體驗」按鈕：
             //IWebElement iwe = WaitFindWebElementBySelector_ToBeClickable("body > div.container-fluid.bg-dark.px-1 > div > h2.text-center.my-2.py-4 > button > div", 10);
             IWebElement iwe = WaitFindWebElementBySelector_ToBeClickable("body > div.container-fluid.px-1 > div > h2.text-center.my-2.py-4 > button > div", 10);
             if (iwe == null) return false;
-            Form1.playSound(Form1.soundLike.processing);
+            Form1.PlaySound(Form1.SoundLike.processing);
             try
             {
                 driver.SwitchTo().Window(driver.CurrentWindowHandle);
@@ -7165,10 +7165,10 @@ namespace TextForCtext
                 _OCR_GJcool_WindowClosed = false;
                 if (signOut)
                 {//登出帳號
-                    Form1.playSound(Form1.soundLike.done);
+                    Form1.PlaySound(Form1.SoundLike.done);
                     WaitFindWebElementBySelector_ToBeClickable("#navbarNav > ul:nth-child(2) > li:nth-child(2) > a > p.mb-0.fs-6.fst-italic").Click();
                     //if (signOut)waitFindWebElementBySelector_ToBeClickable("#navbarNav > ul:nth-child(2) > li > a > p.mb-0.fs-6.fst-italic").Click();
-                    Form1.playSound(Form1.soundLike.over);
+                    Form1.PlaySound(Form1.SoundLike.over);
 
                     //現在機制似乎改變了，故改成此式 20231228
                     returnFalse = true;
@@ -7232,14 +7232,14 @@ namespace TextForCtext
             //int copyBtnPosX = Width * (835 / 1920), copyBtnPosY = Height * (730 / 1200);
 
 
-            //Form1.playSound(Form1.soundLike.processing);
+            //Form1.PlaySound(Form1.soundLike.processing);
             ActiveForm1.TopMost = false;
 
             //首頁「快速體驗」按鈕：
             //IWebElement iwe = WaitFindWebElementBySelector_ToBeClickable("body > div.container-fluid.bg-dark.px-1 > div > h2.text-center.my-2.py-4 > button > div", 10);
             IWebElement iwe = WaitFindWebElementBySelector_ToBeClickable("body > div.container-fluid.px-1 > div > h2.text-center.my-2.py-4 > button > div", 10);
             if (iwe == null) return false;
-            Form1.playSound(Form1.soundLike.processing);
+            Form1.PlaySound(Form1.SoundLike.processing);
             try
             {
                 driver.SwitchTo().Window(driver.CurrentWindowHandle);
@@ -7284,7 +7284,7 @@ namespace TextForCtext
             //iwe = WaitFindWebElementBySelector_ToBeClickable("#task-upload-btn");
             //if (iwe == null) return false;
             //driver.SwitchTo().Window(driver.CurrentWindowHandle);//切換到目前Selenium操控的視窗，就不怕沒及時得到焦點而失誤了
-            //Form1.playSound(Form1.soundLike.processing);
+            //Form1.PlaySound(Form1.soundLike.processing);
             //Clipboard.SetText(downloadImgFullName);
             //driver.SwitchTo().Window(driver.CurrentWindowHandle);
             //iwe.Click();//按下「上傳 拍照」按鈕：
@@ -7308,7 +7308,7 @@ namespace TextForCtext
             //SendKeys.Send("+{Insert}~");//or "^v"
             //                            //SendKeys.Send("{ENTER}");
 
-            //Form1.playSound(Form1.soundLike.processing);
+            //Form1.PlaySound(Form1.soundLike.processing);
 
             //Thread.Sleep(200);
             //Clipboard.Clear();
@@ -7368,7 +7368,7 @@ namespace TextForCtext
             //    //Console.WriteLine(et.HResult + et.Message);
             //    //Debugger.Break();
             //    //throw;
-            //    Form1.playSound(Form1.soundLike.error);
+            //    Form1.PlaySound(Form1.soundLike.error);
             //}
 
 
@@ -7397,7 +7397,7 @@ namespace TextForCtext
             if (GjcoolElementHelper.WaitUntilCopyButtonAppears(driver, out IWebElement copyBtn))
             {
                 copyBtn.Click();
-                Form1.playSound(Form1.soundLike.done);
+                Form1.PlaySound(Form1.SoundLike.done);
                 while (!Form1.IsClipBoardAvailable_Text()) { }
                 goto finish;
             }
@@ -7412,7 +7412,7 @@ namespace TextForCtext
             //{
             //    // 找到複製按鈕，直接操作
             //    copyBtn.Click();
-            //    Form1.playSound(Form1.soundLike.press);
+            //    Form1.PlaySound(Form1.soundLike.press);
             //    while (!IsClipBoardAvailable_Text()){}
             //        goto finish;
             //}
@@ -7438,7 +7438,7 @@ namespace TextForCtext
                 //按下「複製」圖示按鈕
                 Task.Run(() =>
                 {
-                    //Form1.playSound(Form1.soundLike.info);
+                    //Form1.PlaySound(Form1.soundLike.info);
 
                     if (Copybutton_GjcoolFastExperience_Location.IsEmpty) Copybutton_GjcoolFastExperience_Location = new Point(copyBtnPosX, copyBtnPosY);//Copybutton_GjcoolFastExperience_Location = new Point(835, 711);
                                                                                                                                                          //copyBtnPos = new Point(838, 711);
@@ -7471,14 +7471,14 @@ namespace TextForCtext
                     {
                         if (Clipboard.GetText() != string.Empty) break;
                         if (IsChromeActive() && IsBrowserMaximized(driver))//按下「複製」圖示按鈕
-                            clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.soundLike.press);
+                            clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.SoundLike.press);
                         //Thread.Sleep(550);
                         Thread.Sleep(450);
                     }
                     ////}
                     ////else break;
                     //}
-                    if (!trafficLimit) Form1.playSound(Form1.soundLike.info);
+                    if (!trafficLimit) Form1.PlaySound(Form1.SoundLike.info);
                     //Debugger.Break();
                     //if (Clipboard.GetText() != string.Empty) Application.OpenForms[0].Activate();
                 });
@@ -7509,7 +7509,7 @@ namespace TextForCtext
             //}
 
             if (Clipboard.GetText() != string.Empty) goto finish;
-            Form1.playSound(Form1.soundLike.info, true);//just for test
+            Form1.PlaySound(Form1.SoundLike.info, true);//just for test
             string info;
         retry:
             //2024除夕
@@ -7533,8 +7533,8 @@ namespace TextForCtext
                 {
                     e.Click();//下式一樣沒作用，還原原式
                     //e.JsClick();//Click(e);
-                    //Form1.playSound(Form1.soundLike.press, true);
-                    Form1.playSound(Form1.soundLike.info, true);//just for test
+                    //Form1.PlaySound(Form1.soundLike.press, true);
+                    Form1.PlaySound(Form1.SoundLike.info, true);//just for test
                     //Thread.Sleep(455);
                     Thread.Sleep(255);
                     try
@@ -7550,7 +7550,7 @@ namespace TextForCtext
                 if (DateTime.Now.Subtract(dateTime).TotalSeconds < 3)
                 {
                     Thread.Sleep(200);
-                    Form1.playSound(Form1.soundLike.press, true);
+                    Form1.PlaySound(Form1.SoundLike.press, true);
                     goto retry;
                 }
             }
@@ -7586,12 +7586,12 @@ namespace TextForCtext
             {
             }
 
-            Form1.playSound(Form1.soundLike.over, true);
+            Form1.PlaySound(Form1.SoundLike.over, true);
 
             if (Clipboard.GetText() != "") goto finish;
             else
             {
-                //Form1.playSound(Form1.soundLike.processing);//just for test
+                //Form1.PlaySound(Form1.soundLike.processing);//just for test
                 try
                 {
                     if (Clipboard.GetText() != "") goto finish;
@@ -7643,7 +7643,7 @@ namespace TextForCtext
             //    wait = new WebDriverWait(driver, TimeSpan.FromMilliseconds(1250));
             //    if (e != null && Clipboard.GetText() == string.Empty)
             //    {
-            //        Form1.playSound(Form1.soundLike.exam);
+            //        Form1.PlaySound(Form1.soundLike.exam);
             //        wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(e));
             //    }
             //}
@@ -7695,7 +7695,7 @@ namespace TextForCtext
                     //第 1 次好像會找不到，只好用手動了：
                     //Thread.Sleep(450);
                     //if (Clipboard.GetText() != "") goto finish;
-                    //Form1.playSound(Form1.soundLike.processing);                    
+                    //Form1.PlaySound(Form1.soundLike.processing);                    
                 }
                 catch (Exception)
                 {
@@ -7707,7 +7707,7 @@ namespace TextForCtext
                     //    //Thread.Sleep(500);
                     //    try
                     //    {
-                    //        Form1.playSound(Form1.soundLike.press);//just for test
+                    //        Form1.PlaySound(Form1.soundLike.press);//just for test
                     //        e = driver.FindElement(By.XPath("//*[starts-with(@id, 'dialog_')]//div[contains(@class, 'col')]//div[contains(@class, 'd-flex py-1')]//button//i"));
                     //        wait = new WebDriverWait(driver, TimeSpan.FromSeconds(0.2));
                     //        wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementToBeClickable(e));
@@ -7717,7 +7717,7 @@ namespace TextForCtext
                     //        //Console.WriteLine(et.HResult + et.Message);
                     //        //Debugger.Break();
                     //        //throw;
-                    //        //Form1.playSound(Form1.soundLike.error);
+                    //        //Form1.PlaySound(Form1.soundLike.error);
 
 
                     //        //if (Clipboard.GetText() != "") goto finish;
@@ -7885,7 +7885,7 @@ namespace TextForCtext
                             {//要自動切換IP時：
                              //driver.Close();//return以後也還會再執行一次哦！注意
 
-                                Form1.playSound(Form1.soundLike.over); ActiveForm1.HideToNICo();// TopMost = false;
+                                Form1.PlaySound(Form1.SoundLike.over); ActiveForm1.HideToNICo();// TopMost = false;
 
                                 //Task ts = Task.Run(() =>
                                 //{
@@ -8016,7 +8016,7 @@ namespace TextForCtext
                 }
                 catch (Exception) { }
             }
-            Form1.playSound(Form1.soundLike.over, true);//找到複製按鈕按下的音效
+            Form1.PlaySound(Form1.SoundLike.over, true);//找到複製按鈕按下的音效
             #endregion
 
             int timeSpanSecs = 25;//0;
@@ -8052,7 +8052,7 @@ namespace TextForCtext
 
                 Cursor.Position = copyBtnPos;
                 //Thread.Sleep(800);//要等一下才行否則反應不過來
-                //Form1.playSound(Form1.soundLike.info);
+                //Form1.PlaySound(Form1.soundLike.info);
                 if (ActiveForm1.TopMost) ActiveForm1.TopMost = false;
                 Thread.Sleep(300);//要等一下才行否則反應不過來                
                 / 20230401 Bing大菩薩：在C#中，您可以使用 `MouseOperations` 类来模拟鼠标点击。这个类中有一个名为 `MouseEvent` 的方法，它可以接受一个 `MouseEventFlags` 枚举值作为参数，用来指定要执行的鼠标操作¹。例如，要模拟鼠标左键点击，可以这样写：
@@ -8070,7 +8070,7 @@ namespace TextForCtext
                 //MouseOperations.MouseEventMousePos(MouseOperations.MouseEventFlags.LeftDown, copyBtnPos);
                 ////Thread.Sleep(50);
                 //MouseOperations.MouseEventMousePos(MouseOperations.MouseEventFlags.LeftUp, copyBtnPos);
-                ////Form1.playSound(Form1.soundLike.info);
+                ////Form1.PlaySound(Form1.soundLike.info);
                 //clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.soundLike.none);
                 task = Task.Run(() => { clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.soundLike.press); });
 
@@ -8200,14 +8200,14 @@ namespace TextForCtext
                     Thread.Sleep(600);//要寫在這，讓_OCR_GJcool_WindowClosed能設定完成
                     if (Clipboard.GetText() == "" && !_OCR_GJcool_WindowClosed)
                         //if (!_OCR_GJcool_WindowClosed)
-                        clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.soundLike.press);
+                        clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.SoundLike.press);
 
                     if (Clipboard.GetText() == "")
                     {
                         Task ts1 = Task.Run(() =>
                         {
                             Thread.Sleep(800);//要寫在這，讓_OCR_GJcool_WindowClosed能設定完成
-                            if (Clipboard.GetText() == "" && !_OCR_GJcool_WindowClosed) clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.soundLike.none);
+                            if (Clipboard.GetText() == "" && !_OCR_GJcool_WindowClosed) clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.SoundLike.none);
                         });
                         ts1.Wait();
                         if (Clipboard.GetText() == "")
@@ -8216,7 +8216,7 @@ namespace TextForCtext
                             {
                                 //前已有ts1.Wait();或不再需要
                                 Thread.Sleep(400);//要寫在這，讓_OCR_GJcool_WindowClosed能設定完成
-                                if (Clipboard.GetText() == "" && !_OCR_GJcool_WindowClosed) clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.soundLike.none);
+                                if (Clipboard.GetText() == "" && !_OCR_GJcool_WindowClosed) clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.SoundLike.none);
                             });
                             ts2.Wait();
                             if (Clipboard.GetText() == "")
@@ -8224,7 +8224,7 @@ namespace TextForCtext
                                 Task ts3 = Task.Run(() =>
                                 {
                                     Thread.Sleep(800);//要寫在這，讓_OCR_GJcool_WindowClosed能設定完成
-                                    if (Clipboard.GetText() == "" && !_OCR_GJcool_WindowClosed) clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.soundLike.done);
+                                    if (Clipboard.GetText() == "" && !_OCR_GJcool_WindowClosed) clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.SoundLike.done);
                                 });
                                 ts3.Wait();
                             }
@@ -8258,7 +8258,7 @@ namespace TextForCtext
             #region 20250119 取消
             //while (!Form1.isClipBoardAvailable_Text(10))
             //{
-            //    //Form1.playSound(Form1.soundLike.info);
+            //    //Form1.PlaySound(Form1.soundLike.info);
             //    //if (timeSpanSecs > 0 && DateTime.Now.Subtract(begin).TotalSeconds > timeSpanSecs) return false;
             //    //藉由手動關閉視窗以提早/強制中止程序
             //    #region 方便提早取消作業（藉由關閉OCR視窗）
@@ -8335,7 +8335,7 @@ namespace TextForCtext
                     driver.FindElement(By.XPath("/html/body/div[1]/div/div/div[2]/div/div[1]/div[3]/div[2]/div[2]/button/i"))?.Click();
                     if (Clipboard.ContainsText())
                     {
-                        playSound(soundLike.done);
+                        PlaySound(SoundLike.done);
                         goto finish;
                     }
                 }
@@ -8410,18 +8410,18 @@ namespace TextForCtext
         /// <param name="copyBtnPos">要點擊的座標</param>
         /// <param name="soundlike">指定所發出的提示音</param>
         /// <returns>執行完畢即傳回一個Task物件以供await參考</returns>
-        private static Task clickCopybutton_GjcoolFastExperience(Point copyBtnPos, Form1.soundLike soundlike = Form1.soundLike.info)
+        private static Task clickCopybutton_GjcoolFastExperience(Point copyBtnPos, Form1.SoundLike soundlike = Form1.SoundLike.info)
         {
             //Thread.Sleep(1300);
             if (Cursor.Position != copyBtnPos)
                 Cursor.Position = copyBtnPos;
-            //Form1.playSound(soundlike);
+            //Form1.PlaySound(soundlike);
             //MouseOperations.MouseEventMousePos(MouseOperations.MouseEventFlags.LeftDown, copyBtnPos);
             //MouseOperations.MouseEventMousePos(MouseOperations.MouseEventFlags.LeftUp, copyBtnPos);
 
             return Task.Run(() =>
             {
-                Form1.playSound(soundlike);
+                Form1.PlaySound(soundlike);
                 MouseOperations.MouseEventMousePos(MouseOperations.MouseEventFlags.LeftDown, copyBtnPos);
                 MouseOperations.MouseEventMousePos(MouseOperations.MouseEventFlags.LeftUp, copyBtnPos);
                 //Thread.Sleep(150);//讓複製功能讀入剪貼簿。
@@ -8695,7 +8695,7 @@ namespace TextForCtext
                 if (WaitFindWebElementBySelector_ToBeClickable("#waitingSpinner") == null && reClickFlag == false && iwe.Text == x)
                 {
                     WaitFindWebElementBySelector_ToBeClickable("#main > div > div.p-1.p-md-3.d-flex.justify-content-end > div:nth-child(6) > button > i").Click();
-                    Form1.playSound(Form1.soundLike.over, true);
+                    Form1.PlaySound(Form1.SoundLike.over, true);
                     reClickFlag = true;
                 }
                 //reach traffic limit. wait 1.2 hours
@@ -9315,14 +9315,14 @@ namespace TextForCtext
                         {
                             //if (iwe.GetAttribute("innerText") == "　抱歉，找不到您所查詢的資料")
                             //{
-                            //    //Form1.playSound(Form1.soundLike.error, true);
+                            //    //Form1.PlaySound(Form1.soundLike.error, true);
                             //    //ActiveForm1.AvailableInUseBothKeysMouse();
                             //}
                         }
                         //找到了-《漢籍全文資料庫》
                         else
                         {//檢索有結果：《漢籍全文資料庫》
-                            Form1.playSound(Form1.soundLike.info);
+                            Form1.PlaySound(Form1.SoundLike.info);
                             returnValue = true;
                             iwe = waitFindWebElementByName_ToBeClickable("_IMG_檢索報表", 2);
                             if (iwe != null)//   ?.Click();
@@ -9349,7 +9349,7 @@ namespace TextForCtext
                                     //按下「附註開啟」以展開小註
                                     {
                                         iwe.Click();
-                                        Form1.playSound(Form1.soundLike.done, true);
+                                        Form1.PlaySound(Form1.SoundLike.done, true);
                                     }
 
                                 }
@@ -9378,7 +9378,7 @@ namespace TextForCtext
                                 //        //按下「附註開啟」以展開小註
                                 //        {
                                 //            iwe.Click();
-                                //            Form1.playSound(Form1.soundLike.done);
+                                //            Form1.PlaySound(Form1.soundLike.done);
                                 //        }
                                 //    }
                                 //    else
@@ -9397,7 +9397,7 @@ namespace TextForCtext
                                 //            //按下「附註開啟」以展開小註
                                 //            {
                                 //                iwe.Click();
-                                //                Form1.playSound(Form1.soundLike.done);
+                                //                Form1.PlaySound(Form1.soundLike.done);
                                 //            }
                                 //        }
 
@@ -9490,14 +9490,14 @@ namespace TextForCtext
                     //                break;
                     //        }
                     //    }
-                    //    //Form1.playSound(Form1.soundLike.info);
+                    //    //Form1.PlaySound(Form1.soundLike.info);
                     //    ActiveForm1.TopMost = false;
                     //}
                     //catch (WebDriverTimeoutException)
                     //{
                     //    // 處理頁面未在指定時間內載入完成的情況
                     //    // 在這裡不進行任何操作
-                    //    //Form1.playSound(Form1.soundLike.error);
+                    //    //Form1.PlaySound(Form1.soundLike.error);
                     //}
 
 
@@ -9516,7 +9516,7 @@ namespace TextForCtext
                         {
                             iwe1 = WaitFindWebElementBySelector_ToBeClickable("body > form > table > tbody > tr:nth-child(2) > td > table > tbody > tr > td > table > tbody > tr:nth-child(2) > td > table > tbody > tr:nth-child(1) > td.seqno");
                             returnValue = true;
-                            Form1.playSound(Form1.soundLike.info, true);//靜音模式時仍播出
+                            Form1.PlaySound(Form1.SoundLike.info, true);//靜音模式時仍播出
                             break;
                         }
                         iwe1 = WaitFindWebElementBySelector_ToBeClickable("body > form > table > tbody > tr:nth-child(2) > td > table > tbody > tr > td.leftbg > table > tbody > tr:nth-child(1) > td > table > tbody > tr:nth-child(2) > td > input.s_btn.hjblock", 0.3);
@@ -9533,7 +9533,7 @@ namespace TextForCtext
 
                     if (iwe1 == null)
                     {
-                        //Form1.playSound(Form1.soundLike.error, true);
+                        //Form1.PlaySound(Form1.soundLike.error, true);
                         //ActiveForm1.AvailableInUseBothKeysMouse();
 
                     }
@@ -9565,7 +9565,7 @@ namespace TextForCtext
             if (ListIndex_Hanchi_SearchingKeywordsYijing > keywords.Count - 1)
             {
                 ListIndex_Hanchi_SearchingKeywordsYijing = 0;
-                Form1.playSound(Form1.soundLike.finish, true);//靜音模式時仍播出
+                Form1.PlaySound(Form1.SoundLike.finish, true);//靜音模式時仍播出
                 returnValue = true;
                 if (ActiveForm1.textBox4Font.Size < 20.25)
                     ActiveForm1.textBox4Font = new Font(ActiveForm1.textBox4Font.FontFamily, (float)20.25);
@@ -9598,7 +9598,7 @@ namespace TextForCtext
         /// <returns></returns>
         public static bool FindPageAndPaste2Find(WebDriver driver, string pasteTxt, bool paste2Find = true)
         {
-            Form1.playSound(Form1.soundLike.over, true);
+            Form1.PlaySound(Form1.SoundLike.over, true);
             ActiveForm1.TopMost = false;
             try
             {
@@ -10069,10 +10069,10 @@ namespace TextForCtext
                     //    ImproveGJcoolOCRMemoDoc.Application.WindowState = Microsoft.Office.Interop.Word.WdWindowState.wdWindowStateNormal;
                     //Thread.Sleep(1000);
                     //ImproveGJcoolOCRMemoDoc.Application.WindowState = Microsoft.Office.Interop.Word.WdWindowState.wdWindowStateMinimize;
-                    Form1.playSound(Form1.soundLike.done, true);
+                    Form1.PlaySound(Form1.SoundLike.done, true);
                 }
                 else
-                    Form1.playSound(Form1.soundLike.info, true);
+                    Form1.PlaySound(Form1.SoundLike.info, true);
             }
             catch (Exception)
             {
@@ -10089,7 +10089,7 @@ namespace TextForCtext
         /// </summary>
         internal static void NoSuchWindowErrHandler()
         {
-            Form1.playSound(Form1.soundLike.error, true);
+            Form1.PlaySound(Form1.SoundLike.error, true);
             if (driver == null) DriverNew();
             if (IsWindowHandleValid(driver, LastValidWindow))
                 driver.SwitchTo().Window(LastValidWindow);
@@ -10132,7 +10132,7 @@ namespace TextForCtext
         /// <param name="clipboardSetText">要貼上的文字（原本Sendkeys要送的按鍵）</param>
         internal static void ChromeDriverOnlySupportsCharactersBMP(IWebElement iwe, string clipboardSetText)
         {
-            //Form1.playSound(Form1.soundLike.error, true);
+            //Form1.PlaySound(Form1.soundLike.error, true);
             if (clipboardSetText == string.Empty) return;
             Clipboard.SetText(clipboardSetText);
             iwe.SendKeys(OpenQA.Selenium.Keys.Shift + OpenQA.Selenium.Keys.Insert);//改成貼上
@@ -10209,7 +10209,7 @@ namespace TextForCtext
                 else
                 {
                     LastValidWindow = driver.WindowHandles.Last();
-                    Form1.playSound(Form1.soundLike.error, true);
+                    Form1.PlaySound(Form1.SoundLike.error, true);
                 }
                 openNewTabWindow(OpenQA.Selenium.WindowType.Tab);
                 driver.Manage().Timeouts().PageLoad = new TimeSpan(0, 0, 4);
@@ -10278,7 +10278,7 @@ namespace TextForCtext
                     else
                     {
                         Console.WriteLine(ex.HResult + ex.Message);
-                        Form1.playSound(Form1.soundLike.error, true);
+                        Form1.PlaySound(Form1.SoundLike.error, true);
                         //MessageBox.Show(ex.HResult + ex.Message, "", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
                     }
                 }
@@ -10397,7 +10397,7 @@ namespace TextForCtext
                     if (ex.Message.StartsWith("no such window: target window already closed"))
                     {
                         NoSuchWindowErrHandler();
-                        //Form1.playSound(Form1.soundLike.error, true);
+                        //Form1.PlaySound(Form1.soundLike.error, true);
                         //if (IsWindowHandleValid(driver, LastValidWindow))
                         //    driver.SwitchTo().Window(LastValidWindow);
                         //else
@@ -10454,7 +10454,7 @@ namespace TextForCtext
                     if (ex.Message.StartsWith("no such window: target window already closed"))
                     {
                         NoSuchWindowErrHandler();
-                        //Form1.playSound(Form1.soundLike.error, true);
+                        //Form1.PlaySound(Form1.soundLike.error, true);
                         //if (IsWindowHandleValid(driver, LastValidWindow))
                         //    driver.SwitchTo().Window(LastValidWindow);
                         //else
@@ -10530,7 +10530,7 @@ namespace TextForCtext
                 {
                     if (ex.Message.StartsWith("no such window: target window already closed"))
                     {
-                        //Form1.playSound(Form1.soundLike.error, true);
+                        //Form1.PlaySound(Form1.soundLike.error, true);
                         //if (IsWindowHandleValid(driver, LastValidWindow))
                         //    driver.SwitchTo().Window(LastValidWindow);
                         //else
@@ -11165,13 +11165,13 @@ namespace TextForCtext
             //bool found = false;
             //if (driver.WindowHandles.Contains(driver.CurrentWindowHandle))
             //{
-            //    if (!Form1.IsValidUrl＿keyDownCtrlAdd(driver.CurrentWindowHandle))
+            //    if (!IsValidUrl＿keyDownCtrlAdd(driver.CurrentWindowHandle))
             //    {
 
             //        for (int i = driver.WindowHandles.Count - 1; i > -1; i--)
             //        {
             //            driver.SwitchTo().Window(driver.WindowHandles[i]);
-            //            if (Form1.IsValidUrl＿keyDownCtrlAdd(driver.Url)) { found = true; break; }
+            //            if (IsValidUrl＿keyDownCtrlAdd(driver.Url)) { found = true; break; }
             //        }
             //    }
 
@@ -12762,7 +12762,7 @@ namespace TextForCtext
                 }
 
                 imageInput.SendKeys(filePath);
-                Form1.playSound(Form1.soundLike.press);
+                Form1.PlaySound(Form1.SoundLike.press);
 
                 if (!previewImgExam) return true;
 
@@ -12791,7 +12791,7 @@ namespace TextForCtext
                 //            var previewImg = elems[0];
                 //            if (previewImg.Displayed && previewImg.Size.Width > 50 && previewImg.Size.Height > 50)
                 //            {
-                //                Form1.playSound(Form1.soundLike.done);
+                //                Form1.PlaySound(Form1.soundLike.done);
                 //                return true;
                 //            }
                 //        }
@@ -12803,7 +12803,7 @@ namespace TextForCtext
                 //    {
                 //        if (img.Displayed && img.Size.Width > 50 && img.Size.Height > 50)
                 //        {
-                //            Form1.playSound(Form1.soundLike.done);
+                //            Form1.PlaySound(Form1.soundLike.done);
                 //            return true;
                 //        }
                 //    }
@@ -12874,7 +12874,7 @@ namespace TextForCtext
                                 candidate.Size.Height > minHeight)
                             {
                                 element = candidate;
-                                Form1.playSound(Form1.soundLike.done);
+                                Form1.PlaySound(Form1.SoundLike.done);
                                 return true;
                             }
                         }
@@ -12896,7 +12896,7 @@ namespace TextForCtext
                             img.Size.Height > minHeight)
                         {
                             element = img;
-                            Form1.playSound(Form1.soundLike.done);
+                            Form1.PlaySound(Form1.SoundLike.done);
                             return true;
                         }
                     }
@@ -13225,9 +13225,11 @@ namespace TextForCtext
                 Thread.Sleep(300);
             }
 
+            //按下pro按鈕
             driver.FindElement(By.Id("auto_ocr")).Click();
             Thread.Sleep(300);
-
+            Browser.ChromeSetFocus();
+            //按下「古籍識別」按鈕
             driver.FindElement(By.CssSelector("#OneLine > div.d-flex.mt-2 > div:nth-child(1) > div:nth-child(3) > ul > li:nth-child(2) > button")).Click();
             Thread.Sleep(300);
 
