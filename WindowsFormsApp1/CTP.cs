@@ -2547,6 +2547,17 @@ var callback = arguments[arguments.length - 1];
             return url;
         }
 
+        /// <summary>
+        /// 是否是圖文對照的頁面
+        /// </summary>
+        /// <returns></returns>
+        internal static bool IsImageTextComparisonPage()
+        {
+            return Div_generic_TextBoxFrame != null;
+        }
+
+
+
     }
     /// <summary>
     /// 有關 XML 處理的靜態類別；凡是完整編輯等處要處理 XML 內容的功能都放在這裡 20260111
@@ -2803,7 +2814,8 @@ var callback = arguments[arguments.length - 1];
             /// <summary>
             /// Xml重新編頁：編輯區內容頁碼減頁差後回存。
             /// 頁差由textBox1第一段設定
-            /// （頁差=目的-來源頁碼）
+            /// （頁差=「來源-目的」頁碼；意謂來源到目的；或「來源~目的」-蓋在手動輸入模式下是禁止輸入「-」，因為數字鍵盤中的「-」常用來作自動段落標記功能用）
+            /// 如果用「~」而省略來源頁碼，則取目前頁面之頁碼；不可用「-」，會與負/減混
             /// 在Selenium模式有效頁面下，網頁停在要開始編輯頁碼之首頁圖文對照頁面上，按下Ctrl + Shift 再顯示Form1（TextForCtext 主介面主表單）即可全程自動化
             /// </summary>
             internal static void EditPageNumOffset_PageNumModifier(string refers = "")
@@ -2811,10 +2823,32 @@ var callback = arguments[arguments.length - 1];
                 #region 編輯區內容頁碼減1後回存 20260110
                 //20260110 為方便編輯同版書籍作對應頁故，因《天下郡國利病書》此二本之迻錄 https://ctext.org/wiki.pl?if=gb&res=5115261 https://ctext.org/wiki.pl?if=gb&res=951851
                 string originalText = Clipboard.GetText();//記錄剪貼簿內文字資料
+                string pageNum = string.Empty;
                 void shiftPage()
                 {
-                    if (refers.IsNullOrEmpty() == false && int.TryParse(refers.Substring(0, refers.IndexOf(Environment.NewLine)), result: out int offset))
-                        Clipboard.SetText(ScanPageAdjuster.ShiftScanPages(originalText, offset));
+                    if (refers.IsNullOrEmpty() == false)
+                    {
+                        refers = refers.Substring(0, refers.IndexOf(Environment.NewLine) == -1 ? refers.Length : refers.IndexOf(Environment.NewLine));
+                        if (refers.IndexOf('-') > 0 || refers.IndexOf('~') > -1)//Leo AI 大菩薩
+                        {
+                            //string input = "178-28";
+                            //如果省略來源頁碼，則取目前頁面之頁碼
+                            if (refers.IndexOf('~') == 0)
+                            {
+                                if (pageNum.IsNullOrEmpty()) Debugger.Break();//return;
+                                refers = pageNum + refers;
+                            }
+                            char separator = '-';
+                            //string[] parts = refers.Split('-');
+                            string[] parts = refers.Split(separator);
+                            if ((parts.Length) == 1) { separator = '~'; parts = refers.Split(separator); }
+                            SplitResult sr = new SplitResult(parts[0], parts[1], refers.IndexOf(separator));
+                            int result = int.Parse(sr.SecondPart) - int.Parse(sr.FirstPart);
+                            refers = result.ToString();
+                        }
+                        if (int.TryParse(refers, result: out int offset))
+                            Clipboard.SetText(ScanPageAdjuster.ShiftScanPages(originalText, offset));
+                    }
                     else
                         Clipboard.SetText(ScanPageAdjuster.ShiftScanPages(originalText));
                 }
@@ -2834,7 +2868,7 @@ var callback = arguments[arguments.length - 1];
                     Form1.InstanceForm1.ResumeEvents();
                     if (Div_generic_TextBoxFrame != null)
                     {
-                        string pageNum = CurrentPageNum_textbox_Value;//PageNum_textbox.GetDomProperty("value");
+                        pageNum = CurrentPageNum_textbox_Value;//PageNum_textbox.GetDomProperty("value");
                         if (pageNum.IsNullOrEmpty()) return;
                         if (Edit_Linkbox != null)
                         {
@@ -2854,6 +2888,7 @@ var callback = arguments[arguments.length - 1];
                                 originalText = part.SecondPart;//data.Substring(splitPos);
                                                                //先設定一次；如果後續出錯的話還可以手動操作貼上，如碰到要輸入驗證時
                                 SetIWebElementValueProperty(Textarea_data_Edit_textbox, part.FirstPart);//data.Substring(0, splitPos));
+                                SetIWebElementValueProperty(Description_Edit_textbox, "調整頁碼頁碼對齊-以末學自製於GitHub開源免費免安裝之應用程式TextForCtext調正之。感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主");
                             }
                             //檢視重新編頁後的結果
                             shiftPage();
@@ -2861,7 +2896,9 @@ var callback = arguments[arguments.length - 1];
                     }
                     if (Textarea_data_Edit_textbox != null)
                     {
-                        SetIWebElementValueProperty(Textarea_data_Edit_textbox, Textarea_data_Edit_textbox.GetDomProperty("value") + Clipboard.GetText());
+                        SetIWebElementValueProperty(Textarea_data_Edit_textbox,
+                            ScanPageCleaner.RemoveTrulyEmptyScanPages(
+                                Textarea_data_Edit_textbox.GetDomProperty("value") + Clipboard.GetText()));
                     }
                     if (Commit != null)
                     {
@@ -2872,6 +2909,225 @@ var callback = arguments[arguments.length - 1];
                 }
                 #endregion
             }
+
+
+            //https://chatgpt.com/s/t_69650945a1e4819185e49644c1b463ac
+
+            /// <summary>
+            /// 清理空頁碼標記            
+            /// </summary>
+            public static class ScanPageCleaner
+            {
+                private static readonly Regex EmptyScanPairRegex =
+                    new Regex(
+                        @"<scanbegin\b[^>]*\bpage=""(\d+)""[^>]*/><scanend\b[^>]*\bpage=""\1""[^>]*/>",
+                        RegexOptions.Compiled
+                    );
+
+                /// <summary>
+                /// 只移除「scanbegin 與 scanend 緊貼、且頁碼相同」的空頁
+                /// </summary>
+                public static string RemoveTrulyEmptyScanPages(string input)
+                {
+                    if (string.IsNullOrEmpty(input))
+                        return input;
+
+                    Regex EmptyScanPairRegex =
+                    new Regex(
+                        @"<scanbegin\b[^>]*\bpage=""(\d+)""[^>]*/><scanend\b[^>]*\bpage=""\1""[^>]*/>",
+                        RegexOptions.Compiled
+                    );
+                    return EmptyScanPairRegex.Replace(input, string.Empty);
+                }
+
+
+                //準備將WordVBA中「Sub 清除頁前的分段符號()」搬到這裡來跑了 https://chatgpt.com/s/t_6965bb4984e08191b33eae051683c086 20260113蔣經國前總統逝世紀念
+
+                /// <summary>
+                /// 正則只負責「定位頁面」
+                /// </summary>
+                private static readonly Regex PageBlockRegex =
+    new Regex(
+        @"<scanbegin\b[^>]*page=""(\d+)""\s*/>(.*?)<scanend\b[^>]*page=""\1""\s*/>",
+        RegexOptions.Singleline | RegexOptions.Compiled
+    );
+                /// <summary>
+                /// 頁前垃圾的「極保守」定義
+                /// </summary>
+                private static readonly Regex LeadingPageGarbageRegex =
+    new Regex(
+        @"^(?:\s*<(scanbreak|scanskip)\b[^>]*/>\s*)+",
+        RegexOptions.Compiled
+    );
+
+                // 可以此頁來測試：https://ctext.org/wiki.pl?if=gb&chapter=547844
+
+                /// <summary>
+                /// 主清理方法；即WordVBA中的Sub 清除頁前的分段符號()
+                /// </summary>
+                /// <param name="input"></param>
+                /// <returns></returns>
+                public static string RemoveLeadingPageBreaks_chatGPT(string input)
+                {
+                    if (string.IsNullOrEmpty(input))
+                        return input;
+
+                    #region 熱重載方便故
+                    //                    Regex PageBlockRegex =
+                    //new Regex(
+                    //    @"<scanbegin\b[^>]*page=""(\d+)""\s*/>(.*?)<scanend\b[^>]*page=""\1""\s*/>",
+                    //    RegexOptions.Singleline | RegexOptions.Compiled
+                    //);
+                    //                /// <summary>
+                    //                /// 頁前垃圾的「極保守」定義
+                    //                /// </summary>
+                    //                Regex LeadingPageGarbageRegex =
+                    //    new Regex(
+                    //        @"^(?:\s*<(scanbreak|scanskip)\b[^>]*/>\s*)+",
+                    //        RegexOptions.Compiled
+                    //    );
+
+                    #endregion
+
+                    return PageBlockRegex.Replace(input, m =>
+                    {
+                        string page = m.Groups[1].Value;
+                        string body = m.Groups[2].Value;
+
+                        // 只處理「頁首」
+                        string cleanedBody = LeadingPageGarbageRegex.Replace(body, string.Empty);
+
+                        return m.Value.Replace(body, cleanedBody);
+                    });
+                }
+                /// <summary>
+                /// 即WordVBA中的Sub 清除頁前的分段符號()
+                /// </summary>
+                /// <param name="input"></param>
+                /// <returns></returns>
+                public static string RemoveLeadingPageBreaks(string input)
+                {
+                    // 首頁補「●」
+                    input = SetPage1Code(input);
+
+                    // 分割成各頁
+                    string[] pages = input.Split(new string[] { "<scanbegin" }, StringSplitOptions.None);
+
+                    for (int i = 0; i < pages.Length; i++)
+                    {
+                        if (string.IsNullOrWhiteSpace(pages[i])) continue;
+
+                        // 檢查頁首是否有兩個以上的分段符號
+                        var match = Regex.Match(pages[i], @"^(?:\r\n|\n){2,}");
+                        //if (match.Success && i > 0)
+                        //{
+                        //    // 搬到上一頁尾巴
+                        //    pages[i - 1] += match.Value;
+                        //    // 移除當前頁首的分段符號
+                        //    pages[i] = pages[i].Substring(match.Length);
+                        //}
+                        //https://copilot.microsoft.com/shares/Ym8kPpyjwdULFHPWGFpvG
+                        if (match.Success && i > 0)
+                        {
+                            // 找到上一頁的 scanend 標記
+                            int scanendIndex = pages[i - 1].LastIndexOf("<scanend");
+                            if (scanendIndex > -1)
+                            {
+                                // 在 scanend 標記前插入分段符號
+                                pages[i - 1] = pages[i - 1].Insert(scanendIndex, match.Value);
+                            }
+                            else
+                            {
+                                // 如果沒找到 scanend，就退而求其次，加到尾巴
+                                pages[i - 1] += match.Value;
+                            }
+
+                            // 移除當前頁首的分段符號
+                            pages[i] = pages[i].Substring(match.Length);
+                        }
+
+                    }
+
+                    return string.Join("<scanbegin", pages);
+                }
+
+                private static string SetPage1Code(string xmlText)
+                {
+                    if (!xmlText.Contains("page=\"1\""))
+                    {
+                        var match = Regex.Match(xmlText, "page=\"(\\d+)\"");
+                        if (match.Success)
+                        {
+                            int pageNum = int.Parse(match.Groups[1].Value);
+                            if (pageNum < 10)
+                            {
+                                var fileMatch = Regex.Match(xmlText, "file=\"([^\"]+)\"");
+                                if (fileMatch.Success)
+                                {
+                                    string bID = fileMatch.Groups[1].Value;
+                                    string page1Stub =
+                                        $"<scanbegin file=\"{bID}\" page=\"1\" />●<scanend file=\"{bID}\" page=\"1\" />";
+                                    xmlText = page1Stub + xmlText;
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        string page1 = GetPageContent(xmlText, "1");
+                        if (page1.Contains("}}<scanskip "))
+                        {
+                            xmlText = xmlText.Replace(page1, "●");
+                        }
+                        else
+                        {
+                            if (!Page1Exam_NotContainsRegex(page1))
+                            {
+                                if (Page1Exam_ContainsRegex(page1))
+                                {
+                                    xmlText = xmlText.Replace(page1, "●");
+                                }
+                                else
+                                {
+                                    // 簡化：自動清除
+                                    xmlText = xmlText.Replace(page1, "●");
+                                }
+                            }
+                        }
+                    }
+                    return xmlText;
+                }
+
+                private static string GetPageContent(string xmlText, string pageNum)
+                {
+                    var re = new Regex(
+                        $"<scanbegin[^>]*page=\"{pageNum}\"[^>]*>([\\s\\S]*?)<scanend[^>]*page=\"{pageNum}\"[^>]*>",
+                        RegexOptions.IgnoreCase);
+                    var match = re.Match(xmlText);
+                    return match.Success ? match.Groups[1].Value : "";
+                }
+
+                private static bool Page1Exam_NotContainsRegex(string text)
+                {
+                    var re = new Regex("[《》]");
+                    return re.IsMatch(text);
+                }
+
+                private static bool Page1Exam_ContainsRegex(string text)
+                {
+                    string[] patterns = { @"\}\}\r\n\r\n<scanbreak" };
+                    string combined = "(" + string.Join("|", patterns) + ")";
+                    var re = new Regex(combined, RegexOptions.IgnoreCase);
+                    return re.IsMatch(text);
+                }
+
+
+
+
+            }
+
+            
+  
 
 
         }
@@ -2941,10 +3197,12 @@ var callback = arguments[arguments.length - 1];
                     int lines = description.IndexOf(Environment.NewLine);
                     description = lines > -1 ? description.Substring(0, lines) : description;
                 }
+                else
+                    description = "本書與本站另一本同版，今據此版並以末學自製於GitHub開源、免費免安裝之TextForCtext應用程式及其內之WordVBA對應迻入，（討論區與末學YouTube頻道有實境演示影片可供參考），以俟後賢精校。各本後亦可同步更新。感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主";
                 SetIWebElementValueProperty(Description_Edit_textbox, description);
                 Commit?.JsClick();
                 PlaySound(SoundLike.done);
-                Clipboard.Clear();                
+                Clipboard.Clear();
             }
             #endregion
         }

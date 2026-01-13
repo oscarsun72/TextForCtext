@@ -1045,6 +1045,19 @@ namespace TextForCtext
                                 //-2146233079session not created（重新安裝Chrome瀏覽器（免安裝版）即可解決）
                                 //from unknown error: cannot parse internal JSON template: Line: 1, column: 1, Unexpected token. (SessionNotCreated)
                             }
+                        case -2147467259://0x80131515:unknown error: cannot find Chrome binary\n  (unknown error: DevToolsActivePort file doesn't exist)\n  (The process started from chrome location W:\PortableApps\PortableApps\GoogleChromePortable\App\Chrome-bin\chrome.exe is no longer running, so ChromeDriver is assuming that Chrome has crashed.) (WebDriverException)
+                            if (ex.Message.StartsWith("系統找不到指定的檔案。"))
+                            {
+                                MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message + Environment.NewLine + Environment.NewLine +
+                                    "請在開啟的檔案總管中加入與現用Chrome瀏覽器相同版本的 chromedriver.exe 感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主");
+                                Process.Start(chrome_path);
+                                return null;
+                            }
+                            {
+                                Console.WriteLine(ex.HResult + ex.Message);
+                                Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
+                                return null;
+                            }
                         default:
                             Console.WriteLine(ex.HResult + ex.Message);
                             Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
@@ -10677,7 +10690,7 @@ namespace TextForCtext
         /// 若是null則會自行啟用chromedriver 20250215
         /// </summary>
         /// <param name="driver"></param>
-        /// <returns></returns>
+        /// <returns>失敗傳回false</returns>
         internal static bool IsDriverInvalid()
         {
             try
@@ -10685,14 +10698,16 @@ namespace TextForCtext
                 if (BrowsrOPMode == BrowserOPMode.appActivateByName) return true;
 
                 if (getChromedrivers().Length == 0)
-                    RestartChromedriver();
+                    if (!RestartChromedriver()) return true;
 
                 if (driver == null)
                 {
                     Form1.BrowsrOPMode = Form1.BrowserOPMode.seleniumNew;
                     DriverNew();
                     if (driver == null)
-                        RestartDriver();
+                        if (!RestartDriver()) return true;
+                        else
+                            return false;
                 }
                 try
                 {
@@ -10887,13 +10902,15 @@ namespace TextForCtext
         /// <summary>
         /// chromedriver被誤關時 20241008
         /// </summary>
-        internal static void RestartChromedriver()
+        /// <returns>啟動Chrome瀏覽器失敗則傳回false</returns>
+        internal static bool RestartChromedriver()
         {
             killchromedriverFromHere();
             driver = null;
             if (Form1.BrowsrOPMode != Form1.BrowserOPMode.seleniumNew)
                 Form1.BrowsrOPMode = Form1.BrowserOPMode.seleniumNew;
-            DriverNew();
+            if (DriverNew() == null) return false;
+            return true;
         }
         /// <summary>
         /// 檢索《漢籍全文資料庫》，成功則傳回true。20241008
@@ -13101,7 +13118,9 @@ namespace TextForCtext
                 if (!string.IsNullOrWhiteSpace(msg) &&
                     (msg.StartsWith("操作过于频繁") || msg.StartsWith("算力不足")))
                 {
-                    Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("已達上限，請稍後再試！");
+                    Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("已達上限，請稍後再試！" +
+                        Environment.NewLine + Environment.NewLine +
+                        msg);
                     driver.Close();
                     driver.SwitchTo().Window(driver.WindowHandles.Last());
                     Browser.StopOCR = true;
@@ -13135,7 +13154,11 @@ namespace TextForCtext
                     }
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                if (ex.Message.Contains("no such window: target window already closed"))
+                    return true;
+            }
 
             return false;
         }
@@ -13166,10 +13189,10 @@ namespace TextForCtext
                         return null;
                     begin = DateTime.Now;
                 }
-                Thread.Sleep(300);
+                //Thread.Sleep(300);
             }
 
-            try { copyBtn.Click(); Thread.Sleep(200); }
+            try { copyBtn.Click(); }//Thread.Sleep(200); }
             catch { try { copyBtn.SendKeys(selm.Keys.Enter); } catch { } }
 
             begin = DateTime.Now;
@@ -13188,7 +13211,7 @@ namespace TextForCtext
                         return null;
                     begin = DateTime.Now;
                 }
-                Thread.Sleep(200);
+                //Thread.Sleep(200);
             }
         }
 
@@ -13210,7 +13233,7 @@ namespace TextForCtext
                     if (title != null && title.Text.Contains("上传完毕"))
                     {
                         var okBtn = driver.FindElement(By.CssSelector("button.swal2-confirm"));
-                        okBtn.Click();
+                        okBtn.JsClick();
                         break;
                     }
                 }
@@ -13222,19 +13245,20 @@ namespace TextForCtext
                         return null;
                     begin = DateTime.Now;
                 }
-                Thread.Sleep(300);
+                //Thread.Sleep(300);
             }
 
             //按下pro按鈕
-            driver.FindElement(By.Id("auto_ocr")).Click();
-            Thread.Sleep(300);
+            driver.FindElement(By.Id("auto_ocr")).JsClick();
             Browser.ChromeSetFocus();
+            //Thread.Sleep(300);
             //按下「古籍識別」按鈕
             driver.FindElement(By.CssSelector("#OneLine > div.d-flex.mt-2 > div:nth-child(1) > div:nth-child(3) > ul > li:nth-child(2) > button")).Click();
-            Thread.Sleep(300);
+            //driver.FindElement(By.CssSelector("#OneLine > div.d-flex.mt-2 > div:nth-child(1) > div:nth-child(3) > ul > li:nth-child(2) > button")).JsClick();//前後按鈕都可以，唯獨這個不行
+            //Thread.Sleep(300);
 
             SendKeys.SendWait("~");
-            Thread.Sleep(300);
+            //Thread.Sleep(300);
 
             begin = DateTime.Now;
             while (true)
@@ -13256,14 +13280,14 @@ namespace TextForCtext
                         return null;
                     begin = DateTime.Now;
                 }
-                Thread.Sleep(500);
+                //Thread.Sleep(500);
             }
 
             try
-            {
+            {//【文本行】按鈕
                 var textBtn = driver.FindElement(By.CssSelector("#line_image_panel > div > div.d-flex.gap-2 > div:nth-child(6) > button:nth-child(2)"));
-                textBtn.Click();
-                Thread.Sleep(500);
+                textBtn.JsClick();
+                //Thread.Sleep(500);
             }
             catch { }
 

@@ -138,12 +138,17 @@ button1 「分行分段」或「送出貼上」按鈕:
 
 Alt + ↑ ↓ ← → ：移動操作表單介面視窗位置
 
-Ctrl + Shift + p ：從圖文對照目前頁面開始，開始自動往後翻頁瀏覽各頁面（如在翻書。多作為批量OCR或大量快速自動編輯的行前檢查用。p=page。）
->若要煞車，請對Chrome瀏覽器或本操作介面按下`Ctrl + 滑鼠左鍵`
+Ctrl + 數字鍵盤 / ：啟動/關閉自動輸入模式。
 
 Ctrl + Shift + 數字鍵盤 * ：啟動/關閉手動輸入模式。
 
-Ctrl + 數字鍵盤 / ：啟動/關閉自動輸入模式。
+Ctrl + Shift + p ：從圖文對照目前頁面開始，開始自動往後翻頁瀏覽各頁面（如在翻書。多作為批量OCR或大量快速自動編輯的行前檢查用。p=page。）
+>若要煞車，請對Chrome瀏覽器或本操作介面按下`Ctrl + 滑鼠左鍵` 或`CapsLock`鍵或啟動/執行 `cmd.exe`
+### WordVBA轉譯來者
+Ctrl + Shift + Alt + p：執行從WordVBA轉譯來的`清除頁前的分段符號`程序。20260113 蔣經國前總統逝世紀念、海賢老和尚大德往生前紀念　Gemini大菩薩成功！（p=page）
+
+Ctrl + Shift + Alt + a：執行從WordVBA轉譯來的`提取人名_二字人名中有空白者`程序。20260113 蔣經國前總統逝世紀念、海賢老和尚大德往生前紀念　Gemini大菩薩成功！（m=n`a`me,`a`uthor)
+
 ### 加速輸入
 Insert 鍵 ：切換`插入、取代`輸入模式（預設為`插入輸入模式`）
 
@@ -1022,6 +1027,8 @@ Ctrl + 滑鼠左鍵：清除框中所有文字
     >> 若只輸入「ifp」則還原為預設值
 - 輸入「anv」 設定是否要自動複製下一卷/單位文本
     > autoNextVolumnContextMark值的切換。預設為true
+- 輸入「ep」 (edit page)設定是否是在編輯XML頁碼偏移/位移時的模式。（同版書、同版本文本帶入置換file id 和 頁數） 20260112
+    > EditModeMakeup_changeFile_Page值的切換。預設為false
 
 ### 在 textBox3 網址資訊專用方塊框：
 - 拖曳網址在 textBox3 或 textBox1 上放開，則會讀入所拖曳的網址值給 textBox3

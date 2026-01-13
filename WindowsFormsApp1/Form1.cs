@@ -28,7 +28,9 @@ using static TextForCtext.Browser;
 using static TextForCtext.CTP;
 using static TextForCtext.XML;
 using static TextForCtext.XML.ScanPageAdjuster;
+using static TextForCtext.XML.ScanPageAdjuster.ScanPageCleaner;
 using static WindowsFormsApp1.KeyboardInfo;
+using static WindowsFormsApp1.KeyboardPress;
 //using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 //引用adodb 要將其「內嵌 Interop 類型」（Embed Interop Type）屬性設為false（預設是true）才不會出現以下錯誤：  HResult=0x80131522  Message=無法從組件 載入類型 'ADODB.FieldsToInternalFieldsMarshaler'。
 //https://stackoverflow.com/questions/5666265/adodbcould-not-load-type-adodb-fieldstointernalfieldsmarshaler-from-assembly  https://blog.csdn.net/m15188153014/article/details/119895082
@@ -2663,10 +2665,8 @@ namespace WindowsFormsApp1
             {
                 if (e.KeyCode == Keys.D1)
                 {//Alt + Shift + 1 如宋詞中的換片空格，只將文中的空格轉成空白，其他如首綴前罝以明段落或標題者不轉換
-                    e.Handled = true; TopMost = false;
-                    SpacesBlanksInContext();
-                    TopMost = true;
-                    AvailableInUse_BothKeysMouse();
+                    e.Handled = true;
+                    AltShift1();
                     return;
                 }
                 if (e.KeyCode == Keys.D2)
@@ -2846,7 +2846,9 @@ namespace WindowsFormsApp1
                 }
                 if (e.KeyCode == Keys.Back)
                 {//Ctrl + Backspace : 清除插入點之前的所有「　」或「􏿽」
-                    e.Handled = true; 清除插入點之前的所有空格();
+                    e.Handled = true;
+                    //ctrlBackspace_ClearAllSpaceBeforeCaret_RemoveUnnecessaryBeforeInsertionPoint();
+                    ctrlBackspace_ClearBeforeCaret();
                     return;
                 }
                 if (e.KeyCode == Keys.Insert)
@@ -4786,79 +4788,9 @@ namespace WindowsFormsApp1
                 if (e.KeyCode == Keys.Add)
                 {//在非自動且手動輸入模式下單獨按下數字鍵盤的「+」("+",數字鍵盤的「+」)→方便檢索到這塊程式碼
                  //整頁貼上Quick edit [簡單修改模式]  並將下一頁直接送交《古籍酷》OCR// 原為加上篇名格式代碼
-
-                    //還原放大的書圖
-                    RestoreImageSize();
-
-                    #region 全自動貼上模式（自動連續輸入模式）不適用，因為要輸入「+」成「+<p>」以取消「<p>」的檢查判斷
-                    if (autoPaste2QuickEdit)
-                    {
-                        return;
-                    }
-                    #endregion
-
-                    //防止誤按
-                    if (Quickedit_data_textboxTxt == "+" &&
-                        textBox1.Text.Replace("+", string.Empty) == string.Empty)//textBox1.Text == string.Empty 已包含
-                        return;
-                    if (keyinTextMode && OcrTextMode)
-                    {
-                        e.Handled = true;
-                        //if (textBox1.Text != string.Empty)
-                        //{ undoRecord(); pauseEvents(); textBox1.Text = string.Empty; resumeEvents(); }
-                        //OpenQA.Selenium.IWebElement iw = waitFindWebElementBySelector_ToBeClickable("#canvas > svg");
-                        TopMost = false;
-                        OpenQA.Selenium.IWebElement iw = WaitFindWebElementBySelector_ToBeClickable("#content");
-                        if (iw != null) // clickCopybutton_GjcoolFastExperience(iw.Location); 
-                            Cursor.Position = (Point)iw.Location;
-
-                        rep://OCR連續輸入
-                        if (pagePaste2GjcoolOCR() && PasteOcrResultFisrtMode && ModifierKeys != Keys.Control && !confirm_that_you_are_human)
-                            goto rep;
-
-                        //if (!pagePaste2GjcoolOCR())//因為失敗的結果非唯一，故改寫在方法之中
-                        //{ //數字鍵盤的「+」
-                        //    PauseEvents();//為了等待時可以切到別的視窗看看，在執行成功且完成後，再把這2個關鍵的視窗置前
-                        //    try
-                        //    {
-                        //        driver.SwitchTo().Window(LastValidWindow);
-                        //        Thread.Sleep(300);
-                        //    }
-                        //    catch (Exception)
-                        //    {
-                        //        LastValidWindow = null;
-                        //    }
-                        //    ResumeEvents();
-                        //    //SendKeys.Send("^z");//因為會輸入「+」取代選取區文字//這應該是在下一個程序textBox1_KeyPress才會輸入，而不是在這時
-                        //}
-                        //if (!Visible) Visible = true;
-                        //bringBackMousePosFrmCenter();
-                        if (PagePaste2GjcoolOCR_ing && (BatchProcessingGJcoolOCR || PasteOcrResultFisrtMode)) PagePaste2GjcoolOCR_ing = false;
-                        return;
-                    }
-                    else
-                    {
-                        e.Handled = true;
-                        if (keyinTextMode)
-                        {
-                            PagePaste2GjcoolOCR_ing = true;//這樣寫才是 20251230 才能防止誤輸入「+」
-                            SelectAll2Quickedit();
-                            //PagePaste2GjcoolOCR_ing = false;//不能恢復，否則會誤輸入「+」
-                            //if (!PagePaste2GjcoolOCR_ing)
-                            //    PagePaste2GjcoolOCR_ing = true;//防止誤輸入「+」//在前面方法執行時就被輸入「+」了！20251230
-                        }
-                        else// if(!autoPaste2QuickEdit)//前已有 return了
-                        {
-                            { PlaySound(SoundLike.press, true); altA_predictEndofPageRange(); }
-                            keyDownCtrlAdd(false);
-                            RestoreImageSize();
-                            if (!autoPaste2QuickEdit && !isSKQSFrontPage(textBox1.Text)) AvailableInUse_BothKeysMouse();
-                            EndUpdate();
-                            PagePaste2GjcoolOCR_ing = true;//借用這個變數，以免誤輸入「+」
-                        }
-                        return;
-                    }
-
+                    e.Handled = true;
+                    add();
+                    return;
                 }
                 if (e.KeyCode == Keys.Subtract)
                 {//"-"： 在非自動且手動輸入模式下單獨按下數字鍵盤的「-」，執行與按下 Scroll Lock 一樣的功能
@@ -4901,6 +4833,95 @@ namespace WindowsFormsApp1
                 //以上按下單一鍵
                 #endregion
             }
+        }
+        /// <summary>
+        /// 在非自動且手動輸入模式下單獨按下數字鍵盤的「+」("+",數字鍵盤的「+」)→方便檢索到這塊程式碼
+        /// 整頁貼上Quick edit [簡單修改模式]  並將下一頁直接送交《古籍酷》OCR// 原為加上篇名格式代碼
+        /// </summary>
+        private void add()
+        {
+            //還原放大的書圖
+            RestoreImageSize();
+
+            #region 全自動貼上模式（自動連續輸入模式）不適用，因為要輸入「+」成「+<p>」以取消「<p>」的檢查判斷
+            if (autoPaste2QuickEdit)
+            {
+                return;
+            }
+            #endregion
+
+            //防止誤按
+            if (Quickedit_data_textboxTxt == "+" &&
+                textBox1.Text.Replace("+", string.Empty) == string.Empty)//textBox1.Text == string.Empty 已包含
+                return;
+            if (keyinTextMode && OcrTextMode)
+            {
+                //e.Handled = true;
+                //if (textBox1.Text != string.Empty)
+                //{ undoRecord(); pauseEvents(); textBox1.Text = string.Empty; resumeEvents(); }
+                //OpenQA.Selenium.IWebElement iw = waitFindWebElementBySelector_ToBeClickable("#canvas > svg");
+                TopMost = false;
+                OpenQA.Selenium.IWebElement iw = WaitFindWebElementBySelector_ToBeClickable("#content");
+                if (iw != null) // clickCopybutton_GjcoolFastExperience(iw.Location); 
+                    Cursor.Position = (Point)iw.Location;
+
+                rep://OCR連續輸入
+                if (pagePaste2GjcoolOCR() && PasteOcrResultFisrtMode && ModifierKeys != Keys.Control && !confirm_that_you_are_human)
+                    goto rep;
+
+                //if (!pagePaste2GjcoolOCR())//因為失敗的結果非唯一，故改寫在方法之中
+                //{ //數字鍵盤的「+」
+                //    PauseEvents();//為了等待時可以切到別的視窗看看，在執行成功且完成後，再把這2個關鍵的視窗置前
+                //    try
+                //    {
+                //        driver.SwitchTo().Window(LastValidWindow);
+                //        Thread.Sleep(300);
+                //    }
+                //    catch (Exception)
+                //    {
+                //        LastValidWindow = null;
+                //    }
+                //    ResumeEvents();
+                //    //SendKeys.Send("^z");//因為會輸入「+」取代選取區文字//這應該是在下一個程序textBox1_KeyPress才會輸入，而不是在這時
+                //}
+                //if (!Visible) Visible = true;
+                //bringBackMousePosFrmCenter();
+                if (PagePaste2GjcoolOCR_ing && (BatchProcessingGJcoolOCR || PasteOcrResultFisrtMode)) PagePaste2GjcoolOCR_ing = false;
+                return;
+            }
+            else
+            {
+                //e.Handled = true;
+                if (keyinTextMode)
+                {
+                    PagePaste2GjcoolOCR_ing = true;//這樣寫才是 20251230 才能防止誤輸入「+」
+                    SelectAll2Quickedit();
+                    //PagePaste2GjcoolOCR_ing = false;//不能恢復，否則會誤輸入「+」
+                    //if (!PagePaste2GjcoolOCR_ing)
+                    //    PagePaste2GjcoolOCR_ing = true;//防止誤輸入「+」//在前面方法執行時就被輸入「+」了！20251230
+                }
+                else// if(!autoPaste2QuickEdit)//前已有 return了
+                {
+                    { PlaySound(SoundLike.press, true); altA_predictEndofPageRange(); }
+                    keyDownCtrlAdd(false);
+                    RestoreImageSize();
+                    if (!autoPaste2QuickEdit && !isSKQSFrontPage(textBox1.Text)) AvailableInUse_BothKeysMouse();
+                    EndUpdate();
+                    PagePaste2GjcoolOCR_ing = true;//借用這個變數，以免誤輸入「+」
+                }
+                return;
+            }
+        }
+
+        /// <summary>
+        /// Alt + Shift + 1 如宋詞中的換片空格，只將文中的空格轉成空白，其他如首綴前罝以明段落或標題者不轉換
+        /// </summary>
+        private void AltShift1()
+        {
+            TopMost = false;
+            SpacesBlanksInContext();
+            TopMost = true;
+            AvailableInUse_BothKeysMouse();
         }
 
         private void altS()
@@ -5126,6 +5147,11 @@ namespace WindowsFormsApp1
                     //toOCR(OCRSiteTitle.GJcool);
                     toOCR(PagePast2OCRsite);
                     if (PagePaste2GjcoolOCR_ing) { Debugger.Break(); PagePaste2GjcoolOCR_ing = false; }//●●●●●●●●●●●●●●●●●●●●●●●20251230
+                    if (textBox1.SelectionStart > 0 || textBox1.SelectionLength > 0)
+                    {
+                        textBox1.Select(0, 0);//20260112
+                        textBox1.ScrollToCaret();
+                    }
                 }
 
                 //避免事件被終止
@@ -6127,12 +6153,104 @@ namespace WindowsFormsApp1
             textBox1.Text = xSl + "<p>" + Environment.NewLine + x;
             stopUndoRec = false;
         }
+
+
+        #region Ctrl + Backspace Copilot大菩薩優化後的版本
+        // 定義清除規則 https://copilot.microsoft.com/shares/FCdPysNdqxvGvA5681kWP
+        public class ClearRule
+        {
+            public string Pattern { get; set; }
+            public int Length => Pattern.Length;
+        }
+        /// <summary>
+        /// 用一個 List<ClearRule> 來存放所有清除規則。
+        /// 擴充方便：只要在 clearRules 加一筆即可。
+        /// </summary>
+        private readonly List<ClearRule> clearRules = new List<ClearRule>
+{
+    new ClearRule { Pattern = "<p>" },
+    new ClearRule { Pattern = "。<p>" },
+    new ClearRule { Pattern = "}}" },
+    new ClearRule { Pattern = reviewMark ?? string.Empty }
+}
+.OrderByDescending(r => r.Pattern?.Length ?? 0)
+.ToList();//在建構時自動依長度排序，避免日後新增規則時忘記順序
+
+        /// <summary>
+        /// Ctrl + Backspace
+        /// </summary>
+        private void ctrlBackspace_ClearBeforeCaret()
+        {
+            int s = textBox1.SelectionStart;
+            string x = textBox1.Text;
+
+            // 1. 處理連續 *
+            if (s > 0 && x[s - 1] == '*')
+            {
+                while (s > 0 && x[s - 1] == '*') s--;
+                clearSelection(s, textBox1.SelectionStart - s);
+                return;
+            }
+
+            // 2. 處理規則表
+            ////foreach (var rule in clearRules)
+            ////{
+            ////    if (s >= rule.Length && x.Substring(s - rule.Length, rule.Length) == rule.Pattern)
+            ////    {
+            ////        clearSelection(s - rule.Length, rule.Length);
+            ////        return;
+            ////    }
+            ////}
+            /* Matching logic improvements https://copilot.microsoft.com/shares/vkPHWh9KeVcYLaGkV5zRz https://copilot.microsoft.com/shares/kiDimtGNNB2MpDsnGk8mR
+                最長優先匹配： 迴圈中維持長度降序，遇到第一個命中就清除並 return。
+                防禦性檢查： 跳過 null 或空字串的規則，避免例外。
+                EndsWith 可讀性： 對 caret 前子串匹配時，可用 Substring，但若情境允許（整體尾端匹配），改用 EndsWith 會更直覺。*/
+            foreach (var rule in clearRules)
+            {
+                var pat = rule.Pattern;
+                if (string.IsNullOrEmpty(pat)) continue;
+
+                int len = pat.Length;
+                if (s >= len && x.Substring(s - len, len) == pat)
+                {
+                    clearSelection(s - len, len);
+                    return;
+                }
+            }
+
+
+            // 3. 處理特殊括號
+            if (x.Contains("〖"))
+            {
+                clearWhiteSquareBracketsRange(s, x, true);
+                return;
+            }
+
+            // 4. 處理空白
+            int e = s;
+            while (s > 0 && char.IsWhiteSpace(x[s - 1])) s--;
+            clearSelection(s, e - s);
+        }
+
+        private void clearSelection(int start, int length)
+        {
+            textBox1.Select(start, length);
+            undoRecord();
+            stopUndoRec = true; PauseEvents();
+            textBox1.SelectedText = string.Empty;
+            stopUndoRec = false; ResumeEvents();
+            undoRecord();
+        }
+        #endregion
+
+        // 20260112請Copilot大菩薩優化如上 https://copilot.microsoft.com/shares/MtLkwJtBJ71LRfLYujyw5 https://copilot.microsoft.com/shares/itnAQ2gBR8DxQnKAL6BoE
+
         /// <summary>
         /// 清除插入點之前的所有空格「　」、空白「􏿽」、「<p>」、「}}」、「*」、「●●」
         /// </summary>
-        private void 清除插入點之前的所有空格()
-        {//Ctrl + Backspace,若插入點前為「<p>」則一併清除
-         //throw new NotImplementedException();
+        private void ctrlBackspace_ClearAllSpaceBeforeCaret_RemoveUnnecessaryBeforeInsertionPoint()
+        {//Ctrl + Backspace,若插入點前為「<p>」則一併清除 ctrlbackspace
+
             int s = textBox1.SelectionStart, e = s; string x = textBox1.Text;
             if (s > 0 && x[s - 1] == '*')
             {
@@ -6142,6 +6260,10 @@ namespace WindowsFormsApp1
             else if (s > 3 && x.Substring(s - 3, 3) == "<p>")
             {
                 textBox1.Select(s - 3, 3);
+            }
+            else if (s > 4 && x.Substring(s - 4, 4) == "。<p>")
+            {
+                textBox1.Select(s - 4, 4);
             }
             else if (s > 2 && x.Substring(s - 2, 2) == "}}")
             {
@@ -6686,7 +6808,7 @@ namespace WindowsFormsApp1
             CnText.ReplaceBlanksWithSpaces(textBox1);
 
             restoreCaretPosition(textBox1, s, 0);
-            stopUndoRec = false;
+            stopUndoRec = false; undoRecord();
             if (textBox1.TextLength > 1100) PlaySound(SoundLike.over, true);
 
         }
@@ -10674,7 +10796,7 @@ namespace WindowsFormsApp1
         }
 
 
-        
+
         /// <summary>
         /// 是否是四庫全書的扉頁
         /// </summary>
@@ -12195,7 +12317,7 @@ namespace WindowsFormsApp1
 
                     //按著Ctrl鍵則直接ok 20250109（並啟動快捷模式） 20251224 Ctrl 等鍵似乎有時會跳不起來，故取清，改以 cmd.exe 方式為主
                     //if (ModifierKeys == Keys.Control && dialogResult != DialogResult.Abort) { dialogResult = DialogResult.OK; goto ok; }
-
+                    Application.DoEvents();//加了這行後CapsLock就不會再失靈了！感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主 20260113蔣經國前總統逝世紀念，海賢老和尚大德準備往生之紀念
                     if ((ModifierKeys == Keys.Control && keycodeNow != Keys.Subtract
                             && !KeyboardInfo.getKeyStateToggled(System.Windows.Input.Key.Add)
                             && !KeyboardInfo.getKeyStateToggled(System.Windows.Input.Key.Subtract)
@@ -12249,6 +12371,7 @@ namespace WindowsFormsApp1
                     else if (Console.CapsLock)
                     { // 模擬按下 CapsLock 鍵
                       //SendKeys.SendWait("{CAPSLOCK}");
+                        Application.DoEvents();//加了這行後CapsLock就不會再失靈了！感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主 20260113蔣經國前總統逝世紀念，海賢老和尚大德準備往生之紀念
                         KeyboardPress.CAPSLOCK_Press();//關閉 CapsLock 燈
                         dialogResult = DialogResult.OK; doNotShowMsgBox = true; goto ok;
                     }
@@ -12802,6 +12925,48 @@ namespace WindowsFormsApp1
             //https://zhidao.baidu.com/question/628222381668604284.html
             var m = ModifierKeys;
 
+            if (e.Control && e.Shift && e.Alt && e.KeyCode == Keys.A)
+            {//Ctrl + Shift + Alt + a：執行從WordVBA轉譯來的`提取人名_二字人名中有空白者`程序。20260113 蔣經國前總統逝世紀念、海賢老和尚大德往生前紀念　Gemini大菩薩成功！（m=n`a`me,`a`uthor)
+                e.Handled = true; e.SuppressKeyPress = true;
+                if (!Clipboard.GetText().Contains("􏿽") && textBox1.Text.Contains("􏿽")) Clipboard.SetText(textBox1.Text);
+                NameExtractor.ExtractNamesWithSpaces();
+                return;
+            }
+            if (e.Control && e.Shift && e.Alt && e.KeyCode == Keys.P)
+            {//Ctrl + Shift + Alt + p：執行從WordVBA轉譯來的`清除頁前的分段符號`程序
+                e.Handled = true;
+                if (!IsDriverInvalid())
+                {
+                    if (Textarea_data_Edit_textbox != null)
+                    {
+                        string xml = Textarea_data_Edit_textboxTxt;//Clipboard.GetText();
+                        if (xml.IsNullOrEmpty() || xml.Contains("<scanbegin file=\"") == false) return;
+                        Clipboard.SetText(xml);
+                        TextForCtext.CtextCleaner.ProcessClipboard();
+                        if (xml != Clipboard.GetText())
+                        {
+                            string textForm2 = GetSecondFormText();//https://copilot.microsoft.com/shares/kudAKddNP7MztHtzaz2o4
+                            //Console.WriteLine("第2個表單的文字：" + text);
+                            if (textForm2.StartsWith("將星號前的分段符號移置前段之末"))
+                            {
+                                SetIWebElementValueProperty(Description_Edit_textbox, textForm2);
+                            }
+                            SetIWebElementValueProperty(Textarea_data_Edit_textbox, Clipboard.GetText());
+                            if (Commit == null) return;
+                            if (Commit.JsClick()) Clipboard.Clear();
+                        }
+                        else
+                        {
+                            MessageBoxShowOKCancelExclamationDefaultDesktopOnly("不需處理~");
+                            Clipboard.Clear();
+                        }
+                    }
+                }
+                //string test = RemoveLeadingPageBreaks(Clipboard.GetText());
+                //Clipboard.SetText(test);
+                return;
+            }// 20260113
+
             #region 同時按下 Ctrl Shift Alt
 
             if (e.Control && e.Shift && e.Alt && e.KeyCode == Keys.T)// 20240718
@@ -12810,7 +12975,28 @@ namespace WindowsFormsApp1
             {
                 e.Handled = true;
                 PlaySound(SoundLike.exam, true);
-                HanchiTextReadinginPagebyPage();
+
+                //NameExtractor.ExtractNamesWithSpaces();
+
+
+                #region 測試「清除頁前的分段符號」VBA轉來者
+
+                //// 執行清理，結果會直接存回剪貼簿
+                //TextForCtext.CtextCleaner.ProcessClipboard();
+
+                //// 如果您有一個 TextBox 想要顯示結果
+                //// txtContent.Text = Clipboard.GetText(); 
+
+
+
+
+                ////string test = RemoveLeadingPageBreaks(Clipboard.GetText());
+                ////Clipboard.SetText(test);
+                #endregion
+
+
+
+                //HanchiTextReadinginPagebyPage();
 
                 //string x = textBox1.Text;
                 //CnText.ClearFirstParaLeadingSpace(ref x);
@@ -12974,40 +13160,12 @@ namespace WindowsFormsApp1
             //Ctrl + Shift + p ： 逐頁瀏覽肉眼檢查空白頁，以免白跑OCR 20240727 執行 CheckBlankPagesBeforeOCR
             if (e.Control && e.Shift && e.KeyCode == Keys.P)
             {
-                e.Handled = true;
-                string url = string.Empty;
-                if (driver == null) return;
-                try
+                e.Handled = true; e.SuppressKeyPress = true;
+                bool flowControl = ctrlShiftP();
+                if (!flowControl)
                 {
-                    url = driver.Url;
+                    return;
                 }
-                catch (Exception)
-                {
-                    //Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
-                    //return;
-                    if (IsWindowHandleValid(driver, LastValidWindow))
-                        driver.SwitchTo().Window(LastValidWindow);
-                }
-                //檢查是否是可操作的頁面（分頁）
-                if (!IsValidUrl＿ImageTextComparisonPage(url))
-                {
-                    foreach (var item in driver.WindowHandles)
-                    {
-                        driver.SwitchTo().Window(item);
-                        url = driver.Url;
-                        if (IsValidUrl＿ImageTextComparisonPage(url))
-                            if (MessageBoxShowOKCancelExclamationDefaultDesktopOnly("是否是這個頁面？") == DialogResult.OK) break;
-                    }
-                    if (!IsValidUrl＿ImageTextComparisonPage(url))
-                    {
-                        MessageBoxShowOKExclamationDefaultDesktopOnly("請開啟要瀏覽檢查的頁面？"); return;
-                    }
-                }
-                if (url != textBox3.Text) textBox3.Text = url;
-
-                int stopPageNum = pageUBound;
-
-                CheckBlankPagesBeforeOCR_NextPage(url, int.Parse(PageNum_textbox.GetAttribute("defaultValue")), stopPageNum);
                 return;
             }
 
@@ -13721,16 +13879,58 @@ namespace WindowsFormsApp1
             }//以上 按下單一鍵
             #endregion
         }
+        /// <summary>
+        /// Ctrl + Shift + p ： 逐頁瀏覽肉眼檢查空白頁，以免白跑OCR 20240727 執行 CheckBlankPagesBeforeOCR
+        /// </summary>
+        /// <returns>失敗傳回false</returns>
+        private bool ctrlShiftP()
+        {
+            string url = string.Empty;
+            if (driver == null) return false;
+            if (IsDriverInvalid()) RestartChromedriver();
+            try
+            {
+                url = driver.Url;
+            }
+            catch (Exception)
+            {
+                //Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
+                //return;
+                if (IsWindowHandleValid(driver, LastValidWindow))
+                    driver.SwitchTo().Window(LastValidWindow);
+            }
+            //檢查是否是可操作的頁面（分頁）
+            if (!IsValidUrl＿ImageTextComparisonPage(url))
+            {
+                foreach (var item in driver.WindowHandles)
+                {
+                    driver.SwitchTo().Window(item);
+                    url = driver.Url;
+                    if (IsValidUrl＿ImageTextComparisonPage(url))
+                        if (MessageBoxShowOKCancelExclamationDefaultDesktopOnly("是否是這個頁面？") == DialogResult.OK) break;
+                }
+                if (!IsValidUrl＿ImageTextComparisonPage(url))
+                {
+                    MessageBoxShowOKExclamationDefaultDesktopOnly("請開啟要瀏覽檢查的頁面？"); return false;
+                }
+            }
+            if (url != textBox3.Text) textBox3.Text = url;
+
+            int stopPageNum = pageUBound;
+
+            CheckBlankPagesBeforeOCR_NextPage(url, int.Parse(PageNum_textbox.GetAttribute("defaultValue")), stopPageNum);
+            return true;
+        }
 
         private void ctrlShiftF1()
         {
-            //if (insertMode && textBox1.SelectionLength > 0 || !insertMode)
-            if (textBox1.SelectionLength > 0)
+            if (insertMode && textBox1.SelectionLength > 0 || !insertMode)
+            //if (textBox1.SelectionLength > 0)
             {
                 undoRecord();
                 stopUndoRec = true;
-                //if (textBox1.SelectionLength == 0)
-                overtypeModeSelectedTextSetting(ref textBox1);
+                if (textBox1.SelectionLength == 0)
+                    overtypeModeSelectedTextSetting(ref textBox1);
                 string x = textBox1.SelectedText;
                 //先清理
                 x = x.Replace("。<p>", string.Empty).Replace("<p>", string.Empty);
@@ -14283,6 +14483,27 @@ namespace WindowsFormsApp1
         //}
 
 
+        //https://copilot.microsoft.com/shares/TXueHo5prDPYwMKY3Z6Na
+
+        /// <summary>
+        /// 取得Form2.textBox1的Text值
+        /// </summary>
+        /// <returns></returns>
+        public static string GetSecondFormText()
+        {
+            if (Application.OpenForms.Count >= 2)
+            {
+                Form1 secondForm = Application.OpenForms[1] as Form1;
+                if (secondForm != null)
+                {
+                    return secondForm.textBox1.Text;
+                }
+            }
+            return string.Empty; // 沒有第2個表單就回傳空字串
+        }
+
+
+
         /// <summary>
         /// 執行OCR主程式
         /// </summary>
@@ -14298,30 +14519,32 @@ namespace WindowsFormsApp1
 
             try
             {
-
-                try
-                {
-                    if (!driver.WindowHandles.Contains(driver.CurrentWindowHandle))
-                        driver.SwitchTo().Window(LastValidWindow);
-                }
-                catch (Exception)
+                if (!IsDriverInvalid())//20260112
                 {
                     try
                     {
-                        driver.SwitchTo().Window(LastValidWindow);
-                        PlaySound(SoundLike.exam);
+                        if (!driver.WindowHandles.Contains(driver.CurrentWindowHandle))
+                            driver.SwitchTo().Window(LastValidWindow);
                     }
                     catch (Exception)
                     {
-                        if (driver.WindowHandles.Count > 0)
+                        try
                         {
-                            driver.SwitchTo().Window(driver.WindowHandles[0]);
-                            LastValidWindow = driver.WindowHandles[0];
+                            driver.SwitchTo().Window(LastValidWindow);
+                            PlaySound(SoundLike.exam);
                         }
+                        catch (Exception)
+                        {
+                            if (driver.WindowHandles.Count > 0)
+                            {
+                                driver.SwitchTo().Window(driver.WindowHandles[0]);
+                                LastValidWindow = driver.WindowHandles[0];
+                            }
 
+                        }
                     }
+                    LastValidWindow = driver.CurrentWindowHandle;
                 }
-                LastValidWindow = driver.CurrentWindowHandle;
             }
             catch (Exception)
             {
@@ -14901,18 +15124,40 @@ namespace WindowsFormsApp1
                 string pageUrl = $"{baseUrl}&page={i}";
                 driver.Navigate().GoToUrl(pageUrl);
                 //if (MessageBoxShowOKCancelExclamationDefaultDesktopOnly("繼續下一頁？") == DialogResult.Cancel) break;
-                if (ModifierKeys == Keys.Control || BrakeByCmd()) break;
+                Application.DoEvents();//加了這行後CapsLock就不會再失靈了！感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主 20260113蔣經國前總統逝世紀念，海賢老和尚大德準備往生之紀念
+                if (ModifierKeys == Keys.Control || BrakeByCmd() || Console.CapsLock)
+                {
+                    if (MessageBoxShowOKCancelExclamationDefaultDesktopOnly("是否將textBox3的值設為當前頁面網址？") == DialogResult.OK)
+                    {
+                        PauseEvents(); textBox3.Text = driver.Url; ResumeEvents();
+                    }
+                    if (Console.CapsLock) CAPSLOCK_Press();
+                    break;
+                }
                 //Thread.Sleep(300);
                 //while (waitFindWebElementBySelector_ToBeClickable("#canvas > svg") == null) { }
                 while (Svg_image_PageImageFrame == null) { }
                 if (Div_generic_TextBoxFrame == null)
                     if (MessageBoxShowOKCancelExclamationDefaultDesktopOnly("是否終止/中斷？") == DialogResult.OK)
+                    {
+                        if (MessageBoxShowOKCancelExclamationDefaultDesktopOnly("是否將textBox3的值設為當前頁面網址？") == DialogResult.OK)
+                        {
+                            PauseEvents(); textBox3.Text = driver.Url; ResumeEvents();
+                        }
+                        Application.DoEvents();
+                        if (Console.CapsLock) CAPSLOCK_Press();
                         break;
+                    }
                     else
-                    { ChromeSetFocus(); }
+                    {
+                        ChromeSetFocus(); Application.DoEvents();
+                        if (Console.CapsLock) CAPSLOCK_Press();
+                    }
 
 
             }
+            Application.DoEvents();
+            if (Console.CapsLock) CAPSLOCK_Press();
             return true;
         }
         /// <summary>
@@ -17527,6 +17772,11 @@ namespace WindowsFormsApp1
         }
 
         string ClpTxtBefore = "";
+        /// <summary>
+        /// 是否是在編輯XML頁碼時的模式 
+        /// 對應於WordVBA同名巨集程序（同版本文本帶入置換file id 和 頁數）
+        /// </summary>
+        bool EditModeMakeup_changeFile_Page = false;
         private void Form1_Activated(object sender, EventArgs e)
 
         {//此中斷點專為偵錯測試用 感恩感恩　南無阿彌陀佛 20230314
@@ -17537,22 +17787,26 @@ namespace WindowsFormsApp1
             //alt + Shift + f ： 將章節單位的頁面樹狀目錄收起或展開
             //OutlineTitlesCloseOpenFoldExpandSwitcher();            
 
-            //在textBox1的第一段指定頁差（=目的-來源頁碼）
-            //if (ModifierKeys == Keys.Shift && (textBox1.TextLength > 30 || originalText.Contains(@"<scanbegin file=""")))
-            if (AreModifiersPressed(Keys.Alt) == false && KeyboardInfo.AreModifiersPressed(Keys.Control | Keys.Shift) && (textBox1.TextLength > 30 || Clipboard.GetText().Contains(@"<scanbegin file=""")))
+            #region 只有在同版書迻入要編輯頁碼對應時才執行！
+            if (EditModeMakeup_changeFile_Page)
             {
-                EditPageNumOffset_PageNumModifier();
-                nextPages(Keys.PageUp, false);//檢視編輯結果
-                AvailableInUse_BothKeysMouse();
+                //在textBox1的第一段指定頁差（=來源-目的頁碼，保持與WordVBA一致）；或「來源~目的」-蓋在手動輸入模式下是禁止輸入「-」，因為數字鍵盤中的「-」常用來作自動段落標記功能用。如果用「~」而省略來源頁碼，則取目前頁面之頁碼；不可用「-」，會與負/減混
+                //if (ModifierKeys == Keys.Shift && (textBox1.TextLength > 30 || originalText.Contains(@"<scanbegin file=""")))
+                if (AreModifiersPressed(Keys.Alt) == false && KeyboardInfo.AreModifiersPressed(Keys.Control | Keys.Shift) && (textBox1.TextLength > 0 || Clipboard.GetText().Contains(@"<scanbegin file=""")))
+                {
+                    string refers = _document.Text;//_document.GetParagraphs()[0].Text;
+                    EditPageNumOffset_PageNumModifier(refers);
+                    nextPages(Keys.PageUp, false);//檢視編輯結果
+                    AvailableInUse_BothKeysMouse();
+                }
+                if (!IsDriverInvalid() && AreModifiersPressed(Keys.Control | Keys.Shift | Keys.Alt) && textBox1.TextLength > 0)
+                {
+                    Move2NextChapter();
+                    nextPages(Keys.PageUp, false);//檢視重新編頁後的結果
+                    AvailableInUse_BothKeysMouse();
+                }
+                #endregion
             }
-            if (!IsDriverInvalid() && AreModifiersPressed(Keys.Control | Keys.Shift | Keys.Alt) && textBox1.TextLength > 30)
-            {
-                Move2NextChapter();
-                nextPages(Keys.PageUp, false);//檢視重新編頁後的結果
-                AvailableInUse_BothKeysMouse();
-            }
-
-
             //20250113
             if (this.Name != "Form1")
             {
@@ -18286,39 +18540,39 @@ namespace WindowsFormsApp1
             switch (x)
             {
 
+                case "ep"://輸入「ep」(edit page) 設定是否是在編輯XML頁碼時的模式。（同版書、同版本文本帶入置換file id 和 頁數） 20260112
+                    PauseEvents(); textBox2.Text = "";
+                    EditModeMakeup_changeFile_Page = !EditModeMakeup_changeFile_Page;
+                    if (EditModeMakeup_changeFile_Page)
+                        new SoundPlayer(@"C:\Windows\Media\Speech On.wav").Play();
+                    else
+                        new SoundPlayer(@"C:\Windows\Media\Speech Off.wav").Play();
+                    ResumeEvents(); return;
                 //輸入「anv」 設定是否要自動複製下一卷/單位文本
                 // autoNextVolumnContextMark值的切換。預設為true
                 case "anv":// 由textBox2輸入 "anv" 來切換設定
-                    {
-                        PauseEvents(); textBox2.Text = "";
-                        autoNextVolumnContextMark = !autoNextVolumnContextMark;
-                        ResumeEvents(); return;
-                    }
+                    PauseEvents(); textBox2.Text = "";
+                    autoNextVolumnContextMark = !autoNextVolumnContextMark;
+                    ResumeEvents(); return;
 
                 // 輸入「lp」：由textBox2輸入 "lp" 來切換設定是否將每頁的尾端「`|`」字符改成「`<p>`」以方便文字版的圖文對照連結圖示的出現。這在目錄或清單、詩偈特長的篇卷中很適用。
                 case "lp":
-                    {
-                        PauseEvents(); textBox2.Text = "";
-                        lpMode = !lpMode;
-                        ResumeEvents(); return;
-                    }
+                    PauseEvents(); textBox2.Text = "";
+                    lpMode = !lpMode;
+                    ResumeEvents(); return;
 
                 // 是否進行非正常行長（CheckAbnormalLinePara 方法）的檢查
                 case "alp":// 由textBox2輸入 "alp" 來切換設定
-                    {
-                        PauseEvents(); textBox2.Text = "";
-                        abnormalLineParaChecking = !abnormalLineParaChecking;
-                        ResumeEvents(); return;
-                    }
+                    PauseEvents(); textBox2.Text = "";
+                    abnormalLineParaChecking = !abnormalLineParaChecking;
+                    ResumeEvents(); return;
 
                 #region 輸入「nb,」可以切換 GXDS.SKQSnoteBlank 值以指定是否要檢查注文中因空白而誤標的情形。現在有些源文本是「 」或「  」而不是「􏿽」，可以透過「 」來檢測識別 20260107
                 case "nb,":
-                    {
-                        GXDS.SKQSnoteBlank = !GXDS.SKQSnoteBlank;
-                        PauseEvents();
-                        textBox2.Text = "";
-                        ResumeEvents(); return;
-                    }
+                    GXDS.SKQSnoteBlank = !GXDS.SKQSnoteBlank;
+                    PauseEvents();
+                    textBox2.Text = "";
+                    ResumeEvents(); return;
                 #endregion
 
                 #region 輸入「oT」（ocr first ture）設定直接貼入OCR結果先不管版面行款排版模式 輸入「oF」（ocr first false ）設定直接貼入OCR結果先不管版面行款排版模式 PasteOcrResultFisrtMode = false
@@ -19357,12 +19611,12 @@ namespace WindowsFormsApp1
                 {
                     try
                     {
-                        openNewTabWindow();
+                        if (openNewTabWindow() == null) return;
                         driver.Url = url;
                     }
                     catch (Exception)
                     {
-                        RestartChromedriver();
+                        if (!RestartChromedriver()) return;
                         goto retry;
                     }
                 }
