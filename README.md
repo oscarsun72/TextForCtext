@@ -143,11 +143,17 @@ Ctrl + 數字鍵盤 / ：啟動/關閉自動輸入模式。
 Ctrl + Shift + 數字鍵盤 * ：啟動/關閉手動輸入模式。
 
 Ctrl + Shift + p ：從圖文對照目前頁面開始，開始自動往後翻頁瀏覽各頁面（如在翻書。多作為批量OCR或大量快速自動編輯的行前檢查用。p=page。）
->若要煞車，請對Chrome瀏覽器或本操作介面按下`Ctrl + 滑鼠左鍵` 或`CapsLock`鍵或啟動/執行 `cmd.exe`
-### WordVBA轉譯來者
+>若要煞車，請對Chrome瀏覽器或本操作介面按下`Ctrl` 或`CapsLock`鍵或啟動/執行 `cmd.exe`
+### 處理XML文本或由WordVBA轉譯來者
 Ctrl + Shift + Alt + p：執行從WordVBA轉譯來的`清除頁前的分段符號`程序。20260113 蔣經國前總統逝世紀念、海賢老和尚大德往生前紀念　Gemini大菩薩成功！（p=page）
 
 Ctrl + Shift + Alt + a：執行從WordVBA轉譯來的`提取人名_二字人名中有空白者`程序。20260113 蔣經國前總統逝世紀念、海賢老和尚大德往生前紀念　Gemini大菩薩成功！（m=n`a`me,`a`uthor)
+
+Ctrl + Shift + Alt + l：在XML文末加上末頁的標記 （l:last page）
+
+Ctrl + Shift + Alt + m：在XML修改記錄中找出已編輯與未修過的頁碼 （m:modified page）並建立檢查機制之記錄-執行同步快取程序
+
+Ctrl + Shift + Alt + n：執行「新頁面Auto」程序：自動根據書籍相關參數建立新的文字版章節文本單位、及其內容的圖文對應語法標記 n:new text
 
 ### 加速輸入
 Insert 鍵 ：切換`插入、取代`輸入模式（預設為`插入輸入模式`）
@@ -168,7 +174,7 @@ Alt + 3 ： 輸入`◯`
 
 Alt + F1 ： 輸入墨丁、墨等、墨蓋、墨塊`■`
 
-Alt + F2 ： 輸入空圍`□`
+Alt + F2 ： 輸入空圍`▢`(之前是`□`，為避免與源文本缺字符撞碼)
 
 Ctrl + h ：取代文字（仿同MS Word功能）
 
@@ -632,8 +638,10 @@ Ctrl + Shift + 滑鼠下一頁：清除 [Quick edit]([簡單修改模式])中的
 
 Ctrl + Shift + t 同Chrome瀏覽器 --還原最近關閉的頁籤
 
-Ctrl + Shift + p ： 自動翻頁，逐頁瀏覽圖文對照的書圖頁面。要中止，則對本軟件介面或Chrome瀏覽器按住 Ctrl 同時按下滑鼠左鍵；或啟動 cmd.exe 。
+Ctrl + Shift + p ： 自動翻頁，逐頁瀏覽圖文對照的書圖頁面。要中止，則對本軟件介面或Chrome瀏覽器按住 Ctrl 或CapsLock鍵 或啟動 cmd.exe 。
 >> 逐頁瀏覽肉眼檢查是否有空白頁，以免白跑OCR 20240727 執行 CheckBlankPagesBeforeOCR
+
+>> 也可以作為同版書迻錄時對齊頁碼的巡覽功能。很好用。如末學目前在做的《天下郡國利病書》與《春融堂集》即是如是操作而得者。感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主 20260114
 
 
 ### 在 textBox1 中按下以下組合鍵：
@@ -810,7 +818,7 @@ Alt + Insert ：將剪貼簿的文字內容讀入textBox1中；在手動輸入�
 
 Alt + F1 : 輸入■；若其後為「　」或「􏿽」或「\<p\>」或「*」則清除之。若有選取，則置換選取區中的「　」或「􏿽」或「\<p\>」
 
-Alt + F2 : 輸入□；若其後為「　」或「􏿽」或「\<p\>」或「*」則清除之。若有選取，則置換選取區中的「　」或「􏿽」或「\<p\>」
+Alt + F2 : 輸入`▢`（原為`□`）；若其後為「　」或「􏿽」或「\<p\>」或「*」則清除之。若有選取，則置換選取區中的「　」或「􏿽」或「\<p\>」
 
 F1 : 複製textBox1的內容到剪貼簿
 
@@ -1008,7 +1016,7 @@ Ctrl + 滑鼠左鍵：清除框中所有文字
 
 - 在textBox2中輸入「`tr:nth-child(2)`」或當前chapter（冊）的Selector字串值，以指定或重設目前的文字版(View)單元（章節 chapter） 
 
-  或在textBox2中輸入「cpt序號」以指定。如「cpt183」即第183（冊） 20250305
+  或在textBox2中輸入「fn序號」以指定。如「fn183」即第183（冊,file,原用chapter、cpt） 20250305 20260116 fn=file no.
     > 如 `tr:nth-child(3)`，即 tr:nth-child(2) 的下一章（節、單元 chapter）
     >>`"#content > div:nth-child(6) > table > tbody > tr:nth-child(2) > td:nth-child(1) > a"`
 
@@ -1028,7 +1036,9 @@ Ctrl + 滑鼠左鍵：清除框中所有文字
 - 輸入「anv」 設定是否要自動複製下一卷/單位文本
     > autoNextVolumnContextMark值的切換。預設為true
 - 輸入「ep」 (edit page)設定是否是在編輯XML頁碼偏移/位移時的模式。（同版書、同版本文本帶入置換file id 和 頁數） 20260112
-    > EditModeMakeup_changeFile_Page值的切換。預設為false
+    > EditModeMakeup_changeFile_Page值的切換。預設為false。e:edit p:pages
+- 輸入「eE」 (exam Editted)設定是否要做已編輯之檢查，避免蓋覆前人校讀或編輯過的資料。（批量連續快捷輸入時適用） 20260115
+    > examEditedModified 值的切換。預設為false。執行Ctrl + Shift + Alt + m 後會自行設為true。
 
 ### 在 textBox3 網址資訊專用方塊框：
 - 拖曳網址在 textBox3 或 textBox1 上放開，則會讀入所拖曳的網址值給 textBox3

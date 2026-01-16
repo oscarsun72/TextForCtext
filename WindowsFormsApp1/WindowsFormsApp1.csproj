@@ -131,6 +131,7 @@
     <Compile Include="Browser.cs" />
     <Compile Include="CnText.cs" />
     <Compile Include="CtextCleaner.cs" />
+    <Compile Include="CtextPage.cs" />
     <Compile Include="CTP.cs" />
     <Compile Include="Document.cs" />
     <Compile Include="Form1.cs">

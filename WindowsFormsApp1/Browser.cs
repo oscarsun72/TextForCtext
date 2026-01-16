@@ -102,14 +102,14 @@ namespace TextForCtext
         //internal static selm.IWebDriver driver=driverNew();
         //internal static ChromeDriver driver = driverNew();
         internal static string browserName = Form1.defaultBrowserName;//  "chrome";
-        internal static string chrome_path = Form1.getDefaultBrowserEXE();
+        internal static string chrome_path = Form1.GetDefaultBrowserEXE();
         static string user_data_dir;
         static string downloadDirectory_Chrome;//= "";
         static Process[] chromeProcessInstances = Process.GetProcessesByName(browserName);//("chrome");
         internal static ChromeDriverService driverService;
-        internal static ChromeOptions options = chromeOptions(chrome_path);
-        internal static ChromeDriver driver = initiateChromeDriver().Item1;
-        internal static RemoteWebDriver driverRemote = initiateChromeDriver().Item2;
+        internal static ChromeOptions options = ChromeOptions(chrome_path);
+        internal static ChromeDriver driver = InitiateChromeDriver().Item1;
+        internal static RemoteWebDriver driverRemote = InitiateChromeDriver().Item2;
 
         internal static Form1 ActiveForm1 { get => frm ?? Application.OpenForms[0] as Form1; set => frm = value; }
 
@@ -178,7 +178,7 @@ namespace TextForCtext
         /// 對成員driver欄位初始化
         /// </summary>
         /// <returns></returns>
-        static Tuple<ChromeDriver, RemoteWebDriver> initiateChromeDriver()
+        static Tuple<ChromeDriver, RemoteWebDriver> InitiateChromeDriver()
         {
             ////////如果抓得到非由 Selenium啟動的 Chrome瀏覽器再說
             //////if (chromeProcessInstances.Length > 0)
@@ -296,7 +296,7 @@ namespace TextForCtext
                     {
                         driver.SwitchTo().Window(driver.WindowHandles[i]);
                         //if (DialogResult.OK == Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("是這個分頁嗎？"))
-                        if (IsValidUrl＿ImageTextComparisonPage(driver.Url))
+                        if (IsValidUrl_ImageTextComparisonPage(driver.Url))
                         {
                             _lastValidWindowHandle = driver.WindowHandles[i];
                             return _lastValidWindowHandle;
@@ -333,7 +333,7 @@ namespace TextForCtext
                 ex.Message.StartsWith("invalid session id"))//An unknown exception was encountered sending an HTTP request to the remote WebDriver server for URL http://localhost:13451/session/6f6c77cfb73c5c388c6cdfd40a06b806/url. The exception message was: 傳送要求時發生錯誤。
             {
                 Form1.PlaySound(Form1.SoundLike.over);
-                killchromedriverFromHere();
+                KillchromedriverFromHere();
                 driver = null;
                 DriverNew();
                 return true;
@@ -513,7 +513,7 @@ namespace TextForCtext
         {
             try
             {
-                if (IsDriverInvalid())
+                if (IsDriverInvalid)
                     driver.SwitchTo().Window(driver.WindowHandles.LastOrDefault());
                 string currentHandle = driver.CurrentWindowHandle;
                 if (driver.WindowHandles.Contains(currentHandle))
@@ -696,7 +696,7 @@ namespace TextForCtext
         /// <param name="second"></param>
         /// <param name="drver"></param>
         /// <returns></returns>
-        internal static IWebElement waitFindWebElementByName_ToBeClickable(string name, double second,
+        internal static IWebElement WaitFindWebElementByName_ToBeClickable(string name, double second,
             IWebDriver drver = null)
         {
             IWebElement e = null;
@@ -774,7 +774,7 @@ namespace TextForCtext
         /// <param name="id"></param>
         /// <param name="second"></param>
         /// <returns></returns>
-        internal static IWebElement waitFindWebElementById_ToBeClickable(string id, double second)
+        internal static IWebElement WaitFindWebElementById_ToBeClickable(string id, double second)
         {
             try
             {
@@ -851,7 +851,7 @@ namespace TextForCtext
         /// <param name="TagName"></param>
         /// <param name="second"></param>
         /// <returns></returns>
-        internal static IWebElement waitFindWebElementByTagName_ToBeClickable(string TagName, double second = 2)
+        internal static IWebElement WaitFindWebElementByTagName_ToBeClickable(string TagName, double second = 2)
         {
             try
             {
@@ -899,7 +899,7 @@ namespace TextForCtext
                 //string chrome_path = Form1.getDefaultBrowserEXE();
 
                 // 將 ChromeOptions 設定加入 ChromeDriver
-                options = chromeOptions(chrome_path);//加入參數的順序重要，要參考「string user_data_dir = options.Arguments[0];」
+                options = ChromeOptions(chrome_path);//加入參數的順序重要，要參考「string user_data_dir = options.Arguments[0];」
                                                      //ChromeDriver cDrv = new ChromeDriver("C:\\Users\\oscar\\.cache\\selenium\\chromedriver\\win32\\108.0.5359.71\\chromedriver.exe", options);
                                                      //cDrv = new ChromeDriver(@"C:\Program Files\Google\Chrome\Application\chrome.exe",options);
                                                      //cDrv = new ChromeDriver(@"x:\chromedriver.exe", options);
@@ -912,7 +912,7 @@ namespace TextForCtext
                 ChromeDriver cDrv = null;//綠色免安裝版仍搞不定，安裝 chrome 了就OK 20220101 chatGPT建議者未通；20220105自行解決了，詳下
 
 
-                setupChromeDriverService();
+                SetupChromeDriverService();
                 #region 啟動Chrome瀏覽器 （最會出錯的部分！！）
                 try
                 {
@@ -996,14 +996,14 @@ namespace TextForCtext
                                 //    chromeInstance.Kill();
                                 //}
                                 //Task.WaitAll();
-                                killProcesses(new string[] { "chrome", "chromedriver" });
+                                KillProcesses(new string[] { "chrome", "chromedriver" });
                                 goto tryagain;
                             }
                             else
                             {
                                 Form1.BrowsrOPMode = Form1.BrowserOPMode.appActivateByName;
                                 //killProcesses(new string[] { "chromedriver" });//至少把之前當掉的（已經無法由C#表單操控的）清掉
-                                killchromedriverFromHere();//至少把之前當掉的（已經無法由C#表單操控的）清掉
+                                KillchromedriverFromHere();//至少把之前當掉的（已經無法由C#表單操控的）清掉
                                 return null;
                             }
                         //driverService = ChromeDriverService.CreateDefaultService(chrome_path);
@@ -1014,7 +1014,7 @@ namespace TextForCtext
                             if (ex.Message.IndexOf("This version of ChromeDriver only supports Chrome") > -1)
                             {
                                 Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("請更新 chromedriver 才能繼續");
-                                Form1.BrowsrOPMode = Form1.BrowserOPMode.appActivateByName; killchromedriverFromHere();
+                                Form1.BrowsrOPMode = Form1.BrowserOPMode.appActivateByName; KillchromedriverFromHere();
                                 Process.Start("https://googlechromelabs.github.io/chrome-for-testing/#stable");
                                 Process.Start(chrome_path);
 
@@ -1023,7 +1023,7 @@ namespace TextForCtext
                             else if (ex.Message.StartsWith("session not created: Chrome failed to start: exited normally."))//"session not created: Chrome failed to start: exited normally.\n  (session not created: DevToolsActivePort file doesn't exist)\n  (The process started from chrome location W:\\PortableApps\\PortableApps\\GoogleChromePortable\\App\\Chrome-bin\\chrome.exe is no longer running, so ChromeDriver is assuming that Chrome has crashed.) (SessionNotCreated)"
                             {
                                 Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(@"請手動關閉Chrome瀏覽器，再按「ok」確定，以繼續");
-                                killchromedriverFromHere();
+                                KillchromedriverFromHere();
                                 goto tryagain;
                             }
                             else if (ex.Message.StartsWith("session not created\nfrom disconnected: unable to connect to renderer (SessionNotCreated)"))//-2146233079session not created
@@ -1031,7 +1031,7 @@ namespace TextForCtext
                             {
                                 //Debugger.Break();
                                 Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(@"請手動關閉Chrome瀏覽器，再按「ok」確定，以繼續");
-                                killchromedriverFromHere();
+                                KillchromedriverFromHere();
                                 //driver = null;
                                 RestartChromedriver();
                                 return cDrv;
@@ -1106,7 +1106,7 @@ namespace TextForCtext
                     catch (Exception)
                     {
                         cDrv.SwitchTo().Window(cDrv.WindowHandles.Last());
-                        openNewTabWindow();
+                        OpenNewTabWindow();
                         //cDrv.SwitchTo().NewWindow(WindowType.Tab);
                     }
 
@@ -1176,7 +1176,7 @@ namespace TextForCtext
 
                 driver = cDrv;// quickedit_data_textboxSetting 方法堆疊（stack）中要用到driver參考
 
-                if (IsValidUrl＿ImageTextComparisonPage(url))
+                if (IsValidUrl_ImageTextComparisonPage(url))
                     Quickedit_data_textboxSetting(url, null, cDrv);
                 //IWebElement clk  = cDrv.FindElement(selm.By.Id("logininfo")); clk.Click();
                 //cDrv.FindElement(selm.By.Id("logininfo")).Click();
@@ -1189,14 +1189,14 @@ namespace TextForCtext
                 //如果是手動輸入模式且在簡單編輯頁面，則將其Quick edit值傳到textBox1
                 try
                 {
-                    if (ActiveForm1.KeyinTextMode && isQuickEditUrl(ActiveForm1.textBox3Text ?? ""))
+                    if (ActiveForm1.KeyinTextMode && IsQuickEditUrl(ActiveForm1.TextBox3Text ?? ""))
                     {
                         try
                         {
                             driver = driver ?? cDrv;
                             try
                             {
-                                ActiveForm1.Controls["textBox1"].Text = quickedit_data_textboxTxt;//waitFindWebElementByName_ToBeClickable("data", _webDriverWaitTimSpan)?.Text;//.Text屬性會Trim前空格
+                                ActiveForm1.Controls["textBox1"].Text = Quickedit_data_textbox_Txt;//waitFindWebElementByName_ToBeClickable("data", _webDriverWaitTimSpan)?.Text;//.Text屬性會Trim前空格
                             }
                             catch (Exception)
                             {
@@ -1263,12 +1263,12 @@ namespace TextForCtext
         internal static bool RestartDriver()
         {
             driver = null;
-            killchromedriverFromHere();
+            KillchromedriverFromHere();
             if (Form1.BrowsrOPMode != Form1.BrowserOPMode.seleniumNew)
                 Form1.BrowsrOPMode = Form1.BrowserOPMode.seleniumNew;
             return DriverNew() != null;
         }
-        private static void setupChromeDriverService()
+        private static void SetupChromeDriverService()
         {
             user_data_dir = user_data_dir ?? options.Arguments[0];
             #region 免安裝版要先將chromedriver.exe複製到chrome.exe可執行檔的路徑，與chrome.exe並列（同在一個目錄下）才行
@@ -1303,7 +1303,7 @@ namespace TextForCtext
                                                          //先設定才能依其設定開啟，才不會出現cmd黑色屏幕視窗，若先創建Chrome瀏覽器視窗（即下一行），再設定「.HideCommandPromptWindow = true」則不行。邏輯！感恩感恩　讚歎讚歎　南無阿彌陀佛 202301051414
         }
 
-        private static ChromeOptions chromeOptions(string chrome_path)
+        private static ChromeOptions ChromeOptions(string chrome_path)
         {
             // 建立 ChromeOptions 物件            
             ChromeOptions options = new ChromeOptions();
@@ -1405,7 +1405,7 @@ namespace TextForCtext
             //Console.Write(downloadDirectoryChrome);
 
             //get => downloadDirectory_Chrome ?? (downloadDirectory_Chrome =getChromeDownloadDirectory());
-            get => downloadDirectory_Chrome ?? (downloadDirectory_Chrome = getChromeDownloadDirectory_YouChatchatGPT());
+            get => downloadDirectory_Chrome ?? (downloadDirectory_Chrome = GetChromeDownloadDirectory_YouChatchatGPT());
 
             set => downloadDirectory_Chrome = value;
         }
@@ -1517,7 +1517,7 @@ namespace TextForCtext
         /// </summary>
         /// <param name="controlType"></param>
         /// <returns></returns>
-        internal static string getUrl(ControlType controlType)
+        internal static string GetUrl(ControlType controlType)
         {
             string urls = ""; Form1.PlaySound(Form1.SoundLike.over);
             try
@@ -1721,7 +1721,7 @@ namespace TextForCtext
                         case -2146233088:
                             if (ex.Message.IndexOf("no such window: target window already closed") > -1) //"no such window: target window already closed\nfrom unknown error: web view not found\n  (Session info: chrome=110.0.5481.178)"
                             {
-                                openNewTabWindow();
+                                OpenNewTabWindow();
                                 url = urlActiveTab;
                                 driver.Navigate().GoToUrl(url);
                                 //driver.SwitchTo().Window(driver.WindowHandles[0]);
@@ -1820,7 +1820,7 @@ namespace TextForCtext
                             || ex.Message.StartsWith("disconnected: not connected to DevTools"))//"disconnected: not connected to DevTools\n  (failed to check if window was closed: disconnected: not connected to DevTools)\n  (Session info: chrome=128.0.6613.138)"
 
                         {
-                            killProcesses(new string[] { "chromedriver" });//手動關閉由Selenium啟動的Chrome瀏覽器須由此才能清除
+                            KillProcesses(new string[] { "chromedriver" });//手動關閉由Selenium啟動的Chrome瀏覽器須由此才能清除
                             driver = null;
                             driver = DriverNew();
                             if (driver != null) tabCount = driver.WindowHandles.Count;
@@ -1829,7 +1829,7 @@ namespace TextForCtext
                         }
                         else if (ex.Message.StartsWith("An unknown exception was encountered sending an HTTP request to the remote WebDriver server for URL"))
                         {
-                            killchromedriverFromHere();
+                            KillchromedriverFromHere();
                             Form1.PlaySound(Form1.SoundLike.error, true);
                             //Debugger.Break();
                             driver = null; Form1.BrowsrOPMode = Form1.BrowserOPMode.seleniumNew;
@@ -1875,7 +1875,7 @@ namespace TextForCtext
                         case -2146233088:
                             if (ex.Message.StartsWith("invalid session id"))
                                 RestartChromedriver();
-                            openNewTabWindow();
+                            OpenNewTabWindow();
                             break;
                         default:
                             throw;
@@ -1884,7 +1884,7 @@ namespace TextForCtext
             }
             else
             {
-                openNewTabWindow();
+                OpenNewTabWindow();
             }
             //throw;
             try
@@ -1980,7 +1980,7 @@ namespace TextForCtext
 
 
 
-        internal static ChromeDriver openNewTabWindow(WindowType tabOrwindow = WindowType.Tab)//creedit 20230103
+        internal static ChromeDriver OpenNewTabWindow(WindowType tabOrwindow = WindowType.Tab)//creedit 20230103
         {/*chatGPT
             在 C# 中使用 Selenium 開啟新 Chrome 瀏覽器分頁可以使用以下方法：*/
             // 創建 ChromeDriver 實例
@@ -2079,7 +2079,7 @@ namespace TextForCtext
             return driver;
         }
 
-        static string stringtoEscape_sequences_for_Unicode_character_sets(string input)
+        static string StringtoEscape_sequences_for_Unicode_character_sets(string input)
         {
 
             string output = "";
@@ -2093,7 +2093,7 @@ namespace TextForCtext
             return output;
 
         }
-        static string stringtoUTF_16_encoded_escape_sequences(string input)
+        static string StringtoUTF_16_encoded_escape_sequences(string input)
         {
 
             string output = "";
@@ -2118,7 +2118,7 @@ namespace TextForCtext
             try
             {
                 //url = url ?? System.Windows.Forms.Application.OpenForms[0].Controls["textBox3"].Text;
-                url = url ?? ActiveForm1.textBox3Text;
+                url = url ?? ActiveForm1.TextBox3Text;
 
                 //if (CTP.IsSameBookPageWithDrive(url) || ActiveForm1.GetEditwikiID_fromUrl(url) != ActiveForm1.PreviousEditwikiID) GoToUrlandActivate(url, true);
                 if (!CTP.IsSameBookPageWithDrive(url)) GoToUrlandActivate(url, true);
@@ -2246,7 +2246,7 @@ namespace TextForCtext
         /// <summary>
         /// 清除從這裡啟動的 chromedriver
         /// </summary>
-        internal static void killchromedriverFromHere()
+        internal static void KillchromedriverFromHere()
         {
             if (chromedriversPID == null || chromedriversPID.Count == 0) return;
             Process[] processInstances;//= null;
@@ -2285,7 +2285,7 @@ namespace TextForCtext
         /// 取得工作管理員中的chromedriver
         /// </summary>
         /// <returns></returns>
-        internal static Process[] getChromedrivers()
+        internal static Process[] GetChromedrivers()
         {
             return Process.GetProcessesByName("chromedriver");
         }
@@ -2293,7 +2293,7 @@ namespace TextForCtext
         /// 依工作管理員中的名稱，中止、清除此名稱的所有程序
         /// </summary>
         /// <param name="processName">要找的名稱（不含副檔名）</param>
-        internal static void killProcesses(string[] processName)
+        internal static void KillProcesses(string[] processName)
         {
             foreach (var item in processName)
             {
@@ -2318,10 +2318,10 @@ namespace TextForCtext
 
 
 
-        string getUrl(forms.Keys eKeyCode)
+        string GetUrl(forms.Keys eKeyCode)
         {
 
-            string url = new Form1().textBox3Text;
+            string url = new Form1().TextBox3Text;
             if (url == "") return url;
             int edit = url.IndexOf("&editwiki");
             int page;
@@ -2355,7 +2355,7 @@ namespace TextForCtext
             return url;
         }
 
-        internal static void importBookmarks()//(ref ChromeDriver drive)
+        internal static void ImportBookmarks()//(ref ChromeDriver drive)
         {
             /*  chatGPT： 20230104
              您可以使用 ChromeDriver 和 ChromeOptions 類別來自動匯入書籤。
@@ -2392,7 +2392,7 @@ namespace TextForCtext
             string currentWindowHndl = LastValidWindow;
             //const string keep = "https://keep.google.com/#NOTE/1XHzZWpH5DCDGOctKjMwNad9qGdtUiYQpSw7HtkmfuEEAJOCtlj37xJg5XgRzWoE";
             string keep = OCRSite_URL[OCRSiteTitle.GoogleKeep];//"https://keep.new";
-            openNewTabWindow(WindowType.Window);
+            OpenNewTabWindow(WindowType.Window);
             ActiveForm1.TopMost = false;
             driver.Navigate().GoToUrl(keep);
             //取得文字框
@@ -2492,7 +2492,7 @@ namespace TextForCtext
             ActiveForm1.TopMost = false;
             //LastValidWindow = driver.CurrentWindowHandle;
             //Form1.ResetLastValidWindow();
-            openNewTabWindow();
+            OpenNewTabWindow();
             //GoToUrlandActivate("https://kandianguji.com/ocr");//https://kandianguji.com/shuzihua?page_mode=img_file
             GoToUrlandActivate("https://kandianguji.com/shuzihua?page_mode=img_file");
             //driver.Navigate().GoToUrl("https://kandianguji.com/ocr");
@@ -2847,7 +2847,7 @@ namespace TextForCtext
                     bool showBox = true;
                     //Tuple<bool, bool, bool, bool, DateTime> ipStatus = Mdb.IPStatus(CurrentIP == null ? GetPublicIpAddress("") : CurrentIP);
                     Tuple<bool, bool, bool, bool, DateTime> ipStatus = Mdb.IPStatus(CurrentIP ?? GetPublicIpAddress(""));
-                    if (ipStatus != null) showBox = ipStatus.Item4 ? false : true;
+                    if (ipStatus != null) showBox = !ipStatus.Item4;
                     if (!IPStatusMessageShow(out ipStatus, string.Empty, false, showBox))
                     {
 
@@ -2894,7 +2894,7 @@ namespace TextForCtext
                         {
                             int retryCntr = 0;
                         retry:
-                            openNewTabWindow(WindowType.Tab);
+                            OpenNewTabWindow(WindowType.Tab);
                             try
                             {
                                 //driver.Navigate().GoToUrl("https://gj.cool/account");
@@ -3071,7 +3071,7 @@ namespace TextForCtext
                     //Point pt = new Point(1002, 656);
                     Point pt = new Point(1002, 666);
                     //Cursor.Position = pt;
-                    clickCopybutton_GjcoolFastExperience(pt, Form1.SoundLike.done);
+                    ClickCopybutton_GjcoolFastExperience(pt, Form1.SoundLike.done);
 
                     GJcoolAccounts[i] = new Tuple<string, DateTime>(GJcoolAccounts[i].Item1, DateTime.Now);
 
@@ -3082,7 +3082,7 @@ namespace TextForCtext
                         ie.Clear();
                         ie.SendKeys(currentAccount);
                         //SendKeys.Send("{tab 2}");
-                        clickCopybutton_GjcoolFastExperience(pt, Form1.SoundLike.none);
+                        ClickCopybutton_GjcoolFastExperience(pt, Form1.SoundLike.none);
                     }
 
                 }
@@ -3126,19 +3126,19 @@ namespace TextForCtext
                 Cursor.Position = copyBtnPos;
                 //ClickLeftMouse(x, y);
                 //Thread.Sleep(150);
-                clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.SoundLike.press);
+                ClickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.SoundLike.press);
                 Thread.Sleep(450);
                 //copyBtnPos = new Point(1597, 295);//連接（Connect）按鈕位置
                 //copyBtnPos = new Point(1595, 333);//連接（Connect）按鈕位置（此與TouchVPN的有交集）
                 //copyBtnPos = new Point(1525, 333);//連接（Connect）按鈕位置（此與TouchVPN的有交集） 118.0.5993.89版以後
                 copyBtnPos = new Point(1525, 320);//連接（Connect）按鈕位置（此與TouchVPN、VeePN的有交集） 118.0.5993.89版以後
                 Cursor.Position = copyBtnPos;
-                clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.SoundLike.over);
+                ClickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.SoundLike.over);
                 Thread.Sleep(250);
                 //copyBtnPos = new Point(1700, 160);//TouchVPN的Stop按鈕
                 copyBtnPos = new Point(1630, 160);//TouchVPN的Stop按鈕  118.0.5993.89版以後
                 Cursor.Position = copyBtnPos;
-                clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.SoundLike.over);
+                ClickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.SoundLike.over);
                 if (VPNSwitchedTimer == 0)
                     Thread.Sleep(2400);//TouchVPN比較久
                 else
@@ -3147,7 +3147,7 @@ namespace TextForCtext
                                        //copyBtnPos = new Point(1525, 333);// TouchVPN 連接（Connect）按鈕位置 118.0.5993.89版以後
                 copyBtnPos = new Point(1525, 320);// TouchVPN 連接（Connect）按鈕位置 118.0.5993.89版以後
                 Cursor.Position = copyBtnPos;
-                clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.SoundLike.done);
+                ClickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.SoundLike.done);
                 Thread.Sleep(150);
                 SendKeys.SendWait("{esc}");
                 try
@@ -3179,12 +3179,12 @@ namespace TextForCtext
 
             Point copyBtnPos = new Point(1739, 55);//擴充功能顯示清單中最右邊的位置
             Cursor.Position = copyBtnPos;
-            clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.SoundLike.press);
+            ClickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.SoundLike.press);
             Thread.Sleep(450);
 
             copyBtnPos = new Point(1606, 401);
             Cursor.Position = copyBtnPos;
-            clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.SoundLike.press);
+            ClickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.SoundLike.press);
             Thread.Sleep(250);
 
             SendKeys.SendWait("{tab}");
@@ -3232,7 +3232,7 @@ namespace TextForCtext
         internal static void VPNSwitchedCheckOut(string ip = "", bool already = false)
         {
             if (already) return;
-            openNewTabWindow(WindowType.Tab);
+            OpenNewTabWindow(WindowType.Tab);
             Thread.Sleep(850);
             if (ip == string.Empty)
             {
@@ -3385,7 +3385,7 @@ namespace TextForCtext
                     Cursor.Position = copyBtnPos;
                     //ClickLeftMouse(x, y);
                     Thread.Sleep(350);
-                    clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.SoundLike.none);
+                    ClickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.SoundLike.none);
                     Thread.Sleep(150);
                     //Task.Run(() => { Thread.Sleep(5800); ShowWindow(targetWindowHandle, SW_MINIMIZE); });
                     Task.Run(() => { Thread.Sleep(8800); ShowWindow(targetWindowHandle, SW_MINIMIZE); });
@@ -3410,7 +3410,7 @@ namespace TextForCtext
             Cursor.Position = copyBtnPos;
             //ClickLeftMouse(x, y);
             //Thread.Sleep(150);
-            clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.SoundLike.press);
+            ClickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.SoundLike.press);
             Thread.Sleep(450);
 
             List<string> list = new List<string>() { "土耳其", "丹麥", "厄瓜多", "巴西", "巴基斯坦", "日本", "比利時", "以色列", "加拿大", "北馬其頓", "台灣", "立陶宛", "冰島", "匈牙利", "印尼", "印度", "西班牙", "克羅埃西亞", "希臘", "奈及利亞", "拉脫維亞", "法國", "波多黎各", "波蘭", "芬蘭", "阿拉伯聯合大公國", "阿根廷", "俄羅斯", "保加利亞", "南非", "南韓", "柬埔寨", "美國", "英國", "香港", "哥倫比亞", "哥斯達黎加", "埃及", "挪威", "泰國", "烏克蘭", "秘魯", "紐西蘭", "馬來西亞", "馬爾他", "捷克", "荷蘭", "喬治亞", "斯洛伐克", "斯洛維尼亞", "智利", "菲律賓", "越南", "塞爾維亞", "奧地利", "愛沙尼亞", "愛爾蘭", "新加坡", "瑞士", "瑞典", "義大利", "葡萄牙", "德國", "摩洛哥", "摩爾多瓦", "緬甸", "墨西哥", "澳洲", "盧森堡", "賽普勒斯", "羅馬尼亞" };
@@ -3575,10 +3575,10 @@ namespace TextForCtext
                 //ClickLeftMouse(x, y);
                 //Thread.Sleep(150);
                 Thread.Sleep(450);
-                clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.SoundLike.none);
+                ClickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.SoundLike.none);
                 //Thread.Sleep(1150);//等待斷開 
                 Thread.Sleep(1350);//等待斷開
-                clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.SoundLike.none);
+                ClickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.SoundLike.none);
                 Thread.Sleep(6500);//監看連線成功
                 return true;
             }
@@ -3641,9 +3641,9 @@ namespace TextForCtext
                 Cursor.Position = copyBtnPos;
                 //ClickLeftMouse(x, y);
                 Thread.Sleep(150);
-                clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.SoundLike.none);
+                ClickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.SoundLike.none);
                 Thread.Sleep(850);//等待斷開
-                clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.SoundLike.none);
+                ClickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.SoundLike.none);
                 Thread.Sleep(900);//監看連線成功
 
                 Point form1Location = ActiveForm1.Location; bool eventEnable = ActiveForm1.EventsEnabled;
@@ -3904,14 +3904,14 @@ namespace TextForCtext
                 //string ipUrl = "https://www.whatismyip.com.tw/", selector = "body > b > span";
                 retry:
                     //Thread.Sleep(5000);
-                    openNewTabWindow();//要打開比較快更新
+                    OpenNewTabWindow();//要打開比較快更新
                     try
                     {
                         driver.Navigate().GoToUrl(ipUrl);
                     }
                     catch (Exception)
                     {
-                        openNewTabWindow();//要打開比較快更新
+                        OpenNewTabWindow();//要打開比較快更新
                         try
                         {
                             driver.Navigate().GoToUrl(ipUrl);
@@ -3990,7 +3990,7 @@ namespace TextForCtext
             {
                 driver = driver ?? DriverNew();
                 string currentWindowHndl = driver.CurrentWindowHandle;
-                openNewTabWindow(WindowType.Tab);
+                OpenNewTabWindow(WindowType.Tab);
                 GoToUrlandActivate(OCRSite_URL[OCRSiteTitle.GJcool]);
                 //GoToUrlandActivate("https://gj.cool/try_ocr#");
                 //GoToUrlandActivate("https://gj.cool/try_ocr#Batch");
@@ -4191,7 +4191,7 @@ namespace TextForCtext
             IWebElement iwe;// = null;
             try
             {
-                openNewTabWindow(WindowType.Tab);
+                OpenNewTabWindow(WindowType.Tab);
                 GoToUrlandActivate(OCRSite_URL[OCRSiteTitle.GJcool]);
                 //GoToUrlandActivate("https://gj.cool/try_ocr#");
                 //GoToUrlandActivate("https://gj.cool/try_ocr#Batch");
@@ -4901,7 +4901,7 @@ namespace TextForCtext
                 driver = driver ?? DriverNew();
                 currentWindowHndl = driver.CurrentWindowHandle;
                 //openNewTabWindow(WindowType.Window);
-                openNewTabWindow(windowType);
+                OpenNewTabWindow(windowType);
                 _OCR_GJcool_WindowClosed = false;
 
                 #region 方便提早取消作業（藉由關閉OCR視窗）
@@ -5222,8 +5222,8 @@ namespace TextForCtext
                                 //"no such window: target window already closed
                                 if (ex.Message.IndexOf("no such window") > -1)
                                 {
-                                    openNewTabWindow();
-                                    GoToUrlandActivate(frm.textBox3Text);
+                                    OpenNewTabWindow();
+                                    GoToUrlandActivate(frm.TextBox3Text);
                                 }
                                 else
                                     Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
@@ -5243,7 +5243,7 @@ namespace TextForCtext
                     if (points - pointCoin < pointCoin)
                         //Form1.PlaySound(Form1.soundLike.stop);
                         using (SoundPlayer sp = new SoundPlayer("C:\\Windows\\Media\\chord.wav")) { sp.Play(); }
-                    waitGJcoolPoint = false; innerText = null;
+                    waitGJcoolPoint = false;
                 }//釋放記憶體
             }
             else { StopOCR = true; return false; }
@@ -5258,14 +5258,14 @@ namespace TextForCtext
             ActiveForm1.TopMost = false;
             Clipboard.Clear();
             DateTime begin = DateTime.Now; const int timeSpanSecs = 30;
-            TimeSpan timeSpan = new TimeSpan();
+            _ = new TimeSpan();
             iwe = WaitFindWebElementBySelector_ToBeClickable("#line_img_form > div > input[type=file]");
             while (iwe == null)
             {
                 //iwe = waitFindWebElementBySelector_ToBeClickable("#line_img_form > div > input[type=file]");
                 //iwe = WaitFindWebElementBySelector_ToBeClickable("#OneLine > div.d-flex.mt-2 > div:nth-child(1) > div.ps-1.pe-2.align-self-center > button > i");                
                 iwe = WaitFindWebElementBySelector_ToBeClickable("#OneLine > div.d-flex.mt-2 > div:nth-child(1) > div:nth-child(2) > button");
-                timeSpan = (DateTime.Now.Subtract(begin));
+                TimeSpan timeSpan = (DateTime.Now.Subtract(begin));
                 if (timeSpan.TotalSeconds > timeSpanSecs ||
                     Clipboard.GetText() != string.Empty) { StopOCR = true; return false; }
             }
@@ -5702,7 +5702,7 @@ namespace TextForCtext
                 driver = driver ?? DriverNew();
                 currentWindowHndl = driver.CurrentWindowHandle;
                 //openNewTabWindow(WindowType.Window);
-                openNewTabWindow(windowType);
+                OpenNewTabWindow(windowType);
                 _OCR_GJcool_WindowClosed = false;
 
                 #region 方便提早取消作業（藉由關閉OCR視窗）
@@ -6022,8 +6022,8 @@ namespace TextForCtext
                                 //"no such window: target window already closed
                                 if (ex.Message.IndexOf("no such window") > -1)
                                 {
-                                    openNewTabWindow();
-                                    GoToUrlandActivate(frm.textBox3Text);
+                                    OpenNewTabWindow();
+                                    GoToUrlandActivate(frm.TextBox3Text);
                                 }
                                 else
                                     Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
@@ -7015,7 +7015,7 @@ namespace TextForCtext
 
             if (string.IsNullOrEmpty(downloadDirectory) || !Directory.Exists(downloadDirectory))
             {
-                downloadDirectory = getChromeDownloadDirectory_YouChatchatGPT();
+                downloadDirectory = GetChromeDownloadDirectory_YouChatchatGPT();
                 if (string.IsNullOrEmpty(downloadDirectory) || !Directory.Exists(downloadDirectory))
                 {
                     Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("請先指定Chrome瀏覽器的下載目錄，再繼續！感恩感恩　南無阿彌陀佛");
@@ -7484,7 +7484,7 @@ namespace TextForCtext
                     {
                         if (Clipboard.GetText() != string.Empty) break;
                         if (IsChromeActive() && IsBrowserMaximized(driver))//按下「複製」圖示按鈕
-                            clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.SoundLike.press);
+                            ClickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.SoundLike.press);
                         //Thread.Sleep(550);
                         Thread.Sleep(450);
                     }
@@ -7826,7 +7826,7 @@ namespace TextForCtext
                             {
                                 if (info.StartsWith("System is busy") || info.StartsWith("system is busy") || info.StartsWith("ip address banned"))
                                 {
-                                    Form1.OCRBreakSoundNotification();
+                                    Form1.BreakSoundNotification();
                                     //if (File.Exists("C:\\Windows\\Media\\ring05.wav"))
                                     //{
                                     //    using (SoundPlayer sp = new SoundPlayer("C:\\Windows\\Media\\ring05.wav"))
@@ -8213,14 +8213,14 @@ namespace TextForCtext
                     Thread.Sleep(600);//要寫在這，讓_OCR_GJcool_WindowClosed能設定完成
                     if (Clipboard.GetText() == "" && !_OCR_GJcool_WindowClosed)
                         //if (!_OCR_GJcool_WindowClosed)
-                        clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.SoundLike.press);
+                        ClickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.SoundLike.press);
 
                     if (Clipboard.GetText() == "")
                     {
                         Task ts1 = Task.Run(() =>
                         {
                             Thread.Sleep(800);//要寫在這，讓_OCR_GJcool_WindowClosed能設定完成
-                            if (Clipboard.GetText() == "" && !_OCR_GJcool_WindowClosed) clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.SoundLike.none);
+                            if (Clipboard.GetText() == "" && !_OCR_GJcool_WindowClosed) ClickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.SoundLike.none);
                         });
                         ts1.Wait();
                         if (Clipboard.GetText() == "")
@@ -8229,7 +8229,7 @@ namespace TextForCtext
                             {
                                 //前已有ts1.Wait();或不再需要
                                 Thread.Sleep(400);//要寫在這，讓_OCR_GJcool_WindowClosed能設定完成
-                                if (Clipboard.GetText() == "" && !_OCR_GJcool_WindowClosed) clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.SoundLike.none);
+                                if (Clipboard.GetText() == "" && !_OCR_GJcool_WindowClosed) ClickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.SoundLike.none);
                             });
                             ts2.Wait();
                             if (Clipboard.GetText() == "")
@@ -8237,7 +8237,7 @@ namespace TextForCtext
                                 Task ts3 = Task.Run(() =>
                                 {
                                     Thread.Sleep(800);//要寫在這，讓_OCR_GJcool_WindowClosed能設定完成
-                                    if (Clipboard.GetText() == "" && !_OCR_GJcool_WindowClosed) clickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.SoundLike.done);
+                                    if (Clipboard.GetText() == "" && !_OCR_GJcool_WindowClosed) ClickCopybutton_GjcoolFastExperience(copyBtnPos, Form1.SoundLike.done);
                                 });
                                 ts3.Wait();
                             }
@@ -8423,7 +8423,7 @@ namespace TextForCtext
         /// <param name="copyBtnPos">要點擊的座標</param>
         /// <param name="soundlike">指定所發出的提示音</param>
         /// <returns>執行完畢即傳回一個Task物件以供await參考</returns>
-        private static Task clickCopybutton_GjcoolFastExperience(Point copyBtnPos, Form1.SoundLike soundlike = Form1.SoundLike.info)
+        private static Task ClickCopybutton_GjcoolFastExperience(Point copyBtnPos, Form1.SoundLike soundlike = Form1.SoundLike.info)
         {
             //Thread.Sleep(1300);
             if (Cursor.Position != copyBtnPos)
@@ -8448,7 +8448,7 @@ namespace TextForCtext
         /// </summary>
         /// <returns></returns>
         /// <exception cref="NotImplementedException"></exception>
-        private static string getChromeDownloadDirectory()
+        private static string GetChromeDownloadDirectory()
         {
 
             //ChromeOptions options = chromeOptions(chrome_path);
@@ -8485,7 +8485,7 @@ namespace TextForCtext
         /// 20230311 YouChat菩薩，待測試！！！！
         /// </summary>
         /// <returns></returns>
-        private static string getChromeDownloadDirectory_YouChat()
+        private static string GetChromeDownloadDirectory_YouChat()
         {//用 C# 和 Selenium 可以取得Chrome瀏覽器的下載目錄嗎            
          //YouChat菩薩：可以使用 C# 和 Selenium 获取 Chrome 浏览器的下载目录。可以使用以下代码示例来实现：
             IWebElement downloadsFolderInput = driver.FindElement(By.Name("download.default_directory"));
@@ -8499,7 +8499,7 @@ namespace TextForCtext
         /// 取得Chrome瀏覽器的下載目錄 YouChat菩薩的成功了
         /// </summary>
         /// <returns></returns>
-        private static string getChromeDownloadDirectory_YouChatchatGPT()
+        private static string GetChromeDownloadDirectory_YouChatchatGPT()
         {
             #region YouChat菩薩的成功了
             /*用 C# 和 Selenium 可以取得Chrome瀏覽器的下載目錄嗎
@@ -8622,7 +8622,7 @@ namespace TextForCtext
             if (!IsWindowHandleValid(driver, lastWindowHandle))
                 Debugger.Break();
             LastValidWindow = GetCurrentWindowHandle(driver) ?? lastWindowHandle;
-            openNewTabWindow();
+            OpenNewTabWindow();
             int retryCntr = 0;
         retry:
             try
@@ -8696,13 +8696,14 @@ namespace TextForCtext
                 iwe = WaitFindWebElementBySelector_ToBeClickable("#main > div > div.p-1.p-md-3.d-flex.justify-content-end > div:nth-child(6) > button > i");
                 if (DateTime.Now.Subtract(dt).TotalSeconds > 8) if (Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("還沒找到「標點」按鈕，是否繼續？") == DialogResult.Cancel) return false;
             }
-            iwe.Click();//Thread.Sleep(640);//非得要等一會才能成功！//自動標點會清除全形空格
-                        //iwe.SendKeys(OpenQA.Selenium.Keys.Enter);//不能互動，會出現錯誤
+            iwe.JsClick();
+            //iwe.Click();//Thread.Sleep(640);//非得要等一會才能成功！//自動標點會清除全形空格
+            //iwe.SendKeys(OpenQA.Selenium.Keys.Enter);//不能互動，會出現錯誤
             iwe = WaitFindWebElementBySelector_ToBeClickable("#PunctArea");
             dt = DateTime.Now; bool reClickFlag = false;
             //等待OCR結果
             //while (iwe.Text == x)//.Text屬性傳回的會是經過trim的，故若開頭是全形空格，則一下子就會誤判成已經標點過（文本經改過）的了
-            while (iwe.GetAttribute("textContent") == x)//.Text屬性傳回的會是經過trim的，故若開頭是全形空格，則一下子就會誤判成已經標點過（文本經改過）的了
+            while (iwe.GetDomProperty("textContent") == x)//.Text屬性傳回的會是經過trim的，故若開頭是全形空格，則一下子就會誤判成已經標點過（文本經改過）的了
             {
                 //檢查如果沒有按到「標點」按鈕，就再次按下 20240811 以出現等待圖示控制項為判斷
                 if (WaitFindWebElementBySelector_ToBeClickable("#waitingSpinner") == null && reClickFlag == false && iwe.Text == x)
@@ -8713,13 +8714,13 @@ namespace TextForCtext
                 }
                 //reach traffic limit. wait 1.2 hours
                 if (WaitFindWebElementBySelector_ToBeClickable("#main > div:nth-child(1)") != null)
-                    if (WaitFindWebElementBySelector_ToBeClickable("#main > div:nth-child(1)").GetAttribute("textContent").StartsWith("reach traffic limit. wait "))
+                    if (WaitFindWebElementBySelector_ToBeClickable("#main > div:nth-child(1)").GetDomProperty("textContent").StartsWith("reach traffic limit. wait "))
                     { Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("超過額度！"); return false; }
 
                 if (DateTime.Now.Subtract(dt).TotalSeconds > 25) if (Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("標點逾時，是否繼續？") == DialogResult.Cancel) return false;
             }
             //x = iwe.Text;//.Text屬性傳回的會是經過trim的
-            x = iwe.GetAttribute("textContent");
+            x = iwe.GetDomProperty("textContent");
             //補上句號
             if (x.EndsWith("<p>") || x.EndsWith("<p>" + Environment.NewLine))
             {
@@ -8759,7 +8760,7 @@ namespace TextForCtext
             {
                 Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message, "GjcoolPunctOld記下原來分頁視窗句柄");
             }
-            openNewTabWindow();
+            OpenNewTabWindow();
             driver.Navigate().GoToUrl("https://old.gj.cool/gjcool/index");
             //文本輸入框
             IWebElement iwe = WaitFindWebElementBySelector_ToBeClickable("#origin000");
@@ -8882,7 +8883,7 @@ namespace TextForCtext
 
             if (WindowHandles.TryGetValue("Hanchi_CTP_SearchingKeywordsYijing", out string windowHandle_Hanchi_CTP_SearchingKeywordsYijing))
                 if (driver.WindowHandles.Contains(windowHandle_Hanchi_CTP_SearchingKeywordsYijing))
-                    if (!IsDriverInvalid())
+                    if (!IsDriverInvalid)
                     {
                         if (driver.CurrentWindowHandle != windowHandle_Hanchi_CTP_SearchingKeywordsYijing)
                             driver.SwitchTo().Window(windowHandle_Hanchi_CTP_SearchingKeywordsYijing);
@@ -9042,9 +9043,9 @@ namespace TextForCtext
             string keyword = keywords[ListIndex_Hanchi_SearchingKeywordsYijing]; //Clipboard.SetText(keyword);20240914作廢
             ActiveForm1.PauseEvents();
             string indexStr = ListIndex_Hanchi_SearchingKeywordsYijing.ToString();
-            ActiveForm1.textBox4Text = indexStr;
-            if (indexStr.Length > 2) if (ActiveForm1.textBox4Font.Size > 12)
-                { ActiveForm1.textBox4Font = new Font(ActiveForm1.textBox4Font.FontFamily, 12); ActiveForm1.Refresh(); }
+            ActiveForm1.TextBox4Text = indexStr;
+            if (indexStr.Length > 2) if (ActiveForm1.TextBox4Font.Size > 12)
+                { ActiveForm1.TextBox4Font = new Font(ActiveForm1.TextBox4Font.FontFamily, 12); ActiveForm1.Refresh(); }
             ActiveForm1.Controls["textBox1"].Text = keyword;
             ActiveForm1.ResumeEvents();
             bool returnValue = false;
@@ -9296,7 +9297,7 @@ namespace TextForCtext
 
                     //按下「搜尋」：
                     //IWebElement iwe = waitFindWebElementBySelector_ToBeClickable("#frmTitle > table > tbody > tr:nth-child(2) > td > table > tbody > tr:nth-child(8) > td > input[type=IMAGE]:nth-child(1)");
-                    IWebElement iwe = waitFindWebElementByName_ToBeClickable("_IMG_搜尋", 3);
+                    IWebElement iwe = WaitFindWebElementByName_ToBeClickable("_IMG_搜尋", 3);
                     if (iwe != null && iweKeywordInputBox.GetAttribute("value") == keyword)
                     {
                         try
@@ -9337,7 +9338,7 @@ namespace TextForCtext
                         {//檢索有結果：《漢籍全文資料庫》
                             Form1.PlaySound(Form1.SoundLike.info);
                             returnValue = true;
-                            iwe = waitFindWebElementByName_ToBeClickable("_IMG_檢索報表", 2);
+                            iwe = WaitFindWebElementByName_ToBeClickable("_IMG_檢索報表", 2);
                             if (iwe != null)//   ?.Click();
                             {//20240710 Copilot大菩薩：要在 Selenium 中使用鍵盤的 Shift 鍵，您可以使用 Actions 類別來模擬鍵盤和滑鼠的操作。以下是一個範例程式碼：
                              // 建立一個新的 Actions 物件                                
@@ -9580,8 +9581,8 @@ namespace TextForCtext
                 ListIndex_Hanchi_SearchingKeywordsYijing = 0;
                 Form1.PlaySound(Form1.SoundLike.finish, true);//靜音模式時仍播出
                 returnValue = true;
-                if (ActiveForm1.textBox4Font.Size < 20.25)
-                    ActiveForm1.textBox4Font = new Font(ActiveForm1.textBox4Font.FontFamily, (float)20.25);
+                if (ActiveForm1.TextBox4Font.Size < 20.25)
+                    ActiveForm1.TextBox4Font = new Font(ActiveForm1.TextBox4Font.FontFamily, (float)20.25);
                 if (ActiveForm1.KeyinTextMode == false) ActiveForm1.KeyinTextmodeSwitcher(false);
             }
             #endregion//單個關鍵字查詢結束
@@ -9810,8 +9811,11 @@ namespace TextForCtext
         /// <summary>
         /// 作為一些需要保留或比對驗證的視窗句柄集，鍵值是視窗ID（或唯一名稱）以供比較尋找，值為視窗句柄
         /// 也可作為其他必要的參考、參數，如鍵值為"currentPageNum"時，乃翻到下一頁前記下的前一頁的頁碼
+        /// 鍵為「FileSelector」（原為ChapterSelector）時，乃是記錄每一分冊的 CSS selector（即書首頁的表列諸冊連結元件；「檔案名稱」欄位下的諸項）
         /// </summary>
         internal static Dictionary<string, string> WindowHandles = new Dictionary<string, string>();
+
+
         /// <summary>
         /// Ctrl + Alt + a ： [AI太炎](https://t.shenshen.wiki/)標點 20241105
         /// </summary>
@@ -9827,7 +9831,7 @@ namespace TextForCtext
                 return false;
             }
 
-            if (!IsDriverInvalid()) LastValidWindow = driver.CurrentWindowHandle;
+            if (!IsDriverInvalid) LastValidWindow = driver.CurrentWindowHandle;
             else LastValidWindow = driver.WindowHandles.Last();
 
             //string windowHandle= WindowHandles.FirstOrDefault(w => w.Value == "《AI太炎》").Key;            
@@ -9843,7 +9847,7 @@ namespace TextForCtext
                     //if (driver.Url != "https://t.shenshen.wiki/")
                     if (driver.Url != url)
                     {
-                        openNewTabWindow();
+                        OpenNewTabWindow();
                         //driver.Navigate().GoToUrl("https://t.shenshen.wiki/");
                         driver.Navigate().GoToUrl(url);
                     }
@@ -9851,13 +9855,13 @@ namespace TextForCtext
             }
             else
             {
-                if (IsDriverInvalid())
+                if (IsDriverInvalid)
                 {
                     if (driver == null)
                         DriverNew();
                     else
                         driver.SwitchTo().Window(driver.WindowHandles.Last());
-                    openNewTabWindow();
+                    OpenNewTabWindow();
                     driver.Navigate().GoToUrl(url);
                 }
                 else
@@ -9865,7 +9869,7 @@ namespace TextForCtext
                     driver.SwitchTo().Window(driver.WindowHandles.Last());
                     if (driver.Url != url)
                     {
-                        openNewTabWindow();
+                        OpenNewTabWindow();
                         driver.Navigate().GoToUrl(url);
                     }
                 }
@@ -9881,7 +9885,7 @@ namespace TextForCtext
                 }
                 else
                 {
-                    openNewTabWindow();
+                    OpenNewTabWindow();
                     driver.Navigate().GoToUrl(url);
                     WindowHandles["《AI太炎》"] = driver.CurrentWindowHandle;
                 }
@@ -9913,7 +9917,7 @@ namespace TextForCtext
             //結果
             iwe = WaitFindWebElementBySelector_ToBeClickable("#output-content");
             if (iwe == null) return false;
-            x = iwe.GetAttribute("textContent").Replace("□", "􏿽");
+            x = iwe.GetDomProperty("textContent").Replace("□", "􏿽");
             //driver.Close();//不關閉，以手動評量其標點良窳
             driver.SwitchTo().Window(LastValidWindow);
             return true;
@@ -10122,8 +10126,8 @@ namespace TextForCtext
                         try
                         {
                             Debugger.Break();
-                            killchromedriverFromHere();
-                            killProcesses(new string[] { "chrome" });
+                            KillchromedriverFromHere();
+                            KillProcesses(new string[] { "chrome" });
                             driver = DriverNew();
 
                         }
@@ -10158,7 +10162,7 @@ namespace TextForCtext
         /// <returns></returns>
         public static bool LookupYTenx(string x)
         {
-            if (!IsDriverInvalid())
+            if (!IsDriverInvalid)
             {
                 LastValidWindow = driver.CurrentWindowHandle;
             }
@@ -10173,7 +10177,7 @@ namespace TextForCtext
                     RestartChromedriver();
                 }
             }
-            openNewTabWindow();
+            OpenNewTabWindow();
             driver.Navigate().GoToUrl("https://ytenx.org/");
             //檢索框
             IWebElement iwe = WaitFindWebElementBySelector_ToBeClickable("#search-form > input.search-query.span3");
@@ -10203,7 +10207,7 @@ namespace TextForCtext
         public static bool LookupZitools(string x)
         {
             if (x.IsNullOrEmpty()) return true;
-            if (Math.Abs(Form1.isChineseChar(x, false)) != 1) return true;
+            if (Math.Abs(Form1.IsChineseChar(x, false)) != 1) return true;
 
             StringInfo si = new StringInfo(x);
             if (si.LengthInTextElements == 0) return false;
@@ -10214,7 +10218,7 @@ namespace TextForCtext
         retry:
             try
             {
-                if (!IsDriverInvalid())
+                if (!IsDriverInvalid)
                 {
                     LastValidWindow = driver.CurrentWindowHandle;
                     ts = driver.Manage().Timeouts().PageLoad;
@@ -10224,7 +10228,7 @@ namespace TextForCtext
                     LastValidWindow = driver.WindowHandles.Last();
                     Form1.PlaySound(Form1.SoundLike.error, true);
                 }
-                openNewTabWindow(OpenQA.Selenium.WindowType.Tab);
+                OpenNewTabWindow(OpenQA.Selenium.WindowType.Tab);
                 driver.Manage().Timeouts().PageLoad = new TimeSpan(0, 0, 4);
                 string selector;
                 if (si.LengthInTextElements == 1)
@@ -10295,7 +10299,7 @@ namespace TextForCtext
                         //MessageBox.Show(ex.HResult + ex.Message, "", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
                     }
                 }
-                if (!IsDriverInvalid())
+                if (!IsDriverInvalid)
                     driver.SwitchTo().Window(driver.WindowHandles.Last());
                 if (ts != new TimeSpan()) driver.Manage().Timeouts().PageLoad = ts;
 
@@ -10364,16 +10368,16 @@ namespace TextForCtext
             string url = "https://ivantsoi.myds.me/web/hydcd/search.html", urlResult;//= null;
             IWebElement iwe;
         retry:
-            if (IsDriverInvalid()) driver.SwitchTo().Window(driver.WindowHandles.Last());
+            if (IsDriverInvalid) driver.SwitchTo().Window(driver.WindowHandles.Last());
             try
             {
                 LastValidWindow = driver.CurrentWindowHandle;
-                openNewTabWindow(OpenQA.Selenium.WindowType.Tab);
+                OpenNewTabWindow(OpenQA.Selenium.WindowType.Tab);
                 string wh = driver.CurrentWindowHandle;
                 //Task.Run(() =>
                 //{//以防圖像網站當掉之權宜措施
-                openNewTabWindow(); driver.Navigate().GoToUrl("https://homeinmists.ilotus.org/hd/hydcd.php?m=s&p=1&st=term&kw=" + x);
-                openNewTabWindow(); driver.Navigate().GoToUrl("https://www.hanyucidian.org/dictionary/entry?dictionaryCode=hydcdcx&entryName=" + x);
+                OpenNewTabWindow(); driver.Navigate().GoToUrl("https://homeinmists.ilotus.org/hd/hydcd.php?m=s&p=1&st=term&kw=" + x);
+                OpenNewTabWindow(); driver.Navigate().GoToUrl("https://www.hanyucidian.org/dictionary/entry?dictionaryCode=hydcdcx&entryName=" + x);
                 driver.SwitchTo().Window(wh);
                 //});
                 driver.Navigate().GoToUrl(url);
@@ -10443,13 +10447,13 @@ namespace TextForCtext
                  + "#searchL";
             IWebElement iwe;
         retry:
-            if (IsDriverInvalid())
+            if (IsDriverInvalid)
                 //driver.SwitchTo().Window(driver.WindowHandles.Last());
                 driver.SwitchTo().Window(LastValidWindow);
             try
             {
                 if (LastValidWindow != driver.CurrentWindowHandle) LastValidWindow = driver.CurrentWindowHandle;
-                openNewTabWindow(OpenQA.Selenium.WindowType.Tab);
+                OpenNewTabWindow(OpenQA.Selenium.WindowType.Tab);
                 driver.Navigate().GoToUrl(url);
                 //driver.Navigate().GoToUrl("https://dict.variants.moe.edu.tw/");
                 //Clipboard.SetText(x);
@@ -10522,11 +10526,11 @@ namespace TextForCtext
                 + "&qMd=0&qCol=1";
             IWebElement iwe;
         retry:
-            if (IsDriverInvalid()) driver.SwitchTo().Window(driver.WindowHandles.Last());
+            if (IsDriverInvalid) driver.SwitchTo().Window(driver.WindowHandles.Last());
             try
             {
                 LastValidWindow = driver.CurrentWindowHandle;
-                openNewTabWindow(OpenQA.Selenium.WindowType.Tab);
+                OpenNewTabWindow(OpenQA.Selenium.WindowType.Tab);
                 driver.Navigate().GoToUrl(url);
                 //driver.Navigate().GoToUrl("https://dict.variants.moe.edu.tw/");
                 //Clipboard.SetText(x);
@@ -10585,12 +10589,12 @@ namespace TextForCtext
         {
             StringInfo si = new StringInfo(x);
             if (si.LengthInTextElements != 1) return false;
-            if (IsDriverInvalid()) driver.SwitchTo().Window(driver.WindowHandles.Last());
+            if (IsDriverInvalid) driver.SwitchTo().Window(driver.WindowHandles.Last());
             retry:
             try
             {
                 LastValidWindow = driver.CurrentWindowHandle;
-                openNewTabWindow(OpenQA.Selenium.WindowType.Tab);
+                OpenNewTabWindow(OpenQA.Selenium.WindowType.Tab);
                 driver.Navigate().GoToUrl("https://www.kangxizidian.com/search/index.php?stype=Word"
                     + "&sword=" + x);// + "&detail=n" );
             }
@@ -10648,7 +10652,7 @@ namespace TextForCtext
         /// <returns></returns>
         public static bool IsBrowserMaximized(ChromeDriver driver)
         {
-            if (IsDriverInvalid())
+            if (IsDriverInvalid)
             {
                 return false;
             }
@@ -10691,45 +10695,48 @@ namespace TextForCtext
         /// </summary>
         /// <param name="driver"></param>
         /// <returns>失敗傳回false</returns>
-        internal static bool IsDriverInvalid()
+        internal static bool IsDriverInvalid
         {
-            try
+            get
             {
-                if (BrowsrOPMode == BrowserOPMode.appActivateByName) return true;
-
-                if (getChromedrivers().Length == 0)
-                    if (!RestartChromedriver()) return true;
-
-                if (driver == null)
-                {
-                    Form1.BrowsrOPMode = Form1.BrowserOPMode.seleniumNew;
-                    DriverNew();
-                    if (driver == null)
-                        if (!RestartDriver()) return true;
-                        else
-                            return false;
-                }
                 try
                 {
-                    string url;
-                    if (driver != null)
+                    if (BrowsrOPMode == BrowserOPMode.appActivateByName) return true;
+
+                    if (GetChromedrivers().Length == 0)
+                        if (!RestartChromedriver()) return true;
+
+                    if (driver == null)
                     {
-                        if (driver?.WindowHandles.Contains(driver?.CurrentWindowHandle) == false)
-                            return true;
-                        else
-                            url = driver?.Url;
+                        Form1.BrowsrOPMode = Form1.BrowserOPMode.seleniumNew;
+                        DriverNew();
+                        if (driver == null)
+                            if (!RestartDriver()) return true;
+                            else
+                                return false;
+                    }
+                    try
+                    {
+                        string url;
+                        if (driver != null)
+                        {
+                            if (driver?.WindowHandles.Contains(driver?.CurrentWindowHandle) == false)
+                                return true;
+                            else
+                                url = driver?.Url;
+                        }
+                    }
+                    catch (Exception)
+                    {
+                        return true;
                     }
                 }
                 catch (Exception)
                 {
                     return true;
                 }
+                return false;
             }
-            catch (Exception)
-            {
-                return true;
-            }
-            return false;
         }
 
         /* GitHub Copilot大菩薩：
@@ -10770,18 +10777,18 @@ namespace TextForCtext
         public static bool KanDianGuJiSearchAll(string searchTxt)
         {
             //防呆：非中文則駁回
-            if (Math.Abs(Form1.isChineseChar(searchTxt, true)) != 1) return false;
+            if (Math.Abs(Form1.IsChineseChar(searchTxt, true)) != 1) return false;
 
             void openNewtab(string strUrl)
             {
-                openNewTabWindow();
+                OpenNewTabWindow();
                 GoToUrlandActivate(strUrl, true);
             }
             bool exact = false;
             const string url = "https://kandianguji.com/search";
             if (DialogResult.OK == Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("是否要【精確檢索】？")) exact = true;
             TimeSpan ts = new TimeSpan();
-            if (!IsDriverInvalid())
+            if (!IsDriverInvalid)
             {
                 LastValidWindow = driver.CurrentWindowHandle;
                 ts = driver.Manage().Timeouts().PageLoad;
@@ -10790,7 +10797,7 @@ namespace TextForCtext
         reload:
             try
             {
-                if (!IsDriverInvalid())
+                if (!IsDriverInvalid)
                 {
                     if (ts != driver.Manage().Timeouts().PageLoad) ts = driver.Manage().Timeouts().PageLoad;
                     driver.Manage().Timeouts().PageLoad = new TimeSpan(0, 0, 3);
@@ -10832,7 +10839,7 @@ namespace TextForCtext
                 iwe = WaitFindWebElementBySelector_ToBeClickable("#search_select");
                 if (DateTime.Now.Subtract(dt).TotalSeconds > 3 && iwe == null)
                 {
-                    if (ts != new TimeSpan() && IsDriverInvalid() == false) driver.Manage().Timeouts().PageLoad = ts;
+                    if (ts != new TimeSpan() && IsDriverInvalid == false) driver.Manage().Timeouts().PageLoad = ts;
                     return false;
                 }
             }
@@ -10905,7 +10912,7 @@ namespace TextForCtext
         /// <returns>啟動Chrome瀏覽器失敗則傳回false</returns>
         internal static bool RestartChromedriver()
         {
-            killchromedriverFromHere();
+            KillchromedriverFromHere();
             driver = null;
             if (Form1.BrowsrOPMode != Form1.BrowserOPMode.seleniumNew)
                 Form1.BrowsrOPMode = Form1.BrowserOPMode.seleniumNew;
@@ -10922,7 +10929,7 @@ namespace TextForCtext
         {
             if (driver == null) return false;
             bool free = true, inside = false;
-            if (!IsDriverInvalid())
+            if (!IsDriverInvalid)
             {
                 LastValidWindow = driver.CurrentWindowHandle;
                 ChromeSetFocus();
@@ -10953,13 +10960,13 @@ namespace TextForCtext
 
             const string url = "https://hanchi.ihp.sinica.edu.tw/ihp/hanji.htm";
 
-            if (!IsDriverInvalid())
+            if (!IsDriverInvalid)
             {
                 if (!driver.Url.StartsWith("https://hanchi.ihp.sinica.edu.tw/"))
                 {
                     try
                     {
-                        openNewTabWindow();
+                        OpenNewTabWindow();
                         GoToUrlandActivate(url, true);
                     }
                     catch (Exception)
@@ -10977,7 +10984,7 @@ namespace TextForCtext
             {
                 try
                 {
-                    openNewTabWindow();
+                    OpenNewTabWindow();
                     GoToUrlandActivate(url, true);
                 }
                 catch (Exception)
@@ -11057,7 +11064,7 @@ namespace TextForCtext
             //IWebElement iwe = null;
 
             //檢查頁面
-            if (!IsDriverInvalid())
+            if (!IsDriverInvalid)
             {
                 LastValidWindow = driver.CurrentWindowHandle;
 
@@ -11207,14 +11214,14 @@ namespace TextForCtext
             if (driver.WindowHandles.Contains(LastValidWindow))
             {
                 driver.SwitchTo().Window(LastValidWindow);
-                if (driver.Url != Form1.InstanceForm1.textBox3Text)
+                if (driver.Url != Form1.InstanceForm1.TextBox3Text)
                 {
                     //Debugger.Break();
                     bool foundWindowHandle = false;
                     for (int i = driver.WindowHandles.Count - 1; i > -1; i--)
                     {
                         driver.SwitchTo().Window(driver.WindowHandles[i]);
-                        if (driver.Url == Form1.InstanceForm1.textBox3Text)
+                        if (driver.Url == Form1.InstanceForm1.TextBox3Text)
                         {
                             foundWindowHandle = true;
                             LastValidWindow = driver.WindowHandles[i];
@@ -11634,7 +11641,7 @@ namespace TextForCtext
         internal static bool ChromeSetFocus()
         {
             if (driver == null) return false;
-            if (!IsDriverInvalid())
+            if (!IsDriverInvalid)
             {
                 driver.SwitchTo().Window(driver.CurrentWindowHandle);
                 //if (ActiveForm1.Active) BringToFront("chrome");//多執行緒時會出現錯誤
@@ -11679,7 +11686,7 @@ namespace TextForCtext
                 {
                     if (driver != null)
                     {
-                        openNewTabWindow(OpenQA.Selenium.WindowType.Tab);
+                        OpenNewTabWindow(OpenQA.Selenium.WindowType.Tab);
                         try
                         {
                             driver.Navigate().GoToUrl("https://www.google.com/search?q=" + x);
@@ -11712,6 +11719,49 @@ namespace TextForCtext
     /// </summary>
     public static class SeleniumExtensions
     {
+
+        //https://gemini.google.com/share/1d7725d35b8f https://gemini.google.com/share/abe9f15b728c 20260115 Selenium 調整元件大小方法
+
+        /// <summary>
+        /// 使用 JavaScript 擴充方法調整元件寬高
+        /// 用法：element.JsResize("800px", "600px");
+        /// </summary>
+        /// <param name="element">目標網頁元件</param>
+        /// <param name="width">寬度字串，需帶單位如 "800px" 或 "50%"○靈活性：您可以傳入 px（像素）或者是 vw/vh（視窗比例），甚至傳入 "auto"，JavaScript 都會正確執行。</param>
+        /// <param name="height">高度字串，需帶單位如 "600px"</param>
+        /// <returns>執行是否成功</returns>
+        public static bool JsResize(this IWebElement element, string width, string height)
+        {
+            if (element == null) return false;
+
+            try
+            {
+                // 1. 從元素獲取 WebDriver (跟您的 JsClick 邏輯一致)
+                IWebDriver driver = ((IWrapsDriver)element).WrappedDriver;
+                IJavaScriptExecutor js = (IJavaScriptExecutor)driver;
+
+                // 2. 執行 JavaScript 調整樣式
+                // arguments[0] 是元件，arguments[1] 是寬，arguments[2] 是高
+                // 同時強制設定 resize 為 both 以確保 CSS 允許調整
+                string script = @"
+                arguments[0].style.width = arguments[1];
+                arguments[0].style.height = arguments[2];
+                arguments[0].style.resize = 'both';
+            ";
+
+                js.ExecuteScript(script, element, width, height);
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                // 使用您自定義的彈窗方法記錄錯誤
+                Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("JsResize 錯誤：" + ex.Message);
+                Console.WriteLine(ex.Message);
+                return false;
+            }
+        }
+
         ///// <summary>
         ///// Submit() 和 Click 方法一樣 若被最大化的視窗遮住都會失效（無法確實按下），但不會出錯。 20251229
         ///// 以下的方法則大成功！感謝Copilot大菩薩、Gemini大菩薩 感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主

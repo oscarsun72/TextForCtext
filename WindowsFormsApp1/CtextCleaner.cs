@@ -5,60 +5,71 @@ using System;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
+using WebSocketSharp;
 using static WindowsFormsApp1.Form1;
 
 namespace TextForCtext
 {
     public static class CtextCleaner
     {
-        public static void ProcessClipboard()
+
+        /// <summary>
+        /// 即WordVBA「清除頁前的分段符號」之核心程式
+        /// </summary>
+        /// <param name="xmlContent"></param>
+        /// <returns>失敗傳回false</returns>
+        public static bool FixXMLParagraphMarkPosition_SetPage1Content(ref string xmlContent)//public static void ProcessClipboard()
         {
             try
             {
-                if (!Clipboard.ContainsText())
-                {
-                    MessageBox.Show("剪貼簿是空的。", "提示", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    //MessageBoxShowOKExclamationDefaultDesktopOnly("剪貼簿是空的。");
-                    return;
-                }
+                //if (!Clipboard.ContainsText())
+                //{
+                //    MessageBox.Show("剪貼簿是空的。", "提示", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                //    //MessageBoxShowOKExclamationDefaultDesktopOnly("剪貼簿是空的。");
+                //    return;
+                //}
 
-                string content = Clipboard.GetText();
+                //string content = Clipboard.GetText();
+                if (xmlContent.IsNullOrEmpty()) return false;
 
                 // 1. 統一換行符號 (標準化)
-                content = content.Replace("\r\n", "\n").Replace("\r", "\n").Replace("\n", "\r\n");
+                xmlContent = xmlContent.Replace("\r\n", "\n").Replace("\r", "\n").Replace("\n", "\r\n");
 
                 // 2. 處理第一頁代碼 (setPage1Code)
-                content = SetPage1Code(content);
+                xmlContent = SetPage1Code(ref xmlContent);
 
                 // 3. 清除多餘代碼 (clearRedundantCode)
                 // 確保 scanend 與 scanbegin 緊緊相連，中間無雜訊
-                content = ClearRedundantCode(content);
+                xmlContent = ClearRedundantCode(ref xmlContent);
 
                 // 4. 【修正重點】將星號前的分段符號移置前段之末
                 // 包含了 "跨頁雙標籤跳躍" 與 "單標籤跳躍" 的邏輯
-                content = MoveAsteriskUp(content);
+                xmlContent = MoveAsteriskUp(ref xmlContent);
 
                 // 5. 清除頁前的分段符號 (處理 scanbegin 後的空行)
                 // 原 VBA: rng.Delete
-                content = CleanScanBegin(content);
+                xmlContent = CleanScanBegin(ref xmlContent);
 
                 // 6. 處理 scanend 後的分段符號
                 // 原 VBA: Cut -> SetRange s,s -> Paste (即移到 scanend 之前)
-                content = CleanScanEnd(content);
+                xmlContent = CleanScanEnd(ref xmlContent);
 
-                Clipboard.SetText(content);
+                //Clipboard.SetText(xmlContent);
                 System.Media.SystemSounds.Beep.Play(); // 播放完成音效
+                return true;
             }
             catch (Exception ex)
             {
-                MessageBox.Show("發生錯誤: " + ex.Message);
+                MessageBoxShowOKExclamationDefaultDesktopOnly("發生錯誤: " + ex.Message);
+                return false;
+
             }
         }
 
         /// <summary>
         /// 處理第一頁的 XML 標籤 (包含自動清理與詢問機制)
         /// </summary>
-        private static string SetPage1Code(string text)
+        private static string SetPage1Code(ref string text)
         {
             // 1. 如果完全沒有 page="1"，嘗試補上 (這部分邏輯不變)
             if (!text.Contains("page=\"1\""))
@@ -104,13 +115,17 @@ namespace TextForCtext
 
                 // --- 邏輯 C: 模糊地帶，詢問使用者 (對應 VBA: MsgBox) ---
                 // 既不符合自動刪除，也不符合自動保留，這時跳出視窗讓您決定
-                DialogResult result = MessageBox.Show(
-                    "是否清除第一頁的內容，以利連續自動輸入之進程？\n\n" +
+                DialogResult result = MessageBoxShowOKCancelExclamationDefaultDesktopOnly("是否清除第一頁的內容，以利連續自動輸入之進程？\n\n" +
                     "目前頁一的xml內容是：\n\n" +
                     innerContent.Trim(), // 顯示內容給使用者看 (Trim 去掉前後空白較整潔)
-                    "TextForCtext - 第一頁清理確認",
-                    MessageBoxButtons.OKCancel,
-                    MessageBoxIcon.Question);
+                    "TextForCtext - 第一頁清理確認");
+                //DialogResult result = MessageBox.Show(
+                //    "是否清除第一頁的內容，以利連續自動輸入之進程？\n\n" +
+                //    "目前頁一的xml內容是：\n\n" +
+                //    innerContent.Trim(), // 顯示內容給使用者看 (Trim 去掉前後空白較整潔)
+                //    "TextForCtext - 第一頁清理確認",
+                //    MessageBoxButtons.OKCancel,
+                //    MessageBoxIcon.Question);
 
                 if (result == DialogResult.OK)
                 {
@@ -156,7 +171,7 @@ namespace TextForCtext
             return text;
         }
 
-        private static string ClearRedundantCode(string text)
+        private static string ClearRedundantCode(ref string text)
         {
             // 將 <scanend ...> ...雜訊... <scanbegin ...> 替換為 <scanend ...><scanbegin ...>
             // 讓它們緊貼，符合「上一頁的 end 要和下一頁的 begin 角括弧接在一起」
@@ -166,7 +181,7 @@ namespace TextForCtext
                 RegexOptions.IgnoreCase);
         }
 
-        private static string MoveAsteriskUp(string text)
+        private static string MoveAsteriskUp(ref string text)
         {
             // 這裡是原本出錯的地方，現在分為兩步處理：
 
@@ -192,7 +207,7 @@ namespace TextForCtext
             return text;
         }
 
-        private static string CleanScanBegin(string text)
+        private static string CleanScanBegin(ref string text)
         {
             // 對應 VBA: Do While rng.Find.Execute("<scanbegin ")... rng.Delete
             // 如果 scanbegin 後面有空行，直接刪除 (因為如果是星號的情況，上面 MoveAsteriskUp 已經先移走了，這裡處理的是純文字的情況)
@@ -201,7 +216,7 @@ namespace TextForCtext
                 "$1");
         }
 
-        private static string CleanScanEnd(string text)
+        private static string CleanScanEnd(ref string text)
         {
             // 對應 VBA: Do While ... <scanend ...> ... rng.Cut ... rng.Paste (移到前面)
             // 如果 scanend 後面有空行，移到 scanend 前面

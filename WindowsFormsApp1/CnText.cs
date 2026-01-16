@@ -586,6 +586,25 @@ namespace TextForCtext
             該詞匹配任何前後包含字母或數字的字串中的小數點。replace方法在這種情況下會使用中文句號替換它們。
              */
         }
+
+
+
+        //20260115:C# XML 頁碼連貫性檢查 https://gemini.google.com/share/02c5adfee0e4 https://gemini.google.com/share/eae30166dede
+
+        // 1. 一般單字元標點（UTF-16 只要一個 char 的）
+        // 1. 嚴格定義單字元標點 (不包含單獨的全形空格)
+        private static readonly HashSet<char> SingleCharSet = new HashSet<char>(
+            "，。？！〈〉《》：『』〖〗【】「」、●□▢■·〇◯|"
+        );
+
+        // 2. 特殊標記（包含代理對字元 􏿽、或是 ***, {{{ 等）
+        // 使用靜態預編譯 Regex，這是處理 UTF-16 代理對最安全且有效率的方式
+        // 2. 嚴格定義組合記號與代理對 (包含您指定的空格組合)
+        // 這裡將 􏿽、{{{, }}}, **, 　}}, *　 全部鎖定
+        private static readonly Regex SpecialMarkersRegex = new Regex(
+            @"􏿽|\*\*|\{\{\{|\}\}\}|　\}\}|\*　",
+            RegexOptions.Compiled
+        );
         /// <summary>
         /// 判斷是否已經人工手動編輯了
         /// </summary>
@@ -594,9 +613,61 @@ namespace TextForCtext
         internal static bool HasEditedWithPunctuationMarks(ref string text)
         {
             if (string.IsNullOrEmpty(text)) return false;
+
+            // A. 第一階段：極速掃描單字元 (處理 99% 的情況)//掃描真正的單字元標點 (O(n) 極速)            
+            foreach (char c in text)
+            {
+                if (SingleCharSet.Contains(c)) return true;
+            }
+
+            // B. 第二階段：精確比對代理對與多字元標記
+            // Regex 會自動將「代理對」視為一個整體進行比對，不會出錯
+            // B.第二階段：精確比對組合記號(解決代理對與特定組合問題)
+            // 此處會精確捕捉「　}}」或「*　」，而不會被單獨的空格誤導
+            return SpecialMarkersRegex.IsMatch(text);
+        }
+
+
+        ////https://gemini.google.com/share/8742429c7548 20260115:C# XML 頁碼連貫性檢查
+
+        //// 定義在類別層級，靜態預編譯//在類別層級定義一個靜態的查詢集，避免重複建立物件
+        //private static readonly HashSet<char> ManualPunctuationSet = new HashSet<char>(
+        //    "，。？！〈〉《》：『』〖〗【】「」􏿽、●□▢■·〇◯|"
+        //);
+
+        //// 針對多字元標記 (如 *** 或 {{{)//針對多個字元組合成的記號，使用靜態預編譯的 Regex
+        //private static readonly Regex MultiCharMarkers = new Regex(@"\*\*|\{\{\{|\}\}\}|　\}\}|\*　", RegexOptions.Compiled);
+        ///// <summary>
+        ///// 判斷是否已經人工手動編輯了
+        ///// </summary>
+        ///// <param name="text">要檢查的文本</param>
+        ///// <returns>若有人工手動編輯過的記號，則傳回true</returns>
+        //internal static bool HasEditedWithPunctuationMarks(ref string text)
+        //{
+        //    if (string.IsNullOrEmpty(text)) return false;
+
+        //    // 單次掃描字串：O(n) 複雜度，萬級文本也極快// A. 優先進行單次字元掃描 (效能極高)
+        //    // 只要掃描一遍字串，就能判定絕大部分的標點符號
+        //    foreach (char c in text)
+        //    {
+        //        if (ManualPunctuationSet.Contains(c)) return true;
+        //    }
+
+        //    // 若單字元都沒中，再看多字元記號// B. 只有單字元沒抓到時，才檢查多字元組合 (如 ***, {{{) https://gemini.google.com/share/86f40ca27863 C# XML 頁碼連貫性檢查
+        //    // 使用預編譯的 Regex 檢查
+        //    return MultiCharMarkers.IsMatch(text);
+        //}
+        /// <summary>
+        /// 判斷是否已經人工手動編輯了
+        /// </summary>
+        /// <param name="text">要檢查的文本</param>
+        /// <returns>若有人工手動編輯過的記號，則傳回true</returns>
+        internal static bool HasEditedWithPunctuationMarks_OLD(ref string text)
+        {
+            if (string.IsNullOrEmpty(text)) return false;
             if (text.Length > 1000)
             {
-                Regex regex = new Regex(@"\，|\。|\？|\！|\〈|\〉|\《|\》|\：|\『|\』|\〖|\〗|\【|\】|\「|\」|\􏿽|、|●|□|■|·|\*\*|\{\{\{|\}\}\}|\||〇|◯|　}}|\*　");
+                Regex regex = new Regex(@"\，|\。|\？|\！|\〈|\〉|\《|\》|\：|\『|\』|\〖|\〗|\【|\】|\「|\」|\􏿽|、|●|□|▢|■|·|\*\*|\{\{\{|\}\}\}|\||〇|◯|　}}|\*　");
                 Match match = regex.Match(text);
                 return match.Success;
             }
@@ -608,6 +679,7 @@ namespace TextForCtext
                     || text.Contains("「") || text.Contains("」") || text.Contains("【") || text.Contains("】")
                     || text.Contains("》") || text.Contains("〉")
                     || text.Contains("□") || text.Contains("■")
+                    || text.Contains("▢") 
                     || text.Contains("●") || text.Contains("、")
                     || text.Contains("·") || text.Contains("**")
                     || text.Contains("|") || text.Contains("　}}")
@@ -626,7 +698,7 @@ namespace TextForCtext
         {
             if (text.Length == 0) return false;
             if (!HasEditedWithPunctuationMarks(ref text)) return false;
-            Regex regex = new Regex(@"\，|\。|\？|\！|\〈|\〉|\《|\》|\：|\『|\』|\「|\」|\􏿽|、|●|□|■|·|\*\*|\{\{\{|\}\}\}|\||〇|◯|　}}|\*　");
+            Regex regex = new Regex(@"\，|\。|\？|\！|\〈|\〉|\《|\》|\：|\『|\』|\「|\」|\􏿽|、|●|□|▢|■|·|\*\*|\{\{\{|\}\}\}|\||〇|◯|　}}|\*　");
             text = regex.Replace(text, "");
             return true;
         }
@@ -759,7 +831,7 @@ namespace TextForCtext
         /// <returns>傳回出現的位置。沒有或有錯誤則傳回-1</returns>
         internal static int HasPlatecenterTextIncluded(string xChecking)
         {
-            string title = CTP.Title_Linkbox?.GetAttribute("textContent");
+            string title = CTP.Title_BookName_Linkbox_ImageTextCorrespondencePage?.GetAttribute("textContent");
             if (title == null)
             {
                 Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("未能找到正確的「書名（title）」超連結控制項，請檢查！", "HasPlatecenterTextIncluded");
@@ -855,7 +927,7 @@ namespace TextForCtext
         /// <returns>傳回出現的位置。沒有或有錯誤則傳回-1</returns>
         internal static int HasPlatecenterTextIncluded_exactly(string xChecking)
         {
-            string title = CTP.Title_Linkbox?.GetAttribute("textContent");
+            string title = CTP.Title_BookName_Linkbox_ImageTextCorrespondencePage?.GetAttribute("textContent");
             if (title == null)
             {
                 Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("未能找到正確的「書名（title）」超連結控制項，請檢查！", "HasPlatecenterTextIncluded");
@@ -1753,12 +1825,12 @@ namespace TextForCtext
             {
                 //選取整個行/段
                 Form1.InstanceForm1.TextBox1_SelectionStart =
-                    Form1.InstanceForm1._document.Range(Form1.InstanceForm1.TextBox1_SelectionStart, Form1.InstanceForm1.TextBox1_SelectionStart).GetCurrentParagraph().Start;
+                    Form1.InstanceForm1.Document.Range(Form1.InstanceForm1.TextBox1_SelectionStart, Form1.InstanceForm1.TextBox1_SelectionStart).GetCurrentParagraph().Start;
                 Form1.InstanceForm1.TextBox1_SelectionLength =
-                    Form1.InstanceForm1._document.Range(Form1.InstanceForm1.TextBox1_SelectionStart + Form1.InstanceForm1.TextBox1_SelectionLength, Form1.InstanceForm1.TextBox1_SelectionStart + Form1.InstanceForm1.TextBox1_SelectionLength).GetCurrentParagraph().End
-                     - Form1.InstanceForm1._document.Range(Form1.InstanceForm1.TextBox1_SelectionStart, Form1.InstanceForm1.TextBox1_SelectionStart).GetCurrentParagraph().Start;
+                    Form1.InstanceForm1.Document.Range(Form1.InstanceForm1.TextBox1_SelectionStart + Form1.InstanceForm1.TextBox1_SelectionLength, Form1.InstanceForm1.TextBox1_SelectionStart + Form1.InstanceForm1.TextBox1_SelectionLength).GetCurrentParagraph().End
+                     - Form1.InstanceForm1.Document.Range(Form1.InstanceForm1.TextBox1_SelectionStart, Form1.InstanceForm1.TextBox1_SelectionStart).GetCurrentParagraph().Start;
 
-                text = Form1.InstanceForm1._document.Text.Substring(Form1.InstanceForm1.TextBox1_SelectionStart, Form1.InstanceForm1.TextBox1_SelectionLength);
+                text = Form1.InstanceForm1.Document.Text.Substring(Form1.InstanceForm1.TextBox1_SelectionStart, Form1.InstanceForm1.TextBox1_SelectionLength);
                 text = text.Replace("}}" + Environment.NewLine + "{{", Environment.NewLine);
             }
             CnText.RemoveBooksPunctuation(ref text);
@@ -2135,7 +2207,7 @@ namespace TextForCtext
 
             try
             {
-                // 1. 基礎解碼與 Unicode 轉義還原 (確保 □、■、◯ 能正確顯示)
+                // 1. 基礎解碼與 Unicode 轉義還原 (確保 □、▢、■、◯ 能正確顯示)
                 string decoded = WebUtility.HtmlDecode(inputSource);
                 decoded = UnescapeUnicode(decoded);
 
@@ -2163,7 +2235,7 @@ namespace TextForCtext
 
                     if (string.IsNullOrWhiteSpace(cleanContent)) continue;
 
-                    // 4. 根據類型排版，並保留所有字元（含 □ ■ ◯ 〇 等）
+                    // 4. 根據類型排版，並保留所有字元（含 □ ▢ ■ ◯ 〇 等）
                     if (typeStr == "1") // 正文
                     {
                         finalResult.AppendLine(cleanContent);
