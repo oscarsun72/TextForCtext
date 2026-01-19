@@ -229,8 +229,9 @@ namespace TextForCtext
                         }
                     }
                 }
-
-                if (sbRoot != string.Empty && !reBuild)
+                
+                if (isSKQS <= 500) Debugger.Break();//just for test  20260119
+                if (sbRoot != string.Empty && !reBuild && isSKQS < 500)//有些因為源文本之問題，如此頁「欽定四庫全書」會在很後面 https://www.kanripo.org/edition/WYG/KR4f0025/4
                 {
                     StringBuilder sb = new StringBuilder();
                     for (int i = 0; i < isSKQS; i++)

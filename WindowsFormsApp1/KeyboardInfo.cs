@@ -76,6 +76,9 @@ namespace WindowsFormsApp1
 
     }
 
+
+    #region Form1_Load有參考到，不可註解掉 20260119
+
     // 鍵盤掛鉤管理類
     public static class HookManager
     {
@@ -110,4 +113,5 @@ namespace WindowsFormsApp1
             }
         }
     }
+    #endregion
 }
