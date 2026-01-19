@@ -142,6 +142,7 @@
     </Compile>
     <Compile Include="GXDS.cs" />
     <Compile Include="KeyboardInfo.cs" />
+    <Compile Include="LineFormatter.cs" />
     <Compile Include="Mdb.cs" />
     <Compile Include="MouseOperations.cs" />
     <Compile Include="OCRClient.cs" />

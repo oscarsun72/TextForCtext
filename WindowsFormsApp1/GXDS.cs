@@ -11,6 +11,7 @@ using System.Windows.Forms;
 using System.Globalization;
 using System.Diagnostics;
 using static WindowsFormsApp1.Form1;
+using WebSocketSharp;
 
 
 namespace TextForCtext
@@ -284,7 +285,8 @@ namespace TextForCtext
                         int sPre = xForMark.LastIndexOf(newLine, sLineStart - newLineLen);
                         if (sPre > -1)
                         {
-                            if (xForMark.Substring(sPre + newLineLen, newLineLen) == newLine)
+                            if (xForMark.Substring(sPre + newLineLen, newLineLen) == newLine
+                                && !xForMark.Substring(sLineStart, sLineLen).IsNullOrEmpty())//嚴重的bug終於抓到了！20260117 海賢老和尚往生13周年紀念！感恩感恩　讚歎讚歎　海賢老和尚大德慈悲加持護佑　南無阿彌陀佛　讚美主
                             {
                                 xForMark = xForMark.Substring(0, sLineStart - newLineLen * 2) + "<p>" + newLine
                                     + "*" +//標題文字，清除書名篇名號等 20230125 creedit with chatGPT大菩薩：Regular Expression Replace Multi：

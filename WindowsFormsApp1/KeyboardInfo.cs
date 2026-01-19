@@ -1,8 +1,9 @@
 ﻿
+using System;
+using System.Diagnostics;
+using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using System.Windows.Input;
-using System;
-using System.Runtime.InteropServices;
 
 namespace WindowsFormsApp1
 {
@@ -97,6 +98,8 @@ namespace WindowsFormsApp1
 
             public bool PreFilterMessage(ref Message m)
             {
+                //Debug.WriteLine($"PreFilterMessage: wParam={m.WParam}, keyData={(Keys)m.WParam}");
+
                 if (m.Msg == WM_KEYDOWN)
                 {
                     Keys keyData = (Keys)m.WParam;

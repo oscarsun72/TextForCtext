@@ -55,7 +55,8 @@ namespace TextForCtext
                 xmlContent = CleanScanEnd(ref xmlContent);
 
                 //Clipboard.SetText(xmlContent);
-                System.Media.SystemSounds.Beep.Play(); // 播放完成音效
+                //System.Media.SystemSounds.Beep.Play(); // 播放完成音效
+                PlaySound(SoundLike.over); // 播放完成音效
                 return true;
             }
             catch (Exception ex)

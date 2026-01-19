@@ -145,15 +145,19 @@ Ctrl + Shift + 數字鍵盤 * ：啟動/關閉手動輸入模式。
 Ctrl + Shift + p ：從圖文對照目前頁面開始，開始自動往後翻頁瀏覽各頁面（如在翻書。多作為批量OCR或大量快速自動編輯的行前檢查用。p=page。）
 >若要煞車，請對Chrome瀏覽器或本操作介面按下`Ctrl` 或`CapsLock`鍵或啟動/執行 `cmd.exe`
 ### 處理XML文本或由WordVBA轉譯來者
-Ctrl + Shift + Alt + p：執行從WordVBA轉譯來的`清除頁前的分段符號`程序。20260113 蔣經國前總統逝世紀念、海賢老和尚大德往生前紀念　Gemini大菩薩成功！（p=page）
-
 Ctrl + Shift + Alt + a：執行從WordVBA轉譯來的`提取人名_二字人名中有空白者`程序。20260113 蔣經國前總統逝世紀念、海賢老和尚大德往生前紀念　Gemini大菩薩成功！（m=n`a`me,`a`uthor)
 
 Ctrl + Shift + Alt + l：在XML文末加上末頁的標記 （l:last page）
 
 Ctrl + Shift + Alt + m：在XML修改記錄中找出已編輯與未修過的頁碼 （m:modified page）並建立檢查機制之記錄-執行同步快取程序
+> 操作起始頁：[如此頁](https://ctext.org/wiki.pl?if=gb&action=diff&to=9160905&from=4576560)
 
-Ctrl + Shift + Alt + n：執行「新頁面Auto」程序：自動根據書籍相關參數建立新的文字版章節文本單位、及其內容的圖文對應語法標記 n:new text
+Ctrl + Shift + Alt + n：根據現有文本資源，一鍵執行 [create a new entry 建立新的原典維基項目](https://ctext.org/wiki.pl?if=en) [Submit a new text 上傳新資料](https://ctext.org/wiki.pl?if=en&action=new)的操作。
+>操作起始頁：打開現有文本的[Edit text metadata 修改原典後設資料](https://ctext.org/wiki.pl?if=en&action=edit&res=6930444)（如此頁）。然後按下此組合鍵，即可根據此本後設資料(metadata)另造一新本與同一書圖對應。最少可使通行字本與忠於原著之第一圖文對應文本並存並行。理論上可以無限文本對應同一部書圖資源。
+>>即執行原WordVBA「新頁面Auto」程序，轉編到C#裡頭並優化出來：自動根據書籍相關參數建立新的文字版章節文本單位、及其內容的圖文對應語法標記 n:*n*ew text、a*n*other text
+
+Ctrl + Shift + Alt + p：執行從WordVBA轉譯來的`清除頁前的分段符號`程序。20260113 蔣經國前總統逝世紀念、海賢老和尚大德往生前紀念　Gemini大菩薩成功！（p=page）
+> 操作起始頁：[如此頁](https://ctext.org/wiki.pl?if=gb&chapter=1658058&action=editchapter#57190)。
 
 ### 加速輸入
 Insert 鍵 ：切換`插入、取代`輸入模式（預設為`插入輸入模式`）
@@ -336,6 +340,9 @@ Ctrl + q 或 Alt + q：據游標（插入點）所在前1段的長度來將textB
 Ctrl+ 滑鼠左鍵：在插入點後分行/分段
 
 textBox2中輸入 `fc` ：雙欄目錄或詩偈類型文本的排版（fc=format Category）
+
+Ctrl + Shift + Alt + f：根據第一行/段的排版格式套用到後面的內容各行/段中 (f: lineFormatter 的 f formatter) 20260117
+> 於編輯詩偈格式中很好用。尤其是在處置OCR結果讀入後的文本。
 #### 小注
 Alt + s ：小注不換行、夾注不換行
 >還有其餘類似功能，詳後開列。
@@ -526,7 +533,9 @@ Alt + r ：在Selenium模式+手動輸入模式下、關閉所在Chrome瀏覽器
 
 Ctrl + n ：開新預設瀏覽器視窗 //原：在新頁籤開啟 google 網頁，以備用（在預設瀏覽器為 Chrome 時）
 
-Ctrl + Shift + n 或 Shift + F1 : 開新Form1 實例
+Ctrl + Shift + n : 開新Form1 實例
+
+Ctrl + Shift + s : 將隱藏的主表單Form1顯示出來（有時在隱藏執行程式時當掉需要） 20260118
 
 Ctrl + r ：刷新目前 Chrome瀏覽器 或 預設瀏覽器 網頁（同於網頁上按下F5鍵）；當瀏覽器網頁未能完整開啟必須重載時可用。
 
@@ -710,6 +719,10 @@ Ctrl + 8 ：如同鍵入「　」1個全形空格，且各個空格間有分段�
 Ctrl + 9 ：如同鍵入「　　」2個全形空格，且各個空格間有分段符。用在版心前後文字內容銜接處為小字註文時，作為空一行的間隔；或前後為正文打字，作為空兩行的間隔。
 
 Ctrl + 0 ：如同鍵入「　　　　」4個全形空格，且各個空格間有分段符。用在四合一版面等上下銜接處為小字註文時，作為空兩行的間隔
+
+Ctrl + d ：複製所在行到下一行前，即多複製一行（插入點所在行） 20260117
+
+Ctrl + Shift + d ：刪除所在行或選取段落 20260117
 
 Alt + 1 : 鍵入空白（本站制式文字版留空空格標記）「􏿽」：若有選取則取代全形空格「　」為「􏿽」；若已選取「{{」或「}}」則逕以「􏿽」取代
 

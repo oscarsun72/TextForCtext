@@ -8658,35 +8658,6 @@ namespace TextForCtext
                 if (DateTime.Now.Subtract(dt).TotalSeconds > 10) if (Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("等待頁面開啟已逾時，是否繼續？") == DialogResult.Cancel) return false;
             }
             SetIWebElement_textContent_Property(iwe, x);
-            //rePaste:20240914作廢
-            ////將要標點的文本寫入剪貼簿：
-            //try
-            //{
-            //    Clipboard.SetText(x);
-            //}
-            //catch (Exception)
-            //{
-            //}
-            //try
-            //{
-            //    if (Clipboard.GetText() == string.Empty)
-            //    {
-            //        Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("剪貼簿出錯！請重來"); return false;
-            //    }
-            //}
-            //catch (Exception)
-            //{
-            //    Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("剪貼簿出錯！請重來");
-            //    return false;
-            //}
-            ////將要標點的文本貼到標點區：
-            //iwe.SendKeys(OpenQA.Selenium.Keys.Shift + OpenQA.Selenium.Keys.Insert);
-            //if (string.Empty == iwe.Text)
-            //{
-            //    if (Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("貼上失誤，是否重試一次？") == DialogResult.OK) goto rePaste;
-            //}
-
-
             iwe = null;
             //按下「標點」按鈕：
             Thread.Sleep(640);//非得要等一會才能成功！

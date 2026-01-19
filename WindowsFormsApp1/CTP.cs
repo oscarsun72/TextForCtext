@@ -66,7 +66,7 @@ namespace TextForCtext
 
         #region 修改原典後設資料頁面諸元件
         ///<summary> 
-        ///修改原典後設資料(&amp;action=edit)、新增資源(&amp;action=new)、新增section(&amp;action=newchapter) 等頁面的「著作名稱:」或「標題／篇名:」文字方塊控制項
+        ///修改原典後設資料(&amp;action=edit)、新增資源(&amp;action=new)、新增section(&amp;action=newchapter) 、編輯section(editchapter) 等頁面的「著作名稱:」或「標題／篇名:」文字方塊控制項
         /// </summary>
         internal static IWebElement Title_textBox { get => WaitFindWebElementBySelector_ToBeClickable("#title"); }
         ///<summary> 
@@ -207,7 +207,7 @@ namespace TextForCtext
                     if (Img_divWikibox1?.JsClick() == false) return false;
                     break;
                 case CtextPageType.WikiEditChapter:
-                    if (Title_Chapter_Edit_BookName?.JsClick() == false) return false;
+                    if (Title_Chapter_BookName?.JsClick() == false) return false;
                     if (Img_divWikibox1?.JsClick() == false) return false; break;
                 case CtextPageType.EditTextMetadata:
                     if (Title_linkbox_EditTextMetadata_BookName?.JsClick() == false) return false;
@@ -786,49 +786,36 @@ namespace TextForCtext
             //}
         }
         /// <summary>
-        /// 取得文字版chapter章節頁面[編輯]的[標題]（書名）元件；若失敗則回傳null 20260110
-        /// </summary>
-        internal static IWebElement Title_Chapter_Edit_BookName
-        {
-            get
-            {
-                if (Browser.driver.Url.IndexOf("chapter") > -1)
-                {
-                    return Browser.WaitFindWebElementBySelector_ToBeClickable("#content > div:nth-child(6) > span:nth-child(2) > a > span", WebDriverWaitTimeSpan);
-                }
-                else
-                    return null;
-            }
-        }
-        /// <summary>
         /// 取得 修改原典後設資料(Edit text metadata)頁面的[標題]（書名）元件；若失敗則回傳null 20260116
         /// </summary>
         internal static IWebElement Title_linkbox_EditTextMetadata_BookName
         {
-            get
-            {
-                if (Browser.driver.Url.IndexOf("chapter") > -1)
-                {
-                    return Browser.WaitFindWebElementBySelector_ToBeClickable("#content > div:nth-child(4) > a:nth-child(2)", WebDriverWaitTimeSpan);
-                }
-                else
-                    return null;
-            }
+            get => Browser.WaitFindWebElementBySelector_ToBeClickable("#content > div:nth-child(4) > a:nth-child(2)", WebDriverWaitTimeSpan);
+            //get
+            //{
+            //    if (Browser.driver.Url.IndexOf("chapter") > -1)
+            //    {
+            //        return Browser.WaitFindWebElementBySelector_ToBeClickable("#content > div:nth-child(4) > a:nth-child(2)", WebDriverWaitTimeSpan);
+            //    }
+            //    else
+            //        return null;
+            //}
         }
         /// <summary>
-        /// 取得文字版chapter章節瀏覽頁面的[標題]（書名）元件；若失敗則回傳null 20260110
+        /// 取得文字版chapter章節瀏覽與編輯頁面的[標題]（書名）超連結元件；若失敗則回傳null 20260110
         /// </summary>
         internal static IWebElement Title_Chapter_BookName
         {
-            get
-            {
-                if (Browser.driver.Url.IndexOf("chapter") > -1)
-                {
-                    return Browser.WaitFindWebElementBySelector_ToBeClickable("#content > div:nth-child(4) > span:nth-child(2) > a > span", WebDriverWaitTimeSpan);
-                }
-                else
-                    return null;
-            }
+            get => Browser.WaitFindWebElementBySelector_ToBeClickable("#content > div:nth-child(4) > span:nth-child(2) > a > span", WebDriverWaitTimeSpan);
+            //get
+            //{
+            //    if (Browser.driver.Url.IndexOf("chapter") > -1)
+            //    {
+            //        return Browser.WaitFindWebElementBySelector_ToBeClickable("#content > div:nth-child(4) > span:nth-child(2) > a > span", WebDriverWaitTimeSpan);
+            //    }
+            //    else
+            //        return null;
+            //}
         }
 
         /// <summary>
@@ -981,7 +968,8 @@ namespace TextForCtext
             return selector;
         }
         /// <summary>
-        /// 常數，作為第一冊連結元件的Css selector值的存儲
+        /// 常數，作為圖書館(Library)書籍首頁各冊列表中第一冊超連結元件的Css selector值的存儲
+        /// 書籍首頁如此頁：https://ctext.org/library.pl?if=gb&amp;res=414
         /// </summary>
         internal const string FirstFileCSSSelector = "#content > div:nth-child(6) > table > tbody > tr:nth-child(2) > td:nth-child(1) > a";
         /// <summary>
@@ -1325,7 +1313,8 @@ namespace TextForCtext
                             break;
                     }
                 }
-                quickedit.Click();//下面「submit.Click();」不必等網頁作出回應才執行下一步，但這裡接下來還要取元件操作，就得在同一線程中跑。感恩感恩　南無阿彌陀佛
+                if (quickedit == null) return false;
+                quickedit.JsClick();//下面「submit.Click();」不必等網頁作出回應才執行下一步，但這裡接下來還要取元件操作，就得在同一線程中跑。感恩感恩　南無阿彌陀佛
                 textbox = Browser.driver.FindElement(selenium.By.Name("data"));
                 //throw;
             }
@@ -3408,8 +3397,12 @@ var callback = arguments[arguments.length - 1];
                 {
                     if (!IsDriverInvalid)
                     {
-                        if (CTP.IsImageTextComparisonPage())
+                        if (CtextPageClassifier.ParseUrl(driver.Url).PageType == CtextPageType.LibraryFile)
+                            //if (CTP.IsImageTextComparisonPage())
                             Edit_Linkbox_ImageTextComparisonPage?.JsClick();
+                        //現在用 FixXMLParagraphMarkPosition_and_Page1Content(); 程式化可以背景執行了，則手動的部分，則加標題，故將插入點位置移到標題欄位中以供輸入，也不怕其他欄位受影響，因為都是程式在幕後操作了。 20260117                        
+                        Title_textBox?.Click();//焦點要放在這裡，就要用 Click，不能用 JsClick
+
                         if (Textarea_data_Edit_textbox != null)
                         {
                             string xml = Textarea_data_Edit_textboxTxt;//Clipboard.GetText();
