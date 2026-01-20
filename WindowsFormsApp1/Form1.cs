@@ -432,49 +432,52 @@ namespace WindowsFormsApp1
             {
                 #region 輸出一些常用設定值以供下次再用。如果在除錯撰碼時 只為開發方便爾。使用者可以不用。20260102
                 bool logged = false; string log = string.Empty;
-                if (WindowHandles.TryGetValue("FileSelector", out string fileSelector))
-                //Debug.WriteLine("fn= " + chapterSelector);//https://copilot.microsoft.com/shares/j5vsqNpooaUje3bo1T3N1
+                if (_wordsPerLinePara > 0 && _lines_perPage > 0 && _inputTextFrontPage != "{{{封面}}}<p>")
                 {
-                    if (fileSelector != FirstFileCSSSelector)
+                    if (WindowHandles.TryGetValue("FileSelector", out string fileSelector))
+                    //Debug.WriteLine("fn= " + chapterSelector);//https://copilot.microsoft.com/shares/j5vsqNpooaUje3bo1T3N1
                     {
-                        Log("fn= " + fileSelector, out logged);//https://copilot.microsoft.com/shares/j5vsqNpooaUje3bo1T3N1
-                        log += "fn= " + Environment.NewLine + fileSelector;
+                        if (fileSelector != FirstFileCSSSelector)
+                        {
+                            Log("fn= " + fileSelector, out logged);//https://copilot.microsoft.com/shares/j5vsqNpooaUje3bo1T3N1
+                            log += "fn= " + Environment.NewLine + fileSelector;
+                        }
                     }
-                }
-                if (_inputTextFrontPage != "{{{封面}}}<p>")
-                {
-                    Log("扉頁: " + _inputTextFrontPage, out logged);
-                    log += Environment.NewLine + Environment.NewLine + "扉頁: " + Environment.NewLine + _inputTextFrontPage;
-                }
-                if (_lines_perPage > 0)
-                {
+                    //if (_inputTextFrontPage != "{{{封面}}}<p>")
+                    //{
+                        Log("扉頁: " + _inputTextFrontPage, out logged);
+                        log += Environment.NewLine + Environment.NewLine + "扉頁: " + Environment.NewLine + _inputTextFrontPage;
+                    //}
+                    //if (_lines_perPage > 0)
+                    //{
                     Log("lines_perPage: " + _lines_perPage, out logged);
                     log += Environment.NewLine + Environment.NewLine + "lines_perPage: " + Environment.NewLine + _lines_perPage;
-                }
-                if (_wordsPerLinePara > 0)
-                {
+                    //}
+                    //if (_wordsPerLinePara > 0)
+                    //{
                     Log("wordsPerLinePara: " + _wordsPerLinePara, out logged);
                     log += Environment.NewLine + Environment.NewLine + "wordsPerLinePara: " + Environment.NewLine + _wordsPerLinePara;
-                }
-                if (logged)
-                {
-                    if (!string.IsNullOrEmpty(log))
+                    //}
+                    if (logged)
                     {
-                        //MessageBoxShowOKExclamationDefaultDesktopOnly(log);
-                        Clipboard.SetText(log);//以備用
-                                               //方便一次輸入到textBox2以作設定，尤其是在開發階段偵錯狀態下批量快捷模式處理書籍時
-                        while (!IsClipBoardAvailable_Text()) { }
-                        log = fileSelector + "," + _inputTextFrontPage + ","
-                            + _lines_perPage.ToString() + "," + _wordsPerLinePara.ToString() + ","
-                            + textBox3.Text;
-                        Clipboard.SetText(log);//以備用
-                        using (var streamWriter = new StreamWriter(
-                            dropBoxPathIncldBackSlash + "BookFeature_forNextTime_copy and paste to textBox2 to startup TextForCtext Selenium mode.txt")) { streamWriter.Write(log); }
+                        if (!string.IsNullOrEmpty(log))
+                        {
+                            //MessageBoxShowOKExclamationDefaultDesktopOnly(log);
+                            Clipboard.SetText(log);//以備用
+                                                   //方便一次輸入到textBox2以作設定，尤其是在開發階段偵錯狀態下批量快捷模式處理書籍時
+                            while (!IsClipBoardAvailable_Text()) { }
+                            log = fileSelector + "," + _inputTextFrontPage + ","
+                                + _lines_perPage.ToString() + "," + _wordsPerLinePara.ToString() + ","
+                                + textBox3.Text;
+                            Clipboard.SetText(log);//以備用
+                            using (var streamWriter = new StreamWriter(
+                                dropBoxPathIncldBackSlash + "BookFeature_forNextTime_copy and paste to textBox2 to startup TextForCtext Selenium mode.txt")) { streamWriter.Write(log); }
+
+                        }
+                        //Debugger.Break();
+                        #endregion
 
                     }
-                    //Debugger.Break();
-                    #endregion
-
                 }
                 /// <summary>
                 /// Windows Forms 偵錯最佳習慣清單 使用 Debug.WriteLine 將訊息導向 Output → Debug，避免混淆。建議建立小工具方法，例如：
@@ -21683,6 +21686,7 @@ namespace WindowsFormsApp1
         /// <summary>
         /// 連續空格錯位檢查。插入半形空格的結果顯示在 textBox1；
         /// richTextBox1 不插入，只高亮原始文字中合格序列的前後各一個文字元素（含 surrogate）。
+        /// 如此書（《四庫》本《曝書亭集》）的源文本排版錯亂之空格（標題/篇名前之連續全形空格）位置判斷式 20260120 ctext.org/library.pl?if=gb&amp;file=50127&amp;page=67
         /// </summary>
         /// <param name="requiredCount">需要檢查幾個連續的全形空格</param>
         /// <returns>若含有檢驗出來的連續空格，則傳回 true；若不需檢查，則傳回 false</returns>

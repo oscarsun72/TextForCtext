@@ -2526,11 +2526,18 @@ Sub 國學大師_Kanripo_四庫全書本轉來(Optional lineCntPerPage As Byte = 0)
     Loop
     Set rng = rng.Document.Range
     rng.Find.Execute "^p^p", , , , , , , wdFindContinue, , "^p", wdReplaceAll
-    If VBA.InStr(rng.text, VBA.ChrW(160) & "/" & VBA.Chr(11)) Then _
-        rng.Find.Execute VBA.ChrW(160) & "^g" & VBA.Chr(11), , , , , , , wdFindContinue, , VBA.Chr(11), wdReplaceAll 'chr(11)分行符號
-    If VBA.InStr(rng.text, VBA.ChrW(160) & "/" & VBA.Chr(13)) Then _
-        rng.Find.Execute VBA.ChrW(160) & "^g" & VBA.Chr(13), , , , , , , wdFindContinue, , VBA.Chr(13), wdReplaceAll
-        
+    If InStr(rng.text, VBA.ChrW(160)) Then 'Ctrl + c 複製貼上的
+        If VBA.InStr(rng.text, VBA.ChrW(160) & "/" & VBA.Chr(11)) Then _
+            rng.Find.Execute VBA.ChrW(160) & "^g" & VBA.Chr(11), , , , , , , wdFindContinue, , VBA.Chr(11), wdReplaceAll 'chr(11)分行符號
+        If VBA.InStr(rng.text, VBA.ChrW(160) & "/" & VBA.Chr(13)) Then _
+            rng.Find.Execute VBA.ChrW(160) & "^g" & VBA.Chr(13), , , , , , , wdFindContinue, , VBA.Chr(13), wdReplaceAll
+    Else 'C#裡頭 SelectAndCopyElementHtmlContentSmartStable 方法抓取的
+        If VBA.InStr(rng.text, VBA.ChrW(32) & "/" & VBA.Chr(11)) Then _
+            rng.Find.Execute VBA.Chr(11) & VBA.ChrW(32) & "^g" & VBA.Chr(11), , , , , , , wdFindContinue, , VBA.Chr(11), wdReplaceAll 'chr(11)分行符號
+        If VBA.InStr(rng.text, VBA.ChrW(32) & "/" & VBA.Chr(13)) Then _
+            rng.Find.Execute VBA.Chr(13) & VBA.ChrW(32) & "^g" & VBA.Chr(13), , , , , , , wdFindContinue, , VBA.Chr(13), wdReplaceAll
+    End If
+
     rng.Find.ClearFormatting
     
     

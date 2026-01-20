@@ -11434,7 +11434,7 @@ namespace TextForCtext
             switch (urlPrefixDomain)
             {
                 case "www.kanripo.org":
-                    iElementSelector = "#txtcont > p:nth-child(1)";
+                    iElementSelector = "#txtcont";//"#txtcont > p:nth-child(1)";
                     break;
                 case "github.com":
                     iElementSelector = "#read-only-cursor-text-area";
@@ -12060,24 +12060,45 @@ namespace TextForCtext
 
             IJavaScriptExecutor js = (IJavaScriptExecutor)driver;
 
+            #region Ctrl + C 複製方式
+            ////後面的新式在《維基文庫》《國學大師》讀回的內容與直接 Ctrl + c 複製的有異故 20260106
+            ////今Copilot大菩薩協助，將Kanripo網頁的擬複製功能優化，可比Ctrl + c，故仍再試看看！20260120
+            //if (Browser.CurrentUrlPrefixDomain.Contains("wikisource") || Browser.CurrentUrlPrefixDomain.Contains("skqs.39017.com"))
+            //{
+            //    #region 新式 20260120 https://copilot.microsoft.com/shares/px9mAUi7teRJRbQGanWgj
 
-            //後面的新式在《維基文庫》《國學大師》讀回的內容與直接 Ctrl + c 複製的有異故 20260106
-            if (Browser.CurrentUrlPrefixDomain.Contains("wikisource") || Browser.CurrentUrlPrefixDomain.Contains("skqs.39017.com"))
-            {
-                // 使用 JavaScript 來全選元素內的文字
-                //OpenQA.Selenium.IJavaScriptExecutor js = (OpenQA.Selenium.IJavaScriptExecutor)driver;
-                js.ExecuteScript("var range = document.createRange(); range.selectNodeContents(arguments[0]); var sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(range);", element);
+            //    //var js = (IJavaScriptExecutor)driver;
 
-                Browser.ChromeSetFocus();
-                Browser.WaitFindWebElementBySelector_ToBeClickable("body").SendKeys(selm.Keys.Control + "c");//外面的框
-                ////以下一樣沒效：
-                //// 使用 Actions 來模擬 Ctrl + C 鍵盤操作
-                //Actions actions = new Actions(driver);
-                ////actions.MoveToElement(element).Click().KeyDown(OpenQA.Selenium.Keys.Control).SendKeys("a").SendKeys("c").KeyUp(OpenQA.Selenium.Keys.Control).Perform();
-                //actions.MoveToElement(element).Click().KeyDown(OpenQA.Selenium.Keys.Control).SendKeys("c").KeyUp(OpenQA.Selenium.Keys.Control).Perform();
-                while (!IsClipBoardAvailable_Text()) { }
-                return true;
-            }
+            //    // 1) 首選：瀏覽器原生複製（等同 Ctrl+C）
+            //    if (NativeCopyElement(js, element))
+            //    {
+            //        // 等瀏覽器把資料寫入剪貼簿
+            //        while (!Form1.IsClipBoardAvailable_Text()) ;
+            //        return true;
+            //    }
+
+            //    #endregion
+
+            //    #region 原式
+
+            //    //// 使用 JavaScript 來全選元素內的文字
+            //    ////OpenQA.Selenium.IJavaScriptExecutor js = (OpenQA.Selenium.IJavaScriptExecutor)driver;
+            //    //js.ExecuteScript("var range = document.createRange(); range.selectNodeContents(arguments[0]); var sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(range);", element);
+
+            //    //Browser.ChromeSetFocus();
+            //    //Browser.WaitFindWebElementBySelector_ToBeClickable("body").SendKeys(selm.Keys.Control + "c");//外面的框
+            //    //////以下一樣沒效：
+            //    ////// 使用 Actions 來模擬 Ctrl + C 鍵盤操作
+            //    ////Actions actions = new Actions(driver);
+            //    //////actions.MoveToElement(element).Click().KeyDown(OpenQA.Selenium.Keys.Control).SendKeys("a").SendKeys("c").KeyUp(OpenQA.Selenium.Keys.Control).Perform();
+            //    ////actions.MoveToElement(element).Click().KeyDown(OpenQA.Selenium.Keys.Control).SendKeys("c").KeyUp(OpenQA.Selenium.Keys.Control).Perform();
+            //    //while (!IsClipBoardAvailable_Text()) { }
+            //    //return true;
+
+            //    #endregion 原式
+
+            //}
+            #endregion Ctrl + C 複製方式
 
             string content = (string)js.ExecuteScript("return arguments[0].innerHTML;", element);
 
@@ -12150,38 +12171,144 @@ namespace TextForCtext
                 https://copilot.microsoft.com/shares/DzMwwRF6wBQ41xCLqpHJr https://copilot.microsoft.com/shares/J696S91DUrxWDjjYV53nR
          */
 
+        // https://copilot.microsoft.com/shares/px9mAUi7teRJRbQGanWgj 使用 JavaScript 背景操作複製網頁內容
+
+        /// <summary>
+        /// 使用瀏覽器原生複製（等同 Ctrl+C），將指定元素的內容複製到剪貼簿。
+        /// 這會由瀏覽器生成完整的 CF_HTML（含樣式與 &nbsp;），貼到 Word 效果與手動 Ctrl+C 一致。
+        /// </summary>
+        public static bool NativeCopyElement(IJavaScriptExecutor js, IWebElement element)
+        {
+            string script = @"
+        (function(el){
+            // 保存原選取狀態
+            var sel = window.getSelection();
+            var ranges = [];
+            for (var i = 0; i < sel.rangeCount; i++) {
+                ranges.push(sel.getRangeAt(i));
+            }
+
+            // 建立範圍並選取目標元素內容
+            var range = document.createRange();
+            range.selectNodeContents(el);
+            sel.removeAllRanges();
+            sel.addRange(range);
+
+            // 嘗試執行原生複製（等同 Ctrl+C）
+            var ok = false;
+            try {
+                ok = document.execCommand('copy');
+            } catch(e) {
+                ok = false;
+            }
+
+            // 還原原選取狀態
+            sel.removeAllRanges();
+            for (var j = 0; j < ranges.length; j++) {
+                sel.addRange(ranges[j]);
+            }
+
+            return ok;
+        })(arguments[0]);
+    ";
+            try
+            {
+                var result = js.ExecuteScript(script, element);
+                return result is bool b && b;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+
+        //https://copilot.microsoft.com/shares/24vE49qSQnSvEY2LRyFAT 使用 JavaScript 背景操作複製網頁內容 https://copilot.microsoft.com/shares/tCnL9vAtWZ7BG3hfwHFMs
+        //https://copilot.microsoft.com/shares/YFgrLY3nLRk5FVf2jHCyR  https://copilot.microsoft.com/shares/tzNvrG9Mr76P1iHVGpwcgz
+        /// <summary>
+        /// 將元素及其子元素的所有 computed style 內嵌到 style 屬性，
+        /// 確保貼到 Word 時保留字型、顏色、大小等樣式。
+        /// </summary>
+        public static string EmbedComputedStyle(IJavaScriptExecutor js, IWebElement element)
+        {
+            string script = @"
+        var container = arguments[0];
+        function inlineAllStyles(el) {
+            var computed = window.getComputedStyle(el);
+            var styleStr = '';
+            for (var i = 0; i < computed.length; i++) {
+                var prop = computed[i];
+                styleStr += prop + ':' + computed.getPropertyValue(prop) + ';';
+            }
+            el.setAttribute('style', styleStr);
+            for (var j = 0; j < el.children.length; j++) {
+                inlineAllStyles(el.children[j]);
+            }
+        }
+        inlineAllStyles(container);
+        return container.outerHTML;
+    ";
+            return (string)js.ExecuteScript(script, element);
+        }
 
         /// <summary>
         /// 智慧複製指定元素的完整內容到剪貼簿（Word可完整貼上）
+        /// 保留必要樣式 + 將空格轉成 &nbsp; → Word 貼上後 ChrW(160)
         /// 由 CopyElementContentSmartStable改寫而來
-        /// </summary>        
+        /// </summary>
         /// <param name="driver"></param>
         /// <param name="element"></param>
         /// <returns>失敗傳回false</returns>
         public static bool SelectAndCopyElementHtmlContentSmartStable(IWebDriver driver, IWebElement element)
         {
             var js = (IJavaScriptExecutor)driver;
-            //var element = driver.FindElement(By.CssSelector(cssSelector));
 
-            // 抓完整 HTML 片段（包含子元素）
-            string fragmentHtml = (string)js.ExecuteScript("return arguments[0].outerHTML;", element);
+            // 使用 EmbedComputedStyle 內嵌所有樣式
+            string fragmentHtml = EmbedComputedStyle(js, element);
             if (string.IsNullOrWhiteSpace(fragmentHtml)) return false;
 
-            // 生成穩健 CF_HTML
+            // 生成 CF_HTML
             string cfHtml = BuildCfHtmlUtf8(fragmentHtml, driver.Url);
 
-            // 同時提供純文字（方便 Notepad++）
+            // 同時提供純文字
             string plainText = (string)js.ExecuteScript("return arguments[0].innerText;", element);
 
-            var data = new DataObject();//https://copilot.microsoft.com/shares/562GQdNPLGNavN1UPHeDz 這次能在 Word 完整貼上格式化內容、同時在 Notepad++ 貼上純文字，正是因為最後的修正把 CF_HTML 與 UnicodeText 兩種格式同時正確寫入剪貼簿了。
+            var data = new DataObject();
             data.SetData(DataFormats.Html, cfHtml);
             data.SetData(DataFormats.UnicodeText, plainText ?? string.Empty);
             Clipboard.SetDataObject(data, true);
 
-            while (!Form1.IsClipBoardAvailable_Text()) ;
-
             return true;
         }
+
+
+        #region 原式
+        //public static bool SelectAndCopyElementHtmlContentSmartStable(IWebDriver driver, IWebElement element)
+        //{
+        //    var js = (IJavaScriptExecutor)driver;
+        //    //var element = driver.FindElement(By.CssSelector(cssSelector));
+
+        //    // 抓完整 HTML 片段（包含子元素）
+        //    string fragmentHtml = (string)js.ExecuteScript("return arguments[0].outerHTML;", element);
+        //    if (string.IsNullOrWhiteSpace(fragmentHtml)) return false;
+
+        //    // 生成穩健 CF_HTML
+        //    string cfHtml = BuildCfHtmlUtf8(fragmentHtml, driver.Url);
+
+        //    // 同時提供純文字（方便 Notepad++）
+        //    string plainText = (string)js.ExecuteScript("return arguments[0].innerText;", element);
+
+        //    var data = new DataObject();//https://copilot.microsoft.com/shares/562GQdNPLGNavN1UPHeDz 這次能在 Word 完整貼上格式化內容、同時在 Notepad++ 貼上純文字，正是因為最後的修正把 CF_HTML 與 UnicodeText 兩種格式同時正確寫入剪貼簿了。
+        //    data.SetData(DataFormats.Html, cfHtml);
+        //    data.SetData(DataFormats.UnicodeText, plainText ?? string.Empty);
+        //    Clipboard.SetDataObject(data, true);
+
+        //    while (!Form1.IsClipBoardAvailable_Text()) ;
+
+        //    return true;
+        //}
+        #endregion
+
         /// <summary>
         /// 自動判斷內容且自動展開以複製指定元件的所有內容
         /// </summary>
