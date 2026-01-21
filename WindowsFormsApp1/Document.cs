@@ -265,6 +265,13 @@ namespace TextForCtext
             var nextParagraph2 = paragraphs[currentParagraphIndex + 2];
 
             string mergedText = "{{" + nextParagraph1.Text.Replace(Environment.NewLine, "") + nextParagraph2.Text.Replace(Environment.NewLine, "") + "}}";
+            if (mergedText.EndsWith("<p>}}"))
+            {
+                if (Form1.InstanceForm1.KeyinTextMode)
+                    mergedText = mergedText.Replace("<p>}}", "。}}<p>");
+                else
+                    mergedText = mergedText.Replace("<p>}}", "}}<p>");
+            }
 
             currentParagraph.Text += mergedText;
 

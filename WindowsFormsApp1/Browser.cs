@@ -14,6 +14,7 @@ using System.Globalization;
 //https://dotblogs.com.tw/supergary/2020/10/29/selenium#images-3
 using System.IO;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Media;
 using System.Net;
 using System.Net.Http;
@@ -8656,6 +8657,15 @@ namespace TextForCtext
             {
                 iwe = WaitFindWebElementBySelector_ToBeClickable("#PunctArea");
                 if (DateTime.Now.Subtract(dt).TotalSeconds > 10) if (Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("等待頁面開啟已逾時，是否繼續？") == DialogResult.Cancel) return false;
+                try//手動關掉頁籤視窗以提早結束用
+                {
+                    driver.SwitchTo().Window(driver.CurrentWindowHandle);
+                }
+                catch
+                {
+                    driver.SwitchTo().Window(LastValidWindow);
+                    return false;
+                }
             }
             SetIWebElement_textContent_Property(iwe, x);
             iwe = null;
@@ -8666,6 +8676,15 @@ namespace TextForCtext
             {
                 iwe = WaitFindWebElementBySelector_ToBeClickable("#main > div > div.p-1.p-md-3.d-flex.justify-content-end > div:nth-child(6) > button > i");
                 if (DateTime.Now.Subtract(dt).TotalSeconds > 8) if (Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("還沒找到「標點」按鈕，是否繼續？") == DialogResult.Cancel) return false;
+                try//手動關掉頁籤視窗以提早結束用
+                {
+                    driver.SwitchTo().Window(driver.CurrentWindowHandle);
+                }
+                catch
+                {
+                    driver.SwitchTo().Window(LastValidWindow);
+                    return false;
+                }
             }
             iwe.JsClick();
             //iwe.Click();//Thread.Sleep(640);//非得要等一會才能成功！//自動標點會清除全形空格
@@ -8676,19 +8695,28 @@ namespace TextForCtext
             //while (iwe.Text == x)//.Text屬性傳回的會是經過trim的，故若開頭是全形空格，則一下子就會誤判成已經標點過（文本經改過）的了
             while (iwe.GetDomProperty("textContent") == x)//.Text屬性傳回的會是經過trim的，故若開頭是全形空格，則一下子就會誤判成已經標點過（文本經改過）的了
             {
-                //檢查如果沒有按到「標點」按鈕，就再次按下 20240811 以出現等待圖示控制項為判斷
-                if (WaitFindWebElementBySelector_ToBeClickable("#waitingSpinner") == null && reClickFlag == false && iwe.Text == x)
+                try
                 {
-                    WaitFindWebElementBySelector_ToBeClickable("#main > div > div.p-1.p-md-3.d-flex.justify-content-end > div:nth-child(6) > button > i").Click();
-                    Form1.PlaySound(Form1.SoundLike.over, true);
-                    reClickFlag = true;
-                }
-                //reach traffic limit. wait 1.2 hours
-                if (WaitFindWebElementBySelector_ToBeClickable("#main > div:nth-child(1)") != null)
-                    if (WaitFindWebElementBySelector_ToBeClickable("#main > div:nth-child(1)").GetDomProperty("textContent").StartsWith("reach traffic limit. wait "))
-                    { Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("超過額度！"); return false; }
 
-                if (DateTime.Now.Subtract(dt).TotalSeconds > 25) if (Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("標點逾時，是否繼續？") == DialogResult.Cancel) return false;
+                    //檢查如果沒有按到「標點」按鈕，就再次按下 20240811 以出現等待圖示控制項為判斷
+                    if (WaitFindWebElementBySelector_ToBeClickable("#waitingSpinner") == null && reClickFlag == false && iwe.Text == x)
+                    {
+                        WaitFindWebElementBySelector_ToBeClickable("#main > div > div.p-1.p-md-3.d-flex.justify-content-end > div:nth-child(6) > button > i").Click();
+                        Form1.PlaySound(Form1.SoundLike.over, true);
+                        reClickFlag = true;
+                    }
+                    //reach traffic limit. wait 1.2 hours
+                    if (WaitFindWebElementBySelector_ToBeClickable("#main > div:nth-child(1)") != null)
+                        if (WaitFindWebElementBySelector_ToBeClickable("#main > div:nth-child(1)").GetDomProperty("textContent").StartsWith("reach traffic limit. wait "))
+                        { Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("超過額度！"); return false; }
+
+                    if (DateTime.Now.Subtract(dt).TotalSeconds > 25) if (Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("標點逾時，是否繼續？") == DialogResult.Cancel) return false;
+                }
+                catch
+                {
+                    driver.SwitchTo().Window(LastValidWindow);
+                    return false;
+                }
             }
             //x = iwe.Text;//.Text屬性傳回的會是經過trim的
             x = iwe.GetDomProperty("textContent");
@@ -10268,6 +10296,10 @@ namespace TextForCtext
                         Console.WriteLine(ex.HResult + ex.Message);
                         Form1.PlaySound(Form1.SoundLike.error, true);
                         //MessageBox.Show(ex.HResult + ex.Message, "", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
+
+
+                        driver.SwitchTo().Window(LastValidWindow);
+                        return false;
                     }
                 }
                 if (!IsDriverInvalid)

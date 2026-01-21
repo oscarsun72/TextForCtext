@@ -147,6 +147,8 @@ Ctrl + Shift + p ：從圖文對照目前頁面開始，開始自動往後翻頁
 ### 處理XML文本或由WordVBA轉譯來者
 Ctrl + Shift + Alt + a：執行從WordVBA轉譯來的`提取人名_二字人名中有空白者`程序。20260113 蔣經國前總統逝世紀念、海賢老和尚大德往生前紀念　Gemini大菩薩成功！（m=n`a`me,`a`uthor)
 
+Ctrl + Shift + Alt + x : 檢查textBox1文本中指定連續全形空格位置不當者，起於對《四庫全書》源文本標題錯置者之檢查，如[《曝書亭集》卷六](https://ctext.org/library.pl?if=gb&file=50127&page=108) x:Exam
+ 
 Ctrl + Shift + Alt + l：在XML文末加上末頁的標記 （l:last page）
 
 Ctrl + Shift + Alt + m：在XML修改記錄中找出已編輯與未修過的頁碼 （m:modified page）並建立檢查機制之記錄-執行同步快取程序
@@ -704,9 +706,10 @@ Ctrl + Shift + F2：選取範圍前後加上{{}}並清除分行/段符號+並小
 
 Alt + Shift + 6 或 Alt + s：小注文不換行：notes_a_line()
 
-Alt + Shift + s : 小注文不換行：notes_a_line_all 
+Alt + Shift + s : 5textBox1內的小注文都不換行：notes_a_line_all 
 
-Alt + Shift + Ctrl + s : 小注文不換行(短於指定漢字長者 由變數 noteinLineLenLimit 限定）：notes_a_line_all 
+Alt + Shift + Ctrl + s : 小注文不換行(短於指定漢字長者才不換行。由變數`noteinLineLenLimit`指定）：notes_a_line_all 
+> Ctrl + Shift + Alt + s
 
 Ctrl + Alt + s : 標題下之小注文才不換行( 會與小小輸入法預設的繁簡轉換鍵衝突，使用時請先關閉輸入法。其他快捷鍵若無作用，也多係因有較其優先之如此系統快速鍵已指定的緣故) 20230108
 
