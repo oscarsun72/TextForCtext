@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text;
+using WindowsFormsApp1;
 
 namespace TextForCtext
 {
@@ -25,13 +26,19 @@ namespace TextForCtext
         public char TargetSpaceChar { get; set; } = '　'; // U+3000
         public bool AllowHalfWidthSpace { get; set; } = false;
 
-        // 放在 FullWidthSpaceFixer 類別內
-        public static void ExamFullWidthSpaceSequencesFormattingError_inserttoCheck_HighlighttoWatch(
+        /// <summary>
+        /// Ctrl + Shift + Alt + x : 檢查textBox1文本中指定連續全形空格位置不當者，起於對《四庫全書》源文本標題錯置者之檢查，如《曝書亭集》卷六) x:Exam
+        /// </summary>
+        /// <param name="originalRaw"></param>
+        /// <param name="textBox1"></param>
+        /// <param name="richTextBox1"></param>
+        /// <returns>若通過檢查則傳回false（不需檢查）</returns>
+        public static bool ExamFullWidthSpaceSequencesFormattingError_inserttoCheck_HighlighttoWatch(
             string originalRaw, System.Windows.Forms.TextBox textBox1, System.Windows.Forms.RichTextBox richTextBox1)
         {
             // 保持 richTextBox1 與 textBox1 的外觀一致（字型、大小）
             richTextBox1.Size = textBox1.Size;
-            richTextBox1.Location= textBox1.Location;
+            richTextBox1.Location = textBox1.Location;
             richTextBox1.Font = new System.Drawing.Font(textBox1.Font.FontFamily, richTextBox1.Font.Size);
 
             var fixer = new FullWidthSpaceFixer
@@ -39,7 +46,7 @@ namespace TextForCtext
                 RequiredCount = 3,
                 Mode = InsertionMode.HalfSpace,
                 AllowHalfWidthSpace = false,
-                EnableDebugReport = true,
+                //EnableDebugReport = true,// ← 平常註解掉，需要時再打開
                 HighlightColor = System.Drawing.Color.Yellow,
                 AutoScrollToFirstHighlight = true
             };
@@ -80,7 +87,17 @@ namespace TextForCtext
                 richTextBox1.ScrollToCaret();
             }
 
-            if (rangesNormalized.Count > 0) richTextBox1.Show();
+            if (rangesNormalized.Count > 0)
+            {
+                richTextBox1.Show();
+                return true;
+            }
+            else
+            {
+                //richTextBox1.Hide();
+                return false;
+            }
+
             #region 偵錯用
 
             //var sb = new System.Text.StringBuilder();
@@ -238,6 +255,16 @@ namespace TextForCtext
             if (prev == '\n' || prev == '\r' || IsTargetSpace(prev))
             {
                 if (EnableDebugReport) DebugBuilder.AppendFormat("  排除: 前一字元為換行或空格 U+{0:X4}\r\n", (int)prev);
+                return false;
+            }
+
+            // 新增條件：字數差異 ≤ 4
+            int l = TextLengthHelper.CountWordsLenPerLinePara(line);
+            int normalLength = Form1.InstanceForm1.NormalLineParaLength;//l - runLen;
+            if (l - normalLength > 4)//誤差4，由 CheckAbnormalLinePara 方法來決定
+            {
+                if (EnableDebugReport)
+                    DebugBuilder.AppendFormat("  排除: 行字數差異過大 (l={0}, normal={1})\r\n", l, normalLength);
                 return false;
             }
 

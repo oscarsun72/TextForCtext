@@ -10,6 +10,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using WindowsFormsApp1;
+using static TextForCtext.TextLengthHelper;
 using ado = ADODB;
 using static WindowsFormsApp1.Form1;
 //using OpenQA.Selenium.DevTools.V125.Runtime;
@@ -548,7 +549,7 @@ namespace TextForCtext
                 if (p.StartsWith("　"))
                 {
                     if (i + 1 < PCount && !paragraphs[i + 1].StartsWith("　") &&
-                        Form1.CountWordsLenPerLinePara(p.TrimStart('　')) == Form1.InstanceForm1.NormalLineParaLength)
+                        CountWordsLenPerLinePara(p.TrimStart('　')) == Form1.InstanceForm1.NormalLineParaLength)
                     {
                         //string pNew = p.TrimStart('　');
                         int pSt = text.IndexOf(p);

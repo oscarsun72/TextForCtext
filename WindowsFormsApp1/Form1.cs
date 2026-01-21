@@ -32,6 +32,7 @@ using static TextForCtext.XML;
 using static TextForCtext.XML.ScanPageAdjuster;
 using static TextForCtext.XML.ScanPageAdjuster.ScanPageCleaner;
 using static TextForCtext.FullWidthSpaceFixer;
+using static TextForCtext.TextLengthHelper;
 using static WindowsFormsApp1.KeyboardInfo;
 using static WindowsFormsApp1.KeyboardPress;
 //using static System.Windows.Forms.VisualStyles.VisualStyleElement;
@@ -119,6 +120,10 @@ namespace WindowsFormsApp1
          * https://ctext.org/library.pl?if=gb&file=95825&page=272  就被此頁的手動編輯 https://ctext.org/library.pl?if=gb&file=95825&page=266
          * 所蓋覆。蓋編輯時間戳記同在 2025-12-31 03:13:05 同時衝突的緣故，伺服器反應不過來吧。詳 history 頁面記錄：https://ctext.org/wiki.pl?if=gb&chapter=980722&action=history
          * 即便前後頁不相連，也沒OCR_MATCH的標籤，也會如此。 */
+        /// <summary>
+        /// 欄位成員的屬性
+        /// </summary>
+        public bool FastMode { get => _fastMode; }//set => fastMode = value; }
         /// <summary>
         /// 記下切換 FastModd 前的顏色
         /// </summary>
@@ -435,7 +440,7 @@ namespace WindowsFormsApp1
             {
                 #region 輸出一些常用設定值以供下次再用。如果在除錯撰碼時 只為開發方便爾。使用者可以不用。20260102
                 bool logged = false; string log = string.Empty;
-                if (_wordsPerLinePara > 0 || _lines_perPage > 0)
+                if (WordsPerLinePara > 0 || Lines_perPage > 0)
                 {
                     if (WindowHandles.TryGetValue("FileSelector", out string fileSelector))
                     //Debug.WriteLine("fn= " + chapterSelector);//https://copilot.microsoft.com/shares/j5vsqNpooaUje3bo1T3N1
@@ -453,13 +458,13 @@ namespace WindowsFormsApp1
                     //}
                     //if (_lines_perPage > 0)
                     //{
-                    Log("lines_perPage: " + _lines_perPage, out logged);
-                    log += Environment.NewLine + Environment.NewLine + "lines_perPage: " + Environment.NewLine + _lines_perPage;
+                    Log("lines_perPage: " + Lines_perPage, out logged);
+                    log += Environment.NewLine + Environment.NewLine + "lines_perPage: " + Environment.NewLine + Lines_perPage;
                     //}
                     //if (_wordsPerLinePara > 0)
                     //{
-                    Log("wordsPerLinePara: " + _wordsPerLinePara, out logged);
-                    log += Environment.NewLine + Environment.NewLine + "wordsPerLinePara: " + Environment.NewLine + _wordsPerLinePara;
+                    Log("wordsPerLinePara: " + WordsPerLinePara, out logged);
+                    log += Environment.NewLine + Environment.NewLine + "wordsPerLinePara: " + Environment.NewLine + WordsPerLinePara;
                     //}
                     if (logged)
                     {
@@ -470,7 +475,7 @@ namespace WindowsFormsApp1
                                                    //方便一次輸入到textBox2以作設定，尤其是在開發階段偵錯狀態下批量快捷模式處理書籍時
                             while (!IsClipBoardAvailable_Text()) { }
                             log = fileSelector + "," + _inputTextFrontPage + ","
-                                + _lines_perPage.ToString() + "," + _wordsPerLinePara.ToString() + ","
+                                + Lines_perPage.ToString() + "," + WordsPerLinePara.ToString() + ","
                                 + textBox3.Text;
                             Clipboard.SetText(log);//以備用
                             using (var streamWriter = new StreamWriter(
@@ -1639,7 +1644,7 @@ namespace WindowsFormsApp1
                         }
                         else
                         {
-                            string PredictCopyX = CnText.GetSelectionTextByLineParaCount(ref textBox1, _linesParasPerPage / 2);
+                            string PredictCopyX = CnText.GetSelectionTextByLineParaCount(ref textBox1, LinesParasPerPage / 2);
                             if (DialogResult.OK == Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("請重新指定頁面結束位置" + Environment.NewLine + Environment.NewLine +
                                    "是不是這些內容？" +
                                    Environment.NewLine + Environment.NewLine +
@@ -2288,7 +2293,7 @@ namespace WindowsFormsApp1
                         e.Handled = true;
                         UndoRecord();
                         int s = textBox1.SelectionStart, l = textBox1.SelectionLength;
-                        textBox1.Text = AncientTextTool.ProcessText(textBox1.Text, _wordsPerLinePara);
+                        textBox1.Text = AncientTextTool.ProcessText(textBox1.Text, WordsPerLinePara);
                         textBox1.Select(s, l); textBox1.ScrollToCaret();
                         return;
                     case Keys.G://Ctrl + Shift + Alt + g ： 以選取文字加上雙引號`""`檢索Google
@@ -2720,7 +2725,7 @@ namespace WindowsFormsApp1
                     if (s + l == textBox1.TextLength)
                         // 處理 textBox1 內容並顯示在結果中
                         //textBox1.Text = AncientTextTool.ProcessTextBox(textBox1.Text, wordsPerLinePara);
-                        textBox1.Text = AncientTextTool.ProcessText(textBox1.Text, _wordsPerLinePara);
+                        textBox1.Text = AncientTextTool.ProcessText(textBox1.Text, WordsPerLinePara);
                     else
                     {
                         x = NoteFixSwap(t1, ref s, ref l);
@@ -2785,7 +2790,7 @@ namespace WindowsFormsApp1
                     e.Handled = true;
                     e.SuppressKeyPress = true; // 防止發出系統警告音
 
-                    int count = _lines_perPage / 2 - 1;
+                    int count = Lines_perPage / 2 - 1;
                     if (count <= 0) return;
 
                     // 使用 StringBuilder 預算好容量，效率最高
@@ -4198,7 +4203,7 @@ namespace WindowsFormsApp1
 
                     if (textBox1.SelectedText != "" && textBox1.SelectedText.Replace("　", "") == "")
                     {//如果選取的是空格，則進行自動標記（mark）
-                        if (_wordsPerLinePara == -1)
+                        if (WordsPerLinePara == -1)
                         {
                             Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("請先用Scroll Lock鍵讓程式取得每行/段的正常長度（字數）以供判斷。"); return;
                         }
@@ -5197,9 +5202,9 @@ namespace WindowsFormsApp1
 
             //●●●20260108
             BetweenAddParaMarkMoveEnd();
-            if (_lines_perPage == 0)
+            if (Lines_perPage == 0)
             {
-                _lines_perPage = CountLinesPerPage(textBox1.Text.Substring(0, textBox1.SelectionStart + textBox1.SelectionLength));
+                Lines_perPage = CountLinesPerPage(textBox1.Text.Substring(0, textBox1.SelectionStart + textBox1.SelectionLength));
             }
 
 
@@ -5248,7 +5253,7 @@ namespace WindowsFormsApp1
         void KeyDownCtrlAddFalse()
         {
             //if (textBox1.Text.Substring(0, 600).Contains(" "))//在注文有空格位置錯亂時用
-            string xCheck = GetPageText(textBox1.TextLength > 1200 ? textBox1.Text.Substring(0, 1200) : textBox1.Text, 1, _lines_perPage);//1200以《四庫》本《佛祖歷代通載》四合一字數來約略計算
+            string xCheck = GetPageText(textBox1.TextLength > 1200 ? textBox1.Text.Substring(0, 1200) : textBox1.Text, 1, Lines_perPage);//1200以《四庫》本《佛祖歷代通載》四合一字數來約略計算
             if (textBox1.SelectedText == " ")
             //if (lines_perPage > 0 && xCheck.Contains(" "))//在注文有空格位置錯亂時用
             {
@@ -5442,7 +5447,7 @@ namespace WindowsFormsApp1
             }
 
             //lines_perPage = 16;//●●●●●●●●●●●●●●●●●●
-            if (_lines_perPage == 0)//&& autoPaste2QuickEdit)
+            if (Lines_perPage == 0)//&& autoPaste2QuickEdit)
             {
                 Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("請先設定每頁正常的行/段數！");
                 return false;
@@ -5462,7 +5467,7 @@ namespace WindowsFormsApp1
             int paraCount = CountLinesPerPage(rngTxt);
 
 
-            if (paraCount > _lines_perPage)
+            if (paraCount > Lines_perPage)
             {
                 //List<Paragraph> paragraphs = _document.GetParagraphs();
                 List<Paragraph> paragraphs = new Document(x).GetParagraphs();
@@ -5484,7 +5489,7 @@ namespace WindowsFormsApp1
                 end = p.End;
             }
             //如果所抓到或預測的送出範圍少於正常每頁的行/段數的話： 20250216
-            if (paraCount < _lines_perPage)
+            if (paraCount < Lines_perPage)
             {
                 if (!_fastMode && textBox1.Text.Contains(_pageEndText10) && _pageTextEndPosition > 0) return true;//按下 Ctrl + - 指定了送出位置，則不再以每頁行數來交由程式自動判斷了
                 PredictRange(ref end);
@@ -5527,7 +5532,7 @@ namespace WindowsFormsApp1
             paraCount = CountLinesPerPage(textBox1.Text.Substring(0, textBox1.SelectionStart));
 
 
-            if (paraCount != _lines_perPage)
+            if (paraCount != Lines_perPage)
             {
                 if (!PredictRange(ref end)) return false;
             }
@@ -5544,7 +5549,7 @@ namespace WindowsFormsApp1
         bool PredictRange(ref int end)
         {
             if (textBox1.TextLength == 0) return false;
-            if (_lines_perPage == 0)
+            if (Lines_perPage == 0)
             {
                 Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("請先設定每頁正常的行/段數！");
                 return false;
@@ -5553,7 +5558,7 @@ namespace WindowsFormsApp1
             string x = textBox1.Text;
             end = 0;
             int paraCount = CountLinesPerPage(x.Substring(0, end));
-            while (paraCount < _lines_perPage)
+            while (paraCount < Lines_perPage)
             {
                 end = x.IndexOf(Environment.NewLine, end + 1);// + 2;
                 if (end > -1)
@@ -5900,7 +5905,7 @@ namespace WindowsFormsApp1
         {
             int wordCountLimit = 12;//少於12字才視標題
                                     //int wordCountLimit = 17;//少於17字才視標題
-            if (wordCountLimit + 2 >= _wordsPerLinePara) wordCountLimit = _wordsPerLinePara - 2;//一般題目都是空二格故
+            if (wordCountLimit + 2 >= WordsPerLinePara) wordCountLimit = WordsPerLinePara - 2;//一般題目都是空二格故
             string x = textBox1.Text;
             int sOriginal = textBox1.SelectionStart, lOriginal = textBox1.SelectionLength, lenOriginal = x.Length;
             //清除最後末的分行/段符號
@@ -5913,7 +5918,7 @@ namespace WindowsFormsApp1
             }
             int s = x.IndexOf(Environment.NewLine), lenLine = 0, lenLineNext = 0;
             //取得正常行/段字數
-            if (_wordsPerLinePara < 1) _wordsPerLinePara = CountWordsLenPerLinePara(GetLineText_WithoutPunctuation(x, s));
+            if (WordsPerLinePara < 1) WordsPerLinePara = CountWordsLenPerLinePara(GetLineText_WithoutPunctuation(x, s));
             while (s > -1)
             {
                 //StringInfo si = new StringInfo(getLineTxtWithoutPunctuation(x, s));                
@@ -5947,11 +5952,11 @@ namespace WindowsFormsApp1
                     //if (lenLine < wordCountLimit)
                     //{
                     textBox1.Select(s, 0);
-                    if (lenLineNext >= _wordsPerLinePara)
+                    if (lenLineNext >= WordsPerLinePara)
                         KeysTitleCodeAndPreFullWidthSpace();
                     else if (lenLineNext == 0)
                     {//如果是最後一行，且前一行短於正常行長（等於者手動鍵入）
-                        if (previousLineLen < _wordsPerLinePara) KeysTitleCodeAndPreFullWidthSpace();
+                        if (previousLineLen < WordsPerLinePara) KeysTitleCodeAndPreFullWidthSpace();
                     }
                     else
                         KeysParagraphSymbol(true);
@@ -5974,7 +5979,7 @@ namespace WindowsFormsApp1
                 if (lenLineNext < wordCountLimit)
                 {
                     textBox1.Select(x.Length, 0);
-                    if (lenLine >= _wordsPerLinePara)
+                    if (lenLine >= WordsPerLinePara)
                         //其後一行若短於正常行長，且其本身不短於正常行長，                    
                         KeysParagraphSymbol(true);//則視為標題
                     else//否則只當作段落
@@ -5982,7 +5987,7 @@ namespace WindowsFormsApp1
                 }
                 else
                 {
-                    if (lenLineNext < _wordsPerLinePara)
+                    if (lenLineNext < WordsPerLinePara)
                     {
                         textBox1.Select(x.Length, 0);
                         KeysParagraphSymbol(true);
@@ -6893,10 +6898,10 @@ namespace WindowsFormsApp1
                                 prePara = x.Substring(preParaStart, preParaEnd - preParaStart);
                             if (xLine.Length > 1 && xLine.Substring(1, 1) != "　" && xLine.IndexOf("*") == -1
                                 && (!prePara.StartsWith("{{　") && !prePara.StartsWith("　"))
-                                && (!(prePara.StartsWith("􏿽") && CountWordsLenPerLinePara(prePara) == _wordsPerLinePara))
+                                && (!(prePara.StartsWith("􏿽") && CountWordsLenPerLinePara(prePara) == WordsPerLinePara))
                                 //不是「本行短於正常行長，而前一行等於正常行常」
-                                && !(CountWordsLenPerLinePara(xLine) < _wordsPerLinePara && CountWordsLenPerLinePara(prePara) == _wordsPerLinePara)
-                                && (CountWordsLenPerLinePara(xLine) == _wordsPerLinePara && CountWordsLenPerLinePara(prePara) == _wordsPerLinePara
+                                && !(CountWordsLenPerLinePara(xLine) < WordsPerLinePara && CountWordsLenPerLinePara(prePara) == WordsPerLinePara)
+                                && (CountWordsLenPerLinePara(xLine) == WordsPerLinePara && CountWordsLenPerLinePara(prePara) == WordsPerLinePara
                                         && !xLine.EndsWith("<p>"))
                                 )
                             {
@@ -7108,7 +7113,7 @@ namespace WindowsFormsApp1
         void DetectTitleYetWithoutPreSpace()
         {//Alt + t ：預測游標所在行是否為標題
             if (NormalLineParaLength == 0)
-                NormalLineParaLength = _wordsPerLinePara;
+                NormalLineParaLength = WordsPerLinePara;
             if (NormalLineParaLength == 0)
             {
                 MessageBox.Show("請先執行Word VBA 「轉成黑豆以作行字數長度判斷用」程序以取得正文每行正常長度再執行。感恩感恩　南無阿彌陀佛", "", MessageBoxButtons.OK, MessageBoxIcon.Stop); return;//碼詳：https://github.com/oscarsun72/TextForCtext/blob/f75b5da5a5e6eca69baaae0b98ed2d6c286a3aab/WordVBA/%E4%B8%AD%E5%9C%8B%E5%93%B2%E5%AD%B8%E6%9B%B8%E9%9B%BB%E5%AD%90%E5%8C%96%E8%A8%88%E5%8A%83.bas#L316
@@ -7461,11 +7466,11 @@ namespace WindowsFormsApp1
                 if (preLineEnd > -1)
                 {
                     preLineText = GetLineText(x, preLineEnd);
-                    if ((preLineText.IndexOf("*") > -1 && CountWordsLenPerLinePara(preLineText) >= _wordsPerLinePara)
+                    if ((preLineText.IndexOf("*") > -1 && CountWordsLenPerLinePara(preLineText) >= WordsPerLinePara)
                         //如果前一段已有星號，且其長度又與正常長度相同或更長（則此行當是標題太長而折行）則駁回
                         ||//或者是第一行小於正常長長而本行又同於正常行長，則本行當屬縮排的序文等項
-                        (preLineText.IndexOf("*") > -1 && CountWordsLenPerLinePara(preLineText) < _wordsPerLinePara
-                            && CountWordsLenPerLinePara(titleFirstParaText) == _wordsPerLinePara)
+                        (preLineText.IndexOf("*") > -1 && CountWordsLenPerLinePara(preLineText) < WordsPerLinePara
+                            && CountWordsLenPerLinePara(titleFirstParaText) == WordsPerLinePara)
                         ||//或者不是縮排中的文字
                         (preLineText.IndexOf("*") == -1 && titleLeadingSpaceCount > 0 && _leadingSpacesRegex.Match(preLineText).Value.Length == titleLeadingSpaceCount
                             && CountWordsLenPerLinePara(preLineText) >= CountWordsLenPerLinePara(titleFirstParaText))
@@ -7482,7 +7487,7 @@ namespace WindowsFormsApp1
                 #region 空一格之行/段檢查
                 if (_leadingSpacesRegex.Match(titleFirstParaText).Value.Length == 1)
                 {//若是空一格之行/段，且其長不短於正常行長，而其後不是縮排者，則駁回：
-                    if (CountWordsLenPerLinePara(titleFirstParaText) >= _lines_perPage)
+                    if (CountWordsLenPerLinePara(titleFirstParaText) >= Lines_perPage)
                         if (nextLineText != string.Empty
                             && nextLineText.StartsWith("{{") == false
                             && _leadingSpacesRegex.Match(nextLineText).Value.Length == 0
@@ -7527,7 +7532,7 @@ namespace WindowsFormsApp1
                             //標題首行長度若小於常規就不再繼續找下去
 
                             //singleLineTitle:
-                            if (CountWordsLenPerLinePara(titleFirstParaText) < _wordsPerLinePara)
+                            if (CountWordsLenPerLinePara(titleFirstParaText) < WordsPerLinePara)
                             {
                                 textBox1.Select(s, pTitleFirstParaEnd - s);//選取標題文字內容,準備將標題格式，置換成標題語法格式
 
@@ -7537,7 +7542,7 @@ namespace WindowsFormsApp1
 
                                 //下一行/段也是短於正常行長者，則當屬組詩之類的標題了 20250221
                                 //且其前縮排之空格當較正題為多 20250222
-                                if (CountWordsLenPerLinePara(pNextTitleFirstParaText) < _wordsPerLinePara &&
+                                if (CountWordsLenPerLinePara(pNextTitleFirstParaText) < WordsPerLinePara &&
                                     _leadingSpacesRegex.Match(titleFirstParaText).Value.Length <= _leadingSpacesRegex.Match(pNextTitleFirstParaText).Value.Length)
                                 {
 
@@ -7560,7 +7565,7 @@ namespace WindowsFormsApp1
                                 {//下一行為縮排空格起者
 
                                     if (x.IndexOf(Environment.NewLine, j + 2) > -1
-                                        && CountWordsLenPerLinePara(x.Substring(j + 2, x.IndexOf(Environment.NewLine, j + 2) - (j + 2))) == _wordsPerLinePara)
+                                        && CountWordsLenPerLinePara(x.Substring(j + 2, x.IndexOf(Environment.NewLine, j + 2) - (j + 2))) == WordsPerLinePara)
                                     {//這一行的字數和正常行/段長同者（表示標題還未結束）
                                         continue;
                                     }
@@ -7580,7 +7585,7 @@ namespace WindowsFormsApp1
                                     if (x.IndexOf(Environment.NewLine, j + 2) > -1)
                                     {
                                         string currentLineText = x.Substring(j + 2, x.IndexOf(Environment.NewLine, j + 2) - (j + 2));
-                                        if (CountWordsLenPerLinePara(x.Substring(j + 2, x.IndexOf(Environment.NewLine, j + 2) - (j + 2))) == _wordsPerLinePara)
+                                        if (CountWordsLenPerLinePara(x.Substring(j + 2, x.IndexOf(Environment.NewLine, j + 2) - (j + 2))) == WordsPerLinePara)
                                         {//這一行的字數和正常行/段長同者，且起頭是注文標記又有縮排（表示標題還未結束）
                                             Match matchTitleLeadingSpace = _leadingSpacesRegex.Match(titleFirstParaText);
                                             //現在處理的位置 s + j + 2 + 1 前面空格數（縮排空格數,j 只是偏移、位移 offset的單位長）
@@ -7601,7 +7606,7 @@ namespace WindowsFormsApp1
                         if (nx == "{{")
                         {
                             if (x.IndexOf(Environment.NewLine, j) > -1 &&
-                                CountWordsLenPerLinePara(x.Substring(j, x.IndexOf(Environment.NewLine, j) - j)) == _wordsPerLinePara)
+                                CountWordsLenPerLinePara(x.Substring(j, x.IndexOf(Environment.NewLine, j) - j)) == WordsPerLinePara)
                                 continue;//這一行的字數和正常行/段長同者（表示標題還未結束）
 
                             //Paragraph pNext = _document.Range(s, s).GetNextParagraph();
@@ -9405,158 +9410,519 @@ namespace WindowsFormsApp1
         /// 每頁行/段數。初始化（歸零）值為-1
         /// </summary>
         int _linesParasPerPage = -1;
+        public int LinesParasPerPage { get => _linesParasPerPage; set => _linesParasPerPage = value; }
         /// <summary>
         /// 每行/段字數。初始化（歸零）值為-1
         /// </summary>
         int _wordsPerLinePara = -1;
-        internal static int CountNoteLen(string notePure)
-        {//同時取商數與餘數 https://dotblogs.com.tw/abbee/2010/09/28/17943
-            int l = new StringInfo(notePure).LengthInTextElements;
-            int x = l / 2; ; //商數
-            int y = l - (x * 2);//餘數
-                                //return (((l + 1) % 2) == 1) ? ++l / 2 : l / 2;
-            return y == 0 ? x : ++x;
-        }
-
-        /* https://ctext.org/library.pl?if=en&file=36096&page=99&editwiki=644293#editor (20250224 已測試） */
+        public int WordsPerLinePara { get => _wordsPerLinePara; set => _wordsPerLinePara = value; }
         /// <summary>
-        /// 計算單行/段的字數
-        /// 含空格空白；而標點符號、校按、標題標記、段落標記、分行標記均不計（即只計算原書內文之長度，以供比較行/段長度）
-        /// 待除錯，可以此頁內容檢測（當已標記時再執行此函式會誤改動 20240905 
+        /// 正常的每頁行數（正文算1，注文算2，故8行正文之文本傳回的值即16）
+        /// 起始值（初始化）為0
         /// </summary>
-        /// <param name="xLinePara">要計算的行/段的文字字串</param>
-        /// <returns></returns>
-        internal static int CountWordsLenPerLinePara(string xLinePara)
-        {
-            //if (xLinePara.IndexOf("是歲復置函谷關") > -1)//just for debugging
-            //    Debugger.Break();
+        int _lines_perPage = 0;
+        public int Lines_perPage { get => _lines_perPage; set => _lines_perPage = value; }
 
-            #region  清除{{{}}}內容不算入字數∵圖文對照頁面並不會顯示出來
-            /* 20231102 Bing大菩薩：C#正則表達式：
-             * …在C#中，您可以使用正則表達式來滿足您的需求。以下是一個範例程式碼，它將會找到「{{{」和「}}}」之間的所有文字並將其移除：…
-             * …在這個程式碼中，我們使用了 Regex.Replace 方法來替換匹配到的部分。正則表達式 {{{.*?}}} 會匹配到「{{{」和「}}}」之間的所有文字（包含「{{{」和「}}}」）。請注意，我們在 .*? 中使用了 ? 來實現非貪婪匹配，這樣可以確保當有多組「{{{」和「}}}」時能夠正確地匹配。…
-             */
-            string pattern;
-            if (xLinePara.IndexOf("{{{") > -1 || xLinePara.IndexOf("}}}") > -1)
-            {
-                pattern = "{{{.*?}}}";//Copilot大菩薩： 如果要使用貪婪匹配，只需要把正則表達式中的「?」去掉即可。原本的模式 ＝.*?＝ 中，「?」使得匹配變成非貪婪模式，而去掉它後，模式 ＝.*＝ 就變成了貪婪匹配。 20250224
-                xLinePara = Regex.Replace(xLinePara, pattern, string.Empty);
-            }
-            #endregion
-            #region 構字表達式「●＝＝」只保留「●」
-            pattern = "＝.*?＝";//Copilot大菩薩： 非貪婪匹配（Lazy Matching）和貪婪匹配（Greedy Matching）是正則表達式中的兩種匹配模式。貪婪匹配會盡可能多地匹配字符，而非貪婪匹配則會盡可能少地匹配字符。
-                              //例如，在字串 ＝abc＝def＝ 中，正則表達式 ＝.*＝（貪婪匹配）會匹配整個字串 ＝abc＝def＝，而 ＝.*?＝（非貪婪匹配）則會分別匹配 ＝abc＝ 和 ＝def＝。
-            xLinePara = Regex.Replace(xLinePara, pattern, string.Empty);
-            #endregion
+        /// <summary>
+        /// 正常的行/段長度（漢字數）
+        /// 起始值（初始化）為0
+        /// </summary>
+        int _normalLineParaLength = 0;
+        /// <summary>
+        /// 取得每行的長度（正常的行/段長度（含幾個漢字中文字））
+        /// </summary>
+        public int NormalLineParaLength { get => _normalLineParaLength; set => _normalLineParaLength = value; }
 
-            #region 語法標記不記（如插圖、專名標誌等語法）
-            //待實作,碰到再說
-            #endregion
+        #region 原式 改併到 TextLengthHelper類別裡
 
-            #region 標題標記、段落標記、分行標記均不計（即只計算原書內文之長度）
+        //internal static int CountNoteLen(string notePure)
+        //{//同時取商數與餘數 https://dotblogs.com.tw/abbee/2010/09/28/17943
+        //    int l = new StringInfo(notePure).LengthInTextElements;
+        //    int x = l / 2; ; //商數
+        //    int y = l - (x * 2);//餘數
+        //                        //return (((l + 1) % 2) == 1) ? ++l / 2 : l / 2;
+        //    return y == 0 ? x : ++x;
+        //}
 
-            #endregion
-            pattern = "[*<p>|]";
-            xLinePara = Regex.Replace(xLinePara, pattern, string.Empty);
-            #region 標點符號不計
-            //StringInfo seInfo = new StringInfo(se);
-            foreach (var item in PunctuationsNum)
-            {
-                xLinePara = xLinePara.Replace(item.ToString(), "");
-            }
-            #endregion
+        ///* https://ctext.org/library.pl?if=en&file=36096&page=99&editwiki=644293#editor (20250224 已測試） */
+        ///// <summary>
+        ///// 計算單行/段的字數
+        ///// 含空格空白；而標點符號、校按、標題標記、段落標記、分行標記均不計（即只計算原書內文之長度，以供比較行/段長度）
+        ///// 待除錯，可以此頁內容檢測（當已標記時再執行此函式會誤改動 20240905 
+        ///// 待優化，詳：https://copilot.microsoft.com/shares/SR41ukqNLdvohf4ZitLPY
+        ///// </summary>
+        ///// <param name="xLinePara">要計算的行/段的文字字串</param>
+        ///// <returns></returns>
+        //internal static int CountWordsLenPerLinePara(string xLinePara)
+        //{
+        //    //if (xLinePara.IndexOf("是歲復置函谷關") > -1)//just for debugging
+        //    //    Debugger.Break();
+
+        //    #region  清除{{{}}}內容不算入字數∵圖文對照頁面並不會顯示出來
+        //    /* 20231102 Bing大菩薩：C#正則表達式：
+        //     * …在C#中，您可以使用正則表達式來滿足您的需求。以下是一個範例程式碼，它將會找到「{{{」和「}}}」之間的所有文字並將其移除：…
+        //     * …在這個程式碼中，我們使用了 Regex.Replace 方法來替換匹配到的部分。正則表達式 {{{.*?}}} 會匹配到「{{{」和「}}}」之間的所有文字（包含「{{{」和「}}}」）。請注意，我們在 .*? 中使用了 ? 來實現非貪婪匹配，這樣可以確保當有多組「{{{」和「}}}」時能夠正確地匹配。…
+        //     */
+        //    string pattern;
+        //    if (xLinePara.IndexOf("{{{") > -1 || xLinePara.IndexOf("}}}") > -1)
+        //    {
+        //        pattern = "{{{.*?}}}";//Copilot大菩薩： 如果要使用貪婪匹配，只需要把正則表達式中的「?」去掉即可。原本的模式 ＝.*?＝ 中，「?」使得匹配變成非貪婪模式，而去掉它後，模式 ＝.*＝ 就變成了貪婪匹配。 20250224
+        //        xLinePara = Regex.Replace(xLinePara, pattern, string.Empty);
+        //    }
+        //    #endregion
+        //    #region 構字表達式「●＝＝」只保留「●」
+        //    pattern = "＝.*?＝";//Copilot大菩薩： 非貪婪匹配（Lazy Matching）和貪婪匹配（Greedy Matching）是正則表達式中的兩種匹配模式。貪婪匹配會盡可能多地匹配字符，而非貪婪匹配則會盡可能少地匹配字符。
+        //                      //例如，在字串 ＝abc＝def＝ 中，正則表達式 ＝.*＝（貪婪匹配）會匹配整個字串 ＝abc＝def＝，而 ＝.*?＝（非貪婪匹配）則會分別匹配 ＝abc＝ 和 ＝def＝。
+        //    xLinePara = Regex.Replace(xLinePara, pattern, string.Empty);
+        //    #endregion
+
+        //    #region 語法標記不記（如插圖、專名標誌等語法）
+        //    //待實作,碰到再說
+        //    #endregion
+
+        //    #region 標題標記、段落標記、分行標記均不計（即只計算原書內文之長度）
+
+        //    #endregion
+        //    pattern = "[*<p>|]";
+        //    xLinePara = Regex.Replace(xLinePara, pattern, string.Empty);
+        //    #region 標點符號不計
+        //    //StringInfo seInfo = new StringInfo(se);
+        //    foreach (var item in PunctuationsNum)
+        //    {
+        //        xLinePara = xLinePara.Replace(item.ToString(), "");
+        //    }
+        //    #endregion
 
 
 
-            int openCurlybracketsPostion = xLinePara.IndexOf("{{"), closeCurlybracketsPostion = xLinePara.IndexOf("}}"),
-                s = 0, countResult = 0;//, e = 0
+        //    int openCurlybracketsPostion = xLinePara.IndexOf("{{"), closeCurlybracketsPostion = xLinePara.IndexOf("}}"),
+        //        s = 0, countResult = 0;//, e = 0
 
-            //if(openCurlybracketsPostion==-1 && closeCurlybracketsPostion>-1)
-            //{
-            //    xLinePara = "{{" + xLinePara;
-            //    openCurlybracketsPostion = xLinePara.IndexOf("{{");
-            //}
+        //    //if(openCurlybracketsPostion==-1 && closeCurlybracketsPostion>-1)
+        //    //{
+        //    //    xLinePara = "{{" + xLinePara;
+        //    //    openCurlybracketsPostion = xLinePara.IndexOf("{{");
+        //    //}
 
-            string txt = "", note = "";//se = ""
+        //    string txt = "", note = "";//se = ""
 
-            if (openCurlybracketsPostion == -1 && closeCurlybracketsPostion == -1)//純正文、純注文
-                return new StringInfo(xLinePara).LengthInTextElements;
-            //else if (openCurlybracketsPostion > -1 && closeCurlybracketsPostion > -1)
-            else if (!(openCurlybracketsPostion == 0 && closeCurlybracketsPostion == xLinePara.Length - 2)
-                && !(openCurlybracketsPostion == 0 && closeCurlybracketsPostion == -1)
-                && !(openCurlybracketsPostion == -1 && closeCurlybracketsPostion == xLinePara.Length - 2)) //20250220
-            {//兼具 {{、}} 正文、注文夾雜者
-                while (true)
-                {
-                    //if (openCurlybracketsPostion == 0 && closeCurlybracketsPostion > openCurlybracketsPostion &&
-                    //        xLinePara.IndexOf("{{", closeCurlybracketsPostion) == -1 &&
-                    //        xLinePara.IndexOf("}}", closeCurlybracketsPostion + 2) == -1)
-                    //{// like this :     {{……}}……
-                    //    return new StringInfo(xLinePara.Substring(closeCurlybracketsPostion + 2)).LengthInTextElements +
-                    //            countNoteLen(xLinePara.Substring(openCurlybracketsPostion + 2, closeCurlybracketsPostion - 2));
-                    //}
-                    //else 
-                    if (closeCurlybracketsPostion > -1 &&
-                        (openCurlybracketsPostion > closeCurlybracketsPostion) || openCurlybracketsPostion == -1)
-                    {//先出現 }} 的話
-                     //s = closeCurlybracketsPostion + 2;
-                     //   countResult += new StringInfo(xLinePara.Substring(0, closeCurlybracketsPostion)).LengthInTextElements;
-                        countResult += CountNoteLen(xLinePara.Substring(0, closeCurlybracketsPostion));
-                        //closeCurlybracketsPostion = xLinePara.IndexOf("}}", closeCurlybracketsPostion + 2);
-                    }
-                    else if (closeCurlybracketsPostion > -1)//&& openCurlybracketsPostion>-1
-                    {
-                        txt = xLinePara.Substring(s, openCurlybracketsPostion - s);
-                        countResult += new StringInfo(txt).LengthInTextElements;
-                        note = xLinePara.Substring(openCurlybracketsPostion + 2, closeCurlybracketsPostion - (openCurlybracketsPostion + 2));
-                        countResult += CountNoteLen(note);
-                    }
-                    else if (closeCurlybracketsPostion == -1 && openCurlybracketsPostion > -1)
-                    {
-                        txt = xLinePara.Substring(s, openCurlybracketsPostion);
-                        countResult += new StringInfo(txt).LengthInTextElements;
-                        note = xLinePara.Substring(openCurlybracketsPostion + 2);
-                        countResult += CountNoteLen(note);
-                        break;
-                    }
-                    else {; }
-                    s = closeCurlybracketsPostion + 2;
-                    openCurlybracketsPostion = xLinePara.IndexOf("{{", closeCurlybracketsPostion);
-                    if (openCurlybracketsPostion == -1)
-                    {
-                        if (closeCurlybracketsPostion + 2 > xLinePara.Length) txt = "";
-                        else txt = xLinePara.Substring(closeCurlybracketsPostion + 2);
-                        return countResult += new StringInfo(txt).LengthInTextElements;
-                    }
-                    closeCurlybracketsPostion = xLinePara.IndexOf("}}", closeCurlybracketsPostion + 2);
-                    if (closeCurlybracketsPostion == -1)
-                    {
-                        txt = xLinePara.Substring(s, openCurlybracketsPostion - s);
-                        countResult += new StringInfo(txt).LengthInTextElements;
-                        note = xLinePara.Substring(openCurlybracketsPostion + 2);
-                        return countResult += CountNoteLen(note);
-                    }
-                    //if (!(openCurlybracketsPostion > -1)) break;
-                    if (openCurlybracketsPostion < 0) break;
-                }
+        //    if (openCurlybracketsPostion == -1 && closeCurlybracketsPostion == -1)//純正文、純注文
+        //        return new StringInfo(xLinePara).LengthInTextElements;
+        //    //else if (openCurlybracketsPostion > -1 && closeCurlybracketsPostion > -1)
+        //    else if (!(openCurlybracketsPostion == 0 && closeCurlybracketsPostion == xLinePara.Length - 2)
+        //        && !(openCurlybracketsPostion == 0 && closeCurlybracketsPostion == -1)
+        //        && !(openCurlybracketsPostion == -1 && closeCurlybracketsPostion == xLinePara.Length - 2)) //20250220
+        //    {//兼具 {{、}} 正文、注文夾雜者
+        //        while (true)
+        //        {
+        //            //if (openCurlybracketsPostion == 0 && closeCurlybracketsPostion > openCurlybracketsPostion &&
+        //            //        xLinePara.IndexOf("{{", closeCurlybracketsPostion) == -1 &&
+        //            //        xLinePara.IndexOf("}}", closeCurlybracketsPostion + 2) == -1)
+        //            //{// like this :     {{……}}……
+        //            //    return new StringInfo(xLinePara.Substring(closeCurlybracketsPostion + 2)).LengthInTextElements +
+        //            //            countNoteLen(xLinePara.Substring(openCurlybracketsPostion + 2, closeCurlybracketsPostion - 2));
+        //            //}
+        //            //else 
+        //            if (closeCurlybracketsPostion > -1 &&
+        //                (openCurlybracketsPostion > closeCurlybracketsPostion) || openCurlybracketsPostion == -1)
+        //            {//先出現 }} 的話
+        //             //s = closeCurlybracketsPostion + 2;
+        //             //   countResult += new StringInfo(xLinePara.Substring(0, closeCurlybracketsPostion)).LengthInTextElements;
+        //                countResult += CountNoteLen(xLinePara.Substring(0, closeCurlybracketsPostion));
+        //                //closeCurlybracketsPostion = xLinePara.IndexOf("}}", closeCurlybracketsPostion + 2);
+        //            }
+        //            else if (closeCurlybracketsPostion > -1)//&& openCurlybracketsPostion>-1
+        //            {
+        //                txt = xLinePara.Substring(s, openCurlybracketsPostion - s);
+        //                countResult += new StringInfo(txt).LengthInTextElements;
+        //                note = xLinePara.Substring(openCurlybracketsPostion + 2, closeCurlybracketsPostion - (openCurlybracketsPostion + 2));
+        //                countResult += CountNoteLen(note);
+        //            }
+        //            else if (closeCurlybracketsPostion == -1 && openCurlybracketsPostion > -1)
+        //            {
+        //                txt = xLinePara.Substring(s, openCurlybracketsPostion);
+        //                countResult += new StringInfo(txt).LengthInTextElements;
+        //                note = xLinePara.Substring(openCurlybracketsPostion + 2);
+        //                countResult += CountNoteLen(note);
+        //                break;
+        //            }
+        //            else {; }
+        //            s = closeCurlybracketsPostion + 2;
+        //            openCurlybracketsPostion = xLinePara.IndexOf("{{", closeCurlybracketsPostion);
+        //            if (openCurlybracketsPostion == -1)
+        //            {
+        //                if (closeCurlybracketsPostion + 2 > xLinePara.Length) txt = "";
+        //                else txt = xLinePara.Substring(closeCurlybracketsPostion + 2);
+        //                return countResult += new StringInfo(txt).LengthInTextElements;
+        //            }
+        //            closeCurlybracketsPostion = xLinePara.IndexOf("}}", closeCurlybracketsPostion + 2);
+        //            if (closeCurlybracketsPostion == -1)
+        //            {
+        //                txt = xLinePara.Substring(s, openCurlybracketsPostion - s);
+        //                countResult += new StringInfo(txt).LengthInTextElements;
+        //                note = xLinePara.Substring(openCurlybracketsPostion + 2);
+        //                return countResult += CountNoteLen(note);
+        //            }
+        //            //if (!(openCurlybracketsPostion > -1)) break;
+        //            if (openCurlybracketsPostion < 0) break;
+        //        }
 
-                return countResult;
+        //        return countResult;
 
-            }
-            else if (openCurlybracketsPostion > 0 && closeCurlybracketsPostion == -1)
-            {//只有 {{ 雜正文                
-                return new StringInfo(xLinePara.Substring(0, openCurlybracketsPostion)).LengthInTextElements +
-                        CountNoteLen(xLinePara.Substring(openCurlybracketsPostion + 2));
-            }
-            else if (closeCurlybracketsPostion < xLinePara.Length - 2 && openCurlybracketsPostion == -1)
-            {//只有 }} 雜正文
-                return CountNoteLen(xLinePara.Substring(0, closeCurlybracketsPostion)) +
-                    new StringInfo(xLinePara.Substring(closeCurlybracketsPostion + 2)).LengthInTextElements;
-            }
-            else//純注文（獨立注文，頭為「{{」，尾為「}}」）20250220
-                return new StringInfo(xLinePara.Replace("{{", string.Empty).Replace("}}", string.Empty)).LengthInTextElements;
+        //    }
+        //    else if (openCurlybracketsPostion > 0 && closeCurlybracketsPostion == -1)
+        //    {//只有 {{ 雜正文                
+        //        return new StringInfo(xLinePara.Substring(0, openCurlybracketsPostion)).LengthInTextElements +
+        //                CountNoteLen(xLinePara.Substring(openCurlybracketsPostion + 2));
+        //    }
+        //    else if (closeCurlybracketsPostion < xLinePara.Length - 2 && openCurlybracketsPostion == -1)
+        //    {//只有 }} 雜正文
+        //        return CountNoteLen(xLinePara.Substring(0, closeCurlybracketsPostion)) +
+        //            new StringInfo(xLinePara.Substring(closeCurlybracketsPostion + 2)).LengthInTextElements;
+        //    }
+        //    else//純注文（獨立注文，頭為「{{」，尾為「}}」）20250220
+        //        return new StringInfo(xLinePara.Replace("{{", string.Empty).Replace("}}", string.Empty)).LengthInTextElements;
 
-        }
+        //}
+
+
+
+        ///// <summary>
+        ///// 檢查非常長度的行（段）
+        ///// 待優化，詳：https://copilot.microsoft.com/shares/SR41ukqNLdvohf4ZitLPY
+        ///// </summary>
+        ///// <param name="xChk">這引數是指定要傳入檢查的文本</param>
+        ///// <returns>若發現非常長度的行，則傳回一個數組（陣列）以表示非常行諸特徵：
+        ///// { lineSeprtStart（起點）, lineSeprtEnd - lineSeprtStart（非常長度） ,
+        /////     normalLineParaLength（通常長度）};
+        ///// </returns>
+        //public static int[] CheckAbnormalLinePara(string xChk, int normalLenght)
+        //{
+        //    string[] xLineParas = xChk.Split(
+        //            new[] { Environment.NewLine },
+        //                StringSplitOptions.RemoveEmptyEntries);
+        //    //string[] xLineParas = Regex.Split(xChk, @"\r?\n");//  20250608 GitHub　Copilot大菩薩：	若你要支援不同平台的換行（如 \n、\r），可以用 Regex.Split(xChk, @"\r?\n")。
+        //    foreach (string line in xLineParas)
+        //    {
+        //        int l = Form1.CountWordsLenPerLinePara(line);
+        //        if (l - normalLenght > 4)
+        //        {
+        //            return new int[] { xChk.IndexOf(line), l, normalLenght };
+        //        }
+
+        //    }
+        //    return new int[0];
+
+        //}
+
+        ////20230117 creedit chatGPT大菩薩：C# Visual Studio 註解顯示:/// 是用於多行註解，用於註釋程式碼的多行。……在 C# 中，使用三個斜線 (///) 來撰寫註解文字，並將它放在該函式的宣告之前，就可以在 Visual Studio 中在自訂函式上停駐滑鼠游標時顯示該函式的提示文字。……這樣可以顯示註解文字，且註解文字可以在 Intellisense 中顯示。
+        ///// <summary>
+        ///// 檢查非常長度的行（段）
+        ///// </summary>
+        ///// <param name="xChk">這引數是指定要傳入檢查的文本</param>
+        ///// <returns>若發現非常長度的行，則傳回一個數組（陣列）以表示非常行諸特徵：
+        ///// { lineSeprtStart（起點）, lineSeprtEnd - lineSeprtStart（非常長度） ,
+        /////     normalLineParaLength（通常長度）,len（長度）};
+        ///// </returns>
+        //private int[] CheckAbnormalLinePara(string xChk)
+        //{
+
+        //    if (!_fastMode) SaveText();//備份以防萬一
+        //    string[] xLineParas = xChk.Split(
+        //        Environment.NewLine.ToArray(),
+        //        StringSplitOptions.RemoveEmptyEntries);
+
+        //    #region get lines_perPage//取得該頁的每行（段）文字
+        //    //lines_perPage = 0;
+        //    if (_keyinTextMode)
+        //    {//如果是手動輸入模式：
+        //        _lines_perPage = CountLinesPerPage(xChk);
+        //        _linesParasPerPage = _lines_perPage;
+        //        //略過只含有「　」的元素
+        //        xLineParas = xLineParas.Where(x => x.Trim('　') != "").ToArray();
+        //        /* 20230907 Bing大菩薩：
+        //         太好了，我很高興能幫助您！LINQ 是 Language Integrated Query 的簡稱，它是一種用於查詢和操作數據的語言。在 C# 中，LINQ 可以用來查詢各種數據源，包括數組、列表、XML 文件等。
+        //            在上面的例子中，我們使用了 LINQ 的 `Where` 方法來過濾出 `xLineParas` 中不符合條件的元素。`Where` 方法接受一個委託作為參數，該委託定義了過濾條件。在這個例子中，我們定義了一個匿名函數 `x => x.Trim('　') != ""` 作為過濾條件。這個函數會對每個元素進行判斷，如果元素去掉前後的「　」後不為空字符串，則返回 `true`，否則返回 `false`。
+        //            `Where` 方法會根據過濾條件返回一個新的序列，其中只包含符合條件的元素。最後，我們使用 `ToArray` 方法將序列轉換為數組。
+        //            希望這對您有所幫助！如果您還有其他問題，請隨時告訴我。感恩感恩　讚歎讚歎　南無阿彌陀佛。
+        //        */
+        //    }
+        //    else//不是手動輸入模式：
+        //        _lines_perPage = (_linesParasPerPage != -1 && _linesParasPerPage != 0) ? _linesParasPerPage : CountLinesPerPage(xChk);
+        //    if (_linesParasPerPage == -1) _linesParasPerPage = _lines_perPage;
+        //    //lines_perPage = xLineParas.Length;
+        //    /*
+        //    foreach (string item in xLineParas)
+        //    {
+        //        if (lines_perPage == 0 & xChk.IndexOf("}}") < xChk.IndexOf("{{") && xChk.IndexOf("}}") > item.Length)
+        //            lines_perPage++;
+        //        else if (item.Length > 4 && item.Substring(0, 2) == "{{" && item.Substring(item.Length - 2, 2) == "}}"
+        //                && item.Substring(2, item.Length - 4).IndexOf("{{") == -1 && item.Substring(2, item.Length - 4).IndexOf("}}") == -1)
+        //            lines_perPage++;
+        //        else if (item.Length > 2 && (item.Substring(0, 2) == "{{" && item.IndexOf("}}") == -1 || item.Substring(item.Length - 2, 2) == "}}" && item.IndexOf("{{") == -1))
+        //            lines_perPage++;
+        //        else
+        //            lines_perPage += 2;
+        //    }
+        //    */
+        //    #endregion
+        //    if (NormalLineParaLength == 0)
+        //    {
+        //        if (_wordsPerLinePara != -1) NormalLineParaLength = _wordsPerLinePara;
+        //        else
+        //        {
+        //            if (xLineParas.Length > 0)//通常第一行會有卷首篇題，故不準；最末行又可能收尾，故取其次末行
+        //                NormalLineParaLength = CountWordsLenPerLinePara(xLineParas[xLineParas.Length - 1]);// new StringInfo(xLineParas[0]).LengthInTextElements;
+        //        }
+        //    }
+
+        //    /////暫時取消此條件，7改成4（即每行3字內，自行目測檢查。）20230822
+        //    //if (normalLineParaLength < 7)
+        //    if (NormalLineParaLength < 4)
+        //    {//如果正常漢字數小於7則不執行
+        //     //normalLineParaLength歸零、wordsPerLinePara歸零
+        //        if (_keyinTextMode) { NormalLineParaLength = 0; _wordsPerLinePara = -1; }
+        //        return new int[0];
+        //    }
+
+        //    int i = -1, len = 0;
+        //    foreach (string lineParaText in xLineParas)
+        //    {
+        //        //if (lineParaText.IndexOf("竝當與") > -1) //just for check 
+        //        //    Debugger.Break();
+
+
+        //        i++;
+        //        if (lineParaText.IndexOf("{{{") > -1 || lineParaText.IndexOf("孫守真") > -1 || lineParaText.IndexOf("＝") > -1)//{{{孫守真按：}}}、缺字說明等略去，以人工校對
+        //        {
+        //            continue;
+        //        }
+        //        int noteTextBlendStart = lineParaText.IndexOf("{"),
+        //            noteTextBlendEnd = lineParaText.IndexOf("}");
+        //        int gap;
+        //        if (noteTextBlendStart != -1 || noteTextBlendEnd != -1)
+        //        {//blend text and note                     
+        //            string text = "", note = "";
+        //            if (noteTextBlendStart != -1 && noteTextBlendEnd == -1)
+        //            {// {{ only
+        //                text = ClearOmitChar(lineParaText.Substring(0, noteTextBlendStart));
+        //                note = ClearOmitChar(lineParaText.Substring(noteTextBlendStart + 2));
+        //                if (text == "")
+        //                    len = new StringInfo(note).LengthInTextElements;
+        //                else
+        //                    len = new StringInfo(text).LengthInTextElements +
+        //                        (int)Math.Ceiling((decimal)new StringInfo(note).LengthInTextElements / 2);
+        //            }
+        //            if (noteTextBlendStart == -1 && noteTextBlendEnd != -1)
+        //            {// }} only
+        //                note = ClearOmitChar(lineParaText.Substring(0, noteTextBlendEnd));
+        //                text = ClearOmitChar(lineParaText.Substring(noteTextBlendEnd + 2));
+        //                if (text == "")
+        //                    len = new StringInfo(note).LengthInTextElements;
+        //                else
+        //                    len = new StringInfo(text).LengthInTextElements +
+        //                        (int)Math.Ceiling((decimal)new StringInfo(note).LengthInTextElements / 2);
+        //            }
+        //            if (noteTextBlendStart != -1 && noteTextBlendEnd != -1)
+        //            {// {{ and }} both
+        //                if (noteTextBlendStart == 0 && noteTextBlendEnd + "}}".Length == lineParaText.Length)
+        //                {
+        //                    note += lineParaText.Substring
+        //                        (noteTextBlendStart + 2,
+        //                        noteTextBlendEnd == -1 ?
+        //                        lineParaText.Length - (noteTextBlendStart + 2)
+        //                        : noteTextBlendEnd - (noteTextBlendStart + 2));
+        //                    note += new String('　', CountWordsLenPerLinePara(note));//單行注文則補上空格以方便計算字數
+        //                    len = CountWordsLenPerLinePara(note) / 2;
+        //                }
+        //                else if (noteTextBlendStart < noteTextBlendEnd)
+        //                {
+        //                    int st = 0, lText = noteTextBlendStart;
+        //                    while (noteTextBlendStart != -1)
+        //                    {
+        //                        text += lineParaText.Substring(st,
+        //                            lText);
+        //                        note += lineParaText.Substring
+        //                            (noteTextBlendStart + 2,
+        //                            noteTextBlendEnd == -1 ?
+        //                            lineParaText.Length - (noteTextBlendStart + 2)
+        //                            : noteTextBlendEnd - (noteTextBlendStart + 2));
+        //                        if (CountWordsLenPerLinePara(note) % 2 == 1)
+        //                            note += "　";//如果一行中有兩處注文以上，可能剛好都缺1字（即均為單數長，又剛好有2的倍數量），造成字數統計上的失誤，如此例：　斗字作斤{{詳前《急就篇》}}與什形近{{《説文·敘》云：人持十為斗。}}此什卽斗字趙
+        //                                        //故補上空白以供計算
+        //                        noteTextBlendStart = lineParaText.IndexOf
+        //                            ("{", noteTextBlendStart + 2);
+        //                        if (noteTextBlendStart == -1)
+        //                        {
+        //                            if (noteTextBlendEnd != -1)
+        //                                text += lineParaText.Substring
+        //                                    (noteTextBlendEnd + 2);
+        //                            break;
+        //                        }
+        //                        st = noteTextBlendEnd + 2;
+        //                        lText = noteTextBlendStart - st;//(noteTextBlendEnd + 2);
+        //                        if (lText < 0)
+        //                        {
+        //                            MessageBox.Show("somethins must be wrong,plx check it out !", "", MessageBoxButtons.OK, MessageBoxIcon.Error
+        //                                , MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
+        //                            return new int[0];
+        //                        }
+        //                        text += lineParaText.Substring
+        //                            (st, lText);
+        //                        lText = noteTextBlendEnd;
+        //                        noteTextBlendEnd = lineParaText.IndexOf("}",
+        //                           noteTextBlendStart);
+        //                        if (noteTextBlendEnd == -1)
+        //                        {
+        //                            note += lineParaText.Substring(
+        //                                noteTextBlendStart,
+        //                                lineParaText.Length - noteTextBlendStart);
+        //                            break;
+        //                        }
+        //                        st = noteTextBlendEnd + 2;
+        //                        lText = noteTextBlendStart;
+        //                        noteTextBlendStart = lineParaText.IndexOf("{", st);
+        //                        if (noteTextBlendStart == -1)
+        //                        {
+        //                            note += lineParaText.Substring(lText + 2,
+        //                                noteTextBlendEnd - (lText + 2));
+        //                            lText = lineParaText.Length - st;
+        //                            text += lineParaText.Substring(st,
+        //                                lineParaText.Length - st);
+        //                            break;
+        //                        }
+        //                        note += lineParaText.Substring(lText + 2, noteTextBlendEnd - (lText + 2));
+        //                        noteTextBlendEnd = lineParaText.IndexOf("}", noteTextBlendStart);
+        //                        lText = noteTextBlendStart - st;
+        //                    }
+        //                    text = ClearOmitChar(text); note = ClearOmitChar(note);
+        //                    //len = new StringInfo(text).LengthInTextElements + (int)Math.Ceiling((decimal)(new StringInfo(note).LengthInTextElements
+        //                    //    / ((lineParaText.Length - note.Length == 4 && lineParaText.StartsWith("{{") && lineParaText.EndsWith("}}") &&
+        //                    //    new StringInfo(note).LengthInTextElements == normalLineParaLength) ? 1 : 2)));
+        //                    len = new StringInfo(text).LengthInTextElements +
+        //                        (int)Math.Ceiling((decimal)new StringInfo(note).LengthInTextElements
+        //                        / ((lineParaText.StartsWith("{{") && lineParaText.EndsWith("}}") &&
+        //                        new StringInfo(lineParaText.Substring(2, lineParaText.Length - "{{}}".Length)).LengthInTextElements == NormalLineParaLength) ? 1 : 2));
+        //                    //單行小注而字數與正文大字同時，則不折半
+        //                }
+        //                else
+        //                {// noteTextBlendEnd < noteTextBlendStart  
+        //                    int stNote = 0, lNote = noteTextBlendEnd;
+        //                    while (noteTextBlendStart != -1)
+        //                    {
+        //                        note += lineParaText.Substring(stNote, lNote);
+        //                        text += lineParaText.Substring(noteTextBlendEnd + 2,
+        //                            noteTextBlendStart - (noteTextBlendEnd + 2));
+        //                        noteTextBlendEnd = lineParaText.IndexOf("}",
+        //                            noteTextBlendStart + 2);
+        //                        stNote = noteTextBlendStart + 2;
+        //                        if (noteTextBlendEnd == -1)
+        //                        {
+        //                            note += lineParaText.Substring(stNote); break;
+        //                        }
+        //                        else
+        //                        {
+        //                            note += lineParaText.Substring(stNote, noteTextBlendEnd -
+        //                                (noteTextBlendStart + 2));
+        //                            stNote = noteTextBlendStart;//暫記下備用
+        //                            noteTextBlendStart = lineParaText.IndexOf("{",
+        //                                noteTextBlendStart + 2);
+        //                            if (noteTextBlendStart == -1)
+        //                            {
+        //                                text += lineParaText.Substring(noteTextBlendEnd + 2);
+        //                                break;
+        //                            }
+        //                            text += lineParaText.Substring(noteTextBlendEnd + 2,
+        //                                noteTextBlendStart - (noteTextBlendEnd + 2));
+        //                            stNote = noteTextBlendStart + 2;
+        //                            lNote = noteTextBlendEnd;
+        //                            noteTextBlendEnd = lineParaText.IndexOf("}", stNote);
+        //                            if (noteTextBlendEnd == -1)
+        //                            {
+        //                                text += lineParaText.Substring(lNote + 2,
+        //                                    noteTextBlendStart - (lNote + 2));
+        //                                lNote = lineParaText.Length - stNote;
+        //                                note += lineParaText.Substring(stNote, lNote);
+        //                                break;
+        //                            }
+        //                            lNote = noteTextBlendEnd - stNote;
+        //                            noteTextBlendStart = lineParaText.IndexOf("{",
+        //                                noteTextBlendEnd);
+        //                            if (noteTextBlendStart == -1)
+        //                            {
+        //                                text += lineParaText.Substring(
+        //                                    noteTextBlendEnd + 2);
+        //                            }
+        //                        }
+        //                    }
+        //                    text = ClearOmitChar(text); note = ClearOmitChar(note);
+        //                    len = new StringInfo(text).LengthInTextElements +
+        //                        (int)Math.Ceiling((decimal)
+        //                        new StringInfo(note).LengthInTextElements / 2);
+        //                }
+        //            }
+        //            gap = Math.Abs(len - NormalLineParaLength);
+        //        }
+        //        else//only text or note
+        //        {
+        //            len = CountWordsLenPerLinePara(lineParaText.EndsWith("<p>") ? lineParaText.Substring(0, lineParaText.Length - "<p>".Length) : lineParaText);
+        //            //len = new StringInfo(clearOmitChar(lineParaText)).LengthInTextElements;
+        //            if ((xChk.IndexOf(lineParaText) + lineParaText.Length + lineParaText.Length <= xChk.Length
+        //                && xChk.Substring(xChk.IndexOf(lineParaText) + lineParaText.Length, "<p>".Length) == "<p>") ||
+        //                lineParaText.EndsWith("<p>"))
+        //                gap = 0;
+        //            else
+        //                gap = Math.Abs(len - NormalLineParaLength);
+        //        }
+
+        //        //誤差容錯值
+        //        const int gapRef = 0;//3;//9;
+
+        //        //the normal rule
+        //        if (gap > gapRef && !(len < NormalLineParaLength
+        //            && lineParaText.IndexOf("<p>") > -1)
+        //            && lineParaText != "　" && lineParaText.IndexOf("*") == -1 &&
+        //                lineParaText.IndexOf("|") == -1) //&& gap < 8)
+        //        {//select the abnormal one
+        //            bool alarm = true;
+        //            if (i + 1 < xLineParas.Length)
+        //            {
+        //                if (gap > gapRef && len < NormalLineParaLength
+        //                    && xLineParas[i + 1].IndexOf("}}") > -1
+        //                    && CountWordsLenPerLinePara(xLineParas[i + 1]) < NormalLineParaLength)
+        //                //&& xChk.IndexOf(lineParaText) + lineParaText.Length - 1 > 0
+        //                //&& xChk.Substring(xChk.IndexOf(lineParaText) + lineParaText.Length , "<p>".Length) == "<p>")
+        //                {
+        //                    alarm = false;
+        //                }
+        //            }
+        //            if (alarm)
+        //            {
+        //                string x = textBox1.Text;
+        //                int j = -1, lineSeprtEnd = 0, lineSeprtStart = lineSeprtEnd;//Seprt=Separate
+        //                lineSeprtEnd = x.IndexOf(Environment.NewLine, lineSeprtEnd);
+        //                while (lineSeprtEnd > -1)
+        //                {
+
+        //                    if (++j == i) break;
+        //                    lineSeprtStart = lineSeprtEnd;
+        //                    lineSeprtEnd = x.IndexOf(Environment.NewLine, ++lineSeprtEnd);
+        //                }
+        //                if (gap > 10)
+        //                {
+        //                    SystemSounds.Hand.Play();
+        //                }
+        //                return new int[] { lineSeprtStart, (lineSeprtEnd==-1?x.Length:lineSeprtEnd) - lineSeprtStart ,
+        //                NormalLineParaLength,len};
+
+        //            }
+        //        }
+        //    }
+        //    return new int[0];
+        //    //throw new NotImplementedException();
+        //}
+
+        #endregion
 
         /// <summary>
         /// 快速取得字串前面連續空格數的方法        
@@ -9599,7 +9965,7 @@ namespace WindowsFormsApp1
             int rs = textBox1.SelectionStart, rl = textBox1.SelectionLength;
             string se = textBox1.Text.Substring(s, e - s);//取得s(start)和e(end)之間的字串，就叫se
                                                           //int l = new StringInfo(se).LengthInTextElements;
-            if (_wordsPerLinePara == -1 && new StringInfo(se).LengthInTextElements < 10)
+            if (WordsPerLinePara == -1 && new StringInfo(se).LengthInTextElements < 10)
             {
                 MessageBoxShowOKExclamationDefaultDesktopOnly("請先在第1行指定正常行長再繼續！");
                 return;
@@ -9607,20 +9973,20 @@ namespace WindowsFormsApp1
             if (se.Contains("●") && se.Replace("●", "") == "")
             {
                 l = se.Length;
-                _wordsPerLinePara = l;
-                NormalLineParaLength = _wordsPerLinePara;
+                WordsPerLinePara = l;
+                NormalLineParaLength = WordsPerLinePara;
             }
             else
             {
-                l = _wordsPerLinePara != -1 ? _wordsPerLinePara : CountWordsLenPerLinePara(se);
-                if (_wordsPerLinePara == 0)
+                l = WordsPerLinePara != -1 ? WordsPerLinePara : CountWordsLenPerLinePara(se);
+                if (WordsPerLinePara == 0)
                 {
                     Debugger.Break();
-                    _wordsPerLinePara = CountWordsLenPerLinePara(se);
+                    WordsPerLinePara = CountWordsLenPerLinePara(se);
                 }
                 //if (NormalLineParaLength == 0) NormalLineParaLength = wordsPerLinePara;
-                if (_normalLineParaLength != _wordsPerLinePara)
-                    NormalLineParaLength = _wordsPerLinePara;
+                if (_normalLineParaLength != WordsPerLinePara)
+                    NormalLineParaLength = WordsPerLinePara;
             }
 
             bool ev = _eventsEnabled;
@@ -9650,14 +10016,14 @@ namespace WindowsFormsApp1
             //string p = "<p>";
             string p = _keyinTextMode && !_ocrTextMode ? "。<p>" : "<p>";
 
-            if (_wordsPerLinePara == -1)
+            if (WordsPerLinePara == -1)
             {
-                _wordsPerLinePara = l;//l作為正常的行/段長度（含幾個漢字中文字）的儲存變量
-                NormalLineParaLength = _wordsPerLinePara;
+                WordsPerLinePara = l;//l作為正常的行/段長度（含幾個漢字中文字）的儲存變量
+                NormalLineParaLength = WordsPerLinePara;
             }
             else
             {
-                if (se.IndexOf("<p>") == -1 && se.IndexOf("*") == -1 && CountWordsLenPerLinePara(se) < _wordsPerLinePara)
+                if (se.IndexOf("<p>") == -1 && se.IndexOf("*") == -1 && CountWordsLenPerLinePara(se) < WordsPerLinePara)
                 {
                     textBox1.Text = textBox1.Text.Substring(0, e) + p//"<p>"
                         + textBox1.Text.Substring(e);
@@ -9908,7 +10274,7 @@ namespace WindowsFormsApp1
             }
             //最後一行
             string lastLineText = GetLineText_WithoutPunctuation(textBox1.Text, s);
-            if (new StringInfo(lastLineText).LengthInTextElements < _wordsPerLinePara && lastLineText.IndexOf("<p>") == -1)
+            if (new StringInfo(lastLineText).LengthInTextElements < WordsPerLinePara && lastLineText.IndexOf("<p>") == -1)
                 textBox1.Text += p;
             stopUndoRec = false; ResumeEvents();
             ReplaceBlank_ifNOTTitleAndAfterparagraphMark();
@@ -9928,10 +10294,10 @@ namespace WindowsFormsApp1
                 //if (se.IndexOf("跡驗父故邪夏侯方") > -1)//just for test
                 //    Debugger.Break();
                 e = CountWordsLenPerLinePara(se);
-                if (e < _wordsPerLinePara)
+                if (e < WordsPerLinePara)
                     if (se.StartsWith("{{") && se.EndsWith("}}"))
                     {
-                        if (e < _wordsPerLinePara / 2)
+                        if (e < WordsPerLinePara / 2)
                             if (textBox1.Text.Substring(textBox1.TextLength - 1, 1) != ">") textBox1.Text += "<p>";
                     }
                     else
@@ -10039,7 +10405,7 @@ namespace WindowsFormsApp1
             {
                 string currLineX = GetLineText(x, s);
                 //本行與正常行等長
-                if (CountWordsLenPerLinePara(currLineX) == _wordsPerLinePara)
+                if (CountWordsLenPerLinePara(currLineX) == WordsPerLinePara)
                 {//本行有縮排
                     if (_leadingSpacesRegex.Match(currLineX).Value.Length > 0)
                     {
@@ -10049,7 +10415,7 @@ namespace WindowsFormsApp1
                         {
                             string nextLineX = GetLineText(x, s);
                             //下行與正常行等長且無縮排 或者下行文字長度為0（如為「|」）
-                            if (((CountWordsLenPerLinePara(nextLineX) == _wordsPerLinePara &&
+                            if (((CountWordsLenPerLinePara(nextLineX) == WordsPerLinePara &&
                                     _leadingSpacesRegex.Match(nextLineX).Value.Length == 0)
                                 || (CountWordsLenPerLinePara(nextLineX) == 0))
                                 && (!nextLineX.StartsWith("{{") && !currLineX.EndsWith("}}"))
@@ -11334,11 +11700,11 @@ namespace WindowsFormsApp1
                         else
                         {//如果在自動輸入模式，且已取得每頁正常行/段數時
                          //if (autoPaste2QuickEdit && (linesParasPerPage != -1 || lines_perPage != 0))
-                            if (!_keyinTextMode && (_linesParasPerPage != -1 || _lines_perPage != 0))
+                            if (!_keyinTextMode && (LinesParasPerPage != -1 || Lines_perPage != 0))
                             {
-                                if (_lines_perPage > 0 && CountLinesPerPage(textBox1.Text.Substring(0, textBox1.SelectionStart)) != _lines_perPage)
+                                if (Lines_perPage > 0 && CountLinesPerPage(textBox1.Text.Substring(0, textBox1.SelectionStart)) != Lines_perPage)
                                 {
-                                    string PredictCopyX = CnText.GetSelectionTextByLineParaCount(ref textBox1, _lines_perPage / 2);
+                                    string PredictCopyX = CnText.GetSelectionTextByLineParaCount(ref textBox1, Lines_perPage / 2);
                                     if (DialogResult.OK == Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("請重新指定頁面結束位置"
                                             + Environment.NewLine + Environment.NewLine +
                                            "是不是這些內容？" +
@@ -11376,28 +11742,32 @@ namespace WindowsFormsApp1
             //規範化文本，如半形標點符號轉全形：//在 下面 newTextBox1 會執行，此略（須加第3引數×才行，否則原本是根據textBox1.Text來執行的 20240427）
             if (!xCopy.Contains("<p>+") && !xCopy.Contains("+<p>"))
                 CnText.FormalizeText(ref xCopy);//+<p> 與 <p>+ 會被清除，所以要先保留，以作為是否正確的人工判斷 20260111
-            if (!PasteOcrResultFisrtMode && (_autoPaste2QuickEdit && _lines_perPage == 0))//自動輸入時 lines_perPage 要由 checkAbnormalLinePara 取得
+            if (!PasteOcrResultFisrtMode && (_autoPaste2QuickEdit && Lines_perPage == 0))//自動輸入時 lines_perPage 要由 checkAbnormalLinePara 取得
             {
                 #region checkAbnormalLinePara method test unit
                 try
                 {
-                    int[] chk;
+                    //int[] chk;
+                    AbnormalLineInfo? chk;
                     if (_keyinTextMode)
                         chk = CheckAbnormalLinePara(xCopy.Replace
                            ("<p>" + Environment.NewLine, "★★★").Replace("<p>", string.Empty).Replace("★★★", "<p>" + Environment.NewLine)
                            + xCopy.Substring(xCopy.Length - "<p>".Length, "<p>".Length) == "<p>" ? "<p>" : string.Empty);
                     else
                         chk = CheckAbnormalLinePara(xCopy);
-                    if (chk.Length > 0)
+                    //if (chk.Length > 0)
+                    if (chk.HasValue)
                     {
                         BringBackMousePosFrmCenter();
                         if (MessageBox.Show("there is abnormal LinePara Length , check it now?" +
                             Environment.NewLine + Environment.NewLine +
-                            "normal= " + chk[2] + "\t【abnormal】= " + chk[3], "",
+                            //"normal= " + chk[2] + "\t【abnormal】= " + chk[3], "",
+                            "normal= " + chk.Value.NormalLength + "\t【abnormal】= " + chk.Value.AbnormalLength, "",
                             MessageBoxButtons.OKCancel, MessageBoxIcon.Warning,
                             MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly) == DialogResult.OK)//檢查行/段落長
                         {
-                            textBox1.Select(chk[0], chk[1]);
+                            //textBox1.Select(chk[0], chk[1]);
+                            textBox1.Select(chk.Value.StartIndex, chk.Value.Length);
                             textBox1.ScrollToCaret();
                             if (s > _pageTextEndPosition)
                             {
@@ -11436,32 +11806,40 @@ namespace WindowsFormsApp1
             //貼到 Ctext Quick edit 前的文本檢查
             if (_abnormalLineParaChecking && _fastMode)
             {//在快速模式下，有時《國學大師》或《Kanripo漢籍リポジトリ》等的文本分行不當，2行成1行，故添此判斷
-                if (_wordsPerLinePara < 1)
+                if (WordsPerLinePara < 1)
                 {
                     MessageBoxShowOKExclamationDefaultDesktopOnly("請先設定每行正常長度！感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主"); return false;
                 }
                 //int[] chk = checkAbnormalLinePara(xCopy);// int st = 0, ln = 0;
-                int[] chk = CheckAbnormalLinePara(xCopy, _wordsPerLinePara);
-                if (chk.Length > 0)
+                //int[] chk = CheckAbnormalLinePara(xCopy, _wordsPerLinePara);
+                var chk = TextLengthHelper.CheckAbnormalLinePara(xCopy, WordsPerLinePara);
+                //if (chk.Length > 0)
+                if (chk.HasValue)//https://copilot.microsoft.com/shares/HSuFN8WURrN3XKSuugheL
                 {
                     driver.SwitchTo().Window(driver.CurrentWindowHandle);
                     //if (chk[1] - chk[2] > 4)
                     //{//)chk[2] * 0.5)
                     int st = textBox1.SelectionStart;
                     int ln = textBox1.SelectionLength;
-                    textBox1.Select(chk[0], chk[1]);
+                    //textBox1.Select(chk[0], chk[1]);
+                    textBox1.Select(chk.Value.StartIndex, chk.Value.Length);
                     //Refresh();
-                    if (DialogResult.OK == MessageBoxShowOKCancelExclamationDefaultDesktopOnly("發現不正常的分行，是否終止？"))
+                    if (DialogResult.OK == MessageBoxShowOKCancelExclamationDefaultDesktopOnly
+                        ("發現不正常的分行，是否終止？"))
                     {
                         //textBox1.Select(chk[0] + chk[2] + (chk[0] > 0 ? 2 : 0), 0);//定位以便Enter切行
-                        int i = _wordsPerLinePara;
+                        int i = WordsPerLinePara;
                         //while (new StringInfo(CnText.RemovePunctuationsNum(textBox1.Text.Substring(chk[0], i))).LengthInTextElements < wordsPerLinePara)
-                        while (CountWordsLenPerLinePara(textBox1.Text.Substring(chk[0], i)) < _wordsPerLinePara)
+                        //while (CountWordsLenPerLinePara(textBox1.Text.Substring(chk[0], i)) < _wordsPerLinePara)
+                        while (CountWordsLenPerLinePara(textBox1.Text.Substring(chk.Value.StartIndex, i)) < WordsPerLinePara)
                             i++;
-                        if (char.IsLowSurrogate(textBox1.Text.Substring(chk[0] + i, 1).ToCharArray()[0]))
-                            textBox1.Select(chk[0] + i + 1, 0);//定位以便Enter切行                        
+                        //if (char.IsLowSurrogate(textBox1.Text.Substring(chk[0] + i, 1).ToCharArray()[0]))
+                        if (char.IsLowSurrogate(textBox1.Text.Substring(chk.Value.StartIndex + i, 1).ToCharArray()[0]))
+                            //textBox1.Select(chk[0] + i + 1, 0);//定位以便Enter切行                        
+                            textBox1.Select(chk.Value.StartIndex + i + 1, 0);//定位以便Enter切行                        
                         else
-                            textBox1.Select(chk[0] + i, 0);//定位以便Enter切行                        
+                            //textBox1.Select(chk[0] + i, 0);//定位以便Enter切行
+                            textBox1.Select(chk.Value.StartIndex + i, 0);//定位以便Enter切行
                         return false;
                     }
                     //ChromeSetFocus();
@@ -11798,13 +12176,13 @@ namespace WindowsFormsApp1
         void PredictEndofPage(string xCopy)
         {
             //if (lines_perPage == 0)
-            if (_lines_perPage < 6)
+            if (Lines_perPage < 6)
             {
                 if (AutoPasteToCtext)
                     //現在不用剪貼簿了，所以以引數來判斷 20241109
                     //lines_perPage = (linesParasPerPage != -1 && linesParasPerPage != 0) ? linesParasPerPage : CountLinesPerPage(Clipboard.GetText());
-                    _lines_perPage = (_linesParasPerPage != -1 && _linesParasPerPage != 0) ? _linesParasPerPage : CountLinesPerPage(xCopy);
-                if (_lines_perPage == 0) return;
+                    Lines_perPage = (LinesParasPerPage != -1 && LinesParasPerPage != 0) ? LinesParasPerPage : CountLinesPerPage(xCopy);
+                if (Lines_perPage == 0) return;
             }
             string x = textBox1.Text;
             if (x.Length < 30) return;
@@ -11995,7 +12373,7 @@ namespace WindowsFormsApp1
                 else//純正文及注文夾雜者
                     i += 2;
                 s = e + 2;
-                if (i >= _lines_perPage)
+                if (i >= Lines_perPage)
                 {
                     predictEndofPagePosition = s - 2;
                     break;
@@ -12008,350 +12386,7 @@ namespace WindowsFormsApp1
             }
         }
 
-        /// <summary>
-        /// 正常的每頁行數（正文算1，注文算2，故8行正文之文本傳回的值即16）
-        /// 起始值（初始化）為0
-        /// </summary>
-        int _lines_perPage = 0;
-        /// <summary>
-        /// 正常的行/段長度（漢字數）
-        /// 起始值（初始化）為0
-        /// </summary>
-        int _normalLineParaLength = 0;
 
-        /// <summary>
-        /// 檢查非常長度的行（段）
-        /// </summary>
-        /// <param name="xChk">這引數是指定要傳入檢查的文本</param>
-        /// <returns>若發現非常長度的行，則傳回一個數組（陣列）以表示非常行諸特徵：
-        /// { lineSeprtStart（起點）, lineSeprtEnd - lineSeprtStart（非常長度） ,
-        ///     normalLineParaLength（通常長度）};
-        /// </returns>
-        public static int[] CheckAbnormalLinePara(string xChk, int normalLenght)
-        {
-            string[] xLineParas = xChk.Split(
-                    new[] { Environment.NewLine },
-                        StringSplitOptions.RemoveEmptyEntries);
-            //string[] xLineParas = Regex.Split(xChk, @"\r?\n");//  20250608 GitHub　Copilot大菩薩：	若你要支援不同平台的換行（如 \n、\r），可以用 Regex.Split(xChk, @"\r?\n")。
-            foreach (string line in xLineParas)
-            {
-                int l = Form1.CountWordsLenPerLinePara(line);
-                if (l - normalLenght > 4)
-                {
-                    return new int[] { xChk.IndexOf(line), l, normalLenght };
-                }
-
-            }
-            return new int[0];
-
-        }
-
-        //20230117 creedit chatGPT大菩薩：C# Visual Studio 註解顯示:/// 是用於多行註解，用於註釋程式碼的多行。……在 C# 中，使用三個斜線 (///) 來撰寫註解文字，並將它放在該函式的宣告之前，就可以在 Visual Studio 中在自訂函式上停駐滑鼠游標時顯示該函式的提示文字。……這樣可以顯示註解文字，且註解文字可以在 Intellisense 中顯示。
-        /// <summary>
-        /// 檢查非常長度的行（段）
-        /// </summary>
-        /// <param name="xChk">這引數是指定要傳入檢查的文本</param>
-        /// <returns>若發現非常長度的行，則傳回一個數組（陣列）以表示非常行諸特徵：
-        /// { lineSeprtStart（起點）, lineSeprtEnd - lineSeprtStart（非常長度） ,
-        ///     normalLineParaLength（通常長度）,len（長度）};
-        /// </returns>
-        private int[] CheckAbnormalLinePara(string xChk)
-        {
-
-            if (!_fastMode) SaveText();//備份以防萬一
-            string[] xLineParas = xChk.Split(
-                Environment.NewLine.ToArray(),
-                StringSplitOptions.RemoveEmptyEntries);
-
-            #region get lines_perPage//取得該頁的每行（段）文字
-            //lines_perPage = 0;
-            if (_keyinTextMode)
-            {//如果是手動輸入模式：
-                _lines_perPage = CountLinesPerPage(xChk);
-                _linesParasPerPage = _lines_perPage;
-                //略過只含有「　」的元素
-                xLineParas = xLineParas.Where(x => x.Trim('　') != "").ToArray();
-                /* 20230907 Bing大菩薩：
-                 太好了，我很高興能幫助您！LINQ 是 Language Integrated Query 的簡稱，它是一種用於查詢和操作數據的語言。在 C# 中，LINQ 可以用來查詢各種數據源，包括數組、列表、XML 文件等。
-                    在上面的例子中，我們使用了 LINQ 的 `Where` 方法來過濾出 `xLineParas` 中不符合條件的元素。`Where` 方法接受一個委託作為參數，該委託定義了過濾條件。在這個例子中，我們定義了一個匿名函數 `x => x.Trim('　') != ""` 作為過濾條件。這個函數會對每個元素進行判斷，如果元素去掉前後的「　」後不為空字符串，則返回 `true`，否則返回 `false`。
-                    `Where` 方法會根據過濾條件返回一個新的序列，其中只包含符合條件的元素。最後，我們使用 `ToArray` 方法將序列轉換為數組。
-                    希望這對您有所幫助！如果您還有其他問題，請隨時告訴我。感恩感恩　讚歎讚歎　南無阿彌陀佛。
-                */
-            }
-            else//不是手動輸入模式：
-                _lines_perPage = (_linesParasPerPage != -1 && _linesParasPerPage != 0) ? _linesParasPerPage : CountLinesPerPage(xChk);
-            if (_linesParasPerPage == -1) _linesParasPerPage = _lines_perPage;
-            //lines_perPage = xLineParas.Length;
-            /*
-            foreach (string item in xLineParas)
-            {
-                if (lines_perPage == 0 & xChk.IndexOf("}}") < xChk.IndexOf("{{") && xChk.IndexOf("}}") > item.Length)
-                    lines_perPage++;
-                else if (item.Length > 4 && item.Substring(0, 2) == "{{" && item.Substring(item.Length - 2, 2) == "}}"
-                        && item.Substring(2, item.Length - 4).IndexOf("{{") == -1 && item.Substring(2, item.Length - 4).IndexOf("}}") == -1)
-                    lines_perPage++;
-                else if (item.Length > 2 && (item.Substring(0, 2) == "{{" && item.IndexOf("}}") == -1 || item.Substring(item.Length - 2, 2) == "}}" && item.IndexOf("{{") == -1))
-                    lines_perPage++;
-                else
-                    lines_perPage += 2;
-            }
-            */
-            #endregion
-            if (NormalLineParaLength == 0)
-            {
-                if (_wordsPerLinePara != -1) NormalLineParaLength = _wordsPerLinePara;
-                else
-                {
-                    if (xLineParas.Length > 0)//通常第一行會有卷首篇題，故不準；最末行又可能收尾，故取其次末行
-                        NormalLineParaLength = CountWordsLenPerLinePara(xLineParas[xLineParas.Length - 1]);// new StringInfo(xLineParas[0]).LengthInTextElements;
-                }
-            }
-
-            /////暫時取消此條件，7改成4（即每行3字內，自行目測檢查。）20230822
-            //if (normalLineParaLength < 7)
-            if (NormalLineParaLength < 4)
-            {//如果正常漢字數小於7則不執行
-             //normalLineParaLength歸零、wordsPerLinePara歸零
-                if (_keyinTextMode) { NormalLineParaLength = 0; _wordsPerLinePara = -1; }
-                return new int[0];
-            }
-
-            int i = -1, len = 0;
-            foreach (string lineParaText in xLineParas)
-            {
-                //if (lineParaText.IndexOf("竝當與") > -1) //just for check 
-                //    Debugger.Break();
-
-
-                i++;
-                if (lineParaText.IndexOf("{{{") > -1 || lineParaText.IndexOf("孫守真") > -1 || lineParaText.IndexOf("＝") > -1)//{{{孫守真按：}}}、缺字說明等略去，以人工校對
-                {
-                    continue;
-                }
-                int noteTextBlendStart = lineParaText.IndexOf("{"),
-                    noteTextBlendEnd = lineParaText.IndexOf("}");
-                int gap;
-                if (noteTextBlendStart != -1 || noteTextBlendEnd != -1)
-                {//blend text and note                     
-                    string text = "", note = "";
-                    if (noteTextBlendStart != -1 && noteTextBlendEnd == -1)
-                    {// {{ only
-                        text = ClearOmitChar(lineParaText.Substring(0, noteTextBlendStart));
-                        note = ClearOmitChar(lineParaText.Substring(noteTextBlendStart + 2));
-                        if (text == "")
-                            len = new StringInfo(note).LengthInTextElements;
-                        else
-                            len = new StringInfo(text).LengthInTextElements +
-                                (int)Math.Ceiling((decimal)new StringInfo(note).LengthInTextElements / 2);
-                    }
-                    if (noteTextBlendStart == -1 && noteTextBlendEnd != -1)
-                    {// }} only
-                        note = ClearOmitChar(lineParaText.Substring(0, noteTextBlendEnd));
-                        text = ClearOmitChar(lineParaText.Substring(noteTextBlendEnd + 2));
-                        if (text == "")
-                            len = new StringInfo(note).LengthInTextElements;
-                        else
-                            len = new StringInfo(text).LengthInTextElements +
-                                (int)Math.Ceiling((decimal)new StringInfo(note).LengthInTextElements / 2);
-                    }
-                    if (noteTextBlendStart != -1 && noteTextBlendEnd != -1)
-                    {// {{ and }} both
-                        if (noteTextBlendStart == 0 && noteTextBlendEnd + "}}".Length == lineParaText.Length)
-                        {
-                            note += lineParaText.Substring
-                                (noteTextBlendStart + 2,
-                                noteTextBlendEnd == -1 ?
-                                lineParaText.Length - (noteTextBlendStart + 2)
-                                : noteTextBlendEnd - (noteTextBlendStart + 2));
-                            note += new String('　', CountWordsLenPerLinePara(note));//單行注文則補上空格以方便計算字數
-                            len = CountWordsLenPerLinePara(note) / 2;
-                        }
-                        else if (noteTextBlendStart < noteTextBlendEnd)
-                        {
-                            int st = 0, lText = noteTextBlendStart;
-                            while (noteTextBlendStart != -1)
-                            {
-                                text += lineParaText.Substring(st,
-                                    lText);
-                                note += lineParaText.Substring
-                                    (noteTextBlendStart + 2,
-                                    noteTextBlendEnd == -1 ?
-                                    lineParaText.Length - (noteTextBlendStart + 2)
-                                    : noteTextBlendEnd - (noteTextBlendStart + 2));
-                                if (CountWordsLenPerLinePara(note) % 2 == 1)
-                                    note += "　";//如果一行中有兩處注文以上，可能剛好都缺1字（即均為單數長，又剛好有2的倍數量），造成字數統計上的失誤，如此例：　斗字作斤{{詳前《急就篇》}}與什形近{{《説文·敘》云：人持十為斗。}}此什卽斗字趙
-                                                //故補上空白以供計算
-                                noteTextBlendStart = lineParaText.IndexOf
-                                    ("{", noteTextBlendStart + 2);
-                                if (noteTextBlendStart == -1)
-                                {
-                                    if (noteTextBlendEnd != -1)
-                                        text += lineParaText.Substring
-                                            (noteTextBlendEnd + 2);
-                                    break;
-                                }
-                                st = noteTextBlendEnd + 2;
-                                lText = noteTextBlendStart - st;//(noteTextBlendEnd + 2);
-                                if (lText < 0)
-                                {
-                                    MessageBox.Show("somethins must be wrong,plx check it out !", "", MessageBoxButtons.OK, MessageBoxIcon.Error
-                                        , MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
-                                    return new int[0];
-                                }
-                                text += lineParaText.Substring
-                                    (st, lText);
-                                lText = noteTextBlendEnd;
-                                noteTextBlendEnd = lineParaText.IndexOf("}",
-                                   noteTextBlendStart);
-                                if (noteTextBlendEnd == -1)
-                                {
-                                    note += lineParaText.Substring(
-                                        noteTextBlendStart,
-                                        lineParaText.Length - noteTextBlendStart);
-                                    break;
-                                }
-                                st = noteTextBlendEnd + 2;
-                                lText = noteTextBlendStart;
-                                noteTextBlendStart = lineParaText.IndexOf("{", st);
-                                if (noteTextBlendStart == -1)
-                                {
-                                    note += lineParaText.Substring(lText + 2,
-                                        noteTextBlendEnd - (lText + 2));
-                                    lText = lineParaText.Length - st;
-                                    text += lineParaText.Substring(st,
-                                        lineParaText.Length - st);
-                                    break;
-                                }
-                                note += lineParaText.Substring(lText + 2, noteTextBlendEnd - (lText + 2));
-                                noteTextBlendEnd = lineParaText.IndexOf("}", noteTextBlendStart);
-                                lText = noteTextBlendStart - st;
-                            }
-                            text = ClearOmitChar(text); note = ClearOmitChar(note);
-                            //len = new StringInfo(text).LengthInTextElements + (int)Math.Ceiling((decimal)(new StringInfo(note).LengthInTextElements
-                            //    / ((lineParaText.Length - note.Length == 4 && lineParaText.StartsWith("{{") && lineParaText.EndsWith("}}") &&
-                            //    new StringInfo(note).LengthInTextElements == normalLineParaLength) ? 1 : 2)));
-                            len = new StringInfo(text).LengthInTextElements +
-                                (int)Math.Ceiling((decimal)new StringInfo(note).LengthInTextElements
-                                / ((lineParaText.StartsWith("{{") && lineParaText.EndsWith("}}") &&
-                                new StringInfo(lineParaText.Substring(2, lineParaText.Length - "{{}}".Length)).LengthInTextElements == NormalLineParaLength) ? 1 : 2));
-                            //單行小注而字數與正文大字同時，則不折半
-                        }
-                        else
-                        {// noteTextBlendEnd < noteTextBlendStart  
-                            int stNote = 0, lNote = noteTextBlendEnd;
-                            while (noteTextBlendStart != -1)
-                            {
-                                note += lineParaText.Substring(stNote, lNote);
-                                text += lineParaText.Substring(noteTextBlendEnd + 2,
-                                    noteTextBlendStart - (noteTextBlendEnd + 2));
-                                noteTextBlendEnd = lineParaText.IndexOf("}",
-                                    noteTextBlendStart + 2);
-                                stNote = noteTextBlendStart + 2;
-                                if (noteTextBlendEnd == -1)
-                                {
-                                    note += lineParaText.Substring(stNote); break;
-                                }
-                                else
-                                {
-                                    note += lineParaText.Substring(stNote, noteTextBlendEnd -
-                                        (noteTextBlendStart + 2));
-                                    stNote = noteTextBlendStart;//暫記下備用
-                                    noteTextBlendStart = lineParaText.IndexOf("{",
-                                        noteTextBlendStart + 2);
-                                    if (noteTextBlendStart == -1)
-                                    {
-                                        text += lineParaText.Substring(noteTextBlendEnd + 2);
-                                        break;
-                                    }
-                                    text += lineParaText.Substring(noteTextBlendEnd + 2,
-                                        noteTextBlendStart - (noteTextBlendEnd + 2));
-                                    stNote = noteTextBlendStart + 2;
-                                    lNote = noteTextBlendEnd;
-                                    noteTextBlendEnd = lineParaText.IndexOf("}", stNote);
-                                    if (noteTextBlendEnd == -1)
-                                    {
-                                        text += lineParaText.Substring(lNote + 2,
-                                            noteTextBlendStart - (lNote + 2));
-                                        lNote = lineParaText.Length - stNote;
-                                        note += lineParaText.Substring(stNote, lNote);
-                                        break;
-                                    }
-                                    lNote = noteTextBlendEnd - stNote;
-                                    noteTextBlendStart = lineParaText.IndexOf("{",
-                                        noteTextBlendEnd);
-                                    if (noteTextBlendStart == -1)
-                                    {
-                                        text += lineParaText.Substring(
-                                            noteTextBlendEnd + 2);
-                                    }
-                                }
-                            }
-                            text = ClearOmitChar(text); note = ClearOmitChar(note);
-                            len = new StringInfo(text).LengthInTextElements +
-                                (int)Math.Ceiling((decimal)
-                                new StringInfo(note).LengthInTextElements / 2);
-                        }
-                    }
-                    gap = Math.Abs(len - NormalLineParaLength);
-                }
-                else//only text or note
-                {
-                    len = CountWordsLenPerLinePara(lineParaText.EndsWith("<p>") ? lineParaText.Substring(0, lineParaText.Length - "<p>".Length) : lineParaText);
-                    //len = new StringInfo(clearOmitChar(lineParaText)).LengthInTextElements;
-                    if ((xChk.IndexOf(lineParaText) + lineParaText.Length + lineParaText.Length <= xChk.Length
-                        && xChk.Substring(xChk.IndexOf(lineParaText) + lineParaText.Length, "<p>".Length) == "<p>") ||
-                        lineParaText.EndsWith("<p>"))
-                        gap = 0;
-                    else
-                        gap = Math.Abs(len - NormalLineParaLength);
-                }
-
-                //誤差容錯值
-                const int gapRef = 0;//3;//9;
-
-                //the normal rule
-                if (gap > gapRef && !(len < NormalLineParaLength
-                    && lineParaText.IndexOf("<p>") > -1)
-                    && lineParaText != "　" && lineParaText.IndexOf("*") == -1 &&
-                        lineParaText.IndexOf("|") == -1) //&& gap < 8)
-                {//select the abnormal one
-                    bool alarm = true;
-                    if (i + 1 < xLineParas.Length)
-                    {
-                        if (gap > gapRef && len < NormalLineParaLength
-                            && xLineParas[i + 1].IndexOf("}}") > -1
-                            && CountWordsLenPerLinePara(xLineParas[i + 1]) < NormalLineParaLength)
-                        //&& xChk.IndexOf(lineParaText) + lineParaText.Length - 1 > 0
-                        //&& xChk.Substring(xChk.IndexOf(lineParaText) + lineParaText.Length , "<p>".Length) == "<p>")
-                        {
-                            alarm = false;
-                        }
-                    }
-                    if (alarm)
-                    {
-                        string x = textBox1.Text;
-                        int j = -1, lineSeprtEnd = 0, lineSeprtStart = lineSeprtEnd;//Seprt=Separate
-                        lineSeprtEnd = x.IndexOf(Environment.NewLine, lineSeprtEnd);
-                        while (lineSeprtEnd > -1)
-                        {
-
-                            if (++j == i) break;
-                            lineSeprtStart = lineSeprtEnd;
-                            lineSeprtEnd = x.IndexOf(Environment.NewLine, ++lineSeprtEnd);
-                        }
-                        if (gap > 10)
-                        {
-                            SystemSounds.Hand.Play();
-                        }
-                        return new int[] { lineSeprtStart, (lineSeprtEnd==-1?x.Length:lineSeprtEnd) - lineSeprtStart ,
-                        NormalLineParaLength,len};
-
-                    }
-                }
-            }
-            return new int[0];
-            //throw new NotImplementedException();
-        }
 
 
         /*
@@ -13171,7 +13206,8 @@ namespace WindowsFormsApp1
             {//Ctrl + Shift + Alt + x : 檢查textBox1文本中指定連續全形空格位置不當者，起於對《四庫全書》源文本標題錯置者之檢查，如[《曝書亭集》卷六](https://ctext.org/library.pl?if=gb&file=50127&page=108) x:Exam
                 e.Handled = true; e.SuppressKeyPress = true;
                 string originalRaw = textBox1.Text ?? string.Empty; // 確保是原始未插入文字
-                FullWidthSpaceFixer.ExamFullWidthSpaceSequencesFormattingError_inserttoCheck_HighlighttoWatch(originalRaw, textBox1, richTextBox1);
+                if(!ExamFullWidthSpaceSequencesFormattingError_inserttoCheck_HighlighttoWatch(originalRaw, textBox1, richTextBox1))
+                    PlaySound(SoundLike.finish);
                 //https://copilot.microsoft.com/shares/gWdFMKkRVTazmVXsHpLzt
                 return;
             }
@@ -13245,7 +13281,7 @@ namespace WindowsFormsApp1
                     if (MessageBoxShowOKCancelExclamationDefaultDesktopOnly("是否要自動標識標題，在OCR識讀匯入後", pagePast2OCRsiteName + "──要送去OCR的網站") == DialogResult.OK)
                     {
                         _autoTitleMark_OCRTextMode = true;
-                        _linesParasPerPage = CountLinesPerPage(textBox1.Text);
+                        LinesParasPerPage = CountLinesPerPage(textBox1.Text);
                     }
                     else _autoTitleMark_OCRTextMode = false;
                     if (!BatchProcessingGJcoolOCR)
@@ -15168,7 +15204,7 @@ namespace WindowsFormsApp1
             if (_autoTitleMark_OCRTextMode)
             {
                 //or lines_perPage 
-                if (_linesParasPerPage >= CountLinesPerPage(textBox1.Text))//行數小於或等於正常行數時才執行，蓋《古籍酷》OCR會將小注分行輸出 20240126
+                if (LinesParasPerPage >= CountLinesPerPage(textBox1.Text))//行數小於或等於正常行數時才執行，蓋《古籍酷》OCR會將小注分行輸出 20240126
                 {
                     UndoRecord(); stopUndoRec = true;
                     bool ee = _eventsEnabled;
@@ -16162,13 +16198,13 @@ namespace WindowsFormsApp1
                     { "漢籍電子文獻資料庫文本整理_以轉貼到中國哲學書電子化計劃", MacroUtils.EmptyArgs() },
 
                     { "中國哲學書電子化計劃.國學大師_Kanripo_四庫全書本轉來",
-                        new object[] { (_lines_perPage > 0 && _lines_perPage < 255) ? _lines_perPage / 2 : 0 } },
+                        new object[] { (Lines_perPage > 0 && Lines_perPage < 255) ? Lines_perPage / 2 : 0 } },
 
                     { "中國哲學書電子化計劃.Kanripo_GitHub轉來",
-                        new object[] { (_lines_perPage > 0 && _lines_perPage < 255) ? _lines_perPage / 2 : 0 } },
+                        new object[] { (Lines_perPage > 0 && Lines_perPage < 255) ? Lines_perPage / 2 : 0 } },
 
                     { "中國哲學書電子化計劃.維基文庫四部叢刊本轉來",
-                        new object[] { (_lines_perPage > 0 && _lines_perPage < 255) ? _lines_perPage / 2 : 0 } }
+                        new object[] { (Lines_perPage > 0 && Lines_perPage < 255) ? Lines_perPage / 2 : 0 } }
                 };
 
 
@@ -16339,7 +16375,7 @@ namespace WindowsFormsApp1
                     range = new Range(document, paragraphs[2].Start, paragraphs[i].End, document.Content);
                     lineParaCount = CountLinesPerPage(range.Text);
                     lineParaCount = lineParaCount % 2 == 0 ? lineParaCount : lineParaCount + 1;//若獨立小注之末可能只有單行，不會成雙
-                    if (_lines_perPage * 2 - 2 * 2 <= lineParaCount)
+                    if (Lines_perPage * 2 - 2 * 2 <= lineParaCount)
                     {
                         lastParaIndex = i;
                         break;
@@ -16366,7 +16402,7 @@ namespace WindowsFormsApp1
                     range = new Range(document, paragraphs[i].Start, paragraphs[paragraphs.Count - 2].End, document.Content);
                     lineParaCount = CountLinesPerPage(range.Text);//若獨立小注之尾可能只有單行，不會成雙
                     lineParaCount = lineParaCount % 2 == 0 ? lineParaCount : lineParaCount + 1;
-                    if (_lines_perPage * 2 - 1 * 2 <= lineParaCount)
+                    if (Lines_perPage * 2 - 1 * 2 <= lineParaCount)
                     {
                         lastParaIndex = i;
                         break;
@@ -16406,7 +16442,7 @@ namespace WindowsFormsApp1
                     range = new Range(document, paragraphs[2].Start, paragraphs[i].End, document.Content);
                     lineParaCount = CountLinesPerPage(range.Text);
                     lineParaCount = lineParaCount % 2 == 0 ? lineParaCount : lineParaCount + 1;//若獨立小注之末可能只有單行，不會成雙
-                    if (_lines_perPage * 2 - 2 * 2 <= lineParaCount)
+                    if (Lines_perPage * 2 - 2 * 2 <= lineParaCount)
                     {
                         lastParaIndex = i;
                         break;
@@ -16433,7 +16469,7 @@ namespace WindowsFormsApp1
                     range = new Range(document, paragraphs[i].Start, paragraphs[paragraphs.Count - 2].End, document.Content);
                     lineParaCount = CountLinesPerPage(range.Text);//若獨立小注之尾可能只有單行，不會成雙
                     lineParaCount = lineParaCount % 2 == 0 ? lineParaCount : lineParaCount + 1;
-                    if (_lines_perPage * 2 - 1 * 2 <= lineParaCount)
+                    if (Lines_perPage * 2 - 1 * 2 <= lineParaCount)
                     {
                         lastParaIndex = i;
                         break;
@@ -17939,7 +17975,8 @@ namespace WindowsFormsApp1
 
 #pragma warning disable IDE1006 // 忽略命名規範檢查
         private void textBox2_KeyDown(object sender, KeyEventArgs e)
-        {
+    {
+
             if (e.KeyCode == Keys.NumPad5 || e.KeyCode == Keys.Oemplus || e.KeyCode == Keys.Add || e.KeyCode == Keys.Subtract)
             {
                 textBox1_KeyDown(sender, e);
@@ -17951,37 +17988,37 @@ namespace WindowsFormsApp1
             if (m == Keys.Alt && e.KeyCode == Keys.OemPeriod)
             {//Alt + . ：輸入「·」。
                 e.Handled = true; e.SuppressKeyPress = true;
-                InsertWords("·", textBox4);
+                InsertWords("·", textBox2);
                 return;
             }
             if (m == Keys.Alt && e.KeyCode == Keys.D1)
             {//Alt + 1 ：輸入「􏿽」（CTP空白字符）。
                 e.Handled = true; e.SuppressKeyPress = true;
-                InsertWords("􏿽", textBox4);
+                InsertWords("􏿽", textBox2);
                 return;
             }
             if (m == Keys.Alt && e.KeyCode == Keys.D2)
             {//-Alt + 2 ：輸入「　」（全形空格）。
                 e.Handled = true; e.SuppressKeyPress = true;
-                InsertWords("　", textBox4);
+                InsertWords("　", textBox2);
                 return;
             }
             if (m == Keys.Alt && e.KeyCode == Keys.D3)
             {//-Alt + 3 ：輸入「◯」。
                 e.Handled = true; e.SuppressKeyPress = true;
-                InsertWords("◯", textBox4);
+                InsertWords("◯", textBox2);
                 return;
             }
             if (m == Keys.Alt && e.KeyCode == Keys.F1)
             {//-Alt + F1 ：輸入「■」。
                 e.Handled = true; e.SuppressKeyPress = true;
-                InsertWords("■", textBox4);
+                InsertWords("■", textBox2);
                 return;
             }
             if (m == Keys.Alt && e.KeyCode == Keys.F2)
             {//-Alt + F2 ：輸入「▢」。
                 e.Handled = true; e.SuppressKeyPress = true;
-                InsertWords("▢", textBox4);
+                InsertWords("▢", textBox2);
                 return;
             }
             #endregion
@@ -18978,11 +19015,9 @@ namespace WindowsFormsApp1
         /// 是否為OCR連續自動輸入模式
         /// </summary>
         public bool OcrTextMode { get => _ocrTextMode; set => _ocrTextMode = value; }
-        /// <summary>
-        /// 取得每行的長度（正常的行/段長度（含幾個漢字中文字））
-        /// </summary>
-        public int NormalLineParaLength { get => _normalLineParaLength; set => _normalLineParaLength = value; }
-        public bool FastMode { get => _fastMode; }//set => fastMode = value; }
+
+
+
         /// <summary>
         /// 暫停事件處理程序
         /// </summary>
@@ -19038,8 +19073,8 @@ namespace WindowsFormsApp1
                 PauseEvents(); textBox2.Text = "";//因為觸發textBox3_TextChanged事件 會將以下參數重設故
                 FileCSSSelector = setValue[0];
                 _inputTextFrontPage = setValue[1];
-                _lines_perPage = int.Parse(setValue[2]);
-                _wordsPerLinePara = int.Parse(setValue[3]);
+                Lines_perPage = int.Parse(setValue[2]);
+                WordsPerLinePara = int.Parse(setValue[3]);
                 ResumeEvents();
                 textBox1.Focus(); AvailableInUse_BothKeysMouse();
                 return;
@@ -19102,14 +19137,14 @@ namespace WindowsFormsApp1
             else if (x.StartsWith("ls")) //-輸入「ls」：設定「lines_perPage」（每頁行數）值。如每頁正文行數為8行，則輸入「ls16」（8*2=16；以雙行小注單位為準以供程式參考）
             {
                 PauseEvents();
-                if (int.TryParse(x.Substring(2), out int result)) { _lines_perPage = result; textBox2.Text = ""; }
+                if (int.TryParse(x.Substring(2), out int result)) { Lines_perPage = result; textBox2.Text = ""; }
                 else MessageBoxShowOKExclamationDefaultDesktopOnly("指定之數值有誤！");
                 ResumeEvents(); return;
             }
             else if (x.StartsWith("wl"))//-輸入「wl」：設定「wordsPerLinePara」（每行字數）值。如每行字數為20字，則輸入「wl20」。
             {
                 PauseEvents();
-                if (int.TryParse(x.Substring(2), out int result)) { _wordsPerLinePara = result; textBox2.Text = ""; }
+                if (int.TryParse(x.Substring(2), out int result)) { WordsPerLinePara = result; textBox2.Text = ""; }
                 else MessageBoxShowOKExclamationDefaultDesktopOnly("指定之數值有誤！");
                 ResumeEvents(); return;
             }
@@ -20002,11 +20037,11 @@ namespace WindowsFormsApp1
                                 Input_picture();
                                 //清除空行；因為碰到許多中間會空行或篇末會空行之排版，以致原來程式邏輯不堪應用。今將保留其空行部分（由程式判斷每頁行數；但確實也有不規則的，但畢竟較此情況少見），不像之前那樣一律清除，故在確定不須保留時，可逕行清除。 2026年元旦
                                 string tx1 = textBox1.Text;
-                                if (_lines_perPage > 0)
+                                if (Lines_perPage > 0)
                                 {
-                                    if (tx1.Substring(0, (_lines_perPage + _lines_perPage / 2)).Replace("|" + Environment.NewLine, string.Empty) == string.Empty)
+                                    if (tx1.Substring(0, (Lines_perPage + Lines_perPage / 2)).Replace("|" + Environment.NewLine, string.Empty) == string.Empty)
                                     {
-                                        textBox1.Select(0, (_lines_perPage + _lines_perPage / 2));
+                                        textBox1.Select(0, (Lines_perPage + Lines_perPage / 2));
                                         UndoRecord();
                                         textBox1.SelectedText = string.Empty;
                                         UndoRecord();
@@ -20033,8 +20068,8 @@ namespace WindowsFormsApp1
             {//滑鼠左鍵點二下，同 Ctrl + -（數字鍵盤） 會重設以插入點位置為頁面結束位國
              //if (autoPaste2QuickEdit && lines_perPage == 0)
              //{
-                _lines_perPage = CountLinesPerPage(textBox1.Text.Substring(0, textBox1.SelectionStart));//重設 lines_perPage 值
-                                                                                                        //}
+                Lines_perPage = CountLinesPerPage(textBox1.Text.Substring(0, textBox1.SelectionStart));//重設 lines_perPage 值
+                                                                                                       //}
                 ResetPageTextEndPositionPasteToCText();
                 if (!_autoPaste2QuickEdit) AvailableInUse_BothKeysMouse();
             }
@@ -20543,10 +20578,10 @@ namespace WindowsFormsApp1
         private void ResetBooksPagesFeatures()
         {
 
-            _linesParasPerPage = -1;//每頁行/段數
-            _wordsPerLinePara = -1;//每行/段字數 reset
+            LinesParasPerPage = -1;//每頁行/段數
+            WordsPerLinePara = -1;//每行/段字數 reset
             _pageTextEndPosition = 0; _pageEndText10 = "";
-            _lines_perPage = 0;
+            Lines_perPage = 0;
             //normalLineParaLength = 0;
             NormalLineParaLength = 0; //wordsPerLinePara = -1;
             _abnormalLineParaChecking = true;
@@ -21147,7 +21182,7 @@ namespace WindowsFormsApp1
                         }
                         int space_blank_Count = (int)(e - eo) / 2, en = x.IndexOf(Environment.NewLine, e + 2);
                         if (CountWordsLenPerLinePara(x.Substring(s, e - s - "<p>".Length - Environment.NewLine.Length))
-                            + space_blank_Count == _wordsPerLinePara
+                            + space_blank_Count == WordsPerLinePara
                             && e + 2 < x.Length &&
                             x.Substring(e + 2, en - (e + 2)).IndexOf("*") == -1)
                         {//後面行/段不能是標題（篇名），前面行/段不能太短-要剛好正常行/段長才行
@@ -21330,7 +21365,8 @@ namespace WindowsFormsApp1
         private void JustForTest()
         {
             string originalRaw = textBox1.Text ?? string.Empty; // 確保是原始未插入文字
-            FullWidthSpaceFixer.ExamFullWidthSpaceSequencesFormattingError_inserttoCheck_HighlighttoWatch(originalRaw, textBox1, richTextBox1);
+            if (!ExamFullWidthSpaceSequencesFormattingError_inserttoCheck_HighlighttoWatch(originalRaw, textBox1, richTextBox1))
+                PlaySound(SoundLike.finish);
             //https://copilot.microsoft.com/shares/gWdFMKkRVTazmVXsHpLzt
 
 

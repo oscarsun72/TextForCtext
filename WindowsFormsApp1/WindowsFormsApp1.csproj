@@ -150,6 +150,7 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TextFixerBase.cs" />
+    <Compile Include="TextLengthHelper.cs" />
     <Compile Include="VBA.cs" />
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
