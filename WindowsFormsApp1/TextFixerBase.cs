@@ -6,6 +6,10 @@ using System.Drawing;
 
 namespace TextForCtext
 {
+    /// <summary>
+    /// 源文本修正器基底類別
+    /// creedit_with_Copilot大菩薩　20260121
+    /// </summary>
     public abstract class TextFixerBase
     {
         public bool EnableDebugReport { get; set; } = false;

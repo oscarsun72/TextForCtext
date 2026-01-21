@@ -6,6 +6,10 @@ using System.Text;
 
 namespace TextForCtext
 {
+    /// <summary>
+    /// 源文本全形空格修正器
+    /// creedit_with_Copilot大菩薩　20260121
+    /// </summary>
     public class FullWidthSpaceFixer : TextFixerBase
     {
         private const string _checkMark = "❌";
