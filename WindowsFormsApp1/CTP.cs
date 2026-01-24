@@ -673,6 +673,43 @@ namespace TextForCtext
             }
         }
         /// <summary>
+        /// 放大書圖以便檢視
+        /// </summary>
+        internal static void EnlargeSvgImageSize()
+        {
+            IWebElement iwe = Svg_image_PageImageFrame;
+            DateTime dt = DateTime.Now;
+            while (iwe == null)
+            {
+                iwe = Svg_image_PageImageFrame;
+                if (DateTime.Now.Subtract(dt).TotalSeconds > 2) break;
+            }
+            if (iwe?.Size.Width <= 500) // Leo AI 20260118 iwe?.GetAttribute("width");
+            {
+                ChromeSetFocus();
+                iwe.Click();//這裡不能用 iwe.JsClick()，會出錯;
+            }            
+        }
+        /// <summary>
+        ///還原放大的書圖
+        /// </summary>
+        internal static void RestoreSvgImageSize()
+        {
+            IWebElement iwe = Svg_image_PageImageFrame;
+            DateTime dt = DateTime.Now;
+            while (iwe == null)
+            {
+                iwe = Svg_image_PageImageFrame;
+                if (DateTime.Now.Subtract(dt).TotalSeconds > 2) break;
+            }
+            if (iwe?.Size.Width > 500) // Leo AI 20260118 iwe?.GetAttribute("width");
+            {
+                ChromeSetFocus();
+                iwe.Click();//這裡不能用 iwe.JsClick()，會出錯;
+            }
+        }
+
+        /// <summary>
         /// 自動全選[Quick edit]的內容，方便有時候須用剪下貼上者
         /// </summary>
         /// <returns>成功則傳回true</returns>
@@ -691,25 +728,36 @@ namespace TextForCtext
         /// <summary>
         /// 取得如欽定四庫全書的版本連結元件；若失敗則回傳null
         /// </summary>
-        internal static IWebElement Version_LinkBox
+        internal static IWebElement Version_LinkBox_ImageTextCorrespondencePage
         {
             get
             {
                 IWebElement version_LinkBox;
-                if (IsValidUrl＿keyDownCtrlAdd(ActiveForm1.TextBox3Text))
-                {
-                    //  /html/body/div[2]/div[5]/div[3]/a[1]
-                    version_LinkBox = Browser.WaitFindWebElementBySelector_ToBeClickable("#content > div:nth-child(8) > div:nth-child(3) > a:nth-child(1)");
-                    if (version_LinkBox == null)
-                        // /html/body/div[2]/div[5]/div/a[1] /html/body/div[2]/div[5]/div/a[1]
-                        version_LinkBox = Browser.WaitFindWebElementBySelector_ToBeClickable("#content > div:nth-child(8) > div > a:nth-child(1)");
+                //if (IsValidUrl＿keyDownCtrlAdd(ActiveForm1.TextBox3Text))
+                //{
+                //  /html/body/div[2]/div[5]/div[3]/a[1]
+                version_LinkBox = Browser.WaitFindWebElementBySelector_ToBeClickable("#content > div:nth-child(8) > div:nth-child(3) > a:nth-child(1)");
+                if (version_LinkBox == null)
+                    // /html/body/div[2]/div[5]/div/a[1] /html/body/div[2]/div[5]/div/a[1]
+                    version_LinkBox = Browser.WaitFindWebElementBySelector_ToBeClickable("#content > div:nth-child(8) > div > a:nth-child(1)");
 
-                }
-                else
-                    version_LinkBox = null;
+                //}
+                //else
+                //version_LinkBox = null;
                 return version_LinkBox;
             }
         }
+        /// <summary>
+        /// 調整quick edit 文字方塊大小以便檢視 20260123
+        /// </summary>
+        internal static void AdjustQuickEditDataTextBoxSizetoWatch()
+        {
+            // 調整 UI 大小以便檢視
+            //Quickedit_data_textbox.JsResize("1000px", "800px");
+            selenium.IWebElement iwe = Quickedit_data_textbox;
+            iwe.JsResize((iwe.Size.Width + 100).ToString() + "px", (iwe.Size.Height + 50).ToString() + "px");
+        }
+
         /// <summary>
         /// 取得[簡單修改模式]的文字方塊（編輯區的文字方塊）；若失敗則回傳null        
         /// Get the textbox of [Quick edit] 
@@ -833,7 +881,7 @@ namespace TextForCtext
         {
             get
             {
-                if (!IsValidUrl＿keyDownCtrlAdd(ActiveForm1.TextBox3Text)) return string.Empty;
+                //if (!IsValidUrl＿keyDownCtrlAdd(ActiveForm1.TextBox3Text)) return string.Empty;
                 IWebElement ie = Quickedit_data_textbox;
                 if (ie != null)
                 {
@@ -2898,7 +2946,7 @@ var callback = arguments[arguments.length - 1];
         /// 在textBox1第一行/段輸入「修改摘要」欄位的值，開頭須是「本書與 URN: ctp:」以供程式判斷
         /// 如：本書與 URN: ctp:wb951851 同版，今據此版並以末學自製於GitHub開源、免費免安裝之TextForCtext應用程式及其內之WordVBA對應迻入，（討論區與末學YouTube頻道有實境演示影片可供參考），以俟後賢精校。各本後亦可同步更新。感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主
         /// </summary>
-        internal static void Move2NextChapter()
+        internal static void Move2NextSectionChapter()
         {
             if (Browser.IsDriverInvalid) return;
             #region 將編輯區內容指定頁碼之後的部分搬到下一個單位後回存 20260111
@@ -4600,7 +4648,7 @@ var callback = arguments[arguments.length - 1];
 
 
                 SetIWebElementValueProperty(Textarea_data_Edit_textbox, result);
-                SetIWebElementValueProperty(Description_Edit_textbox, "加入末頁XML標記");
+                SetIWebElementValueProperty(Description_Edit_textbox, "加入末頁XML標記-以末學自製於GitHub開源免費免安裝之應用程式TextForCtext自動化加入。感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主");
                 if (Commit == null) return null;
                 Commit.JsClick();
                 return result;

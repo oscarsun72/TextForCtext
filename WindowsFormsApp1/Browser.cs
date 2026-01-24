@@ -14,10 +14,11 @@ using System.Globalization;
 //https://dotblogs.com.tw/supergary/2020/10/29/selenium#images-3
 using System.IO;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Media;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
+
 
 //using System.Net;
 //using System.Net.NetworkInformation;
@@ -1984,9 +1985,10 @@ namespace TextForCtext
         internal static ChromeDriver OpenNewTabWindow(WindowType tabOrwindow = WindowType.Tab)//creedit 20230103
         {/*chatGPT
             在 C# 中使用 Selenium 開啟新 Chrome 瀏覽器分頁可以使用以下方法：*/
-            // 創建 ChromeDriver 實例
-            //IWebDriver driver = new ChromeDriver();
-            //ChromeDriver driver = driverNew();//new ChromeDriver();
+        // 創建 ChromeDriver 實例
+        //IWebDriver driver = new ChromeDriver();
+        //ChromeDriver driver = driverNew();//new ChromeDriver();
+        retry:
             if (driver == null)
             {
                 if (Form1.BrowsrOPMode == Form1.BrowserOPMode.appActivateByName)
@@ -1995,6 +1997,7 @@ namespace TextForCtext
             }
             try
             {
+                if (driver == null) goto retry;
                 //LastValidWindow = driver.CurrentWindowHandle;//●●●●●●●●●●●●●●●●●●●●● 20250408取消
                 //Form1.ResetLastValidWindow();
                 driver = (ChromeDriver)driver.SwitchTo().NewWindow(tabOrwindow);
@@ -9912,6 +9915,15 @@ namespace TextForCtext
             {
                 if (DateTime.Now.Subtract(dt).TotalMinutes > 0.6) return false;
                 iwe = WaitFindWebElementBySelector_ToBeClickable("#feedback > div.feedback-button.feedback-tip");
+                try
+                {//for提早結束
+                    string cw = driver.CurrentWindowHandle;
+                }
+                catch (Exception)
+                {
+                    return false;
+                }
+
             }
             //結果
             iwe = WaitFindWebElementBySelector_ToBeClickable("#output-content");
@@ -10224,6 +10236,7 @@ namespace TextForCtext
                 }
                 else
                 {
+                    if (driver.WindowHandles.Contains(LastValidWindow)) driver.SwitchTo().Window(LastValidWindow);
                     LastValidWindow = driver.WindowHandles.Last();
                     Form1.PlaySound(Form1.SoundLike.error, true);
                 }
@@ -10291,12 +10304,18 @@ namespace TextForCtext
                         //if (ts != new TimeSpan()) driver.Manage().Timeouts().PageLoad = ts;
                         //return false;
                     }
+                    else if (ex.Message.StartsWith("timeout: Timed out receiving message from renderer:"))
+                    {
+                        if (DialogResult.Cancel == MessageBoxShowOKCancelExclamationDefaultDesktopOnly("Timed out receiving message from renderer, continue?"))
+                            return false;
+                        else
+                            return true;
+                    }
                     else
                     {
                         Console.WriteLine(ex.HResult + ex.Message);
                         Form1.PlaySound(Form1.SoundLike.error, true);
                         //MessageBox.Show(ex.HResult + ex.Message, "", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
-
 
                         driver.SwitchTo().Window(LastValidWindow);
                         return false;
@@ -11327,8 +11346,8 @@ namespace TextForCtext
                         break;
                 }
             }
-            if (!result) return result;
-            gotoNext:
+            if (!result) { CurrentUrlPrefixDomain = string.Empty; return result; }//找不到就歸零，再重新抓取 20260123 像現在Kanripo當了，改用《國學大師》本，就需要如此設計
+        gotoNext:
             if (string.IsNullOrWhiteSpace(CurrentUrlPrefixDomain)) CurrentUrlPrefixDomain = urlPrefixDomain;
             //取得下一卷的網址
             if (urlPrefixDomain == "skqs.guoxuedashi.net" || urlPrefixDomain == "skqs.39017.com")
@@ -11369,9 +11388,11 @@ namespace TextForCtext
                 if (iwe == null) return false;
                 //string textContent = iwe.GetAttribute("textContent");//.Substring(0, 100);
                 string textContent = iwe.GetDomProperty("textContent");//.Substring(0, 100);
-                int l = textContent.Length;
-                l = l > 50 ? 50 : l;
-                textContent = textContent.Replace("　", string.Empty).Substring(0, l);
+                int l = textContent.Length, textContentLength = l;
+                const int textContentCompareUBound = 37;//37者，原為50，但太長，以這頁為例 https://www.inindex.com/literature/bookDetails/1172175545378127874/1172175547936653313 20260124
+                l = l > textContentCompareUBound ? textContentCompareUBound : l;
+                //textContent = textContent.Replace("　", string.Empty).Substring(0, l);
+                textContent = textContent.Substring(0, l).Replace("　", string.Empty);
                 #endregion
                 iwe = WaitFindWebElementBySelector_ToBeClickable("#root > main > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div.gt");
                 if (iwe == null) return false;
@@ -11382,6 +11403,9 @@ namespace TextForCtext
                 //if (Cursor.Position != iwe.Location)
                 //    Cursor.Position = iwe.Location;
 
+                //內容太短會影響比對，如此頁 https://www.inindex.com/literature/bookDetails/1172175545378127874/1172175547936653313 20260124
+                if (textContentLength <= textContentCompareUBound) Thread.Sleep(120);//30~100，每10間差均實測過了。100暨100以下仍有誤差，30就太短了（之前會以為新的方法 SelectAndCopyElementHtmlContentSmartStableFinal 會讓網頁壞掉，原來邏輯在這裡，不在那個方法！蓋時間太短促，網頁渲染反應不及爾。）感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主 20260124
+
                 //內容框
                 iwe = WaitFindWebElementBySelector_ToBeClickable("#printView > div:nth-child(3) > div:nth-child(1) > div");//文本內容框
 
@@ -11390,7 +11414,10 @@ namespace TextForCtext
                 //while (urlOld == driver.Url)
                 //string textContent1 = iwe.GetAttribute("textContent");
                 string textContent1 = iwe.GetDomProperty("textContent");
-                if (textContent1.Length > 50) textContent1 = textContent1.Replace("　", string.Empty).Substring(0, l);
+                //if (textContent1.Length > 50) textContent1 = textContent1.Replace("　", string.Empty).Substring(0, l);                
+                if (textContent1.Length > textContentCompareUBound) textContent1 = textContent1.Substring(0, l).Replace("　", string.Empty);
+
+
                 //while (iwe.GetAttribute("textContent").Substring(0,100) == textContent)
                 while (textContent1 == textContent)
                 {
@@ -11400,7 +11427,7 @@ namespace TextForCtext
                      */
                     //textContent1 = iwe.GetAttribute("textContent");
                     textContent1 = iwe.GetDomProperty("textContent");
-                    if (textContent1.Length > 50) textContent1 = textContent1.Replace("　", string.Empty).Substring(0, l);
+                    if (textContent1.Length > textContentCompareUBound) textContent1 = textContent1.Substring(0, l).Replace("　", string.Empty);
                     if (DateTime.Now.Subtract(dt).TotalSeconds > 10) return false;
                 }
                 //driver.SwitchTo().Window(driver.CurrentWindowHandle);
@@ -12140,7 +12167,22 @@ namespace TextForCtext
             {
                 case ClipboardContentType.Html_CFHTML:
                     {
-                        return SelectAndCopyElementHtmlContentSmartStable(driver, element);
+
+                        //竟然問題是出在呼叫端，這個迴圈 while (textContent1 == textContent) 的判斷上？？再觀察 阿彌陀佛 20260123
+                        //蓋因為判斷式錯誤，太快了網頁來不及反應或抓不到就加以選取才會造成像網頁壞掉的樣子。現在又恢復正常了。原式還是保留以防再萬一。感恩感恩　南無阿彌陀佛
+                        return SelectAndCopyElementHtmlContentSmartStableFinal(driver, element);
+
+                        //switch (Browser.CurrentUrlPrefixDomain)
+                        //{
+                        //    //新式 SelectAndCopyElementHtmlContentSmartStableFinal 讀《元引科技引得數字人文資源平臺·中國歷代文獻》網頁似會破壞其結構，不知何故 20260123 改用分流，不同網頁處置不同
+                        //    case "www.inindex.com":
+                        //        return SelectAndCopyElementHtmlContentSmartStable(driver, element);
+                        //    case "inindex.com":
+                        //        return SelectAndCopyElementHtmlContentSmartStable(driver, element);
+                        //    default:
+                        //        return SelectAndCopyElementHtmlContentSmartStableFinal(driver, element);
+                        //}
+
                         //// 包裝成 CF_HTML 格式
                         //string header = "Version:0.9\r\n";
                         //string source = "SourceURL:" + driver.Url + "\r\n";
@@ -12291,7 +12333,7 @@ namespace TextForCtext
         /// <param name="driver"></param>
         /// <param name="element"></param>
         /// <returns>失敗傳回false</returns>
-        public static bool SelectAndCopyElementHtmlContentSmartStable(IWebDriver driver, IWebElement element)
+        public static bool SelectAndCopyElementHtmlContentSmartStableFinal(IWebDriver driver, IWebElement element)
         {
             var js = (IJavaScriptExecutor)driver;
 
@@ -12308,37 +12350,38 @@ namespace TextForCtext
             var data = new DataObject();
             data.SetData(DataFormats.Html, cfHtml);
             data.SetData(DataFormats.UnicodeText, plainText ?? string.Empty);
+
             Clipboard.SetDataObject(data, true);
 
             return true;
         }
 
 
-        #region 原式
-        //public static bool SelectAndCopyElementHtmlContentSmartStable(IWebDriver driver, IWebElement element)
-        //{
-        //    var js = (IJavaScriptExecutor)driver;
-        //    //var element = driver.FindElement(By.CssSelector(cssSelector));
+        #region 原式留著是對了！剛才才發現新式（上式 SelectAndCopyElementHtmlContentSmartStableFinal）會造成《元引科技引得數字人文資源平臺·中國歷代文獻》之網頁變形，且抓錯資料，不知何故 阿彌陀佛 20260123
+        public static bool SelectAndCopyElementHtmlContentSmartStable(IWebDriver driver, IWebElement element)
+        {
+            var js = (IJavaScriptExecutor)driver;
+            //var element = driver.FindElement(By.CssSelector(cssSelector));
 
-        //    // 抓完整 HTML 片段（包含子元素）
-        //    string fragmentHtml = (string)js.ExecuteScript("return arguments[0].outerHTML;", element);
-        //    if (string.IsNullOrWhiteSpace(fragmentHtml)) return false;
+            // 抓完整 HTML 片段（包含子元素）
+            string fragmentHtml = (string)js.ExecuteScript("return arguments[0].outerHTML;", element);
+            if (string.IsNullOrWhiteSpace(fragmentHtml)) return false;
 
-        //    // 生成穩健 CF_HTML
-        //    string cfHtml = BuildCfHtmlUtf8(fragmentHtml, driver.Url);
+            // 生成穩健 CF_HTML
+            string cfHtml = BuildCfHtmlUtf8(fragmentHtml, driver.Url);
 
-        //    // 同時提供純文字（方便 Notepad++）
-        //    string plainText = (string)js.ExecuteScript("return arguments[0].innerText;", element);
+            // 同時提供純文字（方便 Notepad++）
+            string plainText = (string)js.ExecuteScript("return arguments[0].innerText;", element);
 
-        //    var data = new DataObject();//https://copilot.microsoft.com/shares/562GQdNPLGNavN1UPHeDz 這次能在 Word 完整貼上格式化內容、同時在 Notepad++ 貼上純文字，正是因為最後的修正把 CF_HTML 與 UnicodeText 兩種格式同時正確寫入剪貼簿了。
-        //    data.SetData(DataFormats.Html, cfHtml);
-        //    data.SetData(DataFormats.UnicodeText, plainText ?? string.Empty);
-        //    Clipboard.SetDataObject(data, true);
+            var data = new DataObject();//https://copilot.microsoft.com/shares/562GQdNPLGNavN1UPHeDz 這次能在 Word 完整貼上格式化內容、同時在 Notepad++ 貼上純文字，正是因為最後的修正把 CF_HTML 與 UnicodeText 兩種格式同時正確寫入剪貼簿了。
+            data.SetData(DataFormats.Html, cfHtml);
+            data.SetData(DataFormats.UnicodeText, plainText ?? string.Empty);
+            Clipboard.SetDataObject(data, true);
 
-        //    while (!Form1.IsClipBoardAvailable_Text()) ;
+            while (!Form1.IsClipBoardAvailable_Text()) ;
 
-        //    return true;
-        //}
+            return true;
+        }
         #endregion
 
         /// <summary>

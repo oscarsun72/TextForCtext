@@ -44,7 +44,8 @@ namespace TextForCtext
             var fixer = new FullWidthSpaceFixer
             {
                 RequiredCount = 3,
-                Mode = InsertionMode.HalfSpace,
+                //Mode = InsertionMode.HalfSpace,
+                Mode = InsertionMode.CheckMark,
                 AllowHalfWidthSpace = false,
                 //EnableDebugReport = true,// ← 平常註解掉，需要時再打開
                 HighlightColor = System.Drawing.Color.Yellow,
@@ -89,7 +90,8 @@ namespace TextForCtext
 
             if (rangesNormalized.Count > 0)
             {
-                richTextBox1.Show();
+                //richTextBox1.Show();
+                Form1.PlaySound(Form1.SoundLike.exam, true);                
                 return true;
             }
             else
@@ -148,7 +150,7 @@ namespace TextForCtext
 
                     if (runLen >= RequiredCount)
                     {
-                        bool valid = IsValid(text, start, runLen);
+                        bool valid = IsValidFullWidthSpaceSequencesNeededFixed(text, start, runLen);
                         if (EnableDebugReport)
                         {
                             DebugBuilder.AppendFormat("Candidate start={0}, len={1}, IsValid={2}\r\n", start, runLen, valid);
@@ -211,7 +213,7 @@ namespace TextForCtext
             return sb.ToString();
         }
 
-        private bool IsValid(string text, int start, int runLen)
+        private bool IsValidFullWidthSpaceSequencesNeededFixed(string text, int start, int runLen)
         {
             if (string.IsNullOrEmpty(text)) return false;
 
@@ -261,8 +263,8 @@ namespace TextForCtext
             // 新增條件：字數差異 ≤ 4
             int l = TextLengthHelper.CountWordsLenPerLinePara(line);
             int normalLength = Form1.InstanceForm1.NormalLineParaLength;//l - runLen;
-            if (l - normalLength > 4)//誤差4，由 CheckAbnormalLinePara 方法來決定
-            {
+            if (l - normalLength > 4)//誤差4，由 CheckAbnormalLinePara 方法來決定；然既已有數個全形空格同行存在，嫌疑已大，故不必如此嚴苛，可再酌！20260122
+            {//長過正常行長度的才要排除。因為有異長行長度檢查的機制 TextLengthHelper.CheckAbnormalLinePara()
                 if (EnableDebugReport)
                     DebugBuilder.AppendFormat("  排除: 行字數差異過大 (l={0}, normal={1})\r\n", l, normalLength);
                 return false;

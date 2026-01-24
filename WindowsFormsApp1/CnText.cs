@@ -2586,6 +2586,8 @@ namespace TextForCtext
         /// </summary>
         public static List<string> SplitIntoPages(string text, int linesPerPage)
         {
+            //if (linesPerPage == 0) return null;
+
             if (string.IsNullOrEmpty(text)) return new List<string>();
             if (linesPerPage < 1) throw new ArgumentOutOfRangeException(nameof(linesPerPage));
 

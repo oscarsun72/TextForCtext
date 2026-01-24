@@ -2540,7 +2540,7 @@ Sub 國學大師_Kanripo_四庫全書本轉來(Optional lineCntPerPage As Byte = 0)
 
     rng.Find.ClearFormatting
     
-    
+    '找夾注注文
     rng.Find.font.Color = 16711935
     Do While rng.Find.Execute(vbNullString, , , False, , , True, wdFindStop)
         If noteFont Is Nothing Then Set noteFont = rng.font
@@ -2643,6 +2643,11 @@ Sub 國學大師_Kanripo_四庫全書本轉來(Optional lineCntPerPage As Byte = 0)
                     End If
                 End If
                 
+                'just for test
+                Dim rngTest As Range
+                Set rngTest = noteRng.Document.Range(noteRng.start, noteRng.End)
+                rngTest.MoveStartUntil Chr(11), -50
+                If InStr(rngTest, "平鋪一面席高出四邊牆") Then Stop
                 
                 For Each a In noteRng.Characters '找到/（夾注換行）的位置
                     If a = "/" And a.InlineShapes.Count = 0 Then
@@ -2652,7 +2657,7 @@ Sub 國學大師_Kanripo_四庫全書本轉來(Optional lineCntPerPage As Byte = 0)
                             
                             Do Until VBA.Abs(noteRng.Document.Range(noteRng.start, a.start).Characters.Count - VBA.IIf(a.End = noteRng.End, 0, noteRng.Document.Range(a.End, noteRng.End).Characters.Count)) < 2
                                 'noteRng.Document.Range(a.End, noteRng.End).text = noteRng.Document.Range(a.End, noteRng.End).text & "　"
-                                noteRng.text = noteRng.text & "　"
+                                noteRng.text = noteRng.text & "　" '小注不換行補空格U+3000
                                 a.SetRange aSt, aEd
                                 
                                 counter = counter + 1
@@ -2660,6 +2665,7 @@ Sub 國學大師_Kanripo_四庫全書本轉來(Optional lineCntPerPage As Byte = 0)
                                     Exit Do
                                 End If
                             Loop
+                            counter = 0 '歸零 20260122 真是誇張的bug :) :D 感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主
                             If a.Next = VBA.Chr(11) Then '如果斜線/後面即換行
                                 If aX = vbNullString Or VBA.Replace(aX, "　", vbNullString) <> vbNullString Then '若無縮排，則清除掉斜線/
                                     a.text = vbNullString
@@ -3661,13 +3667,14 @@ Sub Add0toSequenceField()
         WD.SwitchTo.Window w
         url = WD.url
         If VBA.InStr(url, "https://ctext.org/wiki.pl") = 1 And VBA.InStr(url, "&chapter=") Then
-            'Edit Link
+            'Edit Link 按下[修改]連結元件
             Set iwe = WD.FindElementByCssSelector("#content > h2 > span > a:nth-child(2)")
             iwe.Click
-            'sequence Box
+            
+            'sequence Box 設定「序號:」欄位值
             Set iwe = WD.FindElementByCssSelector("#sequence")
             SeleniumOP.SetIWebElementValueProperty iwe, iwe.GetAttribute("value") & add0
-            'Submit changes
+            'Submit changes 按下「保存編輯」按鈕
             Set iwe = WD.FindElementByCssSelector("#commit")
             iwe.Click
             VBA.Interaction.DoEvents
@@ -3677,6 +3684,7 @@ Sub Add0toSequenceField()
             WD.Close
         End If
     Next w
+    playSound 7
 End Sub
 
 Sub tempReplaceTxtforCtextEdit()

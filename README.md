@@ -538,6 +538,8 @@ Ctrl + n ：開新預設瀏覽器視窗 //原：在新頁籤開啟 google 網頁
 Ctrl + Shift + n : 開新Form1 實例
 
 Ctrl + Shift + s : 將隱藏的主表單Form1顯示出來（有時在隱藏執行程式時當掉需要） 20260118
+> 前提是要開多個表單，且不能被隱藏起來，則可以用Form2、Form3……等來操作。
+>> 因此今改為縮小至系統任務列中（亦等同隱藏表單），則當可經由滑鼠滑過其小圖示而得以復原顯現。感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主 20260122
 
 Ctrl + r ：刷新目前 Chrome瀏覽器 或 預設瀏覽器 網頁（同於網頁上按下F5鍵）；當瀏覽器網頁未能完整開啟必須重載時可用。
 
@@ -1038,7 +1040,7 @@ Ctrl + 滑鼠左鍵：清除框中所有文字
 
 - 輸入「tlsc」(TitleLeadingSpacesCount)後可以在textBox1前端列出目前的標題階級及其空格數
 - 輸入「tlsc.rmv1」(rmv=Remove)，可以移除第1個項目，「tlsc.clr」(clr=Clear)可以清除全部；清除textBox3的內容亦可以清除所有項目，及重設所有書面特徵參數（如每頁幾行、每行幾字等）
-- 輸入「tlsc.add」可以依textBox1被選取的行段資料來新增標題空格之項目。一行一筆，元素值為整數。
+- 輸入「tlsc.add」或「tadd」可以依textBox1被選取的行段資料來新增標題空格之項目。一行一筆，元素值為整數。
 - 輸入「lp」：由textBox2輸入 "lp" 來切換設定是否將每頁的尾端「`|`」字符改成「`<p>`」以方便文字版的圖文對照連結圖示的出現。這在目錄或清單、詩偈特長的篇卷中很適用。如[《唐文拾遺》](https://ctext.org/wiki.pl?if=gb&chapter=980722#%E5%94%90%E6%96%87%E6%8B%BE%E9%81%BA%E7%9B%AE%E9%8C%84%E7%AC%AC%E4%B8%80)。（l:line,p:paragraph）20251231
 - 輸入「alp」：由textBox2輸入 "alp" 來切換設定是否進行非正常行長（CheckAbnormalLinePara 方法）的檢查。 20250614 (a:abnormal,l:line,p:paragraph)
     >a=abnormal, l=line, p=paragraph
@@ -1051,8 +1053,8 @@ Ctrl + 滑鼠左鍵：清除框中所有文字
     >> 若只輸入「ifp」則還原為預設值
 - 輸入「anv」 設定是否要自動複製下一卷/單位文本
     > autoNextVolumnContextMark值的切換。預設為true
-- 輸入「ep」 (edit page)設定是否是在編輯XML頁碼偏移/位移時的模式。（同版書、同版本文本帶入置換file id 和 頁數） 20260112
-    > EditModeMakeup_changeFile_Page值的切換。預設為false。e:edit p:pages
+- 輸入「eP」 (edit Page)設定是否是在編輯XML頁碼偏移/位移時的模式。（同版書、同版本文本帶入置換file id 和 頁數） 20260112
+    > EditModeMakeup_changeFile_Page值的切換。預設為false。e:edit P:pages
 - 輸入「eE」 (exam Editted)設定是否要做已編輯之檢查，避免蓋覆前人校讀或編輯過的資料。（批量連續快捷輸入時適用） 20260115
     > examEditedModified 值的切換。預設為false。執行Ctrl + Shift + Alt + m 後會自行設為true。
 
