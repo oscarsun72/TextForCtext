@@ -152,6 +152,7 @@
     <Compile Include="TextFixerBase.cs" />
     <Compile Include="TextLengthHelper.cs" />
     <Compile Include="VBA.cs" />
+    <Compile Include="XMLPageRearranger.cs" />
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
     </EmbeddedResource>

@@ -13316,7 +13316,7 @@ namespace WindowsFormsApp1
                 e.Handled = true;
                 PlaySound(SoundLike.exam, true);
                 #region 測試程式貼在裡面
-                JustForTest();
+                JustForTestOnly();
                 #endregion
                 return;
             }
@@ -16798,6 +16798,85 @@ namespace WindowsFormsApp1
          */
 
         /// <summary>
+        /// SaveText 子程序
+        /// </summary>
+        internal void SaveText_sub()
+        {
+            string str1 = textBox1.Text;
+            string f = dropBoxPathIncldBackSlash + ((_ocrTextMode & PasteOcrResultFisrtMode) ? "cTextOCR.txt" : fName_to_Save_Txt);
+
+            try
+            {
+                // 使用暫存檔避免 Dropbox 衝突
+                string tempFile = Path.GetTempFileName();
+
+                // 先寫入暫存檔，允許其他程式同時存取
+                using (var fs = new FileStream(tempFile, FileMode.Create, FileAccess.Write, FileShare.ReadWrite))
+                using (var sw = new StreamWriter(fs, Encoding.UTF8))
+                {
+                    sw.Write(str1);
+                }
+
+                // 嘗試原子性替換
+                RetryReplace(tempFile, f);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.HResult + ":" + ex.Message);
+
+                switch (ex.HResult)
+                {
+                    case -2147024809: // 特殊 surrogate 錯誤
+                        if (ex.Message.StartsWith("無法將索引") && ex.Message.EndsWith("轉譯為指定的字碼頁。"))
+                            return;
+                        break;
+                    default:
+                        Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
+                        break;
+                }
+                return;
+            }
+
+            if (_keyinTextMode && !_autoPaste2QuickEdit)
+            {
+                Task.Run(() =>
+                {
+                    string downloadDirectory = DownloadDirectory_Chrome;
+                    string downloadImgFullName = MydocumentsPathIncldBackSlash + "CtextTempFiles\\Ctext_Page_Image.png";
+                    if (ChkDownloadDirectory_Chrome(downloadImgFullName, downloadDirectory))
+                    {
+                        string filePath = Path.Combine(downloadDirectory,
+                            Path.GetFileNameWithoutExtension(downloadImgFullName) + ".txt");
+
+                        if (File.Exists(filePath)) File.Delete(filePath);
+                    }
+                });
+            }
+        }
+
+        /// <summary>
+        /// 嘗試原子性替換，若檔案被佔用則重試
+        /// </summary>
+        private void RetryReplace(string tempFile, string targetFile, int maxRetry = 3, int delayMs = 500)
+        {
+            for (int i = 0; i < maxRetry; i++)
+            {
+                try
+                {
+                    File.Replace(tempFile, targetFile, null);
+                    return;
+                }
+                catch (IOException ex) when ((uint)ex.HResult == 0x80070020) // ERROR_SHARING_VIOLATION
+                {
+                    Thread.Sleep(delayMs);
+                }
+            }
+
+            Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("檔案仍被佔用，無法寫入：" + targetFile);
+        }
+
+        // https://copilot.microsoft.com/shares/rcFrgGKoQvJTsG8Q8J9ir 20260124 https://copilot.microsoft.com/shares/NoNTkZWN8XFAG11daHEoe C# 檔案寫入錯誤處理與優化
+        /// <summary>
         /// 儲存當前文本以備份；預設路徑在Dropbox預設安裝路徑
         /// 按F5以載入所備份（刷新textBox1的內容）
         /// </summary>
@@ -16823,6 +16902,14 @@ namespace WindowsFormsApp1
                         if (ex.Message.StartsWith("無法將索引") && ex.Message.EndsWith("轉譯為指定的字碼頁。"))//20240921 應該是由於在分段/行或還原時時切到了surrogate的字
                             return;
                         break;
+                    case -2147024864: //0x80070020 檔案被其他程式佔用
+                        if (ex.Message == @"由於另一個處理序正在使用檔案 '" + f + "'，所以無法存取該檔案。")
+                            SaveText_sub();
+                        //Form1.MessageBoxShowOKExclamationDefaultDesktopOnly("檔案被其他程式佔用，無法寫入：" + f);
+                        /*HResult = -2147024864
+                            ex = {"由於另一個處理序正在使用檔案 'C:\\Users\\Admin\\Dropbox\\cText.txt'，所以無法存取該檔案。"} https://copilot.microsoft.com/shares/pmRFCPDjubik1Dn1URZEK C# 檔案寫入錯誤處理與優化
+                         */
+                        return;
                     default:
                         Debugger.Break();
                         Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
@@ -18686,7 +18773,8 @@ namespace WindowsFormsApp1
         bool _editModeMakeup_changeFile_Page = false;
         private void Form1_Activated(object sender, EventArgs e)
 
-        {//此中斷點專為偵錯測試用 感恩感恩　南無阿彌陀佛 20230314
+        {
+            //此中斷點專為偵錯測試用 感恩感恩　南無阿彌陀佛 20230314
 
             //if (_currentPageNum == "115") Debugger.Break();
             //just for test 20151223
@@ -18727,6 +18815,7 @@ namespace WindowsFormsApp1
                         && Svg_image_PageImageFrame != null)
                 {//如果是《四庫全書》原扉頁，則將其書圖點大，以便檢視輸入
                     EnlargeSvgImageSize();
+                    AvailableInUse_BothKeysMouse();
                 }
                 if (Application.OpenForms[0].Controls["textBox3"].Text != string.Empty && textBox3.Text != Application.OpenForms[0].Controls["textBox3"].Text)
                 {
@@ -18775,8 +18864,10 @@ namespace WindowsFormsApp1
             //汲取剪貼簿內資料
             //Application.DoEvents(); 
             string clpTxt = "";//記錄剪貼簿內文字資料
+            DateTime dtClip = DateTime.Now;
             try
             {
+                while (!IsClipBoardAvailable_Text()) { if (DateTime.Now.Subtract(dtClip).TotalSeconds > 3) break; }
                 clpTxt = Clipboard.GetText();
             }
             catch (Exception)
@@ -18875,9 +18966,9 @@ namespace WindowsFormsApp1
                         default:
                             break;
                     }
-
+                    dtClip = DateTime.Now;
                     //確定剪貼簿是可用的
-                    while (!Form1.IsClipBoardAvailable_Text()) { }
+                    while (!Form1.IsClipBoardAvailable_Text()) { if (DateTime.Now.Subtract(dtClip).TotalSeconds > 3) break; }
 
 
                     #region 讀取剪貼簿裡的內容（即擷取自 quick_edit_box 框內的文字）__先取消此功能，改交由別處進行！！！20240211大年初二
@@ -18962,11 +19053,13 @@ namespace WindowsFormsApp1
 
             //bool autoPasteFromSBCKwhether = false; this.autoPasteFromSBCKwhether = autoPasteFromSBCKwhether;            
 
+
             bool flowControl = AssignedRunWordVBA(clpTxt);
             if (!flowControl)
             {
                 return;
             }
+
         }//完成 From1的 Activated事件處理程序
 
         /// <summary>
@@ -18977,7 +19070,7 @@ namespace WindowsFormsApp1
         internal bool AssignedRunWordVBA(string clpTxt)
         {
             #region 在textBox1內容文字少於100時的檢查，以自行決定其他的操作，如《中國哲學書電子化計劃》清除頁前的分段符號、撤掉與書圖的對應_脫鉤,《國學大師》的《四庫全書》本文等
-            if (textBox1.TextLength < 100)
+            if ((!_fastMode && textBox1.TextLength < 100) || (_fastMode && textBox1.TextLength == 0))
             {
                 //如果剪貼簿裡的文字內容長於99個字元，則執行相關的 Word VBA
                 if (clpTxt.Length > 99)
@@ -20853,10 +20946,11 @@ namespace WindowsFormsApp1
             if (dragDrop) dragDrop = false;
             _selStart = textBox1.SelectionStart; _selLength = textBox1.SelectionLength;
 
-            if (Name == "Form3" && textBox1.Text.Contains("欽定四庫全書"))
-            {
-                RestoreSvgImageSize();
-            }
+            //if (Name == "Form3" && textBox1.Text.Contains("欽定四庫全書"))
+            //{
+            //    RestoreSvgImageSize();
+            //}
+
             //if (this.WindowState==FormWindowState.Minimized)
             //{
             //    hideToNICo();
@@ -21590,43 +21684,54 @@ namespace WindowsFormsApp1
         /// 測試專用 Ctrl + Shift + Alt + t
         /// 測試程式貼在裡面。ok了，可重新命名獨立出來。
         /// </summary>
-        private void JustForTest()
+        private void JustForTestOnly()
         {
-            string originalRaw = textBox1.Text ?? string.Empty; // 確保是原始未插入文字
-            if (!ExamFullWidthSpaceSequencesFormattingError_inserttoCheck_HighlighttoWatch(originalRaw, textBox1, richTextBox1))
-                PlaySound(SoundLike.finish);
-            //https://copilot.microsoft.com/shares/gWdFMKkRVTazmVXsHpLzt
+            // 往下一頁搬最後 1 段
+            Clipboard.SetText(TextForCtext.PageRearranger.Rearrange(Clipboard.GetText(), 1, MoveDirection.Forward));
+            // 往下一頁搬最後 2 段
+            //string result1 = TextForCtext.PageRearranger.Rearrange(inputXml, 2, MoveDirection.Forward);
 
+            // 往上一頁搬最前 1 段
+            //string result2 = TextForCtext.PageRearranger.Rearrange(inputXml, 1, MoveDirection.Backward);
 
-            //HighlightValidFullWidthSpaceSequences(richTextBox1, 3);
+            //https://copilot.microsoft.com/shares/iuzKaufrCJUrR7HT2CBDo https://copilot.microsoft.com/shares/q8yoF1WL9u5YLZZgnvouT 20260124
 
-            //HighlightValidFullWidthSpaceSequences_insertsapcetoCheck(3);
-
-            #region 之前測試的
-
-            //HanchiTextReadinginPagebyPage();
-
-            //string x = textBox1.Text;
-            //CnText.ClearFirstParaLeadingSpace(ref x);
-            //textBox1.Text = x;
-
-            //MessageBoxShowOKExclamationDefaultDesktopOnly(CountWordsLenPerLinePara(GetLineText(textBox1.Text, textBox1.SelectionStart)).ToString() + " 字長");
-
-
-            //AutoMarkTitleParagraph();
-
-            //if (!IsDriverInvalid())
-            //CopySKQSNextVolume();
-
-            //expandSelectedTextRangeToWholeLinePara(textBox1.SelectionStart,textBox1.SelectionLength,textBox1.Text);
-            //Range range = new Document(ref textBox1).Range(textBox1.SelectionStart, textBox1.SelectionStart + textBox1.SelectionLength);
-            //outdent_ConvexRow(ref range);
-            //undoRecord();
-            //PauseEvents();                
-            //textBox1.SelectedText = range.Text;
-            //ResumeEvents();
-            #endregion
         }
+        #region 之前測試的
+        //string originalRaw = textBox1.Text ?? string.Empty; // 確保是原始未插入文字
+        //if (!ExamFullWidthSpaceSequencesFormattingError_inserttoCheck_HighlighttoWatch(originalRaw, textBox1, richTextBox1))
+        //    PlaySound(SoundLike.finish);
+        ////https://copilot.microsoft.com/shares/gWdFMKkRVTazmVXsHpLzt
+
+
+        //HighlightValidFullWidthSpaceSequences(richTextBox1, 3);
+
+        //HighlightValidFullWidthSpaceSequences_insertsapcetoCheck(3);
+
+
+
+        //HanchiTextReadinginPagebyPage();
+
+        //string x = textBox1.Text;
+        //CnText.ClearFirstParaLeadingSpace(ref x);
+        //textBox1.Text = x;
+
+        //MessageBoxShowOKExclamationDefaultDesktopOnly(CountWordsLenPerLinePara(GetLineText(textBox1.Text, textBox1.SelectionStart)).ToString() + " 字長");
+
+
+        //AutoMarkTitleParagraph();
+
+        //if (!IsDriverInvalid())
+        //CopySKQSNextVolume();
+
+        //expandSelectedTextRangeToWholeLinePara(textBox1.SelectionStart,textBox1.SelectionLength,textBox1.Text);
+        //Range range = new Document(ref textBox1).Range(textBox1.SelectionStart, textBox1.SelectionStart + textBox1.SelectionLength);
+        //outdent_ConvexRow(ref range);
+        //undoRecord();
+        //PauseEvents();                
+        //textBox1.SelectedText = range.Text;
+        //ResumeEvents();
+        #endregion
     }
 
 
