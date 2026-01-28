@@ -10175,7 +10175,12 @@ namespace WindowsFormsApp1
             if (se.Replace("●", "") == "")
             {
                 if (ev) _eventsEnabled = false;
-                textBox1.Text = textBox1.Text.Substring(e + 2);//●●●●●●●●乃作為權訂每行字數之參考，故可刪去
+                //textBox1.Text = textBox1.Text.Substring(e + 2);//●●●●●●●●乃作為權訂每行字數之參考，故可刪去
+                textBox1.Text = textBox1.Text.Substring(e + Environment.NewLine.Length);//●●●●●●●●乃作為權訂每行字數之參考，故可刪去
+                x = textBox1.Text;//之前都忘了重設這些相關的值了！這個bug之前竟然都沒發覺？！ 20260128 
+                e = x.IndexOf(Environment.NewLine); if (e < 0) return;
+                //se = GetLineText(x, s);
+                se = textBox1.Text.Substring(s, e - s);//取得s(start)和e(end)之間的字串，就叫se
                 _eventsEnabled = ev;                                                                   //if (CountWordsLenPerLinePara(se) == wordsPerLinePara && se.Replace("●", "") == "") textBox1.Text = textBox1.Text.Substring(e + 2);
             }
             else
@@ -10217,16 +10222,32 @@ namespace WindowsFormsApp1
             else
             {
                 //目前 se 為第一行/段內容                
-                if (se.IndexOf("<p>") == -1 && se.IndexOf("*") == -1 && CountWordsLenPerLinePara(se) < WordsPerLinePara)
+                if (!se.EndsWith("|") && se.IndexOf("<p>") == -1 && se.IndexOf("*") == -1 && CountWordsLenPerLinePara(se) < WordsPerLinePara)
                 {
-                    if (IsShortLine(GetNextLineText_IncludingMarkers(x, s), se, cnt, rst))
-                        textBox1.Text = textBox1.Text.Substring(0, e) + p//"<p>"
-                            + textBox1.Text.Substring(e);
+                    if (topLine)
+                    {
+                        //if (IsShortLine(GetNextLineText_IncludingMarkers(textBox1.Text, s), se, cnt, rst))
+                        if (IsShortLine(GetNextLineText_IncludingMarkers(x, s), se, cnt, rst))
+                        {
+                            textBox1.Text = textBox1.Text.Substring(0, e) + p//"<p>"
+                                + textBox1.Text.Substring(e);
+                            //e += 3;//"<p>".length
+                            e += p.Length;
+                        }
+                        else
+                        {
+                            textBox1.Text = textBox1.Text.Substring(0, e) + "|"
+                                + textBox1.Text.Substring(e);
+                            e += "|".Length;
+                        }
+                    }
                     else
-                        textBox1.Text = textBox1.Text.Substring(0, e) + "|"
-                            + textBox1.Text.Substring(e);
-                    //e += 3;//"<p>".length
-                    e += p.Length;
+                    {
+                        textBox1.Text = textBox1.Text.Substring(0, e) + p//"<p>"
+                        + textBox1.Text.Substring(e);
+                        //e += 3;//"<p>".length
+                        e += p.Length;
+                    }
                 }
             }
 
@@ -10308,7 +10329,7 @@ namespace WindowsFormsApp1
                                     else
                                     {
                                         textBox1.SelectedText = "|";
-                                        e++;
+                                        e++;//e += "|".Length;
                                         if ((int)rst.AbsolutePosition > 1) rst.MoveFirst();
                                     }
                                 }
