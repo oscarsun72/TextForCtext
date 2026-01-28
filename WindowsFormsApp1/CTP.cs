@@ -637,12 +637,12 @@ namespace TextForCtext
             get
             {
                 IWebElement iwe;
-                if (IsValidUrl_ImageTextComparisonPage(ActiveForm1.TextBox3Text))
-                {
-                    iwe = Browser.WaitFindWebElementBySelector_ToBeClickable("#canvas > svg");
-                }
-                else
-                    return null;
+                //if (IsValidUrl_ImageTextComparisonPage(ActiveForm1.TextBox3Text))
+                //{
+                iwe = Browser.WaitFindWebElementBySelector_ToBeClickable("#canvas > svg");
+                //}
+                //else
+                //return null;
                 if (iwe == null)
                     iwe = Browser.WaitFindWebElementBySelector_ToBeClickable("#previmg");
                 if (iwe == null)
@@ -675,7 +675,8 @@ namespace TextForCtext
         /// <summary>
         /// 放大書圖以便檢視
         /// </summary>
-        internal static void EnlargeSvgImageSize()
+        /// <returns>有按下來放大則傳回true</returns>
+        internal static bool EnlargeSvgImageSize(bool chromeSetFocus = true)
         {
             IWebElement iwe = Svg_image_PageImageFrame;
             DateTime dt = DateTime.Now;
@@ -686,14 +687,18 @@ namespace TextForCtext
             }
             if (iwe?.Size.Width <= 500) // Leo AI 20260118 iwe?.GetAttribute("width");
             {
-                ChromeSetFocus();
+                if (chromeSetFocus)
+                    ChromeSetFocus();
                 iwe.Click();//這裡不能用 iwe.JsClick()，會出錯;
-            }            
+                return true;
+            }
+            return false;
         }
         /// <summary>
-        ///還原放大的書圖
+        /// 還原放大的書圖
         /// </summary>
-        internal static void RestoreSvgImageSize()
+        /// <returns>有按下以還原則為true</returns>
+        internal static bool RestoreSvgImageSize(bool chromeSetFocus = true)
         {
             IWebElement iwe = Svg_image_PageImageFrame;
             DateTime dt = DateTime.Now;
@@ -704,9 +709,12 @@ namespace TextForCtext
             }
             if (iwe?.Size.Width > 500) // Leo AI 20260118 iwe?.GetAttribute("width");
             {
-                ChromeSetFocus();
+                if (chromeSetFocus)
+                    ChromeSetFocus();
                 iwe.Click();//這裡不能用 iwe.JsClick()，會出錯;
+                return true;
             }
+            return false;
         }
 
         /// <summary>
@@ -1283,6 +1291,7 @@ namespace TextForCtext
                     if (!found)
                     {
                         Form1.PlaySound(Form1.SoundLike.error, true);
+                        MessageBoxShowOKExclamationDefaultDesktopOnly("請檢查textBox3內的值是否是有效的 Quick edit 編輯頁面的網址！！感恩感恩　南無阿彌陀佛");//20260127
                         return false;
                     }
                 }
@@ -1303,12 +1312,16 @@ namespace TextForCtext
                         if (!found)
                         {
                             Form1.PlaySound(Form1.SoundLike.error, true);
+                            MessageBoxShowOKExclamationDefaultDesktopOnly("請檢查textBox3內的值是否是有效的 Quick edit 編輯頁面的網址！！感恩感恩　南無阿彌陀佛");//20260127
                             return false;
                         }
                     }
                 }
                 else
+                {
+                    MessageBoxShowOKExclamationDefaultDesktopOnly("請檢查textBox3內的值是否是有效的 Quick edit 編輯頁面的網址！！感恩感恩　南無阿彌陀佛");//20260127
                     Debugger.Break();
+                }
             }
 
             #endregion
@@ -2754,8 +2767,14 @@ namespace TextForCtext
             if (DownloadImage_WithSeleniumCookies(driver, imageUrl, pageUrl, downloadImgFullName))
                 return true;
 
+            //// 如果失敗，回退到瀏覽器 fetch 模式
+            //return DownloadImage_ViaBrowserFetch(driver, imageUrl, downloadImgFullName);
             // 如果失敗，回退到瀏覽器 fetch 模式
-            return DownloadImage_ViaBrowserFetch(driver, imageUrl, downloadImgFullName);
+            if (DownloadImage_ViaBrowserFetch(driver, imageUrl, downloadImgFullName))
+                return true;
+
+            // 再失敗，則回到原來開新分頁的方式下載
+            return DownloadImage(imageUrl, downloadImgFullName);
         }
 
         private static bool DownloadImage_WithSeleniumCookies(ChromeDriver driver, string imageUrl, string pageUrl, string downloadImgFullName)

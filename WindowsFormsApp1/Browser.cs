@@ -10225,23 +10225,35 @@ namespace TextForCtext
 
             //以上防呆
 
-            TimeSpan ts = new TimeSpan();
+            TimeSpan timeSpan = new TimeSpan();
         retry:
             try
             {
                 if (!IsDriverInvalid)
                 {
                     LastValidWindow = driver.CurrentWindowHandle;
-                    ts = driver.Manage().Timeouts().PageLoad;
+                    timeSpan = driver.Manage().Timeouts().PageLoad;
+                    if (timeSpan.TotalSeconds < 60)
+                    {
+                        Browser.driver.Manage().Timeouts().PageLoad = TimeSpan.FromSeconds(60);
+                        timeSpan = driver.Manage().Timeouts().PageLoad;
+                    }
+
                 }
-                else
+                else//if (IsDriverInvalid)
                 {
-                    if (driver.WindowHandles.Contains(LastValidWindow)) driver.SwitchTo().Window(LastValidWindow);
-                    LastValidWindow = driver.WindowHandles.Last();
                     Form1.PlaySound(Form1.SoundLike.error, true);
+                    if (driver.WindowHandles.Contains(LastValidWindow))
+                        driver.SwitchTo().Window(LastValidWindow);
+                    else
+                    {
+                        LastValidWindow = driver.WindowHandles.Last();
+                        driver.SwitchTo().Window(LastValidWindow);
+                    }
+
                 }
                 OpenNewTabWindow(OpenQA.Selenium.WindowType.Tab);
-                driver.Manage().Timeouts().PageLoad = new TimeSpan(0, 0, 4);
+                driver.Manage().Timeouts().PageLoad = new TimeSpan(0, 0, 10);
                 string selector;
                 if (si.LengthInTextElements == 1)
                 {
@@ -10270,7 +10282,7 @@ namespace TextForCtext
                 if (iwe == null)
                 {
                     //driver.SwitchTo().Window(LastValidWindow);
-                    if (ts != new TimeSpan()) driver.Manage().Timeouts().PageLoad = ts;
+                    if (timeSpan != new TimeSpan()) driver.Manage().Timeouts().PageLoad = timeSpan;
                     //return true;
                 }
 
@@ -10306,10 +10318,18 @@ namespace TextForCtext
                     }
                     else if (ex.Message.StartsWith("timeout: Timed out receiving message from renderer:"))
                     {
-                        if (DialogResult.Cancel == MessageBoxShowOKCancelExclamationDefaultDesktopOnly("Timed out receiving message from renderer, continue?"))
-                            return false;
-                        else
-                            return true;
+                        MessageBoxShowOKExclamationDefaultDesktopOnly("Timed out receiving message from renderer, continue?");
+                        //if (DialogResult.Cancel == MessageBoxShowOKCancelExclamationDefaultDesktopOnly("Timed out receiving message from renderer, continue?"))
+                        //    return false;
+                        //else
+                        //    return true;
+                        if (driver.Manage().Timeouts().PageLoad < timeSpan)
+                        {
+                            //Console.Write(driver.Manage().Timeouts().PageLoad.ToString() +
+                            //    Environment.NewLine + timeSpan.ToString());//.TotalMilliseconds.ToString());
+                            driver.Manage().Timeouts().PageLoad = timeSpan;
+                        }
+                        return false;
                     }
                     else
                     {
@@ -10323,7 +10343,7 @@ namespace TextForCtext
                 }
                 if (!IsDriverInvalid)
                     driver.SwitchTo().Window(driver.WindowHandles.Last());
-                if (ts != new TimeSpan()) driver.Manage().Timeouts().PageLoad = ts;
+                if (timeSpan != new TimeSpan()) driver.Manage().Timeouts().PageLoad = timeSpan;
 
                 return false;
             }
@@ -10333,12 +10353,12 @@ namespace TextForCtext
                 if (!SetFocusOnWebPageBody())
                 {
                     driver.SwitchTo().Window(LastValidWindow);
-                    if (ts != new TimeSpan()) driver.Manage().Timeouts().PageLoad = ts;
+                    if (timeSpan != new TimeSpan()) driver.Manage().Timeouts().PageLoad = timeSpan;
                     return true;
                 }
             }
 
-            if (ts != new TimeSpan()) driver.Manage().Timeouts().PageLoad = ts;
+            if (timeSpan != new TimeSpan()) driver.Manage().Timeouts().PageLoad = timeSpan;
             return true;
         }
 
@@ -13281,6 +13301,9 @@ namespace TextForCtext
     /// </summary>
     public static class GjcoolOCR
     {
+        // OCR 視窗句柄，用於判斷視窗被手動關閉以提早結束、或多視窗切換
+        private static string _ocrWindowHandle = "";
+
         // 🌟 模式偵測
         private static GjcoolMode DetectGjcoolMode(ChromeDriver driver)
         {
@@ -13313,6 +13336,8 @@ namespace TextForCtext
             if (DetectRestriction(driver))
                 return null;
 
+            _ocrWindowHandle = driver.CurrentWindowHandle;
+
             switch (DetectGjcoolMode(driver))
             {
                 case GjcoolMode.FastExperience:
@@ -13331,7 +13356,11 @@ namespace TextForCtext
             }
         }
 
-        // 🌟 防錯機制（您改好的版本）
+        /// <summary>
+        /// 🌟 防錯機制（您改好的版本）
+        /// </summary>
+        /// <param name="driver"></param>
+        /// <returns>若檢測成功或手動關閉OCR視窗分頁（即OCR被中斷）傳回true</returns>
         private static bool DetectRestriction(ChromeDriver driver)
         {
             try
@@ -13346,6 +13375,21 @@ namespace TextForCtext
                         msg);
                     driver.Close();
                     driver.SwitchTo().Window(driver.WindowHandles.Last());
+                    Browser.StopOCR = true;
+                    return true;
+                }
+
+                try
+                {
+                    //檢測視窗是否被手動關閉
+                    if (!driver.WindowHandles.Contains(_ocrWindowHandle))
+                    {
+                        Browser.StopOCR = true;
+                        return true;
+                    }
+                }
+                catch (Exception)
+                {
                     Browser.StopOCR = true;
                     return true;
                 }
@@ -13464,7 +13508,7 @@ namespace TextForCtext
 
                 if ((DateTime.Now - begin).TotalSeconds > 20)
                 {
-                    if (Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("等待上传完毕已逾時，要繼續嗎？") == DialogResult.Cancel)
+                    if (Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("等待上傳完畢已逾時，要繼續嗎？") == DialogResult.Cancel)
                         return null;
                     begin = DateTime.Now;
                 }

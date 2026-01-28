@@ -261,7 +261,7 @@ namespace TextForCtext
         /// 輸入平抬條件：0=後綴；1=前綴；2=前後之前；3前後之後；4是前+後之詞彙；5非前+後之詞彙；6非後綴之詞彙；7非前綴之詞彙
         /// Alt + l
         /// </summary>
-        /// <param name="termtoChk"></param>
+        /// <param name="termtoChk">termtoCheck:要檢查是否需要新增平抬條件的字串</param>
         internal static void TopLineFactorIuput04condition(string termtoChk)
         {
             //TextBox tb = (TextBox)frm.Controls["textBox1"];

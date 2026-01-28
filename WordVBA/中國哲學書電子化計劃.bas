@@ -2272,13 +2272,21 @@ Sub Kanripo_GitHub轉來(Optional lineCntPerPage As Byte = 0)
         If amp <> "&" Then
             noteRng.text = Replace(noteRng.text, "&amp;", "&")
         End If
-        noteRng.Copy
+        'noteRng.Copy'怕整個Range結構都複製進剪貼簿去了!測試果然！！故才會常造成Access解析端出現系統記憶體資源不足之問題。故資料型別（data type）之重要與關鍵如此！ 20260128
+        ClipboardPutIn noteRng.text '只要複製純文字就好
         noteRng.Application.Visible = True
         noteRng.Application.windowState = wdWindowStateMaximize
         noteRng.Application.Activate
         noteRng.Document.ActiveWindow.Visible = True
         noteRng.Document.ActiveWindow.Activate
         DoEvents
+        
+'        '20260127
+'        CreateInputForm_KanjiCharacterCodeReplacementReferenceTableinKanripoGitHubRepository noteRng.text, cnt
+        
+'        If MsgBox("進行造字或缺字字圖資料之新增" & _
+            vbCr & vbCr & vbCr & "完成後再按下「確定」繼續。" & _
+            vbCr & vbCr & vbCr & "若目前系統尚無字、或如《字統網》之組字式亦不易表達者，則請按「取消」。", vbOKCancel + vbExclamation) = vbOK Then
         If MsgBox("請開啟「查字forinput.mdb」資料庫，按下「Ctrl + 1」鍵進行造字或缺字字圖資料之新增(記錄在「KanripoGitHub存放庫造字圖碼取代對照表」中)。" & _
             vbCr & vbCr & vbCr & "完成後再按下「確定」繼續。" & _
             vbCr & vbCr & vbCr & "若目前系統尚無字、或如《字統網》之組字式亦不易表達者，則請按「取消」。", vbOKCancel + vbExclamation) = vbOK Then
@@ -3208,7 +3216,8 @@ restart:
         Set p = d.Paragraphs(2)
         If p.Range.text = Chr(13) Then
             If preFileNum = 0 Then
-                MsgBox "請輸入目的地的file值，之後可由程式自動+1"
+                MsgBox "請輸入目的地的file值，之後可由程式自動+1" & vbCr & vbCr _
+                    & "第一段請以「-」開始，「-」為要變更到目的地的頁碼。感恩感恩　南無阿彌陀佛"
                 Exit Sub
             Else
                 d.Range(p.Range.start, p.Range.End - 1) = preFileNum + 1

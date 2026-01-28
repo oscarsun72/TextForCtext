@@ -356,7 +356,7 @@ eH:
                 SystemSetup.wait 0.8
                 Resume
             Case Else
-                MsgBox Err.number + Err.description
+                MsgBox Err.number & Err.description
         End Select
 End Function
 
