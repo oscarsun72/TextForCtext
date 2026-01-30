@@ -121,7 +121,7 @@ retry:      Next ch
         AppActivate "Microsoft word"
         MsgBox "²Î­p§¹¦¨!!" & vbCr & "(¡°¦@°õ¦æ¤F" & wrong & "¦¸ªºÀË¬d¡°)" _
             & vbCr & "¡°¯Ó®É:" & Format(EndTime - StTime, "n¤Às¬í") & "¡°" _
-            & vbCr & "¦r¤¸¼Æ=" & .Characters.Count & vbCr '_
+            & vbCr & "¦r¤¸¼Æ=" & .Characters.count & vbCr '_
     '        & firstword
     '    MsgBox "²Î­p§¹¦¨!!" & vbCr & "(¡°¦@°õ¦æ¤F" & wrong & "¦¸ªºÀË¬d¡°)" _
     '        & vbCr & "¡°¯Ó®É:" & DateDiff("n", StTime, EndTime) & "¤ÀÄÁ¡°" _
@@ -435,8 +435,8 @@ Sub ¶i¶¥µüÀW1() '2002/11/15­nSub¤~¯à¦bWord¤¤°õ¦æ!
     With ActiveDocument
         For phralh = 1 To j
     '    ­ì¼È©w³Ìªø¬°5­Ó¦rºc¦¨ªºµü,¤µ§ï§@ÅÜ¼Æj,«h­­©óByte¤j¤p¦Õ!
-            For phra = 1 To .Characters.Count
-                If phra + (phralh - 1) <= .Characters.Count Then
+            For phra = 1 To .Characters.count
+                If phra + (phralh - 1) <= .Characters.count Then
                     phras = ""
                     For i = 0 To phralh - 1
                         phras = phras & .Characters(phra + i)
@@ -475,7 +475,7 @@ Sub ¶i¶¥µüÀW1() '2002/11/15­nSub¤~¯à¦bWord¤¤°õ¦æ!
         MsgBox "²Î­p§¹¦¨!!" & vbCr & "(¡°¦@°õ¦æ¤F" & wrong & "¦¸ªºÀË¬d¡°)" _
             & "µü·J¥kÃä¥b§ÎªÅ®æ¤Z" & hfspace & "¦¸,©¿²¤¤£­p!" _
             & vbCr & "¡°¯Ó®É:" & Format(EndTime - StTime, "n¤Às¬í") & "¡°" _
-            & vbCr & "¦r¤¸¼Æ=" & .Characters.Count
+            & vbCr & "¦r¤¸¼Æ=" & .Characters.count
     End With
     'd.Visible = True
     If MsgBox("­n§Y¨èÀËµøµ²ªG¶Ü?", vbYesNo + vbQuestion) = vbYes Then
@@ -528,59 +528,59 @@ Sub «ü©w¦r¼ÆµüÀW() '2002/11/11
     End If
     StTime = VBA.Time
     With ActiveDocument
-        For phra = 1 To .Characters.Count
+        For phra = 1 To .Characters.count
             Select Case CByte(phralh)
                 Case Is = 1
                     phras = .Characters(phra)
                 Case Is = 2
-                    If phra + 1 <= .Characters.Count Then _
+                    If phra + 1 <= .Characters.count Then _
                     phras = .Characters(phra) & .Characters(phra + 1)
                 Case Is = 3
-                    If phra + 2 <= .Characters.Count Then _
+                    If phra + 2 <= .Characters.count Then _
                     phras = .Characters(phra) & .Characters(phra + 1) & _
                             .Characters(phra + 2)
                 Case Is = 4
-                    If phra + 3 <= .Characters.Count Then _
+                    If phra + 3 <= .Characters.count Then _
                     phras = .Characters(phra) & .Characters(phra + 1) & _
                             .Characters(phra + 2) & .Characters(phra + 3)
                 Case Is = 5
-                    If phra + 4 <= .Characters.Count Then _
+                    If phra + 4 <= .Characters.count Then _
                     phras = .Characters(phra) & .Characters(phra + 1) & _
                             .Characters(phra + 2) & .Characters(phra + 3) & _
                             .Characters(phra + 4)
                 Case Is = 6
-                    If phra + 5 <= .Characters.Count Then _
+                    If phra + 5 <= .Characters.count Then _
                     phras = .Characters(phra) & .Characters(phra + 1) & _
                             .Characters(phra + 2) & .Characters(phra + 3) & _
                             .Characters(phra + 4) & .Characters(phra + 5)
                 Case Is = 7
-                    If phra + 6 <= .Characters.Count Then _
+                    If phra + 6 <= .Characters.count Then _
                     phras = .Characters(phra) & .Characters(phra + 1) & _
                             .Characters(phra + 2) & .Characters(phra + 3) & _
                             .Characters(phra + 4) & .Characters(phra + 5) & _
                             .Characters(phra + 6)
                 Case Is = 8
-                    If phra + 7 <= .Characters.Count Then _
+                    If phra + 7 <= .Characters.count Then _
                     phras = .Characters(phra) & .Characters(phra + 1) & _
                             .Characters(phra + 2) & .Characters(phra + 3) & _
                             .Characters(phra + 4) & .Characters(phra + 5) & _
                             .Characters(phra + 6) & .Characters(phra + 7)
                 Case Is = 9
-                    If phra + 8 <= .Characters.Count Then _
+                    If phra + 8 <= .Characters.count Then _
                     phras = .Characters(phra) & .Characters(phra + 1) & _
                             .Characters(phra + 2) & .Characters(phra + 3) & _
                             .Characters(phra + 4) & .Characters(phra + 5) & _
                             .Characters(phra + 6) & .Characters(phra + 7) & _
                             .Characters(phra + 8)
                 Case Is = 10
-                    If phra + 9 <= .Characters.Count Then _
+                    If phra + 9 <= .Characters.count Then _
                     phras = .Characters(phra) & .Characters(phra + 1) & _
                             .Characters(phra + 2) & .Characters(phra + 3) & _
                             .Characters(phra + 4) & .Characters(phra + 5) & _
                             .Characters(phra + 6) & .Characters(phra + 7) & _
                             .Characters(phra + 8) & .Characters(phra + 9)
                 Case Is = 11
-                    If phra + 10 <= .Characters.Count Then _
+                    If phra + 10 <= .Characters.count Then _
                     phras = .Characters(phra) & .Characters(phra + 1) & _
                             .Characters(phra + 2) & .Characters(phra + 3) & _
                             .Characters(phra + 4) & .Characters(phra + 5) & _
@@ -618,7 +618,7 @@ Sub «ü©w¦r¼ÆµüÀW() '2002/11/11
         MsgBox "²Î­p§¹¦¨!!" & vbCr & "(¡°¦@°õ¦æ¤F" & wrong & "¦¸ªºÀË¬d¡°)" _
             & "µü·J¥kÃä¥b§ÎªÅ®æ¤Z" & hfspace & "¦¸,©¿²¤¤£­p!" _
             & vbCr & "¡°¯Ó®É:" & Format(EndTime - StTime, "n¤Às¬í") & "¡°" _
-            & vbCr & "¦r¤¸¼Æ=" & .Characters.Count
+            & vbCr & "¦r¤¸¼Æ=" & .Characters.count
     End With
     If MsgBox("­n§Y¨èÀËµøµ²ªG¶Ü?", vbYesNo + vbQuestion) = vbYes Then
     '    Set d = GetObject("d:\¤d¼{¤@±oÂN\®ÑÄy¸ê®Æ\µüÀW.mdb")
@@ -666,8 +666,8 @@ Sub «ü©w11¦r¼ÆµüÀW()     '2002/11/15'¥H¦¹¬°¨Ò,¥i§@¬°¹w¥ý­­©w¦r¼Æªº¦U­Óµ{§Ç(¥»¨Ò¬
     End If
     StTime = VBA.Time
     With ActiveDocument
-        For phra = 1 To .Characters.Count
-            If phra + 10 <= .Characters.Count Then _
+        For phra = 1 To .Characters.count
+            If phra + 10 <= .Characters.count Then _
                 phras = .Characters(phra) & .Characters(phra + 1) & _
                         .Characters(phra + 2) & .Characters(phra + 3) & _
                         .Characters(phra + 4) & .Characters(phra + 5) & _
@@ -704,7 +704,7 @@ Sub «ü©w11¦r¼ÆµüÀW()     '2002/11/15'¥H¦¹¬°¨Ò,¥i§@¬°¹w¥ý­­©w¦r¼Æªº¦U­Óµ{§Ç(¥»¨Ò¬
         MsgBox "²Î­p§¹¦¨!!" & vbCr & "(¡°¦@°õ¦æ¤F" & wrong & "¦¸ªºÀË¬d¡°)" _
             & "µü·J¥kÃä¥b§ÎªÅ®æ¤Z" & hfspace & "¦¸,©¿²¤¤£­p!" _
             & vbCr & "¡°¯Ó®É:" & Format(EndTime - StTime, "n¤Às¬í") & "¡°" _
-            & vbCr & "¦r¤¸¼Æ=" & .Characters.Count
+            & vbCr & "¦r¤¸¼Æ=" & .Characters.count
     End With
     If MsgBox("­n§Y¨èÀËµøµ²ªG¶Ü?", vbYesNo + vbQuestion) = vbYes Then
     '    Set d = GetObject("d:\¤d¼{¤@±oÂN\®ÑÄy¸ê®Æ\µüÀW.mdb")
@@ -749,8 +749,8 @@ Sub «ü©w10¦r¼ÆµüÀW() '2002/11/15
     End If
     StTime = VBA.Time
     With ActiveDocument
-        For phra = 1 To .Characters.Count
-            If phra + 9 <= .Characters.Count Then _
+        For phra = 1 To .Characters.count
+            If phra + 9 <= .Characters.count Then _
                 phras = .Characters(phra) & .Characters(phra + 1) & _
                         .Characters(phra + 2) & .Characters(phra + 3) & _
                         .Characters(phra + 4) & .Characters(phra + 5) & _
@@ -786,7 +786,7 @@ Sub «ü©w10¦r¼ÆµüÀW() '2002/11/15
         MsgBox "²Î­p§¹¦¨!!" & vbCr & "(¡°¦@°õ¦æ¤F" & wrong & "¦¸ªºÀË¬d¡°)" _
             & "µü·J¥kÃä¥b§ÎªÅ®æ¤Z" & hfspace & "¦¸,©¿²¤¤£­p!" _
             & vbCr & "¡°¯Ó®É:" & Format(EndTime - StTime, "n¤Às¬í") & "¡°" _
-            & vbCr & "¦r¤¸¼Æ=" & .Characters.Count
+            & vbCr & "¦r¤¸¼Æ=" & .Characters.count
     End With
     If MsgBox("­n§Y¨èÀËµøµ²ªG¶Ü?", vbYesNo + vbQuestion) = vbYes Then
     '    Set d = GetObject("d:\¤d¼{¤@±oÂN\®ÑÄy¸ê®Æ\µüÀW.mdb")
@@ -832,8 +832,8 @@ Sub «ü©w9¦r¼ÆµüÀW()  '2002/11/15
     End If
     StTime = VBA.Time
     With ActiveDocument
-        For phra = 1 To .Characters.Count
-            If phra + 8 <= .Characters.Count Then _
+        For phra = 1 To .Characters.count
+            If phra + 8 <= .Characters.count Then _
                 phras = .Characters(phra) & .Characters(phra + 1) & _
                         .Characters(phra + 2) & .Characters(phra + 3) & _
                         .Characters(phra + 4) & .Characters(phra + 5) & _
@@ -869,7 +869,7 @@ Sub «ü©w9¦r¼ÆµüÀW()  '2002/11/15
         MsgBox "²Î­p§¹¦¨!!" & vbCr & "(¡°¦@°õ¦æ¤F" & wrong & "¦¸ªºÀË¬d¡°)" _
             & "µü·J¥kÃä¥b§ÎªÅ®æ¤Z" & hfspace & "¦¸,©¿²¤¤£­p!" _
             & vbCr & "¡°¯Ó®É:" & Format(EndTime - StTime, "n¤Às¬í") & "¡°" _
-            & vbCr & "¦r¤¸¼Æ=" & .Characters.Count
+            & vbCr & "¦r¤¸¼Æ=" & .Characters.count
     End With
     If MsgBox("­n§Y¨èÀËµøµ²ªG¶Ü?", vbYesNo + vbQuestion) = vbYes Then
     '    Set d = GetObject("d:\¤d¼{¤@±oÂN\®ÑÄy¸ê®Æ\µüÀW.mdb")
@@ -916,8 +916,8 @@ Sub «ü©w8¦r¼ÆµüÀW()   '2002/11/15
     End If
     StTime = VBA.Time
     With ActiveDocument
-        For phra = 1 To .Characters.Count
-            If phra + 7 <= .Characters.Count Then _
+        For phra = 1 To .Characters.count
+            If phra + 7 <= .Characters.count Then _
                 phras = .Characters(phra) & .Characters(phra + 1) & _
                         .Characters(phra + 2) & .Characters(phra + 3) & _
                         .Characters(phra + 4) & .Characters(phra + 5) & _
@@ -952,7 +952,7 @@ Sub «ü©w8¦r¼ÆµüÀW()   '2002/11/15
         MsgBox "²Î­p§¹¦¨!!" & vbCr & "(¡°¦@°õ¦æ¤F" & wrong & "¦¸ªºÀË¬d¡°)" _
             & "µü·J¥kÃä¥b§ÎªÅ®æ¤Z" & hfspace & "¦¸,©¿²¤¤£­p!" _
             & vbCr & "¡°¯Ó®É:" & Format(EndTime - StTime, "n¤Às¬í") & "¡°" _
-            & vbCr & "¦r¤¸¼Æ=" & .Characters.Count
+            & vbCr & "¦r¤¸¼Æ=" & .Characters.count
     End With
     If MsgBox("­n§Y¨èÀËµøµ²ªG¶Ü?", vbYesNo + vbQuestion) = vbYes Then
     '    Set d = GetObject("d:\¤d¼{¤@±oÂN\®ÑÄy¸ê®Æ\µüÀW.mdb")
@@ -998,8 +998,8 @@ Sub «ü©w6¦r¼ÆµüÀW()    '2002/11/15
     End If
     StTime = VBA.Time
     With ActiveDocument
-        For phra = 1 To .Characters.Count
-            If phra + 5 <= .Characters.Count Then _
+        For phra = 1 To .Characters.count
+            If phra + 5 <= .Characters.count Then _
                 phras = .Characters(phra) & .Characters(phra + 1) & _
                         .Characters(phra + 2) & .Characters(phra + 3) & _
                         .Characters(phra + 4) & .Characters(phra + 5)
@@ -1033,7 +1033,7 @@ Sub «ü©w6¦r¼ÆµüÀW()    '2002/11/15
         MsgBox "²Î­p§¹¦¨!!" & vbCr & "(¡°¦@°õ¦æ¤F" & wrong & "¦¸ªºÀË¬d¡°)" _
             & "µü·J¥kÃä¥b§ÎªÅ®æ¤Z" & hfspace & "¦¸,©¿²¤¤£­p!" _
             & vbCr & "¡°¯Ó®É:" & Format(EndTime - StTime, "n¤Às¬í") & "¡°" _
-            & vbCr & "¦r¤¸¼Æ=" & .Characters.Count
+            & vbCr & "¦r¤¸¼Æ=" & .Characters.count
     End With
     If MsgBox("­n§Y¨èÀËµøµ²ªG¶Ü?", vbYesNo + vbQuestion) = vbYes Then
     '    Set d = GetObject("d:\¤d¼{¤@±oÂN\®ÑÄy¸ê®Æ\µüÀW.mdb")
@@ -1079,8 +1079,8 @@ Sub «ü©w5¦r¼ÆµüÀW()     '2002/11/15
     End If
     StTime = VBA.Time
     With ActiveDocument
-        For phra = 1 To .Characters.Count
-            If phra + 4 <= .Characters.Count Then _
+        For phra = 1 To .Characters.count
+            If phra + 4 <= .Characters.count Then _
                 phras = .Characters(phra) & .Characters(phra + 1) & _
                         .Characters(phra + 2) & .Characters(phra + 3) & _
                         .Characters(phra + 4)
@@ -1114,7 +1114,7 @@ Sub «ü©w5¦r¼ÆµüÀW()     '2002/11/15
         MsgBox "²Î­p§¹¦¨!!" & vbCr & "(¡°¦@°õ¦æ¤F" & wrong & "¦¸ªºÀË¬d¡°)" _
             & "µü·J¥kÃä¥b§ÎªÅ®æ¤Z" & hfspace & "¦¸,©¿²¤¤£­p!" _
             & vbCr & "¡°¯Ó®É:" & Format(EndTime - StTime, "n¤Às¬í") & "¡°" _
-            & vbCr & "¦r¤¸¼Æ=" & .Characters.Count
+            & vbCr & "¦r¤¸¼Æ=" & .Characters.count
     End With
     If MsgBox("­n§Y¨èÀËµøµ²ªG¶Ü?", vbYesNo + vbQuestion) = vbYes Then
     '    Set d = GetObject("d:\¤d¼{¤@±oÂN\®ÑÄy¸ê®Æ\µüÀW.mdb")
@@ -1159,8 +1159,8 @@ Sub «ü©w4¦r¼ÆµüÀW()       '2002/11/15
     End If
     StTime = VBA.Time
     With ActiveDocument
-        For phra = 1 To .Characters.Count
-            If phra + 3 <= .Characters.Count Then _
+        For phra = 1 To .Characters.count
+            If phra + 3 <= .Characters.count Then _
                 phras = .Characters(phra) & .Characters(phra + 1) & _
                         .Characters(phra + 2) & .Characters(phra + 3)
             If Len(phras) > 1 And VBA.Right(phras, 1) = " " Then
@@ -1193,7 +1193,7 @@ Sub «ü©w4¦r¼ÆµüÀW()       '2002/11/15
         MsgBox "²Î­p§¹¦¨!!" & vbCr & "(¡°¦@°õ¦æ¤F" & wrong & "¦¸ªºÀË¬d¡°)" _
             & "µü·J¥kÃä¥b§ÎªÅ®æ¤Z" & hfspace & "¦¸,©¿²¤¤£­p!" _
             & vbCr & "¡°¯Ó®É:" & Format(EndTime - StTime, "n¤Às¬í") & "¡°" _
-            & vbCr & "¦r¤¸¼Æ=" & .Characters.Count
+            & vbCr & "¦r¤¸¼Æ=" & .Characters.count
     End With
     If MsgBox("­n§Y¨èÀËµøµ²ªG¶Ü?", vbYesNo + vbQuestion) = vbYes Then
     '    Set d = GetObject("d:\¤d¼{¤@±oÂN\®ÑÄy¸ê®Æ\µüÀW.mdb")
@@ -1239,8 +1239,8 @@ Sub «ü©w3¦r¼ÆµüÀW()      '2002/11/15
     End If
     StTime = VBA.Time
     With ActiveDocument
-        For phra = 1 To .Characters.Count
-            If phra + 2 <= .Characters.Count Then _
+        For phra = 1 To .Characters.count
+            If phra + 2 <= .Characters.count Then _
                 phras = .Characters(phra) & .Characters(phra + 1) & _
                         .Characters(phra + 2)
             If Len(phras) > 1 And VBA.Right(phras, 1) = " " Then
@@ -1273,7 +1273,7 @@ Sub «ü©w3¦r¼ÆµüÀW()      '2002/11/15
         MsgBox "²Î­p§¹¦¨!!" & vbCr & "(¡°¦@°õ¦æ¤F" & wrong & "¦¸ªºÀË¬d¡°)" _
             & "µü·J¥kÃä¥b§ÎªÅ®æ¤Z" & hfspace & "¦¸,©¿²¤¤£­p!" _
             & vbCr & "¡°¯Ó®É:" & Format(EndTime - StTime, "n¤Às¬í") & "¡°" _
-            & vbCr & "¦r¤¸¼Æ=" & .Characters.Count
+            & vbCr & "¦r¤¸¼Æ=" & .Characters.count
     End With
     If MsgBox("­n§Y¨èÀËµøµ²ªG¶Ü?", vbYesNo + vbQuestion) = vbYes Then
     '    Set d = GetObject("d:\¤d¼{¤@±oÂN\®ÑÄy¸ê®Æ\µüÀW.mdb")
@@ -1319,8 +1319,8 @@ Sub «ü©w2¦r¼ÆµüÀW()       '2002/11/15
     End If
     StTime = VBA.Time
     With ActiveDocument
-        For phra = 1 To .Characters.Count
-            If phra + 1 <= .Characters.Count Then _
+        For phra = 1 To .Characters.count
+            If phra + 1 <= .Characters.count Then _
                 phras = .Characters(phra) & .Characters(phra + 1)
             If Len(phras) > 1 And VBA.Right(phras, 1) = " " Then
                 hfspace = hfspace + 1 '­p¦¸
@@ -1352,7 +1352,7 @@ Sub «ü©w2¦r¼ÆµüÀW()       '2002/11/15
         MsgBox "²Î­p§¹¦¨!!" & vbCr & "(¡°¦@°õ¦æ¤F" & wrong & "¦¸ªºÀË¬d¡°)" _
             & "µü·J¥kÃä¥b§ÎªÅ®æ¤Z" & hfspace & "¦¸,©¿²¤¤£­p!" _
             & vbCr & "¡°¯Ó®É:" & Format(EndTime - StTime, "n¤Às¬í") & "¡°" _
-            & vbCr & "¦r¤¸¼Æ=" & .Characters.Count
+            & vbCr & "¦r¤¸¼Æ=" & .Characters.count
     End With
     If MsgBox("­n§Y¨èÀËµøµ²ªG¶Ü?", vbYesNo + vbQuestion) = vbYes Then
     '    Set d = GetObject("d:\¤d¼{¤@±oÂN\®ÑÄy¸ê®Æ\µüÀW.mdb")
@@ -1398,7 +1398,7 @@ Sub «ü©w1¦r¼ÆµüÀW()        '2002/11/15
     End If
     StTime = VBA.Time
     With ActiveDocument
-        For phra = 1 To .Characters.Count
+        For phra = 1 To .Characters.count
                 phras = .Characters(phra)
             If Len(phras) > 1 And VBA.Right(phras, 1) = " " Then
                 hfspace = hfspace + 1 '­p¦¸
@@ -1430,7 +1430,7 @@ Sub «ü©w1¦r¼ÆµüÀW()        '2002/11/15
         MsgBox "²Î­p§¹¦¨!!" & vbCr & "(¡°¦@°õ¦æ¤F" & wrong & "¦¸ªºÀË¬d¡°)" _
             & "µü·J¥kÃä¥b§ÎªÅ®æ¤Z" & hfspace & "¦¸,©¿²¤¤£­p!" _
             & vbCr & "¡°¯Ó®É:" & Format(EndTime - StTime, "n¤Às¬í") & "¡°" _
-            & vbCr & "¦r¤¸¼Æ=" & .Characters.Count
+            & vbCr & "¦r¤¸¼Æ=" & .Characters.count
     End With
     If MsgBox("­n§Y¨èÀËµøµ²ªG¶Ü?", vbYesNo + vbQuestion) = vbYes Then
     '    Set d = GetObject("d:\¤d¼{¤@±oÂN\®ÑÄy¸ê®Æ\µüÀW.mdb")
@@ -1479,8 +1479,8 @@ Sub «ü©w7¦r¼ÆµüÀW()      '2002/11/15'¥H¦¹¬°¨Ò,¥i§@¬°¹w¥ý­­©w¦r¼Æªº¦U­Óµ{§Ç(¥»¨Ò¬
     End If
     StTime = VBA.Time
     With ActiveDocument
-        For phra = 1 To .Characters.Count
-            If phra + 6 <= .Characters.Count Then _
+        For phra = 1 To .Characters.count
+            If phra + 6 <= .Characters.count Then _
                 phras = .Characters(phra) & .Characters(phra + 1) & _
                         .Characters(phra + 2) & .Characters(phra + 3) & _
                         .Characters(phra + 4) & .Characters(phra + 5) & _
@@ -1515,7 +1515,7 @@ Sub «ü©w7¦r¼ÆµüÀW()      '2002/11/15'¥H¦¹¬°¨Ò,¥i§@¬°¹w¥ý­­©w¦r¼Æªº¦U­Óµ{§Ç(¥»¨Ò¬
         MsgBox "²Î­p§¹¦¨!!" & vbCr & "(¡°¦@°õ¦æ¤F" & wrong & "¦¸ªºÀË¬d¡°)" _
             & "µü·J¥kÃä¥b§ÎªÅ®æ¤Z" & hfspace & "¦¸,©¿²¤¤£­p!" _
             & vbCr & "¡°¯Ó®É:" & Format(EndTime - StTime, "n¤Às¬í") & "¡°" _
-            & vbCr & "¦r¤¸¼Æ=" & .Characters.Count
+            & vbCr & "¦r¤¸¼Æ=" & .Characters.count
     End With
     If MsgBox("­n§Y¨èÀËµøµ²ªG¶Ü?", vbYesNo + vbQuestion) = vbYes Then
     '    Set d = GetObject("d:\¤d¼{¤@±oÂN\®ÑÄy¸ê®Æ\µüÀW.mdb")
@@ -1564,11 +1564,11 @@ Sub «ü©w¦r¼ÆµüÀW1() '2002/11/15'®Ä¯à¸ûºC!
     End If
     StTime = VBA.Time
     With ActiveDocument
-        For phra = 1 To .Characters.Count
+        For phra = 1 To .Characters.count
             j = CByte(phralh)
             ReDim a1(1 To j) As String
             If j > 1 Then
-                If phra + (phralh - 1) <= .Characters.Count Then
+                If phra + (phralh - 1) <= .Characters.count Then
                     For j = 1 To j
                         For i = 0 To j - 1
                                 a1(j) = a1(j) & .Characters(phra + i)
@@ -1610,7 +1610,7 @@ Sub «ü©w¦r¼ÆµüÀW1() '2002/11/15'®Ä¯à¸ûºC!
         MsgBox "²Î­p§¹¦¨!!" & vbCr & "(¡°¦@°õ¦æ¤F" & wrong & "¦¸ªºÀË¬d¡°)" _
             & "µü·J¥kÃä¥b§ÎªÅ®æ¤Z" & hfspace & "¦¸,©¿²¤¤£­p!" _
             & vbCr & "¡°¯Ó®É:" & Format(EndTime - StTime, "n¤Às¬í") & "¡°" _
-            & vbCr & "¦r¤¸¼Æ=" & .Characters.Count
+            & vbCr & "¦r¤¸¼Æ=" & .Characters.count
     End With
     If MsgBox("­n§Y¨èÀËµøµ²ªG¶Ü?", vbYesNo + vbQuestion) = vbYes Then
     '    Set d = GetObject("d:\¤d¼{¤@±oÂN\®ÑÄy¸ê®Æ\µüÀW.mdb")
@@ -1660,9 +1660,9 @@ Sub «ü©w¦r¼ÆµüÀW2() '2002/11/15®Ä¯à»P­ì³]­p®t¤£¦h,¦ý¥iÅÜ¼Æ¤Æ!
     StTime = VBA.Time
     j = CByte(phralh)
     With ActiveDocument
-        For phra = 1 To .Characters.Count
+        For phra = 1 To .Characters.count
     '        If j > 1 Then'§Y¨Ï¬O³æ¦r¤]¤£¶·¤À§O³B²z¤F!!
-                If phra + (phralh - 1) <= .Characters.Count Then
+                If phra + (phralh - 1) <= .Characters.count Then
                     phras = ""
                     For i = 0 To j - 1
                         phras = phras & .Characters(phra + i)
@@ -1701,7 +1701,7 @@ Sub «ü©w¦r¼ÆµüÀW2() '2002/11/15®Ä¯à»P­ì³]­p®t¤£¦h,¦ý¥iÅÜ¼Æ¤Æ!
         MsgBox "²Î­p§¹¦¨!!" & vbCr & "(¡°¦@°õ¦æ¤F" & wrong & "¦¸ªºÀË¬d¡°)" _
             & "µü·J¥kÃä¥b§ÎªÅ®æ¤Z" & hfspace & "¦¸,©¿²¤¤£­p!" _
             & vbCr & "¡°¯Ó®É:" & Format(EndTime - StTime, "n¤Às¬í") & "¡°" _
-            & vbCr & "¦r¤¸¼Æ=" & .Characters.Count
+            & vbCr & "¦r¤¸¼Æ=" & .Characters.count
     End With
     If MsgBox("­n§Y¨èÀËµøµ²ªG¶Ü?", vbYesNo + vbQuestion) = vbYes Then
     '    Set d = GetObject("d:\¤d¼{¤@±oÂN\®ÑÄy¸ê®Æ\µüÀW.mdb")
@@ -1799,29 +1799,29 @@ Sub ¤å¥ó¦rÀW_old()
                 If Len(.Range) = 1 Then '©|¥¼¿é¤J¤º®e
                     .Range.InsertAfter "¦rÀW = " & j & "¦¸¡G¡]" & Len(Replace(Xsort(j), "¡B", "")) & "¦r¡^"
                     .Range.Paragraphs(1).Range.font.Size = 12
-                    .Range.Paragraphs(.Paragraphs.Count).Range.font.name = "·s²Ó©úÅé"
-                    .Range.Paragraphs(.Paragraphs.Count).Range.font.NameAscii = "Times New Roman"
+                    .Range.Paragraphs(.Paragraphs.count).Range.font.name = "·s²Ó©úÅé"
+                    .Range.Paragraphs(.Paragraphs.count).Range.font.NameAscii = "Times New Roman"
                     '.Range.Paragraphs(1).Range.Font.Bold = True
                 Else
                     .Range.InsertParagraphAfter
                     .ActiveWindow.Selection.Range.Collapse Direction:=wdCollapseEnd
                     .Range.InsertAfter "¦rÀW = " & j & "¦¸¡G¡]" & Len(Replace(Xsort(j), "¡B", "")) & "¦r¡^"
-                    .Range.Paragraphs(.Paragraphs.Count).Range.font.Size = 12
+                    .Range.Paragraphs(.Paragraphs.count).Range.font.Size = 12
                     '.Range.Paragraphs(.Paragraphs.Count).Range.Bold = True
-                    .Range.Paragraphs(.Paragraphs.Count).Range.font.name = "·s²Ó©úÅé"
-                    .Range.Paragraphs(.Paragraphs.Count).Range.font.NameAscii = "Times New Roman"
+                    .Range.Paragraphs(.Paragraphs.count).Range.font.name = "·s²Ó©úÅé"
+                    .Range.Paragraphs(.Paragraphs.count).Range.font.NameAscii = "Times New Roman"
                 End If
                 .Range.InsertParagraphAfter
                 .ActiveWindow.Selection.Range.Collapse Direction:=wdCollapseEnd
-                .Range.Paragraphs(.Paragraphs.Count).Range.font.Size = 12
+                .Range.Paragraphs(.Paragraphs.count).Range.font.Size = 12
     '            .Range.Paragraphs(.Paragraphs.Count).Range.Bold = False
                 .Range.InsertAfter Replace(Xsort(j), "¡B", VBA.Chr(9), 1, 1) 'vba.Chr(9)¬°©w¦ì¦r¤¸(TabÁä­È)
                 .Range.InsertParagraphAfter
-                If InStr(.Range.Paragraphs(.Paragraphs.Count).Range, "¦rÀW") = 0 Then
-                    .Range.Paragraphs(.Paragraphs.Count - 1).Range.font.name = "¼Ð·¢Åé"
+                If InStr(.Range.Paragraphs(.Paragraphs.count).Range, "¦rÀW") = 0 Then
+                    .Range.Paragraphs(.Paragraphs.count - 1).Range.font.name = "¼Ð·¢Åé"
                 Else
-                    .Range.Paragraphs(.Paragraphs.Count).Range.font.name = "·s²Ó©úÅé"
-                    .Range.Paragraphs(.Paragraphs.Count).Range.font.NameAscii = "Times New Roman"
+                    .Range.Paragraphs(.Paragraphs.count).Range.font.name = "·s²Ó©úÅé"
+                    .Range.Paragraphs(.Paragraphs.count).Range.font.NameAscii = "Times New Roman"
                 End If
             End With
         End If
@@ -1940,7 +1940,7 @@ Function trimStrForSearch(x As String, sl As word.Selection) As String
     'https://docs.microsoft.com/zh-tw/dotnet/visual-basic/programming-guide/language-features/procedures/passing-arguments-by-value-and-by-reference
     Dim ayToTrim As Variant, a As Variant, rng As Range, slTxtR As String
     On Error GoTo eH
-    slTxtR = sl.Characters(sl.Characters.Count)
+    slTxtR = sl.Characters(sl.Characters.count)
     ayToTrim = Array(VBA.Chr(13), VBA.Chr(9), VBA.Chr(10), VBA.Chr(11), VBA.Chr(13) & VBA.Chr(7), VBA.Chr(13) & VBA.Chr(10))
     x = VBA.Trim(x)
     For Each a In ayToTrim
@@ -1974,7 +1974,7 @@ Sub ResetSelectionAvoidSymbols()
     Dim rng As Range
     Set rng = Selection.Range.Duplicate
     'Do While Selection.Characters(Selection.Characters.Count) = VBA.Chr(13)
-    Do While rng.Characters(rng.Characters.Count) = VBA.Chr(13)
+    Do While rng.Characters(rng.Characters.count) = VBA.Chr(13)
         rng.SetRange rng.start, rng.End - 1
         If rng.End = 0 Then Exit Sub
         'Selection.MoveLeft wdCharacter, 1, wdExtend'¿ï¨ú°_¨´¤è¦V¤£¦P·|¦³¼vÅT 20240924
@@ -2071,7 +2071,7 @@ Sub ¿ï¨ú¬q¸¨²Å¸¹()
 '        ActiveDocument.Range(.End - 1, .End).Select
 '    End With
 Dim i As Integer
-For i = 1 To ActiveDocument.Paragraphs.Count
+For i = 1 To ActiveDocument.Paragraphs.count
     With ActiveDocument.Paragraphs(i).Range
         ActiveDocument.Range(.End - 1, .End).Select
     End With
@@ -2233,7 +2233,7 @@ Sub µù¸}½s¸¹«e«á¥[¤è¬A¸¹()
 With Selection
     Do
 
-        Selection.GoTo What:=wdGoToFootnote, Which:=wdGoToNext, Count:=1, name:=""
+        Selection.GoTo What:=wdGoToFootnote, Which:=wdGoToNext, count:=1, name:=""
 '        Selection.GoTo What:=wdGoToFootnote, Which:=wdGoToNext, Count:=1, Name:=""
         Selection.Find.ClearFormatting
 '        With Selection.Find
@@ -2252,7 +2252,7 @@ With Selection
 '        If .Find.Execute() = False Then Exit Do
         'Application.Browser.Next
         .TypeText text:="["
-        .MoveLeft Unit:=wdCharacter, Count:=1, Extend:=wdExtend
+        .MoveLeft Unit:=wdCharacter, count:=1, Extend:=wdExtend
         .font.Superscript = wdToggle
 '        Selection.Copy
 '        Selection.MoveRight Unit:=wdCharacter, Count:=3
@@ -2262,7 +2262,7 @@ With Selection
 '        Selection.Delete Unit:=wdCharacter, Count:=1
 '        Selection.TypeText Text:="¡n"
 '        Selection.MoveLeft Unit:=wdCharacter, Count:=1
-        Selection.MoveRight Unit:=wdCharacter, Count:=2
+        Selection.MoveRight Unit:=wdCharacter, count:=2
         'Selection.TypeBackspace
         Selection.TypeText text:="]"
         'Selection.MoveRight Unit:=wdCharacter, Count:=1
@@ -2369,29 +2369,29 @@ For j = u To 0 Step -1 '°}¦C±Æ§Ç'2010/10/29
             If Len(.Range) = 1 Then '©|¥¼¿é¤J¤º®e
                 .Range.InsertAfter "¦rÀW = " & j & "¦¸¡G¡]" & Len(Replace(Xsort(j), "¡B", "")) & "¦r¡^"
                 .Range.Paragraphs(1).Range.font.Size = 12
-                .Range.Paragraphs(.Paragraphs.Count).Range.font.name = "·s²Ó©úÅé"
-                .Range.Paragraphs(.Paragraphs.Count).Range.font.NameAscii = "Times New Roman"
+                .Range.Paragraphs(.Paragraphs.count).Range.font.name = "·s²Ó©úÅé"
+                .Range.Paragraphs(.Paragraphs.count).Range.font.NameAscii = "Times New Roman"
                 '.Range.Paragraphs(1).Range.Font.Bold = True
             Else
                 .Range.InsertParagraphAfter
                 .ActiveWindow.Selection.Range.Collapse Direction:=wdCollapseEnd
                 .Range.InsertAfter "¦rÀW = " & j & "¦¸¡G¡]" & Len(Replace(Xsort(j), "¡B", "")) & "¦r¡^"
-                .Range.Paragraphs(.Paragraphs.Count).Range.font.Size = 12
+                .Range.Paragraphs(.Paragraphs.count).Range.font.Size = 12
                 '.Range.Paragraphs(.Paragraphs.Count).Range.Bold = True
-                .Range.Paragraphs(.Paragraphs.Count).Range.font.name = "·s²Ó©úÅé"
-                .Range.Paragraphs(.Paragraphs.Count).Range.font.NameAscii = "Times New Roman"
+                .Range.Paragraphs(.Paragraphs.count).Range.font.name = "·s²Ó©úÅé"
+                .Range.Paragraphs(.Paragraphs.count).Range.font.NameAscii = "Times New Roman"
             End If
             .Range.InsertParagraphAfter
             .ActiveWindow.Selection.Range.Collapse Direction:=wdCollapseEnd
-            .Range.Paragraphs(.Paragraphs.Count).Range.font.Size = 12
+            .Range.Paragraphs(.Paragraphs.count).Range.font.Size = 12
 '            .Range.Paragraphs(.Paragraphs.Count).Range.Bold = False
             .Range.InsertAfter Replace(Xsort(j), "¡B", VBA.Chr(9), 1, 1) 'vba.Chr(9)¬°©w¦ì¦r¤¸(TabÁä­È)
             .Range.InsertParagraphAfter
-            If InStr(.Range.Paragraphs(.Paragraphs.Count).Range, "¦rÀW") = 0 Then
-                .Range.Paragraphs(.Paragraphs.Count - 1).Range.font.name = "¼Ð·¢Åé"
+            If InStr(.Range.Paragraphs(.Paragraphs.count).Range, "¦rÀW") = 0 Then
+                .Range.Paragraphs(.Paragraphs.count - 1).Range.font.name = "¼Ð·¢Åé"
             Else
-                .Range.Paragraphs(.Paragraphs.Count).Range.font.name = "·s²Ó©úÅé"
-                .Range.Paragraphs(.Paragraphs.Count).Range.font.NameAscii = "Times New Roman"
+                .Range.Paragraphs(.Paragraphs.count).Range.font.name = "·s²Ó©úÅé"
+                .Range.Paragraphs(.Paragraphs.count).Range.font.NameAscii = "Times New Roman"
             End If
         End With
     End If
@@ -2590,29 +2590,29 @@ For j = u To 0 Step -1 '°}¦C±Æ§Ç'2010/10/29
             If Len(.Range) = 1 Then '©|¥¼¿é¤J¤º®e
                 .Range.InsertAfter "µüÀW = " & j & "¦¸¡G¡]" & Len(Replace(Xsort(j), "¡B", "")) / ln & "­Ó¡^"
                 .Range.Paragraphs(1).Range.font.Size = 12
-                .Range.Paragraphs(.Paragraphs.Count).Range.font.name = "·s²Ó©úÅé"
-                .Range.Paragraphs(.Paragraphs.Count).Range.font.NameAscii = "Times New Roman"
+                .Range.Paragraphs(.Paragraphs.count).Range.font.name = "·s²Ó©úÅé"
+                .Range.Paragraphs(.Paragraphs.count).Range.font.NameAscii = "Times New Roman"
                 '.Range.Paragraphs(1).Range.Font.Bold = True
             Else
                 .Range.InsertParagraphAfter
                 .ActiveWindow.Selection.Range.Collapse Direction:=wdCollapseEnd
                 .Range.InsertAfter "µüÀW = " & j & "¦¸¡G¡]" & Len(Replace(Xsort(j), "¡B", "")) / ln & "­Ó¡^"
-                .Range.Paragraphs(.Paragraphs.Count).Range.font.Size = 12
+                .Range.Paragraphs(.Paragraphs.count).Range.font.Size = 12
                 '.Range.Paragraphs(.Paragraphs.Count).Range.Bold = True
-                .Range.Paragraphs(.Paragraphs.Count).Range.font.name = "·s²Ó©úÅé"
-                .Range.Paragraphs(.Paragraphs.Count).Range.font.NameAscii = "Times New Roman"
+                .Range.Paragraphs(.Paragraphs.count).Range.font.name = "·s²Ó©úÅé"
+                .Range.Paragraphs(.Paragraphs.count).Range.font.NameAscii = "Times New Roman"
             End If
             .Range.InsertParagraphAfter
             .ActiveWindow.Selection.Range.Collapse Direction:=wdCollapseEnd
-            .Range.Paragraphs(.Paragraphs.Count).Range.font.Size = 12
+            .Range.Paragraphs(.Paragraphs.count).Range.font.Size = 12
 '            .Range.Paragraphs(.Paragraphs.Count).Range.Bold = False
             .Range.InsertAfter Replace(Xsort(j), "¡B", VBA.Chr(9), 1, 1) 'vba.Chr(9)¬°©w¦ì¦r¤¸(TabÁä­È)
             .Range.InsertParagraphAfter
-            If InStr(.Range.Paragraphs(.Paragraphs.Count).Range, "µüÀW") = 0 Then
-                .Range.Paragraphs(.Paragraphs.Count - 1).Range.font.name = "¼Ð·¢Åé"
+            If InStr(.Range.Paragraphs(.Paragraphs.count).Range, "µüÀW") = 0 Then
+                .Range.Paragraphs(.Paragraphs.count - 1).Range.font.name = "¼Ð·¢Åé"
             Else
-                .Range.Paragraphs(.Paragraphs.Count).Range.font.name = "·s²Ó©úÅé"
-                .Range.Paragraphs(.Paragraphs.Count).Range.font.NameAscii = "Times New Roman"
+                .Range.Paragraphs(.Paragraphs.count).Range.font.name = "·s²Ó©úÅé"
+                .Range.Paragraphs(.Paragraphs.count).Range.font.NameAscii = "Times New Roman"
             End If
         End With
     End If
@@ -2773,7 +2773,7 @@ Dim lngTemp As Long '¦]¬°»~«ö¨ì°lÂÜ­×­q¡A¤~·|¤Þµo°T®§´£¥Ü§R°£Àx¦s®æ¤£·|¦³¼ÐÃÑ
 Dim tb As table, c As cell ', ci As Long
 'Set d = ActiveDocument
 lngTemp = word.Application.DisplayAlerts
-If r.tables.Count > 0 Then
+If r.tables.count > 0 Then
     '¤¤°ê­õ¾Ç®Ñ¹q¤l¤Æ­p¹º.²M°£¤å¥»­¶¤¤ªº½s¸¹Àx¦s®æ r
     For Each tb In r.tables
         'tb.Columns(1).Delete
@@ -2822,7 +2822,7 @@ Dim slRng As Range, a, ur As UndoRecord, d As Document 'Alt + ]
 SystemSetup.stopUndo ur, "¤¤°ê­õ¾Ç®Ñ¹q¤l¤Æ­p¹º_¥h±¼µù¤å«O¯d¥¿¤å"
 Set d = Docs.ªÅ¥Õªº·s¤å¥ó(True)
 'If ActiveDocument.Characters.Count = 1 Then Selection.Paste
-If d.Characters.Count = 1 Then d.ActiveWindow.Selection.Paste
+If d.Characters.count = 1 Then d.ActiveWindow.Selection.Paste
 If d.ActiveWindow.Selection.Type = wdSelectionIP Then d.Select
 Set slRng = d.ActiveWindow.Selection.Range
 ¤¤°ê­õ¾Ç®Ñ¹q¤l¤Æ­p¹º_ªí®æÂà¤å¦r slRng
@@ -2935,7 +2935,7 @@ Sub º~Äy¹q¤l¤åÄm¸ê®Æ®w¤å¥»¾ã²z_¥HÂà¶K¨ì¤¤°ê­õ¾Ç®Ñ¹q¤l¤Æ­p¹º(Optional doNotCloseD
     Dim rp As Variant, i As Byte
     'Set ur = SystemSetup.stopUndo("º~Äy¹q¤l¤åÄm¸ê®Æ®w¤å¥»¾ã²z_¥HÂà¶K¨ì¤¤°ê­õ¾Ç®Ñ¹q¤l¤Æ­p¹º")
     SystemSetup.stopUndo ur, "º~Äy¹q¤l¤åÄm¸ê®Æ®w¤å¥»¾ã²z_¥HÂà¶K¨ì¤¤°ê­õ¾Ç®Ñ¹q¤l¤Æ­p¹º"
-    If Documents.Count = 0 Then Documents.Add
+    If Documents.count = 0 Then Documents.Add
     Set d = ActiveDocument
     If (d.path <> "" Or d.content.text <> VBA.Chr(13)) And openNewDoc Then
         Set d = Documents.Add()
@@ -2955,7 +2955,7 @@ Sub º~Äy¹q¤l¤åÄm¸ê®Æ®w¤å¥»¾ã²z_¥HÂà¶K¨ì¤¤°ê­õ¾Ç®Ñ¹q¤l¤Æ­p¹º(Optional doNotCloseD
          "-", "", "^#", "", "¡C¡C", "¡C") ', "¡C}}<p>¡C}}<p>", "¡C}}<p>")
          '­ì¨Ó¡uvba.Chrw(13) & vba.Chrw(45) & vba.Chrw(13) & vba.Chrw(13) & vba.Chrw(11)¡v¬O¨ä¤¤¦³ªí®æ°Ú
     Set rng = d.Range
-    If rng.Characters.Count = 1 Then '¤å¥óµL¤º®e®É¤~¶K¤W
+    If rng.Characters.count = 1 Then '¤å¥óµL¤º®e®É¤~¶K¤W
         rng.Paste '¡mº~Äy¥þ¤å¸ê®Æ®w¡n§ïª©«á°Å¶KÃ¯®Ä¯à«Ü®t¡A­n¾¨¶qÁ×§K ·P®¦·P®¦¡@Æg¼ÛÆg¼Û¡@«nµLªüÀ±ªû¦ò 20240825
     End If
     If Not rng.Document Is ActiveDocument Then
@@ -3062,7 +3062,7 @@ Sub º~Äy¹q¤l¤åÄm¸ê®Æ®w¤å¥»¾ã²z_ª`¤å«e«á¥[¬A¸¹() '³Ì«á°õ¦æ Docs.mark©ö¾ÇÃöÁä¦r(¦b
                 Exit Do
             End If
             If rng.End = rng.Document.Range.End Then rng.End = rng.End - 1
-            Do While rng.Characters(rng.Characters.Count) = VBA.Chr(13)
+            Do While rng.Characters(rng.Characters.count) = VBA.Chr(13)
                 rng.End = rng.End - 1
             Loop
             Do While rng.Characters(1) = VBA.Chr(13) & VBA.Chr(7)
@@ -3315,7 +3315,7 @@ With rng.Find
     .Style = "¶W³sµ²"
     .Execute , , , , , , , wdFindStop ', , "" ', wdReplaceAll
     Do
-        If InStr(rng.Characters(rng.Characters.Count).Next.Style, "®Õ®×") _
+        If InStr(rng.Characters(rng.Characters.count).Next.Style, "®Õ®×") _
             Or InStr(rng.Characters(1).Previous.Style, "®Õ®×") Then
             rng.Select
             Selection.Delete
@@ -3354,7 +3354,7 @@ Sub ¥ÍÃø¦r¥[¤W°ê»yÃã¨åª`­µ()
     st = Selection.Type
     If st = wdSelectionIP Then
         If Selection.start = 0 Then Exit Sub
-        x = Selection.Previous.Characters(Selection.Previous.Characters.Count).text
+        x = Selection.Previous.Characters(Selection.Previous.Characters.count).text
         If InStr("¡C¡A¡F¡u¡v¡y¡z¡q¡r¡m¡n¡H.,;""?¡Ð-¢w¢w--¡]¡^()¡i¡j¡e¡f<>[]¡K! ¡@¡I", x) Then Exit Sub
     '    Selection.Previous.Copy
     Else
@@ -3397,7 +3397,7 @@ Sub ¥ÍÃø¦r¥[¤W°ê»yÃã¨åª`­µ()
                 GoSub list
             Else
 2
-                If Selection.Characters.Count = 1 Then 'words  ³æ¦r
+                If Selection.Characters.count = 1 Then 'words  ³æ¦r
                     frmDict.getDictVariantsRecS words, rst
                     If rst.RecordCount > 0 Then
                         GoSub list
@@ -3513,14 +3513,14 @@ typeTexts:
             x = rst.Fields(2).Value 'URL  'frmDict.get1URLfor1(words)
             If VBA.IsNull(x) Then
                     If st = wdSelectionIP Then
-                        If Selection.Previous.Characters(Selection.Previous.Characters.Count).Hyperlinks.Count > 0 Then
+                        If Selection.Previous.Characters(Selection.Previous.Characters.count).Hyperlinks.count > 0 Then
                             Dim rngW As Range
                             Set rngW = Selection.Range
-                            rngW.SetRange Selection.Previous.Characters(Selection.Previous.Characters.Count).start, Selection.Previous.Characters(Selection.Previous.Characters.Count).End
+                            rngW.SetRange Selection.Previous.Characters(Selection.Previous.Characters.count).start, Selection.Previous.Characters(Selection.Previous.Characters.count).End
                             SystemSetup.ClipboardPutIn "=" & rngW.text '"^" & rngW.text & "$" 'version 6's new settings
                             Set rngW = Nothing
                         Else
-                            Set rngW = Selection.Previous.Characters(Selection.Previous.Characters.Count)
+                            Set rngW = Selection.Previous.Characters(Selection.Previous.Characters.count)
                             SystemSetup.ClipboardPutIn "=" & rngW.text
                             'Selection.Previous.Characters(Selection.Previous.Characters.Count).Copy
                         End If
@@ -4166,7 +4166,7 @@ Sub ¤À¦æ¤À¬q_®Ú¾Ú²Ä1¦æªº¦r¼Æªø«×¨Ó§@¤Á³Î()
 Dim wordCount As Byte, d As Document, rng As Range, i As Integer, dx As String, a, p As Paragraph, j As Byte, wl
 Dim omitStr As String
 omitStr = "{}<p>¡m¡n¡q¡r¡G¡A¡C¡u¡v¡y¡z¡@¡P0123456789-" & VBA.ChrW(8231) & VBA.ChrW(183) & VBA.Chr(13)
-If word.Documents.Count = 0 Then
+If word.Documents.count = 0 Then
     Set d = Documents.Add()
 ElseIf ActiveDocument.path <> "" Then
     Set d = Documents.Add() 'ActiveDocument
@@ -4185,9 +4185,9 @@ wl = InStr(dx, VBA.Chr(13))
 rng.text = VBA.Left(dx, wl) & Replace(dx, VBA.Chr(13), "", wl)
 
 i = 1
-Do Until rng.Paragraphs(rng.Paragraphs.Count).Range.Characters.Count < wordCount
+Do Until rng.Paragraphs(rng.Paragraphs.count).Range.Characters.count < wordCount
     i = i + 1
-    If i > rng.Paragraphs.Count Then Exit Do
+    If i > rng.Paragraphs.count Then Exit Do
     Set p = rng.Paragraphs(i)
     For Each a In p.Range.Characters
         If InStr(omitStr, a) = 0 Then j = j + 1
@@ -4201,7 +4201,7 @@ Do Until rng.Paragraphs(rng.Paragraphs.Count).Range.Characters.Count < wordCount
 Loop
 rng.Cut
 rng.Document.Close wdDoNotSaveChanges
-If word.Documents.Count = 0 Then
+If word.Documents.count = 0 Then
     word.Application.Quit
 Else
     word.ActiveWindow.windowState = wdWindowStateMinimize
@@ -4212,8 +4212,8 @@ Sub replaceWithNextChararcter() 'Alt+Shift+h
 Dim s As Integer, chars 'As Characters
 Dim f As String, r As String
 Set chars = Selection.Characters
-If chars.Count < 2 And InStr(Selection, VBA.Chr(9)) = 0 Then Exit Sub
-If chars.Count > 2 Then
+If chars.count < 2 And InStr(Selection, VBA.Chr(9)) = 0 Then Exit Sub
+If chars.count > 2 Then
     s = InStr(Selection, VBA.Chr(9))
     If s > 0 Then
         If InStr(VBA.Mid(Selection.text, s + 1), VBA.Chr(9)) = 0 Then
@@ -4246,7 +4246,7 @@ Dim i As Long
 ActiveDocument.Range.Find.Execute VBA.Chr(13), , , , , , , wdFindContinue, , "", wdReplaceAll
 Do Until Selection.End = ActiveDocument.Range.End - 1
     Selection.Move
-    If Selection.Previous <> VBA.ChrW(20008) And Selection.Hyperlinks.Count = 0 Then
+    If Selection.Previous <> VBA.ChrW(20008) And Selection.Hyperlinks.count = 0 Then
         ¥ÍÃø¦r¥[¤W°ê»yÃã¨åª`­µ
         ActiveWindow.ScrollIntoView Selection, False
         i = i + 1
@@ -4361,9 +4361,9 @@ Private Function ¹y¸¹¤å¦r¥[¤W²Å¸¹(symbol As String) As Boolean
             End If
         Next a
         If Not rng.Characters(1).Next Is Nothing Then
-            If rng.Characters(rng.Characters.Count).Next.text <> symbolClose And rng.Characters(rng.Characters.Count).text <> symbolClose And rng.Characters(rng.Characters.Count).text <> "¡B" Then rng.InsertAfter symbolClose
+            If rng.Characters(rng.Characters.count).Next.text <> symbolClose And rng.Characters(rng.Characters.count).text <> symbolClose And rng.Characters(rng.Characters.count).text <> "¡B" Then rng.InsertAfter symbolClose
         Else
-            If rng.Characters(rng.Characters.Count).text <> symbolClose And rng.Characters(rng.Characters.Count).text <> "¡B" Then rng.InsertAfter symbolClose
+            If rng.Characters(rng.Characters.count).text <> symbolClose And rng.Characters(rng.Characters.count).text <> "¡B" Then rng.InsertAfter symbolClose
         End If
         If Not rng.Characters(1).Previous Is Nothing Then
             If rng.Characters(1).Previous.text <> symbol And rng.Characters(1).text <> symbol And rng.Characters(1).text <> "¡B" Then rng.InsertBefore symbol
@@ -4574,6 +4574,17 @@ Sub ¤j³°¤Þ¸¹§ï»OÆW¤Þ¸¹()
     ' «ì´_­ì¨Ó³]¸m
     options.AutoFormatAsYouTypeReplaceQuotes = smartQuotes
 End Sub
+
+Rem ­pºâ¦b¬Y­Ó¤å¥»¤¤©Ò«ü©wªº¦r¦ê¥X²{ªºÀW²v¡]¦s¦bªº¼Æ¶q¡^
+Function StrCounter(text As String, str As String) As Long
+    Dim si As New StringInfo, siNew As New StringInfo
+    si.Create text
+    siNew.Create VBA.Replace(text, str, vbNullString)
+    StrCounter = si.LengthInTextElements - siNew.LengthInTextElements
+    'count = VBA.Len(text) - VBA.Len(VBA.Replace(text, str, vbNullString))'Leo Ai¤jµÐÂÄ 20260129
+    Set si = Nothing: Set siNew = Nothing
+End Function
+
 
 Sub ºû°ò¤å®w¥hª`¤å()
     Dim rng As Range, ur As UndoRecord

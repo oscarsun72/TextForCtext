@@ -60,7 +60,7 @@ Sub 分行分段()
         If p.Style = "內文" And p.Range.ParagraphFormat.Alignment = wdAlignParagraphLeft Then
             If Not p.Next Is Nothing Then
                 If p.Next.Range.text <> "．　．　．　．　．　．　．　．　．　．　．　．　．　．　．　．　．　．" & Chr(13) Then
-                    p.Range.Characters(p.Range.Characters.Count).text = vbNullString
+                    p.Range.Characters(p.Range.Characters.count).text = vbNullString
                     Set p = p.Previous
                 Else
                     p.Next.Range.text = vbNullString
@@ -79,10 +79,10 @@ Sub 分行分段()
 '                Stop
 '            End If
 
-            If p.Range.Characters.Count - 1 > lineLength Then
+            If p.Range.Characters.count - 1 > lineLength Then
                 i = 0 ''i =  1 'lineLength
                 Set rng = p.Range.Characters(1)
-                Do While i + lineLength < p.Range.Characters.Count - 1 'Step lineLength 'p.Range.Characters.Count Step lineLength
+                Do While i + lineLength < p.Range.Characters.count - 1 'Step lineLength 'p.Range.Characters.Count Step lineLength
 lastfew:
                     
                     lineCntr = 0
@@ -325,7 +325,7 @@ Function GetPageContent(xmlText As String, pageNum As String) As String
     re.Global = False
     
     Set matches = re.Execute(xmlText)
-    If matches.Count > 0 Then
+    If matches.count > 0 Then
         GetPageContent = matches(0).SubMatches(0)
     Else
         GetPageContent = ""
@@ -493,7 +493,7 @@ Sub 將星號前的分段符號移置前段之末(ByRef d As Document) '20220522
                         Loop
                         '檢查是否正在跨頁處 20230811
                         If d.Range(rngP.start, rngP.start + 11) = "><scanbegin" Then
-                            rngP.Move Count:=-1
+                            rngP.Move count:=-1
                             Do Until rngP.Next = "<"
                                 If rngP.start = 0 Then GoTo NextOne
                                 rngP.Move wdCharacter, -1
@@ -599,7 +599,7 @@ Sub 轉成黑豆以作行字數長度判斷用()
     Set p = Selection.Paragraphs(1)
     p.Range.Select
     清除選取處的所有符號
-    cntr = p.Range.Characters.Count - 1
+    cntr = p.Range.Characters.count - 1
     For i = 1 To cntr
         Set a = p.Range.Characters(i)
         If a.text <> VBA.Chr(13) Then a.text = "●"
@@ -676,7 +676,7 @@ Sub formatter() '為《經典釋文》春秋三傳等格式用，日後可改成其他需要格式化的文本
                         rng.SetRange s, e
                         'rng.Select
                         rng.text = Replace(rng.text, "　", VBA.ChrW(-9217) & VBA.ChrW(-8195))
-                        Set a = rng.Characters(rng.Characters.Count)
+                        Set a = rng.Characters(rng.Characters.count)
                     End If
                 End If
             End If
@@ -760,13 +760,13 @@ Sub 維基文庫四部叢刊本轉來(Optional lineCntPerPage As Byte = 0)
         If VBA.Left(xP, 2) = "{{" And VBA.Right(xP, 3) = "}}" & VBA.Chr(13) Then
             xP = VBA.Mid(p.Range, 3, Len(xP) - 5)
             If InStr(xP, "{{") = 0 And InStr(xP, "}}") = 0 Then
-                acP = p.Range.Characters.Count - 1
+                acP = p.Range.Characters.count - 1
                 If acP Mod 2 = 0 Then
                     acP = CInt(acP / 2)
                 Else
                     acP = CInt((acP + 1) / 2)
                 End If
-                If p.Range.Characters(acP).InlineShapes.Count = 0 Then
+                If p.Range.Characters(acP).InlineShapes.count = 0 Then
                     p.Range.Characters(acP).InsertParagraphAfter
                 Else
                     p.Range.Characters(acP).Select
@@ -785,13 +785,13 @@ Sub 維基文庫四部叢刊本轉來(Optional lineCntPerPage As Byte = 0)
                         Set rng = p.Range
                         rng.SetRange rng.Characters(1).start, rng.Characters(i + 1).End
                         rng.text = "{{" & space
-                        acP = p.Range.Characters.Count - 1 - Len(space)
+                        acP = p.Range.Characters.count - 1 - Len(space)
                         If acP Mod 2 = 0 Then
                             acP = CInt(acP / 2) + Len(space) + 1
                         Else
                             acP = CInt((acP + 1) / 2) + Len(space) + 1
                         End If
-                        If p.Range.Characters(acP).InlineShapes.Count = 0 Then
+                        If p.Range.Characters(acP).InlineShapes.count = 0 Then
                             p.Range.Characters(acP).InsertBefore VBA.Chr(13) & space
                         Else
                             p.Range.Characters(acP).Select
@@ -816,7 +816,7 @@ Sub 維基文庫四部叢刊本轉來(Optional lineCntPerPage As Byte = 0)
 eH:
     Select Case Err.number
         Case 5904 '無法編輯 [範圍]。
-            If p.Range.Characters(acP).Hyperlinks.Count > 0 Then p.Range.Characters(acP).Hyperlinks(1).Delete
+            If p.Range.Characters(acP).Hyperlinks.count > 0 Then p.Range.Characters(acP).Hyperlinks(1).Delete
             Resume
         Case Else
             MsgBox Err.number & Err.description
@@ -970,9 +970,9 @@ For Each p In d.Paragraphs
         Selection.TypeText "〉}}}" '將注腳編號〔一〕的右邊〕改成}}}
         px = p.Range.text
         If InStr(VBA.Right(px, 4), "<p>") Then
-            e = p.Range.Characters(p.Range.Characters.Count - 4).End
+            e = p.Range.Characters(p.Range.Characters.count - 4).End
         Else
-            e = p.Range.Characters(p.Range.Characters.Count - 1).End
+            e = p.Range.Characters(p.Range.Characters.count - 1).End
         End If
         rng.SetRange e, e
         rng.InsertAfter "}}"
@@ -982,7 +982,7 @@ For Each p In d.Paragraphs
         Do While InStr(pRng.text, "〔")
             rng.SetRange e, e
             rng.MoveEndUntil "〔"
-            If rng.Characters(rng.Characters.Count) <> "）" Then  ' if not correction
+            If rng.Characters(rng.Characters.count) <> "）" Then  ' if not correction
                 rng.Collapse wdCollapseEnd
                 rng.Move , 1
                 rng.MoveEnd wdCharacter, 1
@@ -1020,7 +1020,7 @@ For Each p In d.Paragraphs
         p.Range.Characters(1).Delete
         rng.SetRange p.Range.start, p.Range.start
         rng.InsertAfter "{{"
-        rng.SetRange p.Range.Characters(p.Range.Characters.Count - 4).End, p.Range.Characters(p.Range.Characters.Count - 4).End
+        rng.SetRange p.Range.Characters(p.Range.Characters.count - 4).End, p.Range.Characters(p.Range.Characters.count - 4).End
         rng.InsertAfter "}}"
         If Len(rng.Paragraphs(1).Next.Range.text) = 1 Then rng.Paragraphs(1).Next.Range.Delete
     End If
@@ -1123,9 +1123,9 @@ For Each p In d.Paragraphs
         Selection.TypeText "〉}}}" '將注腳編號〔一〕的右邊〕改成}}}
         px = p.Range.text
         If InStr(VBA.Right(px, 4), "<p>") Then
-            e = p.Range.Characters(p.Range.Characters.Count - 4).End
+            e = p.Range.Characters(p.Range.Characters.count - 4).End
         Else
-            e = p.Range.Characters(p.Range.Characters.Count - 1).End
+            e = p.Range.Characters(p.Range.Characters.count - 1).End
         End If
         rng.SetRange e, e
         rng.InsertAfter "}}"
@@ -1135,7 +1135,7 @@ For Each p In d.Paragraphs
         Do While InStr(pRng.text, "〔")
             rng.SetRange e, e
             rng.MoveEndUntil "〔"
-            If rng.Characters(rng.Characters.Count) <> "）" Then  ' if not correction
+            If rng.Characters(rng.Characters.count) <> "）" Then  ' if not correction
                 rng.Collapse wdCollapseEnd
                 rng.Move , 1
                 rng.MoveEnd wdCharacter, 1
@@ -1173,7 +1173,7 @@ For Each p In d.Paragraphs
         p.Range.Characters(1).Delete
         rng.SetRange p.Range.start, p.Range.start
         rng.InsertAfter "{{"
-        rng.SetRange p.Range.Characters(p.Range.Characters.Count).End, p.Range.Characters(p.Range.Characters.Count).End
+        rng.SetRange p.Range.Characters(p.Range.Characters.count).End, p.Range.Characters(p.Range.Characters.count).End
         rng.InsertAfter "}}"
     End If
 Next p
@@ -1181,7 +1181,7 @@ If VBA.Left(d.Paragraphs(1).Range.text, 3) = "史記卷" Then
     Set p = d.Paragraphs(1)
     rng.SetRange p.Range.start, p.Range.start
     rng.InsertAfter "*"
-    rng.SetRange p.Range.Characters(p.Range.Characters.Count - 1).End, p.Range.Characters(p.Range.Characters.Count - 1).End
+    rng.SetRange p.Range.Characters(p.Range.Characters.count - 1).End, p.Range.Characters(p.Range.Characters.count - 1).End
     rng.InsertAfter "<p>"
 End If
 If VBA.InStr(d.Paragraphs(2).Range.text, "第") Then
@@ -1229,9 +1229,9 @@ For Each p In d.Paragraphs
     px = p.Range.text
     If VBA.Left(p.Range.text, 7) = "{{" & VBA.ChrW(-9217) & VBA.ChrW(-8195) & "{{{" Then
         If InStr(VBA.Right(px, 4), "<p>") Then
-            e = p.Range.Characters(p.Range.Characters.Count - 4).End
+            e = p.Range.Characters(p.Range.Characters.count - 4).End
         Else
-            e = p.Range.Characters(p.Range.Characters.Count - 1).End
+            e = p.Range.Characters(p.Range.Characters.count - 1).End
         End If
         rng.SetRange e, e
         rng.InsertAfter "}}"
@@ -1254,7 +1254,7 @@ For Each p In d.Paragraphs
             s = p.Range.Characters(1).start
             rng.SetRange s, s
             rng.InsertBefore "{{"
-            e = p.Range.Characters(p.Range.Characters.Count - 4).End
+            e = p.Range.Characters(p.Range.Characters.count - 4).End
             rng.SetRange e, e
             rng.InsertAfter "}}"
         End If
@@ -1280,7 +1280,7 @@ With rng.Find
             If InStr(rng, "}}") Then Exit Do
         End If
         s = rng.Characters(1).start
-        e = rng.Characters(rng.Characters.Count - 1).End
+        e = rng.Characters(rng.Characters.count - 1).End
         rngLast.SetRange e - 1, e
         rngLast.InsertAfter "}}"
         rngLast.SetRange s, s
@@ -1395,7 +1395,7 @@ Sub 讀史記三家注()
     End With
     d.Range.Cut
     d.Close wdDoNotSaveChanges
-    If word.Application.Windows.Count > 0 Then word.Application.ActiveWindow.windowState = wdWindowStateMinimize
+    If word.Application.Windows.count > 0 Then word.Application.ActiveWindow.windowState = wdWindowStateMinimize
 End Sub
 
 Sub 戰國策_四部叢刊_維基文庫本() '《戰國策》格式者皆適用（即主文首行頂格，而其餘內容降一格者）
@@ -1451,7 +1451,7 @@ re:
                 End If
     '            rng.Select
     '            Stop
-                rngCnt = rng.Characters.Count
+                rngCnt = rng.Characters.count
                 If rngCnt > 1 Then
                     i = 0
                     For Each a In rng.Characters
@@ -1487,11 +1487,11 @@ re:
     Next
     If ok Then
         For Each p In rngDoc.Paragraphs
-            If VBA.Left(p.Range.text, 3) = "{{　" And p.Range.Characters(p.Range.Characters.Count - 1) = "}" Then
+            If VBA.Left(p.Range.text, 3) = "{{　" And p.Range.Characters(p.Range.Characters.count - 1) = "}" Then
                 a = p.Range.text
                 a = VBA.Mid(a, 4, Len(a) - 6)
                 If InStr(a, "　") > 0 And InStr(a, "{") = 0 And InStr(a, "}") = 0 Then
-                    rngCnt = p.Range.Characters.Count
+                    rngCnt = p.Range.Characters.count
                     For i = 4 To rngCnt
                         Set a = p.Range.Characters(i)
                         If a = "　" Then
@@ -1535,13 +1535,13 @@ Sub 楚辭集注縮排N格雙行小注格式_四庫全書_國學大師()
         If e > 0 And s > 0 And VBA.InStr(sx, "{{") = 0 And VBA.InStr(sx, "}}") = 0 Then '前後有{{}}，但些中間不能再有{{}}
             If s = 1 Then '如果前無縮排
                 rng.SetRange p.Range.start + 2, p.Range.End - 3
-                rng.Characters(Int(rng.Characters.Count / 2)).InsertAfter VBA.Chr(13)
+                rng.Characters(Int(rng.Characters.count / 2)).InsertAfter VBA.Chr(13)
             Else
                 If VBA.InStr(px, "　{{") > 0 Then
                     sx = VBA.Mid(px, 1, s - 1)
                     If Replace(sx, "　", vbNullString) = vbNullString Then '如前前綴都是全形空格；即縮排
                         rng.SetRange p.Range.start + VBA.Len(sx) + 2, p.Range.End - 3
-                        rng.Characters(Int(rng.Characters.Count / 2)).InsertAfter VBA.Chr(13) & VBA.Mid(px, 1, s - 1)
+                        rng.Characters(Int(rng.Characters.count / 2)).InsertAfter VBA.Chr(13) & VBA.Mid(px, 1, s - 1)
                     End If
                 End If
             End If
@@ -1560,8 +1560,8 @@ Sub 本草綱目縮排1格雙行小注格式_四庫全書_國學大師()
         If (VBA.Left(px, 3) = "　{{" Or VBA.Left(px, 3) = "{{　") And VBA.Right(px, 3) = "}}" & VBA.Chr(13) Then
             rng.SetRange p.Range.start + 3, p.Range.End - 3
             If VBA.InStr(rng.text, "}") = 0 Then
-                If rng.Characters.Count > 1 Then
-                    rng.Characters(Int(rng.Characters.Count / 2)).InsertAfter VBA.Chr(13) & "　"
+                If rng.Characters.count > 1 Then
+                    rng.Characters(Int(rng.Characters.count / 2)).InsertAfter VBA.Chr(13) & "　"
                 Else
                     rng.Characters(1).InsertAfter VBA.Chr(13) & "　"
                 End If
@@ -1576,9 +1576,9 @@ Sub 本草綱目縮排1格雙行小注格式_四庫全書_國學大師()
                         End If
                     Next a
                 Else
-                    If rng.Characters.Count > 1 Then
+                    If rng.Characters.count > 1 Then
                         'Skype Copilot大菩薩 20240519
-                        rng.Characters(-Int(-(rng.Characters.Count / 2))).InsertAfter VBA.Chr(13) & "　"
+                        rng.Characters(-Int(-(rng.Characters.count / 2))).InsertAfter VBA.Chr(13) & "　"
                     Else
                         rng.Characters(1).InsertAfter VBA.Chr(13) & "　"
                     End If
@@ -1918,8 +1918,8 @@ Sub 元引科技引得數字人文資源平臺_北京元引科技有限公司轉來(Optional lineCntPerPag
     '清除每行/段符號前的冗餘空格
     For Each p In rng.Document.Paragraphs
         If (Len(p.Range.text) > 1) Then
-            Do While p.Range.Characters(p.Range.Characters.Count - 1) = "　"
-                p.Range.Characters(p.Range.Characters.Count - 1).Delete
+            Do While p.Range.Characters(p.Range.Characters.count - 1) = "　"
+                p.Range.Characters(p.Range.Characters.count - 1).Delete
                 If Not Len(p.Range.text) > 1 Then Exit Do
             Loop
         End If
@@ -1943,7 +1943,7 @@ Sub 元引科技引得數字人文資源平臺_北京元引科技有限公司轉來(Optional lineCntPerPag
                 rng.Paragraphs(1).Range.Delete ' 清除頁碼所在段落
                 Exit Do
             End If
-            Do While rngExamLineCntPerPage.Paragraphs.Count < lineCntPerPage
+            Do While rngExamLineCntPerPage.Paragraphs.count < lineCntPerPage
                  rngAddPara.SetRange rngExamLineCntPerPage.End, rngExamLineCntPerPage.End
                  rngExamLineCntPerPage.InsertAfter "　"
                  rngExamLineCntPerPage.InsertParagraphAfter
@@ -1976,12 +1976,12 @@ Sub 元引科技引得數字人文資源平臺_北京元引科技有限公司轉來(Optional lineCntPerPag
         
 '        If InStr(noteRng, "萁草之句") Then Stop 'just for test
         
-        Set aNext = noteRng.Characters(noteRng.Characters.Count).Next
+        Set aNext = noteRng.Characters(noteRng.Characters.count).Next
         Set aPre = noteRng.Characters(1).Previous
-        midNoteRngPos = Excel.RoundUpCustom(noteRng.Characters.Count / 2)
+        midNoteRngPos = Excel.RoundUpCustom(noteRng.Characters.count / 2)
         
         Set midNoteRng = noteRng.Document.Range(noteRng.Characters(VBA.IIf(midNoteRngPos - 1 < 1, 1, midNoteRngPos - 1)).start _
-            , noteRng.Characters(VBA.IIf(midNoteRngPos + 1 > noteRng.Characters.Count, noteRng.Characters.Count, midNoteRngPos + 1)).End)
+            , noteRng.Characters(VBA.IIf(midNoteRngPos + 1 > noteRng.Characters.count, noteRng.Characters.count, midNoteRngPos + 1)).End)
         If midNoteRng.start = noteRng.start And midNoteRng.End = noteRng.End Then
             Set midNoteRng = noteRng
         End If
@@ -2050,12 +2050,12 @@ Sub 元引科技引得數字人文資源平臺_北京元引科技有限公司轉來(Optional lineCntPerPag
                 
                 
                 For Each a In noteRng.Characters '找到/（夾注換行）的位置
-                    If a = "/" And a.InlineShapes.Count = 0 Then
+                    If a = "/" And a.InlineShapes.count = 0 Then
                         If a.font.Color = noteFont.Color And a.font.Size = noteFont.Size Then
                             aSt = a.start
                             aEd = a.End
                             
-                            Do Until VBA.Abs(noteRng.Document.Range(noteRng.start, a.start).Characters.Count - VBA.IIf(a.End = noteRng.End, 0, noteRng.Document.Range(a.End, noteRng.End).Characters.Count)) < 2
+                            Do Until VBA.Abs(noteRng.Document.Range(noteRng.start, a.start).Characters.count - VBA.IIf(a.End = noteRng.End, 0, noteRng.Document.Range(a.End, noteRng.End).Characters.count)) < 2
                                'noteRng.Document.Range(a.End, noteRng.End).text = noteRng.Document.Range(a.End, noteRng.End).text & "　"
                                noteRng.text = noteRng.text & "　"
                                a.SetRange aSt, aEd
@@ -2335,7 +2335,7 @@ Sub Kanripo_GitHub轉來(Optional lineCntPerPage As Byte = 0)
                 rng.Paragraphs(1).Range.Delete ' 清除頁碼所在段落
                 Exit Do
             End If
-            Do While rngExamLineCntPerPage.Paragraphs.Count < lineCntPerPage
+            Do While rngExamLineCntPerPage.Paragraphs.count < lineCntPerPage
                  rngExamLineCntPerPage.InsertAfter "　"
                  rngExamLineCntPerPage.InsertParagraphAfter
             Loop
@@ -2373,8 +2373,8 @@ Sub Kanripo_GitHub轉來(Optional lineCntPerPage As Byte = 0)
         noteRng.Move
         noteRng.MoveEndUntil ")" '取得注文範圍
         
-        Rem just for test
-'        If InStr(rng.Paragraphs(1).Range.text, "人/") Or InStr(noteRng, "師古曰漢制三公號稱萬石其俸") Or InStr(noteRng, "以下復古詩") Then
+'        'just for test
+'        If InStr(rng.Paragraphs(1).Range.text, "黛眉愁") Or InStr(noteRng, "師古曰漢制三公號稱萬石其俸") Or InStr(noteRng, "以下復古詩") Then
 '            noteRng.Select
 '            noteRng.Document.Activate
 '            Stop
@@ -2390,8 +2390,10 @@ Sub Kanripo_GitHub轉來(Optional lineCntPerPage As Byte = 0)
                         Set p = rng.Paragraphs(1)
                         Set exa_rng = d.Range(p.Range.start, noteRng.start - 1)
                         If a.Next = ")" Then
+                            '非獨立夾注注文且只有1個字
                             'If noteRng.Characters.Count > 1 Then
-                            If i > 2 And noteRng.start > p.Range.start + 1 Then 'noteRng 不包括「()」故須+1
+                            If 文字處理.StrCounter(p.Range.text, ")") > 1 _
+                                Or (i > 2 And noteRng.start > p.Range.start + 1) Then 'noteRng 不包括「()」故須+1
 '
 '                                If InStr(noteRng.text, "有赦令詔書去其鉗") Then
 '                                    a.Select
@@ -2412,7 +2414,7 @@ Sub Kanripo_GitHub轉來(Optional lineCntPerPage As Byte = 0)
                                 'If noteRng.start - 1 = p.Range.start And noteRng.End + 1 = p.Range.End - 1 And p.Range.Characters(p.Range.Characters.Count - 1).text = ")" Then
                                 '全注文則注文之字數會較整段來得少3個，即注文起迄符2個再加上段落標記符chr(13)一個
                                 '在有縮排及插入全形空格時便不適用，要再減去插入的空格數
-                                If p.Range.Characters.Count - 3 - VBA.Len(exa_rng.text) = noteRng.Characters.Count _
+                                If p.Range.Characters.count - 3 - VBA.Len(exa_rng.text) = noteRng.Characters.count _
                                     Or (a.Next.Next = Chr(13) _
                                         And Replace(d.Range(p.Range.start, p.Range.start + (InStr(p.Range.text, "(")) - 1), "　", vbNullString) = vbNullString _
                                         And noteRng.Characters(2).text = "\" And si.Create(noteRng.text).LengthInTextElements = 2) Then '或者是獨立注文只有2個字（第1個是漢字，末後是「/」）
@@ -2428,7 +2430,7 @@ Sub Kanripo_GitHub轉來(Optional lineCntPerPage As Byte = 0)
                             'a.Delete '清除/
                             'If noteRng.start - 1 = p.Range.start And noteRng.End + 1 = p.Range.End - 1 And p.Range.Characters(p.Range.Characters.Count - 1).text = ")" Then
                             '行全注文則注文之字數會較整段來得少3個，即注文起迄符2個再加上段落標記符chr(13)一個
-                            If p.Range.Characters.Count - 3 - VBA.Len(exa_rng.text) = noteRng.Characters.Count Then '在有縮排及插入全形空格時便不適用，要再減去插入的空格數
+                            If p.Range.Characters.count - 3 - VBA.Len(exa_rng.text) = noteRng.Characters.count Then '在有縮排及插入全形空格時便不適用，要再減去插入的空格數
                                 a.Characters(1).text = VBA.Chr(13)
                             Else
                                 If InStr(noteRng, " ") = 0 Then a.Characters(1).Delete
@@ -2559,12 +2561,12 @@ Sub 國學大師_Kanripo_四庫全書本轉來(Optional lineCntPerPage As Byte = 0)
         
 '        If InStr(noteRng, "萁草之句") Then Stop 'just for test
         
-        Set aNext = noteRng.Characters(noteRng.Characters.Count).Next
+        Set aNext = noteRng.Characters(noteRng.Characters.count).Next
         Set aPre = noteRng.Characters(1).Previous
-        midNoteRngPos = Excel.RoundUpCustom(noteRng.Characters.Count / 2)
+        midNoteRngPos = Excel.RoundUpCustom(noteRng.Characters.count / 2)
         
         Set midNoteRng = noteRng.Document.Range(noteRng.Characters(VBA.IIf(midNoteRngPos - 1 < 1, 1, midNoteRngPos - 1)).start _
-            , noteRng.Characters(VBA.IIf(midNoteRngPos + 1 > noteRng.Characters.Count, noteRng.Characters.Count, midNoteRngPos + 1)).End)
+            , noteRng.Characters(VBA.IIf(midNoteRngPos + 1 > noteRng.Characters.count, noteRng.Characters.count, midNoteRngPos + 1)).End)
         If midNoteRng.start = noteRng.start And midNoteRng.End = noteRng.End Then
             Set midNoteRng = noteRng
         End If
@@ -2658,12 +2660,12 @@ Sub 國學大師_Kanripo_四庫全書本轉來(Optional lineCntPerPage As Byte = 0)
                 If InStr(rngTest, "平鋪一面席高出四邊牆") Then Stop
                 
                 For Each a In noteRng.Characters '找到/（夾注換行）的位置
-                    If a = "/" And a.InlineShapes.Count = 0 Then
+                    If a = "/" And a.InlineShapes.count = 0 Then
                         If a.font.Color = noteFont.Color And a.font.Size = noteFont.Size Then
                             aSt = a.start
                             aEd = a.End
                             
-                            Do Until VBA.Abs(noteRng.Document.Range(noteRng.start, a.start).Characters.Count - VBA.IIf(a.End = noteRng.End, 0, noteRng.Document.Range(a.End, noteRng.End).Characters.Count)) < 2
+                            Do Until VBA.Abs(noteRng.Document.Range(noteRng.start, a.start).Characters.count - VBA.IIf(a.End = noteRng.End, 0, noteRng.Document.Range(a.End, noteRng.End).Characters.count)) < 2
                                 'noteRng.Document.Range(a.End, noteRng.End).text = noteRng.Document.Range(a.End, noteRng.End).text & "　"
                                 noteRng.text = noteRng.text & "　" '小注不換行補空格U+3000
                                 a.SetRange aSt, aEd
@@ -2923,7 +2925,7 @@ Sub 清除文本頁中的編號儲存格(rng As Range)
         For Each c In t.Range.cells
             c.Select
             cx = c.Range.text
-            If VBA.IsNumeric(VBA.Left(cx, 1)) And VBA.InStr(cx, VBA.ChrW(160) & VBA.ChrW(47)) > 0 And c.Range.InlineShapes.Count = 1 And VBA.Len(cx) < 13 Then
+            If VBA.IsNumeric(VBA.Left(cx, 1)) And VBA.InStr(cx, VBA.ChrW(160) & VBA.ChrW(47)) > 0 And c.Range.InlineShapes.count = 1 And VBA.Len(cx) < 13 Then
                 If VBA.InStr(cx, VBA.Val(cx) & VBA.ChrW(160) & VBA.ChrW(47)) = 1 Then
                     c.Delete
                 End If
@@ -2962,7 +2964,7 @@ Sub dbSBCKWordtoReplace() '四部叢刊造字對照表 Alt+5
     dbSBCKWordtoReplaceSub rng
     If Not ActiveDocument.name = "《四部叢刊資料庫》補入《中國哲學書電子化計劃》.docm" Then
         rng.Cut
-        If rng.Application.Documents.Count = 1 Then
+        If rng.Application.Documents.count = 1 Then
             rng.Application.Quit wdDoNotSaveChanges
         Else
             rng.Document.Close wdDoNotSaveChanges
@@ -2994,7 +2996,7 @@ Sub dbSBCKWordtoReplace_AddNewOne() '四部叢刊造字對照表 Alt+4
     db.cnt查字 cnt
     rst.Open "select * from " + tbName + " where strcomp(造字, """ + rng.Characters(1) + """)=0", cnt, adOpenKeyset, adLockOptimistic
     If rst.RecordCount = 0 Then
-        If rng.Characters.Count = 2 Then
+        If rng.Characters.count = 2 Then
             'rst.Open tbName, cnt, adOpenKeyset, adLockOptimistic
             rst.AddNew
             rst.Fields(0) = rng.Characters(1)
@@ -3006,7 +3008,7 @@ Sub dbSBCKWordtoReplace_AddNewOne() '四部叢刊造字對照表 Alt+4
             Selection.Move
         End If
     Else
-        If rng.Characters.Count = 2 Then If rng.Characters(2) = rst.Fields(1).Value Then rng.Characters(2).Delete
+        If rng.Characters.count = 2 Then If rng.Characters(2) = rst.Fields(1).Value Then rng.Characters(2).Delete
         rng.Characters(1) = rst.Fields(1).Value
     End If
     rst.Close: cnt.Close: Set db = Nothing
@@ -3086,7 +3088,7 @@ Sub checkEditingOfPreviousVersion()
     rng.Paste
     GoSub fontColor
     GoSub punctuations
-    If d.Application.Documents.Count = 1 Then
+    If d.Application.Documents.count = 1 Then
         d.Application.Quit wdDoNotSaveChanges
     Else
         d.Close wdDoNotSaveChanges
@@ -3144,7 +3146,7 @@ restart:
     If d.AttachedTemplate = "Normal.dotm" Then '新檔案單獨輸入時 20251220
         Set p = d.Paragraphs(1)
         '文件只有一段內容時（方便快捷整理）
-        If d.Paragraphs.Count = 1 Then
+        If d.Paragraphs.count = 1 Then
             If IsNumeric(Replace(p.Range, Chr(13), vbNullString)) Then
                 If InStr(GetClipboardText(), " file=""") Then
                     d.Range.InsertParagraphAfter
@@ -3184,7 +3186,7 @@ restart:
             d.Range.text = Chr(13) & Chr(13) & Chr(13) & GetClipboardText()
         ElseIf preFileNum > 0 And d.Paragraphs(3).Range.text = Chr(13) And InStr(GetClipboardText(), "<scanbegin file=""") Then
             d.Range.InsertAfter GetClipboardText()
-        ElseIf IsNumeric(d.Range(d.Paragraphs(2).Range.start, d.Paragraphs(2).Range.Characters(d.Paragraphs(2).Range.Characters.Count - 1).End)) And d.Paragraphs(3).Range.text = Chr(13) And InStr(GetClipboardText(), "<scanbegin file=""") Then
+        ElseIf IsNumeric(d.Range(d.Paragraphs(2).Range.start, d.Paragraphs(2).Range.Characters(d.Paragraphs(2).Range.Characters.count - 1).End)) And d.Paragraphs(3).Range.text = Chr(13) And InStr(GetClipboardText(), "<scanbegin file=""") Then
             d.Range.InsertAfter GetClipboardText()
         End If
 
@@ -3235,10 +3237,10 @@ restart:
     Dim numRngDashPost As Byte, numRng As Range
     numRngDashPost = VBA.InStr(d.Paragraphs(1).Range.text, "-")
     If numRngDashPost > 1 Then '=1 是負數標識
-        Set numRng = d.Range(d.Paragraphs(1).Range.Characters(1).start, d.Paragraphs(1).Range.Characters(d.Paragraphs(1).Range.Characters.Count).start)
+        Set numRng = d.Range(d.Paragraphs(1).Range.Characters(1).start, d.Paragraphs(1).Range.Characters(d.Paragraphs(1).Range.Characters.count).start)
         numRng.text = VBA.CInt(VBA.Left(numRng.text, numRngDashPost - 1)) - VBA.CInt(Mid(numRng.text, numRngDashPost + 1))
     End If
-    differPageNum = VBA.IIf(d.Paragraphs(1).Range.Characters.Count = 1, 0, VBA.Replace(d.Paragraphs(1).Range.text, VBA.Chr(13), "")) '頁數差(來源-(減去)目的）
+    differPageNum = VBA.IIf(d.Paragraphs(1).Range.Characters.count = 1, 0, VBA.Replace(d.Paragraphs(1).Range.text, VBA.Chr(13), "")) '頁數差(來源-(減去)目的）
     Dim file
     file = VBA.Replace(d.Paragraphs(2).Range.text, VBA.Chr(13), "") ' 目的。不取代則為0
     If file = "" Then file = 0
@@ -3350,7 +3352,7 @@ Function CurrentChapterNum_Selector() As String
     
     ' 進行匹配
     Set match = regex.Execute(selector)
-    If match.Count > 0 Then
+    If match.count > 0 Then
         ' 取得匹配的群組值
         CurrentChapterNum_Selector = match(0).SubMatches(0)
     Else
@@ -3370,7 +3372,7 @@ Function IncrementNthChild(selector As String) As String
     
     ' 執行匹配
     Set match = regex.Execute(selector)
-    If match.Count > 0 Then
+    If match.count > 0 Then
         ' 取得群組中的數字，並轉為整數
         number = CInt(match(0).SubMatches(0))
         number = number + 1
@@ -3554,9 +3556,9 @@ Sub FindNonSequentialPages()
     Set nonSequential = New Collection
     Set d = Documents.Add
     d.Range.Paste
-    If d.tables.Count > 1 Then
+    If d.tables.count > 1 Then
         d.tables(2).Delete
-    ElseIf d.tables.Count = 0 Then
+    ElseIf d.tables.count = 0 Then
         Exit Sub
     End If
     d.tables(1).Columns(1).Delete
@@ -3573,7 +3575,7 @@ Sub FindNonSequentialPages()
     
     ' 找出不連號的頁碼
     prevPage = -1
-    For i = 1 To pageNumbers.Count
+    For i = 1 To pageNumbers.count
         If prevPage <> -1 Then
             If pageNumbers(i) <> prevPage + 1 Then
                 nonSequential.Add pageNumbers(i)
@@ -3581,7 +3583,7 @@ Sub FindNonSequentialPages()
         End If
         prevPage = pageNumbers(i)
     Next
-    If nonSequential.Count > 0 Then
+    If nonSequential.count > 0 Then
         
         ' 建立新文件並輸出結果
         Set d = Documents.Add
@@ -3648,6 +3650,46 @@ Sub Quickedit_Syntax_Convert2_Edit()
     d.Range.Copy
     playSound 1
     
+End Sub
+Property Get Blank() As String
+    Blank = VBA.ChrW(-9217) & VBA.ChrW(-8195)
+End Property
+
+'20260128
+Sub 御定詞譜詞牌標題標記()
+    Dim d As Document, p As Paragraph, rngTitlt As Range, aSt As Range, pCC As Integer
+    Set d = Documents.Add
+    d.Range.Paste
+    For Each p In d.Paragraphs
+        If VBA.Len(p.Range.text) > 4 Then
+        Set aSt = p.Range.Characters(2): pCC = p.Range.Characters.count
+            If p.Range.Characters(1) = Blank And aSt <> Blank Then
+                Set rngTitlt = d.Range(aSt.start, aSt.End)
+                rngTitlt.MoveEndUntil "{", pCC
+                If rngTitlt.text = vbNullString Then Stop
+                If rngTitlt.text <> vbNullString And StrCounter(rngTitlt.Paragraphs(1).Range.text, "{") = 2 Then
+                    rngTitlt.text = "*" & VBA.Replace(VBA.Replace(rngTitlt.text, "〈", vbNullString), "〉", vbNullString) & "<p>"
+                    p.Range.Characters(1).text = "　"
+    '                rngTitlt.Select
+    '                Stop
+                End If
+            ElseIf p.Range.Characters(1) = "　" And aSt <> "　" Then
+                Set rngTitlt = d.Range(aSt.start, aSt.End)
+                rngTitlt.MoveEndUntil "{", pCC
+                If rngTitlt.text = vbNullString Then Stop
+                If rngTitlt.text <> vbNullString And StrCounter(rngTitlt.Paragraphs(1).Range.text, "{") = 2 Then
+                    rngTitlt.text = "*" & VBA.Replace(VBA.Replace(rngTitlt.text, "〈", vbNullString), "〉", vbNullString) & "<p>"
+                    If p.Previous.Range.Characters(p.Previous.Range.Characters.count - 1) <> ">" Then
+                        p.Previous.Range.Characters(p.Previous.Range.Characters.count - 1).InsertAfter "<p>"
+                    End If
+    '                rngTitlt.Select
+    '                Stop
+                End If
+            End If
+        End If
+    Next p
+    d.Range.Copy
+    d.Close wdDoNotSaveChanges
 End Sub
 
 Sub 提取作者人名_二字人名中有空白者()
