@@ -5259,7 +5259,7 @@ namespace TextForCtext
             //Thread.Sleep(3200);
             //等待「選擇檔案」控制項出現，最多等timeSpanSecs秒；
             //為免tab鍵數不同，而須手動操作，以免表單遮住畫面:
-            ActiveForm1.TopMost = false;
+            //ActiveForm1.TopMost = false;//現在呼叫端已經最小化了 20260131
             Clipboard.Clear();
             DateTime begin = DateTime.Now; const int timeSpanSecs = 30;
             _ = new TimeSpan();

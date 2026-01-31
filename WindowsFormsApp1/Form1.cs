@@ -2315,12 +2315,12 @@ namespace WindowsFormsApp1
             if (_keycodeNow == Keys.Delete) UndoRecord();
 
 
-            //if ((m & Keys.None) == Keys.None && e.KeyCode == Keys.Delete) undoRecord();
-            //if ((m & Keys.Control) == Keys.Control && (m & Keys.Alt) == Keys.Alt && e.KeyCode == Keys.G)
-            //if((int)Control.ModifierKeys ==
-            //    (int)Keys.Control + (int)Keys.Alt && e.KeyCode == Keys.G)
-            if ((m & Keys.Shift) == Keys.Shift && e.KeyCode == Keys.Insert && !_keyinTextMode) { pasteAllOverWrite = true; dragDrop = false; }
-            else pasteAllOverWrite = false;
+            ////if ((m & Keys.None) == Keys.None && e.KeyCode == Keys.Delete) undoRecord();
+            ////if ((m & Keys.Control) == Keys.Control && (m & Keys.Alt) == Keys.Alt && e.KeyCode == Keys.G)
+            ////if((int)Control.ModifierKeys ==
+            ////    (int)Keys.Control + (int)Keys.Alt && e.KeyCode == Keys.G)
+            //if ((m & Keys.Shift) == Keys.Shift && e.KeyCode == Keys.Insert && !_keyinTextMode) { pasteAllOverWrite = true; dragDrop = false; }
+            //else pasteAllOverWrite = false;//20260131此二行今日取消再觀察！●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●
 
             #region 同時按下 Ctrl + Shift + Alt 
             if (e.Control && e.Shift && e.Alt)
@@ -5108,6 +5108,15 @@ namespace WindowsFormsApp1
         /// </summary>
         private void Add()
         {
+
+            try
+            {
+                driver.SwitchTo().Window(driver.CurrentWindowHandle);
+            }
+            catch (Exception)
+            {
+                return;
+            }
             //還原放大的書圖
             RestoreSvgImageSize();
 
@@ -5479,7 +5488,7 @@ namespace WindowsFormsApp1
             //if (lines_perPage > 0 && xCheck.Contains(" "))//在注文有空格位置錯亂時用
             {
                 int s = textBox1.SelectionStart, p = xCheckPage1.LastIndexOf(Environment.NewLine);
-                p = xCheckPage1.LastIndexOf(Environment.NewLine, p);// + Environment.NewLine.Length;
+                //p = xCheckPage1.LastIndexOf(Environment.NewLine, p);// + Environment.NewLine.Length;
                 if (s > p)
                 {
                     if (!GetLineText(textBox1.Text, s).EndsWith("<p>"))
@@ -16418,6 +16427,11 @@ namespace WindowsFormsApp1
                     //if (textBox1.TextLength == 0 && pageUBound >= int.Parse(_currentPageNum))
                     if (_autoNextVolumnContextMark && PageUBound >= int.Parse(_currentPageNum))
                     {
+                        while (Clipboard.GetText().IsNullOrEmpty())
+                        {
+                            Task.Delay(100).Wait();
+                            Application.DoEvents();
+                        }//20260131等待剪貼簿有內容
                         if (Clipboard.GetText().Contains("-1a]"))
                         {
                             RunWordMacro("中國哲學書電子化計劃.國學大師_Kanripo_四庫全書本轉來");
@@ -18812,16 +18826,19 @@ namespace WindowsFormsApp1
 
         /// <summary>
         /// 智能貼上清理規則
-        /// </summary>
-        // 您的規則清單依然保留，作為「第一層」過濾器
+        /// </summary>        
         private readonly List<TextTransformationRule> _autoCleanRules = new List<TextTransformationRule>
 {
     // 規則 1：原本的篡改文字
     new TextTransformationRule(@"「(.*?)」被篡改成「□」！！！阿彌陀佛", 1),
     
-    // 規則 2：修正版，使用 [\s\S]* 確保抓取中間所有雜質（包含換行）
-    // 邏輯：由第一個漢字開始，抓到最後一個漢字
-    new TextTransformationRule(@"([\u4E00-\u9FA5][\s\S]*[\u4E00-\u9FA5])", 1),
+    //// 規則 2：修正版，使用 [\s\S]* 確保抓取中間所有雜質（包含換行）
+    //// 邏輯：由第一個漢字開始，抓到最後一個漢字
+    //new TextTransformationRule(@"([\u4E00-\u9FA5][\s\S]*[\u4E00-\u9FA5])", 1),
+    // 修正後的規則 2：
+    // [\u4E00-\u9FA5] -> 找到第一個漢字
+    // [\s\S]* -> 不管後面是什麼（雜質或更多漢字），通通抓到底
+    new TextTransformationRule(@"([\u4E00-\u9FA5][\s\S]*)", 1),
 };
 
         // https://gemini.google.com/share/c4fc89240ea7
@@ -18897,6 +18914,8 @@ namespace WindowsFormsApp1
         }
 
         //https://gemini.google.com/share/f7707d7349a5
+
+        //原來可行的程式在這裡備份 ： https://snipsave.com/view-snippet?user=oscarsun72&snippet_id=bPiEBTu2c71B6WS5s9
 
         /// <summary>
         /// 智能貼上之剪貼簿清理器
@@ -19133,6 +19152,7 @@ namespace WindowsFormsApp1
         /// <summary>
         /// 是否是在編輯XML頁碼時的模式 
         /// 對應於WordVBA同名巨集程序（同版本文本帶入置換file id 和 頁數）
+        /// 預設為false
         /// </summary>
         bool _editModeMakeup_changeFile_Page = false;
         private void Form1_Activated(object sender, EventArgs e)
@@ -19165,7 +19185,8 @@ namespace WindowsFormsApp1
             {
                 //在textBox1的第一段指定頁差（=來源-目的頁碼，保持與WordVBA一致）；或「來源~目的」-蓋在手動輸入模式下是禁止輸入「-」，因為數字鍵盤中的「-」常用來作自動段落標記功能用。如果用「~」而省略來源頁碼，則取目前頁面之頁碼；不可用「-」，會與負/減混
                 //if (ModifierKeys == Keys.Shift && (textBox1.TextLength > 30 || originalText.Contains(@"<scanbegin file=""")))
-                if (AreModifiersPressed(Keys.Alt) == false && KeyboardInfo.AreModifiersPressed(Keys.Control | Keys.Shift) && (textBox1.TextLength > 0 || Clipboard.GetText().Contains(@"<scanbegin file=""")))
+                if (AreModifiersPressed(Keys.Alt) == false && KeyboardInfo.AreModifiersPressed(Keys.Control | Keys.Shift)
+                    && (textBox1.TextLength > 0 || Clipboard.GetText().Contains(@"<scanbegin file=""")))
                 {
                     string refers = Document.Text;//_document.GetParagraphs()[0].Text;
                     EditPageNumOffset_PageNumModifier(out int offset, refers);
@@ -19176,14 +19197,17 @@ namespace WindowsFormsApp1
                         while (offset-- > 0)
                             NextPages(Keys.PageDown, false);//檢視編輯結果
                     //AvailableInUse_BothKeysMouse();
-                    return;//因為主要是藉由此事件程序觸發此函式方法執行，不必完成此事件程序（主要目的不在讓表單現前故） 20260127
+                    //return;//因為主要是藉由此事件程序觸發此函式方法執行，不必完成此事件程序（主要目的不在讓表單現前故） 20260127
+                    //然後續操作仍常需要表單成為作用中的，所以還是需要讓此事件完成
                 }
-                if (!IsDriverInvalid && AreModifiersPressed(Keys.Control | Keys.Shift | Keys.Alt) && textBox1.TextLength > 0)
+                if (!IsDriverInvalid && AreModifiersPressed(Keys.Control | Keys.Shift | Keys.Alt))// && textBox1.TextLength > 0)//現在有欄位 _editModeMakeup_changeFile_Page 控制，可以不用了
                 {
                     Move2NextSectionChapter();
                     NextPages(Keys.PageUp, false);//檢視重新編頁後的結果
                     //AvailableInUse_BothKeysMouse();
-                    return;//因為主要是藉由此事件程序觸發此函式方法執行，不必完成此事件程序（主要目的不在讓表單現前故） 20260127
+                    //return;//因為主要是藉由此事件程序觸發此函式方法執行，不必完成此事件程序（主要目的不在讓表單現前故） 20260127
+                    //然後續操作仍常需要表單成為作用中的，所以還是需要讓此事件完成
+
                 }
                 #endregion
             }
@@ -19223,6 +19247,39 @@ namespace WindowsFormsApp1
             }
             #endregion
 
+            #region 在手動輸入模式下且是Selenium模式時，將Chrome瀏覽器切到目前作用中的分頁上，對於如要對舉的兩部書瀏覽輸入上方便切換，如目前所整理之《隸韻》此二部： https://ctext.org/library.pl?if=gb&file=236236&page=73 https://ctext.org/library.pl?if=gb&file=15072&page=73
+            if (BrowsrOPMode != BrowserOPMode.appActivateByName && Name == "Form1" && _keyinTextMode
+                && Process.GetProcessesByName("TextForCtext").Length > 1)
+            {
+                if (!IsDriverInvalid)
+                {
+                    try
+                    {
+                        driver = driver ?? DriverNew();
+                        driver.SwitchTo().Window(driver.CurrentWindowHandle);
+                        //this.BringToFront();
+                        //AvailableInUse_BothKeysMouse();
+                    }
+                    catch (Exception ex)
+                    {
+                        switch (ex.HResult)
+                        {
+                            case -2146233088:
+                                if (ex.Message.IndexOf("no such window: target window already closed") > -1)
+                                {
+                                    ResetLastValidWindow();
+                                }
+                                break;
+                            default:
+                                Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
+                                Debugger.Break();
+                                break;
+                        }
+                    }
+                }
+            }
+            #endregion
+
 
             //Keys modifierKey = ModifierKeys;
             ////直接針對目前的分頁開啟古籍酷OCR//20240328暫取消
@@ -19237,7 +19294,7 @@ namespace WindowsFormsApp1
             //if (!this.TopMost && !PagePaste2GjcoolOCR_ing || ModifierKeys != Keys.Control) this.TopMost = true;
 
             //不全部貼上取代原文字
-            if (_keyinTextMode && !pasteAllOverWrite) pasteAllOverWrite = false;
+            if (!pasteAllOverWrite && (BrowsrOPMode != BrowserOPMode.appActivateByName || _keyinTextMode)) pasteAllOverWrite = false;
 
             //當自動由《四部叢刊資料庫》貼入，不做以下處置
             if (_autoPasteFromSBCKwhether) { AutoPasteFromSBCK(_autoPasteFromSBCKwhether); return; }
@@ -20789,6 +20846,7 @@ namespace WindowsFormsApp1
             _pageTextEndPosition = s + textBox1.SelectionLength;//重設 pageTextEndPosition 值
             _pageEndText10 = string.Empty;
             //if (keyDownCtrlAdd(false)) if (textBox1.Text != "") { pauseEvents(); textBox1.Text = ""; resumeEvents(); }
+            RestoreSvgImageSize();
             return KeyDownCtrlAdd(false);
             //return Alt_a();
         }
@@ -21296,6 +21354,7 @@ namespace WindowsFormsApp1
             _lpMode = false;
             _aiPasteCleaning = false;
             _inputTextFrontPage = "{{{封面}}}<p>";
+            _editModeMakeup_changeFile_Page = false;
 
             if (Name != "Form1") return;//以免開新表單重設了靜態與共用成員 20260123
 

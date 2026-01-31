@@ -3464,7 +3464,8 @@ var callback = arguments[arguments.length - 1];
                 {
                     if (!IsDriverInvalid)
                     {
-                        if (CtextPageClassifier.ParseUrl(driver.Url).PageType == CtextPageType.LibraryFile)
+                        if (CtextPageClassifier.ParseUrl(driver.Url).PageType == CtextPageType.LibraryFile
+                            || CtextPageClassifier.ParseUrl(driver.Url).PageType == CtextPageType.LibraryFileEditWiki)
                             //if (CTP.IsImageTextComparisonPage())
                             Edit_Linkbox_ImageTextComparisonPage?.JsClick();
                         //現在用 FixXMLParagraphMarkPosition_and_Page1Content(); 程式化可以背景執行了，則手動的部分，則加標題，故將插入點位置移到標題欄位中以供輸入，也不怕其他欄位受影響，因為都是程式在幕後操作了。 20260117                        

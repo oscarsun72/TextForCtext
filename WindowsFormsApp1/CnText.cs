@@ -680,7 +680,7 @@ namespace TextForCtext
                     || text.Contains("「") || text.Contains("」") || text.Contains("【") || text.Contains("】")
                     || text.Contains("》") || text.Contains("〉")
                     || text.Contains("□") || text.Contains("■")
-                    || text.Contains("▢") 
+                    || text.Contains("▢")
                     || text.Contains("●") || text.Contains("、")
                     || text.Contains("·") || text.Contains("**")
                     || text.Contains("|") || text.Contains("　}}")
@@ -704,6 +704,135 @@ namespace TextForCtext
             return true;
         }
 
+        #region FormalizeText https://gemini.google.com/share/9dc170e66272
+        
+        // 定義一個簡單的結構來存放規則，保證所有 C# 版本都相容
+        internal struct ReplaceRule
+        {
+            public string OldChar;
+            public string NewChar;
+
+            public ReplaceRule(string oldChar, string newChar)
+            {
+                OldChar = oldChar;
+                NewChar = newChar;
+            }
+        }
+        /// <summary>
+        /// 文本規範化，正規化，以合於[簡單修改模式]接受的形式。如半形標點符號轉全形。置換為全形符號。
+        /// 由narrow2WidePunctuationMarks擴展而來
+        /// 從newTextBox1抽離出來的
+        /// </summary>
+        /// <param name="x">須轉換的文本。傳址（pass　by　reference）</param>
+        internal static void FormalizeText(ref string x)
+        {
+            if (x.Length == 0) return;
+
+            // 複雜標籤檢測，直接返回邏輯保留
+            if (x.IndexOf("\" ") > -1 && x.IndexOf("=\"") > -1 && x.IndexOf(" />") > -1)
+            {
+                x = x.Replace("/><p>＝", "/>＝");
+                return;
+            }
+
+            // 危險標點符號清單
+            HashSet<string> riskyPunctuation = new HashSet<string> {
+        ",", ":", ";", "'", "!", "?", "@", "+", "."
+    };
+
+            // 使用 List 存放結構，取代原本的 ValueTuple，相容性最高
+            List<ReplaceRule> replaceRules = new List<ReplaceRule>
+    {
+        // === 格式： new ReplaceRule("被取代者", "取代為") ===
+        new ReplaceRule("＠", ""), new ReplaceRule("○", "◯"), new ReplaceRule("〇", "◯"),
+        new ReplaceRule("!", "！"), new ReplaceRule("！！", "！"),
+        new ReplaceRule("'", "、"), new ReplaceRule(",", "，"), new ReplaceRule(";", "；"),
+        new ReplaceRule(":", "："), new ReplaceRule("．", "·"), new ReplaceRule("?", "？"),
+        new ReplaceRule("：：", "："), new ReplaceRule("：\r\n：", "：\r\n"),
+        new ReplaceRule("《《", "《"), new ReplaceRule("》》", "》"),
+        new ReplaceRule("〈〈", "〈"), new ReplaceRule("〉〉", "〉"),
+        
+        // 複雜標籤清理
+        new ReplaceRule("。}}<p>。}}", "。}}"), new ReplaceRule("。}}。}}", "。}}"),
+        new ReplaceRule("。}}}。<p>", "。}}}<p>"), new ReplaceRule("}}}。<p>", "。}}}<p>"),
+        new ReplaceRule("。}}。<p>", "。}}<p>"), new ReplaceRule("}}。<p>", "。}}<p>"),
+        new ReplaceRule(".<p>", "。<p>"), new ReplaceRule("·<p>", "。<p>"),
+        new ReplaceRule("<p>。<p>", "<p>"), new ReplaceRule("<p>。", "<p>"),
+        new ReplaceRule("􏿽。<p>", "　"), new ReplaceRule("　。<p>", "　"),
+        new ReplaceRule("。。", "。"), new ReplaceRule("，，", "，"), new ReplaceRule("@", "●"),
+        
+        // 換行與標點
+        new ReplaceRule("\r\n。<p>", "\r\n"), new ReplaceRule("\r\n〗", "〗\r\n"),
+        new ReplaceRule("\r\n。}}", "。}}\r\n"), new ReplaceRule("\r\n：", "：\r\n"),
+        new ReplaceRule("！。<p>", "！<p>"), new ReplaceRule("？。<p>", "？<p>"),
+        new ReplaceRule("+<p>", "<p>"), new ReplaceRule("<p>++", "<p>"),
+        new ReplaceRule("<p>+", "<p>"), new ReplaceRule("：。<p>", "：<p>"),
+        new ReplaceRule("。\r\n。", "。\r\n"),
+        
+        // 書名號
+        new ReplaceRule("《\r\n　　", "\r\n　　《"), new ReplaceRule("《\r\n　", "\r\n　《"),
+        new ReplaceRule("《\r\n", "\r\n《"),
+        
+        // 其他
+        new ReplaceRule("：。", "。"), new ReplaceRule("\r\n，", "，\r\n"),
+        new ReplaceRule("\r\n。", "。\r\n"), new ReplaceRule("\r\n、", "、\r\n"),
+        new ReplaceRule("\r\n？", "？\r\n"), new ReplaceRule("\r\n」", "」\r\n"),
+        new ReplaceRule("「\r\n", "\r\n「"), new ReplaceRule("{{\r\n", "\r\n{{"),
+        new ReplaceRule("\r\n}}", "}}\r\n"),
+
+        new ReplaceRule("􏿽？", "？􏿽"), new ReplaceRule("􏿽。", "。􏿽"),
+        new ReplaceRule("，〉", "〉，"), new ReplaceRule("。〉", "〉。"),
+        new ReplaceRule("〈、", "、〈"), new ReplaceRule("！，", "！"),
+        new ReplaceRule("〈，", "，〈"), new ReplaceRule("。〈。", "。〈"),
+        new ReplaceRule("〈：", "〈"), new ReplaceRule("：〉", "〉"),
+        new ReplaceRule("〈。", "。〈"), new ReplaceRule("：，", "："),
+        new ReplaceRule("|。", "。|"),
+
+        new ReplaceRule("，。", "。"), new ReplaceRule("〉·", "·"), new ReplaceRule("》·", "·"),
+        new ReplaceRule("}}\r\n}", "}}}\r\n"),
+        new ReplaceRule("*欽定《四庫全書》", "*欽定四庫全書")
+    };
+
+            // 執行替換迴圈
+            foreach (var rule in replaceRules)
+            {
+                // 判斷是否為「危險」的單字元標點符號
+                // 注意：這裡改用 rule.OldChar 讀取
+                if (riskyPunctuation.Contains(rule.OldChar))
+                {
+                    x = ReplaceOutsideTags(x, rule.OldChar, rule.NewChar);
+                }
+                else
+                {
+                    x = x.Replace(rule.OldChar, rule.NewChar);
+                }
+            }
+
+            //置換中文文本中的英文句號（小數點）
+            CnText.PeriodsReplace_ChinesePunctuationMarks(ref x);
+
+            //清除\r 
+            string pattern = "(?<!\\n)\\r(?!\\n)";
+            string replacementStr = "";
+            Regex rgx = new Regex(pattern);
+            x = rgx.Replace(x, replacementStr);
+
+            pattern = "(?<!\\r)\\n(?!\\r)";
+            rgx = new Regex(pattern);
+            x = rgx.Replace(x, replacementStr);
+        }
+
+        // 輔助方法保持不變
+        private static string ReplaceOutsideTags(string input, string oldValue, string newValue)
+        {
+            string pattern = $"(<[^>]+>)|({Regex.Escape(oldValue)})";
+            return Regex.Replace(input, pattern, m =>
+            {
+                if (m.Groups[1].Success) return m.Value;
+                return newValue;
+            });
+        }
+        //https://gemini.google.com/share/d06f3c5b207f
 
         /// <summary>
         /// 文本規範化，正規化，以合於[簡單修改模式]接受的形式。如半形標點符號轉全形。置換為全形符號。
@@ -711,7 +840,7 @@ namespace TextForCtext
         /// 從newTextBox1抽離出來的
         /// </summary>
         /// <param name="x">須轉換的文本。傳址（pass　by　reference）</param>        
-        internal static void FormalizeText(ref string x)
+        internal static void FormalizeText_OLD(ref string x)
         {
             if (x.Length == 0) return;
             //有語法內容者不執行（暫時先這樣，不做細緻的區別）20240803
@@ -805,6 +934,9 @@ namespace TextForCtext
 
             //RemoveInnerBraces(ref x);            
         }
+
+        #endregion FormalizeText
+
         /// <summary>
         /// 移除文本中的標點符號和阿拉伯數字
         /// 20240818 Copilot大菩薩：移除標點符號的C#函式方法：https://sl.bing.net/erpgod8B3LM

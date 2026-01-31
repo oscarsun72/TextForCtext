@@ -29,13 +29,13 @@ namespace TextForCtext
         LibraryResource,
 
         /// <summary>
-        /// 圖文對照瀏覽頁面
+        /// 圖文對照「瀏覽」頁面
         /// 如：https://ctext.org/library.pl?if=gb&amp;file=76626&amp;page=1
         /// </summary>
         LibraryFile,
 
         /// <summary>
-        /// 圖文對照編輯頁面，quick edit（可編輯 Wiki）
+        /// 圖文對照「編輯」頁面，quick edit（可編輯 Wiki） [簡單修改模式]
         /// 如: https://ctext.org/library.pl?if=gb&amp;file=76626&amp;page=5&amp;editwiki=713430#editor
         /// </summary>
         LibraryFileEditWiki,
