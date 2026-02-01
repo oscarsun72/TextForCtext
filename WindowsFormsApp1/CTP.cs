@@ -1096,11 +1096,16 @@ namespace TextForCtext
 
             if (FileCSSSelector == null) { MessageBoxShowOKCancelExclamationDefaultDesktopOnly("請先在textBox2中以「fn」+n(數字)指定目前是第n冊。或直接貼入CssSelector值"); return false; }
             //點擊下一個file的連結
-            string nfSelector = NextFileSelector;
-            if (nfSelector.IsNullOrEmpty()) return false;
+            string nextfileSelector = NextFileSelector;
+            if (nextfileSelector.IsNullOrEmpty()) return false;
             //點擊本書首頁的冊(file,網址中有）連結
-            IWebElement iwe = WaitFindWebElementBySelector_ToBeClickable(nfSelector, 5);
-            if (iwe == null) return false;
+            IWebElement iwe = WaitFindWebElementBySelector_ToBeClickable(nextfileSelector, 5);
+            if (iwe == null)
+            {
+                //MessageBoxShowOKExclamationDefaultDesktopOnly("本書業畢，沒有下一冊了！");//20260201 改寫在呼叫端
+                //if (Form1.InstanceForm1.FastMode) Form1.InstanceForm1.FastModeSwitcher();
+                return false;
+            }
             return iwe.JsClick();
         }
         /// <summary>

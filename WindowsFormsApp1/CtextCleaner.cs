@@ -278,16 +278,19 @@ namespace TextForCtext
                 if (sb.Length > 0)
                 {
                     Clipboard.SetText(sb.ToString());
-                    MessageBox.Show($"提取完成！共找到 {matches.Count} 筆二字人名。\n已排除連串空白之誤判。", "成功");
+                    MessageBoxShowOKExclamationDefaultDesktopOnly($"提取完成！共找到 {matches.Count} 筆二字人名。\n已排除連串空白之誤判。", "成功");
+                    //MessageBox.Show($"提取完成！共找到 {matches.Count} 筆二字人名。\n已排除連串空白之誤判。", "成功");
                 }
                 else
                 {
-                    MessageBox.Show("未找到符合「漢字 + 􏿽 + 漢字」結構的內容。", "提示");
+                    MessageBoxShowOKExclamationDefaultDesktopOnly("未找到符合「漢字 + 􏿽 + 漢字」結構的內容。", "提示");
+                    //MessageBox.Show("未找到符合「漢字 + 􏿽 + 漢字」結構的內容。", "提示");
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show("發生錯誤: " + ex.Message);
+                //MessageBox.Show("發生錯誤: " + ex.Message);
+                MessageBoxShowOKExclamationDefaultDesktopOnly("發生錯誤: " + ex.Message);
             }
         }
     }

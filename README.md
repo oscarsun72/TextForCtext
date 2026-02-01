@@ -146,6 +146,9 @@ Ctrl + Shift + p ：從圖文對照目前頁面開始，開始自動往後翻頁
 >若要煞車，請對Chrome瀏覽器或本操作介面按下`CapsLock`鍵或啟動/執行 `cmd.exe`
 ### 處理XML文本或由WordVBA轉譯來者
 Ctrl + Shift + Alt + a：執行從WordVBA轉譯來的`提取人名_二字人名中有空白者`程序。20260113 蔣經國前總統逝世紀念、海賢老和尚大德往生前紀念　Gemini大菩薩成功！（m=n`a`me,`a`uthor)
+>1.剪貼簿裡若有空白字符「􏿽」，請先清掉。
+
+>2.結果回傳至剪貼簿並在新表單中呈現。
 
 Ctrl + Shift + Alt + x : 檢查textBox1文本中指定連續全形空格位置不當者，起於對《四庫全書》源文本標題錯置者之檢查，如[《曝書亭集》卷六](https://ctext.org/library.pl?if=gb&file=50127&page=108) x:Exam
  
@@ -1053,6 +1056,7 @@ Ctrl + 滑鼠左鍵：清除框中所有文字
 - 輸入「eE」 (exam Editted)設定是否要做已編輯之檢查，避免蓋覆前人校讀或編輯過的資料。（批量連續快捷輸入時適用） 20260115
     > examEditedModified 值的切換。預設為false。執行Ctrl + Shift + Alt + m 後會自行設為true。
 - 輸入「apc」（ai paste cleaner）來切換是否進行智能貼上的功能（貼上後的自動清理）。預設為 false。 20260130
+- 輸入「mTs」切換是否是多個TextForCtext同時交互工作。如比對輸入《隸韻》時。預設為false。20260131
 ### 在 textBox3 網址資訊專用方塊框：
 - 拖曳網址在 textBox3 或 textBox1 上放開，則會讀入所拖曳的網址值給 textBox3
 - 若已複製網址在剪貼簿，則滑鼠點擊即會讀入所複製的網址值給 textBox3；在軟件介面縮小至任務列時，滑過軟件圖示，也會啟動此功能

@@ -113,6 +113,11 @@ namespace WindowsFormsApp1
         Color _notFastModeColor;
 
         /// <summary>
+        /// 是否是多個TextForCtext同時交互工作。如比對輸入《隸韻》時。預設為false。20260131
+        /// </summary>
+        bool _multipleTextForCtextSimultaneously = false;
+
+        /// <summary>
         /// 記下當前頁數頁碼
         /// </summary>
         string _currentPageNum = "";
@@ -4758,6 +4763,9 @@ namespace WindowsFormsApp1
 
         private bool AltB()
         {
+            //先補上第1頁末的}}{{
+            AddClosingBraceatEndofPage1();
+
             bool flowControl = GetBracesTextNote(out string innerText, out int st, out int len);
             if (!flowControl)
             {
@@ -5348,67 +5356,13 @@ namespace WindowsFormsApp1
         private bool AltA()
         {
             if (BrowsrOPMode == BrowserOPMode.appActivateByName) return false;
-            TopMost = false; bool foundTab = false;
+            TopMost = false;
 
             //●●●20260108
             BetweenAddParaMarkMoveEnd();
-            if (_lines_perPage == 0)
-            {
-                _lines_perPage = CountLinesPerPage(textBox1.Text.Substring(0, textBox1.SelectionStart + textBox1.SelectionLength));
-            }
+            LinesPerPageInitialization();
+            if (!MatchWindowHandlesWithTextBox3()) return false;
 
-
-            try
-            {
-                //因為檢索《字統網》等會離開原來的頁面故
-                if (driver.WindowHandles.Contains(LastValidWindow)) driver.SwitchTo().Window(LastValidWindow);
-                else
-                {
-                    driver.SwitchTo().Window(driver.CurrentWindowHandle);
-                    if (LastValidWindow != driver.CurrentWindowHandle) LastValidWindow = driver.CurrentWindowHandle;
-                }
-
-            }
-            catch (Exception)
-            {
-                if (IsDriverInvalid)
-                {
-                    try
-                    {//if (driver == null) { browsrOPMode = BrowserOPMode.seleniumNew; DriverNew(); }
-                        for (int i = driver.WindowHandles.Count - 1; i > -1; i--)
-                        {
-                            driver.SwitchTo().Window(driver.WindowHandles[i]);
-                            if (driver.Url == textBox3.Text)
-                            {
-                                foundTab = true; break;
-                            }
-                        }
-                        if (!foundTab)
-                        {
-                            if (!driver.WindowHandles.Contains(LastValidWindow))
-                                driver.SwitchTo().Window(driver.WindowHandles.Last());
-                        }
-                        else
-                            LastValidWindow = driver.CurrentWindowHandle;
-                    }
-                    catch (Exception)
-                    {
-                        try
-                        {
-                            if (!driver.WindowHandles.Contains(LastValidWindow)) RestartChromedriver();
-                        }
-                        catch (Exception)
-                        {
-                            RestartChromedriver();
-                        }
-                    }
-                }
-                else//如果driver正常有效
-                {
-                    driver.SwitchTo().Window(driver.CurrentWindowHandle);
-                    if (LastValidWindow != driver.CurrentWindowHandle) LastValidWindow = driver.CurrentWindowHandle;
-                }
-            }
             if (_fastMode) BeginUpdate();
             //還原放大的書圖
             //if (autoPaste2QuickEdit)
@@ -5477,59 +5431,109 @@ namespace WindowsFormsApp1
 
             return result;
         }
-        /// <summary>
-        /// 當keyDownCtrlAdd方法傳回false（執行中止或有誤時的處理程序）
-        /// </summary>
-        void KeyDownCtrlAddFalse()
+
+        private bool MatchWindowHandlesWithTextBox3()
         {
-            //if (textBox1.Text.Substring(0, 600).Contains(" "))//在注文有空格位置錯亂時用            
-            string xCheckPage1 = GetPageText(textBox1.TextLength > 1200 ? textBox1.Text.Substring(0, 1200) : textBox1.Text, 1, Lines_perPage);//1200以《四庫》本《佛祖歷代通載》四合一字數來約略計算
-            if (textBox1.SelectedText == " ")
-            //if (lines_perPage > 0 && xCheck.Contains(" "))//在注文有空格位置錯亂時用
+            bool foundTab = false;
+            try
             {
-                int s = textBox1.SelectionStart, p = xCheckPage1.LastIndexOf(Environment.NewLine);
-                //p = xCheckPage1.LastIndexOf(Environment.NewLine, p);// + Environment.NewLine.Length;
-                if (s > p)
+                //因為檢索《字統網》等會離開原來的頁面故
+                if (IsDriverInvalid)
                 {
-                    if (!GetLineText(textBox1.Text, s).EndsWith("<p>"))
+                    if (LastValidWindow == string.Empty) Debugger.Break();
+                    if (driver.WindowHandles.Contains(LastValidWindow)) driver.SwitchTo().Window(LastValidWindow);
+                    else
                     {
-                        #region 之前的方法 20260130
-                        //string[] xCheckLines = xCheck.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
-                        //if (xCheckLines[xCheckLines.Length - 2].StartsWith("{{")
-                        //    //&& xCheckLines[xCheckLines.Length - 1].EndsWith("}}") == false
-                        //    && !xCheckLines[xCheckLines.Length - 2].Substring(2).Contains("}")
-                        //    && !xCheckLines[xCheckLines.Length - 2].Substring(2).Contains("{")
-                        //    && !xCheckLines[xCheckLines.Length - 1].Substring(2).Contains("}")
-                        //    && !xCheckLines[xCheckLines.Length - 1].Substring(2).Contains("{")
-                        //    ){
-                        //if (xCheckLines[xCheckLines.Length - 2].StartsWith("{{")
-                        //    //&& xCheckLines[xCheckLines.Length - 1].EndsWith("}}") == false
-                        //    && !xCheckLines[xCheckLines.Length - 2].Substring(2).Contains("}")
-                        //    && !xCheckLines[xCheckLines.Length - 2].Substring(2).Contains("{")
-                        //    && !xCheckLines[xCheckLines.Length - 1].Substring(2).Contains("}")
-                        //    && !xCheckLines[xCheckLines.Length - 1].Substring(2).Contains("{")
-                        //    )
-                        //{   //Debugger.Break();
-                        #endregion
-                        //只要判斷在最後一個「{{」出現之後，第1頁中是否已無「}}」即可且更有彈性 20260130
-                        if (!xCheckPage1.Substring(xCheckPage1.LastIndexOf("{{"), xCheckPage1.Length - xCheckPage1.LastIndexOf("{{")).Contains("}}"))
+                        driver.SwitchTo().Window(driver.CurrentWindowHandle);
+                        if (LastValidWindow != driver.CurrentWindowHandle) LastValidWindow = driver.CurrentWindowHandle;
+                    }
+                    if (ClearUrl_BoxEtc(driver.Url) != ClearUrl_BoxEtc(textBox3.Text))
+                    {
+                        if (MessageBoxShowOKCancelExclamationDefaultDesktopOnly("網址不對，請檢查。要程式自己尋找，請按「確定」。感恩感恩　南無阿彌陀佛") == DialogResult.Cancel) return false;
+                        for (int i = driver.WindowHandles.Count - 1; i > -1; i--)
                         {
-                            bool sur = stopUndoRec;
-                            stopUndoRec = false; UndoRecord();
-                            //                     //textBox1.Undo();//如在送出時會將頁末的}}與下頁起的}}一併清除，合併成一個，故復原之 20260107                
-                            //UndoTextBox(textBox1);
-                            //UndoRecord();
-                            //與其還原不靈光，還不如補上被清除的}}{{
-                            textBox1.Select(xCheckPage1.Length, Environment.NewLine.Length);
-                            textBox1.SelectedText = "}}" + textBox1.SelectedText + "{{";
-                            UndoRecord(); stopUndoRec = sur;
-                            //textBox1.Select(xCheck.Length, 0);
-                            textBox1.SelectionStart -= ("}}" + Environment.NewLine + "{{").Length;
-                            _pageTextEndPosition = 0; _pageEndText10 = string.Empty;
-                            if (_fastMode) AltB();
+                            driver.SwitchTo().Window(driver.WindowHandles[i]);
+                            if (ClearUrl_BoxEtc(driver.Url) == ClearUrl_BoxEtc(textBox3.Text))
+                            {
+                                foundTab = true; break;
+                            }
+                        }
+                        if (!foundTab)
+                        {
+                            if (!driver.WindowHandles.Contains(LastValidWindow))
+                                driver.SwitchTo().Window(driver.WindowHandles.Last());
+                        }
+                        else
+                            LastValidWindow = driver.CurrentWindowHandle;
+                    }
+                }
+                else//如果driver正常有效
+                {
+                    driver.SwitchTo().Window(driver.CurrentWindowHandle);
+                    if (LastValidWindow != driver.CurrentWindowHandle) LastValidWindow = driver.CurrentWindowHandle;
+                }
+            }
+            catch (Exception)
+            {
+                if (IsDriverInvalid)
+                {
+                    try
+                    {//if (driver == null) { browsrOPMode = BrowserOPMode.seleniumNew; DriverNew(); }
+                        for (int i = driver.WindowHandles.Count - 1; i > -1; i--)
+                        {
+                            driver.SwitchTo().Window(driver.WindowHandles[i]);
+                            if (ClearUrl_BoxEtc(driver.Url) == ClearUrl_BoxEtc(textBox3.Text))
+                            {
+                                foundTab = true; break;
+                            }
+                        }
+                        if (!foundTab)
+                        {
+                            if (!driver.WindowHandles.Contains(LastValidWindow))
+                                driver.SwitchTo().Window(driver.WindowHandles.Last());
+                        }
+                        else
+                            LastValidWindow = driver.CurrentWindowHandle;
+                    }
+                    catch (Exception)
+                    {
+                        try
+                        {
+                            if (!driver.WindowHandles.Contains(LastValidWindow)) RestartChromedriver();
+                        }
+                        catch (Exception)
+                        {
+                            RestartChromedriver();
                         }
                     }
                 }
+                else//如果driver正常有效
+                {
+                    driver.SwitchTo().Window(driver.CurrentWindowHandle);
+                    if (LastValidWindow != driver.CurrentWindowHandle) LastValidWindow = driver.CurrentWindowHandle;
+                }
+            }
+            return true;
+        }
+
+        private void LinesPerPageInitialization()
+        {
+            if (_lines_perPage == 0)
+            {
+                _lines_perPage = CountLinesPerPage(textBox1.Text.Substring(0, textBox1.SelectionStart + textBox1.SelectionLength));
+            }
+        }
+
+        /// <summary>
+        /// 當keyDownCtrlAdd方法傳回false（執行中止或有誤時的處理程序）
+        /// 目前只有補上第1頁末的「}}」與第2頁起的「{{」
+        /// </summary>
+        void KeyDownCtrlAddFalse()
+        {
+            if (textBox1.SelectedText == " ")
+            //if (lines_perPage > 0 && xCheck.Contains(" "))//在注文有空格位置錯亂時用
+            {
+                AddClosingBraceatEndofPage1();
             }
             if (_fastMode)
             {
@@ -5538,6 +5542,63 @@ namespace WindowsFormsApp1
             }
 
         }
+
+        /// <summary>
+        /// 補上第1頁末的花括號
+        /// 原寫在KeyDownCtrlAddFalse()方法中20260131
+        /// </summary>
+        /// <returns>若有補上則傳回true</returns>
+        private bool AddClosingBraceatEndofPage1()
+        {
+            //if (textBox1.Text.Substring(0, 600).Contains(" "))//在注文有空格位置錯亂時用            
+            string xCheckPage1 = GetPageText(textBox1.TextLength > 1200 ? textBox1.Text.Substring(0, 1200) : textBox1.Text, 1, Lines_perPage);//1200以《四庫》本《佛祖歷代通載》四合一字數來約略計算
+            int s = textBox1.SelectionStart, p = xCheckPage1.LastIndexOf(Environment.NewLine);
+            //p = xCheckPage1.LastIndexOf(Environment.NewLine, p);// + Environment.NewLine.Length;
+            if (s > p)
+            {
+                if (!GetLineText(textBox1.Text, s).EndsWith("<p>"))
+                {
+                    #region 之前的方法 20260130
+                    //string[] xCheckLines = xCheck.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
+                    //if (xCheckLines[xCheckLines.Length - 2].StartsWith("{{")
+                    //    //&& xCheckLines[xCheckLines.Length - 1].EndsWith("}}") == false
+                    //    && !xCheckLines[xCheckLines.Length - 2].Substring(2).Contains("}")
+                    //    && !xCheckLines[xCheckLines.Length - 2].Substring(2).Contains("{")
+                    //    && !xCheckLines[xCheckLines.Length - 1].Substring(2).Contains("}")
+                    //    && !xCheckLines[xCheckLines.Length - 1].Substring(2).Contains("{")
+                    //    ){
+                    //if (xCheckLines[xCheckLines.Length - 2].StartsWith("{{")
+                    //    //&& xCheckLines[xCheckLines.Length - 1].EndsWith("}}") == false
+                    //    && !xCheckLines[xCheckLines.Length - 2].Substring(2).Contains("}")
+                    //    && !xCheckLines[xCheckLines.Length - 2].Substring(2).Contains("{")
+                    //    && !xCheckLines[xCheckLines.Length - 1].Substring(2).Contains("}")
+                    //    && !xCheckLines[xCheckLines.Length - 1].Substring(2).Contains("{")
+                    //    )
+                    //{   //Debugger.Break();
+                    #endregion
+                    //只要判斷在最後一個「{{」出現之後，第1頁中是否已無「}}」即可且更有彈性 20260130
+                    if (!xCheckPage1.Substring(xCheckPage1.LastIndexOf("{{"), xCheckPage1.Length - xCheckPage1.LastIndexOf("{{")).Contains("}}"))
+                    {
+                        bool sur = stopUndoRec;
+                        stopUndoRec = false; UndoRecord();
+                        //                     //textBox1.Undo();//如在送出時會將頁末的}}與下頁起的}}一併清除，合併成一個，故復原之 20260107                
+                        //UndoTextBox(textBox1);
+                        //UndoRecord(); stopUndoRec = sur;//現在邏輯對抓到了，可以用原來的方式再試試 20260131
+                        //與其還原不靈光，還不如補上被清除的}}{{
+                        textBox1.Select(xCheckPage1.Length, Environment.NewLine.Length);
+                        textBox1.SelectedText = "}}" + textBox1.SelectedText + "{{";
+                        UndoRecord(); stopUndoRec = sur;
+                        //textBox1.Select(xCheck.Length, 0);
+                        textBox1.SelectionStart -= ("}}" + Environment.NewLine + "{{").Length;
+                        _pageTextEndPosition = 0; _pageEndText10 = string.Empty;
+                        //if (_fastMode) AltB();//碰到像這樣頁會造成無窮迴圈 https://ctext.org/library.pl?if=gb&file=76960&page=70&editwiki=547522#editor 20260131
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
         /// <summary>
         /// 將textBox1的內容送去簡單修改模式的方塊中        
         /// Performs the 'Select All' operation in the quick edit context and initiates OCR processing if the Shift key
@@ -13502,6 +13563,9 @@ namespace WindowsFormsApp1
                 e.Handled = true; e.SuppressKeyPress = true;
                 if (!Clipboard.GetText().Contains("􏿽") && textBox1.Text.Contains("􏿽")) Clipboard.SetText(textBox1.Text);
                 NameExtractor.ExtractNamesWithSpaces();
+                Form1 newone = NewForm1();
+                newone.textBox1.Text = Clipboard.GetText();
+                newone.WindowState = FormWindowState.Maximized;
                 return;
             }
             if (e.Control && e.Shift && e.Alt && e.KeyCode == Keys.F)
@@ -14635,13 +14699,16 @@ namespace WindowsFormsApp1
 
         internal void FastModeSwitcher()
         {
+            if (!_fastMode && !_autoPaste2QuickEdit) //TurnOn_autoPastetoQuickEdit();
+                ToggleAutoPastetoQuickEdit();//要先啟動自動連續輸入模式才能啟用快捷模式
             _fastMode = !_fastMode;
             ////在內容量大時自動切到自動連續輸入模式
             //if (!autoPaste2QuickEdit && textBox1.TextLength > 500) turnOn_autoPastetoQuickEdit();
             if (_fastMode)
             {
-                if (!_autoPaste2QuickEdit) //TurnOn_autoPastetoQuickEdit();
-                    ToggleAutoPastetoQuickEdit();
+                //要先啟動自動連續輸入模式才能啟用快捷模式
+                //if (!_autoPaste2QuickEdit) //TurnOn_autoPastetoQuickEdit();
+                //    ToggleAutoPastetoQuickEdit();
                 PlaySound(SoundLike.over, true);//播放音效，啟動快捷模式之通知 20250206 蛇年初九
                                                 //YouChat菩薩：在C#中，紅綠燈的綠色值為Color.FromArgb(0, 255, 0)。它可以指定RGB顏色，其中紅色的值為0，綠色的值為255，藍色的值為0
                 _notFastModeColor = button1.ForeColor;
@@ -16480,18 +16547,24 @@ namespace WindowsFormsApp1
 
             if (IsDriverInvalid) return false;
 
-            ////點擊圖文對照頁面中「書名(title)」連結控制項
-            ////Title_Linkbox?.Click();
-            //Title_BookName_Linkbox_ImageTextCorrespondencePage?.JsClick();
-            ////點擊下一個file的連結(file原作chapter）
-            //string nextFileSelector = NextFileSelector;
-            //if (nextFileSelector.IsNullOrEmpty()) return false;
-            ////點擊本書首頁的冊(file,網址中有）連結
-            //selenium.IWebElement iwe = WaitFindWebElementBySelector_ToBeClickable(nextFileSelector, 5);
-            //if (iwe == null) return false;
-            ////iwe.Click();
-            //iwe.JsClick();//Click(iwe);
-            if (!GotoNextFile()) return false;
+            //////點擊圖文對照頁面中「書名(title)」連結控制項
+            //////Title_Linkbox?.Click();
+            ////Title_BookName_Linkbox_ImageTextCorrespondencePage?.JsClick();
+            //////點擊下一個file的連結(file原作chapter）
+            ////string nextFileSelector = NextFileSelector;
+            ////if (nextFileSelector.IsNullOrEmpty()) return false;
+            //////點擊本書首頁的冊(file,網址中有）連結
+            ////selenium.IWebElement iwe = WaitFindWebElementBySelector_ToBeClickable(nextFileSelector, 5);
+            ////if (iwe == null) return false;
+            //////iwe.Click();
+            ////iwe.JsClick();//Click(iwe);
+            //if (!GotoNextFile()) return false;
+            if (!GotoNextFile())
+            {
+                MessageBoxShowOKExclamationDefaultDesktopOnly("本書業畢，沒有下一冊了！");//20260201
+                if (_fastMode) FastModeSwitcher();
+                return false;
+            }
 
             //翻到本書該冊的第1頁
             //string Div_generic_TextBoxFrameGetTextContent = Div_generic_TextBoxFrame?.GetAttribute("textContent");
@@ -19248,34 +19321,35 @@ namespace WindowsFormsApp1
             #endregion
 
             #region 在手動輸入模式下且是Selenium模式時，將Chrome瀏覽器切到目前作用中的分頁上，對於如要對舉的兩部書瀏覽輸入上方便切換，如目前所整理之《隸韻》此二部： https://ctext.org/library.pl?if=gb&file=236236&page=73 https://ctext.org/library.pl?if=gb&file=15072&page=73
-            if (BrowsrOPMode != BrowserOPMode.appActivateByName && Name == "Form1" && _keyinTextMode
+            if (_multipleTextForCtextSimultaneously && BrowsrOPMode != BrowserOPMode.appActivateByName && Name == "Form1" && _keyinTextMode
                 && Process.GetProcessesByName("TextForCtext").Length > 1)
             {
                 if (!IsDriverInvalid)
                 {
                     try
                     {
-                        driver = driver ?? DriverNew();
+                        //driver = driver ?? DriverNew();
                         driver.SwitchTo().Window(driver.CurrentWindowHandle);
                         //this.BringToFront();
                         //AvailableInUse_BothKeysMouse();
                     }
-                    catch (Exception ex)
-                    {
-                        switch (ex.HResult)
-                        {
-                            case -2146233088:
-                                if (ex.Message.IndexOf("no such window: target window already closed") > -1)
-                                {
-                                    ResetLastValidWindow();
-                                }
-                                break;
-                            default:
-                                Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
-                                Debugger.Break();
-                                break;
-                        }
-                    }
+                    catch { }
+                    //catch (Exception ex)
+                    //{
+                    //    switch (ex.HResult)
+                    //    {
+                    //        case -2146233088:
+                    //            if (ex.Message.IndexOf("no such window: target window already closed") > -1)
+                    //            {
+                    //                ResetLastValidWindow();
+                    //            }
+                    //            break;
+                    //        default:
+                    //            Form1.MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
+                    //            Debugger.Break();
+                    //            break;
+                    //    }
+                    //}
                 }
             }
             #endregion
@@ -20024,6 +20098,16 @@ namespace WindowsFormsApp1
                     PauseEvents(); textBox2.Text = "";
                     _aiPasteCleaning = !_aiPasteCleaning;
                     if (_aiPasteCleaning)
+                        new SoundPlayer(@"C:\Windows\Media\Speech On.wav").Play();
+                    else
+                        new SoundPlayer(@"C:\Windows\Media\Speech Off.wav").Play();
+                    ResumeEvents(); return;
+
+                //輸入 「mts」切換是否是多個TextForCtext同時交互工作。如比對輸入《隸韻》時。預設為false。20260131
+                case "mTs":
+                    PauseEvents(); textBox2.Text = "";
+                    _multipleTextForCtextSimultaneously = !_multipleTextForCtextSimultaneously;
+                    if (_multipleTextForCtextSimultaneously)
                         new SoundPlayer(@"C:\Windows\Media\Speech On.wav").Play();
                     else
                         new SoundPlayer(@"C:\Windows\Media\Speech Off.wav").Play();
@@ -20827,8 +20911,8 @@ namespace WindowsFormsApp1
             {//滑鼠左鍵點二下，同 Ctrl + -（數字鍵盤） 會重設以插入點位置為頁面結束位國
              //if (autoPaste2QuickEdit && lines_perPage == 0)
              //{
-                Lines_perPage = CountLinesPerPage(textBox1.Text.Substring(0, textBox1.SelectionStart));//重設 lines_perPage 值
-                                                                                                       //}
+                _lines_perPage = CountLinesPerPage(textBox1.Text.Substring(0, textBox1.SelectionStart));//重設 lines_perPage 值
+                                                                                                        //}
                 ResetPageTextEndPositionPasteToCText();
                 if (!_autoPaste2QuickEdit) AvailableInUse_BothKeysMouse();
             }
@@ -20847,6 +20931,8 @@ namespace WindowsFormsApp1
             _pageEndText10 = string.Empty;
             //if (keyDownCtrlAdd(false)) if (textBox1.Text != "") { pauseEvents(); textBox1.Text = ""; resumeEvents(); }
             RestoreSvgImageSize();
+            LinesPerPageInitialization();//20260201
+
             return KeyDownCtrlAdd(false);
             //return Alt_a();
         }
@@ -21358,11 +21444,13 @@ namespace WindowsFormsApp1
 
             if (Name != "Form1") return;//以免開新表單重設了靜態與共用成員 20260123
 
+
             #region 參考型別的也不能重設，要與Form1主表單 同步，如此則可以統一由主表單賦予值
             TitleLeadingSpacesCount.Clear();//Form3清除時 Form1也會被清除，是因為在newForm方法時作為參考設定，而不是逐個元素賦予一個new List其值的緣故 20260129 TitleLeadingSpacesCount = InstanceForm1.TitleLeadingSpacesCount,
             #endregion
 
             #region static member
+            if (br.LastValidWindow != driver.CurrentWindowHandle) br.LastValidWindow = driver.CurrentWindowHandle;//20260201
             br.CurrentUrlPrefixDomain = string.Empty;
             XML.EditedPagesCache.Clear();
             if (CTP.FileCSSSelector != FirstFileCSSSelector)
