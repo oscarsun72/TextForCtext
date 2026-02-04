@@ -2272,6 +2272,9 @@ Sub Kanripo_GitHub轉來(Optional lineCntPerPage As Byte = 0)
         If amp <> "&" Then
             noteRng.text = Replace(noteRng.text, "&amp;", "&")
         End If
+        
+        playSound 2
+        
         'noteRng.Copy'怕整個Range結構都複製進剪貼簿去了!測試果然！！故才會常造成Access解析端出現系統記憶體資源不足之問題。故資料型別（data type）之重要與關鍵如此！ 20260128
         ClipboardPutIn noteRng.text '只要複製純文字就好
         noteRng.Application.Visible = True

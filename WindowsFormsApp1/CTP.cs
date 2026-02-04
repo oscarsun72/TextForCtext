@@ -397,6 +397,12 @@ namespace TextForCtext
                 return iwe;
             }
         }
+        //有多工（多個TextForCtext同時運行時，此技不通）
+        //internal static int Please_confirm_that_you_are_human_Page_Occurrence_Counter = 0;
+        /// <summary>
+        /// 在碰到認證碼時要隨文附上的敬告訊息 20260204 今凌晨半夜天未明突然被「熱」醒而有之靈感 亦天意也。既反應無效（去信、討論區、臉書、x.com），且讓來者與站長德龍賢友菩薩明悉如是苛政之猛厲虐於校正者之瀝血也，感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主　哈利路亞　而今天天母家這又是大晴天，一掃連日之陰霾寒流，如是才一吐這一年多來被這樣惡整的窩囊氣，柳暗花明，真是天意啊！這樣做來才真是舒坦的。有人性多了。否則一個人兀自做著做著、辛勤地耕耘者像深宮怨婦一般，盡做一些吃力不討好的，何必？之前站長德龍賢友菩薩還會熱情回應，現在就完全地不理睬人了，真的不知何故何忍…… 人在做，天在看，末日審判時再見吧。看看上帝是怎麼判，又賢友此時到底在忙什麼，可以如此不理睬來無償奉獻者（當不止末學一人而已矣）。感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主　哈利路亞
+        /// </summary>
+        internal static string Please_confirm_that_you_are_human_Page_Occurrence_Interrupt_Message = string.Empty;
         /// <summary>
         /// 取得「Please confirm that you are human! 敬請輸入認證圖案」元件
         /// </summary>
@@ -406,7 +412,8 @@ namespace TextForCtext
             {
                 IWebElement iwe = Browser.WaitFindWebElementBySelector_ToBeClickable("#content > font");
                 if (iwe == null) return null;
-                if (iwe.GetAttribute("textContent") == "Please confirm that you are human! 敬請輸入認證圖案")
+                //if (iwe.GetAttribute("textContent") == "Please confirm that you are human! 敬請輸入認證圖案")
+                if (iwe.GetDomProperty("textContent") == "Please confirm that you are human! 敬請輸入認證圖案")
                     return iwe;
                 else
                     return null;
@@ -2609,6 +2616,11 @@ namespace TextForCtext
                 if (retryCount < 2) { retryCount++; goto retry; }
 
             }
+            if (result)
+            {
+                SetPlease_confirm_that_you_are_human_Page_Occurrence_Interrupt_Message();
+            }
+
             return result;
             //return confirm_that_you_are_human;
 
@@ -2624,6 +2636,27 @@ namespace TextForCtext
             //}
             //else
             //    return false;
+        }
+
+        internal static void SetPlease_confirm_that_you_are_human_Page_Occurrence_Interrupt_Message()
+        {
+            string theLetters = string.Empty, clipboardText = Clipboard.GetText();
+            //if (!string.IsNullOrEmpty(clipboardText) &&//Leo AI 大菩薩 20260204
+            //    clipboardText.Length <= 10 &&
+            //    Regex.IsMatch(clipboardText, @"^[a-zA-Z0-9]+$"))
+            if (Clipboard.GetText() is var clip &&
+                clip.Length > 0 &&
+                clip.Length <= 10 &&
+                clip.All(c => char.IsLetterOrDigit(c)))
+            {
+                theLetters += ": " + clipboardText + " ";
+            }
+            Please_confirm_that_you_are_human_Page_Occurrence_Interrupt_Message =
+                "<p>{{{⚠🚫✋⚡佛弟子文獻學博士孫守真任真甫按：🚧😵因認證碼機制（" +
+                "\"Please confirm that you are human! 敬請輸入認證圖案\"" +
+                theLetters +
+                "）掣肘而致 TextForCtext 自動連續輸入中斷，屢次數處向站主反應投訴卻概不見報，愚為此干擾折騰隱忍洎今已逾年所，故請來者賢友諸仁注意協力檢查文本是否有經正確地輸入！愚莫復獨自承擔❤️💕日暮途遠，夫我則不暇矣。見原見諒⚠️☢️🈲感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主　哈利路亞 👼 " +
+                DateTime.Now.ToString() + "}}}<p>";
         }
 
         /// <summary>

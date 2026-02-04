@@ -2145,6 +2145,12 @@ namespace WindowsFormsApp1
 
             if (_lpMode && xCopy.EndsWith("|"))
                 xCopy = xCopy.Substring(0, xCopy.Length - "|".Length) + "<p>";
+            if (Please_confirm_that_you_are_human_Page_Occurrence_Interrupt_Message != string.Empty)
+            {
+                SetPlease_confirm_that_you_are_human_Page_Occurrence_Interrupt_Message();
+                xCopy += Please_confirm_that_you_are_human_Page_Occurrence_Interrupt_Message;
+                Please_confirm_that_you_are_human_Page_Occurrence_Interrupt_Message = string.Empty;
+            }
             TextPatst2Quick_editBox = xCopy;
             BackupLastPageText(xCopy, false, false);
 
@@ -4591,6 +4597,7 @@ namespace WindowsFormsApp1
                     try
                     {
                         Clipboard.SetText(textBox1.Text);
+                        PlaySound(SoundLike.done);
                     }
                     catch (Exception)
                     {
@@ -5397,14 +5404,19 @@ namespace WindowsFormsApp1
 
                 ////若停止重畫，則恢復之//由KeyDownCtrlAdd()轉至此，先取消，因為後面有EndUpdate()了，待觀察！20260126●●●●●●●●●●●●●●●●●●●●
                 //if (!_rePaint)
-                //    EndUpdate();
+                //    EndUpdate();                
                 if (!_autoPastetoCtextQuitEditTextboxCancel) _autoPastetoCtextQuitEditTextboxCancel = true;
-                driver.SwitchTo().Window(driver.CurrentWindowHandle);
+                //driver.SwitchTo().Window(driver.CurrentWindowHandle);//這樣在執行端已經有了(//不符合自動連續輸入執行的條件時：……)
+
             }
             #endregion
 
             RestoreSvgImageSize();
-            if (!_autoPaste2QuickEdit && !IsSKQSFrontPage(textBox1.Text)) AvailableInUse_BothKeysMouse();
+            if ((!_autoPaste2QuickEdit && !IsSKQSFrontPage(textBox1.Text))
+                    ||//(_autoNextVolumnContextMark && PageUBound >= int.Parse(_currentPageNum))
+                     PageUBound == int.Parse(_currentPageNum)
+                )
+                if (!Active) AvailableInUse_BothKeysMouse();
 
             EndUpdate();
             UndoRecord();
@@ -5435,84 +5447,84 @@ namespace WindowsFormsApp1
         private bool MatchWindowHandlesWithTextBox3()
         {
             bool foundTab = false;
-            try
+            //try
+            //{
+            //    //因為檢索《字統網》等會離開原來的頁面故
+            //    if (IsDriverInvalid)
+            //    {
+            //        if (LastValidWindow == string.Empty) Debugger.Break();
+            //        if (driver.WindowHandles.Contains(LastValidWindow)) driver.SwitchTo().Window(LastValidWindow);
+            //        else
+            //        {
+            //            driver.SwitchTo().Window(driver.CurrentWindowHandle);
+            //            if (LastValidWindow != driver.CurrentWindowHandle) LastValidWindow = driver.CurrentWindowHandle;
+            //        }
+            //        if (!ClearUrl_BoxEtc(textBox3.Text).StartsWith(ClearUrl_BoxEtc(driver.Url)))
+            //        {
+            //            if (MessageBoxShowOKCancelExclamationDefaultDesktopOnly("網址不對，請檢查。要程式自己尋找，請按「確定」。感恩感恩　南無阿彌陀佛") == DialogResult.Cancel) return false;
+            //            for (int i = driver.WindowHandles.Count - 1; i > -1; i--)
+            //            {
+            //                driver.SwitchTo().Window(driver.WindowHandles[i]);
+            //                if (ClearUrl_BoxEtc(textBox3.Text).StartsWith(ClearUrl_BoxEtc(driver.Url)))
+            //                {
+            //                    foundTab = true; break;
+            //                }
+            //            }
+            //            if (!foundTab)
+            //            {
+            //                if (!driver.WindowHandles.Contains(LastValidWindow))
+            //                    driver.SwitchTo().Window(driver.WindowHandles.Last());
+            //            }
+            //            else
+            //                LastValidWindow = driver.CurrentWindowHandle;
+            //        }
+            //    }
+            //    else//如果driver正常有效
+            //    {
+            //        driver.SwitchTo().Window(driver.CurrentWindowHandle);
+            //        if (LastValidWindow != driver.CurrentWindowHandle) LastValidWindow = driver.CurrentWindowHandle;
+            //    }
+            //}
+            //catch (Exception)
+            //{
+            if (IsDriverInvalid)
             {
-                //因為檢索《字統網》等會離開原來的頁面故
-                if (IsDriverInvalid)
-                {
-                    if (LastValidWindow == string.Empty) Debugger.Break();
-                    if (driver.WindowHandles.Contains(LastValidWindow)) driver.SwitchTo().Window(LastValidWindow);
+                try
+                {//if (driver == null) { browsrOPMode = BrowserOPMode.seleniumNew; DriverNew(); }
+                    for (int i = driver.WindowHandles.Count - 1; i > -1; i--)
+                    {
+                        driver.SwitchTo().Window(driver.WindowHandles[i]);
+                        if (ClearUrl_BoxEtc(textBox3.Text).StartsWith(ClearUrl_BoxEtc(driver.Url)))
+                        {
+                            foundTab = true; break;
+                        }
+                    }
+                    if (!foundTab)
+                    {
+                        if (!driver.WindowHandles.Contains(LastValidWindow))
+                            driver.SwitchTo().Window(driver.WindowHandles.Last());
+                    }
                     else
-                    {
-                        driver.SwitchTo().Window(driver.CurrentWindowHandle);
-                        if (LastValidWindow != driver.CurrentWindowHandle) LastValidWindow = driver.CurrentWindowHandle;
-                    }
-                    if (ClearUrl_BoxEtc(driver.Url) != ClearUrl_BoxEtc(textBox3.Text))
-                    {
-                        if (MessageBoxShowOKCancelExclamationDefaultDesktopOnly("網址不對，請檢查。要程式自己尋找，請按「確定」。感恩感恩　南無阿彌陀佛") == DialogResult.Cancel) return false;
-                        for (int i = driver.WindowHandles.Count - 1; i > -1; i--)
-                        {
-                            driver.SwitchTo().Window(driver.WindowHandles[i]);
-                            if (ClearUrl_BoxEtc(driver.Url) == ClearUrl_BoxEtc(textBox3.Text))
-                            {
-                                foundTab = true; break;
-                            }
-                        }
-                        if (!foundTab)
-                        {
-                            if (!driver.WindowHandles.Contains(LastValidWindow))
-                                driver.SwitchTo().Window(driver.WindowHandles.Last());
-                        }
-                        else
-                            LastValidWindow = driver.CurrentWindowHandle;
-                    }
+                        LastValidWindow = driver.CurrentWindowHandle;
                 }
-                else//如果driver正常有效
-                {
-                    driver.SwitchTo().Window(driver.CurrentWindowHandle);
-                    if (LastValidWindow != driver.CurrentWindowHandle) LastValidWindow = driver.CurrentWindowHandle;
-                }
-            }
-            catch (Exception)
-            {
-                if (IsDriverInvalid)
+                catch (Exception)
                 {
                     try
-                    {//if (driver == null) { browsrOPMode = BrowserOPMode.seleniumNew; DriverNew(); }
-                        for (int i = driver.WindowHandles.Count - 1; i > -1; i--)
-                        {
-                            driver.SwitchTo().Window(driver.WindowHandles[i]);
-                            if (ClearUrl_BoxEtc(driver.Url) == ClearUrl_BoxEtc(textBox3.Text))
-                            {
-                                foundTab = true; break;
-                            }
-                        }
-                        if (!foundTab)
-                        {
-                            if (!driver.WindowHandles.Contains(LastValidWindow))
-                                driver.SwitchTo().Window(driver.WindowHandles.Last());
-                        }
-                        else
-                            LastValidWindow = driver.CurrentWindowHandle;
+                    {
+                        if (!driver.WindowHandles.Contains(LastValidWindow)) RestartChromedriver();
                     }
                     catch (Exception)
                     {
-                        try
-                        {
-                            if (!driver.WindowHandles.Contains(LastValidWindow)) RestartChromedriver();
-                        }
-                        catch (Exception)
-                        {
-                            RestartChromedriver();
-                        }
+                        RestartChromedriver();
                     }
                 }
-                else//如果driver正常有效
-                {
-                    driver.SwitchTo().Window(driver.CurrentWindowHandle);
-                    if (LastValidWindow != driver.CurrentWindowHandle) LastValidWindow = driver.CurrentWindowHandle;
-                }
             }
+            else//如果driver正常有效
+            {
+                driver.SwitchTo().Window(driver.CurrentWindowHandle);
+                if (LastValidWindow != driver.CurrentWindowHandle) LastValidWindow = driver.CurrentWindowHandle;
+            }
+            //}
             return true;
         }
 
@@ -5535,11 +5547,11 @@ namespace WindowsFormsApp1
             {
                 AddClosingBraceatEndofPage1();
             }
-            if (_fastMode)
-            {
-                driver.SwitchTo().Window(driver.CurrentWindowHandle); //br.ChromeSetFocus();
-                AvailableInUse_BothKeysMouse();
-            }
+            //if (_fastMode)
+            //{
+            //    driver.SwitchTo().Window(driver.CurrentWindowHandle); //br.ChromeSetFocus();
+            //    AvailableInUse_BothKeysMouse();
+            //}
 
         }
 
@@ -7992,9 +8004,12 @@ namespace WindowsFormsApp1
                                 {
                                     if (k - 2 < 0)
                                     {
-
+                                        PlaySound(SoundLike.warn);
                                         Debugger.Break();//●●●●●●●●●●●●●●●●●●
                                                          //stopUndoRec = false; return true;
+                                        Console.WriteLine(textBox1.Text.Substring(j, 20));//20260202
+                                        textBox1.Select(j + 2 + 1, 0);
+                                        textBox1.SelectedText += _checkMark;
                                         break;
                                     }
                                     if (x.Substring(k - 2, 2) == "}}" && x.Substring(k + 2, 2) != "{{")
@@ -8249,7 +8264,8 @@ namespace WindowsFormsApp1
                                             Debugger.Break();//★★★★★這個很重要，不能取消！還要再除錯！！！（因為文本的複雜性，如此頁 https://ctext.org/library.pl?if=gb&file=93823&page=16 崔莅 標題之標識）
                                                              //item.Range.Text = item.Text.Substring(0, spsStart) + sb.ToString() + item.Text.Substring(item.Text.IndexOf("{{"));//這一行會造成篡改資料（之前不知道，不知執行幾次了。嗟呼！），如上所指摘之頁，可供測試 文本來源：https://www.inindex.com/literature/bookDetails/1167459247318110210/1167459285729546241 20251231元旦除夕
                                                              //標題（篇名）前後端都加入半形空格以便人工檢查；在「*」前之空格之前加入半形空格以供執行時程式停下來人工校對！20251231
-                                            range.Text = " " + range.Text + " ";//range為目前要標題的範圍（篇名範圍），起自「　*」（看目前前空幾格為標明）迄於「<p>」                                            
+                                                             //range.Text = " " + range.Text + " ";//range為目前要標題的範圍（篇名範圍），起自「　*」（看目前前空幾格為標明）迄於「<p>」                                            
+                                            range.Text = _checkMark + range.Text + _checkMark;//range為目前要標題的範圍（篇名範圍），起自「　*」（看目前前空幾格為標明）迄於「<p>」                                            
                                             continue;//應是改成continue 才是，否別會造成後面的都無法標識了
                                                      //range.End += ispscount;//已與Paragraph.Range.Text同步
                                                      //return false;//這樣會造成後面的都無法標識了
@@ -12893,7 +12909,7 @@ namespace WindowsFormsApp1
             //感覺ModifierKeys屬性似會不靈光，按下Ctrl鍵後似乎會黏住而彈不起來，故行此：20250215
             if (ModifierKeys == Keys.Control) SendKeys.Send("^");
 
-            bool keyDownCtrlAdd_ReturnVale = false;
+            bool keyDownCtrlAdd_ReturnValue = false;
             if (!_autoPastetoCtextQuitEditTextboxCancel
                 && textBox1.SelectionStart + textBox1.SelectionLength + 2 <= textBox1.TextLength
                 && textBox1.Text.Substring(textBox1.SelectionStart + textBox1.SelectionLength, 2) == Environment.NewLine)
@@ -12964,11 +12980,12 @@ namespace WindowsFormsApp1
                             //|| IsCapsLockOn()//GitHub　Copilot大菩薩：要實現根據 Caps Lock 燈的狀態來執行 FastModeSwitcher 方法，我們可以使用 Control.IsKeyLocked 方法來檢查 Caps Lock 燈的狀態。這個方法可以直接檢查 Caps Lock 燈是否亮著。……這樣可以確保在 Caps Lock 燈亮時觸發 FastModeSwitcher 方法，而不需要按住 Caps Lock 鍵。
                             || BrakeByCmd())//啟動 cmd.exe 來剎車 20251218
                         {
-                            //if (_fastMode) FastModeSwitcher();
+                            if (_fastMode) FastModeSwitcher();//此即可關閉自動連續輸入，不必ToggleAutoPastetoQuickEdit()
                             //killProcesses(new string[] { "OpenConsole", "cmd" });
-                            ToggleAutoPastetoQuickEdit();//沒有這個會煞不了車 20260128
+                            else
+                                ToggleAutoPastetoQuickEdit();//沒有這個會煞不了車 20260128
                             //if (Console.CapsLock) //https://copilot.microsoft.com/shares/eKhg7mDDaoJZywT3DYsAA
-                            //// 模擬按下 CapsLock 鍵
+                            //// 模擬按下 CapsLock 鍵//改寫在後面
                             //SendKeys.SendWait("{CAPSLOCK}");
                         }
                         //else
@@ -12989,6 +13006,7 @@ namespace WindowsFormsApp1
                       //SendKeys.SendWait("{CAPSLOCK}");
                         Application.DoEvents();//加了這行後CapsLock就不會再失靈了！感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主 20260113蔣經國前總統逝世紀念，海賢老和尚大德準備往生之紀念
                         KeyboardPress.CAPSLOCK_Press();//關閉 CapsLock 燈
+
                         dialogResult = DialogResult.OK; doNotShowMsgBox = true; goto ok;
                     }
                     else if (!_fastMode && !_autoPaste2QuickEdit) { dialogResult = DialogResult.OK; doNotShowMsgBox = true; goto ok; }
@@ -13075,10 +13093,10 @@ namespace WindowsFormsApp1
 
                         }
                         //if (_fastMode && _rePaint) BeginUpdate();//20260126 改到呼叫端AltA()處●●●●●●●●●●●●●●●●●●●●●●
-                        keyDownCtrlAdd_ReturnVale = KeyDownCtrlAdd(false);
+                        keyDownCtrlAdd_ReturnValue = KeyDownCtrlAdd(false);
                         //if (fastMode) EndUpdate();
                         //if (!keyDownCtrlAdd_ReturnVale && doNotShowMsgBox == true) { dialogResult = DialogResult.Cancel; WindowsScrolltoTop(); goto ok; }//dialogRes-ult = DialogResult.Abort;
-                        if (!keyDownCtrlAdd_ReturnVale && doNotShowMsgBox == true) { dialogResult = DialogResult.Cancel; goto ok; }//●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●20260107
+                        if (!keyDownCtrlAdd_ReturnValue && doNotShowMsgBox == true) { dialogResult = DialogResult.Cancel; goto ok; }//●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●20260107
                         doNotShowMsgBox = false;
                         //if (browsrOPMode != BrowserOPMode.appActivateByName && !autoPastetoCtextQuitEditTextboxCancel)
                         if (BrowsrOPMode != BrowserOPMode.appActivateByName)
@@ -13100,7 +13118,7 @@ namespace WindowsFormsApp1
                     else
                     {
                         _autoPastetoCtextQuitEditTextboxCancel = true;
-                        if (keyDownCtrlAdd_ReturnVale) keyDownCtrlAdd_ReturnVale = false;
+                        if (keyDownCtrlAdd_ReturnValue) keyDownCtrlAdd_ReturnValue = false;
                         //if (fastMode) EndUpdate();//●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●20260107
 
                         //如果是鄰近頁牽連編輯，則自動翻到下一頁書圖以備檢覆
@@ -13144,7 +13162,7 @@ namespace WindowsFormsApp1
                                         //if (IsDriverInvalid) RestartChromedriver();
                                         if (driver.Url != "https://ctext.org/wiki.pl" && PageUBound > int.Parse(PageNum_textbox.GetAttribute("value")))
                                         {
-                                            if (keyDownCtrlAdd_ReturnVale)//20260117●●●●●●●●●●●●●●●●●●●●●●●●●●●●●
+                                            if (keyDownCtrlAdd_ReturnValue)//20260117●●●●●●●●●●●●●●●●●●●●●●●●●●●●●
                                             {
                                                 dialogResult = MessageBox.Show("是否移到下一頁？", "",
                                                     MessageBoxButtons.OKCancel, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1,
@@ -13174,7 +13192,7 @@ namespace WindowsFormsApp1
                         }
                         //避免誤觸
                         //if (BrowsrOPMode != BrowserOPMode.appActivateByName && textBox1.Enabled) textBox1.Enabled = false;//●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●20260107
-                        if (keyDownCtrlAdd_ReturnVale && dialogResult == DialogResult.OK)
+                        if (keyDownCtrlAdd_ReturnValue && dialogResult == DialogResult.OK)
                             _pageTextEndPosition = textBox1.SelectionStart + predictEndofPageSelectedTextLen;
                         if (textBox1.TextLength > 0 && textBox1.TextLength - _pageTextEndPosition > 0)
                         {
@@ -13183,13 +13201,14 @@ namespace WindowsFormsApp1
                                                                     : textBox1.TextLength - _pageTextEndPosition);//終於抓到這個bug了，忘了加第2個參數
                         }
                         #region 連續輸入終止時的插入點位置
-                        if (textBox1.TextLength > 0 && !keyDownCtrlAdd_ReturnVale
+                        if (textBox1.TextLength > 0 && !keyDownCtrlAdd_ReturnValue
                             && textBox1.TextLength >= _pageTextEndPosition && textBox1.Text.Substring(0, _pageTextEndPosition).IndexOf("/") > -1)
                             textBox1.Select(textBox1.Text.Substring(0, _pageTextEndPosition).IndexOf("/"), _insertMode ? 1 : 0);
                         //else
                         //    textBox1.Select(pageTextEndPosition, 0);
                         #endregion
-                        //driver.SwitchTo().Window(driver.CurrentWindowHandle);//●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●20260107
+                        //連續輸入終止時的切換到現用的分頁視窗 20260203 多個TextForCtext運行時很需要！！
+                        driver.SwitchTo().Window(driver.CurrentWindowHandle);//20260203●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●20260107
                         //焦點交回表單
                         #region 解除 textbox防觸鎖定，並準備檢視編輯；如果訊息方塊不是在取得 Cancel回應值時即關閉，則此下程式恐怕要移出這個 if else區塊才行
 
@@ -13212,7 +13231,7 @@ namespace WindowsFormsApp1
                 else
                 {
                     dialogResult = DialogResult.Cancel;
-                    keyDownCtrlAdd_ReturnVale = KeyDownCtrlAdd(false);
+                    keyDownCtrlAdd_ReturnValue = KeyDownCtrlAdd(false);
                     return false;//注意會不會造成無窮遞迴
                 }
             }
@@ -13236,7 +13255,6 @@ namespace WindowsFormsApp1
                         else
                             Form1.PlaySound(Form1.SoundLike.waiting, true);
                     }
-
                     return false;//20250301●●●●●●●●●●●●●●●●●
                 }
                 else//20250301●●●●●●●●●●●●●●●●●
@@ -13291,7 +13309,8 @@ namespace WindowsFormsApp1
             //●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●20260128 果然會拖慢卡住，蓋需要測 driver 故。今先取消之。再觀察
             if (BrowsrOPMode != BrowserOPMode.appActivateByName
                 && driver != null && _autoPastetoCtextQuitEditTextboxCancel == false
-                && !IsDriverInvalid && IsConfirmHumanPage())
+                //&& !IsDriverInvalid && IsConfirmHumanPage())
+                && Please_confirm_that_you_are_human_Page_Occurrence_Interrupt_Message != string.Empty)
                 return;//這個主要是為了要輸入驗證碼時不要將滑鼠鍵盤拉回到表單中。可見《中國哲學書電子化計劃》這個機制多折騰人，完全是為了保護爛資料而不讓人輕鬆愉快地輸入好資料。之前還能因為信任而完全取消，合情合理，現在則不但無法取消，變成固定大概多久就出現一次的來折磨人，您自己計算一下，如果出現一次我要多費去10~20秒鐘來辨識輸入驗證碼的話，百次千次，累積下來浪費掉了多少時間！！當初如果知道它會變成這樣（還變成圖文對照的不開放給全球看了，要登入才能讀），您看我還會不會專為它而打造這個應用程式了。寫信去、討論區留言、x.com留訊息，都不回應。完全不理人，卻會刪除我留下的校案訊息，可見能讀嘛。真是夠忍人的了。末日審判再會時，不知是何光景。好自為之囉。反正我橫豎應該都要去烏來桶后往生了，除非有供養布施贊助於我者，即使有，我也不想死在這個世界裡，病院人群中……最多是延後我出發離世的時日罷了。感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主 20260128 我真的很期待末日的審判，否則我幹嘛此生一無所求，直至如此。（沒有好的資料文獻供檢讀，卻不忍心看著文獻亂碼爛資料橫行遍布如此，只能整理文獻到死，給以後有緣的守真看。當然我往生是不會想再來的了，可是將心比心，如果我前有此先賢幫我先整理好的話，不知道我會多麼感激。只是自己沒有這樣的福報罷了。阿彌陀佛）……到時再來看看，究竟是怎麼一回事 ：） 哈哈 感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主 在才又一次輸入完認證碼後有感書此。感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主
 
             if (this.InvokeRequired)
@@ -13613,7 +13632,9 @@ namespace WindowsFormsApp1
                     if (!XmlProcessor.SubmitAnotherText_NewPage_Auto_action_newchapter_create_a_new_entry(driver.Url))
                         MessageBoxShowOKExclamationDefaultDesktopOnly("Edit text metadata(修改原典後設資料)之頁面，網址當含有「&action=edit&res=」");
                     else
-                        MessageBoxShowOKExclamationDefaultDesktopOnly("done! 新文本己建置完成！感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主");
+                        MessageBoxShowOKExclamationDefaultDesktopOnly("" +
+                            "done! 新文本已建置完成！" + Environment.NewLine + Environment.NewLine + Environment.NewLine + Environment.NewLine +
+                            "感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主");
                 }));
                 ResumeEvents();
                 TopMost = topmost;
@@ -16488,13 +16509,16 @@ namespace WindowsFormsApp1
                     if (_autoNextVolumnContextMark)
                         if (AutoExecuteSKQSContextMark())
                         {
+                            driver.SwitchTo().Window(driver.CurrentWindowHandle);//20260202
                             AvailableInUse_BothKeysMouse();
-                            ChromeSetFocus();
+                            //ChromeSetFocus();
                         }
                     //if (textBox1.TextLength == 0 && pageUBound >= int.Parse(_currentPageNum))
                     if (_autoNextVolumnContextMark && PageUBound >= int.Parse(_currentPageNum))
                     {
-                        while (Clipboard.GetText().IsNullOrEmpty())
+
+                        //while (Clipboard.GetText().IsNullOrEmpty())
+                        while (GetClipboardTextSafe().IsNullOrEmpty())
                         {
                             Task.Delay(100).Wait();
                             Application.DoEvents();
@@ -16511,8 +16535,9 @@ namespace WindowsFormsApp1
                             AutoMarkTitleParagraph();
                             AvailableInUse_BothKeysMouse();
                         }
+                        //Debugger.Break();//just for test
                     }
-                    else
+                    else//翻到下一冊
                         if (PageUBound < int.Parse(_currentPageNum))
                         if (!GotoNextFile_FormatContentInput_SKQS())
                         {
@@ -16561,7 +16586,13 @@ namespace WindowsFormsApp1
             //if (!GotoNextFile()) return false;
             if (!GotoNextFile())
             {
-                MessageBoxShowOKExclamationDefaultDesktopOnly("本書業畢，沒有下一冊了！");//20260201
+                MessageBoxShowOKExclamationDefaultDesktopOnly("本書業畢，沒有下一冊了！" +
+                    Environment.NewLine + Environment.NewLine + Environment.NewLine +
+                    "恭喜恭喜！！辛苦了。行道守真，任真妙音！" +
+                    Environment.NewLine + Environment.NewLine +
+                    "感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主" +
+                    Environment.NewLine + Environment.NewLine +
+                    "！哈利路亞！", "阿彌陀佛");//20260201
                 if (_fastMode) FastModeSwitcher();
                 return false;
             }
@@ -19296,6 +19327,7 @@ namespace WindowsFormsApp1
                     {//如果是《四庫全書》原扉頁，則將其書圖點大，以便檢視輸入                        
                         if (EnlargeSvgImageSize(false))
                         {
+                            Application.DoEvents();
                             //因為目前是在Activated事件程序中，故要等事件程序結束後才能執行以下動作
                             AvailableInUse_BothKeysMouse();
                             return;//須完成此事件程序，否則Form3不會完成Activated的事件 20260127（改由以上行控制 20260129 AvailableInUse_BothKeysMouse()裡有用到Activate()方法）
@@ -19328,10 +19360,11 @@ namespace WindowsFormsApp1
                 {
                     try
                     {
-                        //driver = driver ?? DriverNew();
-                        driver.SwitchTo().Window(driver.CurrentWindowHandle);
-                        //this.BringToFront();
-                        //AvailableInUse_BothKeysMouse();
+                        MatchWindowHandlesWithTextBox3();
+                        ////driver = driver ?? DriverNew();
+                        //driver.SwitchTo().Window(driver.CurrentWindowHandle);
+                        ////this.BringToFront();
+                        ////AvailableInUse_BothKeysMouse();
                     }
                     catch { }
                     //catch (Exception ex)
@@ -19379,17 +19412,19 @@ namespace WindowsFormsApp1
             DateTime dtClip = DateTime.Now;
             try
             {
-                while (!IsClipBoardAvailable_Text()) { if (DateTime.Now.Subtract(dtClip).TotalSeconds > 3) break; }
-                clpTxt = Clipboard.GetText();
+                //while (!IsClipBoardAvailable_Text()) { if (DateTime.Now.Subtract(dtClip).TotalSeconds > 3) break; }
+                //clpTxt = Clipboard.GetText();
+                clpTxt = GetClipboardTextSafe();//20260201●●●●●●●●●●●●●●●●●●●●●
             }
             catch (Exception)
             {//等候剪貼簿可用
 
+                Thread.Sleep(250);
                 //Task.Delay(900).Wait();
                 Task.WaitAll();
                 Application.DoEvents();
                 DateTime dt = DateTime.Now;
-                while (!IsClipBoardAvailable_Text()) { if (DateTime.Now.Subtract(dt).TotalSeconds > 4) break; }
+                while (!IsClipBoardAvailable_Text()) { if (DateTime.Now.Subtract(dt).TotalSeconds > 2) break; }
                 try
                 {
                     clpTxt = Clipboard.GetText();
@@ -19582,7 +19617,7 @@ namespace WindowsFormsApp1
         internal bool AssignedRunWordVBA(string clpTxt)
         {
             #region 在textBox1內容文字少於100時的檢查，以自行決定其他的操作，如《中國哲學書電子化計劃》清除頁前的分段符號、撤掉與書圖的對應_脫鉤,《國學大師》的《四庫全書》本文等
-            if ((!_fastMode && textBox1.TextLength < 100) || (_fastMode && textBox1.TextLength == 0))
+            if ((!_autoPaste2QuickEdit && textBox1.TextLength < 100) || (_fastMode && textBox1.TextLength == 0))
             {
                 //如果剪貼簿裡的文字內容長於99個字元，則執行相關的 Word VBA
                 if (clpTxt.Length > 99)
@@ -19720,7 +19755,7 @@ namespace WindowsFormsApp1
             if ((xClip.IndexOf("MidleadingBot") > 0 || xClip.IndexOf("此頁面可能存在如下一些問題：") > -1
                 || xClip.IndexOf("Wmr-bot") > -1
                 || xClip.Contains("〈" + Environment.NewLine.Substring(0, 1)) || xClip.Contains(".djvu") || xClip.Contains("​Page:")
-                || br.CurrentUrlPrefixDomain.Contains("wikisource"))
+                || br.CurrentUrlPrefixDomainBook.Contains("wikisource"))
                 && textBox1.TextLength < 100)//xClip.Length > 500 )
                                              //|| (xClip.Contains(Environment.NewLine.Substring(1, 1) +
                                              //Environment.NewLine.Substring(0, 1)) && !xClip.Contains("<scan"))//這個條件太寬，先交給WordVBA去分派 20251229 1230 實在太寬，易誤觸發，先撤銷！
@@ -21425,6 +21460,8 @@ namespace WindowsFormsApp1
         /// </summary>
         private void ResetBooksPagesFeatures()
         {
+            if (br.LastValidWindow.IsNullOrEmpty()) br.LastValidWindow = driver.CurrentWindowHandle;//20260201
+
             if (_lines_perPage > 0 || CTP.FileCSSSelector != FirstFileCSSSelector || _wordsPerLinePara > -1)
                 if (MessageBoxShowOKCancelExclamationDefaultDesktopOnly("確定重設表單" + Name +
                     "的書籍行款版面諸特徵？") == DialogResult.Cancel) return;
@@ -21451,7 +21488,7 @@ namespace WindowsFormsApp1
 
             #region static member
             if (br.LastValidWindow != driver.CurrentWindowHandle) br.LastValidWindow = driver.CurrentWindowHandle;//20260201
-            br.CurrentUrlPrefixDomain = string.Empty;
+            br.CurrentUrlPrefixDomainBook = string.Empty;
             XML.EditedPagesCache.Clear();
             if (CTP.FileCSSSelector != FirstFileCSSSelector)
                 CTP.FileCSSSelector = FirstFileCSSSelector;

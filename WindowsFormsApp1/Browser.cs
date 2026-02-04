@@ -11305,8 +11305,9 @@ namespace TextForCtext
         /// <summary>
         /// 在多部書同時操作時，記錄目前的網址網域字首部分以供比對用 20260106
         /// 初始值為空字串，在CopyNextVolume()中設定，在 resetBooksPagesFeatures（重設書籍頁面特徵時）清空
+        /// 今擴充到書籍的層次、以易今名。蓋為如《武備志》這樣版面複雜者會拖慢進度，《元引科技引得數字人文資源平臺·中國歷代文獻》尚有許多版面單純者可同時並行。且自《維基文庫》至元引科技，均係於網址中以最後一個斜線為界作為一部書之識別項故。20260203
         /// </summary>
-        internal static string CurrentUrlPrefixDomain = string.Empty;
+        internal static string CurrentUrlPrefixDomainBook = string.Empty;
         /// <summary>
         /// 複製下一卷文本以供快捷模式連續輸入
         /// 由《四庫全書》文本起，至 20250418 起新增非《四庫》之文本 20251227 改今名
@@ -11329,8 +11330,9 @@ namespace TextForCtext
                 if (!url.Contains("//")) break;
                 urlPrefixDomain = url.Substring(url.IndexOf("//") + "//".Length, url.IndexOf("/", url.IndexOf("//") + "//".Length) - (url.IndexOf("//") + "//".Length));
                 //和目前正在做的書籍網址網域字首部分作比對，在多書同時操作時適用 20260106
-                if (!string.IsNullOrEmpty(CurrentUrlPrefixDomain))
-                    if (urlPrefixDomain != CurrentUrlPrefixDomain)
+                if (!string.IsNullOrEmpty(CurrentUrlPrefixDomainBook))
+                    //if (urlPrefixDomain != CurrentUrlPrefixDomain)
+                    if (!url.StartsWith(CurrentUrlPrefixDomainBook))
                         continue;
 
                 urlPrefix = url.Substring(0, url.IndexOf("//") + "//".Length);//http://skqs.guoxuedashi.net/wen_2885i/174671.html#002-1a //https://www.kanripo.org/text/KR4h0141/221
@@ -11366,9 +11368,10 @@ namespace TextForCtext
                         break;
                 }
             }
-            if (!result) { CurrentUrlPrefixDomain = string.Empty; return result; }//找不到就歸零，再重新抓取 20260123 像現在Kanripo當了，改用《國學大師》本，就需要如此設計
+            if (!result) { CurrentUrlPrefixDomainBook = string.Empty; return result; }//找不到就歸零/重設，再重新抓取 20260123 像現在Kanripo當了，改用《國學大師》本，就需要如此設計
         gotoNext:
-            if (string.IsNullOrWhiteSpace(CurrentUrlPrefixDomain)) CurrentUrlPrefixDomain = urlPrefixDomain;
+            //if (string.IsNullOrWhiteSpace(CurrentUrlPrefixDomain)) CurrentUrlPrefixDomain = urlPrefixDomain;
+            if (string.IsNullOrWhiteSpace(CurrentUrlPrefixDomainBook)) CurrentUrlPrefixDomainBook = url.Substring(0, url.LastIndexOf(@"/"));
             //取得下一卷的網址
             if (urlPrefixDomain == "skqs.guoxuedashi.net" || urlPrefixDomain == "skqs.39017.com")
             {
