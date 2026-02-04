@@ -4597,7 +4597,7 @@ namespace WindowsFormsApp1
                     try
                     {
                         Clipboard.SetText(textBox1.Text);
-                        PlaySound(SoundLike.done);
+                        PlaySound(SoundLike.press);
                     }
                     catch (Exception)
                     {
@@ -5850,7 +5850,8 @@ namespace WindowsFormsApp1
             else
             {
                 textBox1.Select(end, 0);
-                _pageTextEndPosition = end;
+                if (_pageTextEndPosition != end)
+                    _pageTextEndPosition = end;
                 if (textBox1.TextLength > 10)
                     _pageEndText10 = textBox1.Text.Substring(end - 10, 10);
                 else

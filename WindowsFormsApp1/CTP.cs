@@ -1568,8 +1568,13 @@ namespace TextForCtext
                         {
                             return CheckPageNumBeforeSubmitSaveChanges(Browser.driver, submit);
                         }
-                        catch (Exception)
+                        catch (Exception exp)
                         {
+                            MessageBoxShowOKExclamationDefaultDesktopOnly("出現錯誤！！請仔細檢查！之前第一頁無法順利送出就是這裡出了問題！" +
+                                Environment.NewLine + Environment.NewLine +
+                                exp.HResult + exp.Message);
+                            Debugger.Break();
+                            return false;
                         }
                     else
                     {
@@ -1701,8 +1706,11 @@ namespace TextForCtext
             if (!IsDriverInvalid && int.Parse(ActiveForm1.CurrentPageNum) > 2)
             {
                 int currentPageNum = int.Parse(Form1.InstanceForm1.CurrentPageNum);
-                if (ActiveForm1.AutoPasteToCtext && currentPageNum != Form1.InstanceForm1.GetPageNumFromUrl(Browser.driver.Url) ||
-                    Math.Abs(int.Parse(ActiveForm1.CurrentPageNum) - int.Parse(WindowHandles["currentPageNum"])) != 1)
+                if (ActiveForm1.AutoPasteToCtext
+                    && currentPageNum != Form1.InstanceForm1.GetPageNumFromUrl(Browser.driver.Url)
+                    //|| Math.Abs(int.Parse(ActiveForm1.CurrentPageNum) - int.Parse(Browser.WindowHandles["currentPageNum"])) != 1)
+                    ||//之前忘了檢查WindowHandles的索引值而在呼叫端又沒處理好例外情形，導致第1次送出都失敗而不察 20260204 終於抓到這個bug了！
+                    (Browser.WindowHandles.TryGetValue("currentPageNum", out string curpage) && Math.Abs(int.Parse(ActiveForm1.CurrentPageNum) - int.Parse(curpage)) != 1))
                 {
                     if (DialogResult.OK == Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("頁碼不同！請轉至頁面" +
                         "頁再按下「確定」以供輸入"))
