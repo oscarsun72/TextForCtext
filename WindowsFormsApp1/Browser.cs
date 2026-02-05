@@ -9814,9 +9814,33 @@ namespace TextForCtext
         /// 作為一些需要保留或比對驗證的視窗句柄集，鍵值是視窗ID（或唯一名稱）以供比較尋找，值為視窗句柄
         /// 也可作為其他必要的參考、參數，如鍵值為"currentPageNum"時，乃翻到下一頁前記下的前一頁的頁碼
         /// 鍵為「FileSelector」（原為ChapterSelector）時，乃是記錄每一分冊的 CSS selector（即書首頁的表列諸冊連結元件；「檔案名稱」欄位下的諸項）
+        /// 必須要初始化，否則會發生像CheckPageNumBeforeSubmitSaveChanges方法，而又剛好沒妥善處理例外情形的狀況，導致第1筆成了幽靈送出而失靈而不知不察乃至不明所以。 20260205 而且這樣將必要的鍵值預先建立起來，也方便日後查找與使用 感恩感恩　讚歎讚歎　Leo大菩薩　南無阿彌陀佛　讚美主
         /// </summary>
-        internal static Dictionary<string, string> WindowHandles = new Dictionary<string, string>();
+        internal static Dictionary<string, string> WindowHandles = new Dictionary<string, string>()
+        //internal static Dictionary<string, string> WindowHandles = new Dictionary<string, string>();
+        {
+            ["currentPageNum"] = "0",//20260205 Leo Ai 大菩薩：是的，這樣初始化會在字典中預先建立一個鍵為 "currentPageNum" 的項目，並將其值設置為 "0"。這樣做可以確保在使用 WindowHandles["currentPageNum"] 時不會出現 KeyNotFoundException，因為該鍵已經存在於字典中。且若要int.Parse()，所取得的字串格式也正確。
+            //["FileSelector"] = ""
+            ["FileSelector"] = FirstFileCSSSelector
+        };
+        /** Leo Ai 大菩薩：根據您的註解說明，建議使用方式2（空字典），因為這些值似乎是在執行時動態添加的。如果需要預設值，則用方式1並給予適當的初始值（如空字串或 "0"）。
+         * // 方式1：初始化時加入一個鍵值對
+            internal static Dictionary<string, string> WindowHandles = new Dictionary<string, string>() 
+            { 
+                { "currentPageNum", "" }  // 或給予預設值，如 { "currentPageNum", "0" }
+            };
 
+            // 方式2：初始化為空字典，之後再添加
+            internal static Dictionary<string, string> WindowHandles = new Dictionary<string, string>();
+
+            // 方式3：使用集合初始化器（C# 6.0+）
+            internal static Dictionary<string, string> WindowHandles = new Dictionary<string, string>() 
+            { 
+                ["currentPageNum"] = "",
+                ["FileSelector"] = ""
+            };
+         */
+        
 
         /// <summary>
         /// Ctrl + Alt + a ： [AI太炎](https://t.shenshen.wiki/)標點 20241105

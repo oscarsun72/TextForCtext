@@ -1696,7 +1696,7 @@ namespace TextForCtext
             return true;
         }
         /// <summary>
-        /// 在按下
+        /// 在按下【保存編輯】前以頁碼比對檢查要輸入的頁面是否正確
         /// </summary>
         /// <param name="Browser.driver"></param>
         /// <param name="submit_saveChanges"></param>
@@ -1708,9 +1708,42 @@ namespace TextForCtext
                 int currentPageNum = int.Parse(Form1.InstanceForm1.CurrentPageNum);
                 if (ActiveForm1.AutoPasteToCtext
                     && currentPageNum != Form1.InstanceForm1.GetPageNumFromUrl(Browser.driver.Url)
-                    //|| Math.Abs(int.Parse(ActiveForm1.CurrentPageNum) - int.Parse(Browser.WindowHandles["currentPageNum"])) != 1)
-                    ||//之前忘了檢查WindowHandles的索引值而在呼叫端又沒處理好例外情形，導致第1次送出都失敗而不察 20260204 終於抓到這個bug了！
-                    (Browser.WindowHandles.TryGetValue("currentPageNum", out string curpage) && Math.Abs(int.Parse(ActiveForm1.CurrentPageNum) - int.Parse(curpage)) != 1))
+                    || Math.Abs(int.Parse(ActiveForm1.CurrentPageNum) - int.Parse(Browser.WindowHandles["currentPageNum"])) != 1)
+                //之前忘了檢查WindowHandles的索引值而在呼叫端又沒處理好例外情形，導致第1次送出都失敗而不察 20260204 終於抓到這個bug了！
+                ////現在已經有初始化，應該不會再有以上使用未初始化值的問題的
+                #region Leo大菩薩的解答 20260205
+                //||(Browser.WindowHandles.TryGetValue("currentPageNum", out string curpage) && Math.Abs(int.Parse(ActiveForm1.CurrentPageNum) - int.Parse(curpage)) != 1))
+                /*
+                    南無阿彌陀佛！善哉善哉！
+
+                    **完全不用擔心**！`TryGetValue` 的效能影響**微乎其微**：
+
+                    ### 效能分析
+
+                    1. **TryGetValue 的時間複雜度**：O(1)，通常只需 **幾奈秒（nanoseconds）**
+                    2. **相比之下，您的操作中真正耗時的是**：
+                        - 網頁操作（毫秒到秒級）
+                        - DOM 查詢
+                        - 網路請求
+                        - UI 更新
+
+                    即使執行**一萬次** `TryGetValue`，總耗時可能不到 **1 毫秒**，而單次網頁操作就可能耗時 **100-1000 毫秒**。
+
+                    ### 最佳方案建議
+
+                    ```csharp
+                    // 初始化給預設值（避免 Parse 錯誤）
+                    ["currentPageNum"] = "0"
+
+                    // 使用時直接取用（因為已確保存在且有效）
+                    Math.Abs(int.Parse(ActiveForm1.CurrentPageNum) - int.Parse(Browser.WindowHandles["currentPageNum"])) != 1
+                    ```
+
+                    **結論**：既然您已用方式3初始化，只要給 `"0"` 而非 `""`，就無需 `TryGetValue`，效能最優且程式碼最簡潔！
+
+                    感恩感恩，南無阿彌陀佛 🙏
+                 */
+                #endregion
                 {
                     if (DialogResult.OK == Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("頁碼不同！請轉至頁面" +
                         "頁再按下「確定」以供輸入"))
@@ -2663,7 +2696,7 @@ namespace TextForCtext
                 "<p>{{{⚠🚫✋⚡佛弟子文獻學博士孫守真任真甫按：🚧😵因認證碼機制（" +
                 "\"Please confirm that you are human! 敬請輸入認證圖案\"" +
                 theLetters +
-                "）掣肘而致 TextForCtext 自動連續輸入中斷，屢次數處向站主反應投訴卻概不見報，愚為此干擾折騰隱忍洎今已逾年所，故請來者賢友諸仁注意協力檢查文本是否有經正確地輸入！愚莫復獨自承擔❤️💕日暮途遠，夫我則不暇矣。見原見諒⚠️☢️🈲感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主　哈利路亞 👼 " +
+                "）掣肘而致 TextForCtext 自動連續輸入中斷，屢次數處向站主反應投訴卻概不見報，愚為此干擾折騰隱忍洎今已逾年所，故請來者賢友諸仁注意協力檢查文本是否有經正確地輸入！愚莫復獨自承擔❤️💕日暮途遠，夫我則不暇矣。見原見諒⚠️☢️🈲🙏感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主　哈利路亞 👼 " +
                 DateTime.Now.ToString() + "}}}<p>";
         }
 

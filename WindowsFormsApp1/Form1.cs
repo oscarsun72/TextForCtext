@@ -308,8 +308,8 @@ namespace WindowsFormsApp1
             Document = new Document(ref textBox1);
 
             #region 靜態成員或共用屬性之初始化，只有Form1才做！20260124
-            if (Application.OpenForms.Count == 0) //第一個表單（主表單）啟動時才設定 ∵(Name == "Form1")//Name的屬性在 這個建構子及NewForm1()中還未設定故；OpenForms.Count的數量也得在表單 Show 出來後才算數，故此時還沒有表單「出現（Open）」。20260124感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主
-                FileCSSSelector = FirstFileCSSSelector;
+            //if (Application.OpenForms.Count == 0) //第一個表單（主表單）啟動時才設定 ∵(Name == "Form1")//Name的屬性在 這個建構子及NewForm1()中還未設定故；OpenForms.Count的數量也得在表單 Show 出來後才算數，故此時還沒有表單「出現（Open）」。20260124感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主
+            //    FileCSSSelector = FirstFileCSSSelector;//已改在 WindowHandles 初始化中設定 20260205
             #endregion
         }
 
