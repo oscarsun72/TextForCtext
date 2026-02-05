@@ -1538,7 +1538,8 @@ namespace TextForCtext
                         return submit.JsClick(); //Click(submit);
                     else
                     {
-                        if (!CheckPageNumBeforeSubmitSaveChanges(Browser.driver, submit))
+                        //if (!CheckPageNumBeforeSubmitSaveChanges(Browser.driver, submit))
+                        if (!CheckPageNumBeforeSubmitSaveChanges(submit))
                             return false;
                     }
                 }
@@ -1566,7 +1567,8 @@ namespace TextForCtext
                     if (submit != null)
                         try
                         {
-                            return CheckPageNumBeforeSubmitSaveChanges(Browser.driver, submit);
+                            //return CheckPageNumBeforeSubmitSaveChanges(Browser.driver, submit);
+                            return CheckPageNumBeforeSubmitSaveChanges(submit);
                         }
                         catch (Exception exp)
                         {
@@ -1701,7 +1703,8 @@ namespace TextForCtext
         /// <param name="Browser.driver"></param>
         /// <param name="submit_saveChanges"></param>
         /// <returns></returns>
-        internal static bool CheckPageNumBeforeSubmitSaveChanges(ChromeDriver driver, IWebElement submit_saveChanges = null)
+        internal static bool CheckPageNumBeforeSubmitSaveChanges(IWebElement submit_saveChanges = null)
+        //internal static bool CheckPageNumBeforeSubmitSaveChanges(ChromeDriver driver, IWebElement submit_saveChanges = null)
         {
             if (!IsDriverInvalid && int.Parse(ActiveForm1.CurrentPageNum) > 2)
             {
