@@ -44,6 +44,7 @@ using br = TextForCtext.Browser;
 using Font = System.Drawing.Font;
 using Point = System.Drawing.Point;
 using selenium = OpenQA.Selenium;
+using OpenQA.Selenium.IE;
 
 
 //using System.Windows.Input;
@@ -4597,7 +4598,7 @@ namespace WindowsFormsApp1
                     try
                     {
                         Clipboard.SetText(textBox1.Text);
-                        PlaySound(SoundLike.press);
+                        PlaySound(SoundLike.over);
                     }
                     catch (Exception)
                     {
@@ -6879,7 +6880,11 @@ namespace WindowsFormsApp1
             //string tx = textBox1.Text;
             //replaceXdirectly(ref tx);
             textBox1.Select(s, xSel.Length);
-            stopUndoRec = false;
+            xSel = textBox1.SelectedText;
+            ReplaceXdirectly(ref xSel, string.Empty, true);
+            textBox1.Select(s, xSel.Length);
+            textBox1.ScrollToCaret();
+            stopUndoRec = false; UndoRecord();
         }
 
         void Notes_a_line_all(bool ctrl, bool onlyUnderTitle = false)
@@ -15168,6 +15173,8 @@ namespace WindowsFormsApp1
             Form1 formNew = new Form1()
             {
                 #region 設定初始值
+                Size = InstanceForm1.Size,//在 mTs 模式時（多個TextForCtext同時運行時）以形狀大小來區別 20260206
+
                 //原則上一個TextForCtext應用程式系統，應該只處理一部書
                 _lines_perPage = InstanceForm1.Lines_perPage,//方便以新表單讀入WordVBA結果時還能保持填滿空白行的功能
                 _linesParasPerPage = InstanceForm1.LinesParasPerPage,
@@ -19675,7 +19682,7 @@ namespace WindowsFormsApp1
                     {
                         _ocrTextMode = false;
                         RunWordMacro("中國哲學書電子化計劃.國學大師_Kanripo_四庫全書本轉來");
-                        //UndoRecord();//在呼叫端做
+                        UndoRecord();//在呼叫端做//但後續會執行 AutoMarkTitleParagraph(); 故在此要做一次，保留原來從Word讀回的樣子 20260207
                         if (_fastMode && !textBox1.Text.Contains("　*") && TitleLeadingSpacesCount.Count > 0)
                             //if (fastMode && TitleLeadingSpacesCount.Count > 0)
                             AutoMarkTitleParagraph();
@@ -19690,7 +19697,7 @@ namespace WindowsFormsApp1
                     {
                         _ocrTextMode = false;
                         RunWordMacro("中國哲學書電子化計劃.Kanripo_GitHub轉來");
-                        //UndoRecord();//在呼叫端做
+                        UndoRecord();//在呼叫端做//但後續會執行 AutoMarkTitleParagraph(); 故在此要做一次，保留原來從Word讀回的樣子 20260207
                         if (_fastMode && !textBox1.Text.Contains("　*") && TitleLeadingSpacesCount.Count > 0)
                             //if (fastMode && TitleLeadingSpacesCount.Count > 0)
                             AutoMarkTitleParagraph();
@@ -19699,7 +19706,10 @@ namespace WindowsFormsApp1
                     }
                     else//主要是針對《維基文庫》的文本，移至此處●●●●●●●●●●●●●●●●●●●●●●●
                         //函式內會作判斷要不要自動執行Word VBA相關的程序
-                        AutoRunWordVBAMacro();//因為條件太寬，改寫到後面 20251229
+                    {    AutoRunWordVBAMacro();//因為條件太寬，改寫到後面 20251229
+                        UndoRecord();//儲存從 Word 讀回的內容，以備還原用
+                    }
+
                 }
                 else if (clpTxt.Contains("action=editchapter"))
                 {
@@ -21488,6 +21498,7 @@ namespace WindowsFormsApp1
             #endregion
 
             #region static member
+            br.WindowHandles["currentPageNum"] = _currentPageNum;
             if (br.LastValidWindow != driver.CurrentWindowHandle) br.LastValidWindow = driver.CurrentWindowHandle;//20260201
             br.CurrentUrlPrefixDomainBook = string.Empty;
             XML.EditedPagesCache.Clear();
@@ -21965,12 +21976,19 @@ namespace WindowsFormsApp1
                 }
                 rst.MoveNext();
             }
-            rst.Close(); cnt.Close(); rst = null; cnt = null;//當您透過開啟 的 Recordset 物件結束作業時，請使用 Close 方法來釋放任何相關聯的系統資源。 關閉物件並不會從記憶體中移除它;您可以變更其屬性設定，並使用 Open 方法來稍後再次開啟它。 若要完全排除記憶體中的物件，請將物件變數設定為 Nothing。 https://docs.microsoft.com/zh-tw/sql/ado/reference/ado-api/open-method-ado-recordset?view=sql-server-ver16
+            rst.Close(); cnt.Close();
+            cnt = null;//當您透過開啟 的 Recordset 物件結束作業時，請使用 Close 方法來釋放任何相關聯的系統資源。 關閉物件並不會從記憶體中移除它;您可以變更其屬性設定，並使用 Open 方法來稍後再次開啟它。 若要完全排除記憶體中的物件，請將物件變數設定為 Nothing。 https://docs.microsoft.com/zh-tw/sql/ado/reference/ado-api/open-method-ado-recordset?view=sql-server-ver16
             UndoRecord();
             if (selection)
-                textBox1.SelectedText = tx;
+            {
+                if (textBox1.SelectedText != tx)
+                    textBox1.SelectedText = tx;
+            }
             else
-                textBox1.Text = tx;
+            {
+                if (textBox1.Text != tx)
+                    textBox1.Text = tx;
+            }
             //replaceBlank_ifNOTTitleAndAfterparagraphMark();
 
             //fixFormatErrorlike王文成公全書();//●●●●●●●●●●●●●●●●20250306先取消 因為會造成如《詞綜》排版的錯誤 https://ctext.org/library.pl?if=gb&file=63722&page=2 http://skqs.guoxuedashi.net/wen_3024p/178527.html

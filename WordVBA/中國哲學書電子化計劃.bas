@@ -3146,6 +3146,7 @@ Sub EditModeMakeup_changeFile_Page() '同版本文本帶入置換file id 和 頁數
     SystemSetup.stopUndo ur, "EditModeMakeup_changeFile_Page"
     Set d = ActiveDocument
 restart:
+    playSound 0.484
     If d.AttachedTemplate = "Normal.dotm" Then '新檔案單獨輸入時 20251220
         Set p = d.Paragraphs(1)
         '文件只有一段內容時（方便快捷整理）
@@ -3185,7 +3186,9 @@ restart:
             GoSub autoInput
         End If
     Else '連續輸入時，以Normal.dotm範本以外的範本（如 TextForCtext-WordVBA.dotm）開啟之新文件者
-        If d.Paragraphs(1).Range.Characters(1) <> "-" And InStr(GetClipboardText(), "<scanbegin file=""") Then
+        If preFileNum > 0 And InStr(d.Range.text, "<scanbegin file") = 1 Then '如果是XML開頭（即上次執行完後狀態）就自行清除以自動執行下一冊之輸入 20260205
+            d.Range.text = Chr(13) & Chr(13) & Chr(13) & GetClipboardText()
+        ElseIf d.Paragraphs(1).Range.Characters(1) <> "-" And InStr(GetClipboardText(), "<scanbegin file=""") Then
             d.Range.text = Chr(13) & Chr(13) & Chr(13) & GetClipboardText()
         ElseIf preFileNum > 0 And d.Paragraphs(3).Range.text = Chr(13) And InStr(GetClipboardText(), "<scanbegin file=""") Then
             d.Range.InsertAfter GetClipboardText()
