@@ -2635,7 +2635,8 @@ namespace TextForCtext
             try
             {
                 //result = confirm_that_you_are_human = Browser.driver.Url == "https://ctext.org/wiki.pl" || Please_confirm_that_you_are_human_Page != null;
-                confirm_that_you_are_human = (Browser.driver.Url == "https://ctext.org/wiki.pl" || Please_confirm_that_you_are_human_Page != null);
+                //confirm_that_you_are_human = (Browser.driver.Url == "https://ctext.org/wiki.pl" || Please_confirm_that_you_are_human_Page != null);
+                confirm_that_you_are_human =  Please_confirm_that_you_are_human_Page != null;
                 result = confirm_that_you_are_human;
             }
             catch (Exception ex)
@@ -2699,7 +2700,7 @@ namespace TextForCtext
                 "<p>{{{⚠🚫✋⚡佛弟子文獻學博士孫守真任真甫按：🚧😵因認證碼機制（" +
                 "\"Please confirm that you are human! 敬請輸入認證圖案\"" +
                 theLetters +
-                "）掣肘而致 TextForCtext 自動連續輸入中斷，屢次多方數處向站主反應投訴卻概不見報（本站討論區可見一斑），愚為此干擾折騰隱忍洎今已逾年所，故請來者賢友諸仁注意協力檢查文本是否有經正確地輸入！愚莫復獨自承擔❤️💕日暮途遠，夫我則不暇矣。見原見諒⚠️☢️🈲🙏感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主　哈利路亞 👼 " +
+                "）掣肘而致 TextForCtext 自動連續輸入中斷，屢次多方數處向站主反應投訴卻概不見報（本站討論區可見一斑），愚為此干擾折騰隱忍洎今已逾年所，故請來者賢友諸仁注意協力檢查文本是否有經正確地輸入！奇紊共欣賞，苛政猛於虎，愚莫復獨自承擔❤️💕日暮途遠，夫我則不暇矣。見原見諒⚠️☢️🈲🙏感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主　哈利路亞 👼 " +
                 DateTime.Now.ToString() + "}}}<p>";
         }
 

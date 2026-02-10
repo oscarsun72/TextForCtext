@@ -1882,6 +1882,7 @@ namespace TextForCtext
             }
             else
             {
+                MessageBoxShowOKExclamationDefaultDesktopOnly("未找到數字");
                 throw new Exception("未找到數字");
             }
         }

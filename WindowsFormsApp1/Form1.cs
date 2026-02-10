@@ -370,7 +370,13 @@ namespace WindowsFormsApp1
             if (Name == "Form1" && (driver != null || BrowsrOPMode != BrowserOPMode.appActivateByName))
             {
                 //if (MessageBox.Show("本軟件即將關閉，也會同時關閉由其開啟的Chrome瀏覽器，若有沒儲存的資訊，請先儲存再按「確定」鈕繼續；否則請按「取消」", "", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning) == DialogResult.Cancel) { e.Cancel = true; return; }
-                if (MessageBoxShowOKCancelExclamationDefaultDesktopOnly("本軟件即將關閉，可能也會同時關閉由其開啟的Chrome瀏覽器，若有沒儲存的資訊，請先儲存再按「確定」鈕繼續；否則請按「取消」") == DialogResult.Cancel) { e.Cancel = true; return; }
+                if (MessageBoxShowOKCancelExclamationDefaultDesktopOnly("本軟件即將關閉，可能也會同時關閉由其開啟的Chrome瀏覽器，若有沒儲存的資訊，請先儲存再按「確定」鈕繼續；否則請按「取消」") == DialogResult.Cancel)
+                {
+                    e.Cancel = true;
+                    //如是取消時即可在不結束應用程式的狀況下取得書籍版面的諸項特徵了。20260210 感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主　哈利路亞
+                    CopyOutputBookFeature_forNextTime();
+                    return;
+                }
                 else
                 {
                     //備份《四庫全書》扉頁訊息以便下次利用。在偵錯時特別好用。 20260123 目前此資料是放在 Form3 中
@@ -5396,7 +5402,7 @@ namespace WindowsFormsApp1
                 //_autoPastetoCtextQuitEditTextboxCancel = false;//前面 if 條件已然
                 while (result)
                 {
-                    result = AutoPaste2CtextQuitEditTextbox(out DialogResult dialogresult);
+                    result = AutoPaste2CtextQuitEditTextbox(out _);
                 }
                 //result = AutoPaste2CtextQuitEditTextbox(out DialogResult dialogresult);//在此中雖有判斷autoPastetoQuickEdit時，然呼叫它會造成無限遞迴（recursion）                    
                 //                                                                       //Debugger.Break();
@@ -5413,10 +5419,12 @@ namespace WindowsFormsApp1
             #endregion
 
             RestoreSvgImageSize();
-            if ((!_autoPaste2QuickEdit && !IsSKQSFrontPage(textBox1.Text))
-                    ||//(_autoNextVolumnContextMark && PageUBound >= int.Parse(_currentPageNum))
-                     PageUBound == int.Parse(_currentPageNum)
-                )
+            if ((!result && Please_confirm_that_you_are_human_Page_Occurrence_Interrupt_Message == string.Empty)
+                    || ((!_autoPaste2QuickEdit && !IsSKQSFrontPage(textBox1.Text))
+                        ||//(_autoNextVolumnContextMark && PageUBound >= int.Parse(_currentPageNum))
+                        ((CtextPageClassifier.ParseUrl(driver.Url).PageType == CtextPageType.LibraryFile ||
+                        CtextPageClassifier.ParseUrl(driver.Url).PageType == CtextPageType.LibraryFileEditWiki) &&
+                        PageUBound == int.Parse(_currentPageNum))))
                 if (!Active) AvailableInUse_BothKeysMouse();
 
             EndUpdate();
@@ -8383,7 +8391,7 @@ namespace WindowsFormsApp1
                                                 ssb.Append("　");
                                             }
                                             PlaySound(SoundLike.warn, true);
-                                            Debugger.Break();
+                                            //Debugger.Break();
                                             //item.Range.Text = ssb.ToString() + result;
                                             //range.End += (result.Length - text.Length);
                                             item.Range.Text = _checkMark + ssb.ToString() + result + _checkMark;//20260123
@@ -12968,7 +12976,8 @@ namespace WindowsFormsApp1
                     //|| Console.CapsLock
                     Console.CapsLock
                     //|| IsCapsLockOn()
-                    || BrakeByCmd())//啟動 cmd.exe 來剎車
+                    //|| BrakeByCmd()//啟動 cmd.exe 來剎車
+                    )
                     {
                         if (
                             //KeyboardInfo.getKeyStateToggled(System.Windows.Input.Key.CapsLock)
@@ -12984,7 +12993,8 @@ namespace WindowsFormsApp1
                             //|| Console.CapsLock
                             Console.CapsLock
                             //|| IsCapsLockOn()//GitHub　Copilot大菩薩：要實現根據 Caps Lock 燈的狀態來執行 FastModeSwitcher 方法，我們可以使用 Control.IsKeyLocked 方法來檢查 Caps Lock 燈的狀態。這個方法可以直接檢查 Caps Lock 燈是否亮著。……這樣可以確保在 Caps Lock 燈亮時觸發 FastModeSwitcher 方法，而不需要按住 Caps Lock 鍵。
-                            || BrakeByCmd())//啟動 cmd.exe 來剎車 20251218
+                            //|| BrakeByCmd())//啟動 cmd.exe 來剎車 20251218
+                            )
                         {
                             if (_fastMode) FastModeSwitcher();//此即可關閉自動連續輸入，不必ToggleAutoPastetoQuickEdit()
                             //killProcesses(new string[] { "OpenConsole", "cmd" });
@@ -15977,7 +15987,8 @@ namespace WindowsFormsApp1
                 Application.DoEvents();
 
                 // 2. 檢查使用者是否手動中斷
-                if (ModifierKeys == Keys.Control || BrakeByCmd() || Console.CapsLock)
+                //if (ModifierKeys == Keys.Control || BrakeByCmd() || Console.CapsLock)
+                if (Console.CapsLock)
                 {
                     HandleStopLogic(); // 抽取出來的邏輯，避免代碼重複
                     break;
@@ -19131,6 +19142,56 @@ namespace WindowsFormsApp1
         {
             if (!_eventsEnabled) return;
 
+
+
+            //if (textBox1.Text.Contains("」被篡改成「") && textBox1.Text.Contains("」！！！阿彌陀佛"))
+            //{//「𮪍」被篡改成「□」！！！阿彌陀佛
+            //    PauseEvents();
+            //    //AiPasteCleaner(GetClipboardTextSafe());
+            //    //AiPasteCleaner(Clipboard.GetText());
+            //}
+            #region 智能貼上原來的 https://snipsave.com/view-snippet?user=oscarsun72&snippet_id=bPiEBTu2c71B6WS5s9
+            #region 智能貼上程式碼
+            if (textBox1.Text.Contains("」被篡改成「□」！！！阿彌陀佛"))
+            {
+                aiShenshen();
+                //    PauseEvents();
+                //    int s = textBox1.SelectionStart;
+                //    textBox1.Text = textBox1.Text.Replace("");
+                //    textBox1.SelectionStart = s;textBox1.ScrollToCaret();
+                //    ResumeEvents();
+            }
+            //https://gemini.google.com/share/5c97fde7d500 https://gemini.google.com/share/7cc31dbb7aae
+            void aiShenshen()//https://gemini.google.com/share/4559aaf9edeb
+            {
+                // 逐一檢查清單中的每一條規則
+                foreach (var rule in _autoCleanRules)
+                {
+                    Match match = Regex.Match(textBox1.Text, rule.Pattern);
+
+                    if (match.Success)
+                    {
+                        // 取得要保留的內容（例如 𲨹）
+                        string replacement = match.Groups[rule.CaptureGroup].Value;
+
+                        PauseEvents();
+
+                        // 精確選取並替換，保持游標位置正確
+                        textBox1.Select(match.Index, match.Length);
+                        textBox1.SelectedText = replacement;
+                        textBox1.ScrollToCaret();
+
+                        ResumeEvents();
+
+                        // 處理完一條規則後就跳出，避免同一次變動產生衝突
+                        break;
+                    }
+                }
+            }
+            #endregion
+            #endregion 智能貼上原來的 
+
+
             Keys mk = ModifierKeys;
             if (textBox1.Text.IndexOf("") > -1)
             {//Ctrl+Shift+6會插入這個""符號
@@ -19706,7 +19767,8 @@ namespace WindowsFormsApp1
                     }
                     else//主要是針對《維基文庫》的文本，移至此處●●●●●●●●●●●●●●●●●●●●●●●
                         //函式內會作判斷要不要自動執行Word VBA相關的程序
-                    {    AutoRunWordVBAMacro();//因為條件太寬，改寫到後面 20251229
+                    {
+                        AutoRunWordVBAMacro();//因為條件太寬，改寫到後面 20251229
                         UndoRecord();//儲存從 Word 讀回的內容，以備還原用
                     }
 
@@ -20042,9 +20104,12 @@ namespace WindowsFormsApp1
                     if (i > 0)
                     {
                         i--;
-                        PauseEvents(); textBox2.Text = "";
-                        TitleLeadingSpacesCount.RemoveAt(i);
-                        ResumeEvents(); return;
+                        if (i < TitleLeadingSpacesCount.Count)
+                        {
+                            PauseEvents(); textBox2.Text = "";
+                            TitleLeadingSpacesCount.RemoveAt(i);
+                            ResumeEvents(); return;
+                        }
                     }
                 }
             }
@@ -20922,13 +20987,19 @@ namespace WindowsFormsApp1
                             {//按住Ctrl再按五鍵滑鼠的下一頁按鈕，則可以以預設的書頁圖大小來設定紅框以供輸入。可以網址來產生紅框如下： 20250202大年初五 感恩感恩　讚歎讚歎　南無阿彌陀佛　讚美主
                              //driver.Navigate().GoToUrl(driver.Url.Replace("#editor", "#box(2,14,792,1146)"));
                                 driver.Navigate().GoToUrl(driver.Url.Replace("#editor", "#box(0,2,798,1288)"));
+
+                                //selenium.IWebElement svgImg = Svg_image_PageImageFrame;
+                                //driver.Navigate().GoToUrl(driver.Url.Replace("#editor", "#box(0,2," +
+                                //    (svgImg.Size.Width * (790 / 400)).ToString() + "," +
+                                //    (svgImg.Size.Height * (1180 / 604)).ToString() + ")"));
+
                                 driver.Navigate().Refresh();
                                 Input_picture();
                                 //清除空行；因為碰到許多中間會空行或篇末會空行之排版，以致原來程式邏輯不堪應用。今將保留其空行部分（由程式判斷每頁行數；但確實也有不規則的，但畢竟較此情況少見），不像之前那樣一律清除，故在確定不須保留時，可逕行清除。 2026年元旦
                                 string tx1 = textBox1.Text;
                                 if (Lines_perPage > 0)
                                 {
-                                    if (tx1.Substring(0, (Lines_perPage + Lines_perPage / 2)).Replace("|" + Environment.NewLine, string.Empty) == string.Empty)
+                                    if ((Lines_perPage + Lines_perPage / 2) < tx1.Length && tx1.Substring(0, (Lines_perPage + Lines_perPage / 2)).Replace("|" + Environment.NewLine, string.Empty) == string.Empty)
                                     {
                                         textBox1.Select(0, (Lines_perPage + Lines_perPage / 2));
                                         UndoRecord();
