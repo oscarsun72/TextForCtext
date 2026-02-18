@@ -2013,14 +2013,14 @@ namespace WindowsFormsApp1
                 if (xCopy.LastIndexOf("*") > -1 && xCopy.LastIndexOf("*") > xCopy.LastIndexOf("<p>"))
                     _chkPTitleNotEnd = true;
                 else
-                if (_chkPTitleNotEnd) _chkPTitleNotEnd = false;
+                    if (_chkPTitleNotEnd) _chkPTitleNotEnd = false;
                 if (chkP > -1 && x.Substring(chkP, 1) == "*")
                     chkP = -1;
 
             }
             else chkP = -1;
             #endregion
-            chksum:
+        chksum:
             if (missWordPositon > -1 || chkP > -1)
             //if (xCopy.IndexOf(" ") > -1 || xCopy.IndexOfAny("�".ToCharArray()) > -1 ||
             //xCopy.IndexOf("□") > -1)//□為《維基文庫》《四庫全書》的缺字符，" "則是《四部叢刊》的，"�"則是《四部叢刊》的造字符。
@@ -2329,7 +2329,7 @@ namespace WindowsFormsApp1
                 }
             }
             else
-            if (e.KeyCode != Keys.F5) CaretPositionRecord();
+                if (e.KeyCode != Keys.F5) CaretPositionRecord();
             if (_keycodeNow == Keys.Delete) UndoRecord();
 
 
@@ -2940,7 +2940,7 @@ namespace WindowsFormsApp1
                             }
                             else
                                 if (MessageBoxShowOKCancelExclamationDefaultDesktopOnly("是否要執行【查詢網路辭典】？") == DialogResult.OK)
-                                Process.Start(dropBoxPathIncldBackSlash + @"VS\VB\查詢國語辭典\查詢國語辭典\bin\Debug\查詢國語辭典.exe");
+                                    Process.Start(dropBoxPathIncldBackSlash + @"VS\VB\查詢國語辭典\查詢國語辭典\bin\Debug\查詢國語辭典.exe");
                         }
                         else
                             Process.Start(dropBoxPathIncldBackSlash + @"VS\VB\查詢國語辭典\查詢國語辭典\bin\Debug\查詢國語辭典.exe");
@@ -5164,7 +5164,7 @@ namespace WindowsFormsApp1
                 if (iw != null) // clickCopybutton_GjcoolFastExperience(iw.Location); 
                     Cursor.Position = (Point)iw.Location;
 
-                rep://OCR連續輸入
+            rep://OCR連續輸入
                 if (PagePaste2GjcoolOCR() && PasteOcrResultFisrtMode && ModifierKeys != Keys.Control && !confirm_that_you_are_human)
                     goto rep;
 
@@ -5279,7 +5279,8 @@ namespace WindowsFormsApp1
             int openIndex = text.IndexOf("{{", pos);
             int closeIndex = text.LastIndexOf("}}", pos);
 
-            if (openIndex == -1 || closeIndex == -1) return;
+            if (pos > 2 && textBox1.Text.Substring(pos - 1, 1) != "}"
+                && (openIndex == -1 || closeIndex == -1)) return;
 
             // 如果插入點在 "{{" 的前後，移到第一個 { 之後
             if (pos == openIndex || pos == openIndex + 1)
@@ -5393,29 +5394,29 @@ namespace WindowsFormsApp1
             #region 20260126●●●●●●●●●●●●●●●●●●●●●●●●●●●●●
             else
                 if (_autoPaste2QuickEdit && !_keyinTextMode && !_autoPastetoCtextQuitEditTextboxCancel)
-            {
-                //內中遞迴（recursion）在12820行（以下為其程式碼片段）：
-                //if (result)//●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●20260107
-                //    result = AutoPaste2CtextQuitEditTextbox(out DialogResult dialogresult);//遞迴（recursion） 20230113
-                result = true;
-                if (_fastMode && _rePaint) BeginUpdate();
-                //_autoPastetoCtextQuitEditTextboxCancel = false;//前面 if 條件已然
-                while (result)
                 {
-                    result = AutoPaste2CtextQuitEditTextbox(out _);
+                    //內中遞迴（recursion）在12820行（以下為其程式碼片段）：
+                    //if (result)//●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●20260107
+                    //    result = AutoPaste2CtextQuitEditTextbox(out DialogResult dialogresult);//遞迴（recursion） 20230113
+                    result = true;
+                    if (_fastMode && _rePaint) BeginUpdate();
+                    //_autoPastetoCtextQuitEditTextboxCancel = false;//前面 if 條件已然
+                    while (result)
+                    {
+                        result = AutoPaste2CtextQuitEditTextbox(out _);
+                    }
+                    //result = AutoPaste2CtextQuitEditTextbox(out DialogResult dialogresult);//在此中雖有判斷autoPastetoQuickEdit時，然呼叫它會造成無限遞迴（recursion）                    
+                    //                                                                       //Debugger.Break();
+                    //                                                                       //●●●●●●●●●●●●●20250213
+                    ////if (!result) return result;
+
+                    ////若停止重畫，則恢復之//由KeyDownCtrlAdd()轉至此，先取消，因為後面有EndUpdate()了，待觀察！20260126●●●●●●●●●●●●●●●●●●●●
+                    //if (!_rePaint)
+                    //    EndUpdate();                
+                    if (!_autoPastetoCtextQuitEditTextboxCancel) _autoPastetoCtextQuitEditTextboxCancel = true;
+                    //driver.SwitchTo().Window(driver.CurrentWindowHandle);//這樣在執行端已經有了(//不符合自動連續輸入執行的條件時：……)
+
                 }
-                //result = AutoPaste2CtextQuitEditTextbox(out DialogResult dialogresult);//在此中雖有判斷autoPastetoQuickEdit時，然呼叫它會造成無限遞迴（recursion）                    
-                //                                                                       //Debugger.Break();
-                //                                                                       //●●●●●●●●●●●●●20250213
-                ////if (!result) return result;
-
-                ////若停止重畫，則恢復之//由KeyDownCtrlAdd()轉至此，先取消，因為後面有EndUpdate()了，待觀察！20260126●●●●●●●●●●●●●●●●●●●●
-                //if (!_rePaint)
-                //    EndUpdate();                
-                if (!_autoPastetoCtextQuitEditTextboxCancel) _autoPastetoCtextQuitEditTextboxCancel = true;
-                //driver.SwitchTo().Window(driver.CurrentWindowHandle);//這樣在執行端已經有了(//不符合自動連續輸入執行的條件時：……)
-
-            }
             #endregion
 
             RestoreSvgImageSize();
@@ -5653,7 +5654,7 @@ namespace WindowsFormsApp1
                 //避免事件被終止
                 if (!_eventsEnabled) _eventsEnabled = true;
                 ////恢復 ●●●●●●●●●●●●●●●●●●●●20251226聖誕節後一日 觀察中！
-                if (PagePaste2GjcoolOCR_ing) { Debugger.Break(); PagePaste2GjcoolOCR_ing = false; }
+                //if (PagePaste2GjcoolOCR_ing) { Debugger.Break(); PagePaste2GjcoolOCR_ing = false; }//OCR出錯時會有觸發此行！然若執行此行，則會輸入「+」到textBox1中，故今仍註解掉，改在呼叫端處重設之 20260216
                 //改在呼叫端控制，因為只有按下「+」鍵時會有影響●●●●●●●●●●●●●●●●●●●●●●●20251230
 
             }
@@ -10928,7 +10929,7 @@ namespace WindowsFormsApp1
                 textBox1.SelectionStart = 0;
 
 
-            finish:
+        finish:
             textBox1.ScrollToCaret();
             TopMost = topmost; stopUndoRec = false; ResumeEvents();
             AvailableInUse_BothKeysMouse();
@@ -13597,10 +13598,12 @@ namespace WindowsFormsApp1
             {//Ctrl + Shift + Alt + a：執行從WordVBA轉譯來的`提取人名_二字人名中有空白者`程序。20260113 蔣經國前總統逝世紀念、海賢老和尚大德往生前紀念　Gemini大菩薩成功！（m=n`a`me,`a`uthor)
                 e.Handled = true; e.SuppressKeyPress = true;
                 if (!Clipboard.GetText().Contains("􏿽") && textBox1.Text.Contains("􏿽")) Clipboard.SetText(textBox1.Text);
-                NameExtractor.ExtractNamesWithSpaces();
-                Form1 newone = NewForm1();
-                newone.textBox1.Text = Clipboard.GetText();
-                newone.WindowState = FormWindowState.Maximized;
+                if (NameExtractor.ExtractNamesWithSpaces())
+                {//成功提取到人名了，則將結果貼到新的表單裡，以便檢視與複製 20260215
+                    Form1 newone = NewForm1();
+                    newone.textBox1.Text = Clipboard.GetText();
+                    newone.WindowState = FormWindowState.Maximized;
+                }
                 return;
             }
             if (e.Control && e.Shift && e.Alt && e.KeyCode == Keys.F)
@@ -14960,6 +14963,8 @@ namespace WindowsFormsApp1
                     break;
             }
 
+            //取回自動標點之結果
+
             //textBox1.SelectedText = x;//先作個備份（還原）記錄，以防萬一 20240914 作為下面 RestoreParagraphs 方法除錯用，因其中已有 Debugger.Break(); 故今省略
             //textBox1.Select(s, l);
 
@@ -14979,12 +14984,15 @@ namespace WindowsFormsApp1
                 try
                 {
                     driver.SwitchTo().Window(LastValidWindow);
-                    if (driver.Url != textBox3.Text)
+                    if (!MatchWindowHandlesWithTextBox3())
                     {
-                        foreach (var item in driver.WindowHandles)
+                        if (driver.Url != textBox3.Text)
                         {
-                            driver.SwitchTo().Window(item);
-                            if (driver.Url == textBox3.Text) break;
+                            foreach (var item in driver.WindowHandles)
+                            {
+                                driver.SwitchTo().Window(item);
+                                if (driver.Url == textBox3.Text) break;
+                            }
                         }
                     }
                     if (driver.Url != textBox3.Text)
@@ -16558,14 +16566,14 @@ namespace WindowsFormsApp1
                     }
                     else//翻到下一冊
                         if (PageUBound < int.Parse(_currentPageNum))
-                        if (!GotoNextFile_FormatContentInput_SKQS())
-                        {
-                            //Debugger.Break();
-                            if (!_eventsEnabled) _eventsEnabled = true;
-                            //if (!Visible) EndUpdate();//show_nICo();
+                            if (!GotoNextFile_FormatContentInput_SKQS())
+                            {
+                                //Debugger.Break();
+                                if (!_eventsEnabled) _eventsEnabled = true;
+                                //if (!Visible) EndUpdate();//show_nICo();
 
-                            return false;
-                        }
+                                return false;
+                            }
 
                     stopUndoRec = false; ResumeEvents(); UndoRecord();
                 }
@@ -17550,7 +17558,7 @@ namespace WindowsFormsApp1
         internal static string defaultBrowserName = string.Empty;//https://cybarlab.com/web-browser-name-in-c-sharp
         internal void AppActivateByName()
         {
-        //Process[] procsBrowser = Process.GetProcessesByName("chrome");
+            //Process[] procsBrowser = Process.GetProcessesByName("chrome");
         tryagain:
             Process[] procsBrowser = Process.GetProcessesByName(defaultBrowserName);
             if (procsBrowser.Length <= 0)
@@ -17823,7 +17831,7 @@ namespace WindowsFormsApp1
                         if (xInput == string.Empty) return false;//●●●●●●●●●●●●●●●●●●●●20251220
                                                                  //await Task.Run(() =>
                                                                  //{ //送出後也不必等待，也沒有其他須用到的元件，故可交給作業系統開個新線程去跑就好，但因為editchapter上傳儲存時常較Quit edit費時，故保險起見，還是在後加個Task.delay一下比較好
-                        reCommit:
+                    reCommit:
                         try
                         {
                             commit.Click();
@@ -20365,11 +20373,11 @@ namespace WindowsFormsApp1
                                 else
                                     //chromedriver被誤關了
                                     if (!ChromedriverLose(ex))
-                                {
-                                    Debugger.Break();
-                                    Console.WriteLine(ex.HResult + ex.Message);
-                                    MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
-                                }
+                                    {
+                                        Debugger.Break();
+                                        Console.WriteLine(ex.HResult + ex.Message);
+                                        MessageBoxShowOKExclamationDefaultDesktopOnly(ex.HResult + ex.Message);
+                                    }
                                 break;
                             default:
                                 Console.WriteLine(ex.HResult + ex.Message);
@@ -21306,7 +21314,7 @@ namespace WindowsFormsApp1
             else
             {
                 editwikiID = GetEditwikiID_fromUrl(url);
-            //OpenQA.Selenium.IWebElement ie = Full_text_search_textbox_searchressingle;
+                //OpenQA.Selenium.IWebElement ie = Full_text_search_textbox_searchressingle;
             retry:
                 if (IsDriverInvalid)
                 {
@@ -21506,7 +21514,7 @@ namespace WindowsFormsApp1
                 new SoundPlayer(@"C:\Windows\Media\Windows Notify Messaging.wav").Play();
                 if (Math.Abs(bookID - _previousBookID) > 1) if (MessageBox.Show("是否更新頁面每行字數及每頁行數等資訊？", "", MessageBoxButtons.OKCancel
                        , MessageBoxIcon.Question, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly) == DialogResult.OK)
-                        ResetBooksPagesFeatures();
+                    ResetBooksPagesFeatures();
 
                 if (_autoPaste2QuickEdit == false)
                 {

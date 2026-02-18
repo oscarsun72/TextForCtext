@@ -128,6 +128,8 @@ namespace TextForCtext
                 //    MessageBoxButtons.OKCancel,
                 //    MessageBoxIcon.Question);
 
+                WindowsFormsApp1.Form1.InstanceForm1.TopMost = false;
+                Browser.ChromeSetFocus();//以便輸入卷次等標題訊息
                 if (result == DialogResult.OK)
                 {
                     // 使用者按了「確定」，執行取代
@@ -239,11 +241,12 @@ namespace TextForCtext
         /// 即 WordVBA Sub 提取人名_二字人名中有空白者()
         /// 選取剪貼簿以操作，結果亦傳回剪貼簿中
         /// </summary>
-        public static void ExtractNamesWithSpaces()
+        //public static void ExtractNamesWithSpaces()
+        public static bool ExtractNamesWithSpaces()
         {
             try
             {
-                if (!Clipboard.ContainsText()) return;
+                if (!Clipboard.ContainsText()) return false;
                 string input = Clipboard.GetText();
 
                 // 1. 定義 Ctext 空白字元 w (U+10FFFD)
@@ -280,17 +283,20 @@ namespace TextForCtext
                     Clipboard.SetText(sb.ToString());
                     MessageBoxShowOKExclamationDefaultDesktopOnly($"提取完成！共找到 {matches.Count} 筆二字人名。\n已排除連串空白之誤判。", "成功");
                     //MessageBox.Show($"提取完成！共找到 {matches.Count} 筆二字人名。\n已排除連串空白之誤判。", "成功");
+                    return true;
                 }
                 else
                 {
                     MessageBoxShowOKExclamationDefaultDesktopOnly("未找到符合「漢字 + 􏿽 + 漢字」結構的內容。", "提示");
                     //MessageBox.Show("未找到符合「漢字 + 􏿽 + 漢字」結構的內容。", "提示");
+                    return false;
                 }
             }
             catch (Exception ex)
             {
                 //MessageBox.Show("發生錯誤: " + ex.Message);
                 MessageBoxShowOKExclamationDefaultDesktopOnly("發生錯誤: " + ex.Message);
+                return false;
             }
         }
     }

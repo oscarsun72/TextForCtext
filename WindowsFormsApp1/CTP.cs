@@ -2630,13 +2630,14 @@ namespace TextForCtext
         /// <returns></returns>
         internal static bool IsConfirmHumanPage()
         {
-            bool result = true; int retryCount = 0;
+            bool result = true, confirm_that_you_are_human_Page = false; int retryCount = 0;
         retry:
             try
             {
+                confirm_that_you_are_human_Page = Please_confirm_that_you_are_human_Page != null;
                 //result = confirm_that_you_are_human = Browser.driver.Url == "https://ctext.org/wiki.pl" || Please_confirm_that_you_are_human_Page != null;
-                //confirm_that_you_are_human = (Browser.driver.Url == "https://ctext.org/wiki.pl" || Please_confirm_that_you_are_human_Page != null);
-                confirm_that_you_are_human =  Please_confirm_that_you_are_human_Page != null;
+                confirm_that_you_are_human = (Browser.driver.Url == "https://ctext.org/wiki.pl" || confirm_that_you_are_human_Page);
+                //confirm_that_you_are_human =  Please_confirm_that_you_are_human_Page != null;
                 result = confirm_that_you_are_human;
             }
             catch (Exception ex)
@@ -2661,7 +2662,7 @@ namespace TextForCtext
                 if (retryCount < 2) { retryCount++; goto retry; }
 
             }
-            if (result)
+            if (confirm_that_you_are_human_Page)
             {
                 SetPlease_confirm_that_you_are_human_Page_Occurrence_Interrupt_Message();
             }

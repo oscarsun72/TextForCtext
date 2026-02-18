@@ -907,7 +907,7 @@ namespace TextForCtext
                                                      //cDrv = new ChromeDriver(@"x:\chromedriver.exe", options);
                                                      //上述加入書籤並不管用！！！20230104//解法已詳下chromeOptions()中
 
-            //bool isChromeRunning;= IsChromeRunning;//作為是否在前已開啟Chrome瀏覽器時，關閉新多開的 20241002
+                //bool isChromeRunning;= IsChromeRunning;//作為是否在前已開啟Chrome瀏覽器時，關閉新多開的 20241002
 
             tryagain:
                 //////////////ChromeDriverService driverService;
@@ -1799,10 +1799,10 @@ namespace TextForCtext
                 driver = DriverNew();
                 ////throw;
             }
-        /*另外，您也可以使用以下方法在 C# 中取得 Chrome 瀏覽器的標籤（分頁）數量:
-         // 取得 Chrome 瀏覽器的標籤數量
-            int tabCount = driver.Manage().Window.Bounds.Width / 100;
-         */
+            /*另外，您也可以使用以下方法在 C# 中取得 Chrome 瀏覽器的標籤（分頁）數量:
+             // 取得 Chrome 瀏覽器的標籤數量
+                int tabCount = driver.Manage().Window.Bounds.Width / 100;
+             */
         retry:
             try
             {
@@ -1985,9 +1985,9 @@ namespace TextForCtext
         internal static ChromeDriver OpenNewTabWindow(WindowType tabOrwindow = WindowType.Tab)//creedit 20230103
         {/*chatGPT
             在 C# 中使用 Selenium 開啟新 Chrome 瀏覽器分頁可以使用以下方法：*/
-        // 創建 ChromeDriver 實例
-        //IWebDriver driver = new ChromeDriver();
-        //ChromeDriver driver = driverNew();//new ChromeDriver();
+            // 創建 ChromeDriver 實例
+            //IWebDriver driver = new ChromeDriver();
+            //ChromeDriver driver = driverNew();//new ChromeDriver();
         retry:
             if (driver == null)
             {
@@ -3905,7 +3905,7 @@ namespace TextForCtext
                     //if (driver.Url == "https://api.ipify.org/") driver.Close();
                     ActiveForm1.PauseEvents();
                     string ipUrl = "https://api.ipify.org", selector = "body > pre";
-                //string ipUrl = "https://www.whatismyip.com.tw/", selector = "body > b > span";
+                    //string ipUrl = "https://www.whatismyip.com.tw/", selector = "body > b > span";
                 retry:
                     //Thread.Sleep(5000);
                     OpenNewTabWindow();//要打開比較快更新
@@ -4032,23 +4032,23 @@ namespace TextForCtext
                                             //SendKeys.Send("{ENTER}");
                 Clipboard.Clear();
 
-            ////图片预览
-            //iwe = waitFindWebElementBySelector_ToBeClickable("#batch_figure_0");
-            //while (iwe == null)
-            //{
-            //    iwe = waitFindWebElementBySelector_ToBeClickable("#batch_figure_0");
-            //    //提前結束用
-            //    if (Clipboard.GetText() != string.Empty)// && !Clipboard.GetText().Contains("Ctext_Page_Image"))
-            //    { StopOCR = true; return false; }
-            //}
+                ////图片预览
+                //iwe = waitFindWebElementBySelector_ToBeClickable("#batch_figure_0");
+                //while (iwe == null)
+                //{
+                //    iwe = waitFindWebElementBySelector_ToBeClickable("#batch_figure_0");
+                //    //提前結束用
+                //    if (Clipboard.GetText() != string.Empty)// && !Clipboard.GetText().Contains("Ctext_Page_Image"))
+                //    { StopOCR = true; return false; }
+                //}
 
-            ////按下「上傳」
-            //iwe = waitFindWebElementBySelector_ToBeClickable("#batchUploadDropdown");
-            //iwe.Click();
+                ////按下「上傳」
+                //iwe = waitFindWebElementBySelector_ToBeClickable("#batchUploadDropdown");
+                //iwe.Click();
 
-            ////按下「豎排自動識別」
-            //iwe = waitFindWebElementBySelector_ToBeClickable("#Batch > div.d-flex.justify-content-between.mt-3 > div > div > div:nth-child(2) > ul > li.dropdown-item > div > label");
-            //iwe.Click();
+                ////按下「豎排自動識別」
+                //iwe = waitFindWebElementBySelector_ToBeClickable("#Batch > div.d-flex.justify-content-between.mt-3 > div > div > div:nth-child(2) > ul > li.dropdown-item > div > label");
+                //iwe.Click();
 
 
             retry:
@@ -4605,20 +4605,20 @@ namespace TextForCtext
                 throw;
             }
 
-        ////按下「上傳」
-        //iwe = waitFindWebElementBySelector_ToBeClickable("#batchUploadDropdown");
-        //iwe.Click();
+            ////按下「上傳」
+            //iwe = waitFindWebElementBySelector_ToBeClickable("#batchUploadDropdown");
+            //iwe.Click();
 
-        ////按下「豎排自動識別」
-        //iwe = waitFindWebElementBySelector_ToBeClickable("#Batch > div.d-flex.justify-content-between.mt-3 > div > div > div:nth-child(2) > ul > li.dropdown-item > div > label");
-        //iwe.Click();
+            ////按下「豎排自動識別」
+            //iwe = waitFindWebElementBySelector_ToBeClickable("#Batch > div.d-flex.justify-content-between.mt-3 > div > div > div:nth-child(2) > ul > li.dropdown-item > div > label");
+            //iwe.Click();
 
-        //Thread.Sleep(1100);
-        //Thread.Sleep(1000);
-        //Thread.Sleep(1050);
+            //Thread.Sleep(1100);
+            //Thread.Sleep(1000);
+            //Thread.Sleep(1050);
 
 
-        #region 複製OCR結果
+            #region 複製OCR結果
         copyResult:
             try
             {
@@ -5665,7 +5665,7 @@ namespace TextForCtext
 
 
 
-        #endregion
+            #endregion
 
 
         finished:
@@ -6593,7 +6593,7 @@ namespace TextForCtext
             }
 
 
-        #endregion
+            #endregion
 
 
         finished:
@@ -8402,11 +8402,11 @@ namespace TextForCtext
                     return false;
                 }
             }
-        //driver.Close();
-        //driver.SwitchTo().Window(currentWindowHndl);
-        #endregion
+            //driver.Close();
+            //driver.SwitchTo().Window(currentWindowHndl);
+            #endregion
 
-        #region 關閉OCR視窗後回到原來分頁視窗
+            #region 關閉OCR視窗後回到原來分頁視窗
         finish:
             StopOCR = true;
             if (!_OCR_GJcool_WindowClosed) _OCR_GJcool_WindowClosed = true;
@@ -8621,11 +8621,12 @@ namespace TextForCtext
             //20240809 Copilot大菩薩：C# Windows.Forms 中判定文本是否只有英數字：這個正則表達式 ^[a-zA-Z0-9\s.,!?']+$ 會允許英文字母、數字、半形空格以及常見的標點符號（如句號、逗號、驚嘆號、問號和單引號）。
             if (Regex.IsMatch(x, @"^[a-zA-Z0-9\s.,!?']+$")) return false;
 
-            //LastValidWindow = GetCurrentWindowHandle(driver)??(IsWindowHandleValid(driver,driver.WindowHandles.Last())? driver.WindowHandles.Last(): driver.WindowHandles.First());
-            string lastWindowHandle = driver.WindowHandles.Last();
-            if (!IsWindowHandleValid(driver, lastWindowHandle))
-                Debugger.Break();
-            LastValidWindow = GetCurrentWindowHandle(driver) ?? lastWindowHandle;
+            ////LastValidWindow = GetCurrentWindowHandle(driver)??(IsWindowHandleValid(driver,driver.WindowHandles.Last())? driver.WindowHandles.Last(): driver.WindowHandles.First());
+            //string lastWindowHandle = driver.WindowHandles.Last();
+            //if (!IsWindowHandleValid(driver, lastWindowHandle))
+            //Debugger.Break();
+            //LastValidWindow = GetCurrentWindowHandle(driver) ?? lastWindowHandle;
+            LastValidWindow = driver.CurrentWindowHandle;
             OpenNewTabWindow();
             int retryCntr = 0;
         retry:
@@ -8662,7 +8663,8 @@ namespace TextForCtext
                 if (DateTime.Now.Subtract(dt).TotalSeconds > 10) if (Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("等待頁面開啟已逾時，是否繼續？") == DialogResult.Cancel) return false;
                 try//手動關掉頁籤視窗以提早結束用
                 {
-                    driver.SwitchTo().Window(driver.CurrentWindowHandle);
+                    //driver.SwitchTo().Window(driver.CurrentWindowHandle);
+                    string cw = driver.CurrentWindowHandle;
                 }
                 catch
                 {
@@ -8962,7 +8964,7 @@ namespace TextForCtext
                     WindowHandles.Add("Hanchi_CTP_SearchingKeywordsYijing", driver.CurrentWindowHandle);
                 else
                     if (windowHandle_Hanchi_CTP_SearchingKeywordsYijing != driver.CurrentWindowHandle)
-                    WindowHandles["Hanchi_CTP_SearchingKeywordsYijing"] = windowHandle_Hanchi_CTP_SearchingKeywordsYijing;
+                        WindowHandles["Hanchi_CTP_SearchingKeywordsYijing"] = windowHandle_Hanchi_CTP_SearchingKeywordsYijing;
             }
 
             #endregion
@@ -9047,7 +9049,7 @@ namespace TextForCtext
             string indexStr = ListIndex_Hanchi_SearchingKeywordsYijing.ToString();
             ActiveForm1.TextBox4Text = indexStr;
             if (indexStr.Length > 2) if (ActiveForm1.TextBox4Font.Size > 12)
-                { ActiveForm1.TextBox4Font = new Font(ActiveForm1.TextBox4Font.FontFamily, 12); ActiveForm1.Refresh(); }
+            { ActiveForm1.TextBox4Font = new Font(ActiveForm1.TextBox4Font.FontFamily, 12); ActiveForm1.Refresh(); }
             ActiveForm1.Controls["textBox1"].Text = keyword;
             ActiveForm1.ResumeEvents();
             bool returnValue = false;
@@ -9055,7 +9057,7 @@ namespace TextForCtext
             //if (title.Contains("中國哲學書電子化計劃")) 即CTP
             if (title.EndsWith("中國哲學書電子化計劃") || title.EndsWith("Chinese Text Project"))
             {
-            //檢索方塊
+                //檢索方塊
             researchCtext:
                 //桌面版和手機版的尋找方塊不同
                 //手機版
@@ -9840,7 +9842,7 @@ namespace TextForCtext
                 ["FileSelector"] = ""
             };
          */
-        
+
 
         /// <summary>
         /// Ctrl + Alt + a ： [AI太炎](https://t.shenshen.wiki/)標點 20241105
@@ -10006,7 +10008,7 @@ namespace TextForCtext
                 if (!File.Exists(f = f.Replace("C:\\", "A:\\")))//A槽是我的虛擬機所設定者 20240822
                     return;
 
-                retry:
+        retry:
             if (ImproveGJcoolOCRMemoDoc == null)
             {
                 taskOpeningDocument = Task.Run(() =>
@@ -10656,7 +10658,7 @@ namespace TextForCtext
             StringInfo si = new StringInfo(x);
             if (si.LengthInTextElements != 1) return false;
             if (IsDriverInvalid) driver.SwitchTo().Window(driver.WindowHandles.Last());
-            retry:
+        retry:
             try
             {
                 LastValidWindow = driver.CurrentWindowHandle;
@@ -13452,6 +13454,19 @@ namespace TextForCtext
             {
                 if (ex.Message.Contains("no such window: target window already closed"))
                     return true;
+                else
+                {
+                    try
+                    {
+                        string cw = driver.CurrentWindowHandle;
+                    }
+                    catch (Exception exx)
+                    {
+                        if (exx.Message.Contains("no such window: target window already closed"))
+                            return true;
+                    }
+                }
+
             }
 
             return false;
@@ -13516,10 +13531,19 @@ namespace TextForCtext
                 return null;
 
             DateTime begin = DateTime.Now;
+            string cw;
             while (true)
             {
                 if (DetectRestriction(driver))
                     return null;
+                try
+                {
+                    cw = driver.CurrentWindowHandle;
+                }
+                catch (Exception)
+                {
+                    return null;
+                }
 
                 try
                 {
@@ -13551,6 +13575,7 @@ namespace TextForCtext
             //driver.FindElement(By.CssSelector("#OneLine > div.d-flex.mt-2 > div:nth-child(1) > div:nth-child(3) > ul > li:nth-child(2) > button")).JsClick();//前後按鈕都可以，唯獨這個不行
             //Thread.Sleep(300);
 
+            //Chrome瀏覽器的系統訊息方塊
             SendKeys.SendWait("~");
             //Thread.Sleep(300);
 

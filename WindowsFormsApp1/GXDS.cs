@@ -172,7 +172,7 @@ namespace TextForCtext
                                     .Replace(" /\v\v", newLine).Replace("\v", newLine)
                                     .Replace(" /", "");
             //這要做標題判斷，不能取代掉.Replace(Environment.NewLine + Environment.NewLine, Environment.NewLine)
-            skqsTitleMark_WithoutPreSpaceWrappedinBlankLines(ref xForStandardize);
+            SkqsTitleMark_WithoutPreSpaceWrappedinBlankLines(ref xForStandardize);
 
             noteBeforeTitleSplitTwoLine(ref xForStandardize);
 
@@ -229,7 +229,7 @@ namespace TextForCtext
                         }
                     }
                 }
-                
+
                 //if (isSKQS <= 500) Debugger.Break();//just for test  20260119
                 if (sbRoot != string.Empty && !reBuild && isSKQS < 500)//有些因為源文本之問題，如此頁「欽定四庫全書」會在很後面 https://www.kanripo.org/edition/WYG/KR4f0025/4
                 {
@@ -269,7 +269,7 @@ namespace TextForCtext
         /// 標題/篇名標識。只要一行/段之前後均只是空行的話（跨行以上的不處理，手動自行處理）
         /// </summary>
         /// <param name="xForMark">要處理的文本</param>
-        void skqsTitleMark_WithoutPreSpaceWrappedinBlankLines(ref string xForMark)
+        void SkqsTitleMark_WithoutPreSpaceWrappedinBlankLines(ref string xForMark)
         {
             int s = xForMark.IndexOf(Environment.NewLine);
             //while (s > -1)
@@ -277,7 +277,9 @@ namespace TextForCtext
             {//只要一行/段之前後均只是空行的話（跨行以上的不處理，手動自行處理）
                 string tx = Form1.GetLineText(xForMark, s, out int sLineStart, out int sLineLen);
                 //如果後一行/段是空行段
-                if (xForMark.Length >= s + newLineLen * 2 && xForMark.Substring(s + newLineLen, newLineLen) == newLine)
+                if (s > 30 &&//首頁不處理，如此頁 https://ctext.org/library.pl?if=gb&file=34249&page=2
+                    !tx.IsNullOrEmpty() &&
+                    (xForMark.Length >= s + newLineLen * 2 && xForMark.Substring(s + newLineLen, newLineLen) == newLine))
                 {
                     if (sLineStart - newLineLen > 0)
                     {
@@ -286,17 +288,37 @@ namespace TextForCtext
                         int sPre = xForMark.LastIndexOf(newLine, sLineStart - newLineLen);
                         if (sPre > -1)
                         {
+                            if (tx != xForMark.Substring(sLineStart, sLineLen)) Debugger.Break();//just for test 
+
                             if (xForMark.Substring(sPre + newLineLen, newLineLen) == newLine
                                 && !xForMark.Substring(sLineStart, sLineLen).IsNullOrEmpty())//嚴重的bug終於抓到了！20260117 海賢老和尚往生13周年紀念！感恩感恩　讚歎讚歎　海賢老和尚大德慈悲加持護佑　南無阿彌陀佛　讚美主
                             {
-                                xForMark = xForMark.Substring(0, sLineStart - newLineLen * 2) + "<p>" + newLine
-                                    + "*" +//標題文字，清除書名篇名號等 20230125 creedit with chatGPT大菩薩：Regular Expression Replace Multi：
-                                    Regex.Replace(xForMark.Substring(sLineStart, sLineLen), "[《》〈〉]", "").Replace("　", "􏿽")
-                                    + "<p>" +
-                                    xForMark.Substring(sLineStart + sLineLen + newLineLen);//清除標題後的空行/段
-                                //xForMark = xForMark.Substring(0, sLineStart - newLineLen * 2) + "<p>" + newLine +
-                                //    "*" + xForMark.Substring(sLineStart, sLineLen) + "<p>" +
-                                //    xForMark.Substring(sLineStart + sLineLen + newLineLen);//清除標題後的空行/段
+                                DialogResult dr = MessageBox.Show("是否要加上標題標記？" +
+                                    Environment.NewLine + Environment.NewLine + Environment.NewLine +
+                                    tx +
+                                    Environment.NewLine + Environment.NewLine + Environment.NewLine +
+                                    xForMark.Substring(sLineStart - 100 < 0 ? 0 : sLineStart - 100, sLineLen + 200 > xForMark.Length ? xForMark.Length : sLineLen + 200),
+                                    "標題標記", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1
+                                    , MessageBoxOptions.DefaultDesktopOnly);
+                                switch (dr)
+                                {
+                                    case DialogResult.Cancel:
+                                        return;
+                                    case DialogResult.Yes:
+                                        xForMark = xForMark.Substring(0, sLineStart - newLineLen * 2) + "<p>" + newLine
+                                            + "*" +//標題文字，清除書名篇名號等 20230125 creedit with chatGPT大菩薩：Regular Expression Replace Multi：
+                                            Regex.Replace(xForMark.Substring(sLineStart, sLineLen), "[《》〈〉]", "").Replace("　", "􏿽")
+                                            + "<p>" +
+                                            xForMark.Substring(sLineStart + sLineLen + newLineLen);//清除標題後的空行/段
+                                                                                                   //xForMark = xForMark.Substring(0, sLineStart - newLineLen * 2) + "<p>" + newLine +
+                                                                                                   //    "*" + xForMark.Substring(sLineStart, sLineLen) + "<p>" +
+                                                                                                   //    xForMark.Substring(sLineStart + sLineLen + newLineLen);//清除標題後的空行/段
+                                        break;
+                                    case DialogResult.No:
+                                        break;
+                                    default:
+                                        break;
+                                }
                             }
                         }
                         s = xForMark.IndexOf(newLine, sLineLen + newLineLen);
