@@ -39,10 +39,18 @@ namespace TextForCtext
         {//20240731 Copilot大菩薩：解決圖檔讀取問題的程式碼修改建議：看來這個錯誤是因為圖檔還未完全下載完成就被讀取了。您可以在讀取圖檔之前加入一個等待機制，確保圖檔已經完全下載。以下是修改後的程式碼：
          //int retryCntr = 0;
          //retry:
-         // 等待圖檔完全下載            
+         // 等待圖檔完全下載
+            DateTime dt = DateTime.Now;
             while (!File.Exists(imagePath))
             {
                 Thread.Sleep(100); // 等待 100 毫秒
+                if (DateTime.Now.Subtract(dt).TotalSeconds > 5)
+                {
+                    if (DialogResult.Cancel == Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("書圖還沒下好嗎？是否繼續等待？"))
+                        return null;
+                    else
+                        dt = DateTime.Now;
+                }
             }
             ActiveForm1.TopMost = false;
             // 確保圖檔可以被讀取
@@ -54,6 +62,13 @@ namespace TextForCtext
                     using (FileStream stream = new FileStream(imagePath, FileMode.Open, FileAccess.Read))
                     {
                         fileReady = true;
+                    }
+                    if (DateTime.Now.Subtract(dt).TotalSeconds > 8)
+                    {
+                        if (DialogResult.Cancel == Form1.MessageBoxShowOKCancelExclamationDefaultDesktopOnly("書圖還沒下好嗎？是否繼續等待？"))
+                            return null;
+                        else
+                            dt = DateTime.Now;
                     }
                 }
                 catch (IOException)

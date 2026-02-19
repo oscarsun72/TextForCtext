@@ -14359,7 +14359,8 @@ namespace WindowsFormsApp1
                         int s = textBox1.SelectionStart; Paragraph p = Document.Range(s, s).GetCurrentParagraph();
                         string currParaTxt = p.Text;
                         s = currParaTxt.IndexOf("{{");
-                        textBox1.Select(s + p.Start, currParaTxt.LastIndexOf("}}") - s + 2);
+                        if (s + p.Start > -1 && s + p.Start < textBox1.TextLength && currParaTxt.LastIndexOf("}}") > s)
+                            textBox1.Select(s + p.Start, currParaTxt.LastIndexOf("}}") - s + 2);
                     }
 
                     //textBox1.SelectedText = CnText.TransformText(textBox1.SelectedText).Replace("/", string.Empty);
