@@ -1985,7 +1985,7 @@ Sub じまмま眔计ゅ戈方キ籓_ㄊじまмΤそ锣ㄓ(Optional lineCntPerPag
         If midNoteRng.start = noteRng.start And midNoteRng.End = noteRng.End Then
             Set midNoteRng = noteRng
         End If
-'        If InStr(noteRng, "続/") Then Stop
+'        If InStr(noteRng, "/") Then Stop
 
 
                 '耞Τ礚罽逼
@@ -2059,7 +2059,8 @@ Sub じまмま眔计ゅ戈方キ籓_ㄊじまмΤそ锣ㄓ(Optional lineCntPerPag
                                'noteRng.Document.Range(a.End, noteRng.End).text = noteRng.Document.Range(a.End, noteRng.End).text & ""
                                noteRng.text = noteRng.text & ""
                                a.SetRange aSt, aEd
-                               If rng.End + 3 >= rng.Document.Range.End Then Exit Do
+                               '硂︽穦硑Θソ猔ぃ传︽礚猭干ì芠诡
+                               'If rng.End + 3 >= rng.Document.Range.End Then Exit Do
                                counter = counter + 1
                                If counter > 50 Then Exit Do
                             Loop
