@@ -1133,7 +1133,7 @@ Function IsChromeRunning() As Boolean
     Set objWMIService = GetObject("winmgmts:\\.\root\cimv2")
     Set colProcesses = objWMIService.ExecQuery("Select * from Win32_Process Where Name = 'chrome.exe'")
     
-    chromeRunning = (colProcesses.Count > 0)
+    chromeRunning = (colProcesses.count > 0)
     
     IsChromeRunning = chromeRunning
 End Function
@@ -1480,6 +1480,7 @@ Function HanchiSearch(searchTxt As String) As Boolean
     word.Application.windowState = wdWindowStateMinimize
     Dim iwe As SeleniumBasic.IWebElement, key As New SeleniumBasic.keys
     If Not inside Then
+        If WD.url <> url Then WD.Navigate.GoToUrl url
         If free Then
             Set iwe = WD.FindElementByCssSelector("body > table > tbody > tr:nth-child(2) > td > table > tbody > tr > td > table > tbody > tr:nth-child(4) > td > a:nth-child(8) > img")
             If iwe Is Nothing Then
@@ -1489,6 +1490,7 @@ Function HanchiSearch(searchTxt As String) As Boolean
             Set iwe = WD.FindElementByCssSelector("body > table > tbody > tr:nth-child(2) > td > table > tbody > tr > td > table > tbody > tr:nth-child(4) > td > a:nth-child(9) > img")
             If iwe Is Nothing Then
                 Set iwe = WD.FindElementByXPath("/html/body/table/tbody/tr[2]/td/table/tbody/tr/td/table/tbody/tr[4]/td/a[2]/img")
+'                Set iwe = WD.FindElementByCssSelector("body > table > tbody > tr:nth-child(2) > td > table > tbody > tr > td > table > tbody > tr:nth-child(4) > td > a:nth-child(6) > img")
             End If
         End If
         
@@ -1500,7 +1502,7 @@ Function HanchiSearch(searchTxt As String) As Boolean
     Dim dt As Date
     dt = VBA.Now
     Do While iwe Is Nothing
-        iwe = WD.FindElementByCssSelector("#frmTitle > table > tbody > tr:nth-child(2) > td > table > tbody > tr:nth-child(1) > td > input[type=text]:nth-child(2)")
+        Set iwe = WD.FindElementByCssSelector("#frmTitle > table > tbody > tr:nth-child(2) > td > table > tbody > tr:nth-child(1) > td > input[type=text]:nth-child(2)")
         If VBA.DateDiff("s", dt, VBA.Now) > 2 Then Exit Do
     Loop
     If iwe Is Nothing Then Exit Function
@@ -3989,20 +3991,20 @@ Sub inputElementContent插入網頁元件部分內容(elementPositions As Collection)
                 ' 插入文字
                 Set rng = Selection.Range
                 rng.text = elementInfo(2)
-                Selection.MoveRight Unit:=wdCharacter, Count:=1
+                Selection.MoveRight Unit:=wdCharacter, count:=1
             Case "IMG"
                 ' 插入圖片
                 Set rng = Selection.Range
                 rng.InlineShapes.AddPicture fileName:=elementInfo(3), _
                                             LinkToFile:=False, SaveWithDocument:=True
-                Selection.MoveRight Unit:=wdCharacter, Count:=1
+                Selection.MoveRight Unit:=wdCharacter, count:=1
             Case "A"
                 ' 插入超連結
                 Set rng = Selection.Range
                 ActiveDocument.Hyperlinks.Add Anchor:=rng, _
                                               Address:=elementInfo(4), _
                                               TextToDisplay:=elementInfo(2)
-                Selection.MoveRight Unit:=wdCharacter, Count:=1
+                Selection.MoveRight Unit:=wdCharacter, count:=1
         End Select
     Next e
 End Sub
@@ -4051,7 +4053,7 @@ Sub inputElementContentAll插入網頁元件所有的內容(iwe As SeleniumBasic.IWebElemen
                         If rng.Find.Found Then
                             Selection.MoveDown
                         Else
-                            Selection.MoveRight Unit:=wdCharacter, Count:=1
+                            Selection.MoveRight Unit:=wdCharacter, count:=1
                         End If
 '                    End If
                 End If
@@ -4065,12 +4067,12 @@ Sub inputElementContentAll插入網頁元件所有的內容(iwe As SeleniumBasic.IWebElemen
                         Set rng = Selection.Range
                         rng.InlineShapes.AddPicture fileName:=element.GetAttribute("src"), _
                                                     LinkToFile:=False, SaveWithDocument:=True
-                        Selection.MoveRight Unit:=wdCharacter, Count:=1
+                        Selection.MoveRight Unit:=wdCharacter, count:=1
                     End If
                 Else
                     Set rng = Selection.Range
                     rng.InlineShapes.AddPicture fileName:=element.GetAttribute("src"), LinkToFile:=False, SaveWithDocument:=True
-                    Selection.MoveRight Unit:=wdCharacter, Count:=1
+                    Selection.MoveRight Unit:=wdCharacter, count:=1
                 End If
                 
             Case "a"
@@ -4115,12 +4117,12 @@ Private Sub insertImageInline插入包含圖片的段落(iwe As SeleniumBasic.IWebElement
             rng.InlineShapes.AddPicture images_arrayIWebElement()(0).GetAttribute("src"), LinkToFile:=False, SaveWithDocument:=True
 '            rng.InlineShapes.AddPicture fileName:=Mid(textParts(i), InStr(textParts(i), "src=") + 5, InStr(textParts(i), """", InStr(textParts(i), "src=") + 5) - InStr(textParts(i), "src=") - 5), _
                                         LinkToFile:=False, SaveWithDocument:=True
-            Selection.MoveRight Unit:=wdCharacter, Count:=1
+            Selection.MoveRight Unit:=wdCharacter, count:=1
         End If
         ' 插入文字
         Set rng = Selection.Range
         rng.text = iwe.GetAttribute("textContent") 'StripHTMLTags(textParts(i))
-        Selection.MoveRight Unit:=wdCharacter, Count:=1
+        Selection.MoveRight Unit:=wdCharacter, count:=1
     Next i
     
 '    wd.Quit
